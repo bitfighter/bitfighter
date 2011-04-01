@@ -28,6 +28,8 @@
 
 namespace TNL {
 
+#define VectorBlockSize 16
+
 bool VectorResize(U32 *aSize, U32 *aCount, void **arrayPtr, U32 newCount, U32 elemSize)
 {
    if (newCount > 0) {

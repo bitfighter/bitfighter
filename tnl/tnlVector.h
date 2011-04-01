@@ -29,6 +29,8 @@
 #define _TNL_VECTOR_H_
 
 //Includes
+#include <vector>
+
 #ifndef _TNL_TYPES_H_
 #include "tnlTypes.h"
 #endif
@@ -37,25 +39,9 @@
 #include "tnlPlatform.h"
 #endif
 
-#ifndef _TNL_ASSERT_H_
-#include "tnlAssert.h"
-#endif
-
-#define VectorBlockSize 16
-
 namespace TNL {
 
-//-----------------------------------------------------------------------------
-
-/// VectorRep is an image of a Vector template object that is used
-/// for marshalling and unmarshalling Vectors across RPCs.
-struct VectorRep
-{
-   U32 elementCount;
-   U32 arraySize;
-   U8 *array;
-};
-
+using namespace std;
 // =============================================================================
 
 /// A dynamic array template class.
@@ -64,35 +50,18 @@ struct VectorRep
 /// elements.  Insertion is fastest at the end of the array.  Resizing
 /// of the array can be avoided by pre-allocating space using the
 /// reserve() method.
+///
+/// This is now just a wrapper for stl::vector
 template<class T> class Vector
 {
-  protected:
-   U32 mElementCount; ///< Number of elements currently in the Vector.
-   U32 mArraySize;    ///< Number of elements allocated for the Vector.
-   T*  mArray;        ///< Pointer to the Vector elements.
+private:
+   vector<T> innerVector;
 
-   void  checkSize(U32 newElementCount);///< checks the element count against the array size and resizes the array if necessary
-   void  destroy(U32 start, U32 end);   ///< Destructs elements from <i>start</i> to <i>end-1</i>
-   void  construct(U32 start, U32 end); ///< Constructs elements from <i>start</i> to <i>end-1</i>
-   void  construct(U32 start, U32 end, const T* array);
-  public:
-   Vector(const U32 initialSize = 0);     // Constructor
-   Vector(const Vector&);
+public:
+   Vector(const U32 initialSize = 0);
+   Vector(const Vector& p);
+   Vector(const vector<T>& p);
    ~Vector();
-
-   /// @name VectorSTL STL interface
-   ///
-   /// @{
-
-   ///
-   typedef T        value_type;
-   typedef T&       reference;
-   typedef const T& const_reference;
-
-   typedef S32      difference_type;
-   typedef U32      size_type;
-
-   typedef difference_type (QSORT_CALLBACK *compare_func)(T *a, T *b);
 
    Vector<T>& operator=(const Vector<T>& p);
 
@@ -101,155 +70,88 @@ template<class T> class Vector
 
    T&       get(S32 index);
    const T& get(S32 index) const;
-   T&       get(U32 index) { return get(S32(index)); }
-
-   T&       front();
-   const T& front() const;
-   T&       back();
-   const T& back() const;
 
    void push_front(const T&);
    void push_back(const T&);
    T& pop_front();
    T& pop_back();
 
-   T& operator[](U32);
-   const T& operator[](U32) const;
+   T& operator[](U32 index);
+   const T& operator[](U32 index) const;
+   T& operator[](S32 index);
+   const T& operator[](S32 index) const;
 
-   T& operator[](S32 i)              { return operator[](U32(i)); }
-   const T& operator[](S32 i ) const { return operator[](U32(i)); }
-
-   void reserve(U32);
-
-   /// @}
-
-   /// @name VectorExtended Extended Interface
-   ///
-   /// @{
-
-   ///
-   U32  memSize() const;
-   T*   address() const;
-   U32  setSize(U32);
-   void insert(U32);
-   void erase(U32);
-   void erase_fast(U32);
+   void reserve(U32 size);
+   void setSize(U32 size);
+   void insert(U32 index);
+   void erase(U32 index);
+   void erase_fast(U32 index);
    void clear();
    void deleteAndClear();
-   void compact();
 
-   void sort(compare_func f);
    T& first();
    T& last();
    const T& first() const;
    const T& last() const;
 
-   void set(void * addr, U32 sz);
+   vector<T> getStlVector() const;
+   T*   address();
+   const T*   address() const;
 
-   /// @}
+
+   typedef S32 (QSORT_CALLBACK *compare_func)(T *a, T *b);
+   void sort(compare_func f);
 };
 
-template<class T> inline Vector<T>::~Vector()                        // Destructor
-{
-   destroy(0, mElementCount);
-   free(mArray);
-}
-
+// Note that tnlVector reserves the space whereas stl::vector actually sets the size
 template<class T> inline Vector<T>::Vector(const U32 initialSize)   // Constructor
 {
-   mArray        = 0;
-   mElementCount = 0;
-   mArraySize    = 0;
-   if(initialSize)
-      reserve(initialSize);
+   innerVector = vector<T>();
+   innerVector.reserve(initialSize);
 }
 
 template<class T> inline Vector<T>::Vector(const Vector& p)        // Copy constructor
 {
-   mArray = 0;
-   mArraySize = 0;
-   mElementCount = 0;
-
-   checkSize(p.mElementCount);
-   mElementCount = p.mElementCount;
-   construct(0, p.mElementCount, p.mArray);
+   innerVector = vector<T>(p.getStlVector());
 }
 
-
-template<class T> inline void  Vector<T>::destroy(U32 start, U32 end) // destroys from start to end-1
+template<class T> inline Vector<T>::Vector(const vector<T>& p)        // Constructor to wrap std::vector
 {
-   while(start < end)
-   {
-      destructInPlace(&mArray[start]);
-      start++;
-   }
+   innerVector = p;
 }
 
-template<class T> inline void  Vector<T>::construct(U32 start, U32 end) // destroys from start to end-1
+template<class T> inline Vector<T>::~Vector() {}       // Destructor
+
+template<class T> inline vector<T> Vector<T>::getStlVector() const
 {
-   while(start < end)
-   {
-      constructInPlace(&mArray[start]);
-      start++;
-   }
+   return innerVector;
 }
 
-template<class T> inline void  Vector<T>::construct(U32 start, U32 end, const T* array) // destroys from start to end-1
+template<class T> inline T* Vector<T>::address()
 {
-   while(start < end)
-   {
-      constructInPlace(&mArray[start], &array[start]);
-      start++;
-   }
+   return &(*innerVector.begin());
 }
 
-template<class T> inline T* Vector<T>::address() const
+template<class T> const inline T* Vector<T>::address() const
 {
-   return mArray;
+   return &(*innerVector.begin());
 }
 
-template<class T> inline U32 Vector<T>::setSize(U32 size)
+// was U32
+template<class T> inline void Vector<T>::setSize(U32 size)
 {
-   checkSize(size);
-
-   if(size > mElementCount)
-   {
-      construct(mElementCount, size);
-      mElementCount = size;
-   }
-   else if(size < mElementCount)
-   {
-      destroy(size, mElementCount);
-      mElementCount = size;
-      if(!mElementCount)
-      {
-         free(mArray);
-         mArray = NULL;
-         mArraySize = 0;
-      }
-   }
-   return mElementCount;
+   innerVector.resize(size);
 }
 
+// inserts an empty element at the specified index
 template<class T> inline void Vector<T>::insert(U32 index)
 {
-   checkSize(mElementCount + 1);
-   constructInPlace(&mArray[mElementCount]);
-   mElementCount++;
-
-   for(U32 i = mElementCount - 1; i > index; i--)
-      mArray[i] = mArray[i - 1];
-   destructInPlace(&mArray[index]);
-   constructInPlace(&mArray[index]);
+   innerVector.insert(innerVector.begin() + index, 1, T());
 }
 
 template<class T> inline void Vector<T>::erase(U32 index)
 {
-   // Assert: index >= 0 && index < mElementCount
-   for(U32 i = index; i < mElementCount - 1; i++)
-      mArray[i] = mArray[i+1];
-   destructInPlace(&mArray[mElementCount - 1]);
-   mElementCount--;
+   innerVector.erase(innerVector.begin() + index);
 }
 
 template<class T> inline void Vector<T>::erase_fast(U32 index)
@@ -257,178 +159,121 @@ template<class T> inline void Vector<T>::erase_fast(U32 index)
    // CAUTION: this operator does NOT maintain list order
    // Copy the last element into the deleted 'hole' and decrement the
    //   size of the vector.
-   // Assert: index >= 0 && index < mElementCount
 
-   if(index != mElementCount - 1)
-      mArray[index] = mArray[mElementCount - 1];
-   destructInPlace(&mArray[mElementCount - 1]);
-   mElementCount--;
+   if(index != innerVector.size() - 1)
+      swap(innerVector[index], innerVector[innerVector.size() - 1]);
+   innerVector.pop_back();
 }
 
 template<class T> inline T& Vector<T>::first()
 {
-   return mArray[0];
+   return *innerVector.begin();
 }
 
 template<class T> inline const T& Vector<T>::first() const
 {
-   return mArray[0];
+   return *innerVector.begin();
 }
 
 template<class T> inline T& Vector<T>::last()
 {
-   TNLAssert(mElementCount != 0, "Error, no last element of a zero sized array!");
-   return mArray[mElementCount - 1];
+   return *(innerVector.end() - 1);
 }
 
 template<class T> inline const T& Vector<T>::last() const
 {
-   return mArray[mElementCount - 1];
+   return *(innerVector.end() - 1);
 }
 
 template<class T> inline void Vector<T>::clear()
 {
-   setSize(0);
+   innerVector.clear();
 }
 
 template<class T> inline void Vector<T>::deleteAndClear()
 {
-   for(U32 i = 0; i < mElementCount; i++)
-      delete mArray[i];
+   for(U32 i = 0; i < innerVector.size(); i++)
+      delete innerVector[i];
 
-   clear();
+   innerVector.clear();
 }
-
-//-----------------------------------------------------------------------------
 
 template<class T> inline Vector<T>& Vector<T>::operator=(const Vector<T>& p)
 {
-   destroy(0, mElementCount);
-   mElementCount = 0;
-   checkSize(p.mElementCount);
-   construct(0, p.mElementCount, p.mArray);
-   mElementCount = p.mElementCount;
+   innerVector = p.innerVector;
    return *this;
 }
 
 template<class T> inline S32 Vector<T>::size() const
 {
-   return (S32)mElementCount;
+   return (S32)innerVector.size();
 }
 
 template<class T> inline bool Vector<T>::empty() const
 {
-   return (mElementCount == 0);
+   return innerVector.begin() == innerVector.end();
 }
-
-// The following were removed by CE because they served no function and cluttered the IDE
-//template<class T> inline T& Vector<T>::front()
-//{
-//   //return *begin();
-//   return;
-//}
-//
-//template<class T> inline const T& Vector<T>::front() const
-//{
-//   //return *begin();
-//   return;
-//}
-//
-//template<class T> inline T& Vector<T>::back()
-//{
-//   //return *end();
-//   return;
-//}
-//
-//template<class T> inline const T& Vector<T>::back() const
-//{
-//   //return *end();
-//   return;
-//}
-
 
 template<class T> inline T& Vector<T>::get(S32 index)
 {
-   return mArray[index];
+   return innerVector[index];
 }
 
 
 template<class T> inline const T& Vector<T>::get(S32 index) const
 {
-   return mArray[index];
+   return innerVector[index];
 }
 
 
 template<class T> inline void Vector<T>::push_front(const T &x)
 {
    insert(0);
-   mArray[0] = x;
+   innerVector[0] = x;
 }
 
 template<class T> inline void Vector<T>::push_back(const T &x)
 {
-   checkSize(mElementCount + 1);
-   mElementCount++;
-   constructInPlace(mArray + mElementCount - 1, &x);
+   innerVector.push_back(x);
 }
 
 template<class T> inline T& Vector<T>::pop_front()
 {
-   T& t = mArray[0];
-   erase(U32(0));
+   T& t = innerVector[0];
+   innerVector.erase(innerVector.begin());
    return t;
 }
 
 template<class T> inline T& Vector<T>::pop_back()
 {
-   T& t = mArray[mElementCount - 1];
-   mElementCount--;
-   destructInPlace(mArray + mElementCount);
+   T& t = *(innerVector.end() - 1);
+   innerVector.pop_back();
    return t;
 }
 
 template<class T> inline T& Vector<T>::operator[](U32 index)
 {
-   return mArray[index];
+   return innerVector[index];
 }
 
 template<class T> inline const T& Vector<T>::operator[](U32 index) const
 {
-   return mArray[index];
+   return innerVector[index];
+}
+
+template<class T> inline T& Vector<T>::operator[](S32 index)
+{
+   return innerVector[(U32)index];
+}
+
+template<class T> inline const T& Vector<T>::operator[](S32 index) const
+{
+   return innerVector[(U32)index];
 }
 
 template<class T> inline void Vector<T>::reserve(U32 size)
 {
-   checkSize(size);
-}
-
-//template<class T> inline void Vector<T>::set(void * addr, U32 sz)
-//{
-//   setSize(sz);
-//   if (addr)
-//      memcpy(address(),addr,sz*sizeof(T));
-//}
-
-//-----------------------------------------------------------------------------
-
-template<class T> inline void Vector<T>::checkSize(U32 newCount)
-{
-   if(newCount <= mArraySize)
-      return;
-
-   U32 blk = VectorBlockSize - (newCount % VectorBlockSize);
-   newCount += blk;
-
-   T *newArray = (T *) malloc(sizeof(T) * newCount);
-   T *oldArray = mArray;
-
-   mArray = newArray;
-   construct(0, mElementCount, oldArray);
-   mArray = oldArray;
-   destroy(0, mElementCount);
-   free(oldArray);
-   mArray = newArray;
-   mArraySize = newCount;
+   innerVector.reserve(size);
 }
 
 typedef int (QSORT_CALLBACK *qsort_compare_func)(const void *, const void *);
@@ -441,4 +286,3 @@ template<class T> inline void Vector<T>::sort(compare_func f)
 };
 
 #endif //_TNL_TVECTOR_H_
-
