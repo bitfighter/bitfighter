@@ -129,11 +129,17 @@ template<class T> inline vector<T> Vector<T>::getStlVector() const
 
 template<class T> inline T* Vector<T>::address()
 {
+   if (innerVector.begin() == innerVector.end())
+      return NULL;
+
    return &(*innerVector.begin());
 }
 
 template<class T> const inline T* Vector<T>::address() const
 {
+   if (innerVector.begin() == innerVector.end())
+      return NULL;
+
    return &(*innerVector.begin());
 }
 
