@@ -125,16 +125,9 @@ Barrier::Barrier(const Vector<Point> &points, F32 width, bool solid)
 
    if(mSolid)
    {
-      if (isWoundClockwise(mPoints))  // all walls must be CCW to clip correctly  
       // TODO: could we pass a direction flag rather than reversing the array, which is slow??
-      {
-         for(S32 i = (mPoints.size() >> 1) - 1; i >= 0; i--)  // Reverse point order  (size >> 1 == half size, faster then size / 2)
-         {
-            Point tmp1 = mPoints[mPoints.size() - i - 1];
-            mPoints[mPoints.size() - i - 1] = mPoints[i];
-            mPoints[i] = tmp1;
-         }
-      }
+      if (isWoundClockwise(mPoints))  // all walls must be CCW to clip correctly
+         mPoints.reverse();
 
       Triangulate::Process(mPoints, mRenderFillGeometry);
 
@@ -352,17 +345,8 @@ void Barrier::bufferBarrierForBotZone(const Point &start, const Point &end, F32 
 
 void Barrier::bufferPolyWallForBotZone(const Vector<Point>& inputPoints, Vector<Point>& bufferedPoints)
 {
-   if (isWoundClockwise(inputPoints))  // Must make CCW for clipper's offset method to work
-   {
-      Vector<Point> reversePoints;
-
-      for(S32 i = inputPoints.size() - 1; i >= 0; i--)
-         reversePoints.push_back(inputPoints[i]);
-
-      offsetPolygon(reversePoints, bufferedPoints, BotNavMeshZone::BufferRadius);
-   }
-   else
-      offsetPolygon(inputPoints, bufferedPoints, BotNavMeshZone::BufferRadius);
+   // Points should be CCW before getting here
+   offsetPolygon(inputPoints, bufferedPoints, BotNavMeshZone::BufferRadius);
 }
 
 
