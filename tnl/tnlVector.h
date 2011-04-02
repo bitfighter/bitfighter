@@ -94,7 +94,7 @@ public:
    const T& first() const;
    const T& last() const;
 
-   vector<T> getStlVector() const;
+   vector<T>& getStlVector();
    T*   address();
    const T*   address() const;
 
@@ -106,13 +106,12 @@ public:
 // Note that tnlVector reserves the space whereas stl::vector actually sets the size
 template<class T> inline Vector<T>::Vector(const U32 initialSize)   // Constructor
 {
-   innerVector = vector<T>();
    innerVector.reserve(initialSize);
 }
 
 template<class T> inline Vector<T>::Vector(const Vector& p)        // Copy constructor
 {
-   innerVector = vector<T>(p.getStlVector());
+   innerVector = p.innerVector;
 }
 
 template<class T> inline Vector<T>::Vector(const vector<T>& p)        // Constructor to wrap std::vector
@@ -122,7 +121,8 @@ template<class T> inline Vector<T>::Vector(const vector<T>& p)        // Constru
 
 template<class T> inline Vector<T>::~Vector() {}       // Destructor
 
-template<class T> inline vector<T> Vector<T>::getStlVector() const
+// returns a modifiable reference to the internal std::vector object
+template<class T> inline vector<T>& Vector<T>::getStlVector()
 {
    return innerVector;
 }
