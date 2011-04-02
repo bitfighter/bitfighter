@@ -361,8 +361,8 @@ bool IsClockwise(const TPolygon &poly)
 TDoublePoint DoublePoint(const double &X, const double &Y)
 {
   TDoublePoint p;
-  p.x = X;
-  p.y = Y;
+  p.x = (float)X;
+  p.y = (float)Y;
   return p;
 }
 //------------------------------------------------------------------------------
@@ -541,23 +541,23 @@ bool IntersectPoint(TEdge &edge1, TEdge &edge2, TDoublePoint &ip)
   double b1, b2;
   if(  edge1.dx == 0 )
   {
-    ip.x = edge1.xbot;
+    ip.x = (F32)edge1.xbot;
     b2 = edge2.ybot - edge2.xbot/edge2.dx;
-    ip.y = ip.x/edge2.dx + b2;
+    ip.y = ip.x/(F32)edge2.dx + (F32)b2;
   }
   else if(  edge2.dx == 0 )
   {
-    ip.x = edge2.xbot;
+    ip.x = (F32)edge2.xbot;
     b1 = edge1.ybot - edge1.xbot/edge1.dx;
-    ip.y = ip.x/edge1.dx + b1;
+    ip.y = ip.x/(F32)edge1.dx + (F32)b1;
   }
   else
   {
     if( edge1.dx == edge2.dx ) return false;
     b1 = edge1.xbot - edge1.ybot *edge1.dx;
     b2 = edge2.xbot - edge2.ybot *edge2.dx;
-    ip.y = (b2-b1)/(edge1.dx - edge2.dx);
-    ip.x = edge1.dx * ip.y + b1;
+    ip.y = (F32)((b2-b1)/(edge1.dx - edge2.dx));
+    ip.x = (F32)(edge1.dx * ip.y + b1);
   }
   return (ip.y > edge1.ytop + tolerance) && (ip.y > edge2.ytop + tolerance);
 }
@@ -772,11 +772,11 @@ TEdge* ClipperBase::AddBoundsToLML(TEdge *e)
 TDoublePoint RoundToPrecision(const TDoublePoint &pt){
   TDoublePoint result;
   result.x = (pt.x >= 0.0) ?
-    (std::floor( pt.x/precision + 0.5 ) * precision):
-    (std::ceil( pt.x/precision + 0.5 ) * precision);
+    (F32)(std::floor( pt.x/precision + 0.5 ) * precision):
+    (F32)(std::ceil( pt.x/precision + 0.5 ) * precision);
   result.y = (pt.y >= 0.0) ?
-    (std::floor( pt.y/precision + 0.5 ) * precision):
-    (std::ceil( pt.y/precision + 0.5 ) * precision);
+    (F32)(std::floor( pt.y/precision + 0.5 ) * precision):
+    (F32)(std::ceil( pt.y/precision + 0.5 ) * precision);
   return result;
 }
 //------------------------------------------------------------------------------

@@ -34,8 +34,8 @@ TPolygon BuildArc(const TDoublePoint &pt,
   double a = a1;
   for (int i = 0; i <= n; ++i)
   {
-    result[i].x = pt.x + std::cos(a)*r;
-    result[i].y = pt.y + std::sin(a)*r;
+    result[i].x = pt.x + (F32)(std::cos(a)*r);
+    result[i].y = pt.y + (F32)(std::sin(a)*r);
     a = a + da;
   }
   return result;
