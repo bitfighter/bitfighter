@@ -152,7 +152,7 @@ class WorldItem : public DatabaseObject
 private:
    Vector<Point> mVerts;
 
-   Vector<bool> mVertSelected;
+   vector<bool> mVertSelected;  // only use std::vector<bool> with booleans
    bool mAnyVertsSelected;
 
    void init(GameItems itemType, S32 xteam, F32 xwidth, U32 itemid, bool isDockItem);
@@ -352,7 +352,7 @@ class SelectionItem
 {
 private:
    bool mSelected;
-   Vector<bool> mVertSelected;
+   vector<bool> mVertSelected;
 
 public:
    SelectionItem() { /* do nothing */ }      // Generic constructor

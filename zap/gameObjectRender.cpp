@@ -1388,7 +1388,7 @@ void renderWallEdges(const Vector<Point> &edges, F32 alpha)
 
    glEnableClientState(GL_VERTEX_ARRAY);
 
-   glVertexPointer(2, GL_FLOAT, sizeof(Point), &edges[0]);    
+   glVertexPointer(2, GL_FLOAT, sizeof(Point), edges.address());    
    glDrawArrays(GL_LINES, 0, edges.size());
 
    glDisableClientState(GL_VERTEX_ARRAY);

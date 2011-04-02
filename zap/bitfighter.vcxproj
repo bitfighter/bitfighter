@@ -154,6 +154,7 @@
     <ClCompile Include="..\zap\move.cpp" />
     <ClCompile Include="..\zap\moveObject.cpp" />
     <ClCompile Include="..\zap\playerInfo.cpp" />
+    <ClCompile Include="..\zap\polygon.cpp" />
     <ClCompile Include="..\zap\projectile.cpp" />
     <ClCompile Include="quickChatHelper.cpp" />
     <ClCompile Include="..\zap\rabbitGame.cpp" />

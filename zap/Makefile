@@ -86,6 +86,7 @@ OBJECTS_ZAP=\
    moveObject.o\
    oglconsole.o\
    playerInfo.o\
+   polygon.o\
    projectile.o\
    quickChatHelper.o\
    rabbitGame.o\

@@ -26,8 +26,7 @@
 #ifndef _POLYGON_H_
 #define _POLYGON_H_
 
-#include "GeomUtils.h"      // For polygon triangulation
-#include "point.h"
+#include "gameObject.h"
 
 namespace Zap
 {
@@ -39,76 +38,19 @@ class Polyline
 public:
    Vector<Point> mPolyBounds;
 
-
 protected:
-   void packUpdate(GhostConnection *connection, BitStream *stream)
-   {
-      // - 1 because writeEnum ranges from 0 to n-1; mPolyBounds.size() ranges from 1 to n
-      stream->writeEnum(mPolyBounds.size() - 1, gMaxPolygonPoints);  
-      for(S32 i = 0; i < mPolyBounds.size(); i++)
-      {
-         stream->write(mPolyBounds[i].x);
-         stream->write(mPolyBounds[i].y);
-      }
-   }
-
+   void packUpdate(GhostConnection *connection, BitStream *stream);
 
    // Read a series of points from a command line, and add them to a Vector of points
-   void processPolyBounds(S32 argc, const char **argv, S32 firstCoord, F32 gridSize, bool allowFirstAndLastPointToBeEqual)
-   {
-      Point p, lastP;
-      
-      for(S32 i = firstCoord; i < argc; i += 2)
-      {
-         // Put a cap on the number of vertices in a polygon
-         if(mPolyBounds.size() >= gMaxPolygonPoints)      // || argc == i + 1 might be needed...
-            break;
-
-         p.set( (F32) atof(argv[i]) * gridSize, (F32) atof(argv[i+1]) * gridSize );
-
-         if(i == firstCoord || p != lastP)
-            mPolyBounds.push_back(p);
-         
-         lastP.set(p);
-      }
-
-      // Check if last point was same as first; if so, scrap it
-      if(!allowFirstAndLastPointToBeEqual && mPolyBounds.first() == mPolyBounds.last())
-         mPolyBounds.erase(mPolyBounds.size() - 1);
-   }
-
+   void processPolyBounds(S32 argc, const char **argv, S32 firstCoord, F32 gridSize, bool allowFirstAndLastPointToBeEqual);
 
    virtual void processPolyBounds(S32 argc, const char **argv, S32 firstCoord, F32 gridSize)
    {
       processPolyBounds(argc, argv, firstCoord, gridSize, true);
    }
 
-
-   U32 unpackUpdate(GhostConnection *connection, BitStream *stream)
-   {
-      U32 size = stream->readEnum(gMaxPolygonPoints) + 1;
-
-      for(U32 i = 0; i < size; i++)
-      {
-         Point p;
-         stream->read(&p.x);
-         stream->read(&p.y);
-         mPolyBounds.push_back(p);
-      }
-
-      return size;
-   }
-
-
-   Rect computePolyExtents()
-   {
-      Rect extent(mPolyBounds[0], mPolyBounds[0]);
-
-      for(S32 i = 1; i < mPolyBounds.size(); i++)
-         extent.unionPoint(mPolyBounds[i]);
-
-      return extent;
-   }
+   U32 unpackUpdate(GhostConnection *connection, BitStream *stream);
+   Rect computePolyExtents();
 };
 
 
@@ -118,38 +60,15 @@ protected:
 class Polygon : public Polyline
 {
 protected:
-   void processPolyBounds(S32 argc, const char **argv, S32 firstCoord, F32 gridSize)
-   {
-      Parent::processPolyBounds(argc, argv, firstCoord, gridSize, false);
-
-      mCentroid = findCentroid(mPolyBounds);
-   }
-
+   void processPolyBounds(S32 argc, const char **argv, S32 firstCoord, F32 gridSize);
 
 public:
    typedef Polyline Parent;
-
    Point mCentroid;
-
    Vector<Point> mPolyFill;      // Triangles used for rendering polygon fill
-
    F32 mLabelAngle;
 
-   U32 unpackUpdate(GhostConnection *connection, BitStream *stream)
-   {
-      U32 size = Parent::unpackUpdate(connection, stream);
-
-      if(size)
-      {
-         Triangulate::Process(mPolyBounds, mPolyFill);
-         //TNLAssert(mPolyFill.size() > 0, "Bogus polygon geometry detected!"); // should be checked in a different place...
-
-         mCentroid = findCentroid(mPolyBounds);
-         mLabelAngle = angleOfLongestSide(mPolyBounds);
-      }
-
-      return size;
-   }
+   U32 unpackUpdate(GhostConnection *connection, BitStream *stream);
 };
 
 

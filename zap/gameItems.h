@@ -28,7 +28,6 @@
 #define _GAME_ITEMS_H_
 
 #include "item.h"
-#include "ship.h"
 #include "luaObject.h"        // For Lua interfaces
 #include "gameObjectRender.h"
 #include "../glut/glutInclude.h"
@@ -37,6 +36,7 @@
 
 namespace Zap
 {
+class Ship;
 
 class RepairItem : public PickupItem
 {

@@ -149,6 +149,9 @@ Barrier::Barrier(const Vector<Point> &points, F32 width, bool solid)
    }
    else
    {
+      if (mPoints.size() == 2 && mPoints[0] == mPoints[1])   // Test for zero-length barriers
+         mPoints[1] += Point(0,0.5);                         // Add vertical vector of half a point so we can see outline geo in-game
+
       bufferBarrierForBotZone(mPoints[0], mPoints[1], mWidth, mBotZoneBufferGeometry);     // Fills with 8 points, octagonal
 
       if(mPoints.size() == 2 && mWidth != 0)   // It's a regular segment, so apply width
@@ -317,11 +320,7 @@ void Barrier::bufferBarrierForBotZone(const Point &start, const Point &end, F32 
 {
    bufferedPoints.clear();
 
-   Point difference;
-   if (start == end)  // Test for zero-length barriers
-      difference = (end + Point(0,1)) - start;
-   else
-      difference = end - start;
+   Point difference = end - start;
 
    Point crossVector(difference.y, -difference.x);  // Create a point whose vector from 0,0 is perpenticular to the original vector
    crossVector.normalize((barrierWidth * 0.5) + BotNavMeshZone::BufferRadius);  // reduce point so the vector has length of barrier width + ship radius
@@ -341,7 +340,7 @@ void Barrier::bufferBarrierForBotZone(const Point &start, const Point &end, F32 
 
    // Now add/subtract perpendicular and parallel vectors to buffer the segments
    bufferedPoints.push_back((start - parallelVector)  + crossPartial);
-   bufferedPoints.push_back((start - parallelVector)  + crossVector);
+   bufferedPoints.push_back((start - parallelPartial)  + crossVector);
    bufferedPoints.push_back(end   + parallelPartial + crossVector);
    bufferedPoints.push_back(end   + parallelVector  + crossPartial);
    bufferedPoints.push_back(end   + parallelVector  - crossPartial);

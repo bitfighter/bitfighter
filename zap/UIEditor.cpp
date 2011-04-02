@@ -845,7 +845,7 @@ void EditorUserInterface::validateLevel()
    S32 foundFlagCount = 0;
    bool foundNeutralSpawn = false;
 
-   Vector<bool> foundSpawn;
+   vector<bool> foundSpawn;
    char buf[32];
 
    string teamList, teams;
@@ -907,7 +907,7 @@ void EditorUserInterface::validateLevel()
    if(mScriptLine == "" && !foundNeutralSpawn)
    {
       // Make sure each team has a spawn point
-      for(S32 i = 0; i < foundSpawn.size(); i++)
+      for(S32 i = 0; i < (S32)foundSpawn.size(); i++)
          if(!foundSpawn[i])
          {
             dSprintf(buf, sizeof(buf), "%d", i+1);
@@ -5635,7 +5635,7 @@ void WorldItem::unselectVert(S32 vertIndex)
    mVertSelected[vertIndex] = false;
 
    bool anySelected = false;
-   for(S32 j = 0; j < mVertSelected.size(); j++)
+   for(S32 j = 0; j < (S32)mVertSelected.size(); j++)
       if(mVertSelected[j])
       {
          anySelected = true;
@@ -5670,7 +5670,7 @@ void WorldItem::addVert(Point vert)
 void WorldItem::addVertFront(Point vert)
 {
    mVerts.push_front(vert);
-   mVertSelected.push_front(false);
+   mVertSelected.insert(mVertSelected.begin(), false);
 }
 
 
@@ -5679,8 +5679,7 @@ void WorldItem::insertVert(Point vert, S32 vertIndex)
    mVerts.insert(vertIndex);
    mVerts[vertIndex] = vert;
 
-   mVertSelected.insert(vertIndex);
-   mVertSelected[vertIndex] = false;
+   mVertSelected.insert(mVertSelected.begin() + vertIndex, false);
 }
 
 
@@ -5693,7 +5692,7 @@ void WorldItem::setVert(Point vert, S32 vertIndex)
 void WorldItem::deleteVert(S32 vertIndex)
 {
    mVerts.erase(vertIndex);
-   mVertSelected.erase(vertIndex);
+   mVertSelected.erase(mVertSelected.begin() + vertIndex);
 }
 
 

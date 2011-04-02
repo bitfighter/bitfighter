@@ -1,5 +1,4 @@
 --- from quickBot v2, modified by sam686
---- plays on all level types
 
 game = nil
 difficulty = nil
@@ -105,7 +104,7 @@ function fireAtObject(obj, weapon)
 		obj:getClassID() == RobotType or
 		obj:getClassID() == TurretType or
 		obj:getClassID() == ForceFieldProjectorType) then
-			if obj:getTeamIndx() == bot:getTeamIndx() and game:isTeamGame() then
+			if obj:getTeamIndx() == bot:getTeamIndx() and game:isTeamGame() and obj:getTeamIndx() == NeutralTeamIndx then
 				--logprint("It's an ally.")
 				return(false)
 			end
