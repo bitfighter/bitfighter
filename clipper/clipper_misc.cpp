@@ -34,8 +34,8 @@ TPolygon BuildArc(const TDoublePoint &pt,
   double a = a1;
   for (int i = 0; i <= n; ++i)
   {
-    result[i].X = pt.X + std::cos(a)*r;
-    result[i].Y = pt.Y + std::sin(a)*r;
+    result[i].x = pt.x + std::cos(a)*r;
+    result[i].y = pt.y + std::sin(a)*r;
     a = a + da;
   }
   return result;
@@ -46,9 +46,9 @@ double Area(const TPolygon &pts)
 {
   int highI = (int)pts.size() -1;
   if (highI < 2) return 0;
-  double area = pts[highI].X * pts[0].Y - pts[0].X * pts[highI].Y;
+  double area = pts[highI].x * pts[0].y - pts[0].x * pts[highI].y;
   for (int i = 0; i < highI; ++i)
-    area += pts[i].X * pts[i+1].Y - pts[i+1].X * pts[i].Y;
+    area += pts[i].x * pts[i+1].y - pts[i+1].x * pts[i].y;
   return area/2;
 }
 //------------------------------------------------------------------------------
@@ -83,23 +83,23 @@ TPolyPolygon OffsetPolygons(const TPolyPolygon &pts, const double &delta)
 
     for (int i = 0; i < highI; ++i)
     {
-      pg.push_back(DoublePoint(pts[j][i].X + delta *normals[i].X,
-        pts[j][i].Y + delta *normals[i].Y));
-      pg.push_back(DoublePoint(pts[j][i].X + delta *normals[i+1].X,
-        pts[j][i].Y + delta *normals[i+1].Y));
+      pg.push_back(DoublePoint(pts[j][i].x + delta *normals[i].x,
+        pts[j][i].y + delta *normals[i].y));
+      pg.push_back(DoublePoint(pts[j][i].x + delta *normals[i+1].x,
+        pts[j][i].y + delta *normals[i+1].y));
     }
-    pg.push_back(DoublePoint(pts[j][highI].X + delta *normals[highI].X,
-      pts[j][highI].Y + delta *normals[highI].Y));
-    pg.push_back(DoublePoint(pts[j][highI].X + delta *normals[0].X,
-      pts[j][highI].Y + delta *normals[0].Y));
+    pg.push_back(DoublePoint(pts[j][highI].x + delta *normals[highI].x,
+      pts[j][highI].y + delta *normals[highI].y));
+    pg.push_back(DoublePoint(pts[j][highI].x + delta *normals[0].x,
+      pts[j][highI].y + delta *normals[0].y));
 
     //round off reflex angles (ie > 180 deg) unless it's almost flat (ie < 10deg angle) ...
     //cross product normals < 0 -> reflex angle; dot product normals == 1 -> no angle
-    if ((normals[highI].X *normals[0].Y - normals[0].X *normals[highI].Y) *delta > 0 &&
-    (normals[0].X *normals[highI].X + normals[0].Y *normals[highI].Y) < 0.985)
+    if ((normals[highI].x *normals[0].y - normals[0].x *normals[highI].y) *delta > 0 &&
+    (normals[0].x *normals[highI].x + normals[0].y *normals[highI].y) < 0.985)
     {
-      double a1 = std::atan2(normals[highI].Y, normals[highI].X);
-      double a2 = std::atan2(normals[0].Y, normals[0].X);
+      double a1 = std::atan2(normals[highI].y, normals[highI].x);
+      double a2 = std::atan2(normals[0].y, normals[0].x);
       if (delta > 0 && a2 < a1) a2 = a2 + pi*2;
       else if (delta < 0 && a2 > a1) a2 = a2 - pi*2;
       TPolygon arc = BuildArc(pts[j][highI], a1, a2, delta);
@@ -107,11 +107,11 @@ TPolyPolygon OffsetPolygons(const TPolyPolygon &pts, const double &delta)
       pg.insert(it, arc.begin(), arc.end());
     }
     for (int i = highI; i > 0; --i)
-      if ((normals[i-1].X*normals[i].Y - normals[i].X*normals[i-1].Y) *delta > 0 &&
-      (normals[i].X*normals[i-1].X + normals[i].Y*normals[i-1].Y) < 0.985)
+      if ((normals[i-1].x*normals[i].y - normals[i].x*normals[i-1].y) *delta > 0 &&
+      (normals[i].x*normals[i-1].x + normals[i].y*normals[i-1].y) < 0.985)
       {
-        double a1 = std::atan2(normals[i-1].Y, normals[i-1].X);
-        double a2 = std::atan2(normals[i].Y, normals[i].X);
+        double a1 = std::atan2(normals[i-1].y, normals[i-1].x);
+        double a2 = std::atan2(normals[i].y, normals[i].x);
         if (delta > 0 && a2 < a1) a2 = a2 + pi*2;
         else if (delta < 0 && a2 > a1) a2 = a2 - pi*2;
         TPolygon arc = BuildArc(pts[j][i-1], a1, a2, delta);

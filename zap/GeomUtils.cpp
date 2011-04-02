@@ -813,13 +813,13 @@ void unpackPolyPolygon(const TPolyPolygon &solution, Vector<Point> &lineSegmentP
 
       for(U32 j = 1; j < poly.size(); j++)
       {
-         lineSegmentPoints[index++] = Point((F32)poly[j-1].X, (F32)poly[j-1].Y);
-         lineSegmentPoints[index++] = Point((F32)poly[j].X,   (F32)poly[j].Y);
+         lineSegmentPoints[index++] = Point((F32)poly[j-1].x, (F32)poly[j-1].y);
+         lineSegmentPoints[index++] = Point((F32)poly[j].x,   (F32)poly[j].y);
       }
 
       // Close the loop
-      lineSegmentPoints[index++] = Point((F32)poly[poly.size()-1].X, (F32)poly[poly.size()-1].Y);
-      lineSegmentPoints[index++] = Point((F32)poly[0].X, (F32)poly[0].Y);
+      lineSegmentPoints[index++] = Point((F32)poly[poly.size()-1].x, (F32)poly[poly.size()-1].y);
+      lineSegmentPoints[index++] = Point((F32)poly[0].x, (F32)poly[0].y);
    }
 }
 
@@ -842,7 +842,7 @@ void offsetPolygon(const Vector<Point> &inputPoly, Vector<Point> &outputPoly, co
 
    // Only one polygon should come back since only one went in
    for(U32 i = 0; i < poly.size(); i++)
-      outputPoly.push_back(Point(poly[i].X, poly[i].Y));
+      outputPoly.push_back(Point(poly[i].x, poly[i].y));
 }
 
 
@@ -941,8 +941,8 @@ bool Triangulate::processComplex(TriangleData& outputData, const Rect& bounds,
          S32 first = nextPt;
          for (U32 k = 0; k < poly.size(); k++)
          {
-            coords.push_back((F32)poly[k].X);
-            coords.push_back((F32)poly[k].Y);
+            coords.push_back((F32)poly[k].x);
+            coords.push_back((F32)poly[k].y);
 
             if(k > 0)
             {

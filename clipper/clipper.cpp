@@ -333,14 +333,14 @@ TDoubleRect GetBounds(const TPolygon& poly)
 {
   if (poly.size() == 0) return nullRect;
   TDoubleRect result;
-  result.left = poly[0].X; result.top = poly[0].Y;
-  result.right = poly[0].X; result.bottom = poly[0].Y;
+  result.left = poly[0].x; result.top = poly[0].y;
+  result.right = poly[0].x; result.bottom = poly[0].y;
   for (int i = 1; i < int(poly.size()); ++i)
   {
-    if (poly[i].X < result.left) result.left = poly[i].X;
-    else if (poly[i].X > result.right) result.right = poly[i].X;
-    if (poly[i].Y < result.top) result.top = poly[i].Y;
-    else if (poly[i].Y > result.bottom) result.bottom = poly[i].Y;
+    if (poly[i].x < result.left) result.left = poly[i].x;
+    else if (poly[i].x > result.right) result.right = poly[i].x;
+    if (poly[i].y < result.top) result.top = poly[i].y;
+    else if (poly[i].y > result.bottom) result.bottom = poly[i].y;
   }
   return result;
 }
@@ -350,9 +350,9 @@ bool IsClockwise(const TPolygon &poly)
 {
   int highI = poly.size() -1;
   if (highI < 2) return false;
-  double area = poly[highI].X * poly[0].Y - poly[0].X * poly[highI].Y;
+  double area = poly[highI].x * poly[0].y - poly[0].x * poly[highI].y;
   for (int i = 0; i < highI; ++i)
-    area += poly[i].X * poly[i+1].Y - poly[i+1].X * poly[i].Y;
+    area += poly[i].x * poly[i+1].y - poly[i+1].x * poly[i].y;
   //area := area/2;
   return area > 0; //ie reverse of normal formula because Y axis inverted
 }
@@ -361,16 +361,16 @@ bool IsClockwise(const TPolygon &poly)
 TDoublePoint DoublePoint(const double &X, const double &Y)
 {
   TDoublePoint p;
-  p.X = X;
-  p.Y = Y;
+  p.x = X;
+  p.y = Y;
   return p;
 }
 //------------------------------------------------------------------------------
 
 bool PointsEqual( const TDoublePoint &pt1, const TDoublePoint &pt2)
 {
-  return ( std::fabs( pt1.X - pt2.X ) < precision + tolerance ) &&
-  ( std::fabs( (pt1.Y - pt2.Y) ) < precision + tolerance );
+  return ( std::fabs( pt1.x - pt2.x ) < precision + tolerance ) &&
+  ( std::fabs( (pt1.y - pt2.y) ) < precision + tolerance );
 }
 //------------------------------------------------------------------------------
 
@@ -384,8 +384,8 @@ bool PointsEqual( const double &pt1x, const double &pt1y,
 
 TDoublePoint GetUnitNormal( const TDoublePoint &pt1, const TDoublePoint &pt2)
 {
-  double dx = ( pt2.X - pt1.X );
-  double dy = ( pt2.Y - pt1.Y );
+  double dx = ( pt2.x - pt1.x );
+  double dy = ( pt2.y - pt1.y );
   if(  ( dx == 0 ) && ( dy == 0 ) ) return DoublePoint( 0, 0 );
 
   double f = 1 *1.0/ std::sqrt( dx*dx + dy*dy );
@@ -464,8 +464,8 @@ bool IsHorizontal(const TEdge &e)
 
 bool IsHorizontal(TDoublePoint pt1, TDoublePoint pt2)
 {
-  return (std::fabs(pt1.X - pt2.X) > precision &&
-    std::fabs(pt1.Y - pt2.Y) < precision);
+  return (std::fabs(pt1.x - pt2.x) > precision &&
+    std::fabs(pt1.y - pt2.y) < precision);
 }
 //------------------------------------------------------------------------------
 
@@ -527,12 +527,12 @@ bool SlopesEqual(TEdge &e1, TEdge &e2)
 bool SlopesEqual(const TDoublePoint pt1,
   const TDoublePoint pt2, const TDoublePoint pt3)
 {
-  return (std::fabs(pt1.X-pt2.X) <= slope_precision &&
-      std::fabs(pt2.X-pt3.X) <= slope_precision) ||
-      (std::fabs(pt1.Y-pt2.Y) <= slope_precision &&
-      std::fabs(pt2.Y-pt3.Y) <= slope_precision) ||
-      (std::fabs((pt2.Y - pt1.Y)*(pt3.X - pt2.X) -
-      (pt2.X - pt1.X)*(pt3.Y - pt2.Y)) < slope_precision);
+  return (std::fabs(pt1.x-pt2.x) <= slope_precision &&
+      std::fabs(pt2.x-pt3.x) <= slope_precision) ||
+      (std::fabs(pt1.y-pt2.y) <= slope_precision &&
+      std::fabs(pt2.y-pt3.y) <= slope_precision) ||
+      (std::fabs((pt2.y - pt1.y)*(pt3.x - pt2.x) -
+      (pt2.x - pt1.x)*(pt3.y - pt2.y)) < slope_precision);
 }
 //------------------------------------------------------------------------------
 
@@ -541,25 +541,25 @@ bool IntersectPoint(TEdge &edge1, TEdge &edge2, TDoublePoint &ip)
   double b1, b2;
   if(  edge1.dx == 0 )
   {
-    ip.X = edge1.xbot;
+    ip.x = edge1.xbot;
     b2 = edge2.ybot - edge2.xbot/edge2.dx;
-    ip.Y = ip.X/edge2.dx + b2;
+    ip.y = ip.x/edge2.dx + b2;
   }
   else if(  edge2.dx == 0 )
   {
-    ip.X = edge2.xbot;
+    ip.x = edge2.xbot;
     b1 = edge1.ybot - edge1.xbot/edge1.dx;
-    ip.Y = ip.X/edge1.dx + b1;
+    ip.y = ip.x/edge1.dx + b1;
   }
   else
   {
     if( edge1.dx == edge2.dx ) return false;
     b1 = edge1.xbot - edge1.ybot *edge1.dx;
     b2 = edge2.xbot - edge2.ybot *edge2.dx;
-    ip.Y = (b2-b1)/(edge1.dx - edge2.dx);
-    ip.X = edge1.dx * ip.Y + b1;
+    ip.y = (b2-b1)/(edge1.dx - edge2.dx);
+    ip.x = edge1.dx * ip.y + b1;
   }
-  return (ip.Y > edge1.ytop + tolerance) && (ip.Y > edge2.ytop + tolerance);
+  return (ip.y > edge1.ytop + tolerance) && (ip.y > edge2.ytop + tolerance);
 }
 //------------------------------------------------------------------------------
 
@@ -569,7 +569,7 @@ bool IsClockwise(TPolyPt *pt)
   TPolyPt* startPt = pt;
   do
   {
-    area = area + (pt->pt.X * pt->next->pt.Y) - (pt->next->pt.X * pt->pt.Y);
+    area = area + (pt->pt.x * pt->next->pt.y) - (pt->next->pt.x * pt->pt.y);
     pt = pt->next;
   }
   while (pt != startPt);
@@ -581,8 +581,8 @@ bool IsClockwise(TPolyPt *pt)
 void InitEdge(TEdge *e, TEdge *eNext, TEdge *ePrev, const TDoublePoint &pt)
 {
   std::memset( e, 0, sizeof( TEdge ));
-  e->xbot = pt.X;
-  e->ybot = pt.Y;
+  e->xbot = pt.x;
+  e->ybot = pt.y;
   e->next = eNext;
   e->prev = ePrev;
   SetDx(*e);
@@ -771,12 +771,12 @@ TEdge* ClipperBase::AddBoundsToLML(TEdge *e)
 
 TDoublePoint RoundToPrecision(const TDoublePoint &pt){
   TDoublePoint result;
-  result.X = (pt.X >= 0.0) ?
-    (std::floor( pt.X/precision + 0.5 ) * precision):
-    (std::ceil( pt.X/precision + 0.5 ) * precision);
-  result.Y = (pt.Y >= 0.0) ?
-    (std::floor( pt.Y/precision + 0.5 ) * precision):
-    (std::ceil( pt.Y/precision + 0.5 ) * precision);
+  result.x = (pt.x >= 0.0) ?
+    (std::floor( pt.x/precision + 0.5 ) * precision):
+    (std::ceil( pt.x/precision + 0.5 ) * precision);
+  result.y = (pt.y >= 0.0) ?
+    (std::floor( pt.y/precision + 0.5 ) * precision):
+    (std::ceil( pt.y/precision + 0.5 ) * precision);
   return result;
 }
 //------------------------------------------------------------------------------
@@ -791,7 +791,7 @@ void ClipperBase::AddPolygon( const TPolygon &pg, TPolyType polyType)
 
   //make sure this is still a sensible polygon (ie with at least one minima) ...
   int i = 1;
-  while(  i <= highI && std::fabs(p[i].Y - p[0].Y) < precision ) i++;
+  while(  i <= highI && std::fabs(p[i].y - p[0].y) < precision ) i++;
   if( i > highI ) return;
 
   //create a new edge array ...
@@ -799,8 +799,8 @@ void ClipperBase::AddPolygon( const TPolygon &pg, TPolyType polyType)
   m_edges.push_back(edges);
 
   //convert 'edges' to a double-linked-list and initialize a few of the vars ...
-  edges[0].xbot = p[0].X;
-  edges[0].ybot = p[0].Y;
+  edges[0].xbot = p[0].x;
+  edges[0].ybot = p[0].y;
   InitEdge(&edges[highI], &edges[0], &edges[highI-1], p[highI]);
   for (i = highI-1; i > 0; --i)
     InitEdge(&edges[i], &edges[i+1], &edges[i-1], p[i]);
@@ -1249,13 +1249,13 @@ void Clipper::InsertLocalMinimaIntoAEL( const double &botY)
         TPolyPt* p = m_CurrentHorizontals[i].outPPt;
 
         TPolyPt* p2;
-        if (IsHorizontal(p->pt, p->prev->pt) && (p->prev->pt.X == hPt2.X))
+        if (IsHorizontal(p->pt, p->prev->pt) && (p->prev->pt.x == hPt2.x))
           p2 = p->prev;
-        else if (IsHorizontal(p->pt, p->next->pt) && (p->next->pt.X == hPt2.X))
+        else if (IsHorizontal(p->pt, p->next->pt) && (p->next->pt.x == hPt2.x))
           p2 = p->next;
         else continue;
 
-        if (HorizOverlap(hPt.X, hPt2.X, lm->rightBound->xbot, lm->rightBound->xtop))
+        if (HorizOverlap(hPt.x, hPt2.x, lm->rightBound->xbot, lm->rightBound->xtop))
         {
           AddPolyPt(lm->rightBound, hPt);
           int j = m_Joins.size();
@@ -1265,7 +1265,7 @@ void Clipper::InsertLocalMinimaIntoAEL( const double &botY)
           m_Joins[j].pt = hPt;
         }
         else if (HorizOverlap(lm->rightBound->xbot,
-          lm->rightBound->xtop, hPt.X, hPt2.X))
+          lm->rightBound->xtop, hPt.x, hPt2.x))
         {
           TDoublePoint pt =
             DoublePoint(lm->rightBound->xbot, lm->rightBound->ybot);
@@ -1740,10 +1740,10 @@ bool E1PrecedesE2inAEL(TEdge *e1, TEdge *e2)
 
 bool Clipper::Process1Before2(TIntersectNode *Node1, TIntersectNode *Node2)
 {
-  if ( std::fabs(Node1->pt.Y - Node2->pt.Y) < m_IntersectTolerance )
+  if ( std::fabs(Node1->pt.y - Node2->pt.y) < m_IntersectTolerance )
   {
-    if ( std::fabs(Node1->pt.X - Node2->pt.X) > precision )
-      return Node1->pt.X < Node2->pt.X;
+    if ( std::fabs(Node1->pt.x - Node2->pt.x) > precision )
+      return Node1->pt.x < Node2->pt.x;
     //a complex intersection (with more than 2 edges intersecting) ...
     if ( Node1->edge1 == Node2->edge1  || SlopesEqual(*Node1->edge1, *Node2->edge1) )
     {
@@ -1754,8 +1754,8 @@ bool Clipper::Process1Before2(TIntersectNode *Node1, TIntersectNode *Node2)
         //(N1.E1 == N2.E1) and (N1.E2 & N2.E2 are co-linear) ...
         return E1PrecedesE2inAEL(Node1->edge2, Node2->edge2);
       else if //check if minima **
-        ( (std::fabs(Node1->edge2->ybot - Node1->pt.Y) < slope_precision  ||
-        std::fabs(Node2->edge2->ybot - Node2->pt.Y) < slope_precision ) &&
+        ( (std::fabs(Node1->edge2->ybot - Node1->pt.y) < slope_precision  ||
+        std::fabs(Node2->edge2->ybot - Node2->pt.y) < slope_precision ) &&
         (Node1->edge2->next == Node2->edge2 || Node1->edge2->prev == Node2->edge2) )
       {
         if ( Node1->edge1->dx < 0 ) return Node1->edge2->dx > Node2->edge2->dx;
@@ -1767,13 +1767,13 @@ bool Clipper::Process1Before2(TIntersectNode *Node1, TIntersectNode *Node2)
         return (Node1->edge2->dx < Node2->edge2->dx);
 
     } else if ( Node1->edge2 == Node2->edge2  && //check if maxima ***
-      (std::fabs(Node1->edge1->ytop - Node1->pt.Y) < slope_precision ||
-      std::fabs(Node2->edge1->ytop - Node2->pt.Y) < slope_precision) )
+      (std::fabs(Node1->edge1->ytop - Node1->pt.y) < slope_precision ||
+      std::fabs(Node2->edge1->ytop - Node2->pt.y) < slope_precision) )
         return (Node1->edge1->dx > Node2->edge1->dx);
     else
       return (Node1->edge1->dx < Node2->edge1->dx);
   } else
-      return (Node1->pt.Y > Node2->pt.Y);
+      return (Node1->pt.y > Node2->pt.y);
   //**a minima that very slightly overlaps an edge can appear like
   //a complex intersection but it's not. (Minima can't have parallel edges.)
   //***a maxima that very slightly overlaps an edge can appear like
@@ -1924,11 +1924,11 @@ void Clipper::IntersectEdges(TEdge *e1, TEdge *e2,
   //e2 in AEL except when e1 is being inserted at the intersection point ...
 
   bool e1stops = !(ipLeft & protects) &&  !e1->nextInLML &&
-    ( std::fabs( e1->xtop - pt.X ) < tolerance ) && //nb: not precision
-    ( std::fabs( e1->ytop - pt.Y ) < tolerance );
+    ( std::fabs( e1->xtop - pt.x ) < tolerance ) && //nb: not precision
+    ( std::fabs( e1->ytop - pt.y ) < tolerance );
   bool e2stops = !(ipRight & protects) &&  !e2->nextInLML &&
-    ( std::fabs( e2->xtop - pt.X ) < tolerance ) && //nb: not precision
-    ( std::fabs( e2->ytop - pt.Y ) < tolerance );
+    ( std::fabs( e2->xtop - pt.x ) < tolerance ) && //nb: not precision
+    ( std::fabs( e2->ytop - pt.y ) < tolerance );
   bool e1Contributing = ( e1->outIdx >= 0 );
   bool e2contributing = ( e2->outIdx >= 0 );
 
@@ -2179,8 +2179,8 @@ TPolyPt* FixupOutPolygon(TPolyPt *p, bool stripPointyEdgesOnly = false)
     if (PointsEqual(pp->pt, pp->next->pt) ||
       (SlopesEqual(pp->prev->pt, pp->pt, pp->next->pt) &&
       (!stripPointyEdgesOnly ||
-      ((pp->pt.X - pp->prev->pt.X > 0) != (pp->next->pt.X - pp->pt.X > 0)) ||
-      ((pp->pt.Y - pp->prev->pt.Y > 0) != (pp->next->pt.Y - pp->pt.Y > 0)))))
+      ((pp->pt.x - pp->prev->pt.x > 0) != (pp->next->pt.x - pp->pt.x > 0)) ||
+      ((pp->pt.y - pp->prev->pt.y > 0) != (pp->next->pt.y - pp->pt.y > 0)))))
     {
       lastOK = 0;
       pp->prev->next = pp->next;
@@ -2557,8 +2557,8 @@ void Clipper::AppendPolygon(TEdge *e1, TEdge *e2)
 bool SlopesEqual(const TDoublePoint& pt1a, const TDoublePoint& pt1b,
   const TDoublePoint& pt2a, const TDoublePoint& pt2b)
 {
-  return std::fabs((pt1b.Y - pt1a.Y) * (pt2b.X - pt2a.X) -
-    (pt1b.X - pt1a.X) * (pt2b.Y - pt2a.Y)) < slope_precision;
+  return std::fabs((pt1b.y - pt1a.y) * (pt2b.x - pt2a.x) -
+    (pt1b.x - pt1a.x) * (pt2b.y - pt2a.y)) < slope_precision;
 }
 //------------------------------------------------------------------------------
 
@@ -2590,10 +2590,10 @@ void Clipper::MergePolysWithCommonEdges()
       if (!PtIsAPolyPt(m_Joins[i].pt, p2)) continue;
     }
 
-    if (((p1->next->pt.X > p1->pt.X && p2->next->pt.X > p2->pt.X) ||
-      (p1->next->pt.X < p1->pt.X && p2->next->pt.X < p2->pt.X) ||
-      (p1->next->pt.Y > p1->pt.Y && p2->next->pt.Y > p2->pt.Y) ||
-      (p1->next->pt.Y < p1->pt.Y && p2->next->pt.Y < p2->pt.Y)) &&
+    if (((p1->next->pt.x > p1->pt.x && p2->next->pt.x > p2->pt.x) ||
+      (p1->next->pt.x < p1->pt.x && p2->next->pt.x < p2->pt.x) ||
+      (p1->next->pt.y > p1->pt.y && p2->next->pt.y > p2->pt.y) ||
+      (p1->next->pt.y < p1->pt.y && p2->next->pt.y < p2->pt.y)) &&
       SlopesEqual(p1->pt, p1->next->pt, p2->pt, p2->next->pt))
     {
       if (m_Joins[i].idx1 == m_Joins[i].idx2) continue;
@@ -2605,10 +2605,10 @@ void Clipper::MergePolysWithCommonEdges()
       p1->next = p2;
       p2->prev = p1;
     }
-    else if (((p1->next->pt.X > p1->pt.X && p2->prev->pt.X > p2->pt.X) ||
-      (p1->next->pt.X < p1->pt.X && p2->prev->pt.X < p2->pt.X) ||
-      (p1->next->pt.Y > p1->pt.Y && p2->prev->pt.Y > p2->pt.Y) ||
-      (p1->next->pt.Y < p1->pt.Y && p2->prev->pt.Y < p2->pt.Y)) &&
+    else if (((p1->next->pt.x > p1->pt.x && p2->prev->pt.x > p2->pt.x) ||
+      (p1->next->pt.x < p1->pt.x && p2->prev->pt.x < p2->pt.x) ||
+      (p1->next->pt.y > p1->pt.y && p2->prev->pt.y > p2->pt.y) ||
+      (p1->next->pt.y < p1->pt.y && p2->prev->pt.y < p2->pt.y)) &&
       SlopesEqual(p1->pt, p1->next->pt, p2->pt, p2->prev->pt))
     {
       TPolyPt* pp1 = DuplicatePolyPt(p1);
@@ -2618,10 +2618,10 @@ void Clipper::MergePolysWithCommonEdges()
       p2->next = pp1;
       pp1->prev = p2;
     }
-    else if (((p1->prev->pt.X > p1->pt.X && p2->next->pt.X > p2->pt.X) ||
-      (p1->prev->pt.X < p1->pt.X && p2->next->pt.X < p2->pt.X) ||
-      (p1->prev->pt.Y > p1->pt.Y && p2->next->pt.Y > p2->pt.Y) ||
-      (p1->prev->pt.Y < p1->pt.Y && p2->next->pt.Y < p2->pt.Y)) &&
+    else if (((p1->prev->pt.x > p1->pt.x && p2->next->pt.x > p2->pt.x) ||
+      (p1->prev->pt.x < p1->pt.x && p2->next->pt.x < p2->pt.x) ||
+      (p1->prev->pt.y > p1->pt.y && p2->next->pt.y > p2->pt.y) ||
+      (p1->prev->pt.y < p1->pt.y && p2->next->pt.y < p2->pt.y)) &&
       SlopesEqual(p1->pt, p1->prev->pt, p2->pt, p2->next->pt))
     {
       TPolyPt* pp1 = DuplicatePolyPt(p1);
@@ -2631,10 +2631,10 @@ void Clipper::MergePolysWithCommonEdges()
       pp1->prev = p2;
       p2->next = pp1;
     }
-    else if (((p1->prev->pt.X > p1->pt.X && p2->prev->pt.X > p2->pt.X) ||
-      (p1->prev->pt.X < p1->pt.X && p2->prev->pt.X < p2->pt.X) ||
-      (p1->prev->pt.Y > p1->pt.Y && p2->prev->pt.Y > p2->pt.Y) ||
-      (p1->prev->pt.Y < p1->pt.Y && p2->prev->pt.Y < p2->pt.Y)) &&
+    else if (((p1->prev->pt.x > p1->pt.x && p2->prev->pt.x > p2->pt.x) ||
+      (p1->prev->pt.x < p1->pt.x && p2->prev->pt.x < p2->pt.x) ||
+      (p1->prev->pt.y > p1->pt.y && p2->prev->pt.y > p2->pt.y) ||
+      (p1->prev->pt.y < p1->pt.y && p2->prev->pt.y < p2->pt.y)) &&
       SlopesEqual(p1->pt, p1->prev->pt, p2->pt, p2->prev->pt))
     {
       if (m_Joins[i].idx1 == m_Joins[i].idx2) continue;
@@ -2690,11 +2690,11 @@ double SetDx(TPolyPt* pp)
   {
     TPolyPt* pp2;
     if (ofForwardBound & pp->flags) pp2 = pp->next; else pp2 = pp->prev;
-    double dx = std::fabs(pp->pt.X - pp2->pt.X);
-    double dy = std::fabs(pp->pt.Y - pp2->pt.Y);
+    double dx = std::fabs(pp->pt.x - pp2->pt.x);
+    double dy = std::fabs(pp->pt.y - pp2->pt.y);
     if ((dx < 0.1 && dy *10 < dx) || dy < precision)
       pp->dx = horizontal; else
-      pp->dx = (pp->pt.X - pp2->pt.X)/(pp->pt.Y - pp2->pt.Y);
+      pp->dx = (pp->pt.x - pp2->pt.x)/(pp->pt.y - pp2->pt.y);
   }
   return pp->dx;
 }
@@ -2723,15 +2723,15 @@ double GetR(const TDoublePoint pt1,
   //right, +1.99 is an acute angle turn left and 0 when the points are parallel.
   TDoublePoint N1 = GetUnitNormal(pt1, pt2);
   TDoublePoint N2 = GetUnitNormal(pt2, pt3);
-  if (N1.X * N2.Y - N2.X * N1.Y < 0)
-    return 1- (N1.X*N2.X + N1.Y*N2.Y); else
-    return (N1.X*N2.X + N1.Y*N2.Y) -1;
+  if (N1.x * N2.y - N2.x * N1.y < 0)
+    return 1- (N1.x*N2.x + N1.y*N2.y); else
+    return (N1.x*N2.x + N1.y*N2.y) -1;
 }
 //------------------------------------------------------------------------------
 
 double DistanceSqr(const TDoublePoint pt1, const TDoublePoint pt2)
 {
-  return (pt1.X - pt2.X)*(pt1.X - pt2.X) + (pt1.Y - pt2.Y)*(pt1.Y - pt2.Y);
+  return (pt1.x - pt2.x)*(pt1.x - pt2.x) + (pt1.y - pt2.y)*(pt1.y - pt2.y);
 }
 //------------------------------------------------------------------------------
 
@@ -2800,10 +2800,10 @@ int CompareForwardAngles(TPolyPt* p1, TPolyPt* p2)
 
 int blCompare(TPolyPt* pp1, TPolyPt* pp2)
 {
-  if (pp2->pt.Y > pp1->pt.Y + precision) return -1;
-  else if (pp2->pt.Y < pp1->pt.Y - precision) return 1;
-  else if (pp2->pt.X < pp1->pt.X - precision) return -1;
-  else if (pp2->pt.X > pp1->pt.X + precision) return 1;
+  if (pp2->pt.y > pp1->pt.y + precision) return -1;
+  else if (pp2->pt.y < pp1->pt.y - precision) return 1;
+  else if (pp2->pt.x < pp1->pt.x - precision) return -1;
+  else if (pp2->pt.x > pp1->pt.x + precision) return 1;
   else if (pp1 == pp2) return 0;
   else
   {
@@ -2827,10 +2827,10 @@ int wlCompare(TPolyPt* pp1, TPolyPt* pp2)
     pp1Next = pp1->prev;
 
   if (pp1 == pp2) return 0;
-  else if (pp1->pt.X < pp2->pt.X - tolerance &&
-    pp1Next->pt.X < pp2->pt.X + tolerance) return 1;
-  else if (pp1->pt.X > pp2->pt.X + tolerance &&
-    pp1Next->pt.X > pp2->pt.X - tolerance) return -1;
+  else if (pp1->pt.x < pp2->pt.x - tolerance &&
+    pp1Next->pt.x < pp2->pt.x + tolerance) return 1;
+  else if (pp1->pt.x > pp2->pt.x + tolerance &&
+    pp1Next->pt.x > pp2->pt.x - tolerance) return -1;
   else if (PointsEqual(pp1->pt, pp2->pt))
   {
     double dx1 = SetDx(pp1); double dx2 = SetDx(pp2);
@@ -2839,7 +2839,7 @@ int wlCompare(TPolyPt* pp1, TPolyPt* pp2)
     {
       if (ofForwardBound & pp2->flags)
         pp2Next = pp2->next; else pp2Next = pp2->prev;
-      if (pp2Next->pt.X < pp1->pt.X) return -1; else return 1;
+      if (pp2Next->pt.x < pp1->pt.x) return -1; else return 1;
     }
     else if (dx1 < dx2 - precision) return -1;
     else if (dx1 > dx2 + precision) return 1;
@@ -2849,11 +2849,11 @@ int wlCompare(TPolyPt* pp1, TPolyPt* pp2)
     SetDx(pp1);
     if (pp1->dx == horizontal) {
       if (ofForwardBound & pp1->flags) pp2 = pp1->next; else pp2 = pp1->prev;
-      if (pp2->pt.X > pp1->pt.X) return -1; else return 1;
+      if (pp2->pt.x > pp1->pt.x) return -1; else return 1;
     }
-    double pp1X = pp1->pt.X + (pp2->pt.Y - pp1->pt.Y) * pp1->dx;
-    if (pp1X < pp2->pt.X - precision) return 1;
-    else if (pp1X > pp2->pt.X + precision) return -1;
+    double pp1X = pp1->pt.x + (pp2->pt.y - pp1->pt.y) * pp1->dx;
+    if (pp1X < pp2->pt.x - precision) return 1;
+    else if (pp1X > pp2->pt.x + precision) return -1;
     else
     {
       if (ofForwardBound & pp2->flags)
@@ -2881,8 +2881,8 @@ int wlCompare(TPolyPt* pp1, TPolyPt* pp2)
 bool NextIsBottom(TPolyPt* p)
 {
   TPolyPt* pp = p->next;
-  while (pp->next->pt.Y == pp->pt.Y) pp = pp->next;
-  if (pp->next->pt.Y > pp->pt.Y) return false;
+  while (pp->next->pt.y == pp->pt.y) pp = pp->next;
+  if (pp->next->pt.y > pp->pt.y) return false;
   else return true;
 }
 //------------------------------------------------------------------------------
@@ -2895,7 +2895,7 @@ void UpdateBounds(SkipList<TPolyPt*>& sl, SkipNode* sn, const double Y)
     TPolyPt* pp2;
     if (ofForwardBound & pp->flags)
       pp2 = pp->next; else pp2 = pp->prev;
-    if (pp2->pt.Y < Y - tolerance) break;
+    if (pp2->pt.y < Y - tolerance) break;
     pp = pp2;
     if (ofTop & pp->flags) break;
   }
@@ -2924,9 +2924,9 @@ void Clipper::FixOrientation()
       p = p->next;
       do
       {
-        if (p->pt.Y > lowestP->pt.Y) lowestP = p;
-        else if (p->pt.Y == lowestP->pt.Y &&
-          p->pt.X <= lowestP->pt.X) lowestP = p;
+        if (p->pt.y > lowestP->pt.y) lowestP = p;
+        else if (p->pt.y == lowestP->pt.y &&
+          p->pt.x <= lowestP->pt.x) lowestP = p;
         p = p->next;
       }
       while ( p != (TPolyPt*)m_PolyPts[i] );
@@ -2949,7 +2949,7 @@ void Clipper::FixOrientation()
       //and add them to the queue ...
       do
       {
-        while (p->next->pt.Y == p->pt.Y) p = p->next; //ignore horizontals
+        while (p->next->pt.y == p->pt.y) p = p->next; //ignore horizontals
 
         p->flags = tmpFlag | ofForwardBound;
         if (lowestPending && (ofCW & lowestP->flags))
@@ -2960,7 +2960,7 @@ void Clipper::FixOrientation()
 
         queue.InsertItem(p);
         //go up the bound ...
-        while (p->next->pt.Y <= p->pt.Y)
+        while (p->next->pt.y <= p->pt.y)
         {
           p->next->flags = tmpFlag | ofForwardBound;
           p = p->next;
@@ -2973,7 +2973,7 @@ void Clipper::FixOrientation()
           p = p->next;
         }
 
-        if (p->next->pt.Y == p->next->next->pt.Y)
+        if (p->next->pt.y == p->next->next->pt.y)
         {
           p = p->next;
           p->flags = tmpFlag;
@@ -2984,7 +2984,7 @@ void Clipper::FixOrientation()
             lowestPending = false;
           }
           queue.InsertItem(p);
-          while (p != lowestP && p->next->pt.Y == p->pt.Y) p = p->next;
+          while (p != lowestP && p->next->pt.y == p->pt.y) p = p->next;
         } else
         {
           p = DuplicatePolyPt(p);
@@ -2994,7 +2994,7 @@ void Clipper::FixOrientation()
             p->flags = p->flags | ofBottomMinima;
           queue.InsertItem(p);
           p = p->next;
-          while (p != lowestP && p->next->pt.Y == p->prev->pt.Y) p = p->next;
+          while (p != lowestP && p->next->pt.y == p->prev->pt.y) p = p->next;
         }
       }
       while (p != lowestP);
@@ -3021,7 +3021,7 @@ void Clipper::FixOrientation()
         //and removing bounds that are no longer in scope ...
         //nb: Bounds never intersect other bounds so UpdateBounds() should
         //not upset the order of the bounds in worklist.
-        UpdateBounds(workList, sn, p->pt.Y);
+        UpdateBounds(workList, sn, p->pt.y);
         sn = sn2;
       }
 

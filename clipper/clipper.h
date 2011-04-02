@@ -39,13 +39,17 @@
 #include <cstring>
 #include <cstdlib>
 
+#include "../zap/point.h"
+
 namespace clipper {
 
 enum TClipType { ctIntersection, ctUnion, ctDifference, ctXor };
 enum TPolyType { ptSubject, ptClip };
 enum TPolyFillType { pftEvenOdd, pftNonZero};
 
-struct TDoublePoint { double X; double Y; };
+typedef Zap::Point TDoublePoint;
+
+//struct TDoublePoint { double X; double Y; };
 struct TDoubleRect { double left; double top; double right; double bottom; };
 typedef std::vector< TDoublePoint > TPolygon;
 typedef std::vector< TPolygon > TPolyPolygon;
