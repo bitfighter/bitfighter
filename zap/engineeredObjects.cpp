@@ -31,6 +31,7 @@
 #include "gameWeapons.h"
 #include "sfx.h"
 #include "gameObjectRender.h"
+#include "GeomUtils.h"
 
 namespace Zap
 {

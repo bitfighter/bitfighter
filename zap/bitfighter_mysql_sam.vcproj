@@ -953,6 +953,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\polygon.cpp"
+			>
+		</File>
+		<File
 			RelativePath=".\quickChatHelper.cpp"
 			>
 		</File>
