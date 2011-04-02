@@ -547,7 +547,8 @@ bool BotNavMeshZone::buildBotMeshZones(Game *game)
          BotNavMeshZone *botzone = NULL;
    
          const S32 bytesPerVertex = sizeof(U16);      // Recast coords are U16s
-         Vector<S32> polyToZoneMap(mesh.npolys);
+         Vector<S32> polyToZoneMap;
+         polyToZoneMap.setSize(mesh.npolys);
 
          // Visualize rcPolyMesh
          for(S32 i = 0; i < mesh.npolys; i++)
