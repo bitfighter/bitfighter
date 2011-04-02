@@ -5112,16 +5112,10 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(WorldItem *item)
 void WallSegmentManager::clipAllWallEdges(const Vector<WallSegment *> &wallSegments, Vector<Point> &wallEdges)
 {
    TPolyPolygon inputPolygons, solution;
-   TPolygon inputPoly;
 
    for(S32 i = 0; i < wallSegments.size(); i++)
    {
-      inputPoly.clear();
-
-      for(S32 j = 0; j < wallSegments[i]->corners.size(); j++)
-         inputPoly.push_back(DoublePoint(wallSegments[i]->corners[j].x, wallSegments[i]->corners[j].y));
-
-      inputPolygons.push_back(inputPoly);
+      inputPolygons.push_back(wallSegments[i]->corners.getStlVector());
    }
 
    mergePolys(inputPolygons, solution);      // Merged wall segments are placed in solution

@@ -185,13 +185,13 @@ bool Barrier::unionBarriers(const Vector<DatabaseObject *> &barriers, bool useBo
       if(useBotGeom)
       {
          for(S32 j = 0; j < barrier->mBotZoneBufferGeometry.size(); j++)
-            inputPoly.push_back(DoublePoint(barrier->mBotZoneBufferGeometry[j].x, barrier->mBotZoneBufferGeometry[j].y));
+            inputPoly.push_back(barrier->mBotZoneBufferGeometry[j]);
       }
       else    
       {
          barrier->getCollisionPoly(points);        // Puts object bounds into points
          for(S32 j = 0; j < points.size(); j++)
-            inputPoly.push_back(DoublePoint(points[j].x, points[j].y));
+            inputPoly.push_back(points[j]);
       }
 
 #ifdef DUMP_DATA

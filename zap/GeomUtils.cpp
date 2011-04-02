@@ -813,36 +813,29 @@ void unpackPolyPolygon(const TPolyPolygon &solution, Vector<Point> &lineSegmentP
 
       for(U32 j = 1; j < poly.size(); j++)
       {
-         lineSegmentPoints[index++] = Point((F32)poly[j-1].x, (F32)poly[j-1].y);
-         lineSegmentPoints[index++] = Point((F32)poly[j].x,   (F32)poly[j].y);
+         lineSegmentPoints[index++] = poly[j-1];
+         lineSegmentPoints[index++] = poly[j];
       }
 
       // Close the loop
-      lineSegmentPoints[index++] = Point((F32)poly[poly.size()-1].x, (F32)poly[poly.size()-1].y);
-      lineSegmentPoints[index++] = Point((F32)poly[0].x, (F32)poly[0].y);
+      lineSegmentPoints[index++] = poly[poly.size()-1];
+      lineSegmentPoints[index++] = poly[0];
    }
 }
 
 
 // Offset a complex polygon by a given amount
 // Uses clipper to create a buffer around a polygon with the given offset
-// TODO: somehow merge Point <-> DoublePoint conversions to speed processing; maybe get clipper to use Point?
-void offsetPolygon(const Vector<Point> &inputPoly, Vector<Point> &outputPoly, const F32 offset)
+void offsetPolygon(const Vector<Point>& inputPoly, Vector<Point>& outputPoly, const F32 offset)
 {
    TPolyPolygon polygons;
-   TPolygon poly;
 
-   for(S32 i = 0; i < inputPoly.size(); i++)
-      poly.push_back(DoublePoint(inputPoly[i].x, inputPoly[i].y));
-
-   polygons.push_back(poly);
+   // create a copy of inputPoly for clipper to modify
+   polygons.push_back(Vector<Point>(inputPoly).getStlVector());
 
    polygons = OffsetPolygons(polygons, offset);    // Call Clipper to do the dirty work
-   poly = polygons[0];
 
-   // Only one polygon should come back since only one went in
-   for(U32 i = 0; i < poly.size(); i++)
-      outputPoly.push_back(Point(poly[i].x, poly[i].y));
+   outputPoly = Vector<Point>(polygons[0]);
 }
 
 
@@ -941,8 +934,8 @@ bool Triangulate::processComplex(TriangleData& outputData, const Rect& bounds,
          S32 first = nextPt;
          for (U32 k = 0; k < poly.size(); k++)
          {
-            coords.push_back((F32)poly[k].x);
-            coords.push_back((F32)poly[k].y);
+            coords.push_back(poly[k].x);
+            coords.push_back(poly[k].y);
 
             if(k > 0)
             {
