@@ -5674,7 +5674,7 @@ void WorldItem::addVert(Point vert)
 void WorldItem::addVertFront(Point vert)
 {
    mVerts.push_front(vert);
-   mVertSelected.insert(mVertSelected.begin(), false);
+   mVertSelected.push_front(false);
 }
 
 
