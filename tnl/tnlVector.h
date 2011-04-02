@@ -97,6 +97,7 @@ public:
    vector<T>& getStlVector();
    T*   address();
    const T*   address() const;
+   void reverse();
 
 
    typedef S32 (QSORT_CALLBACK *compare_func)(T *a, T *b);
@@ -280,6 +281,17 @@ template<class T> inline const T& Vector<T>::operator[](S32 index) const
 template<class T> inline void Vector<T>::reserve(U32 size)
 {
    innerVector.reserve(size);
+}
+
+// Reverses this Vector's elements in place.
+template<class T> inline void Vector<T>::reverse()
+{
+   for(S32 i = (innerVector.size() >> 1) - 1; i >= 0; i--)
+   {
+      T temp = innerVector[innerVector.size() - i - 1];
+      innerVector[innerVector.size() - i - 1] = innerVector[i];
+      innerVector[i] = temp;
+   }
 }
 
 typedef int (QSORT_CALLBACK *qsort_compare_func)(const void *, const void *);
