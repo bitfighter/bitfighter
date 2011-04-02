@@ -128,12 +128,12 @@ Barrier::Barrier(const Vector<Point> &points, F32 width, bool solid)
       if (isWoundClockwise(mPoints))  // all walls must be CCW to clip correctly  
       // TODO: could we pass a direction flag rather than reversing the array, which is slow??
       {
-         Vector<Point> reversePoints(mPoints.size());
-
-         for(S32 i = mPoints.size() - 1; i >= 0; i--)
-            reversePoints[mPoints.size() - i - 1] = mPoints[i];
-
-         mPoints = reversePoints;
+         for(S32 i = (mPoints.size() >> 1) - 1; i >= 0; i--)  // Reverse point order  (size >> 1 == half size, faster then size / 2)
+         {
+            Point tmp1 = mPoints[mPoints.size() - i - 1];
+            mPoints[mPoints.size() - i - 1] = mPoints[i];
+            mPoints[i] = tmp1;
+         }
       }
 
       Triangulate::Process(mPoints, mRenderFillGeometry);
