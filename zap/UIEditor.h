@@ -64,8 +64,12 @@ enum ShowMode
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-struct WallSegment : public DatabaseObject
+class WallSegment : public DatabaseObject
 {
+private:
+   static GridDatabase *mGridDatabase;
+   GridDatabase *getGridDatabase() { return mGridDatabase; }      
+
 public:
    WallSegment(const Point &start, const Point &end, F32 width, S32 owner = -1);
    ~WallSegment();
@@ -83,7 +87,8 @@ public:
 
    ////////////////////
    //  DatabaseObject methods
-   GridDatabase *getGridDatabase();
+   static void setGridDatabase(GridDatabase *database) { mGridDatabase = database; }
+
 
    // Note that the poly returned here is different than what you might expect -- it is composed of the edges,
    // not the corners, and is thus in A-B, C-D, E-F format rather than the more typical A-B-C-D format returned
@@ -151,6 +156,8 @@ private:
    bool mAnyVertsSelected;
 
    void init(GameItems itemType, S32 xteam, F32 xwidth, U32 itemid, bool isDockItem);
+
+   static GridDatabase *mGridDatabase;
 
 public:
    WorldItem(GameItems itemType = ItemInvalid, S32 itemId = 0);    // Only used when creating an item from a loaded level
@@ -258,7 +265,9 @@ public:
 
    ////////////////////
    //  DatabaseObject methods
-   GridDatabase *getGridDatabase();
+   static void setGridDatabase(GridDatabase *database) { mGridDatabase = database; }
+   GridDatabase *getGridDatabase() { return mGridDatabase; }
+
    bool getCollisionPoly(Vector<Point> &polyPoints) { return false; }
    bool getCollisionCircle(U32 stateIndex, Point &point, float &radius) { return false; }
    bool isCollisionEnabled() { return true; }
@@ -267,14 +276,51 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+
+class WallEdge : public DatabaseObject
+{
+private:
+   static GridDatabase *mGridDatabase;
+
+   Point mStart, mEnd;
+
+public:
+   WallEdge(const Point &start = Point(), const Point &end = Point());
+   ~WallEdge();
+
+   Point *getStart() { return &mStart; }
+   Point *getEnd() { return &mEnd; }
+
+   GridDatabase *getGridDatabase() { return mGridDatabase; }      // TODO: make private
+
+
+   // Note that the poly returned here is different than what you might expect -- it is composed of the edges,
+   // not the corners, and is thus in A-B, C-D, E-F format rather than the more typical A-B-C-D format returned
+   // by getCollisionPoly() elsewhere in the game.  Therefore, it needs to be handled differently.
+   bool getCollisionPoly(Vector<Point> &polyPoints) { polyPoints.setSize(2); polyPoints[0] = mStart; polyPoints[1] = mEnd; return true; }  
+   bool getCollisionCircle(U32 stateIndex, Point &point, float &radius) { return false; }
+   bool isCollisionEnabled() { return true; }
+
+   static void setGridDatabase(GridDatabase *database) { mGridDatabase = database; }
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+
 class WallSegmentManager
 {
+private:
+   static GridDatabase *mGridDatabase;
+   GridDatabase *getGridDatabase() { return mGridDatabase; }      
+
 public:
    WallSegmentManager()  { /* Do nothing */ }
-   ~WallSegmentManager() { /* Do nothing */ }
 
-   Vector<WallSegment *> wallSegments;
-   static Vector<Point> mWallEdges;             // a-b c-d format
+   Vector<WallSegment *> mWallSegments;
+   static Vector<WallEdge *> mWallEdges;        // For mounting forcefields/turrets
+   static Vector<Point> mWallEdgePoints;        // For rendering
 
    void deleteSegments(U32 owner);              // Delete all segments owned by specified WorldItem
    void deleteAllSegments();
@@ -287,7 +333,9 @@ public:
 
    void buildWallSegmentEdgesAndPoints(WorldItem *item);
    void recomputeAllWallGeometry();
-   
+
+   static void setGridDatabase(GridDatabase *database) { mGridDatabase = database; }
+
    // Populate wallEdges
    static void clipAllWallEdges(const Vector<WallSegment *> &wallSegments, Vector<Point> &wallEdges);
  
@@ -583,9 +631,11 @@ public:
    Point snapPoint(Point const &p, bool snapWhileOnDock = false);
    Point snapPointToLevelGrid(Point const &p);
 
-   static S32 checkEdgesForSnap(const Point &clickPoint, const Vector<Point> &verts, bool abcFormat, F32 &minDist, 
-                                Point &snapPoint);
-   S32 checkCornersForSnap(const Point &clickPoint, const Vector<Point> &verts, F32 &minDist, Point &snapPoint);
+   static S32 checkEdgesForSnap(const Point &clickPoint, const Vector<Point> &points, bool abcFormat, F32 &minDist, Point &snapPoint);
+   static S32 checkEdgesForSnap(const Point &clickPoint,  const Vector<WallEdge *> &edges, bool abcFormat, F32 &minDist, Point &snapPoint);
+
+   S32 checkCornersForSnap(const Point &clickPoint, const Vector<Point> &points, F32 &minDist, Point &snapPoint);
+   S32 checkCornersForSnap(const Point &clickPoint,  const Vector<WallEdge *> &edges, F32 &minDist, Point &snapPoint);
 
 
    

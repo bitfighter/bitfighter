@@ -338,10 +338,11 @@ DatabaseObject *EngineeredObject::findAnchorPointAndNormal(GridDatabase *db, con
       }
    }
 
-   Vector<Point> walls;
-   if(closestWall && closestWall->getCollisionPoly(walls))
-      if(isWoundClockwise(walls))
-         normal = -normal;  // to avoid objects pointing inside polygon walls
+   // TODO: Reactivate for polywalls
+   //Vector<Point> walls;
+   //if(closestWall && closestWall->getCollisionPoly(walls))
+   //   if(isWoundClockwise(walls))
+   //      normal = -normal;  // Avoid objects pointing inside polygon walls
 
    return closestWall;
 }

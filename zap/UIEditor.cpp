@@ -96,8 +96,6 @@ enum EntryMode {
 static EntryMode entryMode;
 static Vector<ZoneBorder> zoneBorders;
 
-Vector<Point> WallSegmentManager::mWallEdges;
-
 void saveLevelCallback()
 {
    if(gEditorUserInterface.saveLevel(true, true))
@@ -116,7 +114,7 @@ void backToMainMenuCallback()
 const S32 NONE = -1;
 
 // Constructor
-EditorUserInterface::EditorUserInterface() : mGridDatabase(GridDatabase(false))
+EditorUserInterface::EditorUserInterface() : mGridDatabase(GridDatabase(false))     // false --> not using game coords
 {
    setMenuID(EditorUI);
 
@@ -132,6 +130,12 @@ EditorUserInterface::EditorUserInterface() : mGridDatabase(GridDatabase(false))
    mLastUndoStateWasBarrierWidthChange = false;
 
    mUndoItems.setSize(UNDO_STATES);
+
+   // Pass the gridDatabase on to these other objects, so they can have local access
+   WorldItem::setGridDatabase(&mGridDatabase);
+   WallSegment::setGridDatabase(&mGridDatabase);      // Still needed?
+   WallEdge::setGridDatabase(&mGridDatabase);
+   WallSegmentManager::setGridDatabase(&mGridDatabase);
 }
 
 
@@ -1417,6 +1421,25 @@ Point EditorUserInterface::snapPoint(Point const &p, bool snapWhileOnDock)
 
 extern bool findNormalPoint(const Point &p, const Point &s1, const Point &s2, Point &closest);
 
+static Point closest;      // Reusable container
+
+static bool checkEdge(const Point &clickPoint, const Point &start, const Point &end, F32 &minDist, Point &snapPoint)
+{
+   if(findNormalPoint(clickPoint, start, end, closest))    // closest is point on line where clickPoint normal intersects
+   {
+      F32 dist = closest.distSquared(clickPoint);
+      if(dist < minDist)
+      {
+         minDist = dist;
+         snapPoint.set(closest);  
+         return true;
+      }
+   }
+
+   return false;
+}
+
+
 // Checks for snapping against a series of edges defined by verts in A-B-C-D format if abcFormat is true, or A-B B-C C-D if false
 // Sets snapPoint and minDist.  Returns index of closest segment found if closer than minDist.
 S32 EditorUserInterface::checkEdgesForSnap(const Point &clickPoint, const Vector<Point> &verts, bool abcFormat,
@@ -1424,21 +1447,43 @@ S32 EditorUserInterface::checkEdgesForSnap(const Point &clickPoint, const Vector
 {
    S32 inc = abcFormat ? 1 : 2;   
    S32 segFound = NONE;
-   Point closest;
 
    for(S32 i = 0; i < verts.size() - 1; i += inc)
-      if(findNormalPoint(clickPoint, verts[i], verts[i+1], closest))    // closest is point on line where clickPoint normal intersects
-      {
-         F32 dist = closest.distSquared(clickPoint);
-         if(dist < minDist)
-         {
-            minDist = dist;
-            snapPoint.set(closest);   
-            segFound = i;
-         }
-      }
+      if(checkEdge(clickPoint, verts[i], verts[i+1], minDist, snapPoint))
+         segFound = i;
 
    return segFound;
+}
+
+
+S32 EditorUserInterface::checkEdgesForSnap(const Point &clickPoint, const Vector<WallEdge *> &edges, bool abcFormat,
+                                           F32 &minDist, Point &snapPoint )
+{
+   S32 inc = abcFormat ? 1 : 2;   
+   S32 segFound = NONE;
+
+   for(S32 i = 0; i < edges.size(); i++)
+   {
+      if(checkEdge(clickPoint, *edges[i]->getStart(), *edges[i]->getEnd(), minDist, snapPoint))
+         segFound = i;
+   }
+
+   return segFound;
+}
+
+
+
+static bool checkPoint(const Point &clickPoint, const Point &point, F32 &minDist, Point &snapPoint)
+{
+   F32 dist = point.distSquared(clickPoint);
+   if(dist < minDist)
+   {
+      minDist = dist;
+      snapPoint = point;
+      return true;
+   }
+
+   return false;
 }
 
 
@@ -1447,15 +1492,25 @@ S32 EditorUserInterface::checkCornersForSnap(const Point &clickPoint, const Vect
    S32 vertFound = NONE;
 
    for(S32 i = 0; i < verts.size(); i++)
-   {
-      F32 dist = verts[i].distSquared(clickPoint);
-      if(dist < minDist)
-      {
-         minDist = dist;
-         snapPoint.set(verts[i]);
+      if(checkPoint(clickPoint, verts[i], minDist, snapPoint))
          vertFound = i;
+
+   return vertFound;
+}
+
+
+S32 EditorUserInterface::checkCornersForSnap(const Point &clickPoint, const Vector<WallEdge *> &edges, F32 &minDist, Point &snapPoint)
+{
+   S32 vertFound = NONE;
+   const Point *vert;
+
+   for(S32 i = 0; i < edges.size(); i++)
+      for(S32 j = 0; j < 1; j++)
+      {
+         vert = (j == 0) ? edges[i]->getStart() : edges[i]->getEnd();
+         if(checkPoint(clickPoint, *vert, minDist, snapPoint))
+            vertFound = i;
       }
-   }
 
    return vertFound;
 }
@@ -3309,14 +3364,12 @@ void EditorUserInterface::findSnapVertex()
          S32 v2 = mEdgeHit + 1;
 
          // Handle special case of looping item
-         if(mEdgeHit + 1 == mItems[mItemHit].vertCount())
+         if(mEdgeHit == mItems[mItemHit].vertCount() - 1)
             v2 = 0;
 
-         if( mItems[mItemHit].vert(v1).distSquared(mouseLevelCoord) < 
-             mItems[mItemHit].vert(v2).distSquared(mouseLevelCoord) )
-            mSnapVertex_j = v1;
-         else     // Second vertex is closer
-            mSnapVertex_j = v2;
+         // Find closer vertex: v1 or v2
+         mSnapVertex_j = (mItems[mItemHit].vert(v1).distSquared(mouseLevelCoord) < 
+                          mItems[mItemHit].vert(v2).distSquared(mouseLevelCoord)) ? v1 : v2;
 
          return;
       }
@@ -3584,22 +3637,26 @@ void EditorUserInterface::deleteItem(S32 itemIndex)
       // Need to recompute boundaries of any intersecting walls
       wallSegmentManager.invalidateIntersectingSegments(&mItems[itemIndex]);  // Mark intersecting segments invalid
       wallSegmentManager.deleteSegments(mItems[itemIndex].mId);               // Delete the segments associated with the wall
+
+      mItems.erase(itemIndex);
       wallSegmentManager.recomputeAllWallGeometry();                          // Recompute wall edges
       recomputeAllEngineeredItems();         // Really only need to recompute items that were attached to deleted wall... but we
                                              // don't yet have a method to do that, and I'm feeling lazy at the moment
    }
    else if(index == ItemNavMeshZone)
+   {
       deleteBorderSegs(mItems[itemIndex].mId);
+      mItems.erase(itemIndex);
+   }
 
    //else
    //   mItems[itemIndex].removeFromDatabase();
-
-   mItems.erase(itemIndex);
 
    // Reset a bunch of things
    mSnapVertex_i = NONE;
    mSnapVertex_j = NONE;
    itemToLightUp = NONE;
+   //TNLAssert(mUnmovedItems.size() > itemIndex, "UnmovedItems too small!");
    mUnmovedItems.erase(itemIndex);
 
    validateLevel();
@@ -4938,16 +4995,60 @@ void EditorUserInterface::checkZones(S32 i, S32 j)
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-GridDatabase *getGridDatabase() 
+// Declare/initialize static variables
+GridDatabase *WallEdge::mGridDatabase; 
+
+// Constructor
+WallEdge::WallEdge(const Point &start, const Point &end) 
 { 
-   return gEditorUserInterface.getGridDatabase(); 
+   mStart = start; 
+   mEnd = end; 
+
+   setExtent(Rect(start, end)); 
+
+   // Set some things required by DatabaseObject
+   mObjectTypeMask = BarrierType;
 }
+
+
+// Destructor
+WallEdge::~WallEdge()
+{
+    // Make sure object is out of the database
+   getGridDatabase()->removeFromDatabase(this, this->getExtent()); 
+}
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Declare/initialize static variables
+Vector<WallEdge *> WallSegmentManager::mWallEdges; 
+Vector<Point>  WallSegmentManager::mWallEdgePoints;
+GridDatabase *WallSegmentManager::mGridDatabase;   
 
 
 void WallSegmentManager::recomputeAllWallGeometry()
 {
    gEditorUserInterface.buildAllWallSegmentEdgesAndPoints();
-   clipAllWallEdges(wallSegments, mWallEdges);
+
+   mWallEdgePoints.clear();
+
+   // Clip mWallSegments to create wallEdgePoints, which will be used below to create a new set of WallEdge objects
+   clipAllWallEdges(mWallSegments, mWallEdgePoints);    
+
+
+   mWallEdges.deleteAndClear();
+   mWallEdges.setSize(mWallEdgePoints.size() / 2);
+
+   // Add clipped wallEdges to the spatial database
+   for(S32 i = 0; i < mWallEdgePoints.size(); i+=2)
+   {
+      WallEdge *newEdge = new WallEdge(mWallEdgePoints[i], mWallEdgePoints[i+1]);    // Create the edge object
+      
+      newEdge->addToDatabase();
+
+      mWallEdges[i/2] = newEdge;
+   }
 }
 
 
@@ -4956,13 +5057,13 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(WorldItem *item)
    // Find any forcefields that terminate on this wall, and mark them for recalculation later
    Vector<WorldItem *> forcefields;    // A list of forcefields terminating on the wall segment that we'll be deleting
 
-   S32 count = wallSegments.size();                
+   S32 count = mWallSegments.size();                
    for(S32 i = 0; i < count; i++)
-      if(wallSegments[i]->mOwner == item->mId)     // Segment belongs to item
+      if(mWallSegments[i]->mOwner == item->mId)     // Segment belongs to item
          for(S32 j = 0; j < gEditorUserInterface.mItems.size(); j++)
             if(gEditorUserInterface.mItems[j].index == ItemForceField && 
-                  ( gEditorUserInterface.mItems[j].forceFieldEndSegment == wallSegments[i] ||
-                    gEditorUserInterface.mItems[j].forceFieldMountSegment == wallSegments[i] ) )
+                  ( gEditorUserInterface.mItems[j].forceFieldEndSegment == mWallSegments[i] ||
+                    gEditorUserInterface.mItems[j].forceFieldMountSegment == mWallSegments[i] ) )
                forcefields.push_back(&gEditorUserInterface.mItems[j]);
 
    // Get rid of any existing segments that correspond to our item; we'll be building new ones
@@ -4975,14 +5076,14 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(WorldItem *item)
    {
       WallSegment *newSegment = new WallSegment(item->extendedEndPoints[i], item->extendedEndPoints[i+1], 
                                                 item->width / getGridSize(), item->mId );    // Create the segment
-      wallSegments.push_back(newSegment);       // And add it to our master segment list
+      mWallSegments.push_back(newSegment);            // And add it to our master segment list
    }
 
-   for(S32 i = 0; i < wallSegments.size(); i++)
+   for(S32 i = 0; i < mWallSegments.size(); i++)
    {
-      wallSegments[i]->addToDatabase();              // Add it to our spatial database
+      mWallSegments[i]->addToDatabase();              // Add it to our spatial database
 
-      Rect segExtent(wallSegments[i]->corners);      // Calculate a bounding box around the segment
+      Rect segExtent(mWallSegments[i]->corners);      // Calculate a bounding box around the segment
       if(i == 0)
          allSegExtent.set(segExtent);
       else
@@ -5024,13 +5125,13 @@ void WallSegmentManager::invalidateIntersectingSegments(WorldItem *item)
 {
    static Vector<DatabaseObject *> intersectingSegments;
 
-   intersectingSegments.clear();
+   intersectingSegments.clear();    // TODO: Should be deleteAndClear?
 
    // Before we update our edges, we need to mark all intersecting segments using the invalid flag.
    // These will need new walls after we've moved our segment.
-   for(S32 i = 0; i < wallSegments.size(); i++)
-      if(wallSegments[i]->mOwner == item->mId)      // Segment belongs to our item; look it up in the database
-         getGridDatabase()->findObjects(BarrierType, intersectingSegments, wallSegments[i]->getExtent());
+   for(S32 i = 0; i < mWallSegments.size(); i++)
+      if(mWallSegments[i]->mOwner == item->mId)      // Segment belongs to our item; look it up in the database
+         getGridDatabase()->findObjects(BulletType, intersectingSegments, mWallSegments[i]->getExtent());
 
    for(S32 i = 0; i < intersectingSegments.size(); i++)
    {
@@ -5045,9 +5146,9 @@ void WallSegmentManager::invalidateIntersectingSegments(WorldItem *item)
 
    // Invalidate all segments that potentially intersect the changed segment in its new location
    intersectingSegments.clear();
-   for(S32 i = 0; i < wallSegments.size(); i++)
-      if(wallSegments[i]->mOwner == item->mId)      // Segment belongs to our item, compare to all others
-         getGridDatabase()->findObjects(BarrierType, intersectingSegments, wallSegments[i]->getExtent());
+   for(S32 i = 0; i < mWallSegments.size(); i++)
+      if(mWallSegments[i]->mOwner == item->mId)      // Segment belongs to our item, compare to all others
+         getGridDatabase()->findObjects(BulletType, intersectingSegments, mWallSegments[i]->getExtent());
 
    for(S32 i = 0; i < intersectingSegments.size(); i++)
       dynamic_cast<WallSegment *>(intersectingSegments[i])->invalid = true;
@@ -5065,23 +5166,20 @@ void WallSegmentManager::computeWallSegmentIntersections(WorldItem *item)
 
 void WallSegmentManager::deleteAllSegments()
 {
-   for(S32 i = 0; i < wallSegments.size(); i++)
-      delete wallSegments[i];
-
-   wallSegments.clear();
+   mWallSegments.deleteAndClear();
 }
 
 
 // Delete all wall segments owned by specified owner.
 void WallSegmentManager::deleteSegments(U32 owner)
 {
-   S32 count = wallSegments.size();
+   S32 count = mWallSegments.size();
 
    for(S32 i = 0; i < count; i++)
-      if(wallSegments[i]->mOwner == owner)
+      if(mWallSegments[i]->mOwner == owner)
       {
-         delete wallSegments[i];    // Destructor will remove segment from database
-         wallSegments.erase_fast(i);
+         delete mWallSegments[i];    // Destructor will remove segment from database
+         mWallSegments.erase_fast(i);
          i--;
          count--;
       }
@@ -5090,20 +5188,22 @@ void WallSegmentManager::deleteSegments(U32 owner)
 
 void WallSegmentManager::renderWalls(bool convert, F32 alpha)
 {
-   for(S32 i = 0; i < wallSegments.size(); i++)
+   for(S32 i = 0; i < mWallSegments.size(); i++)
    {
-      bool beingDragged = gEditorUserInterface.mDraggingObjects && gEditorUserInterface.itemIsSelected(wallSegments[i]->mOwner);
+      bool beingDragged = gEditorUserInterface.mDraggingObjects && gEditorUserInterface.itemIsSelected(mWallSegments[i]->mOwner);
 
-      wallSegments[i]->renderFill(beingDragged);
+      mWallSegments[i]->renderFill(beingDragged);
    }
 
-   // Render the exterior outlines -- these are stored as a sequence of lines, rather than individual points
-   renderWallEdges(mWallEdges);
+   renderWallEdges(mWallEdgePoints);      // Render wall outlines
 }
 
 
 ////////////////////////////////////////
 ////////////////////////////////////////
+
+GridDatabase *WorldItem::mGridDatabase;      // Declare static variable
+
 
 // Default constructor -- only used when loading a file
 WorldItem::WorldItem(GameItems itemType, S32 itemId) : lineEditor(MAX_TEXTITEM_LEN)
@@ -5440,6 +5540,7 @@ void WorldItem::processEndPoints()
 {
    if(index == ItemBarrierMaker)
       Barrier::constructBarrierEndPoints(mVerts, width / getGridSize(), extendedEndPoints);
+
    else if(index == ItemPolyWall)
    {
       extendedEndPoints.clear();
@@ -5459,6 +5560,7 @@ void WorldItem::processEndPoints()
 Point WorldItem::snapEngineeredObject(const Point &pos)
 {  
    Point anchor, nrml;
+
    DatabaseObject *mountSeg = EngineeredObject::
                findAnchorPointAndNormal(getGridDatabase(), pos, EngineeredObject::MAX_SNAP_DISTANCE / getGridSize(), false, anchor, nrml);
 
@@ -5540,12 +5642,6 @@ void WorldItem::unselectVert(S32 vertIndex)
          break;
       }
    mAnyVertsSelected = anySelected;
-}
-
-
-GridDatabase *WorldItem::getGridDatabase() 
-{ 
-   return gEditorUserInterface.getGridDatabase(); 
 }
 
 
@@ -5753,10 +5849,7 @@ void WorldItem::scale(const Point &center, F32 scale)
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-GridDatabase *WallSegment::getGridDatabase()
-{ 
-   return gEditorUserInterface.getGridDatabase(); 
-}
+GridDatabase *WallSegment::mGridDatabase; // Declare static variable
 
 
 // Constructor
@@ -5775,7 +5868,7 @@ WallSegment::WallSegment(const Point &start, const Point &end, F32 width, S32 ow
    invalid = false; 
 
    // Set some things required by DatabaseObject
-   mObjectTypeMask = BarrierType;
+   mObjectTypeMask = BulletType;
 }
 
 

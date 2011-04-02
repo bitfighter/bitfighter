@@ -243,6 +243,7 @@ DatabaseObject *GridDatabase::findObjectLOS(U32 typeMask, U32 stateIndex, bool f
    static Vector<DatabaseObject *> fillVector;
 
    fillVector.clear();
+
    findObjects(typeMask, fillVector, queryRect);
 
    Point collisionPoint;
