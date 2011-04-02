@@ -585,6 +585,8 @@ public:
    void onMouseMoved(S32 x, S32 y);
    void onMouseMoved();
    void onMouseDragged(S32 x, S32 y);
+   bool mouseIgnore;
+
 
    void populateDock();                         // Load up dock with game-specific items to drag and drop
 
