@@ -929,7 +929,6 @@ void GameType::gameOverManGameOver()
    saveGameStats();
 }
 
-
 VersionedGameStats GameType::getGameStats()
 {
    VersionedGameStats stats;
@@ -1002,6 +1001,20 @@ VersionedGameStats GameType::getGameStats()
 }
 
 
+#ifdef BF_WRITE_TO_MYSQL
+DWORD WINAPI insertStatsToDatabase(LPVOID lpParam)
+{
+   VersionedGameStats *stats = (VersionedGameStats *) lpParam;
+   DatabaseWriter databaseWriter(gIniSettings.mySqlStatsDatabaseServer.c_str(), gIniSettings.mySqlStatsDatabaseName.c_str(),
+                                       gIniSettings.mySqlStatsDatabaseUser.c_str(),   gIniSettings.mySqlStatsDatabasePassword.c_str() );
+
+   databaseWriter.insertStats(stats->gameStats);
+   delete stats;
+   return 0;
+}
+#endif
+
+
 // Transmit statistics to the master server, LogStats to game server
 void GameType::saveGameStats()
 {
@@ -1059,10 +1072,10 @@ void GameType::saveGameStats()
 #ifdef BF_WRITE_TO_MYSQL
       if(gIniSettings.mySqlStatsDatabaseServer != "")
       {
-         DatabaseWriter databaseWriter(gIniSettings.mySqlStatsDatabaseServer.c_str(), gIniSettings.mySqlStatsDatabaseName.c_str(),
-                                       gIniSettings.mySqlStatsDatabaseUser.c_str(),   gIniSettings.mySqlStatsDatabasePassword.c_str() );
-
-         databaseWriter.insertStats(stats.gameStats);
+         //DatabaseWriter databaseWriter(gIniSettings.mySqlStatsDatabaseServer.c_str(), gIniSettings.mySqlStatsDatabaseName.c_str(),
+         //                              gIniSettings.mySqlStatsDatabaseUser.c_str(),   gIniSettings.mySqlStatsDatabasePassword.c_str() );
+         //databaseWriter.insertStats(stats.gameStats);
+         CreateThread(NULL, 0, insertStatsToDatabase, (LPVOID)(new VersionedGameStats(stats)), 0, NULL);
       }
       else
 #endif
