@@ -3667,7 +3667,8 @@ void EditorUserInterface::deleteItem(S32 itemIndex)
    mSnapVertex_j = NONE;
    itemToLightUp = NONE;
    //TNLAssert(mUnmovedItems.size() > itemIndex, "UnmovedItems too small!");
-   mUnmovedItems.erase(itemIndex);
+   if(mUnmovedItems.size() > itemIndex)  // better fix?
+      mUnmovedItems.erase(itemIndex);
 
    validateLevel();
 
