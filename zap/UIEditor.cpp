@@ -3425,7 +3425,7 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
    Vector<WorldItem> items = mItems;
    bool deleted = false;
 
-   for(S32 i = 0; i < mItems.size(); i++)
+   for(S32 i = mItems.size()-1; i >= 0; i--)
    {
       if(mItems[i].selected)
       {  
@@ -3437,7 +3437,6 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
 
          deleteItem(i);
          deleted = true;
-         i--;
 
       }
       else if(!objectsOnly)      // Deleted any selected vertices
@@ -3451,7 +3450,6 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
                mItems[i].deleteVert(j);
                deleted = true;
                geomChanged = true;
-               j--;
             }
          }
 
@@ -3462,7 +3460,6 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
          {
             deleteItem(i);
             deleted = true;
-            i--;
          }
          else if(geomChanged)
             mItems[i].onGeomChanged();
