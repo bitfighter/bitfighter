@@ -97,6 +97,7 @@ Game::Game(const Address &theBindAddress) : mDatabase(GridDatabase(true))
    mTimeUnconnectedToMaster = 0;
 
    mNetInterface = new GameNetInterface(theBindAddress, this);
+   mHaveTriedToConnectToMaster = false;
 }
 
 
@@ -161,16 +162,28 @@ void Game::checkConnectionToMaster(U32 timeDelta)
 
    if(!mConnectionToMaster.isValid())      // It's valid if it isn't null, so could be disconnected and would still be valid
    {
-      if(gMasterAddress == Address())     // Check for a valid address
+      //if(gMasterAddress == Address())     // Check for a valid address
+      //   return;
+      if(gMasterAddress.size() == 0)
          return;
 
       if(mNextMasterTryTime < timeDelta && mReadyToConnectToMaster)
       {
-          logprintf(LogConsumer::LogConnection, "%s connecting to master [%s]", isServer() ? "Server" : "Client", 
-                    gMasterAddress.toString());
+         if(mHaveTriedToConnectToMaster)
+         {
+            gMasterAddress.push_back(gMasterAddress[0]);  // Try all the address in the list, one at a time..
+            gMasterAddress.erase(0);
+         }
+         mHaveTriedToConnectToMaster = true;
+         logprintf(LogConsumer::LogConnection, "%s connecting to master [%s]", isServer() ? "Server" : "Client", 
+                    gMasterAddress[0].c_str());
 
-          mConnectionToMaster = new MasterServerConnection(isServer());
-          mConnectionToMaster->connect(mNetInterface, gMasterAddress);
+         Address addr(gMasterAddress[0].c_str());
+         if(addr.isValid())
+         {
+            mConnectionToMaster = new MasterServerConnection(isServer());
+            mConnectionToMaster->connect(mNetInterface, addr);
+         }
 
          mNextMasterTryTime = GameConnection::MASTER_SERVER_FAILURE_RETRY;     // 10 secs, just in case this attempt fails
       }

@@ -399,6 +399,7 @@ void MasterServerConnection::writeConnectRequest(BitStream *bstream)
    }
 }
 
+extern CmdLineSettings gCmdLineSettings;
 
 void MasterServerConnection::onConnectionEstablished()
 {
@@ -406,6 +407,17 @@ void MasterServerConnection::onConnectionEstablished()
       logprintf(LogConsumer::ServerFilter, "Server established connection with Master Server");
    else
       logprintf(LogConsumer::LogConnection, "Client established connection with Master Server");
+   if(gCmdLineSettings.masterAddress == "" && gMasterAddress.size() >= 2)
+   {
+      // If there is 2 or more master address, the first address is the one used to connect..
+      string string1;
+      for(S32 i=0; i<gMasterAddress.size()-1; i++)
+      {
+         string1 = string1 + gMasterAddress[i] + ",";
+      }
+      string1 += gMasterAddress[gMasterAddress.size()-1];
+      gIniSettings.masterAddress = string1;
+   }
 }
 
 

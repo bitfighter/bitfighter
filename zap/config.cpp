@@ -272,7 +272,7 @@ static void loadGeneralSettings()
    gIniSettings.winYPos = max(gINI.GetValueI(section, "WindowYPos", gIniSettings.winYPos), 0);
 
    gIniSettings.winSizeFact = (F32) gINI.GetValueF(section, "WindowScalingFactor", gIniSettings.winSizeFact);
-   gIniSettings.masterAddress = gINI.GetValue(section, "MasterServerAddress", gIniSettings.masterAddress);
+   gIniSettings.masterAddress = gINI.GetValue(section, "MasterServerAddressList", gIniSettings.masterAddress);
    
    gIniSettings.name           = gINI.GetValue(section, "Nickname", gIniSettings.name);
    gIniSettings.password       = gINI.GetValue(section, "Password", gIniSettings.password);
@@ -1258,7 +1258,7 @@ static void writeSettings()
       gINI.sectionComment(section, " VerboseHelpMessages - Display additional on-screen messages while learning the game?  Yes/No");
       gINI.sectionComment(section, " ShowKeyboardKeysInStickMode - If you are using a joystick, also show keyboard shortcuts in Loadout and QuickChat menus");
       gINI.sectionComment(section, " JoystickType - Type of joystick to use if auto-detect doesn't recognize your controller");
-      gINI.sectionComment(section, " MasterServerAddress - Address of master server, in form: IP:67.18.11.66:25955 or IP:myMaster.org:25955");
+      gINI.sectionComment(section, " MasterServerAddressList - Comma seperated list of Address of master server, in form: IP:67.18.11.66:25955,IP:myMaster.org:25955 (tries all listed, only connects to one at a time)");
       gINI.sectionComment(section, " DefaultName - Name that will be used if user hits <enter> on name entry screen without entering one");
       gINI.sectionComment(section, " Nickname - Specify your nickname to bypass the name entry screen altogether");
       gINI.sectionComment(section, " Password - Password to use if your nickname has been reserved in the forums");
@@ -1285,7 +1285,7 @@ static void writeSettings()
    gINI.setValueYN(section, "ShowKeyboardKeysInStickMode", gIniSettings.showKeyboardKeys);
 
    gINI.SetValue  (section, "JoystickType", joystickTypeToString(gIniSettings.joystickType));
-   gINI.SetValue  (section, "MasterServerAddress", gIniSettings.masterAddress);
+   gINI.SetValue  (section, "MasterServerAddressList", gIniSettings.masterAddress);
    gINI.SetValue  (section, "DefaultName", gIniSettings.defaultName);
    gINI.SetValue  (section, "LastName", gIniSettings.lastName);
    gINI.SetValue  (section, "LastPassword", gIniSettings.lastPassword);

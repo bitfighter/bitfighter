@@ -215,7 +215,7 @@ string gLevelChangePassword = "";
 
 DataConnection *dataConn = NULL;
 
-Address gMasterAddress;
+Vector<string> gMasterAddress;
 Address gBindAddress(IPProtocol, Address::Any, 28000);      // Good for now, may be overwritten by INI or cmd line setting
       // Above is equivalent to ("IP:Any:28000")
 
@@ -1577,10 +1577,14 @@ void processStartupParams()
    if(gCmdLineSettings.winWidth > 0)
       gIniSettings.winSizeFact = max((F32) gCmdLineSettings.winWidth / (F32) gScreenInfo.getGameCanvasWidth(), MIN_SCALING_FACT);
 
+   string strings;
    if(gCmdLineSettings.masterAddress != "")
-      gMasterAddress.set(gCmdLineSettings.masterAddress);
+      strings = gCmdLineSettings.masterAddress;
    else
-      gMasterAddress.set(gIniSettings.masterAddress);    // This will always have a value
+      strings = gIniSettings.masterAddress;    // This will always have a value
+   Vector<string> stringList;
+   parseString(strings.c_str(), gMasterAddress, ',');
+
 
    if(gCmdLineSettings.name != "")                       // We'll clobber the INI file setting.  Since this
       gIniSettings.name = gCmdLineSettings.name;         // setting is never saved, we won't mess up our INI

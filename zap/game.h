@@ -111,6 +111,7 @@ private:
    // Info about modules -- access via getModuleInfo()
    Vector<ModuleInfo> mModuleInfos;
    void buildModuleInfos();
+   bool mHaveTriedToConnectToMaster;
 
 protected:
    void cleanUp();
@@ -438,7 +439,7 @@ public:
 
 extern ServerGame *gServerGame;
 extern ClientGame *gClientGame;
-extern Address gMasterAddress;
+extern Vector<string> gMasterAddress;
 
 extern void joinGame(Address remoteAddress, bool isFromMaster, bool local);
 extern void endGame();
