@@ -3655,6 +3655,10 @@ void EditorUserInterface::deleteItem(S32 itemIndex)
       deleteBorderSegs(mItems[itemIndex].mId);
       mItems.erase(itemIndex);
    }
+   else
+   {
+      mItems.erase(itemIndex);
+   }
 
    //else
    //   mItems[itemIndex].removeFromDatabase();
