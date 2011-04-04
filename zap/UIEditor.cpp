@@ -1328,8 +1328,8 @@ Point EditorUserInterface::snapPoint(Point const &p, bool snapWhileOnDock)
    F32 minDist = maxSnapDist;
 
    // Where will we be snapping things?
-   bool snapToWallCorners = mDraggingObjects && mItems[mSnapVertex_i].index != ItemBarrierMaker;
-   bool snapToWallEdges = mSnapVertex_i != NONE && mItems[mSnapVertex_i].geomType() == geomPoly;
+   bool snapToWallCorners = !mSnapDisabled && mDraggingObjects && mItems[mSnapVertex_i].index != ItemBarrierMaker && mItems[mSnapVertex_i].geomType() != geomPoly;
+   bool snapToWallEdges = !mSnapDisabled && mSnapVertex_i != NONE && false; // mItems[mSnapVertex_i].geomType() == geomPoly; // causes annoying drifting of polywall...
    bool snapToNavZoneEdges = mSnapVertex_i != NONE && mItems[mSnapVertex_i].index == ItemNavMeshZone;
    bool snapToLevelGrid = !snapToNavZoneEdges && !mSnapDisabled;
 
@@ -3450,6 +3450,8 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
                mItems[i].deleteVert(j);
                deleted = true;
                geomChanged = true;
+               mSnapVertex_i = NONE;
+               mSnapVertex_j = NONE;
             }
          }
 
