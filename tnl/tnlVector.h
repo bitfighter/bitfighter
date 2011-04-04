@@ -31,6 +31,7 @@
 //Includes
 #include <vector>
 
+
 #ifndef _TNL_TYPES_H_
 #include "tnlTypes.h"
 #endif
@@ -38,6 +39,11 @@
 #ifndef _TNL_PLATFORM_H_
 #include "tnlPlatform.h"
 #endif
+
+#ifndef _TNL_ASSERT_H_
+#include "tnlAssert.h"
+#endif
+
 
 namespace TNL {
 
@@ -153,16 +159,19 @@ template<class T> inline void Vector<T>::setSize(U32 size)
 // inserts an empty element at the specified index
 template<class T> inline void Vector<T>::insert(U32 index)
 {
+   TNLAssert(index <= innerVector.size(), "index out of range");
    innerVector.insert(innerVector.begin() + index, 1, T());
 }
 
 template<class T> inline void Vector<T>::erase(U32 index)
 {
+   TNLAssert(index < innerVector.size(), "index out of range");
    innerVector.erase(innerVector.begin() + index);
 }
 
 template<class T> inline void Vector<T>::erase_fast(U32 index)
 {
+   TNLAssert(index < innerVector.size(), "index out of range");
    // CAUTION: this operator does NOT maintain list order
    // Copy the last element into the deleted 'hole' and decrement the
    //   size of the vector.
@@ -174,21 +183,25 @@ template<class T> inline void Vector<T>::erase_fast(U32 index)
 
 template<class T> inline T& Vector<T>::first()
 {
+   TNLAssert(innerVector.size() != 0, "Vector is empty");
    return *innerVector.begin();
 }
 
 template<class T> inline const T& Vector<T>::first() const
 {
+   TNLAssert(innerVector.size() != 0, "Vector is empty");
    return *innerVector.begin();
 }
 
 template<class T> inline T& Vector<T>::last()
 {
+   TNLAssert(innerVector.size() != 0, "Vector is empty");
    return *(innerVector.end() - 1);
 }
 
 template<class T> inline const T& Vector<T>::last() const
 {
+   TNLAssert(innerVector.size() != 0, "Vector is empty");
    return *(innerVector.end() - 1);
 }
 
@@ -223,12 +236,14 @@ template<class T> inline bool Vector<T>::empty() const
 
 template<class T> inline T& Vector<T>::get(S32 index)
 {
+   TNLAssert(U32(index) < innerVector.size(), "index out of range");
    return innerVector[index];
 }
 
 
 template<class T> inline const T& Vector<T>::get(S32 index) const
 {
+   TNLAssert(U32(index) < innerVector.size(), "index out of range");
    return innerVector[index];
 }
 
@@ -246,6 +261,7 @@ template<class T> inline void Vector<T>::push_back(const T &x)
 
 template<class T> inline T& Vector<T>::pop_front()
 {
+   TNLAssert(innerVector.size() != 0, "Vector is empty");
    T& t = innerVector[0];
    innerVector.erase(innerVector.begin());
    return t;
@@ -253,6 +269,7 @@ template<class T> inline T& Vector<T>::pop_front()
 
 template<class T> inline T& Vector<T>::pop_back()
 {
+   TNLAssert(innerVector.size() != 0, "Vector is empty");
    T& t = *(innerVector.end() - 1);
    innerVector.pop_back();
    return t;
@@ -260,21 +277,25 @@ template<class T> inline T& Vector<T>::pop_back()
 
 template<class T> inline T& Vector<T>::operator[](U32 index)
 {
+   TNLAssert(index < innerVector.size(), "index out of range");
    return innerVector[index];
 }
 
 template<class T> inline const T& Vector<T>::operator[](U32 index) const
 {
+   TNLAssert(index < innerVector.size(), "index out of range");
    return innerVector[index];
 }
 
 template<class T> inline T& Vector<T>::operator[](S32 index)
 {
+   TNLAssert(U32(index) < innerVector.size(), "index out of range");
    return innerVector[(U32)index];
 }
 
 template<class T> inline const T& Vector<T>::operator[](S32 index) const
 {
+   TNLAssert(U32(index) < innerVector.size(), "index out of range");
    return innerVector[(U32)index];
 }
 

@@ -3425,7 +3425,7 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
    Vector<WorldItem> items = mItems;
    bool deleted = false;
 
-   for(S32 i = mItems.size()-1; i >= 0; i--)
+   for(S32 i = mItems.size()-1; i >= 0; i--)  // reverse, to avoind having to have i-- in middle of loop
    {
       if(mItems[i].selected)
       {  
@@ -5672,7 +5672,7 @@ void WorldItem::addVert(Point vert)
 void WorldItem::addVertFront(Point vert)
 {
    mVerts.push_front(vert);
-   mVertSelected.push_front(false);
+   mVertSelected.insert(mVertSelected.begin(), false);
 }
 
 

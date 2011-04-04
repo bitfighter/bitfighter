@@ -34,7 +34,7 @@
 #include "BotNavMeshZone.h"      // For Border def
 #include "tnlNetStringTable.h"
 #include <string>
-#include <deque>
+#include <vector>
 
 using namespace std;
 
@@ -153,7 +153,7 @@ class WorldItem : public DatabaseObject
 private:
    Vector<Point> mVerts;
 
-   deque<bool> mVertSelected;  // never use std::vector<bool> use deque instead
+   vector<bool> mVertSelected;  // never use std::vector<bool> use deque instead
    bool mAnyVertsSelected;
 
    void init(GameItems itemType, S32 xteam, F32 xwidth, U32 itemid, bool isDockItem);
@@ -353,7 +353,7 @@ class SelectionItem
 {
 private:
    bool mSelected;
-   deque<bool> mVertSelected;
+   vector<bool> mVertSelected;
 
 public:
    SelectionItem() { /* do nothing */ }      // Generic constructor

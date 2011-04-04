@@ -42,11 +42,15 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <TargetName>bitfighter_d</TargetName>
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(IncludePath);../win_include_do_not_distribute</IncludePath>
+    <LibraryPath>$(LibraryPath);../win_include_do_not_distribute</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>..\exe\</OutDir>
     <TargetName>bitfighter</TargetName>
+    <IncludePath>$(IncludePath);../win_include_do_not_distribute</IncludePath>
+    <LibraryPath>$(LibraryPath);../win_include_do_not_distribute</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -58,13 +62,13 @@
       <PreprocessToFile>false</PreprocessToFile>
       <PreprocessKeepComments>false</PreprocessKeepComments>
       <FunctionLevelLinking>true</FunctionLevelLinking>
-      <PreprocessorDefinitions>BF_WRITE_TO_SQLITE;TNL_ENABLE_ASSERTS;TNL_DEBUG;TNL_ENABLE_LOGGING;WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>BF_WRITE_TO_SQLITE;TNL_ENABLE_ASSERTS;TNL_DEBUG;TNL_ENABLE_LOGGING;WIN32;_DEBUG;_LIB;_HAS_ITERATOR_DEBUGGING=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>../glut;</AdditionalLibraryDirectories>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>../Debug/libtomcrypt.lib;../Debug/tnl.lib;../Debug/lua-vec.lib;../openal/ALut.lib;../openal/OpenAL32.lib;../win_include_do_not_distribute/dinput8.lib;../win_include_do_not_distribute/dsound.lib;../win_include_do_not_distribute/dxguid.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>../Debug/libtomcrypt.lib;../Debug/tnl.lib;../Debug/lua-vec.lib;../openal/ALut.lib;../openal/OpenAL32.lib;dinput8.lib;dsound.lib;dxguid.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>MSVCRTD.lib;msvcprtd.lib</IgnoreSpecificDefaultLibraries>
     </Link>
     <ProjectReference>
@@ -89,7 +93,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>../glut;</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>MSVCRT.lib;msvcprt.lib</IgnoreSpecificDefaultLibraries>
-      <AdditionalDependencies>../Release/libtomcrypt.lib;../Release/tnl.lib;../Release/lua-vec.lib;../openal/ALut.lib;../openal/OpenAL32.lib;../win_include_do_not_distribute/dinput8.lib;../win_include_do_not_distribute/dsound.lib;../win_include_do_not_distribute/dxguid.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>../Release/libtomcrypt.lib;../Release/tnl.lib;../Release/lua-vec.lib;../openal/ALut.lib;../openal/OpenAL32.lib;dinput8.lib;dsound.lib;dxguid.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
     </Link>
   </ItemDefinitionGroup>
