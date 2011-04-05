@@ -418,7 +418,7 @@ private:
 
    Vector<Vector<WorldItem> > mUndoItems;    // Undo/redo history  [[note that g++ requires space btwn >>]]
    Vector<WorldItem> mMostRecentState;       // Copy of most recent state, to facilitate dragging
-   Vector<WorldItem> mUnmovedItems;          // Copy of items where they were before they moved... different than mMostRecentState when dragging from dock
+   Point mMoveOrigin;                        // Point representing where items were moved "from" for figuring out how far they moved
 
    Vector<WorldItem> mLevelGenItems;         // Items added by a levelgen script
 
@@ -431,6 +431,7 @@ private:
 
    static const U32 UNDO_STATES = 128;
    void saveUndoState(const Vector<WorldItem> &items, bool cameFromRedo = false);    // Save current state into undo history buffer
+   void deleteUndoState();             // Removes most recent undo state from stack
    bool undoAvailable();               // Is an undo state available?
    void undo(bool addToRedoStack);     // Restore mItems to latest undo state
    void redo();                        // Redo latest undo
@@ -537,8 +538,6 @@ public:
    char mGameType[GAME_TYPE_LEN];
 
    Vector<string> mGameTypeArgs;
-
-   void syncUnmovedItems();
 
    Color getTeamColor(S32 team);     // Return a color based on team index (needed by editor instructions)
    bool isFlagGame(char *mGameType);

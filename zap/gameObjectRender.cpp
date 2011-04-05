@@ -765,27 +765,35 @@ void renderPolygonLabel(const Point &centroid, F32 angle, F32 size, const char *
 }
 
 
+// geomType should be GL_LINES or GL_POLYGON
+static void renderPointVector(const Vector<Point> &points, U32 geomType)
+{
+   glEnableClientState(GL_VERTEX_ARRAY);
+
+   glVertexPointer(2, GL_FLOAT, sizeof(Point), points.address());    
+   glDrawArrays(geomType, 0, points.size());
+
+   glDisableClientState(GL_VERTEX_ARRAY);
+
+   // Equivalent to, but amost twice as fast as:
+
+   //glBegin(GL_LINE_LOOP);
+   //   for(S32 i = 0; i < points.size(); i++)
+   //      glVertex2f(points[i].x, points[i].y);
+   //glEnd();
+}
+
+
 // Renders fill in the form of a series of points representing triangles
 void renderTriangulatedPolygonFill(const Vector<Point> &fill)
 {
-   // TODO: rewrite with new method
-   for(S32 i = 0; i < fill.size(); i+=3)
-   {
-      glBegin(GL_POLYGON);
-         for(S32 j = i; j < i + 3; j++)
-            glVertex2f(fill[j].x, fill[j].y);
-      glEnd();
-   }
+   renderPointVector(fill, GL_POLYGON);
 }
 
 
 void renderPolygonOutline(const Vector<Point> &outline)
 {
-   // TODO: rewrite with new method
-   glBegin(GL_LINE_LOOP);
-      for(S32 i = 0; i < outline.size(); i++)
-         glVertex2f(outline[i].x, outline[i].y);
-   glEnd();
+   renderPointVector(outline, GL_LINES);
 }
 
 
@@ -1385,20 +1393,7 @@ void renderWallFill(const Vector<Point> &points, bool polyWall)
 void renderWallEdges(const Vector<Point> &edges, F32 alpha)
 {
    glColor(gIniSettings.wallOutlineColor, alpha);
-
-   glEnableClientState(GL_VERTEX_ARRAY);
-
-   glVertexPointer(2, GL_FLOAT, sizeof(Point), edges.address());    
-   glDrawArrays(GL_LINES, 0, edges.size());
-
-   glDisableClientState(GL_VERTEX_ARRAY);
-
-   // Equivalent to, but amost twice as fast as:
-
-   //glBegin(GL_LINES);
-   //   for(S32 i = 0; i < edges.size(); i++)
-   //      glVertex(edges[i]);
-   //glEnd();
+   renderPointVector(edges, GL_LINES);
 }
 
 

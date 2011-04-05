@@ -298,6 +298,14 @@ void EditorUserInterface::saveUndoState()
 }
 
 
+// Removes most recent undo state from stack
+void EditorUserInterface::deleteUndoState()
+{
+   mLastUndoIndex--;
+   mLastRedoIndex--; 
+}
+
+
 // Save the current state of the editor objects for later undoing
 void EditorUserInterface::saveUndoState(const Vector<WorldItem> &items, bool cameFromRedo)
 {
@@ -1151,7 +1159,6 @@ void EditorUserInterface::onAfterRunScriptFromConsole()
       mItems[i].selected = !mItems[i].selected;
 
    rebuildEverything();
-   syncUnmovedItems();
 }
 
 
@@ -1197,8 +1204,6 @@ void EditorUserInterface::onActivate()
    loadLevel();
    setCurrentTeam(0);
 
-   syncUnmovedItems();
-
    mSnapDisabled = false;      // Hold [space] to temporarily disable snapping
 
    // Reset display parameters...
@@ -1227,11 +1232,6 @@ void EditorUserInterface::onActivate()
    actualizeScreenMode(false); 
 }
 
-
-void EditorUserInterface::syncUnmovedItems()
-{
-   mUnmovedItems = mItems;
-}
 
 void EditorUserInterface::onDeactivate()
 {
@@ -3289,7 +3289,6 @@ void EditorUserInterface::onMouseDragged(S32 x, S32 y)
       mItems.push_back(item);      // Add our new item to the master item list
       mItems.sort(geometricSort);  // So things will render in the proper order
       mDraggingDockItem = NONE;    // Because now we're dragging a real item
-      syncUnmovedItems();          // So we know where things were so we know where to render them while being dragged
       validateLevel();             // Check level for errors
 
       // Because we sometimes have trouble finding an item when we drag it off the dock, after it's been sorted,
@@ -3308,9 +3307,14 @@ void EditorUserInterface::onMouseDragged(S32 x, S32 y)
    if(mSnapVertex_i == NONE || mSnapVertex_j == NONE)
       return;
 
-   mDraggingObjects = true;
+   
+   if(!mDraggingObjects)      // Just started dragging
+   {
+      mMoveOrigin = mItems[mSnapVertex_i].vert(mSnapVertex_j);
+      saveUndoState();
+   }
 
-   const Point &origPoint = mUnmovedItems[mSnapVertex_i].vert(mSnapVertex_j);
+   mDraggingObjects = true;
 
    Point delta;
 
@@ -3319,9 +3323,9 @@ void EditorUserInterface::onMouseDragged(S32 x, S32 y)
    // in the selection, and we just want the damn thing where we put it.
    // (*origPoint - mMouseDownPos) represents distance from item's snap vertex where we "grabbed" it
    if(mItems[mSnapVertex_i].geomType() == geomPoint || (mItemHit != NONE && mItems[mItemHit].anyVertsSelected()))
-      delta = snapPoint(convertCanvasToLevelCoord(mMousePos))  - origPoint;
+      delta = snapPoint(convertCanvasToLevelCoord(mMousePos)) - mMoveOrigin;
    else
-      delta = snapPoint(convertCanvasToLevelCoord(mMousePos) + origPoint - mMouseDownPos) - origPoint;
+      delta = snapPoint(convertCanvasToLevelCoord(mMousePos) + mMoveOrigin - mMouseDownPos) - mMoveOrigin;
 
    // Update the locations of all items we're moving to show them being dragged.  Note that an item cannot be
    // selected if one of its vertices are.
@@ -3331,10 +3335,11 @@ void EditorUserInterface::onMouseDragged(S32 x, S32 y)
       if(i == mSnapVertex_i && (mItems[i].index == ItemForceField || mItems[i].index == ItemTurret) && mItems[i].snapped)
          continue;
 
+      // Update coordinates of dragged item
       for(S32 j = 0; j < mItems[i].vertCount(); j++)
          if(mItems[i].selected || mItems[i].vertSelected(j))
          {
-            mItems[i].setVert(mUnmovedItems[i].vert(j) + delta, j);
+            mItems[i].setVert(mUndoItems[(mLastUndoIndex - 1) % UNDO_STATES][i].vert(j) + delta, j);
 
             // If we are dragging a vertex, and not the entire item, we are changing the geom, so notify the item
             if(mItems[i].vertSelected(j))
@@ -3669,9 +3674,6 @@ void EditorUserInterface::deleteItem(S32 itemIndex)
    mSnapVertex_i = NONE;
    mSnapVertex_j = NONE;
    itemToLightUp = NONE;
-   //TNLAssert(mUnmovedItems.size() > itemIndex, "UnmovedItems too small!");
-   if(mUnmovedItems.size() > itemIndex)  // better fix?
-      mUnmovedItems.erase(itemIndex);
 
    validateLevel();
 
@@ -3932,11 +3934,6 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          mItems[mItemHit].insertVert(newVertex, mEdgeHit + 1);
          mItems[mItemHit].selectVert(mEdgeHit + 1);
 
-         // Do the same for the mUnmovedItems list, to keep it in sync with mItems,
-         // which allows us to drag our vertex around without wierd snapping action
-         mUnmovedItems[mItemHit].insertVert(newVertex, mEdgeHit + 1);
-         mUnmovedItems[mItemHit].selectVert(mEdgeHit + 1);
-
          // Alert the item that its geometry is changing
          mItems[mItemHit].onGeomChanging();
 
@@ -4066,7 +4063,6 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          }
      }     // end mouse not on dock block, doc
 
-     syncUnmovedItems();
      findSnapVertex();     // Update snap vertex in the event an item was selected
 
    }     // end if keyCode == MOUSE_LEFT
@@ -4491,37 +4487,21 @@ void EditorUserInterface::finishedDragging()
    {
       if(mDraggingDockItem == NONE)    // Not dragging from dock - user is moving object around screen
       {
-         // Size can change if we somehow insert/paste/whatever while dragging.  Shouldn't happen, but used to...
-         TNLAssert(mItems.size() == mUnmovedItems.size(), "Selection size changed while dragging!");   
-         if(mItems.size() != mUnmovedItems.size())
-            return;     // It's this or crash...
+         // If our snap vertex has moved then all selected items have moved
+         bool itemsMoved = mItems[mSnapVertex_i].vert(mSnapVertex_j) != mMoveOrigin;
 
-         bool anyItemsChanged = false;
-
-         // Check if anything changed... (i.e. did we move?)
-         for(S32 i = 0; i < mItems.size(); i++)
+         if(itemsMoved)    // Move consumated... update any moved items, and save our autosave
          {
-            bool itemChanged = false;
+            for(S32 i = 0; i < mItems.size(); i++)
+               if(mItems[i].selected || mItems[i].anyVertsSelected())
+                  mItems[i].onGeomChanged();
 
-            for(S32 j = 0; j < mItems[i].vertCount(); j++)
-               if(mItems[i].vert(j) != mUnmovedItems[i].vert(j))
-               {
-                  itemChanged = true;
-                  anyItemsChanged = true;
-                  break;
-               }
-
-            if(itemChanged)
-               mItems[i].onGeomChanged();
-         }
-
-         if(anyItemsChanged)
-         {
-            saveUndoState(mMostRecentState);    // Something changed... save an undo state!
             mNeedToSave = true;
             autoSave();
             return;
          }
+         else     // We started our move, then didn't end up moving anything... remove associated undo state
+            deleteUndoState();
       }
    }
 }
