@@ -787,13 +787,13 @@ static void renderPointVector(const Vector<Point> &points, U32 geomType)
 // Renders fill in the form of a series of points representing triangles
 void renderTriangulatedPolygonFill(const Vector<Point> &fill)
 {
-   renderPointVector(fill, GL_POLYGON);
+   renderPointVector(fill, GL_TRIANGLES);
 }
 
 
 void renderPolygonOutline(const Vector<Point> &outline)
 {
-   renderPointVector(outline, GL_LINES);
+   renderPointVector(outline, GL_LINE_LOOP);
 }
 
 
