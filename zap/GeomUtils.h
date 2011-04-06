@@ -56,8 +56,7 @@
 #include "../recast/Recast.h"
 #include "../recast/RecastAlloc.h"
 
-#include "../clipper/clipper.h"
-#include "../clipper/clipper_misc.h"
+#include "../clipper/clipper4.h"
 
 extern "C" {
 #include "../Triangle/triangle.h"      // For Triangle!
@@ -107,13 +106,17 @@ S32 findClosestPoint(const Point &point, const Vector<Point> &points);
 void offsetPolygon(const Vector<Point>& inputPoly, Vector<Point>& outputPoly,const F32 offset);
 
 // Use Clipper to merge inputPolygons, placing the result in solution
-bool mergePolys(const TPolyPolygon &inputPolygons, TPolyPolygon &solution);
+bool mergePolys(const Vector<Vector<Point> > &inputPolygons, Vector<Vector<Point> > &outputPolygons);
 
-// Convert a TPolyPolygon to a list of points in a-b c-d e-f format
-void unpackPolyPolygon(const TPolyPolygon &solution, Vector<Point> &lineSegmentPoints);
+// Convert a Polygons to a list of points in a-b b-c c-d d-a format
+void unpackPolygons(const Vector<Vector<Point> > &solution, Vector<Point> &lineSegmentPoints);
 
 // test if a complex polygon has clockwise point winding order
 bool isWoundClockwise(const Vector<Point>& inputPoly);
+
+// scale Geometric points for clipper
+Polygons upscaleClipperPoints(const Vector<Vector<Point> >& inputPolygons);
+Vector<Vector<Point> > downscaleClipperPoints(const Polygons& inputPolygons);
 
 /*****************************************************************/
 /** Static class to triangulate any contour/polygon efficiently **/
@@ -157,7 +160,7 @@ public:
    static bool Process(const Vector<Point> &contour, Vector<Point> &result);
 
    // Triangulate a bounded area with complex polygon holes
-   static bool processComplex(TriangleData& outputData, const Rect& bounds, const TPolyPolygon& polygonList, Vector<F32>& holeMarkerList, ComplexMethod method);
+   static bool processComplex(TriangleData& outputData, const Rect& bounds, const Vector<Vector<Point> >& polygonList, Vector<F32>& holeMarkerList, ComplexMethod method);
 
    // Merge triangles into convex polygons
    static bool mergeTriangles(TriangleData& triangleData, rcPolyMesh& mesh, S32 maxVertices = 6);

@@ -28,7 +28,6 @@
 
 #include "gameObject.h"
 #include "point.h"
-#include "../clipper/clipper.h"     // For TPolyPolygon def
 #include "tnlNetObject.h"
 
 namespace Zap
@@ -90,7 +89,7 @@ public:
    static void bufferPolyWallForBotZone(const Vector<Point> &inputPoints, Vector<Point> &bufferedPoints);
 
    // Combines multiple barriers into a single complex polygon
-   static bool unionBarriers(const Vector<DatabaseObject *> &barriers, bool useBotGeom, clipper::TPolyPolygon &solution);
+   static bool unionBarriers(const Vector<DatabaseObject *> &barriers, bool useBotGeom, Vector<Vector<Point> > &solution);
 
    /// Clips the current set of render lines against the polygon passed as polyPoints, modifies lineSegmentPoints.
    static void clipRenderLinesToPoly(const Vector<DatabaseObject *> &barrierList, Vector<Point> &lineSegmentPoints);

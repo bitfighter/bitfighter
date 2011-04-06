@@ -779,39 +779,80 @@ bool Triangulate::Process(const Vector<Point> &contour, Vector<Point> &result)
 }
 
 
-// Use Clipper to merge inputPolygons, placing the result in solution
-bool mergePolys(const TPolyPolygon &inputPolygons, TPolyPolygon &solution)
-{
-   // Fire up clipper and union!
-   Clipper clipper;
-   clipper.IgnoreOrientation(false);      // Can be true?  Would that make things go faster?
-   clipper.AddPolyPolygon(inputPolygons, ptSubject);
-   
-   return clipper.Execute(ctUnion, solution, pftNonZero, pftNonZero);
+Polygons upscaleClipperPoints(const Vector<Vector<Point> >& inputPolygons) {
+   Polygons outputPolygons;
+   clipper::Polygon polygon;
+   for (S32 i = 0; i < inputPolygons.size(); i++) {
+      polygon.clear();
+
+      for (S32 j = 0; j < inputPolygons[i].size(); j++)
+         polygon.push_back(IntPoint(S32(inputPolygons[i][j].x * 1000), S32(inputPolygons[i][j].y * 1000)));
+
+      outputPolygons.push_back(polygon);
+   }
+
+   return outputPolygons;
 }
 
 
-// Convert a TPolyPolygon to a list of points in a-b c-d e-f format
-void unpackPolyPolygon(const TPolyPolygon &solution, Vector<Point> &lineSegmentPoints)
+Vector<Vector<Point> > downscaleClipperPoints(const Polygons& inputPolygons) {
+   Vector<Vector<Point> > outputPolygons;
+   Vector<Point> polygon;
+
+   for (U32 i = 0; i < inputPolygons.size(); i++) {
+      polygon.clear();
+
+      for (U32 j = 0; j < inputPolygons[i].size(); j++)
+         polygon.push_back(Point(F32(inputPolygons[i][j].X) / 1000, F32(inputPolygons[i][j].Y) / 1000));
+
+      outputPolygons.push_back(polygon);
+   }
+
+   return outputPolygons;
+}
+
+
+// Use Clipper to merge inputPolygons, placing the result in solution
+bool mergePolys(const Vector<Vector<Point> > &inputPolygons, Vector<Vector<Point> > &outputPolygons)
+{
+   Polygons input = upscaleClipperPoints(inputPolygons);
+   Polygons solution;
+
+   // Fire up clipper and union!
+   Clipper clipper;
+//   clipper.IgnoreOrientation(false);      // Can be true?  Would that make things go faster?
+   clipper.AddPolygons(input, ptSubject);
+
+   bool success = clipper.Execute(ctUnion, solution, pftNonZero, pftNonZero);
+
+   if(success)
+      outputPolygons = downscaleClipperPoints(solution);
+
+   return success;
+}
+
+
+// Convert a Polygons to a list of points in a-b b-c c-d d-a format
+void unpackPolygons(const Vector<Vector<Point> > &solution, Vector<Point> &lineSegmentPoints)
 {
    // Precomputing list size improves performance dramatically
    S32 segments = 0;
-   for(U32 i = 0; i < solution.size(); i++)
+   for(S32 i = 0; i < solution.size(); i++)
       segments += solution[i].size();
 
    lineSegmentPoints.setSize(segments * 2);      // 2 points per line segment
 
-   TPolygon poly;
+   Vector<Point> poly;
    S32 index = 0;
 
-   for(U32 i = 0; i < solution.size(); i++)
+   for(S32 i = 0; i < solution.size(); i++)
    {
       poly = solution[i];
 
       if(poly.size() == 0)
          continue;
 
-      for(U32 j = 1; j < poly.size(); j++)
+      for(S32 j = 1; j < poly.size(); j++)
       {
          lineSegmentPoints[index++] = poly[j-1];
          lineSegmentPoints[index++] = poly[j];
@@ -824,18 +865,48 @@ void unpackPolyPolygon(const TPolyPolygon &solution, Vector<Point> &lineSegmentP
 }
 
 
+/*
+
+vector<IntPoint>& upscaleClipperPoints(const vector<Point>& inputPolygon) {
+   vector<IntPoint> outputPolygon;
+
+   for (U32 i = 0; i < inputPolygon.size(); i++) {
+      outputPolygon.push_back(IntPoint(S32(inputPolygon[i].x * 1000), S32(inputPolygon[i].y * 1000)));
+   }
+
+   return outputPolygon;
+}
+
+
+vector<Point>& downscaleClipperPoints(const vector<IntPoint>& inputPolygon) {
+   vector<Point> outputPolygon;
+
+   for (U32 i = 0; i < inputPolygon.size(); i++) {
+      outputPolygon.push_back(Point(F32(inputPolygon[i].X) / 1000, F32(inputPolygon[i].Y) / 1000));
+   }
+
+   return outputPolygon;
+}
+
+ */
+
 // Offset a complex polygon by a given amount
 // Uses clipper to create a buffer around a polygon with the given offset
 void offsetPolygon(const Vector<Point>& inputPoly, Vector<Point>& outputPoly, const F32 offset)
 {
-   TPolyPolygon polygons;
+   Vector<Vector<Point> > tempVector;
+   tempVector.push_back(Vector<Point>(inputPoly).getStlVector());
 
-   // create a copy of inputPoly for clipper to modify
-   polygons.push_back(Vector<Point>(inputPoly).getStlVector());
+   // Upscale for clipper
+   Polygons polygons = upscaleClipperPoints(tempVector);
 
-   polygons = OffsetPolygons(polygons, offset);    // Call Clipper to do the dirty work
+   // Call Clipper to do the dirty work
+   polygons = OffsetPolygons(polygons, offset);
 
-   outputPoly = Vector<Point>(polygons[0]);
+   // Downscale
+   tempVector = downscaleClipperPoints(polygons);
+
+   outputPoly = tempVector[0];
 }
 
 
@@ -900,7 +971,7 @@ S32 QSORT_CALLBACK IDtoPointSort(S32 *a_ptr, S32 *b_ptr)
 
 // Triangulate a bounded area with complex polygon holes
 bool Triangulate::processComplex(TriangleData& outputData, const Rect& bounds,
-                                 const TPolyPolygon& polygonList, Vector<F32>& holeMarkerList, ComplexMethod method)
+                                 const Vector<Vector<Point> >& polygonList, Vector<F32>& holeMarkerList, ComplexMethod method)
 {
    Vector<F32> coords;
 
@@ -923,8 +994,8 @@ bool Triangulate::processComplex(TriangleData& outputData, const Rect& bounds,
       edges.push_back(2);       edges.push_back(3);
       edges.push_back(3);       edges.push_back(0);
 
-      TPolygon poly;
-      for (U32 j = 0; j < polygonList.size(); j++)
+      Vector<Point> poly;
+      for (S32 j = 0; j < polygonList.size(); j++)
       {
          poly = polygonList[j];
 
@@ -932,7 +1003,7 @@ bool Triangulate::processComplex(TriangleData& outputData, const Rect& bounds,
             continue;
 
          S32 first = nextPt;
-         for (U32 k = 0; k < poly.size(); k++)
+         for (S32 k = 0; k < poly.size(); k++)
          {
             coords.push_back(poly[k].x);
             coords.push_back(poly[k].y);

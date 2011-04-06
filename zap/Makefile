@@ -120,8 +120,7 @@ OBJECTS_ZAP=\
    ../Triangle/triangle.o\
    ../recast/RecastAlloc.o\
    ../recast/RecastMesh.o\
-   ../clipper/clipper.o\
-   ../clipper/clipper_misc.o\
+   ../clipper/clipper4.o\
    ../poly2tri/common/shapes.o\
    ../poly2tri/sweep/sweep.o\
    ../poly2tri/sweep/sweep_context.o\

@@ -165,10 +165,10 @@ void Barrier::onAddedToGame(Game *theGame)
 
 
 // Combines multiple barriers into a single complex polygon... fills solution
-bool Barrier::unionBarriers(const Vector<DatabaseObject *> &barriers, bool useBotGeom, TPolyPolygon &solution)
+bool Barrier::unionBarriers(const Vector<DatabaseObject *> &barriers, bool useBotGeom, Vector<Vector<Point> > &solution)
 {
-   TPolyPolygon inputPolygons;
-   TPolygon inputPoly;
+   Vector<Vector<Point> > inputPolygons;
+   Vector<Point> inputPoly;
 
    // Reusable container
    Vector<Point> points;
@@ -184,14 +184,12 @@ bool Barrier::unionBarriers(const Vector<DatabaseObject *> &barriers, bool useBo
 
       if(useBotGeom)
       {
-         for(S32 j = 0; j < barrier->mBotZoneBufferGeometry.size(); j++)
-            inputPoly.push_back(barrier->mBotZoneBufferGeometry[j]);
+         inputPoly = barrier->mBotZoneBufferGeometry;
       }
       else    
       {
          barrier->getCollisionPoly(points);        // Puts object bounds into points
-         for(S32 j = 0; j < points.size(); j++)
-            inputPoly.push_back(points[j]);
+         inputPoly = points;
       }
 
 #ifdef DUMP_DATA
@@ -356,11 +354,11 @@ void Barrier::bufferPolyWallForBotZone(const Vector<Point>& inputPoints, Vector<
 // static method
 void Barrier::clipRenderLinesToPoly(const Vector<DatabaseObject *> &barrierList, Vector<Point> &lineSegmentPoints)
 {
-   TPolyPolygon solution;
+   Vector<Vector<Point> > solution;
 
    unionBarriers(barrierList, false, solution);
 
-   unpackPolyPolygon(solution, lineSegmentPoints);
+   unpackPolygons(solution, lineSegmentPoints);
 }
 
 

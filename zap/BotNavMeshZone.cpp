@@ -501,7 +501,7 @@ bool BotNavMeshZone::buildBotMeshZones(Game *game)
    Vector<DatabaseObject *> barrierList;
    game->getGridDatabase()->findObjects(BarrierType, barrierList, bounds);
 
-   TPolyPolygon solution;
+   Vector<Vector<Point> > solution;
 
    if(!Barrier::unionBarriers(barrierList, true, solution))
       return false;
