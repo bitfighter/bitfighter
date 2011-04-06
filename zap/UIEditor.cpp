@@ -5080,12 +5080,20 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(WorldItem *item)
 
    Rect allSegExtent;
 
-   // Create a series of WallSegments, each representing a sequential pair of vertices on our wall
-   for(S32 i = 0; i < item->extendedEndPoints.size(); i += 2)
+   if(item->index == ItemPolyWall)
    {
-      WallSegment *newSegment = new WallSegment(item->extendedEndPoints[i], item->extendedEndPoints[i+1], 
-                                                item->width / getGridSize(), item->mId );    // Create the segment
-      mWallSegments.push_back(newSegment);            // And add it to our master segment list
+      WallSegment *newSegment = new WallSegment(item->getVerts(), item->mId);
+      mWallSegments.push_back(newSegment);
+   }
+   else
+   {
+      // Create a series of WallSegments, each representing a sequential pair of vertices on our wall
+      for(S32 i = 0; i < item->extendedEndPoints.size(); i += 2)
+      {
+         WallSegment *newSegment = new WallSegment(item->extendedEndPoints[i], item->extendedEndPoints[i+1], 
+                                                   item->width / getGridSize(), item->mId );    // Create the segment
+         mWallSegments.push_back(newSegment);            // And add it to our master segment list
+      }
    }
 
    for(S32 i = 0; i < mWallSegments.size(); i++)
@@ -5113,9 +5121,7 @@ void WallSegmentManager::clipAllWallEdges(const Vector<WallSegment *> &wallSegme
    TPolyPolygon inputPolygons, solution;
 
    for(S32 i = 0; i < wallSegments.size(); i++)
-   {
       inputPolygons.push_back(wallSegments[i]->corners.getStlVector());
-   }
 
    mergePolys(inputPolygons, solution);      // Merged wall segments are placed in solution
 
@@ -5854,12 +5860,26 @@ void WorldItem::scale(const Point &center, F32 scale)
 GridDatabase *WallSegment::mGridDatabase; // Declare static variable
 
 
-// Constructor
+// Regular constructor
 WallSegment::WallSegment(const Point &start, const Point &end, F32 width, S32 owner) 
 { 
    // Calculate segment corners by expanding the extended end points into a rectangle
    Barrier::expandCenterlineToOutline(start, end, width, corners);   
+   init(owner);
+}
 
+
+// PolyWall constructor
+WallSegment::WallSegment(const Vector<Point> &points, S32 owner)
+{
+   corners = points;
+   init(owner);
+}
+
+
+// Intialize, only called from constructors above
+void WallSegment::init(S32 owner)
+{
    // Recompute the edges based on our new corner points
    resetEdges();                                            
 
@@ -5872,7 +5892,6 @@ WallSegment::WallSegment(const Point &start, const Point &end, F32 width, S32 ow
    // Set some things required by DatabaseObject
    mObjectTypeMask = BulletType;
 }
-
 
 // Destructor
 WallSegment::~WallSegment()

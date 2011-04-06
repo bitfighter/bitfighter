@@ -71,8 +71,11 @@ private:
    static GridDatabase *mGridDatabase;
    GridDatabase *getGridDatabase() { return mGridDatabase; }      
 
+   void init(S32 owner);
+
 public:
-   WallSegment(const Point &start, const Point &end, F32 width, S32 owner = -1);
+   WallSegment(const Point &start, const Point &end, F32 width, S32 owner = -1);    // Normal wall segment
+   WallSegment(const Vector<Point> &points, S32 owner = -1);                        // PolyWall 
    ~WallSegment();
 
    Vector<Point> edges;    
