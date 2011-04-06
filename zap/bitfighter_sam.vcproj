@@ -641,11 +641,7 @@
 			>
 		</File>
 		<File
-			RelativePath="..\clipper\clipper.cpp"
-			>
-		</File>
-		<File
-			RelativePath="..\clipper\clipper_misc.cpp"
+			RelativePath="..\clipper\clipper4.cpp"
 			>
 		</File>
 		<File

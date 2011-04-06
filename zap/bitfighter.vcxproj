@@ -98,8 +98,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\clipper\clipper.cpp" />
-    <ClCompile Include="..\clipper\clipper_misc.cpp" />
+    <ClCompile Include="..\clipper\clipper4.cpp" />
     <ClCompile Include="..\master\database.cpp" />
     <ClCompile Include="..\master\masterInterface.cpp" />
     <ClCompile Include="..\poly2tri\common\shapes.cc" />
@@ -205,8 +204,7 @@
     <ClCompile Include="UIMenuItems.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\clipper\clipper.h" />
-    <ClInclude Include="..\clipper\clipper_misc.h" />
+    <ClInclude Include="..\clipper\clipper4.h" />
     <ClInclude Include="..\master\database.h" />
     <ClInclude Include="..\master\masterInterface.h" />
     <ClInclude Include="..\poly2tri\common\shapes.h" />
