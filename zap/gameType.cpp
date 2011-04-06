@@ -1515,6 +1515,7 @@ void GameType::updateShipLoadout(GameObject *shipObject)
 
 void GameType::setClientShipLoadout(ClientRef *cl, const Vector<U32> &loadout, bool silent)
 {
+   bool spyBugAllowed = false;
    if(loadout.size() != ShipModuleCount + ShipWeaponCount)     // Reject improperly sized loadouts.  Currently 2 + 3
       return;
 
@@ -1524,12 +1525,20 @@ void GameType::setClientShipLoadout(ClientRef *cl, const Vector<U32> &loadout, b
          return;
       if(!engineerIsEnabled() && (loadout[i] == ModuleEngineer)) // Reject engineer if not enabled
          return;
+      if(!engineerIsEnabled() && (loadout[i] == ModuleSensor))  // allow spyBug when using Sensor
+         spyBugAllowed = true;
    }
 
    for(S32 i = ShipModuleCount; i < ShipWeaponCount + ShipModuleCount; i++)
    {
       if(loadout[i] >= U32(WeaponCount)) // bad number.
          return;
+      if(loadout[i] == WeaponSpyBug && !spyBugAllowed) // Reject spybug when not using ModuleSensor
+         return;
+#if CS_PROTOCOL_VERSION == 32
+      if(loadout[i] == WeaponHeatSeeker) // Reject HeatSeeker, Not supported yet
+         return;
+#endif
    }
 
 
