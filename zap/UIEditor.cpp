@@ -301,8 +301,10 @@ void EditorUserInterface::saveUndoState()
 // Removes most recent undo state from stack
 void EditorUserInterface::deleteUndoState()
 {
+
    mLastUndoIndex--;
    mLastRedoIndex--; 
+   logprintf("Deleting undo state... %d", mLastUndoIndex);    // XXXXX
 }
 
 
@@ -319,8 +321,10 @@ void EditorUserInterface::saveUndoState(const Vector<WorldItem> &items, bool cam
 
    mUndoItems[mLastUndoIndex % UNDO_STATES] = items;
 
+logprintf("Saving undo state... %d", mLastUndoIndex);    // XXXXX
    mLastUndoIndex++;
    mLastRedoIndex++; 
+
 
    if(mLastUndoIndex % UNDO_STATES == mFirstUndoIndex % UNDO_STATES)           // Undo buffer now full...
    {
@@ -350,7 +354,7 @@ void EditorUserInterface::undo(bool addToRedoStack)
 
    if(mLastUndoIndex == mLastRedoIndex && !mRedoingAnUndo)
    {
-      saveUndoState(mItems);
+      saveUndoState();
       mLastUndoIndex--;
       mLastRedoIndex--;
       mRedoingAnUndo = true;
@@ -500,6 +504,7 @@ void EditorUserInterface::loadLevel()
    mTeams.clear();
    mSnapVertex_i = NONE;
    mSnapVertex_j = NONE;
+   mAddingVertex = false;
    clearLevelGenItems();
    mLoadTarget = &mItems;
    mGameTypeArgs.clear();
@@ -678,7 +683,7 @@ void EditorUserInterface::copyScriptItemsToEditor()
    if(mLevelGenItems.size() == 0)
       return;     // Print error message?
 
-   saveUndoState(mItems);
+   saveUndoState();
 
    Vector<WorldItem> zones;
 
@@ -2787,12 +2792,12 @@ void EditorUserInterface::pasteSelection()
 
    S32 itemCount = mClipboard.size();
 
-    if(!itemCount)         // Nothing on clipboard, nothing to do
+    if(!itemCount)       // Nothing on clipboard, nothing to do
       return;
 
-   saveUndoState(mItems);  // So we can undo the paste
+   saveUndoState();      // So we can undo the paste
 
-   clearSelection();       // Only the pasted items should be selected
+   clearSelection();     // Only the pasted items should be selected
 
    Point pos = snapPoint(convertCanvasToLevelCoord(mMousePos));
 
@@ -2850,7 +2855,7 @@ void EditorUserInterface::scaleSelection(F32 scale)
    if(!anyItemsSelected() || scale < .01 || scale == 1)    // Apply some sanity checks
       return;
 
-   saveUndoState(mItems);
+   saveUndoState();
 
    // Find center of selection
    Point min, max;                        
@@ -2875,7 +2880,7 @@ void EditorUserInterface::rotateSelection(F32 angle)
    if(!anyItemsSelected())
       return;
 
-   saveUndoState(mItems);
+   saveUndoState();
 
    for(S32 i = 0; i < mItems.size(); i++)
    {
@@ -2983,7 +2988,7 @@ void EditorUserInterface::flipSelectionHorizontal()
    if(!anyItemsSelected())
       return;
 
-   saveUndoState(mItems);
+   saveUndoState();
 
    Point min, max;
    computeSelectionMinMax(min, max);
@@ -3001,7 +3006,7 @@ void EditorUserInterface::flipSelectionVertical()
    if(!anyItemsSelected())
       return;
 
-   saveUndoState(mItems);
+   saveUndoState();
 
    Point min, max;
    computeSelectionMinMax(min, max);
@@ -3489,7 +3494,7 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
 void EditorUserInterface::incBarrierWidth(S32 amt)
 {
    if(!mLastUndoStateWasBarrierWidthChange)
-      saveUndoState(mItems); 
+      saveUndoState(); 
 
    for(S32 i = 0; i < mItems.size(); i++)
       if(mItems[i].selected)
@@ -3503,7 +3508,7 @@ void EditorUserInterface::incBarrierWidth(S32 amt)
 void EditorUserInterface::decBarrierWidth(S32 amt)
 {
    if(!mLastUndoStateWasBarrierWidthChange)
-      saveUndoState(mItems); 
+      saveUndoState(); 
 
    for(S32 i = 0; i < mItems.size(); i++)
       if(mItems[i].selected)
@@ -3687,7 +3692,7 @@ void EditorUserInterface::insertNewItem(GameItems itemType)
       return;
 
    clearSelection();
-   saveUndoState(mItems);
+   saveUndoState();
 
    Point pos = snapPoint(convertCanvasToLevelCoord(mMousePos));
    S32 team = -1;
@@ -3902,23 +3907,24 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    // Ctrl-left click is same as right click for Mac users
    else if(keyCode == MOUSE_RIGHT || (keyCode == MOUSE_LEFT && getKeyState(KEY_CTRL)))
    {
-      if(getKeyState(MOUSE_LEFT) && !getKeyState(KEY_CTRL))         // Prevent weirdness
+      if(getKeyState(MOUSE_LEFT) && !getKeyState(KEY_CTRL))    // Prevent weirdness
          return;  
 
       mMousePos.set(gScreenInfo.getMousePos());
 
       if(mCreatingPoly || mCreatingPolyline)
       {
-         if(mNewItem.vertCount() >= gMaxPolygonPoints)     // Limit number of points in a polygon/polyline
-            return;
-         //else
-         mNewItem.addVert(snapPoint(convertCanvasToLevelCoord(mMousePos)));
-         mNewItem.onGeomChanging();
+         if(mNewItem.vertCount() < gMaxPolygonPoints)          // Limit number of points in a polygon/polyline
+         {
+            mNewItem.addVert(snapPoint(convertCanvasToLevelCoord(mMousePos)));
+            mNewItem.onGeomChanging();
+         }
+         
          return;
       }
 
-      //saveUndoState(mItems);     // Save undo state before we clear the selection
-      clearSelection();          // Unselect anything currently selected
+      saveUndoState();     // Save undo state before we clear the selection
+      clearSelection();    // Unselect anything currently selected
 
       // Can only add new vertices by clicking on item's edge, not it's interior (for polygons, that is)
       if(mEdgeHit != NONE && mItemHit != NONE && (mItems[mItemHit].geomType() == geomLine ||
@@ -3929,6 +3935,8 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 
          mMostRecentState = mItems;
          Point newVertex = snapPoint(convertCanvasToLevelCoord(mMousePos));      // adding vertex w/ right-mouse
+
+         mAddingVertex = true;
 
          // Insert an extra vertex at the mouse clicked point, and then select it.
          mItems[mItemHit].insertVert(newVertex, mEdgeHit + 1);
@@ -3964,20 +3972,20 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    }
    else if(keyCode == MOUSE_LEFT)
    {
-      if(getKeyState(MOUSE_RIGHT))          // Prevent weirdness
+      if(getKeyState(MOUSE_RIGHT))              // Prevent weirdness
          return;
 
       mDraggingDockItem = NONE;
       mMousePos.set(gScreenInfo.getMousePos());
 
-      if(mCreatingPoly || mCreatingPolyline)          // Save any polygon/polyline we might be creating
+      if(mCreatingPoly || mCreatingPolyline)    // Save any polygon/polyline we might be creating
       {
-         saveUndoState(mItems);             // Save state prior to addition of new polygon
+         saveUndoState();                       // Save state prior to addition of new polygon
 
          if(mNewItem.vertCount() > 1)
          {
             mItems.push_back(mNewItem);
-            mItems.last().onGeomChanged();  // Walls need to be added to mItems BEFORE onGeomChanged() is run!
+            mItems.last().onGeomChanged();      // Walls need to be added to mItems BEFORE onGeomChanged() is run!
             mItems.sort(geometricSort);
          }
          mNewItem.invalidate();
@@ -4364,7 +4372,7 @@ void EditorUserInterface::itemPropertiesEnterKeyHandler()
          if(mSpecialAttribute != NoAttribute)
          {
             mEditingSpecialAttrItem = i;
-            saveUndoState(mItems);
+            saveUndoState();
          }
          else
             doneEditingSpecialItem(true);
@@ -4412,7 +4420,7 @@ void EditorUserInterface::onKeyUp(KeyCode keyCode)
          mShowingReferenceShip = false;
          break;
       case MOUSE_LEFT:
-      case MOUSE_RIGHT:    // test
+      case MOUSE_RIGHT:  
          mMousePos.set(gScreenInfo.getMousePos());
 
          if(mDragSelecting)      // We were drawing a rubberband selection box
@@ -4449,11 +4457,17 @@ void EditorUserInterface::onKeyUp(KeyCode keyCode)
             }
             mDragSelecting = false;
          }
-         else
+         else if(mDraggingObjects)     // We were dragging and dropping.  Could have been a move or a delete (by dragging to dock).
          {
-            if(mDraggingObjects)    // We were dragging and dropping.  Could have been a move or a delete (by dragging to dock).
-               finishedDragging();
+            if(mAddingVertex)
+            {
+               deleteUndoState();
+               mAddingVertex = false;
+            }
+
+            finishedDragging();
          }
+
          break;
    }     // case
 }
@@ -4464,16 +4478,17 @@ void EditorUserInterface::finishedDragging()
 {
    mDraggingObjects = false;
 
-   if(mouseOnDock())             // This was really a delete (item dragged to dock)
+   if(mouseOnDock())                      // Mouse is over the dock -- either dragging to or from dock
    {
-      if(mDraggingDockItem == NONE)
+      if(mDraggingDockItem == NONE)       // This was really a delete (item dragged to dock)
       {
-         for(S32 i = 0; i < mItems.size(); i++)
+         for(S32 i = 0; i < mItems.size(); i++)    //  Delete all selected items
             if(mItems[i].selected)
             {
                deleteItem(i);
-               break;
+               i--;
             }
+
          itemToLightUp = NONE;
       }
       else        // Dragged item off the dock, then back on  ==> nothing really changed

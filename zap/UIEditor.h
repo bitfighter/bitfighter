@@ -475,6 +475,7 @@ private:
    bool mCreatingPoly;
    bool mCreatingPolyline;
    bool mDragSelecting;
+   bool mAddingVertex;
    bool mShowingReferenceShip;
    LineEditor mEntryBox;
 
