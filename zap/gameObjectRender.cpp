@@ -793,7 +793,7 @@ void renderTriangulatedPolygonFill(const Vector<Point> &fill)
 
 void renderPolygonOutline(const Vector<Point> &outline)
 {
-   renderPointVector(outline, GL_LINES);
+   renderPointVector(outline, GL_LINE_LOOP);
 }
 
 
@@ -946,17 +946,10 @@ void renderSlipZone(const Vector<Point> &bounds, const Vector<Point> &boundsFill
    Color theColor (0, 0.5, 0);  // Go for a pale green, for now...
 
    glColor(theColor * 0.5);
-
-   glBegin(GL_TRIANGLES);
-      for(S32 i = 0; i < boundsFill.size(); i++)
-         glVertex2f(boundsFill[i].x, boundsFill[i].y);
-   glEnd();
+   renderPointVector(boundsFill, GL_TRIANGLES);
 
    glColor(theColor * 0.7);
-   glBegin(GL_LINE_LOOP);
-      for(S32 i = 0; i < bounds.size(); i++)
-         glVertex2f(bounds[i].x, bounds[i].y);
-   glEnd();
+   renderPointVector(bounds, GL_LINE_LOOP);
 
    Point extents = extent.getExtents();
    Point center = extent.getCenter();
@@ -1381,11 +1374,7 @@ void renderEnergyItem(const Point &pos)
 void renderWallFill(const Vector<Point> &points, bool polyWall)
 {
    glColor(gIniSettings.wallFillColor);
-
-   glBegin(polyWall ? GL_TRIANGLES : GL_POLYGON);   // Rendering is a bit different for solid polys
-      for(S32 i = 0; i < points.size(); i++)
-         glVertex(points[i]);
-   glEnd();
+   renderPointVector(points, polyWall ? GL_TRIANGLES : GL_POLYGON);
 }
 
 
@@ -1400,14 +1389,17 @@ void renderWallEdges(const Vector<Point> &edges, F32 alpha)
 void renderSpeedZone(const Vector<Point> &points, U32 time)
 {
    glColor3f(1, 0, 0);     // Red
+
    for(S32 j = 0; j < 2; j++)
    {
       S32 start = j * points.size() / 2;    // GoFast comes in two equal shapes
 
-      glBegin(GL_LINE_LOOP);
-         for(S32 i = start; i < start + points.size() / 2; i++)
-            glVertex(points[i]);
-      glEnd();
+      glEnableClientState(GL_VERTEX_ARRAY);
+
+      glVertexPointer(2, GL_FLOAT, sizeof(Point), points.address());    
+      glDrawArrays(GL_LINE_LOOP, start, points.size() / 2);
+
+      glDisableClientState(GL_VERTEX_ARRAY);
    }
 }
 
@@ -1568,10 +1560,7 @@ New idea.  Determine the color spectrum that looks good.  Maybe the old default 
    Vector<Point> geom;
    ForceFieldProjector::getGeom(pos, normal, geom);
 
-   glBegin(GL_LINE_LOOP);
-      for(S32 i = 0; i < geom.size(); i++)
-         glVertex(geom[i]);
-   glEnd();
+   renderPointVector(geom, GL_LINE_LOOP);
 }
 
 
@@ -1598,10 +1587,8 @@ void renderForceField(Point start, Point end, Color c, bool fieldUp, F32 scaleFa
    c = c * (1.0 - ForceFieldBrightness) + ForceFieldBrightness;
 
    glColor(fieldUp ? c : c * 0.5);
-   glBegin(GL_LINE_LOOP);
-      for(S32 i = 0; i < geom.size(); i++)
-         glVertex(geom[i]);
-   glEnd();
+
+   renderPointVector(geom, GL_LINE_LOOP);
 }
 
 

@@ -65,7 +65,9 @@ XXX need to document timers, new luavec stuff XXX
 <li>Added support for PS3 joystick.
 <li>Tab-expansion when typing a /command has been much improved.
 <li>Added /pausebots and /stepbots commands, also mapped alt-] to /stepbots, and ctrl-] to /stepbots 10
-<li>Increased rendering efficiency by a tiny bit
+<li>Increased rendering speed for most game objects
+<li>Vastly improved performance for auto-generated bot nav zones
+<li>Bot nav zones now auto generated for all levels at load time; no further need to manually create zones; manual zone creation will be removed in future version
 </ul>
 <h4>New Features</h4>
 <ul>
