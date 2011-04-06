@@ -1371,9 +1371,9 @@ void renderEnergyItem(const Point &pos)
 }
 
 
-void renderWallFill(const Vector<Point> &points, bool polyWall)
+void renderWallFill(const Vector<Point> &points, bool polyWall, const Color &fillColor)
 {
-   glColor(gIniSettings.wallFillColor);
+   glColor(fillColor);
    renderPointVector(points, polyWall ? GL_TRIANGLES : GL_POLYGON);
 }
 

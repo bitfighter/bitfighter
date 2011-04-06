@@ -209,7 +209,7 @@ void EditorUserInterface::populateDock()
       {
          mDockItems.push_back(WorldItem(ItemGoalZone, Point(gScreenInfo.getGameCanvasWidth() - horizMargin - DOCK_WIDTH + 5, yPos), 
                                         mCurrentTeam, true, DOCK_POLY_WIDTH, DOCK_POLY_HEIGHT));
-         yPos += spacer;
+         yPos += 25;
       }
 
       mDockItems.push_back(WorldItem(ItemPolyWall, Point(gScreenInfo.getGameCanvasWidth() - horizMargin - DOCK_WIDTH + 5, yPos), 
@@ -301,10 +301,8 @@ void EditorUserInterface::saveUndoState()
 // Removes most recent undo state from stack
 void EditorUserInterface::deleteUndoState()
 {
-
    mLastUndoIndex--;
    mLastRedoIndex--; 
-   logprintf("Deleting undo state... %d", mLastUndoIndex);    // XXXXX
 }
 
 
@@ -321,7 +319,6 @@ void EditorUserInterface::saveUndoState(const Vector<WorldItem> &items, bool cam
 
    mUndoItems[mLastUndoIndex % UNDO_STATES] = items;
 
-logprintf("Saving undo state... %d", mLastUndoIndex);    // XXXXX
    mLastUndoIndex++;
    mLastRedoIndex++; 
 
@@ -2330,6 +2327,8 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
             glColor(item.isConvex() ? green : red, alpha * .5);
          else if(item.index == ItemNexus)
             glColor(gNexusOpenColor, alpha);      // Render Nexus items in pale green to match the actual thing
+         else if(item.index == ItemPolyWall)
+            glColor(EDITOR_WALL_FILL_COLOR);
          else
             glColor(getTeamColor(item.team), alpha);
 
@@ -5886,6 +5885,9 @@ void WallSegment::init(S32 owner)
    Rect extent(corners);
    setExtent(extent); 
 
+   // Drawing walls filled requires that points be triangluated
+   Triangulate::Process(corners, triangulatedFillPoints);
+
    mOwner = owner; 
    invalid = false; 
 
@@ -5923,13 +5925,10 @@ void WallSegment::renderFill(bool renderLight)
    bool useGameColor = UserInterface::current && UserInterface::current->getMenuID() == EditorUI && 
                        gEditorUserInterface.isShowingReferenceShip();
 
-   glColor((useGameColor ? gIniSettings.wallFillColor : EDITOR_WALL_FILL_COLOR) * (renderLight ? 0.5 : 1));
-   
    glDisableBlendfromLineSmooth;
-   glBegin(GL_POLYGON);
-      for(S32 i = 0; i < corners.size(); i++)
-         glVertex(corners[i]);
-   glEnd();
+   
+   // Use true below because all segments are triangulated
+   renderWallFill(triangulatedFillPoints, true, (useGameColor ? gIniSettings.wallFillColor : EDITOR_WALL_FILL_COLOR) * (renderLight ? 0.5 : 1));   
    glEnableBlendfromLineSmooth;
 }
 

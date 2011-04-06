@@ -381,7 +381,7 @@ void Barrier::prepareRenderingGeometry(Game *game)
 void Barrier::render(S32 layerIndex)
 {
    if(layerIndex == 0)           // First pass: draw the fill
-      renderWallFill(mRenderFillGeometry, mSolid);
+      renderWallFill(mRenderFillGeometry, mSolid, gIniSettings.wallFillColor);
 }
 
 // static 

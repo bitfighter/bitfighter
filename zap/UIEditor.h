@@ -80,6 +80,7 @@ public:
 
    Vector<Point> edges;    
    Vector<Point> corners;
+   Vector<Point> triangulatedFillPoints;
    U32 mOwner;
 
    bool invalid;              // A flag for marking segments in need of processing
