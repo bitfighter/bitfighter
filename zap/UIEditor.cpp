@@ -5872,6 +5872,10 @@ WallSegment::WallSegment(const Point &start, const Point &end, F32 width, S32 ow
 WallSegment::WallSegment(const Vector<Point> &points, S32 owner)
 {
    corners = points;
+
+   if(isWoundClockwise(points))
+      corners.reverse();
+
    init(owner);
 }
 
