@@ -507,20 +507,18 @@ void HuntersFlagItem::renderItem(Point pos)
 
    Parent::renderItem(pos);
 
-   if(mIsMounted)
+   if(mIsMounted && mFlagCount > 0)
    {
-      if(mFlagCount)
-      {
-         if(mFlagCount >= 20)
-            glColor3f(1, 0.5, 0.5);
-         else if(mFlagCount >= 10)
-            glColor3f(1, 1, 0);
-         else
-            glColor3f(1, 1, 1);
+      if(mFlagCount >= 40)
+         glColor3f(1, 0.5, 0.5);
+      else if(mFlagCount >= 20)
+         glColor3f(1, 1, 0);
+      else if(mFlagCount >= 10)
+         glColor3f(0, 1, 0);
+      else
+         glColor3f(1, 1, 1);
 
-         UserInterface::drawStringf(pos.x + 10, pos.y - 46, 12, "%d", mFlagCount);
-         //UserInterface::drawStringf(pos.x - 5, pos.y - 30, 12, "%d", mFlagCount);
-      }
+      UserInterface::drawStringf(pos.x + 10, pos.y - 46, 12, "%d", mFlagCount);
    }
 }
 
