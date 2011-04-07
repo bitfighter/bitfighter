@@ -231,7 +231,7 @@ S32 CIniFile::addSection(const string keyname)
    if(findSection(keyname) != noID)            // Don't create duplicate keys!
       return noID;
    names.push_back(keyname);
-   keys.setSize(keys.size() + 1);
+   keys.resize(keys.size() + 1);
    return names.size() - 1;
 }
 

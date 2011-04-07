@@ -946,7 +946,7 @@ VersionedGameStats GameType::getGameStats()
    gameStats->build_version = BUILD_VERSION;
    gameStats->build_version = CS_PROTOCOL_VERSION; // This is not send, but may be used for logging
 
-   gameStats->teamStats.setSize(mTeams.size());
+   gameStats->teamStats.resize(mTeams.size());
    for(S32 i = 0; i < mTeams.size(); i++)
    {
       TeamStats *teamStats = &gameStats->teamStats[i];

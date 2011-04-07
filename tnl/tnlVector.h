@@ -88,7 +88,7 @@ public:
    const T& operator[](S32 index) const;
 
    void reserve(U32 size);
-   void setSize(U32 size);
+   void resize(U32 size);
    void insert(U32 index);
    void erase(U32 index);
    void erase_fast(U32 index);
@@ -150,8 +150,8 @@ template<class T> const inline T* Vector<T>::address() const
    return &(*innerVector.begin());
 }
 
-// was U32
-template<class T> inline void Vector<T>::setSize(U32 size)
+// was U32     
+template<class T> inline void Vector<T>::resize(U32 size)
 {
    innerVector.resize(size);
 }

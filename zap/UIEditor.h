@@ -302,7 +302,7 @@ public:
    // Note that the poly returned here is different than what you might expect -- it is composed of the edges,
    // not the corners, and is thus in A-B, C-D, E-F format rather than the more typical A-B-C-D format returned
    // by getCollisionPoly() elsewhere in the game.  Therefore, it needs to be handled differently.
-   bool getCollisionPoly(Vector<Point> &polyPoints) { polyPoints.setSize(2); polyPoints[0] = mStart; polyPoints[1] = mEnd; return true; }  
+   bool getCollisionPoly(Vector<Point> &polyPoints) { polyPoints.resize(2); polyPoints[0] = mStart; polyPoints[1] = mEnd; return true; }  
    bool getCollisionCircle(U32 stateIndex, Point &point, float &radius) { return false; }
    bool isCollisionEnabled() { return true; }
 

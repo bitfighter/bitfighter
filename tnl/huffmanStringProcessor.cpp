@@ -88,9 +88,9 @@ void HuffmanStringProcessor::buildTables()
 
    // First, construct the array of wraps...
    //
-   mHuffLeaves.setSize(256);
+   mHuffLeaves.resize(256);
    mHuffNodes.reserve(256);
-   mHuffNodes.setSize(mHuffNodes.size() + 1);
+   mHuffNodes.resize(mHuffNodes.size() + 1);
    for (i = 0; i < 256; i++) {
       HuffLeaf& rLeaf = mHuffLeaves[i];
 
@@ -126,7 +126,7 @@ void HuffmanStringProcessor::buildTables()
       TNLAssert(index1 != -1 && index2 != -1 && index1 != index2, "hrph");
 
       // Create a node for this...
-      mHuffNodes.setSize(mHuffNodes.size() + 1);
+      mHuffNodes.resize(mHuffNodes.size() + 1);
       HuffNode& rNode = mHuffNodes.last();
       rNode.pop    = pWrap[index1].getPop() + pWrap[index2].getPop();
       rNode.index0 = determineIndex(pWrap[index1]);

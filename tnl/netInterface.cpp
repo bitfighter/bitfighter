@@ -51,7 +51,7 @@ NetInterface::NetInterface(const Address &bindAddress) : mSocket(bindAddress)
 
    Random::read(mRandomHashData, sizeof(mRandomHashData));
 
-   mConnectionHashTable.setSize(129);
+   mConnectionHashTable.resize(129);
    for(S32 i = 0; i < mConnectionHashTable.size(); i++)
       mConnectionHashTable[i] = NULL;
    mSendPacketList = NULL;
@@ -273,7 +273,7 @@ void NetInterface::addConnection(NetConnection *conn)
 
    if(numConnections > mConnectionHashTable.size() / 2)
    {
-      mConnectionHashTable.setSize(numConnections * 4 - 1);
+      mConnectionHashTable.resize(numConnections * 4 - 1);
       for(S32 i = 0; i < mConnectionHashTable.size(); i++)
          mConnectionHashTable[i] = NULL;
 

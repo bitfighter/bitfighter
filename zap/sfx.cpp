@@ -515,7 +515,7 @@ void SFXObject::init()
    error = alGetError();
 
    alGenBuffers(NumSFXBuffers, gBuffers);
-   gVoiceFreeBuffers.setSize(32);
+   gVoiceFreeBuffers.resize(32);
    alGenBuffers(32, gVoiceFreeBuffers.address());
 
    error = alGetError();

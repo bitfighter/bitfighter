@@ -779,33 +779,38 @@ bool Triangulate::Process(const Vector<Point> &contour, Vector<Point> &result)
 }
 
 
-Polygons upscaleClipperPoints(const Vector<Vector<Point> >& inputPolygons) {
+static const F32 CLIPPER_SCALE_FACT = 1000;
+
+Polygons upscaleClipperPoints(const Vector<Vector<Point> >& inputPolygons) 
+{
    Polygons outputPolygons;
-   clipper::Polygon polygon;
-   for (S32 i = 0; i < inputPolygons.size(); i++) {
-      polygon.clear();
 
-      for (S32 j = 0; j < inputPolygons[i].size(); j++)
-         polygon.push_back(IntPoint(S32(inputPolygons[i][j].x * 1000), S32(inputPolygons[i][j].y * 1000)));
+   outputPolygons.resize(inputPolygons.size());
 
-      outputPolygons.push_back(polygon);
+   for(S32 i = 0; i < inputPolygons.size(); i++) 
+   {
+      outputPolygons[i].resize(inputPolygons[i].size());
+
+      for(S32 j = 0; j < inputPolygons[i].size(); j++)
+         outputPolygons[i][j] = IntPoint(S32(inputPolygons[i][j].x * CLIPPER_SCALE_FACT), S32(inputPolygons[i][j].y * CLIPPER_SCALE_FACT));
    }
 
    return outputPolygons;
 }
 
 
-Vector<Vector<Point> > downscaleClipperPoints(const Polygons& inputPolygons) {
+Vector<Vector<Point> > downscaleClipperPoints(const Polygons& inputPolygons) 
+{
    Vector<Vector<Point> > outputPolygons;
-   Vector<Point> polygon;
 
-   for (U32 i = 0; i < inputPolygons.size(); i++) {
-      polygon.clear();
+   outputPolygons.resize(inputPolygons.size());
 
-      for (U32 j = 0; j < inputPolygons[i].size(); j++)
-         polygon.push_back(Point(F32(inputPolygons[i][j].X) / 1000, F32(inputPolygons[i][j].Y) / 1000));
+   for(U32 i = 0; i < inputPolygons.size(); i++) 
+   {
+      outputPolygons[i].resize(inputPolygons[i].size());
 
-      outputPolygons.push_back(polygon);
+      for(U32 j = 0; j < inputPolygons[i].size(); j++)
+         outputPolygons[i][j] = Point(F32(inputPolygons[i][j].X) / CLIPPER_SCALE_FACT, F32(inputPolygons[i][j].Y) / CLIPPER_SCALE_FACT);
    }
 
    return outputPolygons;
@@ -840,7 +845,7 @@ void unpackPolygons(const Vector<Vector<Point> > &solution, Vector<Point> &lineS
    for(S32 i = 0; i < solution.size(); i++)
       segments += solution[i].size();
 
-   lineSegmentPoints.setSize(segments * 2);      // 2 points per line segment
+   lineSegmentPoints.resize(segments * 2);      // 2 points per line segment
 
    Vector<Point> poly;
    S32 index = 0;
@@ -864,31 +869,6 @@ void unpackPolygons(const Vector<Vector<Point> > &solution, Vector<Point> &lineS
    }
 }
 
-
-/*
-
-vector<IntPoint>& upscaleClipperPoints(const vector<Point>& inputPolygon) {
-   vector<IntPoint> outputPolygon;
-
-   for (U32 i = 0; i < inputPolygon.size(); i++) {
-      outputPolygon.push_back(IntPoint(S32(inputPolygon[i].x * 1000), S32(inputPolygon[i].y * 1000)));
-   }
-
-   return outputPolygon;
-}
-
-
-vector<Point>& downscaleClipperPoints(const vector<IntPoint>& inputPolygon) {
-   vector<Point> outputPolygon;
-
-   for (U32 i = 0; i < inputPolygon.size(); i++) {
-      outputPolygon.push_back(Point(F32(inputPolygon[i].X) / 1000, F32(inputPolygon[i].Y) / 1000));
-   }
-
-   return outputPolygon;
-}
-
- */
 
 // Offset a complex polygon by a given amount
 // Uses clipper to create a buffer around a polygon with the given offset
@@ -1024,7 +1004,7 @@ bool Triangulate::processComplex(TriangleData& outputData, const Rect& bounds,
 
       // Start of duplicate Points removal, helps to avoid error / crash in triangulate
       Vector<S32> sortID;
-      sortID.setSize(coords.size()/2);
+      sortID.resize(coords.size()/2);
       for(S32 i=0; i<sortID.size(); i++)
       {
          sortID[i]=i;
@@ -1171,7 +1151,7 @@ bool Triangulate::mergeTriangles(TriangleData& triangleData, rcPolyMesh& mesh, S
 {
    S32 ntris = triangleData.triangleCount;
    Vector<S32> intPoints(triangleData.pointCount * 2);     // 2 entries per point: x,y
-   intPoints.setSize(triangleData.pointCount * 2);
+   intPoints.resize(triangleData.pointCount * 2);
 
    if(triangleData.pointCount > U16_MAX) // too many points for rcBuildPolyMesh
       return false;

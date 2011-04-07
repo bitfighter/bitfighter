@@ -129,7 +129,7 @@ EditorUserInterface::EditorUserInterface() : mGridDatabase(GridDatabase(false)) 
 
    mLastUndoStateWasBarrierWidthChange = false;
 
-   mUndoItems.setSize(UNDO_STATES);
+   mUndoItems.resize(UNDO_STATES);
 
    // Pass the gridDatabase on to these other objects, so they can have local access
    WorldItem::setGridDatabase(&mGridDatabase);
@@ -5046,7 +5046,7 @@ void WallSegmentManager::recomputeAllWallGeometry()
 
 
    mWallEdges.deleteAndClear();
-   mWallEdges.setSize(mWallEdgePoints.size() / 2);
+   mWallEdges.resize(mWallEdgePoints.size() / 2);
 
    // Add clipped wallEdges to the spatial database
    for(S32 i = 0; i < mWallEdgePoints.size(); i+=2)
