@@ -140,7 +140,7 @@ public:
    void render();
    S32 getRenderSortValue() { return 0; }
 
-	void getForceFieldStartAndEndPoints(Point &start, Point &end) {start = mStart; end = mEnd;}
+   void getForceFieldStartAndEndPoints(Point &start, Point &end) {start = mStart; end = mEnd;}
 
 
    TNL_DECLARE_CLASS(ForceField);

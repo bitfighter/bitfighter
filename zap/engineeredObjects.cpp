@@ -865,6 +865,7 @@ Turret::Turret(S32 team, Point anchorPoint, Point anchorNormal) : EngineeredObje
    mWeaponFireType = WeaponTurret;
    mNetFlags.set(Ghostable);
    setObjectMask();
+   mCurrentAngle = mAnchorNormal.ATAN2();
 }
 
 bool Turret::processArguments(S32 argc2, const char **argv2)
@@ -877,15 +878,15 @@ bool Turret::processArguments(S32 argc2, const char **argv2)
       switch(c)
       {
       case 'W':
-			if(argv2[i][1] == '=')
-			{
-				S32 w=0;
-				while(w < WeaponCount && stricmp(gWeapons[w].name.getString(), &argv2[i][2]))
-					w++;
-				if(w < WeaponCount)
-					mWeaponFireType = w;
-				break;
-			}
+         if(argv2[i][1] == '=')
+         {
+            S32 w=0;
+            while(w < WeaponCount && stricmp(gWeapons[w].name.getString(), &argv2[i][2]))
+               w++;
+            if(w < WeaponCount)
+               mWeaponFireType = w;
+            break;
+         }
       }
       if((c < 'a' || c > 'z') && (c < 'A' || c > 'Z'))
       {
@@ -895,7 +896,9 @@ bool Turret::processArguments(S32 argc2, const char **argv2)
          }
       }
    }
-	return EngineeredObject::processArguments(argc1, argv1);
+   bool returnBool = EngineeredObject::processArguments(argc1, argv1);
+   mCurrentAngle = mAnchorNormal.ATAN2();
+   return returnBool;
 }
 
 
@@ -1020,8 +1023,7 @@ void Turret::idle(IdleCallPath path)
 // This could possibly be combined with LuaRobot's getFiringSolution, as it's essentially the same thing
       F32 t;      // t is set in next statement
       if(!FindLowestRootInInterval(Vs.dot(Vs) - S * S, 2 * Vs.dot(d), d.dot(d), gWeapons[mWeaponFireType].projLiveTime * 0.001f, t))
-		   if(gWeapons[mWeaponFireType].projLiveTime >= 0)
-            continue;
+         continue;
 
       Point leadPos = potential->getRenderPos() + Vs * t;
 
@@ -1096,7 +1098,7 @@ void Turret::idle(IdleCallPath path)
          string killer = string("got blasted by ") + getGame()->getGameType()->getTeamName(mTeam).getString() + " turret";
          mKillString = killer.c_str();
 
-			createWeaponProjectiles(WeaponType(mWeaponFireType), bestDelta, aimPos, velocity, mWeaponFireType == WeaponBurst ? 45.f : 35.f, this);
+         createWeaponProjectiles(WeaponType(mWeaponFireType), bestDelta, aimPos, velocity, mWeaponFireType == WeaponBurst ? 45.f : 35.f, this);
          mFireTimer.reset(gWeapons[mWeaponFireType].fireDelay);
       }
    }
