@@ -792,7 +792,7 @@ Polygons upscaleClipperPoints(const Vector<Vector<Point> >& inputPolygons)
       outputPolygons[i].resize(inputPolygons[i].size());
 
       for(S32 j = 0; j < inputPolygons[i].size(); j++)
-         outputPolygons[i][j] = IntPoint(S32(inputPolygons[i][j].x * CLIPPER_SCALE_FACT), S32(inputPolygons[i][j].y * CLIPPER_SCALE_FACT));
+         outputPolygons[i][j] = IntPoint(S64(inputPolygons[i][j].x * CLIPPER_SCALE_FACT), S64(inputPolygons[i][j].y * CLIPPER_SCALE_FACT));
    }
 
    return outputPolygons;
@@ -826,7 +826,14 @@ bool mergePolys(const Vector<Vector<Point> > &inputPolygons, Vector<Vector<Point
    // Fire up clipper and union!
    Clipper clipper;
 //   clipper.IgnoreOrientation(false);      // Can be true?  Would that make things go faster?
-   clipper.AddPolygons(input, ptSubject);
+   try  // there is a "throw" in AddPolygon..
+   {
+      clipper.AddPolygons(input, ptSubject);
+   }
+   catch(...)
+   {
+      logprintf(LogConsumer::LogError, "clipper.AddPolygons, something went wrong");
+   }
 
    bool success = clipper.Execute(ctUnion, solution, pftNonZero, pftNonZero);
 

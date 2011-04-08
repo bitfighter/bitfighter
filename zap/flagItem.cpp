@@ -173,7 +173,7 @@ void FlagItem::sendHome()
    for(S32 i = 0; i < gt->mFlags.size(); i++)
    {
       FlagItem *flag = gt->mFlags[i];
-      if(flag->isAtHome() && (flag->mTeam < 0 || flag->mTeam == mTeam))
+      if(flag->isAtHome() && (flag->mTeam < 0 || flag->mTeam == mTeam || !gt->isTeamFlagGame()))
       {
          // Need to remove this flag's spawnpoint from the list of potential spawns... it's occupied, after all...
          // Note that if two spawnpoints are on top of one another, this will remove the first, leaving the other
