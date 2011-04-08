@@ -176,12 +176,11 @@ void EditorUserInterface::populateDock()
       yPos += spacer;
 
       mDockItems.push_back(WorldItem(ItemFlagSpawn, Point(xPos, yPos), mCurrentTeam, true, 0, 0));
+      yPos += spacer;
 
 
-      yPos += spacer;
-      mDockItems.push_back(WorldItem(ItemMine, Point(xPos, yPos), mCurrentTeam, true, 0, 0));
-      yPos += spacer;
-      mDockItems.push_back(WorldItem(ItemSpyBug, Point(xPos, yPos), mCurrentTeam, true, 0, 0));
+      mDockItems.push_back(WorldItem(ItemMine, Point(xPos - 10, yPos), mCurrentTeam, true, 0, 0));
+      mDockItems.push_back(WorldItem(ItemSpyBug, Point(xPos + 10, yPos), mCurrentTeam, true, 0, 0));
       yPos += spacer;
 
       // These two will share a line
@@ -263,7 +262,7 @@ GameItemRec itemDef[] = {
    { "Asteroid",            false,    false,     false,    false,   false,   false,   geomPoint,       0,     true,   "Asteroids",              "Ast.",     "Asteroid",     "Shootable asteroid object.  Just like the arcade game." },
    { "AsteroidSpawn",       false,    false,     false,    false,   false,   true,    geomPoint,       0,     true,   "Asteroid spawn points",  "ASP",      "AsteroidSpawn","Periodically spawns a new asteroid." },
    { "Mine",                false,    false,     true,     true,    false,   false,   geomPoint,      'M',    true,   "Mines",                  "Mine",     "Mine",         "Mines can be prepositioned, and are are \"hostile to all\". [M]" },
-   { "SpyBug",              false,    true,      true,     true,    false,   false,   geomPoint,      'S',    false,  "Spy bugs",               "Spy Bug",  "Spy Bug",      "Remote monitoring device that shows enemy ships on the commander's map. [Ctrl-B]" },
+   { "SpyBug",              false,    true,      true,     true,    false,   false,   geomPoint,      'S',    false,  "Spy bugs",               "Bug",      "Spy Bug",      "Remote monitoring device that shows enemy ships on the commander's map. [Ctrl-B]" },
    { "ResourceItem",        false,    false,     false,    false,   false,   false,   geomPoint,       0,     true,   "Resource items",         "Res.",     "Resource",     "Small bouncy object that floats around and gets in the way." },
    { "LoadoutZone",         false,    true,      true,     true,    false,   false,   geomPoly,        0,     false,  "Loadout zones",          "Loadout",  "Loadout",      "Area to finalize ship modifications.  Each team should have at least one." },
    { "HuntersNexusObject",  false,    false,     true,     true,    false,   false,   geomPoly,        0,     false,  "Nexus zones",            "Nexus",    "Nexus",        "Area to bring flags in Hunter game.  Cannot be used in other games." },
@@ -2518,19 +2517,19 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
          else
          {
             glColor(hideit ? grayedOutColorDim : Color(.7,.7,.7), alpha);
-            drawCircle(pos, 9);
+            drawCircle(pos, 9 - (item.mDockItem ? 2 : 0));
 
             glColor(hideit ? grayedOutColorDim : Color(.1,.3,.3), alpha);
-            drawCircle(pos, 5);
+            drawCircle(pos, 5 - (item.mDockItem ? 1 : 0));
          }
       }
       else if(item.index == ItemSpyBug)  // And a spy bug
       {
          glColor(hideit ? grayedOutColorDim : Color(.7,.7,.7), alpha);
-         drawCircle(pos, 9);
+         drawCircle(pos, 9 - (item.mDockItem ? 2 : 0));
 
          glColor(hideit ? grayedOutColorDim : getTeamColor(item.team), alpha);
-         drawCircle(pos, 5);
+         drawCircle(pos, 5 - (item.mDockItem ? 1 : 0));
 
          // And show how far it can see... unless, of course, it's on the dock, and assuming the tab key has been pressed
          if(!item.mDockItem && mShowingReferenceShip && (item.selected || item.litUp))
