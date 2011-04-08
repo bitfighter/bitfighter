@@ -882,13 +882,13 @@ void unpackPolygons(const Vector<Vector<Point> > &solution, Vector<Point> &lineS
 void offsetPolygon(const Vector<Point>& inputPoly, Vector<Point>& outputPoly, const F32 offset)
 {
    Vector<Vector<Point> > tempVector;
-   tempVector.push_back(Vector<Point>(inputPoly).getStlVector());
+   tempVector.push_back(inputPoly);
 
    // Upscale for clipper
    Polygons polygons = upscaleClipperPoints(tempVector);
 
    // Call Clipper to do the dirty work
-   polygons = OffsetPolygons(polygons, offset);
+   polygons = OffsetPolygons(polygons, offset * CLIPPER_SCALE_FACT);
 
    // Downscale
    tempVector = downscaleClipperPoints(polygons);

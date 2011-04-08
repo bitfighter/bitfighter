@@ -103,7 +103,7 @@ bool findIntersection(const Point &p1, const Point &p2, const Point &p3, const P
 S32 findClosestPoint(const Point &point, const Vector<Point> &points);
 
 // Offset a complex polygon by a given amount
-void offsetPolygon(const Vector<Point>& inputPoly, Vector<Point>& outputPoly,const F32 offset);
+void offsetPolygon(const Vector<Point>& inputPoly, Vector<Point>& outputPoly, const F32 offset);
 
 // Use Clipper to merge inputPolygons, placing the result in solution
 bool mergePolys(const Vector<Vector<Point> > &inputPolygons, Vector<Vector<Point> > &outputPolygons);
