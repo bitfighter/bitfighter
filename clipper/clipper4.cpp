@@ -49,16 +49,25 @@ enum Position  { pFirst, pMiddle, pSecond };
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
 
-bool IsClockwise(const Polygon &poly)
+// Old IsClockwise was buggy...
+// Test if a complex polygon has clockwise point winding order
+// Implemented from
+// http://stackoverflow.com/questions/1165647/how-to-determine-if-a-list-of-polygon-points-are-in-clockwise-order/1165943#1165943
+bool IsClockwise(const Polygon &inputPoly)
 {
-  int highI = poly.size() -1;
-  if (highI < 2) return false;
-  double a;
-  a = (double)poly[highI].X * poly[0].Y -(double)poly[0].X * poly[highI].Y;
-  for (int i = 0; i < highI; ++i)
-    a += (double)poly[i].X * poly[i+1].Y -(double)poly[i+1].X * poly[i].Y;
-  //area := area/2;
-  return a > 0; //ie reverse of normal formula because assume Y axis inverted
+   long64 finalSum = 0;
+   int i_prev = inputPoly.size() - 1;
+
+   for(int i = 0; i < inputPoly.size(); i++)
+   {
+      // (x2-x1)(y2+y1)
+      finalSum += (long64)(inputPoly[i].X - inputPoly[i_prev].X) * (inputPoly[i].Y + inputPoly[i_prev].Y);
+      i_prev = i;
+   }
+
+   // Negative result = counter-clockwise
+   return finalSum >= 0;
+
 }
 //------------------------------------------------------------------------------
 
@@ -68,12 +77,13 @@ bool IsClockwise(PolyPt *pt)
   PolyPt* startPt = pt;
   do
   {
-    a += (long64)(pt->pt.X*pt->next->pt.Y)-(long64)(pt->next->pt.X*pt->pt.Y);
+    // (x2-x1)(y2+y1)
+    a += (long64)(pt->pt.X - pt->prev->pt.X) * (pt->pt.Y + pt->prev->pt.Y);
     pt = pt->next;
   }
   while (pt != startPt);
   //area = area /2;
-  return a > 0; //ie reverse of normal formula because Y axis inverted
+  return a >= 0; //ie reverse of normal formula because Y axis inverted
 }
 //------------------------------------------------------------------------------
 
@@ -1877,7 +1887,7 @@ void Clipper::BuildResult(Polygons &polypoly)
       if (p && p->isHole == IsClockwise(p))
         ReversePolyPtLinks(*p);
     }
-  JoinCommonEdges();
+  JoinCommonEdges();  // errors in here when isClockwise was broken..
 
   int k = 0;
   polypoly.resize(m_PolyPts.size());
