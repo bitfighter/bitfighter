@@ -1817,7 +1817,7 @@ void setupLogging()
 void setOrtho(GLdouble left, GLdouble right, GLdouble bottom, GLdouble top)
 {
    glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
+   glLoadIdentity();
 
    // The best understanding I can get for glOrtho is that these are the coordinates you want to appear at the four corners of the
    // physical screen. If you want a "black border" down one side of the screen, you need to make left negative, so that 0 would 
@@ -1825,7 +1825,7 @@ void setOrtho(GLdouble left, GLdouble right, GLdouble bottom, GLdouble top)
    glOrtho(left, right, bottom, top, 0, 1);   
 
    glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
+   glLoadIdentity();
 }
 
 
@@ -1971,44 +1971,44 @@ void launchUpdater(string bitfighterExecutablePathAndFilename)
    switch(result)
    {
       case 0:
-	      msg = "The operating system is out of memory or resources.";
-	      break;
+         msg = "The operating system is out of memory or resources.";
+         break;
       case ERROR_FILE_NOT_FOUND:
-	      msg = "The specified file was not found (tried " + updaterFileName + ").";
-	      break;
+         msg = "The specified file was not found (tried " + updaterFileName + ").";
+         break;
       case ERROR_PATH_NOT_FOUND:
-	      msg = "The specified path was not found (tried " + updaterFileName + ").";
-	      break;
+         msg = "The specified path was not found (tried " + updaterFileName + ").";
+         break;
       case ERROR_BAD_FORMAT:
-	      msg = "The .exe file is invalid (non-Win32 .exe or error in .exe image --> tried " + updaterFileName + ").";
-	      break;
+         msg = "The .exe file is invalid (non-Win32 .exe or error in .exe image --> tried " + updaterFileName + ").";
+         break;
       case SE_ERR_ACCESSDENIED:
-	      msg = "The operating system denied access to the specified file (tried " + updaterFileName + ").";
-	      break;
+         msg = "The operating system denied access to the specified file (tried " + updaterFileName + ").";
+         break;
       case SE_ERR_ASSOCINCOMPLETE:
-	      msg = "The file name association is incomplete or invalid (tried " + updaterFileName + ").";;
-	      break;
+         msg = "The file name association is incomplete or invalid (tried " + updaterFileName + ").";;
+         break;
       case SE_ERR_DDEBUSY:
-	      msg = "The DDE transaction could not be completed because other DDE transactions were being processed.";
-	      break;
+         msg = "The DDE transaction could not be completed because other DDE transactions were being processed.";
+         break;
       case SE_ERR_DDEFAIL:
-	      msg = "The DDE transaction failed.";
-	      break;
+         msg = "The DDE transaction failed.";
+         break;
       case SE_ERR_DDETIMEOUT:
-	      msg = "The DDE transaction could not be completed because the request timed out.";
-	      break;
+         msg = "The DDE transaction could not be completed because the request timed out.";
+         break;
       case SE_ERR_DLLNOTFOUND:
-	      msg = "The specified DLL was not found.";
-	      break;
+         msg = "The specified DLL was not found.";
+         break;
       case SE_ERR_NOASSOC:
-	      msg = "There is no application associated with the given file name extension.";
-	      break;
+         msg = "There is no application associated with the given file name extension.";
+         break;
       case SE_ERR_OOM:
-	      msg = "There was not enough memory to complete the operation.";
-	      break;
+         msg = "There was not enough memory to complete the operation.";
+         break;
       case SE_ERR_SHARE:
-	      msg = "A sharing violation occurred.";
-	      break;
+         msg = "A sharing violation occurred.";
+         break;
    }
 
    if(msg != "")
@@ -2127,7 +2127,7 @@ int main(int argc, char **argv)
 
       if(gIniSettings.useLineSmoothing)
       {
-	     glEnable(GL_LINE_SMOOTH);
+        glEnable(GL_LINE_SMOOTH);
         //glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
         glEnable(GL_BLEND);
       }

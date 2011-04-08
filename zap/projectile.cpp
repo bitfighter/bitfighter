@@ -274,17 +274,17 @@ void Projectile::idle(GameObject::IdleCallPath path)
             pos = collisionPoint + surfNormal;
             timeLeft = timeLeft * (0.99 - collisionTime);
 
-				MoveObject *obj = dynamic_cast<MoveObject *>(hitObject);
-				if(obj)
-				{
-					setMaskBits(PositionMask);  // Bouncing off a moving objects can easily get desync.
-					float1 = pos.distanceTo(obj->getRenderPos());
-					if(float1 < obj->getRadius())
-					{
-						float1 = obj->getRadius() * 1.01 / float1;
-						pos = pos * float1 + obj->getRenderPos() * (1.0 - float1);  // to fix bouncy stuck inside shielded ship
-					}
-				}
+            MoveObject *obj = dynamic_cast<MoveObject *>(hitObject);
+            if(obj)
+            {
+               setMaskBits(PositionMask);  // Bouncing off a moving objects can easily get desync.
+               float1 = pos.distanceTo(obj->getRenderPos());
+               if(float1 < obj->getRadius())
+               {
+                  float1 = obj->getRadius() * 1.01 / float1;
+                  pos = pos * float1 + obj->getRenderPos() * (1.0 - float1);  // to fix bouncy stuck inside shielded ship
+               }
+            }
 
             if(isGhost())
                SFXObject::play(SFXBounceShield, collisionPoint, surfNormal * surfNormal.dot(velocity) * 2);
