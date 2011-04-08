@@ -131,7 +131,7 @@
 				FavorSizeOrSpeed="1"
 				WholeProgramOptimization="true"
 				AdditionalIncludeDirectories="../tnl;../glut;../openal;&quot;../mysql++&quot;;&quot;C:\Program Files\MySQL\MySQL Server 5.1\include&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;TNL_ENABLE_LOGGING;MYSQLPP_NO_DLL;BF_WRITE_TO_MYSQL;SAM_ONLY"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;TNL_ENABLE_LOGGING;MYSQLPP_NO_DLL;BF_WRITE_TO_MYSQL;SAM_ONLY;_SECURE_SCL=0"
 				RuntimeLibrary="0"
 				EnableEnhancedInstructionSet="2"
 				FloatingPointModel="2"
