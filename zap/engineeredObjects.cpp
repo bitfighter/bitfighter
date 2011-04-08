@@ -862,8 +862,40 @@ TNL_IMPLEMENT_NETOBJECT(Turret);
 // Constructor
 Turret::Turret(S32 team, Point anchorPoint, Point anchorNormal) : EngineeredObject(team, anchorPoint, anchorNormal)
 {
+   mWeaponFireType = WeaponTurret;
    mNetFlags.set(Ghostable);
    setObjectMask();
+}
+
+bool Turret::processArguments(S32 argc2, const char **argv2)
+{
+   S32 argc1 = 0;
+   const char *argv1[128];
+   for(S32 i=0; i<argc2; i++)
+   {
+      char c = argv2[i][0];
+      switch(c)
+      {
+      case 'W':
+			if(argv2[i][1] == '=')
+			{
+				S32 w=0;
+				while(w < WeaponCount && stricmp(gWeapons[w].name.getString(), &argv2[i][2]))
+					w++;
+				if(w < WeaponCount)
+					mWeaponFireType = w;
+				break;
+			}
+      }
+      if((c < 'a' || c > 'z') && (c < 'A' || c > 'Z'))
+      {
+         if(argc1 < 128)
+         {  argv1[argc1] = argv2[i];
+            argc1++;
+         }
+      }
+   }
+	return EngineeredObject::processArguments(argc1, argv1);
 }
 
 
@@ -982,13 +1014,14 @@ void Turret::idle(IdleCallPath path)
 
       // Calculate where we have to shoot to hit this...
       Point Vs = potential->getActualVel();
-      F32 S = gWeapons[WeaponTurret].projVelocity;
+      F32 S = gWeapons[mWeaponFireType].projVelocity;
       Point d = potential->getRenderPos() - aimPos;
 
 // This could possibly be combined with LuaRobot's getFiringSolution, as it's essentially the same thing
       F32 t;      // t is set in next statement
-      if(!FindLowestRootInInterval(Vs.dot(Vs) - S * S, 2 * Vs.dot(d), d.dot(d), gWeapons[WeaponTurret].projLiveTime * 0.001f, t))
-         continue;
+      if(!FindLowestRootInInterval(Vs.dot(Vs) - S * S, 2 * Vs.dot(d), d.dot(d), gWeapons[mWeaponFireType].projLiveTime * 0.001f, t))
+		   if(gWeapons[mWeaponFireType].projLiveTime >= 0)
+            continue;
 
       Point leadPos = potential->getRenderPos() + Vs * t;
 
@@ -1010,7 +1043,7 @@ void Turret::idle(IdleCallPath path)
       // See if we're gonna clobber our own stuff...
       disableCollision();
       Point delta2 = delta;
-      delta2.normalize(gWeapons[WeaponTurret].projLiveTime * gWeapons[WeaponTurret].projVelocity / 1000);
+      delta2.normalize(gWeapons[mWeaponFireType].projLiveTime * gWeapons[mWeaponFireType].projVelocity / 1000);
       GameObject *hitObject = findObjectLOS(ShipType | RobotType | BarrierType | EngineeredType, 0, aimPos, aimPos + delta2, t, n);
       enableCollision();
 
@@ -1063,8 +1096,8 @@ void Turret::idle(IdleCallPath path)
          string killer = string("got blasted by ") + getGame()->getGameType()->getTeamName(mTeam).getString() + " turret";
          mKillString = killer.c_str();
 
-         createWeaponProjectiles(WeaponTurret, bestDelta, aimPos, velocity, 35.0f, this);
-         mFireTimer.reset(gWeapons[WeaponTurret].fireDelay);
+			createWeaponProjectiles(WeaponType(mWeaponFireType), bestDelta, aimPos, velocity, mWeaponFireType == WeaponBurst ? 45.f : 35.f, this);
+         mFireTimer.reset(gWeapons[mWeaponFireType].fireDelay);
       }
    }
 }

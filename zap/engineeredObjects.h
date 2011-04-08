@@ -61,7 +61,7 @@ protected:
 
 public:
    EngineeredObject(S32 team = -1, Point anchorPoint = Point(), Point anchorNormal = Point());
-   bool processArguments(S32 argc, const char **argv);
+   virtual bool processArguments(S32 argc, const char **argv);
 
    static const S32 MAX_SNAP_DISTANCE = 100;    // Max distance to look for a mount point
 
@@ -206,6 +206,9 @@ private:
    void setObjectMask() { mObjectTypeMask = TurretType | CommandMapVisType; }
 
 public:
+   S32 mWeaponFireType;
+   bool processArguments(S32 argc, const char **argv);
+
    static const S32 defaultRespawnTime = 0;
 
    static const S32 TURRET_OFFSET = 15;   // Distance of the turret's render location from it's attachment location
