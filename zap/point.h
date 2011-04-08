@@ -110,7 +110,8 @@ struct Color
 
    Color(const Color &c) { r = c.r; g = c.g; b = c.b; }
    Color(float red, float green, float blue) { r = red; g = green; b = blue; }
-   Color(float grayScale = 1) { r = grayScale; g = grayScale; b = grayScale; }
+   Color(float grayScale = 1) { r = grayScale;      g = grayScale;      b = grayScale; }
+   Color(double grayScale)    { r = (F32)grayScale; g = (F32)grayScale; b = (F32)grayScale; }
 
    Color(U32 rgbInt) { r = F32(U8(rgbInt)) / 255.0f; 
                        g = F32(U8(rgbInt >> 8)) / 255.0f; 

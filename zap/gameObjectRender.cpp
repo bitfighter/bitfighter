@@ -54,6 +54,70 @@ void glVertex(const Point &p)
    glVertex2f(p.x, p.y);
 }
 
+
+void  glScale(F32 scaleFactor)
+{
+    glScalef(scaleFactor, scaleFactor, 1);
+}
+
+
+void glTranslate(const Point &pos)
+{
+   glTranslatef(pos.x, pos.y, 0);
+}
+
+
+static Color green(0,1,0);
+static Color red(1,0,0);
+static Color yellow(1,1,0);
+static Color blue(0,0,1);
+static Color white(1,1,1);
+static Color gray50(0.5);
+static Color cyan(0,1,1);
+static Color orange(1, .67 ,0);
+
+
+// geomType should be GL_LINES or GL_POLYGON
+static void renderPointVector(const Vector<Point> &points, U32 geomType)
+{
+   glEnableClientState(GL_VERTEX_ARRAY);
+
+   glVertexPointer(2, GL_FLOAT, sizeof(Point), points.address());    
+   glDrawArrays(geomType, 0, points.size());
+
+   glDisableClientState(GL_VERTEX_ARRAY);
+
+   // Equivalent to, but amost twice as fast as:
+
+   //glBegin(GL_LINE_LOOP);
+   //   for(S32 i = 0; i < points.size(); i++)
+   //      glVertex2f(points[i].x, points[i].y);
+   //glEnd();
+}
+
+
+static void renderVertexArray(const S16 verts[], S32 vertCount, S32 geomType)
+{
+   glEnableClientState(GL_VERTEX_ARRAY);
+
+   glVertexPointer(2, GL_SHORT, 0, verts);    
+   glDrawArrays(geomType, 0, vertCount);
+
+   glDisableClientState(GL_VERTEX_ARRAY);
+}
+
+
+static void renderVertexArray(const F32 verts[], S32 vertCount, S32 geomType)
+{
+   glEnableClientState(GL_VERTEX_ARRAY);
+
+   glVertexPointer(2, GL_FLOAT, 0, verts);    
+   glDrawArrays(geomType, 0, vertCount);
+
+   glDisableClientState(GL_VERTEX_ARRAY);
+}
+
+
 // Draw arc centered on pos, with given radius, from startAngle to endAngle.  0 is East, increasing CW
 void drawArc(const Point &pos, F32 radius, F32 startAngle, F32 endAngle)
 {
@@ -271,20 +335,12 @@ void renderShip(const Color &c, F32 alpha, F32 thrusts[], F32 health, F32 radius
 
    // Then render the ship:
    // flameports...
-   glColor4f(0.5,0.5,0.5, alpha);
-   glBegin(GL_LINES);
-      glVertex2f(-12.5, 0);
-      glVertex2f(-12.5, 10);
-      glVertex2f(-12.5, 10);
-      glVertex2f(-7.5, 10);
-      glVertex2f(7.5, 10);
-      glVertex2f(12.5, 10);
-      glVertex2f(12.5, 10);
-      glVertex2f(12.5, 0);
-   glEnd();
+   glColor(gray50, alpha);
+   static F32 flamePortPoints[] = { -12.5,0, -12.5,10,  -12.5,10, -7.5,10,  7.5,10, 12.5,10,  12.5,10, 12.5,0 };
+   renderVertexArray(flamePortPoints, ARRAYSIZE(flamePortPoints) / 2, GL_LINES);
 
    // colored insides
-   glColor4f(c.r,c.g,c.b, alpha);
+   glColor(c, alpha);
    glBegin(GL_LINE_LOOP);
       glVertex2f(-12, -13);
       glVertex2f(0, 22);
@@ -340,7 +396,7 @@ void renderShip(const Color &c, F32 alpha, F32 thrusts[], F32 health, F32 radius
    {
       glColor4f(1,1,1,alpha);
       F32 radius = (sensorTime & 0x1FF) * 0.002;
-      drawCircle(Point(), radius * Ship::CollisionRadius + 4);
+      drawCircle(0, 0, radius * Ship::CollisionRadius + 4);
    }
    
    if(alpha != 1.0)
@@ -491,7 +547,7 @@ void renderTeleporter(const Point &pos, U32 type, bool in, S32 time, F32 radiusF
 
    glDisable(GL_POLYGON_SMOOTH);
 
-   glTranslatef(pos.x, pos.y, 0);
+   glTranslate(pos);
 
    F32 arcTime = 0.5 + (1 - radiusFraction) * 0.5;
    if(!in)
@@ -537,6 +593,7 @@ void renderTeleporter(const Point &pos, U32 type, bool in, S32 time, F32 radiusF
 
          glVertex(start * (startRadius + beamWidth * 0.3) + n * 2);
          glVertex(start * (startRadius - beamWidth * 0.3) + n * 2);
+
          for(U32 j = 0; j <= vertexCount; j++)
          {
             F32 frac = j / F32(vertexCount);
@@ -623,41 +680,15 @@ static void drawFlag(const Color &flagColor, const Color *mastColor, F32 alpha)
 {
    glColor(flagColor, alpha);
 
-   /*
-   glEnable(GL_TEXTURE_2D);
-   setGLTex(0);
-   glBegin(GL_QUADS);
-      glTexCoord2f(0,0);
-      glVertex2f(-15, -15);
-      glTexCoord2f(1,0);
-      glVertex2f(15, -15);
-      glTexCoord2f(1,1);
-      glVertex2f(15, 15);
-      glTexCoord2f(0,1);
-      glVertex2f(-15, 15);
-   glEnd();
-   glDisable(GL_TEXTURE_2D);
-   return;
-   */
+   // First, the flag itself
+   static F32 flagPoints[] = { -15,-15, 15,-5,  15,-5, -15,5,  -15,-10, 10,-5,  10,-5, -15,0 };
+   renderVertexArray(flagPoints, ARRAYSIZE(flagPoints) / 2, GL_LINES);
+
+
+   // Now the flag's mast
+   glColor(mastColor != NULL ? *mastColor : white, alpha);
 
    glBegin(GL_LINES);
-
-      // First, the flag itself
-      glVertex2f(-15, -15);
-      glVertex2f(15, -5);
-
-      glVertex2f(15, -5);
-      glVertex2f(-15, 5);
-
-      glVertex2f(-15, -10);
-      glVertex2f(10, -5);
-
-      glVertex2f(10, -5);
-      glVertex2f(-15, 0);
-
-      // Now the flag's mast
-      glColor(mastColor != NULL ? *mastColor : Color(1,1,1), alpha);
-
       glVertex2f(-15, -15);
       glVertex2f(-15, 15);
    glEnd();
@@ -681,8 +712,6 @@ void renderFlag(const Point &pos, const Color &flagColor, const Color *mastColor
 }
 
 
-// Could be eliminated with by using an optional param for mastColor, but
-// this seems to cause problems with our extern statements...
 void renderFlag(const Point &pos, const Color &flagColor)
 {
    renderFlag(pos.x, pos.y, flagColor, NULL, 1);
@@ -693,7 +722,6 @@ void renderFlag(F32 x, F32 y, const Color &flagColor)
 {
    renderFlag(x, y, flagColor, NULL, 1);
 }
-
 
 
 // Not used
@@ -713,29 +741,29 @@ void renderFlag(F32 x, F32 y, const Color &flagColor)
 
 void renderSmallFlag(const Point &pos, const Color &c, F32 parentAlpha)
 {
-   F32 alpha = 0.75;
+   F32 alpha = 0.75 * parentAlpha;
    glEnableBlend;
    glPushMatrix();
-   glTranslatef(pos.x, pos.y, 0);
-   glScalef(0.2, 0.2, 1);
+      glTranslate(pos);
+      glScale(0.2);
 
-   glColor(c, alpha * parentAlpha);
+      glColor(c, alpha);
       glBegin(GL_LINES);
-      glVertex2f(-15, -15);
-      glVertex2f(15, -5);
+         glVertex2f(-15, -15);
+         glVertex2f(15, -5);
 
-      glVertex2f(15, -5);
-      glVertex2f(-15, 5);
+         glVertex2f(15, -5);
+         glVertex2f(-15, 5);
 
-      //glVertex2f(-15, -10);
-      //glVertex2f(10, -5);
+         //glVertex2f(-15, -10);
+         //glVertex2f(10, -5);
 
-      //glVertex2f(10, -5);
-      //glVertex2f(-15, 0);
-      glColor4f(1, 1, 1, alpha * parentAlpha);
-      glVertex2f(-15, -15);
-      glVertex2f(-15, 15);
-   glEnd();
+         //glVertex2f(10, -5);
+         //glVertex2f(-15, 0);
+         glColor(white, alpha);
+         glVertex2f(-15, -15);
+         glVertex2f(-15, 15);
+      glEnd();
    glPopMatrix();
    glDisableBlend;
 }
@@ -757,30 +785,11 @@ void renderCenteredString(const Point &pos, F32 size, const char *string)
 void renderPolygonLabel(const Point &centroid, F32 angle, F32 size, const char *text, F32 scaleFact)
 {
    glPushMatrix();
-      glScalef(scaleFact, scaleFact, 0);
-      glTranslatef(centroid.x, centroid.y, 0);
+      glScale(scaleFact);
+      glTranslate(centroid);
       glRotatef(angle * 360 / Float2Pi, 0, 0, 1);
       renderCenteredString(Point(0,0), size,  text);
    glPopMatrix();
-}
-
-
-// geomType should be GL_LINES or GL_POLYGON
-static void renderPointVector(const Vector<Point> &points, U32 geomType)
-{
-   glEnableClientState(GL_VERTEX_ARRAY);
-
-   glVertexPointer(2, GL_FLOAT, sizeof(Point), points.address());    
-   glDrawArrays(geomType, 0, points.size());
-
-   glDisableClientState(GL_VERTEX_ARRAY);
-
-   // Equivalent to, but amost twice as fast as:
-
-   //glBegin(GL_LINE_LOOP);
-   //   for(S32 i = 0; i < points.size(); i++)
-   //      glVertex2f(points[i].x, points[i].y);
-   //glEnd();
 }
 
 
@@ -799,19 +808,27 @@ void renderPolygonOutline(const Vector<Point> &outline)
 
 void renderPolygonOutline(const Vector<Point> &outlinePoints, const Color &outlineColor, F32 alpha = 1)
 {
-   glEnableBlend;
+   if(alpha != 1)
+      glEnableBlend;
+
    glColor(outlineColor, alpha);
    renderPolygonOutline(outlinePoints);
-   glDisableBlend;
+
+   if(alpha != 1)
+      glDisableBlend;
 }
 
 
 void renderPolygonFill(const Vector<Point> &fillPoints, const Color &fillColor, F32 alpha = 1)
 {
-   glEnableBlend;
+   if(alpha != 1)
+      glEnableBlend;
+
    glColor(fillColor, alpha);
    renderTriangulatedPolygonFill(fillPoints);
-   glDisableBlend;
+
+   if(alpha != 1)
+      glDisableBlend;
 }
 
 
@@ -830,11 +847,6 @@ void renderLoadoutZone(Color color, const Vector<Point> &outline, const Vector<P
    renderPolygonLabel(centroid, labelAngle, 25, "LOADOUT ZONE", scaleFact);
 }
 
-
-static Color green(0,1,0);
-static Color red(1,0,0);
-static Color yellow(1,1,0);
-static Color blue(0,0,1);
 
 void renderNavMeshZone(const Vector<Point> &outline, const Vector<Point> &fill, const Point &centroid, S32 zoneId, bool isConvex, bool isSelected)
 {
@@ -856,7 +868,8 @@ void renderNavMeshZone(const Vector<Point> &outline, const Vector<Point> &fill, 
 
 void renderNavMeshBorder(const Border &border, F32 scaleFact, const Color &color, F32 fillAlpha, F32 width)
 {
-   glEnableBlend;
+   if(fillAlpha != 1)
+      glDisableBlend;
 
    for(S32 j = 1; j >= 0; j--)
    {
@@ -864,7 +877,8 @@ void renderNavMeshBorder(const Border &border, F32 scaleFact, const Color &color
       renderTwoPointPolygon(border.borderStart, border.borderEnd, width * scaleFact, j ? GL_POLYGON : GL_LINE_LOOP);
    }
 
-   glDisableBlend;
+   if(fillAlpha != 1)
+      glDisableBlend;
 }
 
 
@@ -908,10 +922,8 @@ void renderGoalZone(Color c, const Vector<Point> &outline, const Vector<Point> &
 {
    F32 alpha = isFlashing ? 0.75 : 0.5;
 
-   Color h(1,1,0);      // Yellow highlight
-
-   Color fillColor = Color(h * (glowFraction * glowFraction) + c * alpha * (1 - glowFraction * glowFraction));
-   Color outlineColor = Color(h * (glowFraction * glowFraction) + c * (1 - glowFraction * glowFraction));
+   Color fillColor    = Color(yellow * (glowFraction * glowFraction) + c * alpha * (1 - glowFraction * glowFraction));
+   Color outlineColor = Color(yellow * (glowFraction * glowFraction) + c *         (1 - glowFraction * glowFraction));
 
    renderPolygon(fill, outline, fillColor, outlineColor);
 
@@ -928,7 +940,7 @@ void renderNexus(const Vector<Point> &outline, const Vector<Point> &fill, Point 
    Color c;
 
    if(open)
-      c.interp(glowFraction, Color(1,1,0), gNexusOpenColor);
+      c.interp(glowFraction, yellow, gNexusOpenColor);
    else
       c = gNexusClosedColor;
 
@@ -955,11 +967,13 @@ void renderSlipZone(const Vector<Point> &bounds, const Vector<Point> &boundsFill
    Point center = extent.getCenter();
 
    glPushMatrix();
-   glTranslatef(center.x, center.y, 0);
-   if(extents.x < extents.y)
-      glRotatef(90, 0, 0, 1);
-   glColor3f(0,1.0,10.);
-   renderCenteredString(Point(0,0), 25, "CAUTION - SLIPPERY!");
+      glTranslate(center);
+
+      if(extents.x < extents.y)
+         glRotatef(90, 0, 0, 1);
+
+      glColor(cyan);
+      renderCenteredString(Point(0,0), 25, "CAUTION - SLIPPERY!");
    glPopMatrix();
 }
 
@@ -970,42 +984,26 @@ void renderProjectile(const Point &pos, U32 type, U32 time)
 
    S32 bultype = 1;
 
-   if (bultype==1) { // Default stars
-
+   if(bultype == 1)    // Default stars
+   { 
       glColor(pi->projColors[0]);
       glPushMatrix();
-      glTranslatef(pos.x, pos.y, 0);
-      glScalef(pi->scaleFactor, pi->scaleFactor, 1);
+         glTranslate(pos);
+         glScale(pi->scaleFactor);
 
-      glPushMatrix();
+         glPushMatrix();
+            glRotatef((time % 720) * 0.5, 0, 0, 1);
 
-      glRotatef((time % 720) * 0.5, 0, 0, 1);
+            static S16 projectilePoints1[] = { -2,2,  0,6,  2,2,  6,0,  2,-2,  0,-6,  -2,-2,  -6,0 };
+            renderVertexArray(projectilePoints1, ARRAYSIZE(projectilePoints1) / 2, GL_LINE_LOOP);
 
-      glBegin(GL_LINE_LOOP);
-      glVertex2f(-2, 2);
-      glVertex2f(0, 6);
-      glVertex2f(2, 2);
-      glVertex2f(6, 0);
-      glVertex2f(2, -2);
-      glVertex2f(0, -6);
-      glVertex2f(-2, -2);
-      glVertex2f(-6, 0);
-      glEnd();
+         glPopMatrix();
 
-      glPopMatrix();
+         glRotatef(180 - (time % 360), 0, 0, 1);
+         glColor(pi->projColors[1]);
 
-      glRotatef(180 - (time % 360), 0, 0, 1);
-      glColor(pi->projColors[1]);
-      glBegin(GL_LINE_LOOP);
-         glVertex2f(-2, 2);
-         glVertex2f(0, 8);
-         glVertex2f(2, 2);
-         glVertex2f(8, 0);
-         glVertex2f(2, -2);
-         glVertex2f(0, -8);
-         glVertex2f(-2, -2);
-         glVertex2f(-8, 0);
-      glEnd();
+         static S16 projectilePoints2[] = { -2,2,  0,8,  2,2,  8,0,  2,-2,  0,-8, -2,-2,  -8,0 };
+         renderVertexArray(projectilePoints2, ARRAYSIZE(projectilePoints2) / 2, GL_LINE_LOOP);
 
       glPopMatrix();
 
@@ -1013,19 +1011,16 @@ void renderProjectile(const Point &pos, U32 type, U32 time)
 
       glColor(pi->projColors[0]);
       glPushMatrix();
-      glTranslatef(pos.x, pos.y, 0);
-      glScalef(pi->scaleFactor, pi->scaleFactor, 1);
+      glTranslate(pos);
+      glScale(pi->scaleFactor);
 
       glPushMatrix();
 
       glRotatef((time % 720), 0, 0, 1);
       glColor(pi->projColors[1]);
-      glBegin(GL_LINE_LOOP);
-         glVertex2f(-2, 2);
-         glVertex2f(2, 2);
-         glVertex2f(2, -2);
-         glVertex2f(-2, -2);
-      glEnd();
+
+      static S16 projectilePoints3[] = { -2,2,  2,2,  2,-2,  -2,-2 };
+      renderVertexArray(projectilePoints3, ARRAYSIZE(projectilePoints3) / 2, GL_LINE_LOOP);
 
       glPopMatrix();
 
@@ -1067,7 +1062,7 @@ void renderMine(const Point &pos, bool armed, bool visible)
    F32 vis = .25;
    if(visible)
    {
-      glColor3f(0.5, 0.5, 0.5);
+      glColor(gray50);
       drawCircle(pos, Mine::SensorRadius);
       mod = 0.8;
       vis = 1.0;
@@ -1104,7 +1099,7 @@ void renderMine(const Point &pos, bool armed, bool visible)
 // 5 = normal rendering
 void renderGrenade(const Point &pos, F32 lifeLeft)
 {
-   glColor3f(1,1,1);
+   glColor(white);
    drawCircle(pos, 10);
 
    bool innerVis = true;
@@ -1131,7 +1126,7 @@ void renderGrenade(const Point &pos, F32 lifeLeft)
    if(gIniSettings.burstGraphicsMode == 1 || gIniSettings.burstGraphicsMode == 3)
       glColor3f(1, min(1.25 - lifeLeft, 1), 0);
    else
-      glColor3f(1, 0, 0);
+      glColor(red);
 
    // if(innerVis)
    if((innerVis && (gIniSettings.burstGraphicsMode == 1 || gIniSettings.burstGraphicsMode == 2)) || gIniSettings.burstGraphicsMode == 3 || gIniSettings.burstGraphicsMode == 4 )
@@ -1208,7 +1203,7 @@ void renderSpyBug(const Point &pos, bool visible)
 
    if(visible)
    {
-      glColor3f(0.5,0.5,0.5);
+      glColor(gray50);
       drawCircle(pos, 15);
       mod = 1.0;
       UserInterface::drawString(pos.x - 5, pos.y - 5, 10, "S");
@@ -1249,9 +1244,9 @@ void renderRepairItem(const Point &pos, bool forEditor, const Color *overrideCol
    }
 
    glPushMatrix();
-   glTranslatef(pos.x, pos.y, 0);
+   glTranslate(pos);
 
-   glColor(overrideColor == NULL ? Color(1,1,1) : *overrideColor, alpha);
+   glColor(overrideColor == NULL ? white : *overrideColor, alpha);
    glBegin(GL_LINE_LOOP);
       glVertex2f(-size , -size );
       glVertex2f(size , -size );
@@ -1259,7 +1254,7 @@ void renderRepairItem(const Point &pos, bool forEditor, const Color *overrideCol
       glVertex2f(-size , size );
    glEnd();
 
-   glColor(overrideColor == NULL ? Color(1,0,0) : *overrideColor, alpha);
+   glColor(overrideColor == NULL ? red : *overrideColor, alpha);
    glBegin(GL_LINE_LOOP);
       glVertex2f(crossWidth, crossWidth);
       glVertex2f(crossLen, crossWidth);
@@ -1292,18 +1287,18 @@ void renderEnergyGuage(S32 energy, S32 maxEnergy, S32 cooldownThreshold)
 
    // Guage fill
    glBegin(GL_POLYGON);
-      glColor3f(0, 0, 1);
+      glColor(blue);
       glVertex2f(UserInterface::horizMargin, canvasHeight - UserInterface::vertMargin - GUAGE_HEIGHT);
       glVertex2f(UserInterface::horizMargin, canvasHeight - UserInterface::vertMargin);
 
-      glColor3f(0, 1, 1);
+      glColor(cyan);
       glVertex2f(UserInterface::horizMargin + full, canvasHeight - UserInterface::vertMargin);
       glVertex2f(UserInterface::horizMargin + full, canvasHeight - UserInterface::vertMargin - GUAGE_HEIGHT);
    glEnd();
 
    // Guage outline
    glBegin(GL_LINES);
-      glColor3f(1, 1 ,1);
+      glColor(white);
       glVertex2f(UserInterface::horizMargin, canvasHeight - UserInterface::vertMargin - GUAGE_HEIGHT);
       glVertex2f(UserInterface::horizMargin, canvasHeight - UserInterface::vertMargin);
       glVertex2f(UserInterface::horizMargin + GAUGE_WIDTH, canvasHeight - UserInterface::vertMargin - GUAGE_HEIGHT);
@@ -1312,7 +1307,7 @@ void renderEnergyGuage(S32 energy, S32 maxEnergy, S32 cooldownThreshold)
       // Show safety line
       F32 cutoffx = (cooldownThreshold * GAUGE_WIDTH) / maxEnergy;
 
-      glColor3f(1, 1, 0);
+      glColor(yellow);
       glVertex2f(UserInterface::horizMargin + cutoffx, canvasHeight - UserInterface::vertMargin - 23);
       glVertex2f(UserInterface::horizMargin + cutoffx, canvasHeight - UserInterface::vertMargin + 4);
    glEnd();
@@ -1323,27 +1318,23 @@ void renderEnergyGuage(S32 energy, S32 maxEnergy, S32 cooldownThreshold)
 void renderEnergySymbol(const Color *overrideColor, F32 alpha)
 {
    // Yellow lightning bolt
-   glColor(overrideColor == NULL ? Color(1,1,0) : *overrideColor, alpha);
-   glBegin(GL_LINE_LOOP);
-      glVertex2f( 20, -20);
-      glVertex2f(  3,  -2);
-      glVertex2f( 12,   5);
-      glVertex2f(-20,  20);
-      glVertex2f( -2,   3);
-      glVertex2f(-12,  -5); 
-   glEnd();
+   glColor(overrideColor == NULL ? yellow : *overrideColor, alpha);
+
+   static S16 energySymbolPoints[] = { 20,-20,  3,-2,  12,5,  -20,20,  -2,3,  -12,-5 };
+   renderVertexArray(energySymbolPoints, ARRAYSIZE(energySymbolPoints) / 2, GL_LINE_LOOP);
 
    // Orangey circle
    glLineWidth(gLineWidth3);
-   glColor(overrideColor == 0 ? Color(1, .67 ,0) : *overrideColor, alpha);
+   glColor(overrideColor == 0 ? orange : *overrideColor, alpha);
    glLineWidth(gDefaultLineWidth);
 }
+
 
 void renderEnergySymbol(const Point &pos, F32 scaleFactor)
 {
    glPushMatrix();
-      glTranslatef(pos.x, pos.y, 0);
-      glScalef(scaleFactor, scaleFactor, 1);
+      glTranslate(pos);
+      glScale(scaleFactor);
       renderEnergySymbol(0, 1);
    glPopMatrix();
 }
@@ -1354,8 +1345,8 @@ void renderEnergyItem(const Point &pos, bool forEditor, const Color *overrideCol
    F32 scaleFactor = forEditor ? .45 : 1;    // Resize for editor
 
    glPushMatrix();
-      glTranslatef(pos.x, pos.y, 0);
-      glScalef(scaleFactor, scaleFactor, 1);
+      glTranslate(pos);
+      glScale(scaleFactor);
 
       renderEnergySymbol(overrideColor, alpha);
 
@@ -1407,7 +1398,7 @@ void renderSpeedZone(const Vector<Point> &points, U32 time)
 void renderTestItem(const Point &pos, F32 alpha)
 {
    glPushMatrix();
-   glTranslatef(pos.x, pos.y, 0);
+   glTranslate(pos);
 
    glColor4f(1, 1, 0, alpha);
    drawPolygon(Point(0,0), 7, 60, 0);
@@ -1418,7 +1409,7 @@ void renderTestItem(const Point &pos, F32 alpha)
 void renderWorm(const Point &pos)
 {
    glPushMatrix();
-   glTranslatef(pos.x, pos.y, 0);
+   glTranslate(pos);
 
    F32 size = (F32)Worm::WORM_RADIUS * .5;
 
@@ -1436,7 +1427,7 @@ void renderWorm(const Point &pos)
 void renderAsteroid(const Point &pos, S32 design, F32 scaleFact, const Color *color, F32 alpha)
 {
    glPushMatrix();
-   glTranslatef(pos.x, pos.y, 0);
+   glTranslate(pos);
 
    glColor(color ? *color : Color(.7, .7, .7), alpha);
       // Design 1
@@ -1461,21 +1452,12 @@ void renderAsteroid(const Point &pos, S32 design, F32 scaleFact)
 void renderResourceItem(const Point &pos, F32 scaleFactor, const Color *color, F32 alpha)
 {
    glPushMatrix();
-      glTranslatef(pos.x, pos.y, 0);
+      glTranslate(pos);
+      glScale(scaleFactor);
+      glColor(color == NULL ? white : *color, alpha);
 
-      glColor(color == NULL ? Color(1, 1, 1) : *color, alpha);
-
-      glBegin(GL_LINE_LOOP);
-         glVertex2f(-8 * scaleFactor, 8 * scaleFactor);
-         glVertex2f(0, 20 * scaleFactor);
-         glVertex2f(8 * scaleFactor, 8 * scaleFactor);
-         glVertex2f(20 * scaleFactor, 0);
-         glVertex2f(8 * scaleFactor, -8 * scaleFactor);
-         glVertex2f(0, -20 * scaleFactor);
-         glVertex2f(-8 * scaleFactor, -8 * scaleFactor);
-         glVertex2f(-20 * scaleFactor, 0);
-      glEnd();
-
+      static F32 resourcePoints[] = { -8,8,  0,20,  8,8,  20,0,  8,-8,  0,-20,  -8,-8,  -20,0 };
+      renderVertexArray(resourcePoints, ARRAYSIZE(resourcePoints) / 2, GL_LINE_LOOP);
    glPopMatrix();
 }
 
@@ -1497,14 +1479,14 @@ void renderTextItem(const Point &pos, Point dir, U32 size, S32 team, string text
 {
    if(text == "Bitfighter")
    {
-      glColor3f(0,1,0);
+      glColor(green);
       // All factors in here determined experimentally, seem to work at a variety of sizes and approximate the width and height
       // of ordinary text in cases tested.  What should happen is the Bitfighter logo should, as closely as possible, match the 
       // size and extent of the text "Bitfighter".
       F32 scaleFactor = size / 129.0f;
       glPushMatrix();
-      glTranslatef(pos.x, pos.y, 0);
-         glScalef(scaleFactor, scaleFactor, 1);
+      glTranslate(pos);
+         glScale(scaleFactor);
                   
       glRotatef(pos.angleTo(dir) * radiansToDegreesConversion, 0, 0, 1);
 
@@ -1535,23 +1517,6 @@ void renderTextItem(const Point &pos, Point dir, U32 size, S32 team, string text
 
 void renderForceFieldProjector(Point pos, Point normal, Color c, bool enabled)
 {
-   // Make sure colors are dark enough to be visible  but goes to gray 
-   //if(c.r < 0.7)   c.r = 0.7;
-   //if(c.g < 0.7)   c.g = 0.7;
-   //if(c.b < 0.7)   c.b = 0.7;
-
-/*
-K's idea:
-New idea.  Determine the color spectrum that looks good.  Maybe the old default maximum values, and minimum values where we can still distinguish color.  Then calibrate color selection to use our new minimums as "zero" levels.  For example, in the older release, I see the threshold for each value being at about 60.  You can distinguish colors at lower values, but at a glance they just appear gray.  Try loading the level code below in an old version, then adjust the team colors down to 55 to see the difference.  I say we make the new possible color range whatever the old range was from 60-100.
-*/
-
-   // Make sure colors are bright enough to be visible  --> didn't work
-//   if((c.r < 0.6) && (c.g < 0.6) && (c.b < 0.6))
-//   {
-//      c.r += .15;
-//      c.g += .15;
-//      c.b += .15;
-//   }
    F32 ForceFieldBrightnessProjector = 0.50;
 
    c = c * (1.0 - ForceFieldBrightnessProjector) + ForceFieldBrightnessProjector;
@@ -1566,20 +1531,6 @@ New idea.  Determine the color spectrum that looks good.  Maybe the old default 
 
 void renderForceField(Point start, Point end, Color c, bool fieldUp, F32 scaleFact)
 {
-   // Make sure colors are dark enough to be visible, goes to gray with dark colors
-   //if(c.r < 0.5)   c.r = 0.5;
-   //if(c.g < 0.5)   c.g = 0.5;
-   //if(c.b < 0.5)   c.b = 0.5;
-
-// Tried this, was lame
-   // Make sure colors are bright enough to be visible
-//   if((c.r < 0.6) && (c.g < 0.6) && (c.b < 0.6))
-//  {
-//      c.r += .15;
-//      c.g += .15;
-//      c.b += .15;
-//   }
-
    Vector<Point> geom;
    ForceField::getGeom(start, end, geom, scaleFact);
 
@@ -1761,7 +1712,7 @@ void renderBitfighterLogo(S32 yPos, F32 scale, U32 mask)
 
    glPushMatrix();
       glTranslatef((gScreenInfo.getGameCanvasWidth() - 3609 * fact) / 2, yPos - 594 * fact / 2, 0);
-      glScalef(fact, fact, 0);                   // Scale it down...
+      glScale(fact);                   // Scale it down...
       renderBitfighterLogo(mask);
    glPopMatrix();
 }
@@ -1813,14 +1764,20 @@ void drawFilledSquare(const Point &pos, F32 size)
 }
 
 
-void drawCircle(const Point &pos, F32 radius)
+void drawCircle(F32 x, F32 y, F32 radius)
 {
     glBegin(GL_LINE_LOOP);
     
     for(F32 theta = 0; theta < Float2Pi; theta += 0.2)
-        glVertex2f(pos.x + cos(theta) * radius, pos.y + sin(theta) * radius);
+        glVertex2f(x + cos(theta) * radius, y + sin(theta) * radius);
     
     glEnd();
+}
+
+
+void drawCircle(const Point &pos, F32 radius)
+{
+   drawCircle(pos.x, pos.y, radius);
 }
 
 

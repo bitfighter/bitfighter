@@ -410,8 +410,8 @@ void InstructionsUserInterface::renderPage2()
 
                renderShip(Color(0, 0, 1), 1, thrusts, health, Ship::CollisionRadius, 0, false, false, false, false);
                glLineWidth(gLineWidth3);
-               glColor3f(1,0, 0);
-               drawCircle(Point(0, 0), Ship::RepairDisplayRadius);
+               glColor3f(1, 0, 0);
+               drawCircle(0, 0, Ship::RepairDisplayRadius);
                glLineWidth(gDefaultLineWidth);
             }
             break;

@@ -59,6 +59,8 @@ extern void drawFilledSquare(const Point &pos, U32 size);
 extern void drawFilledSquare(const Point &pos, S32 size);
 extern void drawFilledSquare(const Point &pos, F32 size);
 extern void drawCircle(const Point &pos, F32 radius);
+extern void drawCircle(F32 x, F32 y, F32 radius);
+
 
 
 //////////

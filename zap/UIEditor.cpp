@@ -2429,7 +2429,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
                renderFlag(0, 0, c, hideit ? &grayedOutColorDim : NULL, alpha);
 
                glColor(hideit ? grayedOutColorDim : white, alpha);
-               drawCircle(Point(-4,0), 26);
+               drawCircle(-4, 0, 26);
             glPopMatrix();
          }
       }
@@ -2447,7 +2447,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
                renderAsteroid(Point(0,0), asteroidDesign, .1, hideit ? &grayedOutColorDim : NULL, alpha);
 
                glColor(hideit ? grayedOutColorDim : white, alpha);
-               drawCircle(Point(0, 0), 13);
+               drawCircle(0, 0, 13);
             glPopMatrix();
          }
       }
