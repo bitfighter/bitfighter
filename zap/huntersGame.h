@@ -66,7 +66,7 @@ public:
    // Info about this game type:
    bool isTeamGame() { return mTeams.size() > 1; }
    bool isFlagGame() { return true; }         // Well, technically not, but we'll morph flags to our own uses as we load the level
-   //bool isTeamFlagGame() { return true; }   // Ditto... team info will be ignored... no need to show warning in editor
+   bool isTeamFlagGame() { return false; }   // Ditto... team info will be ignored... no need to show warning in editor
 
    bool isSpawnWithLoadoutGame() { return true; }
 
