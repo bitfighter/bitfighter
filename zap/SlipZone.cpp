@@ -44,7 +44,7 @@ SlipZone::SlipZone()     // Constructor
    mTeam = 0;
    mNetFlags.set(Ghostable);
    mObjectTypeMask = SlipZoneType | CommandMapVisType;
-	slipAmount = 0.1;
+   slipAmount = 0.1;
 }
 
 
@@ -85,14 +85,14 @@ bool SlipZone::processArguments(S32 argc2, const char **argv2)
    if(argc < 6)
       return false;
 
-	if(argc & 1) // odd number of arg count (7,9,11) to allow optional slipAmount arg
-	{
-		slipAmount = atof(argv[0]);
+   if(argc & 1) // odd number of arg count (7,9,11) to allow optional slipAmount arg
+   {
+      slipAmount = atof(argv[0]);
       processPolyBounds(argc-1, argv+1, 0, getGame()->getGridSize());
-	}else // even number of arg count (6,8,10)
-	{
+   }else // even number of arg count (6,8,10)
+   {
       processPolyBounds(argc, argv, 0, getGame()->getGridSize());
-	}
+   }
    computeExtent();
 
    /*for(S32 i = 1; i < argc; i += 2)
