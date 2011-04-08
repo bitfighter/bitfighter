@@ -2383,7 +2383,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
                //   renderPolygon(item.fillPoints, item.getVerts(), gIniSettings.wallFillColor, gIniSettings.wallOutlineColor, 1);
 
                // If item is selected, and we're not in preview mode, draw a border highlight
-               if(!mShowingReferenceShip && (item.selected || item.litUp))
+               if(!mShowingReferenceShip && (item.selected || item.litUp || (mDraggingObjects && item.anyVertsSelected())))
                {        
                   glColor(hideit ? grayedOutColorBright : drawColor, alpha);
                   glLineWidth(gLineWidth3);  
@@ -5282,7 +5282,7 @@ void WorldItem::initializeGeom()
    if(geomType() == geomPoly)
    {
       Triangulate::Process(mVerts, fillPoints);   // Populates fillPoints from polygon outline
-      TNLAssert(fillPoints.size() > 0, "Bogus polygon geometry detected!");
+      //TNLAssert(fillPoints.size() > 0, "Bogus polygon geometry detected!");
 
       centroid = findCentroid(mVerts);
       setExtent(Rect(mVerts));
@@ -5724,14 +5724,18 @@ void WorldItem::onGeomChanging()
 {
    if(index == ItemTextItem)
       onGeomChanged();
+   else if(index == ItemPolyWall)
+   {
+      // Do nothing
+   }
    else if(geomType() == geomPoly)
-      onGeomChanged();     // Allows poly fill to get reshaped as vertices move
+      onGeomChanged();           // Allows poly fill to get reshaped as vertices move
 }
 
 
 // Item is being activel dragged
 void WorldItem::onItemDragging()
-{ 
+{
    if(index == ItemForceField)
      onGeomChanged();
 
