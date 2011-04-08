@@ -253,10 +253,10 @@ GameItemRec itemDef[] = {
    { "FlagItem",            false,    true,      true,     true,    false,   false,   geomPoint,       0,     false,  "Flags",                  "Flag",     "Flag",         "Flag item, used by a variety of game types." },
    { "FlagSpawn",           false,    true,      true,     true,    false,   true,    geomPoint,       0,     true,   "Flag spawn points",      "FlagSpawn","FlagSpawn",    "Location where flags (or balls in Soccer) spawn after capture." },
    { "BarrierMaker",        true,     false,     false,    false,   false,   false,   geomLine,        0,     false,  "Barrier makers",         "Wall",     "Wall",         "Run-of-the-mill wall item." },
-   { "PolyWall",            false,    false,     false,    false,   false,   false,   geomPoly,        0,     false,  "PolyWalls",               "Wall",     "Wall",         "Polygon wall barrier." },
+   { "PolyWall",            false,    false,     false,    false,   false,   false,   geomPoly,        0,     false,  "PolyWalls",              "Wall",     "Wall",         "Polygon wall barrier; create linear walls with right mouse click." },
    { "LineItem",            true,     true,      true,     true,    false,   false,   geomLine,        0,     false,  "Decorative Lines",       "LineItem", "LineItem",     "Decorative linework." },
    { "Teleporter",          false,    false,     false,    false,   false,   false,   geomSimpleLine,  0,     false,  "Teleporters",            "Teleport", "Teleport",     "Teleports ships from one place to another. [T]" },
-   { "RepairItem",          false,    false,     false,    false,   false,   true,    geomPoint,       0,     false,  "Repair items",           "Repair",      "Repair",       "Repairs damage to ships. [B]" },
+   { "RepairItem",          false,    false,     false,    false,   false,   true,    geomPoint,       0,     false,  "Repair items",           "Repair",    "Repair",       "Repairs damage to ships. [B]" },
    { "EnergyItem",          false,    false,     false,    false,   false,   true,    geomPoint,       0,     false,  "Energy items",           "Enrg",     "Energy",       "Restores energy to ships" },
    { "TestItem",            false,    false,     false,    false,   false,   false,   geomPoint,       0,     true,   "Test items",             "Test",     "Test Item",    "Bouncy object that floats around and gets in the way." },
    { "Asteroid",            false,    false,     false,    false,   false,   false,   geomPoint,       0,     true,   "Asteroids",              "Ast.",     "Asteroid",     "Shootable asteroid object.  Just like the arcade game." },
@@ -3286,13 +3286,18 @@ void EditorUserInterface::onMouseDragged(S32 x, S32 y)
          WorldItem(mDockItems[mDraggingDockItem].index, pos, mDockItems[mDraggingDockItem].team, false, .7, .4) :
          // Non polygon item --> size only used for geomSimpleLine items (teleport et al), ignored for geomPoints
          WorldItem(mDockItems[mDraggingDockItem].index, pos, mDockItems[mDraggingDockItem].team, false, 1, 0);
-  
+
+      // A little hack here to keep the polywall fill to appear to be left behind behind the dock
+      if(item.index == ItemPolyWall)
+         item.fillPoints.clear();
+
       clearSelection();            // No items are selected...
       item.selected = true;        // ...except for the new one
       mItems.push_back(item);      // Add our new item to the master item list
       mItems.sort(geometricSort);  // So things will render in the proper order
       mDraggingDockItem = NONE;    // Because now we're dragging a real item
       validateLevel();             // Check level for errors
+
 
       // Because we sometimes have trouble finding an item when we drag it off the dock, after it's been sorted,
       // we'll manually set mItemHit based on the selected item, which will always be the one we just added.
