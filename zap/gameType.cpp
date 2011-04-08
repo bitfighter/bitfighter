@@ -1535,6 +1535,8 @@ void GameType::setClientShipLoadout(ClientRef *cl, const Vector<U32> &loadout, b
          return;
       if(loadout[i] == WeaponSpyBug && !spyBugAllowed) // Reject spybug when not using ModuleSensor
          return;
+      if(loadout[i] == WeaponTurret) // Reject WeaponTurret
+         return;
 #if CS_PROTOCOL_VERSION == 32
       if(loadout[i] == WeaponHeatSeeker) // Reject HeatSeeker, Not supported yet
          return;
