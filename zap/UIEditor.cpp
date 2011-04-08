@@ -5731,11 +5731,11 @@ void WorldItem::onGeomChanging()
 
 // Item is being activel dragged
 void WorldItem::onItemDragging()
-{
+{ 
    if(index == ItemForceField)
      onGeomChanged();
 
-   else if(geomType() == geomPoly)
+   else if(geomType() == geomPoly && index != ItemPolyWall)
       onGeomChanged();     // Allows poly fill to get dragged around with outline
 }
 
