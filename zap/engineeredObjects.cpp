@@ -320,18 +320,19 @@ DatabaseObject *EngineeredObject::findAnchorPointAndNormal(GridDatabase *db, con
    {
       Point dir(cos(theta), sin(theta));
       dir *= snapDist;
+      Point pos2 = pos - dir * 0.001f; // only needed for editor..
 
       F32 t;
       Point n;
 
       // Look for walls
-      DatabaseObject *wall = db->findObjectLOS(BarrierType, MoveObject::ActualState, format, pos, pos + dir, t, n);
+      DatabaseObject *wall = db->findObjectLOS(BarrierType, MoveObject::ActualState, format, pos2, pos2 + dir, t, n);
 
       if(wall != NULL)     // Found one!
       {
          if(t < minDist)
          {
-            anchor.set(pos + dir * t);
+            anchor.set(pos2 + dir * t);
             normal.set(n);
             minDist = t;
             closestWall = wall;
