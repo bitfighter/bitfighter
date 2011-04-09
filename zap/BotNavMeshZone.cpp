@@ -293,8 +293,8 @@ S32 BotNavMeshZone::getNeighborIndex(S32 zoneID)
 
 struct rcEdge
 {
-	unsigned short vert[2];    // from, to verts
-	unsigned short poly[2];    // left, right poly
+   unsigned short vert[2];    // from, to verts
+   unsigned short poly[2];    // left, right poly
 };
 
 // Build connections between zones using the adjacency data created in recast
@@ -312,98 +312,98 @@ static bool buildBotNavMeshZoneConnectionsRecastStyle(rcPolyMesh &mesh, const Ve
 
    /////////////////////////////
    // Based on recast's interpretation of code by Eric Lengyel:
-	// http://www.terathon.com/code/edges.php
-	
+   // http://www.terathon.com/code/edges.php
+   
    int maxEdgeCount = mesh.npolys*mesh.nvp;
-	unsigned short* firstEdge = (unsigned short*)rcAlloc(sizeof(unsigned short)*(mesh.nverts + maxEdgeCount), RC_ALLOC_TEMP);
-	if (!firstEdge)      // Allocation went bad
-		return false;
-	unsigned short* nextEdge = firstEdge + mesh.nverts;
-	int edgeCount = 0;
-	
-	rcEdge* edges = (rcEdge*)rcAlloc(sizeof(rcEdge)*maxEdgeCount, RC_ALLOC_TEMP);
-	if (!edges)
-	{
-		rcFree(firstEdge);
-		return false;
-	}
-	
-	for(int i = 0; i < mesh.nverts; i++)
-		firstEdge[i] = RC_MESH_NULL_IDX;
-	
+   unsigned short* firstEdge = (unsigned short*)rcAlloc(sizeof(unsigned short)*(mesh.nverts + maxEdgeCount), RC_ALLOC_TEMP);
+   if (!firstEdge)      // Allocation went bad
+      return false;
+   unsigned short* nextEdge = firstEdge + mesh.nverts;
+   int edgeCount = 0;
+   
+   rcEdge* edges = (rcEdge*)rcAlloc(sizeof(rcEdge)*maxEdgeCount, RC_ALLOC_TEMP);
+   if (!edges)
+   {
+      rcFree(firstEdge);
+      return false;
+   }
+   
+   for(int i = 0; i < mesh.nverts; i++)
+      firstEdge[i] = RC_MESH_NULL_IDX;
+   
    // First process edges where 1st node < 2nd node
-	for(int i = 0; i < mesh.npolys; ++i)
-	{
+   for(int i = 0; i < mesh.npolys; ++i)
+   {
       unsigned short* t = &mesh.polys[i*mesh.nvp];
 
       // Skip "missing" polygons
       if(*t == U16_MAX)
          continue;
 
-		for (int j = 0; j < mesh.nvp; ++j)
-		{
-			unsigned short v0 = t[j];           // jth vert
+      for (int j = 0; j < mesh.nvp; ++j)
+      {
+         unsigned short v0 = t[j];           // jth vert
 
          if(v0 == RC_MESH_NULL_IDX)
             break;
 
-			unsigned short v1 = (j+1 >= mesh.nvp || t[j+1] == RC_MESH_NULL_IDX) ? t[0] : t[j+1];  // j+1th vert
+         unsigned short v1 = (j+1 >= mesh.nvp || t[j+1] == RC_MESH_NULL_IDX) ? t[0] : t[j+1];  // j+1th vert
 
-			if (v0 < v1)      
-			{
-				rcEdge& edge = edges[edgeCount];       // edge connecting v0 and v1
-				edge.vert[0] = v0;
-				edge.vert[1] = v1;
-				edge.poly[0] = (unsigned short)i;      // left poly
-				edge.poly[1] = (unsigned short)i;      // right poly, will be recalced later -- the fact that both are the same is used as a marker
+         if (v0 < v1)      
+         {
+            rcEdge& edge = edges[edgeCount];       // edge connecting v0 and v1
+            edge.vert[0] = v0;
+            edge.vert[1] = v1;
+            edge.poly[0] = (unsigned short)i;      // left poly
+            edge.poly[1] = (unsigned short)i;      // right poly, will be recalced later -- the fact that both are the same is used as a marker
 
-				nextEdge[edgeCount] = firstEdge[v0];        // Next edge on the previous vert now points to whatever was in firstEdge previously
-				firstEdge[v0] = (unsigned short)edgeCount;  // First edge of this vert 
+            nextEdge[edgeCount] = firstEdge[v0];        // Next edge on the previous vert now points to whatever was in firstEdge previously
+            firstEdge[v0] = (unsigned short)edgeCount;  // First edge of this vert 
 
-				edgeCount++;                           // edgeCount never resets -- each edge gets a unique id
-			}
-		}
-	}
-	
+            edgeCount++;                           // edgeCount never resets -- each edge gets a unique id
+         }
+      }
+   }
+   
    // Now process edges where 2nd node is > 1st node
-	for(int i = 0; i < mesh.npolys; ++i)
-	{
-		unsigned short* t = &mesh.polys[i*mesh.nvp];
+   for(int i = 0; i < mesh.npolys; ++i)
+   {
+      unsigned short* t = &mesh.polys[i*mesh.nvp];
 
       // Skip "missing" polygons
       if(*t == U16_MAX)
          continue;
 
-		for(int j = 0; j < mesh.nvp; ++j)
-		{
-			unsigned short v0 = t[j];
+      for(int j = 0; j < mesh.nvp; ++j)
+      {
+         unsigned short v0 = t[j];
          if(v0 == RC_MESH_NULL_IDX)
             break;
 
-			unsigned short v1 = (j+1 >= mesh.nvp || t[j+1] == RC_MESH_NULL_IDX) ? t[0] : t[j+1];
+         unsigned short v1 = (j+1 >= mesh.nvp || t[j+1] == RC_MESH_NULL_IDX) ? t[0] : t[j+1];
 
-			if(v0 > v1)      
-			{
-				for(unsigned short e = firstEdge[v1]; e != RC_MESH_NULL_IDX; e = nextEdge[e])
-				{
-					rcEdge& edge = edges[e];
-					if(edge.vert[1] == v0 && edge.poly[0] == edge.poly[1])
+         if(v0 > v1)      
+         {
+            for(unsigned short e = firstEdge[v1]; e != RC_MESH_NULL_IDX; e = nextEdge[e])
+            {
+               rcEdge& edge = edges[e];
+               if(edge.vert[1] == v0 && edge.poly[0] == edge.poly[1])
                {
-						edge.poly[1] = (unsigned short)i;
+                  edge.poly[1] = (unsigned short)i;
                   break;
                }
-				}
-			}
-		}
-	}
+            }
+         }
+      }
+   }
 
-	// Now create our neighbor data
-	for(int i = 0; i < edgeCount; i++)
-	{
-		const rcEdge& e = edges[i];
+   // Now create our neighbor data
+   for(int i = 0; i < edgeCount; i++)
+   {
+      const rcEdge& e = edges[i];
 
-		if(e.poly[0] != e.poly[1])      // Should normally be the case
-		{
+      if(e.poly[0] != e.poly[1])      // Should normally be the case
+      {
          U16 *v;
 
          v = &mesh.verts[e.vert[0] * 2];
@@ -419,13 +419,13 @@ static bool buildBotNavMeshZoneConnectionsRecastStyle(rcPolyMesh &mesh, const Ve
 
          neighbor.zoneID = polyToZoneMap[e.poly[0]];   
          gBotNavMeshZones[polyToZoneMap[e.poly[1]]]->mNeighbors.push_back(neighbor);
-		}
-	}
-	
-	rcFree(firstEdge);
-	rcFree(edges);
-	
-	return true;
+      }
+   }
+   
+   rcFree(firstEdge);
+   rcFree(edges);
+   
+   return true;
 }
 
 
@@ -602,7 +602,7 @@ bool BotNavMeshZone::buildBotMeshZones(Game *game)
 
          buildBotNavMeshZoneConnectionsRecastStyle(mesh, polyToZoneMap);
          BotNavMeshZone::linkTeleportersBotNavMeshZoneConnections(game);
-		}
+      }
    }
 
    // If recast failed, build zones from the underlying triangle geometry.  This bit could be made more efficient by using the adjacnecy
@@ -617,14 +617,14 @@ bool BotNavMeshZone::buildBotMeshZones(Game *game)
          BotNavMeshZone *botzone = new BotNavMeshZone();
 
          // removed F32(S32(...)) - why do rounding here? (sam)
-		   botzone->mPolyBounds.push_back(Point(triangleData.pointList[triangleData.triangleList[i]*2],   triangleData.pointList[triangleData.triangleList[i]*2 + 1]));
-		   botzone->mPolyBounds.push_back(Point(triangleData.pointList[triangleData.triangleList[i+1]*2], triangleData.pointList[triangleData.triangleList[i+1]*2 + 1]));
-		   botzone->mPolyBounds.push_back(Point(triangleData.pointList[triangleData.triangleList[i+2]*2], triangleData.pointList[triangleData.triangleList[i+2]*2 + 1]));
+         botzone->mPolyBounds.push_back(Point(triangleData.pointList[triangleData.triangleList[i]*2],   triangleData.pointList[triangleData.triangleList[i]*2 + 1]));
+         botzone->mPolyBounds.push_back(Point(triangleData.pointList[triangleData.triangleList[i+1]*2], triangleData.pointList[triangleData.triangleList[i+1]*2 + 1]));
+         botzone->mPolyBounds.push_back(Point(triangleData.pointList[triangleData.triangleList[i+2]*2], triangleData.pointList[triangleData.triangleList[i+2]*2 + 1]));
          botzone->mCentroid.set(findCentroid(botzone->mPolyBounds));
 
-		   botzone->mConvex = true;             // Avoid random red and green on /showzones.
-		   botzone->addToGame(game);
-		   botzone->computeExtent();   
+         botzone->mConvex = true;             // Avoid random red and green on /showzones.
+         botzone->addToGame(game);
+         botzone->computeExtent();   
          if(gClientGame)      // Only triangulate when there is client
             Triangulate::Process(botzone->mPolyBounds, botzone->mPolyFill);
        }
@@ -704,11 +704,11 @@ void BotNavMeshZone::linkTeleportersBotNavMeshZoneConnections(Game *game)
    // Now create paths representing the teleporters
    Vector<DatabaseObject *> teleporters, dests;
 
-	game->getGridDatabase()->findObjects(TeleportType, teleporters, game->getWorldExtents());
+   game->getGridDatabase()->findObjects(TeleportType, teleporters, game->getWorldExtents());
 
-	for(S32 i = 0; i < teleporters.size(); i++)
-	{
-		Teleporter *teleporter = dynamic_cast<Teleporter *>(teleporters[i]);
+   for(S32 i = 0; i < teleporters.size(); i++)
+   {
+      Teleporter *teleporter = dynamic_cast<Teleporter *>(teleporters[i]);
 
       if(!teleporter)
          continue;
@@ -716,26 +716,26 @@ void BotNavMeshZone::linkTeleportersBotNavMeshZoneConnections(Game *game)
       BotNavMeshZone *origZone = findZoneContainingPoint(teleporter->getActualPos());
 
       if(origZone != NULL)
-		for(S32 j = 0; j < teleporter->mDest.size(); j++)     // Review each teleporter destination
-		{
+      for(S32 j = 0; j < teleporter->mDest.size(); j++)     // Review each teleporter destination
+      {
          BotNavMeshZone *destZone = findZoneContainingPoint(teleporter->mDest[j]);
 
-			if(destZone != NULL && origZone != destZone)      // Ignore teleporters that begin and end in the same zone
-			{
-				// Teleporter is one way path
-				neighbor.zoneID = destZone->mZoneId;
-				neighbor.borderStart.set(teleporter->getActualPos());
-				neighbor.borderEnd.set(teleporter->mDest[j]);
-				neighbor.borderCenter.set(teleporter->getActualPos());
+         if(destZone != NULL && origZone != destZone)      // Ignore teleporters that begin and end in the same zone
+         {
+            // Teleporter is one way path
+            neighbor.zoneID = destZone->mZoneId;
+            neighbor.borderStart.set(teleporter->getActualPos());
+            neighbor.borderEnd.set(teleporter->mDest[j]);
+            neighbor.borderCenter.set(teleporter->getActualPos());
 
             // Teleport instantly, at no cost -- except this is wrong... if teleporter has multiple dests, actual cost could be quite high.
             // This should be the average of the costs of traveling from each dest zone to the target zone
-				neighbor.distTo = 0;                                    
-				neighbor.center.set(teleporter->getActualPos());
+            neighbor.distTo = 0;                                    
+            neighbor.center.set(teleporter->getActualPos());
 
-				origZone->mNeighbors.push_back(neighbor);
-			}
-		}
+            origZone->mNeighbors.push_back(neighbor);
+         }
+      }
    }
 }
 
@@ -759,14 +759,14 @@ Vector<Point> AStar::findPath(S32 startZone, S32 targetZone, const Point &target
    static S16 openZone[MAX_ZONES]; 
    static S16 parentZones[MAX_ZONES]; 
 
-   static F32 Fcost[MAX_ZONES];	
-   static F32 Gcost[MAX_ZONES]; 	
-   static F32 Hcost[MAX_ZONES];	
+   static F32 Fcost[MAX_ZONES];   
+   static F32 Gcost[MAX_ZONES];    
+   static F32 Hcost[MAX_ZONES];   
 
-	S16 numberOfOpenListItems = 0;
-	bool foundPath;
+   S16 numberOfOpenListItems = 0;
+   bool foundPath;
 
-	S32 newOpenListItemID = 0;         // Used for creating new IDs for zones to make heap work
+   S32 newOpenListItemID = 0;         // Used for creating new IDs for zones to make heap work
 
    Vector<Point> path;
 
@@ -776,35 +776,35 @@ Vector<Point> AStar::findPath(S32 startZone, S32 targetZone, const Point &target
    // more efficient for the zone counts we typically see in Bitfighter levels.
 
    if(onClosedList > U16_MAX - 3 ) // Reset whichList when we've run out of headroom
-	{
-		for(S32 i = 0; i < MAX_ZONES; i++) 
-		   whichList[i] = 0;
-		onClosedList = 0;	
-	}
-	onClosedList = onClosedList + 2; // Changing the values of onOpenList and onClosed list is faster than redimming whichList() array
-	onOpenList = onClosedList - 1;
+   {
+      for(S32 i = 0; i < MAX_ZONES; i++) 
+         whichList[i] = 0;
+      onClosedList = 0;   
+   }
+   onClosedList = onClosedList + 2; // Changing the values of onOpenList and onClosed list is faster than redimming whichList() array
+   onOpenList = onClosedList - 1;
 
-	Gcost[startZone] = 0;         // That's the cost of going from the startZone to the startZone!
+   Gcost[startZone] = 0;         // That's the cost of going from the startZone to the startZone!
    Fcost[0] = Hcost[0] = heuristic(startZone, targetZone);
 
-	numberOfOpenListItems = 1;    // Start with one open item: the startZone
+   numberOfOpenListItems = 1;    // Start with one open item: the startZone
 
-	openList[1] = 0;              // Start with 1 item in the open list (must be index 1), which is maintained as a binary heap
-	openZone[0] = startZone;
+   openList[1] = 0;              // Start with 1 item in the open list (must be index 1), which is maintained as a binary heap
+   openZone[0] = startZone;
 
    // Loop until a path is found or deemed nonexistent.
-	while(true)
-	{
-	   if(numberOfOpenListItems == 0)      // List is empty, we're done
-	   {
-		   foundPath = false; 
+   while(true)
+   {
+      if(numberOfOpenListItems == 0)      // List is empty, we're done
+      {
+         foundPath = false; 
          break;
-	   }  
+      }  
       else
-	   {
+      {
          // The open list is not empty, so take the first cell off of the list.
-         //	Since the list is a binary heap, this will be the lowest F cost cell on the open list.
-	      S32 parentZone = openZone[openList[1]];
+         //   Since the list is a binary heap, this will be the lowest F cost cell on the open list.
+         S32 parentZone = openZone[openList[1]];
 
          if(parentZone == targetZone)
          {
@@ -813,51 +813,51 @@ Vector<Point> AStar::findPath(S32 startZone, S32 targetZone, const Point &target
          }
 
          whichList[parentZone] = onClosedList;   // add the item to the closed list
-         numberOfOpenListItems--;	
+         numberOfOpenListItems--;   
 
-         //	Open List = Binary Heap: Delete this item from the open list, which
+         //   Open List = Binary Heap: Delete this item from the open list, which
          // is maintained as a binary heap. For more information on binary heaps, see:
-         //	http://www.policyalmanac.org/games/binaryHeaps.htm
-      		
-         //	Delete the top item in binary heap and reorder the heap, with the lowest F cost item rising to the top.
-	      openList[1] = openList[numberOfOpenListItems + 1];   // Move the last item in the heap up to slot #1
-	      S16 v = 1; 
+         //   http://www.policyalmanac.org/games/binaryHeaps.htm
+            
+         //   Delete the top item in binary heap and reorder the heap, with the lowest F cost item rising to the top.
+         openList[1] = openList[numberOfOpenListItems + 1];   // Move the last item in the heap up to slot #1
+         S16 v = 1; 
 
-         //	Loop until the new item in slot #1 sinks to its proper spot in the heap.
-	      while(true) // ***
-	      {
-	         S16 u = v;		
-	         if (2 * u + 1 < numberOfOpenListItems) // if both children exist
-	         {
-	 	         //Check if the F cost of the parent is greater than each child.
-		         //Select the lowest of the two children.
-		         if(Fcost[openList[u]] >= Fcost[openList[2*u]]) 
-			         v = 2 * u;
-		         if(Fcost[openList[v]] >= Fcost[openList[2*u+1]]) 
-			         v = 2 * u + 1;		
-	         }
-	         else if (2 * u < numberOfOpenListItems) // if only child (#1) exists
-	         {
- 	            // Check if the F cost of the parent is greater than child #1	
-		         if(Fcost[openList[u]] >= Fcost[openList[2*u]]) 
-			         v = 2 * u;
-	         }
+         //   Loop until the new item in slot #1 sinks to its proper spot in the heap.
+         while(true) // ***
+         {
+            S16 u = v;      
+            if (2 * u + 1 < numberOfOpenListItems) // if both children exist
+            {
+                //Check if the F cost of the parent is greater than each child.
+               //Select the lowest of the two children.
+               if(Fcost[openList[u]] >= Fcost[openList[2*u]]) 
+                  v = 2 * u;
+               if(Fcost[openList[v]] >= Fcost[openList[2*u+1]]) 
+                  v = 2 * u + 1;      
+            }
+            else if (2 * u < numberOfOpenListItems) // if only child (#1) exists
+            {
+                // Check if the F cost of the parent is greater than child #1   
+               if(Fcost[openList[u]] >= Fcost[openList[2*u]]) 
+                  v = 2 * u;
+            }
 
-	         if(u != v) // If parent's F is > one of its children, swap them...
-	         {
+            if(u != v) // If parent's F is > one of its children, swap them...
+            {
                S16 temp = openList[u];
                openList[u] = openList[v];
-               openList[v] = temp;			
-	         }
-	         else
-		         break; // ...otherwise, exit loop
-	      } // ***
+               openList[v] = temp;         
+            }
+            else
+               break; // ...otherwise, exit loop
+         } // ***
 
          // Check the adjacent zones. (Its "children" -- these path children
-         //	are similar, conceptually, to the binary heap children mentioned
-         //	above, but don't confuse them. They are different. 
+         //   are similar, conceptually, to the binary heap children mentioned
+         //   above, but don't confuse them. They are different.
          // Add these adjacent child squares to the open list
-         //	for later consideration if appropriate.
+         //   for later consideration if appropriate.
 
          Vector<NeighboringZone> neighboringZones = gBotNavMeshZones[parentZone]->mNeighbors;
 
@@ -866,15 +866,15 @@ Vector<Point> AStar::findPath(S32 startZone, S32 targetZone, const Point &target
             NeighboringZone zone = neighboringZones[a];
             S32 zoneID = zone.zoneID;
 
-            //	Check if zone is already on the closed list (items on the closed list have
-            //	already been considered and can now be ignored).			
+            //   Check if zone is already on the closed list (items on the closed list have
+            //   already been considered and can now be ignored).
             if(whichList[zoneID] == onClosedList) 
                continue;
 
-            //	Add zone to the open list if it's not already on it
+            //   Add zone to the open list if it's not already on it
             TNLAssert(newOpenListItemID < MAX_ZONES, "Too many nav zones... try increasing MAX_ZONES!");
             if(whichList[zoneID] != onOpenList && newOpenListItemID < MAX_ZONES) 
-            {	
+            {   
                // Create a new open list item in the binary heap
                newOpenListItemID = newOpenListItemID + 1;   // Give each new item a unique id
                S32 m = numberOfOpenListItems + 1;
@@ -904,20 +904,20 @@ Vector<Point> AStar::findPath(S32 startZone, S32 targetZone, const Point &target
             }
 
             // If zone is already on the open list, check to see if this 
-            //	path to that cell from the starting location is a better one. 
-            //	If so, change the parent of the cell and its G and F costs.
+            //   path to that cell from the starting location is a better one. 
+            //   If so, change the parent of the cell and its G and F costs.
 
             else // zone was already on the open list
             {
                // Figure out the G cost of this possible new path
                S32 tempGcost = (S32)(Gcost[parentZone] + zone.distTo);
-         		
+               
                // If this path is shorter (G cost is lower) then change
-               // the parent cell, G cost and F cost. 		
+               // the parent cell, G cost and F cost.
                if (tempGcost < Gcost[zoneID])
                {
                   parentZones[zoneID] = parentZone; // Change the square's parent
-                  Gcost[zoneID] = tempGcost;        // and its G cost			
+                  Gcost[zoneID] = tempGcost;        // and its G cost         
 
                   // Because changing the G cost also changes the F cost, if
                   // the item is on the open list we need to change the item's
@@ -928,40 +928,40 @@ Vector<Point> AStar::findPath(S32 startZone, S32 targetZone, const Point &target
                   {
                      if(openZone[openList[i]] == zoneID) 
                      {
-	                     Fcost[openList[i]] = Gcost[zoneID] + Hcost[openList[i]]; // Change the F cost
-            				
-	                     // See if changing the F score bubbles the item up from it's current location in the heap
-	                     S32 m = i;
-	                     while(m > 1 && Fcost[openList[m]] < Fcost[openList[m/2]]) 
-	                     {
-		                     S16 temp = openList[m/2];
-		                     openList[m/2] = openList[m];
-		                     openList[m] = temp;
-		                     m = m/2;
-	                     }
-	                
+                        Fcost[openList[i]] = Gcost[zoneID] + Hcost[openList[i]]; // Change the F cost
+                        
+                        // See if changing the F score bubbles the item up from it's current location in the heap
+                        S32 m = i;
+                        while(m > 1 && Fcost[openList[m]] < Fcost[openList[m/2]]) 
+                        {
+                           S16 temp = openList[m/2];
+                           openList[m/2] = openList[m];
+                           openList[m] = temp;
+                           m = m/2;
+                        }
+                   
                         break; 
                      } 
                   }
                }
 
-            } // else if whichList(zoneID) = onOpenList	
+            } // else if whichList(zoneID) = onOpenList   
          } // for loop looping through neighboring zones list
-	   }  
+      }  
 
-	   // If target is added to open list then path has been found.
-	   if(whichList[targetZone] == onOpenList)
-	   {
-		   foundPath = true; 
+      // If target is added to open list then path has been found.
+      if(whichList[targetZone] == onOpenList)
+      {
+         foundPath = true; 
          break;
-	   }
-	}
+      }
+   }
 
    // Save the path if it exists.
-	if(foundPath)
-	{
+   if(foundPath)
+   {
       // Working backwards from the target to the starting location by checking
-      //	each cell's parent, figure out the length of the path.
+      //   each cell's parent, figure out the length of the path.
       // Fortunately, we want our list to have the closest zone last (see getWaypoint),
       // so it all works out nicely.
       // We'll store both the zone center and the gateway to the neighboring zone.  This
@@ -973,22 +973,22 @@ Vector<Point> AStar::findPath(S32 startZone, S32 targetZone, const Point &target
       
       S32 zone = targetZone;
 
-	   while(zone != startZone)
-	   {
-		   path.push_back(findGateway(parentZones[zone], zone));   // don't switch findGateway arguments, some path is one way (teleporters).
+      while(zone != startZone)
+      {
+         path.push_back(findGateway(parentZones[zone], zone));   // don't switch findGateway arguments, some path is one way (teleporters).
 
-		   zone = parentZones[zone];		// Find the parent of the current cell	
+         zone = parentZones[zone];      // Find the parent of the current cell
 
          path.push_back(gBotNavMeshZones[zone]->getCenter());
-	   }
+      }
       path.push_back(gBotNavMeshZones[startZone]->getCenter());
 
-	   return path;
-	}
+      return path;
+   }
 
    // else there is no path to the selected target
    TNLAssert(path.size() == 0, "Expected empty path!");
-	return path;
+   return path;
 }
 
 

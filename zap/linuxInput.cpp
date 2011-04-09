@@ -50,7 +50,7 @@ static Display *Xdisplay = XOpenDisplay(NULL);
 
 
 const U32 MAX_AXIS = 32;
-const U32 MAX_BUTTON = 32;	// Can fit 32 buttons in a 32 bit integer!
+const U32 MAX_BUTTON = 32;   // Can fit 32 buttons in a 32 bit integer!
 
 
 struct padData {

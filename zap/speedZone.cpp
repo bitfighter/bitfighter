@@ -224,7 +224,7 @@ bool SpeedZone::collide(GameObject *hitObject)
                return false;
          }
       }
-		return true;
+      return true;
    }
    return false;
 }

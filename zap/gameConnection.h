@@ -100,7 +100,7 @@ private:
    static GameConnection gClientList;
 
    bool mInCommanderMap;
-	bool mIsRobot;
+   bool mIsRobot;
    bool mIsAdmin;
    bool mIsLevelChanger;
    bool mWaitingForPermissionsReply;
@@ -203,7 +203,7 @@ public:
    bool isRobot() { return mIsRobot; }
    void setIsRobot(bool robot) { mIsRobot = robot; }
 
-	bool isAdmin() { return mIsAdmin; }
+   bool isAdmin() { return mIsAdmin; }
    void setIsAdmin(bool admin) { mIsAdmin = admin; }
 
    bool isBusy() { if(!this) return false; else return mIsBusy; }

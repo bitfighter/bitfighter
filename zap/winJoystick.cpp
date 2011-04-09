@@ -26,7 +26,7 @@
 #define STRICT
 #define DIRECTINPUT_VERSION 0x0800
 #include <windows.h>
-#include "dinput.h"	 // See readme in win_include_do_not_distribute folder
+#include "dinput.h"    // See readme in win_include_do_not_distribute folder
 
 #include "gameConnection.h"
 #include "UI.h"
@@ -40,9 +40,9 @@ extern const char *gWindowTitle;
 
 void getModifierState( bool &shiftDown, bool &controlDown, bool &altDown )
 {
-	shiftDown = ( GetKeyState( VK_SHIFT ) & 0xFF00 ) != 0;
-	controlDown = ( GetKeyState( VK_CONTROL ) & 0xFF00 ) != 0;
-	altDown = ( GetKeyState( VK_MENU ) & 0xFF00 ) != 0;
+   shiftDown = ( GetKeyState( VK_SHIFT ) & 0xFF00 ) != 0;
+   controlDown = ( GetKeyState( VK_CONTROL ) & 0xFF00 ) != 0;
+   altDown = ( GetKeyState( VK_MENU ) & 0xFF00 ) != 0;
 }
 
 void checkMousePos(S32 maxdx, S32 maxdy)

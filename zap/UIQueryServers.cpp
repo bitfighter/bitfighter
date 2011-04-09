@@ -781,7 +781,7 @@ void QueryServersUserInterface::render()
          drawStringf(columns[2].xStart, y, SERVER_ENTRY_TEXTSIZE, "%d", s.pingTime);
 
          // Color by number of players
-			Color color;
+         Color color;
          if(s.playerCount == s.maxPlayers)
             color = red;       // max players
          else if(s.playerCount == 0)
@@ -927,7 +927,7 @@ void QueryServersUserInterface::renderMessageBox(bool drawmsg1, bool drawmsg2)
    else if(mGivenUpOnMaster)
    {
       msg1 = "Unable to connect to master";
-		msg2 = "";
+      msg2 = "";
       lines = 1;
    }
    else
@@ -1186,7 +1186,7 @@ void QueryServersUserInterface::sortSelected()
       mLastSortColumn = mSortColumn;
       mSortAscending = true;
    }
-   sort();	
+   sort();   
 
    selectedId = servers[currentItem].id;
 }
@@ -1331,29 +1331,29 @@ void QueryServersUserInterface::issueChat()
 {
    if(mLineEditor.length() >= 9)
    {
-	   const char *str1 = mLineEditor.c_str();
-	   S32 a = 0;
+      const char *str1 = mLineEditor.c_str();
+      S32 a = 0;
 
-	   while(a < 9)      // compare character by character, now case insensitive
-	   {       
-		   if(str1[a] != "/connect "[a] && str1[a] != "/CONNECT "[a] ) 
+      while(a < 9)      // compare character by character, now case insensitive
+      {       
+         if(str1[a] != "/connect "[a] && str1[a] != "/CONNECT "[a] ) 
             a = S32_MAX;
          else
-		      a++;
-	   }
-	   if(a == 9)
+            a++;
+      }
+      if(a == 9)
       {
-		   Address address(&str1[9]);
-			if(address.isValid())
-			{
-				if(address.port == 0)
-					address.port = 28000;   //default port number, if user did not enter port number
-				joinGame(address, false, false);
-			}
-			else
-				newMessage("","INVALID ADDRESS",false,true);
-		   return;
-	   }
+         Address address(&str1[9]);
+         if(address.isValid())
+         {
+            if(address.port == 0)
+               address.port = 28000;   //default port number, if user did not enter port number
+            joinGame(address, false, false);
+         }
+         else
+            newMessage("","INVALID ADDRESS",false,true);
+         return;
+      }
    }
    ChatParent::issueChat();
 }

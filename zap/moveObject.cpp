@@ -165,7 +165,7 @@ const F32 velocityEpsilon = 0.00001f;
 void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vector<SafePtr<MoveObject> > displacerList)
 {
    U32 tryCount = 0;
-	Vector<SafePtr<GameObject> > disabledList;
+   Vector<SafePtr<GameObject> > disabledList;
 
    while(moveTime > moveTimeEpsilon && tryCount < 8)     // moveTimeEpsilon is a very short, but non-zero, bit of time
    {
@@ -197,13 +197,13 @@ void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vecto
 
          // Prevent infinite loops with a series of objects trying to displace each other forever
          if(isBeingDisplaced)
-			{
-				bool hit = false;
+         {
+            bool hit = false;
             for(S32 i = 0; i < displacerList.size(); i++)
                if(moveObjectThatWasHit == displacerList[i])
                  hit = true;
-				if(hit) break;
-			}
+            if(hit) break;
+         }
  
          if(posDelta.dot(velDelta) < 0)   // moveObjectThatWasHit is closing faster than we are ???
          {
@@ -237,23 +237,23 @@ void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vecto
       else if(objectHit->getObjectTypeMask() & (BarrierType | EngineeredType | ForceFieldType))
       {
          computeCollisionResponseBarrier(stateIndex, collisionPoint);
-			//moveTime = 0;
+         //moveTime = 0;
       }
       else if(objectHit->getObjectTypeMask() & SpeedZoneType)
-		{
-			SpeedZone *speedZone = dynamic_cast<SpeedZone *>(objectHit);
-			if(speedZone)
-			{
-				speedZone->collided(this, stateIndex);
-			}
+      {
+         SpeedZone *speedZone = dynamic_cast<SpeedZone *>(objectHit);
+         if(speedZone)
+         {
+            speedZone->collided(this, stateIndex);
+         }
          disabledList.push_back(objectHit);
          objectHit->disableCollision();
-			tryCount--;   // SpeedZone don't count as tryCount
-		}
+         tryCount--;   // SpeedZone don't count as tryCount
+      }
       moveTime -= collisionTime;
    }
    for(S32 i = 0; i < disabledList.size(); i++)   // enable any disabled collision
-		if(disabledList[i].isValid())
+      if(disabledList[i].isValid())
          disabledList[i]->enableCollision();
 }
 

@@ -90,7 +90,7 @@ void GameConnection::initialize()
    mNext = mPrev = this;
    setTranslatesStrings();
    mInCommanderMap = false;
-	mIsRobot = false;
+   mIsRobot = false;
    mIsAdmin = false;
    mIsLevelChanger = false;
    mIsBusy = false;
@@ -624,20 +624,20 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sAdminPlayerAction,
             s2cDisplayMessage(ColorAqua, SFXNone, nokick);
             return;
          }
-			if(theClient->isEstablished())     //Robot don't have established connections.
-			{
+         if(theClient->isEstablished())     //Robot don't have established connections.
+         {
             ConnectionParameters &p = theClient->getConnectionParameters();
             if(p.mIsArranged)
                gServerGame->getNetInterface()->banHost(p.mPossibleAddresses[0], BanDuration);      // Banned for 30 seconds
             gServerGame->getNetInterface()->banHost(theClient->getNetAddress(), BanDuration);      // Banned for 30 seconds
             theClient->disconnect(ReasonKickedByAdmin, "");
-			}
+         }
 
-			for(S32 i = 0; i < Robot::robots.size(); i++)
-			{
-				if(Robot::robots[i]->getName() == theClient->getClientName())
-					delete Robot::robots[i];
-			}	
+         for(S32 i = 0; i < Robot::robots.size(); i++)
+         {
+            if(Robot::robots[i]->getName() == theClient->getClientName())
+               delete Robot::robots[i];
+         }   
          break;
       }
    default:
@@ -1092,20 +1092,20 @@ extern void updateClientChangedName(GameConnection *,StringTableEntry);  //in ma
 // then client have changed name to non-reserved, or entered password.
 TNL_IMPLEMENT_RPC(GameConnection, c2sRenameClient, (StringTableEntry newName), (newName), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 2)
 {
-	StringTableEntry oldName = getClientName();
-	setClientName(StringTableEntry(""));       //avoid unique self
-	StringTableEntry uniqueName = GameConnection::makeUnique(newName.getString()).c_str();  //new name
-	setClientName(oldName);                   //restore name to properly get it updated to clients.
-	setClientNameNonUnique(newName);          //for correct authentication
-	setAuthenticated(false);         //don't underline anymore because of rename
+   StringTableEntry oldName = getClientName();
+   setClientName(StringTableEntry(""));       //avoid unique self
+   StringTableEntry uniqueName = GameConnection::makeUnique(newName.getString()).c_str();  //new name
+   setClientName(oldName);                   //restore name to properly get it updated to clients.
+   setClientNameNonUnique(newName);          //for correct authentication
+   setAuthenticated(false);         //don't underline anymore because of rename
    mIsVerified = false;             //Reset all verified to false.
    mClientNeedsToBeVerified = false;
    mClientClaimsToBeVerified = false;
 
-	if(oldName != uniqueName)  //different?
-	{
-		updateClientChangedName(this,uniqueName);
-	}
+   if(oldName != uniqueName)  //different?
+   {
+      updateClientChangedName(this,uniqueName);
+   }
 }
 
 // old 015 clients will ignore this command. (new on version 015a)
@@ -1203,7 +1203,7 @@ bool GameConnection::readConnectRequest(BitStream *stream, NetConnection::Termin
    name[len] = 0;    // Terminate string properly
 
    mClientName = makeUnique(name).c_str();  // Unique name
-	mClientNameNonUnique = name;             // For authentication non-unique name
+   mClientNameNonUnique = name;             // For authentication non-unique name
 
    mClientId.read(stream);
    mIsVerified = false;
@@ -1272,7 +1272,7 @@ std::string GameConnection::makeUnique(string name)
             char numstr[10];
             sprintf(numstr, ".%d", index);
 
-			   // Max length name can be such that when number is appended, it's still less than MAX_PLAYER_NAME_LENGTH
+            // Max length name can be such that when number is appended, it's still less than MAX_PLAYER_NAME_LENGTH
             S32 maxNamePos = MAX_PLAYER_NAME_LENGTH - (S32)strlen(numstr);   
             name = name.substr(0, maxNamePos);                      // Make sure name won't grow too long
             proposedName = name + numstr;
