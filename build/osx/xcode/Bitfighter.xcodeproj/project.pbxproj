@@ -86,6 +86,22 @@
 		737CE5CB129051DC00D732B7 /* libtomcrypt.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 737CE46C12904E9E00D732B7 /* libtomcrypt.framework */; };
 		737CE637129055BF00D732B7 /* tnl.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 737CE61D1290553D00D732B7 /* tnl.framework */; };
 		737CE639129055C500D732B7 /* tnl.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 737CE61D1290553D00D732B7 /* tnl.framework */; };
+		73844F3713500C2F00033B85 /* clipper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73844F2613500C2F00033B85 /* clipper.cpp */; };
+		73844F3813500C2F00033B85 /* shapes.cc in Sources */ = {isa = PBXBuildFile; fileRef = 73844F2A13500C2F00033B85 /* shapes.cc */; };
+		73844F3913500C2F00033B85 /* advancing_front.cc in Sources */ = {isa = PBXBuildFile; fileRef = 73844F2F13500C2F00033B85 /* advancing_front.cc */; };
+		73844F3A13500C2F00033B85 /* cdt.cc in Sources */ = {isa = PBXBuildFile; fileRef = 73844F3113500C2F00033B85 /* cdt.cc */; };
+		73844F3B13500C2F00033B85 /* sweep.cc in Sources */ = {isa = PBXBuildFile; fileRef = 73844F3313500C2F00033B85 /* sweep.cc */; };
+		73844F3C13500C2F00033B85 /* sweep_context.cc in Sources */ = {isa = PBXBuildFile; fileRef = 73844F3513500C2F00033B85 /* sweep_context.cc */; };
+		73844F3D13500C2F00033B85 /* clipper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73844F2613500C2F00033B85 /* clipper.cpp */; };
+		73844F3E13500C2F00033B85 /* shapes.cc in Sources */ = {isa = PBXBuildFile; fileRef = 73844F2A13500C2F00033B85 /* shapes.cc */; };
+		73844F3F13500C2F00033B85 /* advancing_front.cc in Sources */ = {isa = PBXBuildFile; fileRef = 73844F2F13500C2F00033B85 /* advancing_front.cc */; };
+		73844F4013500C2F00033B85 /* cdt.cc in Sources */ = {isa = PBXBuildFile; fileRef = 73844F3113500C2F00033B85 /* cdt.cc */; };
+		73844F4113500C2F00033B85 /* sweep.cc in Sources */ = {isa = PBXBuildFile; fileRef = 73844F3313500C2F00033B85 /* sweep.cc */; };
+		73844F4213500C2F00033B85 /* sweep_context.cc in Sources */ = {isa = PBXBuildFile; fileRef = 73844F3513500C2F00033B85 /* sweep_context.cc */; };
+		73844F4F13500E1600033B85 /* GeomUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73844F4B13500E1600033B85 /* GeomUtils.cpp */; };
+		73844F5013500E1600033B85 /* polygon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73844F4D13500E1600033B85 /* polygon.cpp */; };
+		73844F5113500E1600033B85 /* GeomUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73844F4B13500E1600033B85 /* GeomUtils.cpp */; };
+		73844F5213500E1600033B85 /* polygon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73844F4D13500E1600033B85 /* polygon.cpp */; };
 		73D2F35112E2D7E800EA5EBE /* barrier.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F28112E2D7E700EA5EBE /* barrier.cpp */; };
 		73D2F35412E2D7E800EA5EBE /* BotNavMeshZone.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F28512E2D7E700EA5EBE /* BotNavMeshZone.cpp */; };
 		73D2F35612E2D7E800EA5EBE /* config.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F28812E2D7E700EA5EBE /* config.cpp */; };
@@ -153,7 +169,6 @@
 		73D2F39C12E2D7E800EA5EBE /* speedZone.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F30B12E2D7E800EA5EBE /* speedZone.cpp */; };
 		73D2F39D12E2D7E800EA5EBE /* statistics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F30D12E2D7E800EA5EBE /* statistics.cpp */; };
 		73D2F39E12E2D7E800EA5EBE /* stringUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F30F12E2D7E800EA5EBE /* stringUtils.cpp */; };
-		73D2F39F12E2D7E800EA5EBE /* SweptEllipsoid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F31112E2D7E800EA5EBE /* SweptEllipsoid.cpp */; };
 		73D2F3A012E2D7E800EA5EBE /* teamInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F31312E2D7E800EA5EBE /* teamInfo.cpp */; };
 		73D2F3A112E2D7E800EA5EBE /* teleporter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F31512E2D7E800EA5EBE /* teleporter.cpp */; };
 		73D2F3A212E2D7E800EA5EBE /* textItem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F31712E2D7E800EA5EBE /* textItem.cpp */; };
@@ -246,7 +261,6 @@
 		73D2F40F12E2D7E800EA5EBE /* speedZone.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F30B12E2D7E800EA5EBE /* speedZone.cpp */; };
 		73D2F41012E2D7E800EA5EBE /* statistics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F30D12E2D7E800EA5EBE /* statistics.cpp */; };
 		73D2F41112E2D7E800EA5EBE /* stringUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F30F12E2D7E800EA5EBE /* stringUtils.cpp */; };
-		73D2F41212E2D7E800EA5EBE /* SweptEllipsoid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F31112E2D7E800EA5EBE /* SweptEllipsoid.cpp */; };
 		73D2F41312E2D7E800EA5EBE /* teamInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F31312E2D7E800EA5EBE /* teamInfo.cpp */; };
 		73D2F41412E2D7E800EA5EBE /* teleporter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F31512E2D7E800EA5EBE /* teleporter.cpp */; };
 		73D2F41512E2D7E800EA5EBE /* textItem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F31712E2D7E800EA5EBE /* textItem.cpp */; };
@@ -615,6 +629,24 @@
 		737CE46C12904E9E00D732B7 /* libtomcrypt.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = libtomcrypt.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		737CE61D1290553D00D732B7 /* tnl.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = tnl.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		737CE61E1290553D00D732B7 /* tnl-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "tnl-Info.plist"; sourceTree = "<group>"; };
+		73844F2613500C2F00033B85 /* clipper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = clipper.cpp; sourceTree = "<group>"; };
+		73844F2713500C2F00033B85 /* clipper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = clipper.h; sourceTree = "<group>"; };
+		73844F2A13500C2F00033B85 /* shapes.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = shapes.cc; sourceTree = "<group>"; };
+		73844F2B13500C2F00033B85 /* shapes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = shapes.h; sourceTree = "<group>"; };
+		73844F2C13500C2F00033B85 /* utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = utils.h; sourceTree = "<group>"; };
+		73844F2D13500C2F00033B85 /* poly2tri.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = poly2tri.h; sourceTree = "<group>"; };
+		73844F2F13500C2F00033B85 /* advancing_front.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = advancing_front.cc; sourceTree = "<group>"; };
+		73844F3013500C2F00033B85 /* advancing_front.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = advancing_front.h; sourceTree = "<group>"; };
+		73844F3113500C2F00033B85 /* cdt.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cdt.cc; sourceTree = "<group>"; };
+		73844F3213500C2F00033B85 /* cdt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cdt.h; sourceTree = "<group>"; };
+		73844F3313500C2F00033B85 /* sweep.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sweep.cc; sourceTree = "<group>"; };
+		73844F3413500C2F00033B85 /* sweep.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sweep.h; sourceTree = "<group>"; };
+		73844F3513500C2F00033B85 /* sweep_context.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sweep_context.cc; sourceTree = "<group>"; };
+		73844F3613500C2F00033B85 /* sweep_context.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sweep_context.h; sourceTree = "<group>"; };
+		73844F4B13500E1600033B85 /* GeomUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GeomUtils.cpp; path = ../../../zap/GeomUtils.cpp; sourceTree = SOURCE_ROOT; };
+		73844F4C13500E1600033B85 /* GeomUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GeomUtils.h; path = ../../../zap/GeomUtils.h; sourceTree = SOURCE_ROOT; };
+		73844F4D13500E1600033B85 /* polygon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = polygon.cpp; path = ../../../zap/polygon.cpp; sourceTree = SOURCE_ROOT; };
+		73844F4E13500E1600033B85 /* SlipZone.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SlipZone.h; path = ../../../zap/SlipZone.h; sourceTree = SOURCE_ROOT; };
 		73D2F28112E2D7E700EA5EBE /* barrier.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = barrier.cpp; path = ../../../zap/barrier.cpp; sourceTree = SOURCE_ROOT; };
 		73D2F28212E2D7E700EA5EBE /* barrier.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = barrier.h; path = ../../../zap/barrier.h; sourceTree = SOURCE_ROOT; };
 		73D2F28512E2D7E700EA5EBE /* BotNavMeshZone.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BotNavMeshZone.cpp; path = ../../../zap/BotNavMeshZone.cpp; sourceTree = SOURCE_ROOT; };
@@ -747,8 +779,6 @@
 		73D2F30E12E2D7E800EA5EBE /* statistics.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = statistics.h; path = ../../../zap/statistics.h; sourceTree = SOURCE_ROOT; };
 		73D2F30F12E2D7E800EA5EBE /* stringUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = stringUtils.cpp; path = ../../../zap/stringUtils.cpp; sourceTree = SOURCE_ROOT; };
 		73D2F31012E2D7E800EA5EBE /* stringUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = stringUtils.h; path = ../../../zap/stringUtils.h; sourceTree = SOURCE_ROOT; };
-		73D2F31112E2D7E800EA5EBE /* SweptEllipsoid.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SweptEllipsoid.cpp; path = ../../../zap/SweptEllipsoid.cpp; sourceTree = SOURCE_ROOT; };
-		73D2F31212E2D7E800EA5EBE /* SweptEllipsoid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SweptEllipsoid.h; path = ../../../zap/SweptEllipsoid.h; sourceTree = SOURCE_ROOT; };
 		73D2F31312E2D7E800EA5EBE /* teamInfo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = teamInfo.cpp; path = ../../../zap/teamInfo.cpp; sourceTree = SOURCE_ROOT; };
 		73D2F31412E2D7E800EA5EBE /* teamInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = teamInfo.h; path = ../../../zap/teamInfo.h; sourceTree = SOURCE_ROOT; };
 		73D2F31512E2D7E800EA5EBE /* teleporter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = teleporter.cpp; path = ../../../zap/teleporter.cpp; sourceTree = SOURCE_ROOT; };
@@ -1106,6 +1136,8 @@
 		29B97314FDCFA39411CA2CEA /* Bitfighter */ = {
 			isa = PBXGroup;
 			children = (
+				73844F2513500C2F00033B85 /* clipper */,
+				73844F2813500C2F00033B85 /* poly2tri */,
 				73702882132A020B00397F99 /* recast */,
 				73702887132A020B00397F99 /* Triangle */,
 				5E481F4113053943004F9637 /* sqlite */,
@@ -1223,9 +1255,59 @@
 			name = libtomcrypt;
 			sourceTree = "<group>";
 		};
+		73844F2513500C2F00033B85 /* clipper */ = {
+			isa = PBXGroup;
+			children = (
+				73844F2613500C2F00033B85 /* clipper.cpp */,
+				73844F2713500C2F00033B85 /* clipper.h */,
+			);
+			name = clipper;
+			path = ../../../clipper;
+			sourceTree = SOURCE_ROOT;
+		};
+		73844F2813500C2F00033B85 /* poly2tri */ = {
+			isa = PBXGroup;
+			children = (
+				73844F2913500C2F00033B85 /* common */,
+				73844F2D13500C2F00033B85 /* poly2tri.h */,
+				73844F2E13500C2F00033B85 /* sweep */,
+			);
+			name = poly2tri;
+			path = ../../../poly2tri;
+			sourceTree = SOURCE_ROOT;
+		};
+		73844F2913500C2F00033B85 /* common */ = {
+			isa = PBXGroup;
+			children = (
+				73844F2A13500C2F00033B85 /* shapes.cc */,
+				73844F2B13500C2F00033B85 /* shapes.h */,
+				73844F2C13500C2F00033B85 /* utils.h */,
+			);
+			path = common;
+			sourceTree = "<group>";
+		};
+		73844F2E13500C2F00033B85 /* sweep */ = {
+			isa = PBXGroup;
+			children = (
+				73844F2F13500C2F00033B85 /* advancing_front.cc */,
+				73844F3013500C2F00033B85 /* advancing_front.h */,
+				73844F3113500C2F00033B85 /* cdt.cc */,
+				73844F3213500C2F00033B85 /* cdt.h */,
+				73844F3313500C2F00033B85 /* sweep.cc */,
+				73844F3413500C2F00033B85 /* sweep.h */,
+				73844F3513500C2F00033B85 /* sweep_context.cc */,
+				73844F3613500C2F00033B85 /* sweep_context.h */,
+			);
+			path = sweep;
+			sourceTree = "<group>";
+		};
 		73D2F27E12E2D6D800EA5EBE /* zap */ = {
 			isa = PBXGroup;
 			children = (
+				73844F4B13500E1600033B85 /* GeomUtils.cpp */,
+				73844F4C13500E1600033B85 /* GeomUtils.h */,
+				73844F4D13500E1600033B85 /* polygon.cpp */,
+				73844F4E13500E1600033B85 /* SlipZone.h */,
 				7374B37012F5D20600B13E6A /* gameStats.cpp */,
 				7374B37112F5D20600B13E6A /* gameStats.h */,
 				73D2F28112E2D7E700EA5EBE /* barrier.cpp */,
@@ -1360,8 +1442,6 @@
 				73D2F30E12E2D7E800EA5EBE /* statistics.h */,
 				73D2F30F12E2D7E800EA5EBE /* stringUtils.cpp */,
 				73D2F31012E2D7E800EA5EBE /* stringUtils.h */,
-				73D2F31112E2D7E800EA5EBE /* SweptEllipsoid.cpp */,
-				73D2F31212E2D7E800EA5EBE /* SweptEllipsoid.h */,
 				73D2F31312E2D7E800EA5EBE /* teamInfo.cpp */,
 				73D2F31412E2D7E800EA5EBE /* teamInfo.h */,
 				73D2F31512E2D7E800EA5EBE /* teleporter.cpp */,
@@ -1940,7 +2020,6 @@
 				73D2F39C12E2D7E800EA5EBE /* speedZone.cpp in Sources */,
 				73D2F39D12E2D7E800EA5EBE /* statistics.cpp in Sources */,
 				73D2F39E12E2D7E800EA5EBE /* stringUtils.cpp in Sources */,
-				73D2F39F12E2D7E800EA5EBE /* SweptEllipsoid.cpp in Sources */,
 				73D2F3A012E2D7E800EA5EBE /* teamInfo.cpp in Sources */,
 				73D2F3A112E2D7E800EA5EBE /* teleporter.cpp in Sources */,
 				73D2F3A212E2D7E800EA5EBE /* textItem.cpp in Sources */,
@@ -2004,6 +2083,14 @@
 				73702897132A020B00397F99 /* RecastAlloc.cpp in Sources */,
 				73702898132A020B00397F99 /* RecastMesh.cpp in Sources */,
 				7370289D132A020B00397F99 /* triangle.c in Sources */,
+				73844F3D13500C2F00033B85 /* clipper.cpp in Sources */,
+				73844F3E13500C2F00033B85 /* shapes.cc in Sources */,
+				73844F3F13500C2F00033B85 /* advancing_front.cc in Sources */,
+				73844F4013500C2F00033B85 /* cdt.cc in Sources */,
+				73844F4113500C2F00033B85 /* sweep.cc in Sources */,
+				73844F4213500C2F00033B85 /* sweep_context.cc in Sources */,
+				73844F5113500E1600033B85 /* GeomUtils.cpp in Sources */,
+				73844F5213500E1600033B85 /* polygon.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2165,7 +2252,6 @@
 				73D2F40F12E2D7E800EA5EBE /* speedZone.cpp in Sources */,
 				73D2F41012E2D7E800EA5EBE /* statistics.cpp in Sources */,
 				73D2F41112E2D7E800EA5EBE /* stringUtils.cpp in Sources */,
-				73D2F41212E2D7E800EA5EBE /* SweptEllipsoid.cpp in Sources */,
 				73D2F41312E2D7E800EA5EBE /* teamInfo.cpp in Sources */,
 				73D2F41412E2D7E800EA5EBE /* teleporter.cpp in Sources */,
 				73D2F41512E2D7E800EA5EBE /* textItem.cpp in Sources */,
@@ -2230,6 +2316,14 @@
 				7370288F132A020B00397F99 /* RecastAlloc.cpp in Sources */,
 				73702890132A020B00397F99 /* RecastMesh.cpp in Sources */,
 				73702895132A020B00397F99 /* triangle.c in Sources */,
+				73844F3713500C2F00033B85 /* clipper.cpp in Sources */,
+				73844F3813500C2F00033B85 /* shapes.cc in Sources */,
+				73844F3913500C2F00033B85 /* advancing_front.cc in Sources */,
+				73844F3A13500C2F00033B85 /* cdt.cc in Sources */,
+				73844F3B13500C2F00033B85 /* sweep.cc in Sources */,
+				73844F3C13500C2F00033B85 /* sweep_context.cc in Sources */,
+				73844F4F13500E1600033B85 /* GeomUtils.cpp in Sources */,
+				73844F5013500E1600033B85 /* polygon.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
