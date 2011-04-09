@@ -1495,7 +1495,18 @@ void GameConnection::onConnectTerminated(TerminationReason reason, const char *n
          gErrorMsgUserInterface.setMessage(3, "because server is full.");
          gErrorMsgUserInterface.setMessage(5, "Please try a different server, or try again later.");
          gErrorMsgUserInterface.activate();
+      }
+      else if(reason == ReasonKickedByAdmin)
+      {
+         gErrorMsgUserInterface.reset();
+         gErrorMsgUserInterface.setTitle("Connection Terminated");
 
+         gErrorMsgUserInterface.setMessage(2, "You were kicked off the server by an admin,");
+         gErrorMsgUserInterface.setMessage(3, "and have been temporarily banned.");
+         gErrorMsgUserInterface.setMessage(5, "You can try another server, host your own,");
+         gErrorMsgUserInterface.setMessage(6, "or try the server that kicked you again later.");
+         gMainMenuUserInterface.activate();
+         gErrorMsgUserInterface.activate();
       }
       else  // Looks like the connection failed for some unknown reason.  Server died?
       {

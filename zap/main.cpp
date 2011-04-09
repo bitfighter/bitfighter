@@ -68,6 +68,8 @@ XXX need to document timers, new luavec stuff XXX
 <li>Increased rendering speed for most game objects
 <li>Vastly improved performance for auto-generated bot nav zones
 <li>Bot nav zones now auto generated for all levels at load time; no further need to manually create zones; manual zone creation will be removed in future version
+<li>Some minor adjustment to SpeedZone to avoid any possibility to get through one way SpeedZone path, reduce lag while using SpeedZone.
+<li>Fix problem where kicking a player will lag, delay disconnect other players at the same IP address or same computer.
 <li>PolyWall item added to editor -- works just like a wall, but is edited like a loadout zone or other polygon item.  Note that this replaces the undocumented item "BarrierMakerS" which is now deprecated.
 </ul>
 <h4>New Features</h4>
