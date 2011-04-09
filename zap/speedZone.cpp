@@ -201,9 +201,8 @@ bool SpeedZone::getCollisionPoly(Vector<Point> &polyPoints)
 }
 
 
-// Handle collisions with a SpeedZone
 static bool ignoreThisCollision = false;
-extern U32 collideStateIndex;
+// Checks collisions with a SpeedZone
 bool SpeedZone::collide(GameObject *hitObject)
 {
    if(ignoreThisCollision)
@@ -211,11 +210,11 @@ bool SpeedZone::collide(GameObject *hitObject)
    // This is run on both server and client side to reduce teleport lag effect.
    if(hitObject->getObjectTypeMask() & (ShipType | RobotType))     // Only ships & robots collide
    {
-      Ship *s = dynamic_cast<Ship *>(hitObject);
+      MoveObject *s = dynamic_cast<MoveObject *>(hitObject);
       if(!s)
          return false;
 
-      if(isGhost()) // on client, don't process speedZone on all ships except the controlling one.
+      if(isGhost()) // on client, don't process speedZone on all moveObjects except the controlling one.
       {
          ClientGame *client = dynamic_cast<ClientGame *>(getGame());
          if(client)
@@ -225,12 +224,13 @@ bool SpeedZone::collide(GameObject *hitObject)
                return false;
          }
       }
-      s->mSpeedZoneHit[collideStateIndex] = this;
+		return true;
    }
    return false;
 }
 
-void SpeedZone::collided(Ship *s, U32 stateIndex)
+// Handles collisions with a SpeedZone
+void SpeedZone::collided(MoveObject *s, U32 stateIndex)
 {
    {
       MoveObject::MoveState *moveState = &s->mMoveState[stateIndex];
@@ -245,12 +245,12 @@ void SpeedZone::collided(Ship *s, U32 stateIndex)
       impulse.normalize(mSpeed);
       Point shipNormal = moveState->vel;
       shipNormal.normalize(mSpeed);
-      F32 speed = mSpeed;
+      F32 angleSpeed = mSpeed * 0.5f;
 
          // using mUnpackInit, as client does not know that mRotateSpeed is not zero.
       if(mSnapLocation && mRotateSpeed == 0 && mUnpackInit < 3)
-         speed *= 0.5;
-      if(shipNormal.distanceTo(impulse) < speed && moveState->vel.len() > mSpeed * 0.8)
+         angleSpeed *= 0.01f;
+      if(shipNormal.distanceTo(impulse) < angleSpeed && moveState->vel.len() > mSpeed)
          return;
 
       // This following line will cause ships entering the speedzone to have their location set to the same point

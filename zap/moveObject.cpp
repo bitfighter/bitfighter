@@ -30,6 +30,7 @@
 #include "sparkManager.h"
 #include "ship.h"
 #include "sfx.h"
+#include "speedZone.h"
 
 namespace Zap
 {
@@ -164,13 +165,15 @@ const F32 velocityEpsilon = 0.00001f;
 void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vector<SafePtr<MoveObject> > displacerList)
 {
    U32 tryCount = 0;
+	Vector<SafePtr<GameObject> > disabledList;
+
    while(moveTime > moveTimeEpsilon && tryCount < 8)     // moveTimeEpsilon is a very short, but non-zero, bit of time
    {
       tryCount++;
 
       // Ignore tiny movements unless we're processing a collision
       if(!isBeingDisplaced && mMoveState[stateIndex].vel.len() < velocityEpsilon)
-         return;
+         break;
 
       F32 collisionTime = moveTime;
       Point collisionPoint = mMoveState[stateIndex].pos;
@@ -179,7 +182,7 @@ void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vecto
       if(!objectHit)    // No collision (or if isBeingDisplaced is true, we haven't been pushed into another object)
       {
          mMoveState[stateIndex].pos += mMoveState[stateIndex].vel * moveTime;    // Move to desired destination
-         return;
+         break;
       }
 
       // Collision!  Advance to the point of collision
@@ -193,15 +196,20 @@ void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vecto
          Point posDelta = moveObjectThatWasHit->mMoveState[stateIndex].pos - mMoveState[stateIndex].pos;
 
          // Prevent infinite loops with a series of objects trying to displace each other forever
-         for(S32 i = 0; i < displacerList.size(); i++)
-            if(isBeingDisplaced && (moveObjectThatWasHit == displacerList[i]))
-              return;
+         if(isBeingDisplaced)
+			{
+				bool hit = false;
+            for(S32 i = 0; i < displacerList.size(); i++)
+               if(moveObjectThatWasHit == displacerList[i])
+                 hit = true;
+				if(hit) break;
+			}
  
          if(posDelta.dot(velDelta) < 0)   // moveObjectThatWasHit is closing faster than we are ???
          {
             computeCollisionResponseMoveObject(stateIndex, moveObjectThatWasHit);
             if(isBeingDisplaced)
-               return;
+               break;
          }
          else                            // We're moving faster than the object we hit (I think)
          {
@@ -210,7 +218,7 @@ void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vecto
             F32 displaceEpsilon = 0.002f;
             F32 t = computeMinSeperationTime(stateIndex, moveObjectThatWasHit, intendedPos);
             if(t <= 0)
-               return;   // Some kind of math error, couldn't find result: stop simulating this ship
+               break;   // Some kind of math error, couldn't find result: stop simulating this ship
 
             // Note that we could end up with an infinite feedback loop here, if, for some reason, two objects keep trying to displace
             // one another, as this will just recurse deeper and deeper.
@@ -231,8 +239,22 @@ void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vecto
          computeCollisionResponseBarrier(stateIndex, collisionPoint);
 			//moveTime = 0;
       }
+      else if(objectHit->getObjectTypeMask() & SpeedZoneType)
+		{
+			SpeedZone *speedZone = dynamic_cast<SpeedZone *>(objectHit);
+			if(speedZone)
+			{
+				speedZone->collided(this, stateIndex);
+			}
+         disabledList.push_back(objectHit);
+         objectHit->disableCollision();
+			tryCount--;   // SpeedZone don't count as tryCount
+		}
       moveTime -= collisionTime;
    }
+   for(S32 i = 0; i < disabledList.size(); i++)   // enable any disabled collision
+		if(disabledList[i].isValid())
+         disabledList[i]->enableCollision();
 }
 
 
@@ -241,7 +263,6 @@ bool MoveObject::collide(GameObject *otherObject)
    return true;
 }
 
-U32 collideStateIndex; // need to somehow pass the stateIndex to SpeedZone::collide
 GameObject *MoveObject::findFirstCollision(U32 stateIndex, F32 &collisionTime, Point &collisionPoint)
 {
    // Check for collisions against other objects
@@ -257,8 +278,6 @@ GameObject *MoveObject::findFirstCollision(U32 stateIndex, F32 &collisionTime, P
 
    GameObject *collisionObject = NULL;
    Vector<Point> poly;
-
-   collideStateIndex = stateIndex;
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {

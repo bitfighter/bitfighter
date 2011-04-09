@@ -90,7 +90,7 @@ public:
 
    bool getCollisionPoly(Vector<Point> &polyPoints);  // More precise boundary for precise collision detection
    bool collide(GameObject *hitObject);
-   void collided(Ship *ship, U32 stateIndex);
+   void collided(MoveObject *s, U32 stateIndex);
    void idle(GameObject::IdleCallPath path);
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);

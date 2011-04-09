@@ -209,12 +209,6 @@ void Ship::processMove(U32 stateIndex)
    F32 time = mCurrentMove.time * 0.001;
    Point requestVel(mCurrentMove.right - mCurrentMove.left, mCurrentMove.down - mCurrentMove.up);
 
-   if(mSpeedZoneHit[stateIndex].isValid())
-   {
-      mSpeedZoneHit[stateIndex]->collided(this, stateIndex);
-      mSpeedZoneHit[stateIndex] = NULL;
-   }
-
    const S32 MAX_CONTROLLABLE_SPEED = 1000;     // 1000 is completely arbitrary, but it seems to work well...
    if(mMoveState[stateIndex].vel.len() > MAX_CONTROLLABLE_SPEED)     
       requestVel.set(0,0);
@@ -468,8 +462,8 @@ void Ship::idle(GameObject::IdleCallPath path)
       //if(mMoveState[ActualState].vel == Point(0,0))
       {
          SpeedZone *speedZone = dynamic_cast<SpeedZone *>(isOnObject(SpeedZoneType));
-         if(speedZone)
-            speedZone->collide(this);
+         if(speedZone && speedZone->collide(this))
+            speedZone->collided(this, ActualState);
       }
 
 
