@@ -134,6 +134,7 @@ GameType::GameType() : mScoreboardUpdateTimer(1000) , mGameTimer(DefaultGameTime
    mWinningScore = DefaultWinningScore;
    mLeadingTeam = -1;
    mLeadingTeamScore = 0;
+   mDigitsNeededToDisplayScore = 1;
    minRecPlayers = -1;
    maxRecPlayers = -1;
    mCanSwitchTeams = true;       // Players can switch right away
@@ -632,17 +633,10 @@ void GameType::renderInterfaceOverlay(bool scoreboardVisible)
       teams.sort(teamScoreSort);    
 
       S32 maxScore = getLeadingScore();
-      S32 digits;
-         
-      if(maxScore == 0)
-         digits = 1;
-      else if(maxScore > 0)
-         digits = S32(log10((F32)maxScore)) + 1;
-      else
-         digits = S32(log10((F32)maxScore)) + 2;
 
       const S32 textsize = 32;
-      S32 xpos = gScreenInfo.getGameCanvasWidth() - UserInterface::horizMargin - digits * UserInterface::getStringWidth(F32(textsize), "0");
+      S32 xpos = gScreenInfo.getGameCanvasWidth() - UserInterface::horizMargin - mDigitsNeededToDisplayScore * 
+                                                                                 UserInterface::getStringWidth(F32(textsize), "0");
 
       for(S32 i = 0; i < teams.size(); i++)
       {
@@ -2085,14 +2079,22 @@ void GameType::updateScore(ClientRef *player, S32 team, ScoringEvent scoringEven
 void GameType::updateLeadingTeamAndScore()
 {
    mLeadingTeamScore = S32_MIN;
+   mDigitsNeededToDisplayScore = -1;
 
    // Find the leading team...
    for(S32 i = 0; i < mTeams.size(); i++)
-      if(mTeams[i].getScore() > mLeadingTeamScore)
+   {
+      S32 score = mTeams[i].getScore();
+      S32 digits = score == 0 ? 1 : (S32(log10(F32(abs(score)))) + (score < 0 ? 2 : 1));
+
+      mDigitsNeededToDisplayScore = max(digits, mDigitsNeededToDisplayScore);
+
+      if(score > mLeadingTeamScore)
       {
          mLeadingTeamScore = mTeams[i].getScore();
          mLeadingTeam = i;
-      }  // no break statement in above!
+      }
+   }
 }
 
 

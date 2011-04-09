@@ -468,11 +468,12 @@ private:
    Point mMousePos;              // Where the mouse is at the moment
    Point mMouseDownPos;          // Where the mouse was pressed for a drag operation
 
-   void renderGenericItem(Point pos, Color c, F32 alpha);
+   void renderGenericItem(const Point &pos, const Color &c, F32 alpha, const Color &letterColor, char letter);
    void renderGrid();                                       // Draw background snap grid
    void renderDock(F32 width);
    void renderTextEntryOverlay();
    void renderReferenceShip();
+   void drawLetter(char letter, const Point &pos, const Color &color, F32 alpha);
    F32 renderTextItem(WorldItem &item, F32 alpha);          // Returns size of text
    void setTranslationAndScale(const Point &pos);
 

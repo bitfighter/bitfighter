@@ -309,42 +309,37 @@ bool EngineeredObject::processArguments(S32 argc, const char **argv)
 
 
 // This is used for both positioning items in-game and for snapping them to walls in the editor --> static method
+// Polulates anchor and normal
 DatabaseObject *EngineeredObject::findAnchorPointAndNormal(GridDatabase *db, const Point &pos, F32 snapDist, 
                                                            bool format, Point &anchor, Point &normal)
 {
    F32 minDist = F32_MAX;
    DatabaseObject *closestWall = NULL;
 
+   Point n;    // Reused in loop below
+   F32 t;
+
    // Start with a sweep of the area
    for(F32 theta = 0; theta < Float2Pi; theta += FloatPi * 0.125)    // Reducing to 0.0125 seems to have no effect
    {
       Point dir(cos(theta), sin(theta));
       dir *= snapDist;
-      Point pos2 = pos - dir * 0.001f; // only needed for editor..
-
-      F32 t;
-      Point n;
+      Point mountPos = pos - dir * 0.001f;                           // Offsetting slightly prevents spazzy behavior in editor
 
       // Look for walls
-      DatabaseObject *wall = db->findObjectLOS(BarrierType, MoveObject::ActualState, format, pos2, pos2 + dir, t, n);
+      DatabaseObject *wall = db->findObjectLOS(BarrierType, MoveObject::ActualState, format, mountPos, mountPos + dir, t, n);
 
       if(wall != NULL)     // Found one!
       {
          if(t < minDist)
          {
-            anchor.set(pos2 + dir * t);
+            anchor.set(mountPos + dir * t);
             normal.set(n);
             minDist = t;
             closestWall = wall;
          }
       }
    }
-
-   // TODO: Reactivate for polywalls
-   //Vector<Point> walls;
-   //if(closestWall && closestWall->getCollisionPoly(walls))
-   //   if(isWoundClockwise(walls))
-   //      normal = -normal;  // Avoid objects pointing inside polygon walls
 
    return closestWall;
 }

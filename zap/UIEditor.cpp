@@ -235,7 +235,6 @@ struct GameItemRec
    bool hasText;        // Item has a text string attached to it
    bool hasRepop;       // Item has a repop delay that can be set
    GeomType geom;
-   char letter;         // How item is represented by editor.  Some items are drawn with a letter others have custom symbols.
    bool specialTabKeyRendering;  // true if item is rendered in a special way when tab is down
    const char *prettyNamePlural;
    const char *onDockName;       // Briefer, pretty looking label to label things on dock
@@ -244,36 +243,36 @@ struct GameItemRec
 };
 
 
-// Remember to keep these properly aligned with GameItems enum                                       display
-//   Name,                 hasWidth, hasTeam, canBeNeut, canBeHos, hasText, hasRepop,   geom,        letter, special, prettyNamePlural        onDockName   onScreenName      description
+// Remember to keep these properly aligned with GameItems enum                                       
+//   Name,                 hasWidth, hasTeam, canBeNeut, canBeHos, hasText, hasRepop,   geom,        special, prettyNamePlural        onDockName   onScreenName      description
 GameItemRec itemDef[] = {
-   { "Spawn",               false,    true,      true,     false,   false,   false,   geomPoint,      'S',    true,   "Spawn points",           "Spawn",    "Spawn",        "Location where ships start.  At least one per team is required. [G]" },
-   { "SpeedZone",           false,    false,     true,     true,    false,   false,   geomSimpleLine,  0,     false,  "GoFasts",                "GoFast",   "GoFast",       "Makes ships go fast in direction of arrow. [P]" },
-   { "SoccerBallItem",      false,    false,     false,    false,   false,   false,   geomPoint,       0,     true,   "Soccer balls",           "Ball",     "Ball",         "Soccer ball, can only be used in Soccer games." },
-   { "FlagItem",            false,    true,      true,     true,    false,   false,   geomPoint,       0,     false,  "Flags",                  "Flag",     "Flag",         "Flag item, used by a variety of game types." },
-   { "FlagSpawn",           false,    true,      true,     true,    false,   true,    geomPoint,       0,     true,   "Flag spawn points",      "FlagSpawn","FlagSpawn",    "Location where flags (or balls in Soccer) spawn after capture." },
-   { "BarrierMaker",        true,     false,     false,    false,   false,   false,   geomLine,        0,     false,  "Barrier makers",         "Wall",     "Wall",         "Run-of-the-mill wall item." },
-   { "PolyWall",            false,    false,     false,    false,   false,   false,   geomPoly,        0,     false,  "PolyWalls",              "Wall",     "Wall",         "Polygon wall barrier; create linear walls with right mouse click." },
-   { "LineItem",            true,     true,      true,     true,    false,   false,   geomLine,        0,     false,  "Decorative Lines",       "LineItem", "LineItem",     "Decorative linework." },
-   { "Teleporter",          false,    false,     false,    false,   false,   false,   geomSimpleLine,  0,     false,  "Teleporters",            "Teleport", "Teleport",     "Teleports ships from one place to another. [T]" },
-   { "RepairItem",          false,    false,     false,    false,   false,   true,    geomPoint,       0,     false,  "Repair items",           "Repair",    "Repair",       "Repairs damage to ships. [B]" },
-   { "EnergyItem",          false,    false,     false,    false,   false,   true,    geomPoint,       0,     false,  "Energy items",           "Enrg",     "Energy",       "Restores energy to ships" },
-   { "TestItem",            false,    false,     false,    false,   false,   false,   geomPoint,       0,     true,   "Test items",             "Test",     "Test Item",    "Bouncy object that floats around and gets in the way." },
-   { "Asteroid",            false,    false,     false,    false,   false,   false,   geomPoint,       0,     true,   "Asteroids",              "Ast.",     "Asteroid",     "Shootable asteroid object.  Just like the arcade game." },
-   { "AsteroidSpawn",       false,    false,     false,    false,   false,   true,    geomPoint,       0,     true,   "Asteroid spawn points",  "ASP",      "AsteroidSpawn","Periodically spawns a new asteroid." },
-   { "Mine",                false,    false,     true,     true,    false,   false,   geomPoint,      'M',    true,   "Mines",                  "Mine",     "Mine",         "Mines can be prepositioned, and are are \"hostile to all\". [M]" },
-   { "SpyBug",              false,    true,      true,     true,    false,   false,   geomPoint,      'S',    false,  "Spy bugs",               "Bug",      "Spy Bug",      "Remote monitoring device that shows enemy ships on the commander's map. [Ctrl-B]" },
-   { "ResourceItem",        false,    false,     false,    false,   false,   false,   geomPoint,       0,     true,   "Resource items",         "Res.",     "Resource",     "Small bouncy object that floats around and gets in the way." },
-   { "LoadoutZone",         false,    true,      true,     true,    false,   false,   geomPoly,        0,     false,  "Loadout zones",          "Loadout",  "Loadout",      "Area to finalize ship modifications.  Each team should have at least one." },
-   { "HuntersNexusObject",  false,    false,     true,     true,    false,   false,   geomPoly,        0,     false,  "Nexus zones",            "Nexus",    "Nexus",        "Area to bring flags in Hunter game.  Cannot be used in other games." },
-   { "SlipZone",            false,    false,     true,     true,    false,   false,   geomPoly,       'z',    false,  "Slip zones",             "Slip Zone","Slip Zone",    "Not yet implemented." },
-   { "Turret",              false,    true,      true,     true,    false,   true,    geomPoint,      'T',    false,  "Turrets",                "Turret",   "Turret",       "Creates shooting turret.  Can be on a team, neutral, or \"hostile to all\". [Y]" },
-   { "ForceFieldProjector", false,    true,      true,     true,    false,   true ,   geomPoint,      '>',    false,  "Force field projectors", "ForceFld", "ForceFld",     "Creates a force field that lets only team members pass. [F]" },
-   { "GoalZone",            false,    true,      true,     true,    false,   false,   geomPoly,        0,     false,  "Goal zones",             "Goal",     "Goal",         "Target area used in a variety of games." },
-   { "TextItem",            false,    true,      true,     true,    true,    false,   geomSimpleLine,  0,     false,  "Text Items",             "TextItem", "Text",         "Draws a bit of text on the map.  Visible only to team, or to all if neutral." },
-   { "BotNavMeshZone",      false,    false,     true,     true,    false,   false,   geomPoly,        0,     false,  "NavMesh Zones",          "NavMesh",  "NavMesh",      "Creates navigational mesh zone for robots." },
+   { "Spawn",               false,    true,      true,     false,   false,   false,   geomPoint,       true,   "Spawn points",           "Spawn",    "Spawn",        "Location where ships start.  At least one per team is required. [G]" },
+   { "SpeedZone",           false,    false,     true,     true,    false,   false,   geomSimpleLine,  false,  "GoFasts",                "GoFast",   "GoFast",       "Makes ships go fast in direction of arrow. [P]" },
+   { "SoccerBallItem",      false,    false,     false,    false,   false,   false,   geomPoint,       true,   "Soccer balls",           "Ball",     "Ball",         "Soccer ball, can only be used in Soccer games." },
+   { "FlagItem",            false,    true,      true,     true,    false,   false,   geomPoint,       false,  "Flags",                  "Flag",     "Flag",         "Flag item, used by a variety of game types." },
+   { "FlagSpawn",           false,    true,      true,     true,    false,   true,    geomPoint,       true,   "Flag spawn points",      "FlagSpawn","FlagSpawn",    "Location where flags (or balls in Soccer) spawn after capture." },
+   { "BarrierMaker",        true,     false,     false,    false,   false,   false,   geomLine,        false,  "Barrier makers",         "Wall",     "Wall",         "Run-of-the-mill wall item." },
+   { "PolyWall",            false,    false,     false,    false,   false,   false,   geomPoly,        false,  "PolyWalls",              "Wall",     "Wall",         "Polygon wall barrier; create linear walls with right mouse click." },
+   { "LineItem",            true,     true,      true,     true,    false,   false,   geomLine,        false,  "Decorative Lines",       "LineItem", "LineItem",     "Decorative linework." },
+   { "Teleporter",          false,    false,     false,    false,   false,   false,   geomSimpleLine,  false,  "Teleporters",            "Teleport", "Teleport",     "Teleports ships from one place to another. [T]" },
+   { "RepairItem",          false,    false,     false,    false,   false,   true,    geomPoint,       false,  "Repair items",           "Repair",    "Repair",       "Repairs damage to ships. [B]" },
+   { "EnergyItem",          false,    false,     false,    false,   false,   true,    geomPoint,       false,  "Energy items",           "Enrg",     "Energy",       "Restores energy to ships" },
+   { "TestItem",            false,    false,     false,    false,   false,   false,   geomPoint,       true,   "Test items",             "Test",     "Test Item",    "Bouncy object that floats around and gets in the way." },
+   { "Asteroid",            false,    false,     false,    false,   false,   false,   geomPoint,       true,   "Asteroids",              "Ast.",     "Asteroid",     "Shootable asteroid object.  Just like the arcade game." },
+   { "AsteroidSpawn",       false,    false,     false,    false,   false,   true,    geomPoint,       true,   "Asteroid spawn points",  "ASP",      "AsteroidSpawn","Periodically spawns a new asteroid." },
+   { "Mine",                false,    false,     true,     true,    false,   false,   geomPoint,       true,   "Mines",                  "Mine",     "Mine",         "Mines can be prepositioned, and are are \"hostile to all\". [M]" },
+   { "SpyBug",              false,    true,      true,     true,    false,   false,   geomPoint,       false,  "Spy bugs",               "Bug",      "Spy Bug",      "Remote monitoring device that shows enemy ships on the commander's map. [Ctrl-B]" },
+   { "ResourceItem",        false,    false,     false,    false,   false,   false,   geomPoint,       true,   "Resource items",         "Res.",     "Resource",     "Small bouncy object that floats around and gets in the way." },
+   { "LoadoutZone",         false,    true,      true,     true,    false,   false,   geomPoly,        false,  "Loadout zones",          "Loadout",  "Loadout",      "Area to finalize ship modifications.  Each team should have at least one." },
+   { "HuntersNexusObject",  false,    false,     true,     true,    false,   false,   geomPoly,        false,  "Nexus zones",            "Nexus",    "Nexus",        "Area to bring flags in Hunter game.  Cannot be used in other games." },
+   { "SlipZone",            false,    false,     true,     true,    false,   false,   geomPoly,        false,  "Slip zones",             "Slip Zone","Slip Zone",    "Not yet implemented." },
+   { "Turret",              false,    true,      true,     true,    false,   true,    geomPoint,       false,  "Turrets",                "Turret",   "Turret",       "Creates shooting turret.  Can be on a team, neutral, or \"hostile to all\". [Y]" },
+   { "ForceFieldProjector", false,    true,      true,     true,    false,   true ,   geomPoint,       false,  "Force field projectors", "ForceFld", "ForceFld",     "Creates a force field that lets only team members pass. [F]" },
+   { "GoalZone",            false,    true,      true,     true,    false,   false,   geomPoly,        false,  "Goal zones",             "Goal",     "Goal",         "Target area used in a variety of games." },
+   { "TextItem",            false,    true,      true,     true,    true,    false,   geomSimpleLine,  false,  "Text Items",             "TextItem", "Text",         "Draws a bit of text on the map.  Visible only to team, or to all if neutral." },
+   { "BotNavMeshZone",      false,    false,     true,     true,    false,   false,   geomPoly,        false,  "NavMesh Zones",          "NavMesh",  "NavMesh",      "Creates navigational mesh zone for robots." },
 
-   { NULL,                  false,    false,     false,   false,    false,   false,   geomNone,        0,     false,  "",                       "",         "",             "" },
+   { NULL,                  false,    false,     false,   false,    false,   false,   geomNone,        false,  "",                       "",         "",             "" },
 };
 
 
@@ -2090,6 +2089,7 @@ bool EditorUserInterface::showingNavZones()
    return (mShowMode == ShowAllObjects || mShowMode == NavZoneMode) && !mShowingReferenceShip;
 }
 
+
 extern void renderPolygon(const Vector<Point> &fillPoints, const Vector<Point> &outlinePoints, const Color &fillColor, const Color &outlineColor, F32 alpha = 1);
 
 static const S32 asteroidDesign = 2;      // Design we'll use for all asteroids in editor
@@ -2116,8 +2116,6 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
       drawColor = Color(.75, .75, .75);
 
    pos = convertLevelToCanvasCoord(item.vert(0), !item.mDockItem);
-
-   bool showLetter = true;    // In a few cases, we want to disable rendering of letters on objects
 
    glEnableBlend;        // Enable transparency
 
@@ -2521,6 +2519,8 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
 
             glColor(hideit ? grayedOutColorDim : Color(.1,.3,.3), alpha);
             drawCircle(pos, 5 - (item.mDockItem ? 1 : 0));
+
+            drawLetter('M', pos, hideit ? grayedOutColorBright : drawColor, alpha);
          }
       }
       else if(item.index == ItemSpyBug)  // And a spy bug
@@ -2530,6 +2530,8 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
 
          glColor(hideit ? grayedOutColorDim : getTeamColor(item.team), alpha);
          drawCircle(pos, 5 - (item.mDockItem ? 1 : 0));
+
+         drawLetter('S', pos, hideit ? grayedOutColorBright : drawColor, alpha);
 
          // And show how far it can see... unless, of course, it's on the dock, and assuming the tab key has been pressed
          if(!item.mDockItem && mShowingReferenceShip && (item.selected || item.litUp))
@@ -2575,23 +2577,14 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
                                    item.forceFieldEnd, c, true, scaleFact);
                glPopMatrix();
             }
-
-            showLetter = false;
-         }
-
-         else renderGenericItem(pos, c, alpha);  
-      }
-
-      else                             // Draw anything else
-      {
-         if(mShowingReferenceShip && !item.mDockItem)
-         {
-            // Do nothing
          }
          else
-            renderGenericItem(pos, c, alpha);
+            renderGenericItem(pos, c, alpha, hideit ? grayedOutColorBright : drawColor, item.index == ItemTurret ? 'T' : '>');  
       }
-
+      else if(item.index == ItemSpawn)
+         renderGenericItem(pos, c, alpha, hideit ? grayedOutColorBright : drawColor, 'S');  
+      else
+         TNLAssert(false, "Unknown item!");
 
       // If this is an item that has a repop attribute, and the item is selected, draw the text
       if(!item.mDockItem && itemDef[item.index].hasRepop)
@@ -2656,22 +2649,6 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
          drawSquare(ctr, highlightRadius);
       }
 
-      if(item.mDockItem || showLetter && !(itemDef[item.index].specialTabKeyRendering && mShowingReferenceShip)) 
-      {
-         char letter = itemDef[item.index].letter;    // Get letter to represent object
-
-         // Mark the item with a letter, unless we're showing the reference ship
-         if(letter)
-         {
-            S32 vertOffset = 8;
-            if (letter >= 'a' && letter <= 'z')    // Better position lowercase letters
-               vertOffset = 10;
-
-            glColor(hideit ? grayedOutColorBright : drawColor, alpha);
-            drawStringf(pos.x - getStringWidthf(15, "%c", letter) / 2, pos.y - vertOffset, 15, "%c", letter);
-         }
-      }
-
       // Add a label if we're hovering over it (or not, unless it's on the dock, where we've already labeled our items)
       // For the moment, we need special handling for turrets & forcefields :-(
       if(mShowMode != ShowWallsOnly && (item.selected || item.litUp) && 
@@ -2722,10 +2699,23 @@ F32 EditorUserInterface::renderTextItem(WorldItem &item, F32 alpha)
 }
 
 
-void EditorUserInterface::renderGenericItem(Point pos, Color c, F32 alpha)
+void EditorUserInterface::renderGenericItem(const Point &pos, const Color &c, F32 alpha, const Color &letterColor, char letter)
 {
    glColor(c, alpha);
    drawFilledSquare(pos, 8);  // Draw filled box in which we'll put our letter
+   drawLetter(letter, pos, letterColor, alpha);
+}
+
+
+void EditorUserInterface::drawLetter(char letter, const Point &pos, const Color &color, F32 alpha)
+{
+   // Mark the item with a letter, unless we're showing the reference ship
+   S32 vertOffset = 8;
+   if (letter >= 'a' && letter <= 'z')    // Better position lowercase letters
+      vertOffset = 10;
+
+   glColor(color, alpha);
+   drawStringf(pos.x - getStringWidthf(15, "%c", letter) / 2, pos.y - vertOffset, 15, "%c", letter);
 }
 
 

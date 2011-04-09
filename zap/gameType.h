@@ -251,22 +251,23 @@ public:
    void addItemOfInterest(Item *theItem);
 
    Timer mScoreboardUpdateTimer;
-   Timer mGameTimer;             // Track when current game will end
+   Timer mGameTimer;                // Track when current game will end
    Timer mGameTimeUpdateTimer;
    Timer mLevelInfoDisplayTimer;
    Timer mInputModeChangeAlertDisplayTimer;
 
-   bool mCanSwitchTeams;         // Player can switch teams when this is true, not when it is false
+   bool mCanSwitchTeams;            // Player can switch teams when this is true, not when it is false
 
-   S32 mWinningScore;            // Game over when team (or player in individual games) gets this score
-   S32 mLeadingTeam;             // Team with highest score
-   S32 mLeadingTeamScore;        // Score of mLeadingTeam
+   S32 mWinningScore;               // Game over when team (or player in individual games) gets this score
+   S32 mLeadingTeam;                // Team with highest score
+   S32 mLeadingTeamScore;           // Score of mLeadingTeam
+   S32 mDigitsNeededToDisplayScore; // Digits needed to display scores
 
-   bool mBetweenLevels;          // We'll need to prohibit certain things (like team changes) when game is in an "intermediate" state
-   bool mGameOver;               // Set to true when an end condition is met
+   bool mBetweenLevels;             // We'll need to prohibit certain things (like team changes) when game is in an "intermediate" state
+   bool mGameOver;                  // Set to true when an end condition is met
 
-   bool mAllowSoccerPickup;      // soccer balls only.
-   bool mHaveSoccer;             // does it have soccer balls? used to determine weather or not to send s2cSoccerCollide
+   bool mAllowSoccerPickup;         // Soccer balls only
+   bool mHaveSoccer;                // Does level have soccer balls? used to determine weather or not to send s2cSoccerCollide
 
    bool mAllowAddBot;
    bool mBotZoneCreationFailed;
