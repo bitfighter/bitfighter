@@ -56,7 +56,7 @@
 #include "../recast/Recast.h"
 #include "../recast/RecastAlloc.h"
 
-#include "../clipper/clipper4.h"
+#include "../clipper/clipper.h"
 
 extern "C" {
 #include "../Triangle/triangle.h"      // For Triangle!

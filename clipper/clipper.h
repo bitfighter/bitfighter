@@ -1,8 +1,8 @@
 /*******************************************************************************
 *                                                                              *
 * Author    :  Angus Johnson                                                   *
-* Version   :  3.1.0                                                           *
-* Date      :  17 February 2011                                                *
+* Version   :  4.1.1                                                           *
+* Date      :  8 April 2011                                                    *
 * Website   :  http://www.angusj.com                                           *
 * Copyright :  Angus Johnson 2010-2011                                         *
 *                                                                              *
@@ -19,15 +19,7 @@
 * Computer graphics and geometric modeling: implementation and algorithms      *
 * By Max K. Agoston                                                            *
 * Springer; 1 edition (January 4, 2005)                                        *
-* Pages 98 - 106.                                                              *
 * http://books.google.com/books?q=vatti+clipping+agoston                       *
-*                                                                              *
-*******************************************************************************/
-
-/*******************************************************************************
-*                                                                              *
-* This is a translation of the Delphi Clipper library and the naming style     *
-* used has retained a very strong Delphi flavour.                              *
 *                                                                              *
 *******************************************************************************/
 
@@ -39,43 +31,42 @@
 #include <cstring>
 #include <cstdlib>
 
-#include "../zap/point.h"
-
 namespace clipper {
 
-enum TClipType { ctIntersection, ctUnion, ctDifference, ctXor };
-enum TPolyType { ptSubject, ptClip };
-enum TPolyFillType { pftEvenOdd, pftNonZero};
+enum ClipType { ctIntersection, ctUnion, ctDifference, ctXor };
+enum PolyType { ptSubject, ptClip };
+enum PolyFillType { pftEvenOdd, pftNonZero };
 
-typedef Zap::Point TDoublePoint;
+typedef signed long long long64;
 
-//struct TDoublePoint { double X; double Y; };
-struct TDoubleRect { double left; double top; double right; double bottom; };
-typedef std::vector< TDoublePoint > TPolygon;
-typedef std::vector< TPolygon > TPolyPolygon;
+struct IntPoint {
+  long64 X;
+  long64 Y;
+  IntPoint(long64 x = 0, long64 y = 0): X(x), Y(y) {};
+};
 
-TDoublePoint DoublePoint(const double &X, const double &Y);
-TPolyPolygon OffsetPolygons(const TPolyPolygon &pts, const double &delta);
-TDoubleRect GetBounds(const TPolygon &poly);
-bool IsClockwise(const TPolygon &poly);
-TDoublePoint GetUnitNormal( const TDoublePoint &pt1, const TDoublePoint &pt2);
+typedef std::vector< IntPoint > Polygon;
+typedef std::vector< Polygon > Polygons;
+
+bool IsClockwise(const Polygon &poly);
+double Area(const Polygon &poly);
+Polygons OffsetPolygons(const Polygons &pts, const float &delta);
 
 //used internally ...
-enum TEdgeSide { esLeft, esRight };
-enum TIntersectProtects { ipNone = 0, ipLeft = 1, ipRight = 2, ipBoth = 3 };
+enum EdgeSide { esLeft, esRight };
+enum IntersectProtects { ipNone = 0, ipLeft = 1, ipRight = 2, ipBoth = 3 };
 
 struct TEdge {
-  double xbot;
-  double ybot;
-  double xcurr;
-  double ycurr;
-  double xtop;
-  double ytop;
+  long64 xbot;
+  long64 ybot;
+  long64 xcurr;
+  long64 ycurr;
+  long64 xtop;
+  long64 ytop;
   double dx;
-  double tmpX;
-  bool nextAtTop;
-  TPolyType polyType;
-  TEdgeSide side;
+  long64 tmpX;
+  PolyType polyType;
+  EdgeSide side;
   int windDelta; //1 or -1 depending on winding direction
   int windCnt;
   int windCnt2; //winding count of the opposite polytype
@@ -89,51 +80,52 @@ struct TEdge {
   TEdge *prevInSEL;
 };
 
-struct TIntersectNode {
-  TEdge *edge1;
-  TEdge *edge2;
-  TDoublePoint pt;
-  TIntersectNode *next;
-  TIntersectNode *prev;
+struct IntersectNode {
+  TEdge          *edge1;
+  TEdge          *edge2;
+  IntPoint        pt;
+  IntersectNode  *next;
 };
 
-struct TLocalMinima {
-  double Y;
-  TEdge *leftBound;
-  TEdge *rightBound;
-  TLocalMinima *nextLm;
+struct LocalMinima {
+  long64          Y;
+  TEdge        *leftBound;
+  TEdge        *rightBound;
+  LocalMinima  *next;
 };
 
-struct TScanbeam {
-  double Y;
-  TScanbeam *nextSb;
+struct Scanbeam {
+  long64       Y;
+  Scanbeam *next;
 };
 
-//nb: ofClockwise = desired orientation flag; ofCW = current orientation flag
-enum TOrientationFlag {ofEmpty = 0, ofClockwise = 1, ofCW = 2,
-  ofForwardBound = 4, ofTop = 8, ofBottomMinima = 16};
-
-inline TOrientationFlag operator|(TOrientationFlag a, TOrientationFlag b)
-{return static_cast<TOrientationFlag>(static_cast<int>(a) | static_cast<int>(b));}
-
-struct TPolyPt {
-  TDoublePoint pt;
-  TPolyPt *next;
-  TPolyPt *prev;
-  TOrientationFlag flags;
-  double dx;
+struct PolyPt {
+  IntPoint pt;
+  PolyPt  *next;
+  PolyPt  *prev;
+  bool     isHole;
 };
 
-struct TJoinRec {
-    TDoublePoint pt;
-    int idx1;
-    int idx2;
-    TPolyPt* outPPt; //used by horizontal joins only
+struct JoinRec {
+  IntPoint  pt1a;
+  IntPoint  pt1b;
+  int       poly1Idx;
+  IntPoint  pt2a;
+  IntPoint  pt2b;
+  int       poly2Idx;
 };
 
-typedef std::vector < TPolyPt * > PolyPtList;
-typedef std::vector < TJoinRec > JoinList;
-typedef std::vector< TEdge* > EdgeList;
+struct HorzJoinRec {
+  TEdge   *edge;
+  int       savedIdx;
+};
+
+struct IntRect { long64 left; long64 top; long64 right; long64 bottom; };
+
+typedef std::vector < PolyPt* > PolyPtList;
+typedef std::vector < TEdge* > EdgeList;
+typedef std::vector < JoinRec* > JoinList;
+typedef std::vector < HorzJoinRec* > HorzJoinList;
 
 //ClipperBase is the ancestor to the Clipper class. It should not be
 //instantiated directly. This class simply abstracts the conversion of sets of
@@ -143,19 +135,19 @@ class ClipperBase
 public:
   ClipperBase();
   virtual ~ClipperBase();
-  void AddPolygon(const TPolygon &pg, TPolyType polyType);
-  void AddPolyPolygon( const TPolyPolygon &ppg, TPolyType polyType);
+  bool AddPolygon(const Polygon &pg, PolyType polyType);
+  bool AddPolygons( const Polygons &ppg, PolyType polyType);
   virtual void Clear();
-  TDoubleRect GetBounds();
+  IntRect GetBounds();
 protected:
   void DisposeLocalMinimaList();
-  void InsertLocalMinima(TLocalMinima *newLm);
   TEdge* AddBoundsToLML(TEdge *e);
   void PopLocalMinima();
-  bool Reset();
-  TLocalMinima           *m_CurrentLM;
+  virtual void Reset();
+  void InsertLocalMinima(LocalMinima *newLm);
+  LocalMinima           *m_CurrentLM;
+  LocalMinima           *m_MinimaList;
 private:
-  TLocalMinima           *m_localMinimaList;
   EdgeList               m_edges;
 };
 
@@ -164,38 +156,31 @@ class Clipper : public virtual ClipperBase
 public:
   Clipper();
   ~Clipper();
-  bool Execute(TClipType clipType,
-  TPolyPolygon &solution,
-  TPolyFillType subjFillType = pftEvenOdd,
-  TPolyFillType clipFillType = pftEvenOdd);
-  //IgnoreOrientation: the Execute method will be approx 60% faster if
-  //Clipper doesn't need to calculate the orientation of output polygons ...
-  bool IgnoreOrientation();
-  void IgnoreOrientation(bool value);
+  bool Execute(ClipType clipType,
+    Polygons &solution,
+    PolyFillType subjFillType = pftEvenOdd,
+    PolyFillType clipFillType = pftEvenOdd);
+protected:
+  void Reset();
 private:
   PolyPtList        m_PolyPts;
   JoinList          m_Joins;
-  JoinList          m_CurrentHorizontals;
-  TClipType         m_ClipType;
-  TScanbeam        *m_Scanbeam;
-  TEdge            *m_ActiveEdges;
-  TEdge            *m_SortedEdges;
-  TIntersectNode   *m_IntersectNodes;
+  HorzJoinList      m_HorizJoins;
+  ClipType          m_ClipType;
+  Scanbeam         *m_Scanbeam;
+  TEdge           *m_ActiveEdges;
+  TEdge           *m_SortedEdges;
+  IntersectNode    *m_IntersectNodes;
   bool              m_ExecuteLocked;
-  bool              m_IgnoreOrientation;
-  TPolyFillType     m_ClipFillType;
-  TPolyFillType     m_SubjFillType;
-  double            m_IntersectTolerance;
-  void UpdateHoleStates();
+  PolyFillType      m_ClipFillType;
+  PolyFillType      m_SubjFillType;
   void DisposeScanbeamList();
-  void SetWindingDelta(TEdge& edge);
   void SetWindingCount(TEdge& edge);
   bool IsNonZeroFillType(const TEdge& edge) const;
   bool IsNonZeroAltFillType(const TEdge& edge) const;
-  bool InitializeScanbeam();
-  void InsertScanbeam(const double &Y);
-  double PopScanbeam();
-  void InsertLocalMinimaIntoAEL(const double &botY);
+  void InsertScanbeam(const long64 Y);
+  long64 PopScanbeam();
+  void InsertLocalMinimaIntoAEL(const long64 botY);
   void InsertEdgeIntoAEL(TEdge *edge);
   void AddEdgeToSEL(TEdge *edge);
   void CopyAELToSEL();
@@ -203,35 +188,37 @@ private:
   void DeleteFromAEL(TEdge *e);
   void UpdateEdgeIntoAEL(TEdge *&e);
   void SwapPositionsInSEL(TEdge *edge1, TEdge *edge2);
-  bool Process1Before2(TIntersectNode *Node1, TIntersectNode *Node2);
-  bool TestIntersections();
   bool IsContributing(const TEdge& edge) const;
-  bool IsTopHorz(const double &XPos);
+  bool IsTopHorz(const long64 XPos);
   void SwapPositionsInAEL(TEdge *edge1, TEdge *edge2);
-  void DoMaxima(TEdge *e, const double &topY);
+  void DoMaxima(TEdge *e, long64 topY);
   void ProcessHorizontals();
   void ProcessHorizontal(TEdge *horzEdge);
-  void AddLocalMaxPoly(TEdge *e1, TEdge *e2, const TDoublePoint &pt);
-  void AddLocalMinPoly(TEdge *e1, TEdge *e2, const TDoublePoint &pt);
+  void AddLocalMaxPoly(TEdge *e1, TEdge *e2, const IntPoint &pt);
+  void AddLocalMinPoly(TEdge *e1, TEdge *e2, const IntPoint &pt);
   void AppendPolygon(TEdge *e1, TEdge *e2);
-  void DoEdge1(TEdge *edge1, TEdge *edge2, const TDoublePoint &pt);
-  void DoEdge2(TEdge *edge1, TEdge *edge2, const TDoublePoint &pt);
-  void DoBothEdges(TEdge *edge1, TEdge *edge2, const TDoublePoint &pt);
+  void DoEdge1(TEdge *edge1, TEdge *edge2, const IntPoint &pt);
+  void DoEdge2(TEdge *edge1, TEdge *edge2, const IntPoint &pt);
+  void DoBothEdges(TEdge *edge1, TEdge *edge2, const IntPoint &pt);
   void IntersectEdges(TEdge *e1, TEdge *e2,
-     const TDoublePoint &pt, TIntersectProtects protects);
-  TPolyPt* AddPolyPt(TEdge *e, const TDoublePoint &pt);
-  TPolyPt* InsertPolyPtBetween(const TDoublePoint &pt, TPolyPt* pp1, TPolyPt* pp2);
+    const IntPoint &pt, IntersectProtects protects);
+  PolyPt* AddPolyPt(TEdge *e, const IntPoint &pt);
   void DisposeAllPolyPts();
-  void ProcessIntersections( const double &topY);
-  void AddIntersectNode(TEdge *e1, TEdge *e2, const TDoublePoint &pt);
-  void BuildIntersectList(const double& topY);
+  bool ProcessIntersections( const long64 topY);
+  void AddIntersectNode(TEdge *e1, TEdge *e2, const IntPoint &pt);
+  void BuildIntersectList(const long64 topY);
   void ProcessIntersectList();
-  TEdge* BubbleSwap(TEdge *edge);
-  void ProcessEdgesAtTopOfScanbeam(const double &topY);
-  void BuildResult(TPolyPolygon& polypoly);
+  void ProcessEdgesAtTopOfScanbeam(const long64 topY);
+  void BuildResult(Polygons& polypoly);
   void DisposeIntersectNodes();
-  void MergePolysWithCommonEdges();
-  void FixOrientation();
+  bool FixupIntersections();
+  bool IsHole(TEdge *e);
+  void AddJoin(TEdge *e1, TEdge *e2, int e1OutIdx = -1);
+  void ClearJoins();
+  void AddHorzJoin(TEdge *e, int idx);
+  void ClearHorzJoins();
+  void JoinCommonEdges();
+
 };
 
 //------------------------------------------------------------------------------
@@ -249,61 +236,6 @@ class clipperException : public std::exception
 };
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
-
-  struct SkipNode
-  {
-    void* item;
-    int level;
-    SkipNode* prev;    //ie SkipNodes form a double linked list
-    SkipNode* next[1];
-  };
-
-  template<typename T>
-  class SkipList
-  {
-    //definition of the compare function that's passed to the constructor ...
-    typedef int (*compareFunc)(T, T);
-  public:
-    SkipList( compareFunc cf);
-    ~SkipList();
-    void Clear();
-    SkipNode* InsertItem(T item); //throws an exception on duplicates
-    SkipNode* FindItem(T item);
-    bool DeleteItem(T item);
-    void Delete(SkipNode*& node);
-    T PopFirst();
-    SkipNode* First();
-    SkipNode* Next(SkipNode* currentNode);
-    SkipNode* Prev(SkipNode* currentNode);
-    SkipNode* Last();
-    unsigned Count();
-  private:
-    int m_MaxLevel;
-    double m_SkipFrac;
-    int m_CurrentMaxLevel;
-    SkipNode* m_Base;
-    int m_Count;
-    SkipNode* m_Lvls[32];
-    SkipNode* NewNode(int level, T item);
-    compareFunc m_CompareFunc;
-  };
-
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-
-class skiplistException : public std::exception
-{
-  public:
-    skiplistException(const char* description)
-      throw(): std::exception(), m_description (description) {}
-    virtual ~skiplistException() throw() {}
-    virtual const char* what() const throw() {return m_description.c_str();}
-  private:
-    std::string m_description;
-};
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-
 
 } //clipper namespace
 #endif //clipper_hpp
