@@ -265,6 +265,12 @@ void TeamDefUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 
    else if(keyCode == KEY_DELETE || keyCode == KEY_MINUS)            // Del or Minus - Delete current team
    {
+      if (gEditorUserInterface.mTeams.size() == 1) {
+         errorMsgTimer.reset(errorMsgDisplayTime);
+         errorMsg = "There must be at least one team";
+         return;
+      }
+
       gEditorUserInterface.mTeams.erase(selectedIndex);
       if(selectedIndex >= gEditorUserInterface.mTeams.size())
          selectedIndex = gEditorUserInterface.mTeams.size() - 1;
