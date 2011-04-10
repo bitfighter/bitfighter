@@ -134,7 +134,7 @@
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;TNL_ENABLE_LOGGING;SAM_ONLY"
 				RuntimeLibrary="0"
 				EnableEnhancedInstructionSet="2"
-				FloatingPointModel="2"
+				FloatingPointModel="0"
 				RuntimeTypeInfo="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
