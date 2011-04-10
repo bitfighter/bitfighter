@@ -2018,6 +2018,8 @@ void GameType::updateScore(Ship *ship, ScoringEvent scoringEvent, S32 data)
 // Runs on server only
 void GameType::updateScore(ClientRef *player, S32 team, ScoringEvent scoringEvent, S32 data)
 {
+   if(mGameOver)     // freeze score while game over.
+      return;
    S32 newScore = S32_MIN;
 
    if(player != NULL)
