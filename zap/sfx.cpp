@@ -505,7 +505,6 @@ void SFXObject::init()
 
    static int contextData[][2] =
    {
-      {ALC_FREQUENCY, 11025},
       {0,0} // Indicate end of list...
    };
 
