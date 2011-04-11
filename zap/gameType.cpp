@@ -1236,8 +1236,25 @@ bool GameType::processLevelItem(S32 argc, const char **argv)
    {         
       // Examine items on the specials line
       for(S32 i = 1; i < argc; i++)
+      {
          if(!stricmp(argv[i], "Engineer" ) )
             mEngineerEnabled = true;
+         if(!stricmp(argv[i], "nobots" ) )
+            mAllowAddBot = false;
+      }
+   }
+   else if(!stricmp(argv[0], "SoccerPickup"))  // option for old style soccer, this option might get moved or removed
+   {
+      if(argc < 2)
+      {
+         logprintf(LogConsumer::LogWarning, "Improperly formed SoccerPickup parameter");
+      }
+      mAllowSoccerPickup =
+         !stricmp(argv[0], "yes") ||
+         !stricmp(argv[0], "enable") ||
+         !stricmp(argv[0], "on") ||
+         !stricmp(argv[0], "activate") ||
+         !stricmp(argv[0], "1");
    }
    else if(!strcmp(argv[0], "Script"))
    {

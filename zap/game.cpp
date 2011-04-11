@@ -867,39 +867,6 @@ void ServerGame::processLevelLoadLine(U32 argc, U32 id, const char **argv)
    if(!stricmp(argv[0], "BotsPerTeam"))
       return;
 
-   if(!stricmp(argv[0], "SoccerPickup"))
-   {
-      if(argc < 2)
-      {
-         logprintf(LogConsumer::LogWarning, "Improperly formed SoccerPickup parameter in level \"%s\"", origFilename.c_str());
-         return;
-      }
-      if(getGameType())
-         getGameType()->mAllowSoccerPickup =
-            !stricmp(argv[0], "yes") ||
-            !stricmp(argv[0], "enable") ||
-            !stricmp(argv[0], "on") ||
-            !stricmp(argv[0], "activate") ||
-            !stricmp(argv[0], "1");
-      return;
-   }
-
-   if(!stricmp(argv[0], "AllowAddBot"))  // some levels can have "AllowAddBot no" to prevent level from adding robots.
-   {
-      if(argc < 2)
-      {
-         logprintf(LogConsumer::LogWarning, "Improperly formed AllowAddBot parameter in level \"%s\"", origFilename.c_str());
-         return;
-      }
-      if(getGameType())
-         getGameType()->mAllowAddBot =
-            !stricmp(argv[0], "yes") ||
-            !stricmp(argv[0], "enable") ||
-            !stricmp(argv[0], "on") ||
-            !stricmp(argv[0], "1");
-      return;
-   }
-
    if(!stricmp(argv[0], "GridSize"))      // GridSize requires a single parameter (an int
    {                                      //    specifiying how many pixels in a grid cell)
       if(argc < 2)
