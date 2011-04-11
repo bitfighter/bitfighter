@@ -386,6 +386,25 @@ void DiagnosticUserInterface::render()
       ypos += textsize + gap;
       ypos += textsize + gap;
 
+      const S32 rawAxisPosX = 500;
+      const S32 rawAxisPosY = 330;
+      glColor3f(1, 0, 1);
+      drawString(rawAxisPosX, rawAxisPosY-40, textsize - 2, "Raw Analog Axis:");
+      glBegin(GL_LINES);
+      for(U32 i = 0; i < MaxJoystickAxes; i++) // shows RAW axis inputs
+      {
+         glColor3f(0.5,0,0);
+         glVertex2f(i*8+rawAxisPosX, rawAxisPosY - 20);
+         glVertex2f(i*8+rawAxisPosX, rawAxisPosY + 20);
+         glColor3f(1,1,0);
+         glVertex2f(i*8+rawAxisPosX, rawAxisPosY);
+         F32 a = gRawAxisButtonInputs[i];
+         if(a < -1) a = -1;
+         if(a > 1) a = 1;
+         glVertex2f(i*8+rawAxisPosX, rawAxisPosY + a * 20);
+      }
+      glEnd();
+
       // Key states
       glColor3f(1, 1, 0);
       S32 hpos = horizMargin;
@@ -404,21 +423,6 @@ void DiagnosticUserInterface::render()
       for(U32 i = 0; i < MaxJoystickButtons; i++)
          if(gRawJoystickButtonInputs & (1 << i))
             hpos += drawStringAndGetWidthf( hpos, ypos, textsize - 2, "(%d)", i ) + 5;
-
-      glBegin(GL_LINES);
-      for(U32 i = 0; i < MaxJoystickAxes; i++) // shows RAW axis inputs
-      {
-         glColor3f(0.5,0,0);
-         glVertex2f(i*8+400, ypos - 20);
-         glVertex2f(i*8+400, ypos + 20);
-         glColor3f(1,1,0);
-         glVertex2f(i*8+400, ypos);
-         F32 a = gRawAxisButtonInputs[i];
-         if(a < -1) a = -1;
-         if(a > 1) a = 1;
-         glVertex2f(i*8+400, ypos + a * 20);
-      }
-      glEnd();
 
       ypos += textsize + gap + 10;
 
