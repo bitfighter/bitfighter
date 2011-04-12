@@ -781,7 +781,7 @@ bool Triangulate::Process(const Vector<Point> &contour, Vector<Point> &result)
 
 static const F32 CLIPPER_SCALE_FACT = 1000;
 
-Polygons upscaleClipperPoints(const Vector<Vector<Point> >& inputPolygons) 
+Polygons upscaleClipperPoints(const Vector<Vector<Point> > &inputPolygons) 
 {
    Polygons outputPolygons;
 
@@ -825,7 +825,7 @@ bool mergePolys(const Vector<Vector<Point> > &inputPolygons, Vector<Vector<Point
 
    // Fire up clipper and union!
    Clipper clipper;
-//   clipper.IgnoreOrientation(false);      // Can be true?  Would that make things go faster?
+
    try  // there is a "throw" in AddPolygon..
    {
       clipper.AddPolygons(input, ptSubject);
@@ -849,30 +849,28 @@ void unpackPolygons(const Vector<Vector<Point> > &solution, Vector<Point> &lineS
 {
    // Precomputing list size improves performance dramatically
    S32 segments = 0;
+
    for(S32 i = 0; i < solution.size(); i++)
       segments += solution[i].size();
 
    lineSegmentPoints.resize(segments * 2);      // 2 points per line segment
 
-   Vector<Point> poly;
    S32 index = 0;
 
    for(S32 i = 0; i < solution.size(); i++)
    {
-      poly = solution[i];
-
-      if(poly.size() == 0)
+      if(solution[i].size() == 0)
          continue;
 
-      for(S32 j = 1; j < poly.size(); j++)
+      for(S32 j = 1; j < solution[i].size(); j++)
       {
-         lineSegmentPoints[index++] = poly[j-1];
-         lineSegmentPoints[index++] = poly[j];
+         lineSegmentPoints[index++] = solution[i][j - 1];
+         lineSegmentPoints[index++] = solution[i][j];
       }
 
       // Close the loop
-      lineSegmentPoints[index++] = poly[poly.size()-1];
-      lineSegmentPoints[index++] = poly[0];
+      lineSegmentPoints[index++] = solution[i][solution[i].size() - 1];
+      lineSegmentPoints[index++] = solution[i][0];
    }
 }
 
