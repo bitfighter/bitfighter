@@ -782,12 +782,19 @@ void GameUserInterface::renderChatMessageDisplay()
       msgCount = ChatMessageDisplayCount;  // Short form
 
 
+   if(mHelper)
+      glEnableBlend;
+
    if(mMessageDisplayMode == ShortTimeout)
       for(S32 i = 0; i < msgCount; i++)
       {
          if(mDisplayChatMessage[i][0])
          {
-            glColor(mDisplayChatMessageColor[i]);
+            if (mHelper)
+               glColor(mDisplayChatMessageColor[i], 0.2);
+            else
+               glColor(mDisplayChatMessageColor[i]);
+
             drawString(UserInterface::horizMargin, y, CHAT_FONTSIZE, mDisplayChatMessage[i]);
             y -= CHAT_FONTSIZE + CHAT_FONT_GAP;
          }
@@ -797,11 +804,18 @@ void GameUserInterface::renderChatMessageDisplay()
       {
          if(mStoreChatMessage[i][0])
          {
-            glColor(mStoreChatMessageColor[i]);
+            if (mHelper)
+               glColor(mStoreChatMessageColor[i], 0.2);
+            else
+               glColor(mStoreChatMessageColor[i]);
+
             drawString(UserInterface::horizMargin, y, CHAT_FONTSIZE, mStoreChatMessage[i]);
             y -= CHAT_FONTSIZE + CHAT_FONT_GAP;
          }
       }
+
+   if(mHelper)
+      glDisableBlend;
 }
 
 

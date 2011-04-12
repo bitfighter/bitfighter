@@ -63,7 +63,7 @@ namespace Zap
 extern S32 gLoadoutIndicatorHeight;
 
 S32 UserInterface::messageMargin = UserInterface::vertMargin + gLoadoutIndicatorHeight + 5;
-S32 UserInterface::chatMessageMargin = gScreenInfo.getGameCanvasHeight() - 85;
+S32 UserInterface::chatMessageMargin = 515;
 
 UserInterface *UserInterface::current = NULL;
 Vector<UserInterface *> UserInterface::prevUIs;    // List of peviously displayed UIs
