@@ -1761,18 +1761,17 @@ void GameUserInterface::renderCurrentChat()
    if(! (gClientGame && gClientGame->getConnectionToServer()))
       return;
 
-   S32 promptSize = getStringWidth(FONTSIZE, promptStr);
-   S32 nameSize = getStringWidthf(FONTSIZE, "%s: ", gClientGame->getConnectionToServer()->getClientName().getString());
+   S32 promptSize = getStringWidth(CHAT_FONTSIZE, promptStr);
+   S32 nameSize = getStringWidthf(CHAT_FONTSIZE, "%s: ", gClientGame->getConnectionToServer()->getClientName().getString());
    S32 nameWidth = max(nameSize, promptSize);
    // Above block repeated below...
 
    S32 xpos = UserInterface::horizMargin;
 
-   const S32 ypos = UserInterface::vertMargin +
-                    (gIniSettings.showWeaponIndicators ? UserInterface::messageMargin : UserInterface::vertMargin) +
-                    (mMessageDisplayMode == LongFixed ? ChatMessageStoreCount : ChatMessageDisplayCount) * (FONTSIZE + FONT_GAP);
+   const S32 ypos = UserInterface::chatMessageMargin + CHAT_FONTSIZE + (2 * CHAT_FONT_GAP) + 5;
 
-   S32 width = gScreenInfo.getGameCanvasWidth() - 2 * horizMargin - (nameWidth - promptSize) + 6;
+
+   S32 width = gScreenInfo.getGameCanvasWidth() - 2 * horizMargin - (nameWidth - promptSize) - 130;
 
    // Render text entry box like thingy
    glEnableBlend;
@@ -1784,8 +1783,8 @@ void GameUserInterface::renderCurrentChat()
       glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
          glVertex2f(xpos, ypos - 3);
          glVertex2f(xpos + width, ypos - 3);
-         glVertex2f(xpos + width, ypos + FONTSIZE + 7);
-         glVertex2f(xpos, ypos + FONTSIZE + 7);
+         glVertex2f(xpos + width, ypos + CHAT_FONTSIZE + 7);
+         glVertex2f(xpos, ypos + CHAT_FONTSIZE + 7);
       glEnd();
    }
    glDisableBlend;
@@ -1793,9 +1792,9 @@ void GameUserInterface::renderCurrentChat()
    glColor(baseColor);
 
    xpos += 3;     // Left margin
-   xpos += drawStringAndGetWidth(xpos, ypos, FONTSIZE, promptStr);
+   xpos += drawStringAndGetWidth(xpos, ypos, CHAT_FONTSIZE, promptStr);
 
-   S32 x = drawStringAndGetWidth(xpos, ypos, FONTSIZE, mLineEditor.c_str());
+   S32 x = drawStringAndGetWidth(xpos, ypos, CHAT_FONTSIZE, mLineEditor.c_str());
 
    // If we've just finished entering a chat cmd, show next parameter
    if(isCmdChat())
@@ -1814,7 +1813,7 @@ void GameUserInterface::renderCurrentChat()
                if(chatCmds[i].cmdArgCount >= words.size() && line[line.size() - 1] == ' ')
                {
                   glColor(baseColor * .5);
-                  drawString(xpos + x, ypos, FONTSIZE, chatCmds[i].helpArgString[words.size() - 1].c_str());
+                  drawString(xpos + x, ypos, CHAT_FONTSIZE, chatCmds[i].helpArgString[words.size() - 1].c_str());
                }
 
                break;
@@ -1824,7 +1823,7 @@ void GameUserInterface::renderCurrentChat()
    }
 
    glColor(baseColor);
-   mLineEditor.drawCursor(xpos, ypos, FONTSIZE);
+   mLineEditor.drawCursor(xpos, ypos, CHAT_FONTSIZE);
 }
 
 
@@ -1991,17 +1990,17 @@ void GameUserInterface::processChatModeKey(KeyCode keyCode, char ascii)
       // Protect against crashes while game is initializing (because we look at the ship for the player's name)
       if(gClientGame->getConnectionToServer())     // gClientGame cannot be NULL here
       {
-         S32 promptSize = getStringWidth(FONTSIZE, mCurrentChatType == TeamChat ? "(Team): " : "(Global): ");
+         S32 promptSize = getStringWidth(CHAT_FONTSIZE, mCurrentChatType == TeamChat ? "(Team): " : "(Global): ");
 
          //Ship *ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
          //if(!ship)
          //   return;  // problem with unable to type something while trying to respawn.
 
-         S32 nameSize = getStringWidthf(FONTSIZE, "%s: ", gClientGame->getConnectionToServer()->getClientName().getString());
+         S32 nameSize = getStringWidthf(CHAT_FONTSIZE, "%s: ", gClientGame->getConnectionToServer()->getClientName().getString());
          S32 nameWidth = max(nameSize, promptSize);
          // Above block repeated above
 
-         if(nameWidth + (S32) getStringWidthf(FONTSIZE, "%s%c", mLineEditor.c_str(), ascii) < 
+         if(nameWidth + (S32) getStringWidthf(CHAT_FONTSIZE, "%s%c", mLineEditor.c_str(), ascii) <
                                              gScreenInfo.getGameCanvasWidth() - 2 * horizMargin - 3)
             mLineEditor.addChar(ascii);
       }
