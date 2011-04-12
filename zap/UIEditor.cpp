@@ -1363,13 +1363,6 @@ Point EditorUserInterface::snapPoint(Point const &p, bool snapWhileOnDock)
    // Build a list of walls we might be snapping to if we're snapping to either the edges or corners
    static Vector<DatabaseObject *> foundObjects;
 
-   //if(snapToWallCorners || snapToWallEdges)
-   //{
-   //   foundObjects.clear();
-   //   mGridDatabase.findObjects(BarrierType, foundObjects, Rect(p, sqrt(minDist) * 2));   // minDist is dist squared
-   //}
-
-
    // Search for a corner to snap to - by using wall edges, we'll also look for intersections between segments
    if(snapToWallCorners)
       checkCornersForSnap(p, WallSegmentManager::mWallEdges, minDist, snapPoint);
