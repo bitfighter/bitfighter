@@ -44,7 +44,7 @@ private:
    virtual KeyCode getActivationKey() { return KEY_NONE; }
 
 protected:
-   static const S32 MENU_TOP = 300;     // Location of top of overlay menu
+   static const S32 MENU_TOP = 240;     // Location of top of overlay menu
 
    // Shortcut helper function
    void exitHelper();

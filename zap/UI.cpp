@@ -62,7 +62,8 @@ namespace Zap
 
 extern S32 gLoadoutIndicatorHeight;
 
-S32 UserInterface::chatMargin = UserInterface::vertMargin + gLoadoutIndicatorHeight + 5;
+S32 UserInterface::messageMargin = UserInterface::vertMargin + gLoadoutIndicatorHeight + 5;
+S32 UserInterface::chatMessageMargin = gScreenInfo.getGameCanvasHeight() - 60;
 
 UserInterface *UserInterface::current = NULL;
 Vector<UserInterface *> UserInterface::prevUIs;    // List of peviously displayed UIs
@@ -747,7 +748,7 @@ void UserInterfaceData::get()
    prevUIs = UserInterface::prevUIs;
    vertMargin = UserInterface::vertMargin;
    horizMargin = UserInterface::horizMargin;
-   chatMargin = UserInterface::chatMargin;
+   chatMargin = UserInterface::messageMargin;
    S32 inputmode = S32(gIniSettings.inputMode);
 }
 
@@ -758,7 +759,7 @@ void UserInterfaceData::set()
    UserInterface::prevUIs = prevUIs;
    UserInterface::vertMargin = vertMargin;
    UserInterface::horizMargin = horizMargin;
-   UserInterface::chatMargin = chatMargin;
+   UserInterface::messageMargin = chatMargin;
 
    S32 inputmode = S32(gIniSettings.inputMode);
 }

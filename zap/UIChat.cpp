@@ -230,9 +230,9 @@ void AbstractChat::deliverPrivateMessage(const char *sender, const char *message
    if(UserInterface::current->getMenuID() != gChatInterface.getMenuID() &&
       UserInterface::current->getMenuID() != gQueryServersUserInterface.getMenuID() )
    {
-      gClientGame->mGameUserInterface->displayMessage(GameUserInterface::privateF5MessageDisplayedInGameColor,
+      gClientGame->mGameUserInterface->displayChatMessage(GameUserInterface::privateF5MessageDisplayedInGameColor,
          "Private message from %s: Press [%s] to enter chat mode", sender, keyCodeToString(keyOUTGAMECHAT));
-      gClientGame->mGameUserInterface->displayMessage(GameUserInterface::privateF5MessageDisplayedInGameColor, "%s %s", ARROW, message);
+      gClientGame->mGameUserInterface->displayChatMessage(GameUserInterface::privateF5MessageDisplayedInGameColor, "%s %s", ARROW, message);
    }
 }
 

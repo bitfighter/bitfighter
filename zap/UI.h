@@ -217,7 +217,8 @@ public:
    UIID getPrevMenuID();                     // Retrieve previous interface's name
 
    static S32 vertMargin, horizMargin;
-   static S32 chatMargin;
+   static S32 messageMargin;
+   static S32 chatMessageMargin;
 
    static bool cameFrom(UIID menuID);        // Did we arrive at our current interface via the specified interface?
 

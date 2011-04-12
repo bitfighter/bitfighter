@@ -118,8 +118,8 @@ GameUserInterface::GameUserInterface()
    for(S32 i = 0; i < MessageDisplayCount; i++)
       mDisplayMessage[i][0] = 0;
 
-   for(S32 i = 0; i < MessageStoreCount; i++)
-      mStoreMessage[i][0] = 0;
+   for(S32 i = 0; i < ChatMessageStoreCount; i++)
+      mStoreChatMessage[i][0] = 0;
 
    mGotControlUpdate = false;
    mRecalcFPSTimer = 0;
@@ -129,7 +129,7 @@ GameUserInterface::GameUserInterface()
       mModActivated[i] = false;
 
    mDisplayMessageTimer.setPeriod(DisplayMessageTimeout);    // Set the period of our message timeout timer
-
+   mDisplayChatMessageTimer.setPeriod(DisplayChatMessageTimeout);
    //populateChatCmdList();
 
    remoteLevelDownloadFilename = "downloaded.level";
@@ -180,11 +180,11 @@ void GameUserInterface::onActivate()
    onMouseMoved();                     // Make sure ship pointed is towards mouse
 
    // Clear out any lingering chat messages
-   for(S32 i = 0; i < MessageStoreCount; i++)
+   for(S32 i = 0; i < ChatMessageStoreCount; i++)
       mDisplayMessage[i][0] = 0;
 
    for(S32 i = 0; i < MessageDisplayCount; i++)
-      mStoreMessage[i][0] = 0;
+      mStoreChatMessage[i][0] = 0;
 
    mMessageDisplayMode = ShortTimeout;          // Start with normal chat msg display
    enterMode(PlayMode);                         // Make sure we're not in chat or loadout-select mode
@@ -253,7 +253,7 @@ void GameUserInterface::displayMessage(GameConnection::MessageColors msgColorInd
 }
 
 
-// A new chat message is here!  We don't actually display anything here, despite the name...
+// A new server message is here!  We don't actually display anything here, despite the name...
 // just add it to the list, will be displayed in render()
 void GameUserInterface::displayMessage(const Color &msgColor, const char *format, ...)
 {
@@ -269,12 +269,6 @@ void GameUserInterface::displayMessage(const Color &msgColor, const char *format
          mDisplayMessageColor[i] = mDisplayMessageColor[i-1];
       }
 
-   for(S32 i = MessageStoreCount - 1; i > 0; i--)
-   {
-      strcpy(mStoreMessage[i], mStoreMessage[i-1]);
-      mStoreMessageColor[i] = mStoreMessageColor[i-1];
-   }
-
    va_list args;
 
    va_start(args, format);
@@ -282,13 +276,45 @@ void GameUserInterface::displayMessage(const Color &msgColor, const char *format
    va_end(args);
    mDisplayMessageColor[0] = msgColor;
 
-   va_start(args, format);
-   vsnprintf(mStoreMessage[0], sizeof(mStoreMessage[0]), format, args);
-   va_end(args);
-
-   mStoreMessageColor[0] = msgColor;
-
    mDisplayMessageTimer.reset();
+}
+
+
+// A new chat message is here!  We don't actually display anything here, despite the name...
+// just add it to the list, will be displayed in render()
+void GameUserInterface::displayChatMessage(const Color &msgColor, const char *format, ...)
+{
+   // Ignore empty message
+   if(!strcmp(format, ""))
+      return;
+
+   // Create a slot for our new message
+   if(mDisplayChatMessage[0][0])
+      for(S32 i = ChatMessageDisplayCount - 1; i > 0; i--)
+      {
+         strcpy(mDisplayChatMessage[i], mDisplayChatMessage[i-1]);
+         mDisplayChatMessageColor[i] = mDisplayChatMessageColor[i-1];
+      }
+
+   for(S32 i = ChatMessageStoreCount - 1; i > 0; i--)
+   {
+      strcpy(mStoreChatMessage[i], mStoreChatMessage[i-1]);
+      mStoreChatMessageColor[i] = mStoreChatMessageColor[i-1];
+   }
+
+   va_list args;
+
+   va_start(args, format);
+   vsnprintf(mDisplayChatMessage[0], sizeof(mDisplayChatMessage[0]), format, args);
+   va_end(args);
+   mDisplayChatMessageColor[0] = msgColor;
+
+   va_start(args, format);
+   vsnprintf(mStoreChatMessage[0], sizeof(mStoreChatMessage[0]), format, args);
+   va_end(args);
+   mStoreChatMessageColor[0] = msgColor;
+
+   mDisplayChatMessageTimer.reset();
 }
 
 
@@ -296,6 +322,7 @@ void GameUserInterface::idle(U32 timeDelta)
 {
    mShutdownTimer.update(timeDelta);
 
+   // server messages
    if(mDisplayMessageTimer.update(timeDelta))
    {
       for(S32 i = MessageDisplayCount - 1; i > 0; i--)
@@ -306,6 +333,19 @@ void GameUserInterface::idle(U32 timeDelta)
 
       mDisplayMessage[0][0] = 0;    // Null, that is
       mDisplayMessageTimer.reset();
+   }
+
+   //chat messages
+   if(mDisplayChatMessageTimer.update(timeDelta))
+   {
+      for(S32 i = ChatMessageDisplayCount - 1; i > 0; i--)
+      {
+         strcpy(mDisplayChatMessage[i], mDisplayChatMessage[i-1]);
+         mDisplayChatMessageColor[i] = mDisplayChatMessageColor[i-1];
+      }
+
+      mDisplayChatMessage[0][0] = 0;    // Null, that is
+      mDisplayChatMessageTimer.reset();
    }
 
    // Time to recalc FPS?
@@ -399,7 +439,8 @@ void GameUserInterface::render()
    if(!gClientGame->isSuspended())
    {
       renderReticle();           // Draw crosshairs if using mouse
-      renderMessageDisplay();    // Render incoming chat msgs
+      renderMessageDisplay();    // Render incoming server msgs
+      renderChatMessageDisplay();    // Render incoming chat msgs
       renderCurrentChat();       // Render any chat msg user is composing
       renderLoadoutIndicators(); // Draw indicators for the various loadout items
 
@@ -702,38 +743,63 @@ void GameUserInterface::renderLoadoutIndicators()
 static const S32 FONTSIZE = 14;
 static const S32 FONT_GAP = 4;
 
-// Render any incoming chat msgs
+// Render any incoming server msgs
 void GameUserInterface::renderMessageDisplay()
 {
    glColor3f(1,1,1);
 
-   S32 y = gIniSettings.showWeaponIndicators ? UserInterface::chatMargin : UserInterface::vertMargin;
+   S32 y = gIniSettings.showWeaponIndicators ? UserInterface::messageMargin : UserInterface::vertMargin;
+   S32 msgCount;
+
+   msgCount = MessageDisplayCount;  // Short form
+
+   for(S32 i = msgCount - 1; i >= 0; i--)
+   {
+      if(mDisplayMessage[i][0])
+      {
+         glColor(mDisplayMessageColor[i]);
+         drawString(UserInterface::horizMargin, y, FONTSIZE, mDisplayMessage[i]);
+         y += FONTSIZE + FONT_GAP;
+      }
+   }
+}
+
+
+static const S32 CHAT_FONTSIZE = 12;
+static const S32 CHAT_FONT_GAP = 3;
+
+// Render any incoming player chat msgs
+void GameUserInterface::renderChatMessageDisplay()
+{
+   glColor3f(1,1,1);
+
+   S32 y = gIniSettings.showWeaponIndicators ? UserInterface::chatMessageMargin : UserInterface::vertMargin;
    S32 msgCount;
 
    if(mMessageDisplayMode == LongFixed)
-      msgCount = MessageStoreCount;    // Long form
+      msgCount = ChatMessageStoreCount;    // Long form
    else
-      msgCount = MessageDisplayCount;  // Short form
+      msgCount = ChatMessageDisplayCount;  // Short form
 
 
    if(mMessageDisplayMode == ShortTimeout)
-      for(S32 i = msgCount - 1; i >= 0; i--)
+      for(S32 i = 0; i < msgCount; i++)
       {
-         if(mDisplayMessage[i][0])
+         if(mDisplayChatMessage[i][0])
          {
-            glColor(mDisplayMessageColor[i]);
-            drawString(UserInterface::horizMargin, y, FONTSIZE, mDisplayMessage[i]);
-            y += FONTSIZE + FONT_GAP;
+            glColor(mDisplayChatMessageColor[i]);
+            drawString(UserInterface::horizMargin, y, CHAT_FONTSIZE, mDisplayChatMessage[i]);
+            y -= CHAT_FONTSIZE + CHAT_FONT_GAP;
          }
       }
    else
-      for(S32 i = msgCount - 1; i >= 0; i--)
+      for(S32 i = 0; i < msgCount; i++)
       {
-         if(mStoreMessage[i][0])
+         if(mStoreChatMessage[i][0])
          {
-            glColor(mStoreMessageColor[i]);
-            drawString(UserInterface::horizMargin, y, FONTSIZE, mStoreMessage[i]);
-            y += FONTSIZE + FONT_GAP;
+            glColor(mStoreChatMessageColor[i]);
+            drawString(UserInterface::horizMargin, y, CHAT_FONTSIZE, mStoreChatMessage[i]);
+            y -= CHAT_FONTSIZE + CHAT_FONT_GAP;
          }
       }
 }
@@ -1703,8 +1769,8 @@ void GameUserInterface::renderCurrentChat()
    S32 xpos = UserInterface::horizMargin;
 
    const S32 ypos = UserInterface::vertMargin +
-                    (gIniSettings.showWeaponIndicators ? UserInterface::chatMargin : UserInterface::vertMargin) +
-                    (mMessageDisplayMode == LongFixed ? MessageStoreCount : MessageDisplayCount) * (FONTSIZE + FONT_GAP);
+                    (gIniSettings.showWeaponIndicators ? UserInterface::messageMargin : UserInterface::vertMargin) +
+                    (mMessageDisplayMode == LongFixed ? ChatMessageStoreCount : ChatMessageDisplayCount) * (FONTSIZE + FONT_GAP);
 
    S32 width = gScreenInfo.getGameCanvasWidth() - 2 * horizMargin - (nameWidth - promptSize) + 6;
 
