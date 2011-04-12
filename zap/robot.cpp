@@ -920,7 +920,7 @@ S32 LuaRobot::getWaypoint(lua_State *L)  // Takes a luavec or an x,y
 
          // removed if(first) ... Problems with Robot get stuck after pushed from burst or mines.
          // To save calculations, might want to avoid (thisRobot->canSeePoint(last))
-         if(gServerGame->getGridDatabase()->pointCanSeePoint(thisRobot->getActualPos(), last))
+         if(thisRobot->canSeePoint(last))
          {
             dest = last;
             found = true;
@@ -1881,16 +1881,22 @@ bool Robot::canSeePoint(Point point)
    // flight lane to point.  Radius of the robot is mRadius.  This keeps the ship from getting hung up on
    // obstacles that appear visible from the center of the ship, but are actually blocked.
 
-   F32 ang = getActualPos().angleTo(point);
-   F32 cosang = cos(ang) * mRadius;
-   F32 sinang = sin(ang) * mRadius;
+   Point difference = point - getActualPos();
 
-   Point edgePoint1 = getActualPos() + Point(sinang, -cosang);
-   Point edgePoint2 = getActualPos() + Point(-sinang, cosang);
+   Point crossVector(difference.y, -difference.x);  // Create a point whose vector from 0,0 is perpenticular to the original vector
+   crossVector.normalize(mRadius);                  // reduce point so the vector has length of ship radius
+
+   // edge points of ship
+   Point shipEdge1 = getActualPos() + crossVector;
+   Point shipEdge2 = getActualPos() - crossVector;
+
+   // edge points of point
+   Point pointEdge1 = point + crossVector;
+   Point pointEdge2 = point - crossVector;
 
    return(
-      gServerGame->getGridDatabase()->pointCanSeePoint(edgePoint1, point) &&
-      gServerGame->getGridDatabase()->pointCanSeePoint(edgePoint2, point) );
+      gServerGame->getGridDatabase()->pointCanSeePoint(shipEdge1, pointEdge1) &&
+      gServerGame->getGridDatabase()->pointCanSeePoint(shipEdge2, pointEdge2) );
 }
 
 
