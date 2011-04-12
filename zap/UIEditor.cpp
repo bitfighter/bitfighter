@@ -5133,7 +5133,7 @@ void WallSegmentManager::invalidateIntersectingSegments(WorldItem *item)
    // These will need new walls after we've moved our segment.
    for(S32 i = 0; i < mWallSegments.size(); i++)
       if(mWallSegments[i]->mOwner == item->mId)      // Segment belongs to our item; look it up in the database
-         getGridDatabase()->findObjects(BulletType, intersectingSegments, mWallSegments[i]->getExtent());
+         getGridDatabase()->findObjects(EditorWallSegmentType, intersectingSegments, mWallSegments[i]->getExtent());
 
    for(S32 i = 0; i < intersectingSegments.size(); i++)
    {
@@ -5150,7 +5150,7 @@ void WallSegmentManager::invalidateIntersectingSegments(WorldItem *item)
    intersectingSegments.clear();
    for(S32 i = 0; i < mWallSegments.size(); i++)
       if(mWallSegments[i]->mOwner == item->mId)      // Segment belongs to our item, compare to all others
-         getGridDatabase()->findObjects(BulletType, intersectingSegments, mWallSegments[i]->getExtent());
+         getGridDatabase()->findObjects(EditorWallSegmentType, intersectingSegments, mWallSegments[i]->getExtent());
 
    for(S32 i = 0; i < intersectingSegments.size(); i++)
       dynamic_cast<WallSegment *>(intersectingSegments[i])->invalid = true;
@@ -5894,7 +5894,7 @@ void WallSegment::init(S32 owner)
    invalid = false; 
 
    // Set some things required by DatabaseObject
-   mObjectTypeMask = BulletType;
+   mObjectTypeMask = EditorWallSegmentType;
 }
 
 // Destructor

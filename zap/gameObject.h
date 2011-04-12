@@ -41,7 +41,7 @@ enum GameObjectType
 {
    UnknownType         = BIT(0),    // First bit, BIT(0) == 1, NOT 0!  (Well, yes, 0!, but not 0.  C'mon... get a life!)
    ShipType            = BIT(1),
-   BarrierType         = BIT(2),
+   BarrierType         = BIT(2),    // Used in both editor and game
    MoveableType        = BIT(3),
    ItemType            = BIT(4),    // Not made available to Lua... could we get rid of this altogether?  Or make it a aggregate of other masks?
    ResourceItemType    = BIT(5),
@@ -79,7 +79,11 @@ enum GameObjectType
    EngineeredType     = TurretType | ForceFieldProjectorType,
    DamagableTypes     = ShipType | RobotType | MoveableType | BulletType | ItemType | ResourceItemType | EngineeredType | MineType | AsteroidType,
    MotionTriggerTypes = ShipType | RobotType | ResourceItemType | TestItemType | AsteroidType,
-   AllObjectTypes     = 0xFFFFFFFF
+   AllObjectTypes     = 0xFFFFFFFF,
+
+   //////////
+   // Types used exclusively in the editor
+   EditorWallSegmentType = BIT(3)
 };
 
 const S32 gSpyBugRange = 300;     // How far can a spy bug see?
