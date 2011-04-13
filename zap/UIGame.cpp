@@ -1780,12 +1780,9 @@ void GameUserInterface::renderCurrentChat()
    S32 nameWidth = max(nameSize, promptSize);
    // Above block repeated below...
 
-   S32 xpos = UserInterface::horizMargin;
+   const S32 ypos = chatMessageMargin + CHAT_FONTSIZE + (2 * CHAT_FONT_GAP) + 5;
 
-   const S32 ypos = UserInterface::chatMessageMargin + CHAT_FONTSIZE + (2 * CHAT_FONT_GAP) + 5;
-
-
-   S32 width = gScreenInfo.getGameCanvasWidth() - 2 * horizMargin - (nameWidth - promptSize) - 130;
+   S32 boxWidth = gScreenInfo.getGameCanvasWidth() - 2 * horizMargin - (nameWidth - promptSize) - 230;
 
    // Render text entry box like thingy
    glEnableBlend;
@@ -1795,20 +1792,34 @@ void GameUserInterface::renderCurrentChat()
       glColor(baseColor, i ? .25 : .4);
 
       glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
-         glVertex2f(xpos, ypos - 3);
-         glVertex2f(xpos + width, ypos - 3);
-         glVertex2f(xpos + width, ypos + CHAT_FONTSIZE + 7);
-         glVertex2f(xpos, ypos + CHAT_FONTSIZE + 7);
+         glVertex2f(horizMargin, ypos - 3);
+         glVertex2f(horizMargin + boxWidth, ypos - 3);
+         glVertex2f(horizMargin + boxWidth, ypos + CHAT_FONTSIZE + 7);
+         glVertex2f(horizMargin, ypos + CHAT_FONTSIZE + 7);
       glEnd();
    }
    glDisableBlend;
 
    glColor(baseColor);
 
-   xpos += 3;     // Left margin
-   xpos += drawStringAndGetWidth(xpos, ypos, CHAT_FONTSIZE, promptStr);
+   // Display prompt
+   S32 promptWidth = getStringWidth(CHAT_FONTSIZE, promptStr);
+   S32 xStartPos = horizMargin + 3 + promptWidth;
 
-   S32 x = drawStringAndGetWidth(xpos, ypos, CHAT_FONTSIZE, mLineEditor.c_str());
+   drawString(horizMargin + 3, ypos, CHAT_FONTSIZE, promptStr);  // draw prompt
+
+   // Display typed text
+   string displayString = mLineEditor.getString();
+   S32 displayWidth = getStringWidth(CHAT_FONTSIZE, displayString.c_str());
+
+   // If the string goes too far out of bounds, display it chopped off at the front to give more room to type
+   while (displayWidth > boxWidth - promptWidth - 16)  // 16 -> Account for margin and cursor
+   {
+      displayString = displayString.substr(25, string::npos);  // 25 -> # chars to chop off displayed text if overflow
+      displayWidth = getStringWidth(CHAT_FONTSIZE, displayString.c_str());
+   }
+
+   drawString(xStartPos, ypos, CHAT_FONTSIZE, displayString.c_str());
 
    // If we've just finished entering a chat cmd, show next parameter
    if(isCmdChat())
@@ -1827,7 +1838,7 @@ void GameUserInterface::renderCurrentChat()
                if(chatCmds[i].cmdArgCount >= words.size() && line[line.size() - 1] == ' ')
                {
                   glColor(baseColor * .5);
-                  drawString(xpos + x, ypos, CHAT_FONTSIZE, chatCmds[i].helpArgString[words.size() - 1].c_str());
+                  drawString(xStartPos + displayWidth, ypos, CHAT_FONTSIZE, chatCmds[i].helpArgString[words.size() - 1].c_str());
                }
 
                break;
@@ -1837,7 +1848,7 @@ void GameUserInterface::renderCurrentChat()
    }
 
    glColor(baseColor);
-   mLineEditor.drawCursor(xpos, ypos, CHAT_FONTSIZE);
+   mLineEditor.drawCursor(xStartPos, ypos, CHAT_FONTSIZE, displayWidth);
 }
 
 
@@ -2014,9 +2025,7 @@ void GameUserInterface::processChatModeKey(KeyCode keyCode, char ascii)
          S32 nameWidth = max(nameSize, promptSize);
          // Above block repeated above
 
-         if(nameWidth + (S32) getStringWidthf(CHAT_FONTSIZE, "%s%c", mLineEditor.c_str(), ascii) <
-                                             gScreenInfo.getGameCanvasWidth() - 2 * horizMargin - 3)
-            mLineEditor.addChar(ascii);
+         mLineEditor.addChar(ascii);
       }
    }
 }

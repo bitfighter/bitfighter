@@ -88,11 +88,19 @@ void LineEditor::buildMatchList(Vector<string> *candidates, const char *partial)
 // Draw our cursor, assuming string is drawn at x,y  (vert spacing works differently than on the angle version
 void LineEditor::drawCursor(S32 x, S32 y, U32 fontSize)
 {
+   S32 width = UserInterface::getStringWidth((F32)fontSize, mLine.c_str());
+   drawCursor(x, y, fontSize, width);
+}
+
+
+// Draw our cursor, assuming string is drawn at x,y with starting width
+void LineEditor::drawCursor(S32 x, S32 y, U32 fontSize, S32 startingWidth)
+{
    if(cursorBlink)
    {
-      S32 w = UserInterface::getStringWidth((F32)fontSize, mLine.c_str());
-
-      UserInterface::drawString(x + w + S32(F32(mLine.length())/5.1), y, fontSize, "_");  // Mostly right, but still a tiny bit off
+      // Get width of tiny letter in this font to use as space between text and cursor
+      S32 space = UserInterface::getStringWidth((F32)fontSize, "i");
+      UserInterface::drawString(x + startingWidth + space, y, fontSize, "_");
    }
 }
 

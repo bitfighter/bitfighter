@@ -122,19 +122,6 @@ void AbstractChat::playerLeftGlobalChat(const StringTableEntry &playerNick)
 }
 
 
-void AbstractChat::addCharToMessage(char ascii)
-{
-   // Limit chat messages to the size that can be displayed on receiver's screen
-   S32 xpos = UserInterface::getStringWidthf(CHAT_FONT_SIZE, "%s%s", gClientInfo.name.c_str(), ARROW) + AFTER_ARROW_SPACE +
-                   UserInterface::getStringWidth(CHAT_TIME_FONT_SIZE, "[00:00] ");
-
-   // Only add char if there's room
-   if(xpos + (S32) UserInterface::getStringWidthf(CHAT_FONT_SIZE, "%s%c", mLineEditor.c_str(), ascii) < 
-                                                  gScreenInfo.getGameCanvasWidth() - 2 * UserInterface::horizMargin)
-      mLineEditor.addChar(ascii);
-}
-
-
 // We're using a rolling "wrap-around" array, and this figures out which array index we need to retrieve a message.
 // First message has index == 0, second has index == 1, etc.
 ChatMessage AbstractChat::getMessage(U32 index)
@@ -213,14 +200,26 @@ void AbstractChat::renderMessages(U32 ypos, U32 numberToDisplay)            // y
 void AbstractChat::renderMessageComposition(S32 ypos)
 {
    const char *PROMPT_STR = "> ";     // For composition only
-   const S32 xStartPos = UserInterface::horizMargin + UserInterface::getStringWidth(CHAT_FONT_SIZE, PROMPT_STR);
+   const S32 promptWidth = UserInterface::getStringWidth(CHAT_FONT_SIZE, PROMPT_STR);
+   const S32 xStartPos = UserInterface::horizMargin + promptWidth;
+
+   string displayString = mLineEditor.getString();
+   S32 width = UserInterface::getStringWidth(CHAT_FONT_SIZE, displayString.c_str());
+
+   // If the string goes too far out of bounds, display it chopped off at the front to give room to type more
+   while (width > gScreenInfo.getGameCanvasWidth() - (2 * UserInterface::horizMargin) - promptWidth)
+   {
+      displayString = displayString.substr(MESSAGE_OVERFLOW_SHIFT, string::npos);
+      width = UserInterface::getStringWidth(CHAT_FONT_SIZE, displayString.c_str());
+   }
 
    glColor3f(0,1,1);
    UserInterface::drawString(UserInterface::horizMargin, ypos, CHAT_FONT_SIZE, PROMPT_STR);
 
    glColor3f(1,1,1);
-   UserInterface::drawString(xStartPos, ypos, CHAT_FONT_SIZE, mLineEditor.c_str());
-   mLineEditor.drawCursor(xStartPos, ypos, CHAT_FONT_SIZE);
+   UserInterface::drawString(xStartPos, ypos, CHAT_FONT_SIZE, displayString.c_str());
+
+   mLineEditor.drawCursor(xStartPos, ypos, CHAT_FONT_SIZE, width);
 }
 
 
@@ -387,7 +386,7 @@ void ChatUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    else if (keyCode == KEY_DELETE || keyCode == KEY_BACKSPACE)       // Do backspacey things
       mLineEditor.handleBackspace(keyCode);
    else if(ascii)                               // Other keys - add key to message
-      addCharToMessage(ascii);
+      mLineEditor.addChar(ascii);
 }
 
 

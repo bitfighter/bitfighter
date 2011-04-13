@@ -94,14 +94,12 @@ private:
    void disableMovementKey(KeyCode keyCode);
 
    // Related to display of in-game chat and status messages
-   enum {
-      MessageDisplayCount = 6,         // How many messages to display
-      DisplayMessageTimeout = 3000,    // How long to display them (ms)
+   static const S32 MessageDisplayCount = 6;           // How many server messages to display
+   static const S32 DisplayMessageTimeout = 3000;      // How long to display them (ms)
 
-      ChatMessageStoreCount = 24,          // How many messages to store (only top MessageDisplayCount are normally displayed)
-      ChatMessageDisplayCount = 5,         // How many messages to display
-      DisplayChatMessageTimeout = 4000     // How long to display them (ms)
-   };
+   static const S32 ChatMessageStoreCount = 24;        // How many chat messages to store (only top MessageDisplayCount are normally displayed)
+   static const S32 ChatMessageDisplayCount = 5;       // How many chat messages to display
+   static const S32 DisplayChatMessageTimeout = 4000;  // How long to display them (ms)
 
    enum MessageDisplayMode {
       ShortTimeout,            // Traditional message display mode (6 MessageDisplayCount lines, messages timeout after DisplayMessageTimeout)
