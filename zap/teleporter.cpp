@@ -36,6 +36,22 @@ using namespace TNL;
 namespace Zap
 {
 
+
+bool AbstractTeleporter::processArguments(S32 argc, const char **argv)
+{
+   if(argc != 4)
+      return false;
+
+   mPos.read(argv);
+   mDest.read(argv + 2);
+
+   return true;
+}
+
+
+////////////////////////////////////////
+///////////////////////////////////////
+
 TNL_IMPLEMENT_NETOBJECT(Teleporter);
 
 static Vector<DatabaseObject *> foundObjects;
@@ -45,7 +61,6 @@ static Vector<DatabaseObject *> foundObjects;
 Teleporter::Teleporter()
 {
    mNetFlags.set(Ghostable);
-   mPos = Point(F32_MAX, F32_MAX);
    timeout = 0;
 
    mObjectTypeMask |= CommandMapVisType | TeleportType;
@@ -63,16 +78,11 @@ void Teleporter::onAddedToGame(Game *theGame)
 
 bool Teleporter::processArguments(S32 argc, const char **argv)
 {
-   if(argc != 4)
+   if(!Parent::processArguments(argc, argv))
       return false;
 
-   Point pos;
-   pos.read(argv);
-   pos *= getGame()->getGridSize();
-
-   Point dest;
-   dest.read(argv + 2);
-   dest *= getGame()->getGridSize();
+      mDest *= getGame()->getGridSize();
+      mPos *= getGame()->getGridSize();
 
    // See if we already have any teleports with this pos... if so, this is a "multi-dest" teleporter
    bool found = false;
@@ -83,19 +93,19 @@ bool Teleporter::processArguments(S32 argc, const char **argv)
    for(S32 i = 0; i < foundObjects.size(); i++)
    {
       Teleporter *tel = dynamic_cast<Teleporter *>(foundObjects[i]);
-      if(tel->mPos.distanceTo(pos) < 1)     // i.e these are really close!  Must be the same!
+      if(tel->mPos.distanceTo(mPos) < 1)     // i.e These are really close!  Must be the same!
       {
-         tel->mDest.push_back(dest);
+         tel->mDests.push_back(mDest);
          found = true;
-         break;      // There will be only one!
+         break;      // There will only be one!
       }
    }
 
    if(!found)     // New teleporter origin
    {
-      mPos = pos;
-      mDest.push_back(dest);
-      Rect r(pos, pos);
+      mDests.push_back(mDest);
+
+      Rect r(mPos, mPos);
       r.expand(Point(TELEPORTER_RADIUS, TELEPORTER_RADIUS));
       setExtent(r);
    }
@@ -118,12 +128,12 @@ U32 Teleporter::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
    {
       stream->write(mPos.x);
       stream->write(mPos.y);
-      stream->write(mDest.size());
+      stream->write(mDests.size());
 
-      for(S32 i = 0; i < mDest.size(); i++)
+      for(S32 i = 0; i < mDests.size(); i++)
       {
-         stream->write(mDest[i].x);
-         stream->write(mDest[i].y);
+         stream->write(mDests[i].x);
+         stream->write(mDests[i].y);
       }
    }
 
@@ -141,13 +151,13 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
       stream->read(&mPos.x);
       stream->read(&mPos.y);
       stream->read(&count);
-      mDest.clear();
+      mDests.clear();
       for(S32 i = 0; i < count; i++)
       {
          Point dest;
          stream->read(&dest.x);
          stream->read(&dest.y);
-         mDest.push_back(dest);
+         mDests.push_back(dest);
       }
       Rect r(mPos, mPos);
       r.expand(Point(TELEPORTER_RADIUS, TELEPORTER_RADIUS));
@@ -158,8 +168,8 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
       S32 dest;
       stream->read(&dest);
 
-      FXManager::emitTeleportInEffect(mDest[dest], 0);
-      SFXObject::play(SFXTeleportIn, mDest[dest], Point());
+      FXManager::emitTeleportInEffect(mDests[dest], 0);
+      SFXObject::play(SFXTeleportIn, mDests[dest], Point());
 
       SFXObject::play(SFXTeleportOut, mPos, Point());
       timeout = TeleporterDelay;
@@ -214,8 +224,8 @@ void Teleporter::idle(GameObject::IdleCallPath path)
       Ship *s = dynamic_cast<Ship *>(foundObjects[i]);
       if((mPos - s->getRenderPos()).len() < TELEPORTER_RADIUS + s->getRadius())
       {
-         mLastDest = TNL::Random::readI(0, mDest.size() - 1);
-         Point newPos = s->getActualPos() - mPos + mDest[mLastDest];    
+         mLastDest = TNL::Random::readI(0, mDests.size() - 1);
+         Point newPos = s->getActualPos() - mPos + mDests[mLastDest];    
          s->setActualPos(newPos, true);
          setMaskBits(TeleportMask);
       }
@@ -238,7 +248,7 @@ void Teleporter::render()
    else
       r = F32(TeleporterExpandTime - timeout) / F32(TeleporterExpandTime);
 
-   renderTeleporter(mPos, 0, true, mTime, r, TELEPORTER_RADIUS, 1.0, mDest, false);
+   renderTeleporter(mPos, 0, true, mTime, r, TELEPORTER_RADIUS, 1.0, mDests, false);
 }
 
 // Lua methods

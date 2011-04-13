@@ -310,8 +310,16 @@ bool EngineeredObject::processArguments(S32 argc, const char **argv)
 
 // This is used for both positioning items in-game and for snapping them to walls in the editor --> static method
 // Polulates anchor and normal
+
 DatabaseObject *EngineeredObject::findAnchorPointAndNormal(GridDatabase *db, const Point &pos, F32 snapDist, 
                                                            bool format, Point &anchor, Point &normal)
+{
+   return findAnchorPointAndNormal(db, pos, snapDist, format, BarrierType, anchor, normal);
+}
+
+
+DatabaseObject *EngineeredObject::findAnchorPointAndNormal(GridDatabase *db, const Point &pos, F32 snapDist, 
+                                                           bool format, S32 wallType, Point &anchor, Point &normal)
 {
    F32 minDist = F32_MAX;
    DatabaseObject *closestWall = NULL;
@@ -327,7 +335,7 @@ DatabaseObject *EngineeredObject::findAnchorPointAndNormal(GridDatabase *db, con
       Point mountPos = pos - dir * 0.001f;                           // Offsetting slightly prevents spazzy behavior in editor
 
       // Look for walls
-      DatabaseObject *wall = db->findObjectLOS(BarrierType, MoveObject::ActualState, format, mountPos, mountPos + dir, t, n);
+      DatabaseObject *wall = db->findObjectLOS(wallType, MoveObject::ActualState, format, mountPos, mountPos + dir, t, n);
 
       if(wall != NULL)     // Found one!
       {

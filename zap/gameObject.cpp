@@ -470,18 +470,19 @@ void GameObject::readCompressedVelocity(Point &vel, U32 max, BitStream *stream)
    }
 }
 
+
 // Gets overridden by child classes
-bool GameObject::processArguments(S32 argc, const char**argv)
+bool GameObject::processArguments(S32 argc, const char **argv)
 {
    return true;
 }
+
 
 bool GameObject::onGhostAdd(GhostConnection *theConnection)
 {
    addToGame(gClientGame);
    return true;
 }
-
 
 
 };

@@ -88,6 +88,10 @@ public:
    static DatabaseObject *findAnchorPointAndNormal(GridDatabase *db, const Point &pos, F32 snapDist, bool format, 
                                                    Point &anchor, Point &normal);
 
+   static DatabaseObject *findAnchorPointAndNormal(GridDatabase *db, const Point &pos, F32 snapDist, 
+                                                   bool format, S32 wallType, Point &anchor, Point &normal);
+
+
    // LuaItem interface
    // S32 getLoc(lua_State *L) { }   ==> Will be implemented by derived objects
    // S32 getRad(lua_State *L) { }   ==> Will be implemented by derived objects

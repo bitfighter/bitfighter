@@ -229,6 +229,7 @@ public:
    bool collisionPolyPointIntersect(Point center, F32 radius);
 
    virtual bool processArguments(S32 argc, const char**argv);
+
    void setScopeAlways();
 
    S32 getTeamIndx(lua_State *L) { return LuaObject::returnInt(L, mTeam + 1); }             // Return item team to Lua

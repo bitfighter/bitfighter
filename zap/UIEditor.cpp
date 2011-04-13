@@ -3303,9 +3303,20 @@ void EditorUserInterface::onMouseDragged(S32 x, S32 y)
    {
       mMoveOrigin = mItems[mSnapVertex_i].vert(mSnapVertex_j);
       saveUndoState();
+
+      //// Select any turrets/ffs that are attached to any selected walls
+      //for(S32 i = 0; i < mItems.size(); i++)
+      //   if(mItems[i].index == ItemBarrierMaker && mItems[i].selected)
+      //   {
+      //      for(S32 j = 0; j < mItems.size(); j++)
+      //         if((mItems[j].index == ItemTurret || mItems[j].index == ItemForceField) && 
+      //                     mItems[j].forceFieldMountSegment && mItems[j].forceFieldMountSegment->mOwner == mItems[i].mId)
+      //            mItems[j].selected = true;
+      //   }
    }
 
    mDraggingObjects = true;
+
 
    Point delta;
 
@@ -3317,6 +3328,8 @@ void EditorUserInterface::onMouseDragged(S32 x, S32 y)
       delta = snapPoint(convertCanvasToLevelCoord(mMousePos)) - mMoveOrigin;
    else
       delta = snapPoint(convertCanvasToLevelCoord(mMousePos) + mMoveOrigin - mMouseDownPos) - mMoveOrigin;
+
+
 
    // Update the locations of all items we're moving to show them being dragged.  Note that an item cannot be
    // selected if one of its vertices are.
@@ -5274,6 +5287,8 @@ void WorldItem::initializeGeom()
       centroid = findCentroid(mVerts);
       setExtent(Rect(mVerts));
    }
+
+   forceFieldMountSegment = NULL;
 }
 
 
@@ -5556,8 +5571,8 @@ Point WorldItem::snapEngineeredObject(const Point &pos)
 {  
    Point anchor, nrml;
 
-   DatabaseObject *mountSeg = EngineeredObject::
-               findAnchorPointAndNormal(getGridDatabase(), pos, EngineeredObject::MAX_SNAP_DISTANCE / getGridSize(), false, anchor, nrml);
+   DatabaseObject *mountSeg = EngineeredObject::findAnchorPointAndNormal(getGridDatabase(), pos, 
+                     EngineeredObject::MAX_SNAP_DISTANCE / getGridSize(), false, EditorWallSegmentType, anchor, nrml);
 
    if(mountSeg)
    {
