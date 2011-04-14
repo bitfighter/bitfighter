@@ -1604,6 +1604,7 @@ void processStartupParams()
    {
       gClientGame1 = new ClientGame(Address());   //   Let the system figure out IP address and assign a port
       gClientGame = gClientGame1;
+      gEditorGame = new EditorGame();
    }
       //gClientGame2 = new ClientGame(Address());   //  !!! 2-player split-screen game in same game.
 

@@ -112,14 +112,14 @@ void backToMainMenuCallback()
 }
 
 
+extern EditorGame *gEditorGame;
+
 const S32 NONE = -1;
 
 // Constructor
 EditorUserInterface::EditorUserInterface() : mGridDatabase(GridDatabase(false))     // false --> not using game coords
 {
    setMenuID(EditorUI);
-
-   editorGame = new EditorGame();
 
    // Create some items for the dock...  One of each, please!
    mShowMode = ShowAllObjects; 
@@ -290,8 +290,6 @@ EditorUserInterface::~EditorUserInterface()
          mItems.erase_fast(i);
          i--;
       }
-
-   delete editorGame;
 }
 
 
@@ -594,7 +592,7 @@ void EditorUserInterface::loadLevel()
    gGameParamUserInterface.gameParams.clear();
    gGameParamUserInterface.savedMenuItems.clear();          // clear() because this is not a pointer vector
    gGameParamUserInterface.menuItems.deleteAndClear();      // Keeps interface from using our menuItems to rebuild savedMenuItems
-   mGridSize = Game::DefaultGridSize;                       // Used in editor for scaling walls and text items appropriately
+   gEditorGame->setGridSize(Game::DefaultGridSize);         // Used in editor for scaling walls and text items appropriately
 
    mGameType[0] = 0;                   // Clear mGameType
    char fileBuffer[1024];
@@ -759,6 +757,12 @@ void EditorUserInterface::clearLevelGenItems()
 }
 
 
+inline F32 getGridSize()
+{
+   return gEditorGame->getGridSize();
+}
+
+
 extern void removeCollinearPoints(Vector<Point> &points, bool isPolygon);
 
 void EditorUserInterface::copyScriptItemsToEditor()
@@ -845,7 +849,7 @@ void EditorUserInterface::removeUnusedNavMeshZones(Vector<WorldItem> &zones)
             continue;
 
          static Point start, end;
-         if(zonesTouch(zones[zoneIndex].getVerts(), zones[i].getVerts(), 1 / mGridSize, start, end))
+         if(zonesTouch(zones[zoneIndex].getVerts(), zones[i].getVerts(), 1 / getGridSize(), start, end))
          {
             if(!zones[i].flag)           // If zone hasn't been processed...
             {
@@ -908,7 +912,7 @@ void EditorUserInterface::runScript(const string &scriptName, const Vector<strin
    }
 
    // Load the items
-   LuaLevelGenerator(name, args, mGridSize, getGridDatabase(), this, gConsole);
+   LuaLevelGenerator(name, args, gEditorGame->getGridSize(), getGridDatabase(), this, gConsole);
    
    // Process new items
    // Not sure about all this... may need to test
@@ -1108,12 +1112,6 @@ static Color getTeamColor(S32 team)
 string EditorUserInterface::getLevelFileName()
 {
    return mEditFileName;
-}
-
-
-inline F32 getGridSize()
-{
-   return gEditorUserInterface.editorGame->getGridSize();
 }
 
 
@@ -1823,7 +1821,7 @@ void EditorUserInterface::renderReferenceShip()
 
    glPushMatrix();
       glTranslatef(mMousePos.x, mMousePos.y, 0);
-      glScalef(mCurrentScale / mGridSize, mCurrentScale / mGridSize, 1);
+      glScalef(mCurrentScale / getGridSize(), mCurrentScale / getGridSize(), 1);
       glRotatef(90, 0, 0, 1);
       renderShip(red, 1, thrusts, 1, 5, 0, false, false, false, false);
       glRotatef(-90, 0, 0, 1);
@@ -1885,11 +1883,11 @@ void EditorUserInterface::render()
          if(mLevelGenItems[i].index == ItemBarrierMaker)
             for(S32 j = 0; j < mLevelGenItems[i].extendedEndPoints.size(); j+=2)
                renderTwoPointPolygon(mLevelGenItems[i].extendedEndPoints[j], mLevelGenItems[i].extendedEndPoints[j+1], 
-                                     mLevelGenItems[i].width / mGridSize / 2, GL_POLYGON);
+                                     mLevelGenItems[i].width / getGridSize() / 2, GL_POLYGON);
    glPopMatrix();
 
    for(S32 i = 0; i < mLevelGenItems.size(); i++)
-      mLevelGenItems[i].render(-1, false, true, mShowingReferenceShip, mShowMode);
+      mLevelGenItems[i].render(false, true, mShowingReferenceShip, mShowMode);
    
    // Render polyWall item fill just before rendering regular walls.  This will create the effect of all walls merging together.  
    // PolyWall outlines are already part of the wallSegmentManager, so will be rendered along with those of regular walls.
@@ -1906,13 +1904,13 @@ void EditorUserInterface::render()
    // Draw map items (teleporters, etc.) that are not being dragged, and won't have any text labels  (below the dock)
    for(S32 i = 0; i < mItems.size(); i++)
       if(!(mDraggingObjects && mItems[i].isSelected()))
-         mItems[i].render(i, mEditingSpecialAttrItem == i, false, mShowingReferenceShip, mShowMode);
+         mItems[i].render(mEditingSpecialAttrItem == i, false, mShowingReferenceShip, mShowMode);
 
    // Draw map items (teleporters, etc.) that are are selected and/or lit up, so label is readable (still below the dock)
    // Do this as a separate operation to ensure that these are drawn on top of those drawn above.
    for(S32 i = 0; i < mItems.size(); i++)
       if(mItems[i].isSelected() || mItems[i].isLitUp())
-         mItems[i].render(i, mEditingSpecialAttrItem == i, false, mShowingReferenceShip, mShowMode);
+         mItems[i].render(mEditingSpecialAttrItem == i, false, mShowingReferenceShip, mShowMode);
 
 
    // Go through and render any borders between navMeshZones -- these need to be rendered after the zones themselves so they
@@ -1921,7 +1919,7 @@ void EditorUserInterface::render()
    {
       glPushMatrix();  
          setLevelToCanvasCoordConversion();
-         renderNavMeshBorders(zoneBorders, 1 / mGridSize);
+         renderNavMeshBorders(zoneBorders, 1 / getGridSize());
       glPopMatrix();
       
       if(!mShowingReferenceShip)
@@ -1978,7 +1976,7 @@ void EditorUserInterface::render()
          setLevelToCanvasCoordConversion();
   
          for(S32 i = 0; i < zoneBorders.size(); i++)
-            renderNavMeshBorder(zoneBorders[i], 1 / mGridSize, yellow, .5, .05 * mGridSize);
+            renderNavMeshBorder(zoneBorders[i], 1 / getGridSize(), yellow, .5, .05 * getGridSize());
       glPopMatrix();
    }
 
@@ -1992,7 +1990,7 @@ void EditorUserInterface::render()
    // we'll lose our wall centernlines.
    for(S32 i = 0; i < mItems.size(); i++)
       if(mItems[i].index != ItemBarrierMaker && mDraggingObjects && mItems[i].isSelected())
-         mItems[i].render(i, mEditingSpecialAttrItem == i, false, mShowingReferenceShip, mShowMode);
+         mItems[i].render(mEditingSpecialAttrItem == i, false, mShowingReferenceShip, mShowMode);
 
    if(mDragSelecting)      // Draw box for selecting items
    {
@@ -2027,7 +2025,7 @@ void EditorUserInterface::render()
    if(!mShowingReferenceShip)
       for(S32 i = 0; i < mDockItems.size(); i++)
       {
-         mDockItems[i].render(-1, false, false, mShowingReferenceShip, mShowMode);
+         mDockItems[i].render(false, false, mShowingReferenceShip, mShowMode);
          mDockItems[i].setLitUp(false);
       }
 
@@ -2147,7 +2145,7 @@ extern void renderPolygon(const Vector<Point> &fillPoints, const Vector<Point> &
 static const S32 asteroidDesign = 2;      // Design we'll use for all asteroids in editor
 
 // Items are rendered in index order, so those with a higher index get drawn later, and hence, on top
-void WorldItem::render(S32 index, bool isBeingEdited, bool isScriptItem, bool showingReferenceShip, ShowMode showMode)
+void WorldItem::render(bool isBeingEdited, bool isScriptItem, bool showingReferenceShip, ShowMode showMode)
 {
    const S32 labelSize = 9;      // Size to label items we're hovering over
    const S32 instrSize = 9;      // Size of instructions for special items
@@ -2310,11 +2308,11 @@ void WorldItem::render(S32 index, bool isBeingEdited, bool isScriptItem, bool sh
          }
          else if(index == ItemTextItem)
          {
-            renderTextItem(1);
-         
             // If this is a textItem, and either the item or either vertex is selected, draw the text
             if(!mDockItem)
             {
+               renderTextItem(1);
+
                F32 txtSize = renderTextItem(alpha);
 
                if(isBeingEdited)
@@ -3110,7 +3108,7 @@ void EditorUserInterface::findHitItemAndEdge()
          if(mItems[i].geomType() == geomPoint)
          {
             S32 radius = mItems[i].getRadius(mCurrentScale);
-            S32 targetRadius = (radius == NONE) ? POINT_HIT_RADIUS : S32(radius * mCurrentScale / mGridSize + 0.5f);
+            S32 targetRadius = (radius == NONE) ? POINT_HIT_RADIUS : S32(radius * mCurrentScale / getGridSize() + 0.5f);
 
             F32 ang = mItems[i].normal.ATAN2();
             Point pos = convertLevelToCanvasCoord(mItems[i].vert(0) + mItems[i].getSelectionOffset(mCurrentScale).rotate(ang));
@@ -3310,7 +3308,7 @@ void EditorUserInterface::onMouseDragged(S32 x, S32 y)
          // Non polygon item --> size only used for geomSimpleLine items (teleport et al), ignored for geomPoints
          WorldItem(mDockItems[mDraggingDockItem].index, pos, mDockItems[mDraggingDockItem].team, false, 1, 0);
 
-         item.addToGame(gEditorUserInterface.editorGame);
+         item.addToGame(gEditorGame);
 
       // A little hack here to keep the polywall fill to appear to be left behind behind the dock
       if(item.index == ItemPolyWall)
@@ -3748,7 +3746,7 @@ void EditorUserInterface::insertNewItem(GameItems itemType)
 
    WorldItem newItem = WorldItem(itemType, pos, team, false, 1, 1);
 
-   newItem.addToGame(editorGame);
+   newItem.addToGame(gEditorGame);
    mItems.push_back(newItem);
    
 
@@ -4029,7 +4027,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 
          if(mNewItem.vertCount() > 1)
          {
-            mNewItem.addToGame(editorGame);
+            mNewItem.addToGame(gEditorGame);
 
             mItems.push_back(mNewItem);
             mItems.last().onGeomChanged();      // Walls need to be added to mItems BEFORE onGeomChanged() is run!
@@ -5040,7 +5038,7 @@ void EditorUserInterface::checkZones(S32 i, S32 j)
    if(!mItems[i].getExtent().intersectsOrBorders(mItems[j].getExtent()))
       return;
 
-   if(zonesTouch(mItems[i].getVerts(), mItems[j].getVerts(), 1 / mGridSize, zoneBorder.borderStart, zoneBorder.borderEnd))
+   if(zonesTouch(mItems[i].getVerts(), mItems[j].getVerts(), 1 / getGridSize(), zoneBorder.borderStart, zoneBorder.borderEnd))
    {
       zoneBorder.mOwner1 = mItems[i].mId;
       zoneBorder.mOwner2 = mItems[j].mId;

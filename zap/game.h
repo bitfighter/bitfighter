@@ -441,7 +441,7 @@ public:
 class EditorGame : public Game
 {
 public:
-   EditorGame() : Game(Address()) { /* do nothing */ }     // Constructor
+   EditorGame() : Game(Address()) { setGridSize(DefaultGridSize); }     // Constructor
 
    U32 getPlayerCount() { return 0; }
    bool isServer() { return false; }
@@ -455,6 +455,8 @@ public:
 
 extern ServerGame *gServerGame;
 extern ClientGame *gClientGame;
+extern EditorGame *gEditorGame;
+
 extern Vector<string> gMasterAddress;
 
 extern void joinGame(Address remoteAddress, bool isFromMaster, bool local);

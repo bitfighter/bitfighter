@@ -291,7 +291,7 @@ public:
    void renderPolylineCenterline(F32 alpha);    // Draw barrier centerlines; wraps renderPolyline()
    void renderLinePolyVertices(F32 scale, F32 alpha = 1.0);
    
-   void render(S32 index, bool isBeingEdited, bool isScriptItem, bool showingReferenceShip, ShowMode showMode);
+   void render(bool isBeingEdited, bool isScriptItem, bool showingReferenceShip, ShowMode showMode);
 
    const char *getOriginBottomLabel();          // SimpleLine items only
    const char *getDestinationBottomLabel();
@@ -547,7 +547,6 @@ private:
    void insertNewItem(GameItems itemType);                                                    // Insert a new object into the game
 
    bool mWasTesting;
-   F32 mGridSize;
 
    void finishedDragging();
 
