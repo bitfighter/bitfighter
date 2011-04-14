@@ -101,7 +101,7 @@ public:
 
    void leaveGlobalChat();                // Send msg to master telling them we're leaving chat
 
-   void renderMessages(U32 yPos, U32 numberToDisplay);
+   void renderMessages(U32 yPos, U32 lineCountToDisplay);
    void renderMessageComposition(S32 ypos);   // Render outgoing chat message composition line
 
    void renderChatters(S32 xpos, S32 ypos);   // Render list of other people in chat room

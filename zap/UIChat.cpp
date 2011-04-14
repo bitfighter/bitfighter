@@ -33,6 +33,7 @@
 
 #include "../glut/glutInclude.h"
 #include <stdarg.h>
+#include <utility>
 
 namespace Zap
 {
@@ -164,24 +165,117 @@ void AbstractChat::leaveGlobalChat()
 }
 
 
-void AbstractChat::renderMessages(U32 ypos, U32 numberToDisplay)            // ypos is starting location of first message
+void AbstractChat::renderMessages(U32 ypos, U32 lineCountToDisplay)  // ypos is starting location of first message
 {
-   U32 firstMsg = (mMessageCount <= numberToDisplay) ? 0 : (mMessageCount - numberToDisplay);       // Don't use min/max because of U32/S32 issues!
+   if (mMessageCount == 0)  // Skip logic if no messages received yet
+      return;
 
-   for(U32 i = 0; i < numberToDisplay; i++)
+   //==== First determine line counts of messages
+   Vector<pair<U32, Vector<string> > > messagesLines;
+   pair<U32, Vector<string> > messagesIndexLinesPair;
+   S32 spaceWidth = UserInterface::getStringWidth(CHAT_FONT_SIZE, " "); // Width of one space in this font size
+
+   // Find the first message to show, also set the available lines to loop through
+   U32 firstMsg;
+   U32 availableLines = lineCountToDisplay;
+   if (mMessageCount <= lineCountToDisplay)
    {
-      if(i >= min(firstMsg + numberToDisplay, mMessageCount))       // No more messages to display
+      firstMsg = 0;
+      availableLines = mMessageCount;
+   }
+   else
+      firstMsg = mMessageCount - lineCountToDisplay;
+
+   for (U32 i = 0; i < availableLines; i++)  // Maximum one message per line
+   {
+      ChatMessage msg = getMessage(firstMsg + i);
+
+      S32 xpos = UserInterface::horizMargin / 2;
+      xpos += UserInterface::getStringWidthf(CHAT_TIME_FONT_SIZE, "[%s] ", msg.time.c_str());
+
+      if(!msg.isSystem)
+         xpos += UserInterface::getStringWidth(CHAT_FONT_SIZE, msg.from.c_str());     // No sender for system message
+
+      if(msg.isPrivate)
+         xpos += UserInterface::getStringWidth(CHAT_FONT_SIZE, "*");
+
+      if(!msg.isSystem)
+         xpos += UserInterface::getStringWidth(CHAT_FONT_SIZE, ARROW) + AFTER_ARROW_SPACE;
+
+      S32 allowedWidth = gScreenInfo.getGameCanvasWidth() - (2 * UserInterface::horizMargin) - xpos;
+
+      Vector<string> lines;
+      Vector<string> words;
+
+      // Split string into words
+      parseString(msg.message.c_str(), words, ' ');
+
+      S32 spaceRemaining = allowedWidth;
+      string currentLine;
+
+      for (S32 j = 0; j < words.size(); j ++)
+      {
+         S32 wordWidth = UserInterface::getStringWidth(CHAT_FONT_SIZE, words[j].c_str());
+
+         if (wordWidth + spaceWidth > spaceRemaining)
+         {
+            lines.push_back(currentLine);
+            currentLine = words[j] + " ";
+            spaceRemaining = allowedWidth - wordWidth;
+         }
+         else
+         {
+            currentLine.append(words[j] + " ");
+            spaceRemaining = spaceRemaining - (wordWidth + spaceWidth);
+         }
+      }
+
+      lines.push_back(currentLine);  // Remaining words added as last line
+
+      // Couple the message index to the lines to keep track of for later
+      messagesIndexLinesPair = make_pair(firstMsg + i, lines);
+
+      messagesLines.push_back(messagesIndexLinesPair);
+   }
+
+   //==== Determine which message to start at based on line count
+   U32 messageLineCount = 0;
+   S32 startingPosition = 0;
+   for (S32 i = messagesLines.size() - 1; i >=0; i--)  // Loop backwards
+   {
+      messageLineCount += messagesLines[i].second.size();
+
+      // If this message added more than allowable lines, set the render starting point to the next message
+      if (messageLineCount > lineCountToDisplay)
+      {
+         startingPosition = i + 1;
+         break;
+      }
+   }
+
+   //==== Now do the drawing
+   for (S32 i = startingPosition; i < messagesLines.size(); i++)
+   {
+      U32 messageIndex = messagesLines[i].first;
+
+      // If the current position is greater than the lass possible message, return - there are
+      // no more messages to display
+      if(U32(i) > min(messageIndex + ((messagesLines.size() - 1) - startingPosition), mMessageCount))
          return;
 
-      ChatMessage msg = getMessage(i + firstMsg); 
+      ChatMessage msg = getMessage(messageIndex);
+
       glColor(msg.color);
 
       S32 xpos = UserInterface::horizMargin / 2;
-      xpos += UserInterface::drawStringAndGetWidthf(xpos, ypos + (CHAT_FONT_SIZE - CHAT_TIME_FONT_SIZE) / 2 + 2,  // + 2 just looks better!
-                                                    CHAT_TIME_FONT_SIZE, "[%s] ", msg.time.c_str()); 
 
+      // Draw the time
+      xpos += UserInterface::drawStringAndGetWidthf(xpos, ypos + (CHAT_FONT_SIZE - CHAT_TIME_FONT_SIZE) / 2 + 2,  // + 2 just looks better!
+            CHAT_TIME_FONT_SIZE, "[%s] ", msg.time.c_str());
+
+      // Draw the prefix
       if(!msg.isSystem)
-         xpos += UserInterface::drawStringAndGetWidth(xpos, ypos, CHAT_FONT_SIZE, msg.from.c_str());     // No sender for system message
+         xpos += UserInterface::drawStringAndGetWidth(xpos, ypos, CHAT_FONT_SIZE, msg.from.c_str());  // No sender for system message
 
       if(msg.isPrivate)
          xpos += UserInterface::drawStringAndGetWidthf(xpos, ypos, CHAT_FONT_SIZE, "*");
@@ -189,9 +283,12 @@ void AbstractChat::renderMessages(U32 ypos, U32 numberToDisplay)            // y
       if(!msg.isSystem)
          xpos += UserInterface::drawStringAndGetWidth(xpos, ypos, CHAT_FONT_SIZE, ARROW) + AFTER_ARROW_SPACE;
 
-      UserInterface::drawString(xpos, ypos, CHAT_FONT_SIZE, msg.message.c_str());
-
-      ypos += CHAT_FONT_SIZE + CHAT_FONT_MARGIN;
+      // Draw the message text
+      for (S32 j = 0; j < messagesLines[i].second.size(); j++)
+      {
+         UserInterface::drawString(xpos, ypos, CHAT_FONT_SIZE, messagesLines[i].second[j].c_str());
+         ypos += CHAT_FONT_SIZE + CHAT_FONT_MARGIN;
+      }
    }
 }
 
