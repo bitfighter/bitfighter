@@ -83,6 +83,19 @@ void GameNetInterface::checkBanlistTimeouts(U32 timeElapsed)
    }
 }
 
+
+// using this and not computeClientIdentityToken fix problem with random ping timed out in game lobby.
+// Only server use this function, client only holds Token received in PingResponse.
+// This function can be changed at any time without breaking compatibility.
+U32 computeSimpleToken(const Address &theAddress, const Nonce &theNonce)
+{
+   return (theNonce.data[1] ^ theNonce.data[3])
+      | ((theNonce.data[0] ^ theNonce.data[5]) << 8)
+      | ((theNonce.data[2] ^ theNonce.data[7]) << 16)
+      | ((theNonce.data[4] ^ theNonce.data[6]) << 24)
+      ^ 0x638542e6;
+}
+
 void GameNetInterface::handleInfoPacket(const Address &remoteAddress, U8 packetType, BitStream *stream)
 {
    switch(packetType)
@@ -99,7 +112,7 @@ void GameNetInterface::handleInfoPacket(const Address &remoteAddress, U8 packetT
             if(protocolVersion != CS_PROTOCOL_VERSION)   // Ignore pings from incompatible versions
                break;
 
-            U32 token = computeClientIdentityToken(remoteAddress, clientNonce);
+            U32 token = computeSimpleToken(remoteAddress, clientNonce);
             PacketStream pingResponse;
             pingResponse.write(U8(PingResponse));
             clientNonce.write(&pingResponse);
@@ -124,7 +137,7 @@ void GameNetInterface::handleInfoPacket(const Address &remoteAddress, U8 packetT
             U32 clientIdentityToken;
             theNonce.read(stream);
             stream->read(&clientIdentityToken);
-            if(clientIdentityToken == computeClientIdentityToken(remoteAddress, theNonce))
+            if(clientIdentityToken == computeSimpleToken(remoteAddress, theNonce))
             {
                PacketStream queryResponse;
                queryResponse.write(U8(QueryResponse));

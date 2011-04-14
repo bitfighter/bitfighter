@@ -3064,13 +3064,13 @@ GAMETYPE_RPC_S2C(GameType, s2cDisplayChatPM, (StringTableEntry fromName, StringT
 
    Color theColor = Color(1,1,0);
    if(mLocalClient->name == toName && toName == fromName)      // Message sent to self
-      clientGame->mGameUserInterface->displayMessage(theColor, "%s: %s", toName.getString(), message.getString());  
+      clientGame->mGameUserInterface->displayChatMessage(theColor, "%s: %s", toName.getString(), message.getString());
 
    else if(mLocalClient->name == toName)                       // To this player
-      clientGame->mGameUserInterface->displayMessage(theColor, "from %s: %s", fromName.getString(), message.getString());
+      clientGame->mGameUserInterface->displayChatMessage(theColor, "from %s: %s", fromName.getString(), message.getString());
 
    else if(mLocalClient->name == fromName)                     // From this player
-      clientGame->mGameUserInterface->displayMessage(theColor, "to %s: %s", toName.getString(), message.getString());
+      clientGame->mGameUserInterface->displayChatMessage(theColor, "to %s: %s", toName.getString(), message.getString());
 
    else                // Should never get here... shouldn't be able to see PM that is not from or not to you
       clientGame->mGameUserInterface->displayMessage(theColor, "from %s to %s: %s", fromName.getString(), toName.getString(), message.getString());
@@ -3086,7 +3086,7 @@ GAMETYPE_RPC_S2C(GameType, s2cDisplayChatMessage, (bool global, StringTableEntry
       return;
 
    Color theColor = global ? gGlobalChatColor : gTeamChatColor;
-   clientGame->mGameUserInterface->displayMessage(theColor, "%s: %s", clientName.getString(), message.getString());
+   clientGame->mGameUserInterface->displayChatMessage(theColor, "%s: %s", clientName.getString(), message.getString());
 }
 
 
@@ -3098,7 +3098,7 @@ GAMETYPE_RPC_S2C(GameType, s2cDisplayChatMessageSTE, (bool global, StringTableEn
    TNLAssert(clientGame, "clientGame is NULL");
    if(!clientGame) return;
 
-   clientGame->mGameUserInterface->displayMessage(theColor, "%s: %s", clientName.getString(), message.getString());
+   clientGame->mGameUserInterface->displayChatMessage(theColor, "%s: %s", clientName.getString(), message.getString());
 }
 
 

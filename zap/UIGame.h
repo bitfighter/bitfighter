@@ -94,11 +94,12 @@ private:
    void disableMovementKey(KeyCode keyCode);
 
    // Related to display of in-game chat and status messages
-   enum {
-      MessageStoreCount = 20,          // How many messages to store (only top MessageDisplayCount are normally displayed)
-      MessageDisplayCount = 6,         // How many messages to display
-      DisplayMessageTimeout = 3000,    // How long to display them (ms)
-   };
+   static const S32 MessageDisplayCount = 6;           // How many server messages to display
+   static const S32 DisplayMessageTimeout = 3000;      // How long to display them (ms)
+
+   static const S32 ChatMessageStoreCount = 24;        // How many chat messages to store (only top MessageDisplayCount are normally displayed)
+   static const S32 ChatMessageDisplayCount = 5;       // How many chat messages to display
+   static const S32 DisplayChatMessageTimeout = 4000;  // How long to display them (ms)
 
    enum MessageDisplayMode {
       ShortTimeout,            // Traditional message display mode (6 MessageDisplayCount lines, messages timeout after DisplayMessageTimeout)
@@ -109,15 +110,20 @@ private:
 
    MessageDisplayMode mMessageDisplayMode;    // Our current message display mode
 
-   // These are our normal chat messages, that "time out"
+   // These are our normal server messages, that "time out"
    Color mDisplayMessageColor[MessageDisplayCount];
    char mDisplayMessage[MessageDisplayCount][MAX_CHAT_MSG_LENGTH];
 
+   // These are our chat messages, that "time out"
+   Color mDisplayChatMessageColor[ChatMessageDisplayCount];
+   char mDisplayChatMessage[ChatMessageDisplayCount][MAX_CHAT_MSG_LENGTH];
+
    // These are only displayed in the extended chat panel, and don't time out
-   Color mStoreMessageColor[MessageStoreCount];
-   char mStoreMessage[MessageStoreCount][MAX_CHAT_MSG_LENGTH];
+   Color mStoreChatMessageColor[ChatMessageStoreCount];
+   char mStoreChatMessage[ChatMessageStoreCount][MAX_CHAT_MSG_LENGTH];
 
    Timer mDisplayMessageTimer;
+   Timer mDisplayChatMessageTimer;
    Timer mShutdownTimer;
 
    enum ChatType {            // Types of in-game chat messages:
@@ -230,13 +236,15 @@ public:
 
    void displayMessage(const Color &msgColor, const char *format, ...);
    void displayMessage(GameConnection::MessageColors msgColorIndex, const char *format, ...);
+   void displayChatMessage(const Color &msgColor, const char *format, ...);
 
    void initializeLoadoutOptions(bool engineerAllowed) { mLoadoutHelper.initialize(engineerAllowed); }
 
    void render();                   // Render game screen
    void renderReticle();            // Render crosshairs
    void renderProgressBar();        // Render level-load progress bar
-   void renderMessageDisplay();     // Render incoming chat msgs
+   void renderMessageDisplay();     // Render incoming server msgs
+   void renderChatMessageDisplay();     // Render incoming chat msgs
    void renderCurrentChat();        // Render chat msg user is composing
    void renderLoadoutIndicators();  // Render indicators for the various loadout items
    void renderShutdownMessage();    // Render an alert if server is shutting down

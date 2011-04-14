@@ -1087,7 +1087,7 @@ void QueryServersUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    else if (keyCode == KEY_DELETE || keyCode == KEY_BACKSPACE)       // Do backspacey things
       mLineEditor.handleBackspace(keyCode);   
    else if(ascii)                               // Other keys - add key to message
-     addCharToMessage(ascii);
+      mLineEditor.addChar(ascii);
 
    // The following keys only make sense if there are some servers to browse through
    else if(servers.size() == 0)
