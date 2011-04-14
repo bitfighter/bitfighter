@@ -332,6 +332,9 @@ static const char *wallInstructions[] =
 };
 
 
+extern void renderVertex(VertexRenderStyles style, const Point &v, S32 number);
+extern Color gNeutralTeamColor;
+
 void EditorInstructionsUserInterface::renderPageWalls()
 {
    // Draw animated creation of walls
@@ -390,7 +393,7 @@ void EditorInstructionsUserInterface::renderPageWalls()
          delete wallSegments[i];
    }
 
-   glColor(mAnimStage <= 11 ? Color(1,1,0) : gEditorUserInterface.getTeamColor(-1));
+   glColor(mAnimStage <= 11 ? Color(1,1,0) : gNeutralTeamColor);
 
    glLineWidth(WALL_SPINE_WIDTH);
 
@@ -402,14 +405,13 @@ void EditorInstructionsUserInterface::renderPageWalls()
    glLineWidth(gDefaultLineWidth);
 
 
-
    for(S32 i = 0; i < points.size(); i++)
       if(i < (points.size() - ((mAnimStage > 6) ? 0 : 1) ) && !(i == 2 && (mAnimStage == 9 || mAnimStage == 10 || mAnimStage == 11)))
-         gEditorUserInterface.renderVertex(SelectedItemVertex, points[i], i);
+         renderVertex(SelectedItemVertex, points[i], i);
       else if(mAnimStage == 9 || mAnimStage == 10 || mAnimStage == 11)
-         gEditorUserInterface.renderVertex(SelectedVertex, points[i], i);
+         renderVertex(SelectedVertex, points[i], i);
       else  // mAnimStage > 11, moving vertices about
-         gEditorUserInterface.renderVertex(HighlightedVertex, points[i], -1);
+         renderVertex(HighlightedVertex, points[i], -1);
 
    // And now some written instructions
    S32 x = 50 + getStringWidth(textSize, "* ");

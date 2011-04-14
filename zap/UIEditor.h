@@ -183,7 +183,7 @@ public:
    ////// TEMP THINGS
    
    // only needed for teleporter, speedzone, textitem
-   Point getDest() { return mDockItem ? mVerts[1] : gEditorUserInterface.convertLevelToCanvasCoord(mVerts[1]); }
+   Point getDest();
    F32 renderTextItem(F32 alpha);          // Returns size of text
    void addToGame(Game *game) { mGame = game; /*addToDatabase();*/ }    // Could maintain mItems here...
    Game *getGame() { return mGame; }
@@ -289,7 +289,7 @@ public:
    void renderPolyline();                       // Draws a line connecting points in mVerts
 
    void renderPolylineCenterline(F32 alpha);    // Draw barrier centerlines; wraps renderPolyline()
-   void renderLinePolyVertices(F32 alpha = 1.0);
+   void renderLinePolyVertices(F32 scale, F32 alpha = 1.0);
    
    void render(S32 index, bool isBeingEdited, bool isScriptItem, bool showingReferenceShip, ShowMode showMode);
 
@@ -559,7 +559,7 @@ protected:
 public:
    ~EditorUserInterface();    // Destructor
 
-   static EditorGame *editorGame;
+   EditorGame *editorGame;
 
    void setLevelFileName(string name);
    void setLevelGenScriptName(string name);
@@ -611,8 +611,6 @@ public:
    bool mDraggingObjects;     // Should be private
 
    // Render walls & lineItems
-   void setLevelToCanvasCoordConversion(bool convert = true);
-
    WallSegmentManager *getWallSegmentManager() { return &wallSegmentManager; }
 
    // Handle input

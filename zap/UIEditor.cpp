@@ -295,9 +295,10 @@ EditorUserInterface::~EditorUserInterface()
 }
 
 
+static const S32 NO_NUMBER = -1;
+
 // Draw a vertex of a selected editor item
-// TODO: Move to EditorObjectRenderer
-static void renderVertex(VertexRenderStyles style, Point v, S32 number, F32 alpha = 1, S32 size = 5)
+void renderVertex(VertexRenderStyles style, const Point &v, S32 number, F32 alpha, S32 size)
 {
    bool hollow = style == HighlightedVertex || style == SelectedVertex || style == SelectedItemVertex || style == SnappingVertex;
 
@@ -327,6 +328,18 @@ static void renderVertex(VertexRenderStyles style, Point v, S32 number, F32 alph
 }
 
 
+void renderVertex(VertexRenderStyles style, const Point &v, S32 number, F32 alpha)
+{
+   renderVertex(style, v, number, alpha, 5);
+}
+
+
+void renderVertex(VertexRenderStyles style, const Point &v, S32 number)
+{
+   renderVertex(style, v, number, 1);
+}
+
+
 static void drawLetter(char letter, const Point &pos, const Color &color, F32 alpha)
 {
    // Mark the item with a letter, unless we're showing the reference ship
@@ -348,6 +361,22 @@ static void renderGenericItem(const Point &pos, const Color &c, F32 alpha, const
    drawLetter(letter, pos, letterColor, alpha);
 }
 
+
+// Replaces the need to do a convertLevelToCanvasCoord on every point before rendering
+static void setLevelToCanvasCoordConversion()
+{
+   Point offset = gEditorUserInterface.getCurrentOffset();
+   F32 scale = gEditorUserInterface.getCurrentScale();
+
+   offset /= scale;
+
+   glScalef(scale, scale, 1);
+   glTranslatef(offset.x, offset.y, 0);
+} 
+
+
+////////////////////////////////////
+////////////////////////////////////
 
 void EditorUserInterface::saveUndoState()
 {
@@ -646,7 +675,7 @@ void EditorUserInterface::processLevelLoadLine(U32 argc, U32 id, const char **ar
    else if(!strcmp(argv[0], "GridSize"))
    {
       if(argc >= 1)
-         gEditorUserInterface.editorGame->setGridSize((F32) atof(argv[1]));
+         editorGame->setGridSize((F32) atof(argv[1]));
    }
 
    else if(!strcmp(argv[0], "Script"))
@@ -1079,6 +1108,18 @@ static Color getTeamColor(S32 team)
 string EditorUserInterface::getLevelFileName()
 {
    return mEditFileName;
+}
+
+
+inline F32 getGridSize()
+{
+   return gEditorUserInterface.editorGame->getGridSize();
+}
+
+
+inline F32 getCurrentScale()
+{
+   return gEditorUserInterface.getCurrentScale();
 }
 
 
@@ -1576,7 +1617,6 @@ extern Color gErrorMessageTextColor;
 
 static const Color grayedOutColorBright = Color(.5, .5, .5);
 static const Color grayedOutColorDim = Color(.25, .25, .25);
-static const S32 NO_NUMBER = -1;
 static bool fillRendered = false;
 
 // Render background snap grid
@@ -1887,7 +1927,7 @@ void EditorUserInterface::render()
       if(!mShowingReferenceShip)
          for(S32 i = 0; i < mItems.size(); i++)
             if(mItems[i].index == ItemNavMeshZone)
-               mItems[i].renderLinePolyVertices(1); 
+               mItems[i].renderLinePolyVertices(gEditorUserInterface.getCurrentScale()); 
    }
 
    fillRendered = false;
@@ -2047,8 +2087,14 @@ void EditorUserInterface::render()
 }
 
 
+inline Point convertLevelToCanvasCoord(const Point &point, bool convert = true) 
+{ 
+   return gEditorUserInterface.convertLevelToCanvasCoord(point, convert); 
+}
+
+
 // Draw the vertices for a polygon or line item (i.e. walls)
-void WorldItem::renderLinePolyVertices(F32 alpha)
+void WorldItem::renderLinePolyVertices(F32 scale, F32 alpha)
 {
    // Draw the vertices of the wall or the polygon area
    for(S32 j = 0; j < mVerts.size(); j++)
@@ -2062,7 +2108,7 @@ void WorldItem::renderLinePolyVertices(F32 alpha)
       else if(mSelected || mLitUp || mAnyVertsSelected)
          renderVertex(SelectedItemVertex, v, j, alpha);         // Hollow red boxes with number
       else
-         renderVertex(UnselectedItemVertex, v, NO_NUMBER, alpha, getCurrentScale() > 35 ? 2 : 1);   // Solid red boxes, no number
+         renderVertex(UnselectedItemVertex, v, NO_NUMBER, alpha, scale > 35 ? 2 : 1);   // Solid red boxes, no number
    }
 }
 
@@ -2082,22 +2128,6 @@ If wall shape or location is changed steps 1-5 need to be repeated
 If intersecting wall is changed, only steps 4 and 5 need to be repeated
 If wall thickness is changed, steps 3-5 need to be repeated
 */
-
-inline Point convertLevelToCanvasCoord(const Point &point, bool convert = true) 
-{ 
-   return gEditorUserInterface.convertLevelToCanvasCoord(point, convert); 
-}
-
-inline F32 getGridSize()
-{
-   return gEditorUserInterface.editorGame->getGridSize();
-}
-
-inline F32 getCurrentScale()
-{
-   return gEditorUserInterface.getCurrentScale();
-}
-
 
 static inline void labelSimpleLineItem(Point pos, U32 labelSize, const char *itemLabelTop, const char *itemLabelBottom)
 {
@@ -2331,7 +2361,7 @@ void WorldItem::render(S32 index, bool isBeingEdited, bool isScriptItem, bool sh
       renderPolylineCenterline(alpha);
 
       if(!showingReferenceShip)
-         renderLinePolyVertices(alpha);
+         renderLinePolyVertices(gEditorUserInterface.getCurrentScale(), alpha);
    }
 
    //////////
@@ -2342,7 +2372,7 @@ void WorldItem::render(S32 index, bool isBeingEdited, bool isScriptItem, bool sh
          renderPolylineCenterline(alpha);
 
       if(!showingReferenceShip)
-         renderLinePolyVertices(alpha);
+         renderLinePolyVertices(gEditorUserInterface.getCurrentScale(), alpha);
    } 
    else if(geomType() == geomPoly)    // Draw regular line objects and poly objects
    {
@@ -2429,7 +2459,7 @@ void WorldItem::render(S32 index, bool isBeingEdited, bool isScriptItem, bool sh
       // NavMeshZone verts will be drawn elsewhere
       if((geomType() == geomLine || showMode != ShowWallsOnly) && 
                   !mDockItem && index != ItemNavMeshZone && !showingReferenceShip)  
-         renderLinePolyVertices(alpha);                               
+         renderLinePolyVertices(gEditorUserInterface.getCurrentScale(), alpha);                               
    }
  
    else if(showMode != ShowWallsOnly || 
@@ -2717,6 +2747,12 @@ void WorldItem::render(S32 index, bool isBeingEdited, bool isScriptItem, bool sh
 }
 
 
+Point WorldItem::getDest() 
+{ 
+   return mDockItem ? mVerts[1] : gEditorUserInterface.convertLevelToCanvasCoord(mVerts[1]); 
+}
+
+
 F32 WorldItem::renderTextItem(F32 alpha)
 {
    // Use this more precise F32 calculation of size for smoother interactive rendering.
@@ -2744,22 +2780,6 @@ void EditorUserInterface::setTranslationAndScale(const Point &pos)
    glScalef(scale / gridSize, scale / gridSize, 1);
    glTranslatef(pos.x * gridSize / scale - pos.x, pos.y * gridSize / scale - pos.y, 0);
 }
-
-
-// Replaces the need to do a convertLevelToCanvasCoord on every point before rendering
-static void setLevelToCanvasCoordConversion(bool convert = true)
-{
-   if(convert)
-   {
-      Point offset = gEditorUserInterface.getCurrentOffset();
-      F32 scale = gEditorUserInterface.getCurrentScale();
-
-      offset /= scale;
-
-      glScalef(scale, scale, 1);
-      glTranslatef(offset.x, offset.y, 0);
-   }
-} 
 
 
 void EditorUserInterface::clearSelection()
@@ -4009,7 +4029,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 
          if(mNewItem.vertCount() > 1)
          {
-            mNewItem.addToGame(gEditorUserInterface.editorGame);
+            mNewItem.addToGame(editorGame);
 
             mItems.push_back(mNewItem);
             mItems.last().onGeomChanged();      // Walls need to be added to mItems BEFORE onGeomChanged() is run!
@@ -5642,7 +5662,7 @@ void WorldItem::renderPolylineCenterline(F32 alpha)
 void WorldItem::renderPolyline()
 {
    glPushMatrix();
-      gEditorUserInterface.setLevelToCanvasCoordConversion();
+      setLevelToCanvasCoordConversion();
 
       glBegin(GL_LINE_STRIP);
          for(S32 j = 0; j < mVerts.size(); j++)
