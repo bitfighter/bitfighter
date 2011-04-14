@@ -353,7 +353,7 @@ void GameParamUserInterface::onEscape()
    gEditorUserInterface.setLevelFileName(menuItems[OPT_FILENAME]->getValueForWritingToLevelFile());  
    gEditorUserInterface.setLevelGenScriptName(menuItems[OPT_SCRIPT]->getValueForWritingToLevelFile());
 
-   gEditorUserInterface.setGridSize(menuItems[OPT_GRIDSIZE]->getIntValue()); 
+   gEditorUserInterface.editorGame->setGridSize(menuItems[OPT_GRIDSIZE]->getIntValue()); 
    buildGameParamList();
 
    if(anythingChanged())

@@ -35,24 +35,11 @@ namespace Zap
 
 ////////////////////////////////////////
 ////////////////////////////////////////
-// TODO: Move to UIEditor or soemthing
-class EditorObject      // Interface class
+
+class Teleporter : public GameObject, public EditorObject, public LuaItem
 {
-   virtual bool processArguments(S32 argc, const char **argv) = 0;
-};
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-class AbstractTeleporter
-{
-protected:
-   Point mPos;
-   Point mDest;
-
 public:
-   enum {
+      enum {
       InitMask     = BIT(0),
       TeleportMask = BIT(1),
 
@@ -63,30 +50,20 @@ public:
       TeleportInRadius = 120,
    };
 
-   static const S32 TELEPORTER_RADIUS = 75;  // Overall size of the teleporter
-   virtual bool processArguments(S32 argc, const char **argv);
-   virtual void render() = 0;
-};
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-class Teleporter : public AbstractTeleporter, public GameObject, public LuaItem
-{
-   typedef AbstractTeleporter Parent;
-
 private:
    S32 mLastDest;    // Destination of last ship through
+   Point mPos;
+   Point mDest;
 
 public:
+   Teleporter();     // Constructor
+
    bool doSplash;
    U32 timeout;
    U32 mTime;
 
-   Teleporter();     // Constructor
-   
-   bool processArguments(S32 argc, const char **argv);
+   static const S32 TELEPORTER_RADIUS = 75;  // Overall size of the teleporter
+   virtual bool processArguments(S32 argc, const char **argv);
 
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
@@ -118,16 +95,6 @@ public:
    S32 getTeamIndx(lua_State *L) { return returnInt(L, Item::TEAM_NEUTRAL + 1); }    // All teleporters are neutral
    GameObject *getGameObject() { return this; }                                      // Return the underlying GameObject
 };
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-class EditorTeleporter : public AbstractTeleporter, public EditorObject
-{
-         // Nothing here yet
-};
-
 
 };
 

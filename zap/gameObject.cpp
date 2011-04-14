@@ -471,7 +471,7 @@ void GameObject::readCompressedVelocity(Point &vel, U32 max, BitStream *stream)
 }
 
 
-// Gets overridden by child classes
+// Gets overridden by most child classes (except Barrier)
 bool GameObject::processArguments(S32 argc, const char **argv)
 {
    return true;

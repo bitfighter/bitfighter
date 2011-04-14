@@ -287,7 +287,7 @@ public:
    static void drawAngleStringf_fixed(F32 x, F32 y, F32 size, F32 angle, const char *format, ...);
 
    // Center text between two points
-   void drawStringf_2pt(Point p1, Point p2, F32 size, F32 vert_offset, const char *format, ...);
+   static void drawStringf_2pt(Point p1, Point p2, F32 size, F32 vert_offset, const char *format, ...);
 
    // Draw text centered on screen (normal and formatted versions)  --> now return starting location
    static S32 drawCenteredString(S32 y, U32 size, const char *str);

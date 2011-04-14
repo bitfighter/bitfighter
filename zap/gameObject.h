@@ -236,6 +236,17 @@ public:
    virtual void push(lua_State *L) { TNLAssert(false, "Unimplemented push function!"); }    // Lua-aware classes will implement this
 };
 
+
+////////////////////////////////////////
+////////////////////////////////////////
+// TODO: Move to UIEditor or soemthing
+class EditorObject      // Interface class
+{
+   virtual bool processArguments(S32 argc, const char **argv) = 0;
+   virtual void render() = 0;
+};
+
+
 };
 
 #endif

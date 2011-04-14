@@ -1600,7 +1600,7 @@ void processStartupParams()
 
    // Note that we can be in both clientMode and serverMode (such as when we're hosting a game interactively)
 
-   if(gCmdLineSettings.clientMode)               // Create ClientGame object
+   if(gCmdLineSettings.clientMode)                // Create ClientGame object
    {
       gClientGame1 = new ClientGame(Address());   //   Let the system figure out IP address and assign a port
       gClientGame = gClientGame1;
@@ -1633,6 +1633,7 @@ void processStartupParams()
             gClientGame = gClientGame2;
             gClientGame1->mUserInterfaceData->get();
             gMainMenuUserInterface.activate();
+
             gClientGame2->mUserInterfaceData->get();
             gClientGame1->mUserInterfaceData->set();
             gClientGame = gClientGame1;

@@ -43,6 +43,7 @@ class GameType;
 class Item : public MoveObject, public LuaItem
 {
    typedef MoveObject Parent;
+
 private:
    F32 UpdateTimer1;
    Point prevMoveVelocity;

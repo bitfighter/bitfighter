@@ -28,10 +28,11 @@
 
 #include "UIMenus.h"
 #include "gameLoader.h"
+#include "gameObject.h"          // For EditorObject definition
 #include "gridDB.h"              // For DatabaseObject definition
 #include "timer.h"
 #include "point.h"
-#include "BotNavMeshZone.h"      // For Border def
+#include "BotNavMeshZone.h"      // For Border definition
 #include "tnlNetStringTable.h"
 #include <string>
 #include <vector>
@@ -152,10 +153,15 @@ extern bool isConvex(const Vector<Point> &verts);
 #define WALL_SPINE_WIDTH gLineWidth3
 
 
-class WorldItem : public DatabaseObject
+class WorldItem : public DatabaseObject, public EditorObject
 {  
 private:
    Vector<Point> mVerts;
+
+   bool mDockItem;              // True if this item lives on the dock
+   bool mSelected;
+   bool mLitUp;
+   S32 mVertexLitUp;
 
    vector<bool> mVertSelected;  // never use std::vector<bool> use deque instead
    bool mAnyVertsSelected;
@@ -164,12 +170,24 @@ private:
 
    static GridDatabase *mGridDatabase;
 
+   Game *mGame;
+
 public:
    WorldItem(GameItems itemType = ItemInvalid, S32 itemId = 0);    // Only used when creating an item from a loaded level
    WorldItem(GameItems itemType, Point pos, S32 team, bool isDockItem, F32 width = 1, F32 height = 1, U32 id = 0);  // Primary constructor
 
    void initializeGeom();     // Once we have our points, do some geom preprocessing
 
+
+   ////////////////////////////
+   ////// TEMP THINGS
+   
+   // only needed for teleporter, speedzone, textitem
+   Point getDest() { return mDockItem ? mVerts[1] : gEditorUserInterface.convertLevelToCanvasCoord(mVerts[1]); }
+   F32 renderTextItem(F32 alpha);          // Returns size of text
+   void addToGame(Game *game) { mGame = game; /*addToDatabase();*/ }    // Could maintain mItems here...
+   Game *getGame() { return mGame; }
+   F32 getGridSize() { return mGame->getGridSize(); }
 
    bool flag;
 
@@ -186,9 +204,17 @@ public:
 
    S32 mScore;            // Score awarded for this item
    
-   bool selected;
-   bool litUp;
-   bool mDockItem;        // True if this item lives on the dock
+   bool isSelected() { return mSelected; }
+   void setSelected(bool selected) { mSelected = selected; }
+
+   bool isLitUp() { return mLitUp; }
+   void setLitUp(bool litUp) { mLitUp = litUp; }
+
+   bool isVertexLitUp(S32 vertexIndex) { return mVertexLitUp == vertexIndex; }
+   bool setVertexLitUp(S32 vertexIndex) { mVertexLitUp = vertexIndex; }
+
+
+   bool isOnDock() { return mDockItem; }
 
    LineEditor lineEditor; // For items that have an aux text field
    U32 textSize;          // For items that have an aux text field
@@ -260,8 +286,12 @@ public:
 
    ////////////////////
    // Rendering methods
-   void renderPolylineCenterline(F32 alpha);    // Draw barrier centerlines; wraps renderPolyline()
    void renderPolyline();                       // Draws a line connecting points in mVerts
+
+   void renderPolylineCenterline(F32 alpha);    // Draw barrier centerlines; wraps renderPolyline()
+   void renderLinePolyVertices(F32 alpha = 1.0);
+   
+   void render(S32 index, bool isBeingEdited, bool isScriptItem, bool showingReferenceShip, ShowMode showMode);
 
    const char *getOriginBottomLabel();          // SimpleLine items only
    const char *getDestinationBottomLabel();
@@ -274,6 +304,10 @@ public:
    bool getCollisionPoly(Vector<Point> &polyPoints) { return false; }
    bool getCollisionCircle(U32 stateIndex, Point &point, float &radius) { return false; }
    bool isCollisionEnabled() { return true; }
+
+   ////////////////////
+   //  EditorItem methods
+   void render() { /* Do nothing */ }
 };
 
 ////////////////////////////////////////
@@ -463,17 +497,14 @@ private:
    WorldItem mNewItem;
    F32 mCurrentScale;
    Point mCurrentOffset;         // Coords of UR corner of screen
+
    Point mMousePos;              // Where the mouse is at the moment
    Point mMouseDownPos;          // Where the mouse was pressed for a drag operation
 
-   void renderGenericItem(const Point &pos, const Color &c, F32 alpha, const Color &letterColor, char letter);
    void renderGrid();                                       // Draw background snap grid
    void renderDock(F32 width);
    void renderTextEntryOverlay();
    void renderReferenceShip();
-   void drawLetter(char letter, const Point &pos, const Color &color, F32 alpha);
-   F32 renderTextItem(WorldItem &item, F32 alpha);          // Returns size of text
-   void setTranslationAndScale(const Point &pos);
 
    bool mCreatingPoly;
    bool mCreatingPolyline;
@@ -494,7 +525,6 @@ private:
    void splitBarrier();          // Split wall on selected vertex/vertices
    void joinBarrier();           // Join barrier bits together into one (if ends are coincident)
 
-   S32 countSelectedItems();
    //S32 countSelectedVerts();
    bool anyItemsSelected();           // Are any items selected?
    bool anythingSelected();           // Are any items/vertices selected?
@@ -517,9 +547,9 @@ private:
    void insertNewItem(GameItems itemType);                                                    // Insert a new object into the game
 
    bool mWasTesting;
+   F32 mGridSize;
 
    void finishedDragging();
-   bool showingNavZones();
 
 protected:
    void onActivate();
@@ -528,6 +558,9 @@ protected:
 
 public:
    ~EditorUserInterface();    // Destructor
+
+   static EditorGame *editorGame;
+
    void setLevelFileName(string name);
    void setLevelGenScriptName(string name);
 
@@ -537,16 +570,22 @@ public:
    U32 mAllUndoneUndoLevel;   // What undo level reflects everything back just the
 
    void saveUndoState();
+   bool showingNavZones();    // Stupid helper function, will be deleted in future
 
    #define GAME_TYPE_LEN 256   // TODO: Define this in terms of something else...
    char mGameType[GAME_TYPE_LEN];
 
    Vector<string> mGameTypeArgs;
 
-   Color getTeamColor(S32 team);     // Return a color based on team index (needed by editor instructions)
    bool isFlagGame(char *mGameType);
    bool isTeamFlagGame(char *mGameType);
    bool isShowingReferenceShip() { return mShowingReferenceShip; }
+
+   F32 getCurrentScale() { return mCurrentScale; }
+   Point getCurrentOffset() { return mCurrentOffset; }
+
+   S32 getEditingSpecialAttrItem() { return mEditingSpecialAttrItem; }
+   bool isEditingSpecialAttribute(SpecialAttribute attribute) { return mSpecialAttribute == attribute; }
 
    void clearUndoHistory();         // Wipe undo/redo history
 
@@ -557,6 +596,10 @@ public:
 
    GridDatabase *getGridDatabase() { return &mGridDatabase; }
 
+   static void setTranslationAndScale(const Point &pos);
+
+   S32 getSnapItemIndex() { return mSnapVertex_i; }
+   S32 getSnapVertexIndex() { return mSnapVertex_j; }
    void rebuildEverything();        // Does lots of things in undo, redo, and add items from script
    void recomputeAllEngineeredItems();
 
@@ -564,14 +607,10 @@ public:
    void onAfterRunScriptFromConsole();
 
    void render();
-   void renderItem(WorldItem &item, S32 index, bool isBeingEdited, bool isScriptItem);
-   void renderLinePolyVertices(WorldItem &item, F32 alpha = 1.0);
 
    bool mDraggingObjects;     // Should be private
 
    // Render walls & lineItems
-   void renderVertex(VertexRenderStyles style, Point v, S32 number, F32 alpha = 1, S32 size = 5);
-
    void setLevelToCanvasCoordConversion(bool convert = true);
 
    WallSegmentManager *getWallSegmentManager() { return &wallSegmentManager; }
@@ -593,10 +632,6 @@ public:
 
 
    void populateDock();                         // Load up dock with game-specific items to drag and drop
-
-   F32 mGridSize;    // Should be private
-   F32 getGridSize() { return mGridSize; }
-   void setGridSize(F32 gridSize) { mGridSize = gridSize; }
 
    string mScriptLine;                          // Script and args, if any
    void setHasNavMeshZones(bool hasZones) { mHasBotNavZones = hasZones; }

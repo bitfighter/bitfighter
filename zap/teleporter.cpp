@@ -36,22 +36,6 @@ using namespace TNL;
 namespace Zap
 {
 
-
-bool AbstractTeleporter::processArguments(S32 argc, const char **argv)
-{
-   if(argc != 4)
-      return false;
-
-   mPos.read(argv);
-   mDest.read(argv + 2);
-
-   return true;
-}
-
-
-////////////////////////////////////////
-///////////////////////////////////////
-
 TNL_IMPLEMENT_NETOBJECT(Teleporter);
 
 static Vector<DatabaseObject *> foundObjects;
@@ -72,17 +56,21 @@ void Teleporter::onAddedToGame(Game *theGame)
 {
    if(!isGhost())
       setScopeAlways();    // Always in scope!
+
    getGame()->mObjectsLoaded++;
 }
 
 
 bool Teleporter::processArguments(S32 argc, const char **argv)
 {
-   if(!Parent::processArguments(argc, argv))
+   if(argc != 4)
       return false;
 
-      mDest *= getGame()->getGridSize();
-      mPos *= getGame()->getGridSize();
+   mPos.read(argv);
+   mDest.read(argv + 2);
+
+   mDest *= getGame()->getGridSize();
+   mPos *= getGame()->getGridSize();
 
    // See if we already have any teleports with this pos... if so, this is a "multi-dest" teleporter
    bool found = false;

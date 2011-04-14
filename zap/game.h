@@ -106,12 +106,14 @@ struct UserInterfaceData;
 class Game
 {
 private:
+   F32 mGridSize;     
+
    U32 mTimeUnconnectedToMaster;      // Time that we've been unconnected to the master
+   bool mHaveTriedToConnectToMaster;
 
    // Info about modules -- access via getModuleInfo()
    Vector<ModuleInfo> mModuleInfos;
    void buildModuleInfos();
-   bool mHaveTriedToConnectToMaster;
 
 protected:
    void cleanUp();
@@ -120,7 +122,6 @@ protected:
 
    Rect mWorldExtents;     // Extents of everything
 
-   F32 mGridSize;          // GridSize for this level (default defined below)
    string mLevelFileHash;  // MD5 hash of level file
 
    struct DeleteRef
@@ -187,13 +188,13 @@ public:
    void removeFromGameObjectList(GameObject *theObject);
    void deleteObjects(U32 typeMask);
 
+   F32 getGridSize() { return mGridSize; }
    void setGridSize(F32 gridSize) { mGridSize = gridSize; }
 
    static Point getScopeRange(bool sensorIsActive) { return sensorIsActive ? Point(PLAYER_SENSOR_VISUAL_DISTANCE_HORIZONTAL + PLAYER_SCOPE_MARGIN,
                                                                                    PLAYER_SENSOR_VISUAL_DISTANCE_VERTICAL  + PLAYER_SCOPE_MARGIN)
                                                                            : Point(PLAYER_VISUAL_DISTANCE_HORIZONTAL + PLAYER_SCOPE_MARGIN,
                                                                                    PLAYER_VISUAL_DISTANCE_VERTICAL  + PLAYER_SCOPE_MARGIN); }
-   F32 getGridSize() { return mGridSize; }
    U32 getCurrentTime() { return mCurrentTime; }
    virtual bool isServer() = 0;              // Will be overridden by either clientGame (return false) or serverGame (return true)
    virtual void idle(U32 timeDelta) = 0;
@@ -436,6 +437,21 @@ public:
 
 ////////////////////////////////////////
 ////////////////////////////////////////
+
+class EditorGame : public Game
+{
+public:
+   EditorGame() : Game(Address()) { /* do nothing */ }     // Constructor
+
+   U32 getPlayerCount() { return 0; }
+   bool isServer() { return false; }
+   void idle(U32 timeDelta) { /* do nothing */ }
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 
 extern ServerGame *gServerGame;
 extern ClientGame *gClientGame;
