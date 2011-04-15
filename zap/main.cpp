@@ -71,6 +71,9 @@ XXX need to document timers, new luavec stuff XXX
 <li>Some minor adjustment to SpeedZone to avoid any possibility to get through one way SpeedZone path, reduce lag while using SpeedZone.
 <li>Fix problem where kicking a player will lag, delay disconnect other players at the same IP address or same computer.
 <li>PolyWall item added to editor -- works just like a wall, but is edited like a loadout zone or other polygon item.  Note that this replaces the undocumented item "BarrierMakerS" which is now deprecated.
+<li>Chat/Command box now in lower-left of screen.  Chats now appear immediatly above it.
+<li>Multi-line chat in game lobby
+<li>Engineer disabled by default
 </ul>
 <h4>New Features</h4>
 <ul>
