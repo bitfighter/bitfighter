@@ -266,7 +266,8 @@ void AbstractChat::renderMessages(U32 ypos, U32 lineCountToDisplay)            /
    U32 ypos_top = ypos;
    ypos += (CHAT_FONT_SIZE + CHAT_FONT_MARGIN) * lineCountToDisplay;
    bool renderLoop = false;   // Double pass, first loop is just to calculate number of lines used, then second pass will render.
-   do{
+   do
+   {
       for(U32 i = lineCountToDisplay-1; i != -1; i--)
       {
          if(ypos <= ypos_top)

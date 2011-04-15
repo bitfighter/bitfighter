@@ -98,6 +98,7 @@ public:
 
 class Item;
 class LuaRobot;
+class RobotController;
 
 /**
  * This is the wrapper around the C++ object found in object.cc
@@ -125,7 +126,7 @@ private:
 
    Vector<string> mArgs;            // List of arguments passed to the robot.  Script name itself is the first one.
    bool gameConnectionInitalized;
-   void *robotController;           // A pointer of RobotController, for speeding up compiler, it is (void *) here.
+   RobotController *robotController;           // A pointer of RobotController.
 
    void spawn();                    // Handles bot spawning
 

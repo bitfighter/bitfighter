@@ -645,6 +645,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\robotController.cpp"
+			>
+		</File>
+		<File
 			RelativePath=".\config.cpp"
 			>
 		</File>

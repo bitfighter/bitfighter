@@ -55,6 +55,7 @@
 #include "luaUtil.h"
 #include "glutInclude.h"
 #include "config.h"              // for gIniSettings.defaultRobotScript
+#include "robotController.h"
 
 #include "oglconsole.h"
 
@@ -70,24 +71,6 @@ const bool QUIT_ON_SCRIPT_ERROR = true;
 
 bool Robot::mIsPaused = false;
 S32 Robot::mStepCount = -1;
-
-// To use this RobotController, add Robot without any parameters in level file.
-// I would like to keep this class here, to speed up compiler.
-// If this class is in Robot.h, it will have to recompile everything when we change anything in this class
-class RobotController
-{
-   Robot *ship;
-   GameType *gametype;
-   void gotoPoint(Point pos);
-   Point prevEnemyPosition;
-
-public:
-   RobotController()
-   {
-      // Do nothing
-   }
-   void run(Robot *newship, GameType *newgametype);
-};
 
 
 
@@ -1905,6 +1888,9 @@ void Robot::render(S32 layerIndex)
    if(isGhost())                                      // Client rendering client's objects
       Parent::render(layerIndex);
 
+	if(layerIndex == 1 && !isRunningScript)
+		flightPlan = robotController->mFlightPlan;
+
    else if(layerIndex = 1 && flightPlan.size() != 0)  // Client hosting is rendering server objects
    {
       glColor3f(1,1,0);       // yellow
@@ -1989,7 +1975,7 @@ void Robot::idle(GameObject::IdleCallPath path)
          }
 
          // Built-in robot might soon be fully programmed without using script file.
-         ((RobotController *)robotController)->run(this, getGame()->getGameType());    
+         robotController->run(this);    
       }
 
       Parent::idle(GameObject::ServerIdleControlFromClient);   // Let's say the script is the client
@@ -2023,60 +2009,6 @@ void Robot::spawn()
 }
 
 
-// Currently does not go anywhere, all it does is fire at enemies.
-void RobotController::run(Robot *newship, GameType *newgametype)
-{
-   ship = newship;
-   gametype = newgametype;
-
-
-   F32 minDistance = F32_MAX;
-   Ship *enemyship = NULL;
-   Vector<DatabaseObject *> objects;
-   Point pos = ship->getActualPos();
-   Rect queryRect(pos, pos);
-   queryRect.expand(gServerGame->computePlayerVisArea(ship));
-   gServerGame->getGridDatabase()->findObjects(ShipType,objects,queryRect);
-   for(S32 i=0; i<objects.size(); i++)
-   {
-      Ship *foundship = dynamic_cast<Ship *>(objects[i]);
-      if(foundship != NULL)
-      if(!gametype->isTeamGame() || foundship->getTeam() != ship->getTeam())
-      {
-         F32 newDist = pos.distanceTo(foundship->getActualPos());
-         if(newDist < minDistance)
-         {
-            if(gametype->getGridDatabase()->pointCanSeePoint(pos, foundship->getActualPos()))
-            {
-               minDistance = newDist;
-               enemyship = foundship;
-            }
-         }
-      }
-   }
-   if(enemyship != NULL)
-   {
-      Move move = ship->getCurrentMove();
-      //move->angle = ship->getActualPos().angleTo(enemyship->getActualPos());
-      WeaponInfo weap = gWeapons[ship->getSelectedWeapon()];    // Robot's active weapon
-      F32 interceptAngle;
-      move.fire = (calcInterceptCourse(enemyship, ship->getActualPos(), ship->getRadius(), ship->getTeam(), weap.projVelocity, weap.projLiveTime, false, interceptAngle));
-      if(move.fire)
-         move.angle = interceptAngle;
-      ship->setCurrentMove(move);
-   }
-   else
-   {
-      Move move = ship->getCurrentMove();
-      move.fire = false;
-      ship->setCurrentMove(move);
-   }
-}
-
-void RobotController::gotoPoint(Point point)
-{
-   //ship->getCurrentMove();
-}
 
 };
 

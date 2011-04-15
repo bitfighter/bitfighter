@@ -969,6 +969,14 @@
 			>
 		</File>
 		<File
+			RelativePath=".\robotController.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\robotController.h"
+			>
+		</File>
+		<File
 			RelativePath=".\screenShooter.cpp"
 			>
 		</File>

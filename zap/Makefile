@@ -92,6 +92,7 @@ OBJECTS_ZAP=\
    rabbitGame.o\
    retrieveGame.o\
    robot.o\
+   robotController.o\
    screenShooter.o \
    sfx.o\
    ship.o\
