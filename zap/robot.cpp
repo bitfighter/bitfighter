@@ -2003,60 +2003,6 @@ void Robot::spawn()
 }
 
 
-// Currently does not go anywhere, all it does is fire at enemies.
-void RobotController::run(Robot *newship, GameType *newgametype)
-{
-   ship = newship;
-   gametype = newgametype;
-
-
-   F32 minDistance = F32_MAX;
-   Ship *enemyship = NULL;
-   Vector<DatabaseObject *> objects;
-   Point pos = ship->getActualPos();
-   Rect queryRect(pos, pos);
-   queryRect.expand(gServerGame->computePlayerVisArea(ship));
-   gServerGame->getGridDatabase()->findObjects(ShipType,objects,queryRect);
-   for(S32 i=0; i<objects.size(); i++)
-   {
-      Ship *foundship = dynamic_cast<Ship *>(objects[i]);
-      if(foundship != NULL)
-      if(!gametype->isTeamGame() || foundship->getTeam() != ship->getTeam())
-      {
-         F32 newDist = pos.distanceTo(foundship->getActualPos());
-         if(newDist < minDistance)
-         {
-            if(gametype->getGridDatabase()->pointCanSeePoint(pos, foundship->getActualPos()))
-            {
-               minDistance = newDist;
-               enemyship = foundship;
-            }
-         }
-      }
-   }
-   if(enemyship != NULL)
-   {
-      Move move = ship->getCurrentMove();
-      //move->angle = ship->getActualPos().angleTo(enemyship->getActualPos());
-      WeaponInfo weap = gWeapons[ship->getSelectedWeapon()];    // Robot's active weapon
-      F32 interceptAngle;
-      move.fire = (calcInterceptCourse(enemyship, ship->getActualPos(), ship->getRadius(), ship->getTeam(), weap.projVelocity, weap.projLiveTime, false, interceptAngle));
-      if(move.fire)
-         move.angle = interceptAngle;
-      ship->setCurrentMove(move);
-   }
-   else
-   {
-      Move move = ship->getCurrentMove();
-      move.fire = false;
-      ship->setCurrentMove(move);
-   }
-}
-
-void RobotController::gotoPoint(Point point)
-{
-   //ship->getCurrentMove();
-}
 
 };
 
