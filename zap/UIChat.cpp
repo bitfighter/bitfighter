@@ -182,7 +182,7 @@ void AbstractChat::leaveGlobalChat()
 
 #ifdef USE_SAM_RENDER_MESSAGES
 
-U32 drawWrapText(char *text, S32 xpos, S32 ypos, U32 size, U32 lineHeight, U32 width = 500, S32 ypos_end = S32_MAX, bool alignBottom = false)
+U32 drawWrapText(char *text, S32 xpos, S32 ypos, U32 size, U32 lineHeight, U32 width = 500, S32 ypos_end = S32_MAX, bool alignBottom = false, bool draw = true)
 {
    U32 lines = 0;
    U32 startingChar = 0;
@@ -224,10 +224,13 @@ U32 drawWrapText(char *text, S32 xpos, S32 ypos, U32 size, U32 lineHeight, U32 w
       cur = seperator[i];
       if(!alignBottom || ypos >= ypos_end)
       {
-         char c = text[cur];
-         text[cur] = 0;
-         UserInterface::drawString(xpos, ypos, size, &text[startingChar]);
-         text[cur] = c;
+         if(draw)
+         {
+            char c = text[cur];
+            text[cur] = 0;
+            UserInterface::drawString(xpos, ypos, size, &text[startingChar]);
+            text[cur] = c;
+         }
          lines++;
       }
       ypos += lineHeight;
@@ -241,7 +244,8 @@ U32 drawWrapText(char *text, S32 xpos, S32 ypos, U32 size, U32 lineHeight, U32 w
    {
       if(!alignBottom || ypos >= ypos_end)
       {
-         UserInterface::drawString(xpos, ypos, size, &text[startingChar]);
+         if(draw)
+            UserInterface::drawString(xpos, ypos, size, &text[startingChar]);
          lines++;
       }
    }
@@ -249,11 +253,11 @@ U32 drawWrapText(char *text, S32 xpos, S32 ypos, U32 size, U32 lineHeight, U32 w
 }
 
 // Convert (const char *)  to  (char *)
-U32 drawWrapText(const char *text, S32 xpos, S32 ypos, U32 size, U32 lineHeight, U32 width = 500, S32 ypos_end = S32_MAX, bool alignBottom = false)
+U32 drawWrapText(const char *text, S32 xpos, S32 ypos, U32 size, U32 lineHeight, U32 width = 500, S32 ypos_end = S32_MAX, bool alignBottom = false, bool draw = true)
 {
    char text2[4096];
    strncpy(text2, text, sizeof(text2));
-   return drawWrapText(text2, xpos, ypos, size, lineHeight, width, ypos_end, alignBottom);
+   return drawWrapText(text2, xpos, ypos, size, lineHeight, width, ypos_end, alignBottom, draw);
 }
 
 void AbstractChat::renderMessages(U32 ypos, U32 lineCountToDisplay)            // ypos is starting location of first message
@@ -261,50 +265,57 @@ void AbstractChat::renderMessages(U32 ypos, U32 lineCountToDisplay)            /
    U32 firstMsg = (mMessageCount <= lineCountToDisplay) ? 0 : (mMessageCount - lineCountToDisplay);       // Don't use min/max because of U32/S32 issues!
    U32 ypos_top = ypos;
    ypos += (CHAT_FONT_SIZE + CHAT_FONT_MARGIN) * lineCountToDisplay;
-   for(U32 i = lineCountToDisplay-1; i != -1; i--)
-   {
-      if(ypos <= ypos_top)
-         break;
-      if(i >= min(firstMsg + lineCountToDisplay, mMessageCount))       // No more messages to display
-         ;  // Don't return, For loop is running in backwards.
-      else
+   bool renderLoop = false;   // Double pass, first loop is just to calculate number of lines used, then second pass will render.
+   do{
+      for(U32 i = lineCountToDisplay-1; i != -1; i--)
       {
+         if(ypos <= ypos_top)
+            break;
+         if(i >= min(firstMsg + lineCountToDisplay, mMessageCount))       // No more messages to display
+            ;  // Don't return / break, For loop is running in backwards.
+         else
+         {
 
-      ChatMessage msg = getMessage(i + firstMsg); 
-      glColor(msg.color);
+         ChatMessage msg = getMessage(i + firstMsg); 
+         glColor(msg.color);
 
-      S32 xpos = UserInterface::horizMargin / 2;
-      // Will need to figure out the xpos
-      xpos += UserInterface::getStringWidthf(CHAT_TIME_FONT_SIZE, "[%s] ", msg.time.c_str()); 
-      if(!msg.isSystem)
-         xpos += UserInterface::getStringWidth(CHAT_FONT_SIZE, msg.from.c_str());     // No sender for system message
-      if(msg.isPrivate)
-         xpos += UserInterface::getStringWidth(CHAT_FONT_SIZE, "*");
-      if(!msg.isSystem)
-         xpos += UserInterface::getStringWidth(CHAT_FONT_SIZE, ARROW) + AFTER_ARROW_SPACE;
+         S32 xpos = UserInterface::horizMargin / 2;
+         // Will need to figure out the xpos
+         xpos += UserInterface::getStringWidthf(CHAT_TIME_FONT_SIZE, "[%s] ", msg.time.c_str()); 
+         if(!msg.isSystem)
+            xpos += UserInterface::getStringWidth(CHAT_FONT_SIZE, msg.from.c_str());     // No sender for system message
+         if(msg.isPrivate)
+            xpos += UserInterface::getStringWidth(CHAT_FONT_SIZE, "*");
+         if(!msg.isSystem)
+            xpos += UserInterface::getStringWidth(CHAT_FONT_SIZE, ARROW) + AFTER_ARROW_SPACE;
 
-      ypos -= (CHAT_FONT_SIZE + CHAT_FONT_MARGIN) *
-         drawWrapText(msg.message.c_str(), xpos, (S32 &) ypos, CHAT_FONT_SIZE, CHAT_FONT_SIZE + CHAT_FONT_MARGIN, U32(770 - xpos), ypos_top, true);
+         ypos -= (CHAT_FONT_SIZE + CHAT_FONT_MARGIN) *
+            drawWrapText(msg.message.c_str(), xpos, (S32 &) ypos, CHAT_FONT_SIZE, CHAT_FONT_SIZE + CHAT_FONT_MARGIN, U32(770 - xpos), ypos_top, true, renderLoop);
 
+         if(renderLoop)
+         {
+   
+            xpos = UserInterface::horizMargin / 2;
+            xpos += UserInterface::drawStringAndGetWidthf(xpos, ypos + (CHAT_FONT_SIZE - CHAT_TIME_FONT_SIZE) / 2 + 2,  // + 2 just looks better!
+                                                     CHAT_TIME_FONT_SIZE, "[%s] ", msg.time.c_str()); 
 
-      xpos = UserInterface::horizMargin / 2;
-      xpos += UserInterface::drawStringAndGetWidthf(xpos, ypos + (CHAT_FONT_SIZE - CHAT_TIME_FONT_SIZE) / 2 + 2,  // + 2 just looks better!
-                                                    CHAT_TIME_FONT_SIZE, "[%s] ", msg.time.c_str()); 
+            if(!msg.isSystem)
+               xpos += UserInterface::drawStringAndGetWidth(xpos, ypos, CHAT_FONT_SIZE, msg.from.c_str());     // No sender for system message
 
-      if(!msg.isSystem)
-         xpos += UserInterface::drawStringAndGetWidth(xpos, ypos, CHAT_FONT_SIZE, msg.from.c_str());     // No sender for system message
+            if(msg.isPrivate)
+               xpos += UserInterface::drawStringAndGetWidthf(xpos, ypos, CHAT_FONT_SIZE, "*");
 
-      if(msg.isPrivate)
-         xpos += UserInterface::drawStringAndGetWidthf(xpos, ypos, CHAT_FONT_SIZE, "*");
+            if(!msg.isSystem)
+               xpos += UserInterface::drawStringAndGetWidth(xpos, ypos, CHAT_FONT_SIZE, ARROW) + AFTER_ARROW_SPACE;
 
-      if(!msg.isSystem)
-         xpos += UserInterface::drawStringAndGetWidth(xpos, ypos, CHAT_FONT_SIZE, ARROW) + AFTER_ARROW_SPACE;
-
-      //UserInterface::drawString(xpos, ypos, CHAT_FONT_SIZE, msg.message.c_str());
-
-
+            //UserInterface::drawString(xpos, ypos, CHAT_FONT_SIZE, msg.message.c_str());
+            }
+         }
       }
-   }
+      ypos = ypos_top + ypos_top - ypos + (CHAT_FONT_SIZE + CHAT_FONT_MARGIN) * lineCountToDisplay;  // calculate position for renderLoop
+
+      renderLoop = !renderLoop;
+   } while(renderLoop);
 }
 
 #else
