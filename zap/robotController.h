@@ -1,4 +1,5 @@
-// To use this RobotController, add Robot without any parameters in level file.
+
+// To use this RobotController, use command ( /addbot 0 "" )
 
 #include "point.h"
 #include "tnlVector.h"
