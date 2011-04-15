@@ -55,7 +55,6 @@
 #include "luaUtil.h"
 #include "glutInclude.h"
 #include "config.h"              // for gIniSettings.defaultRobotScript
-#include "robotController.h"
 
 #include "oglconsole.h"
 
@@ -1400,7 +1399,6 @@ Vector<Robot *> Robot::robots;
 // Constructor, runs on client and server
 Robot::Robot(StringTableEntry robotName, S32 team, Point pt, F32 mass) : Ship(robotName, false, team, pt, mass, true)
 {
-   robotController = new RobotController();
    gameConnectionInitalized = false;
    mObjectTypeMask = RobotType | MoveableType | CommandMapVisType | TurretTargetType;     // Override typemask set by ship
 
@@ -1427,7 +1425,6 @@ Robot::Robot(StringTableEntry robotName, S32 team, Point pt, F32 mass) : Ship(ro
 // Destructor, runs on client and server
 Robot::~Robot()
 {
-   delete (RobotController *)robotController;
    if(gameConnectionInitalized)
    {
       GameConnection *gc = getOwner();
@@ -1888,9 +1885,6 @@ void Robot::render(S32 layerIndex)
    if(isGhost())                                      // Client rendering client's objects
       Parent::render(layerIndex);
 
-	if(layerIndex == 1 && !isRunningScript)
-		flightPlan = robotController->mFlightPlan;
-
    else if(layerIndex = 1 && flightPlan.size() != 0)  // Client hosting is rendering server objects
    {
       glColor3f(1,1,0);       // yellow
@@ -1923,15 +1917,16 @@ void Robot::idle(GameObject::IdleCallPath path)
          return;
       }
 
+      // Clear out current move.  It will get set just below with the lua call, but if that function
+      // doesn't set the various move components, we want to make sure that they default to 0.
+      mCurrentMove.fire = false;
+      mCurrentMove.up = 0;
+      mCurrentMove.down = 0;
+      mCurrentMove.right = 0;
+      mCurrentMove.left = 0;
+
       if(isRunningScript)
       {
-         // Clear out current move.  It will get set just below with the lua call, but if that function
-         // doesn't set the various move components, we want to make sure that they default to 0.
-         mCurrentMove.fire = false;
-         mCurrentMove.up = 0;
-         mCurrentMove.down = 0;
-         mCurrentMove.right = 0;
-         mCurrentMove.left = 0;
 
          for(S32 i = 0; i < ShipModuleCount; i++)
             mCurrentMove.module[i] = false;
@@ -1973,9 +1968,8 @@ void Robot::idle(GameObject::IdleCallPath path)
             getGame()->getGameType()->s2cDisplayChatMessage(true, getName(), "!!! ROBOT ERROR !!!");
             wasRunningScript = false;
          }
+			// Robot does nothing without script.
 
-         // Built-in robot might soon be fully programmed without using script file.
-         robotController->run(this);    
       }
 
       Parent::idle(GameObject::ServerIdleControlFromClient);   // Let's say the script is the client
@@ -2009,6 +2003,60 @@ void Robot::spawn()
 }
 
 
+// Currently does not go anywhere, all it does is fire at enemies.
+void RobotController::run(Robot *newship, GameType *newgametype)
+{
+   ship = newship;
+   gametype = newgametype;
+
+
+   F32 minDistance = F32_MAX;
+   Ship *enemyship = NULL;
+   Vector<DatabaseObject *> objects;
+   Point pos = ship->getActualPos();
+   Rect queryRect(pos, pos);
+   queryRect.expand(gServerGame->computePlayerVisArea(ship));
+   gServerGame->getGridDatabase()->findObjects(ShipType,objects,queryRect);
+   for(S32 i=0; i<objects.size(); i++)
+   {
+      Ship *foundship = dynamic_cast<Ship *>(objects[i]);
+      if(foundship != NULL)
+      if(!gametype->isTeamGame() || foundship->getTeam() != ship->getTeam())
+      {
+         F32 newDist = pos.distanceTo(foundship->getActualPos());
+         if(newDist < minDistance)
+         {
+            if(gametype->getGridDatabase()->pointCanSeePoint(pos, foundship->getActualPos()))
+            {
+               minDistance = newDist;
+               enemyship = foundship;
+            }
+         }
+      }
+   }
+   if(enemyship != NULL)
+   {
+      Move move = ship->getCurrentMove();
+      //move->angle = ship->getActualPos().angleTo(enemyship->getActualPos());
+      WeaponInfo weap = gWeapons[ship->getSelectedWeapon()];    // Robot's active weapon
+      F32 interceptAngle;
+      move.fire = (calcInterceptCourse(enemyship, ship->getActualPos(), ship->getRadius(), ship->getTeam(), weap.projVelocity, weap.projLiveTime, false, interceptAngle));
+      if(move.fire)
+         move.angle = interceptAngle;
+      ship->setCurrentMove(move);
+   }
+   else
+   {
+      Move move = ship->getCurrentMove();
+      move.fire = false;
+      ship->setCurrentMove(move);
+   }
+}
+
+void RobotController::gotoPoint(Point point)
+{
+   //ship->getCurrentMove();
+}
 
 };
 

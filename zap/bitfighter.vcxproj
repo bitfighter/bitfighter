@@ -163,7 +163,6 @@
     <ClCompile Include="..\zap\rabbitGame.cpp" />
     <ClCompile Include="..\zap\retrieveGame.cpp" />
     <ClCompile Include="..\zap\robot.cpp" />
-    <ClCompile Include="..\zap\robotController.cpp" />
     <ClCompile Include="..\zap\screenShooter.cpp" />
     <ClCompile Include="..\zap\sfx.cpp" />
     <ClCompile Include="..\zap\ship.cpp" />
@@ -271,7 +270,6 @@
     <ClInclude Include="..\zap\rabbitGame.h" />
     <ClInclude Include="..\zap\resource.h" />
     <ClInclude Include="..\zap\robot.h" />
-    <ClInclude Include="..\zap\robotController.h" />
     <ClInclude Include="..\zap\screenShooter.h" />
     <ClInclude Include="..\zap\sfx.h" />
     <ClInclude Include="..\zap\SharedConstants.h" />
