@@ -264,7 +264,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sSetAuthenticated, (Vector<
    Nonce clientId(id);     // Reconstitute our id into a nonce
 
    for(GameConnection *walk = GameConnection::getClientList(); walk; walk = walk->getNextClient())
-      if(*walk->getClientId() == clientId)
+      if(walk->getClientId()->isValid() && *walk->getClientId() == clientId)  // Robots don't have valid clientID
       {
          if(status == AuthenticationStatusAuthenticatedName)
          {

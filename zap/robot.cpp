@@ -937,6 +937,7 @@ S32 LuaRobot::getWaypoint(lua_State *L)  // Takes a luavec or an x,y
    if(currentZone == targetZone)
    {
       Point p;
+      thisRobot->flightPlan.push_back(target);
       if(!thisRobot->canSeePoint(target))           // Possible, if we're just on a boundary, and a protrusion's blocking a ship edge
       {
          p = gBotNavMeshZones[targetZone]->getCenter();
@@ -945,7 +946,6 @@ S32 LuaRobot::getWaypoint(lua_State *L)  // Takes a luavec or an x,y
       else
          p = target;
 
-      thisRobot->flightPlan.push_back(target);
       return returnPoint(L, p);
    }
 
