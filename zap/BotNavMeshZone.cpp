@@ -139,8 +139,6 @@ GridDatabase *BotNavMeshZone::getGridDatabase()
 }
 
 
-extern bool isConvex(const Vector<Point> &verts);
-
 // Create objects from parameters stored in level file
 bool BotNavMeshZone::processArguments(S32 argc, const char **argv)
 {

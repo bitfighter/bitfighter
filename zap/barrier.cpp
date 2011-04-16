@@ -42,8 +42,6 @@ TNL_IMPLEMENT_NETOBJECT(Barrier);
 
 Vector<Point> Barrier::mRenderLineSegments;
 
-extern void removeCollinearPoints(Vector<Point> &points, bool isPolygon);
-
 bool loadBarrierPoints(const BarrierRec &barrier, Vector<Point> &points)
 {
    // Convert the list of floats into a list of points

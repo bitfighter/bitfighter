@@ -1818,8 +1818,6 @@ F32 Robot::getAnglePt(Point point)
 }
 
 
-extern bool PolygonContains2(const Point *inVertices, int inNumVertices, const Point &inPoint);
-
 // Return coords of nearest ship... and experimental robot routine
 bool Robot::findNearestShip(Point &loc)
 {
