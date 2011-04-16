@@ -55,6 +55,7 @@
 #include "luaUtil.h"
 #include "glutInclude.h"
 #include "config.h"              // for gIniSettings.defaultRobotScript
+#include "GeomUtils.h"
 
 #include "oglconsole.h"
 
@@ -1857,6 +1858,8 @@ bool Robot::canSeePoint(Point point)
    // flight lane to point.  Radius of the robot is mRadius.  This keeps the ship from getting hung up on
    // obstacles that appear visible from the center of the ship, but are actually blocked.
 
+
+
    Point difference = point - getActualPos();
 
    Point crossVector(difference.y, -difference.x);  // Create a point whose vector from 0,0 is perpenticular to the original vector
@@ -1870,10 +1873,30 @@ bool Robot::canSeePoint(Point point)
    Point pointEdge1 = point + crossVector;
    Point pointEdge2 = point - crossVector;
 
-   return(
-      gServerGame->getGridDatabase()->pointCanSeePoint(shipEdge1, pointEdge1) &&
-      gServerGame->getGridDatabase()->pointCanSeePoint(shipEdge2, pointEdge2) &&
-      gServerGame->getGridDatabase()->pointCanSeePoint(getActualPos(), point) );
+   Vector<Point> thisPoints;
+   thisPoints.push_back(shipEdge1);
+   thisPoints.push_back(shipEdge2);
+   thisPoints.push_back(pointEdge2);
+   thisPoints.push_back(pointEdge1);
+
+   Vector<Point> otherPoints;
+   Rect queryRect(thisPoints);
+   Vector<DatabaseObject *> fillVector;
+   findObjects(BarrierType, fillVector, queryRect);
+   for(S32 i=0; i < fillVector.size(); i++)
+   {
+      if(fillVector[i]->getCollisionPoly(otherPoints))
+      {
+         if(polygonsIntersect(thisPoints, otherPoints))
+            return false;
+      }
+   }
+   return true;
+
+   //return(
+   //   gServerGame->getGridDatabase()->pointCanSeePoint(shipEdge1, pointEdge1) &&
+   //   gServerGame->getGridDatabase()->pointCanSeePoint(shipEdge2, pointEdge2) &&
+   //   gServerGame->getGridDatabase()->pointCanSeePoint(getActualPos(), point) );
 }
 
 
@@ -1965,7 +1988,7 @@ void Robot::idle(GameObject::IdleCallPath path)
             getGame()->getGameType()->s2cDisplayChatMessage(true, getName(), "!!! ROBOT ERROR !!!");
             wasRunningScript = false;
          }
-			// Robot does nothing without script.
+         // Robot does nothing without script.
 
       }
 
