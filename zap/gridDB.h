@@ -32,6 +32,7 @@
 #include "tnlVector.h"
 
 #include "point.h"
+#include "GeomUtils.h"
 
 
 using namespace TNL;

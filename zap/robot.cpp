@@ -362,8 +362,6 @@ S32 LuaRobot::setThrust(lua_State *L)
 }
 
 
-extern bool FindLowestRootInInterval(F32 inA, F32 inB, F32 inC, F32 inUpperBound, F32 &outX);
-
 bool calcInterceptCourse(GameObject *target, Point aimPos, F32 aimRadius, S32 aimTeam, F32 aimVel, F32 aimLife, bool ignoreFriendly, F32 &interceptAngle)
 {
    Point offset = target->getActualPos() - aimPos;    // Account for fact that robot doesn't fire from center

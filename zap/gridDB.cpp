@@ -142,85 +142,6 @@ void GridDatabase::findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVecto
    }
 }
 
-// TODO: Generic geometry function... Should this move to SweptEllipsoid (reanming that to geomUtils)?
-// Check to see if ray start->end intersects poly 
-// Assumes a polygon in format A-B-C-D if format is true, A-B, C-D, E-F if format is false
-bool polygonLineIntersect(Point *poly, U32 vertexCount, bool format, const Point &start, const Point &end, 
-                          float &collisionTime, Point &normal)
-{
-   Point v1 = poly[vertexCount - 1];
-   Point v2, dv;
-   Point dp = end - start;
-
-   S32 inc = format ? 1 : 2;
-
-   F32 currentCollisionTime = 100;
-
-   for(U32 i = 0; i < vertexCount - (inc - 1); i += inc)    // Count by 1s when format is true, 2 when false
-   {
-      if(format)     // A-B-C-D format ==> examine every contiguous pair of vertices
-         v2.set(poly[i]);
-      else           // A-B C-D format ==> don't examine segment B-C
-      {
-         v1.set(poly[i]);
-         v2.set(poly[i + 1]);
-      }
-
-      // edge from v1 -> v2
-      // ray from start -> end
-
-      dv.set(v2 - v1);
-
-      F32 denom = dp.y * dv.x - dp.x * dv.y;
-      if(denom != 0) // otherwise, the lines are parallel
-      {
-         F32 s = ( (start.x - v1.x) * dv.y + (v1.y - start.y) * dv.x ) / denom;
-         F32 t = ( (start.x - v1.x) * dp.y + (v1.y - start.y) * dp.x ) / denom;
-
-         if(s >= 0 && s <= 1 && t >= 0 && t <= 1 && s < currentCollisionTime)    // Found collision closer than others
-         {
-            normal.set(dv.y, -dv.x);
-            currentCollisionTime = s;
-         }
-      } 
-      v1.set(v2);    // No real effect if format == false
-   }
-
-   if(currentCollisionTime <= 1)    // Found intersection
-   {
-      collisionTime = currentCollisionTime;
-      return true;
-   }
-
-   // No intersection
-   return false;
-}
-
-
-extern bool FindLowestRootInInterval(F32 inA, F32 inB, F32 inC, F32 inUpperBound, F32 &outX);
-
-bool CircleLineIntersect(Point center, float radius, Point rayStart, Point rayEnd, float &collisionTime)
-{
-   // if the point is in the circle, it's a collision at the start
-   Point d = center - rayStart;
-   Point v = rayEnd - rayStart;
-
-   if(d.len() <= radius)
-   {
-      collisionTime = 0;
-      return true;
-   }
-
-   // otherwise, solve the following equation for t
-   // (d - vt)^2 = radius^2
-
-   float a = v.dot(v);
-   float b = -2 * d.dot(v);
-   float c = d.dot(d) - radius * radius;
-
-   return FindLowestRootInInterval(a, b, c, 100, collisionTime);
-}
-
 
 // Find objects along a ray, returning first discovered object, along with time of
 // that collision and a Point representing the normal angle at intersection point
@@ -268,7 +189,7 @@ DatabaseObject *GridDatabase::findObjectLOS(U32 typeMask, U32 stateIndex, bool f
             continue;
 
          Point normal;
-         if(polygonLineIntersect(&poly[0], poly.size(), format, rayStart, rayEnd, ct, normal))
+         if(polygonIntersectsSegmentDetailed(&poly[0], poly.size(), format, rayStart, rayEnd, ct, normal))
          {
             if(ct < collisionTime)
             {
@@ -280,7 +201,7 @@ DatabaseObject *GridDatabase::findObjectLOS(U32 typeMask, U32 stateIndex, bool f
       }
       else if(fillVector[i]->getCollisionCircle(stateIndex, center, radius))
       {
-         if(CircleLineIntersect(center, radius, rayStart, rayEnd, ct))
+         if(circleIntersectsSegment(center, radius, rayStart, rayEnd, ct))
          {
             if(ct < collisionTime)
             {

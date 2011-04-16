@@ -87,7 +87,9 @@ bool zonesTouch(const Vector<Point> &zone1, const Vector<Point> &zone2, F32 scal
 bool pointOnSegment(const Point &c, const Point &a, const Point &b, F32 closeEnough);
 
 bool polygonsIntersect(const Vector<Point> &p1, const Vector<Point> &p2);
-bool polygonIntersectsSegment(const Vector<Point> &points, const Point &start, const Point &end);
+bool polygonIntersectsSegment(const Vector<Point> &points, const Point &start, const Point &end);  // This is four times faster than the Detailed one.
+bool polygonIntersectsSegmentDetailed(Point *poly, U32 vertexCount, bool format, const Point &start, const Point &end, float &collisionTime, Point &normal);
+bool circleIntersectsSegment(Point center, float radius, Point start, Point end, float &collisionTime);
 
 Point findCentroid(const Vector<Point> &polyPoints);
 F32 area(const Vector<Point> &polyPoints);
@@ -98,6 +100,8 @@ bool findNormalPoint(const Point &p, const Point &s1, const Point &s2, Point &cl
 bool segmentsIntersect(const Point &p1, const Point &p2, const Point &p3, const Point &p4);
 bool findIntersection(const Point &p1, const Point &p2, const Point &p3, const Point &p4, Point &intersection);
 
+// TODO: Create a MathUtils class for this and other useful purely mathematic functions?
+bool FindLowestRootInInterval(F32 inA, F32 inB, F32 inC, F32 inUpperBound, F32 &outX);
 
 // Returns index of points vector closest to point
 S32 findClosestPoint(const Point &point, const Vector<Point> &points);
