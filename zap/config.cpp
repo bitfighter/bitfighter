@@ -1350,7 +1350,7 @@ static void writeHost()
       addComment("                                 database server, database name, login, and password as a comma delimeted list");
       addComment(" VoteLength - number of seconds the voting will last, zero will disable voting.");
       addComment(" VoteRetryLength - When vote fail, the vote caller is unable to vote until after this number of seconds.");
-      addComment(" Vote Strengths - Vote will pass when sum of all votes is bigger then zero.");
+      addComment(" Vote Strengths - Vote will pass when sum of all vote strengths is bigger then zero.");
       addComment("----------------");
    }
 

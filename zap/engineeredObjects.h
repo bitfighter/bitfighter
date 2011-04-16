@@ -97,6 +97,7 @@ public:
    S32 getTeamIndx(lua_State *L) { return returnInt(L, getTeam() + 1); }
    S32 getHealth(lua_State *L) { return returnFloat(L, mHealth); }
    S32 isActive(lua_State *L) { return returnInt(L, isEnabled()); }
+   S32 getAngle(lua_State *L) {return returnFloat(L, mAnchorNormal.ATAN2());};
 
    GameObject *getGameObject() { return this; }
 };
@@ -193,7 +194,7 @@ public:
    };
 
    S32 getRad(lua_State *L) { return returnInt(L, radius); }
-   S32 getLoc(lua_State *L) { return LuaObject::returnPoint(L, mAnchorPoint + mAnchorNormal * radius ); } 
+   S32 getLoc(lua_State *L) { return LuaObject::returnPoint(L, mAnchorPoint + mAnchorNormal * radius ); }
 };
 
 
@@ -248,7 +249,9 @@ public:
 
    // LuaItem methods
    S32 getRad(lua_State *L) { return returnInt(L, TURRET_OFFSET); }
-   S32 getLoc(lua_State *L) { return LuaObject::returnPoint(L, mAnchorPoint + mAnchorNormal * (TURRET_OFFSET)); } 
+   S32 getLoc(lua_State *L) { return LuaObject::returnPoint(L, mAnchorPoint + mAnchorNormal * (TURRET_OFFSET)); }
+   S32 getAngleAim(lua_State *L) {return returnFloat(L, mCurrentAngle);};
+
 };
 
 
