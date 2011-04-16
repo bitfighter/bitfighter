@@ -1876,7 +1876,8 @@ bool Robot::canSeePoint(Point point)
 
    return(
       gServerGame->getGridDatabase()->pointCanSeePoint(shipEdge1, pointEdge1) &&
-      gServerGame->getGridDatabase()->pointCanSeePoint(shipEdge2, pointEdge2) );
+      gServerGame->getGridDatabase()->pointCanSeePoint(shipEdge2, pointEdge2) &&
+      gServerGame->getGridDatabase()->pointCanSeePoint(getActualPos(), point) );
 }
 
 
