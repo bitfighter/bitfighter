@@ -1045,7 +1045,7 @@ void ServerGame::idle(U32 timeDelta)
                if(walk->mVote == 0 && !walk->isRobot())
                {
                   WaitingToVote = true;
-                  walk->s2cDisplayMessageESI(GameConnection::ColorAqua, SFXUIBoop, msg, e, s, i);
+                  walk->s2cDisplayMessageESI(GameConnection::ColorAqua, SFXNone, msg, e, s, i);
                }
             }
             if(!WaitingToVote)
