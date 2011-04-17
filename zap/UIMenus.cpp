@@ -1382,7 +1382,7 @@ LevelMenuUserInterface::LevelMenuUserInterface()
 }
 
 
-static const char *UPLOAD_LEVELS = "Upload Levels";
+static const char *UPLOAD_LEVELS = "UPLOAD LEVELS";
 static const char *ALL_LEVELS = "All Levels";
 static const U32 UPLOAD_LEVELS_MENUID = 1000;
 
@@ -1421,8 +1421,6 @@ void LevelMenuUserInterface::onActivate()
 
    char c[] = "A";   // Shortcut key
    menuItems.push_back(new MenuItem(0, ALL_LEVELS, selectLevelTypeCallback, "", stringToKeyCode(c)));
-   if(gc->mSendableFlags & 1)
-      menuItems.push_back(new MenuItem(UPLOAD_LEVELS_MENUID, UPLOAD_LEVELS, selectLevelTypeCallback, "", stringToKeyCode(c)));
 
    // Cycle through all levels, looking for unique type strings
    for(S32 i = 0; i < gc->mLevelInfos.size(); i++)
@@ -1441,6 +1439,9 @@ void LevelMenuUserInterface::onActivate()
    }
 
    menuItems.sort(menuItemValueSort);
+
+   if(gc->mSendableFlags & 1)
+      menuItems.push_back(new MenuItem(UPLOAD_LEVELS_MENUID, UPLOAD_LEVELS, selectLevelTypeCallback, "", stringToKeyCode(c)));
 }
 
 
@@ -1470,6 +1471,7 @@ static void processLevelSelectionCallback(U32 index)
 
 const U32 UPLOAD_LEVELS_BIT = 0x80000000;
 extern ConfigDirectories gConfigDirs;
+extern Color gCmdChatColor;
 
 void LevelMenuSelectUserInterface::processSelection(U32 index)     
 {
@@ -1479,7 +1481,8 @@ void LevelMenuSelectUserInterface::processSelection(U32 index)
    if((index & UPLOAD_LEVELS_BIT) && (index & (~UPLOAD_LEVELS_BIT)) < U32(mLevels.size()))
    {
       string filename = strictjoindir(gConfigDirs.levelDir, mLevels[index & (~UPLOAD_LEVELS_BIT)]);
-      gc->s2rUploadFile(filename.c_str(),1);
+      if(! gc->s2rUploadFile(filename.c_str(),1))
+         gClientGame->mGameUserInterface->displayErrorMessage("Can't upload level: unable to read file");
    }
    else
    {

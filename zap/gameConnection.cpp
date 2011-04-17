@@ -1210,6 +1210,8 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendDataParts, (U8 type, ByteBufferPtr data
          S32 id = gServerGame->addLevelInfo(filename1, levelInfo);
          c2sRequestLevelChange2(id, false);
       }
+      else
+         s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Upload Failed, server can't write file");
    }
 
    if(type != 0)
