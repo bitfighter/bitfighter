@@ -165,39 +165,39 @@ static void renderMenuInstructions()
     glColor3f(1, 1, 1);     // white
 
    if(gIniSettings.inputMode == Keyboard)
-	  UserInterface::drawCenteredString(y, size, "UP, DOWN to choose | ENTER to select | ESC exits menu");
+     UserInterface::drawCenteredString(y, size, "UP, DOWN to choose | ENTER to select | ESC exits menu");
    else
    {
-	  S32 totalWidth = getControllerButtonRenderedSize(BUTTON_DPAD_UP) + getControllerButtonRenderedSize(BUTTON_DPAD_DOWN) +
-					   getControllerButtonRenderedSize(BUTTON_START) +   getControllerButtonRenderedSize(BUTTON_BACK) +
-					   UserInterface::getStringWidth(size, "to choose |  to select |  exits menu");
+     S32 totalWidth = getControllerButtonRenderedSize(BUTTON_DPAD_UP) + getControllerButtonRenderedSize(BUTTON_DPAD_DOWN) +
+                  getControllerButtonRenderedSize(BUTTON_START) +   getControllerButtonRenderedSize(BUTTON_BACK) +
+                  UserInterface::getStringWidth(size, "to choose |  to select |  exits menu");
 
-	  S32 x = canvasWidth / 2 - UserInterface::horizMargin - totalWidth/2;
+     S32 x = canvasWidth / 2 - UserInterface::horizMargin - totalWidth/2;
 
-	  renderControllerButton(x, y, BUTTON_DPAD_UP, false);
-	  x += getControllerButtonRenderedSize(BUTTON_DPAD_UP) + UserInterface::getStringWidth(size, " ");
+     renderControllerButton(x, y, BUTTON_DPAD_UP, false);
+     x += getControllerButtonRenderedSize(BUTTON_DPAD_UP) + UserInterface::getStringWidth(size, " ");
 
-	  renderControllerButton(x, y, BUTTON_DPAD_DOWN, false);
-	  x += getControllerButtonRenderedSize(BUTTON_DPAD_DOWN) + UserInterface::getStringWidth(size, " ");
-
-     glColor3f(1,1,1);
-	  static const char *msg1 = "to choose | ";
-	  UserInterface::drawString(x, y, size, msg1);
-	  x += UserInterface::getStringWidth(size, msg1);
-
-	  renderControllerButton(x, y + 4, BUTTON_START, false);
-	  x += getControllerButtonRenderedSize(BUTTON_START);
+     renderControllerButton(x, y, BUTTON_DPAD_DOWN, false);
+     x += getControllerButtonRenderedSize(BUTTON_DPAD_DOWN) + UserInterface::getStringWidth(size, " ");
 
      glColor3f(1,1,1);
-	  static const char *msg2 = "to select | ";
-	  UserInterface::drawString(x, y, size, msg2);
-	  x += UserInterface::getStringWidth(size, msg2);
+     static const char *msg1 = "to choose | ";
+     UserInterface::drawString(x, y, size, msg1);
+     x += UserInterface::getStringWidth(size, msg1);
 
-	  renderControllerButton(x + 4, y + 4, BUTTON_BACK, false);
-	  x += getControllerButtonRenderedSize(BUTTON_BACK) + 4;
+     renderControllerButton(x, y + 4, BUTTON_START, false);
+     x += getControllerButtonRenderedSize(BUTTON_START);
 
      glColor3f(1,1,1);
-	  UserInterface::drawString(x, y, size, "exits menu");
+     static const char *msg2 = "to select | ";
+     UserInterface::drawString(x, y, size, msg2);
+     x += UserInterface::getStringWidth(size, msg2);
+
+     renderControllerButton(x + 4, y + 4, BUTTON_BACK, false);
+     x += getControllerButtonRenderedSize(BUTTON_BACK) + 4;
+
+     glColor3f(1,1,1);
+     UserInterface::drawString(x, y, size, "exits menu");
    }
 }
 
@@ -1026,8 +1026,8 @@ static void nameAndPasswordAcceptCallback(U32 unused)
    gClientGame->setReadyToConnectToMaster(true);
    seedRandomNumberGenerator(gClientInfo.name);
    //gClientInfo.id.getRandom();          // Generate a player ID - messes up with the rename and Authentication
-	if(gClientGame->getConnectionToServer())                 // Rename while in game server, if connected
-		gClientGame->getConnectionToServer()->c2sRenameClient(gClientInfo.name);
+   if(gClientGame->getConnectionToServer())                 // Rename while in game server, if connected
+      gClientGame->getConnectionToServer()->c2sRenameClient(gClientInfo.name);
 }
 
 
@@ -1382,7 +1382,9 @@ LevelMenuUserInterface::LevelMenuUserInterface()
 }
 
 
+static const char *UPLOAD_LEVELS = "Upload Levels";
 static const char *ALL_LEVELS = "All Levels";
+static const U32 UPLOAD_LEVELS_MENUID = 1000;
 
 
 static void selectLevelTypeCallback(U32 level)
@@ -1390,6 +1392,8 @@ static void selectLevelTypeCallback(U32 level)
    // First entry will be "All Levels", subsequent entries will be level types populated from mLevelInfos
    if(level == 0)
       gLevelMenuSelectUserInterface.category = ALL_LEVELS;
+   else if(level == UPLOAD_LEVELS_MENUID)
+      gLevelMenuSelectUserInterface.category = UPLOAD_LEVELS;
 
    else
    {
@@ -1417,6 +1421,8 @@ void LevelMenuUserInterface::onActivate()
 
    char c[] = "A";   // Shortcut key
    menuItems.push_back(new MenuItem(0, ALL_LEVELS, selectLevelTypeCallback, "", stringToKeyCode(c)));
+   if(gc->mSendableFlags & 1)
+      menuItems.push_back(new MenuItem(UPLOAD_LEVELS_MENUID, UPLOAD_LEVELS, selectLevelTypeCallback, "", stringToKeyCode(c)));
 
    // Cycle through all levels, looking for unique type strings
    for(S32 i = 0; i < gc->mLevelInfos.size(); i++)
@@ -1456,19 +1462,30 @@ LevelMenuSelectUserInterface::LevelMenuSelectUserInterface()
 }
 
 
+
 static void processLevelSelectionCallback(U32 index)             
 {
    gLevelMenuSelectUserInterface.processSelection(index);
 }
 
+const U32 UPLOAD_LEVELS_BIT = 0x80000000;
+extern ConfigDirectories gConfigDirs;
 
 void LevelMenuSelectUserInterface::processSelection(U32 index)     
 {
    Parent::onActivate();
    GameConnection *gc = gClientGame->getConnectionToServer();
 
-   // The selection index is the level to load
-   gc->c2sRequestLevelChange(index, false);
+   if((index & UPLOAD_LEVELS_BIT) && (index & (~UPLOAD_LEVELS_BIT)) < U32(mLevels.size()))
+   {
+      string filename = strictjoindir(gConfigDirs.levelDir, mLevels[index & (~UPLOAD_LEVELS_BIT)]);
+      gc->s2rUploadFile(filename.c_str(),1);
+   }
+   else
+   {
+      // The selection index is the level to load
+      gc->c2sRequestLevelChange(index, false);
+   }
    reactivateMenu(*gClientGame->mGameUserInterface);    // Jump back to the game menu
 }
 
@@ -1483,8 +1500,22 @@ void LevelMenuSelectUserInterface::onActivate()
       return;
 
    menuItems.deleteAndClear();
+
+   mLevels.clear();
+
+   char c[2];
+   c[1] = 0; // null terminate
+
+   if(!strcmp(category.c_str(), UPLOAD_LEVELS))
+   {
+      mLevels = LevelListLoader::buildLevelList();
+      for(S32 i=0; i < mLevels.size(); i++)
+      {
+         c[0] = mLevels[i].c_str()[0];
+         menuItems.push_back(new MenuItem(i | UPLOAD_LEVELS_BIT, mLevels[i].c_str(), processLevelSelectionCallback, "", stringToKeyCode(c)));
+      }
+   }
  
-   char c[] = "A";  
    for(S32 i = 0; i < gc->mLevelInfos.size(); i++)
    {
       if(gc->mLevelInfos[i].levelName == "")   // Skip levels with blank names --> but all should have names now!
@@ -1492,7 +1523,7 @@ void LevelMenuSelectUserInterface::onActivate()
       if(!strcmp( gc->mLevelInfos[i].levelType.getString(), category.c_str() ) || 
          !strcmp(category.c_str(), ALL_LEVELS) )
       {
-         strncpy(c, gc->mLevelInfos[i].levelName.getString(), 1);
+         c[0] = gc->mLevelInfos[i].levelName.getString()[0];
          menuItems.push_back(new MenuItem(i, gc->mLevelInfos[i].levelName.getString(), processLevelSelectionCallback, "", stringToKeyCode(c)));
       }
    }

@@ -82,7 +82,7 @@ string itos(U64 i)
 
 string itos(S64 i)
 {
-   char outString[21];  // 20 chars plus a null char, ?9223372036854775808
+   char outString[21];  // 20 chars plus a null char, -9223372036854775808
    dSprintf(outString, sizeof(outString), "%d", i);
    return outString;
 }
@@ -189,31 +189,31 @@ Vector<string> parseString(const string &line)
 // Splits inputString into a series of words using the specified separator
 void parseString(const char *inputString, Vector<string> &words, char seperator)
 {
-	char word[128];
-	S32 wn = 0;       // Where we are in the word we're creating
-	S32 isn = 0;      // Where we are in the inputString we're parsing
+   char word[128];
+   S32 wn = 0;       // Where we are in the word we're creating
+   S32 isn = 0;      // Where we are in the inputString we're parsing
 
-	words.clear();
+   words.clear();
 
-	while(inputString[isn] != 0)
+   while(inputString[isn] != 0)
    {
-		if(inputString[isn] == seperator) 
+      if(inputString[isn] == seperator) 
       {
-			word[wn] = 0;    // Add terminating NULL
-			if(wn > 0) 
+         word[wn] = 0;    // Add terminating NULL
+         if(wn > 0) 
             words.push_back(word);
-			wn = 0;
-		}
+         wn = 0;
+      }
       else
       {
-			if(wn < 126)   // Avoid overflows
+         if(wn < 126)   // Avoid overflows
          {
             word[wn] = inputString[isn]; 
             wn++; 
          }
-		}
-		isn++;
-	}
+      }
+      isn++;
+   }
     word[wn] = 0;
     if(wn > 0) 
        words.push_back(word);
@@ -222,7 +222,7 @@ void parseString(const char *inputString, Vector<string> &words, char seperator)
 
 string listToString(Vector<string> &words, char seperator)
 {
-	string str = "";
+   string str = "";
 
    // Convert separator char to a c_string so it can be added below
    char sep[2];
@@ -335,6 +335,29 @@ S32 countCharInString(const string &source, char search)
     return count;
 }
 
+
+static const U32 MAX_FILE_NAME_LEN = 128;     // Completely arbitrary
+
+string makeFilenameFromString(const char *levelname)
+{
+   static char filename[MAX_FILE_NAME_LEN + 1];    // Leave room for terminating null
+
+   U32 i = 0;
+
+   while(i < MAX_FILE_NAME_LEN && levelname[i] != 0)
+   {
+      // Prevent invalid characters in file names
+      char c = levelname[i];
+      if((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9'))
+         filename[i]=c;
+      else
+         filename[i]='_';
+      i++;
+   }
+
+   filename[i] = 0;    // Null terminate
+   return filename;
+}
 
 };
 

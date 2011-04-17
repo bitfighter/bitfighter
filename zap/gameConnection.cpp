@@ -111,6 +111,8 @@ void GameConnection::initialize()
    mIsVerified = false;                   // Final conclusion... client is or is not verified
    switchedTeamCount = 0;
    mSoccerCollide = false;
+   mSendableFlags = 0;
+   mDataBuffer = NULL;
 }
 
 // Destructor
@@ -139,6 +141,9 @@ GameConnection::~GameConnection()
                                                isLocalConnection() ? "Local Connection" : getNetAddressString(), 
                                                getTimeStamp().c_str(), elapsed);
    }
+   if(mDataBuffer)
+      delete mDataBuffer;
+
 }
 
 
@@ -998,6 +1003,10 @@ extern string gLevelChangePassword;
 TNL_IMPLEMENT_RPC(GameConnection, c2sRequestLevelChange, (S32 newLevelIndex, bool isRelative), (newLevelIndex, isRelative), 
                               NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 1)
 {
+   c2sRequestLevelChange2(newLevelIndex, isRelative);
+}
+void GameConnection::c2sRequestLevelChange2(S32 newLevelIndex, bool isRelative)
+{
    if(!mIsLevelChanger)
       return;
 
@@ -1113,6 +1122,127 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSoccerCollide, (bool enable), (enable), Net
 {
    mSoccerCollide = enable;
 }
+
+
+TNL_IMPLEMENT_RPC(GameConnection, s2rSendableFlags, (U8 flags), (flags), NetClassGroupGameMask, RPCGuaranteed, RPCDirAny, 4)
+{
+   mSendableFlags = flags;
+}
+
+LevelInfo getLevelInfo(char *level, S32 size)
+{
+   S32 cur = 0;
+   S32 startingCur = 0;
+   const char *gametypeName;
+   string levelName;
+   LevelInfo levelInfo;
+   levelInfo.levelType = "?";
+   levelInfo.minRecPlayers = -1;
+   levelInfo.maxRecPlayers = -1;
+
+   while(cur < size)
+   {
+      if(level[cur] < 32)
+      {
+         if(cur - startingCur > 5)
+         {
+            char c = level[cur];
+            level[cur] = 0;
+            Vector<string> list = parseString(string(&level[startingCur]));
+            level[cur] = c;
+            if(list.size() >= 1 && list[0].find("GameType") != -1)
+            {
+               TNL::Object *theObject = TNL::Object::create(list[0].c_str());  // Instantiate a gameType object
+               GameType *gt = dynamic_cast<GameType*>(theObject);  // and cast it
+               if(gt)
+               {
+                  levelInfo.levelType = gt->getGameTypeString();
+                  delete gt;
+               }
+            }
+            else if(list.size() >= 2 && list[0] == "LevelName")
+               levelInfo.levelName = list[1];
+            else if(list.size() >= 2 && list[0] == "MinPlayers")
+               levelInfo.minRecPlayers = atoi(list[1].c_str());
+            else if(list.size() >= 2 && list[0] == "MaxPlayers")
+               levelInfo.maxRecPlayers = atoi(list[1].c_str());
+         }
+         startingCur = cur + 1;
+      }
+      cur++;
+   }
+   return levelInfo;
+}
+
+extern ConfigDirectories gConfigDirs;
+
+TNL_IMPLEMENT_RPC(GameConnection, s2rSendDataParts, (U8 type, ByteBufferPtr data), (type, data), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 4)
+{
+   if(!gIniSettings.allowMapUpload)  // don't need it when not enabled.
+      return;
+
+   if(mDataBuffer)
+   {
+      if(mDataBuffer->getBufferSize() < 1024*256)  // limit memory, to avoid eating too much memory.
+         mDataBuffer->appendBuffer(*data.getPointer());
+   }
+   else
+   {
+      mDataBuffer = new ByteBuffer(*data.getPointer());
+      mDataBuffer->takeOwnership();
+   }
+
+   if(type == 1 && gIniSettings.allowMapUpload && !isInitiator() && mDataBuffer->getBufferSize() != 0)
+   {
+      LevelInfo levelInfo = getLevelInfo((char *)mDataBuffer->getBuffer(), mDataBuffer->getBufferSize());
+
+      //BitStream s(mDataBuffer.getBuffer(), mDataBuffer.getBufferSize());
+      char filename1[128];
+      string titleName = makeFilenameFromString(levelInfo.levelName.getString());
+      dSprintf(filename1, sizeof(filename1), "upload_%s.level", titleName.c_str());
+      string filename2 = strictjoindir(gConfigDirs.levelDir, filename1);
+
+      FILE *f = fopen(filename2.c_str(), "wb");
+      if(f)
+      {
+         fwrite(mDataBuffer->getBuffer(), 1, mDataBuffer->getBufferSize(), f);
+         fclose(f);
+         S32 id = gServerGame->addLevelInfo(filename1, levelInfo);
+         c2sRequestLevelChange2(id, false);
+      }
+   }
+
+   if(type != 0)
+   {
+      delete mDataBuffer;
+      mDataBuffer = NULL;
+   }
+}
+
+bool GameConnection::s2rUploadFile(const char *filename, U8 type)
+{
+   BitStream s;
+   const U32 partsSize = 512;   // max 1023, limited by ByteBufferSizeBitSize=10
+   FILE *f = fopen(filename, "rb");
+   if(f)
+   {
+      U32 size = partsSize;
+      while(size == partsSize)
+      {
+         ByteBuffer *bytebuffer = new ByteBuffer();
+         bytebuffer->resize(512);
+         size = fread(bytebuffer->getBuffer(), 1, bytebuffer->getBufferSize(), f);
+         if(size != partsSize)
+            bytebuffer->resize(size);
+         s2rSendDataParts(size == partsSize ? 0 : type, ByteBufferPtr(bytebuffer));
+      }
+      fclose(f);
+      return true;
+   }
+   return false;
+}
+
+
 
 extern IniSettings gIniSettings;
 extern Nonce gClientId;
@@ -1372,6 +1502,8 @@ void GameConnection::onConnectionEstablished()
       GameType *gt = gServerGame->getGameType();
       if(gt)
          s2cSoccerCollide(!gt->mAllowSoccerPickup);
+      if(gIniSettings.allowMapUpload)
+         s2rSendableFlags(1);
    }
 }
 

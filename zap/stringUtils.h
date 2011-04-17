@@ -98,6 +98,8 @@ string trim(const string &source, const string &t = " ");
 
 S32 countCharInString(const string &source, char search);
 
+string makeFilenameFromString(const char *levelname);
+
 };
 
 #endif

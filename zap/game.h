@@ -371,6 +371,8 @@ public:
    void suspenderLeftGame() { mSuspendor = NULL; }
    GameConnection *getSuspendor() { return mSuspendor; }
 
+   S32 addLevelInfo(const char *filename, LevelInfo &info);
+
    HostingModePhases hostingModePhase;
 };
 

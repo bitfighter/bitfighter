@@ -130,8 +130,6 @@ public:
    U32 mVoteTime;
    bool mChatMute;
 
-   bool mSoccerCollide;
-
    void linkToClientList();
    Vector<LevelInfo> mLevelInfos;
 
@@ -263,6 +261,7 @@ public:
    TNL_DECLARE_RPC(s2cDisplayMessageBox, (StringTableEntry title, StringTableEntry instr, Vector<StringTableEntry> message));
    TNL_DECLARE_RPC(s2cAddLevel, (StringTableEntry name, StringTableEntry type));
    TNL_DECLARE_RPC(c2sRequestLevelChange, (S32 newLevelIndex, bool isRelative));
+   void c2sRequestLevelChange2(S32 newLevelIndex, bool isRelative);
    TNL_DECLARE_RPC(c2sRequestShutdown, (U16 time, StringPtr reason));
    TNL_DECLARE_RPC(c2sRequestCancelShutdown, ());
    TNL_DECLARE_RPC(s2cInitiateShutdown, (U16 time, StringTableEntry name, StringPtr reason, bool originator));
@@ -275,7 +274,14 @@ public:
 
    TNL_DECLARE_RPC(c2sRequestCurrentLevel, ());
 
+   bool mSoccerCollide;
    TNL_DECLARE_RPC(s2cSoccerCollide, (bool enable));
+
+   U8 mSendableFlags;
+   TNL::ByteBuffer *mDataBuffer;
+   TNL_DECLARE_RPC(s2rSendableFlags, (U8 flags));
+   TNL_DECLARE_RPC(s2rSendDataParts, (U8 type, ByteBufferPtr data));
+   bool s2rUploadFile(const char *filename, U8 type);
 
    static GameConnection *getClientList();
    static S32 getClientCount();

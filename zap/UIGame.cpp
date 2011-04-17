@@ -1223,27 +1223,6 @@ static const char *findPointerOfArg(const char *message, S32 count)
 }
 
 
-static string makeFilenameFromString(const char *levelname)
-{
-   static char filename[MAX_FILE_NAME_LEN + 1];    // Leave room for terminating null
-
-   U32 i = 0;
-
-   while(i < MAX_FILE_NAME_LEN && levelname[i] != 0)
-   {
-      // Prevent invalid characters in file names
-      char c = levelname[i];
-      if((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9'))
-         filename[i]=c;
-      else
-         filename[i]='_';
-      i++;
-   }
-
-   filename[i] = 0;    // Null terminate
-   return filename;
-}
-
 
 // TODO: Probably misnamed... handles deletes too
 static void changeServerNameDescr(GameConnection *gc, GameConnection::ParamType type, const Vector<string> &words)
