@@ -121,6 +121,9 @@ GameUserInterface::GameUserInterface()
    for(S32 i = 0; i < ChatMessageStoreCount; i++)
       mStoreChatMessage[i][0] = 0;
 
+   for(S32 i = 0; i < ChatMessageDisplayCount; i++)
+      mDisplayChatMessage[i][0] = 0;
+
    mGotControlUpdate = false;
    mRecalcFPSTimer = 0;
 
@@ -753,13 +756,22 @@ void GameUserInterface::renderMessageDisplay()
 
    msgCount = MessageDisplayCount;  // Short form
 
+   S32 y_end = y + msgCount * (FONTSIZE + FONT_GAP);
+
    for(S32 i = msgCount - 1; i >= 0; i--)
    {
       if(mDisplayMessage[i][0])
       {
          glColor(mDisplayMessageColor[i]);
-         drawString(UserInterface::horizMargin, y, FONTSIZE, mDisplayMessage[i]);
-         y += FONTSIZE + FONT_GAP;
+         //drawString(UserInterface::horizMargin, y, FONTSIZE, mDisplayMessage[i]);
+         //y += FONTSIZE + FONT_GAP;
+         y += (FONTSIZE + FONT_GAP)
+            * UserInterface::drawWrapText(mDisplayMessage[i], UserInterface::horizMargin, y,
+               750, // wrap width
+               y_end, // ypos_end
+               FONTSIZE + FONT_GAP, // line height
+               FONTSIZE, // font size
+               false); // align top
       }
    }
 }
@@ -781,6 +793,7 @@ void GameUserInterface::renderChatMessageDisplay()
    else
       msgCount = ChatMessageDisplayCount;  // Short form
 
+   S32 y_end = y - msgCount * (CHAT_FONTSIZE + CHAT_FONT_GAP);
 
    if(mHelper)
       glEnableBlend;
@@ -795,8 +808,14 @@ void GameUserInterface::renderChatMessageDisplay()
             else
                glColor(mDisplayChatMessageColor[i]);
 
-            drawString(UserInterface::horizMargin, y, CHAT_FONTSIZE, mDisplayChatMessage[i]);
-            y -= CHAT_FONTSIZE + CHAT_FONT_GAP;
+            //drawString(UserInterface::horizMargin, y, CHAT_FONTSIZE, mDisplayChatMessage[i]);
+            y -= (CHAT_FONTSIZE + CHAT_FONT_GAP)
+               * UserInterface::drawWrapText(mDisplayChatMessage[i], UserInterface::horizMargin, y,
+                  700, // wrap width
+                  y_end, // ypos_end
+                  CHAT_FONTSIZE + CHAT_FONT_GAP, // line height
+                  CHAT_FONTSIZE, // font size
+                  true); // align bottom
          }
       }
    else
@@ -809,8 +828,14 @@ void GameUserInterface::renderChatMessageDisplay()
             else
                glColor(mStoreChatMessageColor[i]);
 
-            drawString(UserInterface::horizMargin, y, CHAT_FONTSIZE, mStoreChatMessage[i]);
-            y -= CHAT_FONTSIZE + CHAT_FONT_GAP;
+            //drawString(UserInterface::horizMargin, y, CHAT_FONTSIZE, mStoreChatMessage[i]);
+            y -= (CHAT_FONTSIZE + CHAT_FONT_GAP)
+               * UserInterface::drawWrapText(mStoreChatMessage[i], UserInterface::horizMargin, y,
+                  700, // wrap width
+                  y_end, // ypos_end
+                  CHAT_FONTSIZE + CHAT_FONT_GAP, // line height
+                  CHAT_FONTSIZE, // font size
+                  true); // align bottom
          }
       }
 

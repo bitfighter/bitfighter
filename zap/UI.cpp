@@ -727,6 +727,93 @@ void UserInterface::renderMessageBox(const char *title, const char *instr, const
 }
 
 
+U32 UserInterface::drawWrapText(char *text, S32 xpos, U32 ypos, S32 width, U32 ypos_end, U32 lineHeight, U32 fontSize, bool alignBottom, bool draw)
+{
+   U32 lines = 0;
+   U32 lineStartIndex = 0;
+   U32 lineEndIndex = 0;
+   U32 lineBreakCandidateIndex = 0;
+   Vector<U32> seperator;  // Collection of character indexes at which to split the message
+
+   //char* text = (char*)message.c_str();  // Make message non-const: ok to do since it was passed by value
+
+   while(text[lineEndIndex] != 0)
+   {
+      char c = text[lineEndIndex];  // Store character
+      text[lineEndIndex] = 0;  // Temporarily set this index as char array terminator
+      bool overWidthLimit = UserInterface::getStringWidth(fontSize, &text[lineStartIndex]) > width;
+      text[lineEndIndex] = c;  // Now set it back again
+
+      // If this character is a space, keep track in case we need to split here
+      if(text[lineEndIndex] == ' ')
+         lineBreakCandidateIndex = lineEndIndex;
+
+      if(overWidthLimit)
+      {
+         // If no spaces were found, we need to force a line break at this character; game will freeze otherwise
+         if(lineBreakCandidateIndex == lineStartIndex)
+            lineBreakCandidateIndex = lineEndIndex;
+
+         seperator.push_back(lineBreakCandidateIndex);  // Add this index to line split list
+         text[lineBreakCandidateIndex] = ' ';           // Add the space
+         lineStartIndex = lineBreakCandidateIndex + 1;  // Skip a char which is a space.
+         lineBreakCandidateIndex = lineStartIndex;      // Reset line break index to start of list
+      }
+
+      lineEndIndex++;
+   }
+
+   // Align the y position, if alignBottom is enabled
+   if(alignBottom)
+   {
+      ypos -= seperator.size() * lineHeight;  // Align according to number of wrapped lines
+      if(lineStartIndex != lineEndIndex)     // Align the remaining line
+         ypos -= lineHeight;
+   }
+
+   // Draw lines that need to wrap
+   lineStartIndex = 0;
+   for(S32 i = 0; i < seperator.size(); i++)
+   {
+      lineEndIndex = seperator[i];
+      if(ypos >= ypos_end || !alignBottom)  // if there is room to draw some lines at top when aligned bottom
+      {
+         if(draw)
+         {
+            char c = text[lineEndIndex];  // Store character
+            text[lineEndIndex] = 0;  // Temporarily set this index as char array terminator
+            UserInterface::drawString(xpos, ypos, fontSize, &text[lineStartIndex]);
+            text[lineEndIndex] = c;  // Now set it back again
+         }
+         lines++;
+         if(ypos < ypos_end && !alignBottom)  // if drawing from align top, and ran out of room, then stop and return
+         {
+            return lines;
+         }
+      }
+      ypos += lineHeight;
+
+      lineStartIndex = lineEndIndex + 1;  // skip a char which is a space.
+   }
+
+   // Draw any remaining characters
+   if(lineStartIndex != lineEndIndex)
+   {
+      if(ypos >= ypos_end || !alignBottom)
+      {
+         if(draw)
+            UserInterface::drawString(xpos, ypos, fontSize, &text[lineStartIndex]);
+
+         lines++;
+      }
+   }
+
+   return lines;
+}
+
+
+
+
 // These will be overridden in child classes if needed
 void UserInterface::render()                               { /* Do nothing */ }
 void UserInterface::idle(U32 timeDelta)                    { /* Do nothing */ }
