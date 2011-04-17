@@ -1565,8 +1565,13 @@ void GameType::clientRequestLoadout(GameConnection *client, const Vector<U32> &l
 {
    Ship *ship = dynamic_cast<Ship *>(client->getControlObject());
 
-   if(ship && ship->isInZone(LoadoutZoneType))
-      setClientShipLoadout(client->getClientRef(), loadout, false);
+   if(ship)
+   {
+      GameObject *object = ship->isInZone(LoadoutZoneType);
+      if(object)
+         if(object->getTeam() == ship->getTeam() || object->getTeam() == -1)
+            setClientShipLoadout(client->getClientRef(), loadout, false);
+   }
 
    // Not CE
    //S32 clientIndex = findClientIndexByConnection(client);
