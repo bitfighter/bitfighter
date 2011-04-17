@@ -429,6 +429,9 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sAdminPassword, (StringPtr pass), (pass),
       setIsLevelChanger(true);   // ...get these permissions too!
       s2cSetIsAdmin(true);                                                 // Tell client they have been granted access
 
+      if(gIniSettings.allowAdminMapUpload)
+         s2rSendableFlags(1); // enable level uploads
+
       GameType *gt = gServerGame->getGameType();
 
       if(gt)
@@ -1178,7 +1181,7 @@ extern ConfigDirectories gConfigDirs;
 
 TNL_IMPLEMENT_RPC(GameConnection, s2rSendDataParts, (U8 type, ByteBufferPtr data), (type, data), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 4)
 {
-   if(!gIniSettings.allowMapUpload)  // don't need it when not enabled.
+   if(!gIniSettings.allowMapUpload && !isAdmin())  // don't need it when not enabled, saves some memory. May remove this, it is checked again leter.
       return;
 
    if(mDataBuffer)
@@ -1192,7 +1195,9 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendDataParts, (U8 type, ByteBufferPtr data
       mDataBuffer->takeOwnership();
    }
 
-   if(type == 1 && gIniSettings.allowMapUpload && !isInitiator() && mDataBuffer->getBufferSize() != 0)
+   if(type == 1 &&
+      (gIniSettings.allowMapUpload || (gIniSettings.allowAdminMapUpload && isAdmin())) &&
+      !isInitiator() && mDataBuffer->getBufferSize() != 0)
    {
       LevelInfo levelInfo = getLevelInfo((char *)mDataBuffer->getBuffer(), mDataBuffer->getBufferSize());
 

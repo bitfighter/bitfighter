@@ -188,6 +188,7 @@ struct IniSettings      // With defaults specified
    S32 maxBots;
 
    bool allowMapUpload;
+   bool allowAdminMapUpload;
 
    U32 voteLength;
    U32 voteLengthToChangeTeam;

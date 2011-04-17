@@ -95,6 +95,7 @@ void IniSettings::init()
    wallOutlineColor.set(0,0,1);
 
    allowMapUpload = false;
+   allowAdminMapUpload = true;
 
    voteLength = 12;
    voteLengthToChangeTeam = 10;
@@ -398,6 +399,7 @@ static void loadHostConfiguration()
    gIniSettings.alertsVolLevel = checkVol(gIniSettings.alertsVolLevel);
 
    gIniSettings.allowMapUpload         = (U32) gINI.GetValueYN("Host", "AllowMapUpload", S32(gIniSettings.allowMapUpload) );
+   gIniSettings.allowAdminMapUpload    = (U32) gINI.GetValueYN("Host", "AllowAdminMapUpload", S32(gIniSettings.allowAdminMapUpload) );
 
    gIniSettings.voteLength             = (U32) gINI.GetValueI("Host", "VoteLength", S32(gIniSettings.voteLength) );
    gIniSettings.voteLengthToChangeTeam = (U32) gINI.GetValueI("Host", "VoteLengthToChangeTeam", S32(gIniSettings.voteLengthToChangeTeam) );
@@ -1374,6 +1376,7 @@ static void writeHost()
    gINI.setValueYN(section, "LogStats", gIniSettings.logStats);
 
    gINI.setValueYN(section, "AllowMapUpload", S32(gIniSettings.allowMapUpload) );
+   gINI.setValueYN(section, "AllowAdminMapUpload", S32(gIniSettings.allowAdminMapUpload) );
 
    gINI.SetValueI(section, "VoteLength", S32(gIniSettings.voteLength) );
    gINI.SetValueI(section, "VoteLengthToChangeTeam", S32(gIniSettings.voteLengthToChangeTeam) );
