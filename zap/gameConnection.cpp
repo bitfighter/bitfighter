@@ -270,18 +270,34 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestCurrentLevel, (), (), NetClassGroupG
    }
 }
 
+const U32 maxDataBufferSize = 1024*256;
+
 // << DataSendable >>
 // Send a chunk of the file -- this gets run on the receiving end       
 TNL_IMPLEMENT_RPC(GameConnection, s2rSendLine, (StringPtr line), (line), 
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 1)
+//void s2rSendLine2(StringPtr line)
 {
-   // server might need mOutputFile, if the server were to receive files. Currently, server don't receive files in-game.
-   TNLAssert(mClientGame != NULL, "trying to get mOutputFile, mClientGame is NULL");
+   if(!isInitiator()) // make it client only.
+      return;
+   //// server might need mOutputFile, if the server were to receive files. Currently, server don't receive files in-game.
+   //TNLAssert(mClientGame != NULL, "trying to get mOutputFile, mClientGame is NULL");
 
-   if(mClientGame && mClientGame->mGameUserInterface->mOutputFile)
-      fwrite(line.getString(), 1, strlen(line.getString()), mClientGame->mGameUserInterface->mOutputFile);
+   //if(mClientGame && mClientGame->mGameUserInterface->mOutputFile)
+   //   fwrite(line.getString(), 1, strlen(line.getString()), mClientGame->mGameUserInterface->mOutputFile);
       //mOutputFile.write(line.getString(), strlen(line.getString()));
    // else... what?
+   if(mDataBuffer)
+   {
+      if(mDataBuffer->getBufferSize() < maxDataBufferSize)  // limit memory, to avoid eating too much memory.
+         mDataBuffer->appendBuffer((U8 *)line.getString(), strlen(line.getString()));
+   }
+   else
+   {
+      mDataBuffer = new ByteBuffer((U8 *)line.getString(), strlen(line.getString()));
+      mDataBuffer->takeOwnership();
+   }
+
 }
 
 
@@ -290,21 +306,42 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendLine, (StringPtr line), (line),
 TNL_IMPLEMENT_RPC(GameConnection, s2rCommandComplete, (RangedU32<0,SENDER_STATUS_COUNT> status), (status), 
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 1)
 {
+   if(!isInitiator()) // make it client only.
+      return;
    // server might need mOutputFile, if the server were to receive files. Currently, server don't receive files in-game.
    TNLAssert(mClientGame != NULL, "trying to get mOutputFile, mClientGame is NULL");
 
-   if(mClientGame && mClientGame->mGameUserInterface->mOutputFile)
+   if(mClientGame && mClientGame->mGameUserInterface->mOutputFileName != "")
    {
-      fclose(mClientGame->mGameUserInterface->mOutputFile);
-      mClientGame->mGameUserInterface->mOutputFile = NULL;
+      if(status.value == STATUS_OK && mDataBuffer)
+      {
+         FILE *OutputFile = fopen(mClientGame->mGameUserInterface->mOutputFileName.c_str(), "wb");
 
-      if(status.value == STATUS_OK)
-         mClientGame->mGameUserInterface->displaySuccessMessage("Level download to %s", mClientGame->mGameUserInterface->remoteLevelDownloadFilename.c_str());
+         if(!OutputFile)
+         {
+            logprintf("Problem opening file %s for writing", mClientGame->mGameUserInterface->mOutputFileName.c_str());
+            mClientGame->mGameUserInterface->displayErrorMessage("!!! Problem opening file %s for writing", mClientGame->mGameUserInterface->mOutputFileName.c_str());
+         }
+         else
+         {
+            fwrite((char *)mDataBuffer->getBuffer(), 1, mDataBuffer->getBufferSize(), OutputFile);
+            fclose(OutputFile);
+            mClientGame->mGameUserInterface->displaySuccessMessage("Level download to %s", mClientGame->mGameUserInterface->remoteLevelDownloadFilename.c_str());
+         }
+      }
       else if(status.value == COMMAND_NOT_ALLOWED)
          mClientGame->mGameUserInterface->displayErrorMessage("!!! Getmap command is disabled on this server");
       else
          mClientGame->mGameUserInterface->displayErrorMessage("Error downloading level");
+
+      mClientGame->mGameUserInterface->mOutputFileName = "";
    }
+   if(mDataBuffer)
+   {
+      delete mDataBuffer;
+      mDataBuffer = NULL;
+   }
+
 }
 
 
@@ -1186,7 +1223,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendDataParts, (U8 type, ByteBufferPtr data
 
    if(mDataBuffer)
    {
-      if(mDataBuffer->getBufferSize() < 1024*256)  // limit memory, to avoid eating too much memory.
+      if(mDataBuffer->getBufferSize() < maxDataBufferSize)  // limit memory, to avoid eating too much memory.
          mDataBuffer->appendBuffer(*data.getPointer());
    }
    else

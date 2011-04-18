@@ -79,7 +79,7 @@ static void makeCommandCandidateList();      // Forward delcaration
 // Constructor
 GameUserInterface::GameUserInterface()
 {
-   mOutputFile = NULL;
+   //mOutputFile = NULL;
    bool mLeftDisabled = false; // Fix some uninitalized variables (randomly was true)
    bool mRightDisabled = false;
    bool mUpDisabled = false;
@@ -144,8 +144,8 @@ GameUserInterface::GameUserInterface()
 // Destructor
 GameUserInterface::~GameUserInterface()
 {
-   if(mOutputFile)
-      fclose(mOutputFile);
+   //if(mOutputFile)
+   //   fclose(mOutputFile);
 }
 
 void processGameConsoleCommand(OGLCONSOLE_Console console, char *cmd)
@@ -1376,17 +1376,17 @@ void GameUserInterface::getMapHandler(GameUserInterface *gui, const Vector<strin
          gui->remoteLevelDownloadFilename += ".level";
 
       // Make into a fully qualified file name
-      string fullFile = strictjoindir(gConfigDirs.levelDir, gui->remoteLevelDownloadFilename);
+      gui->mOutputFileName = strictjoindir(gConfigDirs.levelDir, gui->remoteLevelDownloadFilename);
 
       // Prepare for writing
-      gui->mOutputFile = fopen(fullFile.c_str(), "w");    // TODO: Writes empty file when server does not allow getmap.  Shouldn't.
+      //gui->mOutputFile = fopen(fullFile.c_str(), "w");    // TODO: Writes empty file when server does not allow getmap.  Shouldn't.
 
-      if(!gui->mOutputFile)
-      {
-         logprintf("Problem opening file %s for writing", fullFile.c_str());
-         gui->displayErrorMessage("!!! Problem opening file %s for writing", fullFile.c_str());
-      }
-      else
+      //if(!gui->mOutputFile)
+      //{
+      //   logprintf("Problem opening file %s for writing", fullFile.c_str());
+      //   gui->displayErrorMessage("!!! Problem opening file %s for writing", fullFile.c_str());
+      //}
+      //else
          gClientGame->getConnectionToServer()->c2sRequestCurrentLevel();
    }
 }
