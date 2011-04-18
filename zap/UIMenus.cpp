@@ -1440,7 +1440,7 @@ void LevelMenuUserInterface::onActivate()
 
    menuItems.sort(menuItemValueSort);
 
-   if(gc->mSendableFlags & 1)
+   if((gc->mSendableFlags & 1) && !gc->isLocalConnection())   // local connection is useless, already have all maps..
       menuItems.push_back(new MenuItem(UPLOAD_LEVELS_MENUID, UPLOAD_LEVELS, selectLevelTypeCallback, "", stringToKeyCode(c)));
 }
 
