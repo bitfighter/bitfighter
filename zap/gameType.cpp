@@ -347,7 +347,7 @@ void GameType::idle(GameObject::IdleCallPath path)
          if(mClientList[i]->clientConnection)
          {
             mClientList[i]->ping = (U32) mClientList[i]->clientConnection->getRoundTripTime();
-            if(mClientList[i]->ping > MaxPing)
+            if(mClientList[i]->ping > MaxPing || mClientList[i]->clientConnection->lostContact())
                mClientList[i]->ping = MaxPing;
          }
       }
