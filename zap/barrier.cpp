@@ -123,7 +123,6 @@ Barrier::Barrier(const Vector<Point> &points, F32 width, bool solid)
 
    if(mSolid)
    {
-      // TODO: could we pass a direction flag rather than reversing the array, which is slow??
       if (isWoundClockwise(mPoints))  // all walls must be CCW to clip correctly
          mPoints.reverse();
 
@@ -135,21 +134,14 @@ Barrier::Barrier(const Vector<Point> &points, F32 width, bool solid)
          logprintf(LogConsumer::LogWarning, "Invalid barrier detected (polywall with invalid geometry).  Disregarding...");
          return;
       }
-
-      bufferPolyWallForBotZone(mPoints, mBotZoneBufferGeometry);
    }
    else
    {
       if (mPoints.size() == 2 && mPoints[0] == mPoints[1])   // Test for zero-length barriers
          mPoints[1] += Point(0,0.5);                         // Add vertical vector of half a point so we can see outline geo in-game
 
-      bufferBarrierForBotZone(mPoints[0], mPoints[1], mWidth, mBotZoneBufferGeometry);     // Fills with 8 points, octagonal
-
       if(mPoints.size() == 2 && mWidth != 0)   // It's a regular segment, so apply width
-      {
          expandCenterlineToOutline(mPoints[0], mPoints[1], mWidth, mRenderFillGeometry);     // Fills with 4 points
-         mPoints = mRenderFillGeometry;
-      }
    }
 
    getCollisionPoly(mRenderOutlineGeometry);    // Outline is the same for both barrier geometries
@@ -163,7 +155,7 @@ void Barrier::onAddedToGame(Game *theGame)
 
 
 // Combines multiple barriers into a single complex polygon... fills solution
-bool Barrier::unionBarriers(const Vector<DatabaseObject *> &barriers, bool useBotGeom, Vector<Vector<Point> > &solution)
+bool Barrier::unionBarriers(const Vector<DatabaseObject *> &barriers, Vector<Vector<Point> > &solution)
 {
    Vector<Vector<Point> > inputPolygons;
    Vector<Point> inputPoly;
@@ -180,15 +172,8 @@ bool Barrier::unionBarriers(const Vector<DatabaseObject *> &barriers, bool useBo
 
       inputPoly.clear();
 
-      if(useBotGeom)
-      {
-         inputPoly = barrier->mBotZoneBufferGeometry;
-      }
-      else    
-      {
-         barrier->getCollisionPoly(points);        // Puts object bounds into points
-         inputPoly = points;
-      }
+      barrier->getCollisionPoly(points);        // Puts object bounds into points
+      inputPoly = points;
 
 #ifdef DUMP_DATA
       for(S32 j = 0; j < barrier->mBotZoneBufferGeometry.size(); j++)
@@ -205,7 +190,11 @@ bool Barrier::unionBarriers(const Vector<DatabaseObject *> &barriers, bool useBo
 // Processes mPoints and fills polyPoints 
 bool Barrier::getCollisionPoly(Vector<Point> &polyPoints)
 {
-   polyPoints = mPoints;
+   if (mSolid)
+      polyPoints = mPoints;
+   else
+      polyPoints = mRenderFillGeometry;
+
    return true;
 }
 
@@ -304,45 +293,53 @@ void Barrier::expandCenterlineToOutline(const Point &start, const Point &end, F3
    cornerPoints.push_back(start - crossVec);
 }
 
-// Puffs out segment to the specified width with a further buffer for bot zones, has an inset tangent corner cut
-void Barrier::bufferBarrierForBotZone(const Point &start, const Point &end, F32 barrierWidth, Vector<Point> &bufferedPoints)
+
+Vector<Point> Barrier::getBufferForBotZone()
 {
-   bufferedPoints.clear();
+   Vector<Point> bufferedPoints;
 
-   Point difference = end - start;
+   // Use a clipper library to buffer polywalls; should be counter-clockwise by here
+   if(mSolid)
+   {
+      offsetPolygon(mPoints, bufferedPoints, BotNavMeshZone::BufferRadius);
+   }
 
-   Point crossVector(difference.y, -difference.x);  // Create a point whose vector from 0,0 is perpenticular to the original vector
-   crossVector.normalize((barrierWidth * 0.5) + BotNavMeshZone::BufferRadius);  // reduce point so the vector has length of barrier width + ship radius
+   // If a barrier, do our own buffer
+   // Puffs out segment to the specified width with a further buffer for bot zones, has an inset tangent corner cut
+   else
+   {
+      Point& start = mPoints[0];
+      Point& end = mPoints[1];
+      Point difference = end - start;
 
-   Point parallelVector(difference.x, difference.y); // Create a vector parallel to original segment
-   parallelVector.normalize(BotNavMeshZone::BufferRadius);  // Reduce point so vector has length of ship radius
+      Point crossVector(difference.y, -difference.x);  // Create a point whose vector from 0,0 is perpenticular to the original vector
+      crossVector.normalize((mWidth * 0.5) + BotNavMeshZone::BufferRadius);  // reduce point so the vector has length of barrier width + ship radius
 
-   // For octagonal zones
-   //   create extra vectors that are offset full offset to create 'cut' corners
-   //   (FloatSqrtHalf * BotNavMeshZone::BufferRadius)  creates a tangent to the radius of the buffer
-   //   we then subtract a little from the tangent cut to shorten the buffer on the corners and allow zones to be created when barriers are close
-   Point crossPartial = crossVector;
-   crossPartial.normalize((FloatSqrtHalf * BotNavMeshZone::BufferRadius) + (barrierWidth * 0.5) - (0.30 * BotNavMeshZone::BufferRadius));
+      Point parallelVector(difference.x, difference.y); // Create a vector parallel to original segment
+      parallelVector.normalize(BotNavMeshZone::BufferRadius);  // Reduce point so vector has length of ship radius
 
-   Point parallelPartial = parallelVector;
-   parallelPartial.normalize((FloatSqrtHalf * BotNavMeshZone::BufferRadius) - (0.30 * BotNavMeshZone::BufferRadius));
+      // For octagonal zones
+      //   create extra vectors that are offset full offset to create 'cut' corners
+      //   (FloatSqrtHalf * BotNavMeshZone::BufferRadius)  creates a tangent to the radius of the buffer
+      //   we then subtract a little from the tangent cut to shorten the buffer on the corners and allow zones to be created when barriers are close
+      Point crossPartial = crossVector;
+      crossPartial.normalize((FloatSqrtHalf * BotNavMeshZone::BufferRadius) + (mWidth * 0.5) - (0.30 * BotNavMeshZone::BufferRadius));
 
-   // Now add/subtract perpendicular and parallel vectors to buffer the segments
-   bufferedPoints.push_back((start - parallelVector)  + crossPartial);
-   bufferedPoints.push_back((start - parallelPartial)  + crossVector);
-   bufferedPoints.push_back(end   + parallelPartial + crossVector);
-   bufferedPoints.push_back(end   + parallelVector  + crossPartial);
-   bufferedPoints.push_back(end   + parallelVector  - crossPartial);
-   bufferedPoints.push_back(end   + parallelPartial - crossVector);
-   bufferedPoints.push_back((start - parallelPartial) - crossVector);
-   bufferedPoints.push_back((start - parallelVector)  - crossPartial);
-}
+      Point parallelPartial = parallelVector;
+      parallelPartial.normalize((FloatSqrtHalf * BotNavMeshZone::BufferRadius) - (0.30 * BotNavMeshZone::BufferRadius));
 
+      // Now add/subtract perpendicular and parallel vectors to buffer the segments
+      bufferedPoints.push_back((start - parallelVector)  + crossPartial);
+      bufferedPoints.push_back((start - parallelPartial)  + crossVector);
+      bufferedPoints.push_back(end   + parallelPartial + crossVector);
+      bufferedPoints.push_back(end   + parallelVector  + crossPartial);
+      bufferedPoints.push_back(end   + parallelVector  - crossPartial);
+      bufferedPoints.push_back(end   + parallelPartial - crossVector);
+      bufferedPoints.push_back((start - parallelPartial) - crossVector);
+      bufferedPoints.push_back((start - parallelVector)  - crossPartial);
+   }
 
-void Barrier::bufferPolyWallForBotZone(const Vector<Point>& inputPoints, Vector<Point>& bufferedPoints)
-{
-   // Points should be CCW before getting here
-   offsetPolygon(inputPoints, bufferedPoints, BotNavMeshZone::BufferRadius);
+   return bufferedPoints;
 }
 
 
@@ -354,7 +351,7 @@ void Barrier::clipRenderLinesToPoly(const Vector<DatabaseObject *> &barrierList,
 {
    Vector<Vector<Point> > solution;
 
-   unionBarriers(barrierList, false, solution);
+   unionBarriers(barrierList, solution);
 
    unpackPolygons(solution, lineSegmentPoints);
 }

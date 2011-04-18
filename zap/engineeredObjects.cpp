@@ -32,6 +32,7 @@
 #include "sfx.h"
 #include "gameObjectRender.h"
 #include "GeomUtils.h"
+#include "BotNavMeshZone.h"
 
 namespace Zap
 {
@@ -645,6 +646,19 @@ bool ForceFieldProjector::getCollisionPoly(Vector<Point> &polyPoints)
    return true;
 }
 
+Vector<Point> ForceFieldProjector::getBufferForBotZone()
+{
+   Vector<Point> inputPoints, bufferedPoints;
+   getCollisionPoly(inputPoints);
+
+   if (isWoundClockwise(inputPoints))
+      inputPoints.reverse();
+
+   offsetPolygon(inputPoints, bufferedPoints, BotNavMeshZone::BufferRadius);
+
+   return bufferedPoints;
+}
+
 void ForceFieldProjector::onAddedToGame(Game *theGame)
 {
    getGame()->mObjectsLoaded++;
@@ -847,7 +861,6 @@ bool ForceField::getCollisionPoly(Vector<Point> &points)
    return true;
 }
 
-
 void ForceField::render()
 {
    Color c = getGame()->getGameType()->getTeamColor(mTeam);
@@ -864,6 +877,19 @@ Turret::Turret(S32 team, Point anchorPoint, Point anchorNormal) : EngineeredObje
    mNetFlags.set(Ghostable);
    setObjectMask();
    mCurrentAngle = mAnchorNormal.ATAN2();
+}
+
+Vector<Point> Turret::getBufferForBotZone()
+{
+   Vector<Point> inputPoints, bufferedPoints;
+   getCollisionPoly(inputPoints);
+
+   if (isWoundClockwise(inputPoints))
+      inputPoints.reverse();
+
+   offsetPolygon(inputPoints, bufferedPoints, BotNavMeshZone::BufferRadius);
+
+   return bufferedPoints;
 }
 
 bool Turret::processArguments(S32 argc2, const char **argv2)

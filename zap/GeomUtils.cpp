@@ -901,7 +901,7 @@ bool mergePolys(const Vector<Vector<Point> > &inputPolygons, Vector<Vector<Point
 
    // Fire up clipper and union!
    Clipper clipper;
-//   clipper.IgnoreOrientation(false);      // Can be true?  Would that make things go faster?
+
    try  // there is a "throw" in AddPolygon..
    {
       clipper.AddPolygons(input, ptSubject);

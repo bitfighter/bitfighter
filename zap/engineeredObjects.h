@@ -164,6 +164,8 @@ public:
    static void getGeom(const Point &anchor, const Point &normal, Vector<Point> &geom);
    static Point getForceFieldStartPoint(const Point &anchor, const Point &normal, F32 scaleFact = 1);
 
+   Vector<Point> getBufferForBotZone();
+
    // Get info about the forcfield that might be projected from this projector
    void getForceFieldStartAndEndPoints(Point &start, Point &end);
 
@@ -227,6 +229,8 @@ public:
 
    static void getGeom(const Point &anchor, const Point &normal, Vector<Point> &polyPoints);
    bool getCollisionPoly(Vector<Point> &polyPoints);
+
+   Vector<Point> getBufferForBotZone();
 
    void render();
    void idle(IdleCallPath path);
