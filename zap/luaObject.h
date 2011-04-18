@@ -30,7 +30,7 @@
 #include "lua.h"
 #include "../lua/include/lunar.h"
 #include "tnl.h"
-#include "point.h"
+#include "Point.h"
 #include <string>
 
 using namespace std;

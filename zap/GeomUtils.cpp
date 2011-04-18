@@ -43,10 +43,9 @@
 // Please have a look at the notes. They indicate obvious places for optimization
 // if you are using a swept ellipsoid against a large number of polygons.
 
-#include "point.h" 
+#include "GeomUtils.h"        // Must be last...   Why??
 #include "tnlVector.h"
 #include "tnlLog.h"           // for logprintf
-#include "GeomUtils.h"        // Must be last
 
 
 using namespace TNL;

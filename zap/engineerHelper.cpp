@@ -26,7 +26,7 @@
 #include "engineerHelper.h"
 #include "engineeredObjects.h"      // For EngineerModuleDeployer
 #include "UIGame.h"
-#include "point.h"      // For Color def
+#include "Color.h"      // For Color def
 
 namespace Zap
 {

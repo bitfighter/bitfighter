@@ -31,7 +31,7 @@
 #include "gameConnection.h"
 #include "UI.h"
 #include "input.h"
-#include "point.h"
+#include "Rect.h"
 
 namespace Zap
 {

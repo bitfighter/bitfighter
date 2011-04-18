@@ -31,6 +31,8 @@
 #include "tnlMethodDispatch.h"
 #include "tnlAssert.h"
 
+#include "Color.h"
+
 
 // This is shared in both client and master.
 // this read/write is usually the hardest part about struct, but this allows custom version handling.

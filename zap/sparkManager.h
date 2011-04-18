@@ -27,7 +27,7 @@
 #define _FXMANAGER_H_
 
 #include "gameObject.h"     
-#include "point.h"          
+#include "Point.h"
 
 namespace Zap
 {

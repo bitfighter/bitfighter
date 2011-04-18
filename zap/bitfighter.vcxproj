@@ -159,6 +159,9 @@
     <ClCompile Include="..\zap\playerInfo.cpp" />
     <ClCompile Include="..\zap\polygon.cpp" />
     <ClCompile Include="..\zap\projectile.cpp" />
+    <ClInclude Include="..\zap\Point.cpp" />
+    <ClInclude Include="..\zap\Rect.cpp" />
+    <ClInclude Include="..\zap\Color.cpp" />
     <ClCompile Include="quickChatHelper.cpp" />
     <ClCompile Include="..\zap\rabbitGame.cpp" />
     <ClCompile Include="..\zap\retrieveGame.cpp" />
@@ -262,7 +265,9 @@
     <ClInclude Include="..\zap\move.h" />
     <ClInclude Include="..\zap\moveObject.h" />
     <ClInclude Include="..\zap\playerInfo.h" />
-    <ClInclude Include="..\zap\point.h" />
+    <ClInclude Include="..\zap\Point.h" />
+    <ClInclude Include="..\zap\Rect.h" />
+    <ClInclude Include="..\zap\Color.h" />
     <ClInclude Include="..\zap\polygon.h" />
     <ClInclude Include="..\zap\private.h" />
     <ClInclude Include="..\zap\projectile.h" />

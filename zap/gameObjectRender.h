@@ -29,7 +29,8 @@
 #include "tnl.h"
 #include "../glut/glutInclude.h"
 
-#include "point.h"
+#include "Rect.h"
+#include "Color.h"
 #include <string>
 
 using namespace TNL;

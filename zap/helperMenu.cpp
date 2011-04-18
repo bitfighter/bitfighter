@@ -25,7 +25,6 @@
 
 
 #include "helperMenu.h"
-#include "point.h"      // For Color def
 #include "UIGame.h"     // For mGameUserInterface
 
 namespace Zap

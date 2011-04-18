@@ -945,7 +945,27 @@
 			>
 		</File>
 		<File
-			RelativePath=".\point.h"
+			RelativePath=".\Point.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\Point.h"
+			>
+		</File>
+		<File
+			RelativePath=".\Rect.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\Rect.h"
+			>
+		</File>
+		<File
+			RelativePath=".\Color.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\Color.h"
 			>
 		</File>
 		<File

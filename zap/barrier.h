@@ -27,7 +27,7 @@
 #define _BARRIER_H_
 
 #include "gameObject.h"
-#include "point.h"
+#include "Point.h"
 #include "tnlNetObject.h"
 
 namespace Zap

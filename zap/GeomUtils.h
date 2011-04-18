@@ -49,7 +49,7 @@
 #ifndef _GEOM_UTILS_
 #define _GEOM_UTILS_
 
-#include "point.h"
+#include "Rect.h"
 #include <string>
 #include "tnlAlloc.h"
 

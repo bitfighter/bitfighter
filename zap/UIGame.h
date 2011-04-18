@@ -34,7 +34,8 @@
 #include "timer.h"
 #include "sfx.h"
 #include "voiceCodec.h"
-#include "point.h"
+#include "Point.h"
+#include "Color.h"
 
 namespace Zap
 {

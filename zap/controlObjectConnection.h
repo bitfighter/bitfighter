@@ -30,7 +30,7 @@
 #include "../tnl/tnlGhostConnection.h"
 
 #include "move.h"
-#include "point.h"     
+#include "Point.h"
 #include "gameObject.h" 
 
 using namespace TNL;

@@ -30,7 +30,6 @@
 #include "luaObject.h"
 #include "gameWeapons.h"
 #include "shipItems.h"     // For module defs
-#include "point.h"         // For LuaPoint
 #include "move.h"         // For ShipModuleCount + ShipWeaponCount
 
 namespace Zap

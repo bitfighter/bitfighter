@@ -34,7 +34,7 @@
 
 #include "tnlTypes.h"
 #include "tnlNetStringTable.h"
-#include "point.h"      // For Color def
+#include "Color.h"      // For Color def
 
 #include "input.h"
 #include <string>

@@ -28,7 +28,8 @@
 
 #include "UI.h"
 #include "UIChat.h"
-#include "point.h"
+#include "Point.h"
+#include "Color.h"
 
 #include "../tnl/tnlNonce.h"
 

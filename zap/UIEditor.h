@@ -30,7 +30,7 @@
 #include "gameLoader.h"
 #include "gridDB.h"              // For DatabaseObject definition
 #include "timer.h"
-#include "point.h"
+#include "Point.h"
 #include "BotNavMeshZone.h"      // For Border def
 #include "tnlNetStringTable.h"
 #include <string>

@@ -29,7 +29,7 @@
 #include "keyCode.h"
 #include "SharedConstants.h"
 #include "timer.h"
-#include "point.h"
+#include "Point.h"
 #include "lineEditor.h"
 #include "config.h"           // For DisplayMode enum
 #include "stringUtils.h"      // For itos
