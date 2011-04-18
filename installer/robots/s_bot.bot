@@ -105,7 +105,7 @@ function fireAtObject(obj, weapon)
 		obj:getClassID() == RobotType or
 		obj:getClassID() == TurretType or
 		obj:getClassID() == ForceFieldProjectorType) then
-			if obj:getTeamIndx() == bot:getTeamIndx() and game:isTeamGame() and obj:getTeamIndx() == NeutralTeamIndx then
+			if obj:getTeamIndx() == bot:getTeamIndx() and game:isTeamGame() or obj:getTeamIndx() == NeutralTeamIndx then
 				--logprint("It's an ally.")
 				return(false)
 			end

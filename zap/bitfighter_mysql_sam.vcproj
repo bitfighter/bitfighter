@@ -753,6 +753,14 @@
 			>
 		</File>
 		<File
+			RelativePath=".\Color.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\Color.h"
+			>
+		</File>
+		<File
 			RelativePath=".\config.cpp"
 			>
 		</File>
@@ -953,22 +961,6 @@
 			>
 		</File>
 		<File
-			RelativePath=".\Rect.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\Rect.h"
-			>
-		</File>
-		<File
-			RelativePath=".\Color.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\Color.h"
-			>
-		</File>
-		<File
 			RelativePath=".\polygon.cpp"
 			>
 		</File>
@@ -986,6 +978,14 @@
 		</File>
 		<File
 			RelativePath="..\recast\RecastMesh.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\Rect.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\Rect.h"
 			>
 		</File>
 		<File
