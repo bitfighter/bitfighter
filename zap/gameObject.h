@@ -79,6 +79,7 @@ enum GameObjectType
    EngineeredType     = TurretType | ForceFieldProjectorType,
    DamagableTypes     = ShipType | RobotType | MoveableType | BulletType | ItemType | ResourceItemType | EngineeredType | MineType | AsteroidType,
    MotionTriggerTypes = ShipType | RobotType | ResourceItemType | TestItemType | AsteroidType,
+   CollideableType    = BarrierType | TurretType | ForceFieldProjectorType,
    AllObjectTypes     = 0xFFFFFFFF
 };
 

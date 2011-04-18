@@ -1854,12 +1854,6 @@ bool Robot::findNearestShip(Point &loc)
 
 bool Robot::canSeePoint(Point point)
 {
-   // Need to check the two edge points perpendicular to the direction of looking to ensure we have an unobstructed
-   // flight lane to point.  Radius of the robot is mRadius.  This keeps the ship from getting hung up on
-   // obstacles that appear visible from the center of the ship, but are actually blocked.
-
-
-
    Point difference = point - getActualPos();
 
    Point crossVector(difference.y, -difference.x);  // Create a point whose vector from 0,0 is perpenticular to the original vector
@@ -1882,7 +1876,8 @@ bool Robot::canSeePoint(Point point)
    Vector<Point> otherPoints;
    Rect queryRect(thisPoints);
    Vector<DatabaseObject *> fillVector;
-   findObjects(BarrierType, fillVector, queryRect);
+   findObjects(CollideableType, fillVector, queryRect);
+
    for(S32 i=0; i < fillVector.size(); i++)
    {
       if(fillVector[i]->getCollisionPoly(otherPoints))
@@ -1892,11 +1887,6 @@ bool Robot::canSeePoint(Point point)
       }
    }
    return true;
-
-   //return(
-   //   gServerGame->getGridDatabase()->pointCanSeePoint(shipEdge1, pointEdge1) &&
-   //   gServerGame->getGridDatabase()->pointCanSeePoint(shipEdge2, pointEdge2) &&
-   //   gServerGame->getGridDatabase()->pointCanSeePoint(getActualPos(), point) );
 }
 
 
