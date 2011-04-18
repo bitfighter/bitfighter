@@ -1153,7 +1153,7 @@ LevelInfo getLevelInfo(char *level, S32 size)
             level[cur] = 0;
             Vector<string> list = parseString(string(&level[startingCur]));
             level[cur] = c;
-            if(list.size() >= 1 && list[0].find("GameType") != -1)
+            if(list.size() >= 1 && list[0].find("GameType") != string::npos)
             {
                TNL::Object *theObject = TNL::Object::create(list[0].c_str());  // Instantiate a gameType object
                GameType *gt = dynamic_cast<GameType*>(theObject);  // and cast it

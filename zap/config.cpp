@@ -97,12 +97,13 @@ void IniSettings::init()
    allowMapUpload = false;
    allowAdminMapUpload = true;
 
+   voteEnable = false; // disable by default.
    voteLength = 12;
    voteLengthToChangeTeam = 10;
    voteRetryLength = 30;
-   voteYesStrength = 5;
-   voteNoStrength = -5;
-   voteNothingStrength = -2;
+   voteYesStrength = 3;
+   voteNoStrength = -3;
+   voteNothingStrength = -1;
 
    useUpdater = true;
 
@@ -401,6 +402,7 @@ static void loadHostConfiguration()
    gIniSettings.allowMapUpload         = (U32) gINI.GetValueYN("Host", "AllowMapUpload", S32(gIniSettings.allowMapUpload) );
    gIniSettings.allowAdminMapUpload    = (U32) gINI.GetValueYN("Host", "AllowAdminMapUpload", S32(gIniSettings.allowAdminMapUpload) );
 
+   gIniSettings.voteEnable             = (U32) gINI.GetValueYN("Host", "VoteEnable", S32(gIniSettings.voteEnable) );
    gIniSettings.voteLength             = (U32) gINI.GetValueI("Host", "VoteLength", S32(gIniSettings.voteLength) );
    gIniSettings.voteLengthToChangeTeam = (U32) gINI.GetValueI("Host", "VoteLengthToChangeTeam", S32(gIniSettings.voteLengthToChangeTeam) );
    gIniSettings.voteRetryLength        = (U32) gINI.GetValueI("Host", "VoteRetryLength", S32(gIniSettings.voteRetryLength) );
@@ -1378,6 +1380,7 @@ static void writeHost()
    gINI.setValueYN(section, "AllowMapUpload", S32(gIniSettings.allowMapUpload) );
    gINI.setValueYN(section, "AllowAdminMapUpload", S32(gIniSettings.allowAdminMapUpload) );
 
+   gINI.setValueYN(section, "VoteEnable", S32(gIniSettings.voteEnable) );
    gINI.SetValueI(section, "VoteLength", S32(gIniSettings.voteLength) );
    gINI.SetValueI(section, "VoteLengthToChangeTeam", S32(gIniSettings.voteLengthToChangeTeam) );
    gINI.SetValueI(section, "VoteRetryLength", S32(gIniSettings.voteRetryLength) );

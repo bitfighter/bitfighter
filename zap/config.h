@@ -190,6 +190,7 @@ struct IniSettings      // With defaults specified
    bool allowMapUpload;
    bool allowAdminMapUpload;
 
+   bool voteEnable;
    U32 voteLength;
    U32 voteLengthToChangeTeam;
    U32 voteRetryLength;
