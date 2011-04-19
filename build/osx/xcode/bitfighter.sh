@@ -21,6 +21,11 @@ if [ ! -d "$userdatadir/robots" ]; then
   ln -s "$userdatadir" "$HOME/Documents/bitfighter_settings"
 fi
 
+# upgrade specifics
+if [ ! -f "$userdatadir/robots/s_bot.bot" ]; then
+  cp "$datadir/robots/s_bot.bot" "$userdatadir/robots/"
+fi
+
 # Full path is need on some Mac systems for sfx - not sure why yet
 cd "$datadir"
 absolute_datadir="$( pwd )"
