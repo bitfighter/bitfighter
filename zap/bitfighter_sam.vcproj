@@ -131,9 +131,9 @@
 				FavorSizeOrSpeed="1"
 				WholeProgramOptimization="true"
 				AdditionalIncludeDirectories="../tnl;../glut;../openal"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;TNL_ENABLE_LOGGING;SAM_ONLY"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;TNL_ENABLE_LOGGING;_SECURE_SCL=0"
 				RuntimeLibrary="0"
-				EnableEnhancedInstructionSet="2"
+				EnableEnhancedInstructionSet="0"
 				FloatingPointModel="0"
 				RuntimeTypeInfo="true"
 				UsePrecompiledHeader="0"
@@ -440,6 +440,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\GeomUtils.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\GeomUtils.h"
+				>
+			</File>
+			<File
 				RelativePath=".\goalZone.cpp"
 				>
 			</File>
@@ -468,11 +476,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\polygon.h"
+				RelativePath=".\polygon.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\polygon.cpp"
+				RelativePath=".\polygon.h"
 				>
 			</File>
 			<File
@@ -513,14 +521,6 @@
 			</File>
 			<File
 				RelativePath=".\speedZone.h"
-				>
-			</File>
-			<File
-				RelativePath=".\GeomUtils.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\GeomUtils.h"
 				>
 			</File>
 			<File
@@ -629,19 +629,15 @@
 			>
 		</File>
 		<File
-			RelativePath="..\poly2tri\common\shapes.cc"
-			>
-		</File>
-		<File
-			RelativePath="..\poly2tri\sweep\sweep.cc"
-			>
-		</File>
-		<File
-			RelativePath="..\poly2tri\sweep\sweep_context.cc"
-			>
-		</File>
-		<File
 			RelativePath="..\clipper\clipper.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\Color.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\Color.h"
 			>
 		</File>
 		<File
@@ -841,22 +837,6 @@
 			>
 		</File>
 		<File
-			RelativePath=".\Rect.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\Rect.h"
-			>
-		</File>
-		<File
-			RelativePath=".\Color.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\Color.h"
-			>
-		</File>
-		<File
 			RelativePath=".\quickChatHelper.cpp"
 			>
 		</File>
@@ -873,11 +853,23 @@
 			>
 		</File>
 		<File
+			RelativePath=".\Rect.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\Rect.h"
+			>
+		</File>
+		<File
 			RelativePath=".\screenShooter.cpp"
 			>
 		</File>
 		<File
 			RelativePath=".\screenShooter.h"
+			>
+		</File>
+		<File
+			RelativePath="..\poly2tri\common\shapes.cc"
 			>
 		</File>
 		<File
@@ -902,6 +894,14 @@
 		</File>
 		<File
 			RelativePath=".\stringUtils.cpp"
+			>
+		</File>
+		<File
+			RelativePath="..\poly2tri\sweep\sweep.cc"
+			>
+		</File>
+		<File
+			RelativePath="..\poly2tri\sweep\sweep_context.cc"
 			>
 		</File>
 		<File
