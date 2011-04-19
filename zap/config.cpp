@@ -60,7 +60,7 @@ void IniSettings::init()
    sfxSet = sfxModernSet;             // Start off with our modern sounds
 
    starsInDistance = true;            // True if stars move in distance behind maze, false if they are in fixed location
-   useLineSmoothing = false;          // Enable/disable anti-aliasing
+   useLineSmoothing = true;          // Enable/disable anti-aliasing
    diagnosticKeyDumpMode = false;     // True if want to dump keystrokes to the screen
    enableExperimentalAimMode = false; // True if we want to show experimental aiming vector in joystick mode
 

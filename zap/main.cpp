@@ -1973,6 +1973,10 @@ void checkIfThisIsAnUpdate()
    // Wipe out all comments; they will be replaced with any updates
    gINI.deleteHeaderComments();
    gINI.deleteAllSectionComments();
+
+   // version specific changes
+   // 015a
+   gIniSettings.useLineSmoothing = true;
 }
 
 
