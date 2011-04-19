@@ -1976,7 +1976,8 @@ void checkIfThisIsAnUpdate()
 
    // version specific changes
    // 015a
-   gIniSettings.useLineSmoothing = true;
+   if(gIniSettings.version < 1836)
+      gIniSettings.useLineSmoothing = true;
 }
 
 
