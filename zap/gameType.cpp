@@ -344,7 +344,7 @@ void GameType::idle(GameObject::IdleCallPath path)
       mScoreboardUpdateTimer.reset();
       for(S32 i = 0; i < mClientList.size(); i++)
       {
-         if(mClientList[i]->clientConnection)
+         if(mClientList[i]->clientConnection && mClientList[i]->clientConnection->isEstablished())  // robots don't have connection
          {
             mClientList[i]->ping = (U32) mClientList[i]->clientConnection->getRoundTripTime();
             if(mClientList[i]->ping > MaxPing || mClientList[i]->clientConnection->lostContact())
