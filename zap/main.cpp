@@ -60,7 +60,11 @@ XXX need to document timers, new luavec stuff XXX
 <li>Added support for PS3 joystick.
 <li>Tab-expansion when typing a /command has been much improved.
 <li>Added /pausebots and /stepbots commands, also mapped alt-] to /stepbots, and ctrl-] to /stepbots 10
+<li>Added /addbot, /addbots, /kickbot, /kickbots commands
+<li>Added /mute to mute a noisy player
+<li>Added /gmute to globally mute a noisy player (Admins only)
 <li>Increased rendering speed for most game objects
+<li>Improved edge rendering for barriers in-game and in the editor
 <li>Vastly improved performance for auto-generated bot nav zones
 <li>Bot nav zones now auto generated for all levels at load time; no further need to manually create zones; manual zone creation will be removed in future version
 <li>PolyWall item added to editor -- works just like a wall, but is edited like a loadout zone or other polygon item.  Note that this replaces the undocumented item "BarrierMakerS" which is now deprecated.
@@ -69,9 +73,14 @@ XXX need to document timers, new luavec stuff XXX
 <li>Engineer disabled by default
 <li>Game statistics are kept in a local SQLite database
 <li>Robots are smarter now; they avoid running into walls, turrets, and forcefield projectors less
+<li>Robots can use teleporters now
 <li>Robots paths are cached - can speed up performance on large maps with many bots
+<li>Primordial voting system added; disabled by default; will improve upon it in the future
+<li>Add level option to allow soccer ball pickup
+<li>S_bot is the default robot when adding a robot
+<li>Admins can upload local .level files to a server
 </ul>
-<h2>Bug fixes</h2>
+<h2>Bug Fixes</h2>
 <ul>
 <li>Fixed bug with crossing forcefields when using engineer module.
 <li>Fixed bug letting some players pick heat seeker when the weapon doesn't yet exist.
@@ -83,6 +92,11 @@ XXX need to document timers, new luavec stuff XXX
 <li>Fixed giant memory leak with editor and /showzones
 <li>Fix editor crash if all teams were deleted
 <li>Fix missing sound on some Intel sound chips
+<li>Fix missing sound when using /suspend
+<li>Linux joystick fixes
+<li>Fix CPU timing issues
+<li>Fix broken rating sort - teams should sort better at start of rounds now
+<li>Fix large scores being chopped off of the display
 </ul>
 */
 
