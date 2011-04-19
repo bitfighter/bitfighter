@@ -48,17 +48,12 @@ XXX need to document timers, new luavec stuff XXX
 */
 
 /* Fixes after 015
-<h4></h4>
+<h2>New Features and Enhancements</h2>
 <ul>
 <li>Players can now see cloaked teammates.
-<li>Fixed bug with crossing forcefields when using engineer module.
-<li>Fixed bug letting some players pick heat seeker when the weapon doesn't yet exist.
-<li>Fixed a possible server crash when client sends invalid weapon or module in loadout.
-<li>Fixed Robot:getReqLoadout that returns invalid third weapon.
 <li>Added Robot:dropItem()
 <li>Fixed selecting loadout that is same as ship after selecting new loadout, now avoids changing ships loadout when cancelled.
 <li>Can now choose one of multiple joysticks. If there is no joystick, then you cannot change input from keyboard to joystick.
-<li>Can add or remove joysticks while in the options menu; no longer requires restart.
 <li>New levels have engineer enabled by default.
 <li>Indicator now shows which team possesses the flag in CTF, ZC, and rabbit in team mode.
 <li>Rabbit and Nexus no longer always spawn with current loadout where there is loadout zone.
@@ -68,15 +63,26 @@ XXX need to document timers, new luavec stuff XXX
 <li>Increased rendering speed for most game objects
 <li>Vastly improved performance for auto-generated bot nav zones
 <li>Bot nav zones now auto generated for all levels at load time; no further need to manually create zones; manual zone creation will be removed in future version
-<li>Some minor adjustment to SpeedZone to avoid any possibility to get through one way SpeedZone path, reduce lag while using SpeedZone.
-<li>Fix problem where kicking a player will lag, delay disconnect other players at the same IP address or same computer.
 <li>PolyWall item added to editor -- works just like a wall, but is edited like a loadout zone or other polygon item.  Note that this replaces the undocumented item "BarrierMakerS" which is now deprecated.
 <li>Chat/Command box now in lower-left of screen.  Chats now appear immediatly above it.
 <li>Multi-line chat in game lobby
 <li>Engineer disabled by default
+<li>Game statistics are kept in a local SQLite database
+<li>Robots are smarter now; they avoid running into walls, turrets, and forcefield projectors less
+<li>Robots paths are cached - can speed up performance on large maps with many bots
 </ul>
-<h4>New Features</h4>
+<h2>Bug fixes</h2>
 <ul>
+<li>Fixed bug with crossing forcefields when using engineer module.
+<li>Fixed bug letting some players pick heat seeker when the weapon doesn't yet exist.
+<li>Fixed a possible server crash when client sends invalid weapon or module in loadout.
+<li>Fixed Robot:getReqLoadout that returns invalid third weapon.
+<li>Fix problem where kicking a player will lag, delay disconnect other players at the same IP address or same computer.
+<li>Some minor adjustment to SpeedZone to avoid any possibility to get through one way SpeedZone path, reduce lag while using SpeedZone.
+<li>Can add or remove joysticks while in the options menu; no longer requires restart.
+<li>Fixed giant memory leak with editor and /showzones
+<li>Fix editor crash if all teams were deleted
+<li>Fix missing sound on some Intel sound chips
 </ul>
 */
 
