@@ -389,7 +389,7 @@ bool ServerGame::voteStart(GameConnection *client, S32 type, S32 number)
    if(VoteTimer == 0)
       return false;
 
-   if(VoteTimer != 0)
+   if(mVoteTimer != 0)
    {
       client->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "Can't start vote when there is pending vote.");
       return true;
