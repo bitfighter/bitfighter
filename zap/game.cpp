@@ -380,14 +380,16 @@ bool ServerGame::voteStart(GameConnection *client, S32 type, S32 number)
 {
    if(!gIniSettings.voteEnable)
       return false;
+
+   U32 VoteTimer;
    if(type == 4) // change team
-      mVoteTimer = gIniSettings.voteLengthToChangeTeam * 1000;
+      VoteTimer = gIniSettings.voteLengthToChangeTeam * 1000;
    else
-      mVoteTimer = gIniSettings.voteLength * 1000;
-   if(mVoteTimer == 0)
+      VoteTimer = gIniSettings.voteLength * 1000;
+   if(VoteTimer == 0)
       return false;
 
-   if(gServerGame->mVoteTimer != 0)
+   if(VoteTimer != 0)
    {
       client->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "Can't start vote when there is pending vote.");
       return true;
@@ -402,6 +404,7 @@ bool ServerGame::voteStart(GameConnection *client, S32 type, S32 number)
       client->s2cDisplayMessageESI(GameConnection::ColorRed, SFXNone, "Can't start vote, try again %i0 seconds later.", e, s, i);
       return true;
    }
+   mVoteTimer = VoteTimer;
    mVoteType = type;
    mVoteNumber = number;
    mVoteClientName = client->getClientName();
