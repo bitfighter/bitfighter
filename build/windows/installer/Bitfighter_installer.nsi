@@ -1,5 +1,5 @@
 # Script grabs version number from game.h
-!searchparse /file "../zap/version.h" `ZAP_GAME_RELEASE "` versionNumber `"`
+!searchparse /file "../../../zap/version.h" `ZAP_GAME_RELEASE "` versionNumber `"`
 !define curVersion "${versionNumber}"  
 ;--------------------------------
 ; Include Modern UI
@@ -177,7 +177,7 @@ FunctionEnd
 ; Pages
 
    !insertmacro MUI_PAGE_WELCOME
-   !insertmacro MUI_PAGE_LICENSE "End-User License.txt"
+   !insertmacro MUI_PAGE_LICENSE "..\..\..\End-User License.txt"
    !insertmacro MUI_PAGE_DIRECTORY
    !insertmacro MUI_PAGE_INSTFILES
    !insertmacro MUI_PAGE_FINISH		
@@ -196,36 +196,36 @@ FunctionEnd
 Section "Install"
 
   SetOutPath "$INSTDIR"
-  File ..\exe\Bitfighter.exe
+  File "..\..\..\exe\Bitfighter.exe"
   
   CreateShortCut "$INSTDIR\Play Bitfighter.lnk" "$INSTDIR\Bitfighter.exe" "-rootdatadir $\"$DOCUMENTS\Bitfighter$\""
 
-  File ".\Windows specific\OpenAL32.dll"     
-  File ".\Windows specific\glut32.dll"
+  File "..\..\..\lib\OpenAL32.dll"     
+  File "..\..\..\lib\glut32.dll"
 
-  File "readme.txt"
-  File "End-User License.txt"
-  File ".\Windows specific\twoplayers.bat"
+  File "..\..\..\doc\readme.txt"
+  File "..\..\..\End-User License.txt"
+  File ".\twoplayers.bat"
   
   SetOutPath "$INSTDIR\scripts"
-  File /r "..\exe\scripts\*.lua"
+  File /r "..\..\..\resource\scripts\*.lua"
   
   SetOutPath "$INSTDIR\updater"
-  File /r "..\exe\updater\bfup.exe"
-  File /r "..\exe\updater\bfup.xml"
-  File /r "..\exe\updater\libcurl.dll"
-  File /r "..\exe\updater\License.txt"
-  File /r "..\exe\updater\readme.txt"
+  File /r ".\updater\bfup.exe"
+  File /r ".\updater\bfup.xml"
+  File /r ".\updater\libcurl.dll"
+  File /r ".\updater\License.txt"
+  File /r ".\updater\readme.txt"
 
   SetOutPath "$INSTDIR\sfx"
-  File /r ".\sfx\*.wav"
+  File /r "..\..\..\resource\sfx\*.wav"
 
   SetOutPath "$DOCUMENTS\Bitfighter\levels"
-  File /r ".\levels\*.level"  
-  File /r ".\levels\*.levelgen"
+  File /r "..\..\..\resource\levels\*.level"  
+  File /r "..\..\..\resource\levels\*.levelgen"
 
   SetOutPath "$DOCUMENTS\Bitfighter\robots"
-  File /r ".\robots\*.bot" 
+  File /r "..\..\..\resource\robots\*.bot" 
 
   
   ;Insert datadir path into twoplayers.bat
