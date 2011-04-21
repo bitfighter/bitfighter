@@ -68,7 +68,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>../glut;</AdditionalLibraryDirectories>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>../Debug/libtomcrypt.lib;../Debug/tnl.lib;../Debug/lua-vec.lib;../openal/ALut.lib;../openal/OpenAL32.lib;dinput8.lib;dsound.lib;dxguid.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>../Debug/libtomcrypt.lib;../Debug/tnl.lib;../Debug/lua-vec.lib;../lib/ALut.lib;../lib/OpenAL32.lib;dinput8.lib;dsound.lib;dxguid.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>MSVCRTD.lib;msvcprtd.lib</IgnoreSpecificDefaultLibraries>
     </Link>
     <ProjectReference>
@@ -93,7 +93,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>../glut;</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>MSVCRT.lib;msvcprt.lib</IgnoreSpecificDefaultLibraries>
-      <AdditionalDependencies>../Release/libtomcrypt.lib;../Release/tnl.lib;../Release/lua-vec.lib;../openal/ALut.lib;../openal/OpenAL32.lib;dinput8.lib;dsound.lib;dxguid.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>../Release/libtomcrypt.lib;../Release/tnl.lib;../Release/lua-vec.lib;../lib/ALut.lib;../lib/OpenAL32.lib;dinput8.lib;dsound.lib;dxguid.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
     </Link>
   </ItemDefinitionGroup>

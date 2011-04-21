@@ -134,7 +134,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="../openal/alut.lib wsock32.lib ../glut/glut32.lib ../lib/tnl.lib ../lib/libtomcrypt.lib Ws2_32.lib"
+				AdditionalDependencies="../lib/alut.lib wsock32.lib ../lib/glut32.lib ../lib/tnl.lib ../lib/libtomcrypt.lib Ws2_32.lib"
 				AdditionalLibraryDirectories="../libtomcrypt/release;../tnl;../lib"
 				IgnoreDefaultLibraryNames="MSVCRTD.lib;msvcprtd.lib;MSVCRT.lib;msvcprt.lib;libcmtd.lib"
 				GenerateDebugInformation="true"
