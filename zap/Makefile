@@ -156,6 +156,7 @@ debug: bitfighter
 release: DEBUG=
 release: bitfighter
 
+dedicated: DEBUG=
 dedicated: CFLAGS=-DZAP_DEDICATED 
 dedicated: LFLAGS=-lstdc++ -lm -ldl
 dedicated: GLUT=
