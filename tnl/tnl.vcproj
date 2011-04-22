@@ -50,9 +50,7 @@
 				RuntimeTypeInfo="true"
 				UsePrecompiledHeader="0"
 				PrecompiledHeaderFile=""
-				AssemblerListingLocation=".\Debug/"
-				ObjectFile="c:\temp\tnl_debug_obj\"
-				ProgramDataBaseFileName="c:\temp\tnl_debug\"
+				AssemblerListingLocation="$(IntDir)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="4"
@@ -127,9 +125,7 @@
 				RuntimeTypeInfo="true"
 				UsePrecompiledHeader="0"
 				PrecompiledHeaderFile=".\Release/tnl.pch"
-				AssemblerListingLocation=".\Release/"
-				ObjectFile="c:\temp\tnl_release_obj\"
-				ProgramDataBaseFileName="c:\temp\tnl_release\"
+				AssemblerListingLocation="$(IntDir)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="3"
@@ -521,10 +517,4 @@
 			>
 		</File>
 	</Files>
-	<Globals>
-		<Global
-			Name="RESOURCE_FILE"
-			Value="\home\tnl\test\test.rc"
-		/>
-	</Globals>
 </VisualStudioProject>

@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="libtomcrypt"
-	ProjectGUID="{3F7F7B79-4473-4CAB-A54E-4274A9F1A01A}"
-	RootNamespace="libtomcrypt"
+	Name="mysql++"
+	ProjectGUID="{59304CAA-A3FD-43B2-8EC6-EB08A5841947}"
+	RootNamespace="mysql++"
 	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
@@ -17,8 +17,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="c:\temp\libtomcrypt_Debug"
-			IntermediateDirectory="c:\temp\libtomcrypt_Debug"
+			OutputDirectory="c:\temp\mysqlpp_Debug"
+			IntermediateDirectory="c:\temp\mysqlpp_Debug"
 			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
@@ -43,8 +43,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="."
-				PreprocessorDefinitions="TNL_ENABLE_LOGGING;TNL_DEBUG;WIN32;_DEBUG;_LIB;"
+				AdditionalIncludeDirectories="&quot;C:\Program Files\MySQL\MySQL Server 5.1\include&quot;"
+				PreprocessorDefinitions="TNL_ENABLE_LOGGING;TNL_DEBUG;WIN32;_DEBUG;_LIB;MYSQLPP_NO_DLL;"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				RuntimeTypeInfo="true"
@@ -68,7 +68,9 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\lib\libtomcryptd.lib"
+				AdditionalDependencies="libmysql.lib"
+				OutputFile="..\lib\mysqlppd.lib"
+				AdditionalLibraryDirectories="&quot;C:\Program Files\MySQL\MySQL Server 5.1\lib\opt&quot;"
 				SuppressStartupBanner="true"
 			/>
 			<Tool
@@ -89,8 +91,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="c:\temp\libtomcrypt_Release"
-			IntermediateDirectory="c:\temp\libtomcrypt_Release"
+			OutputDirectory="c:\temp\mysqlpp_Release"
+			IntermediateDirectory="c:\temp\mysqlpp_Release"
 			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
@@ -116,10 +118,10 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="."
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
+				AdditionalIncludeDirectories="&quot;C:\Program Files\MySQL\MySQL Server 5.1\include&quot;"
+				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;MYSQLPP_NO_DLL"
 				StringPooling="true"
-				ExceptionHandling="0"
+				ExceptionHandling="1"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				RuntimeTypeInfo="true"
@@ -143,7 +145,9 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\lib\libtomcrypt.lib"
+				AdditionalDependencies="libmysql.lib"
+				OutputFile="..\lib\mysqlpp.lib"
+				AdditionalLibraryDirectories="&quot;C:\Program Files\MySQL\MySQL Server 5.1\lib\opt&quot;"
 				SuppressStartupBanner="true"
 			/>
 			<Tool
@@ -167,251 +171,123 @@
 	</References>
 	<Files>
 		<File
-			RelativePath=".\aes.c"
+			RelativePath=".\beemutex.cpp"
 			>
 		</File>
 		<File
-			RelativePath=".\base64.c"
+			RelativePath=".\cmdline.cpp"
 			>
 		</File>
 		<File
-			RelativePath=".\bits.c"
+			RelativePath=".\connection.cpp"
 			>
 		</File>
 		<File
-			RelativePath=".\blowfish.c"
+			RelativePath=".\cpool.cpp"
 			>
 		</File>
 		<File
-			RelativePath=".\cast5.c"
+			RelativePath=".\datetime.cpp"
 			>
 		</File>
 		<File
-			RelativePath=".\cbc.c"
+			RelativePath=".\dbdriver.cpp"
 			>
 		</File>
 		<File
-			RelativePath=".\cfb.c"
+			RelativePath=".\field_names.cpp"
 			>
 		</File>
 		<File
-			RelativePath=".\crypt.c"
+			RelativePath=".\field_types.cpp"
 			>
 		</File>
 		<File
-			RelativePath=".\ctr.c"
+			RelativePath=".\manip.cpp"
 			>
 		</File>
 		<File
-			RelativePath=".\des.c"
+			RelativePath=".\myset.cpp"
 			>
 		</File>
 		<File
-			RelativePath=".\dh.c"
+			RelativePath=".\mysql++.cpp"
 			>
 		</File>
 		<File
-			RelativePath=".\dsa.c"
+			RelativePath=".\mystring.cpp"
 			>
 		</File>
 		<File
-			RelativePath=".\ecb.c"
+			RelativePath=".\null.cpp"
 			>
 		</File>
 		<File
-			RelativePath=".\ecc.c"
+			RelativePath=".\options.cpp"
 			>
 		</File>
 		<File
-			RelativePath=".\gf.c"
+			RelativePath=".\qparms.cpp"
 			>
 		</File>
 		<File
-			RelativePath=".\hash.c"
+			RelativePath=".\query.cpp"
 			>
 		</File>
 		<File
-			RelativePath=".\hmac.c"
+			RelativePath=".\result.cpp"
 			>
 		</File>
 		<File
-			RelativePath=".\keyring.c"
+			RelativePath=".\row.cpp"
 			>
 		</File>
 		<File
-			RelativePath=".\md2.c"
+			RelativePath=".\scopedconnection.cpp"
 			>
 		</File>
 		<File
-			RelativePath=".\md4.c"
+			RelativePath=".\sql_buffer.cpp"
 			>
 		</File>
 		<File
-			RelativePath=".\md5.c"
+			RelativePath=".\sqlstream.cpp"
 			>
 		</File>
 		<File
-			RelativePath=".\mem.c"
+			RelativePath=".\ssqls2.cpp"
 			>
 		</File>
 		<File
-			RelativePath=".\mpi.c"
+			RelativePath=".\stadapter.cpp"
 			>
 		</File>
 		<File
-			RelativePath=".\mycrypt.h"
+			RelativePath=".\tcp_connection.cpp"
 			>
 		</File>
 		<File
-			RelativePath=".\mycrypt_argchk.h"
+			RelativePath=".\transaction.cpp"
 			>
 		</File>
 		<File
-			RelativePath=".\mycrypt_cfg.h"
+			RelativePath=".\type_info.cpp"
 			>
 		</File>
 		<File
-			RelativePath=".\mycrypt_cipher.h"
+			RelativePath=".\uds_connection.cpp"
 			>
 		</File>
 		<File
-			RelativePath=".\mycrypt_custom.h"
+			RelativePath=".\utility.cpp"
 			>
 		</File>
 		<File
-			RelativePath=".\mycrypt_gf.h"
+			RelativePath=".\vallist.cpp"
 			>
 		</File>
 		<File
-			RelativePath=".\mycrypt_hash.h"
-			>
-		</File>
-		<File
-			RelativePath=".\mycrypt_kr.h"
-			>
-		</File>
-		<File
-			RelativePath=".\mycrypt_macros.h"
-			>
-		</File>
-		<File
-			RelativePath=".\mycrypt_misc.h"
-			>
-		</File>
-		<File
-			RelativePath=".\mycrypt_pk.h"
-			>
-		</File>
-		<File
-			RelativePath=".\mycrypt_prng.h"
-			>
-		</File>
-		<File
-			RelativePath=".\noekeon.c"
-			>
-		</File>
-		<File
-			RelativePath=".\ofb.c"
-			>
-		</File>
-		<File
-			RelativePath=".\omac.c"
-			>
-		</File>
-		<File
-			RelativePath=".\packet.c"
-			>
-		</File>
-		<File
-			RelativePath=".\prime.c"
-			>
-		</File>
-		<File
-			RelativePath=".\rc2.c"
-			>
-		</File>
-		<File
-			RelativePath=".\rc4.c"
-			>
-		</File>
-		<File
-			RelativePath=".\rc5.c"
-			>
-		</File>
-		<File
-			RelativePath=".\rc6.c"
-			>
-		</File>
-		<File
-			RelativePath=".\rmd128.c"
-			>
-		</File>
-		<File
-			RelativePath=".\rmd160.c"
-			>
-		</File>
-		<File
-			RelativePath=".\rsa.c"
-			>
-		</File>
-		<File
-			RelativePath=".\safer+.c"
-			>
-		</File>
-		<File
-			RelativePath=".\safer.c"
-			>
-		</File>
-		<File
-			RelativePath=".\safer_tab.c"
-			>
-		</File>
-		<File
-			RelativePath=".\sha1.c"
-			>
-		</File>
-		<File
-			RelativePath=".\sha256.c"
-			>
-		</File>
-		<File
-			RelativePath=".\sha512.c"
-			>
-		</File>
-		<File
-			RelativePath=".\skipjack.c"
-			>
-		</File>
-		<File
-			RelativePath=".\sprng.c"
-			>
-		</File>
-		<File
-			RelativePath=".\strings.c"
-			>
-		</File>
-		<File
-			RelativePath=".\tiger.c"
-			>
-		</File>
-		<File
-			RelativePath=".\tommath.h"
-			>
-		</File>
-		<File
-			RelativePath=".\twofish.c"
-			>
-		</File>
-		<File
-			RelativePath=".\twofish_tab.c"
-			>
-		</File>
-		<File
-			RelativePath=".\xtea.c"
-			>
-		</File>
-		<File
-			RelativePath=".\yarrow.c"
+			RelativePath=".\wnp_connection.cpp"
 			>
 		</File>
 	</Files>

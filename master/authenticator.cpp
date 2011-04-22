@@ -22,6 +22,8 @@ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWIS
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#ifdef VERIFY_PHPBB3
+
 #include "authenticator.h"
 #include "phpbbhash.h"
 #include "../zap/stringUtils.h"     // For replaceString()
@@ -149,3 +151,4 @@ bool Authenticator::isSqlSafe(string s){
 			return true;
 	}
 }
+#endif
