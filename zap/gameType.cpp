@@ -2848,7 +2848,7 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
       else if(!clientRef->clientConnection->isLevelChanger())
          clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Need level change permissions to add a bot");
 
-      else if(Robot::robots.size() >= gIniSettings.maxBots)
+      else if((Robot::robots.size() >= gIniSettings.maxBots && !clientRef->clientConnection->isAdmin()) || Robot::robots.size() >= 256)
          clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Can't add more bots -- this server is full");
 
       else if(args.size() >= 2 && !safeFilename(args[1].getString()))

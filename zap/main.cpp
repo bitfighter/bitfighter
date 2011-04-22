@@ -1978,6 +1978,10 @@ void checkIfThisIsAnUpdate()
    // 015a
    if(gIniSettings.version < 1836)
       gIniSettings.useLineSmoothing = true;
+
+   // after 015a
+   if(gIniSettings.version < 1840 && gIniSettings.maxBots == 127)
+      gIniSettings.maxBots = 10;
 }
 
 

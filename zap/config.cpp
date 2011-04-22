@@ -83,7 +83,7 @@ void IniSettings::init()
    hostname = "Bitfighter host";      // Default host name
    hostdescr = "";
    maxPlayers = 127;
-   maxBots = 127;
+   maxBots = 10;
    serverPassword = "";               // Passwords empty by default
    adminPassword = "";
    levelChangePassword = "";
