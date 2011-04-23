@@ -1173,7 +1173,7 @@ LevelInfo getLevelInfo(char *level, S32 size)
 {
    S32 cur = 0;
    S32 startingCur = 0;
-   const char *gametypeName;
+   //const char *gametypeName;
    string levelName;
    LevelInfo levelInfo;
    levelInfo.levelType = "?";

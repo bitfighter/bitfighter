@@ -44,6 +44,8 @@
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(IncludePath);../win_include_do_not_distribute</IncludePath>
     <LibraryPath>$(LibraryPath);../win_include_do_not_distribute</LibraryPath>
+    <CustomBuildAfterTargets>
+    </CustomBuildAfterTargets>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>true</LinkIncremental>
@@ -51,6 +53,8 @@
     <TargetName>bitfighter</TargetName>
     <IncludePath>$(IncludePath);../win_include_do_not_distribute</IncludePath>
     <LibraryPath>$(LibraryPath);../win_include_do_not_distribute</LibraryPath>
+    <CustomBuildAfterTargets>
+    </CustomBuildAfterTargets>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -66,7 +70,7 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>../glut;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../lib;</AdditionalLibraryDirectories>
       <SubSystem>Console</SubSystem>
       <AdditionalDependencies>../Debug/libtomcrypt.lib;../Debug/tnl.lib;../Debug/lua-vec.lib;../lib/ALut.lib;../lib/OpenAL32.lib;dinput8.lib;dsound.lib;dxguid.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>MSVCRTD.lib;msvcprtd.lib</IgnoreSpecificDefaultLibraries>
@@ -74,6 +78,20 @@
     <ProjectReference>
       <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
     </ProjectReference>
+    <CustomBuildStep>
+      <Command>
+      </Command>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Message>
+      </Message>
+    </CustomBuildStep>
+    <PostBuildEvent>
+      <Command>xcopy /e /y $(SolutionDir)resource\* $(ProjectDir)$(OutDir) &amp;&amp; copy $(SolutionDir)lib\*.dll $(ProjectDir)$(OutDir)</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copy resources to exe folder</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -91,11 +109,23 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>../glut;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../lib;</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>MSVCRT.lib;msvcprt.lib</IgnoreSpecificDefaultLibraries>
       <AdditionalDependencies>../Release/libtomcrypt.lib;../Release/tnl.lib;../Release/lua-vec.lib;../lib/ALut.lib;../lib/OpenAL32.lib;dinput8.lib;dsound.lib;dxguid.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
     </Link>
+    <CustomBuildStep>
+      <Command>
+      </Command>
+      <Message>
+      </Message>
+    </CustomBuildStep>
+    <PostBuildEvent>
+      <Command>xcopy /e /y $(SolutionDir)resource\* $(ProjectDir)$(OutDir) &amp;&amp; copy $(SolutionDir)\lib\*.dll $(ProjectDir)$(OutDir)</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copy resources to exe folder</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\clipper\clipper.cpp" />
@@ -159,9 +189,9 @@
     <ClCompile Include="..\zap\playerInfo.cpp" />
     <ClCompile Include="..\zap\polygon.cpp" />
     <ClCompile Include="..\zap\projectile.cpp" />
-    <ClInclude Include="..\zap\Point.cpp" />
-    <ClInclude Include="..\zap\Rect.cpp" />
-    <ClInclude Include="..\zap\Color.cpp" />
+    <ClCompile Include="..\zap\Point.cpp" />
+    <ClCompile Include="..\zap\Rect.cpp" />
+    <ClCompile Include="..\zap\Color.cpp" />
     <ClCompile Include="quickChatHelper.cpp" />
     <ClCompile Include="..\zap\rabbitGame.cpp" />
     <ClCompile Include="..\zap\retrieveGame.cpp" />
