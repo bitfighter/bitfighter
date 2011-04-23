@@ -87,7 +87,7 @@
       </Message>
     </CustomBuildStep>
     <PostBuildEvent>
-      <Command>xcopy /e /y $(SolutionDir)resource\* $(ProjectDir)$(OutDir) &amp;&amp; copy $(SolutionDir)lib\*.dll $(ProjectDir)$(OutDir)</Command>
+      <Command>xcopy /e /d /y $(SolutionDir)resource\* $(ProjectDir)$(OutDir) &amp;&amp; xcopy /d /y $(SolutionDir)lib\*.dll $(ProjectDir)$(OutDir)</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copy resources to exe folder</Message>
@@ -121,7 +121,7 @@
       </Message>
     </CustomBuildStep>
     <PostBuildEvent>
-      <Command>xcopy /e /y $(SolutionDir)resource\* $(ProjectDir)$(OutDir) &amp;&amp; copy $(SolutionDir)\lib\*.dll $(ProjectDir)$(OutDir)</Command>
+      <Command>xcopy /e /d /y $(SolutionDir)resource\* $(ProjectDir)$(OutDir) &amp;&amp; xcopy /d /y $(SolutionDir)lib\*.dll $(ProjectDir)$(OutDir)</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copy resources to exe folder</Message>
