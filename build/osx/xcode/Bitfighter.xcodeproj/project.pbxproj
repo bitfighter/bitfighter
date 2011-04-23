@@ -634,11 +634,10 @@
 		737C80F9135CC67500FF5282 /* Rect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Rect.h; path = ../../../zap/Rect.h; sourceTree = SOURCE_ROOT; };
 		737C8110135CCD7300FF5282 /* version.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = version.h; path = ../../../zap/version.h; sourceTree = SOURCE_ROOT; };
 		737CE312129048B900D732B7 /* libtomcrypt-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "libtomcrypt-Info.plist"; sourceTree = "<group>"; };
-		737CE3F412904D5300D732B7 /* robots */ = {isa = PBXFileReference; lastKnownFileType = folder; name = robots; path = ../../../installer/robots; sourceTree = SOURCE_ROOT; };
-		737CE3FC12904D5300D732B7 /* scripts */ = {isa = PBXFileReference; lastKnownFileType = folder; name = scripts; path = ../../../exe/scripts; sourceTree = SOURCE_ROOT; };
-		737CE40712904D7D00D732B7 /* levels */ = {isa = PBXFileReference; lastKnownFileType = folder; name = levels; path = ../../../installer/levels; sourceTree = SOURCE_ROOT; };
-		737CE41F12904D7D00D732B7 /* screenshots */ = {isa = PBXFileReference; lastKnownFileType = folder; name = screenshots; path = ../../../installer/screenshots; sourceTree = SOURCE_ROOT; };
-		737CE42212904D7D00D732B7 /* sfx */ = {isa = PBXFileReference; lastKnownFileType = folder; name = sfx; path = ../../../installer/sfx; sourceTree = SOURCE_ROOT; };
+		737CE3F412904D5300D732B7 /* robots */ = {isa = PBXFileReference; lastKnownFileType = folder; name = robots; path = ../../../resource/robots; sourceTree = SOURCE_ROOT; };
+		737CE3FC12904D5300D732B7 /* scripts */ = {isa = PBXFileReference; lastKnownFileType = folder; name = scripts; path = ../../../resource/scripts; sourceTree = SOURCE_ROOT; };
+		737CE40712904D7D00D732B7 /* levels */ = {isa = PBXFileReference; lastKnownFileType = folder; name = levels; path = ../../../resource/levels; sourceTree = SOURCE_ROOT; };
+		737CE42212904D7D00D732B7 /* sfx */ = {isa = PBXFileReference; lastKnownFileType = folder; name = sfx; path = ../../../resource/sfx; sourceTree = SOURCE_ROOT; };
 		737CE46C12904E9E00D732B7 /* libtomcrypt.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = libtomcrypt.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		737CE61D1290553D00D732B7 /* tnl.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = tnl.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		737CE61E1290553D00D732B7 /* tnl-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "tnl-Info.plist"; sourceTree = "<group>"; };
@@ -965,8 +964,8 @@
 		73D2F52012E2DA1700EA5EBE /* twofish.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = twofish.c; path = ../../../libtomcrypt/twofish.c; sourceTree = SOURCE_ROOT; };
 		73D2F52112E2DA1700EA5EBE /* xtea.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = xtea.c; path = ../../../libtomcrypt/xtea.c; sourceTree = SOURCE_ROOT; };
 		73D2F52212E2DA1700EA5EBE /* yarrow.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = yarrow.c; path = ../../../libtomcrypt/yarrow.c; sourceTree = SOURCE_ROOT; };
-		73D2F60212E2E0A500EA5EBE /* FreeALUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FreeALUT.framework; path = ../../../openal/FreeALUT.framework; sourceTree = SOURCE_ROOT; };
-		73D2F60412E2E0A600EA5EBE /* OpenAL-Soft.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = "OpenAL-Soft.framework"; path = "../../../openal/OpenAL-Soft.framework"; sourceTree = SOURCE_ROOT; };
+		73D2F60212E2E0A500EA5EBE /* FreeALUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FreeALUT.framework; path = ../../../lib/FreeALUT.framework; sourceTree = SOURCE_ROOT; };
+		73D2F60412E2E0A600EA5EBE /* OpenAL-Soft.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = "OpenAL-Soft.framework"; path = "../../../lib/OpenAL-Soft.framework"; sourceTree = SOURCE_ROOT; };
 		73D2F67B12E2E1D400EA5EBE /* lapi.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = lapi.c; path = "../../../lua/lua-vec/src/lapi.c"; sourceTree = SOURCE_ROOT; };
 		73D2F67C12E2E1D400EA5EBE /* lapi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = lapi.h; path = "../../../lua/lua-vec/src/lapi.h"; sourceTree = SOURCE_ROOT; };
 		73D2F67D12E2E1D400EA5EBE /* lauxlib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = lauxlib.c; path = "../../../lua/lua-vec/src/lauxlib.c"; sourceTree = SOURCE_ROOT; };
@@ -1174,7 +1173,6 @@
 				737CE312129048B900D732B7 /* libtomcrypt-Info.plist */,
 				737CE61E1290553D00D732B7 /* tnl-Info.plist */,
 				737CE40712904D7D00D732B7 /* levels */,
-				737CE41F12904D7D00D732B7 /* screenshots */,
 				737CE42212904D7D00D732B7 /* sfx */,
 				737CE3F412904D5300D732B7 /* robots */,
 				737CE3FC12904D5300D732B7 /* scripts */,
@@ -2646,8 +2644,7 @@
 				COPY_PHASE_STRIP = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					../../../openal,
-					"\"$(SRCROOT)/../../../openal\"",
+					"\"$(SRCROOT)/../../../lib\"",
 					"\"$(SRCROOT)/../tools\"",
 				);
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -2675,8 +2672,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					../../../openal,
-					"\"$(SRCROOT)/../../../openal\"",
+					"\"$(SRCROOT)/../../../lib\"",
 					"\"$(SRCROOT)/../tools\"",
 				);
 				GCC_MODEL_TUNING = G5;
