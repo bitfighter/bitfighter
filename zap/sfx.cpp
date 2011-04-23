@@ -378,9 +378,9 @@ void SFXObject::queueBuffer(ByteBufferPtr p)
       alSourceQueueBuffers(source, 1, &buffer);
 
       ALint state;
-      alGetSourcei(mSourceIndex, AL_SOURCE_STATE, &state);
+      alGetSourcei(source, AL_SOURCE_STATE, &state);
       if(state == AL_STOPPED)
-         alSourcePlay(mSourceIndex);
+         alSourcePlay(source);
    }
    else
       play();
@@ -399,6 +399,8 @@ void SFXObject::playOnSource()
 
       ALuint buffer = gVoiceFreeBuffers.first();
       gVoiceFreeBuffers.pop_front();
+
+      alSourcei(source, AL_BUFFER, 0);  // seems to be required for linux and voice chat to work (press R)
 
       alBufferData(buffer, AL_FORMAT_MONO16, mInitialBuffer->getBuffer(),
             mInitialBuffer->getBufferSize(), 8000);
@@ -911,13 +913,33 @@ void SFXObject::stopRecording()
 namespace Zap
 {
 
+static U32 prevTimer;
+
 bool SFXObject::startRecording()
 {
-   return false;
+   return true;
 }
 
+// TODO: make it record from sound input for linux / mac
 void SFXObject::captureSamples(ByteBufferPtr buffer)
 {
+   U32 newTimer = Platform::getRealMilliseconds();
+   U32 speedTimer = newTimer - prevTimer;
+   if(speedTimer > 1000) speedTimer = 0;
+   prevTimer = newTimer;
+
+   // 8000 mhz, 16-bit, mono sound
+
+   U32 startSize = buffer->getBufferSize();
+   U32 endSize = startSize + speedTimer * 16;   //  8000.mhz * (16.bit / 8) / 1000
+
+   buffer->resize(endSize);
+   U8 *mem = buffer->getBuffer();
+   for(U32 i = startSize; i < endSize; i+= 2)
+   {
+      Random::read(&mem[i], 2);   // random sound
+   }
+
 }
 
 void SFXObject::stopRecording()
