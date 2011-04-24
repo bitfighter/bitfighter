@@ -57,8 +57,6 @@ protected:
       NextFreeMask = BIT(3),
    };
 
-   virtual void setObjectMask() = 0;   // Must be overridden by child classes
-
 public:
    EngineeredObject(S32 team = -1, Point anchorPoint = Point(), Point anchorNormal = Point());
    virtual bool processArguments(S32 argc, const char **argv);
@@ -156,7 +154,6 @@ class ForceFieldProjector : public EngineeredObject
 private:
    typedef EngineeredObject Parent;
    SafePtr<ForceField> mField;
-   void setObjectMask() { mObjectTypeMask = ForceFieldProjectorType | CommandMapVisType; }
 
 public:
    static const S32 defaultRespawnTime = 0;
@@ -207,7 +204,6 @@ private:
    typedef EngineeredObject Parent;
    Timer mFireTimer;
    F32 mCurrentAngle;
-   void setObjectMask() { mObjectTypeMask = TurretType | CommandMapVisType; }
 
 public:
    S32 mWeaponFireType;

@@ -91,7 +91,9 @@ public:
    void resize(U32 size);
    void insert(U32 index);
    void erase(U32 index);
+   void deleteAndErase(U32 index);
    void erase_fast(U32 index);
+   void deleteAndErase_fast(U32 index);
    void clear();
    void deleteAndClear();
 
@@ -163,11 +165,21 @@ template<class T> inline void Vector<T>::insert(U32 index)
    innerVector.insert(innerVector.begin() + index, 1, T());
 }
 
+
 template<class T> inline void Vector<T>::erase(U32 index)
 {
    TNLAssert(index < innerVector.size(), "index out of range");
    innerVector.erase(innerVector.begin() + index);
 }
+
+
+template<class T> inline void Vector<T>::deleteAndErase(U32 index)
+{
+   TNLAssert(index < innerVector.size(), "index out of range");
+   delete innerVector[index];
+   erase(index);
+}
+
 
 template<class T> inline void Vector<T>::erase_fast(U32 index)
 {
@@ -180,6 +192,18 @@ template<class T> inline void Vector<T>::erase_fast(U32 index)
       swap(innerVector[index], innerVector[innerVector.size() - 1]);
    innerVector.pop_back();
 }
+
+
+template<class T> inline void Vector<T>::deleteAndErase_fast(U32 index)
+{
+   TNLAssert(index < innerVector.size(), "index out of range");
+   // CAUTION: this operator does NOT maintain list order
+   // Copy the last element into the deleted 'hole' and decrement the
+   //   size of the vector.
+   delete innderVector[index];
+   erase_fast(index);
+}
+
 
 template<class T> inline T& Vector<T>::first()
 {

@@ -68,19 +68,6 @@ Vector<Point> SpeedZone::generatePoints(Point pos, Point dir)
 {
    Vector<Point> points;
 
-   //// Yes, we already did this if we came from processArguments,
-   //// but not if we came from elsewhere, like UIInstructions
-   //Point offset(dir - pos);
-   //offset.normalize();
-   //dir = Point(pos + offset * SpeedZone::height);
-
-   //Point perpendic(pos.y - dir.y, dir.x - pos.x);
-   //perpendic.normalize();
-
-   //points.push_back(pos + perpendic * SpeedZone::halfWidth);
-   //points.push_back(dir);
-   //points.push_back(pos - perpendic * SpeedZone::halfWidth);
-
    Point parallel(dir - pos);
    parallel.normalize();
 
@@ -113,6 +100,47 @@ void SpeedZone::render()
 {
    renderSpeedZone(mPolyBounds, gClientGame->getCurrentTime());
 }
+
+//void SpeedZone::renderEditor()
+// Special labeling for speedzones
+//if((mSelected && gEditorUserInterface.getEditingSpecialAttrItem() == NONE) || isBeingEdited)
+//{
+//   glColor((gEditorUserInterface.isEditingSpecialAttribute(EditorUserInterface::GoFastSnap)) ? white : inactiveSpecialAttributeColor);
+//   UserInterface::drawStringf_2pt(pos, dest, attrSize, 10, "Speed: %d", mSpeed);
+
+//   glColor((gEditorUserInterface.isEditingSpecialAttribute(EditorUserInterface::GoFastSpeed)) ? white : inactiveSpecialAttributeColor);
+//   UserInterface::drawStringf_2pt(pos, dest, attrSize, -2, "Snapping: %s", boolattr ? "On" : "Off");
+
+//   glColor(white);
+
+//   // TODO: This block should be moved to WorldItem
+//   const char *msg, *instr;
+
+//   if(gEditorUserInterface.isEditingSpecialAttribute(EditorUserInterface::NoAttribute))
+//   {
+//      msg = "[Enter] to edit speed";
+//      instr = "";
+//   }
+//   else if(gEditorUserInterface.isEditingSpecialAttribute(EditorUserInterface::GoFastSpeed))
+//   {
+//      msg = "[Enter] to edit snapping";
+//      instr = "Up/Dn to change speed";
+//   }
+//   else if(gEditorUserInterface.isEditingSpecialAttribute(EditorUserInterface::GoFastSnap))
+//   {
+//      msg = "[Enter] to stop editing";
+//      instr = "Up/Dn to toggle snapping";
+//   }
+//   else
+//   {
+//      msg = "???";
+//      instr = "???";
+//   }
+
+//   UserInterface::drawStringf_2pt(pos, dest, instrSize, -22, msg);
+//   UserInterface::drawStringf_2pt(pos, dest, instrSize, -22 - instrSize - 2, instr);
+//}
+
 
 
 // This object should be drawn above polygons

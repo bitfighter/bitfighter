@@ -44,6 +44,8 @@ private:
    typedef GameObject Parent;
    Vector<Point> mPolyBounds;
 
+   U16 mSpeed;             // Speed at which ship is propelled, defaults to defaultSpeed
+
    //struct Exclusion {
    //   Ship *ship;
    //   U32 time;
@@ -71,12 +73,14 @@ public:
    static const U16 maxSpeed = 5000;      // Max speed for the goFast
    static const U16 defaultSpeed = 2000;  // Default speed if none specified
 
+   U16 getSpeed() { return mSpeed; }
+
    F32 mRotateSpeed;
    U32 mUnpackInit;  // Some form of counter, to know that it is a rotating speed zone.
 
    Point pos;
    Point dir;
-   U16 mSpeed;             // Speed at which ship is propelled, defaults to defaultSpeed
+  
    bool mSnapLocation;     // If true, ship will be snapped to center of speedzone before being ejected
    
    SpeedZone();   // Constructor

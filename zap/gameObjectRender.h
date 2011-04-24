@@ -52,10 +52,10 @@ extern void drawFilledEllipse(const Point &pos, F32 width, F32 height, F32 angle
 extern void drawPolygon(const Point &pos, S32 sides, F32 radius, F32 angle);
 
 extern void glColor(const Color &c, float alpha = 1.0);
-extern void drawSquare(const Point &pos, S32 size, bool filled);
+extern void drawSquare(const Point &pos, F32 size, bool filled);
 extern void drawSquare(const Point &pos, S32 size);
 extern void drawSquare(const Point &pos, F32 size);
-extern void drawFilledSquare(const Point &pos, U32 size);
+extern void drawFilledSquare(const Point &pos, F32 size);
 extern void drawFilledSquare(const Point &pos, S32 size);
 extern void drawFilledSquare(const Point &pos, F32 size);
 extern void drawCircle(const Point &pos, F32 radius);
@@ -84,6 +84,7 @@ extern void renderFlag(F32 x, F32 y, const Color &flagColor);
 extern void renderFlag(const Point &pos, const Color &flagColor, const Color *mastColor, F32 alpha);
 extern void renderFlag(F32 x, F32 y, const Color &flagColor, const Color *mastColor, F32 alpha);
 
+extern void renderPointVector(const Vector<Point> &points, U32 geomType);
 
 //extern void renderFlag(Point pos, Color c, F32 timerFraction);
 extern void renderSmallFlag(const Point &pos, const Color &c, F32 parentAlpha);
@@ -155,7 +156,7 @@ void renderResourceItem(const Point &pos, F32 alpha = 1);
 void renderResourceItem(const Point &pos, F32 scaleFactor, const Color *color, F32 alpha);
 
 void renderSoccerBall(const Point &pos, F32 alpha = 1);
-void renderTextItem(const Point &pos, Point dir, U32 size, S32 team, string text);
+void renderTextItem(const Point &pos, const Point &dir, F32 size, const string &text, const Color &color);
 
 
 extern void renderForceFieldProjector(Point pos, Point normal);

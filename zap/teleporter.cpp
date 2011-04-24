@@ -239,6 +239,16 @@ void Teleporter::render()
    renderTeleporter(mPos, 0, true, mTime, r, TELEPORTER_RADIUS, 1.0, mDests, false);
 }
 
+// void Teleporter::renderEditor()
+//Teleporter render
+   //{
+   //   glColor(green);
+   //   glLineWidth(gLineWidth3);
+   //   drawPolygon(pos, 12, Teleporter::TELEPORTER_RADIUS, 0);
+   //   glLineWidth(gDefaultLineWidth);
+   //}
+
+
 // Lua methods
 
 const char Teleporter::className[] = "Teleporter";      // Class name as it appears to Lua scripts

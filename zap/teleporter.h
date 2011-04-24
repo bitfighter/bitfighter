@@ -25,8 +25,9 @@
 
 #include "gameConnection.h"
 #include "gameObject.h"
-#include "projectile.h"   // For LuaItem
+#include "projectile.h"    // For LuaItem
 #include "point.h"
+#include "UIEditor.h"      // For EditorObject 
 
 #include "tnlNetObject.h"
 
@@ -36,7 +37,7 @@ namespace Zap
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class Teleporter : public GameObject, public EditorObject, public LuaItem
+class Teleporter : public EditorObject, public LuaItem
 {
 public:
       enum {
@@ -73,7 +74,7 @@ public:
 
    void onAddedToGame(Game *theGame);
 
-   Teleporter findTeleporterAt(Point pos);      // Find a teleporter at pos
+   //Teleporter findTeleporterAt(Point pos);      // Find a teleporter at pos
 
    Vector<Point> mDests;   // need public for BotNavMeshZones
 

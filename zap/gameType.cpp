@@ -1781,11 +1781,12 @@ extern Color gNeutralTeamColor;
 extern Color gHostileTeamColor;
 
 // This method can be overridden by other game types that handle colors differently
+// TODO: Combine with EditorGame::getTeamColor
 Color GameType::getTeamColor(S32 team)
 {
-   if(team == -1 || team >= mTeams.size() || team < -2)
+   if(team == Item::TEAM_NEUTRAL || team >= mTeams.size() || team < Item::TEAM_HOSTILE)
       return gNeutralTeamColor;
-   else if(team == -2)
+   else if(team == Item::TEAM_HOSTILE)
       return gHostileTeamColor;
    else
       return mTeams[team].color;

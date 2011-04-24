@@ -371,15 +371,7 @@ void UserInterface::drawAngleString_fixed(F32 x, F32 y, F32 size, F32 angle, con
 }
 
 
-// Old, broken version
-void UserInterface::drawAngleStringf(F32 x, F32 y, F32 size, F32 angle, const char *format, ...)
-{
-   makeBuffer;
-   doDrawAngleString((S32) x, (S32) y, size, angle, buffer, false);
-}
-
-
-void UserInterface::drawAngleString(S32 x, S32 y, F32 size, F32 angle, const char *string)
+void UserInterface::drawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string)
 {
    doDrawAngleString(x, y, size, angle, string, false);
 }
@@ -391,7 +383,7 @@ void UserInterface::drawAngleString(S32 x, S32 y, U32 size, F32 angle, const cha
 }
 
 
-void UserInterface::doDrawAngleString(S32 x, S32 y, F32 size, F32 angle, const char *string, bool fix)
+void UserInterface::doDrawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string, bool fix)
 {
    F32 scaleFactor = size / 120.0f;
    glPushMatrix();
@@ -403,27 +395,11 @@ void UserInterface::doDrawAngleString(S32 x, S32 y, F32 size, F32 angle, const c
    glPopMatrix();
 }
 
-// Same but accepts F32 args
-void UserInterface::doDrawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string, bool fix)
+// Same but accepts S32 args
+void UserInterface::doDrawAngleString(S32 x, S32 y, F32 size, F32 angle, const char *string, bool fix)
 {
-   doDrawAngleString((S32) x, (S32) y, size, angle, string, fix);
+   doDrawAngleString(F32(x), F32(y), size, angle, string, fix);
 }
-
-
-//void UserInterface::drawAngleString(S32 x, S32 y, U32 size, F32 angle, const char *string)
-//{
-//   drawAngleString(x, y, (F32) size, angle, string);
-//}
-//
-//void UserInterface::drawAngleStringf(S32 x, S32 y, U32 size, F32 angle, const char *format, ...)
-//{
-//   va_list args;
-//   va_start(args, format);
-//   char buffer[2048];
-//
-//   dVsprintf(buffer, sizeof(buffer), format, args);
-//   drawAngleString(x, y, (F32) size, angle, buffer);
-//}
 
 
 void UserInterface::drawString(S32 x, S32 y, U32 size, const char *string)
@@ -482,10 +458,10 @@ S32 UserInterface::drawStringAndGetWidthf(F32 x, F32 y, U32 size, const char *fo
 }
 
 
-void UserInterface::drawStringc(F32 x, F32 y, U32 size, const char *string)
+void UserInterface::drawStringc(F32 x, F32 y, F32 size, const char *string)
 {
-   S32 len = getStringWidth(size, string);
-   drawAngleString((S32) x - len / 2, (S32) y, size, 0, string);
+   F32 len = getStringWidth(size, string);
+   drawAngleString(x - len / 2, y, size, 0, string);
 }
 
 

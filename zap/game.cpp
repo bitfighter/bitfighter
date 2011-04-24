@@ -49,6 +49,7 @@
 #include "UIGame.h"
 #include "UIMenus.h"
 #include "UINameEntry.h"
+#include "UIEditor.h"         // For EditorUserInterface def, needed by EditorGame stuff
 
 
 //#include "UIChat.h"
@@ -225,24 +226,6 @@ void Game::processDeleteList(U32 timeDelta)
    }
 }
 
-void Game::addToGameObjectList(GameObject *theObject)
-{
-   mGameObjects.push_back(theObject);
-}
-
-void Game::removeFromGameObjectList(GameObject *theObject)
-{
-   for(S32 i = 0; i < mGameObjects.size(); i++)
-   {
-      if(mGameObjects[i] == theObject)
-      {
-         mGameObjects.erase_fast(i);
-         return;
-      }
-   }
-   TNLAssert(0, "Object not in game's list!");
-}
-
 
 // Delete all objects of specified type
 void Game::deleteObjects(U32 typeMask)
@@ -319,14 +302,43 @@ Point Game::computePlayerVisArea(Ship *ship)
 }
 
 
-//-----------------------------------------------------------------------------------
-//-----------------------------------------------------------------------------------
+////////////////////////////////////////
+////////////////////////////////////////
+
+void GameGame::addToGameObjectList(XObject *xObject)
+{
+   GameObject *gameObject = dynamic_cast<GameObject *>(xObject);
+
+   TNLAssert(gameObject, "invalid cast!");
+
+   mGameObjects.push_back(gameObject);
+}
+
+void GameGame::removeFromGameObjectList(XObject *xObject)
+{
+   GameObject *gameObject = dynamic_cast<GameObject *>(xObject);
+
+   TNLAssert(gameObject, "invalid cast!");
+
+   for(S32 i = 0; i < mGameObjects.size(); i++)
+      if(mGameObjects[i] == gameObject)
+      {
+         mGameObjects.erase_fast(i);
+         return;
+      }
+
+   TNLAssert(0, "Object not in game's list!");
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 extern string gHostName;
 extern string gHostDescr;
 
 // Constructor
-ServerGame::ServerGame(const Address &theBindAddress, U32 maxPlayers, const char *hostName, bool testMode) : Game(theBindAddress)
+ServerGame::ServerGame(const Address &theBindAddress, U32 maxPlayers, const char *hostName, bool testMode) : GameGame(theBindAddress)
 {
    mVoteTimer = 0;
    mNextLevel = NEXT_LEVEL;
@@ -1247,7 +1259,7 @@ void ServerGame::gameEnded()
 
 
 // Constructor
-ClientGame::ClientGame(const Address &bindAddress) : Game(bindAddress)
+ClientGame::ClientGame(const Address &bindAddress) : GameGame(bindAddress)
 {
    mGameUserInterface = new GameUserInterface();
    mUserInterfaceData = new UserInterfaceData();
@@ -1499,6 +1511,17 @@ U32 ClientGame::getPlayerCount()
    }
 
    return players;
+}
+
+
+Color ClientGame::getTeamColor(S32 teamId)
+{
+   GameType *gameType = getGameType();
+
+   if(!gameType)
+      return Parent::getTeamColor(teamId);
+
+   return gameType->getTeamColor(teamId);
 }
 
 
@@ -1966,6 +1989,24 @@ void ClientGame::render()
       renderCommander();
    else
       renderNormal();
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+extern Color gNeutralTeamColor;
+extern Color gHostileTeamColor;
+
+// TODO: Combine with GameType::getTeamColor
+Color EditorGame::getTeamColor(S32 teamId)
+{
+   if(teamId == Item::TEAM_NEUTRAL)
+      return gNeutralTeamColor;
+   else if(teamId == Item::TEAM_HOSTILE)
+      return gHostileTeamColor;
+   else
+      return gEditorUserInterface.mTeams[teamId].color;     // TODO: Maintain teams on EditorGame object to avoid this call?
 }
 
 

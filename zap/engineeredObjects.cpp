@@ -266,8 +266,6 @@ EngineeredObject::EngineeredObject(S32 team, Point anchorPoint, Point anchorNorm
    mAnchorNormal = anchorNormal;
    mIsDestroyed = false;
    mHealRate = 0;
-
-   //setObjectMask();  // --> Moved to child classes for the moment, because there was a problem with inheritence.
 }
 
 
@@ -584,7 +582,7 @@ TNL_IMPLEMENT_NETOBJECT(ForceFieldProjector);
 ForceFieldProjector::ForceFieldProjector(S32 team, Point anchorPoint, Point anchorNormal) : EngineeredObject(team, anchorPoint, anchorNormal)
 {
    mNetFlags.set(Ghostable);
-   setObjectMask();
+   mObjectTypeMask = ForceFieldProjectorType | CommandMapVisType;
 }
 
 void ForceFieldProjector::onDisabled()
@@ -661,7 +659,7 @@ void ForceFieldProjector::onAddedToGame(Game *theGame)
 
 void ForceFieldProjector::render()
 {
-   renderForceFieldProjector(mAnchorPoint, mAnchorNormal, getGame()->getGameType()->getTeamColor(getTeam()), isEnabled());
+   renderForceFieldProjector(mAnchorPoint, mAnchorNormal, getGame()->getTeamColor(getTeam()), isEnabled());
 }
 
 // Lua methods
@@ -856,7 +854,7 @@ bool ForceField::getCollisionPoly(Vector<Point> &points)
 
 void ForceField::render()
 {
-   Color c = getGame()->getGameType()->getTeamColor(mTeam);
+   Color c = getGame()->getTeamColor(mTeam);
    renderForceField(mStart, mEnd, c, mFieldUp);
 }
 
@@ -868,7 +866,7 @@ Turret::Turret(S32 team, Point anchorPoint, Point anchorNormal) : EngineeredObje
 {
    mWeaponFireType = WeaponTurret;
    mNetFlags.set(Ghostable);
-   setObjectMask();
+   mObjectTypeMask = TurretType | CommandMapVisType;
    mCurrentAngle = mAnchorNormal.ATAN2();
 }
 
@@ -1002,7 +1000,7 @@ void Turret::idle(IdleCallPath path)
    {
       if(fillVector[i]->getObjectTypeMask() & ( ShipType | RobotType))
       {
-         Ship *potential = (Ship*)fillVector[i];
+         Ship *potential = dynamic_cast<Ship *>(fillVector[i]);
 
          // Is it dead or cloaked?  Carrying objects makes ship visible, except in nexus game
          TNLAssert(gServerGame->getGameType(), "Bad GameType!");

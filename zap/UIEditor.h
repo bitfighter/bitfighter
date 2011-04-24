@@ -30,6 +30,7 @@
 #include "gameLoader.h"
 #include "gameObject.h"          // For EditorObject definition
 #include "gridDB.h"              // For DatabaseObject definition
+#include "gameObject.h"          // For EditorObject definition
 #include "timer.h"
 #include "point.h"
 #include "BotNavMeshZone.h"      // For Border definition
@@ -101,70 +102,294 @@ public:
    // by getCollisionPoly() elsewhere in the game.  Therefore, it needs to be handled differently.
    bool getCollisionPoly(Vector<Point> &polyPoints) { polyPoints = edges; return true; }  
    bool getCollisionCircle(U32 stateIndex, Point &point, float &radius) { return false; }
-   bool isCollisionEnabled() { return true; }
 };
 
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-enum GameItems    // Remember to keep these properly aligned with gGameItemRecs[]
+enum GameItems    
 {
-   ItemSpawn,
-   ItemSpeedZone,
-   ItemSoccerBall,
-   ItemFlag,
-   ItemFlagSpawn,
-   ItemBarrierMaker,
-   ItemPolyWall,
-   ItemLineItem,
-   ItemTeleporter,
-   ItemRepair,
-   ItemEnergy,
-   ItemBouncyBall,
-   ItemAsteroid,
-   ItemAsteroidSpawn,
-   ItemMine,
-   ItemSpyBug,
-   ItemResource,
-   ItemLoadoutZone,
-   ItemNexus,
-   ItemSlipZone,
-   ItemTurret,
-   ItemForceField,
-   ItemGoalZone,
-   ItemTextItem,
-   ItemNavMeshZone,
-   ItemInvalid
-};
+   ItemSpawn              = BIT(0), 
+   ItemSpeedZone          = BIT(1),
+   ItemSoccerBall         = BIT(2), 
+   ItemFlag               = BIT(3),
+   ItemFlagSpawn          = BIT(4), 
+   ItemBarrierMaker       = BIT(5),
+   ItemTextItem           = BIT(6),
+   ItemPolyWall           = BIT(7),
+   ItemLineItem           = BIT(8),
+   ItemTeleporter         = BIT(9),
+   ItemRepair             = BIT(10),
+   ItemEnergy             = BIT(11),
+   ItemBouncyBall         = BIT(12),
+   ItemAsteroid           = BIT(13),
+   ItemAsteroidSpawn      = BIT(14),
+   ItemMine               = BIT(15),
+   ItemSpyBug             = BIT(16),
+   ItemResource           = BIT(17),
+   ItemLoadoutZone        = BIT(18),
+   ItemNexus              = BIT(19),
+   ItemSlipZone           = BIT(20),
+   ItemTurret             = BIT(21),
+   ItemForceField         = BIT(22),
+   ItemGoalZone           = BIT(23),
+   ItemNavMeshZone        = BIT(24),
+   ItemInvalid            = BIT(25),
+};                         
+                           
 
-
-enum GeomType {
-   geomPoint,           // Single point feature (like a flag)
-   geomSimpleLine,      // Two point line (like a teleport)
+enum GeomType {           
+   geomPoint,           // ype = BIT(Single point feature (like a flag)
+   geomSimpleLine,      // = BIT(28),Two point line (like a teleport)
    geomLine,            // Many point line (like a wall)
-   geomPoly,            // Polygon feature (like a loadout zone)
-   geomNone,            // Other/unknown (not used, just here for completeness)
+   geomPoly,            // BIT(30),Polygon feature (like a loadout zone)
+   geomNone,            // BIT(31),  Other/unknown (not used, just here for completeness)
 };
 
-
-extern bool isConvex(const Vector<Point> &verts);
 
 // Width of line representing centerline of barriers
 #define WALL_SPINE_WIDTH gLineWidth3
 
+////////////////////////////////////////
+////////////////////////////////////////
+// TODO: Make this class abstract, most functionality should be moved to objects as noted
 
-class WorldItem : public DatabaseObject, public EditorObject
+static const S32 NONE = -1;
+
+class EditorObject : public virtual GameObject     // Interface class
+{
+private:
+   Vector<Point> mPoints;     // TODO: GET RID OF THIS!!!
+   Vector<Point> mPolyFill;   // Polygons only
+   Point mCentroid;
+   S32 mWidth;    // Walls, lines only
+
+   S32 mVertexLitUp;
+
+   Color getTeamColor(S32 teamId);
+   bool mIsBeingEdited;
+
+protected:
+   bool mDockItem;      // True if this item lives on the dock
+   bool mSelected;
+   bool mLitUp;
+
+   // A vector of bools that must have on entry per vertex -- it is each object's responsibility for making this happen
+   bool mAnyVertsSelected;
+   vector<bool> mVertSelected; 
+
+   S32 mSerialNumber;   // TODO: rename... an autoincremented serial number
+   S32 mItemId;         // Item's unique id... 0 if there is none
+
+   Color getDrawColor();
+
+public:
+   EditorObject(GameItems objectType = ItemInvalid) 
+      { mDockItem = false; mSnapped = false; mLitUp = false; mSelected = false; setObjectTypeMask(objectType); 
+        mAnyVertsSelected = false; mIsBeingEdited = false;}
+   virtual ~EditorObject() { };     // Provide virtual destructor
+
+   EditorObject *newCopy();
+
+   void addToEditor(Game *game);
+   void addToDock(Game *game);
+
+   virtual void renderEditor(F32 currentScale) { /* to be = 0 */ };
+
+   //// Is item sufficiently snapped?  only for turrets and forcefields
+   // TODO: Move to turret/ff objects
+   bool mSnapped;
+   Point mAnchorNormal;             // Point perpendicular to snap point, only for turrets and forcefields
+   bool isSnapped() { return mSnapped; }
+   void setSnapped(bool snapped) { mSnapped = snapped; }
+   WallSegment *forceFieldMountSegment;   // Segment where forcefield is mounted in editor
+   WallSegment *forceFieldEndSegment;     // Segment where forcefield terminates in editor
+
+   Point getCentroid() { return mCentroid; }    // only for polygons
+   void setCentroid(const Point &centroid) { mCentroid = centroid; }
+   
+   // These methods are mostly for lines and polygons
+   void selectVert(S32 vertIndex);
+   void aselectVert(S32 vertIndex);
+   void unselectVert(S32 vertIndex);
+   void unselectVerts();
+   bool vertSelected(S32 vertIndex);
+
+   // Keep track which vertex, if any is lit up in the currently selected item
+   bool isVertexLitUp(S32 vertexIndex) { return mVertexLitUp == vertexIndex; }
+   void setVertexLitUp(S32 vertexIndex) { mVertexLitUp = vertexIndex; }
+
+
+   Vector<Point> extendedEndPoints;                            // these are computed but not stored in barrier... not sure how to merge
+
+   virtual void renderDock() { };  // TODO = make this =0?
+   void renderLinePolyVertices(F32 scale, F32 alpha = 1.0);    // Only for polylines and polygons  --> move there
+
+   // TODO: Get rid of this ==> most of this code already in polygon
+   void initializePolyGeom();     // Once we have our points, do some geom preprocessing ==> only for polygons
+
+   //// For walls only
+   void processEndPoints();      // Wall only
+   void decreaseWidth(S32 amt);  // Wall only
+   void increaseWidth(S32 amt);  // Wall only
+   void setWidth(S32 width) { mWidth = width; }
+   S32 getWidth() { return mWidth; }
+   ////
+
+   S32 repopDelay;        // For repair items, also used for engineered objects heal rate
+   S32 speed;             // Speed for speedzone items
+   bool boolattr;         // Additional optional boolean attribute for some items (only speedzone so far...)
+
+   // Will have default value here, and be overridden in turret and ff classes
+   Point getEditorSelectionOffset(F32 scale);      // For turrets, apparent selection center is not the same as the item's actual location
+
+   S32 getDefaultRepopDelay(GameItems itemType);      // Implement in objects
+   S32 getRadius(F32 scale);
+
+   bool anyVertsSelected() { return mAnyVertsSelected; }
+   void setAnyVertsSelected(bool anySelected) { mAnyVertsSelected = anySelected; }
+   
+   virtual Vector<Point> getVerts() { return mPoints; };    // Return basic geometry points for object
+   virtual Point getVert(S32 index) { return mPoints[index]; }
+   virtual S32 getVertCount() { return mPoints.size(); }
+   virtual void clearVerts() { mPoints.clear(); }           // Only for splittable things?
+
+   virtual void setVert(const Point &point, S32 index);
+   virtual void addVert(const Point &point);
+   virtual void addVertFront(Point vert);
+   virtual void deleteVert(S32 vertIndex);
+   virtual void insertVert(Point vertex, S32 vertIndex);
+
+   virtual Vector<Point> *getPolyFillPoints() { return &mPolyFill; }
+   virtual void clearPolyFillPoints() { mPolyFill.clear(); }
+
+   void renderPolylineCenterline(F32 alpha);    // Draw barrier centerlines; wraps renderPolyline()  ==> lineItem, barrierMaker only
+
+   virtual void onGeomChanging();                        // Item geom is interactively changing
+   virtual void onItemDragging();                        // Item is being dragged around the screen
+   virtual void onAttrsChanging() { /* Do nothing */ };  // Attr is in the process of being changed (i.e. a char was typed for a textItem)
+   virtual void onAttrsChanged() { /* Do nothing */ };   // Attrs changed
+
+   /////  ToDO: Move this into all objects
+   Vector<Point> mVerts;
+
+   ///
+   Point mDest;      // for teleporter
+   Point dir;        // same thing, for goFast
+   U16 mSpeed;       // goFast
+   ///
+   /////
+   // Geometry operations  -- can we provide standard implementations of these?
+   void rotateAboutPoint(const Point &origin, F32 angle) { };
+   void flipHorizontal(const Point &min, const Point &max) { };
+   void flipVertical(const Point &min, const Point &max) { };
+   void scale(const Point &center, F32 scale) { };
+
+//void WorldItem::rotateAboutPoint(const Point &center, F32 angle)
+//{
+//   F32 sinTheta = sin(angle * Float2Pi / 360.0f);
+//   F32 cosTheta = cos(angle * Float2Pi / 360.0f);
+//
+//   for(S32 j = 0; j < mVerts.size(); j++)
+//   {
+//      Point v = mVerts[j] - center;
+//      Point n(v.x * cosTheta + v.y * sinTheta, v.y * cosTheta - v.x * sinTheta);
+//
+//      mVerts[j] = n + center;
+//   }
+//
+//   onGeomChanged();
+//}
+//void WorldItem::flipHorizontal(const Point &boundingBoxMin, const Point &boundingBoxMax)
+//{
+//   for(S32 j = 0; j < mVerts.size(); j++)
+//      mVerts[j].x = boundingBoxMin.x + (boundingBoxMax.x - mVerts[j].x);
+//   onGeomChanged();
+//}
+//
+//
+//void WorldItem::flipVertical(const Point &boundingBoxMin, const Point &boundingBoxMax)
+//{
+//   for(S32 j = 0; j < mVerts.size(); j++)
+//      mVerts[j].y = boundingBoxMax.y + (boundingBoxMax.y - mVerts[j].y);
+//   onGeomChanged();
+//}
+   // Make object bigger or smaller
+//void EditorObject::scale(const Point &center, F32 scale)
+//{
+//   for(S32 j = 0; j < mVerts.size(); j++)
+//      mVerts[j].set((mVerts[j] - center) * scale + center);
+//
+//   // Scale the wall width, within limits
+//   if(index == ItemBarrierMaker)
+//      width = min(max(width * scale, static_cast<float>(LineItem::MIN_LINE_WIDTH)), static_cast<float>(LineItem::MAX_LINE_WIDTH));
+//
+//   onGeomChanged();
+//}
+
+
+  /////
+
+   S32 getItemId() { return mItemId; }
+   void setItemId(S32 itemId) { mItemId = itemId; }
+   
+   S32 getSerialNumber() { return mSerialNumber; }
+   void setSerialNumber(S32 serialNumber) { mSerialNumber = serialNumber; }
+
+
+   bool isSelected() { return mSelected; }
+   void setSelected(bool selected) { mSelected = selected; }
+
+   void setDockItem(bool isDockItem) { mDockItem = isDockItem; }
+
+   bool isLitUp() { return mLitUp; }
+   void setLitUp(bool litUp) { mLitUp = litUp; if(!litUp) setVertexLitUp(NONE); }
+
+   bool isBeingEdited() { return mIsBeingEdited; }
+   void setIsBeingEdited(bool isBeingEdited) { mIsBeingEdited = isBeingEdited; }
+
+   void onGeomChanged();    // Item changed geometry (or moved), do any internal updating that might be required
+
+   
+   //////////
+   // TODO: Move these down into the actual classes
+   bool hasWidth() { return(getObjectTypeMask() == ItemBarrierMaker || getObjectTypeMask() == ItemLineItem); }
+   
+   void findForceFieldEnd();                                      // Find end of forcefield
+   Point forceFieldEnd;      // Point where forcefield terminates.  Only used for forcefields.
+
+   S32 mScore;
+   S32 getScore() { return mScore; }     // goal zones only, return zone's score
+
+   virtual GeomType getGeomType();
+   virtual bool canBeHostile();
+   virtual bool canBeNeutral();
+   virtual bool hasTeam();
+   virtual bool hasText() { return false; }     // Only TextItem overrides this
+   virtual const char *getEditorHelpString();     
+   virtual bool getHasRepop();
+   virtual bool EditorObject::getSpecial();   
+   virtual const char *getPrettyNamePlural();     
+   virtual const char *getOnDockName();     
+   virtual const char *getOnScreenName();   
+
+
+   bool processArguments(S32 argc, const char **argv);
+   void saveItem(FILE *f) { };     // Write item to stream
+
+   //////////////
+
+   //TODO: Get rid of this altogether
+   void render(bool isBeingEdited, bool isScriptItem, bool showingReferenceShip, ShowMode showMode);
+
+};
+
+
+class WorldItem : public DatabaseObject
 {  
 private:
    Vector<Point> mVerts;
 
-   bool mDockItem;              // True if this item lives on the dock
-   bool mSelected;
-   bool mLitUp;
-   S32 mVertexLitUp;
-
-   vector<bool> mVertSelected;  // never use std::vector<bool> use deque instead
-   bool mAnyVertsSelected;
 
    void init(GameItems itemType, S32 xteam, F32 xwidth, U32 itemid, bool isDockItem);
 
@@ -176,138 +401,30 @@ public:
    WorldItem(GameItems itemType = ItemInvalid, S32 itemId = 0);    // Only used when creating an item from a loaded level
    WorldItem(GameItems itemType, Point pos, S32 team, bool isDockItem, F32 width = 1, F32 height = 1, U32 id = 0);  // Primary constructor
 
-   void initializeGeom();     // Once we have our points, do some geom preprocessing
-
 
    ////////////////////////////
    ////// TEMP THINGS
-   
-   // only needed for teleporter, speedzone, textitem
-   Point getDest();
-   F32 renderTextItem(F32 alpha);          // Returns size of text
-   void addToGame(Game *game) { mGame = game; /*addToDatabase();*/ }    // Could maintain mItems here...
+   Point getDest();      // only needed for teleporter, speedzone, textitem
+
    Game *getGame() { return mGame; }
    F32 getGridSize() { return mGame->getGridSize(); }
 
    bool flag;
 
-   bool processArguments(S32 argc, const char **argv);
-   S32 getDefaultRepopDelay(GameItems itemType);
-   S32 getRadius(F32 scale);
-   Point getSelectionOffset(F32 scale);      // For turrets, apparent selection center is not the same as the item's actual location
-
-   GameItems index;
-   S32 team;
-   F32 width;
    U32 id;                // Item's unique id... 0 if there is none
    U32 mId;               // TODO: rename... an autoincremented serial number
 
    S32 mScore;            // Score awarded for this item
    
-   bool isSelected() { return mSelected; }
-   void setSelected(bool selected) { mSelected = selected; }
-
-   bool isLitUp() { return mLitUp; }
-   void setLitUp(bool litUp) { mLitUp = litUp; }
-
-   bool isVertexLitUp(S32 vertexIndex) { return mVertexLitUp == vertexIndex; }
-   bool setVertexLitUp(S32 vertexIndex) { mVertexLitUp = vertexIndex; }
-
-
-   bool isOnDock() { return mDockItem; }
-
-   LineEditor lineEditor; // For items that have an aux text field
-   U32 textSize;          // For items that have an aux text field
-   S32 repopDelay;        // For repair items, also used for engineered objects heal rate
-   S32 speed;             // Speed for speedzone items
-   bool boolattr;         // Additional optional boolean attribute for some items (only speedzone so far...)
-
-   bool hasWidth();
-   bool anyVertsSelected() { return mAnyVertsSelected; }
-   bool renderFull(F32 scale);    // Should item be rendered it full glory?  Not fully used at the moment...
-
-   // Following are used by all items; scale has wall specific code
-   void rotateAboutPoint(const Point &center, F32 angle);      // Rotate item around specified point
-   void scale(const Point &center, F32 scale);                 // Scale item centered on center
-
-
-   // These methods are mostly for lines and polygons
-   void selectVert(S32 vertIndex);
-   void aselectVert(S32 vertIndex);
-   void unselectVert(S32 vertIndex);
-   void unselectVerts();
-   bool vertSelected(S32 vertIndex);
-   void addVert(Point vert);
-   void addVertFront(Point vert);
-   void deleteVert(S32 vertIndex);
-   void insertVert(Point vertex, S32 vertIndex);
-   void setVert(Point vertex, S32 vertIndex);
-   void invalidate() { mVerts.clear(); index = ItemInvalid; }
-
-   void onGeomChanging();   // Item geom is interactively changing
-   void onItemDragging();   // Item is being dragged around the screen
-   void onGeomChanged();    // Item changed geometry (or moved), do any internal updating that might be required
-   void onAttrsChanging();
-   void onAttrsChanged();   // Attrs changed
-
-   void flipHorizontal(const Point &boundingBoxMin, const Point &boundingBoxMax);      // All items use this
-   void flipVertical(const Point &boundingBoxMin, const Point &boundingBoxMax);        // All items use this
-
-   Point normal;             // Point perpendicular to snap point, only for turrets and forcefields
-   bool snapped;             // Is item sufficiently snapped?  only for turrets and forcefields
-
-   Point forceFieldEnd;      // Point where forcefield terminates.  Only used for turrets.
-   WallSegment *forceFieldMountSegment;   // Segment where forcefield is mounted
-   WallSegment *forceFieldEndSegment;     // Segment where forcefield ends
-
-   // The following are for polygonal items only
-   Vector<Point> fillPoints;
-   Point centroid;
-
-   void processEndPoints();      // Wall only
-
-   void decreaseWidth(S32 amt);  // Wall only
-   void increaseWidth(S32 amt);  // Wall only
 
 
    // Find mount point or turret or forcefield closest to pos
-   Point snapEngineeredObject(const Point &pos);  
-   void findForceFieldEnd();                                      // Find end of forcefield
-
-   virtual bool isConvex() { return Zap::isConvex(mVerts); }      // Only used for navmeshzones
-
-   Vector<Point> &getVerts() { return mVerts; }
-   Vector<Point> extendedEndPoints;                               // a-b b-c format
-
-   S32 vertCount() { return mVerts.size(); }
-   Point vert(S32 vertIndex) { return mVerts[vertIndex]; }
-
-   GeomType geomType();
+   //Point snapEngineeredObject(const Point &pos);  
 
    ////////////////////
    // Rendering methods
-   void renderPolyline();                       // Draws a line connecting points in mVerts
-
-   void renderPolylineCenterline(F32 alpha);    // Draw barrier centerlines; wraps renderPolyline()
-   void renderLinePolyVertices(F32 scale, F32 alpha = 1.0);
    
    void render(bool isBeingEdited, bool isScriptItem, bool showingReferenceShip, ShowMode showMode);
-
-   const char *getOriginBottomLabel();          // SimpleLine items only
-   const char *getDestinationBottomLabel();
-
-   ////////////////////
-   //  DatabaseObject methods
-   static void setGridDatabase(GridDatabase *database) { mGridDatabase = database; }
-   GridDatabase *getGridDatabase() { return mGridDatabase; }
-
-   bool getCollisionPoly(Vector<Point> &polyPoints) { return false; }
-   bool getCollisionCircle(U32 stateIndex, Point &point, float &radius) { return false; }
-   bool isCollisionEnabled() { return true; }
-
-   ////////////////////
-   //  EditorItem methods
-   void render() { /* Do nothing */ }
 };
 
 ////////////////////////////////////////
@@ -336,7 +453,6 @@ public:
    // by getCollisionPoly() elsewhere in the game.  Therefore, it needs to be handled differently.
    bool getCollisionPoly(Vector<Point> &polyPoints) { polyPoints.resize(2); polyPoints[0] = mStart; polyPoints[1] = mEnd; return true; }  
    bool getCollisionCircle(U32 stateIndex, Point &point, float &radius) { return false; }
-   bool isCollisionEnabled() { return true; }
 
    static void setGridDatabase(GridDatabase *database) { mGridDatabase = database; }
 };
@@ -363,12 +479,12 @@ public:
    void deleteAllSegments();
 
    // Recalucate edge geometry for all walls when item has changed
-   void computeWallSegmentIntersections(WorldItem *item); 
+   void computeWallSegmentIntersections(EditorObject *item); 
 
    // Takes a wall, finds all intersecting segments, and marks them invalid
-   void invalidateIntersectingSegments(WorldItem *item);
+   void invalidateIntersectingSegments(EditorObject *item);
 
-   void buildWallSegmentEdgesAndPoints(WorldItem *item);
+   void buildWallSegmentEdgesAndPoints(EditorObject *item);
    void recomputeAllWallGeometry();
 
    static void setGridDatabase(GridDatabase *database) { mGridDatabase = database; }
@@ -392,24 +508,24 @@ private:
    vector<bool> mVertSelected;
 
 public:
-   SelectionItem() { /* do nothing */ }      // Generic constructor
-   SelectionItem(WorldItem &item);           // Primary constructor
+   SelectionItem() { /* Do nothing */ }      // Generic constructor
+   SelectionItem(EditorObject *item);        // Primary constructor
 
-   void restore(WorldItem &item);
+   void restore(EditorObject *item);
 };
 
 
 class Selection
 {
 public:
-   Selection() { /* do nothing */ }          // Generic constructor
-   Selection(Vector<WorldItem> &items);      // Primary constructor
+   Selection() { /* Do nothing */ }            // Generic constructor
+   Selection(Vector<EditorObject *> &items);   // Primary constructor
 
 private:
    Vector<SelectionItem> mSelection;
 
 public:
-   void restore(Vector<WorldItem> &items);
+   void restore(Vector<EditorObject *> &items);
 };
 
 
@@ -426,6 +542,9 @@ public:
       GoFastSnap,
       NoAttribute                 // Must be last
    };
+
+   static const S32 DOCK_LABEL_SIZE = 9;      // Size to label items on the dock
+   static const Color DOCK_LABEL_COLOR;
 
 private:
    string mSaveMsg;
@@ -452,11 +571,10 @@ private:
    Timer mSaveMsgTimer;
    Timer mWarnMsgTimer;
 
-   Vector<Vector<WorldItem> > mUndoItems;    // Undo/redo history  [[note that g++ requires space btwn >>]]
-   Vector<WorldItem> mMostRecentState;       // Copy of most recent state, to facilitate dragging
-   Point mMoveOrigin;                        // Point representing where items were moved "from" for figuring out how far they moved
+   Vector<Vector<EditorObject *> > mUndoItems;  // Undo/redo history  [[note that g++ requires space btwn >>]]
+   Point mMoveOrigin;                           // Point representing where items were moved "from" for figuring out how far they moved
 
-   Vector<WorldItem> mLevelGenItems;         // Items added by a levelgen script
+   Vector<EditorObject *> mLevelGenItems;       // Items added by a levelgen script
 
    U32 mFirstUndoIndex;
    U32 mLastUndoIndex;
@@ -466,7 +584,6 @@ private:
    WallSegmentManager wallSegmentManager;
 
    static const U32 UNDO_STATES = 128;
-   void saveUndoState(const Vector<WorldItem> &items, bool cameFromRedo = false);    // Save current state into undo history buffer
    void deleteUndoState();             // Removes most recent undo state from stack
    bool undoAvailable();               // Is an undo state available?
    void undo(bool addToRedoStack);     // Restore mItems to latest undo state
@@ -474,8 +591,7 @@ private:
 
    void autoSave();                    // Hope for the best, prepare for the worst
 
-   Vector<WorldItem> mDockItems;       // Items sitting in the dock
-   Vector<WorldItem> mClipboard;       // Items on clipboard
+   Vector<EditorObject *> mClipboard;    // Items on clipboard
 
    bool mLastUndoStateWasBarrierWidthChange;
 
@@ -483,9 +599,8 @@ private:
    void restoreSelection();            // Restore selection mask
    Selection mSelectedSet;             // Place to store selection mask
 
-   S32 itemToLightUp;
-   S32 vertexToLightUp;
-
+   EditorObject *mItemToLightUp;
+ 
    string mEditFileName;               // Manipulate with get/setLevelFileName
 
    S32 mEditingSpecialAttrItem;        // Index of item we're editing special attributes on
@@ -494,7 +609,7 @@ private:
    void doneEditingSpecialItem(bool save);    // Gets run when user exits special-item editing mode
    U32 getNextAttr(S32 item);                 // Assist on finding the next attribute this item is capable of editing,
                                               // for cycling through the various editable attributes
-   WorldItem mNewItem;
+   EditorObject *mNewItem;
    F32 mCurrentScale;
    Point mCurrentOffset;         // Coords of UR corner of screen
 
@@ -529,20 +644,21 @@ private:
    bool anyItemsSelected();           // Are any items selected?
    bool anythingSelected();           // Are any items/vertices selected?
 
-   void findHitVertex(Point canvasPos, S32 &hitItem, S32 &hitVertex);
+   void findHitVertex(const Point &canvasPos, EditorObject *&hitObject, S32 &hitVertex);
    void findHitItemAndEdge();         // Sets mItemHit and mEdgeHit
    S32 findHitItemOnDock(Point canvasPos);
 
    void findSnapVertex();
-   S32 mSnapVertex_i;
+   EditorObject *mSnapVertex_i;
    S32 mSnapVertex_j;
 
-   S32 mEdgeHit, mItemHit;
+   S32 mEdgeHit;
+   EditorObject *mItemHit;
 
    void computeSelectionMinMax(Point &min, Point &max);
    bool mouseOnDock();                // Return whether mouse is currently over the dock
 
-   void processLevelLoadLine(U32 argc, U32 id, const char **argv);
+   void processLevelLoadLine(U32 argc, U32 id, const char **argv) { /* TODO: Delete this! */};
 
    void insertNewItem(GameItems itemType);                                                    // Insert a new object into the game
 
@@ -591,13 +707,14 @@ public:
    Vector<TeamEditor> mTeams;       // Team list: needs to be public so we can edit from UITeamDefMenu
    Vector<TeamEditor> mOldTeams;    // Team list from before we run team editor, so we can see what changed
 
-   Vector<WorldItem> mItems;        // Item list: needs to be public so we can get team info while in UITeamDefMenu
+   Vector<EditorObject *> mItems;        // Item list: needs to be public so we can get team info while in UITeamDefMenu
+   Vector<EditorObject *> mDockItems;    // Items sitting in the dock
 
    GridDatabase *getGridDatabase() { return &mGridDatabase; }
 
    static void setTranslationAndScale(const Point &pos);
 
-   S32 getSnapItemIndex() { return mSnapVertex_i; }
+   EditorObject *getSnapItem() { return mSnapVertex_i; }
    S32 getSnapVertexIndex() { return mSnapVertex_j; }
    void rebuildEverything();        // Does lots of things in undo, redo, and add items from script
    void recomputeAllEngineeredItems();
@@ -606,6 +723,9 @@ public:
    void onAfterRunScriptFromConsole();
 
    void render();
+
+   Color getTeamColor(S32 teamId) { return mTeams[teamId].color; }
+
 
    bool mDraggingObjects;     // Should be private
 
@@ -690,10 +810,6 @@ public:
    void runLevelGenScript();              // Run associated levelgen script
    void copyScriptItemsToEditor();        // Insert these items into the editor as first class items that can be manipulated or saved
    void clearLevelGenItems();             // Clear any previously created levelgen items
-
-   // For generating nav mesh zones automatically.  Hooray!
-   void generateBotZones();
-   void removeUnusedNavMeshZones(Vector<WorldItem> &zones);
 };
 
 
@@ -711,7 +827,6 @@ protected:
 
 public:
    EditorMenuUserInterface();    // Constructor
-   void render();
 };
 
 extern EditorUserInterface gEditorUserInterface;

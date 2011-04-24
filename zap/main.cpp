@@ -1944,6 +1944,8 @@ void setJoystick(ControllerTypeType jsType)
 extern void clearINIComments();
 
 // Function to handle one-time update tasks
+// Use this when upgrading, and changing something like the name of an INI parameter.  The old version is stored in
+// gIniSettings.version, and the new version is in BUILD_VERSION.
 void checkIfThisIsAnUpdate()
 {
    if(gIniSettings.version == BUILD_VERSION)

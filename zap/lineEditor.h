@@ -84,8 +84,8 @@ public:
    string getString() const { return mLine; }                              // Return the string in string format
    const string *getStringPtr() const { return &mLine; }
    string getDisplayString() const { return mSecret ? string(mLine.length(), '*') : mLine; }
-   void setString(string str) { mLine.assign(str.substr(0, mMaxLen)); }    // Set the string
-   void setPrompt(string prompt) { mPrompt = prompt; }
+   void setString(const string &str) { mLine.assign(str.substr(0, mMaxLen)); }    // Set the string
+   void setPrompt(const string &prompt) { mPrompt = prompt; }
    string getPrompt() { return mPrompt; }
    const char *c_str() { return mLine.c_str(); }                 // Return the string in c_str format
 

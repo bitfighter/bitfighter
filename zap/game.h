@@ -92,6 +92,7 @@ namespace Zap
 class MasterServerConnection;
 class GameNetInterface;
 class GameType;
+class XObject;
 class GameObject;
 class GameConnection;
 class Ship;
@@ -146,7 +147,6 @@ protected:
    bool mGameSuspended;                   // True if we're in "suspended animation" mode
 
 public:
-   GridDatabase mDatabaseForBotZones;
    static const S32 DefaultGridSize = 255;   // Size of "pages", represented by floats for intrapage locations (i.e. pixels per integer)
    static const S32 MIN_GRID_SIZE = 5;       // Ridiculous, it's true, but we step by our minimum value, so we can't make this too high
    static const S32 MAX_GRID_SIZE = 1000;    // A bit ridiculous too...  250-300 seems about right for normal use.  But we'll let folks experiment.
@@ -157,7 +157,7 @@ public:
    static const S32 PLAYER_SCOPE_MARGIN = 150;
 
    static const S32 PLAYER_SENSOR_VISUAL_DISTANCE_HORIZONTAL = 1060;   // How far player can see with sensor activated horizontally...
-   static const S32 PLAYER_SENSOR_VISUAL_DISTANCE_VERTICAL = 795;     // ...and vertically
+   static const S32 PLAYER_SENSOR_VISUAL_DISTANCE_VERTICAL = 795;      // ...and vertically
 
    static const S32 PLAYER_COUNT_UNAVAILABLE = -1;
 
@@ -170,6 +170,8 @@ public:
    Game(const Address &theBindAddress);      // Constructor
    virtual ~Game() { /* Do nothing */ };     // Destructor
 
+   virtual Color getTeamColor(S32 teamId) { return Color(1,1,1); }      // ClientGame and EditorGame will override
+
 
    ModuleInfo *getModuleInfo(ShipModule module) { return &mModuleInfos[(U32)module]; }
    
@@ -178,14 +180,17 @@ public:
 
    Point computePlayerVisArea(Ship *ship);
 
+   GridDatabase mDatabaseForBotZones;
 
    U32 getTimeUnconnectedToMaster() { return mTimeUnconnectedToMaster; }
 
 
    void addToDeleteList(GameObject *theObject, U32 delay);
 
-   void addToGameObjectList(GameObject *theObject);
-   void removeFromGameObjectList(GameObject *theObject);
+   // Client/ServerGame and EditorGame will each keep track of objects in a slightly different manner, using the same interface
+   virtual void addToGameObjectList(XObject *theObject) = 0;
+   virtual void removeFromGameObjectList(XObject *theObject) = 0;
+
    void deleteObjects(U32 typeMask);
 
    F32 getGridSize() { return mGridSize; }
@@ -261,9 +266,27 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+// Provide a place for things we want in Client & Server Game, but not in EditorGame
+// TODO: rename this Game, and rename Game something else...  Framework?
+
+class GameGame : public Game
+{
+public:
+   GameGame(const Address &theBindAddress) : Game(theBindAddress) { /* Do nothing */};      // Constructor
+   virtual ~GameGame() { /* Do nothing */ };     // Destructor
+
+   // Implementations for virtual methods in Game
+   void addToGameObjectList(XObject *theObject);
+   void removeFromGameObjectList(XObject *theObject);
+};
+ 
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 class ClientRef;
 
-class ServerGame : public Game, public LevelLoader
+class ServerGame : public GameGame, public LevelLoader
 {
 private:
    enum {
@@ -375,11 +398,14 @@ public:
    HostingModePhases hostingModePhase;
 };
 
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class ClientGame : public Game
+class ClientGame : public GameGame
 {
+   typedef GameGame Parent;
+
 private:
    enum {
       NumStars = 256,               // 256 stars should be enough for anybody!   -- Bill Gates
@@ -431,6 +457,8 @@ public:
    U32 getPlayerAndRobotCount();    // Returns number of human and robot players
    U32 getPlayerCount();            // Returns number of human players
 
+   Color getTeamColor(S32 teamId);
+
    void suspendGame()   { mGameSuspended = true; }
    void unsuspendGame() { mGameSuspended = false; }
 };
@@ -441,11 +469,17 @@ public:
 class EditorGame : public Game
 {
 public:
-   EditorGame() : Game(Address()) { setGridSize(DefaultGridSize); }     // Constructor
+   EditorGame() : Game(Address()) { setGridSize((F32)DefaultGridSize); }     // Constructor
 
    U32 getPlayerCount() { return 0; }
    bool isServer() { return false; }
    void idle(U32 timeDelta) { /* do nothing */ }
+
+   // TODO: Use this to manage mItems in editor
+   void addToGameObjectList(XObject *theObject) { };
+   void removeFromGameObjectList(XObject *theObject) { };
+
+   Color getTeamColor(S32 teamId);
 };
 
 
@@ -466,7 +500,4 @@ extern void endGame();
 
 
 #endif
-
-
-
 

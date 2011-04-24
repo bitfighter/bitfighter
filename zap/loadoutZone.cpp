@@ -54,15 +54,18 @@ LoadoutZone::LoadoutZone()
    mObjectTypeMask = LoadoutZoneType | CommandMapVisType;
 }
 
+
 void LoadoutZone::render()
 {
-   renderLoadoutZone(getGame()->getGameType()->getTeamColor(getTeam()), mPolyBounds, mPolyFill, mCentroid, mLabelAngle);
+   renderLoadoutZone(getGame()->getTeamColor(getTeam()), mPolyBounds, mPolyFill, mCentroid, mLabelAngle);
 }
+
 
 S32 LoadoutZone::getRenderSortValue()
 {
    return -1;
 }
+
 
 // Create objects from parameters stored in level file
 bool LoadoutZone::processArguments(S32 argc2, const char **argv2)

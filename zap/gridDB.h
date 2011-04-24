@@ -67,7 +67,8 @@ public:
    virtual GridDatabase *getGridDatabase() = 0;
    virtual bool getCollisionPoly(Vector<Point> &polyPoints) = 0;
    virtual bool getCollisionCircle(U32 stateIndex, Point &point, float &radius) = 0;
-   virtual bool isCollisionEnabled() = 0;
+   
+   virtual bool isCollisionEnabled() { return true; }
 
    bool isInDatabase() { return mInDatabase; }
 

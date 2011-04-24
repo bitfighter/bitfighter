@@ -78,7 +78,7 @@ static Color orange(1, .67 ,0);
 
 
 // geomType should be GL_LINES or GL_POLYGON
-static void renderPointVector(const Vector<Point> &points, U32 geomType)
+void renderPointVector(const Vector<Point> &points, U32 geomType)
 {
    glEnableClientState(GL_VERTEX_ARRAY);
 
@@ -819,16 +819,24 @@ void renderPolygonOutline(const Vector<Point> &outlinePoints, const Color &outli
 }
 
 
-void renderPolygonFill(const Vector<Point> &fillPoints, const Color &fillColor, F32 alpha = 1)
+// TODO: Get rid of one of these!
+void renderPolygonFill(const Vector<Point> *fillPoints, const Color &fillColor, F32 alpha = 1)
 {
    if(alpha != 1)
       glEnableBlend;
 
    glColor(fillColor, alpha);
-   renderTriangulatedPolygonFill(fillPoints);
+   renderTriangulatedPolygonFill(*fillPoints);
 
    if(alpha != 1)
       glDisableBlend;
+}
+
+
+// TODO: Get rid of one of these!
+void renderPolygonFill(const Vector<Point> &fillPoints, const Color &fillColor, F32 alpha = 1)
+{
+   renderPolygonFill(&fillPoints, fillColor, alpha);
 }
 
 
@@ -1475,7 +1483,7 @@ void renderSoccerBall(const Point &pos, F32 alpha)
 }
 
 
-void renderTextItem(const Point &pos, Point dir, U32 size, S32 team, string text)
+void renderTextItem(const Point &pos, const Point &dir, F32 size, const string &text, const Color &color)
 {
    if(text == "Bitfighter")
    {
@@ -1498,19 +1506,7 @@ void renderTextItem(const Point &pos, Point dir, U32 size, S32 team, string text
       return;
    }
 
-   // Don't render opposing team's text items
-   if(!gClientGame || !gClientGame->getConnectionToServer())      // Not sure if this is really needed...
-      return;
-
-   Ship *ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
-   if( (!ship && team != -1) || (ship && ship->getTeam() != team && team != -1) )
-      return;
-
-   GameType *gt = gClientGame->getGameType();
-   if(!gt) 
-      return;
-
-   glColor(gt->getTeamColor(team));       // Handles teams -1  and -2 properly
+   glColor(color);      
    UserInterface::drawAngleString_fixed(pos.x, pos.y, size, pos.angleTo(dir), text.c_str());
 }
 
@@ -1723,7 +1719,7 @@ void glColor(const Color &c, float alpha)
     glColor4f(c.r, c.g, c.b, alpha);
 }
 
-void drawSquare(const Point &pos, S32 size, bool filled)
+void drawSquare(const Point &pos, F32 size, bool filled)
 {
     glBegin(filled ? GL_POLYGON : GL_LINE_LOOP);
        glVertex2f(pos.x - size, pos.y - size);
@@ -1736,17 +1732,17 @@ void drawSquare(const Point &pos, S32 size, bool filled)
 
 void drawSquare(const Point &pos, S32 size)
 {
-    drawSquare(pos, size, false);
+    drawSquare(pos, F32(size), false);
 }
 
 
 void drawSquare(const Point &pos, F32 size)
 {
-    drawSquare(pos, S32(size + .5));
+    drawSquare(pos, size, false);
 }
 
 
-void drawFilledSquare(const Point &pos, U32 size)
+void drawFilledSquare(const Point &pos, F32 size)
 {
     drawSquare(pos, size, true);
 }
@@ -1754,13 +1750,7 @@ void drawFilledSquare(const Point &pos, U32 size)
 
 void drawFilledSquare(const Point &pos, S32 size)
 {
-    drawSquare(pos, U32(size), true);
-}
-
-
-void drawFilledSquare(const Point &pos, F32 size)
-{
-    drawSquare(pos, U32(size + 0.5f), true);
+    drawSquare(pos, F32(size), true);
 }
 
 

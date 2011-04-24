@@ -103,7 +103,7 @@ void BotNavMeshZone::render(S32 layerIndex)
       return;
 
    // TODO: Move to constructor, only doing this when there is a local client?
-   if(mPolyFill.size() == 0)    // Need to process PolyFill here, rendering server objects into client.  
+   if(getPolyFillPoints()->size() == 0)    // Need to process PolyFill here, rendering server objects into client.  
       Triangulate::Process(mPolyBounds, mPolyFill);
 
    if(layerIndex == 0)
@@ -625,8 +625,9 @@ bool BotNavMeshZone::buildBotMeshZones(Game *game)
          botzone->mConvex = true;             // Avoid random red and green on /showzones.
          botzone->addToGame(game);
          botzone->computeExtent();   
+
          if(gClientGame)      // Only triangulate when there is client
-            Triangulate::Process(botzone->mPolyBounds, botzone->mPolyFill);
+            Triangulate::Process(botzone->mPolyBounds, *botzone->getPolyFillPoints());
        }
 
       BotNavMeshZone::buildBotNavMeshZoneConnections();
