@@ -194,9 +194,7 @@ void TextItem::renderEditorItem(F32 currentScale)
 
    // If we're editing the text, we need to draw our cursor
    if(isBeingEdited())
-   {
       lineEditor.drawCursorAngle(mPos.x, mPos.y, mSize / getGame()->getGridSize(), mPos.angleTo(mDir));
-   }
 }
 
 
@@ -248,7 +246,7 @@ void TextItem::saveItem(FILE *f)
 
 
 // Editor
-void TextItem::recalcTextSize(F32 currentScale)
+void TextItem::recalcTextSize()
 {
    const F32 dummyTextSize = 120;
 
@@ -364,19 +362,19 @@ void TextItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 ///// Editor Methods
 
 // Runs when text is being changed in the editor
-void TextItem::onAttrsChanging(F32 currentScale)
+void TextItem::onAttrsChanging()
 {
-   onGeomChanged(currentScale);
+   onGeomChanged();
 }
 
-void TextItem::onGeomChanging(F32 currentScale)
+void TextItem::onGeomChanging()
 {
-   onGeomChanged(currentScale);
+   onGeomChanged();
 }
 
-void TextItem::onGeomChanged(F32 currentScale)
+void TextItem::onGeomChanged()
 {
-   recalcTextSize(currentScale);
+   recalcTextSize();
 }
 
 ////////////////////////////////////////

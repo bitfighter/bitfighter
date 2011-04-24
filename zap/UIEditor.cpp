@@ -737,7 +737,7 @@ void EditorUserInterface::loadLevel()
    // And hand-process all other items
    for(S32 i = 0; i < mItems.size(); i++)
       if(mItems[i]->getObjectTypeMask() & ~ItemBarrierMaker && mItems[i]->getObjectTypeMask() & ~ItemNavMeshZone)
-         mItems[i]->onGeomChanged(getCurrentScale());
+         mItems[i]->onGeomChanged();
 }
 
 
@@ -2035,7 +2035,7 @@ EditorObject *EditorObject::newCopy()
    if(textItem != NULL)
    {
       TextItem *newTextItem = new TextItem(*textItem);
-      newTextItem->onGeomChanged(getCurrentScale());
+      newTextItem->onGeomChanged();
       return newTextItem;
    }
 
@@ -2624,7 +2624,7 @@ void EditorUserInterface::pasteSelection()
       mItems.last()->setSelected(true);
       for(S32 j = 0; j < mItems.last()->getVertCount(); j++)
          mItems.last()->setVert(mItems.last()->getVert(j) += offset, j);
-      mItems.last()->onGeomChanged(getCurrentScale());
+      mItems.last()->onGeomChanged();
    }
    mItems.sort(geometricSort);
    validateLevel();
@@ -3187,7 +3187,7 @@ void EditorUserInterface::onMouseDragged(S32 x, S32 y)
 
             // If we are dragging a vertex, and not the entire item, we are changing the geom, so notify the item
             if(mItems[i]->vertSelected(j))
-               mItems[i]->onGeomChanging(getCurrentScale());     
+               mItems[i]->onGeomChanging();     
          }
 
       if(mItems[i]->isSelected())     
@@ -3315,7 +3315,7 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
             deleted = true;
          }
          else if(geomChanged)
-            mItems[i]->onGeomChanged(getCurrentScale());
+            mItems[i]->onGeomChanged();
 
       }  // else if(!objectsOnly) 
    }  // for
@@ -3391,8 +3391,8 @@ void EditorUserInterface::splitBarrier()
                mItems.push_back(newItem);
 
                // Tell the new segments that they have new geometry
-               mItems[i]->onGeomChanged(getCurrentScale());
-               mItems.last()->onGeomChanged(getCurrentScale());
+               mItems[i]->onGeomChanged();
+               mItems.last()->onGeomChanged();
 
                // And get them in the right order
                mItems.sort(geometricSort);         
@@ -3482,7 +3482,7 @@ void EditorUserInterface::joinBarrier()
       clearSelection();
       mNeedToSave = true;
       autoSave();
-      mItems[joinedItem]->onGeomChanged(getCurrentScale());
+      mItems[joinedItem]->onGeomChanged();
    }
 }
 
@@ -3676,7 +3676,7 @@ void EditorUserInterface::doneEditingSpecialItem(bool saveChanges)
             mItems[i]->repopDelay = mEditingSpecialAttrItem->repopDelay;
             mItems[i]->speed = mEditingSpecialAttrItem->speed;
             mItems[i]->boolattr = mEditingSpecialAttrItem->boolattr;
-            mItems[i]->onAttrsChanged(getCurrentScale());
+            mItems[i]->onAttrsChanged();
          }
       }
 
@@ -3760,7 +3760,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          if(mNewItem->getVertCount() < gMaxPolygonPoints)          // Limit number of points in a polygon/polyline
          {
             mNewItem->addVert(snapPoint(convertCanvasToLevelCoord(mMousePos)));
-            mNewItem->onGeomChanging(getCurrentScale());
+            mNewItem->onGeomChanging();
          }
          
          return;
@@ -3784,7 +3784,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          mItemHit->selectVert(mEdgeHit + 1);
 
          // Alert the item that its geometry is changing
-         mItemHit->onGeomChanging(getCurrentScale());
+         mItemHit->onGeomChanging();
 
          mMouseDownPos = newVertex;
          
@@ -3836,7 +3836,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
             mNewItem->addToEditor(gEditorGame);
 
             mItems.push_back(mNewItem);
-            mItems.last()->onGeomChanged(getCurrentScale());      // Walls need to be added to mItems BEFORE onGeomChanged() is run!
+            mItems.last()->onGeomChanged();      // Walls need to be added to mItems BEFORE onGeomChanged() is run!
             mItems.sort(geometricSort);
          }
 
@@ -4170,7 +4170,7 @@ void EditorUserInterface::specialAttributeKeyHandler(KeyCode keyCode, char ascii
       else if(ascii)       // User typed a character -- add it to the string
          textItem->lineEditor.addChar(ascii);
 
-      textItem->onAttrsChanging(getCurrentScale());
+      textItem->onAttrsChanging();
 
    }
    else if(mSpecialAttribute == RepopDelay)
@@ -4207,7 +4207,7 @@ void EditorUserInterface::specialAttributeKeyHandler(KeyCode keyCode, char ascii
       }
    }
 
-   mEditingSpecialAttrItem->onAttrsChanging(getCurrentScale());
+   mEditingSpecialAttrItem->onAttrsChanging();
 }
 
 
@@ -4357,7 +4357,7 @@ void EditorUserInterface::finishedDragging()
          {
             for(S32 i = 0; i < mItems.size(); i++)
                if(mItems[i]->isSelected() || mItems[i]->anyVertsSelected())
-                  mItems[i]->onGeomChanged(getCurrentScale());
+                  mItems[i]->onGeomChanged();
 
             mNeedToSave = true;
             autoSave();
@@ -4957,7 +4957,7 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(EditorObject *item)
 
    // Alert all forcefields terminating on any of the wall segments we deleted and potentially recreated
    for(S32 j = 0; j < forcefields.size(); j++)  
-      forcefields[j]->onGeomChanged(getCurrentScale());
+      forcefields[j]->onGeomChanged();
 }
 
 
@@ -5148,7 +5148,7 @@ void EditorObject::increaseWidth(S32 amt)
 
    setWidth(width);
 
-   onGeomChanged(getCurrentScale());
+   onGeomChanged();
 }
 
 
@@ -5163,7 +5163,7 @@ void EditorObject::decreaseWidth(S32 amt)
 
    setWidth(width);
 
-   onGeomChanged(getCurrentScale());
+   onGeomChanged();
 }
 
 
@@ -5490,10 +5490,10 @@ void EditorObject::deleteVert(S32 vertIndex)
 }
 
 
-void EditorObject::onGeomChanging(F32 currentScale)
+void EditorObject::onGeomChanging()
 {
    if(getGeomType() == geomPoly)
-      onGeomChanged(currentScale);           // Allows poly fill to get reshaped as vertices move
+      onGeomChanged();               // Allows poly fill to get reshaped as vertices move
 }
 
 
@@ -5501,10 +5501,10 @@ void EditorObject::onGeomChanging(F32 currentScale)
 void EditorObject::onItemDragging()
 {
    if(getObjectTypeMask() & ItemForceField)
-     onGeomChanged(getCurrentScale());
+     onGeomChanged();
 
    else if(getGeomType() == geomPoly && getObjectTypeMask() & ~ItemPolyWall)
-      onGeomChanged(getCurrentScale());     // Allows poly fill to get dragged around with outline
+      onGeomChanged();     // Allows poly fill to get dragged around with outline
 }
 
 
@@ -5514,7 +5514,7 @@ WallSegmentManager *getWallSegmentManager()
 }
 
 
-void EditorObject::onGeomChanged(F32 currentScale)
+void EditorObject::onGeomChanged()
 {
    // TODO: Delegate all this to the member objects
    if(getObjectTypeMask() & ItemBarrierMaker || getObjectTypeMask() & ItemPolyWall)
@@ -5631,7 +5631,7 @@ WallSegment::~WallSegment()
       if(gEditorUserInterface.mItems[i]->getObjectTypeMask() & ItemForceField && 
                (gEditorUserInterface.mItems[i]->forceFieldEndSegment == this || 
                 gEditorUserInterface.mItems[i]->forceFieldMountSegment == this) )
-         gEditorUserInterface.mItems[i]->onGeomChanged(getCurrentScale());       // Will force recalculation of mount and endpoint
+         gEditorUserInterface.mItems[i]->onGeomChanged();            // Will force recalculation of mount and endpoint
    }
 
  

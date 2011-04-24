@@ -143,11 +143,11 @@ public:
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
    ///// Editor Methods
-   void onAttrsChanging(F32 currentScale);
-   void onGeomChanging(F32 currentScale);
-   void onGeomChanged(F32 currentScale);
+   void onAttrsChanging();
+   void onGeomChanging();
+   void onGeomChanged();
 
-   void recalcTextSize(F32 currentScale);
+   void recalcTextSize();
 
    // Some properties about the item that will be needed in the editor
    bool hasText() { return true; }

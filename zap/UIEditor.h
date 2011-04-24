@@ -264,10 +264,10 @@ public:
 
    void renderPolylineCenterline(F32 alpha);    // Draw barrier centerlines; wraps renderPolyline()  ==> lineItem, barrierMaker only
 
-   virtual void onGeomChanging(F32 currentScale);        // Item geom is interactively changing
+   virtual void onGeomChanging();                        // Item geom is interactively changing
    virtual void onItemDragging();                        // Item is being dragged around the screen
-   virtual void onAttrsChanging(F32 currentScale) { /* Do nothing */ };  // Attr is in the process of being changed (i.e. a char was typed for a textItem)
-   virtual void onAttrsChanged(F32 currentScale) { /* Do nothing */ };   // Attrs changed
+   virtual void onAttrsChanging() { /* Do nothing */ };  // Attr is in the process of being changed (i.e. a char was typed for a textItem)
+   virtual void onAttrsChanged() { /* Do nothing */ };   // Attrs changed
 
    /////  ToDO: Move this into all objects
    Vector<Point> mVerts;
@@ -347,7 +347,7 @@ public:
    bool isBeingEdited() { return mIsBeingEdited; }
    void setIsBeingEdited(bool isBeingEdited) { mIsBeingEdited = isBeingEdited; }
 
-   void onGeomChanged(F32 currentScale);    // Item changed geometry (or moved), do any internal updating that might be required
+   void onGeomChanged();          // Item changed geometry (or moved), do any internal updating that might be required
 
    
    //////////
