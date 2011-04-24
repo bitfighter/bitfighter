@@ -264,10 +264,10 @@ public:
 
    void renderPolylineCenterline(F32 alpha);    // Draw barrier centerlines; wraps renderPolyline()  ==> lineItem, barrierMaker only
 
-   virtual void onGeomChanging();                        // Item geom is interactively changing
+   virtual void onGeomChanging(F32 currentScale);        // Item geom is interactively changing
    virtual void onItemDragging();                        // Item is being dragged around the screen
-   virtual void onAttrsChanging() { /* Do nothing */ };  // Attr is in the process of being changed (i.e. a char was typed for a textItem)
-   virtual void onAttrsChanged() { /* Do nothing */ };   // Attrs changed
+   virtual void onAttrsChanging(F32 currentScale) { /* Do nothing */ };  // Attr is in the process of being changed (i.e. a char was typed for a textItem)
+   virtual void onAttrsChanged(F32 currentScale) { /* Do nothing */ };   // Attrs changed
 
    /////  ToDO: Move this into all objects
    Vector<Point> mVerts;
@@ -347,7 +347,7 @@ public:
    bool isBeingEdited() { return mIsBeingEdited; }
    void setIsBeingEdited(bool isBeingEdited) { mIsBeingEdited = isBeingEdited; }
 
-   void onGeomChanged();    // Item changed geometry (or moved), do any internal updating that might be required
+   void onGeomChanged(F32 currentScale);    // Item changed geometry (or moved), do any internal updating that might be required
 
    
    //////////
@@ -379,7 +379,7 @@ public:
    //////////////
 
    //TODO: Get rid of this altogether
-   void render(bool isBeingEdited, bool isScriptItem, bool showingReferenceShip, ShowMode showMode);
+   void render(bool isScriptItem, bool showingReferenceShip, ShowMode showMode);
 
 };
 
@@ -600,22 +600,22 @@ private:
 
    EditorObject *mItemToLightUp;
  
-   string mEditFileName;               // Manipulate with get/setLevelFileName
+   string mEditFileName;                      // Manipulate with get/setLevelFileName
 
-   S32 mEditingSpecialAttrItem;        // Index of item we're editing special attributes on
-   SpecialAttribute mSpecialAttribute; // Type of special attribute we're editing
+   EditorObject *mEditingSpecialAttrItem;     // Item we're editing special attributes on
+   SpecialAttribute mSpecialAttribute;        // Type of special attribute we're editing
 
    void doneEditingSpecialItem(bool save);    // Gets run when user exits special-item editing mode
    U32 getNextAttr(S32 item);                 // Assist on finding the next attribute this item is capable of editing,
                                               // for cycling through the various editable attributes
    EditorObject *mNewItem;
    F32 mCurrentScale;
-   Point mCurrentOffset;         // Coords of UR corner of screen
+   Point mCurrentOffset;            // Coords of UR corner of screen
 
-   Point mMousePos;              // Where the mouse is at the moment
-   Point mMouseDownPos;          // Where the mouse was pressed for a drag operation
+   Point mMousePos;                 // Where the mouse is at the moment
+   Point mMouseDownPos;             // Where the mouse was pressed for a drag operation
 
-   void renderGrid();                                       // Draw background snap grid
+   void renderGrid();               // Draw background snap grid
    void renderDock(F32 width);
    void renderTextEntryOverlay();
    void renderReferenceShip();
@@ -673,8 +673,6 @@ protected:
 public:
    ~EditorUserInterface();    // Destructor
 
-   EditorGame *editorGame;
-
    void setLevelFileName(string name);
    void setLevelGenScriptName(string name);
 
@@ -698,7 +696,7 @@ public:
    F32 getCurrentScale() { return mCurrentScale; }
    Point getCurrentOffset() { return mCurrentOffset; }
 
-   S32 getEditingSpecialAttrItem() { return mEditingSpecialAttrItem; }
+   bool isEditingSpecialAttrItem() { return mEditingSpecialAttrItem != NULL; }
    bool isEditingSpecialAttribute(SpecialAttribute attribute) { return mSpecialAttribute == attribute; }
 
    void clearUndoHistory();         // Wipe undo/redo history
@@ -723,7 +721,7 @@ public:
 
    void render();
 
-   Color getTeamColor(S32 teamId) { return mTeams[teamId].color; }
+   Color getTeamColor(S32 teamId);
 
 
    bool mDraggingObjects;     // Should be private

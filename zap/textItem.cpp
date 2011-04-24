@@ -61,6 +61,9 @@ static inline void labelSimpleLineItem(Point pos, F32 labelSize, const char *ite
 }
 
 
+static Color white(1,1,1);
+static const S32 INSTRUCTION_TEXTSIZE = 9;      // TODO: Put in editor
+
 // Draw arrow that serves as the core of SimpleLine items in the editor
 // Subclasses will fill in the rest
 void SimpleLine::renderEditor(F32 currentScale)
@@ -96,34 +99,35 @@ void SimpleLine::renderEditor(F32 currentScale)
 
    renderEditorItem(currentScale);
 
-   // Label any selected or highlihgted vertices
+   glPushMatrix();
+   glScalef(1/currentScale, 1/currentScale, 1);
+
+   // Label item with message about what happens if user presses enter
+   if(!isBeingEdited() && isSelected())
+   {
+      glColor(white);
+      UserInterface::drawStringf_2pt(pos * currentScale, dest * currentScale, INSTRUCTION_TEXTSIZE, -22, getEditMessage());
+   }
+
+   // Label any selected or highlighted vertices
    if(vertSelected(0) || (mLitUp && isVertexLitUp(0)))         // "From" vertex
    {
-      glPushMatrix();
-      glScalef(1/currentScale, 1/currentScale, 1);
-
       F32 alpha = 1;
       glColor(getDrawColor(), alpha);
       drawSquare(pos * currentScale, 7);
 
       labelSimpleLineItem(pos * currentScale, EditorUserInterface::DOCK_LABEL_SIZE, getOnScreenName(), getOriginBottomLabel());
-
-      glPopMatrix();
    }
    else if(vertSelected(1) || (mLitUp && isVertexLitUp(1)))    // "To" vertex
    {
-      glPushMatrix();
-      glScalef(1/currentScale, 1/currentScale, 1);
-
       F32 alpha = 1;
       glColor(getDrawColor(), alpha);
       drawSquare(dest * currentScale, 7);
 
       labelSimpleLineItem(dest * currentScale, EditorUserInterface::DOCK_LABEL_SIZE, getOnScreenName(), getDestinationBottomLabel());
-
-      glPopMatrix();
    }
-   
+
+   glPopMatrix();   
 }
 
 
@@ -156,8 +160,6 @@ TextItem::TextItem()
    mTeam = Item::TEAM_NEUTRAL;
    mText = "Your text here";
    lineEditor.setString(mText);
-
-   onGeomChanged();     // Needed for editor -- do we want to run this in the game?
 }
 
 
@@ -168,6 +170,7 @@ TextItem::~TextItem()
 }
 
 
+// In game rendering
 void TextItem::render()
 {
    ClientGame *game = dynamic_cast<ClientGame *>(getGame());
@@ -183,34 +186,20 @@ void TextItem::render()
    renderTextItem(mPos, mDir, mSize, mText, game->getGameType()->getTeamColor(mTeam));
 }
 
-static Color white(1,1,1);
-static const S32 INSTRUCTION_TEXTSIZE = 9;      // TODO: Put in editor
-
 
 // Called by SimpleItem::renderEditor()
 void TextItem::renderEditorItem(F32 currentScale)
 {
-   renderTextItem(mPos, mDir, F32(F32(mSize) / 120), mText, getGame()->getTeamColor(mTeam));
-
-
-   //glColor(getTeamColor(textItem->getTeam()), alpha);
-   //F32 txtSize = textItem->getSize() / getGridSize() * getCurrentScale();
-
-
-   //UserInterface::drawAngleString_fixed(pos.x, pos.y, txtSize, pos.angleTo(dir), textItem->lineEditor->c_str());
-
-
-   F32 txtSize = 12;
+   renderTextItem(mPos, mDir, F32(F32(mSize) / 120), lineEditor.getDisplayString(), getGame()->getTeamColor(mTeam));
 
    if(isBeingEdited())
-      lineEditor.drawCursorAngle(mPos.x, mPos.y, txtSize, mPos.angleTo(mDest));
-
-   else if(isSelected())
    {
-      glColor(white);
-      UserInterface::drawStringf_2pt(mPos, mDest, INSTRUCTION_TEXTSIZE, -22, "[Enter] to edit text");
-   }
+      glPushMatrix();
+      glScalef(1/currentScale, 1/currentScale, 1);
 
+      lineEditor.drawCursorAngle(mPos.x * currentScale, mPos.y * currentScale, F32(getSize()), mPos.angleTo(mDir));
+      glPopMatrix();
+   }
 }
 
 
@@ -257,9 +246,22 @@ bool TextItem::processArguments(S32 argc, const char **argv)
 }
 
 
+// Editor
 void TextItem::saveItem(FILE *f)
 {
    s_fprintf(f, "%s %g %g %g %g %d %s\n", Object::getClassName(), mPos.x, mPos.y, mDir.x, mDir.y, mSize, mText.c_str());
+}
+
+
+// Editor
+void TextItem::recalcTextSize(F32 currentScale)
+{
+   F32 lineLen = getVert(0).distanceTo(getVert(1)) * currentScale;
+   F32 strWidth = (F32)UserInterface::getStringWidth(120, lineEditor.c_str()); 
+   F32 size = 120.0f * lineLen / strWidth;
+
+   // Compute text size subject to min and max defined in TextItem
+   mSize = max(min(U32(size), MAX_TEXT_SIZE), MIN_TEXT_SIZE);
 }
 
 
@@ -366,25 +368,19 @@ void TextItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 ///// Editor Methods
 
 // Runs when text is being changed in the editor
-void TextItem::onAttrsChanging()
+void TextItem::onAttrsChanging(F32 currentScale)
 {
-   onGeomChanged();
+   onGeomChanged(currentScale);
 }
 
-void TextItem::onGeomChanging()
+void TextItem::onGeomChanging(F32 currentScale)
 {
-   onGeomChanged();
+   onGeomChanged(currentScale);
 }
 
-
-void TextItem::onGeomChanged()
+void TextItem::onGeomChanged(F32 currentScale)
 {
-   F32 strWidth = (F32)UserInterface::getStringWidth(120, lineEditor.c_str());
-   F32 lineLen = mPos.distanceTo(mDir);
-   F32 size = 120.0f * lineLen / max(strWidth, 80.0f);
-
-   // Compute text size subject to min and max defined in TextItem
-   //mSize = max(min(U32(size), MAX_TEXT_SIZE), MIN_TEXT_SIZE); 
+   recalcTextSize(currentScale);
 }
 
 ////////////////////////////////////////

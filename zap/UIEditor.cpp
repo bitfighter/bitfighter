@@ -139,6 +139,8 @@ EditorUserInterface::EditorUserInterface() : mGridDatabase(GridDatabase(false)) 
    WallSegment::setGridDatabase(&mGridDatabase);      // Still needed?  Can do this via editorGame?
    WallEdge::setGridDatabase(&mGridDatabase);
    WallSegmentManager::setGridDatabase(&mGridDatabase);
+
+   //editorGame = gEditorGame;     // TODO: we should be passing this in rather than relying on the global
 }
 
 
@@ -735,7 +737,7 @@ void EditorUserInterface::loadLevel()
    // And hand-process all other items
    for(S32 i = 0; i < mItems.size(); i++)
       if(mItems[i]->getObjectTypeMask() & ~ItemBarrierMaker && mItems[i]->getObjectTypeMask() & ~ItemNavMeshZone)
-         mItems[i]->onGeomChanged();
+         mItems[i]->onGeomChanged(getCurrentScale());
 }
 
 
@@ -1226,7 +1228,7 @@ void EditorUserInterface::onActivate()
 
    mItemToLightUp = NULL;    
 
-   mEditingSpecialAttrItem = NONE;
+   mEditingSpecialAttrItem = NULL;
    mSpecialAttribute = NoAttribute;
 
    mSaveMsgTimer = 0;
@@ -1249,7 +1251,7 @@ void EditorUserInterface::onReactivate()
 {
    mDraggingObjects = false;  
 
-   mEditingSpecialAttrItem = NONE;     // Probably not necessary
+   mEditingSpecialAttrItem = NULL;     // Probably not necessary
    mSpecialAttribute = NoAttribute;
 
    if(mWasTesting)
@@ -1801,7 +1803,7 @@ void EditorUserInterface::render()
    glPopMatrix();
 
    for(S32 i = 0; i < mLevelGenItems.size(); i++)
-      mLevelGenItems[i]->render(false, true, mShowingReferenceShip, mShowMode);
+      mLevelGenItems[i]->render(true, mShowingReferenceShip, mShowMode);
    
    // Render polyWall item fill just before rendering regular walls.  This will create the effect of all walls merging together.  
    // PolyWall outlines are already part of the wallSegmentManager, so will be rendered along with those of regular walls.
@@ -1818,13 +1820,13 @@ void EditorUserInterface::render()
    // Draw map items (teleporters, etc.) that are not being dragged, and won't have any text labels  (below the dock)
    for(S32 i = 0; i < mItems.size(); i++)
       if(!(mDraggingObjects && mItems[i]->isSelected()))
-         mItems[i]->render(mEditingSpecialAttrItem == i, false, mShowingReferenceShip, mShowMode);
+         mItems[i]->render(false, mShowingReferenceShip, mShowMode);
 
    // Draw map items (teleporters, etc.) that are are selected and/or lit up, so label is readable (still below the dock)
    // Do this as a separate operation to ensure that these are drawn on top of those drawn above.
    for(S32 i = 0; i < mItems.size(); i++)
       if(mItems[i]->isSelected() || mItems[i]->isLitUp())
-         mItems[i]->render(mEditingSpecialAttrItem == i, false, mShowingReferenceShip, mShowMode);
+         mItems[i]->render(false, mShowingReferenceShip, mShowMode);
 
 
    // Go through and render any borders between navMeshZones -- these need to be rendered after the zones themselves so they
@@ -1904,7 +1906,7 @@ void EditorUserInterface::render()
    // we'll lose our wall centernlines.
    for(S32 i = 0; i < mItems.size(); i++)
       if(!(mItems[i]->getObjectTypeMask() & ItemBarrierMaker) && mDraggingObjects && mItems[i]->isSelected())
-         mItems[i]->render(mEditingSpecialAttrItem == i, false, mShowingReferenceShip, mShowMode);
+         mItems[i]->render(false, mShowingReferenceShip, mShowMode);
 
    if(mDragSelecting)      // Draw box for selecting items
    {
@@ -1941,7 +1943,7 @@ void EditorUserInterface::render()
    if(!mShowingReferenceShip)
       for(S32 i = 0; i < mDockItems.size(); i++)
       {
-         mDockItems[i]->render(false, false, mShowingReferenceShip, mShowMode);
+         mDockItems[i]->render(false, mShowingReferenceShip, mShowMode);
          mDockItems[i]->setLitUp(false);
       }
 
@@ -2001,6 +2003,18 @@ void EditorUserInterface::render()
 }
 
 
+// TODO: Merge with nearly identical version in gameType
+Color EditorUserInterface::getTeamColor(S32 team)
+{
+   if(team == Item::TEAM_NEUTRAL || team >= mTeams.size() || team < Item::TEAM_HOSTILE)
+      return gNeutralTeamColor;
+   else if(team == Item::TEAM_HOSTILE)
+      return gHostileTeamColor;
+   else
+      return mTeams[team].color;
+}
+
+
 Color EditorObject::getDrawColor()
 {
    F32 alpha = 1;
@@ -2019,7 +2033,11 @@ EditorObject *EditorObject::newCopy()
 {
    TextItem *textItem = dynamic_cast<TextItem *>(this);
    if(textItem != NULL)
-      return new TextItem(*textItem);
+   {
+      TextItem *newTextItem = new TextItem(*textItem);
+      newTextItem->onGeomChanged(getCurrentScale());
+      return newTextItem;
+   }
 
    TNLAssert(false, "Unhandled object in newCopy!");
    EditorObject *newObject = newEditorObject(this->getClassName());
@@ -2099,7 +2117,7 @@ extern void renderPolygon(const Vector<Point> &fillPoints, const Vector<Point> &
 static const S32 asteroidDesign = 2;      // Design we'll use for all asteroids in editor
 
 // Items are rendered in index order, so those with a higher index get drawn later, and hence, on top
-void EditorObject::render(bool isBeingEdited, bool isScriptItem, bool showingReferenceShip, ShowMode showMode)    // TODO: pass scale
+void EditorObject::render(bool isScriptItem, bool showingReferenceShip, ShowMode showMode)    // TODO: pass scale
 {
    const S32 instrSize = 9;      // Size of instructions for special items
    const S32 attrSize = 10;
@@ -2460,8 +2478,8 @@ void EditorObject::render(bool isBeingEdited, bool isScriptItem, bool showingRef
       if(!mDockItem && getHasRepop())
       {
          if(showMode != ShowWallsOnly && 
-            ((mSelected || mLitUp) &&  gEditorUserInterface.getEditingSpecialAttrItem() == NONE) &&
-            (getObjectTypeMask() & ~ItemFlagSpawn || !strcmp(gEditorUserInterface.mGameType, "HuntersGameType")) || isBeingEdited)
+            ((mSelected || mLitUp) && !gEditorUserInterface.isEditingSpecialAttrItem()) &&
+            (getObjectTypeMask() & ~ItemFlagSpawn || !strcmp(gEditorUserInterface.mGameType, "HuntersGameType")) || isBeingEdited())
          {
             glColor(white);
 
@@ -2484,7 +2502,7 @@ void EditorObject::render(bool isBeingEdited, bool isScriptItem, bool showingRef
 
             if(gEditorUserInterface.isEditingSpecialAttribute(EditorUserInterface::NoAttribute))
                msg = "[Enter] to edit";
-            else if(isBeingEdited && gEditorUserInterface.isEditingSpecialAttribute(EditorUserInterface::RepopDelay))
+            else if(isBeingEdited() && gEditorUserInterface.isEditingSpecialAttribute(EditorUserInterface::RepopDelay))
                msg = "Up/Dn to change";
             else
                msg = "???";
@@ -2606,7 +2624,7 @@ void EditorUserInterface::pasteSelection()
       mItems.last()->setSelected(true);
       for(S32 j = 0; j < mItems.last()->getVertCount(); j++)
          mItems.last()->setVert(mItems.last()->getVert(j) += offset, j);
-      mItems.last()->onGeomChanged();
+      mItems.last()->onGeomChanged(getCurrentScale());
    }
    mItems.sort(geometricSort);
    validateLevel();
@@ -2826,7 +2844,7 @@ void EditorUserInterface::findHitVertex(const Point &canvasPos, EditorObject *&h
    hitObject = NULL;
    hitVertex = NONE;
 
-   if(mEditingSpecialAttrItem != NONE)    // If we're editing a text special attribute, disable this functionality
+   if(mEditingSpecialAttrItem)    // If we're editing a text special attribute, disable this functionality
       return;
 
    const S32 VERTEX_HIT_RADIUS = 8;
@@ -2869,7 +2887,7 @@ void EditorUserInterface::findHitItemAndEdge()
    mItemHit = NULL;
    mEdgeHit = NONE;
 
-   if(mEditingSpecialAttrItem != NONE)               // If we're editing special attributes, disable this functionality
+   if(mEditingSpecialAttrItem)                        // If we're editing special attributes, disable this functionality
       return;
 
    // Do this in two passes -- the first we only consider selected items, the second pass will consider all targets.
@@ -2961,10 +2979,10 @@ void EditorUserInterface::findHitItemAndEdge()
 
 S32 EditorUserInterface::findHitItemOnDock(Point canvasPos)
 {
-   if(mShowMode == ShowWallsOnly)           // Only add dock items when objects are visible
+   if(mShowMode == ShowWallsOnly)     // Only add dock items when objects are visible
       return NONE;
 
-   if(mEditingSpecialAttrItem != NONE)    // If we're editing a text item, disable this functionality
+   if(mEditingSpecialAttrItem)        // If we're editing a text item, disable this functionality
       return NONE;
 
    for(S32 i = mDockItems.size() - 1; i >= 0; i--)     // Go in reverse order because the code we copied did ;-)
@@ -3062,7 +3080,7 @@ void EditorUserInterface::onMouseDragged(S32 x, S32 y)
 
    mMousePos.set(gScreenInfo.getMousePos());
 
-   if(mCreatingPoly || mCreatingPolyline || mDragSelecting || mEditingSpecialAttrItem != NONE)
+   if(mCreatingPoly || mCreatingPolyline || mDragSelecting || mEditingSpecialAttrItem)
       return;
 
    if(mDraggingDockItem != NONE)      // We just started dragging an item off the dock
@@ -3169,7 +3187,7 @@ void EditorUserInterface::onMouseDragged(S32 x, S32 y)
 
             // If we are dragging a vertex, and not the entire item, we are changing the geom, so notify the item
             if(mItems[i]->vertSelected(j))
-               mItems[i]->onGeomChanging();     
+               mItems[i]->onGeomChanging(getCurrentScale());     
          }
 
       if(mItems[i]->isSelected())     
@@ -3297,7 +3315,7 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
             deleted = true;
          }
          else if(geomChanged)
-            mItems[i]->onGeomChanged();
+            mItems[i]->onGeomChanged(getCurrentScale());
 
       }  // else if(!objectsOnly) 
    }  // for
@@ -3373,8 +3391,8 @@ void EditorUserInterface::splitBarrier()
                mItems.push_back(newItem);
 
                // Tell the new segments that they have new geometry
-               mItems[i]->onGeomChanged();
-               mItems.last()->onGeomChanged();
+               mItems[i]->onGeomChanged(getCurrentScale());
+               mItems.last()->onGeomChanged(getCurrentScale());
 
                // And get them in the right order
                mItems.sort(geometricSort);         
@@ -3464,7 +3482,7 @@ void EditorUserInterface::joinBarrier()
       clearSelection();
       mNeedToSave = true;
       autoSave();
-      mItems[joinedItem]->onGeomChanged();
+      mItems[joinedItem]->onGeomChanged(getCurrentScale());
    }
 }
 
@@ -3649,19 +3667,22 @@ void EditorUserInterface::doneEditingSpecialItem(bool saveChanges)
    else
       for(S32 i = 0; i < mItems.size(); i++)
       {
-         if(i == mEditingSpecialAttrItem)
+         if(mEditingSpecialAttrItem == mItems[i])
             continue;
-         else if(mItems[i]->isSelected() && mItems[i]->getObjectTypeMask() == mItems[mEditingSpecialAttrItem]->getObjectTypeMask())
+
+         else if(mItems[i]->isSelected() && mItems[i]->getObjectTypeMask() == mEditingSpecialAttrItem->getObjectTypeMask())
          {
             // We'll ignore text here, because that really makes less sense
-            mItems[i]->repopDelay = mItems[mEditingSpecialAttrItem]->repopDelay;
-            mItems[i]->speed = mItems[mEditingSpecialAttrItem]->speed;
-            mItems[i]->boolattr = mItems[mEditingSpecialAttrItem]->boolattr;
-            mItems[i]->onAttrsChanged();
+            mItems[i]->repopDelay = mEditingSpecialAttrItem->repopDelay;
+            mItems[i]->speed = mEditingSpecialAttrItem->speed;
+            mItems[i]->boolattr = mEditingSpecialAttrItem->boolattr;
+            mItems[i]->onAttrsChanged(getCurrentScale());
          }
       }
 
-   mEditingSpecialAttrItem = NONE;
+
+   mEditingSpecialAttrItem->setIsBeingEdited(false);
+   mEditingSpecialAttrItem = NULL;
    mSpecialAttribute = NoAttribute;
 }
 
@@ -3686,7 +3707,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 
    // This first section is the key handlers for when we're editing the special attributes of an item.  Regular
    // key actions are handled below.
-   else if(mEditingSpecialAttrItem != NONE)
+   else if(mEditingSpecialAttrItem)
       specialAttributeKeyHandler(keyCode, ascii);
 
    // Regular key handling from here on down
@@ -3739,7 +3760,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          if(mNewItem->getVertCount() < gMaxPolygonPoints)          // Limit number of points in a polygon/polyline
          {
             mNewItem->addVert(snapPoint(convertCanvasToLevelCoord(mMousePos)));
-            mNewItem->onGeomChanging();
+            mNewItem->onGeomChanging(getCurrentScale());
          }
          
          return;
@@ -3763,7 +3784,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          mItemHit->selectVert(mEdgeHit + 1);
 
          // Alert the item that its geometry is changing
-         mItemHit->onGeomChanging();
+         mItemHit->onGeomChanging(getCurrentScale());
 
          mMouseDownPos = newVertex;
          
@@ -3815,7 +3836,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
             mNewItem->addToEditor(gEditorGame);
 
             mItems.push_back(mNewItem);
-            mItems.last()->onGeomChanged();      // Walls need to be added to mItems BEFORE onGeomChanged() is run!
+            mItems.last()->onGeomChanged(getCurrentScale());      // Walls need to be added to mItems BEFORE onGeomChanged() is run!
             mItems.sort(geometricSort);
          }
 
@@ -4138,9 +4159,9 @@ void EditorUserInterface::specialAttributeKeyHandler(KeyCode keyCode, char ascii
       doneEditingSpecialItem(false); 
       return;
    }
-   else if(mSpecialAttribute == Text)
+   else if(mSpecialAttribute == Text)     // TODO: Move this to textitem
    {
-      TextItem *textItem = dynamic_cast<TextItem *>(mItems[mEditingSpecialAttrItem]);
+      TextItem *textItem = dynamic_cast<TextItem *>(mEditingSpecialAttrItem);
       TNLAssert(textItem, "bad cast");
 
       if(keyCode == KEY_BACKSPACE || keyCode == KEY_DELETE)
@@ -4148,42 +4169,45 @@ void EditorUserInterface::specialAttributeKeyHandler(KeyCode keyCode, char ascii
 
       else if(ascii)       // User typed a character -- add it to the string
          textItem->lineEditor.addChar(ascii);
+
+      textItem->onAttrsChanging(getCurrentScale());
+
    }
    else if(mSpecialAttribute == RepopDelay)
    {
       if(keyCode == KEY_UP)         // Up - increase delay
       {  /* braces required */
-         if(mItems[mEditingSpecialAttrItem]->repopDelay < MAX_REPOP_DELAY)
-            mItems[mEditingSpecialAttrItem]->repopDelay++;
+         if(mEditingSpecialAttrItem->repopDelay < MAX_REPOP_DELAY)
+            mEditingSpecialAttrItem->repopDelay++;
       }
       else if(keyCode == KEY_DOWN)  // Down - decrease delay
       {  /* braces required */
-         if(mItems[mEditingSpecialAttrItem]->repopDelay > 0)
-            mItems[mEditingSpecialAttrItem]->repopDelay--;
+         if(mEditingSpecialAttrItem->repopDelay > 0)
+            mEditingSpecialAttrItem->repopDelay--;
       }
    }
    else if(mSpecialAttribute == GoFastSpeed)
    {
       if(keyCode == KEY_UP)         // Up - increase speed
       {  /* braces required */
-         if(mItems[mEditingSpecialAttrItem]->speed < SpeedZone::maxSpeed)
-            mItems[mEditingSpecialAttrItem]->speed += 10;
+         if(mEditingSpecialAttrItem->speed < SpeedZone::maxSpeed)
+            mEditingSpecialAttrItem->speed += 10;
       }
       else if(keyCode == KEY_DOWN)  // Down - decrease speed
       {  /* braces required */
-         if(mItems[mEditingSpecialAttrItem]->speed > SpeedZone::minSpeed)
-            mItems[mEditingSpecialAttrItem]->speed -= 10;
+         if(mEditingSpecialAttrItem->speed > SpeedZone::minSpeed)
+            mEditingSpecialAttrItem->speed -= 10;
       }
    }
    else if(mSpecialAttribute == GoFastSnap)
    {
       if(keyCode == KEY_UP || keyCode == KEY_DOWN)   // Up/Down - toggle snapping
       {  /* braces required */
-         mItems[mEditingSpecialAttrItem]->boolattr = !mItems[mEditingSpecialAttrItem]->boolattr;
+         mEditingSpecialAttrItem->boolattr = !mEditingSpecialAttrItem->boolattr;
       }
    }
 
-   mItems[mEditingSpecialAttrItem]->onAttrsChanging();
+   mEditingSpecialAttrItem->onAttrsChanging(getCurrentScale());
 }
 
 
@@ -4201,14 +4225,14 @@ void EditorUserInterface::itemPropertiesEnterKeyHandler()
             if(mItems[j]->isSelected() && mItems[j]->getObjectTypeMask() != mItems[i]->getObjectTypeMask())
                unselectItem(j);
 
-         mEditingSpecialAttrItem = i;
-         mSpecialAttribute = (SpecialAttribute) getNextAttr(i);
+         if(mEditingSpecialAttrItem)
+            mEditingSpecialAttrItem->setIsBeingEdited(false);
+         mEditingSpecialAttrItem = mItems[i];
+         mEditingSpecialAttrItem->setIsBeingEdited(true);
+         mSpecialAttribute = (SpecialAttribute)getNextAttr(i);
 
          if(mSpecialAttribute != NoAttribute)
-         {
-            mEditingSpecialAttrItem = i;
             saveUndoState();
-         }
          else
             doneEditingSpecialItem(true);
 
@@ -4333,7 +4357,7 @@ void EditorUserInterface::finishedDragging()
          {
             for(S32 i = 0; i < mItems.size(); i++)
                if(mItems[i]->isSelected() || mItems[i]->anyVertsSelected())
-                  mItems[i]->onGeomChanged();
+                  mItems[i]->onGeomChanged(getCurrentScale());
 
             mNeedToSave = true;
             autoSave();
@@ -4933,7 +4957,7 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(EditorObject *item)
 
    // Alert all forcefields terminating on any of the wall segments we deleted and potentially recreated
    for(S32 j = 0; j < forcefields.size(); j++)  
-      forcefields[j]->onGeomChanged();
+      forcefields[j]->onGeomChanged(getCurrentScale());
 }
 
 
@@ -5124,7 +5148,7 @@ void EditorObject::increaseWidth(S32 amt)
 
    setWidth(width);
 
-   onGeomChanged();
+   onGeomChanged(getCurrentScale());
 }
 
 
@@ -5139,7 +5163,7 @@ void EditorObject::decreaseWidth(S32 amt)
 
    setWidth(width);
 
-   onGeomChanged();
+   onGeomChanged(getCurrentScale());
 }
 
 
@@ -5466,10 +5490,10 @@ void EditorObject::deleteVert(S32 vertIndex)
 }
 
 
-void EditorObject::onGeomChanging()
+void EditorObject::onGeomChanging(F32 currentScale)
 {
    if(getGeomType() == geomPoly)
-      onGeomChanged();           // Allows poly fill to get reshaped as vertices move
+      onGeomChanged(currentScale);           // Allows poly fill to get reshaped as vertices move
 }
 
 
@@ -5477,10 +5501,10 @@ void EditorObject::onGeomChanging()
 void EditorObject::onItemDragging()
 {
    if(getObjectTypeMask() & ItemForceField)
-     onGeomChanged();
+     onGeomChanged(getCurrentScale());
 
    else if(getGeomType() == geomPoly && getObjectTypeMask() & ~ItemPolyWall)
-      onGeomChanged();     // Allows poly fill to get dragged around with outline
+      onGeomChanged(getCurrentScale());     // Allows poly fill to get dragged around with outline
 }
 
 
@@ -5490,7 +5514,7 @@ WallSegmentManager *getWallSegmentManager()
 }
 
 
-void EditorObject::onGeomChanged()
+void EditorObject::onGeomChanged(F32 currentScale)
 {
    // TODO: Delegate all this to the member objects
    if(getObjectTypeMask() & ItemBarrierMaker || getObjectTypeMask() & ItemPolyWall)
@@ -5607,7 +5631,7 @@ WallSegment::~WallSegment()
       if(gEditorUserInterface.mItems[i]->getObjectTypeMask() & ItemForceField && 
                (gEditorUserInterface.mItems[i]->forceFieldEndSegment == this || 
                 gEditorUserInterface.mItems[i]->forceFieldMountSegment == this) )
-         gEditorUserInterface.mItems[i]->onGeomChanged();       // Will force recalculation of mount and endpoint
+         gEditorUserInterface.mItems[i]->onGeomChanged(getCurrentScale());       // Will force recalculation of mount and endpoint
    }
 
  

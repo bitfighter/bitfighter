@@ -1495,12 +1495,10 @@ void renderTextItem(const Point &pos, const Point &dir, F32 size, const string &
       glPushMatrix();
       glTranslate(pos);
          glScale(scaleFactor);
-                  
-      glRotatef(pos.angleTo(dir) * radiansToDegreesConversion, 0, 0, 1);
-
+         glRotatef(pos.angleTo(dir) * radiansToDegreesConversion, 0, 0, 1);
          glTranslatef(-119, -45, 0);      // Determined experimentally
-         renderBitfighterLogo(0, 1);
 
+         renderBitfighterLogo(0, 1);
       glPopMatrix();
 
       return;

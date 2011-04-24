@@ -53,6 +53,7 @@ private:
 
    virtual const char *getOriginBottomLabel() = 0;          
    virtual const char *getDestinationBottomLabel() = 0;
+   virtual const char *getEditMessage() = 0;
 
 public:
    // Some properties about the item that will be needed in the editor
@@ -79,7 +80,7 @@ class TextItem : public SimpleLine
    typedef GameObject Parent;
 
 private:
-   U32 mSize;            // Text size
+   F32 mSize;            // Text size
    Point mPos;           // Location of text
    Point mDir;           // Direction text is "facing"
    string mText;         // Text itself
@@ -90,6 +91,7 @@ private:
    // How are this item's vertices labeled in the editor?
    const char *getOriginBottomLabel() { return "Start"; }
    const char *getDestinationBottomLabel() { return "Direction"; }
+   const char *getEditMessage() { return "[Enter] to edit text"; }
 
 
             /*if(getObjectTypeMask() & ItemTeleporter)
@@ -108,7 +110,7 @@ public:
    static const U32 MAX_TEXT_SIZE = 255;
    static const U32 MIN_TEXT_SIZE = 10;
 
-   S32 mTeam;            // Team text is visible to (-1 for visible to all)
+   //S32 mTeam;            // Team text is visible to (-1 for visible to all)
    
    TextItem();    // Constructor
    ~TextItem();   // Destructor
@@ -124,7 +126,8 @@ public:
    void onAddedToGame(Game *theGame);
    void computeExtent();                                         // Bounding box for quick collision-possibility elimination
 
-   U32 getSize() { return mSize; }
+   F32 getSize() { return mSize; }
+   void setSize(F32 size) { mSize = size; }
 
    Vector<Point> getVerts() { Vector<Point> p; p.push_back(mPos); p.push_back(mDir); return p; }      // TODO: Can we get rid of this somehow?
 
@@ -140,9 +143,11 @@ public:
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
    ///// Editor Methods
-   void onAttrsChanging();
-   void onGeomChanging();
-   void onGeomChanged();
+   void onAttrsChanging(F32 currentScale);
+   void onGeomChanging(F32 currentScale);
+   void onGeomChanged(F32 currentScale);
+
+   void recalcTextSize(F32 currentScale);
 
    // Some properties about the item that will be needed in the editor
    bool hasText() { return true; }
