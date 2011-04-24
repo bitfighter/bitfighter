@@ -33,6 +33,7 @@
 #include "timer.h"
 #include "gameLoader.h"
 #include "Rect.h"
+#include "Color.h"
 #include "shipItems.h"     // For moduleInfos
 
 #include "dataConnection.h"      // For DataSender
