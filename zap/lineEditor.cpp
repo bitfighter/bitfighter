@@ -111,7 +111,7 @@ void LineEditor::drawCursorAngle(F32 x, F32 y, F32 fontSize, F32 angle)
 {
    if(cursorBlink)
    {
-      S32 w = UserInterface::getStringWidth(fontSize, mLine.c_str());
+      F32 w = UserInterface::getStringWidthF32(fontSize, mLine.c_str());
 
       F32 xpos = x + (w * cos(angle)); 
       F32 ypos = y + (w * sin(angle)); 

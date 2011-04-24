@@ -602,14 +602,20 @@ void UserInterface::drawString4Colf(S32 y, U32 size, U32 col, const char *format
 }
 
    
-
-S32 UserInterface::getStringWidth(F32 size, const char *string)
+F32 UserInterface::getStringWidthF32(F32 size, const char *string)
 {
 #ifndef ZAP_DEDICATED
-   return S32(F32( glutStrokeLength(GLUT_STROKE_ROMAN, (const unsigned char *) string) ) * size / 120.0);
+   return F32( glutStrokeLength(GLUT_STROKE_ROMAN, (const unsigned char *) string) ) * size / 120.0;
 #else
    return 1;
 #endif
+
+}
+
+
+S32 UserInterface::getStringWidth(F32 size, const char *string)
+{
+   return S32(getStringWidthF32(size, string));
 }
 
 

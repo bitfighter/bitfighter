@@ -190,16 +190,12 @@ void TextItem::render()
 // Called by SimpleItem::renderEditor()
 void TextItem::renderEditorItem(F32 currentScale)
 {
-   renderTextItem(mPos, mDir, F32(F32(mSize) / 120), lineEditor.getDisplayString(), getGame()->getTeamColor(mTeam));
+   renderTextItem(mPos, mDir, mSize / getGame()->getGridSize(), lineEditor.getDisplayString(), getGame()->getTeamColor(mTeam));
 
    // If we're editing the text, we need to draw our cursor
    if(isBeingEdited())
    {
-      glPushMatrix();
-      glScalef(1/currentScale, 1/currentScale, 1);
-
-      lineEditor.drawCursorAngle(mPos.x * currentScale, mPos.y * currentScale, getSize(), mPos.angleTo(mDir));
-      glPopMatrix();
+      lineEditor.drawCursorAngle(mPos.x, mPos.y, mSize / getGame()->getGridSize(), mPos.angleTo(mDir));
    }
 }
 
@@ -227,10 +223,7 @@ bool TextItem::processArguments(S32 argc, const char **argv)
    mDir *= getGame()->getGridSize();
 
    mSize = atoi(argv[5]);
-   if (mSize > MAX_TEXT_SIZE)
-      mSize = MAX_TEXT_SIZE;
-   else if(mSize < MIN_TEXT_SIZE)
-      mSize = MIN_TEXT_SIZE;
+   mSize = max(min(mSize, MAX_TEXT_SIZE), MIN_TEXT_SIZE);      // Note that same line exists below, in recalcXXX()... combine?
 
    for(S32 i = 6; i < argc; i++)
    {
@@ -257,12 +250,14 @@ void TextItem::saveItem(FILE *f)
 // Editor
 void TextItem::recalcTextSize(F32 currentScale)
 {
-   F32 lineLen = getVert(0).distanceTo(getVert(1)) * currentScale;
-   F32 strWidth = (F32)UserInterface::getStringWidth(120, lineEditor.c_str()); 
-   F32 size = 120.0f * lineLen / strWidth;
+   const F32 dummyTextSize = 120;
+
+   F32 lineLen = getVert(0).distanceTo(getVert(1)) * getGame()->getGridSize();      // In in-game units
+   F32 strWidth = F32(UserInterface::getStringWidth(dummyTextSize, lineEditor.c_str())) / dummyTextSize; 
+   F32 size = lineLen / strWidth;
 
    // Compute text size subject to min and max defined in TextItem
-   mSize = max(min(U32(size), MAX_TEXT_SIZE), MIN_TEXT_SIZE);
+   mSize = max(min(size, MAX_TEXT_SIZE), MIN_TEXT_SIZE);
 }
 
 

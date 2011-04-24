@@ -312,6 +312,7 @@ public:
    // Return string rendering width (normal and formatted versions)
    static S32 getStringWidth(F32 size, const char *str);
    static S32 getStringWidthf(U32 size, const char *format, ...);
+   static F32 getStringWidthF32(F32 size, const char *string);    // TODO: make functions above return F32 and get rid of this one
 
    static U32 drawWrapText(char *text, S32 xpos, U32 ypos, S32 width, U32 ypos_end, U32 lineHeight, U32 fontSize, bool alignBottom = false, bool draw = true);
 
