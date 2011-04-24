@@ -69,6 +69,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				LinkLibraryDependencies="false"
 				AdditionalDependencies="dsound.lib dinput8.lib dxguid.lib ../lib/OpenAL32.lib ../lib/alut.lib wsock32.lib ../lib/glut32.lib ../lib/tnld.lib ../lib/libtomcryptd.lib ../lib/lua-vec-d.lib"
 				OutputFile="../exe/Bitfighter_d.exe"
 				LinkIncremental="2"
@@ -154,6 +155,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				LinkLibraryDependencies="false"
 				AdditionalDependencies="dsound.lib dxguid.lib dinput8.lib ../lib/OpenAL32.lib ../lib/alut.lib wsock32.lib ../lib/glut32.lib ../lib/tnl.lib ../lib/libtomcrypt.lib ../lib/lua-vec.lib"
 				OutputFile="..\exe\Bitfighter.exe"
 				LinkIncremental="1"
@@ -243,6 +245,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				LinkLibraryDependencies="false"
 				AdditionalDependencies="dsound.lib dinput8.lib dxguid.lib ../lib/OpenAL32.lib ../lib/alut.lib wsock32.lib ../lib/glut32.lib ../lib/tnld.lib ../lib/libtomcryptd.lib ../lib/lua-vec-d.lib ../lib/mysqlppd.lib Ws2_32.lib"
 				OutputFile="../exe/Bitfighter_mysql_d.exe"
 				LinkIncremental="2"
@@ -328,6 +331,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				LinkLibraryDependencies="false"
 				AdditionalDependencies="dsound.lib dxguid.lib dinput8.lib ../lib/OpenAL32.lib ../lib/alut.lib wsock32.lib ../lib/glut32.lib ../lib/tnl.lib ../lib/libtomcrypt.lib ../lib/lua-vec.lib ../lib/mysqlpp.lib"
 				OutputFile="..\exe\Bitfighter_mysql.exe"
 				LinkIncremental="1"
