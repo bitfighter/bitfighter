@@ -60,7 +60,7 @@ void IniSettings::init()
    sfxSet = sfxModernSet;             // Start off with our modern sounds
 
    starsInDistance = true;            // True if stars move in distance behind maze, false if they are in fixed location
-   useLineSmoothing = false;          // Enable/disable anti-aliasing
+   useLineSmoothing = true;          // Enable/disable anti-aliasing
    diagnosticKeyDumpMode = false;     // True if want to dump keystrokes to the screen
    enableExperimentalAimMode = false; // True if we want to show experimental aiming vector in joystick mode
 
@@ -83,7 +83,7 @@ void IniSettings::init()
    hostname = "Bitfighter host";      // Default host name
    hostdescr = "";
    maxPlayers = 127;
-   maxBots = 127;
+   maxBots = 10;
    serverPassword = "";               // Passwords empty by default
    adminPassword = "";
    levelChangePassword = "";
@@ -94,12 +94,16 @@ void IniSettings::init()
    wallFillColor.set(0,0,.15);
    wallOutlineColor.set(0,0,1);
 
+   allowMapUpload = false;
+   allowAdminMapUpload = true;
+
+   voteEnable = false; // disable by default.
    voteLength = 12;
    voteLengthToChangeTeam = 10;
    voteRetryLength = 30;
-   voteYesStrength = 5;
-   voteNoStrength = -5;
-   voteNothingStrength = -2;
+   voteYesStrength = 3;
+   voteNoStrength = -3;
+   voteNothingStrength = -1;
 
    useUpdater = true;
 
@@ -395,6 +399,10 @@ static void loadHostConfiguration()
 
    gIniSettings.alertsVolLevel = checkVol(gIniSettings.alertsVolLevel);
 
+   gIniSettings.allowMapUpload         = (U32) gINI.GetValueYN("Host", "AllowMapUpload", S32(gIniSettings.allowMapUpload) );
+   gIniSettings.allowAdminMapUpload    = (U32) gINI.GetValueYN("Host", "AllowAdminMapUpload", S32(gIniSettings.allowAdminMapUpload) );
+
+   gIniSettings.voteEnable             = (U32) gINI.GetValueYN("Host", "VoteEnable", S32(gIniSettings.voteEnable) );
    gIniSettings.voteLength             = (U32) gINI.GetValueI("Host", "VoteLength", S32(gIniSettings.voteLength) );
    gIniSettings.voteLengthToChangeTeam = (U32) gINI.GetValueI("Host", "VoteLengthToChangeTeam", S32(gIniSettings.voteLengthToChangeTeam) );
    gIniSettings.voteRetryLength        = (U32) gINI.GetValueI("Host", "VoteRetryLength", S32(gIniSettings.voteRetryLength) );
@@ -1350,7 +1358,7 @@ static void writeHost()
       addComment("                                 database server, database name, login, and password as a comma delimeted list");
       addComment(" VoteLength - number of seconds the voting will last, zero will disable voting.");
       addComment(" VoteRetryLength - When vote fail, the vote caller is unable to vote until after this number of seconds.");
-      addComment(" Vote Strengths - Vote will pass when sum of all votes is bigger then zero.");
+      addComment(" Vote Strengths - Vote will pass when sum of all vote strengths is bigger then zero.");
       addComment("----------------");
    }
 
@@ -1369,6 +1377,10 @@ static void writeHost()
    gINI.SetValueI (section, "MaxFPS", gIniSettings.maxDedicatedFPS);
    gINI.setValueYN(section, "LogStats", gIniSettings.logStats);
 
+   gINI.setValueYN(section, "AllowMapUpload", S32(gIniSettings.allowMapUpload) );
+   gINI.setValueYN(section, "AllowAdminMapUpload", S32(gIniSettings.allowAdminMapUpload) );
+
+   gINI.setValueYN(section, "VoteEnable", S32(gIniSettings.voteEnable) );
    gINI.SetValueI(section, "VoteLength", S32(gIniSettings.voteLength) );
    gINI.SetValueI(section, "VoteLengthToChangeTeam", S32(gIniSettings.voteLengthToChangeTeam) );
    gINI.SetValueI(section, "VoteRetryLength", S32(gIniSettings.voteRetryLength) );

@@ -4,7 +4,7 @@
 	Version="9.00"
 	Name="lua-vec"
 	ProjectGUID="{9D7B0AAD-B135-449D-8E12-1ED548AC1048}"
-	RootNamespace="libtomcrypt"
+	RootNamespace="lua-vec"
 	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
@@ -50,9 +50,7 @@
 				RuntimeTypeInfo="true"
 				UsePrecompiledHeader="0"
 				PrecompiledHeaderFile=""
-				AssemblerListingLocation=".\Debug/"
-				ObjectFile="c:\temp\lua-vec_debug_obj\"
-				ProgramDataBaseFileName="c:\temp\lua-vec_debug\"
+				AssemblerListingLocation="$(IntDir)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="4"
@@ -70,7 +68,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\..\lib\lua-vec.lib"
+				OutputFile="..\..\lib\lua-vec-d.lib"
 				SuppressStartupBanner="true"
 			/>
 			<Tool
@@ -91,8 +89,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="c:\temp\libtomcrypt_Release"
-			IntermediateDirectory="c:\temp\libtomcrypt_Release"
+			OutputDirectory="c:\temp\lua-vec_Release"
+			IntermediateDirectory="c:\temp\lua-vec_Release"
 			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
@@ -126,10 +124,8 @@
 				EnableFunctionLevelLinking="true"
 				RuntimeTypeInfo="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\Release/libtomcrypt.pch"
-				AssemblerListingLocation=".\Release/"
-				ObjectFile="c:\temp\libtomcrypt_release_obj\"
-				ProgramDataBaseFileName="c:\temp\libtomcrypt_release\"
+				PrecompiledHeaderFile=""
+				AssemblerListingLocation="$(IntDir)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="3"
@@ -147,7 +143,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\lib\libtomcrypt.lib"
+				OutputFile="..\..\lib\lua-vec.lib"
 				SuppressStartupBanner="true"
 			/>
 			<Tool
@@ -391,10 +387,4 @@
 			>
 		</File>
 	</Files>
-	<Globals>
-		<Global
-			Name="RESOURCE_FILE"
-			Value="\home\libtomcrypt\test\test.rc"
-		/>
-	</Globals>
 </VisualStudioProject>

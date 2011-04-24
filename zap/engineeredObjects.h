@@ -99,6 +99,7 @@ public:
    S32 getTeamIndx(lua_State *L) { return returnInt(L, getTeam() + 1); }
    S32 getHealth(lua_State *L) { return returnFloat(L, mHealth); }
    S32 isActive(lua_State *L) { return returnInt(L, isEnabled()); }
+   S32 getAngle(lua_State *L) {return returnFloat(L, mAnchorNormal.ATAN2());};
 
    GameObject *getGameObject() { return this; }
 };
@@ -164,6 +165,8 @@ public:
    static void getGeom(const Point &anchor, const Point &normal, Vector<Point> &geom);
    static Point getForceFieldStartPoint(const Point &anchor, const Point &normal, F32 scaleFact = 1);
 
+   Vector<Point> getBufferForBotZone();
+
    // Get info about the forcfield that might be projected from this projector
    void getForceFieldStartAndEndPoints(Point &start, Point &end);
 
@@ -194,7 +197,7 @@ public:
    };
 
    S32 getRad(lua_State *L) { return returnInt(L, radius); }
-   S32 getLoc(lua_State *L) { return LuaObject::returnPoint(L, mAnchorPoint + mAnchorNormal * radius ); } 
+   S32 getLoc(lua_State *L) { return LuaObject::returnPoint(L, mAnchorPoint + mAnchorNormal * radius ); }
 };
 
 
@@ -227,6 +230,8 @@ public:
    static void getGeom(const Point &anchor, const Point &normal, Vector<Point> &polyPoints);
    bool getCollisionPoly(Vector<Point> &polyPoints);
 
+   Vector<Point> getBufferForBotZone();
+
    void render();
    void idle(IdleCallPath path);
    void onAddedToGame(Game *theGame);
@@ -248,7 +253,9 @@ public:
 
    // LuaItem methods
    S32 getRad(lua_State *L) { return returnInt(L, TURRET_OFFSET); }
-   S32 getLoc(lua_State *L) { return LuaObject::returnPoint(L, mAnchorPoint + mAnchorNormal * (TURRET_OFFSET)); } 
+   S32 getLoc(lua_State *L) { return LuaObject::returnPoint(L, mAnchorPoint + mAnchorNormal * (TURRET_OFFSET)); }
+   S32 getAngleAim(lua_State *L) {return returnFloat(L, mCurrentAngle);};
+
 };
 
 

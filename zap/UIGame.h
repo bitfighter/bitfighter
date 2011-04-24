@@ -34,7 +34,8 @@
 #include "timer.h"
 #include "sfx.h"
 #include "voiceCodec.h"
-#include "point.h"
+#include "Point.h"
+#include "Color.h"
 
 namespace Zap
 {
@@ -274,7 +275,8 @@ public:
 
    string remoteLevelDownloadFilename;
    //ofstream mOutputFile;            // For saving downloaded levels
-   FILE *mOutputFile;               // For saving downloaded levels
+   //FILE *mOutputFile;               // For saving downloaded levels
+   string mOutputFileName;
 
    void onKeyDown(KeyCode keyCode, char ascii);
    void onKeyUp(KeyCode keyCode);

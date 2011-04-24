@@ -78,6 +78,12 @@
 		737826AD12960DDF007333BE /* bitfighter.sh in CopyFiles */ = {isa = PBXBuildFile; fileRef = 736DE9A512906AA400C3CB73 /* bitfighter.sh */; };
 		7378E23812F93C9D005EF681 /* database.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7378E23612F93C9D005EF681 /* database.cpp */; };
 		7378E23912F93C9D005EF681 /* database.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7378E23612F93C9D005EF681 /* database.cpp */; };
+		737C80FA135CC67500FF5282 /* Color.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737C80F4135CC67500FF5282 /* Color.cpp */; };
+		737C80FB135CC67500FF5282 /* Point.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737C80F6135CC67500FF5282 /* Point.cpp */; };
+		737C80FC135CC67500FF5282 /* Rect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737C80F8135CC67500FF5282 /* Rect.cpp */; };
+		737C80FD135CC67500FF5282 /* Color.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737C80F4135CC67500FF5282 /* Color.cpp */; };
+		737C80FE135CC67500FF5282 /* Point.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737C80F6135CC67500FF5282 /* Point.cpp */; };
+		737C80FF135CC67500FF5282 /* Rect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737C80F8135CC67500FF5282 /* Rect.cpp */; };
 		737CE40512904D5300D732B7 /* robots in Resources */ = {isa = PBXBuildFile; fileRef = 737CE3F412904D5300D732B7 /* robots */; };
 		737CE40612904D5300D732B7 /* scripts in Resources */ = {isa = PBXBuildFile; fileRef = 737CE3FC12904D5300D732B7 /* scripts */; };
 		737CE44E12904D7D00D732B7 /* levels in Resources */ = {isa = PBXBuildFile; fileRef = 737CE40712904D7D00D732B7 /* levels */; };
@@ -620,12 +626,18 @@
 		737826B112960DDF007333BE /* Bitfighterd.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Bitfighterd.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7378E23612F93C9D005EF681 /* database.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = database.cpp; path = ../../../master/database.cpp; sourceTree = SOURCE_ROOT; };
 		7378E23712F93C9D005EF681 /* database.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = database.h; path = ../../../master/database.h; sourceTree = SOURCE_ROOT; };
+		737C80F4135CC67500FF5282 /* Color.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Color.cpp; path = ../../../zap/Color.cpp; sourceTree = SOURCE_ROOT; };
+		737C80F5135CC67500FF5282 /* Color.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Color.h; path = ../../../zap/Color.h; sourceTree = SOURCE_ROOT; };
+		737C80F6135CC67500FF5282 /* Point.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Point.cpp; path = ../../../zap/Point.cpp; sourceTree = SOURCE_ROOT; };
+		737C80F7135CC67500FF5282 /* Point.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Point.h; path = ../../../zap/Point.h; sourceTree = SOURCE_ROOT; };
+		737C80F8135CC67500FF5282 /* Rect.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Rect.cpp; path = ../../../zap/Rect.cpp; sourceTree = SOURCE_ROOT; };
+		737C80F9135CC67500FF5282 /* Rect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Rect.h; path = ../../../zap/Rect.h; sourceTree = SOURCE_ROOT; };
+		737C8110135CCD7300FF5282 /* version.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = version.h; path = ../../../zap/version.h; sourceTree = SOURCE_ROOT; };
 		737CE312129048B900D732B7 /* libtomcrypt-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "libtomcrypt-Info.plist"; sourceTree = "<group>"; };
-		737CE3F412904D5300D732B7 /* robots */ = {isa = PBXFileReference; lastKnownFileType = folder; name = robots; path = ../../../installer/robots; sourceTree = SOURCE_ROOT; };
-		737CE3FC12904D5300D732B7 /* scripts */ = {isa = PBXFileReference; lastKnownFileType = folder; name = scripts; path = ../../../exe/scripts; sourceTree = SOURCE_ROOT; };
-		737CE40712904D7D00D732B7 /* levels */ = {isa = PBXFileReference; lastKnownFileType = folder; name = levels; path = ../../../installer/levels; sourceTree = SOURCE_ROOT; };
-		737CE41F12904D7D00D732B7 /* screenshots */ = {isa = PBXFileReference; lastKnownFileType = folder; name = screenshots; path = ../../../installer/screenshots; sourceTree = SOURCE_ROOT; };
-		737CE42212904D7D00D732B7 /* sfx */ = {isa = PBXFileReference; lastKnownFileType = folder; name = sfx; path = ../../../installer/sfx; sourceTree = SOURCE_ROOT; };
+		737CE3F412904D5300D732B7 /* robots */ = {isa = PBXFileReference; lastKnownFileType = folder; name = robots; path = ../../../resource/robots; sourceTree = SOURCE_ROOT; };
+		737CE3FC12904D5300D732B7 /* scripts */ = {isa = PBXFileReference; lastKnownFileType = folder; name = scripts; path = ../../../resource/scripts; sourceTree = SOURCE_ROOT; };
+		737CE40712904D7D00D732B7 /* levels */ = {isa = PBXFileReference; lastKnownFileType = folder; name = levels; path = ../../../resource/levels; sourceTree = SOURCE_ROOT; };
+		737CE42212904D7D00D732B7 /* sfx */ = {isa = PBXFileReference; lastKnownFileType = folder; name = sfx; path = ../../../resource/sfx; sourceTree = SOURCE_ROOT; };
 		737CE46C12904E9E00D732B7 /* libtomcrypt.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = libtomcrypt.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		737CE61D1290553D00D732B7 /* tnl.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = tnl.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		737CE61E1290553D00D732B7 /* tnl-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "tnl-Info.plist"; sourceTree = "<group>"; };
@@ -747,7 +759,6 @@
 		73D2F2EC12E2D7E800EA5EBE /* packedfont.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = packedfont.c; path = ../../../zap/packedfont.c; sourceTree = SOURCE_ROOT; };
 		73D2F2ED12E2D7E800EA5EBE /* playerInfo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = playerInfo.cpp; path = ../../../zap/playerInfo.cpp; sourceTree = SOURCE_ROOT; };
 		73D2F2EE12E2D7E800EA5EBE /* playerInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = playerInfo.h; path = ../../../zap/playerInfo.h; sourceTree = SOURCE_ROOT; };
-		73D2F2EF12E2D7E800EA5EBE /* point.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = point.h; path = ../../../zap/point.h; sourceTree = SOURCE_ROOT; };
 		73D2F2F012E2D7E800EA5EBE /* polygon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = polygon.h; path = ../../../zap/polygon.h; sourceTree = SOURCE_ROOT; };
 		73D2F2F112E2D7E800EA5EBE /* private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = private.h; path = ../../../zap/private.h; sourceTree = SOURCE_ROOT; };
 		73D2F2F212E2D7E800EA5EBE /* projectile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = projectile.cpp; path = ../../../zap/projectile.cpp; sourceTree = SOURCE_ROOT; };
@@ -953,8 +964,8 @@
 		73D2F52012E2DA1700EA5EBE /* twofish.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = twofish.c; path = ../../../libtomcrypt/twofish.c; sourceTree = SOURCE_ROOT; };
 		73D2F52112E2DA1700EA5EBE /* xtea.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = xtea.c; path = ../../../libtomcrypt/xtea.c; sourceTree = SOURCE_ROOT; };
 		73D2F52212E2DA1700EA5EBE /* yarrow.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = yarrow.c; path = ../../../libtomcrypt/yarrow.c; sourceTree = SOURCE_ROOT; };
-		73D2F60212E2E0A500EA5EBE /* FreeALUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FreeALUT.framework; path = ../../../openal/FreeALUT.framework; sourceTree = SOURCE_ROOT; };
-		73D2F60412E2E0A600EA5EBE /* OpenAL-Soft.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = "OpenAL-Soft.framework"; path = "../../../openal/OpenAL-Soft.framework"; sourceTree = SOURCE_ROOT; };
+		73D2F60212E2E0A500EA5EBE /* FreeALUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FreeALUT.framework; path = ../../../lib/FreeALUT.framework; sourceTree = SOURCE_ROOT; };
+		73D2F60412E2E0A600EA5EBE /* OpenAL-Soft.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = "OpenAL-Soft.framework"; path = "../../../lib/OpenAL-Soft.framework"; sourceTree = SOURCE_ROOT; };
 		73D2F67B12E2E1D400EA5EBE /* lapi.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = lapi.c; path = "../../../lua/lua-vec/src/lapi.c"; sourceTree = SOURCE_ROOT; };
 		73D2F67C12E2E1D400EA5EBE /* lapi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = lapi.h; path = "../../../lua/lua-vec/src/lapi.h"; sourceTree = SOURCE_ROOT; };
 		73D2F67D12E2E1D400EA5EBE /* lauxlib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = lauxlib.c; path = "../../../lua/lua-vec/src/lauxlib.c"; sourceTree = SOURCE_ROOT; };
@@ -1162,7 +1173,6 @@
 				737CE312129048B900D732B7 /* libtomcrypt-Info.plist */,
 				737CE61E1290553D00D732B7 /* tnl-Info.plist */,
 				737CE40712904D7D00D732B7 /* levels */,
-				737CE41F12904D7D00D732B7 /* screenshots */,
 				737CE42212904D7D00D732B7 /* sfx */,
 				737CE3F412904D5300D732B7 /* robots */,
 				737CE3FC12904D5300D732B7 /* scripts */,
@@ -1304,6 +1314,13 @@
 		73D2F27E12E2D6D800EA5EBE /* zap */ = {
 			isa = PBXGroup;
 			children = (
+				737C8110135CCD7300FF5282 /* version.h */,
+				737C80F4135CC67500FF5282 /* Color.cpp */,
+				737C80F5135CC67500FF5282 /* Color.h */,
+				737C80F6135CC67500FF5282 /* Point.cpp */,
+				737C80F7135CC67500FF5282 /* Point.h */,
+				737C80F8135CC67500FF5282 /* Rect.cpp */,
+				737C80F9135CC67500FF5282 /* Rect.h */,
 				73844F4B13500E1600033B85 /* GeomUtils.cpp */,
 				73844F4C13500E1600033B85 /* GeomUtils.h */,
 				73844F4D13500E1600033B85 /* polygon.cpp */,
@@ -1410,7 +1427,6 @@
 				73D2F2EC12E2D7E800EA5EBE /* packedfont.c */,
 				73D2F2ED12E2D7E800EA5EBE /* playerInfo.cpp */,
 				73D2F2EE12E2D7E800EA5EBE /* playerInfo.h */,
-				73D2F2EF12E2D7E800EA5EBE /* point.h */,
 				73D2F2F012E2D7E800EA5EBE /* polygon.h */,
 				73D2F2F112E2D7E800EA5EBE /* private.h */,
 				73D2F2F212E2D7E800EA5EBE /* projectile.cpp */,
@@ -1933,7 +1949,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "app_name=\"Bitfighterd\"\nto_package_dir=$( mktemp -dt ${app_name} )\ntools_dir=\"../tools\"\n# magic\nversion=$( grep 'ZAP_GAME_RELEASE' ../../../zap/game.h |cut -f3 -d' ' | sed 's/\"//g' )\nfinal_dmg=\"${BUILT_PRODUCTS_DIR}/${app_name}-${version}.macosx-universal\"\n\ntest -f \"${final_dmg}.dmg\" && rm \"${final_dmg}.dmg\"\n\ncp -R \"${BUILT_PRODUCTS_DIR}/${app_name}.app\" \"${to_package_dir}\"\n\nuncompressed_dmg=`$tools_dir/dmg-create \"${to_package_dir}\" \"${app_name}\"`\n\n$tools_dir/dmg-convert \"${uncompressed_dmg}\" \"${final_dmg}\"\nrm \"${uncompressed_dmg}\"\nrm -r \"${to_package_dir}\"";
+			shellScript = "app_name=\"Bitfighterd\"\nto_package_dir=$( mktemp -dt ${app_name} )\ntools_dir=\"../tools\"\n# magic\nversion=$( grep 'ZAP_GAME_RELEASE' ../../../zap/version.h |cut -f3 -d' ' | sed 's/\"//g' )\nfinal_dmg=\"${BUILT_PRODUCTS_DIR}/${app_name}-${version}.macosx-universal\"\n\ntest -f \"${final_dmg}.dmg\" && rm \"${final_dmg}.dmg\"\n\ncp -R \"${BUILT_PRODUCTS_DIR}/${app_name}.app\" \"${to_package_dir}\"\n\nuncompressed_dmg=`$tools_dir/dmg-create \"${to_package_dir}\" \"${app_name}\"`\n\n$tools_dir/dmg-convert \"${uncompressed_dmg}\" \"${final_dmg}\"\nrm \"${uncompressed_dmg}\"\nrm -r \"${to_package_dir}\"";
 		};
 		03AD18B512CE2C6F00274A25 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -1946,7 +1962,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/bash;
-			shellScript = "app_name=\"Bitfighter\"\nto_package_dir=$( mktemp -dt ${app_name} )\npkgdmg=\"../tools/pkg-dmg\"\n\ndsstore=bitfighter.dsstore\nbackground=bf_dmg_background.png\n\n# magic\nversion=$( grep 'ZAP_GAME_RELEASE' ../../../zap/game.h |cut -f3 -d' ' | sed 's/\"//g' )\nfinal_dmg=\"${BUILT_PRODUCTS_DIR}/${app_name}-${version}.macosx-universal\"\n\ntest -f \"${final_dmg}.dmg\" && rm \"${final_dmg}.dmg\"\n\nrsync -av \"${BUILT_PRODUCTS_DIR}/${app_name}.app\" \"${to_package_dir}/\"\n\n$pkgdmg --target ${final_dmg} --source ${to_package_dir} --volname ${app_name} --copy ${dsstore}:/.DS_Store --mkdir /.background --copy ${background}:/.background --symlink /Applications:/Applications\n\nrm -r \"${to_package_dir}\"";
+			shellScript = "app_name=\"Bitfighter\"\nto_package_dir=$( mktemp -dt ${app_name} )\npkgdmg=\"../tools/pkg-dmg\"\n\ndsstore=bitfighter.dsstore\nbackground=bf_dmg_background.png\n\n# magic\nversion=$( grep 'ZAP_GAME_RELEASE' ../../../zap/version.h |cut -f3 -d' ' | sed 's/\"//g' )\nfinal_dmg=\"${BUILT_PRODUCTS_DIR}/${app_name}-${version}.macosx-universal\"\n\ntest -f \"${final_dmg}.dmg\" && rm \"${final_dmg}.dmg\"\n\nrsync -av \"${BUILT_PRODUCTS_DIR}/${app_name}.app\" \"${to_package_dir}/\"\n\n$pkgdmg --target ${final_dmg} --source ${to_package_dir} --volname ${app_name} --copy ${dsstore}:/.DS_Store --mkdir /.background --copy ${background}:/.background --symlink /Applications:/Applications\n\nrm -r \"${to_package_dir}\"";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -2091,6 +2107,9 @@
 				73844F4213500C2F00033B85 /* sweep_context.cc in Sources */,
 				73844F5113500E1600033B85 /* GeomUtils.cpp in Sources */,
 				73844F5213500E1600033B85 /* polygon.cpp in Sources */,
+				737C80FD135CC67500FF5282 /* Color.cpp in Sources */,
+				737C80FE135CC67500FF5282 /* Point.cpp in Sources */,
+				737C80FF135CC67500FF5282 /* Rect.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2324,6 +2343,9 @@
 				73844F3C13500C2F00033B85 /* sweep_context.cc in Sources */,
 				73844F4F13500E1600033B85 /* GeomUtils.cpp in Sources */,
 				73844F5013500E1600033B85 /* polygon.cpp in Sources */,
+				737C80FA135CC67500FF5282 /* Color.cpp in Sources */,
+				737C80FB135CC67500FF5282 /* Point.cpp in Sources */,
+				737C80FC135CC67500FF5282 /* Rect.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2622,8 +2644,7 @@
 				COPY_PHASE_STRIP = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					../../../openal,
-					"\"$(SRCROOT)/../../../openal\"",
+					"\"$(SRCROOT)/../../../lib\"",
 					"\"$(SRCROOT)/../tools\"",
 				);
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -2651,8 +2672,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					../../../openal,
-					"\"$(SRCROOT)/../../../openal\"",
+					"\"$(SRCROOT)/../../../lib\"",
 					"\"$(SRCROOT)/../tools\"",
 				);
 				GCC_MODEL_TUNING = G5;

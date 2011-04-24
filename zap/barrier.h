@@ -27,7 +27,7 @@
 #define _BARRIER_H_
 
 #include "gameObject.h"
-#include "point.h"
+#include "Point.h"
 #include "tnlNetObject.h"
 
 namespace Zap
@@ -46,7 +46,6 @@ public:
    // By precomputing and storing, we should ease the rendering cost
    Vector<Point> mRenderFillGeometry; ///< Actual geometry used for rendering fill.
    Vector<Point> mRenderOutlineGeometry; ///< Actual geometry used for rendering outline.
-   Vector<Point> mBotZoneBufferGeometry; ///< Geometry used for rendering the botzones.
 
    F32 mWidth;
 
@@ -83,13 +82,12 @@ public:
    // Simply takes a segment and "puffs it out" to a rectangle of a specified width, filling cornerPoints.  Does not modify endpoints.
    static void expandCenterlineToOutline(const Point &start, const Point &end, F32 width, Vector<Point> &cornerPoints);
 
-   // Takes a segment and "puffs it out" to a rectangle for bot zone generation.
-   // This rectangle is the width of the barrier plus the ship's collision radius added to the outside
-   static void bufferBarrierForBotZone(const Point &start, const Point &end, F32 barrierWidth, Vector<Point> &bufferedPoints);
-   static void bufferPolyWallForBotZone(const Vector<Point> &inputPoints, Vector<Point> &bufferedPoints);
+   // Takes a segment and "puffs it out" to a polygon for bot zone generation.
+   // This polygon is the width of the barrier plus the ship's collision radius added to the outside
+   Vector<Point> getBufferForBotZone();
 
    // Combines multiple barriers into a single complex polygon
-   static bool unionBarriers(const Vector<DatabaseObject *> &barriers, bool useBotGeom, Vector<Vector<Point> > &solution);
+   static bool unionBarriers(const Vector<DatabaseObject *> &barriers, Vector<Vector<Point> > &solution);
 
    /// Clips the current set of render lines against the polygon passed as polyPoints, modifies lineSegmentPoints.
    static void clipRenderLinesToPoly(const Vector<DatabaseObject *> &barrierList, Vector<Point> &lineSegmentPoints);

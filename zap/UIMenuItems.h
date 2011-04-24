@@ -28,7 +28,7 @@
 
 #include "keyCode.h"       // For keyCodes!
 #include "teamInfo.h"      // For Team def
-#include "point.h"
+#include "Color.h"
 #include "stringUtils.h"   // For itos
 #include <string>
 

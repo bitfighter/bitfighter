@@ -55,6 +55,7 @@
 #include "luaUtil.h"
 #include "glutInclude.h"
 #include "config.h"              // for gIniSettings.defaultRobotScript
+#include "GeomUtils.h"
 
 #include "oglconsole.h"
 
@@ -70,24 +71,6 @@ const bool QUIT_ON_SCRIPT_ERROR = true;
 
 bool Robot::mIsPaused = false;
 S32 Robot::mStepCount = -1;
-
-// To use this RobotController, add Robot without any parameters in level file.
-// I would like to keep this class here, to speed up compiler.
-// If this class is in Robot.h, it will have to recompile everything when we change anything in this class
-class RobotController
-{
-   Robot *ship;
-   GameType *gametype;
-   void gotoPoint(Point pos);
-   Point prevEnemyPosition;
-
-public:
-   RobotController()
-   {
-      // Do nothing
-   }
-   void run(Robot *newship, GameType *newgametype);
-};
 
 
 
@@ -379,8 +362,6 @@ S32 LuaRobot::setThrust(lua_State *L)
    return 0;
 }
 
-
-extern bool FindLowestRootInInterval(F32 inA, F32 inB, F32 inC, F32 inUpperBound, F32 &outX);
 
 bool calcInterceptCourse(GameObject *target, Point aimPos, F32 aimRadius, S32 aimTeam, F32 aimVel, F32 aimLife, bool ignoreFriendly, F32 &interceptAngle)
 {
@@ -955,6 +936,7 @@ S32 LuaRobot::getWaypoint(lua_State *L)  // Takes a luavec or an x,y
    if(currentZone == targetZone)
    {
       Point p;
+      thisRobot->flightPlan.push_back(target);
       if(!thisRobot->canSeePoint(target))           // Possible, if we're just on a boundary, and a protrusion's blocking a ship edge
       {
          p = gBotNavMeshZones[targetZone]->getCenter();
@@ -963,7 +945,6 @@ S32 LuaRobot::getWaypoint(lua_State *L)  // Takes a luavec or an x,y
       else
          p = target;
 
-      thisRobot->flightPlan.push_back(target);
       return returnPoint(L, p);
    }
 
@@ -1417,7 +1398,6 @@ Vector<Robot *> Robot::robots;
 // Constructor, runs on client and server
 Robot::Robot(StringTableEntry robotName, S32 team, Point pt, F32 mass) : Ship(robotName, false, team, pt, mass, true)
 {
-   robotController = new RobotController();
    gameConnectionInitalized = false;
    mObjectTypeMask = RobotType | MoveableType | CommandMapVisType | TurretTargetType;     // Override typemask set by ship
 
@@ -1444,7 +1424,6 @@ Robot::Robot(StringTableEntry robotName, S32 team, Point pt, F32 mass) : Ship(ro
 // Destructor, runs on client and server
 Robot::~Robot()
 {
-   delete (RobotController *)robotController;
    if(gameConnectionInitalized)
    {
       GameConnection *gc = getOwner();
@@ -1840,8 +1819,6 @@ F32 Robot::getAnglePt(Point point)
 }
 
 
-extern bool PolygonContains2(const Point *inVertices, int inNumVertices, const Point &inPoint);
-
 // Return coords of nearest ship... and experimental robot routine
 bool Robot::findNearestShip(Point &loc)
 {
@@ -1877,10 +1854,6 @@ bool Robot::findNearestShip(Point &loc)
 
 bool Robot::canSeePoint(Point point)
 {
-   // Need to check the two edge points perpendicular to the direction of looking to ensure we have an unobstructed
-   // flight lane to point.  Radius of the robot is mRadius.  This keeps the ship from getting hung up on
-   // obstacles that appear visible from the center of the ship, but are actually blocked.
-
    Point difference = point - getActualPos();
 
    Point crossVector(difference.y, -difference.x);  // Create a point whose vector from 0,0 is perpenticular to the original vector
@@ -1894,9 +1867,26 @@ bool Robot::canSeePoint(Point point)
    Point pointEdge1 = point + crossVector;
    Point pointEdge2 = point - crossVector;
 
-   return(
-      gServerGame->getGridDatabase()->pointCanSeePoint(shipEdge1, pointEdge1) &&
-      gServerGame->getGridDatabase()->pointCanSeePoint(shipEdge2, pointEdge2) );
+   Vector<Point> thisPoints;
+   thisPoints.push_back(shipEdge1);
+   thisPoints.push_back(shipEdge2);
+   thisPoints.push_back(pointEdge2);
+   thisPoints.push_back(pointEdge1);
+
+   Vector<Point> otherPoints;
+   Rect queryRect(thisPoints);
+   Vector<DatabaseObject *> fillVector;
+   findObjects(CollideableType, fillVector, queryRect);
+
+   for(S32 i=0; i < fillVector.size(); i++)
+   {
+      if(fillVector[i]->getCollisionPoly(otherPoints))
+      {
+         if(polygonsIntersect(thisPoints, otherPoints))
+            return false;
+      }
+   }
+   return true;
 }
 
 
@@ -1937,15 +1927,16 @@ void Robot::idle(GameObject::IdleCallPath path)
          return;
       }
 
+      // Clear out current move.  It will get set just below with the lua call, but if that function
+      // doesn't set the various move components, we want to make sure that they default to 0.
+      mCurrentMove.fire = false;
+      mCurrentMove.up = 0;
+      mCurrentMove.down = 0;
+      mCurrentMove.right = 0;
+      mCurrentMove.left = 0;
+
       if(isRunningScript)
       {
-         // Clear out current move.  It will get set just below with the lua call, but if that function
-         // doesn't set the various move components, we want to make sure that they default to 0.
-         mCurrentMove.fire = false;
-         mCurrentMove.up = 0;
-         mCurrentMove.down = 0;
-         mCurrentMove.right = 0;
-         mCurrentMove.left = 0;
 
          for(S32 i = 0; i < ShipModuleCount; i++)
             mCurrentMove.module[i] = false;
@@ -1987,9 +1978,8 @@ void Robot::idle(GameObject::IdleCallPath path)
             getGame()->getGameType()->s2cDisplayChatMessage(true, getName(), "!!! ROBOT ERROR !!!");
             wasRunningScript = false;
          }
+         // Robot does nothing without script.
 
-         // Built-in robot might soon be fully programmed without using script file.
-         ((RobotController *)robotController)->run(this, getGame()->getGameType());    
       }
 
       Parent::idle(GameObject::ServerIdleControlFromClient);   // Let's say the script is the client
@@ -2023,60 +2013,6 @@ void Robot::spawn()
 }
 
 
-// Currently does not go anywhere, all it does is fire at enemies.
-void RobotController::run(Robot *newship, GameType *newgametype)
-{
-   ship = newship;
-   gametype = newgametype;
-
-
-   F32 minDistance = F32_MAX;
-   Ship *enemyship = NULL;
-   Vector<DatabaseObject *> objects;
-   Point pos = ship->getActualPos();
-   Rect queryRect(pos, pos);
-   queryRect.expand(gServerGame->computePlayerVisArea(ship));
-   gServerGame->getGridDatabase()->findObjects(ShipType,objects,queryRect);
-   for(S32 i=0; i<objects.size(); i++)
-   {
-      Ship *foundship = dynamic_cast<Ship *>(objects[i]);
-      if(foundship != NULL)
-      if(!gametype->isTeamGame() || foundship->getTeam() != ship->getTeam())
-      {
-         F32 newDist = pos.distanceTo(foundship->getActualPos());
-         if(newDist < minDistance)
-         {
-            if(gametype->getGridDatabase()->pointCanSeePoint(pos, foundship->getActualPos()))
-            {
-               minDistance = newDist;
-               enemyship = foundship;
-            }
-         }
-      }
-   }
-   if(enemyship != NULL)
-   {
-      Move move = ship->getCurrentMove();
-      //move->angle = ship->getActualPos().angleTo(enemyship->getActualPos());
-      WeaponInfo weap = gWeapons[ship->getSelectedWeapon()];    // Robot's active weapon
-      F32 interceptAngle;
-      move.fire = (calcInterceptCourse(enemyship, ship->getActualPos(), ship->getRadius(), ship->getTeam(), weap.projVelocity, weap.projLiveTime, false, interceptAngle));
-      if(move.fire)
-         move.angle = interceptAngle;
-      ship->setCurrentMove(move);
-   }
-   else
-   {
-      Move move = ship->getCurrentMove();
-      move.fire = false;
-      ship->setCurrentMove(move);
-   }
-}
-
-void RobotController::gotoPoint(Point point)
-{
-   //ship->getCurrentMove();
-}
 
 };
 

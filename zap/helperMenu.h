@@ -28,14 +28,13 @@
 
 #include "keyCode.h"
 #include "tnl.h"
+#include "Color.h"
 
 using namespace TNL; 
 
 
 namespace Zap
 {
-
-struct Color;
 
 class HelperMenu   
 {

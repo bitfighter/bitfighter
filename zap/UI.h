@@ -29,7 +29,7 @@
 #include "keyCode.h"
 #include "SharedConstants.h"
 #include "timer.h"
-#include "point.h"
+#include "Point.h"
 #include "lineEditor.h"
 #include "config.h"           // For DisplayMode enum
 #include "stringUtils.h"      // For itos
@@ -313,10 +313,14 @@ public:
    static S32 getStringWidth(F32 size, const char *str);
    static S32 getStringWidthf(U32 size, const char *format, ...);
 
+   static U32 drawWrapText(char *text, S32 xpos, U32 ypos, S32 width, U32 ypos_end, U32 lineHeight, U32 fontSize, bool alignBottom = false, bool draw = true);
+
    static void playBoop();    // Make some noise!
 };
 
 
+
+// Used only for multiple mClientGame in one instance
 struct UserInterfaceData
 {
    UserInterface *current;            // Currently active menu

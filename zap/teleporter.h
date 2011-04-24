@@ -26,7 +26,7 @@
 #include "gameConnection.h"
 #include "gameObject.h"
 #include "projectile.h"    // For LuaItem
-#include "point.h"
+#include "Point.h"
 #include "UIEditor.h"      // For EditorObject 
 
 #include "tnlNetObject.h"

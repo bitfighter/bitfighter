@@ -344,10 +344,10 @@ void GameType::idle(GameObject::IdleCallPath path)
       mScoreboardUpdateTimer.reset();
       for(S32 i = 0; i < mClientList.size(); i++)
       {
-         if(mClientList[i]->clientConnection)
+         if(mClientList[i]->clientConnection && mClientList[i]->clientConnection->isEstablished())  // robots don't have connection
          {
             mClientList[i]->ping = (U32) mClientList[i]->clientConnection->getRoundTripTime();
-            if(mClientList[i]->ping > MaxPing)
+            if(mClientList[i]->ping > MaxPing || mClientList[i]->clientConnection->lostContact())
                mClientList[i]->ping = MaxPing;
          }
       }
@@ -1565,8 +1565,13 @@ void GameType::clientRequestLoadout(GameConnection *client, const Vector<U32> &l
 {
    Ship *ship = dynamic_cast<Ship *>(client->getControlObject());
 
-   if(ship && ship->isInZone(LoadoutZoneType))
-      setClientShipLoadout(client->getClientRef(), loadout, false);
+   if(ship)
+   {
+      GameObject *object = ship->isInZone(LoadoutZoneType);
+      if(object)
+         if(object->getTeam() == ship->getTeam() || object->getTeam() == -1)
+            setClientShipLoadout(client->getClientRef(), loadout, false);
+   }
 
    // Not CE
    //S32 clientIndex = findClientIndexByConnection(client);
@@ -2844,7 +2849,7 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
       else if(!clientRef->clientConnection->isLevelChanger())
          clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Need level change permissions to add a bot");
 
-      else if(Robot::robots.size() >= gIniSettings.maxBots)
+      else if((Robot::robots.size() >= gIniSettings.maxBots && !clientRef->clientConnection->isAdmin()) || Robot::robots.size() >= 256)
          clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Can't add more bots -- this server is full");
 
       else if(args.size() >= 2 && !safeFilename(args[1].getString()))

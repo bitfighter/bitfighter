@@ -32,6 +32,7 @@
 #include "sfx.h"
 #include "gameObjectRender.h"
 #include "GeomUtils.h"
+#include "BotNavMeshZone.h"
 
 namespace Zap
 {
@@ -651,6 +652,19 @@ bool ForceFieldProjector::getCollisionPoly(Vector<Point> &polyPoints)
    return true;
 }
 
+Vector<Point> ForceFieldProjector::getBufferForBotZone()
+{
+   Vector<Point> inputPoints, bufferedPoints;
+   getCollisionPoly(inputPoints);
+
+   if (isWoundClockwise(inputPoints))
+      inputPoints.reverse();
+
+   offsetPolygon(inputPoints, bufferedPoints, BotNavMeshZone::BufferRadius);
+
+   return bufferedPoints;
+}
+
 void ForceFieldProjector::onAddedToGame(Game *theGame)
 {
    getGame()->mObjectsLoaded++;
@@ -683,8 +697,10 @@ Lunar<ForceFieldProjector>::RegType ForceFieldProjector::methods[] =
    method(ForceFieldProjector, getVel),
    method(ForceFieldProjector, getTeamIndx),
 
+   // EngineeredObject methods
    method(ForceFieldProjector, getHealth),
    method(ForceFieldProjector, isActive),
+   method(ForceFieldProjector, getAngle),
 
    {0,0}    // End method list
 };
@@ -851,7 +867,6 @@ bool ForceField::getCollisionPoly(Vector<Point> &points)
    return true;
 }
 
-
 void ForceField::render()
 {
    Color c = getGame()->getTeamColor(mTeam);
@@ -868,6 +883,19 @@ Turret::Turret(S32 team, Point anchorPoint, Point anchorNormal) : EngineeredObje
    mNetFlags.set(Ghostable);
    mObjectTypeMask = TurretType | CommandMapVisType;
    mCurrentAngle = mAnchorNormal.ATAN2();
+}
+
+Vector<Point> Turret::getBufferForBotZone()
+{
+   Vector<Point> inputPoints, bufferedPoints;
+   getCollisionPoly(inputPoints);
+
+   if (isWoundClockwise(inputPoints))
+      inputPoints.reverse();
+
+   offsetPolygon(inputPoints, bufferedPoints, BotNavMeshZone::BufferRadius);
+
+   return bufferedPoints;
 }
 
 bool Turret::processArguments(S32 argc2, const char **argv2)
@@ -962,7 +990,6 @@ void Turret::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
 
 extern ServerGame *gServerGame;
-extern bool FindLowestRootInInterval(F32 inA, F32 inB, F32 inC, F32 inUpperBound, F32 &outX);
 
 // Choose target, aim, and, if possible, fire
 void Turret::idle(IdleCallPath path)
@@ -1126,8 +1153,13 @@ Lunar<Turret>::RegType Turret::methods[] =
    method(Turret, getVel),
    method(Turret, getTeamIndx),
 
+   // EngineeredObject methods
    method(Turret, getHealth),
    method(Turret, isActive),
+   method(Turret, getAngle),
+
+   // Turret Methods
+   method(Turret, getAngleAim),
 
    {0,0}    // End method list
 };

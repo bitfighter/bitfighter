@@ -30,8 +30,6 @@
 #include "../tnl/tnlTypes.h"
 #include "../tnl/tnlBitStream.h"
 
-#include "point.h"  
-
 
 using namespace TNL;
 

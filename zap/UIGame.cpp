@@ -79,7 +79,7 @@ static void makeCommandCandidateList();      // Forward delcaration
 // Constructor
 GameUserInterface::GameUserInterface()
 {
-   mOutputFile = NULL;
+   //mOutputFile = NULL;
    bool mLeftDisabled = false; // Fix some uninitalized variables (randomly was true)
    bool mRightDisabled = false;
    bool mUpDisabled = false;
@@ -121,6 +121,9 @@ GameUserInterface::GameUserInterface()
    for(S32 i = 0; i < ChatMessageStoreCount; i++)
       mStoreChatMessage[i][0] = 0;
 
+   for(S32 i = 0; i < ChatMessageDisplayCount; i++)
+      mDisplayChatMessage[i][0] = 0;
+
    mGotControlUpdate = false;
    mRecalcFPSTimer = 0;
 
@@ -141,8 +144,8 @@ GameUserInterface::GameUserInterface()
 // Destructor
 GameUserInterface::~GameUserInterface()
 {
-   if(mOutputFile)
-      fclose(mOutputFile);
+   //if(mOutputFile)
+   //   fclose(mOutputFile);
 }
 
 void processGameConsoleCommand(OGLCONSOLE_Console console, char *cmd)
@@ -753,13 +756,22 @@ void GameUserInterface::renderMessageDisplay()
 
    msgCount = MessageDisplayCount;  // Short form
 
+   S32 y_end = y + msgCount * (FONTSIZE + FONT_GAP);
+
    for(S32 i = msgCount - 1; i >= 0; i--)
    {
       if(mDisplayMessage[i][0])
       {
          glColor(mDisplayMessageColor[i]);
-         drawString(UserInterface::horizMargin, y, FONTSIZE, mDisplayMessage[i]);
-         y += FONTSIZE + FONT_GAP;
+         //drawString(UserInterface::horizMargin, y, FONTSIZE, mDisplayMessage[i]);
+         //y += FONTSIZE + FONT_GAP;
+         y += (FONTSIZE + FONT_GAP)
+            * UserInterface::drawWrapText(mDisplayMessage[i], UserInterface::horizMargin, y,
+               750, // wrap width
+               y_end, // ypos_end
+               FONTSIZE + FONT_GAP, // line height
+               FONTSIZE, // font size
+               false); // align top
       }
    }
 }
@@ -781,6 +793,7 @@ void GameUserInterface::renderChatMessageDisplay()
    else
       msgCount = ChatMessageDisplayCount;  // Short form
 
+   S32 y_end = y - msgCount * (CHAT_FONTSIZE + CHAT_FONT_GAP);
 
    if(mHelper)
       glEnableBlend;
@@ -795,8 +808,14 @@ void GameUserInterface::renderChatMessageDisplay()
             else
                glColor(mDisplayChatMessageColor[i]);
 
-            drawString(UserInterface::horizMargin, y, CHAT_FONTSIZE, mDisplayChatMessage[i]);
-            y -= CHAT_FONTSIZE + CHAT_FONT_GAP;
+            //drawString(UserInterface::horizMargin, y, CHAT_FONTSIZE, mDisplayChatMessage[i]);
+            y -= (CHAT_FONTSIZE + CHAT_FONT_GAP)
+               * UserInterface::drawWrapText(mDisplayChatMessage[i], UserInterface::horizMargin, y,
+                  700, // wrap width
+                  y_end, // ypos_end
+                  CHAT_FONTSIZE + CHAT_FONT_GAP, // line height
+                  CHAT_FONTSIZE, // font size
+                  true); // align bottom
          }
       }
    else
@@ -809,8 +828,14 @@ void GameUserInterface::renderChatMessageDisplay()
             else
                glColor(mStoreChatMessageColor[i]);
 
-            drawString(UserInterface::horizMargin, y, CHAT_FONTSIZE, mStoreChatMessage[i]);
-            y -= CHAT_FONTSIZE + CHAT_FONT_GAP;
+            //drawString(UserInterface::horizMargin, y, CHAT_FONTSIZE, mStoreChatMessage[i]);
+            y -= (CHAT_FONTSIZE + CHAT_FONT_GAP)
+               * UserInterface::drawWrapText(mStoreChatMessage[i], UserInterface::horizMargin, y,
+                  700, // wrap width
+                  y_end, // ypos_end
+                  CHAT_FONTSIZE + CHAT_FONT_GAP, // line height
+                  CHAT_FONTSIZE, // font size
+                  true); // align bottom
          }
       }
 
@@ -1198,27 +1223,6 @@ static const char *findPointerOfArg(const char *message, S32 count)
 }
 
 
-static string makeFilenameFromString(const char *levelname)
-{
-   static char filename[MAX_FILE_NAME_LEN + 1];    // Leave room for terminating null
-
-   U32 i = 0;
-
-   while(i < MAX_FILE_NAME_LEN && levelname[i] != 0)
-   {
-      // Prevent invalid characters in file names
-      char c = levelname[i];
-      if((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9'))
-         filename[i]=c;
-      else
-         filename[i]='_';
-      i++;
-   }
-
-   filename[i] = 0;    // Null terminate
-   return filename;
-}
-
 
 // TODO: Probably misnamed... handles deletes too
 static void changeServerNameDescr(GameConnection *gc, GameConnection::ParamType type, const Vector<string> &words)
@@ -1372,17 +1376,17 @@ void GameUserInterface::getMapHandler(GameUserInterface *gui, const Vector<strin
          gui->remoteLevelDownloadFilename += ".level";
 
       // Make into a fully qualified file name
-      string fullFile = strictjoindir(gConfigDirs.levelDir, gui->remoteLevelDownloadFilename);
+      gui->mOutputFileName = strictjoindir(gConfigDirs.levelDir, gui->remoteLevelDownloadFilename);
 
       // Prepare for writing
-      gui->mOutputFile = fopen(fullFile.c_str(), "w");    // TODO: Writes empty file when server does not allow getmap.  Shouldn't.
+      //gui->mOutputFile = fopen(fullFile.c_str(), "w");    // TODO: Writes empty file when server does not allow getmap.  Shouldn't.
 
-      if(!gui->mOutputFile)
-      {
-         logprintf("Problem opening file %s for writing", fullFile.c_str());
-         gui->displayErrorMessage("!!! Problem opening file %s for writing", fullFile.c_str());
-      }
-      else
+      //if(!gui->mOutputFile)
+      //{
+      //   logprintf("Problem opening file %s for writing", fullFile.c_str());
+      //   gui->displayErrorMessage("!!! Problem opening file %s for writing", fullFile.c_str());
+      //}
+      //else
          gClientGame->getConnectionToServer()->c2sRequestCurrentLevel();
    }
 }

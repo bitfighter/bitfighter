@@ -43,10 +43,9 @@
 // Please have a look at the notes. They indicate obvious places for optimization
 // if you are using a swept ellipsoid against a large number of polygons.
 
-#include "point.h" 
+#include "GeomUtils.h"        // Must be last...   Why??
 #include "tnlVector.h"
 #include "tnlLog.h"           // for logprintf
-#include "GeomUtils.h"        // Must be last
 
 
 using namespace TNL;
@@ -291,6 +290,83 @@ bool polygonsIntersect(const Vector<Point> &p1, const Vector<Point> &p2)
    }
    //  All points of polygon is inside the other polygon?  At this point, if any are, all are.
    return PolygonContains2(p1.address(), p1.size(), p2[0]) || PolygonContains2(p2.address(), p2.size(), p1[0]);
+}
+
+
+// Check to see if segment start-end intersects poly
+// Assumes a polygon in format A-B-C-D if format is true, A-B, C-D, E-F if format is false
+bool polygonIntersectsSegmentDetailed(Point *poly, U32 vertexCount, bool format, const Point &start, const Point &end,
+                          float &collisionTime, Point &normal)
+{
+   Point v1 = poly[vertexCount - 1];
+   Point v2, dv;
+   Point dp = end - start;
+
+   S32 inc = format ? 1 : 2;
+
+   F32 currentCollisionTime = 100;
+
+   for(U32 i = 0; i < vertexCount - (inc - 1); i += inc)    // Count by 1s when format is true, 2 when false
+   {
+      if(format)     // A-B-C-D format ==> examine every contiguous pair of vertices
+         v2.set(poly[i]);
+      else           // A-B C-D format ==> don't examine segment B-C
+      {
+         v1.set(poly[i]);
+         v2.set(poly[i + 1]);
+      }
+
+      // edge from v1 -> v2
+      // ray from start -> end
+
+      dv.set(v2 - v1);
+
+      F32 denom = dp.y * dv.x - dp.x * dv.y;
+      if(denom != 0) // otherwise, the lines are parallel
+      {
+         F32 s = ( (start.x - v1.x) * dv.y + (v1.y - start.y) * dv.x ) / denom;
+         F32 t = ( (start.x - v1.x) * dp.y + (v1.y - start.y) * dp.x ) / denom;
+
+         if(s >= 0 && s <= 1 && t >= 0 && t <= 1 && s < currentCollisionTime)    // Found collision closer than others
+         {
+            normal.set(dv.y, -dv.x);
+            currentCollisionTime = s;
+         }
+      }
+      v1.set(v2);    // No real effect if format == false
+   }
+
+   if(currentCollisionTime <= 1)    // Found intersection
+   {
+      collisionTime = currentCollisionTime;
+      return true;
+   }
+
+   // No intersection
+   return false;
+}
+
+
+bool circleIntersectsSegment(Point center, float radius, Point start, Point end, float &collisionTime)
+{
+   // if the point is in the circle, it's a collision at the start
+   Point d = center - start;
+   Point v = end - start;
+
+   if(d.len() <= radius)
+   {
+      collisionTime = 0;
+      return true;
+   }
+
+   // otherwise, solve the following equation for t
+   // (d - vt)^2 = radius^2
+
+   float a = v.dot(v);
+   float b = -2 * d.dot(v);
+   float c = d.dot(d) - radius * radius;
+
+   return FindLowestRootInInterval(a, b, c, 100, collisionTime);
 }
 
 

@@ -31,6 +31,7 @@
 #include "gameObjectRender.h"
 #include "teleporter.h"
 #include "barrier.h"             // For Barrier methods in generating zones
+#include "engineeredObjects.h"   // For Turret and ForceFieldProjector methods in generating zones
 #include "../recast/Recast.h"    // For zone generation
 #include "../recast/RecastAlloc.h"
 
@@ -138,8 +139,6 @@ GridDatabase *BotNavMeshZone::getGridDatabase()
    return &mGame->mDatabaseForBotZones;
 }
 
-
-extern bool isConvex(const Vector<Point> &verts);
 
 // Create objects from parameters stored in level file
 bool BotNavMeshZone::processArguments(S32 argc, const char **argv)
@@ -458,10 +457,13 @@ static BotNavMeshZone *findZoneContainingPoint(const Point &point)
 #endif
 
 // Required for input to Triangle
-static void buildHolesList(const Vector<DatabaseObject *> &barriers, Vector<F32> &holes)
+static void buildHolesList(const Vector<DatabaseObject *> &barriers,
+      const Vector<DatabaseObject *> &turrets,
+      const Vector<DatabaseObject *> &forceFieldProjectors, Vector<F32> &holes)
 {
    Point ctr; 
 
+   // Build holes list for barriers
    for(S32 i = 0; i < barriers.size(); i++)
    {
       Barrier *barrier = dynamic_cast<Barrier *>(barriers[i]);
@@ -481,6 +483,78 @@ static void buildHolesList(const Vector<DatabaseObject *> &barriers, Vector<F32>
       holes.push_back(ctr.x);
       holes.push_back(ctr.y);
    }
+
+   // Build holes list for turrets
+   for(S32 i = 0; i < turrets.size(); i++)
+   {
+      Turret *turret = dynamic_cast<Turret *>(turrets[i]);
+
+      if(!turret)
+         continue;
+
+      ctr = turret->getExtent().getCenter();
+
+      holes.push_back(ctr.x);
+      holes.push_back(ctr.y);
+   }
+
+   // Build holes list for forcefields
+   for(S32 i = 0; i < forceFieldProjectors.size(); i++)
+   {
+      ForceFieldProjector *forceField = dynamic_cast<ForceFieldProjector *>(forceFieldProjectors[i]);
+
+      if(!forceField)
+         continue;
+
+      ctr = forceField->getExtent().getCenter();
+
+      holes.push_back(ctr.x);
+      holes.push_back(ctr.y);
+   }
+}
+
+
+static bool mergeBotZoneBuffers(const Vector<DatabaseObject *> &barriers,
+      const Vector<DatabaseObject *> &turrets,
+      const Vector<DatabaseObject *> &forceFieldProjectors, Vector<Vector<Point> >& solution)
+{
+
+   Vector<Vector<Point> > inputPolygons;
+
+   // Add barriers
+   for(S32 i = 0; i < barriers.size(); i++)
+   {
+      Barrier *barrier = dynamic_cast<Barrier *>(barriers[i]);
+
+      if(!barrier)
+         continue;
+
+      inputPolygons.push_back(barrier->getBufferForBotZone());
+   }
+
+   // Add turrets
+   for (S32 i = 0; i < turrets.size(); i++)
+   {
+      Turret* turret = dynamic_cast<Turret *>(turrets[i]);
+
+      if(!turret)
+         continue;
+
+      inputPolygons.push_back(turret->getBufferForBotZone());
+   }
+
+   // Add forcefield projectors
+   for (S32 i = 0; i < forceFieldProjectors.size(); i++)
+   {
+      ForceFieldProjector* forceFieldProjector = dynamic_cast<ForceFieldProjector *>(forceFieldProjectors[i]);
+
+      if(!forceFieldProjector)
+         continue;
+
+      inputPolygons.push_back(forceFieldProjector->getBufferForBotZone());
+   }
+
+   return mergePolys(inputPolygons, solution);
 }
 
 
@@ -497,16 +571,22 @@ bool BotNavMeshZone::buildBotMeshZones(Game *game)
    bounds.expandToInt(Point(LEVEL_ZONE_BUFFER, LEVEL_ZONE_BUFFER));      // Provide a little breathing room
 
    Vector<F32> holes;
+   Vector<Vector<Point> > solution;
 
    Vector<DatabaseObject *> barrierList;
    game->getGridDatabase()->findObjects(BarrierType, barrierList, bounds);
 
-   Vector<Vector<Point> > solution;
+   Vector<DatabaseObject *> turretList;
+   game->getGridDatabase()->findObjects(TurretType, turretList, bounds);
 
-   if(!Barrier::unionBarriers(barrierList, true, solution))
+   Vector<DatabaseObject *> forceFieldProjectorList;
+   game->getGridDatabase()->findObjects(ForceFieldProjectorType, forceFieldProjectorList, bounds);
+
+   // Merge bot zone buffers from barriers, turrets, and forcefield projectors
+   if(!mergeBotZoneBuffers(barrierList, turretList, forceFieldProjectorList, solution))
       return false;
 
-   buildHolesList(barrierList, holes);
+   buildHolesList(barrierList, turretList, forceFieldProjectorList, holes);
 
 
 #ifdef LOG_TIMER

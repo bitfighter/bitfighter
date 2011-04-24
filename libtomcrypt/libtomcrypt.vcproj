@@ -50,9 +50,7 @@
 				RuntimeTypeInfo="true"
 				UsePrecompiledHeader="0"
 				PrecompiledHeaderFile=""
-				AssemblerListingLocation=".\Debug/"
-				ObjectFile="c:\temp\libtomcrypt_debug_obj\"
-				ProgramDataBaseFileName="c:\temp\libtomcrypt_debug\"
+				AssemblerListingLocation="$(IntDir)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="4"
@@ -127,9 +125,7 @@
 				RuntimeTypeInfo="true"
 				UsePrecompiledHeader="0"
 				PrecompiledHeaderFile=".\Release/libtomcrypt.pch"
-				AssemblerListingLocation=".\Release/"
-				ObjectFile="c:\temp\libtomcrypt_release_obj\"
-				ProgramDataBaseFileName="c:\temp\libtomcrypt_release\"
+				AssemblerListingLocation="$(IntDir)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="3"
@@ -419,10 +415,4 @@
 			>
 		</File>
 	</Files>
-	<Globals>
-		<Global
-			Name="RESOURCE_FILE"
-			Value="\home\libtomcrypt\test\test.rc"
-		/>
-	</Globals>
 </VisualStudioProject>

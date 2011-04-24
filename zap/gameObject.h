@@ -83,11 +83,8 @@ enum GameObjectType
    EngineeredType     = TurretType | ForceFieldProjectorType,
    DamagableTypes     = ShipType | RobotType | MoveableType | BulletType | ItemType | ResourceItemType | EngineeredType | MineType | AsteroidType,
    MotionTriggerTypes = ShipType | RobotType | ResourceItemType | TestItemType | AsteroidType,
-   AllObjectTypes     = 0xFFFFFFFF,
-
-   //////////
-   // Types used exclusively in the editor
-   EditorWallSegmentType = BIT(3)
+   CollideableType    = BarrierType | TurretType | ForceFieldProjectorType,
+   AllObjectTypes     = 0xFFFFFFFF
 };
 
 const S32 gSpyBugRange = 300;     // How far can a spy bug see?

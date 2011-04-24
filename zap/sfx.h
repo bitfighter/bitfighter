@@ -30,7 +30,7 @@
 #include "tnlNetBase.h"
 #include "tnlByteBuffer.h"
 
-#include "point.h"
+#include "Point.h"
 
 
 using namespace TNL;

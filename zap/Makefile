@@ -50,6 +50,7 @@ OBJECTS_ZAP=\
    UIQueryServers.o\
    UIGameParameters.o\
    barrier.o\
+   Color.o\
    config.o\
    controlObjectConnection.o\
    dataConnection.o\
@@ -86,10 +87,12 @@ OBJECTS_ZAP=\
    moveObject.o\
    oglconsole.o\
    playerInfo.o\
+   Point.o\
    polygon.o\
    projectile.o\
    quickChatHelper.o\
    rabbitGame.o\
+   Rect.o\
    retrieveGame.o\
    robot.o\
    screenShooter.o \
@@ -153,6 +156,7 @@ debug: bitfighter
 release: DEBUG=
 release: bitfighter
 
+dedicated: DEBUG=
 dedicated: CFLAGS=-DZAP_DEDICATED 
 dedicated: LFLAGS=-lstdc++ -lm -ldl
 dedicated: GLUT=

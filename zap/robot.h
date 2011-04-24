@@ -125,7 +125,6 @@ private:
 
    Vector<string> mArgs;            // List of arguments passed to the robot.  Script name itself is the first one.
    bool gameConnectionInitalized;
-   void *robotController;           // A pointer of RobotController, for speeding up compiler, it is (void *) here.
 
    void spawn();                    // Handles bot spawning
 

@@ -290,6 +290,7 @@ class LevelMenuSelectUserInterface : public MenuUserInterface
 {
 private:
    typedef MenuUserInterface Parent;
+   Vector<string> mLevels;
 
 public:
    LevelMenuSelectUserInterface();        // Constructor

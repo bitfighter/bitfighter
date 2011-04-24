@@ -34,7 +34,7 @@
 
 #include "tnlTypes.h"
 #include "tnlNetStringTable.h"
-#include "point.h"      // For Color def
+#include "Color.h"      // For Color def
 
 #include "input.h"
 #include <string>
@@ -187,6 +187,10 @@ struct IniSettings      // With defaults specified
    S32 maxPlayers;                  // Max number of players that can play on local server
    S32 maxBots;
 
+   bool allowMapUpload;
+   bool allowAdminMapUpload;
+
+   bool voteEnable;
    U32 voteLength;
    U32 voteLengthToChangeTeam;
    U32 voteRetryLength;

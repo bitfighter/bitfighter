@@ -25,6 +25,7 @@
 
 #include "lineEditor.h"
 #include "UI.h"
+#include <math.h>
 
 namespace Zap
 {

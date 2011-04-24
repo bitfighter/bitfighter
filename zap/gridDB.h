@@ -31,7 +31,8 @@
 #include "tnlDataChunker.h"
 #include "tnlVector.h"
 
-#include "point.h"
+#include "Rect.h"
+#include "GeomUtils.h"
 
 
 using namespace TNL;

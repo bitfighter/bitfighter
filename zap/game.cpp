@@ -391,7 +391,18 @@ void Game::cleanUp()
 // Return true when handled
 bool ServerGame::voteStart(GameConnection *client, S32 type, S32 number)
 {
-   if(gServerGame->mVoteTimer != 0)
+   if(!gIniSettings.voteEnable)
+      return false;
+
+   U32 VoteTimer;
+   if(type == 4) // change team
+      VoteTimer = gIniSettings.voteLengthToChangeTeam * 1000;
+   else
+      VoteTimer = gIniSettings.voteLength * 1000;
+   if(VoteTimer == 0)
+      return false;
+
+   if(mVoteTimer != 0)
    {
       client->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "Can't start vote when there is pending vote.");
       return true;
@@ -406,12 +417,7 @@ bool ServerGame::voteStart(GameConnection *client, S32 type, S32 number)
       client->s2cDisplayMessageESI(GameConnection::ColorRed, SFXNone, "Can't start vote, try again %i0 seconds later.", e, s, i);
       return true;
    }
-   if(type == 4) // change team
-      mVoteTimer = gIniSettings.voteLengthToChangeTeam * 1000;
-   else
-      mVoteTimer = gIniSettings.voteLength * 1000;
-   if(mVoteTimer == 0)
-      return false;
+   mVoteTimer = VoteTimer;
    mVoteType = type;
    mVoteNumber = number;
    mVoteClientName = client->getClientName();
@@ -1058,7 +1064,7 @@ void ServerGame::idle(U32 timeDelta)
                if(walk->mVote == 0 && !walk->isRobot())
                {
                   WaitingToVote = true;
-                  walk->s2cDisplayMessageESI(GameConnection::ColorAqua, SFXUIBoop, msg, e, s, i);
+                  walk->s2cDisplayMessageESI(GameConnection::ColorAqua, SFXNone, msg, e, s, i);
                }
             }
             if(!WaitingToVote)
@@ -1253,6 +1259,31 @@ void ServerGame::gameEnded()
 {
    mLevelSwitchTimer.reset(LevelSwitchTime);
 }
+
+//extern ConfigDirectories gConfigDirs;
+
+S32 ServerGame::addLevelInfo(const char *filename, LevelInfo &info)
+{
+
+   for(S32 i=0; i<mLevelInfos.size(); i++)
+   {
+      if(mLevelInfos[i].levelFileName == info.levelFileName)
+         return i;
+   }
+
+   if(info.levelName == StringTableEntry(""))
+      info.levelName = filename;
+
+   info.levelFileName = filename; //strictjoindir(gConfigDirs.levelDir, filename).c_str();
+
+   mLevelInfos.push_back(info);
+   for(GameConnection *walk = GameConnection::getClientList(); walk; walk = walk->getNextClient())
+   {
+      walk->s2cAddLevel(info.levelName, info.levelType);
+   }
+   return mLevelInfos.size() - 1;
+}
+
 
 //-----------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------

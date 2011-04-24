@@ -32,7 +32,7 @@
 #include "gridDB.h"
 #include "timer.h"
 #include "gameLoader.h"
-#include "point.h"
+#include "Rect.h"
 #include "shipItems.h"     // For moduleInfos
 
 #include "dataConnection.h"      // For DataSender
@@ -394,6 +394,8 @@ public:
 
    void suspenderLeftGame() { mSuspendor = NULL; }
    GameConnection *getSuspendor() { return mSuspendor; }
+
+   S32 addLevelInfo(const char *filename, LevelInfo &info);
 
    HostingModePhases hostingModePhase;
 };

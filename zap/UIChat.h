@@ -30,7 +30,7 @@
 
 #include "game.h"
 #include "UI.h"
-#include "point.h"
+#include "Color.h"
 #include "lineEditor.h"
 
 #include <map>

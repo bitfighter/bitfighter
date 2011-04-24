@@ -253,8 +253,6 @@ void Ship::findObjectsUnderShip(GameObjectType type)
 }
 
 
-extern bool PolygonContains2(const Point *inVertices, int inNumVertices, const Point &inPoint);
-
 // Returns the zone in question if this ship is in a zone of type zoneType
 GameObject *Ship::isInZone(GameObjectType zoneType)
 {

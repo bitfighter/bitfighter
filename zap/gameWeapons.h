@@ -29,7 +29,7 @@
 //#include "gameObject.h"  // this file is included from master's database.h
 #include "tnlVector.h"
 #include "tnlNetStringTable.h"
-#include "point.h"
+#include "Point.h"
 
 using namespace TNL;
 

@@ -27,6 +27,7 @@
 #include "moveObject.h"    // For ActualState definition
 #include "gameType.h"
 #include "ship.h"
+#include "GeomUtils.h"
 
 #include "projectile.h"
 
@@ -341,8 +342,6 @@ Rect GameObject::getBounds(U32 stateIndex)
 }
 
 
-extern bool PolygonContains2(const Point *inVertices, int inNumVertices, const Point &inPoint);
-
 // Find if the specified point is in theObject's collisionPoly or collisonCircle
 bool GameObject::collisionPolyPointIntersect(Point point)
 {
@@ -360,9 +359,6 @@ bool GameObject::collisionPolyPointIntersect(Point point)
       return false;
 }
 
-
-extern bool polygonsIntersect(const Vector<Point> &p1, const Vector<Point> &p2);
-extern bool polygonCircleIntersect(const Point *inVertices, int inNumVertices, const Point &inCenter, F32 inRadiusSq, Point &outPoint);
 
 // Find if the specified polygon intersects theObject's collisionPoly or collisonCircle
 bool GameObject::collisionPolyPointIntersect(Vector<Point> points)

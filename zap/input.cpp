@@ -26,7 +26,7 @@
 #include "input.h"
 #include "move.h"
 #include "UIMenus.h"
-#include "point.h" 
+#include "Point.h"
 
 #include "tnlJournal.h"
 
