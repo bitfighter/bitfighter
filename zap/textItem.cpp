@@ -192,12 +192,13 @@ void TextItem::renderEditorItem(F32 currentScale)
 {
    renderTextItem(mPos, mDir, F32(F32(mSize) / 120), lineEditor.getDisplayString(), getGame()->getTeamColor(mTeam));
 
+   // If we're editing the text, we need to draw our cursor
    if(isBeingEdited())
    {
       glPushMatrix();
       glScalef(1/currentScale, 1/currentScale, 1);
 
-      lineEditor.drawCursorAngle(mPos.x * currentScale, mPos.y * currentScale, F32(getSize()), mPos.angleTo(mDir));
+      lineEditor.drawCursorAngle(mPos.x * currentScale, mPos.y * currentScale, getSize(), mPos.angleTo(mDir));
       glPopMatrix();
    }
 }
