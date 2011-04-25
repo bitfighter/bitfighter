@@ -190,18 +190,20 @@ private:
       RefPtr<SFXObject> mVoiceSfx;
       RefPtr<VoiceEncoder> mVoiceEncoder;
       bool mRecordingAudio;
+      U8 mWantToStopRecordingAudio;
       S32 mMaxAudioSample;
       S32 mMaxForGain;
       ByteBufferPtr mUnusedAudio;
 
       VoiceRecorder();
+      ~VoiceRecorder();
 
       void idle(U32 timeDelta);
       void process();
       void start();
       void stop();
+      void stopNow();
       void render();
-
    } mVoiceRecorder;
 
    void dropItem();                       // User presses drop item key

@@ -2286,6 +2286,11 @@ GameUserInterface::VoiceRecorder::VoiceRecorder()
    mVoiceEncoder = new LPC10VoiceEncoder;
 }
 
+GameUserInterface::VoiceRecorder::~VoiceRecorder()
+{
+   stopNow();
+}
+
 
 void GameUserInterface::VoiceRecorder::idle(U32 timeDelta)
 {
@@ -2333,6 +2338,7 @@ void GameUserInterface::VoiceRecorder::render()
 
 void GameUserInterface::VoiceRecorder::start()
 {
+   mWantToStopRecordingAudio = 0; // linux repeadedly sends key-up / key-down when only holding key down
    if(!mRecordingAudio)
    {
       mRecordingAudio = SFXObject::startRecording();
@@ -2350,7 +2356,7 @@ void GameUserInterface::VoiceRecorder::start()
    }
 }
 
-void GameUserInterface::VoiceRecorder::stop()
+void GameUserInterface::VoiceRecorder::stopNow()
 {
    if(mRecordingAudio)
    {
@@ -2362,10 +2368,22 @@ void GameUserInterface::VoiceRecorder::stop()
       mUnusedAudio = NULL;
    }
 }
-
+void GameUserInterface::VoiceRecorder::stop()
+{
+   mWantToStopRecordingAudio = 2;
+}
 
 void GameUserInterface::VoiceRecorder::process()
 {
+   if(mWantToStopRecordingAudio != 0)
+   {
+      mWantToStopRecordingAudio--;
+      if(mWantToStopRecordingAudio == 0)
+      {
+         stopNow();
+         return;
+      }
+   }
    U32 preSampleCount = mUnusedAudio->getBufferSize() / 2;
    SFXObject::captureSamples(mUnusedAudio);
 

@@ -75,9 +75,14 @@ bool LoadWAVFile(const char *filename, char &format, char **data, int &size, int
 	}
 
 	*data = new char[size];
-	fread(*data, 1, size, (FILE*) file);
+	size_t readsize = fread(*data, 1, size, (FILE*) file);
 	closefile(file);
 	format = (stereo ? 2 : 0) + (bits16 ? 1 : 0);
+	if(readsize < 1)
+	{
+		delete *data;
+		return false;
+	}
 	return true;
 }
 
@@ -128,6 +133,7 @@ pictureLoader *LoadPicture(const char* path){
    }
 
    c=0;
+   d=0;
    y2=y;while(y2>0){
       y2--;e=0;
       x2=0;while(x2<x){
