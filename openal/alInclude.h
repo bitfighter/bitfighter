@@ -29,10 +29,14 @@
 
 #if defined(TNL_OS_MAC_OSX)
 #include <OpenAL-Soft/alc.h>
-#include <FreeALUT/alut.h>		   // <--- Note that this alut.h is the same as the one included above in the OSX block
-#else    // Windows
+#include <OpenAL-Soft/al.h>
+// #include <FreeALUT/alut.h>         // <--- Note that this alut.h is the same as the one included above in the OSX block
+#elif defined(TNL_OS_WIN32)    // Windows,  may need seperate path so linux don't include this files when linux have their own system files.
+#include "include/alc.h"
+#include "include/al.h"
+#else
 #include <alc.h>
-#include <alut_win.h>
+#include <al.h>
 #endif
 
 #endif

@@ -70,7 +70,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				LinkLibraryDependencies="false"
-				AdditionalDependencies="dsound.lib dinput8.lib dxguid.lib ../lib/OpenAL32.lib ../lib/alut.lib wsock32.lib ../lib/glut32.lib ../lib/tnld.lib ../lib/libtomcryptd.lib ../lib/lua-vec-d.lib"
+				AdditionalDependencies="dinput8.lib dxguid.lib ../lib/OpenAL32.lib ../lib/alut.lib wsock32.lib ../lib/glut32.lib ../lib/tnld.lib ../lib/libtomcryptd.lib ../lib/lua-vec-d.lib"
 				OutputFile="../exe/Bitfighter_d.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="../tnl;../lib../win_include_do_not_distribute;"
@@ -156,7 +156,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				LinkLibraryDependencies="false"
-				AdditionalDependencies="dsound.lib dxguid.lib dinput8.lib ../lib/OpenAL32.lib ../lib/alut.lib wsock32.lib ../lib/glut32.lib ../lib/tnl.lib ../lib/libtomcrypt.lib ../lib/lua-vec.lib"
+				AdditionalDependencies="dxguid.lib dinput8.lib ../lib/OpenAL32.lib ../lib/alut.lib wsock32.lib ../lib/glut32.lib ../lib/tnl.lib ../lib/libtomcrypt.lib ../lib/lua-vec.lib"
 				OutputFile="..\exe\Bitfighter.exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="../tnl;../lib../win_include_do_not_distribute;"
@@ -246,7 +246,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				LinkLibraryDependencies="false"
-				AdditionalDependencies="dsound.lib dinput8.lib dxguid.lib ../lib/OpenAL32.lib ../lib/alut.lib wsock32.lib ../lib/glut32.lib ../lib/tnld.lib ../lib/libtomcryptd.lib ../lib/lua-vec-d.lib ../lib/mysqlppd.lib Ws2_32.lib"
+				AdditionalDependencies="dinput8.lib dxguid.lib ../lib/OpenAL32.lib ../lib/alut.lib wsock32.lib ../lib/glut32.lib ../lib/tnld.lib ../lib/libtomcryptd.lib ../lib/lua-vec-d.lib ../lib/mysqlppd.lib Ws2_32.lib"
 				OutputFile="../exe/Bitfighter_mysql_d.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="../tnl;../lib../win_include_do_not_distribute;"
@@ -332,7 +332,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				LinkLibraryDependencies="false"
-				AdditionalDependencies="dsound.lib dxguid.lib dinput8.lib ../lib/OpenAL32.lib ../lib/alut.lib wsock32.lib ../lib/glut32.lib ../lib/tnl.lib ../lib/libtomcrypt.lib ../lib/lua-vec.lib ../lib/mysqlpp.lib"
+				AdditionalDependencies="dxguid.lib dinput8.lib ../lib/OpenAL32.lib ../lib/alut.lib wsock32.lib ../lib/glut32.lib ../lib/tnl.lib ../lib/libtomcrypt.lib ../lib/lua-vec.lib ../lib/mysqlpp.lib"
 				OutputFile="..\exe\Bitfighter_mysql.exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="../tnl;../lib../win_include_do_not_distribute;"
@@ -998,6 +998,10 @@
 		</File>
 		<File
 			RelativePath=".\oglconsole.c"
+			>
+		</File>
+		<File
+			RelativePath=".\pictureloader.cpp"
 			>
 		</File>
 		<File

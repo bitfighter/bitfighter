@@ -36,8 +36,6 @@
 #if !defined (ZAP_DEDICATED) && !defined (TNL_OS_XBOX)
 
 #include "alInclude.h"
-//#include "al.h"
-//#include "alc.h"
 #include "pictureloader.h"  // for LoadWAVFile
 
 using namespace TNL;
@@ -505,7 +503,7 @@ void SFXObject::init()
 
    if(!gDevice)
    gDevice = alcOpenDevice(NULL);                           // Last ditch attempt to get a valid device
-	
+
    // alcOpenDevice: If the function returns NULL, then no sound driver/device has been found.
    if(!gDevice)
    {
@@ -554,7 +552,7 @@ void SFXObject::init()
       ALvoid   *data;
       ALboolean loop;
 
-		char format1;
+      char format1;
 
       string fileBuffer = joindir(gConfigDirs.sfxDir, gSFXProfiles[i].fileName);
 
@@ -565,18 +563,18 @@ void SFXObject::init()
 //      alutLoadWAVFile((ALbyte *) fileBuffer.c_str(), &format, &data, &size, &freq, &loop);
 //#endif
 //      if(alGetError() != AL_NO_ERROR)
-		if(!LoadWAVFile(fileBuffer.c_str(), format1, (char **) &data, (int &)size, (int &)freq))
+      if(!LoadWAVFile(fileBuffer.c_str(), format1, (char **) &data, (int &)size, (int &)freq))
       {
          logprintf(LogConsumer::LogError, "Failure (1) loading sound file '%s': Game will proceed without sound.", fileBuffer.c_str()); 
          return;                                                                       
       }
 
-		const int formatconvert[] = {AL_FORMAT_MONO8, AL_FORMAT_MONO16, AL_FORMAT_STEREO8, AL_FORMAT_STEREO16};
-		format = formatconvert[format1];
+      const int formatconvert[] = {AL_FORMAT_MONO8, AL_FORMAT_MONO16, AL_FORMAT_STEREO8, AL_FORMAT_STEREO16};
+      format = formatconvert[format1];
 
       alBufferData(gBuffers[i], format, data, size, freq);
       //alutUnloadWAV(format, data, size, freq);
-		delete data;
+      delete (char *)data;
 
       if(alGetError() != AL_NO_ERROR)
       {
@@ -804,7 +802,7 @@ void SFXObject::shutdown()
 
 #endif
 
-#ifdef TNL_OS_WIN32
+#if 0 //#ifdef TNL_OS_WIN32
 
 #include "dsound.h"   // See readme in win_include_do_not_distribute folder
 #include <stdio.h>
@@ -925,6 +923,8 @@ void SFXObject::stopRecording()
 };
 
 #elif defined(ZAP_DEDICATED) || !defined(AL_VERSION_1_1)
+namespace Zap
+{
 bool SFXObject::startRecording()
 {
    return false;
@@ -952,11 +952,11 @@ static ALCdevice *captureDevice;
 
 bool SFXObject::startRecording()
 {
-	captureDevice = alcCaptureOpenDevice(NULL, 8000, AL_FORMAT_MONO16, 2048);
-	if(alGetError() != AL_NO_ERROR)
-		return false;
+   captureDevice = alcCaptureOpenDevice(NULL, 8000, AL_FORMAT_MONO16, 2048);
+   if(alGetError() != AL_NO_ERROR || captureDevice == NULL)
+      return false;
 
-	alcCaptureStart(captureDevice);
+   alcCaptureStart(captureDevice);
    return true;
 }
 
@@ -964,12 +964,11 @@ void SFXObject::captureSamples(ByteBufferPtr buffer)
 {
 
    U32 startSize = buffer->getBufferSize();
-	ALint sample;
+   ALint sample;
 
    alcGetIntegerv(captureDevice, ALC_CAPTURE_SAMPLES, 1, &sample);
-	sample *= 2;  // convert number of samples (2 byte mono) to number of bytes.
 
-   U32 endSize = startSize + sample;
+   U32 endSize = startSize + sample*2;  // convert number of samples (2 byte mono) to number of bytes, but keep sample size unchanged for alcCaptureSamples
 
    buffer->resize(endSize);
    alcCaptureSamples(captureDevice, (ALCvoid *) &buffer->getBuffer()[startSize], sample);
@@ -979,6 +978,7 @@ void SFXObject::stopRecording()
 {
    alcCaptureStop(captureDevice);
    alcCaptureCloseDevice(captureDevice);
+   captureDevice = NULL;
 }
 
 };
