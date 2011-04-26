@@ -2860,10 +2860,10 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
          Robot *robot = new Robot();
          robot->addToGame(getGame());
          S32 args_count = 0;
-         const char *args_char[128];  // Convert to a format processArgs will allow
+         const char *args_char[LevelLoader::MAX_LEVEL_LINE_ARGS];  // Convert to a format processArgs will allow
          
          // The first arg = team number, the second arg = robot script filename, the rest of args get passed as script arguments
-         for(S32 i = 0; i < args.size() && i < 128; i++)    // TODO: Tie 128 to some constant
+         for(S32 i = 0; i < args.size() && i < LevelLoader::MAX_LEVEL_LINE_ARGS; i++)   
          {
             args_char[i] = args[i].getString();
             args_count++;

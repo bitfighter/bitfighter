@@ -31,109 +31,6 @@
 namespace Zap
 {
 
-static const Color HIGHLIGHT_COLOR = Color(1,1,1);    // TODO: Use editor def
-
-void SimpleLine::renderDock()
-{
-   Color itemColor = getEditorRenderColor();
-
-   glColor(itemColor);
-   drawFilledSquare(getVert(0), 5);    // Draw origin of item to give user something to grab on the dock
-
-   // Add a label
-   F32 xpos = getVert(0).x;
-   F32 ypos = getVert(0).y + 6;
-   glColor(EditorUserInterface::DOCK_LABEL_COLOR);
-   UserInterface::drawStringc(xpos, ypos, EditorUserInterface::DOCK_LABEL_SIZE, getOnDockName());
-   
-   if(mLitUp)
-   {
-      glColor(HIGHLIGHT_COLOR);
-      drawSquare(getVert(0), 8);
-   }
-}
-
-
-static inline void labelSimpleLineItem(Point pos, F32 labelSize, const char *itemLabelTop, const char *itemLabelBottom)
-{
-   UserInterface::drawStringc(pos.x, pos.y + labelSize + 2, labelSize, itemLabelTop);
-   UserInterface::drawStringc(pos.x, pos.y + 2 * labelSize + 5, labelSize, itemLabelBottom);
-}
-
-
-static Color white(1,1,1);
-static const S32 INSTRUCTION_TEXTSIZE = 9;      // TODO: Put in editor
-
-// Draw arrow that serves as the core of SimpleLine items in the editor
-// Subclasses will fill in the rest
-void SimpleLine::renderEditor(F32 currentScale)
-{
-   Point pos = getVert(0);
-   Point dest = getVert(1);
-
-   for(S32 i = 1; i >= 0; i--)
-   {
-      // Draw heavy colored line with colored core
-      glLineWidth(i ? gLineWidth4 : gDefaultLineWidth);                
-      glColor(getEditorRenderColor(), .15);
-
-
-      F32 ang = pos.angleTo(dest);
-      const F32 al = 15 / currentScale; // Length of arrow-head, in editor units (15 pixels)
-      const F32 angoff = .5;            // Pitch of arrow-head prongs
-
-      glBegin(GL_LINES);
-         glVertex2f(dest.x, dest.y);    // Draw arrow-head
-         glVertex2f(dest.x - cos(ang + angoff) * al, dest.y - sin(ang + angoff) * al);
-         glVertex2f(dest.x, dest.y);
-         glVertex2f(dest.x - cos(ang - angoff) * al, dest.y - sin(ang - angoff) * al);
-
-         // Draw highlight on 2nd pass if item is selected, but not while it's being edited
-         if(!i && (mSelected || mLitUp) /*&& !isBeingEdited  <== passed into render method*/)
-            glColor(getEditorRenderColor());
-
-         glVertex(pos);                 // Draw connecting line
-         glVertex(dest);
-      glEnd();
-   }
-
-   renderEditorItem(currentScale);
-
-   glPushMatrix();
-   glScalef(1/currentScale, 1/currentScale, 1);
-
-   // Label item with message about what happens if user presses enter
-   if(!isBeingEdited() && isSelected())
-   {
-      glColor(white);
-      UserInterface::drawStringf_2pt(pos * currentScale, dest * currentScale, INSTRUCTION_TEXTSIZE, -22, getEditMessage());
-   }
-
-   // Label any selected or highlighted vertices
-   if(vertSelected(0) || (mLitUp && isVertexLitUp(0)))         // "From" vertex
-   {
-      F32 alpha = 1;
-      glColor(getDrawColor(), alpha);
-      drawSquare(pos * currentScale, 7);
-
-      labelSimpleLineItem(pos * currentScale, EditorUserInterface::DOCK_LABEL_SIZE, getOnScreenName(), getOriginBottomLabel());
-   }
-   else if(vertSelected(1) || (mLitUp && isVertexLitUp(1)))    // "To" vertex
-   {
-      F32 alpha = 1;
-      glColor(getDrawColor(), alpha);
-      drawSquare(dest * currentScale, 7);
-
-      labelSimpleLineItem(dest * currentScale, EditorUserInterface::DOCK_LABEL_SIZE, getOnScreenName(), getDestinationBottomLabel());
-   }
-
-   glPopMatrix();   
-}
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
 TNL_IMPLEMENT_NETOBJECT(TextItem);
 
 // RDW - These need storage, I believe VC++ pukes on this,
@@ -150,8 +47,7 @@ TextItem::TextItem()
    mNetFlags.set(Ghostable);
    mObjectTypeMask = TextItemType | CommandMapVisType;     // Or not?
 
-   mVertSelected.resize(2);                                // One spot for mPos, one for mDest
-   unselectVerts();                                        // Set all verts to be unselected
+   SimpleLine::initialize();
 
    // Some default values
    mSize = 20;
@@ -220,7 +116,7 @@ bool TextItem::processArguments(S32 argc, const char **argv)
    mDir.read(argv + 3);
    mDir *= getGame()->getGridSize();
 
-   mSize = atoi(argv[5]);
+   mSize = atof(argv[5]);
    mSize = max(min(mSize, MAX_TEXT_SIZE), MIN_TEXT_SIZE);      // Note that same line exists below, in recalcXXX()... combine?
 
    for(S32 i = 6; i < argc; i++)
@@ -238,10 +134,11 @@ bool TextItem::processArguments(S32 argc, const char **argv)
 }
 
 
-// Editor
-void TextItem::saveItem(FILE *f)
+string TextItem::toString()
 {
-   s_fprintf(f, "%s %g %g %g %g %d %s\n", Object::getClassName(), mPos.x, mPos.y, mDir.x, mDir.y, mSize, mText.c_str());
+   char outString[LevelLoader::MAX_LEVEL_LINE_LENGTH];
+   dSprintf(outString, sizeof(outString), "%s %g %g %g %g %g %s", Object::getClassName(), mPos.x, mPos.y, mDir.x, mDir.y, mSize, mText.c_str());
+   return outString;
 }
 
 

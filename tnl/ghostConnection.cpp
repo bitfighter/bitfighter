@@ -478,7 +478,7 @@ void GhostConnection::readPacket(BitStream *bstream)
             mLocalGhosts[index]->unpackUpdate(this, bstream);
             NetObject::mIsInitialUpdate = false;
             
-            if(!obj->onGhostAdd(this))
+            if(!obj->onGhostAdd(this))    // Runs addToGame() on some objects
             {
                if(!mErrorBuffer[0])
                   setLastError("Invalid packet.");

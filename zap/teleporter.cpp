@@ -44,10 +44,12 @@ static Vector<DatabaseObject *> foundObjects;
 // that we get the multiple destination aspect of teleporters right
 Teleporter::Teleporter()
 {
-   mNetFlags.set(Ghostable);
-   timeout = 0;
-
    mObjectTypeMask |= CommandMapVisType | TeleportType;
+   mNetFlags.set(Ghostable);
+
+   SimpleLine::initialize();
+
+   timeout = 0;
    mTime = 0;
 }
 
@@ -105,6 +107,14 @@ bool Teleporter::processArguments(S32 argc, const char **argv)
    }
 
    return true;
+}
+
+
+string Teleporter::toString()
+{
+   char outString[LevelLoader::MAX_LEVEL_LINE_LENGTH];
+   dSprintf(outString, sizeof(outString), "%s %g %g %g %g", Object::getClassName(), mPos.x, mPos.y, mDest.x, mDest.y);
+   return outString;
 }
 
 
@@ -239,14 +249,17 @@ void Teleporter::render()
    renderTeleporter(mPos, 0, true, mTime, r, TELEPORTER_RADIUS, 1.0, mDests, false);
 }
 
-// void Teleporter::renderEditor()
-//Teleporter render
-   //{
-   //   glColor(green);
-   //   glLineWidth(gLineWidth3);
-   //   drawPolygon(pos, 12, Teleporter::TELEPORTER_RADIUS, 0);
-   //   glLineWidth(gDefaultLineWidth);
-   //}
+
+static const Color green(0,1,0);
+
+void Teleporter::renderEditorItem(F32 currentScale)
+{
+   glColor(green);
+
+   glLineWidth(gLineWidth3);
+   drawPolygon(mPos, 12, Teleporter::TELEPORTER_RADIUS, 0);
+   glLineWidth(gDefaultLineWidth);
+}
 
 
 // Lua methods

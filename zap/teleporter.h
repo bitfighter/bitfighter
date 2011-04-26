@@ -23,6 +23,10 @@
 //
 //------------------------------------------------------------------------------------
 
+#ifndef _TELEPORTER_H_
+#define _TELEPORTER_H_
+
+#include "SimpleLine.h"    // For SimpleLine def
 #include "gameConnection.h"
 #include "gameObject.h"
 #include "projectile.h"    // For LuaItem
@@ -37,7 +41,7 @@ namespace Zap
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class Teleporter : public EditorObject, public LuaItem
+class Teleporter : public SimpleLine, public LuaItem
 {
 public:
       enum {
@@ -56,6 +60,11 @@ private:
    Point mPos;
    Point mDest;
 
+   // How are this item's vertices labeled in the editor? -- these can be private
+   const char *getOriginBottomLabel() { return "Intake Vortex"; }
+   const char *getDestinationBottomLabel() { return "Destination"; }
+   const char *getEditMessage() { return ""; }
+
 public:
    Teleporter();     // Constructor
 
@@ -65,6 +74,7 @@ public:
 
    static const S32 TELEPORTER_RADIUS = 75;  // Overall size of the teleporter
    virtual bool processArguments(S32 argc, const char **argv);
+   string toString();
 
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
@@ -95,7 +105,34 @@ public:
    S32 getVel(lua_State *L) { return returnPoint(L, Point(0,0)); }                   // Speed of item (returns point)
    S32 getTeamIndx(lua_State *L) { return returnInt(L, Item::TEAM_NEUTRAL + 1); }    // All teleporters are neutral
    GameObject *getGameObject() { return this; }                                      // Return the underlying GameObject
-};
+
+
+   ///// Editor Methods
+   Color getEditorRenderColor() { return Color(0,1,0); }
+
+   void renderEditorItem(F32 currentScale);
+
+   Point getVert(S32 index) { return index == 0 ? mPos : mDest; }
+   void setVert(const Point &point, S32 index) { if(index == 0) mPos = point; else mDest = point; }
+
+   void onAttrsChanging() { /* Do nothing */ }
+   void onGeomChanging()  { /* Do nothing */ }
+   void onGeomChanged()   { /* Do nothing */ }
+
+   // Some properties about the item that will be needed in the editor
+   bool hasText() { return true; }
+   const char *getEditorHelpString() { return "Teleports ships from one place to another. [T]"; }  
+   const char *getPrettyNamePlural() { return "Teleporters"; }
+   const char *getOnDockName() { return "Teleport"; }
+   const char *getOnScreenName() { return "Teleport"; }
+   bool hasTeam() { return false; }
+   bool canBeHostile() { return false; }
+   bool canBeNeutral() { return false; }
+   bool getHasRepop() { return false; }
 
 };
 
+
+};
+
+#endif

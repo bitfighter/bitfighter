@@ -26,6 +26,7 @@
 #ifndef _GO_FAST_H_
 #define _GO_FAST_H_
 
+#include "SimpleLine.h"    // For SimpleLine def
 #include "gameObject.h"
 #include "gameType.h"
 #include "gameNetInterface.h"
@@ -37,11 +38,12 @@
 namespace Zap
 {
 
-class SpeedZone : public GameObject
+class SpeedZone : public SimpleLine
 {
+   typedef GameObject Parent;
+
 private:
 
-   typedef GameObject Parent;
    Vector<Point> mPolyBounds;
 
    U16 mSpeed;             // Speed at which ship is propelled, defaults to defaultSpeed
@@ -58,6 +60,12 @@ private:
    // Take our basic inputs, pos and dir, and expand them into a three element
    // vector (the three points of our triangle graphic), and compute its extent
    void preparePoints();
+
+   // How are this item's vertices labeled in the editor? -- these can be private
+   const char *getOriginBottomLabel() { return "Location"; }
+   const char *getDestinationBottomLabel() { return "Direction"; }
+   const char *getEditMessage() { return "[Enter] to edit text"; }
+
 
 public:
    enum {
@@ -84,11 +92,13 @@ public:
    bool mSnapLocation;     // If true, ship will be snapped to center of speedzone before being ejected
    
    SpeedZone();   // Constructor
-   static Vector<Point> generatePoints(Point pos, Point dir);
+   static void generatePoints(const Point &pos, const Point &dir, F32 gridSize, Vector<Point> &points);
    void render();
    S32 getRenderSortValue();
 
    bool processArguments(S32 argc, const char **argv);           // Create objects from parameters stored in level file
+   string toString();
+
    void onAddedToGame(Game *theGame);
    void computeExtent();                                         // Bounding box for quick collision-possibility elimination
 
@@ -98,6 +108,36 @@ public:
    void idle(GameObject::IdleCallPath path);
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
+
+   ///// Editor methods 
+   // Offset lets us drag an item out from the dock by an amount offset from the 0th vertex.  This makes placement seem more natural.
+   Point getInitialPlacementOffset() { return Point(.15,0); }
+
+   Color getEditorRenderColor() { return Color(1,0,0); }
+
+   void renderEditorItem(F32 currentScale);
+
+   Point getVert(S32 index) { return index == 0 ? pos : dir; }
+   void setVert(const Point &point, S32 index) { if(index == 0) pos = point; else dir = point; }
+
+   void onAttrsChanging() { /* Do nothing */ }
+   void onGeomChanging() { onGeomChanged(); }
+   void onItemDragging() { onGeomChanged(); }
+   void onGeomChanged();
+
+   void saveItem(FILE *f);
+
+   // Some properties about the item that will be needed in the editor
+   bool hasText() { return true; }
+   const char *getEditorHelpString() { return "Makes ships go fast in direction of arrow. [P]"; }  
+   const char *getPrettyNamePlural() { return "GoFasts"; }
+   const char *getOnDockName() { return "GoFast"; }
+   const char *getOnScreenName() { return "GoFast"; }
+   bool hasTeam() { return false; }
+   bool canBeHostile() { return false; }
+   bool canBeNeutral() { return false; }
+   bool getHasRepop() { return false; }
+
 
    TNL_DECLARE_CLASS(SpeedZone);
 };

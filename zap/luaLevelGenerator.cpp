@@ -33,9 +33,6 @@ static F32 sGridSize;
 static GridDatabase *sGridDatabase;
 static LevelLoader *mCaller;
 
-#ifdef TNL_OS_LINUX
-//const S32 LevelLoader::MaxArgc;
-#endif
 
 string levelGenFile;     // Exists here so exception handler will know what file we were running
 
@@ -72,8 +69,7 @@ LuaLevelGenerator::LuaLevelGenerator(const string &scriptName, const Vector<stri
 const char LuaLevelGenerator::className[] = "LuaLevelGenerator";      // Class name as it appears to Lua scripts
 
 // Used in addItem() below...
-static const char *argv[LevelLoader::MaxArgc];
-//static const char argv_buffer[LevelLoader::MaxArgc][LevelLoader::MaxArgLen];
+static const char *argv[LevelLoader::MAX_LEVEL_LINE_ARGS];
 
 
 // Lua Constructor
@@ -211,7 +207,7 @@ S32 LuaLevelGenerator::addItem(lua_State *L)
 {
    static const char *methodName = "LevelGenerator:addItem()";
 
-   S32 argc = min(lua_gettop(L), LevelLoader::MaxArgc);     // Never more that MaxArgc args, please.
+   S32 argc = min(lua_gettop(L), LevelLoader::MAX_LEVEL_LINE_ARGS);     // Never more that MaxArgc args, please.
 
    if(argc == 0)
    {

@@ -46,12 +46,12 @@ namespace Zap
 
 // GCC wants storage for these, for some reason.  Unfortunately VC++ doesn't want that.
 #ifndef WIN32
-const int LevelLoader::MaxArgc;
+const int LevelLoader::MAX_LEVEL_LINE_ARGS;
 const int LevelLoader::MaxArgLen;
 #endif
 
 // For readability and laziness...
-#define MaxArgc LevelLoader::MaxArgc
+#define MaxArgc LevelLoader::MAX_LEVEL_LINE_ARGS
 #define MaxArgLen LevelLoader::MaxArgLen
 #define MaxIdLen LevelLoader::MaxIdLen
 
@@ -220,7 +220,7 @@ stateLineParseDone:
 // Reads files by chunks, converts to lines
 bool LevelLoader::loadLevelFromFile(const char *filename)
 {
-   char levelChunk[4096];     // Data buffer for reading in chunks of our level file
+   char levelChunk[MAX_LEVEL_LINE_LENGTH];     // Data buffer for reading in chunks of our level file
    FILE *file = fopen(filename, "r");
 
 #ifdef SAM_ONLY

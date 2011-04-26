@@ -232,6 +232,7 @@
     <ClCompile Include="..\zap\zoneControlGame.cpp" />
     <ClCompile Include="dataConnection.cpp" />
     <ClCompile Include="oglconsole.c" />
+    <ClCompile Include="SimpleLine.cpp" />
     <ClCompile Include="stringUtils.cpp" />
     <ClCompile Include="UIAbstractInstructions.cpp" />
     <ClCompile Include="UIMenuItems.cpp" />
@@ -342,6 +343,7 @@
     <ClInclude Include="dataConnection.h" />
     <ClInclude Include="helperMenu.h" />
     <ClInclude Include="oglconsole.h" />
+    <ClInclude Include="SimpleLine.h" />
     <ClInclude Include="SlipZone.h" />
     <ClInclude Include="stringUtils.h" />
     <ClInclude Include="UIAbstractInstructions.h" />

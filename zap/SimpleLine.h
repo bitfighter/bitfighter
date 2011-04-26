@@ -23,47 +23,48 @@
 //
 //------------------------------------------------------------------------------------
 
-#ifndef _GAMELOADER_H_
-#define _GAMELOADER_H_
+#ifndef _SIMPLELINE_H_
+#define _SIMPLELINE_H_
 
-#include "tnl.h"
-#include "tnlNetStringTable.h"
-#include "tnlVector.h"
+#include "UIEditor.h"      // For EditorObject (to be moved!)
 
-using namespace TNL;
 
 namespace Zap
 {
 
-class LevelLoader
+class SimpleLine : public EditorObject
 {
+private:
+   virtual Color getEditorRenderColor() = 0;
+
+   virtual const char *getOriginBottomLabel() = 0;          
+   virtual const char *getDestinationBottomLabel() = 0;
+   virtual const char *getEditMessage() = 0;
+
+protected:
+   void initialize();      // Called by child objects
+
+
 public:
-   // Put these in here so we can access them from luaLevelGenerator
-   static const S32 MAX_LEVEL_LINE_ARGS = 128;     // Most args on a single line,
-   static const S32 MaxArgLen = 100;               // Each at most MaxArgLen bytes long  (enforced in addCharToArg)
-   static const S32 MaxIdLen = 11;                 // Max 32-bit int is 10 digits, plus room for a null
+   // Some properties about the item that will be needed in the editor
+   GeomType getGeomType() { return geomSimpleLine; }
 
-   static const S32 MAX_LEVEL_LINE_LENGTH = 4096;  // Max total level line length we'll tolerate
+   virtual Point getVert(S32 index) = 0;
+   virtual const char *getOnDockName() = 0;
 
-   bool loadLevelFromFile(const char *file);
-   void parseLevelLine(const char *string);
+   void renderDock();     // Render item on the dock
+   void renderEditor(F32 currentScale);
+   virtual void renderEditorItem(F32 currentScale) = 0;
 
-   // Implementers of this class need to provide the following implementations:
-   virtual void processLevelLoadLine(U32 argc, U32 id, const char **argv) = 0;
-   virtual void setGameTime(F32 time) = 0;
-};
+   virtual S32 getVertCount() { return 2; }
 
-// Provide a class to help organize loading of levels from disk
-class LevelListLoader
-{
-public:
-   static Vector<std::string> buildLevelList();
-   static void removeSkippedLevels(Vector<std::string> &levelList);
+   void deleteVert(S32 vertIndex) { /* Do nothing */ }
+
+   virtual void initializeEditor(const Point &pos);
+
 };
 
 
 };
 
 #endif
-
-

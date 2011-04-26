@@ -38,9 +38,9 @@
 #include "soccerGame.h"          // For soccer ball radius
 #include "engineeredObjects.h"   // For Turret properties
 #include "barrier.h"             // For BarrierWidth
-#include "speedZone.h"           // For default speed
 #include "gameItems.h"           // For Asteroid defs
-#include "teleporter.h"          // For teleporter radius
+#include "teleporter.h"          // For teleporter def
+#include "speedZone.h"           // for speedzone def
 #include "config.h"
 #include "GeomUtils.h"
 #include "textItem.h"            // For MAX_TEXTITEM_LEN and MAX_TEXT_SIZE
@@ -79,8 +79,8 @@ static const Color magenta = Color(1,0,1);
 static const Color black = Color(0,0,0);
 
 static const Color SELECT_COLOR = yellow;
-static const Color HIGHLIGHT_COLOR = white;
 
+const Color EditorUserInterface::HIGHLIGHT_COLOR = white;
 const Color EditorUserInterface::DOCK_LABEL_COLOR = white;
 
 static const S32 TEAM_NEUTRAL = Item::TEAM_NEUTRAL;
@@ -169,17 +169,20 @@ void EditorUserInterface::populateDock()
       yPos += spacer;
       mDockItems.push_back(WorldItem(ItemTurret, Point(xPos, yPos), mCurrentTeam, true, 0, 0));
       yPos += spacer;
-      mDockItems.push_back(WorldItem(ItemTeleporter, Point(xPos, yPos), mCurrentTeam, true, 0, 0));
+       */
+      
+      Teleporter *teleporter = new Teleporter();
+      teleporter->setVert(Point(xPos, yPos), 0);
+      teleporter->addToDock(gEditorGame);
       yPos += spacer;
-      mDockItems.push_back(WorldItem(ItemSpeedZone, Point(xPos, yPos), mCurrentTeam, true, 0, 0));
+
+      SpeedZone *speedZone = new SpeedZone();
+      speedZone->setVert(Point(xPos, yPos), 0);
+      speedZone->addToDock(gEditorGame);
       yPos += spacer;
-      */
+     
       TextItem *textItem = new TextItem();
-
-      Point pos(xPos, yPos);
-
-      textItem->setVert(pos, 0);
-      textItem->setVert(pos, 1);
+      textItem->setVert(Point(xPos, yPos), 0);
       textItem->setTeam(mCurrentTeam);
 
       textItem->addToDock(gEditorGame);
@@ -244,57 +247,6 @@ void EditorUserInterface::populateDock()
 }
 
 
-//struct GameItemRec
-//{
-//   const char *name;    // Item's name, as seen in save file
-//   bool hasWidth;       // Does item have width?
-//   bool hasTeam;        // Item can be associated with team
-//   bool canBeNeutral;   // Item can be neutral 
-//   bool canBeHostile;   // Item can be hostile 
-//   bool hasText;        // Item has a text string attached to it
-//   bool hasRepop;       // Item has a repop delay that can be set
-//   GeomType geom;
-//   bool specialTabKeyRendering;  // true if item is rendered in a special way when tab is down
-//   const char *prettyNamePlural;
-//   const char *onDockName;       // Briefer, pretty looking label to label things on dock
-//   const char *onScreenName;     // Brief, pretty looking label to label things on screen
-//   const char *helpText;         // Help string displayed when hovering over item on the dock
-//};
-//
-////                            x        x         x          x                            x                                                                              x
-//// Remember to keep these properly aligned with GameItems enum        x        x                      
-////   Name,                 hasWidth, hasTeam, canBeNeut, canBeHos, hasText, hasRepop,   geom,        special, prettyNamePlural        onDockName   onScreenName      description
-//GameItemRec itemDef[] = {
-//   { "Spawn",               false,    true,      true,     false,   false,   false,   geomPoint,       true,   "Spawn points",           "Spawn",    "Spawn",        "Location where ships start.  At least one per team is required. [G]" },
-//   { "SpeedZone",           false,    false,     true,     true,    false,   false,   geomSimpleLine,  false,  "GoFasts",                "GoFast",   "GoFast",       "Makes ships go fast in direction of arrow. [P]" },
-//   { "SoccerBallItem",      false,    false,     false,    false,   false,   false,   geomPoint,       true,   "Soccer balls",           "Ball",     "Ball",         "Soccer ball, can only be used in Soccer games." },
-//   { "FlagItem",            false,    true,      true,     true,    false,   false,   geomPoint,       false,  "Flags",                  "Flag",     "Flag",         "Flag item, used by a variety of game types." },
-//   { "FlagSpawn",           false,    true,      true,     true,    false,   true,    geomPoint,       true,   "Flag spawn points",      "FlagSpawn","FlagSpawn",    "Location where flags (or balls in Soccer) spawn after capture." },
-//   { "BarrierMaker",        true,     false,     false,    false,   false,   false,   geomLine,        false,  "Barrier makers",         "Wall",     "Wall",         "Run-of-the-mill wall item." },
-//   { "PolyWall",            false,    false,     false,    false,   false,   false,   geomPoly,        false,  "PolyWalls",              "Wall",     "Wall",         "Polygon wall barrier; create linear walls with right mouse click." },
-//   { "LineItem",            true,     true,      true,     true,    false,   false,   geomLine,        false,  "Decorative Lines",       "LineItem", "LineItem",     "Decorative linework." },
-//   { "Teleporter",          false,    false,     false,    false,   false,   false,   geomSimpleLine,  false,  "Teleporters",            "Teleport", "Teleport",     "Teleports ships from one place to another. [T]" },
-//   { "RepairItem",          false,    false,     false,    false,   false,   true,    geomPoint,       false,  "Repair items",           "Repair",    "Repair",       "Repairs damage to ships. [B]" },
-//   { "EnergyItem",          false,    false,     false,    false,   false,   true,    geomPoint,       false,  "Energy items",           "Enrg",     "Energy",       "Restores energy to ships" },
-//   { "TestItem",            false,    false,     false,    false,   false,   false,   geomPoint,       true,   "Test items",             "Test",     "Test Item",    "Bouncy object that floats around and gets in the way." },
-//   { "Asteroid",            false,    false,     false,    false,   false,   false,   geomPoint,       true,   "Asteroids",              "Ast.",     "Asteroid",     "Shootable asteroid object.  Just like the arcade game." },
-//   { "AsteroidSpawn",       false,    false,     false,    false,   false,   true,    geomPoint,       true,   "Asteroid spawn points",  "ASP",      "AsteroidSpawn","Periodically spawns a new asteroid." },
-//   { "Mine",                false,    false,     true,     true,    false,   false,   geomPoint,       true,   "Mines",                  "Mine",     "Mine",         "Mines can be prepositioned, and are are \"hostile to all\". [M]" },
-//   { "SpyBug",              false,    true,      true,     true,    false,   false,   geomPoint,       false,  "Spy bugs",               "Bug",      "Spy Bug",      "Remote monitoring device that shows enemy ships on the commander's map. [Ctrl-B]" },
-//   { "ResourceItem",        false,    false,     false,    false,   false,   false,   geomPoint,       true,   "Resource items",         "Res.",     "Resource",     "Small bouncy object that floats around and gets in the way." },
-//   { "LoadoutZone",         false,    true,      true,     true,    false,   false,   geomPoly,        false,  "Loadout zones",          "Loadout",  "Loadout",      "Area to finalize ship modifications.  Each team should have at least one." },
-//   { "HuntersNexusObject",  false,    false,     true,     true,    false,   false,   geomPoly,        false,  "Nexus zones",            "Nexus",    "Nexus",        "Area to bring flags in Hunter game.  Cannot be used in other games." },
-//   { "SlipZone",            false,    false,     true,     true,    false,   false,   geomPoly,        false,  "Slip zones",             "Slip Zone","Slip Zone",    "Not yet implemented." },
-//   { "Turret",              false,    true,      true,     true,    false,   true,    geomPoint,       false,  "Turrets",                "Turret",   "Turret",       "Creates shooting turret.  Can be on a team, neutral, or \"hostile to all\". [Y]" },
-//   { "ForceFieldProjector", false,    true,      true,     true,    false,   true ,   geomPoint,       false,  "Force field projectors", "ForceFld", "ForceFld",     "Creates a force field that lets only team members pass. [F]" },
-//   { "GoalZone",            false,    true,      true,     true,    false,   false,   geomPoly,        false,  "Goal zones",             "Goal",     "Goal",         "Target area used in a variety of games." },
-//   { "TextItem",            false,    true,      true,     true,    true,    false,   geomSimpleLine,  false,  "Text Items",             "TextItem", "Text",         "Draws a bit of text on the map.  Visible only to team, or to all if neutral." },
-//   { "BotNavMeshZone",      false,    false,     true,     true,    false,   false,   geomPoly,        false,  "NavMesh Zones",          "NavMesh",  "NavMesh",      "Creates navigational mesh zone for robots." },
-//
-//   { NULL,                  false,    false,     false,   false,    false,   false,   geomNone,        false,  "",                       "",         "",             "" },
-//};
-
-
 // Destructor -- unwind things in an orderly fashion
 EditorUserInterface::~EditorUserInterface()
 {
@@ -304,8 +256,8 @@ EditorUserInterface::~EditorUserInterface()
    mClipboard.deleteAndClear();
    delete mNewItem;
 
-   for(S32 i = 0; i < UNDO_STATES; i++)
-      mUndoItems[i].deleteAndClear();
+   //for(S32 i = 0; i < UNDO_STATES; i++)
+   //   mUndoItems[i].deleteAndClear();
 }
 
 
@@ -324,7 +276,7 @@ void renderVertex(VertexRenderStyles style, const Point &v, S32 number, F32 alph
    }
       
    if(style == HighlightedVertex)
-      glColor(HIGHLIGHT_COLOR, alpha);
+      glColor(EditorUserInterface::HIGHLIGHT_COLOR, alpha);
    else if(style == SelectedVertex)
       glColor(SELECT_COLOR, alpha);
    else if(style == SnappingVertex)
@@ -444,6 +396,55 @@ void EditorUserInterface::deleteUndoState()
 }
 
 
+// Objects created with this method MUST be deleted!
+// Returns NULL if className is invalid
+static EditorObject *newEditorObject(const char *className)
+{
+   Object *theObject = Object::create(className);        // Create an object of the specified type
+   TNLAssert(dynamic_cast<EditorObject *>(theObject), "invalid object!");
+
+   return dynamic_cast<EditorObject *>(theObject);       // Force our new object to be an EditorObject
+}
+
+
+// Experimental save to string method
+static void copyItems(const Vector<EditorObject *> &from, Vector<string> &to)
+{
+   to.resize(from.size());      // Preallocation makes things go faster
+
+   for(S32 i = 0; i < from.size(); i++)
+      to[i] = from[i]->toString();
+}
+
+// TODO: Make this an UIEditor method, and get rid of the global
+static void restoreItems(const Vector<string> &from, Vector<EditorObject *> &to)
+{
+   to.deleteAndClear();
+   to.reserve(from.size());      // Preallocation makes things go faster
+
+   Vector<string> args;
+
+   for(S32 i = 0; i < from.size(); i++)
+   {
+      args = parseString(from[i]);
+      EditorObject *newObject = newEditorObject(args[0].c_str());
+
+      S32 args_count = 0;
+      const char *args_char[LevelLoader::MAX_LEVEL_LINE_ARGS];  // Convert to a format processArgs will allow
+         
+      // Skip the first arg because we've already handled that one above
+      for(S32 j = 1; j < args.size() && j < LevelLoader::MAX_LEVEL_LINE_ARGS; j++)
+      {
+         args_char[j-1] = args[j-1].c_str();
+         args_count++;
+      }
+
+      newObject->addToEditor(gEditorGame);
+      newObject->processArguments(args_count, args_char);
+   }
+}
+
+
 static void copyItems(const Vector<EditorObject *> &from, Vector<EditorObject *> &to)
 {
    to.deleteAndClear();
@@ -504,7 +505,8 @@ void EditorUserInterface::undo(bool addToRedoStack)
    }
 
    mLastUndoIndex--;
-   copyItems(mUndoItems[mLastUndoIndex % UNDO_STATES], mItems);
+   mItems.deleteAndClear();
+   restoreItems(mUndoItems[mLastUndoIndex % UNDO_STATES], mItems);
 
    rebuildEverything();
 
@@ -521,7 +523,7 @@ void EditorUserInterface::redo()
       mSnapVertex_j = NONE;
 
       mLastUndoIndex++;
-      copyItems(mUndoItems[mLastUndoIndex % UNDO_STATES], mItems);   
+      restoreItems(mUndoItems[mLastUndoIndex % UNDO_STATES], mItems);   
 
       rebuildEverything();
       validateLevel();
@@ -738,17 +740,6 @@ void EditorUserInterface::loadLevel()
    for(S32 i = 0; i < mItems.size(); i++)
       if(mItems[i]->getObjectTypeMask() & ~ItemBarrierMaker && mItems[i]->getObjectTypeMask() & ~ItemNavMeshZone)
          mItems[i]->onGeomChanged();
-}
-
-
-// Objects created with this method MUST be deleted!
-// Returns NULL if className is invalid
-static EditorObject *newEditorObject(const char *className)
-{
-   Object *theObject = Object::create(className);        // Create an object of the specified type
-   TNLAssert(dynamic_cast<EditorObject *>(theObject), "invalid object!");
-
-   return dynamic_cast<EditorObject *>(theObject);       // Force our new object to be an EditorObject
 }
 
 
@@ -2022,25 +2013,43 @@ Color EditorObject::getDrawColor()
    if(mSelected)
       return SELECT_COLOR;
    else if(mLitUp, alpha)
-      return HIGHLIGHT_COLOR;
+      return EditorUserInterface::HIGHLIGHT_COLOR;
    else  // Normal
       return Color(.75, .75, .75);
 }
 
 
+void EditorObject::saveItem(FILE *f)
+{
+   s_fprintf(f, "%s\n", toString().c_str());
+}
+
+
 // Return a pointer to a new copy of the object.  You will have to delete this copy when you are done with it!
+// This is kind of a hack, but not sure of a better way to do this...  perhaps a clone method in each object?
 EditorObject *EditorObject::newCopy()
 {
+   EditorObject *newObject = NULL;
+
    TextItem *textItem = dynamic_cast<TextItem *>(this);
    if(textItem != NULL)
-   {
-      TextItem *newTextItem = new TextItem(*textItem);
-      newTextItem->onGeomChanged();
-      return newTextItem;
-   }
+      newObject = new TextItem(*textItem);
 
-   TNLAssert(false, "Unhandled object in newCopy!");
-   EditorObject *newObject = newEditorObject(this->getClassName());
+   Teleporter *teleporter = dynamic_cast<Teleporter *>(this);
+   if(teleporter != NULL)
+      newObject = new Teleporter(*teleporter);
+
+   SpeedZone *speedZone = dynamic_cast<SpeedZone *>(this);
+   if(speedZone != NULL)
+      newObject = new SpeedZone(*speedZone);
+
+   TNLAssert(newObject, "Unhandled object in newCopy!");
+
+   newObject->initializeEditor(getVert(0));
+   newObject->onGeomChanged();
+   newObject->mGame = NULL;         // mGame pointer will have been copied, but needs to be cleared before we can add this to the game
+
+   //EditorObject *newObject = newEditorObject(this->getClassName());
    return newObject;
 }
 
@@ -2133,7 +2142,7 @@ void EditorObject::render(bool isScriptItem, bool showingReferenceShip, ShowMode
    else if(mSelected)
       drawColor = SELECT_COLOR;
    else if(mLitUp, alpha)
-      drawColor = HIGHLIGHT_COLOR;
+      drawColor = EditorUserInterface::HIGHLIGHT_COLOR;
    else  // Normal
       drawColor = Color(.75, .75, .75);
 
@@ -2619,7 +2628,7 @@ void EditorUserInterface::pasteSelection()
 
    for(S32 i = 0; i < itemCount; i++)
    {
-      mItems.push_back(mClipboard[i]);
+      mItems.push_back(mClipboard[i]->newCopy());
       mItems.last()->setSerialNumber(getNextItemId());
       mItems.last()->setSelected(true);
       for(S32 j = 0; j < mItems.last()->getVertCount(); j++)
@@ -2932,7 +2941,7 @@ void EditorUserInterface::findHitItemAndEdge()
          
          for(S32 j = 0; j < mItems[i]->getVertCount() - 1; j++)
          {
-            Point p2 = convertLevelToCanvasCoord(verts[j+1]);
+            Point p2 = convertLevelToCanvasCoord(mItems[i]->getVert(j+1));
             
             if(findNormalPoint(mMousePos, p1, p2, closest))
             {
@@ -3085,29 +3094,12 @@ void EditorUserInterface::onMouseDragged(S32 x, S32 y)
 
    if(mDraggingDockItem != NONE)      // We just started dragging an item off the dock
    {
-      // Offset lets us drag an item out from the dock by an amount offset from the 0th vertex.  This makes placement
-      // seem more natural.
-      Point offset;
-
-      if(mDockItems[mDraggingDockItem]->getGeomType() == geomPoly)
-         offset.set(.25, .15);
-      else if(mDockItems[mDraggingDockItem]->getObjectTypeMask() & ItemSpeedZone)
-         offset.set(.15, 0);
-      else if(mDockItems[mDraggingDockItem]->getObjectTypeMask() & ItemTextItem)     
-         offset.set(.4, 0);
-
       // Instantiate object so we are in essence dragging a non-dock item
-      Point pos = snapPoint(convertCanvasToLevelCoord(mMousePos) - offset, true);
+      // Offset lets us drag an item out from the dock by an amount offset from the 0th vertex.  This makes placement seem more natural.
+      Point pos = snapPoint(convertCanvasToLevelCoord(mMousePos) - mDockItems[mDraggingDockItem]->getInitialPlacementOffset() / getCurrentScale(), true);
 
-      
       EditorObject *item = newEditorObject(mDockItems[mDraggingDockItem]->getClassName());
-
-      // Put this in item itself?
-      item->setVert(pos, 0);
-      item->setVert(pos + Point(1,0), 1);
-      item->setTeam(mDockItems[mDraggingDockItem]->getTeam());
       
-
       item->setWidth((mDockItems[mDraggingDockItem]->getGeomType() == geomPoly) ? .7 : 1);
 
       item->addToEditor(gEditorGame);
@@ -3138,11 +3130,19 @@ void EditorUserInterface::onMouseDragged(S32 x, S32 y)
    findSnapVertex();
    if(!mSnapVertex_i || mSnapVertex_j == NONE)
       return;
-
+   
    
    if(!mDraggingObjects)      // Just started dragging
    {
       mMoveOrigin = mSnapVertex_i->getVert(mSnapVertex_j);
+      
+      mOriginalVertLocations.clear();
+
+      for(S32 i = 0; i < mItems.size(); i++)
+         if(mItems[i]->isSelected() || mItems[i]->anyVertsSelected())
+            for(S32 j = 0; j < mItems[i]->getVertCount(); j++)
+               mOriginalVertLocations.push_back(mItems[i]->getVert(j));
+
       saveUndoState();
 
       //// Select any turrets/ffs that are attached to any selected walls
@@ -3159,6 +3159,8 @@ void EditorUserInterface::onMouseDragged(S32 x, S32 y)
    mDraggingObjects = true;
 
 
+
+
    Point delta;
 
    // The thinking here is that for large items -- walls, polygons, etc., we may grab an item far from its snap vertex, and we
@@ -3173,26 +3175,27 @@ void EditorUserInterface::onMouseDragged(S32 x, S32 y)
 
    // Update the locations of all items we're moving to show them being dragged.  Note that an item cannot be
    // selected if one of its vertices are.
+   //for(S32 i = 0; i < mItems.size(); i++)
+   //{
+   //   // Skip selected item if it's a turret or forcefield -- snapping will have already been applied
+   //   if(mItems[i] == mSnapVertex_i && (mItems[i]->getObjectTypeMask() & ItemForceField || mItems[i]->getObjectTypeMask() & ItemTurret) && mItems[i]->isSnapped())
+   //      continue;
+
+   // Update coordinates of dragged item
+   S32 count = 0;
    for(S32 i = 0; i < mItems.size(); i++)
-   {
-      // Skip selected item if it's a turret or forcefield -- snapping will have already been applied
-      if(mItems[i] == mSnapVertex_i && (mItems[i]->getObjectTypeMask() & ItemForceField || mItems[i]->getObjectTypeMask() & ItemTurret) && mItems[i]->isSnapped())
-         continue;
+      if(mItems[i]->isSelected() || mItems[i]->anyVertsSelected())
+      {
+         for(S32 j = 0; j < mItems[i]->getVertCount(); j++)
+            mItems[i]->setVert(mOriginalVertLocations[count++] + delta, j);
 
-      // Update coordinates of dragged item
-      for(S32 j = 0; j < mItems[i]->getVertCount(); j++)
-         if(mItems[i]->isSelected() || mItems[i]->vertSelected(j))
-         {
-            mItems[i]->setVert(mUndoItems[(mLastUndoIndex - 1) % UNDO_STATES][i]->getVert(j) + delta, j);
+         // If we are dragging a vertex, and not the entire item, we are changing the geom, so notify the item
+         if(mItems[i]->anyVertsSelected())
+            mItems[i]->onGeomChanging();  
 
-            // If we are dragging a vertex, and not the entire item, we are changing the geom, so notify the item
-            if(mItems[i]->vertSelected(j))
-               mItems[i]->onGeomChanging();     
-         }
-
-      if(mItems[i]->isSelected())     
-         mItems[i]->onItemDragging();      // Make sure this gets run after we've updated the item's location
-   }
+         if(mItems[i]->isSelected())     
+            mItems[i]->onItemDragging();      // Make sure this gets run after we've updated the item's location
+      }
 }
 
 
@@ -3533,19 +3536,20 @@ void EditorUserInterface::insertNewItem(GameItems itemType)
    Point pos = snapPoint(convertCanvasToLevelCoord(mMousePos));
    S32 team = -1;
 
-   // Get team affiliation from dockItem of same type
+   EditorObject *newItem = NULL;
+
+   // Find a dockItem to copy
    for(S32 i = 0; i < mDockItems.size(); i++)
-      if (mDockItems[i]->getObjectTypeMask() & itemType)
+      if(mDockItems[i]->getObjectTypeMask() & itemType)
       {
-         team = mDockItems[i]->getTeam();
+         newItem = mDockItems[i]->newCopy();
          break;
       }
+   TNLAssert(newItem, "Couldn't create object in insertNewItem()");
 
-   EditorObject *newItem = new EditorObject(itemType);
    newItem->setVert(pos, 0);
-   newItem->setTeam(team);
-
-   newItem->addToEditor(gEditorGame);     // Adds newItem to mItems
+   
+   newItem->addToEditor(gEditorGame);     // Adds newItem to mItems l
 
    mItems.sort(geometricSort);
    validateLevel();
@@ -3810,10 +3814,11 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
             }
 
             mNewItem = newEditorObject(type);
+            mNewItem->initializeEditor(convertCanvasToLevelCoord(mMousePos));
 
-            mNewItem->setVert(convertCanvasToLevelCoord(mMousePos), 0);
-            mNewItem->setTeam(TEAM_NEUTRAL);
-            mNewItem->setWidth(width);
+            //mNewItem->setVert(convertCanvasToLevelCoord(mMousePos), 0);
+            //mNewItem->setTeam(TEAM_NEUTRAL);
+            //mNewItem->setWidth(width);
          }
       }
    }
@@ -4538,26 +4543,6 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
 
             p->saveItem(f);
 
-
-            //s_fprintf(f, "%s", itemDef[mItems[i]->index].name);
-
-            //// Write id if it's not 0
-            //if(mItems[i]->id > 0)
-            //   s_fprintf(f, "!%d", mItems[i]->id);
-
-            //if(mItems[i]->hasTeam())
-            //   s_fprintf(f, " %d", mItems[i]->getTeam());
-            //if(mItems[i]->hasWidth())
-            //   s_fprintf(f, " %g", mItems[i]->getWidth());
-            //for(S32 j = 0; j < p.vertCount(); j++)
-            //   s_fprintf(f, " %g %g ", p->getVert(j).x, p->getVert(j).y);
-
-            //if(mItems[i]->getHasRepop() && mItems[i]->repopDelay != -1)
-            //   s_fprintf(f, " %d", mItems[i]->repopDelay);
-            //if(mItems[i]->getObjectTypeMask() & ItemSpeedZone)
-            //   s_fprintf(f, " %d %s", mItems[i]->speed, mItems[i]->boolattr ? "SnapEnabled" : "");
-
-            //s_fprintf(f, "\n");
          }
       fclose(f);
    }
@@ -4605,20 +4590,19 @@ void EditorUserInterface::testLevel()
       gYesNoUserInterface.reset();
       gYesNoUserInterface.setTitle("LEVEL HAS PROBLEMS");
 
+      S32 line = 1;
       for(S32 i = 0; i < mLevelErrorMsgs.size(); i++)
-         gYesNoUserInterface.setMessage(i + 1, mLevelErrorMsgs[i].c_str());
+         gYesNoUserInterface.setMessage(line++, mLevelErrorMsgs[i].c_str());
 
       for(S32 i = 0; i < mLevelWarnings.size(); i++)
-         gYesNoUserInterface.setMessage(i + 1, mLevelWarnings[i].c_str());
-
-      S32 i = mLevelErrorMsgs.size() + mLevelWarnings.size() - 2;
+         gYesNoUserInterface.setMessage(line++, mLevelWarnings[i].c_str());
 
       if(gameTypeError)
       {
-         gYesNoUserInterface.setMessage(i + 1, "ERROR: GameType is invalid.");
-         gYesNoUserInterface.setMessage(i + 2, "(Fix in Level Parameters screen [F3])");
-         i+=2;
+         gYesNoUserInterface.setMessage(line++, "ERROR: GameType is invalid.");
+         gYesNoUserInterface.setMessage(line++, "(Fix in Level Parameters screen [F3])");
       }
+
       gYesNoUserInterface.setInstr("Press [Y] to start, [ESC] to cancel");
       gYesNoUserInterface.registerYesFunction(testLevelStart_local);   // testLevelStart_local() just calls testLevelStart() below
       gYesNoUserInterface.activate();
@@ -5397,7 +5381,7 @@ void EditorObject::renderPolylineCenterline(F32 alpha)
    if(mSelected)
       glColor(SELECT_COLOR, alpha);
    else if(mLitUp && !mAnyVertsSelected)
-      glColor(HIGHLIGHT_COLOR, alpha);
+      glColor(EditorUserInterface::HIGHLIGHT_COLOR, alpha);
    else
       glColor(getTeamColor(mTeam), alpha);
 
@@ -5514,40 +5498,40 @@ WallSegmentManager *getWallSegmentManager()
 }
 
 
-void EditorObject::onGeomChanged()
-{
-   // TODO: Delegate all this to the member objects
-   if(getObjectTypeMask() & ItemBarrierMaker || getObjectTypeMask() & ItemPolyWall)
-   {  
-      // Fill extendedEndPoints from the vertices of our wall's centerline, or from PolyWall edges
-      processEndPoints();
-
-      if(getObjectTypeMask() & ItemPolyWall)     // Prepare interior fill triangulation
-         initializePolyGeom();          // Triangulate, find centroid, calc extents
-
-      getWallSegmentManager()->computeWallSegmentIntersections(this);
-
-      gEditorUserInterface.recomputeAllEngineeredItems();      // Seems awfully lazy...  should only recompute items attached to altered wall
-
-      // But if we're doing the above, we don't need to bother with the below... unless we stop being lazy
-      //// Find any forcefields that might intersect our new wall segment and recalc them
-      //for(S32 i = 0; i < gEditorUserInterface.mItems.size(); i++)
-      //   if(gEditorUserInterface.mItems[i]->index == ItemForceField &&
-      //                           gEditorUserInterface.mItems[i]->getExtent().intersects(getExtent()))
-      //      gEditorUserInterface.mItems[i]->findForceFieldEnd();
-   }
-
-   else if(getObjectTypeMask() & ItemForceField)
-   {
-      findForceFieldEnd();    // Find the end-point of the projected forcefield
-   }
-
-   else if(getGeomType() == geomPoly)
-      initializePolyGeom();
-
-   if(getObjectTypeMask() & ItemNavMeshZone)
-      gEditorUserInterface.rebuildBorderSegs(getItemId());
-}
+//void EditorObject::onGeomChanged()
+//{
+//   // TODO: Delegate all this to the member objects
+//   if(getObjectTypeMask() & ItemBarrierMaker || getObjectTypeMask() & ItemPolyWall)
+//   {  
+//      // Fill extendedEndPoints from the vertices of our wall's centerline, or from PolyWall edges
+//      processEndPoints();
+//
+//      if(getObjectTypeMask() & ItemPolyWall)     // Prepare interior fill triangulation
+//         initializePolyGeom();          // Triangulate, find centroid, calc extents
+//
+//      getWallSegmentManager()->computeWallSegmentIntersections(this);
+//
+//      gEditorUserInterface.recomputeAllEngineeredItems();      // Seems awfully lazy...  should only recompute items attached to altered wall
+//
+//      // But if we're doing the above, we don't need to bother with the below... unless we stop being lazy
+//      //// Find any forcefields that might intersect our new wall segment and recalc them
+//      //for(S32 i = 0; i < gEditorUserInterface.mItems.size(); i++)
+//      //   if(gEditorUserInterface.mItems[i]->index == ItemForceField &&
+//      //                           gEditorUserInterface.mItems[i]->getExtent().intersects(getExtent()))
+//      //      gEditorUserInterface.mItems[i]->findForceFieldEnd();
+//   }
+//
+//   else if(getObjectTypeMask() & ItemForceField)
+//   {
+//      findForceFieldEnd();    // Find the end-point of the projected forcefield
+//   }
+//
+//   else if(getGeomType() == geomPoly)
+//      initializePolyGeom();
+//
+//   if(getObjectTypeMask() & ItemNavMeshZone)
+//      gEditorUserInterface.rebuildBorderSegs(getItemId());
+//}
 
 
 // TODO: Move this to forcefield
@@ -5704,14 +5688,12 @@ void Selection::restore(Vector<EditorObject *> &items)
 {
    switch(getObjectTypeMask()) {
       case ItemSpawn: return true;
-      case ItemSpeedZone: return false;
       case ItemSoccerBall: return false;
       case ItemFlag: return true;
       case ItemFlagSpawn: return true;
       case ItemBarrierMaker: return false;
       case ItemPolyWall: return false;
       case ItemLineItem: return true;
-      case ItemTeleporter: return false;
       case ItemRepair: return false;
       case ItemEnergy: return false;
       case ItemBouncyBall: return false;
@@ -5736,14 +5718,12 @@ bool EditorObject::canBeNeutral()
 {
    switch(getObjectTypeMask()) {
       case ItemSpawn: return true;
-      case ItemSpeedZone: return true;
       case ItemSoccerBall: return false;
       case ItemFlag: return true;
       case ItemFlagSpawn: return true;
       case ItemBarrierMaker: return false;
       case ItemPolyWall: return false;
       case ItemLineItem: return true;
-      case ItemTeleporter: return false;
       case ItemRepair: return false;
       case ItemEnergy: return false;
       case ItemBouncyBall: return false;
@@ -5767,14 +5747,12 @@ bool EditorObject::canBeHostile()
 {
    switch(getObjectTypeMask()) {
       case ItemSpawn: return false;
-      case ItemSpeedZone: return true;
       case ItemSoccerBall: return false;
       case ItemFlag: return true;
       case ItemFlagSpawn: return true;
       case ItemBarrierMaker: return false;
       case ItemPolyWall: return false;
       case ItemLineItem: return true;
-      case ItemTeleporter: return false;
       case ItemRepair: return false;
       case ItemEnergy: return false;
       case ItemBouncyBall: return false;
@@ -5798,7 +5776,6 @@ GeomType EditorObject::getGeomType()
 {
    switch(getObjectTypeMask()) {
       case ItemSpawn: return geomPoint;
-      case ItemSpeedZone: return geomSimpleLine;
       case ItemSoccerBall: return geomPoint;
       case ItemFlag: return geomPoint;
       case ItemFlagSpawn: return geomPoint;
@@ -5829,14 +5806,12 @@ bool EditorObject::getHasRepop()
 {
    switch(getObjectTypeMask()) {
       case ItemSpawn: return false;
-      case ItemSpeedZone: return false;
       case ItemSoccerBall: return false;
       case ItemFlag: return false;
       case ItemFlagSpawn: return true;
       case ItemBarrierMaker: return false;
       case ItemPolyWall: return false;
       case ItemLineItem: return false;
-      case ItemTeleporter: return false;
       case ItemRepair: return true;
       case ItemEnergy: return true;
       case ItemBouncyBall: return false;
@@ -5860,14 +5835,12 @@ const char *EditorObject::getEditorHelpString()
 {
    switch(getObjectTypeMask()) {
       case ItemSpawn: return "Location where ships start.  At least one per team is required. [G]";
-      case ItemSpeedZone: return "Makes ships go fast in direction of arrow. [P]";
       case ItemSoccerBall: return "Soccer ball, can only be used in Soccer games.";
       case ItemFlag: return "Flag item, used by a variety of game types.";
       case ItemFlagSpawn: return "Location where flags (or balls in Soccer) spawn after capture.";
       case ItemBarrierMaker: return "Run-of-the-mill wall item.";
       case ItemPolyWall: return "Polygon wall barrier; create linear walls with right mouse click.";
       case ItemLineItem: return "Decorative linework.";
-      case ItemTeleporter: return "Teleports ships from one place to another. [T]";
       case ItemRepair:  return "Repairs damage to ships. [B]";
       case ItemEnergy: return "Restores energy to ships";
       case ItemBouncyBall: return "Bouncy object that floats around and gets in the way.";
@@ -5908,14 +5881,12 @@ const char *EditorObject::getPrettyNamePlural()
 {
    switch(getObjectTypeMask()) {
       case ItemSpawn: return "Spawn points";   	
-      case ItemSpeedZone: return "GoFasts";           	
       case ItemSoccerBall: return "Soccer balls";     	
       case ItemFlag: return "Flags";                  	
       case ItemFlagSpawn: return "Flag spawn points"; 	
       case ItemBarrierMaker: return "Barrier makers"; 	
       case ItemPolyWall: return "PolyWalls";          	
       case ItemLineItem: return "Decorative Lines";   	
-      case ItemTeleporter: return "Teleporters";      	
       case ItemRepair: return "Repair items";         	
       case ItemEnergy: return "Energy items";         	
       case ItemBouncyBall: return "Test items";       	
@@ -5940,14 +5911,12 @@ const char *EditorObject::getOnDockName()
 {
    switch(getObjectTypeMask()) {
       case ItemSpawn: return "Spawn";    		
-      case ItemSpeedZone: return "GoFast";   		
       case ItemSoccerBall: return "Ball";     		
       case ItemFlag: return "Flag";     			
       case ItemFlagSpawn: return "FlagSpawn";		
       case ItemBarrierMaker: return "Wall";     		
       case ItemPolyWall: return "Wall";     			
       case ItemLineItem: return "LineItem"; 			
-      case ItemTeleporter: return "Teleport"; 		
       case ItemRepair: return "Repair";    			
       case ItemEnergy: return "Enrg";     			
       case ItemBouncyBall: return "Test";     		
@@ -5973,14 +5942,12 @@ const char *EditorObject::getOnScreenName()
 {
    switch(getObjectTypeMask()) {
       case ItemSpawn: return "Spawn";        			
-      case ItemSpeedZone: return "GoFast";       			
       case ItemSoccerBall: return "Ball";         			
       case ItemFlag: return "Flag";         				
       case ItemFlagSpawn: return "FlagSpawn";    			
       case ItemBarrierMaker: return "Wall";         			
       case ItemPolyWall: return "Wall";         			
       case ItemLineItem: return "LineItem";     			
-      case ItemTeleporter: return "Teleport";     			
       case ItemRepair: return "Repair";      			
       case ItemEnergy: return "Energy";       			
       case ItemBouncyBall: return "Test Item";    			

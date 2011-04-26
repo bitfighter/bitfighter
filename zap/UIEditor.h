@@ -106,36 +106,37 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+// TODO: get rid of this, use gameObject enum
 enum GameItems    
 {
-   ItemSpawn              = BIT(0), 
-   ItemSpeedZone          = BIT(1),
-   ItemSoccerBall         = BIT(2), 
-   ItemFlag               = BIT(3),
-   ItemFlagSpawn          = BIT(4), 
-   ItemBarrierMaker       = BIT(5),
-   ItemTextItem           = BIT(6),
-   ItemPolyWall           = BIT(7),
-   ItemLineItem           = BIT(8),
-   ItemTeleporter         = BIT(9),
-   ItemRepair             = BIT(10),
-   ItemEnergy             = BIT(11),
-   ItemBouncyBall         = BIT(12),
-   ItemAsteroid           = BIT(13),
-   ItemAsteroidSpawn      = BIT(14),
-   ItemMine               = BIT(15),
-   ItemSpyBug             = BIT(16),
-   ItemResource           = BIT(17),
-   ItemLoadoutZone        = BIT(18),
-   ItemNexus              = BIT(19),
-   ItemSlipZone           = BIT(20),
-   ItemTurret             = BIT(21),
-   ItemForceField         = BIT(22),
-   ItemGoalZone           = BIT(23),
-   ItemNavMeshZone        = BIT(24),
-   ItemInvalid            = BIT(25),
-};                         
-                           
+   ItemSpawn              = BIT(0),       
+   ItemSpeedZone          = BIT(28),      
+   ItemSoccerBall         = BIT(24),      
+   ItemFlag               = BIT(10),      
+   ItemFlagSpawn          = BIT(1),       
+   ItemBarrierMaker       = BIT(2),       
+   ItemTextItem           = BIT(6),       
+   ItemPolyWall           = BIT(3),       
+   ItemLineItem           = BIT(4),       
+   ItemTeleporter         = BIT(19),      
+   ItemRepair             = BIT(22),      
+   ItemEnergy             = BIT(23),      
+   ItemBouncyBall         = BIT(9),     
+   ItemAsteroid           = BIT(21),
+   ItemAsteroidSpawn      = BIT(25),    
+   ItemMine               = BIT(14),    
+   ItemSpyBug             = BIT(15),    
+   ItemResource           = BIT(5),     
+   ItemLoadoutZone        = BIT(8),     
+   ItemNexus              = BIT(16),      
+   ItemSlipZone           = BIT(12),      
+   ItemTurret             = BIT(26),      
+   ItemForceField         = BIT(7),
+   ItemGoalZone           = BIT(20),      
+   ItemNavMeshZone        = BIT(17),      
+   ItemInvalid            = BIT(31)     
+};                                        
+                                          
 
 enum GeomType {           
    geomPoint,           // ype = BIT(Single point feature (like a flag)
@@ -193,6 +194,8 @@ public:
    void addToEditor(Game *game);
    void addToDock(Game *game);
 
+   // Offset lets us drag an item out from the dock by an amount offset from the 0th vertex.  This makes placement seem more natural.
+   virtual Point getInitialPlacementOffset() { return Point(0,0); }
    virtual void renderEditor(F32 currentScale) { /* to be = 0 */ };
 
    //// Is item sufficiently snapped?  only for turrets and forcefields
@@ -218,6 +221,8 @@ public:
    bool isVertexLitUp(S32 vertexIndex) { return mVertexLitUp == vertexIndex; }
    void setVertexLitUp(S32 vertexIndex) { mVertexLitUp = vertexIndex; }
 
+   void saveItem(FILE *f);
+   virtual string toString() { TNLAssert(false, "UNIMPLEMENTED!"); /* TODO: =0 */ }
 
    Vector<Point> extendedEndPoints;                            // these are computed but not stored in barrier... not sure how to merge
 
@@ -347,9 +352,11 @@ public:
    bool isBeingEdited() { return mIsBeingEdited; }
    void setIsBeingEdited(bool isBeingEdited) { mIsBeingEdited = isBeingEdited; }
 
-   void onGeomChanged();          // Item changed geometry (or moved), do any internal updating that might be required
+   virtual void onGeomChanged() { /* To be =0 */ };   // Item changed geometry (or moved), do any internal updating that might be required
 
-   
+   virtual void initializeEditor(const Point &pos) { };
+
+
    //////////
    // TODO: Move these down into the actual classes
    bool hasWidth() { return(getObjectTypeMask() == ItemBarrierMaker || getObjectTypeMask() == ItemLineItem); }
@@ -374,7 +381,6 @@ public:
 
 
    bool processArguments(S32 argc, const char **argv);
-   void saveItem(FILE *f) { };     // Write item to stream
 
    //////////////
 
@@ -544,6 +550,7 @@ public:
 
    static const S32 DOCK_LABEL_SIZE = 9;      // Size to label items on the dock
    static const Color DOCK_LABEL_COLOR;
+   static const Color HIGHLIGHT_COLOR;
 
 private:
    string mSaveMsg;
@@ -570,8 +577,9 @@ private:
    Timer mSaveMsgTimer;
    Timer mWarnMsgTimer;
 
-   Vector<Vector<EditorObject *> > mUndoItems;  // Undo/redo history  [[note that g++ requires space btwn >>]]
+   Vector<Vector</*EditorObject **/string> > mUndoItems;  // Undo/redo history  [[note that g++ requires space btwn >>]]
    Point mMoveOrigin;                           // Point representing where items were moved "from" for figuring out how far they moved
+   Vector<Point> mOriginalVertLocations;
 
    Vector<EditorObject *> mLevelGenItems;       // Items added by a levelgen script
 

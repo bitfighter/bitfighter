@@ -164,12 +164,12 @@ void processConfigLine(int argc, string argv[])
 }
 
 enum {
-   MaxArgc = 128,
    MaxArgLen = 100,
 };
 
-static string argv[MaxArgc];   // *argv[MaxArgc]
-static char argv_buffer[MaxArgc][MaxArgLen];
+
+static string argv[LevelLoader::MAX_LEVEL_LINE_ARGS];   
+static char argv_buffer[LevelLoader::MAX_LEVEL_LINE_ARGS][MaxArgLen];
 static int argc;
 static int argLen = 0;
 static const char *argString;
@@ -183,7 +183,7 @@ inline char getNextChar()
 
 inline void addCharToArg(char c)
 {
-   if(argc < MaxArgc && argLen < MaxArgLen-1)
+   if(argc < LevelLoader::MAX_LEVEL_LINE_ARGS && argLen < MaxArgLen-1)
    {
       argv[argc] += c;
       argLen++;
@@ -192,9 +192,8 @@ inline void addCharToArg(char c)
 
 inline void addArg()
 {
-   if(argc < MaxArgc)
+   if(argc < LevelLoader::MAX_LEVEL_LINE_ARGS)
    {
-      //argv[argc][argLen] = 0;
       argc++;
       argLen = 0;
    }
@@ -202,7 +201,7 @@ inline void addArg()
 
 inline void clearArgv()
 {
-   for(S32 i = 0; i < MaxArgc; i++)
+   for(S32 i = 0; i < LevelLoader::MAX_LEVEL_LINE_ARGS; i++)
       argv[i] = "";
 }
 
@@ -217,7 +216,7 @@ int parseArgs(const char *string)
    argString = string;
    char c;
 
-   for(U32 i = 0; i < MaxArgc; i++)
+   for(U32 i = 0; i < LevelLoader::MAX_LEVEL_LINE_ARGS; i++)
       argv[i] = argv_buffer[i];
 
 stateEatingWhitespace:

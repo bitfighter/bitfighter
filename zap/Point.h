@@ -78,6 +78,7 @@ public:
    F32 dot(const Point &p) const;
    void read(const char **argv);
 
+
    // inlines  need to be in header, too
    inline Point operator+(const Point &pt) const
    {

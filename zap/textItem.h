@@ -26,12 +26,11 @@
 #ifndef _TEXTITEM_H_
 #define _TEXTITEM_H_
 
-
+#include "SimpleLine.h"    // For SimpleLine def
 #include "gameObject.h"
-#include "UIEditor.h"      // For EditorObject (to be moved!)
 #include "gameType.h"
 #include "gameNetInterface.h"
-#include "polygon.h"    // For def of Polyline, for lineItem
+#include "polygon.h"       // For def of Polyline, for lineItem
 #include "UI.h"
 #include "gameObjectRender.h"
 #include "ship.h"
@@ -46,35 +45,6 @@ using namespace std;
 namespace Zap
 {
 
-class SimpleLine : public EditorObject
-{
-private:
-   virtual Color getEditorRenderColor() = 0;
-
-   virtual const char *getOriginBottomLabel() = 0;          
-   virtual const char *getDestinationBottomLabel() = 0;
-   virtual const char *getEditMessage() = 0;
-
-public:
-   // Some properties about the item that will be needed in the editor
-   GeomType getGeomType() { return geomSimpleLine; }
-
-   virtual Point getVert(S32 index) = 0;
-   virtual const char *getOnDockName() = 0;
-
-   void renderDock();     // Render item on the dock
-   void renderEditor(F32 currentScale);
-   virtual void renderEditorItem(F32 currentScale) = 0;
-
-   virtual S32 getVertCount() { return 2; }
-
-   void deleteVert(S32 vertIndex) { /* Do nothing */ }
-};
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
 class TextItem : public SimpleLine
 {
    typedef GameObject Parent;
@@ -85,26 +55,10 @@ private:
    Point mDir;           // Direction text is "facing"
    string mText;         // Text itself
 
-   Color getEditorRenderColor() { return Color(0,0,1); }
-
-   // For editor
-   // How are this item's vertices labeled in the editor?
+   // How are this item's vertices labeled in the editor? -- these can be private
    const char *getOriginBottomLabel() { return "Start"; }
    const char *getDestinationBottomLabel() { return "Direction"; }
    const char *getEditMessage() { return "[Enter] to edit text"; }
-
-
-            /*if(getObjectTypeMask() & ItemTeleporter)
-            return "Intake Vortex";
-         else if(getObjectTypeMask() & ItemSpeedZone)
-            return "Location";
-         else if(getObjectTypeMask() & ItemTextItem)
-            return "Start";*/
-
-                    /* if(getObjectTypeMask() & ItemTeleporter)
-            return "Destination";
-         else if(getObjectTypeMask() & ItemSpeedZone || getObjectTypeMask() & ItemTextItem)
-            return "Direction";*/
 
 public:
    static const U32 MAX_TEXT_SIZE = 255;
@@ -117,24 +71,16 @@ public:
 
    static Vector<Point> generatePoints(Point pos, Point dir);
    void render();
-   void renderEditorItem(F32 currentScale);
    S32 getRenderSortValue();
 
    bool processArguments(S32 argc, const char **argv);           // Create objects from parameters stored in level file
-   void saveItem(FILE *f);
+   string toString();
 
    void onAddedToGame(Game *theGame);
    void computeExtent();                                         // Bounding box for quick collision-possibility elimination
 
-   F32 getSize() { return mSize; }
-   void setSize(F32 size) { mSize = size; }
-
    Vector<Point> getVerts() { Vector<Point> p; p.push_back(mPos); p.push_back(mDir); return p; }      // TODO: Can we get rid of this somehow?
 
-   Point getVert(S32 index) { return index == 0 ? mPos : mDir; }
-   void setVert(const Point &point, S32 index) { if(index == 0) mPos = point; else mDir = point; }
-
-   LineEditor lineEditor;    // For editing in the editor
 
    bool getCollisionPoly(Vector<Point> &polyPoints);  // More precise boundary for precise collision detection
    bool collide(GameObject *hitObject);
@@ -143,11 +89,26 @@ public:
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
    ///// Editor Methods
+
+   Color getEditorRenderColor() { return Color(0,0,1); }
+
+   LineEditor lineEditor;    // For editing in the editor
+
+   void renderEditorItem(F32 currentScale);
+   F32 getSize() { return mSize; }
+   void setSize(F32 size) { mSize = size; }
+
+   Point getVert(S32 index) { return index == 0 ? mPos : mDir; }
+   void setVert(const Point &point, S32 index) { if(index == 0) mPos = point; else mDir = point; }
+
    void onAttrsChanging();
    void onGeomChanging();
    void onGeomChanged();
 
    void recalcTextSize();
+
+   // Offset lets us drag an item out from the dock by an amount offset from the 0th vertex.  This makes placement seem more natural.
+   Point getInitialPlacementOffset() { return Point(.4, 0); }
 
    // Some properties about the item that will be needed in the editor
    bool hasText() { return true; }
@@ -160,8 +121,13 @@ public:
    bool canBeNeutral() { return true; }
    bool getHasRepop() { return false; }
 
-
    TNL_DECLARE_CLASS(TextItem);
+};
+
+
+class TextItemEditor : public TextItem
+{
+
 };
 
 

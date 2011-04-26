@@ -500,6 +500,11 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
       glTranslatef(objStart.x, objStart.y, 0);
       glScalef(0.7, 0.7, 1);
 
+
+      // TODO: Do this once, elsewhere
+      Vector<Point> speedZoneRenderPoints;
+      SpeedZone::generatePoints(Point(-SpeedZone::height / 2, 0), Point(1, 0), 1, speedZoneRenderPoints);
+
       switch(i)
       {
          case 0:
@@ -595,7 +600,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
             break;
 
          case 23:    // SpeedZone
-            renderSpeedZone(SpeedZone::generatePoints(Point(-SpeedZone::height / 2, 0), Point(1, 0)), gClientGame->getCurrentTime());
+            renderSpeedZone(speedZoneRenderPoints, gClientGame->getCurrentTime());
             break;
 
          case 24:    // TestItem
