@@ -59,8 +59,9 @@ namespace Zap
 EditorUserInterface gEditorUserInterface;
 
 const S32 DOCK_WIDTH = 50;
-const F32 MIN_SCALE = 20;        // Most zoomed-in scale
-const F32 MAX_SCALE = 800;       // Most zoomed-out scale
+const F32 MIN_SCALE = .05;        // Most zoomed-in scale
+const F32 MAX_SCALE = 2.5;        // Most zoomed-out scale
+const F32 STARTING_SCALE = 0.5;   
 
 // Some colors
 
@@ -315,8 +316,8 @@ inline F32 getGridSize()
 // Replaces the need to do a convertLevelToCanvasCoord on every point before rendering
 static void setLevelToCanvasCoordConversion()
 {
-   F32 scale =  gEditorUserInterface.getCurrentScale() / getGridSize();
-   Point offset = gEditorUserInterface.getCurrentOffset()/* / scale*/;
+   F32 scale =  gEditorUserInterface.getCurrentScale();
+   Point offset = gEditorUserInterface.getCurrentOffset();
 
    glTranslatef(offset.x, offset.y, 0);
    glScalef(scale, scale, 1);
@@ -435,7 +436,7 @@ static void restoreItems(const Vector<string> &from, Vector<EditorObject *> &to)
       // Skip the first arg because we've already handled that one above
       for(S32 j = 1; j < args.size() && j < LevelLoader::MAX_LEVEL_LINE_ARGS; j++)
       {
-         args_char[j-1] = args[j-1].c_str();
+         args_char[j-1] = args[j].c_str();
          args_count++;
       }
 
@@ -523,6 +524,7 @@ void EditorUserInterface::redo()
       mSnapVertex_j = NONE;
 
       mLastUndoIndex++;
+      mItems.deleteAndClear();
       restoreItems(mUndoItems[mLastUndoIndex % UNDO_STATES], mItems);   
 
       rebuildEverything();
@@ -1286,19 +1288,9 @@ Point EditorUserInterface::snapPointToLevelGrid(Point const &p)
       return p;
 
    // First, find a snap point based on our grid
-   F32 mulFactor, divFactor;
-   if(mCurrentScale >= 100 / getGridSize())
-   {
-      mulFactor = 10;
-      divFactor = 0.1;
-   }
-   else
-   {
-      mulFactor = 2;
-      divFactor = 0.5;
-   }
+   F32 factor = (showMinorGridLines() ? 0.1 : 0.5) * getGridSize();     // Tenths or halves
 
-   return Point(floor(p.x * mulFactor + 0.5) * divFactor, floor(p.y * mulFactor + 0.5) * divFactor);
+   return Point(floor(p.x / factor + 0.5) * factor, floor(p.y / factor + 0.5) * factor);
 }
 
 
@@ -1323,14 +1315,13 @@ Point EditorUserInterface::snapPoint(Point const &p, bool snapWhileOnDock)
       return snapEngineeredObject(mSnapVertex_i, snapPointToLevelGrid(p));
 
 
-   F32 maxSnapDist = 100 / (mCurrentScale * mCurrentScale);
+   F32 maxSnapDist = 2 / (mCurrentScale * mCurrentScale);
    F32 minDist = maxSnapDist;
 
    // Where will we be snapping things?
    bool snapToWallCorners = !mSnapDisabled && mDraggingObjects && !(mSnapVertex_i->getObjectTypeMask() & ItemBarrierMaker) && mSnapVertex_i->getGeomType() != geomPoly;
 bool snapToWallEdges = !mSnapDisabled && mSnapVertex_i && false; // TODO: Can delete?
-   bool snapToNavZoneEdges = mSnapVertex_i && mSnapVertex_i->getObjectTypeMask() & ItemNavMeshZone;
-   bool snapToLevelGrid = !snapToNavZoneEdges && !mSnapDisabled;
+   bool snapToLevelGrid = !mSnapDisabled;
 
 
    if(snapToLevelGrid)     // Lowest priority
@@ -1369,42 +1360,10 @@ bool snapToWallEdges = !mSnapDisabled && mSnapVertex_i && false; // TODO: Can de
    // If we're editing a vertex of a polygon, and if we're outside of some threshold distance, see if we can 
    // snap to the edge of a another zone or wall.  Decreasing value in minDist test will favor snapping to walls, 
    // decreasing(increasing??) it will require being closer to a wall to snap to it.
-   if(minDist >= 90 / (mCurrentScale * mCurrentScale))
+   if(minDist >= 2 / (mCurrentScale * mCurrentScale))
    {
       if(snapToWallEdges)
          checkEdgesForSnap(p, WallSegmentManager::mWallEdges, false, minDist, snapPoint);
-   }
-
-   // Will overwrite snapPoint if a zone corner or edge is found, thus prioritizing zone edges to other things when 
-   // snapToNavZoneEdges is true
-   if(snapToNavZoneEdges)
-   {
-      Rect vertexRect(snapPoint, .25); 
-      Vector<EditorObject> candidates;
-      Point edgeSnapPoint;
-      F32 minCornerDist = maxSnapDist;
-      F32 minEdgeDist = maxSnapDist;
-
-      for(S32 i = 0; i < mItems.size(); i++)
-      {
-         if(mItems[i]->getObjectTypeMask() & ~ItemNavMeshZone || mItems[i]->isSelected() || mItems[i]->anyVertsSelected())
-            continue;
-
-         if(!mItems[i]->getExtent().intersectsOrBorders(vertexRect))
-            continue;
-         
-         // To close the polygon, we need to repeat our first point at the end
-         Vector<Point> verts = mItems[i]->getVerts();     // Makes copy -- TODO: alter checkEdgesforsnap to make
-                                                         // copy unnecessary, only needed when 3rd param is true
-         verts.push_back(verts.first());
-
-         // Combine these two checks in an awkward manner to reduce cost of checks above
-         checkEdgesForSnap(p, verts, true, minEdgeDist, edgeSnapPoint);
-         checkCornersForSnap(p, mItems[i]->getVerts(), minCornerDist, snapPoint);
-
-         if(minCornerDist == maxSnapDist && minEdgeDist < maxSnapDist)     // i.e. found edge, but not corner
-            snapPoint.set(edgeSnapPoint);
-      }
    }
 
    return snapPoint;
@@ -1518,6 +1477,13 @@ static const Color grayedOutColorBright = Color(.5, .5, .5);
 static const Color grayedOutColorDim = Color(.25, .25, .25);
 static bool fillRendered = false;
 
+
+bool EditorUserInterface::showMinorGridLines()
+{
+   return mCurrentScale >= .5;
+}
+
+
 // Render background snap grid
 void EditorUserInterface::renderGrid()
 {
@@ -1525,13 +1491,13 @@ void EditorUserInterface::renderGrid()
       return;   
 
    F32 colorFact = mSnapDisabled ? .5 : 1;
-
+   
    // Minor grid lines
    for(S32 i = 1; i >= 0; i--)
    {
-      if(mCurrentScale >= (i ? 100 : 10))      
+      if(i && showMinorGridLines() || !i)      
       {
-         F32 gridScale = mCurrentScale * (i ? 0.1 : 1);     // Minor then major gridlines
+         F32 gridScale = mCurrentScale * getGridSize() * (i ? 0.1 : 1);     // Minor then major gridlines
          F32 colorLevel = (i ? .2 : .4);
 
          F32 xStart = fmod(mCurrentOffset.x, gridScale);
@@ -2090,7 +2056,6 @@ static inline void labelSimpleLineItem(Point pos, F32 labelSize, const char *ite
 // Unclear enough??
 void EditorUserInterface::setTranslationAndScale(const Point &pos)
 {
-   F32 gridSize = getGridSize();
    F32 scale = gEditorUserInterface.getCurrentScale();
 
    glScalef(scale, scale, 1);
@@ -2739,10 +2704,10 @@ void EditorUserInterface::setCurrentTeam(S32 currentTeam)
       if(!mDockItems[i]->hasTeam())
          continue;
 
-      if(currentTeam == TEAM_NEUTRAL && !mItems[i]->canBeNeutral())
+      if(currentTeam == TEAM_NEUTRAL && !mDockItems[i]->canBeNeutral())
          continue;
 
-      if(currentTeam == TEAM_HOSTILE && !mItems[i]->canBeHostile())
+      if(currentTeam == TEAM_HOSTILE && !mDockItems[i]->canBeHostile())
          continue;
 
       mDockItems[i]->setTeam(currentTeam);
@@ -3598,7 +3563,7 @@ void EditorUserInterface::centerView()
    }
    else     // Put (0,0) at center of screen
    {
-      mCurrentScale = 100;
+      mCurrentScale = STARTING_SCALE;
       mCurrentOffset.set(gScreenInfo.getGameCanvasWidth() / 2, gScreenInfo.getGameCanvasHeight() / 2);
    }
 }
@@ -5358,8 +5323,6 @@ void EditorObject::processEndPoints()
       extendedEndPoints.push_back(mVerts.first());
    }
 }
-
-
 
 
 // Draw barrier centerlines; wraps renderPolyline()  ==> lineItem, barrierMaker only

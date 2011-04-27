@@ -626,6 +626,7 @@ private:
    Point mMousePos;                 // Where the mouse is at the moment
    Point mMouseDownPos;             // Where the mouse was pressed for a drag operation
 
+   bool showMinorGridLines();
    void renderGrid();               // Draw background snap grid
    void renderDock(F32 width);
    void renderTextEntryOverlay();
@@ -787,8 +788,8 @@ public:
    void setSaveMessage(string msg, bool savedOK);
    void setWarnMessage(string msg1, string msg2);
 
-   Point convertCanvasToLevelCoord(Point p) { return (p - mCurrentOffset) * (1 / mCurrentScale) * 255; }
-   Point convertLevelToCanvasCoord(Point p, bool convert = true) { return convert ? p * mCurrentScale / 255 + mCurrentOffset : p; }
+   Point convertCanvasToLevelCoord(Point p) { return (p - mCurrentOffset) * (1 / mCurrentScale); }
+   Point convertLevelToCanvasCoord(Point p, bool convert = true) { return convert ? p * mCurrentScale + mCurrentOffset : p; }
 
    void onPreDisplayModeChange();   // Called when we shift between windowed and fullscreen mode, before change is made
    void onDisplayModeChange();      // Called when we shift between windowed and fullscreen mode, after change is made

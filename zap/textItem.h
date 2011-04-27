@@ -75,6 +75,7 @@ public:
 
    bool processArguments(S32 argc, const char **argv);           // Create objects from parameters stored in level file
    string toString();
+   void initializeEditor(F32 gridSize);
 
    void onAddedToGame(Game *theGame);
    void computeExtent();                                         // Bounding box for quick collision-possibility elimination

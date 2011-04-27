@@ -107,14 +107,11 @@ void SimpleLine::renderEditor(F32 currentScale)
 
    renderEditorItem(currentScale);
 
-   glPushMatrix();
-   //glScalef(1/currentScale, 1/currentScale, 1);
-
    // Label item with message about what happens if user presses enter
    if(!isBeingEdited() && isSelected())
    {
       glColor(INSTRUCTION_TEXTCOLOR);
-      UserInterface::drawStringf_2pt(pos * currentScale, dest * currentScale, INSTRUCTION_TEXTSIZE, -22, getEditMessage());
+      UserInterface::drawStringf_2pt(pos, dest, INSTRUCTION_TEXTSIZE, -22, getEditMessage());
    }
 
    // Label any selected or highlighted vertices
@@ -122,18 +119,16 @@ void SimpleLine::renderEditor(F32 currentScale)
    {
       F32 alpha = 1;
       glColor(getDrawColor(), alpha);
-      drawSquare(pos * currentScale, 7);
+      drawSquare(pos, 7);
 
-      labelSimpleLineItem(pos * currentScale, EditorUserInterface::DOCK_LABEL_SIZE, getOnScreenName(), getOriginBottomLabel());
+      labelSimpleLineItem(pos, EditorUserInterface::DOCK_LABEL_SIZE, getOnScreenName(), getOriginBottomLabel());
    }
    else if(vertSelected(1) || (mLitUp && isVertexLitUp(1)))    // "To" vertex
    {
       F32 alpha = 1;
       glColor(getDrawColor(), alpha);
-      drawSquare(dest * currentScale, 7);
+      drawSquare(dest, 7);
 
-      labelSimpleLineItem(dest * currentScale, EditorUserInterface::DOCK_LABEL_SIZE, getOnScreenName(), getDestinationBottomLabel());
+      labelSimpleLineItem(dest, EditorUserInterface::DOCK_LABEL_SIZE, getOnScreenName(), getDestinationBottomLabel());
    }
-
-   glPopMatrix();   
 }

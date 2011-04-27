@@ -113,7 +113,7 @@ bool Teleporter::processArguments(S32 argc, const char **argv)
 string Teleporter::toString()
 {
    char outString[LevelLoader::MAX_LEVEL_LINE_LENGTH];
-   dSprintf(outString, sizeof(outString), "%s %g %g %g %g", Object::getClassName(), mPos.x, mPos.y, mDest.x, mDest.y);
+   dSprintf(outString, sizeof(outString), "%s %g %g %g %g", Object::getClassName(), mPos.x / 255, mPos.y / 255, mDest.x / 255, mDest.y / 255);
    return outString;
 }
 

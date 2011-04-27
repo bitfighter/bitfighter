@@ -51,11 +51,7 @@ TextItem::TextItem()
 
    // Some default values
    mSize = 20;
-   mPos = Point(0,0);   
-   mDir = Point(1,0);
    mTeam = Item::TEAM_NEUTRAL;
-   mText = "Your text here";
-   lineEditor.setString(mText);
 }
 
 
@@ -63,6 +59,15 @@ TextItem::TextItem()
 TextItem::~TextItem()
 {
    // Do nothing
+}
+
+
+void TextItem::initializeEditor(F32 gridSize)
+{
+   SimpleLine::initializeEditor(gridSize);
+
+   lineEditor.setString("Your text here");
+   recalcTextSize();
 }
 
 
@@ -86,11 +91,11 @@ void TextItem::render()
 // Called by SimpleItem::renderEditor()
 void TextItem::renderEditorItem(F32 currentScale)
 {
-   renderTextItem(mPos, mDir, mSize / currentScale, lineEditor.getDisplayString(), getGame()->getTeamColor(mTeam));
+   renderTextItem(mPos, mDir, mSize, lineEditor.getDisplayString(), getGame()->getTeamColor(mTeam));
 
    // If we're editing the text, we need to draw our cursor
    if(isBeingEdited())
-      lineEditor.drawCursorAngle(mPos.x, mPos.y, mSize / currentScale, mPos.angleTo(mDir));
+      lineEditor.drawCursorAngle(mPos.x, mPos.y, mSize, mPos.angleTo(mDir));
 }
 
 
@@ -119,6 +124,8 @@ bool TextItem::processArguments(S32 argc, const char **argv)
    mSize = atof(argv[5]);
    mSize = max(min(mSize, MAX_TEXT_SIZE), MIN_TEXT_SIZE);      // Note that same line exists below, in recalcXXX()... combine?
 
+   // Assemble any remainin args into a string
+   mText = "";
    for(S32 i = 6; i < argc; i++)
    {
       mText += argv[i];
@@ -127,7 +134,7 @@ bool TextItem::processArguments(S32 argc, const char **argv)
    }
 
    mText = mText.substr(0, MAX_TEXTITEM_LEN-1);      // Limit length to MAX_TEXTITEM_LEN chars (leaving room for a trailing null)
-
+   lineEditor.setString(mText);
    computeExtent();
 
    return true;
@@ -137,7 +144,7 @@ bool TextItem::processArguments(S32 argc, const char **argv)
 string TextItem::toString()
 {
    char outString[LevelLoader::MAX_LEVEL_LINE_LENGTH];
-   dSprintf(outString, sizeof(outString), "%s %g %g %g %g %g %s", Object::getClassName(), mPos.x, mPos.y, mDir.x, mDir.y, mSize, mText.c_str());
+   dSprintf(outString, sizeof(outString), "%s %d %g %g %g %g %g %s", Object::getClassName(), mTeam, mPos.x / 255, mPos.y / 255, mDir.x / 255, mDir.y / 255, mSize, lineEditor.c_str());
    return outString;
 }
 
