@@ -60,7 +60,7 @@ public:
 
    void deleteVert(S32 vertIndex) { /* Do nothing */ }
 
-   virtual void initializeEditor(const Point &pos);
+   virtual void initializeEditor(F32 gridSize);
 
 };
 

@@ -240,6 +240,9 @@ public:
    S32 getWidth() { return mWidth; }
    ////
 
+   void moveTo(const Point &pos, S32 snapVertex = 0);    // Move object to location, specifying (optional) vertex to be positioned at pos
+   void offset(const Point &offset);                     // Offset object by a certain amount
+
    S32 repopDelay;        // For repair items, also used for engineered objects heal rate
    S32 speed;             // Speed for speedzone items
    bool boolattr;         // Additional optional boolean attribute for some items (only speedzone so far...)
@@ -354,7 +357,7 @@ public:
 
    virtual void onGeomChanged() { /* To be =0 */ };   // Item changed geometry (or moved), do any internal updating that might be required
 
-   virtual void initializeEditor(const Point &pos) { };
+   virtual void initializeEditor(F32 gridSize) { };
 
 
    //////////
@@ -784,8 +787,8 @@ public:
    void setSaveMessage(string msg, bool savedOK);
    void setWarnMessage(string msg1, string msg2);
 
-   Point convertCanvasToLevelCoord(Point p) { return (p - mCurrentOffset) * (1 / mCurrentScale); }
-   Point convertLevelToCanvasCoord(Point p, bool convert = true) { return convert ? p * mCurrentScale + mCurrentOffset : p; }
+   Point convertCanvasToLevelCoord(Point p) { return (p - mCurrentOffset) * (1 / mCurrentScale) * 255; }
+   Point convertLevelToCanvasCoord(Point p, bool convert = true) { return convert ? p * mCurrentScale / 255 + mCurrentOffset : p; }
 
    void onPreDisplayModeChange();   // Called when we shift between windowed and fullscreen mode, before change is made
    void onDisplayModeChange();      // Called when we shift between windowed and fullscreen mode, after change is made

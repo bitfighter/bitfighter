@@ -86,11 +86,11 @@ void TextItem::render()
 // Called by SimpleItem::renderEditor()
 void TextItem::renderEditorItem(F32 currentScale)
 {
-   renderTextItem(mPos, mDir, mSize / getGame()->getGridSize(), lineEditor.getDisplayString(), getGame()->getTeamColor(mTeam));
+   renderTextItem(mPos, mDir, mSize / currentScale, lineEditor.getDisplayString(), getGame()->getTeamColor(mTeam));
 
    // If we're editing the text, we need to draw our cursor
    if(isBeingEdited())
-      lineEditor.drawCursorAngle(mPos.x, mPos.y, mSize / getGame()->getGridSize(), mPos.angleTo(mDir));
+      lineEditor.drawCursorAngle(mPos.x, mPos.y, mSize / currentScale, mPos.angleTo(mDir));
 }
 
 
@@ -147,7 +147,7 @@ void TextItem::recalcTextSize()
 {
    const F32 dummyTextSize = 120;
 
-   F32 lineLen = getVert(0).distanceTo(getVert(1)) * getGame()->getGridSize();      // In in-game units
+   F32 lineLen = getVert(0).distanceTo(getVert(1));      // In in-game units
    F32 strWidth = F32(UserInterface::getStringWidth(dummyTextSize, lineEditor.c_str())) / dummyTextSize; 
    F32 size = lineLen / strWidth;
 

@@ -74,9 +74,9 @@ void SpeedZone::preparePoints()
 
 void SpeedZone::generatePoints(const Point &pos, const Point &dir, F32 gridSize, Vector<Point> &points)
 {
-   const S32 inset = 3 / gridSize;
-   const F32 halfWidth = SpeedZone::halfWidth / gridSize;
-   const F32 height = SpeedZone::height / gridSize;
+   const S32 inset = 3;
+   const F32 halfWidth = SpeedZone::halfWidth;
+   const F32 height = SpeedZone::height;
 
    points.resize(12);
 
@@ -95,7 +95,7 @@ void SpeedZone::generatePoints(const Point &pos, const Point &dir, F32 gridSize,
 
    for(S32 i = 0; i < 2; i++)
    {
-      F32 offset = halfWidth * 2 * i - (i * 4) / gridSize;
+      F32 offset = halfWidth * 2 * i - (i * 4);
 
       // Red chevron
       points[index++] = pos + parallel *  (chevronThickness + offset);                                          
@@ -119,16 +119,16 @@ void SpeedZone::render()
 
 void SpeedZone::renderEditorItem(F32 currentScale)
 {
-   glPushMatrix();
+   //glPushMatrix();
    //glScalef(1/currentScale, 1/currentScale, 1);
    renderSpeedZone(mPolyBounds, getGame()->getCurrentTime());
-   glPopMatrix();
+   //glPopMatrix();
 }
 
 
 void SpeedZone::onGeomChanged()   
 {  
-   generatePoints(pos, dir, getGame()->getGridSize(), mPolyBounds); 
+   generatePoints(pos, dir, 1, mPolyBounds); 
 }
 
 
@@ -279,6 +279,7 @@ string SpeedZone::toString()
 
 
 static bool ignoreThisCollision = false;
+
 // Checks collisions with a SpeedZone
 bool SpeedZone::collide(GameObject *hitObject)
 {
@@ -312,12 +313,6 @@ void SpeedZone::collided(MoveObject *s, U32 stateIndex)
 {
    {
       MoveObject::MoveState *moveState = &s->mMoveState[stateIndex];
-     // Make sure ship hasn't been excluded
-      //for(S32 i = 0; i < mExclusions.size(); i++)
-         //if(mExclusions[i].ship == s)
-            //return false;
-      // Using ship's velosity and position to determine if it should be excluded
-
 
       Point impulse = (dir - pos);
       impulse.normalize(mSpeed);
@@ -335,13 +330,10 @@ void SpeedZone::collided(MoveObject *s, U32 stateIndex)
       // within the zone so that their path out will be very predictable.
       if(mSnapLocation)
       {
-         //s->setActualPos(pos, false);
-
          Point diffpos = moveState->pos - pos;
          Point thisAngle = dir - pos;
          thisAngle.normalize();
          Point newPos = thisAngle * diffpos.dot(thisAngle) + pos + impulse * 0.001;
-         //s->setActualPos(newpos, false);
 
          Point oldVel = moveState->vel;
          Point oldPos = moveState->pos;
@@ -357,31 +349,19 @@ void SpeedZone::collided(MoveObject *s, U32 stateIndex)
             moveState->vel = oldVel;
             return;
          }
-         //s->mImpulseVector = impulse * 1.5;     // <-- why???
-         moveState->vel = impulse * 1.5;
-         //moveState->pos = newPos;
+         moveState->vel = impulse * 1.5;     // Why multiply by 1.5?
 
       }
       else
       {
          if(shipNormal.distanceTo(impulse) < mSpeed && moveState->vel.len() > mSpeed * 0.8)
             return;
-         //s->mImpulseVector = impulse * 1.5;     // <-- why???
-         moveState->vel += impulse * 1.5;
+
+         moveState->vel += impulse * 1.5;    // Why multiply by 1.5?
       }
 
 
-
-      // To ensure we don't give multiple impulses to the same ship, we'll exclude it from
-      // further action for about 300ms.  That should do the trick.
-
-      //Exclusion exclusion;
-      //exclusion.ship = s;
-      //exclusion.time = getGame()->getCurrentTime() + 300;
-
-      //mExclusions.push_back(exclusion);
-
-      if(!s->isGhost() && stateIndex == MoveObject::ActualState) // only server needs to send information.
+      if(!s->isGhost() && stateIndex == MoveObject::ActualState)  // Only server needs to send information
       {
          setMaskBits(HitMask);
          if(s->getControllingClient().isValid())
@@ -395,10 +375,6 @@ void SpeedZone::collided(MoveObject *s, U32 stateIndex)
 
 void SpeedZone::idle(GameObject::IdleCallPath path)
 {
-   // Check for old exclusions that no longer apply
-   //for(S32 i = mExclusions.size()-1; i >= 0; i--)
-      //if(mExclusions[i].time < getGame()->getCurrentTime())     // Exclusion has expired
-         //mExclusions.erase_fast(i);
    if(mRotateSpeed != 0)
    {
       dir -= pos;

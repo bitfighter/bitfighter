@@ -61,10 +61,10 @@ static inline void labelSimpleLineItem(Point pos, F32 labelSize, const char *ite
 }
 
 
-void SimpleLine::initializeEditor(const Point &pos) 
+void SimpleLine::initializeEditor(F32 gridSize) 
 {
-   setVert(pos, 0);
-   setVert(pos + Point(1,0), 1);
+   setVert(Point(0,0), 0);
+   setVert(Point(1,0) * gridSize, 1);
 }
 
 
@@ -87,7 +87,7 @@ void SimpleLine::renderEditor(F32 currentScale)
 
 
       F32 ang = pos.angleTo(dest);
-      const F32 al = 15 / currentScale; // Length of arrow-head, in editor units (15 pixels)
+      const F32 al = 15/* / currentScale*/; // Length of arrow-head, in editor units (15 pixels)
       const F32 angoff = .5;            // Pitch of arrow-head prongs
 
       glBegin(GL_LINES);
@@ -108,7 +108,7 @@ void SimpleLine::renderEditor(F32 currentScale)
    renderEditorItem(currentScale);
 
    glPushMatrix();
-   glScalef(1/currentScale, 1/currentScale, 1);
+   //glScalef(1/currentScale, 1/currentScale, 1);
 
    // Label item with message about what happens if user presses enter
    if(!isBeingEdited() && isSelected())
