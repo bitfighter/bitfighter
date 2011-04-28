@@ -118,7 +118,7 @@ template<class T> inline Vector<T>::Vector(const U32 initialSize)   // Construct
 
 template<class T> inline Vector<T>::Vector(const Vector& p)        // Copy constructor
 {
-   innerVector = p.innerVector;
+   innerVector = vector<T>(p.innerVector);
 }
 
 template<class T> inline Vector<T>::Vector(const vector<T>& p)        // Constructor to wrap std::vector
