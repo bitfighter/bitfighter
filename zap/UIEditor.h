@@ -209,7 +209,9 @@ public:
 
    Point getCentroid() { return mCentroid; }    // only for polygons
    void setCentroid(const Point &centroid) { mCentroid = centroid; }
-   
+
+   void unselect();
+
    // These methods are mostly for lines and polygons
    void selectVert(S32 vertIndex);
    void aselectVert(S32 vertIndex);
@@ -645,7 +647,6 @@ private:
    bool mUp, mDown, mLeft, mRight, mIn, mOut;
 
    void clearSelection();        // Mark all objects and vertices as unselected
-   void unselectItem(S32 i);     // Mark item and vertices as unselected
 
    void centerView();            // Center display on all objects
    void splitBarrier();          // Split wall on selected vertex/vertices
@@ -754,6 +755,7 @@ public:
    void onMouseMoved(S32 x, S32 y);
    void onMouseMoved();
    void onMouseDragged(S32 x, S32 y);
+   void startDraggingDockItem();
    bool mouseIgnore;
 
 
