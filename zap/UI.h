@@ -289,7 +289,13 @@ public:
 
    // Draw text centered on screen (normal and formatted versions)  --> now return starting location
    static S32 drawCenteredString(S32 y, U32 size, const char *str);
+   static S32 drawCenteredString(S32 x, S32 y, U32 size, const char *str);
    static S32 drawCenteredStringf(S32 y, U32 size, const char *format, ...);
+   static S32 drawCenteredStringf(S32 x, S32 y, U32 size, const char *format, ...);
+
+   static S32 drawCenteredStringPair(S32 xpos, S32 ypos, U32 size, const Color &leftColor, const Color &rightColor, 
+                                     const char *leftStr, const char *rightStr);
+
    static S32 drawCenteredStringPair(S32 ypos, U32 size, const Color &leftColor, const Color &rightColor, 
                                      const char *leftStr, const char *rightStr);
 

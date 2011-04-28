@@ -43,28 +43,17 @@ class SpeedZone : public SimpleLine
    typedef GameObject Parent;
 
 private:
-
    Vector<Point> mPolyBounds;
-
    U16 mSpeed;             // Speed at which ship is propelled, defaults to defaultSpeed
-
-   //struct Exclusion {
-   //   Ship *ship;
-   //   U32 time;
-   //};
-
-   // To keep a ship from triggering the SpeedZone multiple times in one go, we'll exclude any ships
-   // that hit the zone from hitting it again within a brief time.
-   //Vector<Exclusion> mExclusions;
 
    // Take our basic inputs, pos and dir, and expand them into a three element
    // vector (the three points of our triangle graphic), and compute its extent
    void preparePoints();
 
-   // How are this item's vertices labeled in the editor? -- these can be private
+   // How are things labeled in the editor? 
    const char *getOriginBottomLabel() { return "Location"; }
    const char *getDestinationBottomLabel() { return "Direction"; }
-   const char *getEditMessage() { return "[Enter] to edit text"; }
+   const char *getEditMessage(S32 line);
 
 
 public:

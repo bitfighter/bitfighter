@@ -32,6 +32,22 @@
 namespace Zap
 {
 
+
+class GoFastEditorAttributeMenuUserInterface : public MenuUserInterface
+{
+private:
+   typedef MenuUserInterface Parent;
+
+public:
+   GoFastEditorAttributeMenuUserInterface();        // Constructor
+
+   void render();
+   EditorObject *object;      // Object whose attributes are being edited
+
+   //void playerSelected(U32 index);
+   void onEscape();
+};
+
 class SimpleLine : public EditorObject
 {
 private:
@@ -39,13 +55,14 @@ private:
 
    virtual const char *getOriginBottomLabel() = 0;          
    virtual const char *getDestinationBottomLabel() = 0;
-   virtual const char *getEditMessage() = 0;
+   virtual const char *getEditMessage(S32 line) { return ""; }
 
 protected:
    void initialize();      // Called by child objects
 
-
 public:
+   SimpleLine();           // Constructor
+
    // Some properties about the item that will be needed in the editor
    GeomType getGeomType() { return geomSimpleLine; }
 
@@ -62,6 +79,7 @@ public:
 
    virtual void initializeEditor(F32 gridSize);
 
+   GoFastEditorAttributeMenuUserInterface mAttrMenu;     // test
 };
 
 

@@ -92,6 +92,7 @@ public:
 
    virtual MenuItemTypes getItemType() { return MenuItemType; }
    virtual void render(S32 ypos, S32 textsize, bool isSelected);
+   virtual void render(S32 xpos, S32 ypos, S32 textsize, bool isSelected);
    const char *getHelp() { return mHelp.c_str(); }
    const char *getText() { return mText.c_str(); }
    S32 getIndex() { return mIndex; }
@@ -143,7 +144,7 @@ public:
    virtual S32 getValueIndex() { return mIndex; }
    virtual void setValueIndex(U32 index) { mIndex = index; }
 
-   virtual void render(S32 ypos, S32 textsize, bool isSelected);
+   virtual void render(S32 xpos, S32 ypos, S32 textsize, bool isSelected);
    virtual bool handleKey(KeyCode keyCode, char ascii);
 
    virtual void activatedWithShortcutKey() { /* Do nothing */ }
@@ -205,7 +206,7 @@ public:
       mEnterAdvancesItem = true;
    }
 
-   virtual void render(S32 ypos, S32 textsize, bool isSelected);
+   virtual void render(S32 xpos, S32 ypos, S32 textsize, bool isSelected);
 
    virtual MenuItemTypes getItemType() { return CounterMenuItemType; }
    virtual string getValueForDisplayingInMenu() { return itos(mValue); }
@@ -294,7 +295,7 @@ public:
    }
 
    virtual MenuItemTypes getItemType() { return EditableMenuItemType; }
-   virtual void render(S32 ypos, S32 textsize, bool isSelected);
+   virtual void render(S32 xpos, S32 ypos, S32 textsize, bool isSelected);
    virtual bool handleKey(KeyCode keyCode, char ascii);
 
    LineEditor getLineEditor() { return mLineEditor; }
@@ -341,7 +342,7 @@ public:
    }
 
    virtual MenuItemTypes getItemType() { return PlayerMenuItemType; }
-   virtual void render(S32 ypos, S32 textsize, bool isSelected);
+   virtual void render(S32 xpos, S32 ypos, S32 textsize, bool isSelected);
 
    virtual void activatedWithShortcutKey() { /* Do nothing */ }
 };
@@ -365,7 +366,7 @@ public:
 }
 
    virtual MenuItemTypes getItemType() { return TeamMenuItemType; }
-   void render(S32 ypos, S32 textsize, bool isSelected);
+   void render(S32 xpos, S32 ypos, S32 textsize, bool isSelected);
 
    virtual void activatedWithShortcutKey() { /* Do nothing */ }
 

@@ -25,6 +25,12 @@
 
 #include "SimpleLine.h"
 
+// Constructor
+SimpleLine::SimpleLine()
+{
+   //MenuUserInterface mAttrMenu = TestMenuUserInterface();
+}
+
 
 void SimpleLine::initialize()
 {
@@ -71,6 +77,10 @@ void SimpleLine::initializeEditor(F32 gridSize)
 // TODO: Put in editor ??
 static const Color INSTRUCTION_TEXTCOLOR(1,1,1);
 static const S32 INSTRUCTION_TEXTSIZE = 9;      
+static const S32 ATTR_TEXTSIZE = 10;                                          // called attrSize in the editor
+static const Color ACTIVE_SPECIAL_ATTRIBUTE_COLOR = Color(.6, .6, .6);    
+static const Color INACTIVE_SPECIAL_ATTRIBUTE_COLOR = Color(.6, .6, .6);      // already in editor, called inactiveSpecialAttributeColor
+
 
 // Draw arrow that serves as the core of SimpleLine items in the editor
 // Subclasses will fill in the rest
@@ -87,11 +97,11 @@ void SimpleLine::renderEditor(F32 currentScale)
 
 
       F32 ang = pos.angleTo(dest);
-      const F32 al = 15/* / currentScale*/; // Length of arrow-head, in editor units (15 pixels)
+      const F32 al = 15;                // Length of arrow-head, in editor units (15 pixels)
       const F32 angoff = .5;            // Pitch of arrow-head prongs
 
       glBegin(GL_LINES);
-         glVertex2f(dest.x, dest.y);    // Draw arrow-head
+         glVertex2f(dest.x, dest.y);    // Draw arrowhead
          glVertex2f(dest.x - cos(ang + angoff) * al, dest.y - sin(ang + angoff) * al);
          glVertex2f(dest.x, dest.y);
          glVertex2f(dest.x - cos(ang - angoff) * al, dest.y - sin(ang - angoff) * al);
@@ -108,10 +118,18 @@ void SimpleLine::renderEditor(F32 currentScale)
    renderEditorItem(currentScale);
 
    // Label item with message about what happens if user presses enter
-   if(!isBeingEdited() && isSelected())
+   if(isSelected())
    {
-      glColor(INSTRUCTION_TEXTCOLOR);
-      UserInterface::drawStringf_2pt(pos, dest, INSTRUCTION_TEXTSIZE, -22, getEditMessage());
+      //glColor(INSTRUCTION_TEXTCOLOR);
+      //UserInterface::drawStringf_2pt(pos, dest, INSTRUCTION_TEXTSIZE, -22, getEditMessage(0));
+      //UserInterface::drawStringf_2pt(pos, dest, INSTRUCTION_TEXTSIZE, -22 - INSTRUCTION_TEXTSIZE - 2, getEditMessage(1));
+
+
+      //glColor((gEditorUserInterface.isEditingSpecialAttribute(EditorUserInterface::GoFastSnap)) ? ACTIVE_SPECIAL_ATTRIBUTE_COLOR : INACTIVE_SPECIAL_ATTRIBUTE_COLOR);
+      //UserInterface::drawStringf_2pt(pos, dest, ATTR_TEXTSIZE, 10, "Speed: %d", mSpeed);
+
+      //glColor((gEditorUserInterface.isEditingSpecialAttribute(EditorUserInterface::GoFastSpeed)) ? ACTIVE_SPECIAL_ATTRIBUTE_COLOR : INACTIVE_SPECIAL_ATTRIBUTE_COLOR);
+      //UserInterface::drawStringf_2pt(pos, dest, ATTR_TEXTSIZE, -2, "Snapping: %s", boolattr ? "On" : "Off");
    }
 
    // Label any selected or highlighted vertices
@@ -132,3 +150,46 @@ void SimpleLine::renderEditor(F32 currentScale)
       labelSimpleLineItem(dest, EditorUserInterface::DOCK_LABEL_SIZE, getOnScreenName(), getDestinationBottomLabel());
    }
 }
+
+
+// Constructor
+GoFastEditorAttributeMenuUserInterface::GoFastEditorAttributeMenuUserInterface()
+{
+   setMenuID(PlayerUI);
+   menuItems.push_back(new CounterMenuItem("Speed", 100, 5, 1, 2000, "", "Really slow", "", KEY_UNKNOWN, KEY_UNKNOWN, Color(.35)));
+   menuItems.push_back(new YesNoMenuItem("Snapping", true, NULL, "", KEY_UNKNOWN, KEY_UNKNOWN, Color(.35)));
+}
+//CounterMenuItem(const string &title, S32 value, S32 step, S32 minVal, S32 maxVal, const string &units, const string &minMsg, const string &help, 
+//                KeyCode k1 = KEY_UNKNOWN, KeyCode k2 = KEY_UNKNOWN, Color color = Color(1,1,1)) :
+//YesNoMenuItem(string title, bool currOption, void (*callback)(U32), string help, KeyCode k1 = KEY_UNKNOWN, KeyCode k2 = KEY_UNKNOWN, Color color = Color(1,1,1)) :
+
+
+void GoFastEditorAttributeMenuUserInterface::onEscape()
+{
+   reactivatePrevUI();
+}
+
+//extern EditorUserInterface gEditorUserInterface;
+
+void GoFastEditorAttributeMenuUserInterface::render()
+{
+   // Draw the editor screen
+   gEditorUserInterface.render();     // better way than global?
+
+ /*  if(mRenderInstructions)
+      renderMenuInstructions();*/
+   
+   S32 gap = 3;
+   Point offset = gEditorUserInterface.getCurrentOffset();
+   Point center = (object->getVert(0) + object->getVert(1)) * gEditorUserInterface.getCurrentScale() / 2 + offset;
+
+   S32 count = menuItems.size();
+   S32 yStart = center.y - count * (ATTR_TEXTSIZE + gap) - 10;
+
+   for(S32 i = 0; i < count; i++)
+   {
+      S32 y = yStart + i * (ATTR_TEXTSIZE + gap);
+      menuItems[i]->render(center.x, y, ATTR_TEXTSIZE, selectedIndex == i);
+   }
+}
+

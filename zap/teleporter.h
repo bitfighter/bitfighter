@@ -63,7 +63,6 @@ private:
    // How are this item's vertices labeled in the editor? -- these can be private
    const char *getOriginBottomLabel() { return "Intake Vortex"; }
    const char *getDestinationBottomLabel() { return "Destination"; }
-   const char *getEditMessage() { return ""; }
 
 public:
    Teleporter();     // Constructor

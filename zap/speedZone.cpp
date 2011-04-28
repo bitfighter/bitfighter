@@ -110,19 +110,13 @@ void SpeedZone::generatePoints(const Point &pos, const Point &dir, F32 gridSize,
 
 void SpeedZone::render()
 {
-   //glPushMatrix();
-   //glScalef(getGame()->getGridSize(), getGame()->getGridSize(), 1);
    renderSpeedZone(mPolyBounds, getGame()->getCurrentTime());
-   //glPopMatrix();
 }
 
 
 void SpeedZone::renderEditorItem(F32 currentScale)
 {
-   //glPushMatrix();
-   //glScalef(1/currentScale, 1/currentScale, 1);
-   renderSpeedZone(mPolyBounds, getGame()->getCurrentTime());
-   //glPopMatrix();
+   render();
 }
 
 
@@ -130,47 +124,6 @@ void SpeedZone::onGeomChanged()
 {  
    generatePoints(pos, dir, 1, mPolyBounds); 
 }
-
-
-
-//if((mSelected && gEditorUserInterface.getEditingSpecialAttrItem() == NONE) || isBeingEdited)
-//{
-//   glColor((gEditorUserInterface.isEditingSpecialAttribute(EditorUserInterface::GoFastSnap)) ? white : inactiveSpecialAttributeColor);
-//   UserInterface::drawStringf_2pt(pos, dest, attrSize, 10, "Speed: %d", mSpeed);
-//
-//   glColor((gEditorUserInterface.isEditingSpecialAttribute(EditorUserInterface::GoFastSpeed)) ? white : inactiveSpecialAttributeColor);
-//   UserInterface::drawStringf_2pt(pos, dest, attrSize, -2, "Snapping: %s", boolattr ? "On" : "Off");
-//
-//   glColor(white);
-//
-//   // TODO: This block should be moved to WorldItem
-//   const char *msg, *instr;
-//
-//   if(gEditorUserInterface.isEditingSpecialAttribute(EditorUserInterface::NoAttribute))
-//   {
-//      msg = "[Enter] to edit speed";
-//      instr = "";
-//   }
-//   else if(gEditorUserInterface.isEditingSpecialAttribute(EditorUserInterface::GoFastSpeed))
-//   {
-//      msg = "[Enter] to edit snapping";
-//      instr = "Up/Dn to change speed";
-//   }
-//   else if(gEditorUserInterface.isEditingSpecialAttribute(EditorUserInterface::GoFastSnap))
-//   {
-//      msg = "[Enter] to stop editing";
-//      instr = "Up/Dn to toggle snapping";
-//   }
-//   else
-//   {
-//      msg = "???";
-//      instr = "???";
-//   }
-//
-//   UserInterface::drawStringf_2pt(pos, dest, instrSize, -22, msg);
-//   UserInterface::drawStringf_2pt(pos, dest, instrSize, -22 - instrSize - 2, instr);
-//}
-
 
 
 // This object should be drawn above polygons
@@ -278,6 +231,26 @@ string SpeedZone::toString()
 }
 
 
+const char *SpeedZone::getEditMessage(S32 line)
+{
+   //glColor((gEditorUserInterface.isEditingSpecialAttribute(EditorUserInterface::GoFastSnap)) ? white : inactiveSpecialAttributeColor);
+   //UserInterface::drawStringf_2pt(pos, dest, attrSize, 10, "Speed: %d", mSpeed);
+
+   //glColor((gEditorUserInterface.isEditingSpecialAttribute(EditorUserInterface::GoFastSpeed)) ? white : inactiveSpecialAttributeColor);
+   //UserInterface::drawStringf_2pt(pos, dest, attrSize, -2, "Snapping: %s", boolattr ? "On" : "Off");
+
+
+   if(gEditorUserInterface.isEditingSpecialAttribute(EditorUserInterface::NoAttribute))
+      return line == 0 ? "[Enter] to edit speed" : "";
+   else if(gEditorUserInterface.isEditingSpecialAttribute(EditorUserInterface::GoFastSpeed))
+      return line == 0 ? "[Enter] to edit snapping" : "Up/Dn to change speed";
+   else if(gEditorUserInterface.isEditingSpecialAttribute(EditorUserInterface::GoFastSnap))
+      return line == 0 ? "[Enter] to stop editing" : "Up/Dn to toggle snapping";
+   else
+      return "xx???";
+}
+
+
 static bool ignoreThisCollision = false;
 
 // Checks collisions with a SpeedZone
@@ -311,63 +284,59 @@ bool SpeedZone::collide(GameObject *hitObject)
 // Handles collisions with a SpeedZone
 void SpeedZone::collided(MoveObject *s, U32 stateIndex)
 {
+   MoveObject::MoveState *moveState = &s->mMoveState[stateIndex];
+
+   Point impulse = (dir - pos);
+   impulse.normalize(mSpeed);
+   Point shipNormal = moveState->vel;
+   shipNormal.normalize(mSpeed);
+   F32 angleSpeed = mSpeed * 0.5f;
+
+   // Using mUnpackInit, as client does not know that mRotateSpeed is not zero.
+   if(mSnapLocation && mRotateSpeed == 0 && mUnpackInit < 3)
+      angleSpeed *= 0.01f;
+   if(shipNormal.distanceTo(impulse) < angleSpeed && moveState->vel.len() > mSpeed)
+      return;
+
+   // This following line will cause ships entering the speedzone to have their location set to the same point
+   // within the zone so that their path out will be very predictable.
+   if(mSnapLocation)
    {
-      MoveObject::MoveState *moveState = &s->mMoveState[stateIndex];
+      Point diffpos = moveState->pos - pos;
+      Point thisAngle = dir - pos;
+      thisAngle.normalize();
+      Point newPos = thisAngle * diffpos.dot(thisAngle) + pos + impulse * 0.001;
 
-      Point impulse = (dir - pos);
-      impulse.normalize(mSpeed);
-      Point shipNormal = moveState->vel;
-      shipNormal.normalize(mSpeed);
-      F32 angleSpeed = mSpeed * 0.5f;
+      Point oldVel = moveState->vel;
+      Point oldPos = moveState->pos;
 
-      // Using mUnpackInit, as client does not know that mRotateSpeed is not zero.
-      if(mSnapLocation && mRotateSpeed == 0 && mUnpackInit < 3)
-         angleSpeed *= 0.01f;
-      if(shipNormal.distanceTo(impulse) < angleSpeed && moveState->vel.len() > mSpeed)
+      ignoreThisCollision = true;
+      moveState->vel = newPos - moveState->pos;
+      s->move(1, stateIndex, false);
+      ignoreThisCollision = false;
+
+      if(s->getActualPos().distSquared(newPos) > 1)  // make sure we can get to the position without going through walls.
+      {
+         moveState->pos = oldPos;
+         moveState->vel = oldVel;
+         return;
+      }
+      moveState->vel = impulse * 1.5;     // Why multiply by 1.5?
+   }
+   else
+   {
+      if(shipNormal.distanceTo(impulse) < mSpeed && moveState->vel.len() > mSpeed * 0.8)
          return;
 
-      // This following line will cause ships entering the speedzone to have their location set to the same point
-      // within the zone so that their path out will be very predictable.
-      if(mSnapLocation)
-      {
-         Point diffpos = moveState->pos - pos;
-         Point thisAngle = dir - pos;
-         thisAngle.normalize();
-         Point newPos = thisAngle * diffpos.dot(thisAngle) + pos + impulse * 0.001;
+      moveState->vel += impulse * 1.5;    // Why multiply by 1.5?
+   }
 
-         Point oldVel = moveState->vel;
-         Point oldPos = moveState->pos;
-
-         ignoreThisCollision = true;
-         moveState->vel = newPos - moveState->pos;
-         s->move(1, stateIndex, false);
-         ignoreThisCollision = false;
-
-         if(s->getActualPos().distSquared(newPos) > 1)  // make sure we can get to the position without going through walls.
-         {
-            moveState->pos = oldPos;
-            moveState->vel = oldVel;
-            return;
-         }
-         moveState->vel = impulse * 1.5;     // Why multiply by 1.5?
-
-      }
-      else
-      {
-         if(shipNormal.distanceTo(impulse) < mSpeed && moveState->vel.len() > mSpeed * 0.8)
-            return;
-
-         moveState->vel += impulse * 1.5;    // Why multiply by 1.5?
-      }
-
-
-      if(!s->isGhost() && stateIndex == MoveObject::ActualState)  // Only server needs to send information
-      {
-         setMaskBits(HitMask);
-         if(s->getControllingClient().isValid())
-            // Trigger a sound on the player's machine: They're going to be so far away they'll never hear the sound emitted by the gofast itself...
-            s->getControllingClient()->s2cDisplayMessage(0, SFXGoFastInside, "");
-      }
+   if(!s->isGhost() && stateIndex == MoveObject::ActualState)  // Only server needs to send information
+   {
+      setMaskBits(HitMask);
+      if(s->getControllingClient().isValid())
+         // Trigger a sound on the player's machine: They're going to be so far away they'll never hear the sound emitted by the gofast itself...
+         s->getControllingClient()->s2cDisplayMessage(0, SFXGoFastInside, "");
    }
 
 }

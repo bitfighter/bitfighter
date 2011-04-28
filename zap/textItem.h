@@ -58,7 +58,7 @@ private:
    // How are this item's vertices labeled in the editor? -- these can be private
    const char *getOriginBottomLabel() { return "Start"; }
    const char *getDestinationBottomLabel() { return "Direction"; }
-   const char *getEditMessage() { return "[Enter] to edit text"; }
+   const char *getEditMessage(S32 line) { return line == 0 ? "[Enter] to edit text" : ""; }
 
 public:
    static const U32 MAX_TEXT_SIZE = 255;

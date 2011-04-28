@@ -3586,6 +3586,13 @@ void EditorUserInterface::restoreSelection()
 
 U32 EditorUserInterface::getNextAttr(S32 item)       // Not sure why this fn can't return a SpecialAttribute...  hrm...
 {
+   SimpleLine *si = dynamic_cast<SimpleLine *>(mItems[item]);
+   if(si && mSpecialAttribute == NoAttribute)
+   {
+      si->mAttrMenu.object = mItems[item];
+      si->mAttrMenu.activate();
+   }
+
    // Advance to the next attribute. If we were at NoAttribute, start with the first.
    U32 curr = (mSpecialAttribute == NoAttribute) ? 0 : mSpecialAttribute + 1;
 

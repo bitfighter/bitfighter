@@ -33,11 +33,19 @@ namespace Zap
 
 extern void glColor(const Color &c, float alpha = 1.0);
 
+// Shouldn't need to be overridden -- all redering routines should include xpos
 void MenuItem::render(S32 ypos, S32 textsize, bool isSelected)
 {
-   glColor(isSelected ? Color(1,1,0) : mColor);
-   UserInterface::drawCenteredStringf(ypos, textsize, "%s >", getText());
+   render(gScreenInfo.getGameCanvasWidth() / 2, ypos, textsize, isSelected);
 }
+
+
+void MenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
+{
+   glColor(isSelected ? Color(1,1,0) : mColor);
+   UserInterface::drawCenteredStringf(xpos, ypos, textsize, "%s >", getText());
+}
+
 
 
 bool MenuItem::handleKey(KeyCode keyCode, char ascii)
@@ -60,9 +68,9 @@ bool MenuItem::handleKey(KeyCode keyCode, char ascii)
 ////////////////////////////////////
 ////////////////////////////////////
 
-void ToggleMenuItem::render(S32 ypos, S32 textsize, bool isSelected)
+void ToggleMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
 {
-   UserInterface::drawCenteredStringPair(ypos, textsize, mColor, Color(0,1,1), getText(), mOptions[mIndex].c_str());
+   UserInterface::drawCenteredStringPair(xpos, ypos, textsize, mColor, Color(0,1,1), getText(), mOptions[mIndex].c_str());
 }
 
 
@@ -126,12 +134,12 @@ bool ToggleMenuItem::handleKey(KeyCode keyCode, char ascii)
 ////////////////////////////////////
 ////////////////////////////////////
 
-void CounterMenuItem::render(S32 ypos, S32 textsize, bool isSelected)
+void CounterMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
 {
    if(mValue == mMinValue && mMinMsg != "")
-      UserInterface::drawCenteredStringPair(ypos, textsize, mColor, Color(0,1,1), getText(), mMinMsg.c_str());
+      UserInterface::drawCenteredStringPair(xpos, ypos, textsize, mColor, Color(0,1,1), getText(), mMinMsg.c_str());
    else
-      UserInterface::drawCenteredStringPair(ypos, textsize, mColor, Color(0,1,1), getText(), 
+      UserInterface::drawCenteredStringPair(xpos, ypos, textsize, mColor, Color(0,1,1), getText(), 
                                            (getValueForDisplayingInMenu() + " " + getUnits()).c_str());
 }
 
@@ -188,7 +196,7 @@ void CounterMenuItem::decrement(S32 fact)
 ////////////////////////////////////
 ////////////////////////////////////
 
-void PlayerMenuItem::render(S32 ypos, S32 textsize, bool isSelected)
+void PlayerMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
 {
    string temp = getText();
 
@@ -201,7 +209,7 @@ void PlayerMenuItem::render(S32 ypos, S32 textsize, bool isSelected)
       temp = "[Robot] " + temp;
 
    glColor(mColor);
-   UserInterface::drawCenteredString(ypos, textsize, temp.c_str());
+   UserInterface::drawCenteredString(xpos, ypos, textsize, temp.c_str());
 }
 
 
@@ -209,17 +217,17 @@ void PlayerMenuItem::render(S32 ypos, S32 textsize, bool isSelected)
 ////////////////////////////////////
 
 
-void TeamMenuItem::render(S32 ypos, S32 textsize, bool isSelected)
+void TeamMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
 {
    glColor(mColor);
-   UserInterface::drawCenteredStringf(ypos, textsize, "%s%s [%d /%d]", mIsCurrent ? "-> " : "", getText(), mTeam.numPlayers, mTeam.getScore());
+   UserInterface::drawCenteredStringf(xpos, ypos, textsize, "%s%s [%d /%d]", mIsCurrent ? "-> " : "", getText(), mTeam.numPlayers, mTeam.getScore());
 }
 
 
 ////////////////////////////////////
 ////////////////////////////////////
 
-void EditableMenuItem::render(S32 ypos, S32 textsize, bool isSelected)
+void EditableMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
 {
    Color textColor;     
    if(mLineEditor.getString() == "" && mEmptyVal != "")
@@ -229,12 +237,12 @@ void EditableMenuItem::render(S32 ypos, S32 textsize, bool isSelected)
    else
       textColor.set(0,1,1);
 
-   S32 xpos = UserInterface::drawCenteredStringPair(ypos, textsize, mColor, textColor, getText(), 
+   S32 xpos2 = UserInterface::drawCenteredStringPair(xpos, ypos, textsize, mColor, textColor, getText(), 
                                                     mLineEditor.getString() != "" ? mLineEditor.getDisplayString().c_str() : mEmptyVal.c_str());
 
    glColor3f(1,0,0);      // Cursor is always red
    if(isSelected)
-      mLineEditor.drawCursor(xpos, ypos, textsize);
+      mLineEditor.drawCursor(xpos2, ypos, textsize);
 }
 
 
