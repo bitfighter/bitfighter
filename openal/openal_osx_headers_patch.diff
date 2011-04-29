@@ -1,0 +1,267 @@
+diff -pruN openal-soft-1.13/OpenAL32/Include/alAuxEffectSlot.h openal-soft-1.13-patched/OpenAL32/Include/alAuxEffectSlot.h
+--- openal-soft-1.13/OpenAL32/Include/alAuxEffectSlot.h	2010-12-01 19:22:01.000000000 -0700
++++ openal-soft-1.13-patched/OpenAL32/Include/alAuxEffectSlot.h	2011-04-29 01:50:29.000000000 -0600
+@@ -36,6 +36,17 @@ typedef struct ALeffectslot
+ 
+ ALvoid ReleaseALAuxiliaryEffectSlots(ALCcontext *Context);
+ 
++AL_API ALvoid AL_APIENTRY alGenAuxiliaryEffectSlots(ALsizei n, ALuint *effectslots);
++AL_API ALvoid AL_APIENTRY alDeleteAuxiliaryEffectSlots(ALsizei n, ALuint *effectslots);
++AL_API ALboolean AL_APIENTRY alIsAuxiliaryEffectSlot(ALuint effectslot);
++AL_API ALvoid AL_APIENTRY alAuxiliaryEffectSloti(ALuint effectslot, ALenum param, ALint iValue);
++AL_API ALvoid AL_APIENTRY alAuxiliaryEffectSlotiv(ALuint effectslot, ALenum param, ALint *piValues);
++AL_API ALvoid AL_APIENTRY alAuxiliaryEffectSlotf(ALuint effectslot, ALenum param, ALfloat flValue);
++AL_API ALvoid AL_APIENTRY alAuxiliaryEffectSlotfv(ALuint effectslot, ALenum param, ALfloat *pflValues);
++AL_API ALvoid AL_APIENTRY alGetAuxiliaryEffectSloti(ALuint effectslot, ALenum param, ALint *piValue);
++AL_API ALvoid AL_APIENTRY alGetAuxiliaryEffectSlotiv(ALuint effectslot, ALenum param, ALint *piValues);
++AL_API ALvoid AL_APIENTRY alGetAuxiliaryEffectSlotf(ALuint effectslot, ALenum param, ALfloat *pflValue);
++AL_API ALvoid AL_APIENTRY alGetAuxiliaryEffectSlotfv(ALuint effectslot, ALenum param, ALfloat *pflValues);
+ 
+ struct ALeffectState {
+     ALvoid (*Destroy)(ALeffectState *State);
+diff -pruN openal-soft-1.13/OpenAL32/Include/alBuffer.h openal-soft-1.13-patched/OpenAL32/Include/alBuffer.h
+--- openal-soft-1.13/OpenAL32/Include/alBuffer.h	2010-12-03 23:10:54.000000000 -0700
++++ openal-soft-1.13-patched/OpenAL32/Include/alBuffer.h	2011-04-29 01:50:29.000000000 -0600
+@@ -91,6 +91,24 @@ typedef struct ALbuffer
+ 
+ ALvoid ReleaseALBuffers(ALCdevice *device);
+ 
++AL_API ALvoid AL_APIENTRY alGenBuffers(ALsizei n,ALuint *puiBuffers);
++AL_API ALvoid AL_APIENTRY alDeleteBuffers(ALsizei n, const ALuint *puiBuffers);
++AL_API ALboolean AL_APIENTRY alIsBuffer(ALuint uiBuffer);
++AL_API ALvoid AL_APIENTRY alBufferData(ALuint buffer,ALenum format,const ALvoid *data,ALsizei size,ALsizei freq);
++AL_API ALvoid AL_APIENTRY alBufferSubDataEXT(ALuint buffer,ALenum format,const ALvoid *data,ALsizei offset,ALsizei length);
++AL_API void AL_APIENTRY alBufferf(ALuint buffer, ALenum eParam, ALfloat flValue);
++AL_API void AL_APIENTRY alBuffer3f(ALuint buffer, ALenum eParam, ALfloat flValue1, ALfloat flValue2, ALfloat flValue3);
++AL_API void AL_APIENTRY alBufferfv(ALuint buffer, ALenum eParam, const ALfloat* flValues);
++AL_API void AL_APIENTRY alBufferi(ALuint buffer, ALenum eParam, ALint lValue);
++AL_API void AL_APIENTRY alBuffer3i( ALuint buffer, ALenum eParam, ALint lValue1, ALint lValue2, ALint lValue3);
++AL_API void AL_APIENTRY alBufferiv(ALuint buffer, ALenum eParam, const ALint* plValues);
++AL_API ALvoid AL_APIENTRY alGetBufferf(ALuint buffer, ALenum eParam, ALfloat *pflValue);
++AL_API void AL_APIENTRY alGetBuffer3f(ALuint buffer, ALenum eParam, ALfloat* pflValue1, ALfloat* pflValue2, ALfloat* pflValue3);
++AL_API void AL_APIENTRY alGetBufferfv(ALuint buffer, ALenum eParam, ALfloat* pflValues);
++AL_API ALvoid AL_APIENTRY alGetBufferi(ALuint buffer, ALenum eParam, ALint *plValue);
++AL_API void AL_APIENTRY alGetBuffer3i(ALuint buffer, ALenum eParam, ALint* plValue1, ALint* plValue2, ALint* plValue3);
++AL_API void AL_APIENTRY alGetBufferiv(ALuint buffer, ALenum eParam, ALint* plValues);
++
+ #ifdef __cplusplus
+ }
+ #endif
+diff -pruN openal-soft-1.13/OpenAL32/Include/alDatabuffer.h openal-soft-1.13-patched/OpenAL32/Include/alDatabuffer.h
+--- openal-soft-1.13/OpenAL32/Include/alDatabuffer.h	2010-03-23 19:04:16.000000000 -0600
++++ openal-soft-1.13-patched/OpenAL32/Include/alDatabuffer.h	2011-04-29 01:58:57.000000000 -0600
+@@ -26,6 +26,25 @@ typedef struct ALdatabuffer
+ 
+ ALvoid ReleaseALDatabuffers(ALCdevice *device);
+ 
++AL_API ALvoid AL_APIENTRY alBufferSubDataSOFT(ALuint buffer,ALenum format,const ALvoid *data,ALsizei offset,ALsizei length);
++AL_API ALvoid AL_APIENTRY alGenDatabuffersEXT(ALsizei n,ALuint *puiBuffers);
++AL_API ALvoid AL_APIENTRY alDeleteDatabuffersEXT(ALsizei n, const ALuint *puiBuffers);
++AL_API ALboolean AL_APIENTRY alIsDatabufferEXT(ALuint uiBuffer);
++AL_API ALvoid AL_APIENTRY alDatabufferDataEXT(ALuint buffer,const ALvoid *data,ALsizeiptrEXT size,ALenum usage);
++AL_API ALvoid AL_APIENTRY alDatabufferSubDataEXT(ALuint uiBuffer, ALintptrEXT start, ALsizeiptrEXT length, const ALvoid *data);
++AL_API ALvoid AL_APIENTRY alGetDatabufferSubDataEXT(ALuint uiBuffer, ALintptrEXT start, ALsizeiptrEXT length, ALvoid *data);
++AL_API ALvoid AL_APIENTRY alDatabufferfEXT(ALuint buffer, ALenum eParam, ALfloat flValue);
++AL_API ALvoid AL_APIENTRY alDatabufferfvEXT(ALuint buffer, ALenum eParam, const ALfloat* flValues);
++AL_API ALvoid AL_APIENTRY alDatabufferiEXT(ALuint buffer, ALenum eParam, ALint lValue);
++AL_API ALvoid AL_APIENTRY alDatabufferivEXT(ALuint buffer, ALenum eParam, const ALint* plValues);
++AL_API ALvoid AL_APIENTRY alGetDatabufferfEXT(ALuint buffer, ALenum eParam, ALfloat *pflValue);
++AL_API ALvoid AL_APIENTRY alGetDatabufferfvEXT(ALuint buffer, ALenum eParam, ALfloat* pflValues);
++AL_API ALvoid AL_APIENTRY alGetDatabufferiEXT(ALuint buffer, ALenum eParam, ALint *plValue);
++AL_API ALvoid AL_APIENTRY alGetDatabufferivEXT(ALuint buffer, ALenum eParam, ALint* plValues);
++AL_API ALvoid AL_APIENTRY alSelectDatabufferEXT(ALenum target, ALuint uiBuffer);
++AL_API ALvoid* AL_APIENTRY alMapDatabufferEXT(ALuint uiBuffer, ALintptrEXT start, ALsizeiptrEXT length, ALenum access);
++AL_API ALvoid AL_APIENTRY alUnmapDatabufferEXT(ALuint uiBuffer);
++
+ #ifdef __cplusplus
+ }
+ #endif
+diff -pruN openal-soft-1.13/OpenAL32/Include/alEffect.h openal-soft-1.13-patched/OpenAL32/Include/alEffect.h
+--- openal-soft-1.13/OpenAL32/Include/alEffect.h	2010-05-18 18:25:18.000000000 -0600
++++ openal-soft-1.13-patched/OpenAL32/Include/alEffect.h	2011-04-29 01:50:29.000000000 -0600
+@@ -76,6 +76,18 @@ typedef struct ALeffect
+ 
+ ALvoid ReleaseALEffects(ALCdevice *device);
+ 
++AL_API ALvoid AL_APIENTRY alGenEffects(ALsizei n, ALuint *effects);
++AL_API ALvoid AL_APIENTRY alDeleteEffects(ALsizei n, ALuint *effects);
++AL_API ALboolean AL_APIENTRY alIsEffect(ALuint effect);
++AL_API ALvoid AL_APIENTRY alEffecti(ALuint effect, ALenum param, ALint iValue);
++AL_API ALvoid AL_APIENTRY alEffectiv(ALuint effect, ALenum param, ALint *piValues);
++AL_API ALvoid AL_APIENTRY alEffectf(ALuint effect, ALenum param, ALfloat flValue);
++AL_API ALvoid AL_APIENTRY alEffectfv(ALuint effect, ALenum param, ALfloat *pflValues);
++AL_API ALvoid AL_APIENTRY alGetEffecti(ALuint effect, ALenum param, ALint *piValue);
++AL_API ALvoid AL_APIENTRY alGetEffectiv(ALuint effect, ALenum param, ALint *piValues);
++AL_API ALvoid AL_APIENTRY alGetEffectf(ALuint effect, ALenum param, ALfloat *pflValue);
++AL_API ALvoid AL_APIENTRY alGetEffectfv(ALuint effect, ALenum param, ALfloat *pflValues);
++
+ #ifdef __cplusplus
+ }
+ #endif
+diff -pruN openal-soft-1.13/OpenAL32/Include/alFilter.h openal-soft-1.13-patched/OpenAL32/Include/alFilter.h
+--- openal-soft-1.13/OpenAL32/Include/alFilter.h	2010-08-14 23:25:47.000000000 -0600
++++ openal-soft-1.13-patched/OpenAL32/Include/alFilter.h	2011-04-29 01:50:29.000000000 -0600
+@@ -131,6 +131,18 @@ typedef struct ALfilter
+ 
+ ALvoid ReleaseALFilters(ALCdevice *device);
+ 
++AL_API ALvoid AL_APIENTRY alGenFilters(ALsizei n, ALuint *filters);
++AL_API ALvoid AL_APIENTRY alDeleteFilters(ALsizei n, ALuint *filters);
++AL_API ALboolean AL_APIENTRY alIsFilter(ALuint filter);
++AL_API ALvoid AL_APIENTRY alFilteri(ALuint filter, ALenum param, ALint iValue);
++AL_API ALvoid AL_APIENTRY alFilteriv(ALuint filter, ALenum param, ALint *piValues);
++AL_API ALvoid AL_APIENTRY alFilterf(ALuint filter, ALenum param, ALfloat flValue);
++AL_API ALvoid AL_APIENTRY alFilterfv(ALuint filter, ALenum param, ALfloat *pflValues);
++AL_API ALvoid AL_APIENTRY alGetFilteri(ALuint filter, ALenum param, ALint *piValue);
++AL_API ALvoid AL_APIENTRY alGetFilteriv(ALuint filter, ALenum param, ALint *piValues);
++AL_API ALvoid AL_APIENTRY alGetFilterf(ALuint filter, ALenum param, ALfloat *pflValue);
++AL_API ALvoid AL_APIENTRY alGetFilterfv(ALuint filter, ALenum param, ALfloat *pflValues);
++
+ #ifdef __cplusplus
+ }
+ #endif
+diff -pruN openal-soft-1.13/OpenAL32/Include/alMain.h openal-soft-1.13-patched/OpenAL32/Include/alMain.h
+--- openal-soft-1.13/OpenAL32/Include/alMain.h	2011-02-09 12:50:49.000000000 -0700
++++ openal-soft-1.13-patched/OpenAL32/Include/alMain.h	2011-04-29 01:50:29.000000000 -0600
+@@ -294,6 +294,10 @@ void alc_pulse_probe(int type);
+ void alc_null_init(BackendFuncs *func_list);
+ void alc_null_deinit(void);
+ void alc_null_probe(int type);
++void alc_ca_init(BackendFuncs *func_list);
++void alc_ca_deinit(void);
++void alc_ca_probe(int type);
++  
+ 
+ 
+ typedef struct UIntMap {
+diff -pruN openal-soft-1.13/OpenAL32/alExtension.c openal-soft-1.13-patched/OpenAL32/alExtension.c
+--- openal-soft-1.13/OpenAL32/alExtension.c	2010-09-21 10:24:53.000000000 -0600
++++ openal-soft-1.13-patched/OpenAL32/alExtension.c	2011-04-29 01:50:29.000000000 -0600
+@@ -32,8 +32,12 @@
+ #include "alDatabuffer.h"
+ #include "alSource.h"
+ #include "alBuffer.h"
++#include "alListener.h"
++#include "alu.h"
+ #include "AL/al.h"
+ #include "AL/alc.h"
++#include "AL/alext.h"
++#include "AL/efx.h"
+ 
+ typedef struct ALenums {
+     const ALchar *enumName;
+diff -pruN openal-soft-1.13/config.h openal-soft-1.13-patched/config.h
+--- openal-soft-1.13/config.h	1969-12-31 17:00:00.000000000 -0700
++++ openal-soft-1.13-patched/config.h	2011-04-29 01:50:29.000000000 -0600
+@@ -0,0 +1,97 @@
++#ifndef CONFIG_H
++#define CONFIG_H
++
++/* Define to the library version */
++#define ALSOFT_VERSION "1.13"
++
++/* Define if we have the ALSA backend */
++/* #undef HAVE_ALSA */
++
++/* Define if we have the OSS backend */
++/* #undef HAVE_OSS */
++
++/* Define if we have the Solaris backend */
++/* #undef HAVE_SOLARIS */
++
++/* Define if we have the DSound backend */
++/* #undef HAVE_DSOUND */
++
++/* Define if we have the Windows Multimedia backend */
++/* #undef HAVE_WINMM */
++
++/* Define if we have the PortAudio backend */
++/* #undef HAVE_PORTAUDIO */
++
++/* Define if we have the PulseAudio backend */
++/* #undef HAVE_PULSEAUDIO */
++
++/* Define if we have the Wave Writer backend */
++#define HAVE_WAVE
++
++/* Define if we have dlfcn.h */
++#define HAVE_DLFCN_H
++
++/* Define if we have the stat function */
++#define HAVE_STAT
++
++/* Define if we have the powf function */
++#define HAVE_POWF
++
++/* Define if we have the sqrtf function */
++#define HAVE_SQRTF
++
++/* Define if we have the acosf function */
++#define HAVE_ACOSF
++
++/* Define if we have the atanf function */
++#define HAVE_ATANF
++
++/* Define if we have the fabsf function */
++#define HAVE_FABSF
++
++/* Define if we have the strtof function */
++#define HAVE_STRTOF
++
++/* Define if we have stdint.h */
++#define HAVE_STDINT_H
++
++/* Define if we have the __int64 type */
++/* #undef HAVE___INT64 */
++
++/* Define to the size of a long int type */
++#define SIZEOF_LONG 8
++
++/* Define to the size of a long long int type */
++#define SIZEOF_LONG_LONG 8
++
++/* Define to the size of an unsigned int type */
++#define SIZEOF_UINT 4
++
++/* Define to the size of a void pointer type */
++#define SIZEOF_VOIDP 8
++
++/* Define if we have GCC's destructor attribute */
++#define HAVE_GCC_DESTRUCTOR
++
++/* Define if we have GCC's format attribute */
++#define HAVE_GCC_FORMAT
++
++/* Define if we have pthread_np.h */
++/* #undef HAVE_PTHREAD_NP_H */
++
++/* Define if we have float.h */
++#define HAVE_FLOAT_H
++
++/* Define if we have fenv.h */
++#define HAVE_FENV_H
++
++/* Define if we have fesetround() */
++#define HAVE_FESETROUND
++
++/* Define if we have _controlfp() */
++/* #undef HAVE__CONTROLFP */
++
++/* Define if we have pthread_setschedparam() */
++#define HAVE_PTHREAD_SETSCHEDPARAM
++
++#endif
+diff -pruN openal-soft-1.13/include/AL/alc.h openal-soft-1.13-patched/include/AL/alc.h
+--- openal-soft-1.13/include/AL/alc.h	2010-11-28 15:51:15.000000000 -0700
++++ openal-soft-1.13-patched/include/AL/alc.h	2011-04-29 01:55:20.000000000 -0600
+@@ -242,6 +242,10 @@ ALC_API void            ALC_APIENTRY alc
+ 
+ ALC_API void            ALC_APIENTRY alcCaptureSamples( ALCdevice *device, ALCvoid *buffer, ALCsizei samples );
+ 
++ALC_API ALCboolean      ALC_APIENTRY alcSetThreadContext( ALCcontext *context );
++
++ALC_API ALCcontext*     ALC_APIENTRY alcGetThreadContext( void );
++
+ /*
+  * Pointer-to-function types, useful for dynamically getting ALC entry points.
+  */

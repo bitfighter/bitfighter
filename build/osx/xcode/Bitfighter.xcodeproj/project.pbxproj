@@ -50,7 +50,6 @@
 		7364B18212EBC1E9001993A7 /* Bitfighterd.icns in Resources */ = {isa = PBXBuildFile; fileRef = 7364B18112EBC1E9001993A7 /* Bitfighterd.icns */; };
 		73657A0612E2E3FB00BED56F /* masterInterface.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73657A0412E2E3FB00BED56F /* masterInterface.cpp */; };
 		73657A0712E2E3FB00BED56F /* masterInterface.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73657A0412E2E3FB00BED56F /* masterInterface.cpp */; };
-		7367D2C012E807EF00861430 /* OpenAL-Soft.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 73D2F60412E2E0A600EA5EBE /* OpenAL-Soft.framework */; };
 		736DE9A612906AA400C3CB73 /* bitfighter.sh in Resources */ = {isa = PBXBuildFile; fileRef = 736DE9A512906AA400C3CB73 /* bitfighter.sh */; };
 		736DE9B412906D0E00C3CB73 /* bitfighter.sh in CopyFiles */ = {isa = PBXBuildFile; fileRef = 736DE9A512906AA400C3CB73 /* bitfighter.sh */; };
 		7370288F132A020B00397F99 /* RecastAlloc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73702884132A020B00397F99 /* RecastAlloc.cpp */; };
@@ -120,7 +119,6 @@
 		7375E2DD13690F2C00F71273 /* lopcodes.c in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F69812E2E1D400EA5EBE /* lopcodes.c */; };
 		7375E2DE13690F2C00F71273 /* lparser.c in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F69B12E2E1D400EA5EBE /* lparser.c */; };
 		7375E2F6136911B300F71273 /* luavec_Prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = 7375E2F5136911A800F71273 /* luavec_Prefix.pch */; };
-		7375E3A5136916E000F71273 /* luavec-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 7375E3A4136916E000F71273 /* luavec-Info.plist */; };
 		7375E3A6136916E000F71273 /* luavec-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 7375E3A4136916E000F71273 /* luavec-Info.plist */; };
 		7375E3AA1369176300F71273 /* luavec.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 7375E28E13690E1900F71273 /* luavec.framework */; };
 		7378261D12960DDF007333BE /* Bitfighter.icns in Resources */ = {isa = PBXBuildFile; fileRef = 94B7EABF11D7DABC0083AEAF /* Bitfighter.icns */; };
@@ -169,6 +167,52 @@
 		73844F5013500E1600033B85 /* polygon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73844F4D13500E1600033B85 /* polygon.cpp */; };
 		73844F5113500E1600033B85 /* GeomUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73844F4B13500E1600033B85 /* GeomUtils.cpp */; };
 		73844F5213500E1600033B85 /* polygon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73844F4D13500E1600033B85 /* polygon.cpp */; };
+		73B4C004136A9E8700D5CAFF /* ALc.c in Sources */ = {isa = PBXBuildFile; fileRef = 73B4BFBF136A9E8700D5CAFF /* ALc.c */; };
+		73B4C005136A9E8700D5CAFF /* alcConfig.c in Sources */ = {isa = PBXBuildFile; fileRef = 73B4BFC0136A9E8700D5CAFF /* alcConfig.c */; };
+		73B4C006136A9E8700D5CAFF /* alcEcho.c in Sources */ = {isa = PBXBuildFile; fileRef = 73B4BFC1136A9E8700D5CAFF /* alcEcho.c */; };
+		73B4C007136A9E8700D5CAFF /* alcModulator.c in Sources */ = {isa = PBXBuildFile; fileRef = 73B4BFC2136A9E8700D5CAFF /* alcModulator.c */; };
+		73B4C008136A9E8700D5CAFF /* alcReverb.c in Sources */ = {isa = PBXBuildFile; fileRef = 73B4BFC3136A9E8700D5CAFF /* alcReverb.c */; };
+		73B4C009136A9E8700D5CAFF /* alcRing.c in Sources */ = {isa = PBXBuildFile; fileRef = 73B4BFC4136A9E8700D5CAFF /* alcRing.c */; };
+		73B4C00A136A9E8700D5CAFF /* alcThread.c in Sources */ = {isa = PBXBuildFile; fileRef = 73B4BFC5136A9E8700D5CAFF /* alcThread.c */; };
+		73B4C00C136A9E8700D5CAFF /* ALu.c in Sources */ = {isa = PBXBuildFile; fileRef = 73B4BFC7136A9E8700D5CAFF /* ALu.c */; };
+		73B4C00D136A9E8700D5CAFF /* bs2b.c in Sources */ = {isa = PBXBuildFile; fileRef = 73B4BFC8136A9E8700D5CAFF /* bs2b.c */; };
+		73B4C00F136A9E8700D5CAFF /* mixer.c in Sources */ = {isa = PBXBuildFile; fileRef = 73B4BFCA136A9E8700D5CAFF /* mixer.c */; };
+		73B4C010136A9E8700D5CAFF /* null.c in Sources */ = {isa = PBXBuildFile; fileRef = 73B4BFCB136A9E8700D5CAFF /* null.c */; };
+		73B4C012136A9E8700D5CAFF /* panning.c in Sources */ = {isa = PBXBuildFile; fileRef = 73B4BFCD136A9E8700D5CAFF /* panning.c */; };
+		73B4C016136A9E8700D5CAFF /* wave.c in Sources */ = {isa = PBXBuildFile; fileRef = 73B4BFD1136A9E8700D5CAFF /* wave.c */; };
+		73B4C01E136A9E8700D5CAFF /* config.h in Headers */ = {isa = PBXBuildFile; fileRef = 73B4BFDB136A9E8700D5CAFF /* config.h */; };
+		73B4C021136A9E8700D5CAFF /* al.h in Headers */ = {isa = PBXBuildFile; fileRef = 73B4BFE0136A9E8700D5CAFF /* al.h */; };
+		73B4C022136A9E8700D5CAFF /* alc.h in Headers */ = {isa = PBXBuildFile; fileRef = 73B4BFE1136A9E8700D5CAFF /* alc.h */; };
+		73B4C023136A9E8700D5CAFF /* alext.h in Headers */ = {isa = PBXBuildFile; fileRef = 73B4BFE2136A9E8700D5CAFF /* alext.h */; };
+		73B4C024136A9E8700D5CAFF /* efx-creative.h in Headers */ = {isa = PBXBuildFile; fileRef = 73B4BFE3136A9E8700D5CAFF /* efx-creative.h */; };
+		73B4C025136A9E8700D5CAFF /* efx.h in Headers */ = {isa = PBXBuildFile; fileRef = 73B4BFE4136A9E8700D5CAFF /* efx.h */; };
+		73B4C027136A9E8700D5CAFF /* alAuxEffectSlot.c in Sources */ = {isa = PBXBuildFile; fileRef = 73B4BFE7136A9E8700D5CAFF /* alAuxEffectSlot.c */; };
+		73B4C028136A9E8700D5CAFF /* alBuffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 73B4BFE8136A9E8700D5CAFF /* alBuffer.c */; };
+		73B4C029136A9E8700D5CAFF /* alDatabuffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 73B4BFE9136A9E8700D5CAFF /* alDatabuffer.c */; };
+		73B4C02A136A9E8700D5CAFF /* alEffect.c in Sources */ = {isa = PBXBuildFile; fileRef = 73B4BFEA136A9E8700D5CAFF /* alEffect.c */; };
+		73B4C02B136A9E8700D5CAFF /* alError.c in Sources */ = {isa = PBXBuildFile; fileRef = 73B4BFEB136A9E8700D5CAFF /* alError.c */; };
+		73B4C02C136A9E8700D5CAFF /* alExtension.c in Sources */ = {isa = PBXBuildFile; fileRef = 73B4BFEC136A9E8700D5CAFF /* alExtension.c */; };
+		73B4C02D136A9E8700D5CAFF /* alFilter.c in Sources */ = {isa = PBXBuildFile; fileRef = 73B4BFED136A9E8700D5CAFF /* alFilter.c */; };
+		73B4C02E136A9E8700D5CAFF /* alListener.c in Sources */ = {isa = PBXBuildFile; fileRef = 73B4BFEE136A9E8700D5CAFF /* alListener.c */; };
+		73B4C02F136A9E8700D5CAFF /* alSource.c in Sources */ = {isa = PBXBuildFile; fileRef = 73B4BFEF136A9E8700D5CAFF /* alSource.c */; };
+		73B4C030136A9E8700D5CAFF /* alState.c in Sources */ = {isa = PBXBuildFile; fileRef = 73B4BFF0136A9E8700D5CAFF /* alState.c */; };
+		73B4C031136A9E8700D5CAFF /* alThunk.c in Sources */ = {isa = PBXBuildFile; fileRef = 73B4BFF1136A9E8700D5CAFF /* alThunk.c */; };
+		73B4C032136A9E8700D5CAFF /* alAuxEffectSlot.h in Headers */ = {isa = PBXBuildFile; fileRef = 73B4BFF3136A9E8700D5CAFF /* alAuxEffectSlot.h */; };
+		73B4C033136A9E8700D5CAFF /* alBuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = 73B4BFF4136A9E8700D5CAFF /* alBuffer.h */; };
+		73B4C034136A9E8700D5CAFF /* alDatabuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = 73B4BFF5136A9E8700D5CAFF /* alDatabuffer.h */; };
+		73B4C035136A9E8700D5CAFF /* alEffect.h in Headers */ = {isa = PBXBuildFile; fileRef = 73B4BFF6136A9E8700D5CAFF /* alEffect.h */; };
+		73B4C036136A9E8700D5CAFF /* alError.h in Headers */ = {isa = PBXBuildFile; fileRef = 73B4BFF7136A9E8700D5CAFF /* alError.h */; };
+		73B4C037136A9E8700D5CAFF /* alFilter.h in Headers */ = {isa = PBXBuildFile; fileRef = 73B4BFF8136A9E8700D5CAFF /* alFilter.h */; };
+		73B4C038136A9E8700D5CAFF /* alListener.h in Headers */ = {isa = PBXBuildFile; fileRef = 73B4BFF9136A9E8700D5CAFF /* alListener.h */; };
+		73B4C039136A9E8700D5CAFF /* alMain.h in Headers */ = {isa = PBXBuildFile; fileRef = 73B4BFFA136A9E8700D5CAFF /* alMain.h */; };
+		73B4C03A136A9E8700D5CAFF /* alSource.h in Headers */ = {isa = PBXBuildFile; fileRef = 73B4BFFB136A9E8700D5CAFF /* alSource.h */; };
+		73B4C03B136A9E8700D5CAFF /* alState.h in Headers */ = {isa = PBXBuildFile; fileRef = 73B4BFFC136A9E8700D5CAFF /* alState.h */; };
+		73B4C03C136A9E8700D5CAFF /* alThunk.h in Headers */ = {isa = PBXBuildFile; fileRef = 73B4BFFD136A9E8700D5CAFF /* alThunk.h */; };
+		73B4C03D136A9E8700D5CAFF /* alu.h in Headers */ = {isa = PBXBuildFile; fileRef = 73B4BFFE136A9E8700D5CAFF /* alu.h */; };
+		73B4C03E136A9E8700D5CAFF /* bs2b.h in Headers */ = {isa = PBXBuildFile; fileRef = 73B4BFFF136A9E8700D5CAFF /* bs2b.h */; };
+		73B4C040136A9E8700D5CAFF /* openal-info.c in Sources */ = {isa = PBXBuildFile; fileRef = 73B4C002136A9E8700D5CAFF /* openal-info.c */; };
+		73B4C09C136AA7B400D5CAFF /* OpenAL-Soft.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 73B4BEFF136A9D8600D5CAFF /* OpenAL-Soft.framework */; };
+		73B4C135136AAA7200D5CAFF /* OpenAL-Soft.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 73B4BEFF136A9D8600D5CAFF /* OpenAL-Soft.framework */; };
 		73D2F35112E2D7E800EA5EBE /* barrier.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F28112E2D7E700EA5EBE /* barrier.cpp */; };
 		73D2F35412E2D7E800EA5EBE /* BotNavMeshZone.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F28512E2D7E700EA5EBE /* BotNavMeshZone.cpp */; };
 		73D2F35612E2D7E800EA5EBE /* config.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F28812E2D7E700EA5EBE /* config.cpp */; };
@@ -477,7 +521,6 @@
 		73D2F56612E2DA1700EA5EBE /* xtea.c in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F52112E2DA1700EA5EBE /* xtea.c */; };
 		73D2F56712E2DA1700EA5EBE /* yarrow.c in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F52212E2DA1700EA5EBE /* yarrow.c */; };
 		73D2F5DF12E2DDD200EA5EBE /* libtomcrypt.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 737CE46C12904E9E00D732B7 /* libtomcrypt.framework */; };
-		73D2F61712E2E0FB00EA5EBE /* OpenAL-Soft.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 73D2F60412E2E0A600EA5EBE /* OpenAL-Soft.framework */; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 		94010E8111D7CF0200E2DBB2 /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 94010E8011D7CF0200E2DBB2 /* GLUT.framework */; };
 		94010E8511D7CF0200E2DBB2 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 94010E8411D7CF0200E2DBB2 /* OpenGL.framework */; };
@@ -557,6 +600,13 @@
 			remoteGlobalIDString = 737CE46B12904E9E00D732B7;
 			remoteInfo = libtomcrypt;
 		};
+		73B4C04D136A9F0B00D5CAFF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 73B4BEFE136A9D8600D5CAFF;
+			remoteInfo = "OpenAL-Soft";
+		};
 		73D2F5D512E2DD7000EA5EBE /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
@@ -604,8 +654,8 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				73B4C135136AAA7200D5CAFF /* OpenAL-Soft.framework in CopyFiles */,
 				7375E3AA1369176300F71273 /* luavec.framework in CopyFiles */,
-				7367D2C012E807EF00861430 /* OpenAL-Soft.framework in CopyFiles */,
 				737CE639129055C500D732B7 /* tnl.framework in CopyFiles */,
 				737CE5CA129051CB00D732B7 /* libtomcrypt.framework in CopyFiles */,
 			);
@@ -674,6 +724,52 @@
 		73844F4C13500E1600033B85 /* GeomUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GeomUtils.h; path = ../../../zap/GeomUtils.h; sourceTree = SOURCE_ROOT; };
 		73844F4D13500E1600033B85 /* polygon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = polygon.cpp; path = ../../../zap/polygon.cpp; sourceTree = SOURCE_ROOT; };
 		73844F4E13500E1600033B85 /* SlipZone.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SlipZone.h; path = ../../../zap/SlipZone.h; sourceTree = SOURCE_ROOT; };
+		73B4BEFF136A9D8600D5CAFF /* OpenAL-Soft.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = "OpenAL-Soft.framework"; sourceTree = BUILT_PRODUCTS_DIR; };
+		73B4BF00136A9D8600D5CAFF /* OpenAL-Soft-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "OpenAL-Soft-Info.plist"; sourceTree = "<group>"; };
+		73B4BFBF136A9E8700D5CAFF /* ALc.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ALc.c; sourceTree = "<group>"; };
+		73B4BFC0136A9E8700D5CAFF /* alcConfig.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = alcConfig.c; sourceTree = "<group>"; };
+		73B4BFC1136A9E8700D5CAFF /* alcEcho.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = alcEcho.c; sourceTree = "<group>"; };
+		73B4BFC2136A9E8700D5CAFF /* alcModulator.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = alcModulator.c; sourceTree = "<group>"; };
+		73B4BFC3136A9E8700D5CAFF /* alcReverb.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = alcReverb.c; sourceTree = "<group>"; };
+		73B4BFC4136A9E8700D5CAFF /* alcRing.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = alcRing.c; sourceTree = "<group>"; };
+		73B4BFC5136A9E8700D5CAFF /* alcThread.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = alcThread.c; sourceTree = "<group>"; };
+		73B4BFC7136A9E8700D5CAFF /* ALu.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ALu.c; sourceTree = "<group>"; };
+		73B4BFC8136A9E8700D5CAFF /* bs2b.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = bs2b.c; sourceTree = "<group>"; };
+		73B4BFCA136A9E8700D5CAFF /* mixer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mixer.c; sourceTree = "<group>"; };
+		73B4BFCB136A9E8700D5CAFF /* null.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = null.c; sourceTree = "<group>"; };
+		73B4BFCD136A9E8700D5CAFF /* panning.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = panning.c; sourceTree = "<group>"; };
+		73B4BFD1136A9E8700D5CAFF /* wave.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = wave.c; sourceTree = "<group>"; };
+		73B4BFDB136A9E8700D5CAFF /* config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = config.h; sourceTree = "<group>"; };
+		73B4BFE0136A9E8700D5CAFF /* al.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = al.h; sourceTree = "<group>"; };
+		73B4BFE1136A9E8700D5CAFF /* alc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alc.h; sourceTree = "<group>"; };
+		73B4BFE2136A9E8700D5CAFF /* alext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alext.h; sourceTree = "<group>"; };
+		73B4BFE3136A9E8700D5CAFF /* efx-creative.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "efx-creative.h"; sourceTree = "<group>"; };
+		73B4BFE4136A9E8700D5CAFF /* efx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = efx.h; sourceTree = "<group>"; };
+		73B4BFE7136A9E8700D5CAFF /* alAuxEffectSlot.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = alAuxEffectSlot.c; sourceTree = "<group>"; };
+		73B4BFE8136A9E8700D5CAFF /* alBuffer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = alBuffer.c; sourceTree = "<group>"; };
+		73B4BFE9136A9E8700D5CAFF /* alDatabuffer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = alDatabuffer.c; sourceTree = "<group>"; };
+		73B4BFEA136A9E8700D5CAFF /* alEffect.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = alEffect.c; sourceTree = "<group>"; };
+		73B4BFEB136A9E8700D5CAFF /* alError.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = alError.c; sourceTree = "<group>"; };
+		73B4BFEC136A9E8700D5CAFF /* alExtension.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = alExtension.c; sourceTree = "<group>"; };
+		73B4BFED136A9E8700D5CAFF /* alFilter.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = alFilter.c; sourceTree = "<group>"; };
+		73B4BFEE136A9E8700D5CAFF /* alListener.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = alListener.c; sourceTree = "<group>"; };
+		73B4BFEF136A9E8700D5CAFF /* alSource.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = alSource.c; sourceTree = "<group>"; };
+		73B4BFF0136A9E8700D5CAFF /* alState.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = alState.c; sourceTree = "<group>"; };
+		73B4BFF1136A9E8700D5CAFF /* alThunk.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = alThunk.c; sourceTree = "<group>"; };
+		73B4BFF3136A9E8700D5CAFF /* alAuxEffectSlot.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alAuxEffectSlot.h; sourceTree = "<group>"; };
+		73B4BFF4136A9E8700D5CAFF /* alBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alBuffer.h; sourceTree = "<group>"; };
+		73B4BFF5136A9E8700D5CAFF /* alDatabuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alDatabuffer.h; sourceTree = "<group>"; };
+		73B4BFF6136A9E8700D5CAFF /* alEffect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alEffect.h; sourceTree = "<group>"; };
+		73B4BFF7136A9E8700D5CAFF /* alError.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alError.h; sourceTree = "<group>"; };
+		73B4BFF8136A9E8700D5CAFF /* alFilter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alFilter.h; sourceTree = "<group>"; };
+		73B4BFF9136A9E8700D5CAFF /* alListener.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alListener.h; sourceTree = "<group>"; };
+		73B4BFFA136A9E8700D5CAFF /* alMain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alMain.h; sourceTree = "<group>"; };
+		73B4BFFB136A9E8700D5CAFF /* alSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alSource.h; sourceTree = "<group>"; };
+		73B4BFFC136A9E8700D5CAFF /* alState.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alState.h; sourceTree = "<group>"; };
+		73B4BFFD136A9E8700D5CAFF /* alThunk.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alThunk.h; sourceTree = "<group>"; };
+		73B4BFFE136A9E8700D5CAFF /* alu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alu.h; sourceTree = "<group>"; };
+		73B4BFFF136A9E8700D5CAFF /* bs2b.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bs2b.h; sourceTree = "<group>"; };
+		73B4C002136A9E8700D5CAFF /* openal-info.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "openal-info.c"; sourceTree = "<group>"; };
 		73D2F28112E2D7E700EA5EBE /* barrier.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = barrier.cpp; path = ../../../zap/barrier.cpp; sourceTree = SOURCE_ROOT; };
 		73D2F28212E2D7E700EA5EBE /* barrier.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = barrier.h; path = ../../../zap/barrier.h; sourceTree = SOURCE_ROOT; };
 		73D2F28512E2D7E700EA5EBE /* BotNavMeshZone.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BotNavMeshZone.cpp; path = ../../../zap/BotNavMeshZone.cpp; sourceTree = SOURCE_ROOT; };
@@ -979,7 +1075,6 @@
 		73D2F52012E2DA1700EA5EBE /* twofish.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = twofish.c; path = ../../../libtomcrypt/twofish.c; sourceTree = SOURCE_ROOT; };
 		73D2F52112E2DA1700EA5EBE /* xtea.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = xtea.c; path = ../../../libtomcrypt/xtea.c; sourceTree = SOURCE_ROOT; };
 		73D2F52212E2DA1700EA5EBE /* yarrow.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = yarrow.c; path = ../../../libtomcrypt/yarrow.c; sourceTree = SOURCE_ROOT; };
-		73D2F60412E2E0A600EA5EBE /* OpenAL-Soft.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = "OpenAL-Soft.framework"; path = "../../../lib/OpenAL-Soft.framework"; sourceTree = SOURCE_ROOT; };
 		73D2F67B12E2E1D400EA5EBE /* lapi.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = lapi.c; path = "../../../lua/lua-vec/src/lapi.c"; sourceTree = SOURCE_ROOT; };
 		73D2F67C12E2E1D400EA5EBE /* lapi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = lapi.h; path = "../../../lua/lua-vec/src/lapi.h"; sourceTree = SOURCE_ROOT; };
 		73D2F67D12E2E1D400EA5EBE /* lauxlib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = lauxlib.c; path = "../../../lua/lua-vec/src/lauxlib.c"; sourceTree = SOURCE_ROOT; };
@@ -1079,6 +1174,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		73B4BEFD136A9D8600D5CAFF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		8D11072E0486CEB800E47090 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -1091,7 +1193,7 @@
 				94010E8511D7CF0200E2DBB2 /* OpenGL.framework in Frameworks */,
 				9462C40311D7D82700791A0B /* IOKit.framework in Frameworks */,
 				9462C41711D7D95600791A0B /* Carbon.framework in Frameworks */,
-				73D2F61712E2E0FB00EA5EBE /* OpenAL-Soft.framework in Frameworks */,
+				73B4C09C136AA7B400D5CAFF /* OpenAL-Soft.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1132,6 +1234,7 @@
 		036FF0B612D1D7EF00C14EE2 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				73B4BEFF136A9D8600D5CAFF /* OpenAL-Soft.framework */,
 				7375E28E13690E1900F71273 /* luavec.framework */,
 				737CE46C12904E9E00D732B7 /* libtomcrypt.framework */,
 				737CE61D1290553D00D732B7 /* tnl.framework */,
@@ -1170,6 +1273,7 @@
 		29B97314FDCFA39411CA2CEA /* Bitfighter */ = {
 			isa = PBXGroup;
 			children = (
+				73B4BFBD136A9E8700D5CAFF /* openal-soft-1.13 */,
 				73844F2513500C2F00033B85 /* clipper */,
 				73844F2813500C2F00033B85 /* poly2tri */,
 				73702882132A020B00397F99 /* recast */,
@@ -1191,6 +1295,7 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				73B4BF00136A9D8600D5CAFF /* OpenAL-Soft-Info.plist */,
 				7364B18112EBC1E9001993A7 /* Bitfighterd.icns */,
 				73649AEB12976345004366A3 /* Bitfighterd-Info.plist */,
 				737CE312129048B900D732B7 /* libtomcrypt-Info.plist */,
@@ -1211,7 +1316,6 @@
 			children = (
 				1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */,
 				1058C7A2FEA54F0111CA2CBB /* Other Frameworks */,
-				73D2F60412E2E0A600EA5EBE /* OpenAL-Soft.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -1332,6 +1436,106 @@
 				73844F3613500C2F00033B85 /* sweep_context.h */,
 			);
 			path = sweep;
+			sourceTree = "<group>";
+		};
+		73B4BFBD136A9E8700D5CAFF /* openal-soft-1.13 */ = {
+			isa = PBXGroup;
+			children = (
+				73B4BFBE136A9E8700D5CAFF /* Alc */,
+				73B4BFDB136A9E8700D5CAFF /* config.h */,
+				73B4BFDE136A9E8700D5CAFF /* include */,
+				73B4BFE6136A9E8700D5CAFF /* OpenAL32 */,
+				73B4C001136A9E8700D5CAFF /* utils */,
+			);
+			name = "openal-soft-1.13";
+			path = "../../../openal/openal-soft-1.13";
+			sourceTree = SOURCE_ROOT;
+		};
+		73B4BFBE136A9E8700D5CAFF /* Alc */ = {
+			isa = PBXGroup;
+			children = (
+				73B4BFBF136A9E8700D5CAFF /* ALc.c */,
+				73B4BFC0136A9E8700D5CAFF /* alcConfig.c */,
+				73B4BFC1136A9E8700D5CAFF /* alcEcho.c */,
+				73B4BFC2136A9E8700D5CAFF /* alcModulator.c */,
+				73B4BFC3136A9E8700D5CAFF /* alcReverb.c */,
+				73B4BFC4136A9E8700D5CAFF /* alcRing.c */,
+				73B4BFC5136A9E8700D5CAFF /* alcThread.c */,
+				73B4BFC7136A9E8700D5CAFF /* ALu.c */,
+				73B4BFC8136A9E8700D5CAFF /* bs2b.c */,
+				73B4BFCA136A9E8700D5CAFF /* mixer.c */,
+				73B4BFCB136A9E8700D5CAFF /* null.c */,
+				73B4BFCD136A9E8700D5CAFF /* panning.c */,
+				73B4BFD1136A9E8700D5CAFF /* wave.c */,
+			);
+			path = Alc;
+			sourceTree = "<group>";
+		};
+		73B4BFDE136A9E8700D5CAFF /* include */ = {
+			isa = PBXGroup;
+			children = (
+				73B4BFDF136A9E8700D5CAFF /* AL */,
+			);
+			path = include;
+			sourceTree = "<group>";
+		};
+		73B4BFDF136A9E8700D5CAFF /* AL */ = {
+			isa = PBXGroup;
+			children = (
+				73B4BFE0136A9E8700D5CAFF /* al.h */,
+				73B4BFE1136A9E8700D5CAFF /* alc.h */,
+				73B4BFE2136A9E8700D5CAFF /* alext.h */,
+				73B4BFE3136A9E8700D5CAFF /* efx-creative.h */,
+				73B4BFE4136A9E8700D5CAFF /* efx.h */,
+			);
+			path = AL;
+			sourceTree = "<group>";
+		};
+		73B4BFE6136A9E8700D5CAFF /* OpenAL32 */ = {
+			isa = PBXGroup;
+			children = (
+				73B4BFE7136A9E8700D5CAFF /* alAuxEffectSlot.c */,
+				73B4BFE8136A9E8700D5CAFF /* alBuffer.c */,
+				73B4BFE9136A9E8700D5CAFF /* alDatabuffer.c */,
+				73B4BFEA136A9E8700D5CAFF /* alEffect.c */,
+				73B4BFEB136A9E8700D5CAFF /* alError.c */,
+				73B4BFEC136A9E8700D5CAFF /* alExtension.c */,
+				73B4BFED136A9E8700D5CAFF /* alFilter.c */,
+				73B4BFEE136A9E8700D5CAFF /* alListener.c */,
+				73B4BFEF136A9E8700D5CAFF /* alSource.c */,
+				73B4BFF0136A9E8700D5CAFF /* alState.c */,
+				73B4BFF1136A9E8700D5CAFF /* alThunk.c */,
+				73B4BFF2136A9E8700D5CAFF /* Include */,
+			);
+			path = OpenAL32;
+			sourceTree = "<group>";
+		};
+		73B4BFF2136A9E8700D5CAFF /* Include */ = {
+			isa = PBXGroup;
+			children = (
+				73B4BFF3136A9E8700D5CAFF /* alAuxEffectSlot.h */,
+				73B4BFF4136A9E8700D5CAFF /* alBuffer.h */,
+				73B4BFF5136A9E8700D5CAFF /* alDatabuffer.h */,
+				73B4BFF6136A9E8700D5CAFF /* alEffect.h */,
+				73B4BFF7136A9E8700D5CAFF /* alError.h */,
+				73B4BFF8136A9E8700D5CAFF /* alFilter.h */,
+				73B4BFF9136A9E8700D5CAFF /* alListener.h */,
+				73B4BFFA136A9E8700D5CAFF /* alMain.h */,
+				73B4BFFB136A9E8700D5CAFF /* alSource.h */,
+				73B4BFFC136A9E8700D5CAFF /* alState.h */,
+				73B4BFFD136A9E8700D5CAFF /* alThunk.h */,
+				73B4BFFE136A9E8700D5CAFF /* alu.h */,
+				73B4BFFF136A9E8700D5CAFF /* bs2b.h */,
+			);
+			path = Include;
+			sourceTree = "<group>";
+		};
+		73B4C001136A9E8700D5CAFF /* utils */ = {
+			isa = PBXGroup;
+			children = (
+				73B4C002136A9E8700D5CAFF /* openal-info.c */,
+			);
+			path = utils;
 			sourceTree = "<group>";
 		};
 		73D2F27E12E2D6D800EA5EBE /* zap */ = {
@@ -1832,6 +2036,32 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		73B4BEFA136A9D8600D5CAFF /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				73B4C01E136A9E8700D5CAFF /* config.h in Headers */,
+				73B4C021136A9E8700D5CAFF /* al.h in Headers */,
+				73B4C022136A9E8700D5CAFF /* alc.h in Headers */,
+				73B4C023136A9E8700D5CAFF /* alext.h in Headers */,
+				73B4C024136A9E8700D5CAFF /* efx-creative.h in Headers */,
+				73B4C025136A9E8700D5CAFF /* efx.h in Headers */,
+				73B4C032136A9E8700D5CAFF /* alAuxEffectSlot.h in Headers */,
+				73B4C033136A9E8700D5CAFF /* alBuffer.h in Headers */,
+				73B4C034136A9E8700D5CAFF /* alDatabuffer.h in Headers */,
+				73B4C035136A9E8700D5CAFF /* alEffect.h in Headers */,
+				73B4C036136A9E8700D5CAFF /* alError.h in Headers */,
+				73B4C037136A9E8700D5CAFF /* alFilter.h in Headers */,
+				73B4C038136A9E8700D5CAFF /* alListener.h in Headers */,
+				73B4C039136A9E8700D5CAFF /* alMain.h in Headers */,
+				73B4C03A136A9E8700D5CAFF /* alSource.h in Headers */,
+				73B4C03B136A9E8700D5CAFF /* alState.h in Headers */,
+				73B4C03C136A9E8700D5CAFF /* alThunk.h in Headers */,
+				73B4C03D136A9E8700D5CAFF /* alu.h in Headers */,
+				73B4C03E136A9E8700D5CAFF /* bs2b.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
@@ -1913,6 +2143,24 @@
 			productReference = 737CE61D1290553D00D732B7 /* tnl.framework */;
 			productType = "com.apple.product-type.framework";
 		};
+		73B4BEFE136A9D8600D5CAFF /* OpenAL-Soft */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 73B4BF03136A9D8700D5CAFF /* Build configuration list for PBXNativeTarget "OpenAL-Soft" */;
+			buildPhases = (
+				73B4BEFA136A9D8600D5CAFF /* Headers */,
+				73B4BEFB136A9D8600D5CAFF /* Resources */,
+				73B4BEFC136A9D8600D5CAFF /* Sources */,
+				73B4BEFD136A9D8600D5CAFF /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "OpenAL-Soft";
+			productName = "OpenAL-Soft";
+			productReference = 73B4BEFF136A9D8600D5CAFF /* OpenAL-Soft.framework */;
+			productType = "com.apple.product-type.framework";
+		};
 		8D1107260486CEB800E47090 /* Bitfighter */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = C01FCF4A08A954540054247B /* Build configuration list for PBXNativeTarget "Bitfighter" */;
@@ -1929,6 +2177,7 @@
 				737CE631129055A600D732B7 /* PBXTargetDependency */,
 				737CE7371290582200D732B7 /* PBXTargetDependency */,
 				7375E2A013690EDD00F71273 /* PBXTargetDependency */,
+				73B4C04E136A9F0B00D5CAFF /* PBXTargetDependency */,
 			);
 			name = Bitfighter;
 			productInstallPath = "$(HOME)/Applications";
@@ -1955,6 +2204,7 @@
 			projectRoot = "";
 			targets = (
 				8D1107260486CEB800E47090 /* Bitfighter */,
+				73B4BEFE136A9D8600D5CAFF /* OpenAL-Soft */,
 				7375E28D13690E1900F71273 /* luavec */,
 				737CE46B12904E9E00D732B7 /* libtomcrypt */,
 				737CE61C1290553D00D732B7 /* tnl */,
@@ -2005,6 +2255,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		73B4BEFB136A9D8600D5CAFF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		8D1107290486CEB800E47090 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -2017,7 +2274,6 @@
 				736DE9A612906AA400C3CB73 /* bitfighter.sh in Resources */,
 				73D2F3E712E2D7E800EA5EBE /* Info.plist in Resources */,
 				73D2F3EC12E2D7E800EA5EBE /* keymap.txt in Resources */,
-				7375E3A5136916E000F71273 /* luavec-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2296,6 +2552,38 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		73B4BEFC136A9D8600D5CAFF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				73B4C004136A9E8700D5CAFF /* ALc.c in Sources */,
+				73B4C005136A9E8700D5CAFF /* alcConfig.c in Sources */,
+				73B4C006136A9E8700D5CAFF /* alcEcho.c in Sources */,
+				73B4C007136A9E8700D5CAFF /* alcModulator.c in Sources */,
+				73B4C008136A9E8700D5CAFF /* alcReverb.c in Sources */,
+				73B4C009136A9E8700D5CAFF /* alcRing.c in Sources */,
+				73B4C00A136A9E8700D5CAFF /* alcThread.c in Sources */,
+				73B4C00C136A9E8700D5CAFF /* ALu.c in Sources */,
+				73B4C00D136A9E8700D5CAFF /* bs2b.c in Sources */,
+				73B4C00F136A9E8700D5CAFF /* mixer.c in Sources */,
+				73B4C010136A9E8700D5CAFF /* null.c in Sources */,
+				73B4C012136A9E8700D5CAFF /* panning.c in Sources */,
+				73B4C016136A9E8700D5CAFF /* wave.c in Sources */,
+				73B4C027136A9E8700D5CAFF /* alAuxEffectSlot.c in Sources */,
+				73B4C028136A9E8700D5CAFF /* alBuffer.c in Sources */,
+				73B4C029136A9E8700D5CAFF /* alDatabuffer.c in Sources */,
+				73B4C02A136A9E8700D5CAFF /* alEffect.c in Sources */,
+				73B4C02B136A9E8700D5CAFF /* alError.c in Sources */,
+				73B4C02C136A9E8700D5CAFF /* alExtension.c in Sources */,
+				73B4C02D136A9E8700D5CAFF /* alFilter.c in Sources */,
+				73B4C02E136A9E8700D5CAFF /* alListener.c in Sources */,
+				73B4C02F136A9E8700D5CAFF /* alSource.c in Sources */,
+				73B4C030136A9E8700D5CAFF /* alState.c in Sources */,
+				73B4C031136A9E8700D5CAFF /* alThunk.c in Sources */,
+				73B4C040136A9E8700D5CAFF /* openal-info.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		8D11072C0486CEB800E47090 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -2464,6 +2752,11 @@
 			isa = PBXTargetDependency;
 			target = 737CE46B12904E9E00D732B7 /* libtomcrypt */;
 			targetProxy = 737CE7361290582200D732B7 /* PBXContainerItemProxy */;
+		};
+		73B4C04E136A9F0B00D5CAFF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 73B4BEFE136A9D8600D5CAFF /* OpenAL-Soft */;
+			targetProxy = 73B4C04D136A9F0B00D5CAFF /* PBXContainerItemProxy */;
 		};
 		73D2F5D612E2DD7000EA5EBE /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -2732,6 +3025,56 @@
 			};
 			name = Release;
 		};
+		73B4BF01136A9D8700D5CAFF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_VERSION = A;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				HEADER_SEARCH_PATHS = (
+					"../../../openal/openal-soft-1.13/include",
+					"../../../openal/openal-soft-1.13/OpenAL32/Include",
+					"../../../openal/openal-soft-1.13",
+				);
+				INFOPLIST_FILE = "OpenAL-Soft-Info.plist";
+				INSTALL_PATH = "@executable_path/../Frameworks";
+				PREBINDING = NO;
+				PRODUCT_NAME = "OpenAL-Soft";
+			};
+			name = Debug;
+		};
+		73B4BF02136A9D8700D5CAFF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_VERSION = A;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				HEADER_SEARCH_PATHS = (
+					"../../../openal/openal-soft-1.13/include",
+					"../../../openal/openal-soft-1.13/OpenAL32/Include",
+					"../../../openal/openal-soft-1.13",
+				);
+				INFOPLIST_FILE = "OpenAL-Soft-Info.plist";
+				INSTALL_PATH = "@executable_path/../Frameworks";
+				PREBINDING = NO;
+				PRODUCT_NAME = "OpenAL-Soft";
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
 		C01FCF4B08A954540054247B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -2741,6 +3084,7 @@
 					"$(inherited)",
 					"\"$(SRCROOT)/../../../lib\"",
 					"\"$(SRCROOT)/../tools\"",
+					"\"$(SRCROOT)/build/Release\"",
 				);
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
@@ -2769,6 +3113,7 @@
 					"$(inherited)",
 					"\"$(SRCROOT)/../../../lib\"",
 					"\"$(SRCROOT)/../tools\"",
+					"\"$(SRCROOT)/build/Release\"",
 				);
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -2887,6 +3232,15 @@
 			buildConfigurations = (
 				737CE61F1290553D00D732B7 /* Debug */,
 				737CE6201290553D00D732B7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		73B4BF03136A9D8700D5CAFF /* Build configuration list for PBXNativeTarget "OpenAL-Soft" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				73B4BF01136A9D8700D5CAFF /* Debug */,
+				73B4BF02136A9D8700D5CAFF /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
