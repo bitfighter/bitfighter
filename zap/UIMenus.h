@@ -359,7 +359,7 @@ public:
    TeamMenuUserInterface();        // Constructor
    void render();
    void onEscape();
-   const char *nameToChange;
+   string nameToChange;
 
    void processSelection(U32 index);
 };

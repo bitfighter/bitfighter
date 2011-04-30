@@ -45,7 +45,8 @@ class SpeedZone : public SimpleLine
 private:
    Vector<Point> mPolyBounds;
    U16 mSpeed;             // Speed at which ship is propelled, defaults to defaultSpeed
-
+   bool mSnapLocation;     // If true, ship will be snapped to center of speedzone before being ejected
+   
    // Take our basic inputs, pos and dir, and expand them into a three element
    // vector (the three points of our triangle graphic), and compute its extent
    void preparePoints();
@@ -75,15 +76,16 @@ public:
    static const U16 defaultSpeed = 2000;  // Default speed if none specified
 
    U16 getSpeed() { return mSpeed; }
+   void setSpeed(U16 speed) { mSpeed = speed; }
+
+   bool getSnapping() { return mSnapLocation; }
+   void setSnapping(bool snapping) { mSnapLocation = snapping; }
 
    F32 mRotateSpeed;
    U32 mUnpackInit;  // Some form of counter, to know that it is a rotating speed zone.
 
    Point pos;
    Point dir;
-  
-   bool mSnapLocation;     // If true, ship will be snapped to center of speedzone before being ejected
-   
 
    static void generatePoints(const Point &pos, const Point &dir, F32 gridSize, Vector<Point> &points);
    void render();

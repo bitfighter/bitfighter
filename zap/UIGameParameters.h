@@ -51,7 +51,7 @@ private:
 public:
    SavedMenuItem() { /* Unused */ }    // Default constructor
 
-   SavedMenuItem(MenuItem *menuItem) { mParamName = menuItem->getText(); setValues(menuItem); }
+   SavedMenuItem(MenuItem *menuItem) { mParamName = menuItem->getPrompt(); setValues(menuItem); }
 
    void setValues(MenuItem *menuItem) { mParamVal = menuItem->getValueForWritingToLevelFile(); }
 

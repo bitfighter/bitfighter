@@ -270,6 +270,11 @@ public:
 };
 
 
+////////////////////////////////////////
+////////////////////////////////////////
+
+class EditorAttributeMenuUI;
+
 class EditorUserInterface : public UserInterface, public LevelLoader
 {
 public:
@@ -342,10 +347,6 @@ private:
  
    string mEditFileName;                      // Manipulate with get/setLevelFileName
 
-   EditorObject *mEditingSpecialAttrItem;     // Item we're editing special attributes on
-
-   void doneEditingSpecialItem(bool save);    // Gets run when user exits special-item editing mode
-                                              // for cycling through the various editable attributes
    EditorObject *mNewItem;
    F32 mCurrentScale;
    Point mCurrentOffset;            // Coords of UR corner of screen
@@ -434,8 +435,7 @@ public:
    F32 getCurrentScale() { return mCurrentScale; }
    Point getCurrentOffset() { return mCurrentOffset; }
 
-   //bool isEditingSpecialAttrItem() { return mEditingSpecialAttrItem != NULL; }
-   //bool isEditingSpecialAttribute(SpecialAttribute attribute) { return mSpecialAttribute == attribute; }
+   void doneEditingAttributes(EditorAttributeMenuUI *editor, EditorObject *object);   // Gets run when user exits attribute editor
 
    void clearUndoHistory();         // Wipe undo/redo history
 
@@ -473,7 +473,7 @@ public:
    void onKeyDown(KeyCode keyCode, char ascii);             // Handle all keyboard inputs, mouse clicks, and button presses
    void textEntryKeyHandler(KeyCode keyCode, char ascii);   // Handle keyboard activity when we're editing an item's attributes
    void specialAttributeKeyHandler(KeyCode keyCode, char ascii);
-   void itemPropertiesEnterKeyHandler();
+   void startAttributeEditor();
 
    // This function is only called from the levelgens.  If we're running in the editor, I think we can safely ignore it.
    void setGameTime(F32 time) { /* Do nothing */ }

@@ -1222,8 +1222,6 @@ void EditorUserInterface::onActivate()
 
    mItemToLightUp = NULL;    
 
-   mEditingSpecialAttrItem = NULL;
-
    mSaveMsgTimer = 0;
 
    OGLCONSOLE_EnterKey(processEditorConsoleCommand);     // Setup callback for processing console commands
@@ -1243,8 +1241,6 @@ void EditorUserInterface::onDeactivate()
 void EditorUserInterface::onReactivate()
 {
    mDraggingObjects = false;  
-
-   mEditingSpecialAttrItem = NULL;     // Probably not necessary
 
    if(mWasTesting)
    {
@@ -2782,9 +2778,6 @@ void EditorUserInterface::findHitVertex(const Point &canvasPos, EditorObject *&h
    hitObject = NULL;
    hitVertex = NONE;
 
-   if(mEditingSpecialAttrItem)    // If we're editing a text special attribute, disable this functionality
-      return;
-
    const S32 VERTEX_HIT_RADIUS = 8;
 
    for(S32 x = 1; x >= 0; x--)    // Two passes... first for selected item, second for all items
@@ -2824,9 +2817,6 @@ void EditorUserInterface::findHitItemAndEdge()
 {
    mItemHit = NULL;
    mEdgeHit = NONE;
-
-   if(mEditingSpecialAttrItem)                        // If we're editing special attributes, disable this functionality
-      return;
 
    // Do this in two passes -- the first we only consider selected items, the second pass will consider all targets.
    // This will give priority to moving vertices of selected items
@@ -2918,9 +2908,6 @@ void EditorUserInterface::findHitItemAndEdge()
 S32 EditorUserInterface::findHitItemOnDock(Point canvasPos)
 {
    if(mShowMode == ShowWallsOnly)     // Only add dock items when objects are visible
-      return NONE;
-
-   if(mEditingSpecialAttrItem)        // If we're editing a text item, disable this functionality
       return NONE;
 
    for(S32 i = mDockItems.size() - 1; i >= 0; i--)     // Go in reverse order because the code we copied did ;-)
@@ -3018,7 +3005,7 @@ void EditorUserInterface::onMouseDragged(S32 x, S32 y)
 
    mMousePos.set(gScreenInfo.getMousePos());
 
-   if(mCreatingPoly || mCreatingPolyline || mDragSelecting || mEditingSpecialAttrItem)
+   if(mCreatingPoly || mCreatingPolyline || mDragSelecting)
       return;
 
    if(mDraggingDockItem != NONE)      // We just started dragging an item off the dock
@@ -3573,32 +3560,20 @@ void EditorUserInterface::centerView()
 }
 
 
-// Gets run when user exits special-item editing mode
-void EditorUserInterface::doneEditingSpecialItem(bool saveChanges)
+// Gets run when user exits special-item editing mode, called from attribute editors
+void EditorUserInterface::doneEditingAttributes(EditorAttributeMenuUI *editor, EditorObject *object)
 {
+   object->onAttrsChanged();
+
    // Find any other selected items of the same type of the item we just edited, and update their values too
-
-   if(!saveChanges)
-      undo(false);
-   else
-      for(S32 i = 0; i < mItems.size(); i++)
+   for(S32 i = 0; i < mItems.size(); i++)
+   {
+      if(mItems[i] != object && mItems[i]->isSelected() && mItems[i]->getObjectTypeMask() == object->getObjectTypeMask())
       {
-         if(mEditingSpecialAttrItem == mItems[i])
-            continue;
-
-         else if(mItems[i]->isSelected() && mItems[i]->getObjectTypeMask() == mEditingSpecialAttrItem->getObjectTypeMask())
-         {
-            // We'll ignore text here, because that really makes less sense
-            mItems[i]->repopDelay = mEditingSpecialAttrItem->repopDelay;
-            mItems[i]->speed = mEditingSpecialAttrItem->speed;
-            mItems[i]->boolattr = mEditingSpecialAttrItem->boolattr;
-            mItems[i]->onAttrsChanged();
-         }
+         editor->doneEditing(mItems[i]);  // Transfer attributes from editor to object
+         mItems[i]->onAttrsChanged();     // And notify the object that its attributes have changed
       }
-
-
-   mEditingSpecialAttrItem->setIsBeingEdited(false);
-   mEditingSpecialAttrItem = NULL;
+   }
 }
 
 
@@ -3618,12 +3593,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       textEntryKeyHandler(keyCode, ascii);
 
    else if(keyCode == KEY_ENTER)       // Enter - Edit props
-      itemPropertiesEnterKeyHandler();
-
-   // This first section is the key handlers for when we're editing the special attributes of an item.  Regular
-   // key actions are handled below.
-   //else if(mEditingSpecialAttrItem)
-   //   specialAttributeKeyHandler(keyCode, ascii);
+      startAttributeEditor();
 
    // Regular key handling from here on down
    else if(getKeyState(KEY_SHIFT) && keyCode == KEY_0)  // Shift-0 -> Set team to hostile
@@ -4065,37 +4035,28 @@ void EditorUserInterface::textEntryKeyHandler(KeyCode keyCode, char ascii)
 
 static const S32 MAX_REPOP_DELAY = 600;      // That's 10 whole minutes!
 
-void EditorUserInterface::itemPropertiesEnterKeyHandler()
+void EditorUserInterface::startAttributeEditor()
 {
    for(S32 i = 0; i < mItems.size(); i++)
    {
       if(mItems[i]->isSelected())
       {
          // Force item i to be the one and only selected item type.  This will clear up some problems that
-         // might otherwise occur.  If you have multiple items selected, all will end up with the same values
-         //for(S32 j = 0; j < mItems.size(); j++)
-         //   if(mItems[j]->isSelected() && mItems[j]->getObjectTypeMask() != mItems[i]->getObjectTypeMask())
-         //      mItems[j]->unselect();
+         // might otherwise occur.  If you have multiple items selected, all will end up with the same values.
+         for(S32 j = 0; j < mItems.size(); j++)
+            if(mItems[j]->isSelected() && mItems[j]->getObjectTypeMask() != mItems[i]->getObjectTypeMask())
+               mItems[j]->unselect();
 
-         if(mEditingSpecialAttrItem)
-            mEditingSpecialAttrItem->setIsBeingEdited(false);
-
-         mEditingSpecialAttrItem = mItems[i];
-         mEditingSpecialAttrItem->setIsBeingEdited(true);
 
          // Activate the attribute editor if there is one
          EditorAttributeMenuUI *menu = mItems[i]->getAttributeMenu();
          if(menu)
          {
-            menu->setObject(mItems[i]);
+            menu->startEditing(mItems[i]);
             menu->activate();
 
             saveUndoState();
          }
-
-         
-
-doneEditingSpecialItem(true);    // <== TODO: Move this -- copies modifed attributes to all selected items
 
          break;
       }

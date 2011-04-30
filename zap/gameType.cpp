@@ -2228,7 +2228,7 @@ static void switchTeamsCallback(U32 unused)
    else
    {
       gTeamMenuUserInterface.activate();     // Show menu to let player select a new team
-      gTeamMenuUserInterface.nameToChange = gClientInfo.name.c_str();
+      gTeamMenuUserInterface.nameToChange = gClientInfo.name;
    }
  }
 

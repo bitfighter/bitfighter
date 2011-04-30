@@ -61,8 +61,8 @@ enum PlayerType {
 class MenuItem
 {
 private:
-   string mText;     // Text displayed on menu
-   string mHelp;     // An optional help string
+   string mPrompt;     // Text displayed on menu
+   string mHelp;       // An optional help string
    S32 mIndex;
 
 protected:
@@ -72,15 +72,15 @@ protected:
    bool mEnterAdvancesItem;
    void (*mCallback)(U32);
 
-   const char *mPromptString;
+   const char *mPromptAppendage;
 
 public:
    MenuItem() { TNLAssert(false, "Do not use this constructor!"); }    // Default constructor
 
    // Constructor
-   MenuItem(S32 index, const string &text, void (*callback)(U32), const string &help, KeyCode k1 = KEY_UNKNOWN, KeyCode k2 = KEY_UNKNOWN)
+   MenuItem(S32 index, const string &prompt, void (*callback)(U32), const string &help, KeyCode k1 = KEY_UNKNOWN, KeyCode k2 = KEY_UNKNOWN)
    {
-      mText = text;
+      mPrompt = prompt;
       key1 = k1;
       key2 = k2;
       mCallback = callback;
@@ -89,7 +89,7 @@ public:
       mEnterAdvancesItem = false;
       mSelectedColor = yellow;
       mUnselectedColor = white;
-      mPromptString = " >";
+      mPromptAppendage = " >";
    }
 
    KeyCode key1;     // Allow two shortcut keys per menu item...
@@ -103,9 +103,11 @@ public:
    const Color *getColor(bool isSelected);
 
    const char *getHelp() { return mHelp.c_str(); }
-   const char *getText() { return mText.c_str(); }
    S32 getIndex() { return mIndex; }
-   string getString() { return mText; }
+
+   virtual string getPrompt() { return mPrompt; }
+   virtual string getValue() { return mPrompt; } 
+
    virtual void setSecret(bool secret) { /* Do nothing */ }
 
    // When enter is pressed, should selection advance to the next item?
@@ -139,7 +141,7 @@ class MessageMenuItem : public MenuItem
 public:
    MessageMenuItem(string title, const Color &color) : MenuItem(-1, title, NULL, "")  
    { 
-      mPromptString = ""; 
+      mPromptAppendage = ""; 
       mUnselectedColor = color; 
    }
 };
@@ -229,6 +231,8 @@ public:
    virtual string getValueForDisplayingInMenu() { return mIndex ? " Engineer" : ""; }
    virtual string getValueForWritingToLevelFile() { return mIndex ? "yes" : "no"; }
    virtual void setValue(const string &val) { mIndex = (val == "yes") ? 1 : 0; }
+   virtual S32 getIntValue() { return mIndex; }
+   virtual void setIntValue(S32 value) { mIndex = (value == 0) ? 0 : 1; }
 };
 
 ////////////////////////////////////////
@@ -360,6 +364,10 @@ public:
 
    virtual string getValueForWritingToLevelFile() { return mLineEditor.getString(); }
    virtual string getValueForDisplayingInMenu() { return mLineEditor.getString(); }
+
+   virtual string getValue() { return mLineEditor.getString(); } 
+   void setValue(const string &val) { mLineEditor.setString(val); }
+
    virtual void setFilter(LineEditor::LineEditorFilter filter) { mLineEditor.setFilter(filter); }
 
    virtual void activatedWithShortcutKey() { /* Do nothing */ }

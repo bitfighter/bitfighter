@@ -25,6 +25,7 @@
 
 #include "UIEditorMenus.h"
 #include "textItem.h"
+#include "speedZone.h"
 
 namespace Zap
 {
@@ -32,6 +33,7 @@ namespace Zap
 
 void EditorAttributeMenuUI::onEscape()
 {
+   doneEditing(mObject);
    reactivatePrevUI();     // Back to the editor!
 }
 
@@ -61,6 +63,14 @@ void EditorAttributeMenuUI::render()
 }
 
 
+void EditorAttributeMenuUI::doneEditing(EditorObject *object) 
+{ 
+   if(object == mObject) 
+      gEditorUserInterface.doneEditingAttributes(this, mObject); 
+}
+
+
+
 ////////////////////////////////////////
 ////////////////////////////////////////
    
@@ -79,12 +89,36 @@ static void setMenuColors(MenuItem *menuItem)
 GoFastEditorAttributeMenuUI::GoFastEditorAttributeMenuUI()
 {
    setMenuID(GoFastAttributeEditorUI);
+   menuItems.resize(2);
 
-   menuItems.push_back(new CounterMenuItem("Speed", 100, 5, 1, 2000, "", "Really slow", ""));
-   setMenuColors(menuItems.last());
+   menuItems[0] = new CounterMenuItem("Speed", 100, 100, SpeedZone::minSpeed, SpeedZone::maxSpeed, "", "Really slow", "");
+   setMenuColors(menuItems[0]);
 
-   menuItems.push_back(new YesNoMenuItem("Snapping", true, NULL, ""));
-   setMenuColors(menuItems.last());
+   menuItems[1] = new YesNoMenuItem("Snapping", true, NULL, "");
+   setMenuColors(menuItems[1]);
+}
+
+
+void GoFastEditorAttributeMenuUI::startEditing(EditorObject *object)
+{
+   Parent::startEditing(object);
+
+   SpeedZone *goFast = dynamic_cast<SpeedZone *>(object);
+
+   // Now transfer some attributes
+   menuItems[0]->setIntValue(goFast->getSpeed());
+   menuItems[1]->setValue(goFast->getSnapping() ? "yes" : "no");
+}
+
+
+void GoFastEditorAttributeMenuUI::doneEditing(EditorObject *object)
+{
+   SpeedZone *goFast = dynamic_cast<SpeedZone *>(object);
+
+   goFast->setSpeed(menuItems[0]->getIntValue());
+   goFast->setSnapping(menuItems[1]->getIntValue() != 0);
+
+   Parent::doneEditing(object);
 }
 
 
@@ -106,12 +140,36 @@ TextItemEditorAttributeMenuUI::TextItemEditorAttributeMenuUI()
 {
    setMenuID(TextItemAttributeEditorUI);
 
+   menuItems.resize(1);
+
    EditableMenuItem *menuItem = new EditableMenuItem("Text: ", "Blah", "", "", MAX_TEXTITEM_LEN);
 
    menuItem->setTextEditedCallback(textEditedCallback);
    setMenuColors(menuItem);
-   menuItems.push_back(menuItem);
+
+   menuItems[0] = menuItem;
 }
 
+
+void TextItemEditorAttributeMenuUI::startEditing(EditorObject *object)
+{
+   Parent::startEditing(object);
+
+   TextItem *textItem = dynamic_cast<TextItem *>(object);
+
+   // Now transfer some attributes
+   menuItems[0]->setValue(textItem->getText());
+}
+
+
+void TextItemEditorAttributeMenuUI::doneEditing(EditorObject *object)
+{
+   // The following seems redundant because we have a callback that keeps the item updated throughout the editing process.
+   // However, this is also called if we edit three textItems at once and we need to transfer the text to the other two.
+   TextItem *textItem = dynamic_cast<TextItem *>(object);
+   textItem->setText(menuItems[0]->getValue());
+
+   Parent::doneEditing(object);
+}
 
 };

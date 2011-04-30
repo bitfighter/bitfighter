@@ -51,10 +51,10 @@ namespace Zap
 extern U32 gUseStickNumber;
 
 
-// Sorts alphanumerically by menuItem.value
+// Sorts alphanumerically by menuItem's prompt  ==> used for getting levels in the right order and such
 S32 QSORT_CALLBACK menuItemValueSort(MenuItem **a, MenuItem **b)
 {
-   return stricmp((*a)->getText(), (*b)->getText());
+   return stricmp((*a)->getPrompt().c_str(), (*b)->getPrompt().c_str());
 }
 
 
@@ -1427,7 +1427,7 @@ void LevelMenuUserInterface::onActivate()
    {
       S32 j;
       for(j = 0; j < menuItems.size(); j++)
-         if(gc->mLevelInfos[i].levelName == "" || !stricmp(gc->mLevelInfos[i].levelType.getString(), menuItems[j]->getText()) )     
+         if(gc->mLevelInfos[i].levelName == "" || !stricmp(gc->mLevelInfos[i].levelType.getString(), menuItems[j]->getPrompt().c_str()) )     
          {
             break;                  // Skip over levels with blank names or duplicate entries
          }
@@ -1605,13 +1605,13 @@ void PlayerMenuUserInterface::playerSelected(U32 index)
    if(action == ChangeTeam)
    {
       gTeamMenuUserInterface.activate();     // Show menu to let player select a new team
-      gTeamMenuUserInterface.nameToChange = menuItems[index]->getText();
+      gTeamMenuUserInterface.nameToChange = menuItems[index]->getPrompt();
 
-      logprintf("%s",gTeamMenuUserInterface.nameToChange);
+      logprintf("Changing %s...", gTeamMenuUserInterface.nameToChange.c_str());     // TODO: Delete this line
    }
    else if(gc)    // action == Kick
    {
-      StringTableEntry e(menuItems[index]->getText());
+      StringTableEntry e(menuItems[index]->getPrompt().c_str());
       gc->c2sAdminPlayerAction(e, action, -1);
    }
 
@@ -1686,11 +1686,11 @@ void TeamMenuUserInterface::processSelection(U32 index)
    if(!gc || !gt)
       return;
 
-   if(index != (U32)gt->getTeam(nameToChange))
+   if(index != (U32)gt->getTeam(nameToChange.c_str()))
    {
       if(getPrevMenuID() == PlayerUI)     // Initiated by an admin (PlayerUI is the kick/change team player-pick admin menu)
       {
-         StringTableEntry e(nameToChange);
+         StringTableEntry e(nameToChange.c_str());
          gc->c2sAdminPlayerAction(e, PlayerMenuUserInterface::ChangeTeam, index);   // Index will be the team index
       }
       else                                // Came from player changing own team
@@ -1719,7 +1719,7 @@ void TeamMenuUserInterface::render()
    {
       strncpy(c, gt->mTeams[i].getName().getString(), 1);     // Grab first char of name for a shortcut key
 
-      bool isCurrent = (i == gt->getTeam(nameToChange));
+      bool isCurrent = (i == gt->getTeam(nameToChange.c_str()));
       
       menuItems.push_back(new TeamMenuItem(i, gt->mTeams[i], processTeamSelectionCallback, stringToKeyCode(c), isCurrent));
    }
@@ -1732,7 +1732,7 @@ void TeamMenuUserInterface::render()
          name = ship->getName().getString();
    }
 
-   if(strcmp(name.c_str(), nameToChange))    // i.e. names differ, this isn't the local player
+   if(name != nameToChange)    // i.e. names differ, this isn't the local player
    {
       name = nameToChange;
       name += " ";

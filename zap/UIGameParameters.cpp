@@ -174,7 +174,7 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
          // Would be more efficient with a dictionary
          if(savedMenuItems.size())
             for(S32 j = 0; j < savedMenuItems.size(); j++)
-               if(savedMenuItems[j].getParamName() == menuItems[i]->getString())   // Overwrite already saved parameters
+               if(savedMenuItems[j].getParamName() == menuItems[i]->getPrompt())   // Overwrite already saved parameters
                {
                   savedMenuItems[j].setValues(menuItems[i]);
                   found = true;
@@ -334,7 +334,7 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
    if(savedMenuItems.size())
       for(S32 i = 1; i < menuItems.size(); i++)   
          for(S32 j = 0; j < savedMenuItems.size(); j++)
-            if(menuItems[i]->getString() == savedMenuItems[j].getParamName())    // Found a match
+            if(menuItems[i]->getPrompt() == savedMenuItems[j].getParamName())    // Found a match
             {
                menuItems[i]->setValue(savedMenuItems[j].getParamVal());
                break;

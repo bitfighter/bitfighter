@@ -45,7 +45,8 @@ protected:
 
 public:
    EditorObject *getObject() { return mObject; }
-   void setObject(EditorObject *object) { mObject = object; }
+   virtual void startEditing(EditorObject *object) { mObject = object; }
+   virtual void doneEditing(EditorObject *object);
    void render();
    void onEscape();
 };
@@ -60,6 +61,8 @@ class GoFastEditorAttributeMenuUI : public EditorAttributeMenuUI
 
 public:
    GoFastEditorAttributeMenuUI();        // Constructor
+   void startEditing(EditorObject *object);
+   void doneEditing(EditorObject *object);
 };
 
 
@@ -72,6 +75,8 @@ class TextItemEditorAttributeMenuUI : public EditorAttributeMenuUI
 
 public:
    TextItemEditorAttributeMenuUI();        // Constructor
+   void startEditing(EditorObject *object);
+   void doneEditing(EditorObject *object);
 };
 
 
