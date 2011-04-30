@@ -26,24 +26,24 @@
 #ifndef _TEXTITEM_H_
 #define _TEXTITEM_H_
 
-#include "SimpleLine.h"    // For SimpleLine def
+#include "SimpleLine.h"       // For SimpleLine def
 #include "gameObject.h"
 #include "gameType.h"
 #include "gameNetInterface.h"
-#include "polygon.h"       // For def of Polyline, for lineItem
+#include "polygon.h"          // For def of Polyline, for lineItem
 #include "UI.h"
 #include "gameObjectRender.h"
 #include "ship.h"
 #include "../glut/glutInclude.h"
 #include <string>
 
-//TODO: Make these regular vars
-#define MAX_TEXTITEM_LEN 255
 
 using namespace std;
 
 namespace Zap
 {
+
+static const S32 MAX_TEXTITEM_LEN = 255;
 
 class TextItem : public SimpleLine
 {
@@ -59,6 +59,8 @@ private:
    const char *getOriginBottomLabel() { return "Start"; }
    const char *getDestinationBottomLabel() { return "Direction"; }
    const char *getEditMessage(S32 line) { return line == 0 ? "[Enter] to edit text" : ""; }
+
+   static EditorAttributeMenuUI *mAttributeMenuUI;      // Menu for text editing; since it's static, don't bother with smart pointer
 
 public:
    static const U32 MAX_TEXT_SIZE = 255;
@@ -83,6 +85,8 @@ public:
    Vector<Point> getVerts() { Vector<Point> p; p.push_back(mPos); p.push_back(mDir); return p; }      // TODO: Can we get rid of this somehow?
 
 
+   EditorAttributeMenuUI *getAttributeMenu();
+
    bool getCollisionPoly(Vector<Point> &polyPoints);  // More precise boundary for precise collision detection
    bool collide(GameObject *hitObject);
    void idle(GameObject::IdleCallPath path);
@@ -93,14 +97,18 @@ public:
 
    Color getEditorRenderColor() { return Color(0,0,1); }
 
-   LineEditor lineEditor;    // For editing in the editor
-
    void renderEditorItem(F32 currentScale);
    F32 getSize() { return mSize; }
    void setSize(F32 size) { mSize = size; }
 
+   string getText() { return mText; }
+   void setText(string text) { mText = text; }
+
    Point getVert(S32 index) { return index == 0 ? mPos : mDir; }
    void setVert(const Point &point, S32 index) { if(index == 0) mPos = point; else mDir = point; }
+
+   // Provide a static hook into the object currently being edited with the attrubute editor for callback purposes
+   static EditorObject *getAttributeEditorObject();
 
    void onAttrsChanging();
    void onGeomChanging();
@@ -123,12 +131,6 @@ public:
    bool getHasRepop() { return false; }
 
    TNL_DECLARE_CLASS(TextItem);
-};
-
-
-class TextItemEditor : public TextItem
-{
-
 };
 
 

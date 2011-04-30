@@ -1640,8 +1640,8 @@ void PlayerMenuUserInterface::render()
       // Will be used to show admin/player/robot prefix on menu
       PlayerType pt = gt->mClientList[i]->isRobot ? PlayerTypeRobot : (gt->mClientList[i]->isAdmin ? PlayerTypeAdmin : PlayerTypePlayer);    
 
-      Color color = gt->getTeamColor(gt->mClientList[i]->getTeam());
-      menuItems.push_back(new PlayerMenuItem(i, gt->mClientList[i]->name.getString(), playerSelectedCallback, stringToKeyCode(c), color, pt));
+      menuItems.push_back(new PlayerMenuItem(i, gt->mClientList[i]->name.getString(), playerSelectedCallback, stringToKeyCode(c), pt));
+      menuItems.last()->setUnselectedColor(gt->getTeamColor(gt->mClientList[i]->getTeam()));
    }
 
    menuItems.sort(menuItemValueSort);

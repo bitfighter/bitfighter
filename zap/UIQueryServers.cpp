@@ -67,12 +67,6 @@ static const U32 AREA_BETWEEN_BOTTOM_OF_SERVER_LIST_AND_DIVIDER = (SEL_SERVER_IN
 // "Chat window" includes chat composition, but not list of names of people in chatroom
 #define BOTTOM_OF_CHAT_WINDOW (gScreenInfo.getGameCanvasHeight() - vertMargin / 2 - CHAT_NAMELIST_SIZE)
 
-// Some colors
-static const Color red = Color(1,0,0);
-static const Color green = Color(0,1,0);
-static const Color yellow = Color(1,1,0);
-static const Color blue = Color(0,0,1);
-static const Color white = Color(1,1,1);
 
 // Our one and only instantiation of this interface!
 QueryServersUserInterface gQueryServersUserInterface;

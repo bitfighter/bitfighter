@@ -55,6 +55,7 @@ private:
    const char *getDestinationBottomLabel() { return "Direction"; }
    const char *getEditMessage(S32 line);
 
+   static EditorAttributeMenuUI *mAttributeMenuUI;      // Menu for attribute editing; since it's static, don't bother with smart pointer
 
 public:
    enum {
@@ -65,6 +66,9 @@ public:
       InitMask     = BIT(0),
       HitMask      = BIT(1),
    };
+
+   SpeedZone();   // Constructor
+   ~SpeedZone();  // Destructor
 
    static const U16 minSpeed = 500;       // How slow can you go?
    static const U16 maxSpeed = 5000;      // Max speed for the goFast
@@ -80,7 +84,7 @@ public:
   
    bool mSnapLocation;     // If true, ship will be snapped to center of speedzone before being ejected
    
-   SpeedZone();   // Constructor
+
    static void generatePoints(const Point &pos, const Point &dir, F32 gridSize, Vector<Point> &points);
    void render();
    S32 getRenderSortValue();
@@ -113,6 +117,8 @@ public:
    void onGeomChanging() { onGeomChanged(); }
    void onItemDragging() { onGeomChanged(); }
    void onGeomChanged();
+
+   EditorAttributeMenuUI *getAttributeMenu();
 
    void saveItem(FILE *f);
 

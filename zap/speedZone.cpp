@@ -29,6 +29,7 @@
 #include "gameNetInterface.h"
 #include "gameObjectRender.h"
 #include "ship.h"
+#include "UIEditorMenus.h"    // For GoFastEditorAttributeMenuUI def
 #include "UI.h"
 #include "../glut/glutInclude.h"
 
@@ -44,6 +45,9 @@ const U16 SpeedZone::defaultSpeed;
 
 TNL_IMPLEMENT_NETOBJECT(SpeedZone);
 
+EditorAttributeMenuUI *SpeedZone::mAttributeMenuUI = NULL;
+
+
 // Constructor
 SpeedZone::SpeedZone()
 {
@@ -58,6 +62,12 @@ SpeedZone::SpeedZone()
    mUnpackInit = 0;           // Some form of counter, to know that it is a rotating speed zone
 }
 
+
+// Destructor
+SpeedZone::~SpeedZone()
+{
+   //delete mAttributeMenuUI;
+}
 
 // Take our basic inputs, pos and dir, and expand them into a three element
 // vector (the three points of our triangle graphic), and compute its extent
@@ -233,21 +243,17 @@ string SpeedZone::toString()
 
 const char *SpeedZone::getEditMessage(S32 line)
 {
-   //glColor((gEditorUserInterface.isEditingSpecialAttribute(EditorUserInterface::GoFastSnap)) ? white : inactiveSpecialAttributeColor);
-   //UserInterface::drawStringf_2pt(pos, dest, attrSize, 10, "Speed: %d", mSpeed);
-
-   //glColor((gEditorUserInterface.isEditingSpecialAttribute(EditorUserInterface::GoFastSpeed)) ? white : inactiveSpecialAttributeColor);
-   //UserInterface::drawStringf_2pt(pos, dest, attrSize, -2, "Snapping: %s", boolattr ? "On" : "Off");
+   return line == 0 ? "[Enter] to edit attributes" : "";
+}
 
 
-   if(gEditorUserInterface.isEditingSpecialAttribute(EditorUserInterface::NoAttribute))
-      return line == 0 ? "[Enter] to edit speed" : "";
-   else if(gEditorUserInterface.isEditingSpecialAttribute(EditorUserInterface::GoFastSpeed))
-      return line == 0 ? "[Enter] to edit snapping" : "Up/Dn to change speed";
-   else if(gEditorUserInterface.isEditingSpecialAttribute(EditorUserInterface::GoFastSnap))
-      return line == 0 ? "[Enter] to stop editing" : "Up/Dn to toggle snapping";
-   else
-      return "xx???";
+EditorAttributeMenuUI *SpeedZone::getAttributeMenu()
+{
+   // Lazily initialize this -- if we're in the game, we'll never need this to be instantiated
+   if(!mAttributeMenuUI)
+      mAttributeMenuUI = new GoFastEditorAttributeMenuUI;
+
+   return mAttributeMenuUI;
 }
 
 

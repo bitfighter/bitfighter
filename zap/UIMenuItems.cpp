@@ -40,12 +40,17 @@ void MenuItem::render(S32 ypos, S32 textsize, bool isSelected)
 }
 
 
-void MenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
+const Color *MenuItem::getColor(bool isSelected)
 {
-   glColor(isSelected ? Color(1,1,0) : mColor);
-   UserInterface::drawCenteredStringf(xpos, ypos, textsize, "%s >", getText());
+   return isSelected ? &mSelectedColor : &mUnselectedColor;
 }
 
+
+void MenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
+{
+   glColor(*getColor(isSelected));
+   UserInterface::drawCenteredStringf(xpos, ypos, textsize, "%s%s", getText(), mPromptString);
+}
 
 
 bool MenuItem::handleKey(KeyCode keyCode, char ascii)
@@ -68,9 +73,11 @@ bool MenuItem::handleKey(KeyCode keyCode, char ascii)
 ////////////////////////////////////
 ////////////////////////////////////
 
+
 void ToggleMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
 {
-   UserInterface::drawCenteredStringPair(xpos, ypos, textsize, mColor, Color(0,1,1), getText(), mOptions[mIndex].c_str());
+   UserInterface::drawCenteredStringPair(xpos, ypos, textsize, *getColor(isSelected), *getValueColor(isSelected), 
+                                         getText(), mOptions[mIndex].c_str());
 }
 
 
@@ -137,9 +144,9 @@ bool ToggleMenuItem::handleKey(KeyCode keyCode, char ascii)
 void CounterMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
 {
    if(mValue == mMinValue && mMinMsg != "")
-      UserInterface::drawCenteredStringPair(xpos, ypos, textsize, mColor, Color(0,1,1), getText(), mMinMsg.c_str());
+      UserInterface::drawCenteredStringPair(xpos, ypos, textsize, *getColor(isSelected), *getValueColor(isSelected), getText(), mMinMsg.c_str());
    else
-      UserInterface::drawCenteredStringPair(xpos, ypos, textsize, mColor, Color(0,1,1), getText(), 
+      UserInterface::drawCenteredStringPair(xpos, ypos, textsize, *getColor(isSelected), *getValueColor(isSelected), getText(), 
                                            (getValueForDisplayingInMenu() + " " + getUnits()).c_str());
 }
 
@@ -208,7 +215,7 @@ void PlayerMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
    else if(mType == PlayerTypeRobot)
       temp = "[Robot] " + temp;
 
-   glColor(mColor);
+   glColor(*getColor(isSelected));
    UserInterface::drawCenteredString(xpos, ypos, textsize, temp.c_str());
 }
 
@@ -219,7 +226,7 @@ void PlayerMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
 
 void TeamMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
 {
-   glColor(mColor);
+   glColor(*getColor(isSelected));
    UserInterface::drawCenteredStringf(xpos, ypos, textsize, "%s%s [%d /%d]", mIsCurrent ? "-> " : "", getText(), mTeam.numPlayers, mTeam.getScore());
 }
 
@@ -237,7 +244,7 @@ void EditableMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
    else
       textColor.set(0,1,1);
 
-   S32 xpos2 = UserInterface::drawCenteredStringPair(xpos, ypos, textsize, mColor, textColor, getText(), 
+   S32 xpos2 = UserInterface::drawCenteredStringPair(xpos, ypos, textsize, *getColor(isSelected), textColor, getText(), 
                                                     mLineEditor.getString() != "" ? mLineEditor.getDisplayString().c_str() : mEmptyVal.c_str());
 
    glColor3f(1,0,0);      // Cursor is always red
@@ -251,11 +258,19 @@ bool EditableMenuItem::handleKey(KeyCode keyCode, char ascii)
    if(keyCode == KEY_DELETE || keyCode == KEY_BACKSPACE)
    {
       mLineEditor.handleBackspace(keyCode); 
+
+      if(mTextEditedCallback)
+         mTextEditedCallback(mLineEditor.getString());
+
       return true;
    }
    else if(ascii > 0)
    {
       mLineEditor.addChar(ascii);
+
+      if(mTextEditedCallback)
+         mTextEditedCallback(mLineEditor.getString());
+
       return true;
    }
    
@@ -263,5 +278,4 @@ bool EditableMenuItem::handleKey(KeyCode keyCode, char ascii)
 }
 
 };
-
 

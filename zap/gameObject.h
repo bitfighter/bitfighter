@@ -66,10 +66,10 @@ enum GameObjectType
    TeleportType        = BIT(19),
    GoalZoneType        = BIT(20),
 
-   AsteroidType        = BIT(21),      // Only needed for Lua...
+   AsteroidType        = BIT(21),      // Only needed for Lua and editor...
    RepairItemType      = BIT(22),      // Only needed for Lua...
    EnergyItemType      = BIT(23),      // Only needed for Lua...
-   SoccerBallItemType  = BIT(24),      // Only needed for Lua and indicating what the ship is carrying...
+   SoccerBallItemType  = BIT(24),      // Only needed for Lua and indicating what the ship is carrying and editor...
    WormType            = BIT(25),
 
    TurretType          = BIT(26),      // Formerly EngineeredType
@@ -88,7 +88,10 @@ enum GameObjectType
   
    //////////
    // Types used exclusively in the editor -- will reuse some values from above
-   EditorWallSegmentType = BIT(3)
+   EditorWallSegmentType = BIT(3),
+   SpawnType = BIT(13),
+   FlagSpawnType = BIT(11),
+   PolyWallType = BIT(25)
 };
 
 const S32 gSpyBugRange = 300;     // How far can a spy bug see?

@@ -250,8 +250,6 @@ void Teleporter::render()
 }
 
 
-static const Color green(0,1,0);
-
 void Teleporter::renderEditorItem(F32 currentScale)
 {
    glColor(green);

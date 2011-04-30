@@ -24,6 +24,9 @@
 //------------------------------------------------------------------------------------
 
 #include "UIEditor.h"
+#include "UIEditorMenus.h"    // For access to menu methods such as setObject
+#include "EditorObject.h"
+
 #include "UINameEntry.h"
 #include "UIEditorInstructions.h"
 #include "UIChat.h"
@@ -52,6 +55,7 @@
 
 #include <ctype.h>
 #include <exception>
+#include <algorithm>             // For sort
 
 namespace Zap
 {
@@ -68,18 +72,8 @@ const F32 STARTING_SCALE = 0.5;
 extern Color gNexusOpenColor;
 extern Color EDITOR_WALL_FILL_COLOR;
 
-
 static const Color inactiveSpecialAttributeColor = Color(.6, .6, .6);
-static const Color white = Color(1,1,1);
-static const Color red = Color(1,0,0);
-static const Color yellow = Color(1,1,0);
-static const Color blue = Color(0,0,1);
-static const Color cyan = Color(0,1,1);
-static const Color green = Color(0,1,0);
-static const Color magenta = Color(1,0,1);
-static const Color black = Color(0,0,0);
-
-static const Color SELECT_COLOR = yellow;
+const Color SELECT_COLOR = yellow;
 
 const Color EditorUserInterface::HIGHLIGHT_COLOR = white;
 const Color EditorUserInterface::DOCK_LABEL_COLOR = white;
@@ -87,7 +81,7 @@ const Color EditorUserInterface::DOCK_LABEL_COLOR = white;
 static const S32 TEAM_NEUTRAL = Item::TEAM_NEUTRAL;
 static const S32 TEAM_HOSTILE = Item::TEAM_HOSTILE;
 
-static Vector<EditorObject *> *mLoadTarget;
+static pointainer<vector<EditorObject *> > *mLoadTarget;
 
 enum EntryMode {
    EntryID,          // Entering an objectID
@@ -150,7 +144,7 @@ static const S32 DOCK_POLY_WIDTH = DOCK_WIDTH - 10;
 
 void EditorUserInterface::populateDock()
 {
-   mDockItems.deleteAndClear();
+   mDockItems.clear();
 
    if(mShowMode == ShowAllObjects || mShowMode == ShowAllButNavZones)
    {
@@ -251,9 +245,9 @@ void EditorUserInterface::populateDock()
 // Destructor -- unwind things in an orderly fashion
 EditorUserInterface::~EditorUserInterface()
 {
-   mItems.deleteAndClear();
-   mDockItems.deleteAndClear();
-   mLevelGenItems.deleteAndClear();
+   mItems.clear();
+   mDockItems.clear();
+   mLevelGenItems.clear();
    mClipboard.deleteAndClear();
    delete mNewItem;
 
@@ -325,7 +319,7 @@ static void setLevelToCanvasCoordConversion()
 
 
 // Draws a line connecting points in mVerts
-static void renderPolyline(const Vector<Point> verts)
+void EditorUserInterface::renderPolyline(const Vector<Point> verts)
 {
    glPushMatrix();
       setLevelToCanvasCoordConversion();
@@ -341,7 +335,7 @@ static bool renderFull(U32 index, F32 scale, bool dockItem, bool snapped)
    if(dockItem)
       return false;
 
-   if(index == ItemTurret || index == ItemForceField)
+   if(index & EngineeredType)
       return(snapped && scale > 70);
    
    return true;
@@ -389,14 +383,6 @@ inline Point convertLevelToCanvasCoord(const Point &point, bool convert = true)
 ////////////////////////////////////
 ////////////////////////////////////
 
-// Removes most recent undo state from stack --> won't actually delete items on stack until we need the slot, or we quit
-void EditorUserInterface::deleteUndoState()
-{
-   mLastUndoIndex--;
-   mLastRedoIndex--; 
-}
-
-
 // Objects created with this method MUST be deleted!
 // Returns NULL if className is invalid
 static EditorObject *newEditorObject(const char *className)
@@ -408,8 +394,16 @@ static EditorObject *newEditorObject(const char *className)
 }
 
 
+// Removes most recent undo state from stack --> won't actually delete items on stack until we need the slot, or we quit
+void EditorUserInterface::deleteUndoState()
+{
+   mLastUndoIndex--;
+   mLastRedoIndex--; 
+}
+
+
 // Experimental save to string method
-static void copyItems(const Vector<EditorObject *> &from, Vector<string> &to)
+static void copyItems(pointainer<vector<EditorObject *> > &from, Vector<string> &to)
 {
    to.resize(from.size());      // Preallocation makes things go faster
 
@@ -417,10 +411,11 @@ static void copyItems(const Vector<EditorObject *> &from, Vector<string> &to)
       to[i] = from[i]->toString();
 }
 
+
 // TODO: Make this an UIEditor method, and get rid of the global
-static void restoreItems(const Vector<string> &from, Vector<EditorObject *> &to)
+static void restoreItems(const Vector<string> &from, pointainer<vector<EditorObject *> > &to)
 {
-   to.deleteAndClear();
+   to.clear();
    to.reserve(from.size());      // Preallocation makes things go faster
 
    Vector<string> args;
@@ -506,7 +501,7 @@ void EditorUserInterface::undo(bool addToRedoStack)
    }
 
    mLastUndoIndex--;
-   mItems.deleteAndClear();
+   mItems.clear();
    restoreItems(mUndoItems[mLastUndoIndex % UNDO_STATES], mItems);
 
    rebuildEverything();
@@ -524,7 +519,7 @@ void EditorUserInterface::redo()
       mSnapVertex_j = NONE;
 
       mLastUndoIndex++;
-      mItems.deleteAndClear();
+      mItems.clear();
       restoreItems(mUndoItems[mLastUndoIndex % UNDO_STATES], mItems);   
 
       rebuildEverything();
@@ -576,7 +571,7 @@ static Point snapEngineeredObject(EditorObject *object, const Point &pos)
 void EditorUserInterface::recomputeAllEngineeredItems()
 {
    for(S32 i = 0; i < mItems.size(); i++)
-      if(mItems[i]->getObjectTypeMask() & ItemTurret || mItems[i]->getObjectTypeMask() & ItemForceField)
+      if(mItems[i]->getObjectTypeMask() & TurretType || mItems[i]->getObjectTypeMask() & ForceFieldProjectorType)
          snapEngineeredObject(mItems[i], mItems[i]->getVert(0));
 }
 
@@ -655,14 +650,20 @@ void EditorUserInterface::makeSureThereIsAtLeastOneTeam()
 // This sort will put points on top of lines on top of polygons...  as they should be
 // NavMeshZones are now drawn on top, to make them easier to see.  Disable with Ctrl-A!
 // We'll also put walls on the bottom, as this seems to work best in practice
-S32 QSORT_CALLBACK geometricSort(EditorObject **a, EditorObject **b)
+S32 QSORT_CALLBACK geometricSort(EditorObject *a, EditorObject *b)
 {
-   if((*a)->getObjectTypeMask() & ItemBarrierMaker)
+   if((a)->getObjectTypeMask() & BarrierType)
       return -1;
-   if((*b)->getObjectTypeMask() & ItemBarrierMaker)
+   if((b)->getObjectTypeMask() & BarrierType)
       return 1;
 
-   return( (*b)->getGeomType() - (*a)->getGeomType() );
+   return( (b)->getGeomType() - (a)->getGeomType() );
+}
+
+
+static void geomSort(pointainer<vector<EditorObject *> > &objects)
+{
+   sort(objects.begin(), objects.end(), geometricSort);
 }
 
 
@@ -698,7 +699,8 @@ void EditorUserInterface::loadLevel()
       makeSureThereIsAtLeastOneTeam(); // Make sure we at least have one team
       validateTeams();                 // Make sure every item has a valid team
       validateLevel();                 // Check level for errors (like too few spawns)
-      mItems.sort(geometricSort);
+      //mItems.sort(geometricSort);
+      geomSort(mItems);
       gGameParamUserInterface.ignoreGameParams = false;
    }
    else     
@@ -728,19 +730,19 @@ void EditorUserInterface::loadLevel()
    
    // Bulk-process bot nav mesh zone boundaries
    for(S32 i = 0; i < mItems.size(); i++)
-      if(mItems[i]->getObjectTypeMask() & ItemNavMeshZone)
+      if(mItems[i]->getObjectTypeMask() & BotNavMeshZoneType)
           mItems[i]->initializePolyGeom();
 
    gEditorUserInterface.rebuildAllBorderSegs();
 
 
    for(S32 i = 0; i < mItems.size(); i++)
-      if(mItems[i]->getObjectTypeMask() & ItemTurret || mItems[i]->getObjectTypeMask() & ItemForceField)
+      if(mItems[i]->getObjectTypeMask() & EngineeredType)
         snapEngineeredObject(mItems[i], mItems[i]->getVert(0));
 
    // And hand-process all other items
    for(S32 i = 0; i < mItems.size(); i++)
-      if(mItems[i]->getObjectTypeMask() & ~ItemBarrierMaker && mItems[i]->getObjectTypeMask() & ~ItemNavMeshZone)
+      if(mItems[i]->getObjectTypeMask() & ~BarrierType && mItems[i]->getObjectTypeMask() & ~BotNavMeshZoneType)
          mItems[i]->onGeomChanged();
 }
 
@@ -850,7 +852,7 @@ extern OGLCONSOLE_Console gConsole;
 
 void EditorUserInterface::clearLevelGenItems()
 {
-   mLevelGenItems.deleteAndClear();
+   mLevelGenItems.clear();
 }
 
 
@@ -920,12 +922,11 @@ void EditorUserInterface::runScript(const string &scriptName, const Vector<strin
    // Not sure about all this... may need to test
    // Bulk-process new items, walls first
    for(S32 i = 0; i < mLoadTarget->size(); i++)
-      if((*mLoadTarget)[i]->getObjectTypeMask() & ItemBarrierMaker || (*mLoadTarget)[i]->getObjectTypeMask() & ItemPolyWall)
+      if((*mLoadTarget)[i]->getObjectTypeMask() & BarrierType || (*mLoadTarget)[i]->getObjectTypeMask() & PolyWallType)
       {
          if((*mLoadTarget)[i]->getVertCount() < 2)      // Invalid item; delete
          {
-            delete (*mLoadTarget)[i];
-            (*mLoadTarget).erase_fast(i);
+            (*mLoadTarget).erase((*mLoadTarget).begin() + i);
             i--;
          }
 
@@ -959,22 +960,22 @@ void EditorUserInterface::validateLevel()
 
    for(S32 i = 0; i < mItems.size(); i++)
    {
-      if(mItems[i]->getObjectTypeMask() & ItemSpawn && mItems[i]->getTeam() == TEAM_NEUTRAL)
+      if(mItems[i]->getObjectTypeMask() & SpawnType && mItems[i]->getTeam() == TEAM_NEUTRAL)
          foundNeutralSpawn = true;
-      else if(mItems[i]->getObjectTypeMask() & ItemSpawn && mItems[i]->getTeam() >= 0)
+      else if(mItems[i]->getObjectTypeMask() & SpawnType && mItems[i]->getTeam() >= 0)
          foundSpawn[mItems[i]->getTeam()] = true;
-      else if(mItems[i]->getObjectTypeMask() & ItemSoccerBall)
+      else if(mItems[i]->getObjectTypeMask() & SoccerBallItemType)
          foundSoccerBall = true;
-      else if(mItems[i]->getObjectTypeMask() & ItemNexus)
+      else if(mItems[i]->getObjectTypeMask() & NexusType)
          foundNexus = true;
-      else if(mItems[i]->getObjectTypeMask() & ItemFlag)
+      else if(mItems[i]->getObjectTypeMask() & FlagType)
       {
          foundFlags = true;
          foundFlagCount++;
          if(mItems[i]->getTeam() >= 0)
             foundTeamFlags = true;
       }
-      else if(mItems[i]->getObjectTypeMask() & ItemFlagSpawn)
+      else if(mItems[i]->getObjectTypeMask() & FlagSpawnType)
       {
          if(mItems[i]->getTeam() >= 0)
             foundTeamFlagSpawns = true;
@@ -1222,7 +1223,6 @@ void EditorUserInterface::onActivate()
    mItemToLightUp = NULL;    
 
    mEditingSpecialAttrItem = NULL;
-   mSpecialAttribute = NoAttribute;
 
    mSaveMsgTimer = 0;
 
@@ -1235,7 +1235,7 @@ void EditorUserInterface::onActivate()
 
 void EditorUserInterface::onDeactivate()
 {
-   mDockItems.deleteAndClear();     // Free some memory -- dock will be rebuilt when editor restarts
+   mDockItems.clear();     // Free some memory -- dock will be rebuilt when editor restarts
    actualizeScreenMode(true);
 }
 
@@ -1245,7 +1245,6 @@ void EditorUserInterface::onReactivate()
    mDraggingObjects = false;  
 
    mEditingSpecialAttrItem = NULL;     // Probably not necessary
-   mSpecialAttribute = NoAttribute;
 
    if(mWasTesting)
    {
@@ -1311,7 +1310,7 @@ Point EditorUserInterface::snapPoint(Point const &p, bool snapWhileOnDock)
    
    // Turrets & forcefields: Snap to a wall edge as first (and only) choice
    if(mDraggingObjects &&
-            (mSnapVertex_i->getObjectTypeMask() & ItemTurret || mSnapVertex_i->getObjectTypeMask() & ItemForceField))
+            (mSnapVertex_i->getObjectTypeMask() & EngineeredType))
       return snapEngineeredObject(mSnapVertex_i, snapPointToLevelGrid(p));
 
 
@@ -1319,7 +1318,7 @@ Point EditorUserInterface::snapPoint(Point const &p, bool snapWhileOnDock)
    F32 minDist = maxSnapDist;
 
    // Where will we be snapping things?
-   bool snapToWallCorners = !mSnapDisabled && mDraggingObjects && !(mSnapVertex_i->getObjectTypeMask() & ItemBarrierMaker) && mSnapVertex_i->getGeomType() != geomPoly;
+   bool snapToWallCorners = !mSnapDisabled && mDraggingObjects && !(mSnapVertex_i->getObjectTypeMask() & BarrierType) && mSnapVertex_i->getGeomType() != geomPoly;
 bool snapToWallEdges = !mSnapDisabled && mSnapVertex_i && false; // TODO: Can delete?
    bool snapToLevelGrid = !mSnapDisabled;
 
@@ -1732,7 +1731,7 @@ void EditorUserInterface::render()
 
       glColor(Color(0,.25,0));
       for(S32 i = 0; i < mLevelGenItems.size(); i++)
-         if(mLevelGenItems[i]->getObjectTypeMask() & ItemBarrierMaker)
+         if(mLevelGenItems[i]->getObjectTypeMask() & BarrierType)
             for(S32 j = 0; j < mLevelGenItems[i]->extendedEndPoints.size(); j+=2)
                renderTwoPointPolygon(mLevelGenItems[i]->extendedEndPoints[j], mLevelGenItems[i]->extendedEndPoints[j+1], 
                                      mLevelGenItems[i]->getWidth() / getGridSize() / 2, GL_POLYGON);
@@ -1746,7 +1745,7 @@ void EditorUserInterface::render()
    glPushMatrix();  
       setLevelToCanvasCoordConversion();
       for(S32 i = 0; i < mItems.size(); i++)
-         if(mItems[i]->getObjectTypeMask() & ItemPolyWall)
+         if(mItems[i]->getObjectTypeMask() & PolyWallType)
             renderPolygonFill(mItems[i]->getPolyFillPoints(), EDITOR_WALL_FILL_COLOR, 1);
    
       wallSegmentManager.renderWalls(true, getRenderingAlpha(false/*isScriptItem*/));
@@ -1777,7 +1776,7 @@ void EditorUserInterface::render()
       
       if(!mShowingReferenceShip)
          for(S32 i = 0; i < mItems.size(); i++)
-            if(mItems[i]->getObjectTypeMask() & ItemNavMeshZone)
+            if(mItems[i]->getObjectTypeMask() & BotNavMeshZoneType)
                mItems[i]->renderLinePolyVertices(gEditorUserInterface.getCurrentScale()); 
    }
 
@@ -1815,7 +1814,7 @@ void EditorUserInterface::render()
    else  
    {
       for(S32 i = 0; i < mItems.size(); i++)
-         if(mItems[i]->hasWidth() && (mItems[i]->isSelected() || (mItems[i]->isLitUp() && mItems[i]->isVertexLitUp(NONE))) )
+         //if((mItems[i]->getObjectTypeMask() & ItemBarrierMaker || mItems[i]->getObjectTypeMask() & ItemLineItem) && (mItems[i]->isSelected() || (mItems[i]->isLitUp() && mItems[i]->isVertexLitUp(NONE))) )
          {
             width =  mItems[i]->getWidth();
             break;
@@ -1842,7 +1841,7 @@ void EditorUserInterface::render()
    // Draw map items (teleporters, etc.) that are being dragged  (above the dock).  But don't draw walls here, or
    // we'll lose our wall centernlines.
    for(S32 i = 0; i < mItems.size(); i++)
-      if(!(mItems[i]->getObjectTypeMask() & ItemBarrierMaker) && mDraggingObjects && mItems[i]->isSelected())
+      if(!(mItems[i]->getObjectTypeMask() & BarrierType) && mDraggingObjects && mItems[i]->isSelected())
          mItems[i]->render(false, mShowingReferenceShip, mShowMode);
 
    if(mDragSelecting)      // Draw box for selecting items
@@ -2594,7 +2593,8 @@ void EditorUserInterface::pasteSelection()
       newObj->moveTo(pos + offset);
       newObj->onGeomChanged();
    }
-   mItems.sort(geometricSort);
+   //mItems.sort(geometricSort);
+   geomSort(mItems);
    validateLevel();
    mNeedToSave = true;
    autoSave();
@@ -2795,8 +2795,8 @@ void EditorUserInterface::findHitVertex(const Point &canvasPos, EditorObject *&h
             continue;
 
          U32 type = mItems[i]->getObjectTypeMask();
-         if(mShowMode == ShowWallsOnly && !(type & ItemBarrierMaker) && !(type & ItemPolyWall) ||
-            mShowMode == NavZoneMode && !(type & ItemNavMeshZone) )        // Only select walls in CTRL-A mode
+         if(mShowMode == ShowWallsOnly && !(type & BarrierType) && !(type & PolyWallType) ||
+            mShowMode == NavZoneMode && !(type & BotNavMeshZoneType) )        // Only select walls in CTRL-A mode
             continue;
 
          if(mItems[i]->getGeomType() <= geomPoint)
@@ -2838,10 +2838,10 @@ void EditorUserInterface::findHitItemAndEdge()
             continue;
          
           // Only select walls in CTRL-A mode...
-         if(mShowMode == ShowWallsOnly && mItems[i]->getObjectTypeMask() & ~ItemBarrierMaker && !(mItems[i]->getObjectTypeMask() & ItemPolyWall)) 
+         if(mShowMode == ShowWallsOnly && mItems[i]->getObjectTypeMask() & ~BarrierType && !(mItems[i]->getObjectTypeMask() & PolyWallType)) 
             continue;                                                              // ...so if it's not a wall, proceed to next item
 
-         if(mShowMode == NavZoneMode && mItems[i]->getObjectTypeMask() & ~ItemNavMeshZone)   // Only select zones in CTRL-A mode...
+         if(mShowMode == NavZoneMode && mItems[i]->getObjectTypeMask() & ~BotNavMeshZoneType)   // Only select zones in CTRL-A mode...
             continue;                                                                        // ...so if it's not a bot nav zone, proceed to next item
 
          if(mItems[i]->getGeomType() == geomPoint)
@@ -2894,9 +2894,9 @@ void EditorUserInterface::findHitItemAndEdge()
    // This time we'll loop forward, though I don't think it really matters.
    for(S32 i = 0; i < mItems.size(); i++)
    {
-      if(mShowMode == ShowAllButNavZones && mItems[i]->getObjectTypeMask() & ItemNavMeshZone)     // Don't select NavMeshZones while they're hidden
+      if(mShowMode == ShowAllButNavZones && mItems[i]->getObjectTypeMask() & BotNavMeshZoneType)     // Don't select NavMeshZones while they're hidden
          continue;
-      if(mShowMode == NavZoneMode && mItems[i]->getObjectTypeMask() & ~ItemNavMeshZone)
+      if(mShowMode == NavZoneMode && mItems[i]->getObjectTypeMask() & ~BotNavMeshZoneType)
          continue;
 
       if(mItems[i]->getGeomType() == geomPoly)
@@ -3117,12 +3117,13 @@ void EditorUserInterface::startDraggingDockItem()
    item->addToEditor(gEditorGame);
 
    // A little hack here to keep the polywall fill to appear to be left behind behind the dock
-   if(item->getObjectTypeMask() & ItemPolyWall)
+   if(item->getObjectTypeMask() & PolyWallType)
       item->clearPolyFillPoints();
 
    clearSelection();            // No items are selected...
    item->setSelected(true);     // ...except for the new one
-   mItems.sort(geometricSort);  // So things will render in the proper order
+   //mItems.sort(geometricSort);  // So things will render in the proper order
+   geomSort(mItems);            // So things will render in the proper order
    mDraggingDockItem = NONE;    // Because now we're dragging a real item
    validateLevel();             // Check level for errors
 
@@ -3331,14 +3332,15 @@ void EditorUserInterface::splitBarrier()
                   }
                }
 
-               mItems.push_back(newItem);
 
                // Tell the new segments that they have new geometry
                mItems[i]->onGeomChanged();
-               mItems.last()->onGeomChanged();
+               newItem->onGeomChanged();
+               mItems.push_back(newItem);
 
                // And get them in the right order
-               mItems.sort(geometricSort);         
+               //mItems.sort(geometricSort);  
+               geomSort(mItems);
                goto done2;                         // Yes, gotos are naughty, but they just work so well sometimes...
             }
 done2:
@@ -3433,25 +3435,25 @@ void EditorUserInterface::joinBarrier()
 void EditorUserInterface::deleteItem(S32 itemIndex)
 {
    S32 mask = mItems[itemIndex]->getObjectTypeMask();
-   if(mask & ItemBarrierMaker || mask & ItemPolyWall)
+   if(mask & BarrierType || mask & PolyWallType)
    {
       // Need to recompute boundaries of any intersecting walls
       wallSegmentManager.invalidateIntersectingSegments(mItems[itemIndex]);  // Mark intersecting segments invalid
       wallSegmentManager.deleteSegments(mItems[itemIndex]->getItemId());       // Delete the segments associated with the wall
 
-      mItems.deleteAndErase(itemIndex);
+      mItems.erase(mItems.begin() + itemIndex);
 
       wallSegmentManager.recomputeAllWallGeometry();                          // Recompute wall edges
       recomputeAllEngineeredItems();         // Really only need to recompute items that were attached to deleted wall... but we
                                              // don't yet have a method to do that, and I'm feeling lazy at the moment
    }
-   else if(mask & ItemNavMeshZone)
+   else if(mask & BotNavMeshZoneType)
    {
       deleteBorderSegs(mItems[itemIndex]->getItemId());
-      mItems.deleteAndErase(itemIndex);
+      mItems.erase(mItems.begin() + itemIndex);
    }
    else
-      mItems.deleteAndErase(itemIndex);
+      mItems.erase(mItems.begin() + itemIndex);
 
 
    // Reset a bunch of things
@@ -3465,7 +3467,7 @@ void EditorUserInterface::deleteItem(S32 itemIndex)
 }
 
 
-void EditorUserInterface::insertNewItem(GameItems itemType)
+void EditorUserInterface::insertNewItem(GameObjectType itemType)
 {
    if(mShowMode == ShowWallsOnly || mDraggingObjects)     // No inserting when items are hidden or being dragged!
       return;
@@ -3492,7 +3494,8 @@ void EditorUserInterface::insertNewItem(GameItems itemType)
    newObject->moveTo(snapPoint(convertCanvasToLevelCoord(mMousePos)));
    newObject->addToEditor(gEditorGame);     // Adds newItem to mItems list
 
-   mItems.sort(geometricSort);
+   //mItems.sort(geometricSort);
+   geomSort(mItems);
    validateLevel();
    mNeedToSave = true;
    autoSave();
@@ -3570,45 +3573,6 @@ void EditorUserInterface::centerView()
 }
 
 
-// Save selection mask, which can be retrieved later, as long as mItems hasn't changed.
-void EditorUserInterface::saveSelection()
-{
-   mSelectedSet = Selection(mItems);
-}
-
-
-// Restore selection mask
-void EditorUserInterface::restoreSelection()
-{
-   mSelectedSet.restore(mItems);
-}
-
-
-U32 EditorUserInterface::getNextAttr(S32 item)       // Not sure why this fn can't return a SpecialAttribute...  hrm...
-{
-   SimpleLine *si = dynamic_cast<SimpleLine *>(mItems[item]);
-   if(si && mSpecialAttribute == NoAttribute)
-   {
-      si->mAttrMenu.object = mItems[item];
-      si->mAttrMenu.activate();
-   }
-
-   // Advance to the next attribute. If we were at NoAttribute, start with the first.
-   U32 curr = (mSpecialAttribute == NoAttribute) ? 0 : mSpecialAttribute + 1;
-
-   // Find next attribute that applies to selected object
-   for(U32 i = curr; i <= NoAttribute; i++)
-   {
-      if( ((i == Text) && mItems[item]->hasText()) ||
-          ((i == RepopDelay) && mItems[item]->getHasRepop()) ||
-          ((i == GoFastSpeed || i == GoFastSnap) && mItems[item]->getObjectTypeMask() & ItemSpeedZone) ||  
-          (i == NoAttribute ) )
-         return i;
-   }
-   return NoAttribute;      // Should never get here...
-}
-
-
 // Gets run when user exits special-item editing mode
 void EditorUserInterface::doneEditingSpecialItem(bool saveChanges)
 {
@@ -3635,7 +3599,6 @@ void EditorUserInterface::doneEditingSpecialItem(bool saveChanges)
 
    mEditingSpecialAttrItem->setIsBeingEdited(false);
    mEditingSpecialAttrItem = NULL;
-   mSpecialAttribute = NoAttribute;
 }
 
 
@@ -3659,8 +3622,8 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 
    // This first section is the key handlers for when we're editing the special attributes of an item.  Regular
    // key actions are handled below.
-   else if(mEditingSpecialAttrItem)
-      specialAttributeKeyHandler(keyCode, ascii);
+   //else if(mEditingSpecialAttrItem)
+   //   specialAttributeKeyHandler(keyCode, ascii);
 
    // Regular key handling from here on down
    else if(getKeyState(KEY_SHIFT) && keyCode == KEY_0)  // Shift-0 -> Set team to hostile
@@ -3787,8 +3750,9 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
             mNewItem->addToEditor(gEditorGame);
 
             mItems.push_back(mNewItem);
-            mItems.last()->onGeomChanged();      // Walls need to be added to mItems BEFORE onGeomChanged() is run!
-            mItems.sort(geometricSort);
+            mNewItem->onGeomChanged();      // Walls need to be added to mItems BEFORE onGeomChanged() is run!
+            //mItems.sort(geometricSort);
+            geomSort(mItems);
          }
 
          mNewItem = NULL;
@@ -4015,21 +3979,21 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       UserInterface::playBoop();
    }
    else if(keyCode == KEY_T)              // T - Teleporter
-      insertNewItem(ItemTeleporter);
+      insertNewItem(TeleportType);
    else if(keyCode == KEY_P)              // P - Speed Zone
-      insertNewItem(ItemSpeedZone);
+      insertNewItem(SpeedZoneType);
    else if(keyCode == KEY_G)              // G - Spawn
-      insertNewItem(ItemSpawn);
+      insertNewItem(SpawnType);
    else if(keyCode == KEY_B && getKeyState(KEY_CTRL)) // Ctrl-B - Spy Bug
-      insertNewItem(ItemSpyBug);
+      insertNewItem(SpyBugType);
    else if(keyCode == KEY_B)              // B - Repair
-      insertNewItem(ItemRepair);
+      insertNewItem(RepairItemType);
    else if(keyCode == KEY_Y)              // Y - Turret
-      insertNewItem(ItemTurret);
+      insertNewItem(TurretType);
    else if(keyCode == KEY_M)              // M - Mine
-      insertNewItem(ItemMine);
+      insertNewItem(MineType);
    else if(keyCode == KEY_F)              // F - Force Field
-      insertNewItem(ItemForceField);
+      insertNewItem(ForceFieldProjectorType);
    else if(keyCode == KEY_BACKSPACE || keyCode == KEY_DELETE)
          deleteSelection(false);
    else if(keyCode == keyHELP)            // Turn on help screen
@@ -4101,67 +4065,6 @@ void EditorUserInterface::textEntryKeyHandler(KeyCode keyCode, char ascii)
 
 static const S32 MAX_REPOP_DELAY = 600;      // That's 10 whole minutes!
 
-void EditorUserInterface::specialAttributeKeyHandler(KeyCode keyCode, char ascii)
-{
-   if( keyCode == KEY_J && getKeyState(KEY_CTRL) )
-   { /* Do nothing */ }
-   else if(keyCode == KEY_ESCAPE || keyCode == MOUSE_LEFT || keyCode == MOUSE_RIGHT)      // End editing, revert
-   {
-      doneEditingSpecialItem(false); 
-      return;
-   }
-   else if(mSpecialAttribute == Text)     // TODO: Move this to textitem
-   {
-      TextItem *textItem = dynamic_cast<TextItem *>(mEditingSpecialAttrItem);
-      TNLAssert(textItem, "bad cast");
-
-      if(keyCode == KEY_BACKSPACE || keyCode == KEY_DELETE)
-         textItem->lineEditor.handleBackspace(keyCode);
-
-      else if(ascii)       // User typed a character -- add it to the string
-         textItem->lineEditor.addChar(ascii);
-
-      textItem->onAttrsChanging();
-
-   }
-   else if(mSpecialAttribute == RepopDelay)
-   {
-      if(keyCode == KEY_UP)         // Up - increase delay
-      {  /* braces required */
-         if(mEditingSpecialAttrItem->repopDelay < MAX_REPOP_DELAY)
-            mEditingSpecialAttrItem->repopDelay++;
-      }
-      else if(keyCode == KEY_DOWN)  // Down - decrease delay
-      {  /* braces required */
-         if(mEditingSpecialAttrItem->repopDelay > 0)
-            mEditingSpecialAttrItem->repopDelay--;
-      }
-   }
-   else if(mSpecialAttribute == GoFastSpeed)
-   {
-      if(keyCode == KEY_UP)         // Up - increase speed
-      {  /* braces required */
-         if(mEditingSpecialAttrItem->speed < SpeedZone::maxSpeed)
-            mEditingSpecialAttrItem->speed += 10;
-      }
-      else if(keyCode == KEY_DOWN)  // Down - decrease speed
-      {  /* braces required */
-         if(mEditingSpecialAttrItem->speed > SpeedZone::minSpeed)
-            mEditingSpecialAttrItem->speed -= 10;
-      }
-   }
-   else if(mSpecialAttribute == GoFastSnap)
-   {
-      if(keyCode == KEY_UP || keyCode == KEY_DOWN)   // Up/Down - toggle snapping
-      {  /* braces required */
-         mEditingSpecialAttrItem->boolattr = !mEditingSpecialAttrItem->boolattr;
-      }
-   }
-
-   mEditingSpecialAttrItem->onAttrsChanging();
-}
-
-
 void EditorUserInterface::itemPropertiesEnterKeyHandler()
 {
    for(S32 i = 0; i < mItems.size(); i++)
@@ -4170,23 +4073,29 @@ void EditorUserInterface::itemPropertiesEnterKeyHandler()
       {
          // Force item i to be the one and only selected item type.  This will clear up some problems that
          // might otherwise occur.  If you have multiple items selected, all will end up with the same values
-         //mItems[i]->setSelected(true);
-
-         for(S32 j = 0; j < mItems.size(); j++)
-            if(mItems[j]->isSelected() && mItems[j]->getObjectTypeMask() != mItems[i]->getObjectTypeMask())
-               mItems[j]->unselect();
+         //for(S32 j = 0; j < mItems.size(); j++)
+         //   if(mItems[j]->isSelected() && mItems[j]->getObjectTypeMask() != mItems[i]->getObjectTypeMask())
+         //      mItems[j]->unselect();
 
          if(mEditingSpecialAttrItem)
             mEditingSpecialAttrItem->setIsBeingEdited(false);
 
          mEditingSpecialAttrItem = mItems[i];
          mEditingSpecialAttrItem->setIsBeingEdited(true);
-         mSpecialAttribute = (SpecialAttribute)getNextAttr(i);
 
-         if(mSpecialAttribute != NoAttribute)
+         // Activate the attribute editor if there is one
+         EditorAttributeMenuUI *menu = mItems[i]->getAttributeMenu();
+         if(menu)
+         {
+            menu->setObject(mItems[i]);
+            menu->activate();
+
             saveUndoState();
-         else
-            doneEditingSpecialItem(true);
+         }
+
+         
+
+doneEditingSpecialItem(true);    // <== TODO: Move this -- copies modifed attributes to all selected items
 
          break;
       }
@@ -4244,12 +4153,12 @@ void EditorUserInterface::onKeyUp(KeyCode keyCode)
                // Skip hidden items
                if(mShowMode == ShowWallsOnly)
                {
-                  if(mItems[i]->getObjectTypeMask() & ~ItemBarrierMaker && mItems[i]->getObjectTypeMask() & ~ItemPolyWall)
+                  if(mItems[i]->getObjectTypeMask() & ~BarrierType && mItems[i]->getObjectTypeMask() & ~PolyWallType)
                      continue;
                }
                else if(mShowMode == ShowAllButNavZones)
                {
-                  if(mItems[i]->getObjectTypeMask() & ItemNavMeshZone)
+                  if(mItems[i]->getObjectTypeMask() & BotNavMeshZoneType)
                      continue;
                }
 
@@ -4485,7 +4394,7 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
             EditorObject *p = mItems[i];
 
             // Make sure we are writing wall items on first pass, non-wall items next
-            if((p->getObjectTypeMask() & ItemBarrierMaker || p->getObjectTypeMask() & ItemPolyWall) != (j == 0))
+            if((p->getObjectTypeMask() & BarrierType || p->getObjectTypeMask() & PolyWallType) != (j == 0))
                continue;
 
             p->saveItem(f);
@@ -4592,7 +4501,7 @@ void EditorUserInterface::buildAllWallSegmentEdgesAndPoints()
    wallSegmentManager.deleteAllSegments();
 
    for(S32 i = 0; i < mItems.size(); i++)
-      if(mItems[i]->getObjectTypeMask() & ItemBarrierMaker || mItems[i]->getObjectTypeMask() & ItemPolyWall)
+      if(mItems[i]->getObjectTypeMask() & BarrierType || mItems[i]->getObjectTypeMask() & PolyWallType)
          wallSegmentManager.buildWallSegmentEdgesAndPoints(mItems[i]);
 }
 
@@ -4748,7 +4657,7 @@ void EditorUserInterface::rebuildAllBorderSegs()
 
    for(S32 i = 0; i < mItems.size(); i++)
    {
-      if(mItems[i]->getObjectTypeMask() & ~ItemNavMeshZone)
+      if(mItems[i]->getObjectTypeMask() & ~BotNavMeshZoneType)
          continue;
 
       for(S32 j = i + 1; j < mItems.size(); j++)
@@ -4761,7 +4670,7 @@ void EditorUserInterface::checkZones(S32 i, S32 j)
 {
    static ZoneBorder zoneBorder;
 
-   if(i == j || mItems[j]->getObjectTypeMask() & ~ItemNavMeshZone)
+   if(i == j || mItems[j]->getObjectTypeMask() & ~BotNavMeshZoneType)
       return;      // Don't check self...
 
    // Do zones i and j touch?  First a quick and dirty bounds check:
@@ -4847,7 +4756,7 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(EditorObject *item)
    for(S32 i = 0; i < count; i++)
       if(mWallSegments[i]->mOwner == item->getItemId())     // Segment belongs to item
          for(S32 j = 0; j < gEditorUserInterface.mItems.size(); j++)
-            if(gEditorUserInterface.mItems[j]->getObjectTypeMask() & ItemForceField && 
+            if(gEditorUserInterface.mItems[j]->getObjectTypeMask() & ForceFieldProjectorType && 
                   ( gEditorUserInterface.mItems[j]->forceFieldEndSegment == mWallSegments[i] ||
                     gEditorUserInterface.mItems[j]->forceFieldMountSegment == mWallSegments[i] ) )
                forcefields.push_back(gEditorUserInterface.mItems[j]);
@@ -4857,7 +4766,7 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(EditorObject *item)
 
    Rect allSegExtent;
 
-   if(item->getObjectTypeMask() & ItemPolyWall)
+   if(item->getObjectTypeMask() & PolyWallType)
    {
       WallSegment *newSegment = new WallSegment(item->getVerts(), item->getSerialNumber());
       mWallSegments.push_back(newSegment);
@@ -5125,15 +5034,15 @@ void EditorObject::decreaseWidth(S32 amt)
 // Radius of item in editor
 S32 EditorObject::getRadius(F32 scale)
 {
-   if(getObjectTypeMask() & ItemBouncyBall)
+   if(getObjectTypeMask() & TestItemType)
       return TestItem::TEST_ITEM_RADIUS;
-   else if(getObjectTypeMask() & ItemResource)
+   else if(getObjectTypeMask() & ResourceItemType)
       return ResourceItem::RESOURCE_ITEM_RADIUS;
-   else if(getObjectTypeMask() & ItemAsteroid)
+   else if(getObjectTypeMask() & AsteroidType)
       return S32((F32)Asteroid::ASTEROID_RADIUS * 0.75f);
-   else if(getObjectTypeMask() & ItemSoccerBall)
+   else if(getObjectTypeMask() & SoccerBallItemType)
       return SoccerBallItem::SOCCER_BALL_RADIUS;
-   else if(getObjectTypeMask() & ItemTurret && renderFull(getObjectTypeMask(), scale, mDockItem, mSnapped))
+   else if(getObjectTypeMask() & TurretType && renderFull(getObjectTypeMask(), scale, mDockItem, mSnapped))
       return 25;
    else return NONE;    // Use default
 }
@@ -5143,32 +5052,33 @@ S32 EditorObject::getRadius(F32 scale)
 // Should be pushed down to the objects themselves
 Point EditorObject::getEditorSelectionOffset(F32 scale)
 {
-   if(getObjectTypeMask() & ItemTurret && renderFull(getObjectTypeMask(), scale, mDockItem, mSnapped))
+   if(getObjectTypeMask() & TurretType && renderFull(getObjectTypeMask(), scale, mDockItem, mSnapped))
       return Point(0.0, .075);
-   else if(getObjectTypeMask() & ItemForceField && renderFull(getObjectTypeMask(), scale, mDockItem, mSnapped))
+   else if(getObjectTypeMask() & ForceFieldProjectorType && renderFull(getObjectTypeMask(), scale, mDockItem, mSnapped))
       return Point(0.0, .035);     
    else
       return Point(0, 0);     // No offset for most items
 }
 
 
-S32 EditorObject::getDefaultRepopDelay(GameItems itemType)  
-{
-   if(itemType == ItemFlagSpawn)
-      return FlagSpawn::defaultRespawnTime;
-   else if(itemType == ItemAsteroidSpawn)
-      return AsteroidSpawn::defaultRespawnTime;
-   else if(itemType == ItemTurret)
-      return Turret::defaultRespawnTime;
-   else if(itemType == ItemForceField)
-      return ForceFieldProjector::defaultRespawnTime;
-   else if(itemType == ItemRepair)
-      return RepairItem::defaultRespawnTime;
-   else if(itemType == ItemEnergy)
-      return EnergyItem::defaultRespawnTime;
-   else
-      return -1;
-}
+////TODO: Down to object
+//S32 EditorObject::getDefaultRepopDelay(GameObjectType itemType)  
+//{
+//   if(itemType == ItemFlagSpawn)
+//      return FlagSpawn::defaultRespawnTime;
+//   else if(itemType == ItemAsteroidSpawn)
+//      return AsteroidSpawn::defaultRespawnTime;
+//   else if(itemType == ItemTurret)
+//      return Turret::defaultRespawnTime;
+//   else if(itemType == ItemForceField)
+//      return ForceFieldProjector::defaultRespawnTime;
+//   else if(itemType == ItemRepair)
+//      return RepairItem::defaultRespawnTime;
+//   else if(itemType == ItemEnergy)
+//      return EnergyItem::defaultRespawnTime;
+//   else
+//      return -1;
+//}
 
 
 // First argument has already been removed before we get this.  This is just the parameter list.
@@ -5299,228 +5209,9 @@ bool EditorObject::processArguments(S32 argc, const char **argv)
 }
 
 
-// Except for commented lines, this is the same as GameObject's addtoEditor; can probably be merged
-void EditorObject::addToEditor(Game *game)
-{
-   TNLAssert(mGame == NULL, "Error: Object already in a game in GameObject::addToGame.");
-   TNLAssert(game != NULL,  "Error: theGame is NULL in GameObject::addToGame.");
-
-   game->addToGameObjectList(this);
-   //mCreationTime = theGame->getCurrentTime();
-   mGame = game;
-   addToDatabase();
-   //onAddedToGame(game);
-   gEditorUserInterface.mItems.push_back(this);
-}
-
-
-void EditorObject::addToDock(Game *game)
-{
-   mGame = game;
-   mDockItem = true;
-   gEditorUserInterface.mDockItems.push_back(this);
-}
-
-
-void EditorObject::processEndPoints()
-{
-   if(getObjectTypeMask() & ItemBarrierMaker)
-      Barrier::constructBarrierEndPoints(mVerts, getWidth() / getGridSize(), extendedEndPoints);
-
-   else if(getObjectTypeMask() & ItemPolyWall)
-   {
-      extendedEndPoints.clear();
-      for(S32 i = 1; i < getVertCount(); i++)
-      {
-         extendedEndPoints.push_back(mVerts[i-1]);
-         extendedEndPoints.push_back(mVerts[i]);
-      }
-
-      // Close the loop
-      extendedEndPoints.push_back(mVerts.last());
-      extendedEndPoints.push_back(mVerts.first());
-   }
-}
-
-
-// Draw barrier centerlines; wraps renderPolyline()  ==> lineItem, barrierMaker only
-void EditorObject::renderPolylineCenterline(F32 alpha)
-{
-   // Render wall centerlines
-   if(mSelected)
-      glColor(SELECT_COLOR, alpha);
-   else if(mLitUp && !mAnyVertsSelected)
-      glColor(EditorUserInterface::HIGHLIGHT_COLOR, alpha);
-   else
-      glColor(getTeamColor(mTeam), alpha);
-
-   glLineWidth(WALL_SPINE_WIDTH);
-   renderPolyline(getVerts());
-   glLineWidth(gDefaultLineWidth);
-}
-
-
-// Select a single vertex.  This is the default selection we use most of the time
-void EditorObject::selectVert(S32 vertIndex) 
-{ 
-   unselectVerts();
-   aselectVert(vertIndex);
-}
-
-
-// Select an additional vertex (remember command line ArcInfo?)
-void EditorObject::aselectVert(S32 vertIndex)
-{
-   mVertSelected[vertIndex] = true;
-   mAnyVertsSelected = true;
-}
-
-
-// Unselect a single vertex, considering the possibility that there may be other selected vertices as well
-void EditorObject::unselectVert(S32 vertIndex) 
-{ 
-   mVertSelected[vertIndex] = false;
-
-   bool anySelected = false;
-   for(S32 j = 0; j < (S32)mVertSelected.size(); j++)
-      if(mVertSelected[j])
-      {
-         anySelected = true;
-         break;
-      }
-   mAnyVertsSelected = anySelected;
-}
-
-
-// Unselect all vertices
-void EditorObject::unselectVerts() 
-{ 
-   for(S32 j = 0; j < getVertCount(); j++) 
-      mVertSelected[j] = false; 
-   mAnyVertsSelected = false;
-}
-
-
-bool EditorObject::vertSelected(S32 vertIndex) 
-{ 
-   return mVertSelected[vertIndex]; 
-}
-
-
-void EditorObject::addVert(const Point &vert)
-{
-   mVerts.push_back(vert);
-   mVertSelected.push_back(false);
-}
-
-
-void EditorObject::addVertFront(Point vert)
-{
-   mVerts.push_front(vert);
-   mVertSelected.insert(mVertSelected.begin(), false);
-}
-
-
-void EditorObject::insertVert(Point vert, S32 vertIndex)
-{
-   mVerts.insert(vertIndex);
-   mVerts[vertIndex] = vert;
-
-   mVertSelected.insert(mVertSelected.begin() + vertIndex, false);
-}
-
-
-void EditorObject::setVert(const Point &vert, S32 vertIndex)
-{
-   mVerts[vertIndex] = vert;
-}
-
-
-void EditorObject::deleteVert(S32 vertIndex)
-{
-   mVerts.erase(vertIndex);
-   mVertSelected.erase(mVertSelected.begin() + vertIndex);
-}
-
-
-void EditorObject::onGeomChanging()
-{
-   if(getGeomType() == geomPoly)
-      onGeomChanged();               // Allows poly fill to get reshaped as vertices move
-}
-
-
-// Item is being actively dragged
-void EditorObject::onItemDragging()
-{
-   if(getObjectTypeMask() & ItemForceField)
-     onGeomChanged();
-
-   else if(getGeomType() == geomPoly && getObjectTypeMask() & ~ItemPolyWall)
-      onGeomChanged();     // Allows poly fill to get dragged around with outline
-}
-
-
 WallSegmentManager *getWallSegmentManager()
 {
    return gEditorUserInterface.getWallSegmentManager();
-}
-
-
-//void EditorObject::onGeomChanged()
-//{
-//   // TODO: Delegate all this to the member objects
-//   if(getObjectTypeMask() & ItemBarrierMaker || getObjectTypeMask() & ItemPolyWall)
-//   {  
-//      // Fill extendedEndPoints from the vertices of our wall's centerline, or from PolyWall edges
-//      processEndPoints();
-//
-//      if(getObjectTypeMask() & ItemPolyWall)     // Prepare interior fill triangulation
-//         initializePolyGeom();          // Triangulate, find centroid, calc extents
-//
-//      getWallSegmentManager()->computeWallSegmentIntersections(this);
-//
-//      gEditorUserInterface.recomputeAllEngineeredItems();      // Seems awfully lazy...  should only recompute items attached to altered wall
-//
-//      // But if we're doing the above, we don't need to bother with the below... unless we stop being lazy
-//      //// Find any forcefields that might intersect our new wall segment and recalc them
-//      //for(S32 i = 0; i < gEditorUserInterface.mItems.size(); i++)
-//      //   if(gEditorUserInterface.mItems[i]->index == ItemForceField &&
-//      //                           gEditorUserInterface.mItems[i]->getExtent().intersects(getExtent()))
-//      //      gEditorUserInterface.mItems[i]->findForceFieldEnd();
-//   }
-//
-//   else if(getObjectTypeMask() & ItemForceField)
-//   {
-//      findForceFieldEnd();    // Find the end-point of the projected forcefield
-//   }
-//
-//   else if(getGeomType() == geomPoly)
-//      initializePolyGeom();
-//
-//   if(getObjectTypeMask() & ItemNavMeshZone)
-//      gEditorUserInterface.rebuildBorderSegs(getItemId());
-//}
-
-
-// TODO: Move this to forcefield
-void EditorObject::findForceFieldEnd()
-{
-   // Load the corner points of a maximum-length forcefield into geom
-   Vector<Point> geom;
-   DatabaseObject *collObj;
-
-   F32 scale = 1 / getGridSize();
-   
-   Point start = ForceFieldProjector::getForceFieldStartPoint(getVert(0), mAnchorNormal, scale);
-
-   if(ForceField::findForceFieldEnd(getGridDatabase(), start, mAnchorNormal, scale, forceFieldEnd, &collObj))
-      forceFieldEndSegment = dynamic_cast<WallSegment *>(collObj);
-   else
-      forceFieldEndSegment = NULL;
-
-   ForceField::getGeom(start, forceFieldEnd, geom, scale);    
-   setExtent(Rect(geom));
 }
 
 
@@ -5581,7 +5272,7 @@ WallSegment::~WallSegment()
    // segment is no longer in database, when we recalculate the forcefield, our endSegmentPointer will be reset.
    // This is a last-ditch effort to ensure that the pointers point at something real.
    for(S32 i = 0; i < gEditorUserInterface.mItems.size(); i++)
-      if(gEditorUserInterface.mItems[i]->getObjectTypeMask() & ItemForceField && 
+      if(gEditorUserInterface.mItems[i]->getObjectTypeMask() & ForceFieldProjectorType && 
                (gEditorUserInterface.mItems[i]->forceFieldEndSegment == this || 
                 gEditorUserInterface.mItems[i]->forceFieldMountSegment == this) )
          gEditorUserInterface.mItems[i]->onGeomChanged();            // Will force recalculation of mount and endpoint
@@ -5648,324 +5339,6 @@ void Selection::restore(Vector<EditorObject *> &items)
    for(S32 i = 0; i < items.size(); i++)
       mSelection[i].restore(items[i]);
 }
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
- bool EditorObject::hasTeam()
-{
-   switch(getObjectTypeMask()) {
-      case ItemSpawn: return true;
-      case ItemSoccerBall: return false;
-      case ItemFlag: return true;
-      case ItemFlagSpawn: return true;
-      case ItemBarrierMaker: return false;
-      case ItemPolyWall: return false;
-      case ItemLineItem: return true;
-      case ItemRepair: return false;
-      case ItemEnergy: return false;
-      case ItemBouncyBall: return false;
-      case ItemAsteroid: return false;
-      case ItemAsteroidSpawn: return false;
-      case ItemMine: return false;
-      case ItemSpyBug: return true;
-      case ItemResource: return false;
-      case ItemLoadoutZone: return true;
-      case ItemNexus: return false;
-      case ItemSlipZone: return false;
-      case ItemTurret: return true;
-      case ItemForceField: return true;
-      case ItemGoalZone: return true;
-      case ItemNavMeshZone: return false;
-   }
-   return true;
-}
-
-
-bool EditorObject::canBeNeutral()
-{
-   switch(getObjectTypeMask()) {
-      case ItemSpawn: return true;
-      case ItemSoccerBall: return false;
-      case ItemFlag: return true;
-      case ItemFlagSpawn: return true;
-      case ItemBarrierMaker: return false;
-      case ItemPolyWall: return false;
-      case ItemLineItem: return true;
-      case ItemRepair: return false;
-      case ItemEnergy: return false;
-      case ItemBouncyBall: return false;
-      case ItemAsteroid: return false;
-      case ItemAsteroidSpawn: return false;
-      case ItemMine: return true;
-      case ItemSpyBug: return true;
-      case ItemResource: return false;
-      case ItemLoadoutZone: return true;
-      case ItemNexus: return true;
-      case ItemSlipZone: return true;
-      case ItemTurret: return true;
-      case ItemForceField: return true;
-      case ItemGoalZone: return true;
-      case ItemNavMeshZone: return true;
-   }
-   return true;
-}
-
-bool EditorObject::canBeHostile()
-{
-   switch(getObjectTypeMask()) {
-      case ItemSpawn: return false;
-      case ItemSoccerBall: return false;
-      case ItemFlag: return true;
-      case ItemFlagSpawn: return true;
-      case ItemBarrierMaker: return false;
-      case ItemPolyWall: return false;
-      case ItemLineItem: return true;
-      case ItemRepair: return false;
-      case ItemEnergy: return false;
-      case ItemBouncyBall: return false;
-      case ItemAsteroid: return false;
-      case ItemAsteroidSpawn: return false;
-      case ItemMine: return true;
-      case ItemSpyBug: return true;
-      case ItemResource: return false;
-      case ItemLoadoutZone: return true;
-      case ItemNexus: return true;
-      case ItemSlipZone: return true;
-      case ItemTurret: return true;
-      case ItemForceField: return true;
-      case ItemGoalZone: return true;
-      case ItemNavMeshZone: return true;
-   }
-   return true;
-}
-
-GeomType EditorObject::getGeomType()     
-{
-   switch(getObjectTypeMask()) {
-      case ItemSpawn: return geomPoint;
-      case ItemSoccerBall: return geomPoint;
-      case ItemFlag: return geomPoint;
-      case ItemFlagSpawn: return geomPoint;
-      case ItemBarrierMaker: return geomLine;
-      case ItemPolyWall: return geomPoly;
-      case ItemLineItem: return geomLine;
-      case ItemTeleporter: return geomSimpleLine;
-      case ItemRepair: return geomPoint;
-      case ItemEnergy: return geomPoint;
-      case ItemBouncyBall: return geomPoint;
-      case ItemAsteroid: return geomPoint;
-      case ItemAsteroidSpawn: return geomPoint;
-      case ItemMine: return geomPoint;
-      case ItemSpyBug: return geomPoint;
-      case ItemResource: return geomPoint;
-      case ItemLoadoutZone: return geomPoly;
-      case ItemNexus: return geomPoly;
-      case ItemSlipZone: return geomPoly;
-      case ItemTurret: return geomPoint;
-      case ItemForceField: return geomPoint;
-      case ItemGoalZone: return geomPoly;
-      case ItemNavMeshZone: return geomPoly;
-   }
-   return geomNone;
-}
-
-bool EditorObject::getHasRepop()     
-{
-   switch(getObjectTypeMask()) {
-      case ItemSpawn: return false;
-      case ItemSoccerBall: return false;
-      case ItemFlag: return false;
-      case ItemFlagSpawn: return true;
-      case ItemBarrierMaker: return false;
-      case ItemPolyWall: return false;
-      case ItemLineItem: return false;
-      case ItemRepair: return true;
-      case ItemEnergy: return true;
-      case ItemBouncyBall: return false;
-      case ItemAsteroid: return false;
-      case ItemAsteroidSpawn: return true;
-      case ItemMine: return false;
-      case ItemSpyBug: return false;
-      case ItemResource: return false;
-      case ItemLoadoutZone: return false;
-      case ItemNexus: return false;
-      case ItemSlipZone: return false;
-      case ItemTurret: return true;
-      case ItemForceField: return true;
-      case ItemGoalZone: return false;
-      case ItemNavMeshZone: return false;
-   }
-   return false;
-}
-
-const char *EditorObject::getEditorHelpString()     
-{
-   switch(getObjectTypeMask()) {
-      case ItemSpawn: return "Location where ships start.  At least one per team is required. [G]";
-      case ItemSoccerBall: return "Soccer ball, can only be used in Soccer games.";
-      case ItemFlag: return "Flag item, used by a variety of game types.";
-      case ItemFlagSpawn: return "Location where flags (or balls in Soccer) spawn after capture.";
-      case ItemBarrierMaker: return "Run-of-the-mill wall item.";
-      case ItemPolyWall: return "Polygon wall barrier; create linear walls with right mouse click.";
-      case ItemLineItem: return "Decorative linework.";
-      case ItemRepair:  return "Repairs damage to ships. [B]";
-      case ItemEnergy: return "Restores energy to ships";
-      case ItemBouncyBall: return "Bouncy object that floats around and gets in the way.";
-      case ItemAsteroid: return "Shootable asteroid object.  Just like the arcade game.";
-      case ItemAsteroidSpawn: return "Periodically spawns a new asteroid.";
-      case ItemMine: return "Mines can be prepositioned, and are are \"hostile to all\". [M]";
-      case ItemSpyBug: return "Remote monitoring device that shows enemy ships on the commander's map. [Ctrl-B]";
-      case ItemResource: return "Small bouncy object that floats around and gets in the way.";
-      case ItemLoadoutZone: return "Area to finalize ship modifications.  Each team should have at least one.";
-      case ItemNexus: return "Area to bring flags in Hunter game.  Cannot be used in other games.";
-      case ItemSlipZone: return "Not yet implemented.";
-      case ItemTurret: return "Creates shooting turret.  Can be on a team, neutral, or \"hostile to all\". [Y]";
-      case ItemForceField: return "Creates a force field that lets only team members pass. [F]";
-      case ItemGoalZone: return "Target area used in a variety of games.";
-      case ItemNavMeshZone: return "Creates navigational mesh zone for robots.";
-   }
-   return "blug";
-}
-
-
-bool EditorObject::getSpecial()     
-{
-   switch(getObjectTypeMask()) {
-      case ItemSpawn: return true;          
-      case ItemSoccerBall: return true;     
-      case ItemFlagSpawn: return true;      
-      case ItemBouncyBall: return true;     
-      case ItemAsteroid: return true;       
-      case ItemAsteroidSpawn: return true;  
-      case ItemMine: return true;   		
-      case ItemResource: return true;   	
-   }
-   return false;
-}
-
-
-const char *EditorObject::getPrettyNamePlural()     
-{
-   switch(getObjectTypeMask()) {
-      case ItemSpawn: return "Spawn points";   	
-      case ItemSoccerBall: return "Soccer balls";     	
-      case ItemFlag: return "Flags";                  	
-      case ItemFlagSpawn: return "Flag spawn points"; 	
-      case ItemBarrierMaker: return "Barrier makers"; 	
-      case ItemPolyWall: return "PolyWalls";          	
-      case ItemLineItem: return "Decorative Lines";   	
-      case ItemRepair: return "Repair items";         	
-      case ItemEnergy: return "Energy items";         	
-      case ItemBouncyBall: return "Test items";       	
-      case ItemAsteroid: return "Asteroids";          	
-      case ItemAsteroidSpawn: return "Asteroid spawn points";
-      case ItemMine: return "Mines";                  	
-      case ItemSpyBug: return "Spy bugs";             	
-      case ItemResource: return "Resource items";     	
-      case ItemLoadoutZone: return "Loadout zones";   	
-      case ItemNexus: return "Nexus zones";           	
-      case ItemSlipZone: return "Slip zones";         	
-      case ItemTurret: return "Turrets";              	
-      case ItemForceField: return "Force field projectors"; 	
-      case ItemGoalZone: return "Goal zones";             	
-      case ItemNavMeshZone: return "NavMesh Zones";       	
-   }
-   return "blug";
-}
-
-
-const char *EditorObject::getOnDockName()     
-{
-   switch(getObjectTypeMask()) {
-      case ItemSpawn: return "Spawn";    		
-      case ItemSoccerBall: return "Ball";     		
-      case ItemFlag: return "Flag";     			
-      case ItemFlagSpawn: return "FlagSpawn";		
-      case ItemBarrierMaker: return "Wall";     		
-      case ItemPolyWall: return "Wall";     			
-      case ItemLineItem: return "LineItem"; 			
-      case ItemRepair: return "Repair";    			
-      case ItemEnergy: return "Enrg";     			
-      case ItemBouncyBall: return "Test";     		
-      case ItemAsteroid: return "Ast.";     			
-      case ItemAsteroidSpawn: return "ASP";      		
-      case ItemMine: return "Mine";     			
-      case ItemSpyBug: return "Bug";      			
-      case ItemResource: return "Res.";     			
-      case ItemLoadoutZone: return "Loadout";  		
-      case ItemNexus: return "Nexus";    			
-      case ItemSlipZone: return "Slip Zone";			
-      case ItemTurret: return "Turret";   			
-      case ItemForceField: return "ForceFld"; 		
-      case ItemGoalZone: return "Goal";     			
-      case ItemNavMeshZone: return "NavMesh";  		
-   }
-
-   return "blug";
-}
-
-
-const char *EditorObject::getOnScreenName()     
-{
-   switch(getObjectTypeMask()) {
-      case ItemSpawn: return "Spawn";        			
-      case ItemSoccerBall: return "Ball";         			
-      case ItemFlag: return "Flag";         				
-      case ItemFlagSpawn: return "FlagSpawn";    			
-      case ItemBarrierMaker: return "Wall";         			
-      case ItemPolyWall: return "Wall";         			
-      case ItemLineItem: return "LineItem";     			
-      case ItemRepair: return "Repair";      			
-      case ItemEnergy: return "Energy";       			
-      case ItemBouncyBall: return "Test Item";    			
-      case ItemAsteroid: return "Asteroid";     			
-      case ItemAsteroidSpawn: return "AsteroidSpawn";		
-      case ItemMine: return "Mine";         				
-      case ItemSpyBug: return "Spy Bug";      			
-      case ItemResource: return "Resource";     			
-      case ItemLoadoutZone: return "Loadout";      			
-      case ItemNexus: return "Nexus";        			
-      case ItemSlipZone: return "Slip Zone";    			
-      case ItemTurret: return "Turret";       			
-      case ItemForceField: return "ForceFld";     			
-      case ItemGoalZone: return "Goal";         			
-      case ItemNavMeshZone: return "NavMesh";      			
-   }return "blug";
-}
-
-//
-//const char *EditorObject::getName()     
-//{
-//   switch(getObjectTypeMask()) {			
-//      case ItemSpawn: return "Spawn";        			
-//      case ItemSpeedZone: return "SpeedZone";       	
-//      case ItemSoccerBall: return "SoccerBallItem";    	
-//      case ItemFlag: return "FlagItem";         		
-//      case ItemFlagSpawn: return "FlagSpawn";    		
-//      case ItemBarrierMaker: return "BarrierMaker";      	
-//      case ItemPolyWall: return "PolyWall";         	
-//      case ItemLineItem: return "LineItem";     		
-//      case ItemTeleporter: return "Teleporter";     	
-//      case ItemRepair: return "RepairItem";      		
-//      case ItemEnergy: return "EnergyItem";       		
-//      case ItemBouncyBall: return "TestItem";    		
-//      case ItemAsteroid: return "Asteroid";     		
-//      case ItemAsteroidSpawn: return "AsteroidSpawn";	
-//      case ItemMine: return "Mine";         			  
-//      case ItemSpyBug: return "SpyBug";      		 
-//      case ItemResource: return "ResourceItem";     	
-//      case ItemLoadoutZone: return "LoadoutZone";     
-//      case ItemNexus: return "HuntersNexusObject";    
-//      case ItemSlipZone: return "SlipZone";    		          	
-//      case ItemTurret: return "Turret";       		             	
-//      case ItemForceField: return "ForceFieldProjector"; 
-//      case ItemGoalZone: return "GoalZone";         			
-//      case ItemTextItem: return "TextItem";         			
-//      case ItemNavMeshZone: return "BotNavMeshZone";     	
-//   }return "blug";
-//}
 
 
 };

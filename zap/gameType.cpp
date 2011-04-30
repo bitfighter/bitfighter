@@ -2244,8 +2244,8 @@ void GameType::addClientGameMenuOptions(Vector<MenuItem *> &menuOptions)
          menuOptions.push_back(new MenuItem(0, "SWITCH TEAMS", switchTeamsCallback, "", KEY_S, KEY_T));
       else
       {
-         menuOptions.push_back(new MenuItem(0, "WAITING FOR SERVER TO ALLOW", NULL, "", KEY_UNKNOWN, KEY_UNKNOWN, Color(1,0,0)));
-         menuOptions.push_back(new MenuItem(0, "YOU TO SWITCH TEAMS",         NULL, "", KEY_UNKNOWN, KEY_UNKNOWN, Color(1,0,0)));
+         menuOptions.push_back(new MessageMenuItem("WAITING FOR SERVER TO ALLOW", red));
+         menuOptions.push_back(new MessageMenuItem("YOU TO SWITCH TEAMS AGAIN", red));
       }
    }
 }

@@ -28,25 +28,8 @@
 
 #include "UIEditor.h"      // For EditorObject (to be moved!)
 
-
 namespace Zap
 {
-
-
-class GoFastEditorAttributeMenuUserInterface : public MenuUserInterface
-{
-private:
-   typedef MenuUserInterface Parent;
-
-public:
-   GoFastEditorAttributeMenuUserInterface();        // Constructor
-
-   void render();
-   EditorObject *object;      // Object whose attributes are being edited
-
-   //void playerSelected(U32 index);
-   void onEscape();
-};
 
 class SimpleLine : public EditorObject
 {
@@ -78,8 +61,6 @@ public:
    void deleteVert(S32 vertIndex) { /* Do nothing */ }
 
    virtual void initializeEditor(F32 gridSize);
-
-   GoFastEditorAttributeMenuUserInterface mAttrMenu;     // test
 };
 
 

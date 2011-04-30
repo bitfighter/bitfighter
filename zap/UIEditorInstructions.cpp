@@ -434,13 +434,10 @@ void EditorInstructionsUserInterface::renderPageWalls()
    }
 }
 
+
 extern const Color BORDER_FILL_COLOR;
 extern const F32 BORDER_FILL_ALPHA;
 extern const F32 BORDER_WIDTH;
-
-static const Color cyan = Color(0,1,1);
-static const Color yellow = Color(1,1,0);
-
 
 void EditorInstructionsUserInterface::renderPageZones()
 {

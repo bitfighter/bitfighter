@@ -24,6 +24,7 @@
 //------------------------------------------------------------------------------------
 
 #include "textItem.h"
+#include "UIEditorMenus.h"       // For TextItemEditorAttributeMenuUI def
 #include "gameNetInterface.h"
 #include "glutInclude.h"
 #include "gameObjectRender.h"    // For renderPointVector()
@@ -39,6 +40,9 @@ TNL_IMPLEMENT_NETOBJECT(TextItem);
 const U32 TextItem::MAX_TEXT_SIZE;
 const U32 TextItem::MIN_TEXT_SIZE;
 #endif
+
+
+EditorAttributeMenuUI *TextItem::mAttributeMenuUI = NULL;
 
 
 // Constructor
@@ -66,7 +70,6 @@ void TextItem::initializeEditor(F32 gridSize)
 {
    SimpleLine::initializeEditor(gridSize);
 
-   lineEditor.setString("Your text here");
    recalcTextSize();
 }
 
@@ -91,11 +94,11 @@ void TextItem::render()
 // Called by SimpleItem::renderEditor()
 void TextItem::renderEditorItem(F32 currentScale)
 {
-   renderTextItem(mPos, mDir, mSize, lineEditor.getDisplayString(), getGame()->getTeamColor(mTeam));
+   renderTextItem(mPos, mDir, mSize, mText, getGame()->getTeamColor(mTeam));
 
-   // If we're editing the text, we need to draw our cursor
-   if(isBeingEdited())
-      lineEditor.drawCursorAngle(mPos.x, mPos.y, mSize, mPos.angleTo(mDir));
+   //// If we're editing the text, we need to draw our cursor
+   //if(isBeingEdited())
+   //   lineEditor.drawCursorAngle(mPos.x, mPos.y, mSize, mPos.angleTo(mDir));
 }
 
 
@@ -133,8 +136,6 @@ bool TextItem::processArguments(S32 argc, const char **argv)
          mText += " ";
    }
 
-   mText = mText.substr(0, MAX_TEXTITEM_LEN-1);      // Limit length to MAX_TEXTITEM_LEN chars (leaving room for a trailing null)
-   lineEditor.setString(mText);
    computeExtent();
 
    return true;
@@ -143,8 +144,11 @@ bool TextItem::processArguments(S32 argc, const char **argv)
 
 string TextItem::toString()
 {
+   F32 gs = getGame()->getGridSize();
+
    char outString[LevelLoader::MAX_LEVEL_LINE_LENGTH];
-   dSprintf(outString, sizeof(outString), "%s %d %g %g %g %g %g %s", Object::getClassName(), mTeam, mPos.x / 255, mPos.y / 255, mDir.x / 255, mDir.y / 255, mSize, lineEditor.c_str());
+   dSprintf(outString, sizeof(outString), "%s %d %g %g %g %g %g %s", Object::getClassName(), mTeam, 
+                                          mPos.x / gs, mPos.y / gs, mDir.x / gs, mDir.y / gs, mSize, mText.c_str());
    return outString;
 }
 
@@ -155,7 +159,7 @@ void TextItem::recalcTextSize()
    const F32 dummyTextSize = 120;
 
    F32 lineLen = getVert(0).distanceTo(getVert(1));      // In in-game units
-   F32 strWidth = F32(UserInterface::getStringWidth(dummyTextSize, lineEditor.c_str())) / dummyTextSize; 
+   F32 strWidth = F32(UserInterface::getStringWidth(dummyTextSize, mText.c_str())) / dummyTextSize; 
    F32 size = lineLen / strWidth;
 
    // Compute text size subject to min and max defined in TextItem
@@ -280,6 +284,27 @@ void TextItem::onGeomChanged()
 {
    recalcTextSize();
 }
+
+
+// Static method: Provide hook into the object currently being edited with the attrubute editor for callback purposes
+EditorObject *TextItem::getAttributeEditorObject()     
+{ 
+   return mAttributeMenuUI->getObject(); 
+}
+
+
+EditorAttributeMenuUI *TextItem::getAttributeMenu()
+{
+   // Lazily initialize this -- if we're in the game, we'll never need this to be instantiated
+   if(!mAttributeMenuUI)
+      mAttributeMenuUI = new TextItemEditorAttributeMenuUI;
+
+   // Udate the editor with attributes from our current object
+   mAttributeMenuUI->menuItems[0]->setValue(mText);
+
+   return mAttributeMenuUI;
+}
+
 
 ////////////////////////////////////////
 ////////////////////////////////////////

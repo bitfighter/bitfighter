@@ -67,16 +67,6 @@ void glTranslate(const Point &pos)
 }
 
 
-static Color green(0,1,0);
-static Color red(1,0,0);
-static Color yellow(1,1,0);
-static Color blue(0,0,1);
-static Color white(1,1,1);
-static Color gray50(0.5);
-static Color cyan(0,1,1);
-static Color orange(1, .67 ,0);
-
-
 // geomType should be GL_LINES or GL_POLYGON
 void renderPointVector(const Vector<Point> &points, U32 geomType)
 {
@@ -930,8 +920,8 @@ void renderGoalZone(Color c, const Vector<Point> &outline, const Vector<Point> &
 {
    F32 alpha = isFlashing ? 0.75 : 0.5;
 
-   Color fillColor    = Color(yellow * (glowFraction * glowFraction) + c * alpha * (1 - glowFraction * glowFraction));
-   Color outlineColor = Color(yellow * (glowFraction * glowFraction) + c *         (1 - glowFraction * glowFraction));
+   Color fillColor    = Color(yellow) * (glowFraction * glowFraction) + c * alpha * (1 - glowFraction * glowFraction);
+   Color outlineColor = Color(yellow) * (glowFraction * glowFraction) + c *         (1 - glowFraction * glowFraction);
 
    renderPolygon(fill, outline, fillColor, outlineColor);
 
