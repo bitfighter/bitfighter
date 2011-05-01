@@ -32,6 +32,7 @@ OPTION(DSOUND  "Check for DirectSound backend"         ON)
 OPTION(WINMM   "Check for Windows Multimedia backend"  ON)
 OPTION(PORTAUDIO  "Check for PortAudio backend"        ON)
 OPTION(PULSEAUDIO "Check for PulseAudio backend"       ON)
+OPTION(COREAUDIO  "Check for CoreAudio backend"        ON)
 OPTION(WAVE    "Enable Wave Writer backend"            ON)
 
 OPTION(DLOPEN  "Check for the dlopen API for loading optional libs"  ON)
@@ -319,6 +320,7 @@ SET(OPENAL_OBJS  OpenAL32/alAuxEffectSlot.c
 SET(ALC_OBJS  Alc/ALc.c
               Alc/ALu.c
               Alc/alcConfig.c
+              Alc/alcDedicated.c
               Alc/alcEcho.c
               Alc/alcModulator.c
               Alc/alcReverb.c
@@ -327,6 +329,7 @@ SET(ALC_OBJS  Alc/ALc.c
               Alc/bs2b.c
               Alc/mixer.c
               Alc/panning.c
+              Alc/loopback.c
               Alc/null.c
 )
 
@@ -338,6 +341,7 @@ SET(HAVE_DSOUND     0)
 SET(HAVE_WINMM      0)
 SET(HAVE_PORTAUDIO  0)
 SET(HAVE_PULSEAUDIO 0)
+SET(HAVE_COREAUDIO  0)
 SET(HAVE_WAVE       0)
 
 # Check ALSA backend
@@ -441,6 +445,19 @@ IF(PULSEAUDIO)
                 SET(EXTRA_LIBS pulse ${EXTRA_LIBS})
             ENDIF()
         ENDIF()
+    ENDIF()
+ENDIF()
+
+# Check CoreAudio backend
+IF(COREAUDIO)
+    CHECK_INCLUDE_FILE(/System/Library/Frameworks/CoreAudio.framework/Headers/CoreAudio.h HAVE_COREAUDIO_FRAMEWORK)
+    IF(HAVE_COREAUDIO_FRAMEWORK)
+        SET(HAVE_COREAUDIO 1)
+        SET(ALC_OBJS  ${ALC_OBJS} Alc/coreaudio.c)
+        SET(BACKENDS  "${BACKENDS} CoreAudio,")
+        SET(EXTRA_LIBS /System/Library/Frameworks/CoreAudio.framework ${EXTRA_LIBS})
+        SET(EXTRA_LIBS /System/Library/Frameworks/AudioUnit.framework ${EXTRA_LIBS})
+        SET(EXTRA_LIBS /System/Library/Frameworks/ApplicationServices.framework ${EXTRA_LIBS})
     ENDIF()
 ENDIF()
 

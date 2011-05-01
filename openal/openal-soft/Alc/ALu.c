@@ -746,10 +746,10 @@ static void Write_##T##_##chans(ALCdevice *device, T *buffer, ALuint SamplesToDo
         {                                                                     \
             ALfloat samp = 0.0f;                                              \
             for(c = 0;c < MAXCHANNELS;c++)                                    \
-                samp += DryBuffer[i][c] * Matrix[c][chans[j]];                \
-            ((T*)buffer)[ChanMap[chans[j]]] = func(samp);                     \
+                samp += DryBuffer[i][c] * Matrix[chans[j]][c];                \
+            buffer[ChanMap[chans[j]]] = func(samp);                           \
         }                                                                     \
-        buffer = ((T*)buffer) + N;                                            \
+        buffer += N;                                                          \
     }                                                                         \
 }
 
@@ -800,13 +800,13 @@ static void Write_##T##_##chans(ALCdevice *device, T *buffer, ALuint SamplesToDo
             float samples[2] = { 0.0f, 0.0f };                                \
             for(c = 0;c < MAXCHANNELS;c++)                                    \
             {                                                                 \
-                samples[0] += DryBuffer[i][c]*Matrix[c][FRONT_LEFT];          \
-                samples[1] += DryBuffer[i][c]*Matrix[c][FRONT_RIGHT];         \
+                samples[0] += DryBuffer[i][c]*Matrix[FRONT_LEFT][c];          \
+                samples[1] += DryBuffer[i][c]*Matrix[FRONT_RIGHT][c];         \
             }                                                                 \
             bs2b_cross_feed(device->Bs2b, samples);                           \
-            ((T*)buffer)[ChanMap[FRONT_LEFT]]  = func(samples[0]);            \
-            ((T*)buffer)[ChanMap[FRONT_RIGHT]] = func(samples[1]);            \
-            buffer = ((T*)buffer) + 2;                                        \
+            buffer[ChanMap[FRONT_LEFT]]  = func(samples[0]);                  \
+            buffer[ChanMap[FRONT_RIGHT]] = func(samples[1]);                  \
+            buffer += 2;                                                      \
         }                                                                     \
     }                                                                         \
     else                                                                      \
@@ -817,10 +817,10 @@ static void Write_##T##_##chans(ALCdevice *device, T *buffer, ALuint SamplesToDo
             {                                                                 \
                 ALfloat samp = 0.0f;                                          \
                 for(c = 0;c < MAXCHANNELS;c++)                                \
-                    samp += DryBuffer[i][c] * Matrix[c][chans[j]];            \
-                ((T*)buffer)[ChanMap[chans[j]]] = func(samp);                 \
+                    samp += DryBuffer[i][c] * Matrix[chans[j]][c];            \
+                buffer[ChanMap[chans[j]]] = func(samp);                       \
             }                                                                 \
-            buffer = ((T*)buffer) + N;                                        \
+            buffer += N;                                                      \
         }                                                                     \
     }                                                                         \
 }

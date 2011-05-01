@@ -137,6 +137,8 @@
 		737826AD12960DDF007333BE /* bitfighter.sh in CopyFiles */ = {isa = PBXBuildFile; fileRef = 736DE9A512906AA400C3CB73 /* bitfighter.sh */; };
 		7378E23812F93C9D005EF681 /* database.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7378E23612F93C9D005EF681 /* database.cpp */; };
 		7378E23912F93C9D005EF681 /* database.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7378E23612F93C9D005EF681 /* database.cpp */; };
+		7379553D136E1CCE003A660B /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7379553C136E1CCE003A660B /* AudioUnit.framework */; };
+		73795552136E1DF2003A660B /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9462C41611D7D95600791A0B /* Carbon.framework */; };
 		737C80FA135CC67500FF5282 /* Color.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737C80F4135CC67500FF5282 /* Color.cpp */; };
 		737C80FB135CC67500FF5282 /* Point.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737C80F6135CC67500FF5282 /* Point.cpp */; };
 		737C80FC135CC67500FF5282 /* Rect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737C80F8135CC67500FF5282 /* Rect.cpp */; };
@@ -167,6 +169,9 @@
 		73844F5013500E1600033B85 /* polygon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73844F4D13500E1600033B85 /* polygon.cpp */; };
 		73844F5113500E1600033B85 /* GeomUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73844F4B13500E1600033B85 /* GeomUtils.cpp */; };
 		73844F5213500E1600033B85 /* polygon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73844F4D13500E1600033B85 /* polygon.cpp */; };
+		73A3ECD3136BC69A009E0F68 /* alcDedicated.c in Sources */ = {isa = PBXBuildFile; fileRef = 73A3ECD1136BC69A009E0F68 /* alcDedicated.c */; };
+		73A3ECD4136BC69A009E0F68 /* coreaudio.c in Sources */ = {isa = PBXBuildFile; fileRef = 73A3ECD2136BC69A009E0F68 /* coreaudio.c */; };
+		73A3ECEF136BC81C009E0F68 /* loopback.c in Sources */ = {isa = PBXBuildFile; fileRef = 73A3ECEE136BC81C009E0F68 /* loopback.c */; };
 		73B4C004136A9E8700D5CAFF /* ALc.c in Sources */ = {isa = PBXBuildFile; fileRef = 73B4BFBF136A9E8700D5CAFF /* ALc.c */; };
 		73B4C005136A9E8700D5CAFF /* alcConfig.c in Sources */ = {isa = PBXBuildFile; fileRef = 73B4BFC0136A9E8700D5CAFF /* alcConfig.c */; };
 		73B4C006136A9E8700D5CAFF /* alcEcho.c in Sources */ = {isa = PBXBuildFile; fileRef = 73B4BFC1136A9E8700D5CAFF /* alcEcho.c */; };
@@ -691,6 +696,9 @@
 		737826B112960DDF007333BE /* Bitfighterd.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Bitfighterd.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7378E23612F93C9D005EF681 /* database.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = database.cpp; path = ../../../master/database.cpp; sourceTree = SOURCE_ROOT; };
 		7378E23712F93C9D005EF681 /* database.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = database.h; path = ../../../master/database.h; sourceTree = SOURCE_ROOT; };
+		7379552E136E1C42003A660B /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
+		73795535136E1C60003A660B /* CoreAudioKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudioKit.framework; path = System/Library/Frameworks/CoreAudioKit.framework; sourceTree = SDKROOT; };
+		7379553C136E1CCE003A660B /* AudioUnit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioUnit.framework; path = System/Library/Frameworks/AudioUnit.framework; sourceTree = SDKROOT; };
 		737C80F4135CC67500FF5282 /* Color.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Color.cpp; path = ../../../zap/Color.cpp; sourceTree = SOURCE_ROOT; };
 		737C80F5135CC67500FF5282 /* Color.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Color.h; path = ../../../zap/Color.h; sourceTree = SOURCE_ROOT; };
 		737C80F6135CC67500FF5282 /* Point.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Point.cpp; path = ../../../zap/Point.cpp; sourceTree = SOURCE_ROOT; };
@@ -724,6 +732,9 @@
 		73844F4C13500E1600033B85 /* GeomUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GeomUtils.h; path = ../../../zap/GeomUtils.h; sourceTree = SOURCE_ROOT; };
 		73844F4D13500E1600033B85 /* polygon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = polygon.cpp; path = ../../../zap/polygon.cpp; sourceTree = SOURCE_ROOT; };
 		73844F4E13500E1600033B85 /* SlipZone.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SlipZone.h; path = ../../../zap/SlipZone.h; sourceTree = SOURCE_ROOT; };
+		73A3ECD1136BC69A009E0F68 /* alcDedicated.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = alcDedicated.c; sourceTree = "<group>"; };
+		73A3ECD2136BC69A009E0F68 /* coreaudio.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = coreaudio.c; sourceTree = "<group>"; };
+		73A3ECEE136BC81C009E0F68 /* loopback.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = loopback.c; sourceTree = "<group>"; };
 		73B4BEFF136A9D8600D5CAFF /* OpenAL-Soft.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = "OpenAL-Soft.framework"; sourceTree = BUILT_PRODUCTS_DIR; };
 		73B4BF00136A9D8600D5CAFF /* OpenAL-Soft-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "OpenAL-Soft-Info.plist"; sourceTree = "<group>"; };
 		73B4BFBF136A9E8700D5CAFF /* ALc.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ALc.c; sourceTree = "<group>"; };
@@ -1178,6 +1189,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7379553D136E1CCE003A660B /* AudioUnit.framework in Frameworks */,
+				73795552136E1DF2003A660B /* Carbon.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1273,7 +1286,7 @@
 		29B97314FDCFA39411CA2CEA /* Bitfighter */ = {
 			isa = PBXGroup;
 			children = (
-				73B4BFBD136A9E8700D5CAFF /* openal-soft-1.13 */,
+				73B4BFBD136A9E8700D5CAFF /* openal-soft */,
 				73844F2513500C2F00033B85 /* clipper */,
 				73844F2813500C2F00033B85 /* poly2tri */,
 				73702882132A020B00397F99 /* recast */,
@@ -1288,6 +1301,9 @@
 				29B97317FDCFA39411CA2CEA /* Resources */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
+				7379552E136E1C42003A660B /* CoreAudio.framework */,
+				73795535136E1C60003A660B /* CoreAudioKit.framework */,
+				7379553C136E1CCE003A660B /* AudioUnit.framework */,
 			);
 			name = Bitfighter;
 			sourceTree = "<group>";
@@ -1438,7 +1454,7 @@
 			path = sweep;
 			sourceTree = "<group>";
 		};
-		73B4BFBD136A9E8700D5CAFF /* openal-soft-1.13 */ = {
+		73B4BFBD136A9E8700D5CAFF /* openal-soft */ = {
 			isa = PBXGroup;
 			children = (
 				73B4BFBE136A9E8700D5CAFF /* Alc */,
@@ -1447,13 +1463,16 @@
 				73B4BFE6136A9E8700D5CAFF /* OpenAL32 */,
 				73B4C001136A9E8700D5CAFF /* utils */,
 			);
-			name = "openal-soft-1.13";
-			path = "../../../openal/openal-soft-1.13";
+			name = "openal-soft";
+			path = "../../../openal/openal-soft";
 			sourceTree = SOURCE_ROOT;
 		};
 		73B4BFBE136A9E8700D5CAFF /* Alc */ = {
 			isa = PBXGroup;
 			children = (
+				73A3ECEE136BC81C009E0F68 /* loopback.c */,
+				73A3ECD1136BC69A009E0F68 /* alcDedicated.c */,
+				73A3ECD2136BC69A009E0F68 /* coreaudio.c */,
 				73B4BFBF136A9E8700D5CAFF /* ALc.c */,
 				73B4BFC0136A9E8700D5CAFF /* alcConfig.c */,
 				73B4BFC1136A9E8700D5CAFF /* alcEcho.c */,
@@ -2581,6 +2600,9 @@
 				73B4C030136A9E8700D5CAFF /* alState.c in Sources */,
 				73B4C031136A9E8700D5CAFF /* alThunk.c in Sources */,
 				73B4C040136A9E8700D5CAFF /* openal-info.c in Sources */,
+				73A3ECD3136BC69A009E0F68 /* alcDedicated.c in Sources */,
+				73A3ECD4136BC69A009E0F68 /* coreaudio.c in Sources */,
+				73A3ECEF136BC81C009E0F68 /* loopback.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3039,12 +3061,13 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				HEADER_SEARCH_PATHS = (
-					"../../../openal/openal-soft-1.13/include",
-					"../../../openal/openal-soft-1.13/OpenAL32/Include",
-					"../../../openal/openal-soft-1.13",
+					"../../../openal/openal-soft/include",
+					"../../../openal/openal-soft/OpenAL32/Include",
+					"../../../openal/openal-soft",
 				);
 				INFOPLIST_FILE = "OpenAL-Soft-Info.plist";
 				INSTALL_PATH = "@executable_path/../Frameworks";
+				OTHER_CFLAGS = "-DAL_ALEXT_PROTOTYPES";
 				PREBINDING = NO;
 				PRODUCT_NAME = "OpenAL-Soft";
 			};
@@ -3063,12 +3086,13 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				HEADER_SEARCH_PATHS = (
-					"../../../openal/openal-soft-1.13/include",
-					"../../../openal/openal-soft-1.13/OpenAL32/Include",
-					"../../../openal/openal-soft-1.13",
+					"../../../openal/openal-soft/include",
+					"../../../openal/openal-soft/OpenAL32/Include",
+					"../../../openal/openal-soft",
 				);
 				INFOPLIST_FILE = "OpenAL-Soft-Info.plist";
 				INSTALL_PATH = "@executable_path/../Frameworks";
+				OTHER_CFLAGS = "-DAL_ALEXT_PROTOTYPES";
 				PREBINDING = NO;
 				PRODUCT_NAME = "OpenAL-Soft";
 				ZERO_LINK = NO;

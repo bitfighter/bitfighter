@@ -167,11 +167,14 @@ AL_API ALvoid AL_APIENTRY alEffecti(ALuint effect, ALenum param, ALint iValue)
     {
         if(param == AL_EFFECT_TYPE)
         {
-            ALboolean isOk = (iValue == AL_EFFECT_NULL ||
-                (iValue == AL_EFFECT_EAXREVERB && !DisabledEffects[EAXREVERB]) ||
-                (iValue == AL_EFFECT_REVERB && !DisabledEffects[REVERB]) ||
-                (iValue == AL_EFFECT_ECHO && !DisabledEffects[ECHO]) ||
-                (iValue == AL_EFFECT_RING_MODULATOR && !DisabledEffects[MODULATOR]));
+            ALboolean isOk = (iValue == AL_EFFECT_NULL);
+            ALint i;
+            for(i = 0;!isOk && EffectList[i].val;i++)
+            {
+                if(iValue == EffectList[i].val &&
+                   !DisabledEffects[EffectList[i].type])
+                    isOk = AL_TRUE;
+            }
 
             if(isOk)
                 InitEffectParams(ALEffect, iValue);
@@ -681,6 +684,23 @@ AL_API ALvoid AL_APIENTRY alEffectf(ALuint effect, ALenum param, ALfloat flValue
                 break;
             }
         }
+        else if(ALEffect->type == AL_EFFECT_DEDICATED_LOW_FREQUENCY_EFFECT ||
+                ALEffect->type == AL_EFFECT_DEDICATED_DIALOGUE)
+        {
+            switch(param)
+            {
+            case AL_DEDICATED_GAIN:
+                if(flValue >= 0.0f)
+                    ALEffect->Dedicated.Gain = flValue;
+                else
+                    alSetError(Context, AL_INVALID_VALUE);
+                break;
+
+            default:
+                alSetError(Context, AL_INVALID_ENUM);
+                break;
+            }
+        }
         else
             alSetError(Context, AL_INVALID_ENUM);
     }
@@ -802,6 +822,20 @@ AL_API ALvoid AL_APIENTRY alEffectfv(ALuint effect, ALenum param, ALfloat *pflVa
             {
             case AL_RING_MODULATOR_FREQUENCY:
             case AL_RING_MODULATOR_HIGHPASS_CUTOFF:
+                alEffectf(effect, param, pflValues[0]);
+                break;
+
+            default:
+                alSetError(Context, AL_INVALID_ENUM);
+                break;
+            }
+        }
+        else if(ALEffect->type == AL_EFFECT_DEDICATED_LOW_FREQUENCY_EFFECT ||
+                ALEffect->type == AL_EFFECT_DEDICATED_DIALOGUE)
+        {
+            switch(param)
+            {
+            case AL_DEDICATED_GAIN:
                 alEffectf(effect, param, pflValues[0]);
                 break;
 
@@ -1176,6 +1210,20 @@ AL_API ALvoid AL_APIENTRY alGetEffectf(ALuint effect, ALenum param, ALfloat *pfl
                 break;
             }
         }
+        else if(ALEffect->type == AL_EFFECT_DEDICATED_LOW_FREQUENCY_EFFECT ||
+                ALEffect->type == AL_EFFECT_DEDICATED_DIALOGUE)
+        {
+            switch(param)
+            {
+            case AL_DEDICATED_GAIN:
+                *pflValue = ALEffect->Dedicated.Gain;
+                break;
+
+            default:
+                alSetError(Context, AL_INVALID_ENUM);
+                break;
+            }
+        }
         else
             alSetError(Context, AL_INVALID_ENUM);
     }
@@ -1295,6 +1343,20 @@ AL_API ALvoid AL_APIENTRY alGetEffectfv(ALuint effect, ALenum param, ALfloat *pf
                 break;
             }
         }
+        else if(ALEffect->type == AL_EFFECT_DEDICATED_LOW_FREQUENCY_EFFECT ||
+                ALEffect->type == AL_EFFECT_DEDICATED_DIALOGUE)
+        {
+            switch(param)
+            {
+            case AL_DEDICATED_GAIN:
+                alGetEffectf(effect, param, pflValues);
+                break;
+
+            default:
+                alSetError(Context, AL_INVALID_ENUM);
+                break;
+            }
+        }
         else
             alSetError(Context, AL_INVALID_ENUM);
     }
@@ -1371,6 +1433,10 @@ static void InitEffectParams(ALeffect *effect, ALenum type)
         effect->Modulator.Frequency = AL_RING_MODULATOR_DEFAULT_FREQUENCY;
         effect->Modulator.HighPassCutoff = AL_RING_MODULATOR_DEFAULT_HIGHPASS_CUTOFF;
         effect->Modulator.Waveform = AL_RING_MODULATOR_DEFAULT_WAVEFORM;
+        break;
+    case AL_EFFECT_DEDICATED_LOW_FREQUENCY_EFFECT:
+    case AL_EFFECT_DEDICATED_DIALOGUE:
+        effect->Dedicated.Gain = 1.0f;
         break;
     }
 }

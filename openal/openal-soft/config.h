@@ -2,96 +2,99 @@
 #define CONFIG_H
 
 /* Define to the library version */
-#define ALSOFT_VERSION "${LIB_VERSION}"
+#define ALSOFT_VERSION "1.13"
 
 /* Define if we have the ALSA backend */
-#cmakedefine HAVE_ALSA
+/* #undef HAVE_ALSA */
 
 /* Define if we have the OSS backend */
-#cmakedefine HAVE_OSS
+/* #undef HAVE_OSS */
 
 /* Define if we have the Solaris backend */
-#cmakedefine HAVE_SOLARIS
+/* #undef HAVE_SOLARIS */
 
 /* Define if we have the DSound backend */
-#cmakedefine HAVE_DSOUND
+/* #undef HAVE_DSOUND */
 
 /* Define if we have the Windows Multimedia backend */
-#cmakedefine HAVE_WINMM
+/* #undef HAVE_WINMM */
 
 /* Define if we have the PortAudio backend */
-#cmakedefine HAVE_PORTAUDIO
+/* #undef HAVE_PORTAUDIO */
 
 /* Define if we have the PulseAudio backend */
-#cmakedefine HAVE_PULSEAUDIO
+/* #undef HAVE_PULSEAUDIO */
+
+/* Define if we have the CoreAudio backend */
+#define HAVE_COREAUDIO
 
 /* Define if we have the Wave Writer backend */
-#cmakedefine HAVE_WAVE
+#define HAVE_WAVE
 
 /* Define if we have dlfcn.h */
-#cmakedefine HAVE_DLFCN_H
+#define HAVE_DLFCN_H
 
 /* Define if we have the stat function */
-#cmakedefine HAVE_STAT
+#define HAVE_STAT
 
 /* Define if we have the powf function */
-#cmakedefine HAVE_POWF
+#define HAVE_POWF
 
 /* Define if we have the sqrtf function */
-#cmakedefine HAVE_SQRTF
+#define HAVE_SQRTF
 
 /* Define if we have the acosf function */
-#cmakedefine HAVE_ACOSF
+#define HAVE_ACOSF
 
 /* Define if we have the atanf function */
-#cmakedefine HAVE_ATANF
+#define HAVE_ATANF
 
 /* Define if we have the fabsf function */
-#cmakedefine HAVE_FABSF
+#define HAVE_FABSF
 
 /* Define if we have the strtof function */
-#cmakedefine HAVE_STRTOF
+#define HAVE_STRTOF
 
 /* Define if we have stdint.h */
-#cmakedefine HAVE_STDINT_H
+#define HAVE_STDINT_H
 
 /* Define if we have the __int64 type */
-#cmakedefine HAVE___INT64
+/* #undef HAVE___INT64 */
 
 /* Define to the size of a long int type */
-#cmakedefine SIZEOF_LONG ${SIZEOF_LONG}
+#define SIZEOF_LONG 8
 
 /* Define to the size of a long long int type */
-#cmakedefine SIZEOF_LONG_LONG ${SIZEOF_LONG_LONG}
+#define SIZEOF_LONG_LONG 8
 
 /* Define to the size of an unsigned int type */
-#cmakedefine SIZEOF_UINT ${SIZEOF_UINT}
+#define SIZEOF_UINT 4
 
 /* Define to the size of a void pointer type */
-#cmakedefine SIZEOF_VOIDP ${SIZEOF_VOIDP}
+#define SIZEOF_VOIDP 8
 
 /* Define if we have GCC's destructor attribute */
-#cmakedefine HAVE_GCC_DESTRUCTOR
+#define HAVE_GCC_DESTRUCTOR
 
 /* Define if we have GCC's format attribute */
-#cmakedefine HAVE_GCC_FORMAT
+#define HAVE_GCC_FORMAT
 
 /* Define if we have pthread_np.h */
-#cmakedefine HAVE_PTHREAD_NP_H
+/* #undef HAVE_PTHREAD_NP_H */
 
 /* Define if we have float.h */
-#cmakedefine HAVE_FLOAT_H
+#define HAVE_FLOAT_H
 
 /* Define if we have fenv.h */
-#cmakedefine HAVE_FENV_H
+#define HAVE_FENV_H
 
 /* Define if we have fesetround() */
-#cmakedefine HAVE_FESETROUND
+#define HAVE_FESETROUND
 
 /* Define if we have _controlfp() */
-#cmakedefine HAVE__CONTROLFP
+/* #undef HAVE__CONTROLFP */
 
 /* Define if we have pthread_setschedparam() */
-#cmakedefine HAVE_PTHREAD_SETSCHEDPARAM
+#define HAVE_PTHREAD_SETSCHEDPARAM
 
 #endif

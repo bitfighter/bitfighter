@@ -68,12 +68,6 @@ extern "C" {
 #define ALC_CHAN_CD_LOKI                         0x500003
 #endif
 
-#ifndef ALC_ENUMERATE_ALL_EXT
-#define ALC_ENUMERATE_ALL_EXT 1
-#define ALC_DEFAULT_ALL_DEVICES_SPECIFIER        0x1012
-#define ALC_ALL_DEVICES_SPECIFIER                0x1013
-#endif
-
 #ifndef AL_EXT_MCFORMATS
 #define AL_EXT_MCFORMATS 1
 #define AL_FORMAT_QUAD8                          0x1204
@@ -156,6 +150,30 @@ AL_API ALvoid AL_APIENTRY alBufferSubDataSOFT(ALuint buffer,ALenum format,const 
 #ifndef AL_SOFT_loop_points
 #define AL_SOFT_loop_points 1
 #define AL_LOOP_POINTS_SOFT                      0x2015
+#endif
+
+#ifndef AL_EXT_FOLDBACK
+#define AL_EXT_FOLDBACK 1
+#define AL_EXT_FOLDBACK_NAME                     "AL_EXT_FOLDBACK"
+#define AL_FOLDBACK_EVENT_BLOCK                  0x4112
+#define AL_FOLDBACK_EVENT_START                  0x4111
+#define AL_FOLDBACK_EVENT_STOP                   0x4113
+#define AL_FOLDBACK_MODE_MONO                    0x4101
+#define AL_FOLDBACK_MODE_STEREO                  0x4102
+typedef void (AL_APIENTRY*LPALFOLDBACKCALLBACK)(ALenum,ALsizei);
+typedef void (AL_APIENTRY*LPALREQUESTFOLDBACKSTART)(ALenum,ALsizei,ALsizei,ALfloat*,LPALFOLDBACKCALLBACK);
+typedef void (AL_APIENTRY*LPALREQUESTFOLDBACKSTOP)(void);
+#ifdef AL_ALEXT_PROTOTYPES
+AL_API void AL_APIENTRY alRequestFoldbackStart(ALenum mode,ALsizei count,ALsizei length,ALfloat *mem,LPALFOLDBACKCALLBACK callback);
+AL_API void AL_APIENTRY alRequestFoldbackStop(void);
+#endif
+#endif
+
+#ifndef ALC_EXT_DEDICATED
+#define ALC_EXT_DEDICATED 1
+#define AL_DEDICATED_GAIN                        0x0001
+#define AL_EFFECT_DEDICATED_DIALOGUE             0x9001
+#define AL_EFFECT_DEDICATED_LOW_FREQUENCY_EFFECT 0x9000
 #endif
 
 #ifdef __cplusplus

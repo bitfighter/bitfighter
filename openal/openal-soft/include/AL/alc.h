@@ -171,9 +171,18 @@ typedef void ALCvoid;
 /**
  * Capture extension
  */
+#define ALC_EXT_CAPTURE 1
 #define ALC_CAPTURE_DEVICE_SPECIFIER             0x310
 #define ALC_CAPTURE_DEFAULT_DEVICE_SPECIFIER     0x311
 #define ALC_CAPTURE_SAMPLES                      0x312
+
+
+/**
+ * ALC_ENUMERATE_ALL_EXT enums
+ */
+#define ALC_ENUMERATE_ALL_EXT 1
+#define ALC_DEFAULT_ALL_DEVICES_SPECIFIER        0x1012
+#define ALC_ALL_DEVICES_SPECIFIER                0x1013
 
 
 /*
@@ -241,10 +250,6 @@ ALC_API void            ALC_APIENTRY alcCaptureStart( ALCdevice *device );
 ALC_API void            ALC_APIENTRY alcCaptureStop( ALCdevice *device );
 
 ALC_API void            ALC_APIENTRY alcCaptureSamples( ALCdevice *device, ALCvoid *buffer, ALCsizei samples );
-
-ALC_API ALCboolean      ALC_APIENTRY alcSetThreadContext( ALCcontext *context );
-
-ALC_API ALCcontext*     ALC_APIENTRY alcGetThreadContext( void );
 
 /*
  * Pointer-to-function types, useful for dynamically getting ALC entry points.

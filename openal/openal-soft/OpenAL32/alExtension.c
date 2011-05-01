@@ -32,12 +32,8 @@
 #include "alDatabuffer.h"
 #include "alSource.h"
 #include "alBuffer.h"
-#include "alListener.h"
-#include "alu.h"
 #include "AL/al.h"
 #include "AL/alc.h"
-#include "AL/alext.h"
-#include "AL/efx.h"
 
 typedef struct ALenums {
     const ALchar *enumName;
@@ -215,6 +211,8 @@ static const ALenums enumeration[] = {
     { "AL_EFFECT_COMPRESSOR",                 AL_EFFECT_COMPRESSOR                },
     { "AL_EFFECT_EQUALIZER",                  AL_EFFECT_EQUALIZER                 },
 #endif
+    { "AL_EFFECT_DEDICATED_LOW_FREQUENCY_EFFECT",AL_EFFECT_DEDICATED_LOW_FREQUENCY_EFFECT},
+    { "AL_EFFECT_DEDICATED_DIALOGUE",         AL_EFFECT_DEDICATED_DIALOGUE        },
 
     // Reverb params
     { "AL_REVERB_DENSITY",                    AL_REVERB_DENSITY                   },
@@ -268,11 +266,24 @@ static const ALenums enumeration[] = {
     { "AL_RING_MODULATOR_HIGHPASS_CUTOFF",    AL_RING_MODULATOR_HIGHPASS_CUTOFF   },
     { "AL_RING_MODULATOR_WAVEFORM",           AL_RING_MODULATOR_WAVEFORM          },
 
+    // Dedicated Dialogue/LFE params
+    { "AL_DEDICATED_GAIN",                    AL_DEDICATED_GAIN                   },
+
 
     // Default
     { NULL,                                   (ALenum)0                           }
 };
 
+
+const struct EffectList EffectList[] = {
+    { "eaxreverb", EAXREVERB, "AL_EFFECT_EAXREVERB",      AL_EFFECT_EAXREVERB },
+    { "reverb",    REVERB,    "AL_EFFECT_REVERB",         AL_EFFECT_REVERB },
+    { "echo",      ECHO,      "AL_EFFECT_ECHO",           AL_EFFECT_ECHO },
+    { "modulator", MODULATOR, "AL_EFFECT_RING_MODULATOR", AL_EFFECT_RING_MODULATOR },
+    { "dedicated", DEDICATED, "AL_EFFECT_DEDICATED_LOW_FREQUENCY_EFFECT", AL_EFFECT_DEDICATED_LOW_FREQUENCY_EFFECT },
+    { "dedicated", DEDICATED, "AL_EFFECT_DEDICATED_DIALOGUE", AL_EFFECT_DEDICATED_DIALOGUE },
+    { NULL, 0, NULL, (ALenum)0 }
+};
 
 
 AL_API ALboolean AL_APIENTRY alIsExtensionPresent(const ALchar *extName)
@@ -325,8 +336,16 @@ AL_API ALvoid* AL_APIENTRY alGetProcAddress(const ALchar *funcName)
 
 AL_API ALenum AL_APIENTRY alGetEnumValue(const ALchar *enumName)
 {
-    ALsizei i = 0;
+    ALsizei i;
 
+    for(i = 0;EffectList[i].ename;i++)
+    {
+        if(DisabledEffects[EffectList[i].type] &&
+           strcmp(EffectList[i].ename, enumName) == 0)
+            return (ALenum)0;
+    }
+
+    i = 0;
     while(enumeration[i].enumName &&
           strcmp(enumeration[i].enumName, enumName) != 0)
         i++;
