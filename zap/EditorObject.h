@@ -27,24 +27,10 @@
 #ifndef _EDITOROBJECT_H_
 #define _EDITOROBJECT_H_
 
-//#include "UIMenus.h"
-//#include "UIEditorMenus.h"       // needed for editorObject only?
-
-//#include "gameLoader.h"
-//#include "gridDB.h"              // For DatabaseObject definition
-//#include "timer.h"
-//#include "BotNavMeshZone.h"      // For Border def
-//#include "tnlNetStringTable.h"
-//#include "pointainer.h"
-
-
-#include "UIEditor.h"            // For GameItems def
-#include "gameObject.h"          // We inherit from this
+#include "gameObject.h"          // We inherit from this -- for XObject, for now
 
 #include "Point.h"
 #include "tnlVector.h"
-
-//#include <vector>
 
 using namespace std;
 
@@ -54,14 +40,28 @@ namespace Zap
 
 static const S32 NONE = -1;
 
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+enum GeomType {           
+   geomPoint,           
+   geomSimpleLine,      
+   geomLine,            
+   geomPoly,            
+   geomNone,            
+};
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 class EditorAttributeMenuUI;
 class WallSegment;
 
-extern enum GeomType;
 extern enum ShowMode;
 extern enum GameItems;
 
-class EditorObject : public virtual GameObject     // Interface class
+class EditorObject : virtual public XObject   // Interface class  -- All editor objects need to implement this
 {
 private:
    Vector<Point> mPoints;     // TODO: GET RID OF THIS!!!
@@ -76,32 +76,41 @@ private:
 
 protected:
    bool mDockItem;      // True if this item lives on the dock
-   bool mSelected;
-   bool mLitUp;
+   bool mSelected;      // True if item is selected
+   bool mLitUp;         // True if user is hovering over the item and it's "lit up"
 
    // A vector of bools that must have on entry per vertex -- it is each object's responsibility for making this happen
    bool mAnyVertsSelected;
    vector<bool> mVertSelected; 
 
-   S32 mSerialNumber;   // TODO: rename... an autoincremented serial number
+   S32 mSerialNumber;   // Autoincremented serial number    TODO: Still used?
    S32 mItemId;         // Item's unique id... 0 if there is none
 
    Color getDrawColor();
 
 public:
    EditorObject(GameObjectType objectType = UnknownType) 
-      { mDockItem = false; mSnapped = false; mLitUp = false; mSelected = false; setObjectTypeMask(objectType); 
-        mAnyVertsSelected = false; mIsBeingEdited = false;}
+   { 
+      mDockItem = false; 
+      mSnapped = false; 
+      mLitUp = false; 
+      mSelected = false; 
+      setObjectTypeMask(objectType); 
+      mAnyVertsSelected = false; 
+      mIsBeingEdited = false;
+   }
    virtual ~EditorObject() { };     // Provide virtual destructor
 
-   EditorObject *newCopy();
+   EditorObject *newCopy();         // Copies object
 
    void addToEditor(Game *game);
    void addToDock(Game *game);
 
    // Offset lets us drag an item out from the dock by an amount offset from the 0th vertex.  This makes placement seem more natural.
    virtual Point getInitialPlacementOffset() { return Point(0,0); }
-   virtual void renderEditor(F32 currentScale) { /* to be = 0 */ };
+   virtual void renderEditor(F32 currentScale);
+
+   virtual F32 getEditorRenderScaleFactor(F32 mCurrentScale) { return 1; }
 
    //// Is item sufficiently snapped?  only for turrets and forcefields
    // TODO: Move to turret/ff objects
@@ -128,12 +137,20 @@ public:
    bool isVertexLitUp(S32 vertexIndex) { return mVertexLitUp == vertexIndex; }
    void setVertexLitUp(S32 vertexIndex) { mVertexLitUp = vertexIndex; }
 
+   // Objects can be different sizes on the dock and in the editor.  We need to draw selection boxes in both locations,
+   // and these functions specify how big those boxes should be.  Override if implementing a non-standard sized item.
+   // (strictly speaking, only getEditorRadius needs to be public, but it make sense to keep these together organizationally.)
+   virtual S32 getDockRadius() { return 10; }                     // Size of object on dock 
+   virtual S32 getEditorRadius(F32 currentScale) { return 10; }   // Size of object in editor 
+   virtual const char *getVertLabel(S32 index) { return ""; }     // Label for vertex, if any... only overridden by SimpleLine objects
+
+
    void saveItem(FILE *f);
    virtual string toString() { TNLAssert(false, "UNIMPLEMENTED!"); /* TODO: =0 */ }
 
    Vector<Point> extendedEndPoints;                            // these are computed but not stored in barrier... not sure how to merge
 
-   virtual void renderDock() { };  // TODO = make this =0?
+   virtual void renderDock();
    void renderLinePolyVertices(F32 scale, F32 alpha = 1.0);    // Only for polylines and polygons  --> move there
 
    // TODO: Get rid of this ==> most of this code already in polygon
@@ -151,22 +168,22 @@ public:
    void offset(const Point &offset);                     // Offset object by a certain amount
 
    S32 repopDelay;        // For repair items, also used for engineered objects heal rate
-   S32 speed;             // Speed for speedzone items
-   bool boolattr;         // Additional optional boolean attribute for some items (only speedzone so far...)
 
    // Will have default value here, and be overridden in turret and ff classes
    Point getEditorSelectionOffset(F32 scale);      // For turrets, apparent selection center is not the same as the item's actual location
 
-   //S32 getDefaultRepopDelay(GameObject itemType);      // Implement in objects
-   S32 getRadius(F32 scale);
+   //////
+   // Vertex management functions
+      /////  ToDO: Move this into all objects
+   Vector<Point> mVerts;
 
-   bool anyVertsSelected() { return mAnyVertsSelected; }
-   void setAnyVertsSelected(bool anySelected) { mAnyVertsSelected = anySelected; }
-   
    virtual Vector<Point> getVerts() { return mPoints; };    // Return basic geometry points for object
    virtual Point getVert(S32 index) { return mPoints[index]; }
    virtual S32 getVertCount() { return mPoints.size(); }
    virtual void clearVerts() { mPoints.clear(); }           // Only for splittable things?
+
+   bool anyVertsSelected() { return mAnyVertsSelected; }
+   void setAnyVertsSelected(bool anySelected) { mAnyVertsSelected = anySelected; }
 
    virtual void setVert(const Point &point, S32 index);
    virtual void addVert(const Point &point);
@@ -184,13 +201,10 @@ public:
    virtual void onAttrsChanging() { /* Do nothing */ };  // Attr is in the process of being changed (i.e. a char was typed for a textItem)
    virtual void onAttrsChanged() { /* Do nothing */ };   // Attrs changed
 
-   /////  ToDO: Move this into all objects
-   Vector<Point> mVerts;
 
    ///
    Point mDest;      // for teleporter
    Point dir;        // same thing, for goFast
-   U16 mSpeed;       // goFast
    ///
    /////
    // Geometry operations  -- can we provide standard implementations of these?
@@ -264,7 +278,7 @@ public:
 
    virtual void onGeomChanged() { /* To be =0 */ };   // Item changed geometry (or moved), do any internal updating that might be required
 
-   virtual void initializeEditor(F32 gridSize) { };
+   virtual void initializeEditor(F32 gridSize);
 
 
    void findForceFieldEnd();                                      // Find end of forcefield
@@ -277,16 +291,11 @@ public:
    virtual bool canBeHostile();
    virtual bool canBeNeutral();
    virtual bool hasTeam();
-   virtual bool hasText() { return false; }     // Only TextItem overrides this
    virtual const char *getEditorHelpString();     
-   virtual bool getHasRepop();
    virtual bool EditorObject::getSpecial();   
    virtual const char *getPrettyNamePlural();     
    virtual const char *getOnDockName();     
    virtual const char *getOnScreenName();   
-
-
-   bool processArguments(S32 argc, const char **argv);
 
    virtual EditorAttributeMenuUI *getAttributeMenu() { return NULL; }    // Override if child class has an attribute menu
 

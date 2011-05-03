@@ -52,8 +52,7 @@ private:
    void preparePoints();
 
    // How are things labeled in the editor? 
-   const char *getOriginBottomLabel() { return "Location"; }
-   const char *getDestinationBottomLabel() { return "Direction"; }
+   const char *getVertLabel(S32 index) { return index == 0 ? "Location" : "Direction"; }
    const char *getEditMessage(S32 line);
 
    static EditorAttributeMenuUI *mAttributeMenuUI;      // Menu for attribute editing; since it's static, don't bother with smart pointer
@@ -125,7 +124,6 @@ public:
    void saveItem(FILE *f);
 
    // Some properties about the item that will be needed in the editor
-   bool hasText() { return true; }
    const char *getEditorHelpString() { return "Makes ships go fast in direction of arrow. [P]"; }  
    const char *getPrettyNamePlural() { return "GoFasts"; }
    const char *getOnDockName() { return "GoFast"; }
@@ -133,8 +131,6 @@ public:
    bool hasTeam() { return false; }
    bool canBeHostile() { return false; }
    bool canBeNeutral() { return false; }
-   bool getHasRepop() { return false; }
-
 
    TNL_DECLARE_CLASS(SpeedZone);
 };

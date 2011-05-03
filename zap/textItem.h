@@ -56,8 +56,7 @@ private:
    string mText;         // Text itself
 
    // How are this item's vertices labeled in the editor? -- these can be private
-   const char *getOriginBottomLabel() { return "Start"; }
-   const char *getDestinationBottomLabel() { return "Direction"; }
+   const char *getVertLabel(S32 index) { return index == 0 ? "Start" : "Direction"; }
    const char *getEditMessage(S32 line) { return line == 0 ? "[Enter] to edit text" : ""; }
 
    static EditorAttributeMenuUI *mAttributeMenuUI;      // Menu for text editing; since it's static, don't bother with smart pointer
@@ -111,6 +110,7 @@ public:
    static EditorObject *getAttributeEditorObject();
 
    void onAttrsChanging();
+   void onAttrsChanged();
    void onGeomChanging();
    void onGeomChanged();
 
@@ -120,7 +120,6 @@ public:
    Point getInitialPlacementOffset() { return Point(.4, 0); }
 
    // Some properties about the item that will be needed in the editor
-   bool hasText() { return true; }
    const char *getEditorHelpString() { return "Draws a bit of text on the map.  Visible only to team, or to all if neutral."; }  
    const char *getPrettyNamePlural() { return "Text Items"; }
    const char *getOnDockName() { return "TextItem"; }
@@ -128,7 +127,6 @@ public:
    bool hasTeam() { return true; }
    bool canBeHostile() { return true; }
    bool canBeNeutral() { return true; }
-   bool getHasRepop() { return false; }
 
    TNL_DECLARE_CLASS(TextItem);
 };

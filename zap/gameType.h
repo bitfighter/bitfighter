@@ -190,7 +190,7 @@ public:
    void catalogSpybugs();     // Rebuild a list of spybugs in the game
 
    virtual bool isFlagGame() { return false; }              // Does game use flags?
-   virtual bool isTeamFlagGame() { return true; }          // Does flag-team orientation matter?  Only false in HunterGame.
+   virtual bool isTeamFlagGame() { return true; }           // Does flag-team orientation matter?  Only false in HunterGame.
    virtual S32 getFlagCount() { return mFlags.size(); }     // Return the number of game-significant flags
 
    virtual bool isCarryingItems(Ship *ship) { return ship->mMountedItems.size() > 0; }     // Nexus game will override this

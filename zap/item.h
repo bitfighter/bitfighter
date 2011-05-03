@@ -26,8 +26,9 @@
 #ifndef _ITEM_H_
 #define _ITEM_H_
 
-#include "moveObject.h"
-#include "luaObject.h"
+#include "moveObject.h"       // Parent class
+#include "EditorObject.h"     // Parent class
+#include "luaObject.h"        // Parent class
 #include "timer.h"
 
 namespace Zap
@@ -40,12 +41,13 @@ class GameType;
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class Item : public MoveObject, public LuaItem
+class Item : public MoveObject, virtual public EditorObject, public LuaItem
 {
    typedef MoveObject Parent;
+   typedef EditorObject EditorParent;
 
 private:
-   F32 UpdateTimer1;
+   F32 updateTimer;
    Point prevMoveVelocity;
 
 protected:
@@ -72,6 +74,8 @@ protected:
    Timer mDroppedTimer;                   // Make flags have a tiny bit of delay before they can be picked up again
    static const U32 DROP_DELAY = 500;     // Time until we can pick the item up after it's dropped (in ms)
 
+   F32 getEditorRenderScaleFactor(F32 currentScale);     // Calculates scaling factor for items in the editor
+
 public:
    Item(Point p = Point(0,0), bool collideable = false, float radius = 1, float mass = 1);   // Constructor
 
@@ -82,8 +86,8 @@ public:
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
-   void setActualPos(Point p);
-   void setActualVel(Point vel);
+   void setActualPos(const Point &p);
+   void setActualVel(const Point &vel);
 
    U16 getItemId() { return mItemId; }
 
@@ -117,13 +121,30 @@ public:
    S32 getLoc(lua_State *L) { return LuaObject::returnPoint(L, getActualPos()); }
    S32 getRad(lua_State *L) { return LuaObject::returnFloat(L, getRadius()); }
    S32 getVel(lua_State *L) { return LuaObject::returnPoint(L, getActualVel()); }
-   virtual S32 getTeamIndx(lua_State *L) { return TEAM_NEUTRAL + 1; }     // Can be overridden for team items
+   virtual S32 getTeamIndx(lua_State *L) { return TEAM_NEUTRAL + 1; }              // Can be overridden for team items
    S32 isInCaptureZone(lua_State *L) { return returnBool(L, mZone.isValid()); }    // Is flag in a team's capture zone?
-   S32 isOnShip(lua_State *L) { return returnBool(L, mIsMounted); }           // Is flag being carried by a ship?
+   S32 isOnShip(lua_State *L) { return returnBool(L, mIsMounted); }                // Is flag being carried by a ship?
 	S32 getCaptureZone(lua_State *L);
 	S32 getShip(lua_State *L);
-
    GameObject *getGameObject() { return this; }
+
+
+   // Some properties about the item that will be needed in the editor
+   GeomType getGeomType() { return geomPoint; }
+
+   virtual Point getVert(S32 index) { return getActualPos(); }
+   virtual void setVert(const Point &point, S32 index) { setActualPos(point); }
+
+   virtual const char *getOnDockName() { return "CCCC"; }      // TODO: = 0
+
+   virtual void renderDock() { EditorParent::renderDock(); };     // Render item on the dock. 
+   virtual void renderEditor(F32 currentScale);
+
+   S32 getVertCount() { return 1; }
+
+   void deleteVert(S32 vertIndex) { /* Do nothing -- can't delete vertices from a point! */ };
+
+   virtual void initializeEditor(F32 gridSize);
 };
 
 ////////////////////////////////////////

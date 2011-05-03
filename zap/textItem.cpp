@@ -51,8 +51,6 @@ TextItem::TextItem()
    mNetFlags.set(Ghostable);
    mObjectTypeMask = TextItemType | CommandMapVisType;     // Or not?
 
-   SimpleLine::initialize();
-
    // Some default values
    mSize = 20;
    mTeam = Item::TEAM_NEUTRAL;
@@ -70,6 +68,7 @@ void TextItem::initializeEditor(F32 gridSize)
 {
    SimpleLine::initializeEditor(gridSize);
 
+   mText = "Your text here";
    recalcTextSize();
 }
 
@@ -95,10 +94,6 @@ void TextItem::render()
 void TextItem::renderEditorItem(F32 currentScale)
 {
    renderTextItem(mPos, mDir, mSize, mText, getGame()->getTeamColor(mTeam));
-
-   //// If we're editing the text, we need to draw our cursor
-   //if(isBeingEdited())
-   //   lineEditor.drawCursorAngle(mPos.x, mPos.y, mSize, mPos.angleTo(mDir));
 }
 
 
@@ -271,6 +266,11 @@ void TextItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
 // Runs when text is being changed in the editor
 void TextItem::onAttrsChanging()
+{
+   onGeomChanged();
+}
+
+void TextItem::onAttrsChanged()
 {
    onGeomChanged();
 }

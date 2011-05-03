@@ -120,6 +120,15 @@ bool FlagItem::processArguments(S32 argc, const char **argv)
 }
 
 
+string FlagItem::toString()
+{
+   Point pos = getActualPos();
+   char outString[LevelLoader::MAX_LEVEL_LINE_LENGTH];
+   dSprintf(outString, sizeof(outString), "%s %d %g %g", Object::getClassName(), mTeam, pos.x / 255, pos.y / 255);
+   return outString;
+}
+
+
 U32 FlagItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
    if(stream->writeFlag(updateMask & InitialMask))
@@ -215,12 +224,25 @@ void FlagItem::renderItem(Point pos)
    if(mIsMounted)
       offset.set(15, -15);
 
-   Color c;
-   GameType *gt = getGame()->getGameType();
+   renderFlag(pos + offset, getGame()->getTeamColor(mTeam));
+}
 
-   c = gt->getTeamColor(mTeam);
-     
-   renderFlag(pos + offset, c);
+
+void FlagItem::renderDock()
+{
+   glPushMatrix();
+      glTranslatef(getActualPos().x, getActualPos().y, 0);
+      glScalef(0.6, 0.6, 1);
+      renderFlag(0, 0, getGame()->getTeamColor(mTeam));
+   glPopMatrix();   
+
+   Parent::renderDock();
+}
+
+
+S32 FlagItem::getEditorRadius(F32 currentScale)
+{
+   return 18 * getEditorRenderScaleFactor(currentScale);
 }
 
 

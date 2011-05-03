@@ -54,8 +54,6 @@ SpeedZone::SpeedZone()
    mNetFlags.set(Ghostable);
    mObjectTypeMask = SpeedZoneType | CommandMapVisType;
 
-   SimpleLine::initialize();
-
    mSpeed = defaultSpeed;
    mSnapLocation = false;     // Don't snap unless specified
    mRotateSpeed = 0;

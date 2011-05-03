@@ -32,44 +32,18 @@ SimpleLine::SimpleLine()
 }
 
 
-void SimpleLine::initialize()
-{
-
-   mVertSelected.resize(2);     // One spot for mPos, one for mDest
-   unselectVerts();             // Set all verts to be unselected
-}
-
-
 void SimpleLine::renderDock()
 {
-   Color itemColor = getEditorRenderColor();
+   glColor(getEditorRenderColor());       // Blue for TextItem, red for GoFast, etc.
+   drawFilledSquare(getVert(0), 5);       // Draw origin of item to give user something to grab on the dock
 
-   glColor(itemColor);
-   drawFilledSquare(getVert(0), 5);    // Draw origin of item to give user something to grab on the dock
-
-   // Add a label
-   F32 xpos = getVert(0).x;
-   F32 ypos = getVert(0).y + 6;
-   glColor(EditorUserInterface::DOCK_LABEL_COLOR);
-   UserInterface::drawStringc(xpos, ypos, EditorUserInterface::DOCK_LABEL_SIZE, getOnDockName());
-   
-   if(mLitUp)
-   {
-      glColor(EditorUserInterface::HIGHLIGHT_COLOR);
-      drawSquare(getVert(0), 8);
-   }
-}
-
-
-static inline void labelSimpleLineItem(Point pos, F32 labelSize, const char *itemLabelTop, const char *itemLabelBottom)
-{
-   UserInterface::drawStringc(pos.x, pos.y + labelSize + 2, labelSize, itemLabelTop);
-   UserInterface::drawStringc(pos.x, pos.y + 2 * labelSize + 5, labelSize, itemLabelBottom);
+   EditorParent::renderDock();
 }
 
 
 void SimpleLine::initializeEditor(F32 gridSize) 
 {
+   EditorParent::initializeEditor(gridSize);
    setVert(Point(0,0), 0);
    setVert(Point(1,0) * gridSize, 1);
 }
@@ -125,22 +99,6 @@ void SimpleLine::renderEditor(F32 currentScale)
       UserInterface::drawStringf_2pt(pos, dest, INSTRUCTION_TEXTSIZE, -22 - INSTRUCTION_TEXTSIZE - 2, getEditMessage(1));
    }
 
-   // Label any selected or highlighted vertices
-   if(vertSelected(0) || (mLitUp && isVertexLitUp(0)))         // "From" vertex
-   {
-      F32 alpha = 1;
-      glColor(getDrawColor(), alpha);
-      drawSquare(pos, 7);
-
-      labelSimpleLineItem(pos, EditorUserInterface::DOCK_LABEL_SIZE, getOnScreenName(), getOriginBottomLabel());
-   }
-   else if(vertSelected(1) || (mLitUp && isVertexLitUp(1)))    // "To" vertex
-   {
-      F32 alpha = 1;
-      glColor(getDrawColor(), alpha);
-      drawSquare(dest, 7);
-
-      labelSimpleLineItem(dest, EditorUserInterface::DOCK_LABEL_SIZE, getOnScreenName(), getDestinationBottomLabel());
-   }
+   EditorParent::renderEditor(currentScale);
 }
 

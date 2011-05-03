@@ -107,67 +107,12 @@ public:
    bool getCollisionCircle(U32 stateIndex, Point &point, float &radius) { return false; }
 };
 
+
 ////////////////////////////////////////
 ////////////////////////////////////////
-
-enum GeomType {           
-   geomPoint,           // ype = BIT(Single point feature (like a flag)
-   geomSimpleLine,      // = BIT(28),Two point line (like a teleport)
-   geomLine,            // Many point line (like a wall)
-   geomPoly,            // BIT(30),Polygon feature (like a loadout zone)
-   geomNone,            // BIT(31),  Other/unknown (not used, just here for completeness)
-};
-
 
 // Width of line representing centerline of barriers
 #define WALL_SPINE_WIDTH gLineWidth3
-
-
-
-class WorldItem : public DatabaseObject
-{  
-private:
-   Vector<Point> mVerts;
-
-
-   void init(GameObjectType itemType, S32 xteam, F32 xwidth, U32 itemid, bool isDockItem);
-
-   static GridDatabase *mGridDatabase;
-
-   Game *mGame;
-
-public:
-   WorldItem(GameObjectType itemType = UnknownType, S32 itemId = 0);    // Only used when creating an item from a loaded level
-   WorldItem(GameObjectType itemType, Point pos, S32 team, bool isDockItem, F32 width = 1, F32 height = 1, U32 id = 0);  // Primary constructor
-
-
-   ////////////////////////////
-   ////// TEMP THINGS
-   Point getDest();      // only needed for teleporter, speedzone, textitem
-
-   Game *getGame() { return mGame; }
-   F32 getGridSize() { return mGame->getGridSize(); }
-
-   bool flag;
-
-   U32 id;                // Item's unique id... 0 if there is none
-   U32 mId;               // TODO: rename... an autoincremented serial number
-
-   S32 mScore;            // Score awarded for this item
-   
-
-
-   // Find mount point or turret or forcefield closest to pos
-   //Point snapEngineeredObject(const Point &pos);  
-
-   ////////////////////
-   // Rendering methods
-   
-   void render(bool isBeingEdited, bool isScriptItem, bool showingReferenceShip, ShowMode showMode);
-};
-
-////////////////////////////////////////
-////////////////////////////////////////
 
 
 class WallEdge : public DatabaseObject

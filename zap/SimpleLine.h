@@ -31,17 +31,21 @@
 namespace Zap
 {
 
-class SimpleLine : public EditorObject
+class SimpleLine : public EditorObject, public GameObject
 {
+   typedef GameObject Parent;
+   typedef EditorObject EditorParent;
+
 private:
    virtual Color getEditorRenderColor() = 0;
 
-   virtual const char *getOriginBottomLabel() = 0;          
-   virtual const char *getDestinationBottomLabel() = 0;
+   virtual const char *getVertLabel(S32 index) = 0;          
    virtual const char *getEditMessage(S32 line) { return ""; }
 
 protected:
-   void initialize();      // Called by child objects
+   virtual void initializeEditor(F32 gridSize);
+   virtual S32 getDockRadius() { return 8; }                       // Size of object on dock
+   virtual S32 getEditorRadius(F32 currentScale) { return 7; }     // Size of object (or in this case vertex) in editor
 
 public:
    SimpleLine();           // Constructor
@@ -59,8 +63,6 @@ public:
    virtual S32 getVertCount() { return 2; }
 
    void deleteVert(S32 vertIndex) { /* Do nothing */ }
-
-   virtual void initializeEditor(F32 gridSize);
 };
 
 

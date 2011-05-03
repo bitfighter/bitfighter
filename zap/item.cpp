@@ -44,7 +44,6 @@ Item::Item(Point p, bool collideable, float radius, float mass) : MoveObject(p, 
    mObjectTypeMask = MoveableType | ItemType | CommandMapVisType;
    mInitial = false;
 
-   // Item Ids are generated on the server and propagated to the clients
    //if(getGame()->isServer())
    //{
       mItemId = sItemId;
@@ -52,7 +51,7 @@ Item::Item(Point p, bool collideable, float radius, float mass) : MoveObject(p, 
    //}
    //else  // is client
    //   mItemId = 0;
-   UpdateTimer1 = 0;
+   updateTimer = 0;
 }
 
 
@@ -74,7 +73,7 @@ bool Item::processArguments(S32 argc, const char **argv)
 }
 
 
-// Client only
+// Client only, in-game
 void Item::render()
 {
    // If the item is mounted, renderItem will be called from the ship it is mounted to
@@ -82,6 +81,35 @@ void Item::render()
       return;
 
    renderItem(mMoveState[RenderState].pos);
+}
+
+
+// This scaling factor allows us to draw actual item, letting it grow and shrink with editor scale, but places a limit on how small it will get
+F32 Item::getEditorRenderScaleFactor(F32 currentScale)
+{
+   const F32 thresh = 0.5;      // Size at which we'll stop rendering actual size, to keep item from getting too small
+
+   return (currentScale < thresh) ? thresh / currentScale : 1;
+}
+
+
+void Item::renderEditor(F32 currentScale)
+{
+   F32 scaleFact = getEditorRenderScaleFactor(currentScale);
+
+   glPushMatrix();
+      glScalef(scaleFact, scaleFact, 1);
+
+      renderItem(getActualPos() / scaleFact);                    
+   glPopMatrix();
+
+   EditorParent::renderEditor(currentScale);      // Draws highlight box and label
+}
+
+
+void Item::initializeEditor(F32 gridSize)
+{
+   EditorParent::initializeEditor(gridSize);    // Call parent
 }
 
 
@@ -156,7 +184,7 @@ void Item::dismount()
 }
 
 
-void Item::setActualPos(Point p)
+void Item::setActualPos(const Point &p)
 {
    mMoveState[ActualState].pos = p;
    mMoveState[ActualState].vel.set(0,0);
@@ -164,7 +192,7 @@ void Item::setActualPos(Point p)
 }
 
 
-void Item::setActualVel(Point vel)
+void Item::setActualVel(const Point &vel)
 {
    mMoveState[ActualState].vel = vel;
    setMaskBits(WarpPositionMask | PositionMask);
@@ -229,11 +257,11 @@ void Item::idle(GameObject::IdleCallPath path)
          {
             // Update less often on slow moving item, more often on fast moving item, and update when we change velocity.
             // Update at most every 5 seconds.
-            UpdateTimer1 = UpdateTimer1 - (mMoveState[ActualState].vel.len() + 20) * time;
-            if(UpdateTimer1 < 0 || mMoveState[ActualState].vel.distSquared(prevMoveVelocity) > 100)
+            updateTimer -= (mMoveState[ActualState].vel.len() + 20) * time;
+            if(updateTimer < 0 || mMoveState[ActualState].vel.distSquared(prevMoveVelocity) > 100)
             {
                setMaskBits(PositionMask);
-               UpdateTimer1 = 100;
+               updateTimer = 100;
                prevMoveVelocity = mMoveState[ActualState].vel;
             }
          }
@@ -251,7 +279,8 @@ void Item::idle(GameObject::IdleCallPath path)
    mDroppedTimer.update(deltaT);
 }
 
-static const S32 VEL_POINT_SEND_BITS = 511;     // 511 = 2^9 - 1
+
+static const S32 VEL_POINT_SEND_BITS = 511;     // 511 = 2^9 - 1, the biggest int we can pack into 9 bits.
 
 U32 Item::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {

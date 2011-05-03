@@ -140,6 +140,7 @@ public:
 
 
    Game *getGame() { return mGame; }
+   void setGame(Game *game) { mGame = game; }
 
    // DatabaseObject methods
    virtual GridDatabase *getGridDatabase();     // BotNavMeshZones have their own GridDatabase

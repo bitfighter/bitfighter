@@ -47,8 +47,6 @@ Teleporter::Teleporter()
    mObjectTypeMask |= CommandMapVisType | TeleportType;
    mNetFlags.set(Ghostable);
 
-   SimpleLine::initialize();
-
    timeout = 0;
    mTime = 0;
 }

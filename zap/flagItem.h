@@ -53,6 +53,7 @@ public:
    void initialize();      // Set inital values of things
 
    virtual bool processArguments(S32 argc, const char **argv);
+   virtual string toString();
 
    virtual void onAddedToGame(Game *theGame);
    virtual void renderItem(Point pos);
@@ -75,6 +76,20 @@ public:
 
    TNL_DECLARE_CLASS(FlagItem);
 
+   ///// Editor stuff
+
+   void renderDock();
+   S32 getEditorRadius(F32 currentScale);
+
+   // Some properties about the item that will be needed in the editor
+   const char *getEditorHelpString() { return "Flag item, used by a variety of game types."; }  
+   const char *getPrettyNamePlural() { return "Flags"; }
+   const char *getOnDockName() { return "Flag"; }
+   const char *getOnScreenName() { return "Flag"; }
+   bool hasTeam() { return true; }
+   bool canBeHostile() { return true; }
+   bool canBeNeutral() { return true; }
+
    ///// Lua Interface
 
    FlagItem(lua_State *L) { /* Do nothing */ };    //  Lua constructor
@@ -87,7 +102,6 @@ public:
    S32 getTeamIndx(lua_State *L) { return returnInt(L, mTeam + 1); }          // Index of owning team
    S32 isInInitLoc(lua_State *L) { return returnBool(L, isAtHome()); }        // Is flag in it's initial location?
 
-//private:
    void push(lua_State *L) { Lunar<FlagItem>::push(L, this); }
 
 };

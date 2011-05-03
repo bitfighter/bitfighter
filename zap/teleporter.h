@@ -61,8 +61,7 @@ private:
    Point mDest;
 
    // How are this item's vertices labeled in the editor? -- these can be private
-   const char *getOriginBottomLabel() { return "Intake Vortex"; }
-   const char *getDestinationBottomLabel() { return "Destination"; }
+   const char *getVertLabel(S32 index) { return index == 0 ? "Intake Vortex" : "Destination"; }
 
 public:
    Teleporter();     // Constructor
@@ -86,7 +85,6 @@ public:
    //Teleporter findTeleporterAt(Point pos);      // Find a teleporter at pos
 
    Vector<Point> mDests;   // need public for BotNavMeshZones
-
 
    TNL_DECLARE_CLASS(Teleporter);
 
@@ -119,7 +117,6 @@ public:
    void onGeomChanged()   { /* Do nothing */ }
 
    // Some properties about the item that will be needed in the editor
-   bool hasText() { return true; }
    const char *getEditorHelpString() { return "Teleports ships from one place to another. [T]"; }  
    const char *getPrettyNamePlural() { return "Teleporters"; }
    const char *getOnDockName() { return "Teleport"; }
@@ -127,8 +124,6 @@ public:
    bool hasTeam() { return false; }
    bool canBeHostile() { return false; }
    bool canBeNeutral() { return false; }
-   bool getHasRepop() { return false; }
-
 };
 
 
