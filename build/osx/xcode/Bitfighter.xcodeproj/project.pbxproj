@@ -185,6 +185,7 @@
 		73A3ECD3136BC69A009E0F68 /* alcDedicated.c in Sources */ = {isa = PBXBuildFile; fileRef = 73A3ECD1136BC69A009E0F68 /* alcDedicated.c */; };
 		73A3ECD4136BC69A009E0F68 /* coreaudio.c in Sources */ = {isa = PBXBuildFile; fileRef = 73A3ECD2136BC69A009E0F68 /* coreaudio.c */; };
 		73A3ECEF136BC81C009E0F68 /* loopback.c in Sources */ = {isa = PBXBuildFile; fileRef = 73A3ECEE136BC81C009E0F68 /* loopback.c */; };
+		73A4901613709B3400785E2E /* ALURE-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 73A4901513709B3400785E2E /* ALURE-Info.plist */; };
 		73B4C004136A9E8700D5CAFF /* ALc.c in Sources */ = {isa = PBXBuildFile; fileRef = 73B4BFBF136A9E8700D5CAFF /* ALc.c */; };
 		73B4C005136A9E8700D5CAFF /* alcConfig.c in Sources */ = {isa = PBXBuildFile; fileRef = 73B4BFC0136A9E8700D5CAFF /* alcConfig.c */; };
 		73B4C006136A9E8700D5CAFF /* alcEcho.c in Sources */ = {isa = PBXBuildFile; fileRef = 73B4BFC1136A9E8700D5CAFF /* alcEcho.c */; };
@@ -622,7 +623,7 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 73B4BEFE136A9D8600D5CAFF /* OpenAL-Soft */;
+			remoteGlobalIDString = 73B4BEFE136A9D8600D5CAFF;
 			remoteInfo = "OpenAL-Soft";
 		};
 		73B4C04D136A9F0B00D5CAFF /* PBXContainerItemProxy */ = {
@@ -753,7 +754,6 @@
 		73844F4D13500E1600033B85 /* polygon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = polygon.cpp; path = ../../../zap/polygon.cpp; sourceTree = SOURCE_ROOT; };
 		73844F4E13500E1600033B85 /* SlipZone.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SlipZone.h; path = ../../../zap/SlipZone.h; sourceTree = SOURCE_ROOT; };
 		7386B9F7136FE3000094A660 /* ALURE.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ALURE.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		7386B9FC136FE3000094A660 /* ALURE-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "ALURE-Info.plist"; sourceTree = "<group>"; };
 		7386BA08136FE3520094A660 /* config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = config.h; sourceTree = "<group>"; };
 		7386BA0C136FE3520094A660 /* alure.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alure.h; sourceTree = "<group>"; };
 		7386BA0D136FE3520094A660 /* alext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alext.h; sourceTree = "<group>"; };
@@ -769,6 +769,7 @@
 		73A3ECD1136BC69A009E0F68 /* alcDedicated.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = alcDedicated.c; sourceTree = "<group>"; };
 		73A3ECD2136BC69A009E0F68 /* coreaudio.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = coreaudio.c; sourceTree = "<group>"; };
 		73A3ECEE136BC81C009E0F68 /* loopback.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = loopback.c; sourceTree = "<group>"; };
+		73A4901513709B3400785E2E /* ALURE-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "ALURE-Info.plist"; sourceTree = "<group>"; };
 		73B4BEFF136A9D8600D5CAFF /* OpenAL-Soft.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = "OpenAL-Soft.framework"; sourceTree = BUILT_PRODUCTS_DIR; };
 		73B4BF00136A9D8600D5CAFF /* OpenAL-Soft-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "OpenAL-Soft-Info.plist"; sourceTree = "<group>"; };
 		73B4BFBF136A9E8700D5CAFF /* ALc.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ALc.c; sourceTree = "<group>"; };
@@ -1348,7 +1349,6 @@
 				7379552E136E1C42003A660B /* CoreAudio.framework */,
 				73795535136E1C60003A660B /* CoreAudioKit.framework */,
 				7379553C136E1CCE003A660B /* AudioUnit.framework */,
-				7386B9FC136FE3000094A660 /* ALURE-Info.plist */,
 			);
 			name = Bitfighter;
 			sourceTree = "<group>";
@@ -1356,6 +1356,7 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				73A4901513709B3400785E2E /* ALURE-Info.plist */,
 				73B4BF00136A9D8600D5CAFF /* OpenAL-Soft-Info.plist */,
 				7364B18112EBC1E9001993A7 /* Bitfighterd.icns */,
 				73649AEB12976345004366A3 /* Bitfighterd-Info.plist */,
@@ -2398,6 +2399,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				73A4901613709B3400785E2E /* ALURE-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
