@@ -36,12 +36,9 @@
 #if !defined (ZAP_DEDICATED) && !defined (TNL_OS_XBOX)
 
 #include "alInclude.h"
-#include "pictureloader.h"  // for LoadWAVFile
+#include "../alure/include/AL/alure.h"
 
 using namespace TNL;
-
-
-extern bool LoadWAVFile(const char *filename, char &format, char **data, int &size, int &freq); // in pictureLoader.cpp
 
 namespace Zap
 {
@@ -201,8 +198,8 @@ static SFXProfile sfxProfilesClassic[] = {
 extern IniSettings gIniSettings;
 SFXProfile *gSFXProfiles;
 
-static ALCdevice *gDevice = NULL;
-static ALCcontext *gContext = NULL;
+//static ALCdevice *gDevice = NULL;
+//static ALCcontext *gContext = NULL;
 static bool gSFXValid = false;
 
 enum {
@@ -324,7 +321,7 @@ static void unqueueBuffers(S32 sourceIndex)
       ALint processed;
       alGetError();
 
-      alGetSourcei(gSources[sourceIndex], AL_BUFFERS_PROCESSED, &processed);   // CRASH here with greg on OS X with malloc error double free, index = 1
+      alGetSourcei(gSources[sourceIndex], AL_BUFFERS_PROCESSED, &processed);
 
       while(processed)
       {
@@ -491,94 +488,60 @@ void SFXObject::stop()
 extern ConfigDirectories gConfigDirs;
 extern string joindir(const string &path, const string &filename);
 
+// Initialize the sound sub-system.
+// Use ALURE to ease the use of OpenAL.
 void SFXObject::init()
 {
-   ALint error;
-
-#if defined(TNL_OS_MAC_OSX) || defined(AL_VERSION_1_1)
-   gDevice = alcOpenDevice((ALCchar *) "DirectSound3D");    // Required for the different version of alut we're using on OS X
-#else
-   gDevice = alcOpenDevice((ALubyte *) "DirectSound3D");    // Original, required for the version of alut we're using on Windows & Linux
-#endif
-
-   if(!gDevice)
-   gDevice = alcOpenDevice(NULL);                           // Last ditch attempt to get a valid device
-
-   // alcOpenDevice: If the function returns NULL, then no sound driver/device has been found.
-   if(!gDevice)
+   // Initialize the sound device
+   if(!alureInitDevice(NULL, NULL))
    {
-      logprintf(LogConsumer::LogError, "Failed to intitialize OpenAL.");
+      logprintf(LogConsumer::LogError, "Failed to open OpenAL device: %s\n", alureGetErrorString());
       return;
    }
 
-   static int contextData[][2] =
+   // Create free (empty) sound sources
+   alGenSources(NumSources, gSources);
+   if(alGetError() != AL_NO_ERROR)
    {
-      {0,0} // Indicate end of list...
-   };
+      logprintf(LogConsumer::LogError, "Failed to create OpenAL sources!\n");
+      return;
+   }
 
-   gContext = alcCreateContext(gDevice, (ALCint*)contextData);
-   alcMakeContextCurrent(gContext);
-
-   error = alGetError();
-
+   // Create sound buffers for the sound effect pool
    alGenBuffers(NumSFXBuffers, gBuffers);
-   gVoiceFreeBuffers.resize(32);
-   alGenBuffers(32, gVoiceFreeBuffers.address());
+   if(alGetError() != AL_NO_ERROR)
+   {
+      logprintf(LogConsumer::LogError, "Failed to create OpenAL buffers!\n");
+      return;
+   }
 
-   error = alGetError();
-
+   // This MUST be set to maintain bitfighter's unique gain system
+   // OpenAL normally defaults the distance model to AL_INVERSE_DISTANCE
+   // which is the "physically correct" model
    alDistanceModel(AL_NONE);
-   error = alGetError();
+   if(alGetError() != AL_NO_ERROR)
+      logprintf(LogConsumer::LogWarning, "Failed to set proper sound gain distance model!  Sounds will be off..\n");
 
-   // Load up all the sound buffers
-   //if(error != AL_NO_ERROR)    // <--- why is this commented out?
-   //   return;
-
-   // Select the soundset we'll be using today
+   // Choose the sound set
    if(gIniSettings.sfxSet == sfxClassicSet)
       gSFXProfiles = sfxProfilesClassic;
    else
       gSFXProfiles = sfxProfilesModern;
 
-   alGenSources(NumSources, gSources);
-
-   for(U32 i = 0; i < NumSFXBuffers; i++)    // Iterate through all sounds
+   // Iterate through all sounds
+   for(U32 i = 0; i < NumSFXBuffers; i++)
    {
-      if(!gSFXProfiles[i].fileName)          // End when we find a sound sans filename
+      // End when we find a sound sans filename
+      if(!gSFXProfiles[i].fileName)
          break;
 
-      ALsizei size,freq;
-      ALenum   format;
-      ALvoid   *data;
-      ALboolean loop;
-
-      char format1;
-
+      // Grab sound file location
       string fileBuffer = joindir(gConfigDirs.sfxDir, gSFXProfiles[i].fileName);
 
-// newer version openAL may not have alutLoadWAVFile
-//#if defined(TNL_OS_MAC_OSX)
-//      alutLoadWAVFile((ALbyte *) fileBuffer.c_str(), &format, &data, &size, &freq);      // OS X version has no loop param
-//#else
-//      alutLoadWAVFile((ALbyte *) fileBuffer.c_str(), &format, &data, &size, &freq, &loop);
-//#endif
-//      if(alGetError() != AL_NO_ERROR)
-      if(!LoadWAVFile(fileBuffer.c_str(), format1, (char **) &data, (int &)size, (int &)freq))
+      // Stick sound into a buffer
+      if(alureBufferDataFromFile(fileBuffer.c_str(), gBuffers[i]) == AL_FALSE)
       {
-         logprintf(LogConsumer::LogError, "Failure (1) loading sound file '%s': Game will proceed without sound.", fileBuffer.c_str()); 
-         return;                                                                       
-      }
-
-      const int formatconvert[] = {AL_FORMAT_MONO8, AL_FORMAT_MONO16, AL_FORMAT_STEREO8, AL_FORMAT_STEREO16};
-      format = formatconvert[format1];
-
-      alBufferData(gBuffers[i], format, data, size, freq);
-      //alutUnloadWAV(format, data, size, freq);
-      delete (char *)data;
-
-      if(alGetError() != AL_NO_ERROR)
-      {
-         logprintf(LogConsumer::LogError, "Failure (2) loading sound file '%s': Game will proceed without sound.", fileBuffer.c_str());   
+         logprintf(LogConsumer::LogError, "Failure (1) loading sound file '%s': Game will proceed without sound.", fileBuffer.c_str());
          return;
       }
    }
@@ -689,6 +652,8 @@ void SFXObject::process()
       else
          s->updateGain();     // For other sources, check the distance and adjust the gain
    }
+
+   alureUpdate();
 }
 
 void SFXObject::setListenerParams(Point pos, Point velocity)
@@ -707,9 +672,9 @@ void SFXObject::shutdown()
       return;
 
    alDeleteBuffers(NumSFXBuffers, gBuffers);
-   alcMakeContextCurrent(NULL);
-   alcDestroyContext(gContext);
-   alcCloseDevice(gDevice);
+   alDeleteSources(NumSources, gSources);
+
+   alureShutdownDevice();
 }
 
 };

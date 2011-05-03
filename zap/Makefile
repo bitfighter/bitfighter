@@ -19,7 +19,7 @@
 
 OPTIMIZE=-O2
 DEBUG=-g
-INCLUDES=-I../tnl -I../glut -I../openal -I../Triangle -I../recast -I../clipper -I../poly2tri
+INCLUDES=-I../tnl -I../glut -I../openal -I../Triangle -I../recast -I../clipper -I../poly2tri -I../alure/include
 CC=gcc $(DEBUG) $(INCLUDES) -DTNL_ENABLE_LOGGING -W $(OPTIMIZE)
 THREADLIB= -lpthread
 GLUT=-lGL -lGLU -lglut
@@ -86,7 +86,6 @@ OBJECTS_ZAP=\
    move.o\
    moveObject.o\
    oglconsole.o\
-   pictureloader.o\
    playerInfo.o\
    Point.o\
    polygon.o\
@@ -167,7 +166,7 @@ dedicated: bitfighter
 
 
 bitfighter: $(OBJECTS_ZAP) 
-	$(CC) -o ../exe/$(EXEFILE) $(OBJECTS_ZAP) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a ../lua/lua-vec/src/liblua.a $(OPENAL) $(GLUT) $(THREADLIB) $(LFLAGS)
+	$(CC) -o ../exe/$(EXEFILE) $(OBJECTS_ZAP) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a ../lua/lua-vec/src/liblua.a ../alure/libalure.a $(OPENAL) $(GLUT) $(THREADLIB) $(LFLAGS)
 
 
 clean: 

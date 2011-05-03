@@ -42,6 +42,7 @@ release:
 	@$(MAKE) -C libtomcrypt
 	#@$(MAKE) -C master
 	@$(MAKE) -C lua/lua-vec/src
+	@$(MAKE) -C alure
 	@$(MAKE) -C zap	
 
 debug:
@@ -49,6 +50,7 @@ debug:
 	@$(MAKE) -C libtomcrypt
 	#@$(MAKE) -C master
 	@$(MAKE) -C lua/lua-vec/src
+	@$(MAKE) -C alure
 	@$(MAKE) -C zap	debug
 
 dedicated:
@@ -71,6 +73,7 @@ clean:
 	@$(MAKE) -C libtomcrypt clean
 	@$(MAKE) -C master clean
 	@$(MAKE) -C lua/lua-vec/src clean
+	@$(MAKE) -C alure clean
 	@$(MAKE) -C zap	clean
 
 cleano:
@@ -78,5 +81,6 @@ cleano:
 	@$(MAKE) -C libtomcrypt cleano
 	@$(MAKE) -C master cleano
 	@$(MAKE) -C lua/lua-vec/src cleano
+	@$(MAKE) -C alure cleano
 	@$(MAKE) -C zap	cleano
 
