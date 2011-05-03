@@ -86,6 +86,7 @@ OBJECTS_ZAP=\
    move.o\
    moveObject.o\
    oglconsole.o\
+   pictureloader.o\
    playerInfo.o\
    Point.o\
    polygon.o\

@@ -397,7 +397,13 @@ bool calcInterceptCourse(GameObject *target, Point aimPos, F32 aimRadius, S32 ai
 
    // Make sure we can see it...
    Point n;
-   if(target->findObjectLOS(BarrierType, MoveObject::ActualState, aimPos, target->getActualPos(), t, n))
+   U32 objectType = 0;
+   objectType |= BarrierType;
+
+   if(!(target->getObjectTypeMask() & ( ShipType | RobotType)))  // If the target isn't a ship, take forcefields into account
+      objectType |= ForceFieldType;
+
+   if(target->findObjectLOS(objectType, MoveObject::ActualState, aimPos, target->getActualPos(), t, n))
       return false;
 
    // See if we're gonna clobber our own stuff...

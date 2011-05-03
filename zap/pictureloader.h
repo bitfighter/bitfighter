@@ -11,3 +11,7 @@ struct pictureLoader
 };
 
 extern bool setGLTex(S32 num);
+
+
+
+extern bool LoadWAVFile(const char *filename, char &format, char **data, int &size, int &freq);

@@ -39,6 +39,62 @@ unsigned int readint(void* fp){
 
 
 
+bool LoadWAVFile(const char *filename, char &format, char **data, int &size, int &freq)
+{
+   void *file = readfile(filename);
+   if(file == NULL)
+      return false;
+
+   int a;
+
+   if(readint(file) != 0x46464952)
+   {
+      closefile(file);
+      return false;
+   }
+   readint(file); // size
+   readint(file); // "WAVE"
+   readint(file); // "fmt "
+   int size1 = readint(file) & 255; // size of format code  (linit to avoid freezing)
+   readshort(file); // format
+   bool stereo = readshort(file) == 2;
+   freq = readint(file);
+   readint(file); // data rate
+   readshort(file); // data block size
+   bool bits16 = readshort(file) == 16; // bits per sample
+   for(int i=16; i<size1; i++)
+      readbyte(file);
+
+   a=readint(file);
+   while(a != 0x61746164 && a != 0) // loop until found "data"
+   {
+      a=readint(file);
+      for(int i=0; i < (a & 0xFFF); i++)
+         readbyte(file);
+      a=readint(file);
+   }
+   size = readint(file);
+   if(size > 0x8000000) size = 0x8000000; // limit 128 MB
+   if(size < 1)
+   {
+      closefile(file);
+      return false;
+   }
+
+   *data = new char[size];
+   size_t readsize = fread(*data, 1, size, (FILE*) file);
+   closefile(file);
+   format = (stereo ? 2 : 0) + (bits16 ? 1 : 0);
+   if(readsize < 1)
+   {
+      delete *data;
+      return false;
+   }
+   return true;
+}
+
+
+
 pictureLoader *LoadPicture(const char* path){
    int a,b,c,d,e,j,x,y,vx,bpp,x2,y2;
    U32 p[256];
@@ -84,6 +140,7 @@ pictureLoader *LoadPicture(const char* path){
    }
 
    c=0;
+   d=0;
    y2=y;while(y2>0){
       y2--;e=0;
       x2=0;while(x2<x){

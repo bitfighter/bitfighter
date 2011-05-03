@@ -27,12 +27,7 @@
 #ifndef _ALINCLUDE_H_
 #define _ALINCLUDE_H_
 
-#if defined(TNL_OS_MAC_OSX)
-#include <OpenAL-Soft/alc.h>
-#include <FreeALUT/alut.h>		   // <--- Note that this alut.h is the same as the one included above in the OSX block
-#else    // Windows
-#include <alc.h>
-#include <alut_win.h>
-#endif
+#include "include/alc.h"
+#include "include/al.h"
 
 #endif

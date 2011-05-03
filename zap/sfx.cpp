@@ -36,8 +36,12 @@
 #if !defined (ZAP_DEDICATED) && !defined (TNL_OS_XBOX)
 
 #include "alInclude.h"
+#include "pictureloader.h"  // for LoadWAVFile
 
 using namespace TNL;
+
+
+extern bool LoadWAVFile(const char *filename, char &format, char **data, int &size, int &freq); // in pictureLoader.cpp
 
 namespace Zap
 {
@@ -214,6 +218,8 @@ static ALuint gBuffers[NumSFXBuffers];
 static Vector<ALuint> gVoiceFreeBuffers;
 
 static Vector<SFXHandle> gPlayList;
+
+
 
 SFXObject::SFXObject(U32 profileIndex, ByteBufferPtr ib, F32 gain, Point position, Point velocity)
 {
@@ -489,7 +495,7 @@ void SFXObject::init()
 {
    ALint error;
 
-#ifdef TNL_OS_MAC_OSX
+#if defined(TNL_OS_MAC_OSX) || defined(AL_VERSION_1_1)
    gDevice = alcOpenDevice((ALCchar *) "DirectSound3D");    // Required for the different version of alut we're using on OS X
 #else
    gDevice = alcOpenDevice((ALubyte *) "DirectSound3D");    // Original, required for the version of alut we're using on Windows & Linux
@@ -546,21 +552,29 @@ void SFXObject::init()
       ALvoid   *data;
       ALboolean loop;
 
+      char format1;
+
       string fileBuffer = joindir(gConfigDirs.sfxDir, gSFXProfiles[i].fileName);
 
-#if defined(TNL_OS_MAC_OSX)
-      alutLoadWAVFile((ALbyte *) fileBuffer.c_str(), &format, &data, &size, &freq);      // OS X version has no loop param
-#else
-      alutLoadWAVFile((ALbyte *) fileBuffer.c_str(), &format, &data, &size, &freq, &loop);
-#endif
-      if(alGetError() != AL_NO_ERROR)
+// newer version openAL may not have alutLoadWAVFile
+//#if defined(TNL_OS_MAC_OSX)
+//      alutLoadWAVFile((ALbyte *) fileBuffer.c_str(), &format, &data, &size, &freq);      // OS X version has no loop param
+//#else
+//      alutLoadWAVFile((ALbyte *) fileBuffer.c_str(), &format, &data, &size, &freq, &loop);
+//#endif
+//      if(alGetError() != AL_NO_ERROR)
+      if(!LoadWAVFile(fileBuffer.c_str(), format1, (char **) &data, (int &)size, (int &)freq))
       {
          logprintf(LogConsumer::LogError, "Failure (1) loading sound file '%s': Game will proceed without sound.", fileBuffer.c_str()); 
          return;                                                                       
       }
 
+      const int formatconvert[] = {AL_FORMAT_MONO8, AL_FORMAT_MONO16, AL_FORMAT_STEREO8, AL_FORMAT_STEREO16};
+      format = formatconvert[format1];
+
       alBufferData(gBuffers[i], format, data, size, freq);
-      alutUnloadWAV(format, data, size, freq);
+      //alutUnloadWAV(format, data, size, freq);
+      delete (char *)data;
 
       if(alGetError() != AL_NO_ERROR)
       {
@@ -666,7 +680,7 @@ void SFXObject::process()
       SFXHandle &s = gPlayList[i];
       if(s->mSourceIndex == -1)
       {
-         while(sourceActive[firstFree])
+         while(firstFree < NumSources-1 && sourceActive[firstFree])
             firstFree++;
          s->mSourceIndex = firstFree;
          sourceActive[firstFree] = true;
@@ -788,7 +802,7 @@ void SFXObject::shutdown()
 
 #endif
 
-#ifdef TNL_OS_WIN32
+#if 0 //#ifdef TNL_OS_WIN32
 
 #include "dsound.h"   // See readme in win_include_do_not_distribute folder
 #include <stdio.h>
@@ -908,42 +922,63 @@ void SFXObject::stopRecording()
 
 };
 
+#elif defined(ZAP_DEDICATED) || !defined(AL_VERSION_1_1)
+namespace Zap
+{
+bool SFXObject::startRecording()
+{
+   return false;
+}
+
+void SFXObject::captureSamples(ByteBufferPtr buffer)
+{
+}
+
+void SFXObject::stopRecording()
+{
+}
+
+};
+
 #else
 
 namespace Zap
 {
 
-static U32 prevTimer;
+// probably requires openAL version 1.1
+
+static ALCdevice *captureDevice;
+
 
 bool SFXObject::startRecording()
 {
+   captureDevice = alcCaptureOpenDevice(NULL, 8000, AL_FORMAT_MONO16, 2048);
+   if(alGetError() != AL_NO_ERROR || captureDevice == NULL)
+      return false;
+
+   alcCaptureStart(captureDevice);
    return true;
 }
 
-// TODO: make it record from sound input for linux / mac
 void SFXObject::captureSamples(ByteBufferPtr buffer)
 {
-   U32 newTimer = Platform::getRealMilliseconds();
-   U32 speedTimer = newTimer - prevTimer;
-   if(speedTimer > 1000) speedTimer = 0;
-   prevTimer = newTimer;
-
-   // 8000 mhz, 16-bit, mono sound
 
    U32 startSize = buffer->getBufferSize();
-   U32 endSize = startSize + speedTimer * 16;   //  8000.mhz * (16.bit / 8) / 1000
+   ALint sample;
+
+   alcGetIntegerv(captureDevice, ALC_CAPTURE_SAMPLES, 1, &sample);
+
+   U32 endSize = startSize + sample*2;  // convert number of samples (2 byte mono) to number of bytes, but keep sample size unchanged for alcCaptureSamples
 
    buffer->resize(endSize);
-   U8 *mem = buffer->getBuffer();
-   for(U32 i = startSize; i < endSize; i+= 2)
-   {
-      Random::read(&mem[i], 2);   // random sound
-   }
-
+   alcCaptureSamples(captureDevice, (ALCvoid *) &buffer->getBuffer()[startSize], sample);
 }
 
 void SFXObject::stopRecording()
 {
+   alcCaptureStop(captureDevice);
+   alcCaptureCloseDevice(captureDevice);
+   captureDevice = NULL;
 }
 
 };
