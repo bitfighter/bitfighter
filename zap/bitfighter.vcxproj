@@ -60,7 +60,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\tnl;..\libtomcrypt;..\glut;..\openal;..\win_include_do_not_distribute</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\tnl;..\libtomcrypt;..\glut;..\openal;..\alure;..\win_include_do_not_distribute</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PreprocessToFile>false</PreprocessToFile>
@@ -72,7 +72,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>../lib;</AdditionalLibraryDirectories>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>../Debug/libtomcrypt.lib;../Debug/tnl.lib;../Debug/lua-vec.lib;../lib/ALut.lib;../lib/OpenAL32.lib;dinput8.lib;dxguid.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>../Debug/libtomcrypt.lib;../Debug/tnl.lib;../Debug/lua-vec.lib;../lib/ALut.lib;../lib/OpenAL32.lib;../lib/ALURE32.lib;dinput8.lib;dxguid.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>MSVCRTD.lib;msvcprtd.lib</IgnoreSpecificDefaultLibraries>
     </Link>
     <ProjectReference>
@@ -99,7 +99,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>..\tnl;..\libtomcrypt;..\glut;..\openal;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\tnl;..\libtomcrypt;..\glut;..\openal;..\alure</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
       <MinimalRebuild>true</MinimalRebuild>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -111,7 +111,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>../lib;</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>MSVCRT.lib;msvcprt.lib</IgnoreSpecificDefaultLibraries>
-      <AdditionalDependencies>../Release/libtomcrypt.lib;../Release/tnl.lib;../Release/lua-vec.lib;../lib/ALut.lib;../lib/OpenAL32.lib;dinput8.lib;dxguid.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>../Release/libtomcrypt.lib;../Release/tnl.lib;../Release/lua-vec.lib;../lib/ALut.lib;../lib/OpenAL32.lib;../lib/ALURE32.lib;dinput8.lib;dxguid.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
     </Link>
     <CustomBuildStep>
@@ -186,7 +186,6 @@
     <ClCompile Include="..\zap\md5wrapper.cpp" />
     <ClCompile Include="..\zap\move.cpp" />
     <ClCompile Include="..\zap\moveObject.cpp" />
-    <ClCompile Include="..\zap\pictureloader.cpp" />
     <ClCompile Include="..\zap\playerInfo.cpp" />
     <ClCompile Include="..\zap\polygon.cpp" />
     <ClCompile Include="..\zap\projectile.cpp" />
@@ -295,7 +294,6 @@
     <ClInclude Include="..\zap\md5wrapper.h" />
     <ClInclude Include="..\zap\move.h" />
     <ClInclude Include="..\zap\moveObject.h" />
-    <ClInclude Include="..\zap\pictureloader.h" />
     <ClInclude Include="..\zap\playerInfo.h" />
     <ClInclude Include="..\zap\Point.h" />
     <ClInclude Include="..\zap\Rect.h" />
