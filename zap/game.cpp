@@ -63,6 +63,7 @@
 #include "tnlNetInterface.h"
 
 #include <sys/stat.h>
+#include <math.h>
 
 
 using namespace TNL;

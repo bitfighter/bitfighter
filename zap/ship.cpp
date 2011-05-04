@@ -49,6 +49,7 @@
 #include "glutInclude.h"
 
 #include <stdio.h>
+#include <math.h>
 
 #define hypot _hypot    // Kill some warnings
 

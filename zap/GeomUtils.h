@@ -62,8 +62,6 @@ extern "C" {
 #include "../Triangle/triangle.h"      // For Triangle!
 }
 
-#include "../poly2tri/poly2tri.h"
-
 using namespace TNL;
 using namespace clipper;
 
@@ -146,9 +144,6 @@ Vector<Vector<Point> > downscaleClipperPoints(const Polygons& inputPolygons);
 class Triangulate
 {
 public:
-   // use either Triangle of Poly2Tri to tessellate
-   enum ComplexMethod { cmTriangle, cmP2t};
-
    // class for output data of the triangulate process methods; hopefully cleans itself up
    class TriangleData
    {
@@ -169,7 +164,7 @@ public:
    static bool Process(const Vector<Point> &contour, Vector<Point> &result);
 
    // Triangulate a bounded area with complex polygon holes
-   static bool processComplex(TriangleData& outputData, const Rect& bounds, const Vector<Vector<Point> >& polygonList, Vector<F32>& holeMarkerList, ComplexMethod method);
+   static bool processComplex(TriangleData& outputData, const Rect& bounds, const Vector<Vector<Point> >& polygonList, Vector<F32>& holeMarkerList);
 
    // Merge triangles into convex polygons
    static bool mergeTriangles(TriangleData& triangleData, rcPolyMesh& mesh, S32 maxVertices = 6);

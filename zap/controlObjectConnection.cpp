@@ -27,6 +27,8 @@
 #include "controlObjectConnection.h"
 #include "UIGame.h"
 
+#include <math.h>
+
 namespace Zap
 {
 

@@ -51,6 +51,7 @@
 
 #include <ctype.h>
 #include <exception>
+#include <math.h>
 
 namespace Zap
 {

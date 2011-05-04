@@ -59,6 +59,7 @@
 
 #include "oglconsole.h"
 
+#include <math.h>
 
 
 #define hypot _hypot    // Kill some warnings

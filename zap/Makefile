@@ -19,7 +19,7 @@
 
 OPTIMIZE=-O2
 DEBUG=-g
-INCLUDES=-I../tnl -I../glut -I../openal -I../Triangle -I../recast -I../clipper -I../poly2tri -I../alure/include
+INCLUDES=-I../tnl -I../glut -I../openal -I../Triangle -I../recast -I../clipper -I../alure
 CC=gcc $(DEBUG) $(INCLUDES) -DTNL_ENABLE_LOGGING -W $(OPTIMIZE)
 THREADLIB= -lpthread
 GLUT=-lGL -lGLU -lglut
@@ -123,12 +123,7 @@ OBJECTS_ZAP=\
    ../Triangle/triangle.o\
    ../recast/RecastAlloc.o\
    ../recast/RecastMesh.o\
-   ../clipper/clipper.o\
-   ../poly2tri/common/shapes.o\
-   ../poly2tri/sweep/sweep.o\
-   ../poly2tri/sweep/sweep_context.o\
-   ../poly2tri/sweep/advancing_front.o\
-   ../poly2tri/sweep/cdt.o
+   ../clipper/clipper.o
 
 
 CFLAGS=

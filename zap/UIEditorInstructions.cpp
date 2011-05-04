@@ -41,6 +41,8 @@
 
 #include "../glut/glutInclude.h"
 
+#include <math.h>
+
 namespace Zap
 {
 

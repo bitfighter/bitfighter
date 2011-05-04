@@ -43,6 +43,7 @@ using namespace TNL;
 #include <string>
 #include <stdarg.h>     // For va_args
 
+#include <math.h>
 
 #ifdef ZAP_DEDICATED
 void *glutStrokeRoman;

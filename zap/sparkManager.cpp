@@ -28,6 +28,8 @@
 #include "gameObjectRender.h"
 #include "../glut/glutInclude.h"
 
+#include <math.h>
+
 using namespace TNL;
 
 namespace Zap

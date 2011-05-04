@@ -27,6 +27,8 @@
 #include "gameNetInterface.h"
 #include "glutInclude.h"
 
+#include <math.h>
+
 namespace Zap
 {
 

@@ -43,8 +43,10 @@
 #include "config.h"
 
 #include "../glut/glutInclude.h"
+
 #include <algorithm>
 #include <string>
+#include <math.h>
 
 namespace Zap
 {

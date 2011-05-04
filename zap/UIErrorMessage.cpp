@@ -29,7 +29,9 @@
 #include "UIMenus.h"
 
 #include "../glut/glutInclude.h"
+
 #include <stdio.h>
+#include <math.h>
 
 namespace Zap
 {

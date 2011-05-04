@@ -42,6 +42,8 @@
 
 //#include "pictureloader.h"
 
+#include <math.h>
+
 namespace Zap
 {
 

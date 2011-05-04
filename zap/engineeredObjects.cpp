@@ -34,6 +34,8 @@
 #include "GeomUtils.h"
 #include "BotNavMeshZone.h"
 
+#include <math.h>
+
 namespace Zap
 {
 

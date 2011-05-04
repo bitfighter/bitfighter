@@ -32,6 +32,8 @@
 #include "sfx.h"
 #include "speedZone.h"
 
+#include <math.h>
+
 namespace Zap
 {
 

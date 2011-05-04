@@ -26,6 +26,8 @@
 #include "Rect.h"
 #include "GeomUtils.h"
 
+#include <math.h>
+
 using namespace TNL;
 
 namespace Zap

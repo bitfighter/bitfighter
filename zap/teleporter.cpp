@@ -26,6 +26,8 @@
 #include "teleporter.h"
 #include "../glut/glutInclude.h"
 
+#include <math.h>
+
 using namespace TNL;
 #include "ship.h"
 #include "sparkManager.h"

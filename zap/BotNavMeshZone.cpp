@@ -36,6 +36,7 @@
 #include "../recast/RecastAlloc.h"
 
 #include <vector>
+#include <math.h>
 
 
 // triangulate wants quit on error
@@ -595,7 +596,7 @@ bool BotNavMeshZone::buildBotMeshZones(Game *game)
 
    // Tessellate!
    Triangulate::TriangleData triangleData;
-   if(!Triangulate::processComplex(triangleData, bounds, solution, holes, Triangulate::cmTriangle))  // use Triangulate::cmP2t for poly2tri
+   if(!Triangulate::processComplex(triangleData, bounds, solution, holes))
       return false;
 
 #ifdef LOG_TIMER
