@@ -36,7 +36,7 @@
 #if !defined (ZAP_DEDICATED) && !defined (TNL_OS_XBOX)
 
 #include "alInclude.h"
-#include "../alure/include/AL/alure.h"
+#include "../alure/AL/alure.h"
 
 using namespace TNL;
 
