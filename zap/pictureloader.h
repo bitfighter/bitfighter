@@ -1,17 +1,19 @@
 #include "../tnl/tnlTypes.h"
+#include "../glut/glutInclude.h"  // for GLuint
+
 using namespace TNL;
 
-struct pictureLoader
+struct PictureLoader
 {
    U32 x;
    U32 y;
    U32 *data;
-   pictureLoader() {x=0; y=0; data=NULL;}
-   ~pictureLoader() {if(data) delete data;}
+   PictureLoader() {x=0; y=0; data=NULL;}
+   ~PictureLoader() {if(data) delete data;}
 };
 
-extern bool setGLTex(S32 num);
-
+PictureLoader *LoadPicture(const char* path);
+GLuint loadGLTex(PictureLoader picture);
 
 
 extern bool LoadWAVFile(const char *filename, char &format, char **data, int &size, int &freq);

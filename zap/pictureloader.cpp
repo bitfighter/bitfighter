@@ -95,11 +95,11 @@ bool LoadWAVFile(const char *filename, char &format, char **data, int &size, int
 
 
 
-pictureLoader *LoadPicture(const char* path){
+PictureLoader *LoadPicture(const char* path){
    int a,b,c,d,e,j,x,y,vx,bpp,x2,y2;
    U32 p[256];
    U32 *mem;
-   pictureLoader *pict = NULL;
+   PictureLoader *pict = NULL;
    void* r=readfile((const char*) path);
    if(r==0) return 0;
    readshort(r);
@@ -109,7 +109,7 @@ pictureLoader *LoadPicture(const char* path){
    readint(r);
    x=((readint(r)-1) & 0xFFFF)+1;
    y=((readint(r)-1) & 0xFFFF)+1;
-   pict = new pictureLoader();
+   pict = new PictureLoader();
    pict->data = new U32[x*y];
    pict->x = x;
    pict->y = y;
@@ -169,40 +169,24 @@ pictureLoader *LoadPicture(const char* path){
    return pict;
 }
 
-GLuint glTexHandle[16];
-bool hasLoaded[16];
 
 
-// true when loaded successfully
-bool setGLTex(S32 num)
+GLuint loadGLTex(PictureLoader *picture)
 {
-   if(U32(num) >= 16) return false;
-
-   if(glTexHandle[num] != 0)
-   {
-      /* Select our font */
-      glBindTexture(GL_TEXTURE_2D, glTexHandle[num]);
-      {int err=glGetError();if(err)printf("glBindTexture() error: %i\n",err);}
-      return hasLoaded[num];
-   }
-   hasLoaded[num] = false;
+   GLuint outputGL;
 
    /* Get a font index from OpenGL */
-   glGenTextures(1, &glTexHandle[num]);    /* Create 1 texture, store in glFontHandle */
+   glGenTextures(1, &outputGL);    /* Create 1 texture, store in glFontHandle */
    {int err=glGetError();if(err)printf("glGenTextures() error: %i\n",err);}
     
    /* Select our font */
-   glBindTexture(GL_TEXTURE_2D, glTexHandle[num]);
+   glBindTexture(GL_TEXTURE_2D, outputGL);
    {int err=glGetError();if(err)printf("glBindTexture() error: %i\n",err);}
 
    /* Set some parameters i guess */
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-
-   pictureLoader *pict = LoadPicture("SMOKE.BMP");
-   if(pict == NULL)
-      return false;
 
    //if(num == 0)  // move color into alpha
    //{
@@ -212,10 +196,9 @@ bool setGLTex(S32 num)
 
    glTexImage2D(
          GL_TEXTURE_2D, 0, GL_RGBA,
-         pict->x, pict->y, 0,
-         GL_RGBA, GL_UNSIGNED_BYTE, pict->data);
+         picture->x, picture->y, 0,
+         GL_RGBA, GL_UNSIGNED_BYTE, picture->data);
    {int err=glGetError();if(err)printf("glBindTexture() error: %i\n",err);}
-   delete pict;
-   hasLoaded[num] = true;
-   return true;
+   return outputGL;
 }
+
