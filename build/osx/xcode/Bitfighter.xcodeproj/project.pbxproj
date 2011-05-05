@@ -164,17 +164,7 @@
 		737CE637129055BF00D732B7 /* tnl.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 737CE61D1290553D00D732B7 /* tnl.framework */; };
 		737CE639129055C500D732B7 /* tnl.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 737CE61D1290553D00D732B7 /* tnl.framework */; };
 		73844F3713500C2F00033B85 /* clipper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73844F2613500C2F00033B85 /* clipper.cpp */; };
-		73844F3813500C2F00033B85 /* shapes.cc in Sources */ = {isa = PBXBuildFile; fileRef = 73844F2A13500C2F00033B85 /* shapes.cc */; };
-		73844F3913500C2F00033B85 /* advancing_front.cc in Sources */ = {isa = PBXBuildFile; fileRef = 73844F2F13500C2F00033B85 /* advancing_front.cc */; };
-		73844F3A13500C2F00033B85 /* cdt.cc in Sources */ = {isa = PBXBuildFile; fileRef = 73844F3113500C2F00033B85 /* cdt.cc */; };
-		73844F3B13500C2F00033B85 /* sweep.cc in Sources */ = {isa = PBXBuildFile; fileRef = 73844F3313500C2F00033B85 /* sweep.cc */; };
-		73844F3C13500C2F00033B85 /* sweep_context.cc in Sources */ = {isa = PBXBuildFile; fileRef = 73844F3513500C2F00033B85 /* sweep_context.cc */; };
 		73844F3D13500C2F00033B85 /* clipper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73844F2613500C2F00033B85 /* clipper.cpp */; };
-		73844F3E13500C2F00033B85 /* shapes.cc in Sources */ = {isa = PBXBuildFile; fileRef = 73844F2A13500C2F00033B85 /* shapes.cc */; };
-		73844F3F13500C2F00033B85 /* advancing_front.cc in Sources */ = {isa = PBXBuildFile; fileRef = 73844F2F13500C2F00033B85 /* advancing_front.cc */; };
-		73844F4013500C2F00033B85 /* cdt.cc in Sources */ = {isa = PBXBuildFile; fileRef = 73844F3113500C2F00033B85 /* cdt.cc */; };
-		73844F4113500C2F00033B85 /* sweep.cc in Sources */ = {isa = PBXBuildFile; fileRef = 73844F3313500C2F00033B85 /* sweep.cc */; };
-		73844F4213500C2F00033B85 /* sweep_context.cc in Sources */ = {isa = PBXBuildFile; fileRef = 73844F3513500C2F00033B85 /* sweep_context.cc */; };
 		73844F4F13500E1600033B85 /* GeomUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73844F4B13500E1600033B85 /* GeomUtils.cpp */; };
 		73844F5013500E1600033B85 /* polygon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73844F4D13500E1600033B85 /* polygon.cpp */; };
 		73844F5113500E1600033B85 /* GeomUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73844F4B13500E1600033B85 /* GeomUtils.cpp */; };
@@ -760,18 +750,6 @@
 		737CE61E1290553D00D732B7 /* tnl-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "tnl-Info.plist"; sourceTree = "<group>"; };
 		73844F2613500C2F00033B85 /* clipper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = clipper.cpp; sourceTree = "<group>"; };
 		73844F2713500C2F00033B85 /* clipper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = clipper.h; sourceTree = "<group>"; };
-		73844F2A13500C2F00033B85 /* shapes.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = shapes.cc; sourceTree = "<group>"; };
-		73844F2B13500C2F00033B85 /* shapes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = shapes.h; sourceTree = "<group>"; };
-		73844F2C13500C2F00033B85 /* utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = utils.h; sourceTree = "<group>"; };
-		73844F2D13500C2F00033B85 /* poly2tri.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = poly2tri.h; sourceTree = "<group>"; };
-		73844F2F13500C2F00033B85 /* advancing_front.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = advancing_front.cc; sourceTree = "<group>"; };
-		73844F3013500C2F00033B85 /* advancing_front.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = advancing_front.h; sourceTree = "<group>"; };
-		73844F3113500C2F00033B85 /* cdt.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cdt.cc; sourceTree = "<group>"; };
-		73844F3213500C2F00033B85 /* cdt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cdt.h; sourceTree = "<group>"; };
-		73844F3313500C2F00033B85 /* sweep.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sweep.cc; sourceTree = "<group>"; };
-		73844F3413500C2F00033B85 /* sweep.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sweep.h; sourceTree = "<group>"; };
-		73844F3513500C2F00033B85 /* sweep_context.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sweep_context.cc; sourceTree = "<group>"; };
-		73844F3613500C2F00033B85 /* sweep_context.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sweep_context.h; sourceTree = "<group>"; };
 		73844F4B13500E1600033B85 /* GeomUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GeomUtils.cpp; path = ../../../zap/GeomUtils.cpp; sourceTree = SOURCE_ROOT; };
 		73844F4C13500E1600033B85 /* GeomUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GeomUtils.h; path = ../../../zap/GeomUtils.h; sourceTree = SOURCE_ROOT; };
 		73844F4D13500E1600033B85 /* polygon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = polygon.cpp; path = ../../../zap/polygon.cpp; sourceTree = SOURCE_ROOT; };
@@ -1347,7 +1325,6 @@
 				73B0FB751370AAD10019AE4E /* openal-soft */,
 				7386BA07136FE3520094A660 /* alure */,
 				73844F2513500C2F00033B85 /* clipper */,
-				73844F2813500C2F00033B85 /* poly2tri */,
 				73702882132A020B00397F99 /* recast */,
 				73702887132A020B00397F99 /* Triangle */,
 				5E481F4113053943004F9637 /* sqlite */,
@@ -1485,42 +1462,6 @@
 			name = clipper;
 			path = ../../../clipper;
 			sourceTree = SOURCE_ROOT;
-		};
-		73844F2813500C2F00033B85 /* poly2tri */ = {
-			isa = PBXGroup;
-			children = (
-				73844F2913500C2F00033B85 /* common */,
-				73844F2D13500C2F00033B85 /* poly2tri.h */,
-				73844F2E13500C2F00033B85 /* sweep */,
-			);
-			name = poly2tri;
-			path = ../../../poly2tri;
-			sourceTree = SOURCE_ROOT;
-		};
-		73844F2913500C2F00033B85 /* common */ = {
-			isa = PBXGroup;
-			children = (
-				73844F2A13500C2F00033B85 /* shapes.cc */,
-				73844F2B13500C2F00033B85 /* shapes.h */,
-				73844F2C13500C2F00033B85 /* utils.h */,
-			);
-			path = common;
-			sourceTree = "<group>";
-		};
-		73844F2E13500C2F00033B85 /* sweep */ = {
-			isa = PBXGroup;
-			children = (
-				73844F2F13500C2F00033B85 /* advancing_front.cc */,
-				73844F3013500C2F00033B85 /* advancing_front.h */,
-				73844F3113500C2F00033B85 /* cdt.cc */,
-				73844F3213500C2F00033B85 /* cdt.h */,
-				73844F3313500C2F00033B85 /* sweep.cc */,
-				73844F3413500C2F00033B85 /* sweep.h */,
-				73844F3513500C2F00033B85 /* sweep_context.cc */,
-				73844F3613500C2F00033B85 /* sweep_context.h */,
-			);
-			path = sweep;
-			sourceTree = "<group>";
 		};
 		7386BA07136FE3520094A660 /* alure */ = {
 			isa = PBXGroup;
@@ -2599,11 +2540,6 @@
 				73702898132A020B00397F99 /* RecastMesh.cpp in Sources */,
 				7370289D132A020B00397F99 /* triangle.c in Sources */,
 				73844F3D13500C2F00033B85 /* clipper.cpp in Sources */,
-				73844F3E13500C2F00033B85 /* shapes.cc in Sources */,
-				73844F3F13500C2F00033B85 /* advancing_front.cc in Sources */,
-				73844F4013500C2F00033B85 /* cdt.cc in Sources */,
-				73844F4113500C2F00033B85 /* sweep.cc in Sources */,
-				73844F4213500C2F00033B85 /* sweep_context.cc in Sources */,
 				73844F5113500E1600033B85 /* GeomUtils.cpp in Sources */,
 				73844F5213500E1600033B85 /* polygon.cpp in Sources */,
 				737C80FD135CC67500FF5282 /* Color.cpp in Sources */,
@@ -2854,11 +2790,6 @@
 				73702890132A020B00397F99 /* RecastMesh.cpp in Sources */,
 				73702895132A020B00397F99 /* triangle.c in Sources */,
 				73844F3713500C2F00033B85 /* clipper.cpp in Sources */,
-				73844F3813500C2F00033B85 /* shapes.cc in Sources */,
-				73844F3913500C2F00033B85 /* advancing_front.cc in Sources */,
-				73844F3A13500C2F00033B85 /* cdt.cc in Sources */,
-				73844F3B13500C2F00033B85 /* sweep.cc in Sources */,
-				73844F3C13500C2F00033B85 /* sweep_context.cc in Sources */,
 				73844F4F13500E1600033B85 /* GeomUtils.cpp in Sources */,
 				73844F5013500E1600033B85 /* polygon.cpp in Sources */,
 				737C80FA135CC67500FF5282 /* Color.cpp in Sources */,
