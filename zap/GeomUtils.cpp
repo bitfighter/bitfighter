@@ -43,13 +43,25 @@
 // Please have a look at the notes. They indicate obvious places for optimization
 // if you are using a swept ellipsoid against a large number of polygons.
 
-#include "GeomUtils.h"        // Must be last...   Why??
 #include "tnlVector.h"
-#include "tnlLog.h"           // for logprintf
+#include "tnlTypes.h"
+#include "tnlLog.h"
+
+#include "GeomUtils.h"
+#include "Point.h"
+#include "Rect.h"
+#include "../recast/Recast.h"
+#include "../recast/RecastAlloc.h"
+#include "../clipper/clipper.h"
+
+extern "C" {
+#include "../Triangle/triangle.h"      // For Triangle!
+}
 
 #include <math.h>
 
 using namespace TNL;
+using namespace clipper;
 
 namespace Zap
 {

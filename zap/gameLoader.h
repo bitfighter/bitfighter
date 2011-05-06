@@ -26,11 +26,14 @@
 #ifndef _GAMELOADER_H_
 #define _GAMELOADER_H_
 
-#include "tnl.h"
-#include "tnlNetStringTable.h"
-#include "tnlVector.h"
+#include "string"
 
-using namespace TNL;
+// forward declarations
+namespace TNL {
+   template<class T> class Vector;
+   typedef unsigned int U32;
+   typedef float F32;
+};
 
 namespace Zap
 {
@@ -47,16 +50,16 @@ public:
    void parseLevelLine(const char *string);
 
    // Implementers of this class need to provide the following implementations:
-   virtual void processLevelLoadLine(U32 argc, U32 id, const char **argv) = 0;
-   virtual void setGameTime(F32 time) = 0;
+   virtual void processLevelLoadLine(TNL::U32 argc, TNL::U32 id, const char **argv) = 0;
+   virtual void setGameTime(TNL::F32 time) = 0;
 };
 
 // Provide a class to help organize loading of levels from disk
 class LevelListLoader
 {
 public:
-   static Vector<std::string> buildLevelList();
-   static void removeSkippedLevels(Vector<std::string> &levelList);
+   static TNL::Vector<std::string> buildLevelList();
+   static void removeSkippedLevels(TNL::Vector<std::string> &levelList);
 };
 
 

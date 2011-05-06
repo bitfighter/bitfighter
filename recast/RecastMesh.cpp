@@ -28,6 +28,7 @@
 
 
 using namespace TNL;
+using namespace std;
 
 struct rcEdge
 {

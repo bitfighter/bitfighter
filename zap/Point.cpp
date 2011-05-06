@@ -26,6 +26,7 @@
 #include "Point.h"
 
 #include <math.h>
+#include <cstdlib>
 
 using namespace TNL;
 
