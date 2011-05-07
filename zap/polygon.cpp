@@ -44,6 +44,7 @@ void Polyline::packUpdate(GhostConnection *connection, BitStream *stream)
 
 
 // Read a series of points from a command line, and add them to a Vector of points
+// Note, This function might make mPolyBounds.size() have only one point, when all input points are equal
 void Polyline::processPolyBounds(S32 argc, const char **argv, S32 firstCoord, F32 gridSize, bool allowFirstAndLastPointToBeEqual)
 {
    Point p, lastP;
@@ -56,14 +57,14 @@ void Polyline::processPolyBounds(S32 argc, const char **argv, S32 firstCoord, F3
 
       p.set( (F32) atof(argv[i]) * gridSize, (F32) atof(argv[i+1]) * gridSize );
 
-   if(i == firstCoord || p != lastP)
+      if(i == firstCoord || p != lastP)
          mPolyBounds.push_back(p);
 
       lastP.set(p);
    }
 
-   // Check if last point was same as first; if so, scrap it
-   if(!allowFirstAndLastPointToBeEqual && mPolyBounds.first() == mPolyBounds.last())
+   // Check if last point was same as first; if so, scrap it, if there are multiple points
+   if(!allowFirstAndLastPointToBeEqual && mPolyBounds.size() > 1 && mPolyBounds.first() == mPolyBounds.last())
       mPolyBounds.erase(mPolyBounds.size() - 1);
 }
 
@@ -87,6 +88,10 @@ U32 Polyline::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
 Rect Polyline::computePolyExtents()
 {
+   TNLAssert(mPolyBounds.size() != 0, "Why computePolyExtents then mPolyBounds empty?");
+   if(mPolyBounds.size() == 0)
+      return Rect();
+
    Rect extent(mPolyBounds[0], mPolyBounds[0]);
 
    for(S32 i = 1; i < mPolyBounds.size(); i++)
