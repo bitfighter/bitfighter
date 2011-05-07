@@ -546,6 +546,9 @@ void SFXObject::init()
       }
    }
 
+   gVoiceFreeBuffers.resize(32);  // need this to allow receiving voice chat
+   alGenBuffers(32, gVoiceFreeBuffers.address());
+
    gSFXValid = true;
 }
 

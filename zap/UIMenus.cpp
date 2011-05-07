@@ -919,7 +919,7 @@ void OptionsMenuUserInterface::setupMenus()
    menuItems.push_back(new ToggleMenuItem("SFX VOLUME:",        opts, U32((gIniSettings.sfxVolLevel + 0.05) * 10.0), false, 
                        setSFXVolumeCallback,   "Set sound effects volume", KEY_S));
 
-   menuItems.push_back(new ToggleMenuItem("VOICE CHAT VOLUME:", opts, U32((gIniSettings.sfxVolLevel + 0.05) * 10.0), false, 
+   menuItems.push_back(new ToggleMenuItem("VOICE CHAT VOLUME:", opts, U32((gIniSettings.voiceChatVolLevel + 0.05) * 10.0), false, 
                        setVoiceVolumeCallback, "Set voice chat volume",    KEY_V));
 
    // No music yet, so keep this out to keep menus from getting too long.  Uncomment when we have music.

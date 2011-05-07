@@ -139,7 +139,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				LinkLibraryDependencies="false"
-				AdditionalDependencies="../lib/alut.lib wsock32.lib ../lib/glut32.lib ../lib/tnl.lib ../lib/libtomcrypt.lib"
+				AdditionalDependencies="wsock32.lib ../lib/tnl.lib ../lib/libtomcrypt.lib"
 				OutputFile="master.exe"
 				AdditionalLibraryDirectories="../libtomcrypt/release;../tnl;../lib"
 				IgnoreDefaultLibraryNames="MSVCRTD.lib;msvcprtd.lib;MSVCRT.lib;msvcprt.lib;libcmtd.lib"
@@ -295,7 +295,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				LinkLibraryDependencies="false"
-				AdditionalDependencies="../lib/alut.lib wsock32.lib ../lib/glut32.lib ../lib/tnl.lib ../lib/libtomcrypt.lib ../lib/mysqlpp.lib Ws2_32.lib"
+				AdditionalDependencies="wsock32.lib ../lib/tnl.lib ../lib/libtomcrypt.lib ../lib/mysqlpp.lib Ws2_32.lib"
 				OutputFile="master_mysql.exe"
 				AdditionalLibraryDirectories="../libtomcrypt/release;../tnl;../lib"
 				IgnoreDefaultLibraryNames="MSVCRTD.lib;msvcprtd.lib;MSVCRT.lib;msvcprt.lib;libcmtd.lib"
