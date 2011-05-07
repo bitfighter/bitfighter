@@ -1174,9 +1174,9 @@ LevelInfo getLevelInfo(char *level, S32 size)
    S32 cur = 0;
    S32 startingCur = 0;
    //const char *gametypeName;
-   string levelName;
    LevelInfo levelInfo;
-   levelInfo.levelType = "?";
+   levelInfo.levelName = "";
+   levelInfo.levelType = "Bitmatch";
    levelInfo.minRecPlayers = -1;
    levelInfo.maxRecPlayers = -1;
 
@@ -1201,7 +1201,12 @@ LevelInfo getLevelInfo(char *level, S32 size)
                }
             }
             else if(list.size() >= 2 && list[0] == "LevelName")
-               levelInfo.levelName = list[1];
+            {
+               string levelName = list[1];
+               for(S32 i=2; i<list.size(); i++)
+                  levelName += " " + list[i];
+               levelInfo.levelName = levelName;
+            }
             else if(list.size() >= 2 && list[0] == "MinPlayers")
                levelInfo.minRecPlayers = atoi(list[1].c_str());
             else if(list.size() >= 2 && list[0] == "MaxPlayers")

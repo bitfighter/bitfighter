@@ -512,6 +512,28 @@ void ServerGame::setShuttingDown(bool shuttingDown, U16 time, ClientRef *who, St
 
 void ServerGame::loadNextLevel()
 {
+
+   string path = ConfigDirectories::findLevelFile(string(mLevelInfos[mLevelLoadIndex].levelFileName.getString()));
+   FILE *f = fopen(path.c_str(), "rb");
+   if(f)
+   {
+      char data[1024*4];  // 4 kb should be big enough to fit all parameters at the beginning of level, don't need to read everything.
+      S32 size = fread(data, 1, sizeof(data), f);
+      fclose(f);
+      LevelInfo info = getLevelInfo(data, size);
+      if(info.levelName == "")
+         info.levelName = mLevelInfos[mLevelLoadIndex].levelFileName;
+      mLevelInfos[mLevelLoadIndex].setInfo(info.levelName, info.levelType, info.maxRecPlayers, info.maxRecPlayers);
+      mLevelLoadIndex++;
+   }
+   else
+   {
+      logprintf(LogConsumer::LogWarning, "Could not load level %s.  Skipping...", mLevelInfos[mLevelLoadIndex].levelFileName.getString());
+      mLevelInfos.erase(mLevelLoadIndex);
+   }
+
+
+/*
    // Here we cycle through all the levels, reading them in, and grabbing their names for the level list
    // Seems kind of wasteful...  could we quit after we found the name? (probably not easily, and we get the benefit of learning early on which levels are b0rked)
    // How about storing them in memory for rapid recall? People sometimes load hundreds of levels, so it's probably not feasible.
@@ -547,7 +569,7 @@ void ServerGame::loadNextLevel()
          logprintf(LogConsumer::LogWarning, "Could not load level %s.  Skipping...", levelName.c_str());
          mLevelInfos.erase(mLevelLoadIndex);
       }
-   }
+   }*/
 
    if(mLevelLoadIndex == mLevelInfos.size())
       ServerGame::hostingModePhase = DoneLoadingLevels;
@@ -847,6 +869,23 @@ bool ServerGame::loadLevel(const string &origFilename2)
       if(name == "")
       {
          logprintf(LogConsumer::LogWarning, "Warning: Could not find script \"%s\" in level\"%s\"", 
+                                    getGameType()->mScriptName.c_str(), origFilename.c_str());
+         return false;
+      }
+
+      // The script file will be the first argument, subsequent args will be passed on to the script.
+      // Now we've crammed all our action into the constructor... is this ok design?
+      LuaLevelGenerator levelgen = LuaLevelGenerator(name, getGameType()->mScriptArgs, getGridSize(), getGridDatabase(), this, gConsole);
+   }
+
+   // script specified in INI globalLevelLoadScript
+   if(gIniSettings.globalLevelScript != "")
+   {
+      string name = ConfigDirectories::findLevelGenScript(gIniSettings.globalLevelScript);  // Find full name of levelgen script
+
+      if(name == "")
+      {
+         logprintf(LogConsumer::LogWarning, "Warning: Could not find script \"%s\" in globalLevelScript", 
                                     getGameType()->mScriptName.c_str(), origFilename.c_str());
          return false;
       }

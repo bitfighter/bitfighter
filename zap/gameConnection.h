@@ -314,6 +314,8 @@ public:
    TNL_DECLARE_NETCONNECTION(GameConnection);
 };
 
+LevelInfo getLevelInfo(char *level, S32 size);
+
 
 };
 
