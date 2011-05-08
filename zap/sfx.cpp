@@ -265,7 +265,6 @@ extern bool gDedicatedServer;
 void SFXObject::updateGain()
 {
    ALuint source = gSources[mSourceIndex];
-   F32 gain = mGain;
 
    // First check if it's a voice chat... voice volume is handled separately.
    if(mSFXIndex == SFXVoice)
@@ -274,25 +273,7 @@ void SFXObject::updateGain()
       return;
    }
 
-   // Not voice, so it's a regular sound effect!
-   else if(!mProfile->isRelative)  // Is sound affected by distance?  Relative == no.  Poorly named setting!
-   {
-      F32 distance = (mListenerPosition - mPosition).len();
-      if(distance > mProfile->fullGainDistance)
-      {
-         if(distance < mProfile->zeroGainDistance)
-            gain *= 1 - (distance - mProfile->fullGainDistance) /
-                    (mProfile->zeroGainDistance - mProfile->fullGainDistance);
-         else
-            gain = 0.0f;      // Too far, sound won't be heard
-      }
-      else
-         gain = 1.0f;         // Closer than fullGainDistance, sound is at full volume
-   }
-   else
-      gain = 1.0f;            // Sound is not affected by distance, sound is at full volume
-
-   alSourcef(source, AL_GAIN, gain * mProfile->gainScale * (gDedicatedServer ? gIniSettings.alertsVolLevel : gIniSettings.sfxVolLevel));
+   alSourcef(source, AL_GAIN, mGain * mProfile->gainScale * (gDedicatedServer ? gIniSettings.alertsVolLevel : gIniSettings.sfxVolLevel));
 }
 
 void SFXObject::updateMovementParams()
@@ -403,7 +384,7 @@ void SFXObject::playOnSource()
       ALuint buffer = gVoiceFreeBuffers.first();
       gVoiceFreeBuffers.pop_front();
 
-      alSourcei(source, AL_BUFFER, 0);  // seems to be required for linux and voice chat to work (press R)
+      alSourcei(source, AL_BUFFER, 0);  // clear old buffers
 
       alBufferData(buffer, AL_FORMAT_MONO16, mInitialBuffer->getBuffer(),
             mInitialBuffer->getBufferSize(), 8000);
@@ -413,15 +394,13 @@ void SFXObject::playOnSource()
       alSourcei(source, AL_BUFFER, gBuffers[mSFXIndex]);
 
    alSourcei(source, AL_LOOPING, mProfile->isLooping);
-#ifdef TNL_OS_MAC_OSX
-   // This is a workaround for the broken OS X implementation of AL_NONE distance model.
-   alSourcef(source, AL_REFERENCE_DISTANCE,9000);
+   alSourcef(source, AL_REFERENCE_DISTANCE,mProfile->fullGainDistance);
+   alSourcef(source, AL_MAX_DISTANCE, mProfile->zeroGainDistance);
    alSourcef(source, AL_ROLLOFF_FACTOR,1);
-   alSourcef(source, AL_MAX_DISTANCE, 10000);
-#endif
-   updateMovementParams();
 
+   updateMovementParams();
    updateGain();
+
    alSourcePlay(source);
 }
 
@@ -518,7 +497,7 @@ void SFXObject::init()
    // This MUST be set to maintain bitfighter's unique gain system
    // OpenAL normally defaults the distance model to AL_INVERSE_DISTANCE
    // which is the "physically correct" model
-   alDistanceModel(AL_NONE);
+   alDistanceModel(AL_LINEAR_DISTANCE_CLAMPED);
    if(alGetError() != AL_NO_ERROR)
       logprintf(LogConsumer::LogWarning, "Failed to set proper sound gain distance model!  Sounds will be off..\n");
 
