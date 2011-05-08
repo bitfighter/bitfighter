@@ -315,6 +315,7 @@ public:
 };
 
 LevelInfo getLevelInfo(char *level, S32 size);
+void updateClientChangedName(GameConnection *,StringTableEntry);  //in masterConnection.cpp
 
 
 };

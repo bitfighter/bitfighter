@@ -1134,8 +1134,25 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetServerAlertVolume, (S8 vol), (vol), NetC
    //setServerAlertVolume(vol);
 }
 
-
-extern void updateClientChangedName(GameConnection *,StringTableEntry);  //in masterConnection.cpp
+//  Tell all clients name is changed, and update server side name
+// Game Server only
+void updateClientChangedName(GameConnection *gc, StringTableEntry newName){
+   GameType *gt = gServerGame->getGameType();
+   ClientRef *cr = gc->getClientRef();
+   logprintf(LogConsumer::LogConnection, "Name changed from %s to %s",gc->getClientName().getString(),newName.getString());
+   if(gt)
+   {
+      gt->s2cRenameClient(gc->getClientName(), newName);
+   }
+   gc->setClientName(newName);
+   cr->name = newName;
+   Ship *ship = dynamic_cast<Ship *>(gc->getControlObject());
+   if(ship)
+   {
+      ship->setName(newName);
+      ship->setMaskBits(Ship::AuthenticationMask);  //ship names will update with this bit
+   }
+}
 
 // Client connect to master after joining game server, get authentication fail,
 // then client have changed name to non-reserved, or entered password.
@@ -1254,6 +1271,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendDataParts, (U8 type, ByteBufferPtr data
       {
          fwrite(mDataBuffer->getBuffer(), 1, mDataBuffer->getBufferSize(), f);
          fclose(f);
+         logprintf(LogConsumer::ServerFilter, "%s %s Uploaded %s", getNetAddressString(), mClientName.getString(), filename1);
          S32 id = gServerGame->addLevelInfo(filename1, levelInfo);
          c2sRequestLevelChange2(id, false);
       }

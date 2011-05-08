@@ -237,26 +237,6 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSetAuthenticated,
 }
 
 
-//  Tell all clients name is changed, and update server side name
-// Game Server only
-void updateClientChangedName(GameConnection *gc, StringTableEntry newName){
-	GameType *gt = gServerGame->getGameType();
-	ClientRef *cr = gc->getClientRef();
-	logprintf(LogConsumer::LogConnection, "Name changed from %s to %s",gc->getClientName().getString(),newName.getString());
-	if(gt)
-	{
-		gt->s2cRenameClient(gc->getClientName(), newName);
-	}
-	gc->setClientName(newName);
-	cr->name = newName;
-	Ship *ship = dynamic_cast<Ship *>(gc->getControlObject());
-	if(ship)
-	{
-		ship->setName(newName);
-		ship->setMaskBits(Ship::AuthenticationMask);  //ship names will update with this bit
-	}
-}
-
 // Now we know that player with specified id has an approved name
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sSetAuthenticated, (Vector<U8> id, StringTableEntry name,
          RangedU32<0,AuthenticationStatusCount> status))

@@ -2924,19 +2924,27 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
             mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXNone, msg, e);
       }
    }
-   /* /// Remove this command
-   else if(!stricmp(cmd, "rename") && args.size() >= 1)
-   {
-      //for testing, might want to remove this once it is fully working.
-      StringTableEntry oldName = clientRef->clientConnection->getClientName();
-      clientRef->clientConnection->setClientName(StringTableEntry(""));       //avoid unique self
-      StringTableEntry uniqueName = GameConnection::makeUnique(args[0].getString()).c_str();  //new name
-      clientRef->clientConnection->setClientName(oldName);                   //restore name to properly get it updated to clients.
-
-      clientRef->clientConnection->setAuthenticated(false);         //don't underline anymore because of rename
-      updateClientChangedName(clientRef->clientConnection,uniqueName);
-   }
-   */
+   else if(!stricmp(cmd, "rename") && args.size() >= 1)  // allow admins to rename anyone (in case of bad name)
+      if(!clientRef->clientConnection->isAdmin())
+         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Need admin permission");
+      else if(args.size() < 2)
+         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "Use /rename <From_name> <To_name>");
+      else
+      {
+         GameConnection *gc = findClient(this, args[0].getString());
+         if(!gc)
+            clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Player name not found");
+         else
+         {
+            StringTableEntry oldName = gc->getClientName();
+            gc->setClientName(StringTableEntry(""));       //avoid unique self
+            StringTableEntry uniqueName = GameConnection::makeUnique(args[1].getString()).c_str();  //new name
+            gc->setClientName(oldName);                   //restore name to properly get it updated to clients.
+            gc->setAuthenticated(false);         //don't underline anymore because of rename
+            updateClientChangedName(gc,uniqueName);
+            clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, StringTableEntry("Player is renamed"));
+         }
+      }
    else if(!stricmp(cmd, "yes"))
    {
       gServerGame->voteClient(clientRef->clientConnection, true);
