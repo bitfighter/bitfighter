@@ -349,32 +349,6 @@ void SoundSystem::stopSoundEffect(SFXHandle& effect)
 }
 
 
-void SoundSystem::setSoundEffectGain(SFXHandle& effect, F32 gain)
-{
-   if(!gSFXValid)
-      return;
-
-   effect->mGain = gain;
-   if(effect->mSourceIndex != -1)
-      updateSoundEffectGain(effect);
-}
-
-
-// Recalculate distance, and reset gain as necessary
-void SoundSystem::updateSoundEffectGain(SFXHandle& effect)
-{
-   ALuint source = gSources[effect->mSourceIndex];
-
-   // First check if it's a voice chat... voice volume is handled separately.
-   if(effect->mSFXIndex == SFXVoice)
-   {
-      alSourcef(source, AL_GAIN, gIniSettings.voiceChatVolLevel);
-      return;
-   }
-
-   alSourcef(source, AL_GAIN, effect->mGain * effect->mProfile->gainScale * (gDedicatedServer ? gIniSettings.alertsVolLevel : gIniSettings.sfxVolLevel));
-}
-
 void SoundSystem::unqueueBuffers(S32 sourceIndex)
 {
    // free up any played buffers from this source.
@@ -655,10 +629,6 @@ void SoundSystem::updateMovementParams(SFXHandle& effect)
 }
 
 void SoundSystem::playOnSource(SFXHandle& effect)
-{
-}
-
-void SoundSystem::setSoundEffectGain(SFXHandle& effect, F32 gain)
 {
 }
 

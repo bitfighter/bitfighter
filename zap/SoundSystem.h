@@ -105,7 +105,7 @@ private:
    static void updateGain(SFXHandle& effect);
 
 public:
-   static const TNL::S32 NumSamples = 16;
+   static const TNL::S32 NumSamples = 32;
 
    SoundSystem();
    virtual ~SoundSystem();
@@ -122,8 +122,6 @@ public:
    static void playSoundEffect(SFXHandle& effect);
    static SFXHandle playRecordedBuffer(TNL::ByteBufferPtr p, TNL::F32 gain);
    static void stopSoundEffect(SFXHandle& effect);
-   static void setSoundEffectGain(SFXHandle& effect, TNL::F32 gain);
-   static void updateSoundEffectGain(SFXHandle& effect);
    static void unqueueBuffers(TNL::S32 sourceIndex);
    static void setMovementParams(SFXHandle& effect, Point position, Point velocity);
    static void updateMovementParams(SFXHandle& effect);
