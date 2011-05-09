@@ -30,6 +30,7 @@
 #include "gameObjectRender.h"
 #include "ship.h"
 #include "UI.h"
+#include "SoundSystem.h"
 #include "../glut/glutInclude.h"
 
 namespace Zap
@@ -369,7 +370,7 @@ void SpeedZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
       preparePoints();
    }
    else 
-      SFXObject::play(SFXGoFastOutside, pos, pos);
+      SoundSystem::playSoundEffect(SFXGoFastOutside, pos, pos);
 }
 
 };

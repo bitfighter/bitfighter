@@ -27,7 +27,6 @@
 using namespace TNL;
 
 #include "UI.h"
-#include "sfx.h"
 #include "move.h"
 #include "keyCode.h"
 #include "UIMenus.h"
@@ -649,7 +648,7 @@ S32 UserInterface::getStringWidthf(U32 size, const char *format, ...)
 
 void UserInterface::playBoop()
 {
-   SFXObject::play(SFXUIBoop, 1);
+   SoundSystem::playSoundEffect(SFXUIBoop, 1);
 }
 
 

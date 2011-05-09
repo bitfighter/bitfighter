@@ -34,6 +34,7 @@
 #include "gameItems.h"     // For asteroid def.
 #include "engineeredObjects.h"
 #include "gameObjectRender.h"
+#include "SoundEffect.h"
 #include "config.h"
 #include "projectile.h"     // For s2cClientJoinedTeam()
 #include "playerInfo.h"     // For LuaPlayerInfo constructor  
@@ -2422,7 +2423,7 @@ GAMETYPE_RPC_S2C(GameType, s2cAddClient,
    cref->isRobot = isRobot;
 
    cref->decoder = new LPC10VoiceDecoder();
-   cref->voiceSFX = new SFXObject(SFXVoice, NULL, 1, Point(), Point());
+   cref->voiceSFX = new SoundEffect(SFXVoice, NULL, 1, Point(), Point());
 
    mClientList.push_back(cref);
 
@@ -2448,7 +2449,7 @@ GAMETYPE_RPC_S2C(GameType, s2cAddClient,
    {
       clientGame->mGameUserInterface->displayMessage(Color(0.6f, 0.6f, 0.8f), "%s joined the game.", name.getString());      
       if(playAlert)
-         SFXObject::play(SFXPlayerJoined, 1);
+         SoundSystem::playSoundEffect(SFXPlayerJoined, 1);
    }
 }
 
@@ -2513,7 +2514,7 @@ GAMETYPE_RPC_S2C(GameType, s2cRemoveClient, (StringTableEntry name), (name))
    if(!clientGame) return;
 
    clientGame->mGameUserInterface->displayMessage(Color(0.6f, 0.6f, 0.8f), "%s left the game.", name.getString());
-   SFXObject::play(SFXPlayerLeft, 1);
+   SoundSystem::playSoundEffect(SFXPlayerLeft, 1);
 }
 
 GAMETYPE_RPC_S2C(GameType, s2cAddTeam, (StringTableEntry teamName, F32 r, F32 g, F32 b), (teamName, r, g, b))
@@ -3321,7 +3322,8 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cVoiceChat, (StringTableEntry clientName
    if(cl)
    {
       ByteBufferPtr playBuffer = cl->decoder->decompressBuffer(*(voiceBuffer.getPointer()));
-      cl->voiceSFX->queueBuffer(playBuffer);
+      SoundSystem::queueVoiceChatBuffer(cl->voiceSFX, playBuffer);
+//      cl->voiceSFX->queueBuffer(playBuffer);
    }
 }
 

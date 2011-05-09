@@ -30,7 +30,6 @@
 #include "projectile.h"
 #include "gameObjectRender.h"
 #include "goalZone.h"
-#include "sfx.h"
 #include "../glut/glutInclude.h"
 
 namespace Zap
@@ -47,7 +46,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(SoccerGameType, s2cSoccerScoreMessage,
 {
    S32 teamIndexAdjusted = (S32) teamIndex + GameType::gFirstTeamNumber;      // Before calling this RPC, we subtracted gFirstTeamNumber, so we need to add it back here...
    string msg;
-   SFXObject::play(SFXFlagCapture);
+   SoundSystem::playSoundEffect(SFXFlagCapture);
 
    // Compose the message
 

@@ -31,7 +31,7 @@
 #include "moveObject.h"
 #include "luaObject.h"
 #include "sparkManager.h"
-#include "sfx.h"
+#include "SoundEffect.h"
 #include "timer.h"
 #include "shipItems.h"
 #include "gameWeapons.h"

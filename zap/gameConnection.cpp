@@ -397,7 +397,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSuspendGame, (bool suspend), (suspend), Net
 TNL_IMPLEMENT_RPC(GameConnection, s2cUnsuspend, (), (), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 1)
 {
    mClientGame->unsuspendGame();       
-   SFXObject::play(SFXPlayerJoined, 1);
+   SoundSystem::playSoundEffect(SFXPlayerJoined, 1);
 }
 
 
@@ -896,7 +896,7 @@ static void displayMessage(U32 colorIndex, U32 sfxEnum, const char *message)
 
    gClientGame->mGameUserInterface->displayMessage(colors[colorIndex], "%s", message);
    if(sfxEnum != SFXNone)
-      SFXObject::play(sfxEnum);
+      SoundSystem::playSoundEffect(sfxEnum);
 }
 
 // I believe this is not used -CE

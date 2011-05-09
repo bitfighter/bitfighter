@@ -544,13 +544,25 @@
 				>
 			</File>
 			<File
-				RelativePath=".\sfx.cpp"
+				RelativePath=".\SoundSystem.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\sfx.h"
+				RelativePath=".\SoundSystem.h"
 				>
 			</File>
+         <File
+            RelativePath=".\SoundEffect.cpp"
+            >
+         </File>
+         <File
+            RelativePath=".\SoundEffect.h"
+            >
+         </File>
+         <File
+            RelativePath=".\SFXProfile.h"
+            >
+         </File>
 			<File
 				RelativePath=".\voiceCodec.cpp"
 				>

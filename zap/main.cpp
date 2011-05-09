@@ -161,7 +161,7 @@ using namespace TNL;
 #include "game.h"
 #include "gameNetInterface.h"
 #include "masterConnection.h"
-#include "sfx.h"
+#include "SoundSystem.h"
 #include "sparkManager.h"
 #include "input.h"
 #include "keyCode.h"
@@ -997,7 +997,7 @@ void onExit()
    delete gClientGame;     // Has effect of disconnecting from master
 
    OGLCONSOLE_Quit();
-   SFXObject::shutdown();
+   SoundSystem::shutdown();
    ShutdownJoystick();
 
    // Save settings to capture window position
@@ -2107,7 +2107,7 @@ int main(int argc, char **argv)
       initHostGame(gBindAddress, levels, false);     // Start hosting
    }
 
-   SFXObject::init();  // Even dedicated server needs sound these days
+   SoundSystem::init();  // Even dedicated server needs sound these days
 
    checkIfThisIsAnUpdate();
 

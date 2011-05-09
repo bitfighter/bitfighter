@@ -47,6 +47,7 @@
 #include "config.h"
 #include "loadoutHelper.h"
 #include "gameNetInterface.h"
+#include "SoundSystem.h"
 
 #include "md5wrapper.h"          // For submission of passwords
 
@@ -2342,7 +2343,7 @@ void GameUserInterface::VoiceRecorder::start()
    mWantToStopRecordingAudio = 0; // linux repeadedly sends key-up / key-down when only holding key down
    if(!mRecordingAudio)
    {
-      mRecordingAudio = SFXObject::startRecording();
+      mRecordingAudio = SoundSystem::startRecording();
       if(!mRecordingAudio)
          return;
 
@@ -2352,7 +2353,7 @@ void GameUserInterface::VoiceRecorder::start()
       mVoiceAudioTimer.reset(FirstVoiceAudioSampleTime);
 
       // trim the start of the capture buffer:
-      SFXObject::captureSamples(mUnusedAudio);
+      SoundSystem::captureSamples(mUnusedAudio);
       mUnusedAudio->resize(0);
    }
 }
@@ -2364,7 +2365,7 @@ void GameUserInterface::VoiceRecorder::stopNow()
       process();
 
       mRecordingAudio = false;
-      SFXObject::stopRecording();
+      SoundSystem::stopRecording();
       mVoiceSfx = NULL;
       mUnusedAudio = NULL;
    }
@@ -2386,7 +2387,7 @@ void GameUserInterface::VoiceRecorder::process()
       }
    }
    U32 preSampleCount = mUnusedAudio->getBufferSize() / 2;
-   SFXObject::captureSamples(mUnusedAudio);
+   SoundSystem::captureSamples(mUnusedAudio);
 
    U32 sampleCount = mUnusedAudio->getBufferSize() / 2;
    if(sampleCount == preSampleCount)

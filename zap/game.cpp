@@ -36,7 +36,7 @@
 #include "move.h"
 #include "moveObject.h"
 #include "projectile.h"          // For SpyBug class
-#include "sfx.h"
+#include "SoundSystem.h"
 #include "SharedConstants.h"     // For ServerInfoFlags enum
 #include "ship.h"
 #include "sparkManager.h"
@@ -1016,7 +1016,7 @@ void ServerGame::addClient(GameConnection *theConnection)
    mPlayerCount++;
 
    if(gDedicatedServer)
-      SFXObject::play(SFXPlayerJoined, 1);
+      SoundSystem::playSoundEffect(SFXPlayerJoined, 1);
 }
 
 
@@ -1027,7 +1027,7 @@ void ServerGame::removeClient(GameConnection *theConnection)
    mPlayerCount--;
 
    if(gDedicatedServer)
-      SFXObject::play(SFXPlayerLeft, 1);
+      SoundSystem::playSoundEffect(SFXPlayerLeft, 1);
 }
 
 
@@ -1278,7 +1278,7 @@ void ServerGame::idle(U32 timeDelta)
    }
 
    // Lastly, play any sounds server might have made...
-   SFXObject::process();
+   SoundSystem::processSoundEffects();
 }
 
 
@@ -1397,7 +1397,7 @@ void ClientGame::idle(U32 timeDelta)
    if(isSuspended())
    {
       mNetInterface->processConnections();
-      SFXObject::process();                        // Process sound effects (SFX)
+      SoundSystem::processSoundEffects();                        // Process sound effects (SFX)
       return;
    }
 
@@ -1485,12 +1485,12 @@ void ClientGame::idle(U32 timeDelta)
       }
 
       if(controlObject)
-         SFXObject::setListenerParams(controlObject->getRenderPos(),controlObject->getRenderVel());
+         SoundSystem::setListenerParams(controlObject->getRenderPos(),controlObject->getRenderVel());
    }
 
    processDeleteList(timeDelta);                // Delete any objects marked for deletion
    FXManager::tick((F32)timeDelta * 0.001f);    // Processes sparks and teleporter effects
-   SFXObject::process();                        // Process sound effects (SFX)
+   SoundSystem::processSoundEffects();                        // Process sound effects (SFX)
 
    mNetInterface->processConnections();         // Here we can pass on our updated ship info to the server
 
@@ -1531,9 +1531,9 @@ void ClientGame::zoomCommanderMap()
 {
    mInCommanderMap = !mInCommanderMap;
    if(mInCommanderMap)
-      SFXObject::play(SFXUICommUp);
+      SoundSystem::playSoundEffect(SFXUICommUp);
    else
-      SFXObject::play(SFXUICommDown);
+      SoundSystem::playSoundEffect(SFXUICommDown);
 
 
    GameConnection *conn = getConnectionToServer();

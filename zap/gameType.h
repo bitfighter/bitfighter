@@ -45,7 +45,7 @@ namespace Zap
 class GoalZone;
 class MenuItem;
 class Item;
-class SFXObject;
+class SoundEffect;
 class VoiceDecoder;
 
 class ClientRef : public Object
@@ -85,7 +85,7 @@ public:
    bool readyForRegularGhosts;
 
    SafePtr<GameConnection> clientConnection;
-   RefPtr<SFXObject> voiceSFX;
+   RefPtr<SoundEffect> voiceSFX;
    RefPtr<VoiceDecoder> decoder;
 
    U32 ping;

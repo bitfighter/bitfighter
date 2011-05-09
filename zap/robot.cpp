@@ -31,7 +31,6 @@
 #include "sparkManager.h"
 #include "projectile.h"
 #include "gameLoader.h"
-#include "sfx.h"
 #include "UI.h"
 #include "UIMenus.h"
 #include "UIGame.h"

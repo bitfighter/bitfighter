@@ -28,6 +28,7 @@
 #include "item.h"
 #include "ship.h"
 #include "gameObjectRender.h"
+#include "SoundSystem.h"
 #include "../glut/glutInclude.h"
 
 #include <math.h>
@@ -56,7 +57,7 @@ bool RepairItem::pickup(Ship *theShip)
 // Runs on client when item's unpack method signifies the item has been picked up
 void RepairItem::onClientPickup()
 {
-   SFXObject::play(SFXShipHeal, getRenderPos(), getRenderVel());
+   SoundSystem::playSoundEffect(SFXShipHeal, getRenderPos(), getRenderVel());
 }
 
 
@@ -119,7 +120,7 @@ bool EnergyItem::pickup(Ship *theShip)
 // Runs on client when item's unpack method signifies the item has been picked up
 void EnergyItem::onClientPickup()
 {
-   SFXObject::play(SFXShipHeal, getRenderPos(), getRenderVel());
+   SoundSystem::playSoundEffect(SFXShipHeal, getRenderPos(), getRenderVel());
 }
 
 
@@ -312,7 +313,7 @@ void Asteroid::unpackUpdate(GhostConnection *connection, BitStream *stream)
       mDesign = stream->readEnum(AsteroidDesigns);
 
       if(!mInitial)
-         SFXObject::play(SFXAsteroidExplode, mMoveState[RenderState].pos, Point());
+         SoundSystem::playSoundEffect(SFXAsteroidExplode, mMoveState[RenderState].pos, Point());
    }
 
    bool explode = (stream->readFlag());     // Exploding!  Take cover!!
@@ -346,7 +347,7 @@ bool Asteroid::collide(GameObject *otherObject)
 
 void Asteroid::emitAsteroidExplosion(Point pos)
 {
-   SFXObject::play(SFXAsteroidExplode, pos, Point());
+   SoundSystem::playSoundEffect(SFXAsteroidExplode, pos, Point());
    // FXManager::emitBurst(pos, Point(.1, .1), Color(1,1,1), Color(1,1,1), 10);
 }
 

@@ -95,8 +95,9 @@ OBJECTS_ZAP=\
    Rect.o\
    retrieveGame.o\
    robot.o\
-   screenShooter.o \
-   sfx.o\
+   screenShooter.o\
+   SoundSystem.o\
+   SoundEffect.o\
    ship.o\
    SlipZone.o\
    soccerGame.o\

@@ -192,7 +192,8 @@
     <ClCompile Include="..\zap\retrieveGame.cpp" />
     <ClCompile Include="..\zap\robot.cpp" />
     <ClCompile Include="..\zap\screenShooter.cpp" />
-    <ClCompile Include="..\zap\sfx.cpp" />
+    <ClCompile Include="..\zap\SoundSystem.cpp" />
+    <ClCompile Include="..\zap\SoundEffect.cpp" />
     <ClCompile Include="..\zap\ship.cpp" />
     <ClCompile Include="..\zap\SlipZone.cpp" />
     <ClCompile Include="..\zap\soccerGame.cpp" />
@@ -294,7 +295,9 @@
     <ClInclude Include="..\zap\resource.h" />
     <ClInclude Include="..\zap\robot.h" />
     <ClInclude Include="..\zap\screenShooter.h" />
-    <ClInclude Include="..\zap\sfx.h" />
+    <ClInclude Include="..\zap\SFXProfile.h" />
+    <ClInclude Include="..\zap\SoundSystem.h" />
+    <ClInclude Include="..\zap\SoundEffect.h" />
     <ClInclude Include="..\zap\SharedConstants.h" />
     <ClInclude Include="..\zap\ship.h" />
     <ClInclude Include="..\zap\shipItems.h" />

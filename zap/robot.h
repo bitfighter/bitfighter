@@ -32,7 +32,6 @@
 #include "ship.h"
 
 #include "sparkManager.h"
-#include "sfx.h"
 #include "timer.h"
 #include "shipItems.h"
 #include "gameWeapons.h"

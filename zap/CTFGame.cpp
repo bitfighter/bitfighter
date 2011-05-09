@@ -27,7 +27,6 @@
 #include "ship.h"
 #include "UIGame.h"
 #include "flagItem.h"
-#include "sfx.h"
 
 #include "../glut/glutInclude.h"
 #include <stdio.h>
