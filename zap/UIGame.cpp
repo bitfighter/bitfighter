@@ -787,7 +787,7 @@ void GameUserInterface::renderChatMessageDisplay()
 {
    glColor3f(1,1,1);
 
-   S32 y = gIniSettings.showWeaponIndicators ? UserInterface::chatMessageMargin : UserInterface::vertMargin;
+   S32 y = UserInterface::chatMessageMargin;
    S32 msgCount;
 
    if(mMessageDisplayMode == LongFixed)
