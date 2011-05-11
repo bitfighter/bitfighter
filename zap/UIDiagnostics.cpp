@@ -162,6 +162,9 @@ static void initFoldersBlock(S32 textsize)
    names.push_back("SFX Dir:");
    vals.push_back(gConfigDirs.sfxDir.c_str());
 
+   names.push_back("Music Dir:");
+   vals.push_back(gConfigDirs.musicDir.c_str());
+
    names.push_back("");
    vals.push_back("");
 

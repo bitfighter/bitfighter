@@ -62,6 +62,7 @@ struct ConfigDirectories {
    string levelDir;
    string robotDir;
    string sfxDir;
+   string musicDir;
    string cacheDir;
    string iniDir;
    string logDir;
