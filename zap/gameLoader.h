@@ -26,7 +26,7 @@
 #ifndef _GAMELOADER_H_
 #define _GAMELOADER_H_
 
-#include "string"
+#include <string>
 #include "tnlVector.h"
 #include "tnlTypes.h"
 
