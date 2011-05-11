@@ -70,7 +70,7 @@ static const char *pageHeaders[] = {
    "LEVEL COMMANDS",
    "ADMIN COMMANDS",
    "DEBUG COMMANDS",
-   "SCRIPING CONSOLE"
+   "SCRIPTING CONSOLE"
 };
 
 
@@ -466,7 +466,7 @@ const char *gGameObjectInfo[] = {
    /* 23 */   "GoFast", "Makes ship go fast",
 
    /* 24 */   "Test Item", "Bouncy ball",
-   /* 25 */   "Resource Item", "Smaller bouncy ball",
+   /* 25 */   "Resource Item", "Use with engineer module",
    /* 26 */   "Soccer Ball", "Push into enemy goal in Soccer game",
 };
 static U32 GameObjectCount = 27;      // <=== If you add something above, increment this!

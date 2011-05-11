@@ -117,7 +117,7 @@ const char *pageHeadersEditor[] = {
    "ADVANCED COMMANDS",
    "WALLS AND LINES",
    "BOT NAV ZONES",
-   "SCRIPING CONSOLE"
+   "SCRIPTING CONSOLE"
 };
 
 
