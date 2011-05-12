@@ -129,7 +129,8 @@ U32 NetInterface::computeClientIdentityToken(const Address &address, const Nonce
    U32 hash[8];
 
    sha256_init(&hashState);
-   sha256_process(&hashState, (const U8 *) &address, sizeof(Address));
+   sha256_process(&hashState, (const U8 *) &address.port, sizeof(address.port));
+   sha256_process(&hashState, (const U8 *) address.netNum, sizeof(address.netNum));
    sha256_process(&hashState, theNonce.data, Nonce::NonceSize);
    sha256_process(&hashState, mRandomHashData, sizeof(mRandomHashData));
    sha256_done(&hashState, (U8 *) hash);

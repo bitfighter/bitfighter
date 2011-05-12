@@ -2935,6 +2935,8 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
          GameConnection *gc = findClient(this, args[0].getString());
          if(!gc)
             clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Player name not found");
+         else if(gc->isAuthenticated())
+            clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Can't rename authenticated players");
          else
          {
             StringTableEntry oldName = gc->getClientName();
