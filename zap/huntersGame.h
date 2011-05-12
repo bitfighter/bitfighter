@@ -153,7 +153,7 @@ public:
 };
 
 
-class HuntersNexusObject : public LuaPolygonalGameObject
+class HuntersNexusObject : public EditorPolygon
 {
 private:
    typedef GameObject Parent;
@@ -178,6 +178,17 @@ public:
    TNL_DECLARE_RPC(s2cFlagsReturned, ());    // Alert the Nexus object that flags have been returned to it
 
    TNL_DECLARE_CLASS(HuntersNexusObject);
+
+
+   /////
+   // Editor methods
+   const char *getEditorHelpString() { return "Area to bring flags in Hunter game.  Cannot be used in other games."; }
+   const char *getPrettyNamePlural() { return "Nexii"; }
+   const char *getOnDockName() { return "Nexus"; }
+   const char *getOnScreenName() { return "Nexus"; }
+   string toString();
+
+
 
    HuntersNexusObject(lua_State *L) { /* Do nothing */ };   //  Lua constructor
    static const char className[];                 // Class name as it appears to Lua scripts

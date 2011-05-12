@@ -203,7 +203,10 @@ public:
 };
 
 
-class Mine : public GrenadeProjectile
+////////////////////////////////////////
+////////////////////////////////////////
+
+class Mine : public GrenadeProjectile, public EditorPointObject
 {
    typedef GrenadeProjectile Parent;
 
@@ -232,6 +235,25 @@ public:
 
    TNL_DECLARE_CLASS(Mine);
 
+   /////
+   // Editor methods
+   Point getVert(S32 index) { return getActualPos(); }
+   void setVert(const Point &point, S32 index) { setActualPos(point); }
+
+   void renderEditor(F32 currentScale);
+   void renderDock();
+
+   const char *getEditorHelpString() { return "Mines can be prepositioned, and are are \"hostile to all\". [M]"; }  
+   const char *getPrettyNamePlural() { return "Mines"; }
+   const char *getOnDockName() { return "Mine"; }
+   const char *getOnScreenName() { return "Mine"; }
+   bool hasTeam() { return false; }
+   bool canBeHostile() { return false; }
+   bool canBeNeutral() { return false; }
+
+   string toString();
+
+   /////
    // Lua interface
    Mine(lua_State *L) { /* Do not use */ };            //  Lua constructor
 
@@ -251,7 +273,10 @@ public:
 };
 
 
-class SpyBug : public GrenadeProjectile
+////////////////////////////////////////
+////////////////////////////////////////
+
+class SpyBug : public GrenadeProjectile, public EditorPointObject
 {
    typedef GrenadeProjectile Parent;
 
@@ -276,6 +301,25 @@ public:
 
    TNL_DECLARE_CLASS(SpyBug);
 
+   /////
+   // Editor methods
+   Point getVert(S32 index) { return getActualPos(); }
+   void setVert(const Point &point, S32 index) { setActualPos(point); }
+
+   void renderEditor(F32 currentScale);
+   void renderDock();
+
+   const char *getEditorHelpString() { return "Remote monitoring device that shows enemy ships on the commander's map. [Ctrl-B]"; }  
+   const char *getPrettyNamePlural() { return "Spy Bugs"; }
+   const char *getOnDockName() { return "Bug"; }
+   const char *getOnScreenName() { return "Spy Bug"; }
+   bool hasTeam() { return true; }
+   bool canBeHostile() { return false; }
+   bool canBeNeutral() { return true; }
+
+   string toString();
+
+   /////
    // Lua interface
    SpyBug(lua_State *L) { /* Do not use */ };            //  Lua constructor
 

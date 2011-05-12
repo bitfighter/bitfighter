@@ -485,6 +485,7 @@ void GrenadeProjectile::idle(IdleCallPath path)
 U32 GrenadeProjectile::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
    U32 ret = Parent::packUpdate(connection, updateMask, stream);
+
    stream->writeFlag(exploded);
    stream->writeFlag(updateMask & InitialMask);
    return ret;
@@ -591,7 +592,26 @@ void GrenadeProjectile::renderItem(Point pos)
 }
 
 
-//-----------------------------------------------------------------------------
+////////////////////////////////////////
+////////////////////////////////////////
+
+static void drawLetter(char letter, const Point &pos, const Color &color, F32 alpha)
+{
+   // Mark the item with a letter, unless we're showing the reference ship
+   F32 vertOffset = 8;
+   if (letter >= 'a' && letter <= 'z')    // Better position lowercase letters
+      vertOffset = 10;
+
+   glColor(color, alpha);
+   F32 xpos = pos.x - UserInterface::getStringWidthf(15, "%c", letter) / 2;
+
+   UserInterface::drawStringf(xpos, pos.y - vertOffset, 15, "%c", letter);
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 TNL_IMPLEMENT_NETOBJECT(Mine);
 
 // Constructor (planter defaults to null)
@@ -613,6 +633,13 @@ Mine::Mine(Point pos, Ship *planter) : GrenadeProjectile(pos, Point())
 
    mArmed = false;
    mKillString = "mine";      // Triggers special message when player killed
+}
+
+
+// ProcessArguments() used is the one in item
+string Mine::toString()
+{
+   return string(Object::getClassName()) + " " + (getActualPos() / getGame()->getGridSize()).toString();
 }
 
 
@@ -693,6 +720,7 @@ void Mine::damageObject(DamageInfo *info)
 U32 Mine::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
    U32 ret = Parent::packUpdate(connection, updateMask, stream);
+
    if(stream->writeFlag(updateMask & InitialMask))
    {
       stream->write(mTeam);
@@ -742,6 +770,20 @@ void Mine::renderItem(Point pos)
       (getGame()->getGameType()->mLocalClient && getGame()->getGameType()->mLocalClient->name == mSetBy);
 
    renderMine(pos, mArmed, visible);
+}
+
+
+void Mine::renderEditor(F32 currentScale)
+{
+   renderMine(getActualPos(), true, true);
+}
+
+
+void Mine::renderDock()
+{
+   glColor3f(.7, .7, .7);
+   drawCircle(getActualPos(), 9);
+   drawLetter('M', getActualPos(), Color(.7), 1);
 }
 
 
@@ -797,6 +839,7 @@ SpyBug::~SpyBug()
       gServerGame->getGameType()->catalogSpybugs();
 }
 
+
 bool SpyBug::processArguments(S32 argc, const char **argv)
 {
    if(argc < 3)
@@ -809,6 +852,14 @@ bool SpyBug::processArguments(S32 argc, const char **argv)
 
    return true;
 }
+
+
+// ProcessArguments() used is the one in item
+string SpyBug::toString()
+{
+   return string(Object::getClassName()) + " " + (getActualPos() / getGame()->getGridSize()).toString() + " " + itos(mTeam);
+}
+
 
 // Spy bugs are always in scope.  This only really matters on pre-positioned spy bugs...
 void SpyBug::onAddedToGame(Game *theGame)
@@ -894,6 +945,21 @@ void SpyBug::renderItem(Point pos)
 
    renderSpyBug(pos, visible);
 }
+
+
+void SpyBug::renderEditor(F32 currentScale)
+{
+   renderSpyBug(getActualPos(), true);
+}
+
+
+void SpyBug::renderDock()
+{
+   glColor3f(.7, .7, .7);
+   drawCircle(getActualPos(), 9);
+   drawLetter('S', getActualPos(), Color(.7), 1);
+}
+
 
 
 // Can the player see the spybug?

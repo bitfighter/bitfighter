@@ -24,10 +24,8 @@
 //------------------------------------------------------------------------------------
 
 #include "flagItem.h"
+#include "gameItems.h"     // For FlagSpawn def
 #include "gameType.h"
-#include "ship.h"
-#include "UIMenus.h"
-#include "../glut/glutInclude.h"
 
 namespace Zap
 {
@@ -35,13 +33,13 @@ namespace Zap
 TNL_IMPLEMENT_NETOBJECT(FlagItem);
 
 // C++ constructor
-FlagItem::FlagItem(Point pos) : Item(pos, true, Ship::CollisionRadius) // radius was 20
+FlagItem::FlagItem(Point pos) : EditorItem(pos, true, Ship::CollisionRadius) // radius was 20
 {
    initialize();
 }
 
 // Alternate constructor, currently used by HuntersFlag
-FlagItem::FlagItem(Point pos, bool collidable, float radius, float mass) : Item(pos, collidable, radius, mass)
+FlagItem::FlagItem(Point pos, bool collidable, float radius, float mass) : EditorItem(pos, collidable, radius, mass)
 {
    initialize();
 }
@@ -235,14 +233,12 @@ void FlagItem::renderDock()
       glScalef(0.6, 0.6, 1);
       renderFlag(0, 0, getGame()->getTeamColor(mTeam));
    glPopMatrix();   
-
-   Parent::renderDock();
 }
 
 
-S32 FlagItem::getEditorRadius(F32 currentScale)
+F32 FlagItem::getEditorRadius(F32 currentScale)
 {
-   return 18 * getEditorRenderScaleFactor(currentScale);
+   return 18 * currentScale * getEditorRenderScaleFactor(currentScale);
 }
 
 
@@ -292,15 +288,5 @@ void FlagItem::onMountDestroyed()
    onItemDropped();
 }
 
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-// Constructor
-FlagSpawn::FlagSpawn(Point pos, S32 delay)
-{
-   mPos = pos;
-   timer = Timer(delay);
-};
 
 };

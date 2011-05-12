@@ -57,7 +57,7 @@ private:
 
    // How are this item's vertices labeled in the editor? -- these can be private
    const char *getVertLabel(S32 index) { return index == 0 ? "Start" : "Direction"; }
-   const char *getEditMessage(S32 line) { return line == 0 ? "[Enter] to edit text" : ""; }
+   const char *getInstructionMsg() { return "[Enter] to edit text"; }
 
    static EditorAttributeMenuUI *mAttributeMenuUI;      // Menu for text editing; since it's static, don't bother with smart pointer
 
@@ -96,7 +96,7 @@ public:
 
    Color getEditorRenderColor() { return Color(0,0,1); }
 
-   void renderEditorItem(F32 currentScale);
+   void renderEditorItem();
    F32 getSize() { return mSize; }
    void setSize(F32 size) { mSize = size; }
 
@@ -117,7 +117,7 @@ public:
    void recalcTextSize();
 
    // Offset lets us drag an item out from the dock by an amount offset from the 0th vertex.  This makes placement seem more natural.
-   Point getInitialPlacementOffset() { return Point(.4, 0); }
+   Point getInitialPlacementOffset(F32 gridSize) { return Point(.4, 0); }
 
    // Some properties about the item that will be needed in the editor
    const char *getEditorHelpString() { return "Draws a bit of text on the map.  Visible only to team, or to all if neutral."; }  
@@ -127,6 +127,8 @@ public:
    bool hasTeam() { return true; }
    bool canBeHostile() { return true; }
    bool canBeNeutral() { return true; }
+
+   bool showAttribsWhenSelected() { return false; }      // We already show the attributes, as the text itself
 
    TNL_DECLARE_CLASS(TextItem);
 };

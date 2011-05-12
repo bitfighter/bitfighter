@@ -40,12 +40,11 @@ private:
    virtual Color getEditorRenderColor() = 0;
 
    virtual const char *getVertLabel(S32 index) = 0;          
-   virtual const char *getEditMessage(S32 line) { return ""; }
 
 protected:
    virtual void initializeEditor(F32 gridSize);
    virtual S32 getDockRadius() { return 8; }                       // Size of object on dock
-   virtual S32 getEditorRadius(F32 currentScale) { return 7; }     // Size of object (or in this case vertex) in editor
+   virtual F32 getEditorRadius(F32 currentScale) { return 7; }     // Size of object (or in this case vertex) in editor
 
 public:
    SimpleLine();           // Constructor
@@ -58,11 +57,18 @@ public:
 
    void renderDock();     // Render item on the dock
    void renderEditor(F32 currentScale);
-   virtual void renderEditorItem(F32 currentScale) = 0;
+   virtual void renderEditorItem() = 0;
+   void renderItemText(const char *text, S32 offset, F32 currentScale);
 
    virtual S32 getVertCount() { return 2; }
 
-   void deleteVert(S32 vertIndex) { /* Do nothing */ }
+   void clearVerts() { /* Do nothing */ }
+   void addVert(const Point &point)  { /* Do nothing */ }
+   void addVertFront(Point vert)  { /* Do nothing */ }
+   void deleteVert(S32 vertIndex)  { /* Do nothing */ }
+   void insertVert(Point vertex, S32 vertIndex)  { /* Do nothing */ }
+
+   void addToDock(Game *game, const Point &point);
 };
 
 

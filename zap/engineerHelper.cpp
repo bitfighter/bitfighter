@@ -46,7 +46,6 @@ void EngineerHelper::onMenuShow()
 
 extern void drawSquare(const Point &pos, S32 size);
 static Point deployPosition, deployNormal;
-extern void glColor(const Color &c, float alpha = 1.0);
 
 void EngineerHelper::render()
 {

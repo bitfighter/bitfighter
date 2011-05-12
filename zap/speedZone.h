@@ -53,7 +53,7 @@ private:
 
    // How are things labeled in the editor? 
    const char *getVertLabel(S32 index) { return index == 0 ? "Location" : "Direction"; }
-   const char *getEditMessage(S32 line);
+   const char *getInstructionMsg();
 
    static EditorAttributeMenuUI *mAttributeMenuUI;      // Menu for attribute editing; since it's static, don't bother with smart pointer
 
@@ -105,11 +105,11 @@ public:
 
    ///// Editor methods 
    // Offset lets us drag an item out from the dock by an amount offset from the 0th vertex.  This makes placement seem more natural.
-   Point getInitialPlacementOffset() { return Point(.15,0); }
+   Point getInitialPlacementOffset(F32 gridSize) { return Point(.15,0); }
 
    Color getEditorRenderColor() { return Color(1,0,0); }
 
-   void renderEditorItem(F32 currentScale);
+   void renderEditorItem();
 
    Point getVert(S32 index) { return index == 0 ? pos : dir; }
    void setVert(const Point &point, S32 index) { if(index == 0) pos = point; else dir = point; }

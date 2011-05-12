@@ -91,7 +91,7 @@ void TextItem::render()
 
 
 // Called by SimpleItem::renderEditor()
-void TextItem::renderEditorItem(F32 currentScale)
+void TextItem::renderEditorItem()
 {
    renderTextItem(mPos, mDir, mSize, mText, getGame()->getTeamColor(mTeam));
 }

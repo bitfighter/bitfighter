@@ -31,7 +31,7 @@
 namespace Zap
 {
 
-extern void glColor(const Color &c, float alpha = 1.0);
+//extern void glColor(const Color &c, float alpha = 1.0);
 
 // Shouldn't need to be overridden -- all redering routines should include xpos
 void MenuItem::render(S32 ypos, S32 textsize, bool isSelected)

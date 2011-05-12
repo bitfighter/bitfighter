@@ -122,7 +122,7 @@ void SpeedZone::render()
 }
 
 
-void SpeedZone::renderEditorItem(F32 currentScale)
+void SpeedZone::renderEditorItem()
 {
    render();
 }
@@ -239,9 +239,9 @@ string SpeedZone::toString()
 }
 
 
-const char *SpeedZone::getEditMessage(S32 line)
+const char *SpeedZone::getInstructionMsg()
 {
-   return line == 0 ? "[Enter] to edit attributes" : "";
+   return "[Enter] to edit attributes";
 }
 
 

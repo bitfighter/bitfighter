@@ -58,7 +58,6 @@ bool HelperMenu::processKeyCode(KeyCode keyCode)
 }
 
 
-extern void glColor(const Color &c, float alpha = 1.0);
 extern void renderControllerButton(F32 x, F32 y, KeyCode keyCode, bool activated, S32 offset);
 extern IniSettings gIniSettings;
 extern S32 getControllerButtonRenderedSize(KeyCode keyCode);

@@ -42,7 +42,7 @@ static const S32 ATTR_TEXTSIZE = 10;                                          //
 
 void EditorAttributeMenuUI::render()
 {
-   // Draw the editor screen
+   // Draw the underlying editor screen
    gEditorUserInterface.render();     // better way than global?
 
  /*  if(mRenderInstructions)
@@ -65,10 +65,14 @@ void EditorAttributeMenuUI::render()
 
 void EditorAttributeMenuUI::doneEditing(EditorObject *object) 
 { 
-   if(object == mObject) 
+   // Only run on object that is the subject of this editor.  See TextItemEditorAttributeMenuUI::doneEditing() for explanation
+   // of why this may be run on objects that are not actually the ones being edited (hence the need for passing an object in).
+   if(object == mObject)   
+   {
+      mObject->setIsBeingEdited(false);
       gEditorUserInterface.doneEditingAttributes(this, mObject); 
+   }
 }
-
 
 
 ////////////////////////////////////////
@@ -164,12 +168,12 @@ void TextItemEditorAttributeMenuUI::startEditing(EditorObject *object)
 
 void TextItemEditorAttributeMenuUI::doneEditing(EditorObject *object)
 {
-   // The following seems redundant because we have a callback that keeps the item updated throughout the editing process.
+   Parent::doneEditing(object);
+
+   // The following seems redundant because we have a callback that keeps the item's setText method updated throughout the editing process.
    // However, this is also called if we edit three textItems at once and we need to transfer the text to the other two.
    TextItem *textItem = dynamic_cast<TextItem *>(object);
    textItem->setText(menuItems[0]->getValue());
-
-   Parent::doneEditing(object);
 }
 
 };

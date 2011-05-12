@@ -495,6 +495,8 @@ void SFXObject::init()
 {
    ALint error;
 
+   return;
+
 #if defined(TNL_OS_MAC_OSX) || defined(AL_VERSION_1_1)
    gDevice = alcOpenDevice((ALCchar *) "DirectSound3D");    // Required for the different version of alut we're using on OS X
 #else
@@ -550,19 +552,19 @@ void SFXObject::init()
       ALsizei size,freq;
       ALenum   format;
       ALvoid   *data;
-      ALboolean loop;
+      //ALboolean loop;
 
       char format1;
 
       string fileBuffer = joindir(gConfigDirs.sfxDir, gSFXProfiles[i].fileName);
 
-// newer version openAL may not have alutLoadWAVFile
+ //newer version openAL may not have alutLoadWAVFile
 //#if defined(TNL_OS_MAC_OSX)
 //      alutLoadWAVFile((ALbyte *) fileBuffer.c_str(), &format, &data, &size, &freq);      // OS X version has no loop param
 //#else
 //      alutLoadWAVFile((ALbyte *) fileBuffer.c_str(), &format, &data, &size, &freq, &loop);
 //#endif
-//      if(alGetError() != AL_NO_ERROR)
+      if(alGetError() != AL_NO_ERROR)
       if(!LoadWAVFile(fileBuffer.c_str(), format1, (char **) &data, (int &)size, (int &)freq))
       {
          logprintf(LogConsumer::LogError, "Failure (1) loading sound file '%s': Game will proceed without sound.", fileBuffer.c_str()); 

@@ -96,14 +96,38 @@ Rect Polyline::computePolyExtents()
 }
 
 
+string Polyline::boundsToString(F32 gridSize)
+{
+   string bounds = "";
+   S32 size = mPolyBounds.size();
+
+   Point p;
+   for(S32 i = 0; i < size; i++)
+   {
+      p = mPolyBounds[i] / gridSize;
+      bounds += p.toString() + (i < size - 1 ? " " : "");
+   }
+
+   return bounds;
+}
+
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
 void Polygon::processPolyBounds(S32 argc, const char **argv, S32 firstCoord, F32 gridSize)
 {
    Parent::processPolyBounds(argc, argv, firstCoord, gridSize, false);
+   onPolygonChanged();
+}
 
-   mCentroid = findCentroid(mPolyBounds);
+
+// If polygon changes shape (really only happens in the editor), we need to update some things
+void Polygon::onPolygonChanged() 
+{ 
+   mCentroid = findCentroid(mPolyBounds); 
+   Triangulate::Process(mPolyBounds, mPolyFill);      // Fills mPolyFill from data in mPolyBounds
+   mLabelAngle = angleOfLongestSide(mPolyBounds);
 }
 
 
@@ -112,15 +136,165 @@ U32 Polygon::unpackUpdate(GhostConnection *connection, BitStream *stream)
    U32 size = Parent::unpackUpdate(connection, stream);
 
    if(size)
-   {
-      Triangulate::Process(mPolyBounds, mPolyFill);
-      //TNLAssert(mPolyFill.size() > 0, "Bogus polygon geometry detected!"); // should be checked in a different place...
-
-      mCentroid = findCentroid(mPolyBounds);
-      mLabelAngle = angleOfLongestSide(mPolyBounds);
-   }
+      onPolygonChanged();
 
    return size;
+}
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// TODO: Put in editor ??
+static const Color INSTRUCTION_TEXTCOLOR(1,1,1);
+static const S32 INSTRUCTION_TEXTSIZE = 9;      
+static const S32 INSTRUCTION_TEXTGAP = 3;
+static const Color ACTIVE_SPECIAL_ATTRIBUTE_COLOR = Color(.6, .6, .6);    
+static const Color INACTIVE_SPECIAL_ATTRIBUTE_COLOR = Color(.6, .6, .6);      // already in editor, called inactiveSpecialAttributeColor
+
+// Offset: negative below the item, positive above
+void EditorPolygon::renderItemText(const char *text, S32 offset, F32 currentScale)
+{
+   glColor(INSTRUCTION_TEXTCOLOR);
+   S32 off = (INSTRUCTION_TEXTSIZE + INSTRUCTION_TEXTGAP) * offset - 10 - ((offset > 0) ? 5 : 0);
+   Point pos = convertLevelToCanvasCoord(getVert(0));
+   UserInterface::drawCenteredString(pos.x, pos.y - off, INSTRUCTION_TEXTSIZE, text);
+}
+
+
+void EditorPolygon::renderDock()
+{
+   renderEditor(1);
+}
+
+
+void EditorPolygon::highlightDockItem() 
+{   
+   renderPolyHighlight(); 
+}  
+
+
+// TODO: merge with versions in editor
+const Color HIGHLIGHT_COLOR = white;
+const Color SELECT_COLOR = yellow;
+
+
+extern void renderPolygonOutline(const Vector<Point> &outline);
+
+void EditorPolygon::renderPolyHighlight()
+{
+   glLineWidth(gLineWidth3);
+   glColor(mSelected ? SELECT_COLOR : HIGHLIGHT_COLOR);
+   renderPolygonOutline(mPolyBounds);
+   glLineWidth(gDefaultLineWidth);
+}
+
+
+void EditorPolygon::labelDockItem()
+{
+   renderDockItemLabel(mCentroid, getOnDockName(), -2);
+}
+
+
+void EditorPolygon::addToDock(Game *game, const Point &point)
+{
+   F32 h = 16;    // Entire height
+   F32 w = 20;    // Half the width
+
+   clearVerts();
+   addVert(point + Point(-w, 0)); 
+   addVert(point + Point( w, 0)); 
+   addVert(point + Point( w, h)); 
+   addVert(point + Point(-w, h)); 
+
+   Parent::addToDock(game, point);
+}
+
+
+static const F32 INITIAL_HEIGHT = 0.9;
+static const F32 INITIAL_WIDTH = 0.3;
+
+void EditorPolygon::initializeEditor(F32 gridSize) 
+{
+   Parent::initializeEditor(gridSize);
+
+   F32 w = INITIAL_HEIGHT * gridSize / 2;
+   F32 h = INITIAL_WIDTH * gridSize / 2;
+
+   setVert(Point(-w, -h), 0);
+   setVert(Point(-w,  h), 1);
+   setVert(Point( w,  h), 2);
+   setVert(Point( w, -h), 3);
+}
+
+
+// Offset lets us drag an item out from the dock by an amount offset from the 0th vertex.  This makes placement seem more natural.
+Point EditorPolygon::getInitialPlacementOffset(F32 gridSize)
+{ 
+   return Point(INITIAL_HEIGHT * gridSize / 2, INITIAL_WIDTH * gridSize / 2); 
+}
+
+
+/////
+// Point management methods
+
+S32 EditorPolygon::getVertCount() 
+{ 
+   return mPolyBounds.size(); 
+}
+
+
+void EditorPolygon::clearVerts() 
+{ 
+   mPolyBounds.clear(); 
+   mVertSelected.clear(); 
+   mCentroid = Point(0,0);
+}
+
+
+void EditorPolygon::addVert(const Point &point) 
+{ 
+   mPolyBounds.push_back(point); 
+   mVertSelected.push_back(false); 
+   onPolygonChanged();
+}
+
+
+void EditorPolygon::addVertFront(Point vert) 
+{ 
+   mPolyBounds.push_front(vert); 
+   mVertSelected.insert(mVertSelected.begin(), false); 
+   onPolygonChanged();
+}
+
+
+void EditorPolygon::deleteVert(S32 vertIndex) 
+{ 
+   mPolyBounds.erase(vertIndex); 
+   mVertSelected.erase(mVertSelected.begin() + vertIndex); 
+   onPolygonChanged();
+}
+
+
+void EditorPolygon::insertVert(Point vertex, S32 vertIndex) 
+{ 
+   mPolyBounds.insert(vertIndex); 
+   mPolyBounds[vertIndex] = vertex; 
+                                                  
+   mVertSelected.insert(mVertSelected.begin() + vertIndex, 1, false); 
+   onPolygonChanged();
+}
+
+
+Point EditorPolygon::getVert(S32 index) 
+{ 
+   return mPolyBounds[index]; 
+}
+
+
+void EditorPolygon::setVert(const Point &point, S32 index) 
+{ 
+   mPolyBounds[index] = point; 
+   onPolygonChanged();
 }
 
 

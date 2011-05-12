@@ -26,8 +26,7 @@
 #ifndef _FLAGITEM_H_
 #define _FLAGITEM_H_
 
-#include "item.h"
-#include "goalZone.h"
+#include "gameItems.h"     // For FlagSpawn def
 #include "ship.h"
 
 namespace Zap
@@ -35,16 +34,17 @@ namespace Zap
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class FlagItem : public Item
+class FlagItem : public EditorItem
 {
+protected:
+   typedef EditorItem Parent;         // <=== needs to be protected as this is accessed by child in form of Parent::Parent
+
 private:
-   Point mInitialPos;                   // Where flag was "born"
+   Point mInitialPos;                 // Where flag was "born"
    bool mIsAtHome;
 
 protected:
-   typedef Item Parent;                
-
-   U32 mFlagCount;                      // How many flags does this represet?
+   U32 mFlagCount;                    // How many flags does this represet?
 
 public:
    FlagItem(Point pos = Point());                                    // C++ constructor
@@ -79,7 +79,7 @@ public:
    ///// Editor stuff
 
    void renderDock();
-   S32 getEditorRadius(F32 currentScale);
+   F32 getEditorRadius(F32 currentScale);
 
    // Some properties about the item that will be needed in the editor
    const char *getEditorHelpString() { return "Flag item, used by a variety of game types."; }  
@@ -106,23 +106,6 @@ public:
 
 };
 
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-
-class FlagSpawn
-{
-private:
-   Point mPos;
-
-public:
-   static const S32 defaultRespawnTime = 30;    // in seconds
-
-   FlagSpawn(Point pos, S32 delay);    // C++ constructor (no lua constructor)
-   Point getPos() { return mPos; }
-   Timer timer;
-};
 
 };
 

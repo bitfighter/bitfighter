@@ -67,6 +67,18 @@ void RepairItem::renderItem(Point pos)
 }
 
 
+void RepairItem::renderDock()
+{
+   renderRepairItem(getActualPos(), true, 0, 1);
+}
+
+
+F32 RepairItem::getEditorRadius(F32 currentScale)
+{
+   return 22 * currentScale * getEditorRenderScaleFactor(currentScale);
+}
+
+
 const char RepairItem::className[] = "RepairItem";      // Class name as it appears to Lua scripts
 
 // Lua constructor
@@ -160,12 +172,121 @@ S32 EnergyItem::isVis(lua_State *L) { return returnBool(L, isVisible()); }      
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-// Constructor
-AsteroidSpawn::AsteroidSpawn(Point pos, S32 delay)
+AbstractSpawn::AbstractSpawn(const Point &pos, S32 time, GameObjectType objType) : EditorPointObject(objType)
 {
    mPos = pos;
-   timer = Timer(delay);
+   setRespawnTime(time);
 };
+
+
+void AbstractSpawn::setRespawnTime(S32 time)       // in seconds
+{
+      mSpawnTime = time;
+      timer.setPeriod(time);
+}
+
+
+F32 AbstractSpawn::getEditorRadius(F32 currentScale)
+{
+   return 12;     // Constant size, regardless of zoom
+}
+
+
+bool AbstractSpawn::processArguments(S32 argc, const char **argv)
+{
+   if(argc >= 3)
+      return false;
+
+   mPos.read(argv + 1);
+   mPos *= getGame()->getGridSize();
+
+   S32 time = (argc > 3) ? atoi(argv[3]) : getDefaultRespawnTime();
+
+   setRespawnTime(time);
+
+   return true;
+}
+
+
+string AbstractSpawn::toString()
+{
+   Point pos = mPos / getGame()->getGridSize();
+
+   // AsteroidSpawn|FlagSpawn <x> <y> <time>
+   return string(getClassName()) + " " + pos.toString() + " " + itos(mSpawnTime);
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Constructor
+AsteroidSpawn::AsteroidSpawn(const Point &pos, S32 time) : AbstractSpawn(pos, time, AsteroidSpawnType)
+{
+   // Do nothing
+};
+
+
+static void renderAsteroidSpawn(const Point &pos)
+{
+   F32 scale = 0.8;
+   Point p(0,0);
+
+   glPushMatrix();
+      glTranslatef(pos.x, pos.y, 0);
+      glScalef(scale, scale, 1);
+      renderAsteroid(p, 2, .1);
+
+      glColor(white);
+      drawCircle(p, 13);
+   glPopMatrix();  
+}
+
+
+void AsteroidSpawn::renderEditor(F32 currentScale)
+{
+   glPushMatrix();
+      glTranslatef(mPos.x, mPos.y, 0);
+      glScalef(1/currentScale, 1/currentScale, 1);    // Make item draw at constant size, regardless of zoom
+      renderAsteroidSpawn(Point(0,0));
+   glPopMatrix();   
+}
+
+
+void AsteroidSpawn::renderDock()
+{
+   renderAsteroidSpawn(mPos);
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Constructor
+FlagSpawn::FlagSpawn(const Point &pos, S32 time) : AbstractSpawn(pos, time, FlagSpawnType)
+{
+   // Do nothing
+}
+
+
+void FlagSpawn::renderEditor(F32 currentScale)
+{
+   glPushMatrix();
+      glTranslatef(mPos.x + 1, mPos.y, 0);
+      glScalef(0.4/currentScale, 0.4/currentScale, 1);
+      renderFlag(0, 0, getTeamColor(mTeam));
+
+      glColor(white);
+      drawCircle(-4, 0, 26);
+   glPopMatrix();
+}
+
+
+void FlagSpawn::renderDock()
+{
+   renderEditor(1);
+}
+ 
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -177,7 +298,7 @@ static F32 asteroidVel = 250;
 
 
 // Constructor
-Asteroid::Asteroid() : Item(Point(0,0), true, ASTEROID_RADIUS, 4)
+Asteroid::Asteroid() : EditorItem(Point(0,0), true, ASTEROID_RADIUS, 4)
 {
    mNetFlags.set(Ghostable);
    mObjectTypeMask |= AsteroidType;
@@ -203,6 +324,18 @@ void Asteroid::renderItem(Point pos)
 {
    if(!hasExploded)
       renderAsteroid(pos, mDesign, asteroidRenderSize[mSizeIndex]);
+}
+
+
+void Asteroid::renderDock()
+{
+   renderAsteroid(getActualPos(), 2, .1);
+}
+
+
+F32 Asteroid::getEditorRadius(F32 currentScale)
+{
+   return 75 * currentScale * getEditorRenderScaleFactor(currentScale);
 }
 
 
@@ -501,7 +634,7 @@ void Worm::unpackUpdate(GhostConnection *connection, BitStream *stream)
 TNL_IMPLEMENT_NETOBJECT(TestItem);
 
 // Constructor
-TestItem::TestItem() : Item(Point(0,0), true, TEST_ITEM_RADIUS, 4)
+TestItem::TestItem() : EditorItem(Point(0,0), true, TEST_ITEM_RADIUS, 4)
 {
    mNetFlags.set(Ghostable);
    mObjectTypeMask |= TestItemType | TurretTargetType;
@@ -511,6 +644,18 @@ TestItem::TestItem() : Item(Point(0,0), true, TEST_ITEM_RADIUS, 4)
 void TestItem::renderItem(Point pos)
 {
    renderTestItem(pos);
+}
+
+
+void TestItem::renderDock()
+{
+   renderTestItem(getActualPos(), 8);
+}
+
+
+F32 TestItem::getEditorRadius(F32 currentScale)
+{
+   return getRadius() * currentScale * getEditorRenderScaleFactor(currentScale);
 }
 
 
@@ -558,19 +703,28 @@ Lunar<TestItem>::RegType TestItem::methods[] =
    {0,0}    // End method list
 };
 
+////////////////////////////////////////
+////////////////////////////////////////
 
 TNL_IMPLEMENT_NETOBJECT(ResourceItem);
 
 // Constructor
-ResourceItem::ResourceItem() : Item(Point(0,0), true, RESOURCE_ITEM_RADIUS, 1)
+ResourceItem::ResourceItem() : EditorItem(Point(0,0), true, RESOURCE_ITEM_RADIUS, 1)
 {
    mNetFlags.set(Ghostable);
    mObjectTypeMask |= ResourceItemType | TurretTargetType;
 }
 
+
 void ResourceItem::renderItem(Point pos)
 {
    renderResourceItem(pos);
+}
+
+
+void ResourceItem::renderDock()
+{
+   renderResourceItem(getActualPos(), .4, 0, 1);
 }
 
 

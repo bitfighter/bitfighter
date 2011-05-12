@@ -89,8 +89,8 @@ public:
    string getPrompt() { return mPrompt; }
    const char *c_str() { return mLine.c_str(); }                     // Return the string in c_str format
 
-   void drawCursor(S32 x, S32 y, U32 fontSize);                      // Draw our cursor, assuming string is drawn at x,y
-   void drawCursor(S32 x, S32 y, U32 fontSize, S32 startingWidth);   // Draw cursor starting at a given width
+   void drawCursor(S32 x, S32 y, S32 fontSize);                      // Draw our cursor, assuming string is drawn at x,y
+   void drawCursor(S32 x, S32 y, S32 fontSize, S32 startingWidth);   // Draw cursor starting at a given width
    void drawCursorAngle(F32 x, F32 y, F32 fontSize, F32 angle);      // Draw our cursor, assuming string is drawn at x,y at specified angle
 
    // For tab expansion 

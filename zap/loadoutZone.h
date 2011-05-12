@@ -36,7 +36,7 @@ namespace Zap
 
 extern S32 gMaxPolygonPoints;
 
-class LoadoutZone : public LuaPolygonalGameObject
+class LoadoutZone : public EditorPolygon
 {
 private:
    typedef GameObject Parent;
@@ -55,7 +55,19 @@ public:
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
-   //// Lua interface
+   /////
+   // Editor methods
+   const char *getEditorHelpString() { return "Area to finalize ship modifications.  Each team should have at least one."; }
+   const char *getPrettyNamePlural() { return "Loadout zones"; }
+   const char *getOnDockName() { return "Loadout"; }
+   const char *getOnScreenName() { return "Loadout"; }
+   string toString();
+
+   void renderEditor(F32 currentScale);
+   void renderDock();
+
+   /////
+   // Lua interface
 
    LoadoutZone(lua_State *L) { /* Do nothing */ };    //  Lua constructor
    GameObject *getGameObject() { return this; }          // Return the underlying GameObject

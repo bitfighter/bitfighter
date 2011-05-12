@@ -27,9 +27,14 @@
 #include "engineeredObjects.h"   // For Turret properties
 #include "soccerGame.h"          // For soccer ball radius
 
-#include "textItem.h"         // For copy constructor
-#include "teleporter.h"       // For copy constructor
-#include "speedZone.h"        // For copy constructor
+#include "textItem.h"            // For copy constructor
+#include "teleporter.h"          // For copy constructor
+#include "speedZone.h"           // For copy constructor
+#include "loadoutZone.h"
+#include "goalZone.h"
+#include "huntersGame.h"
+
+#include "UIEditorMenus.h"       // For EditorAttributeMenuUI def
 
 
 inline F32 getGridSize()
@@ -52,10 +57,15 @@ void EditorObject::addToEditor(Game *game)
 }
 
 
-void EditorObject::addToDock(Game *game)
+void EditorObject::addToDock(Game *game, const Point &point)
 {
    mGame = game;
    mDockItem = true;
+   
+   // TODO: Needed?
+   mVertSelected.resize(getVertCount()); 
+   unselectVerts();
+
    gEditorUserInterface.mDockItems.push_back(this);
 }
 
@@ -63,20 +73,20 @@ void EditorObject::addToDock(Game *game)
 void EditorObject::processEndPoints()
 {
    if(getObjectTypeMask() & BarrierType)
-      Barrier::constructBarrierEndPoints(mVerts, getWidth() / getGridSize(), extendedEndPoints);
+      Barrier::constructBarrierEndPoints(getVerts(), getWidth() / getGridSize(), extendedEndPoints);
 
    else if(getObjectTypeMask() & PolyWallType)
    {
       extendedEndPoints.clear();
       for(S32 i = 1; i < getVertCount(); i++)
       {
-         extendedEndPoints.push_back(mVerts[i-1]);
-         extendedEndPoints.push_back(mVerts[i]);
+         extendedEndPoints.push_back(getVert(i-1));
+         extendedEndPoints.push_back(getVert(i));
       }
 
       // Close the loop
-      extendedEndPoints.push_back(mVerts.last());
-      extendedEndPoints.push_back(mVerts.first());
+      extendedEndPoints.push_back(getVert(getVertCount()));
+      extendedEndPoints.push_back(getVert(0));
    }
 }
 
@@ -106,13 +116,12 @@ static void setLevelToCanvasCoordConversion()
 } 
 
 // TODO: merge with UIEditor versions
-const Color SELECT_COLOR = yellow;     
 static const Color grayedOutColorBright = Color(.5, .5, .5);
 static const Color grayedOutColorDim = Color(.25, .25, .25);
 static const S32 NO_NUMBER = -1;
 
 // Draw a vertex of a selected editor item
-void renderVertex(VertexRenderStyles style, const Point &v, S32 number, F32 alpha, S32 size)
+static void renderVertex(VertexRenderStyles style, const Point &v, S32 number, F32 currentScale, F32 alpha, F32 size)
 {
    bool hollow = style == HighlightedVertex || style == SelectedVertex || style == SelectedItemVertex || style == SnappingVertex;
 
@@ -120,11 +129,11 @@ void renderVertex(VertexRenderStyles style, const Point &v, S32 number, F32 alph
    if(hollow && number != NO_NUMBER)
    {
       glColor3f(.25, .25, .25);
-      drawFilledSquare(v, size);
+      drawFilledSquare(v, size / currentScale);
    }
-      
+
    if(style == HighlightedVertex)
-      glColor(EditorUserInterface::HIGHLIGHT_COLOR, alpha);
+      glColor(HIGHLIGHT_COLOR, alpha);
    else if(style == SelectedVertex)
       glColor(SELECT_COLOR, alpha);
    else if(style == SnappingVertex)
@@ -132,74 +141,114 @@ void renderVertex(VertexRenderStyles style, const Point &v, S32 number, F32 alph
    else
       glColor(red, alpha);
 
-   drawSquare(v, size, !hollow);
+   drawSquare(v, size / currentScale, !hollow);
 
    if(number != NO_NUMBER)     // Draw vertex numbers
    {
       glColor(white, alpha);
-      UserInterface::drawStringf(v.x - UserInterface::getStringWidthf(6, "%d", number) / 2, v.y - 3, 6, "%d", number);
+      F32 txtSize = 6.0 / currentScale;
+      UserInterface::drawStringf(v.x - F32(UserInterface::getStringWidthf(txtSize, "%d", number)) / 2, v.y - 3 / currentScale, txtSize, "%d", number);
    }
 }
 
 
-void renderVertex(VertexRenderStyles style, const Point &v, S32 number, F32 alpha)
+static void renderVertex(VertexRenderStyles style, const Point &v, S32 number, F32 currentScale, F32 alpha)
 {
-   renderVertex(style, v, number, alpha, 5);
+   renderVertex(style, v, number, alpha, currentScale, 5);
 }
 
 
-void renderVertex(VertexRenderStyles style, const Point &v, S32 number)
+//static void renderVertex(VertexRenderStyles style, const Point &v, S32 number)
+//{
+//   renderVertex(style, v, number, 1);
+//}
+
+
+static const S32 DOCK_LABEL_SIZE = 9;      // Size to label items on the dock
+static const Color DOCK_LABEL_COLOR = white;
+
+
+static void labelVertex(Point pos, S32 radius, const char *itemLabelTop, const char *itemLabelBottom)
 {
-   renderVertex(style, v, number, 1);
+   F32 labelSize = DOCK_LABEL_SIZE;
+
+   UserInterface::drawStringc(pos.x, pos.y - radius - labelSize - 5, labelSize, itemLabelTop);     // Above the vertex
+   UserInterface::drawStringc(pos.x, pos.y + radius + 2, labelSize, itemLabelBottom);              // Below the vertex
 }
 
 
-// Apply a 2-line label to a vertex
-static inline void labelVertex(Point pos, const char *itemLabelTop, const char *itemLabelBottom)
-{
-   F32 labelSize = EditorUserInterface::DOCK_LABEL_SIZE;
-
-   UserInterface::drawStringc(pos.x, pos.y + labelSize + 2,     labelSize, itemLabelTop);
-   UserInterface::drawStringc(pos.x, pos.y + 2 * labelSize + 5, labelSize, itemLabelBottom);
+// TODO: Fina a way to do this sans global
+Point EditorObject::convertLevelToCanvasCoord(const Point &pt) 
+{ 
+   return gEditorUserInterface.convertLevelToCanvasCoord(pt); 
 }
 
 
-void EditorObject::renderEditor(F32 currentScale)
+static const Color INSTRUCTION_TEXTCOLOR(1,1,1);      // TODO: Put in editor
+
+void EditorObject::renderAttribs(F32 currentScale)
 {
-   if(mLitUp)
+   if(isSelected() && !isBeingEdited() && showAttribsWhenSelected())
    {
-      glColor(EditorUserInterface::HIGHLIGHT_COLOR);
-      drawSquare(getVert(0), getDockRadius());
-   }
+      // Now list the attributes above the item
+      EditorAttributeMenuUI *attrMenu = getAttributeMenu();
 
-   // Label any selected or highlighted vertices
-   for(S32 i = 0; i < getVertCount(); i++)
-      if(vertSelected(i) || (mLitUp && isVertexLitUp(i)))
+      if(attrMenu)
       {
-         F32 alpha = 1;
-         glColor(getDrawColor(), alpha);
-         drawSquare(getVert(i), getEditorRadius(currentScale));
+         glColor(INSTRUCTION_TEXTCOLOR);
 
-         labelVertex(getVert(i), getOnScreenName(), getVertLabel(i));
+         S32 menuSize = attrMenu->menuItems.size();
+         for(S32 i = 0; i < menuSize; i++)       
+         {
+            string txt = attrMenu->menuItems[i]->getPrompt() + ": " + attrMenu->menuItems[i]->getValue();      // TODO: Make this concatenation a method on the menuItems themselves?
+            renderItemText(txt.c_str(), menuSize - i, 1);
+         }
       }
-}
-
-
-// Called by children, who will render the unique elements; here we add a label and do other standard rendering
-void EditorObject::renderDock()
-{
-   // Draw label
-   F32 xpos = getVert(0).x;
-   F32 ypos = getVert(0).y + 6;
-   glColor(EditorUserInterface::DOCK_LABEL_COLOR);
-   UserInterface::drawStringc(xpos, ypos, EditorUserInterface::DOCK_LABEL_SIZE, getOnDockName());
-   
-   if(mLitUp)
-   {
-      glColor(EditorUserInterface::HIGHLIGHT_COLOR);
-      drawSquare(getVert(0), getDockRadius());
    }
 }
+
+
+// Render selected and highlighted vertices, called from renderEditor
+void EditorObject::renderAndLabelHighlightedVertices(F32 currentScale)
+{
+   F32 radius = getEditorRadius(currentScale);
+
+   // Label and highlight any selected or lit up vertices.  This will also highlight point items.
+   for(S32 i = 0; i < getVertCount(); i++)
+      if(vertSelected(i) || isVertexLitUp(i) || ((mSelected || mLitUp)  && getVertCount() == 1))
+      {
+         glColor((vertSelected(i) || mSelected) ? SELECT_COLOR: HIGHLIGHT_COLOR);
+
+         Point pos = gEditorUserInterface.convertLevelToCanvasCoord(getVert(i));
+
+         drawSquare(pos, radius);
+         labelVertex(pos, radius, getOnScreenName(), getVertLabel(i));
+      }         
+}
+
+
+void EditorObject::renderDockItemLabel(const Point &pos, const char *label, F32 yOffset)
+{
+   F32 xpos = pos.x;
+   F32 ypos = pos.y - DOCK_LABEL_SIZE / 2 + yOffset;
+   glColor(DOCK_LABEL_COLOR);
+   UserInterface::drawStringc(xpos, ypos, DOCK_LABEL_SIZE, label);
+}
+
+
+void EditorObject::labelDockItem()
+{
+   renderDockItemLabel(getVert(0), getOnDockName(), 11);
+}
+
+
+void EditorObject::highlightDockItem()
+{
+   glColor(HIGHLIGHT_COLOR);
+   drawSquare(getVert(0), getDockRadius());
+}
+
+
 
 extern void renderPolygon(const Vector<Point> &fillPoints, const Vector<Point> &outlinePoints, const Color &fillColor, const Color &outlineColor, F32 alpha = 1);
 
@@ -219,29 +268,24 @@ void EditorObject::render(bool isScriptItem, bool showingReferenceShip, ShowMode
    Color drawColor;
    if(hideit)
       glColor(grayedOutColorBright, alpha);
-   else if(mSelected)
-      drawColor = SELECT_COLOR;
-   else if(mLitUp, alpha)
-      drawColor = EditorUserInterface::HIGHLIGHT_COLOR;
-   else  // Normal
-      drawColor = Color(.75, .75, .75);
+   else 
+      glColor(getDrawColor(), alpha);
 
    glEnableBlend;        // Enable transparency
 
-   // Render snapping vertex; if it is the same as a highlighted vertex, highlight will overwrite this
-   if(gEditorUserInterface.getSnapItem() && gEditorUserInterface.getSnapVertexIndex() != NONE && 
-            gEditorUserInterface.getSnapItem()->isSelected() && !showingReferenceShip)      
-      // Render snapping vertex as hollow magenta box
-      renderVertex(SnappingVertex, 
-                   convertLevelToCanvasCoord(gEditorUserInterface.getSnapItem()->getVert(gEditorUserInterface.getSnapVertexIndex())), 
-                   NO_NUMBER, alpha);   
+   S32 snapIndex = gEditorUserInterface.getSnapVertexIndex();
 
    // Override drawColor for this special case
    if(mAnyVertsSelected)
       drawColor = SELECT_COLOR;
      
    if(mDockItem)
+   {
       renderDock();
+      labelDockItem();
+      if(mLitUp)
+         highlightDockItem();
+   }
    else if(showingReferenceShip)
    {
       glPushMatrix();
@@ -255,6 +299,14 @@ void EditorObject::render(bool isScriptItem, bool showingReferenceShip, ShowMode
          setLevelToCanvasCoordConversion();
          renderEditor(gEditorUserInterface.getCurrentScale());
       glPopMatrix();
+
+      
+      // Label item with instruction message describing what happens if user presses enter
+      if(isSelected() && !isBeingEdited())
+         renderItemText(getInstructionMsg(), -1, gEditorUserInterface.getCurrentScale());
+
+      renderAndLabelHighlightedVertices(gEditorUserInterface.getCurrentScale());
+      renderAttribs(gEditorUserInterface.getCurrentScale());
    }
 
 
@@ -657,7 +709,7 @@ void EditorObject::renderPolylineCenterline(F32 alpha)
    if(mSelected)
       glColor(SELECT_COLOR, alpha);
    else if(mLitUp && !mAnyVertsSelected)
-      glColor(EditorUserInterface::HIGHLIGHT_COLOR, alpha);
+      glColor(HIGHLIGHT_COLOR, alpha);
    else
       glColor(getTeamColor(mTeam), alpha);
 
@@ -671,6 +723,20 @@ void EditorObject::initializeEditor(F32 gridSize)
 {
    mVertSelected.resize(getVertCount()); 
    unselectVerts();
+}
+
+
+Vector<Point> EditorObject::getVerts() 
+{
+   S32 verts = getVertCount();
+
+   Vector<Point> points;
+   points.resize(verts);
+
+   for(S32 i = 0; i < verts; i++)
+      points[i] = getVert(i);
+
+   return points;
 }
 
 
@@ -721,40 +787,40 @@ bool EditorObject::vertSelected(S32 vertIndex)
 }
 
 
-void EditorObject::addVert(const Point &vert)
-{
-   mVerts.push_back(vert);
-   mVertSelected.push_back(false);
-}
+//void EditorObject::addVert(const Point &vert)
+//{
+//   mVerts.push_back(vert);
+//   mVertSelected.push_back(false);
+//}
 
 
-void EditorObject::addVertFront(Point vert)
-{
-   mVerts.push_front(vert);
-   mVertSelected.insert(mVertSelected.begin(), false);
-}
+//void EditorObject::addVertFront(Point vert)
+//{
+//   mVerts.push_front(vert);
+//   mVertSelected.insert(mVertSelected.begin(), false);
+//}
+//
+//
+//void EditorObject::insertVert(Point vert, S32 vertIndex)
+//{
+//   mVerts.insert(vertIndex);
+//   mVerts[vertIndex] = vert;
+//
+//   mVertSelected.insert(mVertSelected.begin() + vertIndex, false);
+//}
 
 
-void EditorObject::insertVert(Point vert, S32 vertIndex)
-{
-   mVerts.insert(vertIndex);
-   mVerts[vertIndex] = vert;
-
-   mVertSelected.insert(mVertSelected.begin() + vertIndex, false);
-}
-
-
-void EditorObject::setVert(const Point &vert, S32 vertIndex)
-{
-   mVerts[vertIndex] = vert;
-}
-
-
-void EditorObject::deleteVert(S32 vertIndex)
-{
-   mVerts.erase(vertIndex);
-   mVertSelected.erase(mVertSelected.begin() + vertIndex);
-}
+//void EditorObject::setVert(const Point &vert, S32 vertIndex)
+//{
+//   mVerts[vertIndex] = vert;
+//}
+//
+//
+//void EditorObject::deleteVert(S32 vertIndex)
+//{
+//   mVerts.erase(vertIndex);
+//   mVertSelected.erase(mVertSelected.begin() + vertIndex);
+//}
 
 
 void EditorObject::onGeomChanging()
@@ -814,12 +880,10 @@ void EditorObject::onItemDragging()
 
 Color EditorObject::getDrawColor()
 {
-   F32 alpha = 1;
-
    if(mSelected)
-      return SELECT_COLOR;
-   else if(mLitUp, alpha)
-      return EditorUserInterface::HIGHLIGHT_COLOR;
+      return SELECT_COLOR;       // yellow
+   else if(mLitUp)
+      return HIGHLIGHT_COLOR;    // white
    else  // Normal
       return Color(.75, .75, .75);
 }
@@ -846,9 +910,55 @@ static EditorObject *getNewEditorObject(EditorObject *obj)
    if(speedZone != NULL)
       return new SpeedZone(*speedZone);
 
-  FlagItem *flagItem = dynamic_cast<FlagItem *>(obj);
+   FlagItem *flagItem = dynamic_cast<FlagItem *>(obj);
    if(flagItem != NULL)
       return new FlagItem(*flagItem);
+
+   FlagSpawn *flagSpawn = dynamic_cast<FlagSpawn *>(obj);
+   if(flagSpawn != NULL)
+      return new FlagSpawn(*flagSpawn);
+
+   RepairItem *repairItem = dynamic_cast<RepairItem *>(obj);
+   if(repairItem != NULL)
+      return new RepairItem(*repairItem);
+
+   TestItem *testItem = dynamic_cast<TestItem *>(obj);
+   if(testItem != NULL)
+      return new TestItem(*testItem);
+
+   ResourceItem *resourceItem = dynamic_cast<ResourceItem *>(obj);
+   if(resourceItem != NULL)
+      return new ResourceItem(*resourceItem);
+
+   Asteroid *asteroid = dynamic_cast<Asteroid *>(obj);
+   if(asteroid != NULL)
+      return new Asteroid(*asteroid);
+
+   AsteroidSpawn *asteroidSpawn = dynamic_cast<AsteroidSpawn *>(obj);
+   if(asteroidSpawn != NULL)
+      return new AsteroidSpawn(*asteroidSpawn);
+
+   Mine *mine = dynamic_cast<Mine *>(obj);
+   if(mine != NULL)
+      return new Mine(*mine);
+
+   SpyBug *spyBug = dynamic_cast<SpyBug *>(obj);
+   if(spyBug != NULL)
+      return new SpyBug(*spyBug);
+
+   LoadoutZone *loadoutZone= dynamic_cast<LoadoutZone *>(obj);
+   if(loadoutZone != NULL)
+      return new LoadoutZone(*loadoutZone);
+
+   GoalZone *goalZone = dynamic_cast<GoalZone *>(obj);
+   if(goalZone != NULL)
+      return new GoalZone(*goalZone);
+
+   HuntersNexusObject *nexus= dynamic_cast<HuntersNexusObject *>(obj);
+   if(nexus != NULL)
+      return new HuntersNexusObject(*nexus);
+
+   TNLAssert(false, "OBJECT NOT HANDLED IN COPY OPERATION!");
 
    return NULL;   
 }
@@ -860,13 +970,9 @@ EditorObject *EditorObject::newCopy()
 {
    EditorObject *newObject = getNewEditorObject(this);
 
-   if(!newObject)
-   {
-      TNLAssert(newObject, "Unhandled object in newCopy!");
-      return NULL;
-   }
+   if(newObject)
+      newObject->setGame(NULL);         // mGame pointer will have been copied, but needs to be cleared before we can add this to the game
 
-   newObject->setGame(NULL);         // mGame pointer will have been copied, but needs to be cleared before we can add this to the game
    return newObject;
 }
 
@@ -878,21 +984,21 @@ Color EditorObject::getTeamColor(S32 teamId)
 
 
 // Draw the vertices for a polygon or line item (i.e. walls)
-void EditorObject::renderLinePolyVertices(F32 scale, F32 alpha)
+void EditorObject::renderLinePolyVertices(F32 currentScale, F32 alpha)
 {
    // Draw the vertices of the wall or the polygon area
    for(S32 j = 0; j < getVertCount(); j++)
    {
-      Point v = convertLevelToCanvasCoord(mVerts[j]);
+      Point v = getVert(j);
 
       if(mVertSelected[j])
-         renderVertex(SelectedVertex, v, j, alpha);             // Hollow yellow boxes with number
+         renderVertex(SelectedVertex, v, j, currentScale, alpha);             // Hollow yellow boxes with number
       else if(mLitUp && isVertexLitUp(j))
-         renderVertex(HighlightedVertex, v, j, alpha);          // Hollow yellow boxes with number
+         renderVertex(HighlightedVertex, v, j, currentScale, alpha);          // Hollow yellow boxes with number
       else if(mSelected || mLitUp || mAnyVertsSelected)
-         renderVertex(SelectedItemVertex, v, j, alpha);         // Hollow red boxes with number
+         renderVertex(SelectedItemVertex, v, j, currentScale, alpha);         // Hollow red boxes with number
       else
-         renderVertex(UnselectedItemVertex, v, NO_NUMBER, alpha, scale > 35 ? 2 : 1);   // Solid red boxes, no number
+         renderVertex(UnselectedItemVertex, v, NO_NUMBER, currentScale, alpha, currentScale > 2 ? 2 : 1);   // Solid red boxes, no number
    }
 }
 
@@ -927,20 +1033,20 @@ void EditorObject::unselect()
 }
 
 
-void EditorObject::initializePolyGeom()
-{
-   // TODO: Use the same code already in polygon
-   if(getGeomType() == geomPoly)
-   {
-      Triangulate::Process(mVerts, *getPolyFillPoints());   // Populates fillPoints from polygon outline
-      //TNLAssert(fillPoints.size() > 0, "Bogus polygon geometry detected!");
-
-      setCentroid(findCentroid(mVerts));
-      setExtent(Rect(mVerts));
-   }
-
-   forceFieldMountSegment = NULL;
-}
+//void EditorObject::initializePolyGeom()
+//{
+//   // TODO: Use the same code already in polygon
+//   if(getGeomType() == geomPoly)
+//   {
+//      Triangulate::Process(getVerts(), *getPolyFillPoints());   // Populates fillPoints from polygon outline
+//      //TNLAssert(fillPoints.size() > 0, "Bogus polygon geometry detected!");
+//
+//      setCentroid(findCentroid(getVerts()));
+//      setExtent(Rect(getVerts()));
+//   }
+//
+//   forceFieldMountSegment = NULL;
+//}
 
 
 // Move object to location, specifying (optional) vertex to be positioned at pos
@@ -1019,7 +1125,7 @@ static bool renderFull(U32 index, F32 scale, bool dockItem, bool snapped)
 
 
 // Account for the fact that the apparent selection center and actual object center are not quite aligned
-// Should be pushed down to the objects themselves
+// TODO: Should be pushed down to the objects themselves
 Point EditorObject::getEditorSelectionOffset(F32 scale)
 {
    if(getObjectTypeMask() & TurretType && renderFull(getObjectTypeMask(), scale, mDockItem, mSnapped))
@@ -1177,8 +1283,8 @@ GeomType EditorObject::getGeomType()
    //return false;
 //}
 
-const char *EditorObject::getEditorHelpString()     
-{
+//const char *EditorObject::getEditorHelpString()     
+//{
    /*switch(getObjectTypeMask()) {
       case ItemSpawn: return "Location where ships start.  At least one per team is required. [G]";
       case ItemSoccerBall: return "Soccer ball, can only be used in Soccer games.";
@@ -1202,8 +1308,8 @@ const char *EditorObject::getEditorHelpString()
       case ItemGoalZone: return "Target area used in a variety of games.";
       case ItemNavMeshZone: return "Creates navigational mesh zone for robots.";
    }*/
-   return "blug";
-}
+//   return "blug";
+//}
 
 
 bool EditorObject::getSpecial()     
@@ -1222,8 +1328,8 @@ bool EditorObject::getSpecial()
 }
 
 
-const char *EditorObject::getPrettyNamePlural()     
-{
+//const char *EditorObject::getPrettyNamePlural()     
+//{
    /*switch(getObjectTypeMask()) {
       case ItemSpawn: return "Spawn points";   	
       case ItemSoccerBall: return "Soccer balls";     	
@@ -1247,12 +1353,12 @@ const char *EditorObject::getPrettyNamePlural()
       case ItemGoalZone: return "Goal zones";             	
       case ItemNavMeshZone: return "NavMesh Zones";       	
    }*/
-   return "blug";
-}
+//   return "blug";
+//}
 
 
-const char *EditorObject::getOnDockName()     
-{
+//const char *EditorObject::getOnDockName()     
+//{
    /*switch(getObjectTypeMask()) {
       case ItemSpawn: return "Spawn";    		
       case ItemSoccerBall: return "Ball";     		
@@ -1277,12 +1383,12 @@ const char *EditorObject::getOnDockName()
       case ItemNavMeshZone: return "NavMesh";  		
    }
 */
-   return "blug";
-}
+//   return "blug";
+//}
 
 
-const char *EditorObject::getOnScreenName()     
-{
+//const char *EditorObject::getOnScreenName()     
+//{
    /*switch(getObjectTypeMask()) {
       case ItemSpawn: return "Spawn";        			
       case ItemSoccerBall: return "Ball";         			
@@ -1306,8 +1412,8 @@ const char *EditorObject::getOnScreenName()
       case ItemGoalZone: return "Goal";         			
       case ItemNavMeshZone: return "NavMesh";      			
    }*/
-   return "blug";
-}
+//   return "blug";
+//}
 
 //
 //const char *EditorObject::getName()     

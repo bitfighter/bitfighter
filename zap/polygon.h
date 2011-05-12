@@ -27,6 +27,7 @@
 #define _POLYGON_H_
 
 #include "gameObject.h"
+#include "EditorObject.h"     // For EditorPolygon parentage
 
 namespace Zap
 {
@@ -51,6 +52,8 @@ protected:
 
    U32 unpackUpdate(GhostConnection *connection, BitStream *stream);
    Rect computePolyExtents();
+
+   string boundsToString(F32 gridSize);
 };
 
 
@@ -69,31 +72,60 @@ public:
    F32 mLabelAngle;
 
    Point getCentroid() { return mCentroid; }
+   void onPolygonChanged();
 
    Vector<Point> *getPolyFillPoints() { return &mPolyFill; }
 
    U32 unpackUpdate(GhostConnection *connection, BitStream *stream);
-
-   // Editor methods... to move?
-   // Offset lets us drag an item out from the dock by an amount offset from the 0th vertex.  This makes placement seem more natural.
-   Point getInitialPlacementOffset() { return Point(.25, .15); }
-
 };
 
 
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-// This class serves only to provide an implementation of the abstract methods in LuaItem that are common to the polygon classes
-class LuaPolygonalGameObject : public GameObject, public Polygon, public LuaItem
+// Provide editor related methods to the polygon class
+class EditorPolygon : public Polygon, public EditorObject, public GameObject, public LuaItem
 {
+   typedef EditorObject Parent;
+
+   GeomType getGeomType() { return geomPoly; }
+
+   S32 getVertCount();
+   void clearVerts();
+   void addVert(const Point &point);
+   void addVertFront(Point vert);
+   void deleteVert(S32 vertIndex);
+   void insertVert(Point vertex, S32 vertIndex);
+   Point getVert(S32 index);
+   void setVert(const Point &point, S32 index);
+
+   virtual void renderItemText(const char *text, S32 offset, F32 currentScale);
+   virtual void labelDockItem();
+
+
+   void addToDock(Game *game, const Point &point);
+   virtual void renderDock();
+   void highlightDockItem(); 
+
+   void initializeEditor(F32 gridSize);
+
+   // Offset lets us drag an item out from the dock by an amount offset from the 0th vertex.  This makes placement seem more natural.
+   Point getInitialPlacementOffset(F32 gridSize);
+
+protected:
+      void renderPolyHighlight();
+
+
+   /////
+   // Former LuaPolygon methods
+   // This class serves only to provide an implementation of the abstract methods in LuaItem that are common to the polygon classes
 public:
    S32 getLoc(lua_State *L) { return LuaObject::returnPoint(L, mCentroid); }         // Center of item (returns point)
    S32 getRad(lua_State *L) { return LuaObject::returnInt(L, 0); }                   // Radius of item (returns number)
    S32 getVel(lua_State *L) { return LuaObject::returnPoint(L, Point(0,0)); }        // Velocity of item (returns point)
    S32 getTeamIndx(lua_State *L) { return LuaObject::returnInt(L, getTeam() + 1); }  // Team of item (in bots, teams start with 1)
-};
 
+};
 
 };
 

@@ -48,13 +48,13 @@ namespace Zap
 static const U32 GIVE_UP_ON_MASTER_AND_GO_IT_ALONE_TIME = 8000;      // 8 seconds should be enough time to connect to the master
 
 // Text sizes and the like
-static const U32 COLUMN_HEADER_TEXTSIZE = 14;     // Size of text in column headers
-static const U32 SERVER_DESCR_TEXTSIZE = 18;    // Size of lower description of selected server
-static const U32 SERVER_ENTRY_TEXTSIZE = 14;
-static const U32 SERVER_ENTRY_VERT_GAP = 4; 
-static const U32 SERVER_ENTRY_HEIGHT = SERVER_ENTRY_TEXTSIZE + SERVER_ENTRY_VERT_GAP;
-static const U32 SEL_SERVER_INSTR_SIZE = 18;    // Size of "UP, DOWN TO SELECT..." text
-static const U32 SEL_SERVER_INSTR_GAP_ABOVE_DIVIDER_LINE = 10;
+static const S32 COLUMN_HEADER_TEXTSIZE = 14;     // Size of text in column headers
+static const S32 SERVER_DESCR_TEXTSIZE = 18;    // Size of lower description of selected server
+static const S32 SERVER_ENTRY_TEXTSIZE = 14;
+static const S32 SERVER_ENTRY_VERT_GAP = 4; 
+static const S32 SERVER_ENTRY_HEIGHT = SERVER_ENTRY_TEXTSIZE + SERVER_ENTRY_VERT_GAP;
+static const S32 SEL_SERVER_INSTR_SIZE = 18;    // Size of "UP, DOWN TO SELECT..." text
+static const S32 SEL_SERVER_INSTR_GAP_ABOVE_DIVIDER_LINE = 10;
 
 // Positions of things on the screen
 static const U32 BANNER_HEIGHT = 76;  // Height of top green banner area

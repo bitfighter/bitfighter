@@ -114,6 +114,13 @@ public:
 
    TNL_DECLARE_CLASS(SoccerBallItem);
 
+   ///// Editor methods
+   const char *getEditorHelpString() { return "Soccer ball, can only be used in Soccer games."; }
+   const char *getPrettyNamePlural() { return "SoccerBalls"; }
+   const char *getOnDockName() { return "Ball"; }
+   const char *getOnScreenName() { return "SoccerBall"; }
+
+
    ///// Lua Interface
 
    SoccerBallItem(lua_State *L) { /* Do nothing */ };   //  Lua constructor

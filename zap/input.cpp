@@ -291,7 +291,7 @@ S32 smallRectButtonWidth = 19;
 void renderRoundButton(Point loc, const char *label, AlignType align, bool activated)
 {
    const S32 radius = roundButtonRadius;
-   const U32 labelSize = 12;
+   const S32 labelSize = 12;
 
    Point offset;
 
@@ -435,15 +435,15 @@ void renderDPad(Point center, F32 radius, bool upActivated, bool downActivated, 
    glColor3f(1, 1, 1);
    if(strcmp(msg1, ""))    // That is, != "".  Remember, kids, strcmp returns 0 when strings are identical!
    {
-      U32 size = 12;
-      U32 width = UserInterface::getStringWidth(size, msg1);
+      S32 size = 12;
+      S32 width = UserInterface::getStringWidth(size, msg1);
       UserInterface::drawString(center.x - width / 2, center.y + 27, size, msg1);
    }
 
    if(strcmp(msg2, ""))
    {
-      U32 size = 10;
-      U32 width = UserInterface::getStringWidth(size, msg2);
+      S32 size = 10;
+      S32 width = UserInterface::getStringWidth(size, msg2);
       UserInterface::drawString(center.x - width / 2, center.y + 42, size, msg2);
    }
 }

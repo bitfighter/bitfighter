@@ -39,8 +39,8 @@ const char GoalZone::className[] = "GoalZone";      // Class name as it appears 
 Lunar<GoalZone>::RegType GoalZone::methods[] =
 {
    // Standard gameItem methods
-   method(GoalZone, getClassID),
-   method(GoalZone, getLoc),
+   method(GoalZone, getClassID),       // { getClassID, &GoalZone::getClassID }
+   method(GoalZone, getLoc),       
    method(GoalZone, getRad),
    method(GoalZone, getVel),
    method(GoalZone, getTeamIndx),
@@ -67,11 +67,24 @@ void GoalZone::render()
    F32 glow = gt->mZoneGlowTimer.getFraction();
 
    // Check if to make sure that the zone matches the glow team if we're glowing
-      if(gt->mGlowingZoneTeam >= 0 && gt->mGlowingZoneTeam != mTeam)
+   if(gt->mGlowingZoneTeam >= 0 && gt->mGlowingZoneTeam != mTeam)
       glow = 0;
 
    renderGoalZone(gt->getTeamColor(getTeam()), mPolyBounds, mPolyFill, mCentroid, mLabelAngle, isFlashing(), glow, mScore);
 }
+
+
+void GoalZone::renderEditor(F32 currentScale)
+{
+   renderGoalZone(getGame()->getTeamColor(getTeam()), mPolyBounds, mPolyFill, mCentroid, mLabelAngle);
+}
+
+
+void GoalZone::renderDock()
+{
+  renderGoalZone(getGame()->getTeamColor(getTeam()), mPolyBounds, mPolyFill);
+}
+
 
 
 S32 GoalZone::getRenderSortValue()
@@ -88,13 +101,10 @@ bool GoalZone::processArguments(S32 argc2, const char **argv2)
    // so a possible future version can add parameters without compatibility problem.
    S32 argc = 0;
    const char *argv[65]; // 32 * 2 + 1 = 65
-   for(S32 i=0; i<argc2; i++)  // the idea here is to allow optional R3.5 for rotate at speed of 3.5
+   for(S32 i = 0; i < argc2; i++)  // the idea here is to allow optional R3.5 for rotate at speed of 3.5
    {
       char c = argv2[i][0];
-      //switch(c)
-      //{
-      //case 'A': Something = atof(&argv2[i][1]); break;  // using second char to handle number
-      //}
+
       if((c < 'a' || c > 'z') && (c < 'A' || c > 'Z'))
       {
          if(argc < 65)
@@ -112,6 +122,12 @@ bool GoalZone::processArguments(S32 argc2, const char **argv2)
    computeExtent();
 
    return true;
+}
+
+
+string GoalZone::toString()
+{
+   return string(getClassName()) + " " + boundsToString(getGame()->getGridSize());
 }
 
 
@@ -140,19 +156,20 @@ void GoalZone::onAddedToGame(Game *theGame)
 
 void GoalZone::computeExtent()
 {
-   Rect extent(mPolyBounds[0], mPolyBounds[0]);
-   for(S32 i = 1; i < mPolyBounds.size(); i++)
-      extent.unionPoint(mPolyBounds[i]);
-   setExtent(extent);
+   setExtent(Rect(mPolyBounds));
 }
 
 
 bool GoalZone::getCollisionPoly(Vector<Point> &polyPoints)
 {
+   polyPoints.resize(mPolyBounds.size());
+
    for(S32 i = 0; i < mPolyBounds.size(); i++)
-      polyPoints.push_back(mPolyBounds[i]);
+      polyPoints[i] = mPolyBounds[i];
+
    return true;
 }
+
 
 bool GoalZone::collide(GameObject *hitObject)
 {

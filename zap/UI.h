@@ -120,6 +120,7 @@ static const Color white = Color(1,1,1);
 static const Color gray50(0.5);
 static const Color orange(1, .67 ,0);
 
+extern void glColor(const Color &c, float alpha = 1.0);
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -272,27 +273,31 @@ public:
    // Draw string at given location (normal and formatted versions)
    // Note it is important that x be S32 because for longer strings, they are occasionally drawn starting off-screen
    // to the left, and better to have them partially appear than not appear at all, which will happen if they are U32
-   static void drawString(S32 x, S32 y, U32 size, const char *string);
-   static void drawStringf(S32 x, S32 y, U32 size, const char *format, ...);
+   static void drawString(S32 x, S32 y, F32 size, const char *string);
+   static void drawString(F32 x, F32 y, F32 size, const char *string);
+   static void drawString(F32 x, F32 y, S32 size, const char *string);
+   static void drawString(S32 x, S32 y, S32 size, const char *string);
 
-   static void drawStringf(F32 x, F32 y, U32 size, const char *format, ...);
-   static void drawString(F32 x, F32 y, U32 size, const char *string);
+   static void drawStringf(S32 x, S32 y, S32 size, const char *format, ...);
+   static void drawStringf(F32 x, F32 y, F32 size, const char *format, ...);
+   static void drawStringf(F32 x, F32 y, S32 size, const char *format, ...);
+
 
    // Draw strings centered at point
-   static void drawStringfc(F32 x, F32 y, U32 size, const char *format, ...);
+   static void drawStringfc(F32 x, F32 y, S32 size, const char *format, ...);
    static void drawStringc(F32 x, F32 y, F32 size, const char *string);
 
    // Draw strings right-aligned at point
-   static void drawStringfr(F32 x, F32 y, U32 size, const char *format, ...);
+   static void drawStringfr(F32 x, F32 y, S32 size, const char *format, ...);
 
    // Draw string and get it's width
-   static S32 drawStringAndGetWidth(F32 x, F32 y, U32 size, const char *string);
-   static S32 drawStringAndGetWidthf(F32 x, F32 y, U32 size, const char *format, ...);
+   static S32 drawStringAndGetWidth(F32 x, F32 y, S32 size, const char *string);
+   static S32 drawStringAndGetWidthf(F32 x, F32 y, S32 size, const char *format, ...);
 
 
    // Draw text at an angle...
    static void drawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string);
-   static void drawAngleString(S32 x, S32 y, U32 size, F32 angle, const char *string);
+   static void drawAngleString(S32 x, S32 y, F32 size, F32 angle, const char *string);
    
 
    // Original drawAngleString has a bug in positioning, but fixing it everywhere in the app would be a huge pain, so
@@ -306,39 +311,43 @@ public:
    static void drawStringf_2pt(Point p1, Point p2, F32 size, F32 vert_offset, const char *format, ...);
 
    // Draw text centered on screen (normal and formatted versions)  --> now return starting location
-   static S32 drawCenteredString(S32 y, U32 size, const char *str);
-   static S32 drawCenteredString(S32 x, S32 y, U32 size, const char *str);
-   static S32 drawCenteredStringf(S32 y, U32 size, const char *format, ...);
-   static S32 drawCenteredStringf(S32 x, S32 y, U32 size, const char *format, ...);
+   static S32 drawCenteredString(S32 y, S32 size, const char *str);
+   static S32 drawCenteredString(S32 x, S32 y, S32 size, const char *str);
+   static S32 drawCenteredStringf(S32 y, S32 size, const char *format, ...);
+   static S32 drawCenteredStringf(S32 x, S32 y, S32 size, const char *format, ...);
 
-   static S32 drawCenteredStringPair(S32 xpos, S32 ypos, U32 size, const Color &leftColor, const Color &rightColor, 
+   static S32 drawCenteredStringPair(S32 xpos, S32 ypos, S32 size, const Color &leftColor, const Color &rightColor, 
                                      const char *leftStr, const char *rightStr);
 
-   static S32 drawCenteredStringPair(S32 ypos, U32 size, const Color &leftColor, const Color &rightColor, 
+   static S32 drawCenteredStringPair(S32 ypos, S32 size, const Color &leftColor, const Color &rightColor, 
                                      const char *leftStr, const char *rightStr);
 
    // Draw text centered in a left or right column (normal and formatted versions)  --> now return starting location
-   static S32 drawCenteredString2Col(S32 y, U32 size, bool leftCol, const char *str);
-   static S32 drawCenteredString2Colf(S32 y, U32 size, bool leftCol, const char *format, ...);
-   static S32 drawCenteredStringPair2Colf(S32 y, U32 size, bool leftCol, const char *left, const char *right, ...);
+   static S32 drawCenteredString2Col(S32 y, S32 size, bool leftCol, const char *str);
+   static S32 drawCenteredString2Colf(S32 y, S32 size, bool leftCol, const char *format, ...);
+   static S32 drawCenteredStringPair2Colf(S32 y, S32 size, bool leftCol, const char *left, const char *right, ...);
 
    // Get info about where text will be draw
    static S32 get2ColStartingPos(bool leftCol);
-   static S32 getCenteredStringStartingPos(U32 size, const char *string);
-   static S32 getCenteredStringStartingPosf(U32 size, const char *format, ...);
-   static S32 getCenteredString2ColStartingPos(U32 size, bool leftCol, const char *string);
-   static S32 getCenteredString2ColStartingPosf(U32 size, bool leftCol, const char *format, ...);
+   static S32 getCenteredStringStartingPos(S32 size, const char *string);
+   static S32 getCenteredStringStartingPosf(S32 size, const char *format, ...);
+   static S32 getCenteredString2ColStartingPos(S32 size, bool leftCol, const char *string);
+   static S32 getCenteredString2ColStartingPosf(S32 size, bool leftCol, const char *format, ...);
 
    // Draw 4-column left-justified text
-   static void drawString4Col(S32 y, U32 size, U32 col, const char *str);
-   static void drawString4Colf(S32 y, U32 size, U32 col, const char *format, ...);
+   static void drawString4Col(S32 y, S32 size, U32 col, const char *str);
+   static void drawString4Colf(S32 y, S32 size, U32 col, const char *format, ...);
 
    // Return string rendering width (normal and formatted versions)
-   static S32 getStringWidth(F32 size, const char *str);
-   static S32 getStringWidthf(U32 size, const char *format, ...);
+   static F32 getStringWidth(F32 size, const char *str);
+   static S32 getStringWidth(S32 size, const char *str);
+
+   static F32 getStringWidthf(F32 size, const char *format, ...);
+   static S32 getStringWidthf(S32 size, const char *format, ...);
+
    static F32 getStringWidthF32(F32 size, const char *string);    // TODO: make functions above return F32 and get rid of this one
 
-   static U32 drawWrapText(char *text, S32 xpos, U32 ypos, S32 width, U32 ypos_end, U32 lineHeight, U32 fontSize, bool alignBottom = false, bool draw = true);
+   static U32 drawWrapText(char *text, S32 xpos, S32 ypos, S32 width, S32 ypos_end, S32 lineHeight, S32 fontSize, bool alignBottom = false, bool draw = true);
 
    static void playBoop();    // Make some noise!
 };

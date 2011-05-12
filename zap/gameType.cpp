@@ -24,10 +24,7 @@
 //------------------------------------------------------------------------------------
 
 #include "gameType.h"
-#include "ship.h"
-#include "robot.h"
 #include "UIGame.h"
-#include "UINameEntry.h"
 #include "UIMenus.h"
 #include "gameNetInterface.h"
 #include "flagItem.h"
@@ -611,7 +608,7 @@ void GameType::renderInterfaceOverlay(bool scoreboardVisible)
             else
                dSprintf(buff, sizeof(buff), "%d", playerScores[j]->getScore());
 
-            UserInterface::drawString(xr - (120 + UserInterface::getStringWidth(F32(fontSize), buff)), curRowY, fontSize, buff);
+            UserInterface::drawString(xr - (120 + S32(UserInterface::getStringWidth(F32(fontSize), buff))), curRowY, fontSize, buff);
             UserInterface::drawStringf(xr - 70, curRowY, fontSize, "%d", playerScores[j]->ping);
             curRowY += maxHeight;
          }
@@ -1296,7 +1293,7 @@ bool GameType::processLevelItem(S32 argc, const char **argv)
          p.read(argv + 2);
          p *= getGame()->getGridSize();
    
-         S32 time = (argc > 4) ? atoi(argv[4]) : FlagSpawn::defaultRespawnTime;
+         S32 time = (argc > 4) ? atoi(argv[4]) : FlagSpawn::DEFAULT_RESPAWN_TIME;
    
          FlagSpawn spawn = FlagSpawn(p, time * 1000);
    
@@ -1309,19 +1306,12 @@ bool GameType::processLevelItem(S32 argc, const char **argv)
             mFlagSpawnPoints.push_back(spawn);                                     // ...then put it in the non-team list
       }
    }
-   else if(!stricmp(argv[0], "AsteroidSpawn"))      // AsteroidSpawn <x> <y> [timer]
+   else if(!stricmp(argv[0], "AsteroidSpawn"))      // AsteroidSpawn <x> <y> [timer]      // TODO: Move this to AsteroidSpawn class?
    {
-      if(argc >= 3)
-      {
-         Point p;
-         p.read(argv + 1);
-         p *= getGame()->getGridSize();
-   
-         S32 time = (argc > 3) ? atoi(argv[3]) : AsteroidSpawn::defaultRespawnTime;
-   
-         AsteroidSpawn spawn = AsteroidSpawn(p, time * 1000);
+      AsteroidSpawn spawn = AsteroidSpawn();
+
+      if(spawn.processArguments(argc, argv))
          mAsteroidSpawnPoints.push_back(spawn);
-      }
    }
    else if(!stricmp(argv[0], "BarrierMaker"))
    {

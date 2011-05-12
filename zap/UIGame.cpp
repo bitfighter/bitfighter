@@ -33,6 +33,7 @@
 #include "UIMessage.h"
 #include "UIDiagnostics.h"
 #include "UIErrorMessage.h"
+#include "robot.h"               // For robot stuff
 #include "gameType.h"
 #include "lpc10.h"
 #include "IniFile.h"             // For access to gINI functions

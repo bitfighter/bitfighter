@@ -52,7 +52,7 @@ extern void drawEllipse(const Point &pos, F32 width, F32 height, F32 angle);
 extern void drawFilledEllipse(const Point &pos, F32 width, F32 height, F32 angle);
 extern void drawPolygon(const Point &pos, S32 sides, F32 radius, F32 angle);
 
-extern void glColor(const Color &c, float alpha = 1.0);
+//extern void glColor(const Color &c, float alpha = 1.0);
 extern void drawSquare(const Point &pos, F32 size, bool filled);
 extern void drawSquare(const Point &pos, S32 size);
 extern void drawSquare(const Point &pos, F32 size);
@@ -90,8 +90,9 @@ extern void renderPointVector(const Vector<Point> &points, U32 geomType);
 //extern void renderFlag(Point pos, Color c, F32 timerFraction);
 extern void renderSmallFlag(const Point &pos, const Color &c, F32 parentAlpha);
 
+extern void renderLoadoutZone(Color c, const Vector<Point> &outline, const Vector<Point> &fill);      // No label version
 
-extern void renderLoadoutZone(Color c, const Vector<Point> &outline, const Vector<Point> &fill, 
+extern void renderLoadoutZone(Color c, const Vector<Point> &outline, const Vector<Point> &fill,       // With label version
                                        const Point &centroid, F32 labelAngle, F32 scaleFact = 1);
 
 extern void renderNavMeshZone(const Vector<Point> &outline, const Vector<Point> &fill,
@@ -111,8 +112,9 @@ extern const Color BORDER_FILL_COLOR;
 extern const F32 BORDER_FILL_ALPHA;
 extern const F32 BORDER_WIDTH;
 
-extern void renderGoalZone(Color c, const Vector<Point> &outline, const Vector<Point> &fill, Point centroid, F32 labelAngle, 
-                           bool isFlashing, F32 glowFraction, S32 score, F32 scaleFact = 1);
+extern void renderGoalZone(Color c, const Vector<Point> &outline, const Vector<Point> &fill, Point centroid);     // No label version
+extern void renderGoalZone(Color c, const Vector<Point> &outline, const Vector<Point> &fill, Point centroid = Point(), F32 labelAngle = 0, 
+                           bool isFlashing = false, F32 glowFraction = 0, S32 score = 0, F32 scaleFact = 1);
 
 extern void renderNexus(const Vector<Point> &outline, const Vector<Point> &fill, Point centroid, F32 labelAngle, 
                         bool open, F32 glowFraction, F32 scaleFact = 1);
@@ -147,6 +149,7 @@ void renderWallEdges(const Vector<Point> &edges, F32 alpha = 1.0);
 void renderSpeedZone(const Vector<Point> &pts, U32 time);
 
 void renderTestItem(const Point &pos, F32 alpha = 1);
+void renderTestItem(const Point &pos, S32 size, F32 alpha = 1);
 
 void renderWorm(const Point &pos);
 

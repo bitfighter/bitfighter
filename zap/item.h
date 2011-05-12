@@ -29,22 +29,22 @@
 #include "moveObject.h"       // Parent class
 #include "EditorObject.h"     // Parent class
 #include "luaObject.h"        // Parent class
+
+#include"goalZone.h"          // For GoalZone def
 #include "timer.h"
 
 namespace Zap
 {
 
 class Ship;
-class GoalZone;
 class GameType;
 
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class Item : public MoveObject, virtual public EditorObject, public LuaItem
+class Item : public MoveObject, public LuaItem
 {
    typedef MoveObject Parent;
-   typedef EditorObject EditorParent;
 
 private:
    F32 updateTimer;
@@ -73,8 +73,6 @@ protected:
 
    Timer mDroppedTimer;                   // Make flags have a tiny bit of delay before they can be picked up again
    static const U32 DROP_DELAY = 500;     // Time until we can pick the item up after it's dropped (in ms)
-
-   F32 getEditorRenderScaleFactor(F32 currentScale);     // Calculates scaling factor for items in the editor
 
 public:
    Item(Point p = Point(0,0), bool collideable = false, float radius = 1, float mass = 1);   // Constructor
@@ -127,30 +125,67 @@ public:
 	S32 getCaptureZone(lua_State *L);
 	S32 getShip(lua_State *L);
    GameObject *getGameObject() { return this; }
-
-
-   // Some properties about the item that will be needed in the editor
-   GeomType getGeomType() { return geomPoint; }
-
-   virtual Point getVert(S32 index) { return getActualPos(); }
-   virtual void setVert(const Point &point, S32 index) { setActualPos(point); }
-
-   virtual const char *getOnDockName() { return "CCCC"; }      // TODO: = 0
-
-   virtual void renderDock() { EditorParent::renderDock(); };     // Render item on the dock. 
-   virtual void renderEditor(F32 currentScale);
-
-   S32 getVertCount() { return 1; }
-
-   void deleteVert(S32 vertIndex) { /* Do nothing -- can't delete vertices from a point! */ };
-
-   virtual void initializeEditor(F32 gridSize);
 };
 
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class PickupItem : public Item
+// Class with editor methods related to point things
+
+class EditorPointObject : public EditorObject
+{
+   typedef EditorObject Parent;
+
+public:
+   EditorPointObject(GameObjectType objectType = UnknownType) : EditorObject(objectType) { /* Do nothing */ };      // Constructor
+
+   GeomType getGeomType() { return geomPoint; }
+
+   //virtual Point getVert(S32 index) { return getActualPos(); }
+   //virtual void setVert(const Point &point, S32 index) { setActualPos(point); }
+
+   S32 getVertCount() { return 1; }
+   void clearVerts() { /* Do nothing */ }
+   void addVert(const Point &point)  { /* Do nothing */ }
+   void addVertFront(Point vert)  { /* Do nothing */ }
+   void deleteVert(S32 vertIndex)  { /* Do nothing */ }
+   void insertVert(Point vertex, S32 vertIndex)  { /* Do nothing */ }
+
+   virtual void renderItemText(const char *text, S32 offset, F32 currentScale);
+   void addToDock(Game *game, const Point &point);
+
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+class EditorItem : public Item, virtual public EditorPointObject
+{
+   typedef Item Parent;   
+   typedef EditorObject EditorParent;
+
+protected:
+   F32 getEditorRenderScaleFactor(F32 currentScale);     // Calculates scaling factor for items in the editor
+
+public:
+   EditorItem(Point p = Point(0,0), bool collideable = false, float radius = 1, float mass = 1);   // Constructor
+
+   // Some properties about the item that will be needed in the editor
+   string toString();
+
+   virtual Point getVert(S32 index) { return getActualPos(); }
+   virtual void setVert(const Point &point, S32 index) { setActualPos(point); }
+
+   virtual void renderEditor(F32 currentScale);
+   virtual F32 getEditorRadius(F32 currentScale);
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+class PickupItem : public EditorItem
 {
 private:
    typedef Item Parent;
@@ -170,6 +205,7 @@ public:
    PickupItem(Point p = Point(), float radius = 1, S32 repopDelay = 20000);      // Constructor
 
    bool processArguments(S32 argc, const char **argv);
+   string toString();
 
    void idle(GameObject::IdleCallPath path);
    bool isVisible() { return mIsVisible; }

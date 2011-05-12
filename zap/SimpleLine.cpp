@@ -36,8 +36,6 @@ void SimpleLine::renderDock()
 {
    glColor(getEditorRenderColor());       // Blue for TextItem, red for GoFast, etc.
    drawFilledSquare(getVert(0), 5);       // Draw origin of item to give user something to grab on the dock
-
-   EditorParent::renderDock();
 }
 
 
@@ -52,6 +50,7 @@ void SimpleLine::initializeEditor(F32 gridSize)
 // TODO: Put in editor ??
 static const Color INSTRUCTION_TEXTCOLOR(1,1,1);
 static const S32 INSTRUCTION_TEXTSIZE = 9;      
+static const S32 INSTRUCTION_TEXTGAP = 3;
 static const Color ACTIVE_SPECIAL_ATTRIBUTE_COLOR = Color(.6, .6, .6);    
 static const Color INACTIVE_SPECIAL_ATTRIBUTE_COLOR = Color(.6, .6, .6);      // already in editor, called inactiveSpecialAttributeColor
 
@@ -67,8 +66,7 @@ void SimpleLine::renderEditor(F32 currentScale)
    {
       // Draw heavy colored line with colored core
       glLineWidth(i ? gLineWidth4 : gDefaultLineWidth);                
-      glColor(getEditorRenderColor(), .15);
-
+      glColor(getEditorRenderColor(), i ? .35 : 1);         // Get color from child class
 
       F32 ang = pos.angleTo(dest);
       const F32 al = 15;                // Length of arrow-head, in editor units (15 pixels)
@@ -80,25 +78,32 @@ void SimpleLine::renderEditor(F32 currentScale)
          glVertex2f(dest.x, dest.y);
          glVertex2f(dest.x - cos(ang - angoff) * al, dest.y - sin(ang - angoff) * al);
 
-         // Draw highlight on 2nd pass if item is selected, but not while it's being edited
-         if(!i && (mSelected || mLitUp) /*&& !isBeingEdited  <== passed into render method*/)
-            glColor(getEditorRenderColor());
+         // Draw highlighted core on 2nd pass if item is selected, but not while it's being edited
+         if(!i && (mSelected || mLitUp))
+            glColor(SELECT_COLOR);
 
          glVertex(pos);                 // Draw connecting line
          glVertex(dest);
       glEnd();
    }
 
-   renderEditorItem(currentScale);
-
-   // Label item with message about what happens if user presses enter
-   if(isSelected())
-   {
-      glColor(INSTRUCTION_TEXTCOLOR);
-      UserInterface::drawStringf_2pt(pos, dest, INSTRUCTION_TEXTSIZE, -22, getEditMessage(0));
-      UserInterface::drawStringf_2pt(pos, dest, INSTRUCTION_TEXTSIZE, -22 - INSTRUCTION_TEXTSIZE - 2, getEditMessage(1));
-   }
-
-   EditorParent::renderEditor(currentScale);
+   renderEditorItem();
 }
 
+
+// Offset: negative below the item, positive above
+void SimpleLine::renderItemText(const char *text, S32 offset, F32 currentScale)
+{
+   glColor(INSTRUCTION_TEXTCOLOR);
+   S32 off = (INSTRUCTION_TEXTSIZE + INSTRUCTION_TEXTGAP) * offset - 10 - ((offset > 0) ? 5 : 0);
+   UserInterface::drawStringf_2pt(convertLevelToCanvasCoord(getVert(0)), 
+                                  convertLevelToCanvasCoord(getVert(1)), 
+                                  INSTRUCTION_TEXTSIZE, off, text);
+}
+
+
+void SimpleLine::addToDock(Game *game, const Point &point)
+{
+   setVert(point, 0);
+   EditorParent::addToDock(game, point);
+}

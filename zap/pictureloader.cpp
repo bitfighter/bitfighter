@@ -1,7 +1,13 @@
 #include "pictureloader.h"
 #include "tnlLog.h"
-#include "../glut/glutInclude.h"  // for GL
-#include <stdio.h> //for file reading
+#include "../glut/glutInclude.h"    // For GL functions
+
+#include <stdio.h>                  // For file reading
+
+
+#ifdef _MSC_VER
+#pragma warning (disable: 4996)     // Kill warnings about fopen!
+#endif
 
 
 void* readfile(const char* filename){

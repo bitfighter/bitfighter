@@ -73,6 +73,44 @@ bool Item::processArguments(S32 argc, const char **argv)
 }
 
 
+////////////////////////////////////////
+////////////////////////////////////////
+
+// TODO: merge with simpleLine values, put in editor
+static const S32 INSTRUCTION_TEXTSIZE = 9;      
+static const S32 INSTRUCTION_TEXTGAP = 3;
+static const Color INSTRUCTION_TEXTCOLOR(1,1,1);      // TODO: Put in editor
+
+//extern EditorUserInterface gEditorUserInterface;     // TODO: and this!
+
+
+// Offset: negative below the item, positive above
+void EditorPointObject::renderItemText(const char *text, S32 offset, F32 currentScale)
+{
+   glColor(INSTRUCTION_TEXTCOLOR);
+   S32 off = (INSTRUCTION_TEXTSIZE + INSTRUCTION_TEXTGAP) * offset - 10 - ((offset > 0) ? 5 : 0);
+   Point pos = convertLevelToCanvasCoord(getVert(0));
+   UserInterface::drawCenteredString(pos.x, pos.y - off, INSTRUCTION_TEXTSIZE, text);
+}
+
+
+void EditorPointObject::addToDock(Game *game, const Point &point)
+{
+   setVert(point, 0);
+   Parent::addToDock(game, point);
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+string EditorItem::toString()
+{
+   F32 gs = getGame()->getGridSize();
+   return string(getClassName()) + " " + (getVert(0) / gs).toString();
+}
+
+
 // Client only, in-game
 void Item::render()
 {
@@ -85,7 +123,7 @@ void Item::render()
 
 
 // This scaling factor allows us to draw actual item, letting it grow and shrink with editor scale, but places a limit on how small it will get
-F32 Item::getEditorRenderScaleFactor(F32 currentScale)
+F32 EditorItem::getEditorRenderScaleFactor(F32 currentScale)
 {
    const F32 thresh = 0.5;      // Size at which we'll stop rendering actual size, to keep item from getting too small
 
@@ -93,7 +131,7 @@ F32 Item::getEditorRenderScaleFactor(F32 currentScale)
 }
 
 
-void Item::renderEditor(F32 currentScale)
+void EditorItem::renderEditor(F32 currentScale)
 {
    F32 scaleFact = getEditorRenderScaleFactor(currentScale);
 
@@ -102,14 +140,12 @@ void Item::renderEditor(F32 currentScale)
 
       renderItem(getActualPos() / scaleFact);                    
    glPopMatrix();
-
-   EditorParent::renderEditor(currentScale);      // Draws highlight box and label
 }
 
 
-void Item::initializeEditor(F32 gridSize)
+F32 EditorItem::getEditorRadius(F32 currentScale)
 {
-   EditorParent::initializeEditor(gridSize);    // Call parent
+   return (getRadius() + 2) * currentScale * getEditorRenderScaleFactor(currentScale);
 }
 
 
@@ -382,10 +418,12 @@ void Item::unpackUpdate(GhostConnection *connection, BitStream *stream)
    }
 }
 
+
 bool Item::collide(GameObject *otherObject)
 {
    return mIsCollideable && !mIsMounted;
 }
+
 
 S32 Item::getCaptureZone(lua_State *L) { if(mZone.isValid()) {mZone->push(L); return 1;} else return returnNil(L); }
 S32 Item::getShip(lua_State *L) { if(mMount.isValid()) {mMount->push(L); return 1;} else return returnNil(L); }
@@ -394,7 +432,16 @@ S32 Item::getShip(lua_State *L) { if(mMount.isValid()) {mMount->push(L); return 
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-PickupItem::PickupItem(Point p, float radius, S32 repopDelay) : Item(p, false, radius, 1)
+EditorItem::EditorItem(Point p, bool collideable, F32 radius, F32 repopDelay) : Item(p, collideable, radius, repopDelay)
+{
+   // Do nothing
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+PickupItem::PickupItem(Point p, float radius, S32 repopDelay) : EditorItem(p, false, radius, 1)
 {
    mRepopDelay = repopDelay;
    mIsVisible = true;
@@ -462,6 +509,13 @@ bool PickupItem::processArguments(S32 argc, const char **argv)
    }
 
    return true;
+}
+
+
+string PickupItem::toString()
+{
+   F32 gs = getGame()->getGridSize();
+   return string(getClassName()) + " " + (getVert(0) / gs).toString() + (mRepopDelay != -1 ? itos(mRepopDelay) : "");
 }
 
 

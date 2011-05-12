@@ -110,8 +110,9 @@ bool Teleporter::processArguments(S32 argc, const char **argv)
 
 string Teleporter::toString()
 {
+   F32 gs = getGame()->getGridSize();
    char outString[LevelLoader::MAX_LEVEL_LINE_LENGTH];
-   dSprintf(outString, sizeof(outString), "%s %g %g %g %g", Object::getClassName(), mPos.x / 255, mPos.y / 255, mDest.x / 255, mDest.y / 255);
+   dSprintf(outString, sizeof(outString), "%s %g %g %g %g", Object::getClassName(), mPos.x / gs, mPos.y / gs, mDest.x / gs, mDest.y / gs);
    return outString;
 }
 
@@ -248,7 +249,7 @@ void Teleporter::render()
 }
 
 
-void Teleporter::renderEditorItem(F32 currentScale)
+void Teleporter::renderEditorItem()
 {
    glColor(green);
 

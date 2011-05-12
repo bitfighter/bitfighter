@@ -27,7 +27,7 @@
 #define _TEAM_INFO_H_
 
 #include "luaGameInfo.h"
-#include "flagItem.h"
+#include "gameItems.h"        // For FlagSpawn def
 #include "lineEditor.h"
 #include "tnl.h"
 

@@ -200,7 +200,8 @@ public:
    virtual const char *getSpecialEditingInstructions() { return "Use [<-] and [->] keys to change value."; }
    virtual S32 getValueIndex() { return mIndex; }
    virtual void setValueIndex(U32 index) { mIndex = index; }
-
+   
+   virtual string getValue() { return mOptions[mIndex]; } 
 
    virtual void render(S32 xpos, S32 ypos, S32 textsize, bool isSelected);
    virtual bool handleKey(KeyCode keyCode, char ascii);
@@ -273,6 +274,7 @@ public:
    virtual const char *getUnits() { return mUnits.c_str(); }
    virtual S32 getIntValue() { return mValue; }
    virtual void setValue(const string &val) { mValue = atoi(val.c_str()); }
+   virtual string getValue() { return itos(mValue); }
    virtual void setIntValue(S32 val) { mValue = val; }
    virtual const char *getSpecialEditingInstructions() { return "Use [<-] and [->] keys to change value.  Use [Shift] for bigger change."; }
    virtual bool handleKey(KeyCode keyCode, char ascii);

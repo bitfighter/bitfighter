@@ -218,6 +218,12 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+const Color HIGHLIGHT_COLOR = white;
+const Color SELECT_COLOR = yellow;
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 class EditorAttributeMenuUI;
 
 class EditorUserInterface : public UserInterface, public LevelLoader
@@ -233,10 +239,6 @@ public:
       GoFastSnap,
       NoAttribute                 // Must be last
    };
-
-   static const S32 DOCK_LABEL_SIZE = 9;      // Size to label items on the dock
-   static const Color DOCK_LABEL_COLOR;
-   static const Color HIGHLIGHT_COLOR;
 
 private:
    string mSaveMsg;
@@ -327,7 +329,7 @@ private:
    bool anyItemsSelected();           // Are any items selected?
    bool anythingSelected();           // Are any items/vertices selected?
 
-   void findHitVertex(const Point &canvasPos, EditorObject *&hitObject, S32 &hitVertex);
+   //void findHitVertex(EditorObject *&hitObject, S32 &hitVertex);
    void findHitItemAndEdge();         // Sets mItemHit and mEdgeHit
    S32 findHitItemOnDock(Point canvasPos);
 
@@ -336,6 +338,7 @@ private:
    S32 mSnapVertex_j;
 
    S32 mEdgeHit;
+   S32 mVertexHit;
    EditorObject *mItemHit;
 
    void computeSelectionMinMax(Point &min, Point &max);
@@ -347,7 +350,7 @@ private:
 
    bool mWasTesting;
 
-   void finishedDragging();
+   void onFinishedDragging();    // Called when we're done dragging an object
 
 protected:
    void onActivate();
@@ -355,7 +358,7 @@ protected:
    void onDeactivate();
 
 public:
-   ~EditorUserInterface();    // Destructor
+   ~EditorUserInterface();       // Destructor
 
    void setLevelFileName(string name);
    void setLevelGenScriptName(string name);
@@ -432,6 +435,7 @@ public:
 
 
    void populateDock();                         // Load up dock with game-specific items to drag and drop
+   void addDockObject(EditorObject *object, F32 xPos, F32 yPos);
 
    string mScriptLine;                          // Script and args, if any
    void setHasNavMeshZones(bool hasZones) { mHasBotNavZones = hasZones; }

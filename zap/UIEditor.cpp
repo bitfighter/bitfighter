@@ -38,12 +38,13 @@
 #include "gameObjectRender.h"
 #include "game.h"                // For EditorGame def
 #include "gameType.h"
-#include "soccerGame.h"          // For soccer ball radius
+#include "soccerGame.h"          // For Soccer ball radius
 #include "engineeredObjects.h"   // For Turret properties
 #include "barrier.h"             // For BarrierWidth
 #include "gameItems.h"           // For Asteroid defs
-#include "teleporter.h"          // For teleporter def
-#include "speedZone.h"           // for speedzone def
+#include "teleporter.h"          // For Teleporter def
+#include "speedZone.h"           // for Speedzone def
+#include "loadoutZone.h"         // For LoadoutZone def
 #include "config.h"
 #include "GeomUtils.h"
 #include "textItem.h"            // For MAX_TEXTITEM_LEN and MAX_TEXT_SIZE
@@ -67,16 +68,11 @@ const F32 MIN_SCALE = .05;        // Most zoomed-in scale
 const F32 MAX_SCALE = 2.5;        // Most zoomed-out scale
 const F32 STARTING_SCALE = 0.5;   
 
-// Some colors
-
 extern Color gNexusOpenColor;
 extern Color EDITOR_WALL_FILL_COLOR;
 
 static const Color inactiveSpecialAttributeColor = Color(.6, .6, .6);
-const Color SELECT_COLOR = yellow;
 
-const Color EditorUserInterface::HIGHLIGHT_COLOR = white;
-const Color EditorUserInterface::DOCK_LABEL_COLOR = white;
 
 static const S32 TEAM_NEUTRAL = Item::TEAM_NEUTRAL;
 static const S32 TEAM_HOSTILE = Item::TEAM_HOSTILE;
@@ -142,22 +138,29 @@ EditorUserInterface::EditorUserInterface() : mGridDatabase(GridDatabase(false)) 
 static const S32 DOCK_POLY_HEIGHT = 20;
 static const S32 DOCK_POLY_WIDTH = DOCK_WIDTH - 10;
 
+void EditorUserInterface::addDockObject(EditorObject *object, F32 xPos, F32 yPos)
+{
+   //object->initializeEditor(gEditorGame->getGridSize());
+   object->addToDock(gEditorGame, Point(xPos, yPos));       
+   object->setTeam(mCurrentTeam);
+}
+
+
 void EditorUserInterface::populateDock()
 {
    mDockItems.clear();
 
-   if(mShowMode == ShowAllObjects || mShowMode == ShowAllButNavZones)
+   if(mShowMode == ShowAllObjects)
    {
       S32 xPos = gScreenInfo.getGameCanvasWidth() - horizMargin - DOCK_WIDTH / 2;
       S32 yPos = 35;
       const S32 spacer = 35;
 
-      /*
-      // Reinstate in 014!
-      mDockItems.push_back(WorldItem(ItemRepair, Point(xPos /*- 10* /, yPos), mCurrentTeam, true, 0, 0));
-      //mDockItems.push_back(WorldItem(ItemEnergy, Point(xPos + 10, yPos), mCurrentTeam, true, 0, 0));
-
+      addDockObject(new RepairItem(), xPos, yPos);
+      //addDockObject(new ItemEnergy(), xPos + 10, yPos);
       yPos += spacer;
+
+      /*
       mDockItems.push_back(WorldItem(ItemForceField, Point(xPos, yPos), mCurrentTeam, true, 0, 0));
       yPos += spacer;
       mDockItems.push_back(WorldItem(ItemSpawn, Point(xPos, yPos), mCurrentTeam, true, 0, 0));
@@ -166,60 +169,51 @@ void EditorUserInterface::populateDock()
       yPos += spacer;
        */
       
-      Teleporter *teleporter = new Teleporter();
-      teleporter->setVert(Point(xPos, yPos), 0);
-      teleporter->addToDock(gEditorGame);
+      addDockObject(new Teleporter(), xPos, yPos);
       yPos += spacer;
 
-      SpeedZone *speedZone = new SpeedZone();
-      speedZone->setVert(Point(xPos, yPos), 0);
-      speedZone->addToDock(gEditorGame);
+      addDockObject(new SpeedZone(), xPos, yPos);
       yPos += spacer;
-     
-      TextItem *textItem = new TextItem();
-      textItem->setVert(Point(xPos, yPos), 0);
-      textItem->setTeam(mCurrentTeam);
 
-      textItem->addToDock(gEditorGame);
-
+      addDockObject(new TextItem(), xPos, yPos);
       yPos += spacer;
+
       /*
       if(!strcmp(mGameType, "SoccerGameType"))
-         mDockItems.push_back(WorldItem(ItemSoccerBall, Point(xPos, yPos), mCurrentTeam, true, 0, 0));
+         addDockObject(new SoccerBallItem(), xPos, yPos);
       else */
-      {
-         FlagItem *flagItem = new FlagItem();
-         flagItem->setVert(Point(xPos, yPos), 0);
-         flagItem->setTeam(mCurrentTeam);
+         addDockObject(new FlagItem(), xPos, yPos);
+      yPos += spacer;
 
-         flagItem->addToDock(gEditorGame);
-      }
+      addDockObject(new FlagSpawn(), xPos, yPos);
+      yPos += spacer;
 
+      addDockObject(new Mine(), xPos - 10, yPos);
+      addDockObject(new SpyBug(), xPos + 10, yPos);
       yPos += spacer;
       /*
-      mDockItems.push_back(WorldItem(ItemFlagSpawn, Point(xPos, yPos), mCurrentTeam, true, 0, 0));
-      yPos += spacer;
-
-
       mDockItems.push_back(WorldItem(ItemMine, Point(xPos - 10, yPos), mCurrentTeam, true, 0, 0));
       mDockItems.push_back(WorldItem(ItemSpyBug, Point(xPos + 10, yPos), mCurrentTeam, true, 0, 0));
       yPos += spacer;
-
+*/
       // These two will share a line
-      mDockItems.push_back(WorldItem(ItemAsteroid, Point(xPos - 10, yPos), mCurrentTeam, true, 0, 0));
-      mDockItems.push_back(WorldItem(ItemAsteroidSpawn, Point(xPos + 10, yPos), mCurrentTeam, true, 0, 0));
-
+      addDockObject(new Asteroid(), xPos - 10, yPos);
+      addDockObject(new AsteroidSpawn(), xPos + 10, yPos);
       yPos += spacer;
 
       // These two will share a line
-      mDockItems.push_back(WorldItem(ItemBouncyBall, Point(xPos - 10, yPos), mCurrentTeam, true, 0, 0));
-      mDockItems.push_back(WorldItem(ItemResource, Point(xPos + 10, yPos), mCurrentTeam, true, 0, 0));
-
-      yPos += 25;
-      mDockItems.push_back(WorldItem(ItemLoadoutZone, Point(gScreenInfo.getGameCanvasWidth() - horizMargin - DOCK_WIDTH + 5, yPos), 
-                                     mCurrentTeam, true, DOCK_POLY_WIDTH, DOCK_POLY_HEIGHT));
+      addDockObject(new TestItem(), xPos - 10, yPos);
+      addDockObject(new ResourceItem(), xPos + 10, yPos);
       yPos += 25;
 
+      
+      addDockObject(new LoadoutZone(), xPos, yPos);
+      yPos += 25;
+
+      addDockObject(new GoalZone(), xPos, yPos);
+      yPos += 25;
+
+/*
       if(!strcmp(mGameType, "HuntersGameType"))
       {
          mDockItems.push_back(WorldItem(ItemNexus, Point(gScreenInfo.getGameCanvasWidth() - horizMargin - DOCK_WIDTH + 5, yPos), 
@@ -265,7 +259,7 @@ EditorUserInterface::~EditorUserInterface()
 
 static const S32 NO_NUMBER = -1;
 
-// Draw a vertex of a selected editor item
+// Draw a vertex of a selected editor item  -- still used for snapping vertex
 void renderVertex(VertexRenderStyles style, const Point &v, S32 number, F32 alpha, S32 size)
 {
    bool hollow = style == HighlightedVertex || style == SelectedVertex || style == SelectedItemVertex || style == SnappingVertex;
@@ -278,7 +272,7 @@ void renderVertex(VertexRenderStyles style, const Point &v, S32 number, F32 alph
    }
       
    if(style == HighlightedVertex)
-      glColor(EditorUserInterface::HIGHLIGHT_COLOR, alpha);
+      glColor(HIGHLIGHT_COLOR, alpha);
    else if(style == SelectedVertex)
       glColor(SELECT_COLOR, alpha);
    else if(style == SnappingVertex)
@@ -650,7 +644,7 @@ S32 QSORT_CALLBACK geometricSort(EditorObject *a, EditorObject *b)
    if((b)->getObjectTypeMask() & BarrierType)
       return 1;
 
-   return( (b)->getGeomType() - (a)->getGeomType() );
+   return( (a)->getGeomType() - (b)->getGeomType() );
 }
 
 
@@ -721,11 +715,6 @@ void EditorUserInterface::loadLevel()
 
    wallSegmentManager.recomputeAllWallGeometry();
    
-   // Bulk-process bot nav mesh zone boundaries
-   for(S32 i = 0; i < mItems.size(); i++)
-      if(mItems[i]->getObjectTypeMask() & BotNavMeshZoneType)
-          mItems[i]->initializePolyGeom();
-
    gEditorUserInterface.rebuildAllBorderSegs();
 
 
@@ -1594,7 +1583,7 @@ void EditorUserInterface::renderTextEntryOverlay()
    // Render id-editing overlay
    if(entryMode != EntryNone)
    {
-      static const U32 fontsize = 16;
+      static const S32 fontsize = 16;
       static const S32 inset = 9;
       static const S32 boxheight = fontsize + 2 * inset;
       static const Color color(0.9, 0.9, 0.9);
@@ -1729,11 +1718,11 @@ void EditorUserInterface::render()
    
    // Render polyWall item fill just before rendering regular walls.  This will create the effect of all walls merging together.  
    // PolyWall outlines are already part of the wallSegmentManager, so will be rendered along with those of regular walls.
-   glPushMatrix();  
-      setLevelToCanvasCoordConversion();
-      for(S32 i = 0; i < mItems.size(); i++)
-         if(mItems[i]->getObjectTypeMask() & PolyWallType)
-            renderPolygonFill(mItems[i]->getPolyFillPoints(), EDITOR_WALL_FILL_COLOR, 1);
+   //glPushMatrix();  
+   //   setLevelToCanvasCoordConversion();
+   //   for(S32 i = 0; i < mItems.size(); i++)
+   //      if(mItems[i]->getObjectTypeMask() & PolyWallType)
+   //         renderPolygonFill(mItems[i]->getPolyFillPoints(), EDITOR_WALL_FILL_COLOR, 1);
    
       wallSegmentManager.renderWalls(true, getRenderingAlpha(false/*isScriptItem*/));
    glPopMatrix();
@@ -1751,21 +1740,6 @@ void EditorUserInterface::render()
       if(mItems[i]->isSelected() || mItems[i]->isLitUp())
          mItems[i]->render(false, mShowingReferenceShip, mShowMode);
 
-
-   // Go through and render any borders between navMeshZones -- these need to be rendered after the zones themselves so they
-   // don't get covered up.
-   if(showingNavZones())
-   {
-      glPushMatrix();  
-         setLevelToCanvasCoordConversion();
-         renderNavMeshBorders(zoneBorders, 1 / getGridSize());
-      glPopMatrix();
-      
-      if(!mShowingReferenceShip)
-         for(S32 i = 0; i < mItems.size(); i++)
-            if(mItems[i]->getObjectTypeMask() & BotNavMeshZoneType)
-               mItems[i]->renderLinePolyVertices(gEditorUserInterface.getCurrentScale()); 
-   }
 
    fillRendered = false;
    F32 width = NONE;
@@ -1809,16 +1783,9 @@ void EditorUserInterface::render()
    }
 
 
-   if(mShowMode == NavZoneMode)
-   {
-      glPushMatrix();  
-         setLevelToCanvasCoordConversion();
-  
-         for(S32 i = 0; i < zoneBorders.size(); i++)
-            renderNavMeshBorder(zoneBorders[i], 1 / getGridSize(), yellow, .5, .05 * getGridSize());
-      glPopMatrix();
-   }
-
+   // Render our snap vertex
+   if(!mShowingReferenceShip && mSnapVertex_i && mSnapVertex_i->isSelected() && mSnapVertex_j != NONE)      
+      renderVertex(SnappingVertex, mSnapVertex_i->getVert(mSnapVertex_j) * mCurrentScale + mCurrentOffset, NO_NUMBER/*, alpha*/);  // Hollow magenta box
 
    if(mShowingReferenceShip)
       renderReferenceShip();
@@ -2234,41 +2201,41 @@ void EditorUserInterface::flipSelectionVertical()
 }
 
 
-void EditorUserInterface::findHitVertex(const Point &canvasPos, EditorObject *&hitObject, S32 &hitVertex)
-{
-   hitObject = NULL;
-   hitVertex = NONE;
-
-   for(S32 x = 1; x >= 0; x--)    // Two passes... first for selected item, second for all items
-   {
-      for(S32 i = mItems.size() - 1; i >= 0; i--)     // Reverse order so we get items "from the top down"
-      { 
-         if(x && !mItems[i]->isSelected() && !mItems[i]->anyVertsSelected())
-            continue;
-
-         U32 type = mItems[i]->getObjectTypeMask();
-         if(mShowMode == ShowWallsOnly && !(type & BarrierType) && !(type & PolyWallType) ||
-            mShowMode == NavZoneMode && !(type & BotNavMeshZoneType) )        // Only select walls in CTRL-A mode
-            continue;
-
-         if(mItems[i]->getGeomType() < geomPoint)        // Was <=... why?
-            continue;
-
-         S32 radius = mItems[i]->getEditorRadius(mCurrentScale) * mCurrentScale;
-
-         for(S32 j = mItems[i]->getVertCount() - 1; j >= 0; j--)
-         {
-            Point v = convertLevelToCanvasCoord(mItems[i]->getVert(j));
-            if(fabs(v.x - canvasPos.x) < radius && fabs(v.y - canvasPos.y) < radius)
-            {
-               hitObject = mItems[i];
-               hitVertex = j;
-               return;
-            }
-         }
-      }
-   }
-}
+//// Identify a vert that our mouse is over; hitObject contains the vert, hitVertex is the index of the vert we hit
+//void EditorUserInterface::findHitVertex(EditorObject *&hitObject, S32 &hitVertex)
+//{
+//   hitObject = NULL;
+//   hitVertex = NONE;
+//
+//   for(S32 x = 1; x >= 0; x--)    // Two passes... first for selected item, second for all items
+//   {
+//      for(S32 i = mItems.size() - 1; i >= 0; i--)     // Reverse order so we get items "from the top down"
+//      { 
+//         if(x && !mItems[i]->isSelected() && !mItems[i]->anyVertsSelected())
+//            continue;
+//
+//         U32 type = mItems[i]->getObjectTypeMask();
+//         if(mShowMode == ShowWallsOnly && !(type & BarrierType) && !(type & PolyWallType))        // Only select walls in CTRL-A mode
+//            continue;
+//
+//         if(mItems[i]->getGeomType() < geomPoint)        // Was <=... why?
+//            continue;
+//
+//         S32 radius = mItems[i]->getEditorRadius(mCurrentScale) * mItems[i]->getEditorRenderScaleFactor(mCurrentScale);
+//
+//         for(S32 j = mItems[i]->getVertCount() - 1; j >= 0; j--)
+//         {
+//            Point p = mMousePos - mCurrentOffset - mItems[i]->getVert(j) * mCurrentScale;    // Pixels from mouse to mItems[i]->getVert(j), at any zoom
+//            if(fabs(p.x) < radius && fabs(p.y) < radius)
+//            {
+//               hitObject = mItems[i];
+//               hitVertex = j;
+//               return;
+//            }
+//         }
+//      }
+//   }
+//}
 
 
 static const S32 POINT_HIT_RADIUS = 9;
@@ -2278,37 +2245,43 @@ void EditorUserInterface::findHitItemAndEdge()
 {
    mItemHit = NULL;
    mEdgeHit = NONE;
+   mVertexHit = NONE;
 
    // Do this in two passes -- the first we only consider selected items, the second pass will consider all targets.
    // This will give priority to moving vertices of selected items
-   for(S32 x = 1; x >= 0; x--)      // x will be true the first time through, false the second time
+   for(S32 firstPass = 1; firstPass >= 0; firstPass--)   // firstPass will be true the first time through, false the second time
    {
-      for(S32 i = mItems.size() - 1; i >= 0; i--)     // Go in reverse order to prioritize items drawn on top
+      for(S32 i = mItems.size() - 1; i >= 0; i--)        // Go in reverse order to prioritize items drawn on top
       {
-         if(x && !mItems[i]->isSelected() && !mItems[i]->anyVertsSelected())     // First pass is for selected items only
+         if(firstPass && !mItems[i]->isSelected() && !mItems[i]->anyVertsSelected())     // First pass is for selected items only
             continue;
          
-          // Only select walls in CTRL-A mode...
-         if(mShowMode == ShowWallsOnly && mItems[i]->getObjectTypeMask() & ~BarrierType && !(mItems[i]->getObjectTypeMask() & PolyWallType)) 
+         // Only select walls in CTRL-A mode...
+         U32 type = mItems[i]->getObjectTypeMask();
+         if(mShowMode == ShowWallsOnly && !(type & BarrierType) && !(type & PolyWallType))        // Only select walls in CTRL-A mode
             continue;                                                              // ...so if it's not a wall, proceed to next item
 
-         if(mShowMode == NavZoneMode && mItems[i]->getObjectTypeMask() & ~BotNavMeshZoneType)   // Only select zones in CTRL-A mode...
-            continue;                                                                        // ...so if it's not a bot nav zone, proceed to next item
+         S32 radius = mItems[i]->getEditorRadius(mCurrentScale);
 
-         if(mItems[i]->getGeomType() == geomPoint)
+         for(S32 j = mItems[i]->getVertCount() - 1; j >= 0; j--)
          {
-            S32 radius = mItems[i]->getEditorRadius(mCurrentScale) * mItems[i]->getEditorRenderScaleFactor(mCurrentScale);
-            //S32 targetRadius = (radius == NONE) ? POINT_HIT_RADIUS : S32(radius * mCurrentScale / getGridSize() + 0.5f);
+            // p represents pixels from mouse to mItems[i]->getVert(j), at any zoom
+            Point p = mMousePos - mCurrentOffset - mItems[i]->getVert(j) * mCurrentScale;    
 
-            F32 ang = mItems[i]->mAnchorNormal.ATAN2();
-            Point pos = convertLevelToCanvasCoord(mItems[i]->getVert(0) + mItems[i]->getEditorSelectionOffset(mCurrentScale).rotate(ang));
-
-            if(fabs(mMousePos.x - pos.x) < radius && fabs(mMousePos.y - pos.y) < radius)
+            if(fabs(p.x) < radius && fabs(p.y) < radius)
             {
                mItemHit = mItems[i];
+               mVertexHit = j;
                return;
             }
          }
+
+         // This is all we can check on point items -- it makes no sense to check edges or other higher order geometry
+         if(mItems[i]->getGeomType() == geomPoint)
+            continue;
+
+         /////
+         // Didn't find a vertex hit... now we look for an edge
 
          // Make a copy of the items vertices that we can add to in the case of a loop
          Vector<Point> verts = mItems[i]->getVerts();    
@@ -2330,6 +2303,7 @@ void EditorUserInterface::findHitItemAndEdge()
                {
                   mItemHit = mItems[i];
                   mEdgeHit = j;
+
                   return;
                }
             }
@@ -2341,15 +2315,11 @@ void EditorUserInterface::findHitItemAndEdge()
    if(mShowMode == ShowWallsOnly) 
       return;
 
+   /////
    // If we're still here, it means we didn't find anything yet.  Make one more pass, and see if we're in any polys.
    // This time we'll loop forward, though I don't think it really matters.
    for(S32 i = 0; i < mItems.size(); i++)
    {
-      if(mShowMode == ShowAllButNavZones && mItems[i]->getObjectTypeMask() & BotNavMeshZoneType)     // Don't select NavMeshZones while they're hidden
-         continue;
-      if(mShowMode == NavZoneMode && mItems[i]->getObjectTypeMask() & ~BotNavMeshZoneType)
-         continue;
-
       if(mItems[i]->getGeomType() == geomPoly)
       {
          Vector<Point> verts;
@@ -2395,9 +2365,10 @@ S32 EditorUserInterface::findHitItemOnDock(Point canvasPos)
 }
 
 
+// Incoming calls from GLUT come here...
 void EditorUserInterface::onMouseMoved(S32 x, S32 y)
 {
-   onMouseMoved();
+   onMouseMoved();      //... and go here
 }
 
 
@@ -2413,11 +2384,8 @@ void EditorUserInterface::onMouseMoved()
    if(mCreatingPoly || mCreatingPolyline)
       return;
 
-   S32 vertexHit;
-   EditorObject *vertexHitObject;
-
-   findHitVertex(mMousePos, vertexHitObject, vertexHit);      // Sets vertexHitObject and vertexHit
-   findHitItemAndEdge();                                      //  Sets mItemHit and mEdgeHit
+   //findHitVertex(mMousePos, vertexHitObject, vertexHit);      // Sets vertexHitObject and vertexHit
+   findHitItemAndEdge();                                      //  Sets mItemHit, mVertexHit, and mEdgeHit
 
    // Unhighlight the currently lit up object, if any
    if(mItemToLightUp)
@@ -2427,10 +2395,10 @@ void EditorUserInterface::onMouseMoved()
    mItemToLightUp = NULL;
 
    // We hit a vertex that wasn't already selected
-   if(vertexHit != NONE && !vertexHitObject->vertSelected(vertexHit))   
+   if(mVertexHit != NONE && !mItemHit->vertSelected(mVertexHit))   
    {
-      mItemToLightUp = vertexHitObject;
-      mItemToLightUp->setVertexLitUp(vertexHit);
+      mItemToLightUp = mItemHit;
+      mItemToLightUp->setVertexLitUp(mVertexHit);
    }
 
    // We hit an item that wasn't already selected
@@ -2447,7 +2415,7 @@ void EditorUserInterface::onMouseMoved()
    if(mItemToLightUp)
       mItemToLightUp->setLitUp(true);
 
-   bool showMoveCursor = (vertexHitObject || vertexHit != NONE || mItemHit || mEdgeHit != NONE || 
+   bool showMoveCursor = (mItemHit || mVertexHit != NONE || mItemHit || mEdgeHit != NONE || 
                          (mouseOnDock() && findHitItemOnDock(mMousePos) != NONE));
 
 
@@ -2552,11 +2520,11 @@ void EditorUserInterface::startDraggingDockItem()
    // Instantiate object so we are in essence dragging a non-dock item
    EditorObject *item = mDockItems[mDraggingDockItem]->newCopy();
 
-   item->initializeEditor(getGridSize());
+   item->initializeEditor(getGridSize());    // Override this to define some initial geometry for your object... 
    item->setDockItem(false);
 
    // Offset lets us drag an item out from the dock by an amount offset from the 0th vertex.  This makes placement seem more natural.
-   Point pos = snapPoint(convertCanvasToLevelCoord(mMousePos) - item->getInitialPlacementOffset() * getCurrentScale(), true);
+   Point pos = snapPoint(convertCanvasToLevelCoord(mMousePos), true) - item->getInitialPlacementOffset(getGridSize());
    item->moveTo(pos);
       
    item->setWidth((mDockItems[mDraggingDockItem]->getGeomType() == geomPoly) ? .7 : 1);
@@ -2564,8 +2532,8 @@ void EditorUserInterface::startDraggingDockItem()
    item->addToEditor(gEditorGame);
 
    // A little hack here to keep the polywall fill to appear to be left behind behind the dock
-   if(item->getObjectTypeMask() & PolyWallType)
-      item->clearPolyFillPoints();
+   //if(item->getObjectTypeMask() & PolyWallType)
+   //   item->clearPolyFillPoints();
 
    clearSelection();            // No items are selected...
    item->setSelected(true);     // ...except for the new one
@@ -3049,6 +3017,8 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       return;
 
    // TODO: Make this stuff work like the attribute entry stuff; use a real menu and not this ad-hoc code
+   // This is where we handle entering things like rotation angle and other data that requires a special entry box.
+   // NOT for editing an item's attributes.  Still used, but untested in refactor.
    if(entryMode != EntryNone)
       textEntryKeyHandler(keyCode, ascii);
 
@@ -3211,18 +3181,21 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          //  else
          //    toggle the selection of what was clicked
 
-         S32 vertexHit;
+        /* S32 vertexHit;
          EditorObject *vertexHitPoly;
+*/
+         //findHitVertex(mMousePos, vertexHitPoly, vertexHit);
+         //findHitItemAndEdge();      //  Sets mItemHit, mVertexHit, and mEdgeHit
 
-         findHitVertex(mMousePos, vertexHitPoly, vertexHit);
 
          if(!getKeyState(KEY_SHIFT))      // Shift key is not down
          {
-            // If we hit a vertex of an already selected item --> now we can move that vertex w/o losing our selection
-            if(vertexHit != NONE && vertexHitPoly->isSelected())    
+            // If we hit a vertex of an already selected item --> now we can move that vertex w/o losing our selection.
+            // Note that in the case of a point item, we want to skip this step, as we don't select individual vertices.
+            if(mVertexHit != NONE && mItemHit->isSelected() && mItemHit->getGeomType() != geomPoint)    
             {
                clearSelection();
-               vertexHitPoly->selectVert(vertexHit);
+               mItemHit->selectVert(mVertexHit);
             }
             if(mItemHit && mItemHit->isSelected())   // Hit an already selected item
             {
@@ -3233,12 +3206,12 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
                clearSelection();
                mItemHit->setSelected(true);
             }
-            else if(vertexHit != NONE && (!mItemHit || !mItemHit->isSelected()))      // Hit a vertex of an unselected item
+            else if(mVertexHit != NONE && (!mItemHit || !mItemHit->isSelected()))      // Hit a vertex of an unselected item
             {        // (braces required)
-               if(!vertexHitPoly->vertSelected(vertexHit))
+               if(!mItemHit->vertSelected(mVertexHit))
                {
                   clearSelection();
-                  vertexHitPoly->selectVert(vertexHit);
+                  mItemHit->selectVert(mVertexHit);
                }
             }
             else if(mItemHit)                                                        // Hit a non-point item, but not a vertex
@@ -3254,12 +3227,12 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          }
          else     // Shift key is down
          {
-            if(vertexHit != NONE)
+            if(mVertexHit != NONE)
             {
-               if(vertexHitPoly->vertSelected(vertexHit))
-                  vertexHitPoly->unselectVert(vertexHit);
+               if(mItemHit->vertSelected(mVertexHit))
+                  mItemHit->unselectVert(mVertexHit);
                else
-                  vertexHitPoly->aselectVert(vertexHit);
+                  mItemHit->aselectVert(mVertexHit);
             }
             else if(mItemHit)
                mItemHit->setSelected(!mItemHit->isSelected());    // Toggle selection of hit item
@@ -3511,6 +3484,7 @@ void EditorUserInterface::startAttributeEditor()
          EditorAttributeMenuUI *menu = mItems[i]->getAttributeMenu();
          if(menu)
          {
+            mItems[i]->setIsBeingEdited(true);
             menu->startEditing(mItems[i]);
             menu->activate();
 
@@ -3600,7 +3574,7 @@ void EditorUserInterface::onKeyUp(KeyCode keyCode)
                mAddingVertex = false;
             }
 
-            finishedDragging();
+            onFinishedDragging();
          }
 
          break;
@@ -3609,7 +3583,7 @@ void EditorUserInterface::onKeyUp(KeyCode keyCode)
 
 
 // Called when user has been dragging an object and then releases it
-void EditorUserInterface::finishedDragging()
+void EditorUserInterface::onFinishedDragging()
 {
    mDraggingObjects = false;
 
@@ -3642,6 +3616,8 @@ void EditorUserInterface::finishedDragging()
 
             mNeedToSave = true;
             autoSave();
+            geomSort(mItems);  
+
             return;
          }
          else     // We started our move, then didn't end up moving anything... remove associated undo state

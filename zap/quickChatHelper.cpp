@@ -59,7 +59,7 @@ extern S32 getControllerButtonRenderedSize(KeyCode keyCode);
 void QuickChatHelper::render()
 {
    S32 yPos = MENU_TOP;
-   const U32 fontSize = 15;
+   const S32 fontSize = 15;
 
    if(!gQuickChatTree.size())
    {
@@ -135,7 +135,7 @@ void QuickChatHelper::render()
    glColor(gTeamChatColor);
    UserInterface::drawString(UserInterface::horizMargin + indent, yPos, fontSizeSm, "Team Message");
    glColor(gGlobalChatColor);
-   UserInterface::drawString(UserInterface::horizMargin + indent + UserInterface::getStringWidth(fontSizeSm, "Team Message "), yPos, fontSizeSm, "Global Message");
+   UserInterface::drawString(UserInterface::horizMargin + indent + S32(UserInterface::getStringWidth(fontSizeSm, "Team Message ")), yPos, fontSizeSm, "Global Message");
 
    yPos += 12;
 

@@ -163,5 +163,12 @@ void Point::read(const char **argv)
    y = (F32) atof(argv[1]);
 }
 
+string Point::toString()
+{
+   char outString[100];
+   dSprintf(outString, sizeof(outString), "%2.5f %2.5f", x, y);
+   return outString;
+}
+
 };	// namespace
 

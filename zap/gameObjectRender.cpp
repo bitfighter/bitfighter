@@ -838,10 +838,16 @@ void renderPolygon(const Vector<Point> &fillPoints, const Vector<Point> &outline
 }
 
 
+void renderLoadoutZone(Color color, const Vector<Point> &outline, const Vector<Point> &fill)
+{
+   renderPolygon(fill, outline, color * 0.5, color);
+}
+
+
 void renderLoadoutZone(Color color, const Vector<Point> &outline, const Vector<Point> &fill, 
                                     const Point &centroid, F32 labelAngle, F32 scaleFact)
 {
-   renderPolygon(fill, outline, color * 0.5, color);
+   renderLoadoutZone(color, outline, fill);
    renderPolygonLabel(centroid, labelAngle, 25, "LOADOUT ZONE", scaleFact);
 }
 
@@ -914,14 +920,37 @@ void renderNavMeshBorders(const Vector<NeighboringZone> &borders, F32 scaleFact)
 }
 
 
+static Color getGoalZoneOutlineColor(const Color &c, F32 glowFraction)
+{
+   return Color(yellow) * (glowFraction * glowFraction) + Color(c) * (1 - glowFraction * glowFraction);
+}
+
+
+static Color getGoalZoneFillColor(const Color &c, bool isFlashing, F32 glowFraction)
+{
+   F32 alpha = isFlashing ? 0.75 : 0.5;
+
+   return Color(yellow) * (glowFraction * glowFraction) + Color(c) * alpha * (1 - glowFraction * glowFraction);
+}
+
+
+void renderGoalZone(Color c, const Vector<Point> &outline, const Vector<Point> &fill, Point centroid)
+{
+   Color fillColor    = getGoalZoneFillColor(c, false, 0);
+   Color outlineColor = getGoalZoneOutlineColor(c, false);
+
+   renderPolygon(fill, outline, fillColor, outlineColor);
+}
+
+
 // Goal zone flashes after capture, but glows after touchdown...
 void renderGoalZone(Color c, const Vector<Point> &outline, const Vector<Point> &fill, Point centroid, F32 labelAngle, 
                     bool isFlashing, F32 glowFraction, S32 score, F32 scaleFact)
 {
    F32 alpha = isFlashing ? 0.75 : 0.5;
 
-   Color fillColor    = Color(yellow) * (glowFraction * glowFraction) + c * alpha * (1 - glowFraction * glowFraction);
-   Color outlineColor = Color(yellow) * (glowFraction * glowFraction) + c *         (1 - glowFraction * glowFraction);
+   Color fillColor    = getGoalZoneFillColor(c, isFlashing, glowFraction);
+   Color outlineColor = getGoalZoneOutlineColor(c, isFlashing);
 
    renderPolygon(fill, outline, fillColor, outlineColor);
 
@@ -1204,7 +1233,7 @@ void renderSpyBug(const Point &pos, bool visible)
       glColor(gray50);
       drawCircle(pos, 15);
       mod = 1.0;
-      UserInterface::drawString(pos.x - 5, pos.y - 5, 10, "S");
+      UserInterface::drawString(pos.x - 3, pos.y - 5, 10, "S");
    }
    else
    {
@@ -1395,12 +1424,14 @@ void renderSpeedZone(const Vector<Point> &points, U32 time)
 
 void renderTestItem(const Point &pos, F32 alpha)
 {
-   glPushMatrix();
-   glTranslate(pos);
+   renderTestItem(pos, 60, alpha);
+}
 
-   glColor4f(1, 1, 0, alpha);
-   drawPolygon(Point(0,0), 7, 60, 0);
-   glPopMatrix();
+
+void renderTestItem(const Point &pos, S32 size, F32 alpha)
+{
+   glColor(yellow, alpha);
+   drawPolygon(pos, 7, size, 0);
 }
 
 

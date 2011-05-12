@@ -611,7 +611,7 @@ bool HuntersNexusObject::processArguments(S32 argc2, const char **argv2)
    // so a possible future version can add parameters without compatibility problem.
    S32 argc = 0;
    const char *argv[64]; // 32 * 2 = 64
-   for(S32 i=0; i<argc2; i++)  // the idea here is to allow optional R3.5 for rotate at speed of 3.5
+   for(S32 i = 0; i < argc2; i++)  // the idea here is to allow optional R3.5 for rotate at speed of 3.5
    {
       char c = argv2[i][0];
       //switch(c)
@@ -656,6 +656,12 @@ bool HuntersNexusObject::processArguments(S32 argc2, const char **argv2)
    computeExtent();
 
    return true;
+}
+
+
+string HuntersNexusObject::toString()
+{
+   return string(getClassName()) + " " + boundsToString(getGame()->getGridSize());
 }
 
 

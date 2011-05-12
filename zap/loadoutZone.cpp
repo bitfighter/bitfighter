@@ -61,6 +61,22 @@ void LoadoutZone::render()
 }
 
 
+void LoadoutZone::renderEditor(F32 currentScale)
+{
+   render();
+   if(mSelected || mLitUp)
+      renderPolyHighlight();
+
+   renderLinePolyVertices(currentScale, currentScale);
+}
+
+
+void LoadoutZone::renderDock()
+{
+  renderLoadoutZone(getGame()->getTeamColor(getTeam()), mPolyBounds, mPolyFill);
+}
+
+
 S32 LoadoutZone::getRenderSortValue()
 {
    return -1;
@@ -74,7 +90,7 @@ bool LoadoutZone::processArguments(S32 argc2, const char **argv2)
    // so a possible future version can add parameters without compatibility problem.
    S32 argc = 0;
    const char *argv[65]; // 32 * 2 + 1 = 65
-   for(S32 i=0; i<argc2; i++)  // the idea here is to allow optional R3.5 for rotate at speed of 3.5
+   for(S32 i = 0; i < argc2; i++)  // the idea here is to allow optional R3.5 for rotate at speed of 3.5
    {
       char c = argv2[i][0];
       //switch(c)
@@ -100,6 +116,13 @@ bool LoadoutZone::processArguments(S32 argc2, const char **argv2)
 
    return true;
 }
+
+
+string LoadoutZone::toString()
+{
+   return string(getClassName()) + " " + itos(mTeam) + " " + boundsToString(getGame()->getGridSize());
+}
+
 
 void LoadoutZone::onAddedToGame(Game *theGame)
 {

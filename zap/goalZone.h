@@ -32,7 +32,7 @@
 namespace Zap
 {
 
-class GoalZone : public LuaPolygonalGameObject
+class GoalZone : public EditorPolygon
 {
 private:
    typedef GameObject Parent;
@@ -48,7 +48,7 @@ private:
    Timer mFlashTimer;
 
 public:
-   GoalZone();
+   GoalZone();        // Constructor
    void render();
 
    bool mHasFlag;     // Is there a flag parked in this zone?
@@ -71,7 +71,19 @@ public:
 
    TNL_DECLARE_CLASS(GoalZone);
 
-   ///// Lua Interface
+   /////
+   // Editor methods
+   const char *getEditorHelpString() { return "Target area used in a variety of games."; }
+   const char *getPrettyNamePlural() { return "Goal zones"; }
+   const char *getOnDockName() { return "Goal"; }
+   const char *getOnScreenName() { return "Goal"; }
+   string toString();
+
+   void renderEditor(F32 currentScale);
+   void renderDock();
+
+   /////
+   // Lua Interface
    GoalZone(lua_State *L) { /* Do nothing */ };   //  Lua constructor
 
    static const char className[];                 // Class name as it appears to Lua scripts

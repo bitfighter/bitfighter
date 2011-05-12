@@ -91,7 +91,8 @@ enum GameObjectType
    EditorWallSegmentType = BIT(3),
    SpawnType = BIT(13),
    FlagSpawnType = BIT(11),
-   PolyWallType = BIT(25)
+   PolyWallType = BIT(25),
+   AsteroidSpawnType = BIT(18)
 };
 
 const S32 gSpyBugRange = 300;     // How far can a spy bug see?

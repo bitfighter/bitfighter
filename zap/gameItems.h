@@ -53,7 +53,17 @@ public:
 
    TNL_DECLARE_CLASS(RepairItem);
 
-   ///// Lua Interface
+   ///// Editor methods
+   const char *getEditorHelpString() { return "Repairs damage to ships. [B]"; }
+   const char *getPrettyNamePlural() { return "Repair items"; }
+   const char *getOnDockName() { return "Repair"; }
+   const char *getOnScreenName() { return "Repair"; }
+
+   virtual S32 getDockRadius() { return 11; }
+   F32 getEditorRadius(F32 currentScale);
+   void renderDock();
+
+   ///// Lua interface
 
    RepairItem(lua_State *L);             //  Lua constructor
 
@@ -85,6 +95,13 @@ public:
    void renderItem(Point pos);
 
    TNL_DECLARE_CLASS(EnergyItem);
+
+   ///// Editor methods
+   const char *getEditorHelpString() { return "Restores energy to ships"; }
+   const char *getPrettyNamePlural() { return "Energy items"; }
+   const char *getOnDockName() { return "Energy"; }
+   const char *getOnScreenName() { return "Energy"; }
+
 
    ///// Lua Interface
 
@@ -121,7 +138,7 @@ static const S8 AsteroidCoords[AsteroidDesigns][AsteroidPoints][2] =   // <== Wo
 };
 
 
-class Asteroid : public Item
+class Asteroid : public EditorItem
 {
 
 typedef Item Parent;
@@ -154,6 +171,16 @@ public:
 
    TNL_DECLARE_CLASS(Asteroid);
 
+   ///// Editor methods
+   const char *getEditorHelpString() { return "Shootable asteroid object.  Just like the arcade game."; }
+   const char *getPrettyNamePlural() { return "Asteroids"; }
+   const char *getOnDockName() { return "Ast."; }
+   const char *getOnScreenName() { return "Asteroid"; }
+
+      //virtual S32 getDockRadius() { return 11; }
+   F32 getEditorRadius(F32 currentScale);
+   void renderDock();
+
    ///// Lua interface
 
    public:
@@ -174,24 +201,108 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class AsteroidSpawn     // Essentially the same as a FlagSpawn... merge classes?
+// Parent class for spawns that generate items
+class AbstractSpawn : public EditorPointObject
 {
-private:
+   typedef EditorObject Parent;
+
+protected:
    Point mPos;
+   S32 mSpawnTime;
+
+   void setRespawnTime(S32 time);
 
 public:
-   static const S32 defaultRespawnTime = 30;    // in seconds
+   AbstractSpawn(const Point &pos = Point(), S32 time = 0, GameObjectType objType = UnknownType); // Constructor
 
-   AsteroidSpawn(Point pos, S32 delay);  // C++ constructor (no lua constructor)
    Point getPos() { return mPos; }
    Timer timer;
+   
+   bool processArguments(S32 argc, const char **argv);
+
+   ///// Editor methods
+   virtual const char *getEditorHelpString() = 0;
+   virtual const char *getPrettyNamePlural() = 0;
+   virtual const char *getOnDockName() = 0;
+   virtual const char *getOnScreenName() = 0;
+
+   virtual const char *getClassName() = 0;
+
+   virtual S32 getDefaultRespawnTime() = 0;
+
+   string toString();
+
+   F32 getEditorRadius(F32 currentScale);
+
+   virtual void renderEditor(F32 currentScale) = 0;
+   virtual void renderDock() = 0;
+
+   //// PointObject methods     ==> TODO: Make this an interface
+   Point getVert(S32 index) { return mPos; }
+   //S32 getVertCount() { return 1; }
+   //void clearVerts() { /* Do nothing */ }
+   void setVert(const Point &point, S32 index) { mPos = point; }
+   //void addVert(const Point &point)  { /* Do nothing */ }
+   //void addVertFront(Point vert)  { /* Do nothing */ }
+   //void deleteVert(S32 vertIndex)  { /* Do nothing */ }
+   //void insertVert(Point vertex, S32 vertIndex)  { /* Do nothing */ }
+   //GeomType getGeomType() { return geomPoint; }
+   //void addToDock(Game *game, const Point &point);
 };
 
 
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class Worm : public Item
+class AsteroidSpawn : public AbstractSpawn    
+{
+public:
+   static const S32 DEFAULT_RESPAWN_TIME = 30;    // in seconds
+
+   AsteroidSpawn(const Point &pos = Point(), S32 time = DEFAULT_RESPAWN_TIME);  // C++ constructor (no lua constructor)
+
+   const char *getEditorHelpString() { return "Periodically spawns a new asteroid."; }
+   const char *getPrettyNamePlural() { return "Asteroid spawn points"; }
+   const char *getOnDockName() { return "ASP"; }
+   const char *getOnScreenName() { return "AsteroidSpawn"; }
+
+   const char *getClassName() { return "AsteroidSpawn"; }
+
+   S32 getDefaultRespawnTime() { return DEFAULT_RESPAWN_TIME; }
+
+   void renderEditor(F32 currentScale);
+   void renderDock();
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+class FlagSpawn : public AbstractSpawn
+{
+public:
+   static const S32 DEFAULT_RESPAWN_TIME = 30;    // in seconds
+
+   FlagSpawn(const Point &pos = Point(), S32 time = DEFAULT_RESPAWN_TIME);  // C++ constructor (no lua constructor)
+
+   const char *getEditorHelpString() { return "Location where flags (or balls in Soccer) spawn after capture."; }
+   const char *getPrettyNamePlural() { return "Flag spawn points"; }
+   const char *getOnDockName() { return "FlagSpawn"; }
+   const char *getOnScreenName() { return "FlagSpawn"; }
+
+   const char *getClassName() { return "FlagSpawn"; }
+
+   S32 getDefaultRespawnTime() { return DEFAULT_RESPAWN_TIME; }
+
+   void renderEditor(F32 currentScale);
+   void renderDock();
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+class Worm : public Item      // But not an editor object!!  -- should be a Projectile?
 {
 typedef Item Parent;
 
@@ -219,13 +330,14 @@ public:
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
    TNL_DECLARE_CLASS(Worm);
+
 };
 
 
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class TestItem : public Item
+class TestItem : public EditorItem
 {
    typedef Item Parent;
 
@@ -239,6 +351,15 @@ public:
    bool getCollisionPoly(Vector<Point> &polyPoints);
 
    TNL_DECLARE_CLASS(TestItem);
+
+   ///// Editor methods
+   const char *getEditorHelpString() { return "Bouncy object that floats around and gets in the way."; }
+   const char *getPrettyNamePlural() { return "TestItems"; }
+   const char *getOnDockName() { return "Test"; }
+   const char *getOnScreenName() { return "TestItem"; }
+
+   F32 getEditorRadius(F32 currentScale);
+   void renderDock();
 
    ///// Lua Interface
 
@@ -256,7 +377,7 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class ResourceItem : public Item
+class ResourceItem : public EditorItem
 {
    typedef Item Parent;
 
@@ -271,6 +392,16 @@ public:
    void onItemDropped();
 
    TNL_DECLARE_CLASS(ResourceItem);
+
+   ///// Editor methods
+   const char *getEditorHelpString() { return "Small bouncy object; capture one to activate Engineer module"; }
+   const char *getPrettyNamePlural() { return "ResourceItems"; }
+   const char *getOnDockName() { return "Res."; }
+   const char *getOnScreenName() { return "ResourceItem"; }
+
+      //virtual S32 getDockRadius() { return 11; }
+   //F32 getEditorRadius(F32 currentScale);
+   void renderDock();
 
    ///// Lua Interface
 

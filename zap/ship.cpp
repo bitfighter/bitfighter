@@ -43,6 +43,7 @@
 #include "config.h"
 #include "statistics.h"
 #include "SlipZone.h"
+#include "robot.h"            // For EventManager def
 
 #include "stringUtils.h"      // For itos
 
@@ -1536,7 +1537,7 @@ void Ship::render(S32 layerIndex)
 
       glEnableBlend;
       F32 textAlpha = 0.5 * alpha;
-      U32 textSize = 14;
+      S32 textSize = 14;
 #ifdef TNL_OS_XBOX
       textAlpha *= 1 - gClientGame->getCommanderZoomFraction();
       textSize = 23;

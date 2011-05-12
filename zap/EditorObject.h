@@ -64,14 +64,13 @@ extern enum GameItems;
 class EditorObject : virtual public XObject   // Interface class  -- All editor objects need to implement this
 {
 private:
-   Vector<Point> mPoints;     // TODO: GET RID OF THIS!!!
-   Vector<Point> mPolyFill;   // Polygons only
-   Point mCentroid;
+   //Vector<Point> mPoints;     // TODO: GET RID OF THIS!!!
+   //Vector<Point> mPolyFill;   // Polygons only
+   //Point mCentroid;
    S32 mWidth;    // Walls, lines only
 
    S32 mVertexLitUp;
 
-   Color getTeamColor(S32 teamId);
    bool mIsBeingEdited;
 
 protected:
@@ -86,6 +85,7 @@ protected:
    S32 mSerialNumber;   // Autoincremented serial number    TODO: Still used?
    S32 mItemId;         // Item's unique id... 0 if there is none
 
+   Color getTeamColor(S32 teamId);
    Color getDrawColor();
 
 public:
@@ -103,14 +103,26 @@ public:
 
    EditorObject *newCopy();         // Copies object
 
-   void addToEditor(Game *game);
-   void addToDock(Game *game);
+   virtual void addToEditor(Game *game);
+   virtual void addToDock(Game *game, const Point &point);
+
+
+    void renderDockItemLabel(const Point &pos, const char *label, F32 yOffset = 0);    // This could be moved anywhere... it's essentially a static method
 
    // Offset lets us drag an item out from the dock by an amount offset from the 0th vertex.  This makes placement seem more natural.
-   virtual Point getInitialPlacementOffset() { return Point(0,0); }
-   virtual void renderEditor(F32 currentScale);
+   virtual Point getInitialPlacementOffset(F32 gridSize) { return Point(0,0); }
 
-   virtual F32 getEditorRenderScaleFactor(F32 mCurrentScale) { return 1; }
+   void renderAndLabelHighlightedVertices(F32 currentScale);   // Render selected and highlighted vertices, called from renderEditor
+   virtual void renderItemText(const char *text, S32 offset, F32 currentScale) { };    // Render some text, with specified vertical offset
+   virtual void renderEditor(F32 currentScale) { TNLAssert(false, "renderEditor not implemented!"); }
+
+   Point convertLevelToCanvasCoord(const Point &pt);
+
+   // Should we show item attributes when it is selected? (only overridden by TextItem)
+   virtual bool showAttribsWhenSelected() { return true; }                             
+
+   virtual F32 getEditorRenderScaleFactor(F32 mCurrentScale) { return 1; }             // Only overridden for point items
+   virtual void renderAttribs(F32 currentScale);
 
    //// Is item sufficiently snapped?  only for turrets and forcefields
    // TODO: Move to turret/ff objects
@@ -121,8 +133,8 @@ public:
    WallSegment *forceFieldMountSegment;   // Segment where forcefield is mounted in editor
    WallSegment *forceFieldEndSegment;     // Segment where forcefield terminates in editor
 
-   Point getCentroid() { return mCentroid; }    // only for polygons
-   void setCentroid(const Point &centroid) { mCentroid = centroid; }
+   //Point getCentroid() { return mCentroid; }    // only for polygons
+   //void setCentroid(const Point &centroid) { mCentroid = centroid; }
 
    void unselect();
 
@@ -141,17 +153,22 @@ public:
    // and these functions specify how big those boxes should be.  Override if implementing a non-standard sized item.
    // (strictly speaking, only getEditorRadius needs to be public, but it make sense to keep these together organizationally.)
    virtual S32 getDockRadius() { return 10; }                     // Size of object on dock 
-   virtual S32 getEditorRadius(F32 currentScale) { return 10; }   // Size of object in editor 
+   virtual F32 getEditorRadius(F32 currentScale) { return 10; }   // Size of object in editor 
    virtual const char *getVertLabel(S32 index) { return ""; }     // Label for vertex, if any... only overridden by SimpleLine objects
 
 
    void saveItem(FILE *f);
-   virtual string toString() { TNLAssert(false, "UNIMPLEMENTED!"); /* TODO: =0 */ }
+   virtual string toString() = 0; 
 
    Vector<Point> extendedEndPoints;                            // these are computed but not stored in barrier... not sure how to merge
 
-   virtual void renderDock();
+   // Dock item rendering methods
+   virtual void renderDock() { TNLAssert(false, "renderDock not implemented!"); };
+   virtual void labelDockItem();
+   virtual void highlightDockItem();
+
    void renderLinePolyVertices(F32 scale, F32 alpha = 1.0);    // Only for polylines and polygons  --> move there
+  
 
    // TODO: Get rid of this ==> most of this code already in polygon
    void initializePolyGeom();     // Once we have our points, do some geom preprocessing ==> only for polygons
@@ -174,25 +191,23 @@ public:
 
    //////
    // Vertex management functions
-      /////  ToDO: Move this into all objects
-   Vector<Point> mVerts;
+   virtual Vector<Point> getVerts();    // Return basic geometry points for object
+   virtual Point getVert(S32 index) = 0;
+   virtual S32 getVertCount() = 0;
+   virtual void clearVerts() = 0;
 
-   virtual Vector<Point> getVerts() { return mPoints; };    // Return basic geometry points for object
-   virtual Point getVert(S32 index) { return mPoints[index]; }
-   virtual S32 getVertCount() { return mPoints.size(); }
-   virtual void clearVerts() { mPoints.clear(); }           // Only for splittable things?
+   virtual void setVert(const Point &point, S32 index) = 0;
+   virtual void addVert(const Point &point) = 0;
+   virtual void addVertFront(Point vert) = 0;
+   virtual void deleteVert(S32 vertIndex) = 0;
+   virtual void insertVert(Point vertex, S32 vertIndex) = 0;
+
 
    bool anyVertsSelected() { return mAnyVertsSelected; }
    void setAnyVertsSelected(bool anySelected) { mAnyVertsSelected = anySelected; }
 
-   virtual void setVert(const Point &point, S32 index);
-   virtual void addVert(const Point &point);
-   virtual void addVertFront(Point vert);
-   virtual void deleteVert(S32 vertIndex);
-   virtual void insertVert(Point vertex, S32 vertIndex);
-
-   virtual Vector<Point> *getPolyFillPoints() { return &mPolyFill; }
-   virtual void clearPolyFillPoints() { mPolyFill.clear(); }
+   //virtual Vector<Point> *getPolyFillPoints() { return &mPolyFill; }
+   //virtual void clearPolyFillPoints() { mPolyFill.clear(); }
 
    void renderPolylineCenterline(F32 alpha);    // Draw barrier centerlines; wraps renderPolyline()  ==> lineItem, barrierMaker only
 
@@ -291,11 +306,14 @@ public:
    virtual bool canBeHostile();
    virtual bool canBeNeutral();
    virtual bool hasTeam();
-   virtual const char *getEditorHelpString();     
    virtual bool EditorObject::getSpecial();   
-   virtual const char *getPrettyNamePlural();     
-   virtual const char *getOnDockName();     
-   virtual const char *getOnScreenName();   
+
+   virtual const char *getEditorHelpString() = 0;     
+   virtual const char *getPrettyNamePlural() = 0;
+   virtual const char *getOnDockName() = 0;
+   virtual const char *getOnScreenName() = 0;   
+
+   virtual const char *getInstructionMsg() { return ""; }      // Message printed below item when it is selected
 
    virtual EditorAttributeMenuUI *getAttributeMenu() { return NULL; }    // Override if child class has an attribute menu
 

@@ -107,7 +107,7 @@ public:
    ///// Editor Methods
    Color getEditorRenderColor() { return Color(0,1,0); }
 
-   void renderEditorItem(F32 currentScale);
+   void renderEditorItem();
 
    Point getVert(S32 index) { return index == 0 ? mPos : mDest; }
    void setVert(const Point &point, S32 index) { if(index == 0) mPos = point; else mDest = point; }
