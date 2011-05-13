@@ -2429,7 +2429,7 @@ void GameUserInterface::VoiceRecorder::process()
    if(sendBuffer.isValid())
    {
       GameType *gt = gClientGame->getGameType();
-      if(gt)
+      if(gt && sendBuffer->getBufferSize() < 1024)      // don't try to send too big.
          gt->c2sVoiceChat(gIniSettings.echoVoice, sendBuffer);
    }
 }

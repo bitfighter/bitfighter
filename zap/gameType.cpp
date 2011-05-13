@@ -2174,9 +2174,9 @@ S32 GameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S3
          case KilledByAsteroid:  // Fall through OK
          case KilledByTurret:    // Fall through OK
          case KillSelf:
-            return 0;
+            return -1;           // was zero in 015a
          case KillTeammate:
-            return 0;
+            return -1;
          case KillEnemyTurret:
             return 0;
          case KillOwnTurret:
@@ -2196,7 +2196,7 @@ S32 GameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S3
          case KillSelf:
             return -1;
          case KillTeammate:
-            return 0;
+            return -1;
          case KillEnemyTurret:
             return 0;
          case KillOwnTurret:
