@@ -29,6 +29,54 @@
 
 namespace TNL {
 
+void ByteBuffer::newByteBuffer(U32 bufferSize)
+{
+   if(mOwnsMemory)
+   {
+      mOwnsMemory = false;
+      free(mDataPtr);
+      mOwnsMemory = true;
+   }
+   mBufSize = bufferSize;
+   mDataPtr = (U8 *) malloc(bufferSize);
+}
+
+bool ByteBuffer::resize(U32 newBufferSize)
+{
+   if(mBufSize >= newBufferSize)
+      mBufSize = newBufferSize;
+   else if(mOwnsMemory)
+   {
+      mBufSize = newBufferSize;
+      mDataPtr = (U8 *) realloc(mDataPtr, newBufferSize);
+      return true;
+   }
+   return false;
+}
+
+
+bool ByteBuffer::appendBuffer(const U8 *dataBuffer, U32 bufferSize)
+{
+   U32 start = mBufSize;
+   if(!resize(mBufSize + bufferSize))
+      return false;
+   memcpy(mDataPtr + start, dataBuffer, bufferSize);
+   return true;
+}
+
+
+void ByteBuffer::takeOwnership()
+{
+   if(!mOwnsMemory)
+   {
+      U8 *memPtr = (U8 *) malloc(mBufSize);
+      memcpy(memPtr, mDataPtr, mBufSize);
+      mDataPtr = memPtr;
+      mOwnsMemory = true;
+   }
+}
+
+
 RefPtr<ByteBuffer> ByteBuffer::encodeBase64() const
 {
    unsigned long outLen = ((getBufferSize() / 3) + 1) * 4 + 4 + 1;
