@@ -2529,6 +2529,9 @@ GAMETYPE_RPC_S2C(GameType, s2cAddTeam, (StringTableEntry teamName, F32 r, F32 g,
 
 GAMETYPE_RPC_S2C(GameType, s2cSetTeamScore, (RangedU32<0, GameType::gMaxTeams> teamIndex, U32 score), (teamIndex, score))
 {
+   TNLAssert(teamIndex < U32(mTeams.size()), "teamIndex out of range")
+   if(teamIndex >= U32(mTeams.size()))
+      return;
    mTeams[teamIndex].setScore(score);
    updateLeadingTeamAndScore();    
 }

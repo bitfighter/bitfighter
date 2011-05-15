@@ -307,7 +307,9 @@ void GhostConnection::writePacket(BitStream *bstream, PacketNotify *pnotify)
    bstream->writeInt(sendSize - 3, 3); // 0-7 3 bit number
 
    U32 count = 0;
-   // 
+#ifdef TNL_ENABLE_ASSERTS
+   bool debug_have_something_to_send = false;
+#endif
    for(S32 i = mGhostZeroUpdateIndex - 1; i >= 0 && !bstream->isFull(); i--)
    {
       GhostInfo *walk = mGhostArray[i];
@@ -355,12 +357,16 @@ void GhostConnection::writePacket(BitStream *bstream, PacketNotify *pnotify)
 
       // check for packet overrun, and rewind this update if there
       // was one:
-      if(bstream->getBitSpaceAvailable() < MinimumPaddingBits)
+      if(bstream->getBitPosition() >= U32(MaxPacketDataSize)*8 - MinimumPaddingBits)
       {
+         TNLAssert(debug_have_something_to_send, "Packet too big to send");
          bstream->setBitPosition(updateStart);
          bstream->clearError();
          break;
       }
+#ifdef TNL_ENABLE_ASSERTS
+      debug_have_something_to_send = true;
+#endif
 
       // otherwise, create a record of this ghost update and
       // attach it to the packet.

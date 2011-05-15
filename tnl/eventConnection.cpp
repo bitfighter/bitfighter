@@ -257,6 +257,9 @@ void EventConnection::writePacket(BitStream *bstream, PacketNotify *pnotify)
 
    EventNote *packQueueHead = NULL, *packQueueTail = NULL;
 
+#ifdef TNL_ENABLE_ASSERTS
+   bool debug_have_something_to_send = false;
+#endif
    while(mUnorderedSendEventQueueHead)
    {
       if(bstream->isFull())
@@ -279,13 +282,17 @@ void EventConnection::writePacket(BitStream *bstream, PacketNotify *pnotify)
       if(mConnectionParameters.mDebugObjectSizes)
          bstream->writeIntAt(bstream->getBitPosition(), BitStreamPosBitSize, start);
 
-      if(bstream->getBitSpaceAvailable() < MinimumPaddingBits)
+      if(bstream->getBitPosition() >= U32(MaxPacketDataSize)*8 - MinimumPaddingBits)
       {
          // rewind to before the event, and break out of the loop:
+         TNLAssert(debug_have_something_to_send, "Packet too big to send");
          bstream->setBitPosition(start - 1);
          bstream->clearError();
          break;
       }
+#ifdef TNL_ENABLE_ASSERTS
+      debug_have_something_to_send = true;
+#endif
 
       // dequeue the event and add this event onto the packet queue
       mUnorderedSendEventQueueHead = ev->mNextEvent;
@@ -335,13 +342,17 @@ void EventConnection::writePacket(BitStream *bstream, PacketNotify *pnotify)
       if(mConnectionParameters.mDebugObjectSizes)
          bstream->writeIntAt(bstream->getBitPosition(), BitStreamPosBitSize, start - BitStreamPosBitSize);
 
-      if(bstream->getBitSpaceAvailable() < MinimumPaddingBits)
+      if(bstream->getBitPosition() >= U32(MaxPacketDataSize)*8 - MinimumPaddingBits)
       {
+         TNLAssert(debug_have_something_to_send, "Packet too big to send");
          // rewind to before the event, and break out of the loop:
          bstream->setBitPosition(eventStart);
          bstream->clearError();
          break;
       }
+#ifdef TNL_ENABLE_ASSERTS
+      debug_have_something_to_send = true;
+#endif
 
       // dequeue the event:
       mSendEventQueueHead = ev->mNextEvent;      
