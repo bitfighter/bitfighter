@@ -449,7 +449,7 @@ void SoccerBallItem::damageObject(DamageInfo *theInfo)
          Projectile *p = dynamic_cast<Projectile *>(theInfo->damagingObject);
          Ship *ship = dynamic_cast<Ship *>(p->mShooter.getPointer());
          mLastPlayerTouch = ship ? ship : NULL;    // If shooter was a turret, say, we'd expect s to be NULL.
-         mLastPlayerTouchTeam = p->mShooter->getTeam(); // no more NO_TEAM. Turret is in a team, and can be used to credit a team.
+         mLastPlayerTouchTeam = (p && p->mShooter) ? p->mShooter->getTeam() : NULL; // no more NO_TEAM. Turret is in a team, and can be used to credit a team.
          mLastPlayerTouchName = ship ? ship->getName() : StringTableEntry(NULL);
       }
       else
