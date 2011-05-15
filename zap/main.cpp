@@ -994,7 +994,10 @@ void onExit()
 {
    endGame();
 
-   delete gClientGame;     // Has effect of disconnecting from master
+   if(gClientGame)
+      delete gClientGame;     // Has effect of disconnecting from master
+   if(gServerGame)
+      delete gServerGame;     // Has effect of disconnecting from master
 
    OGLCONSOLE_Quit();
    SoundSystem::shutdown();

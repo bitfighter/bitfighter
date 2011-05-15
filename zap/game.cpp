@@ -1291,17 +1291,16 @@ void ServerGame::gameEnded()
 
 S32 ServerGame::addLevelInfo(const char *filename, LevelInfo &info)
 {
+   if(info.levelName == StringTableEntry(""))
+      info.levelName = filename;
+
+   info.levelFileName = filename; //strictjoindir(gConfigDirs.levelDir, filename).c_str();
 
    for(S32 i=0; i<mLevelInfos.size(); i++)
    {
       if(mLevelInfos[i].levelFileName == info.levelFileName)
          return i;
    }
-
-   if(info.levelName == StringTableEntry(""))
-      info.levelName = filename;
-
-   info.levelFileName = filename; //strictjoindir(gConfigDirs.levelDir, filename).c_str();
 
    mLevelInfos.push_back(info);
    for(GameConnection *walk = GameConnection::getClientList(); walk; walk = walk->getNextClient())
