@@ -2422,7 +2422,7 @@ GAMETYPE_RPC_S2C(GameType, s2cAddClient,
    cref->isAdmin = admin;
    cref->isRobot = isRobot;
 
-   cref->decoder = new LPC10VoiceDecoder();
+   cref->decoder = new SpeexVoiceDecoder();
    cref->voiceSFX = new SoundEffect(SFXVoice, NULL, 1, Point(), Point());
 
    mClientList.push_back(cref);

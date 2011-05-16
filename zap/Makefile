@@ -19,7 +19,7 @@
 
 OPTIMIZE=-O2
 DEBUG=-g
-INCLUDES=-I../tnl -I../glut -I../openal -I../Triangle -I../recast -I../clipper -I../alure
+INCLUDES=-I../tnl -I../glut -I../openal -I../Triangle -I../recast -I../clipper -I../alure -I../libspeex
 CC=gcc $(DEBUG) $(INCLUDES) -DTNL_ENABLE_LOGGING -W $(OPTIMIZE)
 THREADLIB= -lpthread
 GLUT=-lGL -lGLU -lglut
@@ -130,7 +130,7 @@ OBJECTS_ZAP=\
 CFLAGS=
 DFLAGS=
 EXEFILE=bitfighter
-OPENAL=-lopenal -lalut
+OPENAL=-lopenal -lspeex
 WFLAGS=
 LFLAGS=-lstdc++ -lm -ldl -lX11
 

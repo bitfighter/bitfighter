@@ -26,11 +26,9 @@
 #ifndef _VOICECODEC_H_
 #define _VOICECODEC_H_
 
-#ifndef _TNL_BYTEBUFFER_H_
-
 #include "../tnl/tnlByteBuffer.h"
 
-#endif
+#include "speex/speex.h"
 
 using namespace TNL;
 
@@ -119,6 +117,39 @@ class GSMVoiceDecoder : public VoiceDecoder
 public:
    GSMVoiceDecoder();
    ~GSMVoiceDecoder();
+};
+
+/// The SpeexVoiceEncoder class implements the Speex codec
+/// compressor.
+class SpeexVoiceEncoder : public VoiceEncoder
+{
+   SpeexBits speexBits;
+   static const U32 maxFrameByteSize = 33;  // don't go to high or ByteBuffer will break
+
+   void *encoderState;
+   U32 getSamplesPerFrame();
+   U32 getMaxCompressedFrameSize();
+   U32 compressFrame(S16 *samplePtr, U8 *outputPtr);
+public:
+   SpeexVoiceEncoder();
+   ~SpeexVoiceEncoder();
+};
+
+/// The SpeexVoiceDecoder class implements the Speex codec
+/// decompressor.
+class SpeexVoiceDecoder : public VoiceDecoder
+{
+   SpeexBits speexBits;
+   static const U32 maxFrameByteSize = 33;
+
+   void *decoderState;
+   U32 getSamplesPerFrame();
+   U32 getAvgCompressedFrameSize();
+
+   U32 decompressFrame(S16 *framePtr, U8 *inputPtr, U32 inSize);
+public:
+   SpeexVoiceDecoder();
+   ~SpeexVoiceDecoder();
 };
 
 };

@@ -2285,7 +2285,7 @@ GameUserInterface::VoiceRecorder::VoiceRecorder()
    mRecordingAudio = false;
    mMaxAudioSample = 0;
    mMaxForGain = 0;
-   mVoiceEncoder = new LPC10VoiceEncoder;
+   mVoiceEncoder = new SpeexVoiceEncoder;
 }
 
 GameUserInterface::VoiceRecorder::~VoiceRecorder()
