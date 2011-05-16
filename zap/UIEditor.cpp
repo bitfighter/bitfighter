@@ -161,14 +161,16 @@ void EditorUserInterface::populateDock()
       yPos += spacer;
 
       /*
-      mDockItems.push_back(WorldItem(ItemForceField, Point(xPos, yPos), mCurrentTeam, true, 0, 0));
-      yPos += spacer;
       mDockItems.push_back(WorldItem(ItemSpawn, Point(xPos, yPos), mCurrentTeam, true, 0, 0));
       yPos += spacer;
-      mDockItems.push_back(WorldItem(ItemTurret, Point(xPos, yPos), mCurrentTeam, true, 0, 0));
-      yPos += spacer;
        */
-      
+
+      addDockObject(new ForceFieldProjector(), xPos, yPos);
+      yPos += spacer;
+
+      addDockObject(new Turret(), xPos, yPos);
+      yPos += spacer;
+
       addDockObject(new Teleporter(), xPos, yPos);
       yPos += spacer;
 
@@ -191,11 +193,7 @@ void EditorUserInterface::populateDock()
       addDockObject(new Mine(), xPos - 10, yPos);
       addDockObject(new SpyBug(), xPos + 10, yPos);
       yPos += spacer;
-      /*
-      mDockItems.push_back(WorldItem(ItemMine, Point(xPos - 10, yPos), mCurrentTeam, true, 0, 0));
-      mDockItems.push_back(WorldItem(ItemSpyBug, Point(xPos + 10, yPos), mCurrentTeam, true, 0, 0));
-      yPos += spacer;
-*/
+
       // These two will share a line
       addDockObject(new Asteroid(), xPos - 10, yPos);
       addDockObject(new AsteroidSpawn(), xPos + 10, yPos);
@@ -329,28 +327,6 @@ void EditorUserInterface::renderPolyline(const Vector<Point> verts)
 }
 
 
-static void drawLetter(char letter, const Point &pos, const Color &color, F32 alpha)
-{
-   // Mark the item with a letter, unless we're showing the reference ship
-   S32 vertOffset = 8;
-   if (letter >= 'a' && letter <= 'z')    // Better position lowercase letters
-      vertOffset = 10;
-
-   glColor(color, alpha);
-   F32 xpos = pos.x - UserInterface::getStringWidthf(15, "%c", letter) / 2;
-
-   UserInterface::drawStringf(xpos, pos.y - vertOffset, 15, "%c", letter);
-}
-
-
-static void renderGenericItem(const Point &pos, const Color &c, F32 alpha, const Color &letterColor, char letter)
-{
-   glColor(c, alpha);
-   drawFilledSquare(pos, 8);  // Draw filled box in which we'll put our letter
-   drawLetter(letter, pos, letterColor, alpha);
-}
-
-
 extern Color gNeutralTeamColor;
 extern Color gHostileTeamColor;
 
@@ -375,7 +351,7 @@ inline Point convertLevelToCanvasCoord(const Point &point, bool convert = true)
 static EditorObject *newEditorObject(const char *className)
 {
    Object *theObject = Object::create(className);        // Create an object of the specified type
-   TNLAssert(dynamic_cast<EditorObject *>(theObject), "invalid object!");
+   TNLAssert(dynamic_cast<EditorObject *>(theObject), "This is not an EditorObject!");
 
    return dynamic_cast<EditorObject *>(theObject);       // Force our new object to be an EditorObject
 }
@@ -1718,13 +1694,13 @@ void EditorUserInterface::render()
    
    // Render polyWall item fill just before rendering regular walls.  This will create the effect of all walls merging together.  
    // PolyWall outlines are already part of the wallSegmentManager, so will be rendered along with those of regular walls.
-   //glPushMatrix();  
-   //   setLevelToCanvasCoordConversion();
+   glPushMatrix();  
+      setLevelToCanvasCoordConversion();
    //   for(S32 i = 0; i < mItems.size(); i++)
    //      if(mItems[i]->getObjectTypeMask() & PolyWallType)
    //         renderPolygonFill(mItems[i]->getPolyFillPoints(), EDITOR_WALL_FILL_COLOR, 1);
    
-      wallSegmentManager.renderWalls(true, getRenderingAlpha(false/*isScriptItem*/));
+     wallSegmentManager.renderWalls(true, getRenderingAlpha(false/*isScriptItem*/));
    glPopMatrix();
 
    // == Normal items ==
@@ -2527,7 +2503,7 @@ void EditorUserInterface::startDraggingDockItem()
    Point pos = snapPoint(convertCanvasToLevelCoord(mMousePos), true) - item->getInitialPlacementOffset(getGridSize());
    item->moveTo(pos);
       
-   item->setWidth((mDockItems[mDraggingDockItem]->getGeomType() == geomPoly) ? .7 : 1);
+   item->setWidth((mDockItems[mDraggingDockItem]->getGeomType() == geomPoly) ? .7 : 1);      // TODO: Still need this?
 
    item->addToEditor(gEditorGame);
 
@@ -3106,29 +3082,26 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       }
       else     // Start creating a new poly or new polyline (tilda key + right-click ==> start polyline)
       {
-         if(mShowMode != NavZoneMode)     // Unless we're in navZoneMode, that is
+         S32 width;
+
+         if(getKeyState(KEY_TILDE))
          {
-            const char *type;
-            S32 width;
-
-            if(getKeyState(KEY_TILDE))
-            {
-               mCreatingPolyline = true;
-               type = "LineItem";
-               width = 2;
-            }
-            else
-            {
-               mCreatingPoly = true;
-               type = "BarrierMaker";
-               width = Barrier::BarrierWidth;
-            }
-
-            mNewItem = newEditorObject(type);
-            mNewItem->initializeEditor(getGridSize());
-            mNewItem->moveTo(convertCanvasToLevelCoord(mMousePos));
-
+            mCreatingPolyline = true;
+            mNewItem = new LineItem();
+            width = 2;
          }
+         else
+         {
+            mCreatingPoly = true;
+            width = Barrier::BarrierWidth;
+            mNewItem = new WallItem();
+         }
+
+        
+         mNewItem->initializeEditor(getGridSize());
+         mNewItem->setTeam(mCurrentTeam);
+         mNewItem->addVert(snapPoint(convertCanvasToLevelCoord(mMousePos)));
+         mNewItem->setDockItem(false);
       }
    }
    else if(keyCode == MOUSE_LEFT)
@@ -4261,7 +4234,7 @@ void WallSegmentManager::deleteAllSegments()
 }
 
 
-// Delete all wall segments owned by specified owner.
+// Delete all wall segments owned by specified owner
 void WallSegmentManager::deleteSegments(U32 owner)
 {
    S32 count = mWallSegments.size();

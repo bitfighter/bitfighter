@@ -43,33 +43,39 @@ void Polyline::packUpdate(GhostConnection *connection, BitStream *stream)
 }
 
 
-// Read a series of points from a command line, and add them to a Vector of points
-void Polyline::processPolyBounds(S32 argc, const char **argv, S32 firstCoord, F32 gridSize, bool allowFirstAndLastPointToBeEqual)
+// Static version
+void Polyline::readPolyBounds(S32 argc, const char **argv, S32 firstCoord, F32 gridSize, bool allowFirstAndLastPointToBeEqual, Vector<Point> &bounds)
 {
    Point p, lastP;
    
    for(S32 i = firstCoord; i < argc; i += 2)
    {
       // Put a cap on the number of vertices in a polygon
-      if(mPolyBounds.size() >= gMaxPolygonPoints)      // || argc == i + 1 might be needed...
+      if(bounds.size() >= gMaxPolygonPoints)      // || argc == i + 1 might be needed...
          break;
 
       p.set( (F32) atof(argv[i]) * gridSize, (F32) atof(argv[i+1]) * gridSize );
 
    if(i == firstCoord || p != lastP)
-         mPolyBounds.push_back(p);
+         bounds.push_back(p);
 
       lastP.set(p);
    }
 
    // Check if last point was same as first; if so, scrap it
-   if(!allowFirstAndLastPointToBeEqual && mPolyBounds.first() == mPolyBounds.last())
-      mPolyBounds.erase(mPolyBounds.size() - 1);
+   if(!allowFirstAndLastPointToBeEqual && bounds.first() == bounds.last())
+      bounds.erase(bounds.size() - 1);
 }
 
 
+// Read a series of points from a command line, and add them to a Vector of points
+void Polyline::processPolyBounds(S32 argc, const char **argv, S32 firstCoord, F32 gridSize, bool allowFirstAndLastPointToBeEqual)
+{
+   readPolyBounds(argc, argv, firstCoord, gridSize, allowFirstAndLastPointToBeEqual, mPolyBounds);
+}
 
-U32 Polyline::unpackUpdate(GhostConnection *connection, BitStream *stream)
+
+void Polyline::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    U32 size = stream->readEnum(gMaxPolygonPoints) + 1;
 
@@ -80,8 +86,6 @@ U32 Polyline::unpackUpdate(GhostConnection *connection, BitStream *stream)
       stream->read(&p.y);
       mPolyBounds.push_back(p);
    }
-
-   return size;
 }
 
 
@@ -112,33 +116,102 @@ string Polyline::boundsToString(F32 gridSize)
 }
 
 
+/////
+// Point management methods
+
+S32 EditorPolyline::getVertCount() 
+{ 
+   return mPolyBounds.size(); 
+}
+
+
+void EditorPolyline::clearVerts() 
+{ 
+   mPolyBounds.clear(); 
+   mVertSelected.clear(); 
+   onPointsChanged();
+}
+
+
+void EditorPolyline::addVert(const Point &point) 
+{ 
+   mPolyBounds.push_back(point); 
+   mVertSelected.push_back(false); 
+   onPointsChanged();
+}
+
+
+void EditorPolyline::addVertFront(Point vert) 
+{ 
+   mPolyBounds.push_front(vert); 
+   mVertSelected.insert(mVertSelected.begin(), false); 
+   onPointsChanged();
+}
+
+
+void EditorPolyline::deleteVert(S32 vertIndex) 
+{ 
+   mPolyBounds.erase(vertIndex); 
+   mVertSelected.erase(mVertSelected.begin() + vertIndex); 
+   onPointsChanged();
+}
+
+
+void EditorPolyline::insertVert(Point vertex, S32 vertIndex) 
+{ 
+   mPolyBounds.insert(vertIndex); 
+   mPolyBounds[vertIndex] = vertex; 
+                                                  
+   mVertSelected.insert(mVertSelected.begin() + vertIndex, 1, false); 
+   onPointsChanged();
+}
+
+
+Point EditorPolyline::getVert(S32 index) 
+{ 
+   return mPolyBounds[index]; 
+}
+
+
+void EditorPolyline::setVert(const Point &point, S32 index) 
+{ 
+   mPolyBounds[index] = point; 
+   onPointsChanged();
+}
+
+
+void EditorPolyline::onPointsChanged()
+{
+   // Do nothing
+}
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-void Polygon::processPolyBounds(S32 argc, const char **argv, S32 firstCoord, F32 gridSize)
+void EditorPolygon::processPolyBounds(S32 argc, const char **argv, S32 firstCoord, F32 gridSize)
 {
    Parent::processPolyBounds(argc, argv, firstCoord, gridSize, false);
-   onPolygonChanged();
+   onPointsChanged();
 }
 
 
 // If polygon changes shape (really only happens in the editor), we need to update some things
-void Polygon::onPolygonChanged() 
+void EditorPolygon::onPointsChanged() 
 { 
    mCentroid = findCentroid(mPolyBounds); 
    Triangulate::Process(mPolyBounds, mPolyFill);      // Fills mPolyFill from data in mPolyBounds
    mLabelAngle = angleOfLongestSide(mPolyBounds);
 }
 
-
-U32 Polygon::unpackUpdate(GhostConnection *connection, BitStream *stream)
+void EditorPolygon::packUpdate(GhostConnection *connection, BitStream *stream)
 {
-   U32 size = Parent::unpackUpdate(connection, stream);
+   Polyline::packUpdate(connection, stream);
+}
 
-   if(size)
-      onPolygonChanged();
-
-   return size;
+void EditorPolygon::unpackUpdate(GhostConnection *connection, BitStream *stream)
+{
+   Polyline::unpackUpdate(connection, stream);
+   onPointsChanged();
 }
 
 ////////////////////////////////////////
@@ -231,70 +304,6 @@ void EditorPolygon::initializeEditor(F32 gridSize)
 Point EditorPolygon::getInitialPlacementOffset(F32 gridSize)
 { 
    return Point(INITIAL_HEIGHT * gridSize / 2, INITIAL_WIDTH * gridSize / 2); 
-}
-
-
-/////
-// Point management methods
-
-S32 EditorPolygon::getVertCount() 
-{ 
-   return mPolyBounds.size(); 
-}
-
-
-void EditorPolygon::clearVerts() 
-{ 
-   mPolyBounds.clear(); 
-   mVertSelected.clear(); 
-   mCentroid = Point(0,0);
-}
-
-
-void EditorPolygon::addVert(const Point &point) 
-{ 
-   mPolyBounds.push_back(point); 
-   mVertSelected.push_back(false); 
-   onPolygonChanged();
-}
-
-
-void EditorPolygon::addVertFront(Point vert) 
-{ 
-   mPolyBounds.push_front(vert); 
-   mVertSelected.insert(mVertSelected.begin(), false); 
-   onPolygonChanged();
-}
-
-
-void EditorPolygon::deleteVert(S32 vertIndex) 
-{ 
-   mPolyBounds.erase(vertIndex); 
-   mVertSelected.erase(mVertSelected.begin() + vertIndex); 
-   onPolygonChanged();
-}
-
-
-void EditorPolygon::insertVert(Point vertex, S32 vertIndex) 
-{ 
-   mPolyBounds.insert(vertIndex); 
-   mPolyBounds[vertIndex] = vertex; 
-                                                  
-   mVertSelected.insert(mVertSelected.begin() + vertIndex, 1, false); 
-   onPolygonChanged();
-}
-
-
-Point EditorPolygon::getVert(S32 index) 
-{ 
-   return mPolyBounds[index]; 
-}
-
-
-void EditorPolygon::setVert(const Point &point, S32 index) 
-{ 
-   mPolyBounds[index] = point; 
-   onPolygonChanged();
 }
 
 

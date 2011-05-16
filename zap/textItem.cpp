@@ -34,8 +34,6 @@ namespace Zap
 
 TNL_IMPLEMENT_NETOBJECT(TextItem);
 
-// RDW - These need storage, I believe VC++ pukes on this,
-// so I'm #ifdeffing them.
 #ifndef TNL_OS_WIN32
 const U32 TextItem::MAX_TEXT_SIZE;
 const U32 TextItem::MIN_TEXT_SIZE;
@@ -329,13 +327,19 @@ void LineItem::render()
    if( (!ship && mTeam != -1) || (ship && ship->getTeam() != mTeam && mTeam != -1) )
       return;
 
-   GameType *gt = gClientGame->getGameType();
-   TNLAssert(gt, "Invalid gameType in LineItem::render()!");
-
-   glColor(gt->getTeamColor(mTeam));
-
+   glColor(getGame()->getTeamColor(mTeam));
    renderPointVector(mPolyBounds, GL_LINE_STRIP);
 }
+
+
+void LineItem::renderEditor(F32 currentScale)
+{
+   glColor(getGame()->getTeamColor(mTeam));
+   renderPointVector(mPolyBounds, GL_LINE_STRIP);
+
+   renderLinePolyVertices(currentScale);
+}
+
 
 // This object should be drawn below others
 S32 LineItem::getRenderSortValue()
@@ -352,13 +356,18 @@ bool LineItem::processArguments(S32 argc, const char **argv)
       return false;
 
    mTeam = atoi(argv[0]);
-   mWidth = max(min(atoi(argv[1]), static_cast<int>(MAX_LINE_WIDTH)), static_cast<int>(MIN_LINE_WIDTH));
-   //mWidth = min(atoi(argv[1]), static_cast<int>(MAX_LINE_WIDTH));
+   setWidth(max(min(atoi(argv[1]), MAX_LINE_WIDTH), MIN_LINE_WIDTH));
    processPolyBounds(argc, argv, 2, getGame()->getGridSize());
 
    computeExtent();
 
    return true;
+}
+
+
+string LineItem::toString()
+{
+   return string(getClassName()) + " " + itos(mTeam) + " " + itos(getWidth()) + " " + boundsToString(getGame()->getGridSize());
 }
 
 
@@ -413,12 +422,48 @@ void LineItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
    //mWidth = stream->readRangedU32(0, MAX_LINE_WIDTH);
    stream->read(&mTeam);
 
-   if(!Polyline::unpackUpdate(connection, stream))
-      return;
+   Polyline::unpackUpdate(connection, stream);
 
    setExtent(computePolyExtents());
 }
 
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Constructor
+WallItem::WallItem()
+{
+   mObjectTypeMask = BarrierType;
+   setWidth(50 * 256);
+}
+
+
+void WallItem::onGeomChanged()
+{
+   // Fill extendedEndPoints from the vertices of our wall's centerline, or from PolyWall edges
+   processEndPoints();
+
+   //if(getObjectTypeMask() & ItemPolyWall)     // Prepare interior fill triangulation
+   //   initializePolyGeom();          // Triangulate, find centroid, calc extents
+
+   gEditorUserInterface.getWallSegmentManager()->computeWallSegmentIntersections(this);
+
+   gEditorUserInterface.recomputeAllEngineeredItems();      // Seems awfully lazy...  should only recompute items attached to altered wall
+
+   // But if we're doing the above, we don't need to bother with the below... unless we stop being lazy
+   //// Find any forcefields that might intersect our new wall segment and recalc them
+   //for(S32 i = 0; i < gEditorUserInterface.mItems.size(); i++)
+   //   if(gEditorUserInterface.mItems[i]->index == ItemForceField &&
+   //                           gEditorUserInterface.mItems[i]->getExtent().intersects(getExtent()))
+   //      gEditorUserInterface.mItems[i]->findForceFieldEnd();
+}
+
+
+string WallItem::toString()
+{
+   return "BarrierMaker " + itos(S32(F32(mWidth) / F32(getGame()->getGridSize()))) + " " + boundsToString(getGame()->getGridSize());
+}
 
 };
 

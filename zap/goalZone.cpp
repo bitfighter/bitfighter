@@ -202,8 +202,9 @@ void GoalZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    if(stream->readFlag()) 
    {
-      if(Polygon::unpackUpdate(connection, stream))
-         computeExtent();
+      EditorPolygon::unpackUpdate(connection, stream);
+      computeExtent();
+
       stream->read(&mScore);
    }
 

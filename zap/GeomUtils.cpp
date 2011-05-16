@@ -1254,6 +1254,9 @@ bool Triangulate::mergeTriangles(TriangleData& triangleData, rcPolyMesh& mesh, S
 // Derived from formulae here: http://local.wasp.uwa.edu.au/~pbourke/geometry/polyarea/
 Point findCentroid(const Vector<Point> &polyPoints)
 {
+   if(polyPoints.size() == 0)
+      return Point(0,0);
+
    F32 area6 = area(polyPoints) * 6;
    F32 x = 0;
    F32 y = 0;

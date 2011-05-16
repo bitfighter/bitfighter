@@ -32,7 +32,7 @@ namespace Zap
 
 extern S32 gMaxPolygonPoints;
 
-class SlipZone : public GameObject, public Polygon/*, public EditorPolygonObject*/
+class SlipZone : public EditorPolygon
 {
    typedef GameObject Parent;
 
@@ -52,6 +52,19 @@ public:
 
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
+
+   /////
+   // Editor methods
+   const char *getEditorHelpString() { return "Areas of higher than normal inertia."; }
+   const char *getPrettyNamePlural() { return "Inertia zones"; }
+   const char *getOnDockName() { return "Inertia"; }
+   const char *getOnScreenName() { return "Inertia"; }
+   string toString();
+
+
+   /////
+   // Future home for Lua methods
+   GameObject *getGameObject() { return this; }   // Return the underlying GameObject
 
    TNL_DECLARE_CLASS(SlipZone);
 };

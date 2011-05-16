@@ -71,7 +71,7 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class BotNavMeshZone : public GameObject, public Polygon
+class BotNavMeshZone : public GameObject
 {
 private:   
    typedef GameObject Parent;
@@ -91,6 +91,11 @@ public:
    void render(S32 layerIndex);
 
    S32 getRenderSortValue();
+
+   Vector<Point> mPolyBounds;
+   Vector<Point> mPolyFill;
+   Point mCentroid;        
+
 
    // Create objects from parameters stored in level file
    bool processArguments(S32 argc, const char **argv);

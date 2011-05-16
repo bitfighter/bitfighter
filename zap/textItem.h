@@ -137,16 +137,13 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class LineItem : public GameObject, public Polyline
+class LineItem : public EditorPolyline
 {
 private:
    typedef GameObject Parent;
    Vector<Point> mRenderPoints;    // Precomputed points used for rendering linework
 
 public:
-   U32 mWidth;           // Width of line
-   S32 mTeam;            // Team text is visible to (-1 for visible to all)
-   
    LineItem();   // Constructor
 
    void render();
@@ -162,10 +159,48 @@ public:
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
+   /////
+   // Editor methods
+   string toString();
+   void renderEditor(F32 currentScale);
+
+   // Some properties about the item that will be needed in the editor
+   const char *getEditorHelpString() { return "Draws a line on the map.  Visible only to team, or to all if neutral."; }  
+   const char *getPrettyNamePlural() { return "Line Items"; }
+   const char *getOnDockName() { return "LineItem"; }
+   const char *getOnScreenName() { return "Line"; }
+   bool hasTeam() { return true; }
+   bool canBeHostile() { return true; }
+   bool canBeNeutral() { return true; }
+
    static const U32 MIN_LINE_WIDTH = 1;
    static const U32 MAX_LINE_WIDTH = 255;
 
    TNL_DECLARE_CLASS(LineItem);
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// TODO: Don't need this to be a GameObject
+class WallItem : public LineItem
+{
+public:
+   WallItem();    // Constructor
+   virtual void onGeomChanged();
+
+
+   // Some properties about the item that will be needed in the editor
+   const char *getEditorHelpString() { return "Walls define the general form of your level."; }  
+   const char *getPrettyNamePlural() { return "Walls"; }
+   const char *getOnDockName() { return "Wall"; }
+   const char *getOnScreenName() { return "Wall"; }
+   bool hasTeam() { return false; }
+   bool canBeHostile() { return false; }
+   bool canBeNeutral() { return false; }
+
+   string toString();
 };
 
 

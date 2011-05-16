@@ -67,7 +67,7 @@ void LoadoutZone::renderEditor(F32 currentScale)
    if(mSelected || mLitUp)
       renderPolyHighlight();
 
-   renderLinePolyVertices(currentScale, currentScale);
+   renderLinePolyVertices(currentScale);
 }
 
 
@@ -161,7 +161,7 @@ bool LoadoutZone::collide(GameObject *hitObject)
 U32 LoadoutZone::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
    stream->write(mTeam);
-   Polygon::packUpdate(connection, stream);
+   EditorPolygon::packUpdate(connection, stream);
    return 0;
 }
 
@@ -169,8 +169,8 @@ U32 LoadoutZone::packUpdate(GhostConnection *connection, U32 updateMask, BitStre
 void LoadoutZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    stream->read(&mTeam);
-   if(Polygon::unpackUpdate(connection, stream))
-      computeExtent();
+   EditorPolygon::unpackUpdate(connection, stream);
+   computeExtent();
 }
 
 

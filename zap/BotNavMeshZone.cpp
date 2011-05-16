@@ -59,13 +59,14 @@ static const S32 MAX_ZONES = 10000;     // Don't make this go above S16 max - 1 
 TNL_IMPLEMENT_NETOBJECT(BotNavMeshZone);
 
 
+//TODO: Switch this to a pointainer
 Vector<SafePtr<BotNavMeshZone> > gBotNavMeshZones;     // List of all our zones
 
 // Constructor
 BotNavMeshZone::BotNavMeshZone()
 {
    mGame = NULL;
-   mObjectTypeMask = BotNavMeshZoneType | CommandMapVisType;
+   //mObjectTypeMask = BotNavMeshZoneType | CommandMapVisType;
    //  The Zones is now rendered without the network interface, if client is hosting.
    //mNetFlags.set(Ghostable);    // For now, so we can see them on the client to help with debugging... when too many zones causes huge lag
    mZoneId = gBotNavMeshZones.size();
@@ -104,7 +105,7 @@ void BotNavMeshZone::render(S32 layerIndex)
       return;
 
    // TODO: Move to constructor, only doing this when there is a local client?
-   if(getPolyFillPoints()->size() == 0)    // Need to process PolyFill here, rendering server objects into client.  
+   if(mPolyFill.size() == 0)    // Need to process PolyFill here, rendering server objects into client.  
       Triangulate::Process(mPolyBounds, mPolyFill);
 
    if(layerIndex == 0)
@@ -146,7 +147,7 @@ bool BotNavMeshZone::processArguments(S32 argc, const char **argv)
    if(argc < 6)
       return false;
 
-   processPolyBounds(argc, argv, 0, mGame->getGridSize());
+   Polyline::readPolyBounds(argc, argv, 0, mGame->getGridSize(), true, mPolyBounds);
    computeExtent();  // Computes extent so we can insert this into the BotNavMesh object database
    mConvex = isConvex(mPolyBounds);
 
@@ -606,24 +607,17 @@ bool BotNavMeshZone::buildBotMeshZones(Game *game)
 
    if(bounds.getWidth() < U16_MAX && bounds.getHeight() < U16_MAX)
    {
-      //if(bounds.getWidth() >= U16_MAX || bounds.getHeight() >= U16_MAX)
-      //{
-      //   logprintf(LogConsumer::LogWarning, "Cannot create bot zones: level too big!");
-      //   return false;
-      //}
-
       rcPolyMesh mesh;
       mesh.offsetX = -1 * floor(bounds.min.x + 0.5);
       mesh.offsetY = -1 * bounds.min.y;
 
-      // this works because bounds is always passed by reference.  Is this really needed?
+      // This works because bounds is always passed by reference.  Is this really needed?
       bounds.offset(Point(mesh.offsetX, mesh.offsetY));
 
       // Merge!  into convex polygons
       recastPassed = Triangulate::mergeTriangles(triangleData, mesh);
       if(recastPassed)
       {
-
          BotNavMeshZone *botzone = NULL;
    
          const S32 bytesPerVertex = sizeof(U16);      // Recast coords are U16s
@@ -707,7 +701,7 @@ bool BotNavMeshZone::buildBotMeshZones(Game *game)
          botzone->computeExtent();   
 
          if(gClientGame)      // Only triangulate when there is client
-            Triangulate::Process(botzone->mPolyBounds, *botzone->getPolyFillPoints());
+            Triangulate::Process(botzone->mPolyBounds, botzone->mPolyFill);
        }
 
       BotNavMeshZone::buildBotNavMeshZoneConnections();

@@ -120,9 +120,9 @@ bool FlagItem::processArguments(S32 argc, const char **argv)
 
 string FlagItem::toString()
 {
-   Point pos = getActualPos();
+   Point pos = getActualPos() / getGame()->getGridSize();
    char outString[LevelLoader::MAX_LEVEL_LINE_LENGTH];
-   dSprintf(outString, sizeof(outString), "%s %d %g %g", Object::getClassName(), mTeam, pos.x / 255, pos.y / 255);
+   dSprintf(outString, sizeof(outString), "%s %d %g %g", Object::getClassName(), mTeam, pos.x, pos.y);
    return outString;
 }
 

@@ -258,7 +258,7 @@ bool EngineerModuleDeployer::deployEngineeredItem(GameConnection *connection, U3
 
 
 // Constructor
-EngineeredObject::EngineeredObject(S32 team, Point anchorPoint, Point anchorNormal)
+EngineeredObject::EngineeredObject(S32 team, Point anchorPoint, Point anchorNormal, GameObjectType objectType) : EditorPointObject(objectType)
 {
    mHealth = 1.0f;
    mTeam = team;
@@ -306,6 +306,11 @@ bool EngineeredObject::processArguments(S32 argc, const char **argv)
    return true;
 }
 
+
+string EngineeredObject::toString()
+{
+   return string(Object::getClassName()) + " " + (Point(mAnchorPoint) / getGame()->getGridSize()).toString() + " " + itos(mHealRate);
+}
 
 // This is used for both positioning items in-game and for snapping them to walls in the editor --> static method
 // Polulates anchor and normal
@@ -577,13 +582,35 @@ void EngineeredObject::healObject(S32 time)
 }
 
 
+static void drawLetter(char letter, const Point &pos, const Color &color, F32 alpha)
+{
+   // Mark the item with a letter, unless we're showing the reference ship
+   S32 vertOffset = 8;
+   if (letter >= 'a' && letter <= 'z')    // Better position lowercase letters
+      vertOffset = 10;
+
+   glColor(color, alpha);
+   F32 xpos = pos.x - UserInterface::getStringWidthf(15, "%c", letter) / 2;
+
+   UserInterface::drawStringf(xpos, pos.y - vertOffset, 15, "%c", letter);
+}
+
+
+static void renderSquareItem(const Point &pos, const Color &c, F32 alpha, const Color &letterColor, char letter)
+{
+   glColor(c, alpha);
+   drawFilledSquare(pos, 8);  // Draw filled box in which we'll put our letter
+   drawLetter(letter, pos, letterColor, alpha);
+}
+
+
 TNL_IMPLEMENT_NETOBJECT(ForceFieldProjector);
 
 // Constructor
-ForceFieldProjector::ForceFieldProjector(S32 team, Point anchorPoint, Point anchorNormal) : EngineeredObject(team, anchorPoint, anchorNormal)
+ForceFieldProjector::ForceFieldProjector(S32 team, Point anchorPoint, Point anchorNormal) : EngineeredObject(team, anchorPoint, anchorNormal, ForceFieldProjectorType)
 {
    mNetFlags.set(Ghostable);
-   mObjectTypeMask = ForceFieldProjectorType | CommandMapVisType;
+   mObjectTypeMask |= CommandMapVisType;     
 }
 
 void ForceFieldProjector::onDisabled()
@@ -657,7 +684,7 @@ Vector<Point> ForceFieldProjector::getBufferForBotZone()
    Vector<Point> inputPoints, bufferedPoints;
    getCollisionPoly(inputPoints);
 
-   if (isWoundClockwise(inputPoints))
+   if(isWoundClockwise(inputPoints))
       inputPoints.reverse();
 
    offsetPolygon(inputPoints, bufferedPoints, BotNavMeshZone::BufferRadius);
@@ -675,6 +702,20 @@ void ForceFieldProjector::render()
 {
    renderForceFieldProjector(mAnchorPoint, mAnchorNormal, getGame()->getTeamColor(getTeam()), isEnabled());
 }
+
+
+void ForceFieldProjector::renderDock()
+{
+   renderSquareItem(mAnchorPoint, getGame()->getTeamColor(mTeam), 1, white, '>');
+}
+
+
+void ForceFieldProjector::renderEditor(F32 currentScale)
+{
+   renderDock();
+}
+
+
 
 // Lua methods
 
@@ -877,11 +918,11 @@ void ForceField::render()
 TNL_IMPLEMENT_NETOBJECT(Turret);
 
 // Constructor
-Turret::Turret(S32 team, Point anchorPoint, Point anchorNormal) : EngineeredObject(team, anchorPoint, anchorNormal)
+Turret::Turret(S32 team, Point anchorPoint, Point anchorNormal) : EngineeredObject(team, anchorPoint, anchorNormal, TurretType)
 {
+   mObjectTypeMask |= CommandMapVisType;  
    mWeaponFireType = WeaponTurret;
    mNetFlags.set(Ghostable);
-   mObjectTypeMask = TurretType | CommandMapVisType;
    mCurrentAngle = mAnchorNormal.ATAN2();
 }
 
@@ -898,11 +939,12 @@ Vector<Point> Turret::getBufferForBotZone()
    return bufferedPoints;
 }
 
+
 bool Turret::processArguments(S32 argc2, const char **argv2)
 {
    S32 argc1 = 0;
    const char *argv1[128];
-   for(S32 i=0; i<argc2; i++)
+   for(S32 i = 0; i < argc2; i++)
    {
       char c = argv2[i][0];
       switch(c)
@@ -926,6 +968,7 @@ bool Turret::processArguments(S32 argc2, const char **argv2)
          }
       }
    }
+
    bool returnBool = EngineeredObject::processArguments(argc1, argv1);
    mCurrentAngle = mAnchorNormal.ATAN2();
    return returnBool;
@@ -968,6 +1011,18 @@ void Turret::render()
       c = Color(1,1,1);
 
    renderTurret(c, mAnchorPoint, mAnchorNormal, isEnabled(), mHealth, mCurrentAngle);
+}
+
+
+void Turret::renderDock()
+{
+   renderSquareItem(mAnchorPoint, getGame()->getTeamColor(mTeam), 1, white, 'T');
+}
+
+
+void Turret::renderEditor(F32 currentScale)
+{
+   renderDock();
 }
 
 

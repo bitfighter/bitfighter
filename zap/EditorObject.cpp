@@ -37,6 +37,10 @@
 #include "UIEditorMenus.h"       // For EditorAttributeMenuUI def
 
 
+S32 EditorObject::mNextSerialNumber = 0;
+
+
+
 inline F32 getGridSize()
 {
    return gEditorGame->getGridSize();
@@ -154,7 +158,7 @@ static void renderVertex(VertexRenderStyles style, const Point &v, S32 number, F
 
 static void renderVertex(VertexRenderStyles style, const Point &v, S32 number, F32 currentScale, F32 alpha)
 {
-   renderVertex(style, v, number, alpha, currentScale, 5);
+   renderVertex(style, v, number, currentScale, alpha, 5);
 }
 
 
@@ -946,7 +950,7 @@ static EditorObject *getNewEditorObject(EditorObject *obj)
    if(spyBug != NULL)
       return new SpyBug(*spyBug);
 
-   LoadoutZone *loadoutZone= dynamic_cast<LoadoutZone *>(obj);
+   LoadoutZone *loadoutZone = dynamic_cast<LoadoutZone *>(obj);
    if(loadoutZone != NULL)
       return new LoadoutZone(*loadoutZone);
 
@@ -954,9 +958,21 @@ static EditorObject *getNewEditorObject(EditorObject *obj)
    if(goalZone != NULL)
       return new GoalZone(*goalZone);
 
-   HuntersNexusObject *nexus= dynamic_cast<HuntersNexusObject *>(obj);
+   HuntersNexusObject *nexus = dynamic_cast<HuntersNexusObject *>(obj);
    if(nexus != NULL)
       return new HuntersNexusObject(*nexus);
+
+   Turret *turret = dynamic_cast<Turret *>(obj);
+   if(turret != NULL)
+      return new Turret(*turret);
+
+   ForceFieldProjector *projector = dynamic_cast<ForceFieldProjector *>(obj);
+   if(projector != NULL)
+      return new ForceFieldProjector(*projector);
+
+   WallItem *wallItem = dynamic_cast<WallItem *>(obj);
+   if(wallItem != NULL)
+      return new WallItem(*wallItem);
 
    TNLAssert(false, "OBJECT NOT HANDLED IN COPY OPERATION!");
 

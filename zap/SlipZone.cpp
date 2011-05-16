@@ -66,7 +66,7 @@ bool SlipZone::processArguments(S32 argc2, const char **argv2)
    // so a possible future version can add parameters without compatibility problem.
    S32 argc = 0;
    const char *argv[65]; // 32 * 2 + 1 = 65
-   for(S32 i=0; i<argc2; i++)  // the idea here is to allow optional R3.5 for rotate at speed of 3.5
+   for(S32 i = 0; i < argc2; i++)  // the idea here is to allow optional R3.5 for rotate at speed of 3.5
    {
       char c = argv2[i][0];
       //switch(c)
@@ -111,6 +111,12 @@ bool SlipZone::processArguments(S32 argc2, const char **argv2)
 }
 
 
+string SlipZone::toString()
+{
+   return string(getClassName()) + " " + ftos(slipAmount, 3) + " " + boundsToString(getGame()->getGridSize());
+}
+
+
 void SlipZone::onAddedToGame(Game *theGame)
 {
    if(!isGhost())
@@ -149,7 +155,7 @@ bool SlipZone::collide(GameObject *hitObject)
 
 U32 SlipZone::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
-   Polygon::packUpdate(connection, stream);
+   EditorPolygon::packUpdate(connection, stream);
    stream->writeFloat(slipAmount, 8);
    return 0;
 }
@@ -157,8 +163,7 @@ U32 SlipZone::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
 
 void SlipZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
-   if(Polygon::unpackUpdate(connection, stream))
-      computeExtent();
+   EditorPolygon::unpackUpdate(connection, stream);
 
    slipAmount = stream->readFloat(8);
 }

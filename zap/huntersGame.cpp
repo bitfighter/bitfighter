@@ -730,7 +730,7 @@ bool HuntersNexusObject::collide(GameObject *hitObject)
 
 U32 HuntersNexusObject::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
-   Polygon::packUpdate(connection, stream);
+   EditorPolygon::packUpdate(connection, stream);
 
    return 0;
 }
@@ -738,8 +738,8 @@ U32 HuntersNexusObject::packUpdate(GhostConnection *connection, U32 updateMask, 
 
 void HuntersNexusObject::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
-   if(Polygon::unpackUpdate(connection, stream))
-      computeExtent();
+   EditorPolygon::unpackUpdate(connection, stream);      
+   computeExtent();
 }
 
 const char HuntersNexusObject::className[] = "HuntersNexusObject";      // Class name as it appears to Lua scripts

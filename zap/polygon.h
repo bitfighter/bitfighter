@@ -39,8 +39,11 @@ class Polyline
 public:
    Vector<Point> mPolyBounds;
 
+   static void readPolyBounds(S32 argc, const char **argv, S32 firstCoord, F32 gridSize, bool allowFirstAndLastPointToBeEqual, Vector<Point> &bounds);
+
 protected:
-   void packUpdate(GhostConnection *connection, BitStream *stream);
+   virtual void packUpdate(GhostConnection *connection, BitStream *stream);
+   virtual void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
    // Read a series of points from a command line, and add them to a Vector of points
    void processPolyBounds(S32 argc, const char **argv, S32 firstCoord, F32 gridSize, bool allowFirstAndLastPointToBeEqual);
@@ -50,46 +53,18 @@ protected:
       processPolyBounds(argc, argv, firstCoord, gridSize, true);
    }
 
-   U32 unpackUpdate(GhostConnection *connection, BitStream *stream);
+   
    Rect computePolyExtents();
 
    string boundsToString(F32 gridSize);
 };
 
 
-////////////////////////////////////////
-////////////////////////////////////////
-
-class Polygon : public Polyline
+class EditorPolyline : public Polyline, public EditorObject, public GameObject
 {
-protected:
-   Vector<Point> mPolyFill;      // Triangles used for rendering polygon fill
-   Point mCentroid;
-   void processPolyBounds(S32 argc, const char **argv, S32 firstCoord, F32 gridSize);
+   virtual GeomType getGeomType() { return geomLine; }
 
 public:
-   typedef Polyline Parent;
-   F32 mLabelAngle;
-
-   Point getCentroid() { return mCentroid; }
-   void onPolygonChanged();
-
-   Vector<Point> *getPolyFillPoints() { return &mPolyFill; }
-
-   U32 unpackUpdate(GhostConnection *connection, BitStream *stream);
-};
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-// Provide editor related methods to the polygon class
-class EditorPolygon : public Polygon, public EditorObject, public GameObject, public LuaItem
-{
-   typedef EditorObject Parent;
-
-   GeomType getGeomType() { return geomPoly; }
-
    S32 getVertCount();
    void clearVerts();
    void addVert(const Point &point);
@@ -99,9 +74,39 @@ class EditorPolygon : public Polygon, public EditorObject, public GameObject, pu
    Point getVert(S32 index);
    void setVert(const Point &point, S32 index);
 
+   virtual void onPointsChanged();
+
+   //virtual void renderItemText(const char *text, S32 offset, F32 currentScale);
+   //virtual void labelDockItem();
+
+
+   //void addToDock(Game *game, const Point &point);
+   //virtual void renderDock();
+   //void highlightDockItem(); 
+
+   //void initializeEditor(F32 gridSize);
+
+   // Offset lets us drag an item out from the dock by an amount offset from the 0th vertex.  This makes placement seem more natural.
+   //Point getInitialPlacementOffset(F32 gridSize);
+
+protected:
+      void renderPolyHighlight();
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+
+// Provide editor related methods to the polygon class
+class EditorPolygon : virtual public Polygon, public EditorPolyline, public LuaItem
+{
+   typedef EditorPolyline Parent;
+
+   GeomType getGeomType() { return geomPoly; }
+
    virtual void renderItemText(const char *text, S32 offset, F32 currentScale);
    virtual void labelDockItem();
-
 
    void addToDock(Game *game, const Point &point);
    virtual void renderDock();
@@ -113,8 +118,23 @@ class EditorPolygon : public Polygon, public EditorObject, public GameObject, pu
    Point getInitialPlacementOffset(F32 gridSize);
 
 protected:
+      void processPolyBounds(S32 argc, const char **argv, S32 firstCoord, F32 gridSize);
+
       void renderPolyHighlight();
 
+      Vector<Point> mPolyFill;      // Triangles used for rendering polygon fill
+      Point mCentroid;
+
+public:
+   F32 mLabelAngle;
+
+   Point getCentroid() { return mCentroid; }
+   void onPointsChanged();
+
+   Vector<Point> *getPolyFillPoints() { return &mPolyFill; }
+
+   void packUpdate(GhostConnection *connection, BitStream *stream);
+   void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
    /////
    // Former LuaPolygon methods

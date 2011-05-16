@@ -33,7 +33,7 @@
 namespace Zap
 {
 
-class EngineeredObject : public GameObject, public LuaItem
+class EngineeredObject : public GameObject, public EditorPointObject, public LuaItem
 {
 private:
    typedef GameObject Parent;
@@ -58,7 +58,7 @@ protected:
    };
 
 public:
-   EngineeredObject(S32 team = -1, Point anchorPoint = Point(), Point anchorNormal = Point());
+   EngineeredObject(S32 team = -1, Point anchorPoint = Point(), Point anchorNormal = Point(), GameObjectType objectType = UnknownType);
    virtual bool processArguments(S32 argc, const char **argv);
 
    static const S32 MAX_SNAP_DISTANCE = 100;    // Max distance to look for a mount point
@@ -89,7 +89,13 @@ public:
    static DatabaseObject *findAnchorPointAndNormal(GridDatabase *db, const Point &pos, F32 snapDist, 
                                                    bool format, S32 wallType, Point &anchor, Point &normal);
 
+   /////
+   // Editor stuff
+   Point getVert(S32 index) { return mAnchorPoint; }
+   void setVert(const Point &pos, S32 index) { mAnchorPoint = pos; }
+   string toString();
 
+   /////
    // LuaItem interface
    // S32 getLoc(lua_State *L) { }   ==> Will be implemented by derived objects
    // S32 getRad(lua_State *L) { }   ==> Will be implemented by derived objects
@@ -177,8 +183,20 @@ public:
    void onEnabled();
    void onDisabled();
 
-
    TNL_DECLARE_CLASS(ForceFieldProjector);
+
+   // Some properties about the item that will be needed in the editor
+   const char *getEditorHelpString() { return "Creates a force field that lets only team members pass. [F]"; }  
+   const char *getPrettyNamePlural() { return "Force field projectors"; }
+   const char *getOnDockName() { return "ForceFld"; }
+   const char *getOnScreenName() { return "ForceFld"; }
+   bool hasTeam() { return true; }
+   bool canBeHostile() { return true; }
+   bool canBeNeutral() { return true; }
+
+   void renderDock();
+   void renderEditor(F32 currentScale);
+
 
    ///// Lua Interface
 
@@ -242,7 +260,21 @@ public:
 
    TNL_DECLARE_CLASS(Turret);
 
-   ///// Lua Interface
+   /////
+   // Some properties about the item that will be needed in the editor
+   const char *getEditorHelpString() { return "Creates shooting turret.  Can be on a team, neutral, or \"hostile to all\". [Y]"; }  
+   const char *getPrettyNamePlural() { return "Turrets"; }
+   const char *getOnDockName() { return "Turret"; }
+   const char *getOnScreenName() { return "Turret"; }
+   bool hasTeam() { return true; }
+   bool canBeHostile() { return true; }
+   bool canBeNeutral() { return true; }
+
+   void renderDock();
+   void renderEditor(F32 currentScale);
+
+   ///// 
+   //Lua Interface
 
    Turret(lua_State *L);             //  Lua constructor
    static const char className[];

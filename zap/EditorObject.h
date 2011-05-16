@@ -67,11 +67,11 @@ private:
    //Vector<Point> mPoints;     // TODO: GET RID OF THIS!!!
    //Vector<Point> mPolyFill;   // Polygons only
    //Point mCentroid;
-   S32 mWidth;    // Walls, lines only
 
    S32 mVertexLitUp;
 
    bool mIsBeingEdited;
+   static S32 mNextSerialNumber;
 
 protected:
    bool mDockItem;      // True if this item lives on the dock
@@ -82,11 +82,14 @@ protected:
    bool mAnyVertsSelected;
    vector<bool> mVertSelected; 
 
-   S32 mSerialNumber;   // Autoincremented serial number    TODO: Still used?
+   S32 mSerialNumber;   // Autoincremented serial number   
    S32 mItemId;         // Item's unique id... 0 if there is none
 
    Color getTeamColor(S32 teamId);
    Color getDrawColor();
+
+   S32 mWidth;    // Walls, lines only
+
 
 public:
    EditorObject(GameObjectType objectType = UnknownType) 
@@ -98,6 +101,7 @@ public:
       setObjectTypeMask(objectType); 
       mAnyVertsSelected = false; 
       mIsBeingEdited = false;
+      mSerialNumber = mNextSerialNumber++;
    }
    virtual ~EditorObject() { };     // Provide virtual destructor
 
@@ -212,7 +216,10 @@ public:
    void renderPolylineCenterline(F32 alpha);    // Draw barrier centerlines; wraps renderPolyline()  ==> lineItem, barrierMaker only
 
    virtual void onGeomChanging();                        // Item geom is interactively changing
+   virtual void onGeomChanged() { /* To be =0 */ };      // Item changed geometry (or moved), do any internal updating that might be required
+
    virtual void onItemDragging();                        // Item is being dragged around the screen
+
    virtual void onAttrsChanging() { /* Do nothing */ };  // Attr is in the process of being changed (i.e. a char was typed for a textItem)
    virtual void onAttrsChanged() { /* Do nothing */ };   // Attrs changed
 
@@ -291,7 +298,6 @@ public:
    bool isBeingEdited() { return mIsBeingEdited; }
    void setIsBeingEdited(bool isBeingEdited) { mIsBeingEdited = isBeingEdited; }
 
-   virtual void onGeomChanged() { /* To be =0 */ };   // Item changed geometry (or moved), do any internal updating that might be required
 
    virtual void initializeEditor(F32 gridSize);
 
