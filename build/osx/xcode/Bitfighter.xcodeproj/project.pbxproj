@@ -133,6 +133,14 @@
 		7375E2F6136911B300F71273 /* luavec_Prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = 7375E2F5136911A800F71273 /* luavec_Prefix.pch */; };
 		7375E3A6136916E000F71273 /* luavec-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 7375E3A4136916E000F71273 /* luavec-Info.plist */; };
 		7375E3AA1369176300F71273 /* luavec.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 7375E28E13690E1900F71273 /* luavec.framework */; };
+		7377F2D71381C7AD00DB1417 /* SoundEffect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7377F2D31381C7AD00DB1417 /* SoundEffect.cpp */; };
+		7377F2D81381C7AD00DB1417 /* SoundSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7377F2D51381C7AD00DB1417 /* SoundSystem.cpp */; };
+		7377F2D91381C7AD00DB1417 /* SoundEffect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7377F2D31381C7AD00DB1417 /* SoundEffect.cpp */; };
+		7377F2DA1381C7AD00DB1417 /* SoundSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7377F2D51381C7AD00DB1417 /* SoundSystem.cpp */; };
+		7377F2EF1381C84700DB1417 /* Ogg.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7377F2EE1381C84700DB1417 /* Ogg.framework */; };
+		7377F2F11381C84700DB1417 /* Speex.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7377F2F01381C84700DB1417 /* Speex.framework */; };
+		7377F3001381C86100DB1417 /* Ogg.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 7377F2EE1381C84700DB1417 /* Ogg.framework */; };
+		7377F3011381C86100DB1417 /* Speex.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 7377F2F01381C84700DB1417 /* Speex.framework */; };
 		7378261D12960DDF007333BE /* Bitfighter.icns in Resources */ = {isa = PBXBuildFile; fileRef = 94B7EABF11D7DABC0083AEAF /* Bitfighter.icns */; };
 		7378261E12960DDF007333BE /* robots in Resources */ = {isa = PBXBuildFile; fileRef = 737CE3F412904D5300D732B7 /* robots */; };
 		7378261F12960DDF007333BE /* scripts in Resources */ = {isa = PBXBuildFile; fileRef = 737CE3FC12904D5300D732B7 /* scripts */; };
@@ -282,7 +290,6 @@
 		73D2F39312E2D7E800EA5EBE /* retrieveGame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2F912E2D7E800EA5EBE /* retrieveGame.cpp */; };
 		73D2F39412E2D7E800EA5EBE /* robot.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2FA12E2D7E800EA5EBE /* robot.cpp */; };
 		73D2F39512E2D7E800EA5EBE /* screenShooter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2FC12E2D7E800EA5EBE /* screenShooter.cpp */; };
-		73D2F39612E2D7E800EA5EBE /* sfx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2FE12E2D7E800EA5EBE /* sfx.cpp */; };
 		73D2F39712E2D7E800EA5EBE /* ship.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F30112E2D7E800EA5EBE /* ship.cpp */; };
 		73D2F39812E2D7E800EA5EBE /* SlipZone.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F30412E2D7E800EA5EBE /* SlipZone.cpp */; };
 		73D2F39912E2D7E800EA5EBE /* soccerGame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F30512E2D7E800EA5EBE /* soccerGame.cpp */; };
@@ -374,7 +381,6 @@
 		73D2F40612E2D7E800EA5EBE /* retrieveGame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2F912E2D7E800EA5EBE /* retrieveGame.cpp */; };
 		73D2F40712E2D7E800EA5EBE /* robot.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2FA12E2D7E800EA5EBE /* robot.cpp */; };
 		73D2F40812E2D7E800EA5EBE /* screenShooter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2FC12E2D7E800EA5EBE /* screenShooter.cpp */; };
-		73D2F40912E2D7E800EA5EBE /* sfx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2FE12E2D7E800EA5EBE /* sfx.cpp */; };
 		73D2F40A12E2D7E800EA5EBE /* ship.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F30112E2D7E800EA5EBE /* ship.cpp */; };
 		73D2F40B12E2D7E800EA5EBE /* SlipZone.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F30412E2D7E800EA5EBE /* SlipZone.cpp */; };
 		73D2F40C12E2D7E800EA5EBE /* soccerGame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F30512E2D7E800EA5EBE /* soccerGame.cpp */; };
@@ -680,6 +686,8 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				7377F3001381C86100DB1417 /* Ogg.framework in CopyFiles */,
+				7377F3011381C86100DB1417 /* Speex.framework in CopyFiles */,
 				73B0FC341370ABE80019AE4E /* ALURE.framework in CopyFiles */,
 				73B0FC351370ABE80019AE4E /* OpenAL-Soft.framework in CopyFiles */,
 				7375E3AA1369176300F71273 /* luavec.framework in CopyFiles */,
@@ -727,6 +735,13 @@
 		7375E28E13690E1900F71273 /* luavec.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = luavec.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		7375E2F5136911A800F71273 /* luavec_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = luavec_Prefix.pch; path = "../../../lua/lua-vec/src/luavec_Prefix.pch"; sourceTree = SOURCE_ROOT; };
 		7375E3A4136916E000F71273 /* luavec-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "luavec-Info.plist"; sourceTree = "<group>"; };
+		7377F2D21381C7AD00DB1417 /* SFXProfile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SFXProfile.h; path = ../../../zap/SFXProfile.h; sourceTree = SOURCE_ROOT; };
+		7377F2D31381C7AD00DB1417 /* SoundEffect.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SoundEffect.cpp; path = ../../../zap/SoundEffect.cpp; sourceTree = SOURCE_ROOT; };
+		7377F2D41381C7AD00DB1417 /* SoundEffect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SoundEffect.h; path = ../../../zap/SoundEffect.h; sourceTree = SOURCE_ROOT; };
+		7377F2D51381C7AD00DB1417 /* SoundSystem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SoundSystem.cpp; path = ../../../zap/SoundSystem.cpp; sourceTree = SOURCE_ROOT; };
+		7377F2D61381C7AD00DB1417 /* SoundSystem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SoundSystem.h; path = ../../../zap/SoundSystem.h; sourceTree = SOURCE_ROOT; };
+		7377F2EE1381C84700DB1417 /* Ogg.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Ogg.framework; path = /Users/geeko/temp/hg/bitfighter/lib/Ogg.framework; sourceTree = "<absolute>"; };
+		7377F2F01381C84700DB1417 /* Speex.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Speex.framework; path = /Users/geeko/temp/hg/bitfighter/lib/Speex.framework; sourceTree = "<absolute>"; };
 		737826B112960DDF007333BE /* Bitfighterd.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Bitfighterd.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7378E23612F93C9D005EF681 /* database.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = database.cpp; path = ../../../master/database.cpp; sourceTree = SOURCE_ROOT; };
 		7378E23712F93C9D005EF681 /* database.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = database.h; path = ../../../master/database.h; sourceTree = SOURCE_ROOT; };
@@ -919,8 +934,6 @@
 		73D2F2FB12E2D7E800EA5EBE /* robot.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = robot.h; path = ../../../zap/robot.h; sourceTree = SOURCE_ROOT; };
 		73D2F2FC12E2D7E800EA5EBE /* screenShooter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = screenShooter.cpp; path = ../../../zap/screenShooter.cpp; sourceTree = SOURCE_ROOT; };
 		73D2F2FD12E2D7E800EA5EBE /* screenShooter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = screenShooter.h; path = ../../../zap/screenShooter.h; sourceTree = SOURCE_ROOT; };
-		73D2F2FE12E2D7E800EA5EBE /* sfx.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sfx.cpp; path = ../../../zap/sfx.cpp; sourceTree = SOURCE_ROOT; };
-		73D2F2FF12E2D7E800EA5EBE /* sfx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sfx.h; path = ../../../zap/sfx.h; sourceTree = SOURCE_ROOT; };
 		73D2F30012E2D7E800EA5EBE /* SharedConstants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SharedConstants.h; path = ../../../zap/SharedConstants.h; sourceTree = SOURCE_ROOT; };
 		73D2F30112E2D7E800EA5EBE /* ship.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ship.cpp; path = ../../../zap/ship.cpp; sourceTree = SOURCE_ROOT; };
 		73D2F30212E2D7E800EA5EBE /* ship.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ship.h; path = ../../../zap/ship.h; sourceTree = SOURCE_ROOT; };
@@ -1242,6 +1255,8 @@
 				9462C41711D7D95600791A0B /* Carbon.framework in Frameworks */,
 				73B0FC1C1370ABB70019AE4E /* ALURE.framework in Frameworks */,
 				73B0FC1D1370ABB70019AE4E /* OpenAL-Soft.framework in Frameworks */,
+				7377F2EF1381C84700DB1417 /* Ogg.framework in Frameworks */,
+				7377F2F11381C84700DB1417 /* Speex.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1282,6 +1297,8 @@
 		036FF0B612D1D7EF00C14EE2 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				7377F2EE1381C84700DB1417 /* Ogg.framework */,
+				7377F2F01381C84700DB1417 /* Speex.framework */,
 				73B0FB5C1370A9F80019AE4E /* OpenAL-Soft.framework */,
 				7386B9F7136FE3000094A660 /* ALURE.framework */,
 				7375E28E13690E1900F71273 /* luavec.framework */,
@@ -1591,6 +1608,11 @@
 		73D2F27E12E2D6D800EA5EBE /* zap */ = {
 			isa = PBXGroup;
 			children = (
+				7377F2D21381C7AD00DB1417 /* SFXProfile.h */,
+				7377F2D31381C7AD00DB1417 /* SoundEffect.cpp */,
+				7377F2D41381C7AD00DB1417 /* SoundEffect.h */,
+				7377F2D51381C7AD00DB1417 /* SoundSystem.cpp */,
+				7377F2D61381C7AD00DB1417 /* SoundSystem.h */,
 				7375E26513690B6300F71273 /* pictureloader.cpp */,
 				7375E26613690B6300F71273 /* pictureloader.h */,
 				737C8110135CCD7300FF5282 /* version.h */,
@@ -1720,8 +1742,6 @@
 				73D2F2FB12E2D7E800EA5EBE /* robot.h */,
 				73D2F2FC12E2D7E800EA5EBE /* screenShooter.cpp */,
 				73D2F2FD12E2D7E800EA5EBE /* screenShooter.h */,
-				73D2F2FE12E2D7E800EA5EBE /* sfx.cpp */,
-				73D2F2FF12E2D7E800EA5EBE /* sfx.h */,
 				73D2F30012E2D7E800EA5EBE /* SharedConstants.h */,
 				73D2F30112E2D7E800EA5EBE /* ship.cpp */,
 				73D2F30212E2D7E800EA5EBE /* ship.h */,
@@ -2500,7 +2520,6 @@
 				73D2F39312E2D7E800EA5EBE /* retrieveGame.cpp in Sources */,
 				73D2F39412E2D7E800EA5EBE /* robot.cpp in Sources */,
 				73D2F39512E2D7E800EA5EBE /* screenShooter.cpp in Sources */,
-				73D2F39612E2D7E800EA5EBE /* sfx.cpp in Sources */,
 				73D2F39712E2D7E800EA5EBE /* ship.cpp in Sources */,
 				73D2F39812E2D7E800EA5EBE /* SlipZone.cpp in Sources */,
 				73D2F39912E2D7E800EA5EBE /* soccerGame.cpp in Sources */,
@@ -2546,6 +2565,8 @@
 				737C80FE135CC67500FF5282 /* Point.cpp in Sources */,
 				737C80FF135CC67500FF5282 /* Rect.cpp in Sources */,
 				7375E26813690B6300F71273 /* pictureloader.cpp in Sources */,
+				7377F2D91381C7AD00DB1417 /* SoundEffect.cpp in Sources */,
+				7377F2DA1381C7AD00DB1417 /* SoundSystem.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2749,7 +2770,6 @@
 				73D2F40612E2D7E800EA5EBE /* retrieveGame.cpp in Sources */,
 				73D2F40712E2D7E800EA5EBE /* robot.cpp in Sources */,
 				73D2F40812E2D7E800EA5EBE /* screenShooter.cpp in Sources */,
-				73D2F40912E2D7E800EA5EBE /* sfx.cpp in Sources */,
 				73D2F40A12E2D7E800EA5EBE /* ship.cpp in Sources */,
 				73D2F40B12E2D7E800EA5EBE /* SlipZone.cpp in Sources */,
 				73D2F40C12E2D7E800EA5EBE /* soccerGame.cpp in Sources */,
@@ -2796,6 +2816,8 @@
 				737C80FB135CC67500FF5282 /* Point.cpp in Sources */,
 				737C80FC135CC67500FF5282 /* Rect.cpp in Sources */,
 				7375E26713690B6300F71273 /* pictureloader.cpp in Sources */,
+				7377F2D71381C7AD00DB1417 /* SoundEffect.cpp in Sources */,
+				7377F2D81381C7AD00DB1417 /* SoundSystem.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
