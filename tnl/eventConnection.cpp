@@ -257,9 +257,7 @@ void EventConnection::writePacket(BitStream *bstream, PacketNotify *pnotify)
 
    EventNote *packQueueHead = NULL, *packQueueTail = NULL;
 
-#ifdef TNL_ENABLE_ASSERTS
-   bool debug_have_something_to_send = false;
-#endif
+   bool have_something_to_send = false;
    while(mUnorderedSendEventQueueHead)
    {
       if(bstream->isFull())
@@ -282,17 +280,19 @@ void EventConnection::writePacket(BitStream *bstream, PacketNotify *pnotify)
       if(mConnectionParameters.mDebugObjectSizes)
          bstream->writeIntAt(bstream->getBitPosition(), BitStreamPosBitSize, start);
 
-      if(bstream->getBitPosition() >= U32(MaxPacketDataSize)*8 - MinimumPaddingBits)
+      // check for packet overrun, and rewind this update if there
+      // was one:
+      if(bstream->getBitPosition() >= MaxPreferredPacketDataSize*8 - MinimumPaddingBits)
       {
-         // rewind to before the event, and break out of the loop:
-         TNLAssert(debug_have_something_to_send, "Packet too big to send");
-         bstream->setBitPosition(start - 1);
-         bstream->clearError();
-         break;
+         TNLAssert(have_something_to_send || bstream->getBitPosition() < MaxPacketDataSize*8 - MinimumPaddingBits, "Packet too big to send");
+         if(have_something_to_send)
+         {
+            bstream->setBitPosition(start - 1);
+            bstream->clearError();
+            break;
+         }
       }
-#ifdef TNL_ENABLE_ASSERTS
-      debug_have_something_to_send = true;
-#endif
+      have_something_to_send = true;
 
       // dequeue the event and add this event onto the packet queue
       mUnorderedSendEventQueueHead = ev->mNextEvent;
@@ -342,17 +342,19 @@ void EventConnection::writePacket(BitStream *bstream, PacketNotify *pnotify)
       if(mConnectionParameters.mDebugObjectSizes)
          bstream->writeIntAt(bstream->getBitPosition(), BitStreamPosBitSize, start - BitStreamPosBitSize);
 
-      if(bstream->getBitPosition() >= U32(MaxPacketDataSize)*8 - MinimumPaddingBits)
+      // check for packet overrun, and rewind this update if there
+      // was one:
+      if(bstream->getBitPosition() >= MaxPreferredPacketDataSize*8 - MinimumPaddingBits)
       {
-         TNLAssert(debug_have_something_to_send, "Packet too big to send");
-         // rewind to before the event, and break out of the loop:
-         bstream->setBitPosition(eventStart);
-         bstream->clearError();
-         break;
+         TNLAssert(have_something_to_send || bstream->getBitPosition() < MaxPacketDataSize*8 - MinimumPaddingBits, "Packet too big to send");
+         if(have_something_to_send)
+         {
+            bstream->setBitPosition(eventStart);
+            bstream->clearError();
+            break;
+         }
       }
-#ifdef TNL_ENABLE_ASSERTS
-      debug_have_something_to_send = true;
-#endif
+      have_something_to_send = true;
 
       // dequeue the event:
       mSendEventQueueHead = ev->mNextEvent;      

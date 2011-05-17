@@ -141,9 +141,9 @@ struct IPAddress
 typedef const IPAddress &IPAddressRef;
 
 /// Packet level network constants
-enum Constants {
-   MaxPacketDataSize = 1500,  ///< The maximum size of a data packet sent through the Net::sendto and Net::recvfrom functions
-};
+const U32 MaxPacketDataSize = 1500;  ///< The maximum size of a data packet sent through the Net::sendto and Net::recvfrom functions
+const U32 MaxPreferredPacketDataSize = 576;  ///< The maximum preferred size for sending
+
 
 /// Error conditions that can be returned by sendto and recvfrom.
 enum NetError {

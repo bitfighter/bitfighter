@@ -307,19 +307,17 @@ void GhostConnection::writePacket(BitStream *bstream, PacketNotify *pnotify)
    bstream->writeInt(sendSize - 3, 3); // 0-7 3 bit number
 
    U32 count = 0;
-#ifdef TNL_ENABLE_ASSERTS
-   bool debug_have_something_to_send = false;
-#endif
+   bool have_something_to_send = false;
    for(S32 i = mGhostZeroUpdateIndex - 1; i >= 0 && !bstream->isFull(); i--)
    {
       GhostInfo *walk = mGhostArray[i];
-		if(walk->flags & (GhostInfo::KillingGhost | GhostInfo::Ghosting))
-		   continue;
+      if(walk->flags & (GhostInfo::KillingGhost | GhostInfo::Ghosting))
+         continue;
 
       U32 updateStart = bstream->getBitPosition();
       U32 updateMask = walk->updateMask;
       U32 retMask = 0;
-		   
+         
       bstream->writeFlag(true);
       bstream->writeInt(walk->index, sendSize);
       if(!bstream->writeFlag(walk->flags & GhostInfo::KillGhost))
@@ -357,16 +355,17 @@ void GhostConnection::writePacket(BitStream *bstream, PacketNotify *pnotify)
 
       // check for packet overrun, and rewind this update if there
       // was one:
-      if(bstream->getBitPosition() >= U32(MaxPacketDataSize)*8 - MinimumPaddingBits)
+      if(bstream->getBitPosition() >= MaxPreferredPacketDataSize*8 - MinimumPaddingBits)
       {
-         TNLAssert(debug_have_something_to_send, "Packet too big to send");
-         bstream->setBitPosition(updateStart);
-         bstream->clearError();
-         break;
+         TNLAssert(have_something_to_send || bstream->getBitPosition() < MaxPacketDataSize*8 - MinimumPaddingBits, "Packet too big to send");
+         if(have_something_to_send)
+         {
+            bstream->setBitPosition(updateStart);
+            bstream->clearError();
+            break;
+         }
       }
-#ifdef TNL_ENABLE_ASSERTS
-      debug_have_something_to_send = true;
-#endif
+      have_something_to_send = true;
 
       // otherwise, create a record of this ghost update and
       // attach it to the packet.
@@ -444,10 +443,10 @@ void GhostConnection::readPacket(BitStream *bstream)
       if(bstream->readFlag()) // is this ghost being deleted?
       {
          TNLAssert(mLocalGhosts[index] != NULL, "Error, NULL ghost encountered.");
-		   if(mLocalGhosts[index])
+         if(mLocalGhosts[index])
          {
             mLocalGhosts[index]->onGhostRemove();
-		      delete mLocalGhosts[index];
+            delete mLocalGhosts[index];
             mLocalGhosts[index] = NULL;
          }
       }
@@ -632,8 +631,8 @@ void GhostConnection::objectInScope(NetObject *obj)
    if (!mScoping || !doesGhostFrom())     // doesGhostFrom ==>  Does this GhostConnection ghost NetObjects to the remote host?
       return;
 
-	if (!obj->isGhostable() || (obj->isScopeLocal() && !isLocalConnection()))
-		return;
+   if (!obj->isGhostable() || (obj->isScopeLocal() && !isLocalConnection()))
+      return;
 
    S32 index = obj->getHashId() & GhostLookupTableMask;
    
