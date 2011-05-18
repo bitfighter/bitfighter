@@ -311,7 +311,6 @@ public:
    virtual bool canBeHostile();
    virtual bool canBeNeutral();
    virtual bool hasTeam();
-   virtual bool EditorObject::getSpecial();   
 
    virtual const char *getEditorHelpString() = 0;     
    virtual const char *getPrettyNamePlural() = 0;
