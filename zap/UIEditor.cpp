@@ -43,8 +43,9 @@
 #include "barrier.h"             // For BarrierWidth
 #include "gameItems.h"           // For Asteroid defs
 #include "teleporter.h"          // For Teleporter def
-#include "speedZone.h"           // for Speedzone def
+#include "speedZone.h"           // For Speedzone def
 #include "loadoutZone.h"         // For LoadoutZone def
+#include "huntersGame.h"         // For HuntersNexusObject def
 #include "config.h"
 #include "GeomUtils.h"
 #include "textItem.h"            // For MAX_TEXTITEM_LEN and MAX_TEXT_SIZE
@@ -160,10 +161,8 @@ void EditorUserInterface::populateDock()
       //addDockObject(new ItemEnergy(), xPos + 10, yPos);
       yPos += spacer;
 
-      /*
-      mDockItems.push_back(WorldItem(ItemSpawn, Point(xPos, yPos), mCurrentTeam, true, 0, 0));
+      addDockObject(new ShipSpawn(), xPos, yPos);
       yPos += spacer;
-       */
 
       addDockObject(new ForceFieldProjector(), xPos, yPos);
       yPos += spacer;
@@ -180,10 +179,9 @@ void EditorUserInterface::populateDock()
       addDockObject(new TextItem(), xPos, yPos);
       yPos += spacer;
 
-      /*
       if(!strcmp(mGameType, "SoccerGameType"))
          addDockObject(new SoccerBallItem(), xPos, yPos);
-      else */
+      else
          addDockObject(new FlagItem(), xPos, yPos);
       yPos += spacer;
 
@@ -211,33 +209,20 @@ void EditorUserInterface::populateDock()
       addDockObject(new GoalZone(), xPos, yPos);
       yPos += 25;
 
-/*
       if(!strcmp(mGameType, "HuntersGameType"))
       {
-         mDockItems.push_back(WorldItem(ItemNexus, Point(gScreenInfo.getGameCanvasWidth() - horizMargin - DOCK_WIDTH + 5, yPos), 
-                                        mCurrentTeam, true, DOCK_POLY_WIDTH, DOCK_POLY_HEIGHT));
+         addDockObject(new HuntersNexusObject(), xPos, yPos);
          yPos += 25;
       }
       else
       {
-         mDockItems.push_back(WorldItem(ItemGoalZone, Point(gScreenInfo.getGameCanvasWidth() - horizMargin - DOCK_WIDTH + 5, yPos), 
-                                        mCurrentTeam, true, DOCK_POLY_WIDTH, DOCK_POLY_HEIGHT));
+         addDockObject(new GoalZone(), xPos, yPos);
          yPos += 25;
       }
 
-      mDockItems.push_back(WorldItem(ItemPolyWall, Point(gScreenInfo.getGameCanvasWidth() - horizMargin - DOCK_WIDTH + 5, yPos), 
-                                     mCurrentTeam, true, DOCK_POLY_WIDTH, DOCK_POLY_HEIGHT));
+      addDockObject(new PolyWall(), xPos, yPos);
       yPos += spacer;
-      */
    }
-   /*
-   else if(mShowMode == NavZoneMode)
-   {
-      mDockItems.push_back(WorldItem(ItemNavMeshZone, Point(gScreenInfo.getGameCanvasWidth() - horizMargin - DOCK_WIDTH + 5, 
-                                                            gScreenInfo.getGameCanvasHeight() - vertMargin - 82), 
-                                     TEAM_NEUTRAL, true, DOCK_POLY_WIDTH, DOCK_POLY_HEIGHT));
-   }
-   */
 }
 
 
@@ -494,7 +479,7 @@ void EditorUserInterface::redo()
 void EditorUserInterface::rebuildEverything()
 {
    wallSegmentManager.recomputeAllWallGeometry();
-   recomputeAllEngineeredItems();
+   resnapAllEngineeredItems();
    rebuildAllBorderSegs();
 
    mNeedToSave = (mAllUndoneUndoLevel != mLastUndoIndex);
@@ -504,38 +489,52 @@ void EditorUserInterface::rebuildEverything()
 
 
 // Find mount point or turret or forcefield closest to pos
-static Point snapEngineeredObject(EditorObject *object, const Point &pos)
+static Point snapEngineeredObject(EngineeredObject *engrObj, const Point &pos)
 {  
-   EngineeredObject *engrObj = dynamic_cast<EngineeredObject *>(object);
-   TNLAssert(engrObj, "snapEngineeredObject should only be called with an EngineeredObject!");
-
    Point anchor, nrml;
 
-   DatabaseObject *mountSeg = engrObj->findAnchorPointAndNormal(object->getGridDatabase(), pos, 
-                     EngineeredObject::MAX_SNAP_DISTANCE / getGridSize(), false, EditorWallSegmentType, anchor, nrml);
+   DatabaseObject *mountSeg = engrObj->findAnchorPointAndNormal(gEditorUserInterface.getGridDatabase(), pos, 
+                     EngineeredObject::MAX_SNAP_DISTANCE, false, EditorWallSegmentType, anchor, nrml);
 
    if(mountSeg)   // Found a segment we can mount to
    {
-      object->setVert(anchor, 0);
-      object->mAnchorNormal.set(nrml);
-      object->findForceFieldEnd();
-      object->forceFieldMountSegment = dynamic_cast<WallSegment *>(mountSeg);
-      object->mSnapped = true;
+      engrObj->setVert(anchor, 0);
+      engrObj->setAnchorNormal(nrml);
+
+      if(engrObj->getObjectTypeMask() & ForceFieldProjectorType)
+      {
+         ForceFieldProjector *ffp = dynamic_cast<ForceFieldProjector *>(engrObj);
+         ffp->findForceFieldEnd();
+         ffp->forceFieldMountSegment = dynamic_cast<WallSegment *>(mountSeg);
+      }
+
+      engrObj->mSnapped = true;
       return anchor;
    }
    else           // No suitable segments found
    {
-      object->mSnapped = false;
+      engrObj->mSnapped = false;
       return pos;
    }
 }
 
 
-void EditorUserInterface::recomputeAllEngineeredItems()
+static Vector<DatabaseObject *> fillVector;     // Reusable container
+
+void EditorUserInterface::resnapAllEngineeredItems()
 {
-   for(S32 i = 0; i < mItems.size(); i++)
-      if(mItems[i]->getObjectTypeMask() & TurretType || mItems[i]->getObjectTypeMask() & ForceFieldProjectorType)
-         snapEngineeredObject(mItems[i], mItems[i]->getVert(0));
+   fillVector.clear();
+
+   gEditorGame->getGridDatabase()->findObjects(EngineeredType, fillVector);
+
+   for(S32 i = 0; i < fillVector.size(); i++)
+   {
+      EngineeredObject *engrObj = dynamic_cast<EngineeredObject *>(fillVector[i]);
+      TNLAssert(engrObj, "snapEngineeredObject should only be called with an EngineeredObject!");
+
+      snapEngineeredObject(engrObj, engrObj->getVert(0));
+      engrObj->onGeomChanged();
+   }
 }
 
 
@@ -693,117 +692,14 @@ void EditorUserInterface::loadLevel()
    
    gEditorUserInterface.rebuildAllBorderSegs();
 
+   // Snap all engineered items to the closest wall, if one is found
+   resnapAllEngineeredItems();
 
+   // Run onGeomChanged for all non-wall items (engineered items already had onGeomChanged run during resnap operation)
    for(S32 i = 0; i < mItems.size(); i++)
-      if(mItems[i]->getObjectTypeMask() & EngineeredType)
-        snapEngineeredObject(mItems[i], mItems[i]->getVert(0));
-
-   // And hand-process all other items
-   for(S32 i = 0; i < mItems.size(); i++)
-      if(mItems[i]->getObjectTypeMask() & ~BarrierType && mItems[i]->getObjectTypeMask() & ~BotNavMeshZoneType)
+      if(mItems[i]->getObjectTypeMask() & ~(BarrierType | EngineeredType))
          mItems[i]->onGeomChanged();
 }
-
-
-// Process a line read from level file
-//void EditorUserInterface::processLevelLoadLine(U32 argc, U32 id, const char **argv)
-//{
-//   S32 strlenCmd = (S32) strlen(argv[0]);
-//
-//   // Parse GameType line... All game types are of form XXXXGameType
-//   if(strlenCmd >= 8 && !strcmp(argv[0] + strlenCmd - 8, "GameType"))
-//   {
-//      strcpy(gEditorUserInterface.mGameType, GameType::validateGameType(argv[0]) );    // validateGameType will return a valid game type, regradless of what's put in
-//
-//      if(strcmp(gEditorUserInterface.mGameType, argv[0]))      // If these differ, then what we put in was invalid
-//         gEditorUserInterface.setWarnMessage("Invalid or missing GameType parameter", "Press [F3] to configure level");
-//
-//      // Save the args (which we already have split out) for easier handling in the Game Parameter Editor
-//      for(U32 i = 1; i < argc; i++)
-//         gEditorUserInterface.mGameTypeArgs.push_back(argv[i]);
-//   }
-//
-//   else if(!strcmp(argv[0], "GridSize"))
-//   {
-//      if(argc >= 1)
-//         editorGame->setGridSize((F32) atof(argv[1]));
-//   }
-//
-//   else if(!strcmp(argv[0], "Script"))
-//   {
-//      gEditorUserInterface.mScriptLine = "";
-//      // Munge everything into a string.  We'll have to parse after editing in GameParamsMenu anyway.
-//      for(U32 i = 1; i < argc; i++)
-//      {
-//         if(i > 1)
-//            gEditorUserInterface.mScriptLine += " ";
-//
-//         gEditorUserInterface.mScriptLine += argv[i];
-//      }
-//   }
-//
-//   // Parse Team definition line
-//   else if(!strcmp(argv[0], "Team"))
-//   {
-//      if(mTeams.size() >= GameType::gMaxTeams)     // Ignore teams with numbers higher than 9
-//         return;
-//
-//      TeamEditor team;
-//      team.readTeamFromLevelLine(argc, argv);
-//
-//      // If team was read and processed properly, numPlayers will be 0
-//      if(team.numPlayers != -1)
-//         mTeams.push_back(team);
-//   }
-//
-//   else
-//   {
-//      string objectType = argv[0];
-//      S32 skipArgs = 0;
-//
-//      GameItems itemType = ItemInvalid;
-//
-//      if(objectType == "BarrierMakerS")
-//      {
-//         objectType = "PolyWall";
-//         skipArgs = 1;
-//      }
-//
-//      for(S32 index = 0; itemDef[index].name != NULL; index++)
-//         if(objectType == itemDef[index].name)
-//         {
-//            itemType = static_cast<GameItems>(index);
-//            break;
-//         }
-//
-//      if(itemType != ItemInvalid)     
-//      {
-//         EditorObject *newItem = newEditorObject(objectType.c_str());
-//         newItem->setItemId(id);
-//
-//         if(newItem->processArguments(argc - 1 - skipArgs, argv + 1 + skipArgs))
-//            mLoadTarget->push_back(newItem);           // Don't add to editor if not valid...
-//         else
-//            delete newItem;
-//
-//         return;
-//      }
-//   }
-//
-//   // What remains are various game parameters...  Note that we will hit this block even if we already looked at gridSize and such...
-//   // Before copying, we'll make a dumb copy, which will be overwritten if the user goes into the GameParameters menu
-//   // This will cover us if the user comes in, edits the level, saves, and exits without visiting the GameParameters menu
-//   // by simply echoing all the parameters back out to the level file without further processing or review.
-//   string temp;
-//   for(U32 i = 0; i < argc; i++)
-//   {
-//      temp += argv[i];
-//      if(i < argc - 1)
-//         temp += " ";
-//   }
-//
-//   gGameParamUserInterface.gameParams.push_back(temp);
-//}    
 
 
 extern OGLCONSOLE_Console gConsole;
@@ -916,9 +812,9 @@ void EditorUserInterface::validateLevel()
 
    for(S32 i = 0; i < mItems.size(); i++)
    {
-      if(mItems[i]->getObjectTypeMask() & SpawnType && mItems[i]->getTeam() == TEAM_NEUTRAL)
+      if(mItems[i]->getObjectTypeMask() & ShipSpawnType && mItems[i]->getTeam() == TEAM_NEUTRAL)
          foundNeutralSpawn = true;
-      else if(mItems[i]->getObjectTypeMask() & SpawnType && mItems[i]->getTeam() >= 0)
+      else if(mItems[i]->getObjectTypeMask() & ShipSpawnType && mItems[i]->getTeam() >= 0)
          foundSpawn[mItems[i]->getTeam()] = true;
       else if(mItems[i]->getObjectTypeMask() & SoccerBallItemType)
          foundSoccerBall = true;
@@ -1261,17 +1157,17 @@ Point EditorUserInterface::snapPoint(Point const &p, bool snapWhileOnDock)
    }
    
    // Turrets & forcefields: Snap to a wall edge as first (and only) choice
-   if(mDraggingObjects &&
-            (mSnapVertex_i->getObjectTypeMask() & EngineeredType))
-      return snapEngineeredObject(mSnapVertex_i, snapPointToLevelGrid(p));
-
+   if(mDraggingObjects && (mSnapVertex_i->getObjectTypeMask() & EngineeredType))
+   {
+      EngineeredObject *engrObj = dynamic_cast<EngineeredObject *>(mSnapVertex_i);
+      return snapEngineeredObject(engrObj, snapPointToLevelGrid(p));
+   }
 
    F32 maxSnapDist = 2 / (mCurrentScale * mCurrentScale);
    F32 minDist = maxSnapDist;
 
    // Where will we be snapping things?
    bool snapToWallCorners = !mSnapDisabled && mDraggingObjects && !(mSnapVertex_i->getObjectTypeMask() & BarrierType) && mSnapVertex_i->getGeomType() != geomPoly;
-bool snapToWallEdges = !mSnapDisabled && mSnapVertex_i && false; // TODO: Can delete?
    bool snapToLevelGrid = !mSnapDisabled;
 
 
@@ -1300,22 +1196,12 @@ bool snapToWallEdges = !mSnapDisabled && mSnapVertex_i && false; // TODO: Can de
       }
    }
 
-
    // Build a list of walls we might be snapping to if we're snapping to either the edges or corners
    static Vector<DatabaseObject *> foundObjects;
 
    // Search for a corner to snap to - by using wall edges, we'll also look for intersections between segments
    if(snapToWallCorners)
       checkCornersForSnap(p, WallSegmentManager::mWallEdges, minDist, snapPoint);
-
-   // If we're editing a vertex of a polygon, and if we're outside of some threshold distance, see if we can 
-   // snap to the edge of a another zone or wall.  Decreasing value in minDist test will favor snapping to walls, 
-   // decreasing(increasing??) it will require being closer to a wall to snap to it.
-   if(minDist >= 2 / (mCurrentScale * mCurrentScale))
-   {
-      if(snapToWallEdges)
-         checkEdgesForSnap(p, WallSegmentManager::mWallEdges, false, minDist, snapPoint);
-   }
 
    return snapPoint;
 }
@@ -1664,13 +1550,6 @@ const char *getModeMessage(ShowMode mode)
 }
 
 
-extern void renderTriangulatedPolygonFill(const Vector<Point> &fill);
-extern void renderPolygonOutline(const Vector<Point> &outline);
-extern void renderPolygonOutline(const Vector<Point> &outlinePoints, Color &outlineColor, F32 alpha = 1);
-
-extern void renderPolygonFill(const Vector<Point> *fillPoints, const Color &fillColor, F32 alpha = 1);
-extern void renderPolygonFill(const Vector<Point> &fillPoints, const Color &fillColor, F32 alpha = 1);
-
 void EditorUserInterface::render()
 {
    mouseIgnore = false; // Needed to avoid freezing effect from too many mouseMoved events without a render in between (sam)
@@ -1696,9 +1575,12 @@ void EditorUserInterface::render()
    // PolyWall outlines are already part of the wallSegmentManager, so will be rendered along with those of regular walls.
    glPushMatrix();  
       setLevelToCanvasCoordConversion();
-   //   for(S32 i = 0; i < mItems.size(); i++)
-   //      if(mItems[i]->getObjectTypeMask() & PolyWallType)
-   //         renderPolygonFill(mItems[i]->getPolyFillPoints(), EDITOR_WALL_FILL_COLOR, 1);
+      for(S32 i = 0; i < mItems.size(); i++)
+         if(mItems[i]->getObjectTypeMask() & PolyWallType)
+         {
+            PolyWall *wall = dynamic_cast<PolyWall *>(mItems[i]);
+            wall->renderFill();
+         }
    
      wallSegmentManager.renderWalls(true, getRenderingAlpha(false/*isScriptItem*/));
    glPopMatrix();
@@ -1751,7 +1633,8 @@ void EditorUserInterface::render()
    else  
    {
       for(S32 i = 0; i < mItems.size(); i++)
-         //if((mItems[i]->getObjectTypeMask() & ItemBarrierMaker || mItems[i]->getObjectTypeMask() & ItemLineItem) && (mItems[i]->isSelected() || (mItems[i]->isLitUp() && mItems[i]->isVertexLitUp(NONE))) )
+         if((mItems[i]->getObjectTypeMask() & (BarrierType | LineType)) && 
+            (mItems[i]->isSelected() || (mItems[i]->isLitUp() && mItems[i]->isVertexLitUp(NONE))) )
          {
             width =  mItems[i]->getWidth();
             break;
@@ -2834,8 +2717,8 @@ void EditorUserInterface::deleteItem(S32 itemIndex)
       mItems.erase(mItems.begin() + itemIndex);
 
       wallSegmentManager.recomputeAllWallGeometry();                          // Recompute wall edges
-      recomputeAllEngineeredItems();         // Really only need to recompute items that were attached to deleted wall... but we
-                                             // don't yet have a method to do that, and I'm feeling lazy at the moment
+      resnapAllEngineeredItems();         // Really only need to resnap items that were attached to deleted wall... but we
+                                          // don't yet have a method to do that, and I'm feeling lazy at the moment
    }
    else if(mask & BotNavMeshZoneType)
    {
@@ -3121,9 +3004,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          else
          {
             mNewItem->addToEditor(gEditorGame);
-
-            mItems.push_back(mNewItem);
-            mNewItem->onGeomChanged();      // Walls need to be added to mItems BEFORE onGeomChanged() is run!
+            mNewItem->onGeomChanged();          // Walls need to be added to editor BEFORE onGeomChanged() is run!
             geomSort(mItems);
          }
 
@@ -3358,7 +3239,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    else if(keyCode == KEY_P)              // P - Speed Zone
       insertNewItem(SpeedZoneType);
    else if(keyCode == KEY_G)              // G - Spawn
-      insertNewItem(SpawnType);
+      insertNewItem(ShipSpawnType);
    else if(keyCode == KEY_B && getKeyState(KEY_CTRL)) // Ctrl-B - Spy Bug
       insertNewItem(SpyBugType);
    else if(keyCode == KEY_B)              // B - Repair
@@ -4119,7 +4000,7 @@ void WallSegmentManager::recomputeAllWallGeometry()
 void WallSegmentManager::buildWallSegmentEdgesAndPoints(EditorObject *item)
 {
    // Find any forcefields that terminate on this wall, and mark them for recalculation later
-   Vector<EditorObject *> forcefields;    // A list of forcefields terminating on the wall segment that we'll be deleting
+   static Vector<EditorObject *> forcefields;    // A list of forcefields terminating on the wall segment that we'll be deleting
 
    S32 count = mWallSegments.size();                
    for(S32 i = 0; i < count; i++)
@@ -4345,10 +4226,14 @@ WallSegment::~WallSegment()
    // segment is no longer in database, when we recalculate the forcefield, our endSegmentPointer will be reset.
    // This is a last-ditch effort to ensure that the pointers point at something real.
    for(S32 i = 0; i < gEditorUserInterface.mItems.size(); i++)
-      if(gEditorUserInterface.mItems[i]->getObjectTypeMask() & ForceFieldProjectorType && 
-               (gEditorUserInterface.mItems[i]->forceFieldEndSegment == this || 
-                gEditorUserInterface.mItems[i]->forceFieldMountSegment == this) )
-         gEditorUserInterface.mItems[i]->onGeomChanged();            // Will force recalculation of mount and endpoint
+      if(gEditorUserInterface.mItems[i]->getObjectTypeMask() & ForceFieldProjectorType)
+      {
+         ForceFieldProjector *proj = dynamic_cast<ForceFieldProjector *>(gEditorUserInterface.mItems[i]);
+         TNLAssert(proj, "bad cast!");
+
+         if(proj->forceFieldEndSegment == this || proj->forceFieldMountSegment == this) 
+            gEditorUserInterface.mItems[i]->onGeomChanged();            // Will force recalculation of mount and endpoint
+      }
    }
 
  

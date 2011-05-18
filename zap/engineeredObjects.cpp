@@ -33,6 +33,8 @@
 #include "gameObjectRender.h"
 #include "GeomUtils.h"
 #include "BotNavMeshZone.h"
+#include "UIEditor.h"      // For EditorUserInterface->getDatabase, and WallSegment def  TODO: can we get rid of this somehow?
+
 
 namespace Zap
 {
@@ -309,7 +311,7 @@ bool EngineeredObject::processArguments(S32 argc, const char **argv)
 
 string EngineeredObject::toString()
 {
-   return string(Object::getClassName()) + " " + (Point(mAnchorPoint) / getGame()->getGridSize()).toString() + " " + itos(mHealRate);
+   return string(Object::getClassName()) + " " + itos(mTeam) + " " + (Point(mAnchorPoint) / getGame()->getGridSize()).toString() + " " + itos(mHealRate);
 }
 
 // This is used for both positioning items in-game and for snapping them to walls in the editor --> static method
@@ -337,7 +339,7 @@ DatabaseObject *EngineeredObject::findAnchorPointAndNormal(GridDatabase *db, con
       Point dir(cos(theta), sin(theta));
       dir *= snapDist;
       Point mountPos = pos - dir * 0.001f;                           // Offsetting slightly prevents spazzy behavior in editor
-
+      
       // Look for walls
       DatabaseObject *wall = db->findObjectLOS(wallType, MoveObject::ActualState, format, mountPos, mountPos + dir, t, n);
 
@@ -460,18 +462,18 @@ void EngineeredObject::explode()
    const S32 EXPLOSION_COLOR_COUNT = 12;
 
    static Color ExplosionColors[EXPLOSION_COLOR_COUNT] = {
-   Color(1, 0, 0),
-   Color(0.9, 0.5, 0),
-   Color(1, 1, 1),
-   Color(1, 1, 0),
-   Color(1, 0, 0),
-   Color(0.8, 1.0, 0),
-   Color(1, 0.5, 0),
-   Color(1, 1, 1),
-   Color(1, 0, 0),
-   Color(0.9, 0.5, 0),
-   Color(1, 1, 1),
-   Color(1, 1, 0),
+      Color(1, 0, 0),
+      Color(0.9, 0.5, 0),
+      Color(1, 1, 1),
+      Color(1, 1, 0),
+      Color(1, 0, 0),
+      Color(0.8, 1.0, 0),
+      Color(1, 0.5, 0),
+      Color(1, 1, 1),
+      Color(1, 0, 0),
+      Color(0.9, 0.5, 0),
+      Color(1, 1, 1),
+      Color(1, 1, 0),
    };
 
    SFXObject::play(SFXShipExplode, getActualPos(), Point());
@@ -582,27 +584,19 @@ void EngineeredObject::healObject(S32 time)
 }
 
 
-static void drawLetter(char letter, const Point &pos, const Color &color, F32 alpha)
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Returns true if we should use the in-game rendering, false if we should use iconified editor rendering
+// Currently unused -- needed? or delete?
+static bool renderFull(F32 currentScale, bool snapped)
 {
-   // Mark the item with a letter, unless we're showing the reference ship
-   S32 vertOffset = 8;
-   if (letter >= 'a' && letter <= 'z')    // Better position lowercase letters
-      vertOffset = 10;
-
-   glColor(color, alpha);
-   F32 xpos = pos.x - UserInterface::getStringWidthf(15, "%c", letter) / 2;
-
-   UserInterface::drawStringf(xpos, pos.y - vertOffset, 15, "%c", letter);
+   return(snapped && currentScale > 70);
 }
 
 
-static void renderSquareItem(const Point &pos, const Color &c, F32 alpha, const Color &letterColor, char letter)
-{
-   glColor(c, alpha);
-   drawFilledSquare(pos, 8);  // Draw filled box in which we'll put our letter
-   drawLetter(letter, pos, letterColor, alpha);
-}
-
+////////////////////////////////////////
+////////////////////////////////////////
 
 TNL_IMPLEMENT_NETOBJECT(ForceFieldProjector);
 
@@ -626,6 +620,12 @@ void ForceFieldProjector::idle(GameObject::IdleCallPath path)
       return;
 
    healObject(mCurrentMove.time);
+}
+
+
+Point ForceFieldProjector::getEditorSelectionOffset(F32 currentScale)
+{
+   return renderFull(getObjectTypeMask(), currentScale) ? Point(0, .035 * 255) : Point(0,0);
 }
 
 static const S32 PROJECTOR_HALF_WIDTH = 12;  // Half the width of base of the projector, along the wall
@@ -712,9 +712,41 @@ void ForceFieldProjector::renderDock()
 
 void ForceFieldProjector::renderEditor(F32 currentScale)
 {
-   renderDock();
+   F32 scaleFact = 1;
+   Color color = getGame()->getTeamColor(mTeam);
+
+   if(mSnapped)
+   {
+      renderForceFieldProjector(mAnchorPoint, mAnchorNormal, color, true);
+      renderForceField(ForceFieldProjector::getForceFieldStartPoint(mAnchorPoint, mAnchorNormal, scaleFact), 
+                       forceFieldEnd, color, true, scaleFact);
+   }
+   else
+      renderDock();
 }
 
+
+extern EditorUserInterface gEditorUserInterface;
+
+// Used in editor to see where forcefield lands
+void ForceFieldProjector::findForceFieldEnd()
+{
+   // Load the corner points of a maximum-length forcefield into geom
+   Vector<Point> geom;
+   DatabaseObject *collObj;
+
+   F32 scale = 1; // 1 / getGridSize();
+   
+   Point start = ForceFieldProjector::getForceFieldStartPoint(getVert(0), mAnchorNormal, scale);
+
+   if(ForceField::findForceFieldEnd(gEditorUserInterface.getGridDatabase(), start, mAnchorNormal, scale, forceFieldEnd, &collObj))
+      forceFieldEndSegment = dynamic_cast<WallSegment *>(collObj);
+   else
+      forceFieldEndSegment = NULL;
+
+   ForceField::getGeom(start, forceFieldEnd, geom, scale);    
+   setExtent(Rect(geom));
+}
 
 
 // Lua methods
@@ -820,6 +852,7 @@ void ForceField::idle(GameObject::IdleCallPath path)
    }
 }
 
+
 U32 ForceField::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
    if(stream->writeFlag(updateMask & InitialMask))
@@ -915,16 +948,22 @@ void ForceField::render()
 }
 
 
+////////////////////////////////////////
+////////////////////////////////////////
+
 TNL_IMPLEMENT_NETOBJECT(Turret);
 
 // Constructor
 Turret::Turret(S32 team, Point anchorPoint, Point anchorNormal) : EngineeredObject(team, anchorPoint, anchorNormal, TurretType)
 {
    mObjectTypeMask |= CommandMapVisType;  
+
    mWeaponFireType = WeaponTurret;
    mNetFlags.set(Ghostable);
-   mCurrentAngle = mAnchorNormal.ATAN2();
+
+   onGeomChanged();
 }
+
 
 Vector<Point> Turret::getBufferForBotZone()
 {
@@ -1003,12 +1042,7 @@ void Turret::onAddedToGame(Game *theGame)
 
 void Turret::render()
 {
-   Color c;
-
-   if(gClientGame->getGameType())
-      c = gClientGame->getGameType()->getTeamColor(mTeam);
-   else
-      c = Color(1,1,1);
+   Color c = getGame()->getTeamColor(mTeam);
 
    renderTurret(c, mAnchorPoint, mAnchorNormal, isEnabled(), mHealth, mCurrentAngle);
 }
@@ -1022,7 +1056,10 @@ void Turret::renderDock()
 
 void Turret::renderEditor(F32 currentScale)
 {
-   renderDock();
+   if(mSnapped)
+      render();
+   else
+      renderDock();
 }
 
 
@@ -1186,6 +1223,19 @@ void Turret::idle(IdleCallPath path)
          mFireTimer.reset(gWeapons[mWeaponFireType].fireDelay);
       }
    }
+}
+
+
+// For turrets, apparent selection center is not the same as the item's actual location
+Point Turret::getEditorSelectionOffset(F32 currentScale)
+{
+   return renderFull(getObjectTypeMask(), currentScale) ? Point(0, .075 * 255) : Point(0,0);
+}
+
+
+void Turret::onGeomChanged() 
+{ 
+   mCurrentAngle = mAnchorNormal.ATAN2(); 
 }
 
 

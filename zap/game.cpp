@@ -1550,7 +1550,7 @@ Color ClientGame::getTeamColor(S32 teamId)
    GameType *gameType = getGameType();
 
    if(!gameType)
-      return Parent::getTeamColor(teamId);
+      return Parent::getTeamColor(teamId);      // returns white
 
    return gameType->getTeamColor(teamId);
 }

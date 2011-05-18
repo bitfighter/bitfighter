@@ -313,7 +313,7 @@ TNL_IMPLEMENT_NETOBJECT(LineItem);
 LineItem::LineItem()
 { 
    mNetFlags.set(Ghostable);
-   mObjectTypeMask |= CommandMapVisType;
+   mObjectTypeMask |= LineType | CommandMapVisType;
 }
 
 
@@ -449,7 +449,7 @@ void WallItem::onGeomChanged()
 
    gEditorUserInterface.getWallSegmentManager()->computeWallSegmentIntersections(this);
 
-   gEditorUserInterface.recomputeAllEngineeredItems();      // Seems awfully lazy...  should only recompute items attached to altered wall
+   gEditorUserInterface.resnapAllEngineeredItems();      // Seems awfully lazy...  should only recompute items attached to altered wall
 
    // But if we're doing the above, we don't need to bother with the below... unless we stop being lazy
    //// Find any forcefields that might intersect our new wall segment and recalc them
@@ -468,3 +468,57 @@ string WallItem::toString()
 };
 
 
+////////////////////////////////////////
+////////////////////////////////////////
+
+Color EDITOR_WALL_FILL_COLOR(.5, .5, 1); 
+
+TNL_IMPLEMENT_NETOBJECT(PolyWall);
+
+const char PolyWall::className[] = "PolyWall";      // Class name as it appears to Lua scripts
+
+
+PolyWall::PolyWall()
+{
+   mObjectTypeMask = PolyWallType;
+}
+
+
+void PolyWall::render()
+{
+   glColor(HIGHLIGHT_COLOR);
+   renderPolygonOutline(mPolyBounds);
+}
+
+
+void PolyWall::renderFill()
+{
+   renderPolygonFill(&mPolyFill, EDITOR_WALL_FILL_COLOR, 1);
+}
+
+
+void PolyWall::renderDock()
+{
+   renderPolygonFill(&mPolyFill, EDITOR_WALL_FILL_COLOR, 1);
+   glColor(blue);
+   renderPolygonOutline(mPolyBounds);
+}
+
+
+bool PolyWall::processArguments(S32 argc, const char **argv)
+{
+   if(argc < 6)
+      return false;
+
+   processPolyBounds(argc, argv, 0, getGame()->getGridSize());
+
+   //computeExtent();
+
+   return true;
+}
+
+
+string PolyWall::toString()
+{
+   return string(getClassName()) + " " + boundsToString(getGame()->getGridSize());
+}

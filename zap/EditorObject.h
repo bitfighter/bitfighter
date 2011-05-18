@@ -116,6 +116,9 @@ public:
    // Offset lets us drag an item out from the dock by an amount offset from the 0th vertex.  This makes placement seem more natural.
    virtual Point getInitialPlacementOffset(F32 gridSize) { return Point(0,0); }
 
+   // Account for the fact that the apparent selection center and actual object center are not quite aligned
+   virtual Point getEditorSelectionOffset(F32 currentScale);  
+
    void renderAndLabelHighlightedVertices(F32 currentScale);   // Render selected and highlighted vertices, called from renderEditor
    virtual void renderItemText(const char *text, S32 offset, F32 currentScale) { };    // Render some text, with specified vertical offset
    virtual void renderEditor(F32 currentScale) { TNLAssert(false, "renderEditor not implemented!"); }
@@ -131,7 +134,6 @@ public:
    //// Is item sufficiently snapped?  only for turrets and forcefields
    // TODO: Move to turret/ff objects
    bool mSnapped;
-   Point mAnchorNormal;             // Point perpendicular to snap point, only for turrets and forcefields
    bool isSnapped() { return mSnapped; }
    void setSnapped(bool snapped) { mSnapped = snapped; }
    WallSegment *forceFieldMountSegment;   // Segment where forcefield is mounted in editor
@@ -190,8 +192,6 @@ public:
 
    S32 repopDelay;        // For repair items, also used for engineered objects heal rate
 
-   // Will have default value here, and be overridden in turret and ff classes
-   Point getEditorSelectionOffset(F32 scale);      // For turrets, apparent selection center is not the same as the item's actual location
 
    //////
    // Vertex management functions
@@ -302,7 +302,6 @@ public:
    virtual void initializeEditor(F32 gridSize);
 
 
-   void findForceFieldEnd();                                      // Find end of forcefield
    Point forceFieldEnd;      // Point where forcefield terminates.  Only used for forcefields.
 
    S32 mScore;

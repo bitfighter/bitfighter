@@ -24,7 +24,8 @@
 //------------------------------------------------------------------------------------
 
 #include "polygon.h"
-#include "GeomUtils.h"      // For polygon triangulation
+#include "GeomUtils.h"           // For polygon triangulation
+#include "gameObjectRender.h"
 
 namespace Zap
 {
@@ -250,8 +251,6 @@ void EditorPolygon::highlightDockItem()
 const Color HIGHLIGHT_COLOR = white;
 const Color SELECT_COLOR = yellow;
 
-
-extern void renderPolygonOutline(const Vector<Point> &outline);
 
 void EditorPolygon::renderPolyHighlight()
 {

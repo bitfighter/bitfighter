@@ -221,6 +221,41 @@ string AbstractSpawn::toString()
 ////////////////////////////////////////
 
 // Constructor
+ShipSpawn::ShipSpawn(const Point &pos, S32 time) : AbstractSpawn(pos, time, ShipSpawnType)
+{
+   // Do nothing
+};
+
+
+string ShipSpawn::toString()
+{
+   Point pos = mPos / getGame()->getGridSize();
+
+   // AsteroidSpawn|FlagSpawn <x> <y> <time>
+   return string(getClassName()) + " " + pos.toString() + " " + itos(mSpawnTime);
+}
+
+
+void ShipSpawn::renderEditor(F32 currentScale)
+{
+   glPushMatrix();
+      glTranslatef(mPos.x, mPos.y, 0);
+      glScalef(1/currentScale, 1/currentScale, 1);    // Make item draw at constant size, regardless of zoom
+      renderSquareItem(Point(0,0), getGame()->getTeamColor(mTeam), 1, white, 'S');
+   glPopMatrix();   
+}
+
+
+void ShipSpawn::renderDock()
+{
+   renderEditor(1);
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Constructor
 AsteroidSpawn::AsteroidSpawn(const Point &pos, S32 time) : AbstractSpawn(pos, time, AsteroidSpawnType)
 {
    // Do nothing

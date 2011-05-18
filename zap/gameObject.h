@@ -47,7 +47,8 @@ enum GameObjectType
    ShipType            = BIT(1),
    BarrierType         = BIT(2),    // Used in both editor and game
    MoveableType        = BIT(3),
-   ItemType            = BIT(4),    // Not made available to Lua... could we get rid of this altogether?  Or make it a aggregate of other masks?
+
+   LineType            = BIT(4),     
    ResourceItemType    = BIT(5),
    TextItemType        = BIT(6),    // Added during editor refactor, only used in editor
    ForceFieldType      = BIT(7),
@@ -81,7 +82,11 @@ enum GameObjectType
 
    // Derived types:
    EngineeredType     = TurretType | ForceFieldProjectorType,
-   DamagableTypes     = ShipType | RobotType | MoveableType | BulletType | ItemType | ResourceItemType | EngineeredType | MineType | AsteroidType,
+   MountableType      = TurretType | ForceFieldProjectorType,
+   ItemType           = SoccerBallItemType | MineType | SpyBugType | AsteroidType | FlagType | ResourceItemType | 
+                        TestItemType | EnergyItemType | RepairItemType,
+   DamagableTypes     = ShipType | RobotType | MoveableType | BulletType | ItemType | ResourceItemType | 
+                        EngineeredType | MineType | AsteroidType,
    MotionTriggerTypes = ShipType | RobotType | ResourceItemType | TestItemType | AsteroidType,
    CollideableType    = BarrierType | TurretType | ForceFieldProjectorType,
    AllObjectTypes     = 0xFFFFFFFF,
@@ -89,9 +94,11 @@ enum GameObjectType
    //////////
    // Types used exclusively in the editor -- will reuse some values from above
    EditorWallSegmentType = BIT(3),
-   SpawnType = BIT(13),
-   FlagSpawnType = BIT(11),
+
    PolyWallType = BIT(25),
+
+   ShipSpawnType = BIT(13),
+   FlagSpawnType = BIT(11),
    AsteroidSpawnType = BIT(18)
 };
 

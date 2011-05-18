@@ -104,12 +104,42 @@ void GridDatabase::removeFromDatabase(DatabaseObject *theObject, const Rect &ext
    }
 }
 
+
+void GridDatabase::findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector, const Rect *extents, S32 minx, S32 miny, S32 maxx, S32 maxy)
+{
+   mQueryId++;    // Used to prevent the same item from being found in multiple buckets
+
+   for(S32 x = minx; x <= maxx; x++)
+      for(S32 y = miny; y <= maxy; y++)
+         for(BucketEntry *walk = mBuckets[x & BucketMask][y & BucketMask]; walk; walk = walk->nextInBucket)
+         {
+            DatabaseObject *theObject = walk->theObject;
+
+            if(theObject->mLastQueryId != mQueryId &&                     // Object hasn't been queried; and
+               (theObject->getObjectTypeMask() & typeMask) &&             // is of the right type; and
+               (!extents || theObject->extent.intersects(*extents)) )     // overlaps our extents (if passed)
+            {
+               walk->theObject->mLastQueryId = mQueryId;    // Flag the object so we know we've already visited it
+               fillVector.push_back(walk->theObject);       // And save it as a found item
+            }
+         }
+}
+
+
+// Find all objects in database of type typeMask
+void GridDatabase::findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector)
+{
+   findObjects(typeMask, fillVector, NULL, 0, 0, BucketRowCount - 1, BucketRowCount - 1);
+}
+
+
 // Find all objects in &extents that are of type typeMask
 void GridDatabase::findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector, const Rect &extents)
 {
    S32 minx, miny, maxx, maxy;
 
    F32 widthDiv = 1 / F32(BucketWidth);
+
    minx = S32(extents.min.x * widthDiv);
    miny = S32(extents.min.y * widthDiv);
    maxx = S32(extents.max.x * widthDiv);
@@ -120,26 +150,7 @@ void GridDatabase::findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVecto
    if(maxy >= miny + BucketRowCount)
       maxy = miny + BucketRowCount - 1;
 
-   mQueryId++;    // Used to prevent the same item from being found in multiple buckets
-
-   for(S32 x = minx; x <= maxx; x++)
-   {
-      for(S32 y = miny; y <= maxy; y++)
-      {
-         for(BucketEntry *walk = mBuckets[x & BucketMask][y & BucketMask]; walk; walk = walk->nextInBucket)
-         {
-            DatabaseObject *theObject = walk->theObject;
-
-            if(theObject->mLastQueryId != mQueryId &&             // Object hasn't been queried; and
-               (theObject->getObjectTypeMask() & typeMask) &&     // is of the right type; and
-               theObject->extent.intersects(extents) )            // overlaps our extents
-            {
-               walk->theObject->mLastQueryId = mQueryId;    // Flag the object so we know we've already visited it
-               fillVector.push_back(walk->theObject);       // And save it as a found item
-            }
-         }
-      }
-   }
+   findObjects(typeMask, fillVector, &extents, minx, miny, maxx, maxy);
 }
 
 

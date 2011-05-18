@@ -301,7 +301,7 @@ S32 SoccerGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEve
 TNL_IMPLEMENT_NETOBJECT(SoccerBallItem);
 
 // Constructor
-SoccerBallItem::SoccerBallItem(Point pos) : Item(pos, true, SoccerBallItem::SOCCER_BALL_RADIUS, 4)
+SoccerBallItem::SoccerBallItem(Point pos) : EditorItem(pos, true, SoccerBallItem::SOCCER_BALL_RADIUS, 4)
 {
    mObjectTypeMask |= CommandMapVisType | TurretTargetType | SoccerBallItemType;
    mNetFlags.set(Ghostable);
@@ -391,6 +391,19 @@ void SoccerBallItem::renderItem(Point pos)
 {
    renderSoccerBall(pos);
 }
+
+
+void SoccerBallItem::renderDock()
+{
+   renderItem(getVert(0));
+}
+
+
+void SoccerBallItem::renderEditor(F32 currentScale)
+{
+   renderItem(getVert(0));
+}
+
 
 
 void SoccerBallItem::idle(GameObject::IdleCallPath path)

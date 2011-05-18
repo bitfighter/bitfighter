@@ -1019,27 +1019,6 @@ void EditorObject::renderLinePolyVertices(F32 currentScale, F32 alpha)
 }
 
 
-// TODO: Move this to forcefield
-void EditorObject::findForceFieldEnd()
-{
-   // Load the corner points of a maximum-length forcefield into geom
-   Vector<Point> geom;
-   DatabaseObject *collObj;
-
-   F32 scale = 1 / getGridSize();
-   
-   Point start = ForceFieldProjector::getForceFieldStartPoint(getVert(0), mAnchorNormal, scale);
-
-   if(ForceField::findForceFieldEnd(getGridDatabase(), start, mAnchorNormal, scale, forceFieldEnd, &collObj))
-      forceFieldEndSegment = dynamic_cast<WallSegment *>(collObj);
-   else
-      forceFieldEndSegment = NULL;
-
-   ForceField::getGeom(start, forceFieldEnd, geom, scale);    
-   setExtent(Rect(geom));
-}
-
-
 void EditorObject::unselect()
 {
    setSelected(false);
@@ -1109,20 +1088,6 @@ void EditorObject::decreaseWidth(S32 amt)
 }
 
 
-// Returns true if we should use the in-game rendering, false if we should use iconified editor rendering
-// TODO: get rid of this fn
-static bool renderFull(U32 index, F32 scale, bool dockItem, bool snapped)
-{
-   if(dockItem)
-      return false;
-
-   if(index & EngineeredType)
-      return(snapped && scale > 70);
-   
-   return true;
-}
-
-
 //// Radius of item in editor -- TODO: Push down to objects
 //S32 EditorObject::getEditorRadius(F32 scale)
 //{
@@ -1140,16 +1105,9 @@ static bool renderFull(U32 index, F32 scale, bool dockItem, bool snapped)
 //}
 
 
-// Account for the fact that the apparent selection center and actual object center are not quite aligned
-// TODO: Should be pushed down to the objects themselves
 Point EditorObject::getEditorSelectionOffset(F32 scale)
 {
-   if(getObjectTypeMask() & TurretType && renderFull(getObjectTypeMask(), scale, mDockItem, mSnapped))
-      return Point(0,.075);
-   else if(getObjectTypeMask() & ForceFieldProjectorType && renderFull(getObjectTypeMask(), scale, mDockItem, mSnapped))
-      return Point(0,.035);     
-   else
-      return Point(0,0);     // No offset for most items
+   return Point(0,0);     // No offset for most items
 }
 
 

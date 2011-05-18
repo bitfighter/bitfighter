@@ -59,9 +59,11 @@ extern void drawSquare(const Point &pos, F32 size);
 extern void drawFilledSquare(const Point &pos, F32 size);
 extern void drawFilledSquare(const Point &pos, S32 size);
 extern void drawFilledSquare(const Point &pos, F32 size);
+
+extern void renderSquareItem(const Point &pos, const Color &c, F32 alpha, const Color &letterColor, char letter);
+
 extern void drawCircle(const Point &pos, F32 radius);
 extern void drawCircle(F32 x, F32 y, F32 radius);
-
 
 
 //////////
@@ -112,6 +114,10 @@ extern const Color BORDER_FILL_COLOR;
 extern const F32 BORDER_FILL_ALPHA;
 extern const F32 BORDER_WIDTH;
 
+extern void renderPolygonOutline(const Vector<Point> &outline);
+extern void renderPolygonOutline(const Vector<Point> &outlinePoints, Color &outlineColor, F32 alpha = 1);
+extern void renderPolygonFill(const Vector<Point> *fillPoints, const Color &fillColor, F32 alpha = 1);
+
 extern void renderGoalZone(Color c, const Vector<Point> &outline, const Vector<Point> &fill, Point centroid);     // No label version
 extern void renderGoalZone(Color c, const Vector<Point> &outline, const Vector<Point> &fill, Point centroid = Point(), F32 labelAngle = 0, 
                            bool isFlashing = false, F32 glowFraction = 0, S32 score = 0, F32 scaleFact = 1);
@@ -121,9 +127,7 @@ extern void renderNexus(const Vector<Point> &outline, const Vector<Point> &fill,
 
 
 extern void renderSlipZone(const Vector<Point> &bounds, const Vector<Point> &boundsFill, Rect extent);
-
 extern void renderPolygonLabel(const Point &centroid, F32 angle, F32 size, const char *text, F32 scaleFact = 1);
-
 
 extern void renderProjectile(const Point &pos, U32 type, U32 time);
 

@@ -810,7 +810,7 @@ void renderPolygonOutline(const Vector<Point> &outlinePoints, const Color &outli
 
 
 // TODO: Get rid of one of these!
-void renderPolygonFill(const Vector<Point> *fillPoints, const Color &fillColor, F32 alpha = 1)
+void renderPolygonFill(const Vector<Point> *fillPoints, const Color &fillColor, F32 alpha)      // alpha is optional
 {
    if(alpha != 1)
       glEnableBlend;
@@ -1770,6 +1770,29 @@ void drawFilledSquare(const Point &pos, F32 size)
 void drawFilledSquare(const Point &pos, S32 size)
 {
     drawSquare(pos, F32(size), true);
+}
+
+
+
+static void drawLetter(char letter, const Point &pos, const Color &color, F32 alpha)
+{
+   // Mark the item with a letter, unless we're showing the reference ship
+   S32 vertOffset = 8;
+   if (letter >= 'a' && letter <= 'z')    // Better position lowercase letters
+      vertOffset = 10;
+
+   glColor(color, alpha);
+   F32 xpos = pos.x - UserInterface::getStringWidthf(15, "%c", letter) / 2;
+
+   UserInterface::drawStringf(xpos, pos.y - vertOffset, 15, "%c", letter);
+}
+
+
+void renderSquareItem(const Point &pos, const Color &c, F32 alpha, const Color &letterColor, char letter)
+{
+   glColor(c, alpha);
+   drawFilledSquare(pos, 8);  // Draw filled box in which we'll put our letter
+   drawLetter(letter, pos, letterColor, alpha);
 }
 
 

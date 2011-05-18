@@ -230,7 +230,7 @@ public:
 
    virtual S32 getDefaultRespawnTime() = 0;
 
-   string toString();
+   virtual string toString();
 
    F32 getEditorRadius(F32 currentScale);
 
@@ -239,17 +239,35 @@ public:
 
    //// PointObject methods     ==> TODO: Make this an interface
    Point getVert(S32 index) { return mPos; }
-   //S32 getVertCount() { return 1; }
-   //void clearVerts() { /* Do nothing */ }
    void setVert(const Point &point, S32 index) { mPos = point; }
-   //void addVert(const Point &point)  { /* Do nothing */ }
-   //void addVertFront(Point vert)  { /* Do nothing */ }
-   //void deleteVert(S32 vertIndex)  { /* Do nothing */ }
-   //void insertVert(Point vertex, S32 vertIndex)  { /* Do nothing */ }
-   //GeomType getGeomType() { return geomPoint; }
-   //void addToDock(Game *game, const Point &point);
 };
 
+
+class ShipSpawn : public AbstractSpawn
+{
+public:
+   static const S32 DEFAULT_RESPAWN_TIME = 30;    // in seconds
+
+   ShipSpawn(const Point &pos = Point(), S32 time = DEFAULT_RESPAWN_TIME);  // C++ constructor (no lua constructor)
+
+   const char *getEditorHelpString() { return "Location where ships start.  At least one per team is required. [G]"; }
+   const char *getPrettyNamePlural() { return "Spawn points"; }
+   const char *getOnDockName() { return "Spawn"; }
+   const char *getOnScreenName() { return "Spawn"; }
+
+   const char *getClassName() { return "ShipSpawn"; }
+
+   string toString();
+
+   S32 getDefaultRespawnTime() { return 0; }    // Somewhat meaningless in this context
+
+   void renderEditor(F32 currentScale);
+   void renderDock();
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 ////////////////////////////////////////
 ////////////////////////////////////////

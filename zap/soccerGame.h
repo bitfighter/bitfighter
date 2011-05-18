@@ -83,7 +83,7 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class SoccerBallItem : public Item
+class SoccerBallItem : public EditorItem
 {
 private:
    typedef Item Parent;
@@ -119,6 +119,12 @@ public:
    const char *getPrettyNamePlural() { return "SoccerBalls"; }
    const char *getOnDockName() { return "Ball"; }
    const char *getOnScreenName() { return "SoccerBall"; }
+   bool hasTeam() { return false; }
+   bool canBeHostile() { return false; }
+   bool canBeNeutral() { return false; }
+
+   void renderDock();
+   void renderEditor(F32 currentScale);
 
 
    ///// Lua Interface

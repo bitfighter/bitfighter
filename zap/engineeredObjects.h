@@ -89,10 +89,13 @@ public:
    static DatabaseObject *findAnchorPointAndNormal(GridDatabase *db, const Point &pos, F32 snapDist, 
                                                    bool format, S32 wallType, Point &anchor, Point &normal);
 
+   void setAnchorNormal(const Point &nrml) { mAnchorNormal = nrml; }
+
    /////
    // Editor stuff
    Point getVert(S32 index) { return mAnchorPoint; }
    void setVert(const Point &pos, S32 index) { mAnchorPoint = pos; }
+   
    string toString();
 
    /////
@@ -194,9 +197,12 @@ public:
    bool canBeHostile() { return true; }
    bool canBeNeutral() { return true; }
 
+   Point getEditorSelectionOffset(F32 currentScale);
+
    void renderDock();
    void renderEditor(F32 currentScale);
 
+   void findForceFieldEnd();                      // Find end of forcefield in editor
 
    ///// Lua Interface
 
@@ -269,6 +275,10 @@ public:
    bool hasTeam() { return true; }
    bool canBeHostile() { return true; }
    bool canBeNeutral() { return true; }
+
+   Point getEditorSelectionOffset(F32 currentScale);
+   void onGeomChanged();
+   void onItemDragging() { onGeomChanged(); }
 
    void renderDock();
    void renderEditor(F32 currentScale);

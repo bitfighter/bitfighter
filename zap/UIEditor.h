@@ -151,7 +151,7 @@ class WallSegmentManager
 {
 private:
    static GridDatabase *mGridDatabase;
-   GridDatabase *getGridDatabase() { return mGridDatabase; }      
+   GridDatabase *getGridDatabase() { return mGridDatabase; } 
 
 public:
    WallSegmentManager()  { /* Do nothing */ }
@@ -400,7 +400,7 @@ public:
    EditorObject *getSnapItem() { return mSnapVertex_i; }
    S32 getSnapVertexIndex() { return mSnapVertex_j; }
    void rebuildEverything();        // Does lots of things in undo, redo, and add items from script
-   void recomputeAllEngineeredItems();
+   void resnapAllEngineeredItems();
 
    void onBeforeRunScriptFromConsole();
    void onAfterRunScriptFromConsole();

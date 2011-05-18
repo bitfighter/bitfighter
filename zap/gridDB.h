@@ -85,6 +85,9 @@ class GridDatabase
 private:
    bool mUsingGameCoords;
 
+   void findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector, const Rect *extents, S32 minx, S32 miny, S32 maxx, S32 maxy);
+   U32 mQueryId;
+
 public:
    enum {
       BucketRowCount = 16,    // Number of buckets per grid row, and number of rows; should be power of 2
@@ -97,7 +100,7 @@ public:
       BucketEntry *nextInBucket;
    };
 
-   U32 mQueryId;
+   
    BucketEntry *mBuckets[BucketRowCount][BucketRowCount];
    ClassChunker<BucketEntry> mChunker;
 
@@ -111,7 +114,9 @@ public:
                                  float &collisionTime, Point &surfaceNormal);
    bool pointCanSeePoint(const Point &point1, const Point &point2);
 
+   void findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector);      
    void findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector, const Rect &extents);
+   
 
    void addToDatabase(DatabaseObject *theObject, const Rect &extents);
    void removeFromDatabase(DatabaseObject *theObject, const Rect &extents);
