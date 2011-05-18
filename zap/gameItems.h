@@ -243,19 +243,19 @@ public:
 };
 
 
-class ShipSpawn : public AbstractSpawn
+class Spawn : public AbstractSpawn
 {
 public:
    static const S32 DEFAULT_RESPAWN_TIME = 30;    // in seconds
 
-   ShipSpawn(const Point &pos = Point(), S32 time = DEFAULT_RESPAWN_TIME);  // C++ constructor (no lua constructor)
+   Spawn(const Point &pos = Point(), S32 time = DEFAULT_RESPAWN_TIME);  // C++ constructor (no lua constructor)
 
    const char *getEditorHelpString() { return "Location where ships start.  At least one per team is required. [G]"; }
    const char *getPrettyNamePlural() { return "Spawn points"; }
    const char *getOnDockName() { return "Spawn"; }
    const char *getOnScreenName() { return "Spawn"; }
 
-   const char *getClassName() { return "ShipSpawn"; }
+   const char *getClassName() { return "Spawn"; }
 
    string toString();
 

@@ -220,6 +220,7 @@ public:
    void render();
    void renderFill();
    void renderDock();
+   void renderEditor(F32 currentScale);
 
    S32 getRenderSortValue() { return -1; }
 

@@ -161,7 +161,7 @@ void EditorUserInterface::populateDock()
       //addDockObject(new ItemEnergy(), xPos + 10, yPos);
       yPos += spacer;
 
-      addDockObject(new ShipSpawn(), xPos, yPos);
+      addDockObject(new Spawn(), xPos, yPos);
       yPos += spacer;
 
       addDockObject(new ForceFieldProjector(), xPos, yPos);

@@ -497,6 +497,13 @@ void PolyWall::renderFill()
 }
 
 
+void PolyWall::renderEditor(F32 currentScale)
+{
+   glColor(HIGHLIGHT_COLOR);
+   renderPolygonOutline(mPolyBounds);
+}
+
+
 void PolyWall::renderDock()
 {
    renderPolygonFill(&mPolyFill, EDITOR_WALL_FILL_COLOR, 1);

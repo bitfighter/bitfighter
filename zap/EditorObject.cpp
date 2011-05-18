@@ -946,6 +946,10 @@ static EditorObject *getNewEditorObject(EditorObject *obj)
    if(mine != NULL)
       return new Mine(*mine);
 
+   Spawn *shipSpawn = dynamic_cast<Spawn *>(obj);
+   if(shipSpawn != NULL)
+      return new Spawn(*shipSpawn);
+
    SpyBug *spyBug = dynamic_cast<SpyBug *>(obj);
    if(spyBug != NULL)
       return new SpyBug(*spyBug);
@@ -973,6 +977,11 @@ static EditorObject *getNewEditorObject(EditorObject *obj)
    WallItem *wallItem = dynamic_cast<WallItem *>(obj);
    if(wallItem != NULL)
       return new WallItem(*wallItem);
+
+   PolyWall *polyWall = dynamic_cast<PolyWall *>(obj);
+   if(polyWall != NULL)
+      return new PolyWall(*polyWall);
+
 
    TNLAssert(false, "OBJECT NOT HANDLED IN COPY OPERATION!");
 

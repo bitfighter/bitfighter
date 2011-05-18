@@ -221,13 +221,13 @@ string AbstractSpawn::toString()
 ////////////////////////////////////////
 
 // Constructor
-ShipSpawn::ShipSpawn(const Point &pos, S32 time) : AbstractSpawn(pos, time, ShipSpawnType)
+Spawn::Spawn(const Point &pos, S32 time) : AbstractSpawn(pos, time, ShipSpawnType)
 {
    // Do nothing
 };
 
 
-string ShipSpawn::toString()
+string Spawn::toString()
 {
    Point pos = mPos / getGame()->getGridSize();
 
@@ -236,7 +236,7 @@ string ShipSpawn::toString()
 }
 
 
-void ShipSpawn::renderEditor(F32 currentScale)
+void Spawn::renderEditor(F32 currentScale)
 {
    glPushMatrix();
       glTranslatef(mPos.x, mPos.y, 0);
@@ -246,7 +246,7 @@ void ShipSpawn::renderEditor(F32 currentScale)
 }
 
 
-void ShipSpawn::renderDock()
+void Spawn::renderDock()
 {
    renderEditor(1);
 }
