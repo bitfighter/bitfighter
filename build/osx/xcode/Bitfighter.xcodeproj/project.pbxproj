@@ -741,7 +741,7 @@
 		7377F2D51381C7AD00DB1417 /* SoundSystem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SoundSystem.cpp; path = ../../../zap/SoundSystem.cpp; sourceTree = SOURCE_ROOT; };
 		7377F2D61381C7AD00DB1417 /* SoundSystem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SoundSystem.h; path = ../../../zap/SoundSystem.h; sourceTree = SOURCE_ROOT; };
 		7377F2EE1381C84700DB1417 /* Ogg.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Ogg.framework; path = ../../../lib/Ogg.framework; sourceTree = SOURCE_ROOT; };
-		7377F2F01381C84700DB1417 /* Speex.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Speex.framework; path = ../../../../../lib/Speex.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		7377F2F01381C84700DB1417 /* Speex.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Speex.framework; path = ../../../lib/Speex.framework; sourceTree = SOURCE_ROOT; };
 		737826B112960DDF007333BE /* Bitfighterd.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Bitfighterd.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7378E23612F93C9D005EF681 /* database.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = database.cpp; path = ../../../master/database.cpp; sourceTree = SOURCE_ROOT; };
 		7378E23712F93C9D005EF681 /* database.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = database.h; path = ../../../master/database.h; sourceTree = SOURCE_ROOT; };
