@@ -60,7 +60,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\tnl;..\libtomcrypt;..\glut;..\openal;..\win_include_do_not_distribute</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\tnl;..\libtomcrypt;..\glut;..\openal;..\libspeex;..\alure;..\win_include_do_not_distribute</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PreprocessToFile>false</PreprocessToFile>
@@ -72,7 +72,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>../lib;</AdditionalLibraryDirectories>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>../Debug/libtomcrypt.lib;../Debug/tnl.lib;../Debug/lua-vec.lib;../lib/ALut.lib;../lib/OpenAL32.lib;dinput8.lib;dxguid.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>../Debug/libtomcrypt.lib;../Debug/tnl.lib;../Debug/lua-vec.lib;../lib/ALut.lib;../lib/OpenAL32.lib;../lib/libspeex.lib;../lib/libogg.lib;../lib/ALURE32.lib;dinput8.lib;dxguid.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>MSVCRTD.lib;msvcprtd.lib</IgnoreSpecificDefaultLibraries>
     </Link>
     <ProjectReference>
@@ -99,7 +99,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>..\tnl;..\libtomcrypt;..\glut;..\openal;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\tnl;..\libtomcrypt;..\glut;..\openal;..\libspeex;..\alure</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
       <MinimalRebuild>true</MinimalRebuild>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -111,7 +111,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>../lib;</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>MSVCRT.lib;msvcprt.lib</IgnoreSpecificDefaultLibraries>
-      <AdditionalDependencies>../Release/libtomcrypt.lib;../Release/tnl.lib;../Release/lua-vec.lib;../lib/ALut.lib;../lib/OpenAL32.lib;dinput8.lib;dxguid.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>../Release/libtomcrypt.lib;../Release/tnl.lib;../Release/lua-vec.lib;../lib/ALut.lib;../lib/OpenAL32.lib;../lib/libspeex.lib;../lib/libogg.lib;../lib/ALURE32.lib;dinput8.lib;dxguid.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
     </Link>
     <CustomBuildStep>
@@ -131,11 +131,6 @@
     <ClCompile Include="..\clipper\clipper.cpp" />
     <ClCompile Include="..\master\database.cpp" />
     <ClCompile Include="..\master\masterInterface.cpp" />
-    <ClCompile Include="..\poly2tri\common\shapes.cc" />
-    <ClCompile Include="..\poly2tri\sweep\advancing_front.cc" />
-    <ClCompile Include="..\poly2tri\sweep\cdt.cc" />
-    <ClCompile Include="..\poly2tri\sweep\sweep.cc" />
-    <ClCompile Include="..\poly2tri\sweep\sweep_context.cc" />
     <ClCompile Include="..\recast\RecastAlloc.cpp" />
     <ClCompile Include="..\recast\RecastMesh.cpp" />
     <ClCompile Include="..\sqlite\sqlite3.c" />
@@ -187,7 +182,6 @@
     <ClCompile Include="..\zap\md5wrapper.cpp" />
     <ClCompile Include="..\zap\move.cpp" />
     <ClCompile Include="..\zap\moveObject.cpp" />
-    <ClCompile Include="..\zap\pictureloader.cpp" />
     <ClCompile Include="..\zap\playerInfo.cpp" />
     <ClCompile Include="..\zap\polygon.cpp" />
     <ClCompile Include="..\zap\projectile.cpp" />
@@ -200,7 +194,8 @@
     <ClCompile Include="..\zap\retrieveGame.cpp" />
     <ClCompile Include="..\zap\robot.cpp" />
     <ClCompile Include="..\zap\screenShooter.cpp" />
-    <ClCompile Include="..\zap\sfx.cpp" />
+    <ClCompile Include="..\zap\SoundSystem.cpp" />
+    <ClCompile Include="..\zap\SoundEffect.cpp" />
     <ClCompile Include="..\zap\ship.cpp" />
     <ClCompile Include="..\zap\SlipZone.cpp" />
     <ClCompile Include="..\zap\soccerGame.cpp" />
@@ -245,13 +240,6 @@
     <ClInclude Include="..\clipper\clipper.h" />
     <ClInclude Include="..\master\database.h" />
     <ClInclude Include="..\master\masterInterface.h" />
-    <ClInclude Include="..\poly2tri\common\shapes.h" />
-    <ClInclude Include="..\poly2tri\common\utils.h" />
-    <ClInclude Include="..\poly2tri\poly2tri.h" />
-    <ClInclude Include="..\poly2tri\sweep\advancing_front.h" />
-    <ClInclude Include="..\poly2tri\sweep\cdt.h" />
-    <ClInclude Include="..\poly2tri\sweep\sweep.h" />
-    <ClInclude Include="..\poly2tri\sweep\sweep_context.h" />
     <ClInclude Include="..\recast\Recast.h" />
     <ClInclude Include="..\recast\RecastAlloc.h" />
     <ClInclude Include="..\sqlite\sqlite3.h" />
@@ -300,7 +288,6 @@
     <ClInclude Include="..\zap\md5wrapper.h" />
     <ClInclude Include="..\zap\move.h" />
     <ClInclude Include="..\zap\moveObject.h" />
-    <ClInclude Include="..\zap\pictureloader.h" />
     <ClInclude Include="..\zap\playerInfo.h" />
     <ClInclude Include="..\zap\Point.h" />
     <ClInclude Include="..\zap\Rect.h" />
@@ -315,7 +302,9 @@
     <ClInclude Include="..\zap\resource.h" />
     <ClInclude Include="..\zap\robot.h" />
     <ClInclude Include="..\zap\screenShooter.h" />
-    <ClInclude Include="..\zap\sfx.h" />
+    <ClInclude Include="..\zap\SFXProfile.h" />
+    <ClInclude Include="..\zap\SoundSystem.h" />
+    <ClInclude Include="..\zap\SoundEffect.h" />
     <ClInclude Include="..\zap\SharedConstants.h" />
     <ClInclude Include="..\zap\ship.h" />
     <ClInclude Include="..\zap\shipItems.h" />

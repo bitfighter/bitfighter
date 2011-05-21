@@ -26,7 +26,7 @@
 #include "rabbitGame.h"
 #include "ship.h"
 #include "UIGame.h"
-#include "sfx.h"
+#include "SoundSystem.h"
 #include "flagItem.h"
 
 #include "../glut/glutInclude.h"
@@ -45,31 +45,31 @@ TNL_IMPLEMENT_NETOBJECT_RPC(RabbitGameType, s2cRabbitMessage, (U32 msgIndex, Str
    switch (msgIndex)
    {
    case RabbitMsgGrab:
-      SFXObject::play(SFXFlagCapture);
+      SoundSystem::playSoundEffect(SFXFlagCapture);
       clientGame->mGameUserInterface->displayMessage(Color(1.0f, 0.0f, 0.0f),
                   "%s GRABBED the Carrot!",
                   clientName.getString());
       break;
    case RabbitMsgRabbitKill:
-      SFXObject::play(SFXShipHeal);
+      SoundSystem::playSoundEffect(SFXShipHeal);
       clientGame->mGameUserInterface->displayMessage(Color(1.0f, 0.0f, 0.0f),
                   "%s is a rabbid rabbit!",
                   clientName.getString());
       break;
    case RabbitMsgDrop:
-      SFXObject::play(SFXFlagDrop);
+      SoundSystem::playSoundEffect(SFXFlagDrop);
       clientGame->mGameUserInterface->displayMessage(Color(0.0f, 1.0f, 0.0f),
                   "%s DROPPED the Carrot!",
                   clientName.getString());
       break;
    case RabbitMsgRabbitDead:
-      SFXObject::play(SFXShipExplode);
+      SoundSystem::playSoundEffect(SFXShipExplode);
       clientGame->mGameUserInterface->displayMessage(Color(1.0f, 0.0f, 0.0f),
                   "%s killed the rabbit!",
                   clientName.getString());
       break;
    case RabbitMsgReturn:
-      SFXObject::play(SFXFlagReturn);
+      SoundSystem::playSoundEffect(SFXFlagReturn);
       clientGame->mGameUserInterface->displayMessage(Color(1.0f, 0.0f, 1.0f),
                   "The Carrot has been returned!");
       break;

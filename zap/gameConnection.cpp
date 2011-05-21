@@ -397,7 +397,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSuspendGame, (bool suspend), (suspend), Net
 TNL_IMPLEMENT_RPC(GameConnection, s2cUnsuspend, (), (), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 1)
 {
    mClientGame->unsuspendGame();       
-   SFXObject::play(SFXPlayerJoined, 1);
+   SoundSystem::playSoundEffect(SFXPlayerJoined, 1);
 }
 
 
@@ -896,7 +896,7 @@ static void displayMessage(U32 colorIndex, U32 sfxEnum, const char *message)
 
    gClientGame->mGameUserInterface->displayMessage(colors[colorIndex], "%s", message);
    if(sfxEnum != SFXNone)
-      SFXObject::play(sfxEnum);
+      SoundSystem::playSoundEffect(sfxEnum);
 }
 
 // I believe this is not used -CE
@@ -1134,8 +1134,25 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetServerAlertVolume, (S8 vol), (vol), NetC
    //setServerAlertVolume(vol);
 }
 
-
-extern void updateClientChangedName(GameConnection *,StringTableEntry);  //in masterConnection.cpp
+//  Tell all clients name is changed, and update server side name
+// Game Server only
+void updateClientChangedName(GameConnection *gc, StringTableEntry newName){
+   GameType *gt = gServerGame->getGameType();
+   ClientRef *cr = gc->getClientRef();
+   logprintf(LogConsumer::LogConnection, "Name changed from %s to %s",gc->getClientName().getString(),newName.getString());
+   if(gt)
+   {
+      gt->s2cRenameClient(gc->getClientName(), newName);
+   }
+   gc->setClientName(newName);
+   cr->name = newName;
+   Ship *ship = dynamic_cast<Ship *>(gc->getControlObject());
+   if(ship)
+   {
+      ship->setName(newName);
+      ship->setMaskBits(Ship::AuthenticationMask);  //ship names will update with this bit
+   }
+}
 
 // Client connect to master after joining game server, get authentication fail,
 // then client have changed name to non-reserved, or entered password.
@@ -1174,9 +1191,9 @@ LevelInfo getLevelInfo(char *level, S32 size)
    S32 cur = 0;
    S32 startingCur = 0;
    //const char *gametypeName;
-   string levelName;
    LevelInfo levelInfo;
-   levelInfo.levelType = "?";
+   levelInfo.levelName = "";
+   levelInfo.levelType = "Bitmatch";
    levelInfo.minRecPlayers = -1;
    levelInfo.maxRecPlayers = -1;
 
@@ -1201,7 +1218,12 @@ LevelInfo getLevelInfo(char *level, S32 size)
                }
             }
             else if(list.size() >= 2 && list[0] == "LevelName")
-               levelInfo.levelName = list[1];
+            {
+               string levelName = list[1];
+               for(S32 i=2; i<list.size(); i++)
+                  levelName += " " + list[i];
+               levelInfo.levelName = levelName;
+            }
             else if(list.size() >= 2 && list[0] == "MinPlayers")
                levelInfo.minRecPlayers = atoi(list[1].c_str());
             else if(list.size() >= 2 && list[0] == "MaxPlayers")
@@ -1249,6 +1271,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendDataParts, (U8 type, ByteBufferPtr data
       {
          fwrite(mDataBuffer->getBuffer(), 1, mDataBuffer->getBufferSize(), f);
          fclose(f);
+         logprintf(LogConsumer::ServerFilter, "%s %s Uploaded %s", getNetAddressString(), mClientName.getString(), filename1);
          S32 id = gServerGame->addLevelInfo(filename1, levelInfo);
          c2sRequestLevelChange2(id, false);
       }

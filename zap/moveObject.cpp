@@ -29,8 +29,10 @@
 #include "GeomUtils.h"
 #include "sparkManager.h"
 #include "ship.h"
-#include "sfx.h"
+#include "SoundSystem.h"
 #include "speedZone.h"
+
+#include <math.h>
 
 namespace Zap
 {
@@ -385,7 +387,7 @@ void MoveObject::computeCollisionResponseBarrier(U32 stateIndex, Point &collisio
       if(scale > 0.5f)
       {
          // Make a noise...
-         SFXObject::play(SFXBounceWall, collisionPoint, Point(), getMin(1.0f, scale - 0.25f));
+         SoundSystem::playSoundEffect(SFXBounceWall, collisionPoint, Point(), getMin(1.0f, scale - 0.25f));
 
          Color bumpC(scale/3, scale/3, scale);
 
@@ -460,7 +462,7 @@ void MoveObject::computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *
    else     // Client only
    {
       if(v1i > 0.25)    // Make sound if the objects are moving fast enough
-         SFXObject::play(SFXBounceObject, moveObjectThatWasHit->mMoveState[stateIndex].pos, Point());
+         SoundSystem::playSoundEffect(SFXBounceObject, moveObjectThatWasHit->mMoveState[stateIndex].pos, Point());
 
       if(moveObjectThatWasHit->getObjectTypeMask() & ItemType)
       {

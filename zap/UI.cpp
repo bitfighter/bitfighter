@@ -27,7 +27,6 @@
 using namespace TNL;
 
 #include "UI.h"
-#include "sfx.h"
 #include "move.h"
 #include "keyCode.h"
 #include "UIMenus.h"
@@ -43,6 +42,7 @@ using namespace TNL;
 #include <string>
 #include <stdarg.h>     // For va_args
 
+#include <math.h>
 
 #ifdef ZAP_DEDICATED
 void *glutStrokeRoman;
@@ -682,7 +682,7 @@ S32 UserInterface::getStringWidthf(S32 size, const char *format, ...)
 
 void UserInterface::playBoop()
 {
-   SFXObject::play(SFXUIBoop, 1);
+   SoundSystem::playSoundEffect(SFXUIBoop, 1);
 }
 
 

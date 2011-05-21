@@ -48,6 +48,7 @@
 #include "config.h"
 #include "loadoutHelper.h"
 #include "gameNetInterface.h"
+#include "SoundSystem.h"
 
 #include "md5wrapper.h"          // For submission of passwords
 
@@ -55,6 +56,7 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <math.h>
 
 #include "oglconsole.h"          // Our console object
 
@@ -786,7 +788,7 @@ void GameUserInterface::renderChatMessageDisplay()
 {
    glColor3f(1,1,1);
 
-   S32 y = gIniSettings.showWeaponIndicators ? UserInterface::chatMessageMargin : UserInterface::vertMargin;
+   S32 y = UserInterface::chatMessageMargin;
    S32 msgCount;
 
    if(mMessageDisplayMode == LongFixed)
@@ -2284,7 +2286,7 @@ GameUserInterface::VoiceRecorder::VoiceRecorder()
    mRecordingAudio = false;
    mMaxAudioSample = 0;
    mMaxForGain = 0;
-   mVoiceEncoder = new LPC10VoiceEncoder;
+   mVoiceEncoder = new SpeexVoiceEncoder;
 }
 
 GameUserInterface::VoiceRecorder::~VoiceRecorder()
@@ -2342,7 +2344,7 @@ void GameUserInterface::VoiceRecorder::start()
    mWantToStopRecordingAudio = 0; // linux repeadedly sends key-up / key-down when only holding key down
    if(!mRecordingAudio)
    {
-      mRecordingAudio = SFXObject::startRecording();
+      mRecordingAudio = SoundSystem::startRecording();
       if(!mRecordingAudio)
          return;
 
@@ -2352,7 +2354,7 @@ void GameUserInterface::VoiceRecorder::start()
       mVoiceAudioTimer.reset(FirstVoiceAudioSampleTime);
 
       // trim the start of the capture buffer:
-      SFXObject::captureSamples(mUnusedAudio);
+      SoundSystem::captureSamples(mUnusedAudio);
       mUnusedAudio->resize(0);
    }
 }
@@ -2364,7 +2366,7 @@ void GameUserInterface::VoiceRecorder::stopNow()
       process();
 
       mRecordingAudio = false;
-      SFXObject::stopRecording();
+      SoundSystem::stopRecording();
       mVoiceSfx = NULL;
       mUnusedAudio = NULL;
    }
@@ -2386,7 +2388,7 @@ void GameUserInterface::VoiceRecorder::process()
       }
    }
    U32 preSampleCount = mUnusedAudio->getBufferSize() / 2;
-   SFXObject::captureSamples(mUnusedAudio);
+   SoundSystem::captureSamples(mUnusedAudio);
 
    U32 sampleCount = mUnusedAudio->getBufferSize() / 2;
    if(sampleCount == preSampleCount)
@@ -2428,7 +2430,7 @@ void GameUserInterface::VoiceRecorder::process()
    if(sendBuffer.isValid())
    {
       GameType *gt = gClientGame->getGameType();
-      if(gt)
+      if(gt && sendBuffer->getBufferSize() < 1024)      // don't try to send too big.
          gt->c2sVoiceChat(gIniSettings.echoVoice, sendBuffer);
    }
 }

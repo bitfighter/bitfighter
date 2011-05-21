@@ -29,12 +29,14 @@
 #include "projectile.h"
 #include "gameType.h"
 #include "gameWeapons.h"
-#include "sfx.h"
+#include "SoundSystem.h"
 #include "gameObjectRender.h"
 #include "GeomUtils.h"
 #include "BotNavMeshZone.h"
 //#include "UIEditor.h"      // For EditorUserInterface->getDatabase, and WallSegment def  TODO: can we get rid of this somehow?
 
+
+#include <math.h>
 
 namespace Zap
 {
@@ -479,7 +481,7 @@ void EngineeredObject::explode()
       Color(1, 1, 0),
    };
 
-   SFXObject::play(SFXShipExplode, getActualPos(), Point());
+   SoundSystem::playSoundEffect(SFXShipExplode, getActualPos(), Point());
 
    F32 a = TNL::Random::readF() * 0.4 + 0.5;
    F32 b = TNL::Random::readF() * 0.2 + 0.9;
@@ -947,7 +949,7 @@ void ForceField::unpackUpdate(GhostConnection *connection, BitStream *stream)
    mFieldUp = stream->readFlag();
 
    if(initial || (wasUp != mFieldUp))
-      SFXObject::play(mFieldUp ? SFXForceFieldUp : SFXForceFieldDown, mStart, Point());
+      SoundSystem::playSoundEffect(mFieldUp ? SFXForceFieldUp : SFXForceFieldDown, mStart, Point());
 }
 
 

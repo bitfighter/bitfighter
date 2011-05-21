@@ -44,7 +44,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				FavorSizeOrSpeed="1"
-				AdditionalIncludeDirectories="../tnl;.;../openal;../glut;../lua/include"
+				AdditionalIncludeDirectories="../tnl;.;../openal;../libspeex;../glut;../lua/include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;TNL_ENABLE_LOGGING;TNL_DEBUG;SAM_ONLY"
 				GeneratePreprocessedFile="0"
 				MinimalRebuild="true"
@@ -70,7 +70,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				LinkLibraryDependencies="false"
-				AdditionalDependencies="dinput8.lib dxguid.lib ../lib/OpenAL32.lib ../lib/alut.lib wsock32.lib ../lib/glut32.lib ../lib/tnld.lib ../lib/libtomcryptd.lib ../lib/lua-vec-d.lib"
+				AdditionalDependencies="dinput8.lib dxguid.lib ../lib/OpenAL32.lib ../lib/libogg.lib ../lib/libspeex.lib ../lib/ALURE32.lib wsock32.lib ../lib/glut32.lib ../lib/tnld.lib ../lib/libtomcryptd.lib ../lib/lua-vec-d.lib"
 				OutputFile="../exe/Bitfighter_d.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="../tnl;../lib../win_include_do_not_distribute;"
@@ -132,7 +132,7 @@
 				Optimization="2"
 				FavorSizeOrSpeed="1"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="../tnl;../glut;../openal"
+				AdditionalIncludeDirectories="../tnl;../glut;../openal;../libspeex"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;TNL_ENABLE_LOGGING;_SECURE_SCL=0"
 				RuntimeLibrary="0"
 				EnableEnhancedInstructionSet="0"
@@ -156,7 +156,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				LinkLibraryDependencies="false"
-				AdditionalDependencies="dxguid.lib dinput8.lib ../lib/OpenAL32.lib ../lib/alut.lib wsock32.lib ../lib/glut32.lib ../lib/tnl.lib ../lib/libtomcrypt.lib ../lib/lua-vec.lib"
+				AdditionalDependencies="dxguid.lib dinput8.lib ../lib/OpenAL32.lib ../lib/libogg.lib ../lib/libspeex.lib ../lib/ALURE32.lib wsock32.lib ../lib/glut32.lib ../lib/tnl.lib ../lib/libtomcrypt.lib ../lib/lua-vec.lib"
 				OutputFile="..\exe\Bitfighter.exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="../tnl;../lib../win_include_do_not_distribute;"
@@ -220,7 +220,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				FavorSizeOrSpeed="1"
-				AdditionalIncludeDirectories="../tnl;.;../openal;../glut;../lua/include;../mysql++;&quot;C:\Program Files\MySQL\MySQL Server 5.1\include&quot;"
+				AdditionalIncludeDirectories="../tnl;.;../openal;../libspeex;../glut;../lua/include;../mysql++;&quot;C:\Program Files\MySQL\MySQL Server 5.1\include&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;TNL_ENABLE_LOGGING;TNL_DEBUG;BF_WRITE_TO_MYSQL;MYSQLPP_NO_DLL;SAM_ONLY"
 				GeneratePreprocessedFile="0"
 				MinimalRebuild="true"
@@ -246,7 +246,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				LinkLibraryDependencies="false"
-				AdditionalDependencies="dinput8.lib dxguid.lib ../lib/OpenAL32.lib ../lib/alut.lib wsock32.lib ../lib/glut32.lib ../lib/tnld.lib ../lib/libtomcryptd.lib ../lib/lua-vec-d.lib ../lib/mysqlppd.lib Ws2_32.lib"
+				AdditionalDependencies="dinput8.lib dxguid.lib ../lib/OpenAL32.lib ../lib/libogg.lib ../lib/libspeex.lib ../lib/ALURE32.lib wsock32.lib ../lib/glut32.lib ../lib/tnld.lib ../lib/libtomcryptd.lib ../lib/lua-vec-d.lib ../lib/mysqlppd.lib Ws2_32.lib"
 				OutputFile="../exe/Bitfighter_mysql_d.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="../tnl;../lib../win_include_do_not_distribute;"
@@ -308,7 +308,7 @@
 				Optimization="2"
 				FavorSizeOrSpeed="1"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="../tnl;../glut;../openal;&quot;../mysql++&quot;;&quot;C:\Program Files\MySQL\MySQL Server 5.1\include&quot;"
+				AdditionalIncludeDirectories="../tnl;../glut;../openal;../libspeex;&quot;../mysql++&quot;;&quot;C:\Program Files\MySQL\MySQL Server 5.1\include&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;TNL_ENABLE_LOGGING;_SECURE_SCL=0;BF_WRITE_TO_MYSQL;MYSQLPP_NO_DLL"
 				RuntimeLibrary="0"
 				EnableEnhancedInstructionSet="0"
@@ -332,7 +332,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				LinkLibraryDependencies="false"
-				AdditionalDependencies="dxguid.lib dinput8.lib ../lib/OpenAL32.lib ../lib/alut.lib wsock32.lib ../lib/glut32.lib ../lib/tnl.lib ../lib/libtomcrypt.lib ../lib/lua-vec.lib ../lib/mysqlpp.lib"
+				AdditionalDependencies="dxguid.lib dinput8.lib ../lib/OpenAL32.lib ../lib/libogg.lib ../lib/libspeex.lib ../lib/ALURE32.lib wsock32.lib ../lib/glut32.lib ../lib/tnl.lib ../lib/libtomcrypt.lib ../lib/lua-vec.lib ../lib/mysqlpp.lib"
 				OutputFile="..\exe\Bitfighter_mysql.exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="../tnl;../lib../win_include_do_not_distribute;"
@@ -544,13 +544,25 @@
 				>
 			</File>
 			<File
-				RelativePath=".\sfx.cpp"
+				RelativePath=".\SoundSystem.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\sfx.h"
+				RelativePath=".\SoundSystem.h"
 				>
 			</File>
+         <File
+            RelativePath=".\SoundEffect.cpp"
+            >
+         </File>
+         <File
+            RelativePath=".\SoundEffect.h"
+            >
+         </File>
+         <File
+            RelativePath=".\SFXProfile.h"
+            >
+         </File>
 			<File
 				RelativePath=".\voiceCodec.cpp"
 				>
@@ -801,14 +813,6 @@
 			</File>
 		</Filter>
 		<File
-			RelativePath="..\poly2tri\sweep\advancing_front.cc"
-			>
-		</File>
-		<File
-			RelativePath="..\poly2tri\sweep\cdt.cc"
-			>
-		</File>
-		<File
 			RelativePath="..\clipper\clipper.cpp"
 			>
 		</File>
@@ -1053,10 +1057,6 @@
 			>
 		</File>
 		<File
-			RelativePath="..\poly2tri\common\shapes.cc"
-			>
-		</File>
-		<File
 			RelativePath=".\SharedConstants.h"
 			>
 		</File>
@@ -1078,14 +1078,6 @@
 		</File>
 		<File
 			RelativePath=".\stringUtils.cpp"
-			>
-		</File>
-		<File
-			RelativePath="..\poly2tri\sweep\sweep.cc"
-			>
-		</File>
-		<File
-			RelativePath="..\poly2tri\sweep\sweep_context.cc"
 			>
 		</File>
 		<File

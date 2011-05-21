@@ -119,7 +119,7 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="&quot;C:\Program Files\MySQL\MySQL Server 5.1\include&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;MYSQLPP_NO_DLL"
+				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;MYSQLPP_NO_DLL;_SECURE_SCL=0"
 				StringPooling="true"
 				ExceptionHandling="1"
 				RuntimeLibrary="0"
@@ -291,4 +291,6 @@
 			>
 		</File>
 	</Files>
+	<Globals>
+	</Globals>
 </VisualStudioProject>

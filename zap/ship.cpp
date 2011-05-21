@@ -29,7 +29,7 @@
 #include "sparkManager.h"
 #include "projectile.h"
 #include "gameLoader.h"
-#include "sfx.h"
+#include "SoundSystem.h"
 #include "UI.h"
 #include "UIMenus.h"
 #include "UIGame.h"
@@ -50,6 +50,7 @@
 #include "glutInclude.h"
 
 #include <stdio.h>
+#include <math.h>
 
 #define hypot _hypot    // Kill some warnings
 
@@ -799,15 +800,16 @@ void Ship::updateModuleSounds()
       if(mModuleActive[i])
       {
          if(mModuleSound[i].isValid())
-            mModuleSound[i]->setMovementParams(mMoveState[RenderState].pos, mMoveState[RenderState].vel);
+            SoundSystem::setMovementParams(mModuleSound[i], mMoveState[RenderState].pos, mMoveState[RenderState].vel);
          else if(moduleSFXs[i] != -1)
-            mModuleSound[i] = SFXObject::play(moduleSFXs[i], mMoveState[RenderState].pos, mMoveState[RenderState].vel);
+            mModuleSound[i] = SoundSystem::playSoundEffect(moduleSFXs[i], mMoveState[RenderState].pos, mMoveState[RenderState].vel);
       }
       else
       {
          if(mModuleSound[i].isValid())
          {
-            mModuleSound[i]->stop();
+//            mModuleSound[i]->stop();
+            SoundSystem::stopSoundEffect(mModuleSound[i]);
             mModuleSound[i] = NULL;
          }
       }
@@ -1126,7 +1128,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
       mWarpInTimer.reset(WarpFadeInTime);    // Make ship all spinny
 
       FXManager::emitTeleportInEffect(mMoveState[ActualState].pos, 1);
-      SFXObject::play(SFXTeleportIn, mMoveState[ActualState].pos, Point());
+      SoundSystem::playSoundEffect(SFXTeleportIn, mMoveState[ActualState].pos, Point());
    }
 
 }  // unpackUpdate
@@ -1341,7 +1343,7 @@ Color ShipExplosionColors[NumShipExplosionColors] = {
 
 void Ship::emitShipExplosion(Point pos)
 {
-   SFXObject::play(SFXShipExplode, pos, Point());
+   SoundSystem::playSoundEffect(SFXShipExplode, pos, Point());
 
    F32 a = TNL::Random::readF() * 0.4 + 0.5;
    F32 b = TNL::Random::readF() * 0.2 + 0.9;

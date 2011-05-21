@@ -26,11 +26,12 @@
 #ifndef _RECT_H_
 #define _RECT_H_
 
-#include "tnlTypes.h"
-#include "tnlVector.h"
 #include "Point.h"
 
-using namespace TNL;
+namespace TNL {
+   typedef float F32;
+   template<class T> class Vector;
+};
 
 namespace Zap
 {
@@ -44,7 +45,7 @@ public:
 
    Rect();                                     // Constuctor
    Rect(const Point &p1, const Point &p2);    // Constuctor
-   Rect(F32 x1, F32 y1, F32 x2, F32 y2);       // Constuctor
+   Rect(TNL::F32 x1, TNL::F32 y1, TNL::F32 x2, TNL::F32 y2);       // Constuctor
    Rect(const Point &p, member_type size);    // Constuctor, takes point and "radius"
 
    Rect(const TNL::Vector<Point> &p);         // Construct as a bounding box around multiple points
@@ -79,8 +80,8 @@ public:
 
    void offset(const Point &offset);
 
-   F32 getWidth();
-   F32 getHeight();
+   TNL::F32 getWidth();
+   TNL::F32 getHeight();
 
    Point getExtents();
 

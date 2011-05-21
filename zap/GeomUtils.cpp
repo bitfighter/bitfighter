@@ -43,12 +43,25 @@
 // Please have a look at the notes. They indicate obvious places for optimization
 // if you are using a swept ellipsoid against a large number of polygons.
 
-#include "GeomUtils.h"        // Must be last...   Why??
 #include "tnlVector.h"
-#include "tnlLog.h"           // for logprintf
+#include "tnlTypes.h"
+#include "tnlLog.h"
 
+#include "GeomUtils.h"
+#include "Point.h"
+#include "Rect.h"
+#include "../recast/Recast.h"
+#include "../recast/RecastAlloc.h"
+#include "../clipper/clipper.h"
+
+extern "C" {
+#include "../Triangle/triangle.h"      // For Triangle!
+}
+
+#include <math.h>
 
 using namespace TNL;
+using namespace clipper;
 
 namespace Zap
 {
@@ -1032,7 +1045,7 @@ S32 QSORT_CALLBACK IDtoPointSort(S32 *a_ptr, S32 *b_ptr)
 
 // Triangulate a bounded area with complex polygon holes
 bool Triangulate::processComplex(TriangleData& outputData, const Rect& bounds,
-                                 const Vector<Vector<Point> >& polygonList, Vector<F32>& holeMarkerList, ComplexMethod method)
+                                 const Vector<Vector<Point> >& polygonList, Vector<F32>& holeMarkerList)
 {
    Vector<F32> coords;
 
@@ -1046,78 +1059,77 @@ bool Triangulate::processComplex(TriangleData& outputData, const Rect& bounds,
 
    S32 nextPt = 4;
 
-   if (method == cmTriangle)
+   // Using Triangle library
+   Vector<S32> edges;
+
+   edges.push_back(0);       edges.push_back(1);
+   edges.push_back(1);       edges.push_back(2);
+   edges.push_back(2);       edges.push_back(3);
+   edges.push_back(3);       edges.push_back(0);
+
+   Vector<Point> poly;
+   for (S32 j = 0; j < polygonList.size(); j++)
    {
-      Vector<S32> edges;
+      poly = polygonList[j];
 
-      edges.push_back(0);       edges.push_back(1);
-      edges.push_back(1);       edges.push_back(2);
-      edges.push_back(2);       edges.push_back(3);
-      edges.push_back(3);       edges.push_back(0);
+      if(poly.size() == 0)
+         continue;
 
-      Vector<Point> poly;
-      for (S32 j = 0; j < polygonList.size(); j++)
+      S32 first = nextPt;
+      for (S32 k = 0; k < poly.size(); k++)
       {
-         poly = polygonList[j];
+         coords.push_back(poly[k].x);
+         coords.push_back(poly[k].y);
 
-         if(poly.size() == 0)
-            continue;
-
-         S32 first = nextPt;
-         for (S32 k = 0; k < poly.size(); k++)
+         if(k > 0)
          {
-            coords.push_back(poly[k].x);
-            coords.push_back(poly[k].y);
-
-            if(k > 0)
-            {
-               edges.push_back(nextPt);
-               edges.push_back(nextPt + 1);
-               nextPt++;
-            }
+            edges.push_back(nextPt);
+            edges.push_back(nextPt + 1);
+            nextPt++;
          }
-
-         // Close the loop
-         edges.push_back(nextPt);
-         edges.push_back(first);
-         nextPt++;
       }
 
-      // Start of duplicate Points removal, helps to avoid error / crash in triangulate
-      Vector<S32> sortID;
-      sortID.resize(coords.size()/2);
-      for(S32 i=0; i<sortID.size(); i++)
-      {
-         sortID[i]=i;
-      }
+      // Close the loop
+      edges.push_back(nextPt);
+      edges.push_back(first);
+      nextPt++;
+   }
 
-      pointsToCheck = coords.address();
-      sortID.sort(IDtoPointSort);
+   // Start of duplicate Points removal, helps to avoid error / crash in triangulate
+   Vector<S32> sortID;
+   sortID.resize(coords.size()/2);
+   for(S32 i=0; i<sortID.size(); i++)
+   {
+      sortID[i]=i;
+   }
 
-      for(S32 i=sortID.size()-1; i>=1; i--)
+   pointsToCheck = coords.address();
+   sortID.sort(IDtoPointSort);
+
+   for(S32 i=sortID.size()-1; i>=1; i--)
+   {
+      S32 i2 = sortID[i];
+      S32 i2prev = sortID[i-1];
+      TNLAssert(IDtoPointSort(&sortID[i], &sortID[i-1]) >= 0, "Not sorted anymore...");
+      if(coords[i2*2] == coords[i2prev*2] && coords[i2*2+1] == coords[i2prev*2+1])
       {
-         S32 i2 = sortID[i];
-         S32 i2prev = sortID[i-1];
-         TNLAssert(IDtoPointSort(&sortID[i], &sortID[i-1]) >= 0, "Not sorted anymore...");
-         if(coords[i2*2] == coords[i2prev*2] && coords[i2*2+1] == coords[i2prev*2+1])
-         {
 #ifdef TNL_DEBUG
-            logprintf("Duplicate points found %f,%f", coords[i2*2], coords[i2*2+1]);
+         logprintf("Duplicate points found %f,%f", coords[i2*2], coords[i2*2+1]);
 #endif
-            for(S32 j=0; j<edges.size(); j++)
-            {
-               if(edges[j] == i2)
-                  edges[j] = i2prev;
-               else if(edges[j]*2+2 == coords.size())
-                  edges[j] = i2;
-            }
-            for(S32 j=0; j<i; j++)
-               if(sortID[j]*2+2 == coords.size())
-                  sortID[j] = i2;
-            coords.erase_fast(i2*2+1);
-            coords.erase_fast(i2*2);
+         for(S32 j=0; j<edges.size(); j++)
+         {
+            if(edges[j] == i2)
+               edges[j] = i2prev;
+            else if(edges[j]*2+2 == coords.size())
+               edges[j] = i2;
          }
+         for(S32 j=0; j<i; j++)
+            if(sortID[j]*2+2 == coords.size())
+               sortID[j] = i2;
+         coords.erase_fast(i2*2+1);
+         coords.erase_fast(i2*2);
       }
+   }
 
 #ifdef DUMP_DATA
    // Dump points
@@ -1130,94 +1142,43 @@ bool Triangulate::processComplex(TriangleData& outputData, const Rect& bounds,
       logprintf("Edge %d, %d-%d", i/2, edges[i], edges[i+1]);
 #endif
 
-      triangulateio in, out;
+   triangulateio in, out;
 
-      initIoStruct(&in);
-      initIoStruct(&out);
+   initIoStruct(&in);
+   initIoStruct(&out);
 
-      in.numberofpoints = coords.size() / 2;
-      in.pointlist = coords.address();
+   in.numberofpoints = coords.size() / 2;
+   in.pointlist = coords.address();
 
-      in.segmentlist = edges.address();
-      in.numberofsegments = edges.size() / 2;
+   in.segmentlist = edges.address();
+   in.numberofsegments = edges.size() / 2;
 
-      in.numberofholes = holeMarkerList.size() / 2;
-      in.holelist = holeMarkerList.address();
+   in.numberofholes = holeMarkerList.size() / 2;
+   in.holelist = holeMarkerList.address();
 
-      // try and except allows continue running after error, but no zones get generated - windows only?
-      // Adding the 'X' option gives a speed boost but seems to crash on several levels running on windows
-      triangulate2((char*)"zpQ", &in, &out, NULL);  // Replace Q with V to debug
+   // try and except allows continue running after error, but no zones get generated - windows only?
+   // Adding the 'X' option gives a speed boost but seems to crash on several levels running on windows
+   triangulate2((char*)"zpQ", &in, &out, NULL);  // Replace Q with V to debug
 
-      // add triangle output to custom object for return storage
-      outputData.pointList = out.pointlist;
-      outputData.pointCount = out.numberofpoints;
-      outputData.triangleList = out.trianglelist;
-      outputData.triangleCount = out.numberoftriangles;
+   // add triangle output to custom object for return storage
+   outputData.pointList = out.pointlist;
+   outputData.pointCount = out.numberofpoints;
+   outputData.triangleList = out.trianglelist;
+   outputData.triangleCount = out.numberoftriangles;
 
-      // clean up Triangle memory
-      //
-      // pointlist and trianglelist will not be freed as they are now wrapped in TriangleData
-      // to be used later
-      trifree(out.pointattributelist);
-      trifree(out.pointmarkerlist);
-      trifree(out.triangleattributelist);
-      trifree(out.segmentlist);
-      trifree(out.segmentmarkerlist);
-      trifree(out.edgelist);
-      trifree(out.edgemarkerlist);
-      trifree(out.normlist);
-      trifree(out.neighborlist);
-   }
-
-   else if (method == cmP2t)
-   {
-      p2t::Point p0(minx, miny);
-      p2t::Point p1(maxx, miny);
-      p2t::Point p2(maxx, maxy);
-      p2t::Point p3(minx, maxy);
-
-      vector<p2t::Point *> boundBox;
-
-      boundBox.push_back(&p0);
-      boundBox.push_back(&p1);
-      boundBox.push_back(&p2);
-      boundBox.push_back(&p3);
-
-      p2t::CDT cdt(boundBox);
-
-      // Add holes (i.e. walls)
-
-      cdt.Triangulate();      // Make the triangles
-
-      vector<p2t::Triangle *> tris = cdt.GetTriangles();
-
-      S32 ntris = tris.size();
-      S32 npoints = ntris * 3;
-
-      // Allocate memory here to match what Triangle method outputs
-      F32* pointList = (F32*)malloc(sizeof(F32) * npoints * 2);     // 2 entries per point: x,y
-      S32* triList = (S32*)malloc(sizeof(S32) * ntris * 3);
-
-      for(U32 i = 0; i < tris.size(); i++)
-      {
-         p2t::Triangle *tri = tris[i];
-
-         for(S32 j = 0; j < 3; j++)
-         {
-            pointList[i*3 + j*2] = (F32)tri->GetPoint(j)->x;
-            pointList[i*3 + j*2 + 1] = (F32)tri->GetPoint(j)->y;
-            triList[i*3 + j] = i*3 +j;
-         }
-      }
-
-      outputData.pointList = pointList;
-      outputData.pointCount = npoints;
-      outputData.triangleList = triList;
-      outputData.triangleCount = ntris;
-   }
-   // no method used, return false
-   else
-      return false;
+   // clean up Triangle memory
+   //
+   // pointlist and trianglelist will not be freed as they are now wrapped in TriangleData
+   // to be used later
+   trifree(out.pointattributelist);
+   trifree(out.pointmarkerlist);
+   trifree(out.triangleattributelist);
+   trifree(out.segmentlist);
+   trifree(out.segmentmarkerlist);
+   trifree(out.edgelist);
+   trifree(out.edgemarkerlist);
+   trifree(out.normlist);
+   trifree(out.neighborlist);
 
    // If no output points, no triangle points, or too many points, we can't use the data so return false
    if(outputData.pointCount == 0 || outputData.triangleCount == 0)

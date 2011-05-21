@@ -31,6 +31,7 @@
 #include "gameItems.h"     // For asteroid def.
 #include "engineeredObjects.h"
 #include "gameObjectRender.h"
+#include "SoundEffect.h"
 #include "config.h"
 #include "projectile.h"     // For s2cClientJoinedTeam()
 #include "playerInfo.h"     // For LuaPlayerInfo constructor  
@@ -44,8 +45,9 @@
 #include "statistics.h"
 #include "masterConnection.h"     // For s2mSendPlayerStatistics, s2mSendGameStatistics
 
-
 #include "glutInclude.h"
+
+#include <math.h>
 
 #ifndef min
 #define min(a,b) ((a) <= (b) ? (a) : (b))
@@ -2163,9 +2165,9 @@ S32 GameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S3
          case KilledByAsteroid:  // Fall through OK
          case KilledByTurret:    // Fall through OK
          case KillSelf:
-            return 0;
+            return -1;           // was zero in 015a
          case KillTeammate:
-            return 0;
+            return -1;
          case KillEnemyTurret:
             return 0;
          case KillOwnTurret:
@@ -2185,7 +2187,7 @@ S32 GameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S3
          case KillSelf:
             return -1;
          case KillTeammate:
-            return 0;
+            return -1;
          case KillEnemyTurret:
             return 0;
          case KillOwnTurret:
@@ -2411,8 +2413,8 @@ GAMETYPE_RPC_S2C(GameType, s2cAddClient,
    cref->isAdmin = admin;
    cref->isRobot = isRobot;
 
-   cref->decoder = new LPC10VoiceDecoder();
-   cref->voiceSFX = new SFXObject(SFXVoice, NULL, 1, Point(), Point());
+   cref->decoder = new SpeexVoiceDecoder();
+   cref->voiceSFX = new SoundEffect(SFXVoice, NULL, 1, Point(), Point());
 
    mClientList.push_back(cref);
 
@@ -2438,7 +2440,7 @@ GAMETYPE_RPC_S2C(GameType, s2cAddClient,
    {
       clientGame->mGameUserInterface->displayMessage(Color(0.6f, 0.6f, 0.8f), "%s joined the game.", name.getString());      
       if(playAlert)
-         SFXObject::play(SFXPlayerJoined, 1);
+         SoundSystem::playSoundEffect(SFXPlayerJoined, 1);
    }
 }
 
@@ -2503,7 +2505,7 @@ GAMETYPE_RPC_S2C(GameType, s2cRemoveClient, (StringTableEntry name), (name))
    if(!clientGame) return;
 
    clientGame->mGameUserInterface->displayMessage(Color(0.6f, 0.6f, 0.8f), "%s left the game.", name.getString());
-   SFXObject::play(SFXPlayerLeft, 1);
+   SoundSystem::playSoundEffect(SFXPlayerLeft, 1);
 }
 
 GAMETYPE_RPC_S2C(GameType, s2cAddTeam, (StringTableEntry teamName, F32 r, F32 g, F32 b), (teamName, r, g, b))
@@ -2518,6 +2520,9 @@ GAMETYPE_RPC_S2C(GameType, s2cAddTeam, (StringTableEntry teamName, F32 r, F32 g,
 
 GAMETYPE_RPC_S2C(GameType, s2cSetTeamScore, (RangedU32<0, GameType::gMaxTeams> teamIndex, U32 score), (teamIndex, score))
 {
+   TNLAssert(teamIndex < U32(mTeams.size()), "teamIndex out of range")
+   if(teamIndex >= U32(mTeams.size()))
+      return;
    mTeams[teamIndex].setScore(score);
    updateLeadingTeamAndScore();    
 }
@@ -2914,19 +2919,29 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
             mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXNone, msg, e);
       }
    }
-   /* /// Remove this command
-   else if(!stricmp(cmd, "rename") && args.size() >= 1)
-   {
-      //for testing, might want to remove this once it is fully working.
-      StringTableEntry oldName = clientRef->clientConnection->getClientName();
-      clientRef->clientConnection->setClientName(StringTableEntry(""));       //avoid unique self
-      StringTableEntry uniqueName = GameConnection::makeUnique(args[0].getString()).c_str();  //new name
-      clientRef->clientConnection->setClientName(oldName);                   //restore name to properly get it updated to clients.
-
-      clientRef->clientConnection->setAuthenticated(false);         //don't underline anymore because of rename
-      updateClientChangedName(clientRef->clientConnection,uniqueName);
-   }
-   */
+   else if(!stricmp(cmd, "rename") && args.size() >= 1)  // allow admins to rename anyone (in case of bad name)
+      if(!clientRef->clientConnection->isAdmin())
+         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Need admin permission");
+      else if(args.size() < 2)
+         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "Use /rename <From_name> <To_name>");
+      else
+      {
+         GameConnection *gc = findClient(this, args[0].getString());
+         if(!gc)
+            clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Player name not found");
+         else if(gc->isAuthenticated())
+            clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Can't rename authenticated players");
+         else
+         {
+            StringTableEntry oldName = gc->getClientName();
+            gc->setClientName(StringTableEntry(""));       //avoid unique self
+            StringTableEntry uniqueName = GameConnection::makeUnique(args[1].getString()).c_str();  //new name
+            gc->setClientName(oldName);                   //restore name to properly get it updated to clients.
+            gc->setAuthenticated(false);         //don't underline anymore because of rename
+            updateClientChangedName(gc,uniqueName);
+            clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, StringTableEntry("Player is renamed"));
+         }
+      }
    else if(!stricmp(cmd, "yes"))
    {
       gServerGame->voteClient(clientRef->clientConnection, true);
@@ -3303,7 +3318,8 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cVoiceChat, (StringTableEntry clientName
    if(cl)
    {
       ByteBufferPtr playBuffer = cl->decoder->decompressBuffer(*(voiceBuffer.getPointer()));
-      cl->voiceSFX->queueBuffer(playBuffer);
+      SoundSystem::queueVoiceChatBuffer(cl->voiceSFX, playBuffer);
+//      cl->voiceSFX->queueBuffer(playBuffer);
    }
 }
 

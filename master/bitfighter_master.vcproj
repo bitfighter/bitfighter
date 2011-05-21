@@ -139,7 +139,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				LinkLibraryDependencies="false"
-				AdditionalDependencies="../lib/alut.lib wsock32.lib ../lib/glut32.lib ../lib/tnl.lib ../lib/libtomcrypt.lib"
+				AdditionalDependencies="wsock32.lib ../lib/tnl.lib ../lib/libtomcrypt.lib"
 				OutputFile="master.exe"
 				AdditionalLibraryDirectories="../libtomcrypt/release;../tnl;../lib"
 				IgnoreDefaultLibraryNames="MSVCRTD.lib;msvcprtd.lib;MSVCRT.lib;msvcprt.lib;libcmtd.lib"
@@ -276,7 +276,7 @@
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
 				AdditionalIncludeDirectories="../tnl;.;../openal;../glut;&quot;../mysql++&quot;;../lua/include;../libtomcrypt;&quot;C:\Program Files\MySQL\MySQL Server 5.1\include&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;TNL_ENABLE_LOGGING;MYSQLPP_NO_DLL;SAM_ONLY"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;TNL_ENABLE_LOGGING;MYSQLPP_NO_DLL;BF_WRITE_TO_MYSQL;VERIFY_PHPBB3;SAM_ONLY"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				AssemblerListingLocation="$(IntDir)\"
@@ -295,7 +295,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				LinkLibraryDependencies="false"
-				AdditionalDependencies="../lib/alut.lib wsock32.lib ../lib/glut32.lib ../lib/tnl.lib ../lib/libtomcrypt.lib ../lib/mysqlpp.lib Ws2_32.lib"
+				AdditionalDependencies="wsock32.lib ../lib/tnl.lib ../lib/libtomcrypt.lib ../lib/mysqlpp.lib Ws2_32.lib"
 				OutputFile="master_mysql.exe"
 				AdditionalLibraryDirectories="../libtomcrypt/release;../tnl;../lib"
 				IgnoreDefaultLibraryNames="MSVCRTD.lib;msvcprtd.lib;MSVCRT.lib;msvcprt.lib;libcmtd.lib"

@@ -576,15 +576,18 @@ bool BitStream::decryptAndCheckHash(U32 hashDigestSize, U32 decryptStartOffset, 
 
 NetError PacketStream::sendto(Socket &outgoingSocket, const Address &addr)
 {
-   return outgoingSocket.sendto(addr, buffer, getBytePosition());
+   return outgoingSocket.sendto(addr, mDataPtr, getBytePosition());
 }
 
 NetError PacketStream::recvfrom(Socket &incomingSocket, Address *recvAddress)
 {
    NetError error;
    S32 dataSize;
-   error = incomingSocket.recvfrom(recvAddress, buffer, sizeof(buffer), &dataSize);
-   setBuffer(buffer, dataSize);
+   if(!mOwnsMemory)
+      newByteBuffer(MaxPacketDataSize);
+   else if(mBufSize < MaxPacketDataSize)
+      resize(MaxPacketDataSize);
+   error = incomingSocket.recvfrom(recvAddress, mDataPtr, mBufSize, &dataSize); // Note that mBufSize >= MaxPacketDataSize, this limits receive dataSize
    setMaxSizes(dataSize, 0);
    reset();
    return error;

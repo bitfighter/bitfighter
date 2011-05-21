@@ -30,7 +30,6 @@
 #include "projectile.h"
 #include "gameObjectRender.h"
 #include "goalZone.h"
-#include "sfx.h"
 #include "../glut/glutInclude.h"
 
 namespace Zap
@@ -47,7 +46,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(SoccerGameType, s2cSoccerScoreMessage,
 {
    S32 teamIndexAdjusted = (S32) teamIndex + GameType::gFirstTeamNumber;      // Before calling this RPC, we subtracted gFirstTeamNumber, so we need to add it back here...
    string msg;
-   SFXObject::play(SFXFlagCapture);
+   SoundSystem::playSoundEffect(SFXFlagCapture);
 
    // Compose the message
 
@@ -463,7 +462,7 @@ void SoccerBallItem::damageObject(DamageInfo *theInfo)
          Projectile *p = dynamic_cast<Projectile *>(theInfo->damagingObject);
          Ship *ship = dynamic_cast<Ship *>(p->mShooter.getPointer());
          mLastPlayerTouch = ship ? ship : NULL;    // If shooter was a turret, say, we'd expect s to be NULL.
-         mLastPlayerTouchTeam = p->mShooter->getTeam(); // no more NO_TEAM. Turret is in a team, and can be used to credit a team.
+         mLastPlayerTouchTeam = p->getTeam(); // Projectile always have a team from what fired it, can be used to credit a team.
          mLastPlayerTouchName = ship ? ship->getName() : StringTableEntry(NULL);
       }
       else

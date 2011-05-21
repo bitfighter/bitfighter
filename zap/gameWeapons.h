@@ -26,8 +26,6 @@
 #ifndef _GAMEWEAPONS_H_
 #define _GAMEWEAPONS_H_
 
-//#include "gameObject.h"  // this file is included from master's database.h
-#include "tnlVector.h"
 #include "tnlNetStringTable.h"
 #include "Point.h"
 

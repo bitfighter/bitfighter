@@ -145,6 +145,7 @@ XXX need to document timers, new luavec stuff XXX
 
 #include "../glut/glutInclude.h"
 #include <stdarg.h>
+#include <math.h>
 //#include <stdio.h>      // For logging to console
 
 using namespace TNL;
@@ -160,7 +161,7 @@ using namespace TNL;
 #include "game.h"
 #include "gameNetInterface.h"
 #include "masterConnection.h"
-#include "sfx.h"
+#include "SoundSystem.h"
 #include "sparkManager.h"
 #include "input.h"
 #include "keyCode.h"
@@ -992,10 +993,13 @@ void onExit()
 {
    endGame();
 
-   delete gClientGame;     // Has effect of disconnecting from master
+   if(gClientGame)
+      delete gClientGame;     // Has effect of disconnecting from master
+   if(gServerGame)
+      delete gServerGame;     // Has effect of disconnecting from master
 
    OGLCONSOLE_Quit();
-   SFXObject::shutdown();
+   SoundSystem::shutdown();
    ShutdownJoystick();
 
    // Save settings to capture window position
@@ -2109,7 +2113,7 @@ int main(int argc, char **argv)
       initHostGame(gBindAddress, levels, false);     // Start hosting
    }
 
-   SFXObject::init();  // Even dedicated server needs sound these days
+   SoundSystem::init();  // Even dedicated server needs sound these days
 
    checkIfThisIsAnUpdate();
 

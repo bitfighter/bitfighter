@@ -31,6 +31,7 @@
 #include "ship.h"
 #include "UIEditorMenus.h"    // For GoFastEditorAttributeMenuUI def
 #include "UI.h"
+#include "SoundSystem.h"
 #include "../glut/glutInclude.h"
 
 namespace Zap
@@ -396,7 +397,7 @@ void SpeedZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
    }
 
    else 
-      SFXObject::play(SFXGoFastOutside, pos, pos);
+      SoundSystem::playSoundEffect(SFXGoFastOutside, pos, pos);
 }
 
 };

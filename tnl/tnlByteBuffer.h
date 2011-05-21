@@ -102,6 +102,10 @@ public:
       mBufSize = bufferSize;
    }
 
+   /// Create a ByteBuffer of the specified size.
+   void newByteBuffer(U32 bufferSize = DefaultBufferSize);
+
+
    /// Set the ByteBuffer to point to a new chunk of memory, indicating whether
    /// it should own the chunk or not.
    void setBuffer(U8 *dataPtr, U32 bufferSize, bool newOwnsMemory)
@@ -113,48 +117,21 @@ public:
    /// Attempts to resize the buffer.
    ///
    /// @returns True if it owns its own memory, false otherwise.
-   bool resize(U32 newBufferSize)
-   {
-      if(mBufSize >= newBufferSize)
-         mBufSize = newBufferSize;
-      else if(mOwnsMemory)
-      {
-         mBufSize = newBufferSize;
-         mDataPtr = (U8 *) realloc(mDataPtr, newBufferSize);
-         return true;
-      }
-      return false;
-   }
+   bool resize(U32 newBufferSize);
 
    /// Appends the specified buffer to the end of the byte buffer.
    /// returns false if it does not own its own memory.
-   bool appendBuffer(const U8 *dataBuffer, U32 bufferSize)
-   {
-      U32 start = mBufSize;
-      if(!resize(mBufSize + bufferSize))
-         return false;
-      memcpy(mDataPtr + start, dataBuffer, bufferSize);
-      return true;
-   }
+   bool appendBuffer(const U8 *dataBuffer, U32 bufferSize);
 
    /// Appends the specified ByteBuffer to the end of this byte buffer.
    /// returns fals if it does not own its own memory.
-   bool appendBuffer(const ByteBuffer &theBuffer)
+   inline bool appendBuffer(const ByteBuffer &theBuffer)
    {
       return appendBuffer(theBuffer.getBuffer(), theBuffer.getBufferSize());
    }
 
    /// Copies the current buffer into a newly allocated buffer that the ByteBuffer owns.
-   void takeOwnership()
-   {
-      if(!mOwnsMemory)
-      {
-         U8 *memPtr = (U8 *) malloc(mBufSize);
-         memcpy(memPtr, mDataPtr, mBufSize);
-         mDataPtr = memPtr;
-         mOwnsMemory = true;
-      }
-   }
+   void takeOwnership();
 
    /// Does this ByteBuffer own its own memory?
    bool ownsMemory()

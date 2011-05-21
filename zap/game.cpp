@@ -36,7 +36,7 @@
 #include "move.h"
 #include "moveObject.h"
 #include "projectile.h"          // For SpyBug class
-#include "sfx.h"
+#include "SoundSystem.h"
 #include "SharedConstants.h"     // For ServerInfoFlags enum
 #include "ship.h"
 #include "sparkManager.h"
@@ -64,6 +64,7 @@
 #include "tnlNetInterface.h"
 
 #include <sys/stat.h>
+#include <math.h>
 
 
 using namespace TNL;
@@ -524,6 +525,28 @@ void ServerGame::setShuttingDown(bool shuttingDown, U16 time, ClientRef *who, St
 
 void ServerGame::loadNextLevel()
 {
+
+   string path = ConfigDirectories::findLevelFile(string(mLevelInfos[mLevelLoadIndex].levelFileName.getString()));
+   FILE *f = fopen(path.c_str(), "rb");
+   if(f)
+   {
+      char data[1024*4];  // 4 kb should be big enough to fit all parameters at the beginning of level, don't need to read everything.
+      S32 size = fread(data, 1, sizeof(data), f);
+      fclose(f);
+      LevelInfo info = getLevelInfo(data, size);
+      if(info.levelName == "")
+         info.levelName = mLevelInfos[mLevelLoadIndex].levelFileName;
+      mLevelInfos[mLevelLoadIndex].setInfo(info.levelName, info.levelType, info.maxRecPlayers, info.maxRecPlayers);
+      mLevelLoadIndex++;
+   }
+   else
+   {
+      logprintf(LogConsumer::LogWarning, "Could not load level %s.  Skipping...", mLevelInfos[mLevelLoadIndex].levelFileName.getString());
+      mLevelInfos.erase(mLevelLoadIndex);
+   }
+
+
+/*
    // Here we cycle through all the levels, reading them in, and grabbing their names for the level list
    // Seems kind of wasteful...  could we quit after we found the name? (probably not easily, and we get the benefit of learning early on which levels are b0rked)
    // How about storing them in memory for rapid recall? People sometimes load hundreds of levels, so it's probably not feasible.
@@ -559,7 +582,7 @@ void ServerGame::loadNextLevel()
          logprintf(LogConsumer::LogWarning, "Could not load level %s.  Skipping...", levelName.c_str());
          mLevelInfos.erase(mLevelLoadIndex);
       }
-   }
+   }*/
 
    if(mLevelLoadIndex == mLevelInfos.size())
       ServerGame::hostingModePhase = DoneLoadingLevels;
@@ -868,6 +891,23 @@ bool ServerGame::loadLevel(const string &origFilename2)
       LuaLevelGenerator levelgen = LuaLevelGenerator(name, getGameType()->mScriptArgs, getGridSize(), getGridDatabase(), this, gConsole);
    }
 
+   // script specified in INI globalLevelLoadScript
+   if(gIniSettings.globalLevelScript != "")
+   {
+      string name = ConfigDirectories::findLevelGenScript(gIniSettings.globalLevelScript);  // Find full name of levelgen script
+
+      if(name == "")
+      {
+         logprintf(LogConsumer::LogWarning, "Warning: Could not find script \"%s\" in globalLevelScript", 
+                                    getGameType()->mScriptName.c_str(), origFilename.c_str());
+         return false;
+      }
+
+      // The script file will be the first argument, subsequent args will be passed on to the script.
+      // Now we've crammed all our action into the constructor... is this ok design?
+      LuaLevelGenerator levelgen = LuaLevelGenerator(name, getGameType()->mScriptArgs, getGridSize(), getGridDatabase(), this, gConsole);
+   }
+
    //  Check after script, script might add Teams
    if(getGameType()->makeSureTeamCountIsNotZero())
       logprintf(LogConsumer::LogWarning, "Warning: Missing Team in level \"%s\"", origFilename.c_str());
@@ -989,7 +1029,7 @@ void ServerGame::addClient(GameConnection *theConnection)
    mPlayerCount++;
 
    if(gDedicatedServer)
-      SFXObject::play(SFXPlayerJoined, 1);
+      SoundSystem::playSoundEffect(SFXPlayerJoined, 1);
 }
 
 
@@ -1000,7 +1040,7 @@ void ServerGame::removeClient(GameConnection *theConnection)
    mPlayerCount--;
 
    if(gDedicatedServer)
-      SFXObject::play(SFXPlayerLeft, 1);
+      SoundSystem::playSoundEffect(SFXPlayerLeft, 1);
 }
 
 
@@ -1251,7 +1291,7 @@ void ServerGame::idle(U32 timeDelta)
    }
 
    // Lastly, play any sounds server might have made...
-   SFXObject::process();
+   SoundSystem::processSoundEffects();
 }
 
 
@@ -1264,17 +1304,16 @@ void ServerGame::gameEnded()
 
 S32 ServerGame::addLevelInfo(const char *filename, LevelInfo &info)
 {
+   if(info.levelName == StringTableEntry(""))
+      info.levelName = filename;
+
+   info.levelFileName = filename; //strictjoindir(gConfigDirs.levelDir, filename).c_str();
 
    for(S32 i=0; i<mLevelInfos.size(); i++)
    {
       if(mLevelInfos[i].levelFileName == info.levelFileName)
          return i;
    }
-
-   if(info.levelName == StringTableEntry(""))
-      info.levelName = filename;
-
-   info.levelFileName = filename; //strictjoindir(gConfigDirs.levelDir, filename).c_str();
 
    mLevelInfos.push_back(info);
    for(GameConnection *walk = GameConnection::getClientList(); walk; walk = walk->getNextClient())
@@ -1370,7 +1409,7 @@ void ClientGame::idle(U32 timeDelta)
    if(isSuspended())
    {
       mNetInterface->processConnections();
-      SFXObject::process();                        // Process sound effects (SFX)
+      SoundSystem::processSoundEffects();                        // Process sound effects (SFX)
       return;
    }
 
@@ -1458,12 +1497,12 @@ void ClientGame::idle(U32 timeDelta)
       }
 
       if(controlObject)
-         SFXObject::setListenerParams(controlObject->getRenderPos(),controlObject->getRenderVel());
+         SoundSystem::setListenerParams(controlObject->getRenderPos(),controlObject->getRenderVel());
    }
 
    processDeleteList(timeDelta);                // Delete any objects marked for deletion
    FXManager::tick((F32)timeDelta * 0.001f);    // Processes sparks and teleporter effects
-   SFXObject::process();                        // Process sound effects (SFX)
+   SoundSystem::processSoundEffects();                        // Process sound effects (SFX)
 
    mNetInterface->processConnections();         // Here we can pass on our updated ship info to the server
 
@@ -1504,9 +1543,9 @@ void ClientGame::zoomCommanderMap()
 {
    mInCommanderMap = !mInCommanderMap;
    if(mInCommanderMap)
-      SFXObject::play(SFXUICommUp);
+      SoundSystem::playSoundEffect(SFXUICommUp);
    else
-      SFXObject::play(SFXUICommDown);
+      SoundSystem::playSoundEffect(SFXUICommDown);
 
 
    GameConnection *conn = getConnectionToServer();

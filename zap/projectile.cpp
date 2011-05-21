@@ -27,7 +27,7 @@
 #include "projectile.h"
 #include "ship.h"
 #include "sparkManager.h"
-#include "sfx.h"
+#include "SoundSystem.h"
 #include "gameObject.h"
 #include "gameObjectRender.h"
 #include "../glut/glutInclude.h"
@@ -120,7 +120,7 @@ U32 Projectile::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
 void Projectile::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    bool initial = false;
-   if(stream->readFlag())  // Read position, for correcting bouncers, needs to be before inital for SFXObject::play
+   if(stream->readFlag())  // Read position, for correcting bouncers, needs to be before inital for SoundSystem::playSoundEffect
    {
       ((GameConnection *) connection)->readCompressedPoint(pos, stream);
       readCompressedVelocity(velocity, CompressedVelocityMax, stream);
@@ -142,7 +142,7 @@ void Projectile::unpackUpdate(GhostConnection *connection, BitStream *stream)
       Rect newExtent(pos,pos);
       setExtent(newExtent);
       initial = true;
-      SFXObject::play(gProjInfo[mType].projectileSound, pos, velocity);
+      SoundSystem::playSoundEffect(gProjInfo[mType].projectileSound, pos, velocity);
    }
    bool preCollided = collided;
    collided = stream->readFlag();
@@ -287,7 +287,7 @@ void Projectile::idle(GameObject::IdleCallPath path)
             }
 
             if(isGhost())
-               SFXObject::play(SFXBounceShield, collisionPoint, surfNormal * surfNormal.dot(velocity) * 2);
+               SoundSystem::playSoundEffect(SFXBounceShield, collisionPoint, surfNormal * surfNormal.dot(velocity) * 2);
          }
          else
          {
@@ -385,7 +385,7 @@ void Projectile::explode(GameObject *hitObject, Point pos)
       else                                         // We hit something else
          sound = gProjInfo[mType].impactSound;
 
-      SFXObject::play(sound, pos, velocity);       // Play the sound
+      SoundSystem::playSoundEffect(sound, pos, velocity);       // Play the sound
    }
 }
 
@@ -508,7 +508,7 @@ void GrenadeProjectile::unpackUpdate(GhostConnection *connection, BitStream *str
 
    if(stream->readFlag())
    {
-      SFXObject::play(SFXGrenadeProjectile, getActualPos(), getActualVel());
+      SoundSystem::playSoundEffect(SFXGrenadeProjectile, getActualPos(), getActualVel());
    }
 }
 
@@ -545,7 +545,7 @@ void GrenadeProjectile::explode(Point pos, WeaponType weaponType)
       //FXManager::emitExplosion(getRenderPos(), 0.5, gProjInfo[ProjectilePhaser].sparkColors, NumSparkColors);      // Original, nancy explosion
       FXManager::emitBlast(pos, OuterBlastRadius);          // New, manly explosion
 
-      SFXObject::play(SFXMineExplode, getActualPos(), Point());
+      SoundSystem::playSoundEffect(SFXMineExplode, getActualPos(), Point());
    }
 
    disableCollision();
@@ -747,9 +747,9 @@ void Mine::unpackUpdate(GhostConnection *connection, BitStream *stream)
    mArmed = stream->readFlag();
 
    if(initial && !mArmed)
-      SFXObject::play(SFXMineDeploy, getActualPos(), Point());
+      SoundSystem::playSoundEffect(SFXMineDeploy, getActualPos(), Point());
    else if(!initial && !wasArmed && mArmed)
-      SFXObject::play(SFXMineArm, getActualPos(), Point());
+      SoundSystem::playSoundEffect(SFXMineArm, getActualPos(), Point());
 }
 
 
@@ -924,7 +924,7 @@ void SpyBug::unpackUpdate(GhostConnection *connection, BitStream *stream)
       stream->readStringTableEntry(&mSetBy);
    }
    if(initial)
-      SFXObject::play(SFXSpyBugDeploy, getActualPos(), Point());
+      SoundSystem::playSoundEffect(SFXSpyBugDeploy, getActualPos(), Point());
 }
 
 

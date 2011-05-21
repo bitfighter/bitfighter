@@ -70,7 +70,7 @@ static const char *pageHeaders[] = {
    "LEVEL COMMANDS",
    "ADMIN COMMANDS",
    "DEBUG COMMANDS",
-   "SCRIPING CONSOLE"
+   "SCRIPTING CONSOLE"
 };
 
 
@@ -355,6 +355,7 @@ static const char *moduleDescriptions[] = {
    "Repair - Repairs self and nearby damaged objects",
    "Sensor - Increases visible distance and reveals hidden objects",
    "Cloak - Turns the ship invisible",
+   "Engineer - Collect resources to build turrets and forcefields",
 };
 
 void InstructionsUserInterface::renderPage2()
@@ -368,7 +369,7 @@ void InstructionsUserInterface::renderPage2()
    }
 
    y += 30;
-   for(S32 i = 0; i < 6; i++)
+   for(S32 i = 0; i < 7; i++)
    {
       glColor3f(1,1,1);
       drawString(105, y, 20, moduleDescriptions[i]);
@@ -415,9 +416,11 @@ void InstructionsUserInterface::renderPage2()
                glLineWidth(gDefaultLineWidth);
             }
             break;
+
          case 4:     // Sensor
             renderShip(Color(0, 0, 1), 1, thrusts, 1, Ship::CollisionRadius, gClientGame->getCurrentTime(), false, false, true, false);
             break;
+
          case 5:     // Cloak
             {
                U32 ct = gClientGame->getCurrentTime();
@@ -430,9 +433,16 @@ void InstructionsUserInterface::renderPage2()
                renderShip(Color(0, 0, 1), alpha, thrusts, 1, Ship::CollisionRadius, 0, false, false, false, false);
             }
             break;
+
+         case 6:     // Engineer
+            {
+               renderShip(Color(0, 0, 1), 1, thrusts, 1, Ship::CollisionRadius, 0, false, false, false, false);
+               renderResourceItem(Point(0,0));
+            }
+            break;
       }
       glPopMatrix();
-      y += 60;
+      y += 50;
    }
 }
 
@@ -466,7 +476,7 @@ const char *gGameObjectInfo[] = {
    /* 23 */   "GoFast", "Makes ship go fast",
 
    /* 24 */   "Test Item", "Bouncy ball",
-   /* 25 */   "Resource Item", "Smaller bouncy ball",
+   /* 25 */   "Resource Item", "Use with engineer module",
    /* 26 */   "Soccer Ball", "Push into enemy goal in Soccer game",
 };
 static U32 GameObjectCount = 27;      // <=== If you add something above, increment this!

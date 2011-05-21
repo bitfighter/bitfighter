@@ -1,537 +1,747 @@
 /*
-This file is part of Yars' Exile.
-
-Yars' Exile is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-Yars' Exile is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with Yars' Exile.  If not, see <http://www.gnu.org/licenses/>.
-
-Copyright 2009 Average Software
-*/
-
-// Average Software Sound System
+ * SoundSystem.cpp
+ *
+ *  Created on: May 8, 2011
+ *      Author: dbuck
+ */
 
 #include "SoundSystem.h"
-#include "Base.h"
-#include <fstream>
-#include <vector>
-#include <map>
-#include <vorbis/vorbisfile.h>
-#include <cstdio>
-#include <cstddef>
-#include <cassert>
-#include <limits>
+#include "SoundEffect.h"
+#include "tnlLog.h"
+#include "tnlByteBuffer.h"
 
-#ifdef __APPLE__
+#if !defined (ZAP_DEDICATED) && !defined (TNL_OS_XBOX)
 
-#include <OpenAL/al.h>
-#include <OpenAL/alc.h>
+#include "alInclude.h"
+#include "../alure/AL/alure.h"
 
-#elif defined __WIN32__ || defined __unix__
+#include "SFXProfile.h"
+#include "config.h"
 
-#include <AL/al.h>
-#include <AL/alc.h>
+#include "tnlNetBase.h"
 
-#else
+using namespace TNL;
 
-#error No system defined in SoundSystem.cpp!
+namespace Zap {
+
+//
+// Must keep this aligned with SFXProfiles!!
+//
+
+//   fileName     isRelative gainScale isLooping  fullGainDistance  zeroGainDistance
+static SFXProfile sfxProfilesModern[] = {
+ // Utility sounds
+ {  "phaser.wav",          true,  1.0f,  false, 0,   0 },      // SFXVoice -- "phaser.wav" is a dummy here
+ {  "phaser.wav",          false, 0.45f, false, 150, 600 },    // SFXNone  -- as above
+
+ // Players joining/leaving noises -- aren't really relative, but true allows them to play properly...
+ {  "player_joined.wav",   true,  0.8f,  false, 150, 600 },
+ {  "player_left.wav",     true,  0.8f,  false, 150, 600 },
+
+ // Weapon noises
+ {  "phaser.wav",          false, 0.45f, false, 150, 600 },
+ {  "tink.wav",            false, 0.9f,  false, 150, 600 },
+ {  "bounce.wav",          false, 0.45f, false, 150, 600 },
+ {  "bounce_impact.wav",   false, 0.7f,  false, 150, 600 },
+ {  "triple.wav",          false, 0.45f, false, 150, 600 },
+ {  "triple_impact.wav",   false, 0.7f,  false, 150, 600 },
+ {  "turret.wav",          false, 0.45f, false, 150, 600 },
+ {  "turret_impact.wav",   false, 0.7f,  false, 150, 600 },
+
+ {  "grenade.wav",         false, 0.9f,  false, 300, 600 },
+
+ {  "mine_deploy.wav",     false, 0.4f,  false, 150, 600 },
+ {  "mine_arm.wav",        false, 0.7f,  false, 400, 600 },
+ {  "mine_explode.wav",    false, 0.8f,  false, 300, 800 },
+
+ {  "spybug_deploy.wav",   false, 0.4f,  false, 150, 600 },
+ {  "spybug_explode.wav",  false, 0.8f,  false, 300, 800 },
+
+ { "asteroid_explode.wav", false, 0.80f, false,  150, 800 },
+
+ // Ship noises
+ {  "ship_explode.wav",    false, 1.0,   false, 300, 1000 },
+ {  "ship_heal.wav",       false, 1.0,   false, 300, 1000 },
+ {  "ship_turbo.wav",      false, 0.15f, true,  150, 500 },
+ {  "ship_hit.wav",        false, 1.0,   false, 150, 600 },    // Ship is hit by a projectile
+
+ {  "bounce_wall.wav",     false, 0.7f,  false, 150, 600 },
+ {  "bounce_obj.wav",      false, 0.7f,  false, 150, 600 },
+ {  "bounce_shield.wav",   false, 0.7f,  false, 150, 600 },
+
+ {  "ship_shield.wav",     false, 0.15f, true,  150, 500 },
+ {  "ship_sensor.wav",     false, 0.15f, true,  150, 500 },
+ {  "ship_repair.wav",     false, 0.15f, true,  150, 500 },
+ {  "ship_cloak.wav",      false, 0.35f, true,  150, 500 },
+
+ // Flag noises
+ {  "flag_capture.wav",    true,  0.45f, false, 0,   0 },
+ {  "flag_drop.wav",       true,  0.45f, false, 0,   0 },
+ {  "flag_return.wav",     true,  0.45f, false, 0,   0 },
+ {  "flag_snatch.wav",     true,  0.45f, false, 0,   0 },
+
+ // Teleport noises
+ {  "teleport_in.wav",     false, 1.0,   false, 200, 500 },
+ {  "teleport_out.wav",    false, 1.0,   false, 200, 500 },
+ {  "gofast.wav",          false, 1.0,   false, 200, 500 },    // Heard outside the ship
+ {  "gofast.wav",          true, 1.0,    false, 200, 500 },    // Heard inside the ship
+
+ // Forcefield noises
+ {  "forcefield_up.wav",   false,  0.7f,  false, 150, 600 },
+ {  "forcefield_down.wav", false,  0.7f,  false, 150, 600 },
+
+ // UI noises
+ {  "boop.wav",            true,  0.4f,  false, 150, 600 },
+ {  "comm_up.wav",         true,  0.4f,  false, 150, 600 },
+ {  "comm_down.wav",       true,  0.4f,  false, 150, 600 },
+ {  "boop.wav",            true,  0.25f, false, 150, 600 },
+
+ {  NULL, false, 0, false, 0, 0 },
+};
+
+
+//   fileName     isRelative gainScale isLooping  fullGainDistance  zeroGainDistance
+
+static SFXProfile sfxProfilesClassic[] = {
+ // Utility sounds
+ {  "phaser.wav",          true,  1.0f,  false, 0,   0 },
+ {  "phaser.wav",          false, 0.45f, false, 150, 600 },
+
+ // Players joining/leaving noises -- aren't really relative, but true allows them to play properly...
+ {  "player_joined.wav",   true,  0.8f,  false, 150, 600 },
+ {  "player_left.wav",     true,  0.8f,  false, 150, 600 },
+
+ // Weapon noises
+ {  "phaser.wav",          false, 0.45f, false, 150, 600 },
+ {  "phaser_impact.wav",   false, 0.7f,  false, 150, 600 },
+ {  "bounce.wav",          false, 0.45f, false, 150, 600 },
+ {  "bounce_impact.wav",   false, 0.7f,  false, 150, 600 },
+ {  "triple.wav",          false, 0.45f, false, 150, 600 },
+ {  "triple_impact.wav",   false, 0.7f,  false, 150, 600 },
+ {  "turret.wav",          false, 0.45f, false, 150, 600 },
+ {  "turret_impact.wav",   false, 0.7f,  false, 150, 600 },
+
+ {  "grenade.wav",         false, 0.9f,  false, 300, 600 },
+
+ {  "mine_deploy.wav",     false, 0.4f,  false, 150, 600 },
+ {  "mine_arm.wav",        false, 0.7f,  false, 400, 600 },
+ {  "mine_explode.wav",    false, 0.8f,  false, 300, 800 },
+
+ {  "spybug_deploy.wav",   false, 0.4f,  false, 150, 600 },
+ {  "spybug_explode.wav",  false, 0.8f,  false, 300, 800 },
+
+ { "asteroid_explode.wav", false, 0.8f, false,  150, 800 },
+
+ // Ship noises
+ {  "ship_explode.wav",    false, 1.0,   false, 300, 1000 },
+ {  "ship_heal.wav",       false, 1.0,   false, 300, 1000 },
+ {  "ship_turbo.wav",      false, 0.15f, true,  150, 500 },
+ {  "ship_hit.wav",        false, 1.0,   false, 150, 600 },    // Ship is hit by a projectile
+
+ {  "bounce_wall.wav",     false, 0.7f,  false, 150, 600 },
+ {  "bounce_obj.wav",      false, 0.7f,  false, 150, 600 },
+ {  "bounce_shield.wav",   false, 0.7f,  false, 150, 600 },
+
+ {  "ship_shield.wav",     false, 0.15f, true,  150, 500 },
+ {  "ship_sensor.wav",     false, 0.15f, true,  150, 500 },
+ {  "ship_repair.wav",     false, 0.15f, true,  150, 500 },
+ {  "ship_cloak.wav",      false, 0.35f, true,  150, 500 },
+
+ // Flag noises
+ {  "flag_capture.wav",    true,  0.45f, false, 0,   0 },
+ {  "flag_drop.wav",       true,  0.45f, false, 0,   0 },
+ {  "flag_return.wav",     true,  0.45f, false, 0,   0 },
+ {  "flag_snatch.wav",     true,  0.45f, false, 0,   0 },
+
+ // Teleport noises
+ {  "teleport_in.wav",     false, 1.0,   false, 200, 500 },
+ {  "teleport_out.wav",    false, 1.0,   false, 200, 500 },
+
+ {  "gofast.wav",          false, 1.0,   false, 200, 500 },    // Heard outside the ship
+ {  "gofast.wav",          true, 1.0,   false, 200, 500 },     // Heard inside the ship
+
+ // Forcefield noises
+ {  "forcefield_up.wav",   false,  0.7f,  false, 150, 600 },
+ {  "forcefield_down.wav", false,  0.7f,  false, 150, 600 },
+
+ // UI noises
+ {  "boop.wav",            true,  0.4f,  false, 150, 600 },
+ {  "comm_up.wav",         true,  0.4f,  false, 150, 600 },
+ {  "comm_down.wav",       true,  0.4f,  false, 150, 600 },
+ {  "boop.wav",            true,  0.25f, false, 150, 600 },
+
+ {  NULL, false, 0, false, 0, 0 },
+};
+
+
+// TODO clean up this rif-raff
+static bool gSFXValid = false;
+F32 mMaxDistance = 500;
+Point mListenerPosition;
+Point mListenerVelocity;
+
+SFXProfile *gSFXProfiles;
+
+static ALuint gSources[SoundSystem::NumSamples];
+static ALuint gBuffers[NumSFXBuffers];
+static Vector<ALuint> gVoiceFreeBuffers;
+static Vector<SFXHandle> gPlayList;
+
+extern IniSettings gIniSettings;
+extern ConfigDirectories gConfigDirs;
+extern bool gDedicatedServer;
+
+extern string joindir(const string &path, const string &filename);
+
+SoundSystem::SoundSystem()
+{
+}
+
+SoundSystem::~SoundSystem()
+{
+}
+
+// Initialize the sound sub-system.
+// Use ALURE to ease the use of OpenAL.
+void SoundSystem::init()
+{
+   // Initialize the sound device
+   if(!alureInitDevice(NULL, NULL))
+   {
+      logprintf(LogConsumer::LogError, "Failed to open OpenAL device: %s\n", alureGetErrorString());
+      return;
+   }
+
+   // Create free (empty) sound sources
+   alGenSources(NumSamples, gSources);
+   if(alGetError() != AL_NO_ERROR)
+   {
+      logprintf(LogConsumer::LogError, "Failed to create OpenAL sources!\n");
+      return;
+   }
+
+   // Create sound buffers for the sound effect pool
+   alGenBuffers(NumSFXBuffers, gBuffers);
+   if(alGetError() != AL_NO_ERROR)
+   {
+      logprintf(LogConsumer::LogError, "Failed to create OpenAL buffers!\n");
+      return;
+   }
+
+   // This MUST be set to maintain bitfighter's unique gain system
+   // OpenAL normally defaults the distance model to AL_INVERSE_DISTANCE
+   // which is the "physically correct" model
+   alDistanceModel(AL_LINEAR_DISTANCE_CLAMPED);
+   if(alGetError() != AL_NO_ERROR)
+      logprintf(LogConsumer::LogWarning, "Failed to set proper sound gain distance model!  Sounds will be off..\n");
+
+   // Choose the sound set
+   if(gIniSettings.sfxSet == sfxClassicSet)
+      gSFXProfiles = sfxProfilesClassic;
+   else
+      gSFXProfiles = sfxProfilesModern;
+
+   // Iterate through all sounds
+   for(U32 i = 0; i < NumSFXBuffers; i++)
+   {
+      // End when we find a sound sans filename
+      if(!gSFXProfiles[i].fileName)
+         break;
+
+      // Grab sound file location
+      string fileBuffer = joindir(gConfigDirs.sfxDir, gSFXProfiles[i].fileName);
+
+      // Stick sound into a buffer
+      if(alureBufferDataFromFile(fileBuffer.c_str(), gBuffers[i]) == AL_FALSE)
+      {
+         logprintf(LogConsumer::LogError, "Failure (1) loading sound file '%s': Game will proceed without sound.", fileBuffer.c_str());
+         return;
+      }
+   }
+
+   // TODO use ALURE to generate buffers for voice streaming
+   gVoiceFreeBuffers.resize(32);  // need this to allow receiving voice chat
+   alGenBuffers(32, gVoiceFreeBuffers.address());
+
+   gSFXValid = true;
+}
+
+void SoundSystem::shutdown()
+{
+   if(!gSFXValid)
+      return;
+
+   alDeleteBuffers(NumSFXBuffers, gBuffers);
+   alDeleteSources(NumSamples, gSources);
+
+   alureShutdownDevice();
+}
+
+void SoundSystem::setListenerParams(Point pos, Point velocity)
+{
+   if(!gSFXValid)
+      return;
+
+   mListenerPosition = pos;
+   mListenerVelocity = velocity;
+   alListener3f(AL_POSITION, pos.x, pos.y, -mMaxDistance/2);
+}
+
+SFXHandle SoundSystem::playRecordedBuffer(ByteBufferPtr p, F32 gain)
+{
+   SFXHandle ret = new SoundEffect(0, p, gain, Point(), Point());
+   playSoundEffect(ret);
+   return ret;
+}
+
+SFXHandle SoundSystem::playSoundEffect(U32 profileIndex, F32 gain)
+{
+   SFXHandle ret = new SoundEffect(profileIndex, NULL, gain, Point(), Point());
+   playSoundEffect(ret);
+   return ret;
+}
+
+SFXHandle SoundSystem::playSoundEffect(U32 profileIndex, Point position, Point velocity, F32 gain)
+{
+   SFXHandle ret = new SoundEffect(profileIndex, NULL, gain, position, velocity);
+   playSoundEffect(ret);
+   return ret;
+}
+
+
+void SoundSystem::playSoundEffect(SFXHandle& effect)
+{
+   if(!gSFXValid)
+      return;
+
+   if(effect->mSourceIndex != -1)
+      return;
+   else
+   {
+      // See if it's aleady on the play list:
+      for(S32 i = 0; i < gPlayList.size(); i++)
+         if(effect == gPlayList[i].getPointer())
+            return;
+      gPlayList.push_back(effect);
+   }
+}
+
+
+void SoundSystem::stopSoundEffect(SFXHandle& effect)
+{
+   if(!gSFXValid)
+      return;
+
+   // Remove from the play list, if this sound is playing
+   if(effect->mSourceIndex != -1)
+   {
+      alSourceStop(gSources[effect->mSourceIndex]);
+      effect->mSourceIndex = -1;
+   }
+   for(S32 i = 0; i < gPlayList.size(); i++)
+   {
+      if(gPlayList[i].getPointer() == effect)
+      {
+         gPlayList.erase(i);
+         return;
+      }
+   }
+}
+
+
+void SoundSystem::unqueueBuffers(S32 sourceIndex)
+{
+   // free up any played buffers from this source.
+   if(sourceIndex != -1)
+   {
+      ALint processed;
+      alGetError();
+
+      alGetSourcei(gSources[sourceIndex], AL_BUFFERS_PROCESSED, &processed);
+
+      while(processed)
+      {
+         ALuint buffer;
+         alSourceUnqueueBuffers(gSources[sourceIndex], 1, &buffer);
+         if(alGetError() != AL_NO_ERROR)
+            return;
+
+         processed--;
+
+         // ok, this is a lame solution - but the way OpenAL should work is...
+         // you should only be able to unqueue buffers that you queued - duh!
+         // otherwise it's a bitch to manage sources that can either be streamed
+         // or already loaded.
+         U32 i;
+         for(i = 0 ; i < NumSFXBuffers; i++)
+            if(buffer == gBuffers[i])
+               break;
+         if(i == NumSFXBuffers)
+            gVoiceFreeBuffers.push_back(buffer);
+      }
+   }
+}
+
+void SoundSystem::setMovementParams(SFXHandle& effect, Point position, Point velocity)
+{
+   if(!gSFXValid)
+      return;
+
+   effect->mPosition = position;
+   effect->mVelocity = velocity;
+   if(effect->mSourceIndex != -1)
+      updateMovementParams(effect);
+}
+
+void SoundSystem::updateMovementParams(SFXHandle& effect)
+{
+   ALuint source = gSources[effect->mSourceIndex];
+   if(effect->mProfile->isRelative)
+   {
+      alSourcei(source, AL_SOURCE_RELATIVE, true);
+      alSource3f(source, AL_POSITION, 0, 0, 0);
+      //alSource3f(source, AL_VELOCITY, 0, 0, 0);
+   }
+   else
+   {
+      alSourcei(source, AL_SOURCE_RELATIVE, false);
+      alSource3f(source, AL_POSITION, effect->mPosition.x, effect->mPosition.y, 0);
+      //alSource3f(source, AL_VELOCITY, mVelocity.x, mVelocity.y, 0);
+   }
+}
+
+void SoundSystem::processSoundEffects()
+{
+   if(!gSFXValid)
+      return;
+
+   // Ok, so we have a list of currently "playing" sounds, which is
+   // unbounded in length, but only the top NumSources actually have sources
+   // associtated with them.  Sounds are prioritized on a 0-1 scale
+   // based on type and distance.
+   //
+   // Each time through the main loop, newly played sounds are placed
+   // on the process list.  When SFXProcess is called, any finished sounds
+   // are retired from the list, and then it prioritizes and sorts all
+   // the remaining sounds.  For any sounds from 0 to NumSources that don't
+   // have a current source, they grab one of the sources not used by the other
+   // top sounds.  At this point, any sound that is not looping, and is
+   // not in the active top list is retired.
+
+   // Now, look through all the currently playing sources and see which
+   // ones need to be retired:
+
+   bool sourceActive[NumSamples];
+   for(S32 i = 0; i < NumSamples; i++)
+   {
+      ALint state;
+      unqueueBuffers(i);
+      alGetSourcei(gSources[i], AL_SOURCE_STATE, &state);
+      sourceActive[i] = state != AL_STOPPED && state != AL_INITIAL;
+   }
+   for(S32 i = 0; i < gPlayList.size(); )
+   {
+      SFXHandle &s = gPlayList[i];
+
+      if(s->mSourceIndex != -1 && !sourceActive[s->mSourceIndex])
+      {
+         // this sound was playing; now it is stopped,
+         // so remove it from the list.
+         s->mSourceIndex = -1;
+         gPlayList.erase_fast(i);
+      }
+      else
+      {
+         // compute a priority for this sound.
+         if(!s->mProfile->isRelative)
+            s->mPriority = (500 - (s->mPosition - mListenerPosition).len()) / 500.0f;
+         else
+            s->mPriority = 1.0;
+         i++;
+      }
+   }
+   // Now, bubble sort all the sounds up the list:
+   // we choose bubble sort, because the list should
+   // have a lot of frame-to-frame coherency, making the
+   // sort most often O(n)
+   for(S32 i = 1; i < gPlayList.size(); i++)
+   {
+      F32 priority = gPlayList[i]->mPriority;
+      for(S32 j = i - 1; j >= 0; j--)
+      {
+         if(priority > gPlayList[j]->mPriority)
+         {
+            SFXHandle temp = gPlayList[j];
+            gPlayList[j] = gPlayList[j+1];
+            gPlayList[j+1] = temp;
+         }
+      }
+   }
+   // Last, release any sources and get rid of non-looping sounds
+   // outside our max sound limit
+   for(S32 i = NumSamples; i < gPlayList.size(); )
+   {
+      SFXHandle &s = gPlayList[i];
+      if(s->mSourceIndex != -1)
+      {
+         sourceActive[s->mSourceIndex] = false;
+         s->mSourceIndex = -1;
+      }
+      if(!s->mProfile->isLooping)
+         gPlayList.erase_fast(i);
+      else
+         i++;
+   }
+   // Assign sources to all sounds that need them
+   S32 firstFree = 0;
+   S32 max = NumSamples;
+   if(max > gPlayList.size())
+      max = gPlayList.size();
+
+   for(S32 i = 0; i < max; i++)
+   {
+      SFXHandle &s = gPlayList[i];
+      if(s->mSourceIndex == -1)
+      {
+         while(firstFree < NumSamples-1 && sourceActive[firstFree])
+            firstFree++;
+         s->mSourceIndex = firstFree;
+         sourceActive[firstFree] = true;
+         playOnSource(s);
+      }
+      else
+         updateGain(s);     // For other sources, check the distance and adjust the gain
+   }
+
+   alureUpdate();
+}
+
+void SoundSystem::playOnSource(SFXHandle& effect)
+{
+   ALuint source = gSources[effect->mSourceIndex];
+   alSourceStop(source);
+   unqueueBuffers(effect->mSourceIndex);
+
+   if(effect->mInitialBuffer.isValid())
+   {
+      if(!gVoiceFreeBuffers.size())
+         return;
+
+      ALuint buffer = gVoiceFreeBuffers.first();
+      gVoiceFreeBuffers.pop_front();
+
+      alSourcei(source, AL_BUFFER, 0);  // clear old buffers
+
+      alBufferData(buffer, AL_FORMAT_MONO16, effect->mInitialBuffer->getBuffer(),
+            effect->mInitialBuffer->getBufferSize(), 8000);
+      alSourceQueueBuffers(source, 1, &buffer);
+   }
+   else
+      alSourcei(source, AL_BUFFER, gBuffers[effect->mSFXIndex]);
+
+   alSourcei(source, AL_LOOPING, effect->mProfile->isLooping);
+   alSourcef(source, AL_REFERENCE_DISTANCE, effect->mProfile->fullGainDistance);
+   alSourcef(source, AL_MAX_DISTANCE, effect->mProfile->zeroGainDistance);
+   alSourcef(source, AL_ROLLOFF_FACTOR, 1);
+
+   updateMovementParams(effect);
+   updateGain(effect);
+
+   alSourcePlay(source);
+}
+
+
+// Recalculate distance, and reset gain as necessary
+void SoundSystem::updateGain(SFXHandle& effect)
+{
+   ALuint source = gSources[effect.getPointer()->mSourceIndex];
+
+   // First check if it's a voice chat... voice volume is handled separately.
+   if(effect.getPointer()->mSFXIndex == SFXVoice)
+   {
+      alSourcef(source, AL_GAIN, gIniSettings.voiceChatVolLevel);
+      return;
+   }
+
+   alSourcef(source, AL_GAIN, effect.getPointer()->mGain * effect.getPointer()->mProfile->gainScale * (gDedicatedServer ? gIniSettings.alertsVolLevel : gIniSettings.sfxVolLevel));
+}
+
+
+// This only called when playing an incoming voice chat message
+void SoundSystem::queueVoiceChatBuffer(SFXHandle& effect, ByteBufferPtr p)
+{
+   if(!gSFXValid)
+      return;
+
+   if(!p->getBufferSize())
+      return;
+
+   effect->mInitialBuffer = p;
+   if(effect->mSourceIndex != -1)
+   {
+      if(!gVoiceFreeBuffers.size())
+         return;
+
+      ALuint source = gSources[effect->mSourceIndex];
+
+      ALuint buffer = gVoiceFreeBuffers.first();
+      gVoiceFreeBuffers.pop_front();
+
+      S16 max = 0;
+      S16 *ptr = (S16 *) p->getBuffer();
+      U32 count = p->getBufferSize() / 2;
+      while(count--)
+      {
+         if(max < *ptr)
+            max = *ptr;
+         ptr++;
+      }
+
+      alBufferData(buffer, AL_FORMAT_MONO16, effect->mInitialBuffer->getBuffer(),
+            effect->mInitialBuffer->getBufferSize(), 8000);
+      alSourceQueueBuffers(source, 1, &buffer);
+
+      ALint state;
+      alGetSourcei(source, AL_SOURCE_STATE, &state);
+      if(state == AL_STOPPED)
+         alSourcePlay(source);
+   }
+   else
+      playSoundEffect(effect);
+}
+
+}
+
+#elif defined (ZAP_DEDICATED)
+
+using namespace TNL;
+
+namespace Zap
+{
+
+
+void SoundSystem::updateGain(SFXHandle& effect)
+{
+}
+
+void SoundSystem::updateMovementParams(SFXHandle& effect)
+{
+}
+
+void SoundSystem::playOnSource(SFXHandle& effect)
+{
+}
+
+void SoundSystem::setMovementParams(SFXHandle& effect, Point position, Point velocity)
+{
+}
+
+SFXHandle SoundSystem::playSoundEffect(U32 profileIndex, F32 gain)
+{
+   return new SoundEffect(0,NULL,0,Point(0,0), Point(0,0));
+}
+
+SFXHandle SoundSystem::playSoundEffect(U32 profileIndex, Point position, Point velocity, F32 gain)
+{
+   return new SoundEffect(0,NULL,0,Point(0,0), Point(0,0));
+}
+
+SFXHandle SoundSystem::playRecordedBuffer(ByteBufferPtr p, F32 gain)
+{
+   return new SoundEffect(0,NULL,0,Point(0,0), Point(0,0));
+}
+
+void SoundSystem::playSoundEffect(SFXHandle& effect)
+{
+}
+
+void SoundSystem::stopSoundEffect(SFXHandle& effect)
+{
+}
+
+void SoundSystem::queueVoiceChatBuffer(SFXHandle& effect, ByteBufferPtr p)
+{
+}
+
+void SoundSystem::init()
+{
+   logprintf(LogConsumer::LogError, "No OpenAL support on this platform.");
+}
+
+void SoundSystem::processSoundEffects()
+{
+}
+
+void SoundSystem::setListenerParams(Point pos, Point velocity)
+{
+}
+
+void SoundSystem::shutdown()
+{
+};
+
+};
 
 #endif
 
-using namespace ASBase;
-using namespace SoundSystem;
 
-using std::string;
-using std::vector;
-using std::map;
-using std::numeric_limits;
-using std::ifstream;
-using std::FILE;
-using std::fopen;
-using std::fclose;
-using std::bad_alloc;
-
-namespace
+#if defined(ZAP_DEDICATED)
+namespace Zap
 {
-    // Object representing a sound effect.
-    struct Sound
-    {
-        ~Sound() throw ();
-        
-        // The OpenAL buffer associated with this sound.
-        ALuint buffer;
-        // The OpenAL source associated with this sound.
-        ALuint source;
-    };
-    
-    // Object representing an audio stream.
-    struct AudioStream
-    {
-        ~AudioStream() throw ();
-        // This is responsible for filling the stream buffer
-        // identified by the parameter.
-        void FillBuffer(ALuint al_buffer) throw ();
-        
-        // The stream is triple buffered.
-        ALuint buffers[3];
-        // The OpenAL source for the stream.
-        ALuint source;
-        // The file handle used by the Ogg Vorbis API.
-        OggVorbis_File file_handle;
-        // OpenAL format identifier, used for buffering.
-        ALenum format;
-        // OpenAL frequency, used for buffering.
-        ALsizei frequency;
-        // The point, in seconds, that the stream returns to after
-        // reaching the end of the file.
-        double loop_point;
-    };
-    
-    // This scans the stored sound IDs and locates the next
-    // available one.
-    SoundID NextSoundID() throw (Exhausted);
-    
-    // Handle to the OpenAL device.
-    ALCdevice *sound_device;
-    // Handle to the OpenAL context.
-    ALCcontext *sound_context;
-    // Ogg Vorbis needs to know the host system's endianness.
-    const int endianness = bitwise_cast<char>(1) ^ 1;
-    // Tracks the on/off state of the sound system.
-    bool enabled;
-    // The internal list of sounds.
-    map<SoundID, Sound*> sound_list;
-    // The current music stream.
-    AudioStream *stream;
-}
-
-void SoundSystem::Initialize() throw (InitializeFailure)
+bool SoundSystem::startRecording()
 {
-    // First attempt to open the sound device.
-	sound_device = alcOpenDevice(NULL);
-	
-	if (sound_device == NULL)
-	{
-		throw InitializeFailure("Failed to open sound device!", NULL, "SoundSystem::Initialize");
-	}
-	
-    // Attempt to create a sound context.
-	sound_context = alcCreateContext(sound_device, NULL);
-	
-	if (sound_context == NULL || !alcMakeContextCurrent(sound_context))
-	{
-		throw InitializeFailure("Failed to obtain context!", NULL, "SoundSystem::Initialize");
-	}
-	
-    // Reset the error state.
-	alGetError();
-	
-    // Set up the listener in the middle of the screen,
-    // facing down the z axis.
-	ALfloat orientation[6] = {0.0, 0.0, -1.0, 0.0, 1.0, 0.0};
-	
-	alListener3f(AL_POSITION, 0.0, 0.0, 0.0);
-	alListener3f(AL_VELOCITY, 0.0, 0.0, 0.0);
-	alListenerfv(AL_ORIENTATION, orientation);
-	
-    enabled = true;
+   return false;
 }
 
-void SoundSystem::Shutdown() throw (ShutdownFailure)
+void SoundSystem::captureSamples(ByteBufferPtr buffer)
 {
-    // Clean up all sound data.
-    ClearSounds();
-    
-    // Release the context.
-	alcMakeContextCurrent(NULL);
-	alcDestroyContext(sound_context);
-	
-    // Attempt to close the device.
-	if (!alcCloseDevice(sound_device))
-	{
-		throw ShutdownFailure("Failed to close sound device!", NULL, "SoundSystem::Shutdown");
-	}
 }
 
-SoundID SoundSystem::LoadOggVorbis(string filename) throw (FileNotFound, Exhausted, bad_alloc)
-{	
-    // Open the Ogg Vorbis file.
-	FILE *in_file = fopen(filename.c_str(), "rb");
-	
-    // Make sure we got it.
-	if (in_file == NULL)
-	{
-		throw FileNotFound(filename, NULL, "SoundSystem::LoadOggVorbis");
-	}
-	
-    // Create a new Sound object.
-	Sound *new_sound = new Sound;
-	vorbis_info *v_info;
-	OggVorbis_File ov_file;
-
-    // Set up the Ogg Vorbis decoder with the file.
-	ov_open_callbacks(in_file, &ov_file, NULL, 0, OV_CALLBACKS_DEFAULT);
-    // Get some information about the sound format.
-	v_info = ov_info(&ov_file, -1);
-	
-	ALenum format;
-    ALsizei frequency;
-	
-    // Convert the Ogg Vorbis information into the format that OpenAL wants.
-	format = v_info->channels == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16;
-	frequency = v_info->rate;
-	
-    // This vector will hold the decoded sound data.
-	vector<char> data_buffer;
-	long bytes;
-	
-	do
-	{
-		char array[32768];
-        // This serves no actual purpose, ov_read returns something in it.
-		int bit_stream;
-		
-        // Read a chunk of the file into array.
-		bytes = ov_read(&ov_file, array, 32768, endianness, 2, 1, &bit_stream);
-        // Insert the data into the final buffer.
-		data_buffer.insert(data_buffer.end(), array, array + bytes);
-        // Keep going until all the data is read.
-	} while (bytes > 0);
-	
-    // Close the file.
-	ov_clear(&ov_file);
-	
-    // Create new OpenAL constructs for the sound effect.
-	alGenBuffers(1, &new_sound->buffer);
-	alGenSources(1, &new_sound->source);
-
-    // Buffer the data.
-	alBufferData(new_sound->buffer, format, &data_buffer[0], data_buffer.size(), frequency);
-    // Set up the sound properties.
-    alSourcef(new_sound->source, AL_PITCH, 1.0);
-    alSourcef(new_sound->source, AL_GAIN, 1.0);
-    alSource3f(new_sound->source, AL_POSITION, 0.0, 0.0, 0.0);
-    alSource3f(new_sound->source, AL_VELOCITY, 0.0, 0.0, 0.0);
-    alSourcei(new_sound->source, AL_LOOPING, AL_FALSE);
-	alSourcei(new_sound->source, AL_BUFFER, new_sound->buffer);
-	
-    // Get the new sound ID.
-    SoundID new_id = NextSoundID();
-    
-    // Add the sound to the list.
-	sound_list[new_id] = new_sound;
-	
-    // Return the ID number of the new sound.
-	return new_id;
-}
-
-void SoundSystem::LoadOggVorbisStream(string filename) throw (FileNotFound, bad_alloc)
+void SoundSystem::stopRecording()
 {
-    // Open the Ogg Vorbis file.
-	FILE *ogg_file = fopen(filename.c_str(), "rb");
-	
-    // Make sure we got it.
-	if (ogg_file == NULL)
-	{
-		throw FileNotFound(filename, NULL, "SoundSystem::LoadOggVorbisStream");
-	}
-	
-    // Build the name of the loop file and open it.
-	string loop_file = filename.substr(0, filename.length() - 3) + "loop";
-	ifstream in_file(loop_file.c_str());
-	
-	// Delete the old audio stream and make a new one.
-	delete stream;
-	stream = new AudioStream;
-	
-    // Check to see if the .loop file was opened.
-    if (in_file)
-    {
-        // If so, load the loop point.
-        in_file >> stream->loop_point;
-        
-        // If the read failed...
-        if (!in_file)
-        {
-            // Assume 0.0.
-            stream->loop_point = 0.0;
-        }
-    }
-    else
-    {
-        // If the .loop file doesn't exist, assume 0.0.
-        stream->loop_point = 0.0;
-    }
-
-	vorbis_info *v_info;
-	
-    // Hand the file handle to Ogg Vorbis.
-	ov_open_callbacks(ogg_file, &stream->file_handle, NULL, 0, OV_CALLBACKS_DEFAULT);
-    // Get some info about the file.
-	v_info = ov_info(&stream->file_handle, -1);
-    // Convert the info to OpenAL format.
-	stream->format = v_info->channels == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16;
-	stream->frequency = v_info->rate;
-	
-    // Create three buffers and a source for the stream.
-	alGenBuffers(3, stream->buffers);
-	alGenSources(1, &stream->source);
-	
-    // Fill all three buffers.
-	stream->FillBuffer(stream->buffers[0]);
-	stream->FillBuffer(stream->buffers[1]);
-	stream->FillBuffer(stream->buffers[2]);
-	
-    // Set the various stream properties.
-	alSourcef(stream->source, AL_PITCH, 1.0);
-    alSourcef(stream->source, AL_GAIN, 1.0);
-    alSource3f(stream->source, AL_POSITION, 0.0, 0.0, 0.0);
-    alSource3f(stream->source, AL_VELOCITY, 0.0, 0.0, 0.0);
-	alSource3f(stream->source, AL_DIRECTION, 0.0, 0.0, 0.0);
-    alSourcei(stream->source, AL_LOOPING, AL_FALSE);
-	alSourcef(stream->source, AL_ROLLOFF_FACTOR, 0.0);
-    // Queue the three buffers.
-	alSourceQueueBuffers(stream->source, 3, stream->buffers);
 }
 
-void SoundSystem::Play(SoundID sound) throw ()
+};
+
+#else
+
+namespace Zap
 {
-	if (!enabled || sound == no_sound)
-	{
-		return;
-	}
-	
-	alSourcePlay(sound_list[sound]->source);
-}
 
-void SoundSystem::SetLocation(SoundID sound, float x_pos, float y_pos, float z_pos) throw ()
+// requires OpenAL version 1.1 (OpenAL-Soft might be required)
+
+static ALCdevice *captureDevice;
+
+bool SoundSystem::startRecording()
 {
-    float location[] = {x_pos, y_pos, z_pos};
-    
-    SetLocation(sound, location);
+   captureDevice = alcCaptureOpenDevice(NULL, 8000, AL_FORMAT_MONO16, 2048);
+   if(alGetError() != AL_NO_ERROR || captureDevice == NULL)
+      return false;
+
+   alcCaptureStart(captureDevice);
+   return true;
 }
 
-void SoundSystem::SetLocation(SoundID sound, const float location[]) throw ()
+void SoundSystem::captureSamples(ByteBufferPtr buffer)
 {
-    alSourcei(sound_list[sound]->source, AL_SOURCE_RELATIVE, AL_TRUE);
-    alSourcefv(sound_list[sound]->source, AL_POSITION, location);
+   U32 startSize = buffer->getBufferSize();
+   ALint sample;
+
+   alcGetIntegerv(captureDevice, ALC_CAPTURE_SAMPLES, 1, &sample);
+
+   U32 endSize = startSize + sample*2;  // convert number of samples (2 byte mono) to number of bytes, but keep sample size unchanged for alcCaptureSamples
+
+   buffer->resize(endSize);
+   alcCaptureSamples(captureDevice, (ALCvoid *) &buffer->getBuffer()[startSize], sample);
 }
 
-void SoundSystem::PlayStream() throw ()
+void SoundSystem::stopRecording()
 {
-	if (!enabled || stream == NULL)
-	{
-		return;
-	}
-	
-	alSourcePlay(stream->source);
+   alcCaptureStop(captureDevice);
+   alcCaptureCloseDevice(captureDevice);
+   captureDevice = NULL;
 }
 
-void SoundSystem::PauseStream() throw ()
-{
-	if (!enabled || stream == NULL)
-	{
-		return;
-	}
-	
-	alSourcePause(stream->source);
-}
+};
 
-void SoundSystem::RewindStream() throw ()
-{
-	if (!enabled || stream == NULL)
-	{
-		return;
-	}
-	
-    // Stop the stream.
-	alSourceStop(stream->source);
-    // Go back to position 0.
-	ov_raw_seek(&stream->file_handle, 0);
-    // Unqueue the buffers.
-	alSourceUnqueueBuffers(stream->source, 3, stream->buffers);
-	
-    // Fill the buffers again from the beginning of the stream.
-	stream->FillBuffer(stream->buffers[0]);
-	stream->FillBuffer(stream->buffers[1]);
-	stream->FillBuffer(stream->buffers[2]);
-	
-    // Queue the buffers up again.
-	alSourceQueueBuffers(stream->source, 3, stream->buffers);
-}
-
-void SoundSystem::ProcessStream() throw ()
-{
-	if (!enabled || stream == NULL)
-	{
-		return;
-	}
-	
-	int buffers_processed;
-	int state;
-	
-    // Get the stream state.
-	alGetSourcei(stream->source, AL_SOURCE_STATE, &state);
-	
-    // If the stream was stopped, we want to fill all three buffers again.
-	if (state == AL_STOPPED)
-	{
-		buffers_processed = 3;
-	}
-	else
-	{
-        // Otherwise, request the number of empty buffers.
-		alGetSourcei(stream->source, AL_BUFFERS_PROCESSED, &buffers_processed);
-        
-        // If none of the buffers have finished playing, get out.
-        if (buffers_processed == 0)
-        {
-            return;
-        }
-	}
-	
-	vector<ALuint> buffers(buffers_processed);
-
-    // Unqueue the completed buffers into the vector.
-	alSourceUnqueueBuffers(stream->source, buffers_processed, &buffers[0]);
-	
-    // Fill them with fresh data.
-	for (int x = 0; x < buffers_processed; x++)
-	{
-		stream->FillBuffer(buffers[x]);
-	}
-	
-    // Queue them back up.
-	alSourceQueueBuffers(stream->source, buffers_processed, &buffers[0]);
-	
-    // If the stream was stopped, start it up again.
-	if (state == AL_STOPPED)
-	{
-		alSourcePlay(stream->source);
-	}
-}
-
-void SoundSystem::Enable() throw ()
-{
-    enabled = true;
-}
-
-void SoundSystem::Disable() throw ()
-{
-    enabled = false;
-    PauseStream();
-}
-
-void SoundSystem::ToggleEnabled() throw ()
-{
-    enabled = !enabled;
-    
-    if (!enabled)
-    {
-        PauseStream();
-    }
-}
-
-void SoundSystem::ClearSounds() throw ()
-{
-	for (map<SoundID, Sound*>::const_iterator i = sound_list.begin(); i != sound_list.end(); ++i)
-    {
-        delete i->second;
-    }
-	
-	sound_list.clear();
-	delete stream;
-	stream = NULL;
-}
-
-void SoundSystem::DeleteSound(SoundID sound) throw ()
-{
-    // Free the sound object.
-    delete sound_list[sound];
-    // Remove the entry.
-    sound_list.erase(sound);
-}
-
-namespace
-{
-    Sound::~Sound() throw ()
-    {
-        alSourceStop(source);
-        alSourcei(source, AL_BUFFER, 0);
-        alDeleteBuffers(1, &buffer);
-        alDeleteSources(1, &source);
-    }
-
-    AudioStream::~AudioStream() throw ()
-    {
-        alSourceStop(source);
-        alSourcei(source, AL_BUFFER, 0);
-        alDeleteBuffers(3, buffers);
-        alDeleteSources(1, &source);
-        ov_clear(&file_handle);
-    }
-    
-    void AudioStream::FillBuffer(ALuint al_buffer) throw ()
-    {
-        char buffer[32768];
-        ALuint total_bytes = 0;
-        
-        do
-        {
-            int bytes = 0;
-            int bit_stream;
-            
-            // Read a chunk of data.
-            bytes = ov_read(&file_handle, buffer + total_bytes, 32768 - total_bytes, endianness, 2, 1, &bit_stream);
-            
-            // If the file is at the end...
-            if (bytes == 0)
-            {
-                // Go back to the loop point.
-                ov_time_seek(&file_handle, loop_point);
-                
-                continue;
-            }
-            
-            total_bytes += bytes;
-            //Loop until the buffer is full.
-        } while (total_bytes < 32768);
-        
-        // Put the data in the OpenAL buffer.
-        alBufferData(al_buffer, format, buffer, total_bytes, frequency);
-    }
-    
-    SoundID NextSoundID() throw (Exhausted)
-    {
-        // Check to see if all SoundIDs have been claimed.
-        if (sound_list.size() == numeric_limits<SoundID>::max() - 1)
-        {
-            throw Exhausted("ASBase::SoundID", NULL, "NextSoundID");
-        }
-
-        // Assume it's 1.
-        SoundID next = 1;
-        
-        for (map<SoundID, Sound*>::const_iterator i = sound_list.begin(); i != sound_list.end(); ++i)
-        {
-            // If this number is not taken, return it.
-            if (i->first != next)
-            {
-                return next;
-            }
-            
-            // Look for the next number.
-            next++;
-        }
-        
-        return next;
-    }
-}
+#endif

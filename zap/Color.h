@@ -26,11 +26,13 @@
 #ifndef _COLOR_H_
 #define _COLOR_H_
 
-#include "tnlTypes.h"
-#include "tnlVector.h"
 #include <string>
 
-using namespace TNL;
+// forward declarations
+namespace TNL {
+   typedef unsigned int U32;
+   typedef float F32;
+};
 
 namespace Zap
 {
@@ -46,7 +48,7 @@ public:
    Color(float grayScale = 1);
    Color(double grayScale);
 
-   Color(U32 rgbInt);
+   Color(TNL::U32 rgbInt);
 
    void read(const char **argv);
 
@@ -54,15 +56,15 @@ public:
 
    // templates must stay in headers
    template<class T, class U, class V>
-   void set(T in_r, U in_g, V in_b) { r = static_cast<F32>(in_r); g = static_cast<F32>(in_g); b = static_cast<F32>(in_b); }
+   void set(T in_r, U in_g, V in_b) { r = static_cast<TNL::F32>(in_r); g = static_cast<TNL::F32>(in_g); b = static_cast<TNL::F32>(in_b); }
 
    void set(const Color &c);
-   void set(const string &s);
+   void set(const std::string &s);
 
-   string toRGBString();
-   string toHexString();
+   std::string toRGBString();
+   std::string toHexString();
 
-   U32 toU32();
+   TNL::U32 toU32();
 
    // inlines must stay in headers
    inline Color operator+(const Color &c) const { return Color (r + c.r, g + c.g, b + c.b); }

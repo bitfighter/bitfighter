@@ -90,7 +90,8 @@ void IniSettings::init()
    levelDir = "";
 
    defaultRobotScript = "s_bot.bot";            
-         
+   globalLevelScript = "";
+
    wallFillColor.set(0,0,.15);
    wallOutlineColor.set(0,0,1);
 
@@ -424,6 +425,7 @@ static void loadHostConfiguration()
 #endif
 
    gIniSettings.defaultRobotScript = gINI.GetValue("Host", "DefaultRobotScript", gIniSettings.defaultRobotScript);
+   gIniSettings.globalLevelScript  = gINI.GetValue("Host", "GlobalLevelScript", gIniSettings.globalLevelScript);
 }
 
 
@@ -1380,6 +1382,7 @@ static void writeHost()
    gINI.setValueYN(section, "AllowMapUpload", S32(gIniSettings.allowMapUpload) );
    gINI.setValueYN(section, "AllowAdminMapUpload", S32(gIniSettings.allowAdminMapUpload) );
 
+
    gINI.setValueYN(section, "VoteEnable", S32(gIniSettings.voteEnable) );
    gINI.SetValueI(section, "VoteLength", S32(gIniSettings.voteLength) );
    gINI.SetValueI(section, "VoteLengthToChangeTeam", S32(gIniSettings.voteLengthToChangeTeam) );
@@ -1389,6 +1392,7 @@ static void writeHost()
    gINI.SetValueI(section, "VoteNothingStrength", gIniSettings.voteNothingStrength );
 
    gINI.SetValue  (section, "DefaultRobotScript", gIniSettings.defaultRobotScript);
+   gINI.SetValue  (section, "GlobalLevelScript", gIniSettings.globalLevelScript );
 #ifdef BF_WRITE_TO_MYSQL
    if(gIniSettings.mySqlStatsDatabaseServer == "" && gIniSettings.mySqlStatsDatabaseName == "" && gIniSettings.mySqlStatsDatabaseUser == "" && gIniSettings.mySqlStatsDatabasePassword == "")
       gINI.SetValue  (section, "MySqlStatsDatabaseCredentials", "server, dbname, login, password");

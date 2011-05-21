@@ -36,6 +36,7 @@
 #include "glutInclude.h"
 
 #include <string>
+#include <math.h>
 
 namespace Zap
 {

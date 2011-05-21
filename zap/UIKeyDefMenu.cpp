@@ -35,7 +35,9 @@
 #include "game.h"    // For gClientGame
 
 #include "../glut/glutInclude.h"
+
 #include <string>
+#include <math.h>
 
 
 namespace Zap

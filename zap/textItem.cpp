@@ -29,6 +29,8 @@
 #include "glutInclude.h"
 #include "gameObjectRender.h"    // For renderPointVector()
 
+#include <math.h>
+
 namespace Zap
 {
 

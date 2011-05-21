@@ -27,11 +27,11 @@
 #define _GAMECONNECTION_H_
 
 
-#include "sfx.h"
 #include "controlObjectConnection.h"
 #include "shipItems.h"           // For EngineerBuildObjects enum
 #include "dataConnection.h"      // For DataSendable interface
 #include "statistics.h"
+#include "SoundSystem.h"
 
 #include "tnlNetConnection.h"
 #include "timer.h"
@@ -41,6 +41,7 @@
 
 namespace Zap
 {
+
 using TNL::StringPtr;
 using std::string;
 
@@ -251,9 +252,9 @@ public:
    TNL_DECLARE_RPC(c2sRequestLoadout, (Vector<U32> loadout));     // Client has changed his loadout configuration
    void sRequestLoadout(Vector<U32> &loadout);                     // Robot has changed his loadout configuration
 
-   TNL_DECLARE_RPC(s2cDisplayMessageESI, (RangedU32<0, ColorCount> color, RangedU32<0, NumSFXBuffers> sfx, 
+   TNL_DECLARE_RPC(s2cDisplayMessageESI, (RangedU32<0, ColorCount> color, RangedU32<0, NumSFXBuffers> sfx,
                    StringTableEntry formatString, Vector<StringTableEntry> e, Vector<StringPtr> s, Vector<S32> i));
-   TNL_DECLARE_RPC(s2cDisplayMessageE, (RangedU32<0, ColorCount> color, RangedU32<0, NumSFXBuffers> sfx, 
+   TNL_DECLARE_RPC(s2cDisplayMessageE, (RangedU32<0, ColorCount> color, RangedU32<0, NumSFXBuffers> sfx,
                    StringTableEntry formatString, Vector<StringTableEntry> e));
    TNL_DECLARE_RPC(s2cTouchdownScored, (U32 sfx, S32 team, StringTableEntry formatString, Vector<StringTableEntry> e));
 
@@ -313,6 +314,9 @@ public:
 
    TNL_DECLARE_NETCONNECTION(GameConnection);
 };
+
+LevelInfo getLevelInfo(char *level, S32 size);
+void updateClientChangedName(GameConnection *,StringTableEntry);  //in masterConnection.cpp
 
 
 };

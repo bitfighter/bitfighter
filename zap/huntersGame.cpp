@@ -26,7 +26,7 @@
 #include "huntersGame.h"
 #include "flagItem.h"
 #include "UIGame.h"
-#include "sfx.h"
+#include "SoundSystem.h"
 #include "gameNetInterface.h"
 #include "ship.h"
 #include "gameObjectRender.h"
@@ -34,6 +34,8 @@
 #include "stringUtils.h"         // For itos
 
 #include "../glut/glutInclude.h"
+
+#include <math.h>
 
 namespace Zap
 {
@@ -66,12 +68,12 @@ TNL_IMPLEMENT_NETOBJECT_RPC(HuntersGameType, s2cHuntersMessage,
 
    if(msgIndex == HuntersMsgScore)
    {
-      SFXObject::play(SFXFlagCapture);
+      SoundSystem::playSoundEffect(SFXFlagCapture);
       clientGame->mGameUserInterface->displayMessage(Color(0.6f, 1.0f, 0.8f),"%s returned %d flag%s to the Nexus for %d points!", clientName.getString(), flagCount, flagCount > 1 ? "s" : "", score);
    }
    else if(msgIndex == HuntersMsgYardSale)
    {
-      SFXObject::play(SFXFlagSnatch);
+      SoundSystem::playSoundEffect(SFXFlagSnatch);
       clientGame->mGameUserInterface->displayMessage(Color(0.6f, 1.0f, 0.8f),
                   "%s is having a YARD SALE!",
                   clientName.getString());
@@ -81,12 +83,12 @@ TNL_IMPLEMENT_NETOBJECT_RPC(HuntersGameType, s2cHuntersMessage,
       clientGame->mGameUserInterface->displayMessage(Color(0.6f, 1.0f, 0.8f),
                      "Player %s wins the game!",
                      clientName.getString());
-      SFXObject::play(SFXFlagCapture);
+      SoundSystem::playSoundEffect(SFXFlagCapture);
    }
    else if(msgIndex == HuntersMsgGameOverTie)
    {
       clientGame->mGameUserInterface->displayMessage(Color(0.6f, 1.0f, 0.8f), "The game ended in a tie.");
-      SFXObject::play(SFXFlagDrop);
+      SoundSystem::playSoundEffect(SFXFlagDrop);
    }
 }
 

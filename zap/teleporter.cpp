@@ -30,7 +30,7 @@ using namespace TNL;
 #include "ship.h"
 #include "sparkManager.h"
 #include "gameLoader.h"
-#include "sfx.h"
+#include "SoundSystem.h"
 #include "gameObjectRender.h"
 
 namespace Zap
@@ -165,10 +165,10 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
       S32 dest;
       stream->read(&dest);
 
-      FXManager::emitTeleportInEffect(mDests[dest], 0);
-      SFXObject::play(SFXTeleportIn, mDests[dest], Point());
+      FXManager::emitTeleportInEffect(mDest[dest], 0);
+      SoundSystem::playSoundEffect(SFXTeleportIn, mDest[dest], Point());
 
-      SFXObject::play(SFXTeleportOut, mPos, Point());
+      SoundSystem::playSoundEffect(SFXTeleportOut, mPos, Point());
       timeout = TeleporterDelay;
    }
 }

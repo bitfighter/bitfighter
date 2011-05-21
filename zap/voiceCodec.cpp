@@ -199,6 +199,75 @@ U32 GSMVoiceDecoder::decompressFrame(S16 *framePtr, U8 *inputPtr, U32 inSize)
    return GSM_ENCODED_FRAME_SIZE;
 }
 
+// Begin Speex
+
+SpeexVoiceEncoder::SpeexVoiceEncoder()
+{
+   speex_bits_init(&speexBits);
+   encoderState = speex_encoder_init(speex_lib_get_mode(SPEEX_MODEID_NB));  // narrow-band coding
+}
+
+SpeexVoiceEncoder::~SpeexVoiceEncoder()
+{
+   speex_bits_destroy(&speexBits);
+   speex_encoder_destroy(encoderState);
+}
+
+U32 SpeexVoiceEncoder::getSamplesPerFrame()
+{
+   U32 samples;
+   speex_encoder_ctl(encoderState, SPEEX_GET_FRAME_SIZE, &samples);
+
+   return samples;  // 160 in narrow-band coding
+}
+
+U32 SpeexVoiceEncoder::getMaxCompressedFrameSize()
+{
+   return maxFrameByteSize;
+}
+
+U32 SpeexVoiceEncoder::compressFrame(S16 *samplePtr, U8 *outputPtr)
+{
+   speex_bits_reset(&speexBits);
+   speex_encode_int(encoderState, samplePtr, &speexBits);
+   speex_bits_write(&speexBits, (char*)outputPtr, maxFrameByteSize);
+
+   return maxFrameByteSize;
+}
+
+SpeexVoiceDecoder::SpeexVoiceDecoder()
+{
+   speex_bits_init(&speexBits);
+   decoderState = speex_decoder_init(speex_lib_get_mode(SPEEX_MODEID_NB));  // narrow-band coding
+}
+
+SpeexVoiceDecoder::~SpeexVoiceDecoder()
+{
+   speex_bits_destroy(&speexBits);
+   speex_decoder_destroy(decoderState);
+}
+
+U32 SpeexVoiceDecoder::getSamplesPerFrame()
+{
+   U32 samples;
+   speex_decoder_ctl(decoderState, SPEEX_GET_FRAME_SIZE, &samples);
+
+   return samples;  // 160 in narrow-band coding
+}
+
+U32 SpeexVoiceDecoder::getAvgCompressedFrameSize()
+{
+   return maxFrameByteSize;
+}
+
+U32 SpeexVoiceDecoder::decompressFrame(S16 *framePtr, U8 *inputPtr, U32 inSize)
+{
+   speex_bits_read_from(&speexBits, (char*)inputPtr, inSize);
+   speex_decode_int(decoderState, &speexBits, framePtr);
+
+   return maxFrameByteSize;
+}
+
 
 };
 

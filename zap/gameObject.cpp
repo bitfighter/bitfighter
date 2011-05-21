@@ -31,8 +31,9 @@
 
 #include "projectile.h"
 
-
 #include "../glut/glutInclude.h"
+
+#include <math.h>
 
 
 using namespace TNL;

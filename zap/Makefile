@@ -19,7 +19,7 @@
 
 OPTIMIZE=-O2
 DEBUG=-g
-INCLUDES=-I../tnl -I../glut -I../openal -I../Triangle -I../recast -I../clipper -I../poly2tri
+INCLUDES=-I../tnl -I../glut -I../openal -I../Triangle -I../recast -I../clipper -I../alure -I../libspeex
 CC=gcc $(DEBUG) $(INCLUDES) -DTNL_ENABLE_LOGGING -W $(OPTIMIZE)
 THREADLIB= -lpthread
 GLUT=-lGL -lGLU -lglut
@@ -86,7 +86,6 @@ OBJECTS_ZAP=\
    move.o\
    moveObject.o\
    oglconsole.o\
-   pictureloader.o\
    playerInfo.o\
    Point.o\
    polygon.o\
@@ -96,8 +95,9 @@ OBJECTS_ZAP=\
    Rect.o\
    retrieveGame.o\
    robot.o\
-   screenShooter.o \
-   sfx.o\
+   screenShooter.o\
+   SoundSystem.o\
+   SoundEffect.o\
    ship.o\
    SlipZone.o\
    soccerGame.o\
@@ -124,18 +124,13 @@ OBJECTS_ZAP=\
    ../Triangle/triangle.o\
    ../recast/RecastAlloc.o\
    ../recast/RecastMesh.o\
-   ../clipper/clipper.o\
-   ../poly2tri/common/shapes.o\
-   ../poly2tri/sweep/sweep.o\
-   ../poly2tri/sweep/sweep_context.o\
-   ../poly2tri/sweep/advancing_front.o\
-   ../poly2tri/sweep/cdt.o
+   ../clipper/clipper.o
 
 
 CFLAGS=
 DFLAGS=
 EXEFILE=bitfighter
-OPENAL=-lopenal -lalut
+OPENAL=-lopenal -lspeex
 WFLAGS=
 LFLAGS=-lstdc++ -lm -ldl -lX11
 
@@ -167,7 +162,7 @@ dedicated: bitfighter
 
 
 bitfighter: $(OBJECTS_ZAP) 
-	$(CC) -o ../exe/$(EXEFILE) $(OBJECTS_ZAP) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a ../lua/lua-vec/src/liblua.a $(OPENAL) $(GLUT) $(THREADLIB) $(LFLAGS)
+	$(CC) -o ../exe/$(EXEFILE) $(OBJECTS_ZAP) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a ../lua/lua-vec/src/liblua.a ../alure/libalure.a $(OPENAL) $(GLUT) $(THREADLIB) $(LFLAGS)
 
 
 clean: 

@@ -32,7 +32,6 @@
 #include "loadoutHelper.h"
 #include "engineerHelper.h"
 #include "timer.h"
-#include "sfx.h"
 #include "voiceCodec.h"
 #include "Point.h"
 #include "Color.h"
@@ -187,7 +186,7 @@ private:
       };
 
       Timer mVoiceAudioTimer;
-      RefPtr<SFXObject> mVoiceSfx;
+      RefPtr<SoundEffect> mVoiceSfx;
       RefPtr<VoiceEncoder> mVoiceEncoder;
       bool mRecordingAudio;
       U8 mWantToStopRecordingAudio;
