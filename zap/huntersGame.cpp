@@ -405,7 +405,7 @@ void HuntersGameType::renderInterfaceOverlay(bool scoreboardVisible)
       renderObjectiveArrow(mYardSaleWaypoints[i].pos, Color(1,1,1));
 
    for(S32 i = 0; i < mNexus.size(); i++)
-      renderObjectiveArrow(mNexus[i], mNexusIsOpen ? gNexusOpenColor : gNexusClosedColor);
+      renderObjectiveArrow(dynamic_cast<GameObject *>(mNexus[i].getPointer()), mNexusIsOpen ? gNexusOpenColor : gNexusClosedColor);
 }
 
 #undef NEXUS_STR

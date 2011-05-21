@@ -868,6 +868,10 @@ void SpyBug::onAddedToGame(Game *theGame)
       setScopeAlways();
 
    getGame()->mObjectsLoaded++;
+
+   GameType *gt = getGame()->getGameType();
+   if(gt && !isGhost())  // non-Ghost / ServerGame only, currently useless for client.
+      gt->addSpyBug(this);
 }
 
 

@@ -1172,10 +1172,20 @@ F32 GameType::getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 upda
 // server only
 void GameType::catalogSpybugs()
 {
+   Vector<DatabaseObject *> spyBugs;
    mSpyBugs.clear();
+   spyBugs.clear();
 
    // Find all spybugs in the game, load them into mSpyBugs
-   getGame()->getGridDatabase()->findObjects(SpyBugType, mSpyBugs, getGame()->getWorldExtents());
+   getGame()->getGridDatabase()->findObjects(SpyBugType, spyBugs, getGame()->getWorldExtents());
+
+   mSpyBugs.resize(spyBugs.size());
+   for(S32 i = 0; i < spyBugs.size(); i++)
+      mSpyBugs[i] = dynamic_cast<Object *>(spyBugs[i]); // convert to SafePtr
+}
+void GameType::addSpyBug(SpyBug *spybug)
+{
+   mSpyBugs.push_back(dynamic_cast<Object *>(spybug)); // convert to SafePtr 
 }
 
 
@@ -1608,21 +1618,26 @@ void GameType::performScopeQuery(GhostConnection *connection)
    // What does the spy bug see?
    //S32 teamId = gc->getClientRef()->teamId;
 
-   for(S32 i = 0; i < mSpyBugs.size(); i++)
+   for(S32 i = mSpyBugs.size()-1; i >= 0; i--)
    {
-      SpyBug *sb = dynamic_cast<SpyBug *>(mSpyBugs[i]);
-      if(!sb->isVisibleToPlayer( cr->getTeam(), cr->name, isTeamGame() ))
-         break;
-      Point pos = sb->getActualPos();
-      Point scopeRange(gSpyBugRange, gSpyBugRange);
-      Rect queryRect(pos, pos);
-      queryRect.expand(scopeRange);
+      SpyBug *sb = dynamic_cast<SpyBug *>(mSpyBugs[i].getPointer());
+      if(!sb)  // SpyBug is destroyed?
+         mSpyBugs.erase_fast(i);
+      else
+      {
+         if(!sb->isVisibleToPlayer( cr->getTeam(), cr->name, isTeamGame() ))
+            break;
+         Point pos = sb->getActualPos();
+         Point scopeRange(gSpyBugRange, gSpyBugRange);
+         Rect queryRect(pos, pos);
+         queryRect.expand(scopeRange);
 
-      fillVector.clear();
-      findObjects(AllObjectTypes, fillVector, queryRect);
+         fillVector.clear();
+         findObjects(AllObjectTypes, fillVector, queryRect);
 
-      for(S32 j = 0; j < fillVector.size(); j++)
-         connection->objectInScope(dynamic_cast<GameObject *>(fillVector[j]));
+         for(S32 j = 0; j < fillVector.size(); j++)
+            connection->objectInScope(dynamic_cast<GameObject *>(fillVector[j]));
+      }
    }
 }
 

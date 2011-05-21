@@ -97,6 +97,7 @@ public:
 class Robot;
 class AsteroidSpawn;
 class Team;
+class SpyBug;
 
 struct BarrierRec
 {
@@ -113,7 +114,7 @@ private:
    Point getSpawnPoint(S32 team);         // Picks a spawn point for ship or robot
    virtual U32 getLowerRightCornerScoreboardOffsetFromBottom() { return 60; }      // Game-specific location for the bottom of the scoreboard on the lower-right corner
                                                                                    // (because games like hunters have more stuff down there we need to look out for)
-   Vector<DatabaseObject *> mSpyBugs;    // List of all spybugs in the game
+   Vector<SafePtr<Object> > mSpyBugs;    // List of all spybugs in the game, could be added and destroyed in-game
    bool mLevelHasLoadoutZone;
    bool mEngineerEnabled;
    bool mShowAllBots;
@@ -187,6 +188,7 @@ public:
    bool engineerIsEnabled() { return mEngineerEnabled; }
 
    void catalogSpybugs();     // Rebuild a list of spybugs in the game
+   void addSpyBug(SpyBug *spybug);
 
    virtual bool isFlagGame() { return false; }              // Does game use flags?
    virtual bool isTeamFlagGame() { return true; }           // Does flag-team orientation matter?  Only false in HunterGame.
