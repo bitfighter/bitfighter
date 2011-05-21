@@ -198,7 +198,7 @@ template<class T> inline void Vector<T>::deleteAndErase_fast(U32 index)
    // CAUTION: this operator does NOT maintain list order
    // Copy the last element into the deleted 'hole' and decrement the
    //   size of the vector.
-   delete innderVector[index];
+   delete innerVector[index];
    erase_fast(index);
 }
 
