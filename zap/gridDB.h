@@ -114,6 +114,7 @@ public:
                                  float &collisionTime, Point &surfaceNormal);
    bool pointCanSeePoint(const Point &point1, const Point &point2);
 
+   void findObjects(Vector<DatabaseObject *> &fillVector);     // Returns all objects in the database
    void findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector);      
    void findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector, const Rect &extents);
    

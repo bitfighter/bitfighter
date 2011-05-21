@@ -36,7 +36,6 @@ namespace Zap
 
 class Point
 {
-
 public:
    F32 x;
    F32 y;
@@ -161,8 +160,8 @@ public:
    {
       return x != pt.x || y != pt.y;
    }
+}; // class
 
-}; // struct
 
 };	// namespace
 

@@ -127,12 +127,8 @@ EditorUserInterface::EditorUserInterface() : mGridDatabase(GridDatabase(false)) 
    mUndoItems.resize(UNDO_STATES);
 
    // Pass the gridDatabase on to these other objects, so they can have local access
-   //EditorObject::setGridDatabase(&mGridDatabase);
    WallSegment::setGridDatabase(&mGridDatabase);      // Still needed?  Can do this via editorGame?
-   WallEdge::setGridDatabase(&mGridDatabase);
    WallSegmentManager::setGridDatabase(&mGridDatabase);
-
-   //editorGame = gEditorGame;     // TODO: we should be passing this in rather than relying on the global
 }
 
 
@@ -204,9 +200,6 @@ void EditorUserInterface::populateDock()
 
       
       addDockObject(new LoadoutZone(), xPos, yPos);
-      yPos += 25;
-
-      addDockObject(new GoalZone(), xPos, yPos);
       yPos += 25;
 
       if(!strcmp(mGameType, "HuntersGameType"))
@@ -478,44 +471,12 @@ void EditorUserInterface::redo()
 
 void EditorUserInterface::rebuildEverything()
 {
-   wallSegmentManager.recomputeAllWallGeometry();
+   mWallSegmentManager.recomputeAllWallGeometry();
    resnapAllEngineeredItems();
-   rebuildAllBorderSegs();
 
    mNeedToSave = (mAllUndoneUndoLevel != mLastUndoIndex);
    mItemToLightUp = NULL;
    autoSave();
-}
-
-
-// Find mount point or turret or forcefield closest to pos
-static Point snapEngineeredObject(EngineeredObject *engrObj, const Point &pos)
-{  
-   Point anchor, nrml;
-
-   DatabaseObject *mountSeg = engrObj->findAnchorPointAndNormal(gEditorUserInterface.getGridDatabase(), pos, 
-                     EngineeredObject::MAX_SNAP_DISTANCE, false, EditorWallSegmentType, anchor, nrml);
-
-   if(mountSeg)   // Found a segment we can mount to
-   {
-      engrObj->setVert(anchor, 0);
-      engrObj->setAnchorNormal(nrml);
-
-      if(engrObj->getObjectTypeMask() & ForceFieldProjectorType)
-      {
-         ForceFieldProjector *ffp = dynamic_cast<ForceFieldProjector *>(engrObj);
-         ffp->findForceFieldEnd();
-         ffp->forceFieldMountSegment = dynamic_cast<WallSegment *>(mountSeg);
-      }
-
-      engrObj->mSnapped = true;
-      return anchor;
-   }
-   else           // No suitable segments found
-   {
-      engrObj->mSnapped = false;
-      return pos;
-   }
 }
 
 
@@ -530,10 +491,9 @@ void EditorUserInterface::resnapAllEngineeredItems()
    for(S32 i = 0; i < fillVector.size(); i++)
    {
       EngineeredObject *engrObj = dynamic_cast<EngineeredObject *>(fillVector[i]);
-      TNLAssert(engrObj, "snapEngineeredObject should only be called with an EngineeredObject!");
 
-      snapEngineeredObject(engrObj, engrObj->getVert(0));
-      engrObj->onGeomChanged();
+      //mountToWall(engrObj, engrObj->getVert(0));
+      engrObj->mountToWall(engrObj->getVert(0));
    }
 }
 
@@ -688,10 +648,8 @@ void EditorUserInterface::loadLevel()
    for(S32 i = 0; i < mItems.size(); i++)
       mItems[i]->processEndPoints();
 
-   wallSegmentManager.recomputeAllWallGeometry();
+   mWallSegmentManager.recomputeAllWallGeometry();
    
-   gEditorUserInterface.rebuildAllBorderSegs();
-
    // Snap all engineered items to the closest wall, if one is found
    resnapAllEngineeredItems();
 
@@ -774,7 +732,7 @@ void EditorUserInterface::runScript(const string &scriptName, const Vector<strin
    // Not sure about all this... may need to test
    // Bulk-process new items, walls first
    for(S32 i = 0; i < mLoadTarget->size(); i++)
-      if((*mLoadTarget)[i]->getObjectTypeMask() & BarrierType || (*mLoadTarget)[i]->getObjectTypeMask() & PolyWallType)
+      if((*mLoadTarget)[i]->getObjectTypeMask() & WallType)
       {
          if((*mLoadTarget)[i]->getVertCount() < 2)      // Invalid item; delete
          {
@@ -1160,7 +1118,7 @@ Point EditorUserInterface::snapPoint(Point const &p, bool snapWhileOnDock)
    if(mDraggingObjects && (mSnapVertex_i->getObjectTypeMask() & EngineeredType))
    {
       EngineeredObject *engrObj = dynamic_cast<EngineeredObject *>(mSnapVertex_i);
-      return snapEngineeredObject(engrObj, snapPointToLevelGrid(p));
+      return engrObj->mountToWall(snapPointToLevelGrid(p));
    }
 
    F32 maxSnapDist = 2 / (mCurrentScale * mCurrentScale);
@@ -1195,9 +1153,6 @@ Point EditorUserInterface::snapPoint(Point const &p, bool snapWhileOnDock)
          }
       }
    }
-
-   // Build a list of walls we might be snapping to if we're snapping to either the edges or corners
-   static Vector<DatabaseObject *> foundObjects;
 
    // Search for a corner to snap to - by using wall edges, we'll also look for intersections between segments
    if(snapToWallCorners)
@@ -1271,18 +1226,6 @@ static bool checkPoint(const Point &clickPoint, const Point &point, F32 &minDist
    }
 
    return false;
-}
-
-
-S32 EditorUserInterface::checkCornersForSnap(const Point &clickPoint, const Vector<Point> &verts, F32 &minDist, Point &snapPoint)
-{
-   S32 vertFound = NONE;
-
-   for(S32 i = 0; i < verts.size(); i++)
-      if(checkPoint(clickPoint, verts[i], minDist, snapPoint))
-         vertFound = i;
-
-   return vertFound;
 }
 
 
@@ -1582,7 +1525,7 @@ void EditorUserInterface::render()
             wall->renderFill();
          }
    
-     wallSegmentManager.renderWalls(true, getRenderingAlpha(false/*isScriptItem*/));
+     mWallSegmentManager.renderWalls(true, mDraggingObjects, mShowingReferenceShip, getRenderingAlpha(false/*isScriptItem*/));
    glPopMatrix();
 
    // == Normal items ==
@@ -1783,20 +1726,13 @@ If wall thickness is changed, steps 3-5 need to be repeated
 
 // Will set the correct translation and scale to render items at correct location and scale as if it were a real level.
 // Unclear enough??
-void EditorUserInterface::setTranslationAndScale(const Point &pos)
-{
-   F32 scale = gEditorUserInterface.getCurrentScale();
-
-   glScalef(scale, scale, 1);
-   glTranslatef(pos.x / scale - pos.x, pos.y / scale - pos.y, 0);
-}
-
-
-bool EditorUserInterface::showingNavZones()
-{
-   return (mShowMode == ShowAllObjects || mShowMode == NavZoneMode) && !mShowingReferenceShip;
-}
-
+//void EditorUserInterface::setTranslationAndScale(const Point &pos)
+//{
+//   F32 scale = gEditorUserInterface.getCurrentScale();
+//
+//   glScalef(scale, scale, 1);
+//   glTranslatef(pos.x / scale - pos.x, pos.y / scale - pos.y, 0);
+//}
 
 
 void EditorUserInterface::clearSelection()
@@ -2317,20 +2253,9 @@ void EditorUserInterface::onMouseDragged(S32 x, S32 y)
                   mOriginalVertLocations.push_back(mItems[i]->getVert(j));
 
       saveUndoState();
-
-      //// Select any turrets/ffs that are attached to any selected walls
-      //for(S32 i = 0; i < mItems.size(); i++)
-      //   if(mItems[i]->getObjectTypeMask() & ItemBarrierMaker && mItems[i]->selected)
-      //   {
-      //      for(S32 j = 0; j < mItems.size(); j++)
-      //         if((mItems[j]->getObjectTypeMask() & ItemTurret || mItems[j]->getObjectTypeMask() & ItemForceField) && 
-      //                     mItems[j]->forceFieldMountSegment && mItems[j]->forceFieldMountSegment->mOwner == mItems[i]->mId)
-      //            mItems[j]->selected = true;
-      //   }
    }
 
    mDraggingObjects = true;
-
 
 
 
@@ -2344,15 +2269,6 @@ void EditorUserInterface::onMouseDragged(S32 x, S32 y)
    else
       delta = (snapPoint(convertCanvasToLevelCoord(mMousePos) + mMoveOrigin - mMouseDownPos) - mMoveOrigin );
 
-   // Update the locations of all items we're moving to show them being dragged.  Note that an item cannot be
-   // selected if one of its vertices are.
-
-
-   //for(S32 i = 0; i < mItems.size(); i++)
-   //{
-   //   // Skip selected item if it's a turret or forcefield -- snapping will have already been applied
-   //   if(mItems[i] == mSnapVertex_i && (mItems[i]->getObjectTypeMask() & ItemForceField || mItems[i]->getObjectTypeMask() & ItemTurret) && mItems[i]->isSnapped())
-   //      continue;
 
    // Update coordinates of dragged item
    S32 count = 0;
@@ -2390,7 +2306,7 @@ void EditorUserInterface::startDraggingDockItem()
 
    item->addToEditor(gEditorGame);
 
-   // A little hack here to keep the polywall fill to appear to be left behind behind the dock
+   // A little hack here to keep the polywall fill from appearing to be left behind behind the dock
    //if(item->getObjectTypeMask() & PolyWallType)
    //   item->clearPolyFillPoints();
 
@@ -2711,19 +2627,14 @@ void EditorUserInterface::deleteItem(S32 itemIndex)
    if(mask & BarrierType || mask & PolyWallType)
    {
       // Need to recompute boundaries of any intersecting walls
-      wallSegmentManager.invalidateIntersectingSegments(mItems[itemIndex]);  // Mark intersecting segments invalid
-      wallSegmentManager.deleteSegments(mItems[itemIndex]->getItemId());       // Delete the segments associated with the wall
+      mWallSegmentManager.invalidateIntersectingSegments(mItems[itemIndex]);    // Mark intersecting segments invalid
+      mWallSegmentManager.deleteSegments(mItems[itemIndex]->getItemId());       // Delete the segments associated with the wall
 
       mItems.erase(mItems.begin() + itemIndex);
 
-      wallSegmentManager.recomputeAllWallGeometry();                          // Recompute wall edges
+      mWallSegmentManager.recomputeAllWallGeometry();                           // Recompute wall edges
       resnapAllEngineeredItems();         // Really only need to resnap items that were attached to deleted wall... but we
                                           // don't yet have a method to do that, and I'm feeling lazy at the moment
-   }
-   else if(mask & BotNavMeshZoneType)
-   {
-      deleteBorderSegs(mItems[itemIndex]->getItemId());
-      mItems.erase(mItems.begin() + itemIndex);
    }
    else
       mItems.erase(mItems.begin() + itemIndex);
@@ -3745,16 +3656,6 @@ void EditorUserInterface::testLevelStart()
 }
 
 
-// Puts 
-void EditorUserInterface::buildAllWallSegmentEdgesAndPoints()
-{
-   wallSegmentManager.deleteAllSegments();
-
-   for(S32 i = 0; i < mItems.size(); i++)
-      if(mItems[i]->getObjectTypeMask() & BarrierType || mItems[i]->getObjectTypeMask() & PolyWallType)
-         wallSegmentManager.buildWallSegmentEdgesAndPoints(mItems[i]);
-}
-
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -3854,407 +3755,6 @@ void EditorMenuUserInterface::onEscape()
 {
    glutSetCursor(GLUT_CURSOR_NONE);
    reactivatePrevUI();
-}
-
-
-// See if item with specified id is selected
-bool EditorUserInterface::itemIsSelected(U32 id)
-{
-   for(S32 i = 0; i < mItems.size(); i++)
-      if(mItems[i]->isSelected() && mItems[i]->getItemId() == id)
-         return true;
-
-   return false;
-}
-
-
-// Clear any borders associated with the specified zone
-void EditorUserInterface::deleteBorderSegs(S32 zoneId)
-{
- 
-   for(S32 i = 0; i < zoneBorders.size(); i++)
-      if(zoneBorders[i].mOwner1 == zoneId || zoneBorders[i].mOwner2 == zoneId)
-      {
-         zoneBorders.erase_fast(i);
-         i--;
-      }
-}
-
-
-void EditorUserInterface::rebuildBorderSegs(U32 zoneId)
-{
-   deleteBorderSegs(zoneId);
-   S32 i = NONE;
-
-   for(S32 j = 0; j < mItems.size(); j++)
-      if(mItems[j]->getItemId() == zoneId)
-      {
-         i = j;
-         break;
-      }
-
-   if(i == NONE)  // Couldn't find any matching zones...
-      return;
-
-   for(S32 j = 0; j < mItems.size(); j++)
-      checkZones(i, j);
-}
-
-
-void EditorUserInterface::rebuildAllBorderSegs()
-{
-   zoneBorders.clear();
-
-   for(S32 i = 0; i < mItems.size(); i++)
-   {
-      if(mItems[i]->getObjectTypeMask() & ~BotNavMeshZoneType)
-         continue;
-
-      for(S32 j = i + 1; j < mItems.size(); j++)
-         checkZones(i, j);   
-   }
-}
-
-
-void EditorUserInterface::checkZones(S32 i, S32 j)
-{
-   static ZoneBorder zoneBorder;
-
-   if(i == j || mItems[j]->getObjectTypeMask() & ~BotNavMeshZoneType)
-      return;      // Don't check self...
-
-   // Do zones i and j touch?  First a quick and dirty bounds check:
-   if(!mItems[i]->getExtent().intersectsOrBorders(mItems[j]->getExtent()))
-      return;
-
-   if(zonesTouch(mItems[i]->getVerts(), mItems[j]->getVerts(), 1 / getGridSize(), zoneBorder.borderStart, zoneBorder.borderEnd))
-   {
-      zoneBorder.mOwner1 = mItems[i]->getItemId();
-      zoneBorder.mOwner2 = mItems[j]->getItemId();
-
-      zoneBorders.push_back(zoneBorder);
-   }
-}
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-// Declare/initialize static variables
-GridDatabase *WallEdge::mGridDatabase; 
-
-// Constructor
-WallEdge::WallEdge(const Point &start, const Point &end) 
-{ 
-   mStart = start; 
-   mEnd = end; 
-
-   setExtent(Rect(start, end)); 
-
-   // Set some things required by DatabaseObject
-   mObjectTypeMask = BarrierType;
-}
-
-
-// Destructor
-WallEdge::~WallEdge()
-{
-    // Make sure object is out of the database
-   getGridDatabase()->removeFromDatabase(this, this->getExtent()); 
-}
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-// Declare/initialize static variables
-Vector<WallEdge *> WallSegmentManager::mWallEdges; 
-Vector<Point>  WallSegmentManager::mWallEdgePoints;
-GridDatabase *WallSegmentManager::mGridDatabase;   
-
-
-void WallSegmentManager::recomputeAllWallGeometry()
-{
-   gEditorUserInterface.buildAllWallSegmentEdgesAndPoints();
-
-   mWallEdgePoints.clear();
-
-   // Clip mWallSegments to create wallEdgePoints, which will be used below to create a new set of WallEdge objects
-   clipAllWallEdges(mWallSegments, mWallEdgePoints);    
-
-
-   mWallEdges.deleteAndClear();
-   mWallEdges.resize(mWallEdgePoints.size() / 2);
-
-   // Add clipped wallEdges to the spatial database
-   for(S32 i = 0; i < mWallEdgePoints.size(); i+=2)
-   {
-      WallEdge *newEdge = new WallEdge(mWallEdgePoints[i], mWallEdgePoints[i+1]);    // Create the edge object
-      
-      newEdge->addToDatabase();
-
-      mWallEdges[i/2] = newEdge;
-   }
-}
-
-
-void WallSegmentManager::buildWallSegmentEdgesAndPoints(EditorObject *item)
-{
-   // Find any forcefields that terminate on this wall, and mark them for recalculation later
-   static Vector<EditorObject *> forcefields;    // A list of forcefields terminating on the wall segment that we'll be deleting
-
-   S32 count = mWallSegments.size();                
-   for(S32 i = 0; i < count; i++)
-      if(mWallSegments[i]->mOwner == item->getItemId())     // Segment belongs to item
-         for(S32 j = 0; j < gEditorUserInterface.mItems.size(); j++)
-            if(gEditorUserInterface.mItems[j]->getObjectTypeMask() & ForceFieldProjectorType && 
-                  ( gEditorUserInterface.mItems[j]->forceFieldEndSegment == mWallSegments[i] ||
-                    gEditorUserInterface.mItems[j]->forceFieldMountSegment == mWallSegments[i] ) )
-               forcefields.push_back(gEditorUserInterface.mItems[j]);
-
-   // Get rid of any existing segments that correspond to our item; we'll be building new ones
-   deleteSegments(item->getSerialNumber());
-
-   Rect allSegExtent;
-
-   if(item->getObjectTypeMask() & PolyWallType)
-   {
-      WallSegment *newSegment = new WallSegment(item->getVerts(), item->getSerialNumber());
-      mWallSegments.push_back(newSegment);
-   }
-   else
-   {
-      // Create a series of WallSegments, each representing a sequential pair of vertices on our wall
-      for(S32 i = 0; i < item->extendedEndPoints.size(); i += 2)
-      {
-         WallSegment *newSegment = new WallSegment(item->extendedEndPoints[i], item->extendedEndPoints[i+1], 
-                                                   item->getWidth() / getGridSize(), item->getSerialNumber() );    // Create the segment
-         mWallSegments.push_back(newSegment);            // And add it to our master segment list
-      }
-   }
-
-   for(S32 i = 0; i < mWallSegments.size(); i++)
-   {
-      mWallSegments[i]->addToDatabase();              // Add it to our spatial database
-
-      Rect segExtent(mWallSegments[i]->corners);      // Calculate a bounding box around the segment
-      if(i == 0)
-         allSegExtent.set(segExtent);
-      else
-         allSegExtent.unionRect(segExtent);
-   }
-
-   item->setExtent(allSegExtent);
-
-   // Alert all forcefields terminating on any of the wall segments we deleted and potentially recreated
-   for(S32 j = 0; j < forcefields.size(); j++)  
-      forcefields[j]->onGeomChanged();
-}
-
-
-// Static method, used above and from instructions
-void WallSegmentManager::clipAllWallEdges(const Vector<WallSegment *> &wallSegments, Vector<Point> &wallEdges)
-{
-   Vector<Vector<Point> > inputPolygons, solution;
-
-   for(S32 i = 0; i < wallSegments.size(); i++)
-      inputPolygons.push_back(wallSegments[i]->corners);
-
-   mergePolys(inputPolygons, solution);      // Merged wall segments are placed in solution
-
-   unpackPolygons(solution, wallEdges);
-}
-
-
-// Takes a wall, finds all intersecting segments, and marks them invalid
-void WallSegmentManager::invalidateIntersectingSegments(EditorObject *item)
-{
-   static Vector<DatabaseObject *> intersectingSegments;
-
-   intersectingSegments.clear();    // TODO: Should be deleteAndClear?
-
-   // Before we update our edges, we need to mark all intersecting segments using the invalid flag.
-   // These will need new walls after we've moved our segment.
-   for(S32 i = 0; i < mWallSegments.size(); i++)
-      if(mWallSegments[i]->mOwner == item->getSerialNumber())      // Segment belongs to our item; look it up in the database
-         getGridDatabase()->findObjects(EditorWallSegmentType, intersectingSegments, mWallSegments[i]->getExtent());
-
-   for(S32 i = 0; i < intersectingSegments.size(); i++)
-   {
-      WallSegment *intersectingSegment = dynamic_cast<WallSegment *>(intersectingSegments[i]);
-
-      // Reset the edges of all invalidated segments to their factory settings
-      intersectingSegment->resetEdges();   
-      intersectingSegment->invalid = true;
-   }
-
-   buildWallSegmentEdgesAndPoints(item);
-
-   // Invalidate all segments that potentially intersect the changed segment in its new location
-   intersectingSegments.clear();
-   for(S32 i = 0; i < mWallSegments.size(); i++)
-      if(mWallSegments[i]->mOwner == item->getSerialNumber())      // Segment belongs to our item, compare to all others
-         getGridDatabase()->findObjects(EditorWallSegmentType, intersectingSegments, mWallSegments[i]->getExtent());
-
-   for(S32 i = 0; i < intersectingSegments.size(); i++)
-      dynamic_cast<WallSegment *>(intersectingSegments[i])->invalid = true;
-}
-
-
-// Called when a wall segment has somehow changed.  All current and previously intersecting segments 
-// need to be recomputed.
-void WallSegmentManager::computeWallSegmentIntersections(EditorObject *item)
-{
-   invalidateIntersectingSegments(item);     // TODO: Is this step still needed?
-   recomputeAllWallGeometry();
-}
-
-
-void WallSegmentManager::deleteAllSegments()
-{
-   mWallSegments.deleteAndClear();
-}
-
-
-// Delete all wall segments owned by specified owner
-void WallSegmentManager::deleteSegments(U32 owner)
-{
-   S32 count = mWallSegments.size();
-
-   for(S32 i = 0; i < count; i++)
-      if(mWallSegments[i]->mOwner == owner)
-      {
-         delete mWallSegments[i];    // Destructor will remove segment from database
-         mWallSegments.erase_fast(i);
-         i--;
-         count--;
-      }
-}
-
-
-void WallSegmentManager::renderWalls(bool convert, F32 alpha)
-{
-   for(S32 i = 0; i < mWallSegments.size(); i++)
-   {
-      bool beingDragged = gEditorUserInterface.mDraggingObjects && gEditorUserInterface.itemIsSelected(mWallSegments[i]->mOwner);
-
-      mWallSegments[i]->renderFill(beingDragged);
-   }
-
-   renderWallEdges(mWallEdgePoints);      // Render wall outlines
-}
-
-
-
-////TODO: Down to object
-//S32 EditorObject::getDefaultRepopDelay(GameObjectType itemType)  
-//{
-//   if(itemType == ItemFlagSpawn)
-//      return FlagSpawn::defaultRespawnTime;
-//   else if(itemType == ItemAsteroidSpawn)
-//      return AsteroidSpawn::defaultRespawnTime;
-//   else if(itemType == ItemTurret)
-//      return Turret::defaultRespawnTime;
-//   else if(itemType == ItemForceField)
-//      return ForceFieldProjector::defaultRespawnTime;
-//   else if(itemType == ItemRepair)
-//      return RepairItem::defaultRespawnTime;
-//   else if(itemType == ItemEnergy)
-//      return EnergyItem::defaultRespawnTime;
-//   else
-//      return -1;
-//}
-
-
-WallSegmentManager *getWallSegmentManager()
-{
-   return gEditorUserInterface.getWallSegmentManager();
-}
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-GridDatabase *WallSegment::mGridDatabase; // Declare static variable
-
-
-// Regular constructor
-WallSegment::WallSegment(const Point &start, const Point &end, F32 width, S32 owner) 
-{ 
-   // Calculate segment corners by expanding the extended end points into a rectangle
-   Barrier::expandCenterlineToOutline(start, end, width, corners);   
-   init(owner);
-}
-
-
-// PolyWall constructor
-WallSegment::WallSegment(const Vector<Point> &points, S32 owner)
-{
-   corners = points;
-
-   if(isWoundClockwise(points))
-      corners.reverse();
-
-   init(owner);
-}
-
-
-// Intialize, only called from constructors above
-void WallSegment::init(S32 owner)
-{
-   // Recompute the edges based on our new corner points
-   resetEdges();                                            
-
-   Rect extent(corners);
-   setExtent(extent); 
-
-   // Drawing walls filled requires that points be triangluated
-   Triangulate::Process(corners, triangulatedFillPoints);
-
-   mOwner = owner; 
-   invalid = false; 
-
-   // Set some things required by DatabaseObject
-   mObjectTypeMask = EditorWallSegmentType;
-}
-
-// Destructor
-WallSegment::~WallSegment()
-{ 
-   // Make sure object is out of the database
-   getGridDatabase()->removeFromDatabase(this, this->getExtent()); 
-
-   // Find any forcefields that were using this as an end point and let them know the segment is gone.  Since 
-   // segment is no longer in database, when we recalculate the forcefield, our endSegmentPointer will be reset.
-   // This is a last-ditch effort to ensure that the pointers point at something real.
-   for(S32 i = 0; i < gEditorUserInterface.mItems.size(); i++)
-      if(gEditorUserInterface.mItems[i]->getObjectTypeMask() & ForceFieldProjectorType)
-      {
-         ForceFieldProjector *proj = dynamic_cast<ForceFieldProjector *>(gEditorUserInterface.mItems[i]);
-         TNLAssert(proj, "bad cast!");
-
-         if(proj->forceFieldEndSegment == this || proj->forceFieldMountSegment == this) 
-            gEditorUserInterface.mItems[i]->onGeomChanged();            // Will force recalculation of mount and endpoint
-      }
-   }
-
- 
-// Resets edges of a wall segment to their factory settings; i.e. 4 simple walls representing a simple outline
-void WallSegment::resetEdges()
-{
-   Barrier::resetEdges(corners, edges);
-}
-
-
-void WallSegment::renderFill(bool renderLight)
-{
-   // We'll use the editor color most of the time; only in preview mode in the editor do we use the game color
-   bool useGameColor = UserInterface::current && UserInterface::current->getMenuID() == EditorUI && 
-                       gEditorUserInterface.isShowingReferenceShip();
-
-   glDisableBlendfromLineSmooth;
-   
-   // Use true below because all segments are triangulated
-   renderWallFill(triangulatedFillPoints, true, (useGameColor ? gIniSettings.wallFillColor : EDITOR_WALL_FILL_COLOR) * (renderLight ? 0.5 : 1));   
-   glEnableBlendfromLineSmooth;
 }
 
 

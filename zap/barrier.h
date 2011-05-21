@@ -27,7 +27,10 @@
 #define _BARRIER_H_
 
 #include "gameObject.h"
+#include "textItem.h"      // for LineItem def  TODO: get rid of this
+
 #include "Point.h"
+#include "tnlVector.h"
 #include "tnlNetObject.h"
 
 namespace Zap
@@ -100,6 +103,193 @@ public:
 
    TNL_DECLARE_CLASS(Barrier);
 };
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// TODO: Don't need this to be a GameObject  -- perhaps merge with barrier above?
+class WallItem : public LineItem
+{
+public:
+   WallItem();    // Constructor
+   virtual void onGeomChanged();
+
+   // Some properties about the item that will be needed in the editor
+   const char *getEditorHelpString() { return "Walls define the general form of your level."; }  
+   const char *getPrettyNamePlural() { return "Walls"; }
+   const char *getOnDockName() { return "Wall"; }
+   const char *getOnScreenName() { return "Wall"; }
+   bool hasTeam() { return false; }
+   bool canBeHostile() { return false; }
+   bool canBeNeutral() { return false; }
+
+   string toString();
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+class PolyWall : public EditorPolygon     // Don't need GameObject component of this...
+{
+private:
+   //typedef EditorObject Parent;
+   //void computeExtent();
+
+public:
+   PolyWall();      // Constructor
+   bool processArguments(S32 argc, const char **argv);
+
+   void render();
+   void renderFill();
+   void renderDock();
+   void renderEditor(F32 currentScale);
+
+   S32 getRenderSortValue() { return -1; }
+
+   //bool getCollisionPoly(Vector<Point> &polyPoints);
+
+   /////
+   // Editor methods
+   const char *getEditorHelpString() { return "Polygonal wall item let you be creative with your wall design."; }
+   const char *getPrettyNamePlural() { return "PolyWalls"; }
+   const char *getOnDockName() { return "PolyWall"; }
+   const char *getOnScreenName() { return "PolyWall"; }
+   string toString();
+
+   /////
+   // Lua interface  ==>  don't need these!!
+
+   PolyWall(lua_State *L) { /* Do nothing */ };    //  Lua constructor
+   GameObject *getGameObject() { return this; }          // Return the underlying GameObject
+
+   static const char className[];                        // Class name as it appears to Lua scripts
+   static Lunar<PolyWall>::RegType methods[];
+
+   S32 getClassID(lua_State *L) { return returnInt(L, PolyWallType); }
+   TNL_DECLARE_CLASS(PolyWall);
+
+private:
+   void push(lua_State *L) { Lunar<PolyWall>::push(L, this); }
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+class WallSegment : public DatabaseObject
+{
+private:
+   static GridDatabase *mGridDatabase;    // Database of segments
+   GridDatabase *getGridDatabase() { return mGridDatabase; }      
+
+   void init(S32 owner);
+
+public:
+   WallSegment(const Point &start, const Point &end, F32 width, S32 owner = -1);    // Normal wall segment
+   WallSegment(const Vector<Point> &points, S32 owner = -1);                        // PolyWall 
+   ~WallSegment();
+
+   Vector<Point> edges;    
+   Vector<Point> corners;
+   Vector<Point> triangulatedFillPoints;
+   U32 mOwner;
+
+   bool invalid;              // A flag for marking segments in need of processing
+
+   void resetEdges();         // Compute basic edges from corner points
+   void computeBoundingBox(); // Computes bounding box based on the corners, updates database
+   
+   void renderFill(bool renderLight, bool showingReferenceShip);
+
+   ////////////////////
+   //  DatabaseObject methods
+   static void setGridDatabase(GridDatabase *database) { mGridDatabase = database; }
+
+
+   // Note that the poly returned here is different than what you might expect -- it is composed of the edges,
+   // not the corners, and is thus in A-B, C-D, E-F format rather than the more typical A-B-C-D format returned
+   // by getCollisionPoly() elsewhere in the game.  Therefore, it needs to be handled differently.
+   bool getCollisionPoly(Vector<Point> &polyPoints) { polyPoints = edges; return true; }  
+   bool getCollisionCircle(U32 stateIndex, Point &point, float &radius) { return false; }
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Width of line representing centerline of barriers
+#define WALL_SPINE_WIDTH gLineWidth3
+
+
+class WallEdge : public DatabaseObject
+{
+private:
+   static GridDatabase mGridDatabase;
+
+   Point mStart, mEnd;
+
+public:
+   WallEdge(const Point &start = Point(), const Point &end = Point());
+   ~WallEdge();
+
+   Point *getStart() { return &mStart; }
+   Point *getEnd() { return &mEnd; }
+
+   GridDatabase *getGridDatabase() { return &mGridDatabase; }      // Can't be static because it's required as part of our interfaceTODO: make private
+   static GridDatabase *getWallEdgeDatabase() { return &mGridDatabase; }    // Provide static access to our database
+
+   // Note that the poly returned here is different than what you might expect -- it is composed of the edges,
+   // not the corners, and is thus in A-B, C-D, E-F format rather than the more typical A-B-C-D format returned
+   // by getCollisionPoly() elsewhere in the game.  Therefore, it needs to be handled differently.
+   bool getCollisionPoly(Vector<Point> &polyPoints) { polyPoints.resize(2); polyPoints[0] = mStart; polyPoints[1] = mEnd; return true; }  
+   bool getCollisionCircle(U32 stateIndex, Point &point, float &radius) { return false; }
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+class EditorObject;
+
+class WallSegmentManager
+{
+private:
+   static GridDatabase *mGridDatabase;
+
+public:
+   WallSegmentManager()  { /* Do nothing */ }
+
+   static GridDatabase *getGridDatabase() { return mGridDatabase; } 
+   static void setGridDatabase(GridDatabase *gridDatabase) { mGridDatabase = gridDatabase; }
+
+   Vector<WallSegment *> mWallSegments;      // TODO: Make this a pointainer
+   static Vector<WallEdge *> mWallEdges;        // For mounting forcefields/turrets
+   static Vector<Point> mWallEdgePoints;        // For rendering
+
+   void buildAllWallSegmentEdgesAndPoints();
+   void deleteSegments(U32 owner);              // Delete all segments owned by specified WorldItem
+   void deleteAllSegments();
+
+   // Recalucate edge geometry for all walls when item has changed
+   void computeWallSegmentIntersections(EditorObject *item); 
+
+   // Takes a wall, finds all intersecting segments, and marks them invalid
+   void invalidateIntersectingSegments(EditorObject *item);
+
+   void buildWallSegmentEdgesAndPoints(DatabaseObject *object);
+   void buildWallSegmentEdgesAndPoints(DatabaseObject *object, const Vector<DatabaseObject *> &engrObjects);
+   void recomputeAllWallGeometry();
+
+   // Populate wallEdges
+   static void clipAllWallEdges(const Vector<WallSegment *> &wallSegments, Vector<Point> &wallEdges);
+ 
+   ////////////////
+   // Render functions
+   void renderWalls(bool convert, bool isBeingDragged, bool showingReferenceShip, F32 alpha);
+};
+
 
 };
 

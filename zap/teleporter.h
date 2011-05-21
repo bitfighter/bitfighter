@@ -31,7 +31,7 @@
 #include "gameObject.h"
 #include "projectile.h"    // For LuaItem
 #include "Point.h"
-#include "UIEditor.h"      // For EditorObject 
+//#include "UIEditor.h"      // For EditorObject 
 
 #include "tnlNetObject.h"
 

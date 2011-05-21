@@ -118,8 +118,8 @@ extern void renderPolygonOutline(const Vector<Point> &outline);
 extern void renderPolygonOutline(const Vector<Point> &outlinePoints, Color &outlineColor, F32 alpha = 1);
 extern void renderPolygonFill(const Vector<Point> *fillPoints, const Color &fillColor, F32 alpha = 1);
 
-extern void renderGoalZone(Color c, const Vector<Point> &outline, const Vector<Point> &fill, Point centroid);     // No label version
-extern void renderGoalZone(Color c, const Vector<Point> &outline, const Vector<Point> &fill, Point centroid = Point(), F32 labelAngle = 0, 
+extern void renderGoalZone(Color c, const Vector<Point> &outline, const Vector<Point> &fill);     // No label version
+extern void renderGoalZone(Color c, const Vector<Point> &outline, const Vector<Point> &fill, Point centroid, F32 labelAngle, 
                            bool isFlashing = false, F32 glowFraction = 0, S32 score = 0, F32 scaleFact = 1);
 
 extern void renderNexus(const Vector<Point> &outline, const Vector<Point> &fill, Point centroid, F32 labelAngle, 

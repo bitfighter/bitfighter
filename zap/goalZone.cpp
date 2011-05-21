@@ -127,7 +127,7 @@ bool GoalZone::processArguments(S32 argc2, const char **argv2)
 
 string GoalZone::toString()
 {
-   return string(getClassName()) + " " + boundsToString(getGame()->getGridSize());
+   return string(getClassName()) + " " + itos(mTeam) + " " + boundsToString(getGame()->getGridSize());
 }
 
 

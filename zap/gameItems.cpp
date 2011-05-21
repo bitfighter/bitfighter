@@ -231,8 +231,8 @@ string Spawn::toString()
 {
    Point pos = mPos / getGame()->getGridSize();
 
-   // AsteroidSpawn|FlagSpawn <x> <y> <time>
-   return string(getClassName()) + " " + pos.toString() + " " + itos(mSpawnTime);
+   // Spawn <team> <x> <y> 
+   return string(getClassName()) + " " + itos(mTeam) + " " + pos.toString();
 }
 
 

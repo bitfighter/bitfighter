@@ -24,6 +24,10 @@
 //------------------------------------------------------------------------------------
 
 #include "SimpleLine.h"
+#include "gameObjectRender.h"
+
+namespace Zap
+{
 
 // Constructor
 SimpleLine::SimpleLine()
@@ -54,6 +58,7 @@ static const S32 INSTRUCTION_TEXTGAP = 3;
 static const Color ACTIVE_SPECIAL_ATTRIBUTE_COLOR = Color(.6, .6, .6);    
 static const Color INACTIVE_SPECIAL_ATTRIBUTE_COLOR = Color(.6, .6, .6);      // already in editor, called inactiveSpecialAttributeColor
 
+static const Color SELECT_COLOR = yellow;
 
 // Draw arrow that serves as the core of SimpleLine items in the editor
 // Subclasses will fill in the rest
@@ -107,3 +112,6 @@ void SimpleLine::addToDock(Game *game, const Point &point)
    setVert(point, 0);
    EditorParent::addToDock(game, point);
 }
+
+
+};

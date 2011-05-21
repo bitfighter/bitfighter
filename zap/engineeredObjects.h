@@ -46,8 +46,12 @@ protected:
    bool mIsDestroyed;
    S32 mOriginalTeam;
 
+   bool mSnapped;       // Item is snapped to a wall
+
    S32 mHealRate;       // Rate at which items will heal themselves, defaults to 0
    Timer mHealTimer;    // Timer for tracking mHealRate
+
+   WallSegment *mMountSeg;    // Segment we're mounted to in the editor (don't care in the game)
 
    enum MaskBits
    {
@@ -81,6 +85,7 @@ public:
    bool collide(GameObject *hitObject) { return true; }
    F32 getHealth() { return mHealth; }
    void healObject(S32 time);
+   Point mountToWall(const Point &pos);
 
    // Figure out where to put our turrets and forcefield projectors.  Will return NULL if no mount points found.
    static DatabaseObject *findAnchorPointAndNormal(GridDatabase *db, const Point &pos, F32 snapDist, bool format, 
@@ -90,6 +95,16 @@ public:
                                                    bool format, S32 wallType, Point &anchor, Point &normal);
 
    void setAnchorNormal(const Point &nrml) { mAnchorNormal = nrml; }
+   WallSegment *getMountSegment() { return mMountSeg; }
+   void setMountSegment(WallSegment *mountSeg) { mMountSeg = mountSeg; }
+
+   // These methods are overriden in ForceFieldProjector
+   virtual WallSegment *getEndSegment() { return NULL; }  
+   virtual void setEndSegment(WallSegment *endSegment) { /* Do nothing */ }
+
+   //// Is item sufficiently snapped?  
+   void setSnapped(bool snapped) { mSnapped = snapped; }
+
 
    /////
    // Editor stuff
@@ -146,7 +161,7 @@ public:
 
    void getGeom(Vector<Point> &geom);
    static void getGeom(const Point &start, const Point &end, Vector<Point> &points, F32 scaleFact = 1);
-   static bool findForceFieldEnd(GridDatabase *db, const Point &start, const Point &normal, F32 scaleFact,
+   static bool findForceFieldEnd(GridDatabase *db, const Point &start, const Point &normal, 
                                  Point &end, DatabaseObject **collObj);
 
    void render();
@@ -164,6 +179,7 @@ class ForceFieldProjector : public EngineeredObject
 private:
    typedef EngineeredObject Parent;
    SafePtr<ForceField> mField;
+   WallSegment *mForceFieldEndSegment;
 
 public:
    static const S32 defaultRespawnTime = 0;
@@ -178,6 +194,9 @@ public:
 
    // Get info about the forcfield that might be projected from this projector
    void getForceFieldStartAndEndPoints(Point &start, Point &end);
+
+   WallSegment *getEndSegment() { return mForceFieldEndSegment; }  
+   void setEndSegment(WallSegment *endSegment) { mForceFieldEndSegment = endSegment; } 
 
    void onAddedToGame(Game *theGame);
    void idle(GameObject::IdleCallPath path);
@@ -202,6 +221,7 @@ public:
    void renderDock();
    void renderEditor(F32 currentScale);
 
+   void onGeomChanged();
    void findForceFieldEnd();                      // Find end of forcefield in editor
 
    ///// Lua Interface

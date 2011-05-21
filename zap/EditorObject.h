@@ -95,7 +95,6 @@ public:
    EditorObject(GameObjectType objectType = UnknownType) 
    { 
       mDockItem = false; 
-      mSnapped = false; 
       mLitUp = false; 
       mSelected = false; 
       setObjectTypeMask(objectType); 
@@ -131,18 +130,9 @@ public:
    virtual F32 getEditorRenderScaleFactor(F32 mCurrentScale) { return 1; }             // Only overridden for point items
    virtual void renderAttribs(F32 currentScale);
 
-   //// Is item sufficiently snapped?  only for turrets and forcefields
-   // TODO: Move to turret/ff objects
-   bool mSnapped;
-   bool isSnapped() { return mSnapped; }
-   void setSnapped(bool snapped) { mSnapped = snapped; }
-   WallSegment *forceFieldMountSegment;   // Segment where forcefield is mounted in editor
-   WallSegment *forceFieldEndSegment;     // Segment where forcefield terminates in editor
-
-   //Point getCentroid() { return mCentroid; }    // only for polygons
-   //void setCentroid(const Point &centroid) { mCentroid = centroid; }
-
    void unselect();
+
+   void setSnapped(bool snapped) { /* Do nothing */ }    // Overridden in EngineeredObject
 
    // These methods are mostly for lines and polygons
    void selectVert(S32 vertIndex);

@@ -2028,6 +2028,14 @@ void ClientGame::render()
 
 extern Color gNeutralTeamColor;
 extern Color gHostileTeamColor;
+extern EditorUserInterface gEditorUserInterface;
+
+// Constructor
+EditorGame::EditorGame() : Game(Address()) 
+{ 
+   setGridSize((F32)DefaultGridSize); 
+   mWallSegmentManager = gEditorUserInterface.getWallSegmentManager();
+}     
 
 // TODO: Combine with GameType::getTeamColor
 Color EditorGame::getTeamColor(S32 teamId)

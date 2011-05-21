@@ -33,7 +33,7 @@
 #include "gameObjectRender.h"
 #include "GeomUtils.h"
 #include "BotNavMeshZone.h"
-#include "UIEditor.h"      // For EditorUserInterface->getDatabase, and WallSegment def  TODO: can we get rid of this somehow?
+//#include "UIEditor.h"      // For EditorUserInterface->getDatabase, and WallSegment def  TODO: can we get rid of this somehow?
 
 
 namespace Zap
@@ -139,7 +139,7 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(Ship *ship, U32 objectTyp
    // Now we can find the point where the forcefield would end if this were a valid position
    Point forceFieldEnd;
    DatabaseObject *collObj;
-   ForceField::findForceFieldEnd(ship->getGridDatabase(), forceFieldStart, mDeployNormal, 1.0, forceFieldEnd, &collObj);
+   ForceField::findForceFieldEnd(ship->getGridDatabase(), forceFieldStart, mDeployNormal, forceFieldEnd, &collObj);
 
    Vector<DatabaseObject *> fillVector;
    bool collision = false;
@@ -260,15 +260,18 @@ bool EngineerModuleDeployer::deployEngineeredItem(GameConnection *connection, U3
 
 
 // Constructor
-EngineeredObject::EngineeredObject(S32 team, Point anchorPoint, Point anchorNormal, GameObjectType objectType) : EditorPointObject(objectType)
+EngineeredObject::EngineeredObject(S32 team, Point anchorPoint, Point anchorNormal, GameObjectType objectType) : 
+      EditorPointObject(objectType),
+      mAnchorPoint(anchorPoint),
+      mAnchorNormal(anchorNormal)
 {
    mHealth = 1.0f;
    mTeam = team;
    mOriginalTeam = mTeam;
-   mAnchorPoint = anchorPoint;
-   mAnchorNormal = anchorNormal;
    mIsDestroyed = false;
    mHealRate = 0;
+   mMountSeg = NULL;
+   mSnapped = false;
 }
 
 
@@ -584,11 +587,55 @@ void EngineeredObject::healObject(S32 time)
 }
 
 
+// Find mount point or turret or forcefield closest to pos
+Point EngineeredObject::mountToWall(const Point &pos)
+{  
+   GridDatabase *wallEdgeDatabase = WallEdge::getWallEdgeDatabase();
+   GridDatabase *wallSegDatabase = WallSegmentManager::getGridDatabase();     // Get database containing walls
+
+   Point anchor, nrml;
+
+   DatabaseObject *mountEdge = NULL, *mountSeg = NULL;
+
+   // First we snap to a wall edge -- this will ensure we don't end up attaching to an interior wall segment in the case of a wall intersection.
+   // That will determine our location, but we also need to figure out which segment we're attaching to so that if that segment were to move,
+   // we could update or item accordingly.  Unfortunately, there is no direct way to associate a WallEdge with a WallSegment, but we can do
+   // it indirectly by snapping again, this time to a segment in our WallSegment database.  By using the snap point we found initially, that will
+   // ensure the segment we find is associated with the edge found in the first pass.
+   mountEdge = findAnchorPointAndNormal(wallEdgeDatabase, pos, 
+                               EngineeredObject::MAX_SNAP_DISTANCE, false, BarrierType, anchor, nrml);
+
+   if(mountEdge)
+   {
+      mountSeg = findAnchorPointAndNormal(wallSegDatabase, anchor,     // <== passing in anchor here (found above), not pos
+                        EngineeredObject::MAX_SNAP_DISTANCE, false, BarrierType, anchor, nrml);
+   }
+
+   if(mountSeg)   // Found a segment we can mount to
+   {
+      setVert(anchor, 0);
+      setAnchorNormal(nrml);
+      setMountSegment(dynamic_cast<WallSegment *>(mountSeg));
+
+      mSnapped = true;
+      onGeomChanged();
+
+      return anchor;
+   }
+   else           // No suitable segments found
+   {
+      mSnapped = false;
+      onGeomChanged();
+
+      return pos;
+   }
+}
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
 // Returns true if we should use the in-game rendering, false if we should use iconified editor rendering
-// Currently unused -- needed? or delete?
+// needed? or delete?
 static bool renderFull(F32 currentScale, bool snapped)
 {
    return(snapped && currentScale > 70);
@@ -628,12 +675,12 @@ Point ForceFieldProjector::getEditorSelectionOffset(F32 currentScale)
    return renderFull(getObjectTypeMask(), currentScale) ? Point(0, .035 * 255) : Point(0,0);
 }
 
-static const S32 PROJECTOR_HALF_WIDTH = 12;  // Half the width of base of the projector, along the wall
-static const S32 PROJECTOR_OFFSET = 15;      // Distance from wall to projector tip; thickness, if you will
 
 // static method
 void ForceFieldProjector::getGeom(const Point &anchor, const Point &normal, Vector<Point> &geom)      
 {
+   static const S32 PROJECTOR_HALF_WIDTH = 12;  // Half the width of base of the projector, along the wall
+
    Point cross(normal.y, -normal.x);
    cross.normalize(PROJECTOR_HALF_WIDTH);
 
@@ -646,6 +693,8 @@ void ForceFieldProjector::getGeom(const Point &anchor, const Point &normal, Vect
 // Get the point where the forcefield actually starts, as it leaves the projector; i.e. the tip of the projector.  Static method.
 Point ForceFieldProjector::getForceFieldStartPoint(const Point &anchor, const Point &normal, F32 scaleFact)
 {
+   static const S32 PROJECTOR_OFFSET = 15;      // Distance from wall to projector tip; thickness, if you will
+
    return Point(anchor.x + normal.x * PROJECTOR_OFFSET * scaleFact, 
                 anchor.y + normal.y * PROJECTOR_OFFSET * scaleFact);
 }
@@ -656,7 +705,7 @@ void ForceFieldProjector::getForceFieldStartAndEndPoints(Point &start, Point &en
    start = getForceFieldStartPoint(mAnchorPoint, mAnchorNormal);
 
    DatabaseObject *collObj;
-   ForceField::findForceFieldEnd(getGridDatabase(), getForceFieldStartPoint(mAnchorPoint, mAnchorNormal), mAnchorNormal, 1.0, end, &collObj);
+   ForceField::findForceFieldEnd(getGridDatabase(), getForceFieldStartPoint(mAnchorPoint, mAnchorNormal), mAnchorNormal, end, &collObj);
 }
 
 
@@ -666,7 +715,7 @@ void ForceFieldProjector::onEnabled()
    Point end;
    DatabaseObject *collObj;
    
-   ForceField::findForceFieldEnd(getGridDatabase(), start, mAnchorNormal, 1.0, end, &collObj);
+   ForceField::findForceFieldEnd(getGridDatabase(), start, mAnchorNormal, end, &collObj);
 
    mField = new ForceField(mTeam, start, end);
    mField->addToGame(getGame());
@@ -726,26 +775,36 @@ void ForceFieldProjector::renderEditor(F32 currentScale)
 }
 
 
+class EditorUserInterface;
 extern EditorUserInterface gEditorUserInterface;
 
-// Used in editor to see where forcefield lands
+// Determine on which segment forcefield lands -- only used in the editor, wraps ForceField::findForceFieldEnd()
 void ForceFieldProjector::findForceFieldEnd()
 {
    // Load the corner points of a maximum-length forcefield into geom
-   Vector<Point> geom;
+   
    DatabaseObject *collObj;
 
-   F32 scale = 1; // 1 / getGridSize();
+   F32 scale = 1;
    
-   Point start = ForceFieldProjector::getForceFieldStartPoint(getVert(0), mAnchorNormal, scale);
+   Point start = getForceFieldStartPoint(getVert(0), mAnchorNormal);
 
-   if(ForceField::findForceFieldEnd(gEditorUserInterface.getGridDatabase(), start, mAnchorNormal, scale, forceFieldEnd, &collObj))
-      forceFieldEndSegment = dynamic_cast<WallSegment *>(collObj);
+   // Pass in database containing WallSegments
+   if(ForceField::findForceFieldEnd(WallSegmentManager::getGridDatabase(), start, mAnchorNormal, forceFieldEnd, &collObj))
+      setEndSegment(dynamic_cast<WallSegment *>(collObj));
    else
-      forceFieldEndSegment = NULL;
+      setEndSegment(NULL);
 
+   Vector<Point> geom;
    ForceField::getGeom(start, forceFieldEnd, geom, scale);    
    setExtent(Rect(geom));
+}
+
+
+void ForceFieldProjector::onGeomChanged()
+{
+   if(mSnapped)
+      findForceFieldEnd();
 }
 
 
@@ -914,16 +973,16 @@ void ForceField::getGeom(Vector<Point> &geom)
 }
 
 
-bool ForceField::findForceFieldEnd(GridDatabase *db, const Point &start, const Point &normal, F32 scaleFact, 
+// Pass in a database containing walls or wallsegments
+bool ForceField::findForceFieldEnd(GridDatabase *db, const Point &start, const Point &normal,  
                                    Point &end, DatabaseObject **collObj)
 {
    F32 time;
    Point n;
 
-   end.set(start.x + normal.x * MAX_FORCEFIELD_LENGTH * scaleFact, 
-           start.y + normal.y * MAX_FORCEFIELD_LENGTH * scaleFact);
+   end.set(start.x + normal.x * MAX_FORCEFIELD_LENGTH, start.y + normal.y * MAX_FORCEFIELD_LENGTH);
 
-   *collObj = db->findObjectLOS(BarrierType, MoveObject::ActualState, start, end, time, n);
+   *collObj = db->findObjectLOS(BarrierType, MoveObject::ActualState, start, end, time, n); 
 
    if(*collObj)
    {
@@ -1235,7 +1294,7 @@ Point Turret::getEditorSelectionOffset(F32 currentScale)
 
 void Turret::onGeomChanged() 
 { 
-   mCurrentAngle = mAnchorNormal.ATAN2(); 
+   mCurrentAngle = mAnchorNormal.ATAN2();       // Keep turret pointed away from the wall... looks better like that!
 }
 
 

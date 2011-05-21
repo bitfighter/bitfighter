@@ -934,7 +934,8 @@ static Color getGoalZoneFillColor(const Color &c, bool isFlashing, F32 glowFract
 }
 
 
-void renderGoalZone(Color c, const Vector<Point> &outline, const Vector<Point> &fill, Point centroid)
+// No label version
+void renderGoalZone(Color c, const Vector<Point> &outline, const Vector<Point> &fill)
 {
    Color fillColor    = getGoalZoneFillColor(c, false, 0);
    Color outlineColor = getGoalZoneOutlineColor(c, false);

@@ -80,6 +80,15 @@ enum GameObjectType
    DeletedType       = BIT(30),
    CommandMapVisType = BIT(31),     // These are objects that can be seen on the commander's map
 
+   //////////
+   // Types used exclusively in the editor -- will reuse some values from above
+   EditorWallSegmentType = BIT(3),     // MoveableType
+   PolyWallType = BIT(25),             // WormType
+   ShipSpawnType = BIT(13),            // BulletType
+   FlagSpawnType = BIT(11),            // TurretTargetType
+   AsteroidSpawnType = BIT(18),        // RobotType
+
+
    // Derived types:
    EngineeredType     = TurretType | ForceFieldProjectorType,
    MountableType      = TurretType | ForceFieldProjectorType,
@@ -89,18 +98,10 @@ enum GameObjectType
                         EngineeredType | MineType | AsteroidType,
    MotionTriggerTypes = ShipType | RobotType | ResourceItemType | TestItemType | AsteroidType,
    CollideableType    = BarrierType | TurretType | ForceFieldProjectorType,
-   AllObjectTypes     = 0xFFFFFFFF,
-  
-   //////////
-   // Types used exclusively in the editor -- will reuse some values from above
-   EditorWallSegmentType = BIT(3),
-
-   PolyWallType = BIT(25),
-
-   ShipSpawnType = BIT(13),
-   FlagSpawnType = BIT(11),
-   AsteroidSpawnType = BIT(18)
+   WallType           = BarrierType | PolyWallType,
+   AllObjectTypes     = 0xFFFFFFFF
 };
+
 
 const S32 gSpyBugRange = 300;     // How far can a spy bug see?
 

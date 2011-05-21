@@ -26,7 +26,8 @@
 #ifndef _SIMPLELINE_H_
 #define _SIMPLELINE_H_
 
-#include "UIEditor.h"      // For EditorObject (to be moved!)
+#include "EditorObject.h"
+//#include "UIEditor.h"      // For EditorObject (to be moved!)
 
 namespace Zap
 {

@@ -28,7 +28,6 @@
 
 #include "UIMenus.h"
 #include "EditorObject.h"
-//#include "UIEditorMenus.h"       // needed for editorObject only?
 
 #include "gameLoader.h"
 #include "gameObject.h"          // For EditorObject definition
@@ -38,6 +37,8 @@
 #include "BotNavMeshZone.h"      // For Border def
 #include "tnlNetStringTable.h"
 #include "pointainer.h"
+#include "barrier.h"             // For wall related defs (WallSegmentManager, etc.)
+
 #include <string>
 #include <vector>
 
@@ -70,122 +71,6 @@ enum ShowMode
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class WallSegment : public DatabaseObject
-{
-private:
-   static GridDatabase *mGridDatabase;
-   GridDatabase *getGridDatabase() { return mGridDatabase; }      
-
-   void init(S32 owner);
-
-public:
-   WallSegment(const Point &start, const Point &end, F32 width, S32 owner = -1);    // Normal wall segment
-   WallSegment(const Vector<Point> &points, S32 owner = -1);                        // PolyWall 
-   ~WallSegment();
-
-   Vector<Point> edges;    
-   Vector<Point> corners;
-   Vector<Point> triangulatedFillPoints;
-   U32 mOwner;
-
-   bool invalid;              // A flag for marking segments in need of processing
-
-   void resetEdges();         // Compute basic edges from corner points
-   void computeBoundingBox(); // Computes bounding box based on the corners, updates database
-   
-   void renderFill(bool renderLight);
-
-   ////////////////////
-   //  DatabaseObject methods
-   static void setGridDatabase(GridDatabase *database) { mGridDatabase = database; }
-
-
-   // Note that the poly returned here is different than what you might expect -- it is composed of the edges,
-   // not the corners, and is thus in A-B, C-D, E-F format rather than the more typical A-B-C-D format returned
-   // by getCollisionPoly() elsewhere in the game.  Therefore, it needs to be handled differently.
-   bool getCollisionPoly(Vector<Point> &polyPoints) { polyPoints = edges; return true; }  
-   bool getCollisionCircle(U32 stateIndex, Point &point, float &radius) { return false; }
-};
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-// Width of line representing centerline of barriers
-#define WALL_SPINE_WIDTH gLineWidth3
-
-
-class WallEdge : public DatabaseObject
-{
-private:
-   static GridDatabase *mGridDatabase;
-
-   Point mStart, mEnd;
-
-public:
-   WallEdge(const Point &start = Point(), const Point &end = Point());
-   ~WallEdge();
-
-   Point *getStart() { return &mStart; }
-   Point *getEnd() { return &mEnd; }
-
-   GridDatabase *getGridDatabase() { return mGridDatabase; }      // TODO: make private
-
-
-   // Note that the poly returned here is different than what you might expect -- it is composed of the edges,
-   // not the corners, and is thus in A-B, C-D, E-F format rather than the more typical A-B-C-D format returned
-   // by getCollisionPoly() elsewhere in the game.  Therefore, it needs to be handled differently.
-   bool getCollisionPoly(Vector<Point> &polyPoints) { polyPoints.resize(2); polyPoints[0] = mStart; polyPoints[1] = mEnd; return true; }  
-   bool getCollisionCircle(U32 stateIndex, Point &point, float &radius) { return false; }
-
-   static void setGridDatabase(GridDatabase *database) { mGridDatabase = database; }
-};
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-class EditorObject;
-
-class WallSegmentManager
-{
-private:
-   static GridDatabase *mGridDatabase;
-   GridDatabase *getGridDatabase() { return mGridDatabase; } 
-
-public:
-   WallSegmentManager()  { /* Do nothing */ }
-
-   Vector<WallSegment *> mWallSegments;
-   static Vector<WallEdge *> mWallEdges;        // For mounting forcefields/turrets
-   static Vector<Point> mWallEdgePoints;        // For rendering
-
-   void deleteSegments(U32 owner);              // Delete all segments owned by specified WorldItem
-   void deleteAllSegments();
-
-   // Recalucate edge geometry for all walls when item has changed
-   void computeWallSegmentIntersections(EditorObject *item); 
-
-   // Takes a wall, finds all intersecting segments, and marks them invalid
-   void invalidateIntersectingSegments(EditorObject *item);
-
-   void buildWallSegmentEdgesAndPoints(EditorObject *item);
-   void recomputeAllWallGeometry();
-
-   static void setGridDatabase(GridDatabase *database) { mGridDatabase = database; }
-
-   // Populate wallEdges
-   static void clipAllWallEdges(const Vector<WallSegment *> &wallSegments, Vector<Point> &wallEdges);
- 
-   ////////////////
-   // Render functions
-   void renderWalls(bool convert, F32 alpha);
-};
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
 class SelectionItem
 {
 private:
@@ -198,6 +83,10 @@ public:
 
    void restore(EditorObject *item);
 };
+
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 class EditorObject;
 
@@ -256,6 +145,7 @@ private:
    bool mHasBotNavZones;
 
    GridDatabase mGridDatabase;
+   WallSegmentManager mWallSegmentManager;
 
    enum {
       saveMsgDisplayTime = 4000,
@@ -275,8 +165,6 @@ private:
    U32 mLastUndoIndex;
    U32 mLastRedoIndex;
    bool mRedoingAnUndo;
-
-   WallSegmentManager wallSegmentManager;
 
    static const U32 UNDO_STATES = 128;
    void deleteUndoState();             // Removes most recent undo state from stack
@@ -369,12 +257,12 @@ public:
    U32 mAllUndoneUndoLevel;   // What undo level reflects everything back just the
 
    void saveUndoState();
-   bool showingNavZones();    // Stupid helper function, will be deleted in future
 
    #define GAME_TYPE_LEN 256   // TODO: Define this in terms of something else...
    char mGameType[GAME_TYPE_LEN];
 
    Vector<string> mGameTypeArgs;
+   WallSegmentManager *getWallSegmentManager() { return &mWallSegmentManager; }
 
    bool isFlagGame(char *mGameType);
    bool isTeamFlagGame(char *mGameType);
@@ -395,12 +283,12 @@ public:
 
    GridDatabase *getGridDatabase() { return &mGridDatabase; }
 
-   static void setTranslationAndScale(const Point &pos);
+   //static void setTranslationAndScale(const Point &pos);
 
    EditorObject *getSnapItem() { return mSnapVertex_i; }
    S32 getSnapVertexIndex() { return mSnapVertex_j; }
    void rebuildEverything();        // Does lots of things in undo, redo, and add items from script
-   void resnapAllEngineeredItems();
+   static void resnapAllEngineeredItems();
 
    void onBeforeRunScriptFromConsole();
    void onAfterRunScriptFromConsole();
@@ -413,9 +301,6 @@ public:
 
 
    bool mDraggingObjects;     // Should be private
-
-   // Render walls & lineItems
-   WallSegmentManager *getWallSegmentManager() { return &wallSegmentManager; }
 
    // Handle input
    void onKeyDown(KeyCode keyCode, char ascii);             // Handle all keyboard inputs, mouse clicks, and button presses
@@ -450,8 +335,6 @@ public:
    void scaleSelection(F32 scale);              // Scale selection by scale
    void rotateSelection(F32 angle);             // Rotate selecton by angle
 
-   void buildAllWallSegmentEdgesAndPoints();    // Populate wallSegments from our collection of worldItems
-
    void validateLevel();               // Check level for things that will make the game crash!
    void validateTeams();               // Check that each item has a valid team (and fix any errors found)
    void teamsHaveChanged();            // Another team validation routine, used when all items have valid teams, but the teams themselves change
@@ -479,19 +362,9 @@ public:
    static S32 checkEdgesForSnap(const Point &clickPoint, const Vector<Point> &points, bool abcFormat, F32 &minDist, Point &snapPoint);
    static S32 checkEdgesForSnap(const Point &clickPoint,  const Vector<WallEdge *> &edges, bool abcFormat, F32 &minDist, Point &snapPoint);
 
-   S32 checkCornersForSnap(const Point &clickPoint, const Vector<Point> &points, F32 &minDist, Point &snapPoint);
    S32 checkCornersForSnap(const Point &clickPoint,  const Vector<WallEdge *> &edges, F32 &minDist, Point &snapPoint);
 
-
-   
-   void deleteBorderSegs(S32 zoneId);     // Clear any borders associated with the specified zone
-   void rebuildBorderSegs(U32 zoneId);
-   void rebuildAllBorderSegs();
-   void checkZones(S32 i, S32 j);
-
    void deleteItem(S32 itemIndex);
-
-   bool itemIsSelected(U32 id);           // See if item with specified id is selected
 
    void runScript(const string &scriptName, const Vector<string> &args);        
    void runLevelGenScript();              // Run associated levelgen script
@@ -499,6 +372,9 @@ public:
    void clearLevelGenItems();             // Clear any previously created levelgen items
 };
 
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 class EditorMenuUserInterface : public MenuUserInterface
 {
@@ -522,5 +398,3 @@ extern EditorMenuUserInterface gEditorMenuUserInterface;
 };
 
 #endif
-
-

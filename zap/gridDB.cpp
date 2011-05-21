@@ -126,6 +126,12 @@ void GridDatabase::findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVecto
 }
 
 
+void GridDatabase::findObjects(Vector<DatabaseObject *> &fillVector)
+{
+   findObjects(AllObjectTypes, fillVector);
+}
+
+
 // Find all objects in database of type typeMask
 void GridDatabase::findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector)
 {

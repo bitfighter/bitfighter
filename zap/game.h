@@ -466,23 +466,30 @@ public:
    void unsuspendGame() { mGameSuspended = false; }
 };
 
+
 ////////////////////////////////////////
 ////////////////////////////////////////
+
+class WallSegmentManager;
 
 class EditorGame : public Game
 {
 public:
-   EditorGame() : Game(Address()) { setGridSize((F32)DefaultGridSize); }     // Constructor
+   EditorGame();
 
    U32 getPlayerCount() { return 0; }
    bool isServer() { return false; }
-   void idle(U32 timeDelta) { /* do nothing */ }
+   void idle(U32 timeDelta) { /* Do nothing */ }
 
    // TODO: Use this to manage mItems in editor
    void addToGameObjectList(XObject *theObject) { };
    void removeFromGameObjectList(XObject *theObject) { };
 
    Color getTeamColor(S32 teamId);
+
+   WallSegmentManager *mWallSegmentManager;     
+   WallSegmentManager *getWallSegmentManager() { return mWallSegmentManager; }
+   void setWallSegmentManager(WallSegmentManager *wallSegmentManager) { mWallSegmentManager = wallSegmentManager; }
 };
 
 

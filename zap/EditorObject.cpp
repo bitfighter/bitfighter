@@ -37,8 +37,10 @@
 #include "UIEditorMenus.h"       // For EditorAttributeMenuUI def
 
 
-S32 EditorObject::mNextSerialNumber = 0;
+namespace Zap
+{
 
+S32 EditorObject::mNextSerialNumber = 0;
 
 
 inline F32 getGridSize()
@@ -845,43 +847,6 @@ void EditorObject::onItemDragging()
 }
 
 
-
-//void EditorObject::onGeomChanged()
-//{
-//   // TODO: Delegate all this to the member objects
-//   if(getObjectTypeMask() & ItemBarrierMaker || getObjectTypeMask() & ItemPolyWall)
-//   {  
-//      // Fill extendedEndPoints from the vertices of our wall's centerline, or from PolyWall edges
-//      processEndPoints();
-//
-//      if(getObjectTypeMask() & ItemPolyWall)     // Prepare interior fill triangulation
-//         initializePolyGeom();          // Triangulate, find centroid, calc extents
-//
-//      getWallSegmentManager()->computeWallSegmentIntersections(this);
-//
-//      gEditorUserInterface.recomputeAllEngineeredItems();      // Seems awfully lazy...  should only recompute items attached to altered wall
-//
-//      // But if we're doing the above, we don't need to bother with the below... unless we stop being lazy
-//      //// Find any forcefields that might intersect our new wall segment and recalc them
-//      //for(S32 i = 0; i < gEditorUserInterface.mItems.size(); i++)
-//      //   if(gEditorUserInterface.mItems[i]->index == ItemForceField &&
-//      //                           gEditorUserInterface.mItems[i]->getExtent().intersects(getExtent()))
-//      //      gEditorUserInterface.mItems[i]->findForceFieldEnd();
-//   }
-//
-//   else if(getObjectTypeMask() & ItemForceField)
-//   {
-//      findForceFieldEnd();    // Find the end-point of the projected forcefield
-//   }
-//
-//   else if(getGeomType() == geomPoly)
-//      initializePolyGeom();
-//
-//   if(getObjectTypeMask() & ItemNavMeshZone)
-//      gEditorUserInterface.rebuildBorderSegs(getItemId());
-//}
-
-
 Color EditorObject::getDrawColor()
 {
    if(mSelected)
@@ -1145,4 +1110,4 @@ GeomType EditorObject::getGeomType()
 }
 
 
-
+};

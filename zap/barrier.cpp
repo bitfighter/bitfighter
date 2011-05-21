@@ -27,6 +27,7 @@
 #include "BotNavMeshZone.h"
 #include "gameObjectRender.h"
 #include "GeomUtils.h"    // For polygon triangulation
+#include "engineeredObjects.h"      // For forcefieldprojector def
 
 #include "gameType.h"          // For BarrierRec struct
 
@@ -88,6 +89,9 @@ void constructBarriers(Game *theGame, const BarrierRec &barrier)
       }
    }
 }
+
+
+static Vector<DatabaseObject *> fillVector;     // Reusable container for searching gridDatabases
 
 
 ////////////////////////////////////////
@@ -382,6 +386,459 @@ void Barrier::renderEdges(S32 layerIndex)
 {
    if(layerIndex == 1)
       renderWallEdges(mRenderLineSegments);
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Constructor
+WallItem::WallItem()
+{
+   mObjectTypeMask = BarrierType;
+   setWidth(50 * 256);
+}
+
+
+void WallItem::onGeomChanged()
+{
+   // Fill extendedEndPoints from the vertices of our wall's centerline, or from PolyWall edges
+   processEndPoints();
+
+   //if(getObjectTypeMask() & ItemPolyWall)     // Prepare interior fill triangulation
+   //   initializePolyGeom();          // Triangulate, find centroid, calc extents
+
+   gEditorGame->getWallSegmentManager()->computeWallSegmentIntersections(this);
+
+   // Find any forcefields that might intersect our new wall segment and recalc their endpoints
+   Rect aoi = getExtent();    
+    // A FF could extend into our area of interest from quite a distance, so expand search region accordingly
+   aoi.expand(Point(ForceField::MAX_FORCEFIELD_LENGTH, ForceField::MAX_FORCEFIELD_LENGTH));  
+
+   fillVector.clear();
+   gEditorGame->getGridDatabase()->findObjects(ForceFieldProjectorType, fillVector, aoi);     
+
+   for(S32 i = 0; i < fillVector.size(); i++)
+   {
+      ForceFieldProjector *ffp = dynamic_cast<ForceFieldProjector *>(fillVector[i]);
+      ffp->findForceFieldEnd();
+   }
+}
+
+
+string WallItem::toString()
+{
+   return "BarrierMaker " + itos(S32(F32(mWidth) / F32(getGame()->getGridSize()))) + " " + boundsToString(getGame()->getGridSize());
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+Color EDITOR_WALL_FILL_COLOR(.5, .5, 1); 
+
+TNL_IMPLEMENT_NETOBJECT(PolyWall);
+
+const char PolyWall::className[] = "PolyWall";      // Class name as it appears to Lua scripts
+
+
+PolyWall::PolyWall()
+{
+   mObjectTypeMask = PolyWallType;
+}
+
+
+static const Color HIGHLIGHT_COLOR = white;
+
+void PolyWall::render()
+{
+   glColor(HIGHLIGHT_COLOR);
+   renderPolygonOutline(mPolyBounds);
+}
+
+
+void PolyWall::renderFill()
+{
+   renderPolygonFill(&mPolyFill, EDITOR_WALL_FILL_COLOR, 1);
+}
+
+
+void PolyWall::renderEditor(F32 currentScale)
+{
+   glColor(HIGHLIGHT_COLOR);
+   renderPolygonOutline(mPolyBounds);
+}
+
+
+void PolyWall::renderDock()
+{
+   renderPolygonFill(&mPolyFill, EDITOR_WALL_FILL_COLOR, 1);
+   glColor(blue);
+   renderPolygonOutline(mPolyBounds);
+}
+
+
+bool PolyWall::processArguments(S32 argc, const char **argv)
+{
+   if(argc < 6)
+      return false;
+
+   processPolyBounds(argc, argv, 0, getGame()->getGridSize());
+
+   //computeExtent();
+
+   return true;
+}
+
+
+string PolyWall::toString()
+{
+   return string(getClassName()) + " " + boundsToString(getGame()->getGridSize());
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Declare/initialize static variables
+//GridDatabase *WallEdge::mGridDatabase; 
+
+// Constructor
+WallEdge::WallEdge(const Point &start, const Point &end) 
+{ 
+   mStart = start; 
+   mEnd = end; 
+
+   setExtent(Rect(start, end)); 
+
+   // Set some things required by DatabaseObject
+   mObjectTypeMask = BarrierType;
+}
+
+
+// Destructor
+WallEdge::~WallEdge()
+{
+    // Make sure object is out of the database
+   getGridDatabase()->removeFromDatabase(this, this->getExtent()); 
+}
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Declare/initialize static variables
+Vector<WallEdge *> WallSegmentManager::mWallEdges; 
+Vector<Point>  WallSegmentManager::mWallEdgePoints;
+GridDatabase *WallSegmentManager::mGridDatabase;   
+GridDatabase WallEdge::mGridDatabase;
+
+
+void WallSegmentManager::recomputeAllWallGeometry()
+{
+   buildAllWallSegmentEdgesAndPoints();
+
+   mWallEdgePoints.clear();
+
+   // Clip mWallSegments to create wallEdgePoints, which will be used below to create a new set of WallEdge objects
+   clipAllWallEdges(mWallSegments, mWallEdgePoints);    
+
+   mWallEdges.deleteAndClear();
+   mWallEdges.resize(mWallEdgePoints.size() / 2);
+
+   // Add clipped wallEdges to the spatial database
+   for(S32 i = 0; i < mWallEdgePoints.size(); i+=2)
+   {
+      WallEdge *newEdge = new WallEdge(mWallEdgePoints[i], mWallEdgePoints[i+1]);    // Create the edge object
+      
+      newEdge->addToDatabase();
+
+      mWallEdges[i/2] = newEdge;
+   }
+}
+
+
+// Delete all segments, then find all walls and build a new set of segments
+void WallSegmentManager::buildAllWallSegmentEdgesAndPoints()
+{
+   deleteAllSegments();
+
+   fillVector.clear();
+   gEditorGame->getGridDatabase()->findObjects(WallType, fillVector);
+
+   Vector<DatabaseObject *> engrObjects;
+   gEditorGame->getGridDatabase()->findObjects(EngineeredType, engrObjects);   // All engineered objects
+
+   for(S32 i = 0; i < fillVector.size(); i++)
+      gEditorGame->getWallSegmentManager()->buildWallSegmentEdgesAndPoints(fillVector[i], engrObjects);
+}
+
+
+void WallSegmentManager::buildWallSegmentEdgesAndPoints(DatabaseObject *dbObject)
+{
+   fillVector.clear();
+   gEditorGame->getGridDatabase()->findObjects(EngineeredType, fillVector);    // All engineered objects
+
+   buildWallSegmentEdgesAndPoints(dbObject, fillVector);
+}
+
+
+void WallSegmentManager::buildWallSegmentEdgesAndPoints(DatabaseObject *dbObject, const Vector<DatabaseObject *> &engrObjects)
+{
+   // Find any forcefields that terminate on this wall, and mark them for resnapping later
+
+   Vector<EngineeredObject *> eosOnDeletedSegs;    // A list of engr objects terminating on the wall segment that we'll be deleting
+
+   EditorObject *wall = dynamic_cast<EditorObject *>(dbObject);    // Wall we're deleting and rebuilding
+
+   S32 count = mWallSegments.size(); 
+
+   for(S32 i = 0; i < count; i++)
+      if(mWallSegments[i]->mOwner == wall->getSerialNumber())      // Segment belongs to item
+         for(S32 j = 0; j < engrObjects.size(); j++)
+         {
+            EngineeredObject *engrObj = dynamic_cast<EngineeredObject *>(engrObjects[j]);
+
+            // Does FF start or end on this segment?
+            if(engrObj->getMountSegment() == mWallSegments[i] || engrObj->getEndSegment() == mWallSegments[i])
+               eosOnDeletedSegs.push_back(engrObj);
+         }
+
+   // Get rid of any existing segments that correspond to our item; we'll be building new ones
+   deleteSegments(wall->getSerialNumber());
+
+   Rect allSegExtent;
+
+   if(wall->getObjectTypeMask() & PolyWallType)
+   {
+      WallSegment *newSegment = new WallSegment(wall->getVerts(), wall->getSerialNumber());
+      mWallSegments.push_back(newSegment);
+   }
+   else     // Tranditional wall
+   {
+      // Create a series of WallSegments, each representing a sequential pair of vertices on our wall
+      for(S32 i = 0; i < wall->extendedEndPoints.size(); i += 2)
+      {
+         WallSegment *newSegment = new WallSegment(wall->extendedEndPoints[i], wall->extendedEndPoints[i+1], 
+                                                   wall->getWidth() / gEditorGame->getGridSize(), wall->getSerialNumber());    // Create the segment
+         mWallSegments.push_back(newSegment);            // And add it to our master segment list
+      }
+   }
+
+   for(S32 i = 0; i < mWallSegments.size(); i++)
+   {
+      mWallSegments[i]->addToDatabase();              // Add it to our spatial database
+
+      Rect segExtent(mWallSegments[i]->corners);      // Calculate a bounding box around the segment
+      if(i == 0)
+         allSegExtent.set(segExtent);
+      else
+         allSegExtent.unionRect(segExtent);
+   }
+
+   wall->setExtent(allSegExtent);
+
+   // Alert all forcefields terminating on any of the wall segments we deleted and potentially recreated
+   for(S32 j = 0; j < eosOnDeletedSegs.size(); j++)  
+      eosOnDeletedSegs[j]->mountToWall(eosOnDeletedSegs[j]->getVert(0));
+}
+
+
+// Static method, used above and from instructions
+void WallSegmentManager::clipAllWallEdges(const Vector<WallSegment *> &wallSegments, Vector<Point> &wallEdges)
+{
+   Vector<Vector<Point> > inputPolygons, solution;
+
+   for(S32 i = 0; i < wallSegments.size(); i++)
+      inputPolygons.push_back(wallSegments[i]->corners);
+
+   mergePolys(inputPolygons, solution);      // Merged wall segments are placed in solution
+
+   unpackPolygons(solution, wallEdges);
+}
+
+
+// Takes a wall, finds all intersecting segments, and marks them invalid
+void WallSegmentManager::invalidateIntersectingSegments(EditorObject *item)
+{
+   fillVector.clear();
+
+   // Before we update our edges, we need to mark all intersecting segments using the invalid flag.
+   // These will need new walls after we've moved our segment.
+   for(S32 i = 0; i < mWallSegments.size(); i++)
+      if(mWallSegments[i]->mOwner == item->getSerialNumber())      // Segment belongs to our item; look it up in the database
+         getGridDatabase()->findObjects(BarrierType, fillVector, mWallSegments[i]->getExtent());
+
+   for(S32 i = 0; i < fillVector.size(); i++)
+   {
+      WallSegment *intersectingSegment = dynamic_cast<WallSegment *>(fillVector[i]);
+
+      // Reset the edges of all invalidated segments to their factory settings
+      intersectingSegment->resetEdges();   
+      intersectingSegment->invalid = true;
+   }
+
+   buildWallSegmentEdgesAndPoints(item);
+
+   // Invalidate all segments that potentially intersect the changed segment in its new location
+   fillVector.clear();
+   for(S32 i = 0; i < mWallSegments.size(); i++)
+      if(mWallSegments[i]->mOwner == item->getSerialNumber())      // Segment belongs to our item, compare to all others
+         getGridDatabase()->findObjects(BarrierType, fillVector, mWallSegments[i]->getExtent());
+
+   for(S32 i = 0; i < fillVector.size(); i++)
+      dynamic_cast<WallSegment *>(fillVector[i])->invalid = true;
+}
+
+
+// Called when a wall segment has somehow changed.  All current and previously intersecting segments 
+// need to be recomputed.
+void WallSegmentManager::computeWallSegmentIntersections(EditorObject *item)
+{
+   invalidateIntersectingSegments(item);     // TODO: Is this step still needed?  similar things, both run buildWallSegmentEdgesAndPoints()
+   recomputeAllWallGeometry();
+}
+
+
+void WallSegmentManager::deleteAllSegments()
+{
+   mWallSegments.deleteAndClear();
+}
+
+
+// Delete all wall segments owned by specified owner
+void WallSegmentManager::deleteSegments(U32 owner)
+{
+   S32 count = mWallSegments.size();
+
+   for(S32 i = 0; i < count; i++)
+      if(mWallSegments[i]->mOwner == owner)
+      {
+         delete mWallSegments[i];    // Destructor will remove segment from database
+         mWallSegments.erase_fast(i);
+         i--;
+         count--;
+      }
+}
+
+
+void WallSegmentManager::renderWalls(bool convert, bool draggingObjects, bool showingReferenceShip, F32 alpha)
+{
+   fillVector.clear();
+   gEditorGame->getGridDatabase()->findObjects(WallType, fillVector);
+
+   for(S32 i = 0; i < mWallSegments.size(); i++)
+   {  
+      bool isBeingDragged = false;
+      if(draggingObjects)
+      {
+         for(S32 j = 0; j < fillVector.size(); j++)
+         {
+            EditorObject *obj = dynamic_cast<EditorObject *>(fillVector[j]);
+            if(obj->isSelected() && obj->getItemId() == mWallSegments[i]->mOwner)
+            {
+               isBeingDragged = true;
+               break;
+            }
+         }
+      }
+
+      mWallSegments[i]->renderFill(isBeingDragged, showingReferenceShip);
+   }
+
+   renderWallEdges(mWallEdgePoints);      // Render wall outlines
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+GridDatabase *WallSegment::mGridDatabase; // Declare static variable
+
+
+// Regular constructor
+WallSegment::WallSegment(const Point &start, const Point &end, F32 width, S32 owner) 
+{ 
+   // Calculate segment corners by expanding the extended end points into a rectangle
+   Barrier::expandCenterlineToOutline(start, end, width, corners);   
+   init(owner);
+}
+
+
+// PolyWall constructor
+WallSegment::WallSegment(const Vector<Point> &points, S32 owner)
+{
+   corners = points;
+
+   if(isWoundClockwise(points))
+      corners.reverse();
+
+   init(owner);
+}
+
+
+// Intialize, only called from constructors above
+void WallSegment::init(S32 owner)
+{
+   // Recompute the edges based on our new corner points
+   resetEdges();                                            
+
+   Rect extent(corners);
+   setExtent(extent); 
+
+   // Drawing walls filled requires that points be triangluated
+   Triangulate::Process(corners, triangulatedFillPoints);
+
+   mOwner = owner; 
+   invalid = false; 
+
+   /////
+   // Set some things required by DatabaseObject
+   mObjectTypeMask = BarrierType;
+}
+
+
+extern EditorGame *gEditorGame;
+
+// Destructor
+WallSegment::~WallSegment()
+{ 
+   // Make sure object is out of the database
+   getGridDatabase()->removeFromDatabase(this, this->getExtent()); 
+
+   // Find any forcefields that were using this as an end point and let them know the segment is gone.  Since 
+   // segment is no longer in database, when we recalculate the forcefield, our endSegmentPointer will be reset.
+   // This is a last-ditch effort to ensure that the pointers point at something real.
+
+   //fillVector.clear();
+   //gEditorGame->getGridDatabase()->findObjects(ForceFieldProjectorType, fillVector);
+
+   //for(S32 i = 0; i < fillVector.size(); i++)
+   //{
+   //   ForceFieldProjector *proj = dynamic_cast<ForceFieldProjector *>(fillVector[i]);
+   //   TNLAssert(proj, "bad cast!");
+
+   //   if(proj->forceFieldEndSegment == this || proj->getMountSegment() == this) 
+   //      proj->onGeomChanged();            // Will force recalculation of mount and endpoint
+   //}
+}
+ 
+// Resets edges of a wall segment to their factory settings; i.e. 4 simple walls representing a simple outline
+void WallSegment::resetEdges()
+{
+   Barrier::resetEdges(corners, edges);
+}
+
+
+void WallSegment::renderFill(bool beingDragged, bool showingReferenceShip)
+{
+   // We'll use the editor color most of the time; only in preview mode in the editor do we use the game color
+   bool useGameColor = UserInterface::current && UserInterface::current->getMenuID() == EditorUI && showingReferenceShip;
+
+   glDisableBlendfromLineSmooth;
+   
+   // Use true below because all segments are triangulated
+   renderWallFill(triangulatedFillPoints, true, (useGameColor ? gIniSettings.wallFillColor : EDITOR_WALL_FILL_COLOR) * (beingDragged ? 0.5 : 1));   
+   glEnableBlendfromLineSmooth;
 }
 
 };

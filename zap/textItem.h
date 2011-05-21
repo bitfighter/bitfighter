@@ -35,6 +35,9 @@
 #include "gameObjectRender.h"
 #include "ship.h"
 #include "../glut/glutInclude.h"
+
+#include "tnlBitStream.h"
+
 #include <string>
 
 
@@ -178,77 +181,6 @@ public:
 
    TNL_DECLARE_CLASS(LineItem);
 };
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-// TODO: Don't need this to be a GameObject
-class WallItem : public LineItem
-{
-public:
-   WallItem();    // Constructor
-   virtual void onGeomChanged();
-
-
-   // Some properties about the item that will be needed in the editor
-   const char *getEditorHelpString() { return "Walls define the general form of your level."; }  
-   const char *getPrettyNamePlural() { return "Walls"; }
-   const char *getOnDockName() { return "Wall"; }
-   const char *getOnScreenName() { return "Wall"; }
-   bool hasTeam() { return false; }
-   bool canBeHostile() { return false; }
-   bool canBeNeutral() { return false; }
-
-   string toString();
-};
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-class PolyWall : public EditorPolygon     // Don't need GameObject component of this...
-{
-private:
-   //typedef EditorObject Parent;
-   //void computeExtent();
-
-public:
-   PolyWall();      // Constructor
-   bool processArguments(S32 argc, const char **argv);
-
-   void render();
-   void renderFill();
-   void renderDock();
-   void renderEditor(F32 currentScale);
-
-   S32 getRenderSortValue() { return -1; }
-
-   //bool getCollisionPoly(Vector<Point> &polyPoints);
-
-   /////
-   // Editor methods
-   const char *getEditorHelpString() { return "Polygonal wall item let you be creative with your wall design."; }
-   const char *getPrettyNamePlural() { return "PolyWalls"; }
-   const char *getOnDockName() { return "PolyWall"; }
-   const char *getOnScreenName() { return "PolyWall"; }
-   string toString();
-
-   /////
-   // Lua interface  ==>  don't need these!!
-
-   PolyWall(lua_State *L) { /* Do nothing */ };    //  Lua constructor
-   GameObject *getGameObject() { return this; }          // Return the underlying GameObject
-
-   static const char className[];                        // Class name as it appears to Lua scripts
-   static Lunar<PolyWall>::RegType methods[];
-
-   S32 getClassID(lua_State *L) { return returnInt(L, PolyWallType); }
-   TNL_DECLARE_CLASS(PolyWall);
-private:
-   void push(lua_State *L) {  Lunar<PolyWall>::push(L, this); }
-};
-
 
 
 };
