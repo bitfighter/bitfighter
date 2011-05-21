@@ -52,14 +52,20 @@ enum GeomType {
    geomNone,            
 };
 
+
+enum ShowMode
+{
+   ShowAllButNavZones,
+   ShowAllObjects,
+   ShowWallsOnly,
+   NavZoneMode,
+   ShowModesCount
+};
 ////////////////////////////////////////
 ////////////////////////////////////////
 
 class EditorAttributeMenuUI;
 class WallSegment;
-
-extern enum ShowMode;
-extern enum GameItems;
 
 class EditorObject : virtual public XObject   // Interface class  -- All editor objects need to implement this
 {

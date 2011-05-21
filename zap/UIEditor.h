@@ -58,15 +58,6 @@ enum VertexRenderStyles
    UnselectedItemVertex,            // Non-highlighted vertex of a non-selected item
 };
 
-enum ShowMode
-{
-   ShowAllButNavZones,
-   ShowAllObjects,
-   ShowWallsOnly,
-   NavZoneMode,
-   ShowModesCount
-};
-
 
 ////////////////////////////////////////
 ////////////////////////////////////////
