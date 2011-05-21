@@ -27,9 +27,15 @@
 #ifndef _TNLTHREAD_H_
 #define _TNLTHREAD_H_
 
+#ifndef _TNL_H_
 #include "tnl.h"
+#endif
+#ifndef _TNL_NETBASE_H_
 #include "tnlNetBase.h"
+#endif
+#ifndef _TNL_METHODDISPATCH_H_
 #include "tnlMethodDispatch.h"
+#endif
 
 #if defined (TNL_OS_WIN32)
 #include <windows.h>
