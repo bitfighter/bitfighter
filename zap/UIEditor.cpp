@@ -58,6 +58,7 @@
 #include <ctype.h>
 #include <exception>
 #include <algorithm>             // For sort
+#include <math.h>
 
 namespace Zap
 {

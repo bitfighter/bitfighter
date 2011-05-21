@@ -32,6 +32,7 @@ using namespace TNL;
 #include "gameLoader.h"
 #include "SoundSystem.h"
 #include "gameObjectRender.h"
+#include <math.h>
 
 namespace Zap
 {

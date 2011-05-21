@@ -2896,6 +2896,17 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
          }
       }
    }
+   else if(!stricmp(cmd, "maxbots"))
+   {
+      if(!clientRef->clientConnection->isAdmin())
+         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Need admin permission");
+      else if(args.size() < 1)
+         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "Use /maxbots <number>");
+      else
+      {
+         gIniSettings.maxBots = atoi(args[0].getString());
+      }
+   }
    else if(!stricmp(cmd, "kickbot") || !stricmp(cmd, "kickbots"))
    {
       if(!clientRef->clientConnection->isLevelChanger())

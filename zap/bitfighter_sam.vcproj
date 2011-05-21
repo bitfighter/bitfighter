@@ -544,6 +544,18 @@
 				>
 			</File>
 			<File
+				RelativePath=".\SFXProfile.h"
+				>
+			</File>
+			<File
+				RelativePath=".\SoundEffect.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\SoundEffect.h"
+				>
+			</File>
+			<File
 				RelativePath=".\SoundSystem.cpp"
 				>
 			</File>
@@ -551,18 +563,6 @@
 				RelativePath=".\SoundSystem.h"
 				>
 			</File>
-         <File
-            RelativePath=".\SoundEffect.cpp"
-            >
-         </File>
-         <File
-            RelativePath=".\SoundEffect.h"
-            >
-         </File>
-         <File
-            RelativePath=".\SFXProfile.h"
-            >
-         </File>
 			<File
 				RelativePath=".\voiceCodec.cpp"
 				>
@@ -849,6 +849,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\EditorObject.cpp"
+			>
+		</File>
+		<File
 			RelativePath=".\engineerHelper.cpp"
 			>
 		</File>
@@ -1061,6 +1065,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\SimpleLine.cpp"
+			>
+		</File>
+		<File
 			RelativePath=".\sparkManager.cpp"
 			>
 		</File>
@@ -1098,6 +1106,10 @@
 		</File>
 		<File
 			RelativePath=".\UIAbstractInstructions.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\UIEditorMenus.cpp"
 			>
 		</File>
 		<File

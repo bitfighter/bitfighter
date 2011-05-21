@@ -30,6 +30,7 @@
 
 #include "../zap/SharedConstants.h"
 #include "../zap/stringUtils.h"
+#include "../zap/gameLoader.h"  // for Zap::LevelLoader::MAX_LEVEL_LINE_ARGS
 
 #include "tnl.h"
 #include "tnlLog.h"
@@ -168,8 +169,8 @@ enum {
 };
 
 
-static string argv[LevelLoader::MAX_LEVEL_LINE_ARGS];   
-static char argv_buffer[LevelLoader::MAX_LEVEL_LINE_ARGS][MaxArgLen];
+static string argv[Zap::LevelLoader::MAX_LEVEL_LINE_ARGS];   
+static char argv_buffer[Zap::LevelLoader::MAX_LEVEL_LINE_ARGS][MaxArgLen];
 static int argc;
 static int argLen = 0;
 static const char *argString;
@@ -183,7 +184,7 @@ inline char getNextChar()
 
 inline void addCharToArg(char c)
 {
-   if(argc < LevelLoader::MAX_LEVEL_LINE_ARGS && argLen < MaxArgLen-1)
+   if(argc < Zap::LevelLoader::MAX_LEVEL_LINE_ARGS && argLen < MaxArgLen-1)
    {
       argv[argc] += c;
       argLen++;
@@ -192,7 +193,7 @@ inline void addCharToArg(char c)
 
 inline void addArg()
 {
-   if(argc < LevelLoader::MAX_LEVEL_LINE_ARGS)
+   if(argc < Zap::LevelLoader::MAX_LEVEL_LINE_ARGS)
    {
       argc++;
       argLen = 0;
@@ -201,7 +202,7 @@ inline void addArg()
 
 inline void clearArgv()
 {
-   for(S32 i = 0; i < LevelLoader::MAX_LEVEL_LINE_ARGS; i++)
+   for(S32 i = 0; i < Zap::LevelLoader::MAX_LEVEL_LINE_ARGS; i++)
       argv[i] = "";
 }
 
@@ -216,7 +217,7 @@ int parseArgs(const char *string)
    argString = string;
    char c;
 
-   for(U32 i = 0; i < LevelLoader::MAX_LEVEL_LINE_ARGS; i++)
+   for(U32 i = 0; i < Zap::LevelLoader::MAX_LEVEL_LINE_ARGS; i++)
       argv[i] = argv_buffer[i];
 
 stateEatingWhitespace:
