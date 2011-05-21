@@ -27,6 +27,7 @@
 #define _GAME_H_
 
 #include "tnlNetObject.h"
+#include "tnlTypes.h"
 
 #include "gameConnection.h"
 #include "gridDB.h"

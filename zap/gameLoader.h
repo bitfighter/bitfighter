@@ -27,13 +27,11 @@
 #define _GAMELOADER_H_
 
 #include "string"
+#include "tnlVector.h"
+#include "tnlTypes.h"
 
-// forward declarations
-namespace TNL {
-   template<class T> class Vector;
-   typedef unsigned int U32;
-   typedef float F32;
-};
+
+using namespace TNL;
 
 namespace Zap
 {

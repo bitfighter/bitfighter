@@ -25,8 +25,11 @@
 
 #include "Point.h"
 
+#include "tnlPlatform.h"
+
 #include <math.h>
 #include <cstdlib>
+
 
 using namespace TNL;
 
@@ -164,7 +167,7 @@ void Point::read(const char **argv)
    y = (F32) atof(argv[1]);
 }
 
-string Point::toString()
+std::string Point::toString()
 {
    char outString[100];
    dSprintf(outString, sizeof(outString), "%2.5f %2.5f", x, y);

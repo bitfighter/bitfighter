@@ -26,6 +26,8 @@
 #ifndef _POINT_H_
 #define _POINT_H_
 
+#include <string>
+
 // forward declarations
 namespace TNL {
    typedef float F32;

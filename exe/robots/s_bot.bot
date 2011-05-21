@@ -1,5 +1,5 @@
 --- from quickBot v2, modified by sam686
---- plays on all level types
+--- works on all game modes
 
 game = nil
 difficulty = nil

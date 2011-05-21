@@ -99,7 +99,7 @@ protected:
 
 
 // Provide editor related methods to the polygon class
-class EditorPolygon : virtual public Polygon, public EditorPolyline, public LuaItem
+class EditorPolygon : public EditorPolyline, public LuaItem
 {
    typedef EditorPolyline Parent;
 

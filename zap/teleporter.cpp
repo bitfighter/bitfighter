@@ -165,8 +165,8 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
       S32 dest;
       stream->read(&dest);
 
-      FXManager::emitTeleportInEffect(mDest[dest], 0);
-      SoundSystem::playSoundEffect(SFXTeleportIn, mDest[dest], Point());
+      FXManager::emitTeleportInEffect(mDests[dest], 0);
+      SoundSystem::playSoundEffect(SFXTeleportIn, mDests[dest], Point());
 
       SoundSystem::playSoundEffect(SFXTeleportOut, mPos, Point());
       timeout = TeleporterDelay;
