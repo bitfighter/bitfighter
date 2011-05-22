@@ -1538,7 +1538,7 @@ void GameType::setClientShipLoadout(ClientRef *cl, const Vector<U32> &loadout, b
          return;
       if(!engineerIsEnabled() && (loadout[i] == ModuleEngineer)) // Reject engineer if not enabled
          return;
-      if(!engineerIsEnabled() && (loadout[i] == ModuleSensor))  // allow spyBug when using Sensor
+      if((loadout[i] == ModuleSensor))  // allow spyBug when using Sensor
          spyBugAllowed = true;
    }
 

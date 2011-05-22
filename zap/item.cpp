@@ -41,7 +41,7 @@ Item::Item(Point p, bool collideable, float radius, float mass) : MoveObject(p, 
 {
    mIsMounted = false;
    mIsCollideable = collideable;
-   mObjectTypeMask = MoveableType | ItemType | CommandMapVisType;
+   mObjectTypeMask = MoveableType | CommandMapVisType;
    mInitial = false;
 
    //if(getGame()->isServer())
