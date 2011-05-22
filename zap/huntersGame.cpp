@@ -204,6 +204,14 @@ void HuntersGameType::addGameSpecificParameterMenuItems(Vector<MenuItem *> &menu
    menuItems.push_back(new CounterMenuItem("Score to Win:", 5000, 100, 100, 20000, "points", "", "Game ends when one player or team gets this score"));
 }
 
+TNL_IMPLEMENT_NETOBJECT(HuntersNexusObject);
+
+
+TNL_IMPLEMENT_NETOBJECT_RPC(HuntersNexusObject, s2cFlagsReturned, (), (), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhost, 0)
+{
+   gClientGame->getGameType()->mZoneGlowTimer.reset();
+}
+
 
 // The nexus is open.  A ship has entered it.  Now what?
 // Runs on server only
@@ -586,18 +594,12 @@ void HuntersFlagItem::unpackUpdate(GhostConnection *connection, BitStream *strea
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-TNL_IMPLEMENT_NETOBJECT(HuntersNexusObject);
-
-
-TNL_IMPLEMENT_NETOBJECT_RPC(HuntersNexusObject, s2cFlagsReturned, (), (), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhost, 0)
-{
-   gClientGame->getGameType()->mZoneGlowTimer.reset();
-}
 
 // Constructor
 HuntersNexusObject::HuntersNexusObject()
 {
    mObjectTypeMask |= NexusType | CommandMapVisType;
+   mObjectTypeNumber = NexusTypeNumber;
    mNetFlags.set(Ghostable);
 }
 

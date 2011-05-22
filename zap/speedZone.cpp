@@ -54,6 +54,7 @@ SpeedZone::SpeedZone() : SimpleLine(SpeedZoneType)
 {
    mNetFlags.set(Ghostable);
    mObjectTypeMask = SpeedZoneType | CommandMapVisType;
+   mObjectTypeNumber = SpeedZoneTypeNumber;
 
    mSpeed = defaultSpeed;
    mSnapLocation = false;     // Don't snap unless specified

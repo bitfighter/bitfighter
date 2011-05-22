@@ -3318,7 +3318,7 @@ void EditorUserInterface::onKeyUp(KeyCode keyCode)
                }
                else if(mShowMode == ShowAllButNavZones)
                {
-                  if(mItems[i]->getObjectTypeMask() & BotNavMeshZoneType)
+                  if(mItems[i]->getObjectTypeNumber() == BotNavMeshZoneTypeNumber)
                      continue;
                }
 

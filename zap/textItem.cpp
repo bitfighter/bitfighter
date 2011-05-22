@@ -50,6 +50,7 @@ TextItem::TextItem() : SimpleLine(TextItemType)
 {
    mNetFlags.set(Ghostable);
    mObjectTypeMask = TextItemType | CommandMapVisType;     
+   mObjectTypeNumber = TextItemTypeNumber;
 
    // Some default values
    mSize = 20;
@@ -316,6 +317,7 @@ LineItem::LineItem()
 { 
    mNetFlags.set(Ghostable);
    mObjectTypeMask |= LineType | CommandMapVisType;
+   mObjectTypeNumber = LineTypeNumber;
 }
 
 

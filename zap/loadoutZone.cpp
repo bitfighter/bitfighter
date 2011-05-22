@@ -52,6 +52,7 @@ LoadoutZone::LoadoutZone()
    mTeam = 0;
    mNetFlags.set(Ghostable);
    mObjectTypeMask = LoadoutZoneType | CommandMapVisType;
+   mObjectTypeNumber = LoadoutZoneTypeNumber;
 }
 
 

@@ -53,6 +53,7 @@ void FlagItem::initialize()
 
    mNetFlags.set(Ghostable);
    mObjectTypeMask |= FlagType | CommandMapVisType;
+   mObjectTypeNumber = FlagTypeNumber;
    setZone(NULL);
 }
 

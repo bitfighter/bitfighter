@@ -68,6 +68,7 @@ BotNavMeshZone::BotNavMeshZone()
 {
    mGame = NULL;
    //mObjectTypeMask = BotNavMeshZoneType | CommandMapVisType;
+   mObjectTypeNumber = BotNavMeshZoneTypeNumber;
    //  The Zones is now rendered without the network interface, if client is hosting.
    //mNetFlags.set(Ghostable);    // For now, so we can see them on the client to help with debugging... when too many zones causes huge lag
    mZoneId = gBotNavMeshZones.size();
@@ -261,8 +262,8 @@ void BotNavMeshZone::unpackUpdate(GhostConnection *connection, BitStream *stream
 U16 BotNavMeshZone::findZoneContaining(const Point &p)
 {
    Vector<DatabaseObject *> fillVector;
-   gServerGame->mDatabaseForBotZones.findObjects(BotNavMeshZoneType, fillVector, 
-                                                      Rect(p - Point(0.1f,0.1f),p + Point(0.1f,0.1f)));  // Slightly extend Rect, it can be on the edge of zone
+   gServerGame->mDatabaseForBotZones.findObjects(0, fillVector, 
+                              Rect(p - Point(0.1f,0.1f),p + Point(0.1f,0.1f)), BotNavMeshZoneTypeNumber);  // Slightly extend Rect, it can be on the edge of zone
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
@@ -437,7 +438,7 @@ static BotNavMeshZone *findZoneContainingPoint(const Point &point)
 {
    Rect rect(point, 0.01f);
    zones.clear();
-   gServerGame->mDatabaseForBotZones.findObjects(BotNavMeshZoneType, zones, rect); 
+   gServerGame->mDatabaseForBotZones.findObjects(0, zones, rect, BotNavMeshZoneTypeNumber); 
 
    // If there is more than one possible match, pick the first arbitrarily (could happen if dest is right on a zone border)
    for(S32 i = 0; i < zones.size(); i++)

@@ -101,6 +101,7 @@ static Vector<DatabaseObject *> fillVector;     // Reusable container for search
 Barrier::Barrier(const Vector<Point> &points, F32 width, bool solid)
 {
    mObjectTypeMask = BarrierType | CommandMapVisType;
+   mObjectTypeNumber = BarrierTypeNumber;
    mPoints = points;
 
    if(points.size() < 2)      // Invalid barrier!
@@ -396,6 +397,7 @@ void Barrier::renderEdges(S32 layerIndex)
 WallItem::WallItem()
 {
    mObjectTypeMask = BarrierType;
+   mObjectTypeNumber = WallItemTypeNumber;
    setWidth(50 * 256);
 }
 
@@ -445,6 +447,7 @@ const char PolyWall::className[] = "PolyWall";      // Class name as it appears 
 PolyWall::PolyWall()
 {
    mObjectTypeMask = PolyWallType;
+   mObjectTypeNumber = PolyWallTypeNumber;
 }
 
 
@@ -513,6 +516,7 @@ WallEdge::WallEdge(const Point &start, const Point &end)
 
    // Set some things required by DatabaseObject
    mObjectTypeMask = BarrierType;
+   mObjectTypeNumber = WallEdgeTypeNumber;
 }
 
 
@@ -794,6 +798,7 @@ void WallSegment::init(S32 owner)
    /////
    // Set some things required by DatabaseObject
    mObjectTypeMask = BarrierType;
+   mObjectTypeNumber = WallSegmentTypeNumber;
 }
 
 

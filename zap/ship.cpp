@@ -78,6 +78,7 @@ TNL_IMPLEMENT_NETOBJECT(Ship);
 Ship::Ship(StringTableEntry playerName, bool isAuthenticated, S32 team, Point p, F32 m, bool isRobot) : MoveObject(p, CollisionRadius), mSpawnPoint(p)
 {
    mObjectTypeMask = ShipType | MoveableType | CommandMapVisType | TurretTargetType;
+   mObjectTypeNumber = ShipTypeNumber;
    mFireTimer = 0;
 
    mNetFlags.set(Ghostable);

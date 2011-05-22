@@ -62,6 +62,7 @@ TNL_IMPLEMENT_NETOBJECT(Projectile);
 Projectile::Projectile(WeaponType type, Point p, Point v, GameObject *shooter)
 {
    mObjectTypeMask = BulletType;
+   mObjectTypeNumber = BulletTypeNumber;
 
    mNetFlags.set(Ghostable);
    pos = p;
@@ -415,6 +416,7 @@ TNL_IMPLEMENT_NETOBJECT(GrenadeProjectile);
 GrenadeProjectile::GrenadeProjectile(Point pos, Point vel, GameObject *shooter): Item(pos, true, mRadius, mMass)
 {
    mObjectTypeMask = MoveableType | BulletType;
+   mObjectTypeNumber = GrenadeProjectileTypeNumber;
 
    mNetFlags.set(Ghostable);
 
@@ -618,6 +620,7 @@ TNL_IMPLEMENT_NETOBJECT(Mine);
 Mine::Mine(Point pos, Ship *planter) : GrenadeProjectile(pos, Point())
 {
    mObjectTypeMask = MoveableType | MineType;
+   mObjectTypeNumber = MineTypeNumber;
    mWeaponType = WeaponMine;
 
    if(planter)
@@ -814,6 +817,7 @@ TNL_IMPLEMENT_NETOBJECT(SpyBug);
 SpyBug::SpyBug(Point pos, Ship *planter) : GrenadeProjectile(pos, Point())
 {
    mObjectTypeMask = MoveableType | SpyBugType;
+   mObjectTypeNumber = SpyBugTypeNumber;
    //mObjectTypeMask &= ~CommandMapVisType;    // These items aren't shown on commander's map (well, sometimes they are, but through a special method)
 
    mWeaponType = WeaponSpyBug;

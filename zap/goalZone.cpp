@@ -55,6 +55,7 @@ GoalZone::GoalZone()
    mTeam = -1;
    mNetFlags.set(Ghostable);
    mObjectTypeMask = CommandMapVisType | GoalZoneType;
+   mObjectTypeNumber = GoalZoneTypeNumber;
    mFlashCount = 0;
    mHasFlag = false;
    mScore = 1;    // For now...

@@ -1784,7 +1784,7 @@ void ClientGame::renderCommander()
 
    // If we're drawing bot zones, add them to our list of render objects
    if(gServerGame && mGameUserInterface->mDebugShowMeshZones)
-       gServerGame->mDatabaseForBotZones.findObjects(BotNavMeshZoneType, rawRenderObjects, mWorldExtents);
+       gServerGame->mDatabaseForBotZones.findObjects(0, rawRenderObjects, mWorldExtents, BotNavMeshZoneTypeNumber);
 
    renderObjects.clear();
    for(S32 i = 0; i < rawRenderObjects.size(); i++)
@@ -2000,7 +2000,7 @@ void ClientGame::renderNormal()
    mDatabase.findObjects(AllObjectTypes, rawRenderObjects, extentRect);    // Use extent rects to quickly find objects in visual range
 
    if(gServerGame && mGameUserInterface->mDebugShowMeshZones)
-       gServerGame->mDatabaseForBotZones.findObjects(BotNavMeshZoneType,rawRenderObjects,extentRect);
+       gServerGame->mDatabaseForBotZones.findObjects(0, rawRenderObjects, extentRect, BotNavMeshZoneTypeNumber);
 
    renderObjects.clear();
    for(S32 i = 0; i < rawRenderObjects.size(); i++)

@@ -62,7 +62,7 @@ enum GameObjectType
    MineType            = BIT(14),
    SpyBugType          = BIT(15),
    NexusType           = BIT(16),
-   BotNavMeshZoneType  = BIT(17),
+   //BotNavMeshZoneType  = BIT(17),
    RobotType           = BIT(18),
    TeleportType        = BIT(19),
    GoalZoneType        = BIT(20),
@@ -100,6 +100,45 @@ enum GameObjectType
    WallType           = BarrierType | PolyWallType,
    AllObjectTypes     = 0xFFFFFFFF
 };
+
+const U8 UnknownTypeNumber = 0;
+const U8 BarrierTypeNumber = 1;
+const U8 ShipTypeNumber = 2;
+const U8 LineTypeNumber = 3;
+const U8 ResourceItemTypeNumber = 4;
+const U8 TextItemTypeNumber = 5;
+const U8 LoadoutZoneTypeNumber = 6;
+const U8 TestItemTypeNumber = 7;
+const U8 FlagTypeNumber = 8;
+const U8 BulletTypeNumber = 9;
+const U8 MineTypeNumber = 10;
+const U8 SpybugZoneTypeNumber = 11;
+const U8 NexusTypeNumber = 12;
+const U8 BotNavMeshZoneTypeNumber = 13;
+const U8 RobotTypeNumber = 14;
+const U8 TeleporterTypeNumber = 15;
+const U8 GoalZoneTypeNumber = 16;
+const U8 AsteroidTypeNumber = 17;
+const U8 RepairItemTypeNumber = 18;
+const U8 EnergyItemTypeNumber = 19;
+const U8 SoccerBallItemTypeNumber = 20;
+const U8 WormTypeNumber = 21;
+const U8 TurretTypeNumber = 22;
+const U8 TurretTargetTypeNumber = 23;
+const U8 ForceFieldTypeNumber = 24;
+const U8 ForceFieldProjectorTypeNumber = 25;
+const U8 SpeedZoneTypeNumber = 26;
+const U8 PolyWallTypeNumber = 27;
+const U8 ShipSpawnTypeNumber = 28;
+const U8 FlagSpawnTypeNumber = 29;
+const U8 AsteroidSpawnTypeNumber = 30;
+const U8 WallItemTypeNumber = 31;
+const U8 WallEdgeTypeNumber = 32;
+const U8 WallSegmentTypeNumber = 33;
+const U8 GrenadeProjectileTypeNumber = 34;
+const U8 SlipZoneTypeNumber = 35;
+const U8 SpyBugTypeNumber = 36;
+
 
 
 const S32 gSpyBugRange = 300;     // How far can a spy bug see?

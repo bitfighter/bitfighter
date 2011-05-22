@@ -83,7 +83,7 @@ GameObject::GameObject()
    mTeam = -1;
    /*mLastQueryId = 0;*/
    mObjectTypeMask = UnknownType;
-   mObjectTypeNumber = 0;
+   mObjectTypeNumber = UnknownTypeNumber;
    mDisableCollisionCount = 0;
    mCreationTime = 0;
 }
@@ -103,6 +103,7 @@ GameConnection *GameObject::getOwner()
 void GameObject::deleteObject(U32 deleteTimeInterval)
 {
    mObjectTypeMask = DeletedType;
+   // mObjectTypeNumber = ??? ;
    if(!mGame)
       delete this;
    else

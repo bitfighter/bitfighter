@@ -653,7 +653,8 @@ TNL_IMPLEMENT_NETOBJECT(ForceFieldProjector);
 ForceFieldProjector::ForceFieldProjector(S32 team, Point anchorPoint, Point anchorNormal) : EngineeredObject(team, anchorPoint, anchorNormal, ForceFieldProjectorType)
 {
    mNetFlags.set(Ghostable);
-   mObjectTypeMask |= CommandMapVisType;     
+   mObjectTypeMask |= CommandMapVisType;
+   mObjectTypeNumber = ForceFieldProjectorTypeNumber;
 }
 
 void ForceFieldProjector::onDisabled()
@@ -856,6 +857,7 @@ ForceField::ForceField(S32 team, Point start, Point end)
 
    mFieldUp = true;
    mObjectTypeMask = ForceFieldType | CommandMapVisType;
+   mObjectTypeNumber = ForceFieldTypeNumber;
    mNetFlags.set(Ghostable);
 }
 
@@ -1017,7 +1019,8 @@ TNL_IMPLEMENT_NETOBJECT(Turret);
 // Constructor
 Turret::Turret(S32 team, Point anchorPoint, Point anchorNormal) : EngineeredObject(team, anchorPoint, anchorNormal, TurretType)
 {
-   mObjectTypeMask |= CommandMapVisType;  
+   mObjectTypeMask |= CommandMapVisType;
+   mObjectTypeNumber = TurretTypeNumber;
 
    mWeaponFireType = WeaponTurret;
    mNetFlags.set(Ghostable);
