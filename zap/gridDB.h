@@ -49,18 +49,21 @@ class DatabaseObject
 friend class GridDatabase;
 
 private:
-   U32 mLastQueryId;    
-   Rect extent;     
+   U32 mLastQueryId;
+   Rect extent;
    bool mInDatabase;
 
 protected:
    U32 mObjectTypeMask;
+   U8 mObjectTypeNumber;
 
 public:
    DatabaseObject() { mLastQueryId = 0; extent = Rect(); mInDatabase = false; }    // Quickie constructor
 
    U32 getObjectTypeMask() { return mObjectTypeMask; }   
    void setObjectTypeMask(U32 objectTypeMask) { mObjectTypeMask = objectTypeMask; }
+   U8 getObjectTypeNumber() { return mObjectTypeNumber; }   
+   void setObjectTypeNumber(U8 objectTypeNumber) { mObjectTypeNumber = objectTypeNumber; }
 
    Rect getExtent() { return extent; }
    void setExtent(const Rect &extentRect);
@@ -85,7 +88,7 @@ class GridDatabase
 private:
    bool mUsingGameCoords;
 
-   void findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector, const Rect *extents, S32 minx, S32 miny, S32 maxx, S32 maxy);
+   void findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector, const Rect *extents, S32 minx, S32 miny, S32 maxx, S32 maxy, U8 typeNumber = U8_MAX);
    U32 mQueryId;
 
 public:
@@ -109,14 +112,14 @@ public:
    S32 BucketWidth;     // Width/height of each bucket in pixels
 
    DatabaseObject *findObjectLOS(U32 typeMask, U32 stateIndex, bool format, const Point &rayStart, const Point &rayEnd, 
-                                 float &collisionTime, Point &surfaceNormal);
+                                 float &collisionTime, Point &surfaceNormal, U8 typeNumber = U8_MAX);
    DatabaseObject *findObjectLOS(U32 typeMask, U32 stateIndex, const Point &rayStart, const Point &rayEnd, 
-                                 float &collisionTime, Point &surfaceNormal);
+                                 float &collisionTime, Point &surfaceNormal, U8 typeNumber = U8_MAX);
    bool pointCanSeePoint(const Point &point1, const Point &point2);
 
-   void findObjects(Vector<DatabaseObject *> &fillVector);     // Returns all objects in the database
-   void findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector);      
-   void findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector, const Rect &extents);
+   void findObjects(Vector<DatabaseObject *> &fillVector, U8 typeNumber = U8_MAX);     // Returns all objects in the database
+   void findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector, U8 typeNumber = U8_MAX);      
+   void findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector, const Rect &extents, U8 typeNumber = U8_MAX);
    
 
    void addToDatabase(DatabaseObject *theObject, const Rect &extents);

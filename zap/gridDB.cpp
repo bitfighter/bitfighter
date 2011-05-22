@@ -105,7 +105,7 @@ void GridDatabase::removeFromDatabase(DatabaseObject *theObject, const Rect &ext
 }
 
 
-void GridDatabase::findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector, const Rect *extents, S32 minx, S32 miny, S32 maxx, S32 maxy)
+void GridDatabase::findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector, const Rect *extents, S32 minx, S32 miny, S32 maxx, S32 maxy, U8 typeNumber)
 {
    mQueryId++;    // Used to prevent the same item from being found in multiple buckets
 
@@ -116,7 +116,7 @@ void GridDatabase::findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVecto
             DatabaseObject *theObject = walk->theObject;
 
             if(theObject->mLastQueryId != mQueryId &&                     // Object hasn't been queried; and
-               (theObject->getObjectTypeMask() & typeMask) &&             // is of the right type; and
+               ((theObject->getObjectTypeMask() & typeMask) || theObject->getObjectTypeNumber() == typeNumber) &&             // is of the right type; and
                (!extents || theObject->extent.intersects(*extents)) )     // overlaps our extents (if passed)
             {
                walk->theObject->mLastQueryId = mQueryId;    // Flag the object so we know we've already visited it
@@ -126,21 +126,21 @@ void GridDatabase::findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVecto
 }
 
 
-void GridDatabase::findObjects(Vector<DatabaseObject *> &fillVector)
+void GridDatabase::findObjects(Vector<DatabaseObject *> &fillVector, U8 typeNumber)
 {
-   findObjects(AllObjectTypes, fillVector);
+   findObjects(AllObjectTypes, fillVector, typeNumber);
 }
 
 
 // Find all objects in database of type typeMask
-void GridDatabase::findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector)
+void GridDatabase::findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector, U8 typeNumber)
 {
-   findObjects(typeMask, fillVector, NULL, 0, 0, BucketRowCount - 1, BucketRowCount - 1);
+   findObjects(typeMask, fillVector, NULL, 0, 0, BucketRowCount - 1, BucketRowCount - 1, typeNumber);
 }
 
 
 // Find all objects in &extents that are of type typeMask
-void GridDatabase::findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector, const Rect &extents)
+void GridDatabase::findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector, const Rect &extents, U8 typeNumber)
 {
    S32 minx, miny, maxx, maxy;
 
@@ -156,7 +156,7 @@ void GridDatabase::findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVecto
    if(maxy >= miny + BucketRowCount)
       maxy = miny + BucketRowCount - 1;
 
-   findObjects(typeMask, fillVector, &extents, minx, miny, maxx, maxy);
+   findObjects(typeMask, fillVector, &extents, minx, miny, maxx, maxy, typeNumber);
 }
 
 
@@ -165,16 +165,16 @@ void GridDatabase::findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVecto
 //             (at least I think that's what's going on here - CE)
 DatabaseObject *GridDatabase::findObjectLOS(U32 typeMask, U32 stateIndex, 
                                             const Point &rayStart, const Point &rayEnd, 
-                                            float &collisionTime, Point &surfaceNormal)
+                                            float &collisionTime, Point &surfaceNormal, U8 typeNumber)
 {
-   return findObjectLOS(typeMask, stateIndex, true, rayStart, rayEnd, collisionTime, surfaceNormal);
+   return findObjectLOS(typeMask, stateIndex, true, rayStart, rayEnd, collisionTime, surfaceNormal, typeNumber);
 }
 
 
 // Format is a passthrough to polygonLineIntersect().  Will be true for most items, false for walls in editor.
 DatabaseObject *GridDatabase::findObjectLOS(U32 typeMask, U32 stateIndex, bool format,
                                             const Point &rayStart, const Point &rayEnd, 
-                                            float &collisionTime, Point &surfaceNormal)
+                                            float &collisionTime, Point &surfaceNormal, U8 typeNumber)
 {
    Rect queryRect(rayStart, rayEnd);
 
@@ -182,7 +182,7 @@ DatabaseObject *GridDatabase::findObjectLOS(U32 typeMask, U32 stateIndex, bool f
 
    fillVector.clear();
 
-   findObjects(typeMask, fillVector, queryRect);
+   findObjects(typeMask, fillVector, queryRect, typeNumber);
 
    Point collisionPoint;
 

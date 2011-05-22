@@ -83,6 +83,7 @@ GameObject::GameObject()
    mTeam = -1;
    /*mLastQueryId = 0;*/
    mObjectTypeMask = UnknownType;
+   mObjectTypeNumber = 0;
    mDisableCollisionCount = 0;
    mCreationTime = 0;
 }
