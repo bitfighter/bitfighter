@@ -27,7 +27,9 @@
 #include "../glut/glutInclude.h"
 #include "gameObjectRender.h"    // for glColor def... shoud be moved!
 
-extern void glColor(const Color &c, float alpha = 1.0);
+namespace Zap
+{
+
 
 void AbstractInstructionsUserInterface::renderConsoleCommands(const char *activationCommand, ControlStringsEditor *cmdList)
 {
@@ -82,4 +84,6 @@ void AbstractInstructionsUserInterface::renderConsoleCommands(const char *activa
       }
       ypos += cmdSize + cmdGap;
    }
+}
+
 }

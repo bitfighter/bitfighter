@@ -40,7 +40,6 @@
 #include <string>
 
 using namespace std;
-using namespace Zap;
 
 
 namespace Zap

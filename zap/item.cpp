@@ -85,14 +85,14 @@ static const Color INSTRUCTION_TEXTCOLOR(1,1,1);      // TODO: Put in editor
  // Constructor
 EditorPointObject::EditorPointObject(GameObjectType objectType) : EditorObject(objectType) 
 { 
-   mGeometry = shared_ptr<Geometry>(new PointGeometry); 
+   mGeometry = boost::shared_ptr<Geometry>(new PointGeometry); 
 }     
 
 
 // Copy constructor -- make sure each copy gets its own geometry object
 EditorPointObject::EditorPointObject(const EditorPointObject &epo)
 {
-   mGeometry = shared_ptr<Geometry>(new PointGeometry);  
+   mGeometry = boost::shared_ptr<Geometry>(new PointGeometry);  
 }
 
 

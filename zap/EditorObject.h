@@ -27,10 +27,13 @@
 #ifndef _EDITOROBJECT_H_
 #define _EDITOROBJECT_H_
 
+#include "boost/smart_ptr/shared_ptr.hpp"
+
 #include "gameObject.h"          // We inherit from this -- for BfObject, for now
 
 #include "Point.h"
 #include "tnlVector.h"
+
 
 using namespace std;
 using namespace TNL;
@@ -142,7 +145,7 @@ private:
 
 
 protected:
-   shared_ptr<Geometry> mGeometry;
+   boost::shared_ptr<Geometry> mGeometry;
 
    bool mDockItem;      // True if this item lives on the dock
    bool mSelected;      // True if item is selected
@@ -171,7 +174,6 @@ public:
       mAnyVertsSelected = false; 
       mIsBeingEdited = false;
       mSerialNumber = mNextSerialNumber++;
-      mGeometry = NULL;
    }
 
    virtual ~EditorObject() { };     // Provide virtual destructor
