@@ -50,7 +50,7 @@ EditorAttributeMenuUI *SpeedZone::mAttributeMenuUI = NULL;
 
 
 // Constructor
-SpeedZone::SpeedZone()
+SpeedZone::SpeedZone() : SimpleLine(SpeedZoneType)
 {
    mNetFlags.set(Ghostable);
    mObjectTypeMask = SpeedZoneType | CommandMapVisType;
@@ -75,12 +75,13 @@ void SpeedZone::preparePoints()
    Game *game = getGame();
 
    TNLAssert(game, "game should not be null here!");
-   generatePoints(pos, dir, 1, mPolyBounds);
+   generatePoints(getVert(0), getVert(1), 1, mPolyBounds);
 
    computeExtent();
 }
 
 
+// static method
 void SpeedZone::generatePoints(const Point &pos, const Point &dir, F32 gridSize, Vector<Point> &points)
 {
    const S32 inset = 3;
@@ -131,7 +132,7 @@ void SpeedZone::renderEditorItem()
 
 void SpeedZone::onGeomChanged()   
 {  
-   generatePoints(pos, dir, 1, mPolyBounds); 
+   generatePoints(getVert(0), getVert(1), 1, mPolyBounds); 
 }
 
 
@@ -209,6 +210,8 @@ bool SpeedZone::processArguments(S32 argc2, const char **argv2)
    if(argc < 4)      // Need two points at a minimum, with an optional speed item
       return false;
 
+   Point pos, dir;
+
    pos.read(argv);
    pos *= getGame()->getGridSize();
 
@@ -219,6 +222,11 @@ bool SpeedZone::processArguments(S32 argc2, const char **argv2)
    Point offset(dir - pos);
    offset.normalize();
    dir = Point(pos + offset * height);
+
+   // Save the points we read into our geometry
+   setVert(pos, 0);
+   setVert(dir, 1);
+
 
    if(argc >= 5)
       mSpeed = max(minSpeed, min(maxSpeed, (U16)(atoi(argv[4]))));
@@ -234,9 +242,10 @@ string SpeedZone::toString()
 {
    F32 gs = getGame()->getGridSize();
 
-   char outString[LevelLoader::MAX_LEVEL_LINE_LENGTH];
-   dSprintf(outString, sizeof(outString), "%s %g %g %g %g %d", getClassName(), pos.x / gs, pos.y / gs, dir.x /gs, dir.y /gs, mSpeed);
-   return outString;
+   Point pos = getVert(0) / gs;
+   Point dir = getVert(1) / gs;
+
+   return string(getClassName()) + " " + pos.toString() + " " + dir.toString() + " " + itos(mSpeed);
 }
 
 
@@ -291,8 +300,11 @@ void SpeedZone::collided(MoveObject *s, U32 stateIndex)
 {
    MoveObject::MoveState *moveState = &s->mMoveState[stateIndex];
 
-   Point impulse = (dir - pos);
-   impulse.normalize(mSpeed);
+   Point pos = getVert(0);
+   Point dir = getVert(1);
+
+   Point impulse = (dir - pos);           // Gives us direction
+   impulse.normalize(mSpeed);             // Gives us the magnitude of speed
    Point shipNormal = moveState->vel;
    shipNormal.normalize(mSpeed);
    F32 angleSpeed = mSpeed * 0.5f;
@@ -351,12 +363,16 @@ void SpeedZone::idle(GameObject::IdleCallPath path)
 {
    if(mRotateSpeed != 0)
    {
-      dir -= pos;
+      Point dir = getVert(1);
+
+      dir -= getVert(0);
       F32 angle = dir.ATAN2();
       angle += mRotateSpeed * mCurrentMove.time * 0.001;
       dir.setPolar(1, angle);
-      dir += pos;
+      dir += getVert(0);
       setMaskBits(InitMask);
+
+      setVert(dir, 1);
 
       preparePoints();     // Avoids "off center" problem
    }
@@ -367,6 +383,9 @@ U32 SpeedZone::packUpdate(GhostConnection *connection, U32 updateMask, BitStream
 {
    if(stream->writeFlag(updateMask & InitMask))    
    {
+      Point pos = getVert(0);
+      Point dir = getVert(1);
+
       stream->write(pos.x);
       stream->write(pos.y);
 
@@ -385,6 +404,8 @@ void SpeedZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    if(stream->readFlag())     // InitMask
    {
+      Point pos, dir;
+
       mUnpackInit++;
       stream->read(&pos.x);
       stream->read(&pos.y);
@@ -392,12 +413,15 @@ void SpeedZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
       stream->read(&dir.x);
       stream->read(&dir.y);
 
+      setVert(pos, 0);
+      setVert(dir, 1);
+
       mSpeed = stream->readInt(16);
       mSnapLocation = stream->readFlag();
    }
 
    else 
-      SoundSystem::playSoundEffect(SFXGoFastOutside, pos, pos);
+      SoundSystem::playSoundEffect(SFXGoFastOutside, getVert(0), getVert(0));
 }
 
 };

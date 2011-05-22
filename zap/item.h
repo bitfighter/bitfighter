@@ -140,10 +140,9 @@ public:
    EditorPointObject(GameObjectType objectType = UnknownType);       // Constructor
    EditorPointObject(const EditorPointObject &epo);                  // Copy constructor
 
-   GeomType getGeomType() { return geomPoint; }
 
    // TODO: Push these up to EditorObject
-
+   GeomType getGeomType() { return mGeometry->getGeomType(); }
    virtual Point getVert(S32 index) { return mGeometry->getVert(index); }
    virtual void setVert(const Point &point, S32 index) { return mGeometry->setVert(point, index); }
 

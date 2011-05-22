@@ -83,9 +83,6 @@ public:
    F32 mRotateSpeed;
    U32 mUnpackInit;  // Some form of counter, to know that it is a rotating speed zone.
 
-   Point pos;
-   Point dir;
-
    static void generatePoints(const Point &pos, const Point &dir, F32 gridSize, Vector<Point> &points);
    void render();
    S32 getRenderSortValue();
@@ -110,9 +107,6 @@ public:
    Color getEditorRenderColor() { return Color(1,0,0); }
 
    void renderEditorItem();
-
-   Point getVert(S32 index) { return index == 0 ? pos : dir; }
-   void setVert(const Point &point, S32 index) { if(index == 0) pos = point; else dir = point; }
 
    void onAttrsChanging() { /* Do nothing */ }
    void onGeomChanging() { onGeomChanged(); }

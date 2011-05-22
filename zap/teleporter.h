@@ -109,9 +109,6 @@ public:
 
    void renderEditorItem();
 
-   Point getVert(S32 index) { return index == 0 ? mPos : mDest; }
-   void setVert(const Point &point, S32 index) { if(index == 0) mPos = point; else mDest = point; }
-
    void onAttrsChanging() { /* Do nothing */ }
    void onGeomChanging()  { /* Do nothing */ }
    void onGeomChanged()   { /* Do nothing */ }

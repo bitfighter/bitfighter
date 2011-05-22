@@ -30,11 +30,20 @@
 namespace Zap
 {
 
-// Constructor
-SimpleLine::SimpleLine()
+
+ // Constructor
+SimpleLine::SimpleLine(GameObjectType objectType) : EditorObject(objectType)
+{ 
+   mGeometry = shared_ptr<Geometry>(new SimpleLineGeometry); 
+}     
+
+
+// Copy constructor -- make sure each copy gets its own geometry object
+SimpleLine::SimpleLine(const SimpleLine &simpleLine)
 {
-   // Do nothing
+   mGeometry = shared_ptr<Geometry>(new SimpleLineGeometry);  
 }
+
 
 
 void SimpleLine::renderDock()

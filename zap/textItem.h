@@ -73,7 +73,7 @@ public:
    TextItem();    // Constructor
    ~TextItem();   // Destructor
 
-   static Vector<Point> generatePoints(Point pos, Point dir);
+   //static Vector<Point> generatePoints(Point pos, Point dir);
    void render();
    S32 getRenderSortValue();
 
@@ -83,9 +83,6 @@ public:
 
    void onAddedToGame(Game *theGame);
    void computeExtent();                                         // Bounding box for quick collision-possibility elimination
-
-   Vector<Point> getVerts() { Vector<Point> p; p.push_back(mPos); p.push_back(mDir); return p; }      // TODO: Can we get rid of this somehow?
-
 
    EditorAttributeMenuUI *getAttributeMenu();
 
@@ -105,9 +102,6 @@ public:
 
    string getText() { return mText; }
    void setText(string text) { mText = text; }
-
-   Point getVert(S32 index) { return index == 0 ? mPos : mDir; }
-   void setVert(const Point &point, S32 index) { if(index == 0) mPos = point; else mDir = point; }
 
    // Provide a static hook into the object currently being edited with the attrubute editor for callback purposes
    static EditorObject *getAttributeEditorObject();

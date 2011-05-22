@@ -77,6 +77,7 @@ public:
    virtual void addVertFront(Point vert) { TNLAssert(false, "Must implement!"); }
    virtual void deleteVert(S32 vertIndex) { TNLAssert(false, "Must implement!"); }
    virtual void insertVert(Point vertex, S32 vertIndex) { TNLAssert(false, "Must implement!"); }
+   virtual GeomType getGeomType() = 0;
 };
 
 
@@ -86,6 +87,7 @@ private:
    Point mPos;
 
 public:
+   GeomType getGeomType() { return geomPoint; }
    Point getVert(S32 index) { return mPos; }
    void setVert(const Point &pos, S32 index) { mPos = pos; }
    S32 getVertCount() { return 1; }
@@ -96,6 +98,29 @@ public:
    void insertVert(Point vertex, S32 vertIndex)  { /* Do nothing */ }
 
    ~PointGeometry() { 
+      //TNLAssert(false, "deleting!");
+   }
+};
+
+
+class SimpleLineGeometry : public Geometry
+{
+private:
+   Point mFromPos;
+   Point mToPos;
+
+public:
+   GeomType getGeomType() { return geomSimpleLine; }
+   Point getVert(S32 index) { return (index == 1) ? mToPos : mFromPos; }
+   void setVert(const Point &pos, S32 index) { if(index == 1) mToPos = pos; else mFromPos = pos; }
+   S32 getVertCount() { return 2; }
+   void clearVerts() { /* Do nothing */ }
+   void addVert(const Point &point)  { /* Do nothing */ }
+   void addVertFront(Point vert)  { /* Do nothing */ }
+   void deleteVert(S32 vertIndex)  { /* Do nothing */ }
+   void insertVert(Point vertex, S32 vertIndex)  { /* Do nothing */ }
+
+   ~SimpleLineGeometry() { 
       //TNLAssert(false, "deleting!");
    }
 };
@@ -232,7 +257,7 @@ public:
 
    //////
    // Vertex management functions
-   virtual Vector<Point> getVerts();    // Return basic geometry points for object
+   virtual Vector<Point> getVerts();    // Return basic geometry points for object  TODO: barely used... can we get rid of this?
    virtual Point getVert(S32 index) = 0;
    virtual S32 getVertCount() = 0;
    virtual void clearVerts() = 0;
@@ -261,10 +286,6 @@ public:
    virtual void onAttrsChanged() { /* Do nothing */ };   // Attrs changed
 
 
-   ///
-   Point mDest;      // for teleporter
-   Point dir;        // same thing, for goFast
-   ///
    /////
    // Geometry operations  -- can we provide standard implementations of these?
    void rotateAboutPoint(const Point &origin, F32 angle) { };

@@ -89,7 +89,7 @@ EditorPointObject::EditorPointObject(GameObjectType objectType) : EditorObject(o
 }     
 
 
-// Copy constructor -- make sure each copy gets a new geometry object
+// Copy constructor -- make sure each copy gets its own geometry object
 EditorPointObject::EditorPointObject(const EditorPointObject &epo)
 {
    mGeometry = shared_ptr<Geometry>(new PointGeometry);  

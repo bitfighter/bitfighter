@@ -46,10 +46,10 @@ EditorAttributeMenuUI *TextItem::mAttributeMenuUI = NULL;
 
 
 // Constructor
-TextItem::TextItem()
+TextItem::TextItem() : SimpleLine(TextItemType)
 {
    mNetFlags.set(Ghostable);
-   mObjectTypeMask = TextItemType | CommandMapVisType;     // Or not?
+   mObjectTypeMask = TextItemType | CommandMapVisType;     
 
    // Some default values
    mSize = 20;

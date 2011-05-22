@@ -48,12 +48,12 @@ protected:
    virtual F32 getEditorRadius(F32 currentScale) { return 7; }     // Size of object (or in this case vertex) in editor
 
 public:
-   SimpleLine();           // Constructor
+   SimpleLine(GameObjectType objectType = UnknownType);       // Constructor
+   SimpleLine(const SimpleLine &simpleLine);                  // Copy constructor
+
 
    // Some properties about the item that will be needed in the editor
-   GeomType getGeomType() { return geomSimpleLine; }
 
-   virtual Point getVert(S32 index) = 0;
    virtual const char *getOnDockName() = 0;
 
    void renderDock();     // Render item on the dock
@@ -61,13 +61,19 @@ public:
    virtual void renderEditorItem() = 0;
    void renderItemText(const char *text, S32 offset, F32 currentScale);
 
-   virtual S32 getVertCount() { return 2; }
 
-   void clearVerts() { /* Do nothing */ }
-   void addVert(const Point &point)  { /* Do nothing */ }
-   void addVertFront(Point vert)  { /* Do nothing */ }
-   void deleteVert(S32 vertIndex)  { /* Do nothing */ }
-   void insertVert(Point vertex, S32 vertIndex)  { /* Do nothing */ }
+   // TODO: Push these up to EditorObject
+   GeomType getGeomType() { return mGeometry->getGeomType(); }
+   Point getVert(S32 index) { return mGeometry->getVert(index); }
+   void setVert(const Point &pos, S32 index) { mGeometry->setVert(pos, index); }
+
+   S32 getVertCount() { return mGeometry->getVertCount(); }
+   void clearVerts() { mGeometry->clearVerts(); }
+   void addVert(const Point &point)  { mGeometry->addVert(point); }
+   void addVertFront(Point vert)  { mGeometry->addVertFront(vert); }
+   void deleteVert(S32 vertIndex)  { mGeometry->deleteVert(vertIndex); }
+   void insertVert(Point vertex, S32 vertIndex)  { mGeometry->insertVert(vertex, vertIndex); }
+   
 
    void addToDock(Game *game, const Point &point);
 };
