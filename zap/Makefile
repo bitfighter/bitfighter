@@ -19,7 +19,7 @@
 
 OPTIMIZE=-O2
 DEBUG=-g
-INCLUDES=-I../tnl -I../glut -I../openal -I../Triangle -I../recast -I../clipper -I../alure -I../libspeex
+INCLUDES=-I../tnl -I../glut -I../openal -I../Triangle -I../recast -I../clipper -I../alure -I../libspeex -I../boost
 CC=gcc $(DEBUG) $(INCLUDES) -DTNL_ENABLE_LOGGING -W $(OPTIMIZE)
 THREADLIB= -lpthread
 GLUT=-lGL -lGLU -lglut

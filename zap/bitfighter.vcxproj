@@ -60,7 +60,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\tnl;..\libtomcrypt;..\glut;..\openal;..\libspeex;..\alure;..\win_include_do_not_distribute</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\tnl;..\boost;..\libtomcrypt;..\glut;..\openal;..\libspeex;..\alure;..\win_include_do_not_distribute</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PreprocessToFile>false</PreprocessToFile>
@@ -99,7 +99,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>..\tnl;..\libtomcrypt;..\glut;..\openal;..\libspeex;..\alure</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\tnl;..\boost;..\libtomcrypt;..\glut;..\openal;..\libspeex;..\alure</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
       <MinimalRebuild>true</MinimalRebuild>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
