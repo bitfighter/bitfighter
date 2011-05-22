@@ -33,6 +33,7 @@
 #include "tnlVector.h"
 
 using namespace std;
+using namespace TNL;
 
 namespace Zap
 {
@@ -61,6 +62,44 @@ enum ShowMode
    NavZoneMode,
    ShowModesCount
 };
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+class Geometry
+{
+public:
+   virtual Point getVert(S32 index) { TNLAssert(false, "Must implement!"); return Point();}
+   virtual void setVert(const Point &pos, S32 index) { TNLAssert(false, "Must implement!"); }
+   virtual S32 getVertCount() { TNLAssert(false, "Must implement!"); return 0; }
+   virtual void clearVerts()  { TNLAssert(false, "Must implement!"); }
+   virtual void addVert(const Point &point) { TNLAssert(false, "Must implement!"); }
+   virtual void addVertFront(Point vert) { TNLAssert(false, "Must implement!"); }
+   virtual void deleteVert(S32 vertIndex) { TNLAssert(false, "Must implement!"); }
+   virtual void insertVert(Point vertex, S32 vertIndex) { TNLAssert(false, "Must implement!"); }
+};
+
+
+class PointGeometry : public Geometry
+{
+private:
+   Point mPos;
+
+public:
+   Point getVert(S32 index) { return mPos; }
+   void setVert(const Point &pos, S32 index) { mPos = pos; }
+   S32 getVertCount() { return 1; }
+   void clearVerts() { /* Do nothing */ }
+   void addVert(const Point &point)  { /* Do nothing */ }
+   void addVertFront(Point vert)  { /* Do nothing */ }
+   void deleteVert(S32 vertIndex)  { /* Do nothing */ }
+   void insertVert(Point vertex, S32 vertIndex)  { /* Do nothing */ }
+
+   ~PointGeometry() { 
+      //TNLAssert(false, "deleting!");
+   }
+};
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -69,17 +108,17 @@ class WallSegment;
 
 class EditorObject : virtual public BfObject   // Interface class  -- All editor objects need to implement this
 {
-private:
-   //Vector<Point> mPoints;     // TODO: GET RID OF THIS!!!
-   //Vector<Point> mPolyFill;   // Polygons only
-   //Point mCentroid;
 
+private:
    S32 mVertexLitUp;
 
    bool mIsBeingEdited;
    static S32 mNextSerialNumber;
 
+
 protected:
+   shared_ptr<Geometry> mGeometry;
+
    bool mDockItem;      // True if this item lives on the dock
    bool mSelected;      // True if item is selected
    bool mLitUp;         // True if user is hovering over the item and it's "lit up"
@@ -107,7 +146,9 @@ public:
       mAnyVertsSelected = false; 
       mIsBeingEdited = false;
       mSerialNumber = mNextSerialNumber++;
+      mGeometry = NULL;
    }
+
    virtual ~EditorObject() { };     // Provide virtual destructor
 
    EditorObject *newCopy();         // Copies object

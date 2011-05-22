@@ -782,8 +782,8 @@ void Mine::renderEditor(F32 currentScale)
 void Mine::renderDock()
 {
    glColor3f(.7, .7, .7);
-   drawCircle(getActualPos(), 9);
-   drawLetter('M', getActualPos(), Color(.7), 1);
+   drawCircle(getVert(0), 9);
+   drawLetter('M', getVert(0), Color(.7), 1);
 }
 
 
@@ -960,8 +960,8 @@ void SpyBug::renderEditor(F32 currentScale)
 void SpyBug::renderDock()
 {
    glColor3f(.7, .7, .7);
-   drawCircle(getActualPos(), 9);
-   drawLetter('S', getActualPos(), Color(.7), 1);
+   drawCircle(getVert(0), 9);
+   drawLetter('S', getVert(0), Color(.7), 1);
 }
 
 

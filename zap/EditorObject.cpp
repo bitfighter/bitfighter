@@ -963,6 +963,8 @@ EditorObject *EditorObject::newCopy()
    if(newObject)
       newObject->setGame(NULL);         // mGame pointer will have been copied, but needs to be cleared before we can add this to the game
 
+   newObject->initializeEditor(getGridSize());
+
    return newObject;
 }
 

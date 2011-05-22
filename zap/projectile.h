@@ -237,9 +237,6 @@ public:
 
    /////
    // Editor methods
-   Point getVert(S32 index) { return getActualPos(); }
-   void setVert(const Point &point, S32 index) { setActualPos(point); }
-
    void renderEditor(F32 currentScale);
    void renderDock();
 
@@ -303,9 +300,6 @@ public:
 
    /////
    // Editor methods
-   Point getVert(S32 index) { return getActualPos(); }
-   void setVert(const Point &point, S32 index) { setActualPos(point); }
-
    void renderEditor(F32 currentScale);
    void renderDock();
 

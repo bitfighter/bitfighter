@@ -137,19 +137,22 @@ class EditorPointObject : public EditorObject
    typedef EditorObject Parent;
 
 public:
-   EditorPointObject(GameObjectType objectType = UnknownType) : EditorObject(objectType) { /* Do nothing */ };      // Constructor
+   EditorPointObject(GameObjectType objectType = UnknownType);       // Constructor
+   EditorPointObject(const EditorPointObject &epo);                  // Copy constructor
 
    GeomType getGeomType() { return geomPoint; }
 
-   //virtual Point getVert(S32 index) { return getActualPos(); }
-   //virtual void setVert(const Point &point, S32 index) { setActualPos(point); }
+   // TODO: Push these up to EditorObject
 
-   S32 getVertCount() { return 1; }
-   void clearVerts() { /* Do nothing */ }
-   void addVert(const Point &point)  { /* Do nothing */ }
-   void addVertFront(Point vert)  { /* Do nothing */ }
-   void deleteVert(S32 vertIndex)  { /* Do nothing */ }
-   void insertVert(Point vertex, S32 vertIndex)  { /* Do nothing */ }
+   virtual Point getVert(S32 index) { return mGeometry->getVert(index); }
+   virtual void setVert(const Point &point, S32 index) { return mGeometry->setVert(point, index); }
+
+   S32 getVertCount() { return mGeometry->getVertCount(); }
+   void clearVerts() { mGeometry->clearVerts(); }
+   void addVert(const Point &point)  { mGeometry->addVert(point); }
+   void addVertFront(Point vert)  { mGeometry->addVertFront(vert); }
+   void deleteVert(S32 vertIndex)  { mGeometry->deleteVert(vertIndex); }
+   void insertVert(Point vertex, S32 vertIndex)  { mGeometry->insertVert(vertex, vertIndex); }
 
    virtual void renderItemText(const char *text, S32 offset, F32 currentScale);
    void addToDock(Game *game, const Point &point);
@@ -173,9 +176,6 @@ public:
 
    // Some properties about the item that will be needed in the editor
    string toString();
-
-   virtual Point getVert(S32 index) { return getActualPos(); }
-   virtual void setVert(const Point &point, S32 index) { setActualPos(point); }
 
    virtual void renderEditor(F32 currentScale);
    virtual F32 getEditorRadius(F32 currentScale);

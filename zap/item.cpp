@@ -81,7 +81,19 @@ static const S32 INSTRUCTION_TEXTSIZE = 9;
 static const S32 INSTRUCTION_TEXTGAP = 3;
 static const Color INSTRUCTION_TEXTCOLOR(1,1,1);      // TODO: Put in editor
 
-//extern EditorUserInterface gEditorUserInterface;     // TODO: and this!
+
+ // Constructor
+EditorPointObject::EditorPointObject(GameObjectType objectType) : EditorObject(objectType) 
+{ 
+   mGeometry = shared_ptr<Geometry>(new PointGeometry); 
+}     
+
+
+// Copy constructor -- make sure each copy gets a new geometry object
+EditorPointObject::EditorPointObject(const EditorPointObject &epo)
+{
+   mGeometry = shared_ptr<Geometry>(new PointGeometry);  
+}
 
 
 // Offset: negative below the item, positive above
@@ -138,7 +150,7 @@ void EditorItem::renderEditor(F32 currentScale)
    glPushMatrix();
       glScalef(scaleFact, scaleFact, 1);
 
-      renderItem(getActualPos() / scaleFact);                    
+      renderItem(getVert(0) / scaleFact);                    
    glPopMatrix();
 }
 

@@ -72,7 +72,7 @@ void RepairItem::renderItem(Point pos)
 
 void RepairItem::renderDock()
 {
-   renderRepairItem(getActualPos(), true, 0, 1);
+   renderRepairItem(getVert(0), true, 0, 1);
 }
 
 
@@ -367,7 +367,7 @@ void Asteroid::renderItem(Point pos)
 
 void Asteroid::renderDock()
 {
-   renderAsteroid(getActualPos(), 2, .1);
+   renderAsteroid(getVert(0), 2, .1);
 }
 
 
@@ -687,7 +687,7 @@ void TestItem::renderItem(Point pos)
 
 void TestItem::renderDock()
 {
-   renderTestItem(getActualPos(), 8);
+   renderTestItem(getVert(0), 8);
 }
 
 
@@ -762,7 +762,7 @@ void ResourceItem::renderItem(Point pos)
 
 void ResourceItem::renderDock()
 {
-   renderResourceItem(getActualPos(), .4, 0, 1);
+   renderResourceItem(getVert(0), .4, 0, 1);
 }
 
 

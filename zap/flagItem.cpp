@@ -120,7 +120,7 @@ bool FlagItem::processArguments(S32 argc, const char **argv)
 
 string FlagItem::toString()
 {
-   Point pos = getActualPos() / getGame()->getGridSize();
+   Point pos = getVert(0) / getGame()->getGridSize();
    char outString[LevelLoader::MAX_LEVEL_LINE_LENGTH];
    dSprintf(outString, sizeof(outString), "%s %d %g %g", Object::getClassName(), mTeam, pos.x, pos.y);
    return outString;
@@ -228,8 +228,9 @@ void FlagItem::renderItem(Point pos)
 
 void FlagItem::renderDock()
 {
+   Point p = getVert(0);
    glPushMatrix();
-      glTranslatef(getActualPos().x, getActualPos().y, 0);
+      glTranslatef(p.x, p.y, 0);
       glScalef(0.6, 0.6, 1);
       renderFlag(0, 0, getGame()->getTeamColor(mTeam));
    glPopMatrix();   
