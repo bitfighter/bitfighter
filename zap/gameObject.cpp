@@ -44,31 +44,31 @@ namespace Zap
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-GridDatabase *XObject::getGridDatabase() 
+GridDatabase *BfObject::getGridDatabase() 
 { 
    return mGame ? mGame->getGridDatabase() : NULL; 
 }
 
 
-bool XObject::getCollisionPoly(Vector<Point> &polyPoints)
+bool BfObject::getCollisionPoly(Vector<Point> &polyPoints)
 {
    return false;
 }
 
 
-bool XObject::getCollisionCircle(U32 stateIndex, Point &point, float &radius)
+bool BfObject::getCollisionCircle(U32 stateIndex, Point &point, float &radius)
 {
    return false;
 }
 
 
-void XObject::render()
+void BfObject::render()
 {
    // Do nothing
 }
 
 
-void XObject::render(S32 layerIndex)
+void BfObject::render(S32 layerIndex)
 {
    if(layerIndex == 1)
       render();

@@ -306,18 +306,18 @@ Point Game::computePlayerVisArea(Ship *ship)
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-void GameGame::addToGameObjectList(XObject *xObject)
+void GameGame::addToGameObjectList(BfObject *BfObject)
 {
-   GameObject *gameObject = dynamic_cast<GameObject *>(xObject);
+   GameObject *gameObject = dynamic_cast<GameObject *>(BfObject);
 
    TNLAssert(gameObject, "invalid cast!");
 
    mGameObjects.push_back(gameObject);
 }
 
-void GameGame::removeFromGameObjectList(XObject *xObject)
+void GameGame::removeFromGameObjectList(BfObject *BfObject)
 {
-   GameObject *gameObject = dynamic_cast<GameObject *>(xObject);
+   GameObject *gameObject = dynamic_cast<GameObject *>(BfObject);
 
    TNLAssert(gameObject, "invalid cast!");
 

@@ -94,7 +94,7 @@ namespace Zap
 class MasterServerConnection;
 class GameNetInterface;
 class GameType;
-class XObject;
+class BfObject;
 class GameObject;
 class GameConnection;
 class Ship;
@@ -190,8 +190,8 @@ public:
    void addToDeleteList(GameObject *theObject, U32 delay);
 
    // Client/ServerGame and EditorGame will each keep track of objects in a slightly different manner, using the same interface
-   virtual void addToGameObjectList(XObject *theObject) = 0;
-   virtual void removeFromGameObjectList(XObject *theObject) = 0;
+   virtual void addToGameObjectList(BfObject *theObject) = 0;
+   virtual void removeFromGameObjectList(BfObject *theObject) = 0;
 
    void deleteObjects(U32 typeMask);
 
@@ -278,8 +278,8 @@ public:
    virtual ~GameGame() { /* Do nothing */ };     // Destructor
 
    // Implementations for virtual methods in Game
-   void addToGameObjectList(XObject *theObject);
-   void removeFromGameObjectList(XObject *theObject);
+   void addToGameObjectList(BfObject *theObject);
+   void removeFromGameObjectList(BfObject *theObject);
 };
  
 
@@ -483,8 +483,8 @@ public:
    void idle(U32 timeDelta) { /* Do nothing */ }
 
    // TODO: Use this to manage mItems in editor
-   void addToGameObjectList(XObject *theObject) { };
-   void removeFromGameObjectList(XObject *theObject) { };
+   void addToGameObjectList(BfObject *theObject) { };
+   void removeFromGameObjectList(BfObject *theObject) { };
 
    Color getTeamColor(S32 teamId);
 

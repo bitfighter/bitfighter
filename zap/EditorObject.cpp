@@ -296,7 +296,7 @@ void EditorObject::render(bool isScriptItem, bool showingReferenceShip, ShowMode
    {
       glPushMatrix();
          setLevelToCanvasCoordConversion();
-         XObject::render();
+         BfObject::render();
       glPopMatrix();
    }
    else

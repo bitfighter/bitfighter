@@ -27,7 +27,7 @@
 #ifndef _EDITOROBJECT_H_
 #define _EDITOROBJECT_H_
 
-#include "gameObject.h"          // We inherit from this -- for XObject, for now
+#include "gameObject.h"          // We inherit from this -- for BfObject, for now
 
 #include "Point.h"
 #include "tnlVector.h"
@@ -67,7 +67,7 @@ enum ShowMode
 class EditorAttributeMenuUI;
 class WallSegment;
 
-class EditorObject : virtual public XObject   // Interface class  -- All editor objects need to implement this
+class EditorObject : virtual public BfObject   // Interface class  -- All editor objects need to implement this
 {
 private:
    //Vector<Point> mPoints;     // TODO: GET RID OF THIS!!!

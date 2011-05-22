@@ -78,11 +78,10 @@ enum GameObjectType
    SpeedZoneType       = BIT(28),      // Only needed for finding speed zones that we may have spawned on top of
 
    DeletedType       = BIT(30),
-   CommandMapVisType = BIT(31),     // These are objects that can be seen on the commander's map
+   CommandMapVisType = BIT(31),        // These are objects that can be seen on the commander's map
 
    //////////
    // Types used exclusively in the editor -- will reuse some values from above
-   EditorWallSegmentType = BIT(3),     // MoveableType
    PolyWallType = BIT(25),             // WormType
    ShipSpawnType = BIT(13),            // BulletType
    FlagSpawnType = BIT(11),            // TurretTargetType
@@ -135,14 +134,14 @@ struct DamageInfo
 ////////////////////////////////////////
 
 // Interface class that feeds GameObject and EditorObject -- these things are common to in-game and editor instances of an object
-class XObject : public DatabaseObject
+class BfObject : public DatabaseObject
 {
 protected:
    Game *mGame;
    S32 mTeam;
 
 public:
-   virtual ~XObject() { };     // Provide virtual destructor
+   virtual ~BfObject() { };     // Provide virtual destructor
 
    S32 getTeam() { return mTeam; }
    void setTeam(S32 team) { mTeam = team; }    
@@ -168,7 +167,7 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class GameObject : public virtual XObject, public NetObject
+class GameObject : public virtual BfObject, public NetObject
 {
    typedef NetObject Parent;
 
