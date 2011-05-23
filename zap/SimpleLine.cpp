@@ -34,7 +34,7 @@ namespace Zap
  // Constructor
 SimpleLine::SimpleLine(GameObjectType objectType) : EditorObject(objectType)
 { 
-	mGeometry = boost::shared_ptr<Geometry>(new SimpleLineGeometry); 
+   mGeometry = boost::shared_ptr<Geometry>(new SimpleLineGeometry); 
 }     
 
 

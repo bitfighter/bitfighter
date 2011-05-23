@@ -240,9 +240,9 @@ public:
    F32 getRating() { return 0; }    // TODO: Fix this
    S32 getScore() { return 0; }     // TODO: Fix this
 
-   void findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector, const Rect &extents);
+   void findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector, const Rect &extents, U8 typeNumber = U8_MAX);
 
-   GameObject *findObjectLOS(U32 typeMask, U32 stateIndex, Point rayStart, Point rayEnd, float &collisionTime, Point &collisionNormal);
+   GameObject *findObjectLOS(U32 typeMask, U32 stateIndex, Point rayStart, Point rayEnd, float &collisionTime, Point &collisionNormal, U8 typeNumber = U8_MAX);
 
    bool isControlled() { return mControllingClient.isValid(); }
 

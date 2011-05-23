@@ -271,24 +271,24 @@ S32 GameObject::radiusDamage(Point pos, S32 innerRad, S32 outerRad, U32 typemask
    return shipsHit;
 }
 
-void GameObject::findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector, const Rect &ext)
+void GameObject::findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector, const Rect &ext, U8 typeNumber)
 {
    GridDatabase *gridDB = getGridDatabase();
    if(!gridDB)
       return;
-   gridDB->findObjects(typeMask, fillVector, ext);
+   gridDB->findObjects(typeMask, fillVector, ext, typeNumber);
 }
 
 
 GameObject *GameObject::findObjectLOS(U32 typeMask, U32 stateIndex, Point rayStart, Point rayEnd, 
-                                      float &collisionTime, Point &collisionNormal)
+                                      float &collisionTime, Point &collisionNormal, U8 typeNumber)
 {
    GridDatabase *gridDB = getGridDatabase();
    if(!gridDB)
       return NULL;
 
    return dynamic_cast<GameObject *>(gridDB->
-                        findObjectLOS(typeMask, stateIndex, rayStart, rayEnd, collisionTime, collisionNormal));
+                        findObjectLOS(typeMask, stateIndex, rayStart, rayEnd, collisionTime, collisionNormal, typeNumber));
 }
 
 
