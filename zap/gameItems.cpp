@@ -88,6 +88,7 @@ const char RepairItem::className[] = "RepairItem";      // Class name as it appe
 RepairItem::RepairItem(lua_State *L)
 {
    mObjectTypeMask |= RepairItemType;
+   mObjectTypeNumber = RepairItemTypeNumber;
 }
 
 
@@ -151,6 +152,7 @@ const char EnergyItem::className[] = "EnergyItem";      // Class name as it appe
 EnergyItem::EnergyItem(lua_State *L)
 {
    mObjectTypeMask |= EnergyItemType;
+   mObjectTypeNumber = EnergyItemTypeNumber;
 }
 
 
@@ -340,6 +342,7 @@ Asteroid::Asteroid() : EditorItem(Point(0,0), true, ASTEROID_RADIUS, 4)
 {
    mNetFlags.set(Ghostable);
    mObjectTypeMask |= AsteroidType;
+   mObjectTypeNumber = AsteroidTypeNumber;
    mSizeIndex = 0;     // Higher = smaller
    hasExploded = false;
    mDesign = TNL::Random::readI(0, AsteroidDesigns - 1);
@@ -559,6 +562,7 @@ Worm::Worm() : Item(Point(0,0), true, WORM_RADIUS, 1)
 {
    mNetFlags.set(Ghostable);
    mObjectTypeMask |= WormType;
+   mObjectTypeNumber = WormTypeNumber;
    hasExploded = false;
 
    // Give the worm some intial motion in a random direction
@@ -676,6 +680,7 @@ TestItem::TestItem() : EditorItem(Point(0,0), true, TEST_ITEM_RADIUS, 4)
 {
    mNetFlags.set(Ghostable);
    mObjectTypeMask |= TestItemType | TurretTargetType;
+   mObjectTypeNumber = TestItemTypeNumber;
 }
 
 
@@ -751,6 +756,7 @@ ResourceItem::ResourceItem() : EditorItem(Point(0,0), true, RESOURCE_ITEM_RADIUS
 {
    mNetFlags.set(Ghostable);
    mObjectTypeMask |= ResourceItemType | TurretTargetType;
+   mObjectTypeNumber = ResourceItemTypeNumber;
 }
 
 

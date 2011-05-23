@@ -81,33 +81,33 @@ static S32 keyCodeToButtonIndex(KeyCode keyCode)
    switch(keyCode)
    {
       case BUTTON_1:
-	      return 0;
+         return 0;
       case BUTTON_2:
-	      return 1;
+         return 1;
       case BUTTON_3:
-	      return 2;
+         return 2;
       case BUTTON_4:
-	      return 3;
+         return 3;
       case BUTTON_5:
-	      return 4;
+         return 4;
       case BUTTON_6:
-	      return 5;
+         return 5;
       case BUTTON_7:
-	      return 6;
+         return 6;
       case BUTTON_8:
-	      return 7;
+         return 7;
       case BUTTON_START:
-	      return 8;
+         return 8;
       case BUTTON_BACK:
-	      return 9;
+         return 9;
       case BUTTON_DPAD_UP:
-	      return 10;
+         return 10;
       case BUTTON_DPAD_DOWN:
-	      return 11;
+         return 11;
       case BUTTON_DPAD_LEFT:
-	      return 12;
+         return 12;
       case BUTTON_DPAD_RIGHT:
-	      return 13;
+         return 13;
       default:
          return 9999;
    }

@@ -109,7 +109,7 @@ LuaRobot::LuaRobot(lua_State *L) : LuaShip((Robot *)lua_touserdata(L, 1))
    setEnum(TurretTargetType);
    setEnum(SlipZoneType);
    setEnum(NexusType);
-   setEnum(BotNavMeshZoneType);
+   //setEnum(BotNavMeshZoneType);
    setEnum(RobotType);
    setEnum(TeleportType);
    setEnum(GoalZoneType);
@@ -1051,7 +1051,7 @@ U16 LuaRobot::findClosestZone(const Point &point)
    Vector<DatabaseObject*> objects;
    Rect rect = Rect(point.x + searchRadius, point.y + searchRadius, point.x - searchRadius, point.y - searchRadius);
 
-   gServerGame->mDatabaseForBotZones.findObjects(BotNavMeshZoneType, objects, rect);
+   gServerGame->mDatabaseForBotZones.findObjects(0, objects, rect, BotNavMeshZoneTypeNumber);
 
    for(S32 i = 0; i < objects.size(); i++)
    {
@@ -1073,8 +1073,8 @@ U16 LuaRobot::findClosestZone(const Point &point)
       F32 collisionTimeIgnore;
       Point surfaceNormalIgnore;
 
-      DatabaseObject* object = gServerGame->mDatabaseForBotZones.findObjectLOS(BotNavMeshZoneType,
-            MoveObject::ActualState, point, extentsCenter, collisionTimeIgnore, surfaceNormalIgnore);
+      DatabaseObject* object = gServerGame->mDatabaseForBotZones.findObjectLOS(0,
+            MoveObject::ActualState, point, extentsCenter, collisionTimeIgnore, surfaceNormalIgnore, BotNavMeshZoneTypeNumber);
 
       BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(object);
 
@@ -1406,6 +1406,7 @@ Robot::Robot(StringTableEntry robotName, S32 team, Point pt, F32 mass) : Ship(ro
 {
    gameConnectionInitalized = false;
    mObjectTypeMask = RobotType | MoveableType | CommandMapVisType | TurretTargetType;     // Override typemask set by ship
+   mObjectTypeNumber = RobotTypeNumber;
 
    L = NULL;
    mCurrentZone = U16_MAX;

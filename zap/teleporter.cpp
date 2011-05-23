@@ -46,6 +46,7 @@ static Vector<DatabaseObject *> foundObjects;
 Teleporter::Teleporter() : SimpleLine(TeleportType)
 {
    mObjectTypeMask = TeleportType | CommandMapVisType;
+   mObjectTypeNumber = TeleporterTypeNumber;
    mNetFlags.set(Ghostable);
 
    timeout = 0;

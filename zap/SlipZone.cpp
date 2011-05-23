@@ -44,6 +44,7 @@ SlipZone::SlipZone()     // Constructor
    mTeam = 0;
    mNetFlags.set(Ghostable);
    mObjectTypeMask = SlipZoneType | CommandMapVisType;
+   mObjectTypeNumber = SlipZoneTypeNumber;
    slipAmount = 0.1;
 }
 

@@ -303,6 +303,7 @@ TNL_IMPLEMENT_NETOBJECT(SoccerBallItem);
 SoccerBallItem::SoccerBallItem(Point pos) : EditorItem(pos, true, SoccerBallItem::SOCCER_BALL_RADIUS, 4)
 {
    mObjectTypeMask |= CommandMapVisType | TurretTargetType | SoccerBallItemType;
+   mObjectTypeNumber = SoccerBallItemTypeNumber;
    mNetFlags.set(Ghostable);
    initialPos = pos;
    mLastPlayerTouch = NULL;
