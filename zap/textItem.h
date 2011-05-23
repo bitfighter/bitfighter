@@ -54,8 +54,6 @@ class TextItem : public SimpleLine
 
 private:
    F32 mSize;            // Text size
-   Point mPos;           // Location of text
-   Point mDir;           // Direction text is "facing"
    string mText;         // Text itself
 
    // How are this item's vertices labeled in the editor? -- these can be private

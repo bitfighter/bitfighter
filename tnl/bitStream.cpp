@@ -270,6 +270,7 @@ U32 BitStream::readInt(U8 bitCount)
    return ret;
 }
 
+
 void BitStream::writeInt(U32 val, U8 bitCount)
 {
    val = convertHostToLEndian(val);
@@ -439,6 +440,7 @@ void BitStream::writePointCompressed(const Point3F& p,F32 scale)
       write(p.z);
    }
 }
+
 
 void BitStream::readPointCompressed(Point3F* p,F32 scale)
 {

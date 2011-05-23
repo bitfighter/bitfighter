@@ -86,14 +86,14 @@ void TextItem::render()
    if( (!ship && mTeam != -1) || (ship && ship->getTeam() != mTeam && mTeam != -1) )
       return;
 
-   renderTextItem(mPos, mDir, mSize, mText, game->getGameType()->getTeamColor(mTeam));
+   renderTextItem(getVert(0), getVert(1), mSize, mText, game->getTeamColor(mTeam));
 }
 
 
 // Called by SimpleItem::renderEditor()
 void TextItem::renderEditorItem()
 {
-   renderTextItem(mPos, mDir, mSize, mText, getGame()->getTeamColor(mTeam));
+   renderTextItem(getVert(0), getVert(1), mSize, mText, getGame()->getTeamColor(mTeam));
 }
 
 
@@ -113,11 +113,16 @@ bool TextItem::processArguments(S32 argc, const char **argv)
 
    mTeam = atoi(argv[0]);
 
-   mPos.read(argv + 1);
-   mPos *= getGame()->getGridSize();
+   Point pos, dir;
 
-   mDir.read(argv + 3);
-   mDir *= getGame()->getGridSize();
+   pos.read(argv + 1);
+   pos *= getGame()->getGridSize();
+
+   dir.read(argv + 3);
+   dir *= getGame()->getGridSize();
+
+   setVert(pos, 0);
+   setVert(dir, 1);
 
    mSize = atof(argv[5]);
    mSize = max(min(mSize, MAX_TEXT_SIZE), MIN_TEXT_SIZE);      // Note that same line exists below, in recalcXXX()... combine?
@@ -127,7 +132,7 @@ bool TextItem::processArguments(S32 argc, const char **argv)
    for(S32 i = 6; i < argc; i++)
    {
       mText += argv[i];
-      if (i < argc - 1)
+      if(i < argc - 1)
          mText += " ";
    }
 
@@ -140,11 +145,10 @@ bool TextItem::processArguments(S32 argc, const char **argv)
 string TextItem::toString()
 {
    F32 gs = getGame()->getGridSize();
+   Point pos = getVert(0) / gs;
+   Point dir = getVert(1) / gs;
 
-   char outString[LevelLoader::MAX_LEVEL_LINE_LENGTH];
-   dSprintf(outString, sizeof(outString), "%s %d %g %g %g %g %g %s", Object::getClassName(), mTeam, 
-                                          mPos.x / gs, mPos.y / gs, mDir.x / gs, mDir.y / gs, mSize, mText.c_str());
-   return outString;
+   return string(getClassName()) + " " + itos(mTeam) + " " + pos.toString() + " " + dir.toString() + " " + ftos(mSize, 3) + " " + mText;
 }
 
 
@@ -177,15 +181,15 @@ void TextItem::computeExtent()
    U32 len = UserInterface::getStringWidth(mSize, mText.c_str());
    U32 buf = mSize / 2;     // Provides some room to accomodate descenders on letters like j and g.
 
-   F32 angle =  mPos.angleTo(mDir);
+   F32 angle =  getVert(0).angleTo(getVert(1));
    F32 sinang = sin(angle);
    F32 cosang = cos(angle);
 
    F32 descenderFactor = .35;    // To account for y, g, j, etc.
    F32 h = mSize * (1 + descenderFactor);
    F32 w = len * 1.05;           // 1.05 adds just a little horizontal padding for certain words with trailing ys or other letters that are just a tiny bit longer than calculated
-   F32 x = mPos.x + mSize * descenderFactor * sinang;
-   F32 y = mPos.y + mSize * descenderFactor * cosang;
+   F32 x = getVert(0).x + mSize * descenderFactor * sinang;
+   F32 y = getVert(0).y + mSize * descenderFactor * cosang;
 
    F32 c1x = x - h * sinang * .5;
    F32 c1y = y;
@@ -228,11 +232,11 @@ void TextItem::idle(GameObject::IdleCallPath path)
 
 U32 TextItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
-   stream->write(mPos.x);
-   stream->write(mPos.y);
+   Point pos = getVert(0);
+   Point dir = getVert(1);
 
-   stream->write(mDir.x);
-   stream->write(mDir.y);
+   pos.write(stream);
+   dir.write(stream);
 
    stream->writeRangedU32(mSize, 0, MAX_TEXT_SIZE);
    stream->write(mTeam);
@@ -242,15 +246,18 @@ U32 TextItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
    return 0;
 }
 
+
 void TextItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    char txt[MAX_TEXTITEM_LEN];
 
-   stream->read(&mPos.x);
-   stream->read(&mPos.y);
+   Point pos, dir;
 
-   stream->read(&mDir.x);
-   stream->read(&mDir.y);
+   pos.read(stream);
+   dir.read(stream);
+
+   setVert(pos, 0);
+   setVert(dir, 1);
 
    mSize = stream->readRangedU32(0, MAX_TEXT_SIZE);
    stream->read(&mTeam);

@@ -67,24 +67,29 @@ bool Teleporter::processArguments(S32 argc, const char **argv)
    if(argc != 4)
       return false;
 
-   mPos.read(argv);
-   mDest.read(argv + 2);
+   Point pos, dest;
 
-   mDest *= getGame()->getGridSize();
-   mPos *= getGame()->getGridSize();
+   pos.read(argv);
+   dest.read(argv + 2);
+
+   dest *= getGame()->getGridSize();
+   pos *= getGame()->getGridSize();
+
+   setVert(pos, 0);
+   setVert(dest, 1);
 
    // See if we already have any teleports with this pos... if so, this is a "multi-dest" teleporter
    bool found = false;
 
    foundObjects.clear();
-   findObjects(TeleportType, foundObjects, Rect(mPos.x-1, mPos.y-1, mPos.x+1, mPos.y+1));
+   findObjects(TeleportType, foundObjects, Rect(pos, 2));      // 1 would probably work just as well here
 
    for(S32 i = 0; i < foundObjects.size(); i++)
    {
       Teleporter *tel = dynamic_cast<Teleporter *>(foundObjects[i]);
-      if(tel->mPos.distanceTo(mPos) < 1)     // i.e These are really close!  Must be the same!
+      if(tel->getVert(0).distanceTo(pos) < 1)     // i.e These are really close!  Must be the same!  --> is always true?
       {
-         tel->mDests.push_back(mDest);
+         tel->mDests.push_back(dest);
          found = true;
          break;      // There will only be one!
       }
@@ -92,11 +97,8 @@ bool Teleporter::processArguments(S32 argc, const char **argv)
 
    if(!found)     // New teleporter origin
    {
-      mDests.push_back(mDest);
-
-      Rect r(mPos, mPos);
-      r.expand(Point(TELEPORTER_RADIUS, TELEPORTER_RADIUS));
-      setExtent(r);
+      mDests.push_back(dest);
+      setExtent(Rect(pos, TELEPORTER_RADIUS));
    }
    else  
    {
@@ -112,9 +114,11 @@ bool Teleporter::processArguments(S32 argc, const char **argv)
 string Teleporter::toString()
 {
    F32 gs = getGame()->getGridSize();
-   char outString[LevelLoader::MAX_LEVEL_LINE_LENGTH];
-   dSprintf(outString, sizeof(outString), "%s %g %g %g %g", Object::getClassName(), mPos.x / gs, mPos.y / gs, mDest.x / gs, mDest.y / gs);
-   return outString;
+   
+   Point pos = getVert(0) / gs;
+   Point dest = getVert(1) / gs;
+
+   return string(getClassName()) + " " + pos.toString() + " " + dest.toString();
 }
 
 
@@ -124,15 +128,12 @@ U32 Teleporter::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
 
    if(stream->writeFlag(updateMask & InitMask))
    {
-      stream->write(mPos.x);
-      stream->write(mPos.y);
+      getVert(0).write(stream);
+
       stream->write(mDests.size());
 
       for(S32 i = 0; i < mDests.size(); i++)
-      {
-         stream->write(mDests[i].x);
-         stream->write(mDests[i].y);
-      }
+         mDests[i].write(stream);
    }
 
    if(stream->writeFlag((updateMask & TeleportMask) && !isInitial))    // Basically, this gets triggered if a ship passes through
@@ -146,21 +147,23 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
    S32 count;
    if(stream->readFlag())
    {
-      stream->read(&mPos.x);
-      stream->read(&mPos.y);
+      Point p;    // Reusable container
+
+      p.read(stream);
+      setVert(p, 0);
+
       stream->read(&count);
       mDests.clear();
+
       for(S32 i = 0; i < count; i++)
       {
-         Point dest;
-         stream->read(&dest.x);
-         stream->read(&dest.y);
-         mDests.push_back(dest);
+         p.read(stream);
+         mDests.push_back(p);
       }
-      Rect r(mPos, mPos);
-      r.expand(Point(TELEPORTER_RADIUS, TELEPORTER_RADIUS));
-      setExtent(r);
+      
+      setExtent(Rect(p, TELEPORTER_RADIUS));
    }
+
    if(stream->readFlag() && isGhost())
    {
       S32 dest;
@@ -169,7 +172,7 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
       FXManager::emitTeleportInEffect(mDests[dest], 0);
       SoundSystem::playSoundEffect(SFXTeleportIn, mDests[dest], Point());
 
-      SoundSystem::playSoundEffect(SFXTeleportOut, mPos, Point());
+      SoundSystem::playSoundEffect(SFXTeleportOut, getVert(0), Point());
       timeout = TeleporterDelay;
    }
 }
@@ -192,20 +195,20 @@ void Teleporter::idle(GameObject::IdleCallPath path)
    if(path != GameObject::ServerIdleMainLoop)
       return;
 
-   // Check for players within range. If so, send them to dest
-   Rect queryRect(mPos, mPos);
-   queryRect.expand(Point(TELEPORTER_RADIUS, TELEPORTER_RADIUS));
+   // Check for players within range.  If found, send them to dest.
+   Rect queryRect(getVert(0), TELEPORTER_RADIUS);
 
    foundObjects.clear();
    findObjects(ShipType | RobotType, foundObjects, queryRect);
 
    // First see if we're triggered...
    bool isTriggered = false;
+   Point pos = getVert(0);
 
    for(S32 i = 0; i < foundObjects.size(); i++)
    {
       Ship *s = dynamic_cast<Ship *>(foundObjects[i]);
-      if((mPos - s->getActualPos()).len() < TeleporterTriggerRadius)
+      if((pos - s->getActualPos()).len() < TeleporterTriggerRadius)
       {
          isTriggered = true;
          timeout = TeleporterDelay;    // Temporarily disable teleporter
@@ -220,10 +223,10 @@ void Teleporter::idle(GameObject::IdleCallPath path)
    for(S32 i = 0; i < foundObjects.size(); i++)
    {
       Ship *s = dynamic_cast<Ship *>(foundObjects[i]);
-      if((mPos - s->getRenderPos()).len() < TELEPORTER_RADIUS + s->getRadius())
+      if((pos - s->getRenderPos()).len() < TELEPORTER_RADIUS + s->getRadius())
       {
          mLastDest = TNL::Random::readI(0, mDests.size() - 1);
-         Point newPos = s->getActualPos() - mPos + mDests[mLastDest];    
+         Point newPos = s->getActualPos() - pos + mDests[mLastDest];    
          s->setActualPos(newPos, true);
          setMaskBits(TeleportMask);
       }
@@ -246,7 +249,7 @@ void Teleporter::render()
    else
       r = F32(TeleporterExpandTime - timeout) / F32(TeleporterExpandTime);
 
-   renderTeleporter(mPos, 0, true, mTime, r, TELEPORTER_RADIUS, 1.0, mDests, false);
+   renderTeleporter(getVert(0), 0, true, mTime, r, TELEPORTER_RADIUS, 1.0, mDests, false);
 }
 
 
@@ -255,7 +258,7 @@ void Teleporter::renderEditorItem()
    glColor(green);
 
    glLineWidth(gLineWidth3);
-   drawPolygon(mPos, 12, Teleporter::TELEPORTER_RADIUS, 0);
+   drawPolygon(getVert(0), 12, Teleporter::TELEPORTER_RADIUS, 0);
    glLineWidth(gDefaultLineWidth);
 }
 

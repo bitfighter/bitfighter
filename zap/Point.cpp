@@ -26,6 +26,7 @@
 #include "Point.h"
 
 #include "tnlPlatform.h"
+#include "tnlBitStream.h"
 
 #include <math.h>
 #include <cstdlib>
@@ -166,6 +167,21 @@ void Point::read(const char **argv)
    x = (F32) atof(argv[0]);
    y = (F32) atof(argv[1]);
 }
+
+
+void Point::read(TNL::BitStream *stream)
+{
+   stream->read(&x);
+   stream->read(&y);
+}
+
+
+void Point::write(TNL::BitStream *stream)
+{
+   stream->write(x);
+   stream->write(y);
+}
+
 
 std::string Point::toString()
 {

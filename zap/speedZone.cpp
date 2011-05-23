@@ -386,11 +386,8 @@ U32 SpeedZone::packUpdate(GhostConnection *connection, U32 updateMask, BitStream
       Point pos = getVert(0);
       Point dir = getVert(1);
 
-      stream->write(pos.x);
-      stream->write(pos.y);
-
-      stream->write(dir.x);
-      stream->write(dir.y);
+      pos.write(stream);
+      dir.write(stream);
 
       stream->writeInt(mSpeed, 16);
       stream->writeFlag(mSnapLocation);
@@ -407,11 +404,9 @@ void SpeedZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
       Point pos, dir;
 
       mUnpackInit++;
-      stream->read(&pos.x);
-      stream->read(&pos.y);
 
-      stream->read(&dir.x);
-      stream->read(&dir.y);
+      pos.read(stream);
+      dir.read(stream);
 
       setVert(pos, 0);
       setVert(dir, 1);

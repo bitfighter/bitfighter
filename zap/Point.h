@@ -26,12 +26,14 @@
 #ifndef _POINT_H_
 #define _POINT_H_
 
+#include "tnlBitStream.h"
 #include <string>
 
 // forward declarations
 namespace TNL {
    typedef float F32;
 };
+
 
 namespace Zap
 {
@@ -78,6 +80,8 @@ public:
 
    TNL::F32 dot(const Point &p) const;
    void read(const char **argv);
+   void read(TNL::BitStream *stream);
+   void write(TNL::BitStream *stream);
 
    std::string toString();
    

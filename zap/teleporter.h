@@ -57,8 +57,6 @@ public:
 
 private:
    S32 mLastDest;    // Destination of last ship through
-   Point mPos;
-   Point mDest;
 
    // How are this item's vertices labeled in the editor? -- these can be private
    const char *getVertLabel(S32 index) { return index == 0 ? "Intake Vortex" : "Destination"; }
@@ -97,7 +95,7 @@ public:
    S32 getClassID(lua_State *L) { return returnInt(L, TeleportType); }   // Object's class
    void push(lua_State *L) { Lunar<Teleporter>::push(L, this); }         // Push item onto stack
 
-   S32 getLoc(lua_State *L) { return returnPoint(L, mPos); }                         // Center of item (returns point)
+   S32 getLoc(lua_State *L) { return returnPoint(L, getVert(0)); }                   // Center of item (returns point)
    S32 getRad(lua_State *L) { return returnInt(L, TeleporterTriggerRadius); }        // Radius of item (returns number)
    S32 getVel(lua_State *L) { return returnPoint(L, Point(0,0)); }                   // Speed of item (returns point)
    S32 getTeamIndx(lua_State *L) { return returnInt(L, Item::TEAM_NEUTRAL + 1); }    // All teleporters are neutral

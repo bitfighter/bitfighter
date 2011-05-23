@@ -203,6 +203,7 @@ public:
    /// Reads a compressed point from the stream, to a precision denoted by scale.
    void readPointCompressed(Point3F *p, F32 scale);
 
+
    /// Writes bitCount bits into the stream from bitPtr.
    bool writeBits(U32 bitCount, const void *bitPtr);
    /// Reads bitCount bits from the stream into bitPtr.
