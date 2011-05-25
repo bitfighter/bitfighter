@@ -205,13 +205,13 @@ void CreditsScroller::updateFX(U32 delta)
    // Scroll the credits text from bottom to top
    for(S32 i = 0; i < credits.size(); i++)
    {
-     S32 pos = S32( credits[i].currPos.x - (delta / 8) );
+      credits[i].currPos.x -= (delta / 8.f);
+      S32 pos = S32( credits[i].currPos.x );
 
       // Reached the top, reset
       if(pos < -CreditSpace )
          pos += mTotalSize - 350;
 
-      credits[i].currPos.x = pos;
    }
 }
 

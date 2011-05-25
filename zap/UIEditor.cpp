@@ -573,7 +573,7 @@ void EditorUserInterface::makeSureThereIsAtLeastOneTeam()
 // This sort will put points on top of lines on top of polygons...  as they should be
 // NavMeshZones are now drawn on top, to make them easier to see.  Disable with Ctrl-A!
 // We'll also put walls on the bottom, as this seems to work best in practice
-S32 QSORT_CALLBACK geometricSort(EditorObject *a, EditorObject *b)
+S32 QSORT_CALLBACK geometricSort(EditorObject * &a, EditorObject * &b)
 {
    if((a)->getObjectTypeMask() & BarrierType)
       return -1;
@@ -586,7 +586,7 @@ S32 QSORT_CALLBACK geometricSort(EditorObject *a, EditorObject *b)
 
 static void geomSort(pointainer<vector<EditorObject *> > &objects)
 {
-   sort(objects.begin(), objects.end(), geometricSort);
+   qsort(&objects[0], objects.size(), sizeof(EditorObject *), (qsort_compare_func) geometricSort);
 }
 
 

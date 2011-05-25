@@ -252,7 +252,7 @@ struct Functor {
    /// Writes this Functor to a BitStream.
    virtual void write(BitStream &stream) = 0;
    /// Dispatch the function represented by the Functor.
-   virtual void dispatch(void *t) = 0;
+   virtual void dispatch(Object *t) = 0;
 };
 
 /// FunctorDecl template class.  This class is specialized based on the
@@ -265,7 +265,7 @@ struct FunctorDecl : public Functor {
    void set() {}
    void read(BitStream &stream) {}
    void write(BitStream &stream) {}
-   void dispatch(void *t) { }
+   void dispatch(Object *t) { }
 };
 template <class T> 
 struct FunctorDecl<void (T::*)()> : public Functor {
@@ -275,7 +275,7 @@ struct FunctorDecl<void (T::*)()> : public Functor {
    void set() {}
    void read(BitStream &stream) {}
    void write(BitStream &stream) {}
-   void dispatch(void *t) { ((T *)t->*ptr)(); }
+   void dispatch(Object *t) { ((T *)t->*ptr)(); }
 }; 
 template <class T, class A>
 struct FunctorDecl<void (T::*)(A)> : public Functor {
@@ -285,7 +285,7 @@ struct FunctorDecl<void (T::*)(A)> : public Functor {
    void set(A &_a) { a = _a; }
    void read(BitStream &stream) { Types::read(stream, &a); }
    void write(BitStream &stream) { Types::write(stream, a); }
-   void dispatch(void *t) { (((T *)t)->*ptr)(a); }
+   void dispatch(Object *t) { (((T *)t)->*ptr)(a); }
 };
 template <class T, class A, class B>
 struct FunctorDecl<void (T::*)(A,B)>: public Functor {
@@ -295,7 +295,7 @@ struct FunctorDecl<void (T::*)(A,B)>: public Functor {
    void set(A &_a, B &_b) { a = _a; b = _b;}
    void read(BitStream &stream) { Types::read(stream, &a); Types::read(stream, &b); }
    void write(BitStream &stream) { Types::write(stream, a); Types::write(stream, b); }
-   void dispatch(void *t) { (((T *)t)->*ptr)(a, b); }
+   void dispatch(Object *t) { (((T *)t)->*ptr)(a, b); }
 };
 
 template <class T, class A, class B, class C>
@@ -306,7 +306,7 @@ struct FunctorDecl<void (T::*)(A,B,C)>: public Functor {
    void set(A &_a, B &_b, C &_c) { a = _a; b = _b; c = _c;}
    void read(BitStream &stream) { Types::read(stream, &a); Types::read(stream, &b); Types::read(stream, &c); }
    void write(BitStream &stream) { Types::write(stream, a); Types::write(stream, b); Types::write(stream, c); }
-   void dispatch(void *t) { (((T *)t)->*ptr)(a, b, c); }
+   void dispatch(Object *t) { (((T *)t)->*ptr)(a, b, c); }
 };
 
 template <class T, class A, class B, class C, class D>
@@ -317,7 +317,7 @@ struct FunctorDecl<void (T::*)(A,B,C,D)>: public Functor {
    void set(A &_a, B &_b, C &_c, D &_d) { a = _a; b = _b; c = _c; d = _d; }
    void read(BitStream &stream) { Types::read(stream, &a); Types::read(stream, &b); Types::read(stream, &c); Types::read(stream, &d); }
    void write(BitStream &stream) { Types::write(stream, a); Types::write(stream, b); Types::write(stream, c); Types::write(stream, d); }
-   void dispatch(void *t) { (((T *)t)->*ptr)(a, b, c, d); }
+   void dispatch(Object *t) { (((T *)t)->*ptr)(a, b, c, d); }
 };
 
 template <class T, class A, class B, class C, class D, class E>
@@ -328,7 +328,7 @@ struct FunctorDecl<void (T::*)(A,B,C,D,E)>: public Functor {
    void set(A &_a, B &_b, C &_c, D &_d, E &_e) { a = _a; b = _b; c = _c; d = _d; e = _e; }
    void read(BitStream &stream) { Types::read(stream, &a); Types::read(stream, &b); Types::read(stream, &c); Types::read(stream, &d); Types::read(stream, &e); }
    void write(BitStream &stream) { Types::write(stream, a); Types::write(stream, b); Types::write(stream, c); Types::write(stream, d); Types::write(stream, e); }
-   void dispatch(void *t) { (((T *)t)->*ptr)(a, b, c, d, e); }
+   void dispatch(Object *t) { (((T *)t)->*ptr)(a, b, c, d, e); }
 };
 
 template <class T, class A, class B, class C, class D, class E, class F>
@@ -339,7 +339,7 @@ struct FunctorDecl<void (T::*)(A,B,C,D,E,F)>: public Functor {
    void set(A &_a, B &_b, C &_c, D &_d, E &_e, F &_f) { a = _a; b = _b; c = _c; d = _d; e = _e; f = _f; }
    void read(BitStream &stream) { Types::read(stream, &a); Types::read(stream, &b); Types::read(stream, &c); Types::read(stream, &d); Types::read(stream, &e); Types::read(stream, &f); }
    void write(BitStream &stream) { Types::write(stream, a); Types::write(stream, b); Types::write(stream, c); Types::write(stream, d); Types::write(stream, e); Types::write(stream, f); }
-   void dispatch(void *t) { (((T *)t)->*ptr)(a, b, c, d, e, f); }
+   void dispatch(Object *t) { (((T *)t)->*ptr)(a, b, c, d, e, f); }
 };
 
 template <class T, class A, class B, class C, class D, class E, class F, class G>
@@ -350,7 +350,7 @@ struct FunctorDecl<void (T::*)(A,B,C,D,E,F,G)>: public Functor {
    void set(A &_a, B &_b, C &_c, D &_d, E &_e, F &_f, G &_g) { a = _a; b = _b; c = _c; d = _d; e = _e; f = _f; g = _g; }
    void read(BitStream &stream) { Types::read(stream, &a); Types::read(stream, &b); Types::read(stream, &c); Types::read(stream, &d); Types::read(stream, &e); Types::read(stream, &f); Types::read(stream, &g); }
    void write(BitStream &stream) { Types::write(stream, a); Types::write(stream, b); Types::write(stream, c); Types::write(stream, d); Types::write(stream, e); Types::write(stream, f); Types::write(stream, g); }
-   void dispatch(void *t) { (((T *)t)->*ptr)(a, b, c, d, e, f, g); }
+   void dispatch(Object *t) { (((T *)t)->*ptr)(a, b, c, d, e, f, g); }
 };
 
 template <class T, class A, class B, class C, class D, class E, class F, class G, class H>
@@ -361,7 +361,7 @@ struct FunctorDecl<void (T::*)(A,B,C,D,E,F,G,H)>: public Functor {
    void set(A &_a, B &_b, C &_c, D &_d, E &_e, F &_f, G &_g, H &_h) { a = _a; b = _b; c = _c; d = _d; e = _e; f = _f; g = _g; h = _h; }
    void read(BitStream &stream) { Types::read(stream, &a); Types::read(stream, &b); Types::read(stream, &c); Types::read(stream, &d); Types::read(stream, &e); Types::read(stream, &f); Types::read(stream, &g); Types::read(stream, &h); }
    void write(BitStream &stream) { Types::write(stream, a); Types::write(stream, b); Types::write(stream, c); Types::write(stream, d); Types::write(stream, e); Types::write(stream, f); Types::write(stream, g); Types::write(stream, h); }
-   void dispatch(void *t) { (((T *)t)->*ptr)(a, b, c, d, e, f, g, h); }
+   void dispatch(Object *t) { (((T *)t)->*ptr)(a, b, c, d, e, f, g, h); }
 };
 
 template <class T, class A, class B, class C, class D, class E, class F, class G, class H, class I>
@@ -372,7 +372,7 @@ struct FunctorDecl<void (T::*)(A,B,C,D,E,F,G,H,I)>: public Functor {
    void set(A &_a, B &_b, C &_c, D &_d, E &_e, F &_f, G &_g, H &_h, I &_i) { a = _a; b = _b; c = _c; d = _d; e = _e; f = _f; g = _g; h = _h; i = _i; }
    void read(BitStream &stream) { Types::read(stream, &a); Types::read(stream, &b); Types::read(stream, &c); Types::read(stream, &d); Types::read(stream, &e); Types::read(stream, &f); Types::read(stream, &g); Types::read(stream, &h); Types::read(stream, &i); }
    void write(BitStream &stream) { Types::write(stream, a); Types::write(stream, b); Types::write(stream, c); Types::write(stream, d); Types::write(stream, e); Types::write(stream, f); Types::write(stream, g); Types::write(stream, h); Types::write(stream, i); }
-   void dispatch(void *t) { (((T *)t)->*ptr)(a, b, c, d, e, f, g, h, i); }
+   void dispatch(Object *t) { (((T *)t)->*ptr)(a, b, c, d, e, f, g, h, i); }
 };
 
 template <class T, class A, class B, class C, class D, class E, class F, class G, class H, class I, class J>
@@ -383,7 +383,7 @@ struct FunctorDecl<void (T::*)(A,B,C,D,E,F,G,H,I,J)>: public Functor {
    void set(A &_a, B &_b, C &_c, D &_d, E &_e, F &_f, G &_g, H &_h, I &_i, J &_j) { a = _a; b = _b; c = _c; d = _d; e = _e; f = _f; g = _g; h = _h; i = _i; j = _j; }
    void read(BitStream &stream) { Types::read(stream, &a); Types::read(stream, &b); Types::read(stream, &c); Types::read(stream, &d); Types::read(stream, &e); Types::read(stream, &f); Types::read(stream, &g); Types::read(stream, &h); Types::read(stream, &i); Types::read(stream, &j); }
    void write(BitStream &stream) { Types::write(stream, a); Types::write(stream, b); Types::write(stream, c); Types::write(stream, d); Types::write(stream, e); Types::write(stream, f); Types::write(stream, g); Types::write(stream, h); Types::write(stream, i); Types::write(stream, j); }
-   void dispatch(void *t) { (((T *)t)->*ptr)(a, b, c, d, e, f, g, h, i, j); }
+   void dispatch(Object *t) { (((T *)t)->*ptr)(a, b, c, d, e, f, g, h, i, j); }
 };
 
 template <class T, class A, class B, class C, class D, class E, class F, class G, class H, class I, class J, class K>
@@ -394,7 +394,7 @@ struct FunctorDecl<void (T::*)(A,B,C,D,E,F,G,H,I,J,K)>: public Functor {
    void set(A &_a, B &_b, C &_c, D &_d, E &_e, F &_f, G &_g, H &_h, I &_i, J &_j, K &_k) { a = _a; b = _b; c = _c; d = _d; e = _e; f = _f; g = _g; h = _h; i = _i; j = _j; k = _k;}
    void read(BitStream &stream) { Types::read(stream, &a); Types::read(stream, &b); Types::read(stream, &c); Types::read(stream, &d); Types::read(stream, &e); Types::read(stream, &f); Types::read(stream, &g); Types::read(stream, &h); Types::read(stream, &i); Types::read(stream, &j); Types::read(stream, &k); }
    void write(BitStream &stream) { Types::write(stream, a); Types::write(stream, b); Types::write(stream, c); Types::write(stream, d); Types::write(stream, e); Types::write(stream, f); Types::write(stream, g); Types::write(stream, h); Types::write(stream, i); Types::write(stream, j); Types::write(stream, k); }
-   void dispatch(void *t) { (((T *)t)->*ptr)(a, b, c, d, e, f, g, h, i, j, k); }
+   void dispatch(Object *t) { (((T *)t)->*ptr)(a, b, c, d, e, f, g, h, i, j, k); }
 };
 
 template <class T, class A, class B, class C, class D, class E, class F, class G, class H, class I, class J, class K, class L>
@@ -405,7 +405,7 @@ struct FunctorDecl<void (T::*)(A,B,C,D,E,F,G,H,I,J,K,L)>: public Functor {
    void set(A &_a, B &_b, C &_c, D &_d, E &_e, F &_f, G &_g, H &_h, I &_i, J &_j, K &_k, L &_l) { a = _a; b = _b; c = _c; d = _d; e = _e; f = _f; g = _g; h = _h; i = _i; j = _j; k = _k; l = _l; }
    void read(BitStream &stream) { Types::read(stream, &a); Types::read(stream, &b); Types::read(stream, &c); Types::read(stream, &d); Types::read(stream, &e); Types::read(stream, &f); Types::read(stream, &g); Types::read(stream, &h); Types::read(stream, &i); Types::read(stream, &j); Types::read(stream, &k); Types::read(stream, &l); }
    void write(BitStream &stream) { Types::write(stream, a); Types::write(stream, b); Types::write(stream, c); Types::write(stream, d); Types::write(stream, e); Types::write(stream, f); Types::write(stream, g); Types::write(stream, h); Types::write(stream, i); Types::write(stream, j); Types::write(stream, k); Types::write(stream, l); }
-   void dispatch(void *t) { (((T *)t)->*ptr)(a, b, c, d, e, f, g, h, i, j, k, l); }
+   void dispatch(Object *t) { (((T *)t)->*ptr)(a, b, c, d, e, f, g, h, i, j, k, l); }
 };
 
 
@@ -417,7 +417,7 @@ struct FunctorDecl<void (T::*)(A,B,C,D,E,F,G,H,I,J,K,L,M)>: public Functor {
    void set(A &_a, B &_b, C &_c, D &_d, E &_e, F &_f, G &_g, H &_h, I &_i, J &_j, K &_k, L &_l, M & _m) { a = _a; b = _b; c = _c; d = _d; e = _e; f = _f; g = _g; h = _h; i = _i; j = _j; k = _k; l = _l; m = _m;}
    void read(BitStream &stream) { Types::read(stream, &a); Types::read(stream, &b); Types::read(stream, &c); Types::read(stream, &d); Types::read(stream, &e); Types::read(stream, &f); Types::read(stream, &g); Types::read(stream, &h); Types::read(stream, &i); Types::read(stream, &j); Types::read(stream, &k); Types::read(stream, &l); Types::read(stream, &m); }
    void write(BitStream &stream) { Types::write(stream, a); Types::write(stream, b); Types::write(stream, c); Types::write(stream, d); Types::write(stream, e); Types::write(stream, f); Types::write(stream, g); Types::write(stream, h); Types::write(stream, i); Types::write(stream, j); Types::write(stream, k); Types::write(stream, l); Types::write(stream, m); }
-   void dispatch(void *t) { (((T *)t)->*ptr)(a, b, c, d, e, f, g, h, i, j, k, l, m); }
+   void dispatch(Object *t) { (((T *)t)->*ptr)(a, b, c, d, e, f, g, h, i, j, k, l, m); }
 };
 
 
@@ -429,7 +429,7 @@ struct FunctorDecl<void (T::*)(A,B,C,D,E,F,G,H,I,J,K,L,M,N)>: public Functor {
    void set(A &_a, B &_b, C &_c, D &_d, E &_e, F &_f, G &_g, H &_h, I &_i, J &_j, K &_k, L &_l, M & _m, N & _n) { a = _a; b = _b; c = _c; d = _d; e = _e; f = _f; g = _g; h = _h; i = _i; j = _j; k = _k; l = _l; m = _m; n = _n; }
    void read(BitStream &stream) { Types::read(stream, &a); Types::read(stream, &b); Types::read(stream, &c); Types::read(stream, &d); Types::read(stream, &e); Types::read(stream, &f); Types::read(stream, &g); Types::read(stream, &h); Types::read(stream, &i); Types::read(stream, &j); Types::read(stream, &k); Types::read(stream, &l); Types::read(stream, &m); Types::read(stream, &n); }
    void write(BitStream &stream) { Types::write(stream, a); Types::write(stream, b); Types::write(stream, c); Types::write(stream, d); Types::write(stream, e); Types::write(stream, f); Types::write(stream, g); Types::write(stream, h); Types::write(stream, i); Types::write(stream, j); Types::write(stream, k); Types::write(stream, l); Types::write(stream, m); Types::write(stream, n); }
-   void dispatch(void *t) { (((T *)t)->*ptr)(a, b, c, d, e, f, g, h, i, j, k, l, m, n); }
+   void dispatch(Object *t) { (((T *)t)->*ptr)(a, b, c, d, e, f, g, h, i, j, k, l, m, n); }
 };
 
 
@@ -441,7 +441,7 @@ struct FunctorDecl<void (T::*)(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O)>: public Functor {
    void set(A &_a, B &_b, C &_c, D &_d, E &_e, F &_f, G &_g, H &_h, I &_i, J &_j, K &_k, L &_l, M & _m, N & _n, O & _o) { a = _a; b = _b; c = _c; d = _d; e = _e; f = _f; g = _g; h = _h; i = _i; j = _j; k = _k; l = _l; m = _m; n = _n; o = _o; }
    void read(BitStream &stream) { Types::read(stream, &a); Types::read(stream, &b); Types::read(stream, &c); Types::read(stream, &d); Types::read(stream, &e); Types::read(stream, &f); Types::read(stream, &g); Types::read(stream, &h); Types::read(stream, &i); Types::read(stream, &j); Types::read(stream, &k); Types::read(stream, &l); Types::read(stream, &m); Types::read(stream, &n); Types::read(stream, &o); }
    void write(BitStream &stream) { Types::write(stream, a); Types::write(stream, b); Types::write(stream, c); Types::write(stream, d); Types::write(stream, e); Types::write(stream, f); Types::write(stream, g); Types::write(stream, h); Types::write(stream, i); Types::write(stream, j); Types::write(stream, k); Types::write(stream, l); Types::write(stream, m); Types::write(stream, n); Types::write(stream, o);}
-   void dispatch(void *t) { (((T *)t)->*ptr)(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o); }
+   void dispatch(Object *t) { (((T *)t)->*ptr)(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o); }
 };
 
 
@@ -453,7 +453,7 @@ struct FunctorDecl<void (T::*)(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P)>: public Functor
    void set(A &_a, B &_b, C &_c, D &_d, E &_e, F &_f, G &_g, H &_h, I &_i, J &_j, K &_k, L &_l, M &_m, N &_n, O &_o, P &_p) { a = _a; b = _b; c = _c; d = _d; e = _e; f = _f; g = _g; h = _h; i = _i; j = _j; k = _k; l = _l; m = _m; n = _n; o = _o; p = _p; }
    void read(BitStream &stream) { Types::read(stream, &a); Types::read(stream, &b); Types::read(stream, &c); Types::read(stream, &d); Types::read(stream, &e); Types::read(stream, &f); Types::read(stream, &g); Types::read(stream, &h); Types::read(stream, &i); Types::read(stream, &j); Types::read(stream, &k); Types::read(stream, &l); Types::read(stream, &m); Types::read(stream, &n); Types::read(stream, &o); Types::read(stream, &p);}
    void write(BitStream &stream) { Types::write(stream, a); Types::write(stream, b); Types::write(stream, c); Types::write(stream, d); Types::write(stream, e); Types::write(stream, f); Types::write(stream, g); Types::write(stream, h); Types::write(stream, i); Types::write(stream, j); Types::write(stream, k); Types::write(stream, l); Types::write(stream, m); Types::write(stream, n); Types::write(stream, o); Types::write(stream, p);}
-   void dispatch(void *t) { (((T *)t)->*ptr)(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p); }
+   void dispatch(Object *t) { (((T *)t)->*ptr)(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p); }
 };
 
 
@@ -465,7 +465,7 @@ struct FunctorDecl<void (T::*)(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q)>: public Funct
    void set(A &_a, B &_b, C &_c, D &_d, E &_e, F &_f, G &_g, H &_h, I &_i, J &_j, K &_k, L &_l, M &_m, N &_n, O &_o, P &_p, Q &_q) { a = _a; b = _b; c = _c; d = _d; e = _e; f = _f; g = _g; h = _h; i = _i; j = _j; k = _k; l = _l; m = _m; n = _n; o = _o; p = _p; q=_q; }
    void read(BitStream &stream) { Types::read(stream, &a); Types::read(stream, &b); Types::read(stream, &c); Types::read(stream, &d); Types::read(stream, &e); Types::read(stream, &f); Types::read(stream, &g); Types::read(stream, &h); Types::read(stream, &i); Types::read(stream, &j); Types::read(stream, &k); Types::read(stream, &l); Types::read(stream, &m); Types::read(stream, &n); Types::read(stream, &o); Types::read(stream, &p); Types::read(stream, &q);}
    void write(BitStream &stream) { Types::write(stream, a); Types::write(stream, b); Types::write(stream, c); Types::write(stream, d); Types::write(stream, e); Types::write(stream, f); Types::write(stream, g); Types::write(stream, h); Types::write(stream, i); Types::write(stream, j); Types::write(stream, k); Types::write(stream, l); Types::write(stream, m); Types::write(stream, n); Types::write(stream, o); Types::write(stream, p); Types::write(stream, q);}
-   void dispatch(void *t) { (((T *)t)->*ptr)(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q); }
+   void dispatch(Object *t) { (((T *)t)->*ptr)(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q); }
 };
 
 
@@ -477,7 +477,7 @@ struct FunctorDecl<void (T::*)(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R)>: public Fun
    void set(A &_a, B &_b, C &_c, D &_d, E &_e, F &_f, G &_g, H &_h, I &_i, J &_j, K &_k, L &_l, M &_m, N &_n, O &_o, P &_p, Q &_q, R &_r) { a = _a; b = _b; c = _c; d = _d; e = _e; f = _f; g = _g; h = _h; i = _i; j = _j; k = _k; l = _l; m = _m; n = _n; o = _o; p = _p; q=_q; r=_r; }
    void read(BitStream &stream) { Types::read(stream, &a); Types::read(stream, &b); Types::read(stream, &c); Types::read(stream, &d); Types::read(stream, &e); Types::read(stream, &f); Types::read(stream, &g); Types::read(stream, &h); Types::read(stream, &i); Types::read(stream, &j); Types::read(stream, &k); Types::read(stream, &l); Types::read(stream, &m); Types::read(stream, &n); Types::read(stream, &o); Types::read(stream, &p); Types::read(stream, &q); Types::read(stream, &r);}
    void write(BitStream &stream) { Types::write(stream, a); Types::write(stream, b); Types::write(stream, c); Types::write(stream, d); Types::write(stream, e); Types::write(stream, f); Types::write(stream, g); Types::write(stream, h); Types::write(stream, i); Types::write(stream, j); Types::write(stream, k); Types::write(stream, l); Types::write(stream, m); Types::write(stream, n); Types::write(stream, o); Types::write(stream, p); Types::write(stream, q); Types::write(stream, r);}
-   void dispatch(void *t) { (((T *)t)->*ptr)(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r); }
+   void dispatch(Object *t) { (((T *)t)->*ptr)(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r); }
 };
 
 };

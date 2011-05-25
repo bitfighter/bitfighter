@@ -258,7 +258,7 @@ void NetObjectRPCEvent::process(EventConnection *ps)
    if(!checkClassType(mDestObject))
       return;
 
-   void *thisPointer = (void *) mDestObject.getPointer();
+   Object *thisPointer = (Object *) mDestObject.getPointer();
 
    NetObject::mRPCSourceConnection = (GhostConnection *) ps;
    mFunctor->dispatch(thisPointer);
