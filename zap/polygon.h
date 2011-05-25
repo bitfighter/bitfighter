@@ -39,9 +39,6 @@ class Polyline
 public:
    static void readPolyBounds(S32 argc, const char **argv, S32 firstCoord, F32 gridSize, bool allowFirstAndLastPointToBeEqual, Vector<Point> &bounds);
 
-protected:
-   void renderPolyHighlight();
-
    //// Read a series of points from a command line, and add them to a Vector of points
    //void processPolyBounds(S32 argc, const char **argv, S32 firstCoord, F32 gridSize, bool allowFirstAndLastPointToBeEqual);
 

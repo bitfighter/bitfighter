@@ -84,7 +84,7 @@ bool PolygonSweptCircleIntersect(const Point *inVertices, int inNumVertices, con
 bool PolygonContains2(const Point *inVertices, int inNumVertices, const Point &inPoint);
 bool segmentsColinear(const Point &p1, const Point &p2, const Point &p3, const Point &p4, TNL::F32 scaleFact);
 bool segsOverlap(const Point &p1, const Point &p2, const Point &p3, const Point &p4, Point &overlapStart, Point &overlapEnd);
-bool zonesTouch(const TNL::Vector<Point> &zone1, const TNL::Vector<Point> &zone2, TNL::F32 scaleFact, Point &overlapStart, Point &overlapEnd);
+bool zonesTouch(const TNL::Vector<Point> *zone1, const TNL::Vector<Point> *zone2, TNL::F32 scaleFact, Point &overlapStart, Point &overlapEnd);
 bool pointOnSegment(const Point &c, const Point &a, const Point &b, TNL::F32 closeEnough);
 bool polygonCircleIntersect(const Point *inVertices, int inNumVertices, const Point &inCenter, TNL::F32 inRadiusSq, Point &outPoint);
 
@@ -122,7 +122,7 @@ void unpackPolygons(const TNL::Vector<TNL::Vector<Point> > &solution, TNL::Vecto
 // test if a complex polygon has clockwise point winding order
 bool isWoundClockwise(const TNL::Vector<Point>& inputPoly);
 
-bool isConvex(const TNL::Vector<Point> &verts);
+bool isConvex(const TNL::Vector<Point> *verts);
 
 // scale Geometric points for clipper
 clipper::Polygons upscaleClipperPoints(const TNL::Vector<TNL::Vector<Point> >& inputPolygons);

@@ -31,6 +31,9 @@
 
 #include "luaObject.h"     // For LuaObject def and returnInt method
 #include "lua.h"           // For push prototype
+#include "Geometry.h"      // For GeomType enum
+
+#include "boost/smart_ptr/shared_ptr.hpp"
 
 #ifdef TNL_OS_WIN32 
 #  pragma warning( disable : 4250)
@@ -179,6 +182,8 @@ protected:
    Game *mGame;
    S32 mTeam;
 
+   boost::shared_ptr<Geometry> mGeometry;
+
 public:
    virtual ~BfObject() { };     // Provide virtual destructor
 
@@ -201,6 +206,43 @@ public:
    // method one time (when layerIndex == 0).
    virtual void render(S32 layerIndex);
    virtual void render();
+
+
+   // Geometry methods
+   virtual GeomType getGeomType() { return mGeometry->getGeomType(); }
+   virtual Point getVert(S32 index) { return mGeometry->getVert(index); }
+   virtual void setVert(const Point &point, S32 index) { mGeometry->setVert(point, index); }
+
+   S32 getVertCount() { return mGeometry->getVertCount(); }
+   void clearVerts() { mGeometry->clearVerts(); }
+   bool addVert(const Point &point)  { return mGeometry->addVert(point); }
+   bool addVertFront(Point vert)  { return mGeometry->addVertFront(vert); }
+   bool deleteVert(S32 vertIndex)  { return mGeometry->deleteVert(vertIndex); }
+   bool insertVert(Point vertex, S32 vertIndex)  { return mGeometry->insertVert(vertex, vertIndex); }
+
+   bool anyVertsSelected() { return mGeometry->anyVertsSelected(); }
+   void selectVert(S32 vertIndex) { mGeometry->selectVert(vertIndex); }
+   void aselectVert(S32 vertIndex) { mGeometry->aselectVert(vertIndex); }
+   void unselectVert(S32 vertIndex) { mGeometry->unselectVert(vertIndex); }
+   void unselectVerts() { mGeometry->unselectVerts(); }
+   bool vertSelected(S32 vertIndex) { return mGeometry->vertSelected(vertIndex); }
+
+   Vector<Point> *getOutline() { return mGeometry->getOutline(); }
+   Vector<Point> *getFill() { return mGeometry->getFill(); }
+   Point getCentroid() { return mGeometry->getCentroid(); }
+   F32 getLabelAngle() { return mGeometry->getLabelAngle(); }
+
+   void packGeom(GhostConnection *connection, BitStream *stream) { mGeometry->packGeom(connection, stream); }
+   void unpackGeom(GhostConnection *connection, BitStream *stream) { mGeometry->unpackGeom(connection, stream); }
+
+   string geomToString(F32 gridSize) { return mGeometry->geomToString(gridSize); }
+   void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize) { mGeometry->readGeom(argc, argv, firstCoord, gridSize); }
+
+   Rect computeExtents() { return mGeometry->computeExtents(); }
+
+   void onPointsChanged() { mGeometry->onPointsChanged(); }
+
+   void disableTriangluation() { mGeometry->disableTriangluation(); }
 };
 
 

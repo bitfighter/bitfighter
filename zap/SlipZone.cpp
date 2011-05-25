@@ -136,7 +136,7 @@ void SlipZone::onAddedToGame(Game *theGame)
 
 void SlipZone::computeExtent()
 {
-   setExtent(EditorObject::getExtent());
+   setExtent(Rect(*getOutline()));
 }
 
 

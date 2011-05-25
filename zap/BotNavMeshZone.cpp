@@ -73,6 +73,8 @@ BotNavMeshZone::BotNavMeshZone()
    //mNetFlags.set(Ghostable);    // For now, so we can see them on the client to help with debugging... when too many zones causes huge lag
    mZoneId = gBotNavMeshZones.size();
 
+   mGeometry = boost::shared_ptr<Geometry>(new PolygonGeometry);
+
    gBotNavMeshZones.push_back(this);
 }
 
@@ -106,12 +108,8 @@ void BotNavMeshZone::render(S32 layerIndex)
    if(!gClientGame->mGameUserInterface->mDebugShowMeshZones)
       return;
 
-   // TODO: Move to constructor, only doing this when there is a local client?
-   if(mPolyFill.size() == 0)    // Need to process PolyFill here, rendering server objects into client.  
-      Triangulate::Process(mPolyBounds, mPolyFill);
-
    if(layerIndex == 0)
-      renderNavMeshZone(&mPolyBounds, &mPolyFill, mCentroid, mZoneId, mConvex);
+      renderNavMeshZone(getOutline(), getFill(), getCentroid(), mZoneId, mConvex);
 
    else if(layerIndex == 1)
       renderNavMeshBorders(mNeighbors);
@@ -149,9 +147,10 @@ bool BotNavMeshZone::processArguments(S32 argc, const char **argv)
    if(argc < 6)
       return false;
 
-   Polyline::readPolyBounds(argc, argv, 0, mGame->getGridSize(), true, mPolyBounds);
+   readGeom(argc, argv, 0, getGame()->getGridSize());
+
    computeExtent();  // Computes extent so we can insert this into the BotNavMesh object database
-   mConvex = isConvex(mPolyBounds);
+   mConvex = isConvex(getOutline());
 
    return true;
 }
@@ -175,86 +174,28 @@ void BotNavMeshZone::onAddedToGame(Game *theGame)
 // Bounding box for quick collision-possibility elimination
 void BotNavMeshZone::computeExtent()
 {
-   Rect extent(mPolyBounds);
-   setExtent(extent);
+   setExtent(BfObject::getExtent());
 }
 
 
 // More precise boundary for precise collision detection
 bool BotNavMeshZone::getCollisionPoly(Vector<Point> &polyPoints)
 {
-   for(S32 i = 0; i < mPolyBounds.size(); i++)
-      polyPoints.push_back(mPolyBounds[i]);
-
+   polyPoints = *getOutline();
    return true;
 }
 
 
-// These methods will be empty later...
- U32 BotNavMeshZone::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
+U32 BotNavMeshZone::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
-/*
-   stream->writeInt(mZoneId, 16);
-
-   Polygon::packUpdate(connection, stream);
-
-   stream->writeInt(mNeighbors.size(), 8);
-
-   for(S32 i = 0; i < mNeighbors.size(); i++)
-   {
-      stream->write(mNeighbors[i].borderStart.x);
-      stream->write(mNeighbors[i].borderStart.y);
-
-      stream->write(mNeighbors[i].borderEnd.x);
-      stream->write(mNeighbors[i].borderEnd.y);
-
-      stream->write(mNeighbors[i].borderCenter.x);
-      stream->write(mNeighbors[i].borderCenter.y);
-
-      stream->write(mNeighbors[i].zoneID);
-      stream->write(mNeighbors[i].distTo);
-      stream->write(mNeighbors[i].center.x);
-      stream->write(mNeighbors[i].center.y);
-   }
-*/
+   // Do nothing, not used
    return 0;
 }
 
 
 void BotNavMeshZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
-/*   mZoneId = stream->readInt(16);
-
-   if(Polygon::unpackUpdate(connection, stream))
-   {
-      computeExtent();
-      mConvex = isConvex(mPolyBounds);
-   }
-
-   U32 size = stream->readInt(8);
-   Point p1, p2;
-
-   for(U32 i = 0; i < size; i++)
-   {
-      NeighboringZone n;
-
-      stream->read(&p1.x);
-      stream->read(&p1.y);
-   
-      stream->read(&p2.x);
-      stream->read(&p2.y);
-
-      n.borderStart = p1;
-      n.borderEnd = p2;
-      stream->read(&n.borderCenter.x);
-      stream->read(&n.borderCenter.y);
-      stream->read(&n.zoneID);
-      stream->read(&n.distTo);
-      stream->read(&n.center.x);
-      stream->read(&n.center.y);
-      mNeighbors.push_back(n);
-     // mNeighborRenderPoints.push_back(Border(p1, p2));
-   }*/
+   // Do nothing, not used
 }
 
 
@@ -274,7 +215,7 @@ U16 BotNavMeshZone::findZoneContaining(const Point &p)
 
       TNLAssert(zone, "NULL zone in findZoneContaining");
       if( zone->getExtent().contains(p) 
-                        && (PolygonContains2(zone->mPolyBounds.address(), zone->mPolyBounds.size(), p)) )
+                        && (PolygonContains2(zone->getOutline()->address(), zone->getOutline()->size(), p)) )
          return zone->mZoneId;
    }
 
@@ -445,7 +386,7 @@ static BotNavMeshZone *findZoneContainingPoint(const Point &point)
    {
       BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(zones[i]);  
 
-      if(zone && PolygonContains2(zone->mPolyBounds.address(), zone->mPolyBounds.size(), point))
+      if(zone && PolygonContains2(zone->getOutline()->address(), zone->getOutline()->size(), point))
          return zone;   
    }
 
@@ -653,22 +594,25 @@ bool BotNavMeshZone::buildBotMeshZones(Game *game)
                if(j == 0)
                {
                   botzone = new BotNavMeshZone();
+
+                  // Triangulation only needed for display on local client... it is expensive to compute for so many zones,
+                  // and there is really no point if it will never be viewed.  Once disabled, triangluation cannot be re-enabled
+                  // for this object.
+                  if(!gClientGame)     
+                     botzone->disableTriangluation();
+
                   polyToZoneMap[i] = botzone->getZoneId();
                }
 
-               botzone->mPolyBounds.push_back(Point(vert[0] - mesh.offsetX, vert[1] - mesh.offsetY));
+               botzone->addVert(Point(vert[0] - mesh.offsetX, vert[1] - mesh.offsetY));
                j++;
             }
    
             if(botzone != NULL)
             {
-               botzone->mCentroid.set(findCentroid(botzone->mPolyBounds));
-
                botzone->mConvex = true;
                botzone->addToGame(game);
                botzone->computeExtent();
-               if(gClientGame)      // Only triangulate when there is client
-                  Triangulate::Process(botzone->mPolyBounds, botzone->mPolyFill);
             }
          }
 
@@ -690,20 +634,21 @@ bool BotNavMeshZone::buildBotMeshZones(Game *game)
       {
          if(gBotNavMeshZones.size() >= MAX_ZONES)      // Don't add too many zones...
             break;
-         BotNavMeshZone *botzone = new BotNavMeshZone();
 
-         // removed F32(S32(...)) - why do rounding here? (sam)
-         botzone->mPolyBounds.push_back(Point(triangleData.pointList[triangleData.triangleList[i]*2],   triangleData.pointList[triangleData.triangleList[i]*2 + 1]));
-         botzone->mPolyBounds.push_back(Point(triangleData.pointList[triangleData.triangleList[i+1]*2], triangleData.pointList[triangleData.triangleList[i+1]*2 + 1]));
-         botzone->mPolyBounds.push_back(Point(triangleData.pointList[triangleData.triangleList[i+2]*2], triangleData.pointList[triangleData.triangleList[i+2]*2 + 1]));
-         botzone->mCentroid.set(findCentroid(botzone->mPolyBounds));
+         BotNavMeshZone *botzone = new BotNavMeshZone();
+         // Triangulation only needed for display on local client... it is expensive to compute for so many zones,
+         // and there is really no point if it will never be viewed.  Once disabled, triangluation cannot be re-enabled
+         // for this object.
+         if(!gClientGame)     
+            botzone->disableTriangluation();
+
+         botzone->addVert(Point(triangleData.pointList[triangleData.triangleList[i]*2],   triangleData.pointList[triangleData.triangleList[i]*2 + 1]));
+         botzone->addVert(Point(triangleData.pointList[triangleData.triangleList[i+1]*2], triangleData.pointList[triangleData.triangleList[i+1]*2 + 1]));
+         botzone->addVert(Point(triangleData.pointList[triangleData.triangleList[i+2]*2], triangleData.pointList[triangleData.triangleList[i+2]*2 + 1]));
 
          botzone->mConvex = true;             // Avoid random red and green on /showzones.
          botzone->addToGame(game);
          botzone->computeExtent();   
-
-         if(gClientGame)      // Only triangulate when there is client
-            Triangulate::Process(botzone->mPolyBounds, botzone->mPolyFill);
        }
 
       BotNavMeshZone::buildBotNavMeshZoneConnections();
@@ -744,7 +689,7 @@ void BotNavMeshZone::buildBotNavMeshZoneConnections()
          if(!gBotNavMeshZones[i]->getExtent().intersectsOrBorders(gBotNavMeshZones[j]->getExtent()))
             continue;
 
-         if(zonesTouch(gBotNavMeshZones[i]->mPolyBounds, gBotNavMeshZones[j]->mPolyBounds, 1.0, bordStart, bordEnd))
+         if(zonesTouch(gBotNavMeshZones[i]->getOutline(), gBotNavMeshZones[j]->getOutline(), 1.0, bordStart, bordEnd))
          {
             rect.set(bordStart, bordEnd);
             bordCen.set(rect.getCenter());

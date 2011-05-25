@@ -402,7 +402,7 @@ void LineItem::onAddedToGame(Game *theGame)
 // Bounding box for quick collision-possibility elimination, and display scoping purposes
 void LineItem::computeExtent()
 {
-   setExtent(EditorObject::computeExtents());
+   setExtent(Rect(*getOutline()));
 }
 
 

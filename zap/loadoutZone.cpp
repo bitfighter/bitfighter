@@ -131,7 +131,7 @@ void LoadoutZone::onAddedToGame(Game *theGame)
 // Bounding box for quick collision-possibility elimination
 void LoadoutZone::computeExtent()
 {
-   setExtent(EditorObject::getExtent());
+   setExtent(Rect(*getOutline()));
 }
 
 // More precise boundary for precise collision detection

@@ -59,23 +59,6 @@ void Polyline::readPolyBounds(S32 argc, const char **argv, S32 firstCoord, F32 g
 }
 
 
-// Read a series of points from a command line, and add them to a Vector of points
-//void Polyline::processPolyBounds(S32 argc, const char **argv, S32 firstCoord, F32 gridSize, bool allowFirstAndLastPointToBeEqual)
-//{
-//   readPolyBounds(argc, argv, firstCoord, gridSize, allowFirstAndLastPointToBeEqual, mPolyBounds);
-//}
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-//void EditorPolygon::processPolyBounds(S32 argc, const char **argv, S32 firstCoord, F32 gridSize)
-//{
-//   Polyline::processPolyBounds(argc, argv, firstCoord, gridSize, false);
-//   //onPointsChanged();
-//}
-
-
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -85,20 +68,6 @@ static const S32 INSTRUCTION_TEXTSIZE = 9;
 static const S32 INSTRUCTION_TEXTGAP = 3;
 static const Color ACTIVE_SPECIAL_ATTRIBUTE_COLOR = Color(.6, .6, .6);    
 static const Color INACTIVE_SPECIAL_ATTRIBUTE_COLOR = Color(.6, .6, .6);      // already in editor, called inactiveSpecialAttributeColor
-
-
-//// Constructor
-//EditorPolygon::EditorPolygon()
-//{
-//   mGeometry = boost::shared_ptr<Geometry>(new PolygonGeometry); 
-//}
-//
-//
-//// Copy constructor
-//EditorPolygon::EditorPolygon(const EditorPolygon &ep)
-//{
-//   mGeometry = boost::shared_ptr<Geometry>(new PolygonGeometry); 
-//}
 
 
 // Offset: negative below the item, positive above

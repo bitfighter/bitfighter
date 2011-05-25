@@ -27,10 +27,7 @@
 #ifndef _EDITOROBJECT_H_
 #define _EDITOROBJECT_H_
 
-#include "boost/smart_ptr/shared_ptr.hpp"
-
 #include "gameObject.h"          // We inherit from this -- for BfObject, for now
-#include "Geometry.h"            // For GeomType enum
 
 #include "Point.h"
 #include "tnlVector.h"
@@ -75,8 +72,6 @@ private:
 
 
 protected:
-   boost::shared_ptr<Geometry> mGeometry;
-
    bool mDockItem;      // True if this item lives on the dock
    bool mSelected;      // True if item is selected
    bool mLitUp;         // True if user is hovering over the item and it's "lit up"
@@ -134,42 +129,6 @@ public:
    void setSnapped(bool snapped) { /* Do nothing */ }          // Overridden in EngineeredObject
 
    virtual void newObjectFromDock(F32 gridSize) { /* Do nothing */ }   // Called when item dragged from dock to editor -- overridden by Polygon and SimpleLine
-
-   // Point manipulation methods, work will be delegated to proper geometry object
-   virtual GeomType getGeomType() { return mGeometry->getGeomType(); }
-   virtual Point getVert(S32 index) { return mGeometry->getVert(index); }
-   virtual void setVert(const Point &point, S32 index) { mGeometry->setVert(point, index); }
-
-   S32 getVertCount() { return mGeometry->getVertCount(); }
-   void clearVerts() { mGeometry->clearVerts(); }
-   bool addVert(const Point &point)  { return mGeometry->addVert(point); }
-   bool addVertFront(Point vert)  { return mGeometry->addVertFront(vert); }
-   bool deleteVert(S32 vertIndex)  { return mGeometry->deleteVert(vertIndex); }
-   bool insertVert(Point vertex, S32 vertIndex)  { return mGeometry->insertVert(vertex, vertIndex); }
-
-   bool anyVertsSelected() { return mGeometry->anyVertsSelected(); }
-   void selectVert(S32 vertIndex) { mGeometry->selectVert(vertIndex); }
-   void aselectVert(S32 vertIndex) { mGeometry->aselectVert(vertIndex); }
-   void unselectVert(S32 vertIndex) { mGeometry->unselectVert(vertIndex); }
-   void unselectVerts() { mGeometry->unselectVerts(); }
-   bool vertSelected(S32 vertIndex) { return mGeometry->vertSelected(vertIndex); }
-
-   Vector<Point> *getOutline() { return mGeometry->getOutline(); }
-   Vector<Point> *getFill() { return mGeometry->getFill(); }
-   Point getCentroid() { return mGeometry->getCentroid(); }
-   F32 getLabelAngle() { return mGeometry->getLabelAngle(); }
-
-   void packGeom(GhostConnection *connection, BitStream *stream) { mGeometry->packGeom(connection, stream); }
-   void unpackGeom(GhostConnection *connection, BitStream *stream) { mGeometry->unpackGeom(connection, stream); }
-
-   string geomToString(F32 gridSize) { return mGeometry->geomToString(gridSize); }
-   void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize) { mGeometry->readGeom(argc, argv, firstCoord, gridSize); }
-
-   //void cloneGeometry() { mGeometry->cloneGeometry(); }
-
-   Rect computeExtents() { return mGeometry->computeExtents(); }
-
-   void onPointsChanged() { mGeometry->onPointsChanged(); }
 
 
    // Keep track which vertex, if any is lit up in the currently selected item

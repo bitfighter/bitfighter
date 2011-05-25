@@ -666,7 +666,7 @@ string HuntersNexusObject::toString()
 
 void HuntersNexusObject::computeExtent()
 {
-   setExtent(EditorObject::computeExtents());
+   setExtent(Rect(*getOutline()));
 }
 
 

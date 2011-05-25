@@ -92,10 +92,6 @@ public:
 
    S32 getRenderSortValue();
 
-   Vector<Point> mPolyBounds;
-   Vector<Point> mPolyFill;
-   Point mCentroid;        
-
 
    // Create objects from parameters stored in level file
    bool processArguments(S32 argc, const char **argv);
@@ -120,9 +116,6 @@ public:
 
    U16 getZoneId() { return mZoneId; }
    void setZoneId(U16 zoneId) { mZoneId = zoneId; }
-
-   //Vector<Point> mPolyBounds;
-   const Vector<Point> *getPolyBoundsPtr() { return &mPolyBounds; }
 
    Vector<NeighboringZone> mNeighbors;       // List of other zones this zone touches, only populated on server
    Vector<Border> mNeighborRenderPoints;     // Only populated on client

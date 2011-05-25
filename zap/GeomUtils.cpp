@@ -182,23 +182,23 @@ bool pointInTriangle(Point p, Point a, Point b, Point c)
 
 // Based on http://www.opengl.org/discussion_boards/ubbthreads.php?ubb=showflat&Number=248453
 // No idea if this is optimal or not, but it is only used in the editor, and works fine for our purposes.
-bool isConvex(const Vector<Point> &verts)
+bool isConvex(const Vector<Point> *verts)
 {
   Point v1, v2;
   double det_value, cur_det_value;
-  int num_vertices = verts.size();
+  int num_vertices = verts->size();
   
   if(num_vertices < 3)
      return true;
   
-  v1 = verts[0] - verts[num_vertices-1];
-  v2 = verts[1] - verts[0];
+  v1 = verts->get(0) - verts->get(num_vertices-1);
+  v2 = verts->get(1) - verts->get(0);
   det_value = v1.determinant(v2);
   
   for(S32 i = 1 ; i < num_vertices-1 ; i++)
   {
     v1 = v2;
-    v2 = verts[i+1] - verts[i];
+    v2 = verts->get(i+1) - verts->get(i);
     cur_det_value = v1.determinant(v2);
     
     if( (cur_det_value * det_value) < 0.0 )
@@ -206,7 +206,7 @@ bool isConvex(const Vector<Point> &verts)
   }
   
   v1 = v2;
-  v2 = verts[0] - verts[num_vertices-1];
+  v2 = verts->get(0) - verts->get(num_vertices-1);
   cur_det_value = v1.determinant(v2);
   
   return  (cur_det_value * det_value) >= 0.0;
@@ -568,30 +568,30 @@ S32 findClosestPoint(const Point &point, const Vector<Point> &points)
 }
 
 
-bool zonesTouch(const Vector<Point> &zone1, const Vector<Point> &zone2, F32 scaleFact, Point &overlapStart, Point &overlapEnd)
+bool zonesTouch(const Vector<Point> *zone1, const Vector<Point> *zone2, F32 scaleFact, Point &overlapStart, Point &overlapEnd)
 {
    // Check for unlikely but fatal situation: Not enough vertices
-   if(zone1.size() < 3 || zone2.size() < 3)
+   if(zone1->size() < 3 || zone2->size() < 3)
       return false;
 
    const Point *pi1, *pi2, *pj1, *pj2;
 
    // Now, do we actually touch?  Let's look, segment by segment
-   for(S32 i = 0; i < zone1.size(); i++)
+   for(S32 i = 0; i < zone1->size(); i++)
    {
-      pi1 = &zone1[i];
-      if(i == zone1.size() - 1)
-         pi2 = &zone1[0];
+      pi1 = &zone1->get(i);
+      if(i == zone1->size() - 1)
+         pi2 = &zone1->get(0);
       else
-         pi2 = &zone1[i + 1];
+         pi2 = &zone1->get(i + 1);
 
-      for(S32 j = 0; j < zone2.size(); j++)
+      for(S32 j = 0; j < zone2->size(); j++)
       {
-         pj1 = &zone2[j];
-         if(j == zone2.size() - 1)
-            pj2 = &zone2[0];
+         pj1 = &zone2->get(j);
+         if(j == zone2->size() - 1)
+            pj2 = &zone2->get(0);
          else
-            pj2 = &zone2[j + 1];
+            pj2 = &zone2->get(j + 1);
 
          if(segsOverlap(*pi1, *pi2, *pj1, *pj2, overlapStart, overlapEnd, scaleFact))
             return true;

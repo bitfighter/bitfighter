@@ -50,7 +50,13 @@ namespace Zap
 
 class Geometry
 {
+protected:
+   bool mTriangluationDisabled;     // Allow optimization of adding points for polygons that will never be displayed
+
 public:
+
+   Geometry() { mTriangluationDisabled = false; }     // Constructor
+
    virtual GeomType getGeomType() = 0;
    virtual Point getVert(S32 index) = 0;
    virtual void setVert(const Point &pos, S32 index) = 0;
@@ -86,6 +92,8 @@ public:
    virtual Rect computeExtents() = 0;
 
    virtual void onPointsChanged() = 0;
+
+   void disableTriangluation() { mTriangluationDisabled = true; }
 };
 
 
@@ -232,7 +240,7 @@ public:
 
    Vector<Point> *getOutline() { return &mPolyBounds; }
    virtual Vector<Point> *getFill() { return NULL; }
-   Point getCentroid() { return mCentroid; }   
+   Point getCentroid() { TNLAssert(!mTriangluationDisabled, "Triangluation disabled!"); return mCentroid; }   
    virtual F32 getLabelAngle() { return 0; }
 
    void packGeom(GhostConnection *connection, BitStream *stream);
@@ -263,8 +271,8 @@ public:
 
    GeomType getGeomType() { return geomPoly; }
 
-   Vector<Point> *getFill() { return &mPolyFill; }
-   F32 getLabelAngle() { return mLabelAngle; }
+   Vector<Point> *getFill() { TNLAssert(!mTriangluationDisabled, "Triangluation disabled!"); return &mPolyFill; }
+   F32 getLabelAngle()      { TNLAssert(!mTriangluationDisabled, "Triangluation disabled!"); return mLabelAngle; }
 
    void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize);
 

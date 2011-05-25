@@ -388,6 +388,9 @@ void PolygonGeometry::readGeom(S32 argc, const char **argv, S32 firstCoord, F32 
 
 void PolygonGeometry::onPointsChanged()
 {
+   if(mTriangluationDisabled)
+      return;
+
    mCentroid = findCentroid(mPolyBounds); 
    Triangulate::Process(mPolyBounds, mPolyFill);        // Resizes and fills mPolyFill from data in mPolyBounds
    mLabelAngle = angleOfLongestSide(mPolyBounds);
