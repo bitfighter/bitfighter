@@ -79,7 +79,6 @@ private:
    U16 mZoneId;            // Unique ID for each zone
 
 public:
-   bool mConvex;           // Stores wheter zone is convex or not
    bool flag;              // Flag used to mark zones during construction process, serves no purpose once zones have been generated
 
    static const S32 BufferRadius = Ship::CollisionRadius;  // Radius to buffer objects when creating the holes for zones

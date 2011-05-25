@@ -180,37 +180,37 @@ bool pointInTriangle(Point p, Point a, Point b, Point c)
 }
 
 
-// Based on http://www.opengl.org/discussion_boards/ubbthreads.php?ubb=showflat&Number=248453
-// No idea if this is optimal or not, but it is only used in the editor, and works fine for our purposes.
-bool isConvex(const Vector<Point> *verts)
-{
-  Point v1, v2;
-  double det_value, cur_det_value;
-  int num_vertices = verts->size();
-  
-  if(num_vertices < 3)
-     return true;
-  
-  v1 = verts->get(0) - verts->get(num_vertices-1);
-  v2 = verts->get(1) - verts->get(0);
-  det_value = v1.determinant(v2);
-  
-  for(S32 i = 1 ; i < num_vertices-1 ; i++)
-  {
-    v1 = v2;
-    v2 = verts->get(i+1) - verts->get(i);
-    cur_det_value = v1.determinant(v2);
-    
-    if( (cur_det_value * det_value) < 0.0 )
-      return false;
-  }
-  
-  v1 = v2;
-  v2 = verts->get(0) - verts->get(num_vertices-1);
-  cur_det_value = v1.determinant(v2);
-  
-  return  (cur_det_value * det_value) >= 0.0;
-}
+//// Based on http://www.opengl.org/discussion_boards/ubbthreads.php?ubb=showflat&Number=248453
+//// No idea if this is optimal or not, but it is only used in the editor, and works fine for our purposes.
+//bool isConvex(const Vector<Point> *verts)
+//{
+//  Point v1, v2;
+//  double det_value, cur_det_value;
+//  int num_vertices = verts->size();
+//  
+//  if(num_vertices < 3)
+//     return true;
+//  
+//  v1 = verts->get(0) - verts->get(num_vertices-1);
+//  v2 = verts->get(1) - verts->get(0);
+//  det_value = v1.determinant(v2);
+//  
+//  for(S32 i = 1 ; i < num_vertices-1 ; i++)
+//  {
+//    v1 = v2;
+//    v2 = verts->get(i+1) - verts->get(i);
+//    cur_det_value = v1.determinant(v2);
+//    
+//    if( (cur_det_value * det_value) < 0.0 )
+//      return false;
+//  }
+//  
+//  v1 = v2;
+//  v2 = verts->get(0) - verts->get(num_vertices-1);
+//  cur_det_value = v1.determinant(v2);
+//  
+//  return  (cur_det_value * det_value) >= 0.0;
+//}
 
 
 // Check if circle at inCenter with radius^2 = inRadiusSq intersects with a polygon.

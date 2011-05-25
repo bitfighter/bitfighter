@@ -109,7 +109,7 @@ void BotNavMeshZone::render(S32 layerIndex)
       return;
 
    if(layerIndex == 0)
-      renderNavMeshZone(getOutline(), getFill(), getCentroid(), mZoneId, mConvex);
+      renderNavMeshZone(getOutline(), getFill(), getCentroid(), mZoneId, true);
 
    else if(layerIndex == 1)
       renderNavMeshBorders(mNeighbors);
@@ -150,7 +150,6 @@ bool BotNavMeshZone::processArguments(S32 argc, const char **argv)
    readGeom(argc, argv, 0, getGame()->getGridSize());
 
    setExtent();     // Sets object's extent database
-   mConvex = isConvex(getOutline());
 
    return true;
 }
@@ -603,7 +602,6 @@ bool BotNavMeshZone::buildBotMeshZones(Game *game)
    
             if(botzone != NULL)
             {
-               botzone->mConvex = true;
                botzone->addToGame(game);
                botzone->setExtent();
             }
@@ -639,7 +637,6 @@ bool BotNavMeshZone::buildBotMeshZones(Game *game)
          botzone->addVert(Point(triangleData.pointList[triangleData.triangleList[i+1]*2], triangleData.pointList[triangleData.triangleList[i+1]*2 + 1]));
          botzone->addVert(Point(triangleData.pointList[triangleData.triangleList[i+2]*2], triangleData.pointList[triangleData.triangleList[i+2]*2 + 1]));
 
-         botzone->mConvex = true;             // Avoid random red and green on /showzones.
          botzone->addToGame(game);
          botzone->setExtent();   
        }
