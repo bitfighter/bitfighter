@@ -37,60 +37,18 @@ extern S32 gMaxPolygonPoints;
 class Polyline
 {
 public:
-   Vector<Point> mPolyBounds;
-
    static void readPolyBounds(S32 argc, const char **argv, S32 firstCoord, F32 gridSize, bool allowFirstAndLastPointToBeEqual, Vector<Point> &bounds);
 
 protected:
-   virtual void packUpdate(GhostConnection *connection, BitStream *stream);
-   virtual void unpackUpdate(GhostConnection *connection, BitStream *stream);
+   void renderPolyHighlight();
 
-   // Read a series of points from a command line, and add them to a Vector of points
-   void processPolyBounds(S32 argc, const char **argv, S32 firstCoord, F32 gridSize, bool allowFirstAndLastPointToBeEqual);
+   //// Read a series of points from a command line, and add them to a Vector of points
+   //void processPolyBounds(S32 argc, const char **argv, S32 firstCoord, F32 gridSize, bool allowFirstAndLastPointToBeEqual);
 
-   virtual void processPolyBounds(S32 argc, const char **argv, S32 firstCoord, F32 gridSize)
-   {
-      processPolyBounds(argc, argv, firstCoord, gridSize, true);
-   }
-
-   
-   Rect computePolyExtents();
-
-   string boundsToString(F32 gridSize);
-};
-
-
-class EditorPolyline : public Polyline, public EditorObject, public GameObject
-{
-   virtual GeomType getGeomType() { return geomLine; }
-
-public:
-   S32 getVertCount();
-   void clearVerts();
-   void addVert(const Point &point);
-   void addVertFront(Point vert);
-   void deleteVert(S32 vertIndex);
-   void insertVert(Point vertex, S32 vertIndex);
-   Point getVert(S32 index);
-   void setVert(const Point &point, S32 index);
-
-   virtual void onPointsChanged();
-
-   //virtual void renderItemText(const char *text, S32 offset, F32 currentScale);
-   //virtual void labelDockItem();
-
-
-   //void addToDock(Game *game, const Point &point);
-   //virtual void renderDock();
-   //void highlightDockItem(); 
-
-   //void initializeEditor(F32 gridSize);
-
-   // Offset lets us drag an item out from the dock by an amount offset from the 0th vertex.  This makes placement seem more natural.
-   //Point getInitialPlacementOffset(F32 gridSize);
-
-protected:
-      void renderPolyHighlight();
+   //virtual void processPolyBounds(S32 argc, const char **argv, S32 firstCoord, F32 gridSize)
+   //{
+   //   processPolyBounds(argc, argv, firstCoord, gridSize, true);
+   //}
 };
 
 
@@ -99,12 +57,8 @@ protected:
 
 
 // Provide editor related methods to the polygon class
-class EditorPolygon : public EditorPolyline, public LuaItem
+class EditorPolygon : public Polyline, public EditorObject, public GameObject, public LuaItem
 {
-   typedef EditorPolyline Parent;
-
-   GeomType getGeomType() { return geomPoly; }
-
    virtual void renderItemText(const char *text, S32 offset, F32 currentScale);
    virtual void labelDockItem();
 
@@ -112,35 +66,30 @@ class EditorPolygon : public EditorPolyline, public LuaItem
    virtual void renderDock();
    void highlightDockItem(); 
 
-   void initializeEditor(F32 gridSize);
-
    // Offset lets us drag an item out from the dock by an amount offset from the 0th vertex.  This makes placement seem more natural.
    Point getInitialPlacementOffset(F32 gridSize);
 
 protected:
-      void processPolyBounds(S32 argc, const char **argv, S32 firstCoord, F32 gridSize);
-
+      //void processPolyBounds(S32 argc, const char **argv, S32 firstCoord, F32 gridSize);
       void renderPolyHighlight();
 
-      Vector<Point> mPolyFill;      // Triangles used for rendering polygon fill
-      Point mCentroid;
-
 public:
-   F32 mLabelAngle;
+   EditorPolygon() { mGeometry = boost::shared_ptr<Geometry>(new PolygonGeometry); };                             // Constructor
+   //EditorPolygon(const EditorPolygon &ep) : EditorObject(ep) { mGeometry = boost::shared_ptr<Geometry>(new PolygonGeometry); };      // Copy constructor
 
-   Point getCentroid() { return mCentroid; }
-   void onPointsChanged();
+   void newObjectFromDock(F32 gridSize);
 
-   Vector<Point> *getPolyFillPoints() { return &mPolyFill; }
+   // Item is being actively dragged
+   virtual void onItemDragging() { onGeomChanged(); }    // maybe not for polywalls??
+   virtual void onGeomChanged() { onPointsChanged(); }   // Tell the geometry that things have changed
 
-   void packUpdate(GhostConnection *connection, BitStream *stream);
-   void unpackUpdate(GhostConnection *connection, BitStream *stream);
+   virtual void renderEditor(F32 currentScale);
 
    /////
    // Former LuaPolygon methods
    // This class serves only to provide an implementation of the abstract methods in LuaItem that are common to the polygon classes
 public:
-   S32 getLoc(lua_State *L) { return LuaObject::returnPoint(L, mCentroid); }         // Center of item (returns point)
+   S32 getLoc(lua_State *L) { return LuaObject::returnPoint(L, getCentroid()); }     // Center of item (returns point)
    S32 getRad(lua_State *L) { return LuaObject::returnInt(L, 0); }                   // Radius of item (returns number)
    S32 getVel(lua_State *L) { return LuaObject::returnPoint(L, Point(0,0)); }        // Velocity of item (returns point)
    S32 getTeamIndx(lua_State *L) { return LuaObject::returnInt(L, getTeam() + 1); }  // Team of item (in bots, teams start with 1)

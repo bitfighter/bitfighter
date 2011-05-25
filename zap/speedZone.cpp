@@ -121,7 +121,7 @@ void SpeedZone::generatePoints(const Point &pos, const Point &dir, F32 gridSize,
 
 void SpeedZone::render()
 {
-   renderSpeedZone(mPolyBounds, getGame()->getCurrentTime());
+   renderSpeedZone(&mPolyBounds, getGame()->getCurrentTime());
 }
 
 

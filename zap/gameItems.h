@@ -207,7 +207,6 @@ class AbstractSpawn : public EditorPointObject
    typedef EditorObject Parent;
 
 protected:
-   Point mPos;
    S32 mSpawnTime;
 
    void setRespawnTime(S32 time);
@@ -215,7 +214,6 @@ protected:
 public:
    AbstractSpawn(const Point &pos = Point(), S32 time = 0, GameObjectType objType = UnknownType); // Constructor
 
-   Point getPos() { return mPos; }
    Timer timer;
    
    bool processArguments(S32 argc, const char **argv);
@@ -232,14 +230,12 @@ public:
 
    virtual string toString();
 
+   Point getPos() { return getVert(0); }     // For readability 
+
    F32 getEditorRadius(F32 currentScale);
 
    virtual void renderEditor(F32 currentScale) = 0;
    virtual void renderDock() = 0;
-
-   //// PointObject methods     ==> TODO: Make this an interface
-   Point getVert(S32 index) { return mPos; }
-   void setVert(const Point &point, S32 index) { mPos = point; }
 };
 
 

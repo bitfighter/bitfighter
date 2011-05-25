@@ -372,7 +372,7 @@ void EditorInstructionsUserInterface::renderPageWalls()
      
       // Extend end points --> populates extendedEndPoints
       Vector<Point> extendedEndPoints;
-      Barrier::constructBarrierEndPoints(points, width, extendedEndPoints);
+      Barrier::constructBarrierEndPoints(&points, width, extendedEndPoints);
 
        Vector<WallSegment *> wallSegments;
 
@@ -389,7 +389,7 @@ void EditorInstructionsUserInterface::renderPageWalls()
       for(S32 i = 0; i < wallSegments.size(); i++)
          wallSegments[i]->renderFill(false, false);
 
-      renderWallEdges(edges);
+      renderWallEdges(&edges);
 
       for(S32 i = 0; i < wallSegments.size(); i++)
          delete wallSegments[i];
@@ -470,7 +470,7 @@ void EditorInstructionsUserInterface::renderPageZones()
    glPushMatrix();
       glTranslatef(col1x, ypos, 0);
       glScalef(scale, scale, 1);
-      renderNavMeshZone(sample1o, sample1f, findCentroid(sample1o), -1, true);
+      renderNavMeshZone(&sample1o, &sample1f, findCentroid(sample1o), -1, true);
    glPopMatrix();
 
    glColor3f(0,1,0);      // Green
@@ -481,7 +481,7 @@ void EditorInstructionsUserInterface::renderPageZones()
    glPushMatrix();
       glTranslatef(col2x, ypos, 0);
       glScalef(scale, scale, 1);
-      renderNavMeshZone(sample2o, sample2f, findCentroid(sample2o), -1, false);
+      renderNavMeshZone(&sample2o, &sample2f, findCentroid(sample2o), -1, false);
    glPopMatrix();
 
    glColor3f(1,0,0);      // Red
@@ -494,8 +494,8 @@ void EditorInstructionsUserInterface::renderPageZones()
     glPushMatrix();
       glTranslatef(col1x, ypos, 0);
       glScalef(scale, scale, 1);
-      renderNavMeshZone(sample3o, sample3f, findCentroid(sample3o), -1, true);
-      renderNavMeshZone(sample4o, sample4f, findCentroid(sample4o), -1, true);
+      renderNavMeshZone(&sample3o, &sample3f, findCentroid(sample3o), -1, true);
+      renderNavMeshZone(&sample4o, &sample4f, findCentroid(sample4o), -1, true);
       renderNavMeshBorder(border34, 1, BORDER_FILL_COLOR, BORDER_FILL_ALPHA, BORDER_WIDTH);
    glPopMatrix();
 
@@ -506,8 +506,8 @@ void EditorInstructionsUserInterface::renderPageZones()
    glPushMatrix();
       glTranslatef(col2x, ypos, 0);
       glScalef(scale, scale, 1);
-      renderNavMeshZone(sample3o, sample3f, findCentroid(sample3o), -1, true);
-      renderNavMeshZone(sample5o, sample5f, findCentroid(sample5o), -1, true);
+      renderNavMeshZone(&sample3o, &sample3f, findCentroid(sample3o), -1, true);
+      renderNavMeshZone(&sample5o, &sample5f, findCentroid(sample5o), -1, true);
    glPopMatrix();
 
    glColor3f(1,0,0);      // Red

@@ -73,8 +73,8 @@ bool Teleporter::processArguments(S32 argc, const char **argv)
    pos.read(argv);
    dest.read(argv + 2);
 
-   dest *= getGame()->getGridSize();
    pos *= getGame()->getGridSize();
+   dest *= getGame()->getGridSize();
 
    setVert(pos, 0);
    setVert(dest, 1);
@@ -148,21 +148,21 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
    S32 count;
    if(stream->readFlag())
    {
-      Point p;    // Reusable container
-
-      p.read(stream);
-      setVert(p, 0);
+      Point pos;
+      pos.read(stream);
+      setVert(pos, 0);
 
       stream->read(&count);
       mDests.clear();
 
+      Point p;    // Reusable container
       for(S32 i = 0; i < count; i++)
       {
          p.read(stream);
          mDests.push_back(p);
       }
       
-      setExtent(Rect(p, TELEPORTER_RADIUS));
+      setExtent(Rect(pos, TELEPORTER_RADIUS));
    }
 
    if(stream->readFlag() && isGhost())

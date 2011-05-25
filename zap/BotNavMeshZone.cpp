@@ -111,7 +111,7 @@ void BotNavMeshZone::render(S32 layerIndex)
       Triangulate::Process(mPolyBounds, mPolyFill);
 
    if(layerIndex == 0)
-      renderNavMeshZone(mPolyBounds, mPolyFill, mCentroid, mZoneId, mConvex);
+      renderNavMeshZone(&mPolyBounds, &mPolyFill, mCentroid, mZoneId, mConvex);
 
    else if(layerIndex == 1)
       renderNavMeshBorders(mNeighbors);

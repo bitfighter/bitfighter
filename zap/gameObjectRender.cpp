@@ -70,12 +70,12 @@ void glTranslate(const Point &pos)
 
 
 // geomType should be GL_LINES or GL_POLYGON
-void renderPointVector(const Vector<Point> &points, U32 geomType)
+void renderPointVector(const Vector<Point> *points, U32 geomType)
 {
    glEnableClientState(GL_VERTEX_ARRAY);
 
-   glVertexPointer(2, GL_FLOAT, sizeof(Point), points.address());    
-   glDrawArrays(geomType, 0, points.size());
+   glVertexPointer(2, GL_FLOAT, sizeof(Point), points->address());    
+   glDrawArrays(geomType, 0, points->size());
 
    glDisableClientState(GL_VERTEX_ARRAY);
 
@@ -786,19 +786,19 @@ void renderPolygonLabel(const Point &centroid, F32 angle, F32 size, const char *
 
 
 // Renders fill in the form of a series of points representing triangles
-void renderTriangulatedPolygonFill(const Vector<Point> &fill)
+void renderTriangulatedPolygonFill(const Vector<Point> *fill)
 {
    renderPointVector(fill, GL_TRIANGLES);
 }
 
 
-void renderPolygonOutline(const Vector<Point> &outline)
+void renderPolygonOutline(const Vector<Point> *outline)
 {
    renderPointVector(outline, GL_LINE_LOOP);
 }
 
 
-void renderPolygonOutline(const Vector<Point> &outlinePoints, const Color &outlineColor, F32 alpha = 1)
+void renderPolygonOutline(const Vector<Point> *outlinePoints, const Color &outlineColor, F32 alpha = 1)
 {
    if(alpha != 1)
       glEnableBlend;
@@ -818,21 +818,14 @@ void renderPolygonFill(const Vector<Point> *fillPoints, const Color &fillColor, 
       glEnableBlend;
 
    glColor(fillColor, alpha);
-   renderTriangulatedPolygonFill(*fillPoints);
+   renderTriangulatedPolygonFill(fillPoints);
 
    if(alpha != 1)
       glDisableBlend;
 }
 
 
-// TODO: Get rid of one of these!
-void renderPolygonFill(const Vector<Point> &fillPoints, const Color &fillColor, F32 alpha = 1)
-{
-   renderPolygonFill(&fillPoints, fillColor, alpha);
-}
-
-
-void renderPolygon(const Vector<Point> &fillPoints, const Vector<Point> &outlinePoints, 
+void renderPolygon(const Vector<Point> *fillPoints, const Vector<Point> *outlinePoints, 
                    const Color &fillColor, const Color &outlineColor, F32 alpha = 1)
 {
    renderPolygonFill(fillPoints, fillColor, alpha);
@@ -840,21 +833,22 @@ void renderPolygon(const Vector<Point> &fillPoints, const Vector<Point> &outline
 }
 
 
-void renderLoadoutZone(Color color, const Vector<Point> &outline, const Vector<Point> &fill)
+void renderLoadoutZone(Color color, const Vector<Point> *outline, const Vector<Point> *fill)
 {
    renderPolygon(fill, outline, color * 0.5, color);
 }
 
 
-void renderLoadoutZone(Color color, const Vector<Point> &outline, const Vector<Point> &fill, 
-                                    const Point &centroid, F32 labelAngle, F32 scaleFact)
+void renderLoadoutZone(Color color, const Vector<Point> *outline, const Vector<Point> *fill, 
+                       const Point &centroid, F32 angle, F32 scaleFact)
 {
    renderLoadoutZone(color, outline, fill);
-   renderPolygonLabel(centroid, labelAngle, 25, "LOADOUT ZONE", scaleFact);
+   renderPolygonLabel(centroid, angle, 25, "LOADOUT ZONE", scaleFact);
 }
 
 
-void renderNavMeshZone(const Vector<Point> &outline, const Vector<Point> &fill, const Point &centroid, S32 zoneId, bool isConvex, bool isSelected)
+void renderNavMeshZone(const Vector<Point> *outline, const Vector<Point> *fill, const Point &centroid, 
+                       S32 zoneId, bool isConvex, bool isSelected)
 {
    Color color = isConvex ? green : red;
 
@@ -937,7 +931,7 @@ static Color getGoalZoneFillColor(const Color &c, bool isFlashing, F32 glowFract
 
 
 // No label version
-void renderGoalZone(Color c, const Vector<Point> &outline, const Vector<Point> &fill)
+void renderGoalZone(Color c, const Vector<Point> *outline, const Vector<Point> *fill)
 {
    Color fillColor    = getGoalZoneFillColor(c, false, 0);
    Color outlineColor = getGoalZoneOutlineColor(c, false);
@@ -947,7 +941,7 @@ void renderGoalZone(Color c, const Vector<Point> &outline, const Vector<Point> &
 
 
 // Goal zone flashes after capture, but glows after touchdown...
-void renderGoalZone(Color c, const Vector<Point> &outline, const Vector<Point> &fill, Point centroid, F32 labelAngle, 
+void renderGoalZone(Color c, const Vector<Point> *outline, const Vector<Point> *fill, Point centroid, F32 labelAngle, 
                     bool isFlashing, F32 glowFraction, S32 score, F32 scaleFact)
 {
    F32 alpha = isFlashing ? 0.75 : 0.5;
@@ -964,7 +958,7 @@ void renderGoalZone(Color c, const Vector<Point> &outline, const Vector<Point> &
 extern Color gNexusOpenColor;
 extern Color gNexusClosedColor;
 
-void renderNexus(const Vector<Point> &outline, const Vector<Point> &fill, Point centroid, F32 labelAngle, bool open, 
+void renderNexus(const Vector<Point> *outline, const Vector<Point> *fill, Point centroid, F32 labelAngle, bool open, 
                  F32 glowFraction, F32 scaleFact)
 {
    Color c;
@@ -983,7 +977,7 @@ void renderNexus(const Vector<Point> &outline, const Vector<Point> &fill, Point 
 }
 
 
-void renderSlipZone(const Vector<Point> &bounds, const Vector<Point> &boundsFill, Rect extent)     
+void renderSlipZone(const Vector<Point> *bounds, const Vector<Point> *boundsFill, const Point &centroid)     
 {
    Color theColor (0, 0.5, 0);  // Go for a pale green, for now...
 
@@ -993,14 +987,11 @@ void renderSlipZone(const Vector<Point> &bounds, const Vector<Point> &boundsFill
    glColor(theColor * 0.7);
    renderPointVector(bounds, GL_LINE_LOOP);
 
-   Point extents = extent.getExtents();
-   Point center = extent.getCenter();
-
    glPushMatrix();
-      glTranslate(center);
+      glTranslate(centroid);
 
-      if(extents.x < extents.y)
-         glRotatef(90, 0, 0, 1);
+      //if(extents.x < extents.y)
+      //   glRotatef(90, 0, 0, 1);
 
       glColor(cyan);
       renderCenteredString(Point(0,0), 25, "CAUTION - SLIPPERY!");
@@ -1392,7 +1383,7 @@ void renderEnergyItem(const Point &pos)
 }
 
 
-void renderWallFill(const Vector<Point> &points, bool polyWall, const Color &fillColor)
+void renderWallFill(const Vector<Point> *points, bool polyWall, const Color &fillColor)
 {
    glColor(fillColor);
    renderPointVector(points, polyWall ? GL_TRIANGLES : GL_POLYGON);
@@ -1400,25 +1391,25 @@ void renderWallFill(const Vector<Point> &points, bool polyWall, const Color &fil
 
 
 // Used in both editor and game
-void renderWallEdges(const Vector<Point> &edges, F32 alpha)
+void renderWallEdges(const Vector<Point> *edges, F32 alpha)
 {
    glColor(gIniSettings.wallOutlineColor, alpha);
    renderPointVector(edges, GL_LINES);
 }
 
 
-void renderSpeedZone(const Vector<Point> &points, U32 time)
+void renderSpeedZone(const Vector<Point> *points, U32 time)
 {
    glColor3f(1, 0, 0);     // Red
 
    for(S32 j = 0; j < 2; j++)
    {
-      S32 start = j * points.size() / 2;    // GoFast comes in two equal shapes
+      S32 start = j * points->size() / 2;    // GoFast comes in two equal shapes
 
       glEnableClientState(GL_VERTEX_ARRAY);
 
-      glVertexPointer(2, GL_FLOAT, sizeof(Point), points.address());    
-      glDrawArrays(GL_LINE_LOOP, start, points.size() / 2);
+      glVertexPointer(2, GL_FLOAT, sizeof(Point), points->address());    
+      glDrawArrays(GL_LINE_LOOP, start, points->size() / 2);
 
       glDisableClientState(GL_VERTEX_ARRAY);
    }
@@ -1541,9 +1532,9 @@ void renderForceFieldProjector(Point pos, Point normal, Color c, bool enabled)
    glColor(enabled ? c : (c * 0.6));
 
    Vector<Point> geom;
-   ForceFieldProjector::getGeom(pos, normal, geom);
+   ForceFieldProjector::getGeom(pos, normal, geom);      // fills geom from pos and normal
 
-   renderPointVector(geom, GL_LINE_LOOP);
+   renderPointVector(&geom, GL_LINE_LOOP);
 }
 
 
@@ -1557,7 +1548,7 @@ void renderForceField(Point start, Point end, Color c, bool fieldUp, F32 scaleFa
 
    glColor(fieldUp ? c : c * 0.5);
 
-   renderPointVector(geom, GL_LINE_LOOP);
+   renderPointVector(&geom, GL_LINE_LOOP);
 }
 
 

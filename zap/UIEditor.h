@@ -285,7 +285,7 @@ public:
    void onAfterRunScriptFromConsole();
 
    void render();
-   static void renderPolyline(const Vector<Point> verts);
+   static void renderPolyline(const Vector<Point> *verts);
 
 
    Color getTeamColor(S32 teamId);

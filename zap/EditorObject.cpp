@@ -34,6 +34,8 @@
 #include "goalZone.h"
 #include "huntersGame.h"
 
+#include "Geometry.h"            // For GeomType enum
+
 #include "UIEditorMenus.h"       // For EditorAttributeMenuUI def
 
 
@@ -68,8 +70,6 @@ void EditorObject::addToDock(Game *game, const Point &point)
    mGame = game;
    mDockItem = true;
    
-   // TODO: Needed?
-   mVertSelected.resize(getVertCount()); 
    unselectVerts();
 
    gEditorUserInterface.mDockItems.push_back(this);
@@ -79,7 +79,7 @@ void EditorObject::addToDock(Game *game, const Point &point)
 void EditorObject::processEndPoints()
 {
    if(getObjectTypeMask() & BarrierType)
-      Barrier::constructBarrierEndPoints(getVerts(), getWidth() / getGridSize(), extendedEndPoints);
+      Barrier::constructBarrierEndPoints(getOutline(), getWidth() / getGridSize(), extendedEndPoints);
 
    else if(getObjectTypeMask() & PolyWallType)
    {
@@ -282,7 +282,7 @@ void EditorObject::render(bool isScriptItem, bool showingReferenceShip, ShowMode
    S32 snapIndex = gEditorUserInterface.getSnapVertexIndex();
 
    // Override drawColor for this special case
-   if(mAnyVertsSelected)
+   if(anyVertsSelected())
       drawColor = SELECT_COLOR;
      
    if(mDockItem)
@@ -714,136 +714,28 @@ void EditorObject::renderPolylineCenterline(F32 alpha)
    // Render wall centerlines
    if(mSelected)
       glColor(SELECT_COLOR, alpha);
-   else if(mLitUp && !mAnyVertsSelected)
+   else if(mLitUp && !anyVertsSelected())
       glColor(HIGHLIGHT_COLOR, alpha);
    else
       glColor(getTeamColor(mTeam), alpha);
 
    glLineWidth(WALL_SPINE_WIDTH);
-   EditorUserInterface::renderPolyline(getVerts());
+   EditorUserInterface::renderPolyline(getOutline());
    glLineWidth(gDefaultLineWidth);
 }
 
 
 void EditorObject::initializeEditor(F32 gridSize)
 {
-   mVertSelected.resize(getVertCount()); 
    unselectVerts();
 }
-
-
-Vector<Point> EditorObject::getVerts() 
-{
-   S32 verts = getVertCount();
-
-   Vector<Point> points;
-   points.resize(verts);
-
-   for(S32 i = 0; i < verts; i++)
-      points[i] = getVert(i);
-
-   return points;
-}
-
-
-// Select a single vertex.  This is the default selection we use most of the time
-void EditorObject::selectVert(S32 vertIndex) 
-{ 
-   unselectVerts();
-   aselectVert(vertIndex);
-}
-
-
-// Select an additional vertex (remember command line ArcInfo?)
-void EditorObject::aselectVert(S32 vertIndex)
-{
-   mVertSelected[vertIndex] = true;
-   mAnyVertsSelected = true;
-}
-
-
-// Unselect a single vertex, considering the possibility that there may be other selected vertices as well
-void EditorObject::unselectVert(S32 vertIndex) 
-{ 
-   mVertSelected[vertIndex] = false;
-
-   bool anySelected = false;
-   for(S32 j = 0; j < (S32)mVertSelected.size(); j++)
-      if(mVertSelected[j])
-      {
-         anySelected = true;
-         break;
-      }
-   mAnyVertsSelected = anySelected;
-}
-
-
-// Unselect all vertices
-void EditorObject::unselectVerts() 
-{ 
-   for(S32 j = 0; j < getVertCount(); j++) 
-      mVertSelected[j] = false; 
-   mAnyVertsSelected = false;
-}
-
-
-bool EditorObject::vertSelected(S32 vertIndex) 
-{ 
-   return mVertSelected[vertIndex]; 
-}
-
-
-//void EditorObject::addVert(const Point &vert)
-//{
-//   mVerts.push_back(vert);
-//   mVertSelected.push_back(false);
-//}
-
-
-//void EditorObject::addVertFront(Point vert)
-//{
-//   mVerts.push_front(vert);
-//   mVertSelected.insert(mVertSelected.begin(), false);
-//}
-//
-//
-//void EditorObject::insertVert(Point vert, S32 vertIndex)
-//{
-//   mVerts.insert(vertIndex);
-//   mVerts[vertIndex] = vert;
-//
-//   mVertSelected.insert(mVertSelected.begin() + vertIndex, false);
-//}
-
-
-//void EditorObject::setVert(const Point &vert, S32 vertIndex)
-//{
-//   mVerts[vertIndex] = vert;
-//}
-//
-//
-//void EditorObject::deleteVert(S32 vertIndex)
-//{
-//   mVerts.erase(vertIndex);
-//   mVertSelected.erase(mVertSelected.begin() + vertIndex);
-//}
 
 
 void EditorObject::onGeomChanging()
 {
    if(getGeomType() == geomPoly)
       onGeomChanged();               // Allows poly fill to get reshaped as vertices move
-}
-
-
-// Item is being actively dragged
-void EditorObject::onItemDragging()
-{
-   if(getObjectTypeMask() & ForceFieldProjectorType)
-     onGeomChanged();
-
-   else if(getGeomType() == geomPoly && getObjectTypeMask() & ~PolyWallType)
-      onGeomChanged();     // Allows poly fill to get dragged around with outline
+   onPointsChanged();
 }
 
 
@@ -963,6 +855,7 @@ EditorObject *EditorObject::newCopy()
    if(newObject)
    {
       newObject->setGame(NULL);         // mGame pointer will have been copied, but needs to be cleared before we can add this to the game
+      newObject->mGeometry = mGeometry->copyGeometry();
       newObject->initializeEditor(getGridSize());
    }
 
@@ -984,11 +877,11 @@ void EditorObject::renderLinePolyVertices(F32 currentScale, F32 alpha)
    {
       Point v = getVert(j);
 
-      if(mVertSelected[j])
+      if(vertSelected(j))
          renderVertex(SelectedVertex, v, j, currentScale, alpha);             // Hollow yellow boxes with number
       else if(mLitUp && isVertexLitUp(j))
          renderVertex(HighlightedVertex, v, j, currentScale, alpha);          // Hollow yellow boxes with number
-      else if(mSelected || mLitUp || mAnyVertsSelected)
+      else if(mSelected || mLitUp || anyVertsSelected())
          renderVertex(SelectedItemVertex, v, j, currentScale, alpha);         // Hollow red boxes with number
       else
          renderVertex(UnselectedItemVertex, v, NO_NUMBER, currentScale, alpha, currentScale > 2 ? 2 : 1);   // Solid red boxes, no number
@@ -1106,11 +999,5 @@ bool EditorObject::canBeHostile()
 {
    return true;
 }
-
-GeomType EditorObject::getGeomType()     
-{
-   return geomNone;
-}
-
 
 };

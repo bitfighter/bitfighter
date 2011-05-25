@@ -167,6 +167,7 @@ public:
    void idle(GameObject::IdleCallPath path);
 
    void render();
+
    S32 getRenderSortValue() { return -1; }
 
    bool getCollisionPoly(Vector<Point> &polyPoints);
@@ -187,7 +188,8 @@ public:
    const char *getOnDockName() { return "Nexus"; }
    const char *getOnScreenName() { return "Nexus"; }
    string toString();
-
+   
+   void renderEditor(F32 currentScale);
 
 
    HuntersNexusObject(lua_State *L) { /* Do nothing */ };   //  Lua constructor

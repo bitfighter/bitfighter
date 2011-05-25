@@ -1243,6 +1243,9 @@ Point findCentroid(const Vector<Point> &polyPoints)
 // Find longest edge, so we can align text with it...
 F32 angleOfLongestSide(const Vector<Point> &polyPoints)
 {
+   if(polyPoints.size() <= 1)
+      return 0;
+
    Point start;
    Point end;
    F32 maxlen = -1;

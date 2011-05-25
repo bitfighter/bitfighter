@@ -644,18 +644,13 @@ bool HuntersNexusObject::processArguments(S32 argc2, const char **argv2)
       if(argc == 4)
          ext.set(atoi(argv[2]), atoi(argv[3]));
 
-      Point p;
-      p.set(pos.x - ext.x, pos.y - ext.y);   // UL corner
-      mPolyBounds.push_back(p);
-      p.set(pos.x + ext.x, pos.y - ext.y);   // UR corner
-      mPolyBounds.push_back(p);
-      p.set(pos.x + ext.x, pos.y + ext.y);   // LR corner
-      mPolyBounds.push_back(p);
-      p.set(pos.x - ext.x, pos.y + ext.y);   // LL corner
-      mPolyBounds.push_back(p);
+      addVert(Point(pos.x - ext.x, pos.y - ext.y));   // UL corner
+      addVert(Point(pos.x + ext.x, pos.y - ext.y));   // UR corner
+      addVert(Point(pos.x + ext.x, pos.y + ext.y));   // LR corner
+      addVert(Point(pos.x - ext.x, pos.y + ext.y));   // LL corner
    }
    else           // Bitfighter format
-      processPolyBounds(argc, argv, 0, getGame()->getGridSize());
+      readGeom(argc, argv, 0, getGame()->getGridSize());
 
    computeExtent();
 
@@ -665,13 +660,13 @@ bool HuntersNexusObject::processArguments(S32 argc2, const char **argv2)
 
 string HuntersNexusObject::toString()
 {
-   return string(getClassName()) + " " + boundsToString(getGame()->getGridSize());
+   return string(getClassName()) + " " + geomToString(getGame()->getGridSize());
 }
 
 
 void HuntersNexusObject::computeExtent()
 {
-   setExtent(computePolyExtents());
+   setExtent(EditorObject::computeExtents());
 }
 
 
@@ -695,14 +690,21 @@ void HuntersNexusObject::render()
 {
    GameType *gt = getGame()->getGameType();
    HuntersGameType *theGameType = dynamic_cast<HuntersGameType *>(gt);
-   renderNexus(mPolyBounds, mPolyFill, mCentroid, mLabelAngle, (theGameType && theGameType->mNexusIsOpen), gt ? gt->mZoneGlowTimer.getFraction() : 0);
+   renderNexus(getOutline(), getFill(), getCentroid(), getLabelAngle(), 
+              (theGameType && theGameType->mNexusIsOpen), gt ? gt->mZoneGlowTimer.getFraction() : 0);
+}
+
+
+void HuntersNexusObject::renderEditor(F32 currentScale)
+{
+   render();
+   EditorPolygon::renderEditor(currentScale);
 }
 
 
 bool HuntersNexusObject::getCollisionPoly(Vector<Point> &polyPoints)
 {
-   for(S32 i = 0; i < mPolyBounds.size(); i++)
-      polyPoints.push_back(mPolyBounds[i]);
+   polyPoints = *getOutline();
    return true;
 }
 
@@ -734,7 +736,7 @@ bool HuntersNexusObject::collide(GameObject *hitObject)
 
 U32 HuntersNexusObject::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
-   EditorPolygon::packUpdate(connection, stream);
+   packGeom(connection, stream);
 
    return 0;
 }
@@ -742,7 +744,7 @@ U32 HuntersNexusObject::packUpdate(GhostConnection *connection, U32 updateMask, 
 
 void HuntersNexusObject::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
-   EditorPolygon::unpackUpdate(connection, stream);      
+   unpackGeom(connection, stream);      
    computeExtent();
 }
 

@@ -51,7 +51,14 @@ SlipZone::SlipZone()     // Constructor
 
 void SlipZone::render()
 {
-   renderSlipZone(mPolyBounds, mPolyFill, getExtent());
+   renderSlipZone(getOutline(), getFill(), getCentroid());
+}
+
+
+void SlipZone::renderEditor(F32 currentScale)
+{
+   render();
+   EditorPolygon::renderEditor(currentScale);
 }
 
 
@@ -86,14 +93,14 @@ bool SlipZone::processArguments(S32 argc2, const char **argv2)
    if(argc < 6)
       return false;
 
-   if(argc & 1) // odd number of arg count (7,9,11) to allow optional slipAmount arg
+   if(argc & 1)   // Odd number of arg count (7,9,11) to allow optional slipAmount arg
    {
       slipAmount = atof(argv[0]);
-      processPolyBounds(argc-1, argv+1, 0, getGame()->getGridSize());
-   }else // even number of arg count (6,8,10)
-   {
-      processPolyBounds(argc, argv, 0, getGame()->getGridSize());
+      readGeom(argc, argv, 1, getGame()->getGridSize());
    }
+   else           // Even number of arg count (6,8,10)
+      readGeom(argc, argv, 0, getGame()->getGridSize());
+
    computeExtent();
 
    /*for(S32 i = 1; i < argc; i += 2)
@@ -114,7 +121,7 @@ bool SlipZone::processArguments(S32 argc2, const char **argv2)
 
 string SlipZone::toString()
 {
-   return string(getClassName()) + " " + ftos(slipAmount, 3) + " " + boundsToString(getGame()->getGridSize());
+   return string(getClassName()) + " " + ftos(slipAmount, 3) + " " + geomToString(getGame()->getGridSize());
 }
 
 
@@ -129,17 +136,13 @@ void SlipZone::onAddedToGame(Game *theGame)
 
 void SlipZone::computeExtent()
 {
-   Rect extent(mPolyBounds[0], mPolyBounds[0]);
-   for(S32 i = 1; i < mPolyBounds.size(); i++)
-      extent.unionPoint(mPolyBounds[i]);
-   setExtent(extent);
+   setExtent(EditorObject::getExtent());
 }
 
 
 bool SlipZone::getCollisionPoly(Vector<Point> &polyPoints)
 {
-   for(S32 i = 0; i < mPolyBounds.size(); i++)
-      polyPoints.push_back(mPolyBounds[i]);
+   polyPoints = *mGeometry->getOutline();
    return true;
 }
 
@@ -156,7 +159,7 @@ bool SlipZone::collide(GameObject *hitObject)
 
 U32 SlipZone::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
-   EditorPolygon::packUpdate(connection, stream);
+   packGeom(connection, stream);
    stream->writeFloat(slipAmount, 8);
    return 0;
 }
@@ -164,10 +167,10 @@ U32 SlipZone::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
 
 void SlipZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
-   EditorPolygon::unpackUpdate(connection, stream);
-
+   unpackGeom(connection, stream);
    slipAmount = stream->readFloat(8);
 }
+
 
 TNL_IMPLEMENT_NETOBJECT(SlipZone);
 

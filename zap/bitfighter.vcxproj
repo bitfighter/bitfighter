@@ -167,6 +167,7 @@
     <ClCompile Include="EditorObject.cpp" />
     <ClCompile Include="engineerHelper.cpp" />
     <ClCompile Include="gameStats.cpp" />
+    <ClCompile Include="Geometry.cpp" />
     <ClCompile Include="helperMenu.cpp" />
     <ClCompile Include="loadoutHelper.cpp" />
     <ClCompile Include="..\zap\loadoutZone.cpp" />
@@ -188,7 +189,6 @@
     <ClCompile Include="..\zap\Point.cpp" />
     <ClCompile Include="..\zap\Rect.cpp" />
     <ClCompile Include="..\zap\Color.cpp" />
-    <ClCompile Include="PointGeom.cpp" />
     <ClCompile Include="quickChatHelper.cpp" />
     <ClCompile Include="..\zap\rabbitGame.cpp" />
     <ClCompile Include="..\zap\retrieveGame.cpp" />
@@ -275,6 +275,7 @@
     <ClInclude Include="EditorObject.h" />
     <ClInclude Include="engineerHelper.h" />
     <ClInclude Include="gameStats.h" />
+    <ClInclude Include="Geometry.h" />
     <ClInclude Include="loadoutHelper.h" />
     <ClInclude Include="..\zap\loadoutZone.h" />
     <ClInclude Include="..\zap\lpc10.h" />
@@ -296,7 +297,6 @@
     <ClInclude Include="..\zap\private.h" />
     <ClInclude Include="..\zap\projectile.h" />
     <ClInclude Include="pointainer.h" />
-    <ClInclude Include="PointGeom.h" />
     <ClInclude Include="quickChatHelper.h" />
     <ClInclude Include="..\zap\rabbitGame.h" />
     <ClInclude Include="..\zap\resource.h" />

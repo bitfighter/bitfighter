@@ -30,6 +30,7 @@
 #include "boost/smart_ptr/shared_ptr.hpp"
 
 #include "gameObject.h"          // We inherit from this -- for BfObject, for now
+#include "Geometry.h"            // For GeomType enum
 
 #include "Point.h"
 #include "tnlVector.h"
@@ -40,22 +41,12 @@ using namespace TNL;
 
 namespace Zap
 {
-// TODO: Make this class abstract, most functionality should be moved to objects as noted
 
 static const S32 NONE = -1;
 
 
 ////////////////////////////////////////
 ////////////////////////////////////////
-
-enum GeomType {           
-   geomPoint,           
-   geomSimpleLine,      
-   geomLine,            
-   geomPoly,            
-   geomNone,            
-};
-
 
 enum ShowMode
 {
@@ -66,67 +57,6 @@ enum ShowMode
    ShowModesCount
 };
 
-////////////////////////////////////////
-////////////////////////////////////////
-
-class Geometry
-{
-public:
-   virtual Point getVert(S32 index) { TNLAssert(false, "Must implement!"); return Point();}
-   virtual void setVert(const Point &pos, S32 index) { TNLAssert(false, "Must implement!"); }
-   virtual S32 getVertCount() { TNLAssert(false, "Must implement!"); return 0; }
-   virtual void clearVerts()  { TNLAssert(false, "Must implement!"); }
-   virtual void addVert(const Point &point) { TNLAssert(false, "Must implement!"); }
-   virtual void addVertFront(Point vert) { TNLAssert(false, "Must implement!"); }
-   virtual void deleteVert(S32 vertIndex) { TNLAssert(false, "Must implement!"); }
-   virtual void insertVert(Point vertex, S32 vertIndex) { TNLAssert(false, "Must implement!"); }
-   virtual GeomType getGeomType() = 0;
-};
-
-
-class PointGeometry : public Geometry
-{
-private:
-   Point mPos;
-
-public:
-   GeomType getGeomType() { return geomPoint; }
-   Point getVert(S32 index) { return mPos; }
-   void setVert(const Point &pos, S32 index) { mPos = pos; }
-   S32 getVertCount() { return 1; }
-   void clearVerts() { /* Do nothing */ }
-   void addVert(const Point &point)  { /* Do nothing */ }
-   void addVertFront(Point vert)  { /* Do nothing */ }
-   void deleteVert(S32 vertIndex)  { /* Do nothing */ }
-   void insertVert(Point vertex, S32 vertIndex)  { /* Do nothing */ }
-
-   ~PointGeometry() { 
-      //TNLAssert(false, "deleting!");
-   }
-};
-
-
-class SimpleLineGeometry : public Geometry
-{
-private:
-   Point mFromPos;
-   Point mToPos;
-
-public:
-   GeomType getGeomType() { return geomSimpleLine; }
-   Point getVert(S32 index) { return (index == 1) ? mToPos : mFromPos; }
-   void setVert(const Point &pos, S32 index) { if(index == 1) mToPos = pos; else mFromPos = pos; }
-   S32 getVertCount() { return 2; }
-   void clearVerts() { /* Do nothing */ }
-   void addVert(const Point &point)  { /* Do nothing */ }
-   void addVertFront(Point vert)  { /* Do nothing */ }
-   void deleteVert(S32 vertIndex)  { /* Do nothing */ }
-   void insertVert(Point vertex, S32 vertIndex)  { /* Do nothing */ }
-
-   ~SimpleLineGeometry() { 
-      //TNLAssert(false, "deleting!");
-   }
-};
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -151,10 +81,6 @@ protected:
    bool mSelected;      // True if item is selected
    bool mLitUp;         // True if user is hovering over the item and it's "lit up"
 
-   // A vector of bools that must have on entry per vertex -- it is each object's responsibility for making this happen
-   bool mAnyVertsSelected;
-   vector<bool> mVertSelected; 
-
    S32 mSerialNumber;   // Autoincremented serial number   
    S32 mItemId;         // Item's unique id... 0 if there is none
 
@@ -171,7 +97,6 @@ public:
       mLitUp = false; 
       mSelected = false; 
       setObjectTypeMask(objectType); 
-      mAnyVertsSelected = false; 
       mIsBeingEdited = false;
       mSerialNumber = mNextSerialNumber++;
    }
@@ -206,14 +131,46 @@ public:
 
    void unselect();
 
-   void setSnapped(bool snapped) { /* Do nothing */ }    // Overridden in EngineeredObject
+   void setSnapped(bool snapped) { /* Do nothing */ }          // Overridden in EngineeredObject
 
-   // These methods are mostly for lines and polygons
-   void selectVert(S32 vertIndex);
-   void aselectVert(S32 vertIndex);
-   void unselectVert(S32 vertIndex);
-   void unselectVerts();
-   bool vertSelected(S32 vertIndex);
+   virtual void newObjectFromDock(F32 gridSize) { /* Do nothing */ }   // Called when item dragged from dock to editor -- overridden by Polygon and SimpleLine
+
+   // Point manipulation methods, work will be delegated to proper geometry object
+   virtual GeomType getGeomType() { return mGeometry->getGeomType(); }
+   virtual Point getVert(S32 index) { return mGeometry->getVert(index); }
+   virtual void setVert(const Point &point, S32 index) { mGeometry->setVert(point, index); }
+
+   S32 getVertCount() { return mGeometry->getVertCount(); }
+   void clearVerts() { mGeometry->clearVerts(); }
+   bool addVert(const Point &point)  { return mGeometry->addVert(point); }
+   bool addVertFront(Point vert)  { return mGeometry->addVertFront(vert); }
+   bool deleteVert(S32 vertIndex)  { return mGeometry->deleteVert(vertIndex); }
+   bool insertVert(Point vertex, S32 vertIndex)  { return mGeometry->insertVert(vertex, vertIndex); }
+
+   bool anyVertsSelected() { return mGeometry->anyVertsSelected(); }
+   void selectVert(S32 vertIndex) { mGeometry->selectVert(vertIndex); }
+   void aselectVert(S32 vertIndex) { mGeometry->aselectVert(vertIndex); }
+   void unselectVert(S32 vertIndex) { mGeometry->unselectVert(vertIndex); }
+   void unselectVerts() { mGeometry->unselectVerts(); }
+   bool vertSelected(S32 vertIndex) { return mGeometry->vertSelected(vertIndex); }
+
+   Vector<Point> *getOutline() { return mGeometry->getOutline(); }
+   Vector<Point> *getFill() { return mGeometry->getFill(); }
+   Point getCentroid() { return mGeometry->getCentroid(); }
+   F32 getLabelAngle() { return mGeometry->getLabelAngle(); }
+
+   void packGeom(GhostConnection *connection, BitStream *stream) { mGeometry->packGeom(connection, stream); }
+   void unpackGeom(GhostConnection *connection, BitStream *stream) { mGeometry->unpackGeom(connection, stream); }
+
+   string geomToString(F32 gridSize) { return mGeometry->geomToString(gridSize); }
+   void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize) { mGeometry->readGeom(argc, argv, firstCoord, gridSize); }
+
+   //void cloneGeometry() { mGeometry->cloneGeometry(); }
+
+   Rect computeExtents() { return mGeometry->computeExtents(); }
+
+   void onPointsChanged() { mGeometry->onPointsChanged(); }
+
 
    // Keep track which vertex, if any is lit up in the currently selected item
    bool isVertexLitUp(S32 vertexIndex) { return mVertexLitUp == vertexIndex; }
@@ -259,30 +216,12 @@ public:
 
    //////
    // Vertex management functions
-   virtual Vector<Point> getVerts();    // Return basic geometry points for object  TODO: barely used... can we get rid of this?
-   virtual Point getVert(S32 index) = 0;
-   virtual S32 getVertCount() = 0;
-   virtual void clearVerts() = 0;
-
-   virtual void setVert(const Point &point, S32 index) = 0;
-   virtual void addVert(const Point &point) = 0;
-   virtual void addVertFront(Point vert) = 0;
-   virtual void deleteVert(S32 vertIndex) = 0;
-   virtual void insertVert(Point vertex, S32 vertIndex) = 0;
-
-
-   bool anyVertsSelected() { return mAnyVertsSelected; }
-   void setAnyVertsSelected(bool anySelected) { mAnyVertsSelected = anySelected; }
-
-   //virtual Vector<Point> *getPolyFillPoints() { return &mPolyFill; }
-   //virtual void clearPolyFillPoints() { mPolyFill.clear(); }
-
    void renderPolylineCenterline(F32 alpha);    // Draw barrier centerlines; wraps renderPolyline()  ==> lineItem, barrierMaker only
 
    virtual void onGeomChanging();                        // Item geom is interactively changing
    virtual void onGeomChanged() { /* To be =0 */ };      // Item changed geometry (or moved), do any internal updating that might be required
 
-   virtual void onItemDragging();                        // Item is being dragged around the screen
+   virtual void onItemDragging() { /* Do nothing */ };   // Item is being dragged around the screen
 
    virtual void onAttrsChanging() { /* Do nothing */ };  // Attr is in the process of being changed (i.e. a char was typed for a textItem)
    virtual void onAttrsChanged() { /* Do nothing */ };   // Attrs changed
@@ -367,7 +306,6 @@ public:
    S32 mScore;
    S32 getScore() { return mScore; }     // goal zones only, return zone's score
 
-   virtual GeomType getGeomType();
    virtual bool canBeHostile();
    virtual bool canBeNeutral();
    virtual bool hasTeam();

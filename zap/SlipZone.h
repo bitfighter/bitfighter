@@ -61,6 +61,8 @@ public:
    const char *getOnScreenName() { return "Inertia"; }
    string toString();
 
+   void renderEditor(F32 currentScale);
+
 
    /////
    // Future home for Lua methods

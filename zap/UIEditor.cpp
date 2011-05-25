@@ -297,7 +297,7 @@ static void setLevelToCanvasCoordConversion()
 
 
 // Draws a line connecting points in mVerts
-void EditorUserInterface::renderPolyline(const Vector<Point> verts)
+void EditorUserInterface::renderPolyline(const Vector<Point> *verts)
 {
    glPushMatrix();
       setLevelToCanvasCoordConversion();
@@ -1556,7 +1556,7 @@ void EditorUserInterface::render()
       else              // LineItem
          glColor(getTeamColor(mNewItem->getTeam()));
 
-      renderPolyline(mNewItem->getVerts());
+      renderPolyline(mNewItem->getOutline());
 
       glLineWidth(gDefaultLineWidth);
 
@@ -2080,7 +2080,7 @@ void EditorUserInterface::findHitItemAndEdge()
          // Didn't find a vertex hit... now we look for an edge
 
          // Make a copy of the items vertices that we can add to in the case of a loop
-         Vector<Point> verts = mItems[i]->getVerts();    
+         Vector<Point> verts = *mItems[i]->getOutline();    
 
          if(mItems[i]->getGeomType() == geomPoly)   // Add first point to the end to create last side on poly
             verts.push_back(verts.first());
@@ -2295,8 +2295,9 @@ void EditorUserInterface::startDraggingDockItem()
 {
    // Instantiate object so we are in essence dragging a non-dock item
    EditorObject *item = mDockItems[mDraggingDockItem]->newCopy();
+   item->newObjectFromDock(getGridSize());
 
-   item->initializeEditor(getGridSize());    // Override this to define some initial geometry for your object... 
+   //item->initializeEditor(getGridSize());    // Override this to define some initial geometry for your object... 
    item->setDockItem(false);
 
    // Offset lets us drag an item out from the dock by an amount offset from the 0th vertex.  This makes placement seem more natural.

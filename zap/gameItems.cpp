@@ -179,7 +179,7 @@ S32 EnergyItem::isVis(lua_State *L) { return returnBool(L, isVisible()); }      
 
 AbstractSpawn::AbstractSpawn(const Point &pos, S32 time, GameObjectType objType) : EditorPointObject(objType)
 {
-   mPos = pos;
+   setVert(pos, 0);
    setRespawnTime(time);
 };
 
@@ -202,8 +202,11 @@ bool AbstractSpawn::processArguments(S32 argc, const char **argv)
    if(argc >= 3)
       return false;
 
-   mPos.read(argv + 1);
-   mPos *= getGame()->getGridSize();
+   Point pos;
+   pos.read(argv + 1);
+   pos *= getGame()->getGridSize();
+
+   setVert(pos, 0);
 
    S32 time = (argc > 3) ? atoi(argv[3]) : getDefaultRespawnTime();
 
@@ -215,7 +218,7 @@ bool AbstractSpawn::processArguments(S32 argc, const char **argv)
 
 string AbstractSpawn::toString()
 {
-   Point pos = mPos / getGame()->getGridSize();
+   Point pos = getVert(0) / getGame()->getGridSize();
 
    // AsteroidSpawn|FlagSpawn <x> <y> <time>
    return string(getClassName()) + " " + pos.toString() + " " + itos(mSpawnTime);
@@ -234,7 +237,7 @@ Spawn::Spawn(const Point &pos, S32 time) : AbstractSpawn(pos, time, ShipSpawnTyp
 
 string Spawn::toString()
 {
-   Point pos = mPos / getGame()->getGridSize();
+   Point pos = getVert(0) / getGame()->getGridSize();
 
    // Spawn <team> <x> <y> 
    return string(getClassName()) + " " + itos(mTeam) + " " + pos.toString();
@@ -243,8 +246,10 @@ string Spawn::toString()
 
 void Spawn::renderEditor(F32 currentScale)
 {
+   Point pos = getVert(0);
+
    glPushMatrix();
-      glTranslatef(mPos.x, mPos.y, 0);
+      glTranslatef(pos.x, pos.y, 0);
       glScalef(1/currentScale, 1/currentScale, 1);    // Make item draw at constant size, regardless of zoom
       renderSquareItem(Point(0,0), getGame()->getTeamColor(mTeam), 1, white, 'S');
    glPopMatrix();   
@@ -270,7 +275,7 @@ AsteroidSpawn::AsteroidSpawn(const Point &pos, S32 time) : AbstractSpawn(pos, ti
 static void renderAsteroidSpawn(const Point &pos)
 {
    F32 scale = 0.8;
-   Point p(0,0);
+   static const Point p(0,0);
 
    glPushMatrix();
       glTranslatef(pos.x, pos.y, 0);
@@ -285,8 +290,10 @@ static void renderAsteroidSpawn(const Point &pos)
 
 void AsteroidSpawn::renderEditor(F32 currentScale)
 {
+   Point pos = getVert(0);
+
    glPushMatrix();
-      glTranslatef(mPos.x, mPos.y, 0);
+      glTranslatef(pos.x, pos.y, 0);
       glScalef(1/currentScale, 1/currentScale, 1);    // Make item draw at constant size, regardless of zoom
       renderAsteroidSpawn(Point(0,0));
    glPopMatrix();   
@@ -295,7 +302,7 @@ void AsteroidSpawn::renderEditor(F32 currentScale)
 
 void AsteroidSpawn::renderDock()
 {
-   renderAsteroidSpawn(mPos);
+   renderAsteroidSpawn(getVert(0));
 }
 
 
@@ -311,8 +318,10 @@ FlagSpawn::FlagSpawn(const Point &pos, S32 time) : AbstractSpawn(pos, time, Flag
 
 void FlagSpawn::renderEditor(F32 currentScale)
 {
+   Point pos = getVert(0);
+
    glPushMatrix();
-      glTranslatef(mPos.x + 1, mPos.y, 0);
+      glTranslatef(pos.x + 1, pos.y, 0);
       glScalef(0.4/currentScale, 0.4/currentScale, 1);
       renderFlag(0, 0, getTeamColor(mTeam));
 

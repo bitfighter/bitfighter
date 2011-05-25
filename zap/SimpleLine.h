@@ -43,7 +43,6 @@ private:
    virtual const char *getVertLabel(S32 index) = 0;          
 
 protected:
-   virtual void initializeEditor(F32 gridSize);
    virtual S32 getDockRadius() { return 8; }                       // Size of object on dock
    virtual F32 getEditorRadius(F32 currentScale) { return 7; }     // Size of object (or in this case vertex) in editor
 
@@ -61,19 +60,7 @@ public:
    virtual void renderEditorItem() = 0;
    void renderItemText(const char *text, S32 offset, F32 currentScale);
 
-
-   // TODO: Push these up to EditorObject
-   GeomType getGeomType() { return mGeometry->getGeomType(); }
-   Point getVert(S32 index) { return mGeometry->getVert(index); }
-   void setVert(const Point &pos, S32 index) { mGeometry->setVert(pos, index); }
-
-   S32 getVertCount() { return mGeometry->getVertCount(); }
-   void clearVerts() { mGeometry->clearVerts(); }
-   void addVert(const Point &point)  { mGeometry->addVert(point); }
-   void addVertFront(Point vert)  { mGeometry->addVertFront(vert); }
-   void deleteVert(S32 vertIndex)  { mGeometry->deleteVert(vertIndex); }
-   void insertVert(Point vertex, S32 vertIndex)  { mGeometry->insertVert(vertex, vertIndex); }
-   
+   virtual void newObjectFromDock(F32 gridSize);
 
    void addToDock(Game *game, const Point &point);
 };

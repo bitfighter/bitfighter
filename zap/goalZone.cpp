@@ -71,19 +71,20 @@ void GoalZone::render()
    if(gt->mGlowingZoneTeam >= 0 && gt->mGlowingZoneTeam != mTeam)
       glow = 0;
 
-   renderGoalZone(gt->getTeamColor(getTeam()), mPolyBounds, mPolyFill, mCentroid, mLabelAngle, isFlashing(), glow, mScore);
+   renderGoalZone(gt->getTeamColor(getTeam()), getOutline(), getFill(), getCentroid(), getLabelAngle(), isFlashing(), glow, mScore);
 }
 
 
 void GoalZone::renderEditor(F32 currentScale)
 {
-   renderGoalZone(getGame()->getTeamColor(getTeam()), mPolyBounds, mPolyFill, mCentroid, mLabelAngle);
+   renderGoalZone(getGame()->getTeamColor(getTeam()), getOutline(), getFill(), getCentroid(), getLabelAngle(), isFlashing());
+   EditorPolygon::renderEditor(currentScale);
 }
 
 
 void GoalZone::renderDock()
 {
-  renderGoalZone(getGame()->getTeamColor(getTeam()), mPolyBounds, mPolyFill);
+  renderGoalZone(getGame()->getTeamColor(getTeam()), getOutline(), getFill());
 }
 
 
@@ -119,7 +120,7 @@ bool GoalZone::processArguments(S32 argc2, const char **argv2)
       return false;
 
    mTeam = atoi(argv[0]);     // Team is first arg
-   processPolyBounds(argc, argv, 1, getGame()->getGridSize());
+   readGeom(argc, argv, 1, getGame()->getGridSize());
    computeExtent();
 
    return true;
@@ -128,7 +129,7 @@ bool GoalZone::processArguments(S32 argc2, const char **argv2)
 
 string GoalZone::toString()
 {
-   return string(getClassName()) + " " + itos(mTeam) + " " + boundsToString(getGame()->getGridSize());
+   return string(getClassName()) + " " + itos(mTeam) + " " + geomToString(getGame()->getGridSize());
 }
 
 
@@ -157,17 +158,13 @@ void GoalZone::onAddedToGame(Game *theGame)
 
 void GoalZone::computeExtent()
 {
-   setExtent(Rect(mPolyBounds));
+   setExtent(Rect(*getOutline()));
 }
 
 
 bool GoalZone::getCollisionPoly(Vector<Point> &polyPoints)
 {
-   polyPoints.resize(mPolyBounds.size());
-
-   for(S32 i = 0; i < mPolyBounds.size(); i++)
-      polyPoints[i] = mPolyBounds[i];
-
+   polyPoints = *getOutline();
    return true;
 }
 
@@ -188,7 +185,7 @@ U32 GoalZone::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
 {
    if(stream->writeFlag(updateMask & InitialMask))
    {
-      Polyline::packUpdate(connection, stream);
+      packGeom(connection, stream);
       stream->write(mScore);
    }
 
@@ -203,7 +200,7 @@ void GoalZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    if(stream->readFlag()) 
    {
-      EditorPolygon::unpackUpdate(connection, stream);
+      unpackGeom(connection, stream);
       computeExtent();
 
       stream->read(&mScore);

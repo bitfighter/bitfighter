@@ -27,19 +27,7 @@
 #define _TEXTITEM_H_
 
 #include "SimpleLine.h"       // For SimpleLine def
-#include "gameObject.h"
-#include "gameType.h"
-#include "gameNetInterface.h"
 #include "polygon.h"          // For def of Polyline, for lineItem
-#include "UI.h"
-#include "gameObjectRender.h"
-#include "ship.h"
-#include "../glut/glutInclude.h"
-
-#include "tnlBitStream.h"
-
-#include <string>
-
 
 using namespace std;
 
@@ -77,7 +65,6 @@ public:
 
    bool processArguments(S32 argc, const char **argv);           // Create objects from parameters stored in level file
    string toString();
-   void initializeEditor(F32 gridSize);
 
    void onAddedToGame(Game *theGame);
    void computeExtent();                                         // Bounding box for quick collision-possibility elimination
@@ -125,6 +112,8 @@ public:
 
    bool showAttribsWhenSelected() { return false; }      // We already show the attributes, as the text itself
 
+   void newObjectFromDock(F32 gridSize);
+
    TNL_DECLARE_CLASS(TextItem);
 };
 
@@ -132,14 +121,15 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class LineItem : public EditorPolyline
+class LineItem : public Polyline, public GameObject, public EditorObject
 {
 private:
    typedef GameObject Parent;
-   Vector<Point> mRenderPoints;    // Precomputed points used for rendering linework
+   Vector<Point> mRenderPoints;     // Precomputed points used for rendering linework
 
 public:
-   LineItem();   // Constructor
+   LineItem();                      // Constructor
+   LineItem(const LineItem &li);    // Copy constructor
 
    void render();
    S32 getRenderSortValue();
@@ -154,6 +144,7 @@ public:
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
+ 
    /////
    // Editor methods
    string toString();

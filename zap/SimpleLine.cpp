@@ -53,9 +53,9 @@ void SimpleLine::renderDock()
 }
 
 
-void SimpleLine::initializeEditor(F32 gridSize) 
+// Called when we create a brand new object and insert it in the editor, like when we drag a new item from the dock
+void SimpleLine::newObjectFromDock(F32 gridSize) 
 {
-   EditorParent::initializeEditor(gridSize);
    setVert(Point(0,0), 0);
    setVert(Point(1,0) * gridSize, 1);
 }

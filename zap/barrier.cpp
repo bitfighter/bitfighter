@@ -26,13 +26,13 @@
 #include "barrier.h"
 #include "BotNavMeshZone.h"
 #include "gameObjectRender.h"
-#include "GeomUtils.h"    // For polygon triangulation
+#include "GeomUtils.h"              // For polygon triangulation
 #include "engineeredObjects.h"      // For forcefieldprojector def
 
-#include "gameType.h"          // For BarrierRec struct
+#include "gameType.h"               // For BarrierRec struct
 
 #include "glutInclude.h"
-#include <cmath>               // C++ version of this headers includes float overloads
+#include <cmath>                    // C++ version of this headers includes float overloads
 
 using namespace TNL;
 
@@ -74,7 +74,7 @@ void constructBarriers(Game *theGame, const BarrierRec &barrier)
    {
       // First, fill a vector with barrier segments
       Vector<Point> barrierEnds;
-      Barrier::constructBarrierEndPoints(vec, barrier.width, barrierEnds);
+      Barrier::constructBarrierEndPoints(&vec, barrier.width, barrierEnds);
 
       Vector<Point> pts;
       // Then add individual segments to the game
@@ -222,19 +222,19 @@ void Barrier::resetEdges(const Vector<Point> &corners, Vector<Point> &edges)
 // Given the points in vec, figure out where the ends of the walls should be (they'll need to be extended slighly in some cases
 // for better rendering).  Set extendAmt to 0 to see why it's needed.
 // Populates barrierEnds with the results.
-void Barrier::constructBarrierEndPoints(const Vector<Point> &vec, F32 width, Vector<Point> &barrierEnds)    // static
+void Barrier::constructBarrierEndPoints(const Vector<Point> *vec, F32 width, Vector<Point> &barrierEnds)    // static
 {
    barrierEnds.clear();    // local static vector
 
-   if(vec.size() <= 1)     // Protect against bad data
+   if(vec->size() <= 1)     // Protect against bad data
       return;
 
-   bool loop = (vec.first() == vec.last());      // Does our barrier form a closed loop?
+   bool loop = (vec->first() == vec->last());      // Does our barrier form a closed loop?
 
    Vector<Point> edgeVector;
-   for(S32 i = 0; i < vec.size() - 1; i++)
+   for(S32 i = 0; i < vec->size() - 1; i++)
    {
-      Point e = vec[i+1] - vec[i];
+      Point e = vec->get(i+1) - vec->get(i);
       e.normalize();
       edgeVector.push_back(e);
    }
@@ -275,8 +275,8 @@ void Barrier::constructBarrierEndPoints(const Vector<Point> &vec, F32 width, Vec
       if(i == edgeVector.size() - 1 && !loop)
          extendForward = 0;
 
-      Point start = vec[i] - edgeVector[i] * extendBack;
-      Point end = vec[i+1] + edgeVector[i] * extendForward;
+      Point start = vec->get(i) - edgeVector[i] * extendBack;
+      Point end = vec->get(i+1) + edgeVector[i] * extendForward;
       barrierEnds.push_back(start);
       barrierEnds.push_back(end);
    }
@@ -379,14 +379,14 @@ void Barrier::prepareRenderingGeometry(Game *game)
 void Barrier::render(S32 layerIndex)
 {
    if(layerIndex == 0)           // First pass: draw the fill
-      renderWallFill(mRenderFillGeometry, mSolid, gIniSettings.wallFillColor);
+      renderWallFill(&mRenderFillGeometry, mSolid, gIniSettings.wallFillColor);
 }
 
 // static 
 void Barrier::renderEdges(S32 layerIndex)
 {
    if(layerIndex == 1)
-      renderWallEdges(mRenderLineSegments);
+      renderWallEdges(&mRenderLineSegments);
 }
 
 
@@ -430,7 +430,7 @@ void WallItem::onGeomChanged()
 
 string WallItem::toString()
 {
-   return "BarrierMaker " + itos(S32(F32(mWidth) / F32(getGame()->getGridSize()))) + " " + boundsToString(getGame()->getGridSize());
+   return "BarrierMaker " + itos(S32(F32(mWidth) / F32(getGame()->getGridSize()))) + " " + geomToString(getGame()->getGridSize());
 }
 
 
@@ -456,28 +456,29 @@ static const Color HIGHLIGHT_COLOR = white;
 void PolyWall::render()
 {
    glColor(HIGHLIGHT_COLOR);
-   renderPolygonOutline(mPolyBounds);
+   renderPolygonOutline(getOutline());
 }
 
 
 void PolyWall::renderFill()
 {
-   renderPolygonFill(&mPolyFill, EDITOR_WALL_FILL_COLOR, 1);
+   renderPolygonFill(getFill(), EDITOR_WALL_FILL_COLOR, 1);
 }
 
 
 void PolyWall::renderEditor(F32 currentScale)
 {
    glColor(HIGHLIGHT_COLOR);
-   renderPolygonOutline(mPolyBounds);
+   renderPolygonOutline(getOutline());
+   EditorPolygon::renderEditor(currentScale);
 }
 
 
 void PolyWall::renderDock()
 {
-   renderPolygonFill(&mPolyFill, EDITOR_WALL_FILL_COLOR, 1);
+   renderPolygonFill(getFill(), EDITOR_WALL_FILL_COLOR, 1);
    glColor(blue);
-   renderPolygonOutline(mPolyBounds);
+   renderPolygonOutline(getOutline());
 }
 
 
@@ -486,8 +487,7 @@ bool PolyWall::processArguments(S32 argc, const char **argv)
    if(argc < 6)
       return false;
 
-   processPolyBounds(argc, argv, 0, getGame()->getGridSize());
-
+   readGeom(argc, argv, 0, getGame()->getGridSize());
    //computeExtent();
 
    return true;
@@ -496,7 +496,7 @@ bool PolyWall::processArguments(S32 argc, const char **argv)
 
 string PolyWall::toString()
 {
-   return string(getClassName()) + " " + boundsToString(getGame()->getGridSize());
+   return string(getClassName()) + " " + geomToString(getGame()->getGridSize());
 }
 
 
@@ -614,7 +614,7 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(DatabaseObject *dbObject
 
    if(wall->getObjectTypeMask() & PolyWallType)
    {
-      WallSegment *newSegment = new WallSegment(wall->getVerts(), wall->getSerialNumber());
+      WallSegment *newSegment = new WallSegment(*wall->getOutline(), wall->getSerialNumber());
       mWallSegments.push_back(newSegment);
    }
    else     // Tranditional wall
@@ -749,7 +749,7 @@ void WallSegmentManager::renderWalls(bool convert, bool draggingObjects, bool sh
       mWallSegments[i]->renderFill(isBeingDragged, showingReferenceShip);
    }
 
-   renderWallEdges(mWallEdgePoints);      // Render wall outlines
+   renderWallEdges(&mWallEdgePoints);      // Render wall outlines
 }
 
 
@@ -842,7 +842,7 @@ void WallSegment::renderFill(bool beingDragged, bool showingReferenceShip)
    glDisableBlendfromLineSmooth;
    
    // Use true below because all segments are triangulated
-   renderWallFill(triangulatedFillPoints, true, (useGameColor ? gIniSettings.wallFillColor : EDITOR_WALL_FILL_COLOR) * (beingDragged ? 0.5 : 1));   
+   renderWallFill(&triangulatedFillPoints, true, (useGameColor ? gIniSettings.wallFillColor : EDITOR_WALL_FILL_COLOR) * (beingDragged ? 0.5 : 1));   
    glEnableBlendfromLineSmooth;
 }
 

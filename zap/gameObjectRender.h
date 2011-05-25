@@ -29,6 +29,8 @@
 #include "tnl.h"
 #include "../glut/glutInclude.h"
 
+#include "Geometry.h"
+
 #include "Rect.h"
 #include "Color.h"
 #include <string>
@@ -87,17 +89,17 @@ extern void renderFlag(F32 x, F32 y, const Color &flagColor);
 extern void renderFlag(const Point &pos, const Color &flagColor, const Color *mastColor, F32 alpha);
 extern void renderFlag(F32 x, F32 y, const Color &flagColor, const Color *mastColor, F32 alpha);
 
-extern void renderPointVector(const Vector<Point> &points, U32 geomType);
+extern void renderPointVector(const Vector<Point> *points, U32 geomType);
 
 //extern void renderFlag(Point pos, Color c, F32 timerFraction);
 extern void renderSmallFlag(const Point &pos, const Color &c, F32 parentAlpha);
 
-extern void renderLoadoutZone(Color c, const Vector<Point> &outline, const Vector<Point> &fill);      // No label version
+extern void renderLoadoutZone(Color c, const Vector<Point> *outline, const Vector<Point> *fill);      // No label version
 
-extern void renderLoadoutZone(Color c, const Vector<Point> &outline, const Vector<Point> &fill,       // With label version
-                                       const Point &centroid, F32 labelAngle, F32 scaleFact = 1);
+extern void renderLoadoutZone(Color c, const Vector<Point> *outline, const Vector<Point> *fill, 
+                              const Point &centroid, F32 angle, F32 scaleFact = 1);
 
-extern void renderNavMeshZone(const Vector<Point> &outline, const Vector<Point> &fill,
+extern void renderNavMeshZone(const Vector<Point> *outline, const Vector<Point> *fill,
                               const Point &centroid, S32 zoneId, bool isConvex, bool isSelected = false);
 
 class Border;
@@ -114,19 +116,19 @@ extern const Color BORDER_FILL_COLOR;
 extern const F32 BORDER_FILL_ALPHA;
 extern const F32 BORDER_WIDTH;
 
-extern void renderPolygonOutline(const Vector<Point> &outline);
-extern void renderPolygonOutline(const Vector<Point> &outlinePoints, Color &outlineColor, F32 alpha = 1);
+extern void renderPolygonOutline(const Vector<Point> *outline);
+extern void renderPolygonOutline(const Vector<Point> *outlinePoints, Color &outlineColor, F32 alpha = 1);
 extern void renderPolygonFill(const Vector<Point> *fillPoints, const Color &fillColor, F32 alpha = 1);
 
-extern void renderGoalZone(Color c, const Vector<Point> &outline, const Vector<Point> &fill);     // No label version
-extern void renderGoalZone(Color c, const Vector<Point> &outline, const Vector<Point> &fill, Point centroid, F32 labelAngle, 
+extern void renderGoalZone(Color c, const Vector<Point> *outline, const Vector<Point> *fill);     // No label version
+extern void renderGoalZone(Color c, const Vector<Point> *outline, const Vector<Point> *fill, Point centroid, F32 labelAngle, 
                            bool isFlashing = false, F32 glowFraction = 0, S32 score = 0, F32 scaleFact = 1);
 
-extern void renderNexus(const Vector<Point> &outline, const Vector<Point> &fill, Point centroid, F32 labelAngle, 
+extern void renderNexus(const Vector<Point> *outline, const Vector<Point> *fill, Point centroid, F32 labelAngle, 
                         bool open, F32 glowFraction, F32 scaleFact = 1);
 
 
-extern void renderSlipZone(const Vector<Point> &bounds, const Vector<Point> &boundsFill, Rect extent);
+extern void renderSlipZone(const Vector<Point> *bounds, const Vector<Point> *boundsFill, const Point &centroid);
 extern void renderPolygonLabel(const Point &centroid, F32 angle, F32 size, const char *text, F32 scaleFact = 1);
 
 extern void renderProjectile(const Point &pos, U32 type, U32 time);
@@ -140,17 +142,17 @@ extern void renderRepairItem(const Point &pos, bool forEditor, const Color *over
 
 extern void renderEnergyItem(const Point &pos); 
 
-extern void renderWallFill(const Vector<Point> &points, bool polyWall, const Color &fillColor);
+extern void renderWallFill(const Vector<Point> *points, bool polyWall, const Color &fillColor);
 
 extern void renderEnergyItem(const Point &pos, bool forEditor, const Color *overrideColor, F32 alpha);
 extern void renderEnergySymbol(const Color *overrideColor, F32 alpha);      // Render lightning bolt symbol
 extern void renderEnergySymbol(const Point &pos, F32 scaleFactor);   // Another signature
 
 // Wall rendering
-void renderWallEdges(const Vector<Point> &edges, F32 alpha = 1.0);
+void renderWallEdges(const Vector<Point> *edges, F32 alpha = 1.0);
 
 //extern void renderSpeedZone(Point pos, Point normal, U32 time);
-void renderSpeedZone(const Vector<Point> &pts, U32 time);
+void renderSpeedZone(const Vector<Point> *pts, U32 time);
 
 void renderTestItem(const Point &pos, F32 alpha = 1);
 void renderTestItem(const Point &pos, S32 size, F32 alpha = 1);

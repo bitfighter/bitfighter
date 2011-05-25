@@ -583,7 +583,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
                Vector<Point> f;     // fill
                Triangulate::Process(o, f);
 
-               renderLoadoutZone(Color(0, 0, 1), o, f, findCentroid(o), angleOfLongestSide(o));
+               renderLoadoutZone(Color(0, 0, 1), &o, &f, findCentroid(o), angleOfLongestSide(o));
             }
 
             break;
@@ -599,7 +599,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
                Vector<Point> f;     // fill
                Triangulate::Process(o, f);
 
-               renderNexus(o, f, findCentroid(o), angleOfLongestSide(o), 
+               renderNexus(&o, &f, findCentroid(o), angleOfLongestSide(o), 
                                        gClientGame->getCurrentTime() % 5000 > 2500, 0);
             }
             break;
@@ -610,7 +610,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
             break;
 
          case 23:    // SpeedZone
-            renderSpeedZone(speedZoneRenderPoints, gClientGame->getCurrentTime());
+            renderSpeedZone(&speedZoneRenderPoints, gClientGame->getCurrentTime());
             break;
 
          case 24:    // TestItem

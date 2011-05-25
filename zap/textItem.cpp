@@ -65,9 +65,9 @@ TextItem::~TextItem()
 }
 
 
-void TextItem::initializeEditor(F32 gridSize)
+void TextItem::newObjectFromDock(F32 gridSize)
 {
-   SimpleLine::initializeEditor(gridSize);
+   SimpleLine::newObjectFromDock(gridSize);
 
    mText = "Your text here";
    recalcTextSize();
@@ -322,9 +322,17 @@ TNL_IMPLEMENT_NETOBJECT(LineItem);
 // Constructor
 LineItem::LineItem()
 { 
+   mGeometry = boost::shared_ptr<Geometry>(new PolylineGeometry);
    mNetFlags.set(Ghostable);
    mObjectTypeMask |= LineType | CommandMapVisType;
    mObjectTypeNumber = LineTypeNumber;
+}
+
+
+// Copy constructor -- make sure each copy gets its own geometry object
+LineItem::LineItem(const LineItem &li)
+{
+   mGeometry = boost::shared_ptr<Geometry>(new PolylineGeometry);  
 }
 
 
@@ -339,14 +347,14 @@ void LineItem::render()
       return;
 
    glColor(getGame()->getTeamColor(mTeam));
-   renderPointVector(mPolyBounds, GL_LINE_STRIP);
+   renderPointVector(getOutline(), GL_LINE_STRIP);
 }
 
 
 void LineItem::renderEditor(F32 currentScale)
 {
    glColor(getGame()->getTeamColor(mTeam));
-   renderPointVector(mPolyBounds, GL_LINE_STRIP);
+   renderPointVector(getOutline(), GL_LINE_STRIP);
 
    renderLinePolyVertices(currentScale);
 }
@@ -368,7 +376,7 @@ bool LineItem::processArguments(S32 argc, const char **argv)
 
    mTeam = atoi(argv[0]);
    setWidth(max(min(atoi(argv[1]), MAX_LINE_WIDTH), MIN_LINE_WIDTH));
-   processPolyBounds(argc, argv, 2, getGame()->getGridSize());
+   readGeom(argc, argv, 2, getGame()->getGridSize());
 
    computeExtent();
 
@@ -378,7 +386,7 @@ bool LineItem::processArguments(S32 argc, const char **argv)
 
 string LineItem::toString()
 {
-   return string(getClassName()) + " " + itos(mTeam) + " " + itos(getWidth()) + " " + boundsToString(getGame()->getGridSize());
+   return string(getClassName()) + " " + itos(mTeam) + " " + itos(getWidth()) + " " + geomToString(getGame()->getGridSize());
 }
 
 
@@ -394,7 +402,7 @@ void LineItem::onAddedToGame(Game *theGame)
 // Bounding box for quick collision-possibility elimination, and display scoping purposes
 void LineItem::computeExtent()
 {
-   setExtent(computePolyExtents());
+   setExtent(EditorObject::computeExtents());
 }
 
 
@@ -422,7 +430,7 @@ U32 LineItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
    //stream->writeRangedU32(mWidth, 0, MAX_LINE_WIDTH);
    stream->write(mTeam);
 
-   Polyline::packUpdate(connection, stream);
+   packGeom(connection, stream);
 
    return 0;
 }
@@ -433,9 +441,8 @@ void LineItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
    //mWidth = stream->readRangedU32(0, MAX_LINE_WIDTH);
    stream->read(&mTeam);
 
-   Polyline::unpackUpdate(connection, stream);
-
-   setExtent(computePolyExtents());
+   unpackGeom(connection, stream);
+   setExtent(EditorObject::computeExtents());
 }
 
 

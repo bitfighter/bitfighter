@@ -221,6 +221,8 @@ public:
    void renderDock();
    void renderEditor(F32 currentScale);
 
+   void onItemDragging() { onGeomChanged(); }   // Item is being actively dragged
+
    void onGeomChanged();
    void findForceFieldEnd();                      // Find end of forcefield in editor
 

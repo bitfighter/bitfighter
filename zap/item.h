@@ -140,22 +140,8 @@ public:
    EditorPointObject(GameObjectType objectType = UnknownType);       // Constructor
    EditorPointObject(const EditorPointObject &epo);                  // Copy constructor
 
-
-   // TODO: Push these up to EditorObject
-   GeomType getGeomType() { return mGeometry->getGeomType(); }
-   virtual Point getVert(S32 index) { return mGeometry->getVert(index); }
-   virtual void setVert(const Point &point, S32 index) { return mGeometry->setVert(point, index); }
-
-   S32 getVertCount() { return mGeometry->getVertCount(); }
-   void clearVerts() { mGeometry->clearVerts(); }
-   void addVert(const Point &point)  { mGeometry->addVert(point); }
-   void addVertFront(Point vert)  { mGeometry->addVertFront(vert); }
-   void deleteVert(S32 vertIndex)  { mGeometry->deleteVert(vertIndex); }
-   void insertVert(Point vertex, S32 vertIndex)  { mGeometry->insertVert(vertex, vertIndex); }
-
    virtual void renderItemText(const char *text, S32 offset, F32 currentScale);
    void addToDock(Game *game, const Point &point);
-
 };
 
 

@@ -95,7 +95,7 @@ public:
    /// Clips the current set of render lines against the polygon passed as polyPoints, modifies lineSegmentPoints.
    static void clipRenderLinesToPoly(const Vector<DatabaseObject *> &barrierList, Vector<Point> &lineSegmentPoints);
 
-   static void constructBarrierEndPoints(const Vector<Point> &vec, F32 width, Vector<Point> &barrierEnds);
+   static void constructBarrierEndPoints(const Vector<Point> *vec, F32 width, Vector<Point> &barrierEnds);
 
    // Clean up edge geometry and get barriers ready for proper rendering
    static void prepareRenderingGeometry(Game *game);

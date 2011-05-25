@@ -58,23 +58,20 @@ LoadoutZone::LoadoutZone()
 
 void LoadoutZone::render()
 {
-   renderLoadoutZone(getGame()->getTeamColor(getTeam()), mPolyBounds, mPolyFill, mCentroid, mLabelAngle);
+   renderLoadoutZone(getGame()->getTeamColor(getTeam()), getOutline(), getFill(), getCentroid(), getLabelAngle());
 }
 
 
 void LoadoutZone::renderEditor(F32 currentScale)
 {
    render();
-   if(mSelected || mLitUp)
-      renderPolyHighlight();
-
-   renderLinePolyVertices(currentScale);
+   EditorPolygon::renderEditor(currentScale);
 }
 
 
 void LoadoutZone::renderDock()
 {
-  renderLoadoutZone(getGame()->getTeamColor(getTeam()), mPolyBounds, mPolyFill);
+  renderLoadoutZone(getGame()->getTeamColor(getTeam()), getOutline(), getFill());
 }
 
 
@@ -111,7 +108,7 @@ bool LoadoutZone::processArguments(S32 argc2, const char **argv2)
       return false;
 
    mTeam = atoi(argv[0]);     // Team is first arg
-   processPolyBounds(argc, argv, 1, getGame()->getGridSize());
+   readGeom(argc, argv, 1, getGame()->getGridSize());
 
    computeExtent();
 
@@ -121,7 +118,7 @@ bool LoadoutZone::processArguments(S32 argc2, const char **argv2)
 
 string LoadoutZone::toString()
 {
-   return string(getClassName()) + " " + itos(mTeam) + " " + boundsToString(getGame()->getGridSize());
+   return string(getClassName()) + " " + itos(mTeam) + " " + geomToString(getGame()->getGridSize());
 }
 
 
@@ -134,17 +131,13 @@ void LoadoutZone::onAddedToGame(Game *theGame)
 // Bounding box for quick collision-possibility elimination
 void LoadoutZone::computeExtent()
 {
-   Rect extent(mPolyBounds[0], mPolyBounds[0]);
-   for(S32 i = 1; i < mPolyBounds.size(); i++)
-      extent.unionPoint(mPolyBounds[i]);
-   setExtent(extent);
+   setExtent(EditorObject::getExtent());
 }
 
 // More precise boundary for precise collision detection
 bool LoadoutZone::getCollisionPoly(Vector<Point> &polyPoints)
 {
-   for(S32 i = 0; i < mPolyBounds.size(); i++)
-      polyPoints.push_back(mPolyBounds[i]);
+   polyPoints = *getOutline();
    return true;
 }
 
@@ -162,7 +155,7 @@ bool LoadoutZone::collide(GameObject *hitObject)
 U32 LoadoutZone::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
    stream->write(mTeam);
-   EditorPolygon::packUpdate(connection, stream);
+   packGeom(connection, stream);
    return 0;
 }
 
@@ -170,8 +163,8 @@ U32 LoadoutZone::packUpdate(GhostConnection *connection, U32 updateMask, BitStre
 void LoadoutZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    stream->read(&mTeam);
-   EditorPolygon::unpackUpdate(connection, stream);
-   computeExtent();
+   unpackGeom(connection, stream);
+   setExtent(EditorObject::computeExtents());
 }
 
 
