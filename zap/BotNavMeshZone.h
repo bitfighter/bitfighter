@@ -101,9 +101,6 @@ public:
    void onAddedToGame(Game *theGame);
    Point getCenter();      // Return center of zone
 
-   // Bounding box for quick collision-possibility elimination
-   void computeExtent();
-
    // More precise boundary for precise collision detection
    bool getCollisionPoly(Vector<Point> &polyPoints);
 

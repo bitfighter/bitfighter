@@ -149,7 +149,7 @@ bool BotNavMeshZone::processArguments(S32 argc, const char **argv)
 
    readGeom(argc, argv, 0, getGame()->getGridSize());
 
-   computeExtent();  // Computes extent so we can insert this into the BotNavMesh object database
+   setExtent();     // Sets object's extent database
    mConvex = isConvex(getOutline());
 
    return true;
@@ -168,13 +168,6 @@ void BotNavMeshZone::addToGame(Game *game)
 void BotNavMeshZone::onAddedToGame(Game *theGame)
 {
    TNLAssert(false, "Should not be added to game");
-}
-
-
-// Bounding box for quick collision-possibility elimination
-void BotNavMeshZone::computeExtent()
-{
-   setExtent(BfObject::getExtent());
 }
 
 
@@ -612,7 +605,7 @@ bool BotNavMeshZone::buildBotMeshZones(Game *game)
             {
                botzone->mConvex = true;
                botzone->addToGame(game);
-               botzone->computeExtent();
+               botzone->setExtent();
             }
          }
 
@@ -648,7 +641,7 @@ bool BotNavMeshZone::buildBotMeshZones(Game *game)
 
          botzone->mConvex = true;             // Avoid random red and green on /showzones.
          botzone->addToGame(game);
-         botzone->computeExtent();   
+         botzone->setExtent();   
        }
 
       BotNavMeshZone::buildBotNavMeshZoneConnections();

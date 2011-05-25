@@ -157,7 +157,6 @@ class HuntersNexusObject : public EditorPolygon
 {
 private:
    typedef GameObject Parent;
-   void computeExtent();
 
 public:
    HuntersNexusObject();      // Constructor

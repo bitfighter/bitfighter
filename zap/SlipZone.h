@@ -46,7 +46,6 @@ public:
    S32 getRenderSortValue();
 
    void onAddedToGame(Game *theGame);
-   void computeExtent();
    bool getCollisionPoly(Vector<Point> &polyPoints);
    bool collide(GameObject *hitObject);
 

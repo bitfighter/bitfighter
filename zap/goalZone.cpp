@@ -121,7 +121,7 @@ bool GoalZone::processArguments(S32 argc2, const char **argv2)
 
    mTeam = atoi(argv[0]);     // Team is first arg
    readGeom(argc, argv, 1, getGame()->getGridSize());
-   computeExtent();
+   setExtent();     // Sets object's extent database;
 
    return true;
 }
@@ -153,12 +153,6 @@ void GoalZone::onAddedToGame(Game *theGame)
    gameType->addZone(this);
 
   theGame->mObjectsLoaded++;     // N.B.: For some reason this has no effect on the client
-}
-
-
-void GoalZone::computeExtent()
-{
-   setExtent(Rect(*getOutline()));
 }
 
 
@@ -201,7 +195,7 @@ void GoalZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
    if(stream->readFlag()) 
    {
       unpackGeom(connection, stream);
-      computeExtent();
+      setExtent();     // Sets object's extent database
 
       stream->read(&mScore);
    }

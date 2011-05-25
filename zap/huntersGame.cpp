@@ -649,10 +649,10 @@ bool HuntersNexusObject::processArguments(S32 argc2, const char **argv2)
       addVert(Point(pos.x + ext.x, pos.y + ext.y));   // LR corner
       addVert(Point(pos.x - ext.x, pos.y + ext.y));   // LL corner
    }
-   else           // Bitfighter format
+   else              // Bitfighter format
       readGeom(argc, argv, 0, getGame()->getGridSize());
 
-   computeExtent();
+   setExtent();      // Sets object's extent database
 
    return true;
 }
@@ -661,12 +661,6 @@ bool HuntersNexusObject::processArguments(S32 argc2, const char **argv2)
 string HuntersNexusObject::toString()
 {
    return string(getClassName()) + " " + geomToString(getGame()->getGridSize());
-}
-
-
-void HuntersNexusObject::computeExtent()
-{
-   setExtent(Rect(*getOutline()));
 }
 
 
@@ -745,7 +739,7 @@ U32 HuntersNexusObject::packUpdate(GhostConnection *connection, U32 updateMask, 
 void HuntersNexusObject::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    unpackGeom(connection, stream);      
-   computeExtent();
+   setExtent();     // Sets object's extent database
 }
 
 const char HuntersNexusObject::className[] = "HuntersNexusObject";      // Class name as it appears to Lua scripts

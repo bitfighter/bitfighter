@@ -48,7 +48,7 @@ void PointGeometry::unpackGeom(GhostConnection *connection, BitStream *stream)
 }
 
 
-Rect PointGeometry::computeExtents()
+Rect PointGeometry::getExtents()
 {
    return Rect(mPos, 1);
 }
@@ -102,7 +102,7 @@ void SimpleLineGeometry::unpackGeom(GhostConnection *connection, BitStream *stre
 }
 
 
-Rect SimpleLineGeometry::computeExtents()
+Rect SimpleLineGeometry::getExtents()
 {
    return Rect(mFromPos, mToPos);
 }
@@ -313,7 +313,7 @@ void PolylineGeometry::unpackGeom(GhostConnection *connection, BitStream *stream
 }
 
 
-Rect PolylineGeometry::computeExtents()
+Rect PolylineGeometry::getExtents()
 {
    return Rect(mPolyBounds);
 }

@@ -101,7 +101,7 @@ bool SlipZone::processArguments(S32 argc2, const char **argv2)
    else           // Even number of arg count (6,8,10)
       readGeom(argc, argv, 0, getGame()->getGridSize());
 
-   computeExtent();
+   setExtent();
 
    /*for(S32 i = 1; i < argc; i += 2)
    {
@@ -131,12 +131,6 @@ void SlipZone::onAddedToGame(Game *theGame)
       setScopeAlways();
 
    getGame()->mObjectsLoaded++;
-}
-
-
-void SlipZone::computeExtent()
-{
-   setExtent(Rect(*getOutline()));
 }
 
 

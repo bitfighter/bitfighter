@@ -89,7 +89,7 @@ public:
    virtual boost::shared_ptr<Geometry> copyGeometry() = 0;
    void newGeomCopy();
 
-   virtual Rect computeExtents() = 0;
+   virtual Rect getExtents() = 0;
 
    virtual void onPointsChanged() = 0;
 
@@ -142,7 +142,7 @@ public:
 
    boost::shared_ptr<Geometry> copyGeometry();
 
-   Rect computeExtents();
+   Rect getExtents();
 
    void onPointsChanged() { /* Do nothing */ }
 };
@@ -194,7 +194,7 @@ public:
 
    boost::shared_ptr<Geometry> copyGeometry();
 
-   Rect computeExtents();
+   Rect getExtents();
 
    void onPointsChanged() { /* Do nothing */ }
 };
@@ -251,7 +251,7 @@ public:
 
    virtual boost::shared_ptr<Geometry> copyGeometry();
 
-   Rect computeExtents();
+   Rect getExtents();
 
    virtual void onPointsChanged();
 };

@@ -238,8 +238,8 @@ public:
    string geomToString(F32 gridSize) { return mGeometry->geomToString(gridSize); }
    void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize) { mGeometry->readGeom(argc, argv, firstCoord, gridSize); }
 
-   Rect computeExtents() { return mGeometry->computeExtents(); }
-
+   virtual void setExtent() { setExtent(mGeometry->getExtents()); }                    // Set extents of object in database
+   virtual void setExtent(const Rect &extent) { DatabaseObject::setExtent(extent); }   // Passthrough
    void onPointsChanged() { mGeometry->onPointsChanged(); }
 
    void disableTriangluation() { mGeometry->disableTriangluation(); }

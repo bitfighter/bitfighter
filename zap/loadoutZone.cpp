@@ -110,7 +110,7 @@ bool LoadoutZone::processArguments(S32 argc2, const char **argv2)
    mTeam = atoi(argv[0]);     // Team is first arg
    readGeom(argc, argv, 1, getGame()->getGridSize());
 
-   computeExtent();
+   setExtent();
 
    return true;
 }
@@ -128,11 +128,6 @@ void LoadoutZone::onAddedToGame(Game *theGame)
       setScopeAlways();
 }
 
-// Bounding box for quick collision-possibility elimination
-void LoadoutZone::computeExtent()
-{
-   setExtent(Rect(*getOutline()));
-}
 
 // More precise boundary for precise collision detection
 bool LoadoutZone::getCollisionPoly(Vector<Point> &polyPoints)
@@ -164,7 +159,7 @@ void LoadoutZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    stream->read(&mTeam);
    unpackGeom(connection, stream);
-   setExtent(EditorObject::computeExtents());
+   setExtent();
 }
 
 

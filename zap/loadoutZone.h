@@ -49,7 +49,6 @@ public:
    bool processArguments(S32 argc, const char **argv);
    void onAddedToGame(Game *theGame);
 
-   void computeExtent();                                 // Bounding box for quick collision-possibility elimination
    bool getCollisionPoly(Vector<Point> &polyPoints);     // More precise boundary for precise collision detection
    bool collide(GameObject *hitObject);
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
