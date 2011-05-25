@@ -32,29 +32,9 @@
 namespace Zap
 {
 
-extern S32 gMaxPolygonPoints;
-
-class Polyline
-{
-public:
-   static void readPolyBounds(S32 argc, const char **argv, S32 firstCoord, F32 gridSize, bool allowFirstAndLastPointToBeEqual, Vector<Point> &bounds);
-
-   //// Read a series of points from a command line, and add them to a Vector of points
-   //void processPolyBounds(S32 argc, const char **argv, S32 firstCoord, F32 gridSize, bool allowFirstAndLastPointToBeEqual);
-
-   //virtual void processPolyBounds(S32 argc, const char **argv, S32 firstCoord, F32 gridSize)
-   //{
-   //   processPolyBounds(argc, argv, firstCoord, gridSize, true);
-   //}
-};
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
 
 // Provide editor related methods to the polygon class
-class EditorPolygon : public Polyline, public EditorObject, public GameObject, public LuaItem
+class EditorPolygon : public EditorObject, public GameObject, public LuaItem
 {
    virtual void renderItemText(const char *text, S32 offset, F32 currentScale);
    virtual void labelDockItem();
@@ -67,7 +47,6 @@ class EditorPolygon : public Polyline, public EditorObject, public GameObject, p
    Point getInitialPlacementOffset(F32 gridSize);
 
 protected:
-      //void processPolyBounds(S32 argc, const char **argv, S32 firstCoord, F32 gridSize);
       void renderPolyHighlight();
 
 public:

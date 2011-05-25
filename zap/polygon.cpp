@@ -30,38 +30,6 @@
 namespace Zap
 {
 
-extern S32 gMaxPolygonPoints;
-
-
-
-// Static version
-void Polyline::readPolyBounds(S32 argc, const char **argv, S32 firstCoord, F32 gridSize, bool allowFirstAndLastPointToBeEqual, Vector<Point> &bounds)
-{
-   Point p, lastP;
-   
-   for(S32 i = firstCoord; i < argc; i += 2)
-   {
-      // Put a cap on the number of vertices in a polygon
-      if(bounds.size() >= gMaxPolygonPoints)      // || argc == i + 1 might be needed...
-         break;
-
-      p.set( (F32) atof(argv[i]) * gridSize, (F32) atof(argv[i+1]) * gridSize );
-
-   if(i == firstCoord || p != lastP)
-         bounds.push_back(p);
-
-      lastP.set(p);
-   }
-
-   // Check if last point was same as first; if so, scrap it
-   if(!allowFirstAndLastPointToBeEqual && bounds.first() == bounds.last())
-      bounds.erase(bounds.size() - 1);
-}
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
 // TODO: Put in editor ??
 static const Color INSTRUCTION_TEXTCOLOR(1,1,1);
 static const S32 INSTRUCTION_TEXTSIZE = 9;      
