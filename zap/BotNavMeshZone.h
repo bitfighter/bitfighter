@@ -75,7 +75,6 @@ class BotNavMeshZone : public GameObject
 {
 private:   
    typedef GameObject Parent;
-   Game *mGame;
    U16 mZoneId;            // Unique ID for each zone
 
 public:
