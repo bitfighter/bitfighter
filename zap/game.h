@@ -163,7 +163,7 @@ public:
 
    static const S32 PLAYER_COUNT_UNAVAILABLE = -1;
 
-   Vector<GameObject *> mGameObjects;
+   Vector<SafePtr<GameObject>> mGameObjects;
 
    Rect getWorldExtents() { return mWorldExtents; }
 

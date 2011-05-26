@@ -586,7 +586,8 @@ S32 QSORT_CALLBACK geometricSort(EditorObject * &a, EditorObject * &b)
 
 static void geomSort(pointainer<vector<EditorObject *> > &objects)
 {
-   qsort(&objects[0], objects.size(), sizeof(EditorObject *), (qsort_compare_func) geometricSort);
+   if(objects.size() >= 2)  // nothing to sort when there is one or zero objects
+      qsort(&objects[0], objects.size(), sizeof(EditorObject *), (qsort_compare_func) geometricSort);
 }
 
 

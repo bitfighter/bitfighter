@@ -3183,7 +3183,7 @@ GAMETYPE_RPC_C2S(GameType, c2sReaffirmMountItem, (U16 itemId), (itemId))
 
    for(S32 i = 0; i < gServerGame->mGameObjects.size(); i++)
    {
-      Item *item = dynamic_cast<Item *>(gServerGame->mGameObjects[i]);
+      Item *item = dynamic_cast<Item *>(gServerGame->mGameObjects[i].getPointer());
       if(item && item->getItemId() == itemId)
       {
          item->setMountedMask();
@@ -3209,7 +3209,7 @@ GAMETYPE_RPC_C2S(GameType, c2sResendItemStatus, (U16 itemId), (itemId))
 
    for(S32 i = 0; i < gServerGame->mGameObjects.size(); i++)
    {
-      Item *item = dynamic_cast<Item *>(gServerGame->mGameObjects[i]);
+      Item *item = dynamic_cast<Item *>(gServerGame->mGameObjects[i].getPointer());
       if(item && item->getItemId() == itemId)
       {
          item->setPositionMask();

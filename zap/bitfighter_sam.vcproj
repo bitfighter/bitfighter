@@ -893,6 +893,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\Geometry.cpp"
+			>
+		</File>
+		<File
 			RelativePath="..\glut\glDedicated.h"
 			>
 		</File>

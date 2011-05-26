@@ -147,7 +147,7 @@ bool BotNavMeshZone::processArguments(S32 argc, const char **argv)
    if(argc < 6)
       return false;
 
-   readGeom(argc, argv, 0, getGame()->getGridSize());
+   readGeom(argc, argv, 0, mGame->getGridSize());   // why does getGame() fail? used mGame. -sam
 
    setExtent();     // Sets object's extent database
 
