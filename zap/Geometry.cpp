@@ -366,6 +366,7 @@ static void readPolyBounds(S32 argc, const char **argv, S32 firstCoord, F32 grid
 void PolylineGeometry::readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize)
 {
     readPolyBounds(argc, argv, firstCoord, gridSize, true, mPolyBounds);
+    mVertSelected.resize(mPolyBounds.size());
     onPointsChanged();
 }
 
@@ -382,6 +383,7 @@ boost::shared_ptr<Geometry> PolylineGeometry::copyGeometry()
 void PolygonGeometry::readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize)
 {
    readPolyBounds(argc, argv, firstCoord, gridSize, false, mPolyBounds);
+   mVertSelected.resize(mPolyBounds.size());
    onPointsChanged();
 }
 

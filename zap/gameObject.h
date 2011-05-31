@@ -185,14 +185,17 @@ protected:
    boost::shared_ptr<Geometry> mGeometry;
 
 public:
+   BfObject();                  // Constructor
    virtual ~BfObject() { };     // Provide virtual destructor
 
    S32 getTeam() { return mTeam; }
    void setTeam(S32 team) { mTeam = team; }    
 
-
    Game *getGame() { return mGame; }
    void setGame(Game *game) { mGame = game; }
+
+   virtual void addToGame(Game *game);
+   virtual void removeFromGame();
 
    // DatabaseObject methods
    virtual GridDatabase *getGridDatabase();     // BotNavMeshZones have their own GridDatabase
@@ -238,6 +241,8 @@ public:
    string geomToString(F32 gridSize) { return mGeometry->geomToString(gridSize); }
    void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize) { mGeometry->readGeom(argc, argv, firstCoord, gridSize); }
 
+
+
    virtual void setExtent() { setExtent(mGeometry->getExtents()); }                    // Set extents of object in database
    virtual void setExtent(const Rect &extent) { DatabaseObject::setExtent(extent); }   // Passthrough
    void onPointsChanged() { mGeometry->onPointsChanged(); }
@@ -254,10 +259,11 @@ class GameObject : public virtual BfObject, public NetObject
    typedef NetObject Parent;
 
 private:
-   U32 mCreationTime;
    SafePtr<GameConnection> mControllingClient;     // Only has meaning on the server, will be null on the client
    SafePtr<GameConnection> mOwner;
    U32 mDisableCollisionCount;                     // No collisions when > 0, use of counter allows "nested" collision disabling
+
+   U32 mCreationTime;
 
 protected:
    Move mLastMove;      // The move for the previous update
@@ -270,12 +276,11 @@ public:
 
    virtual void addToGame(Game *game);       // BotNavMeshZone has its own addToGame
    virtual void onAddedToGame(Game *game);
-   void removeFromGame();
-   
+
+   U32 getCreationTime() { return mCreationTime; }
+   void setCreationTime(U32 creationTime) { mCreationTime = creationTime; }
 
    void deleteObject(U32 deleteTimeInterval = 0);
-   U32 getCreationTime() { return mCreationTime; }
-   
    
    StringTableEntry getKillString() { return mKillString; }
 

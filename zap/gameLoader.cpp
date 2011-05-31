@@ -106,6 +106,7 @@ inline void addArg()
 }
 
 
+
 // Parse the contents of the level file string is the file data itself
 // This is rather ugly!  Totally old school!
 
@@ -206,7 +207,14 @@ stateLineParseDone:
    if(argc)
    {
       id[idLen] = 0;
-      processLevelLoadLine(argc, (U32)atoi(id), (const char **) argv);
+      try
+      {
+         processLevelLoadLine(argc, (U32)atoi(id), (const char **) argv);
+      }
+      catch(LevelLoadException &e)
+      {
+         TNL::logprintf("Level Error: Can't parse %s: %s", string, e.what());
+      }
    }
    argc = 0;
    argLen = 0;

@@ -169,10 +169,10 @@ void TextItem::recalcTextSize()
 
 void TextItem::onAddedToGame(Game *theGame)
 {
+   Parent::onAddedToGame(theGame);
+
    if(!isGhost())
       setScopeAlways();
-
-   getGame()->mObjectsLoaded++;
 }
 
 

@@ -56,10 +56,10 @@ Teleporter::Teleporter() : SimpleLine(TeleportType)
 
 void Teleporter::onAddedToGame(Game *theGame)
 {
+   Parent::onAddedToGame(theGame);
+
    if(!isGhost())
       setScopeAlways();    // Always in scope!
-
-   getGame()->mObjectsLoaded++;
 }
 
 
@@ -105,7 +105,7 @@ bool Teleporter::processArguments(S32 argc, const char **argv)
    {
       // Since this is really part of a different teleporter, delete this one
       removeFromDatabase();
-      this->destroySelf();
+      destroySelf();
    }
 
    return true;

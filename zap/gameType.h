@@ -104,6 +104,9 @@ struct BarrierRec
    Vector<F32> verts;
    F32 width;
    bool solid;
+
+public:
+   void constructBarriers(Game *theGame);
 };
 
 
@@ -181,14 +184,16 @@ public:
    virtual bool canBeIndividualGame() { return true; }
    virtual bool teamHasFlag(S32 teamId) { return false; }
    S32 getWinningScore() { return mWinningScore; }
-   U32 getTotalGameTime() { return (mGameTimer.getPeriod() / 1000); }
-   S32 getRemainingGameTime() { return (mGameTimer.getCurrent() / 1000); }
+   U32 getTotalGameTime() { return (mGameTimer.getPeriod() / 1000); }      // In seconds
+   S32 getRemainingGameTime() { return (mGameTimer.getCurrent() / 1000); } // In seconds
    S32 getLeadingScore() { return mLeadingTeamScore; }
    S32 getLeadingTeam() { return mLeadingTeam; }
    bool engineerIsEnabled() { return mEngineerEnabled; }
 
    void catalogSpybugs();     // Rebuild a list of spybugs in the game
    void addSpyBug(SpyBug *spybug);
+
+   void addBarrier(BarrierRec barrier, Game *game);
 
    virtual bool isFlagGame() { return false; }              // Does game use flags?
    virtual bool isTeamFlagGame() { return true; }           // Does flag-team orientation matter?  Only false in HunterGame.
@@ -376,7 +381,7 @@ public:
    virtual void performProxyScopeQuery(GameObject *scopeObject, GameConnection *connection);
 
    // Functions related to loading levels
-   virtual bool processLevelItem(S32 argc, const char **argv);
+   virtual bool processLevelParam(S32 argc, const char **argv);      // Things like LevelName and other level parameters
 
    void onGhostAvailable(GhostConnection *theConnection);
    TNL_DECLARE_RPC(s2cSetLevelInfo, (StringTableEntry levelName, StringTableEntry levelDesc, S32 teamScoreLimit, StringTableEntry levelCreds, 

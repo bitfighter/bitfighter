@@ -102,26 +102,32 @@ HuntersGameType::HuntersGameType() : GameType()
 }
 
 
-
 bool HuntersGameType::processArguments(S32 argc, const char **argv)
 {
    if(argc > 0)
    {
-      mGameTimer.reset(U32(atof(argv[0]) * 60 * 1000));       // Game time
+      mGameTimer.reset(U32(atof(argv[0]) * 60 * 1000));      // Game time
       if(argc > 1)
       {
          mNexusClosedTime = S32(atof(argv[1]) * 60 * 1000);  // Time until nexus opens, specified in minutes
          if(argc > 2)
          {
-            mNexusOpenTime = S32(atof(argv[2]) * 1000);       // Time nexus remains open, specified in seconds
+            mNexusOpenTime = S32(atof(argv[2]) * 1000);      // Time nexus remains open, specified in seconds
             if(argc > 3)
-               mWinningScore = atoi(argv[3]);                 // Winning score
+               mWinningScore = atoi(argv[3]);                // Winning score
          }
       }
    }
    mNexusTimer.reset(mNexusClosedTime);
 
    return true;
+}
+
+
+string HuntersGameType::toString()
+{
+   return string(getClassName()) + " " + ftos(F32(mGameTimer.getPeriod()) / 60 / 1000, 3) + " " + ftos(F32(mNexusClosedTime) / 60 / 1000, 3) + " " + 
+                                         ftos(F32(mNexusOpenTime) / 1000, 3) + " " + itos(mWinningScore);
 }
 
 
@@ -198,10 +204,15 @@ void HuntersGameType::itemDropped(Ship *ship, Item *item)
 // Create some game-specific menu items for the GameParameters menu from the arguments processed above...
 void HuntersGameType::addGameSpecificParameterMenuItems(Vector<MenuItem *> &menuItems)
 {
-   menuItems.push_back(new TimeCounterMenuItem("Game Time:", 8 * 60, 99*60, "Unlimited", "Time game will last"));
-   menuItems.push_back(new TimeCounterMenuItem("Time for Nexus to Open:", 60, 99*60, "Never", "Time it takes for the Nexus to open"));
-   menuItems.push_back(new TimeCounterMenuItemSeconds("Time Nexus Remains Open:", 30, 99*60, "Always", "Time that the Nexus will remain open"));
-   menuItems.push_back(new CounterMenuItem("Score to Win:", 5000, 100, 100, 20000, "points", "", "Game ends when one player or team gets this score"));
+   //menuItems.push_back(new TimeCounterMenuItem("Game Time:", 8 * 60, 99*60, "Unlimited", "Time game will last"));
+   //menuItems.push_back(new TimeCounterMenuItem("Time for Nexus to Open:", 60, 99*60, "Never", "Time it takes for the Nexus to open"));
+   //menuItems.push_back(new TimeCounterMenuItemSeconds("Time Nexus Remains Open:", 30, 99*60, "Always", "Time that the Nexus will remain open"));
+   //menuItems.push_back(new CounterMenuItem("Score to Win:", 5000, 100, 100, 20000, "points", "", "Game ends when one player or team gets this score"));
+
+   menuItems.push_back(new TimeCounterMenuItem("Game Time:", mGameTimer.getPeriod() / 1000, 99*60, "Unlimited", "Time game will last"));
+   menuItems.push_back(new TimeCounterMenuItem("Time for Nexus to Open:", mNexusClosedTime / 1000, 99*60, "Never", "Time it takes for the Nexus to open"));
+   menuItems.push_back(new TimeCounterMenuItemSeconds("Time Nexus Remains Open:", mNexusOpenTime / 1000, 99*60, "Always", "Time that the Nexus will remain open"));
+   menuItems.push_back(new CounterMenuItem("Score to Win:", mWinningScore, 100, 100, 20000, "points", "", "Game ends when one player or team gets this score"));
 }
 
 TNL_IMPLEMENT_NETOBJECT(HuntersNexusObject);
@@ -666,12 +677,13 @@ string HuntersNexusObject::toString()
 
 void HuntersNexusObject::onAddedToGame(Game *theGame)
 {
+   Parent::onAddedToGame(theGame);
+
    if(!isGhost())
       setScopeAlways();    // Always visible!
 
    HuntersGameType *gt = dynamic_cast<HuntersGameType *>( getGame()->getGameType() );
    if(gt) gt->addNexus(this);
-   getGame()->mObjectsLoaded++;
 }
 
 void HuntersNexusObject::idle(GameObject::IdleCallPath path)

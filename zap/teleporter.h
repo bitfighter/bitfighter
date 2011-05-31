@@ -43,6 +43,8 @@ namespace Zap
 
 class Teleporter : public SimpleLine, public LuaItem
 {
+   typedef SimpleLine Parent;
+
 public:
       enum {
       InitMask     = BIT(0),

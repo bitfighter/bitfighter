@@ -259,7 +259,6 @@ public:
 
    virtual void initializeEditor(F32 gridSize);
 
-
    Point forceFieldEnd;      // Point where forcefield terminates.  Only used for forcefields.
 
    S32 mScore;

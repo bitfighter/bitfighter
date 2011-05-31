@@ -142,6 +142,8 @@ void GoalZone::setTeam(S32 team)
 
 void GoalZone::onAddedToGame(Game *theGame)
 {
+   Parent::onAddedToGame(theGame);
+
    if(!isGhost())
       setScopeAlways();
 
@@ -151,8 +153,6 @@ void GoalZone::onAddedToGame(Game *theGame)
       return;
 
    gameType->addZone(this);
-
-  theGame->mObjectsLoaded++;     // N.B.: For some reason this has no effect on the client
 }
 
 

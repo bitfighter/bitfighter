@@ -59,6 +59,7 @@ private:
 public:
    HuntersGameType();      // Constructor
    bool processArguments(S32 argc, const char **argv);
+   string toString();
 
    bool mNexusIsOpen;      // Is the nexus open?
    S32 getNexusTimeLeft() {return mNexusTimer.getCurrent(); }

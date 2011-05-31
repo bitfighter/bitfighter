@@ -106,7 +106,7 @@ struct UserInterfaceData;
 /// either the server or the client, and is responsible for
 /// managing the passage of time as well as rendering.
 
-class Game
+class Game : public LevelLoader
 {
 private:
    F32 mGridSize;     
@@ -163,14 +163,17 @@ public:
 
    static const S32 PLAYER_COUNT_UNAVAILABLE = -1;
 
+   Game(const Address &theBindAddress);      // Constructor
+   virtual ~Game() { /* Do nothing */ };     // Destructor
+
+
    Vector<GameObject *> mGameObjects;
 
    Rect getWorldExtents() { return mWorldExtents; }
 
    virtual U32 getPlayerCount() = 0;         // Implemented differently on client and server
 
-   Game(const Address &theBindAddress);      // Constructor
-   virtual ~Game() { /* Do nothing */ };     // Destructor
+   virtual bool isTestServer() { return false; }     // Overridden in ServerGame
 
    virtual Color getTeamColor(S32 teamId) { return Color(1,1,1); }      // ClientGame and EditorGame will override
 
@@ -187,6 +190,11 @@ public:
    U32 getTimeUnconnectedToMaster() { return mTimeUnconnectedToMaster; }
 
 
+   void processLevelLoadLine(U32 argc, U32 id, const char **argv);      // Only used by ServerGame and EditorGame
+   bool processPseudoItem(S32 argc, const char **argv) { return false; }
+   void setGameTime(F32 time);                                          // Only used during level load process
+
+
    void addToDeleteList(GameObject *theObject, U32 delay);
 
    // Client/ServerGame and EditorGame will each keep track of objects in a slightly different manner, using the same interface
@@ -196,7 +204,7 @@ public:
    void deleteObjects(U32 typeMask);
 
    F32 getGridSize() { return mGridSize; }
-   void setGridSize(F32 gridSize) { mGridSize = gridSize; }
+   void setGridSize(F32 gridSize);
 
    static Point getScopeRange(bool sensorIsActive) { return sensorIsActive ? Point(PLAYER_SENSOR_VISUAL_DISTANCE_HORIZONTAL + PLAYER_SCOPE_MARGIN,
                                                                                    PLAYER_SENSOR_VISUAL_DISTANCE_VERTICAL  + PLAYER_SCOPE_MARGIN)
@@ -288,7 +296,7 @@ public:
 
 class ClientRef;
 
-class ServerGame : public GameGame, public LevelLoader
+class ServerGame : public GameGame
 {
 private:
    enum {
@@ -365,6 +373,8 @@ public:
 
    bool loadLevel(const string &fileName);    // Load a level
 
+   bool processPseudoItem(S32 argc, const char **argv);      // Things like spawns that aren't really items
+
    void cycleLevel(S32 newLevelIndex = NEXT_LEVEL);
 
    StringTableEntry getLevelNameFromIndex(S32 indx);
@@ -374,9 +384,6 @@ public:
    StringTableEntry getCurrentLevelFileName();  // Return filename of level currently in play  
    StringTableEntry getCurrentLevelName();      // Return name of level currently in play
    StringTableEntry getCurrentLevelType();      // Return type of level currently in play
-
-   void processLevelLoadLine(U32 argc, U32 id, const char **argv);
-   void setGameTime(F32 time);
 
    bool isServer() { return true; }
    void idle(U32 timeDelta);
@@ -487,6 +494,8 @@ public:
    void removeFromGameObjectList(BfObject *theObject) { };
 
    Color getTeamColor(S32 teamId);
+
+   bool processPseudoItem(S32 argc, const char **argv);
 
    WallSegmentManager *mWallSegmentManager;     
    WallSegmentManager *getWallSegmentManager() { return mWallSegmentManager; }

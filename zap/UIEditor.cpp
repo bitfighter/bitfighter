@@ -47,6 +47,9 @@
 #include "loadoutZone.h"         // For LoadoutZone def
 #include "huntersGame.h"         // For HuntersNexusObject def
 #include "config.h"
+
+#include "gameLoader.h"          // For LevelLoadException def
+
 #include "GeomUtils.h"
 #include "textItem.h"            // For MAX_TEXTITEM_LEN and MAX_TEXT_SIZE
 #include "luaLevelGenerator.h"
@@ -138,7 +141,6 @@ static const S32 DOCK_POLY_WIDTH = DOCK_WIDTH - 10;
 
 void EditorUserInterface::addDockObject(EditorObject *object, F32 xPos, F32 yPos)
 {
-   //object->initializeEditor(gEditorGame->getGridSize());
    object->addToDock(gEditorGame, Point(xPos, yPos));       
    object->setTeam(mCurrentTeam);
 }
@@ -176,7 +178,7 @@ void EditorUserInterface::populateDock()
       addDockObject(new TextItem(), xPos, yPos);
       yPos += spacer;
 
-      if(!strcmp(mGameType, "SoccerGameType"))
+      if(gEditorGame->getGameType()->getGameType() == GameType::SoccerGame)
          addDockObject(new SoccerBallItem(), xPos, yPos);
       else
          addDockObject(new FlagItem(), xPos, yPos);
@@ -203,7 +205,7 @@ void EditorUserInterface::populateDock()
       addDockObject(new LoadoutZone(), xPos, yPos);
       yPos += 25;
 
-      if(!strcmp(mGameType, "HuntersGameType"))
+      if(gEditorGame->getGameType()->getGameType() == GameType::NexusGame)
       {
          addDockObject(new HuntersNexusObject(), xPos, yPos);
          yPos += 25;
@@ -515,30 +517,6 @@ void EditorUserInterface::clearUndoHistory()
 }
 
 
-bool EditorUserInterface::isFlagGame(char *mGameType)
-{
-   TNL::Object *theObject = TNL::Object::create(mGameType);  // Instantiate a gameType object
-   GameType *gameType = dynamic_cast<GameType*>(theObject);  // and cast it
-
-   if(!gameType)
-      return false;
-   else
-      return gameType->isFlagGame();
-}
-
-
-bool EditorUserInterface::isTeamFlagGame(char *mGameType)
-{
-   TNL::Object *theObject = TNL::Object::create(mGameType);  // Instantiate a gameType object
-   GameType *gameType = dynamic_cast<GameType*>(theObject);  // and cast it
-
-   if(!gameType)
-      return false;
-   else
-      return gameType->isTeamFlagGame();
-}
-
-
 extern TeamPreset gTeamPresets[];
 
 void EditorUserInterface::setLevelFileName(string name)
@@ -612,11 +590,12 @@ void EditorUserInterface::loadLevel()
    gGameParamUserInterface.menuItems.deleteAndClear();      // Keeps interface from using our menuItems to rebuild savedMenuItems
    gEditorGame->setGridSize(Game::DefaultGridSize);         // Used in editor for scaling walls and text items appropriately
 
-   mGameType[0] = 0;                   // Clear mGameType
+   gEditorGame->setGameType(NULL);
+
    char fileBuffer[1024];
    dSprintf(fileBuffer, sizeof(fileBuffer), "%s/%s", gConfigDirs.levelDir.c_str(), mEditFileName.c_str());
 
-   if(loadLevelFromFile(fileBuffer))   // Process level file --> returns true if file found and loaded, false if not (assume it's a new level)
+   if(gEditorGame->loadLevelFromFile(fileBuffer))   // Process level file --> returns true if file found and loaded, false if not (assume it's a new level)
    {
       // Loaded a level!
       makeSureThereIsAtLeastOneTeam(); // Make sure we at least have one team
@@ -630,7 +609,6 @@ void EditorUserInterface::loadLevel()
    {
       // New level!
       makeSureThereIsAtLeastOneTeam();                               // Make sure we at least have one team, like the man said.
-      strcpy(mGameType, gGameTypeNames[gDefaultGameTypeIndex]);
       gGameParamUserInterface.gameParams.push_back("GameType 10 8"); // A nice, generic game type that we can default to
 
       if(gIniSettings.name != gIniSettings.defaultName)
@@ -726,8 +704,9 @@ void EditorUserInterface::runScript(const string &scriptName, const Vector<strin
       return;
    }
 
+   // TODO: Uncomment the following, make it work again (commented out during refactor of editor load process)
    // Load the items
-   LuaLevelGenerator(name, args, gEditorGame->getGridSize(), getGridDatabase(), this, gConsole);
+   //LuaLevelGenerator(name, args, gEditorGame->getGridSize(), getGridDatabase(), this, gConsole);
    
    // Process new items
    // Not sure about all this... may need to test
@@ -797,20 +776,20 @@ void EditorUserInterface::validateLevel()
    // "Unversal errors" -- levelgens can't (yet) change gametype
 
    // Check for soccer ball in a a game other than SoccerGameType. Doesn't crash no more.
-   if(foundSoccerBall && strcmp(mGameType, "SoccerGameType"))
+   if(foundSoccerBall && gEditorGame->getGameType()->getGameType() != GameType::SoccerGame)
       mLevelWarnings.push_back("WARNING: Soccer ball can only be used in soccer game.");
 
    // Check for the nexus object in a non-hunter game. Does not affect gameplay in non-hunter game.
-   if(foundNexus && strcmp(mGameType, "HuntersGameType"))
+   if(foundNexus && gEditorGame->getGameType()->getGameType() != GameType::NexusGame)
       mLevelWarnings.push_back("WARNING: Nexus object can only be used in Hunters game.");
 
    // Check for missing nexus object in a hunter game.  This cause mucho dolor!
-   if(!foundNexus && !strcmp(mGameType, "HuntersGameType"))
+   if(!foundNexus && gEditorGame->getGameType()->getGameType() == GameType::NexusGame)
       mLevelErrorMsgs.push_back("ERROR: Nexus game must have a Nexus.");
 
-   if(foundFlags && !isFlagGame(mGameType))
+   if(foundFlags && !gEditorGame->getGameType()->isFlagGame())
       mLevelWarnings.push_back("WARNING: This game type does not use flags.");
-   else if(foundTeamFlags && !isTeamFlagGame(mGameType))
+   else if(foundTeamFlags && !gEditorGame->getGameType()->isTeamFlagGame())
       mLevelWarnings.push_back("WARNING: This game type does not use team flags.");
 
    // Check for team flag spawns on games with no team flags
@@ -2652,6 +2631,131 @@ void EditorUserInterface::deleteItem(S32 itemIndex)
    onMouseMoved();   // Reset cursor  
 }
 
+// Process a level line as the level is being loaded
+//void EditorUserInterface::processLevelLoadLine(U32 argc, U32 id, const char **argv) 
+//{
+//   EditorObject *newObject = newEditorObject(argv[0]);
+//
+//   newObject->addToEditor(gEditorGame);
+//   newObject->processArguments(argc, argv);
+//}
+
+
+// Process a line read from level file
+void EditorUserInterface::processLevelLoadLine(U32 argc, U32 id, const char **argv)
+{
+   Game *game = gEditorGame;
+   S32 strlenCmd = (S32) strlen(argv[0]);
+
+   // This is a legacy from the old Zap! days... we do bots differently in Bitfighter, so we'll just ignore this line if we find it.
+   if(!stricmp(argv[0], "BotsPerTeam"))
+      return;
+
+   else if(!stricmp(argv[0], "GridSize"))      // GridSize requires a single parameter (an int specifiying how many pixels in a grid cell)
+   {                                           
+      if(argc < 2)
+         throw LevelLoadException("Improperly formed GridSize parameter");
+
+      game->setGridSize(atof(argv[1]));
+   }
+
+   // Parse GameType line... All game types are of form XXXXGameType
+   else if(strlenCmd >= 8 && !strcmp(argv[0] + strlenCmd - 8, "GameType"))
+   {
+      if(gEditorGame->getGameType())
+         throw LevelLoadException("Duplicate GameType parameter");
+
+      // validateGameType() will return a valid GameType string -- either what's passed in, or the default if something bogus was specified
+      TNL::Object *theObject = TNL::Object::create(GameType::validateGameType(argv[0]));      
+      GameType *gt = dynamic_cast<GameType *>(theObject);  // Force our new object to be a GameObject
+
+      bool validArgs = gt->processArguments(argc - 1, argv + 1);
+
+      gEditorGame->setGameType(gt);
+
+      if(!validArgs || strcmp(gt->getClassName(), argv[0]))
+         throw LevelLoadException("Improperly formed GameType parameter");
+      
+      // Save the args (which we already have split out) for easier handling in the Game Parameter Editor
+      //for(U32 i = 1; i < argc; i++)
+      //   gEditorUserInterface.mGameTypeArgs.push_back(argv[i]);
+   }
+   else if(gEditorGame->getGameType() && gEditorGame->getGameType()->processLevelParam(argc, argv)) 
+   {
+      // Do nothing here
+   }
+
+   // here on up is same as in server game... TODO: unify!
+
+   else if(!strcmp(argv[0], "Script"))
+   {
+      gEditorUserInterface.mScriptLine = "";
+      // Munge everything into a string.  We'll have to parse after editing in GameParamsMenu anyway.
+      for(U32 i = 1; i < argc; i++)
+      {
+         if(i > 1)
+            gEditorUserInterface.mScriptLine += " ";
+
+         gEditorUserInterface.mScriptLine += argv[i];
+      }
+   }
+
+   // Parse Team definition line
+   else if(!strcmp(argv[0], "Team"))
+   {
+      if(mTeams.size() >= GameType::gMaxTeams)     // Ignore teams with numbers higher than 9
+         return;
+
+      TeamEditor team;
+      team.readTeamFromLevelLine(argc, argv);
+
+      // If team was read and processed properly, numPlayers will be 0
+      if(team.numPlayers != -1)
+         mTeams.push_back(team);
+   }
+
+   else
+   {
+      string objectType = argv[0];
+
+      if(objectType == "BarrierMakerS")
+      {
+         objectType = "PolyWall";
+      }
+
+      TNL::Object *theObject = TNL::Object::create(objectType.c_str());   // Create an object of the type specified on the line
+      EditorObject *object = dynamic_cast<EditorObject *>(theObject);     // Coerce our new object to be a GameObject
+
+      if(!object)    // Well... that was a bad idea!
+      {
+         delete theObject;
+      }
+      else  // object was valid
+      {
+         object->addToEditor(gEditorGame);
+         object->processArguments(argc, argv);
+
+         //mLoadTarget->push_back(newItem);           // Don't add to editor if not valid...
+
+         return;
+      }
+   }
+
+   // What remains are various game parameters...  Note that we will hit this block even if we already looked at gridSize and such...
+   // Before copying, we'll make a dumb copy, which will be overwritten if the user goes into the GameParameters menu
+   // This will cover us if the user comes in, edits the level, saves, and exits without visiting the GameParameters menu
+   // by simply echoing all the parameters back out to the level file without further processing or review.
+   string temp;
+   for(U32 i = 0; i < argc; i++)
+   {
+      temp += argv[i];
+      if(i < argc - 1)
+         temp += " ";
+   }
+
+   gGameParamUserInterface.gameParams.push_back(temp);
+} 
+
 
 void EditorUserInterface::insertNewItem(GameObjectType itemType)
 {
@@ -3598,8 +3702,7 @@ extern CmdLineSettings gCmdLineSettings;
 void EditorUserInterface::testLevel()
 {
    bool gameTypeError = false;
-
-   if(strcmp(mGameType, GameType::validateGameType(mGameType)))
+   if(!gEditorGame->getGameType())     // Not sure this could really happen anymore...  TODO: Make sure we always have a valid gametype
       gameTypeError = true;
 
    // With all the map loading error fixes, game should never crash!

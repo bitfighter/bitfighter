@@ -106,7 +106,7 @@ const Color SELECT_COLOR = yellow;
 
 class EditorAttributeMenuUI;
 
-class EditorUserInterface : public UserInterface, public LevelLoader
+class EditorUserInterface : public UserInterface
 {
 public:
    EditorUserInterface();  // Constructor
@@ -223,7 +223,7 @@ private:
    void computeSelectionMinMax(Point &min, Point &max);
    bool mouseOnDock();                // Return whether mouse is currently over the dock
 
-   void processLevelLoadLine(U32 argc, U32 id, const char **argv) { /* TODO: Delete this! */};
+   void processLevelLoadLine(U32 argc, U32 id, const char **argv);
 
    void insertNewItem(GameObjectType itemType);                      // Insert a new object into the game
 
@@ -249,14 +249,9 @@ public:
 
    void saveUndoState();
 
-   #define GAME_TYPE_LEN 256   // TODO: Define this in terms of something else...
-   char mGameType[GAME_TYPE_LEN];
-
    Vector<string> mGameTypeArgs;
    WallSegmentManager *getWallSegmentManager() { return &mWallSegmentManager; }
 
-   bool isFlagGame(char *mGameType);
-   bool isTeamFlagGame(char *mGameType);
    bool isShowingReferenceShip() { return mShowingReferenceShip; }
 
    F32 getCurrentScale() { return mCurrentScale; }
@@ -298,9 +293,6 @@ public:
    void textEntryKeyHandler(KeyCode keyCode, char ascii);   // Handle keyboard activity when we're editing an item's attributes
    void specialAttributeKeyHandler(KeyCode keyCode, char ascii);
    void startAttributeEditor();
-
-   // This function is only called from the levelgens.  If we're running in the editor, I think we can safely ignore it.
-   void setGameTime(F32 time) { /* Do nothing */ }
 
    void onKeyUp(KeyCode keyCode);
    void onMouseMoved(S32 x, S32 y);

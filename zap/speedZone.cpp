@@ -147,12 +147,12 @@ S32 SpeedZone::getRenderSortValue()
 // Runs on server and client
 void SpeedZone::onAddedToGame(Game *theGame)
 {
+   Parent::onAddedToGame(theGame);
+
    if(!isGhost())
       setScopeAlways();    // Runs on server
    else
       preparePoints();     // Runs on client
-
-   theGame->mObjectsLoaded++;
 }
 
 

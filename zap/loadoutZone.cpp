@@ -124,6 +124,8 @@ string LoadoutZone::toString()
 
 void LoadoutZone::onAddedToGame(Game *theGame)
 {
+   Parent::onAddedToGame(theGame);
+
    if(!isGhost())
       setScopeAlways();
 }

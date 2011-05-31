@@ -50,18 +50,11 @@ inline F32 getGridSize()
    return gEditorGame->getGridSize();
 }
 
-// Except for commented lines, this is the same as GameObject's addtoEditor; can probably be merged
+
 void EditorObject::addToEditor(Game *game)
 {
-   TNLAssert(mGame == NULL, "Error: Object already in a game in GameObject::addToGame.");
-   TNLAssert(game != NULL,  "Error: theGame is NULL in GameObject::addToGame.");
-
-   game->addToGameObjectList(this);
-   //mCreationTime = theGame->getCurrentTime();
-   mGame = game;
-   addToDatabase();
-   //onAddedToGame(game);
-   gEditorUserInterface.mItems.push_back(this);
+   BfObject::addToGame(game);
+   gEditorUserInterface.mItems.push_back(this);    // TODO: get rid of this, make all items come from the database
 }
 
 

@@ -353,6 +353,8 @@ Lunar<SoccerBallItem>::RegType SoccerBallItem::methods[] =
 
 void SoccerBallItem::onAddedToGame(Game *theGame)
 {
+   Parent::onAddedToGame(theGame);
+
    // Make soccer ball always visible
    if(!isGhost())
       setScopeAlways();
@@ -369,7 +371,6 @@ void SoccerBallItem::onAddedToGame(Game *theGame)
       SoccerGameType * sgt = dynamic_cast<SoccerGameType *>(gt);
       if(sgt) sgt->setBall(this);
    }
-   getGame()->mObjectsLoaded++;
 }
 
 

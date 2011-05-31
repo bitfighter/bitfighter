@@ -308,6 +308,7 @@ string GameType::getScoringEventDescr(ScoringEvent event)
 }
 
 
+// Will return a valid GameType string -- either what's passed in, or the default if something bogus was specified  (static)
 const char *GameType::validateGameType(const char *gtype)
 {
    for(S32 i = 0; gGameTypeNames[i]; i++)    // Repeat until we hit NULL
@@ -1183,9 +1184,18 @@ void GameType::catalogSpybugs()
    for(S32 i = 0; i < spyBugs.size(); i++)
       mSpyBugs[i] = dynamic_cast<Object *>(spyBugs[i]); // convert to SafePtr
 }
+
+
 void GameType::addSpyBug(SpyBug *spybug)
 {
    mSpyBugs.push_back(dynamic_cast<Object *>(spybug)); // convert to SafePtr 
+}
+
+
+void GameType::addBarrier(BarrierRec barrier, Game *game)
+{
+   mBarriers.push_back(barrier); 
+   barrier.constructBarriers(game);
 }
 
 
@@ -1204,19 +1214,18 @@ void GameType::onLevelLoaded()
 }
 
 
-void GameType::onAddedToGame(Game *theGame)
+void GameType::onAddedToGame(Game *game)
 {
-   theGame->setGameType(this);
+   game->setGameType(this);
+
    if(getGame()->isServer())
-      mShowAllBots = gServerGame->isTestServer();  // Default to true to show all bots if on testing mode
+      mShowAllBots = getGame()->isTestServer();  // Default to true to show all bots if on testing mode
 }
 
 
-extern void constructBarriers(Game *theGame, const BarrierRec &barrier);
-
 // Returns true if we've handled the line (even if it handling it means that the line was bogus); returns false if
 // caller needs to create an object based on the line
-bool GameType::processLevelItem(S32 argc, const char **argv)
+bool GameType::processLevelParam(S32 argc, const char **argv)
 {
    if(!stricmp(argv[0], "Team"))
    {
@@ -1248,7 +1257,7 @@ bool GameType::processLevelItem(S32 argc, const char **argv)
       {
          if(!stricmp(argv[i], "Engineer" ) )
             mEngineerEnabled = true;
-         if(!stricmp(argv[i], "nobots" ) )
+         if(!stricmp(argv[i], "NoBots" ) )
             mAllowAddBot = false;
       }
    }
@@ -1278,105 +1287,6 @@ bool GameType::processLevelItem(S32 argc, const char **argv)
    
          for(S32 i = 2; i < argc; i++)
             mScriptArgs.push_back(string(argv[i]));    // Use string to make a const char copy of the param
-      }
-   }
-   else if(!stricmp(argv[0], "Spawn"))
-   {
-      if(argc >= 4)
-      {
-         S32 teamIndex = atoi(argv[1]);
-         Point p;
-         p.read(argv + 2);
-         p *= getGame()->getGridSize();
-
-         if(teamIndex >= 0 && teamIndex < mTeams.size())    // Normal teams; ignore if invalid
-            mTeams[teamIndex].spawnPoints.push_back(p);
-         else if(teamIndex == -1)                           // Neutral spawn point, add to all teams
-            for(S32 i = 0; i < mTeams.size(); i++)
-               mTeams[i].spawnPoints.push_back(p);
-      }
-   }
-   else if(!stricmp(argv[0], "FlagSpawn"))      // FlagSpawn <team> <x> <y> [timer]
-   {
-      if(argc >= 4)
-      {
-         S32 teamIndex = atoi(argv[1]);
-         Point p;
-         p.read(argv + 2);
-         p *= getGame()->getGridSize();
-   
-         S32 time = (argc > 4) ? atoi(argv[4]) : FlagSpawn::DEFAULT_RESPAWN_TIME;
-   
-         FlagSpawn spawn = FlagSpawn(p, time * 1000);
-   
-         // Following works for Nexus & Soccer games because they are not TeamFlagGame.  Currently, the only
-         // TeamFlagGame is CTF.
-   
-         if(isTeamFlagGame() && (teamIndex >= 0 && teamIndex < mTeams.size()) )    // If we can't find a valid team...
-            mTeams[teamIndex].flagSpawnPoints.push_back(spawn);
-         else
-            mFlagSpawnPoints.push_back(spawn);                                     // ...then put it in the non-team list
-      }
-   }
-   else if(!stricmp(argv[0], "AsteroidSpawn"))      // AsteroidSpawn <x> <y> [timer]      // TODO: Move this to AsteroidSpawn class?
-   {
-      AsteroidSpawn spawn = AsteroidSpawn();
-
-      if(spawn.processArguments(argc, argv))
-         mAsteroidSpawnPoints.push_back(spawn);
-   }
-   else if(!stricmp(argv[0], "BarrierMaker"))
-   {
-      if(argc >= 2)
-      {
-         BarrierRec barrier;
-         barrier.width = F32(atof(argv[1]));
-
-         if(barrier.width < Barrier::MIN_BARRIER_WIDTH)
-            barrier.width = Barrier::MIN_BARRIER_WIDTH;
-         else if(barrier.width > Barrier::MAX_BARRIER_WIDTH)
-            barrier.width = Barrier::MAX_BARRIER_WIDTH;
-   
-         for(S32 i = 2; i < argc; i++)
-            barrier.verts.push_back(F32(atof(argv[i])) * getGame()->getGridSize());
-   
-         if(barrier.verts.size() > 3)
-         {
-            barrier.solid = false;
-            mBarriers.push_back(barrier);
-            constructBarriers(getGame(), barrier);
-         }
-      }
-   }
-   // TODO: Integrate code above with code above!!  EASY!!
-   else if(!stricmp(argv[0], "BarrierMakerS") || !stricmp(argv[0], "PolyWall"))
-   {
-      bool width = false;
-
-      if(!stricmp(argv[0], "BarrierMakerS"))
-      {
-         logprintf(LogConsumer::LogWarning, "BarrierMakerS has been deprecated.  Please use PolyWall instead.");
-         width = true;
-      }
-
-      if(argc >= 2)
-      { 
-         BarrierRec barrier;
-         
-         if(width)      // BarrierMakerS still width, though we ignore it
-            barrier.width = F32(atof(argv[1]));
-         else           // PolyWall does not have width specified
-            barrier.width = 1;
-
-         for(S32 i = 2 - (width ? 0 : 1); i < argc; i++)
-            barrier.verts.push_back(F32(atof(argv[i])) * getGame()->getGridSize());
-
-         if(barrier.verts.size() > 3)
-         {
-            barrier.solid = true;
-            mBarriers.push_back(barrier);
-            constructBarriers(getGame(), barrier);
-         }
       }
    }
    else if(!stricmp(argv[0], "LevelName"))
@@ -2726,7 +2636,7 @@ GAMETYPE_RPC_S2C(GameType, s2cAddBarriers, (Vector<F32> verts, F32 width, bool s
       barrier.width = width;
       barrier.solid = solid;
 
-      constructBarriers(getGame(), barrier);
+      barrier.constructBarriers(getGame());
    }
 }
 

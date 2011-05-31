@@ -746,7 +746,7 @@ Vector<Point> ForceFieldProjector::getBufferForBotZone()
 
 void ForceFieldProjector::onAddedToGame(Game *theGame)
 {
-   getGame()->mObjectsLoaded++;
+   Parent::onAddedToGame(theGame);
 }
 
 
@@ -1099,8 +1099,7 @@ bool Turret::getCollisionPoly(Vector<Point> &polyPoints)
 void Turret::onAddedToGame(Game *theGame)
 {
    Parent::onAddedToGame(theGame);
-   mCurrentAngle = atan2(mAnchorNormal.y, mAnchorNormal.x);
-   getGame()->mObjectsLoaded++;     // N.B.: For some reason this has no effect on the client
+   mCurrentAngle = mAnchorNormal.ATAN2();
 }
 
 

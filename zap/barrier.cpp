@@ -43,38 +43,40 @@ TNL_IMPLEMENT_NETOBJECT(Barrier);
 
 Vector<Point> Barrier::mRenderLineSegments;
 
-bool loadBarrierPoints(const BarrierRec &barrier, Vector<Point> &points)
+bool loadBarrierPoints(const BarrierRec *barrier, Vector<Point> &points)
 {
    // Convert the list of floats into a list of points
-   for(S32 i = 1; i < barrier.verts.size(); i += 2)
-      points.push_back( Point(barrier.verts[i-1], barrier.verts[i]) );
+   for(S32 i = 1; i < barrier->verts.size(); i += 2)
+      points.push_back( Point(barrier->verts[i-1], barrier->verts[i]) );
 
    removeCollinearPoints(points, false);   // Remove collinear points to make rendering nicer and datasets smaller
 
    return (points.size() >= 2);
 }
 
+////////////////////////////////////////
+////////////////////////////////////////
 
-void constructBarriers(Game *theGame, const BarrierRec &barrier)
+void BarrierRec::constructBarriers(Game *theGame)
 {
    Vector<Point> vec;
 
-   if(!loadBarrierPoints(barrier, vec))
+   if(!loadBarrierPoints(this, vec))
       return;
 
-   if(barrier.solid)   // This is a solid polygon
+   if(solid)   // This is a solid polygon
    {
       if(vec.first() == vec.last())      // Does our barrier form a closed loop?
          vec.erase(vec.size() - 1);      // If so, remove last vertex
 
-      Barrier *b = new Barrier(vec, barrier.width, true);
+      Barrier *b = new Barrier(vec, width, true);
       b->addToGame(theGame);
    }
    else        // This is a standard series of segments
    {
       // First, fill a vector with barrier segments
       Vector<Point> barrierEnds;
-      Barrier::constructBarrierEndPoints(&vec, barrier.width, barrierEnds);
+      Barrier::constructBarrierEndPoints(&vec, width, barrierEnds);
 
       Vector<Point> pts;
       // Then add individual segments to the game
@@ -84,7 +86,7 @@ void constructBarriers(Game *theGame, const BarrierRec &barrier)
          pts.push_back(barrierEnds[i]);
          pts.push_back(barrierEnds[i+1]);
 
-         Barrier *b = new Barrier(pts, barrier.width, false);    // false = not solid
+         Barrier *b = new Barrier(pts, width, false);    // false = not solid
          b->addToGame(theGame);
       }
    }
@@ -593,6 +595,8 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(DatabaseObject *dbObject
    Vector<EngineeredObject *> eosOnDeletedSegs;    // A list of engr objects terminating on the wall segment that we'll be deleting
 
    EditorObject *wall = dynamic_cast<EditorObject *>(dbObject);    // Wall we're deleting and rebuilding
+
+   TNLAssert(wall, "Bad cast -- expected an EditorObject!");
 
    S32 count = mWallSegments.size(); 
 

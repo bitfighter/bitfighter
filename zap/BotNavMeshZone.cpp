@@ -60,7 +60,6 @@ static const S32 MAX_ZONES = 10000;     // Don't make this go above S16 max - 1 
 TNL_IMPLEMENT_NETOBJECT(BotNavMeshZone);
 
 
-//TODO: Switch this to a pointainer
 Vector<SafePtr<BotNavMeshZone> > gBotNavMeshZones;     // List of all our zones
 
 // Constructor
@@ -612,7 +611,7 @@ bool BotNavMeshZone::buildBotMeshZones(Game *game)
 #endif               
 
          buildBotNavMeshZoneConnectionsRecastStyle(mesh, polyToZoneMap);
-         BotNavMeshZone::linkTeleportersBotNavMeshZoneConnections(game);
+         linkTeleportersBotNavMeshZoneConnections(game);
       }
    }
 
@@ -758,6 +757,7 @@ F32 AStar::heuristic(S32 fromZone, S32 toZone)
    return gBotNavMeshZones[fromZone]->getCenter().distanceTo( gBotNavMeshZones[toZone]->getCenter() );
 }
 
+
 // Returns a path, including the startZone and targetZone 
 Vector<Point> AStar::findPath(S32 startZone, S32 targetZone, const Point &target)
 {
@@ -781,7 +781,6 @@ Vector<Point> AStar::findPath(S32 startZone, S32 targetZone, const Point &target
    S32 newOpenListItemID = 0;         // Used for creating new IDs for zones to make heap work
 
    Vector<Point> path;
-
 
    // This block here lets us repeatedly reuse the whichList array without resetting it or recreating it
    // which, for larger numbers of zones should be a real time saver.  It's not clear if it is particularly
@@ -841,8 +840,8 @@ Vector<Point> AStar::findPath(S32 startZone, S32 targetZone, const Point &target
             S16 u = v;      
             if (2 * u + 1 < numberOfOpenListItems) // if both children exist
             {
-                //Check if the F cost of the parent is greater than each child.
-               //Select the lowest of the two children.
+               // Check if the F cost of the parent is greater than each child,
+               // and select the lowest of the two children
                if(Fcost[openList[u]] >= Fcost[openList[2*u]]) 
                   v = 2 * u;
                if(Fcost[openList[v]] >= Fcost[openList[2*u+1]]) 
@@ -969,37 +968,36 @@ Vector<Point> AStar::findPath(S32 startZone, S32 targetZone, const Point &target
       }
    }
 
-   // Save the path if it exists.
-   if(foundPath)
-   {
-      // Working backwards from the target to the starting location by checking
-      //   each cell's parent, figure out the length of the path.
-      // Fortunately, we want our list to have the closest zone last (see getWaypoint),
-      // so it all works out nicely.
-      // We'll store both the zone center and the gateway to the neighboring zone.  This
-      // will help keep the robot from getting hung up on blocked but technically visible
-      // paths, such as when we are trying to fly around a protruding wall stub.
-
-      path.push_back(target);                                     // First point is the actual target itself
-      path.push_back(gBotNavMeshZones[targetZone]->getCenter());  // Second is the center of the target's zone
-      
-      S32 zone = targetZone;
-
-      while(zone != startZone)
-      {
-         path.push_back(findGateway(parentZones[zone], zone));   // don't switch findGateway arguments, some path is one way (teleporters).
-
-         zone = parentZones[zone];      // Find the parent of the current cell
-
-         path.push_back(gBotNavMeshZones[zone]->getCenter());
-      }
-      path.push_back(gBotNavMeshZones[startZone]->getCenter());
-
+   // Save the path if it exists
+   if(!foundPath)
+   {      
+      TNLAssert(path.size() == 0, "Expected empty path!");
       return path;
    }
 
-   // else there is no path to the selected target
-   TNLAssert(path.size() == 0, "Expected empty path!");
+   // Working backwards from the target to the starting location by checking
+   // each cell's parent, figure out the length of the path.
+   //
+   // Fortunately, we want our list to have the closest zone last (see getWaypoint),
+   // so it all works out nicely.
+   //
+   // We'll store both the zone center and the gateway to the neighboring zone.  This
+   // will help keep the robot from getting hung up on blocked but technically visible
+   // paths, such as when we are trying to fly around a protruding wall stub.
+
+   path.push_back(target);                                     // First point is the actual target itself
+   path.push_back(gBotNavMeshZones[targetZone]->getCenter());  // Second is the center of the target's zone
+      
+   S32 zone = targetZone;
+
+   while(zone != startZone)
+   {
+      path.push_back(findGateway(parentZones[zone], zone));   // Don't switch findGateway arguments, some path is one way (teleporters).
+      zone = parentZones[zone];                               // Find the parent of the current cell
+      path.push_back(gBotNavMeshZones[zone]->getCenter());
+   }
+
+   path.push_back(gBotNavMeshZones[startZone]->getCenter());
    return path;
 }
 

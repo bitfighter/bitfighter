@@ -868,10 +868,10 @@ string SpyBug::toString()
 // Spy bugs are always in scope.  This only really matters on pre-positioned spy bugs...
 void SpyBug::onAddedToGame(Game *theGame)
 {
+   Parent::onAddedToGame(theGame);
+
    if(!isGhost())
       setScopeAlways();
-
-   getGame()->mObjectsLoaded++;
 
    GameType *gt = getGame()->getGameType();
    if(gt && !isGhost())  // non-Ghost / ServerGame only, currently useless for client.

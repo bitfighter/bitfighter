@@ -235,6 +235,24 @@ Spawn::Spawn(const Point &pos, S32 time) : AbstractSpawn(pos, time, ShipSpawnTyp
 };
 
 
+bool Spawn::processArguments(S32 argc, const char **argv)
+{
+   if(argc >= 4)
+      return false;
+
+   S32 teamIndex = atoi(argv[1]);
+   setTeam(teamIndex);
+
+   Point pos;
+   pos.read(argv + 2);
+   pos *= getGame()->getGridSize();
+
+   setVert(pos, 0);
+
+   return true;
+}
+
+
 string Spawn::toString()
 {
    Point pos = getVert(0) / getGame()->getGridSize();

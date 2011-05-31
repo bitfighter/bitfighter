@@ -264,7 +264,7 @@ public:
    static GridDatabase *getGridDatabase() { return mGridDatabase; } 
    static void setGridDatabase(GridDatabase *gridDatabase) { mGridDatabase = gridDatabase; }
 
-   Vector<WallSegment *> mWallSegments;      // TODO: Make this a pointainer
+   Vector<WallSegment *> mWallSegments;      
    static Vector<WallEdge *> mWallEdges;        // For mounting forcefields/turrets
    static Vector<Point> mWallEdgePoints;        // For rendering
 

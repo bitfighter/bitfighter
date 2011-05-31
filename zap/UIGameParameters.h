@@ -65,7 +65,6 @@ public:
 class GameParamUserInterface : public MenuUserInterface     // By subclassing this, I hoped to get the mouse stuff to automatically work, but it didn't.  <sigh>
 {
 private:
-   void updateMenuItems(const char *gameType);  // Update list of menu items, based on provided game type. (Different game types require different params, after all)  Wraps the S32 version.
    void processSelection(U32 index) { }         // Needed for MenuUserInterface subclassing... does nothing
 
    bool anythingChanged();                      // Compare list of parameters from before and after a session in the GameParams menu.  Did anything get changed??
@@ -89,7 +88,7 @@ public:
    S32 selectedIndex;          // Highlighted menu item
    S32 changingItem;           // Index of key we're changing (in keyDef mode), -1 otherwise
 
-   void updateMenuItems(S32 gameTypeIndex);     // Update list of menu items, based on gGameTypeNames index
+   void updateMenuItems(GameType *gameType);
 
    Vector<SavedMenuItem> savedMenuItems;   
 

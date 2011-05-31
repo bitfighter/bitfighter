@@ -127,10 +127,10 @@ string SlipZone::toString()
 
 void SlipZone::onAddedToGame(Game *theGame)
 {
+   Parent::onAddedToGame(theGame);
+
    if(!isGhost())
       setScopeAlways();
-
-   getGame()->mObjectsLoaded++;
 }
 
 

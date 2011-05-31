@@ -66,7 +66,7 @@ GameParamUserInterface::GameParamUserInterface() : MenuUserInterface()
 void GameParamUserInterface::onActivate()
 {
    selectedIndex = 0;      // First item selected when we begin
-   updateMenuItems(gEditorUserInterface.mGameType);
+   updateMenuItems(gEditorGame->getGameType());
    buildGameParamList();            // "Normalize" parameter list, making sure all params are present and in a standard order
    origGameParams = gameParams;     // Save a copy of the params coming in for comparison when we leave to see what changed
    glutSetCursor(GLUT_CURSOR_NONE);
@@ -76,26 +76,16 @@ void GameParamUserInterface::onActivate()
 extern const char *gGameTypeNames[];
 extern S32 gDefaultGameTypeIndex;
 
-void GameParamUserInterface::updateMenuItems(const char *gt)
-{
-   // Figure out what index our gametype index is.  This is kind of ugly.  We'll assume that gt has a valid string because if not, 
-   // the game would have crashed already!
-   S32 i;
-   for(i = 0; gGameTypeNames[i]; i++)
-      if(!strcmp(gt, gGameTypeNames[i]))
-         break;
-
-   if(!gGameTypeNames[i])    // No match was found, use default
-      i = gDefaultGameTypeIndex;
-
-   updateMenuItems(i);
-}
-
 
 static void changeGameTypeCallback(U32 gtIndex)
 {
-   gGameParamUserInterface.updateMenuItems(gtIndex);
+   TNL::Object *theObject = TNL::Object::create(gGameTypeNames[gtIndex]);   // Instantiate our gameType object
+   GameType *gt = dynamic_cast<GameType *>(theObject);                      // and cast it to GameType
+
+   gEditorGame->setGameType(gt);
+   gGameParamUserInterface.updateMenuItems(gt);
 }
+
 
 static void backToEditorCallback(U32 unused)
 {
@@ -153,13 +143,20 @@ extern const S32 Game::MIN_GRID_SIZE;     // Needed by gcc, cause errors in VC++
 extern const S32 Game::MAX_GRID_SIZE;
 #endif
 
-// Does the actual work of updating the menu items!
-void GameParamUserInterface::updateMenuItems(S32 gtIndex)
+
+static S32 getGameTypeIndex(const char *gt)
+{
+   for(S32 i = 0; gGameTypeNames[i]; i++)
+      if(!strcmp(gt, gGameTypeNames[i]))
+         return i;
+
+   return -1;
+}
+
+
+void GameParamUserInterface::updateMenuItems(GameType *gameType)
 {
    map<string, string> paramMap = makeParamMap(gameParams);
-
-   TNL::Object *theObject = TNL::Object::create(gGameTypeNames[gtIndex]);          // Instantiate our gameType object
-   GameType *gameType = dynamic_cast<GameType*>(theObject);                        // and cast it to GameType
 
    if(gameTypes.size() == 0)     // Should only be run once, as these gameTypes will not change during the session
       buildGameTypeList();
@@ -190,7 +187,7 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
 
    menuItems.push_back(new ToggleMenuItem("Game Type:",       
                                           gameTypes,
-                                          gtIndex,
+                                          getGameTypeIndex(gameType->getClassName()),
                                           true,
                                           changeGameTypeCallback,
                                           gameType->getInstructionString()));
@@ -208,17 +205,17 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
 
 
    MenuItem *item = new EditableMenuItem("Level Name:", 
-                                         paramMap["LevelName"],
+                                         gEditorGame->getGameType()->mLevelName.getString(),
                                          "", 
                                          "The level's name -- pick a good one!",  
-                                         MAX_GAME_NAME_LEN);
+                                         MAX_GAME_NAME_LEN);   
    item->setFilter(LineEditor::allAsciiFilter);
    menuItems.push_back(item);
    OPT_LEVEL_NAME = menuItems.size() - 1;
    
 
    menuItems.push_back(new EditableMenuItem("Level Descr:", 
-                                            paramMap["LevelDescription"], 
+                                            gEditorGame->getGameType()->mLevelDescription.getString(), 
                                             "", 
                                             "A brief description of the level",                     
                                             MAX_GAME_DESCR_LEN));
@@ -226,7 +223,7 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
    
 
    menuItems.push_back(new EditableMenuItem("Level By:", 
-                                            paramMap["LevelCredits"], 
+                                            gEditorGame->getGameType()->mLevelCredits.getString(), 
                                             "", 
                                             "Who created this level",                                  
                                             MAX_GAME_DESCR_LEN));
@@ -249,7 +246,7 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
 
    // Some more standard items
    menuItems.push_back(new CounterMenuItem("Grid Size:",       
-                                           Game::DefaultGridSize,    // value
+                                           gEditorGame->getGridSize(),
                                            Game::MIN_GRID_SIZE,      // increment
                                            Game::MIN_GRID_SIZE,      // min val
                                            Game::MAX_GRID_SIZE,      // max val
@@ -260,7 +257,7 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
 
 
    menuItems.push_back(new CounterMenuItem("Min Players:",       
-                                           0,                  // value
+                                           gEditorGame->getGameType()->minRecPlayers,  // value
                                            1,                  // increment
                                            0,                  // min val
                                            MAX_PLAYERS,        // max val
@@ -271,7 +268,7 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
 
 
    menuItems.push_back(new CounterMenuItem("Max Players:",       
-                                           0,                  // value
+                                           gEditorGame->getGameType()->maxRecPlayers,  // value
                                            1,                  // increment
                                            0,                  // min val
                                            MAX_PLAYERS,        // max val
@@ -325,9 +322,9 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
       }
 
       // And apply our GameType arguments to the game specific parameter settings, if any were provided in a level file we loaded
-      if(!ignoreGameParams)
-         for(S32 i = 0; i < min(gEditorUserInterface.mGameTypeArgs.size(), mGameSpecificParams); i++)
-            menuItems[i + FIRST_GAME_SPECIFIC_PARAM]->setValue(gEditorUserInterface.mGameTypeArgs[i]);
+      //if(!ignoreGameParams)
+      //   for(S32 i = 0; i < min(gEditorUserInterface.mGameTypeArgs.size(), mGameSpecificParams); i++)
+      //      menuItems[i + FIRST_GAME_SPECIFIC_PARAM]->setValue(gEditorUserInterface.mGameTypeArgs[i]);
    }
 
    // Lastly, scan through our list of saved items and replace the default values with those modified here in this interface
@@ -346,7 +343,6 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
 void GameParamUserInterface::onEscape()
 {
    S32 gameTypeIndex = dynamic_cast<ToggleMenuItem *>(menuItems[OPT_GAMETYPE])->getValueIndex();
-   strcpy(gEditorUserInterface.mGameType, gGameTypeNames[gameTypeIndex]);   // Save current game type
 
    // Compose GameType string from GameType and level-specific params
    // Save level file name if it changed. Or hell, even if it didn't
@@ -382,6 +378,7 @@ void GameParamUserInterface::buildGameParamList()
    // GameType string -- value stored in the LineEditor is a "pretty name".  This looks up the "official" value.
    gameTypeHeader += gGameTypeNames[gameTypeIndex];
    
+
    // Build up GameType string parameter by parameter... all game specific params go on the GameType line
    for(S32 i = FIRST_GAME_SPECIFIC_PARAM; i < FIRST_GAME_SPECIFIC_PARAM + mGameSpecificParams; i++)
    {

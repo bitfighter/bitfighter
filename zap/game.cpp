@@ -51,9 +51,6 @@
 #include "UINameEntry.h"
 #include "UIEditor.h"         // For EditorUserInterface def, needed by EditorGame stuff
 
-
-//#include "UIChat.h"
-
 #include "BotNavMeshZone.h"      // For zone clearing code
 
 #include "../glut/glutInclude.h"
@@ -115,6 +112,12 @@ void Game::buildModuleInfos()
 }
 
 
+void Game::setGridSize(F32 gridSize) 
+{ 
+   mGridSize = max(min(gridSize, F32(MAX_GRID_SIZE)), F32(MIN_GRID_SIZE));
+}
+
+
 void Game::setScopeAlwaysObject(GameObject *theObject)
 {
    mScopeAlwaysList.push_back(theObject);
@@ -147,8 +150,138 @@ S32 Game::getTeamCount()
 
 void Game::setGameType(GameType *theGameType)
 {
+   delete mGameType;          // Cleanup, if need be
    mGameType = theGameType;
 }
+
+
+static string origFilename;      // Name of file we're trying to load
+
+// Process a single line of a level file, loaded in gameLoader.cpp
+// argc is the number of parameters on the line, argv is the params themselves
+// Used by ServerGame and EditorGame
+void Game::processLevelLoadLine(U32 argc, U32 id, const char **argv)
+{
+   S32 strlenCmd = (S32) strlen(argv[0]);
+
+   // This is a legacy from the old Zap! days... we do bots differently in Bitfighter, so we'll just ignore this line if we find it.
+   if(!stricmp(argv[0], "BotsPerTeam"))
+      return;
+
+   else if(!stricmp(argv[0], "GridSize"))      // GridSize requires a single parameter (an int specifiying how many pixels in a grid cell)
+   {                                           
+      if(argc < 2)
+         throw LevelLoadException("Improperly formed GridSize parameter");
+
+      setGridSize(atof(argv[1]));
+      return;
+   }
+
+   // Parse GameType line... All game types are of form XXXXGameType
+   else if(strlenCmd >= 8 && !strcmp(argv[0] + strlenCmd - 8, "GameType"))
+   {
+      if(mGameType)
+         throw LevelLoadException("Duplicate GameType parameter");
+
+      // validateGameType() will return a valid GameType string -- either what's passed in, or the default if something bogus was specified
+      TNL::Object *theObject = TNL::Object::create(GameType::validateGameType(argv[0]));      
+      GameType *gt = dynamic_cast<GameType *>(theObject);  // Force our new object to be a GameObject
+
+      bool validArgs = gt->processArguments(argc - 1, argv + 1);
+
+      //setGameType(gt);      ==> gets run in addToGame()
+      gt->addToGame(this);    // --> think this needs to be addToEditor in gEditorGame
+
+      if(!validArgs || strcmp(gt->getClassName(), argv[0]))
+         throw LevelLoadException("Improperly formed GameType parameter");
+      
+      // Save the args (which we already have split out) for easier handling in the Game Parameter Editor
+      //for(U32 i = 1; i < argc; i++)
+      //   gEditorUserInterface.mGameTypeArgs.push_back(argv[i]);
+
+      return;
+   }
+
+   // If we're here, and we don't yet have a gameType, create a default one.  This is an emergency fallback, and shouldn't be relied on.
+   if(!mGameType)
+   {
+      TNL::Object *theObject = TNL::Object::create(GameType::validateGameType("GameType"));   // GameType ==> Bitmatch ==> default type     
+      GameType *gt = dynamic_cast<GameType *>(theObject);  // Force our new object to be a GameObject
+
+      gt->addToGame(this);
+   }
+
+   if(getGameType() && mGameType->processLevelParam(argc, argv)) 
+   {
+      // Do nothing here
+   }
+   else if(getGameType() && processPseudoItem(argc, argv)) 
+   {
+      // Do nothing here
+   }
+   
+   else
+   {
+      char obj[LevelLoader::MaxArgLen + 1];
+
+      // Kind of hacky, but if we encounter a FlagItem in a Nexus game, we'll convert it to a NexusFlag item.  This seems to make more sense.
+      // This will work so long as FlagItem and HuntersFlagItem share a common attribute list.
+      if(!stricmp(argv[0], "FlagItem") && !mGameType.isNull() && mGameType->getGameType() == GameType::NexusGame)
+         strcpy(obj, "HuntersFlagItem");
+      // Also, while we're here, we'll add advanced support for the NexusFlagItem, which HuntersFlagItem will eventually be renamed to...
+      else if(!stricmp(argv[0], "NexusFlagItem"))
+         strcpy(obj, "HuntersFlagItem");
+      else
+      {
+         strncpy(obj, argv[0], LevelLoader::MaxArgLen);
+         obj[LevelLoader::MaxArgLen] = '\0';
+      }
+
+      TNL::Object *theObject = TNL::Object::create(obj);          // Create an object of the type specified on the line
+      GameObject   *object  = dynamic_cast<GameObject *>  (theObject);  // Force our new object to be a GameObject
+      EditorObject *eObject = dynamic_cast<EditorObject *>(theObject);
+
+
+      if(!object && !eObject)    // Well... that was a bad idea!
+      {
+         logprintf(LogConsumer::LogWarning, "Unknown object type \"%s\" in level \"%s\"", obj, origFilename.c_str());
+         delete theObject;
+      }
+      else  // object was valid
+      {
+         computeWorldObjectExtents();    // Make sure this is current if we process a robot that needs this for intro code
+
+         // TODO: Find a way to get rid of this hack!!
+         if(this == gEditorGame)
+            eObject->addToEditor(this);
+         else
+            object->addToGame(this);
+
+         bool validArgs = object->processArguments(argc - 1, argv + 1);
+
+         if(!validArgs)
+         {
+            logprintf(LogConsumer::LogWarning, "Object \"%s\" in level \"%s\"", obj, origFilename.c_str());
+            object->removeFromGame();
+            object->destroySelf();
+         }
+      }
+   }
+}
+
+
+// Only used during level load process...  actually, used at all?  If so, should be combined with similar code in gameType
+// Not used during normal game load... perhaps by lua loader?
+void Game::setGameTime(F32 time)
+{
+   GameType *gt = getGameType();
+
+   TNLAssert(gt, "Null gametype!");
+
+   if(gt)
+      gt->mGameTimer.reset((U32)time * 1000 * 60);
+}
+
 
 extern bool gReadyToConnectToMaster;
 
@@ -610,6 +743,7 @@ S32 ServerGame::getAbsoluteLevelIndex(S32 indx)
    return indx;
 }
 
+
 // Get the level name, as defined in the level file
 StringTableEntry ServerGame::getLevelNameFromIndex(S32 indx)
 {
@@ -645,6 +779,112 @@ StringTableEntry ServerGame::getCurrentLevelName()
 StringTableEntry ServerGame::getCurrentLevelType()
 {
    return mLevelInfos[mCurrentLevelIndex].levelType;
+}
+
+
+bool ServerGame::processPseudoItem(S32 argc, const char **argv)
+{
+   if(!stricmp(argv[0], "Spawn"))
+   {
+      if(argc >= 4)
+      {
+         S32 teamIndex = atoi(argv[1]);
+         Point p;
+         p.read(argv + 2);
+         p *= getGridSize();
+
+         if(teamIndex >= 0 && teamIndex < getGameType()->mTeams.size())    // Normal teams; ignore if invalid
+            getGameType()->mTeams[teamIndex].spawnPoints.push_back(p);
+         else if(teamIndex == -1)                           // Neutral spawn point, add to all teams
+            for(S32 i = 0; i < getGameType()->mTeams.size(); i++)
+               getGameType()->mTeams[i].spawnPoints.push_back(p);
+      }
+   }
+   else if(!stricmp(argv[0], "FlagSpawn"))      // FlagSpawn <team> <x> <y> [timer]
+   {
+      if(argc >= 4)
+      {
+         S32 teamIndex = atoi(argv[1]);
+         Point p;
+         p.read(argv + 2);
+         p *= getGridSize();
+   
+         S32 time = (argc > 4) ? atoi(argv[4]) : FlagSpawn::DEFAULT_RESPAWN_TIME;
+   
+         FlagSpawn spawn = FlagSpawn(p, time * 1000);
+   
+         // Following works for Nexus & Soccer games because they are not TeamFlagGame.  Currently, the only
+         // TeamFlagGame is CTF.
+   
+         if(getGameType()->isTeamFlagGame() && (teamIndex >= 0 && teamIndex < getGameType()->mTeams.size()) )    // If we can't find a valid team...
+            getGameType()->mTeams[teamIndex].flagSpawnPoints.push_back(spawn);
+         else
+            getGameType()->mFlagSpawnPoints.push_back(spawn);                                     // ...then put it in the non-team list
+      }
+   }
+   else if(!stricmp(argv[0], "AsteroidSpawn"))      // AsteroidSpawn <x> <y> [timer]      // TODO: Move this to AsteroidSpawn class?
+   {
+      AsteroidSpawn spawn = AsteroidSpawn();
+
+      if(spawn.processArguments(argc, argv))
+         getGameType()->mAsteroidSpawnPoints.push_back(spawn);
+   }
+   else if(!stricmp(argv[0], "BarrierMaker"))
+   {
+      if(argc >= 2)
+      {
+         BarrierRec barrier;
+         barrier.width = F32(atof(argv[1]));
+
+         if(barrier.width < Barrier::MIN_BARRIER_WIDTH)
+            barrier.width = Barrier::MIN_BARRIER_WIDTH;
+         else if(barrier.width > Barrier::MAX_BARRIER_WIDTH)
+            barrier.width = Barrier::MAX_BARRIER_WIDTH;
+   
+         for(S32 i = 2; i < argc; i++)
+            barrier.verts.push_back(F32(atof(argv[i])) * getGridSize());
+   
+         if(barrier.verts.size() > 3)
+         {
+            barrier.solid = false;
+            getGameType()->addBarrier(barrier, this);
+         }
+      }
+   }
+   // TODO: Integrate code above with code above!!  EASY!!
+   else if(!stricmp(argv[0], "BarrierMakerS") || !stricmp(argv[0], "PolyWall"))
+   {
+      bool width = false;
+
+      if(!stricmp(argv[0], "BarrierMakerS"))
+      {
+         logprintf(LogConsumer::LogWarning, "BarrierMakerS has been deprecated.  Please use PolyWall instead.");
+         width = true;
+      }
+
+      if(argc >= 2)
+      { 
+         BarrierRec barrier;
+         
+         if(width)      // BarrierMakerS still width, though we ignore it
+            barrier.width = F32(atof(argv[1]));
+         else           // PolyWall does not have width specified
+            barrier.width = 1;
+
+         for(S32 i = 2 - (width ? 0 : 1); i < argc; i++)
+            barrier.verts.push_back(F32(atof(argv[i])) * getGridSize());
+
+         if(barrier.verts.size() > 3)
+         {
+            barrier.solid = true;
+            getGameType()->addBarrier(barrier, this);
+         }
+      }
+   }
+   else 
+      return false;
+
+   return true;
 }
 
 
@@ -743,12 +983,17 @@ void ServerGame::cycleLevel(S32 nextLevel)
    // Load the level for real this time (we loaded it once before, when we started the server, but only to grab a few params)
    loadLevel(getLevelFileNameFromIndex(mCurrentLevelIndex));
 
+   // Make sure we have a gameType... if we don't we'll add a default one here
    if(!getGameType())   // loadLevel can fail (missing file) and not create GameType
    {
       logprintf(LogConsumer::LogWarning, "Warning: Missing game type parameter in level \"%s\"", gServerGame->getLevelFileNameFromIndex(mCurrentLevelIndex).c_str());
       GameType *g = new GameType;
       g->addToGame(this);
    }
+
+   //getGameType()->addToGame(this);   //   >>>> already added during load process??
+
+
    if(getGameType()->makeSureTeamCountIsNotZero())
       logprintf(LogConsumer::LogWarning, "Warning: Missing Team in level \"%s\"", gServerGame->getLevelFileNameFromIndex(mCurrentLevelIndex).c_str());
 
@@ -838,7 +1083,6 @@ inline string getPathFromFilename( const string& filename )
 }
 
 
-static string origFilename;      // Name of file we're trying to load
 extern OGLCONSOLE_Console gConsole;
 
 bool ServerGame::loadLevel(const string &origFilename2)
@@ -915,98 +1159,6 @@ bool ServerGame::loadLevel(const string &origFilename2)
    getGameType()->onLevelLoaded();
 
    return true;
-}
-
-
-// Process a single line of a level file, loaded in gameLoader.cpp
-// argc is the number of parameters on the line, argv is the params themselves
-void ServerGame::processLevelLoadLine(U32 argc, U32 id, const char **argv)
-{
-   // This is a legacy from the old Zap! days... we do bots differently in Bitfighter, so we'll just ignore this line if we find it.
-   if(!stricmp(argv[0], "BotsPerTeam"))
-      return;
-
-   if(!stricmp(argv[0], "GridSize"))      // GridSize requires a single parameter (an int
-   {                                      //    specifiying how many pixels in a grid cell)
-      if(argc < 2)
-      {
-         logprintf(LogConsumer::LogWarning, "Improperly formed GridSize parameter in level \"%s\"", origFilename.c_str());
-         return;
-      }
-      setGridSize(max(min((F32) atof(argv[1]), (F32) MAX_GRID_SIZE), (F32) MIN_GRID_SIZE));
-   }
-   // True if we haven't yet created a gameType || false if processLevelItem can't do anything with the line
-   else if(mGameType.isNull() || !mGameType->processLevelItem(argc, argv))    
-   {
-      char obj[LevelLoader::MaxArgLen + 1];
-
-      // Kind of hacky, but if we encounter a FlagItem in a Nexus game, we'll convert it to a NexusFlag item.  This seems to make more sense.
-      // This will work so long as FlagItem and HuntersFlagItem share a common attribute list.
-      if(!stricmp(argv[0], "FlagItem") && !mGameType.isNull() && mGameType->getGameType() == GameType::NexusGame)
-         strcpy(obj, "HuntersFlagItem");
-      // Also, while we're here, we'll add advanced support for the NexusFlagItem, which HuntersFlagItem will eventually be renamed to...
-      else if(!stricmp(argv[0], "NexusFlagItem"))
-         strcpy(obj, "HuntersFlagItem");
-      else
-      {
-         strncpy(obj, argv[0], LevelLoader::MaxArgLen);
-         obj[LevelLoader::MaxArgLen] = '\0';
-      }
-
-      S32 objlen = (S32) strlen(obj);
-      // All game types are of form XXXXGameType
-      if(objlen >= 8 && !strcmp(obj + objlen - 8, "GameType"))
-      {   
-         if(mGameType)
-         {   
-            logprintf(LogConsumer::LogWarning, "Duplicate GameType in level \"%s\"", origFilename.c_str());
-            return;
-         }
-      }
-      else
-      {   
-         if(!mGameType)
-         {   
-            logprintf(LogConsumer::LogWarning, "Missing GameType in level \"%s\"", origFilename.c_str());
-            return;
-         }
-      }
-
-
-      TNL::Object *theObject = TNL::Object::create(obj);          // Create an object of the type specified on the line
-      GameObject *object = dynamic_cast<GameObject*>(theObject);  // Force our new object to be a GameObject
-
-
-      if(!object)    // Well... that was a bad idea!
-      {
-         logprintf(LogConsumer::LogWarning, "Unknown object type \"%s\" in level \"%s\"", obj, origFilename.c_str());
-         delete theObject;
-      }
-      else  // object was valid
-      {
-         gServerGame->computeWorldObjectExtents();    // Make sure this is current if we process a robot that needs this for intro code
-         object->addToGame(this);
-
-         bool validArgs = object->processArguments(argc - 1, argv + 1);
-
-         if(!validArgs)
-         {
-            logprintf(LogConsumer::LogWarning, "Object \"%s\" in level \"%s\"", obj, origFilename.c_str());
-            object->removeFromGame();
-            object->destroySelf();
-         }
-      }
-   }
-}
-
-
-void ServerGame::setGameTime(F32 time)
-{
-   GameType *gt = getGameType();
-   TNLAssert(gt, "Null gametype!");
-
-   if(gt)
-      gt->mGameTimer.reset((U32)time * 1000 * 60);
 }
 
 
@@ -2085,6 +2237,92 @@ Color EditorGame::getTeamColor(S32 teamId)
       return gHostileTeamColor;
    else
       return gEditorUserInterface.mTeams[teamId].color;     // TODO: Maintain teams on EditorGame object to avoid this call?
+}
+
+
+bool EditorGame::processPseudoItem(S32 argc, const char **argv)
+{
+   if(!stricmp(argv[0], "Spawn") || !stricmp(argv[0], "FlagSpawn") || !stricmp(argv[0], "AsteroidSpawn"))
+   {
+      TNL::Object *theObject = TNL::Object::create(argv[0]);           // Create an object of the type specified on the line
+      EditorObject *eObject = dynamic_cast<EditorObject *>(theObject);
+
+      if(!eObject)    // Well... that was a bad idea!
+      {
+         logprintf(LogConsumer::LogWarning, "Unknown object type \"%s\" in level \"%s\"", argv[0], origFilename.c_str());
+         delete theObject;
+      }
+
+      eObject->addToEditor(this);
+
+      bool validArgs = eObject->processArguments(argc - 1, argv + 1);
+
+      if(!validArgs)
+      {
+         logprintf(LogConsumer::LogWarning, "Object \"%s\" in level \"%s\"", argv[0], origFilename.c_str());
+
+         // move these to bfObject
+         eObject->removeFromGame();
+         delete eObject;
+      }
+
+   }
+   else if(!stricmp(argv[0], "BarrierMaker"))
+   {
+      if(argc >= 2)
+      {
+         BarrierRec barrier;
+         barrier.width = F32(atof(argv[1]));
+
+         if(barrier.width < Barrier::MIN_BARRIER_WIDTH)
+            barrier.width = Barrier::MIN_BARRIER_WIDTH;
+         else if(barrier.width > Barrier::MAX_BARRIER_WIDTH)
+            barrier.width = Barrier::MAX_BARRIER_WIDTH;
+   
+         for(S32 i = 2; i < argc; i++)
+            barrier.verts.push_back(F32(atof(argv[i])) * getGridSize());
+   
+         if(barrier.verts.size() > 3)
+         {
+            barrier.solid = false;
+            getGameType()->addBarrier(barrier, this);
+         }
+      }
+   }
+   // TODO: Integrate code above with code above!!  EASY!!
+   else if(!stricmp(argv[0], "BarrierMakerS") || !stricmp(argv[0], "PolyWall"))
+   {
+      bool width = false;
+
+      if(!stricmp(argv[0], "BarrierMakerS"))
+      {
+         logprintf(LogConsumer::LogWarning, "BarrierMakerS has been deprecated.  Please use PolyWall instead.");
+         width = true;
+      }
+
+      if(argc >= 2)
+      { 
+         BarrierRec barrier;
+         
+         if(width)      // BarrierMakerS still width, though we ignore it
+            barrier.width = F32(atof(argv[1]));
+         else           // PolyWall does not have width specified
+            barrier.width = 1;
+
+         for(S32 i = 2 - (width ? 0 : 1); i < argc; i++)
+            barrier.verts.push_back(F32(atof(argv[i])) * getGridSize());
+
+         if(barrier.verts.size() > 3)
+         {
+            barrier.solid = true;
+            getGameType()->addBarrier(barrier, this);
+         }
+      }
+   }
+   else 
+      return false;
+
+   return true;
 }
 
 

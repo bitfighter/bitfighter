@@ -64,6 +64,8 @@ bool Item::processArguments(S32 argc, const char **argv)
    Point pos;
    pos.read(argv);
    pos *= getGame()->getGridSize();
+   setVert(pos, 0);
+
    for(U32 i = 0; i < MoveStateCount; i++)
       mMoveState[i].pos = pos;
 
@@ -527,7 +529,7 @@ bool PickupItem::processArguments(S32 argc, const char **argv)
 string PickupItem::toString()
 {
    F32 gs = getGame()->getGridSize();
-   return string(getClassName()) + " " + (getVert(0) / gs).toString() + (mRepopDelay != -1 ? itos(mRepopDelay) : "");
+   return string(getClassName()) + " " + (getVert(0) / gs).toString() + " " + (mRepopDelay != -1 ? itos(mRepopDelay / 1000) : "");
 }
 
 

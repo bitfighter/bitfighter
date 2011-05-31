@@ -44,10 +44,40 @@ namespace Zap
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+// Constructor
+BfObject::BfObject()
+{
+   // Do nothing
+}
+
+
 GridDatabase *BfObject::getGridDatabase() 
 { 
    return mGame ? mGame->getGridDatabase() : NULL; 
 }
+
+
+void BfObject::addToGame(Game *game)
+{   
+   TNLAssert(mGame == NULL, "Error: Object already in a game in GameObject::addToGame.");
+   TNLAssert(game != NULL,  "Error: theGame is NULL in GameObject::addToGame.");
+
+   game->addToGameObjectList(this);
+   mGame = game;
+   addToDatabase();
+}
+
+
+void BfObject::removeFromGame()
+{
+   if(mGame)
+   {
+      removeFromDatabase();
+      mGame->removeFromGameObjectList(this);
+      mGame = NULL;
+   }
+}
+
 
 
 bool BfObject::getCollisionPoly(Vector<Point> &polyPoints)
@@ -77,7 +107,7 @@ void BfObject::render(S32 layerIndex)
 ////////////////////////////////////////
 ////////////////////////////////////////
 // Constructor
-GameObject::GameObject()
+GameObject::GameObject() : BfObject()
 {
    mGame = NULL;
    mTeam = -1;
@@ -292,33 +322,27 @@ GameObject *GameObject::findObjectLOS(U32 typeMask, U32 stateIndex, Point raySta
 }
 
 
-void GameObject::addToGame(Game *theGame)
+void GameObject::addToGame(Game *game)
 {
-   TNLAssert(mGame == NULL,   "Error: Object already in a game in GameObject::addToGame.");
-   TNLAssert(theGame != NULL, "Error: theGame is NULL in GameObject::addToGame.");
+   BfObject::addToGame(game);
+   // constists of:
+//game->addToGameObjectList(this);
+//mGame = game;
+//addToDatabase();
 
-   theGame->addToGameObjectList(this);
-   mCreationTime = theGame->getCurrentTime();
-   mGame = theGame;
-   addToDatabase();
-   onAddedToGame(theGame);
+   setCreationTime(game->getCurrentTime());
+   onAddedToGame(game);
+   // for gameType conssists of:
+   //   game->setGameType(this);
+   //if(getGame()->isServer())
+   //   mShowAllBots = getGame()->isTestServer();  // Default to true to show all bots if on testing mode
+
 }
 
 
 void GameObject::onAddedToGame(Game *)
 {
-   // Do nothing; overridden by child classes
-}
-
-
-void GameObject::removeFromGame()
-{
-   if(mGame)
-   {
-      removeFromDatabase();
-      mGame->removeFromGameObjectList(this);
-      mGame = NULL;
-   }
+   getGame()->mObjectsLoaded++;
 }
 
 

@@ -85,8 +85,8 @@ Lunar<FlagItem>::RegType FlagItem::methods[] =
 
 void FlagItem::onAddedToGame(Game *theGame)
 { 
+   Parent::onAddedToGame(theGame);
    theGame->getGameType()->addFlag(this);    
-   getGame()->mObjectsLoaded++;
 }
 
 
@@ -106,7 +106,7 @@ bool FlagItem::processArguments(S32 argc, const char **argv)
    mInitialPos = mMoveState[ActualState].pos;
 
    // Now add the flag starting point to the list of flag spawn points
-   GameType *gt = gServerGame->getGameType();
+   GameType *gt = getGame()->getGameType();
    if(gt)
    {
    if(!gt->isTeamFlagGame() || mTeam < 0 || mTeam >= gt->mTeams.size())
