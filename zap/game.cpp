@@ -361,22 +361,32 @@ void Game::processDeleteList(U32 timeDelta)
 }
 
 
-// Delete all objects of specified type
+static Vector<DatabaseObject *> fillVector;     // Reusable container
+
+
+// Delete all objects of specified type  --> currently only used to remove all walls from the game
 void Game::deleteObjects(U32 typeMask)
 {
-   for(S32 i = 0; i < mGameObjects.size(); i++)
-      if(mGameObjects[i]->getObjectTypeMask() & typeMask)
-         mGameObjects[i]->deleteObject(0);
+   fillVector.clear();
+   mDatabase.findObjects(typeMask, fillVector);
+   for(S32 i = 0; i < fillVector.size(); i++)
+   {
+      GameObject *obj = dynamic_cast<GameObject *>(fillVector[i]);
+      obj->deleteObject(0);
+   }
 }
 
 
 void Game::computeWorldObjectExtents()
 {
-    if(!mGameObjects.size())     // No objects ==> no extents!
-    {
-       mWorldExtents = Rect();
+   fillVector.clear();
+   mDatabase.findObjects(fillVector);
+
+   if(fillVector.size() == 0)     // No objects ==> no extents!
+   {
+      mWorldExtents = Rect();
       return;
-    }
+   }
 
    // All this rigamarole is to make world extent correct for levels that do not overlap (0,0)
    // The problem is that the GameType is treated as an object, and has the extent (0,0), and
@@ -389,10 +399,10 @@ void Game::computeWorldObjectExtents()
    S32 first = -1;
 
    // Look for first non-UnknownType object
-   for(S32 i = 0; i < mGameObjects.size() && first == -1; i++)
-      if(mGameObjects[i]->getObjectTypeMask() != UnknownType)
+   for(S32 i = 0; i < fillVector.size() && first == -1; i++)
+      if(fillVector[i]->getObjectTypeMask() != UnknownType)
       {
-         theRect = mGameObjects[i]->getExtent();
+         theRect = fillVector[i]->getExtent();
          first = i;
       }
 
@@ -403,8 +413,8 @@ void Game::computeWorldObjectExtents()
    }
 
    // Now start unioning the extents of remaining objects.  Should be all of them.
-   for(S32 i = first + 1; i < mGameObjects.size(); i++)
-      theRect.unionRect(mGameObjects[i]->getExtent());
+   for(S32 i = first + 1; i < fillVector.size(); i++)
+      theRect.unionRect(fillVector[i]->getExtent());
 
    mWorldExtents = theRect;
 }
@@ -414,9 +424,11 @@ Rect Game::computeBarrierExtents()
 {
    Rect theRect;
 
-   for(S32 i = 0; i < mGameObjects.size(); i++)
-      if(mGameObjects[i]->getObjectTypeMask() & BarrierType)
-         theRect.unionRect(mGameObjects[i]->getExtent());
+   fillVector.clear();
+   mDatabase.findObjects(BarrierType, fillVector);
+
+   for(S32 i = 0; i < fillVector.size(); i++)
+      theRect.unionRect(fillVector[i]->getExtent());
 
    return theRect;
 }
@@ -433,35 +445,6 @@ Point Game::computePlayerVisArea(Ship *ship)
       return regVis + (sensVis - regVis) * fraction;
    else
       return sensVis + (regVis - sensVis) * fraction;
-}
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-void GameGame::addToGameObjectList(BfObject *BfObject)
-{
-   GameObject *gameObject = dynamic_cast<GameObject *>(BfObject);
-
-   TNLAssert(gameObject, "invalid cast!");
-
-   mGameObjects.push_back(gameObject);
-}
-
-void GameGame::removeFromGameObjectList(BfObject *BfObject)
-{
-   GameObject *gameObject = dynamic_cast<GameObject *>(BfObject);
-
-   TNLAssert(gameObject, "invalid cast!");
-
-   for(S32 i = 0; i < mGameObjects.size(); i++)
-      if(mGameObjects[i] == gameObject)
-      {
-         mGameObjects.erase_fast(i);
-         return;
-      }
-
-   TNLAssert(0, "Object not in game's list!");
 }
 
 
@@ -508,17 +491,19 @@ ServerGame::~ServerGame()
    cleanUp();
 }
 
+
+// Called when ClientGame and ServerGame are destructed, and new levels are loaded on the server
 void Game::cleanUp()
 {
    // Delete any objects on the delete list
    processDeleteList(0xFFFFFFFF);
 
-   // Delete any game objects that may exist
-   while(mGameObjects.size())
-      delete mGameObjects.last();
+   // Delete any game objects that may exist  --> not sure this will be needed when we're using shared_ptr
+   fillVector.clear();
+   mDatabase.findObjects(fillVector);
 
-   while(gBotNavMeshZones.size())
-      delete gBotNavMeshZones.last().getPointer();
+   for(S32 i = 0; i < fillVector.size(); i++)
+      delete fillVector[i];
 }
 
 
@@ -975,8 +960,6 @@ void ServerGame::cycleLevel(S32 nextLevel)
    //   mCurrentLevelIndex += 0;
 
 
-   gBotNavMeshZones.clear();
-
    logprintf(LogConsumer::ServerFilter, "Loading %s [%s]... \\", gServerGame->getLevelNameFromIndex(mCurrentLevelIndex).getString(), 
                                              gServerGame->getLevelFileNameFromIndex(mCurrentLevelIndex).c_str());
 
@@ -999,17 +982,17 @@ void ServerGame::cycleLevel(S32 nextLevel)
 
    logprintf(LogConsumer::ServerFilter, "Done. [%s]", getTimeStamp().c_str());
 
-   // Compute world Extents nice and early
-   computeWorldObjectExtents();
+   computeWorldObjectExtents();                       // Compute world Extents nice and early
 
-   if(gBotNavMeshZones.size() != 0) // There is some zones loaded in the level..
+   if(mDatabaseForBotZones.getObjectCount() != 0)     // There are some zones loaded in the level...
    {
       getGameType()->mBotZoneCreationFailed = false;
-      BotNavMeshZone::buildBotNavMeshZoneConnections();
+      BotNavMeshZone::buildBotNavMeshZoneConnections(getBotZoneDatabase());
    }
    else
-   // Try and load Bot Zones for this level, set flag if failed
+      // Try and load Bot Zones for this level, set flag if failed
       getGameType()->mBotZoneCreationFailed = !BotNavMeshZone::buildBotMeshZones(this);
+
 
    // Build a list of our current connections
    Vector<GameConnection *> connectionList;
@@ -1415,19 +1398,25 @@ void ServerGame::idle(U32 timeDelta)
    // Compute it here to save recomputing it for every robot and other method that relies on it.
    computeWorldObjectExtents();
 
+   fillVector.clear();
+   mDatabase.findObjects(fillVector);
+
    // Visit each game object, handling moves and running its idle method
-   for(S32 i = 0; i < mGameObjects.size(); i++)
+   for(S32 i = 0; i < fillVector.size(); i++)
    {
-      if(mGameObjects[i]->getObjectTypeMask() & DeletedType)
+      if(fillVector[i]->getObjectTypeMask() & DeletedType)
          continue;
 
+      GameObject *obj = dynamic_cast<GameObject *>(fillVector[i]);
+      TNLAssert(obj, "Bad cast!");
+
       // Here is where the time gets set for all the various object moves
-      Move thisMove = mGameObjects[i]->getCurrentMove();
+      Move thisMove = obj->getCurrentMove();
       thisMove.time = timeDelta;
 
       // Give the object its move, then have it idle
-      mGameObjects[i]->setCurrentMove(thisMove);
-      mGameObjects[i]->idle(GameObject::ServerIdleMainLoop);
+      obj->setCurrentMove(thisMove);
+      obj->idle(GameObject::ServerIdleMainLoop);
    }
 
    processDeleteList(timeDelta);
@@ -1625,31 +1614,35 @@ void ClientGame::idle(U32 timeDelta)
          prevTimeDelta += timeDelta;
      
       theMove->time = timeDelta;
-         
+      theMove->prepare();           // Pack and unpack the move for consistent rounding errors
 
-      theMove->prepare();     // Pack and unpack the move for consistent rounding errors
+      fillVector.clear();
+      mDatabase.findObjects(fillVector);
 
-      for(S32 i = 0; i < mGameObjects.size(); i++)
+      for(S32 i = 0; i < fillVector.size(); i++)
       {
-         if(mGameObjects[i]->getObjectTypeMask() & DeletedType)
+         if(fillVector[i]->getObjectTypeMask() & DeletedType)
             continue;
 
-         if(mGameObjects[i] == controlObject)
+         GameObject *obj = dynamic_cast<GameObject *>(fillVector[i]);
+         TNLAssert(obj, "Bad cast!");
+
+         if(obj == controlObject)
          {
-            mGameObjects[i]->setCurrentMove(*theMove);
-            mGameObjects[i]->idle(GameObject::ClientIdleControlMain);  // on client, object is our control object
+            obj->setCurrentMove(*theMove);
+            obj->idle(GameObject::ClientIdleControlMain);  // on client, object is our control object
          }
          else
          {
-            Move m = mGameObjects[i]->getCurrentMove();
+            Move m =obj->getCurrentMove();
             m.time = timeDelta;
-            mGameObjects[i]->setCurrentMove(m);
-            mGameObjects[i]->idle(GameObject::ClientIdleMainRemote);    // on client, object is not our control object
+            obj->setCurrentMove(m);
+            obj->idle(GameObject::ClientIdleMainRemote);    // on client, object is not our control object
          }
       }
 
       if(controlObject)
-         SoundSystem::setListenerParams(controlObject->getRenderPos(),controlObject->getRenderVel());
+         SoundSystem::setListenerParams(controlObject->getRenderPos(), controlObject->getRenderVel());
    }
 
    processDeleteList(timeDelta);                // Delete any objects marked for deletion
@@ -1932,11 +1925,11 @@ void ClientGame::renderCommander()
    // Render the objects.  Start by putting all command-map-visible objects into renderObjects.  Note that this no longer captures
    // walls -- those will be rendered separately.
    rawRenderObjects.clear();
-   mDatabase.findObjects(CommandMapVisType, rawRenderObjects, mWorldExtents);
+   mDatabase.findObjects(CommandMapVisType, rawRenderObjects);
 
    // If we're drawing bot zones, add them to our list of render objects
    if(gServerGame && mGameUserInterface->mDebugShowMeshZones)
-       gServerGame->mDatabaseForBotZones.findObjects(0, rawRenderObjects, mWorldExtents, BotNavMeshZoneTypeNumber);
+      gServerGame->getBotZoneDatabase()->findObjects(0, rawRenderObjects, BotNavMeshZoneTypeNumber);
 
    renderObjects.clear();
    for(S32 i = 0; i < rawRenderObjects.size(); i++)
@@ -1983,33 +1976,30 @@ void ClientGame::renderCommander()
             }
          }
 
-         Vector<DatabaseObject *> spyBugObjects;
-         mDatabase.findObjects(SpyBugType, spyBugObjects, mWorldExtents);
+         fillVector.clear();
+         mDatabase.findObjects(SpyBugType, fillVector);
 
          // Render spy bug visibility range second, so ranges appear above ship scanner range
-         for(S32 i = 0; i < spyBugObjects.size(); i++)
+         for(S32 i = 0; i < fillVector.size(); i++)
          {
-            if(spyBugObjects[i]->getObjectTypeMask() & SpyBugType)
+            SpyBug *sb = dynamic_cast<SpyBug *>(fillVector[i]);
+
+            if(sb->isVisibleToPlayer(playerTeam, getGameType()->mLocalClient ? getGameType()->mLocalClient->name : 
+                                                                                 StringTableEntry(""), getGameType()->isTeamGame()))
             {
-               SpyBug *sb = dynamic_cast<SpyBug *>(spyBugObjects[i]);
+               const Point &p = sb->getRenderPos();
+               Point visExt(gSpyBugRange, gSpyBugRange);
+               glColor(teamColor * zoomFrac * 0.45);     // Slightly different color than that used for ships
 
-               if(sb->isVisibleToPlayer(playerTeam, getGameType()->mLocalClient ? getGameType()->mLocalClient->name : 
-                                                                                  StringTableEntry(""), getGameType()->isTeamGame()))
-               {
-                  const Point &p = sb->getRenderPos();
-                  Point visExt(gSpyBugRange, gSpyBugRange);
-                  glColor(teamColor * zoomFrac * 0.45);     // Slightly different color than that used for ships
+               glBegin(GL_POLYGON);
+                  glVertex2f(p.x - visExt.x, p.y - visExt.y);
+                  glVertex2f(p.x + visExt.x, p.y - visExt.y);
+                  glVertex2f(p.x + visExt.x, p.y + visExt.y);
+                  glVertex2f(p.x - visExt.x, p.y + visExt.y);
+               glEnd();
 
-                  glBegin(GL_POLYGON);
-                     glVertex2f(p.x - visExt.x, p.y - visExt.y);
-                     glVertex2f(p.x + visExt.x, p.y - visExt.y);
-                     glVertex2f(p.x + visExt.x, p.y + visExt.y);
-                     glVertex2f(p.x - visExt.x, p.y + visExt.y);
-                  glEnd();
-
-                  glColor(teamColor * 0.8);     // Draw a marker in the middle
-                  drawCircle(u->getRenderPos(), 2);
-               }
+               glColor(teamColor * 0.8);     // Draw a marker in the middle
+               drawCircle(u->getRenderPos(), 2);
             }
          }
       }
@@ -2152,7 +2142,7 @@ void ClientGame::renderNormal()
    mDatabase.findObjects(AllObjectTypes, rawRenderObjects, extentRect);    // Use extent rects to quickly find objects in visual range
 
    if(gServerGame && mGameUserInterface->mDebugShowMeshZones)
-       gServerGame->mDatabaseForBotZones.findObjects(0, rawRenderObjects, extentRect, BotNavMeshZoneTypeNumber);
+       gServerGame->getBotZoneDatabase()->findObjects(0, rawRenderObjects, extentRect, BotNavMeshZoneTypeNumber);
 
    renderObjects.clear();
    for(S32 i = 0; i < rawRenderObjects.size(); i++)

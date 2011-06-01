@@ -62,7 +62,6 @@ void BfObject::addToGame(Game *game)
    TNLAssert(mGame == NULL, "Error: Object already in a game in GameObject::addToGame.");
    TNLAssert(game != NULL,  "Error: theGame is NULL in GameObject::addToGame.");
 
-   game->addToGameObjectList(this);
    mGame = game;
    addToDatabase();
 }
@@ -73,7 +72,6 @@ void BfObject::removeFromGame()
    if(mGame)
    {
       removeFromDatabase();
-      mGame->removeFromGameObjectList(this);
       mGame = NULL;
    }
 }
@@ -134,7 +132,7 @@ void GameObject::deleteObject(U32 deleteTimeInterval)
 {
    mObjectTypeMask = DeletedType;
    // mObjectTypeNumber = ??? ;
-   if(!mGame)
+   if(!mGame)                    // Not in a game
       delete this;
    else
       mGame->addToDeleteList(this, deleteTimeInterval);
@@ -326,7 +324,6 @@ void GameObject::addToGame(Game *game)
 {
    BfObject::addToGame(game);
    // constists of:
-//game->addToGameObjectList(this);
 //mGame = game;
 //addToDatabase();
 

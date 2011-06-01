@@ -371,7 +371,7 @@ void Barrier::prepareRenderingGeometry(Game *game)
 
    Vector<DatabaseObject *> barrierList;
 
-   game->getGridDatabase()->findObjects(BarrierType, barrierList, game->getWorldExtents()); 
+   game->getGridDatabase()->findObjects(BarrierType, barrierList); 
 
    clipRenderLinesToPoly(barrierList, mRenderLineSegments);
 }
@@ -526,7 +526,7 @@ WallEdge::WallEdge(const Point &start, const Point &end)
 WallEdge::~WallEdge()
 {
     // Make sure object is out of the database
-   getGridDatabase()->removeFromDatabase(this, this->getExtent()); 
+   getGridDatabase()->removeFromDatabase(this, getExtent()); 
 }
 
 ////////////////////////////////////////
@@ -812,7 +812,7 @@ extern EditorGame *gEditorGame;
 WallSegment::~WallSegment()
 { 
    // Make sure object is out of the database
-   getGridDatabase()->removeFromDatabase(this, this->getExtent()); 
+   getGridDatabase()->removeFromDatabase(this, getExtent()); 
 
    // Find any forcefields that were using this as an end point and let them know the segment is gone.  Since 
    // segment is no longer in database, when we recalculate the forcefield, our endSegmentPointer will be reset.

@@ -427,7 +427,6 @@ public:
    TNL_DECLARE_RPC(c2sDropItem, ());
 
    // These are used when the client sees something happen and wants a confirmation from the server
-   TNL_DECLARE_RPC(c2sReaffirmMountItem, (U16 itemId));
    TNL_DECLARE_RPC(c2sResendItemStatus, (U16 itemId));
 
    // Handle additional game-specific menu options for the client and the admin

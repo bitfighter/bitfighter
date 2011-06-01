@@ -60,7 +60,8 @@ protected:
 public:
    DatabaseObject() { mLastQueryId = 0; extent = Rect(); mInDatabase = false; }    // Quickie constructor
 
-   U32 getObjectTypeMask() { return mObjectTypeMask; }   
+   U32 getObjectTypeMask() { 
+      return mObjectTypeMask; }   
    void setObjectTypeMask(U32 objectTypeMask) { mObjectTypeMask = objectTypeMask; }
    U8 getObjectTypeNumber() { return mObjectTypeNumber; }   
    void setObjectTypeNumber(U8 objectTypeNumber) { mObjectTypeNumber = objectTypeNumber; }
@@ -91,6 +92,8 @@ private:
    void findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector, const Rect *extents, S32 minx, S32 miny, S32 maxx, S32 maxy, U8 typeNumber = U8_MAX);
    U32 mQueryId;
 
+   Vector<DatabaseObject *> mAllObjects;
+
 public:
    enum {
       BucketRowCount = 16,    // Number of buckets per grid row, and number of rows; should be power of 2
@@ -117,7 +120,7 @@ public:
                                  float &collisionTime, Point &surfaceNormal, U8 typeNumber = U8_MAX);
    bool pointCanSeePoint(const Point &point1, const Point &point2);
 
-   void findObjects(Vector<DatabaseObject *> &fillVector, U8 typeNumber = U8_MAX);     // Returns all objects in the database
+   void findObjects(Vector<DatabaseObject *> &fillVector);     // Returns all objects in the database
    void findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector, U8 typeNumber = U8_MAX);      
    void findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector, const Rect &extents, U8 typeNumber = U8_MAX);
    
@@ -126,6 +129,9 @@ public:
    void removeFromDatabase(DatabaseObject *theObject, const Rect &extents);
 
    bool isUsingGameCoords() { return mUsingGameCoords; }
+
+   S32 getObjectCount() { return mAllObjects.size(); }      // Return the number of objects currently in the database
+   DatabaseObject *getObjectByIndex(S32 index);             // Kind of hacky, kind of useful
 };
 
 };

@@ -60,33 +60,22 @@ static const S32 MAX_ZONES = 10000;     // Don't make this go above S16 max - 1 
 TNL_IMPLEMENT_NETOBJECT(BotNavMeshZone);
 
 
-Vector<SafePtr<BotNavMeshZone> > gBotNavMeshZones;     // List of all our zones
-
 // Constructor
 BotNavMeshZone::BotNavMeshZone()
 {
    mGame = NULL;
    //mObjectTypeMask = BotNavMeshZoneType | CommandMapVisType;
    mObjectTypeNumber = BotNavMeshZoneTypeNumber;
-   //  The Zones is now rendered without the network interface, if client is hosting.
-   //mNetFlags.set(Ghostable);    // For now, so we can see them on the client to help with debugging... when too many zones causes huge lag
-   mZoneId = gBotNavMeshZones.size();
+
+   mZoneId = getGridDatabase()->getObjectCount();
 
    mGeometry = boost::shared_ptr<Geometry>(new PolygonGeometry);
-
-   gBotNavMeshZones.push_back(this);
 }
 
 
 // Destructor
 BotNavMeshZone::~BotNavMeshZone()
 {
-   for(S32 i = gBotNavMeshZones.size() - 1; i >= 0; i--)  // For speed, check in reverse order. Game::cleanUp() clears on reverse order.
-   if(gBotNavMeshZones[i] == this)
-   {
-      gBotNavMeshZones.erase_fast(i);
-      break;
-   }
    if(mGame)
    {
       removeFromDatabase();
@@ -136,7 +125,7 @@ S32 BotNavMeshZone::getRenderSortValue()
 
 GridDatabase *BotNavMeshZone::getGridDatabase()
 {
-   return &mGame->mDatabaseForBotZones;
+   return mGame->getBotZoneDatabase();
 }
 
 
@@ -194,7 +183,7 @@ void BotNavMeshZone::unpackUpdate(GhostConnection *connection, BitStream *stream
 U16 BotNavMeshZone::findZoneContaining(const Point &p)
 {
    Vector<DatabaseObject *> fillVector;
-   gServerGame->mDatabaseForBotZones.findObjects(0, fillVector, 
+   gServerGame->getBotZoneDatabase()->findObjects(0, fillVector, 
                               Rect(p - Point(0.1f,0.1f),p + Point(0.1f,0.1f)), BotNavMeshZoneTypeNumber);  // Slightly extend Rect, it can be on the edge of zone
 
    for(S32 i = 0; i < fillVector.size(); i++)
@@ -232,17 +221,25 @@ struct rcEdge
 };
 
 // Build connections between zones using the adjacency data created in recast
-static bool buildBotNavMeshZoneConnectionsRecastStyle(rcPolyMesh &mesh, const Vector<S32> &polyToZoneMap)    
+bool BotNavMeshZone::buildBotNavMeshZoneConnectionsRecastStyle(GridDatabase *zoneDb, rcPolyMesh &mesh, const Vector<S32> &polyToZoneMap)    
 {
-   if(gBotNavMeshZones.size() == 0)
+   if(zoneDb->getObjectCount() == 0)      // Nothing to do!
       return true;
+
+   Vector<DatabaseObject *> objects;
+   zoneDb->findObjects(objects);          // Database holds only zones, so we'll just get all objects
+
+   // Now cast all those zones to BotNavMeshZones for easier work down below
+   Vector<BotNavMeshZone *> zones;
+   zones.resize(objects.size());
+
+   for(S32 i = 0; i < objects.size(); i++)
+      zones[i] = dynamic_cast<BotNavMeshZone *>(objects[i]);
 
    // We'll reuse these objects throughout the following block, saving the cost of creating and destructing them
    Point bordStart, bordEnd, bordCen;
    Rect rect;
    NeighboringZone neighbor;
-   Vector<DatabaseObject *> objects;
-
 
    /////////////////////////////
    // Based on recast's interpretation of code by Eric Lengyel:
@@ -349,10 +346,10 @@ static bool buildBotNavMeshZoneConnectionsRecastStyle(rcPolyMesh &mesh, const Ve
          neighbor.borderCenter.set((neighbor.borderStart + neighbor.borderEnd) * 0.5);
 
          neighbor.zoneID = polyToZoneMap[e.poly[1]];  
-         gBotNavMeshZones[polyToZoneMap[e.poly[0]]]->mNeighbors.push_back(neighbor);  // (copies neighbor implicitly)
+         zones[polyToZoneMap[e.poly[0]]]->mNeighbors.push_back(neighbor);  // (copies neighbor implicitly)
 
          neighbor.zoneID = polyToZoneMap[e.poly[0]];   
-         gBotNavMeshZones[polyToZoneMap[e.poly[1]]]->mNeighbors.push_back(neighbor);
+         zones[polyToZoneMap[e.poly[1]]]->mNeighbors.push_back(neighbor);
       }
    }
    
@@ -370,7 +367,7 @@ static BotNavMeshZone *findZoneContainingPoint(const Point &point)
 {
    Rect rect(point, 0.01f);
    zones.clear();
-   gServerGame->mDatabaseForBotZones.findObjects(0, zones, rect, BotNavMeshZoneTypeNumber); 
+   gServerGame->getBotZoneDatabase()->findObjects(0, zones, rect, BotNavMeshZoneTypeNumber); 
 
    // If there is more than one possible match, pick the first arbitrarily (could happen if dest is right on a zone border)
    for(S32 i = 0; i < zones.size(); i++)
@@ -579,7 +576,7 @@ bool BotNavMeshZone::buildBotMeshZones(Game *game)
                if(vert[0] == U16_MAX)
                   break;
 
-               if(gBotNavMeshZones.size() >= MAX_ZONES)      // Don't add too many zones...
+               if(game->getBotZoneDatabase()->getObjectCount() >= MAX_ZONES)      // Don't add too many zones...
                   break;
 
                if(j == 0)
@@ -601,16 +598,16 @@ bool BotNavMeshZone::buildBotMeshZones(Game *game)
    
             if(botzone != NULL)
             {
-               botzone->addToGame(game);
+               botzone->addToGame(game);     // Adds zone to database
                botzone->setExtent();
             }
          }
 
 #ifdef LOG_TIMER
-         logprintf("Recast built %d zones!", gBotNavMeshZones.size() );
+         logprintf("Recast built %d zones!", game->getBotZoneDatabase()->getObjectCount());
 #endif               
 
-         buildBotNavMeshZoneConnectionsRecastStyle(mesh, polyToZoneMap);
+         buildBotNavMeshZoneConnectionsRecastStyle(game->getBotZoneDatabase(), mesh, polyToZoneMap);
          linkTeleportersBotNavMeshZoneConnections(game);
       }
    }
@@ -619,15 +616,17 @@ bool BotNavMeshZone::buildBotMeshZones(Game *game)
    // data from Triangle, but it should only run rarely, if ever.
    if(!recastPassed)
    {
+      TNLAssert(false, "Recast failed -- pick continue to build zones from triangle output");
+
       // Visualize triangle output
       for(S32 i = 0; i < triangleData.triangleCount * 3; i+=3)
       {
-         if(gBotNavMeshZones.size() >= MAX_ZONES)      // Don't add too many zones...
+         if(game->getBotZoneDatabase()->getObjectCount() >= MAX_ZONES)      // Don't add too many zones...
             break;
 
          BotNavMeshZone *botzone = new BotNavMeshZone();
          // Triangulation only needed for display on local client... it is expensive to compute for so many zones,
-         // and there is really no point if it will never be viewed.  Once disabled, triangluation cannot be re-enabled
+         // and there is really no point if they will never be viewed.  Once disabled, triangluation cannot be re-enabled
          // for this object.
          if(!gClientGame)     
             botzone->disableTriangluation();
@@ -640,7 +639,7 @@ bool BotNavMeshZone::buildBotMeshZones(Game *game)
          botzone->setExtent();   
        }
 
-      BotNavMeshZone::buildBotNavMeshZoneConnections();
+      BotNavMeshZone::buildBotNavMeshZoneConnections(game->getBotZoneDatabase());
    }
 
 #ifdef LOG_TIMER
@@ -655,30 +654,40 @@ bool BotNavMeshZone::buildBotMeshZones(Game *game)
 
 // Only runs on server
 // TODO can be combined with buildBotNavMeshZoneConnectionsRecastStyle() ?
-void BotNavMeshZone::buildBotNavMeshZoneConnections()    
+void BotNavMeshZone::buildBotNavMeshZoneConnections(GridDatabase *zoneDb)    
 {
-   if(gBotNavMeshZones.size() == 0)
+   if(zoneDb->getObjectCount() == 0)      // Nothing to do!
       return;
+
+   Vector<DatabaseObject *> objects;
+   zoneDb->findObjects(objects);          // Database holds only zones, so we'll just get all objects
+
+   // Now cast all those zones to BotNavMeshZones for easier work down below
+   Vector<BotNavMeshZone *> zones;
+   zones.resize(objects.size());
+
+   for(S32 i = 0; i < objects.size(); i++)
+      zones[i] = dynamic_cast<BotNavMeshZone *>(objects[i]);
+
 
    // We'll reuse these objects throughout the following block, saving the cost of creating and destructing them
    Point bordStart, bordEnd, bordCen;
    Rect rect;
    NeighboringZone neighbor;
-   Vector<DatabaseObject *> objects;
 
    // Figure out which zones are adjacent to which, and find the "gateway" between them
-   for(S32 i = 0; i < gBotNavMeshZones.size(); i++)
+   for(S32 i = 0; i < zones.size(); i++)
    {
-      for(S32 j = i; j < gBotNavMeshZones.size(); j++)
+      for(S32 j = i; j < zones.size(); j++)
       {
          if(i == j)
             continue;      // Don't check self...
 
          // Do zones i and j touch?  First a quick and dirty bounds check:
-         if(!gBotNavMeshZones[i]->getExtent().intersectsOrBorders(gBotNavMeshZones[j]->getExtent()))
+         if(!zones[i]->getExtent().intersectsOrBorders(zones[j]->getExtent()))
             continue;
 
-         if(zonesTouch(gBotNavMeshZones[i]->getOutline(), gBotNavMeshZones[j]->getOutline(), 1.0, bordStart, bordEnd))
+         if(zonesTouch(zones[i]->getOutline(), zones[j]->getOutline(), 1.0, bordStart, bordEnd))
          {
             rect.set(bordStart, bordEnd);
             bordCen.set(rect.getCenter());
@@ -689,9 +698,9 @@ void BotNavMeshZone::buildBotNavMeshZoneConnections()
             neighbor.borderEnd.set(bordEnd);
             neighbor.borderCenter.set(bordCen);
 
-            neighbor.distTo = gBotNavMeshZones[i]->getExtent().getCenter().distanceTo(bordCen);     // Whew!
-            neighbor.center.set(gBotNavMeshZones[j]->getCenter());
-            gBotNavMeshZones[i]->mNeighbors.push_back(neighbor);
+            neighbor.distTo = zones[i]->getExtent().getCenter().distanceTo(bordCen);     // Whew!
+            neighbor.center.set(zones[j]->getCenter());
+            zones[i]->mNeighbors.push_back(neighbor);
 
             // Zone i is a neighbor of j
             neighbor.zoneID = i;
@@ -699,9 +708,9 @@ void BotNavMeshZone::buildBotNavMeshZoneConnections()
             neighbor.borderEnd.set(bordEnd);
             neighbor.borderCenter.set(bordCen);
 
-            neighbor.distTo = gBotNavMeshZones[j]->getExtent().getCenter().distanceTo(bordCen);     
-            neighbor.center.set(gBotNavMeshZones[i]->getCenter());
-            gBotNavMeshZones[j]->mNeighbors.push_back(neighbor);
+            neighbor.distTo = zones[j]->getExtent().getCenter().distanceTo(bordCen);     
+            neighbor.center.set(zones[i]->getCenter());
+            zones[j]->mNeighbors.push_back(neighbor);
          }
       }
    }
@@ -715,7 +724,7 @@ void BotNavMeshZone::linkTeleportersBotNavMeshZoneConnections(Game *game)
    // Now create paths representing the teleporters
    Vector<DatabaseObject *> teleporters, dests;
 
-   game->getGridDatabase()->findObjects(TeleportType, teleporters, game->getWorldExtents());
+   game->getBotZoneDatabase()->findObjects(TeleportType, teleporters);
 
    for(S32 i = 0; i < teleporters.size(); i++)
    {
@@ -752,14 +761,14 @@ void BotNavMeshZone::linkTeleportersBotNavMeshZoneConnections(Game *game)
 
 
 // Rough guess as to distance from fromZone to toZone
-F32 AStar::heuristic(S32 fromZone, S32 toZone)
+F32 AStar::heuristic(const Vector<BotNavMeshZone *> &zones, S32 fromZone, S32 toZone)
 {
-   return gBotNavMeshZones[fromZone]->getCenter().distanceTo( gBotNavMeshZones[toZone]->getCenter() );
+   return zones[fromZone]->getCenter().distanceTo( zones[toZone]->getCenter() );
 }
 
 
 // Returns a path, including the startZone and targetZone 
-Vector<Point> AStar::findPath(S32 startZone, S32 targetZone, const Point &target)
+Vector<Point> AStar::findPath(const Vector<BotNavMeshZone *> &zones, S32 startZone, S32 targetZone, const Point &target)
 {
    // Because of these variables...
    static U16 onClosedList = 0;
@@ -796,7 +805,7 @@ Vector<Point> AStar::findPath(S32 startZone, S32 targetZone, const Point &target
    onOpenList = onClosedList - 1;
 
    Gcost[startZone] = 0;         // That's the cost of going from the startZone to the startZone!
-   Fcost[0] = Hcost[0] = heuristic(startZone, targetZone);
+   Fcost[0] = Hcost[0] = heuristic(zones, startZone, targetZone);
 
    numberOfOpenListItems = 1;    // Start with one open item: the startZone
 
@@ -870,7 +879,7 @@ Vector<Point> AStar::findPath(S32 startZone, S32 targetZone, const Point &target
          // Add these adjacent child squares to the open list
          //   for later consideration if appropriate.
 
-         Vector<NeighboringZone> neighboringZones = gBotNavMeshZones[parentZone]->mNeighbors;
+         Vector<NeighboringZone> neighboringZones = zones[parentZone]->mNeighbors;
 
          for(S32 a = 0; a < neighboringZones.size(); a++)
          {
@@ -892,7 +901,7 @@ Vector<Point> AStar::findPath(S32 startZone, S32 targetZone, const Point &target
                openList[m] = newOpenListItemID;             // Place the new open list item (actually, its ID#) at the bottom of the heap
                openZone[newOpenListItemID] = zoneID;        // Record zone as a newly opened
 
-               Hcost[openList[m]] = heuristic(zoneID, targetZone);
+               Hcost[openList[m]] = heuristic(zones, zoneID, targetZone);
                Gcost[zoneID] = Gcost[parentZone] + zone.distTo;
                Fcost[openList[m]] = Gcost[zoneID] + Hcost[openList[m]];
                parentZones[zoneID] = parentZone; 
@@ -985,30 +994,30 @@ Vector<Point> AStar::findPath(S32 startZone, S32 targetZone, const Point &target
    // will help keep the robot from getting hung up on blocked but technically visible
    // paths, such as when we are trying to fly around a protruding wall stub.
 
-   path.push_back(target);                                     // First point is the actual target itself
-   path.push_back(gBotNavMeshZones[targetZone]->getCenter());  // Second is the center of the target's zone
+   path.push_back(target);                          // First point is the actual target itself
+   path.push_back(zones[targetZone]->getCenter());  // Second is the center of the target's zone
       
    S32 zone = targetZone;
 
    while(zone != startZone)
    {
-      path.push_back(findGateway(parentZones[zone], zone));   // Don't switch findGateway arguments, some path is one way (teleporters).
-      zone = parentZones[zone];                               // Find the parent of the current cell
-      path.push_back(gBotNavMeshZones[zone]->getCenter());
+      path.push_back(findGateway(zones, parentZones[zone], zone));   // Don't switch findGateway arguments, some path is one way (teleporters).
+      zone = parentZones[zone];                                      // Find the parent of the current cell
+      path.push_back(zones[zone]->getCenter());
    }
 
-   path.push_back(gBotNavMeshZones[startZone]->getCenter());
+   path.push_back(zones[startZone]->getCenter());
    return path;
 }
 
 
 // Return a point representing gateway between zones
-Point AStar::findGateway(S32 zone1, S32 zone2)
+Point AStar::findGateway(const Vector<BotNavMeshZone *> &zones, S32 zone1, S32 zone2)
 {
-   S32 neighborIndex = gBotNavMeshZones[zone1]->getNeighborIndex(zone2);
+   S32 neighborIndex = zones[zone1]->getNeighborIndex(zone2);
    TNLAssert(neighborIndex >= 0, "Invalid neighbor index!!");
 
-   return gBotNavMeshZones[zone1]->mNeighbors[neighborIndex].borderCenter;
+   return zones[zone1]->mNeighbors[neighborIndex].borderCenter;
 }
 
 

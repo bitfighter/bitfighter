@@ -135,7 +135,9 @@ protected:
       DeleteRef(GameObject *o = NULL, U32 d = 0);
    };
 
-   GridDatabase mDatabase;
+   GridDatabase mDatabase;                // Database for all normal objects
+   GridDatabase mDatabaseForBotZones;     // Database especially for BotZones to avoid gumming up the regular database with too many objects
+
 
    Vector<DeleteRef> mPendingDeleteObjects;
    Vector<SafePtr<GameObject> > mScopeAlwaysList;
@@ -166,9 +168,6 @@ public:
    Game(const Address &theBindAddress);      // Constructor
    virtual ~Game() { /* Do nothing */ };     // Destructor
 
-
-   Vector<GameObject *> mGameObjects;
-
    Rect getWorldExtents() { return mWorldExtents; }
 
    virtual U32 getPlayerCount() = 0;         // Implemented differently on client and server
@@ -185,8 +184,6 @@ public:
 
    Point computePlayerVisArea(Ship *ship);
 
-   GridDatabase mDatabaseForBotZones;
-
    U32 getTimeUnconnectedToMaster() { return mTimeUnconnectedToMaster; }
 
 
@@ -196,10 +193,6 @@ public:
 
 
    void addToDeleteList(GameObject *theObject, U32 delay);
-
-   // Client/ServerGame and EditorGame will each keep track of objects in a slightly different manner, using the same interface
-   virtual void addToGameObjectList(BfObject *theObject) = 0;
-   virtual void removeFromGameObjectList(BfObject *theObject) = 0;
 
    void deleteObjects(U32 typeMask);
 
@@ -219,6 +212,7 @@ public:
 
    GameNetInterface *getNetInterface();
    GridDatabase *getGridDatabase() { return &mDatabase; }
+   GridDatabase *getBotZoneDatabase() { return &mDatabaseForBotZones; }
 
    const Vector<SafePtr<GameObject> > &getScopeAlwaysList() { return mScopeAlwaysList; }
 
@@ -284,10 +278,6 @@ class GameGame : public Game
 public:
    GameGame(const Address &theBindAddress) : Game(theBindAddress) { /* Do nothing */};      // Constructor
    virtual ~GameGame() { /* Do nothing */ };     // Destructor
-
-   // Implementations for virtual methods in Game
-   void addToGameObjectList(BfObject *theObject);
-   void removeFromGameObjectList(BfObject *theObject);
 };
  
 
@@ -488,10 +478,6 @@ public:
    U32 getPlayerCount() { return 0; }
    bool isServer() { return false; }
    void idle(U32 timeDelta) { /* Do nothing */ }
-
-   // TODO: Use this to manage mItems in editor
-   void addToGameObjectList(BfObject *theObject) { };
-   void removeFromGameObjectList(BfObject *theObject) { };
 
    Color getTeamColor(S32 teamId);
 

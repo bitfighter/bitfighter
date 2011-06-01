@@ -67,6 +67,9 @@ void GridDatabase::addToDatabase(DatabaseObject *theObject, const Rect &extents)
          be->nextInBucket = mBuckets[x & BucketMask][y & BucketMask];
          mBuckets[x & BucketMask][y & BucketMask] = be;
       }
+
+   // Add the object to our non-spatial "database" as well
+   mAllObjects.push_back(theObject);
 }
 
 
@@ -102,6 +105,14 @@ void GridDatabase::removeFromDatabase(DatabaseObject *theObject, const Rect &ext
          }
       }
    }
+
+   // Remove the object to our non-spatial "database" as well
+   for(S32 i = 0; i < mAllObjects.size(); i++)
+      if(mAllObjects[i] == theObject)
+      {
+         mAllObjects.erase_fast(i);
+         break;
+      }
 }
 
 
@@ -115,9 +126,9 @@ void GridDatabase::findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVecto
          {
             DatabaseObject *theObject = walk->theObject;
 
-            if(theObject->mLastQueryId != mQueryId &&                     // Object hasn't been queried; and
-               ((theObject->getObjectTypeMask() & typeMask) || theObject->getObjectTypeNumber() == typeNumber) &&             // is of the right type; and
-               (!extents || theObject->extent.intersects(*extents)) )     // overlaps our extents (if passed)
+            if(theObject->mLastQueryId != mQueryId &&                                                             // Object hasn't been queried; and
+               ((theObject->getObjectTypeMask() & typeMask) || theObject->getObjectTypeNumber() == typeNumber) && // is of the right type; and
+               (!extents || theObject->extent.intersects(*extents)) )                                             // overlaps our extents (if passed)
             {
                walk->theObject->mLastQueryId = mQueryId;    // Flag the object so we know we've already visited it
                fillVector.push_back(walk->theObject);       // And save it as a found item
@@ -126,16 +137,19 @@ void GridDatabase::findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVecto
 }
 
 
-void GridDatabase::findObjects(Vector<DatabaseObject *> &fillVector, U8 typeNumber)
+void GridDatabase::findObjects(Vector<DatabaseObject *> &fillVector)
 {
-   findObjects(AllObjectTypes, fillVector, typeNumber);
+   for(S32 i = 0; i < mAllObjects.size(); i++)
+      fillVector.push_back(mAllObjects[i]);
 }
 
 
 // Find all objects in database of type typeMask
 void GridDatabase::findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector, U8 typeNumber)
 {
-   findObjects(typeMask, fillVector, NULL, 0, 0, BucketRowCount - 1, BucketRowCount - 1, typeNumber);
+   for(S32 i = 0; i < mAllObjects.size(); i++)
+      if((mAllObjects[i]->getObjectTypeMask() & typeMask) || (mAllObjects[i]->getObjectTypeNumber() == typeNumber))
+         fillVector.push_back(mAllObjects[i]);
 }
 
 
@@ -244,6 +258,19 @@ bool GridDatabase::pointCanSeePoint(const Point &point1, const Point &point2)
 
    return( findObjectLOS(BarrierType, MoveObject::ActualState, true, point1, point2, time, coll) == NULL );
 }
+
+
+// Kind of hacky, kind of useful.  Only used by BotZones, and ony works because all zones are added at one time, the list does not change,
+// and the index of the bot zones is stored as an ID by the zone.  If we added and removed zones from our list, this would probably not
+// be a reliable way to access a specific item.  We could probably phase this out by passing pointers to zones rather than indices.
+DatabaseObject *GridDatabase::getObjectByIndex(S32 index) 
+{  
+   if(index < 0 || index >= mAllObjects.size())
+      return NULL;
+   else
+      return mAllObjects[index]; 
+} 
+
 
 
 ////////////////////////////////////////

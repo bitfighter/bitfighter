@@ -36,7 +36,7 @@
 #include "projectile.h"     // For s2cClientJoinedTeam()
 #include "playerInfo.h"     // For LuaPlayerInfo constructor  
 #include "stringUtils.h"    // For itos
-#include "BotNavMeshZone.h" // For gBotNavMeshZones.
+//#include "BotNavMeshZone.h" // For gBotNavMeshZones
 #include "gameStats.h"      // For VersionedGameStats def
 #include "version.h"
 
@@ -151,7 +151,7 @@ GameType::GameType() : mScoreboardUpdateTimer(1000) , mGameTimer(DefaultGameTime
 }
 
 
-static Vector<DatabaseObject *> fillVector;
+static Vector<DatabaseObject *> fillVector;     // Reusable container
 
 bool GameType::processArguments(S32 argc, const char **argv)
 {
@@ -1175,10 +1175,9 @@ void GameType::catalogSpybugs()
 {
    Vector<DatabaseObject *> spyBugs;
    mSpyBugs.clear();
-   spyBugs.clear();
 
    // Find all spybugs in the game, load them into mSpyBugs
-   getGame()->getGridDatabase()->findObjects(SpyBugType, spyBugs, getGame()->getWorldExtents());
+   getGame()->getGridDatabase()->findObjects(SpyBugType, spyBugs);
 
    mSpyBugs.resize(spyBugs.size());
    for(S32 i = 0; i < spyBugs.size(); i++)
@@ -1206,7 +1205,7 @@ void GameType::onLevelLoaded()
 
    // Figure out if this level has any loadout zones
    fillVector.clear();
-   getGame()->getGridDatabase()->findObjects(LoadoutZoneType, fillVector, getGame()->getWorldExtents());
+   getGridDatabase()->findObjects(LoadoutZoneType, fillVector);
 
    mLevelHasLoadoutZone = (fillVector.size() > 0);
 
@@ -2299,7 +2298,7 @@ void GameType::changeClientTeam(GameConnection *source, S32 team)
       Rect worldBounds = getGame()->getWorldExtents();
 
       fillVector.clear();
-      getGame()->getGridDatabase()->findObjects(SpyBugType | MineType, fillVector, getGame()->getWorldExtents());
+      getGame()->getGridDatabase()->findObjects(SpyBugType | MineType, fillVector);
 
       for(S32 i = 0; i < fillVector.size(); i++)
       {
@@ -2498,7 +2497,7 @@ GAMETYPE_RPC_S2C(GameType, s2cClientJoinedTeam,
    // but this RPC only runs when a player joins the game or changes teams, so this will never hurt, and we can
    // save the overhead of sending a separate message which, while theoretically cleaner, will never be needed practically.
    fillVector.clear();
-   clientGame->getGridDatabase()->findObjects(SpyBugType | MineType, fillVector, clientGame->getWorldExtents());
+   clientGame->getGridDatabase()->findObjects(SpyBugType | MineType, fillVector);
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
@@ -3086,40 +3085,16 @@ GAMETYPE_RPC_C2S(GameType, c2sDropItem, (), ())
 }
 
 
-GAMETYPE_RPC_C2S(GameType, c2sReaffirmMountItem, (U16 itemId), (itemId))
-{
-   //logprintf("%s GameType->c2sReaffirmMountItem", isGhost()? "Client:" : "Server:");
-   GameConnection *source = (GameConnection *) getRPCSourceConnection();
-
-   for(S32 i = 0; i < gServerGame->mGameObjects.size(); i++)
-   {
-      Item *item = dynamic_cast<Item *>(gServerGame->mGameObjects[i]);
-      if(item && item->getItemId() == itemId)
-      {
-         item->setMountedMask();
-         break;
-      }
-   }
-
-   //Ship *ship = dynamic_cast<Ship *>(source->getControlObject());
-   //if(!ship)
-   //   return;
-
-   //S32 count = ship->mMountedItems.size();
-
-   //for(S32 i = count - 1; i >= 0; i--)
-   //   ship->mMountedItems[i]->setMountedMask();
-
-}
-
-
 GAMETYPE_RPC_C2S(GameType, c2sResendItemStatus, (U16 itemId), (itemId))
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
 
-   for(S32 i = 0; i < gServerGame->mGameObjects.size(); i++)
+   fillVector.clear();
+   getGridDatabase()->findObjects(fillVector);
+
+   for(S32 i = 0; i < fillVector.size(); i++)
    {
-      Item *item = dynamic_cast<Item *>(gServerGame->mGameObjects[i]);
+      Item *item = dynamic_cast<Item *>(fillVector[i]);
       if(item && item->getItemId() == itemId)
       {
          item->setPositionMask();

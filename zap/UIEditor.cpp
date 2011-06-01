@@ -591,7 +591,7 @@ void EditorUserInterface::loadLevel()
    gGameParamUserInterface.menuItems.deleteAndClear();      // Keeps interface from using our menuItems to rebuild savedMenuItems
    gEditorGame->setGridSize(Game::DefaultGridSize);         // Used in editor for scaling walls and text items appropriately
 
-   gEditorGame->setGameType(NULL);
+   gEditorGame->setGameType(new GameType());
 
    char fileBuffer[1024];
    dSprintf(fileBuffer, sizeof(fileBuffer), "%s/%s", gConfigDirs.levelDir.c_str(), mEditFileName.c_str());

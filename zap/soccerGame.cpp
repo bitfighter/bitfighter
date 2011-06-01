@@ -499,40 +499,41 @@ bool SoccerBallItem::collide(GameObject *hitObject)
 
    if(hitObject->getObjectTypeMask() & (ShipType | RobotType))
    {
-     if(mMount == hitObject)    // Sometimes we get collisions between ship and an already mounted soccer ball.
-        return false;  //false = don't hit self
+      if(mMount == hitObject)    // Sometimes we get collisions between ship and an already mounted soccer ball.
+         return false;  //false = don't hit self
 
-     if(mIsMounted)  // fix problem with random ball jumping from ship to ship?
-        return false;
+      if(mIsMounted)  // fix problem with random ball jumping from ship to ship?
+         return false;
 
-    if(!isGhost())  //Server side
-    {
+      if(!isGhost())    //Server side
+      {
          // mLastPlayerMounted == hitObject &&   without this, that can limit anyone to pickup ball
-      if(mDroppedTimer.getCurrent())      // Have to wait a bit after dropping to pick the ball back up!
-         return false;   //False - Go through soccer looks better while dropping, and allow better sync to client.
+         if(mDroppedTimer.getCurrent())      // Have to wait a bit after dropping to pick the ball back up!
+            return false;   //False - Go through soccer looks better while dropping, and allow better sync to client.
 
 
-      Ship *ship = dynamic_cast<Ship *>(hitObject);
-      mLastPlayerTouch = ship;
-      mLastPlayerTouchTeam = mLastPlayerTouch->getTeam();      // Used to credit team if ship quits game before goal is scored
-      mLastPlayerTouchName = mLastPlayerTouch->getName();      // Used for making nicer looking messages in same situation
-      GameType *gt = getGame()->getGameType();
-      if(gt && !gt->mAllowSoccerPickup)
-         return true;
+         Ship *ship = dynamic_cast<Ship *>(hitObject);
+         mLastPlayerTouch = ship;
+         mLastPlayerTouchTeam = mLastPlayerTouch->getTeam();      // Used to credit team if ship quits game before goal is scored
+         mLastPlayerTouchName = mLastPlayerTouch->getName();      // Used for making nicer looking messages in same situation
+         GameType *gt = getGame()->getGameType();
+
+         if(gt && !gt->mAllowSoccerPickup)
+            return true;
       
-      
-      mDroppedTimer.clear();
-      this->mountToShip(ship);
-      mLastPlayerMounted = ship;
-      mPickupTime = getGame()->getCurrentTime();
-    }else{ //client side
-         // Not needed
-         //if(getGame()->getGameType())
-         //   getGame()->getGameType()->c2sResendItemStatus(mItemId);
-       if(gClientGame && gClientGame->getConnectionToServer())
-          return gClientGame->getConnectionToServer()->mSoccerCollide;
-       return false; //let server do the collision.
-    }
+         mDroppedTimer.clear();
+         this->mountToShip(ship);
+         mLastPlayerMounted = ship;
+         mPickupTime = getGame()->getCurrentTime();
+      }
+
+      else    // Client side
+      { 
+         if(gClientGame && gClientGame->getConnectionToServer())
+            return gClientGame->getConnectionToServer()->mSoccerCollide;
+
+         return false;       // Let server handle the collision
+      }
    }
    else if(hitObject->getObjectTypeMask() & GoalZoneType)      // SCORE!!!!
    {

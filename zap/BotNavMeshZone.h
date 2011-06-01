@@ -119,13 +119,12 @@ public:
    static U16 findZoneContaining(const Point &p);    // Returns ID of zone containing specified point
 
    static bool buildBotMeshZones(Game *game);
-   static void buildBotNavMeshZoneConnections();
+   static void buildBotNavMeshZoneConnections(GridDatabase *zoneDb);
+   static bool buildBotNavMeshZoneConnectionsRecastStyle(GridDatabase *zoneDb, rcPolyMesh &mesh, const Vector<S32> &polyToZoneMap);
    static void linkTeleportersBotNavMeshZoneConnections(Game *game);
 
    TNL_DECLARE_CLASS(BotNavMeshZone);
 };
-
-extern Vector<SafePtr<BotNavMeshZone> > gBotNavMeshZones;     // List of all our zones
 
 
 ////////////////////////////////////////
@@ -134,11 +133,11 @@ extern Vector<SafePtr<BotNavMeshZone> > gBotNavMeshZones;     // List of all our
 class AStar
 {
 private:
-   static F32 heuristic(S32 fromZone, S32 toZone);
-   static Point findGateway(S32 zone1, S32 zone2);
+   static F32 heuristic(const Vector<BotNavMeshZone *> &zones, S32 fromZone, S32 toZone);
+   static Point findGateway(const Vector<BotNavMeshZone *> &zones, S32 zone1, S32 zone2);
 
 public:
-   static Vector<Point> findPath (S32 startZone, S32 targetZone, const Point &target);
+   static Vector<Point> findPath (const Vector<BotNavMeshZone *> &zones, S32 startZone, S32 targetZone, const Point &target);
    
 };
 

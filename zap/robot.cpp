@@ -1,4 +1,3 @@
-
 //-----------------------------------------------------------------------------------
 //
 // Bitfighter - A multiplayer vector graphics space game
@@ -71,6 +70,8 @@ const bool QUIT_ON_SCRIPT_ERROR = true;
 
 bool Robot::mIsPaused = false;
 S32 Robot::mStepCount = -1;
+
+extern ServerGame *gServerGame;
 
 
 
@@ -512,7 +513,6 @@ S32 LuaRobot::setThrustToPt(lua_State *L)
   return 0;
 }
 
-extern Vector<SafePtr<BotNavMeshZone> > gBotNavMeshZones;
 
 // Get the coords of the center of mesh zone z
 S32 LuaRobot::getZoneCenter(lua_State *L)
@@ -521,15 +521,13 @@ S32 LuaRobot::getZoneCenter(lua_State *L)
    checkArgCount(L, 1, methodName);
    S32 z = getInt(L, 1, methodName);
 
-   // In case this gets called too early...
-   if(gBotNavMeshZones.size() == 0)
-      return returnNil(L);
 
-   // Bounds checking...
-   if(z < 0 || z >= gBotNavMeshZones.size())
-      return returnNil(L);
+   BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(gServerGame->getBotZoneDatabase()->getObjectByIndex(z));
 
-   return returnPoint(L, gBotNavMeshZones[z]->getCenter());
+   if(zone)
+      return returnPoint(L, zone->getCenter());
+   // else
+   return returnNil(L);
 }
 
 
@@ -541,25 +539,15 @@ S32 LuaRobot::getGatewayFromZoneToZone(lua_State *L)
    S32 from = getInt(L, 1, methodName);
    S32 to = getInt(L, 2, methodName);
 
-   // In case this gets called too early...
-   if(gBotNavMeshZones.size() == 0)
-      return returnNil(L);
-
-   // Bounds checking...
-   if(from < 0 || from >= gBotNavMeshZones.size() || to < 0 || to >= gBotNavMeshZones.size())
-      return returnNil(L);
+   BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(gServerGame->getBotZoneDatabase()->getObjectByIndex(from));
 
    // Is requested zone a neighbor?
-   for(S32 i = 0; i < gBotNavMeshZones[from]->mNeighbors.size(); i++)
-   {
-      if(gBotNavMeshZones[from]->mNeighbors[i].zoneID == to)
-      {
-         Rect r(gBotNavMeshZones[from]->mNeighbors[i].borderStart, gBotNavMeshZones[from]->mNeighbors[i].borderEnd);
-         return returnPoint(L, r.getCenter());
-      }
-   }
+   if(zone)
+      for(S32 i = 0; i < zone->mNeighbors.size(); i++)
+         if(zone->mNeighbors[i].zoneID == to)
+            return returnPoint(L, Rect(zone->mNeighbors[i].borderStart, zone->mNeighbors[i].borderEnd).getCenter());
 
-   // Did not find requested neighbor... returning nil
+   // Did not find requested neighbor, or zone index was invalid... returning nil
    return returnNil(L);
 }
 
@@ -575,7 +563,7 @@ S32 LuaRobot::getCurrentZone(lua_State *L)
 // Get a count of how many nav zones we have
 S32 LuaRobot::getZoneCount(lua_State *L)
 {
-   return returnInt(L, gBotNavMeshZones.size());
+   return returnInt(L, gServerGame->getBotZoneDatabase()->getObjectCount());
 }
 
 
@@ -932,9 +920,8 @@ S32 LuaRobot::getWaypoint(lua_State *L)  // Takes a luavec or an x,y
    U16 currentZone = thisRobot->getCurrentZone();     // Where we are
 
    if(currentZone == U16_MAX)      // We don't really know where we are... bad news!  Let's find closest visible zone and go that way.
-   {
       currentZone = findClosestZone(thisRobot->getActualPos());
-   }
+
    if(currentZone == U16_MAX)      // That didn't go so well...
       return returnNil(L);
 
@@ -943,9 +930,12 @@ S32 LuaRobot::getWaypoint(lua_State *L)  // Takes a luavec or an x,y
    {
       Point p;
       thisRobot->flightPlan.push_back(target);
+
       if(!thisRobot->canSeePoint(target))           // Possible, if we're just on a boundary, and a protrusion's blocking a ship edge
       {
-         p = gBotNavMeshZones[targetZone]->getCenter();
+         BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(gServerGame->getBotZoneDatabase()->getObjectByIndex(targetZone));
+
+         p = zone->getCenter();
          thisRobot->flightPlan.push_back(p);
       }
       else
@@ -961,12 +951,24 @@ S32 LuaRobot::getWaypoint(lua_State *L)  // Takes a luavec or an x,y
    // check cache for path first
    pair<S32,S32> pathIndex = pair<S32,S32>(currentZone, targetZone);
 
-   if (gServerGame->getGameType()->cachedBotFlightPlans.find(pathIndex) == gServerGame->getGameType()->cachedBotFlightPlans.end())
-   {
-      // not found so calculate flight plan
-      thisRobot->flightPlan = AStar::findPath(currentZone, targetZone, target);
 
-      // now add to cache
+   // TODO: Cache this block -- data will not change throughout game... 
+   Vector<DatabaseObject *> objects;
+   gServerGame->getGridDatabase()->findObjects(objects);
+
+   Vector<BotNavMeshZone *> zones;
+   zones.resize(objects.size());
+   for(S32 i = 0; i < objects.size(); i++)
+      zones[i] = dynamic_cast<BotNavMeshZone *>(objects[i]);
+   // END BLOCK
+
+
+   if(gServerGame->getGameType()->cachedBotFlightPlans.find(pathIndex) == gServerGame->getGameType()->cachedBotFlightPlans.end())
+   {
+      // Not found so calculate flight plan
+      thisRobot->flightPlan = AStar::findPath(zones, currentZone, targetZone, target);
+
+      // Add to cache
       gServerGame->getGameType()->cachedBotFlightPlans[pathIndex] = thisRobot->flightPlan;
    }
    else
@@ -979,64 +981,7 @@ S32 LuaRobot::getWaypoint(lua_State *L)  // Takes a luavec or an x,y
    else
       return returnNil(L);    // Out of options, end of the road
 }
-//
-//
-//// Encapsulate some ugliness
-//Point LuaRobot::getNextWaypoint()
-//{
-//   TNLAssert(thisRobot->flightPlan.size() > 1, "FlightPlan has too few zones!");
-//
-//   S32 currentzone = thisRobot->getCurrentZone();
-//
-//   S32 nextzone = thisRobot->flightPlan[thisRobot->flightPlan.size() - 2];
-//
-//   // Note that getNeighborIndex could return -1.  It shouldn't, but it could.
-//   S32 neighborZoneIndex = gBotNavMeshZones[currentzone]->getNeighborIndex(nextzone);
-//   TNLAssert(neighborZoneIndex >= 0, "Invalid neighbor zone index!");
-//
-//
-//            /*   string plan = "";
-//               for(S32 i = 0; i < thisRobot->flightPlan.size(); i++)
-//               {
-//                  char z[100];
-//                  itoa(thisRobot->flightPlan[i], z, 10);
-//                  plan = plan + " ==>"+z;
-//               }*/
-//
-//
-//   S32 i = 0;
-//   Point currentwaypoint = gBotNavMeshZones[currentzone]->getCenter();
-//   Point nextwaypoint = gBotNavMeshZones[currentzone]->mNeighbors[neighborZoneIndex].borderCenter;
-//
-//   while(thisRobot->canSeePoint(nextwaypoint))
-//   {
-//      currentzone = nextzone;
-//      currentwaypoint = nextwaypoint;
-//      i++;
-//
-//      if(thisRobot->flightPlan.size() - 2 - i < 0)
-//         return nextwaypoint;
-//
-//      nextzone = thisRobot->flightPlan[thisRobot->flightPlan.size() - 2 - i];
-//      S32 neighborZoneIndex = gBotNavMeshZones[currentzone]->getNeighborIndex(nextzone);
-//      TNLAssert(neighborZoneIndex >= 0, "Invalid neighbor zone index!");
-//
-//      nextwaypoint = gBotNavMeshZones[currentzone]->mNeighbors[neighborZoneIndex].borderCenter;
-//   }
-//
-//
-//   return currentwaypoint;
-//
-//
-//
-//   //if(thisRobot->canSeePoint( gBotNavMeshZones[currentZone]->mNeighbors[neighborZoneIndex].center))
-//   //   return gBotNavMeshZones[currentZone]->mNeighbors[neighborZoneIndex].center;
-//   //else if(thisRobot->canSeePoint( gBotNavMeshZones[currentZone]->mNeighbors[neighborZoneIndex].borderCenter))
-//   //   return gBotNavMeshZones[currentZone]->mNeighbors[neighborZoneIndex].borderCenter;
-//   //else
-//   //   return gBotNavMeshZones[currentZone]->getCenter();
-//}
-//
+
 
 // Another helper function: returns id of closest zone to a given point
 U16 LuaRobot::findClosestZone(const Point &point)
@@ -1051,7 +996,7 @@ U16 LuaRobot::findClosestZone(const Point &point)
    Vector<DatabaseObject*> objects;
    Rect rect = Rect(point.x + searchRadius, point.y + searchRadius, point.x - searchRadius, point.y - searchRadius);
 
-   gServerGame->mDatabaseForBotZones.findObjects(0, objects, rect, BotNavMeshZoneTypeNumber);
+   gServerGame->getBotZoneDatabase()->findObjects(0, objects, rect, BotNavMeshZoneTypeNumber);
 
    for(S32 i = 0; i < objects.size(); i++)
    {
@@ -1073,7 +1018,7 @@ U16 LuaRobot::findClosestZone(const Point &point)
       F32 collisionTimeIgnore;
       Point surfaceNormalIgnore;
 
-      DatabaseObject* object = gServerGame->mDatabaseForBotZones.findObjectLOS(0,
+      DatabaseObject* object = gServerGame->getBotZoneDatabase()->findObjectLOS(0,
             MoveObject::ActualState, point, extentsCenter, collisionTimeIgnore, surfaceNormalIgnore, BotNavMeshZoneTypeNumber);
 
       BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(object);
@@ -1091,7 +1036,10 @@ S32 LuaRobot::findAndReturnClosestZone(lua_State *L, const Point &point)
    U16 closest = findClosestZone(point);
 
    if(closest != U16_MAX)
-      return returnPoint(L, gBotNavMeshZones[closest]->getCenter());
+   {
+      BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(gServerGame->getBotZoneDatabase()->getObjectByIndex(closest));
+      return returnPoint(L, zone->getCenter());
+   }
    else
       return returnNil(L);    // Really stuck
 }
