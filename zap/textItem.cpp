@@ -36,11 +36,6 @@ namespace Zap
 
 TNL_IMPLEMENT_NETOBJECT(TextItem);
 
-#ifndef TNL_OS_WIN32
-const U32 TextItem::MAX_TEXT_SIZE;
-const U32 TextItem::MIN_TEXT_SIZE;
-#endif
-
 
 EditorAttributeMenuUI *TextItem::mAttributeMenuUI = NULL;
 
@@ -126,7 +121,7 @@ bool TextItem::processArguments(S32 argc, const char **argv)
    setVert(dir, 1);
 
    mSize = atof(argv[5]);
-   mSize = max(min(mSize, MAX_TEXT_SIZE), MIN_TEXT_SIZE);      // Note that same line exists below, in recalcXXX()... combine?
+   mSize = max(min(mSize, (F32)MAX_TEXT_SIZE), (F32)MIN_TEXT_SIZE);      // Note that same line exists below, in recalcXXX()... combine?
 
    // Assemble any remainin args into a string
    mText = "";
@@ -163,7 +158,7 @@ void TextItem::recalcTextSize()
    F32 size = lineLen / strWidth;
 
    // Compute text size subject to min and max defined in TextItem
-   mSize = max(min(size, MAX_TEXT_SIZE), MIN_TEXT_SIZE);
+   mSize = max(min(size, (F32)MAX_TEXT_SIZE), (F32)MIN_TEXT_SIZE);
 }
 
 
@@ -318,6 +313,12 @@ EditorAttributeMenuUI *TextItem::getAttributeMenu()
 ////////////////////////////////////////
 
 TNL_IMPLEMENT_NETOBJECT(LineItem);
+
+// Why does GCC need this for signed int?
+#ifndef TNL_OS_WIN32
+const S32 LineItem::MIN_LINE_WIDTH;
+const S32 LineItem::MAX_LINE_WIDTH;
+#endif
 
 // Constructor
 LineItem::LineItem()

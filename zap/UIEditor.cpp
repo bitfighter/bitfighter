@@ -63,6 +63,8 @@
 #include <algorithm>             // For sort
 #include <math.h>
 
+using namespace boost;
+
 namespace Zap
 {
 
@@ -82,7 +84,7 @@ static const Color inactiveSpecialAttributeColor = Color(.6, .6, .6);
 static const S32 TEAM_NEUTRAL = Item::TEAM_NEUTRAL;
 static const S32 TEAM_HOSTILE = Item::TEAM_HOSTILE;
 
-static pointainer<vector<EditorObject *> > *mLoadTarget;
+static Vector<shared_ptr<EditorObject> > *mLoadTarget;
 
 enum EntryMode {
    EntryID,          // Entering an objectID
@@ -138,6 +140,18 @@ EditorUserInterface::EditorUserInterface() : mGridDatabase(GridDatabase(false)) 
 
 static const S32 DOCK_POLY_HEIGHT = 20;
 static const S32 DOCK_POLY_WIDTH = DOCK_WIDTH - 10;
+
+void EditorUserInterface::addToDock(EditorObject* object)
+{
+   mDockItems.push_back(shared_ptr<EditorObject>(object));
+}
+
+
+void EditorUserInterface::addToEditor(EditorObject* object)
+{
+   mItems.push_back(shared_ptr<EditorObject>(object));
+}
+
 
 void EditorUserInterface::addDockObject(EditorObject *object, F32 xPos, F32 yPos)
 {
@@ -347,7 +361,7 @@ void EditorUserInterface::deleteUndoState()
 
 
 // Experimental save to string method
-static void copyItems(pointainer<vector<EditorObject *> > &from, Vector<string> &to)
+static void copyItems(Vector<shared_ptr<EditorObject> > &from, Vector<string> &to)
 {
    to.resize(from.size());      // Preallocation makes things go faster
 
@@ -357,7 +371,7 @@ static void copyItems(pointainer<vector<EditorObject *> > &from, Vector<string> 
 
 
 // TODO: Make this an UIEditor method, and get rid of the global
-static void restoreItems(const Vector<string> &from, pointainer<vector<EditorObject *> > &to)
+static void restoreItems(const Vector<string> &from, Vector<shared_ptr<EditorObject> > &to)
 {
    to.clear();
    to.reserve(from.size());      // Preallocation makes things go faster
@@ -551,7 +565,7 @@ void EditorUserInterface::makeSureThereIsAtLeastOneTeam()
 // This sort will put points on top of lines on top of polygons...  as they should be
 // NavMeshZones are now drawn on top, to make them easier to see.  Disable with Ctrl-A!
 // We'll also put walls on the bottom, as this seems to work best in practice
-S32 QSORT_CALLBACK geometricSort(EditorObject * &a, EditorObject * &b)
+S32 QSORT_CALLBACK geometricSort(shared_ptr<EditorObject> a, shared_ptr<EditorObject> b)
 {
    if((a)->getObjectTypeMask() & BarrierType)
       return -1;
@@ -562,10 +576,11 @@ S32 QSORT_CALLBACK geometricSort(EditorObject * &a, EditorObject * &b)
 }
 
 
-static void geomSort(pointainer<vector<EditorObject *> > &objects)
+static void geomSort(Vector<shared_ptr<EditorObject> >& objects)
 {
    if(objects.size() >= 2)  // nothing to sort when there is one or zero objects
-      qsort(&objects[0], objects.size(), sizeof(EditorObject *), (qsort_compare_func) geometricSort);
+      // Cannot use Vector.sort() here because I couldn't figure out how to cast shared_ptr as pointer (*)
+      sort(objects.getStlVector().begin(), objects.getStlVector().end(), geometricSort);
 }
 
 
@@ -717,7 +732,7 @@ void EditorUserInterface::runScript(const string &scriptName, const Vector<strin
       {
          if((*mLoadTarget)[i]->getVertCount() < 2)      // Invalid item; delete
          {
-            (*mLoadTarget).erase((*mLoadTarget).begin() + i);
+            (*mLoadTarget).erase(i);
             i--;
          }
 
@@ -1903,7 +1918,7 @@ void EditorUserInterface::computeSelectionMinMax(Point &min, Point &max)
    {
       if(mItems[i]->isSelected())
       {
-         EditorObject *item = mItems[i];
+         EditorObject *item = mItems[i].get();
          for(S32 j = 0; j < item->getVertCount(); j++)
          {
             Point v = item->getVert(j);
@@ -2094,7 +2109,7 @@ void EditorUserInterface::findHitItemAndEdge()
 
             if(fabs(p.x) < radius && fabs(p.y) < radius)
             {
-               mItemHit = mItems[i];
+               mItemHit = mItems[i].get();
                mVertexHit = j;
                return;
             }
@@ -2125,7 +2140,7 @@ void EditorUserInterface::findHitItemAndEdge()
                F32 distance = (mMousePos - closest).len();
                if(distance < EDGE_HIT_RADIUS)
                {
-                  mItemHit = mItems[i];
+                  mItemHit = mItems[i].get();
                   mEdgeHit = j;
 
                   return;
@@ -2152,7 +2167,7 @@ void EditorUserInterface::findHitItemAndEdge()
 
          if(PolygonContains2(verts.address(), verts.size(), mMousePos))
          {
-            mItemHit = mItems[i];
+            mItemHit = mItems[i].get();
             return;
          }
       }
@@ -2353,7 +2368,7 @@ void EditorUserInterface::startDraggingDockItem()
    for(S32 i = 0; i < mItems.size(); i++)
       if(mItems[i]->isSelected())
       {
-         mItemHit = mItems[i];
+         mItemHit = mItems[i].get();
          break;
       }
 }
@@ -2416,7 +2431,7 @@ void EditorUserInterface::findSnapVertex()
          // If we find a selected vertex, there will be only one, and this is our snap point
          if(mItems[i]->vertSelected(j))
          {
-            mSnapVertex_i = mItems[i];
+            mSnapVertex_i = mItems[i].get();
             mSnapVertex_j = j;
             return;     
          }
@@ -2555,7 +2570,7 @@ void EditorUserInterface::splitBarrier()
                // Tell the new segments that they have new geometry
                mItems[i]->onGeomChanged();
                newItem->onGeomChanged();
-               mItems.push_back(newItem);
+               mItems.push_back(shared_ptr<EditorObject>(newItem));
 
                // And get them in the right order
                //mItems.sort(geometricSort);  
@@ -2657,17 +2672,17 @@ void EditorUserInterface::deleteItem(S32 itemIndex)
    if(mask & BarrierType || mask & PolyWallType)
    {
       // Need to recompute boundaries of any intersecting walls
-      mWallSegmentManager.invalidateIntersectingSegments(mItems[itemIndex]);    // Mark intersecting segments invalid
+      mWallSegmentManager.invalidateIntersectingSegments(mItems[itemIndex].get());    // Mark intersecting segments invalid
       mWallSegmentManager.deleteSegments(mItems[itemIndex]->getItemId());       // Delete the segments associated with the wall
 
-      mItems.erase(mItems.begin() + itemIndex);
+      mItems.erase(itemIndex);
 
       mWallSegmentManager.recomputeAllWallGeometry();                           // Recompute wall edges
       resnapAllEngineeredItems();         // Really only need to resnap items that were attached to deleted wall... but we
                                           // don't yet have a method to do that, and I'm feeling lazy at the moment
    }
    else
-      mItems.erase(mItems.begin() + itemIndex);
+      mItems.erase(itemIndex);
 
 
    // Reset a bunch of things
@@ -2920,9 +2935,9 @@ void EditorUserInterface::doneEditingAttributes(EditorAttributeMenuUI *editor, E
    // Find any other selected items of the same type of the item we just edited, and update their values too
    for(S32 i = 0; i < mItems.size(); i++)
    {
-      if(mItems[i] != object && mItems[i]->isSelected() && mItems[i]->getObjectTypeMask() == object->getObjectTypeMask())
+      if(mItems[i].get() != object && mItems[i]->isSelected() && mItems[i]->getObjectTypeMask() == object->getObjectTypeMask())
       {
-         editor->doneEditing(mItems[i]);  // Transfer attributes from editor to object
+         editor->doneEditing(mItems[i].get());  // Transfer attributes from editor to object
          mItems[i]->onAttrsChanged();     // And notify the object that its attributes have changed
       }
    }
@@ -3350,7 +3365,7 @@ void EditorUserInterface::textEntryKeyHandler(KeyCode keyCode, char ascii)
             if(mItems[i]->isSelected())             // Should only be one
             {
                U32 id = atoi(mEntryBox.c_str());
-               if(mItems[i]->getItemId() != id)     // Did the id actually change?
+               if(mItems[i]->getItemId() != (S32)id)     // Did the id actually change?
                {
                   mItems[i]->setItemId(id);
                   mAllUndoneUndoLevel = -1;        // If so, it can't be undone
@@ -3405,7 +3420,7 @@ void EditorUserInterface::startAttributeEditor()
          if(menu)
          {
             mItems[i]->setIsBeingEdited(true);
-            menu->startEditing(mItems[i]);
+            menu->startEditing(mItems[i].get());
             menu->activate();
 
             saveUndoState();
@@ -3707,7 +3722,7 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
       for(S32 j = 0; j < 2; j++)
          for(S32 i = 0; i < mItems.size(); i++)
          {
-            EditorObject *p = mItems[i];
+            EditorObject *p = mItems[i].get();
 
             // Make sure we are writing wall items on first pass, non-wall items next
             if((p->getObjectTypeMask() & BarrierType || p->getObjectTypeMask() & PolyWallType) != (j == 0))

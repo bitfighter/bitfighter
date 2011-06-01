@@ -194,7 +194,7 @@ public:
    Vector<Point> edges;    
    Vector<Point> corners;
    Vector<Point> triangulatedFillPoints;
-   U32 mOwner;
+   S32 mOwner;
 
    bool invalid;              // A flag for marking segments in need of processing
 
@@ -269,7 +269,7 @@ public:
    static Vector<Point> mWallEdgePoints;        // For rendering
 
    void buildAllWallSegmentEdgesAndPoints();
-   void deleteSegments(U32 owner);              // Delete all segments owned by specified WorldItem
+   void deleteSegments(S32 owner);              // Delete all segments owned by specified WorldItem
    void deleteAllSegments();
 
    // Recalucate edge geometry for all walls when item has changed

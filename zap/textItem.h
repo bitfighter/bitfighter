@@ -51,8 +51,8 @@ private:
    static EditorAttributeMenuUI *mAttributeMenuUI;      // Menu for text editing; since it's static, don't bother with smart pointer
 
 public:
-   static const U32 MAX_TEXT_SIZE = 255;
-   static const U32 MIN_TEXT_SIZE = 10;
+   static const S32 MAX_TEXT_SIZE = 255;
+   static const S32 MIN_TEXT_SIZE = 10;
 
    //S32 mTeam;            // Team text is visible to (-1 for visible to all)
    
@@ -159,8 +159,8 @@ public:
    bool canBeHostile() { return true; }
    bool canBeNeutral() { return true; }
 
-   static const U32 MIN_LINE_WIDTH = 1;
-   static const U32 MAX_LINE_WIDTH = 255;
+   static const S32 MIN_LINE_WIDTH = 1;
+   static const S32 MAX_LINE_WIDTH = 255;
 
    TNL_DECLARE_CLASS(LineItem);
 };
