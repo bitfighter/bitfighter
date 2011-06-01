@@ -61,13 +61,15 @@ TNL_IMPLEMENT_NETOBJECT(BotNavMeshZone);
 
 
 // Constructor
-BotNavMeshZone::BotNavMeshZone()
+BotNavMeshZone::BotNavMeshZone(S32 id)
 {
+   TNLAssert(id > -1, "id == -1!");
+
    mGame = NULL;
    //mObjectTypeMask = BotNavMeshZoneType | CommandMapVisType;
    mObjectTypeNumber = BotNavMeshZoneTypeNumber;
 
-   mZoneId = getGridDatabase()->getObjectCount();
+   mZoneId = id;
 
    mGeometry = boost::shared_ptr<Geometry>(new PolygonGeometry);
 }
@@ -581,7 +583,7 @@ bool BotNavMeshZone::buildBotMeshZones(Game *game)
 
                if(j == 0)
                {
-                  botzone = new BotNavMeshZone();
+                  botzone = new BotNavMeshZone(game->getGridDatabase()->getObjectCount());
 
                   // Triangulation only needed for display on local client... it is expensive to compute for so many zones,
                   // and there is really no point if it will never be viewed.  Once disabled, triangluation cannot be re-enabled

@@ -847,7 +847,9 @@ EditorObject *EditorObject::newCopy()
 
    if(newObject)
    {
-      newObject->setGame(NULL);         // mGame pointer will have been copied, but needs to be cleared before we can add this to the game
+      newObject->setGame(NULL);      // mGame pointer will have been copied, but needs to be cleared before we can add this to the game
+
+      newObject->setObjectTypeMask(getObjectTypeMask());    // For some reason, typemask is not copied... why?!?
       newObject->mGeometry = mGeometry->copyGeometry();
       newObject->initializeEditor(getGridSize());
    }

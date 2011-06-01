@@ -187,8 +187,8 @@ public:
    U32 getTimeUnconnectedToMaster() { return mTimeUnconnectedToMaster; }
 
 
-   void processLevelLoadLine(U32 argc, U32 id, const char **argv);      // Only used by ServerGame and EditorGame
-   bool processPseudoItem(S32 argc, const char **argv) { return false; }
+   virtual void processLevelLoadLine(U32 argc, U32 id, const char **argv);      // Only used by ServerGame and EditorGame
+   virtual bool processPseudoItem(S32 argc, const char **argv) { return false; }
    void setGameTime(F32 time);                                          // Only used during level load process
 
 

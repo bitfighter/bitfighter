@@ -734,10 +734,9 @@ void EditorUserInterface::validateLevel()
 
    bool foundSoccerBall = false;
    bool foundNexus = false;
+   bool foundFlags = false;
    bool foundTeamFlags = false;
    bool foundTeamFlagSpawns = false;
-   bool foundFlags = false;
-   S32 foundFlagCount = 0;
    bool foundNeutralSpawn = false;
 
    vector<bool> foundSpawn;
@@ -746,33 +745,57 @@ void EditorUserInterface::validateLevel()
    string teamList, teams;
 
    // First, catalog items in level
+   foundSpawn.resize(mTeams.size());
    for(S32 i = 0; i < mTeams.size(); i++)      // Initialize vector
-      foundSpawn.push_back(false);
-
-   for(S32 i = 0; i < mItems.size(); i++)
+      foundSpawn[i] = false;
+      
+   fillVector.clear();
+   gEditorGame->getGridDatabase()->findObjects(ShipSpawnType, fillVector);
+   for(S32 i = 0; i < fillVector.size(); i++)
    {
-      if(mItems[i]->getObjectTypeMask() & ShipSpawnType && mItems[i]->getTeam() == TEAM_NEUTRAL)
+      Spawn *spawn = dynamic_cast<Spawn *>(fillVector[i]);
+      S32 team = spawn->getTeam();
+
+      if(team == TEAM_NEUTRAL)
          foundNeutralSpawn = true;
-      else if(mItems[i]->getObjectTypeMask() & ShipSpawnType && mItems[i]->getTeam() >= 0)
-         foundSpawn[mItems[i]->getTeam()] = true;
-      else if(mItems[i]->getObjectTypeMask() & SoccerBallItemType)
-         foundSoccerBall = true;
-      else if(mItems[i]->getObjectTypeMask() & NexusType)
-         foundNexus = true;
-      else if(mItems[i]->getObjectTypeMask() & FlagType)
+      else if(team >= 0)
+         foundSpawn[team] = true;
+   }
+
+   fillVector.clear();
+   gEditorGame->getGridDatabase()->findObjects(SoccerBallItemType, fillVector);
+   if(fillVector.size() > 0)
+      foundSoccerBall = true;
+
+   fillVector.clear();
+   gEditorGame->getGridDatabase()->findObjects(NexusType, fillVector);
+   if(fillVector.size() > 0)
+      foundNexus = true;
+
+   fillVector.clear();
+   gEditorGame->getGridDatabase()->findObjects(FlagType, fillVector);
+   for (S32 i = 0; i < fillVector.size(); i++)
+   {
+      foundFlags = true;
+      FlagItem *flag = dynamic_cast<FlagItem *>(fillVector[i]);
+      if(flag->getTeam() >= 0)
       {
-         foundFlags = true;
-         foundFlagCount++;
-         if(mItems[i]->getTeam() >= 0)
-            foundTeamFlags = true;
-      }
-      else if(mItems[i]->getObjectTypeMask() & FlagSpawnType)
-      {
-         if(mItems[i]->getTeam() >= 0)
-            foundTeamFlagSpawns = true;
+         foundTeamFlags = true;
+         break;
       }
    }
 
+   fillVector.clear();
+   gEditorGame->getGridDatabase()->findObjects(FlagSpawnType, fillVector);
+   for(S32 i = 0; i < fillVector.size(); i++)
+   {
+      FlagSpawn *flagSpawn = dynamic_cast<FlagSpawn *>(fillVector[i]);
+      if(flagSpawn->getTeam() >= 0)
+      {
+         foundTeamFlagSpawns = true;
+         break;
+      }
+   }
 
    // "Unversal errors" -- levelgens can't (yet) change gametype
 
@@ -1497,30 +1520,40 @@ void EditorUserInterface::render()
    
    // Render polyWall item fill just before rendering regular walls.  This will create the effect of all walls merging together.  
    // PolyWall outlines are already part of the wallSegmentManager, so will be rendered along with those of regular walls.
+
+   fillVector.clear();
+   gEditorGame->getGridDatabase()->findObjects(fillVector);
+
    glPushMatrix();  
       setLevelToCanvasCoordConversion();
-      for(S32 i = 0; i < mItems.size(); i++)
-         if(mItems[i]->getObjectTypeMask() & PolyWallType)
+      for(S32 i = 0; i < fillVector.size(); i++)
+         if(fillVector[i]->getObjectTypeMask() & PolyWallType)
          {
-            PolyWall *wall = dynamic_cast<PolyWall *>(mItems[i]);
+            PolyWall *wall = dynamic_cast<PolyWall *>(fillVector[i]);
             wall->renderFill();
          }
    
-     mWallSegmentManager.renderWalls(true, mDraggingObjects, mShowingReferenceShip, getRenderingAlpha(false/*isScriptItem*/));
+      mWallSegmentManager.renderWalls(true, mDraggingObjects, mShowingReferenceShip, getRenderingAlpha(false/*isScriptItem*/));
    glPopMatrix();
 
    // == Normal items ==
    // Draw map items (teleporters, etc.) that are not being dragged, and won't have any text labels  (below the dock)
-   for(S32 i = 0; i < mItems.size(); i++)
-      if(!(mDraggingObjects && mItems[i]->isSelected()))
-         mItems[i]->render(false, mShowingReferenceShip, mShowMode);
+   for(S32 i = 0; i < fillVector.size(); i++)
+   {
+      EditorObject *obj = dynamic_cast<EditorObject *>(fillVector[i]);
+      if(!(mDraggingObjects && obj->isSelected()))
+         obj->render(false, mShowingReferenceShip, mShowMode);
+   }
 
    // == Selected items ==
    // Draw map items (teleporters, etc.) that are are selected and/or lit up, so label is readable (still below the dock)
    // Do this as a separate operation to ensure that these are drawn on top of those drawn above.
-   for(S32 i = 0; i < mItems.size(); i++)
-      if(mItems[i]->isSelected() || mItems[i]->isLitUp())
-         mItems[i]->render(false, mShowingReferenceShip, mShowMode);
+   for(S32 i = 0; i < fillVector.size(); i++)
+   {
+      EditorObject *obj = dynamic_cast<EditorObject *>(fillVector[i]);
+      if(obj->isSelected() || obj->isLitUp())
+         obj->render(false, mShowingReferenceShip, mShowMode);
+   }
 
 
    fillRendered = false;
@@ -1552,17 +1585,23 @@ void EditorUserInterface::render()
       }
       mNewItem->deleteVert(mNewItem->getVertCount() - 1);
    }
+
    // Since we're not constructing a barrier, if there are any barriers or lineItems selected, 
    // get the width for display at bottom of dock
    else  
    {
-      for(S32 i = 0; i < mItems.size(); i++)
-         if((mItems[i]->getObjectTypeMask() & (BarrierType | LineType)) && 
-            (mItems[i]->isSelected() || (mItems[i]->isLitUp() && mItems[i]->isVertexLitUp(NONE))) )
+      fillVector.clear();
+      gEditorGame->getGridDatabase()->findObjects(BarrierType | LineType, fillVector);
+
+      for(S32 i = 0; i < fillVector.size(); i++)
+      {
+         EditorObject *obj = dynamic_cast<EditorObject *>(fillVector[i]);
+         if((obj->isSelected() || (obj->isLitUp() && obj->isVertexLitUp(NONE))) )
          {
-            width =  mItems[i]->getWidth();
+            width = obj->getWidth();
             break;
          }
+      }
    }
 
 
@@ -1577,9 +1616,18 @@ void EditorUserInterface::render()
 
    // Draw map items (teleporters, etc.) that are being dragged  (above the dock).  But don't draw walls here, or
    // we'll lose our wall centernlines.
-   for(S32 i = 0; i < mItems.size(); i++)
-      if(!(mItems[i]->getObjectTypeMask() & BarrierType) && mDraggingObjects && mItems[i]->isSelected())
-         mItems[i]->render(false, mShowingReferenceShip, mShowMode);
+   if(mDraggingObjects)
+   {
+      fillVector.clear();
+      gEditorGame->getGridDatabase()->findObjects(~BarrierType, fillVector);
+
+      for(S32 i = 0; i < fillVector.size(); i++)
+      {
+         EditorObject *obj = dynamic_cast<EditorObject *>(fillVector[i]);
+         if(obj->isSelected())
+            obj->render(false, mShowingReferenceShip, mShowMode);
+      }
+   }
 
    if(mDragSelecting)      // Draw box for selecting items
    {

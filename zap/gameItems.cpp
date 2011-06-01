@@ -181,6 +181,8 @@ AbstractSpawn::AbstractSpawn(const Point &pos, S32 time, GameObjectType objType)
 {
    setVert(pos, 0);
    setRespawnTime(time);
+   //mObjectTypeMask |= AsteroidType;
+   //mObjectTypeNumber = AsteroidTypeNumber
 };
 
 

@@ -83,8 +83,8 @@ public:
    static const S32 BufferRadius = Ship::CollisionRadius;  // Radius to buffer objects when creating the holes for zones
    static const S32 LEVEL_ZONE_BUFFER = 30;                // Extra padding around the game extents to allow outsize zones to be created
 
-   BotNavMeshZone();       // Constructor
-   ~BotNavMeshZone();      // Destructor
+   BotNavMeshZone(S32 id = -1);    // Constructor
+   ~BotNavMeshZone();              // Destructor
 
    void render(S32 layerIndex);
 
