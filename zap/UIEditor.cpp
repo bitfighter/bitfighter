@@ -84,7 +84,7 @@ static const Color inactiveSpecialAttributeColor = Color(.6, .6, .6);
 static const S32 TEAM_NEUTRAL = Item::TEAM_NEUTRAL;
 static const S32 TEAM_HOSTILE = Item::TEAM_HOSTILE;
 
-static Vector<boost::shared_ptr<EditorObject> > *mLoadTarget;
+static Vector<shared_ptr<EditorObject> > *mLoadTarget;
 
 enum EntryMode {
    EntryID,          // Entering an objectID
@@ -143,13 +143,13 @@ static const S32 DOCK_POLY_WIDTH = DOCK_WIDTH - 10;
 
 void EditorUserInterface::addToDock(EditorObject* object)
 {
-   mDockItems.push_back(boost::shared_ptr<EditorObject>(object));
+   mDockItems.push_back(shared_ptr<EditorObject>(object));
 }
 
 
 void EditorUserInterface::addToEditor(EditorObject* object)
 {
-   mItems.push_back(boost::shared_ptr<EditorObject>(object));
+   mItems.push_back(shared_ptr<EditorObject>(object));
 }
 
 
@@ -361,7 +361,7 @@ void EditorUserInterface::deleteUndoState()
 
 
 // Experimental save to string method
-static void copyItems(Vector<boost::shared_ptr<EditorObject> > &from, Vector<string> &to)
+static void copyItems(Vector<shared_ptr<EditorObject> > &from, Vector<string> &to)
 {
    to.resize(from.size());      // Preallocation makes things go faster
 
@@ -371,7 +371,7 @@ static void copyItems(Vector<boost::shared_ptr<EditorObject> > &from, Vector<str
 
 
 // TODO: Make this an UIEditor method, and get rid of the global
-static void restoreItems(const Vector<string> &from, Vector<boost::shared_ptr<EditorObject> > &to)
+static void restoreItems(const Vector<string> &from, Vector<shared_ptr<EditorObject> > &to)
 {
    to.clear();
    to.reserve(from.size());      // Preallocation makes things go faster
@@ -565,7 +565,7 @@ void EditorUserInterface::makeSureThereIsAtLeastOneTeam()
 // This sort will put points on top of lines on top of polygons...  as they should be
 // NavMeshZones are now drawn on top, to make them easier to see.  Disable with Ctrl-A!
 // We'll also put walls on the bottom, as this seems to work best in practice
-S32 QSORT_CALLBACK geometricSort(boost::shared_ptr<EditorObject> a, boost::shared_ptr<EditorObject> b)
+S32 QSORT_CALLBACK geometricSort(shared_ptr<EditorObject> a, shared_ptr<EditorObject> b)
 {
    if((a)->getObjectTypeMask() & BarrierType)
       return -1;
@@ -576,7 +576,7 @@ S32 QSORT_CALLBACK geometricSort(boost::shared_ptr<EditorObject> a, boost::share
 }
 
 
-static void geomSort(Vector<boost::shared_ptr<EditorObject> >& objects)
+static void geomSort(Vector<shared_ptr<EditorObject> >& objects)
 {
    if(objects.size() >= 2)  // nothing to sort when there is one or zero objects
       // Cannot use Vector.sort() here because I couldn't figure out how to cast shared_ptr as pointer (*)
@@ -1423,7 +1423,7 @@ void EditorUserInterface::renderTextEntryOverlay()
          if(id != 0)    // Check for duplicates
          {
             for(S32 i = 0; i < mItems.size(); i++)
-               if(mItems[i]->getItemId() == id && !mItems[i]->isSelected())
+               if(mItems[i]->getItemId() == (S32)id && !mItems[i]->isSelected())
                {
                   errorFound = true;
                   break;
@@ -2570,7 +2570,7 @@ void EditorUserInterface::splitBarrier()
                // Tell the new segments that they have new geometry
                mItems[i]->onGeomChanged();
                newItem->onGeomChanged();
-               mItems.push_back(boost::shared_ptr<EditorObject>(newItem));
+               mItems.push_back(shared_ptr<EditorObject>(newItem));
 
                // And get them in the right order
                //mItems.sort(geometricSort);  

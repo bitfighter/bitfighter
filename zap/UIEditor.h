@@ -40,6 +40,8 @@
 
 #include <string>
 
+#include <boost/shared_ptr.hpp>
+
 using namespace std;
 
 namespace Zap
