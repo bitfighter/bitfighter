@@ -36,11 +36,9 @@
 #include "Point.h"
 #include "BotNavMeshZone.h"      // For Border def
 #include "tnlNetStringTable.h"
-#include "pointainer.h"
 #include "barrier.h"             // For wall related defs (WallSegmentManager, etc.)
 
 #include <string>
-#include <vector>
 
 using namespace std;
 
@@ -66,7 +64,7 @@ class SelectionItem
 {
 private:
    bool mSelected;
-   vector<bool> mVertSelected;
+   Vector<bool> mVertSelected;
 
 public:
    SelectionItem() { /* Do nothing */ }      // Generic constructor
@@ -150,7 +148,8 @@ private:
    Point mMoveOrigin;                           // Point representing where items were moved "from" for figuring out how far they moved
    Vector<Point> mOriginalVertLocations;
 
-   pointainer<vector<EditorObject *> > mLevelGenItems;       // Items added by a levelgen script
+   Vector<boost::shared_ptr<EditorObject> > mLevelGenItems;       // Items added by a levelgen script
+   Vector<boost::shared_ptr<EditorObject> > mDockItems;    // Items sitting in the dock
 
    U32 mFirstUndoIndex;
    U32 mLastUndoIndex;
@@ -264,8 +263,8 @@ public:
    Vector<TeamEditor> mTeams;       // Team list: needs to be public so we can edit from UITeamDefMenu
    Vector<TeamEditor> mOldTeams;    // Team list from before we run team editor, so we can see what changed
 
-   pointainer<vector<EditorObject *> > mItems;        // Item list: needs to be public so we can get team info while in UITeamDefMenu
-   pointainer<vector<EditorObject *> > mDockItems;    // Items sitting in the dock
+   Vector<boost::shared_ptr<EditorObject> > mItems;        // Item list: needs to be public so we can get team info while in UITeamDefMenu
+
 
    GridDatabase *getGridDatabase() { return &mGridDatabase; }
 
@@ -303,7 +302,10 @@ public:
 
 
    void populateDock();                         // Load up dock with game-specific items to drag and drop
+   void addToDock(EditorObject* object);
    void addDockObject(EditorObject *object, F32 xPos, F32 yPos);
+
+   void addToEditor(EditorObject* object);
 
    string mScriptLine;                          // Script and args, if any
    void setHasNavMeshZones(bool hasZones) { mHasBotNavZones = hasZones; }

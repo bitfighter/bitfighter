@@ -38,6 +38,7 @@
 
 #include "UIEditorMenus.h"       // For EditorAttributeMenuUI def
 
+using namespace boost;
 
 namespace Zap
 {
@@ -54,7 +55,7 @@ inline F32 getGridSize()
 void EditorObject::addToEditor(Game *game)
 {
    BfObject::addToGame(game);
-   gEditorUserInterface.mItems.push_back(this);    // TODO: get rid of this, make all items come from the database
+   gEditorUserInterface.addToEditor(this);    // TODO: get rid of this, make all items come from the database
 }
 
 
@@ -65,7 +66,7 @@ void EditorObject::addToDock(Game *game, const Point &point)
    
    unselectVerts();
 
-   gEditorUserInterface.mDockItems.push_back(this);
+   gEditorUserInterface.addToDock(this);
 }
 
 

@@ -30,7 +30,10 @@ OBJECTS_ZAP=\
    HTFGame.o\
    IniFile.o\
    loadoutZone.o\
+   EditorObject.o\
    GeomUtils.o\
+   Geometry.o\
+   SimpleLine.o\
    UI.o\
    UIAbstractInstructions.o\
    UIChat.o\
@@ -38,6 +41,7 @@ OBJECTS_ZAP=\
    UIDiagnostics.o\
    UIEditor.o\
    UIEditorInstructions.o\
+   UIEditorMenus.o\
    UIErrorMessage.o\
    UIYesNo.o\
    UIGame.o\
