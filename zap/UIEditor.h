@@ -324,6 +324,8 @@ public:
 
    void validateLevel();               // Check level for things that will make the game crash!
    void validateTeams();               // Check that each item has a valid team (and fix any errors found)
+   void validateTeams(const Vector<DatabaseObject *> &dbObjects);
+
    void teamsHaveChanged();            // Another team validation routine, used when all items have valid teams, but the teams themselves change
    void makeSureThereIsAtLeastOneTeam();
 

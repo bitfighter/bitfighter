@@ -110,7 +110,6 @@ public:
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
    U16 getZoneId() { return mZoneId; }
-   void setZoneId(U16 zoneId) { mZoneId = zoneId; }
 
    Vector<NeighboringZone> mNeighbors;       // List of other zones this zone touches, only populated on server
    Vector<Border> mNeighborRenderPoints;     // Only populated on client
@@ -118,10 +117,10 @@ public:
 
    static U16 findZoneContaining(const Point &p);    // Returns ID of zone containing specified point
 
-   static bool buildBotMeshZones(Game *game);
+   static bool buildBotMeshZones(ServerGame *game);
    static void buildBotNavMeshZoneConnections(GridDatabase *zoneDb);
    static bool buildBotNavMeshZoneConnectionsRecastStyle(GridDatabase *zoneDb, rcPolyMesh &mesh, const Vector<S32> &polyToZoneMap);
-   static void linkTeleportersBotNavMeshZoneConnections(Game *game);
+   static void linkTeleportersBotNavMeshZoneConnections(ServerGame *game);
 
    TNL_DECLARE_CLASS(BotNavMeshZone);
 };

@@ -26,6 +26,7 @@
 #include "gridDB.h"
 #include "gameObject.h"
 #include "moveObject.h"    // For def of ActualState
+#include "EditorObject.h"  // For def of EditorObject
 
 namespace Zap
 {
@@ -46,7 +47,7 @@ GridDatabase::GridDatabase(bool usingGameCoords)
 
 void GridDatabase::addToDatabase(DatabaseObject *theObject, const Rect &extents)
 {
-   S32 minx, miny, maxx, maxy;
+   S32 minx, miny, maxx, maxy;  
    F32 widthDiv = 1 / F32(BucketWidth);
 
    minx = S32(extents.min.x * widthDiv);
@@ -142,6 +143,12 @@ void GridDatabase::findObjects(Vector<DatabaseObject *> &fillVector)
    for(S32 i = 0; i < mAllObjects.size(); i++)
       fillVector.push_back(mAllObjects[i]);
 }
+
+
+//const Vector<DatabaseObject *> *GridDatabase::getObjectList()
+//{
+//   return &mAllObjects;
+//}
 
 
 // Find all objects in database of type typeMask
@@ -310,6 +317,51 @@ void DatabaseObject::setExtent(const Rect &extents)
    }
 
    extent.set(extents);
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+class EditorObject;
+
+// Constructor
+EditorObjectDatabase::EditorObjectDatabase(bool usingGameCoords) : Parent(usingGameCoords)
+{
+   // Do nothing, just here to call Parent's constructor
+}
+
+
+void EditorObjectDatabase::addToDatabase(DatabaseObject *object, const Rect &extents)
+{
+   //EditorObject *eObj = (EditorObject *)(object);
+   EditorObject *eObj = dynamic_cast<EditorObject *>(object);
+   TNLAssert(eObj, "Bad cast!");
+
+   Parent::addToDatabase(object, extents);
+
+   mAllEditorObjects.push_back(eObj);
+}
+
+
+void EditorObjectDatabase::removeFromDatabase(EditorObject *object, const Rect &extents)
+{
+   Parent::removeFromDatabase((DatabaseObject *)object, extents);
+
+   // Remove the object to our list as well
+   for(S32 i = 0; i < mAllEditorObjects.size(); i++)
+      if(mAllEditorObjects[i] == object)
+      {
+         mAllEditorObjects.erase_fast(i);
+         break;
+      }
+}
+
+
+// Provide a read-only shortcut to a pre-cast list of editor objects
+const Vector<EditorObject *> *EditorObjectDatabase::getObjectList()
+{
+   return &mAllEditorObjects;
 }
 
 

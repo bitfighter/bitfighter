@@ -136,8 +136,6 @@ protected:
    };
 
    GridDatabase mDatabase;                // Database for all normal objects
-   GridDatabase mDatabaseForBotZones;     // Database especially for BotZones to avoid gumming up the regular database with too many objects
-
 
    Vector<DeleteRef> mPendingDeleteObjects;
    Vector<SafePtr<GameObject> > mScopeAlwaysList;
@@ -211,8 +209,7 @@ public:
    MasterServerConnection *getConnectionToMaster();
 
    GameNetInterface *getNetInterface();
-   GridDatabase *getGridDatabase() { return &mDatabase; }
-   GridDatabase *getBotZoneDatabase() { return &mDatabaseForBotZones; }
+   virtual GridDatabase *getGridDatabase() { return &mDatabase; }    // EditorGame, for example, returns an EditorObjectDatabase
 
    const Vector<SafePtr<GameObject> > &getScopeAlwaysList() { return mScopeAlwaysList; }
 
@@ -300,6 +297,8 @@ private:
    string mHostName;
    string mHostDescr;
 
+   GridDatabase mDatabaseForBotZones;     // Database especially for BotZones to avoid gumming up the regular database with too many objects
+
    // Info about levels
    Vector<LevelInfo> mLevelInfos;         // Info about the level
 
@@ -339,6 +338,8 @@ public:
    static const S32 REPLAY_LEVEL = -2;
    static const S32 PREVIOUS_LEVEL = -3;
    static const S32 FIRST_LEVEL = 0;
+
+   GridDatabase *getBotZoneDatabase() { return &mDatabaseForBotZones; }
 
    U32 getPlayerCount() { return mPlayerCount; }
    U32 getMaxPlayers() { return mMaxPlayers; }
@@ -472,6 +473,9 @@ class WallSegmentManager;
 
 class EditorGame : public Game
 {
+private:
+   EditorObjectDatabase mEditorDatabase;
+
 public:
    EditorGame();
 
@@ -486,6 +490,8 @@ public:
    WallSegmentManager *mWallSegmentManager;     
    WallSegmentManager *getWallSegmentManager() { return mWallSegmentManager; }
    void setWallSegmentManager(WallSegmentManager *wallSegmentManager) { mWallSegmentManager = wallSegmentManager; }
+
+   GridDatabase *getGridDatabase() { return &mEditorDatabase; }
 };
 
 

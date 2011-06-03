@@ -125,9 +125,11 @@ S32 BotNavMeshZone::getRenderSortValue()
    return -2;
 }
 
+
 GridDatabase *BotNavMeshZone::getGridDatabase()
 {
-   return mGame->getBotZoneDatabase();
+   TNLAssert(dynamic_cast<ServerGame *>(mGame), "Must be a server game!");
+   return ((ServerGame *)mGame)->getBotZoneDatabase();
 }
 
 
@@ -494,7 +496,7 @@ static bool mergeBotZoneBuffers(const Vector<DatabaseObject *> &barriers,
 
 // Server only
 // Use the Triangle library to create zones.  Aggregate triangles with Recast
-bool BotNavMeshZone::buildBotMeshZones(Game *game)
+bool BotNavMeshZone::buildBotMeshZones(ServerGame *game)
 {
 
 #ifdef LOG_TIMER
@@ -583,7 +585,7 @@ bool BotNavMeshZone::buildBotMeshZones(Game *game)
 
                if(j == 0)
                {
-                  botzone = new BotNavMeshZone(game->getGridDatabase()->getObjectCount());
+                  botzone = new BotNavMeshZone(game->getBotZoneDatabase()->getObjectCount());
 
                   // Triangulation only needed for display on local client... it is expensive to compute for so many zones,
                   // and there is really no point if it will never be viewed.  Once disabled, triangluation cannot be re-enabled
@@ -720,7 +722,7 @@ void BotNavMeshZone::buildBotNavMeshZoneConnections(GridDatabase *zoneDb)
 }
 
 // Only runs on server
-void BotNavMeshZone::linkTeleportersBotNavMeshZoneConnections(Game *game)
+void BotNavMeshZone::linkTeleportersBotNavMeshZoneConnections(ServerGame *game)
 {
    NeighboringZone neighbor;
    // Now create paths representing the teleporters

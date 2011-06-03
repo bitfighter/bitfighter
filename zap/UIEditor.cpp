@@ -84,7 +84,7 @@ static const Color inactiveSpecialAttributeColor = Color(.6, .6, .6);
 static const S32 TEAM_NEUTRAL = Item::TEAM_NEUTRAL;
 static const S32 TEAM_HOSTILE = Item::TEAM_HOSTILE;
 
-static Vector<shared_ptr<EditorObject> > *mLoadTarget;
+static Vector<boost::shared_ptr<EditorObject> > *mLoadTarget;
 
 enum EntryMode {
    EntryID,          // Entering an objectID
@@ -138,18 +138,25 @@ EditorUserInterface::EditorUserInterface() : mGridDatabase(GridDatabase(false)) 
 }
 
 
+// Encapsulate some ugliness
+static const Vector<EditorObject *> *getObjectList()
+{
+   return ((EditorObjectDatabase *)gEditorGame->getGridDatabase())->getObjectList();
+}
+
+
 static const S32 DOCK_POLY_HEIGHT = 20;
 static const S32 DOCK_POLY_WIDTH = DOCK_WIDTH - 10;
 
 void EditorUserInterface::addToDock(EditorObject* object)
 {
-   mDockItems.push_back(shared_ptr<EditorObject>(object));
+   mDockItems.push_back(boost::shared_ptr<EditorObject>(object));
 }
 
 
 void EditorUserInterface::addToEditor(EditorObject* object)
 {
-   mItems.push_back(shared_ptr<EditorObject>(object));
+   mItems.push_back(boost::shared_ptr<EditorObject>(object));
 }
 
 
@@ -361,7 +368,7 @@ void EditorUserInterface::deleteUndoState()
 
 
 // Experimental save to string method
-static void copyItems(Vector<shared_ptr<EditorObject> > &from, Vector<string> &to)
+static void copyItems(Vector<boost::shared_ptr<EditorObject> > &from, Vector<string> &to)
 {
    to.resize(from.size());      // Preallocation makes things go faster
 
@@ -371,7 +378,7 @@ static void copyItems(Vector<shared_ptr<EditorObject> > &from, Vector<string> &t
 
 
 // TODO: Make this an UIEditor method, and get rid of the global
-static void restoreItems(const Vector<string> &from, Vector<shared_ptr<EditorObject> > &to)
+static void restoreItems(const Vector<string> &from, Vector<boost::shared_ptr<EditorObject> > &to)
 {
    to.clear();
    to.reserve(from.size());      // Preallocation makes things go faster
@@ -565,23 +572,23 @@ void EditorUserInterface::makeSureThereIsAtLeastOneTeam()
 // This sort will put points on top of lines on top of polygons...  as they should be
 // NavMeshZones are now drawn on top, to make them easier to see.  Disable with Ctrl-A!
 // We'll also put walls on the bottom, as this seems to work best in practice
-S32 QSORT_CALLBACK geometricSort(shared_ptr<EditorObject> a, shared_ptr<EditorObject> b)
-{
-   if((a)->getObjectTypeMask() & BarrierType)
-      return -1;
-   if((b)->getObjectTypeMask() & BarrierType)
-      return 1;
+//S32 QSORT_CALLBACK geometricSort(boost::shared_ptr<EditorObject> a, boost::shared_ptr<EditorObject> b)
+//{
+//   if((a)->getObjectTypeMask() & BarrierType)
+//      return -1;
+//   if((b)->getObjectTypeMask() & BarrierType)
+//      return 1;
+//
+//   return( (a)->getGeomType() - (b)->getGeomType() );
+//}
 
-   return( (a)->getGeomType() - (b)->getGeomType() );
-}
-
-
-static void geomSort(Vector<shared_ptr<EditorObject> >& objects)
-{
-   if(objects.size() >= 2)  // nothing to sort when there is one or zero objects
-      // Cannot use Vector.sort() here because I couldn't figure out how to cast shared_ptr as pointer (*)
-      sort(objects.getStlVector().begin(), objects.getStlVector().end(), geometricSort);
-}
+//
+//static void geomSort(Vector<shared_ptr<EditorObject> > &objects)
+//{
+//   if(objects.size() >= 2)  // nothing to sort when there is one or zero objects
+//      // Cannot use Vector.sort() here because I couldn't figure out how to cast shared_ptr as pointer (*)
+//      sort(objects.getStlVector().begin(), objects.getStlVector().end(), geometricSort);
+//}
 
 
 extern const char *gGameTypeNames[];
@@ -617,8 +624,7 @@ void EditorUserInterface::loadLevel()
       makeSureThereIsAtLeastOneTeam(); // Make sure we at least have one team
       validateTeams();                 // Make sure every item has a valid team
       validateLevel();                 // Check level for errors (like too few spawns)
-      //mItems.sort(geometricSort);
-      geomSort(mItems);
+      //geomSort(mItems);
       gGameParamUserInterface.ignoreGameParams = false;
    }
    else     
@@ -640,8 +646,10 @@ void EditorUserInterface::loadLevel()
    populateDock();                     // Add game-specific items to the dock
 
    // Bulk-process new items, walls first
-   for(S32 i = 0; i < mItems.size(); i++)
-      mItems[i]->processEndPoints();
+   const Vector<EditorObject *> *objList = getObjectList();
+
+   for(S32 i = 0; i < objList->size(); i++)
+      objList->get(i)->processEndPoints();
 
    mWallSegmentManager.recomputeAllWallGeometry();
    
@@ -649,9 +657,13 @@ void EditorUserInterface::loadLevel()
    resnapAllEngineeredItems();
 
    // Run onGeomChanged for all non-wall items (engineered items already had onGeomChanged run during resnap operation)
-   for(S32 i = 0; i < mItems.size(); i++)
-      if(mItems[i]->getObjectTypeMask() & ~(BarrierType | EngineeredType))
-         mItems[i]->onGeomChanged();
+   fillVector.clear();
+   gEditorGame->getGridDatabase()->findObjects(~(BarrierType | EngineeredType), fillVector);
+   for(S32 i = 0; i < fillVector.size(); i++)
+   {
+      EditorObject *obj = dynamic_cast<EditorObject *>(fillVector[i]);
+      obj->onGeomChanged();
+   }
 }
 
 
@@ -865,30 +877,40 @@ void EditorUserInterface::validateLevel()
 }
 
 
-// Check that each item has a valid team  (fixes any problems it finds)
 void EditorUserInterface::validateTeams()
+{
+   fillVector.clear();
+   gEditorGame->getGridDatabase()->findObjects(fillVector);
+   
+   validateTeams(fillVector);
+}
+
+
+// Check that each item has a valid team  (fixes any problems it finds)
+void EditorUserInterface::validateTeams(const Vector<DatabaseObject *> &dbObjects)
 {
    S32 teams = mTeams.size();
 
-   for(S32 i = 0; i < mItems.size(); i++)
+   for(S32 i = 0; i < dbObjects.size(); i++)
    {
-      S32 team = mItems[i]->getTeam();
+      EditorObject *obj = dynamic_cast<EditorObject *>(dbObjects[i]);
+      S32 team = obj->getTeam();
 
-      if(mItems[i]->hasTeam() && ((team >= 0 && team < teams) || team == TEAM_NEUTRAL || team == TEAM_HOSTILE))  
+      if(obj->hasTeam() && ((team >= 0 && team < teams) || team == TEAM_NEUTRAL || team == TEAM_HOSTILE))  
          continue;      // This one's OK
 
-      if(team == TEAM_NEUTRAL && mItems[i]->canBeNeutral())
+      if(team == TEAM_NEUTRAL && obj->canBeNeutral())
          continue;      // This one too
 
-      if(team == TEAM_HOSTILE && mItems[i]->canBeHostile())
+      if(team == TEAM_HOSTILE && obj->canBeHostile())
          continue;      // This one too
 
-      if(mItems[i]->hasTeam())
-         mItems[i]->setTeam(0);               // We know there's at least one team, so there will always be a team 0
-      else if(mItems[i]->canBeHostile() && !mItems[i]->canBeNeutral())
-         mItems[i]->setTeam(TEAM_HOSTILE); 
+      if(obj->hasTeam())
+         obj->setTeam(0);               // We know there's at least one team, so there will always be a team 0
+      else if(obj->canBeHostile() && !obj->canBeNeutral())
+         obj->setTeam(TEAM_HOSTILE); 
       else
-         mItems[i]->setTeam(TEAM_NEUTRAL);    // We won't consider the case where hasTeam == canBeNeutral == canBeHostile == false
+         obj->setTeam(TEAM_NEUTRAL);    // We won't consider the case where hasTeam == canBeNeutral == canBeHostile == false
    }
 }
 
@@ -912,14 +934,15 @@ void EditorUserInterface::teamsHaveChanged()
    if(!teamsChanged)       // Nothing changed, we're done here
       return;
 
-   for (S32 i = 0; i < mItems.size(); i++)
-      if(mItems[i]->getTeam() >= mTeams.size())       // Team no longer valid?
-         mItems[i]->setTeam(0);                    // Then set it to first team
+   validateTeams();
 
-   // And the dock items too...
-   for (S32 i = 0; i < mDockItems.size(); i++)
-      if(mDockItems[i]->getTeam() >= mTeams.size())
-         mDockItems[i]->setTeam(0);
+   // TODO: I hope we can get rid of this in future... perhaps replace with mDockItems being stored in a database, and pass the database?
+   Vector<DatabaseObject *> hackyjunk;
+   hackyjunk.resize(mDockItems.size());
+   for(S32 i = 0; i < mDockItems.size(); i++)
+      hackyjunk[i] = mDockItems[i].get();
+
+   validateTeams(hackyjunk);
 
    validateLevel();          // Revalidate level -- if teams have changed, requirements for spawns have too
    mNeedToSave = true;
@@ -978,16 +1001,20 @@ void processEditorConsoleCommand(OGLCONSOLE_Console console, char *cmdline)
 
 void EditorUserInterface::onBeforeRunScriptFromConsole()
 {
+   const Vector<EditorObject *> *objList = getObjectList();
+
    // Use selection as a marker -- will have to change in future
-   for(S32 i = 0; i < mItems.size(); i++)
-      mItems[i]->setSelected(true);
+   for(S32 i = 0; i < objList->size(); i++)
+      objList->get(i)->setSelected(true);
 }
 
 
 void EditorUserInterface::onAfterRunScriptFromConsole()
 {
-   for(S32 i = 0; i < mItems.size(); i++)
-      mItems[i]->setSelected(!mItems[i]->isSelected());
+   const Vector<EditorObject *> *objList = getObjectList();
+
+   for(S32 i = 0; i < objList->size(); i++)
+      objList->get(i)->setSelected(!objList->get(i)->isSelected());
 
    rebuildEverything();
 }
@@ -1123,14 +1150,16 @@ Point EditorUserInterface::snapPoint(Point const &p, bool snapWhileOnDock)
    if(mouseOnDock() && !snapWhileOnDock) 
       return p;      // No snapping!
 
+   const Vector<EditorObject *> *objList = getObjectList();
+
    Point snapPoint(p);
 
    if(mDraggingObjects)
    {
       // Mark all items being dragged as no longer being snapped -- only our primary "focus" item will be snapped
-      for(S32 i = 0; i < mItems.size(); i++)
-         if(mItems[i]->isSelected())
-            mItems[i]->setSnapped(false);
+      for(S32 i = 0; i < objList->size(); i++)
+         if(objList->get(i)->isSelected())
+            objList->get(i)->setSnapped(false);
    }
    
    // Turrets & forcefields: Snap to a wall edge as first (and only) choice
@@ -1156,19 +1185,20 @@ Point EditorUserInterface::snapPoint(Point const &p, bool snapWhileOnDock)
 
 
    // Now look for other things we might want to snap to
-   for(S32 i = 0; i < mItems.size(); i++)
+   for(S32 i = 0; i < objList->size(); i++)
    {
+      EditorObject *obj = objList->get(i);
       // Don't snap to selected items or items with selected verts
-      if(mItems[i]->isSelected() || mItems[i]->anyVertsSelected())    
+      if(obj->isSelected() || obj->anyVertsSelected())    
          continue;
 
-      for(S32 j = 0; j < mItems[i]->getVertCount(); j++)
+      for(S32 j = 0; j < obj->getVertCount(); j++)
       {
-         F32 dist = mItems[i]->getVert(j).distSquared(p);
+         F32 dist = obj->getVert(j).distSquared(p);
          if(dist < minDist)
          {
             minDist = dist;
-            snapPoint.set(mItems[i]->getVert(j));
+            snapPoint.set(obj->getVert(j));
          }
       }
    }
@@ -1418,12 +1448,14 @@ void EditorUserInterface::renderTextEntryOverlay()
       // Check for duplicate IDs if we're in ID entry mode
       if(entryMode == EntryID)
       {
-         U32 id = atoi(mEntryBox.c_str());      // mEntryBox has digits only filter applied; ids can only be positive ints
+         S32 id = atoi(mEntryBox.c_str());      // mEntryBox has digits only filter applied; ids can only be positive ints
 
          if(id != 0)    // Check for duplicates
          {
-            for(S32 i = 0; i < mItems.size(); i++)
-               if(mItems[i]->getItemId() == (S32)id && !mItems[i]->isSelected())
+            const Vector<EditorObject *> *objList = getObjectList();
+
+            for(S32 i = 0; i < objList->size(); i++)
+               if(objList->get(i)->getItemId() == id && !objList->get(i)->isSelected())
                {
                   errorFound = true;
                   break;
@@ -1512,6 +1544,7 @@ const char *getModeMessage(ShowMode mode)
 }
 
 
+// TODO: Need to render things in geometric order
 void EditorUserInterface::render()
 {
    mouseIgnore = false; // Needed to avoid freezing effect from too many mouseMoved events without a render in between (sam)
@@ -1781,8 +1814,10 @@ If wall thickness is changed, steps 3-5 need to be repeated
 
 void EditorUserInterface::clearSelection()
 {
-   for(S32 i = 0; i < mItems.size(); i++)
-      mItems[i]->unselect();
+   const Vector<EditorObject *> *objList = getObjectList();
+
+   for(S32 i = 0; i < objList->size(); i++)
+      objList->get(i)->unselect();
 }
 
 
@@ -1801,15 +1836,14 @@ void EditorUserInterface::copySelection()
 
    bool alreadyCleared = false;
 
-   S32 itemCount = mItems.size();
-   for(S32 i = 0; i < itemCount; i++)
-   {
-      if(mItems[i]->isSelected())
-      {
-         EditorObject *newItem =  mItems[i]->newCopy();      
-         newItem->setSelected(false);
+   const Vector<EditorObject *> *objList = getObjectList();
 
-         //newItem->offset(Point(0.5, 0.5));
+   for(S32 i = 0; i < objList->size(); i++)
+   {
+      if(objList->get(i)->isSelected())
+      {
+         EditorObject *newItem =  objList->get(i)->newCopy();      
+         newItem->setSelected(false);
 
          if(!alreadyCleared)  // Make sure we only purge the existing clipboard if we'll be putting someting new there
          {
@@ -1857,7 +1891,7 @@ void EditorUserInterface::pasteSelection()
       newObj->onGeomChanged();
    }
    //mItems.sort(geometricSort);
-   geomSort(mItems);
+   //geomSort(mItems);
    validateLevel();
    mNeedToSave = true;
    autoSave();
@@ -1880,9 +1914,11 @@ void EditorUserInterface::scaleSelection(F32 scale)
    if(scale > 1 && min.distanceTo(max) * scale > 50)    // If walls get too big, they'll bog down the db
       return;
 
-   for(S32 i = 0; i < mItems.size(); i++)
-      if(mItems[i]->isSelected())
-         mItems[i]->scale(ctr, scale);
+   const Vector<EditorObject *> *objList = getObjectList();
+
+   for(S32 i = 0; i < objList->size(); i++)
+      if(objList->get(i)->isSelected())
+         objList->get(i)->scale(ctr, scale);
 
    mNeedToSave = true;
    autoSave();
@@ -1897,11 +1933,12 @@ void EditorUserInterface::rotateSelection(F32 angle)
 
    saveUndoState();
 
-   for(S32 i = 0; i < mItems.size(); i++)
-   {
-      if(mItems[i]->isSelected())
-         mItems[i]->rotateAboutPoint(Point(0,0), angle);
-   }
+   const Vector<EditorObject *> *objList = getObjectList();
+
+   for(S32 i = 0; i < objList->size(); i++)
+      if(objList->get(i)->isSelected())
+         objList->get(i)->rotateAboutPoint(Point(0,0), angle);
+
    mNeedToSave = true;
    autoSave();
 }
@@ -1914,14 +1951,17 @@ void EditorUserInterface::computeSelectionMinMax(Point &min, Point &max)
    min.set(F32_MAX, F32_MAX);
    max.set(F32_MIN, F32_MIN);
 
-   for(S32 i = 0; i < mItems.size(); i++)
+   const Vector<EditorObject *> *objList = getObjectList();
+
+   for(S32 i = 0; i < objList->size(); i++)
    {
-      if(mItems[i]->isSelected())
+      EditorObject *obj = objList->get(i);
+
+      if(obj->isSelected())
       {
-         EditorObject *item = mItems[i].get();
-         for(S32 j = 0; j < item->getVertCount(); j++)
+         for(S32 j = 0; j < obj->getVertCount(); j++)
          {
-            Point v = item->getVert(j);
+            Point v = obj->getVert(j);
 
             if(v.x < min.x)   min.x = v.x;
             if(v.x > max.x)   max.x = v.x;
@@ -1967,23 +2007,27 @@ void EditorUserInterface::setCurrentTeam(S32 currentTeam)
       mDockItems[i]->setTeam(currentTeam);
    }
 
-   for(S32 i = 0; i < mItems.size(); i++)
+
+   const Vector<EditorObject *> *objList = getObjectList();
+
+   for(S32 i = 0; i < objList->size(); i++)
    {
-      if(mItems[i]->isSelected())
+      EditorObject *obj = objList->get(i);
+      if(obj->isSelected())
       {
-         if(!mItems[i]->hasTeam())
+         if(!obj->hasTeam())
             continue;
 
-         if(currentTeam == TEAM_NEUTRAL && !mItems[i]->canBeNeutral())
+         if(currentTeam == TEAM_NEUTRAL && !obj->canBeNeutral())
             continue;
 
-         if(currentTeam == TEAM_HOSTILE && !mItems[i]->canBeHostile())
+         if(currentTeam == TEAM_HOSTILE && !obj->canBeHostile())
             continue;
 
          if(!anyChanged)
             saveUndoState();
 
-         mItems[i]->setTeam(currentTeam);
+         obj->setTeam(currentTeam);
          anyChanged = true;
       }
    }
@@ -2012,9 +2056,11 @@ void EditorUserInterface::flipSelectionHorizontal()
    Point min, max;
    computeSelectionMinMax(min, max);
 
-   for(S32 i = 0; i < mItems.size(); i++)
-      if(mItems[i]->isSelected())
-         mItems[i]->flipHorizontal(min, max);
+   const Vector<EditorObject *> *objList = getObjectList();
+
+   for(S32 i = 0; i < objList->size(); i++)
+      if(objList->get(i)->isSelected())
+         objList->get(i)->flipHorizontal(min, max);
 
    mNeedToSave = true;
    autoSave();
@@ -2031,50 +2077,15 @@ void EditorUserInterface::flipSelectionVertical()
    Point min, max;
    computeSelectionMinMax(min, max);
 
-   for(S32 i = 0; i < mItems.size(); i++)
-      if(mItems[i]->isSelected())
-         mItems[i]->flipVertical(min, max);
+   const Vector<EditorObject *> *objList = getObjectList();
+
+   for(S32 i = 0; i < objList->size(); i++)
+      if(objList->get(i)->isSelected())
+         objList->get(i)->flipVertical(min, max);
 
    mNeedToSave = true;
    autoSave();
 }
-
-
-//// Identify a vert that our mouse is over; hitObject contains the vert, hitVertex is the index of the vert we hit
-//void EditorUserInterface::findHitVertex(EditorObject *&hitObject, S32 &hitVertex)
-//{
-//   hitObject = NULL;
-//   hitVertex = NONE;
-//
-//   for(S32 x = 1; x >= 0; x--)    // Two passes... first for selected item, second for all items
-//   {
-//      for(S32 i = mItems.size() - 1; i >= 0; i--)     // Reverse order so we get items "from the top down"
-//      { 
-//         if(x && !mItems[i]->isSelected() && !mItems[i]->anyVertsSelected())
-//            continue;
-//
-//         U32 type = mItems[i]->getObjectTypeMask();
-//         if(mShowMode == ShowWallsOnly && !(type & BarrierType) && !(type & PolyWallType))        // Only select walls in CTRL-A mode
-//            continue;
-//
-//         if(mItems[i]->getGeomType() < geomPoint)        // Was <=... why?
-//            continue;
-//
-//         S32 radius = mItems[i]->getEditorRadius(mCurrentScale) * mItems[i]->getEditorRenderScaleFactor(mCurrentScale);
-//
-//         for(S32 j = mItems[i]->getVertCount() - 1; j >= 0; j--)
-//         {
-//            Point p = mMousePos - mCurrentOffset - mItems[i]->getVert(j) * mCurrentScale;    // Pixels from mouse to mItems[i]->getVert(j), at any zoom
-//            if(fabs(p.x) < radius && fabs(p.y) < radius)
-//            {
-//               hitObject = mItems[i];
-//               hitVertex = j;
-//               return;
-//            }
-//         }
-//      }
-//   }
-//}
 
 
 static const S32 POINT_HIT_RADIUS = 9;
@@ -2086,61 +2097,64 @@ void EditorUserInterface::findHitItemAndEdge()
    mEdgeHit = NONE;
    mVertexHit = NONE;
 
+   const Vector<EditorObject *> *objList = getObjectList();
+
    // Do this in two passes -- the first we only consider selected items, the second pass will consider all targets.
    // This will give priority to moving vertices of selected items
    for(S32 firstPass = 1; firstPass >= 0; firstPass--)   // firstPass will be true the first time through, false the second time
    {
-      for(S32 i = mItems.size() - 1; i >= 0; i--)        // Go in reverse order to prioritize items drawn on top
+      for(S32 i = objList->size() - 1; i >= 0; i--)        // Go in reverse order to prioritize items drawn on top
       {
-         if(firstPass && !mItems[i]->isSelected() && !mItems[i]->anyVertsSelected())     // First pass is for selected items only
+         EditorObject *obj = objList->get(i);
+         if(firstPass && !obj->isSelected() && !obj->anyVertsSelected())     // First pass is for selected items only
             continue;
          
          // Only select walls in CTRL-A mode...
-         U32 type = mItems[i]->getObjectTypeMask();
+         U32 type = obj->getObjectTypeMask();
          if(mShowMode == ShowWallsOnly && !(type & BarrierType) && !(type & PolyWallType))        // Only select walls in CTRL-A mode
             continue;                                                              // ...so if it's not a wall, proceed to next item
 
-         S32 radius = mItems[i]->getEditorRadius(mCurrentScale);
+         S32 radius = obj->getEditorRadius(mCurrentScale);
 
-         for(S32 j = mItems[i]->getVertCount() - 1; j >= 0; j--)
+         for(S32 j = obj->getVertCount() - 1; j >= 0; j--)
          {
-            // p represents pixels from mouse to mItems[i]->getVert(j), at any zoom
-            Point p = mMousePos - mCurrentOffset - mItems[i]->getVert(j) * mCurrentScale;    
+            // p represents pixels from mouse to obj->getVert(j), at any zoom
+            Point p = mMousePos - mCurrentOffset - obj->getVert(j) * mCurrentScale;    
 
             if(fabs(p.x) < radius && fabs(p.y) < radius)
             {
-               mItemHit = mItems[i].get();
+               mItemHit = obj;
                mVertexHit = j;
                return;
             }
          }
 
          // This is all we can check on point items -- it makes no sense to check edges or other higher order geometry
-         if(mItems[i]->getGeomType() == geomPoint)
+         if(obj->getGeomType() == geomPoint)
             continue;
 
          /////
          // Didn't find a vertex hit... now we look for an edge
 
          // Make a copy of the items vertices that we can add to in the case of a loop
-         Vector<Point> verts = *mItems[i]->getOutline();    
+         Vector<Point> verts = *obj->getOutline();    
 
-         if(mItems[i]->getGeomType() == geomPoly)   // Add first point to the end to create last side on poly
+         if(obj->getGeomType() == geomPoly)   // Add first point to the end to create last side on poly
             verts.push_back(verts.first());
 
-         Point p1 = convertLevelToCanvasCoord(mItems[i]->getVert(0));
+         Point p1 = convertLevelToCanvasCoord(obj->getVert(0));
          Point closest;
          
-         for(S32 j = 0; j < mItems[i]->getVertCount() - 1; j++)
+         for(S32 j = 0; j < obj->getVertCount() - 1; j++)
          {
-            Point p2 = convertLevelToCanvasCoord(mItems[i]->getVert(j+1));
+            Point p2 = convertLevelToCanvasCoord(obj->getVert(j+1));
             
             if(findNormalPoint(mMousePos, p1, p2, closest))
             {
                F32 distance = (mMousePos - closest).len();
                if(distance < EDGE_HIT_RADIUS)
                {
-                  mItemHit = mItems[i].get();
+                  mItemHit = obj;
                   mEdgeHit = j;
 
                   return;
@@ -2157,17 +2171,19 @@ void EditorUserInterface::findHitItemAndEdge()
    /////
    // If we're still here, it means we didn't find anything yet.  Make one more pass, and see if we're in any polys.
    // This time we'll loop forward, though I don't think it really matters.
-   for(S32 i = 0; i < mItems.size(); i++)
+   for(S32 i = 0; i < objList->size(); i++)
    {
-      if(mItems[i]->getGeomType() == geomPoly)
+      EditorObject *obj = objList->get(i);
+
+      if(obj->getGeomType() == geomPoly)
       {
          Vector<Point> verts;
-         for(S32 j = 0; j < mItems[i]->getVertCount(); j++)
-            verts.push_back(convertLevelToCanvasCoord(mItems[i]->getVert(j)));
+         for(S32 j = 0; j < obj->getVertCount(); j++)
+            verts.push_back(convertLevelToCanvasCoord(obj->getVert(j)));
 
          if(PolygonContains2(verts.address(), verts.size(), mMousePos))
          {
-            mItemHit = mItems[i].get();
+            mItemHit = obj;
             return;
          }
       }
@@ -2290,11 +2306,17 @@ void EditorUserInterface::onMouseDragged(S32 x, S32 y)
       mMoveOrigin = mSnapVertex_i->getVert(mSnapVertex_j);
       mOriginalVertLocations.clear();
 
-      for(S32 i = 0; i < mItems.size(); i++)
-         if(mItems[i]->isSelected() || mItems[i]->anyVertsSelected())
-            for(S32 j = 0; j < mItems[i]->getVertCount(); j++)
-               if(mItems[i]->isSelected() || mItems[i]->vertSelected(j))
-                  mOriginalVertLocations.push_back(mItems[i]->getVert(j));
+      const Vector<EditorObject *> *objList = getObjectList();
+
+      for(S32 i = 0; i < objList->size(); i++)
+      {
+         EditorObject *obj = objList->get(i);
+
+         if(obj->isSelected() || obj->anyVertsSelected())
+            for(S32 j = 0; j < obj->getVertCount(); j++)
+               if(obj->isSelected() || obj->vertSelected(j))
+                  mOriginalVertLocations.push_back(obj->getVert(j));
+      }
 
       saveUndoState();
    }
@@ -2314,22 +2336,30 @@ void EditorUserInterface::onMouseDragged(S32 x, S32 y)
       delta = (snapPoint(convertCanvasToLevelCoord(mMousePos) + mMoveOrigin - mMouseDownPos) - mMoveOrigin );
 
 
+
    // Update coordinates of dragged item
+   const Vector<EditorObject *> *objList = getObjectList();
+
    S32 count = 0;
-   for(S32 i = 0; i < mItems.size(); i++)
-      if(mItems[i]->isSelected() || mItems[i]->anyVertsSelected())
+
+   for(S32 i = 0; i < objList->size(); i++)
+   {
+      EditorObject *obj = objList->get(i);
+
+      if(obj->isSelected() || obj->anyVertsSelected())
       {
-         for(S32 j = 0; j < mItems[i]->getVertCount(); j++)
-            if(mItems[i]->isSelected() || mItems[i]->vertSelected(j))
-               mItems[i]->setVert(mOriginalVertLocations[count++] + delta, j);
+         for(S32 j = 0; j < obj->getVertCount(); j++)
+            if(obj->isSelected() || obj->vertSelected(j))
+               obj->setVert(mOriginalVertLocations[count++] + delta, j);
 
          // If we are dragging a vertex, and not the entire item, we are changing the geom, so notify the item
-         if(mItems[i]->anyVertsSelected())
-            mItems[i]->onGeomChanging();  
+         if(obj->anyVertsSelected())
+            obj->onGeomChanging();  
 
-         if(mItems[i]->isSelected())     
-            mItems[i]->onItemDragging();      // Make sure this gets run after we've updated the item's location
+         if(obj->isSelected())     
+            obj->onItemDragging();      // Make sure this gets run after we've updated the item's location
       }
+   }
 }
 
 
@@ -2357,18 +2387,22 @@ void EditorUserInterface::startDraggingDockItem()
 
    clearSelection();            // No items are selected...
    item->setSelected(true);     // ...except for the new one
-   geomSort(mItems);            // So things will render in the proper order
+   //geomSort(mItems);            // So things will render in the proper order
    mDraggingDockItem = NONE;    // Because now we're dragging a real item
    validateLevel();             // Check level for errors
 
 
    // Because we sometimes have trouble finding an item when we drag it off the dock, after it's been sorted,
    // we'll manually set mItemHit based on the selected item, which will always be the one we just added.
+   // TODO: Still needed?
+
+   const Vector<EditorObject *> *objList = getObjectList();
+
    mEdgeHit = NONE;
-   for(S32 i = 0; i < mItems.size(); i++)
-      if(mItems[i]->isSelected())
+   for(S32 i = 0; i < objList->size(); i++)
+      if(objList->get(i)->isSelected())
       {
-         mItemHit = mItems[i].get();
+         mItemHit = objList->get(i);
          break;
       }
 }
@@ -2424,18 +2458,24 @@ void EditorUserInterface::findSnapVertex()
       return;
    } 
 
+   const Vector<EditorObject *> *objList = getObjectList();
+
    // Otherwise, we don't have a selected hitItem -- look for a selected vertex
-   for(S32 i = 0; i < mItems.size(); i++)
-      for(S32 j = 0; j < mItems[i]->getVertCount(); j++)
+   for(S32 i = 0; i < objList->size(); i++)
+   {
+      EditorObject *obj = objList->get(i);
+
+      for(S32 j = 0; j < obj->getVertCount(); j++)
       {
          // If we find a selected vertex, there will be only one, and this is our snap point
-         if(mItems[i]->vertSelected(j))
+         if(obj->vertSelected(j))
          {
-            mSnapVertex_i = mItems[i].get();
+            mSnapVertex_i = obj;
             mSnapVertex_j = j;
             return;     
          }
       }
+   }
 }
 
 
@@ -2449,12 +2489,16 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
 
    bool deleted = false;
 
-   for(S32 i = mItems.size()-1; i >= 0; i--)  // Reverse to avoid having to have i-- in middle of loop
+   const Vector<EditorObject *> *objList = getObjectList();
+
+   for(S32 i = objList->size()-1; i >= 0; i--)  // Reverse to avoid having to have i-- in middle of loop
    {
-      if(mItems[i]->isSelected())
+      EditorObject *obj = objList->get(i);
+
+      if(obj->isSelected())
       {  
          // Since indices change as items are deleted, this will keep incorrect items from being deleted
-         if(mItems[i]->isLitUp())
+         if(obj->isLitUp())
             mItemToLightUp = NULL;
 
          if(!deleted)
@@ -2467,15 +2511,15 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
       {
          bool geomChanged = false;
 
-         for(S32 j = 0; j < mItems[i]->getVertCount(); j++) 
+         for(S32 j = 0; j < obj->getVertCount(); j++) 
          {
-            if(mItems[i]->vertSelected(j))
+            if(obj->vertSelected(j))
             {
                
                if(!deleted)
                   saveUndoState();
               
-               mItems[i]->deleteVert(j);
+               obj->deleteVert(j);
                deleted = true;
 
                geomChanged = true;
@@ -2485,15 +2529,15 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
          }
 
          // Deleted last vertex, or item can't lose a vertex... it must go!
-         if(mItems[i]->getVertCount() == 0 || (mItems[i]->getGeomType() == geomSimpleLine && mItems[i]->getVertCount() < 2)
-                                       || (mItems[i]->getGeomType() == geomLine && mItems[i]->getVertCount() < 2)
-                                       || (mItems[i]->getGeomType() == geomPoly && mItems[i]->getVertCount() < 2))
+         if(obj->getVertCount() == 0 || (obj->getGeomType() == geomSimpleLine && obj->getVertCount() < 2)
+                                     || (obj->getGeomType() == geomLine       && obj->getVertCount() < 2)
+                                     || (obj->getGeomType() == geomPoly       && obj->getVertCount() < 2))
          {
             deleteItem(i);
             deleted = true;
          }
          else if(geomChanged)
-            mItems[i]->onGeomChanged();
+            obj->onGeomChanged();
 
       }  // else if(!objectsOnly) 
    }  // for
@@ -2508,15 +2552,18 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
    }
 }
 
+
 // Increase selected wall thickness by amt
 void EditorUserInterface::incBarrierWidth(S32 amt)
 {
    if(!mLastUndoStateWasBarrierWidthChange)
       saveUndoState(); 
 
-   for(S32 i = 0; i < mItems.size(); i++)
-      if(mItems[i]->isSelected())
-         mItems[i]->increaseWidth(amt);
+   const Vector<EditorObject *> *objList = getObjectList();
+
+   for(S32 i = 0; i < objList->size(); i++)
+      if(objList->get(i)->isSelected())
+         objList->get(i)->increaseWidth(amt);
 
    mLastUndoStateWasBarrierWidthChange = true;
 }
@@ -2528,9 +2575,11 @@ void EditorUserInterface::decBarrierWidth(S32 amt)
    if(!mLastUndoStateWasBarrierWidthChange)
       saveUndoState(); 
 
-   for(S32 i = 0; i < mItems.size(); i++)
-      if(mItems[i]->isSelected())
-         mItems[i]->decreaseWidth(amt);
+   const Vector<EditorObject *> *objList = getObjectList();
+
+   for(S32 i = 0; i < objList->size(); i++)
+      if(objList->get(i)->isSelected())
+         objList->get(i)->decreaseWidth(amt);
 
    mLastUndoStateWasBarrierWidthChange = true;
 }
@@ -2541,42 +2590,48 @@ void EditorUserInterface::splitBarrier()
 {
    bool split = false;
 
-   for(S32 i = 0; i < mItems.size(); i++)
-      if(mItems[i]->getGeomType() == geomLine)
-          for(S32 j = 1; j < mItems[i]->getVertCount() - 1; j++)     // Can't split on end vertices!
-            if(mItems[i]->vertSelected(j))
+   const Vector<EditorObject *> *objList = getObjectList();
+
+   for(S32 i = 0; i < objList->size(); i++)
+   {
+      EditorObject *obj = objList->get(i);
+
+      if(obj->getGeomType() == geomLine)
+          for(S32 j = 1; j < obj->getVertCount() - 1; j++)     // Can't split on end vertices!
+            if(obj->vertSelected(j))
             {
                if(!split)
                   saveUndoState();
                split = true;
 
                // Create a poor man's copy
-               EditorObject *newItem = mItems[i]->newCopy();
+               EditorObject *newItem = obj->newCopy();
                newItem->setTeam(-1);
-               newItem->setWidth(mItems[i]->getWidth());
+               newItem->setWidth(obj->getWidth());
                newItem->clearVerts();
 
-               for(S32 k = j; k < mItems[i]->getVertCount(); k++) 
+               for(S32 k = j; k < obj->getVertCount(); k++) 
                {
-                  newItem->addVert(mItems[i]->getVert(k));
+                  newItem->addVert(obj->getVert(k));
                   if (k > j)
                   {
-                     mItems[i]->deleteVert(k);     // Don't delete j == k vertex -- it needs to remain as the final vertex of the old wall
+                     obj->deleteVert(k);     // Don't delete j == k vertex -- it needs to remain as the final vertex of the old wall
                      k--;
                   }
                }
 
 
                // Tell the new segments that they have new geometry
-               mItems[i]->onGeomChanged();
+               obj->onGeomChanged();
                newItem->onGeomChanged();
-               mItems.push_back(shared_ptr<EditorObject>(newItem));
+               mItems.push_back(boost::shared_ptr<EditorObject>(newItem));
 
                // And get them in the right order
                //mItems.sort(geometricSort);  
-               geomSort(mItems);
+               //geomSort(mItems);
                goto done2;                         // Yes, gotos are naughty, but they just work so well sometimes...
             }
+   }
 done2:
    if(split)
    {
@@ -2592,62 +2647,69 @@ void EditorUserInterface::joinBarrier()
 {
    S32 joinedItem = NONE;
 
-   for(S32 i = 0; i < mItems.size()-1; i++)
-      if(mItems[i]->getGeomType() == geomLine && (mItems[i]->isSelected()))
+   const Vector<EditorObject *> *objList = getObjectList();
+
+   for(S32 i = 0; i < objList->size()-1; i++)
+   {
+      EditorObject *obj_i = objList->get(i);
+
+      if(obj_i->getGeomType() == geomLine && (obj_i->isSelected()))
       {
-         for(S32 j = i + 1; j < mItems.size(); j++)
+         for(S32 j = i + 1; j < objList->size(); j++)
          {
-            if(mItems[j]->getObjectTypeMask() & mItems[i]->getObjectTypeMask() && (mItems[j]->isSelected()))
+            EditorObject *obj_j = objList->get(i);
+
+            if(obj_j->getObjectTypeMask() & obj_i->getObjectTypeMask() && (obj_j->isSelected()))
             {
-               if(mItems[i]->getVert(0).distanceTo(mItems[j]->getVert(0)) < .01)    // First vertices are the same  1 2 3 | 1 4 5
+               if(obj_i->getVert(0).distanceTo(obj_j->getVert(0)) < .01)    // First vertices are the same  1 2 3 | 1 4 5
                {
                   if(joinedItem == NONE)
                      saveUndoState();
                   joinedItem = i;
 
-                  for(S32 a = 1; a < mItems[j]->getVertCount(); a++)             // Skip first vertex, because it would be a dupe
-                     mItems[i]->addVertFront(mItems[j]->getVert(a));
+                  for(S32 a = 1; a < obj_j->getVertCount(); a++)             // Skip first vertex, because it would be a dupe
+                     obj_i->addVertFront(obj_j->getVert(a));
 
                   deleteItem(j);
                   i--;  j--;
                }
                // First vertex conincides with final vertex 3 2 1 | 5 4 3
-               else if(mItems[i]->getVert(0).distanceTo(mItems[j]->getVert(mItems[j]->getVertCount()-1)) < .01)     
+               else if(obj_i->getVert(0).distanceTo(obj_j->getVert(obj_j->getVertCount()-1)) < .01)     
                {
                   if(joinedItem == NONE)
                      saveUndoState();
 
                   joinedItem = i;
-                  for(S32 a = mItems[j]->getVertCount()-2; a >= 0; a--)
-                     mItems[i]->addVertFront(mItems[j]->getVert(a));
+                  for(S32 a = obj_j->getVertCount()-2; a >= 0; a--)
+                     obj_i->addVertFront(obj_j->getVert(a));
 
                   deleteItem(j);
                   i--;  j--;
 
                }
                // Last vertex conincides with first 1 2 3 | 3 4 5
-               else if(mItems[i]->getVert(mItems[i]->getVertCount()-1).distanceTo(mItems[j]->getVert(0)) < .01)     
+               else if(obj_i->getVert(obj_i->getVertCount()-1).distanceTo(obj_j->getVert(0)) < .01)     
                {
                   if(joinedItem == NONE)
                      saveUndoState();
 
                   joinedItem = i;
 
-                  for(S32 a = 1; a < mItems[j]->getVertCount(); a++)  // Skip first vertex, because it would be a dupe         
-                     mItems[i]->addVert(mItems[j]->getVert(a));
+                  for(S32 a = 1; a < obj_j->getVertCount(); a++)  // Skip first vertex, because it would be a dupe         
+                     obj_i->addVert(obj_j->getVert(a));
 
                   deleteItem(j);
                   i--;  j--;
                }
-               else if(mItems[i]->getVert(mItems[i]->getVertCount()-1).distanceTo(mItems[j]->getVert(mItems[j]->getVertCount()-1)) < .01)     // Last vertices coincide  1 2 3 | 5 4 3
+               else if(obj_i->getVert(obj_i->getVertCount()-1).distanceTo(obj_j->getVert(obj_j->getVertCount()-1)) < .01)     // Last vertices coincide  1 2 3 | 5 4 3
                {
                   if(joinedItem == NONE)
                      saveUndoState();
 
                   joinedItem = i;
 
-                  for(S32 a = mItems[j]->getVertCount()-2; a >= 0; a--)
-                     mItems[i]->addVert(mItems[j]->getVert(a));
+                  for(S32 a = obj_j->getVertCount()-2; a >= 0; a--)
+                     obj_i->addVert(obj_j->getVert(a));
 
                   deleteItem(j);
                   i--;  j--;
@@ -2655,13 +2717,14 @@ void EditorUserInterface::joinBarrier()
             }
          }
       }
+   }
 
    if(joinedItem != NONE)
    {
       clearSelection();
       mNeedToSave = true;
       autoSave();
-      mItems[joinedItem]->onGeomChanged();
+      objList->get(joinedItem)->onGeomChanged();
    }
 }
 
@@ -2849,7 +2912,7 @@ void EditorUserInterface::insertNewItem(GameObjectType itemType)
    newObject->addToEditor(gEditorGame);     // Adds newItem to mItems list
 
    //mItems.sort(geometricSort);
-   geomSort(mItems);
+   //geomSort(mItems);
    validateLevel();
    mNeedToSave = true;
    autoSave();
@@ -2869,36 +2932,46 @@ static LineEditor getNewEntryBox(string value, string prompt, S32 length, LineEd
 
 void EditorUserInterface::centerView()
 {
-   if(mItems.size() || mLevelGenItems.size())
+   const Vector<EditorObject *> *objList = getObjectList();
+
+   if(objList->size() || mLevelGenItems.size())
    {
       F32 minx =  F32_MAX,   miny =  F32_MAX;
       F32 maxx = -F32_MAX,   maxy = -F32_MAX;
 
-      for(S32 i = 0; i < mItems.size(); i++)
-         for(S32 j = 0; j < mItems[i]->getVertCount(); j++)
+      for(S32 i = 0; i < objList->size(); i++)
+      {
+         EditorObject *obj = objList->get(i);
+
+         for(S32 j = 0; j < obj->getVertCount(); j++)
          {
-            if(mItems[i]->getVert(j).x < minx)
-               minx = mItems[i]->getVert(j).x;
-            if(mItems[i]->getVert(j).x > maxx)
-               maxx = mItems[i]->getVert(j).x;
-            if(mItems[i]->getVert(j).y < miny)
-               miny = mItems[i]->getVert(j).y;
-            if(mItems[i]->getVert(j).y > maxy)
-               maxy = mItems[i]->getVert(j).y;
+            if(obj->getVert(j).x < minx)
+               minx = obj->getVert(j).x;
+            if(obj->getVert(j).x > maxx)
+               maxx = obj->getVert(j).x;
+            if(obj->getVert(j).y < miny)
+               miny = obj->getVert(j).y;
+            if(obj->getVert(j).y > maxy)
+               maxy = obj->getVert(j).y;
          }
+      }
 
       for(S32 i = 0; i < mLevelGenItems.size(); i++)
-         for(S32 j = 0; j < mLevelGenItems[i]->getVertCount(); j++)
+      {
+         EditorObject *obj = mLevelGenItems[i].get();
+
+         for(S32 j = 0; j < obj->getVertCount(); j++)
          {
-            if(mLevelGenItems[i]->getVert(j).x < minx)
-               minx = mLevelGenItems[i]->getVert(j).x;
-            if(mLevelGenItems[i]->getVert(j).x > maxx)
-               maxx = mLevelGenItems[i]->getVert(j).x;
-            if(mLevelGenItems[i]->getVert(j).y < miny)
-               miny = mLevelGenItems[i]->getVert(j).y;
-            if(mLevelGenItems[i]->getVert(j).y > maxy)
-               maxy = mLevelGenItems[i]->getVert(j).y;
+            if(obj->getVert(j).x < minx)
+               minx = obj->getVert(j).x;
+            if(obj->getVert(j).x > maxx)
+               maxx = obj->getVert(j).x;
+            if(obj->getVert(j).y < miny)
+               miny = obj->getVert(j).y;
+            if(obj->getVert(j).y > maxy)
+               maxy = obj->getVert(j).y;
          }
+      }
 
       // If we have only one point object in our level, the following will correct
       // for any display weirdness.
@@ -2932,13 +3005,17 @@ void EditorUserInterface::doneEditingAttributes(EditorAttributeMenuUI *editor, E
 {
    object->onAttrsChanged();
 
+   const Vector<EditorObject *> *objList = getObjectList();
+
    // Find any other selected items of the same type of the item we just edited, and update their values too
-   for(S32 i = 0; i < mItems.size(); i++)
+   for(S32 i = 0; i < objList->size(); i++)
    {
-      if(mItems[i].get() != object && mItems[i]->isSelected() && mItems[i]->getObjectTypeMask() == object->getObjectTypeMask())
+      EditorObject *obj = objList->get(i);
+
+      if(obj != object && obj->isSelected() && obj->getObjectTypeMask() == object->getObjectTypeMask())
       {
-         editor->doneEditing(mItems[i].get());  // Transfer attributes from editor to object
-         mItems[i]->onAttrsChanged();     // And notify the object that its attributes have changed
+         editor->doneEditing(obj);  // Transfer attributes from editor to object
+         obj->onAttrsChanged();     // And notify the object that its attributes have changed
       }
    }
 }
@@ -2973,10 +3050,12 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    {
       S32 selected = NONE;
 
+      const Vector<EditorObject *> *objList = getObjectList();
+
       // Find first selected item, and just work with that.  Unselect the rest.
-      for(S32 i = 0; i < mItems.size(); i++)
+      for(S32 i = 0; i < objList->size(); i++)
       {
-         if(mItems[i]->isSelected())
+         if(objList->get(i)->isSelected())
          {
             if(selected == NONE)
             {
@@ -2984,14 +3063,14 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
                continue;
             }
             else
-               mItems[i]->setSelected(false);
+               objList->get(i)->setSelected(false);
          }
       }
 
       if(selected == NONE)      // Nothing selected, nothing to do!
          return;
 
-      mEntryBox = getNewEntryBox(mItems[selected]->getItemId() <= 0 ? "" : itos(mItems[selected]->getItemId()), 
+      mEntryBox = getNewEntryBox(objList->get(selected)->getItemId() <= 0 ? "" : itos(objList->get(selected)->getItemId()), 
                                  "Item ID:", 10, LineEditor::digitsOnlyFilter);
       entryMode = EntryID;
    }
@@ -3086,7 +3165,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          {
             mNewItem->addToEditor(gEditorGame);
             mNewItem->onGeomChanged();          // Walls need to be added to editor BEFORE onGeomChanged() is run!
-            geomSort(mItems);
+            //geomSort(mItems);
          }
 
          mNewItem = NULL;
@@ -3361,17 +3440,23 @@ void EditorUserInterface::textEntryKeyHandler(KeyCode keyCode, char ascii)
    {
       if(entryMode == EntryID)
       {
-         for(S32 i = 0; i < mItems.size(); i++)
-            if(mItems[i]->isSelected())             // Should only be one
+         const Vector<EditorObject *> *objList = getObjectList();
+
+         for(S32 i = 0; i < objList->size(); i++)
+         {
+            EditorObject *obj = objList->get(i);
+
+            if(obj->isSelected())             // Should only be one
             {
                U32 id = atoi(mEntryBox.c_str());
-               if(mItems[i]->getItemId() != (S32)id)     // Did the id actually change?
+               if(obj->getItemId() != (S32)id)     // Did the id actually change?
                {
-                  mItems[i]->setItemId(id);
+                  obj->setItemId(id);
                   mAllUndoneUndoLevel = -1;        // If so, it can't be undone
                }
                break;
             }
+         }
       }
       else if(entryMode == EntryAngle)
       {
@@ -3404,23 +3489,30 @@ static const S32 MAX_REPOP_DELAY = 600;      // That's 10 whole minutes!
 
 void EditorUserInterface::startAttributeEditor()
 {
-   for(S32 i = 0; i < mItems.size(); i++)
+   const Vector<EditorObject *> *objList = getObjectList();
+
+   for(S32 i = 0; i < objList->size(); i++)
    {
-      if(mItems[i]->isSelected())
+      EditorObject *obj_i = objList->get(i);
+      if(obj_i->isSelected())
       {
          // Force item i to be the one and only selected item type.  This will clear up some problems that
          // might otherwise occur.  If you have multiple items selected, all will end up with the same values.
-         for(S32 j = 0; j < mItems.size(); j++)
-            if(mItems[j]->isSelected() && mItems[j]->getObjectTypeMask() != mItems[i]->getObjectTypeMask())
-               mItems[j]->unselect();
+         for(S32 j = 0; j < objList->size(); j++)
+         {
+            EditorObject *obj_j = objList->get(j);
+
+            if(obj_j->isSelected() && obj_j->getObjectTypeMask() != obj_i->getObjectTypeMask())
+               obj_j->unselect();
+         }
 
 
          // Activate the attribute editor if there is one
-         EditorAttributeMenuUI *menu = mItems[i]->getAttributeMenu();
+         EditorAttributeMenuUI *menu = obj_i->getAttributeMenu();
          if(menu)
          {
-            mItems[i]->setIsBeingEdited(true);
-            menu->startEditing(mItems[i].get());
+            obj_i->setIsBeingEdited(true);
+            menu->startEditing(obj_i);
             menu->activate();
 
             saveUndoState();
@@ -3477,27 +3569,25 @@ void EditorUserInterface::onKeyUp(KeyCode keyCode)
             Rect r(convertCanvasToLevelCoord(mMousePos), mMouseDownPos);
             S32 j;
 
-            for(S32 i = 0; i < mItems.size(); i++)
+            fillVector.clear();
+
+            if(mShowMode == ShowWallsOnly)
+               gEditorGame->getGridDatabase()->findObjects(~(BarrierType | PolyWallType), fillVector);
+            else
+               gEditorGame->getGridDatabase()->findObjects(fillVector);
+
+
+            for(S32 i = 0; i < fillVector.size(); i++)
             {
-               // Skip hidden items
-               if(mShowMode == ShowWallsOnly)
-               {
-                  if(mItems[i]->getObjectTypeMask() & ~BarrierType && mItems[i]->getObjectTypeMask() & ~PolyWallType)
-                     continue;
-               }
-               else if(mShowMode == ShowAllButNavZones)
-               {
-                  if(mItems[i]->getObjectTypeNumber() == BotNavMeshZoneTypeNumber)
-                     continue;
-               }
+               EditorObject *obj = dynamic_cast<EditorObject *>(fillVector[i]);
 
                // Make sure that all vertices of an item are inside the selection box; basically means that the entire 
                // item needs to be surrounded to be included in the selection
-               for(j = 0; j < mItems[i]->getVertCount(); j++)
-                  if(!r.contains(mItems[i]->getVert(j)))
+               for(j = 0; j < obj->getVertCount(); j++)
+                  if(!r.contains(obj->getVert(j)))
                      break;
-               if(j == mItems[i]->getVertCount())
-                  mItems[i]->setSelected(true);
+               if(j == obj->getVertCount())
+                  obj->setSelected(true);
             }
             mDragSelecting = false;
          }
@@ -3526,8 +3616,10 @@ void EditorUserInterface::onFinishedDragging()
    {
       if(mDraggingDockItem == NONE)       // This was really a delete (item dragged to dock)
       {
-         for(S32 i = 0; i < mItems.size(); i++)    //  Delete all selected items
-            if(mItems[i]->isSelected())
+         const Vector<EditorObject *> *objList = getObjectList();
+
+         for(S32 i = 0; i < objList->size(); i++)    //  Delete all selected items
+            if(objList->get(i)->isSelected())
             {
                deleteItem(i);
                i--;
@@ -3545,13 +3637,15 @@ void EditorUserInterface::onFinishedDragging()
 
          if(itemsMoved)    // Move consumated... update any moved items, and save our autosave
          {
-            for(S32 i = 0; i < mItems.size(); i++)
-               if(mItems[i]->isSelected() || mItems[i]->anyVertsSelected())
-                  mItems[i]->onGeomChanged();
+            const Vector<EditorObject *> *objList = getObjectList();
+
+            for(S32 i = 0; i < objList->size(); i++)
+               if(objList->get(i)->isSelected() || objList->get(i)->anyVertsSelected())
+                  objList->get(i)->onGeomChanged();
 
             mNeedToSave = true;
             autoSave();
-            geomSort(mItems);  
+            //geomSort(mItems);  
 
             return;
          }
@@ -3573,8 +3667,10 @@ bool EditorUserInterface::mouseOnDock()
 
 bool EditorUserInterface::anyItemsSelected()
 {
-   for(S32 i = 0; i < mItems.size(); i++)
-      if(mItems[i]->isSelected())
+   const Vector<EditorObject *> *objList = getObjectList();
+
+   for(S32 i = 0; i < objList->size(); i++)
+      if(objList->get(i)->isSelected())
          return true;
 
    return false;
@@ -3583,11 +3679,11 @@ bool EditorUserInterface::anyItemsSelected()
 
 bool EditorUserInterface::anythingSelected()
 {
-   for(S32 i = 0; i < mItems.size(); i++)
-   {
-      if(mItems[i]->isSelected() || mItems[i]->anyVertsSelected() )
+   const Vector<EditorObject *> *objList = getObjectList();
+
+   for(S32 i = 0; i < objList->size(); i++)
+      if(objList->get(i)->isSelected() || objList->get(i)->anyVertsSelected() )
          return true;
-   }
 
    return false;
 }
@@ -3719,13 +3815,15 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
             mTeams[i].color.r, mTeams[i].color.g, mTeams[i].color.b);
 
       // Write out all level items (do two passes; walls first, non-walls next, so turrets & forcefields have something to grab onto)
+      const Vector<EditorObject *> *objList = getObjectList();
+
       for(S32 j = 0; j < 2; j++)
-         for(S32 i = 0; i < mItems.size(); i++)
+         for(S32 i = 0; i < objList->size(); i++)
          {
-            EditorObject *p = mItems[i].get();
+            EditorObject *p = objList->get(i);
 
             // Make sure we are writing wall items on first pass, non-wall items next
-            if((p->getObjectTypeMask() & BarrierType || p->getObjectTypeMask() & PolyWallType) != (j == 0))
+            if((p->getObjectTypeMask() & (BarrierType | PolyWallType)) != (j == 0))
                continue;
 
             p->saveItem(f);

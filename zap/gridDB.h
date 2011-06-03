@@ -125,13 +125,36 @@ public:
    void findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector, const Rect &extents, U8 typeNumber = U8_MAX);
    
 
-   void addToDatabase(DatabaseObject *theObject, const Rect &extents);
-   void removeFromDatabase(DatabaseObject *theObject, const Rect &extents);
+   virtual void addToDatabase(DatabaseObject *theObject, const Rect &extents);
+   virtual void removeFromDatabase(DatabaseObject *theObject, const Rect &extents);
 
    bool isUsingGameCoords() { return mUsingGameCoords; }
 
    S32 getObjectCount() { return mAllObjects.size(); }      // Return the number of objects currently in the database
    DatabaseObject *getObjectByIndex(S32 index);             // Kind of hacky, kind of useful
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+class EditorObject;
+
+class EditorObjectDatabase : public GridDatabase
+{
+   typedef GridDatabase Parent;
+
+private:
+   Vector<EditorObject *> mAllEditorObjects;
+
+public:
+   EditorObjectDatabase(bool usingGameCoords = true);      // Constructor
+
+   const Vector<EditorObject *> *getObjectList();     
+
+   void addToDatabase(DatabaseObject *theObject, const Rect &extents);
+
+   void removeFromDatabase(EditorObject *theObject, const Rect &extents);
 };
 
 };

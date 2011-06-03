@@ -2216,6 +2216,7 @@ EditorGame::EditorGame() : Game(Address())
 { 
    setGridSize((F32)DefaultGridSize); 
    mWallSegmentManager = gEditorUserInterface.getWallSegmentManager();
+   mEditorDatabase;
 }     
 
 // TODO: Combine with GameType::getTeamColor
