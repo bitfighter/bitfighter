@@ -124,6 +124,7 @@ public:
    void findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector, U8 typeNumber = U8_MAX);      
    void findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector, const Rect &extents, U8 typeNumber = U8_MAX);
    
+   void clear();
 
    virtual void addToDatabase(DatabaseObject *theObject, const Rect &extents);
    virtual void removeFromDatabase(DatabaseObject *theObject, const Rect &extents);

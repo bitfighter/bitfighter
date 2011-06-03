@@ -84,7 +84,10 @@ static const Color inactiveSpecialAttributeColor = Color(.6, .6, .6);
 static const S32 TEAM_NEUTRAL = Item::TEAM_NEUTRAL;
 static const S32 TEAM_HOSTILE = Item::TEAM_HOSTILE;
 
-static Vector<boost::shared_ptr<EditorObject> > *mLoadTarget;
+//static Vector<boost::shared_ptr<EditorObject> > *mLoadTarget;
+static EditorObjectDatabase *mLoadTarget;
+
+static EditorObjectDatabase mLevelGenDatabase;     // Database for inserting objects when running a levelgen script in the editor
 
 enum EntryMode {
    EntryID,          // Entering an objectID
@@ -156,7 +159,7 @@ void EditorUserInterface::addToDock(EditorObject* object)
 
 void EditorUserInterface::addToEditor(EditorObject* object)
 {
-   mItems.push_back(boost::shared_ptr<EditorObject>(object));
+   //mItems.push_back(boost::shared_ptr<EditorObject>(object));
 }
 
 
@@ -246,7 +249,7 @@ void EditorUserInterface::populateDock()
 // Destructor -- unwind things in an orderly fashion
 EditorUserInterface::~EditorUserInterface()
 {
-   mItems.clear();
+   gEditorGame->getGridDatabase()->clear();
    mDockItems.clear();
    mLevelGenItems.clear();
    mClipboard.deleteAndClear();
@@ -368,20 +371,20 @@ void EditorUserInterface::deleteUndoState()
 
 
 // Experimental save to string method
-static void copyItems(Vector<boost::shared_ptr<EditorObject> > &from, Vector<string> &to)
+static void copyItems(const Vector<EditorObject *> *from, Vector<string> &to)
 {
-   to.resize(from.size());      // Preallocation makes things go faster
+   to.resize(from->size());      // Preallocation makes things go faster
 
-   for(S32 i = 0; i < from.size(); i++)
-      to[i] = from[i]->toString();
+   for(S32 i = 0; i < from->size(); i++)
+      to[i] = from->get(i)->toString();
 }
 
 
 // TODO: Make this an UIEditor method, and get rid of the global
-static void restoreItems(const Vector<string> &from, Vector<boost::shared_ptr<EditorObject> > &to)
+static void restoreItems(const Vector<string> &from)
 {
-   to.clear();
-   to.reserve(from.size());      // Preallocation makes things go faster
+   GridDatabase *db = gEditorGame->getGridDatabase();
+   db->clear();
 
    Vector<string> args;
 
@@ -425,7 +428,7 @@ void EditorUserInterface::saveUndoState()
    if(mAllUndoneUndoLevel > mLastRedoIndex)     
       mAllUndoneUndoLevel = NONE;
 
-   copyItems(mItems, mUndoItems[mLastUndoIndex % UNDO_STATES]);
+   copyItems(getObjectList(), mUndoItems[mLastUndoIndex % UNDO_STATES]);
 
    mLastUndoIndex++;
    mLastRedoIndex++; 
@@ -466,8 +469,7 @@ void EditorUserInterface::undo(bool addToRedoStack)
    }
 
    mLastUndoIndex--;
-   mItems.clear();
-   restoreItems(mUndoItems[mLastUndoIndex % UNDO_STATES], mItems);
+   restoreItems(mUndoItems[mLastUndoIndex % UNDO_STATES]);
 
    rebuildEverything();
 
@@ -484,8 +486,7 @@ void EditorUserInterface::redo()
       mSnapVertex_j = NONE;
 
       mLastUndoIndex++;
-      mItems.clear();
-      restoreItems(mUndoItems[mLastUndoIndex % UNDO_STATES], mItems);   
+      restoreItems(mUndoItems[mLastUndoIndex % UNDO_STATES]);   
 
       rebuildEverything();
       validateLevel();
@@ -600,13 +601,13 @@ extern ConfigDirectories gConfigDirs;
 void EditorUserInterface::loadLevel()
 {
    // Initialize
-   mItems.clear();
+   gEditorGame->getGridDatabase()->clear();
    mTeams.clear();
    mSnapVertex_i = NULL;
    mSnapVertex_j = NONE;
    mAddingVertex = false;
    clearLevelGenItems();
-   mLoadTarget = &mItems;
+   mLoadTarget = (EditorObjectDatabase *)gEditorGame->getGridDatabase();
    mGameTypeArgs.clear();
    gGameParamUserInterface.gameParams.clear();
    gGameParamUserInterface.savedMenuItems.clear();          // clear() because this is not a pointer vector
@@ -685,9 +686,9 @@ void EditorUserInterface::copyScriptItemsToEditor()
    saveUndoState();
 
    for(S32 i = 0; i < mLevelGenItems.size(); i++)
-      mItems.push_back(mLevelGenItems[i]);
-
-   mLevelGenItems.clear();    // Don't want to delete these objects... we just handed them off to mItems!
+      mLevelGenItems[i]->addToEditor(gEditorGame);
+      
+   mLevelGenItems.clear();    // Don't want to delete these objects... we just handed them off to the database!
 
    rebuildEverything();
 
@@ -710,13 +711,13 @@ void EditorUserInterface::runLevelGenScript()
 
    clearLevelGenItems();      // Clear out any items from the last run
 
-   // Set the load target to the levelgen list, as that's where we want our items stored
-   mLoadTarget = &mLevelGenItems;
+   // Set the load target to the levelgen db, as that's where we want our items stored
+   mLoadTarget = &mLevelGenDatabase;
 
    runScript(scriptName, scriptArgs);
 
    // Reset the target
-   mLoadTarget = &mItems;
+   mLoadTarget = (EditorObjectDatabase *)gEditorGame->getGridDatabase();
 }
 
 
@@ -739,17 +740,20 @@ void EditorUserInterface::runScript(const string &scriptName, const Vector<strin
    // Process new items
    // Not sure about all this... may need to test
    // Bulk-process new items, walls first
-   for(S32 i = 0; i < mLoadTarget->size(); i++)
-      if((*mLoadTarget)[i]->getObjectTypeMask() & WallType)
-      {
-         if((*mLoadTarget)[i]->getVertCount() < 2)      // Invalid item; delete
-         {
-            (*mLoadTarget).erase(i);
-            i--;
-         }
 
-         (*mLoadTarget)[i]->processEndPoints();
-      }
+   fillVector.clear();
+   mLoadTarget->findObjects(WallType, fillVector);
+
+   for(S32 i = 0; i < fillVector.size(); i++)
+   {
+      EditorObject *obj = dynamic_cast<EditorObject *>(fillVector[i]);
+      if(obj->getVertCount() < 2)      // Invalid item; delete
+         mLoadTarget->removeFromDatabase(obj, obj->getExtent());
+
+      obj->processEndPoints();
+   }
+
+   // When I came through here in early june, there was nothing else here... shouldn't there be some handling of non-wall objects?  -CE
 }
 
 
@@ -2624,7 +2628,8 @@ void EditorUserInterface::splitBarrier()
                // Tell the new segments that they have new geometry
                obj->onGeomChanged();
                newItem->onGeomChanged();
-               mItems.push_back(boost::shared_ptr<EditorObject>(newItem));
+               //mItems.push_back(boost::shared_ptr<EditorObject>(newItem));
+               newItem->addToEditor(gEditorGame);
 
                // And get them in the right order
                //mItems.sort(geometricSort);  
@@ -2731,22 +2736,25 @@ void EditorUserInterface::joinBarrier()
 
 void EditorUserInterface::deleteItem(S32 itemIndex)
 {
-   S32 mask = mItems[itemIndex]->getObjectTypeMask();
-   if(mask & BarrierType || mask & PolyWallType)
+   const Vector<EditorObject *> *objList = getObjectList();
+   EditorObject *obj = objList->get(itemIndex);
+
+   S32 mask = obj->getObjectTypeMask();
+
+   if(mask & (BarrierType | PolyWallType))
    {
       // Need to recompute boundaries of any intersecting walls
-      mWallSegmentManager.invalidateIntersectingSegments(mItems[itemIndex].get());    // Mark intersecting segments invalid
-      mWallSegmentManager.deleteSegments(mItems[itemIndex]->getItemId());       // Delete the segments associated with the wall
+      mWallSegmentManager.invalidateIntersectingSegments(obj);    // Mark intersecting segments invalid
+      mWallSegmentManager.deleteSegments(obj->getItemId());       // Delete the segments associated with the wall
 
-      mItems.erase(itemIndex);
+      gEditorGame->getGridDatabase()->removeFromDatabase(obj, obj->getExtent());
 
-      mWallSegmentManager.recomputeAllWallGeometry();                           // Recompute wall edges
+      mWallSegmentManager.recomputeAllWallGeometry();             // Recompute wall edges
       resnapAllEngineeredItems();         // Really only need to resnap items that were attached to deleted wall... but we
                                           // don't yet have a method to do that, and I'm feeling lazy at the moment
    }
    else
-      mItems.erase(itemIndex);
-
+      gEditorGame->getGridDatabase()->removeFromDatabase(obj, obj->getExtent());
 
    // Reset a bunch of things
    mSnapVertex_i = NULL;
@@ -2909,7 +2917,7 @@ void EditorUserInterface::insertNewItem(GameObjectType itemType)
    TNLAssert(newObject, "Couldn't create object in insertNewItem()");
 
    newObject->moveTo(snapPoint(convertCanvasToLevelCoord(mMousePos)));
-   newObject->addToEditor(gEditorGame);     // Adds newItem to mItems list
+   newObject->addToEditor(gEditorGame);    
 
    //mItems.sort(geometricSort);
    //geomSort(mItems);

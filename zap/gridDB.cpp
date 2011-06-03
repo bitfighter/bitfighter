@@ -45,6 +45,13 @@ GridDatabase::GridDatabase(bool usingGameCoords)
 }
 
 
+void GridDatabase::clear()
+{
+   for(S32 i = mAllObjects.size() - 1; i >= 0 ; i--)
+      removeFromDatabase(mAllObjects[i], mAllObjects[i]->getExtent());
+}
+
+
 void GridDatabase::addToDatabase(DatabaseObject *theObject, const Rect &extents)
 {
    S32 minx, miny, maxx, maxy;  
@@ -108,7 +115,8 @@ void GridDatabase::removeFromDatabase(DatabaseObject *theObject, const Rect &ext
    }
 
    // Remove the object to our non-spatial "database" as well
-   for(S32 i = 0; i < mAllObjects.size(); i++)
+   // Working backwards makes clear() go faster, should have little effect on the case of removing an arbitrary object
+   for(S32 i = mAllObjects.size() - 1; i >= 0 ; i--)
       if(mAllObjects[i] == theObject)
       {
          mAllObjects.erase_fast(i);

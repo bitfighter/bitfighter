@@ -265,9 +265,6 @@ public:
    Vector<TeamEditor> mTeams;       // Team list: needs to be public so we can edit from UITeamDefMenu
    Vector<TeamEditor> mOldTeams;    // Team list from before we run team editor, so we can see what changed
 
-   Vector<boost::shared_ptr<EditorObject> > mItems;        // Item list: needs to be public so we can get team info while in UITeamDefMenu
-
-
    GridDatabase *getGridDatabase() { return &mGridDatabase; }
 
    //static void setTranslationAndScale(const Point &pos);
