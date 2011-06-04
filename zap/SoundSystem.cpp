@@ -7,6 +7,7 @@
 
 #include "SoundSystem.h"
 #include "SoundEffect.h"
+#include "Point.h"
 #include "tnlLog.h"
 #include "tnlByteBuffer.h"
 
@@ -17,6 +18,7 @@
 
 #include "SFXProfile.h"
 #include "config.h"
+#include "stringUtils.h"
 
 #include "tnlNetBase.h"
 
@@ -174,18 +176,27 @@ static SFXProfile sfxProfilesClassic[] = {
 };
 
 
-// TODO clean up this rif-raff
+// TODO clean up this rif-raff; maybe put in config.h?
 static bool gSFXValid = false;
+static bool gMusicValid = false;
 F32 mMaxDistance = 500;
 Point mListenerPosition;
 Point mListenerVelocity;
 
 SFXProfile *gSFXProfiles;
 
-static ALuint gSources[SoundSystem::NumSamples];
-static ALuint gBuffers[NumSFXBuffers];
+static ALuint gSfxBuffers[NumSFXBuffers];
+static Vector<ALuint> gFreeSources;
 static Vector<ALuint> gVoiceFreeBuffers;
+
+// Music specific
 static Vector<SFXHandle> gPlayList;
+static alureStream* musicStream;
+static ALuint* musicSource;  // pointer to whatever source is used by the current music
+static MusicState musicState;
+
+static Vector<string> musicList;
+static S32 currentlyPlayingIndex;
 
 extern IniSettings gIniSettings;
 extern ConfigDirectories gConfigDirs;
@@ -212,8 +223,9 @@ void SoundSystem::init()
       return;
    }
 
-   // Create free (empty) sound sources
-   alGenSources(NumSamples, gSources);
+   // Create source pool for all game sounds
+   gFreeSources.resize(NumSamples);
+   alGenSources(NumSamples, gFreeSources.address());
    if(alGetError() != AL_NO_ERROR)
    {
       logprintf(LogConsumer::LogError, "Failed to create OpenAL sources!\n");
@@ -221,16 +233,16 @@ void SoundSystem::init()
    }
 
    // Create sound buffers for the sound effect pool
-   alGenBuffers(NumSFXBuffers, gBuffers);
+   alGenBuffers(NumSFXBuffers, gSfxBuffers);
    if(alGetError() != AL_NO_ERROR)
    {
       logprintf(LogConsumer::LogError, "Failed to create OpenAL buffers!\n");
       return;
    }
 
-   // This MUST be set to maintain bitfighter's unique gain system
    // OpenAL normally defaults the distance model to AL_INVERSE_DISTANCE
-   // which is the "physically correct" model
+   // which is the "physically correct" model, however we'll use the simple
+   // linear model
    alDistanceModel(AL_LINEAR_DISTANCE_CLAMPED);
    if(alGetError() != AL_NO_ERROR)
       logprintf(LogConsumer::LogWarning, "Failed to set proper sound gain distance model!  Sounds will be off..\n");
@@ -252,16 +264,28 @@ void SoundSystem::init()
       string fileBuffer = joindir(gConfigDirs.sfxDir, gSFXProfiles[i].fileName);
 
       // Stick sound into a buffer
-      if(alureBufferDataFromFile(fileBuffer.c_str(), gBuffers[i]) == AL_FALSE)
+      if(alureBufferDataFromFile(fileBuffer.c_str(), gSfxBuffers[i]) == AL_FALSE)
       {
          logprintf(LogConsumer::LogError, "Failure (1) loading sound file '%s': Game will proceed without sound.", fileBuffer.c_str());
          return;
       }
    }
 
-   // TODO use ALURE to generate buffers for voice streaming
-   gVoiceFreeBuffers.resize(32);  // need this to allow receiving voice chat
-   alGenBuffers(32, gVoiceFreeBuffers.address());
+   // Set up music list for streaming later
+   if (!getFilesFromFolder(gConfigDirs.musicDir, musicList))
+   {
+      logprintf(LogConsumer::LogWarning, "Could not read any music files from the music folder \"%s\".", gConfigDirs.musicDir.c_str());
+   }
+   else
+   {
+      currentlyPlayingIndex = 0;
+      gMusicValid = true;
+      musicState = MusicStopped;
+   }
+
+   // Set up voice chat buffers
+   gVoiceFreeBuffers.resize(NumVoiceBuffers);
+   alGenBuffers(NumVoiceBuffers, gVoiceFreeBuffers.address());
 
    gSFXValid = true;
 }
@@ -271,9 +295,24 @@ void SoundSystem::shutdown()
    if(!gSFXValid)
       return;
 
-   alDeleteBuffers(NumSFXBuffers, gBuffers);
-   alDeleteSources(NumSamples, gSources);
+   // Stop and clean up music
+   stopMusic();
+   alureDestroyStream(musicStream, 0, NULL);
 
+   // Clean up SoundEffect buffers
+   alDeleteBuffers(NumSFXBuffers, gSfxBuffers);
+
+   // Clean up voice buffers
+   for (S32 i = 0; i < 32; i++)
+      alDeleteBuffers(1, &(gVoiceFreeBuffers[i]));
+   gVoiceFreeBuffers.clear();
+
+   // Clean up sources
+   for (S32 i = 0; i < NumSamples; i++)
+      alDeleteSources(1, &(gFreeSources[i]));
+   gFreeSources.clear();
+
+   // Shutdown device cv9
    alureShutdownDevice();
 }
 
@@ -335,7 +374,7 @@ void SoundSystem::stopSoundEffect(SFXHandle& effect)
    // Remove from the play list, if this sound is playing
    if(effect->mSourceIndex != -1)
    {
-      alSourceStop(gSources[effect->mSourceIndex]);
+      alSourceStop(gFreeSources[effect->mSourceIndex]);
       effect->mSourceIndex = -1;
    }
    for(S32 i = 0; i < gPlayList.size(); i++)
@@ -357,12 +396,12 @@ void SoundSystem::unqueueBuffers(S32 sourceIndex)
       ALint processed;
       alGetError();
 
-      alGetSourcei(gSources[sourceIndex], AL_BUFFERS_PROCESSED, &processed);
+      alGetSourcei(gFreeSources[sourceIndex], AL_BUFFERS_PROCESSED, &processed);
 
       while(processed)
       {
          ALuint buffer;
-         alSourceUnqueueBuffers(gSources[sourceIndex], 1, &buffer);
+         alSourceUnqueueBuffers(gFreeSources[sourceIndex], 1, &buffer);
          if(alGetError() != AL_NO_ERROR)
             return;
 
@@ -374,7 +413,7 @@ void SoundSystem::unqueueBuffers(S32 sourceIndex)
          // or already loaded.
          U32 i;
          for(i = 0 ; i < NumSFXBuffers; i++)
-            if(buffer == gBuffers[i])
+            if(buffer == gSfxBuffers[i])
                break;
          if(i == NumSFXBuffers)
             gVoiceFreeBuffers.push_back(buffer);
@@ -395,7 +434,7 @@ void SoundSystem::setMovementParams(SFXHandle& effect, Point position, Point vel
 
 void SoundSystem::updateMovementParams(SFXHandle& effect)
 {
-   ALuint source = gSources[effect->mSourceIndex];
+   ALuint source = gFreeSources[effect->mSourceIndex];
    if(effect->mProfile->isRelative)
    {
       alSourcei(source, AL_SOURCE_RELATIVE, true);
@@ -409,6 +448,35 @@ void SoundSystem::updateMovementParams(SFXHandle& effect)
       //alSource3f(source, AL_VELOCITY, mVelocity.x, mVelocity.y, 0);
    }
 }
+
+
+void SoundSystem::processAudio()
+{
+   processSoundEffects();
+   processMusic();
+   processVoiceChat();
+
+   alureUpdate();
+}
+
+
+void SoundSystem::processMusic()
+{
+   if (!gMusicValid)
+      return;
+
+   alureUpdate();
+
+   if(musicState == MusicStopped)
+      playMusicList();
+}
+
+
+void SoundSystem::processVoiceChat()
+{
+
+}
+
 
 void SoundSystem::processSoundEffects()
 {
@@ -436,7 +504,7 @@ void SoundSystem::processSoundEffects()
    {
       ALint state;
       unqueueBuffers(i);
-      alGetSourcei(gSources[i], AL_SOURCE_STATE, &state);
+      alGetSourcei(gFreeSources[i], AL_SOURCE_STATE, &state);
       sourceActive[i] = state != AL_STOPPED && state != AL_INITIAL;
    }
    for(S32 i = 0; i < gPlayList.size(); )
@@ -512,13 +580,11 @@ void SoundSystem::processSoundEffects()
       else
          updateGain(s);     // For other sources, check the distance and adjust the gain
    }
-
-   alureUpdate();
 }
 
 void SoundSystem::playOnSource(SFXHandle& effect)
 {
-   ALuint source = gSources[effect->mSourceIndex];
+   ALuint source = gFreeSources[effect->mSourceIndex];
    alSourceStop(source);
    unqueueBuffers(effect->mSourceIndex);
 
@@ -537,7 +603,7 @@ void SoundSystem::playOnSource(SFXHandle& effect)
       alSourceQueueBuffers(source, 1, &buffer);
    }
    else
-      alSourcei(source, AL_BUFFER, gBuffers[effect->mSFXIndex]);
+      alSourcei(source, AL_BUFFER, gSfxBuffers[effect->mSFXIndex]);
 
    alSourcei(source, AL_LOOPING, effect->mProfile->isLooping);
    alSourcef(source, AL_REFERENCE_DISTANCE, effect->mProfile->fullGainDistance);
@@ -554,7 +620,7 @@ void SoundSystem::playOnSource(SFXHandle& effect)
 // Recalculate distance, and reset gain as necessary
 void SoundSystem::updateGain(SFXHandle& effect)
 {
-   ALuint source = gSources[effect.getPointer()->mSourceIndex];
+   ALuint source = gFreeSources[effect.getPointer()->mSourceIndex];
 
    // First check if it's a voice chat... voice volume is handled separately.
    if(effect.getPointer()->mSFXIndex == SFXVoice)
@@ -582,7 +648,7 @@ void SoundSystem::queueVoiceChatBuffer(SFXHandle& effect, ByteBufferPtr p)
       if(!gVoiceFreeBuffers.size())
          return;
 
-      ALuint source = gSources[effect->mSourceIndex];
+      ALuint source = gFreeSources[effect->mSourceIndex];
 
       ALuint buffer = gVoiceFreeBuffers.first();
       gVoiceFreeBuffers.pop_front();
@@ -608,6 +674,59 @@ void SoundSystem::queueVoiceChatBuffer(SFXHandle& effect, ByteBufferPtr p)
    }
    else
       playSoundEffect(effect);
+}
+
+
+
+void SoundSystem::music_end_callback(void* userdata, ALuint source)
+{
+   logprintf("error: %d", alGetError());
+//   stopMusic();
+}
+
+void SoundSystem::playMusicList()
+{
+   playMusic();
+}
+
+void SoundSystem::playMusic()
+{
+   musicState = MusicPlaying;
+
+   // Grab a source (sample) from the pool
+   // TODO reintegrate the source with the source pool
+   ALuint source;
+   for(S32 i = 0; i < NumSamples; i++)
+   {
+      ALint state;
+      alGetSourcei(gFreeSources[i], AL_SOURCE_STATE, &state);
+
+      if(state == AL_STOPPED || state == AL_INITIAL)
+      {
+         source = gFreeSources[i];
+         break;  // We have our source let's get out of here
+      }
+   }
+
+   string musicFile = joindir(gConfigDirs.musicDir, musicList[currentlyPlayingIndex]);
+   musicStream = alureCreateStreamFromFile(musicFile.c_str(), MusicChunkSize, 0, NULL);
+
+   if(!musicStream)
+   {
+      logprintf(LogConsumer::LogError, "Failed to create music stream for: %s", musicList[currentlyPlayingIndex].c_str());
+   }
+
+   musicSource = &source;  // keep track of source
+
+   if(!alurePlaySourceStream(source, musicStream, NumMusicStreamBuffers, 0, music_end_callback, NULL))
+   {
+      logprintf(LogConsumer::LogError, "Failed to play music file: %s", musicList[currentlyPlayingIndex].c_str());
+   }
+}
+
+void SoundSystem::stopMusic()
+{
+   alureStopSource(*musicSource, AL_FALSE);
 }
 
 }
@@ -668,7 +787,7 @@ void SoundSystem::init()
    logprintf(LogConsumer::LogError, "No OpenAL support on this platform.");
 }
 
-void SoundSystem::processSoundEffects()
+void SoundSystem::processAudio()
 {
 }
 

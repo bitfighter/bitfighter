@@ -134,7 +134,7 @@ OBJECTS_ZAP=\
 CFLAGS=
 DFLAGS=
 EXEFILE=bitfighter
-OPENAL=-lopenal -lspeex
+OPENAL=-lopenal -lspeex -lvorbis
 WFLAGS=
 LFLAGS=-lstdc++ -lm -ldl -lX11
 

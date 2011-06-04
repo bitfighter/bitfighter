@@ -46,7 +46,7 @@
 /* #undef HAVE_PTHREAD_NP_H */
 
 /* Define the supported backends */
-/* #undef HAS_VORBISFILE */
+#define HAS_VORBISFILE
 /* #undef HAS_FLAC */
 /* #undef HAS_SNDFILE */
 /* #undef HAS_FLUIDSYNTH */

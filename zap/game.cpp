@@ -1432,7 +1432,7 @@ void ServerGame::idle(U32 timeDelta)
    }
 
    // Lastly, play any sounds server might have made...
-   SoundSystem::processSoundEffects();
+   SoundSystem::processAudio();
 }
 
 
@@ -1550,7 +1550,7 @@ void ClientGame::idle(U32 timeDelta)
    if(isSuspended())
    {
       mNetInterface->processConnections();
-      SoundSystem::processSoundEffects();                        // Process sound effects (SFX)
+      SoundSystem::processAudio();                        // Process sound effects (SFX)
       return;
    }
 
@@ -1647,7 +1647,7 @@ void ClientGame::idle(U32 timeDelta)
 
    processDeleteList(timeDelta);                // Delete any objects marked for deletion
    FXManager::tick((F32)timeDelta * 0.001f);    // Processes sparks and teleporter effects
-   SoundSystem::processSoundEffects();                        // Process sound effects (SFX)
+   SoundSystem::processAudio();                        // Process sound effects (SFX)
 
    mNetInterface->processConnections();         // Here we can pass on our updated ship info to the server
 
