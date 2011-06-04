@@ -688,10 +688,12 @@ void WallSegmentManager::invalidateIntersectingSegments(EditorObject *item)
    buildWallSegmentEdgesAndPoints(item);
 
    // Invalidate all segments that potentially intersect the changed segment in its new location
-   fillVector.clear();
    for(S32 i = 0; i < mWallSegments.size(); i++)
       if(mWallSegments[i]->mOwner == item->getSerialNumber())      // Segment belongs to our item, compare to all others
+      {
+         fillVector.clear();
          getGridDatabase()->findObjects(BarrierType, fillVector, mWallSegments[i]->getExtent());
+      }
 
    for(S32 i = 0; i < fillVector.size(); i++)
       dynamic_cast<WallSegment *>(fillVector[i])->invalid = true;

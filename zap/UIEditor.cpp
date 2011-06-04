@@ -1573,26 +1573,28 @@ void EditorUserInterface::render()
    // Render polyWall item fill just before rendering regular walls.  This will create the effect of all walls merging together.  
    // PolyWall outlines are already part of the wallSegmentManager, so will be rendered along with those of regular walls.
 
-   fillVector.clear();
-   gEditorGame->getGridDatabase()->findObjects(fillVector);
+   const Vector<EditorObject *> *objList = getObjectList();
 
    glPushMatrix();  
       setLevelToCanvasCoordConversion();
-      for(S32 i = 0; i < fillVector.size(); i++)
-         if(fillVector[i]->getObjectTypeMask() & PolyWallType)
+      for(S32 i = 0; i < objList->size(); i++)
+      {
+         EditorObject *obj = objList->get(i);
+         if(obj->getObjectTypeMask() & PolyWallType)
          {
-            PolyWall *wall = dynamic_cast<PolyWall *>(fillVector[i]);
+            PolyWall *wall = dynamic_cast<PolyWall *>(obj);
             wall->renderFill();
          }
+      }
    
       mWallSegmentManager.renderWalls(true, mDraggingObjects, mShowingReferenceShip, getRenderingAlpha(false/*isScriptItem*/));
    glPopMatrix();
 
    // == Normal items ==
    // Draw map items (teleporters, etc.) that are not being dragged, and won't have any text labels  (below the dock)
-   for(S32 i = 0; i < fillVector.size(); i++)
+   for(S32 i = 0; i < objList->size(); i++)
    {
-      EditorObject *obj = dynamic_cast<EditorObject *>(fillVector[i]);
+      EditorObject *obj = objList->get(i);
       if(!(mDraggingObjects && obj->isSelected()))
          obj->render(false, mShowingReferenceShip, mShowMode);
    }
@@ -1600,9 +1602,9 @@ void EditorUserInterface::render()
    // == Selected items ==
    // Draw map items (teleporters, etc.) that are are selected and/or lit up, so label is readable (still below the dock)
    // Do this as a separate operation to ensure that these are drawn on top of those drawn above.
-   for(S32 i = 0; i < fillVector.size(); i++)
+   for(S32 i = 0; i < objList->size(); i++)
    {
-      EditorObject *obj = dynamic_cast<EditorObject *>(fillVector[i]);
+      EditorObject *obj = objList->get(i);
       if(obj->isSelected() || obj->isLitUp())
          obj->render(false, mShowingReferenceShip, mShowMode);
    }
@@ -1664,17 +1666,12 @@ void EditorUserInterface::render()
    // Draw map items (teleporters, etc.) that are being dragged  (above the dock).  But don't draw walls here, or
    // we'll lose our wall centernlines.
    if(mDraggingObjects)
-   {
-      fillVector.clear();
-      gEditorGame->getGridDatabase()->findObjects(~BarrierType, fillVector);
-
-      for(S32 i = 0; i < fillVector.size(); i++)
+      for(S32 i = 0; i < objList->size(); i++)
       {
-         EditorObject *obj = dynamic_cast<EditorObject *>(fillVector[i]);
-         if(obj->isSelected())
+         EditorObject *obj = objList->get(i);
+         if(obj->isSelected() && obj->getObjectTypeMask() & ~BarrierType)    // Object is selected and is not a wall
             obj->render(false, mShowingReferenceShip, mShowMode);
       }
-   }
 
    // Render our snap vertex as a hollow magenta box
    if(!mShowingReferenceShip && mSnapVertex_i && mSnapVertex_i->isSelected() && mSnapVertex_j != NONE)      
@@ -3580,7 +3577,7 @@ void EditorUserInterface::onKeyUp(KeyCode keyCode)
             fillVector.clear();
 
             if(mShowMode == ShowWallsOnly)
-               gEditorGame->getGridDatabase()->findObjects(~(BarrierType | PolyWallType), fillVector);
+               gEditorGame->getGridDatabase()->findObjects(BarrierType | PolyWallType, fillVector);
             else
                gEditorGame->getGridDatabase()->findObjects(fillVector);
 

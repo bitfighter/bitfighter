@@ -287,27 +287,26 @@ DatabaseObject *GridDatabase::getObjectByIndex(S32 index)
 } 
 
 
-
 ////////////////////////////////////////
 ////////////////////////////////////////
 
 void DatabaseObject::addToDatabase()
 {
-   if(!mInDatabase)
-   {
-      mInDatabase = true;
-      getGridDatabase()->addToDatabase(this, extent);
-   }
+   if(mInDatabase)
+      return;
+
+   mInDatabase = true;
+   getGridDatabase()->addToDatabase(this, extent);
 }
 
 
 void DatabaseObject::removeFromDatabase()
 {
-   if(mInDatabase)
-   {
-      mInDatabase = false;
-      getGridDatabase()->removeFromDatabase(this, extent);
-   }
+   if(!mInDatabase)
+      return;
+
+   mInDatabase = false;
+   getGridDatabase()->removeFromDatabase(this, extent);
 }
 
 
@@ -325,6 +324,30 @@ void DatabaseObject::setExtent(const Rect &extents)
    }
 
    extent.set(extents);
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// This sort will put points on top of lines on top of polygons...  as they should be
+// We'll also put walls on the bottom, as this seems to work best in practice
+S32 QSORT_CALLBACK geometricSort(EditorObject *a, EditorObject *b)
+{
+   if((a)->getObjectTypeMask() & BarrierType)
+      return -1;
+   if((b)->getObjectTypeMask() & BarrierType)
+      return 1;
+
+   return( (a)->getGeomType() - (b)->getGeomType() );
+}
+
+
+static void geomSort(Vector<EditorObject *> &objects)
+{
+   if(objects.size() >= 2)  // nothing to sort when there is one or zero objects
+      // Cannot use Vector.sort() here because I couldn't figure out how to cast shared_ptr as pointer (*)
+      sort(objects.getStlVector().begin(), objects.getStlVector().end(), geometricSort);
 }
 
 
@@ -349,10 +372,12 @@ void EditorObjectDatabase::addToDatabase(DatabaseObject *object, const Rect &ext
    Parent::addToDatabase(object, extents);
 
    mAllEditorObjects.push_back(eObj);
+
+   geomSort(mAllEditorObjects);
 }
 
 
-void EditorObjectDatabase::removeFromDatabase(EditorObject *object, const Rect &extents)
+void EditorObjectDatabase::removeFromDatabase(DatabaseObject *object, const Rect &extents)
 {
    Parent::removeFromDatabase((DatabaseObject *)object, extents);
 
@@ -360,7 +385,7 @@ void EditorObjectDatabase::removeFromDatabase(EditorObject *object, const Rect &
    for(S32 i = 0; i < mAllEditorObjects.size(); i++)
       if(mAllEditorObjects[i] == object)
       {
-         mAllEditorObjects.erase_fast(i);
+         mAllEditorObjects.erase(i);      // Use erase to maintain sorted order
          break;
       }
 }

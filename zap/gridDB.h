@@ -155,7 +155,7 @@ public:
 
    void addToDatabase(DatabaseObject *theObject, const Rect &extents);
 
-   void removeFromDatabase(EditorObject *theObject, const Rect &extents);
+   void removeFromDatabase(DatabaseObject *theObject, const Rect &extents);
 };
 
 };
