@@ -62,39 +62,39 @@ enum VertexRenderStyles
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class SelectionItem
-{
-private:
-   bool mSelected;
-   Vector<bool> mVertSelected;
-
-public:
-   SelectionItem() { /* Do nothing */ }      // Generic constructor
-   SelectionItem(EditorObject *item);        // Primary constructor
-
-   void restore(EditorObject *item);
-};
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-class EditorObject;
-
-class Selection
-{
-public:
-   Selection() { /* Do nothing */ }            // Generic constructor
-   Selection(Vector<EditorObject *> &items);   // Primary constructor
-
-private:
-   Vector<SelectionItem> mSelection;
-
-public:
-   void restore(Vector<EditorObject *> &items);
-};
-
-
+//class SelectionItem
+//{
+//private:
+//   bool mSelected;
+//   Vector<bool> mVertSelected;
+//
+//public:
+//   SelectionItem() { /* Do nothing */ }      // Generic constructor
+//   SelectionItem(EditorObject *item);        // Primary constructor
+//
+//   void restore(EditorObject *item);
+//};
+//
+//
+//////////////////////////////////////////
+//////////////////////////////////////////
+//
+//class EditorObject;
+//
+//class Selection
+//{
+//public:
+//   Selection() { /* Do nothing */ }            // Generic constructor
+//   Selection(Vector<EditorObject *> &items);   // Primary constructor
+//
+//private:
+//   Vector<SelectionItem> mSelection;
+//
+//public:
+//   void restore(Vector<EditorObject *> &items);
+//};
+//
+//
 ////////////////////////////////////////
 ////////////////////////////////////////
 

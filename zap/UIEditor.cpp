@@ -1656,11 +1656,6 @@ void EditorUserInterface::render()
       }
    }
 
-
-   // Render our snap vertex
-   if(!mShowingReferenceShip && mSnapVertex_i && mSnapVertex_i->isSelected() && mSnapVertex_j != NONE)      
-      renderVertex(SnappingVertex, mSnapVertex_i->getVert(mSnapVertex_j) * mCurrentScale + mCurrentOffset, NO_NUMBER/*, alpha*/);  // Hollow magenta box
-
    if(mShowingReferenceShip)
       renderReferenceShip();
    else
@@ -1680,6 +1675,11 @@ void EditorUserInterface::render()
             obj->render(false, mShowingReferenceShip, mShowMode);
       }
    }
+
+   // Render our snap vertex as a hollow magenta box
+   if(!mShowingReferenceShip && mSnapVertex_i && mSnapVertex_i->isSelected() && mSnapVertex_j != NONE)      
+      renderVertex(SnappingVertex, mSnapVertex_i->getVert(mSnapVertex_j) * mCurrentScale + mCurrentOffset, NO_NUMBER/*, alpha*/);  
+
 
    if(mDragSelecting)      // Draw box for selecting items
    {
@@ -3732,44 +3732,44 @@ void EditorUserInterface::idle(U32 timeDelta)
 }
 
 // Unused??
-static void escapeString(const char *src, char dest[1024])
-{
-   S32 i;
-   for(i = 0; src[i]; i++)
-      if(src[i] == '\"' || src[i] == ' ' || src[i] == '\n' || src[i] == '\t')
-         break;
-
-   if(!src[i])
-   {
-      strcpy(dest, src);
-      return;
-   }
-   char *dptr = dest;
-   *dptr++ = '\"';
-   char c;
-   while((c = *src++) != 0)
-   {
-      switch(c)
-      {
-         case '\"':
-            *dptr++ = '\\';
-            *dptr++ = '\"';
-            break;
-         case '\n':
-            *dptr++ = '\\';
-            *dptr++ = 'n';
-            break;
-         case '\t':
-            *dptr++ = '\\';
-            *dptr++ = 't';
-            break;
-         default:
-            *dptr++ = c;
-      }
-   }
-   *dptr++ = '\"';
-   *dptr++ = 0;
-}
+//static void escapeString(const char *src, char dest[1024])
+//{
+//   S32 i;
+//   for(i = 0; src[i]; i++)
+//      if(src[i] == '\"' || src[i] == ' ' || src[i] == '\n' || src[i] == '\t')
+//         break;
+//
+//   if(!src[i])
+//   {
+//      strcpy(dest, src);
+//      return;
+//   }
+//   char *dptr = dest;
+//   *dptr++ = '\"';
+//   char c;
+//   while((c = *src++) != 0)
+//   {
+//      switch(c)
+//      {
+//         case '\"':
+//            *dptr++ = '\\';
+//            *dptr++ = '\"';
+//            break;
+//         case '\n':
+//            *dptr++ = '\\';
+//            *dptr++ = 'n';
+//            break;
+//         case '\t':
+//            *dptr++ = '\\';
+//            *dptr++ = 't';
+//            break;
+//         default:
+//            *dptr++ = c;
+//      }
+//   }
+//   *dptr++ = '\"';
+//   *dptr++ = 0;
+//}
 
 void EditorUserInterface::setSaveMessage(string msg, bool savedOK)
 {
@@ -4037,42 +4037,42 @@ void EditorMenuUserInterface::onEscape()
 ////////////////////////////////////////
 // Stores the selection state of a particular EditorObject.  Does not store the item itself
 // Primary constructor
-SelectionItem::SelectionItem(EditorObject *item)
-{
-   mSelected = item->isSelected();
-
-   for(S32 i = 0; i < item->getVertCount(); i++)
-      mVertSelected.push_back(item->vertSelected(i));
-}
-
-
-void SelectionItem::restore(EditorObject *item)
-{
-   item->setSelected(mSelected);
-   item->unselectVerts();
-
-   for(S32 i = 0; i < item->getVertCount(); i++)
-      item->aselectVert(mVertSelected[i]);
-}
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-// Selection stores the selection state of group of EditorObjects
-// Constructor
-Selection::Selection(Vector<EditorObject *> &items)
-{
-   for(S32 i = 0; i < items.size(); i++)
-      mSelection.push_back(SelectionItem(items[i]));
-}
-
-
-void Selection::restore(Vector<EditorObject *> &items)
-{
-   for(S32 i = 0; i < items.size(); i++)
-      mSelection[i].restore(items[i]);
-}
-
+//SelectionItem::SelectionItem(EditorObject *item)
+//{
+//   mSelected = item->isSelected();
+//
+//   for(S32 i = 0; i < item->getVertCount(); i++)
+//      mVertSelected.push_back(item->vertSelected(i));
+//}
+//
+//
+//void SelectionItem::restore(EditorObject *item)
+//{
+//   item->setSelected(mSelected);
+//   item->unselectVerts();
+//
+//   for(S32 i = 0; i < item->getVertCount(); i++)
+//      item->aselectVert(mVertSelected[i]);
+//}
+//
+//
+//////////////////////////////////////////
+//////////////////////////////////////////
+//// Selection stores the selection state of group of EditorObjects
+//// Constructor
+//Selection::Selection(Vector<EditorObject *> &items)
+//{
+//   for(S32 i = 0; i < items.size(); i++)
+//      mSelection.push_back(SelectionItem(items[i]));
+//}
+//
+//
+//void Selection::restore(Vector<EditorObject *> &items)
+//{
+//   for(S32 i = 0; i < items.size(); i++)
+//      mSelection[i].restore(items[i]);
+//}
+//
 
 };
 
