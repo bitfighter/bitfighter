@@ -726,7 +726,9 @@ void SoundSystem::playMusic()
 
 void SoundSystem::stopMusic()
 {
-   alureStopSource(*musicSource, AL_FALSE);
+   if(musicSource)
+      alureStopSource(*musicSource, AL_FALSE);
+   musicSource = NULL;
 }
 
 }

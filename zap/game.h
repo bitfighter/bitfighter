@@ -119,7 +119,7 @@ private:
    void buildModuleInfos();
 
 protected:
-   void cleanUp();
+   virtual void cleanUp();
    U32 mNextMasterTryTime;
    bool mReadyToConnectToMaster;
 
@@ -313,7 +313,8 @@ private:
 
    GameConnection *mSuspendor;            // Player requesting suspension if game suspended by request
 
-   U32 mPlayerCount;    
+   U32 mPlayerCount;
+   void cleanUp();
 
 public:
    U32 mInfoFlags;           // Not used for much at the moment, but who knows? --> propagates to master

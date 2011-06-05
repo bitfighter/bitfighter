@@ -371,7 +371,8 @@ void EditorObjectDatabase::addToDatabase(DatabaseObject *object, const Rect &ext
 
    Parent::addToDatabase(object, extents);
 
-   mAllEditorObjects.push_back(eObj);
+   if(eObj)
+      mAllEditorObjects.push_back(eObj);
 
    geomSort(mAllEditorObjects);
 }

@@ -498,14 +498,24 @@ void Game::cleanUp()
    // Delete any objects on the delete list
    processDeleteList(0xFFFFFFFF);
 
-   //// Delete any game objects that may exist  --> not sure this will be needed when we're using shared_ptr
-   //fillVector.clear();
-   //mDatabase.findObjects(fillVector);
+   // Delete any game objects that may exist  --> not sure this will be needed when we're using shared_ptr
+   // sam: should be deleted to properly get removed from server's database and to remove client's net objects.
+   fillVector.clear();
+   mDatabase.findObjects(fillVector);
 
-   //for(S32 i = 0; i < fillVector.size(); i++)
-   //   delete fillVector[i];
+   for(S32 i = 0; i < fillVector.size(); i++)
+      delete dynamic_cast<Object *>(fillVector[i]); // dynamic_cast might be needed to avoid errors.
 }
 
+void ServerGame::cleanUp()
+{
+   fillVector.clear();
+   mDatabaseForBotZones.findObjects(fillVector);
+
+   for(S32 i = 0; i < fillVector.size(); i++)
+      delete dynamic_cast<Object *>(fillVector[i]);
+   Game::cleanUp();
+}
 
 // Return true when handled
 bool ServerGame::voteStart(GameConnection *client, S32 type, S32 number)
