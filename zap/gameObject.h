@@ -88,7 +88,7 @@ enum GameObjectType
    PolyWallType = BIT(25),             // WormType
    ShipSpawnType = BIT(13),            // BulletType
    FlagSpawnType = BIT(11),            // TurretTargetType
-   AsteroidSpawnType = BIT(18),        // RobotType
+   AsteroidSpawnType = BIT(17),        // BotZone
 
 
    // Derived types:
