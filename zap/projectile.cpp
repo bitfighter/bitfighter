@@ -778,7 +778,7 @@ void Mine::renderItem(Point pos)
 
 void Mine::renderEditor(F32 currentScale)
 {
-   renderMine(getActualPos(), true, true);
+   renderMine(getVert(0), true, true);
 }
 
 
@@ -957,7 +957,7 @@ void SpyBug::renderItem(Point pos)
 
 void SpyBug::renderEditor(F32 currentScale)
 {
-   renderSpyBug(getActualPos(), true);
+   renderSpyBug(getVert(0), true);
 }
 
 
