@@ -411,7 +411,6 @@
 		73D2F42812E2D7E800EA5EBE /* UIRebindKeys.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F33D12E2D7E800EA5EBE /* UIRebindKeys.cpp */; };
 		73D2F42912E2D7E800EA5EBE /* UITeamDefMenu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F33F12E2D7E800EA5EBE /* UITeamDefMenu.cpp */; };
 		73D2F42A12E2D7E800EA5EBE /* UIYesNo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F34112E2D7E800EA5EBE /* UIYesNo.cpp */; };
-		73D2F42B12E2D7E800EA5EBE /* voiceCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F34312E2D7E800EA5EBE /* voiceCodec.cpp */; };
 		73D2F43612E2D7E800EA5EBE /* zoneControlGame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F35012E2D7E800EA5EBE /* zoneControlGame.cpp */; };
 		73D2F49E12E2D9C500EA5EBE /* assert.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F46112E2D9C500EA5EBE /* assert.cpp */; };
 		73D2F49F12E2D9C500EA5EBE /* asymmetricKey.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F46212E2D9C500EA5EBE /* asymmetricKey.cpp */; };
@@ -549,6 +548,13 @@
 		D3A9DC31139C925E00FC8814 /* vorbisenc.h in Headers */ = {isa = PBXBuildFile; fileRef = D3A9DC2E139C925E00FC8814 /* vorbisenc.h */; };
 		D3A9DC32139C925E00FC8814 /* vorbisfile.h in Headers */ = {isa = PBXBuildFile; fileRef = D3A9DC2F139C925E00FC8814 /* vorbisfile.h */; };
 		D3A9DC4F139C930300FC8814 /* codec_vorbisfile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D3A9DC4E139C930300FC8814 /* codec_vorbisfile.cpp */; };
+		D3A9DCBC139C9A4700FC8814 /* Geometry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D3A9DCBA139C9A4700FC8814 /* Geometry.cpp */; };
+		D3A9DCCA139C9A9000FC8814 /* UIEditorMenus.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D3A9DCC8139C9A9000FC8814 /* UIEditorMenus.cpp */; };
+		D3A9DCE0139C9B2300FC8814 /* EditorObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D3A9DCDE139C9B2300FC8814 /* EditorObject.cpp */; };
+		D3A9DDB2139CA0FC00FC8814 /* Speex.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D3A9DDB1139CA0FC00FC8814 /* Speex.framework */; };
+		D3A9DDB6139CA10D00FC8814 /* Ogg.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D3A9DDB5139CA10D00FC8814 /* Ogg.framework */; };
+		D3A9DDE0139CA1ED00FC8814 /* voiceCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F34312E2D7E800EA5EBE /* voiceCodec.cpp */; };
+		D3A9DDF3139CA35600FC8814 /* Speex in Frameworks */ = {isa = PBXBuildFile; fileRef = D3A9DDF2139CA35600FC8814 /* Speex */; };
 		D3AAAE98139C0C6C006DA288 /* libalure.map in Resources */ = {isa = PBXBuildFile; fileRef = D3AAAE97139C0C6C006DA288 /* libalure.map */; };
 		D3B2F667139C0AFC004AEE67 /* SimpleLine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D3B2F665139C0AFC004AEE67 /* SimpleLine.cpp */; };
 /* End PBXBuildFile section */
@@ -1196,6 +1202,16 @@
 		D3A9DC2E139C925E00FC8814 /* vorbisenc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vorbisenc.h; sourceTree = "<group>"; };
 		D3A9DC2F139C925E00FC8814 /* vorbisfile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vorbisfile.h; sourceTree = "<group>"; };
 		D3A9DC4E139C930300FC8814 /* codec_vorbisfile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = codec_vorbisfile.cpp; sourceTree = "<group>"; };
+		D3A9DCBA139C9A4700FC8814 /* Geometry.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Geometry.cpp; path = ../../../zap/Geometry.cpp; sourceTree = SOURCE_ROOT; };
+		D3A9DCBB139C9A4700FC8814 /* Geometry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Geometry.h; path = ../../../zap/Geometry.h; sourceTree = SOURCE_ROOT; };
+		D3A9DCC8139C9A9000FC8814 /* UIEditorMenus.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UIEditorMenus.cpp; path = ../../../zap/UIEditorMenus.cpp; sourceTree = SOURCE_ROOT; };
+		D3A9DCC9139C9A9000FC8814 /* UIEditorMenus.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = UIEditorMenus.h; path = ../../../zap/UIEditorMenus.h; sourceTree = SOURCE_ROOT; };
+		D3A9DCDE139C9B2300FC8814 /* EditorObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = EditorObject.cpp; path = ../../../zap/EditorObject.cpp; sourceTree = SOURCE_ROOT; };
+		D3A9DCDF139C9B2300FC8814 /* EditorObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = EditorObject.h; path = ../../../zap/EditorObject.h; sourceTree = SOURCE_ROOT; };
+		D3A9DD30139C9C9000FC8814 /* speex-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "speex-Info.plist"; sourceTree = "<group>"; };
+		D3A9DDB1139CA0FC00FC8814 /* Speex.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Speex.framework; path = ../../../lib/Speex.framework; sourceTree = SOURCE_ROOT; };
+		D3A9DDB5139CA10D00FC8814 /* Ogg.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Ogg.framework; path = ../../../lib/Ogg.framework; sourceTree = SOURCE_ROOT; };
+		D3A9DDF2139CA35600FC8814 /* Speex */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = Speex; path = ../../../lib/Speex.framework/Versions/A/Speex; sourceTree = SOURCE_ROOT; };
 		D3AAAE97139C0C6C006DA288 /* libalure.map */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = libalure.map; sourceTree = "<group>"; };
 		D3B2F665139C0AFC004AEE67 /* SimpleLine.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SimpleLine.cpp; path = ../../../zap/SimpleLine.cpp; sourceTree = SOURCE_ROOT; };
 		D3B2F666139C0AFC004AEE67 /* SimpleLine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SimpleLine.h; path = ../../../zap/SimpleLine.h; sourceTree = SOURCE_ROOT; };
@@ -1270,6 +1286,9 @@
 				73B0FC1D1370ABB70019AE4E /* OpenAL-Soft.framework in Frameworks */,
 				7377F2EF1381C84700DB1417 /* Ogg.framework in Frameworks */,
 				7377F2F11381C84700DB1417 /* Speex.framework in Frameworks */,
+				D3A9DDB2139CA0FC00FC8814 /* Speex.framework in Frameworks */,
+				D3A9DDB6139CA10D00FC8814 /* Ogg.framework in Frameworks */,
+				D3A9DDF3139CA35600FC8814 /* Speex in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1352,13 +1371,14 @@
 		29B97314FDCFA39411CA2CEA /* Bitfighter */ = {
 			isa = PBXGroup;
 			children = (
+				D3A9DDF2139CA35600FC8814 /* Speex */,
+				73D2F27E12E2D6D800EA5EBE /* zap */,
 				73B0FB751370AAD10019AE4E /* openal-soft */,
 				7386BA07136FE3520094A660 /* alure */,
 				73844F2513500C2F00033B85 /* clipper */,
 				73702882132A020B00397F99 /* recast */,
 				73702887132A020B00397F99 /* Triangle */,
 				5E481F4113053943004F9637 /* sqlite */,
-				73D2F27E12E2D6D800EA5EBE /* zap */,
 				73657A0312E2E3CF00BED56F /* master */,
 				73D2F67A12E2E18D00EA5EBE /* lua */,
 				73D2F45C12E2D96D00EA5EBE /* libtomcrypt */,
@@ -1370,6 +1390,7 @@
 				7379552E136E1C42003A660B /* CoreAudio.framework */,
 				73795535136E1C60003A660B /* CoreAudioKit.framework */,
 				7379553C136E1CCE003A660B /* AudioUnit.framework */,
+				D3A9DD30139C9C9000FC8814 /* speex-Info.plist */,
 			);
 			name = Bitfighter;
 			sourceTree = "<group>";
@@ -1397,6 +1418,8 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				D3A9DDB5139CA10D00FC8814 /* Ogg.framework */,
+				D3A9DDB1139CA0FC00FC8814 /* Speex.framework */,
 				1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */,
 				1058C7A2FEA54F0111CA2CBB /* Other Frameworks */,
 			);
@@ -1624,6 +1647,12 @@
 		73D2F27E12E2D6D800EA5EBE /* zap */ = {
 			isa = PBXGroup;
 			children = (
+				D3A9DCDE139C9B2300FC8814 /* EditorObject.cpp */,
+				D3A9DCDF139C9B2300FC8814 /* EditorObject.h */,
+				D3A9DCC8139C9A9000FC8814 /* UIEditorMenus.cpp */,
+				D3A9DCC9139C9A9000FC8814 /* UIEditorMenus.h */,
+				D3A9DCBA139C9A4700FC8814 /* Geometry.cpp */,
+				D3A9DCBB139C9A4700FC8814 /* Geometry.h */,
 				D3B2F665139C0AFC004AEE67 /* SimpleLine.cpp */,
 				D3B2F666139C0AFC004AEE67 /* SimpleLine.h */,
 				7377F2D21381C7AD00DB1417 /* SFXProfile.h */,
@@ -2834,7 +2863,6 @@
 				73D2F42812E2D7E800EA5EBE /* UIRebindKeys.cpp in Sources */,
 				73D2F42912E2D7E800EA5EBE /* UITeamDefMenu.cpp in Sources */,
 				73D2F42A12E2D7E800EA5EBE /* UIYesNo.cpp in Sources */,
-				73D2F42B12E2D7E800EA5EBE /* voiceCodec.cpp in Sources */,
 				73D2F43612E2D7E800EA5EBE /* zoneControlGame.cpp in Sources */,
 				73657A0712E2E3FB00BED56F /* masterInterface.cpp in Sources */,
 				7374B37312F5D20600B13E6A /* gameStats.cpp in Sources */,
@@ -2853,6 +2881,10 @@
 				7377F2D71381C7AD00DB1417 /* SoundEffect.cpp in Sources */,
 				7377F2D81381C7AD00DB1417 /* SoundSystem.cpp in Sources */,
 				D3B2F667139C0AFC004AEE67 /* SimpleLine.cpp in Sources */,
+				D3A9DCBC139C9A4700FC8814 /* Geometry.cpp in Sources */,
+				D3A9DCCA139C9A9000FC8814 /* UIEditorMenus.cpp in Sources */,
+				D3A9DCE0139C9B2300FC8814 /* EditorObject.cpp in Sources */,
+				D3A9DDE0139CA1ED00FC8814 /* voiceCodec.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3318,6 +3350,10 @@
 				);
 				INFOPLIST_FILE = "Bitfighter-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../../../lib/Speex.framework/Versions/A\"",
+				);
 				OTHER_CFLAGS = "-DTNL_ENABLE_LOGGING";
 				PRODUCT_NAME = Bitfighter;
 			};
@@ -3344,6 +3380,10 @@
 				);
 				INFOPLIST_FILE = "Bitfighter-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../../../lib/Speex.framework/Versions/A\"",
+				);
 				OTHER_CFLAGS = "-DTNL_ENABLE_LOGGING";
 				PRODUCT_NAME = Bitfighter;
 				SYMROOT = build/;
@@ -3360,6 +3400,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
+					../libspeex,
 					../openal,
 					../glut,
 					../tnl,
