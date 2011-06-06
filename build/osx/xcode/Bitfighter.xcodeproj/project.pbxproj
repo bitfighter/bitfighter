@@ -545,6 +545,12 @@
 		9462C40311D7D82700791A0B /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9462C40211D7D82700791A0B /* IOKit.framework */; };
 		9462C41711D7D95600791A0B /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9462C41611D7D95600791A0B /* Carbon.framework */; };
 		94B7EAC011D7DABC0083AEAF /* Bitfighter.icns in Resources */ = {isa = PBXBuildFile; fileRef = 94B7EABF11D7DABC0083AEAF /* Bitfighter.icns */; };
+		D3A9DC30139C925E00FC8814 /* codec.h in Headers */ = {isa = PBXBuildFile; fileRef = D3A9DC2D139C925E00FC8814 /* codec.h */; };
+		D3A9DC31139C925E00FC8814 /* vorbisenc.h in Headers */ = {isa = PBXBuildFile; fileRef = D3A9DC2E139C925E00FC8814 /* vorbisenc.h */; };
+		D3A9DC32139C925E00FC8814 /* vorbisfile.h in Headers */ = {isa = PBXBuildFile; fileRef = D3A9DC2F139C925E00FC8814 /* vorbisfile.h */; };
+		D3A9DC4F139C930300FC8814 /* codec_vorbisfile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D3A9DC4E139C930300FC8814 /* codec_vorbisfile.cpp */; };
+		D3AAAE98139C0C6C006DA288 /* libalure.map in Resources */ = {isa = PBXBuildFile; fileRef = D3AAAE97139C0C6C006DA288 /* libalure.map */; };
+		D3B2F667139C0AFC004AEE67 /* SimpleLine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D3B2F665139C0AFC004AEE67 /* SimpleLine.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -1186,6 +1192,13 @@
 		9462C40211D7D82700791A0B /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
 		9462C41611D7D95600791A0B /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = System/Library/Frameworks/Carbon.framework; sourceTree = SDKROOT; };
 		94B7EABF11D7DABC0083AEAF /* Bitfighter.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = Bitfighter.icns; sourceTree = "<group>"; };
+		D3A9DC2D139C925E00FC8814 /* codec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = codec.h; sourceTree = "<group>"; };
+		D3A9DC2E139C925E00FC8814 /* vorbisenc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vorbisenc.h; sourceTree = "<group>"; };
+		D3A9DC2F139C925E00FC8814 /* vorbisfile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vorbisfile.h; sourceTree = "<group>"; };
+		D3A9DC4E139C930300FC8814 /* codec_vorbisfile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = codec_vorbisfile.cpp; sourceTree = "<group>"; };
+		D3AAAE97139C0C6C006DA288 /* libalure.map */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = libalure.map; sourceTree = "<group>"; };
+		D3B2F665139C0AFC004AEE67 /* SimpleLine.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SimpleLine.cpp; path = ../../../zap/SimpleLine.cpp; sourceTree = SOURCE_ROOT; };
+		D3B2F666139C0AFC004AEE67 /* SimpleLine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SimpleLine.h; path = ../../../zap/SimpleLine.h; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1483,6 +1496,8 @@
 		7386BA07136FE3520094A660 /* alure */ = {
 			isa = PBXGroup;
 			children = (
+				D3A9DC2C139C925E00FC8814 /* vorbis */,
+				D3A9DC4E139C930300FC8814 /* codec_vorbisfile.cpp */,
 				7317B9CE1370CAC30025A41E /* AL */,
 				7317B9D01370CAC30025A41E /* alext.h */,
 				7317B9D11370CAC30025A41E /* alure.cpp */,
@@ -1496,6 +1511,7 @@
 				7317B9D91370CAC30025A41E /* streamdec.cpp */,
 				7317B9DA1370CAC30025A41E /* streamplay.cpp */,
 				73D6B5081370C349002ABC48 /* ALURE_Prefix.pch */,
+				D3AAAE97139C0C6C006DA288 /* libalure.map */,
 			);
 			name = alure;
 			path = ../../../alure;
@@ -1608,6 +1624,8 @@
 		73D2F27E12E2D6D800EA5EBE /* zap */ = {
 			isa = PBXGroup;
 			children = (
+				D3B2F665139C0AFC004AEE67 /* SimpleLine.cpp */,
+				D3B2F666139C0AFC004AEE67 /* SimpleLine.h */,
 				7377F2D21381C7AD00DB1417 /* SFXProfile.h */,
 				7377F2D31381C7AD00DB1417 /* SoundEffect.cpp */,
 				7377F2D41381C7AD00DB1417 /* SoundEffect.h */,
@@ -2011,6 +2029,17 @@
 			name = lua;
 			sourceTree = "<group>";
 		};
+		D3A9DC2C139C925E00FC8814 /* vorbis */ = {
+			isa = PBXGroup;
+			children = (
+				D3A9DC2D139C925E00FC8814 /* codec.h */,
+				D3A9DC2E139C925E00FC8814 /* vorbisenc.h */,
+				D3A9DC2F139C925E00FC8814 /* vorbisfile.h */,
+			);
+			name = vorbis;
+			path = ../../../libvorbis/vorbis;
+			sourceTree = SOURCE_ROOT;
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -2115,6 +2144,9 @@
 				7317B9DC1370CAC30025A41E /* alext.h in Headers */,
 				7317B9E11370CAC30025A41E /* config.h in Headers */,
 				7317B9E31370CAC30025A41E /* main.h in Headers */,
+				D3A9DC30139C925E00FC8814 /* codec.h in Headers */,
+				D3A9DC31139C925E00FC8814 /* vorbisenc.h in Headers */,
+				D3A9DC32139C925E00FC8814 /* vorbisfile.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2385,6 +2417,7 @@
 				736DE9A612906AA400C3CB73 /* bitfighter.sh in Resources */,
 				73D2F3E712E2D7E800EA5EBE /* Info.plist in Resources */,
 				73D2F3EC12E2D7E800EA5EBE /* keymap.txt in Resources */,
+				D3AAAE98139C0C6C006DA288 /* libalure.map in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2671,6 +2704,7 @@
 				7317B9E41370CAC30025A41E /* stream.cpp in Sources */,
 				7317B9E51370CAC30025A41E /* streamdec.cpp in Sources */,
 				7317B9E61370CAC30025A41E /* streamplay.cpp in Sources */,
+				D3A9DC4F139C930300FC8814 /* codec_vorbisfile.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2818,6 +2852,7 @@
 				7375E26713690B6300F71273 /* pictureloader.cpp in Sources */,
 				7377F2D71381C7AD00DB1417 /* SoundEffect.cpp in Sources */,
 				7377F2D81381C7AD00DB1417 /* SoundSystem.cpp in Sources */,
+				D3B2F667139C0AFC004AEE67 /* SimpleLine.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3169,9 +3204,16 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				HEADER_SEARCH_PATHS = ../../../alure;
+				GENERATE_MASTER_OBJECT_FILE = NO;
+				HEADER_SEARCH_PATHS = (
+					../../../lib,
+					../../../libogg,
+					../../../libvorbis,
+					../../../alure,
+				);
 				INFOPLIST_FILE = "ALURE-Info.plist";
 				INSTALL_PATH = "@executable_path/../Frameworks";
+				OTHER_CFLAGS = "-DDYNLOAD=1";
 				PREBINDING = NO;
 				PRODUCT_NAME = ALURE;
 			};
@@ -3268,6 +3310,8 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Bitfighter_Prefix.pch;
 				HEADER_SEARCH_PATHS = (
+					../../../libspeex,
+					../../../boost,
 					../../../openal,
 					../../../glut,
 					../../../tnl,
