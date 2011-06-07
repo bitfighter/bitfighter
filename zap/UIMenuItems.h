@@ -75,22 +75,10 @@ protected:
    const char *mPromptAppendage;
 
 public:
-   MenuItem() { TNLAssert(false, "Do not use this constructor!"); }    // Default constructor
+   MenuItem(); // Default constructor
 
    // Constructor
-   MenuItem(S32 index, const string &prompt, void (*callback)(U32), const string &help, KeyCode k1 = KEY_UNKNOWN, KeyCode k2 = KEY_UNKNOWN)
-   {
-      mPrompt = prompt;
-      key1 = k1;
-      key2 = k2;
-      mCallback = callback;
-      mHelp = help;
-      mIndex = (U32)index;
-      mEnterAdvancesItem = false;
-      mSelectedColor = yellow;
-      mUnselectedColor = white;
-      mPromptAppendage = " >";
-   }
+   MenuItem(S32 index, const string &prompt, void (*callback)(U32), const string &help, KeyCode k1 = KEY_UNKNOWN, KeyCode k2 = KEY_UNKNOWN);
 
    KeyCode key1;     // Allow two shortcut keys per menu item...
    KeyCode key2;

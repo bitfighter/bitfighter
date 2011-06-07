@@ -33,6 +33,23 @@ namespace Zap
 
 //extern void glColor(const Color &c, float alpha = 1.0);
 
+MenuItem::MenuItem() { TNLAssert(false, "Do not use this constructor!"); }    // Default constructor
+
+   // Constructor
+MenuItem::MenuItem(S32 index, const string &prompt, void (*callback)(U32), const string &help, KeyCode k1, KeyCode k2)
+{
+   mPrompt = prompt;
+   key1 = k1;
+   key2 = k2;
+   mCallback = callback;
+   mHelp = help;
+   mIndex = (U32)index;
+   mEnterAdvancesItem = false;
+   mSelectedColor = yellow;
+   mUnselectedColor = white;
+   mPromptAppendage = " >";
+}
+
 // Shouldn't need to be overridden -- all redering routines should include xpos
 void MenuItem::render(S32 ypos, S32 textsize, bool isSelected)
 {
