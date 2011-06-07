@@ -194,6 +194,7 @@ static Vector<SFXHandle> gPlayList;
 static alureStream* musicStream;
 static ALuint musicSource;  // dedicated source for Music
 static MusicState musicState;
+static ALfloat musicVolume = 0;
 
 static Vector<string> musicList;
 static S32 currentlyPlayingIndex;
@@ -472,16 +473,22 @@ void SoundSystem::processMusic()
    if (!gMusicValid)
       return;
 
-   alureUpdate();
+   // Adjust music volume only if changed
+   if (S32(gIniSettings.musicVolLevel * 10) != S32(musicVolume * 10)) {
+      musicVolume = gIniSettings.musicVolLevel;
+      alSourcef(musicSource, AL_GAIN, musicVolume);
+   }
 
-   if(musicState == MusicStopped)
+   // Once currentlyPlayingIndex is greater than list size, we are done with the list
+   // We probably don't want this behaviour in the end
+   if(musicState == MusicStopped && currentlyPlayingIndex < musicList.size())
       playMusicList();
 }
 
 
 void SoundSystem::processVoiceChat()
 {
-
+   // TODO move voiceChat logic here
 }
 
 
@@ -688,28 +695,31 @@ void SoundSystem::queueVoiceChatBuffer(SFXHandle& effect, ByteBufferPtr p)
 void SoundSystem::music_end_callback(void* userdata, ALuint source)
 {
    logprintf("finished playing: %s", musicList[currentlyPlayingIndex].c_str());
+
+   musicState = MusicStopped;
+   currentlyPlayingIndex++;
 }
 
 void SoundSystem::playMusicList()
 {
-   playMusic();
+   playMusic(currentlyPlayingIndex);
 }
 
-void SoundSystem::playMusic()
+void SoundSystem::playMusic(S32 listIndex)
 {
    musicState = MusicPlaying;
 
-   string musicFile = joindir(gConfigDirs.musicDir, musicList[currentlyPlayingIndex]);
+   string musicFile = joindir(gConfigDirs.musicDir, musicList[listIndex]);
    musicStream = alureCreateStreamFromFile(musicFile.c_str(), MusicChunkSize, 0, NULL);
 
    if(!musicStream)
    {
-      logprintf(LogConsumer::LogError, "Failed to create music stream for: %s", musicList[currentlyPlayingIndex].c_str());
+      logprintf(LogConsumer::LogError, "Failed to create music stream for: %s", musicList[listIndex].c_str());
    }
 
    if(!alurePlaySourceStream(musicSource, musicStream, NumMusicStreamBuffers, 0, music_end_callback, NULL))
    {
-      logprintf(LogConsumer::LogError, "Failed to play music file: %s", musicList[currentlyPlayingIndex].c_str());
+      logprintf(LogConsumer::LogError, "Failed to play music file: %s", musicList[listIndex].c_str());
    }
 }
 

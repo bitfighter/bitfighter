@@ -148,7 +148,7 @@ public:
 
    // Music functions
    static void processMusic();
-   static void playMusic();
+   static void playMusic(TNL::S32 listIndex);
    static void playMusicList();
    static void stopMusic();
 
