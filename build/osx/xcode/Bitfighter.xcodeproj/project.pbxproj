@@ -754,6 +754,20 @@
 			remoteGlobalIDString = 737CE46B12904E9E00D732B7;
 			remoteInfo = libtomcrypt;
 		};
+		737BEFA9139D97DC0066B0CB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7388F046139D5A05003C6BB0;
+			remoteInfo = Speex;
+		};
+		737BEFAB139D97DC0066B0CB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7388F059139D5A28003C6BB0;
+			remoteInfo = Vorbis;
+		};
 		737CE630129055A600D732B7 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
@@ -3133,6 +3147,8 @@
 				73B0FC211370ABBA0019AE4E /* PBXTargetDependency */,
 				73B0FC231370ABBA0019AE4E /* PBXTargetDependency */,
 				7388F02A139D59C2003C6BB0 /* PBXTargetDependency */,
+				737BEFAA139D97DC0066B0CB /* PBXTargetDependency */,
+				737BEFAC139D97DC0066B0CB /* PBXTargetDependency */,
 			);
 			name = Bitfighter;
 			productInstallPath = "$(HOME)/Applications";
@@ -3833,6 +3849,16 @@
 			target = 737CE46B12904E9E00D732B7 /* libtomcrypt */;
 			targetProxy = 7378261B12960DDF007333BE /* PBXContainerItemProxy */;
 		};
+		737BEFAA139D97DC0066B0CB /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7388F046139D5A05003C6BB0 /* Speex */;
+			targetProxy = 737BEFA9139D97DC0066B0CB /* PBXContainerItemProxy */;
+		};
+		737BEFAC139D97DC0066B0CB /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7388F059139D5A28003C6BB0 /* Vorbis */;
+			targetProxy = 737BEFAB139D97DC0066B0CB /* PBXContainerItemProxy */;
+		};
 		737CE631129055A600D732B7 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 737CE61C1290553D00D732B7 /* tnl */;
@@ -4117,6 +4143,7 @@
 				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = "tnl-Info.plist";
 				INSTALL_PATH = "@executable_path/../Frameworks";
+				OTHER_CFLAGS = "-DTNL_ENABLE_LOGGING";
 				PREBINDING = NO;
 				PRODUCT_NAME = tnl;
 			};
@@ -4167,7 +4194,6 @@
 				);
 				INFOPLIST_FILE = "ALURE-Info.plist";
 				INSTALL_PATH = "@executable_path/../Frameworks";
-				OTHER_CFLAGS = "-DDYNLOAD=1";
 				PREBINDING = NO;
 				PRODUCT_NAME = ALURE;
 				USE_HEADERMAP = NO;
@@ -4189,6 +4215,7 @@
 				HEADER_SEARCH_PATHS = ../../../alure;
 				INFOPLIST_FILE = "ALURE-Info.plist";
 				INSTALL_PATH = "@executable_path/../Frameworks";
+				OTHER_CFLAGS = "";
 				PREBINDING = NO;
 				PRODUCT_NAME = ALURE;
 				USE_HEADERMAP = NO;

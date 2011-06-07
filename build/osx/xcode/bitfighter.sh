@@ -33,6 +33,7 @@ cd -
 
 sfxdir="$absolute_datadir/sfx"
 scriptsdir="$absolute_datadir/scripts"
+musicdir="$absolute_datadir/music"
 
 dsdir=""
 if [ $dedicated -eq 1 ]; then
@@ -47,5 +48,5 @@ fi
 if [ $dedicated -eq 1 ]; then
   ./Bitfighterd -rootDataDir "$userdatadir" -sfxdir "$sfxdir" -scriptsdir "$scriptsdir" -logdir "$dsdir" -inidir "$dsdir" "$@"
 else
-  ./Bitfighter -rootDataDir "$userdatadir" -sfxdir "$sfxdir" -scriptsdir "$scriptsdir" "$@"
+  ./Bitfighter -rootDataDir "$userdatadir" -musicdir "$musicdir" -sfxdir "$sfxdir" -scriptsdir "$scriptsdir" "$@"
 fi

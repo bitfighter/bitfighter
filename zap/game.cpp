@@ -150,7 +150,7 @@ S32 Game::getTeamCount()
 
 void Game::setGameType(GameType *theGameType)
 {
-   delete mGameType;          // Cleanup, if need be
+   mGameType->deleteObject();          // Cleanup, if need be
    mGameType = theGameType;
 }
 
