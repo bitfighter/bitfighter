@@ -33,6 +33,7 @@
 #include "loadoutZone.h"
 #include "goalZone.h"
 #include "huntersGame.h"
+#include "Colors.h"
 
 #include "Geometry.h"            // For GeomType enum
 
@@ -116,7 +117,7 @@ static void setLevelToCanvasCoordConversion()
 } 
 
 // TODO: merge with UIEditor versions
-static const Color grayedOutColorBright = Color(.5, .5, .5);
+static const Color grayedOutColorBright = Colors::gray50;
 static const Color grayedOutColorDim = Color(.25, .25, .25);
 static const S32 NO_NUMBER = -1;
 
@@ -137,15 +138,15 @@ static void renderVertex(VertexRenderStyles style, const Point &v, S32 number, F
    else if(style == SelectedVertex)
       glColor(SELECT_COLOR, alpha);
    else if(style == SnappingVertex)
-      glColor(magenta, alpha);
+      glColor(Colors::magenta, alpha);
    else
-      glColor(red, alpha);
+      glColor(Colors::red, alpha);
 
    drawSquare(v, size / currentScale, !hollow);
 
    if(number != NO_NUMBER)     // Draw vertex numbers
    {
-      glColor(white, alpha);
+      glColor(Colors::white, alpha);
       F32 txtSize = 6.0 / currentScale;
       UserInterface::drawStringf(v.x - F32(UserInterface::getStringWidthf(txtSize, "%d", number)) / 2, v.y - 3 / currentScale, txtSize, "%d", number);
    }
@@ -165,7 +166,7 @@ static void renderVertex(VertexRenderStyles style, const Point &v, S32 number, F
 
 
 static const S32 DOCK_LABEL_SIZE = 9;      // Size to label items on the dock
-static const Color DOCK_LABEL_COLOR = white;
+static const Color DOCK_LABEL_COLOR = Colors::white;
 
 
 static void labelVertex(Point pos, S32 radius, const char *itemLabelTop, const char *itemLabelBottom)
@@ -475,7 +476,7 @@ void EditorObject::render(bool isScriptItem, bool showingReferenceShip, ShowMode
    //      }
    //      else     // Dock item rendering
    //      {
-   //         glColor(hideit ? grayedOutColorBright : Color(1,1,0), alpha);
+   //         glColor(hideit ? grayedOutColorBright : Colors::yellow, alpha);
    //         drawPolygon(pos, 7, 8, 0);
    //      }
    //   }

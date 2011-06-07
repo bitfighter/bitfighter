@@ -243,10 +243,10 @@ void EditorInstructionsUserInterface::renderPageCommands(S32 page)
       glVertex2f(750, starty + 26);
    glEnd();
 
-   static const Color txtColor = Color(0, 1, 1);
-   static const Color keyColor = Color (1, 1, 1);           // White
-   static const Color secColor = Color(1, 1, 0);
-   static const Color groupHeaderColor = Color(1, 0, 0);    // Red
+   static const Color txtColor = Colors::cyan;
+   static const Color keyColor = Colors::white;
+   static const Color secColor = Colors::yellow;
+   static const Color groupHeaderColor = Colors::red;
 
    glColor(secColor);
    drawString(col1, starty, 20, "Action");
@@ -395,7 +395,7 @@ void EditorInstructionsUserInterface::renderPageWalls()
          delete wallSegments[i];
    }
 
-   glColor(mAnimStage <= 11 ? Color(1,1,0) : gNeutralTeamColor);
+   glColor(mAnimStage <= 11 ? Colors::yellow : gNeutralTeamColor);
 
    glLineWidth(WALL_SPINE_WIDTH);
 
@@ -426,10 +426,10 @@ void EditorInstructionsUserInterface::renderPageWalls()
          done = true;
       else
       {
-         glColor3f(1, 0, 0);     // red
+         glColor3f(1,0,0);  // red
          drawString(50, y, textSize, "*");
 
-         glColor3f(1, 1, 1);     // white
+         glColor3f(1,1,1);  // white
          drawString(x, y, textSize, wallInstructions[i]);
          y += 26;
       }
@@ -451,7 +451,7 @@ void EditorInstructionsUserInterface::renderPageZones()
    S32 textSize = 18;
    F32 scale = .7;
  
-   glColor(yellow);
+   glColor(Colors::yellow);
    drawCenteredString(ypos, textSize, "Bot NavZones help bots navigate a level.  If the level does");
    ypos += 25;
    drawCenteredString(ypos, textSize, "not use bots, you don't need NavZones.");
@@ -459,7 +459,7 @@ void EditorInstructionsUserInterface::renderPageZones()
    drawCenteredString(ypos, textSize, "See the Wiki for more details (bitfighter.org)");
    ypos += 40;
 
-   glColor(cyan);
+   glColor(Colors::cyan);
    drawCenteredString(ypos, textSize, "Use Ctrl-A to enter/exit NavZone Editing Mode");
    ypos += 25;
    drawCenteredString(ypos, textSize, "See NavZones in-game using /dzones command");

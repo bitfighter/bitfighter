@@ -81,7 +81,7 @@ TeamDefUserInterface::TeamDefUserInterface()
    setMenuID(TeamDefUI);
    mMenuTitle = "Configure Teams";
    mMenuSubTitle = "For quick configuration, press [ALT]1-9 to specify number of teams";
-   mMenuSubTitleColor = Color(1,1,1);
+   mMenuSubTitleColor = Colors::white;
 }
 
 static const U32 errorMsgDisplayTime = 4000; // 4 seconds
@@ -154,7 +154,7 @@ void TeamDefUserInterface::render()
       if(selectedIndex == j)       // Highlight selected item
          for(S32 i = 1; i >= 0; i--)
          {
-            glColor(i ? Color(0,0,0.4) : Color(0,0,1));     // Fill : Outline
+            glColor(i ? Color(0,0,0.4) : Colors::blue);     // Fill : Outline
             glBegin(i ? GL_POLYGON : GL_LINES);
                glVertex2f(0, y - 2);
                glVertex2f(canvasWidth, y - 2);

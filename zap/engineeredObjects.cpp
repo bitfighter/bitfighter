@@ -34,7 +34,7 @@
 #include "GeomUtils.h"
 #include "BotNavMeshZone.h"
 //#include "UIEditor.h"      // For EditorUserInterface->getDatabase, and WallSegment def  TODO: can we get rid of this somehow?
-
+#include "Colors.h"
 
 #include <math.h>
 
@@ -467,18 +467,18 @@ void EngineeredObject::explode()
    const S32 EXPLOSION_COLOR_COUNT = 12;
 
    static Color ExplosionColors[EXPLOSION_COLOR_COUNT] = {
-      Color(1, 0, 0),
+      Colors::red,
       Color(0.9, 0.5, 0),
-      Color(1, 1, 1),
-      Color(1, 1, 0),
-      Color(1, 0, 0),
+      Colors::white,
+      Colors::yellow,
+      Colors::red,
       Color(0.8, 1.0, 0),
       Color(1, 0.5, 0),
-      Color(1, 1, 1),
-      Color(1, 0, 0),
+      Colors::white,
+      Colors::red,
       Color(0.9, 0.5, 0),
-      Color(1, 1, 1),
-      Color(1, 1, 0),
+      Colors::white,
+      Colors::yellow,
    };
 
    SoundSystem::playSoundEffect(SFXShipExplode, getActualPos(), Point());
@@ -758,7 +758,7 @@ void ForceFieldProjector::render()
 
 void ForceFieldProjector::renderDock()
 {
-   renderSquareItem(mAnchorPoint, getGame()->getTeamColor(mTeam), 1, white, '>');
+   renderSquareItem(mAnchorPoint, getGame()->getTeamColor(mTeam), 1, Colors::white, '>');
 }
 
 
@@ -1113,7 +1113,7 @@ void Turret::render()
 
 void Turret::renderDock()
 {
-   renderSquareItem(mAnchorPoint, getGame()->getTeamColor(mTeam), 1, white, 'T');
+   renderSquareItem(mAnchorPoint, getGame()->getTeamColor(mTeam), 1, Colors::white, 'T');
 }
 
 

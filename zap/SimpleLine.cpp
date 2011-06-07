@@ -25,6 +25,8 @@
 
 #include "SimpleLine.h"
 #include "gameObjectRender.h"
+#include "Colors.h"
+
 #include <math.h>
 
 namespace Zap
@@ -68,7 +70,7 @@ static const S32 INSTRUCTION_TEXTGAP = 3;
 static const Color ACTIVE_SPECIAL_ATTRIBUTE_COLOR = Color(.6, .6, .6);    
 static const Color INACTIVE_SPECIAL_ATTRIBUTE_COLOR = Color(.6, .6, .6);      // already in editor, called inactiveSpecialAttributeColor
 
-static const Color SELECT_COLOR = yellow;
+static const Color SELECT_COLOR = Colors::yellow;
 
 // Draw arrow that serves as the core of SimpleLine items in the editor
 // Subclasses will fill in the rest

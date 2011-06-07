@@ -27,6 +27,7 @@
 #include "engineeredObjects.h"      // For EngineerModuleDeployer
 #include "UIGame.h"
 #include "Color.h"      // For Color def
+#include "Colors.h"
 
 namespace Zap
 {
@@ -51,7 +52,7 @@ void EngineerHelper::render()
 {
    S32 yPos = MENU_TOP;
    const S32 fontSize = 15;
-   const Color engineerMenuHeaderColor (1, 0, 0);
+   const Color engineerMenuHeaderColor (Colors::red);
 
    if(mSelectedItem == -1)    // Haven't selected an item yet
    {

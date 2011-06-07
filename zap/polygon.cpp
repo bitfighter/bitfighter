@@ -26,6 +26,7 @@
 #include "polygon.h"
 #include "GeomUtils.h"           // For polygon triangulation
 #include "gameObjectRender.h"
+#include "Colors.h"
 
 namespace Zap
 {
@@ -70,8 +71,8 @@ void EditorPolygon::highlightDockItem()
 
 
 // TODO: merge with versions in editor
-const Color HIGHLIGHT_COLOR = white;
-const Color SELECT_COLOR = yellow;
+const Color HIGHLIGHT_COLOR = Colors::white;
+const Color SELECT_COLOR = Colors::yellow;
 
 
 void EditorPolygon::renderPolyHighlight()

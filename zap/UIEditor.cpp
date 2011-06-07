@@ -279,15 +279,15 @@ void renderVertex(VertexRenderStyles style, const Point &v, S32 number, F32 alph
    else if(style == SelectedVertex)
       glColor(SELECT_COLOR, alpha);
    else if(style == SnappingVertex)
-      glColor(magenta, alpha);
+      glColor(Colors::magenta, alpha);
    else
-      glColor(red, alpha);
+      glColor(Colors::red, alpha);
 
    drawSquare(v, size, !hollow);
 
    if(number != NO_NUMBER)     // Draw vertex numbers
    {
-      glColor(white, alpha);
+      glColor(Colors::white, alpha);
       UserInterface::drawStringf(v.x - UserInterface::getStringWidthf(6, "%d", number) / 2, v.y - 3, 6, "%d", number);
    }
 }
@@ -1305,7 +1305,7 @@ S32 EditorUserInterface::checkCornersForSnap(const Point &clickPoint, const Vect
 
 extern Color gErrorMessageTextColor;
 
-static const Color grayedOutColorBright = Color(.5, .5, .5);
+static const Color grayedOutColorBright = Colors::gray50;
 static const Color grayedOutColorDim = Color(.25, .25, .25);
 static bool fillRendered = false;
 
@@ -1389,7 +1389,7 @@ void EditorUserInterface::renderDock(F32 width)    // width is current wall widt
 
    for(S32 i = 1; i >= 0; i--)
    {
-      glColor(i ? black : (mouseOnDock() ? yellow : white));       
+      glColor(i ? Colors::black : (mouseOnDock() ? Colors::yellow : Colors::white));
 
       glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
          glVertex2f(canvasWidth - DOCK_WIDTH - horizMargin, canvasHeight - vertMargin);
@@ -1410,7 +1410,7 @@ void EditorUserInterface::renderDock(F32 width)    // width is current wall widt
    F32 xpos = gScreenInfo.getGameCanvasWidth() - horizMargin - DOCK_WIDTH / 2;
 
    char text[50];
-   glColor(white);
+   glColor(Colors::white);
    dSprintf(text, sizeof(text), "%2.2f|%2.2f", pos.x, pos.y);
    drawStringc(xpos, gScreenInfo.getGameCanvasHeight() - vertMargin - 15, 8, text);
 
@@ -1422,14 +1422,14 @@ void EditorUserInterface::renderDock(F32 width)    // width is current wall widt
    dSprintf(text, sizeof(text), "Teams: %d",  mTeams.size());
    drawStringc(xpos, gScreenInfo.getGameCanvasHeight() - vertMargin - 35, 8, text);
 
-   glColor(mNeedToSave ? red : green);     // Color level name by whether it needs to be saved or not
+   glColor(mNeedToSave ? Colors::red : Colors::green);     // Color level name by whether it needs to be saved or not
    dSprintf(text, sizeof(text), "%s%s", mNeedToSave ? "*" : "", mEditFileName.substr(0, mEditFileName.find_last_of('.')).c_str());    // Chop off extension
    drawStringc(xpos, gScreenInfo.getGameCanvasHeight() - vertMargin - 45, 8, text);
 
    // And wall width as needed
    if(width != NONE)
    {
-      glColor(white);
+      glColor(Colors::white);
       dSprintf(text, sizeof(text), "Width: %2.0f", width);
       drawStringc(xpos, gScreenInfo.getGameCanvasHeight() - vertMargin - 55, 8, text);
    }
@@ -1445,7 +1445,7 @@ void EditorUserInterface::renderTextEntryOverlay()
       static const S32 inset = 9;
       static const S32 boxheight = fontsize + 2 * inset;
       static const Color color(0.9, 0.9, 0.9);
-      static const Color errorColor(1, 0, 0);
+      static const Color errorColor(Colors::red);
 
       bool errorFound = false;
 
@@ -1508,7 +1508,7 @@ void EditorUserInterface::renderReferenceShip()
       glTranslatef(mMousePos.x, mMousePos.y, 0);
       glScalef(mCurrentScale / getGridSize(), mCurrentScale / getGridSize(), 1);
       glRotatef(90, 0, 0, 1);
-      renderShip(red, 1, thrusts, 1, 5, 0, false, false, false, false);
+      renderShip(Colors::red, 1, thrusts, 1, 5, 0, false, false, false, false);
       glRotatef(-90, 0, 0, 1);
 
       // And show how far it can see
@@ -1680,7 +1680,7 @@ void EditorUserInterface::render()
 
    if(mDragSelecting)      // Draw box for selecting items
    {
-      glColor(white);
+      glColor(Colors::white);
       Point downPos = convertLevelToCanvasCoord(mMouseDownPos);
       glBegin(GL_LINE_LOOP);
          glVertex2f(downPos.x,   downPos.y);
@@ -1755,7 +1755,7 @@ void EditorUserInterface::render()
          ypos += 25;
       }
 
-      glColor(yellow);
+      glColor(Colors::yellow);
 
       for(S32 i = 0; i < mLevelWarnings.size(); i++)
       {
@@ -1764,7 +1764,7 @@ void EditorUserInterface::render()
       }
    }
 
-   glColor(cyan);
+   glColor(Colors::cyan);
    drawCenteredString(vertMargin, 14, getModeMessage(mShowMode));
 
    renderTextEntryOverlay();
@@ -3772,7 +3772,7 @@ void EditorUserInterface::setSaveMessage(string msg, bool savedOK)
 {
    mSaveMsg = msg;
    mSaveMsgTimer = saveMsgDisplayTime;
-   mSaveMsgColor = (savedOK ? Color(0, 1, 0) : red);
+   mSaveMsgColor = (savedOK ? Colors::green : Colors::red);
 }
 
 void EditorUserInterface::setWarnMessage(string msg1, string msg2)

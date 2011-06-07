@@ -80,9 +80,9 @@ void EditorAttributeMenuUI::doneEditing(EditorObject *object)
    
 static void setMenuColors(MenuItem *menuItem)
 {
-   menuItem->setSelectedColor(white);
-   menuItem->setUnselectedColor(gray50);
-   menuItem->setUnselectedValueColor(gray50);
+   menuItem->setSelectedColor(Colors::white);
+   menuItem->setUnselectedColor(Colors::gray50);
+   menuItem->setUnselectedValueColor(Colors::gray50);
 }
 
 

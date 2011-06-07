@@ -27,6 +27,7 @@
 #include "UIGame.h"
 #include "UIMenus.h"
 #include "gameType.h"
+#include "Colors.h"
 
 
 namespace Zap
@@ -83,7 +84,7 @@ void LoadoutHelper::render()
    S32 yPos = MENU_TOP;
    const S32 fontSize = 15;
 
-   const Color loadoutMenuHeaderColor (1, 0, 0);
+   const Color loadoutMenuHeaderColor (Colors::red);
    char helpStr[100];
 
    if(mCurrentIndex < ShipModuleCount)

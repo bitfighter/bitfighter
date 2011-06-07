@@ -36,6 +36,7 @@ using namespace TNL;
 #include "oglconsole.h"    // For console rendering
 //#include "UIEditor.h"      // <--- we need to get rid of this one!
 //#include "UICredits.h"     // <--- don't want this one either
+#include "Colors.h"
 
 #include "../glut/glutInclude.h"
 
@@ -741,7 +742,7 @@ void UserInterface::renderMessageBox(const char *title, const char *instr, const
       if(i == 0) 
          glEnableBlendfromLineSmooth;
 
-      glColor(i ? Color(.3,0,0) : Color(1,1,1));        // Draw the box
+      glColor(i ? Color(.3,0,0) : Colors::white);        // Draw the box
       
       glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
          glVertex2f(inset, boxTop);

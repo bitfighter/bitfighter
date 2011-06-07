@@ -32,6 +32,7 @@
 #include "projectile.h"    // For LuaItem
 #include "Point.h"
 //#include "UIEditor.h"      // For EditorObject 
+#include "Colors.h"
 
 #include "tnlNetObject.h"
 
@@ -105,7 +106,7 @@ public:
 
 
    ///// Editor Methods
-   Color getEditorRenderColor() { return Color(0,1,0); }
+   Color getEditorRenderColor() { return Colors::green; }
 
    void renderEditorItem();
 

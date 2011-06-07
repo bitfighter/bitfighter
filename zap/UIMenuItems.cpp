@@ -45,8 +45,8 @@ MenuItem::MenuItem(S32 index, const string &prompt, void (*callback)(U32), const
    mHelp = help;
    mIndex = (U32)index;
    mEnterAdvancesItem = false;
-   mSelectedColor = yellow;
-   mUnselectedColor = white;
+   mSelectedColor = Colors::yellow;
+   mUnselectedColor = Colors::white;
    mPromptAppendage = " >";
 }
 
@@ -89,6 +89,26 @@ bool MenuItem::handleKey(KeyCode keyCode, char ascii)
 
 ////////////////////////////////////
 ////////////////////////////////////
+
+ValueMenuItem::ValueMenuItem(S32 index, const string &text, void (*callback)(U32), const string &help, KeyCode k1, KeyCode k2) :
+      MenuItem(index, text, callback, help, k1, k2)
+{
+   mSelectedValueColor = Colors::cyan;
+   mUnselectedValueColor = Colors::cyan;
+}
+
+////////////////////////////////////
+////////////////////////////////////
+
+ToggleMenuItem::ToggleMenuItem(string title, Vector<string> options, U32 currOption, bool wrap, void (*callback)(U32), string help, KeyCode k1, KeyCode k2) :
+      ValueMenuItem(-1, title, callback, help, k1, k2)
+{
+   mValue = "";
+   mIndex = currOption;
+   mOptions = options;
+   mWrap = wrap;
+   mEnterAdvancesItem = true;
+}
 
 
 void ToggleMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
@@ -158,6 +178,35 @@ bool ToggleMenuItem::handleKey(KeyCode keyCode, char ascii)
 ////////////////////////////////////
 ////////////////////////////////////
 
+
+YesNoMenuItem::YesNoMenuItem(string title, bool currOption, void (*callback)(U32), string help, KeyCode k1, KeyCode k2) :
+      ToggleMenuItem(title, Vector<string>(), currOption, true, callback, help, k1, k2)
+{
+   mValue = "";
+   mIndex = currOption;
+   mEnterAdvancesItem = true;
+
+   mOptions.push_back("No");     // 0
+   mOptions.push_back("Yes");    // 1
+}
+
+
+////////////////////////////////////
+////////////////////////////////////
+
+CounterMenuItem::CounterMenuItem(const string &title, S32 value, S32 step, S32 minVal, S32 maxVal, const string &units, const string &minMsg, const string &help,
+                KeyCode k1, KeyCode k2) :
+   ValueMenuItem(-1, title, NULL, help, k1, k2)
+{
+   mValue = value;
+   mStep = step;
+   mMinValue = minVal;
+   mMaxValue = maxVal;
+   mUnits = units;
+   mMinMsg = minMsg;
+   mEnterAdvancesItem = true;
+}
+
 void CounterMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
 {
    if(mValue == mMinValue && mMinMsg != "")
@@ -221,6 +270,33 @@ void CounterMenuItem::decrement(S32 fact)
 ////////////////////////////////////
 ////////////////////////////////////
 
+TimeCounterMenuItem::TimeCounterMenuItem(const string &title, S32 value, S32 maxVal, const string &zeroMsg, const string &help,
+                    S32 step, KeyCode k1, KeyCode k2) :
+   CounterMenuItem(title, value, step, 0, maxVal, "", zeroMsg, help, k1, k2)
+{
+   // Do nothing
+}
+
+
+////////////////////////////////////
+////////////////////////////////////
+
+TimeCounterMenuItemSeconds::TimeCounterMenuItemSeconds(const string &title, S32 value, S32 maxVal, const string &zeroMsg, const string &help,
+                KeyCode k1, KeyCode k2) :
+   TimeCounterMenuItem(title, value, maxVal, zeroMsg, help, 1, k1, k2)
+{
+   // Do nothing
+}
+
+////////////////////////////////////
+////////////////////////////////////
+
+PlayerMenuItem::PlayerMenuItem(S32 index, const char *text, void (*callback)(U32), KeyCode k1, PlayerType type) :
+      MenuItem(index, text, callback, "", k1, KEY_UNKNOWN)
+{
+   mType = type;
+}
+
 void PlayerMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
 {
    string temp = getPrompt();
@@ -241,6 +317,15 @@ void PlayerMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
 ////////////////////////////////////
 ////////////////////////////////////
 
+TeamMenuItem::TeamMenuItem(S32 index, Team team, void (*callback)(U32), KeyCode keyCode, bool isCurrent) :
+               MenuItem(index, team.getName().getString(), callback, "", keyCode, KEY_UNKNOWN)
+{
+   mTeam = team;
+   mIsCurrent = isCurrent;
+   mUnselectedColor = team.color;
+   mSelectedColor = team.color;
+}
+
 
 void TeamMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
 {
@@ -253,15 +338,24 @@ void TeamMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
 ////////////////////////////////////
 ////////////////////////////////////
 
+EditableMenuItem::EditableMenuItem(string title, string val, string emptyVal, string help, U32 maxLen, KeyCode k1, KeyCode k2) :
+         ValueMenuItem(-1, title, NULL, help, k1, k2),
+         mLineEditor(LineEditor(maxLen, val))
+{
+   mEmptyVal = emptyVal;
+   mEnterAdvancesItem = true;
+   mTextEditedCallback = NULL;
+}
+
 void EditableMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
 {
    Color textColor;     
    if(mLineEditor.getString() == "" && mEmptyVal != "")
       textColor.set(.4, .4, .4);
    else if(isSelected)
-      textColor.set(1,0,0);
+      textColor.set(Colors::red);
    else
-      textColor.set(0,1,1);
+      textColor.set(Colors::cyan);
 
    S32 xpos2 = UserInterface::drawCenteredStringPair(xpos, ypos, textsize, *getColor(isSelected), textColor, getPrompt().c_str(), 
                                                     mLineEditor.getString() != "" ? mLineEditor.getDisplayString().c_str() : mEmptyVal.c_str());
@@ -294,6 +388,16 @@ bool EditableMenuItem::handleKey(KeyCode keyCode, char ascii)
    }
    
    return false;
+}
+
+
+////////////////////////////////////
+////////////////////////////////////
+
+MaskedEditableMenuItem::MaskedEditableMenuItem(string title, string val, string emptyVal, string help, U32 maxLen, KeyCode k1, KeyCode k2) :
+   EditableMenuItem(title, val, emptyVal, help, maxLen, k1, k2)
+{
+   mLineEditor.setSecret(true);
 }
 
 };

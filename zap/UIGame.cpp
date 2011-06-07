@@ -70,11 +70,11 @@ extern ConfigDirectories gConfigDirs;          //in main.cpp for Getmap
 
 // TODO: Make these static like privateF5MessageDisplayedInGameColor!
 Color gGlobalChatColor(0.9, 0.9, 0.9);
-Color gTeamChatColor(0, 1, 0);
+Color gTeamChatColor(Colors::green);
 extern Color gCmdChatColor;
 
 
-Color GameUserInterface::privateF5MessageDisplayedInGameColor(0, 0, 1);
+Color GameUserInterface::privateF5MessageDisplayedInGameColor(Colors::blue);
 
 
 static void makeCommandCandidateList();      // Forward delcaration

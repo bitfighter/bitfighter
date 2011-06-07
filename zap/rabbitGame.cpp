@@ -28,6 +28,7 @@
 #include "UIGame.h"
 #include "SoundSystem.h"
 #include "flagItem.h"
+#include "Colors.h"
 
 #include "../glut/glutInclude.h"
 #include <stdio.h>
@@ -152,9 +153,9 @@ Color RabbitGameType::getShipColor(Ship *s)
    Ship *co = dynamic_cast<Ship *>(gc->getControlObject());
 
    if(s == co || (!shipHasFlag(s) && !shipHasFlag(co)))
-      return Color(0,1,0);
+      return Colors::green;
    // else
-   return Color(1,0,0);
+   return Colors::red;
 }
 
 

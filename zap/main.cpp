@@ -168,6 +168,7 @@ using namespace TNL;
 #include "config.h"
 #include "md5wrapper.h"
 #include "version.h"
+#include "Colors.h"
 
 
 #include "screenShooter.h"
@@ -231,7 +232,7 @@ Color gErrorMessageTextColor(1, 0.5, 0.5);
 Color gNeutralTeamColor(0.8, 0.8, 0.8);         // Objects that are neutral (on team -1)
 Color gHostileTeamColor(0.5, 0.5, 0.5);         // Objects that are "hostile-to-all" (on team -2)
 Color gMasterServerBlue(0.8, 0.8, 1);           // Messages about successful master server statii
-Color gHelpTextColor(0, 1, 0);
+Color gHelpTextColor(Colors::green);
 
 S32 gMaxPolygonPoints = 32;                     // Max number of points we can have in Nexuses, LoadoutZones, etc.
 

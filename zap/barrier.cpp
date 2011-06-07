@@ -453,7 +453,7 @@ PolyWall::PolyWall()
 }
 
 
-static const Color HIGHLIGHT_COLOR = white;
+static const Color HIGHLIGHT_COLOR = Colors::white;
 
 void PolyWall::render()
 {
@@ -479,7 +479,7 @@ void PolyWall::renderEditor(F32 currentScale)
 void PolyWall::renderDock()
 {
    renderPolygonFill(getFill(), EDITOR_WALL_FILL_COLOR, 1);
-   glColor(blue);
+   glColor(Colors::blue);
    renderPolygonOutline(getOutline());
 }
 

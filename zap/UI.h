@@ -104,22 +104,6 @@ enum UIID {
    InvalidUI,        // Not a valid UI
 };
 
-
-////////////////////////////////////////
-////////////////////////////////////////
-// Some colors
-
-static const Color red = Color(1,0,0);
-static const Color green = Color(0,1,0);
-static const Color blue = Color(0,0,1);
-static const Color yellow = Color(1,1,0);
-static const Color cyan = Color(0,1,1);
-static const Color magenta = Color(1,0,1);
-static const Color black = Color(0,0,0);
-static const Color white = Color(1,1,1);
-static const Color gray50(0.5);
-static const Color orange(1, .67 ,0);
-
 extern void glColor(const Color &c, float alpha = 1.0);
 
 ////////////////////////////////////////
