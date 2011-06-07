@@ -109,8 +109,8 @@ class SoundSystem
 private:
    static const TNL::S32 NumMusicStreamBuffers = 3;
    static const TNL::S32 MusicChunkSize = 250000;
-   static const TNL::S32 NumVoiceBuffers = 32;
-   static const TNL::S32 NumSamples = 32;
+   static const TNL::S32 NumVoiceChatBuffers = 32;
+   static const TNL::S32 NumSamples = 16;
 
    // Sound Effect functions
    static void playOnSource(SFXHandle& effect);
