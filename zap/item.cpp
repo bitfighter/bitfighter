@@ -94,7 +94,7 @@ EditorPointObject::EditorPointObject(GameObjectType objectType) : EditorObject(o
 // Copy constructor -- make sure each copy gets its own geometry object
 EditorPointObject::EditorPointObject(const EditorPointObject &epo)
 {
-   mGeometry = boost::shared_ptr<Geometry>(new PointGeometry);  
+   mGeometry = boost::shared_ptr<Geometry>(new PointGeometry(*((PointGeometry *)epo.mGeometry.get())));  
 }
 
 

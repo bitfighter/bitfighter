@@ -50,8 +50,9 @@ protected:
       void renderPolyHighlight();
 
 public:
-   EditorPolygon() { mGeometry = boost::shared_ptr<Geometry>(new PolygonGeometry); };                             // Constructor
-   //EditorPolygon(const EditorPolygon &ep) : EditorObject(ep) { mGeometry = boost::shared_ptr<Geometry>(new PolygonGeometry); };      // Copy constructor
+   EditorPolygon() { mGeometry = boost::shared_ptr<Geometry>(new PolygonGeometry); };                          // Constructor
+      //Should Copy Constructor be used here?
+   //EditorPolygon(const EditorPolygon &ep) : EditorObject(ep) { mGeometry = boost::shared_ptr<Geometry>(new PolygonGeometry(*((PolygonGeometry *)ep.mGeometry.get()))); };      // Copy constructor
 
    void newObjectFromDock(F32 gridSize);
 

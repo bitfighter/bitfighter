@@ -333,7 +333,7 @@ LineItem::LineItem()
 // Copy constructor -- make sure each copy gets its own geometry object
 LineItem::LineItem(const LineItem &li)
 {
-   mGeometry = boost::shared_ptr<Geometry>(new PolylineGeometry);  
+   mGeometry = boost::shared_ptr<Geometry>(new PolylineGeometry(*((PolylineGeometry *)li.mGeometry.get())));  
 }
 
 
