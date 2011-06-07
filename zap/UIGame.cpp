@@ -1509,7 +1509,7 @@ void GameUserInterface::showCoordsHandler(GameUserInterface *gui, const Vector<s
 
 void GameUserInterface::showZonesHandler(GameUserInterface *gui, const Vector<string> &words)
 {
-   if(!(gServerGame && gServerGame->isTestServer())) 
+   if(!(gServerGame))// && gServerGame->isTestServer()))  sam: problem with not being able to test from editor due to editor crashing and loading improperly...
       gui->displayErrorMessage("!!! Zones can only be displayed on a local host");
    else
       gui->mDebugShowMeshZones = !gui->mDebugShowMeshZones;

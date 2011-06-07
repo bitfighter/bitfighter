@@ -954,7 +954,7 @@ S32 LuaRobot::getWaypoint(lua_State *L)  // Takes a luavec or an x,y
 
    // TODO: Cache this block -- data will not change throughout game... 
    Vector<DatabaseObject *> objects;
-   gServerGame->getGridDatabase()->findObjects(objects);
+   gServerGame->getBotZoneDatabase()->findObjects(0, objects, BotNavMeshZoneTypeNumber);
 
    Vector<BotNavMeshZone *> zones;
    zones.resize(objects.size());
