@@ -53,8 +53,9 @@
 #include "luaUtil.h"
 #include "config.h"              // for gIniSettings.defaultRobotScript
 #include "GeomUtils.h"
-
 #include "oglconsole.h"
+
+#include "SDL/SDL_opengl.h"
 
 #include <math.h>
 

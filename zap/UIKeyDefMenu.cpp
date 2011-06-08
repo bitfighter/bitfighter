@@ -35,6 +35,9 @@
 #include "game.h"    // For gClientGame
 #include "Colors.h"
 
+#include "SDL/SDL.h"
+#include "SDL/SDL_opengl.h"
+
 #include <string>
 #include <math.h>
 
@@ -329,7 +332,7 @@ void KeyDefMenuUserInterface::onKeyDown(KeyCode keyCode, char ascii)
             selectedIndex--;
       }
 
-      glutSetCursor(GLUT_CURSOR_NONE);    // Turn off cursor
+      SDL_ShowCursor(SDL_DISABLE);    // Turn off cursor
    }
    else if(keyCode == KEY_ESCAPE || keyCode == BUTTON_BACK)       // Quit
    {
@@ -346,7 +349,7 @@ void KeyDefMenuUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       if(selectedIndex < 0)
          selectedIndex = menuItems.size() - 1;
 
-      glutSetCursor(GLUT_CURSOR_NONE);    // Turn off cursor
+      SDL_ShowCursor(SDL_DISABLE);    // Turn off cursor
    }
    else if(keyCode == KEY_DOWN || keyCode == BUTTON_DPAD_DOWN)    // Next item
    {
@@ -356,7 +359,7 @@ void KeyDefMenuUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       if(selectedIndex >= menuItems.size())
          selectedIndex = 0;
 
-      glutSetCursor(GLUT_CURSOR_NONE);    // Turn off cursor
+      SDL_ShowCursor(SDL_DISABLE);    // Turn off cursor
    }
    else if(keyCode == keyOUTGAMECHAT)     // Turn on Global Chat overlay
    {
@@ -375,7 +378,7 @@ void KeyDefMenuUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 // Handle mouse input, figure out which menu item we're over, and highlight it
 void KeyDefMenuUserInterface::onMouseMoved(S32 x, S32 y)
 {
-   glutSetCursor(GLUT_CURSOR_RIGHT_ARROW);            // Show cursor when user moves mouse
+   SDL_ShowCursor(SDL_ENABLE);  // TODO:  was GLUT_CURSOR_RIGHT_ARROW  // Show cursor when user moves mouse
 
    const Point *mousePos = gScreenInfo.getMousePos();
 

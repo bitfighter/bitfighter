@@ -28,8 +28,9 @@
 #include "gameObjectRender.h"
 #include "GeomUtils.h"              // For polygon triangulation
 #include "engineeredObjects.h"      // For forcefieldprojector def
-
 #include "gameType.h"               // For BarrierRec struct
+
+#include "SDL/SDL_opengl.h"
 
 #include <cmath>                    // C++ version of this headers includes float overloads
 

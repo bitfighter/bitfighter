@@ -29,6 +29,8 @@
 
 #include "../tnl/tnlRandom.h"
 
+#include "SDL/SDL_opengl.h"
+
 #include <stdio.h>
 #include <math.h>
 

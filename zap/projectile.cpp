@@ -31,6 +31,8 @@
 #include "gameObject.h"
 #include "gameObjectRender.h"
 
+#include "SDL/SDL_opengl.h"
+
 namespace Zap
 {
 

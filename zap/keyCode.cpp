@@ -36,6 +36,9 @@
 #include "../tnl/tnlLog.h"         // For logprintf
 
 #include "zapjournal.h"    // For journaling support
+
+#include "SDL/SDL.h"
+
 #include <ctype.h>
 
 using namespace TNL;
@@ -123,7 +126,7 @@ char keyToAscii(int key, KeyCode keyCode)
 }
 
 
-/*
+
 // Translate SDL standard keys to our KeyCodes
 KeyCode standardSDLKeyToKeyCode(S32 key)
 {
@@ -609,8 +612,7 @@ KeyCode standardSDLKeyToKeyCode(S32 key)
          return KEY_UNKNOWN;
    }
 }
-*/
-
+/*
 // Translate GLUT standard keys to our KeyCodes
 KeyCode standardGLUTKeyToKeyCode(int key)
 {
@@ -903,8 +905,8 @@ KeyCode specialGLUTKeyToKeyCode(int key)
          return KEY_UNKNOWN;
    }
 }
-
 #endif
+*/
 
 extern ZapJournal gZapJournal;
 extern void getModifierState( bool &shiftDown, bool &controlDown, bool &altDown );

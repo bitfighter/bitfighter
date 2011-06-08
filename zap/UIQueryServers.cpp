@@ -25,21 +25,19 @@
 
 #include "UIQueryServers.h"
 #include "UIMenus.h"
-
 #include "tnlRandom.h"
-
 #include "masterConnection.h"
 #include "gameNetInterface.h"
 #include "game.h"
 #include "gameType.h"
 #include "Colors.h"
-
 #include "config.h"     // TODO: remove requirement -- currently for gIni stuff in screen pos calc
-
 #include "UIChat.h"
 #include "UIDiagnostics.h"
-
 #include "keyCode.h"
+
+#include "SDL/SDL.h"
+#include "SDL/SDL_opengl.h"
 
 #include <math.h>
 
@@ -1070,14 +1068,14 @@ void QueryServersUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    {
       backPage();
 
-      glutSetCursor(GLUT_CURSOR_NONE);        // Hide cursor when navigating with keyboard or joystick
+      SDL_ShowCursor(SDL_DISABLE);        // Hide cursor when navigating with keyboard or joystick
       mItemSelectedWithMouse = false;
    }
    else if(keyCode == KEY_PAGEDOWN) 
    {
       advancePage();
 
-      glutSetCursor(GLUT_CURSOR_NONE);        // Hide cursor when navigating with keyboard or joystick
+      SDL_ShowCursor(SDL_DISABLE);        // Hide cursor when navigating with keyboard or joystick
       mItemSelectedWithMouse = false;
    }
    else if (keyCode == KEY_DELETE || keyCode == KEY_BACKSPACE)       // Do backspacey things
@@ -1096,7 +1094,7 @@ void QueryServersUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          currentIndex = servers.size() - 1;
       mPage = currentIndex / getServersPerPage(); 
 
-      glutSetCursor(GLUT_CURSOR_NONE);        // Hide cursor when navigating with keyboard or joystick
+      SDL_ShowCursor(SDL_DISABLE);        // Hide cursor when navigating with keyboard or joystick
       mItemSelectedWithMouse = false;
       selectedId = servers[currentIndex].id;
    }
@@ -1108,7 +1106,7 @@ void QueryServersUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 
       mPage = currentIndex / getServersPerPage();
 
-      glutSetCursor(GLUT_CURSOR_NONE);        // Hide cursor when navigating with keyboard or joystick
+      SDL_ShowCursor(SDL_DISABLE);        // Hide cursor when navigating with keyboard or joystick
       mItemSelectedWithMouse = false;
       selectedId = servers[currentIndex].id;
    }
@@ -1140,7 +1138,7 @@ void QueryServersUserInterface::onKeyUp(KeyCode keyCode)
 {
    if(mDraggingDivider)
    {
-      glutSetCursor(GLUT_CURSOR_RIGHT_ARROW);      // Reset cursor
+      SDL_ShowCursor(SDL_ENABLE);      // TODO:  was GLUT_CURSOR_RIGHT_ARROW
       mDraggingDivider = false;
    }
 }
@@ -1193,7 +1191,7 @@ void QueryServersUserInterface::onMouseMoved(S32 x, S32 y)
 {
    const Point *mousePos = gScreenInfo.getMousePos();
 
-   glutSetCursor(GLUT_CURSOR_RIGHT_ARROW);            // Show cursor when user moves mouse
+   SDL_ShowCursor(SDL_ENABLE);  // TODO:  was GLUT_CURSOR_RIGHT_ARROW
 
    if(mouseInHeaderRow(mousePos))
    {
@@ -1207,7 +1205,7 @@ void QueryServersUserInterface::onMouseMoved(S32 x, S32 y)
    }
 
    else if(isMouseOverDivider())
-      glutSetCursor(GLUT_CURSOR_UP_DOWN);
+      SDL_ShowCursor(SDL_ENABLE);  // TODO:  was GLUT_CURSOR_UP_DOWN
 
    else
       mHighlightColumn = mSortColumn;

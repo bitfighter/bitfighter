@@ -35,9 +35,9 @@
 #include "engineeredObjects.h"      // For TURRET_OFFSET
 #include "BotNavMeshZone.h"         // For Border def
 #include "version.h"
-
-
 #include "config.h"     // Only for testing burst graphics below
+
+#include "SDL/SDL_opengl.h"
 
 //#include "pictureloader.h"
 

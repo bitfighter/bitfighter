@@ -168,9 +168,10 @@ using namespace TNL;
 #include "md5wrapper.h"
 #include "version.h"
 #include "Colors.h"
-
-
 #include "screenShooter.h"
+
+#include "SDL/SDL.h"
+#include "SDL/SDL_opengl.h"
 
 // For writeToConsole() functionality
 #ifdef WIN32
@@ -403,7 +404,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, keydown, (U8 key), (key))
       gScreenshooter.phase = 1;
    else
    {
-      KeyCode keyCode = standardGLUTKeyToKeyCode(key);
+      KeyCode keyCode = standardSDLKeyToKeyCode(key);
       setKeyState(keyCode, true);
       keyDown(keyCode, keyToAscii(key, keyCode));
    }
@@ -419,7 +420,7 @@ void GLUT_CB_keyup(unsigned char key, int x, int y)
 
 TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, keyup, (U8 key), (key))
 {
-   KeyCode keyCode = standardGLUTKeyToKeyCode(key);
+   KeyCode keyCode = standardSDLKeyToKeyCode(key);
    setKeyState(keyCode, false);
    keyUp(keyCode);
 }
@@ -466,6 +467,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, mouse, (S32 button, S32 state, S32 
 }
 
 // GLUT callback for special key down (special keys are things like F1-F12)
+// TODO: combine with SDL callbacks
 void GLUT_CB_specialkeydown(int key, int x, int y)
 {
    gZapJournal.specialkeydown(key);
@@ -473,7 +475,7 @@ void GLUT_CB_specialkeydown(int key, int x, int y)
 
 TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, specialkeydown, (S32 key), (key))
 {
-   KeyCode keyCode = specialGLUTKeyToKeyCode(key);
+   KeyCode keyCode = standardSDLKeyToKeyCode(key);
    setKeyState(keyCode, true);
 
    if(keyCode == keyDIAG && !gDiagnosticInterface.isActive())   // Turn on diagnostic overlay if not already on
@@ -487,6 +489,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, specialkeydown, (S32 key), (key))
 
 
 // GLUT callback for special key up
+// TODO: combine with SDL callbacks
 void GLUT_CB_specialkeyup(int key, int x, int y)
 {
    gZapJournal.specialkeyup(key);
@@ -494,7 +497,7 @@ void GLUT_CB_specialkeyup(int key, int x, int y)
 
 TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, specialkeyup, (S32 key), (key))
 {
-   KeyCode keyCode = specialGLUTKeyToKeyCode(key);
+   KeyCode keyCode = standardSDLKeyToKeyCode(key);
    setKeyState(keyCode, false);
    keyUp(keyCode);
 }
@@ -2153,7 +2156,7 @@ int main(int argc, char **argv)
       moveToAppPath();
 #endif
       // InitSdlVideo();      // Get our main SDL rendering window all set up
-      // SDL_ShowCursor(0);   // Hide cursor
+      // SDL_ShowCursor(SDL_DISABLE);   // Hide cursor
 
       gScreenInfo.init(glutGet(GLUT_SCREEN_WIDTH), glutGet(GLUT_SCREEN_HEIGHT));     
 

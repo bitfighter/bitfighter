@@ -31,8 +31,9 @@
 #include "game.h"
 #include "gameConnection.h"
 #include "config.h"
-
 #include "md5wrapper.h"
+
+#include "SDL/SDL_opengl.h"
 
 #include <string>
 #include <math.h>

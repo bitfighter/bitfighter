@@ -45,18 +45,18 @@
 #include "robot.h"
 #include "shipItems.h"           // For moduleInfos
 #include "stringUtils.h"
-
 #include "UIGame.h"
 #include "UIMenus.h"
 #include "UINameEntry.h"
 #include "UIEditor.h"         // For EditorUserInterface def, needed by EditorGame stuff
-
 #include "BotNavMeshZone.h"      // For zone clearing code
 
 #include "tnl.h"
 #include "tnlRandom.h"
 #include "tnlGhostConnection.h"
 #include "tnlNetInterface.h"
+
+#include "SDL/SDL_opengl.h"
 
 #include <sys/stat.h>
 #include <math.h>

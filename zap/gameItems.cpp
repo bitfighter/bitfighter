@@ -31,6 +31,8 @@
 #include "SoundSystem.h"
 #include "Colors.h"
 
+#include "SDL/SDL_opengl.h"
+
 #include <math.h>
 
 namespace Zap

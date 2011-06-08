@@ -122,6 +122,7 @@ OBJECTS_ZAP=\
    md5wrapper.o\
    md5.o\
    BotNavMeshZone.o\
+   OpenglUtils.o\
    Colors.o\
    ../master/masterInterface.o\
    ../master/database.o\

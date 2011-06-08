@@ -23,10 +23,9 @@
 //
 //------------------------------------------------------------------------------------
 
-#include "gameConnection.h"
-
-#include "game.h"
 #include "UIGame.h"
+#include "gameConnection.h"
+#include "game.h"
 #include "UIMenus.h"
 #include "UIInstructions.h"
 #include "UIChat.h"
@@ -38,9 +37,6 @@
 #include "lpc10.h"
 #include "IniFile.h"             // For access to gINI functions
 #include "engineeredObjects.h"   // For EngineerModuleDeployer
-
-#include "../tnl/tnlEndian.h"
-
 #include "ship.h"
 #include "shipItems.h"           // For EngineerBuildObjects
 #include "gameObjectRender.h"
@@ -49,17 +45,19 @@
 #include "loadoutHelper.h"
 #include "gameNetInterface.h"
 #include "SoundSystem.h"
-
 #include "md5wrapper.h"          // For submission of passwords
+#include "oglconsole.h"          // Our console object
+#include "config.h"              // for Getmap level dir
+
+#include "../tnl/tnlEndian.h"
+
+#include "SDL/SDL.h"
+#include "SDL/SDL_opengl.h"
 
 #include <ctype.h>
 #include <stdio.h>
 #include <stdarg.h>
 #include <math.h>
-
-#include "oglconsole.h"          // Our console object
-
-#include "config.h"              // for Getmap level dir
 
 namespace Zap
 {
@@ -181,7 +179,7 @@ void GameUserInterface::onActivate()
 {
    gDisableShipKeyboardInput = false;  // Make sure our ship controls are active
    mMissionOverlayActive = false;      // Turn off the mission overlay (if it was on)
-   glutSetCursor(GLUT_CURSOR_NONE);    // Turn off cursor
+   SDL_ShowCursor(SDL_DISABLE);    // Turn off cursor
    onMouseMoved();                     // Make sure ship pointed is towards mouse
 
    // Clear out any lingering chat messages
@@ -211,7 +209,7 @@ void GameUserInterface::onReactivate()
       unsuspendGame();
 
    gDisableShipKeyboardInput = false;
-   glutSetCursor(GLUT_CURSOR_NONE);    // Turn off cursor
+   SDL_ShowCursor(SDL_DISABLE);    // Turn off cursor
    enterMode(PlayMode);
 
    for(S32 i = 0; i < ShipModuleCount; i++)

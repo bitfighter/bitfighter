@@ -27,6 +27,8 @@
 #include "helperMenu.h"
 #include "UIGame.h"     // For mGameUserInterface
 
+#include "SDL/SDL_opengl.h"
+
 namespace Zap
 {
 

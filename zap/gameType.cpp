@@ -46,6 +46,8 @@
 #include "statistics.h"
 #include "masterConnection.h"     // For s2mSendPlayerStatistics, s2mSendGameStatistics
 
+#include "SDL/SDL_opengl.h"
+
 #include <math.h>
 
 #ifndef min

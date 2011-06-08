@@ -33,6 +33,8 @@
 #include "gameObjectRender.h"
 #include "config.h"
 
+#include "SDL/SDL_opengl.h"
+
 #include <math.h>
 #include <string>
 

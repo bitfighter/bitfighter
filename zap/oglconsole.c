@@ -26,11 +26,7 @@
 
 // Begin Bitfighter specific block
 #ifndef ZAP_DEDICATED
-#   ifdef __APPLE__
-#      include <GLUT/glut.h>
-#   else
-#      include <../glut/glut.h>         // Needed for Windows and Linux
-#   endif
+   #include "SDL/SDL_opengl.h"
 #endif
 // End Bitfighter specific block
 

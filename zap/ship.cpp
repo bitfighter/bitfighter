@@ -47,6 +47,8 @@
 #include "robot.h"            // For EventManager def
 #include "stringUtils.h"      // For itos
 
+#include "SDL/SDL_opengl.h"
+
 #include <stdio.h>
 #include <math.h>
 

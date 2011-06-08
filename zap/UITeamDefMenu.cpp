@@ -34,6 +34,9 @@
 #include "config.h"
 #include "gameType.h"      // For gMaxTeams
 
+#include "SDL/SDL.h"
+#include "SDL/SDL_opengl.h"
+
 #include <string>
 
 namespace Zap
@@ -98,7 +101,7 @@ void TeamDefUserInterface::onActivate()
    // Display an intitial message to users
    errorMsgTimer.reset(errorMsgDisplayTime);
    errorMsg = "";
-   glutSetCursor(GLUT_CURSOR_NONE);
+   SDL_ShowCursor(SDL_DISABLE);
 }
 
 void TeamDefUserInterface::idle(U32 timeDelta)
@@ -344,7 +347,7 @@ void TeamDefUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       if(selectedIndex < 0)
          selectedIndex = gEditorUserInterface.mTeams.size() - 1;
       UserInterface::playBoop();
-      glutSetCursor(GLUT_CURSOR_NONE);
+      SDL_ShowCursor(SDL_DISABLE);
 
    }
    else if(keyCode == KEY_DOWN || keyCode == BUTTON_DPAD_DOWN)    // Next item
@@ -353,7 +356,7 @@ void TeamDefUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       if(selectedIndex >= gEditorUserInterface.mTeams.size())
          selectedIndex = 0;
       UserInterface::playBoop();
-      glutSetCursor(GLUT_CURSOR_NONE);
+      SDL_ShowCursor(SDL_DISABLE);
    }
    else if(keyCode == keyOUTGAMECHAT)     // Turn on Global Chat overlay
    {
@@ -365,7 +368,7 @@ void TeamDefUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 
 void TeamDefUserInterface::onMouseMoved(S32 x, S32 y)
 {
-   glutSetCursor(GLUT_CURSOR_RIGHT_ARROW);            // Show cursor when user moves mouse
+   SDL_ShowCursor(SDL_ENABLE);  // TODO:  was GLUT_CURSOR_RIGHT_ARROW  // Show cursor when user moves mouse
 
    S32 teams = gEditorUserInterface.mTeams.size();
 

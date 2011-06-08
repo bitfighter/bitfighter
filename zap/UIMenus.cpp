@@ -43,6 +43,9 @@
 #include "config.h"
 #include "Colors.h"
 
+#include "SDL/SDL.h"
+#include "SDL/SDL_opengl.h"
+
 #include <algorithm>
 #include <string>
 #include <math.h>
@@ -337,7 +340,7 @@ void MenuUserInterface::onMouseMoved()
       return;
 
    itemSelectedWithMouse = true;
-   glutSetCursor(GLUT_CURSOR_RIGHT_ARROW);            // Show cursor when user moves mouse
+   SDL_ShowCursor(SDL_ENABLE);  // TODO:  was GLUT_CURSOR_RIGHT_ARROW           // Show cursor when user moves mouse
 
    selectedIndex = U32( floor(( gScreenInfo.getMousePos()->y - getYStart() + 10 ) / (getTextSize() + getGap())) ) + currOffset;
 
@@ -414,7 +417,7 @@ void MenuUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 
    // Finally, since the user has indicated they want to use keyboard/controller input, hide the cursor
    if(keyCode != MOUSE_LEFT && keyCode != MOUSE_MIDDLE && keyCode != MOUSE_RIGHT && keyCode != KEY_ESCAPE)
-      glutSetCursor(GLUT_CURSOR_NONE);
+      SDL_ShowCursor(SDL_DISABLE);
 }
 
 

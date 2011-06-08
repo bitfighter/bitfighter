@@ -35,6 +35,9 @@
 #include "config.h"
 #include "gameType.h"
 
+#include "SDL/SDL.h"
+#include "SDL/SDL_opengl.h"
+
 #include <string>
 
 #ifndef min
@@ -68,7 +71,7 @@ void GameParamUserInterface::onActivate()
    updateMenuItems(gEditorGame->getGameType());
    buildGameParamList();            // "Normalize" parameter list, making sure all params are present and in a standard order
    origGameParams = gameParams;     // Save a copy of the params coming in for comparison when we leave to see what changed
-   glutSetCursor(GLUT_CURSOR_NONE);
+   SDL_ShowCursor(SDL_DISABLE);
 }
 
 
