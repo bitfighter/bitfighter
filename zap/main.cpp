@@ -47,56 +47,15 @@ XXX need to document timers, new luavec stuff XXX
 
 */
 
-/* Fixes after 015
+/* Fixes after 015a
 <h2>New Features and Enhancements</h2>
 <ul>
-<li>Players can now see cloaked teammates.
-<li>Added Robot:dropItem()
-<li>Fixed selecting loadout that is same as ship after selecting new loadout, now avoids changing ships loadout when cancelled.
-<li>Can now choose one of multiple joysticks. If there is no joystick, then you cannot change input from keyboard to joystick.
-<li>New levels have engineer enabled by default.
-<li>Indicator now shows which team possesses the flag in CTF, ZC, and rabbit in team mode.
-<li>Rabbit and Nexus no longer always spawn with current loadout where there is loadout zone.
-<li>Added support for PS3 joystick.
-<li>Tab-expansion when typing a /command has been much improved.
-<li>Added /pausebots and /stepbots commands, also mapped alt-] to /stepbots, and ctrl-] to /stepbots 10
-<li>Added /addbot, /addbots, /kickbot, /kickbots commands
-<li>Added /mute to mute a noisy player
-<li>Added /gmute to globally mute a noisy player (Admins only)
-<li>Increased rendering speed for most game objects
-<li>Improved edge rendering for barriers in-game and in the editor
-<li>Vastly improved performance for auto-generated bot nav zones
-<li>Bot nav zones now auto generated for all levels at load time; no further need to manually create zones; manual zone creation will be removed in future version
-<li>PolyWall item added to editor -- works just like a wall, but is edited like a loadout zone or other polygon item.  Note that this replaces the undocumented item "BarrierMakerS" which is now deprecated.
-<li>Chat/Command box now in lower-left of screen.  Chats now appear immediatly above it.
-<li>Multi-line chat in game lobby
-<li>Engineer disabled by default
-<li>Game statistics are kept in a local SQLite database
-<li>Robots are smarter now; they avoid running into walls, turrets, and forcefield projectors less
-<li>Robots can use teleporters now
-<li>Robots paths are cached - can speed up performance on large maps with many bots
-<li>Primordial voting system added; disabled by default; will improve upon it in the future
-<li>Add level option to allow soccer ball pickup
-<li>S_bot is the default robot when adding a robot
-<li>Admins can upload local .level files to a server
+<li>voice chat using speex
+<li>voice chat on linux
 </ul>
 <h2>Bug Fixes</h2>
 <ul>
-<li>Fixed bug with crossing forcefields when using engineer module.
-<li>Fixed bug letting some players pick heat seeker when the weapon doesn't yet exist.
-<li>Fixed a possible server crash when client sends invalid weapon or module in loadout.
-<li>Fixed Robot:getReqLoadout that returns invalid third weapon.
-<li>Fix problem where kicking a player will lag, delay disconnect other players at the same IP address or same computer.
-<li>Some minor adjustment to SpeedZone to avoid any possibility to get through one way SpeedZone path, reduce lag while using SpeedZone.
-<li>Can add or remove joysticks while in the options menu; no longer requires restart.
-<li>Fixed giant memory leak with editor and /showzones
-<li>Fix editor crash if all teams were deleted
-<li>Fix missing sound on some Intel sound chips
-<li>Fix missing sound when using /suspend
-<li>Linux joystick fixes
-<li>Fix CPU timing issues
-<li>Fix broken rating sort - teams should sort better at start of rounds now
-<li>Fix large scores being chopped off of the display
+<li>voice chat works again for windows
 </ul>
 */
 
@@ -881,8 +840,8 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, display, (), ())
    // back-buffer, and to set all rendering operations to occur on what was the front-buffer.
    // Double buffering prevents nasty visual tearing from the application drawing on areas of the
    // screen that are being updated at the same time.
-   glutSwapBuffers();
-   //SDL_GL_SwapBuffers();  // Use this if we convert to SDL
+//   glutSwapBuffers();
+   SDL_GL_SwapBuffers();  // Use this if we convert to SDL
  }
 
 
@@ -1418,7 +1377,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
       else if(!stricmp(argv[i], "-usestick")) // additional arg required
       {
          if(hasAdditionalArg)
-            gUseStickNumber = atoi(argv[i+1]);           /////////////////////////////////////////  TODO: should be part of gCmdLineSettings
+            gUseStickNumber = atoi(argv[i+1]);           //  TODO: should be part of gCmdLineSettings
          else
          {
             logprintf(LogConsumer::LogError, "You must specify the joystick you want to use with the -usestick option");
@@ -1433,7 +1392,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
 #endif
 }
 
-/*
+
 void InitSdlVideo()
 {
    // Information about the current video settings.
@@ -1446,7 +1405,7 @@ void InitSdlVideo()
    if (SDL_Init(SDL_INIT_VIDEO) < 0)
    {
        // Failed, exit.
-       logprintf(LogFatalError, "SDL Video initialization failed: %s", SDL_GetError( ));
+       logprintf(LogConsumer::LogFatalError, "SDL Video initialization failed: %s", SDL_GetError());
        exitGame();
    }
 
@@ -1455,7 +1414,7 @@ void InitSdlVideo()
 
    if( !info ) {
        // This should probably never happen.
-       logprintf(LogFatalError, "SDL Video query failed: %s", SDL_GetError());
+       logprintf(LogConsumer::LogFatalError, "SDL Video query failed: %s", SDL_GetError());
        exitGame();
    }
 
@@ -1465,7 +1424,7 @@ void InitSdlVideo()
    // safe. Under Win32, ChangeDisplaySettings
    // can change the bpp.
 
-   gBPP = info->vfmt->BitsPerPixel;
+   U8 gBPP = info->vfmt->BitsPerPixel;
 
    // Now, we want to setup our requested
    // window attributes for our OpenGL window.
@@ -1500,13 +1459,13 @@ void InitSdlVideo()
       // including DISPLAY not being set, the specified
       // resolution not being available, etc.
 
-      logprintf(LogFatalError, "SDL Video mode set failed: %s", SDL_GetError());
+      logprintf(LogConsumer::LogFatalError, "SDL Video mode set failed: %s", SDL_GetError());
       exitGame();
    }
 
    SDL_WM_SetCaption(gWindowTitle, "Icon XXX");    // TODO: Fix icon here
 }
-*/
+
 
 // Now integrate INI settings with those from the command line and process them
 void processStartupParams()
@@ -2145,37 +2104,37 @@ int main(int argc, char **argv)
       setJoystick(gAutoDetectedJoystickType);               // Will override INI settings, so process INI first
 
       // This is required on Linux, has no effect on Windows
-      glutInitWindowSize((S32) ((F32)gScreenInfo.getGameCanvasWidth()  * gIniSettings.winSizeFact),
-                         (S32) ((F32)gScreenInfo.getGameCanvasHeight() * gIniSettings.winSizeFact));   
-
-      glutInit(&argc, argv);
+//      glutInitWindowSize((S32) ((F32)gScreenInfo.getGameCanvasWidth()  * gIniSettings.winSizeFact),
+//                         (S32) ((F32)gScreenInfo.getGameCanvasHeight() * gIniSettings.winSizeFact));
+//
+//      glutInit(&argc, argv);
 
       // On OS X, glutInit changes the working directory to the app
       // bundle's resource directory.  We don't want that. (RDW)
 #ifdef TNL_OS_MAC_OSX
       moveToAppPath();
 #endif
-      // InitSdlVideo();      // Get our main SDL rendering window all set up
-      // SDL_ShowCursor(SDL_DISABLE);   // Hide cursor
+       InitSdlVideo();      // Get our main SDL rendering window all set up
+       SDL_ShowCursor(SDL_DISABLE);   // Hide cursor
 
-      gScreenInfo.init(glutGet(GLUT_SCREEN_WIDTH), glutGet(GLUT_SCREEN_HEIGHT));     
-
-      glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGB);
-      glutCreateWindow(gWindowTitle);
-
-      // Register keyboard/mouse event handlers -- see GLUT docs for details
-      glutDisplayFunc(GLUT_CB_display);        // Called when GLUT thinks display needs to be redrawn
-      glutReshapeFunc(GLUT_CB_reshape);        // Handle window reshape events
-      glutPassiveMotionFunc(GLUT_CB_passivemotion);  // Handle mouse motion when button is not pressed
-      glutMotionFunc(GLUT_CB_motion);          // Handle mouse motion when button is pressed
-      glutKeyboardFunc(GLUT_CB_keydown);       // Handle key-down events for regular keys
-      glutKeyboardUpFunc(GLUT_CB_keyup);       // Handle key-up events for regular keys
-      glutSpecialFunc(GLUT_CB_specialkeydown); // Handle key-down events for special keys
-      glutSpecialUpFunc(GLUT_CB_specialkeyup); // Handle key-up events for special keys
-      glutMouseFunc(GLUT_CB_mouse);            // Handle mouse-clicks
-
-      glutIdleFunc(idle);                      // Register our idle function.  This will get run whenever GLUT is idling.
-      glutSetCursor(GLUT_CURSOR_NONE);         // Turn off the cursor for now... we'll turn it back on later
+//      gScreenInfo.init(glutGet(GLUT_SCREEN_WIDTH), glutGet(GLUT_SCREEN_HEIGHT));
+//
+//      glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGB);
+//      glutCreateWindow(gWindowTitle);
+//
+//      // Register keyboard/mouse event handlers -- see GLUT docs for details
+//      glutDisplayFunc(GLUT_CB_display);        // Called when GLUT thinks display needs to be redrawn
+//      glutReshapeFunc(GLUT_CB_reshape);        // Handle window reshape events
+//      glutPassiveMotionFunc(GLUT_CB_passivemotion);  // Handle mouse motion when button is not pressed
+//      glutMotionFunc(GLUT_CB_motion);          // Handle mouse motion when button is pressed
+//      glutKeyboardFunc(GLUT_CB_keydown);       // Handle key-down events for regular keys
+//      glutKeyboardUpFunc(GLUT_CB_keyup);       // Handle key-up events for regular keys
+//      glutSpecialFunc(GLUT_CB_specialkeydown); // Handle key-down events for special keys
+//      glutSpecialUpFunc(GLUT_CB_specialkeyup); // Handle key-up events for special keys
+//      glutMouseFunc(GLUT_CB_mouse);            // Handle mouse-clicks
+//
+//      glutIdleFunc(idle);                      // Register our idle function.  This will get run whenever GLUT is idling.
+//      glutSetCursor(GLUT_CURSOR_NONE);         // Turn off the cursor for now... we'll turn it back on later
 
       // Put 0,0 at the center of the screen
       glTranslatef(gScreenInfo.getGameCanvasWidth() / 2, gScreenInfo.getGameCanvasHeight() / 2, 0);     
@@ -2200,7 +2159,7 @@ int main(int argc, char **argv)
             launchUpdater(argv[0]);                   // Spawn external updater tool to check for new version of Bitfighter -- Windows only
 #endif
 
-      glutMainLoop();         // Launch GLUT on it's merry way.  It'll call back with events and when idling.
+//      glutMainLoop();         // Launch GLUT on it's merry way.  It'll call back with events and when idling.
       // dedicatedServerLoop();  //    Instead, with SDL, loop forever, running the idle command endlessly
 
    }
