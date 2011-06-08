@@ -45,10 +45,7 @@
 #include "SlipZone.h"
 #include "Colors.h"
 #include "robot.h"            // For EventManager def
-
 #include "stringUtils.h"      // For itos
-
-#include "glutInclude.h"
 
 #include <stdio.h>
 #include <math.h>

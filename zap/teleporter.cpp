@@ -24,7 +24,6 @@
 //------------------------------------------------------------------------------------
 
 #include "teleporter.h"
-#include "../glut/glutInclude.h"
 
 using namespace TNL;
 #include "ship.h"

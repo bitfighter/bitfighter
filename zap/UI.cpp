@@ -38,8 +38,6 @@ using namespace TNL;
 //#include "UICredits.h"     // <--- don't want this one either
 #include "Colors.h"
 
-#include "../glut/glutInclude.h"
-
 #include <string>
 #include <stdarg.h>     // For va_args
 

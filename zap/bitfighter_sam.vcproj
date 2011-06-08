@@ -905,14 +905,6 @@
 			>
 		</File>
 		<File
-			RelativePath="..\glut\glDedicated.h"
-			>
-		</File>
-		<File
-			RelativePath=".\glut.rc"
-			>
-		</File>
-		<File
 			RelativePath=".\gridDB.cpp"
 			>
 		</File>

@@ -28,7 +28,6 @@
 
 #include "UIMessage.h"
 #include "UIMenus.h"
-#include "glutInclude.h"
 #include "Colors.h"
 #include <stdio.h>
 

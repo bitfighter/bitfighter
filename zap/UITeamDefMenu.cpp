@@ -34,7 +34,6 @@
 #include "config.h"
 #include "gameType.h"      // For gMaxTeams
 
-#include "../glut/glutInclude.h"
 #include <string>
 
 namespace Zap

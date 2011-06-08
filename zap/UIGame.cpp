@@ -52,7 +52,6 @@
 
 #include "md5wrapper.h"          // For submission of passwords
 
-#include "../glut/glutInclude.h"
 #include <ctype.h>
 #include <stdio.h>
 #include <stdarg.h>

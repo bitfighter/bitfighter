@@ -31,7 +31,6 @@
 
 #include "gameType.h"               // For BarrierRec struct
 
-#include "glutInclude.h"
 #include <cmath>                    // C++ version of this headers includes float overloads
 
 using namespace TNL;

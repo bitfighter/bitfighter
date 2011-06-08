@@ -30,8 +30,6 @@
 #include "item.h"
 #include "luaObject.h"        // For Lua interfaces
 #include "gameObjectRender.h"
-#include "../glut/glutInclude.h"
-
 
 
 namespace Zap

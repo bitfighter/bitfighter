@@ -54,7 +54,6 @@
 #include "textItem.h"            // For MAX_TEXTITEM_LEN and MAX_TEXT_SIZE
 #include "luaLevelGenerator.h"
 #include "stringUtils.h"
-#include "../glut/glutInclude.h"
 
 #include "oglconsole.h"          // Our console object
 

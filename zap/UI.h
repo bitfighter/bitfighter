@@ -34,7 +34,6 @@
 #include "config.h"           // For DisplayMode enum
 #include "stringUtils.h"      // For itos
 
-#include "../glut/glutInclude.h"
 #include "tnl.h"
 
 #include <string>

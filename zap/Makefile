@@ -19,10 +19,10 @@
 
 OPTIMIZE=-O2
 DEBUG=-g
-INCLUDES=-I../tnl -I../glut -I../openal -I../Triangle -I../recast -I../clipper -I../alure -I../libspeex -I../boost
+INCLUDES=-I../tnl -I../openal -I../libsdl -I../Triangle -I../recast -I../clipper -I../alure -I../libspeex -I../boost
 CC=gcc $(DEBUG) $(INCLUDES) -DTNL_ENABLE_LOGGING -W $(OPTIMIZE)
 THREADLIB= -lpthread
-GLUT=-lGL -lGLU -lglut
+SDL=-lSDL
 INPUT=linuxInput.o 
 
 OBJECTS_ZAP=\
@@ -160,14 +160,14 @@ release: bitfighter
 dedicated: DEBUG=
 dedicated: CFLAGS=-DZAP_DEDICATED 
 dedicated: LFLAGS=-lstdc++ -lm -ldl
-dedicated: GLUT=
+dedicated: SDL=
 dedicated: OPENAL=
 dedicated: EXEFILE=bitfighterd
 dedicated: bitfighter
 
 
 bitfighter: $(OBJECTS_ZAP) 
-	$(CC) -o ../exe/$(EXEFILE) $(OBJECTS_ZAP) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a ../lua/lua-vec/src/liblua.a ../alure/libalure.a $(OPENAL) $(GLUT) $(THREADLIB) $(LFLAGS)
+	$(CC) -o ../exe/$(EXEFILE) $(OBJECTS_ZAP) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a ../lua/lua-vec/src/liblua.a ../alure/libalure.a $(OPENAL) $(SDL) $(THREADLIB) $(LFLAGS)
 
 
 clean: 

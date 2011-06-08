@@ -35,14 +35,6 @@
 #include "../tnl/tnlJournal.h"
 #include "../tnl/tnlLog.h"         // For logprintf
 
-#ifndef ZAP_DEDICATED
-#   ifdef TNL_OS_MAC_OSX
-#      include "GLUT/glut.h"
-#   else
-#      include "../glut/glut.h"          // For glut's key defs
-#   endif
-#endif
-
 #include "zapjournal.h"    // For journaling support
 #include <ctype.h>
 

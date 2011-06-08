@@ -34,8 +34,6 @@
 #include "stringUtils.h"         // For itos
 #include "Colors.h"
 
-#include "../glut/glutInclude.h"
-
 #include <math.h>
 
 namespace Zap

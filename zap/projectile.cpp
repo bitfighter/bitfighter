@@ -30,7 +30,6 @@
 #include "SoundSystem.h"
 #include "gameObject.h"
 #include "gameObjectRender.h"
-#include "../glut/glutInclude.h"
 
 namespace Zap
 {

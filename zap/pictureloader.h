@@ -1,5 +1,4 @@
 #include "../tnl/tnlTypes.h"
-#include "../glut/glutInclude.h"  // for GLuint
 
 using namespace TNL;
 

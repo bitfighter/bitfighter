@@ -43,8 +43,6 @@
 #include "config.h"
 #include "Colors.h"
 
-#include "../glut/glutInclude.h"
-
 #include <algorithm>
 #include <string>
 #include <math.h>

@@ -51,7 +51,6 @@
 #include "BotNavMeshZone.h"      // For BotNavMeshZone class definition
 #include "luaGameInfo.h"
 #include "luaUtil.h"
-#include "glutInclude.h"
 #include "config.h"              // for gIniSettings.defaultRobotScript
 #include "GeomUtils.h"
 

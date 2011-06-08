@@ -33,7 +33,6 @@
 #include "config.h"
 
 #include "md5wrapper.h"
-#include "glutInclude.h"
 
 #include <string>
 #include <math.h>

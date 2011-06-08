@@ -53,8 +53,6 @@
 
 #include "BotNavMeshZone.h"      // For zone clearing code
 
-#include "../glut/glutInclude.h"
-
 #include "tnl.h"
 #include "tnlRandom.h"
 #include "tnlGhostConnection.h"

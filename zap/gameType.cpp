@@ -46,8 +46,6 @@
 #include "statistics.h"
 #include "masterConnection.h"     // For s2mSendPlayerStatistics, s2mSendGameStatistics
 
-#include "glutInclude.h"
-
 #include <math.h>
 
 #ifndef min

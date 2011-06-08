@@ -28,7 +28,6 @@
 #include "gameObjectRender.h"    // For renderBitfighterLogo
 
 #include "../tnl/tnlRandom.h"
-#include "../glut/glutInclude.h"
 
 #include <stdio.h>
 #include <math.h>

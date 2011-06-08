@@ -33,7 +33,6 @@
 #include "gameObjectRender.h"
 #include "config.h"
 
-#include "../glut/glutInclude.h"
 #include <math.h>
 #include <string>
 

@@ -35,8 +35,6 @@
 #include "game.h"    // For gClientGame
 #include "Colors.h"
 
-#include "../glut/glutInclude.h"
-
 #include <string>
 #include <math.h>
 

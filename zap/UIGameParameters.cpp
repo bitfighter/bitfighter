@@ -35,7 +35,6 @@
 #include "config.h"
 #include "gameType.h"
 
-#include "../glut/glutInclude.h"
 #include <string>
 
 #ifndef min

@@ -143,7 +143,6 @@ XXX need to document timers, new luavec stuff XXX
 
 #include "zapjournal.h"
 
-#include "../glut/glutInclude.h"
 #include <stdarg.h>
 #include <math.h>
 //#include <stdio.h>      // For logging to console

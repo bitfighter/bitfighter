@@ -34,7 +34,6 @@
 
 #include "tnl.h"
 
-#include "../glut/glutInclude.h"
 #include <stdio.h>
 
 namespace Zap

@@ -30,7 +30,6 @@
 #include "gameObjectRender.h"
 #include "SoundSystem.h"
 #include "Colors.h"
-#include "../glut/glutInclude.h"
 
 #include <math.h>
 

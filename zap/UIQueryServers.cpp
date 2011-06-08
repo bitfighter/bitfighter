@@ -40,7 +40,6 @@
 #include "UIDiagnostics.h"
 
 #include "keyCode.h"
-#include "../glut/glutInclude.h"
 
 #include <math.h>
 

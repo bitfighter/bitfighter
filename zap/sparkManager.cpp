@@ -28,8 +28,6 @@
 #include "gameObjectRender.h"
 #include "Colors.h"
 
-#include "../glut/glutInclude.h"
-
 #include <math.h>
 
 using namespace TNL;

@@ -29,8 +29,6 @@
 #include "gameType.h"
 #include "flagItem.h"
 
-#include "glutInclude.h"
-
 namespace Zap
 {
 

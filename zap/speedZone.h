@@ -34,7 +34,6 @@
 #include "gameObjectRender.h"
 #include "ship.h"
 #include "Colors.h"
-#include "../glut/glutInclude.h"
 
 namespace Zap
 {

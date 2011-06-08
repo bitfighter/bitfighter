@@ -26,7 +26,6 @@
 #include "textItem.h"
 #include "UIEditorMenus.h"       // For TextItemEditorAttributeMenuUI def
 #include "gameNetInterface.h"
-#include "glutInclude.h"
 #include "gameObjectRender.h"    // For renderPointVector()
 
 #include <math.h>

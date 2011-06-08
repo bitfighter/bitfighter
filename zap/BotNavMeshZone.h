@@ -34,7 +34,6 @@
 #include "polygon.h"
 
 #include "tnlNetBase.h"
-#include "../glut/glutInclude.h"
 
 
 namespace Zap

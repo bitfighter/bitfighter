@@ -39,8 +39,6 @@
 
 #include "GeomUtils.h"      // For polygon triangulation
 
-#include "../glut/glutInclude.h"
-
 #include <math.h>
 
 namespace Zap
