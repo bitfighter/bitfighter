@@ -22,8 +22,22 @@ DEBUG=-g
 INCLUDES=-I../tnl -I../openal -I../libsdl -I../Triangle -I../recast -I../clipper -I../alure -I../libspeex -I../boost
 CC=gcc $(DEBUG) $(INCLUDES) -DTNL_ENABLE_LOGGING -W $(OPTIMIZE)
 THREADLIB= -lpthread
-SDL=-lSDL
 INPUT=linuxInput.o 
+EXEFILE=bitfighter
+
+# sound linker flags
+SFX_LFLAGS=-lopenal -lspeex -lvorbis
+
+# graphics linker flags
+GFX_LFLAGS=-lSDL -lGL -lX11
+
+# Other needed linker flags
+LFLAGS=-lstdc++ -lm -ldl
+
+# Other compiler flags
+CFLAGS=
+DFLAGS=
+WFLAGS=
 
 OBJECTS_ZAP=\
    CTFGame.o\
@@ -133,13 +147,6 @@ OBJECTS_ZAP=\
    ../clipper/clipper.o
 
 
-CFLAGS=
-DFLAGS=
-EXEFILE=bitfighter
-OPENAL=-lopenal -lspeex -lvorbis
-WFLAGS=
-LFLAGS=-lstdc++ -lm -ldl -lX11
-
 .c.o:
 	$(CC) $(DFLAGS) $(WFLAGS) -c $(CFLAGS) -o $@ $<
 
@@ -160,15 +167,14 @@ release: bitfighter
 
 dedicated: DEBUG=
 dedicated: CFLAGS=-DZAP_DEDICATED 
-dedicated: LFLAGS=-lstdc++ -lm -ldl
-dedicated: SDL=
-dedicated: OPENAL=
+dedicated: GFX_LFLAGS=
+dedicated: SFX_LFLAGS=
 dedicated: EXEFILE=bitfighterd
 dedicated: bitfighter
 
 
 bitfighter: $(OBJECTS_ZAP) 
-	$(CC) -o ../exe/$(EXEFILE) $(OBJECTS_ZAP) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a ../lua/lua-vec/src/liblua.a ../alure/libalure.a $(OPENAL) $(SDL) $(THREADLIB) $(LFLAGS)
+	$(CC) -o ../exe/$(EXEFILE) $(OBJECTS_ZAP) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a ../lua/lua-vec/src/liblua.a ../alure/libalure.a $(SFX_LFLAGS) $(GFX_LFLAGS) $(THREADLIB) $(LFLAGS)
 
 
 clean: 
