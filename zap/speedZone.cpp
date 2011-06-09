@@ -73,9 +73,6 @@ SpeedZone::~SpeedZone()
 // vector (the three points of our triangle graphic), and compute its extent
 void SpeedZone::preparePoints()
 {
-   Game *game = getGame();
-
-   TNLAssert(game, "game should not be null here!");
    generatePoints(getVert(0), getVert(1), 1, mPolyBounds);
 
    computeExtent();
@@ -176,7 +173,7 @@ bool SpeedZone::getCollisionPoly(Vector<Point> &polyPoints)
 
 
 // Create objects from parameters stored in level file
-bool SpeedZone::processArguments(S32 argc2, const char **argv2)
+bool SpeedZone::processArguments(S32 argc2, const char **argv2, Game *game)
 {
    S32 argc = 0;
    const char *argv[8];                // 8 is ok, SpeedZone only supports 4 numbered args
@@ -214,10 +211,10 @@ bool SpeedZone::processArguments(S32 argc2, const char **argv2)
    Point pos, dir;
 
    pos.read(argv);
-   pos *= getGame()->getGridSize();
+   pos *= game->getGridSize();
 
    dir.read(argv + 2);
-   dir *= getGame()->getGridSize();
+   dir *= game->getGridSize();
 
    // Adjust the direction point so that it also represents the tip of the triangle
    Point offset(dir - pos);

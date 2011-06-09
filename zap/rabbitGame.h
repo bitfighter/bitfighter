@@ -62,7 +62,7 @@ public:
       mFlagScoreTimer = 5 * 1000;
    }
 
-   bool processArguments(S32 argc, const char **argv);
+   bool processArguments(S32 argc, const char **argv, Game *game);
 
    void addGameSpecificParameterMenuItems(Vector<MenuItem *> &menuItems);
 

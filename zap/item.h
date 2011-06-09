@@ -79,7 +79,7 @@ public:
 
    void idle(GameObject::IdleCallPath path);
 
-   bool processArguments(S32 argc, const char **argv);
+   bool processArguments(S32 argc, const char **argv, Game *game);
 
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
@@ -189,7 +189,7 @@ protected:
 public:
    PickupItem(Point p = Point(), float radius = 1, S32 repopDelay = 20000);      // Constructor
 
-   bool processArguments(S32 argc, const char **argv);
+   bool processArguments(S32 argc, const char **argv, Game *game);
    string toString();
 
    void idle(GameObject::IdleCallPath path);

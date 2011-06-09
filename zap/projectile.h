@@ -280,7 +280,7 @@ class SpyBug : public GrenadeProjectile, public EditorPointObject
 public:
    SpyBug(Point pos = Point(), Ship *owner = NULL);      // Constructor
    ~SpyBug();                                            // Destructor
-   bool processArguments(S32 argc, const char **argv);
+   bool processArguments(S32 argc, const char **argv, Game *game);
    void onAddedToGame(Game *theGame);
 
 

@@ -87,7 +87,7 @@ enum GameObjectType
    // Types used exclusively in the editor -- will reuse some values from above
    PolyWallType = BIT(25),             // WormType
    ShipSpawnType = BIT(13),            // BulletType
-   FlagSpawnType = BIT(11),            // TurretTargetType
+   FlagSpawnType = BIT(1),            // ShipType
    AsteroidSpawnType = BIT(17),        // BotZone
 
 
@@ -202,7 +202,7 @@ public:
    virtual bool getCollisionPoly(Vector<Point> &polyPoints);
    virtual bool getCollisionCircle(U32 stateIndex, Point &point, float &radius);
 
-   virtual bool processArguments(S32 argc, const char**argv) { return true; }
+   virtual bool processArguments(S32 argc, const char**argv, Game *game) { return true; }
 
    // Render is called twice for every object that is in the
    // render list.  By default GameObject will call the render()

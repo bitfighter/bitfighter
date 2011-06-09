@@ -63,7 +63,7 @@ void Teleporter::onAddedToGame(Game *theGame)
 }
 
 
-bool Teleporter::processArguments(S32 argc, const char **argv)
+bool Teleporter::processArguments(S32 argc, const char **argv, Game *game)
 {
    if(argc != 4)
       return false;
@@ -73,8 +73,8 @@ bool Teleporter::processArguments(S32 argc, const char **argv)
    pos.read(argv);
    dest.read(argv + 2);
 
-   pos *= getGame()->getGridSize();
-   dest *= getGame()->getGridSize();
+   pos *= game->getGridSize();
+   dest *= game->getGridSize();
 
    setVert(pos, 0);
    setVert(dest, 1);
@@ -102,11 +102,8 @@ bool Teleporter::processArguments(S32 argc, const char **argv)
       setExtent(Rect(pos, TELEPORTER_RADIUS));
    }
    else  
-   {
       // Since this is really part of a different teleporter, delete this one
-      removeFromDatabase();
       destroySelf();
-   }
 
    return true;
 }

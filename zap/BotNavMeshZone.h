@@ -92,7 +92,7 @@ public:
 
 
    // Create objects from parameters stored in level file
-   bool processArguments(S32 argc, const char **argv);
+   bool processArguments(S32 argc, const char **argv, Game *game);
 
    GridDatabase *getGridDatabase();
    void addToGame(Game *theGame);

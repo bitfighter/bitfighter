@@ -1163,6 +1163,20 @@ void readFolderLocationParams(Vector<StringPtr> &argv)
          argv.erase(i);
          i--;
       }
+
+      else if(!stricmp(argv[i].getString(), "-musicdir"))      // additional arg required
+      {
+         if(!hasAdditionalArg)
+         {
+            logprintf(LogConsumer::LogError, "You must specify your sounds folder with the -musicdir option");
+            exitGame(1);
+         }
+
+         gCmdLineSettings.dirs.musicDir = argv[i+1].getString();
+         argv.erase(i);
+         argv.erase(i);
+         i--;
+      }
    }
 }
 

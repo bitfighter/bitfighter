@@ -787,6 +787,10 @@ static void setSFXVolumeCallback(U32 vol)
    gIniSettings.sfxVolLevel = F32(vol) / 10;
 }
 
+static void setMusicVolumeCallback(U32 vol)
+{
+   gIniSettings.musicVolLevel = F32(vol) / 10;
+}
 
 static void setVoiceVolumeCallback(U32 vol)
 {
@@ -918,6 +922,9 @@ void OptionsMenuUserInterface::setupMenus()
 
    menuItems.push_back(new ToggleMenuItem("SFX VOLUME:",        opts, U32((gIniSettings.sfxVolLevel + 0.05) * 10.0), false, 
                        setSFXVolumeCallback,   "Set sound effects volume", KEY_S));
+
+   menuItems.push_back(new ToggleMenuItem("MUSIC VOLUME:",      opts, U32((gIniSettings.musicVolLevel + 0.05) * 10.0), false,
+                       setMusicVolumeCallback, "Set music volume", KEY_M));
 
    menuItems.push_back(new ToggleMenuItem("VOICE CHAT VOLUME:", opts, U32((gIniSettings.voiceChatVolLevel + 0.05) * 10.0), false, 
                        setVoiceVolumeCallback, "Set voice chat volume",    KEY_V));

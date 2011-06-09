@@ -1588,8 +1588,9 @@ void ConfigDirectories::resolveDirs()
 
    // rootDataDir not used for these folders
    gConfigDirs.cacheDir      = resolutionHelper(gCmdLineSettings.dirs.cacheDir,      "", "cache");
-   gConfigDirs.luaDir        = resolutionHelper(gCmdLineSettings.dirs.luaDir,        "", "scripts");      
-   gConfigDirs.sfxDir        = resolutionHelper(gCmdLineSettings.dirs.sfxDir,        "", "sfx");   
+   gConfigDirs.luaDir        = resolutionHelper(gCmdLineSettings.dirs.luaDir,        "", "scripts");
+   gConfigDirs.sfxDir        = resolutionHelper(gCmdLineSettings.dirs.sfxDir,        "", "sfx");
+   gConfigDirs.musicDir      = resolutionHelper(gCmdLineSettings.dirs.musicDir,      "", "music");
 
    gSqlite = gConfigDirs.logDir + "stats";
 }

@@ -90,12 +90,12 @@ TNL_IMPLEMENT_NETOBJECT_RPC(RabbitGameType, s2cRabbitMessage, (U32 msgIndex, Str
 //-----------------------------------------------------
 TNL_IMPLEMENT_NETOBJECT(RabbitGameType);
 
-bool RabbitGameType::processArguments(S32 argc, const char **argv)
+bool RabbitGameType::processArguments(S32 argc, const char **argv, Game *game)
 {
    if (argc != 4)
       return false;
 
-   if(!Parent::processArguments(argc, argv))
+   if(!Parent::processArguments(argc, argv, game))
       return false;
 
    mFlagReturnTimer = U32(atof(argv[2]) * 1000);

@@ -58,7 +58,7 @@ private:
 
 public:
    HuntersGameType();      // Constructor
-   bool processArguments(S32 argc, const char **argv);
+   bool processArguments(S32 argc, const char **argv, Game *game);
    string toString();
 
    bool mNexusIsOpen;      // Is the nexus open?
@@ -161,7 +161,7 @@ private:
 
 public:
    HuntersNexusObject();      // Constructor
-   bool processArguments(S32 argc, const char **argv);
+   bool processArguments(S32 argc, const char **argv, Game *game);
 
    void onAddedToGame(Game *theGame);
    void idle(GameObject::IdleCallPath path);

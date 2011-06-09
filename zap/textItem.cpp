@@ -102,7 +102,7 @@ S32 TextItem::getRenderSortValue()
 
 // Create objects from parameters stored in level file
 // Entry looks like: TextItem 0 50 10 10 11 11 Message goes here
-bool TextItem::processArguments(S32 argc, const char **argv)
+bool TextItem::processArguments(S32 argc, const char **argv, Game *game)
 {
    if(argc < 7)
       return false;
@@ -112,10 +112,10 @@ bool TextItem::processArguments(S32 argc, const char **argv)
    Point pos, dir;
 
    pos.read(argv + 1);
-   pos *= getGame()->getGridSize();
+   pos *= game->getGridSize();
 
    dir.read(argv + 3);
-   dir *= getGame()->getGridSize();
+   dir *= game->getGridSize();
 
    setVert(pos, 0);
    setVert(dir, 1);
@@ -370,14 +370,14 @@ S32 LineItem::getRenderSortValue()
 
 // Create objects from parameters stored in level file
 // Entry looks like: LineItem 0 50 10 10 11 11 Message goes here
-bool LineItem::processArguments(S32 argc, const char **argv)
+bool LineItem::processArguments(S32 argc, const char **argv, Game *game)
 {
    if(argc < 6)
       return false;
 
    mTeam = atoi(argv[0]);
-   setWidth(max(min(atoi(argv[1]), MAX_LINE_WIDTH), MIN_LINE_WIDTH));
-   readGeom(argc, argv, 2, getGame()->getGridSize());
+   setWidth(atoi(argv[1]));
+   readGeom(argc, argv, 2, game->getGridSize());
 
    computeExtent();
 

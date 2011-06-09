@@ -134,12 +134,12 @@ GridDatabase *BotNavMeshZone::getGridDatabase()
 
 
 // Create objects from parameters stored in level file
-bool BotNavMeshZone::processArguments(S32 argc, const char **argv)
+bool BotNavMeshZone::processArguments(S32 argc, const char **argv, Game *game)
 {
    if(argc < 6)
       return false;
 
-   readGeom(argc, argv, 0, getGame()->getGridSize());
+   readGeom(argc, argv, 0, game->getGridSize());
 
    setExtent();     // Sets object's extent database
 

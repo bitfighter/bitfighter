@@ -3,7 +3,7 @@
 #
 
 # GENERAL FLAGS
-LFLAGS=-lstdc++ -lopenal #-lvorbis
+LFLAGS=-lstdc++ -lopenal -lvorbis
 EXTRA_FLAGS=-D_GNU_SOURCE -DALURE_STATIC_LIBRARY -DDYNLOAD=1 -DHAVE_CONFIG_H -fPIC
 
 CC=g++ -I. -W -O2
@@ -17,8 +17,8 @@ streamplay.o\
 istream.o\
 codec_wav.o\
 codec_aiff.o\
-alure.o#\
-#codec_vorbisfile.o
+alure.o\
+codec_vorbisfile.o
 
 .cpp.o: 
 	$(CC) $(EXTRA_FLAGS) -c $(CFLAGS) -o $@ $<

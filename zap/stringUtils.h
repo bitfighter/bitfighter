@@ -86,6 +86,7 @@ void s_fprintf(FILE *stream, const char *format, ...);      // throws SaveExcept
 // File utils
 bool fileExists(const string &path);               // Does file exist?
 bool makeSureFolderExists(const string &dir);      // Like the man said: Make sure folder exists
+bool getFilesFromFolder(const string& dir, Vector<string>& files, const string& extension = "");
 
 
 // Two different variations on joining file and folder names

@@ -400,7 +400,7 @@ WallItem::WallItem()
 {
    mObjectTypeMask = BarrierType;
    mObjectTypeNumber = WallItemTypeNumber;
-   setWidth(50 * 256);
+   setWidth(Barrier::DEFAULT_BARRIER_WIDTH);
 }
 
 
@@ -432,7 +432,7 @@ void WallItem::onGeomChanged()
 
 string WallItem::toString()
 {
-   return "BarrierMaker " + itos(S32(F32(mWidth) / F32(getGame()->getGridSize()))) + " " + geomToString(getGame()->getGridSize());
+   return "BarrierMaker " + itos(S32(F32(mWidth))) + " " + geomToString(getGame()->getGridSize());
 }
 
 
@@ -484,12 +484,12 @@ void PolyWall::renderDock()
 }
 
 
-bool PolyWall::processArguments(S32 argc, const char **argv)
+bool PolyWall::processArguments(S32 argc, const char **argv, Game *game)
 {
    if(argc < 6)
       return false;
 
-   readGeom(argc, argv, 0, getGame()->getGridSize());
+   readGeom(argc, argv, 0, game->getGridSize());
    //computeExtent();
 
    return true;
@@ -590,7 +590,7 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(DatabaseObject *dbObject
 
 void WallSegmentManager::buildWallSegmentEdgesAndPoints(DatabaseObject *dbObject, const Vector<DatabaseObject *> &engrObjects)
 {
-   // Find any forcefields that terminate on this wall, and mark them for resnapping later
+   // Find any engineered objects that terminate on this wall, and mark them for resnapping later
 
    Vector<EngineeredObject *> eosOnDeletedSegs;    // A list of engr objects terminating on the wall segment that we'll be deleting
 
@@ -627,8 +627,8 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(DatabaseObject *dbObject
       for(S32 i = 0; i < wall->extendedEndPoints.size(); i += 2)
       {
          WallSegment *newSegment = new WallSegment(wall->extendedEndPoints[i], wall->extendedEndPoints[i+1], 
-                                                   wall->getWidth() / gEditorGame->getGridSize(), wall->getSerialNumber());    // Create the segment
-         mWallSegments.push_back(newSegment);            // And add it to our master segment list
+                                                   wall->getWidth(), wall->getSerialNumber());    // Create the segment
+         mWallSegments.push_back(newSegment);          // And add it to our master segment list
       }
    }
 

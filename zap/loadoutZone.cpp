@@ -82,7 +82,7 @@ S32 LoadoutZone::getRenderSortValue()
 
 
 // Create objects from parameters stored in level file
-bool LoadoutZone::processArguments(S32 argc2, const char **argv2)
+bool LoadoutZone::processArguments(S32 argc2, const char **argv2, Game *game)
 {
    // Need to handle or ignore arguments that starts with letters,
    // so a possible future version can add parameters without compatibility problem.
@@ -108,7 +108,7 @@ bool LoadoutZone::processArguments(S32 argc2, const char **argv2)
       return false;
 
    mTeam = atoi(argv[0]);     // Team is first arg
-   readGeom(argc, argv, 1, getGame()->getGridSize());
+   readGeom(argc, argv, 1, game->getGridSize());
 
    setExtent();
 

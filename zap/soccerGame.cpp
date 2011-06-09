@@ -317,9 +317,9 @@ SoccerBallItem::SoccerBallItem(Point pos) : EditorItem(pos, true, SoccerBallItem
 const char SoccerBallItem::className[] = "SoccerBallItem";      // Class name as it appears to Lua scripts
 
 
-bool SoccerBallItem::processArguments(S32 argc, const char **argv)
+bool SoccerBallItem::processArguments(S32 argc, const char **argv, Game *game)
 {
-   if(!Parent::processArguments(argc, argv))
+   if(!Parent::processArguments(argc, argv, game))
       return false;
 
    initialPos = mMoveState[ActualState].pos;

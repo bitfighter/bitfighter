@@ -844,14 +844,15 @@ SpyBug::~SpyBug()
 }
 
 
-bool SpyBug::processArguments(S32 argc, const char **argv)
+bool SpyBug::processArguments(S32 argc, const char **argv, Game *game)
 {
    if(argc < 3)
       return false;
 
    mTeam = atoi(argv[0]);                        // Team first!
 
-   if(!Parent::processArguments(2, &argv[1]))    // Strips off first arg from argv, so the parent gets the straight coordinate pair it's expecting
+   // Strips off first arg from argv, so the parent gets the straight coordinate pair it's expecting
+   if(!Parent::processArguments(2, &argv[1], game))    
       return false;
 
    return true;

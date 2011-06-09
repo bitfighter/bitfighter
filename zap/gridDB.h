@@ -60,8 +60,7 @@ protected:
 public:
    DatabaseObject() { mLastQueryId = 0; extent = Rect(); mInDatabase = false; }    // Quickie constructor
 
-   U32 getObjectTypeMask() { 
-      return mObjectTypeMask; }   
+   U32 getObjectTypeMask() { return mObjectTypeMask; }   
    void setObjectTypeMask(U32 objectTypeMask) { mObjectTypeMask = objectTypeMask; }
    U8 getObjectTypeNumber() { return mObjectTypeNumber; }   
    void setObjectTypeNumber(U8 objectTypeNumber) { mObjectTypeNumber = objectTypeNumber; }
@@ -79,6 +78,8 @@ public:
 
    void addToDatabase();
    void removeFromDatabase();
+
+   virtual bool getIsDatabasable() { return true; }      // Can this item actually be inserted into a database?
 };
 
 ////////////////////////////////////////
@@ -124,8 +125,6 @@ public:
    void findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector, U8 typeNumber = U8_MAX);      
    void findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector, const Rect &extents, U8 typeNumber = U8_MAX);
    
-   void clear();
-
    virtual void addToDatabase(DatabaseObject *theObject, const Rect &extents);
    virtual void removeFromDatabase(DatabaseObject *theObject, const Rect &extents);
 

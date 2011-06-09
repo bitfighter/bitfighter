@@ -167,14 +167,14 @@ void Ship::onGhostRemove()
 }
 
 
-bool Ship::processArguments(S32 argc, const char **argv)
+bool Ship::processArguments(S32 argc, const char **argv, Game *game)
 {
    if(argc != 3)
       return false;
 
    Point pos;
    pos.read(argv + 1);
-   pos *= getGame()->getGridSize();
+   pos *= game->getGridSize();
    for(U32 i = 0; i < MoveStateCount; i++)
    {
       mMoveState[i].pos = pos;

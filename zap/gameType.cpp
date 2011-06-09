@@ -153,7 +153,7 @@ GameType::GameType() : mScoreboardUpdateTimer(1000) , mGameTimer(DefaultGameTime
 
 static Vector<DatabaseObject *> fillVector;     // Reusable container
 
-bool GameType::processArguments(S32 argc, const char **argv)
+bool GameType::processArguments(S32 argc, const char **argv, Game *game)
 {
    if(argc > 0)      // First arg is game length, in minutes
       mGameTimer.reset(U32(atof(argv[0]) * 60 * 1000));
@@ -162,6 +162,13 @@ bool GameType::processArguments(S32 argc, const char **argv)
       mWinningScore = atoi(argv[1]);
 
    return true;
+}
+
+
+void GameType::addToGame(Game *game)
+{
+   GameObject::addToGame(game);
+   game->setGameType(this);
 }
 
 
@@ -2788,7 +2795,7 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
             args_count++;
          }
          
-         robot->processArguments(args_count, args_char);
+         robot->processArguments(args_count, args_char, getGame());
          
          if(robot->isRunningScript && !robot->startLua())
             robot->isRunningScript = false;

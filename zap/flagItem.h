@@ -52,7 +52,7 @@ public:
 
    void initialize();      // Set inital values of things
 
-   virtual bool processArguments(S32 argc, const char **argv);
+   virtual bool processArguments(S32 argc, const char **argv, Game *game);
    virtual string toString();
 
    virtual void onAddedToGame(Game *theGame);

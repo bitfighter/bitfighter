@@ -52,12 +52,6 @@ inline F32 getGridSize()
 }
 
 
-void EditorObject::addToEditor(Game *game)
-{
-   BfObject::addToGame(game);
-   gEditorUserInterface.addToEditor(this);    // TODO: get rid of this, make all items come from the database
-}
-
 
 void EditorObject::addToDock(Game *game, const Point &point)
 {
@@ -73,7 +67,7 @@ void EditorObject::addToDock(Game *game, const Point &point)
 void EditorObject::processEndPoints()
 {
    if(getObjectTypeMask() & BarrierType)
-      Barrier::constructBarrierEndPoints(getOutline(), getWidth() / getGridSize(), extendedEndPoints);
+      Barrier::constructBarrierEndPoints(getOutline(), getWidth(), extendedEndPoints);
 
    else if(getObjectTypeMask() & PolyWallType)
    {
@@ -719,7 +713,7 @@ void EditorObject::renderPolylineCenterline(F32 alpha)
 }
 
 
-void EditorObject::initializeEditor(F32 gridSize)
+void EditorObject::initializeEditor()
 {
    unselectVerts();
 }
@@ -852,7 +846,7 @@ EditorObject *EditorObject::newCopy()
 
       newObject->setObjectTypeMask(getObjectTypeMask());    // For some reason, typemask is not copied... why?!?
       newObject->mGeometry = mGeometry->copyGeometry();
-      newObject->initializeEditor(getGridSize());
+      newObject->initializeEditor();
    }
 
    return newObject;
@@ -927,14 +921,9 @@ void EditorObject::offset(const Point &offset)
 void EditorObject::increaseWidth(S32 amt)
 {
    S32 width = getWidth();
-
    width += amt - (S32) width % amt;    // Handles rounding
 
-   if(width > Barrier::MAX_BARRIER_WIDTH)
-      width = Barrier::MAX_BARRIER_WIDTH;
-
    setWidth(width);
-
    onGeomChanged();
 }
 
@@ -942,15 +931,22 @@ void EditorObject::increaseWidth(S32 amt)
 void EditorObject::decreaseWidth(S32 amt)
 {
    S32 width = getWidth();
-   
    width -= ((S32) width % amt) ? (S32) width % amt : amt;      // Dirty, ugly thing
 
+   setWidth(width);
+   onGeomChanged();
+}
+
+
+void EditorObject::setWidth(S32 width) 
+{         
+   // Bounds check
    if(width < Barrier::MIN_BARRIER_WIDTH)
       width = Barrier::MIN_BARRIER_WIDTH;
+   else if(width > Barrier::MAX_BARRIER_WIDTH)
+      width = Barrier::MAX_BARRIER_WIDTH; 
 
-   setWidth(width);
-
-   onGeomChanged();
+   mWidth = width; 
 }
 
 

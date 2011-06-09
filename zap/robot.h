@@ -150,7 +150,7 @@ public:
    void render(S32 layerIndex);
    void idle(IdleCallPath path);
 
-   bool processArguments(S32 argc, const char **argv);
+   bool processArguments(S32 argc, const char **argv, Game *game);
    void onAddedToGame(Game *);
 
    S32 getCurrentZone();

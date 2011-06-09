@@ -31,6 +31,7 @@
 #include "teleporter.h"
 
 #include "config.h"     // For CmdLineSettings
+#include "stringUtils.h"
 
 #include "tnl.h"
 #include "tnlLog.h"
@@ -307,29 +308,6 @@ bool LevelLoader::loadLevelFromFile(const char *filename)
 
 using namespace std;
 
-// Read files from folder
-// Based on http://www.linuxquestions.org/questions/programming-9/c-list-files-in-directory-379323/
-// Note: used to include special getLevels() in Directory.mm for Mac only, not needed anymore.
-bool getLevels(string dir, Vector<string> &files)
-{
-   DIR *dp;
-   struct dirent *dirp;
-
-   if((dp = opendir(dir.c_str())) == NULL)
-      return false;
-
-   while ((dirp = readdir(dp)) != NULL)
-   {
-      string name = string(dirp->d_name);
-      if(name.length() > 6 && name.substr(name.length() - 6, 6) == ".level")
-         files.push_back(name);
-   }
-
-   closedir(dp);
-   return true;
-}
-
-
 // Sorts alphanumerically
 S32 QSORT_CALLBACK alphaSort(string *a, string *b)
 {
@@ -356,7 +334,7 @@ Vector<string> LevelListLoader::buildLevelList()
       // (n.b. gLevelDir defaults to the "levels" folder under the Bitfighter data install dir)
       Vector<string> levelfiles;
 
-      if(!getLevels(gConfigDirs.levelDir, levelfiles))    // True if error reading level...  print message... or just PANIC!!
+      if(!getFilesFromFolder(gConfigDirs.levelDir, levelfiles, "level"))    // True if error reading level...  print message... or just PANIC!!
       {
          logprintf(LogConsumer::LogError, "Could not read any levels from the levels folder \"%s\".", gConfigDirs.levelDir.c_str());
          return levelList;    // empty

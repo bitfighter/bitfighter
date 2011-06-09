@@ -288,7 +288,7 @@ public:
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
-   virtual bool processArguments(S32 argc, const char **argv);
+   virtual bool processArguments(S32 argc, const char **argv, Game *game);
 
    LuaShip luaProxy;                                  // Our Lua proxy object
    bool isRobot() { return mIsRobot; }

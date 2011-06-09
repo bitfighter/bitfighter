@@ -45,13 +45,6 @@ GridDatabase::GridDatabase(bool usingGameCoords)
 }
 
 
-void GridDatabase::clear()
-{
-   for(S32 i = mAllObjects.size() - 1; i >= 0 ; i--)
-      removeFromDatabase(mAllObjects[i], mAllObjects[i]->getExtent());
-}
-
-
 void GridDatabase::addToDatabase(DatabaseObject *theObject, const Rect &extents)
 {
    S32 minx, miny, maxx, maxy;  
@@ -292,7 +285,7 @@ DatabaseObject *GridDatabase::getObjectByIndex(S32 index)
 
 void DatabaseObject::addToDatabase()
 {
-   if(mInDatabase)
+   if(mInDatabase || !getIsDatabasable())
       return;
 
    mInDatabase = true;
@@ -371,7 +364,8 @@ void EditorObjectDatabase::addToDatabase(DatabaseObject *object, const Rect &ext
 
    Parent::addToDatabase(object, extents);
 
-   mAllEditorObjects.push_back(eObj);
+   if(eObj)
+      mAllEditorObjects.push_back(eObj);
 
    geomSort(mAllEditorObjects);
 }

@@ -311,11 +311,14 @@ public:
    static Vector<RangedU32<0, 200> > mRatings;
 
    GameType();    // Constructor
+
+   virtual void addToGame(Game *game);
+
    void countTeamPlayers();
 
    ClientRef *findClientRef(const StringTableEntry &name);
 
-   bool processArguments(S32 argc, const char **argv);
+   bool processArguments(S32 argc, const char **argv, Game *game);
    virtual void addGameSpecificParameterMenuItems(Vector<MenuItem *> &menuItems);
 
    void onAddedToGame(Game *theGame);
@@ -367,6 +370,7 @@ public:
 
    StringTableEntry getTeamName(S32 team);      // Return the name of the team
 
+   virtual bool getIsDatabasable() { return false; }     // Makes no sense to insert a GameType in our spatial database!
 
    // gameType flag methods for CTF, Rabbit, Football
    virtual void addFlag(FlagItem *flag) {  mFlags.push_back(flag);  }

@@ -56,14 +56,14 @@ Item::Item(Point p, bool collideable, float radius, float mass) : MoveObject(p, 
 
 
 // Server only
-bool Item::processArguments(S32 argc, const char **argv)
+bool Item::processArguments(S32 argc, const char **argv, Game *game)
 {
    if(argc < 2)
       return false;
 
    Point pos;
    pos.read(argv);
-   pos *= getGame()->getGridSize();
+   pos *= game->getGridSize();
    setVert(pos, 0);
 
    for(U32 i = 0; i < MoveStateCount; i++)
@@ -506,11 +506,11 @@ void PickupItem::idle(GameObject::IdleCallPath path)
 }
 
 
-bool PickupItem::processArguments(S32 argc, const char **argv)
+bool PickupItem::processArguments(S32 argc, const char **argv, Game *game)
 {
    if(argc < 2)
       return false;
-   else if(!Parent::processArguments(argc, argv))
+   else if(!Parent::processArguments(argc, argv, game))
       return false;
 
    if(argc == 3)

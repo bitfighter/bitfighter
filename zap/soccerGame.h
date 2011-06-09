@@ -105,7 +105,7 @@ public:
    void sendHome();
    void damageObject(DamageInfo *theInfo);
    void idle(GameObject::IdleCallPath path);
-   bool processArguments(S32 argc, const char **argv);
+   bool processArguments(S32 argc, const char **argv, Game *game);
 
    void onAddedToGame(Game *theGame);
    void onItemDropped();

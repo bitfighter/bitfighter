@@ -63,7 +63,7 @@ protected:
 
 public:
    EngineeredObject(S32 team = -1, Point anchorPoint = Point(), Point anchorNormal = Point(), GameObjectType objectType = UnknownType);
-   virtual bool processArguments(S32 argc, const char **argv);
+   virtual bool processArguments(S32 argc, const char **argv, Game *game);
 
    static const S32 MAX_SNAP_DISTANCE = 100;    // Max distance to look for a mount point
 
@@ -256,7 +256,7 @@ private:
 
 public:
    S32 mWeaponFireType;
-   bool processArguments(S32 argc, const char **argv);
+   bool processArguments(S32 argc, const char **argv, Game *game);
 
    static const S32 defaultRespawnTime = 0;
 

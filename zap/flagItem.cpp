@@ -90,7 +90,7 @@ void FlagItem::onAddedToGame(Game *theGame)
 }
 
 
-bool FlagItem::processArguments(S32 argc, const char **argv)
+bool FlagItem::processArguments(S32 argc, const char **argv, Game *game)
 {
    if(argc < 3)         // FlagItem <team> <x> <y> {time}
       return false;
@@ -98,7 +98,7 @@ bool FlagItem::processArguments(S32 argc, const char **argv)
    mTeam = atoi(argv[0]);
    //if(! getGame()->getGameType()->checkTeamRange(mTeam)) mTeam = -1;
    
-   if(!Parent::processArguments(argc-1, argv+1))
+   if(!Parent::processArguments(argc-1, argv+1, game))
       return false;
 
    S32 time = (argc >= 4) ? atoi(argv[4]) : 0;     // Flag spawn time is possible 4th argument.  This time only turns out to be important in Nexus games at the moment.
@@ -106,7 +106,7 @@ bool FlagItem::processArguments(S32 argc, const char **argv)
    mInitialPos = mMoveState[ActualState].pos;
 
    // Now add the flag starting point to the list of flag spawn points
-   GameType *gt = getGame()->getGameType();
+   GameType *gt = game->getGameType();
    if(gt)
    {
    if(!gt->isTeamFlagGame() || mTeam < 0 || mTeam >= gt->mTeams.size())

@@ -216,7 +216,7 @@ public:
 
    Timer timer;
    
-   virtual bool processArguments(S32 argc, const char **argv);
+   virtual bool processArguments(S32 argc, const char **argv, Game *game);
 
    ///// Editor methods
    virtual const char *getEditorHelpString() = 0;
@@ -253,7 +253,7 @@ public:
 
    const char *getClassName() { return "Spawn"; }
 
-   bool processArguments(S32 argc, const char **argv);
+   bool processArguments(S32 argc, const char **argv, Game *game);
    string toString();
 
    S32 getDefaultRespawnTime() { return 0; }    // Somewhat meaningless in this context

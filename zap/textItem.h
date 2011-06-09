@@ -63,11 +63,11 @@ public:
    void render();
    S32 getRenderSortValue();
 
-   bool processArguments(S32 argc, const char **argv);           // Create objects from parameters stored in level file
+   bool processArguments(S32 argc, const char **argv, Game *game);  // Create objects from parameters stored in level file
    string toString();
 
-   void onAddedToGame(Game *theGame);
-   void computeExtent();                                         // Bounding box for quick collision-possibility elimination
+   void onAddedToGame(Game *theGame);  
+   void computeExtent();                                             // Bounding box for quick collision-possibility elimination
 
    EditorAttributeMenuUI *getAttributeMenu();
 
@@ -134,11 +134,11 @@ public:
    void render();
    S32 getRenderSortValue();
 
-   bool processArguments(S32 argc, const char **argv);           // Create objects from parameters stored in level file
+   bool processArguments(S32 argc, const char **argv, Game *game);   // Create objects from parameters stored in level file
    void onAddedToGame(Game *theGame);
-   void computeExtent();                                         // Bounding box for quick collision-possibility elimination
+   void computeExtent();                                               // Bounding box for quick collision-possibility elimination
 
-   bool getCollisionPoly(Vector<Point> &polyPoints);             // More precise boundary for precise collision detection
+   bool getCollisionPoly(Vector<Point> &polyPoints);                   // More precise boundary for precise collision detection
    bool collide(GameObject *hitObject);
    void idle(GameObject::IdleCallPath path);
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);

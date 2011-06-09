@@ -100,7 +100,6 @@ public:
 
    EditorObject *newCopy();         // Copies object
 
-   virtual void addToEditor(Game *game);
    virtual void addToDock(Game *game, const Point &point);
 
 
@@ -163,7 +162,7 @@ public:
    void processEndPoints();      // Wall only
    void decreaseWidth(S32 amt);  // Wall only
    void increaseWidth(S32 amt);  // Wall only
-   void setWidth(S32 width) { mWidth = width; }
+   void setWidth(S32 width);
    S32 getWidth() { return mWidth; }
    ////
 
@@ -257,7 +256,7 @@ public:
    void setIsBeingEdited(bool isBeingEdited) { mIsBeingEdited = isBeingEdited; }
 
 
-   virtual void initializeEditor(F32 gridSize);
+   virtual void initializeEditor();
 
    Point forceFieldEnd;      // Point where forcefield terminates.  Only used for forcefields.
 

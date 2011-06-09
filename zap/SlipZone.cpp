@@ -68,7 +68,7 @@ S32 SlipZone::getRenderSortValue()
 }
 
 
-bool SlipZone::processArguments(S32 argc2, const char **argv2)
+bool SlipZone::processArguments(S32 argc2, const char **argv2, Game *game)
 {
    // Need to handle or ignore arguments that starts with letters,
    // so a possible future version can add parameters without compatibility problem.
@@ -96,24 +96,12 @@ bool SlipZone::processArguments(S32 argc2, const char **argv2)
    if(argc & 1)   // Odd number of arg count (7,9,11) to allow optional slipAmount arg
    {
       slipAmount = atof(argv[0]);
-      readGeom(argc, argv, 1, getGame()->getGridSize());
+      readGeom(argc, argv, 1, game->getGridSize());
    }
    else           // Even number of arg count (6,8,10)
-      readGeom(argc, argv, 0, getGame()->getGridSize());
+      readGeom(argc, argv, 0, game->getGridSize());
 
    setExtent();
-
-   /*for(S32 i = 1; i < argc; i += 2)
-   {
-      // Put a cap on the number of vertices in a polygon
-      if(mPolyBounds.verts.size() >= gMaxPolygonPoints)
-         break;
-
-      Point p;
-      p.x = atof(argv[i]) * getGame()->getGridSize();
-      p.y = atof(argv[i+1]) * getGame()->getGridSize();
-      mPolyBounds.push_back(p);
-   }*/
 
    return true;
 }

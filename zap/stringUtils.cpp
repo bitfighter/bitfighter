@@ -37,6 +37,12 @@
 #include <direct.h>        // For mkdir
 #endif
 
+#  ifdef TNL_OS_WIN32
+#     include "dirent.h"        // Need local copy for Windows builds
+#  else
+#     include <dirent.h>        // Need standard copy for *NIXes
+#  endif
+
 using namespace std;
 using namespace TNL;
 
@@ -279,6 +285,32 @@ bool makeSureFolderExists(const string &dir)
       }
    }
 
+   return true;
+}
+
+// Read files from folder
+bool getFilesFromFolder(const string& dir, Vector<string>& files, const string& extension)
+{
+   DIR *dp;
+   struct dirent *dirp;
+
+   if((dp = opendir(dir.c_str())) == NULL)
+      return false;
+
+   while ((dirp = readdir(dp)) != NULL)
+   {
+      string name = string(dirp->d_name);
+      if (extension.length() > 0) {
+         if(name.length() > extension.length() + 1 &&  // +1 -> include the dot '.'
+               name.substr(name.length() - extension.length(), extension.length()) == extension)
+            files.push_back(name);
+      }
+      else
+         if (name.length() > 2)  // quick hack to not include . and ..
+            files.push_back(name);
+   }
+
+   closedir(dp);
    return true;
 }
    

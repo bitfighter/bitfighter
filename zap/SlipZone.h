@@ -40,7 +40,7 @@ public:
 	F32 slipAmount;   // 0.0 to 1.0 , lower = more slippy
 
    SlipZone();       // Constructor
-   bool processArguments(S32 argc, const char **argv);
+   bool processArguments(S32 argc, const char **argv, Game *game);
 
    void render();
    S32 getRenderSortValue();

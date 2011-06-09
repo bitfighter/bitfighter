@@ -57,7 +57,7 @@ public:
    bool isFlashing() { return mFlashCount & 1; }
    bool didRecentlyChangeTeam() { return mFlashCount != 0; }
    S32 getRenderSortValue();
-   bool processArguments(S32 argc, const char **argv);
+   bool processArguments(S32 argc, const char **argv, Game *game);
 
    void setTeam(S32 team);
    void onAddedToGame(Game *theGame);

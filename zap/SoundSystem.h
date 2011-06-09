@@ -9,9 +9,10 @@
 #define SOUNDSYSTEM_H_
 
 #include "tnlTypes.h"
-#include "Point.h"
+#include "tnlVector.h"
 
 // forward declarations
+typedef unsigned int ALuint;
 namespace TNL {
    template <class T> class RefPtr;
    class ByteBuffer;
@@ -21,6 +22,7 @@ namespace TNL {
 namespace Zap {
 
 // forward declarations
+class Point;
 class SoundEffect;
 typedef TNL::RefPtr<SoundEffect> SFXHandle;
 
@@ -96,17 +98,27 @@ enum SFXProfiles
    NumSFXBuffers     // Count of the number of SFX sounds we have
 };
 
+enum MusicState {
+   MusicPlaying,
+   MusicStopped,
+   MusicPaused
+};
+
 class SoundSystem
 {
-
 private:
+   static const TNL::S32 NumMusicStreamBuffers = 3;
+   static const TNL::S32 MusicChunkSize = 250000;
+   static const TNL::S32 NumVoiceBuffers = 32;
+   static const TNL::S32 NumSamples = 32;
+
    // Sound Effect functions
    static void playOnSource(SFXHandle& effect);
    static void updateGain(SFXHandle& effect);
 
-public:
-   static const TNL::S32 NumSamples = 32;
+   static void music_end_callback(void* userdata, ALuint source);
 
+public:
    SoundSystem();
    virtual ~SoundSystem();
 
@@ -114,6 +126,7 @@ public:
    static void init();
    static void shutdown();
    static void setListenerParams(Point pos, Point velocity);
+   static void processAudio();
 
    // Sound Effect functions
    static void processSoundEffects();
@@ -127,10 +140,17 @@ public:
    static void updateMovementParams(SFXHandle& effect);
 
    // Voice Chat functions
+   static void processVoiceChat();
    static void queueVoiceChatBuffer(SFXHandle& effect, TNL::ByteBufferPtr p);
    static bool startRecording();
    static void captureSamples(TNL::ByteBufferPtr sampleBuffer);
    static void stopRecording();
+
+   // Music functions
+   static void processMusic();
+   static void playMusic();
+   static void playMusicList();
+   static void stopMusic();
 
 };
 

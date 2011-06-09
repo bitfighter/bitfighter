@@ -102,7 +102,7 @@ HuntersGameType::HuntersGameType() : GameType()
 }
 
 
-bool HuntersGameType::processArguments(S32 argc, const char **argv)
+bool HuntersGameType::processArguments(S32 argc, const char **argv, Game *game)
 {
    if(argc > 0)
    {
@@ -620,7 +620,7 @@ extern S32 gMaxPolygonPoints;
 // If there are 2 or 4 params, this is an Zap! rectangular format object
 // If there are more, this is a Bitfighter polygonal format object
 // Note parallel code in EditorUserInterface::processLevelLoadLine
-bool HuntersNexusObject::processArguments(S32 argc2, const char **argv2)
+bool HuntersNexusObject::processArguments(S32 argc2, const char **argv2, Game *game)
 {
    // Need to handle or ignore arguments that starts with letters,
    // so a possible future version can add parameters without compatibility problem.
@@ -649,7 +649,7 @@ bool HuntersNexusObject::processArguments(S32 argc2, const char **argv2)
    {
       Point pos;
       pos.read(argv);
-      pos *= getGame()->getGridSize();
+      pos *= game->getGridSize();
 
       Point ext(50, 50);
       if(argc == 4)
@@ -661,7 +661,7 @@ bool HuntersNexusObject::processArguments(S32 argc2, const char **argv2)
       addVert(Point(pos.x - ext.x, pos.y + ext.y));   // LL corner
    }
    else              // Bitfighter format
-      readGeom(argc, argv, 0, getGame()->getGridSize());
+      readGeom(argc, argv, 0, game->getGridSize());
 
    setExtent();      // Sets object's extent database
 

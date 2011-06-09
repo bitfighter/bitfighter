@@ -46,7 +46,7 @@ public:
    
    void render();
    S32 getRenderSortValue();
-   bool processArguments(S32 argc, const char **argv);
+   bool processArguments(S32 argc, const char **argv, Game *game);
    void onAddedToGame(Game *theGame);
 
    bool getCollisionPoly(Vector<Point> &polyPoints);     // More precise boundary for precise collision detection
