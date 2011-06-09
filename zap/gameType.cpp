@@ -39,6 +39,7 @@
 //#include "BotNavMeshZone.h" // For gBotNavMeshZones
 #include "gameStats.h"      // For VersionedGameStats def
 #include "version.h"
+#include "Colors.h"
 
 #include "../master/database.h"
 
@@ -881,7 +882,7 @@ void GameType::renderDebugStatus()
 
       for(S32 i = 1; i >= 0; i--)
       {
-         glColor(i ? Color(0,0,0) : Color(1,1,1));
+         glColor(i ? Colors::black : Colors::white);
          glBegin(i ? GL_POLYGON: GL_LINE_LOOP); 
             glVertex2i(x,             y);
             glVertex2i(x + BOX_WIDTH, y);
@@ -2167,8 +2168,8 @@ void GameType::addClientGameMenuOptions(Vector<MenuItem *> &menuOptions)
          menuOptions.push_back(new MenuItem(0, "SWITCH TEAMS", switchTeamsCallback, "", KEY_S, KEY_T));
       else
       {
-         menuOptions.push_back(new MessageMenuItem("WAITING FOR SERVER TO ALLOW", red));
-         menuOptions.push_back(new MessageMenuItem("YOU TO SWITCH TEAMS AGAIN", red));
+         menuOptions.push_back(new MessageMenuItem("WAITING FOR SERVER TO ALLOW", Colors::red));
+         menuOptions.push_back(new MessageMenuItem("YOU TO SWITCH TEAMS AGAIN", Colors::red));
       }
    }
 }

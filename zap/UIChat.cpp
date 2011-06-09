@@ -30,6 +30,7 @@
 #include "UINameEntry.h"
 #include "UIMenus.h"
 #include "UIGame.h"  // For putting private messages into game console
+#include "Colors.h"
 
 #include "../glut/glutInclude.h"
 #include <stdarg.h>
@@ -81,7 +82,7 @@ void AbstractChat::newMessage(string from, string message, bool isPrivate, bool 
    Color color;
 
    if(isFromUs)
-      color = Color(1,1,1);                               // If so, use white
+      color = Colors::white;                               // If so, use white
    else                                                   // Otherwise...
    {
       if(mFromColors.count(from) == 0)                   // ...see if we have a color for this nick.  If we don't, count will be 0

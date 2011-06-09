@@ -25,7 +25,8 @@
 
 #include "UIAbstractInstructions.h"
 #include "../glut/glutInclude.h"
-#include "gameObjectRender.h"    // for glColor def... shoud be moved!
+#include "Color.h"
+#include "Colors.h"
 
 namespace Zap
 {
@@ -44,9 +45,9 @@ void AbstractInstructionsUserInterface::renderConsoleCommands(const char *activa
    drawStringf(cmdCol, ypos, instrSize, activationCommand);
    ypos += 28;
 
-   Color cmdColor =   Color(0, 1, 1);
-   Color descrColor = Color (1, 1, 1);
-   Color secColor =   Color(1, 1, 0);
+   Color cmdColor =   Colors::cyan;
+   Color descrColor = Colors::white;
+   Color secColor =   Colors::yellow;
 
    const S32 headerSize = 20;
    const S32 cmdSize = 16;

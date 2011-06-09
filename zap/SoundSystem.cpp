@@ -192,8 +192,9 @@ static Vector<ALuint> gVoiceFreeBuffers;
 // Music specific
 static Vector<SFXHandle> gPlayList;
 static alureStream* musicStream;
-static ALuint* musicSource;  // pointer to whatever source is used by the current music
+static ALuint musicSource;  // dedicated source for Music
 static MusicState musicState;
+static ALfloat musicVolume = 0;
 
 static Vector<string> musicList;
 static S32 currentlyPlayingIndex;
@@ -274,18 +275,22 @@ void SoundSystem::init()
    // Set up music list for streaming later
    if (!getFilesFromFolder(gConfigDirs.musicDir, musicList))
    {
-      logprintf(LogConsumer::LogWarning, "Could not read any music files from the music folder \"%s\".", gConfigDirs.musicDir.c_str());
+      logprintf(LogConsumer::LogWarning, "Could not read music files from folder \"%s\".  Game will proceed without music", gConfigDirs.musicDir.c_str());
    }
    else
    {
+      // Create dedicated music source
+      alGenSources(1, &musicSource);
+
+      // Set up other relevant data
       currentlyPlayingIndex = 0;
       gMusicValid = true;
       musicState = MusicStopped;
    }
 
    // Set up voice chat buffers
-   gVoiceFreeBuffers.resize(NumVoiceBuffers);
-   alGenBuffers(NumVoiceBuffers, gVoiceFreeBuffers.address());
+   gVoiceFreeBuffers.resize(NumVoiceChatBuffers);
+   alGenBuffers(NumVoiceChatBuffers, gVoiceFreeBuffers.address());
 
    gSFXValid = true;
 }
@@ -296,8 +301,11 @@ void SoundSystem::shutdown()
       return;
 
    // Stop and clean up music
+   if(gMusicValid) {
    stopMusic();
    alureDestroyStream(musicStream, 0, NULL);
+      alDeleteSources(1, &musicSource);
+   }
 
    // Clean up SoundEffect buffers
    alDeleteBuffers(NumSFXBuffers, gSfxBuffers);
@@ -465,16 +473,22 @@ void SoundSystem::processMusic()
    if (!gMusicValid)
       return;
 
-   alureUpdate();
+   // Adjust music volume only if changed
+   if (S32(gIniSettings.musicVolLevel * 10) != S32(musicVolume * 10)) {
+      musicVolume = gIniSettings.musicVolLevel;
+      alSourcef(musicSource, AL_GAIN, musicVolume);
+   }
 
-   if(musicState == MusicStopped)
+   // Once currentlyPlayingIndex is greater than list size, we are done with the list
+   // We probably don't want this behaviour in the end
+   if(musicState == MusicStopped && currentlyPlayingIndex < musicList.size())
       playMusicList();
 }
 
 
 void SoundSystem::processVoiceChat()
 {
-
+   // TODO move voiceChat logic here
 }
 
 
@@ -680,55 +694,38 @@ void SoundSystem::queueVoiceChatBuffer(SFXHandle& effect, ByteBufferPtr p)
 
 void SoundSystem::music_end_callback(void* userdata, ALuint source)
 {
-   logprintf("error: %d", alGetError());
-//   stopMusic();
+   logprintf("finished playing: %s", musicList[currentlyPlayingIndex].c_str());
+
+   musicState = MusicStopped;
+   currentlyPlayingIndex++;
 }
 
 void SoundSystem::playMusicList()
 {
-   playMusic();
+   playMusic(currentlyPlayingIndex);
 }
 
-void SoundSystem::playMusic()
+void SoundSystem::playMusic(S32 listIndex)
 {
    musicState = MusicPlaying;
 
-   // Grab a source (sample) from the pool
-   // TODO reintegrate the source with the source pool
-   ALuint source;
-   for(S32 i = 0; i < NumSamples; i++)
-   {
-      ALint state;
-      alGetSourcei(gFreeSources[i], AL_SOURCE_STATE, &state);
-
-      if(state == AL_STOPPED || state == AL_INITIAL)
-      {
-         source = gFreeSources[i];
-         break;  // We have our source let's get out of here
-      }
-   }
-
-   string musicFile = joindir(gConfigDirs.musicDir, musicList[currentlyPlayingIndex]);
+   string musicFile = joindir(gConfigDirs.musicDir, musicList[listIndex]);
    musicStream = alureCreateStreamFromFile(musicFile.c_str(), MusicChunkSize, 0, NULL);
 
    if(!musicStream)
    {
-      logprintf(LogConsumer::LogError, "Failed to create music stream for: %s", musicList[currentlyPlayingIndex].c_str());
+      logprintf(LogConsumer::LogError, "Failed to create music stream for: %s", musicList[listIndex].c_str());
    }
 
-   musicSource = &source;  // keep track of source
-
-   if(!alurePlaySourceStream(source, musicStream, NumMusicStreamBuffers, 0, music_end_callback, NULL))
+   if(!alurePlaySourceStream(musicSource, musicStream, NumMusicStreamBuffers, 0, music_end_callback, NULL))
    {
-      logprintf(LogConsumer::LogError, "Failed to play music file: %s", musicList[currentlyPlayingIndex].c_str());
+      logprintf(LogConsumer::LogError, "Failed to play music file: %s", musicList[listIndex].c_str());
    }
 }
 
 void SoundSystem::stopMusic()
 {
-   if(musicSource)
-      alureStopSource(*musicSource, AL_FALSE);
-   musicSource = NULL;
+   alureStopSource(musicSource, AL_FALSE);
 }
 
 }

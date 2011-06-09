@@ -33,6 +33,7 @@
 #include "IniFile.h"
 #include "config.h"
 #include "game.h"    // For gClientGame
+#include "Colors.h"
 
 #include "../glut/glutInclude.h"
 
@@ -84,7 +85,7 @@ void KeyDefMenuUserInterface::onActivate()
    else
       mMenuSubTitle = "Input Mode: Keyboard";
 
-   mMenuSubTitleColor = Color(1,1,1);   // white
+   mMenuSubTitleColor = Colors::white;   // white
 
    if (gIniSettings.inputMode == Joystick)
    {

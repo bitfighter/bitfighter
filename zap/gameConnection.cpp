@@ -34,6 +34,7 @@
 #include "shipItems.h"           // For EngineerBuildObjects enum
 #include "masterConnection.h"    // For MasterServerConnection def
 #include "engineeredObjects.h"   // For EngineerModuleDeployer
+#include "Colors.h"
 
 
 #include "UI.h"
@@ -880,12 +881,12 @@ void GameConnection::sRequestLoadout(Vector<U32> &loadout)
 
 Color colors[] =
 {
-   Color(1,1,1),           // ColorWhite
-   Color(1,0,0),           // ColorRed    ==> also used for chat commands
-   Color(0,1,0),           // ColorGreen
-   Color(0,0,1),           // ColorBlue
-   Color(0,1,1),           // ColorAqua
-   Color(1,1,0),           // ColorYellow
+   Colors::white,           // ColorWhite
+   Colors::red,           // ColorRed    ==> also used for chat commands
+   Colors::green,           // ColorGreen
+   Colors::blue,           // ColorBlue
+   Colors::cyan,           // ColorAqua
+   Colors::yellow,           // ColorYellow
    Color(0.6f, 1, 0.8f),   // ColorNuclearGreen
 };
 

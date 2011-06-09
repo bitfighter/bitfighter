@@ -32,6 +32,8 @@ using namespace TNL;
 #include "gameLoader.h"
 #include "SoundSystem.h"
 #include "gameObjectRender.h"
+#include "Colors.h"
+
 #include <math.h>
 
 namespace Zap
@@ -253,7 +255,7 @@ void Teleporter::render()
 
 void Teleporter::renderEditorItem()
 {
-   glColor(green);
+   glColor(Colors::green);
 
    glLineWidth(gLineWidth3);
    drawPolygon(getVert(0), 12, Teleporter::TELEPORTER_RADIUS, 0);

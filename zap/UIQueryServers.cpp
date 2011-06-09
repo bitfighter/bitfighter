@@ -32,6 +32,7 @@
 #include "gameNetInterface.h"
 #include "game.h"
 #include "gameType.h"
+#include "Colors.h"
 
 #include "config.h"     // TODO: remove requirement -- currently for gIni stuff in screen pos calc
 
@@ -119,9 +120,9 @@ QueryServersUserInterface::QueryServersUserInterface()
    S32 textsize = 12;
    S32 ypos = BANNER_HEIGHT - 30;
 
-   Button prevButton = Button(horizMargin, ypos, textsize, 4, "PREV", white, yellow, prevButtonClickedCallback);
+   Button prevButton = Button(horizMargin, ypos, textsize, 4, "PREV", Colors::white, Colors::yellow, prevButtonClickedCallback);
    Button nextButton = Button(gScreenInfo.getGameCanvasWidth() - horizMargin - 50, ypos, 
-                              textsize, 4, "NEXT", white, yellow, nextButtonClickedCallback);
+                              textsize, 4, "NEXT", Colors::white, Colors::yellow, nextButtonClickedCallback);
    
    buttons.push_back(prevButton);
    buttons.push_back(nextButton);
@@ -161,7 +162,7 @@ void QueryServersUserInterface::onActivate()
       s.pingTimedOut = false;
       s.everGotQueryResponse = false;
       s.serverDescr = "Here is  description.  There are many like it, but this one is mine.";
-      s.msgColor = yellow; 
+      s.msgColor = Colors::yellow;
       servers.push_back(s);
    }
 #endif
@@ -294,7 +295,7 @@ void QueryServersUserInterface::addPingServers(const Vector<IPAddress> &ipList)
 
          s.serverName = "Internet Server";
          s.serverDescr = "Internet Server -- attempting to connect";
-         s.msgColor = white;   // white messages
+         s.msgColor = Colors::white;   // white messages
          servers.push_back(s);
          mShouldSort = true;
       }
@@ -325,7 +326,7 @@ void QueryServersUserInterface::gotPingResponse(const Address &theAddress, const
       s.isFromMaster = false;
       s.serverName = "LAN Server";
       s.serverDescr = "LAN Server -- attempting to connect";
-      s.msgColor = white;   // white messages
+      s.msgColor = Colors::white;   // white messages
       servers.push_back(s);
       return;
    }
@@ -370,7 +371,7 @@ void QueryServersUserInterface::gotQueryResponse(const Address &theAddress, cons
 
          s.serverName = string(serverName).substr(0, MaxServerNameLen);
          s.serverDescr = string(serverDescr).substr(0, MaxServerDescrLen);
-         s.msgColor = yellow;   // yellow server details
+         s.msgColor = Colors::yellow;   // yellow server details
          s.pingTime = Platform::getRealMilliseconds() - s.lastSendTime;
          s.lastSendTime = Platform::getRealMilliseconds();     // Record time our last query was recieved, so we'll know when to send again
          if(s.state == ServerRef::SentQuery)
@@ -423,7 +424,7 @@ void QueryServersUserInterface::idle(U32 timeDelta)
                s.pingTime = 999;
                s.serverName = "Ping Timed Out";
                s.serverDescr = "No information: Server not responding to pings";
-               s.msgColor = red;   // red for errors
+               s.msgColor = Colors::red;   // red for errors
                s.playerCount = 0;
                s.maxPlayers = 0;
                s.botCount = 0;
@@ -467,7 +468,7 @@ void QueryServersUserInterface::idle(U32 timeDelta)
                // Otherwise, we can deal with timeouts on remote servers
                s.serverName = "Query Timed Out";
                s.serverDescr = "No information: Server not responding to status query";
-               s.msgColor = red;   // red for errors
+               s.msgColor = Colors::red;   // red for errors
                s.playerCount = s.maxPlayers = s.botCount = 0;
                s.state = ServerRef::Start;//ReceivedQuery;
                mShouldSort = true;
@@ -644,7 +645,7 @@ void QueryServersUserInterface::render()
    }
    else
    {
-      glColor(red);
+      glColor(Colors::red);
       if(mGivenUpOnMaster && prevServerListFromMaster.size() != 0) //can't use empty server list.
          drawCenteredString(vertMargin - 8, 12, "Couldn't connect to Master Server - Using server list from last successful connect.");
       else
@@ -657,7 +658,7 @@ void QueryServersUserInterface::render()
        S32 dividerPos = getDividerPos();
 
       // Horizontal divider between game list and chat window
-      glColor(white);
+      glColor(Colors::white);
       glBegin(GL_LINES);
          glVertex2f(horizMargin, dividerPos);
          glVertex2f(canvasWidth - horizMargin, dividerPos);
@@ -673,7 +674,7 @@ void QueryServersUserInterface::render()
    }
 
    // Instructions at bottom of server selection section
-   glColor(white);
+   glColor(Colors::white);
    drawCenteredString(getDividerPos() - SEL_SERVER_INSTR_SIZE - SEL_SERVER_INSTR_GAP_ABOVE_DIVIDER_LINE + 1, SEL_SERVER_INSTR_SIZE, 
                       "UP, DOWN to select, ENTER to join | Click on column to sort | ESC exits");
 
@@ -697,7 +698,7 @@ void QueryServersUserInterface::render()
          if(composingMessage() && !mJustMovedMouse)   // Disable selection highlight if we're typing a message
             glColor(i ? Color(0.4,0.4,0.4) : Color(0.8,0.8,0.8));
          else
-            glColor(i ? Color(0,0,0.4) : blue);     
+            glColor(i ? Color(0,0,0.4) : Colors::blue);
 
          glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
             glVertex2f(0, y);
@@ -735,11 +736,11 @@ void QueryServersUserInterface::render()
                else
                   break;
 
-         glColor(white);
+         glColor(Colors::white);
          drawString(columns[0].xStart, y, SERVER_ENTRY_TEXTSIZE, sname.c_str());
 
          // Render icons
-         glColor(green);
+         glColor(Colors::green);
          if(s.dedicated || s.test || s.pingTimedOut || !s.everGotQueryResponse)
          {
             glPushMatrix();
@@ -768,22 +769,22 @@ void QueryServersUserInterface::render()
 
          // Set color based on ping time
          if(s.pingTime < 100)
-            glColor(green);
+            glColor(Colors::green);
          else if(s.pingTime < 250)
-            glColor(yellow);
+            glColor(Colors::yellow);
          else
-            glColor(red);
+            glColor(Colors::red);
 
          drawStringf(columns[2].xStart, y, SERVER_ENTRY_TEXTSIZE, "%d", s.pingTime);
 
          // Color by number of players
          Color color;
          if(s.playerCount == s.maxPlayers)
-            color = red;       // max players
+            color = Colors::red;       // max players
          else if(s.playerCount == 0)
-            color = yellow;    // no players
+            color = Colors::yellow;    // no players
          else
-            color = green;     // 1 or more players
+            color = Colors::green;     // 1 or more players
 
          //if(s.playerCount < 0)      // U32 will never be < 0...
          //   drawString(columns[3].xStart, y, SERVER_ENTRY_TEXTSIZE, "?? ??");
@@ -793,7 +794,7 @@ void QueryServersUserInterface::render()
          glColor(color);
          drawStringf(columns[3].xStart, y, SERVER_ENTRY_TEXTSIZE, "%d", s.playerCount);
          drawStringf(columns[3].xStart + 78, y, SERVER_ENTRY_TEXTSIZE, "%d", s.botCount);
-         glColor(white);
+         glColor(Colors::white);
          drawString(columns[4].xStart, y, SERVER_ENTRY_TEXTSIZE, s.serverAddress.toString());
       }
    }
@@ -824,7 +825,7 @@ void QueryServersUserInterface::renderTopBanner()
       glVertex2f(0, BANNER_HEIGHT);
    glEnd();
 
-   glColor(white);
+   glColor(Colors::white);
    drawCenteredString(vertMargin + 7, 35, "BITFIGHTER GAME LOBBY");
 
    drawStringf(horizMargin, vertMargin, 12, "SERVERS: %d", servers.size());
@@ -868,7 +869,7 @@ void QueryServersUserInterface::renderColumnHeaders()
    for(S32 i = 1; i >= 0; i--)
    {
       // Render box around (behind, really) selected column
-      glColor(i ? Color(.4, .4, 0) : white);
+      glColor(i ? Color(.4, .4, 0) : Colors::white);
       glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
          glVertex2f(x1, COLUMN_HEADER_TOP);
          glVertex2f(x2, COLUMN_HEADER_TOP);
@@ -891,7 +892,7 @@ void QueryServersUserInterface::renderColumnHeaders()
       else
          x2 = columns[mHighlightColumn+1].xStart - 5;
 
-      glColor(white);
+      glColor(Colors::white);
       glBegin(GL_LINE_LOOP);
          glVertex2f(x1, COLUMN_HEADER_TOP);
          glVertex2f(x2, COLUMN_HEADER_TOP);
@@ -947,7 +948,7 @@ void QueryServersUserInterface::renderMessageBox(bool drawmsg1, bool drawmsg2)
 
    for(S32 i = 1; i >= 0; i--)    // First fill, then outline
    {
-      glColor(i ? Color(.4, 0, 0) : red);
+      glColor(i ? Color(.4, 0, 0) : Colors::red);
 
       glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
          glVertex2f(xpos1, ypos1);
@@ -958,7 +959,7 @@ void QueryServersUserInterface::renderMessageBox(bool drawmsg1, bool drawmsg2)
    }
 
    // Now text
-   glColor(white);
+   glColor(Colors::white);
 
    drawCenteredString(ypos - lines * (fontsize + fontgap), fontsize, msg1);
    drawCenteredString(ypos - (fontsize + fontgap), fontsize, msg2);

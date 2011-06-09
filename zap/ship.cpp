@@ -43,6 +43,7 @@
 #include "config.h"
 #include "statistics.h"
 #include "SlipZone.h"
+#include "Colors.h"
 #include "robot.h"            // For EventManager def
 
 #include "stringUtils.h"      // For itos
@@ -1328,18 +1329,18 @@ enum {
 };
 
 Color ShipExplosionColors[NumShipExplosionColors] = {
-   Color(1, 0, 0),
+   Colors::red,
    Color(0.9, 0.5, 0),
-   Color(1, 1, 1),
-   Color(1, 1, 0),
-   Color(1, 0, 0),
+   Colors::white,
+   Colors::yellow,
+   Colors::red,
    Color(0.8, 1.0, 0),
    Color(1, 0.5, 0),
-   Color(1, 1, 1),
-   Color(1, 0, 0),
+   Colors::white,
+   Colors::red,
    Color(0.9, 0.5, 0),
-   Color(1, 1, 1),
-   Color(1, 1, 0),
+   Colors::white,
+   Colors::yellow,
 };
 
 void Ship::emitShipExplosion(Point pos)
@@ -1353,8 +1354,8 @@ void Ship::emitShipExplosion(Point pos)
    F32 d = TNL::Random::readF() * 0.2 + 0.9;
 
    FXManager::emitExplosion(mMoveState[ActualState].pos, 0.9, ShipExplosionColors, NumShipExplosionColors);
-   FXManager::emitBurst(pos, Point(a,c), Color(1,1,0.25), Color(1,0,0));
-   FXManager::emitBurst(pos, Point(b,d), Color(1,1,0), Color(0,0.75,0));
+   FXManager::emitBurst(pos, Point(a,c), Color(1,1,0.25), Colors::red);
+   FXManager::emitBurst(pos, Point(b,d), Colors::yellow, Color(0,0.75,0));
 }
 
 void Ship::emitMovementSparks()

@@ -35,6 +35,7 @@
 #include "gameLoader.h"
 #include "Rect.h"
 #include "Color.h"
+#include "Colors.h"
 #include "shipItems.h"     // For moduleInfos
 
 #include "dataConnection.h"      // For DataSender
@@ -172,7 +173,7 @@ public:
 
    virtual bool isTestServer() { return false; }     // Overridden in ServerGame
 
-   virtual Color getTeamColor(S32 teamId) { return Color(1,1,1); }      // ClientGame and EditorGame will override
+   virtual Color getTeamColor(S32 teamId) { return Colors::white; }      // ClientGame and EditorGame will override
 
 
    ModuleInfo *getModuleInfo(ShipModule module) { return &mModuleInfos[(U32)module]; }

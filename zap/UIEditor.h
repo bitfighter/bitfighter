@@ -37,6 +37,7 @@
 #include "BotNavMeshZone.h"      // For Border def
 #include "tnlNetStringTable.h"
 #include "barrier.h"             // For wall related defs (WallSegmentManager, etc.)
+#include "Colors.h"
 
 #include <string>
 
@@ -98,8 +99,8 @@ enum VertexRenderStyles
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-const Color HIGHLIGHT_COLOR = white;
-const Color SELECT_COLOR = yellow;
+const Color HIGHLIGHT_COLOR = Colors::white;
+const Color SELECT_COLOR = Colors::yellow;
 
 ////////////////////////////////////////
 ////////////////////////////////////////

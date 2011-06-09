@@ -41,6 +41,7 @@
 //#include "keyCode.h"
 #include "IniFile.h"
 #include "config.h"
+#include "Colors.h"
 
 #include "../glut/glutInclude.h"
 
@@ -215,7 +216,7 @@ static void renderArrowAbove(S32 pos, S32 height)
    for(S32 i = 1; i >= 0; i--)
    {
       // First create a black poly to blot out what's behind, then the arrow itself
-      glColor(i ? Color(0, 0, 0) : Color(0, 0, 1));
+      glColor(i ? Colors::black : Colors::blue);
       glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
          glVertex2f( (canvasWidth - ARROW_WIDTH) / 2, pos - ARROW_MARGIN - 7);
          glVertex2f( (canvasWidth + ARROW_WIDTH) / 2, pos - ARROW_MARGIN - 7);
@@ -231,7 +232,7 @@ static void renderArrowBelow(S32 pos, S32 height)
    for(S32 i = 1; i >= 0; i--)
    {
       // First create a black poly to blot out what's behind, then the arrow itself
-      glColor(i ? Color(0, 0, 0) : Color(0, 0, 1));
+      glColor(i ? Colors::black : Colors::blue);
       glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
          glVertex2f( (canvasWidth - ARROW_WIDTH) / 2, pos + ARROW_MARGIN - 7);
          glVertex2f( (canvasWidth + ARROW_WIDTH) / 2, pos + ARROW_MARGIN - 7);
@@ -290,7 +291,7 @@ void MenuUserInterface::render()
       if(selectedIndex == i + offset)  // Highlight selected item
          for(S32 j = 1; j >= 0; j--)
          {
-            glColor(j ? Color(0,0,0.4) : Color(0,0,1));   // Fill, then outline
+            glColor(j ? Color(0,0,0.4) : Colors::blue);   // Fill, then outline
             glBegin(j ? GL_POLYGON : GL_LINES);
                glVertex2f(0,           y - getGap() / 2 + adjfact + shrinkfact);
                glVertex2f(canvasWidth, y - getGap() / 2 + adjfact + shrinkfact);
@@ -646,7 +647,7 @@ static const S32 MOTD_POS = 540;
 
 void MainMenuUserInterface::render()
 {
-  Parent::render();
+   Parent::render();
 
    S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
    S32 canvasHeight = gScreenInfo.getGameCanvasHeight();

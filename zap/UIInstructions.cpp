@@ -37,6 +37,7 @@
 #include "speedZone.h"           // For SpeedZone::height
 #include "GeomUtils.h"      // For polygon triangulation
 #include "config.h"
+#include "Colors.h"
 
 #include "../glut/glutInclude.h"
 
@@ -238,9 +239,9 @@ void InstructionsUserInterface::renderPage1()
       glVertex2f(750, starty + 26);
    glEnd();
 
-   static const Color txtColor = Color(0, 1, 1);
-   static const Color keyColor = Color(1, 1, 1);      // white
-   static const Color secColor = Color(1, 1, 0);
+   static const Color txtColor = Colors::cyan;
+   static const Color keyColor = Colors::white;      // white
+   static const Color secColor = Colors::yellow;
 
    ControlString *controls = (gIniSettings.inputMode == Keyboard) ? controlsKeyboard : controlsGamepad;
 
@@ -384,7 +385,7 @@ void InstructionsUserInterface::renderPage2()
       switch(i)
       {
          case 0:     // Boost
-            renderShip(Color(0, 0, 1), 1, thrustsBoost, 1, Ship::CollisionRadius, 0, false, false, false, false);
+            renderShip(Colors::blue, 1, thrustsBoost, 1, Ship::CollisionRadius, 0, false, false, false, false);
             glBegin(GL_LINES);
                glColor3f(1,1,0);
                glVertex2f(-20, -17);
@@ -398,18 +399,18 @@ void InstructionsUserInterface::renderPage2()
             break;
 
          case 1:     // Shield
-            renderShip(Color(0, 0, 1), 1, thrusts, 1, Ship::CollisionRadius, 0, false, true, false, false);
+            renderShip(Colors::blue, 1, thrusts, 1, Ship::CollisionRadius, 0, false, true, false, false);
             break;
 
          case 2:     // Armor
-            renderShip(Color(0, 0, 1), 1, thrusts, 1, Ship::CollisionRadius, 0, false, false, false, true);
+            renderShip(Colors::blue, 1, thrusts, 1, Ship::CollisionRadius, 0, false, false, false, true);
             break;
 
          case 3:     // Repair
             {
                F32 health = (gClientGame->getCurrentTime() & 0x7FF) * 0.0005f;
 
-               renderShip(Color(0, 0, 1), 1, thrusts, health, Ship::CollisionRadius, 0, false, false, false, false);
+               renderShip(Colors::blue, 1, thrusts, health, Ship::CollisionRadius, 0, false, false, false, false);
                glLineWidth(gLineWidth3);
                glColor3f(1, 0, 0);
                drawCircle(0, 0, Ship::RepairDisplayRadius);
@@ -418,7 +419,7 @@ void InstructionsUserInterface::renderPage2()
             break;
 
          case 4:     // Sensor
-            renderShip(Color(0, 0, 1), 1, thrusts, 1, Ship::CollisionRadius, gClientGame->getCurrentTime(), false, false, true, false);
+            renderShip(Colors::blue, 1, thrusts, 1, Ship::CollisionRadius, gClientGame->getCurrentTime(), false, false, true, false);
             break;
 
          case 5:     // Cloak
@@ -430,13 +431,13 @@ void InstructionsUserInterface::renderPage2()
                   alpha = frac * 0.001;
                else
                   alpha = 1 - (frac * 0.001);
-               renderShip(Color(0, 0, 1), alpha, thrusts, 1, Ship::CollisionRadius, 0, false, false, false, false);
+               renderShip(Colors::blue, alpha, thrusts, 1, Ship::CollisionRadius, 0, false, false, false, false);
             }
             break;
 
          case 6:     // Engineer
             {
-               renderShip(Color(0, 0, 1), 1, thrusts, 1, Ship::CollisionRadius, 0, false, false, false, false);
+               renderShip(Colors::blue, 1, thrusts, 1, Ship::CollisionRadius, 0, false, false, false, false);
                renderResourceItem(Point(0,0));
             }
             break;
@@ -553,24 +554,24 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
             renderEnergyItem(Point(0, 0));
             break;
          case 14:
-            renderTurret(Color(1,1,1), Point(0, 15), Point(0, -1), false, 0, 0);
+            renderTurret(Colors::white, Point(0, 15), Point(0, -1), false, 0, 0);
             break;
          case 15:
-            renderTurret(Color(0, 0, 1), Point(0, 15), Point(0, -1), true, 1, 0);
+            renderTurret(Colors::blue, Point(0, 15), Point(0, -1), true, 1, 0);
             break;
 
          case 16:
-            renderForceFieldProjector(Point(-7.5, 0), Point(1, 0), Color(1,1,1), false);
+            renderForceFieldProjector(Point(-7.5, 0), Point(1, 0), Colors::white, false);
             break;
          case 17:
-            renderForceFieldProjector(Point(-50, 0), Point(1, 0), Color(1,0, 0), true);
-            renderForceField(Point(-35, 0), Point(50, 0), Color(1,0, 0), true);
+            renderForceFieldProjector(Point(-50, 0), Point(1, 0), Colors::red, true);
+            renderForceField(Point(-35, 0), Point(50, 0), Colors::red, true);
             break;
          case 18:
             renderTeleporter(Point(0, 0), 0, true, gClientGame->getCurrentTime(), 1, Teleporter::TELEPORTER_RADIUS, 1, Vector<Point>(), false);
             break;
          case 19:
-            renderFlag(0, 0, Color(1, 0, 0));
+            renderFlag(0, 0, Colors::red);
             break;
          case 20:    // Loadout zone
             {              // braces needed: see C2360
@@ -583,7 +584,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
                Vector<Point> f;     // fill
                Triangulate::Process(o, f);
 
-               renderLoadoutZone(Color(0, 0, 1), &o, &f, findCentroid(o), angleOfLongestSide(o));
+               renderLoadoutZone(Colors::blue, &o, &f, findCentroid(o), angleOfLongestSide(o));
             }
 
             break;
@@ -659,9 +660,9 @@ void InstructionsUserInterface::renderPageCommands(U32 page, const char *msg)
       ypos += 28;
    }
 
-   Color cmdColor =   Color(0, 1, 1);
-   Color descrColor = Color (1, 1, 1);
-   Color secColor =   Color(1, 1, 0);
+   Color cmdColor =   Colors::cyan;
+   Color descrColor = Colors::white;
+   Color secColor =   Colors::yellow;
 
    const S32 headerSize = 20;
    const S32 cmdSize = 16;

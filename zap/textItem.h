@@ -28,6 +28,7 @@
 
 #include "SimpleLine.h"       // For SimpleLine def
 #include "polygon.h"          // For def of Polyline, for lineItem
+#include "Colors.h"
 
 using namespace std;
 
@@ -79,7 +80,7 @@ public:
 
    ///// Editor Methods
 
-   Color getEditorRenderColor() { return Color(0,0,1); }
+   Color getEditorRenderColor() { return Colors::blue; }
 
    void renderEditorItem();
    F32 getSize() { return mSize; }

@@ -30,6 +30,7 @@
 #include "input.h"
 #include "UIMenus.h"
 #include "config.h"
+#include "Colors.h"
 
 #include "../glut/glutInclude.h"
 #include <ctype.h>
@@ -88,7 +89,7 @@ void QuickChatHelper::render()
    }
 
    const S32 indent = 20;
-   const Color quickChatMenuHeaderColor(1, 0, 0);
+   const Color quickChatMenuHeaderColor(Colors::red);
 
    drawMenuBorderLine(yPos, quickChatMenuHeaderColor);
 

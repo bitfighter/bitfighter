@@ -29,6 +29,7 @@
 #include "ship.h"
 #include "gameObjectRender.h"
 #include "SoundSystem.h"
+#include "Colors.h"
 #include "../glut/glutInclude.h"
 
 #include <math.h>
@@ -271,7 +272,7 @@ void Spawn::renderEditor(F32 currentScale)
    glPushMatrix();
       glTranslatef(pos.x, pos.y, 0);
       glScalef(1/currentScale, 1/currentScale, 1);    // Make item draw at constant size, regardless of zoom
-      renderSquareItem(Point(0,0), getGame()->getTeamColor(mTeam), 1, white, 'S');
+      renderSquareItem(Point(0,0), getGame()->getTeamColor(mTeam), 1, Colors::white, 'S');
    glPopMatrix();   
 }
 
@@ -302,7 +303,7 @@ static void renderAsteroidSpawn(const Point &pos)
       glScalef(scale, scale, 1);
       renderAsteroid(p, 2, .1);
 
-      glColor(white);
+      glColor(Colors::white);
       drawCircle(p, 13);
    glPopMatrix();  
 }
@@ -345,7 +346,7 @@ void FlagSpawn::renderEditor(F32 currentScale)
       glScalef(0.4/currentScale, 0.4/currentScale, 1);
       renderFlag(0, 0, getTeamColor(mTeam));
 
-      glColor(white);
+      glColor(Colors::white);
       drawCircle(-4, 0, 26);
    glPopMatrix();
 }
@@ -548,7 +549,7 @@ bool Asteroid::collide(GameObject *otherObject)
 void Asteroid::emitAsteroidExplosion(Point pos)
 {
    SoundSystem::playSoundEffect(SFXAsteroidExplode, pos, Point());
-   // FXManager::emitBurst(pos, Point(.1, .1), Color(1,1,1), Color(1,1,1), 10);
+   // FXManager::emitBurst(pos, Point(.1, .1), Colors::white, Colors::white, 10);
 }
 
 

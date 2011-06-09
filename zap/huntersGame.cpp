@@ -32,6 +32,7 @@
 #include "gameObjectRender.h"
 #include "GeomUtils.h"      // For centroid calculation for labeling
 #include "stringUtils.h"         // For itos
+#include "Colors.h"
 
 #include "../glut/glutInclude.h"
 
@@ -421,7 +422,7 @@ void HuntersGameType::renderInterfaceOverlay(bool scoreboardVisible)
 
 
    for(S32 i = 0; i < mYardSaleWaypoints.size(); i++)
-      renderObjectiveArrow(mYardSaleWaypoints[i].pos, Color(1,1,1));
+      renderObjectiveArrow(mYardSaleWaypoints[i].pos, Colors::white);
 
    for(S32 i = 0; i < mNexus.size(); i++)
       renderObjectiveArrow(dynamic_cast<GameObject *>(mNexus[i].getPointer()), mNexusIsOpen ? gNexusOpenColor : gNexusClosedColor);

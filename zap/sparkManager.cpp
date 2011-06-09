@@ -26,6 +26,8 @@
 #include "sparkManager.h"
 #include "teleporter.h"
 #include "gameObjectRender.h"
+#include "Colors.h"
+
 #include "../glut/glutInclude.h"
 
 #include <math.h>
@@ -236,7 +238,7 @@ void emitBlast(Point pos, U32 size)
    {
       Point dir = Point(cos(dr(i)), sin(dr(i)));
       // Emit a ring of bright orange sparks, as well as a whole host of yellow ones
-      emitSpark(pos + dir * 50, dir * TNL::Random::readF() * 500, Color(1, 1, 0), TNL::Random::readF() * 1000 / speed, SparkTypePoint );
+      emitSpark(pos + dir * 50, dir * TNL::Random::readF() * 500, Colors::yellow, TNL::Random::readF() * 1000 / speed, SparkTypePoint );
       emitSpark(pos + dir * 50, dir * speed, Color(1, .8, .45), (F32) (size - 50) / speed, SparkTypeLine);
    }
 }

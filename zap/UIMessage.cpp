@@ -29,6 +29,7 @@
 #include "UIMessage.h"
 #include "UIMenus.h"
 #include "glutInclude.h"
+#include "Colors.h"
 #include <stdio.h>
 
 namespace Zap
@@ -52,7 +53,7 @@ void MessageUserInterface::reset()
    mWidth = gScreenInfo.getGameCanvasWidth() - 200;
    mHeight = gScreenInfo.getGameCanvasHeight() - 200;
    mFadeTime = 0;          // 0 --> "Hit any key to continue"
-   mMessageColor = Color(1, 1, 1);
+   mMessageColor = Colors::white;
    mVertOffset = 0;
    mBox = true;
 

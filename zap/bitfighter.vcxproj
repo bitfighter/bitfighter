@@ -189,6 +189,7 @@
     <ClCompile Include="..\zap\Point.cpp" />
     <ClCompile Include="..\zap\Rect.cpp" />
     <ClCompile Include="..\zap\Color.cpp" />
+    <ClCompile Include="..\zap\Colors.cpp" />
     <ClCompile Include="quickChatHelper.cpp" />
     <ClCompile Include="..\zap\rabbitGame.cpp" />
     <ClCompile Include="..\zap\retrieveGame.cpp" />
@@ -293,6 +294,7 @@
     <ClInclude Include="..\zap\Point.h" />
     <ClInclude Include="..\zap\Rect.h" />
     <ClInclude Include="..\zap\Color.h" />
+    <ClInclude Include="..\zap\Colors.h" />
     <ClInclude Include="..\zap\polygon.h" />
     <ClInclude Include="..\zap\private.h" />
     <ClInclude Include="..\zap\projectile.h" />
