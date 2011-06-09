@@ -213,6 +213,7 @@ Vector<string> gJoystickNames;
 
 extern NameEntryUserInterface gNameEntryUserInterface;
 
+static U8 gBPP;
 
 // Since GLUT reports the current mouse pos via a series of events, and does not make
 // its position available upon request, we'll store it when it changes so we'll have
@@ -242,33 +243,28 @@ ClientInfo gClientInfo;          // Info about the client used for establishing 
 
 
 // Handler called by GLUT when window is reshaped
-void GLUT_CB_reshape(int nw, int nh)
-{
-   gZapJournal.reshape(nw, nh);
-}                                            
-
-TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, reshape, (S32 newWidth, S32 newHeight), (newWidth, newHeight))
+void reshape(SDL_Event& event)
 {
    // If we are entering fullscreen mode, then we don't want to mess around with proportions and all that.  Just save window size and get out.
    if(gIniSettings.displayMode == DISPLAY_MODE_FULL_SCREEN_STRETCHED || gIniSettings.displayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED)
-      gScreenInfo.setWindowSize(newWidth, newHeight);
+      gScreenInfo.setWindowSize(event.resize.w, event.resize.h);
 
    else
    {
-     S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
-     S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
-  
-     // Constrain window to correct proportions...
-     if((newWidth - canvasWidth) > (newHeight - canvasHeight))      // Wider than taller  (is this right? mixing virtual and physical pixels)
-        gIniSettings.winSizeFact = max((F32) newHeight / (F32)canvasHeight, MIN_SCALING_FACT);
-     else
-        gIniSettings.winSizeFact = max((F32) newWidth / (F32)canvasWidth, MIN_SCALING_FACT);
-  
-     S32 width  = (S32)floor(canvasWidth  * gIniSettings.winSizeFact + 0.5f);   // virtual * (physical/virtual) = physical, fix rounding problem
-     S32 height = (S32)floor(canvasHeight * gIniSettings.winSizeFact + 0.5f);    
-  
-     glutReshapeWindow(width, height);
-     gScreenInfo.setWindowSize(width, height);        
+      S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
+      S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
+
+      // Constrain window to correct proportions...
+      if((event.resize.w - canvasWidth) > (event.resize.h - canvasHeight))      // Wider than taller  (is this right? mixing virtual and physical pixels)
+         gIniSettings.winSizeFact = max((F32) event.resize.h / (F32)canvasHeight, MIN_SCALING_FACT);
+      else
+         gIniSettings.winSizeFact = max((F32) event.resize.w / (F32)canvasWidth, MIN_SCALING_FACT);
+
+      S32 width  = (S32)floor(canvasWidth  * gIniSettings.winSizeFact + 0.5f);   // virtual * (physical/virtual) = physical, fix rounding problem
+      S32 height = (S32)floor(canvasHeight * gIniSettings.winSizeFact + 0.5f);
+
+      SDL_SetVideoMode(width, height, gBPP, SDL_OPENGL | SDL_RESIZABLE);
+      gScreenInfo.setWindowSize(width, height);
    }
 
    glViewport(0, 0, gScreenInfo.getWindowWidth(), gScreenInfo.getWindowHeight());
@@ -278,46 +274,36 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, reshape, (S32 newWidth, S32 newHeig
 }
 
 
-// Handler called by GLUT when mouse motion is detected
-void GLUT_CB_motion(int x, int y)
+// SDL handling when mouse motion is detected
+void mouseMotion(SDL_Event& event)
 {
-   gZapJournal.motion(x, y);
-}
-
-TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, motion, (S32 x, S32 y), (x, y))
-{
-   setMousePos(x, y);
+   setMousePos(event.motion.x, event.motion.y);
 
    if(UserInterface::current)
-      UserInterface::current->onMouseDragged(x, y);
+      UserInterface::current->onMouseDragged(event.motion.x, event.motion.y);
 }
 
 // Handler called by GLUT when "passive" mouse motion is detected
-void GLUT_CB_passivemotion(int x, int y)
-{
-   gZapJournal.passivemotion(x, y);
-}
-
-TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, passivemotion, (S32 x, S32 y), (x, y))
-{
-   const Point *winMousePos = gScreenInfo.getWindowMousePos();
-
-   // Glut sometimes fires spurious events.  Let's ignore those.
-   if(x == winMousePos->x && y == winMousePos->y)
-      return;
-
-   // This firstTime rigamarole prevents onMouseMoved() from firing when game first starts up; if we're in full screen mode,
-   // GLUT calls this callback immediately.  Thanks, GLUT!
-   bool firstTime = (winMousePos->x == -1); 
-
-   setMousePos(x, y);
-
-   if(firstTime)
-      return;
-
-   if(UserInterface::current)
-      UserInterface::current->onMouseMoved(x, y);
-}
+//void passivemotion(int x, int y)
+//{
+//   const Point *winMousePos = gScreenInfo.getWindowMousePos();
+//
+//   // Glut sometimes fires spurious events.  Let's ignore those.
+//   if(x == winMousePos->x && y == winMousePos->y)
+//      return;
+//
+//   // This firstTime rigamarole prevents onMouseMoved() from firing when game first starts up; if we're in full screen mode,
+//   // GLUT calls this callback immediately.  Thanks, GLUT!
+//   bool firstTime = (winMousePos->x == -1);
+//
+//   setMousePos(x, y);
+//
+//   if(firstTime)
+//      return;
+//
+//   if(UserInterface::current)
+//      UserInterface::current->onMouseMoved(x, y);
+//}
 
 
 void keyDown(KeyCode keyCode, char ascii)    // Launch the onKeyDown event
@@ -347,20 +333,22 @@ void simulateKeyUp(KeyCode keyCode)
 }
 
 // GLUT handler for key-down events
-void GLUT_CB_keydown(unsigned char key, S32 x, S32 y)
+void keyDown(SDL_Event& event)
 {
-   gZapJournal.keydown(key);
-}
+   SDLKey& key = event.key.keysym.sym;
+   SDLMod& mod = event.key.keysym.mod;
 
+   // TODO:  add more modifier stuff now that we have SDL. yay!
 
-TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, keydown, (U8 key), (key))
-{
-   // First check for some "universal" keys.  If keydown isn't one of those, we'll pass the key onto the keyDown handler
-   // Check for ALT-ENTER --> toggles window mode/full screen
-   if(key == '\r' && (glutGetModifiers() & GLUT_ACTIVE_ALT))
+   // ALT + ENTER --> toggles window mode/full screen
+   if(key == SDLK_RETURN && (mod & (KMOD_LALT | KMOD_RALT)))
       gOptionsMenuUserInterface.toggleDisplayMode();
-   else if(key == 17)      // GLUT reports Ctrl-Q as 17
+
+   // CTRL + Q --> screenshot!
+   else if(key == SDLK_q && (mod & (KMOD_LCTRL | KMOD_RCTRL)))
       gScreenshooter.phase = 1;
+
+   // The rest
    else
    {
       KeyCode keyCode = standardSDLKeyToKeyCode(key);
@@ -371,134 +359,51 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, keydown, (U8 key), (key))
 
 #ifndef ZAP_DEDICATED
 
-// GLUT handler for key-up events
-void GLUT_CB_keyup(unsigned char key, int x, int y)
+// SDL handler for key-up events
+void keyUp(SDL_Event& event)
 {
-   gZapJournal.keyup(key);
-}
-
-TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, keyup, (U8 key), (key))
-{
-   KeyCode keyCode = standardSDLKeyToKeyCode(key);
+   KeyCode keyCode = standardSDLKeyToKeyCode(event.key.keysym.sym);
    setKeyState(keyCode, false);
    keyUp(keyCode);
 }
 
-// GLUT handler for mouse clicks
-void GLUT_CB_mouse(int button, int state, int x, int y)
+// SDL handler for mouse clicks
+void mouseClick(SDL_Event& event)
 {
-   gZapJournal.mouse(button, state, x, y);
-}
-
-TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, mouse, (S32 button, S32 state, S32 x, S32 y), (button, state, x, y))
-{
-   setMousePos(x, y);
+   setMousePos(event.button.x, event.button.y);
 
    if(!UserInterface::current) return;    // Bail if no current UI
 
-   if(button == GLUT_LEFT_BUTTON)
+   if(event.button.button == SDL_BUTTON_LEFT)
    {
-      setKeyState(MOUSE_LEFT, (state == GLUT_DOWN));
+      setKeyState(MOUSE_LEFT, (event.button.state == SDL_PRESSED));
 
-      if(state == GLUT_DOWN)
+      if(event.button.state == SDL_PRESSED)
          keyDown(MOUSE_LEFT, 0);
       else // state == GLUT_UP
          keyUp(MOUSE_LEFT);
    }
-   else if(button == GLUT_RIGHT_BUTTON)
+   else if(event.button.button == SDL_BUTTON_RIGHT)
    {
-      setKeyState(MOUSE_RIGHT, (state == GLUT_DOWN));
+      setKeyState(MOUSE_RIGHT, (event.button.state == SDL_PRESSED));
 
-      if(state == GLUT_DOWN)
+      if(event.button.state == SDL_PRESSED)
          keyDown(MOUSE_RIGHT, 0);
       else // state == GLUT_UP
          keyUp(MOUSE_RIGHT);
    }
-   else if(button == GLUT_MIDDLE_BUTTON)
+   else if(event.button.button == SDL_BUTTON_MIDDLE)
    {
-      setKeyState(MOUSE_MIDDLE, (state == GLUT_DOWN));
+      setKeyState(MOUSE_MIDDLE, (event.button.state == SDL_PRESSED));
 
-      if(state == GLUT_DOWN)
+      if(event.button.state == SDL_PRESSED)
          keyDown(MOUSE_MIDDLE, 0);
       else // state == GLUT_UP
          keyUp(MOUSE_MIDDLE);
    }
 }
 
-// GLUT callback for special key down (special keys are things like F1-F12)
-// TODO: combine with SDL callbacks
-void GLUT_CB_specialkeydown(int key, int x, int y)
-{
-   gZapJournal.specialkeydown(key);
-}
-
-TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, specialkeydown, (S32 key), (key))
-{
-   KeyCode keyCode = standardSDLKeyToKeyCode(key);
-   setKeyState(keyCode, true);
-
-   if(keyCode == keyDIAG && !gDiagnosticInterface.isActive())   // Turn on diagnostic overlay if not already on
-   {
-      UserInterface::playBoop();
-      gDiagnosticInterface.activate();
-   }
-   else
-      keyDown(keyCode, keyToAscii(key, keyCode));           // Launch onKeyDown event
-}
-
-
-// GLUT callback for special key up
-// TODO: combine with SDL callbacks
-void GLUT_CB_specialkeyup(int key, int x, int y)
-{
-   gZapJournal.specialkeyup(key);
-}
-
-TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, specialkeyup, (S32 key), (key))
-{
-   KeyCode keyCode = standardSDLKeyToKeyCode(key);
-   setKeyState(keyCode, false);
-   keyUp(keyCode);
-}
 #endif
-
-TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, modifierkeydown, (U32 key), (key))
-{
-   if(key == 0)         // shift
-   {
-      setKeyState(KEY_SHIFT, true);
-      keyDown(KEY_SHIFT, 0);
-   }
-   else if(key == 1)    // ctrl
-   {
-      setKeyState(KEY_CTRL, true);
-      keyDown(KEY_CTRL, 0);
-   }
-   else if(key == 2)    // alt
-   {
-      setKeyState(KEY_ALT, true);
-      keyDown(KEY_ALT, 0);
-   }
-}
-
-TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, modifierkeyup, (U32 key), (key))
-{
-   if(key == 0)         // shift
-   {
-      setKeyState(KEY_SHIFT, false);
-      keyUp(KEY_SHIFT);
-   }
-   else if(key == 1)    // ctrl
-   {
-      setKeyState(KEY_CTRL, false);
-      keyUp(KEY_CTRL);
-   }
-   else if(key == 2)    // alt
-   {
-      setKeyState(KEY_ALT, false);
-      keyUp(KEY_ALT);
-   }
-}
 
 
 void exitGame(S32 errcode)
@@ -664,6 +569,73 @@ void hostGame()
       joinGame(Address(), false, true);   // ...then we'll play, too!
 }
 
+// Handle the various SDL events here
+void handleInputs(SDL_Event& event)
+{
+   switch(event.type)
+   {
+   // TODO: Joystick stuff
+/*   case SDL_JOYAXISMOTION:
+      input_joyaxis(event->jaxis.axis, event->jaxis.value);
+      break;
+
+   case SDL_JOYBUTTONDOWN:
+      input_joyevent(KEY_PRESS, event->jbutton.button);
+      break;
+
+   case SDL_JOYBUTTONUP:
+      input_joyevent(KEY_RELEASE, event->jbutton.button);
+      break;
+*/
+   case SDL_KEYDOWN:
+      keyDown(event);
+      break;
+
+   case SDL_KEYUP:
+      keyUp(event);
+      break;
+
+    // Mouse stuff
+   case SDL_MOUSEBUTTONDOWN:
+      mouseClick(event);
+      break;
+
+   case SDL_MOUSEMOTION:
+      mouseMotion(event);
+      break;
+
+   // Other
+   case SDL_VIDEORESIZE:
+      reshape(event);
+      break;
+
+   default:   // Just continue for anything else
+      break;
+   }
+}
+
+
+// do the logic to draw the screen
+void display()
+{
+   glFlush();
+   UserInterface::renderCurrent();
+
+   // Render master connection state if we're not connected
+   if(gClientGame && gClientGame->getConnectionToMaster() &&
+      gClientGame->getConnectionToMaster()->getConnectionState() != NetConnection::Connected)
+   {
+      glColor3f(1, 1, 1);
+      UserInterface::drawStringf(10, 550, 15, "Master Server - %s", gConnectStatesTable[gClientGame->getConnectionToMaster()->getConnectionState()]);
+   }
+
+   // Swap the buffers. This this tells the driver to render the next frame from the contents of the
+   // back-buffer, and to set all rendering operations to occur on what was the front-buffer.
+   // Double buffering prevents nasty visual tearing from the application drawing on areas of the
+   // screen that are being updated at the same time.
+   SDL_GL_SwapBuffers();  // Use this if we convert to SDL
+}
+
 
 // This is the master idle loop that gets registered with GLUT and is called on every game tick.
 // This in turn calls the idle functions for all other objects in the game.
@@ -677,7 +649,6 @@ void idle()
          hostGame();
    }
 
-   checkModifierKeyState();      // Most keys are handled as events by GLUT...  but not Ctrl, Alt, Shift!
    static S64 lastTimer = Platform::getHighPrecisionTimerValue(); // accurate, but possible wrong speed when overclocking or underclocking CPU
    static U32 lastTimer2 = Platform::getRealMilliseconds();  // right speed
    static F64 unusedFraction = 0;
@@ -730,30 +701,19 @@ void idle()
    // Note that moving to SDL will require our journaling system to be re-engineered.
    // Note too that SDL will require linking in SDL.lib and SDLMain.lib, and including the SDL.dll in the EXE folder.
 
-   /* SDL requires an active polling loop.  We could use something like the following:
-   while(SDL_PollEvent(&e))
+   // SDL requires an active polling loop.  We could use something like the following:
+   SDL_Event event;
+
+   while(SDL_PollEvent(&event))
    {
-      switch(e.type)
-      {
-         case SDL_KEYDOWN:
-            gZapJournal.keydown((S32) e.key.keysym.sym);      // Cast to S32 to ensure journaling system can cope
-            break;
-         case SDL_KEYUP:
-            gZapJournal.keyup((S32) e.key.keysym.sym);
-            break;
-         case SDL_MOUSEMOTION:
-            break;
-         case SDL_VIDEORESIZE:
-            window_resized(e.resize.w, e.resize.h);
-            break;
-         case SDL_QUIT:       // User closed game window
-            exitGame();
-            break;
-      }
+      if (event.type == SDL_QUIT) // handle quit here
+         exitGame();
+
+      handleInputs(event);
    }
 
-   gZapJournal.display();    // Draw the screen --> GLUT handles this via callback, with SDL we need to do it in our main loop
-   END SDL event polling */
+   display();    // Draw the screen
+   // END SDL event polling
 
 
    // Sleep a bit so we don't saturate the system. For a non-dedicated server,
@@ -802,8 +762,9 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, idle, (U32 integerTime), (integerTi
          gServerGame->idle(integerTime);
    }
 
-   if(gClientGame)
-      glutPostRedisplay();
+   // XXX Is something similar needed for SDL?
+//   if(gClientGame)
+//      glutPostRedisplay();
 }
 
 void dedicatedServerLoop()
@@ -811,38 +772,6 @@ void dedicatedServerLoop()
    for(;;)        // Loop forever!
       idle();     // Idly!
 }
-
-
-#ifndef ZAP_DEDICATED
-void GLUT_CB_display(void)
-{
-   gZapJournal.display();
-
-   if(gScreenshooter.phase)      // We're in mid-shot, so be sure to visit the screenshooter!
-      gScreenshooter.saveScreenshot();
-}
-#endif
-
-TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, display, (), ())
-{
-   glFlush();
-   UserInterface::renderCurrent();
-
-   // Render master connection state if we're not connected
-   if(gClientGame && gClientGame->getConnectionToMaster() && 
-      gClientGame->getConnectionToMaster()->getConnectionState() != NetConnection::Connected)
-   {
-      glColor3f(1, 1, 1);
-      UserInterface::drawStringf(10, 550, 15, "Master Server - %s", gConnectStatesTable[gClientGame->getConnectionToMaster()->getConnectionState()]);
-   }
-
-   // Swap the buffers. This this tells the driver to render the next frame from the contents of the
-   // back-buffer, and to set all rendering operations to occur on what was the front-buffer.
-   // Double buffering prevents nasty visual tearing from the application drawing on areas of the
-   // screen that are being updated at the same time.
-//   glutSwapBuffers();
-   SDL_GL_SwapBuffers();  // Use this if we convert to SDL
- }
 
 
 string joindir(const string &path, const string &filename)
@@ -967,8 +896,9 @@ void onExit()
    // Save settings to capture window position
    saveWindowMode();
 
-   if(gIniSettings.displayMode == DISPLAY_MODE_WINDOWED)
-      saveWindowPosition(glutGet(GLUT_WINDOW_X), glutGet(GLUT_WINDOW_Y));
+   // TODO: reimplement window position saving with SDL
+//   if(gIniSettings.displayMode == DISPLAY_MODE_WINDOWED)
+//      saveWindowPosition(glutGet(GLUT_WINDOW_X), glutGet(GLUT_WINDOW_Y));
 
    saveSettingsToINI();    // Writes settings to the INI, then saves it to disk
 
@@ -1424,7 +1354,7 @@ void InitSdlVideo()
    // safe. Under Win32, ChangeDisplaySettings
    // can change the bpp.
 
-   U8 gBPP = info->vfmt->BitsPerPixel;
+   gBPP = info->vfmt->BitsPerPixel;
 
    // Now, we want to setup our requested
    // window attributes for our OpenGL window.
@@ -1463,7 +1393,7 @@ void InitSdlVideo()
       exitGame();
    }
 
-   SDL_WM_SetCaption(gWindowTitle, "Icon XXX");    // TODO: Fix icon here
+   SDL_WM_SetCaption(gWindowTitle, gWindowTitle);  // Icon name is same as window title
 }
 
 
