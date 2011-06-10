@@ -30,7 +30,8 @@
 #include "SoundSystem.h"
 #include "gameObject.h"
 #include "gameObjectRender.h"
-#include "../glut/glutInclude.h"
+
+#include "SDL/SDL_opengl.h"
 
 namespace Zap
 {

@@ -33,7 +33,8 @@
 #include "gameObjectRender.h"
 #include "config.h"
 
-#include "../glut/glutInclude.h"
+#include "SDL/SDL_opengl.h"
+
 #include <math.h>
 #include <string>
 

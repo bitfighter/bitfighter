@@ -39,6 +39,8 @@
 
 #include "UIEditorMenus.h"       // For EditorAttributeMenuUI def
 
+#include "SDL/SDL_opengl.h"
+
 using namespace boost;
 
 namespace Zap

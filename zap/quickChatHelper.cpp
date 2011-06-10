@@ -32,7 +32,8 @@
 #include "config.h"
 #include "Colors.h"
 
-#include "../glut/glutInclude.h"
+#include "SDL/SDL_opengl.h"
+
 #include <ctype.h>
 
 namespace Zap

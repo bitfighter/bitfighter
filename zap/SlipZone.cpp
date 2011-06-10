@@ -29,7 +29,6 @@
 #include "gameNetInterface.h"
 #include "UI.h"
 #include "gameObjectRender.h"
-#include "../glut/glutInclude.h"
 #include "polygon.h"
 #include "ship.h"
 #include "SlipZone.h"

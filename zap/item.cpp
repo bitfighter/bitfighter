@@ -29,7 +29,7 @@
 #include "gameType.h"
 #include "flagItem.h"
 
-#include "glutInclude.h"
+#include "SDL/SDL_opengl.h"
 
 namespace Zap
 {

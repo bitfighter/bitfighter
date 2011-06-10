@@ -19,11 +19,25 @@
 
 OPTIMIZE=-O2
 DEBUG=-g
-INCLUDES=-I../tnl -I../glut -I../openal -I../Triangle -I../recast -I../clipper -I../alure -I../libspeex -I../boost
+INCLUDES=-I../tnl -I../openal -I../Triangle -I../recast -I../clipper -I../alure -I../libspeex -I../boost
 CC=gcc $(DEBUG) $(INCLUDES) -DTNL_ENABLE_LOGGING -W $(OPTIMIZE)
 THREADLIB= -lpthread
-GLUT=-lGL -lGLU -lglut
 INPUT=linuxInput.o 
+EXEFILE=bitfighter
+
+# sound linker flags
+SFX_LFLAGS=-lopenal -lspeex -lvorbis
+
+# graphics linker flags
+GFX_LFLAGS=-lSDL -lGL -lX11
+
+# Other needed linker flags
+LFLAGS=-lstdc++ -lm -ldl
+
+# Other compiler flags
+CFLAGS=
+DFLAGS=
+WFLAGS=
 
 OBJECTS_ZAP=\
    CTFGame.o\
@@ -122,6 +136,7 @@ OBJECTS_ZAP=\
    md5wrapper.o\
    md5.o\
    BotNavMeshZone.o\
+   OpenglUtils.o\
    Colors.o\
    ../master/masterInterface.o\
    ../master/database.o\
@@ -131,13 +146,6 @@ OBJECTS_ZAP=\
    ../recast/RecastMesh.o\
    ../clipper/clipper.o
 
-
-CFLAGS=
-DFLAGS=
-EXEFILE=bitfighter
-OPENAL=-lopenal -lspeex -lvorbis
-WFLAGS=
-LFLAGS=-lstdc++ -lm -ldl -lX11
 
 .c.o:
 	$(CC) $(DFLAGS) $(WFLAGS) -c $(CFLAGS) -o $@ $<
@@ -159,15 +167,14 @@ release: bitfighter
 
 dedicated: DEBUG=
 dedicated: CFLAGS=-DZAP_DEDICATED 
-dedicated: LFLAGS=-lstdc++ -lm -ldl
-dedicated: GLUT=
-dedicated: OPENAL=
+dedicated: GFX_LFLAGS=
+dedicated: SFX_LFLAGS=
 dedicated: EXEFILE=bitfighterd
 dedicated: bitfighter
 
 
 bitfighter: $(OBJECTS_ZAP) 
-	$(CC) -o ../exe/$(EXEFILE) $(OBJECTS_ZAP) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a ../lua/lua-vec/src/liblua.a ../alure/libalure.a $(OPENAL) $(GLUT) $(THREADLIB) $(LFLAGS)
+	$(CC) -o ../exe/$(EXEFILE) $(OBJECTS_ZAP) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a ../lua/lua-vec/src/liblua.a ../alure/libalure.a $(SFX_LFLAGS) $(GFX_LFLAGS) $(THREADLIB) $(LFLAGS)
 
 
 clean: 

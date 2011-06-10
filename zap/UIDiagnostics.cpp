@@ -34,7 +34,8 @@
 
 #include "tnl.h"
 
-#include "../glut/glutInclude.h"
+#include "SDL/SDL_opengl.h"
+
 #include <stdio.h>
 
 namespace Zap

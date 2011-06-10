@@ -28,8 +28,10 @@
 
 #include "UIMessage.h"
 #include "UIMenus.h"
-#include "glutInclude.h"
 #include "Colors.h"
+
+#include "SDL/SDL_opengl.h"
+
 #include <stdio.h>
 
 namespace Zap

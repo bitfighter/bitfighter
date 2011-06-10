@@ -30,7 +30,6 @@
 #include "flagItem.h"
 #include "Colors.h"
 
-#include "../glut/glutInclude.h"
 #include <stdio.h>
 
 namespace Zap

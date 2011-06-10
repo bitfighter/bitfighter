@@ -25,7 +25,6 @@
 
 #include "engineeredObjects.h"
 #include "ship.h"
-#include "../glut/glutInclude.h"
 #include "projectile.h"
 #include "gameType.h"
 #include "gameWeapons.h"

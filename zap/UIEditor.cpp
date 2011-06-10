@@ -55,9 +55,11 @@
 #include "textItem.h"            // For MAX_TEXTITEM_LEN and MAX_TEXT_SIZE
 #include "luaLevelGenerator.h"
 #include "stringUtils.h"
-#include "../glut/glutInclude.h"
 
 #include "oglconsole.h"          // Our console object
+
+#include "SDL/SDL.h"
+#include "SDL/SDL_opengl.h"
 
 #include <ctype.h>
 #include <exception>
@@ -2272,7 +2274,8 @@ void EditorUserInterface::onMouseMoved()
 
    findSnapVertex();
 
-   glutSetCursor((showMoveCursor && !mShowingReferenceShip) ? GLUT_CURSOR_SPRAY : GLUT_CURSOR_RIGHT_ARROW);
+   // TODO:  was GLUT_CURSOR_SPRAY : GLUT_CURSOR_RIGHT_ARROW
+   SDL_ShowCursor((showMoveCursor && !mShowingReferenceShip) ? SDL_ENABLE : SDL_ENABLE);
 }
 
 
@@ -3321,7 +3324,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          mShowMode = (ShowMode) 0;     // First mode
 
       if(mShowMode == ShowWallsOnly && !mDraggingObjects)
-         glutSetCursor(GLUT_CURSOR_RIGHT_ARROW);
+         SDL_ShowCursor(SDL_ENABLE);  // TODO:  was GLUT_CURSOR_RIGHT_ARROW
 
       populateDock();   // Different modes have different items
 
@@ -3846,7 +3849,7 @@ void EditorUserInterface::testLevelStart()
    string tmpFileName = mEditFileName;
    mEditFileName = "editor.tmp";
 
-   glutSetCursor(GLUT_CURSOR_NONE);    // Turn off cursor
+   SDL_ShowCursor(SDL_DISABLE);    // Turn off cursor
    bool nts = mNeedToSave;             // Save these parameters because they are normally reset when a level is saved.
    S32 auul = mAllUndoneUndoLevel;     // Since we're only saving a temp copy, we really shouldn't reset them...
 
@@ -3963,7 +3966,7 @@ void EditorMenuUserInterface::setupMenus()
 
 void EditorMenuUserInterface::onEscape()
 {
-   glutSetCursor(GLUT_CURSOR_NONE);
+   SDL_ShowCursor(SDL_DISABLE);
    reactivatePrevUI();
 }
 

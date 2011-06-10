@@ -24,7 +24,6 @@
 //------------------------------------------------------------------------------------
 
 #include "teleporter.h"
-#include "../glut/glutInclude.h"
 
 using namespace TNL;
 #include "ship.h"
@@ -33,6 +32,8 @@ using namespace TNL;
 #include "SoundSystem.h"
 #include "gameObjectRender.h"
 #include "Colors.h"
+
+#include "SDL/SDL_opengl.h"
 
 #include <math.h>
 

@@ -28,6 +28,8 @@
 #include "UIMenuItems.h"
 #include "UI.h"
 
+#include "SDL/SDL_opengl.h"
+
 namespace Zap
 {
 

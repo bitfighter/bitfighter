@@ -28,8 +28,6 @@
 #include "UIErrorMessage.h"
 #include "UIMenus.h"
 
-#include "../glut/glutInclude.h"
-
 #include <stdio.h>
 #include <math.h>
 

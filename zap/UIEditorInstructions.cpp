@@ -36,10 +36,9 @@
 #include "UIDiagnostics.h"
 #include "UIEditor.h"
 #include "gameObjectRender.h"
-
 #include "GeomUtils.h"      // For polygon triangulation
 
-#include "../glut/glutInclude.h"
+#include "SDL/SDL_opengl.h"
 
 #include <math.h>
 

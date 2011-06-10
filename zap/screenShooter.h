@@ -29,6 +29,8 @@
 #include "tnl.h"
 #include <sys/stat.h>   // For checking screenshot folder
 
+#include "SDL/SDL_opengl.h"
+
 using namespace TNL;
 
 namespace Zap
@@ -43,14 +45,6 @@ namespace Zap
 /*
  * Include necessary headers.
  */
-
-#ifndef ZAP_DEDICATED
-#   ifdef __APPLE__
-#      include <GLUT/glut.h>
-#   else
-#      include <../glut/glut.h>         // Needed for Windows and Linux
-#   endif
-#endif
 
 #ifdef WIN32
 #   include <windows.h>

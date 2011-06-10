@@ -31,7 +31,7 @@
 #include "gameConnection.h"
 #include "UIRebindKeys.h"
 
-#include "glutInclude.h"
+#include "SDL/SDL_opengl.h"
 
 namespace Zap
 {

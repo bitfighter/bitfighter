@@ -29,6 +29,8 @@
 #include "Color.h"      // For Color def
 #include "Colors.h"
 
+#include "SDL/SDL_opengl.h"
+
 namespace Zap
 {
 
