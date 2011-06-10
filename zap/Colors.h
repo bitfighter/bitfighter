@@ -12,18 +12,18 @@
 
 namespace Zap {
 
-class Colors {
-public:
-   static const Color red;
-   static const Color green;
-   static const Color blue;
-   static const Color yellow;
-   static const Color cyan;
-   static const Color magenta;
-   static const Color black;
-   static const Color white;
-   static const Color gray50;
-   static const Color orange;
+namespace Colors {
+//public:
+   const Color red(1,0,0);
+   const Color green(0,1,0);
+   const Color blue(0,0,1);
+   const Color yellow(1,1,0);
+   const Color cyan(0,1,1);
+   const Color magenta(1,0,1);
+   const Color black(0,0,0);
+   const Color white(1,1,1);
+   const Color gray50(0.5,0.5,0.5);
+   const Color orange(1, .67f ,0);
 };
 
 }
