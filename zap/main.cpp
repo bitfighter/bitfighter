@@ -46,8 +46,15 @@ XXX need to document timers, new luavec stuff XXX
 /shutdown enhancements: on screen timer after msg dismissed, instant dismissal of local notice, notice in join menu, shutdown after level, auto shutdown when quitting and players connected
 
 */
+/* Fixes after 015a
+<h2>Bug Fixes</h2>
+<ul>
+<li>Fix team bitmatch suicide score. 
+</ul>
+*/
 
-/* Fixes after 015
+
+/* Fixes after 015 (not 016)
 <h2>New Features and Enhancements</h2>
 <ul>
 <li>Players can now see cloaked teammates.
