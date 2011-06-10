@@ -65,27 +65,6 @@ void EditorObject::addToDock(Game *game, const Point &point)
 }
 
 
-void EditorObject::processEndPoints()
-{
-   if(getObjectTypeMask() & BarrierType)
-      Barrier::constructBarrierEndPoints(getOutline(), getWidth(), extendedEndPoints);
-
-   else if(getObjectTypeMask() & PolyWallType)
-   {
-      extendedEndPoints.clear();
-      for(S32 i = 1; i < getVertCount(); i++)
-      {
-         extendedEndPoints.push_back(getVert(i-1));
-         extendedEndPoints.push_back(getVert(i));
-      }
-
-      // Close the loop
-      extendedEndPoints.push_back(getVert(getVertCount()));
-      extendedEndPoints.push_back(getVert(0));
-   }
-}
-
-
 // TODO: Merge with copy in editor, if it's really needed
 static F32 getRenderingAlpha(bool isScriptItem)
 {
@@ -128,9 +107,9 @@ static void renderVertex(VertexRenderStyles style, const Point &v, S32 number, F
    }
 
    if(style == HighlightedVertex)
-      glColor(HIGHLIGHT_COLOR, alpha);
+      glColor(*HIGHLIGHT_COLOR, alpha);
    else if(style == SelectedVertex)
-      glColor(SELECT_COLOR, alpha);
+      glColor(*SELECT_COLOR, alpha);
    else if(style == SnappingVertex)
       glColor(Colors::magenta, alpha);
    else
@@ -160,7 +139,6 @@ static void renderVertex(VertexRenderStyles style, const Point &v, S32 number, F
 
 
 static const S32 DOCK_LABEL_SIZE = 9;      // Size to label items on the dock
-static const Color DOCK_LABEL_COLOR = Colors::white;
 
 
 static void labelVertex(Point pos, S32 radius, const char *itemLabelTop, const char *itemLabelBottom)
@@ -212,7 +190,7 @@ void EditorObject::renderAndLabelHighlightedVertices(F32 currentScale)
    for(S32 i = 0; i < getVertCount(); i++)
       if(vertSelected(i) || isVertexLitUp(i) || ((mSelected || mLitUp)  && getVertCount() == 1))
       {
-         glColor((vertSelected(i) || mSelected) ? SELECT_COLOR: HIGHLIGHT_COLOR);
+         glColor((vertSelected(i) || mSelected) ? SELECT_COLOR : HIGHLIGHT_COLOR);
 
          Point pos = gEditorUserInterface.convertLevelToCanvasCoord(getVert(i));
 
@@ -226,7 +204,7 @@ void EditorObject::renderDockItemLabel(const Point &pos, const char *label, F32 
 {
    F32 xpos = pos.x;
    F32 ypos = pos.y - DOCK_LABEL_SIZE / 2 + yOffset;
-   glColor(DOCK_LABEL_COLOR);
+   glColor(Colors::white);
    UserInterface::drawStringc(xpos, ypos, DOCK_LABEL_SIZE, label);
 }
 
@@ -272,7 +250,7 @@ void EditorObject::render(bool isScriptItem, bool showingReferenceShip, ShowMode
 
    // Override drawColor for this special case
    if(anyVertsSelected())
-      drawColor = SELECT_COLOR;
+      drawColor = *SELECT_COLOR;
      
    if(mDockItem)
    {
@@ -704,7 +682,7 @@ void EditorObject::renderPolylineCenterline(F32 alpha)
    if(mSelected)
       glColor(SELECT_COLOR, alpha);
    else if(mLitUp && !anyVertsSelected())
-      glColor(HIGHLIGHT_COLOR, alpha);
+      glColor(*HIGHLIGHT_COLOR, alpha);
    else
       glColor(getTeamColor(mTeam), alpha);
 
@@ -731,9 +709,9 @@ void EditorObject::onGeomChanging()
 Color EditorObject::getDrawColor()
 {
    if(mSelected)
-      return SELECT_COLOR;       // yellow
+      return *SELECT_COLOR;       // yellow
    else if(mLitUp)
-      return HIGHLIGHT_COLOR;    // white
+      return *HIGHLIGHT_COLOR;    // white
    else  // Normal
       return Color(.75, .75, .75);
 }

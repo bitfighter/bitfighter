@@ -71,14 +71,14 @@ void EditorPolygon::highlightDockItem()
 
 
 // TODO: merge with versions in editor
-const Color HIGHLIGHT_COLOR = Colors::white;
-const Color SELECT_COLOR = Colors::yellow;
+const Color *HIGHLIGHT_COLOR = &Colors::white;
+const Color *SELECT_COLOR = &Colors::yellow;
 
 
 void EditorPolygon::renderPolyHighlight()
 {
    glLineWidth(gLineWidth3);
-   glColor(mSelected ? SELECT_COLOR : HIGHLIGHT_COLOR);
+   glColor(mSelected ? *SELECT_COLOR : *HIGHLIGHT_COLOR);
    renderPolygonOutline(getOutline());
    glLineWidth(gDefaultLineWidth);
 }

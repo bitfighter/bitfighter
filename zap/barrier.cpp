@@ -430,6 +430,12 @@ void WallItem::onGeomChanged()
 }
 
 
+void WallItem::processEndPoints()
+{
+   Barrier::constructBarrierEndPoints(getOutline(), getWidth(), extendedEndPoints);
+}
+
+
 string WallItem::toString()
 {
    return "BarrierMaker " + itos(S32(F32(mWidth))) + " " + geomToString(getGame()->getGridSize());
@@ -450,6 +456,21 @@ PolyWall::PolyWall()
 {
    mObjectTypeMask = PolyWallType;
    mObjectTypeNumber = PolyWallTypeNumber;
+}
+
+
+void PolyWall::processEndPoints()
+{
+   extendedEndPoints.clear();
+   for(S32 i = 1; i < getVertCount(); i++)
+   {
+      extendedEndPoints.push_back(getVert(i-1));
+      extendedEndPoints.push_back(getVert(i));
+   }
+
+   // Close the loop
+   extendedEndPoints.push_back(getVert(getVertCount()));
+   extendedEndPoints.push_back(getVert(0));
 }
 
 

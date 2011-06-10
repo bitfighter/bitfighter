@@ -159,7 +159,6 @@ public:
    void initializePolyGeom();     // Once we have our points, do some geom preprocessing ==> only for polygons
 
    //// For walls only
-   void processEndPoints();      // Wall only
    void decreaseWidth(S32 amt);  // Wall only
    void increaseWidth(S32 amt);  // Wall only
    void setWidth(S32 width);

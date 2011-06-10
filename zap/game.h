@@ -494,6 +494,7 @@ public:
    void setWallSegmentManager(WallSegmentManager *wallSegmentManager) { mWallSegmentManager = wallSegmentManager; }
 
    GridDatabase *getGridDatabase() { return &mEditorDatabase; }
+   void setGridDatabase(EditorObjectDatabase database) { mEditorDatabase = database; }
 };
 
 

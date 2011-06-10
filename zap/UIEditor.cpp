@@ -50,6 +50,7 @@
 
 #include "gameLoader.h"          // For LevelLoadException def
 
+#include "Colors.h"
 #include "GeomUtils.h"
 #include "textItem.h"            // For MAX_TEXTITEM_LEN and MAX_TEXT_SIZE
 #include "luaLevelGenerator.h"
@@ -291,9 +292,9 @@ void renderVertex(VertexRenderStyles style, const Point &v, S32 number, F32 alph
    }
       
    if(style == HighlightedVertex)
-      glColor(HIGHLIGHT_COLOR, alpha);
+      glColor(*HIGHLIGHT_COLOR, alpha);
    else if(style == SelectedVertex)
-      glColor(SELECT_COLOR, alpha);
+      glColor(*SELECT_COLOR, alpha);
    else if(style == SnappingVertex)
       glColor(Colors::magenta, alpha);
    else
@@ -450,7 +451,6 @@ void EditorUserInterface::saveUndoState()
 
    mLastUndoIndex++;
    mLastRedoIndex++; 
-
 
    if(mLastUndoIndex % UNDO_STATES == mFirstUndoIndex % UNDO_STATES)           // Undo buffer now full...
    {
@@ -646,7 +646,7 @@ void EditorUserInterface::loadLevel()
    //for(S32 i = 0; i < objList->size(); i++)
    //   objList->get(i)->processEndPoints();
 
-   //mWallSegmentManager.recomputeAllWallGeometry();
+   mWallSegmentManager.recomputeAllWallGeometry();
    
    // Snap all engineered items to the closest wall, if one is found
    resnapAllEngineeredItems();
@@ -734,15 +734,19 @@ void EditorUserInterface::runScript(const string &scriptName, const Vector<strin
    // Bulk-process new items, walls first
 
    fillVector.clear();
-   mLoadTarget->findObjects(WallType, fillVector);
+   mLoadTarget->findObjects(BarrierType | PolyWallType, fillVector);
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
       EditorObject *obj = dynamic_cast<EditorObject *>(fillVector[i]);
+
       if(obj->getVertCount() < 2)      // Invalid item; delete
          mLoadTarget->removeFromDatabase(obj, obj->getExtent());
 
-      obj->processEndPoints();
+      if(obj->getObjectTypeMask() & BarrierType)
+         dynamic_cast<WallItem *>(obj)->processEndPoints();
+      else
+         dynamic_cast<PolyWall *>(obj)->processEndPoints();
    }
 
    // When I came through here in early june, there was nothing else here... shouldn't there be some handling of non-wall objects?  -CE
@@ -1611,7 +1615,7 @@ void EditorUserInterface::render()
       glLineWidth(gLineWidth3);
 
       if(mCreatingPoly) // Wall
-         glColor(SELECT_COLOR);
+         glColor(*SELECT_COLOR);
       else              // LineItem
          glColor(getTeamColor(mNewItem->getTeam()));
 

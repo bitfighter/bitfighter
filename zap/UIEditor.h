@@ -99,8 +99,8 @@ enum VertexRenderStyles
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-const Color HIGHLIGHT_COLOR = Colors::white;
-const Color SELECT_COLOR = Colors::yellow;
+static const Color *HIGHLIGHT_COLOR = &Colors::white;
+static const Color *SELECT_COLOR = &Colors::yellow;
 
 ////////////////////////////////////////
 ////////////////////////////////////////

@@ -289,7 +289,7 @@ bool EngineeredObject::processArguments(S32 argc, const char **argv, Game *game)
    
    Point pos;
    pos.read(argv + 1);
-   pos *= getGame()->getGridSize();
+   pos *= game->getGridSize();
 
    if(argc >= 4)
    {

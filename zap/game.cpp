@@ -180,18 +180,13 @@ void Game::processLevelLoadLine(U32 argc, U32 id, const char **argv)
    // Parse GameType line... All game types are of form XXXXGameType
    else if(strlenCmd >= 8 && !strcmp(argv[0] + strlenCmd - 8, "GameType"))
    {
-      //if(mGameType)
-      //   throw LevelLoadException("Duplicate GameType parameter");
-
       // validateGameType() will return a valid GameType string -- either what's passed in, or the default if something bogus was specified
       TNL::Object *theObject = TNL::Object::create(GameType::validateGameType(argv[0]));      
       GameType *gt = dynamic_cast<GameType *>(theObject);  // Force our new object to be a GameObject
 
       bool validArgs = gt->processArguments(argc - 1, argv + 1, NULL);
 
-      //setGameType(gt);      ==> gets run in addToGame()
       gt->addToGame(this);    
-      
 
       if(!validArgs || strcmp(gt->getClassName(), argv[0]))
          throw LevelLoadException("Improperly formed GameType parameter");
@@ -2274,28 +2269,29 @@ bool EditorGame::processPseudoItem(S32 argc, const char **argv)
    {
       if(argc >= 2)
       {
-         EditorObject *newObject = new WallItem();  
+         WallItem *wallObject = new WallItem();  
          
-         newObject->setWidth(F32(atof(argv[1])));      // setWidth handles bounds checking
+         wallObject->setWidth(F32(atof(argv[1])));      // setWidth handles bounds checking
 
-         newObject->setDockItem(false);     // TODO: Needed?
-         newObject->initializeEditor();     // Only runs unselectVerts
+         wallObject->setDockItem(false);     // TODO: Needed?
+         wallObject->initializeEditor();     // Only runs unselectVerts
 
          Point p;
          for(S32 i = 2; i < argc; i+=2)
          {
             p.set(atof(argv[i]), atof(argv[i+1]));
             p *= getGridSize();
-            newObject->addVert(p);
+            wallObject->addVert(p);
          }
          
-         if(newObject->getVertCount() >= 2)
+         if(wallObject->getVertCount() >= 2)
          {
-            newObject->addToGame(this);
-            newObject->onGeomChanged(); 
+            wallObject->addToGame(this);
+            wallObject->processEndPoints();
+            //wallObject->onGeomChanged(); 
          }
          else
-            delete newObject;
+            delete wallObject;
       }
    }
    // TODO: Integrate code above with code above!!  EASY!!

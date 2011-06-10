@@ -114,6 +114,7 @@ class WallItem : public LineItem
 public:
    WallItem();    // Constructor
    virtual void onGeomChanged();
+   void processEndPoints();      
 
    // Some properties about the item that will be needed in the editor
    const char *getEditorHelpString() { return "Walls define the general form of your level."; }  
@@ -123,6 +124,7 @@ public:
    bool hasTeam() { return false; }
    bool canBeHostile() { return false; }
    bool canBeNeutral() { return false; }
+
 
    string toString();
 };
@@ -140,6 +142,8 @@ private:
 public:
    PolyWall();      // Constructor
    bool processArguments(S32 argc, const char **argv, Game *game);
+
+   void processEndPoints();
 
    void render();
    void renderFill();

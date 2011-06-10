@@ -243,11 +243,11 @@ bool Spawn::processArguments(S32 argc, const char **argv, Game *game)
    if(argc >= 4)
       return false;
 
-   S32 teamIndex = atoi(argv[1]);
+   S32 teamIndex = atoi(argv[0]);
    setTeam(teamIndex);
 
    Point pos;
-   pos.read(argv + 2);
+   pos.read(argv + 1);
    pos *= game->getGridSize();
 
    setVert(pos, 0);
