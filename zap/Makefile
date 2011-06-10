@@ -20,9 +20,7 @@
 OPTIMIZE=-O2
 DEBUG=-g
 INCLUDES=-I../tnl -I../openal -I../Triangle -I../recast -I../clipper -I../alure -I../libspeex -I../boost
-# On linux you MUST use the system SDL headers, not the ones included with bitfighter
-SYSTEM_INCLUDES=-I/usr/include/SDL
-CC=gcc $(DEBUG) $(SYSTEM_INCLUDES) $(INCLUDES) -DTNL_ENABLE_LOGGING -W $(OPTIMIZE)
+CC=gcc $(DEBUG) $(INCLUDES) -DTNL_ENABLE_LOGGING -W $(OPTIMIZE)
 THREADLIB= -lpthread
 INPUT=linuxInput.o 
 EXEFILE=bitfighter
