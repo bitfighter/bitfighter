@@ -29,6 +29,9 @@
 #include "UIMessage.h"
 #include "UIMenus.h"
 #include "Colors.h"
+
+#include "SDL/SDL_opengl.h"
+
 #include <stdio.h>
 
 namespace Zap
