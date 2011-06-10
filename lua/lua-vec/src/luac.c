@@ -183,6 +183,9 @@ static int pmain(lua_State* L)
  return 0;
 }
 
+
+
+/* // this is only because of using a different main.
 int main(int argc, char* argv[])
 {
  lua_State* L;
@@ -198,3 +201,4 @@ int main(int argc, char* argv[])
  lua_close(L);
  return EXIT_SUCCESS;
 }
+*/
