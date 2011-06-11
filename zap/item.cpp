@@ -315,6 +315,11 @@ void Item::idle(GameObject::IdleCallPath path)
                prevMoveVelocity = mMoveState[ActualState].vel;
             }
          }
+         else if(prevMoveVelocity.lenSquared() != 0)
+         {
+            setMaskBits(PositionMask);  // update to client that this item is no longer moving.
+            prevMoveVelocity.set(0,0);
+         }
 
          mMoveState[RenderState] = mMoveState[ActualState];
 

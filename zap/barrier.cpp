@@ -108,7 +108,7 @@ Barrier::Barrier(const Vector<Point> &points, F32 width, bool solid)
 
    if(points.size() < 2)      // Invalid barrier!
    {
-      delete this;
+      //delete this;    // Sam: cannot "delete this" in constructor, as "new" still returns non-NULL address
       logprintf(LogConsumer::LogWarning, "Invalid barrier detected (has only one point).  Disregarding...");
       return;
    }

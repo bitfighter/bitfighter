@@ -256,6 +256,9 @@ void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vecto
    for(S32 i = 0; i < disabledList.size(); i++)   // enable any disabled collision
       if(disabledList[i].isValid())
          disabledList[i]->enableCollision();
+
+   if(tryCount == 8)
+      mMoveState[stateIndex].vel.set(0,0); // prevents some overload by not trying to move anymore
 }
 
 
@@ -273,7 +276,9 @@ GameObject *MoveObject::findFirstCollision(U32 stateIndex, F32 &collisionTime, P
    queryRect.expand(Point(mRadius, mRadius));
 
    fillVector.clear();
-   findObjects(AllObjectTypes, fillVector, queryRect);
+
+   // Free CPU for asteroids
+   findObjects(dynamic_cast<Asteroid *>(this) ? (BarrierType | TurretType | ForceFieldProjectorType | ForceFieldType | ShipType | RobotType | TestItemType | ResourceItemType) : AllObjectTypes, fillVector, queryRect);
 
    F32 collisionFraction;
 
