@@ -122,6 +122,7 @@ private:
    S32 mWindowWidth, mWindowHeight;             // Window dimensions in physical pixels
    F32 mScalingRatio;                           // Ratio of physical pixels to virtual pixels
    bool mIsLandscape;                           // Is our screen landscape or portrait?
+   bool mHardwareSurface;                       // Is our screen going to use a hardware surface?
 
 public:
    ScreenInfo()      // Constructor
@@ -131,7 +132,7 @@ public:
       mWindowMousePos.set(-1,-1);   // -1 is used to indicate initial run
    }     
 
-   // Can't initialize until glut has been set up
+   // Can't initialize until SDL has been set up
    void init(S32 physicalScreenWidth, S32 physicalScreenHeight)
    {
       mPhysicalScreenWidth = physicalScreenWidth;
@@ -142,6 +143,8 @@ public:
 
       mIsLandscape = physicalScreenRatio >= gameCanvasRatio;
       mScalingRatio = mIsLandscape ? (F32)mPhysicalScreenHeight / (F32)mGameCanvasHeight : (F32)mPhysicalScreenWidth / (F32)mGameCanvasWidth;
+
+      mHardwareSurface = false;
    }
 
    void setWindowSize(S32 width, S32 height) { mWindowWidth = width; mWindowHeight = height; }
@@ -175,6 +178,8 @@ public:
    S32 getVertDrawMargin()  { return mIsLandscape ? 0 : S32(getVertPhysicalMargin() / mScalingRatio); }
 
    bool isLandscape() { return mIsLandscape; }     // Whether physical screen is landscape, or at least more landscape than our game window
+   bool isHardwareSurface() { return mHardwareSurface; }  // Whether we can use the opengl hardware surface
+   bool setHardwareSurface(bool isHardwareSurface) { mHardwareSurface = isHardwareSurface; }  // Whether we can use the opengl hardware surface
 
    // Convert physical window screen coordinates into virtual, in-game coordinate
    Point convertWindowToCanvasCoord(const Point &p, DisplayMode mode) { return convertWindowToCanvasCoord((S32)p.x, (S32)p.y, mode); }
