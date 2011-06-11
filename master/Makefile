@@ -18,7 +18,7 @@ EXTRA_FLAGS=
 CC=gcc -g -I../tnl -I../libtomcrypt -W -O2
 
 OBJECTS_MASTER=\
-   main.o\
+   master.o\
    masterInterface.o\
    config.o\
    ../zap/gameStats.o\
