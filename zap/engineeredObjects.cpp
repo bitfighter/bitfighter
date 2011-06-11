@@ -299,7 +299,7 @@ bool EngineeredObject::processArguments(S32 argc, const char **argv, Game *game)
    // Find the mount point:
    Point normal, anchor;
 
-   if(!findAnchorPointAndNormal(getGridDatabase(), pos, MAX_SNAP_DISTANCE, true, anchor, normal))
+   if(!findAnchorPointAndNormal(game->getGridDatabase(), pos, MAX_SNAP_DISTANCE, true, anchor, normal))
       return false;      // Found no mount point
 
    mAnchorPoint.set(anchor + normal);
@@ -307,7 +307,12 @@ bool EngineeredObject::processArguments(S32 argc, const char **argv, Game *game)
    computeExtent();
 
    if(mHealth != 0)
+   {
+      Game *prevGame = mGame;
+      mGame = game;  // needed for onEnabled
       onEnabled();
+      mGame = prevGame;  // need to restore, or we get Assert error trying to Add To Game
+   }
 
    return true;
 }

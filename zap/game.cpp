@@ -248,7 +248,7 @@ void Game::processLevelLoadLine(U32 argc, U32 id, const char **argv)
       {
          computeWorldObjectExtents();    // Make sure this is current if we process a robot that needs this for intro code
 
-
+         //object->setGame(this);  // some objects  might need this while in processArguments
          bool validArgs = object->processArguments(argc - 1, argv + 1, this);
 
          if(validArgs)
@@ -1409,6 +1409,7 @@ void ServerGame::idle(U32 timeDelta)
    fillVector.clear();
    mDatabase.findObjects(fillVector);
 
+
    // Visit each game object, handling moves and running its idle method
    for(S32 i = 0; i < fillVector.size(); i++)
    {
@@ -1425,6 +1426,13 @@ void ServerGame::idle(U32 timeDelta)
       // Give the object its move, then have it idle
       obj->setCurrentMove(thisMove);
       obj->idle(GameObject::ServerIdleMainLoop);
+   }
+   if(mGameType)
+   {
+      Move m = mGameType->getCurrentMove();
+      m.time = timeDelta;
+      mGameType->setCurrentMove(m);
+      mGameType->idle(GameObject::ServerIdleMainLoop);
    }
 
    processDeleteList(timeDelta);
@@ -1642,11 +1650,18 @@ void ClientGame::idle(U32 timeDelta)
          }
          else
          {
-            Move m =obj->getCurrentMove();
+            Move m = obj->getCurrentMove();
             m.time = timeDelta;
             obj->setCurrentMove(m);
             obj->idle(GameObject::ClientIdleMainRemote);    // on client, object is not our control object
          }
+      }
+      if(mGameType)
+      {
+         Move m = mGameType->getCurrentMove();
+         m.time = timeDelta;
+         mGameType->setCurrentMove(m);
+         mGameType->idle(GameObject::ClientIdleMainRemote);
       }
 
       if(controlObject)
