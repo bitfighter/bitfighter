@@ -245,17 +245,14 @@ void UserInterface::renderCurrent()    // static
    // Clear screen -- force clear of "black bars" area to avoid flickering on some video cards
    bool scissorMode = glIsEnabled(GL_SCISSOR_TEST);
 
-   if(scissorMode) 
+   if(scissorMode)
       glDisable(GL_SCISSOR_TEST);
 
-   glClearColor(0, 0, 0, 1.0);
    glClear(GL_COLOR_BUFFER_BIT);
 
-   if(scissorMode) 
+   if(scissorMode)
       glEnable(GL_SCISSOR_TEST);
    
-   glViewport(0, 0, gScreenInfo.getWindowWidth(), gScreenInfo.getWindowHeight());
-
    if(gClientGame2)
    {
       gIniSettings.inputMode = Joystick;

@@ -62,7 +62,7 @@ S32 QSORT_CALLBACK menuItemValueSort(MenuItem **a, MenuItem **b)
 }
 
 
-extern void actualizeScreenMode(bool, bool = false);
+extern void actualizeScreenMode(bool);
 extern void exitGame();
 
 ////////////////////////////////////

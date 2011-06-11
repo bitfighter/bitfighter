@@ -261,13 +261,7 @@ Vector<string> gJoystickNames;
 
 extern NameEntryUserInterface gNameEntryUserInterface;
 
-typedef struct {
-   U8 bpp;          // bits per pixel
-   S32 dWidth;      // desktop width
-   S32 dHeight;     // desktop height
-} VideoInfo;
-
-static VideoInfo gVideoInfo;
+ScreenInfo gScreenInfo;
 
 // Since GLUT reports the current mouse pos via a series of events, and does not make
 // its position available upon request, we'll store it when it changes so we'll have
@@ -317,7 +311,7 @@ void reshape(SDL_Event& event)
       S32 width  = (S32)floor(canvasWidth  * gIniSettings.winSizeFact + 0.5f);   // virtual * (physical/virtual) = physical, fix rounding problem
       S32 height = (S32)floor(canvasHeight * gIniSettings.winSizeFact + 0.5f);
 
-      SDL_SetVideoMode(width, height, gVideoInfo.bpp, SDL_OPENGL | SDL_RESIZABLE);
+      SDL_SetVideoMode(width, height, 0, SDL_OPENGL | SDL_RESIZABLE);
       gScreenInfo.setWindowSize(width, height);
    }
 
@@ -666,9 +660,11 @@ void handleInputs(SDL_Event& event)
 void display()
 {
    glFlush();
+
    UserInterface::renderCurrent();
 
    // Render master connection state if we're not connected
+   // TODO: should this go elsewhere?
    if(gClientGame && gClientGame->getConnectionToMaster() &&
          gClientGame->getConnectionToMaster()->getConnectionState() != NetConnection::Connected)
    {
@@ -788,14 +784,12 @@ void idle()
 
       handleInputs(event);
    }
-
-   display();    // Draw the screen
    // END SDL event polling
 
+   display();    // Draw the screen
 
    // Sleep a bit so we don't saturate the system. For a non-dedicated server,
    // sleep(0) helps reduce the impact of OpenGL on windows.
-
 
    // If there are no players, set sleepTime to 40 to further reduce impact on the server.
    // We'll only go into this longer sleep on dedicated servers when there are no players.
@@ -1396,23 +1390,8 @@ void InitSdlVideo()
       exitGame();
    }
 
-   // We get the bpp we will request from
-   // the display. On X11, VidMode can't change
-   // resolution, so this is probably being overly
-   // safe. Under Win32, ChangeDisplaySettings
-   // can change the bpp.
-
-   // TODO: do we really need bpp?  see SDL_SetVideoMode() doc in SDL_video.h
-   gVideoInfo.bpp = info->vfmt->BitsPerPixel;
-
-   // Find the desktop width/height
-#if SDL_VERSION_ATLEAST(1,2,10)
-   gVideoInfo.dWidth = info->current_w;
-   gVideoInfo.dHeight = info->current_h;
-#else /* #elif SDL_VERSION_ATLEAST(1,2,10) */
-   gVideoInfo.dWidth = 0;
-   gVideoInfo.dHeight = 0;
-#endif
+   // Find the desktop width/height and initialize the ScreenInfo object with it
+   gScreenInfo.init(info->current_w, info->current_h);
 
    // Now, we want to setup our requested
    // window attributes for our OpenGL window.
@@ -1441,7 +1420,7 @@ void InitSdlVideo()
    flags = SDL_OPENGL | SDL_RESIZABLE; // | SDL_FULLSCREEN;
 
 
-   if(SDL_SetVideoMode(gScreenInfo.getGameCanvasWidth(), gScreenInfo.getGameCanvasHeight(), gVideoInfo.bpp, flags) == NULL)
+   if(SDL_SetVideoMode(gScreenInfo.getGameCanvasWidth(), gScreenInfo.getGameCanvasHeight(), 0, flags) == NULL)
    {
       // This could happen for a variety of reasons,
       // including DISPLAY not being set, the specified
@@ -1806,35 +1785,10 @@ void setupLogging()
    gStdoutLog.logprintf("Welcome to Bitfighter!");
 }
 
-
-void setOrtho(GLdouble left, GLdouble right, GLdouble bottom, GLdouble top)
-{
-   glMatrixMode(GL_PROJECTION);
-   glLoadIdentity();
-
-   // The best understanding I can get for glOrtho is that these are the coordinates you want to appear at the four corners of the
-   // physical screen. If you want a "black border" down one side of the screen, you need to make left negative, so that 0 would 
-   // appear some distance in from the left edge of the physical screen.  The same applies to the other coordinates as well.
-   glOrtho(left, right, bottom, top, 0, 1);
-
-   glMatrixMode(GL_MODELVIEW);
-   glLoadIdentity();
-}
-
-
-ScreenInfo gScreenInfo;
-
-
 // Actually put us in windowed or full screen mode.  Pass true the first time this is used, false subsequently.
 // This has the unfortunate side-effect of triggering a mouse move event.  
-void actualizeScreenMode(bool changingInterfaces, bool first = false)
+void actualizeScreenMode(bool changingInterfaces)
 {
-
-   S32 sdlVideoFlags = 0;
-   S32 sdlWindowWidth, sdlWindowHeight;
-
-   // Always use OpenGL
-   sdlVideoFlags |= SDL_OPENGL;
 
    // TODO: reimplement window positioning - difficult with SDL since it doesn't have much access to the
    // window manager; however, it may be possible to do position upon start-up, but not save when exiting
@@ -1874,52 +1828,77 @@ void actualizeScreenMode(bool changingInterfaces, bool first = false)
       displayMode = DISPLAY_MODE_FULL_SCREEN_STRETCHED; 
    }
 
-   if(displayMode == DISPLAY_MODE_FULL_SCREEN_STRETCHED) 
-   {
-      glDisable(GL_SCISSOR_TEST);
-      setOrtho(0, gScreenInfo.getGameCanvasWidth(), gScreenInfo.getGameCanvasHeight(), 0);
+   S32 sdlVideoFlags = 0;
+   S32 sdlWindowWidth, sdlWindowHeight;
+   F64 orthoLeft = 0, orthoRight = 0, orthoTop = 0, orthoBottom = 0;
 
-      sdlWindowWidth = gVideoInfo.dWidth;
-      sdlWindowHeight = gVideoInfo.dHeight;
+   // Always use OpenGL
+   sdlVideoFlags |= SDL_OPENGL;  // | SDL_HWSURFACE  TODO: add hardware surface to free system memory and CPU?
+
+   // Set up variables according to display mode
+   switch (displayMode)
+   {
+   case DISPLAY_MODE_FULL_SCREEN_STRETCHED:
+      sdlWindowWidth = gScreenInfo.getPhysicalScreenWidth();
+      sdlWindowHeight = gScreenInfo.getPhysicalScreenHeight();
       sdlVideoFlags |= SDL_FULLSCREEN;
+
+      orthoRight = gScreenInfo.getGameCanvasWidth();
+      orthoBottom = gScreenInfo.getGameCanvasHeight();
+      break;
+
+   case DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED:
+      sdlWindowWidth = gScreenInfo.getPhysicalScreenWidth();
+      sdlWindowHeight = gScreenInfo.getPhysicalScreenHeight();
+      sdlVideoFlags |= SDL_FULLSCREEN;
+
+      orthoLeft = -1 * (gScreenInfo.getHorizDrawMargin());
+      orthoRight = gScreenInfo.getGameCanvasWidth() + gScreenInfo.getHorizDrawMargin();
+      orthoBottom = gScreenInfo.getGameCanvasHeight() + gScreenInfo.getVertDrawMargin();
+      orthoTop = -1 * (gScreenInfo.getVertDrawMargin());
+      break;
+
+   default:  //  DISPLAY_MODE_WINDOWED
+      sdlWindowWidth = (S32) floor((F32)gScreenInfo.getGameCanvasWidth()  * gIniSettings.winSizeFact + 0.5f);
+      sdlWindowHeight = (S32) floor((F32)gScreenInfo.getGameCanvasHeight() * gIniSettings.winSizeFact + 0.5f);
+      sdlVideoFlags |= SDL_RESIZABLE;
+
+      orthoRight = gScreenInfo.getGameCanvasWidth();
+      orthoBottom = gScreenInfo.getGameCanvasHeight();
+      break;
    }
 
-   else if(displayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED) 
+   // Set the SDL screen size and change to it
+   if(SDL_SetVideoMode(sdlWindowWidth, sdlWindowHeight, 0, sdlVideoFlags) == NULL)
+         logprintf(LogConsumer::LogFatalError, "Setting display mode failed: %s", SDL_GetError());
+
+   glClearColor( 0, 0, 0, 0 );
+
+   glViewport(0, 0, sdlWindowWidth, sdlWindowHeight);
+
+   glMatrixMode(GL_PROJECTION);
+   glLoadIdentity();
+
+   // The best understanding I can get for glOrtho is that these are the coordinates you want to appear at the four corners of the
+   // physical screen. If you want a "black border" down one side of the screen, you need to make left negative, so that 0 would
+   // appear some distance in from the left edge of the physical screen.  The same applies to the other coordinates as well.
+   glOrtho(orthoLeft, orthoRight, orthoBottom, orthoTop, 0, 1);
+
+   glMatrixMode(GL_MODELVIEW);
+   glLoadIdentity();
+
+   // Do the scissoring
+   if (displayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED)
    {
-      glClear(GL_COLOR_BUFFER_BIT);    // Clear the screen
-
-      S32 horizDrawMargin = gScreenInfo.getHorizDrawMargin();     // In game pixels, not
-      S32 vertDrawMargin = gScreenInfo.getVertDrawMargin();       // physical screen pixels
-
-      setOrtho(-horizDrawMargin,                                        // left
-            gScreenInfo.getGameCanvasWidth() + horizDrawMargin,     // right
-            gScreenInfo.getGameCanvasHeight() + vertDrawMargin,     // bottom
-            -vertDrawMargin);                                        // top
-
       glScissor(gScreenInfo.getHorizPhysicalMargin(),    // x
             gScreenInfo.getVertPhysicalMargin(),     // y
             gScreenInfo.getDrawAreaWidth(),          // width
             gScreenInfo.getDrawAreaHeight());        // height
 
       glEnable(GL_SCISSOR_TEST);    // Turn on clipping to keep the margins clear
-
-      sdlWindowWidth = gVideoInfo.dWidth;
-      sdlWindowHeight = gVideoInfo.dHeight;
-      sdlVideoFlags |= SDL_FULLSCREEN;
    }
-
-   else        // DISPLAY_MODE_WINDOWED
-   {
-      setOrtho(0, gScreenInfo.getGameCanvasWidth(), gScreenInfo.getGameCanvasHeight(), 0);   
+   else
       glDisable(GL_SCISSOR_TEST);
-
-      sdlWindowWidth = (S32) floor((F32)gScreenInfo.getGameCanvasWidth()  * gIniSettings.winSizeFact + 0.5f);
-      sdlWindowHeight = (S32) floor((F32)gScreenInfo.getGameCanvasHeight() * gIniSettings.winSizeFact + 0.5f);
-      sdlVideoFlags |= SDL_RESIZABLE;
-   }
-
-   if(SDL_SetVideoMode(sdlWindowWidth, sdlWindowHeight, gVideoInfo.bpp, sdlVideoFlags) == NULL)
-      logprintf(LogConsumer::LogFatalError, "Setting display mode failed: %s", SDL_GetError());
 
    UserInterface::current->onDisplayModeChange();     // Notify the UI that the screen has changed mode
 }
@@ -2123,7 +2102,7 @@ int main(int argc, char **argv)
       }
 
       atexit(onExit);
-      actualizeScreenMode(false, true);               // Create a display window
+      actualizeScreenMode(false);               // Create a display window
 
       gConsole = OGLCONSOLE_Create();                 // Create our console *after* the screen mode has been actualized
 
