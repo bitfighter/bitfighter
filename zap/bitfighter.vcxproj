@@ -74,7 +74,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>../lib;</AdditionalLibraryDirectories>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>../Debug/libtomcrypt.lib;../Debug/tnl.lib;../Debug/lua-vec.lib;../lib/OpenAL32.lib;../lib/libspeex.lib;../lib/libogg.lib;../lib/libvorbis.lib;../lib/libvorbisfile.lib;../lib/ALURE32.lib;../lib/SDLmain.lib;../lib/SDL.lib;dinput8.lib;dxguid.lib;Ws2_32.lib;opengl32.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>../Debug/libtomcrypt.lib;../Debug/tnl.lib;../Debug/lua-vec.lib;../lib/OpenAL32.lib;../lib/libspeex.lib;../lib/libogg.lib;../lib/libvorbis.lib;../lib/libvorbisfile.lib;../lib/ALURE32.lib;../lib/SDLmain.lib;../lib/SDL.lib;dinput8.lib;dxguid.lib;Ws2_32.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>MSVCRTD.lib;msvcprtd.lib</IgnoreSpecificDefaultLibraries>
     </Link>
     <ProjectReference>
@@ -114,7 +114,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>../lib;</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>MSVCRT.lib;msvcprt.lib</IgnoreSpecificDefaultLibraries>
-      <AdditionalDependencies>../Release/libtomcrypt.lib;../Release/tnl.lib;../Release/lua-vec.lib;../lib/OpenAL32.lib;../lib/libspeex.lib;../lib/libogg.lib;../lib/libvorbis.lib;../lib/libvorbisfile.lib;../lib/ALURE32.lib;../lib/SDLmain.lib;../lib/SDL.lib;dinput8.lib;dxguid.lib;Ws2_32.lib;opengl32.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>../Release/libtomcrypt.lib;../Release/tnl.lib;../Release/lua-vec.lib;../lib/OpenAL32.lib;../lib/libspeex.lib;../lib/libogg.lib;../lib/libvorbis.lib;../lib/libvorbisfile.lib;../lib/ALURE32.lib;../lib/SDLmain.lib;../lib/SDL.lib;dinput8.lib;dxguid.lib;Ws2_32.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
     </Link>
     <CustomBuildStep>
