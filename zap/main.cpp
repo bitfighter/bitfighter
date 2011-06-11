@@ -311,7 +311,9 @@ void reshape(SDL_Event& event)
       S32 width  = (S32)floor(canvasWidth  * gIniSettings.winSizeFact + 0.5f);   // virtual * (physical/virtual) = physical, fix rounding problem
       S32 height = (S32)floor(canvasHeight * gIniSettings.winSizeFact + 0.5f);
 
-      SDL_SetVideoMode(width, height, 0, SDL_OPENGL | SDL_RESIZABLE);
+      S32 flags = 0;
+      flags = gScreenInfo.isHardwareSurface() ? SDL_OPENGL | SDL_HWSURFACE | SDL_RESIZABLE : SDL_OPENGL | SDL_RESIZABLE;
+      SDL_SetVideoMode(width, height, 0, flags);
       gScreenInfo.setWindowSize(width, height);
    }
 
@@ -1417,18 +1419,24 @@ void InitSdlVideo()
    // We want to request that SDL provide us with an OpenGL window, possibly in a fullscreen video mode.
    // Note the SDL_DOUBLEBUF flag is not required to enable double buffering when setting an OpenGL
    // video mode. Double buffering is enabled or disabled using the SDL_GL_DOUBLEBUFFER attribute.
-   flags = SDL_OPENGL | SDL_RESIZABLE; // | SDL_FULLSCREEN;
+   flags = SDL_OPENGL | SDL_HWSURFACE;
 
-
-   if(SDL_SetVideoMode(gScreenInfo.getGameCanvasWidth(), gScreenInfo.getGameCanvasHeight(), 0, flags) == NULL)
+   // We don't need a size to initialize
+   if(SDL_SetVideoMode(0, 0, 0, flags) == NULL)
    {
-      // This could happen for a variety of reasons,
-      // including DISPLAY not being set, the specified
-      // resolution not being available, etc.
+      logprintf(LogConsumer::LogWarning, "Unable to create hardware OpenGL window, falling back to software");
 
-      logprintf(LogConsumer::LogFatalError, "SDL Video mode set failed: %s", SDL_GetError());
-      exitGame();
+      flags = SDL_OPENGL;
+      gScreenInfo.setHardwareSurface(false);
+
+      if (SDL_SetVideoMode(0, 0, 0, flags) == NULL)
+      {
+         logprintf(LogConsumer::LogFatalError, "Unable to create OpenGL window: %s", SDL_GetError());
+         exitGame();
+      }
    }
+   else
+      gScreenInfo.setHardwareSurface(true);
 
    SDL_WM_SetCaption(gWindowTitle, gWindowTitle);  // Icon name is same as window title
 }
@@ -1833,7 +1841,7 @@ void actualizeScreenMode(bool changingInterfaces)
    F64 orthoLeft = 0, orthoRight = 0, orthoTop = 0, orthoBottom = 0;
 
    // Always use OpenGL
-   sdlVideoFlags |= SDL_OPENGL;  // | SDL_HWSURFACE  TODO: add hardware surface to free system memory and CPU?
+   sdlVideoFlags = gScreenInfo.isHardwareSurface() ? SDL_OPENGL | SDL_HWSURFACE : SDL_OPENGL;
 
    // Set up variables according to display mode
    switch (displayMode)
