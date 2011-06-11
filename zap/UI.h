@@ -179,7 +179,7 @@ public:
 
    bool isLandscape() { return mIsLandscape; }     // Whether physical screen is landscape, or at least more landscape than our game window
    bool isHardwareSurface() { return mHardwareSurface; }  // Whether we can use the opengl hardware surface
-   bool setHardwareSurface(bool isHardwareSurface) { mHardwareSurface = isHardwareSurface; }  // Whether we can use the opengl hardware surface
+   void setHardwareSurface(bool isHardwareSurface) { mHardwareSurface = isHardwareSurface; }  // Whether we can use the opengl hardware surface
 
    // Convert physical window screen coordinates into virtual, in-game coordinate
    Point convertWindowToCanvasCoord(const Point &p, DisplayMode mode) { return convertWindowToCanvasCoord((S32)p.x, (S32)p.y, mode); }
