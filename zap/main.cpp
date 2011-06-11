@@ -334,30 +334,8 @@ void mouseMotion(SDL_Event& event)
    setMousePos(event.motion.x, event.motion.y);
 
    if(UserInterface::current)
-      UserInterface::current->onMouseDragged(event.motion.x, event.motion.y);
+      UserInterface::current->onMouseMoved(event.motion.x, event.motion.y);
 }
-
-// Handler called by GLUT when "passive" mouse motion is detected
-//void passivemotion(int x, int y)
-//{
-//   const Point *winMousePos = gScreenInfo.getWindowMousePos();
-//
-//   // Glut sometimes fires spurious events.  Let's ignore those.
-//   if(x == winMousePos->x && y == winMousePos->y)
-//      return;
-//
-//   // This firstTime rigamarole prevents onMouseMoved() from firing when game first starts up; if we're in full screen mode,
-//   // GLUT calls this callback immediately.  Thanks, GLUT!
-//   bool firstTime = (winMousePos->x == -1);
-//
-//   setMousePos(x, y);
-//
-//   if(firstTime)
-//      return;
-//
-//   if(UserInterface::current)
-//      UserInterface::current->onMouseMoved(x, y);
-//}
 
 
 void keyDown(KeyCode keyCode, char ascii)    // Launch the onKeyDown event
@@ -1837,7 +1815,7 @@ void setOrtho(GLdouble left, GLdouble right, GLdouble bottom, GLdouble top)
    // The best understanding I can get for glOrtho is that these are the coordinates you want to appear at the four corners of the
    // physical screen. If you want a "black border" down one side of the screen, you need to make left negative, so that 0 would 
    // appear some distance in from the left edge of the physical screen.  The same applies to the other coordinates as well.
-   glOrtho(left, right, bottom, top, 0, 1);   
+   glOrtho(left, right, bottom, top, 0, 1);
 
    glMatrixMode(GL_MODELVIEW);
    glLoadIdentity();
@@ -1859,7 +1837,8 @@ void actualizeScreenMode(bool changingInterfaces, bool first = false)
    sdlVideoFlags |= SDL_OPENGL;
 
    // TODO: reimplement window positioning - difficult with SDL since it doesn't have much access to the
-   // window manager
+   // window manager; however, it may be possible to do position upon start-up, but not save when exiting
+
    //   if(gIniSettings.oldDisplayMode == DISPLAY_MODE_WINDOWED && !first)
    //   {
    //      gIniSettings.winXPos = glutGet(GLUT_WINDOW_X);
@@ -1898,7 +1877,7 @@ void actualizeScreenMode(bool changingInterfaces, bool first = false)
    if(displayMode == DISPLAY_MODE_FULL_SCREEN_STRETCHED) 
    {
       glDisable(GL_SCISSOR_TEST);
-      setOrtho(0, gScreenInfo.getGameCanvasWidth(), gScreenInfo.getGameCanvasHeight(), 0);   
+      setOrtho(0, gScreenInfo.getGameCanvasWidth(), gScreenInfo.getGameCanvasHeight(), 0);
 
       sdlWindowWidth = gVideoInfo.dWidth;
       sdlWindowHeight = gVideoInfo.dHeight;
