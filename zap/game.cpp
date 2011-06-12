@@ -235,7 +235,7 @@ void Game::processLevelLoadLine(U32 argc, U32 id, const char **argv)
       }
 
       TNL::Object *theObject = TNL::Object::create(obj);          // Create an object of the type specified on the line
-      GameObject   *object  = dynamic_cast<GameObject *>  (theObject);  // Force our new object to be a GameObject
+      SafePtr<GameObject> object  = dynamic_cast<GameObject *>  (theObject);  // Force our new object to be a GameObject
       EditorObject *eObject = dynamic_cast<EditorObject *>(theObject);
 
 
@@ -248,11 +248,13 @@ void Game::processLevelLoadLine(U32 argc, U32 id, const char **argv)
       {
          computeWorldObjectExtents();    // Make sure this is current if we process a robot that needs this for intro code
 
-         //object->setGame(this);  // some objects  might need this while in processArguments
          bool validArgs = object->processArguments(argc - 1, argv + 1, this);
 
          if(validArgs)
-            object->addToGame(this);
+         {
+            if(object.isValid())  // processArguments might delete this object (teleporter)
+               object->addToGame(this);
+         }
          else
          {
             logprintf(LogConsumer::LogWarning, "Invalid arguments in object \"%s\" in level \"%s\"", obj, origFilename.c_str());

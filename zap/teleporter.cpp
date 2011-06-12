@@ -86,7 +86,7 @@ bool Teleporter::processArguments(S32 argc, const char **argv, Game *game)
    bool found = false;
 
    foundObjects.clear();
-   findObjects(TeleportType, foundObjects, Rect(pos, 2));      // 1 would probably work just as well here
+   game->getGridDatabase()->findObjects(TeleportType, foundObjects, Rect(pos, 1));
 
    for(S32 i = 0; i < foundObjects.size(); i++)
    {
