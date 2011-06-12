@@ -1908,6 +1908,18 @@ void actualizeScreenMode(bool changingInterfaces)
    else
       glDisable(GL_SCISSOR_TEST);
 
+
+   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+   glLineWidth(gDefaultLineWidth);
+
+   if(gIniSettings.useLineSmoothing)
+   {
+      glEnable(GL_LINE_SMOOTH);
+      //glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+      glEnable(GL_BLEND);
+   }
+
+
    UserInterface::current->onDisplayModeChange();     // Notify the UI that the screen has changed mode
 }
 
@@ -2097,17 +2109,7 @@ int main(int argc, char **argv)
       SDL_ShowCursor(SDL_DISABLE);   // Hide cursor
 
       // Put 0,0 at the center of the screen
-      glTranslatef(gScreenInfo.getGameCanvasWidth() / 2, gScreenInfo.getGameCanvasHeight() / 2, 0);     
-
-      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-      glLineWidth(gDefaultLineWidth);
-
-      if(gIniSettings.useLineSmoothing)
-      {
-         glEnable(GL_LINE_SMOOTH);
-         //glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-         glEnable(GL_BLEND);
-      }
+      //glTranslatef(gScreenInfo.getGameCanvasWidth() / 2, gScreenInfo.getGameCanvasHeight() / 2, 0);     
 
       atexit(onExit);
       actualizeScreenMode(false);               // Create a display window

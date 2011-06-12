@@ -48,6 +48,7 @@
 
 #include "SDL/SDL_opengl.h"
 
+#include "tnlThread.h"
 #include <math.h>
 
 #ifndef min
@@ -1003,18 +1004,31 @@ VersionedGameStats GameType::getGameStats()
 }
 
 
-#ifdef BF_WRITE_TO_MYSQL
-DWORD WINAPI insertStatsToDatabase(LPVOID lpParam)
-{
-   VersionedGameStats *stats = (VersionedGameStats *) lpParam;
-   DatabaseWriter databaseWriter(gIniSettings.mySqlStatsDatabaseServer.c_str(), gIniSettings.mySqlStatsDatabaseName.c_str(),
-                                       gIniSettings.mySqlStatsDatabaseUser.c_str(),   gIniSettings.mySqlStatsDatabasePassword.c_str() );
 
-   databaseWriter.insertStats(stats->gameStats);
-   delete stats;
-   return 0;
-}
+class InsertStatsToDatabaseThread : public TNL::Thread
+{
+public:
+   VersionedGameStats mStats;
+   InsertStatsToDatabaseThread(const VersionedGameStats &stats) {mStats = stats;}
+
+   U32 run()
+   {
+#ifdef BF_WRITE_TO_MYSQL
+      if(gIniSettings.mySqlStatsDatabaseServer != "")
+      {
+         DatabaseWriter databaseWriter(gIniSettings.mySqlStatsDatabaseServer.c_str(), gIniSettings.mySqlStatsDatabaseName.c_str(),
+                                       gIniSettings.mySqlStatsDatabaseUser.c_str(),   gIniSettings.mySqlStatsDatabasePassword.c_str() );
+         databaseWriter.insertStats(mStats.gameStats);
+      }
+      else
 #endif
+      logGameStats(&mStats);      // Log to sqlite db
+
+
+      delete this; // will this work?
+      return 0;
+   }
+};
 
 
 // Transmit statistics to the master server, LogStats to game server
@@ -1065,23 +1079,12 @@ void GameType::saveGameStats()
       */
    }
 
-#ifndef BF_WRITE_TO_MYSQL  // for some reason, logStats keep going back to NO, probably because of running old release version of 015
    if(gIniSettings.logStats)
-#endif
    {
       processStatsResults(&stats.gameStats);
 
-#ifdef BF_WRITE_TO_MYSQL
-      if(gIniSettings.mySqlStatsDatabaseServer != "")
-      {
-         //DatabaseWriter databaseWriter(gIniSettings.mySqlStatsDatabaseServer.c_str(), gIniSettings.mySqlStatsDatabaseName.c_str(),
-         //                              gIniSettings.mySqlStatsDatabaseUser.c_str(),   gIniSettings.mySqlStatsDatabasePassword.c_str() );
-         //databaseWriter.insertStats(stats.gameStats);
-         CreateThread(NULL, 0, insertStatsToDatabase, (LPVOID)(new VersionedGameStats(stats)), 0, NULL);
-      }
-      else
-#endif
-      logGameStats(&stats);      // Log to sqlite db
+      InsertStatsToDatabaseThread *statsthread = new InsertStatsToDatabaseThread(stats);
+      statsthread->start();
    }
 }
 
