@@ -3405,8 +3405,6 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    }
    else if(keyCode == keyOUTGAMECHAT)     // Turn on Global Chat overlay
       gChatInterface.activate();
-//   else if(keyCode == keyDIAG)            // Turn on diagnostic overlay -- why not here??
-//      gDiagnosticInterface.activate();
    else if(keyCode == KEY_ESCAPE)           // Activate the menu
    {
       UserInterface::playBoop();

@@ -336,7 +336,9 @@ void mouseMotion(SDL_Event& event)
 
 void keyDown(KeyCode keyCode, char ascii)    // Launch the onKeyDown event
 {
-   if(UserInterface::current)
+   if(keyCode == keyDIAG && UserInterface::current != (UserInterface *) &gDiagnosticInterface)
+      gDiagnosticInterface.activate();            // Turn on diagnostic overlay -- can be used anywhere
+   else if(UserInterface::current)
       UserInterface::current->onKeyDown(keyCode, ascii);
 }
 
