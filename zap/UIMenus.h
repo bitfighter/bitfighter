@@ -137,7 +137,9 @@ public:
 };
 
 
-extern MainMenuUserInterface gMainMenuUserInterface;
+// the use of #define and _pointer is only to fix black text in main menu.
+extern MainMenuUserInterface *gMainMenuUserInterface_pointer;
+#define gMainMenuUserInterface (*gMainMenuUserInterface_pointer)
 
 
 ////////////////////////////////////////

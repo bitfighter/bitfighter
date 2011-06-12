@@ -583,7 +583,7 @@ static void quitSelectedCallback(U32 unused)
 }
 
 //////////
-MainMenuUserInterface gMainMenuUserInterface;
+MainMenuUserInterface *gMainMenuUserInterface_pointer;
 
 // Constructor
 MainMenuUserInterface::MainMenuUserInterface()

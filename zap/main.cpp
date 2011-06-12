@@ -1590,6 +1590,7 @@ void processStartupParams()
    // Not immediately starting a connection...  start out with name entry or main menu
    if(!gDedicatedServer)
    {
+      gMainMenuUserInterface_pointer = new MainMenuUserInterface();
       if(gIniSettings.name == "")
       {
          if(gClientGame2)
