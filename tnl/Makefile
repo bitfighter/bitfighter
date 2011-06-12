@@ -28,6 +28,7 @@ OBJECTS=\
 	random.o\
 	rpc.o\
 	symmetricCipher.o\
+	thread.o\
 	tnlMethodDispatch.o\
 	journal.o\
 	udp.o\
