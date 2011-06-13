@@ -91,7 +91,7 @@ private:
    bool mUsingGameCoords;
 
    void findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector, const Rect *extents, S32 minx, S32 miny, S32 maxx, S32 maxy, U8 typeNumber = U8_MAX);
-   U32 mQueryId;
+   static U32 mQueryId;
 
    Vector<DatabaseObject *> mAllObjects;
 
@@ -109,11 +109,16 @@ public:
 
    
    BucketEntry *mBuckets[BucketRowCount][BucketRowCount];
-   ClassChunker<BucketEntry> mChunker;
+   static ClassChunker<BucketEntry> mChunker;
 
-   GridDatabase(bool usingGameCoords = true);      // Constructor
+   GridDatabase();                              // Constructor
+   GridDatabase(const GridDatabase &gridDb);    // Copy constructor
+   GridDatabase &operator= (const GridDatabase &database);
+   virtual ~GridDatabase();                     // Destructor
 
-   S32 BucketWidth;     // Width/height of each bucket in pixels
+   void copy(const GridDatabase &source);       // Copy contentes of source into this
+
+   static const S32 BucketWidth = 255;          // Width/height of each bucket in pixels
 
    DatabaseObject *findObjectLOS(U32 typeMask, U32 stateIndex, bool format, const Point &rayStart, const Point &rayEnd, 
                                  float &collisionTime, Point &surfaceNormal, U8 typeNumber = U8_MAX);
@@ -127,8 +132,6 @@ public:
    
    virtual void addToDatabase(DatabaseObject *theObject, const Rect &extents);
    virtual void removeFromDatabase(DatabaseObject *theObject, const Rect &extents);
-
-   bool isUsingGameCoords() { return mUsingGameCoords; }
 
    S32 getObjectCount() { return mAllObjects.size(); }      // Return the number of objects currently in the database
    DatabaseObject *getObjectByIndex(S32 index);             // Kind of hacky, kind of useful
@@ -148,7 +151,7 @@ private:
    Vector<EditorObject *> mAllEditorObjects;
 
 public:
-   EditorObjectDatabase(bool usingGameCoords = true);      // Constructor
+   EditorObjectDatabase();      // Constructor
 
    const Vector<EditorObject *> *getObjectList();     
 

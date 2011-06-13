@@ -31,19 +31,69 @@
 namespace Zap
 {
 
-// Constructor
-GridDatabase::GridDatabase(bool usingGameCoords)
-{
-   mUsingGameCoords = usingGameCoords;
+//class BucketEntry;
 
+U32 GridDatabase::mQueryId = 0;
+ClassChunker<GridDatabase::BucketEntry> GridDatabase::mChunker;
+
+// Constructor
+GridDatabase::GridDatabase()
+{
    mQueryId = 0;
-   BucketWidth = usingGameCoords ? 255 : 1;
 
    for(U32 i = 0; i < BucketRowCount; i++)
       for(U32 j = 0; j < BucketRowCount; j++)
-         mBuckets[i][j] = 0;
+         mBuckets[i][j] = NULL;
+
+   printf("Creating database %p\n", this);
 }
 
+
+// Copy constructor
+GridDatabase::GridDatabase(const GridDatabase &gridDb)
+{
+   copy(gridDb);
+}
+
+
+GridDatabase &GridDatabase::operator= (const GridDatabase &gridDb)
+{
+   copy(gridDb);
+   return *this;
+}
+ 
+
+// Copy contents of source into this
+void GridDatabase::copy(const GridDatabase &source)
+{
+   mUsingGameCoords = source.mUsingGameCoords;
+   
+   for(U32 x = 0; x < BucketRowCount; x++)
+      for(U32 y = 0; y < BucketRowCount; y++)
+      {
+         mBuckets[x & BucketMask][y & BucketMask] = NULL;
+
+         for(BucketEntry *walk = source.mBuckets[x & BucketMask][y & BucketMask]; walk; walk = walk->nextInBucket)
+         {
+            DatabaseObject *theObject = walk->theObject;
+
+            BucketEntry *be = mChunker.alloc();
+            be->theObject = dynamic_cast<EditorObject *>(theObject)->newCopy();  // TODO: <<<===!!!!!!  use dict to avoid copying same object twice
+            be->nextInBucket = mBuckets[x & BucketMask][y & BucketMask];
+            mBuckets[x & BucketMask][y & BucketMask] = be;
+         }
+      }
+
+   mAllObjects = source.mAllObjects;      // Copy our non-spatial database as well  use same dict to copy pointers to object copies we just made above
+}
+
+
+// Destructor
+GridDatabase::~GridDatabase()       
+{
+   // Do nothing for the moment
+   logprintf("destroying database %p", this);
+}
 
 void GridDatabase::addToDatabase(DatabaseObject *theObject, const Rect &extents)
 {
@@ -108,7 +158,7 @@ void GridDatabase::removeFromDatabase(DatabaseObject *theObject, const Rect &ext
    }
 
    // Remove the object to our non-spatial "database" as well
-   // Working backwards makes clear() go faster, should have little effect on the case of removing an arbitrary object
+   // Working backwards makes clear() go faster, and should have little effect on the case of removing an arbitrary object
    for(S32 i = mAllObjects.size() - 1; i >= 0 ; i--)
       if(mAllObjects[i] == theObject)
       {
@@ -350,7 +400,7 @@ static void geomSort(Vector<EditorObject *> &objects)
 class EditorObject;
 
 // Constructor
-EditorObjectDatabase::EditorObjectDatabase(bool usingGameCoords) : Parent(usingGameCoords)
+EditorObjectDatabase::EditorObjectDatabase() : Parent()
 {
    // Do nothing, just here to call Parent's constructor
 }

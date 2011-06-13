@@ -42,6 +42,8 @@
 
 #include "UIChat.h"
 
+#include "boost/smart_ptr/shared_ptr.hpp"
+
 #ifdef TNL_OS_WIN32
 #include <windows.h>   // For screensaver... windows only feature, I'm afraid!
 #endif
@@ -136,7 +138,7 @@ protected:
       DeleteRef(GameObject *o = NULL, U32 d = 0);
    };
 
-   GridDatabase mDatabase;                // Database for all normal objects
+   boost::shared_ptr<GridDatabase> mDatabase;                // Database for all normal objects
 
    Vector<DeleteRef> mPendingDeleteObjects;
    Vector<SafePtr<GameObject> > mScopeAlwaysList;
@@ -210,7 +212,7 @@ public:
    MasterServerConnection *getConnectionToMaster();
 
    GameNetInterface *getNetInterface();
-   virtual GridDatabase *getGridDatabase() { return &mDatabase; }    // EditorGame, for example, returns an EditorObjectDatabase
+   virtual boost::shared_ptr<GridDatabase> getGridDatabase() { return mDatabase; }    // EditorGame, for example, returns an EditorObjectDatabase
 
    const Vector<SafePtr<GameObject> > &getScopeAlwaysList() { return mScopeAlwaysList; }
 
@@ -476,7 +478,7 @@ class WallSegmentManager;
 class EditorGame : public Game
 {
 private:
-   EditorObjectDatabase mEditorDatabase;
+   boost::shared_ptr<EditorObjectDatabase> mEditorDatabase;
 
 public:
    EditorGame();
@@ -493,8 +495,12 @@ public:
    WallSegmentManager *getWallSegmentManager() { return mWallSegmentManager; }
    void setWallSegmentManager(WallSegmentManager *wallSegmentManager) { mWallSegmentManager = wallSegmentManager; }
 
-   GridDatabase *getGridDatabase() { return &mEditorDatabase; }
-   void setGridDatabase(EditorObjectDatabase database) { mEditorDatabase = database; }
+   boost::shared_ptr<GridDatabase> getGridDatabase() { return mEditorDatabase; }
+
+   void setGridDatabase(boost::shared_ptr<GridDatabase> database) { 
+      //TNLAssert(dynamic_cast<EditorObjectDatabase *>(database), "Uh oh...");
+      mEditorDatabase = dynamic_pointer_cast<EditorObjectDatabase>(database); 
+   }
 };
 
 

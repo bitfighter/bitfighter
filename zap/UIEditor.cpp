@@ -59,6 +59,8 @@
 
 #include "oglconsole.h"          // Our console object
 
+#include <boost/shared_ptr.hpp>
+
 #include <ctype.h>
 #include <exception>
 #include <algorithm>             // For sort
@@ -119,7 +121,7 @@ void backToMainMenuCallback()
 extern EditorGame *gEditorGame;
 
 // Constructor
-EditorUserInterface::EditorUserInterface() : mGridDatabase(GridDatabase(false))     // false --> not using game coords
+EditorUserInterface::EditorUserInterface() : mGridDatabase(GridDatabase())     // false --> not using game coords
 {
    setMenuID(EditorUI);
 
@@ -134,7 +136,7 @@ EditorUserInterface::EditorUserInterface() : mGridDatabase(GridDatabase(false)) 
 
    mLastUndoStateWasBarrierWidthChange = false;
 
-   mUndoItems.resize(UNDO_STATES);
+   mUndoItems.resize(UNDO_STATES);     // Create slots for all our undos... also creates a ton of empty dbs.  Maybe we should be using pointers?
 
    // Pass the gridDatabase on to these other objects, so they can have local access
    WallSegment::setGridDatabase(&mGridDatabase);      // Still needed?  Can do this via editorGame?
@@ -145,7 +147,7 @@ EditorUserInterface::EditorUserInterface() : mGridDatabase(GridDatabase(false)) 
 // Encapsulate some ugliness
 static const Vector<EditorObject *> *getObjectList()
 {
-   return ((EditorObjectDatabase *)gEditorGame->getGridDatabase())->getObjectList();
+   return ((EditorObjectDatabase *)gEditorGame->getGridDatabase().get())->getObjectList();
 }
 
 
@@ -252,7 +254,7 @@ static Vector<DatabaseObject *> fillVector;     // Reusable container
 // Destructor -- unwind things in an orderly fashion
 EditorUserInterface::~EditorUserInterface()
 {
-   clearDatabase(gEditorGame->getGridDatabase());
+   clearDatabase(gEditorGame->getGridDatabase().get());
 
    mDockItems.clear();
    mLevelGenItems.clear();
@@ -399,7 +401,7 @@ static void copyItems(const Vector<EditorObject *> *from, Vector<string> &to)
 
 void EditorUserInterface::restoreItems(const Vector<string> &from)
 {
-   GridDatabase *db = gEditorGame->getGridDatabase();
+   GridDatabase *db = gEditorGame->getGridDatabase().get();
    clearDatabase(db);
 
    Vector<string> args;
@@ -447,7 +449,15 @@ void EditorUserInterface::saveUndoState()
    if(mAllUndoneUndoLevel > mLastRedoIndex)     
       mAllUndoneUndoLevel = NONE;
 
-   copyItems(getObjectList(), mUndoItems[mLastUndoIndex % UNDO_STATES]);
+   //copyItems(getObjectList(), mUndoItems[mLastUndoIndex % UNDO_STATES]);
+
+   boost::shared_ptr<EditorObjectDatabase> eod = dynamic_pointer_cast<EditorObjectDatabase>(gEditorGame->getGridDatabase());
+   TNLAssert(eod, "bad!");
+
+   EditorObjectDatabase *newDB = eod.get();     
+   mUndoItems[mLastUndoIndex % UNDO_STATES] = boost::shared_ptr<EditorObjectDatabase>(new EditorObjectDatabase(*newDB));  // Make a copy
+
+   logprintf("Copying database %p to %p", eod.get(), mUndoItems[mLastUndoIndex % UNDO_STATES].get());
 
    mLastUndoIndex++;
    mLastRedoIndex++; 
@@ -487,7 +497,9 @@ void EditorUserInterface::undo(bool addToRedoStack)
    }
 
    mLastUndoIndex--;
-   restoreItems(mUndoItems[mLastUndoIndex % UNDO_STATES]);
+
+   gEditorGame->setGridDatabase(boost::dynamic_pointer_cast<GridDatabase>(mUndoItems[mLastUndoIndex % UNDO_STATES]));
+   //restoreItems(mUndoItems[mLastUndoIndex % UNDO_STATES]);
 
    rebuildEverything();
 
@@ -504,7 +516,8 @@ void EditorUserInterface::redo()
       mSnapVertex_j = NONE;
 
       mLastUndoIndex++;
-      restoreItems(mUndoItems[mLastUndoIndex % UNDO_STATES]);   
+      //restoreItems(mUndoItems[mLastUndoIndex % UNDO_STATES]);   
+      gEditorGame->setGridDatabase(mUndoItems[mLastUndoIndex % UNDO_STATES]);
 
       rebuildEverything();
       validateLevel();
@@ -595,13 +608,13 @@ extern ConfigDirectories gConfigDirs;
 void EditorUserInterface::loadLevel()
 {
    // Initialize
-   clearDatabase(gEditorGame->getGridDatabase());
+   clearDatabase(gEditorGame->getGridDatabase().get());
    mTeams.clear();
    mSnapVertex_i = NULL;
    mSnapVertex_j = NONE;
    mAddingVertex = false;
    clearLevelGenItems();
-   mLoadTarget = (EditorObjectDatabase *)gEditorGame->getGridDatabase();
+   mLoadTarget = (EditorObjectDatabase *)gEditorGame->getGridDatabase().get();
    mGameTypeArgs.clear();
    gGameParamUserInterface.gameParams.clear();
    gGameParamUserInterface.savedMenuItems.clear();          // clear() because this is not a pointer vector
@@ -709,7 +722,7 @@ void EditorUserInterface::runLevelGenScript()
    runScript(scriptName, scriptArgs);
 
    // Reset the target
-   mLoadTarget = (EditorObjectDatabase *)gEditorGame->getGridDatabase();
+   mLoadTarget = (EditorObjectDatabase *)gEditorGame->getGridDatabase().get();
 }
 
 

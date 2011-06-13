@@ -147,7 +147,8 @@ private:
    Timer mSaveMsgTimer;
    Timer mWarnMsgTimer;
 
-   Vector<Vector</*EditorObject **/string> > mUndoItems;  // Undo/redo history  [[note that g++ requires space btwn >>]]
+   //Vector<Vector</*EditorObject **/string> > mUndoItems;  // Undo/redo history  [[note that g++ requires space btwn >>]]
+   Vector<boost::shared_ptr<EditorObjectDatabase> > mUndoItems;  // Undo/redo history 
    Point mMoveOrigin;                           // Point representing where items were moved "from" for figuring out how far they moved
    Vector<Point> mOriginalVertLocations;
 

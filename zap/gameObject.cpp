@@ -53,7 +53,7 @@ BfObject::BfObject()
 
 GridDatabase *BfObject::getGridDatabase() 
 { 
-   return mGame ? mGame->getGridDatabase() : NULL; 
+   return mGame ? mGame->getGridDatabase().get() : NULL; 
 }
 
 

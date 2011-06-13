@@ -85,7 +85,7 @@ extern ScreenInfo gScreenInfo;
 //-----------------------------------------------------------------------------------
 
 // Constructor
-Game::Game(const Address &theBindAddress) : mDatabase(GridDatabase(true))
+Game::Game(const Address &theBindAddress) : mDatabase(new GridDatabase())     //? was without new
 {
    buildModuleInfos();
    mNextMasterTryTime = 0;
@@ -363,7 +363,7 @@ static Vector<DatabaseObject *> fillVector;     // Reusable container
 void Game::deleteObjects(U32 typeMask)
 {
    fillVector.clear();
-   mDatabase.findObjects(typeMask, fillVector);
+   mDatabase->findObjects(typeMask, fillVector);
    for(S32 i = 0; i < fillVector.size(); i++)
    {
       GameObject *obj = dynamic_cast<GameObject *>(fillVector[i]);
@@ -375,7 +375,7 @@ void Game::deleteObjects(U32 typeMask)
 void Game::computeWorldObjectExtents()
 {
    fillVector.clear();
-   mDatabase.findObjects(fillVector);
+   mDatabase->findObjects(fillVector);
 
    if(fillVector.size() == 0)     // No objects ==> no extents!
    {
@@ -420,7 +420,7 @@ Rect Game::computeBarrierExtents()
    Rect theRect;
 
    fillVector.clear();
-   mDatabase.findObjects(BarrierType, fillVector);
+   mDatabase->findObjects(BarrierType, fillVector);
 
    for(S32 i = 0; i < fillVector.size(); i++)
       theRect.unionRect(fillVector[i]->getExtent());
@@ -496,11 +496,11 @@ void Game::cleanUp()
    // Delete any game objects that may exist  --> not sure this will be needed when we're using shared_ptr
    // sam: should be deleted to properly get removed from server's database and to remove client's net objects.
    fillVector.clear();
-   mDatabase.findObjects(fillVector);
+   mDatabase->findObjects(fillVector);
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
-      mDatabase.removeFromDatabase(fillVector[i], fillVector[i]->getExtent());
+      mDatabase->removeFromDatabase(fillVector[i], fillVector[i]->getExtent());
       delete dynamic_cast<Object *>(fillVector[i]); // dynamic_cast might be needed to avoid errors.
    }
 }
@@ -1125,7 +1125,7 @@ bool ServerGame::loadLevel(const string &origFilename2)
 
       // The script file will be the first argument, subsequent args will be passed on to the script.
       // Now we've crammed all our action into the constructor... is this ok design?
-      LuaLevelGenerator levelgen = LuaLevelGenerator(name, getGameType()->mScriptArgs, getGridSize(), getGridDatabase(), this, gConsole);
+      LuaLevelGenerator levelgen = LuaLevelGenerator(name, getGameType()->mScriptArgs, getGridSize(), getGridDatabase().get(), this, gConsole);
    }
 
    // script specified in INI globalLevelLoadScript
@@ -1142,7 +1142,7 @@ bool ServerGame::loadLevel(const string &origFilename2)
 
       // The script file will be the first argument, subsequent args will be passed on to the script.
       // Now we've crammed all our action into the constructor... is this ok design?
-      LuaLevelGenerator levelgen = LuaLevelGenerator(name, getGameType()->mScriptArgs, getGridSize(), getGridDatabase(), this, gConsole);
+      LuaLevelGenerator levelgen = LuaLevelGenerator(name, getGameType()->mScriptArgs, getGridSize(), getGridDatabase().get(), this, gConsole);
    }
 
    //  Check after script, script might add Teams
@@ -1409,7 +1409,7 @@ void ServerGame::idle(U32 timeDelta)
    computeWorldObjectExtents();
 
    fillVector.clear();
-   mDatabase.findObjects(fillVector);
+   mDatabase->findObjects(fillVector);
 
    // Visit each game object, handling moves and running its idle method
    for(S32 i = 0; i < fillVector.size(); i++)
@@ -1627,7 +1627,7 @@ void ClientGame::idle(U32 timeDelta)
       theMove->prepare();           // Pack and unpack the move for consistent rounding errors
 
       fillVector.clear();
-      mDatabase.findObjects(fillVector);
+      mDatabase->findObjects(fillVector);
 
       for(S32 i = 0; i < fillVector.size(); i++)
       {
@@ -1935,7 +1935,7 @@ void ClientGame::renderCommander()
    // Render the objects.  Start by putting all command-map-visible objects into renderObjects.  Note that this no longer captures
    // walls -- those will be rendered separately.
    rawRenderObjects.clear();
-   mDatabase.findObjects(CommandMapVisType, rawRenderObjects);
+   mDatabase->findObjects(CommandMapVisType, rawRenderObjects);
 
    // If we're drawing bot zones, add them to our list of render objects
    if(gServerGame && mGameUserInterface->mDebugShowMeshZones)
@@ -1987,7 +1987,7 @@ void ClientGame::renderCommander()
          }
 
          fillVector.clear();
-         mDatabase.findObjects(SpyBugType, fillVector);
+         mDatabase->findObjects(SpyBugType, fillVector);
 
          // Render spy bug visibility range second, so ranges appear above ship scanner range
          for(S32 i = 0; i < fillVector.size(); i++)
@@ -2083,7 +2083,7 @@ void ClientGame::renderOverlayMap()
    mapBounds.expand(Point(mapWidth * 2, mapHeight * 2));      //TODO: Fix
 
    rawRenderObjects.clear();
-   mDatabase.findObjects(CommandMapVisType, rawRenderObjects, mapBounds);
+   mDatabase->findObjects(CommandMapVisType, rawRenderObjects, mapBounds);
 
    renderObjects.clear();
    for(S32 i = 0; i < rawRenderObjects.size(); i++)
@@ -2149,7 +2149,7 @@ void ClientGame::renderNormal()
    Rect extentRect(position - screenSize, position + screenSize);
 
    rawRenderObjects.clear();
-   mDatabase.findObjects(AllObjectTypes, rawRenderObjects, extentRect);    // Use extent rects to quickly find objects in visual range
+   mDatabase->findObjects(AllObjectTypes, rawRenderObjects, extentRect);    // Use extent rects to quickly find objects in visual range
 
    if(gServerGame && mGameUserInterface->mDebugShowMeshZones)
        gServerGame->getBotZoneDatabase()->findObjects(0, rawRenderObjects, extentRect, BotNavMeshZoneTypeNumber);
@@ -2226,7 +2226,9 @@ EditorGame::EditorGame() : Game(Address())
 { 
    setGridSize((F32)DefaultGridSize); 
    mWallSegmentManager = gEditorUserInterface.getWallSegmentManager();
-   mEditorDatabase;
+   //mEditorDatabase = boost::shared_ptr<EditorObjectDatabase>();
+   mEditorDatabase = boost::shared_ptr<EditorObjectDatabase>(new EditorObjectDatabase());
+   TNLAssert(mEditorDatabase, "WTF???");
 }     
 
 // TODO: Combine with GameType::getTeamColor
