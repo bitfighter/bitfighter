@@ -155,6 +155,7 @@ public:
    void saveScreenshot();
 };
 
+extern Screenshooter gScreenshooter;
 
 }
 

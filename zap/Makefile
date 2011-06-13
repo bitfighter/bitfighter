@@ -74,6 +74,7 @@ OBJECTS_ZAP=\
    dataConnection.o\
    engineeredObjects.o\
    engineerHelper.o\
+   Event.o\
    flagItem.o\
    keyCode.o\
    game.o\

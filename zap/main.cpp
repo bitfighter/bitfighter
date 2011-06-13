@@ -176,6 +176,7 @@ using namespace TNL;
 #include "version.h"
 #include "Colors.h"
 #include "screenShooter.h"
+#include "Event.h"
 
 #include "SDL/SDL.h"
 #include "SDL/SDL_opengl.h"
@@ -263,23 +264,6 @@ extern NameEntryUserInterface gNameEntryUserInterface;
 
 ScreenInfo gScreenInfo;
 
-// Since GLUT reports the current mouse pos via a series of events, and does not make
-// its position available upon request, we'll store it when it changes so we'll have
-// it when we need it.
-//
-// Note that when we are in the editor, we need to override the display mode because our
-// canvas dimensions are irregular.
-void setMousePos(S32 x, S32 y)
-{
-   DisplayMode reportedDisplayMode = gIniSettings.displayMode;
-
-   if(UserInterface::current->getMenuID() == EditorUI && reportedDisplayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED)
-      reportedDisplayMode = DISPLAY_MODE_FULL_SCREEN_STRETCHED;
-
-   gScreenInfo.setMousePos(x, y, reportedDisplayMode);
-}
-
-
 Screenshooter gScreenshooter;    // For taking screen shots
 
 ZapJournal gZapJournal;          // Our main journaling object
@@ -288,163 +272,6 @@ string gPlayerPassword;
 
 struct ClientInfo;
 ClientInfo gClientInfo;          // Info about the client used for establishing connection to server
-
-
-// Handler called by GLUT when window is reshaped
-void reshape(SDL_Event& event)
-{
-   // If we are entering fullscreen mode, then we don't want to mess around with proportions and all that.  Just save window size and get out.
-   if(gIniSettings.displayMode == DISPLAY_MODE_FULL_SCREEN_STRETCHED || gIniSettings.displayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED)
-      gScreenInfo.setWindowSize(event.resize.w, event.resize.h);
-
-   else
-   {
-      S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
-      S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
-
-      // Constrain window to correct proportions...
-      if((event.resize.w - canvasWidth) > (event.resize.h - canvasHeight))      // Wider than taller  (is this right? mixing virtual and physical pixels)
-         gIniSettings.winSizeFact = max((F32) event.resize.h / (F32)canvasHeight, MIN_SCALING_FACT);
-      else
-         gIniSettings.winSizeFact = max((F32) event.resize.w / (F32)canvasWidth, MIN_SCALING_FACT);
-
-      S32 width  = (S32)floor(canvasWidth  * gIniSettings.winSizeFact + 0.5f);   // virtual * (physical/virtual) = physical, fix rounding problem
-      S32 height = (S32)floor(canvasHeight * gIniSettings.winSizeFact + 0.5f);
-
-      S32 flags = 0;
-      flags = gScreenInfo.isHardwareSurface() ? SDL_OPENGL | SDL_HWSURFACE | SDL_RESIZABLE : SDL_OPENGL | SDL_RESIZABLE;
-      SDL_SetVideoMode(width, height, 0, flags);
-      gScreenInfo.setWindowSize(width, height);
-   }
-
-   glViewport(0, 0, gScreenInfo.getWindowWidth(), gScreenInfo.getWindowHeight());
-   OGLCONSOLE_Reshape();
-
-   gINI.SetValueF("Settings", "WindowScalingFactor", gIniSettings.winSizeFact, true);
-}
-
-
-// SDL handling when mouse motion is detected
-void mouseMotion(SDL_Event& event)
-{
-   setMousePos(event.motion.x, event.motion.y);
-
-   if(UserInterface::current)
-      UserInterface::current->onMouseMoved(event.motion.x, event.motion.y);
-}
-
-
-void keyDown(KeyCode keyCode, char ascii)    // Launch the onKeyDown event
-{
-   if(keyCode == keyDIAG && UserInterface::current != (UserInterface *) &gDiagnosticInterface)
-      gDiagnosticInterface.activate();            // Turn on diagnostic overlay -- can be used anywhere
-   else if(UserInterface::current)
-      UserInterface::current->onKeyDown(keyCode, ascii);
-}
-
-// Sometimes we need to pretend a key was pressed, such as for those that don't
-// generate events (shift/ctrl/alt, controller buttons, etc.)
-void simulateKeyDown(KeyCode keyCode)
-{
-   setKeyState(keyCode, true);
-   keyDown(keyCode, 0);
-}
-
-void keyUp(KeyCode keyCode)              // Launch the onKeyUp event
-{
-   if(UserInterface::current)
-      UserInterface::current->onKeyUp(keyCode);
-}
-
-void simulateKeyUp(KeyCode keyCode)
-{
-   setKeyState(keyCode, false);
-   keyUp(keyCode);
-}
-
-// GLUT handler for key-down events
-void keyDown(SDL_Event& event)
-{
-   SDLKey& key = event.key.keysym.sym;
-   SDLMod& mod = event.key.keysym.mod;
-
-   // TODO:  add more modifier stuff now that we have SDL. yay!
-
-   // ALT + ENTER --> toggles window mode/full screen
-   if(key == SDLK_RETURN && (mod & (KMOD_LALT | KMOD_RALT)))
-      gOptionsMenuUserInterface.toggleDisplayMode();
-
-   // CTRL + Q --> screenshot!
-   else if(key == SDLK_q && (mod & (KMOD_LCTRL | KMOD_RCTRL)))
-      gScreenshooter.phase = 1;
-
-   // The rest
-   else
-   {
-      KeyCode keyCode = standardSDLKeyToKeyCode(key);
-      setKeyState(keyCode, true);
-      keyDown(keyCode, keyToAscii(key, keyCode));
-   }
-}
-
-#ifndef ZAP_DEDICATED
-
-// SDL handler for key-up events
-void keyUp(SDL_Event& event)
-{
-   KeyCode keyCode = standardSDLKeyToKeyCode(event.key.keysym.sym);
-   setKeyState(keyCode, false);
-   keyUp(keyCode);
-}
-
-// SDL handlers for mouse clicks
-void mouseClick(SDL_Event& event)
-{
-   setMousePos(event.button.x, event.button.y);
-
-   if(!UserInterface::current) return;    // Bail if no current UI
-
-   if(event.button.button == SDL_BUTTON_LEFT)
-   {
-      setKeyState(MOUSE_LEFT, true);
-      keyDown(MOUSE_LEFT, 0);
-   }
-   else if(event.button.button == SDL_BUTTON_RIGHT)
-   {
-      setKeyState(MOUSE_RIGHT, true);
-      keyDown(MOUSE_RIGHT, 0);
-   }
-   else if(event.button.button == SDL_BUTTON_MIDDLE)
-   {
-      setKeyState(MOUSE_MIDDLE, true);
-      keyDown(MOUSE_MIDDLE, 0);
-   }
-}
-
-void mouseRelease(SDL_Event& event)
-{
-   setMousePos(event.button.x, event.button.y);
-
-   if(!UserInterface::current) return;    // Bail if no current UI
-
-   if(event.button.button == SDL_BUTTON_LEFT)
-   {
-      setKeyState(MOUSE_LEFT, false);
-      keyUp(MOUSE_LEFT);
-   }
-   else if(event.button.button == SDL_BUTTON_RIGHT)
-   {
-      setKeyState(MOUSE_RIGHT, false);
-      keyUp(MOUSE_RIGHT);
-   }
-   else if(event.button.button == SDL_BUTTON_MIDDLE)
-   {
-      setKeyState(MOUSE_MIDDLE, false);
-      keyUp(MOUSE_MIDDLE);
-   }
-}
-
-#endif // ZAP_DEDICATED
 
 
 void exitGame(S32 errcode)
@@ -610,55 +437,6 @@ void hostGame()
       joinGame(Address(), false, true);   // ...then we'll play, too!
 }
 
-// Handle the various SDL events here
-void handleInputs(SDL_Event& event)
-{
-   switch(event.type)
-   {
-   // TODO: Joystick stuff
-   /*   case SDL_JOYAXISMOTION:
-      input_joyaxis(event->jaxis.axis, event->jaxis.value);
-      break;
-
-   case SDL_JOYBUTTONDOWN:
-      input_joyevent(KEY_PRESS, event->jbutton.button);
-      break;
-
-   case SDL_JOYBUTTONUP:
-      input_joyevent(KEY_RELEASE, event->jbutton.button);
-      break;
-    */
-   case SDL_KEYDOWN:
-      keyDown(event);
-      break;
-
-   case SDL_KEYUP:
-      keyUp(event);
-      break;
-
-      // Mouse stuff
-   case SDL_MOUSEBUTTONDOWN:
-      mouseClick(event);
-      break;
-
-   case SDL_MOUSEBUTTONUP:
-      mouseRelease(event);
-      break;
-
-   case SDL_MOUSEMOTION:
-      mouseMotion(event);
-      break;
-
-      // Other
-   case SDL_VIDEORESIZE:
-      reshape(event);
-      break;
-
-   default:   // Just continue for anything else
-      break;
-   }
-}
-
 
 // do the logic to draw the screen
 void display()
@@ -786,7 +564,7 @@ void idle()
       if (event.type == SDL_QUIT) // Handle quit here
          exitGame();
 
-      handleInputs(event);
+      Event::onEvent(&event);
    }
    // END SDL event polling
 

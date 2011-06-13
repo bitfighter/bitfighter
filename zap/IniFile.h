@@ -207,7 +207,7 @@ public:
    bool     deleteAllSectionComments();
 };
 
-
+extern CIniFile gINI;
 
 };
 #endif

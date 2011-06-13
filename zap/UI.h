@@ -115,6 +115,8 @@ private:
    static const S32 GAME_WIDTH = 800;
    static const S32 GAME_HEIGHT = 600;
 
+   static const F32 MIN_SCALING_FACTOR = 0.15;       // Limits minimum window size
+
    Point mWindowMousePos, mCanvasMousePos;    
 
    S32 mPhysicalScreenWidth, mPhysicalScreenHeight;
@@ -198,6 +200,7 @@ public:
    const Point *getMousePos() { return &mCanvasMousePos; }
    const Point *getWindowMousePos() { return &mWindowMousePos; }
 
+   static F32 getMinScalingFactor() {return MIN_SCALING_FACTOR; }
 };
 
 extern ScreenInfo gScreenInfo;
