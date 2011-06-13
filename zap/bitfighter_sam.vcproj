@@ -861,6 +861,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\Event.cpp"
+			>
+		</File>
+		<File
 			RelativePath=".\game.cpp"
 			>
 		</File>

@@ -169,6 +169,7 @@
     <ClCompile Include="..\zap\lineEditor.cpp" />
     <ClCompile Include="EditorObject.cpp" />
     <ClCompile Include="engineerHelper.cpp" />
+    <ClCompile Include="Event.cpp" />
     <ClCompile Include="gameStats.cpp" />
     <ClCompile Include="Geometry.cpp" />
     <ClCompile Include="helperMenu.cpp" />
@@ -278,6 +279,7 @@
     <ClInclude Include="..\zap\lineEditor.h" />
     <ClInclude Include="EditorObject.h" />
     <ClInclude Include="engineerHelper.h" />
+    <ClInclude Include="Event.h" />
     <ClInclude Include="freeglut_stroke.h" />
     <ClInclude Include="freeglut_stroke_roman.h" />
     <ClInclude Include="gameStats.h" />

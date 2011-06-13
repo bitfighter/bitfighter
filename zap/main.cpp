@@ -1887,7 +1887,6 @@ int main(int argc, char **argv)
 #endif
 
       InitSdlVideo();      // Get our main SDL rendering window all set up
-      SDL_ShowCursor(SDL_DISABLE);   // Hide cursor
 
       // Put 0,0 at the center of the screen
       //glTranslatef(gScreenInfo.getGameCanvasWidth() / 2, gScreenInfo.getGameCanvasHeight() / 2, 0);     
