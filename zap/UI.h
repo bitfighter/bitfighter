@@ -115,7 +115,8 @@ private:
    static const S32 GAME_WIDTH = 800;
    static const S32 GAME_HEIGHT = 600;
 
-   static const F32 MIN_SCALING_FACTOR = 0.15;       // Limits minimum window size
+   //static const F32 MIN_SCALING_FACTOR = 0.15;       // Limits minimum window size
+   //... TODO: Fix error: error C2864: 'Zap::ScreenInfo::MIN_SCALING_FACTOR' : only static const integral data members can be initialized within a class
 
    Point mWindowMousePos, mCanvasMousePos;    
 
@@ -127,7 +128,9 @@ private:
    bool mHardwareSurface;                       // Is our screen going to use a hardware surface?
 
 public:
+	static F32 getMinScalingFactor() {return 0.15f; } //{return MIN_SCALING_FACTOR; }
    ScreenInfo()      // Constructor
+
    { 
       resetGameCanvasSize();        // Initialize GameCanvasSize vars
       setWindowSize(GAME_WIDTH, GAME_HEIGHT);      // In case these are used in a calculation before they're set... avoids spurious divide by 0
@@ -200,7 +203,6 @@ public:
    const Point *getMousePos() { return &mCanvasMousePos; }
    const Point *getWindowMousePos() { return &mWindowMousePos; }
 
-   static F32 getMinScalingFactor() {return MIN_SCALING_FACTOR; }
 };
 
 extern ScreenInfo gScreenInfo;

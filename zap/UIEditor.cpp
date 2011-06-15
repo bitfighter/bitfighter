@@ -1390,10 +1390,10 @@ void EditorUserInterface::renderDock(F32 width)    // width is current wall widt
       glColor(i ? Colors::black : (mouseOnDock() ? Colors::yellow : Colors::white));
 
       glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
-         glVertex2f(canvasWidth - DOCK_WIDTH - horizMargin, canvasHeight - vertMargin);
-         glVertex2f(canvasWidth - horizMargin,              canvasHeight - vertMargin);
-         glVertex2f(canvasWidth - horizMargin,              canvasHeight - vertMargin - dockHeight);
-         glVertex2f(canvasWidth - DOCK_WIDTH - horizMargin, canvasHeight - vertMargin - dockHeight);
+         glVertex2i(canvasWidth - DOCK_WIDTH - horizMargin, canvasHeight - vertMargin);
+         glVertex2i(canvasWidth - horizMargin,              canvasHeight - vertMargin);
+         glVertex2i(canvasWidth - horizMargin,              canvasHeight - vertMargin - dockHeight);
+         glVertex2i(canvasWidth - DOCK_WIDTH - horizMargin, canvasHeight - vertMargin - dockHeight);
       glEnd();
    }
 
@@ -1479,10 +1479,10 @@ void EditorUserInterface::renderTextEntryOverlay()
          glColor(Color(.3,.6,.3), i ? .85 : 1);
 
          glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
-            glVertex2f(xpos,            ypos);
-            glVertex2f(xpos + boxwidth, ypos);
-            glVertex2f(xpos + boxwidth, ypos + boxheight);
-            glVertex2f(xpos,            ypos + boxheight);
+            glVertex2i(xpos,            ypos);
+            glVertex2i(xpos + boxwidth, ypos);
+            glVertex2i(xpos + boxwidth, ypos + boxheight);
+            glVertex2i(xpos,            ypos + boxheight);
          glEnd();
       }
       glDisableBlend;
