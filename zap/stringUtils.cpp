@@ -101,6 +101,13 @@ string ftos(F32 f, S32 digits)
    return outString;
 }
 
+string ftos(F32 f)
+{
+   char outString[100];
+   dSprintf(outString, sizeof(outString),  "%f", f);
+   return outString;
+}
+
 
 // From http://stackoverflow.com/questions/1087088/single-quote-issues-with-c-find-and-replace-function
 string replaceString( const string &strString, const string &strOld, const string &strNew )

@@ -23,75 +23,14 @@
 //
 //------------------------------------------------------------------------------------
 
+#include "zoneControlGame.h"
 #include "goalZone.h"
-#include "gameType.h"
 #include "ship.h"
 #include "flagItem.h"
 #include "gameObjectRender.h"
 
 namespace Zap
 {
-class Ship;
-
-class ZoneControlGameType : public GameType
-{
-private:
-   typedef GameType Parent;
-
-   Vector<GoalZone*> mZones;
-   SafePtr<FlagItem> mFlag;
-   S32 mFlagTeam;
-
-public:
-   ZoneControlGameType()
-   {
-      mFlagTeam = -1;
-   }
-
-   bool isFlagGame() { return true; }
-
-   void onGhostAvailable(GhostConnection *theConnection)
-   {
-      Parent::onGhostAvailable(theConnection);
-      NetObject::setRPCDestConnection(theConnection);
-      s2cSetFlagTeam(mFlagTeam);
-      NetObject::setRPCDestConnection(NULL);
-   }
-
-   void shipTouchFlag(Ship *ship, FlagItem *flag);
-   void itemDropped(Ship *ship, Item *item);
-   void addZone(GoalZone *zone);
-
-   void addFlag(FlagItem *flag)     // Server only
-   {
-      Parent::addFlag(flag);
-      mFlag = flag;
-      if(!isGhost())
-         addItemOfInterest(flag);      // Server only
-   }
-
-   void shipTouchZone(Ship *ship, GoalZone *zone);
-
-   GameTypes getGameType() { return ZoneControlGame; }
-   const char *getGameTypeString() { return "Zone Control"; }
-   const char *getShortName() { return "ZC"; }
-   const char *getInstructionString() { return "Capture all the zones by carrying the flag into them! "; }
-   bool isTeamGame() { return true; }
-   bool canBeTeamGame() { return true; }
-   bool canBeIndividualGame() { return false; }
-
-
-   void renderInterfaceOverlay(bool scoreboardVisible);
-   bool teamHasFlag(S32 teamId);
-
-   void performProxyScopeQuery(GameObject *scopeObject, GameConnection *connection);
-   void majorScoringEventOcurred(S32 team);    // Gets run when a touchdown is scored
-
-   S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data);
-
-   TNL_DECLARE_RPC(s2cSetFlagTeam, (S32 newFlagTeam));
-   TNL_DECLARE_CLASS(ZoneControlGameType);
-};
 
 TNL_IMPLEMENT_NETOBJECT(ZoneControlGameType);
 
