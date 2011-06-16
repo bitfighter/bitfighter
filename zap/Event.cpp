@@ -54,10 +54,10 @@ void Event::onEvent(SDL_Event* event)
          break;
 
       case SDL_MOUSEMOTION:
-         onMouseMoved(event->motion.x, event->motion.y, event->motion.xrel, event->motion.yrel, (event->motion.state
-               & SDL_BUTTON(SDL_BUTTON_LEFT)) != 0, (event->motion.state
-               & SDL_BUTTON(SDL_BUTTON_RIGHT)) != 0, (event->motion.state
-               & SDL_BUTTON(SDL_BUTTON_MIDDLE)) != 0);
+            onMouseMoved(event->motion.x, event->motion.y, event->motion.xrel, event->motion.yrel, (event->motion.state
+                  & SDL_BUTTON(SDL_BUTTON_LEFT)) != 0, (event->motion.state
+                  & SDL_BUTTON(SDL_BUTTON_RIGHT)) != 0, (event->motion.state
+                  & SDL_BUTTON(SDL_BUTTON_MIDDLE)) != 0);
          break;
 
       case SDL_MOUSEBUTTONDOWN:
@@ -224,6 +224,7 @@ void Event::onMouseMoved(S32 x, S32 y, S32 relX, S32 relY, bool Left, bool Right
    if(UserInterface::current)
       UserInterface::current->onMouseMoved(x, y);
 }
+
 
 void Event::onMouseWheel(bool Up, bool Down)
 {

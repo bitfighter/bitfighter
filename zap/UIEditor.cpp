@@ -2245,6 +2245,12 @@ void EditorUserInterface::onMouseMoved()
 
    mouseIgnore = true;
 
+   if(getKeyState(MOUSE_LEFT))
+   {
+      onMouseDragged();
+      return;
+   }
+
    mMousePos.set(gScreenInfo.getMousePos());
 
    if(mCreatingPoly || mCreatingPolyline)
@@ -2292,12 +2298,12 @@ void EditorUserInterface::onMouseMoved()
 }
 
 
-void EditorUserInterface::onMouseDragged(S32 x, S32 y)
+void EditorUserInterface::onMouseDragged()
 {
-   if(mouseIgnore)  // Needed to avoid freezing effect from too many mouseMoved events without a render in between (sam)
-      return;
+   //if(mouseIgnore)  // Needed to avoid freezing effect from too many mouseMoved events without a render in between (sam)
+   //   return;
 
-   mouseIgnore = true;
+   //mouseIgnore = true;
 
    mMousePos.set(gScreenInfo.getMousePos());
 

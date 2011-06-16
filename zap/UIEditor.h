@@ -300,7 +300,7 @@ public:
    void onKeyUp(KeyCode keyCode);
    void onMouseMoved(S32 x, S32 y);
    void onMouseMoved();
-   void onMouseDragged(S32 x, S32 y);
+   void onMouseDragged();
    void startDraggingDockItem();
    bool mouseIgnore;
 
