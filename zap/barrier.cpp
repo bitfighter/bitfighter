@@ -28,10 +28,10 @@
 #include "gameObjectRender.h"
 #include "GeomUtils.h"              // For polygon triangulation
 #include "engineeredObjects.h"      // For forcefieldprojector def
-
 #include "gameType.h"               // For BarrierRec struct
 
-#include "glutInclude.h"
+#include "SDL/SDL_opengl.h"
+
 #include <cmath>                    // C++ version of this headers includes float overloads
 
 using namespace TNL;
@@ -108,7 +108,7 @@ Barrier::Barrier(const Vector<Point> &points, F32 width, bool solid)
 
    if(points.size() < 2)      // Invalid barrier!
    {
-      delete this;
+      //delete this;    // Sam: cannot "delete this" in constructor, as "new" still returns non-NULL address
       logprintf(LogConsumer::LogWarning, "Invalid barrier detected (has only one point).  Disregarding...");
       return;
    }
@@ -137,7 +137,7 @@ Barrier::Barrier(const Vector<Point> &points, F32 width, bool solid)
 
       if(mRenderFillGeometry.size() == 0)      // Geometry is bogus; perhaps duplicated points, or other badness
       {
-         delete this;
+         //delete this;    // Sam: cannot "delete this" in constructor, as "new" still returns non-NULL address
          logprintf(LogConsumer::LogWarning, "Invalid barrier detected (polywall with invalid geometry).  Disregarding...");
          return;
       }

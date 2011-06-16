@@ -28,7 +28,6 @@
 #include "gameNetInterface.h"
 #include "UI.h"
 #include "gameObjectRender.h"
-#include "glutInclude.h"
 #include "polygon.h"
 
 namespace Zap

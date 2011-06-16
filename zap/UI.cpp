@@ -37,17 +37,14 @@ using namespace TNL;
 //#include "UIEditor.h"      // <--- we need to get rid of this one!
 //#include "UICredits.h"     // <--- don't want this one either
 #include "Colors.h"
-
-#include "../glut/glutInclude.h"
+#include "OpenglUtils.h"
 
 #include <string>
 #include <stdarg.h>     // For va_args
 
 #include <math.h>
 
-#ifdef ZAP_DEDICATED
-void *glutStrokeRoman;
-#endif
+#include "SDL/SDL_opengl.h"
 
 using namespace std;
 namespace Zap
@@ -248,17 +245,14 @@ void UserInterface::renderCurrent()    // static
    // Clear screen -- force clear of "black bars" area to avoid flickering on some video cards
    bool scissorMode = glIsEnabled(GL_SCISSOR_TEST);
 
-   if(scissorMode) 
+   if(scissorMode)
       glDisable(GL_SCISSOR_TEST);
 
-   glClearColor(0, 0, 0, 1.0);
    glClear(GL_COLOR_BUFFER_BIT);
 
-   if(scissorMode) 
+   if(scissorMode)
       glEnable(GL_SCISSOR_TEST);
    
-   glViewport(0, 0, gScreenInfo.getWindowWidth(), gScreenInfo.getWindowHeight());
-
    if(gClientGame2)
    {
       gIniSettings.inputMode = Joystick;
@@ -392,7 +386,7 @@ void UserInterface::doDrawAngleString(F32 x, F32 y, F32 size, F32 angle, const c
       glRotatef(angle * radiansToDegreesConversion, 0, 0, 1);
       glScalef(scaleFactor, -scaleFactor, 1);
       for(S32 i = 0; string[i]; i++)
-         glutStrokeCharacter(GLUT_STROKE_ROMAN, string[i]);
+         OpenglUtils::drawCharacter(string[i]);
    glPopMatrix();
 }
 
@@ -646,7 +640,7 @@ void UserInterface::drawString4Colf(S32 y, S32 size, U32 col, const char *format
 F32 UserInterface::getStringWidthF32(F32 size, const char *string)
 {
 #ifndef ZAP_DEDICATED
-   return F32( glutStrokeLength(GLUT_STROKE_ROMAN, (const unsigned char *) string) ) * size / 120.0;
+   return F32( OpenglUtils::getStringLength((const unsigned char *) string) ) * size / 120.0;
 #else
    return 1;
 #endif

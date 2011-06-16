@@ -1,6 +1,5 @@
 #include "pictureloader.h"
 #include "tnlLog.h"
-#include "../glut/glutInclude.h"    // For GL functions
 
 #include <stdio.h>                  // For file reading
 

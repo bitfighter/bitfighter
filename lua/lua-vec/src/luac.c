@@ -183,6 +183,9 @@ static int pmain(lua_State* L)
  return 0;
 }
 
+// this is because vc++ linking with SubSystem CONSOLE, 
+// will use this instead of bitfighter main()
+#ifndef _MSC_VER
 int main(int argc, char* argv[])
 {
  lua_State* L;
@@ -198,3 +201,4 @@ int main(int argc, char* argv[])
  lua_close(L);
  return EXIT_SUCCESS;
 }
+#endif

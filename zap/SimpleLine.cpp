@@ -29,6 +29,8 @@
 
 #include <math.h>
 
+#include "SDL/SDL_opengl.h"
+
 namespace Zap
 {
 

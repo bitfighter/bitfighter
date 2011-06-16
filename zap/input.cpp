@@ -32,8 +32,10 @@
 
 #include "gameObjectRender.h"
 #include "config.h"
+#include "Event.h"
 
-#include "../glut/glutInclude.h"
+#include "SDL/SDL_opengl.h"
+
 #include <math.h>
 #include <string>
 
@@ -978,10 +980,6 @@ string joystickTypeToPrettyString(S32 controllerType)
 
 
 
-
-
-void extern simulateKeyDown(KeyCode keyCode);
-void extern simulateKeyUp(KeyCode keyCode);
 bool extern getKeyState(KeyCode keyCode);
 
 // Populates theMove with input from joystick, and also creates some
@@ -1264,8 +1262,18 @@ static bool processJoystickInputJournaled( Move *theMove, U32 &buttonMask )
 }
 
 
-extern void simulateKeyDown(KeyCode keyCode);
-extern void simulateKeyUp(KeyCode keyCode);
+
+void simulateKeyDown(KeyCode keyCode)
+{
+   setKeyState(keyCode, true);
+   UserInterface::current->onKeyDown(MOUSE_MIDDLE, 0);
+}
+
+void simulateKeyUp(KeyCode keyCode)
+{
+   setKeyState(keyCode, false);
+   UserInterface::current->onKeyUp(MOUSE_MIDDLE);
+}
 
 // Loads joystick moves into our Move object (overwriting any keyboard input that was already there)
 // Also translates joystick button events into our KeyCode system

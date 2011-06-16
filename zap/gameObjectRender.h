@@ -27,7 +27,6 @@
 #define _GAMEOBJECTRENDER_H_
 
 #include "tnl.h"
-#include "../glut/glutInclude.h"
 
 #include "Geometry.h"
 

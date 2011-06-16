@@ -31,8 +31,7 @@
 // understand namespace.  This is a sort of hack until we get that issue 
 // figured out.
 
-// These are all the keys that GLUT can detect.  If it's not on this
-// list, the key doesn't exist for our purposes.  Sorry!
+// These are many (all?) the keys that SDL can detect.
 enum KeyCode {
    KEY_0, KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, // Keyboard input
    KEY_6, KEY_7, KEY_8, KEY_9, KEY_A, KEY_B,
@@ -51,11 +50,11 @@ enum KeyCode {
    KEY_INSERT,     KEY_DELETE,
    KEY_F1, KEY_F2, KEY_F3, KEY_F4,  KEY_F5,  KEY_F6,
    KEY_F7, KEY_F8, KEY_F9, KEY_F10, KEY_F11, KEY_F12,
-   // KEY_F13, KEY_F14, KEY_F15,    // Additional keys recognized by SDL
+   KEY_F13, KEY_F14, KEY_F15,    // Additional keys recognized by SDL
    KEY_BACKSPACE,  KEY_TAB, KEY_ENTER,
    KEY_ESCAPE,     KEY_SPACE,
 
-   /* More SDL keys
+   // More SDL keys
    // Locks
    KEY_NUMLOCK, KEY_CAPSLOCK, KEY_SCROLLOCK,
 
@@ -63,13 +62,12 @@ enum KeyCode {
    KEY_RSHIFT, KEY_LSHIFT, KEY_RCTRL, KEY_LCTRL,
    KEY_RALT, KEY_LALT, KEY_RMETA, KEY_LMETA,
    KEY_LSUPER, KEY_RSUPER,
-   */
    
    // And these are psudeo modifers, that may represent multiple events
    // (e.g. KEY_SHIFT means KEY_LSHIFT or KEY_RSHIFT)
    KEY_SHIFT,   KEY_CTRL,   KEY_ALT,
 
-   /* // Some keys in SDL that were not in GLUT
+   // Some keys in SDL that were not in GLUT
    KEY_CLEAR, KEY_PAUSE, KEY_EXCLAIM, KEY_DOUBLEQUOTE, KEY_HASH, KEY_DOLLAR,
    KEY_AMPERSAND, KEY_OPENPAREN, KEY_CLOSEPAREN, KEY_ASTERISK, KEY_PLUS,
    KEY_COLON, KEY_LESS, KEY_GREATER, KEY_QUESTION, KEY_AT, KEY_CARET,
@@ -105,8 +103,8 @@ enum KeyCode {
    KEY_KEYPAD5, KEY_KEYPAD6, KEY_KEYPAD7, KEY_KEYPAD8, KEY_KEYPAD9,
    KEY_KEYPAD_PERIOD, KEY_KEYPAD_DIVIDE, KEY_KEYPAD_MULTIPLY,
    KEY_KEYPAD_MINUS, KEY_KEYPAD_PLUS, KEY_KEYPAD_ENTER, KEY_KEYPAD_EQUALS,
-   */
    
+
    MOUSE_LEFT, MOUSE_MIDDLE, MOUSE_RIGHT,    // Mouse buttons
 
    BUTTON_1, BUTTON_2, BUTTON_3,             // Controller buttons

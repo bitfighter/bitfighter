@@ -29,7 +29,7 @@
 #include "gameType.h"
 #include "flagItem.h"
 
-#include "glutInclude.h"
+#include "SDL/SDL_opengl.h"
 
 namespace Zap
 {
@@ -314,6 +314,11 @@ void Item::idle(GameObject::IdleCallPath path)
                updateTimer = 100;
                prevMoveVelocity = mMoveState[ActualState].vel;
             }
+         }
+         else if(prevMoveVelocity.lenSquared() != 0)
+         {
+            setMaskBits(PositionMask);  // update to client that this item is no longer moving.
+            prevMoveVelocity.set(0,0);
          }
 
          mMoveState[RenderState] = mMoveState[ActualState];

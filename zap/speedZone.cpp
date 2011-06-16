@@ -32,7 +32,6 @@
 #include "UIEditorMenus.h"    // For GoFastEditorAttributeMenuUI def
 #include "UI.h"
 #include "SoundSystem.h"
-#include "../glut/glutInclude.h"
 
 namespace Zap
 {

@@ -28,7 +28,6 @@
 #include "UIYesNo.h"
 #include "UIMenus.h"
 
-#include "../glut/glutInclude.h"
 #include <stdio.h>
 
 namespace Zap

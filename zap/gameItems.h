@@ -31,10 +31,6 @@
 #include "luaObject.h"        // For Lua interfaces
 #include "gameObjectRender.h"
 
-#include "Point.h"
-#include "../glut/glutInclude.h"
-
-
 
 namespace Zap
 {

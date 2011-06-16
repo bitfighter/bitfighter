@@ -45,20 +45,18 @@
 #include "robot.h"
 #include "shipItems.h"           // For moduleInfos
 #include "stringUtils.h"
-
 #include "UIGame.h"
 #include "UIMenus.h"
 #include "UINameEntry.h"
 #include "UIEditor.h"         // For EditorUserInterface def, needed by EditorGame stuff
-
 #include "BotNavMeshZone.h"      // For zone clearing code
-
-#include "../glut/glutInclude.h"
 
 #include "tnl.h"
 #include "tnlRandom.h"
 #include "tnlGhostConnection.h"
 #include "tnlNetInterface.h"
+
+#include "SDL/SDL_opengl.h"
 
 #include <sys/stat.h>
 #include <math.h>
@@ -237,7 +235,7 @@ void Game::processLevelLoadLine(U32 argc, U32 id, const char **argv)
       }
 
       TNL::Object *theObject = TNL::Object::create(obj);          // Create an object of the type specified on the line
-      GameObject   *object  = dynamic_cast<GameObject *>  (theObject);  // Force our new object to be a GameObject
+      SafePtr<GameObject> object  = dynamic_cast<GameObject *>  (theObject);  // Force our new object to be a GameObject
       EditorObject *eObject = dynamic_cast<EditorObject *>(theObject);
 
 
@@ -250,11 +248,13 @@ void Game::processLevelLoadLine(U32 argc, U32 id, const char **argv)
       {
          computeWorldObjectExtents();    // Make sure this is current if we process a robot that needs this for intro code
 
-
          bool validArgs = object->processArguments(argc - 1, argv + 1, this);
 
          if(validArgs)
-            object->addToGame(this);
+         {
+            if(object.isValid())  // processArguments might delete this object (teleporter)
+               object->addToGame(this);
+         }
          else
          {
             logprintf(LogConsumer::LogWarning, "Invalid arguments in object \"%s\" in level \"%s\"", obj, origFilename.c_str());
@@ -1411,6 +1411,7 @@ void ServerGame::idle(U32 timeDelta)
    fillVector.clear();
    mDatabase->findObjects(fillVector);
 
+
    // Visit each game object, handling moves and running its idle method
    for(S32 i = 0; i < fillVector.size(); i++)
    {
@@ -1427,6 +1428,13 @@ void ServerGame::idle(U32 timeDelta)
       // Give the object its move, then have it idle
       obj->setCurrentMove(thisMove);
       obj->idle(GameObject::ServerIdleMainLoop);
+   }
+   if(mGameType)
+   {
+      Move m = mGameType->getCurrentMove();
+      m.time = timeDelta;
+      mGameType->setCurrentMove(m);
+      mGameType->idle(GameObject::ServerIdleMainLoop);
    }
 
    processDeleteList(timeDelta);
@@ -1644,11 +1652,18 @@ void ClientGame::idle(U32 timeDelta)
          }
          else
          {
-            Move m =obj->getCurrentMove();
+            Move m = obj->getCurrentMove();
             m.time = timeDelta;
             obj->setCurrentMove(m);
             obj->idle(GameObject::ClientIdleMainRemote);    // on client, object is not our control object
          }
+      }
+      if(mGameType)
+      {
+         Move m = mGameType->getCurrentMove();
+         m.time = timeDelta;
+         mGameType->setCurrentMove(m);
+         mGameType->idle(GameObject::ClientIdleMainRemote);
       }
 
       if(controlObject)

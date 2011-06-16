@@ -55,11 +55,11 @@
 #include "textItem.h"            // For MAX_TEXTITEM_LEN and MAX_TEXT_SIZE
 #include "luaLevelGenerator.h"
 #include "stringUtils.h"
-#include "../glut/glutInclude.h"
 
 #include "oglconsole.h"          // Our console object
 
-#include <boost/shared_ptr.hpp>
+#include "SDL/SDL.h"
+#include "SDL/SDL_opengl.h"
 
 #include <ctype.h>
 #include <exception>
@@ -1411,10 +1411,10 @@ void EditorUserInterface::renderDock(F32 width)    // width is current wall widt
       glColor(i ? Colors::black : (mouseOnDock() ? Colors::yellow : Colors::white));
 
       glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
-         glVertex2f(canvasWidth - DOCK_WIDTH - horizMargin, canvasHeight - vertMargin);
-         glVertex2f(canvasWidth - horizMargin,              canvasHeight - vertMargin);
-         glVertex2f(canvasWidth - horizMargin,              canvasHeight - vertMargin - dockHeight);
-         glVertex2f(canvasWidth - DOCK_WIDTH - horizMargin, canvasHeight - vertMargin - dockHeight);
+         glVertex2i(canvasWidth - DOCK_WIDTH - horizMargin, canvasHeight - vertMargin);
+         glVertex2i(canvasWidth - horizMargin,              canvasHeight - vertMargin);
+         glVertex2i(canvasWidth - horizMargin,              canvasHeight - vertMargin - dockHeight);
+         glVertex2i(canvasWidth - DOCK_WIDTH - horizMargin, canvasHeight - vertMargin - dockHeight);
       glEnd();
    }
 
@@ -1500,10 +1500,10 @@ void EditorUserInterface::renderTextEntryOverlay()
          glColor(Color(.3,.6,.3), i ? .85 : 1);
 
          glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
-            glVertex2f(xpos,            ypos);
-            glVertex2f(xpos + boxwidth, ypos);
-            glVertex2f(xpos + boxwidth, ypos + boxheight);
-            glVertex2f(xpos,            ypos + boxheight);
+            glVertex2i(xpos,            ypos);
+            glVertex2i(xpos + boxwidth, ypos);
+            glVertex2i(xpos + boxwidth, ypos + boxheight);
+            glVertex2i(xpos,            ypos + boxheight);
          glEnd();
       }
       glDisableBlend;
@@ -2287,7 +2287,8 @@ void EditorUserInterface::onMouseMoved()
 
    findSnapVertex();
 
-   glutSetCursor((showMoveCursor && !mShowingReferenceShip) ? GLUT_CURSOR_SPRAY : GLUT_CURSOR_RIGHT_ARROW);
+   // TODO:  was GLUT_CURSOR_SPRAY : GLUT_CURSOR_RIGHT_ARROW
+   SDL_ShowCursor((showMoveCursor && !mShowingReferenceShip) ? SDL_ENABLE : SDL_ENABLE);
 }
 
 
@@ -3339,7 +3340,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          mShowMode = (ShowMode) 0;     // First mode
 
       if(mShowMode == ShowWallsOnly && !mDraggingObjects)
-         glutSetCursor(GLUT_CURSOR_RIGHT_ARROW);
+         SDL_ShowCursor(SDL_ENABLE);  // TODO:  was GLUT_CURSOR_RIGHT_ARROW
 
       populateDock();   // Different modes have different items
 
@@ -3420,8 +3421,6 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    }
    else if(keyCode == keyOUTGAMECHAT)     // Turn on Global Chat overlay
       gChatInterface.activate();
-//   else if(keyCode == keyDIAG)            // Turn on diagnostic overlay -- why not here??
-//      gDiagnosticInterface.activate();
    else if(keyCode == KEY_ESCAPE)           // Activate the menu
    {
       UserInterface::playBoop();
@@ -3864,7 +3863,7 @@ void EditorUserInterface::testLevelStart()
    string tmpFileName = mEditFileName;
    mEditFileName = "editor.tmp";
 
-   glutSetCursor(GLUT_CURSOR_NONE);    // Turn off cursor
+   SDL_ShowCursor(SDL_DISABLE);    // Turn off cursor
    bool nts = mNeedToSave;             // Save these parameters because they are normally reset when a level is saved.
    S32 auul = mAllUndoneUndoLevel;     // Since we're only saving a temp copy, we really shouldn't reset them...
 
@@ -3981,7 +3980,7 @@ void EditorMenuUserInterface::setupMenus()
 
 void EditorMenuUserInterface::onEscape()
 {
-   glutSetCursor(GLUT_CURSOR_NONE);
+   SDL_ShowCursor(SDL_DISABLE);
    reactivatePrevUI();
 }
 

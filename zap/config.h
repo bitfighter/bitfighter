@@ -253,6 +253,7 @@ struct IniSettings      // With defaults specified
    void init();
 };
 
+extern IniSettings gIniSettings;
 
 void saveSettingsToINI();
 void loadSettingsFromINI();

@@ -45,7 +45,7 @@ XXX need to document timers, new luavec stuff XXX
 
 /shutdown enhancements: on screen timer after msg dismissed, instant dismissal of local notice, notice in join menu, shutdown after level, auto shutdown when quitting and players connected
 
-*/
+ */
 /* Fixes after 015a
 <h2>Bug Fixes</h2>
 <ul>
@@ -105,7 +105,7 @@ XXX need to document timers, new luavec stuff XXX
 <li>Fix broken rating sort - teams should sort better at start of rounds now
 <li>Fix large scores being chopped off of the display
 </ul>
-*/
+ */
 
 //-----------------------------------------------------------------------------------
 //
@@ -150,7 +150,6 @@ XXX need to document timers, new luavec stuff XXX
 
 #include "zapjournal.h"
 
-#include "../glut/glutInclude.h"
 #include <stdarg.h>
 #include <math.h>
 //#include <stdio.h>      // For logging to console
@@ -176,9 +175,11 @@ using namespace TNL;
 #include "md5wrapper.h"
 #include "version.h"
 #include "Colors.h"
-
-
 #include "screenShooter.h"
+#include "Event.h"
+
+#include "SDL/SDL.h"
+#include "SDL/SDL_opengl.h"
 
 // For writeToConsole() functionality
 #ifdef WIN32
@@ -253,7 +254,7 @@ DataConnection *dataConn = NULL;
 
 Vector<string> gMasterAddress;
 Address gBindAddress(IPProtocol, Address::Any, 28000);      // Good for now, may be overwritten by INI or cmd line setting
-      // Above is equivalent to ("IP:Any:28000")
+// Above is equivalent to ("IP:Any:28000")
 
 Vector<StringTableEntry> gLevelSkipList;  // Levels we'll never load, to create a semi-delete function for remote server mgt
 
@@ -261,23 +262,7 @@ Vector<string> gJoystickNames;
 
 extern NameEntryUserInterface gNameEntryUserInterface;
 
-
-// Since GLUT reports the current mouse pos via a series of events, and does not make
-// its position available upon request, we'll store it when it changes so we'll have
-// it when we need it.
-//
-// Note that when we are in the editor, we need to override the display mode because our
-// canvas dimensions are irregular.
-void setMousePos(S32 x, S32 y)
-{
-   DisplayMode reportedDisplayMode = gIniSettings.displayMode;
-
-   if(UserInterface::current->getMenuID() == EditorUI && reportedDisplayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED)
-      reportedDisplayMode = DISPLAY_MODE_FULL_SCREEN_STRETCHED;
-
-   gScreenInfo.setMousePos(x, y, reportedDisplayMode);
-}
-
+ScreenInfo gScreenInfo;
 
 Screenshooter gScreenshooter;    // For taking screen shots
 
@@ -289,272 +274,14 @@ struct ClientInfo;
 ClientInfo gClientInfo;          // Info about the client used for establishing connection to server
 
 
-// Handler called by GLUT when window is reshaped
-void GLUT_CB_reshape(int nw, int nh)
-{
-   gZapJournal.reshape(nw, nh);
-}                                            
-
-TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, reshape, (S32 newWidth, S32 newHeight), (newWidth, newHeight))
-{
-   // If we are entering fullscreen mode, then we don't want to mess around with proportions and all that.  Just save window size and get out.
-   if(gIniSettings.displayMode == DISPLAY_MODE_FULL_SCREEN_STRETCHED || gIniSettings.displayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED)
-      gScreenInfo.setWindowSize(newWidth, newHeight);
-
-   else
-   {
-     S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
-     S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
-  
-     // Constrain window to correct proportions...
-     if((newWidth - canvasWidth) > (newHeight - canvasHeight))      // Wider than taller  (is this right? mixing virtual and physical pixels)
-        gIniSettings.winSizeFact = max((F32) newHeight / (F32)canvasHeight, MIN_SCALING_FACT);
-     else
-        gIniSettings.winSizeFact = max((F32) newWidth / (F32)canvasWidth, MIN_SCALING_FACT);
-  
-     S32 width  = (S32)floor(canvasWidth  * gIniSettings.winSizeFact + 0.5f);   // virtual * (physical/virtual) = physical, fix rounding problem
-     S32 height = (S32)floor(canvasHeight * gIniSettings.winSizeFact + 0.5f);    
-  
-     glutReshapeWindow(width, height);
-     gScreenInfo.setWindowSize(width, height);        
-   }
-
-   glViewport(0, 0, gScreenInfo.getWindowWidth(), gScreenInfo.getWindowHeight());
-   OGLCONSOLE_Reshape();
-
-   gINI.SetValueF("Settings", "WindowScalingFactor", gIniSettings.winSizeFact, true);
-}
-
-
-// Handler called by GLUT when mouse motion is detected
-void GLUT_CB_motion(int x, int y)
-{
-   gZapJournal.motion(x, y);
-}
-
-TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, motion, (S32 x, S32 y), (x, y))
-{
-   setMousePos(x, y);
-
-   if(UserInterface::current)
-      UserInterface::current->onMouseDragged(x, y);
-}
-
-// Handler called by GLUT when "passive" mouse motion is detected
-void GLUT_CB_passivemotion(int x, int y)
-{
-   gZapJournal.passivemotion(x, y);
-}
-
-TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, passivemotion, (S32 x, S32 y), (x, y))
-{
-   const Point *winMousePos = gScreenInfo.getWindowMousePos();
-
-   // Glut sometimes fires spurious events.  Let's ignore those.
-   if(x == winMousePos->x && y == winMousePos->y)
-      return;
-
-   // This firstTime rigamarole prevents onMouseMoved() from firing when game first starts up; if we're in full screen mode,
-   // GLUT calls this callback immediately.  Thanks, GLUT!
-   bool firstTime = (winMousePos->x == -1); 
-
-   setMousePos(x, y);
-
-   if(firstTime)
-      return;
-
-   if(UserInterface::current)
-      UserInterface::current->onMouseMoved(x, y);
-}
-
-
-void keyDown(KeyCode keyCode, char ascii)    // Launch the onKeyDown event
-{
-   if(UserInterface::current)
-      UserInterface::current->onKeyDown(keyCode, ascii);
-}
-
-// Sometimes we need to pretend a key was pressed, such as for those that don't
-// generate events (shift/ctrl/alt, controller buttons, etc.)
-void simulateKeyDown(KeyCode keyCode)
-{
-   setKeyState(keyCode, true);
-   keyDown(keyCode, 0);
-}
-
-void keyUp(KeyCode keyCode)              // Launch the onKeyUp event
-{
-   if(UserInterface::current)
-      UserInterface::current->onKeyUp(keyCode);
-}
-
-void simulateKeyUp(KeyCode keyCode)
-{
-   setKeyState(keyCode, false);
-   keyUp(keyCode);
-}
-
-// GLUT handler for key-down events
-void GLUT_CB_keydown(unsigned char key, S32 x, S32 y)
-{
-   gZapJournal.keydown(key);
-}
-
-
-TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, keydown, (U8 key), (key))
-{
-   // First check for some "universal" keys.  If keydown isn't one of those, we'll pass the key onto the keyDown handler
-   // Check for ALT-ENTER --> toggles window mode/full screen
-   if(key == '\r' && (glutGetModifiers() & GLUT_ACTIVE_ALT))
-      gOptionsMenuUserInterface.toggleDisplayMode();
-   else if(key == 17)      // GLUT reports Ctrl-Q as 17
-      gScreenshooter.phase = 1;
-   else
-   {
-      KeyCode keyCode = standardGLUTKeyToKeyCode(key);
-      setKeyState(keyCode, true);
-      keyDown(keyCode, keyToAscii(key, keyCode));
-   }
-}
-
-#ifndef ZAP_DEDICATED
-
-// GLUT handler for key-up events
-void GLUT_CB_keyup(unsigned char key, int x, int y)
-{
-   gZapJournal.keyup(key);
-}
-
-TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, keyup, (U8 key), (key))
-{
-   KeyCode keyCode = standardGLUTKeyToKeyCode(key);
-   setKeyState(keyCode, false);
-   keyUp(keyCode);
-}
-
-// GLUT handler for mouse clicks
-void GLUT_CB_mouse(int button, int state, int x, int y)
-{
-   gZapJournal.mouse(button, state, x, y);
-}
-
-TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, mouse, (S32 button, S32 state, S32 x, S32 y), (button, state, x, y))
-{
-   setMousePos(x, y);
-
-   if(!UserInterface::current) return;    // Bail if no current UI
-
-   if(button == GLUT_LEFT_BUTTON)
-   {
-      setKeyState(MOUSE_LEFT, (state == GLUT_DOWN));
-
-      if(state == GLUT_DOWN)
-         keyDown(MOUSE_LEFT, 0);
-      else // state == GLUT_UP
-         keyUp(MOUSE_LEFT);
-   }
-   else if(button == GLUT_RIGHT_BUTTON)
-   {
-      setKeyState(MOUSE_RIGHT, (state == GLUT_DOWN));
-
-      if(state == GLUT_DOWN)
-         keyDown(MOUSE_RIGHT, 0);
-      else // state == GLUT_UP
-         keyUp(MOUSE_RIGHT);
-   }
-   else if(button == GLUT_MIDDLE_BUTTON)
-   {
-      setKeyState(MOUSE_MIDDLE, (state == GLUT_DOWN));
-
-      if(state == GLUT_DOWN)
-         keyDown(MOUSE_MIDDLE, 0);
-      else // state == GLUT_UP
-         keyUp(MOUSE_MIDDLE);
-   }
-}
-
-// GLUT callback for special key down (special keys are things like F1-F12)
-void GLUT_CB_specialkeydown(int key, int x, int y)
-{
-   gZapJournal.specialkeydown(key);
-}
-
-TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, specialkeydown, (S32 key), (key))
-{
-   KeyCode keyCode = specialGLUTKeyToKeyCode(key);
-   setKeyState(keyCode, true);
-
-   if(keyCode == keyDIAG && !gDiagnosticInterface.isActive())   // Turn on diagnostic overlay if not already on
-   {
-      UserInterface::playBoop();
-      gDiagnosticInterface.activate();
-   }
-   else
-      keyDown(keyCode, keyToAscii(key, keyCode));           // Launch onKeyDown event
-}
-
-
-// GLUT callback for special key up
-void GLUT_CB_specialkeyup(int key, int x, int y)
-{
-   gZapJournal.specialkeyup(key);
-}
-
-TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, specialkeyup, (S32 key), (key))
-{
-   KeyCode keyCode = specialGLUTKeyToKeyCode(key);
-   setKeyState(keyCode, false);
-   keyUp(keyCode);
-}
-#endif
-
-TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, modifierkeydown, (U32 key), (key))
-{
-   if(key == 0)         // shift
-   {
-      setKeyState(KEY_SHIFT, true);
-      keyDown(KEY_SHIFT, 0);
-   }
-   else if(key == 1)    // ctrl
-   {
-      setKeyState(KEY_CTRL, true);
-      keyDown(KEY_CTRL, 0);
-   }
-   else if(key == 2)    // alt
-   {
-      setKeyState(KEY_ALT, true);
-      keyDown(KEY_ALT, 0);
-   }
-}
-
-TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, modifierkeyup, (U32 key), (key))
-{
-   if(key == 0)         // shift
-   {
-      setKeyState(KEY_SHIFT, false);
-      keyUp(KEY_SHIFT);
-   }
-   else if(key == 1)    // ctrl
-   {
-      setKeyState(KEY_CTRL, false);
-      keyUp(KEY_CTRL);
-   }
-   else if(key == 2)    // alt
-   {
-      setKeyState(KEY_ALT, false);
-      keyUp(KEY_ALT);
-   }
-}
-
-
 void exitGame(S32 errcode)
 {
-   #ifdef TNL_OS_XBOX
-      extern void xboxexit();
-      xboxexit();
-   #else
-      exit(errcode);
-   #endif
+#ifdef TNL_OS_XBOX
+   extern void xboxexit();
+   xboxexit();
+#else
+   exit(errcode);
+#endif
 }
 
 
@@ -674,8 +401,8 @@ void initHostGame(Address bindAddress, Vector<string> &levelList, bool testMode)
       return;
    }
 
-  // Do this even if there are no levels, so hostGame error handling will be triggered
-  gServerGame->hostingModePhase = ServerGame::LoadingLevels;  
+   // Do this even if there are no levels, so hostGame error handling will be triggered
+   gServerGame->hostingModePhase = ServerGame::LoadingLevels;
 }
 
 
@@ -692,7 +419,7 @@ void hostGame()
 
    for(S32 i = 0; i < gServerGame->getLevelNameCount(); i++)
       logprintf(LogConsumer::ServerFilter, "\t%s [%s]", gServerGame->getLevelNameFromIndex(i).getString(), 
-                                                        gServerGame->getLevelFileNameFromIndex(i).c_str());
+            gServerGame->getLevelFileNameFromIndex(i).c_str());
 
    if(gServerGame->getLevelNameCount())                  // Levels loaded --> start game!
       gServerGame->cycleLevel(ServerGame::FIRST_LEVEL);  // Start with the first level
@@ -711,6 +438,60 @@ void hostGame()
 }
 
 
+// do the logic to draw the screen
+void display()
+{
+   glFlush();
+
+   UserInterface::renderCurrent();
+
+   // Render master connection state if we're not connected
+   // TODO: should this go elsewhere?
+   if(gClientGame && gClientGame->getConnectionToMaster() &&
+         gClientGame->getConnectionToMaster()->getConnectionState() != NetConnection::Connected)
+   {
+      glColor3f(1, 1, 1);
+      UserInterface::drawStringf(10, 550, 15, "Master Server - %s", gConnectStatesTable[gClientGame->getConnectionToMaster()->getConnectionState()]);
+   }
+
+   // Swap the buffers. This this tells the driver to render the next frame from the contents of the
+   // back-buffer, and to set all rendering operations to occur on what was the front-buffer.
+   // Double buffering prevents nasty visual tearing from the application drawing on areas of the
+   // screen that are being updated at the same time.
+   SDL_GL_SwapBuffers();  // Use this if we convert to SDL
+}
+
+
+void gameIdle(U32 integerTime)
+{
+   if(UserInterface::current)
+      UserInterface::current->idle(integerTime);
+
+   if(!(gServerGame && gServerGame->hostingModePhase == ServerGame::LoadingLevels))    // Don't idle games during level load
+   {
+      if(gClientGame2)
+      {
+         gIniSettings.inputMode = Joystick;
+         gClientGame1->mUserInterfaceData->get();
+         gClientGame2->mUserInterfaceData->set();
+
+         gClientGame = gClientGame2;
+         gClientGame->idle(integerTime);
+
+         gIniSettings.inputMode = Keyboard;
+         gClientGame2->mUserInterfaceData->get();
+         gClientGame1->mUserInterfaceData->set();
+      }
+      if(gClientGame1)
+      {
+         gClientGame = gClientGame1;
+         gClientGame->idle(integerTime);
+      }
+      if(gServerGame)
+         gServerGame->idle(integerTime);
+   }
+}
+
 // This is the master idle loop that gets registered with GLUT and is called on every game tick.
 // This in turn calls the idle functions for all other objects in the game.
 void idle()
@@ -723,7 +504,6 @@ void idle()
          hostGame();
    }
 
-   checkModifierKeyState();      // Most keys are handled as events by GLUT...  but not Ctrl, Alt, Shift!
    static S64 lastTimer = Platform::getHighPrecisionTimerValue(); // accurate, but possible wrong speed when overclocking or underclocking CPU
    static U32 lastTimer2 = Platform::getRealMilliseconds();  // right speed
    static F64 unusedFraction = 0;
@@ -760,9 +540,9 @@ void idle()
    U32 sleepTime = 1;
 
    if( (gDedicatedServer  && integerTime >= S32(1000 / gIniSettings.maxDedicatedFPS)) || 
-       (!gDedicatedServer && integerTime >= S32(1000 / gIniSettings.maxFPS)) )
+         (!gDedicatedServer && integerTime >= S32(1000 / gIniSettings.maxFPS)) )
    {
-      gZapJournal.idle(U32(integerTime));
+      gameIdle(U32(integerTime));
       integerTime = 0;
       if(!gDedicatedServer)
          sleepTime = 0;      // Live player at the console, but if we're running > 100 fps, we can afford a nap
@@ -776,40 +556,27 @@ void idle()
    // Note that moving to SDL will require our journaling system to be re-engineered.
    // Note too that SDL will require linking in SDL.lib and SDLMain.lib, and including the SDL.dll in the EXE folder.
 
-   /* SDL requires an active polling loop.  We could use something like the following:
-   while(SDL_PollEvent(&e))
+   // SDL requires an active polling loop.  We could use something like the following:
+   SDL_Event event;
+
+   while(SDL_PollEvent(&event))
    {
-      switch(e.type)
-      {
-         case SDL_KEYDOWN:
-            gZapJournal.keydown((S32) e.key.keysym.sym);      // Cast to S32 to ensure journaling system can cope
-            break;
-         case SDL_KEYUP:
-            gZapJournal.keyup((S32) e.key.keysym.sym);
-            break;
-         case SDL_MOUSEMOTION:
-            break;
-         case SDL_VIDEORESIZE:
-            window_resized(e.resize.w, e.resize.h);
-            break;
-         case SDL_QUIT:       // User closed game window
-            exitGame();
-            break;
-      }
+      if (event.type == SDL_QUIT) // Handle quit here
+         exitGame();
+
+      Event::onEvent(&event);
    }
+   // END SDL event polling
 
-   gZapJournal.display();    // Draw the screen --> GLUT handles this via callback, with SDL we need to do it in our main loop
-   END SDL event polling */
-
+   display();    // Draw the screen
 
    // Sleep a bit so we don't saturate the system. For a non-dedicated server,
    // sleep(0) helps reduce the impact of OpenGL on windows.
 
-     
    // If there are no players, set sleepTime to 40 to further reduce impact on the server.
    // We'll only go into this longer sleep on dedicated servers when there are no players.
    if(gDedicatedServer && gServerGame->isSuspended())
-          sleepTime = 40;     // The higher this number, the less accurate the ping is on server lobby when empty, but the less power consumed.
+      sleepTime = 40;     // The higher this number, the less accurate the ping is on server lobby when empty, but the less power consumed.
 
    Platform::sleep(sleepTime);
 
@@ -818,77 +585,11 @@ void idle()
 }  // end idle()
 
 
-
-TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, idle, (U32 integerTime), (integerTime))
-{
-   if(UserInterface::current)
-      UserInterface::current->idle(integerTime);
-
-   if(!(gServerGame && gServerGame->hostingModePhase == ServerGame::LoadingLevels))    // Don't idle games during level load
-   {
-      if(gClientGame2)
-      {
-         gIniSettings.inputMode = Joystick;
-         gClientGame1->mUserInterfaceData->get();
-         gClientGame2->mUserInterfaceData->set();
-
-         gClientGame = gClientGame2;
-         gClientGame->idle(integerTime);
-
-         gIniSettings.inputMode = Keyboard;
-         gClientGame2->mUserInterfaceData->get();
-         gClientGame1->mUserInterfaceData->set();
-      }
-      if(gClientGame1)
-      {
-         gClientGame = gClientGame1;
-         gClientGame->idle(integerTime);
-      }
-      if(gServerGame)
-         gServerGame->idle(integerTime);
-   }
-
-   if(gClientGame)
-      glutPostRedisplay();
-}
-
 void dedicatedServerLoop()
 {
    for(;;)        // Loop forever!
       idle();     // Idly!
 }
-
-
-#ifndef ZAP_DEDICATED
-void GLUT_CB_display(void)
-{
-   gZapJournal.display();
-
-   if(gScreenshooter.phase)      // We're in mid-shot, so be sure to visit the screenshooter!
-      gScreenshooter.saveScreenshot();
-}
-#endif
-
-TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, display, (), ())
-{
-   glFlush();
-   UserInterface::renderCurrent();
-
-   // Render master connection state if we're not connected
-   if(gClientGame && gClientGame->getConnectionToMaster() && 
-      gClientGame->getConnectionToMaster()->getConnectionState() != NetConnection::Connected)
-   {
-      glColor3f(1, 1, 1);
-      UserInterface::drawStringf(10, 550, 15, "Master Server - %s", gConnectStatesTable[gClientGame->getConnectionToMaster()->getConnectionState()]);
-   }
-
-   // Swap the buffers. This this tells the driver to render the next frame from the contents of the
-   // back-buffer, and to set all rendering operations to occur on what was the front-buffer.
-   // Double buffering prevents nasty visual tearing from the application drawing on areas of the
-   // screen that are being updated at the same time.
-   glutSwapBuffers();
-   //SDL_GL_SwapBuffers();  // Use this if we convert to SDL
- }
 
 
 string joindir(const string &path, const string &filename)
@@ -1013,14 +714,17 @@ void onExit()
    // Save settings to capture window position
    saveWindowMode();
 
-   if(gIniSettings.displayMode == DISPLAY_MODE_WINDOWED)
-      saveWindowPosition(glutGet(GLUT_WINDOW_X), glutGet(GLUT_WINDOW_Y));
+   // TODO: reimplement window position saving with SDL
+   //   if(gIniSettings.displayMode == DISPLAY_MODE_WINDOWED)
+   //      saveWindowPosition(glutGet(GLUT_WINDOW_X), glutGet(GLUT_WINDOW_Y));
 
    saveSettingsToINI();    // Writes settings to the INI, then saves it to disk
 
    NetClassRep::logBitUsage();
    TNL::logprintf("Bye!");
-      
+
+   SDL_QuitSubSystem(SDL_INIT_VIDEO);
+
    exitGame();
 }
 
@@ -1423,7 +1127,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
       else if(!stricmp(argv[i], "-usestick")) // additional arg required
       {
          if(hasAdditionalArg)
-            gUseStickNumber = atoi(argv[i+1]);           /////////////////////////////////////////  TODO: should be part of gCmdLineSettings
+            gUseStickNumber = atoi(argv[i+1]);           //  TODO: should be part of gCmdLineSettings
          else
          {
             logprintf(LogConsumer::LogError, "You must specify the joystick you want to use with the -usestick option");
@@ -1432,13 +1136,13 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
       }
    }
 
-// Override some settings if we're compiling ZAP_DEDICATED
+   // Override some settings if we're compiling ZAP_DEDICATED
 #ifdef ZAP_DEDICATED
    setParamsForDedicatedMode();
 #endif
 }
 
-/*
+
 void InitSdlVideo()
 {
    // Information about the current video settings.
@@ -1447,30 +1151,29 @@ void InitSdlVideo()
    // Flags we will pass into SDL_SetVideoMode.
    S32 flags = 0;
 
+   // Init!
+   SDL_Init(0);
+
    // First, initialize SDL's video subsystem.
-   if (SDL_Init(SDL_INIT_VIDEO) < 0)
+   if (SDL_InitSubSystem(SDL_INIT_VIDEO) < 0)
    {
-       // Failed, exit.
-       logprintf(LogFatalError, "SDL Video initialization failed: %s", SDL_GetError( ));
-       exitGame();
+      // Failed, exit.
+      logprintf(LogConsumer::LogFatalError, "SDL Video initialization failed: %s", SDL_GetError());
+      exitGame();
    }
 
    // Let's get some video information.
-   info = SDL_GetVideoInfo( );
+   info = SDL_GetVideoInfo();
 
-   if( !info ) {
-       // This should probably never happen.
-       logprintf(LogFatalError, "SDL Video query failed: %s", SDL_GetError());
-       exitGame();
+   if(!info)
+   {
+      // This should probably never happen.
+      logprintf(LogConsumer::LogFatalError, "SDL Video query failed: %s", SDL_GetError());
+      exitGame();
    }
 
-   // We get the bpp we will request from
-   // the display. On X11, VidMode can't change
-   // resolution, so this is probably being overly
-   // safe. Under Win32, ChangeDisplaySettings
-   // can change the bpp.
-
-   gBPP = info->vfmt->BitsPerPixel;
+   // Find the desktop width/height and initialize the ScreenInfo object with it
+   gScreenInfo.init(info->current_w, info->current_h);
 
    // Now, we want to setup our requested
    // window attributes for our OpenGL window.
@@ -1496,22 +1199,27 @@ void InitSdlVideo()
    // We want to request that SDL provide us with an OpenGL window, possibly in a fullscreen video mode.
    // Note the SDL_DOUBLEBUF flag is not required to enable double buffering when setting an OpenGL
    // video mode. Double buffering is enabled or disabled using the SDL_GL_DOUBLEBUFFER attribute.
-   flags = SDL_OPENGL | SDL_RESIZABLE ; // | SDL_FULLSCREEN;
+   flags = SDL_OPENGL | SDL_HWSURFACE;
 
-
-   if(SDL_SetVideoMode(gScreenInfo.getGameCanvasWidth(), gScreenInfo.getGameCanvasHeight(), gBPP, flags ) == 0)
+   // We don't need a size to initialize
+   if(SDL_SetVideoMode(0, 0, 0, flags) == NULL)
    {
-      // This could happen for a variety of reasons,
-      // including DISPLAY not being set, the specified
-      // resolution not being available, etc.
+      logprintf(LogConsumer::LogWarning, "Unable to create hardware OpenGL window, falling back to software");
 
-      logprintf(LogFatalError, "SDL Video mode set failed: %s", SDL_GetError());
-      exitGame();
+      flags = SDL_OPENGL;
+      gScreenInfo.setHardwareSurface(false);
+
+      if (SDL_SetVideoMode(0, 0, 0, flags) == NULL)
+      {
+         logprintf(LogConsumer::LogFatalError, "Unable to create OpenGL window: %s", SDL_GetError());
+         exitGame();
+      }
    }
+   else
+      gScreenInfo.setHardwareSurface(true);
 
-   SDL_WM_SetCaption(gWindowTitle, "Icon XXX");    // TODO: Fix icon here
+   SDL_WM_SetCaption(gWindowTitle, gWindowTitle);  // Icon name is same as window title
 }
-*/
 
 // Now integrate INI settings with those from the command line and process them
 void processStartupParams()
@@ -1565,7 +1273,7 @@ void processStartupParams()
       gClientInfo.name = gIniSettings.lastName;
 
    gClientInfo.authenticated = false;
-   
+
    if(gCmdLineSettings.password != "")
       gPlayerPassword = gCmdLineSettings.password;
    else if(gIniSettings.password != "")
@@ -1598,7 +1306,7 @@ void processStartupParams()
 
    gConfigDirs.resolveLevelDir(); 
 
- 
+
    if(gIniSettings.levelDir == "")                      // If there is nothing in the INI,
       gIniSettings.levelDir = gConfigDirs.levelDir;     // write a good default to the INI
 
@@ -1654,12 +1362,13 @@ void processStartupParams()
       gClientGame = gClientGame1;
       gEditorGame = new EditorGame();
    }
-      //gClientGame2 = new ClientGame(Address());   //  !!! 2-player split-screen game in same game.
+   //gClientGame2 = new ClientGame(Address());   //  !!! 2-player split-screen game in same game.
 
 
    // Not immediately starting a connection...  start out with name entry or main menu
    if(!gDedicatedServer)
    {
+      gMainMenuUserInterface_pointer = new MainMenuUserInterface();
       if(gIniSettings.name == "")
       {
          if(gClientGame2)
@@ -1706,20 +1415,20 @@ bool writeToConsole()
    // _WIN32_WINNT is needed in case of compiling for old windows 98 (this code won't work for windows 98)
    if(!AttachConsole(-1))
       return false;
-   
+
    try
    {
       int m_nCRTOut= _open_osfhandle((intptr_t) GetStdHandle(STD_OUTPUT_HANDLE), _O_TEXT);
       if(m_nCRTOut == -1)
          return false;
-    
+
       FILE *m_fpCRTOut = _fdopen( m_nCRTOut, "w" );
-    
+
       if( !m_fpCRTOut )
          return false;
-    
+
       *stdout = *m_fpCRTOut;
-    
+
       //// If clear is not done, any cout statement before AllocConsole will 
       //// cause, the cout after AllocConsole to fail, so this is very important
       // But here, we're not using AllocConsole...
@@ -1781,7 +1490,7 @@ void processCmdLineParams(Vector<TNL::StringPtr> &theArgv)
          }
 
          dataConn = new DataConnection(sending ? SEND_FILE : REQUEST_FILE, password, fileName, fileType);
-            
+
          NetInterface *netInterface = new NetInterface(Address());
          dataConn->connect(netInterface, address);
 
@@ -1796,7 +1505,7 @@ void processCmdLineParams(Vector<TNL::StringPtr> &theArgv)
 
                started = true;
             }
-              
+
             netInterface->checkIncomingPackets();
             netInterface->processConnections();
             Platform::sleep(1);              // Don't eat CPU power
@@ -1822,7 +1531,7 @@ void processCmdLineParams(Vector<TNL::StringPtr> &theArgv)
             logprintf(LogConsumer::LogError, "You must specify a file with the jsave option");
             exitGame(1);
          }
-         
+
          theArgv.erase(i);
          theArgv.erase(i);
          i--;
@@ -1865,37 +1574,22 @@ void setupLogging()
    gStdoutLog.logprintf("Welcome to Bitfighter!");
 }
 
-
-void setOrtho(GLdouble left, GLdouble right, GLdouble bottom, GLdouble top)
-{
-   glMatrixMode(GL_PROJECTION);
-   glLoadIdentity();
-
-   // The best understanding I can get for glOrtho is that these are the coordinates you want to appear at the four corners of the
-   // physical screen. If you want a "black border" down one side of the screen, you need to make left negative, so that 0 would 
-   // appear some distance in from the left edge of the physical screen.  The same applies to the other coordinates as well.
-   glOrtho(left, right, bottom, top, 0, 1);   
-
-   glMatrixMode(GL_MODELVIEW);
-   glLoadIdentity();
-}
-
-
-ScreenInfo gScreenInfo;
-
-
 // Actually put us in windowed or full screen mode.  Pass true the first time this is used, false subsequently.
 // This has the unfortunate side-effect of triggering a mouse move event.  
-void actualizeScreenMode(bool changingInterfaces, bool first = false)
-{      
-   if(gIniSettings.oldDisplayMode == DISPLAY_MODE_WINDOWED && !first)
-   {
-      gIniSettings.winXPos = glutGet(GLUT_WINDOW_X);
-      gIniSettings.winYPos = glutGet(GLUT_WINDOW_Y);
+void actualizeScreenMode(bool changingInterfaces)
+{
 
-      gINI.SetValueI("Settings", "WindowXPos", gIniSettings.winXPos, true);
-      gINI.SetValueI("Settings", "WindowYPos", gIniSettings.winYPos, true);
-   }
+   // TODO: reimplement window positioning - difficult with SDL since it doesn't have much access to the
+   // window manager; however, it may be possible to do position upon start-up, but not save when exiting
+
+   //   if(gIniSettings.oldDisplayMode == DISPLAY_MODE_WINDOWED && !first)
+   //   {
+   //      gIniSettings.winXPos = glutGet(GLUT_WINDOW_X);
+   //      gIniSettings.winYPos = glutGet(GLUT_WINDOW_Y);
+   //
+   //      gINI.SetValueI("Settings", "WindowXPos", gIniSettings.winXPos, true);
+   //      gINI.SetValueI("Settings", "WindowYPos", gIniSettings.winYPos, true);
+   //   }
 
    if(changingInterfaces)
       UserInterface::prevUIs.last()->onPreDisplayModeChange();
@@ -1908,7 +1602,7 @@ void actualizeScreenMode(bool changingInterfaces, bool first = false)
 
    // When we're in the editor, let's take advantage of the entire screen unstretched
    if(UserInterface::current->getMenuID() == EditorUI && 
-            (gIniSettings.displayMode == DISPLAY_MODE_FULL_SCREEN_STRETCHED || gIniSettings.displayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED))
+         (gIniSettings.displayMode == DISPLAY_MODE_FULL_SCREEN_STRETCHED || gIniSettings.displayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED))
    {
       // Smaller values give bigger magnification; makes small things easier to see on full screen
       F32 magFactor = 0.85;      
@@ -1923,50 +1617,89 @@ void actualizeScreenMode(bool changingInterfaces, bool first = false)
       displayMode = DISPLAY_MODE_FULL_SCREEN_STRETCHED; 
    }
 
-   if(displayMode == DISPLAY_MODE_FULL_SCREEN_STRETCHED) 
-   {
-      glDisable(GL_SCISSOR_TEST);
-      setOrtho(0, gScreenInfo.getGameCanvasWidth(), gScreenInfo.getGameCanvasHeight(), 0);   
+   S32 sdlVideoFlags = 0;
+   S32 sdlWindowWidth, sdlWindowHeight;
+   F64 orthoLeft = 0, orthoRight = 0, orthoTop = 0, orthoBottom = 0;
 
-      glutFullScreen();
+   // Always use OpenGL
+   sdlVideoFlags = gScreenInfo.isHardwareSurface() ? SDL_OPENGL | SDL_HWSURFACE : SDL_OPENGL;
+
+   // Set up variables according to display mode
+   switch (displayMode)
+   {
+   case DISPLAY_MODE_FULL_SCREEN_STRETCHED:
+      sdlWindowWidth = gScreenInfo.getPhysicalScreenWidth();
+      sdlWindowHeight = gScreenInfo.getPhysicalScreenHeight();
+      sdlVideoFlags |= SDL_FULLSCREEN;
+
+      orthoRight = gScreenInfo.getGameCanvasWidth();
+      orthoBottom = gScreenInfo.getGameCanvasHeight();
+      break;
+
+   case DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED:
+      sdlWindowWidth = gScreenInfo.getPhysicalScreenWidth();
+      sdlWindowHeight = gScreenInfo.getPhysicalScreenHeight();
+      sdlVideoFlags |= SDL_FULLSCREEN;
+
+      orthoLeft = -1 * (gScreenInfo.getHorizDrawMargin());
+      orthoRight = gScreenInfo.getGameCanvasWidth() + gScreenInfo.getHorizDrawMargin();
+      orthoBottom = gScreenInfo.getGameCanvasHeight() + gScreenInfo.getVertDrawMargin();
+      orthoTop = -1 * (gScreenInfo.getVertDrawMargin());
+      break;
+
+   default:  //  DISPLAY_MODE_WINDOWED
+      sdlWindowWidth = (S32) floor((F32)gScreenInfo.getGameCanvasWidth()  * gIniSettings.winSizeFact + 0.5f);
+      sdlWindowHeight = (S32) floor((F32)gScreenInfo.getGameCanvasHeight() * gIniSettings.winSizeFact + 0.5f);
+      sdlVideoFlags |= SDL_RESIZABLE;
+
+      orthoRight = gScreenInfo.getGameCanvasWidth();
+      orthoBottom = gScreenInfo.getGameCanvasHeight();
+      break;
    }
 
-   else if(displayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED) 
+   // Set the SDL screen size and change to it
+   if(SDL_SetVideoMode(sdlWindowWidth, sdlWindowHeight, 0, sdlVideoFlags) == NULL)
+         logprintf(LogConsumer::LogFatalError, "Setting display mode failed: %s", SDL_GetError());
+
+   glClearColor( 0, 0, 0, 0 );
+
+   glViewport(0, 0, sdlWindowWidth, sdlWindowHeight);
+
+   glMatrixMode(GL_PROJECTION);
+   glLoadIdentity();
+
+   // The best understanding I can get for glOrtho is that these are the coordinates you want to appear at the four corners of the
+   // physical screen. If you want a "black border" down one side of the screen, you need to make left negative, so that 0 would
+   // appear some distance in from the left edge of the physical screen.  The same applies to the other coordinates as well.
+   glOrtho(orthoLeft, orthoRight, orthoBottom, orthoTop, 0, 1);
+
+   glMatrixMode(GL_MODELVIEW);
+   glLoadIdentity();
+
+   // Do the scissoring
+   if (displayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED)
    {
-      glClear(GL_COLOR_BUFFER_BIT);    // Clear the screen
-
-      S32 horizDrawMargin = gScreenInfo.getHorizDrawMargin();     // In game pixels, not
-      S32 vertDrawMargin = gScreenInfo.getVertDrawMargin();       // physical screen pixels
-
-      setOrtho(-horizDrawMargin,                                        // left
-                gScreenInfo.getGameCanvasWidth() + horizDrawMargin,     // right
-                gScreenInfo.getGameCanvasHeight() + vertDrawMargin,     // bottom
-               -vertDrawMargin);                                        // top
-
       glScissor(gScreenInfo.getHorizPhysicalMargin(),    // x
-                gScreenInfo.getVertPhysicalMargin(),     // y
-                gScreenInfo.getDrawAreaWidth(),          // width
-                gScreenInfo.getDrawAreaHeight());        // height
+            gScreenInfo.getVertPhysicalMargin(),     // y
+            gScreenInfo.getDrawAreaWidth(),          // width
+            gScreenInfo.getDrawAreaHeight());        // height
 
       glEnable(GL_SCISSOR_TEST);    // Turn on clipping to keep the margins clear
-
-      glutFullScreen();
    }
-
-   else        // DISPLAY_MODE_WINDOWED
-   {
-      setOrtho(0, gScreenInfo.getGameCanvasWidth(), gScreenInfo.getGameCanvasHeight(), 0);   
+   else
       glDisable(GL_SCISSOR_TEST);
 
-      glutReshapeWindow((S32) floor((F32)gScreenInfo.getGameCanvasWidth()  * gIniSettings.winSizeFact + 0.5f), 
-                        (S32) floor((F32)gScreenInfo.getGameCanvasHeight() * gIniSettings.winSizeFact + 0.5f));
 
-      // prevent re-position when going into editor, when already in windowed mode.
-      // Prevent window's title bar going off-screen because of position (0,0)
-      if(gIniSettings.oldDisplayMode != DISPLAY_MODE_WINDOWED || first)
-         if(gIniSettings.winXPos != 0 || gIniSettings.winYPos != 0)
-            glutPositionWindow(gIniSettings.winXPos, gIniSettings.winYPos);
+   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+   glLineWidth(gDefaultLineWidth);
+
+   if(gIniSettings.useLineSmoothing)
+   {
+      glEnable(GL_LINE_SMOOTH);
+      //glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+      glEnable(GL_BLEND);
    }
+
 
    UserInterface::current->onDisplayModeChange();     // Notify the UI that the screen has changed mode
 }
@@ -1988,8 +1721,6 @@ void setJoystick(ControllerTypeType jsType)
       gIniSettings.inputMode = Joystick;
 }
 
-
-extern void clearINIComments();
 
 // Function to handle one-time update tasks
 // Use this when upgrading, and changing something like the name of an INI parameter.  The old version is stored in
@@ -2033,45 +1764,45 @@ void launchUpdater(string bitfighterExecutablePathAndFilename)
 
    switch(result)
    {
-      case 0:
-         msg = "The operating system is out of memory or resources.";
-         break;
-      case ERROR_FILE_NOT_FOUND:
-         msg = "The specified file was not found (tried " + updaterFileName + ").";
-         break;
-      case ERROR_PATH_NOT_FOUND:
-         msg = "The specified path was not found (tried " + updaterFileName + ").";
-         break;
-      case ERROR_BAD_FORMAT:
-         msg = "The .exe file is invalid (non-Win32 .exe or error in .exe image --> tried " + updaterFileName + ").";
-         break;
-      case SE_ERR_ACCESSDENIED:
-         msg = "The operating system denied access to the specified file (tried " + updaterFileName + ").";
-         break;
-      case SE_ERR_ASSOCINCOMPLETE:
-         msg = "The file name association is incomplete or invalid (tried " + updaterFileName + ").";;
-         break;
-      case SE_ERR_DDEBUSY:
-         msg = "The DDE transaction could not be completed because other DDE transactions were being processed.";
-         break;
-      case SE_ERR_DDEFAIL:
-         msg = "The DDE transaction failed.";
-         break;
-      case SE_ERR_DDETIMEOUT:
-         msg = "The DDE transaction could not be completed because the request timed out.";
-         break;
-      case SE_ERR_DLLNOTFOUND:
-         msg = "The specified DLL was not found.";
-         break;
-      case SE_ERR_NOASSOC:
-         msg = "There is no application associated with the given file name extension.";
-         break;
-      case SE_ERR_OOM:
-         msg = "There was not enough memory to complete the operation.";
-         break;
-      case SE_ERR_SHARE:
-         msg = "A sharing violation occurred.";
-         break;
+   case 0:
+      msg = "The operating system is out of memory or resources.";
+      break;
+   case ERROR_FILE_NOT_FOUND:
+      msg = "The specified file was not found (tried " + updaterFileName + ").";
+      break;
+   case ERROR_PATH_NOT_FOUND:
+      msg = "The specified path was not found (tried " + updaterFileName + ").";
+      break;
+   case ERROR_BAD_FORMAT:
+      msg = "The .exe file is invalid (non-Win32 .exe or error in .exe image --> tried " + updaterFileName + ").";
+      break;
+   case SE_ERR_ACCESSDENIED:
+      msg = "The operating system denied access to the specified file (tried " + updaterFileName + ").";
+      break;
+   case SE_ERR_ASSOCINCOMPLETE:
+      msg = "The file name association is incomplete or invalid (tried " + updaterFileName + ").";;
+      break;
+   case SE_ERR_DDEBUSY:
+      msg = "The DDE transaction could not be completed because other DDE transactions were being processed.";
+      break;
+   case SE_ERR_DDEFAIL:
+      msg = "The DDE transaction failed.";
+      break;
+   case SE_ERR_DDETIMEOUT:
+      msg = "The DDE transaction could not be completed because the request timed out.";
+      break;
+   case SE_ERR_DLLNOTFOUND:
+      msg = "The specified DLL was not found.";
+      break;
+   case SE_ERR_NOASSOC:
+      msg = "There is no application associated with the given file name extension.";
+      break;
+   case SE_ERR_OOM:
+      msg = "There was not enough memory to complete the operation.";
+      break;
+   case SE_ERR_SHARE:
+      msg = "A sharing violation occurred.";
+      break;
    }
 
    if(msg != "")
@@ -2096,6 +1827,7 @@ int zapmain(int argc, char **argv)
 int main(int argc, char **argv)
 #endif
 {
+
 #ifdef TNL_OS_MAC_OSX
    // Move to the application bundle's path (RDW)
    moveToAppPath();
@@ -2117,7 +1849,7 @@ int main(int argc, char **argv)
    processCmdLineParams(argVector);          // Reads remaining params in two passes -- pre-journaling, and post-journaling
 
    // Load the INI file
-   gINI.SetPath(joindir(gConfigDirs.iniDir, "bitfighter.ini"));   
+   gINI.SetPath(joindir(gConfigDirs.iniDir, "bitfighter.ini"));
    gIniSettings.init();                      // Init struct that holds INI settings
 
 
@@ -2149,69 +1881,29 @@ int main(int argc, char **argv)
       gAutoDetectedJoystickType = autodetectJoystickType();
       setJoystick(gAutoDetectedJoystickType);               // Will override INI settings, so process INI first
 
-      // This is required on Linux, has no effect on Windows
-      glutInitWindowSize((S32) ((F32)gScreenInfo.getGameCanvasWidth()  * gIniSettings.winSizeFact),
-                         (S32) ((F32)gScreenInfo.getGameCanvasHeight() * gIniSettings.winSizeFact));   
-
-      glutInit(&argc, argv);
-
-      // On OS X, glutInit changes the working directory to the app
-      // bundle's resource directory.  We don't want that. (RDW)
+      // On OS X, make sure we're in the right directory
 #ifdef TNL_OS_MAC_OSX
       moveToAppPath();
 #endif
-      // InitSdlVideo();      // Get our main SDL rendering window all set up
-      // SDL_ShowCursor(0);   // Hide cursor
 
-      gScreenInfo.init(glutGet(GLUT_SCREEN_WIDTH), glutGet(GLUT_SCREEN_HEIGHT));     
-
-      glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGB);
-      glutCreateWindow(gWindowTitle);
-
-      // Register keyboard/mouse event handlers -- see GLUT docs for details
-      glutDisplayFunc(GLUT_CB_display);        // Called when GLUT thinks display needs to be redrawn
-      glutReshapeFunc(GLUT_CB_reshape);        // Handle window reshape events
-      glutPassiveMotionFunc(GLUT_CB_passivemotion);  // Handle mouse motion when button is not pressed
-      glutMotionFunc(GLUT_CB_motion);          // Handle mouse motion when button is pressed
-      glutKeyboardFunc(GLUT_CB_keydown);       // Handle key-down events for regular keys
-      glutKeyboardUpFunc(GLUT_CB_keyup);       // Handle key-up events for regular keys
-      glutSpecialFunc(GLUT_CB_specialkeydown); // Handle key-down events for special keys
-      glutSpecialUpFunc(GLUT_CB_specialkeyup); // Handle key-up events for special keys
-      glutMouseFunc(GLUT_CB_mouse);            // Handle mouse-clicks
-
-      glutIdleFunc(idle);                      // Register our idle function.  This will get run whenever GLUT is idling.
-      glutSetCursor(GLUT_CURSOR_NONE);         // Turn off the cursor for now... we'll turn it back on later
+      InitSdlVideo();      // Get our main SDL rendering window all set up
 
       // Put 0,0 at the center of the screen
-      glTranslatef(gScreenInfo.getGameCanvasWidth() / 2, gScreenInfo.getGameCanvasHeight() / 2, 0);     
-
-      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-      glLineWidth(gDefaultLineWidth);
-
-      if(gIniSettings.useLineSmoothing)
-      {
-        glEnable(GL_LINE_SMOOTH);
-        //glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-        glEnable(GL_BLEND);
-      }
+      //glTranslatef(gScreenInfo.getGameCanvasWidth() / 2, gScreenInfo.getGameCanvasHeight() / 2, 0);     
 
       atexit(onExit);
-      actualizeScreenMode(false, true);               // Create a display window
+      actualizeScreenMode(false);               // Create a display window
 
       gConsole = OGLCONSOLE_Create();                 // Create our console *after* the screen mode has been actualized
-      
+
 #ifdef USE_BFUP
       if(gIniSettings.useUpdater)
-            launchUpdater(argv[0]);                   // Spawn external updater tool to check for new version of Bitfighter -- Windows only
+         launchUpdater(argv[0]);                   // Spawn external updater tool to check for new version of Bitfighter -- Windows only
 #endif
-
-      glutMainLoop();         // Launch GLUT on it's merry way.  It'll call back with events and when idling.
-      // dedicatedServerLoop();  //    Instead, with SDL, loop forever, running the idle command endlessly
 
    }
-   else                       // We're running a dedicated server so...
 #endif
-      dedicatedServerLoop();  //    loop forever, running the idle command endlessly
+   dedicatedServerLoop();  //    loop forever, running the idle command endlessly
 
    return 0;
 }

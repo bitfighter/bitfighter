@@ -512,90 +512,92 @@ extern void actualizeScreenMode(bool changingInterfaces, bool first = false);
 extern IniSettings gIniSettings;
 
 void Screenshooter::saveScreenshot()
-{ 
-   if(phase == 1)
-   {
-      // Save window size/pos for restoration later
-      mWidth = gScreenInfo.getWindowWidth();
-      mXpos = glutGet(GLUT_WINDOW_X);
-      mYpos = glutGet(GLUT_WINDOW_Y);
+{
+   /* TODO: migrate to SDL */
 
-      // Resize window to "standard" size, where 1 virtual pixel = 1 physical pixel
-      glutReshapeWindow(gScreenInfo.getGameCanvasWidth(), gScreenInfo.getGameCanvasHeight());    
-
-      setOrtho(0, gScreenInfo.getGameCanvasWidth(), gScreenInfo.getGameCanvasHeight(), 0); 
-      glDisable(GL_SCISSOR_TEST);
-
-      phase++;
-   }
-
-   else if(phase == 2)
-   {
-      glPixelStorei(GL_PACK_ALIGNMENT,1);
-
-      S32 w = gScreenInfo.getGameCanvasWidth();
-      S32 h = gScreenInfo.getGameCanvasHeight();
-      S32 buffsize = w * h * 3;     // 3 bytes per pixel
-
-      GLubyte *pixels = new GLubyte [buffsize];
-      if (pixels == NULL) 
-         return;    
-       
-      makeSureFolderExists(gConfigDirs.screenshotDir);
-
-      string fullfilename;
-      S32 ctr = 0;
-
-      while(true)    // Settle in for the long haul, boys.
-      {
-         fullfilename = joindir(gConfigDirs.screenshotDir.c_str(), "screenshot_" + itos(ctr) + ".bmp");
-
-         if(!fileExists(fullfilename))
-            break;
-
-         ctr++;
-      }   
-
-      glReadPixels(0, 0, w, h, GL_BGR_EXT, GL_UNSIGNED_BYTE, pixels);
-
-      BITMAPINFOHEADER header;
-
-      header.biSize = sizeof(BITMAPINFOHEADER);           /* Size of info header */
-      header.biWidth = w;          /* Width of image */
-      header.biHeight = h;         /* Height of image */
-      header.biPlanes = 1;         /* Number of color planes */
-      header.biBitCount = 24;       /* Number of bits per pixel */
-      header.biCompression = BI_RGB;    /* Type of compression to use */
-      header.biSizeImage = w * h * 3;      /* Size of image data */
-      header.biXPelsPerMeter = 0;  /* X pixels per meter */
-      header.biYPelsPerMeter = 0;  /* Y pixels per meter */
-      header.biClrUsed = 0;        /* Number of colors used */
-      header.biClrImportant = 0;   /* Number of important colors */ 
-
-      BITMAPINFO *bmpInfo = new BITMAPINFO;
-
-      bmpInfo->bmiHeader = header;
-      bmpInfo->bmiColors->rgbBlue = 0;
-      bmpInfo->bmiColors->rgbGreen = 0;
-      bmpInfo->bmiColors->rgbRed = 0;
-      bmpInfo->bmiColors->rgbReserved = 0;
-
-      SaveDIBitmap(fullfilename.c_str(), bmpInfo, pixels);    
-
-      if(gIniSettings.displayMode == DISPLAY_MODE_WINDOWED)
-      {
-         gIniSettings.winSizeFact = (F32)mWidth / (F32)gScreenInfo.getGameCanvasWidth();
-         gIniSettings.winXPos = mXpos;
-         gIniSettings.winYPos = mYpos;
-      }
-
-      actualizeScreenMode(false, true);
-
-      delete [] pixels;  
-      delete bmpInfo;
-
-      phase = 0;
-   }
+//   if(phase == 1)
+//   {
+//      // Save window size/pos for restoration later
+//      mWidth = gScreenInfo.getWindowWidth();
+//      mXpos = glutGet(GLUT_WINDOW_X);
+//      mYpos = glutGet(GLUT_WINDOW_Y);
+//
+//      // Resize window to "standard" size, where 1 virtual pixel = 1 physical pixel
+//      glutReshapeWindow(gScreenInfo.getGameCanvasWidth(), gScreenInfo.getGameCanvasHeight());
+//
+//      setOrtho(0, gScreenInfo.getGameCanvasWidth(), gScreenInfo.getGameCanvasHeight(), 0);
+//      glDisable(GL_SCISSOR_TEST);
+//
+//      phase++;
+//   }
+//
+//   else if(phase == 2)
+//   {
+//      glPixelStorei(GL_PACK_ALIGNMENT,1);
+//
+//      S32 w = gScreenInfo.getGameCanvasWidth();
+//      S32 h = gScreenInfo.getGameCanvasHeight();
+//      S32 buffsize = w * h * 3;     // 3 bytes per pixel
+//
+//      GLubyte *pixels = new GLubyte [buffsize];
+//      if (pixels == NULL)
+//         return;
+//
+//      makeSureFolderExists(gConfigDirs.screenshotDir);
+//
+//      string fullfilename;
+//      S32 ctr = 0;
+//
+//      while(true)    // Settle in for the long haul, boys.
+//      {
+//         fullfilename = joindir(gConfigDirs.screenshotDir.c_str(), "screenshot_" + itos(ctr) + ".bmp");
+//
+//         if(!fileExists(fullfilename))
+//            break;
+//
+//         ctr++;
+//      }
+//
+//      glReadPixels(0, 0, w, h, GL_BGR_EXT, GL_UNSIGNED_BYTE, pixels);
+//
+//      BITMAPINFOHEADER header;
+//
+//      header.biSize = sizeof(BITMAPINFOHEADER);           /* Size of info header */
+//      header.biWidth = w;          /* Width of image */
+//      header.biHeight = h;         /* Height of image */
+//      header.biPlanes = 1;         /* Number of color planes */
+//      header.biBitCount = 24;       /* Number of bits per pixel */
+//      header.biCompression = BI_RGB;    /* Type of compression to use */
+//      header.biSizeImage = w * h * 3;      /* Size of image data */
+//      header.biXPelsPerMeter = 0;  /* X pixels per meter */
+//      header.biYPelsPerMeter = 0;  /* Y pixels per meter */
+//      header.biClrUsed = 0;        /* Number of colors used */
+//      header.biClrImportant = 0;   /* Number of important colors */
+//
+//      BITMAPINFO *bmpInfo = new BITMAPINFO;
+//
+//      bmpInfo->bmiHeader = header;
+//      bmpInfo->bmiColors->rgbBlue = 0;
+//      bmpInfo->bmiColors->rgbGreen = 0;
+//      bmpInfo->bmiColors->rgbRed = 0;
+//      bmpInfo->bmiColors->rgbReserved = 0;
+//
+//      SaveDIBitmap(fullfilename.c_str(), bmpInfo, pixels);
+//
+//      if(gIniSettings.displayMode == DISPLAY_MODE_WINDOWED)
+//      {
+//         gIniSettings.winSizeFact = (F32)mWidth / (F32)gScreenInfo.getGameCanvasWidth();
+//         gIniSettings.winXPos = mXpos;
+//         gIniSettings.winYPos = mYpos;
+//      }
+//
+//      actualizeScreenMode(false, true);
+//
+//      delete [] pixels;
+//      delete bmpInfo;
+//
+//      phase = 0;
+//   }
 }
 
 }

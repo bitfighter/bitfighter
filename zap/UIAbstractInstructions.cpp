@@ -24,9 +24,10 @@
 //------------------------------------------------------------------------------------
 
 #include "UIAbstractInstructions.h"
-#include "../glut/glutInclude.h"
 #include "Color.h"
 #include "Colors.h"
+
+#include "SDL/SDL_opengl.h"
 
 namespace Zap
 {

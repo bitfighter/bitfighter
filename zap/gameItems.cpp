@@ -31,8 +31,8 @@
 
 #include "SoundSystem.h"
 #include "Colors.h"
-#include "Point.h"
-#include "../glut/glutInclude.h"
+
+#include "SDL/SDL_opengl.h"
 
 #include <math.h>
 

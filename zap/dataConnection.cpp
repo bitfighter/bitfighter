@@ -144,7 +144,7 @@ SenderStatus DataSender::initialize(DataSendable *connection, string filename, F
    if(mLines.size() == 0)          // Read nothing
       return COULD_NOT_OPEN_FILE;
 
-   mConnection = connection;
+   mConnection = dynamic_cast<Object *>(connection);
    mFileType = fileType;
    mDone = false;
    mLineCtr = 0;
@@ -157,17 +157,21 @@ SenderStatus DataSender::initialize(DataSendable *connection, string filename, F
 // Send next line of our file
 void DataSender::sendNextLine()
 {
+   DataSendable *connection = dynamic_cast<DataSendable *>(mConnection.getPointer());
+   if(!connection)
+      mDone = true;
+
    if(mDone)
       return;
 
    if(mLineCtr < mLines.size())
    {
-      mConnection->s2rSendLine(mLines[mLineCtr].c_str());
+      connection->s2rSendLine(mLines[mLineCtr].c_str());
       mLineCtr++;
    }
    else
    {
-      mConnection->s2rCommandComplete(STATUS_OK);
+      connection->s2rCommandComplete(STATUS_OK);
       mDone = true;
       mLines.clear();      // Liberate some memory
    }
