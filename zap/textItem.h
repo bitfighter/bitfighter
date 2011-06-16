@@ -60,6 +60,9 @@ public:
    TextItem();    // Constructor
    ~TextItem();   // Destructor
 
+   TextItem *clone() const;
+   //void copyAttrs(TextItem *target);
+
    //static Vector<Point> generatePoints(Point pos, Point dir);
    void render();
    S32 getRenderSortValue();
@@ -130,7 +133,8 @@ private:
 
 public:
    LineItem();                      // Constructor
-   LineItem(const LineItem &li);    // Copy constructor
+   LineItem *clone() const;
+   //LineItem(const LineItem &li);    // Copy constructor
 
    void render();
    S32 getRenderSortValue();

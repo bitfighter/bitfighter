@@ -49,6 +49,8 @@ private:
 
 public:
    GoalZone();        // Constructor
+   GoalZone *clone() const;
+
    void render();
 
    bool mHasFlag;     // Is there a flag parked in this zone?

@@ -67,6 +67,9 @@ private:
 public:
    Teleporter();     // Constructor
 
+   Teleporter *clone() const;
+   //void copyAttrs(Teleporter *target);
+
    bool doSplash;
    U32 timeout;
    U32 mTime;

@@ -822,6 +822,12 @@ ForceFieldProjector::ForceFieldProjector(lua_State *L)
 }
 
 
+ForceFieldProjector *ForceFieldProjector::clone() const
+{
+   return new ForceFieldProjector(*this);
+}
+
+
 // Define the methods we will expose to Lua
 Lunar<ForceFieldProjector>::RegType ForceFieldProjector::methods[] =
 {
@@ -1026,6 +1032,12 @@ Turret::Turret(S32 team, Point anchorPoint, Point anchorNormal) : EngineeredObje
    mNetFlags.set(Ghostable);
 
    onGeomChanged();
+}
+
+
+Turret *Turret::clone() const
+{
+   return new Turret(*this);
 }
 
 

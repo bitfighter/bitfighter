@@ -98,6 +98,7 @@ private:
 public:
    U32 mPickupTime;
    SoccerBallItem(Point pos = Point());   // C++ constructor
+   SoccerBallItem *clone() const;
 
    static const S32 SOCCER_BALL_RADIUS = 30;
 

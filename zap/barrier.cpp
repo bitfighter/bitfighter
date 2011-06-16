@@ -404,6 +404,12 @@ WallItem::WallItem()
 }
 
 
+WallItem *WallItem::clone() const
+{
+   return new WallItem(*this);
+}
+
+
 void WallItem::onGeomChanged()
 {
    // Fill extendedEndPoints from the vertices of our wall's centerline, or from PolyWall edges
@@ -456,6 +462,12 @@ PolyWall::PolyWall()
 {
    mObjectTypeMask = PolyWallType;
    mObjectTypeNumber = PolyWallTypeNumber;
+}
+
+
+PolyWall *PolyWall::clone() const
+{
+   return new PolyWall(*this);
 }
 
 
@@ -590,6 +602,7 @@ void WallSegmentManager::buildAllWallSegmentEdgesAndPoints()
    deleteAllSegments();
 
    fillVector.clear();
+
    gEditorGame->getGridDatabase()->findObjects(WallType, fillVector);
 
    Vector<DatabaseObject *> engrObjects;

@@ -113,6 +113,8 @@ class WallItem : public LineItem
 {
 public:
    WallItem();    // Constructor
+   WallItem *clone() const;
+   
    virtual void onGeomChanged();
    void processEndPoints();      
 
@@ -141,6 +143,8 @@ private:
 
 public:
    PolyWall();      // Constructor
+   PolyWall *clone() const;
+  
    bool processArguments(S32 argc, const char **argv, Game *game);
 
    void processEndPoints();

@@ -615,6 +615,13 @@ HuntersNexusObject::HuntersNexusObject()
    mNetFlags.set(Ghostable);
 }
 
+
+HuntersNexusObject *HuntersNexusObject::clone() const
+{
+   return new HuntersNexusObject(*this);
+}
+
+
 extern S32 gMaxPolygonPoints;
 
 // The nexus object itself

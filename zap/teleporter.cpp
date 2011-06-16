@@ -56,6 +56,22 @@ Teleporter::Teleporter() : SimpleLine(TeleportType)
 }
 
 
+Teleporter *Teleporter::clone() const
+{
+   return new Teleporter(*this);
+   //copyAttrs(clone.get());
+
+   //return clone;
+}
+
+
+//void Teleporter::copyAttrs(Teleporter *target)
+//{
+//   SimpleLine::copyAttrs(target);
+//}
+
+
+
 void Teleporter::onAddedToGame(Game *theGame)
 {
    Parent::onAddedToGame(theGame);

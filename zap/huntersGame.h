@@ -161,6 +161,8 @@ private:
 
 public:
    HuntersNexusObject();      // Constructor
+   HuntersNexusObject *clone() const;
+
    bool processArguments(S32 argc, const char **argv, Game *game);
 
    void onAddedToGame(Game *theGame);

@@ -66,8 +66,29 @@ SpeedZone::SpeedZone() : SimpleLine(SpeedZoneType)
 // Destructor
 SpeedZone::~SpeedZone()
 {
-   //delete mAttributeMenuUI;
+   // Do nothing
 }
+
+
+SpeedZone *SpeedZone::clone() const
+{
+   return new SpeedZone(*this);
+
+   //copyAttrs(clone.get());
+
+   //return clone;
+}
+
+
+//void SpeedZone::copyAttrs(SpeedZone *target)
+//{
+//   SimpleLine::copyAttrs(target);
+//
+//   target->mSpeed = mSpeed;
+//   target->mSnapLocation = mSnapLocation;
+//   target->mRotateSpeed = mRotateSpeed;
+//}
+
 
 // Take our basic inputs, pos and dir, and expand them into a three element
 // vector (the three points of our triangle graphic), and compute its extent

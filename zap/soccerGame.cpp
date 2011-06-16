@@ -314,6 +314,11 @@ SoccerBallItem::SoccerBallItem(Point pos) : EditorItem(pos, true, SoccerBallItem
 }
 
 
+SoccerBallItem *SoccerBallItem::clone() const
+{
+   return new SoccerBallItem(*this);
+}
+
 const char SoccerBallItem::className[] = "SoccerBallItem";      // Class name as it appears to Lua scripts
 
 

@@ -28,8 +28,10 @@
 #include "item.h"
 #include "ship.h"
 #include "gameObjectRender.h"
+
 #include "SoundSystem.h"
 #include "Colors.h"
+#include "Point.h"
 #include "../glut/glutInclude.h"
 
 #include <math.h>
@@ -38,6 +40,19 @@ namespace Zap
 {
 
 TNL_IMPLEMENT_NETOBJECT(RepairItem);
+
+// Constructor
+RepairItem::RepairItem(Point pos) : PickupItem(pos, REPAIR_ITEM_RADIUS, DEFAULT_RESPAWN_TIME * 1000) 
+{ 
+   // Do nothing 
+}
+
+
+RepairItem *RepairItem::clone() const
+{
+   return new RepairItem(*this);
+}
+
 
 // Runs on server, returns true if we're doing the pickup, false otherwise
 bool RepairItem::pickup(Ship *theShip)
@@ -115,6 +130,19 @@ S32 RepairItem::isVis(lua_State *L) { return returnBool(L, isVisible()); }      
 
 
 TNL_IMPLEMENT_NETOBJECT(EnergyItem);
+
+// Constructor
+EnergyItem::EnergyItem(Point p) : PickupItem(p, 20, DEFAULT_RESPAWN_TIME * 1000) 
+{ 
+   // Do nothing 
+};   
+
+
+EnergyItem *EnergyItem::clone() const
+{
+   return new EnergyItem(*this);
+}
+
 
 // Runs on server, returns true if we're doing the pickup, false otherwise
 bool EnergyItem::pickup(Ship *theShip)
@@ -235,7 +263,13 @@ string AbstractSpawn::toString()
 Spawn::Spawn(const Point &pos, S32 time) : AbstractSpawn(pos, time, ShipSpawnType)
 {
    // Do nothing
-};
+}
+
+
+Spawn *Spawn::clone() const
+{
+   return new Spawn(*this);
+}
 
 
 bool Spawn::processArguments(S32 argc, const char **argv, Game *game)
@@ -290,7 +324,13 @@ void Spawn::renderDock()
 AsteroidSpawn::AsteroidSpawn(const Point &pos, S32 time) : AbstractSpawn(pos, time, AsteroidSpawnType)
 {
    // Do nothing
-};
+}
+
+
+AsteroidSpawn *AsteroidSpawn::clone() const
+{
+   return new AsteroidSpawn(*this);
+}
 
 
 static void renderAsteroidSpawn(const Point &pos)
@@ -337,6 +377,12 @@ FlagSpawn::FlagSpawn(const Point &pos, S32 time) : AbstractSpawn(pos, time, Flag
 }
 
 
+FlagSpawn *FlagSpawn::clone() const
+{
+   return new FlagSpawn(*this);
+}
+
+
 void FlagSpawn::renderEditor(F32 currentScale)
 {
    Point pos = getVert(0);
@@ -366,9 +412,10 @@ class LuaAsteroid;
 
 static F32 asteroidVel = 250;
 
+static const F32 ASTEROID_MASS = 4;
 
 // Constructor
-Asteroid::Asteroid() : EditorItem(Point(0,0), true, ASTEROID_RADIUS, 4)
+Asteroid::Asteroid() : EditorItem(Point(0,0), true, ASTEROID_RADIUS, ASTEROID_MASS)
 {
    mNetFlags.set(Ghostable);
    mObjectTypeMask |= AsteroidType;
@@ -388,6 +435,12 @@ Asteroid::Asteroid() : EditorItem(Point(0,0), true, ASTEROID_RADIUS, 4)
    }
 
    mKillString = "crashed into an asteroid";
+}
+
+
+Asteroid *Asteroid::clone() const
+{
+   return new Asteroid(*this);
 }
 
 
@@ -705,12 +758,20 @@ void Worm::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
 TNL_IMPLEMENT_NETOBJECT(TestItem);
 
+static const F32 TEST_ITEM_MASS = 4;
+
 // Constructor
-TestItem::TestItem() : EditorItem(Point(0,0), true, TEST_ITEM_RADIUS, 4)
+TestItem::TestItem() : EditorItem(Point(0,0), true, TEST_ITEM_RADIUS, TEST_ITEM_MASS)
 {
    mNetFlags.set(Ghostable);
    mObjectTypeMask |= TestItemType | TurretTargetType;
    mObjectTypeNumber = TestItemTypeNumber;
+}
+
+
+TestItem *TestItem::clone() const
+{
+   return new TestItem(*this);
 }
 
 
@@ -781,13 +842,22 @@ Lunar<TestItem>::RegType TestItem::methods[] =
 
 TNL_IMPLEMENT_NETOBJECT(ResourceItem);
 
-// Constructor
-ResourceItem::ResourceItem() : EditorItem(Point(0,0), true, RESOURCE_ITEM_RADIUS, 1)
+static const F32 RESOURCE_ITEM_MASS = 1;
+
+   // Constructor
+ResourceItem::ResourceItem() : EditorItem(Point(0,0), true, RESOURCE_ITEM_RADIUS, RESOURCE_ITEM_MASS)
 {
    mNetFlags.set(Ghostable);
    mObjectTypeMask |= ResourceItemType | TurretTargetType;
    mObjectTypeNumber = ResourceItemTypeNumber;
 }
+
+
+ResourceItem *ResourceItem::clone() const
+{
+   return new ResourceItem(*this);
+}
+
 
 
 void ResourceItem::renderItem(Point pos)

@@ -45,6 +45,12 @@ FlagItem::FlagItem(Point pos, bool collidable, float radius, float mass) : Edito
 }
 
 
+FlagItem *FlagItem::clone() const
+{
+   return new FlagItem(*this);
+}
+
+
 void FlagItem::initialize()
 {
    mTeam = -1;

@@ -62,6 +62,12 @@ GoalZone::GoalZone()
 }
 
 
+GoalZone *GoalZone::clone() const
+{
+   return new GoalZone(*this);
+}
+
+
 void GoalZone::render()
 {
    GameType *gt = getGame()->getGameType();

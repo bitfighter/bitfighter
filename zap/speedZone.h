@@ -71,6 +71,9 @@ public:
    SpeedZone();   // Constructor
    ~SpeedZone();  // Destructor
 
+   SpeedZone *clone() const;
+   //void copyAttrs(SpeedZone *target);
+
    static const U16 minSpeed = 500;       // How slow can you go?
    static const U16 maxSpeed = 5000;      // Max speed for the goFast
    static const U16 defaultSpeed = 2000;  // Default speed if none specified

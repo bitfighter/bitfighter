@@ -390,13 +390,13 @@ void EditorUserInterface::deleteUndoState()
 
 
 // Experimental save to string method
-static void copyItems(const Vector<EditorObject *> *from, Vector<string> &to)
-{
-   to.resize(from->size());      // Preallocation makes things go faster
-
-   for(S32 i = 0; i < from->size(); i++)
-      to[i] = from->get(i)->toString();
-}
+//static void copyItems(const Vector<EditorObject *> *from, Vector<string> &to)
+//{
+//   to.resize(from->size());      // Preallocation makes things go faster
+//
+//   for(S32 i = 0; i < from->size(); i++)
+//      to[i] = from->get(i)->toString();
+//}
 
 
 void EditorUserInterface::restoreItems(const Vector<string> &from)
@@ -430,15 +430,15 @@ void EditorUserInterface::restoreItems(const Vector<string> &from)
 }
    
 
-static void copyItems(const Vector<EditorObject *> &from, Vector<EditorObject *> &to)
-{
-   to.deleteAndClear();
-   
-   to.resize(from.size());      // Preallocation makes things go faster
-
-   for(S32 i = 0; i < from.size(); i++)
-      to[i] = from[i]->newCopy();
-}
+//static void copyItems(const Vector<EditorObject *> &from, Vector<EditorObject *> &to)
+//{
+//   to.deleteAndClear();
+//   
+//   to.resize(from.size());      // Preallocation makes things go faster
+//
+//   for(S32 i = 0; i < from.size(); i++)
+//      to[i] = from[i]->newCopy();
+//}
 
 
 // Save the current state of the editor objects for later undoing
@@ -457,10 +457,9 @@ void EditorUserInterface::saveUndoState()
    EditorObjectDatabase *newDB = eod.get();     
    mUndoItems[mLastUndoIndex % UNDO_STATES] = boost::shared_ptr<EditorObjectDatabase>(new EditorObjectDatabase(*newDB));  // Make a copy
 
-   logprintf("Copying database %p to %p", eod.get(), mUndoItems[mLastUndoIndex % UNDO_STATES].get());
-
    mLastUndoIndex++;
-   mLastRedoIndex++; 
+   //mLastRedoIndex++; 
+   mLastRedoIndex = mLastUndoIndex;
 
    if(mLastUndoIndex % UNDO_STATES == mFirstUndoIndex % UNDO_STATES)           // Undo buffer now full...
    {
@@ -501,6 +500,17 @@ void EditorUserInterface::undo(bool addToRedoStack)
    gEditorGame->setGridDatabase(boost::dynamic_pointer_cast<GridDatabase>(mUndoItems[mLastUndoIndex % UNDO_STATES]));
    //restoreItems(mUndoItems[mLastUndoIndex % UNDO_STATES]);
 
+logprintf("Undo -- now using database %p", gEditorGame->getGridDatabase().get());
+fillVector.clear();
+gEditorGame->getGridDatabase()->findObjects(fillVector);
+for(S32 i = 0; i < fillVector.size(); i++)
+{
+   BfObject *o = dynamic_cast<BfObject *>(fillVector[i]);
+   F32 x = o->getVert(0).x;
+   F32 y = o->getVert(0).y;
+   logprintf("contains object (%f,%f) ==> %p",x,y,o->mGeometry.get());
+}
+
    rebuildEverything();
 
    mLastUndoStateWasBarrierWidthChange = false;
@@ -518,6 +528,7 @@ void EditorUserInterface::redo()
       mLastUndoIndex++;
       //restoreItems(mUndoItems[mLastUndoIndex % UNDO_STATES]);   
       gEditorGame->setGridDatabase(mUndoItems[mLastUndoIndex % UNDO_STATES]);
+      TNLAssert(mUndoItems[mLastUndoIndex % UNDO_STATES], "null!");
 
       rebuildEverything();
       validateLevel();
@@ -546,7 +557,6 @@ void EditorUserInterface::resnapAllEngineeredItems()
    {
       EngineeredObject *engrObj = dynamic_cast<EngineeredObject *>(fillVector[i]);
 
-      //mountToWall(engrObj, engrObj->getVert(0));
       engrObj->mountToWall(engrObj->getVert(0));
    }
 }
@@ -1584,6 +1594,8 @@ void EditorUserInterface::render()
 
    const Vector<EditorObject *> *objList = getObjectList();
 
+//if(objList->size() > 0)logprintf("rendering %p from db %p", objList->get(0), gEditorGame->getGridDatabase().get());
+
    glPushMatrix();  
       setLevelToCanvasCoordConversion();
       for(S32 i = 0; i < objList->size(); i++)
@@ -1811,17 +1823,6 @@ If wall thickness is changed, steps 3-5 need to be repeated
 */
 
 
-// Will set the correct translation and scale to render items at correct location and scale as if it were a real level.
-// Unclear enough??
-//void EditorUserInterface::setTranslationAndScale(const Point &pos)
-//{
-//   F32 scale = gEditorUserInterface.getCurrentScale();
-//
-//   glScalef(scale, scale, 1);
-//   glTranslatef(pos.x / scale - pos.x, pos.y / scale - pos.y, 0);
-//}
-
-
 void EditorUserInterface::clearSelection()
 {
    const Vector<EditorObject *> *objList = getObjectList();
@@ -1852,7 +1853,8 @@ void EditorUserInterface::copySelection()
    {
       if(objList->get(i)->isSelected())
       {
-         EditorObject *newItem =  objList->get(i)->newCopy();      
+         EditorObject *newItem =  objList->get(i)->newCopy();   
+         newItem->setGame(NULL);          // Game needs to be cleared before we can add this to the game
          newItem->setSelected(false);
 
          if(!alreadyCleared)  // Make sure we only purge the existing clipboard if we'll be putting someting new there
@@ -2377,6 +2379,7 @@ void EditorUserInterface::startDraggingDockItem()
 {
    // Instantiate object so we are in essence dragging a non-dock item
    EditorObject *item = mDockItems[mDraggingDockItem]->newCopy();
+   item->setGame(NULL);          // Game needs to be cleared before we can add this to the game
    item->newObjectFromDock(getGridSize());
 
    //item->initializeEditor(getGridSize());    // Override this to define some initial geometry for your object... 
@@ -2614,6 +2617,7 @@ void EditorUserInterface::splitBarrier()
 
                // Create a poor man's copy
                EditorObject *newItem = obj->newCopy();
+               newItem->setGame(NULL);          // Game needs to be cleared before we can add this to the game
                newItem->setTeam(-1);
                newItem->setWidth(obj->getWidth());
                newItem->clearVerts();
@@ -2901,6 +2905,7 @@ void EditorUserInterface::insertNewItem(GameObjectType itemType)
       if(mDockItems[i]->getObjectTypeMask() & itemType)
       {
          newObject = mDockItems[i]->newCopy();
+         newObject->setGame(NULL);          // Game needs to be cleared before we can add this to the game
          newObject->initializeEditor();
          newObject->onGeomChanged();
 

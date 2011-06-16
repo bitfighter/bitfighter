@@ -185,7 +185,8 @@ public:
    static const S32 defaultRespawnTime = 0;
 
    ForceFieldProjector(S32 team = -1, Point anchorPoint = Point(), Point anchorNormal = Point());  // Constructor
-
+   ForceFieldProjector *clone() const;
+   
    bool getCollisionPoly(Vector<Point> &polyPoints);
    static void getGeom(const Point &anchor, const Point &normal, Vector<Point> &geom);
    static Point getForceFieldStartPoint(const Point &anchor, const Point &normal, F32 scaleFact = 1);
@@ -255,6 +256,9 @@ private:
    F32 mCurrentAngle;
 
 public:
+   Turret(S32 team = -1, Point anchorPoint = Point(), Point anchorNormal = Point(1, 0));     // Constructor
+   Turret *clone() const;
+
    S32 mWeaponFireType;
    bool processArguments(S32 argc, const char **argv, Game *game);
 
@@ -271,7 +275,6 @@ public:
       AimMask = EngineeredObject::NextFreeMask,
    };
 
-   Turret(S32 team = -1, Point anchorPoint = Point(), Point anchorNormal = Point(1, 0));     // Constructor
 
    static void getGeom(const Point &anchor, const Point &normal, Vector<Point> &polyPoints);
    bool getCollisionPoly(Vector<Point> &polyPoints);

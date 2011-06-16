@@ -86,19 +86,12 @@ protected:
 
 
 public:
-   EditorObject(GameObjectType objectType = UnknownType) 
-   { 
-      mDockItem = false; 
-      mLitUp = false; 
-      mSelected = false; 
-      setObjectTypeMask(objectType); 
-      mIsBeingEdited = false;
-      mSerialNumber = mNextSerialNumber++;
-   }
+   EditorObject(GameObjectType objectType = UnknownType);      // Constructor
+   virtual ~EditorObject();                                    // Virtual destructor
+   //virtual void copyAttrs(EditorObject *target);
+   virtual EditorObject *clone()  const = 0;
 
-   virtual ~EditorObject() { };     // Provide virtual destructor
-
-   EditorObject *newCopy();         // Copies object
+   EditorObject *newCopy();         // Copies object        // TODO: Will become call to clone, delete method
 
    virtual void addToDock(Game *game, const Point &point);
 

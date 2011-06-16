@@ -60,6 +60,25 @@ TextItem::~TextItem()
 }
 
 
+TextItem *TextItem::clone() const
+{
+   return new TextItem(*this);
+
+   //copyAttrs(clone);
+
+   //return clone;
+}
+
+//
+//void TextItem::copyAttrs(TextItem *target)
+//{
+//   SimpleLine::copyAttrs(target);
+//
+//   target->mSize = mSize;
+//   target->mText = mText;
+//}
+
+
 void TextItem::newObjectFromDock(F32 gridSize)
 {
    SimpleLine::newObjectFromDock(gridSize);
@@ -323,19 +342,25 @@ const S32 LineItem::MAX_LINE_WIDTH;
 // Constructor
 LineItem::LineItem()
 { 
-   mGeometry = boost::shared_ptr<Geometry>(new PolylineGeometry);
+   mGeometry = auto_ptr<Geometry>(new PolylineGeometry);
    mNetFlags.set(Ghostable);
    mObjectTypeMask |= LineType | CommandMapVisType;
    mObjectTypeNumber = LineTypeNumber;
 }
 
 
-// Copy constructor -- make sure each copy gets its own geometry object
-LineItem::LineItem(const LineItem &li)
+LineItem *LineItem::clone() const
 {
-   mGeometry = boost::shared_ptr<Geometry>(new PolylineGeometry(*((PolylineGeometry *)li.mGeometry.get())));  
+   return new LineItem(*this);
 }
 
+//
+//// Copy constructor -- make sure each copy gets its own geometry object
+//LineItem::LineItem(const LineItem &li)
+//{
+//   mGeometry = boost::shared_ptr<Geometry>(new PolylineGeometry(*((PolylineGeometry *)li.mGeometry.get())));  
+//}
+//
 
 void LineItem::render()
 {

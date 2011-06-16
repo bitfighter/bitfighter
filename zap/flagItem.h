@@ -50,6 +50,9 @@ public:
    FlagItem(Point pos = Point());                                    // C++ constructor
    FlagItem(Point pos, bool collidable, float radius, float mass);   // Alternate C++ constructor
 
+   FlagItem *clone() const;
+   void copyAttrs(FlagItem *target);
+
    void initialize();      // Set inital values of things
 
    virtual bool processArguments(S32 argc, const char **argv, Game *game);

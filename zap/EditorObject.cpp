@@ -53,6 +53,38 @@ inline F32 getGridSize()
 }
 
 
+// Constructor
+EditorObject::EditorObject(GameObjectType objectType) 
+{ 
+   mDockItem = false; 
+   mLitUp = false; 
+   mSelected = false; 
+   setObjectTypeMask(objectType); 
+   mIsBeingEdited = false;
+   mSerialNumber = mNextSerialNumber++;
+}
+
+
+// Destructor
+EditorObject::~EditorObject()
+{
+   // Do nothing
+}
+
+
+//void EditorObject::copyAttrs(EditorObject *target)
+//{
+//   target->mGeometry = mGeometry->copyGeometry();
+//   target->mGame = mGame;
+//
+//   target->mDockItem = mDockItem; 
+//   target->mLitUp = mLitUp; 
+//   target->mSelected = mSelected; 
+//   target->setObjectTypeMask(getObjectTypeMask()); 
+//   mIsBeingEdited = false;
+//   mSerialNumber = mNextSerialNumber++;
+//}
+
 
 void EditorObject::addToDock(Game *game, const Point &point)
 {
@@ -282,397 +314,8 @@ void EditorObject::render(bool isScriptItem, bool showingReferenceShip, ShowMode
       renderAttribs(gEditorUserInterface.getCurrentScale());
    }
 
-
-   //////////
-
-   //else if(getObjectTypeMask() & ItemLineItem)
-   //{
-   //   glColor(getTeamColor(getTeam()), alpha);
-   //   renderPolylineCenterline(alpha);
-
-   //   if(!showingReferenceShip)
-   //      renderLinePolyVertices(gEditorUserInterface.getCurrentScale(), alpha);
-   //}
-
-   ////////////
-
-   //else if(getObjectTypeMask() & ItemBarrierMaker)      
-   //{
-   //   if(!showingReferenceShip && getObjectTypeMask() & ItemBarrierMaker)
-   //      renderPolylineCenterline(alpha);
-
-   //   if(!showingReferenceShip)
-   //      renderLinePolyVertices(gEditorUserInterface.getCurrentScale(), alpha);
-   //} 
-   //else if(getGeomType() == geomPoly)    // Draw regular line objects and poly objects
-   //{
-   //   // Hide everything in ShowWallsOnly mode, and hide navMeshZones in ShowAllButNavZones mode, 
-   //   // unless it's a dock item or we're showing the reference ship.  NavMeshZones are hidden when reference ship is shown
-   //   if((showMode != ShowWallsOnly && (gEditorUserInterface.showingNavZones() && getObjectTypeMask() & ItemNavMeshZone || getObjectTypeMask() & ~ItemNavMeshZone)) &&
-   //         !showingReferenceShip || mDockItem || showingReferenceShip && getObjectTypeMask() & ~ItemNavMeshZone)   
-   //   {
-   //      // A few items will get custom colors; most will get their team color
-   //      if(hideit)
-   //         glColor(grayedOutColorDim, alpha);
-   //      else if(getObjectTypeMask() & ItemNexus)
-   //         glColor(gNexusOpenColor, alpha);      // Render Nexus items in pale green to match the actual thing
-   //      else if(getObjectTypeMask() & ItemPolyWall)
-   //         glColor(EDITOR_WALL_FILL_COLOR);
-   //      else
-   //         glColor(getTeamColor(getTeam()), alpha);
-
-
-   //      F32 ang = angleOfLongestSide(mVerts);
-
-   //      if(mDockItem)    // Old school rendering on the dock
-   //      {
-   //         glPushMatrix();
-   //            setLevelToCanvasCoordConversion();
-
-   //            // Render the fill triangles
-   //            renderTriangulatedPolygonFill(*getPolyFillPoints());
-
-   //            glColor(hideit ? grayedOutColorBright : drawColor, alpha);
-   //            glLineWidth(gLineWidth3);  
-   //            renderPolygonOutline(mVerts);
-   //            glLineWidth(gDefaultLineWidth);        // Restore line width
-   //         glPopMatrix();
-
-   //         // Let's add a label
-   //         glColor(hideit ? grayedOutColorBright : drawColor, alpha);
-   //         renderPolygonLabel(convertLevelToCanvasCoord(getCentroid(), !mDockItem), ang, EditorUserInterface::DOCK_LABEL_SIZE, getOnScreenName());
-   //      }
-   //      else     // Not a dock item
-   //      {
-   //         glPushMatrix();  
-   //            setLevelToCanvasCoordConversion();
-
-   //            if(getObjectTypeMask() & ItemLoadoutZone)
-   //               renderLoadoutZone(getTeamColor(getTeam()), mVerts, *getPolyFillPoints(), 
-   //                                 getCentroid() * getGridSize(), ang, 1 / getGridSize());
-
-   //            else if(getObjectTypeMask() & ItemGoalZone)
-   //               renderGoalZone(getTeamColor(getTeam()), mVerts, *getPolyFillPoints(),  
-   //                                 getCentroid() * getGridSize(), ang, false, 0, getScore(), 1 / getGridSize());
-
-   //            else if(getObjectTypeMask() & ItemNexus)
-   //               renderNexus(getVerts(), *getPolyFillPoints(), 
-   //                                 getCentroid() * getGridSize(), ang, true, 0, 1 / getGridSize());
-
-   //            else if(getObjectTypeMask() & ItemNavMeshZone)
-   //               renderNavMeshZone(getVerts(), *getPolyFillPoints(), getCentroid(), showMode == NavZoneMode ? -2 : -1, 
-   //                                 true, mSelected);
-
-   //            else if(getObjectTypeMask() & ItemSlipZone)
-   //               renderSlipZone(mVerts, *getPolyFillPoints(), getExtent());
-
-
-   //            //else if(item.getObjectTypeMask() & ItemBarrierMaker)
-   //            //   renderPolygon(item.fillPoints, item->getVerts(), gIniSettings.wallFillColor, gIniSettings.wallOutlineColor, 1);
-
-   //            // If item is selected, and we're not in preview mode, draw a border highlight
-   //            if(!showingReferenceShip && (mSelected || mLitUp || (gEditorUserInterface.mDraggingObjects && mAnyVertsSelected)))
-   //            {        
-   //               glColor(hideit ? grayedOutColorBright : drawColor, alpha);
-   //               glLineWidth(gLineWidth3);  
-   //               renderPolygonOutline(mVerts);
-   //               glLineWidth(gDefaultLineWidth);        // Restore line width
-   //            }
-
-   //         glPopMatrix();
-   //      }
-   //   }
-
-   //   // NavMeshZone verts will be drawn elsewhere
-   //   if((getGeomType() == geomLine || showMode != ShowWallsOnly) && 
-   //               !mDockItem && !showingReferenceShip)  
-   //      renderLinePolyVertices(gEditorUserInterface.getCurrentScale(), alpha);                               
-   //}
- 
-   //if(showMode != ShowWallsOnly ||  mDockItem || showingReferenceShip)   // Draw the various point items
-   //{
-   //   Color c = hideit ? grayedOutColorDim : getTeamColor(getTeam());           // And a color (based on team affiliation)
-
-   //   if(getObjectTypeMask() & ItemFlag)             // Draw flag
-   //   {
-   //      glPushMatrix();
-   //         glTranslatef(pos.x, pos.y, 0);
-   //         glScalef(0.6, 0.6, 1);
-   //         renderFlag(0, 0, c, hideit ? &grayedOutColorDim : NULL, alpha);
-   //      glPopMatrix();
-   //   }
-   //   else if(getObjectTypeMask() & ItemFlagSpawn)    // Draw flag spawn point
-   //   {
-   //      if(showingReferenceShip && !mDockItem)
-   //      {
-   //         // Do nothing -- hidden in preview mode
-   //      }
-   //      else
-   //      {
-   //         glPushMatrix();
-   //            glTranslatef(pos.x + 1, pos.y, 0);
-   //            glScalef(0.4, 0.4, 1);
-   //            renderFlag(0, 0, c, hideit ? &grayedOutColorDim : NULL, alpha);
-
-   //            glColor(hideit ? grayedOutColorDim : white, alpha);
-   //            drawCircle(-4, 0, 26);
-   //         glPopMatrix();
-   //      }
-   //   }
-   //   else if(getObjectTypeMask() & ItemAsteroidSpawn)    // Draw asteroid spawn point
-   //   {
-   //      if(showingReferenceShip && !mDockItem)
-   //      {
-   //         // Do nothing -- hidden in preview mode
-   //      }
-   //      else
-   //      {
-   //         glPushMatrix();
-   //            glTranslatef(pos.x, pos.y, 0);
-   //            glScalef(0.8, 0.8, 1);
-   //            renderAsteroid(Point(0,0), asteroidDesign, .1, hideit ? &grayedOutColorDim : NULL, alpha);
-
-   //            glColor(hideit ? grayedOutColorDim : white, alpha);
-   //            drawCircle(0, 0, 13);
-   //         glPopMatrix();
-   //      }
-   //   }
-   //   else if(getObjectTypeMask() & ItemBouncyBall)   // Draw testitem
-   //   {
-   //      if(!mDockItem)
-   //      {
-   //         glPushMatrix();
-   //            gEditorUserInterface.setTranslationAndScale(pos);
-   //            renderTestItem(pos, alpha);
-   //         glPopMatrix();
-   //      }
-   //      else     // Dock item rendering
-   //      {
-   //         glColor(hideit ? grayedOutColorBright : Colors::yellow, alpha);
-   //         drawPolygon(pos, 7, 8, 0);
-   //      }
-   //   }
-   //   else if(getObjectTypeMask() & ItemAsteroid)   // Draw asteroid
-   //   {
-   //      if(!mDockItem)
-   //      {
-   //         glPushMatrix();
-   //            gEditorUserInterface.setTranslationAndScale(pos);
-   //            renderAsteroid(pos, asteroidDesign, asteroidRenderSize[0], hideit ? &grayedOutColorDim : NULL, alpha);
-   //         glPopMatrix();
-   //      }
-   //      else     // Dock item rendering
-   //         renderAsteroid(pos, asteroidDesign, .1, hideit ? &grayedOutColorDim : NULL, alpha);
-   //   }
-
-   //   else if(getObjectTypeMask() & ItemResource)   // Draw resourceItem
-   //   {
-   //      if(!mDockItem)
-   //      {
-   //         glPushMatrix();
-   //            gEditorUserInterface.setTranslationAndScale(pos);
-   //            renderResourceItem(pos, alpha);
-   //         glPopMatrix();
-   //      }
-   //      else     // Dock item rendering
-   //          renderResourceItem(pos, .4, hideit ? &grayedOutColorDim : NULL, alpha);
-   //   }
-   //   else if(getObjectTypeMask() & ItemSoccerBall)  // Soccer ball, obviously
-   //   {
-   //      if(!mDockItem)
-   //      {
-   //         glPushMatrix();
-   //            gEditorUserInterface.setTranslationAndScale(pos);
-   //            renderSoccerBall(pos, alpha);
-   //         glPopMatrix();
-   //      }
-   //      else
-   //      {
-   //         glColor(hideit ? grayedOutColorBright : Color(.7,.7,.7), alpha);
-   //         drawCircle(pos, 9);
-   //      }
-   //   }
-   //   else if(getObjectTypeMask() & ItemMine)  // And a mine
-   //   {
-   //      if(showingReferenceShip && !mDockItem) 
-   //      {
-   //          glPushMatrix();
-   //            gEditorUserInterface.setTranslationAndScale(pos);
-   //            renderMine(pos, true, true);
-   //         glPopMatrix();
-   //      }
-   //      else
-   //      {
-   //         glColor(hideit ? grayedOutColorDim : Color(.7,.7,.7), alpha);
-   //         drawCircle(pos, 9 - (mDockItem ? 2 : 0));
-
-   //         glColor(hideit ? grayedOutColorDim : Color(.1,.3,.3), alpha);
-   //         drawCircle(pos, 5 - (mDockItem ? 1 : 0));
-
-   //         drawLetter('M', pos, hideit ? grayedOutColorBright : drawColor, alpha);
-   //      }
-   //   }
-   //   else if(getObjectTypeMask() & ItemSpyBug)  // And a spy bug
-   //   {
-   //      glColor(hideit ? grayedOutColorDim : Color(.7,.7,.7), alpha);
-   //      drawCircle(pos, 9 - (mDockItem ? 2 : 0));
-
-   //      glColor(hideit ? grayedOutColorDim : getTeamColor(getTeam()), alpha);
-   //      drawCircle(pos, 5 - (mDockItem ? 1 : 0));
-
-   //      drawLetter('S', pos, hideit ? grayedOutColorBright : drawColor, alpha);
-
-   //      // And show how far it can see... unless, of course, it's on the dock, and assuming the tab key has been pressed
-   //      if(!mDockItem && showingReferenceShip && (mSelected || mLitUp))
-   //      {
-   //         glColor(getTeamColor(getTeam()), .25 * alpha);
-
-   //         F32 size = getCurrentScale() / getGridSize() * F32(gSpyBugRange);
-
-   //         drawFilledSquare(pos, size);
-   //      }
-   //   }
-
-   //   else if(getObjectTypeMask() & ItemRepair)
-   //      renderRepairItem(pos, true, hideit ? &grayedOutColorDim : NULL, alpha);
-
-   //   else if(getObjectTypeMask() & ItemEnergy)
-   //      renderEnergyItem(pos, true, hideit ? &grayedOutColorDim : NULL, alpha);
-
-   //   else if(getObjectTypeMask() & ItemTurret || getObjectTypeMask() & ItemForceField)
-   //   { 
-   //      if(renderFull(getObjectTypeMask(), getCurrentScale(), mDockItem, mSnapped))      
-   //      {
-   //         if(getObjectTypeMask() & ItemTurret)
-   //         {
-   //            glPushMatrix();
-   //               gEditorUserInterface.setTranslationAndScale(pos);
-   //               renderTurret(c, pos, mAnchorNormal, true, 1.0, mAnchorNormal.ATAN2());
-   //            glPopMatrix();
-   //         }
-   //         else   
-   //         {
-   //            glPushMatrix();
-   //               gEditorUserInterface.setTranslationAndScale(pos);
-   //               renderForceFieldProjector(pos, mAnchorNormal, c, true);
-   //            glPopMatrix();
-
-   //            F32 scaleFact = 1 / getGridSize(); 
-
-   //            glPushMatrix();
-   //               setLevelToCanvasCoordConversion();
-
-   //               renderForceField(ForceFieldProjector::getForceFieldStartPoint(getVert(0), mAnchorNormal, scaleFact), 
-   //                                forceFieldEnd, c, true, scaleFact);
-   //            glPopMatrix();
-   //         }
-   //      }
-   //      else
-   //         renderGenericItem(pos, c, alpha, hideit ? grayedOutColorBright : drawColor, getObjectTypeMask() & ItemTurret ? 'T' : '>');  
-   //   }
-   //   else if(getObjectTypeMask() & ItemSpawn)
-   //      renderGenericItem(pos, c, alpha, hideit ? grayedOutColorBright : drawColor, 'S');  
-
-
-
-
-   //   // If this is an item that has a repop attribute, and the item is selected, draw the text
-   //   if(!mDockItem && getHasRepop())
-   //   {
-   //      if(showMode != ShowWallsOnly && 
-   //         ((mSelected || mLitUp) && !gEditorUserInterface.isEditingSpecialAttrItem()) &&
-   //         (getObjectTypeMask() & ~ItemFlagSpawn || !strcmp(gEditorUserInterface.mGameType, "HuntersGameType")) || isBeingEdited())
-   //      {
-   //         glColor(white);
-
-   //         const char *healword = (getObjectTypeMask() & ItemTurret || getObjectTypeMask() & ItemForceField) ? "10% Heal" : 
-   //                                ((getObjectTypeMask() & ItemFlagSpawn || getObjectTypeMask() & ItemAsteroidSpawn) ? "Spawn Time" : "Regen");
-
-   //         Point offset = getEditorSelectionOffset(getCurrentScale()).rotate(mAnchorNormal.ATAN2()) * getCurrentScale();
-
-   //         S32 radius = getEditorRadius(getCurrentScale());
-   //         offset.y += ((radius == NONE || mDockItem) ? 10 : (radius * getCurrentScale() / getGridSize())) - 6;
-
-   //         if(repopDelay == 0)
-   //            UserInterface::drawStringfc(pos.x + offset.x, pos.y + offset.y + attrSize, attrSize, "%s: Disabled", healword);
-   //         else
-   //            UserInterface::drawStringfc(pos.x + offset.x, pos.y + offset.y + 10, attrSize, "%s: %d sec%c", 
-   //                                        healword, repopDelay, repopDelay != 1 ? 's' : 0);
-
-
-   //         const char *msg;
-
-   //         if(gEditorUserInterface.isEditingSpecialAttribute(EditorUserInterface::NoAttribute))
-   //            msg = "[Enter] to edit";
-   //         else if(isBeingEdited() && gEditorUserInterface.isEditingSpecialAttribute(EditorUserInterface::RepopDelay))
-   //            msg = "Up/Dn to change";
-   //         else
-   //            msg = "???";
-   //         UserInterface::drawStringc(pos.x + offset.x, pos.y + offset.y + instrSize + 13, instrSize, msg);
-   //      }
-   //   }
-
-   //   // If we have a turret, render it's range (if tab is depressed)
-   //   if(getObjectTypeMask() & ItemTurret)
-   //   {
-   //      if(!mDockItem && showingReferenceShip && (mSelected || mLitUp))
-   //      {
-   //         glColor(getTeamColor(getTeam()), .25 * alpha);
-
-   //         F32 size = getCurrentScale() / getGridSize() * (gWeapons[WeaponTurret].projLiveTime * gWeapons[WeaponTurret].projVelocity / 1000);
-   //         drawFilledSquare(pos, size);
-   //      }
-   //   }
-   //}
-
    glDisableBlend;
 }
-
-      // Draw highlighted border around item if selected
-      //if(showMode != ShowWallsOnly && (mSelected || mLitUp))  
-      //{
-      //   // Dock items are never selected, but they can be highlighted
-      //   Point pos = mDockItem ? getVert(0) : convertLevelToCanvasCoord(getVert(0));   
-
-      //   glColor(drawColor);
-
-      //   S32 radius = getEditorRadius(getCurrentScale());
-      //   S32 highlightRadius = (radius == NONE || mDockItem) ? 10 : S32(radius * getCurrentScale() / getGridSize() + 0.5f);
-
-      //   Point ctr = pos + getEditorSelectionOffset(getCurrentScale()).rotate(mAnchorNormal.ATAN2()) * getCurrentScale();   
-
-      //   drawSquare(ctr, highlightRadius);
-      //}
-
-   //   // Add a label if we're hovering over it (or not, unless it's on the dock, where we've already labeled our items)
-   //   // For the moment, we need special handling for turrets & forcefields :-(
-   //   if(showMode != ShowWallsOnly && (mSelected || mLitUp) && 
-   //         getOnScreenName() && !mDockItem &&
-   //         !((getObjectTypeMask() & ItemTurret || getObjectTypeMask() & ItemForceField) && renderFull(getObjectTypeMask(), getCurrentScale(), mDockItem, mSnapped)))
-   //   {
-   //      glColor(drawColor);
-   //      //UserInterface::drawStringc(pos.x, pos.y - EditorUserInterface::DOCK_LABEL_SIZE * 2 - 5, EditorUserInterface::DOCK_LABEL_SIZE, getOnScreenName()); // Label on top
-   //   }
-   // }
-
-   //// Label our dock items
-   //if(mDockItem && getGeomType() != geomPoly)      // Polys are already labeled internally
-   //{
-   //   glColor(hideit ? grayedOutColorBright : drawColor);
-   //   F32 maxy = -F32_MAX;
-   //   for(S32 j = 0; j < getVertCount(); j++)
-   //      if(getVert(j).y > maxy)
-   //         maxy = getVert(j).y;
-
-   //   // Make some label position adjustments
-   //   if(getGeomType() == geomSimpleLine)
-   //      maxy -= 2;
-   //   else if(getObjectTypeMask() & ItemSoccerBall)
-   //      maxy += 1;
-
-   //   F32 xpos = pos.x - UserInterface::getStringWidth(EditorUserInterface::DOCK_LABEL_SIZE, getOnDockName())/2;
-   //   UserInterface::drawString(xpos, maxy + 8, EditorUserInterface::DOCK_LABEL_SIZE, getOnDockName());
-   //}
 
 
 // Draw barrier centerlines; wraps renderPolyline()  ==> lineItem, barrierMaker only
@@ -723,110 +366,14 @@ void EditorObject::saveItem(FILE *f)
 }
 
 
-// Helper function for newCopy()
-static EditorObject *getNewEditorObject(EditorObject *obj)
-{
-   TextItem *textItem = dynamic_cast<TextItem *>(obj);
-   if(textItem != NULL)
-      return new TextItem(*textItem);
-
-   Teleporter *teleporter = dynamic_cast<Teleporter *>(obj);
-   if(teleporter != NULL)
-      return new Teleporter(*teleporter);
-
-   SpeedZone *speedZone = dynamic_cast<SpeedZone *>(obj);
-   if(speedZone != NULL)
-      return new SpeedZone(*speedZone);
-
-   FlagItem *flagItem = dynamic_cast<FlagItem *>(obj);
-   if(flagItem != NULL)
-      return new FlagItem(*flagItem);
-
-   FlagSpawn *flagSpawn = dynamic_cast<FlagSpawn *>(obj);
-   if(flagSpawn != NULL)
-      return new FlagSpawn(*flagSpawn);
-
-   RepairItem *repairItem = dynamic_cast<RepairItem *>(obj);
-   if(repairItem != NULL)
-      return new RepairItem(*repairItem);
-
-   TestItem *testItem = dynamic_cast<TestItem *>(obj);
-   if(testItem != NULL)
-      return new TestItem(*testItem);
-
-   ResourceItem *resourceItem = dynamic_cast<ResourceItem *>(obj);
-   if(resourceItem != NULL)
-      return new ResourceItem(*resourceItem);
-
-   Asteroid *asteroid = dynamic_cast<Asteroid *>(obj);
-   if(asteroid != NULL)
-      return new Asteroid(*asteroid);
-
-   AsteroidSpawn *asteroidSpawn = dynamic_cast<AsteroidSpawn *>(obj);
-   if(asteroidSpawn != NULL)
-      return new AsteroidSpawn(*asteroidSpawn);
-
-   Mine *mine = dynamic_cast<Mine *>(obj);
-   if(mine != NULL)
-      return new Mine(*mine);
-
-   Spawn *shipSpawn = dynamic_cast<Spawn *>(obj);
-   if(shipSpawn != NULL)
-      return new Spawn(*shipSpawn);
-
-   SpyBug *spyBug = dynamic_cast<SpyBug *>(obj);
-   if(spyBug != NULL)
-      return new SpyBug(*spyBug);
-
-   LoadoutZone *loadoutZone = dynamic_cast<LoadoutZone *>(obj);
-   if(loadoutZone != NULL)
-      return new LoadoutZone(*loadoutZone);
-
-   GoalZone *goalZone = dynamic_cast<GoalZone *>(obj);
-   if(goalZone != NULL)
-      return new GoalZone(*goalZone);
-
-   HuntersNexusObject *nexus = dynamic_cast<HuntersNexusObject *>(obj);
-   if(nexus != NULL)
-      return new HuntersNexusObject(*nexus);
-
-   Turret *turret = dynamic_cast<Turret *>(obj);
-   if(turret != NULL)
-      return new Turret(*turret);
-
-   ForceFieldProjector *projector = dynamic_cast<ForceFieldProjector *>(obj);
-   if(projector != NULL)
-      return new ForceFieldProjector(*projector);
-
-   WallItem *wallItem = dynamic_cast<WallItem *>(obj);
-   if(wallItem != NULL)
-      return new WallItem(*wallItem);
-
-   PolyWall *polyWall = dynamic_cast<PolyWall *>(obj);
-   if(polyWall != NULL)
-      return new PolyWall(*polyWall);
-
-
-   TNLAssert(false, "OBJECT NOT HANDLED IN COPY OPERATION!");
-
-   return NULL;   
-}
-
-
 // Return a pointer to a new copy of the object.  You will have to delete this copy when you are done with it!
 // This is kind of a hack, but not sure of a better way to do this...  perhaps a clone method in each object?
 EditorObject *EditorObject::newCopy()
 {
-   EditorObject *newObject = getNewEditorObject(this);
+   EditorObject *newObject = clone();     // TODO: Wrap in shared_ptr?
+   newObject->mGeometry = mGeometry->copyGeometry();
 
-   if(newObject)
-   {
-      newObject->setGame(NULL);      // mGame pointer will have been copied, but needs to be cleared before we can add this to the game
-
-      newObject->setObjectTypeMask(getObjectTypeMask());    // For some reason, typemask is not copied... why?!?
-      newObject->mGeometry = mGeometry->copyGeometry();
-      newObject->initializeEditor();
-   }
+   //newObject->initializeEditor();
 
    return newObject;
 }

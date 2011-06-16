@@ -88,11 +88,11 @@ public:
 class GridDatabase
 {
 private:
-   bool mUsingGameCoords;
 
    void findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector, const Rect *extents, S32 minx, S32 miny, S32 maxx, S32 maxy, U8 typeNumber = U8_MAX);
    static U32 mQueryId;
 
+protected:
    Vector<DatabaseObject *> mAllObjects;
 
 public:
@@ -112,11 +112,7 @@ public:
    static ClassChunker<BucketEntry> mChunker;
 
    GridDatabase();                              // Constructor
-   GridDatabase(const GridDatabase &gridDb);    // Copy constructor
-   GridDatabase &operator= (const GridDatabase &database);
    virtual ~GridDatabase();                     // Destructor
-
-   void copy(const GridDatabase &source);       // Copy contentes of source into this
 
    static const S32 BucketWidth = 255;          // Width/height of each bucket in pixels
 
@@ -152,6 +148,10 @@ private:
 
 public:
    EditorObjectDatabase();      // Constructor
+   EditorObjectDatabase(const EditorObjectDatabase &database);    // Copy constructor
+   EditorObjectDatabase &operator= (const EditorObjectDatabase &database);
+
+   void copy(const EditorObjectDatabase &database);       // Copy contents of source into this
 
    const Vector<EditorObject *> *getObjectList();     
 

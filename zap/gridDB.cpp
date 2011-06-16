@@ -49,44 +49,6 @@ GridDatabase::GridDatabase()
 }
 
 
-// Copy constructor
-GridDatabase::GridDatabase(const GridDatabase &gridDb)
-{
-   copy(gridDb);
-}
-
-
-GridDatabase &GridDatabase::operator= (const GridDatabase &gridDb)
-{
-   copy(gridDb);
-   return *this;
-}
- 
-
-// Copy contents of source into this
-void GridDatabase::copy(const GridDatabase &source)
-{
-   mUsingGameCoords = source.mUsingGameCoords;
-   
-   for(U32 x = 0; x < BucketRowCount; x++)
-      for(U32 y = 0; y < BucketRowCount; y++)
-      {
-         mBuckets[x & BucketMask][y & BucketMask] = NULL;
-
-         for(BucketEntry *walk = source.mBuckets[x & BucketMask][y & BucketMask]; walk; walk = walk->nextInBucket)
-         {
-            DatabaseObject *theObject = walk->theObject;
-
-            BucketEntry *be = mChunker.alloc();
-            be->theObject = dynamic_cast<EditorObject *>(theObject)->newCopy();  // TODO: <<<===!!!!!!  use dict to avoid copying same object twice
-            be->nextInBucket = mBuckets[x & BucketMask][y & BucketMask];
-            mBuckets[x & BucketMask][y & BucketMask] = be;
-         }
-      }
-
-   mAllObjects = source.mAllObjects;      // Copy our non-spatial database as well  use same dict to copy pointers to object copies we just made above
-}
-
 
 // Destructor
 GridDatabase::~GridDatabase()       
@@ -231,6 +193,9 @@ void GridDatabase::findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVecto
    findObjects(typeMask, fillVector, &extents, minx, miny, maxx, maxy, typeNumber);
 }
 
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 // Find objects along a ray, returning first discovered object, along with time of
 // that collision and a Point representing the normal angle at intersection point
@@ -404,6 +369,64 @@ EditorObjectDatabase::EditorObjectDatabase() : Parent()
 {
    // Do nothing, just here to call Parent's constructor
 }
+
+// Copy constructor
+EditorObjectDatabase::EditorObjectDatabase(const EditorObjectDatabase &database)
+{
+   copy(database);
+}
+
+
+EditorObjectDatabase &EditorObjectDatabase::operator= (const EditorObjectDatabase &database)
+{
+   copy(database);
+   return *this;
+}
+ 
+
+// Copy contents of source into this
+void EditorObjectDatabase::copy(const EditorObjectDatabase &source)
+{
+
+logprintf("Copying database (active= %p) to %p", &source, this);
+
+   for(U32 x = 0; x < BucketRowCount; x++)
+      for(U32 y = 0; y < BucketRowCount; y++)
+      {
+         mBuckets[x & BucketMask][y & BucketMask] = NULL;
+
+         for(BucketEntry *walk = source.mBuckets[x & BucketMask][y & BucketMask]; walk; walk = walk->nextInBucket)
+         {
+            DatabaseObject *theObject = walk->theObject;
+
+            BucketEntry *be = mChunker.alloc();
+            be->theObject = dynamic_cast<EditorObject *>(theObject)->newCopy();  // TODO: <<<===!!!!!!  use dict to avoid copying same object twice
+
+BfObject *objxx = dynamic_cast<BfObject *>(theObject);
+Geometry *geomx = objxx->mGeometry.get();
+Geometry *geom2x = dynamic_cast<BfObject *>(be->theObject)->mGeometry.get();
+
+logprintf("Copied object %p(%s) to %p, new copy inserted into %p", geomx, geomx->getVert(0).toString().c_str(),geom2x, this);
+
+
+            be->nextInBucket = mBuckets[x & BucketMask][y & BucketMask];
+            mBuckets[x & BucketMask][y & BucketMask] = be;
+         }
+      }
+
+   // Copy our non-spatial databases as well
+   mAllEditorObjects.resize(source.mAllEditorObjects.size());
+   mAllObjects.resize(source.mAllEditorObjects.size());
+
+   for(S32 i = 0; i < source.mAllEditorObjects.size(); i++)
+   {
+      mAllEditorObjects[i] = source.mAllEditorObjects[i]->newCopy(); // ===>  use same dict to copy pointers to object copies we just made above
+logprintf("oldgame = %p, newgame = %p", source.mAllEditorObjects[i]->getGame(), mAllEditorObjects[i]->getGame());
+      mAllObjects[i] = mAllEditorObjects[i];
+   }
+
+}
+
 
 
 void EditorObjectDatabase::addToDatabase(DatabaseObject *object, const Rect &extents)

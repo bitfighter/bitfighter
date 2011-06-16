@@ -221,6 +221,7 @@ public:
    static const S32 OuterBlastRadius = 250;
 
    Mine(Point pos = Point(), Ship *owner=NULL);    // Constructor
+   Mine *clone() const;
 
    bool mArmed;
    SafePtr<GameConnection> mOwnerConnection;
@@ -280,6 +281,8 @@ class SpyBug : public GrenadeProjectile, public EditorPointObject
 public:
    SpyBug(Point pos = Point(), Ship *owner = NULL);      // Constructor
    ~SpyBug();                                            // Destructor
+   SpyBug *clone() const;
+
    bool processArguments(S32 argc, const char **argv, Game *game);
    void onAddedToGame(Game *theGame);
 
