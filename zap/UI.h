@@ -211,6 +211,17 @@ extern ScreenInfo gScreenInfo;
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+template<class T, class U, class V>
+      static void glColor(T in_r, U in_g, V in_b) { glColor3f(static_cast<TNL::F32>(in_r), static_cast<TNL::F32>(in_g), static_cast<TNL::F32>(in_b)); }
+
+template<class T, class U>
+      static void glVertex(T in_x, U in_y) { glVertex2f(static_cast<TNL::F32>(in_x), static_cast<TNL::F32>(in_y)); }
+
+template<class T, class U, class V>
+      static void glTranslate(T in_x, U in_y, V in_z) { glTranslatef(static_cast<TNL::F32>(in_x), static_cast<TNL::F32>(in_y), static_cast<TNL::F32>(in_z)); }
+
+
+
 class UserInterface
 {
 private:

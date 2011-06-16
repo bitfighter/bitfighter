@@ -53,7 +53,7 @@ void EditorAttributeMenuUI::render()
    Point center = (mObject->getVert(0) + mObject->getVert(1)) * gEditorUserInterface.getCurrentScale() / 2 + offset;
 
    S32 count = menuItems.size();
-   S32 yStart = center.y - count * (ATTR_TEXTSIZE + gap) - 10;
+   S32 yStart = S32(center.y) - count * (ATTR_TEXTSIZE + gap) - 10;
 
    for(S32 i = 0; i < count; i++)
    {

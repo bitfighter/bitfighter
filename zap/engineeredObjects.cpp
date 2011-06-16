@@ -299,7 +299,7 @@ bool EngineeredObject::processArguments(S32 argc, const char **argv, Game *game)
    // Find the mount point:
    Point normal, anchor;
 
-   if(!findAnchorPointAndNormal(game->getGridDatabase(), pos, MAX_SNAP_DISTANCE, true, anchor, normal))
+   if(!findAnchorPointAndNormal(game->getGridDatabase().get(), pos, MAX_SNAP_DISTANCE, true, anchor, normal))
       return false;      // Found no mount point
 
    mAnchorPoint.set(anchor + normal);
@@ -343,7 +343,7 @@ DatabaseObject *EngineeredObject::findAnchorPointAndNormal(GridDatabase *db, con
    F32 t;
 
    // Start with a sweep of the area
-   for(F32 theta = 0; theta < Float2Pi; theta += FloatPi * 0.125)    // Reducing to 0.0125 seems to have no effect
+   for(F32 theta = 0; theta < Float2Pi; theta += FloatPi * 0.125f)    // Reducing to 0.0125 seems to have no effect
    {
       Point dir(cos(theta), sin(theta));
       dir *= snapDist;

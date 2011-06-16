@@ -1043,7 +1043,7 @@ void EditorUserInterface::onAfterRunScriptFromConsole()
 }
 
 
-extern void actualizeScreenMode(bool, bool = false);
+extern void actualizeScreenMode(bool);
 
 void EditorUserInterface::onActivate()
 {

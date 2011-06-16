@@ -128,7 +128,7 @@ public:
 static const S32 AsteroidDesigns = 4;
 static const S32 AsteroidPoints = 12;
 
-static const F32 asteroidRenderSize[] = { .8, .4, .2, -1 };      // Must end in -1
+static const F32 asteroidRenderSize[] = { .8f, .4f, .2f, -1 };      // Must end in -1
 static const S32 asteroidRenderSizes = sizeof(asteroidRenderSize) / sizeof(F32) - 1;
 
 static const S32 mSizeIndexLength = sizeof(asteroidRenderSize) / sizeof(F32) - 1;

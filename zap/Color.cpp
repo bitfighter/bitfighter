@@ -39,12 +39,6 @@ Color::Color(const Color &c)
    b = c.b;
 }
 
-Color::Color(float red, float green, float blue)
-{
-   r = red;
-   g = green;
-   b = blue;
-}
 
 Color::Color(float grayScale)
 {

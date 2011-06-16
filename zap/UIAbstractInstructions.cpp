@@ -61,8 +61,8 @@ void AbstractInstructionsUserInterface::renderConsoleCommands(const char *activa
    //glColor3f(0,1,0);
    ypos += cmdSize + cmdGap;
    glBegin(GL_LINES);
-      glVertex2f(cmdCol, ypos);
-      glVertex2f(750, ypos);
+      glVertex(cmdCol, ypos);
+      glVertex(750, ypos);
    glEnd();
 
    ypos += 5;     // Small gap before cmds start
@@ -71,10 +71,10 @@ void AbstractInstructionsUserInterface::renderConsoleCommands(const char *activa
    {
       if(cmdList[i].command[0] == '-')      // Horiz spacer
       {
-         glColor3f(0.4, 0.4, 0.4);
+         glColor(0.4, 0.4, 0.4);
          glBegin(GL_LINES);
-            glVertex2f(cmdCol, ypos + (cmdSize + cmdGap) / 4);
-            glVertex2f(cmdCol + 335, ypos + (cmdSize + cmdGap) / 4);
+            glVertex(cmdCol, ypos + (cmdSize + cmdGap) / 4);
+            glVertex(cmdCol + 335, ypos + (cmdSize + cmdGap) / 4);
          glEnd();
       }
       else

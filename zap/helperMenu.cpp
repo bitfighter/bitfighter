@@ -69,7 +69,7 @@ void HelperMenu::drawMenuBorderLine(S32 yPos, const Color &color)
    glEnableBlend;
    glBegin(GL_LINES);
       glColor(color);
-      glVertex2f(UserInterface::horizMargin, yPos + 20);
+      glVertex(UserInterface::horizMargin, yPos + 20);
       glColor(color,0);    // Fade to transparent...
       glVertex2f(400, yPos + 20);
    glEnd();

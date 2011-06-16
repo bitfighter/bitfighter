@@ -122,7 +122,7 @@ void SimpleLine::renderItemText(const char *text, S32 offset, F32 currentScale)
    S32 off = (INSTRUCTION_TEXTSIZE + INSTRUCTION_TEXTGAP) * offset - 10 - ((offset > 0) ? 5 : 0);
    UserInterface::drawStringf_2pt(convertLevelToCanvasCoord(getVert(0)), 
                                   convertLevelToCanvasCoord(getVert(1)), 
-                                  INSTRUCTION_TEXTSIZE, off, text);
+                                  F32(INSTRUCTION_TEXTSIZE), F32(off), text);
 }
 
 

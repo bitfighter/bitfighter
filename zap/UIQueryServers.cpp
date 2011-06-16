@@ -698,10 +698,10 @@ void QueryServersUserInterface::render()
             glColor(i ? Color(0,0,0.4) : Colors::blue);
 
          glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
-            glVertex2f(0, y);
-            glVertex2f(canvasWidth, y);
-            glVertex2f(canvasWidth, y + SERVER_ENTRY_TEXTSIZE + 4);
-            glVertex2f(0, y + SERVER_ENTRY_TEXTSIZE + 4);
+            glVertex(0, y);
+            glVertex(canvasWidth, y);
+            glVertex(canvasWidth, y + SERVER_ENTRY_TEXTSIZE + 4);
+            glVertex(0, y + SERVER_ENTRY_TEXTSIZE + 4);
          glEnd();
       }
 
@@ -741,7 +741,7 @@ void QueryServersUserInterface::render()
          if(s.dedicated || s.test || s.pingTimedOut || !s.everGotQueryResponse)
          {
             glPushMatrix();
-               glTranslatef(columns[1].xStart + 5, y + 2, 0);
+               glTranslate(columns[1].xStart + 5, y + 2, 0);
                if( s.pingTimedOut || !s.everGotQueryResponse )
                   drawString(0, 0, SERVER_ENTRY_TEXTSIZE, "?");
                else if(s.test)

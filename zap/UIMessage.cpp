@@ -151,18 +151,18 @@ void MessageUserInterface::render()
    {
       glColor4f(.3, 0, 0, fadeFactor * 0.95);    // Draw a box
       glBegin(GL_POLYGON);
-         glVertex2f(wInset + mVertOffset, hInset);
-         glVertex2f(canvasWidth - wInset + mVertOffset, hInset);
-         glVertex2f(canvasWidth - wInset + mVertOffset, canvasHeight - hInset);
-         glVertex2f(wInset + mVertOffset, canvasHeight - hInset);
+         glVertex(wInset + mVertOffset, hInset);
+         glVertex(canvasWidth - wInset + mVertOffset, hInset);
+         glVertex(canvasWidth - wInset + mVertOffset, canvasHeight - hInset);
+         glVertex(wInset + mVertOffset, canvasHeight - hInset);
       glEnd();
 
       glColor4f(1, 1, 1, fadeFactor); // Add a border
       glBegin(GL_LINE_LOOP);
-         glVertex2f(wInset + mVertOffset, hInset);
-         glVertex2f(canvasWidth - wInset + mVertOffset, hInset);
-         glVertex2f(canvasWidth - wInset + mVertOffset, canvasHeight - hInset);
-         glVertex2f(wInset + mVertOffset, canvasHeight - hInset);
+         glVertex(wInset + mVertOffset, hInset);
+         glVertex(canvasWidth - wInset + mVertOffset, hInset);
+         glVertex(canvasWidth - wInset + mVertOffset, canvasHeight - hInset);
+         glVertex(wInset + mVertOffset, canvasHeight - hInset);
       glEnd();
    }
 

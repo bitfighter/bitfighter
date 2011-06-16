@@ -158,10 +158,10 @@ void TeamDefUserInterface::render()
          {
             glColor(i ? Color(0,0,0.4) : Colors::blue);     // Fill : Outline
             glBegin(i ? GL_POLYGON : GL_LINES);
-               glVertex2f(0, y - 2);
-               glVertex2f(canvasWidth, y - 2);
-               glVertex2f(canvasWidth, y + itemHeight + 2);    // + 2 to allow room for cursor when editing team name
-               glVertex2f(0, y + itemHeight + 2);
+               glVertex(0, y - 2);
+               glVertex(canvasWidth, y - 2);
+               glVertex(canvasWidth, y + itemHeight + 2);    // + 2 to allow room for cursor when editing team name
+               glVertex(0, y + itemHeight + 2);
             glEnd();
          }
 

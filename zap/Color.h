@@ -44,7 +44,10 @@ public:
    float r, g, b;
 
    Color(const Color &c);
-   Color(float red, float green, float blue);
+
+   template<class T, class U, class V>
+      Color(T in_r, U in_g, V in_b) { r = static_cast<TNL::F32>(in_r); g = static_cast<TNL::F32>(in_g); b = static_cast<TNL::F32>(in_b);}
+
    Color(float grayScale = 1);
    Color(double grayScale);
 
@@ -56,7 +59,7 @@ public:
 
    // templates must stay in headers
    template<class T, class U, class V>
-   void set(T in_r, U in_g, V in_b) { r = static_cast<TNL::F32>(in_r); g = static_cast<TNL::F32>(in_g); b = static_cast<TNL::F32>(in_b); }
+      void set(T in_r, U in_g, V in_b) { r = static_cast<TNL::F32>(in_r); g = static_cast<TNL::F32>(in_g); b = static_cast<TNL::F32>(in_b); }
 
    void set(const Color &c);
    void set(const std::string &s);
