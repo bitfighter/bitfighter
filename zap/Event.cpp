@@ -194,7 +194,7 @@ void Event::onKeyDown(SDLKey key, SDLMod mod, U16 unicode)
       setKeyState(keyCode, true);
 
       if(UserInterface::current)
-         UserInterface::current->onKeyDown(keyCode, keyToAscii(key, keyCode));
+         UserInterface::current->onKeyDown(keyCode, keyToAscii(unicode, keyCode));
    }
 }
 

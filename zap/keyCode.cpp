@@ -117,12 +117,17 @@ bool isPrintable(char c)
 
 // If there is a printable ASCII code for the pressed key, return it
 // Filter out some know spurious keystrokes
-char keyToAscii(int key, KeyCode keyCode)
+char keyToAscii(int unicode, KeyCode keyCode)
 {
-   if(keyCode == KEY_UP || keyCode == KEY_DOWN || keyCode == KEY_LEFT || keyCode == KEY_RIGHT)
+   //if(keyCode == KEY_UP || keyCode == KEY_DOWN || keyCode == KEY_LEFT || keyCode == KEY_RIGHT)
+   //   return 0;
+
+   if((unicode & 0xFF80) != 0) 
       return 0;
 
-   return isPrintable(key) ? key : 0;
+   char ch = unicode & 0x7F;
+
+   return isPrintable(ch) ? ch : 0;
 }
 
 

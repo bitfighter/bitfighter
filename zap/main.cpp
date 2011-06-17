@@ -1144,6 +1144,9 @@ void InitSdlVideo()
    SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 16 );
    SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
 
+   SDL_WM_SetCaption(gWindowTitle, gWindowTitle);  // Icon name is same as window title -- set here so window will be created with proper name
+
+
    // We want to request that SDL provide us with an OpenGL window, possibly in a fullscreen video mode.
    // Note the SDL_DOUBLEBUF flag is not required to enable double buffering when setting an OpenGL
    // video mode. Double buffering is enabled or disabled using the SDL_GL_DOUBLEBUFFER attribute.
@@ -1165,8 +1168,6 @@ void InitSdlVideo()
    }
    else
       gScreenInfo.setHardwareSurface(true);
-
-   SDL_WM_SetCaption(gWindowTitle, gWindowTitle);  // Icon name is same as window title
 }
 
 // Now integrate INI settings with those from the command line and process them
@@ -1781,7 +1782,6 @@ int main(int argc, char **argv)
    moveToAppPath();
 #endif
 
-
    // Put all cmd args into a Vector for easier processing
    Vector<StringPtr> argVector;
    for(S32 i = 1; i < argc; i++)
@@ -1834,7 +1834,8 @@ int main(int argc, char **argv)
       moveToAppPath();
 #endif
 
-      InitSdlVideo();      // Get our main SDL rendering window all set up
+      InitSdlVideo();         // Get our main SDL rendering window all set up
+      SDL_EnableUNICODE(1);   // Activate unicode ==> http://sdl.beuc.net/sdl.wiki/SDL_EnableUNICODE
 
       // Put 0,0 at the center of the screen
       //glTranslatef(gScreenInfo.getGameCanvasWidth() / 2, gScreenInfo.getGameCanvasHeight() / 2, 0);     
