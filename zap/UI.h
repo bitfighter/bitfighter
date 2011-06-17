@@ -36,6 +36,8 @@
 
 #include "tnl.h"
 
+#include "SDL/SDL_opengl.h"
+
 #include <string>
 
 using namespace TNL;
