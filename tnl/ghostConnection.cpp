@@ -205,6 +205,23 @@ void GhostConnection::prepareWritePacket()
 
    if(!doesGhostFrom() && !mGhosting)
       return;
+
+   if(mGhostFreeIndex > MaxGhostCount - 10)  // almost running out of GhostFreeIndex, free some objects not in scope.
+   {
+      for(S32 i = mGhostZeroUpdateIndex; i < mGhostFreeIndex; i++)
+      {
+         GhostInfo *walk = mGhostArray[i];
+         if(!(walk->flags & GhostInfo::ScopeLocalAlways))
+         {
+            if(!(walk->flags & GhostInfo::InScope))
+               detachObject(walk);
+            else
+               walk->flags &= ~GhostInfo::InScope;
+         }
+      }
+   }
+
+
    // First step is to check all our polled ghosts:
 
    // 1. Scope query - find if any new objects have come into
