@@ -1266,13 +1266,13 @@ static bool processJoystickInputJournaled( Move *theMove, U32 &buttonMask )
 void simulateKeyDown(KeyCode keyCode)
 {
    setKeyState(keyCode, true);
-   UserInterface::current->onKeyDown(MOUSE_MIDDLE, 0);
+   UserInterface::current->onKeyDown(keyCode, 0);
 }
 
 void simulateKeyUp(KeyCode keyCode)
 {
    setKeyState(keyCode, false);
-   UserInterface::current->onKeyUp(MOUSE_MIDDLE);
+   UserInterface::current->onKeyUp(keyCode);
 }
 
 // Loads joystick moves into our Move object (overwriting any keyboard input that was already there)
