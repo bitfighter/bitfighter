@@ -250,7 +250,7 @@ public:
    static const S32 DEFAULT_RESPAWN_TIME = 30;    // in seconds
 
    Spawn(const Point &pos = Point(), S32 time = DEFAULT_RESPAWN_TIME);  // C++ constructor (no lua constructor)
-   Spawn *Spawn::clone() const;
+   Spawn *clone() const;
 
    const char *getEditorHelpString() { return "Location where ships start.  At least one per team is required. [G]"; }
    const char *getPrettyNamePlural() { return "Spawn points"; }
