@@ -271,8 +271,6 @@ public:
    S32 activateModuleIndex(lua_State *L);  // Activate module this cycle --> takes module enum
 
    S32 setReqLoadout(lua_State *L);        // Sets requested loadout to specified --> takes Loadout object
-   S32 getCurrLoadout(lua_State *L);       // Returns current loadout (Loadout)
-   S32 getReqLoadout(lua_State *L);        // Returns requested loadout (Loadout)
 
    S32 subscribe(lua_State *L);
    S32 unsubscribe(lua_State *L);
@@ -282,6 +280,8 @@ public:
 
    S32 engineerDeployObject(lua_State *L);
    S32 dropItem(lua_State *L);
+   S32 copyMoveFromObject(lua_State *L);
+
 
    S32 getGame(lua_State *L);             // Get a pointer to a game object, where we can run game-info oriented methods
    Ship *getObj() { return thisRobot; }   // This handles delegation properly when we're dealing with methods inherited from LuaShip

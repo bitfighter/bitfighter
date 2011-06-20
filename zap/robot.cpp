@@ -228,6 +228,9 @@ Lunar<LuaRobot>::RegType LuaRobot::methods[] = {
    method(LuaRobot, getAngle),
    method(LuaRobot, getActiveWeapon),
    method(LuaRobot, getMountedItems),
+
+   method(LuaRobot, getCurrLoadout),
+   method(LuaRobot, getReqLoadout),
    // End inherited methods
 
    method(LuaRobot, getZoneCenter),
@@ -254,8 +257,6 @@ Lunar<LuaRobot>::RegType LuaRobot::methods[] = {
    method(LuaRobot, activateModule),
    method(LuaRobot, activateModuleIndex),
    method(LuaRobot, setReqLoadout),
-   method(LuaRobot, getCurrLoadout),
-   method(LuaRobot, getReqLoadout),
 
    method(LuaRobot, subscribe),
    method(LuaRobot, unsubscribe),
@@ -272,6 +273,7 @@ Lunar<LuaRobot>::RegType LuaRobot::methods[] = {
 
    method(LuaRobot, engineerDeployObject),
    method(LuaRobot, dropItem),
+   method(LuaRobot, copyMoveFromObject),
 
    {0,0}    // End method list
 };
@@ -687,45 +689,6 @@ S32 LuaRobot::setReqLoadout(lua_State *L)
 }
 
 
-// Return current loadout
-S32 LuaRobot::getCurrLoadout(lua_State *L)
-{
-   U32 loadoutItems[ShipModuleCount + ShipWeaponCount];
-
-   for(S32 i = 0; i < ShipModuleCount; i++)
-      loadoutItems[i] = (U32) thisRobot->getModule(i);
-
-   for(S32 i = 0; i < ShipWeaponCount; i++)
-      loadoutItems[i + ShipModuleCount] = (U32) thisRobot->getWeapon(i);
-
-   LuaLoadout *loadout = new LuaLoadout(loadoutItems);
-   Lunar<LuaLoadout>::push(L, loadout, true);     // true will allow Lua to delete this object when it goes out of scope
-
-   return 1;
-}
-
-
-extern Vector<LoadoutItem> gLoadoutModules;
-extern Vector<LoadoutItem> gLoadoutWeapons;
-
-// Return requested loadout
-S32 LuaRobot::getReqLoadout(lua_State *L)
-{
-   U32 loadoutItems[ShipModuleCount + ShipWeaponCount];
-   const Vector<U32> requestedLoadout = thisRobot->getOwner()->getLoadout();
-   if(requestedLoadout.size() == 0)    // Robots and clients starts at zero size requested loadout.
-      return getCurrLoadout(L);
-
-   for(S32 i = 0; i < ShipModuleCount + ShipWeaponCount; i++)
-      loadoutItems[i] = requestedLoadout[i];
-
-   LuaLoadout *loadout = new LuaLoadout(loadoutItems);
-   Lunar<LuaLoadout>::push(L, loadout, true);     // true will allow Lua to delete this object when it goes out of scope
-
-   return 1;
-}
-
-
 // Send message to all players
 S32 LuaRobot::globalMsg(lua_State *L)
 {
@@ -1097,6 +1060,23 @@ S32 LuaRobot::dropItem(lua_State *L)
 
    return 0;
 }
+
+S32 LuaRobot::copyMoveFromObject(lua_State *L)
+{
+   static const char *methodName = "Robot:copyMoveFromObject()";
+
+   checkArgCount(L, 2, methodName);
+   U32 type = getInt(L, 1, methodName);
+   LuaItem *luaobj = getItem(L, 2, type, methodName);
+   GameObject *obj = luaobj->getGameObject();
+
+   Move move = obj->getCurrentMove();
+   move.time = thisRobot->getCurrentMove().time; // keep current move time
+   thisRobot->setCurrentMove(move);
+
+   return 0;
+}
+
 
 const char LuaRobot::className[] = "LuaRobot";     // This is the class name as it appears to the Lua scripts
 

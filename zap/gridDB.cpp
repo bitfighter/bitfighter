@@ -340,14 +340,14 @@ void DatabaseObject::setExtent(const Rect &extents)
 
 // This sort will put points on top of lines on top of polygons...  as they should be
 // We'll also put walls on the bottom, as this seems to work best in practice
-bool QSORT_CALLBACK geometricSort(EditorObject *a, EditorObject *b)
+bool QSORT_CALLBACK geometricSort(EditorObject * &a, EditorObject * &b)
 {
-   if((a)->getObjectTypeMask() & BarrierType)
+   if(a->getObjectTypeMask() & BarrierType)
       return true;
-   if((b)->getObjectTypeMask() & BarrierType)
+   if(b->getObjectTypeMask() & BarrierType)
       return false;
 
-   return( (a)->getGeomType() > (b)->getGeomType() );
+   return( a->getGeomType() > b->getGeomType() );
 }
 
 
@@ -355,7 +355,8 @@ static void geomSort(Vector<EditorObject *> &objects)
 {
    if(objects.size() >= 2)  // nothing to sort when there is one or zero objects
       // Cannot use Vector.sort() here because I couldn't figure out how to cast shared_ptr as pointer (*)
-      sort(objects.getStlVector().begin(), objects.getStlVector().begin() + objects.size(), geometricSort);
+      //sort(objects.getStlVector().begin(), objects.getStlVector().begin() + objects.size(), geometricSort);
+      qsort(&objects[0], objects.size(), sizeof(EditorObject *), (qsort_compare_func) geometricSort);
 }
 
 

@@ -1718,6 +1718,8 @@ Lunar<LuaShip>::RegType LuaShip::methods[] = {
    method(LuaShip, getAngle),
    method(LuaShip, getActiveWeapon),
    method(LuaShip, getMountedItems),
+   method(LuaShip, getCurrLoadout),
+   method(LuaShip, getReqLoadout),
 
    {0,0}    // End method list
 };
@@ -1798,6 +1800,40 @@ S32 LuaShip::getMountedItems(lua_State *L)
    return 1;
 }
 
+// Return current loadout
+S32 LuaShip::getCurrLoadout(lua_State *L)
+{
+   U32 loadoutItems[ShipModuleCount + ShipWeaponCount];
+
+   for(S32 i = 0; i < ShipModuleCount; i++)
+      loadoutItems[i] = (U32) thisShip->getModule(i);
+
+   for(S32 i = 0; i < ShipWeaponCount; i++)
+      loadoutItems[i + ShipModuleCount] = (U32) thisShip->getWeapon(i);
+
+   LuaLoadout *loadout = new LuaLoadout(loadoutItems);
+   Lunar<LuaLoadout>::push(L, loadout, true);     // true will allow Lua to delete this object when it goes out of scope
+
+   return 1;
+}
+
+// Return requested loadout
+S32 LuaShip::getReqLoadout(lua_State *L)
+{
+   U32 loadoutItems[ShipModuleCount + ShipWeaponCount];
+   GameConnection *gc = thisShip->getOwner();
+   const Vector<U32> requestedLoadout = gc ? gc->getLoadout() : NULL;
+   if(!gc || requestedLoadout.size() != ShipModuleCount + ShipWeaponCount)    // Robots and clients starts at zero size requested loadout.
+      return getCurrLoadout(L);
+
+   for(S32 i = 0; i < ShipModuleCount + ShipWeaponCount; i++)
+      loadoutItems[i] = requestedLoadout[i];
+
+   LuaLoadout *loadout = new LuaLoadout(loadoutItems);
+   Lunar<LuaLoadout>::push(L, loadout, true);     // true will allow Lua to delete this object when it goes out of scope
+
+   return 1;
+}
 
 GameObject *LuaShip::getGameObject()
 {
