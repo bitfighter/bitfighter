@@ -85,6 +85,8 @@ public:
    S32 getPlayerInfo(lua_State *L);
    S32 isModActive(lua_State *L);
    S32 getMountedItems(lua_State *L);
+   S32 getCurrLoadout(lua_State *L);
+   S32 getReqLoadout(lua_State *L);
 
    GameObject *getGameObject();
    static const char *getClassName() { return "LuaShip"; }

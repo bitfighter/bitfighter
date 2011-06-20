@@ -133,6 +133,7 @@ using namespace TNL;
 #ifdef WIN32
 #include <io.h>
 #include <fcntl.h>
+#include <shellapi.h>
 #define USE_BFUP
 #endif 
 

@@ -23,8 +23,8 @@
 //
 //------------------------------------------------------------------------------------
 
+#include "retrieveGame.h"
 #include "goalZone.h"
-#include "gameType.h"
 #include "ship.h"
 #include "flagItem.h"
 #include "gameObjectRender.h"
@@ -32,15 +32,8 @@
 namespace Zap
 {
 
-class RetrieveGameType : public GameType
-{
-private:
-   typedef GameType Parent;
-   Vector<GoalZone *> mZones;
-
-public:
    // Server only
-   void addFlag(FlagItem *flag)
+   void RetrieveGameType::addFlag(FlagItem *flag)
    {
       //S32 i;
       //for(i = 0; i < mFlags.size(); i++)  // What is this?
@@ -61,17 +54,14 @@ public:
    }
 
 
-   void addZone(GoalZone *zone)
+   void RetrieveGameType::addZone(GoalZone *zone)
    {
       mZones.push_back(zone);
    }
 
 
-   bool isFlagGame() { return true; }
-
-
    // Note -- neutral or enemy-to-all robots can't pick up the flag!!!
-   void shipTouchFlag(Ship *theShip, FlagItem *theFlag)
+   void RetrieveGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
    {
       // See if the ship is already carrying a flag - can only carry one at a time
       if(theShip->carryingFlag() != NO_FLAG)
@@ -123,7 +113,7 @@ public:
    }
 
 
-   void itemDropped(Ship *ship, Item *item)
+   void RetrieveGameType::itemDropped(Ship *ship, Item *item)
    {
       FlagItem *flag = dynamic_cast<FlagItem *>(item);
 
@@ -140,7 +130,7 @@ public:
 
 
    // The ship has entered a drop zone, either friend or foe
-   void shipTouchZone(Ship *s, GoalZone *z)
+   void RetrieveGameType::shipTouchZone(Ship *s, GoalZone *z)
    {
       // See if this is an opposing team's zone.  If so, do nothing.
       if(s->getTeam() != z->getTeam())
@@ -218,14 +208,14 @@ public:
 
 
    // A major scoring event has ocurred -- in this case, it's all flags being collected by one team
-   void majorScoringEventOcurred(S32 team)
+   void RetrieveGameType::majorScoringEventOcurred(S32 team)
    {
       gClientGame->getGameType()->mZoneGlowTimer.reset();
       mGlowingZoneTeam = team;
    }
 
    // Same code as in HTF, CTF
-   void performProxyScopeQuery(GameObject *scopeObject, GameConnection *connection)
+   void RetrieveGameType::performProxyScopeQuery(GameObject *scopeObject, GameConnection *connection)
    {
       Parent::performProxyScopeQuery(scopeObject, connection);
       S32 uTeam = scopeObject->getTeam();
@@ -248,7 +238,7 @@ public:
 
 
    // Runs on client
-   void renderInterfaceOverlay(bool scoreboardVisible)
+   void RetrieveGameType::renderInterfaceOverlay(bool scoreboardVisible)
    {
       Parent::renderInterfaceOverlay(scoreboardVisible);
       Ship *u = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
@@ -306,7 +296,7 @@ public:
 
 
    // What does a particular scoring event score?
-   S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data)
+   S32 RetrieveGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data)
    {
       if(scoreGroup == TeamScore)
       {
@@ -362,19 +352,6 @@ public:
       }
    }
 
-   bool isTeamFlagGame() { return true; }
-
-   GameTypes getGameType() { return RetrieveGame; }
-   const char *getGameTypeString() { return "Retrieve"; }
-   const char *getShortName() { return "Ret"; }
-   const char *getInstructionString() { return "Find all the flags, and bring them to your capture zones!"; }
-   bool isTeamGame() { return true; }
-   bool canBeTeamGame() { return true; }
-   bool canBeIndividualGame() { return false; }
-
-
-   TNL_DECLARE_CLASS(RetrieveGameType);
-};
 
 TNL_IMPLEMENT_NETOBJECT(RetrieveGameType);
 

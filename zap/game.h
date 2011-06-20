@@ -499,7 +499,7 @@ public:
 
    void setGridDatabase(boost::shared_ptr<GridDatabase> database) { 
       //TNLAssert(dynamic_cast<EditorObjectDatabase *>(database), "Uh oh...");
-      mEditorDatabase = dynamic_pointer_cast<EditorObjectDatabase>(database); 
+      mEditorDatabase = boost::dynamic_pointer_cast<EditorObjectDatabase>(database); 
    }
 };
 
