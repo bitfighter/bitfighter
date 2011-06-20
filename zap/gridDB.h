@@ -59,6 +59,8 @@ protected:
 
 public:
    DatabaseObject() { mLastQueryId = 0; extent = Rect(); mInDatabase = false; }    // Quickie constructor
+   //DatabaseObject(const DatabaseObject &t) { t.mObjectTypeMask = t.mObjectTypeMask; };
+
 
    U32 getObjectTypeMask() { return mObjectTypeMask; }   
    void setObjectTypeMask(U32 objectTypeMask) { mObjectTypeMask = objectTypeMask; }

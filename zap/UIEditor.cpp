@@ -1183,13 +1183,13 @@ Point EditorUserInterface::snapPoint(Point const &p, bool snapWhileOnDock)
       for(S32 i = 0; i < objList->size(); i++)
          if(objList->get(i)->isSelected())
             objList->get(i)->setSnapped(false);
-   }
    
-   // Turrets & forcefields: Snap to a wall edge as first (and only) choice
-   if(mDraggingObjects && (mSnapVertex_i->getObjectTypeMask() & EngineeredType))
-   {
-      EngineeredObject *engrObj = dynamic_cast<EngineeredObject *>(mSnapVertex_i);
-      return engrObj->mountToWall(snapPointToLevelGrid(p));
+      // Turrets & forcefields: Snap to a wall edge as first (and only) choice
+      if((mSnapVertex_i->getObjectTypeMask() & EngineeredType))
+      {
+         EngineeredObject *engrObj = dynamic_cast<EngineeredObject *>(mSnapVertex_i);
+         return engrObj->mountToWall(snapPointToLevelGrid(p));
+      }
    }
 
    F32 maxSnapDist = 2 / (mCurrentScale * mCurrentScale);

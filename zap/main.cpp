@@ -1145,7 +1145,8 @@ void InitSdlVideo()
    SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
 
    SDL_WM_SetCaption(gWindowTitle, gWindowTitle);  // Icon name is same as window title -- set here so window will be created with proper name
-
+   SDL_Surface* icon = SDL_LoadBMP("zap_win_icon.bmp");     // <=== TODO: put a real bmp here...
+   SDL_WM_SetIcon(icon, NULL);
 
    // We want to request that SDL provide us with an OpenGL window, possibly in a fullscreen video mode.
    // Note the SDL_DOUBLEBUF flag is not required to enable double buffering when setting an OpenGL

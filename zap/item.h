@@ -138,7 +138,7 @@ class EditorPointObject : public EditorObject
 
 public:
    EditorPointObject(GameObjectType objectType = UnknownType);       // Constructor
-   EditorPointObject(const EditorPointObject &epo);                  // Copy constructor
+   //EditorPointObject(const EditorPointObject &epo);                  // Copy constructor
 
    virtual void renderItemText(const char *text, S32 offset, F32 currentScale);
    void addToDock(Game *game, const Point &point);

@@ -1041,6 +1041,7 @@ Turret::Turret(S32 team, Point anchorPoint, Point anchorNormal) : EngineeredObje
 
 Turret *Turret::clone() const
 {
+
    return new Turret(*this);
 }
 
