@@ -127,6 +127,9 @@ private:
 
    void sendChatDisplayEvent(ClientRef *clientRef, bool global, const char *message, NetEvent *theEvent);      // In-game chat message
 
+
+   Vector<SafePtr<Item> > mCacheResendItem;  // speed up c2sResendItemStatus
+
 public:
    enum GameTypes
    {

@@ -3096,9 +3096,23 @@ GAMETYPE_RPC_C2S(GameType, c2sDropItem, (), ())
 }
 
 
-GAMETYPE_RPC_C2S(GameType, c2sResendItemStatus, (U16 itemId), (itemId))
+//GAMETYPE_RPC_C2S(GameType, c2sResendItemStatus, (U16 itemId), (itemId))  // probably want RPCUnguaranteed to avoid problems with unable to or delayed change weapons and chat
+TNL_IMPLEMENT_NETOBJECT_RPC(GameType, c2sResendItemStatus, (U16 itemId), (itemId), NetClassGroupGameMask, RPCUnguaranteed, RPCToGhostParent, 0)
 {
-   GameConnection *source = (GameConnection *) getRPCSourceConnection();
+   //GameConnection *source = (GameConnection *) getRPCSourceConnection();  // not used
+
+   if(mCacheResendItem.size() == 0)
+      mCacheResendItem.resize(1024);
+
+   for(S32 i=0; i < 1024; i += 256)
+   {
+      Item *item = mCacheResendItem[S32(itemId & 255) | i];
+      if(item && item->getItemId() == itemId)
+      {
+         item->setPositionMask();
+         return;
+      }
+   }
 
    fillVector.clear();
    getGridDatabase()->findObjects(fillVector);
@@ -3109,6 +3123,15 @@ GAMETYPE_RPC_C2S(GameType, c2sResendItemStatus, (U16 itemId), (itemId))
       if(item && item->getItemId() == itemId)
       {
          item->setPositionMask();
+         for(S32 j=0; j < 1024; j += 256)
+         {
+            if(mCacheResendItem[S32(itemId & 255) | j].isNull())
+            {
+               mCacheResendItem[S32(itemId & 255) | j].set(item);
+            }
+            return;
+         }
+         mCacheResendItem[S32(itemId & 255) | (TNL::Random::readI(0,3) * 256)].set(item);
          break;
       }
    }
