@@ -275,9 +275,6 @@ public:
 
    TNL_DECLARE_RPC(c2sRequestCurrentLevel, ());
 
-   bool mSoccerCollide;
-   TNL_DECLARE_RPC(s2cSoccerCollide, (bool enable));
-
    U8 mSendableFlags;
    TNL::ByteBuffer *mDataBuffer;
    TNL_DECLARE_RPC(s2rSendableFlags, (U8 flags));

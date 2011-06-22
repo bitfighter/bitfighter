@@ -207,7 +207,7 @@ bool SoccerGameType::onFire(Ship *ship)
 
             ball->onItemDropped();
             //ball->setActualVel(ship->getAimVector() * 200 + ship->getActualVel()); 
-				//dir * F32(wi->projVelocity) + dir * shooterVel.dot(dir);
+            //dir * F32(wi->projVelocity) + dir * shooterVel.dot(dir);
             ball->setActualVel(ship->getAimVector() * 200 + ship->getAimVector() * ship->getActualVel().dot(ship->getAimVector()));
          }
       }
@@ -310,6 +310,7 @@ SoccerBallItem::SoccerBallItem(Point pos) : EditorItem(pos, true, SoccerBallItem
    mLastPlayerTouchTeam = Item::NO_TEAM;
    mLastPlayerTouchName = StringTableEntry(NULL);
    mDragFactor = 1.0;     // 1.0 for no drag
+   mAllowPickup = false;
 }
 
 
@@ -330,6 +331,8 @@ bool SoccerBallItem::processArguments(S32 argc, const char **argv, Game *game)
 
    // Add the ball's starting point to the list of flag spawn points
    gServerGame->getGameType()->mFlagSpawnPoints.push_back(FlagSpawn(initialPos, 0));
+
+   mAllowPickup = gServerGame->getGameType()->mAllowSoccerPickup;
 
    return true;
 }
@@ -371,7 +374,6 @@ void SoccerBallItem::onAddedToGame(Game *theGame)
    GameType *gt = theGame->getGameType();
    if(gt)
    {
-      gt->mHaveSoccer = true;
       SoccerGameType * sgt = dynamic_cast<SoccerGameType *>(gt);
       if(sgt) sgt->setBall(this);
    }
@@ -522,7 +524,7 @@ bool SoccerBallItem::collide(GameObject *hitObject)
          mLastPlayerTouchName = mLastPlayerTouch->getName();      // Used for making nicer looking messages in same situation
          GameType *gt = getGame()->getGameType();
 
-         if(gt && !gt->mAllowSoccerPickup)
+         if(!mAllowPickup)
             return true;
       
          mDroppedTimer.clear();
@@ -533,10 +535,7 @@ bool SoccerBallItem::collide(GameObject *hitObject)
 
       else    // Client side
       { 
-         if(gClientGame && gClientGame->getConnectionToServer())
-            return gClientGame->getConnectionToServer()->mSoccerCollide;
-
-         return false;       // Let server handle the collision
+         return !mAllowPickup;       // Let server handle the collision when pickup is enabled
       }
    }
    else if(hitObject->getObjectTypeMask() & GoalZoneType)      // SCORE!!!!
@@ -555,6 +554,22 @@ bool SoccerBallItem::collide(GameObject *hitObject)
    }
    return true;
 }
+
+U32 SoccerBallItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
+{
+   U32 retMask = Parent::packUpdate(connection, updateMask, stream);
+   if(updateMask & InitialMask)
+      stream->writeFlag(mAllowPickup);
+   return retMask;
+}
+void SoccerBallItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
+{
+   Parent::unpackUpdate(connection, stream);
+   if(mInitial)
+      mAllowPickup = stream->readFlag();
+}
+
+
 
 
 };

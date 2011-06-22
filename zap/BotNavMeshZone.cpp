@@ -63,7 +63,7 @@ TNL_IMPLEMENT_NETOBJECT(BotNavMeshZone);
 // Constructor
 BotNavMeshZone::BotNavMeshZone(S32 id)
 {
-   TNLAssert(id > -1, "id == -1!");
+   //TNLAssert(id > -1, "id == -1!");  // Some levels already have BotNavMeshZone, trying to create bot zone in processLevelLoadLine will have ID of -1
 
    mGame = NULL;
    //mObjectTypeMask = BotNavMeshZoneType | CommandMapVisType;
@@ -141,8 +141,6 @@ bool BotNavMeshZone::processArguments(S32 argc, const char **argv, Game *game)
 
    readGeom(argc, argv, 0, game->getGridSize());
 
-   setExtent();     // Sets object's extent database
-
    return true;
 }
 
@@ -152,6 +150,10 @@ void BotNavMeshZone::addToGame(Game *game)
    // Ordinarily, we'd call GameObject::addToGame() here, but the BotNavMeshZones don't need to be added to the game
    // the way an ordinary game object would be.  So we won't.
    mGame = game;
+   
+   Vector<Point> polyPoints;
+   getCollisionPoly(polyPoints);
+   setExtent(Rect(polyPoints));
    addToDatabase();
 }
 
@@ -363,8 +365,16 @@ bool BotNavMeshZone::buildBotNavMeshZoneConnectionsRecastStyle(GridDatabase *zon
    return true;
 }
 
-
 Vector<DatabaseObject *> zones;
+
+void BotNavMeshZone::IDBotMeshZones(ServerGame *game)
+{
+   zones.clear();
+   gServerGame->getBotZoneDatabase()->findObjects(0, zones, BotNavMeshZoneTypeNumber);
+   for(S32 i=0; i < zones.size(); i++)
+      dynamic_cast<BotNavMeshZone *>(zones[i])->mZoneId = i;
+}
+
 
 // Returns index of zone containing specified point
 static BotNavMeshZone *findZoneContainingPoint(const Point &point)
@@ -494,6 +504,12 @@ static bool mergeBotZoneBuffers(const Vector<DatabaseObject *> &barriers,
 }
 
 
+
+// Server only
+void IDBotMeshZones(ServerGame *game)
+{
+}
+
 // Server only
 // Use the Triangle library to create zones.  Aggregate triangles with Recast
 bool BotNavMeshZone::buildBotMeshZones(ServerGame *game)
@@ -603,7 +619,6 @@ bool BotNavMeshZone::buildBotMeshZones(ServerGame *game)
             if(botzone != NULL)
             {
                botzone->addToGame(game);     // Adds zone to database
-               botzone->setExtent();
             }
          }
 
@@ -632,7 +647,7 @@ bool BotNavMeshZone::buildBotMeshZones(ServerGame *game)
          // Triangulation only needed for display on local client... it is expensive to compute for so many zones,
          // and there is really no point if they will never be viewed.  Once disabled, triangluation cannot be re-enabled
          // for this object.
-         if(!gClientGame)     
+         if(!gClientGame)
             botzone->disableTriangluation();
 
          botzone->addVert(Point(triangleData.pointList[triangleData.triangleList[i]*2],   triangleData.pointList[triangleData.triangleList[i]*2 + 1]));
@@ -640,7 +655,6 @@ bool BotNavMeshZone::buildBotMeshZones(ServerGame *game)
          botzone->addVert(Point(triangleData.pointList[triangleData.triangleList[i+2]*2], triangleData.pointList[triangleData.triangleList[i+2]*2 + 1]));
 
          botzone->addToGame(game);
-         botzone->setExtent();   
        }
 
       BotNavMeshZone::buildBotNavMeshZoneConnections(game->getBotZoneDatabase());

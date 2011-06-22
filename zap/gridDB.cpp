@@ -153,6 +153,7 @@ void GridDatabase::findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVecto
 
 void GridDatabase::findObjects(Vector<DatabaseObject *> &fillVector)
 {
+   fillVector.reserve(mAllObjects.size());
    for(S32 i = 0; i < mAllObjects.size(); i++)
       fillVector.push_back(mAllObjects[i]);
 }

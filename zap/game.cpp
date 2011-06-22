@@ -997,6 +997,7 @@ void ServerGame::cycleLevel(S32 nextLevel)
    if(mDatabaseForBotZones.getObjectCount() != 0)     // There are some zones loaded in the level...
    {
       getGameType()->mBotZoneCreationFailed = false;
+      BotNavMeshZone::IDBotMeshZones(this);
       BotNavMeshZone::buildBotNavMeshZoneConnections(getBotZoneDatabase());
    }
    else
@@ -1009,8 +1010,6 @@ void ServerGame::cycleLevel(S32 nextLevel)
    GameType *gt = getGameType();
    for(GameConnection *walk = GameConnection::getClientList(); walk; walk = walk->getNextClient())
    {
-      if(gt && gt->mHaveSoccer)
-         walk->s2cSoccerCollide(!gt->mAllowSoccerPickup);
       connectionList.push_back(walk);
    }
 
@@ -1242,6 +1241,10 @@ void ServerGame::idle(U32 timeDelta)
                      e.push_back("?");
                }
                break;
+            case 5:
+               msg = "/YES or /NO : %i0 : %s0";
+               s.push_back(mVoteString);
+               break;
             }
             bool WaitingToVote = false;
             for(GameConnection *walk = GameConnection::getClientList(); walk; walk = walk->getNextClient())
@@ -1307,6 +1310,14 @@ void ServerGame::idle(U32 timeDelta)
                }
                break;
             case 4:
+               if(gt)
+               {
+                  for(GameConnection *walk = GameConnection::getClientList(); walk; walk = walk->getNextClient())
+                     if(walk->getClientName() == mVoteClientName)
+                        gt->changeClientTeam(walk, mVoteNumber);
+               }
+               break;
+            case 5:
                if(gt)
                {
                   for(GameConnection *walk = GameConnection::getClientList(); walk; walk = walk->getNextClient())

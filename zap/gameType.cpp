@@ -147,7 +147,6 @@ GameType::GameType() : mScoreboardUpdateTimer(1000) , mGameTimer(DefaultGameTime
    mShowAllBots = false;
    mTotalGamePlay = 0;
    mAllowSoccerPickup = true;
-   mHaveSoccer = false;           // level have soccer balls, used for s2cSoccerCollide
    mAllowAddBot = true;
    mBotZoneCreationFailed = false;
 }

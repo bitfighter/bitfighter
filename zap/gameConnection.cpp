@@ -111,7 +111,6 @@ void GameConnection::initialize()
    mAuthenticationCounter = 0;            // Counts number of retries
    mIsVerified = false;                   // Final conclusion... client is or is not verified
    switchedTeamCount = 0;
-   mSoccerCollide = false;
    mSendableFlags = 0;
    mDataBuffer = NULL;
 }
@@ -248,7 +247,7 @@ ClientRef *GameConnection::getClientRef()
 // 2. client requent current level
 // 3. server send data and client writes to file, What if sendmap not allowed?
 // 4. server send CommandComplete
-TNL_IMPLEMENT_RPC(GameConnection, c2sRequestCurrentLevel, (), (), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 1)
+TNL_IMPLEMENT_RPC(GameConnection, c2sRequestCurrentLevel, (), (), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
    if(! gIniSettings.allowGetMap)
    {
@@ -276,7 +275,7 @@ const U32 maxDataBufferSize = 1024*256;
 // << DataSendable >>
 // Send a chunk of the file -- this gets run on the receiving end       
 TNL_IMPLEMENT_RPC(GameConnection, s2rSendLine, (StringPtr line), (line), 
-                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 1)
+                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 0)
 //void s2rSendLine2(StringPtr line)
 {
    if(!isInitiator()) // make it client only.
@@ -305,7 +304,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendLine, (StringPtr line), (line),
 // << DataSendable >>
 // When sender is finished, it sends a commandComplete message
 TNL_IMPLEMENT_RPC(GameConnection, s2rCommandComplete, (RangedU32<0,SENDER_STATUS_COUNT> status), (status), 
-                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 1)
+                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 0)
 {
    if(!isInitiator()) // make it client only.
       return;
@@ -384,7 +383,7 @@ void GameConnection::unsuspendGame()
 }
 
 // Client requests that the game be suspended while he waits for other players.  This runs on the server.
-TNL_IMPLEMENT_RPC(GameConnection, c2sSuspendGame, (bool suspend), (suspend), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 1)
+TNL_IMPLEMENT_RPC(GameConnection, c2sSuspendGame, (bool suspend), (suspend), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
    if(suspend)
       gServerGame->suspendGame(this);
@@ -395,7 +394,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSuspendGame, (bool suspend), (suspend), Net
   
 // Here, the server has sent a message to a suspended client to wake up, action's coming in hot!
 // We'll also play the playerJoined sfx to alert local client that the game is on again.
-TNL_IMPLEMENT_RPC(GameConnection, s2cUnsuspend, (), (), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 1)
+TNL_IMPLEMENT_RPC(GameConnection, s2cUnsuspend, (), (), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
    mClientGame->unsuspendGame();       
    SoundSystem::playSoundEffect(SFXPlayerJoined, 1);
@@ -409,7 +408,7 @@ void GameConnection::changeParam(const char *param, ParamType type)
 
 
 TNL_IMPLEMENT_RPC(GameConnection, c2sEngineerDeployObject, (RangedU32<0,EngineeredObjectCount> type), (type), 
-                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 1)
+                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
    sEngineerDeployObject(type);
 }
@@ -447,7 +446,7 @@ bool GameConnection::sEngineerDeployObject(U32 type)
 
 
 TNL_IMPLEMENT_RPC(GameConnection, c2sSetAuthenticated, (), (), 
-                  NetClassGroupGameMask, RPCGuaranteed, RPCDirClientToServer, 2)
+                  NetClassGroupGameMask, RPCGuaranteed, RPCDirClientToServer, 0)
 {
    mIsVerified = false; 
    mClientNeedsToBeVerified = true; 
@@ -458,7 +457,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetAuthenticated, (), (),
 
 
 TNL_IMPLEMENT_RPC(GameConnection, c2sAdminPassword, (StringPtr pass), (pass), 
-                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 1)
+                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
    // If gAdminPassword is blank, no one can get admin permissions except the local host, if there is one...
    if(gAdminPassword != "" && !strcmp(md5.getSaltedHashFromString(gAdminPassword).c_str(), pass))
@@ -481,7 +480,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sAdminPassword, (StringPtr pass), (pass),
 
 
 // pass is our hashed password
-TNL_IMPLEMENT_RPC(GameConnection, c2sLevelChangePassword, (StringPtr pass), (pass), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 1)
+TNL_IMPLEMENT_RPC(GameConnection, c2sLevelChangePassword, (StringPtr pass), (pass), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
    // If password is blank, permissions always granted
    if(gLevelChangePassword == "" || !strcmp(md5.getSaltedHashFromString(gLevelChangePassword).c_str(), pass))
@@ -503,7 +502,7 @@ extern Vector<StringTableEntry> gLevelSkipList;
 
 // Allow admins to change the passwords on their systems
 TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, GameConnection::ParamTypeCount> type), (param, type),
-                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 1)
+                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
    if(!isAdmin())    // Do nothing --> non-admins have no pull here
       return;
@@ -629,7 +628,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
 // Kick player or change his team
 TNL_IMPLEMENT_RPC(GameConnection, c2sAdminPlayerAction,
    (StringTableEntry playerName, U32 actionIndex, S32 team), (playerName, actionIndex, team),
-   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 1)
+   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
    if(!isAdmin())
       return;              // do nothing --> non-admins have no pull here
@@ -706,7 +705,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sAdminPlayerAction,
 
 // This gets called under two circumstances; when it's a new game, or when the server's name is changed by an admin
 TNL_IMPLEMENT_RPC(GameConnection, s2cSetServerName, (StringTableEntry name), (name),
-   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 1)
+   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
    setServerName(name);
 
@@ -737,7 +736,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetServerName, (StringTableEntry name), (na
 extern Color gCmdChatColor;
 
 TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsAdmin, (bool granted), (granted),
-   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 1)
+   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
    static const char *adminPassSuccessMsg = "You've been granted permission to manage players and change levels";
    static const char *adminPassFailureMsg = "Incorrect password: Admin access denied";
@@ -793,7 +792,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsAdmin, (bool granted), (granted),
 
 
 TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsLevelChanger, (bool granted, bool notify), (granted, notify),
-   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 1)
+   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
    static const char *levelPassSuccessMsg = "You've been granted permission to change levels";
    static const char *levelPassFailureMsg = "Incorrect password: Level changing permissions denied";
@@ -849,19 +848,19 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsLevelChanger, (bool granted, bool noti
 
 
 TNL_IMPLEMENT_RPC(GameConnection, c2sRequestCommanderMap, (), (),
-   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 1)
+   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
    mInCommanderMap = true;
 }
 
 TNL_IMPLEMENT_RPC(GameConnection, c2sReleaseCommanderMap, (), (),
-   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 1)
+   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
    mInCommanderMap = false;
 }
 
 // Client has changed his loadout configuration.  This gets run on the server as soon as the loadout is entered.
-TNL_IMPLEMENT_RPC(GameConnection, c2sRequestLoadout, (Vector<U32> loadout), (loadout), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 1)
+TNL_IMPLEMENT_RPC(GameConnection, c2sRequestLoadout, (Vector<U32> loadout), (loadout), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
    sRequestLoadout(loadout);
 }
@@ -905,7 +904,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayMessageESI,
                   (RangedU32<0, GameConnection::ColorCount> color, RangedU32<0, NumSFXBuffers> sfx, StringTableEntry formatString,
                   Vector<StringTableEntry> e, Vector<StringPtr> s, Vector<S32> i),
                   (color, sfx, formatString, e, s, i),
-                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 1)
+                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
    char outputBuffer[256];
    S32 pos = 0;
@@ -945,7 +944,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayMessageESI,
 TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayMessageE,
                   (RangedU32<0, GameConnection::ColorCount> color, RangedU32<0, NumSFXBuffers> sfx, StringTableEntry formatString,
                   Vector<StringTableEntry> e), (color, sfx, formatString, e),
-                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 1)
+                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
    displayMessageE(color, sfx, formatString, e);
 }
@@ -954,7 +953,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayMessageE,
 TNL_IMPLEMENT_RPC(GameConnection, s2cTouchdownScored,
                   (U32 sfx, S32 team, StringTableEntry formatString, Vector<StringTableEntry> e),
                   (sfx, team, formatString, e),
-                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 1)
+                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
    displayMessageE(GameConnection::ColorNuclearGreen, sfx, formatString, e);
    mClientGame->getGameType()->majorScoringEventOcurred(team);
@@ -1007,7 +1006,7 @@ void GameConnection::displayMessageE(U32 color, U32 sfx, StringTableEntry format
 TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayMessage,
                   (RangedU32<0, GameConnection::ColorCount> color, RangedU32<0, NumSFXBuffers> sfx, StringTableEntry formatString),
                   (color, sfx, formatString),
-                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 1)
+                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
    static const S32 STRLEN = 256;
    char outputBuffer[STRLEN];
@@ -1020,7 +1019,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayMessage,
 
 
 TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayMessageBox, (StringTableEntry title, StringTableEntry instr, Vector<StringTableEntry> message),
-                  (title, instr, message), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 1)
+                  (title, instr, message), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
    gErrorMsgUserInterface.reset();
    gErrorMsgUserInterface.setTitle(title.getString());
@@ -1035,14 +1034,14 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayMessageBox, (StringTableEntry title,
 
 // Server sends the name and type of a level to the client (gets run repeatedly when client connects to the server)
 TNL_IMPLEMENT_RPC(GameConnection, s2cAddLevel, (StringTableEntry name, StringTableEntry type), (name, type),
-                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 1)
+                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
    mLevelInfos.push_back(LevelInfo(name, type));
 }
 
 extern string gLevelChangePassword;
 TNL_IMPLEMENT_RPC(GameConnection, c2sRequestLevelChange, (S32 newLevelIndex, bool isRelative), (newLevelIndex, isRelative), 
-                              NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 1)
+                              NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
    c2sRequestLevelChange2(newLevelIndex, isRelative);
 }
@@ -1080,7 +1079,7 @@ void GameConnection::c2sRequestLevelChange2(S32 newLevelIndex, bool isRelative)
 
 
 TNL_IMPLEMENT_RPC(GameConnection, c2sRequestShutdown, (U16 time, StringPtr reason), (time, reason), 
-                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 1)
+                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
    if(!mIsAdmin)
       return;
@@ -1096,13 +1095,13 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestShutdown, (U16 time, StringPtr reaso
 
 
 TNL_IMPLEMENT_RPC(GameConnection, s2cInitiateShutdown, (U16 time, StringTableEntry name, StringPtr reason, bool originator),
-                  (time, name, reason, originator), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 1)
+                  (time, name, reason, originator), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
    mClientGame->mGameUserInterface->shutdownInitiated(time, name, reason, originator);
 }
 
 
-TNL_IMPLEMENT_RPC(GameConnection, c2sRequestCancelShutdown, (), (), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 1)
+TNL_IMPLEMENT_RPC(GameConnection, c2sRequestCancelShutdown, (), (), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
    if(!mIsAdmin)
       return;
@@ -1117,20 +1116,20 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestCancelShutdown, (), (), NetClassGrou
 }
 
 
-TNL_IMPLEMENT_RPC(GameConnection, s2cCancelShutdown, (), (), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 1)
+TNL_IMPLEMENT_RPC(GameConnection, s2cCancelShutdown, (), (), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
    mClientGame->mGameUserInterface->shutdownCanceled();
 }
 
 
 // Client tells server that they are busy chatting or futzing with menus or configuring ship... or not
-TNL_IMPLEMENT_RPC(GameConnection, c2sSetIsBusy, (bool busy), (busy), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 2)
+TNL_IMPLEMENT_RPC(GameConnection, c2sSetIsBusy, (bool busy), (busy), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
    setIsBusy(busy);
 }
 
 
-TNL_IMPLEMENT_RPC(GameConnection, c2sSetServerAlertVolume, (S8 vol), (vol), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 2)
+TNL_IMPLEMENT_RPC(GameConnection, c2sSetServerAlertVolume, (S8 vol), (vol), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
    //setServerAlertVolume(vol);
 }
@@ -1157,7 +1156,7 @@ void updateClientChangedName(GameConnection *gc, StringTableEntry newName){
 
 // Client connect to master after joining game server, get authentication fail,
 // then client have changed name to non-reserved, or entered password.
-TNL_IMPLEMENT_RPC(GameConnection, c2sRenameClient, (StringTableEntry newName), (newName), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 2)
+TNL_IMPLEMENT_RPC(GameConnection, c2sRenameClient, (StringTableEntry newName), (newName), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
    StringTableEntry oldName = getClientName();
    setClientName(StringTableEntry(""));       //avoid unique self
@@ -1175,14 +1174,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRenameClient, (StringTableEntry newName), (
    }
 }
 
-// old 015 clients will ignore this command. (new on version 015a)
-TNL_IMPLEMENT_RPC(GameConnection, s2cSoccerCollide, (bool enable), (enable), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 3)
-{
-   mSoccerCollide = enable;
-}
-
-
-TNL_IMPLEMENT_RPC(GameConnection, s2rSendableFlags, (U8 flags), (flags), NetClassGroupGameMask, RPCGuaranteed, RPCDirAny, 4)
+TNL_IMPLEMENT_RPC(GameConnection, s2rSendableFlags, (U8 flags), (flags), NetClassGroupGameMask, RPCGuaranteed, RPCDirAny, 0)
 {
    mSendableFlags = flags;
 }
@@ -1239,7 +1231,7 @@ LevelInfo getLevelInfo(char *level, S32 size)
 
 extern ConfigDirectories gConfigDirs;
 
-TNL_IMPLEMENT_RPC(GameConnection, s2rSendDataParts, (U8 type, ByteBufferPtr data), (type, data), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 4)
+TNL_IMPLEMENT_RPC(GameConnection, s2rSendDataParts, (U8 type, ByteBufferPtr data), (type, data), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 0)
 {
    if(!gIniSettings.allowMapUpload && !isAdmin())  // don't need it when not enabled, saves some memory. May remove this, it is checked again leter.
       return;
@@ -1568,8 +1560,6 @@ void GameConnection::onConnectionEstablished()
                 isLocalConnection() ? "Local Connection" : getNetAddressString(), getTimeStamp().c_str());
 
       GameType *gt = gServerGame->getGameType();
-      if(gt)
-         s2cSoccerCollide(!gt->mAllowSoccerPickup);
       if(gIniSettings.allowMapUpload)
          s2rSendableFlags(1);
    }

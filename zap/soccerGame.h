@@ -96,6 +96,7 @@ private:
    F32 mDragFactor;
 
 public:
+   bool mAllowPickup;
    U32 mPickupTime;
    SoccerBallItem(Point pos = Point());   // C++ constructor
    SoccerBallItem *clone() const;
@@ -127,6 +128,8 @@ public:
    void renderDock();
    void renderEditor(F32 currentScale);
 
+   U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
+   void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
    ///// Lua Interface
 

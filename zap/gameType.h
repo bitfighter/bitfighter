@@ -276,7 +276,6 @@ public:
    bool mGameOver;                  // Set to true when an end condition is met
 
    bool mAllowSoccerPickup;         // Soccer balls only
-   bool mHaveSoccer;                // Does level have soccer balls? used to determine weather or not to send s2cSoccerCollide
 
    bool mAllowAddBot;
    bool mBotZoneCreationFailed;
