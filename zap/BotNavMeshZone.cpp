@@ -504,12 +504,6 @@ static bool mergeBotZoneBuffers(const Vector<DatabaseObject *> &barriers,
 }
 
 
-
-// Server only
-void IDBotMeshZones(ServerGame *game)
-{
-}
-
 // Server only
 // Use the Triangle library to create zones.  Aggregate triangles with Recast
 bool BotNavMeshZone::buildBotMeshZones(ServerGame *game)

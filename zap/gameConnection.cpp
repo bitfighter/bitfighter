@@ -1038,6 +1038,15 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cAddLevel, (StringTableEntry name, StringTab
 {
    mLevelInfos.push_back(LevelInfo(name, type));
 }
+// Server sends the level that got removed, or removes all levels from list when index is -1
+TNL_IMPLEMENT_RPC(GameConnection, s2cRemoveLevel, (S32 index), (index),
+                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
+{
+   if(index < 0)
+      mLevelInfos.clear();
+   else if(index < mLevelInfos.size())
+      mLevelInfos.erase(index);
+}
 
 extern string gLevelChangePassword;
 TNL_IMPLEMENT_RPC(GameConnection, c2sRequestLevelChange, (S32 newLevelIndex, bool isRelative), (newLevelIndex, isRelative), 

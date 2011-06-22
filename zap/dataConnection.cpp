@@ -210,7 +210,7 @@ extern md5wrapper md5;
 TNL_IMPLEMENT_RPC(DataConnection, c2sSendOrRequestFile, 
                   (StringPtr password, RangedU32<0,U32(FILE_TYPES)> filetype, bool isRequest, StringPtr filename), 
                   (password, filetype, isRequest, filename), 
-                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 1)
+                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
    // Check if data connections are allowed
    if(!gIniSettings.allowDataConnections)
@@ -271,7 +271,7 @@ TNL_IMPLEMENT_RPC(DataConnection, c2sSendOrRequestFile,
 
 // Server tells us it's ok to send... so start sending!
 TNL_IMPLEMENT_RPC(DataConnection, s2cOkToSend, (), (), 
-                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 1)
+                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 0)
 {
    // Initialize on the client to start sending file we want to send
    SenderStatus stat = mDataSender.initialize(this, mFilename.c_str(), mFileType);
@@ -288,7 +288,7 @@ TNL_IMPLEMENT_RPC(DataConnection, s2cOkToSend, (), (),
 // << DataSendable >>
 // Send a chunk of the file -- this gets run on the receiving end       
 TNL_IMPLEMENT_RPC(DataConnection, s2rSendLine, (StringPtr line), (line), 
-                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 1)
+                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 0)
 {
    if(mOutputFile)
       fwrite(line.getString(), 1, strlen(line.getString()), mOutputFile);
@@ -300,7 +300,7 @@ TNL_IMPLEMENT_RPC(DataConnection, s2rSendLine, (StringPtr line), (line),
 // << DataSendable >>
 // When client has finished sending its data, it sends a commandComplete message, which triggers the server to disconnect the client
 TNL_IMPLEMENT_RPC(DataConnection, s2rCommandComplete, (RangedU32<0,SENDER_STATUS_COUNT> status), (status), 
-                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 1)
+                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 0)
 {
    disconnect(ReasonNone, "done");     // Terminate connection... should probably send different message depending on status
 
