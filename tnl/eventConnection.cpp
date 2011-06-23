@@ -291,6 +291,18 @@ void EventConnection::writePacket(BitStream *bstream, PacketNotify *pnotify)
             bstream->clearError();
             break;
          }
+         else //if(bstream->getBitPosition() < MaxPacketDataSize*8 - MinimumPaddingBits)
+         {
+            TNLAssert(false, "Packet too big to send, one or more events may be unable to send");
+            // dequeue the event:
+            mUnorderedSendEventQueueHead = ev->mNextEvent;
+            ev->mNextEvent = NULL;
+            ev->mEvent->notifyDelivered(this, false);
+            mEventNoteChunker.free(ev);
+            bstream->setBitPosition(start - 1);
+            bstream->clearError();
+            break;
+         }
       }
       have_something_to_send = true;
 
@@ -346,9 +358,24 @@ void EventConnection::writePacket(BitStream *bstream, PacketNotify *pnotify)
       // was one:
       if(bstream->getBitPosition() >= MaxPreferredPacketDataSize*8 - MinimumPaddingBits)
       {
-         TNLAssert(have_something_to_send || bstream->getBitPosition() < MaxPacketDataSize*8 - MinimumPaddingBits, "Packet too big to send");
          if(have_something_to_send)
          {
+            bstream->setBitPosition(eventStart);
+            bstream->clearError();
+            break;
+         }
+         else
+         {
+            TNLAssert(false, "Packet too big to send, one or more events may be unable to send");
+            for(EventNote *walk = ev->mNextEvent; walk; walk = walk->mNextEvent)
+               walk->mSeqCount--;    // removing a GuaranteedOrdered needs to re-order mSeqCount
+            mNextSendEventSeq--;
+
+            // dequeue the event:
+            mSendEventQueueHead = ev->mNextEvent;
+            ev->mNextEvent = NULL;
+            ev->mEvent->notifyDelivered(this, false);
+            mEventNoteChunker.free(ev);
             bstream->setBitPosition(eventStart);
             bstream->clearError();
             break;
@@ -432,13 +459,17 @@ void EventConnection::readPacket(BitStream *bstream)
          || (evt->getEventDirection() == NetEvent::DirClientToServer && isConnectionToServer()) )
       {
          setLastError("Invalid Packet -- event direction wrong.");
+         delete evt;
          return;
       }
 
 
       evt->unpack(this, bstream);
       if(mErrorBuffer[0])
+      {
+         delete evt;
          return;
+      }
 
       if(mConnectionParameters.mDebugObjectSizes)
       {
