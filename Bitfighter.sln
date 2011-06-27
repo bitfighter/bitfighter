@@ -14,9 +14,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "master", "master\master.vcx
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tnl", "tnl\tnl.vcxproj", "{5AAE89B5-1F53-4539-9899-071E68FD9A29}"
-	ProjectSection(ProjectDependencies) = postProject
-		{3F7F7B79-4473-4CAB-A54E-4274A9F1A01A} = {3F7F7B79-4473-4CAB-A54E-4274A9F1A01A}
-	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libtomcrypt", "libtomcrypt\libtomcrypt.vcxproj", "{3F7F7B79-4473-4CAB-A54E-4274A9F1A01A}"
 EndProject
