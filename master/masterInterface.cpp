@@ -182,12 +182,11 @@ TNL_IMPLEMENT_RPC(MasterServerInterface, s2mSendGameStatistics_2, (StringTableEn
 
 
 // 015
-TNL_IMPLEMENT_RPC(MasterServerInterface, s2mSendStatistics, (Zap::VersionedGameStats stats), (stats),
-                  NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 6) {}
 
-// future?
-TNL_IMPLEMENT_RPC(MasterServerInterface, s2mSendDataParts, (U8 mode, ByteBufferPtr data), (mode, data),
-                  NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 7) {}
+// With the use of RPCGuaranteedOrderedBigData for 016, a much bigger data can be sent through.
+// old 015 can continue to send through this s2mSendStatistics, limited by data size.
+TNL_IMPLEMENT_RPC(MasterServerInterface, s2mSendStatistics, (Zap::VersionedGameStats stats), (stats),
+                  NetClassGroupMasterMask, RPCGuaranteedOrderedBigData, RPCDirClientToServer, 6) {}
 
 ////////////////////////////////////
 // Authentication RPCs

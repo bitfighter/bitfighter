@@ -210,7 +210,9 @@ public:
                              ///  was sent relative to other ordered events.
       Guaranteed = 1,        ///< Event delivery is guaranteed and will be processed in the order it
                              ///  was received.
-      Unguaranteed = 2       ///< Event delivery is not guaranteed - however, the event will remain
+      Unguaranteed = 2,      ///< Event delivery is not guaranteed - however, the event will remain
+      GuaranteedOrderedBigData = 3
+
                              ///  ordered relative to other unguaranteed events.
    } mGuaranteeType;        ///< Type of data guarantee this event supports
 

@@ -39,6 +39,11 @@
 #include "tnlDataChunker.h"
 #endif
 
+#ifndef _TNL_RPC_H_
+#include "tnlRPC.h"
+#endif
+
+
 namespace TNL {
 
 /// EventConnection is a NetConnection subclass used for sending guaranteed and unguaranteed
@@ -155,6 +160,12 @@ public:
 
    /// For fake connections (AI for instance)
    virtual bool canPostNetEvent() const { return true; }
+
+   TNL_DECLARE_RPC(s2rTNLSendDataParts, (U8 type, ByteBufferPtr data));
+private:
+   TNL::ByteBuffer *mTNLDataBuffer;
+   NetEvent *EventConnection::unpackNetEvent(BitStream *bstream);
+
 };
 
 };

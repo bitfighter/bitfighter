@@ -49,7 +49,10 @@ EventConnection::EventConnection()
    mLastAckedEventSeq = -1;
    mEventClassCount = 0;
    mEventClassBitSize = 0;
+   mTNLDataBuffer = NULL;
 }
+
+static const U32 mTNLDataBufferMaxSize = 1024 * 256;
 
 EventConnection::~EventConnection()
 {
@@ -79,6 +82,8 @@ EventConnection::~EventConnection()
       temp->mEvent->notifyDelivered(this, true);
       mEventNoteChunker.free(temp);
    }
+   if(mTNLDataBuffer)
+      delete mTNLDataBuffer;
 }
 
 void EventConnection::writeConnectRequest(BitStream *stream)
@@ -435,47 +440,9 @@ void EventConnection::readPacket(BitStream *bstream)
          prevSeq = seq;
       }
 
-      U32 endingPosition;
-      if(mConnectionParameters.mDebugObjectSizes)
-         endingPosition = bstream->readInt(BitStreamPosBitSize);
-
-      U32 classId = bstream->readInt(mEventClassBitSize);
-      if(classId >= mEventClassCount)
-      {
-         setLastError("Invalid packet -- classId too high.");
-         return;
-      }
-
-      NetEvent *evt = (NetEvent *) Object::create(getNetClassGroup(), NetClassTypeEvent, classId);
+      NetEvent *evt = unpackNetEvent(bstream);
       if(!evt)
-      {
-         setLastError("Invalid packet -- couldn't create event.");
          return;
-      }
-
-      // Check if the direction this event moves is a valid direction.
-      if(   (evt->getEventDirection() == NetEvent::DirUnset)
-         || (evt->getEventDirection() == NetEvent::DirServerToClient && isConnectionToClient())
-         || (evt->getEventDirection() == NetEvent::DirClientToServer && isConnectionToServer()) )
-      {
-         setLastError("Invalid Packet -- event direction wrong.");
-         delete evt;
-         return;
-      }
-
-
-      evt->unpack(this, bstream);
-      if(mErrorBuffer[0])
-      {
-         delete evt;
-         return;
-      }
-
-      if(mConnectionParameters.mDebugObjectSizes)
-      {
-         TNLAssert(endingPosition == bstream->getBitPosition(),
-                   avar("Unpack did not match pack for event of class %s.", evt->getClassName()) );
-      }
 
       if(unguaranteedPhase)
       {
@@ -536,6 +503,43 @@ bool EventConnection::postNetEvent(NetEvent *theEvent)
          mSendEventQueueTail->mNextEvent = event;
       mSendEventQueueTail = event;
    }
+   else if(event->mEvent->mGuaranteeType == NetEvent::GuaranteedOrderedBigData)
+   {
+      BitStream bstream;
+      const U32 start = 0;
+      const U32 partsSize = 512;
+
+      if(mConnectionParameters.mDebugObjectSizes)
+         bstream.advanceBitPosition(BitStreamPosBitSize);
+      
+      S32 classId = event->mEvent->getClassId(getNetClassGroup());
+      bstream.writeInt(classId, mEventClassBitSize);
+
+      event->mEvent->pack(this, &bstream);
+      logprintf(LogConsumer::LogEventConnection, "EventConnection %s: WroteEvent %s - %d bits", getNetAddressString(), event->mEvent->getDebugName(), bstream.getBitPosition() - start);
+
+      if(mConnectionParameters.mDebugObjectSizes)
+         bstream.writeIntAt(bstream.getBitPosition(), BitStreamPosBitSize, start);
+
+      U32 size = bstream.getBytePosition();
+
+      for(U32 i=0; i<size; i+=partsSize)
+      {
+         if(i+partsSize < size)
+         {
+            ByteBuffer *bytebuffer = new ByteBuffer(&bstream.getBuffer()[i], partsSize);
+            bytebuffer->takeOwnership();  // may have to use this to prevent errors.
+            s2rTNLSendDataParts(0, ByteBufferPtr(bytebuffer));
+         }
+         else
+         {
+            ByteBuffer *bytebuffer = new ByteBuffer(&bstream.getBuffer()[i], size-i);
+            bytebuffer->takeOwnership();
+            s2rTNLSendDataParts(1, ByteBufferPtr(bytebuffer));
+         }
+      }
+      mEventNoteChunker.free(event);
+   }
    else
    {
       event->mSeqCount = InvalidSendEventSeq;
@@ -552,5 +556,88 @@ bool EventConnection::isDataToTransmit()
 {
    return mUnorderedSendEventQueueHead || mSendEventQueueHead || Parent::isDataToTransmit();
 }
+
+
+NetEvent *EventConnection::unpackNetEvent(BitStream *bstream)
+{
+   U32 endingPosition;
+   if(mConnectionParameters.mDebugObjectSizes)
+      endingPosition = bstream->readInt(BitStreamPosBitSize);
+
+   U32 classId = bstream->readInt(mEventClassBitSize);
+   if(classId >= mEventClassCount)
+   {
+      setLastError("Invalid packet -- classId too high.");
+      return NULL;
+   }
+
+   NetEvent *evt = (NetEvent *) Object::create(getNetClassGroup(), NetClassTypeEvent, classId);
+   if(!evt)
+   {
+      setLastError("Invalid packet -- couldn't create event.");
+      return NULL;
+   }
+
+   // Check if the direction this event moves is a valid direction.
+   if(   (evt->getEventDirection() == NetEvent::DirUnset)
+      || (evt->getEventDirection() == NetEvent::DirServerToClient && isConnectionToClient())
+      || (evt->getEventDirection() == NetEvent::DirClientToServer && isConnectionToServer()) )
+   {
+      setLastError("Invalid Packet -- event direction wrong.");
+      delete evt;
+      return NULL;
+   }
+
+
+   evt->unpack(this, bstream);
+   if(mErrorBuffer[0])
+   {
+      delete evt;
+      return NULL;
+   }
+
+   if(mConnectionParameters.mDebugObjectSizes)
+   {
+      TNLAssert(endingPosition == bstream->getBitPosition(),
+                avar("Unpack did not match pack for event of class %s.", evt->getClassName()) );
+   }
+   return evt;
+}
+
+
+
+
+TNL_IMPLEMENT_RPC(EventConnection, s2rTNLSendDataParts, (U8 type, ByteBufferPtr data), (type, data), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 0)
+{
+   if(mTNLDataBuffer)
+   {
+      if(mTNLDataBuffer->getBufferSize() < mTNLDataBufferMaxSize)  // limit memory, to avoid eating too much memory.
+         mTNLDataBuffer->appendBuffer(*data.getPointer());
+   }
+   else
+   {
+      mTNLDataBuffer = new ByteBuffer(*data.getPointer());
+      mTNLDataBuffer->takeOwnership();
+   }
+
+   if(type == 1 && mTNLDataBuffer->getBufferSize() != 0 && mTNLDataBuffer->getBufferSize() < mTNLDataBufferMaxSize)
+   {
+      BitStream bstream(mTNLDataBuffer->getBuffer(), mTNLDataBuffer->getBufferSize());
+      NetEvent *evt = unpackNetEvent(&bstream);
+      if(evt)
+      {
+         processEvent(evt);
+         delete evt;
+      }
+   }
+
+   if(type != 0)
+   {
+      delete mTNLDataBuffer;
+      mTNLDataBuffer = NULL;
+   }
+}
+
+
 
 };
