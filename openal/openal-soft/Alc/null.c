@@ -151,7 +151,7 @@ static ALCboolean null_open_capture(ALCdevice *device, const ALCchar *deviceName
 }
 
 
-BackendFuncs null_funcs = {
+static const BackendFuncs null_funcs = {
     null_open_playback,
     null_close_playback,
     null_reset_playback,
@@ -173,10 +173,17 @@ void alc_null_deinit(void)
 {
 }
 
-void alc_null_probe(int type)
+void alc_null_probe(enum DevProbe type)
 {
-    if(type == DEVICE_PROBE)
-        AppendDeviceList(nullDevice);
-    else if(type == ALL_DEVICE_PROBE)
-        AppendAllDeviceList(nullDevice);
+    switch(type)
+    {
+        case DEVICE_PROBE:
+            AppendDeviceList(nullDevice);
+            break;
+        case ALL_DEVICE_PROBE:
+            AppendAllDeviceList(nullDevice);
+            break;
+        case CAPTURE_DEVICE_PROBE:
+            break;
+    }
 }

@@ -250,7 +250,7 @@ static ALCboolean oss_reset_playback(ALCdevice *device)
 
     if((int)ChannelsFromDevFmt(device->FmtChans) != numChannels)
     {
-        AL_PRINT("Could not set %d channels, got %d instead\n", ChannelsFromDevFmt(device->FmtChans), numChannels);
+        AL_PRINT("Failed to set %s, got %d channels instead\n", DevFmtChannelsString(device->FmtChans), numChannels);
         return ALC_FALSE;
     }
 
@@ -258,11 +258,17 @@ static ALCboolean oss_reset_playback(ALCdevice *device)
          (ossFormat == AFMT_U8 && device->FmtType == DevFmtUByte) ||
          (ossFormat == AFMT_S16_NE && device->FmtType == DevFmtShort)))
     {
-        AL_PRINT("Could not set %#x format type, got OSS format %#x\n", device->FmtType, ossFormat);
+        AL_PRINT("Failed to set %s output, got OSS format %#x\n", DevFmtTypeString(device->FmtType), ossFormat);
         return ALC_FALSE;
     }
 
-    device->Frequency = ossSpeed;
+    if(device->Frequency != (ALuint)ossSpeed)
+    {
+        if((device->Flags&DEVICE_FREQUENCY_REQUEST))
+            AL_PRINT("Failed to set %dhz, got %dhz instead\n", device->Frequency, ossSpeed);
+        device->Flags &= ~DEVICE_FREQUENCY_REQUEST;
+        device->Frequency = ossSpeed;
+    }
     device->UpdateSize = info.fragsize / frameSize;
     device->NumUpdates = info.fragments + 1;
 
@@ -348,7 +354,7 @@ static ALCboolean oss_open_capture(ALCdevice *device, const ALCchar *deviceName)
         case DevFmtUShort:
         case DevFmtFloat:
             free(data);
-            AL_PRINT("Format type %#x capture not supported on OSS\n", device->FmtType);
+            AL_PRINT("%s capture samples not supported on OSS\n", DevFmtTypeString(device->FmtType));
             return ALC_FALSE;
     }
 
@@ -385,7 +391,7 @@ static ALCboolean oss_open_capture(ALCdevice *device, const ALCchar *deviceName)
 
     if((int)ChannelsFromDevFmt(device->FmtChans) != numChannels)
     {
-        AL_PRINT("Could not set %d channels, got %d instead\n", ChannelsFromDevFmt(device->FmtChans), numChannels);
+        AL_PRINT("Failed to set %s, got %d channels instead\n", DevFmtChannelsString(device->FmtChans), numChannels);
         close(data->fd);
         free(data);
         return ALC_FALSE;
@@ -395,7 +401,7 @@ static ALCboolean oss_open_capture(ALCdevice *device, const ALCchar *deviceName)
          (ossFormat == AFMT_U8 && device->FmtType == DevFmtUByte) ||
          (ossFormat == AFMT_S16_NE && device->FmtType == DevFmtShort)))
     {
-        AL_PRINT("Could not set %#x format type, got OSS format %#x\n", device->FmtType, ossFormat);
+        AL_PRINT("Failed to set %s output, got OSS format %#x\n", DevFmtTypeString(device->FmtType), ossFormat);
         close(data->fd);
         free(data);
         return ALC_FALSE;
@@ -470,7 +476,7 @@ static ALCuint oss_available_samples(ALCdevice *pDevice)
 }
 
 
-BackendFuncs oss_funcs = {
+static const BackendFuncs oss_funcs = {
     oss_open_playback,
     oss_close_playback,
     oss_reset_playback,
@@ -492,30 +498,38 @@ void alc_oss_deinit(void)
 {
 }
 
-void alc_oss_probe(int type)
+void alc_oss_probe(enum DevProbe type)
 {
-    if(type == DEVICE_PROBE)
+    switch(type)
     {
+        case DEVICE_PROBE:
+        {
 #ifdef HAVE_STAT
-        struct stat buf;
-        if(stat(GetConfigValue("oss", "device", "/dev/dsp"), &buf) == 0)
+            struct stat buf;
+            if(stat(GetConfigValue("oss", "device", "/dev/dsp"), &buf) == 0)
 #endif
-            AppendDeviceList(oss_device);
-    }
-    else if(type == ALL_DEVICE_PROBE)
-    {
+                AppendDeviceList(oss_device);
+        }
+        break;
+
+        case ALL_DEVICE_PROBE:
+        {
 #ifdef HAVE_STAT
-        struct stat buf;
-        if(stat(GetConfigValue("oss", "device", "/dev/dsp"), &buf) == 0)
+            struct stat buf;
+            if(stat(GetConfigValue("oss", "device", "/dev/dsp"), &buf) == 0)
 #endif
-            AppendAllDeviceList(oss_device);
-    }
-    else if(type == CAPTURE_DEVICE_PROBE)
-    {
+                AppendAllDeviceList(oss_device);
+        }
+        break;
+
+        case CAPTURE_DEVICE_PROBE:
+        {
 #ifdef HAVE_STAT
-        struct stat buf;
-        if(stat(GetConfigValue("oss", "capture", "/dev/dsp"), &buf) == 0)
+            struct stat buf;
+            if(stat(GetConfigValue("oss", "capture", "/dev/dsp"), &buf) == 0)
 #endif
-            AppendCaptureDeviceList(oss_device);
+                AppendCaptureDeviceList(oss_device);
+        }
+        break;
     }
 }

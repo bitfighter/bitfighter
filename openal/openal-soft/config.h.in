@@ -1,5 +1,6 @@
-#ifndef CONFIG_H
-#define CONFIG_H
+/* API declaration export attribute */
+#define AL_API  ${EXPORT_DECL}
+#define ALC_API ${EXPORT_DECL}
 
 /* Define to the library version */
 #define ALSOFT_VERSION "${LIB_VERSION}"
@@ -12,6 +13,12 @@
 
 /* Define if we have the Solaris backend */
 #cmakedefine HAVE_SOLARIS
+
+/* Define if we have the SndIO backend */
+#cmakedefine HAVE_SNDIO
+
+/* Define if we have the MMDevApi backend */
+#cmakedefine HAVE_MMDEVAPI
 
 /* Define if we have the DSound backend */
 #cmakedefine HAVE_DSOUND
@@ -27,6 +34,9 @@
 
 /* Define if we have the CoreAudio backend */
 #cmakedefine HAVE_COREAUDIO
+
+/* Define if we have the OpenSL backend */
+#cmakedefine HAVE_OPENSL
 
 /* Define if we have the Wave Writer backend */
 #cmakedefine HAVE_WAVE
@@ -82,6 +92,12 @@
 /* Define if we have pthread_np.h */
 #cmakedefine HAVE_PTHREAD_NP_H
 
+/* Define if we have guiddef.h */
+#cmakedefine HAVE_GUIDDEF_H
+
+/* Define if we have guiddef.h */
+#cmakedefine HAVE_INITGUID_H
+
 /* Define if we have float.h */
 #cmakedefine HAVE_FLOAT_H
 
@@ -97,4 +113,8 @@
 /* Define if we have pthread_setschedparam() */
 #cmakedefine HAVE_PTHREAD_SETSCHEDPARAM
 
-#endif
+/* Define if we have the restrict keyword */
+#cmakedefine HAVE_RESTRICT
+
+/* Define if we have the __restrict keyword */
+#cmakedefine HAVE___RESTRICT

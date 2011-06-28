@@ -48,7 +48,7 @@ typedef struct {
         HWAVEOUT Out;
     } hWaveHandle;
 
-    ALsizei Frequency;
+    ALuint Frequency;
 
     RingBuffer *pRing;
 } WinMMData;
@@ -337,7 +337,15 @@ static ALCboolean WinMMOpenPlayback(ALCdevice *pDevice, const ALCchar *deviceNam
     pDevice->ExtraData = pData;
 
     if(pDevice->FmtChans != DevFmtMono)
+    {
+        if((pDevice->Flags&DEVICE_CHANNELS_REQUEST) &&
+           pDevice->FmtChans != DevFmtStereo)
+        {
+            AL_PRINT("Failed to set %s, got Stereo instead\n", DevFmtChannelsString(pDevice->FmtChans));
+            pDevice->Flags &= ~DEVICE_CHANNELS_REQUEST;
+        }
         pDevice->FmtChans = DevFmtStereo;
+    }
     switch(pDevice->FmtType)
     {
         case DevFmtByte:
@@ -408,7 +416,7 @@ static void WinMMClosePlayback(ALCdevice *device)
     CloseHandle(pData->hWaveHdrEvent);
     pData->hWaveHdrEvent = 0;
 
-    waveInClose(pData->hWaveHandle.In);
+    waveOutClose(pData->hWaveHandle.Out);
     pData->hWaveHandle.In = 0;
 
     free(pData);
@@ -428,7 +436,15 @@ static ALCboolean WinMMResetPlayback(ALCdevice *device)
 
     device->UpdateSize = (ALuint)((ALuint64)device->UpdateSize *
                                   pData->Frequency / device->Frequency);
-    device->Frequency = pData->Frequency;
+    if(device->Frequency != pData->Frequency)
+    {
+        if((device->Flags&DEVICE_FREQUENCY_REQUEST))
+            AL_PRINT("WinMM does not support changing sample rates (wanted %dhz, got %dhz)\n", device->Frequency, pData->Frequency);
+        device->Flags &= ~DEVICE_FREQUENCY_REQUEST;
+        device->Frequency = pData->Frequency;
+    }
+
+    SetDefaultWFXChannelOrder(device);
 
     pData->lWaveBuffersCommitted = 0;
 
@@ -713,7 +729,7 @@ static void WinMMCaptureSamples(ALCdevice *pDevice, ALCvoid *pBuffer, ALCuint lS
 }
 
 
-static BackendFuncs WinMMFuncs = {
+static const BackendFuncs WinMMFuncs = {
     WinMMOpenPlayback,
     WinMMClosePlayback,
     WinMMResetPlayback,
@@ -751,34 +767,36 @@ void alcWinMMDeinit()
     NumCaptureDevices = 0;
 }
 
-void alcWinMMProbe(int type)
+void alcWinMMProbe(enum DevProbe type)
 {
     ALuint i;
 
-    if(type == DEVICE_PROBE)
+    switch(type)
     {
-        ProbePlaybackDevices();
-        if(NumPlaybackDevices > 0)
-            AppendDeviceList(woDefault);
-    }
-    else if(type == ALL_DEVICE_PROBE)
-    {
-        ProbePlaybackDevices();
-        if(NumPlaybackDevices > 0)
-            AppendAllDeviceList(woDefault);
-        for(i = 0;i < NumPlaybackDevices;i++)
-        {
-            if(PlaybackDeviceList[i])
-                AppendAllDeviceList(PlaybackDeviceList[i]);
-        }
-    }
-    else if(type == CAPTURE_DEVICE_PROBE)
-    {
-        ProbeCaptureDevices();
-        for(i = 0;i < NumCaptureDevices;i++)
-        {
-            if(CaptureDeviceList[i])
-                AppendCaptureDeviceList(CaptureDeviceList[i]);
-        }
+        case DEVICE_PROBE:
+            ProbePlaybackDevices();
+            if(NumPlaybackDevices > 0)
+                AppendDeviceList(woDefault);
+            break;
+
+        case ALL_DEVICE_PROBE:
+            ProbePlaybackDevices();
+            if(NumPlaybackDevices > 0)
+                AppendAllDeviceList(woDefault);
+            for(i = 0;i < NumPlaybackDevices;i++)
+            {
+                if(PlaybackDeviceList[i])
+                    AppendAllDeviceList(PlaybackDeviceList[i]);
+            }
+            break;
+
+        case CAPTURE_DEVICE_PROBE:
+            ProbeCaptureDevices();
+            for(i = 0;i < NumCaptureDevices;i++)
+            {
+                if(CaptureDeviceList[i])
+                    AppendCaptureDeviceList(CaptureDeviceList[i]);
+            }
+            break;
     }
 }

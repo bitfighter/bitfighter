@@ -21,7 +21,6 @@
 #include "config.h"
 
 #define _WIN32_WINNT 0x0500
-#define INITGUID
 #include <stdlib.h>
 #include <stdio.h>
 #include <memory.h>
@@ -48,9 +47,13 @@
 DEFINE_GUID(KSDATAFORMAT_SUBTYPE_PCM, 0x00000001, 0x0000, 0x0010, 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71);
 DEFINE_GUID(KSDATAFORMAT_SUBTYPE_IEEE_FLOAT, 0x00000003, 0x0000, 0x0010, 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71);
 
+
 static void *ds_handle;
 static HRESULT (WINAPI *pDirectSoundCreate)(LPCGUID pcGuidDevice, LPDIRECTSOUND *ppDS, LPUNKNOWN pUnkOuter);
 static HRESULT (WINAPI *pDirectSoundEnumerateA)(LPDSENUMCALLBACKA pDSEnumCallback, LPVOID pContext);
+
+#define DirectSoundCreate     pDirectSoundCreate
+#define DirectSoundEnumerateA pDirectSoundEnumerateA
 
 
 typedef struct {
@@ -74,11 +77,12 @@ static DevMap *DeviceList;
 static ALuint NumDevices;
 
 
-void *DSoundLoad(void)
+static void *DSoundLoad(void)
 {
     if(!ds_handle)
     {
-#ifdef _WIN32
+        ALboolean failed = AL_FALSE;
+
         ds_handle = LoadLibraryA("dsound.dll");
         if(ds_handle == NULL)
         {
@@ -86,24 +90,21 @@ void *DSoundLoad(void)
             return NULL;
         }
 
-#define LOAD_FUNC(f) do { \
-    p##f = (void*)GetProcAddress((HMODULE)ds_handle, #f); \
-    if(p##f == NULL) \
-    { \
-        FreeLibrary(ds_handle); \
-        ds_handle = NULL; \
-        AL_PRINT("Could not load %s from dsound.dll\n", #f); \
-        return NULL; \
-    } \
+#define LOAD_FUNC(x) do {                                                     \
+    if((p##x = (void*)GetProcAddress((HMODULE)ds_handle, #x)) == NULL) {      \
+        AL_PRINT("Could not load %s from dsound.dll\n", #x);                  \
+        failed = AL_TRUE;                                                     \
+    }                                                                         \
 } while(0)
-#else
-        ds_handle = (void*)0xDEADBEEF;
-#define LOAD_FUNC(f) p##f = f
-#endif
-
-LOAD_FUNC(DirectSoundCreate);
-LOAD_FUNC(DirectSoundEnumerateA);
+        LOAD_FUNC(DirectSoundCreate);
+        LOAD_FUNC(DirectSoundEnumerateA);
 #undef LOAD_FUNC
+
+        if(failed)
+        {
+            FreeLibrary(ds_handle);
+            ds_handle = NULL;
+        }
     }
     return ds_handle;
 }
@@ -276,7 +277,7 @@ static ALCboolean DSoundOpenPlayback(ALCdevice *device, const ALCchar *deviceNam
 
         if(!DeviceList)
         {
-            hr = pDirectSoundEnumerateA(DSoundEnumDevices, NULL);
+            hr = DirectSoundEnumerateA(DSoundEnumDevices, NULL);
             if(FAILED(hr))
                 AL_PRINT("Error enumerating DirectSound devices (%#x)!\n", (unsigned int)hr);
         }
@@ -303,7 +304,7 @@ static ALCboolean DSoundOpenPlayback(ALCdevice *device, const ALCchar *deviceNam
     }
 
     //DirectSound Init code
-    hr = pDirectSoundCreate(guid, &pData->lpDS, NULL);
+    hr = DirectSoundCreate(guid, &pData->lpDS, NULL);
     if(SUCCEEDED(hr))
         hr = IDirectSound_SetCooperativeLevel(pData->lpDS, GetForegroundWindow(), DSSCL_PRIORITY);
     if(FAILED(hr))
@@ -354,73 +355,75 @@ static ALCboolean DSoundResetPlayback(ALCdevice *device)
     }
 
     hr = IDirectSound_GetSpeakerConfig(pData->lpDS, &speakers);
-    if(SUCCEEDED(hr) && ConfigValueExists(NULL, "format"))
+    if(SUCCEEDED(hr))
     {
+        if(!(device->Flags&DEVICE_CHANNELS_REQUEST))
+        {
+            speakers = DSSPEAKER_CONFIG(speakers);
+            if(speakers == DSSPEAKER_MONO)
+                device->FmtChans = DevFmtMono;
+            else if(speakers == DSSPEAKER_STEREO || speakers == DSSPEAKER_HEADPHONE)
+                device->FmtChans = DevFmtStereo;
+            else if(speakers == DSSPEAKER_QUAD)
+                device->FmtChans = DevFmtQuad;
+            else if(speakers == DSSPEAKER_5POINT1)
+                device->FmtChans = DevFmtX51;
+            else if(speakers == DSSPEAKER_7POINT1)
+                device->FmtChans = DevFmtX71;
+            else
+                AL_PRINT("Unknown system speaker config: 0x%lx\n", speakers);
+        }
+
         switch(device->FmtChans)
         {
             case DevFmtMono:
-                speakers = DSSPEAKER_COMBINED(DSSPEAKER_MONO, 0);
+                OutputType.dwChannelMask = SPEAKER_FRONT_CENTER;
                 break;
             case DevFmtStereo:
-                speakers = DSSPEAKER_COMBINED(DSSPEAKER_STEREO, 0);
+                OutputType.dwChannelMask = SPEAKER_FRONT_LEFT |
+                                           SPEAKER_FRONT_RIGHT;
                 break;
             case DevFmtQuad:
-                speakers = DSSPEAKER_COMBINED(DSSPEAKER_QUAD, 0);
+                OutputType.dwChannelMask = SPEAKER_FRONT_LEFT |
+                                           SPEAKER_FRONT_RIGHT |
+                                           SPEAKER_BACK_LEFT |
+                                           SPEAKER_BACK_RIGHT;
                 break;
             case DevFmtX51:
-                speakers = DSSPEAKER_COMBINED(DSSPEAKER_5POINT1, 0);
+                OutputType.dwChannelMask = SPEAKER_FRONT_LEFT |
+                                           SPEAKER_FRONT_RIGHT |
+                                           SPEAKER_FRONT_CENTER |
+                                           SPEAKER_LOW_FREQUENCY |
+                                           SPEAKER_BACK_LEFT |
+                                           SPEAKER_BACK_RIGHT;
+                break;
+            case DevFmtX51Side:
+                OutputType.dwChannelMask = SPEAKER_FRONT_LEFT |
+                                           SPEAKER_FRONT_RIGHT |
+                                           SPEAKER_FRONT_CENTER |
+                                           SPEAKER_LOW_FREQUENCY |
+                                           SPEAKER_SIDE_LEFT |
+                                           SPEAKER_SIDE_RIGHT;
                 break;
             case DevFmtX61:
-                /* ??? */;
+                OutputType.dwChannelMask = SPEAKER_FRONT_LEFT |
+                                           SPEAKER_FRONT_RIGHT |
+                                           SPEAKER_FRONT_CENTER |
+                                           SPEAKER_LOW_FREQUENCY |
+                                           SPEAKER_BACK_CENTER |
+                                           SPEAKER_SIDE_LEFT |
+                                           SPEAKER_SIDE_RIGHT;
                 break;
             case DevFmtX71:
-                speakers = DSSPEAKER_COMBINED(DSSPEAKER_7POINT1, 0);
+                OutputType.dwChannelMask = SPEAKER_FRONT_LEFT |
+                                           SPEAKER_FRONT_RIGHT |
+                                           SPEAKER_FRONT_CENTER |
+                                           SPEAKER_LOW_FREQUENCY |
+                                           SPEAKER_BACK_LEFT |
+                                           SPEAKER_BACK_RIGHT |
+                                           SPEAKER_SIDE_LEFT |
+                                           SPEAKER_SIDE_RIGHT;
                 break;
-        }
-    }
-    if(SUCCEEDED(hr))
-    {
-        speakers = DSSPEAKER_CONFIG(speakers);
-        if(speakers == DSSPEAKER_MONO)
-        {
-            device->FmtChans = DevFmtMono;
-            OutputType.dwChannelMask = SPEAKER_FRONT_CENTER;
-        }
-        else if(speakers == DSSPEAKER_STEREO || speakers == DSSPEAKER_HEADPHONE)
-        {
-            device->FmtChans = DevFmtStereo;
-            OutputType.dwChannelMask = SPEAKER_FRONT_LEFT |
-                                       SPEAKER_FRONT_RIGHT;
-        }
-        else if(speakers == DSSPEAKER_QUAD)
-        {
-            device->FmtChans = DevFmtQuad;
-            OutputType.dwChannelMask = SPEAKER_FRONT_LEFT |
-                                       SPEAKER_FRONT_RIGHT |
-                                       SPEAKER_BACK_LEFT |
-                                       SPEAKER_BACK_RIGHT;
-        }
-        else if(speakers == DSSPEAKER_5POINT1)
-        {
-            device->FmtChans = DevFmtX51;
-            OutputType.dwChannelMask = SPEAKER_FRONT_LEFT |
-                                       SPEAKER_FRONT_RIGHT |
-                                       SPEAKER_FRONT_CENTER |
-                                       SPEAKER_LOW_FREQUENCY |
-                                       SPEAKER_BACK_LEFT |
-                                       SPEAKER_BACK_RIGHT;
-        }
-        else if(speakers == DSSPEAKER_7POINT1)
-        {
-            device->FmtChans = DevFmtX71;
-            OutputType.dwChannelMask = SPEAKER_FRONT_LEFT |
-                                       SPEAKER_FRONT_RIGHT |
-                                       SPEAKER_FRONT_CENTER |
-                                       SPEAKER_LOW_FREQUENCY |
-                                       SPEAKER_BACK_LEFT |
-                                       SPEAKER_BACK_RIGHT |
-                                       SPEAKER_SIDE_LEFT |
-                                       SPEAKER_SIDE_RIGHT;
         }
 
         OutputType.Format.wFormatTag = WAVE_FORMAT_PCM;
@@ -436,7 +439,7 @@ static ALCboolean DSoundResetPlayback(ALCdevice *device)
     {
         OutputType.Format.wFormatTag = WAVE_FORMAT_EXTENSIBLE;
         OutputType.Samples.wValidBitsPerSample = OutputType.Format.wBitsPerSample;
-        OutputType.Format.cbSize = 22;
+        OutputType.Format.cbSize = sizeof(WAVEFORMATEXTENSIBLE) - sizeof(WAVEFORMATEX);
         if(device->FmtType == DevFmtFloat)
             OutputType.SubFormat = KSDATAFORMAT_SUBTYPE_IEEE_FLOAT;
         else
@@ -545,7 +548,7 @@ static ALCuint DSoundAvailableSamples(ALCdevice *pDevice)
 }
 
 
-BackendFuncs DSoundFuncs = {
+static const BackendFuncs DSoundFuncs = {
     DSoundOpenPlayback,
     DSoundClosePlayback,
     DSoundResetPlayback,
@@ -575,38 +578,41 @@ void alcDSoundDeinit(void)
     NumDevices = 0;
 
     if(ds_handle)
-    {
-#ifdef _WIN32
         FreeLibrary(ds_handle);
-#endif
-        ds_handle = NULL;
-    }
+    ds_handle = NULL;
 }
 
-void alcDSoundProbe(int type)
+void alcDSoundProbe(enum DevProbe type)
 {
+    HRESULT hr;
+    ALuint i;
+
     if(!DSoundLoad()) return;
 
-    if(type == DEVICE_PROBE)
-        AppendDeviceList(dsDevice);
-    else if(type == ALL_DEVICE_PROBE)
+    switch(type)
     {
-        HRESULT hr;
-        ALuint i;
+        case DEVICE_PROBE:
+            AppendDeviceList(dsDevice);
+            break;
 
-        for(i = 0;i < NumDevices;++i)
-            free(DeviceList[i].name);
-        free(DeviceList);
-        DeviceList = NULL;
-        NumDevices = 0;
+        case ALL_DEVICE_PROBE:
+            for(i = 0;i < NumDevices;++i)
+                free(DeviceList[i].name);
+            free(DeviceList);
+            DeviceList = NULL;
+            NumDevices = 0;
 
-        hr = pDirectSoundEnumerateA(DSoundEnumDevices, NULL);
-        if(FAILED(hr))
-            AL_PRINT("Error enumerating DirectSound devices (%#x)!\n", (unsigned int)hr);
-        else
-        {
-            for(i = 0;i < NumDevices;i++)
-                AppendAllDeviceList(DeviceList[i].name);
-        }
+            hr = DirectSoundEnumerateA(DSoundEnumDevices, NULL);
+            if(FAILED(hr))
+                AL_PRINT("Error enumerating DirectSound devices (%#x)!\n", (unsigned int)hr);
+            else
+            {
+                for(i = 0;i < NumDevices;i++)
+                    AppendAllDeviceList(DeviceList[i].name);
+            }
+            break;
+
+        case CAPTURE_DEVICE_PROBE:
+            break;
     }
 }

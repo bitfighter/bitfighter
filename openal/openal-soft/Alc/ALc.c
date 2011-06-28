@@ -20,11 +20,33 @@
 
 #include "config.h"
 
+#if defined(HAVE_GUIDDEF_H) || defined(HAVE_INITGUID_H)
+#define INITGUID
+#include <windows.h>
+#ifdef HAVE_GUIDDEF_H
+#include <guiddef.h>
+#else
+#include <initguid.h>
+#endif
+
+DEFINE_GUID(KSDATAFORMAT_SUBTYPE_PCM, 0x00000001, 0x0000, 0x0010, 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71);
+DEFINE_GUID(KSDATAFORMAT_SUBTYPE_IEEE_FLOAT, 0x00000003, 0x0000, 0x0010, 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71);
+
+DEFINE_GUID(CLSID_MMDeviceEnumerator, 0xbcde0395, 0xe52f, 0x467c, 0x8e,0x3d, 0xc4,0x57,0x92,0x91,0x69,0x2e);
+DEFINE_GUID(IID_IMMDeviceEnumerator, 0xa95664d2, 0x9614, 0x4f35, 0xa7,0x46, 0xde,0x8d,0xb6,0x36,0x17,0xe6);
+DEFINE_GUID(IID_IAudioClient, 0x1cb9ad4c, 0xdbfa, 0x4c32, 0xb1,0x78, 0xc2,0xf5,0x68,0xa7,0x03,0xb2);
+DEFINE_GUID(IID_IAudioRenderClient, 0xf294acfc, 0x3146, 0x4483, 0xa7,0xbf, 0xad,0xdc,0xa7,0xc2,0x60,0xe2);
+
+#endif
+
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <memory.h>
 #include <ctype.h>
+#ifdef HAVE_DLFCN_H
+#include <dlfcn.h>
+#endif
 
 #include "alMain.h"
 #include "alSource.h"
@@ -34,7 +56,6 @@
 #include "alSource.h"
 #include "alBuffer.h"
 #include "alAuxEffectSlot.h"
-#include "alDatabuffer.h"
 #include "bs2b.h"
 #include "alu.h"
 
@@ -44,7 +65,7 @@ typedef struct BackendInfo {
     const char *name;
     void (*Init)(BackendFuncs*);
     void (*Deinit)(void);
-    void (*Probe)(int);
+    void (*Probe)(enum DevProbe);
     BackendFuncs Funcs;
 } BackendInfo;
 static BackendInfo BackendList[] = {
@@ -63,6 +84,12 @@ static BackendInfo BackendList[] = {
 #ifdef HAVE_SOLARIS
     { "solaris", alc_solaris_init, alc_solaris_deinit, alc_solaris_probe, EmptyFuncs },
 #endif
+#ifdef HAVE_SNDIO
+    { "sndio", alc_sndio_init, alc_sndio_deinit, alc_sndio_probe, EmptyFuncs },
+#endif
+#ifdef HAVE_MMDEVAPI
+    { "mmdevapi", alcMMDevApiInit, alcMMDevApiDeinit, alcMMDevApiProbe, EmptyFuncs },
+#endif
 #ifdef HAVE_DSOUND
     { "dsound", alcDSoundInit, alcDSoundDeinit, alcDSoundProbe, EmptyFuncs },
 #endif
@@ -71,6 +98,9 @@ static BackendInfo BackendList[] = {
 #endif
 #ifdef HAVE_PORTAUDIO
     { "port", alc_pa_init, alc_pa_deinit, alc_pa_probe, EmptyFuncs },
+#endif
+#ifdef HAVE_OPENSL
+    { "opensl", alc_opensl_init, alc_opensl_deinit, alc_opensl_probe, EmptyFuncs },
 #endif
 
     { "null", alc_null_init, alc_null_deinit, alc_null_probe, EmptyFuncs },
@@ -84,12 +114,6 @@ static BackendInfo BackendLoopback = {
     "loopback", alc_loopback_init, alc_loopback_deinit, alc_loopback_probe, EmptyFuncs
 };
 #undef EmptyFuncs
-
-///////////////////////////////////////////////////////
-
-#define ALC_EFX_MAJOR_VERSION                              0x20001
-#define ALC_EFX_MINOR_VERSION                              0x20002
-#define ALC_MAX_AUXILIARY_SENDS                            0x20003
 
 ///////////////////////////////////////////////////////
 // STRING and EXTENSIONS
@@ -130,9 +154,9 @@ static const ALCfunction alcFunctions[] = {
     { "alcSetThreadContext",        (ALCvoid *) alcSetThreadContext      },
     { "alcGetThreadContext",        (ALCvoid *) alcGetThreadContext      },
 
-    { "alcLoopbackOpenDevice",      (ALCvoid *) alcLoopbackOpenDevice    },
-    { "alcIsRenderFormatSupported", (ALCvoid *) alcIsRenderFormatSupported},
-    { "alcRenderSamples",           (ALCvoid *) alcRenderSamples         },
+    { "alcLoopbackOpenDeviceSOFT",  (ALCvoid *) alcLoopbackOpenDeviceSOFT},
+    { "alcIsRenderFormatSupportedSOFT",(ALCvoid *) alcIsRenderFormatSupportedSOFT},
+    { "alcRenderSamplesSOFT",       (ALCvoid *) alcRenderSamplesSOFT         },
 
     { "alEnable",                   (ALCvoid *) alEnable                 },
     { "alDisable",                  (ALCvoid *) alDisable                },
@@ -245,25 +269,12 @@ static const ALCfunction alcFunctions[] = {
     { "alGetAuxiliaryEffectSlotfv", (ALCvoid *) alGetAuxiliaryEffectSlotfv},
 
     { "alBufferSubDataSOFT",        (ALCvoid *) alBufferSubDataSOFT      },
-#if 0
-    { "alGenDatabuffersEXT",        (ALCvoid *) alGenDatabuffersEXT      },
-    { "alDeleteDatabuffersEXT",     (ALCvoid *) alDeleteDatabuffersEXT   },
-    { "alIsDatabufferEXT",          (ALCvoid *) alIsDatabufferEXT        },
-    { "alDatabufferDataEXT",        (ALCvoid *) alDatabufferDataEXT      },
-    { "alDatabufferSubDataEXT",     (ALCvoid *) alDatabufferSubDataEXT   },
-    { "alGetDatabufferSubDataEXT",  (ALCvoid *) alGetDatabufferSubDataEXT},
-    { "alDatabufferfEXT",           (ALCvoid *) alDatabufferfEXT         },
-    { "alDatabufferfvEXT",          (ALCvoid *) alDatabufferfvEXT        },
-    { "alDatabufferiEXT",           (ALCvoid *) alDatabufferiEXT         },
-    { "alDatabufferivEXT",          (ALCvoid *) alDatabufferivEXT        },
-    { "alGetDatabufferfEXT",        (ALCvoid *) alGetDatabufferfEXT      },
-    { "alGetDatabufferfvEXT",       (ALCvoid *) alGetDatabufferfvEXT     },
-    { "alGetDatabufferiEXT",        (ALCvoid *) alGetDatabufferiEXT      },
-    { "alGetDatabufferivEXT",       (ALCvoid *) alGetDatabufferivEXT     },
-    { "alSelectDatabufferEXT",      (ALCvoid *) alSelectDatabufferEXT    },
-    { "alMapDatabufferEXT",         (ALCvoid *) alMapDatabufferEXT       },
-    { "alUnmapDatabufferEXT",       (ALCvoid *) alUnmapDatabufferEXT     },
-#endif
+
+    { "alBufferSamplesSOFT",        (ALCvoid *) alBufferSamplesSOFT      },
+    { "alBufferSubSamplesSOFT",     (ALCvoid *) alBufferSubSamplesSOFT   },
+    { "alGetBufferSamplesSOFT",     (ALCvoid *) alGetBufferSamplesSOFT   },
+    { "alIsBufferFormatSupportedSOFT",(ALCvoid *) alIsBufferFormatSupportedSOFT},
+
     { NULL,                         (ALCvoid *) NULL                     }
 };
 
@@ -298,6 +309,10 @@ static const ALCenums enumeration[] = {
     { "ALC_EFX_MINOR_VERSION",                ALC_EFX_MINOR_VERSION               },
     { "ALC_MAX_AUXILIARY_SENDS",              ALC_MAX_AUXILIARY_SENDS             },
 
+    // Loopback device Properties
+    { "ALC_FORMAT_CHANNELS_SOFT",             ALC_FORMAT_CHANNELS_SOFT            },
+    { "ALC_FORMAT_TYPE_SOFT",                 ALC_FORMAT_TYPE_SOFT                },
+
     // ALC Error Message
     { "ALC_NO_ERROR",                         ALC_NO_ERROR                        },
     { "ALC_INVALID_DEVICE",                   ALC_INVALID_DEVICE                  },
@@ -305,6 +320,7 @@ static const ALCenums enumeration[] = {
     { "ALC_INVALID_ENUM",                     ALC_INVALID_ENUM                    },
     { "ALC_INVALID_VALUE",                    ALC_INVALID_VALUE                   },
     { "ALC_OUT_OF_MEMORY",                    ALC_OUT_OF_MEMORY                   },
+
     { NULL,                                   (ALCenum)0 }
 };
 // Error strings
@@ -331,11 +347,11 @@ static ALCchar *alcCaptureDefaultDeviceSpecifier;
 
 static const ALCchar alcNoDeviceExtList[] =
     "ALC_ENUMERATE_ALL_EXT ALC_ENUMERATION_EXT ALC_EXT_CAPTURE "
-    "ALC_EXT_thread_local_context";
+    "ALC_EXT_thread_local_context ALC_SOFTX_loopback_device";
 static const ALCchar alcExtensionList[] =
     "ALC_ENUMERATE_ALL_EXT ALC_ENUMERATION_EXT ALC_EXT_CAPTURE "
     "ALC_EXT_DEDICATED ALC_EXT_disconnect ALC_EXT_EFX "
-    "ALC_EXT_thread_local_context";
+    "ALC_EXT_thread_local_context ALC_SOFTX_loopback_device";
 static const ALCint alcMajorVersion = 1;
 static const ALCint alcMinorVersion = 1;
 
@@ -348,10 +364,12 @@ static const ALCint alcEFXMinorVersion = 0;
 ///////////////////////////////////////////////////////
 // Global Variables
 
+static CRITICAL_SECTION g_csMutex;
+static CRITICAL_SECTION ListLock;
+
+/* Device List */
 static ALCdevice *g_pDeviceList = NULL;
 static ALCuint    g_ulDeviceCount = 0;
-
-static CRITICAL_SECTION g_csMutex;
 
 // Context List
 static ALCcontext *g_pContextList = NULL;
@@ -370,13 +388,20 @@ static const ALchar alExtList[] =
     "AL_EXT_DOUBLE AL_EXT_EXPONENT_DISTANCE AL_EXT_FLOAT32 AL_EXT_IMA4 "
     "AL_EXT_LINEAR_DISTANCE AL_EXT_MCFORMATS AL_EXT_MULAW "
     "AL_EXT_MULAW_MCFORMATS AL_EXT_OFFSET AL_EXT_source_distance_model "
-    "AL_LOKI_quadriphonic AL_SOFT_buffer_sub_data AL_SOFT_loop_points";
+    "AL_LOKI_quadriphonic AL_SOFTX_buffer_samples AL_SOFT_buffer_sub_data "
+    "AL_SOFT_loop_points";
 
 // Mixing Priority Level
 static ALint RTPrioLevel;
 
 // Output Log File
 static FILE *LogFile;
+
+// Cone scalar
+ALdouble ConeScale = 0.5;
+
+// Localized Z scalar for mono sources
+ALdouble ZScale = 1.0;
 
 ///////////////////////////////////////////////////////
 
@@ -385,14 +410,13 @@ static FILE *LogFile;
 // ALC Related helper functions
 static void ReleaseALC(void);
 
-#ifdef HAVE_GCC_DESTRUCTOR
-static void alc_init(void) __attribute__((constructor));
-static void alc_deinit(void) __attribute__((destructor));
-#else
-#ifdef _WIN32
+static void alc_initconfig(void);
+
+#if defined(_WIN32)
 static void alc_init(void);
 static void alc_deinit(void);
 
+#ifndef AL_LIBTYPE_STATIC
 BOOL APIENTRY DllMain(HANDLE hModule,DWORD ul_reason_for_call,LPVOID lpReserved)
 {
     (void)lpReserved;
@@ -411,10 +435,81 @@ BOOL APIENTRY DllMain(HANDLE hModule,DWORD ul_reason_for_call,LPVOID lpReserved)
     }
     return TRUE;
 }
+#elif defined(_MSC_VER)
+#pragma section(".CRT$XCU",read)
+static void alc_constructor(void);
+static void alc_destructor(void);
+__declspec(allocate(".CRT$XCU")) void (__cdecl* alc_constructor_)(void) = alc_constructor;
+
+static void alc_constructor(void)
+{
+    atexit(alc_destructor);
+    alc_init();
+}
+
+static void alc_destructor(void)
+{
+    alc_deinit();
+}
+#elif defined(HAVE_GCC_DESTRUCTOR)
+static void alc_init(void) __attribute__((constructor));
+static void alc_deinit(void) __attribute__((destructor));
+#else
+#error "No static initialization available on this platform!"
 #endif
+#elif defined(HAVE_GCC_DESTRUCTOR)
+static void alc_init(void) __attribute__((constructor));
+static void alc_deinit(void) __attribute__((destructor));
+#else
+#error "No global initialization available on this platform!"
 #endif
 
 static void alc_init(void)
+{
+    const char *str;
+
+    LogFile = stderr;
+
+    str = getenv("__ALSOFT_HALF_ANGLE_CONES");
+    if(str && (strcasecmp(str, "true") == 0 || strtol(str, NULL, 0) == 1))
+        ConeScale = 1.0;
+
+    str = getenv("__ALSOFT_REVERSE_Z");
+    if(str && (strcasecmp(str, "true") == 0 || strtol(str, NULL, 0) == 1))
+        ZScale = -1.0;
+
+    tls_create(&LocalContext);
+    InitializeCriticalSection(&g_csMutex);
+    InitializeCriticalSection(&ListLock);
+    ALTHUNK_INIT();
+
+#ifdef _WIN32
+    alc_initconfig();
+#endif
+}
+
+static void alc_deinit(void)
+{
+    int i;
+
+    ReleaseALC();
+
+    for(i = 0;BackendList[i].Deinit;i++)
+        BackendList[i].Deinit();
+    BackendLoopback.Deinit();
+
+    FreeALConfig();
+    ALTHUNK_EXIT();
+    DeleteCriticalSection(&ListLock);
+    DeleteCriticalSection(&g_csMutex);
+    tls_delete(LocalContext);
+
+    if(LogFile != stderr)
+        fclose(LogFile);
+    LogFile = NULL;
+}
+
+static void alc_initconfig(void)
 {
     int i;
     const char *devs, *str;
@@ -422,18 +517,14 @@ static void alc_init(void)
     str = getenv("ALSOFT_LOGFILE");
     if(str && str[0])
     {
-        LogFile = fopen(str, "w");
-        if(!LogFile)
-            fprintf(stderr, "AL lib: Failed to open log file '%s'\n", str);
+        FILE *logfile = fopen(str, "wat");
+        if(logfile) LogFile = logfile;
+        else AL_PRINT("Failed to open log file '%s'\n", str);
     }
-    if(!LogFile)
-        LogFile = stderr;
 
-    InitializeCriticalSection(&g_csMutex);
-    ALTHUNK_INIT();
     ReadALConfig();
 
-    tls_create(&LocalContext);
+    InitHrtf();
 
     RTPrioLevel = GetConfigValueInt(NULL, "rt-prio", 0);
 
@@ -532,60 +623,32 @@ static void alc_init(void)
     }
 }
 
-static void alc_deinit(void)
+#ifndef _WIN32
+static pthread_once_t once_control = PTHREAD_ONCE_INIT;
+#define DO_INITCONFIG() pthread_once(&once_control, alc_initconfig)
+#else
+#define DO_INITCONFIG()
+#endif
+
+static void ProbeList(ALCchar **list, size_t *listsize, int type)
 {
-    int i;
+    ALint i;
 
-    ReleaseALC();
+    free(*list);
+    *list = NULL;
+    *listsize = 0;
 
-    for(i = 0;BackendList[i].Deinit;i++)
-        BackendList[i].Deinit();
-    BackendLoopback.Deinit();
-
-    tls_delete(LocalContext);
-
-    FreeALConfig();
-    ALTHUNK_EXIT();
-    DeleteCriticalSection(&g_csMutex);
-
-    if(LogFile != stderr)
-        fclose(LogFile);
-    LogFile = NULL;
+    DO_INITCONFIG();
+    for(i = 0;BackendList[i].Probe;i++)
+        BackendList[i].Probe(type);
 }
-
 
 static void ProbeDeviceList()
-{
-    ALint i;
-
-    free(alcDeviceList); alcDeviceList = NULL;
-    alcDeviceListSize = 0;
-
-    for(i = 0;BackendList[i].Probe;i++)
-        BackendList[i].Probe(DEVICE_PROBE);
-}
-
+{ ProbeList(&alcDeviceList, &alcDeviceListSize, DEVICE_PROBE); }
 static void ProbeAllDeviceList()
-{
-    ALint i;
-
-    free(alcAllDeviceList); alcAllDeviceList = NULL;
-    alcAllDeviceListSize = 0;
-
-    for(i = 0;BackendList[i].Probe;i++)
-        BackendList[i].Probe(ALL_DEVICE_PROBE);
-}
-
+{ ProbeList(&alcAllDeviceList, &alcAllDeviceListSize, ALL_DEVICE_PROBE); }
 static void ProbeCaptureDeviceList()
-{
-    ALint i;
-
-    free(alcCaptureDeviceList); alcCaptureDeviceList = NULL;
-    alcCaptureDeviceListSize = 0;
-
-    for(i = 0;BackendList[i].Probe;i++)
-        BackendList[i].Probe(CAPTURE_DEVICE_PROBE);
-}
+{ ProbeList(&alcCaptureDeviceList, &alcCaptureDeviceListSize, CAPTURE_DEVICE_PROBE); }
 
 
 static void AppendList(const ALCchar *name, ALCchar **List, size_t *ListSize)
@@ -627,7 +690,7 @@ void al_print(const char *fname, unsigned int line, const char *fmt, ...)
     int i;
 
     fn = strrchr(fname, '/');
-    if(!fn) fn = strrchr(fname, '\\');;
+    if(!fn) fn = strrchr(fname, '\\');
     if(!fn) fn = fname;
     else fn += 1;
 
@@ -654,7 +717,7 @@ void SetRTPriority(void)
         failed = !SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
     else
         failed = !SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_NORMAL);
-#elif defined(HAVE_PTHREAD_SETSCHEDPARAM)
+#elif defined(HAVE_PTHREAD_SETSCHEDPARAM) && !defined(__OpenBSD__)
     struct sched_param param;
 
     if(RTPrioLevel > 0)
@@ -787,6 +850,33 @@ ALvoid *LookupUIntMapKey(UIntMap *map, ALuint key)
 }
 
 
+const ALCchar *DevFmtTypeString(enum DevFmtType type)
+{
+    switch(type)
+    {
+    case DevFmtByte: return "Signed Byte";
+    case DevFmtUByte: return "Unsigned Byte";
+    case DevFmtShort: return "Signed Short";
+    case DevFmtUShort: return "Unsigned Short";
+    case DevFmtFloat: return "Float";
+    }
+    return "(unknown type)";
+}
+const ALCchar *DevFmtChannelsString(enum DevFmtChannels chans)
+{
+    switch(chans)
+    {
+    case DevFmtMono: return "Mono";
+    case DevFmtStereo: return "Stereo";
+    case DevFmtQuad: return "Quadraphonic";
+    case DevFmtX51: return "5.1 Surround";
+    case DevFmtX51Side: return "5.1 Side";
+    case DevFmtX61: return "6.1 Surround";
+    case DevFmtX71: return "7.1 Surround";
+    }
+    return "(unknown channels)";
+}
+
 ALuint BytesFromDevFmt(enum DevFmtType type)
 {
     switch(type)
@@ -807,6 +897,7 @@ ALuint ChannelsFromDevFmt(enum DevFmtChannels chans)
     case DevFmtStereo: return 2;
     case DevFmtQuad: return 4;
     case DevFmtX51: return 6;
+    case DevFmtX51Side: return 6;
     case DevFmtX61: return 7;
     case DevFmtX71: return 8;
     }
@@ -893,7 +984,7 @@ ALboolean DecomposeDevFormat(ALenum format, enum DevFmtChannels *chans,
     return AL_FALSE;
 }
 
-static ALboolean IsValidType(ALenum type)
+ALboolean IsValidType(ALenum type)
 {
     switch(type)
     {
@@ -907,12 +998,14 @@ static ALboolean IsValidType(ALenum type)
         case AL_DOUBLE:
         case AL_MULAW:
         case AL_IMA4:
+        case AL_BYTE3:
+        case AL_UNSIGNED_BYTE3:
             return AL_TRUE;
     }
     return AL_FALSE;
 }
 
-static ALboolean IsValidChannels(ALenum channels)
+ALboolean IsValidChannels(ALenum channels)
 {
     switch(channels)
     {
@@ -928,6 +1021,141 @@ static ALboolean IsValidChannels(ALenum channels)
     return AL_FALSE;
 }
 
+
+#ifndef _WIN32
+void InitializeCriticalSection(CRITICAL_SECTION *cs)
+{
+    pthread_mutexattr_t attrib;
+    int ret;
+
+    ret = pthread_mutexattr_init(&attrib);
+    assert(ret == 0);
+
+    ret = pthread_mutexattr_settype(&attrib, PTHREAD_MUTEX_RECURSIVE);
+#ifdef HAVE_PTHREAD_NP_H
+    if(ret != 0)
+        ret = pthread_mutexattr_setkind_np(&attrib, PTHREAD_MUTEX_RECURSIVE);
+#endif
+    assert(ret == 0);
+    ret = pthread_mutex_init(cs, &attrib);
+    assert(ret == 0);
+
+    pthread_mutexattr_destroy(&attrib);
+}
+void DeleteCriticalSection(CRITICAL_SECTION *cs)
+{
+    int ret;
+    ret = pthread_mutex_destroy(cs);
+    assert(ret == 0);
+}
+void EnterCriticalSection(CRITICAL_SECTION *cs)
+{
+    int ret;
+    ret = pthread_mutex_lock(cs);
+    assert(ret == 0);
+}
+void LeaveCriticalSection(CRITICAL_SECTION *cs)
+{
+    int ret;
+    ret = pthread_mutex_unlock(cs);
+    assert(ret == 0);
+}
+
+/* NOTE: This wrapper isn't quite accurate as it returns an ALuint, as opposed
+ * to the expected DWORD. Both are defined as unsigned 32-bit types, however.
+ * Additionally, Win32 is supposed to measure the time since Windows started,
+ * as opposed to the actual time. */
+ALuint timeGetTime(void)
+{
+#if _POSIX_TIMERS > 0
+    struct timespec ts;
+    int ret = -1;
+
+#if defined(_POSIX_MONOTONIC_CLOCK) && (_POSIX_MONOTONIC_CLOCK >= 0)
+#if _POSIX_MONOTONIC_CLOCK == 0
+    static int hasmono = 0;
+    if(hasmono > 0 || (hasmono == 0 &&
+                       (hasmono=sysconf(_SC_MONOTONIC_CLOCK)) > 0))
+#endif
+        ret = clock_gettime(CLOCK_MONOTONIC, &ts);
+#endif
+    if(ret != 0)
+        ret = clock_gettime(CLOCK_REALTIME, &ts);
+    assert(ret == 0);
+
+    return ts.tv_nsec/1000000 + ts.tv_sec*1000;
+#else
+    struct timeval tv;
+    int ret;
+
+    ret = gettimeofday(&tv, NULL);
+    assert(ret == 0);
+
+    return tv.tv_usec/1000 + tv.tv_sec*1000;
+#endif
+}
+#endif
+
+#if defined(_WIN32)
+void *LoadLib(const char *name)
+{ return LoadLibraryA(name); }
+
+void CloseLib(void *handle)
+{ FreeLibrary((HANDLE)handle); }
+
+void *GetSymbol(void *handle, const char *name)
+{
+    void *ret;
+
+    ret = (void*)GetProcAddress((HANDLE)handle, name);
+    if(ret == NULL)
+        AL_PRINT("Failed to load %s\n", name);
+    return ret;
+}
+
+#elif defined(HAVE_DLFCN_H)
+
+void *LoadLib(const char *name)
+{
+    const char *err;
+    void *handle;
+
+    dlerror();
+    handle = dlopen(name, RTLD_NOW);
+    if((err=dlerror()) != NULL)
+        handle = NULL;
+    return handle;
+}
+
+void CloseLib(void *handle)
+{ dlclose(handle); }
+
+void *GetSymbol(void *handle, const char *name)
+{
+    const char *err;
+    void *sym;
+
+    dlerror();
+    sym = dlsym(handle, name);
+    if((err=dlerror()) != NULL)
+    {
+        AL_PRINT("Failed to load %s: %s\n", name, err);
+        sym = NULL;
+    }
+    return sym;
+}
+#endif
+
+static void LockLists(void)
+{
+    EnterCriticalSection(&ListLock);
+}
+
+static void UnlockLists(void)
+{
+    LeaveCriticalSection(&ListLock);
+}
+
 /*
     IsDevice
 
@@ -937,13 +1165,9 @@ static ALCboolean IsDevice(ALCdevice *pDevice)
 {
     ALCdevice *pTempDevice;
 
-    SuspendContext(NULL);
-
     pTempDevice = g_pDeviceList;
     while(pTempDevice && pTempDevice != pDevice)
         pTempDevice = pTempDevice->next;
-
-    ProcessContext(NULL);
 
     return (pTempDevice ? ALC_TRUE : ALC_FALSE);
 }
@@ -957,13 +1181,9 @@ static ALCboolean IsContext(ALCcontext *pContext)
 {
     ALCcontext *pTempContext;
 
-    SuspendContext(NULL);
-
     pTempContext = g_pContextList;
     while (pTempContext && pTempContext != pContext)
         pTempContext = pTempContext->next;
-
-    ProcessContext(NULL);
 
     return (pTempContext ? ALC_TRUE : ALC_FALSE);
 }
@@ -976,10 +1196,12 @@ static ALCboolean IsContext(ALCcontext *pContext)
 */
 ALCvoid alcSetError(ALCdevice *device, ALenum errorCode)
 {
+    LockLists();
     if(IsDevice(device))
         device->LastError = errorCode;
     else
         g_eLastNullDeviceError = errorCode;
+    UnlockLists();
 }
 
 
@@ -989,29 +1211,21 @@ ALCvoid alcSetError(ALCdevice *device, ALenum errorCode)
  */
 static ALCboolean UpdateDeviceParams(ALCdevice *device, const ALCint *attrList)
 {
-    ALCuint freq, numMono, numStereo, numSends;
-    enum DevFmtChannels schans;
-    enum DevFmtType stype;
-    ALboolean running;
-    ALuint oldRate;
-    ALuint attrIdx;
     ALuint i;
-
-    running = ((device->NumContexts > 0) ? AL_TRUE : AL_FALSE);
-    oldRate = device->Frequency;
 
     // Check for attributes
     if(attrList && attrList[0])
     {
+        ALCuint freq, numMono, numStereo, numSends;
+        enum DevFmtChannels schans;
+        enum DevFmtType stype;
+        ALuint attrIdx;
+
         // If a context is already running on the device, stop playback so the
         // device attributes can be updated
-        if(running)
-        {
-            ProcessContext(NULL);
+        if((device->Flags&DEVICE_RUNNING))
             ALCdevice_StopPlayback(device);
-            SuspendContext(NULL);
-            running = AL_FALSE;
-        }
+        device->Flags &= ~DEVICE_RUNNING;
 
         freq = device->Frequency;
         schans = device->FmtChans;
@@ -1020,10 +1234,13 @@ static ALCboolean UpdateDeviceParams(ALCdevice *device, const ALCint *attrList)
         numStereo = device->NumStereoSources;
         numSends = device->NumAuxSends;
 
+        freq = GetConfigValueInt(NULL, "frequency", freq);
+        if(freq < 8000) freq = 8000;
+
         attrIdx = 0;
         while(attrList[attrIdx])
         {
-            if(attrList[attrIdx] == ALC_FORMAT_CHANNELS &&
+            if(attrList[attrIdx] == ALC_FORMAT_CHANNELS_SOFT &&
                device->IsLoopbackDevice)
             {
                 ALCint val = attrList[attrIdx + 1];
@@ -1035,7 +1252,7 @@ static ALCboolean UpdateDeviceParams(ALCdevice *device, const ALCint *attrList)
                 schans = val;
             }
 
-            if(attrList[attrIdx] == ALC_FORMAT_TYPE &&
+            if(attrList[attrIdx] == ALC_FORMAT_TYPE_SOFT &&
                device->IsLoopbackDevice)
             {
                 ALCint val = attrList[attrIdx + 1];
@@ -1061,8 +1278,8 @@ static ALCboolean UpdateDeviceParams(ALCdevice *device, const ALCint *attrList)
                 else if(!ConfigValueExists(NULL, "frequency"))
                 {
                     freq = attrList[attrIdx + 1];
-                    if(freq < 8000)
-                        freq = 8000;
+                    if(freq < 8000) freq = 8000;
+                    device->Flags |= DEVICE_FREQUENCY_REQUEST;
                 }
             }
 
@@ -1097,11 +1314,16 @@ static ALCboolean UpdateDeviceParams(ALCdevice *device, const ALCint *attrList)
         device->NumAuxSends = numSends;
     }
 
-    if(running)
+    if((device->Flags&DEVICE_RUNNING))
         return ALC_TRUE;
 
+    SuspendContext(NULL);
     if(ALCdevice_ResetPlayback(device) == ALC_FALSE)
+    {
+        ProcessContext(NULL);
         return ALC_FALSE;
+    }
+    device->Flags |= DEVICE_RUNNING;
 
     aluInitPanning(device);
 
@@ -1111,19 +1333,60 @@ static ALCboolean UpdateDeviceParams(ALCdevice *device, const ALCint *attrList)
         device->PendingClicks[i] = 0.0f;
     }
 
+    if(!device->IsLoopbackDevice && GetConfigValueBool(NULL, "hrtf", AL_FALSE))
+        device->Flags |= DEVICE_USE_HRTF;
+    if((device->Flags&DEVICE_USE_HRTF) && !IsHrtfCompatible(device))
+    {
+        AL_PRINT("HRTF disabled (format is %uhz %s)\n", device->Frequency, DevFmtChannelsString(device->FmtChans));
+        device->Flags &= ~DEVICE_USE_HRTF;
+    }
+
+    if(!(device->Flags&DEVICE_USE_HRTF) && device->Bs2bLevel > 0 && device->Bs2bLevel <= 6)
+    {
+        if(!device->Bs2b)
+        {
+            device->Bs2b = calloc(1, sizeof(*device->Bs2b));
+            bs2b_clear(device->Bs2b);
+        }
+        bs2b_set_srate(device->Bs2b, device->Frequency);
+        bs2b_set_level(device->Bs2b, device->Bs2bLevel);
+    }
+    else
+    {
+        free(device->Bs2b);
+        device->Bs2b = NULL;
+    }
+
+    device->Flags &= ~DEVICE_DUPLICATE_STEREO;
+    switch(device->FmtChans)
+    {
+        case DevFmtMono:
+        case DevFmtStereo:
+            break;
+        case DevFmtQuad:
+        case DevFmtX51:
+        case DevFmtX51Side:
+        case DevFmtX61:
+        case DevFmtX71:
+            if(GetConfigValueBool(NULL, "stereodup", AL_TRUE))
+                device->Flags |= DEVICE_DUPLICATE_STEREO;
+            break;
+    }
+
     for(i = 0;i < device->NumContexts;i++)
     {
         ALCcontext *context = device->Contexts[i];
         ALsizei pos;
 
-        SuspendContext(context);
         for(pos = 0;pos < context->EffectSlotMap.size;pos++)
         {
             ALeffectslot *slot = context->EffectSlotMap.array[pos].value;
 
             if(ALEffect_DeviceUpdate(slot->EffectState, device) == AL_FALSE)
             {
-                ProcessContext(context);
+                ProcessContext(NULL);
+                ALCdevice_StopPlayback(device);
+                device->Flags &= ~DEVICE_RUNNING;
                 return ALC_FALSE;
             }
             ALEffect_Update(slot->EffectState, context, &slot->effect);
@@ -1142,35 +1405,11 @@ static ALCboolean UpdateDeviceParams(ALCdevice *device, const ALCint *attrList)
                 source->Send[s].WetFilter.filter = 0;
                 s++;
             }
-            source->NeedsUpdate = AL_TRUE;
+            ALsource_Update(source, context);
+            source->NeedsUpdate = AL_FALSE;
         }
-        ProcessContext(context);
     }
-
-    if(device->Bs2bLevel > 0 && device->Bs2bLevel <= 6)
-    {
-        if(!device->Bs2b)
-        {
-            device->Bs2b = calloc(1, sizeof(*device->Bs2b));
-            bs2b_clear(device->Bs2b);
-        }
-        bs2b_set_srate(device->Bs2b, device->Frequency);
-        bs2b_set_level(device->Bs2b, device->Bs2bLevel);
-    }
-    else
-    {
-        free(device->Bs2b);
-        device->Bs2b = NULL;
-    }
-
-    if(ChannelsFromDevFmt(device->FmtChans) <= 2)
-    {
-        device->HeadDampen = GetConfigValueFloat(NULL, "head_dampen", DEFAULT_HEAD_DAMPEN);
-        device->HeadDampen = __min(device->HeadDampen, 1.0f);
-        device->HeadDampen = __max(device->HeadDampen, 0.0f);
-    }
-    else
-        device->HeadDampen = 0.0f;
+    ProcessContext(NULL);
 
     return ALC_TRUE;
 }
@@ -1209,7 +1448,7 @@ ALCcontext *GetContextSuspended(void)
 {
     ALCcontext *pContext = NULL;
 
-    SuspendContext(NULL);
+    LockLists();
 
     pContext = tls_get(LocalContext);
     if(pContext && !IsContext(pContext))
@@ -1219,11 +1458,10 @@ ALCcontext *GetContextSuspended(void)
     }
     if(!pContext)
         pContext = GlobalContext;
-
     if(pContext)
         SuspendContext(pContext);
 
-    ProcessContext(NULL);
+    UnlockLists();
 
     return pContext;
 }
@@ -1295,6 +1533,8 @@ ALC_API ALCdevice* ALC_APIENTRY alcCaptureOpenDevice(const ALCchar *deviceName, 
     ALCdevice *device = NULL;
     ALCint i;
 
+    DO_INITCONFIG();
+
     if(SampleSize <= 0)
     {
         alcSetError(NULL, ALC_INVALID_VALUE);
@@ -1318,7 +1558,10 @@ ALC_API ALCdevice* ALC_APIENTRY alcCaptureOpenDevice(const ALCchar *deviceName, 
 
     device->szDeviceName = NULL;
 
+    device->Flags |= DEVICE_FREQUENCY_REQUEST;
     device->Frequency = frequency;
+
+    device->Flags |= DEVICE_CHANNELS_REQUEST;
     if(DecomposeDevFormat(format, &device->FmtChans, &device->FmtType) == AL_FALSE)
     {
         free(device);
@@ -1329,7 +1572,7 @@ ALC_API ALCdevice* ALC_APIENTRY alcCaptureOpenDevice(const ALCchar *deviceName, 
     device->UpdateSize = SampleSize;
     device->NumUpdates = 1;
 
-    SuspendContext(NULL);
+    LockLists();
     for(i = 0;BackendList[i].Init;i++)
     {
         device->Funcs = &BackendList[i].Funcs;
@@ -1343,7 +1586,7 @@ ALC_API ALCdevice* ALC_APIENTRY alcCaptureOpenDevice(const ALCchar *deviceName, 
             break;
         }
     }
-    ProcessContext(NULL);
+    UnlockLists();
 
     if(!DeviceFound)
     {
@@ -1359,22 +1602,22 @@ ALC_API ALCboolean ALC_APIENTRY alcCaptureCloseDevice(ALCdevice *pDevice)
 {
     ALCdevice **list;
 
-    if(!IsDevice(pDevice) || !pDevice->IsCaptureDevice)
+    LockLists();
+    list = &g_pDeviceList;
+    while(*list && *list != pDevice)
+        list = &(*list)->next;
+
+    if(!*list || !(*list)->IsCaptureDevice)
     {
-        alcSetError(pDevice, ALC_INVALID_DEVICE);
+        alcSetError(*list, ALC_INVALID_DEVICE);
+        UnlockLists();
         return ALC_FALSE;
     }
-
-    SuspendContext(NULL);
-
-    list = &g_pDeviceList;
-    while(*list != pDevice)
-        list = &(*list)->next;
 
     *list = (*list)->next;
     g_ulDeviceCount--;
 
-    ProcessContext(NULL);
+    UnlockLists();
 
     ALCdevice_CloseCapture(pDevice);
 
@@ -1388,32 +1631,32 @@ ALC_API ALCboolean ALC_APIENTRY alcCaptureCloseDevice(ALCdevice *pDevice)
 
 ALC_API void ALC_APIENTRY alcCaptureStart(ALCdevice *device)
 {
-    SuspendContext(NULL);
+    LockLists();
     if(!IsDevice(device) || !device->IsCaptureDevice)
         alcSetError(device, ALC_INVALID_DEVICE);
     else if(device->Connected)
         ALCdevice_StartCapture(device);
-    ProcessContext(NULL);
+    UnlockLists();
 }
 
 ALC_API void ALC_APIENTRY alcCaptureStop(ALCdevice *device)
 {
-    SuspendContext(NULL);
+    LockLists();
     if(!IsDevice(device) || !device->IsCaptureDevice)
         alcSetError(device, ALC_INVALID_DEVICE);
     else
         ALCdevice_StopCapture(device);
-    ProcessContext(NULL);
+    UnlockLists();
 }
 
 ALC_API void ALC_APIENTRY alcCaptureSamples(ALCdevice *device, ALCvoid *buffer, ALCsizei samples)
 {
-    SuspendContext(NULL);
+    LockLists();
     if(!IsDevice(device) || !device->IsCaptureDevice)
         alcSetError(device, ALC_INVALID_DEVICE);
     else
         ALCdevice_CaptureSamples(device, buffer, samples);
-    ProcessContext(NULL);
+    UnlockLists();
 }
 
 /*
@@ -1425,6 +1668,7 @@ ALC_API ALCenum ALC_APIENTRY alcGetError(ALCdevice *device)
 {
     ALCenum errorCode;
 
+    LockLists();
     if(IsDevice(device))
     {
         errorCode = device->LastError;
@@ -1435,6 +1679,7 @@ ALC_API ALCenum ALC_APIENTRY alcGetError(ALCdevice *device)
         errorCode = g_eLastNullDeviceError;
         g_eLastNullDeviceError = ALC_NO_ERROR;
     }
+    UnlockLists();
     return errorCode;
 }
 
@@ -1446,10 +1691,10 @@ ALC_API ALCenum ALC_APIENTRY alcGetError(ALCdevice *device)
 */
 ALC_API ALCvoid ALC_APIENTRY alcSuspendContext(ALCcontext *pContext)
 {
-    SuspendContext(NULL);
+    LockLists();
     if(IsContext(pContext))
         pContext->Suspended = AL_TRUE;
-    ProcessContext(NULL);
+    UnlockLists();
 }
 
 
@@ -1460,10 +1705,10 @@ ALC_API ALCvoid ALC_APIENTRY alcSuspendContext(ALCcontext *pContext)
 */
 ALC_API ALCvoid ALC_APIENTRY alcProcessContext(ALCcontext *pContext)
 {
-    SuspendContext(NULL);
+    LockLists();
     if(IsContext(pContext))
         pContext->Suspended = AL_FALSE;
-    ProcessContext(NULL);
+    UnlockLists();
 }
 
 
@@ -1476,7 +1721,7 @@ ALC_API const ALCchar* ALC_APIENTRY alcGetString(ALCdevice *pDevice,ALCenum para
 {
     const ALCchar *value = NULL;
 
-    switch (param)
+    switch(param)
     {
     case ALC_NO_ERROR:
         value = alcNoError;
@@ -1503,6 +1748,7 @@ ALC_API const ALCchar* ALC_APIENTRY alcGetString(ALCdevice *pDevice,ALCenum para
         break;
 
     case ALC_DEVICE_SPECIFIER:
+        LockLists();
         if(IsDevice(pDevice))
             value = pDevice->szDeviceName;
         else
@@ -1510,6 +1756,7 @@ ALC_API const ALCchar* ALC_APIENTRY alcGetString(ALCdevice *pDevice,ALCenum para
             ProbeDeviceList();
             value = alcDeviceList;
         }
+        UnlockLists();
         break;
 
     case ALC_ALL_DEVICES_SPECIFIER:
@@ -1518,6 +1765,7 @@ ALC_API const ALCchar* ALC_APIENTRY alcGetString(ALCdevice *pDevice,ALCenum para
         break;
 
     case ALC_CAPTURE_DEVICE_SPECIFIER:
+        LockLists();
         if(IsDevice(pDevice))
             value = pDevice->szDeviceName;
         else
@@ -1525,6 +1773,7 @@ ALC_API const ALCchar* ALC_APIENTRY alcGetString(ALCdevice *pDevice,ALCenum para
             ProbeCaptureDeviceList();
             value = alcCaptureDeviceList;
         }
+        UnlockLists();
         break;
 
     /* Default devices are always first in the list */
@@ -1564,10 +1813,12 @@ ALC_API const ALCchar* ALC_APIENTRY alcGetString(ALCdevice *pDevice,ALCenum para
         break;
 
     case ALC_EXTENSIONS:
+        LockLists();
         if(IsDevice(pDevice))
             value = alcExtensionList;
         else
             value = alcNoDeviceExtList;
+        UnlockLists();
         break;
 
     default:
@@ -1592,167 +1843,171 @@ ALC_API ALCvoid ALC_APIENTRY alcGetIntegerv(ALCdevice *device,ALCenum param,ALsi
         return;
     }
 
-    if(IsDevice(device) && device->IsCaptureDevice)
+    LockLists();
+    if(!IsDevice(device))
     {
-        SuspendContext(NULL);
-
-        // Capture device
-        switch (param)
+        switch(param)
         {
-        case ALC_CAPTURE_SAMPLES:
-            *data = ALCdevice_AvailableSamples(device);
-            break;
+            case ALC_MAJOR_VERSION:
+                *data = alcMajorVersion;
+                break;
+            case ALC_MINOR_VERSION:
+                *data = alcMinorVersion;
+                break;
 
-        case ALC_CONNECTED:
-            *data = device->Connected;
-            break;
+            case ALC_ATTRIBUTES_SIZE:
+            case ALC_ALL_ATTRIBUTES:
+            case ALC_FREQUENCY:
+            case ALC_REFRESH:
+            case ALC_SYNC:
+            case ALC_MONO_SOURCES:
+            case ALC_STEREO_SOURCES:
+            case ALC_CAPTURE_SAMPLES:
+            case ALC_FORMAT_CHANNELS_SOFT:
+            case ALC_FORMAT_TYPE_SOFT:
+                alcSetError(NULL, ALC_INVALID_DEVICE);
+                break;
 
-        default:
-            alcSetError(device, ALC_INVALID_ENUM);
-            break;
+            default:
+                alcSetError(NULL, ALC_INVALID_ENUM);
+                break;
         }
-
-        ProcessContext(NULL);
-        return;
     }
-
-    // Playback Device
-    switch (param)
+    else if(device->IsCaptureDevice)
     {
-        case ALC_MAJOR_VERSION:
-            *data = alcMajorVersion;
-            break;
+        switch(param)
+        {
+            case ALC_CAPTURE_SAMPLES:
+                *data = ALCdevice_AvailableSamples(device);
+                break;
 
-        case ALC_MINOR_VERSION:
-            *data = alcMinorVersion;
-            break;
+            case ALC_CONNECTED:
+                *data = device->Connected;
+                break;
 
-        case ALC_EFX_MAJOR_VERSION:
-            *data = alcEFXMajorVersion;
-            break;
+            default:
+                alcSetError(device, ALC_INVALID_ENUM);
+                break;
+        }
+    }
+    else /* render device */
+    {
+        switch(param)
+        {
+            case ALC_MAJOR_VERSION:
+                *data = alcMajorVersion;
+                break;
 
-        case ALC_EFX_MINOR_VERSION:
-            *data = alcEFXMinorVersion;
-            break;
+            case ALC_MINOR_VERSION:
+                *data = alcMinorVersion;
+                break;
 
-        case ALC_MAX_AUXILIARY_SENDS:
-            if(!IsDevice(device))
-                alcSetError(device, ALC_INVALID_DEVICE);
-            else
-                *data = device->NumAuxSends;
-            break;
+            case ALC_EFX_MAJOR_VERSION:
+                *data = alcEFXMajorVersion;
+                break;
 
-        case ALC_ATTRIBUTES_SIZE:
-            if(!IsDevice(device))
-                alcSetError(device, ALC_INVALID_DEVICE);
-            else
+            case ALC_EFX_MINOR_VERSION:
+                *data = alcEFXMinorVersion;
+                break;
+
+            case ALC_ATTRIBUTES_SIZE:
                 *data = 13;
-            break;
+                break;
 
-        case ALC_ALL_ATTRIBUTES:
-            if(!IsDevice(device))
-                alcSetError(device, ALC_INVALID_DEVICE);
-            else if (size < 13)
-                alcSetError(device, ALC_INVALID_VALUE);
-            else
-            {
-                int i = 0;
-
-                SuspendContext(NULL);
-                data[i++] = ALC_FREQUENCY;
-                data[i++] = device->Frequency;
-
-                if(!device->IsLoopbackDevice)
-                {
-                    data[i++] = ALC_REFRESH;
-                    data[i++] = device->Frequency / device->UpdateSize;
-
-                    data[i++] = ALC_SYNC;
-                    data[i++] = ALC_FALSE;
-                }
+            case ALC_ALL_ATTRIBUTES:
+                if(size < 13)
+                    alcSetError(device, ALC_INVALID_VALUE);
                 else
                 {
-                    data[i++] = ALC_FORMAT_CHANNELS;
-                    data[i++] = device->FmtChans;
+                    int i = 0;
 
-                    data[i++] = ALC_FORMAT_TYPE;
-                    data[i++] = device->FmtType;
+                    data[i++] = ALC_FREQUENCY;
+                    data[i++] = device->Frequency;
+
+                    if(!device->IsLoopbackDevice)
+                    {
+                        data[i++] = ALC_REFRESH;
+                        data[i++] = device->Frequency / device->UpdateSize;
+
+                        data[i++] = ALC_SYNC;
+                        data[i++] = ALC_FALSE;
+                    }
+                    else
+                    {
+                        data[i++] = ALC_FORMAT_CHANNELS_SOFT;
+                        data[i++] = device->FmtChans;
+
+                        data[i++] = ALC_FORMAT_TYPE_SOFT;
+                        data[i++] = device->FmtType;
+                    }
+
+                    data[i++] = ALC_MONO_SOURCES;
+                    data[i++] = device->NumMonoSources;
+
+                    data[i++] = ALC_STEREO_SOURCES;
+                    data[i++] = device->NumStereoSources;
+
+                    data[i++] = ALC_MAX_AUXILIARY_SENDS;
+                    data[i++] = device->NumAuxSends;
+
+                    data[i++] = 0;
                 }
+                break;
 
-                data[i++] = ALC_MONO_SOURCES;
-                data[i++] = device->NumMonoSources;
-
-                data[i++] = ALC_STEREO_SOURCES;
-                data[i++] = device->NumStereoSources;
-
-                data[i++] = ALC_MAX_AUXILIARY_SENDS;
-                data[i++] = device->NumAuxSends;
-
-                data[i++] = 0;
-                ProcessContext(NULL);
-            }
-            break;
-
-        case ALC_FREQUENCY:
-            if(!IsDevice(device))
-                alcSetError(device, ALC_INVALID_DEVICE);
-            else
+            case ALC_FREQUENCY:
                 *data = device->Frequency;
-            break;
+                break;
 
-        case ALC_REFRESH:
-            if(!IsDevice(device) || device->IsLoopbackDevice)
-                alcSetError(device, ALC_INVALID_DEVICE);
-            else
-                *data = device->Frequency / device->UpdateSize;
-            break;
+            case ALC_REFRESH:
+                if(device->IsLoopbackDevice)
+                    alcSetError(device, ALC_INVALID_DEVICE);
+                else
+                    *data = device->Frequency / device->UpdateSize;
+                break;
 
-        case ALC_SYNC:
-            if(!IsDevice(device) || device->IsLoopbackDevice)
-                alcSetError(device, ALC_INVALID_DEVICE);
-            else
-                *data = ALC_FALSE;
-            break;
+            case ALC_SYNC:
+                if(device->IsLoopbackDevice)
+                    alcSetError(device, ALC_INVALID_DEVICE);
+                else
+                    *data = ALC_FALSE;
+                break;
 
-        case ALC_FORMAT_CHANNELS:
-            if(!IsDevice(device) || !device->IsLoopbackDevice)
-                alcSetError(device, ALC_INVALID_DEVICE);
-            else
-                *data = device->FmtChans;
-            break;
+            case ALC_FORMAT_CHANNELS_SOFT:
+                if(!device->IsLoopbackDevice)
+                    alcSetError(device, ALC_INVALID_DEVICE);
+                else
+                    *data = device->FmtChans;
+                break;
 
-        case ALC_FORMAT_TYPE:
-            if(!IsDevice(device) || !device->IsLoopbackDevice)
-                alcSetError(device, ALC_INVALID_DEVICE);
-            else
-                *data = device->FmtType;
-            break;
+            case ALC_FORMAT_TYPE_SOFT:
+                if(!device->IsLoopbackDevice)
+                    alcSetError(device, ALC_INVALID_DEVICE);
+                else
+                    *data = device->FmtType;
+                break;
 
-        case ALC_MONO_SOURCES:
-            if(!IsDevice(device))
-                alcSetError(device, ALC_INVALID_DEVICE);
-            else
+            case ALC_MONO_SOURCES:
                 *data = device->NumMonoSources;
-            break;
+                break;
 
-        case ALC_STEREO_SOURCES:
-            if(!IsDevice(device))
-                alcSetError(device, ALC_INVALID_DEVICE);
-            else
+            case ALC_STEREO_SOURCES:
                 *data = device->NumStereoSources;
-            break;
+                break;
 
-        case ALC_CONNECTED:
-            if(!IsDevice(device))
-                alcSetError(device, ALC_INVALID_DEVICE);
-            else
+            case ALC_MAX_AUXILIARY_SENDS:
+                *data = device->NumAuxSends;
+                break;
+
+            case ALC_CONNECTED:
                 *data = device->Connected;
-            break;
+                break;
 
-        default:
-            alcSetError(device, ALC_INVALID_ENUM);
-            break;
+            default:
+                alcSetError(device, ALC_INVALID_ENUM);
+                break;
+        }
     }
+    UnlockLists();
 }
 
 
@@ -1774,7 +2029,9 @@ ALC_API ALCboolean ALC_APIENTRY alcIsExtensionPresent(ALCdevice *device, const A
     }
 
     len = strlen(extName);
+    LockLists();
     ptr = (IsDevice(device) ? alcExtensionList : alcNoDeviceExtList);
+    UnlockLists();
     while(ptr && *ptr)
     {
         if(strncasecmp(ptr, extName, len) == 0 &&
@@ -1847,11 +2104,11 @@ ALC_API ALCcontext* ALC_APIENTRY alcCreateContext(ALCdevice *device, const ALCin
     ALCcontext *ALContext;
     void *temp;
 
-    SuspendContext(NULL);
+    LockLists();
     if(!IsDevice(device) || device->IsCaptureDevice || !device->Connected)
     {
         alcSetError(device, ALC_INVALID_DEVICE);
-        ProcessContext(NULL);
+        UnlockLists();
         return NULL;
     }
 
@@ -1862,11 +2119,11 @@ ALC_API ALCcontext* ALC_APIENTRY alcCreateContext(ALCdevice *device, const ALCin
     {
         alcSetError(device, ALC_INVALID_DEVICE);
         aluHandleDisconnect(device);
-        ProcessContext(NULL);
-        ALCdevice_StopPlayback(device);
+        UnlockLists();
         return NULL;
     }
 
+    SuspendContext(NULL);
     ALContext = NULL;
     temp = realloc(device->Contexts, (device->NumContexts+1) * sizeof(*device->Contexts));
     if(temp)
@@ -1887,7 +2144,11 @@ ALC_API ALCcontext* ALC_APIENTRY alcCreateContext(ALCdevice *device, const ALCin
         alcSetError(device, ALC_OUT_OF_MEMORY);
         ProcessContext(NULL);
         if(device->NumContexts == 0)
+        {
             ALCdevice_StopPlayback(device);
+            device->Flags &= ~DEVICE_RUNNING;
+        }
+        UnlockLists();
         return NULL;
     }
 
@@ -1895,12 +2156,13 @@ ALC_API ALCcontext* ALC_APIENTRY alcCreateContext(ALCdevice *device, const ALCin
     ALContext->Device = device;
 
     InitContext(ALContext);
+    ProcessContext(NULL);
 
     ALContext->next = g_pContextList;
     g_pContextList = ALContext;
     g_ulContextCount++;
 
-    ProcessContext(NULL);
+    UnlockLists();
 
     return ALContext;
 }
@@ -1917,32 +2179,28 @@ ALC_API ALCvoid ALC_APIENTRY alcDestroyContext(ALCcontext *context)
     ALCcontext **list;
     ALuint i;
 
-    SuspendContext(NULL);
-    if(!IsContext(context))
+    LockLists();
+    list = &g_pContextList;
+    while(*list && *list != context)
+        list = &(*list)->next;
+
+    if(!*list)
     {
         alcSetError(NULL, ALC_INVALID_CONTEXT);
-        ProcessContext(NULL);
+        UnlockLists();
         return;
     }
-
-    list = &g_pContextList;
-    while(*list != context)
-        list = &(*list)->next;
 
     *list = (*list)->next;
     g_ulContextCount--;
 
-    Device = context->Device;
-    if(Device->NumContexts == 1)
-    {
-        ProcessContext(NULL);
-        ALCdevice_StopPlayback(Device);
-        SuspendContext(NULL);
-    }
-
+    if(context == tls_get(LocalContext))
+        tls_set(LocalContext, NULL);
     if(context == GlobalContext)
         GlobalContext = NULL;
 
+    Device = context->Device;
+    SuspendContext(NULL);
     for(i = 0;i < Device->NumContexts;i++)
     {
         if(Device->Contexts[i] == context)
@@ -1952,9 +2210,14 @@ ALC_API ALCvoid ALC_APIENTRY alcDestroyContext(ALCcontext *context)
             break;
         }
     }
+    ProcessContext(NULL);
 
-    // Lock context
-    SuspendContext(context);
+    if(Device->NumContexts == 0)
+    {
+        ALCdevice_StopPlayback(Device);
+        Device->Flags &= ~DEVICE_RUNNING;
+    }
+    UnlockLists();
 
     if(context->SourceMap.size > 0)
     {
@@ -1979,13 +2242,8 @@ ALC_API ALCvoid ALC_APIENTRY alcDestroyContext(ALCcontext *context)
     context->MaxActiveSources = 0;
     context->ActiveSourceCount = 0;
 
-    // Unlock context
-    ProcessContext(context);
-    ProcessContext(NULL);
-
     ExitContext(context);
 
-    // Free memory (MUST do this after ProcessContext)
     memset(context, 0, sizeof(ALCcontext));
     free(context);
 }
@@ -1998,12 +2256,20 @@ ALC_API ALCvoid ALC_APIENTRY alcDestroyContext(ALCcontext *context)
 */
 ALC_API ALCcontext* ALC_APIENTRY alcGetCurrentContext(ALCvoid)
 {
-    ALCcontext *pContext;
+    ALCcontext *Context;
 
-    if((pContext=GetContextSuspended()) != NULL)
-        ProcessContext(pContext);
+    LockLists();
+    Context = tls_get(LocalContext);
+    if(Context && !IsContext(Context))
+    {
+        tls_set(LocalContext, NULL);
+        Context = NULL;
+    }
+    if(!Context)
+        Context = GlobalContext;
+    UnlockLists();
 
-    return pContext;
+    return Context;
 }
 
 /*
@@ -2015,7 +2281,7 @@ ALC_API ALCcontext* ALC_APIENTRY alcGetThreadContext(void)
 {
     ALCcontext *pContext = NULL;
 
-    SuspendContext(NULL);
+    LockLists();
 
     pContext = tls_get(LocalContext);
     if(pContext && !IsContext(pContext))
@@ -2024,7 +2290,7 @@ ALC_API ALCcontext* ALC_APIENTRY alcGetThreadContext(void)
         pContext = NULL;
     }
 
-    ProcessContext(NULL);
+    UnlockLists();
 
     return pContext;
 }
@@ -2039,12 +2305,12 @@ ALC_API ALCdevice* ALC_APIENTRY alcGetContextsDevice(ALCcontext *pContext)
 {
     ALCdevice *pDevice = NULL;
 
-    SuspendContext(NULL);
+    LockLists();
     if(IsContext(pContext))
         pDevice = pContext->Device;
     else
         alcSetError(NULL, ALC_INVALID_CONTEXT);
-    ProcessContext(NULL);
+    UnlockLists();
 
     return pDevice;
 }
@@ -2059,7 +2325,7 @@ ALC_API ALCboolean ALC_APIENTRY alcMakeContextCurrent(ALCcontext *context)
 {
     ALboolean bReturn = AL_TRUE;
 
-    SuspendContext(NULL);
+    LockLists();
 
     // context must be a valid Context or NULL
     if(context == NULL || IsContext(context))
@@ -2073,7 +2339,7 @@ ALC_API ALCboolean ALC_APIENTRY alcMakeContextCurrent(ALCcontext *context)
         bReturn = AL_FALSE;
     }
 
-    ProcessContext(NULL);
+    UnlockLists();
 
     return bReturn;
 }
@@ -2087,7 +2353,7 @@ ALC_API ALCboolean ALC_APIENTRY alcSetThreadContext(ALCcontext *context)
 {
     ALboolean bReturn = AL_TRUE;
 
-    SuspendContext(NULL);
+    LockLists();
 
     // context must be a valid Context or NULL
     if(context == NULL || IsContext(context))
@@ -2098,7 +2364,7 @@ ALC_API ALCboolean ALC_APIENTRY alcSetThreadContext(ALCcontext *context)
         bReturn = AL_FALSE;
     }
 
-    ProcessContext(NULL);
+    UnlockLists();
 
     return bReturn;
 }
@@ -2109,30 +2375,13 @@ void SetDefaultChannelOrder(ALCdevice *device)
 {
     switch(device->FmtChans)
     {
-    case DevFmtMono: device->DevChannels[FRONT_CENTER] = 0; break;
-
-    case DevFmtStereo: device->DevChannels[FRONT_LEFT]  = 0;
-                       device->DevChannels[FRONT_RIGHT] = 1; break;
-
-    case DevFmtQuad: device->DevChannels[FRONT_LEFT]  = 0;
-                     device->DevChannels[FRONT_RIGHT] = 1;
-                     device->DevChannels[BACK_LEFT]   = 2;
-                     device->DevChannels[BACK_RIGHT]  = 3; break;
-
     case DevFmtX51: device->DevChannels[FRONT_LEFT]   = 0;
                     device->DevChannels[FRONT_RIGHT]  = 1;
                     device->DevChannels[BACK_LEFT]    = 2;
                     device->DevChannels[BACK_RIGHT]   = 3;
                     device->DevChannels[FRONT_CENTER] = 4;
-                    device->DevChannels[LFE]          = 5; break;
-
-    case DevFmtX61: device->DevChannels[FRONT_LEFT]   = 0;
-                    device->DevChannels[FRONT_RIGHT]  = 1;
-                    device->DevChannels[FRONT_CENTER] = 2;
-                    device->DevChannels[LFE]          = 3;
-                    device->DevChannels[BACK_CENTER]  = 4;
-                    device->DevChannels[SIDE_LEFT]    = 5;
-                    device->DevChannels[SIDE_RIGHT]   = 6; break;
+                    device->DevChannels[LFE]          = 5;
+                    return;
 
     case DevFmtX71: device->DevChannels[FRONT_LEFT]   = 0;
                     device->DevChannels[FRONT_RIGHT]  = 1;
@@ -2141,8 +2390,18 @@ void SetDefaultChannelOrder(ALCdevice *device)
                     device->DevChannels[FRONT_CENTER] = 4;
                     device->DevChannels[LFE]          = 5;
                     device->DevChannels[SIDE_LEFT]    = 6;
-                    device->DevChannels[SIDE_RIGHT]   = 7; break;
+                    device->DevChannels[SIDE_RIGHT]   = 7;
+                    return;
+
+    /* Same as WFX order */
+    case DevFmtMono:
+    case DevFmtStereo:
+    case DevFmtQuad:
+    case DevFmtX51Side:
+    case DevFmtX61:
+        break;
     }
+    SetDefaultWFXChannelOrder(device);
 }
 // Sets the default order used by WaveFormatEx
 void SetDefaultWFXChannelOrder(ALCdevice *device)
@@ -2166,6 +2425,13 @@ void SetDefaultWFXChannelOrder(ALCdevice *device)
                     device->DevChannels[BACK_LEFT]    = 4;
                     device->DevChannels[BACK_RIGHT]   = 5; break;
 
+    case DevFmtX51Side: device->DevChannels[FRONT_LEFT]   = 0;
+                        device->DevChannels[FRONT_RIGHT]  = 1;
+                        device->DevChannels[FRONT_CENTER] = 2;
+                        device->DevChannels[LFE]          = 3;
+                        device->DevChannels[SIDE_LEFT]    = 4;
+                        device->DevChannels[SIDE_RIGHT]   = 5; break;
+
     case DevFmtX61: device->DevChannels[FRONT_LEFT]   = 0;
                     device->DevChannels[FRONT_RIGHT]  = 1;
                     device->DevChannels[FRONT_CENTER] = 2;
@@ -2185,31 +2451,122 @@ void SetDefaultWFXChannelOrder(ALCdevice *device)
     }
 }
 
-static ALenum GetFormatFromString(const char *str)
+static void GetFormatFromString(const char *str, enum DevFmtChannels *chans, enum DevFmtType *type)
 {
-    if(strcasecmp(str, "AL_FORMAT_MONO32") == 0)    return AL_FORMAT_MONO_FLOAT32;
-    if(strcasecmp(str, "AL_FORMAT_STEREO32") == 0)  return AL_FORMAT_STEREO_FLOAT32;
-    if(strcasecmp(str, "AL_FORMAT_QUAD32") == 0)    return AL_FORMAT_QUAD32;
-    if(strcasecmp(str, "AL_FORMAT_51CHN32") == 0)   return AL_FORMAT_51CHN32;
-    if(strcasecmp(str, "AL_FORMAT_61CHN32") == 0)   return AL_FORMAT_61CHN32;
-    if(strcasecmp(str, "AL_FORMAT_71CHN32") == 0)   return AL_FORMAT_71CHN32;
+    if(strcasecmp(str, "AL_FORMAT_MONO32") == 0)
+    {
+        *chans = DevFmtMono;
+        *type = DevFmtFloat;
+        return;
+    }
+    if(strcasecmp(str, "AL_FORMAT_STEREO32") == 0)
+    {
+        *chans = DevFmtStereo;
+        *type = DevFmtFloat;
+        return;
+    }
+    if(strcasecmp(str, "AL_FORMAT_QUAD32") == 0)
+    {
+        *chans = DevFmtQuad;
+        *type = DevFmtFloat;
+        return;
+    }
+    if(strcasecmp(str, "AL_FORMAT_51CHN32") == 0)
+    {
+        *chans = DevFmtX51;
+        *type = DevFmtFloat;
+        return;
+    }
+    if(strcasecmp(str, "AL_FORMAT_61CHN32") == 0)
+    {
+        *chans = DevFmtX61;
+        *type = DevFmtFloat;
+        return;
+    }
+    if(strcasecmp(str, "AL_FORMAT_71CHN32") == 0)
+    {
+        *chans = DevFmtX71;
+        *type = DevFmtFloat;
+        return;
+    }
 
-    if(strcasecmp(str, "AL_FORMAT_MONO16") == 0)    return AL_FORMAT_MONO16;
-    if(strcasecmp(str, "AL_FORMAT_STEREO16") == 0)  return AL_FORMAT_STEREO16;
-    if(strcasecmp(str, "AL_FORMAT_QUAD16") == 0)    return AL_FORMAT_QUAD16;
-    if(strcasecmp(str, "AL_FORMAT_51CHN16") == 0)   return AL_FORMAT_51CHN16;
-    if(strcasecmp(str, "AL_FORMAT_61CHN16") == 0)   return AL_FORMAT_61CHN16;
-    if(strcasecmp(str, "AL_FORMAT_71CHN16") == 0)   return AL_FORMAT_71CHN16;
+    if(strcasecmp(str, "AL_FORMAT_MONO16") == 0)
+    {
+        *chans = DevFmtMono;
+        *type = DevFmtShort;
+        return;
+    }
+    if(strcasecmp(str, "AL_FORMAT_STEREO16") == 0)
+    {
+        *chans = DevFmtStereo;
+        *type = DevFmtShort;
+        return;
+    }
+    if(strcasecmp(str, "AL_FORMAT_QUAD16") == 0)
+    {
+        *chans = DevFmtQuad;
+        *type = DevFmtShort;
+        return;
+    }
+    if(strcasecmp(str, "AL_FORMAT_51CHN16") == 0)
+    {
+        *chans = DevFmtX51;
+        *type = DevFmtShort;
+        return;
+    }
+    if(strcasecmp(str, "AL_FORMAT_61CHN16") == 0)
+    {
+        *chans = DevFmtX61;
+        *type = DevFmtShort;
+        return;
+    }
+    if(strcasecmp(str, "AL_FORMAT_71CHN16") == 0)
+    {
+        *chans = DevFmtX71;
+        *type = DevFmtShort;
+        return;
+    }
 
-    if(strcasecmp(str, "AL_FORMAT_MONO8") == 0)    return AL_FORMAT_MONO8;
-    if(strcasecmp(str, "AL_FORMAT_STEREO8") == 0)  return AL_FORMAT_STEREO8;
-    if(strcasecmp(str, "AL_FORMAT_QUAD8") == 0)    return AL_FORMAT_QUAD8;
-    if(strcasecmp(str, "AL_FORMAT_51CHN8") == 0)   return AL_FORMAT_51CHN8;
-    if(strcasecmp(str, "AL_FORMAT_61CHN8") == 0)   return AL_FORMAT_61CHN8;
-    if(strcasecmp(str, "AL_FORMAT_71CHN8") == 0)   return AL_FORMAT_71CHN8;
+    if(strcasecmp(str, "AL_FORMAT_MONO8") == 0)
+    {
+        *chans = DevFmtMono;
+        *type = DevFmtByte;
+        return;
+    }
+    if(strcasecmp(str, "AL_FORMAT_STEREO8") == 0)
+    {
+        *chans = DevFmtStereo;
+        *type = DevFmtByte;
+        return;
+    }
+    if(strcasecmp(str, "AL_FORMAT_QUAD8") == 0)
+    {
+        *chans = DevFmtQuad;
+        *type = DevFmtByte;
+        return;
+    }
+    if(strcasecmp(str, "AL_FORMAT_51CHN8") == 0)
+    {
+        *chans = DevFmtX51;
+        *type = DevFmtByte;
+        return;
+    }
+    if(strcasecmp(str, "AL_FORMAT_61CHN8") == 0)
+    {
+        *chans = DevFmtX61;
+        *type = DevFmtByte;
+        return;
+    }
+    if(strcasecmp(str, "AL_FORMAT_71CHN8") == 0)
+    {
+        *chans = DevFmtX71;
+        *type = DevFmtByte;
+        return;
+    }
 
     AL_PRINT("Unknown format: \"%s\"\n", str);
-    return AL_FORMAT_STEREO16;
+    *chans = DevFmtStereo;
+    *type = DevFmtShort;
 }
 
 /*
@@ -2223,6 +2580,8 @@ ALC_API ALCdevice* ALC_APIENTRY alcOpenDevice(const ALCchar *deviceName)
     const ALCchar *fmt;
     ALCdevice *device;
     ALint i;
+
+    DO_INITCONFIG();
 
     if(deviceName && !deviceName[0])
         deviceName = NULL;
@@ -2240,6 +2599,7 @@ ALC_API ALCdevice* ALC_APIENTRY alcOpenDevice(const ALCchar *deviceName)
     device->IsLoopbackDevice = AL_FALSE;
     device->LastError = ALC_NO_ERROR;
 
+    device->Flags = 0;
     device->Bs2b = NULL;
     device->szDeviceName = NULL;
 
@@ -2249,21 +2609,18 @@ ALC_API ALCdevice* ALC_APIENTRY alcOpenDevice(const ALCchar *deviceName)
     InitUIntMap(&device->BufferMap);
     InitUIntMap(&device->EffectMap);
     InitUIntMap(&device->FilterMap);
-    InitUIntMap(&device->DatabufferMap);
 
     //Set output format
-    device->Frequency = GetConfigValueInt(NULL, "frequency", SWMIXER_OUTPUT_RATE);
+    if(ConfigValueExists(NULL, "frequency"))
+        device->Flags |= DEVICE_FREQUENCY_REQUEST;
+    device->Frequency = GetConfigValueInt(NULL, "frequency", DEFAULT_OUTPUT_RATE);
     if(device->Frequency < 8000)
         device->Frequency = 8000;
 
+    if(ConfigValueExists(NULL, "format"))
+        device->Flags |= DEVICE_CHANNELS_REQUEST;
     fmt = GetConfigValue(NULL, "format", "AL_FORMAT_STEREO16");
-    if(DecomposeDevFormat(GetFormatFromString(fmt),
-                          &device->FmtChans, &device->FmtType) == AL_FALSE)
-    {
-        /* Should never happen... */
-        device->FmtChans = DevFmtStereo;
-        device->FmtType = DevFmtShort;
-    }
+    GetFormatFromString(fmt, &device->FmtChans, &device->FmtType);
 
     device->NumUpdates = GetConfigValueInt(NULL, "periods", 4);
     if(device->NumUpdates < 2)
@@ -2274,11 +2631,11 @@ ALC_API ALCdevice* ALC_APIENTRY alcOpenDevice(const ALCchar *deviceName)
         device->UpdateSize = 1024;
 
     device->MaxNoOfSources = GetConfigValueInt(NULL, "sources", 256);
-    if((ALint)device->MaxNoOfSources <= 0)
+    if(device->MaxNoOfSources <= 0)
         device->MaxNoOfSources = 256;
 
     device->AuxiliaryEffectSlotMax = GetConfigValueInt(NULL, "slots", 4);
-    if((ALint)device->AuxiliaryEffectSlotMax <= 0)
+    if(device->AuxiliaryEffectSlotMax <= 0)
         device->AuxiliaryEffectSlotMax = 4;
 
     device->NumStereoSources = 1;
@@ -2290,12 +2647,8 @@ ALC_API ALCdevice* ALC_APIENTRY alcOpenDevice(const ALCchar *deviceName)
 
     device->Bs2bLevel = GetConfigValueInt(NULL, "cf_level", 0);
 
-    device->DuplicateStereo = GetConfigValueBool(NULL, "stereodup", 1);
-
-    device->HeadDampen = 0.0f;
-
     // Find a playback device to open
-    SuspendContext(NULL);
+    LockLists();
     for(i = 0;BackendList[i].Init;i++)
     {
         device->Funcs = &BackendList[i].Funcs;
@@ -2309,7 +2662,7 @@ ALC_API ALCdevice* ALC_APIENTRY alcOpenDevice(const ALCchar *deviceName)
             break;
         }
     }
-    ProcessContext(NULL);
+    UnlockLists();
 
     if(!bDeviceFound)
     {
@@ -2332,22 +2685,22 @@ ALC_API ALCboolean ALC_APIENTRY alcCloseDevice(ALCdevice *pDevice)
 {
     ALCdevice **list;
 
-    SuspendContext(NULL);
-    if(!IsDevice(pDevice) || pDevice->IsCaptureDevice)
+    LockLists();
+    list = &g_pDeviceList;
+    while(*list && *list != pDevice)
+        list = &(*list)->next;
+
+    if(!*list || (*list)->IsCaptureDevice)
     {
-        alcSetError(pDevice, ALC_INVALID_DEVICE);
-        ProcessContext(NULL);
+        alcSetError(*list, ALC_INVALID_DEVICE);
+        UnlockLists();
         return ALC_FALSE;
     }
-
-    list = &g_pDeviceList;
-    while(*list != pDevice)
-        list = &(*list)->next;
 
     *list = (*list)->next;
     g_ulDeviceCount--;
 
-    ProcessContext(NULL);
+    UnlockLists();
 
     if(pDevice->NumContexts > 0)
     {
@@ -2386,15 +2739,6 @@ ALC_API ALCboolean ALC_APIENTRY alcCloseDevice(ALCdevice *pDevice)
     }
     ResetUIntMap(&pDevice->FilterMap);
 
-    if(pDevice->DatabufferMap.size > 0)
-    {
-#ifdef _DEBUG
-        AL_PRINT("alcCloseDevice(): deleting %d Databuffer(s)\n", pDevice->DatabufferMap.size);
-#endif
-        ReleaseALDatabuffers(pDevice);
-    }
-    ResetUIntMap(&pDevice->DatabufferMap);
-
     free(pDevice->Bs2b);
     pDevice->Bs2b = NULL;
 
@@ -2412,9 +2756,11 @@ ALC_API ALCboolean ALC_APIENTRY alcCloseDevice(ALCdevice *pDevice)
 }
 
 
-ALC_API ALCdevice* ALC_APIENTRY alcLoopbackOpenDevice(void)
+ALC_API ALCdevice* ALC_APIENTRY alcLoopbackOpenDeviceSOFT(void)
 {
     ALCdevice *device;
+
+    DO_INITCONFIG();
 
     device = calloc(1, sizeof(ALCdevice));
     if(!device)
@@ -2429,6 +2775,7 @@ ALC_API ALCdevice* ALC_APIENTRY alcLoopbackOpenDevice(void)
     device->IsLoopbackDevice = AL_TRUE;
     device->LastError = ALC_NO_ERROR;
 
+    device->Flags = 0;
     device->Bs2b = NULL;
     device->szDeviceName = NULL;
 
@@ -2438,7 +2785,6 @@ ALC_API ALCdevice* ALC_APIENTRY alcLoopbackOpenDevice(void)
     InitUIntMap(&device->BufferMap);
     InitUIntMap(&device->EffectMap);
     InitUIntMap(&device->FilterMap);
-    InitUIntMap(&device->DatabufferMap);
 
     //Set output format
     device->Frequency = 44100;
@@ -2449,11 +2795,11 @@ ALC_API ALCdevice* ALC_APIENTRY alcLoopbackOpenDevice(void)
     device->UpdateSize = 0;
 
     device->MaxNoOfSources = GetConfigValueInt(NULL, "sources", 256);
-    if((ALint)device->MaxNoOfSources <= 0)
+    if(device->MaxNoOfSources <= 0)
         device->MaxNoOfSources = 256;
 
     device->AuxiliaryEffectSlotMax = GetConfigValueInt(NULL, "slots", 4);
-    if((ALint)device->AuxiliaryEffectSlotMax <= 0)
+    if(device->AuxiliaryEffectSlotMax <= 0)
         device->AuxiliaryEffectSlotMax = 4;
 
     device->NumStereoSources = 1;
@@ -2465,28 +2811,24 @@ ALC_API ALCdevice* ALC_APIENTRY alcLoopbackOpenDevice(void)
 
     device->Bs2bLevel = GetConfigValueInt(NULL, "cf_level", 0);
 
-    device->DuplicateStereo = GetConfigValueBool(NULL, "stereodup", 1);
-
-    device->HeadDampen = 0.0f;
-
     // Open the "backend"
-    SuspendContext(NULL);
+    LockLists();
     device->Funcs = &BackendLoopback.Funcs;
     ALCdevice_OpenPlayback(device, "Loopback");
 
     device->next = g_pDeviceList;
     g_pDeviceList = device;
     g_ulDeviceCount++;
-    ProcessContext(NULL);
+    UnlockLists();
 
     return device;
 }
 
-ALC_API ALCboolean ALC_APIENTRY alcIsRenderFormatSupported(ALCdevice *device, ALCsizei freq, ALenum channels, ALenum type)
+ALC_API ALCboolean ALC_APIENTRY alcIsRenderFormatSupportedSOFT(ALCdevice *device, ALCsizei freq, ALenum channels, ALenum type)
 {
     ALCboolean ret = ALC_FALSE;
 
-    SuspendContext(NULL);
+    LockLists();
     if(!IsDevice(device) || !device->IsLoopbackDevice)
         alcSetError(device, ALC_INVALID_DEVICE);
     else if(freq <= 0)
@@ -2504,21 +2846,21 @@ ALC_API ALCboolean ALC_APIENTRY alcIsRenderFormatSupported(ALCdevice *device, AL
            freq >= 8000)
             ret = ALC_TRUE;
     }
-    ProcessContext(NULL);
+    UnlockLists();
 
     return ret;
 }
 
-ALC_API void ALC_APIENTRY alcRenderSamples(ALCdevice *device, ALCvoid *buffer, ALCsizei samples)
+ALC_API void ALC_APIENTRY alcRenderSamplesSOFT(ALCdevice *device, ALCvoid *buffer, ALCsizei samples)
 {
-    SuspendContext(NULL);
+    LockLists();
     if(!IsDevice(device) || !device->IsLoopbackDevice)
         alcSetError(device, ALC_INVALID_DEVICE);
     else if(samples < 0)
         alcSetError(device, ALC_INVALID_VALUE);
     else
         aluMixData(device, buffer, samples);
-    ProcessContext(NULL);
+    UnlockLists();
 }
 
 

@@ -35,6 +35,13 @@
 #  AL_FORMAT_71CHN32  (32-bit float 7.1 output)
 #format = AL_FORMAT_STEREO16
 
+## hrtf:
+#  Enables HRTF filters. These filters provide for better sound spatialization
+#  while using headphones. The filters will only work when output is 44100hz
+#  stereo. While HRTF is active, the cf_level option is disabled. Default is
+#  disabled since stereo speaker output quality may suffer.
+#hrtf = false
+
 ## cf_level:
 #  Sets the crossfeed level for stereo output. Valid values are:
 #  0 - No crossfeed
@@ -47,14 +54,6 @@
 #  Users of headphones may want to try various settings. Has no effect on non-
 #  stereo modes.
 #cf_level = 0
-
-## head_dampen:
-#  Sets the amount of dampening on sounds emanating from behind the listener.
-#  This is used to simulate the natural occlusion of the head, which is
-#  typically missing with mono and stereo output, and as such, only works on
-#  mono and stereo output modes. Valid values range from 0 to 1 (inclusive),
-#  and higher values provide a stronger effect.
-#head_dampen = 0.25
 
 ## frequency:
 #  Sets the output frequency.
@@ -94,24 +93,14 @@
 #sources = 256
 
 ## stereodup:
-#  Sets whether to duplicate stereo sounds on the rear and side speakers for 4+
-#  channel output. This provides a "fuller" playback quality for 4+ channel
-#  output modes, although each individual speaker will have a slight reduction
-#  in volume to compensate for the extra output speakers. True, yes, on, and
-#  non-0 values will duplicate stereo sources. 0 and anything else will cause
-#  stereo sounds to only play out the front speakers. This only has an effect
-#  when a suitable output format is used (ie. those that contain side and/or
-#  rear speakers).
+#  Sets whether to duplicate stereo sounds behind the listener for 4+ channel
+#  output. This provides a "fuller" playback quality for surround sound output
+#  modes, although each individual speaker will have a slight reduction in
+#  volume to compensate for the extra output speakers. True, yes, on, and non-0
+#  values will duplicate stereo sources. 0 and anything else will cause stereo
+#  sounds to only play in front. This only has an effect when a suitable output
+#  format is used (ie. those that contain side and/or rear speakers).
 #stereodup = true
-
-## scalemix:
-#  Sets whether to scale the remixed output. When the final mix is written to
-#  the device, the multi-channel data is remixed so pure-virtual channels (eg.
-#  front-center on stereo output) are remixed and added to available channels
-#  (eg. front-left and front-right). Scaling helps ensure that no single source
-#  will put out more than 100% on a given physical channel. This can cause a
-#  noticeable reduction in overall volume, however, so it is off by default.
-#scalemix = false
 
 ## drivers:
 #  Sets the backend driver list order, comma-seperated. Unknown backends and
@@ -120,7 +109,7 @@
 #  followed by all other available backends, while 'oss' will list OSS only).
 #  Backends prepended with - won't be available for use (eg. '-oss,' will allow
 #  all available backends except OSS). An empty list means the default.
-#drivers = pulse,alsa,core,oss,solaris,dsound,winmm,port,null,wave
+#drivers = pulse,alsa,core,oss,solaris,sndio,mmdevapi,dsound,winmm,port,opensl,null,wave
 
 ## excludefx:
 #  Sets which effects to exclude, preventing apps from using them. This can
@@ -202,6 +191,11 @@
 ## device:
 #  Sets the device name for Solaris output.
 #device = /dev/audio
+
+##
+## MMDevApi backend stuff
+##
+[mmdevapi]
 
 ##
 ## DirectSound backend stuff

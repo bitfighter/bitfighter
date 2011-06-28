@@ -28,12 +28,27 @@ SET(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS TRUE)
 OPTION(ALSA    "Check for ALSA backend"                ON)
 OPTION(OSS     "Check for OSS backend"                 ON)
 OPTION(SOLARIS "Check for Solaris backend"             ON)
+OPTION(SNDIO   "Check for SndIO backend"               ON)
+OPTION(MMDEVAPI "Check for MMDevApi"                   ON)
 OPTION(DSOUND  "Check for DirectSound backend"         ON)
 OPTION(WINMM   "Check for Windows Multimedia backend"  ON)
 OPTION(PORTAUDIO  "Check for PortAudio backend"        ON)
 OPTION(PULSEAUDIO "Check for PulseAudio backend"       ON)
 OPTION(COREAUDIO  "Check for CoreAudio backend"        ON)
+OPTION(OPENSL     "Check for OpenSL backend"           ON)
 OPTION(WAVE    "Enable Wave Writer backend"            ON)
+
+OPTION(REQUIRE_ALSA       "Require ALSA backend"               OFF)
+OPTION(REQUIRE_OSS        "Require OSS backend"                OFF)
+OPTION(REQUIRE_SOLARIS    "Require Solaris backend"            OFF)
+OPTION(REQUIRE_SNDIO      "Require SndIO backend"              OFF)
+OPTION(REQUIRE_MMDEVAPI   "Require MMDevApi"                   OFF)
+OPTION(REQUIRE_DSOUND     "Require DirectSound backend"        OFF)
+OPTION(REQUIRE_WINMM      "Require Windows Multimedia backend" OFF)
+OPTION(REQUIRE_PORTAUDIO  "Require PortAudio backend"          OFF)
+OPTION(REQUIRE_PULSEAUDIO "Require PulseAudio backend"         OFF)
+OPTION(REQUIRE_COREAUDIO  "Require CoreAudio backend"          OFF)
+OPTION(REQUIRE_OPENSL     "Require OpenSL backend"             OFF)
 
 OPTION(DLOPEN  "Check for the dlopen API for loading optional libs"  ON)
 
@@ -59,11 +74,19 @@ SET(LIB_MAJOR_VERSION "1")
 SET(LIB_MINOR_VERSION "13")
 SET(LIB_VERSION "${LIB_MAJOR_VERSION}.${LIB_MINOR_VERSION}")
 
+SET(EXPORT_DECL "")
+
 
 CHECK_TYPE_SIZE("long" SIZEOF_LONG)
 CHECK_TYPE_SIZE("long long" SIZEOF_LONG_LONG)
 CHECK_TYPE_SIZE("unsigned int" SIZEOF_UINT)
 CHECK_TYPE_SIZE("void*" SIZEOF_VOIDP)
+
+
+CHECK_C_SOURCE_COMPILES("int *restrict foo;
+                         int main() {return 0;}" HAVE_RESTRICT)
+CHECK_C_SOURCE_COMPILES("int *__restrict foo;
+                         int main() {return 0;}" HAVE___RESTRICT)
 
 
 # Add definitions, compiler switches, etc.
@@ -137,17 +160,33 @@ ELSE()
 
     CHECK_C_SOURCE_COMPILES("int foo() __attribute__((destructor));
                              int main() {return 0;}" HAVE_GCC_DESTRUCTOR)
+ENDIF()
 
-    # Set visibility options if available
-    IF(NOT WIN32)
-        CHECK_C_COMPILER_FLAG(-fvisibility=internal HAVE_VISIBILITY_SWITCH)
-        IF(HAVE_VISIBILITY_SWITCH)
-            CHECK_C_SOURCE_COMPILES("int foo() __attribute__((visibility(\"default\")));
-                                     int main() {return 0;}" HAVE_GCC_VISIBILITY)
-            IF(HAVE_GCC_VISIBILITY)
-                ADD_DEFINITIONS(-fvisibility=internal -DHAVE_GCC_VISIBILITY)
-            ENDIF()
+# Set visibility/export options if available
+IF(WIN32)
+    SET(EXPORT_DECL "__declspec(dllexport)")
+
+    OPTION(WINE "Enable use of Wine headers when compiling" ON)
+    IF(WINE)
+        FIND_PATH(WINE_INCLUDE_DIR library.h
+                  PATHS
+                  /usr/include/wine
+                  /usr/local/include/wine)
+        IF(WINE_INCLUDE_DIR)
+            MESSAGE(STATUS "Found Wine header files - ${WINE_INCLUDE_DIR}" )
+            INCLUDE_DIRECTORIES("${WINE_INCLUDE_DIR}/windows")
+            SET(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES} "${WINE_INCLUDE_DIR}/windows")
+        ELSE()
+            MESSAGE(STATUS "Could not find Wine header files" )
         ENDIF()
+    ENDIF()
+ELSE()
+    CHECK_C_COMPILER_FLAG(-fvisibility=internal HAVE_VISIBILITY_SWITCH)
+    CHECK_C_SOURCE_COMPILES("int foo() __attribute__((visibility(\"protected\")));
+                             int main() {return 0;}" HAVE_GCC_VISIBILITY)
+    IF(HAVE_VISIBILITY_SWITCH AND HAVE_GCC_VISIBILITY)
+        ADD_DEFINITIONS(-fvisibility=internal)
+        SET(EXPORT_DECL "__attribute__((visibility(\"protected\")))")
     ENDIF()
 ENDIF()
 
@@ -156,6 +195,10 @@ CHECK_C_SOURCE_COMPILES("int foo(const char *str, ...) __attribute__((format(pri
 
 CHECK_INCLUDE_FILE(fenv.h HAVE_FENV_H)
 CHECK_INCLUDE_FILE(float.h HAVE_FLOAT_H)
+CHECK_INCLUDE_FILE(guiddef.h HAVE_GUIDDEF_H)
+IF(NOT HAVE_GUIDDEF_H)
+    CHECK_INCLUDE_FILE(initguid.h HAVE_INITGUID_H)
+ENDIF()
 
 CHECK_LIBRARY_EXISTS(m  powf   "" HAVE_POWF)
 CHECK_LIBRARY_EXISTS(m  sqrtf  "" HAVE_SQRTF)
@@ -295,19 +338,16 @@ IF(NOT HAVE_STDINT_H)
     ENDIF()
 ENDIF()
 
-IF(WIN32)
-    # Windows needs winmm for timeGetTime, even if the backend is disabled
-    CHECK_SHARED_LIBRARY_EXISTS(winmm timeGetTime 0 "" HAVE_LIBWINMM)
-    IF(HAVE_LIBWINMM)
-        SET(EXTRA_LIBS winmm ${EXTRA_LIBS})
-        SET(PKG_CONFIG_LIBS ${PKG_CONFIG_LIBS} -lwinmm)
-    ENDIF()
+# Windows needs winmm for timeGetTime, even if the backend is disabled
+CHECK_SHARED_LIBRARY_EXISTS(winmm timeGetTime 0 "" HAVE_LIBWINMM)
+IF(HAVE_LIBWINMM)
+    SET(EXTRA_LIBS winmm ${EXTRA_LIBS})
+    SET(PKG_CONFIG_LIBS ${PKG_CONFIG_LIBS} -lwinmm)
 ENDIF()
 
 
 SET(OPENAL_OBJS  OpenAL32/alAuxEffectSlot.c
                  OpenAL32/alBuffer.c
-                 OpenAL32/alDatabuffer.c
                  OpenAL32/alEffect.c
                  OpenAL32/alError.c
                  OpenAL32/alExtension.c
@@ -327,6 +367,7 @@ SET(ALC_OBJS  Alc/ALc.c
               Alc/alcRing.c
               Alc/alcThread.c
               Alc/bs2b.c
+              Alc/hrtf.c
               Alc/mixer.c
               Alc/panning.c
               Alc/loopback.c
@@ -337,11 +378,13 @@ SET(BACKENDS "")
 SET(HAVE_ALSA       0)
 SET(HAVE_OSS        0)
 SET(HAVE_SOLARIS    0)
+SET(HAVE_SNDIO      0)
 SET(HAVE_DSOUND     0)
 SET(HAVE_WINMM      0)
 SET(HAVE_PORTAUDIO  0)
 SET(HAVE_PULSEAUDIO 0)
 SET(HAVE_COREAUDIO  0)
+SET(HAVE_OPENSL     0)
 SET(HAVE_WAVE       0)
 
 # Check ALSA backend
@@ -361,6 +404,9 @@ IF(ALSA)
         ENDIF()
     ENDIF()
 ENDIF()
+IF(REQUIRE_ALSA AND NOT HAVE_ALSA)
+    MESSAGE(FATAL_ERROR "Failed to enabled required ALSA backend")
+ENDIF()
 
 # Check OSS backend
 IF(OSS)
@@ -371,6 +417,9 @@ IF(OSS)
         SET(BACKENDS  "${BACKENDS} OSS,")
     ENDIF()
 ENDIF()
+IF(REQUIRE_OSS AND NOT HAVE_OSS)
+    MESSAGE(FATAL_ERROR "Failed to enabled required OSS backend")
+ENDIF()
 
 # Check Solaris backend
 IF(SOLARIS)
@@ -380,6 +429,46 @@ IF(SOLARIS)
         SET(ALC_OBJS  ${ALC_OBJS} Alc/solaris.c)
         SET(BACKENDS  "${BACKENDS} Solaris,")
     ENDIF()
+ENDIF()
+IF(REQUIRE_SOLARIS AND NOT HAVE_SOLARIS)
+    MESSAGE(FATAL_ERROR "Failed to enabled required Solaris backend")
+ENDIF()
+
+# Check SndIO backend
+IF(SNDIO)
+    CHECK_INCLUDE_FILE(sndio.h HAVE_SNDIO_H)
+    IF(HAVE_SNDIO_H)
+        CHECK_SHARED_LIBRARY_EXISTS(sndio sio_open 3 "" HAVE_LIBSNDIO)
+        IF(HAVE_LIBSNDIO OR HAVE_DLFCN_H OR WIN32)
+            SET(HAVE_SNDIO 1)
+            SET(ALC_OBJS  ${ALC_OBJS} Alc/sndio.c)
+            IF(HAVE_DLFCN_H OR WIN32)
+                SET(BACKENDS  "${BACKENDS} SndIO,")
+            ELSE()
+                SET(BACKENDS  "${BACKENDS} SndIO \(linked\),")
+                SET(EXTRA_LIBS sndio ${EXTRA_LIBS})
+            ENDIF()
+        ENDIF()
+    ENDIF()
+ENDIF()
+IF(REQUIRE_SNDIO AND NOT HAVE_SNDIO)
+    MESSAGE(FATAL_ERROR "Failed to enabled required SndIO backend")
+ENDIF()
+
+# Check for MMDevApi backend
+IF(HAVE_WINDOWS_H)
+    IF(MMDEVAPI)
+        CHECK_INCLUDE_FILE(mmdeviceapi.h HAVE_MMDEVICEAPI_H)
+        IF(HAVE_MMDEVICEAPI_H)
+            SET(HAVE_MMDEVAPI 1)
+            SET(ALC_OBJS  ${ALC_OBJS} Alc/mmdevapi.c)
+
+            SET(BACKENDS  "${BACKENDS} MMDevApi,")
+        ENDIF()
+    ENDIF()
+ENDIF()
+IF(REQUIRE_MMDEVAPI AND NOT HAVE_MMDEVAPI)
+    MESSAGE(FATAL_ERROR "Failed to enabled required MMDevApi backend")
 ENDIF()
 
 # Check DSound/MMSystem backend
@@ -400,6 +489,9 @@ IF(DSOUND)
         ENDIF()
     ENDIF()
 ENDIF()
+IF(REQUIRE_DSOUND AND NOT HAVE_DSOUND)
+    MESSAGE(FATAL_ERROR "Failed to enabled required DSound backend")
+ENDIF()
 
 IF(HAVE_WINDOWS_H)
     IF(WINMM)
@@ -410,6 +502,9 @@ IF(HAVE_WINDOWS_H)
             SET(BACKENDS  "${BACKENDS} WinMM,")
         ENDIF()
     ENDIF()
+ENDIF()
+IF(REQUIRE_WINMM AND NOT HAVE_WINMM)
+    MESSAGE(FATAL_ERROR "Failed to enabled required WinMM backend")
 ENDIF()
 
 # Check PortAudio backend
@@ -429,8 +524,11 @@ IF(PORTAUDIO)
         ENDIF()
     ENDIF()
 ENDIF()
+IF(REQUIRE_PORTAUDIO AND NOT HAVE_PORTAUDIO)
+    MESSAGE(FATAL_ERROR "Failed to enabled required PortAudio backend")
+ENDIF()
 
-# Check PortAudio backend
+# Check PulseAudio backend
 IF(PULSEAUDIO)
     CHECK_INCLUDE_FILE(pulse/pulseaudio.h HAVE_PULSE_PULSEAUDIO_H)
     IF(HAVE_PULSE_PULSEAUDIO_H)
@@ -447,6 +545,9 @@ IF(PULSEAUDIO)
         ENDIF()
     ENDIF()
 ENDIF()
+IF(REQUIRE_PULSEAUDIO AND NOT HAVE_PULSEAUDIO)
+    MESSAGE(FATAL_ERROR "Failed to enabled required PulseAudio backend")
+ENDIF()
 
 # Check CoreAudio backend
 IF(COREAUDIO)
@@ -459,6 +560,26 @@ IF(COREAUDIO)
         SET(EXTRA_LIBS /System/Library/Frameworks/AudioUnit.framework ${EXTRA_LIBS})
         SET(EXTRA_LIBS /System/Library/Frameworks/ApplicationServices.framework ${EXTRA_LIBS})
     ENDIF()
+ENDIF()
+IF(REQUIRE_COREAUDIO AND NOT HAVE_COREAUDIO)
+    MESSAGE(FATAL_ERROR "Failed to enabled required CoreAudio backend")
+ENDIF()
+
+# Check for OpenSL (Android) backend
+IF(OPENSL)
+    CHECK_INCLUDE_FILE(SLES/OpenSLES_Android.h HAVE_SLES_OPENSLES_ANDROID_H)
+    IF(HAVE_SLES_OPENSLES_ANDROID_H)
+        CHECK_SHARED_LIBRARY_EXISTS(OpenSLES slCreateEngine 6 "" HAVE_LIBOPENSLES)
+        IF(HAVE_LIBOPENSLES)
+            SET(HAVE_OPENSL 1)
+            SET(ALC_OBJS  ${ALC_OBJS} Alc/opensl.c)
+            SET(BACKENDS  "${BACKENDS} OpenSL,")
+            SET(EXTRA_LIBS OpenSLES ${EXTRA_LIBS})
+        ENDIF()
+    ENDIF()
+ENDIF()
+IF(REQUIRE_OPENSL AND NOT HAVE_OPENSL)
+    MESSAGE(FATAL_ERROR "Failed to enabled required OpenSL backend")
 ENDIF()
 
 # Optionally enable the Wave Writer backend

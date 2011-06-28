@@ -86,9 +86,9 @@ AL_API ALvoid AL_APIENTRY alGenSources(ALsizei n,ALuint *sources)
                 break;
             }
 
-            source->source = (ALuint)ALTHUNK_ADDENTRY(source);
-            err = InsertUIntMapEntry(&Context->SourceMap, source->source,
-                                     source);
+            err = ALTHUNK_ADDENTRY(source, &source->source);
+            if(err == AL_NO_ERROR)
+                err = InsertUIntMapEntry(&Context->SourceMap, source->source, source);
             if(err != AL_NO_ERROR)
             {
                 ALTHUNK_REMOVEENTRY(source->source);
@@ -442,6 +442,37 @@ AL_API ALvoid AL_APIENTRY alSourcefv(ALuint source, ALenum eParam, const ALfloat
 {
     ALCcontext    *pContext;
 
+    if(pflValues)
+    {
+        switch(eParam)
+        {
+            case AL_PITCH:
+            case AL_CONE_INNER_ANGLE:
+            case AL_CONE_OUTER_ANGLE:
+            case AL_GAIN:
+            case AL_MAX_DISTANCE:
+            case AL_ROLLOFF_FACTOR:
+            case AL_REFERENCE_DISTANCE:
+            case AL_MIN_GAIN:
+            case AL_MAX_GAIN:
+            case AL_CONE_OUTER_GAIN:
+            case AL_CONE_OUTER_GAINHF:
+            case AL_SEC_OFFSET:
+            case AL_SAMPLE_OFFSET:
+            case AL_BYTE_OFFSET:
+            case AL_AIR_ABSORPTION_FACTOR:
+            case AL_ROOM_ROLLOFF_FACTOR:
+                alSourcef(source, eParam, pflValues[0]);
+                return;
+
+            case AL_POSITION:
+            case AL_VELOCITY:
+            case AL_DIRECTION:
+                alSource3f(source, eParam, pflValues[0], pflValues[1], pflValues[2]);
+                return;
+        }
+    }
+
     pContext = GetContextSuspended();
     if(!pContext) return;
 
@@ -451,31 +482,6 @@ AL_API ALvoid AL_APIENTRY alSourcefv(ALuint source, ALenum eParam, const ALfloat
         {
             switch(eParam)
             {
-                case AL_PITCH:
-                case AL_CONE_INNER_ANGLE:
-                case AL_CONE_OUTER_ANGLE:
-                case AL_GAIN:
-                case AL_MAX_DISTANCE:
-                case AL_ROLLOFF_FACTOR:
-                case AL_REFERENCE_DISTANCE:
-                case AL_MIN_GAIN:
-                case AL_MAX_GAIN:
-                case AL_CONE_OUTER_GAIN:
-                case AL_CONE_OUTER_GAINHF:
-                case AL_SEC_OFFSET:
-                case AL_SAMPLE_OFFSET:
-                case AL_BYTE_OFFSET:
-                case AL_AIR_ABSORPTION_FACTOR:
-                case AL_ROOM_ROLLOFF_FACTOR:
-                    alSourcef(source, eParam, pflValues[0]);
-                    break;
-
-                case AL_POSITION:
-                case AL_VELOCITY:
-                case AL_DIRECTION:
-                    alSource3f(source, eParam, pflValues[0], pflValues[1], pflValues[2]);
-                    break;
-
                 default:
                     alSetError(pContext, AL_INVALID_ENUM);
                     break;
@@ -497,6 +503,17 @@ AL_API ALvoid AL_APIENTRY alSourcei(ALuint source,ALenum eParam,ALint lValue)
     ALsource            *Source;
     ALbufferlistitem    *BufferListItem;
 
+    switch(eParam)
+    {
+        case AL_MAX_DISTANCE:
+        case AL_ROLLOFF_FACTOR:
+        case AL_CONE_INNER_ANGLE:
+        case AL_CONE_OUTER_ANGLE:
+        case AL_REFERENCE_DISTANCE:
+            alSourcef(source, eParam, (ALfloat)lValue);
+            return;
+    }
+
     pContext = GetContextSuspended();
     if(!pContext) return;
 
@@ -506,14 +523,6 @@ AL_API ALvoid AL_APIENTRY alSourcei(ALuint source,ALenum eParam,ALint lValue)
 
         switch(eParam)
         {
-            case AL_MAX_DISTANCE:
-            case AL_ROLLOFF_FACTOR:
-            case AL_CONE_INNER_ANGLE:
-            case AL_CONE_OUTER_ANGLE:
-            case AL_REFERENCE_DISTANCE:
-                alSourcef(source, eParam, (ALfloat)lValue);
-                break;
-
             case AL_SOURCE_RELATIVE:
                 if(lValue == AL_FALSE || lValue == AL_TRUE)
                 {
@@ -566,6 +575,8 @@ AL_API ALvoid AL_APIENTRY alSourcei(ALuint source,ALenum eParam,ALint lValue)
                             Source->queue = BufferListItem;
                             Source->BuffersInQueue = 1;
 
+                            Source->NumChannels = ChannelsFromFmt(buffer->FmtChannels);
+                            Source->SampleSize  = BytesFromFmt(buffer->FmtType);
                             if(buffer->FmtChannels == FmtMono)
                                 Source->Update = CalcSourceParams;
                             else
@@ -703,6 +714,15 @@ AL_API void AL_APIENTRY alSource3i(ALuint source, ALenum eParam, ALint lValue1, 
     ALCcontext *pContext;
     ALsource   *Source;
 
+    switch(eParam)
+    {
+        case AL_POSITION:
+        case AL_VELOCITY:
+        case AL_DIRECTION:
+            alSource3f(source, eParam, (ALfloat)lValue1, (ALfloat)lValue2, (ALfloat)lValue3);
+            return;
+    }
+
     pContext = GetContextSuspended();
     if(!pContext) return;
 
@@ -710,14 +730,8 @@ AL_API void AL_APIENTRY alSource3i(ALuint source, ALenum eParam, ALint lValue1, 
     {
         ALCdevice *device = pContext->Device;
 
-        switch (eParam)
+        switch(eParam)
         {
-            case AL_POSITION:
-            case AL_VELOCITY:
-            case AL_DIRECTION:
-                alSource3f(source, eParam, (ALfloat)lValue1, (ALfloat)lValue2, (ALfloat)lValue3);
-                break;
-
             case AL_AUXILIARY_SEND_FILTER: {
                 ALeffectslot *ALEffectSlot = NULL;
                 ALfilter     *ALFilter = NULL;
@@ -766,6 +780,39 @@ AL_API void AL_APIENTRY alSourceiv(ALuint source, ALenum eParam, const ALint* pl
 {
     ALCcontext    *pContext;
 
+    if(plValues)
+    {
+        switch(eParam)
+        {
+            case AL_SOURCE_RELATIVE:
+            case AL_CONE_INNER_ANGLE:
+            case AL_CONE_OUTER_ANGLE:
+            case AL_LOOPING:
+            case AL_BUFFER:
+            case AL_SOURCE_STATE:
+            case AL_SEC_OFFSET:
+            case AL_SAMPLE_OFFSET:
+            case AL_BYTE_OFFSET:
+            case AL_MAX_DISTANCE:
+            case AL_ROLLOFF_FACTOR:
+            case AL_REFERENCE_DISTANCE:
+            case AL_DIRECT_FILTER:
+            case AL_DIRECT_FILTER_GAINHF_AUTO:
+            case AL_AUXILIARY_SEND_FILTER_GAIN_AUTO:
+            case AL_AUXILIARY_SEND_FILTER_GAINHF_AUTO:
+            case AL_DISTANCE_MODEL:
+                alSourcei(source, eParam, plValues[0]);
+                return;
+
+            case AL_POSITION:
+            case AL_VELOCITY:
+            case AL_DIRECTION:
+            case AL_AUXILIARY_SEND_FILTER:
+                alSource3i(source, eParam, plValues[0], plValues[1], plValues[2]);
+                return;
+        }
+    }
+
     pContext = GetContextSuspended();
     if(!pContext) return;
 
@@ -775,33 +822,6 @@ AL_API void AL_APIENTRY alSourceiv(ALuint source, ALenum eParam, const ALint* pl
         {
             switch(eParam)
             {
-                case AL_SOURCE_RELATIVE:
-                case AL_CONE_INNER_ANGLE:
-                case AL_CONE_OUTER_ANGLE:
-                case AL_LOOPING:
-                case AL_BUFFER:
-                case AL_SOURCE_STATE:
-                case AL_SEC_OFFSET:
-                case AL_SAMPLE_OFFSET:
-                case AL_BYTE_OFFSET:
-                case AL_MAX_DISTANCE:
-                case AL_ROLLOFF_FACTOR:
-                case AL_REFERENCE_DISTANCE:
-                case AL_DIRECT_FILTER:
-                case AL_DIRECT_FILTER_GAINHF_AUTO:
-                case AL_AUXILIARY_SEND_FILTER_GAIN_AUTO:
-                case AL_AUXILIARY_SEND_FILTER_GAINHF_AUTO:
-                case AL_DISTANCE_MODEL:
-                    alSourcei(source, eParam, plValues[0]);
-                    break;
-
-                case AL_POSITION:
-                case AL_VELOCITY:
-                case AL_DIRECTION:
-                case AL_AUXILIARY_SEND_FILTER:
-                    alSource3i(source, eParam, plValues[0], plValues[1], plValues[2]);
-                    break;
-
                 default:
                     alSetError(pContext, AL_INVALID_ENUM);
                     break;
@@ -967,6 +987,35 @@ AL_API ALvoid AL_APIENTRY alGetSourcefv(ALuint source, ALenum eParam, ALfloat *p
     ALdouble    Offsets[2];
     ALdouble    updateLen;
 
+    switch(eParam)
+    {
+        case AL_PITCH:
+        case AL_GAIN:
+        case AL_MIN_GAIN:
+        case AL_MAX_GAIN:
+        case AL_MAX_DISTANCE:
+        case AL_ROLLOFF_FACTOR:
+        case AL_DOPPLER_FACTOR:
+        case AL_CONE_OUTER_GAIN:
+        case AL_SEC_OFFSET:
+        case AL_SAMPLE_OFFSET:
+        case AL_BYTE_OFFSET:
+        case AL_CONE_INNER_ANGLE:
+        case AL_CONE_OUTER_ANGLE:
+        case AL_REFERENCE_DISTANCE:
+        case AL_CONE_OUTER_GAINHF:
+        case AL_AIR_ABSORPTION_FACTOR:
+        case AL_ROOM_ROLLOFF_FACTOR:
+            alGetSourcef(source, eParam, pflValues);
+            return;
+
+        case AL_POSITION:
+        case AL_VELOCITY:
+        case AL_DIRECTION:
+            alGetSource3f(source, eParam, pflValues+0, pflValues+1, pflValues+2);
+            return;
+    }
+
     pContext = GetContextSuspended();
     if(!pContext) return;
 
@@ -976,32 +1025,6 @@ AL_API ALvoid AL_APIENTRY alGetSourcefv(ALuint source, ALenum eParam, ALfloat *p
         {
             switch(eParam)
             {
-                case AL_PITCH:
-                case AL_GAIN:
-                case AL_MIN_GAIN:
-                case AL_MAX_GAIN:
-                case AL_MAX_DISTANCE:
-                case AL_ROLLOFF_FACTOR:
-                case AL_DOPPLER_FACTOR:
-                case AL_CONE_OUTER_GAIN:
-                case AL_SEC_OFFSET:
-                case AL_SAMPLE_OFFSET:
-                case AL_BYTE_OFFSET:
-                case AL_CONE_INNER_ANGLE:
-                case AL_CONE_OUTER_ANGLE:
-                case AL_REFERENCE_DISTANCE:
-                case AL_CONE_OUTER_GAINHF:
-                case AL_AIR_ABSORPTION_FACTOR:
-                case AL_ROOM_ROLLOFF_FACTOR:
-                    alGetSourcef(source, eParam, pflValues);
-                    break;
-
-                case AL_POSITION:
-                case AL_VELOCITY:
-                case AL_DIRECTION:
-                    alGetSource3f(source, eParam, pflValues+0, pflValues+1, pflValues+2);
-                    break;
-
                 case AL_SAMPLE_RW_OFFSETS_SOFT:
                 case AL_BYTE_RW_OFFSETS_SOFT:
                     updateLen = (ALdouble)pContext->Device->UpdateSize /
@@ -1199,6 +1222,39 @@ AL_API void AL_APIENTRY alGetSourceiv(ALuint source, ALenum eParam, ALint* plVal
     ALdouble    Offsets[2];
     ALdouble    updateLen;
 
+    switch(eParam)
+    {
+        case AL_SOURCE_RELATIVE:
+        case AL_CONE_INNER_ANGLE:
+        case AL_CONE_OUTER_ANGLE:
+        case AL_LOOPING:
+        case AL_BUFFER:
+        case AL_SOURCE_STATE:
+        case AL_BUFFERS_QUEUED:
+        case AL_BUFFERS_PROCESSED:
+        case AL_SEC_OFFSET:
+        case AL_SAMPLE_OFFSET:
+        case AL_BYTE_OFFSET:
+        case AL_MAX_DISTANCE:
+        case AL_ROLLOFF_FACTOR:
+        case AL_DOPPLER_FACTOR:
+        case AL_REFERENCE_DISTANCE:
+        case AL_SOURCE_TYPE:
+        case AL_DIRECT_FILTER:
+        case AL_DIRECT_FILTER_GAINHF_AUTO:
+        case AL_AUXILIARY_SEND_FILTER_GAIN_AUTO:
+        case AL_AUXILIARY_SEND_FILTER_GAINHF_AUTO:
+        case AL_DISTANCE_MODEL:
+            alGetSourcei(source, eParam, plValues);
+            return;
+
+        case AL_POSITION:
+        case AL_VELOCITY:
+        case AL_DIRECTION:
+            alGetSource3i(source, eParam, plValues+0, plValues+1, plValues+2);
+            return;
+    }
+
     pContext = GetContextSuspended();
     if(!pContext) return;
 
@@ -1208,36 +1264,6 @@ AL_API void AL_APIENTRY alGetSourceiv(ALuint source, ALenum eParam, ALint* plVal
         {
             switch(eParam)
             {
-                case AL_SOURCE_RELATIVE:
-                case AL_CONE_INNER_ANGLE:
-                case AL_CONE_OUTER_ANGLE:
-                case AL_LOOPING:
-                case AL_BUFFER:
-                case AL_SOURCE_STATE:
-                case AL_BUFFERS_QUEUED:
-                case AL_BUFFERS_PROCESSED:
-                case AL_SEC_OFFSET:
-                case AL_SAMPLE_OFFSET:
-                case AL_BYTE_OFFSET:
-                case AL_MAX_DISTANCE:
-                case AL_ROLLOFF_FACTOR:
-                case AL_DOPPLER_FACTOR:
-                case AL_REFERENCE_DISTANCE:
-                case AL_SOURCE_TYPE:
-                case AL_DIRECT_FILTER:
-                case AL_DIRECT_FILTER_GAINHF_AUTO:
-                case AL_AUXILIARY_SEND_FILTER_GAIN_AUTO:
-                case AL_AUXILIARY_SEND_FILTER_GAINHF_AUTO:
-                case AL_DISTANCE_MODEL:
-                    alGetSourcei(source, eParam, plValues);
-                    break;
-
-                case AL_POSITION:
-                case AL_VELOCITY:
-                case AL_DIRECTION:
-                    alGetSource3i(source, eParam, plValues+0, plValues+1, plValues+2);
-                    break;
-
                 case AL_SAMPLE_RW_OFFSETS_SOFT:
                 case AL_BYTE_RW_OFFSETS_SOFT:
                     updateLen = (ALdouble)pContext->Device->UpdateSize /
@@ -1330,7 +1356,9 @@ AL_API ALvoid AL_APIENTRY alSourcePlayv(ALsizei n, const ALuint *sources)
             BufferList = BufferList->next;
         }
 
-        if(!BufferList)
+        /* If there's nothing to play, or device is disconnected, go right to
+         * stopped */
+        if(!BufferList || !Context->Device->Connected)
         {
             Source->state = AL_STOPPED;
             Source->BuffersPlayed = Source->BuffersInQueue;
@@ -1348,6 +1376,19 @@ AL_API ALvoid AL_APIENTRY alSourcePlayv(ALsizei n, const ALuint *sources)
             Source->BuffersPlayed = 0;
 
             Source->Buffer = Source->queue->buffer;
+
+            for(j = 0;j < MAXCHANNELS;j++)
+            {
+                ALuint k;
+                for(k = 0;k < SRC_HISTORY_LENGTH;k++)
+                    Source->HrtfHistory[j][k] = 0.0f;
+                for(k = 0;k < HRIR_LENGTH;k++)
+                {
+                    Source->HrtfValues[j][k][0] = 0.0f;
+                    Source->HrtfValues[j][k][1] = 0.0f;
+                }
+            }
+            Source->HrtfOffset = 0;
         }
         else
             Source->state = AL_PLAYING;
@@ -1356,24 +1397,13 @@ AL_API ALvoid AL_APIENTRY alSourcePlayv(ALsizei n, const ALuint *sources)
         if(Source->lOffset)
             ApplyOffset(Source);
 
-        // If device is disconnected, go right to stopped
-        if(!Context->Device->Connected)
+        for(j = 0;j < Context->ActiveSourceCount;j++)
         {
-            Source->state = AL_STOPPED;
-            Source->BuffersPlayed = Source->BuffersInQueue;
-            Source->position = 0;
-            Source->position_fraction = 0;
+            if(Context->ActiveSources[j] == Source)
+                break;
         }
-        else
-        {
-            for(j = 0;j < Context->ActiveSourceCount;j++)
-            {
-                if(Context->ActiveSources[j] == Source)
-                    break;
-            }
-            if(j == Context->ActiveSourceCount)
-                Context->ActiveSources[Context->ActiveSourceCount++] = Source;
-        }
+        if(j == Context->ActiveSourceCount)
+            Context->ActiveSources[Context->ActiveSourceCount++] = Source;
     }
 
 done:
@@ -1602,6 +1632,8 @@ AL_API ALvoid AL_APIENTRY alSourceQueueBuffers(ALuint source, ALsizei n, const A
         {
             BufferFmt = buffer;
 
+            Source->NumChannels = ChannelsFromFmt(buffer->FmtChannels);
+            Source->SampleSize  = BytesFromFmt(buffer->FmtType);
             if(buffer->FmtChannels == FmtMono)
                 Source->Update = CalcSourceParams;
             else

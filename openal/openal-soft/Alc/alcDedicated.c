@@ -58,11 +58,11 @@ static ALvoid DedicatedDLGUpdate(ALeffectState *effect, ALCcontext *Context, con
     ALint pos;
     ALsizei s;
 
-    pos = aluCart2LUTpos(-1.0f, 0.0f);
-    SpeakerGain = &device->PanningLUT[MAXCHANNELS * pos];
+    pos = aluCart2LUTpos(1.0f, 0.0f);
+    SpeakerGain = device->PanningLUT[pos];
 
     for(s = 0;s < MAXCHANNELS;s++)
-        state->gains[s] = SpeakerGain[s] * Effect->Dedicated.Gain;
+        state->gains[s] = SpeakerGain[s] * Effect->Params.Dedicated.Gain;
 }
 
 static ALvoid DedicatedLFEUpdate(ALeffectState *effect, ALCcontext *Context, const ALeffect *Effect)
@@ -73,7 +73,7 @@ static ALvoid DedicatedLFEUpdate(ALeffectState *effect, ALCcontext *Context, con
 
     for(s = 0;s < MAXCHANNELS;s++)
         state->gains[s] = 0.0f;
-    state->gains[LFE] = Effect->Dedicated.Gain;
+    state->gains[LFE] = Effect->Params.Dedicated.Gain;
 }
 
 static ALvoid DedicatedProcess(ALeffectState *effect, const ALeffectslot *Slot, ALuint SamplesToDo, const ALfloat *SamplesIn, ALfloat (*SamplesOut)[MAXCHANNELS])

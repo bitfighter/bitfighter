@@ -105,24 +105,21 @@ static ALvoid EchoUpdate(ALeffectState *effect, ALCcontext *Context, const ALeff
 {
     ALechoState *state = (ALechoState*)effect;
     ALuint frequency = Context->Device->Frequency;
-    ALfloat lrpan, cw, a, g;
+    ALfloat lrpan, cw, g;
 
-    state->Tap[0].delay = (ALuint)(Effect->Echo.Delay * frequency) + 1;
-    state->Tap[1].delay = (ALuint)(Effect->Echo.LRDelay * frequency);
+    state->Tap[0].delay = (ALuint)(Effect->Params.Echo.Delay * frequency) + 1;
+    state->Tap[1].delay = (ALuint)(Effect->Params.Echo.LRDelay * frequency);
     state->Tap[1].delay += state->Tap[0].delay;
 
-    lrpan = Effect->Echo.Spread*0.5f + 0.5f;
+    lrpan = Effect->Params.Echo.Spread*0.5f + 0.5f;
     state->GainL = aluSqrt(     lrpan);
     state->GainR = aluSqrt(1.0f-lrpan);
 
-    state->FeedGain = Effect->Echo.Feedback;
+    state->FeedGain = Effect->Params.Echo.Feedback;
 
     cw = cos(2.0*M_PI * LOWPASSFREQCUTOFF / frequency);
-    g = 1.0f - Effect->Echo.Damping;
-    a = 0.0f;
-    if(g < 0.9999f) // 1-epsilon
-        a = (1 - g*cw - aluSqrt(2*g*(1-cw) - g*g*(1 - cw*cw))) / (1 - g);
-    state->iirFilter.coeff = a;
+    g = 1.0f - Effect->Params.Echo.Damping;
+    state->iirFilter.coeff = lpCoeffCalc(g, cw);
 }
 
 static ALvoid EchoProcess(ALeffectState *effect, const ALeffectslot *Slot, ALuint SamplesToDo, const ALfloat *SamplesIn, ALfloat (*SamplesOut)[MAXCHANNELS])
