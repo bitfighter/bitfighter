@@ -194,7 +194,7 @@ bool QuickChatHelper::processKeyCode(KeyCode keyCode)
 
             if(gQuickChatTree[mCurNode].commandOnly)
             {
-               gClientGame->mGameUserInterface->runCommand(gQuickChatTree[mCurNode].msg.c_str());
+               gClientGame->getUserInterface()->runCommand(gQuickChatTree[mCurNode].msg.c_str());
             }
             else
             {

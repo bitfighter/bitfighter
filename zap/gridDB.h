@@ -71,8 +71,9 @@ public:
    void setExtent(const Rect &extentRect);
 
    virtual GridDatabase *getGridDatabase() = 0;
-   virtual bool getCollisionPoly(Vector<Point> &polyPoints) = 0;
-   virtual bool getCollisionCircle(U32 stateIndex, Point &point, float &radius) = 0;
+
+   virtual bool getCollisionPoly(Vector<Point> &polyPoints) const = 0;
+   virtual bool getCollisionCircle(U32 stateIndex, Point &point, float &radius) const = 0;
    
    virtual bool isCollisionEnabled() { return true; }
 

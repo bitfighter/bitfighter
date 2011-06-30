@@ -95,15 +95,15 @@ namespace Zap
 
       Vector<StringTableEntry> e;
       e.push_back(theShip->getName());
-      e.push_back(getTeamName(teamIndex));
+      e.push_back(getGame()->getTeamName(teamIndex));
 
       if(mFlags.size() == 1)
          e.push_back(theString);
       else
          e.push_back(aString);
 
-      for(S32 i = 0; i < mClientList.size(); i++)
-         mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagSnatch, r, e);
+      for(S32 i = 0; i < getClientCount(); i++)
+         getClient(i)->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagSnatch, r, e);
       theFlag->mountToShip(theShip);
       theFlag->setZone(NULL);
       theFlag->mTimer.clear();
@@ -130,8 +130,8 @@ namespace Zap
          else
             e.push_back(aString);
 
-         for(S32 i = 0; i < mClientList.size(); i++)
-            mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagDrop, dropString, e);
+         for(S32 i = 0; i < getClientCount(); i++)
+            getClient(i)->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagDrop, dropString, e);
       }
    }
 
@@ -166,10 +166,10 @@ namespace Zap
          else
             e.push_back(aString);
 
-         e.push_back(getTeamName(s->getTeam()));
+         e.push_back(getGame()->getTeamName(s->getTeam()));
 
-         for(S32 i = 0; i < mClientList.size(); i++)
-            mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagCapture, capString, e);
+         for(S32 i = 0; i < getClientCount(); i++)
+            getClient(i)->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagCapture, capString, e);
 
          mountedFlag->dismount();
 

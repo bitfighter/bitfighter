@@ -61,7 +61,7 @@ extern void drawFilledSquare(const Point &pos, F32 size);
 extern void drawFilledSquare(const Point &pos, S32 size);
 extern void drawFilledSquare(const Point &pos, F32 size);
 
-extern void renderSquareItem(const Point &pos, const Color &c, F32 alpha, const Color &letterColor, char letter);
+extern void renderSquareItem(const Point &pos, const Color *c, F32 alpha, const Color *letterColor, char letter);
 
 extern void drawCircle(const Point &pos, F32 radius);
 extern void drawCircle(F32 x, F32 y, F32 radius);
@@ -74,7 +74,7 @@ void renderEnergyGuage(S32 energy, S32 maxEnergy, S32 cooldownThreshold);
 extern void renderCenteredString(const Point &pos, S32 size, const char *string);
 extern void renderCenteredString(const Point &pos, F32 size, const char *string);
 
-extern void renderShip(const Color &c, F32 alpha, F32 thrusts[], F32 health, F32 radius, U32 sensorTime, 
+extern void renderShip(const Color *shipColor, F32 alpha, F32 thrusts[], F32 health, F32 radius, U32 sensorTime, 
                        bool cloakActive, bool shieldActive, bool sensorActive, bool hasArmor);
 extern void renderShipCoords(const Point &coords, bool localShip, F32 alpha);
 
@@ -83,19 +83,19 @@ extern void renderTeleporter(const Point &pos, U32 type, bool in, S32 time, F32 
                              const Vector<Point> &dests, bool showDestOverride);
 extern void renderTurret(const Color &c, Point anchor, Point normal, bool enabled, F32 health, F32 barrelAngle);
 
-extern void renderFlag(const Point &pos, const Color &flagColor);
-extern void renderFlag(F32 x, F32 y, const Color &flagColor);
-extern void renderFlag(const Point &pos, const Color &flagColor, const Color *mastColor, F32 alpha);
-extern void renderFlag(F32 x, F32 y, const Color &flagColor, const Color *mastColor, F32 alpha);
+extern void renderFlag(const Point &pos, const Color *flagColor);
+extern void renderFlag(F32 x, F32 y, const Color *flagColor);
+extern void renderFlag(const Point &pos, const Color *flagColor, const Color *mastColor, F32 alpha);
+extern void renderFlag(F32 x, F32 y, const Color *flagColor, const Color *mastColor, F32 alpha);
 
 extern void renderPointVector(const Vector<Point> *points, U32 geomType);
 
 //extern void renderFlag(Point pos, Color c, F32 timerFraction);
 extern void renderSmallFlag(const Point &pos, const Color &c, F32 parentAlpha);
 
-extern void renderLoadoutZone(Color c, const Vector<Point> *outline, const Vector<Point> *fill);      // No label version
+extern void renderLoadoutZone(const Color *c, const Vector<Point> *outline, const Vector<Point> *fill);      // No label version
 
-extern void renderLoadoutZone(Color c, const Vector<Point> *outline, const Vector<Point> *fill, 
+extern void renderLoadoutZone(const Color *c, const Vector<Point> *outline, const Vector<Point> *fill, 
                               const Point &centroid, F32 angle, F32 scaleFact = 1);
 
 extern void renderNavMeshZone(const Vector<Point> *outline, const Vector<Point> *fill,
@@ -116,11 +116,11 @@ extern const F32 BORDER_FILL_ALPHA;
 extern const F32 BORDER_WIDTH;
 
 extern void renderPolygonOutline(const Vector<Point> *outline);
-extern void renderPolygonOutline(const Vector<Point> *outlinePoints, Color &outlineColor, F32 alpha = 1);
-extern void renderPolygonFill(const Vector<Point> *fillPoints, const Color &fillColor, F32 alpha = 1);
+extern void renderPolygonOutline(const Vector<Point> *outlinePoints, const Color *outlineColor, F32 alpha = 1);
+extern void renderPolygonFill(const Vector<Point> *fillPoints, const Color *fillColor, F32 alpha = 1);
 
-extern void renderGoalZone(Color c, const Vector<Point> *outline, const Vector<Point> *fill);     // No label version
-extern void renderGoalZone(Color c, const Vector<Point> *outline, const Vector<Point> *fill, Point centroid, F32 labelAngle, 
+extern void renderGoalZone(const Color *c, const Vector<Point> *outline, const Vector<Point> *fill);     // No label version
+extern void renderGoalZone(const Color *c, const Vector<Point> *outline, const Vector<Point> *fill, Point centroid, F32 labelAngle, 
                            bool isFlashing = false, F32 glowFraction = 0, S32 score = 0, F32 scaleFact = 1);
 
 extern void renderNexus(const Vector<Point> *outline, const Vector<Point> *fill, Point centroid, F32 labelAngle, 
@@ -165,11 +165,11 @@ void renderResourceItem(const Point &pos, F32 alpha = 1);
 void renderResourceItem(const Point &pos, F32 scaleFactor, const Color *color, F32 alpha);
 
 void renderSoccerBall(const Point &pos, F32 alpha = 1);
-void renderTextItem(const Point &pos, const Point &dir, F32 size, const string &text, const Color &color);
+void renderTextItem(const Point &pos, const Point &dir, F32 size, const string &text, const Color *color);
 
 
 extern void renderForceFieldProjector(Point pos, Point normal);
-extern void renderForceFieldProjector(Point pos, Point normal, Color teamColor, bool enabled);
+extern void renderForceFieldProjector(Point pos, Point normal, const Color *teamColor, bool enabled);
 extern void renderForceField(Point start, Point end, Color c, bool fieldUp, F32 scale = 1);
 
 extern void renderBitfighterLogo(S32 yPos, F32 scale, U32 mask = 1023);

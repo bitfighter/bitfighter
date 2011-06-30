@@ -319,21 +319,23 @@ void PlayerMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
 ////////////////////////////////////
 ////////////////////////////////////
 
-TeamMenuItem::TeamMenuItem(S32 index, Team team, void (*callback)(U32), KeyCode keyCode, bool isCurrent) :
-               MenuItem(index, team.getName().getString(), callback, "", keyCode, KEY_UNKNOWN)
+TeamMenuItem::TeamMenuItem(S32 index, AbstractTeam *team, void (*callback)(U32), KeyCode keyCode, bool isCurrent) :
+               MenuItem(index, team->getName().getString(), callback, "", keyCode, KEY_UNKNOWN)
 {
    mTeam = team;
    mIsCurrent = isCurrent;
-   mUnselectedColor = team.color;
-   mSelectedColor = team.color;
+   mUnselectedColor = team->getColor();
+   mSelectedColor = team->getColor();
 }
 
 
 void TeamMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
 {
+   Team *team = (Team *)mTeam;
+
    glColor(*getColor(isSelected));
    UserInterface::drawCenteredStringf(xpos, ypos, textsize, "%s%s [%d /%d]", mIsCurrent ? "-> " : "", getPrompt().c_str(), 
-                                      mTeam.numPlayers, mTeam.getScore());
+                                     team->getPlayerCount(), team->getScore());
 }
 
 

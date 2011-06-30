@@ -265,10 +265,9 @@ public:
 
    void doneEditingAttributes(EditorAttributeMenuUI *editor, EditorObject *object);   // Gets run when user exits attribute editor
 
-   void clearUndoHistory();         // Wipe undo/redo history
+   void clearUndoHistory();          // Wipe undo/redo history
 
-   Vector<TeamEditor> mTeams;       // Team list: needs to be public so we can edit from UITeamDefMenu
-   Vector<TeamEditor> mOldTeams;    // Team list from before we run team editor, so we can see what changed
+   Vector<TeamEditor> mOldTeams;     // Team list from before we run team editor, so we can see what changed
 
    GridDatabase *getGridDatabase() { return &mGridDatabase; }
 
@@ -286,7 +285,7 @@ public:
    static void renderPolyline(const Vector<Point> *verts);
 
 
-   Color getTeamColor(S32 teamId);
+   const Color *getTeamColor(S32 teamId) const;
 
 
    bool mDraggingObjects;     // Should be private

@@ -76,13 +76,13 @@ void BfObject::removeFromGame()
 
 
 
-bool BfObject::getCollisionPoly(Vector<Point> &polyPoints)
+bool BfObject::getCollisionPoly(Vector<Point> &polyPoints) const
 {
    return false;
 }
 
 
-bool BfObject::getCollisionCircle(U32 stateIndex, Point &point, float &radius)
+bool BfObject::getCollisionCircle(U32 stateIndex, Point &point, float &radius) const
 {
    return false;
 }
@@ -341,7 +341,7 @@ void GameObject::onAddedToGame(Game *)
 }
 
 
-Rect GameObject::getBounds(U32 stateIndex)
+Rect GameObject::getBounds(U32 stateIndex) const
 {
    Rect ret;
    Point p;

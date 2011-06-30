@@ -157,9 +157,9 @@ public:
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
-   bool getCollisionPoly(Vector<Point> &polyPoints);
+   bool getCollisionPoly(Vector<Point> &polyPoints) const;
 
-   void getGeom(Vector<Point> &geom);
+   void getGeom(Vector<Point> &geom) const;
    static void getGeom(const Point &start, const Point &end, Vector<Point> &points, F32 scaleFact = 1);
    static bool findForceFieldEnd(GridDatabase *db, const Point &start, const Point &normal, 
                                  Point &end, DatabaseObject **collObj);
@@ -187,7 +187,7 @@ public:
    ForceFieldProjector(S32 team = -1, Point anchorPoint = Point(), Point anchorNormal = Point());  // Constructor
    ForceFieldProjector *clone() const;
    
-   bool getCollisionPoly(Vector<Point> &polyPoints);
+   bool getCollisionPoly(Vector<Point> &polyPoints) const;
    static void getGeom(const Point &anchor, const Point &normal, Vector<Point> &geom);
    static Point getForceFieldStartPoint(const Point &anchor, const Point &normal, F32 scaleFact = 1);
 
@@ -277,7 +277,7 @@ public:
 
 
    static void getGeom(const Point &anchor, const Point &normal, Vector<Point> &polyPoints);
-   bool getCollisionPoly(Vector<Point> &polyPoints);
+   bool getCollisionPoly(Vector<Point> &polyPoints) const;
 
    Vector<Point> getBufferForBotZone();
 

@@ -54,7 +54,6 @@ private:
 
    Vector<YardSaleWaypoint> mYardSaleWaypoints;
    Vector<SafePtr<HuntersNexusObject> > mNexus;
-   U32 getLowerRightCornerScoreboardOffsetFromBottom() { return 88; }
 
 public:
    HuntersGameType();      // Constructor
@@ -65,9 +64,9 @@ public:
    S32 getNexusTimeLeft() {return mNexusTimer.getCurrent(); }
 
    // Info about this game type:
-   bool isTeamGame() { return mTeams.size() > 1; }
+   bool isTeamGame() { return getGame()->getTeamCount() > 1; }
    bool isFlagGame() { return true; }         // Well, technically not, but we'll morph flags to our own uses as we load the level
-   bool isTeamFlagGame() { return false; }   // Ditto... team info will be ignored... no need to show warning in editor
+   bool isTeamFlagGame() { return false; }    // Ditto... team info will be ignored... no need to show warning in editor
 
    bool isSpawnWithLoadoutGame() { return true; }
 
@@ -88,11 +87,12 @@ public:
    void spawnShip(GameConnection *theClient);
    GameTypes getGameType() { return NexusGame; }
    const char *getGameTypeString() { return "Nexus"; }      // Official game name
-   const char *getShortName() { return "N"; }
+   const char *getShortName() const { return "N"; }
    const char *getInstructionString() { return "Collect flags from opposing players and bring them to the Nexus!"; }
    bool canBeTeamGame() { return true; }
    bool canBeIndividualGame() { return true; }
 
+   U32 getLowerRightCornerScoreboardOffsetFromBottom() const { return 88; }
 
    S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data);
 
@@ -172,7 +172,7 @@ public:
 
    S32 getRenderSortValue() { return -1; }
 
-   bool getCollisionPoly(Vector<Point> &polyPoints);
+   bool getCollisionPoly(Vector<Point> &polyPoints) const;
    bool collide(GameObject *hitObject);
 
    U32 packUpdate(GhostConnection *connection, U32 mask, BitStream *stream);

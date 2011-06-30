@@ -50,7 +50,7 @@ public:
 
    Rect(const TNL::Vector<Point> &p);         // Construct as a bounding box around multiple points
 
-   Point getCenter();
+   Point getCenter() const;
 
    void set(const Point &p1, const Point &p2);
 
@@ -83,7 +83,7 @@ public:
    TNL::F32 getWidth();
    TNL::F32 getHeight();
 
-   Point getExtents();
+   Point getExtents() const;
 
    // inlines must stay in headers
    inline Rect& operator=(const Rect &r)  // Performance equivalent to set()

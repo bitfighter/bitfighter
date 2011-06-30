@@ -575,7 +575,7 @@ void joinGame(Address remoteAddress, bool isFromMaster, bool local)
    if(isFromMaster && connToMaster && connToMaster->getConnectionState() == NetConnection::Connected)     // Request arranged connection
    {
       connToMaster->requestArrangedConnection(remoteAddress);
-      gClientGame->mGameUserInterface->activate();
+      gClientGame->getUserInterface()->activate();
    }
    else                                                         // Try a direct connection
    {
@@ -609,7 +609,7 @@ void joinGame(Address remoteAddress, bool isFromMaster, bool local)
       else        // Connect to a remote server, but not via the master server
          gameConnection->connect(gClientGame->getNetInterface(), remoteAddress);  
 
-      gClientGame->mGameUserInterface->activate();
+      gClientGame->getUserInterface()->activate();
    }
    //if(gClientGame2 && gClientGame != gClientGame2)  // make both client connect for now, until menus works in both clients.
    //{

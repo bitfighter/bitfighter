@@ -483,14 +483,16 @@ void PickupItem::idle(GameObject::IdleCallPath path)
          GameType *gt = getGame()->getGameType();
          if(gt)
          {
-            for(S32 i = 0; i < gt->mClientList.size(); i++)
+            for(S32 i = 0; i < gt->getClientCount(); i++)
             {
-               TNLAssert(gt->mClientList[i]->clientConnection, "Defunct client connection in item.cpp!");
+               SafePtr<GameConnection> connection = gt->getClient(i)->clientConnection;
 
-               if(!gt->mClientList[i]->clientConnection)    // <-- not sure this ever happens
+               TNLAssert(connection, "Defunct client connection in item.cpp!");
+
+               if(!connection)    // <-- not sure this ever happens
                   continue;
 
-               Ship *client_ship = dynamic_cast<Ship *>(gt->mClientList[i]->clientConnection->getControlObject());
+               Ship *client_ship = dynamic_cast<Ship *>(connection->getControlObject());
 
                if(!client_ship)
                   continue;

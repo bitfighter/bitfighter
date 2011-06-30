@@ -71,11 +71,11 @@ public:
    string toString();
 
    void onAddedToGame(Game *theGame);  
-   void computeExtent();                                             // Bounding box for quick collision-possibility elimination
+   void computeExtent();                                            // Bounding box for quick collision-possibility elimination
 
    EditorAttributeMenuUI *getAttributeMenu();
 
-   bool getCollisionPoly(Vector<Point> &polyPoints);  // More precise boundary for precise collision detection
+   bool getCollisionPoly(Vector<Point> &polyPoints) const;          // More precise boundary for precise collision detection
    bool collide(GameObject *hitObject);
    void idle(GameObject::IdleCallPath path);
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
@@ -141,9 +141,9 @@ public:
 
    bool processArguments(S32 argc, const char **argv, Game *game);   // Create objects from parameters stored in level file
    void onAddedToGame(Game *theGame);
-   void computeExtent();                                               // Bounding box for quick collision-possibility elimination
+   void computeExtent();                                             // Bounding box for quick collision-possibility elimination
 
-   bool getCollisionPoly(Vector<Point> &polyPoints);                   // More precise boundary for precise collision detection
+   bool getCollisionPoly(Vector<Point> &polyPoints) const;           // More precise boundary for precise collision detection
    bool collide(GameObject *hitObject);
    void idle(GameObject::IdleCallPath path);
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);

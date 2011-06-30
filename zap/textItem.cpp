@@ -230,7 +230,7 @@ void TextItem::computeExtent()
 }
 
 
-bool TextItem::getCollisionPoly(Vector<Point> &polyPoints)
+bool TextItem::getCollisionPoly(Vector<Point> &polyPoints) const
 {
    return false;
 }
@@ -433,7 +433,7 @@ void LineItem::computeExtent()
 }
 
 
-bool LineItem::getCollisionPoly(Vector<Point> &polyPoints)
+bool LineItem::getCollisionPoly(Vector<Point> &polyPoints) const
 {
    return false;
 }

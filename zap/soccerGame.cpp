@@ -52,7 +52,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(SoccerGameType, s2cSoccerScoreMessage,
    if(clientName.isNull())    // Unknown player scored
    {
       if(teamIndexAdjusted >= 0)
-         msg = "A goal was scored on team " + string(getTeamName(teamIndexAdjusted).getString());
+         msg = "A goal was scored on team " + string(getGame()->getTeamName(teamIndexAdjusted).getString());
       else if(teamIndexAdjusted == -1)
          msg = "A goal was scored on a neutral goal!";
       else if(teamIndexAdjusted == -2)
@@ -65,7 +65,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(SoccerGameType, s2cSoccerScoreMessage,
       if(isTeamGame())
       {
          if(teamIndexAdjusted >= 0)
-            msg = string(clientName.getString()) + " scored a goal on team " + string(getTeamName(teamIndexAdjusted).getString());
+            msg = string(clientName.getString()) + " scored a goal on team " + string(getGame()->getTeamName(teamIndexAdjusted).getString());
          else if(teamIndexAdjusted == -1)
             msg = string(clientName.getString()) + " scored a goal on a neutral goal!";
          else if(teamIndexAdjusted == -2)
@@ -83,7 +83,8 @@ TNL_IMPLEMENT_NETOBJECT_RPC(SoccerGameType, s2cSoccerScoreMessage,
    }
    else if(msgIndex == SoccerMsgScoreOwnGoal)
    {
-      msg = string(clientName.getString()) + " scored an own-goal, giving the other team" + (mTeams.size() == 2 ? "" : "s") + " a point!";
+      msg = string(clientName.getString()) + " scored an own-goal, giving the other team" + 
+                  (getGame()->getTeamCount() == 2 ? "" : "s") + " a point!";
    }
 
 
@@ -92,7 +93,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(SoccerGameType, s2cSoccerScoreMessage,
    if(!clientGame) return;
 
    // Print the message
-   clientGame->mGameUserInterface->displayMessage(Color(0.6f, 1.0f, 0.8f), msg.c_str());
+   clientGame->getUserInterface()->displayMessage(Color(0.6f, 1.0f, 0.8f), msg.c_str());
 }
 
 
@@ -231,8 +232,8 @@ void SoccerGameType::itemDropped(Ship *ship, Item *item)
    Vector<StringTableEntry> e;
    e.push_back(ship->getName());
 
-   for(S32 i = 0; i < mClientList.size(); i++)
-      mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagDrop, dropString, e);
+   for(S32 i = 0; i < getClientCount(); i++)
+      getClient(i)->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagDrop, dropString, e);
 }
 
 
@@ -329,7 +330,7 @@ bool SoccerBallItem::processArguments(S32 argc, const char **argv, Game *game)
    initialPos = mMoveState[ActualState].pos;
 
    // Add the ball's starting point to the list of flag spawn points
-   gServerGame->getGameType()->mFlagSpawnPoints.push_back(FlagSpawn(initialPos, 0));
+   gServerGame->getGameType()->addFlagSpawn(FlagSpawn(initialPos, 0));
 
    return true;
 }
@@ -484,10 +485,10 @@ void SoccerBallItem::sendHome()
    // In soccer game, we use flagSpawn points to designate where the soccer ball should spawn.
    // We'll simply redefine "initial pos" as a random selection of the flag spawn points
 
-   Vector<FlagSpawn> spawnPoints = getGame()->getGameType()->mFlagSpawnPoints;
+   const Vector<FlagSpawn> *spawnPoints = getGame()->getGameType()->getFlagSpawns();
 
-   S32 spawnIndex = TNL::Random::readI() % spawnPoints.size();
-   initialPos = spawnPoints[spawnIndex].getPos();
+   S32 spawnIndex = TNL::Random::readI() % spawnPoints->size();
+   initialPos = spawnPoints->get(spawnIndex).getPos();
 
    mMoveState[ActualState].pos = mMoveState[RenderState].pos = initialPos;
    mMoveState[ActualState].vel = mMoveState[RenderState].vel = Point(0,0);

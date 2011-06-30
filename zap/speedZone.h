@@ -94,9 +94,9 @@ public:
    string toString();
 
    void onAddedToGame(Game *theGame);
-   void computeExtent();                                             // Bounding box for quick collision-possibility elimination
+   void computeExtent();                                            // Bounding box for quick collision-possibility elimination
 
-   bool getCollisionPoly(Vector<Point> &polyPoints);  // More precise boundary for precise collision detection
+   bool getCollisionPoly(Vector<Point> &polyPoints) const;          // More precise boundary for precise collision detection
    bool collide(GameObject *hitObject);
    void collided(MoveObject *s, U32 stateIndex);
    void idle(GameObject::IdleCallPath path);

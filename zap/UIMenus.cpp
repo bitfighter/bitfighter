@@ -252,7 +252,7 @@ void MenuUserInterface::render()
    // Draw the game screen, then dim it out so you can still see it under our overlay
    if(gClientGame->getConnectionToServer())
    {
-      gClientGame->mGameUserInterface->render();
+      gClientGame->getUserInterface()->render();
       glColor4f(0, 0, 0, 0.6);
 
       glEnableBlend;
@@ -1376,8 +1376,8 @@ void GameMenuUserInterface::onEscape()
    reactivatePrevUI();      //mGameUserInterface
 
    // Show alert about input mode changing, if needed
-   if(gClientGame->getGameType())
-      gClientGame->getGameType()->mInputModeChangeAlertDisplayTimer.reset((lastInputMode == gIniSettings.inputMode) ? 0 : 2800);
+   bool inputModesChanged = lastInputMode == gIniSettings.inputMode;
+   gClientGame->getUserInterface()->resetInputModeChangeAlertDisplayTimer(inputModesChanged ? 0 : 2800);
 
 }
 
@@ -1493,14 +1493,14 @@ void LevelMenuSelectUserInterface::processSelection(U32 index)
    {
       string filename = strictjoindir(gConfigDirs.levelDir, mLevels[index & (~UPLOAD_LEVELS_BIT)]);
       if(! gc->s2rUploadFile(filename.c_str(),1))
-         gClientGame->mGameUserInterface->displayErrorMessage("Can't upload level: unable to read file");
+         gClientGame->getUserInterface()->displayErrorMessage("Can't upload level: unable to read file");
    }
    else
    {
       // The selection index is the level to load
       gc->c2sRequestLevelChange(index, false);
    }
-   reactivateMenu(*gClientGame->mGameUserInterface);    // Jump back to the game menu
+   reactivateMenu(gClientGame->getUserInterface());    // Jump back to the game menu
 }
 
 
@@ -1626,8 +1626,8 @@ void PlayerMenuUserInterface::playerSelected(U32 index)
       gc->c2sAdminPlayerAction(e, action, -1);
    }
 
-   if(action != ChangeTeam)                     // Unless we need to move on to the change team screen...
-      reactivateMenu(*gClientGame->mGameUserInterface);       // ...it's back to the game!
+   if(action != ChangeTeam)                              // Unless we need to move on to the change team screen...
+      reactivateMenu(gClientGame->getUserInterface());   // ...it's back to the game!
 }
 
 
@@ -1644,15 +1644,17 @@ void PlayerMenuUserInterface::render()
       return;
 
    char c[] = "A";      // Dummy shortcut key
-   for(S32 i = 0; i < gt->mClientList.size(); i++)
+   for(S32 i = 0; i < gt->getClientCount(); i++)
    {
-      strncpy(c, gt->mClientList[i]->name.getString(), 1);        // Grab first char of name for a shortcut key
+      RefPtr<ClientRef> client = gt->getClient(i);
+
+      strncpy(c, client->name.getString(), 1);        // Grab first char of name for a shortcut key
 
       // Will be used to show admin/player/robot prefix on menu
-      PlayerType pt = gt->mClientList[i]->isRobot ? PlayerTypeRobot : (gt->mClientList[i]->isAdmin ? PlayerTypeAdmin : PlayerTypePlayer);    
+      PlayerType pt = client->isRobot ? PlayerTypeRobot : (client->isAdmin ? PlayerTypeAdmin : PlayerTypePlayer);    
 
-      menuItems.push_back(new PlayerMenuItem(i, gt->mClientList[i]->name.getString(), playerSelectedCallback, stringToKeyCode(c), pt));
-      menuItems.last()->setUnselectedColor(gt->getTeamColor(gt->mClientList[i]->getTeam()));
+      menuItems.push_back(new PlayerMenuItem(i, client->name.getString(), playerSelectedCallback, stringToKeyCode(c), pt));
+      menuItems.last()->setUnselectedColor(gt->getTeamColor(client->getTeam()));
    }
 
    menuItems.sort(menuItemValueSort);
@@ -1710,7 +1712,7 @@ void TeamMenuUserInterface::processSelection(U32 index)
       }
    }
 
-   reactivateMenu(*gClientGame->mGameUserInterface);    // Back to the game!
+   reactivateMenu(gClientGame->getUserInterface());    // Back to the game!
 }
 
 
@@ -1723,22 +1725,25 @@ void TeamMenuUserInterface::render()
    if (!gt)
       return;
 
+   ClientGame *game = (ClientGame *)gt->getGame();
+
    gt->countTeamPlayers();    // Make sure numPlayers is correctly populated
 
    char c[] = "A";      // Dummy shortcut key, will change below
-   for(S32 i = 0; i < gt->mTeams.size(); i++)
+   for(S32 i = 0; i < game->getTeamCount(); i++)
    {
-      strncpy(c, gt->mTeams[i].getName().getString(), 1);     // Grab first char of name for a shortcut key
+      AbstractTeam *team = game->getTeam(i);
+      strncpy(c, team->getName().getString(), 1);     // Grab first char of name for a shortcut key
 
       bool isCurrent = (i == gt->getTeam(nameToChange.c_str()));
       
-      menuItems.push_back(new TeamMenuItem(i, gt->mTeams[i], processTeamSelectionCallback, stringToKeyCode(c), isCurrent));
+      menuItems.push_back(new TeamMenuItem(i, team, processTeamSelectionCallback, stringToKeyCode(c), isCurrent));
    }
 
    string name = "";
-   if(gClientGame->getConnectionToServer() && gClientGame->getConnectionToServer()->getControlObject())
+   if(gClientGame->getConnectionToServer() && game->getConnectionToServer()->getControlObject())
    {
-      Ship *ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
+      Ship *ship = dynamic_cast<Ship *>(game->getConnectionToServer()->getControlObject());
       if(ship)
          name = ship->getName().getString();
    }

@@ -74,7 +74,7 @@ public:
    S32 getRenderSortValue() { return 0; }
 
    /// returns the collision polygon of this barrier, which is the boundary extruded from the start,end line segment.
-   bool getCollisionPoly(Vector<Point> &polyPoints);
+   bool getCollisionPoly(Vector<Point> &polyPoints) const;
 
    /// collide always returns true for Barrier objects.
    bool collide(GameObject *otherObject) { return true; }
@@ -219,8 +219,8 @@ public:
    // Note that the poly returned here is different than what you might expect -- it is composed of the edges,
    // not the corners, and is thus in A-B, C-D, E-F format rather than the more typical A-B-C-D format returned
    // by getCollisionPoly() elsewhere in the game.  Therefore, it needs to be handled differently.
-   bool getCollisionPoly(Vector<Point> &polyPoints) { polyPoints = edges; return true; }  
-   bool getCollisionCircle(U32 stateIndex, Point &point, float &radius) { return false; }
+   bool getCollisionPoly(Vector<Point> &polyPoints) const { polyPoints = edges; return true; }  
+   bool getCollisionCircle(U32 stateIndex, Point &point, float &radius) const { return false; }
 };
 
 
@@ -251,8 +251,8 @@ public:
    // Note that the poly returned here is different than what you might expect -- it is composed of the edges,
    // not the corners, and is thus in A-B, C-D, E-F format rather than the more typical A-B-C-D format returned
    // by getCollisionPoly() elsewhere in the game.  Therefore, it needs to be handled differently.
-   bool getCollisionPoly(Vector<Point> &polyPoints) { polyPoints.resize(2); polyPoints[0] = mStart; polyPoints[1] = mEnd; return true; }  
-   bool getCollisionCircle(U32 stateIndex, Point &point, float &radius) { return false; }
+   bool getCollisionPoly(Vector<Point> &polyPoints) const { polyPoints.resize(2); polyPoints[0] = mStart; polyPoints[1] = mEnd; return true; }  
+   bool getCollisionCircle(U32 stateIndex, Point &point, float &radius) const { return false; }
 };
 
 

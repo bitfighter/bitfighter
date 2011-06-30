@@ -46,40 +46,40 @@ TNL_IMPLEMENT_NETOBJECT_RPC(RabbitGameType, s2cRabbitMessage, (U32 msgIndex, Str
    {
    case RabbitMsgGrab:
       SoundSystem::playSoundEffect(SFXFlagCapture);
-      clientGame->mGameUserInterface->displayMessage(Color(1.0f, 0.0f, 0.0f),
+      clientGame->getUserInterface()->displayMessage(Color(1.0f, 0.0f, 0.0f),
                   "%s GRABBED the Carrot!",
                   clientName.getString());
       break;
    case RabbitMsgRabbitKill:
       SoundSystem::playSoundEffect(SFXShipHeal);
-      clientGame->mGameUserInterface->displayMessage(Color(1.0f, 0.0f, 0.0f),
+      clientGame->getUserInterface()->displayMessage(Color(1.0f, 0.0f, 0.0f),
                   "%s is a rabbid rabbit!",
                   clientName.getString());
       break;
    case RabbitMsgDrop:
       SoundSystem::playSoundEffect(SFXFlagDrop);
-      clientGame->mGameUserInterface->displayMessage(Color(0.0f, 1.0f, 0.0f),
+      clientGame->getUserInterface()->displayMessage(Color(0.0f, 1.0f, 0.0f),
                   "%s DROPPED the Carrot!",
                   clientName.getString());
       break;
    case RabbitMsgRabbitDead:
       SoundSystem::playSoundEffect(SFXShipExplode);
-      clientGame->mGameUserInterface->displayMessage(Color(1.0f, 0.0f, 0.0f),
+      clientGame->getUserInterface()->displayMessage(Color(1.0f, 0.0f, 0.0f),
                   "%s killed the rabbit!",
                   clientName.getString());
       break;
    case RabbitMsgReturn:
       SoundSystem::playSoundEffect(SFXFlagReturn);
-      clientGame->mGameUserInterface->displayMessage(Color(1.0f, 0.0f, 1.0f),
+      clientGame->getUserInterface()->displayMessage(Color(1.0f, 0.0f, 1.0f),
                   "The Carrot has been returned!");
       break;
    case RabbitMsgGameOverWin:
-      clientGame->mGameUserInterface->displayMessage(Color(1.0f, 1.0f, 0.0f),
+      clientGame->getUserInterface()->displayMessage(Color(1.0f, 1.0f, 0.0f),
                   "%s is the top rabbit!",
                   clientName.getString());
       break;
    case RabbitMsgGameOverTie:
-      clientGame->mGameUserInterface->displayMessage(Color(1.0f, 1.0f, 0.0f),
+      clientGame->getUserInterface()->displayMessage(Color(1.0f, 1.0f, 0.0f),
                   "No top rabbit - Carrot wins by default!");
       break;
    }
@@ -117,7 +117,7 @@ void RabbitGameType::addGameSpecificParameterMenuItems(Vector<MenuItem *> &menuI
 
 bool RabbitGameType::objectCanDamageObject(GameObject *damager, GameObject *victim)
 {
-   if(mTeams.size() != 1)
+   if(getGame()->getTeamCount() != 1)
 	   return Parent::objectCanDamageObject(damager, victim);
 
    if(!damager)
@@ -141,26 +141,24 @@ bool RabbitGameType::objectCanDamageObject(GameObject *damager, GameObject *vict
 
 
 // Works for ships and robots!  --> or does it?  Was a template, but it wasn't working for regular ships, haven't tested with robots
-Color RabbitGameType::getShipColor(Ship *s)
+const Color *RabbitGameType::getShipColor(Ship *s)
 {
-   if(mTeams.size() != 1)
+   if(getGame()->getTeamCount() != 1)
 	   return Parent::getShipColor(s);
 
    GameConnection *gc = gClientGame->getConnectionToServer();
    if(!gc)
-      return Color();
+      return &Colors::white;     // Something's gone wrong!
+
    Ship *co = dynamic_cast<Ship *>(gc->getControlObject());
 
-   if(s == co || (!shipHasFlag(s) && !shipHasFlag(co)))
-      return Colors::green;
-   // else
-   return Colors::red;
+   return (s == co || (!shipHasFlag(s) && !shipHasFlag(co)))  ?  &Colors::green  :  &Colors::red;
 }
 
 
 Color RabbitGameType::getTeamColor(S32 team)
 {
-   if(team != -1 || mTeams.size() != 1)
+   if(team != -1 || getGame()->getTeamCount() != 1)
 	   return Parent::getTeamColor(team);
 
    return Color(1, 0.5, 0);      // orange neutral team, so the neutral flag is orange.
@@ -212,9 +210,11 @@ void RabbitGameType::idle(GameObject::IdleCallPath path)
             if(!mRabbitFlag->isAtHome() && mRabbitFlag->mTimer.update(deltaT))
             {
                mRabbitFlag->sendHome();
+
                static StringTableEntry returnString("The carrot has been returned!");
-               for (S32 i = 0; i < mClientList.size(); i++)
-                  mClientList[i]->clientConnection->s2cDisplayMessageE( GameConnection::ColorNuclearGreen, SFXFlagReturn, returnString, Vector<StringTableEntry>() );
+
+               for(S32 i = 0; i < getClientCount(); i++)
+                  getClient(i)->clientConnection->s2cDisplayMessageE( GameConnection::ColorNuclearGreen, SFXFlagReturn, returnString, Vector<StringTableEntry>() );
             }
          }
       }
@@ -264,15 +264,11 @@ void RabbitGameType::shipTouchFlag(Ship *ship, FlagItem *flag)
 }
 
 
-bool RabbitGameType::teamHasFlag(S32 teamId)
+bool RabbitGameType::teamHasFlag(S32 teamId) const
 {
    for(S32 i = 0; i < mFlags.size(); i++)
-   {
-      //TNLAssert(mFlags[i], "NULL flag");
-      if(mFlags[i])
-         if(mFlags[i]->isMounted() && mFlags[i]->getMount() && mFlags[i]->getMount()->getTeam() == (S32)teamId)
-            return true;
-   }
+      if(mFlags[i] && mFlags[i]->isMounted() && mFlags[i]->getMount() && mFlags[i]->getMount()->getTeam() == (S32)teamId)
+         return true;
 
    return false;
 }

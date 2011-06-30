@@ -96,7 +96,16 @@ void TeamDefUserInterface::onActivate()
 {
    selectedIndex = 0;                     // First item selected when we begin
    mEditing = false;                      // Not editing anything by default
-   gEditorUserInterface.mOldTeams = gEditorUserInterface.mTeams;
+
+   S32 teamCount = gEditorGame->getTeamCount();
+   gEditorUserInterface.mOldTeams.clear();
+   gEditorUserInterface.mOldTeams.reserve(teamCount);    // To avoid unnecessary reallocations
+
+   for(S32 i = 0; i < teamCount; i++)
+   {
+      TeamEditor team = *((TeamEditor *)gEditorGame->getTeam(i));    // Makes a copy of team, puts it in oldTeams
+      gEditorUserInterface.mOldTeams.push_back(team);   
+   }
 
    // Display an intitial message to users
    errorMsgTimer.reset(errorMsgDisplayTime);
@@ -115,6 +124,7 @@ void TeamDefUserInterface::idle(U32 timeDelta)
 
 extern Color gNeutralTeamColor;
 extern Color gHostileTeamColor;
+extern EditorGame *gEditorGame;
 
 // TODO: Clean this up a bit...  this menu was two-cols before, and some of that garbage is still here...
 void TeamDefUserInterface::render()
@@ -135,7 +145,7 @@ void TeamDefUserInterface::render()
    glColor3f(1, 1, 1);
    drawCenteredString(canvasHeight - vertMargin - 20, 18, "Arrow Keys to choose | ESC to exit");
 
-   S32 size = gEditorUserInterface.mTeams.size();
+   S32 size = gEditorGame->getTeamCount();
 
    if(selectedIndex >= size)
       selectedIndex = 0;
@@ -165,29 +175,29 @@ void TeamDefUserInterface::render()
             glEnd();
          }
 
-      if(j < gEditorUserInterface.mTeams.size())
+         if(j < gEditorGame->getTeamCount())
       {
          char numstr[10];
          dSprintf(numstr, sizeof(numstr), "Team %d: ", j+1);
 
          char namestr[MAX_NAME_LEN + 20];    // Added a little extra, just to cover any contingency...
-         dSprintf(namestr, sizeof(namestr), "%s%s", numstr, gEditorUserInterface.mTeams[j].getName().getString());
+         dSprintf(namestr, sizeof(namestr), "%s%s", numstr, gEditorGame->getTeam(j)->getName().getString());
 
          char colorstr[16];                  // "(100, 100, 100)" + 1 for null
-         dSprintf(colorstr, sizeof(colorstr), "(%d, %d, %d)", S32(gEditorUserInterface.mTeams[j].color.r * 100),
-                                                              S32(gEditorUserInterface.mTeams[j].color.g * 100),
-                                                              S32(gEditorUserInterface.mTeams[j].color.b * 100));
+         const Color *color = gEditorGame->getTeamColor(j);
+         dSprintf(colorstr, sizeof(colorstr), "(%d, %d, %d)", S32(color->r * 100), S32(color->g * 100), S32(color->b * 100));
+         
          static const char *nameColorStr = "%s  %s";
 
          // Draw item text
-         glColor(gEditorUserInterface.mTeams[j].color);
+         glColor(color);
          drawCenteredStringf(y, fontsize, nameColorStr, namestr, colorstr);
 
          // Draw cursor if we're editing
          if(mEditing && j == selectedIndex)
          {
             S32 x = getCenteredStringStartingPosf(fontsize, nameColorStr, namestr, colorstr) + getStringWidth(fontsize, numstr);
-            gEditorUserInterface.mTeams[j].getLineEditor()->drawCursor(x, y, fontsize);
+            ((TeamEditor *)(gEditorGame->getTeam(j)))->getLineEditor()->drawCursor(x, y, fontsize);
          }
       }
    }
@@ -229,112 +239,83 @@ void TeamDefUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    {
       mEditing = !mEditing;
       if(mEditing)
-         origName = gEditorUserInterface.mTeams[selectedIndex].getName().getString();
+         origName = gEditorGame->getTeam(selectedIndex)->getName().getString();
    }
    else if(mEditing)                // Editing, send keystroke to editor
    {
       if(keyCode == KEY_ESCAPE)     // Stop editing, and restore the original value
       {
-         gEditorUserInterface.mTeams[selectedIndex].setName(origName.c_str());
+         gEditorGame->getTeam(selectedIndex)->setName(origName.c_str());
          mEditing = false;
       }
       else if(keyCode == KEY_BACKSPACE || keyCode == KEY_DELETE)
-         gEditorUserInterface.mTeams[selectedIndex].getLineEditor()->handleBackspace(keyCode);
+         ((TeamEditor *)gEditorGame->getTeam(selectedIndex))->getLineEditor()->handleBackspace(keyCode);
       else if(isPrintable(ascii))
-         gEditorUserInterface.mTeams[selectedIndex].getLineEditor()->addChar(ascii);
+         ((TeamEditor *)gEditorGame->getTeam(selectedIndex))->getLineEditor()->addChar(ascii);
    }
    else if(ascii >= '1' && ascii <= '9')        // Keys 1-9 --> use preset
    {
       if(getKeyState(KEY_ALT))      // Replace all teams with # of teams based on presets
       {
          U32 count = (ascii - '0');
-         gEditorUserInterface.mTeams.clear();
+         gEditorGame->clearTeams();
          for(U32 i = 0; i < count; i++)
          {
-            TeamEditor t;
-            t.setName(gTeamPresets[i].name);
-            t.color.set(gTeamPresets[i].r, gTeamPresets[i].g, gTeamPresets[i].b);
-            gEditorUserInterface.mTeams.push_back(t);
+            boost::shared_ptr<AbstractTeam> team = boost::shared_ptr<TeamEditor>(new TeamEditor);
+            team->setName(gTeamPresets[i].name);
+            team->setColor(gTeamPresets[i].r, gTeamPresets[i].g, gTeamPresets[i].b);
+            gEditorGame->addTeam(team);
          }
       }
       else                          // Replace selection with preset of number pressed
       {
          U32 indx = (ascii - '1');
-         gEditorUserInterface.mTeams[selectedIndex].setName(gTeamPresets[indx].name);
-         gEditorUserInterface.mTeams[selectedIndex].color.set(gTeamPresets[indx].r, gTeamPresets[indx].g, gTeamPresets[indx].b);
+         gEditorGame->getTeam(selectedIndex)->setName(gTeamPresets[indx].name);
+         gEditorGame->getTeam(selectedIndex)->setColor(gTeamPresets[indx].r, gTeamPresets[indx].g, gTeamPresets[indx].b);
       }
    }
 
    else if(keyCode == KEY_DELETE || keyCode == KEY_MINUS)            // Del or Minus - Delete current team
    {
-      if (gEditorUserInterface.mTeams.size() == 1) {
+      if(gEditorGame->getTeamCount() == 1) 
+      {
          errorMsgTimer.reset(errorMsgDisplayTime);
          errorMsg = "There must be at least one team";
          return;
       }
 
-      gEditorUserInterface.mTeams.erase(selectedIndex);
-      if(selectedIndex >= gEditorUserInterface.mTeams.size())
-         selectedIndex = gEditorUserInterface.mTeams.size() - 1;
+      gEditorGame->removeTeam(selectedIndex);
+      if(selectedIndex >= gEditorGame->getTeamCount())
+         selectedIndex = gEditorGame->getTeamCount() - 1;
    }
   
    else if(keyCode == KEY_INSERT || keyCode == KEY_EQUALS)           // Ins or Plus (equals) - Add new item
    {
       S32 maxTeams = GameType::gMaxTeams;    // A bit pedantic, perhaps, but using this fixes an odd link error in Linux
-      if(gEditorUserInterface.mTeams.size() >= maxTeams)
+      if(gEditorGame->getTeamCount() >= maxTeams)
       {
          errorMsgTimer.reset(errorMsgDisplayTime);
          errorMsg = "Too many teams for this interface";
          return;
       }
-      gEditorUserInterface.mTeams.insert(selectedIndex);
 
-      gEditorUserInterface.mTeams[selectedIndex].setName(gTeamPresets[selectedIndex].name);
-      gEditorUserInterface.mTeams[selectedIndex].color.set(gTeamPresets[selectedIndex].r, gTeamPresets[selectedIndex].g, gTeamPresets[selectedIndex].b);
+      boost::shared_ptr<AbstractTeam> team = boost::shared_ptr<TeamEditor>(new TeamEditor);
+      team->setName(gTeamPresets[selectedIndex].name);
+      team->setColor(gTeamPresets[selectedIndex].r, gTeamPresets[selectedIndex].g, gTeamPresets[selectedIndex].b);
+      gEditorGame->addTeam(team, selectedIndex);
 
       if(selectedIndex < 0)      // It can happen with too many deletes
          selectedIndex = 0;
    }
 
    else if(keyCode == KEY_R)
-      if(getKeyState(KEY_SHIFT))
-      {
-         gEditorUserInterface.mTeams[selectedIndex].color.r -= .01;
-         if(gEditorUserInterface.mTeams[selectedIndex].color.r < 0)
-            gEditorUserInterface.mTeams[selectedIndex].color.r = 0;
-      }
-      else
-      {
-         gEditorUserInterface.mTeams[selectedIndex].color.r += .01;
-         if (gEditorUserInterface.mTeams[selectedIndex].color.r > 1)
-            gEditorUserInterface.mTeams[selectedIndex].color.r = 1;
-      }
+      gEditorGame->getTeam(selectedIndex)->alterRed(getKeyState(KEY_SHIFT) ? -.01 : .01);
+
    else if(keyCode == KEY_G)
-      if(getKeyState(KEY_SHIFT))
-      {
-         gEditorUserInterface.mTeams[selectedIndex].color.g -= .01;
-         if(gEditorUserInterface.mTeams[selectedIndex].color.g < 0)
-            gEditorUserInterface.mTeams[selectedIndex].color.g = 0;
-      }
-      else
-      {
-         gEditorUserInterface.mTeams[selectedIndex].color.g += .01;
-         if (gEditorUserInterface.mTeams[selectedIndex].color.g > 1)
-            gEditorUserInterface.mTeams[selectedIndex].color.g = 1;
-      }
+      gEditorGame->getTeam(selectedIndex)->alterGreen(getKeyState(KEY_SHIFT) ? -.01 : .01);
+
    else if(keyCode == KEY_B)
-      if(getKeyState(KEY_SHIFT))
-      {
-         gEditorUserInterface.mTeams[selectedIndex].color.b -= .01;
-         if(gEditorUserInterface.mTeams[selectedIndex].color.b < 0)
-            gEditorUserInterface.mTeams[selectedIndex].color.b = 0;
-      }
-      else
-      {
-         gEditorUserInterface.mTeams[selectedIndex].color.b += .01;
-         if (gEditorUserInterface.mTeams[selectedIndex].color.b > 1)
-            gEditorUserInterface.mTeams[selectedIndex].color.b = 1;
-      }
+      gEditorGame->getTeam(selectedIndex)->alterBlue(getKeyState(KEY_SHIFT) ? -.01 : .01);
 
    else if(keyCode == KEY_ESCAPE || keyCode == BUTTON_BACK)       // Quit
    {
@@ -345,7 +326,7 @@ void TeamDefUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    {
       selectedIndex--;
       if(selectedIndex < 0)
-         selectedIndex = gEditorUserInterface.mTeams.size() - 1;
+         selectedIndex = gEditorGame->getTeamCount() - 1;
       UserInterface::playBoop();
       SDL_ShowCursor(SDL_DISABLE);
 
@@ -353,7 +334,7 @@ void TeamDefUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    else if(keyCode == KEY_DOWN || keyCode == BUTTON_DPAD_DOWN)    // Next item
    {
       selectedIndex++;
-      if(selectedIndex >= gEditorUserInterface.mTeams.size())
+      if(selectedIndex >= gEditorGame->getTeamCount())
          selectedIndex = 0;
       UserInterface::playBoop();
       SDL_ShowCursor(SDL_DISABLE);
@@ -370,7 +351,7 @@ void TeamDefUserInterface::onMouseMoved(S32 x, S32 y)
 {
    SDL_ShowCursor(SDL_ENABLE);  // TODO:  was GLUT_CURSOR_RIGHT_ARROW  // Show cursor when user moves mouse
 
-   S32 teams = gEditorUserInterface.mTeams.size();
+   S32 teams = gEditorGame->getTeamCount();
 
    selectedIndex = (S32)((gScreenInfo.getMousePos()->y - yStart + 6) / (fontsize + fontgap)) - 2; 
 

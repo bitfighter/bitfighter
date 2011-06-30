@@ -207,7 +207,7 @@ void GameParamUserInterface::updateMenuItems(GameType *gameType)
 
 
    MenuItem *item = new EditableMenuItem("Level Name:", 
-                                         gEditorGame->getGameType()->mLevelName.getString(),
+                                         gEditorGame->getGameType()->getLevelName()->getString(),
                                          "", 
                                          "The level's name -- pick a good one!",  
                                          MAX_GAME_NAME_LEN);   
@@ -217,15 +217,15 @@ void GameParamUserInterface::updateMenuItems(GameType *gameType)
    
 
    menuItems.push_back(new EditableMenuItem("Level Descr:", 
-                                            gEditorGame->getGameType()->mLevelDescription.getString(), 
+                                            gEditorGame->getGameType()->getLevelDescription()->getString(), 
                                             "", 
                                             "A brief description of the level",                     
                                             MAX_GAME_DESCR_LEN));
    OPT_LEVEL_DESCR = menuItems.size() - 1;
    
 
-   menuItems.push_back(new EditableMenuItem("Level By:", 
-                                            gEditorGame->getGameType()->mLevelCredits.getString(), 
+   menuItems.push_back(new EditableMenuItem("Level By:",       
+                                            gEditorGame->getGameType()->getLevelCredits()->getString(), 
                                             "", 
                                             "Who created this level",                                  
                                             MAX_GAME_DESCR_LEN));

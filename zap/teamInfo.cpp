@@ -33,19 +33,60 @@ namespace Zap
 //U32 Team::mNextId = 0; // ???  when does it go back to zero?
 
 // Read team from level file params
-void AbstractTeam::readTeamFromLevelLine(S32 argc, const char **argv)
+bool AbstractTeam::readTeamFromLevelLine(S32 argc, const char **argv)
 {
-   if(argc < 5)                        // Enough arguments?
-   {
-      numPlayers = -1;            // Signal that this is a bogus object
-      return;
-   }
-
-   numPlayers = 0;
-   numBots = 0;
+   if(argc < 5)               // Not enough arguments!
+      return false;
 
    setName(argv[1]);
-   color.read(argv + 2);
+   mColor.read(argv + 2);
+
+   return true;
+}
+
+
+void AbstractTeam::alterRed(F32 amt) 
+{
+   mColor.r += amt;
+
+   if(mColor.r < 0)
+      mColor.r = 0;
+   else if(mColor.r > 1)
+      mColor.r = 1;
+}
+
+
+void AbstractTeam::alterGreen(F32 amt) 
+{
+   mColor.g += amt;
+
+   if(mColor.g < 0)
+      mColor.g = 0;
+   else if(mColor.g > 1)
+      mColor.g = 1;
+}
+
+
+void AbstractTeam::alterBlue(F32 amt) 
+{
+   mColor.b += amt;
+
+   if(mColor.b < 0)
+      mColor.b = 0;
+   else if(mColor.b > 1)
+      mColor.b = 1;
+}
+
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+void Team::clearStats()
+{
+   mPlayerCount = 0;
+   mBotCount = 0;
+   mRating = 0;
 }
 
 
@@ -74,24 +115,24 @@ LuaTeamInfo::LuaTeamInfo(lua_State *L)
    checkArgCount(L, 1, methodName);
 
    // Lua thinks first team has index 1... we know better, but we need to play along...
-   U32 teamIndx = (U32) getInt(L, 1, methodName, 1, gServerGame->getGameType()->mTeams.size()) - 1;
+   U32 teamIndx = (U32) getInt(L, 1, methodName, 1, gServerGame->getTeamCount()) - 1;
 
-   mTeam = gServerGame->getGameType()->mTeams[teamIndx];
+   mTeam = (Team *)gServerGame->getTeam(teamIndx);
    mTeamIndex = teamIndx;
 }
 
 
 // C++ constructor
-LuaTeamInfo::LuaTeamInfo(Team team)
+LuaTeamInfo::LuaTeamInfo(Team *team)
 {
    mTeam = team;
 
-   const char *teamName = team.getName().getString();
+   const char *teamName = team->getName().getString();
 
-   Vector<Team> teams = gServerGame->getGameType()->mTeams;
+   Vector<shared_ptr<Team> > teams = gServerGame->getTeamCount();
 
-   for(S32 i = 0; i < teams.size(); i++)
-      if(!strcmp(teams[i].getName().getString(), teamName))
+   for(S32 i = 0; i < gServerGame->getTeamCount(); i++)
+      if(!strcmp(gServerGame->getTeam(i)->getName().getString(), teamName))
       {
          mTeamIndex = i;
          break;
@@ -106,30 +147,30 @@ LuaTeamInfo::~LuaTeamInfo()
 
 
 // We'll add 1 to the index to allow the first team in Lua to have index of 1, and the first team in C++ to have an index of 0
-S32 LuaTeamInfo::getIndex(lua_State *L) { return returnInt(L, mTeamIndex + 1); }                  // getTeamIndex() ==> return team's index (returns int)
-S32 LuaTeamInfo::getName(lua_State *L)  { return returnString(L, mTeam.getName().getString()); }  // getTeamName() ==> return team name (returns string)
-S32 LuaTeamInfo::getScore(lua_State *L) { return returnInt(L, mTeam.getScore()); }                // getScore() ==> return team score (returns int)
+S32 LuaTeamInfo::getIndex(lua_State *L) { return returnInt(L, mTeamIndex + 1); }                   // getTeamIndex() ==> return team's index (returns int)
+S32 LuaTeamInfo::getName(lua_State *L)  { return returnString(L, mTeam->getName().getString()); }  // getTeamName() ==> return team name (returns string)
+S32 LuaTeamInfo::getScore(lua_State *L) { return returnInt(L, mTeam->getScore()); }                // getScore() ==> return team score (returns int)
 
 
 S32 LuaTeamInfo::getPlayerCount(lua_State *L)         // number getPlayerCount() ==> return player count
 {
    gServerGame->getGameType()->countTeamPlayers();    // Make sure player counts are up-to-date
-   return returnInt(L, mTeam.numPlayers + mTeam.numBots);
+   return returnInt(L, mTeam->getPlayerBotCount());
 }
 
 
 // Return a table listing all players on this team
 S32 LuaTeamInfo::getPlayers(lua_State *L)
 {
-   TNLAssert(gServerGame->getPlayerCount() == gServerGame->getGameType()->mClientList.size(), "Mismatched player counts!");
+   TNLAssert(gServerGame->getPlayerCount() == gServerGame->getGameType()->getClientCount(), "Mismatched player counts!");
 
    S32 pushed = 0;
 
    lua_newtable(L);    // Create a table, with no slots pre-allocated for our data
 
-   for(S32 i = 0; i < gServerGame->getGameType()->mClientList.size(); i++)
+   for(S32 i = 0; i < gServerGame->getGameType()->getClientCount(); i++)
    {
-      ClientRef *clientRef = gServerGame->getGameType()->mClientList[i];
+      ClientRef *clientRef = gServerGame->getGameType()->getClient(i);
 
       if(clientRef->getTeam() == mTeamIndex)
       {

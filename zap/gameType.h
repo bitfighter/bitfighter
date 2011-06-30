@@ -115,17 +115,38 @@ class GameType : public GameObject
 
 private:
    Point getSpawnPoint(S32 team);         // Picks a spawn point for ship or robot
-   virtual U32 getLowerRightCornerScoreboardOffsetFromBottom() { return 60; }      // Game-specific location for the bottom of the scoreboard on the lower-right corner
-                                                                                   // (because games like hunters have more stuff down there we need to look out for)
+
    Vector<SafePtr<Object> > mSpyBugs;    // List of all spybugs in the game, could be added and destroyed in-game
    bool mLevelHasLoadoutZone;
    bool mEngineerEnabled;
    bool mShowAllBots;
    U32 mTotalGamePlay;
 
+   Vector<RefPtr<ClientRef> > mClientList;
+
    Vector<BarrierRec> mBarriers;
 
    void sendChatDisplayEvent(ClientRef *clientRef, bool global, const char *message, NetEvent *theEvent);      // In-game chat message
+
+   StringTableEntry mLevelName;
+   StringTableEntry mLevelDescription;
+   StringTableEntry mLevelCredits;
+
+   S32 mWinningScore;               // Game over when team (or player in individual games) gets this score
+   S32 mLeadingTeam;                // Team with highest score
+   S32 mLeadingTeamScore;           // Score of mLeadingTeam
+   S32 mDigitsNeededToDisplayScore; // Digits needed to display scores
+
+   bool mCanSwitchTeams;            // Player can switch teams when this is true, not when it is false
+   bool mBetweenLevels;             // We'll need to prohibit certain things (like team changes) when game is in an "intermediate" state
+   bool mGameOver;                  // Set to true when an end condition is met
+
+   Vector<FlagSpawn> mFlagSpawnPoints;           // List of non-team specific spawn points for flags
+   Vector<AsteroidSpawn> mAsteroidSpawnPoints;   // List of spawn points for asteroids
+
+   Timer mGameTimer;                // Track when current game will end
+   Timer mScoreboardUpdateTimer;    
+   Timer mGameTimeUpdateTimer;
 
 public:
    enum GameTypes
@@ -176,19 +197,25 @@ public:
    static const char *validateGameType(const char *gtype);           // Returns a valid gameType, defaulting to gDefaultGameTypeIndex if needed
 
    virtual GameTypes getGameType() { return BitmatchGame; }
-   virtual const char *getGameTypeString() { return "Bitmatch"; }                            // Will be overridden by other games
-   virtual const char *getShortName() { return "BM"; }                                       //          -- ditto --
-   virtual const char *getInstructionString() { return "Blast as many ships as you can!"; }  //          -- ditto --
-   virtual bool isTeamGame() { return mTeams.size() > 1; }                                   // Team game if we have teams.  Otherwise it's every man for himself.
+   virtual const char *getGameTypeString() const { return "Bitmatch"; }                            // Will be overridden by other games
+   virtual const char *getShortName() const { return "BM"; }                                             //          -- ditto --
+   virtual const char *getInstructionString() const { return "Blast as many ships as you can!"; }  //          -- ditto --
+   virtual bool isTeamGame() const { return mGame->getTeamCount() > 1; }                           // Team game if we have teams.  Otherwise it's every man for himself.
    virtual bool canBeTeamGame() { return true; }
    virtual bool canBeIndividualGame() { return true; }
-   virtual bool teamHasFlag(S32 teamId) { return false; }
-   S32 getWinningScore() { return mWinningScore; }
-   U32 getTotalGameTime() { return (mGameTimer.getPeriod() / 1000); }      // In seconds
-   S32 getRemainingGameTime() { return (mGameTimer.getCurrent() / 1000); } // In seconds
-   S32 getLeadingScore() { return mLeadingTeamScore; }
-   S32 getLeadingTeam() { return mLeadingTeam; }
-   bool engineerIsEnabled() { return mEngineerEnabled; }
+   virtual bool teamHasFlag(S32 teamId) const { return false; }
+   S32 getWinningScore() const { return mWinningScore; }
+   void setWinningScore(S32 score) { mWinningScore = score; }
+   void setGameTime(F32 timeInSeconds) { mGameTimer.reset(U32(timeInSeconds) * 1000); }
+
+   U32 getTotalGameTime() const { return (mGameTimer.getPeriod() / 1000); }      // In seconds
+   S32 getRemainingGameTime() const { return (mGameTimer.getCurrent() / 1000); } // In seconds
+   S32 getRemainingGameTimeInMs() const { return (mGameTimer.getCurrent()); }    // In ms
+   void extendGameTime(S32 timeInMs) { mGameTimer.extend(timeInMs); }
+
+   S32 getLeadingScore() const { return mLeadingTeamScore; }
+   S32 getLeadingTeam() const { return mLeadingTeam; }
+   bool engineerIsEnabled() const { return mEngineerEnabled; }
 
    void catalogSpybugs();     // Rebuild a list of spybugs in the game
    void addSpyBug(SpyBug *spybug);
@@ -215,6 +242,10 @@ public:
 
    bool levelHasLoadoutZone() { return mLevelHasLoadoutZone; }        // Does the level have a loadout zone?
 
+   // Game-specific location for the bottom of the scoreboard on the lower-right corner
+   // (because games like hunters have more stuff down there we need to look out for)
+   virtual U32 getLowerRightCornerScoreboardOffsetFromBottom() const { return 60; } 
+
    enum
    {
       RespawnDelay = 1500,
@@ -226,21 +257,28 @@ public:
 
    const Vector<BarrierRec> *getBarrierList() { return &mBarriers; }
 
-   Vector<RefPtr<ClientRef> > mClientList;
+   S32 getClientCount() const { return mClientList.size(); }
+   RefPtr<ClientRef> getClient(S32 index) const { return mClientList[index]; }
+
+
 
    ClientRef *mLocalClient;
 
    virtual ClientRef *allocClientRef() { return new ClientRef; }
 
-   Vector<Team> mTeams;                   // List of teams
    string mScriptName;                    // Name of script
    Vector<string> mScriptArgs;            // List of script params  
-   Vector<FlagSpawn> mFlagSpawnPoints;    // List of non-team specific spawn points for flags
-   Vector<AsteroidSpawn> mAsteroidSpawnPoints;    // List of spawn points for asteroids
 
-   StringTableEntry mLevelName;
-   StringTableEntry mLevelDescription;
-   StringTableEntry mLevelCredits;
+   S32 getFlagSpawnCount() const { return mFlagSpawnPoints.size(); }
+   const FlagSpawn *getFlagSpawn(S32 index) const { return &mFlagSpawnPoints[index]; }
+   const Vector<FlagSpawn> *getFlagSpawns() const { return &mFlagSpawnPoints; }
+   void addFlagSpawn(FlagSpawn flagSpawn) { mFlagSpawnPoints.push_back(flagSpawn); }
+   void addAsteroidSpawn(AsteroidSpawn asteroidSpawn) { mAsteroidSpawnPoints.push_back(asteroidSpawn); }
+
+   const StringTableEntry *getLevelName() const { return &mLevelName; }
+   const StringTableEntry *getLevelDescription() const { return &mLevelDescription; }
+   const StringTableEntry *getLevelCredits() const { return &mLevelCredits; }
+
    Rect mViewBoundsWhileLoading;    // Show these view bounds while loading the map
    S32 mObjectsExpected;      // Count of objects we expect to get with this level (for display purposes only)
    S32 minRecPlayers;         // Recommended min players for this level
@@ -256,21 +294,9 @@ public:
 
    void addItemOfInterest(Item *theItem);
 
-   Timer mScoreboardUpdateTimer;
-   Timer mGameTimer;                // Track when current game will end
-   Timer mGameTimeUpdateTimer;
-   Timer mLevelInfoDisplayTimer;
-   Timer mInputModeChangeAlertDisplayTimer;
+   S32 getDigitsNeededToDisplayScore() const { return mDigitsNeededToDisplayScore; }
 
-   bool mCanSwitchTeams;            // Player can switch teams when this is true, not when it is false
-
-   S32 mWinningScore;               // Game over when team (or player in individual games) gets this score
-   S32 mLeadingTeam;                // Team with highest score
-   S32 mLeadingTeamScore;           // Score of mLeadingTeam
-   S32 mDigitsNeededToDisplayScore; // Digits needed to display scores
-
-   bool mBetweenLevels;             // We'll need to prohibit certain things (like team changes) when game is in an "intermediate" state
-   bool mGameOver;                  // Set to true when an end condition is met
+   bool isGameOver() const { return mGameOver; }
 
    bool mAllowSoccerPickup;         // Soccer balls only
    bool mHaveSoccer;                // Does level have soccer balls? used to determine weather or not to send s2cSoccerCollide
@@ -282,7 +308,6 @@ public:
       MaxPing = 999,
       DefaultGameTime = 10 * 60 * 1000,
       DefaultWinningScore = 8,
-      LevelInfoDisplayTime = 6000,
    };
 
    // Some games have extra game parameters.  We need to create a structure to communicate those parameters to the editor so
@@ -314,7 +339,7 @@ public:
 
    virtual void addToGame(Game *game);
 
-   void countTeamPlayers();
+   void countTeamPlayers() const;
 
    ClientRef *findClientRef(const StringTableEntry &name);
 
@@ -329,6 +354,7 @@ public:
 
    void gameOverManGameOver();
    VersionedGameStats getGameStats();
+   void getSortedPlayerScores(S32 teamIndex, Vector<RefPtr<ClientRef> > &playerScores) const;
    void saveGameStats();                     // Transmit statistics to the master server
 
    void checkForWinningScore(S32 score);     // Check if player or team has reachede the winning score
@@ -347,12 +373,8 @@ public:
    virtual void changeClientTeam(GameConnection *theClient, S32 team);     // Change player to team indicated, -1 = cycle teams
 
    virtual void renderInterfaceOverlay(bool scoreboardVisible);
-   void renderObjectiveArrow(GameObject *target, Color c, F32 alphaMod = 1.0f);
-   void renderObjectiveArrow(Point p, Color c, F32 alphaMod = 1.0f);
-
-   void renderTimeLeft();
-   void renderTalkingClients();     // Render things related to voicechat
-   void renderDebugStatus();        // Render things related to debugging
+   void renderObjectiveArrow(const GameObject *target, const Color *c, F32 alphaMod = 1.0f) const;
+   void renderObjectiveArrow(const Point *p, const Color *c, F32 alphaMod = 1.0f) const;
 
    void addTime(U32 time);          // Extend the game by time (in ms)
 
@@ -360,17 +382,15 @@ public:
    virtual void updateShipLoadout(GameObject *shipObject); // called from LoadoutZone when a Ship touches the zone
    void setClientShipLoadout(ClientRef *cl, const Vector<U32> &loadout, bool silent = false);
 
-   bool checkTeamRange(S32 team);               // Team in range? Used for processing arguments.
-   bool makeSureTeamCountIsNotZero();           // Zero teams will crash.
-   virtual Color getShipColor(Ship *s);         // Get the color of a ship
-   virtual Color getTeamColor(S32 team);        // Get the color of a team, based on index
-   Color getTeamColor(GameObject *theObject);   // Get the color of a team, based on object
+   bool checkTeamRange(S32 team);                     // Team in range? Used for processing arguments.
+   bool makeSureTeamCountIsNotZero();                 // Zero teams can cause crashiness
+   virtual const Color *getShipColor(Ship *s);        // Get the color of a ship
+   virtual const Color *getTeamColor(S32 team) const; // Get the color of a team, based on index
+   const Color *getTeamColor(GameObject *theObject);  // Get the color of a team, based on object
 
-   S32 getTeam(const char *playerName);         // Given a player, return their team
+   S32 getTeam(const char *playerName);               // Given a player, return their team
 
-   StringTableEntry getTeamName(S32 team);      // Return the name of the team
-
-   virtual bool getIsDatabasable() { return false; }     // Makes no sense to insert a GameType in our spatial database!
+   virtual bool getIsDatabasable() { return false; }  // Makes no sense to insert a GameType in our spatial database!
 
    // gameType flag methods for CTF, Rabbit, Football
    virtual void addFlag(FlagItem *flag) {  mFlags.push_back(flag);  }
@@ -401,7 +421,7 @@ public:
    TNL_DECLARE_RPC(c2sSyncMessagesComplete, (U32 sequence));
 
    TNL_DECLARE_RPC(s2cSetGameOver, (bool gameOver));
-   TNL_DECLARE_RPC(s2cSetTimeRemaining, (U32 timeLeft));
+   TNL_DECLARE_RPC(s2cSetTimeRemaining, (U32 timeLeftInMs));
    TNL_DECLARE_RPC(s2cChangeScoreToWin, (U32 score, StringTableEntry changer));
    
 

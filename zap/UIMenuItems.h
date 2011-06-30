@@ -356,11 +356,11 @@ public:
 class TeamMenuItem : public MenuItem
 {
 private:
-   Team mTeam;
+   AbstractTeam *mTeam;
    bool mIsCurrent;     // Is this a player's current team? 
 
 public:
-   TeamMenuItem(S32 index, Team team, void (*callback)(U32), KeyCode keyCode, bool isCurrent);
+   TeamMenuItem(S32 index, AbstractTeam *team, void (*callback)(U32), KeyCode keyCode, bool isCurrent);
 
    virtual MenuItemTypes getItemType() { return TeamMenuItemType; }
    void render(S32 xpos, S32 ypos, S32 textsize, bool isSelected);

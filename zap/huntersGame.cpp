@@ -70,25 +70,25 @@ TNL_IMPLEMENT_NETOBJECT_RPC(HuntersGameType, s2cHuntersMessage,
    if(msgIndex == HuntersMsgScore)
    {
       SoundSystem::playSoundEffect(SFXFlagCapture);
-      clientGame->mGameUserInterface->displayMessage(Color(0.6f, 1.0f, 0.8f),"%s returned %d flag%s to the Nexus for %d points!", clientName.getString(), flagCount, flagCount > 1 ? "s" : "", score);
+      clientGame->getUserInterface()->displayMessage(Color(0.6f, 1.0f, 0.8f),"%s returned %d flag%s to the Nexus for %d points!", clientName.getString(), flagCount, flagCount > 1 ? "s" : "", score);
    }
    else if(msgIndex == HuntersMsgYardSale)
    {
       SoundSystem::playSoundEffect(SFXFlagSnatch);
-      clientGame->mGameUserInterface->displayMessage(Color(0.6f, 1.0f, 0.8f),
+      clientGame->getUserInterface()->displayMessage(Color(0.6f, 1.0f, 0.8f),
                   "%s is having a YARD SALE!",
                   clientName.getString());
    }
    else if(msgIndex == HuntersMsgGameOverWin)
    {
-      clientGame->mGameUserInterface->displayMessage(Color(0.6f, 1.0f, 0.8f),
+      clientGame->getUserInterface()->displayMessage(Color(0.6f, 1.0f, 0.8f),
                      "Player %s wins the game!",
                      clientName.getString());
       SoundSystem::playSoundEffect(SFXFlagCapture);
    }
    else if(msgIndex == HuntersMsgGameOverTie)
    {
-      clientGame->mGameUserInterface->displayMessage(Color(0.6f, 1.0f, 0.8f), "The game ended in a tie.");
+      clientGame->getUserInterface()->displayMessage(Color(0.6f, 1.0f, 0.8f), "The game ended in a tie.");
       SoundSystem::playSoundEffect(SFXFlagDrop);
    }
 }
@@ -107,7 +107,7 @@ bool HuntersGameType::processArguments(S32 argc, const char **argv, Game *game)
 {
    if(argc > 0)
    {
-      mGameTimer.reset(U32(atof(argv[0]) * 60 * 1000));      // Game time
+      setGameTime(atof(argv[0]) * 60);                       // Game time, stored in minutes in level file
       if(argc > 1)
       {
          mNexusClosedTime = S32(atof(argv[1]) * 60 * 1000);  // Time until nexus opens, specified in minutes
@@ -115,7 +115,7 @@ bool HuntersGameType::processArguments(S32 argc, const char **argv, Game *game)
          {
             mNexusOpenTime = S32(atof(argv[2]) * 1000);      // Time nexus remains open, specified in seconds
             if(argc > 3)
-               mWinningScore = atoi(argv[3]);                // Winning score
+               setWinningScore(atoi(argv[3]));               // Winning score
          }
       }
    }
@@ -127,8 +127,8 @@ bool HuntersGameType::processArguments(S32 argc, const char **argv, Game *game)
 
 string HuntersGameType::toString()
 {
-   return string(getClassName()) + " " + ftos(F32(mGameTimer.getPeriod()) / 60 / 1000, 3) + " " + ftos(F32(mNexusClosedTime) / 60 / 1000, 3) + " " + 
-                                         ftos(F32(mNexusOpenTime) / 1000, 3) + " " + itos(mWinningScore);
+   return string(getClassName()) + " " + ftos(F32(getTotalGameTime()) / 60 , 3) + " " + ftos(F32(mNexusClosedTime) / 60 / 1000, 3) + " " + 
+                                         ftos(F32(mNexusOpenTime) / 1000, 3) + " " + itos(getWinningScore());
 }
 
 
@@ -192,28 +192,20 @@ void HuntersGameType::itemDropped(Ship *ship, Item *item)
    static StringTableEntry dropOneString( "%e0 dropped a flag!");
    static StringTableEntry dropManyString( "%e0 dropped %e1 flags!");
 
-   for(S32 i = 0; i < mClientList.size(); i++)
-   {
-      if(flagCount > 1)
-         mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagDrop, dropManyString, e);
-      else
-         mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagDrop, dropOneString, e);
-   }
+   StringTableEntry *ste = (flagCount > 1) ? &dropManyString : &dropOneString;
+
+   for(S32 i = 0; i < getClientCount(); i++)
+      getClient(i)->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagDrop, *ste, e);
 }
 
 
 // Create some game-specific menu items for the GameParameters menu from the arguments processed above...
 void HuntersGameType::addGameSpecificParameterMenuItems(Vector<MenuItem *> &menuItems)
 {
-   //menuItems.push_back(new TimeCounterMenuItem("Game Time:", 8 * 60, 99*60, "Unlimited", "Time game will last"));
-   //menuItems.push_back(new TimeCounterMenuItem("Time for Nexus to Open:", 60, 99*60, "Never", "Time it takes for the Nexus to open"));
-   //menuItems.push_back(new TimeCounterMenuItemSeconds("Time Nexus Remains Open:", 30, 99*60, "Always", "Time that the Nexus will remain open"));
-   //menuItems.push_back(new CounterMenuItem("Score to Win:", 5000, 100, 100, 20000, "points", "", "Game ends when one player or team gets this score"));
-
-   menuItems.push_back(new TimeCounterMenuItem("Game Time:", mGameTimer.getPeriod() / 1000, 99*60, "Unlimited", "Time game will last"));
+   menuItems.push_back(new TimeCounterMenuItem("Game Time:", getTotalGameTime(), 99*60, "Unlimited", "Time game will last"));
    menuItems.push_back(new TimeCounterMenuItem("Time for Nexus to Open:", mNexusClosedTime / 1000, 99*60, "Never", "Time it takes for the Nexus to open"));
    menuItems.push_back(new TimeCounterMenuItemSeconds("Time Nexus Remains Open:", mNexusOpenTime / 1000, 99*60, "Always", "Time that the Nexus will remain open"));
-   menuItems.push_back(new CounterMenuItem("Score to Win:", mWinningScore, 100, 100, 20000, "points", "", "Game ends when one player or team gets this score"));
+   menuItems.push_back(new CounterMenuItem("Score to Win:", getWinningScore(), 100, 100, 20000, "points", "", "Game ends when one player or team gets this score"));
 }
 
 TNL_IMPLEMENT_NETOBJECT(HuntersNexusObject);
@@ -298,13 +290,13 @@ void HuntersGameType::idle(GameObject::IdleCallPath path)
       static StringTableEntry msg("The Nexus is now OPEN!");
 
       // Broadcast a message
-      for(S32 i = 0; i < mClientList.size(); i++)
-         mClientList[i]->clientConnection->s2cDisplayMessage(GameConnection::ColorNuclearGreen, SFXFlagSnatch, msg);
+      for(S32 i = 0; i < getClientCount(); i++)
+        getClient(i)->clientConnection->s2cDisplayMessage(GameConnection::ColorNuclearGreen, SFXFlagSnatch, msg);
 
       // Check if anyone is already in the Nexus, examining each client's ship in turn...
-      for(S32 i = 0; i < mClientList.size(); i++)
+      for(S32 i = 0; i < getClientCount(); i++)
       {
-         Ship *client_ship = dynamic_cast<Ship *>(mClientList[i]->clientConnection->getControlObject());
+         Ship *client_ship = dynamic_cast<Ship *>(getClient(i)->clientConnection->getControlObject());
 
          if(!client_ship)
             continue;
@@ -321,17 +313,19 @@ void HuntersGameType::idle(GameObject::IdleCallPath path)
       s2cSetNexusTimer(mNexusTimer.getCurrent(), mNexusIsOpen);
 
       static StringTableEntry msg("The Nexus is now CLOSED.");
-      for(S32 i = 0; i < mClientList.size(); i++)
-         mClientList[i]->clientConnection->s2cDisplayMessage(GameConnection::ColorNuclearGreen, SFXFlagDrop, msg);
+      for(S32 i = 0; i < getClientCount(); i++)
+         getClient(i)->clientConnection->s2cDisplayMessage(GameConnection::ColorNuclearGreen, SFXFlagDrop, msg);
    }
 
    // Advance all flagSpawn timers and see if it's time for a new flag
-   for(S32 i = 0; i < mFlagSpawnPoints.size(); i++)
+   for(S32 i = 0; i < getFlagSpawnCount(); i++)
    {
-      if(mFlagSpawnPoints[i].timer.update(deltaT))
+      FlagSpawn *flagSpawn = const_cast<FlagSpawn *>(getFlagSpawn(i));    // We need to get a modifiable pointer so we can update the timer
+
+      if(flagSpawn->updateTimer(deltaT))
       {
-         releaseFlag(getGame(), mFlagSpawnPoints[i].getPos(), Point(0,0));   // Release a flag
-         mFlagSpawnPoints[i].timer.reset();                                  // Reset the timer
+         releaseFlag(getGame(), getFlagSpawn(i)->getPos(), Point(0,0));   // Release a flag
+         flagSpawn->resetTimer();                                         // Reset the timer
       }
    }
 }
@@ -422,10 +416,10 @@ void HuntersGameType::renderInterfaceOverlay(bool scoreboardVisible)
 
 
    for(S32 i = 0; i < mYardSaleWaypoints.size(); i++)
-      renderObjectiveArrow(mYardSaleWaypoints[i].pos, Colors::white);
+      renderObjectiveArrow(&mYardSaleWaypoints[i].pos, &Colors::white);
 
    for(S32 i = 0; i < mNexus.size(); i++)
-      renderObjectiveArrow(dynamic_cast<GameObject *>(mNexus[i].getPointer()), mNexusIsOpen ? gNexusOpenColor : gNexusClosedColor);
+      renderObjectiveArrow(dynamic_cast<GameObject *>(mNexus[i].getPointer()), mNexusIsOpen ? &gNexusOpenColor : &gNexusClosedColor);
 }
 
 #undef NEXUS_STR
@@ -716,7 +710,7 @@ void HuntersNexusObject::renderEditor(F32 currentScale)
 }
 
 
-bool HuntersNexusObject::getCollisionPoly(Vector<Point> &polyPoints)
+bool HuntersNexusObject::getCollisionPoly(Vector<Point> &polyPoints) const
 {
    polyPoints = *getOutline();
    return true;

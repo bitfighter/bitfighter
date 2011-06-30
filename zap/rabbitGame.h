@@ -57,7 +57,7 @@ public:
 
    RabbitGameType()
    {
-      mWinningScore = 100;
+      setWinningScore(100);
       mFlagReturnTimer = 30 * 1000;
       mFlagScoreTimer = 5 * 1000;
    }
@@ -78,8 +78,8 @@ public:
    bool objectCanDamageObject(GameObject *damager, GameObject *victim);
    void controlObjectForClientKilled(GameConnection *theClient, GameObject *clientObject, GameObject *killerObject);
    bool shipHasFlag(Ship *ship);
-   bool teamHasFlag(S32 team);
-   Color getShipColor(Ship *s);
+   bool teamHasFlag(S32 team) const;
+   const Color *getShipColor(Ship *s);
 
    Color getTeamColor(S32 team);
 
@@ -90,9 +90,9 @@ public:
 
    GameTypes getGameType() { return RabbitGame; }
    const char *getGameTypeString() { return "Rabbit"; }
-   const char *getShortName() { return "Rab"; }
+   const char *getShortName() const { return "Rab"; }
    const char *getInstructionString() { return "Grab the flag and hold it for as long as you can!"; }
-   bool isTeamGame() { return mTeams.size() != 1; }
+   bool isTeamGame() { return getGame()->getTeamCount() != 1; }
    bool canBeTeamGame() { return true; }
    bool canBeIndividualGame() { return true; }
 

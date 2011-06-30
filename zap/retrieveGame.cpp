@@ -102,10 +102,10 @@ namespace Zap
 
       Vector<StringTableEntry> e;
       e.push_back(theShip->getName());
-      e.push_back(getTeamName(team));
+      e.push_back(getGame()->getTeamName(team));
 
-      for(S32 i = 0; i < mClientList.size(); i++)
-         mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagSnatch, r, e);
+      for(S32 i = 0; i < getClientCount(); i++)
+        getClient(i)->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagSnatch, r, e);
 
       theFlag->mountToShip(theShip);
       updateScore(theShip, RemoveFlagFromEnemyZone);
@@ -123,8 +123,8 @@ namespace Zap
          Vector<StringTableEntry> e;
          e.push_back(ship->getName());
 
-         for(S32 i = 0; i < mClientList.size(); i++)
-            mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagDrop, dropString, e);
+         for(S32 i = 0; i < getClientCount(); i++)
+           getClient(i)->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagDrop, dropString, e);
       }
    }
 
@@ -157,8 +157,8 @@ namespace Zap
 
          Vector<StringTableEntry> e;
          e.push_back(s->getName());
-         for(S32 i = 0; i < mClientList.size(); i++)
-            mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen,
+         for(S32 i = 0; i < getClientCount(); i++)
+           getClient(i)->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen,
                SFXFlagCapture, (mFlags.size() == 1) ? oneFlagCapString : capString, e);
 
          // Drop the flag into the zone
@@ -187,10 +187,10 @@ namespace Zap
          if(mFlags.size() != 1)
          {
             static StringTableEntry capAllString("Team %e0 retrieved all the flags!");
-            e[0] = getTeamName(s->getTeam());
+            e[0] = getGame()->getTeamName(s->getTeam());
 
-            for(S32 i = 0; i < mClientList.size(); i++)
-               mClientList[i]->clientConnection->s2cTouchdownScored(SFXFlagCapture, s->getTeam(), capAllString, e);
+            for(S32 i = 0; i < getClientCount(); i++)
+              getClient(i)->clientConnection->s2cTouchdownScored(SFXFlagCapture, s->getTeam(), capAllString, e);
          }
 
          // Return all the flags to their starting locations if need be

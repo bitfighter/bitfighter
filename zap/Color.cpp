@@ -39,6 +39,12 @@ Color::Color(const Color &c)
    b = c.b;
 }
 
+Color::Color(const Color *c)
+{
+   r = c->r;
+   g = c->g;
+   b = c->b;
+}
 
 Color::Color(float grayScale)
 {
@@ -88,10 +94,27 @@ void Color::set(const string &s)
    }
 }
 
-string Color::toRGBString() { string s = ftos(r, 3) + "," + ftos(g, 3) + "," + ftos(b, 3); return s; }
-string Color::toHexString() { char c[7]; dSprintf(c, sizeof(c), "%.6X", U32(r * 0xFF) << 24 >> 8 | U32(g * 0xFF) << 24 >> 16 | (U32(b * 0xFF)) & 0xFF); return c; }
 
-U32 Color::toU32() { return U32(r * 0xFF) | U32(g * 0xFF)<<8 | U32(b * 0xFF)<<16; }
+string Color::toRGBString() const 
+{ 
+   return ftos(r, 3) + "," + ftos(g, 3) + "," + ftos(b, 3); 
+}
+
+
+string Color::toHexString() const 
+{ 
+   char c[7]; 
+   dSprintf(c, sizeof(c), "%.6X", U32(r * 0xFF) << 24 >> 8 | U32(g * 0xFF) << 24 >> 16 | (U32(b * 0xFF)) & 0xFF); 
+   return c; 
+}
+
+
+U32 Color::toU32() const
+{ 
+   return U32(r * 0xFF) | U32(g * 0xFF)<<8 | U32(b * 0xFF)<<16; 
+}
+
+
 //RangedU32<0, 0xFFFFFF> toRangedU32() { return RangedU32<0, 0xFFFFFF>(toU32()); }
 
 };	// namespace

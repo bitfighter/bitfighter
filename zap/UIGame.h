@@ -110,6 +110,10 @@ private:
 
    MessageDisplayMode mMessageDisplayMode;    // Our current message display mode
 
+   bool hasAdmin(GameConnection *gc, const char *failureMessage);
+   void changeServerNameDescr(GameConnection *gc, GameConnection::ParamType type, const Vector<string> &words);
+   void changePassword(GameConnection *gc, GameConnection::ParamType type, const Vector<string> &words, bool required);
+
    // These are our normal server messages, that "time out"
    Color mDisplayMessageColor[MessageDisplayCount];
    char mDisplayMessage[MessageDisplayCount][MAX_CHAT_MSG_LENGTH];
@@ -125,6 +129,10 @@ private:
    Timer mDisplayMessageTimer;
    Timer mDisplayChatMessageTimer;
    Timer mShutdownTimer;
+
+   bool mMissionOverlayActive;      // Are game instructions (F2) visible?
+   bool mDebugShowShipCoords;       // Show coords on ship?
+   bool mDebugShowMeshZones;        // Show bot nav mesh zones?
 
    enum ChatType {            // Types of in-game chat messages:
       GlobalChat,             // Goes to everyone in game
@@ -148,6 +156,10 @@ private:
    bool mInScoreboardMode;
    ShutdownMode mShutdownMode;
 
+   // Some rendering routines
+   void renderScoreboard(const GameType *gameType);
+
+
    StringTableEntry mShutdownName;  // Name of user who iniated the shutdown
    StringPtr mShutdownReason;       // Reason user provided for the shutdown
    bool mShutdownInitiator;         // True if local client initiated shutdown (and can therefore cancel it)
@@ -160,7 +172,15 @@ private:
    static const S32 WRONG_MODE_MSG_DISPLAY_TIME = 2500;
    static const S32 FPS_AVG_COUNT = 32;
 
-   Timer mWrongModeMsgDisplay;       // Help if user is trying to use keyboard in joystick mode
+   Timer mWrongModeMsgDisplay;               // Help if user is trying to use keyboard in joystick mode
+   Timer mInputModeChangeAlertDisplayTimer;  // Remind user that they just changed input modes
+   Timer mLevelInfoDisplayTimer;
+
+   void renderTimeLeft(const GameType *gameType);
+   void renderTalkingClients(const GameType *gameType);     // Render things related to voicechat
+   void renderDebugStatus(const GameType *gameType);        // Render things related to debugging
+
+
    F32 mFPSAvg;
    F32 mPingAvg;
 
@@ -229,9 +249,11 @@ public:
    ~GameUserInterface();             // Destructor
 
    bool displayInputModeChangeAlert;
-   bool mMissionOverlayActive;      // Are game instructions (F2) visible?
-   bool mDebugShowShipCoords;       // Show coords on ship?
-   bool mDebugShowMeshZones;        // Show bot nav mesh zones?
+
+
+   bool isShowingMissionOverlay()  const { return mMissionOverlayActive; }    // Are game instructions (F2) visible?
+   bool isShowingDebugShipCoords() const { return mDebugShowShipCoords; }     // Show coords on ship?
+   bool isShowingDebugMeshZones()  const { return mDebugShowMeshZones; }      // Show bot nav mesh zones?
 
    void displayErrorMessage(const char *format, ...);
    void displaySuccessMessage(const char *format, ...);
@@ -241,18 +263,24 @@ public:
    void displayChatMessage(const Color &msgColor, const char *format, ...);
 
    void initializeLoadoutOptions(bool engineerAllowed) { mLoadoutHelper.initialize(engineerAllowed); }
+   void resetInputModeChangeAlertDisplayTimer(U32 timeInMs) { mInputModeChangeAlertDisplayTimer.reset(timeInMs); }
 
    void render();                   // Render game screen
    void renderReticle();            // Render crosshairs
    void renderProgressBar();        // Render level-load progress bar
    void renderMessageDisplay();     // Render incoming server msgs
-   void renderChatMessageDisplay();     // Render incoming chat msgs
+   void renderChatMessageDisplay(); // Render incoming chat msgs
    void renderCurrentChat();        // Render chat msg user is composing
    void renderLoadoutIndicators();  // Render indicators for the various loadout items
    void renderShutdownMessage();    // Render an alert if server is shutting down
    void renderLostConnectionMessage(); 
 
+   void renderBasicInterfaceOverlay(const GameType *gameType, bool scoreboardVisible);
+
    void idle(U32 timeDelta);
+
+   void resetLevelInfoDisplayTimer() { mLevelInfoDisplayTimer.reset(6000); }     // 6 seconds 
+   void clearLevelInfoDisplayTimer() { mLevelInfoDisplayTimer.clear(); }
 
    void runCommand(const char *input);
    void issueChat();                // Send chat message (either Team or Global)

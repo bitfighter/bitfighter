@@ -218,7 +218,7 @@ AbstractSpawn::AbstractSpawn(const Point &pos, S32 time, GameObjectType objType)
 void AbstractSpawn::setRespawnTime(S32 time)       // in seconds
 {
       mSpawnTime = time;
-      timer.setPeriod(time);
+      mTimer.setPeriod(time);
 }
 
 
@@ -306,7 +306,7 @@ void Spawn::renderEditor(F32 currentScale)
    glPushMatrix();
       glTranslatef(pos.x, pos.y, 0);
       glScalef(1/currentScale, 1/currentScale, 1);    // Make item draw at constant size, regardless of zoom
-      renderSquareItem(Point(0,0), getGame()->getTeamColor(mTeam), 1, Colors::white, 'S');
+      renderSquareItem(Point(0,0), getGame()->getTeamColor(mTeam), 1, &Colors::white, 'S');
    glPopMatrix();   
 }
 
@@ -390,7 +390,7 @@ void FlagSpawn::renderEditor(F32 currentScale)
    glPushMatrix();
       glTranslatef(pos.x + 1, pos.y, 0);
       glScalef(0.4/currentScale, 0.4/currentScale, 1);
-      renderFlag(0, 0, getTeamColor(mTeam));
+      renderFlag(0, 0, &getTeamColor(mTeam));
 
       glColor(Colors::white);
       drawCircle(-4, 0, 26);
@@ -463,7 +463,7 @@ F32 Asteroid::getEditorRadius(F32 currentScale)
 }
 
 
-bool Asteroid::getCollisionCircle(U32 state, Point &center, F32 &radius)
+bool Asteroid::getCollisionCircle(U32 state, Point &center, F32 &radius) const
 {
    center = mMoveState[state].pos;
    radius = F32(ASTEROID_RADIUS) * asteroidRenderSize[mSizeIndex];
@@ -471,7 +471,7 @@ bool Asteroid::getCollisionCircle(U32 state, Point &center, F32 &radius)
 }
 
 
-bool Asteroid::getCollisionPoly(Vector<Point> &polyPoints)
+bool Asteroid::getCollisionPoly(Vector<Point> &polyPoints) const
 {
    for(S32 i = 0; i < AsteroidPoints; i++)
    {
@@ -671,7 +671,7 @@ void Worm::renderItem(Point pos)
 }
 
 
-bool Worm::getCollisionCircle(U32 state, Point &center, F32 &radius)
+bool Worm::getCollisionCircle(U32 state, Point &center, F32 &radius) const
 {
    center = mMoveState[state].pos;
    radius = F32(WORM_RADIUS);
@@ -679,7 +679,7 @@ bool Worm::getCollisionCircle(U32 state, Point &center, F32 &radius)
 }
 
 
-bool Worm::getCollisionPoly(Vector<Point> &polyPoints)
+bool Worm::getCollisionPoly(Vector<Point> &polyPoints) const
 {
    return false;
 }
@@ -804,7 +804,7 @@ void TestItem::damageObject(DamageInfo *theInfo)
 }
 
 
-bool TestItem::getCollisionPoly(Vector<Point> &polyPoints)
+bool TestItem::getCollisionPoly(Vector<Point> &polyPoints) const
 {
    //for(S32 i = 0; i < 8; i++)    // 8 so that first point gets repeated!  Needed?  Maybe not
    //{

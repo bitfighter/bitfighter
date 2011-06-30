@@ -284,8 +284,8 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendLine, (StringPtr line), (line),
    //// server might need mOutputFile, if the server were to receive files. Currently, server don't receive files in-game.
    //TNLAssert(mClientGame != NULL, "trying to get mOutputFile, mClientGame is NULL");
 
-   //if(mClientGame && mClientGame->mGameUserInterface->mOutputFile)
-   //   fwrite(line.getString(), 1, strlen(line.getString()), mClientGame->mGameUserInterface->mOutputFile);
+   //if(mClientGame && mClientGame->getUserInterface()->mOutputFile)
+   //   fwrite(line.getString(), 1, strlen(line.getString()), mClientGame->getUserInterface()->mOutputFile);
       //mOutputFile.write(line.getString(), strlen(line.getString()));
    // else... what?
    if(mDataBuffer)
@@ -312,30 +312,30 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rCommandComplete, (RangedU32<0,SENDER_STATUS
    // server might need mOutputFile, if the server were to receive files. Currently, server don't receive files in-game.
    TNLAssert(mClientGame != NULL, "trying to get mOutputFile, mClientGame is NULL");
 
-   if(mClientGame && mClientGame->mGameUserInterface->mOutputFileName != "")
+   if(mClientGame && mClientGame->getUserInterface()->mOutputFileName != "")
    {
       if(status.value == STATUS_OK && mDataBuffer)
       {
-         FILE *OutputFile = fopen(mClientGame->mGameUserInterface->mOutputFileName.c_str(), "wb");
+         FILE *OutputFile = fopen(mClientGame->getUserInterface()->mOutputFileName.c_str(), "wb");
 
          if(!OutputFile)
          {
-            logprintf("Problem opening file %s for writing", mClientGame->mGameUserInterface->mOutputFileName.c_str());
-            mClientGame->mGameUserInterface->displayErrorMessage("!!! Problem opening file %s for writing", mClientGame->mGameUserInterface->mOutputFileName.c_str());
+            logprintf("Problem opening file %s for writing", mClientGame->getUserInterface()->mOutputFileName.c_str());
+            mClientGame->getUserInterface()->displayErrorMessage("!!! Problem opening file %s for writing", mClientGame->getUserInterface()->mOutputFileName.c_str());
          }
          else
          {
             fwrite((char *)mDataBuffer->getBuffer(), 1, mDataBuffer->getBufferSize(), OutputFile);
             fclose(OutputFile);
-            mClientGame->mGameUserInterface->displaySuccessMessage("Level download to %s", mClientGame->mGameUserInterface->remoteLevelDownloadFilename.c_str());
+            mClientGame->getUserInterface()->displaySuccessMessage("Level download to %s", mClientGame->getUserInterface()->remoteLevelDownloadFilename.c_str());
          }
       }
       else if(status.value == COMMAND_NOT_ALLOWED)
-         mClientGame->mGameUserInterface->displayErrorMessage("!!! Getmap command is disabled on this server");
+         mClientGame->getUserInterface()->displayErrorMessage("!!! Getmap command is disabled on this server");
       else
-         mClientGame->mGameUserInterface->displayErrorMessage("Error downloading level");
+         mClientGame->getUserInterface()->displayErrorMessage("Error downloading level");
 
-      mClientGame->mGameUserInterface->mOutputFileName = "";
+      mClientGame->getUserInterface()->mOutputFileName = "";
    }
    if(mDataBuffer)
    {
@@ -700,7 +700,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sAdminPlayerAction,
 //{
 //   ClientRef *cl = findClientRef(name);
 //   cl->clientConnection->isAdmin = true;
-//   mGameUserInterface.displayMessage(Color(0,1,1), "%s has been granted administrator access.", name.getString());
+//   getUserInterface().displayMessage(Color(0,1,1), "%s has been granted administrator access.", name.getString());
 //}
 
 
@@ -779,14 +779,14 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsAdmin, (bool granted), (granted),
          if(UserInterface::current->getMenuID() == GameMenuUI)
             gGameMenuUserInterface.mMenuSubTitle = adminPassSuccessMsg;
          else
-            mClientGame->mGameUserInterface->displayMessage(gCmdChatColor, adminPassSuccessMsg);
+            mClientGame->getUserInterface()->displayMessage(gCmdChatColor, adminPassSuccessMsg);
       }
       else
       {
          if(UserInterface::current->getMenuID() == GameMenuUI)
             gGameMenuUserInterface.mMenuSubTitle = adminPassFailureMsg;
          else
-            mClientGame->mGameUserInterface->displayMessage(gCmdChatColor, adminPassFailureMsg);
+            mClientGame->getUserInterface()->displayMessage(gCmdChatColor, adminPassFailureMsg);
       }
    }
 }
@@ -820,7 +820,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsLevelChanger, (bool granted, bool noti
 
    // Check for permissions being rescinded by server, will happen if admin changes level change pw
    if(isLevelChanger() && !granted)
-      mClientGame->mGameUserInterface->displayMessage(gCmdChatColor, "An admin has changed the level change password; you must enter the new password to change levels.");
+      mClientGame->getUserInterface()->displayMessage(gCmdChatColor, "An admin has changed the level change password; you must enter the new password to change levels.");
 
    setIsLevelChanger(granted);
 
@@ -835,14 +835,14 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsLevelChanger, (bool granted, bool noti
          if(UserInterface::current->getMenuID() == GameMenuUI)
             gGameMenuUserInterface.mMenuSubTitle = levelPassSuccessMsg;
          else
-            mClientGame->mGameUserInterface->displayMessage(gCmdChatColor, levelPassSuccessMsg);
+            mClientGame->getUserInterface()->displayMessage(gCmdChatColor, levelPassSuccessMsg);
       }
       else
       {
          if(UserInterface::current->getMenuID() == GameMenuUI)
             gGameMenuUserInterface.mMenuSubTitle = levelPassFailureMsg;
          else
-            mClientGame->mGameUserInterface->displayMessage(gCmdChatColor, levelPassFailureMsg);
+            mClientGame->getUserInterface()->displayMessage(gCmdChatColor, levelPassFailureMsg);
       }
    }
 }
@@ -895,7 +895,7 @@ Color gCmdChatColor = colors[GameConnection::ColorRed];
 static void displayMessage(U32 colorIndex, U32 sfxEnum, const char *message)
 {
 
-   gClientGame->mGameUserInterface->displayMessage(colors[colorIndex], "%s", message);
+   gClientGame->getUserInterface()->displayMessage(colors[colorIndex], "%s", message);
    if(sfxEnum != SFXNone)
       SoundSystem::playSoundEffect(sfxEnum);
 }
@@ -1098,7 +1098,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestShutdown, (U16 time, StringPtr reaso
 TNL_IMPLEMENT_RPC(GameConnection, s2cInitiateShutdown, (U16 time, StringTableEntry name, StringPtr reason, bool originator),
                   (time, name, reason, originator), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 1)
 {
-   mClientGame->mGameUserInterface->shutdownInitiated(time, name, reason, originator);
+   mClientGame->getUserInterface()->shutdownInitiated(time, name, reason, originator);
 }
 
 
@@ -1119,7 +1119,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestCancelShutdown, (), (), NetClassGrou
 
 TNL_IMPLEMENT_RPC(GameConnection, s2cCancelShutdown, (), (), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 1)
 {
-   mClientGame->mGameUserInterface->shutdownCanceled();
+   mClientGame->getUserInterface()->shutdownCanceled();
 }
 
 
@@ -1587,9 +1587,9 @@ void GameConnection::onConnectionTerminated(NetConnection::TerminationReason rea
 
 
       if(UserInterface::cameFrom(EditorUI))
-         UserInterface::reactivateMenu(gEditorUserInterface);
+         UserInterface::reactivateMenu(&gEditorUserInterface);
       else
-         UserInterface::reactivateMenu(gMainMenuUserInterface);
+         UserInterface::reactivateMenu(&gMainMenuUserInterface);
 
       mClientGame->unsuspendGame();
 
@@ -1684,7 +1684,7 @@ void GameConnection::onConnectTerminated(TerminationReason reason, const char *n
       }
       else if(reason == ReasonServerFull)
       {
-         UserInterface::reactivateMenu(gMainMenuUserInterface);
+         UserInterface::reactivateMenu(&gMainMenuUserInterface);
 
          // Display a context-appropriate error message
          gErrorMsgUserInterface.reset();
@@ -1710,7 +1710,7 @@ void GameConnection::onConnectTerminated(TerminationReason reason, const char *n
       }
       else  // Looks like the connection failed for some unknown reason.  Server died?
       {
-         UserInterface::reactivateMenu(gMainMenuUserInterface);
+         UserInterface::reactivateMenu(&gMainMenuUserInterface);
 
          // Display a context-appropriate error message
          gErrorMsgUserInterface.reset();

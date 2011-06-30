@@ -61,6 +61,8 @@
 #include "SDL/SDL.h"
 #include "SDL/SDL_opengl.h"
 
+#include <boost/shared_ptr.hpp>
+
 #include <ctype.h>
 #include <exception>
 #include <algorithm>             // For sort
@@ -106,7 +108,7 @@ static Vector<ZoneBorder> zoneBorders;
 void saveLevelCallback()
 {
    if(gEditorUserInterface.saveLevel(true, true))
-      UserInterface::reactivateMenu(gMainMenuUserInterface);
+      UserInterface::reactivateMenu(&gMainMenuUserInterface);
    else
       gEditorUserInterface.reactivate();
 }
@@ -114,7 +116,7 @@ void saveLevelCallback()
 
 void backToMainMenuCallback()
 {
-   UserInterface::reactivateMenu(gMainMenuUserInterface);
+   UserInterface::reactivateMenu(&gMainMenuUserInterface);
 }
 
 
@@ -597,14 +599,21 @@ void EditorUserInterface::setLevelGenScriptName(string line)
 }
 
 
+static Game *getGame() 
+{
+   return gEditorGame;
+}
+
+
 void EditorUserInterface::makeSureThereIsAtLeastOneTeam()
 {
-   if(mTeams.size() == 0)
+   if(getGame()->getTeamCount() == 0)
    {
-      TeamEditor t;
-      t.setName(gTeamPresets[0].name);
-      t.color.set(gTeamPresets[0].r, gTeamPresets[0].g, gTeamPresets[0].b);
-      mTeams.push_back(t);
+      boost::shared_ptr<AbstractTeam> team = boost::shared_ptr<AbstractTeam>(new TeamEditor);
+      team->setName(gTeamPresets[0].name);
+      team->setColor(gTeamPresets[0].r, gTeamPresets[0].g, gTeamPresets[0].b);
+
+      getGame()->addTeam(team);
    }
 }
 
@@ -619,7 +628,7 @@ void EditorUserInterface::loadLevel()
 {
    // Initialize
    clearDatabase(gEditorGame->getGridDatabase().get());
-   mTeams.clear();
+   getGame()->clearTeams();
    mSnapVertex_i = NULL;
    mSnapVertex_j = NONE;
    mAddingVertex = false;
@@ -795,8 +804,10 @@ void EditorUserInterface::validateLevel()
    string teamList, teams;
 
    // First, catalog items in level
-   foundSpawn.resize(mTeams.size());
-   for(S32 i = 0; i < mTeams.size(); i++)      // Initialize vector
+   S32 teamCount = getGame()->getTeamCount();
+   foundSpawn.resize(teamCount);
+
+   for(S32 i = 0; i < teamCount; i++)      // Initialize vector
       foundSpawn[i] = false;
       
    fillVector.clear();
@@ -912,7 +923,7 @@ void EditorUserInterface::validateTeams()
 // Check that each item has a valid team  (fixes any problems it finds)
 void EditorUserInterface::validateTeams(const Vector<DatabaseObject *> &dbObjects)
 {
-   S32 teams = mTeams.size();
+   S32 teams = getGame()->getTeamCount();
 
    for(S32 i = 0; i < dbObjects.size(); i++)
    {
@@ -944,15 +955,19 @@ void EditorUserInterface::teamsHaveChanged()
 {
    bool teamsChanged = false;
 
-   if(mTeams.size() != mOldTeams.size())
+   if(getGame()->getTeamCount() != mOldTeams.size())     // Number of teams has changed
       teamsChanged = true;
    else
-      for(S32 i = 0; i < mTeams.size(); i++)
-         if(mTeams[i].color != mOldTeams[i].color || mTeams[i].getName() != mOldTeams[i].getName())
+      for(S32 i = 0; i < getGame()->getTeamCount(); i++)
+      {
+         AbstractTeam *team = getGame()->getTeam(i);
+
+         if(team->getColor() != mOldTeams[i].getColor() || team->getName() != mOldTeams[i].getName())   // Color(s) or names(s) have changed
          {
             teamsChanged = true;
             break;
          }
+      }
 
    if(!teamsChanged)       // Nothing changed, we're done here
       return;
@@ -1129,7 +1144,7 @@ void EditorUserInterface::onReactivate()
 
    remove("editor.tmp");      // Delete temp file
 
-   if(mCurrentTeam >= mTeams.size())
+   if(mCurrentTeam >= getGame()->getTeamCount())
       mCurrentTeam = 0;
 
    OGLCONSOLE_EnterKey(processEditorConsoleCommand);     // Restore callback for processing console commands
@@ -1438,7 +1453,7 @@ void EditorUserInterface::renderDock(F32 width)    // width is current wall widt
    drawStringc(xpos, gScreenInfo.getGameCanvasHeight() - vertMargin - 25, 8, text);
 
    // Show number of teams
-   dSprintf(text, sizeof(text), "Teams: %d",  mTeams.size());
+   dSprintf(text, sizeof(text), "Teams: %d",  getGame()->getTeamCount());
    drawStringc(xpos, gScreenInfo.getGameCanvasHeight() - vertMargin - 35, 8, text);
 
    glColor(mNeedToSave ? Colors::red : Colors::green);     // Color level name by whether it needs to be saved or not
@@ -1527,7 +1542,7 @@ void EditorUserInterface::renderReferenceShip()
       glTranslatef(mMousePos.x, mMousePos.y, 0);
       glScalef(mCurrentScale / getGridSize(), mCurrentScale / getGridSize(), 1);
       glRotatef(90, 0, 0, 1);
-      renderShip(Colors::red, 1, thrusts, 1, 5, 0, false, false, false, false);
+      renderShip(&Colors::red, 1, thrusts, 1, 5, 0, false, false, false, false);
       glRotatef(-90, 0, 0, 1);
 
       // And show how far it can see
@@ -1794,15 +1809,9 @@ void EditorUserInterface::render()
 }
 
 
-// TODO: Merge with nearly identical version in gameType
-Color EditorUserInterface::getTeamColor(S32 team)
+const Color *EditorUserInterface::getTeamColor(S32 team) const
 {
-   if(team == Item::TEAM_NEUTRAL || team >= mTeams.size() || team < Item::TEAM_HOSTILE)
-      return gNeutralTeamColor;
-   else if(team == Item::TEAM_HOSTILE)
-      return gHostileTeamColor;
-   else
-      return mTeams[team].color;
+   return getGame()->getTeamColor(team);
 }
 
 
@@ -1992,13 +2001,13 @@ void EditorUserInterface::setCurrentTeam(S32 currentTeam)
 
    saveUndoState();
 
-   if(currentTeam >= mTeams.size())
+   if(currentTeam >= getGame()->getTeamCount())
    {
       char msg[255];
-      if(mTeams.size() == 1)
+      if(getGame()->getTeamCount() == 1)
          dSprintf(msg, sizeof(msg), "Only 1 team has been configured.");
       else
-         dSprintf(msg, sizeof(msg), "Only %d teams have been configured.", mTeams.size());
+         dSprintf(msg, sizeof(msg), "Only %d teams have been configured.", getGame()->getTeamCount());
       gEditorUserInterface.setWarnMessage(msg, "Hit [F2] to configure teams.");
       return;
    }
@@ -2777,122 +2786,6 @@ void EditorUserInterface::deleteItem(S32 itemIndex)
 
    onMouseMoved();   // Reset cursor  
 }
-
-
-// Process a line read from level file
-//void EditorUserInterface::processLevelLoadLine(U32 argc, U32 id, const char **argv)
-//{
-//   Game *game = gEditorGame;
-//   S32 strlenCmd = (S32) strlen(argv[0]);
-//
-//   // This is a legacy from the old Zap! days... we do bots differently in Bitfighter, so we'll just ignore this line if we find it.
-//   if(!stricmp(argv[0], "BotsPerTeam"))
-//      return;
-//
-//   else if(!stricmp(argv[0], "GridSize"))      // GridSize requires a single parameter (an int specifiying how many pixels in a grid cell)
-//   {                                           
-//      if(argc < 2)
-//         throw LevelLoadException("Improperly formed GridSize parameter");
-//
-//      game->setGridSize(atof(argv[1]));
-//   }
-//
-//   // Parse GameType line... All game types are of form XXXXGameType
-//   else if(strlenCmd >= 8 && !strcmp(argv[0] + strlenCmd - 8, "GameType"))
-//   {
-//      if(gEditorGame->getGameType())
-//         throw LevelLoadException("Duplicate GameType parameter");
-//
-//      // validateGameType() will return a valid GameType string -- either what's passed in, or the default if something bogus was specified
-//      TNL::Object *theObject = TNL::Object::create(GameType::validateGameType(argv[0]));      
-//      GameType *gt = dynamic_cast<GameType *>(theObject);  // Force our new object to be a GameObject
-//
-//      bool validArgs = gt->processArguments(argc - 1, argv + 1);
-//
-//      gEditorGame->setGameType(gt);
-//
-//      if(!validArgs || strcmp(gt->getClassName(), argv[0]))
-//         throw LevelLoadException("Improperly formed GameType parameter");
-//      
-//      // Save the args (which we already have split out) for easier handling in the Game Parameter Editor
-//      //for(U32 i = 1; i < argc; i++)
-//      //   gEditorUserInterface.mGameTypeArgs.push_back(argv[i]);
-//   }
-//   else if(gEditorGame->getGameType() && gEditorGame->getGameType()->processLevelParam(argc, argv)) 
-//   {
-//      // Do nothing here
-//   }
-//
-//   // here on up is same as in server game... TODO: unify!
-//
-//   else if(!strcmp(argv[0], "Script"))
-//   {
-//      gEditorUserInterface.mScriptLine = "";
-//      // Munge everything into a string.  We'll have to parse after editing in GameParamsMenu anyway.
-//      for(U32 i = 1; i < argc; i++)
-//      {
-//         if(i > 1)
-//            gEditorUserInterface.mScriptLine += " ";
-//
-//         gEditorUserInterface.mScriptLine += argv[i];
-//      }
-//   }
-//
-//   // Parse Team definition line
-//   else if(!strcmp(argv[0], "Team"))
-//   {
-//      if(mTeams.size() >= GameType::gMaxTeams)     // Ignore teams with numbers higher than 9
-//         return;
-//
-//      TeamEditor team;
-//      team.readTeamFromLevelLine(argc, argv);
-//
-//      // If team was read and processed properly, numPlayers will be 0
-//      if(team.numPlayers != -1)
-//         mTeams.push_back(team);
-//   }
-//
-//   else
-//   {
-//      string objectType = argv[0];
-//
-//      if(objectType == "BarrierMakerS")
-//      {
-//         objectType = "PolyWall";
-//      }
-//
-//      TNL::Object *theObject = TNL::Object::create(objectType.c_str());   // Create an object of the type specified on the line
-//      EditorObject *object = dynamic_cast<EditorObject *>(theObject);     // Coerce our new object to be a GameObject
-//
-//      if(!object)    // Well... that was a bad idea!
-//      {
-//         delete theObject;
-//      }
-//      else  // object was valid
-//      {
-//         object->addToEditor(gEditorGame);
-//         object->processArguments(argc, argv);
-//
-//         //mLoadTarget->push_back(newItem);           // Don't add to editor if not valid...
-//
-//         return;
-//      }
-//   }
-//
-//   // What remains are various game parameters...  Note that we will hit this block even if we already looked at gridSize and such...
-//   // Before copying, we'll make a dumb copy, which will be overwritten if the user goes into the GameParameters menu
-//   // This will cover us if the user comes in, edits the level, saves, and exits without visiting the GameParameters menu
-//   // by simply echoing all the parameters back out to the level file without further processing or review.
-//   string temp;
-//   for(U32 i = 0; i < argc; i++)
-//   {
-//      temp += argv[i];
-//      if(i < argc - 1)
-//         temp += " ";
-//   }
-//
-//   gGameParamUserInterface.gameParams.push_back(temp);
-//} 
 
 
 void EditorUserInterface::insertNewItem(GameObjectType itemType)
@@ -3776,9 +3669,8 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
          if(gGameParamUserInterface.gameParams[i].substr(0, 5) != "Team ")  // Don't write out teams here... do it below!
             s_fprintf(f, "%s\n", gGameParamUserInterface.gameParams[i].c_str());
 
-      for(S32 i = 0; i < mTeams.size(); i++)
-         s_fprintf(f, "Team %s %g %g %g\n", mTeams[i].getName().getString(),
-            mTeams[i].color.r, mTeams[i].color.g, mTeams[i].color.b);
+      for(S32 i = 0; i < getGame()->getTeamCount(); i++)
+         s_fprintf(f, "Team %s %s\n", getGame()->getTeam(i)->getName().getString(), getGame()->getTeam(i)->getColor()->toRGBString());
 
       // Write out all level items (do two passes; walls first, non-walls next, so turrets & forcefields have something to grab onto)
       const Vector<EditorObject *> *objList = getObjectList();
@@ -3963,7 +3855,7 @@ void quitEditorCallback(U32 unused)
       gYesNoUserInterface.activate();
    }
    else
-      gEditorUserInterface.reactivateMenu(gMainMenuUserInterface);
+      gEditorUserInterface.reactivateMenu(&gMainMenuUserInterface);
 
    gEditorUserInterface.clearUndoHistory();        // Clear up a little memory
 }

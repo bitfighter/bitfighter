@@ -323,9 +323,15 @@ void GameUserInterface::displayChatMessage(const Color &msgColor, const char *fo
 
 void GameUserInterface::idle(U32 timeDelta)
 {
+   // Update some timers
    mShutdownTimer.update(timeDelta);
+   mInputModeChangeAlertDisplayTimer.update(timeDelta);
+   mWrongModeMsgDisplay.update(timeDelta);
+   mProgressBarFadeTimer.update(timeDelta);
+   mLevelInfoDisplayTimer.update(timeDelta);
 
-   // server messages
+
+   // Server messages
    if(mDisplayMessageTimer.update(timeDelta))
    {
       for(S32 i = MessageDisplayCount - 1; i > 0; i--)
@@ -338,7 +344,7 @@ void GameUserInterface::idle(U32 timeDelta)
       mDisplayMessageTimer.reset();
    }
 
-   //chat messages
+   // Chat messages
    if(mDisplayChatMessageTimer.update(timeDelta))
    {
       for(S32 i = ChatMessageDisplayCount - 1; i > 0; i--)
@@ -387,10 +393,6 @@ void GameUserInterface::idle(U32 timeDelta)
       mPing[indx] = (U32)gClientGame->getConnectionToServer()->getRoundTripTime();
 
    mFrameIndex++;
-
-   mWrongModeMsgDisplay.update(timeDelta);
-
-   mProgressBarFadeTimer.update(timeDelta);
 
    // Should we move this timer over to UIGame??
    if(gHostMenuUserInterface.levelLoadDisplayFadeTimer.update(timeDelta))
@@ -879,7 +881,7 @@ void GameUserInterface::onMouseMoved()
       if(!ship)      // Can sometimes happen when switching levels. This will stop the ensuing crashing.
          return;
 
-      Point p = gClientGame->worldToScreenPoint( ship->getRenderPos() );
+      Point p = gClientGame->worldToScreenPoint( &ship->getRenderPos() );
 
       mCurrentMove.angle = atan2(mMousePoint.y + gScreenInfo.getGameCanvasHeight() / 2 - p.y, 
                                  mMousePoint.x + gScreenInfo.getGameCanvasWidth() / 2 - p.x);
@@ -1025,10 +1027,7 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    else if(keyCode == keyMISSION)
    {
       mMissionOverlayActive = true;
-
-      GameType *gt = gClientGame->getGameType();
-      if(gt)
-         gt->mLevelInfoDisplayTimer.clear();    // Clear level-start display if user hits F2
+      gClientGame->getUserInterface()->clearLevelInfoDisplayTimer();    // Clear level-start display if user hits F2
    }
    else if(keyCode == KEY_M && getKeyState(KEY_CTRL))    // Ctrl-M, for now, to cycle through message dispaly modes
    {
@@ -1193,14 +1192,14 @@ void GameUserInterface::processPlayModeKey(KeyCode keyCode, char ascii)
 }
 
 
-static bool hasAdmin(GameConnection *gc, const char *failureMessage)
+// Returns true if we have admin privs, displays error message and returns false if not
+bool GameUserInterface::hasAdmin(GameConnection *gc, const char *failureMessage)
 {
-   if(!gc->isAdmin())
-   {
-      gClientGame->mGameUserInterface->displayErrorMessage(failureMessage);
-      return false;
-   }
-   return true;
+   if(gc->isAdmin())
+      return true;
+   
+   displayErrorMessage(failureMessage);
+   return false;
 }
 
 
@@ -1225,7 +1224,7 @@ static const char *findPointerOfArg(const char *message, S32 count)
 
 
 // TODO: Probably misnamed... handles deletes too
-static void changeServerNameDescr(GameConnection *gc, GameConnection::ParamType type, const Vector<string> &words)
+void GameUserInterface::changeServerNameDescr(GameConnection *gc, GameConnection::ParamType type, const Vector<string> &words)
 {
    // Concatenate all params into a single string
    string allWords = concatenate(words, 1);
@@ -1233,7 +1232,7 @@ static void changeServerNameDescr(GameConnection *gc, GameConnection::ParamType 
    // Did the user provide a name/description?
    if(type != GameConnection::DeleteLevel && allWords == "")
    {
-      gClientGame->mGameUserInterface->displayErrorMessage(type == GameConnection::ServerName ? "!!! Need to supply a name" : "!!! Need to supply a description");
+      displayErrorMessage(type == GameConnection::ServerName ? "!!! Need to supply a name" : "!!! Need to supply a description");
       return;
    }
 
@@ -1243,22 +1242,20 @@ static void changeServerNameDescr(GameConnection *gc, GameConnection::ParamType 
 extern CIniFile gINI;
 extern md5wrapper md5;
 
-static void changePassword(GameConnection *gc, GameConnection::ParamType type, const Vector<string> &words, bool required)
+void GameUserInterface::changePassword(GameConnection *gc, GameConnection::ParamType type, const Vector<string> &words, bool required)
 {
    if(required)
    {
       if(words.size() < 2 || words[1] == "")
       {
-         gClientGame->mGameUserInterface->displayErrorMessage("!!! Need to supply a password");
+         displayErrorMessage("!!! Need to supply a password");
          return;
       }
 
       gc->changeParam(words[1].c_str(), type);
    }
    else if(words.size() < 2)
-   {
       gc->changeParam("", type);
-   }
 
    if(words.size() < 2)    // Empty password
    {
@@ -1313,30 +1310,22 @@ void GameUserInterface::addTimeHandler(GameUserInterface *gui, const Vector<stri
 bool GameUserInterface::checkName(const string &name)
 {
    S32 potentials = 0;
-   string potential;
 
-   for(S32 i = 0; i < gClientGame->getGameType()->mClientList.size(); i++)
+   for(S32 i = 0; i < gClientGame->getGameType()->getClientCount(); i++)
    {
-      if(!gClientGame->getGameType()->mClientList[i].isValid())
+      if(!gClientGame->getGameType()->getClient(i).isValid())
          continue;
 
-      const char *n = gClientGame->getGameType()->mClientList[i]->name.getString();
+      // TODO: make this work with StringTableEntry comparison rather than strcmp; might need to add new method
+      const char *n = gClientGame->getGameType()->getClient(i)->name.getString();
+
       if(!strcmp(n, name.c_str()))           // Exact match
          return true;
       else if(!stricmp(n, name.c_str()))     // Case insensitive match
-      {
          potentials++;
-         potential = n;
-      }
    }
 
-   if(potentials == 1)
-   {
-      //*name = potential;
-      return true;
-   }
-
-   return false;
+   return(potentials == 1);      // Return true if we only found exactly one potential match, false otherwise
 }
 
 
@@ -1370,7 +1359,8 @@ void GameUserInterface::getMapHandler(GameUserInterface *gui, const Vector<strin
          gui->remoteLevelDownloadFilename = words[1];
       else
          gui->remoteLevelDownloadFilename = "downloaded_" + makeFilenameFromString(gClientGame->getGameType() ?
-               gClientGame->getGameType()->mLevelName.getString() : "Level");
+               gClientGame->getGameType()->getLevelName()->getString() : "Level");
+
       // Add an extension if needed
       if(gui->remoteLevelDownloadFilename.find(".") == string::npos)
          gui->remoteLevelDownloadFilename += ".level";
@@ -1428,7 +1418,7 @@ void GameUserInterface::shutdownServerHandler(GameUserInterface *gui, const Vect
 {
    GameConnection *gc = gClientGame->getConnectionToServer();
 
-   if(hasAdmin(gc, "!!! You don't have permission to shut the server down"))
+   if(gui->hasAdmin(gc, "!!! You don't have permission to shut the server down"))
    {
       U16 time = 0;
       bool timefound = true;
@@ -1458,7 +1448,7 @@ void GameUserInterface::kickPlayerHandler(GameUserInterface *gui, const Vector<s
 {
    GameConnection *gc = gClientGame->getConnectionToServer();
 
-   if(hasAdmin(gc, "!!! You don't have permission to kick players"))
+   if(gui->hasAdmin(gc, "!!! You don't have permission to kick players"))
    {
       if(words.size() < 2 || words[1] == "")
          gui->displayErrorMessage("!!! Need to specify who to kick");
@@ -1548,40 +1538,40 @@ void GameUserInterface::setAdminPassHandler(GameUserInterface *gui, const Vector
 {
    GameConnection *gc = gClientGame->getConnectionToServer();
 
-   if(hasAdmin(gc, "!!! You don't have permission to set the admin password"))
-      changePassword(gc, GameConnection::AdminPassword, words, true);
+   if(gui->hasAdmin(gc, "!!! You don't have permission to set the admin password"))
+      gui->changePassword(gc, GameConnection::AdminPassword, words, true);
 }
 
 void GameUserInterface::setServerPassHandler(GameUserInterface *gui, const Vector<string> &words)
 {
    GameConnection *gc = gClientGame->getConnectionToServer();
 
-   if(hasAdmin(gc, "!!! You don't have permission to set the server password"))
-      changePassword(gc, GameConnection::ServerPassword, words, false);
+   if(gui->hasAdmin(gc, "!!! You don't have permission to set the server password"))
+      gui->changePassword(gc, GameConnection::ServerPassword, words, false);
 }
 
 void GameUserInterface::setLevPassHandler(GameUserInterface *gui, const Vector<string> &words)
 {
    GameConnection *gc = gClientGame->getConnectionToServer();
 
-   if(hasAdmin(gc, "!!! You don't have permission to set the level change password"))
-      changePassword(gc, GameConnection::LevelChangePassword, words, false);
+   if(gui->hasAdmin(gc, "!!! You don't have permission to set the level change password"))
+      gui->changePassword(gc, GameConnection::LevelChangePassword, words, false);
 }
 
 void GameUserInterface::setServerNameHandler(GameUserInterface *gui, const Vector<string> &words)
 {
    GameConnection *gc = gClientGame->getConnectionToServer();
 
-   if(hasAdmin(gc, "!!! You don't have permission to set the server name"))
-      changeServerNameDescr(gc, GameConnection::ServerName, words);
+   if(gui->hasAdmin(gc, "!!! You don't have permission to set the server name"))
+      gui->changeServerNameDescr(gc, GameConnection::ServerName, words);
 }
 
 void GameUserInterface::setServerDescrHandler(GameUserInterface *gui, const Vector<string> &words)
 {
    GameConnection *gc = gClientGame->getConnectionToServer();
 
-   if(hasAdmin(gc, "!!! You don't have permission to set the server description"))
-      changeServerNameDescr(gc, GameConnection::ServerDescr, words);
+   if(gui->hasAdmin(gc, "!!! You don't have permission to set the server description"))
+      gui->changeServerNameDescr(gc, GameConnection::ServerDescr, words);
 }
 
 
@@ -1589,8 +1579,8 @@ void GameUserInterface::deleteCurrentLevelHandler(GameUserInterface *gui, const 
 {
    GameConnection *gc = gClientGame->getConnectionToServer();
 
-   if(hasAdmin(gc, "!!! You don't have permission to delete the current level"))
-      changeServerNameDescr(gc, GameConnection::DeleteLevel, words);    // handles deletes too
+   if(gui->hasAdmin(gc, "!!! You don't have permission to delete the current level"))
+      gui->changeServerNameDescr(gc, GameConnection::DeleteLevel, words);    // handles deletes too
 }
 
 
@@ -1865,28 +1855,28 @@ static void makeCommandCandidateList()
       commandCandidateList.push_back(chatCmds[i].cmdName);
 }
 
-static void makePlayerNameCandidateList()
+static void makePlayerNameCandidateList(const Game *game)
 {
    nameCandidateList.clear();
 
    if(gClientGame->getGameType())
-      for(S32 i = 0; i < gClientGame->getGameType()->mClientList.size(); i++)
-         if(gClientGame->getGameType()->mClientList[i].isValid())
-            nameCandidateList.push_back(gClientGame->getGameType()->mClientList[i]->name.getString());
+      for(S32 i = 0; i < game->getGameType()->getClientCount(); i++)
+         if(game->getGameType()->getClient(i).isValid())
+            nameCandidateList.push_back(game->getGameType()->getClient(i)->name.getString());
 }
 
 
-static void makeTeamNameCandidateList()
+static void makeTeamNameCandidateList(const Game *game)
 {
    nameCandidateList.clear();
 
    if(gClientGame->getGameType())
-      for(S32 i = 0; i < gClientGame->getTeamCount(); i++)
-         nameCandidateList.push_back(gClientGame->getGameType()->getTeamName(i).getString());
+      for(S32 i = 0; i < game->getTeamCount(); i++)
+         nameCandidateList.push_back(game->getTeamName(i).getString());
 }
 
 
-static Vector<string> *getCandidateList(const string &cmdName, S32 arg)
+static Vector<string> *getCandidateList(Game *game, const string &cmdName, S32 arg)
 {
    if(arg == 0)         // Command completion
       return &commandCandidateList;
@@ -1909,13 +1899,13 @@ static Vector<string> *getCandidateList(const string &cmdName, S32 arg)
 
          if(argType == NAME)           // Player names
          {  
-            makePlayerNameCandidateList();
+            makePlayerNameCandidateList(game);
             return &nameCandidateList;
          }
 
          else if(argType == TEAM)      // Team names
          {
-            makeTeamNameCandidateList();
+            makeTeamNameCandidateList(game);
             return &nameCandidateList;
          }
       }
@@ -1971,7 +1961,7 @@ void GameUserInterface::processChatModeKey(KeyCode keyCode, char ascii)
             partial = "";                    // We'll be matching against an empty list since we've typed nothing so far
          }
 
-         Vector<string> *candidates = getCandidateList(words[0], arg);     // Could return NULL
+         Vector<string> *candidates = getCandidateList(gClientGame, words[0], arg);     // Could return NULL
 
          // Now we have our candidates list... let's compare to what the player has already typed to generate completion string
          if(candidates && candidates->size() > 0)
@@ -2446,6 +2436,420 @@ void GameUserInterface::unsuspendGame()
    gClientGame->unsuspendGame();                            // Unsuspend locally
    gClientGame->getConnectionToServer()->unsuspendGame();   // Tell the server we're unsuspending
 }
+
+
+void GameUserInterface::renderScoreboard(const GameType *gameType)
+{
+   S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
+
+   if(mLevelInfoDisplayTimer.getCurrent() || mMissionOverlayActive)
+   {
+      F32 alpha = 1;
+      if(mLevelInfoDisplayTimer.getCurrent() < 1000 && !mMissionOverlayActive)
+         alpha = mLevelInfoDisplayTimer.getCurrent() * 0.001f;
+
+      glEnableBlend;
+         glColor4f(1, 1, 1, alpha);
+         UserInterface::drawCenteredStringf(canvasHeight / 2 - 180, 30, "Level: %s", gameType->getLevelName()->getString());
+         UserInterface::drawCenteredStringf(canvasHeight / 2 - 140, 30, "Game Type: %s", gameType->getGameTypeString());
+         glColor4f(0, 1, 1, alpha);
+         UserInterface::drawCenteredString(canvasHeight / 2 - 100, 20, gameType->getInstructionString());
+         glColor4f(1, 0, 1, alpha);
+         UserInterface::drawCenteredString(canvasHeight / 2 - 75, 20, gameType->getLevelDescription()->getString());
+
+         glColor4f(0, 1, 0, alpha);
+         UserInterface::drawCenteredStringf(canvasHeight - 100, 20, "Press [%s] to see this information again", keyCodeToString(keyMISSION));
+
+         if(gameType->getLevelCredits()->isNull())    // Credits string is not empty
+         {
+            glColor4f(1, 0, 0, alpha);
+            UserInterface::drawCenteredStringf(canvasHeight / 2 + 50, 20, "%s", gameType->getLevelCredits()->getString());
+         }
+
+         glColor4f(1, 1, 0, alpha);
+         UserInterface::drawCenteredStringf(canvasHeight / 2 - 50, 20, "Score to Win: %d", gameType->getWinningScore());
+
+      glDisableBlend;
+
+      mInputModeChangeAlertDisplayTimer.reset(0);     // Supress mode change alert if this message is displayed...
+   }
+
+   if(mInputModeChangeAlertDisplayTimer.getCurrent() != 0)
+   {
+      // Display alert about input mode changing
+      F32 alpha = 1;
+      if(mInputModeChangeAlertDisplayTimer.getCurrent() < 1000)
+         alpha = mInputModeChangeAlertDisplayTimer.getCurrent() * 0.001f;
+
+      glEnableBlend;
+      glColor4f(1, 0.5 , 0.5, alpha);
+      UserInterface::drawCenteredStringf(UserInterface::vertMargin + 130, 20, "Input mode changed to %s", 
+                                         gIniSettings.inputMode == Joystick ? "Joystick" : "Keyboard");
+      glDisableBlend;
+   }
+
+   U32 totalWidth = gScreenInfo.getGameCanvasWidth() - UserInterface::horizMargin * 2;
+
+   Game *game = gameType->getGame();
+   S32 teams = gameType->isTeamGame() ? game->getTeamCount() : 1;
+
+   U32 columnCount = min(teams, 2);
+
+   U32 teamWidth = totalWidth / columnCount;
+   S32 maxTeamPlayers = 0;
+   gameType->countTeamPlayers();
+
+   // Check to make sure at least one team has at least one player...
+   for(S32 i = 0; i < game->getTeamCount(); i++)
+   {
+      Team *team = (Team *)game->getTeam(i);
+      if(gameType->isTeamGame())
+      {     // (braces required)
+         if(team->getPlayerBotCount() > maxTeamPlayers)
+            maxTeamPlayers = team->getPlayerBotCount();
+      }
+      else
+         maxTeamPlayers += team->getPlayerBotCount();
+   }
+   // ...if not, then go home!
+   if(!maxTeamPlayers)
+      return;
+
+   U32 teamAreaHeight = gameType->isTeamGame() ? 40 : 0;
+   U32 numTeamRows = (game->getTeamCount() + 1) >> 1;
+
+   U32 totalHeight = (gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin * 2) / numTeamRows - (numTeamRows - 1) * 2;
+   U32 maxHeight = MIN(30, (totalHeight - teamAreaHeight) / maxTeamPlayers);
+
+   U32 sectionHeight = (teamAreaHeight + maxHeight * maxTeamPlayers);
+   totalHeight = sectionHeight * numTeamRows + (numTeamRows - 1) * 2;
+
+   for(S32 i = 0; i < teams; i++)
+   {
+      S32 yt = (gScreenInfo.getGameCanvasHeight() - totalHeight) / 2 + (i >> 1) * (sectionHeight + 2);  // y-top
+      S32 yb = yt + sectionHeight;     // y-bottom
+      S32 xl = 10 + (i & 1) * teamWidth;
+      S32 xr = xl + teamWidth - 2;
+
+      const Color *teamColor = gameType->getGame()->getTeamColor(i);
+      glEnableBlend;
+
+      glColor(teamColor, 0.6);
+      glBegin(GL_POLYGON);
+         glVertex2i(xl, yt);
+         glVertex2i(xr, yt);
+         glVertex2i(xr, yb);
+         glVertex2i(xl, yb);
+      glEnd();
+
+      glDisableBlend;
+
+      glColor(Colors::white);
+      if(gameType->isTeamGame())     // Render team scores
+      {
+         renderFlag(F32(xl + 20), F32(yt + 18), teamColor);
+         renderFlag(F32(xr - 20), F32(yt + 18), teamColor);
+
+         glColor(Colors::white);
+         glBegin(GL_LINES);
+            glVertex2i(xl, yt + S32(teamAreaHeight));
+            glVertex2i(xr, yt + S32(teamAreaHeight));
+         glEnd();
+
+         UserInterface::drawString(xl + 40, yt + 2, 30, gameType->getGame()->getTeamName(i).getString());
+         UserInterface::drawStringf(xr - 140, yt + 2, 30, "%d", ((Team *)(game->getTeam(i)))->getScore());
+      }
+
+      // Now for player scores.  First build a list, then sort it, then display it.
+      Vector<RefPtr<ClientRef> > playerScores;
+      gameType->getSortedPlayerScores(i, playerScores);     // Fills playerScores
+
+      S32 curRowY = yt + teamAreaHeight + 1;
+      S32 fontSize = U32(maxHeight * 0.8f);
+
+      for(S32 j = 0; j < playerScores.size(); j++)
+      {
+         static const char *bot = "B ";
+         S32 botsize = UserInterface::getStringWidth(F32(fontSize) * 0.5f, bot);
+         S32 x = xl + 40;
+
+         // Add the mark of the bot
+         if(playerScores[j]->isRobot)
+            UserInterface::drawString(x - botsize, curRowY + fontSize / 4 + 2, fontSize / 2, bot); 
+
+         UserInterface::drawString(x, curRowY, fontSize, playerScores[j]->name.getString());
+
+         static char buff[255] = "";
+
+         if(gameType->isTeamGame())
+            dSprintf(buff, sizeof(buff), "%2.2f", (F32)playerScores[j]->getRating());
+         else
+            dSprintf(buff, sizeof(buff), "%d", playerScores[j]->getScore());
+
+         UserInterface::drawString(xr - (120 + S32(UserInterface::getStringWidth(F32(fontSize), buff))), curRowY, fontSize, buff);
+         UserInterface::drawStringf(xr - 70, curRowY, fontSize, "%d", playerScores[j]->ping);
+         curRowY += maxHeight;
+      }
+   }
+}
+
+
+// Sorts teams by score, high to low
+S32 QSORT_CALLBACK teamScoreSort(Team **a, Team **b)
+{
+   return (*b)->getScore() - (*a)->getScore();  
+}
+
+
+void GameUserInterface::renderBasicInterfaceOverlay(const GameType *gameType, bool scoreboardVisible)
+{
+   S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
+
+   if(mLevelInfoDisplayTimer.getCurrent() || mMissionOverlayActive)
+   {
+      // Fade message out
+      F32 alpha = 1;
+      if(mLevelInfoDisplayTimer.getCurrent() < 1000 && !mMissionOverlayActive)
+         alpha = mLevelInfoDisplayTimer.getCurrent() * 0.001f;
+
+      glEnableBlend;
+         glColor4f(1, 1, 1, alpha);
+         UserInterface::drawCenteredStringf(canvasHeight / 2 - 180, 30, "Level: %s", gameType->getLevelName()->getString());
+         UserInterface::drawCenteredStringf(canvasHeight / 2 - 140, 30, "Game Type: %s", gameType->getGameTypeString());
+         glColor4f(0, 1, 1, alpha);
+         UserInterface::drawCenteredString(canvasHeight / 2 - 100, 20, gameType->getInstructionString());
+         glColor4f(1, 0, 1, alpha);
+         UserInterface::drawCenteredString(canvasHeight / 2 - 75, 20, gameType->getLevelDescription()->getString());
+
+         glColor4f(0, 1, 0, alpha);
+         UserInterface::drawCenteredStringf(canvasHeight - 100, 20, "Press [%s] to see this information again", keyCodeToString(keyMISSION));
+
+         if(gameType->getLevelCredits()->isNotNull())    // Credits string is not empty
+         {
+            glColor4f(1, 0, 0, alpha);
+            UserInterface::drawCenteredStringf(canvasHeight / 2 + 50, 20, "%s", gameType->getLevelCredits()->getString());
+         }
+
+         glColor4f(1, 1, 0, alpha);
+         UserInterface::drawCenteredStringf(canvasHeight / 2 - 50, 20, "Score to Win: %d", gameType->getWinningScore());
+
+      glDisableBlend;
+
+      mInputModeChangeAlertDisplayTimer.reset(0);     // Supress mode change alert if this message is displayed...
+   }
+
+   if(mInputModeChangeAlertDisplayTimer.getCurrent() != 0)
+   {
+      // Display alert about input mode changing
+      F32 alpha = 1;
+      if(mInputModeChangeAlertDisplayTimer.getCurrent() < 1000)
+         alpha = mInputModeChangeAlertDisplayTimer.getCurrent() * 0.001f;
+
+      glEnableBlend;
+      glColor4f(1, 0.5 , 0.5, alpha);
+      UserInterface::drawCenteredStringf(UserInterface::vertMargin + 130, 20, "Input mode changed to %s", 
+                                         gIniSettings.inputMode == Joystick ? "Joystick" : "Keyboard");
+      glDisableBlend;
+   }
+
+   Game *game = gameType->getGame();
+   S32 teamCount = game->getTeamCount();
+
+   if((gameType->isGameOver() || scoreboardVisible) && teamCount > 0)      // Render scoreboard
+      renderScoreboard(gameType);
+
+   else if(teamCount > 1 && gameType->isTeamGame())  // Render team scores in lower-right corner when scoreboard is off
+   {
+      S32 lroff = gameType->getLowerRightCornerScoreboardOffsetFromBottom();
+
+      // Build a list of teams, so we can sort by score
+      Vector<Team *> teams;
+      teams.reserve(teamCount);
+
+      for(S32 i = 0; i < teamCount; i++)
+      {
+         teams.push_back((Team *)gameType->getGame()->getTeam(i));
+         teams[i]->mId = i;
+      }
+
+      teams.sort(teamScoreSort);    
+
+      S32 maxScore = gameType->getLeadingScore();
+
+      const S32 textsize = 32;
+      S32 xpos = gScreenInfo.getGameCanvasWidth() - UserInterface::horizMargin - gameType->getDigitsNeededToDisplayScore() * 
+                                                                                 UserInterface::getStringWidth(F32(textsize), "0");
+
+      for(S32 i = 0; i < teams.size(); i++)
+      {
+         S32 ypos = gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin - lroff - (teams.size() - i - 1) * 38;
+
+         Team *team = (Team *)game->getTeam(i);
+         glColor3f(1,0,1);
+         if( gameType->teamHasFlag(team->getId()) )
+            UserInterface::drawString(xpos - 50, ypos + 3, 18, "*");
+
+         renderFlag(F32(xpos - 20), F32(ypos + 18), team->getColor());
+         glColor3f(1,1,1);
+         UserInterface::drawStringf(xpos, ypos, textsize, "%d", team->getScore());
+      }
+   }
+
+   //else if(mGame->getTeamCount() > 0 && !isTeamGame())   // Render leaderboard for non-team games
+   //{
+   //   S32 lroff = getLowerRightCornerScoreboardOffsetFromBottom();
+
+   //   // Build a list of teams, so we can sort by score
+   //   Vector<RefPtr<ClientRef> > leaderboardList;
+
+   //   // Add you to the leaderboard
+   //   if(mLocalClient)
+   //   {
+   //      leaderboardList.push_back(mLocalClient);
+   //      logprintf("Score = %d", mLocalClient->getScore());
+   //   }
+
+   //   // Get leading player
+   //   ClientRef *winningClient = mClientList[0];
+   //   for(S32 i = 1; i < mClientList.size(); i++)
+   //   {
+   //      if(mClientList[i]->getScore() > winningClient->getScore())
+   //      {
+   //         winningClient = mClientList[i];
+   //      }
+   //   }
+
+   //   // Add leader to the leaderboard
+   //   leaderboardList.push_back(winningClient);
+
+   //   const S32 textsize = 20;
+
+   //   for(S32 i = 0; i < leaderboardList.size(); i++)
+   //   {
+   //      const char* prefix = "";
+   //      if(i == leaderboardList.size() - 1)
+   //      {
+   //         prefix = "Leader:";
+   //      }
+   //      const char* name = leaderboardList[i]->name.getString();
+   //      S32 score = leaderboardList[i]->getScore();
+
+   //      S32 xpos = gScreenInfo.getGameCanvasWidth() - UserInterface::horizMargin - 
+   //                 UserInterface::getStringWidthf(textsize, "%s %s %d", prefix, name, score);
+   //      S32 ypos = gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin - lroff - i * 24;
+
+   //      glColor3f(1, 1, 1);
+   //      UserInterface::drawStringf(xpos, ypos, textsize, "%s %s %d", prefix, name, score);
+   //   }
+   //}
+
+   renderTimeLeft(gameType);
+   renderTalkingClients(gameType);
+   renderDebugStatus(gameType);
+}
+
+
+
+void GameUserInterface::renderTimeLeft(const GameType *gameType)
+{
+   const S32 size = 20;       // Size of time
+   const S32 gtsize = 12;     // Size of game type/score indicator
+   
+   S32 len = UserInterface::getStringWidthf(gtsize, "[%s/%d]", gameType->getShortName(), gameType->getWinningScore());
+
+   glColor3f(0,1,1);
+   UserInterface::drawStringf(gScreenInfo.getGameCanvasWidth() - UserInterface::horizMargin - 65 - len - 5,
+                              gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin - 20 + ((size - gtsize) / 2) + 2, 
+                              gtsize, "[%s/%d]", gameType->getShortName(), gameType->getWinningScore());
+
+   S32 x = gScreenInfo.getGameCanvasWidth() - UserInterface::horizMargin - 65;
+   S32 y = gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin - 20;
+   glColor3f(1,1,1);
+
+   if(gameType->getTotalGameTime() == 0)
+      UserInterface::drawString(x, y, size, "Unlim.");
+   else
+   {
+      U32 timeLeft = gameType->getRemainingGameTime();      // Time remaining in game
+      U32 minsRemaining = timeLeft / 60;
+      U32 secsRemaining = timeLeft - (minsRemaining * 60);
+
+      UserInterface::drawStringf(x, y, size, "%02d:%02d", minsRemaining, secsRemaining);
+   }
+}
+
+
+void GameUserInterface::renderTalkingClients(const GameType *gameType)
+{
+   S32 y = 150;
+   for(S32 i = 0; i < gameType->getClientCount(); i++)
+   {
+      if(gameType->getClient(i)->voiceSFX->isPlaying())
+      {
+         glColor( gameType->getGame()->getTeamColor(gameType->getClient(i)->getTeam()) );
+         UserInterface::drawString(10, y, 20, gameType->getClient(i)->name.getString());
+         y += 25;
+      }
+   }
+}
+
+
+void GameUserInterface::renderDebugStatus(const GameType *gameType)
+{
+   // When bots are frozen, render large pause icon in lower left
+   if(Robot::isPaused())
+   {
+      glColor3f(1,1,1);
+
+      const S32 PAUSE_HEIGHT = 40;
+      const S32 PAUSE_WIDTH = 15;
+      const S32 PAUSE_GAP = 8;
+      const S32 BOX_INSET = 5;
+      const S32 BOX_THICKNESS = 4;
+      const S32 BOX_HEIGHT = PAUSE_HEIGHT + 2 * PAUSE_GAP + BOX_THICKNESS;
+      const S32 BOX_WIDTH = 280;
+      const S32 TEXT_SIZE = 20;
+
+      S32 x, y;
+
+      // Draw box
+      x = UserInterface::vertMargin + BOX_THICKNESS / 2 - 3;
+      y = gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin;
+
+      for(S32 i = 1; i >= 0; i--)
+      {
+         glColor(i ? Colors::black : Colors::white);
+         glBegin(i ? GL_POLYGON: GL_LINE_LOOP); 
+            glVertex2i(x,             y);
+            glVertex2i(x + BOX_WIDTH, y);
+            glVertex2i(x + BOX_WIDTH, y - BOX_HEIGHT);
+            glVertex2i(x,             y - BOX_HEIGHT);
+         glEnd();
+      }
+
+
+      // Draw Pause symbol
+      x = UserInterface::vertMargin + BOX_THICKNESS + BOX_INSET;
+      y = gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin - BOX_THICKNESS - BOX_INSET;
+
+      for(S32 i = 0; i < 2; i++)
+      {
+         glBegin(GL_POLYGON);    // Filled rectangle
+            glVertex2i(x,               y);
+            glVertex2i(x + PAUSE_WIDTH, y);
+            glVertex2i(x + PAUSE_WIDTH, y - PAUSE_HEIGHT);
+            glVertex2i(x,               y - PAUSE_HEIGHT);
+         glEnd();
+
+         x += PAUSE_WIDTH + PAUSE_GAP;
+      }
+
+      x += BOX_INSET;
+      y -= (TEXT_SIZE + BOX_INSET + BOX_THICKNESS + 3);
+      UserInterface::drawString(x, y, TEXT_SIZE, "STEP: Alt-], Ctrl-]");
+   }
+}
+
 
 
 };

@@ -159,8 +159,8 @@ public:
    static const S32 ASTEROID_RADIUS = 89;
 
    void renderItem(Point pos);
-   bool getCollisionPoly(Vector<Point> &polyPoints);
-   bool getCollisionCircle(U32 state, Point &center, F32 &radius);
+   bool getCollisionPoly(Vector<Point> &polyPoints) const;
+   bool getCollisionCircle(U32 state, Point &center, F32 &radius) const;
    bool collide(GameObject *otherObject);
    void setPosAng(Point pos, F32 ang);
 
@@ -213,13 +213,13 @@ class AbstractSpawn : public EditorPointObject
 
 protected:
    S32 mSpawnTime;
+   Timer mTimer;
 
    void setRespawnTime(S32 time);
 
 public:
    AbstractSpawn(const Point &pos = Point(), S32 time = 0, GameObjectType objType = UnknownType); // Constructor
 
-   Timer timer;
    
    virtual bool processArguments(S32 argc, const char **argv, Game *game);
 
@@ -235,9 +235,12 @@ public:
 
    virtual string toString();
 
-   Point getPos() { return getVert(0); }     // For readability 
+   Point getPos() const { return getVert(0); }     // For readability 
 
    F32 getEditorRadius(F32 currentScale);
+
+   bool updateTimer(U32 deltaT) { return mTimer.update(deltaT); }
+   void resetTimer() { mTimer.clear(); }
 
    virtual void renderEditor(F32 currentScale) = 0;
    virtual void renderDock() = 0;
@@ -308,6 +311,9 @@ public:
    FlagSpawn(const Point &pos = Point(), S32 time = DEFAULT_RESPAWN_TIME);  // C++ constructor (no lua constructor)
    FlagSpawn *clone() const;
 
+   bool updateTimer(S32 deltaT) { return mTimer.update(deltaT); }
+   void resetTimer() { mTimer.reset(); }
+
    const char *getEditorHelpString() { return "Location where flags (or balls in Soccer) spawn after capture."; }
    const char *getPrettyNamePlural() { return "Flag spawn points"; }
    const char *getOnDockName() { return "FlagSpawn"; }
@@ -341,8 +347,8 @@ public:
    Worm();     // Constructor  
 
    void renderItem(Point pos);
-   bool getCollisionPoly(Vector<Point> &polyPoints);
-   bool getCollisionCircle(U32 state, Point &center, F32 &radius);
+   bool getCollisionPoly(Vector<Point> &polyPoints) const;
+   bool getCollisionCircle(U32 state, Point &center, F32 &radius) const;
    bool collide(GameObject *otherObject);
    void setPosAng(Point pos, F32 ang);
    void setNextAng(F32 nextAng) { mNextAng = nextAng; }
@@ -372,7 +378,7 @@ public:
 
    void renderItem(Point pos);
    void damageObject(DamageInfo *theInfo);
-   bool getCollisionPoly(Vector<Point> &polyPoints);
+   bool getCollisionPoly(Vector<Point> &polyPoints) const;
 
    TNL_DECLARE_CLASS(TestItem);
 

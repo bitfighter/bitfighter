@@ -228,7 +228,7 @@ void drawCentroidMark(const Point &pos, F32 radius)
 }
 
 
-void renderShip(const Color &c, F32 alpha, F32 thrusts[], F32 health, F32 radius, U32 sensorTime,
+void renderShip(const Color *shipColor, F32 alpha, F32 thrusts[], F32 health, F32 radius, U32 sensorTime,
                 bool cloakActive, bool shieldActive, bool sensorActive, bool hasArmor)
 {
    if(alpha != 1.0)
@@ -331,7 +331,7 @@ void renderShip(const Color &c, F32 alpha, F32 thrusts[], F32 health, F32 radius
    renderVertexArray(flamePortPoints, ARRAYSIZE(flamePortPoints) / 2, GL_LINES);
 
    // colored insides
-   glColor(c, alpha);
+   glColor(shipColor, alpha);
    glBegin(GL_LINE_LOOP);
       glVertex2f(-12, -13);
       glVertex2f(0, 22);
@@ -381,7 +381,6 @@ void renderShip(const Color &c, F32 alpha, F32 thrusts[], F32 health, F32 radius
             glVertex2f(cos(theta) * shieldRadius, sin(theta) * shieldRadius);
       glEnd();
    }
-
       
    if(sensorActive)
    {
@@ -409,6 +408,7 @@ void renderShipCoords(const Point &coords, bool localShip, F32 alpha)
    glDisableBlend;
    glLineWidth(gDefaultLineWidth);
 }
+
 
 // This is a line extending from the ship to give joystick players some idea of where they're aiming
 void renderAimVector()
@@ -666,7 +666,7 @@ void renderTurret(const Color &c, Point anchor, Point normal, bool enabled, F32 
 }
 
 
-static void drawFlag(const Color &flagColor, const Color *mastColor, F32 alpha)
+static void drawFlag(const Color *flagColor, const Color *mastColor, F32 alpha)
 {
    glColor(flagColor, alpha);
 
@@ -685,7 +685,7 @@ static void drawFlag(const Color &flagColor, const Color *mastColor, F32 alpha)
 }
 
 
-void renderFlag(F32 x, F32 y, const Color &flagColor, const Color *mastColor, F32 alpha)
+void renderFlag(F32 x, F32 y, const Color *flagColor, const Color *mastColor, F32 alpha)
 {
    glPushMatrix();
    glTranslatef(x, y, 0);
@@ -696,19 +696,19 @@ void renderFlag(F32 x, F32 y, const Color &flagColor, const Color *mastColor, F3
 }
 
 
-void renderFlag(const Point &pos, const Color &flagColor, const Color *mastColor, F32 alpha)
+void renderFlag(const Point &pos, const Color *flagColor, const Color *mastColor, F32 alpha)
 {
    renderFlag(pos.x, pos.y, flagColor, mastColor, alpha);
 }
 
 
-void renderFlag(const Point &pos, const Color &flagColor)
+void renderFlag(const Point &pos, const Color *flagColor)
 {
    renderFlag(pos.x, pos.y, flagColor, NULL, 1);
 }
 
 
-void renderFlag(F32 x, F32 y, const Color &flagColor)
+void renderFlag(F32 x, F32 y, const Color *flagColor)
 {
    renderFlag(x, y, flagColor, NULL, 1);
 }
@@ -796,7 +796,7 @@ void renderPolygonOutline(const Vector<Point> *outline)
 }
 
 
-void renderPolygonOutline(const Vector<Point> *outlinePoints, const Color &outlineColor, F32 alpha = 1)
+void renderPolygonOutline(const Vector<Point> *outlinePoints, const Color *outlineColor, F32 alpha)
 {
    if(alpha != 1)
       glEnableBlend;
@@ -809,8 +809,7 @@ void renderPolygonOutline(const Vector<Point> *outlinePoints, const Color &outli
 }
 
 
-// TODO: Get rid of one of these!
-void renderPolygonFill(const Vector<Point> *fillPoints, const Color &fillColor, F32 alpha)      // alpha is optional
+void renderPolygonFill(const Vector<Point> *fillPoints, const Color *fillColor, F32 alpha)      
 {
    if(alpha != 1)
       glEnableBlend;
@@ -824,20 +823,23 @@ void renderPolygonFill(const Vector<Point> *fillPoints, const Color &fillColor, 
 
 
 void renderPolygon(const Vector<Point> *fillPoints, const Vector<Point> *outlinePoints, 
-                   const Color &fillColor, const Color &outlineColor, F32 alpha = 1)
+                   const Color *fillColor, const Color *outlineColor, F32 alpha = 1)
 {
    renderPolygonFill(fillPoints, fillColor, alpha);
    renderPolygonOutline(outlinePoints, outlineColor, alpha);
 }
 
 
-void renderLoadoutZone(Color color, const Vector<Point> *outline, const Vector<Point> *fill)
+void renderLoadoutZone(const Color *outlineColor, const Vector<Point> *outline, const Vector<Point> *fill)
 {
-   renderPolygon(fill, outline, color * 0.5, color);
+   Color fillColor = *outlineColor;
+   fillColor *= 0.5;
+
+   renderPolygon(fill, outline, &fillColor, outlineColor);
 }
 
 
-void renderLoadoutZone(Color color, const Vector<Point> *outline, const Vector<Point> *fill, 
+void renderLoadoutZone(const Color *color, const Vector<Point> *outline, const Vector<Point> *fill, 
                        const Point &centroid, F32 angle, F32 scaleFact)
 {
    renderLoadoutZone(color, outline, fill);
@@ -848,9 +850,10 @@ void renderLoadoutZone(Color color, const Vector<Point> *outline, const Vector<P
 void renderNavMeshZone(const Vector<Point> *outline, const Vector<Point> *fill, const Point &centroid, 
                        S32 zoneId, bool isConvex, bool isSelected)
 {
-   Color color = isConvex ? Colors::green : Colors::red;
+   Color outlineColor = isConvex ? Colors::green : Colors::red;
+   Color fillColor = outlineColor * .5;
 
-   renderPolygon(fill, outline, color * .5, color, isSelected ? .65 : .4);
+   renderPolygon(fill, outline, &fillColor, &outlineColor, isSelected ? .65 : .4);
 
    if(zoneId > 0)
    {
@@ -920,7 +923,7 @@ static Color getGoalZoneOutlineColor(const Color &c, F32 glowFraction)
 }
 
 
-static Color getGoalZoneFillColor(const Color &c, bool isFlashing, F32 glowFraction)
+static Color getGoalZoneFillColor(const Color *c, bool isFlashing, F32 glowFraction)
 {
    F32 alpha = isFlashing ? 0.75 : 0.5;
 
@@ -929,17 +932,17 @@ static Color getGoalZoneFillColor(const Color &c, bool isFlashing, F32 glowFract
 
 
 // No label version
-void renderGoalZone(Color c, const Vector<Point> *outline, const Vector<Point> *fill)
+void renderGoalZone(const Color *c, const Vector<Point> *outline, const Vector<Point> *fill)
 {
    Color fillColor    = getGoalZoneFillColor(c, false, 0);
    Color outlineColor = getGoalZoneOutlineColor(c, false);
 
-   renderPolygon(fill, outline, fillColor, outlineColor);
+   renderPolygon(fill, outline, &fillColor, &outlineColor);
 }
 
 
 // Goal zone flashes after capture, but glows after touchdown...
-void renderGoalZone(Color c, const Vector<Point> *outline, const Vector<Point> *fill, Point centroid, F32 labelAngle, 
+void renderGoalZone(const Color *c, const Vector<Point> *outline, const Vector<Point> *fill, Point centroid, F32 labelAngle, 
                     bool isFlashing, F32 glowFraction, S32 score, F32 scaleFact)
 {
    F32 alpha = isFlashing ? 0.75 : 0.5;
@@ -947,7 +950,7 @@ void renderGoalZone(Color c, const Vector<Point> *outline, const Vector<Point> *
    Color fillColor    = getGoalZoneFillColor(c, isFlashing, glowFraction);
    Color outlineColor = getGoalZoneOutlineColor(c, isFlashing);
 
-   renderPolygon(fill, outline, fillColor, outlineColor);
+   renderPolygon(fill, outline, &fillColor, &outlineColor);
 
    renderPolygonLabel(centroid, labelAngle, 25, "GOAL", scaleFact);
 }
@@ -959,18 +962,19 @@ extern Color gNexusClosedColor;
 void renderNexus(const Vector<Point> *outline, const Vector<Point> *fill, Point centroid, F32 labelAngle, bool open, 
                  F32 glowFraction, F32 scaleFact)
 {
-   Color c;
+   Color baseColor;
 
    if(open)
-      c.interp(glowFraction, Colors::yellow, gNexusOpenColor);
+      baseColor.interp(glowFraction, Colors::yellow, gNexusOpenColor);
    else
-      c = gNexusClosedColor;
+      baseColor = gNexusClosedColor;
 
-   Color fillColor = Color(c * (glowFraction * glowFraction  + (1 - glowFraction * glowFraction) * 0.5));
+   Color fillColor = Color(baseColor * (glowFraction * glowFraction  + (1 - glowFraction * glowFraction) * 0.5));
+   Color outlineColor = fillColor * 0.7;
 
-   renderPolygon(fill, outline, fillColor, c * 0.7);
+   renderPolygon(fill, outline, &fillColor, &outlineColor);
 
-   glColor(c);
+   glColor(baseColor);
    renderPolygonLabel(centroid, labelAngle, 25, "NEXUS", scaleFact);
 }
 
@@ -1496,7 +1500,7 @@ void renderSoccerBall(const Point &pos, F32 alpha)
 }
 
 
-void renderTextItem(const Point &pos, const Point &dir, F32 size, const string &text, const Color &color)
+void renderTextItem(const Point &pos, const Point &dir, F32 size, const string &text, const Color *color)
 {
    if(text == "Bitfighter")
    {
@@ -1522,12 +1526,15 @@ void renderTextItem(const Point &pos, const Point &dir, F32 size, const string &
 }
 
 
-void renderForceFieldProjector(Point pos, Point normal, Color c, bool enabled)
+void renderForceFieldProjector(Point pos, Point normal, const Color *c, bool enabled)
 {
    F32 ForceFieldBrightnessProjector = 0.50;
 
-   c = c * (1.0 - ForceFieldBrightnessProjector) + ForceFieldBrightnessProjector;
-   glColor(enabled ? c : (c * 0.6));
+   Color color(c);      // Create locally modifiable copy
+
+   color *= (1.0 - ForceFieldBrightnessProjector) + ForceFieldBrightnessProjector;
+
+   glColor(enabled ? color : (color * 0.6));
 
    Vector<Point> geom;
    ForceFieldProjector::getGeom(pos, normal, geom);      // fills geom from pos and normal
@@ -1772,7 +1779,7 @@ void drawFilledSquare(const Point &pos, S32 size)
 
 
 
-static void drawLetter(char letter, const Point &pos, const Color &color, F32 alpha)
+static void drawLetter(char letter, const Point &pos, const Color *color, F32 alpha)
 {
    // Mark the item with a letter, unless we're showing the reference ship
    S32 vertOffset = 8;
@@ -1786,7 +1793,7 @@ static void drawLetter(char letter, const Point &pos, const Color &color, F32 al
 }
 
 
-void renderSquareItem(const Point &pos, const Color &c, F32 alpha, const Color &letterColor, char letter)
+void renderSquareItem(const Point &pos, const Color *c, F32 alpha, const Color *letterColor, char letter)
 {
    glColor(c, alpha);
    drawFilledSquare(pos, 8);  // Draw filled box in which we'll put our letter

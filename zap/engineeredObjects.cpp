@@ -729,7 +729,7 @@ void ForceFieldProjector::onEnabled()
 }
 
 
-bool ForceFieldProjector::getCollisionPoly(Vector<Point> &polyPoints)
+bool ForceFieldProjector::getCollisionPoly(Vector<Point> &polyPoints) const
 {
    getGeom(mAnchorPoint, mAnchorNormal, polyPoints);
    return true;
@@ -762,14 +762,14 @@ void ForceFieldProjector::render()
 
 void ForceFieldProjector::renderDock()
 {
-   renderSquareItem(mAnchorPoint, getGame()->getTeamColor(mTeam), 1, Colors::white, '>');
+   renderSquareItem(mAnchorPoint, getGame()->getTeamColor(mTeam), 1, &Colors::white, '>');
 }
 
 
 void ForceFieldProjector::renderEditor(F32 currentScale)
 {
    F32 scaleFact = 1;
-   Color color = getGame()->getTeamColor(mTeam);
+   const Color *color = getGame()->getTeamColor(mTeam);
 
    if(mSnapped)
    {
@@ -981,7 +981,7 @@ void ForceField::getGeom(const Point &start, const Point &end, Vector<Point> &ge
 
 
 // Non-static version
-void ForceField::getGeom(Vector<Point> &geom)
+void ForceField::getGeom(Vector<Point> &geom) const
 {
    getGeom(mStart, mEnd, geom);
 }
@@ -1008,11 +1008,12 @@ bool ForceField::findForceFieldEnd(GridDatabase *db, const Point &start, const P
 }
 
 
-bool ForceField::getCollisionPoly(Vector<Point> &points)
+bool ForceField::getCollisionPoly(Vector<Point> &points) const
 {
    getGeom(points);
    return true;
 }
+
 
 void ForceField::render()
 {
@@ -1106,7 +1107,7 @@ void Turret::getGeom(const Point &anchor, const Point &normal, Vector<Point> &po
 }
 
 
-bool Turret::getCollisionPoly(Vector<Point> &polyPoints)
+bool Turret::getCollisionPoly(Vector<Point> &polyPoints) const
 {
    getGeom(mAnchorPoint, mAnchorNormal, polyPoints);
    return true;
@@ -1130,7 +1131,7 @@ void Turret::render()
 
 void Turret::renderDock()
 {
-   renderSquareItem(mAnchorPoint, getGame()->getTeamColor(mTeam), 1, Colors::white, 'T');
+   renderSquareItem(mAnchorPoint, getGame()->getTeamColor(mTeam), 1, &Colors::white, 'T');
 }
 
 
@@ -1296,7 +1297,7 @@ void Turret::idle(IdleCallPath path)
          Point velocity;
 
          // String handling in C++ is such a mess!!!
-         string killer = string("got blasted by ") + getGame()->getGameType()->getTeamName(mTeam).getString() + " turret";
+         string killer = string("got blasted by ") + getGame()->getTeam(mTeam)->getName().getString() + " turret";
          mKillString = killer.c_str();
 
          createWeaponProjectiles(WeaponType(mWeaponFireType), bestDelta, aimPos, velocity, mWeaponFireType == WeaponBurst ? 45.f : 35.f, this);

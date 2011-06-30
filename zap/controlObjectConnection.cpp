@@ -194,7 +194,7 @@ void ControlObjectConnection::readPacket(BitStream *bstream)
             controlObject->readControlState(bstream);
             mServerPosition = controlObject->getActualPos();
             replayControlObjectMoves = true;
-            //gClientGame->mGameUserInterface.receivedControlUpdate(true);
+            //gClientGame->getUserInterface().receivedControlUpdate(true);
          }
          else
             controlObject = NULL;

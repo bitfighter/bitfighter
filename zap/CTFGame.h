@@ -46,11 +46,11 @@ public:
    void itemDropped(Ship *ship, Item *item);
    void performProxyScopeQuery(GameObject *scopeObject, GameConnection *connection);
    void renderInterfaceOverlay(bool scoreboardVisible);
-   bool teamHasFlag(S32 teamId);
+   bool teamHasFlag(S32 teamId) const;
 
    GameTypes getGameType() { return CTFGame; }
    const char *getGameTypeString() { return "Capture the Flag"; }
-   const char *getShortName() { return "CTF"; }
+   const char *getShortName() const { return "CTF"; }
    const char *getInstructionString() { return "Take the opposing team's flag and touch it to your flag!"; }
    
    bool isFlagGame() { return true; }

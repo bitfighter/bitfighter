@@ -144,7 +144,7 @@ public:
    {
       return s.mIndex != mIndex;
    }
-   inline bool isNull() const
+   inline bool isNull() const    // True if string is empty ("")
    {
       return mIndex == 0;
    }

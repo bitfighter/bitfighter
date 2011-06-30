@@ -44,6 +44,7 @@ public:
    float r, g, b;
 
    Color(const Color &c);
+   Color(const Color *c);
 
    template<class T, class U, class V>
       Color(T in_r, U in_g, V in_b) { r = static_cast<TNL::F32>(in_r); g = static_cast<TNL::F32>(in_g); b = static_cast<TNL::F32>(in_b);}
@@ -64,10 +65,10 @@ public:
    void set(const Color &c);
    void set(const std::string &s);
 
-   std::string toRGBString();
-   std::string toHexString();
+   std::string toRGBString() const;
+   std::string toHexString() const;
 
-   TNL::U32 toU32();
+   TNL::U32 toU32() const;
 
    // inlines must stay in headers
    inline Color operator+(const Color &c) const { return Color (r + c.r, g + c.g, b + c.b); }

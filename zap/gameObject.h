@@ -192,7 +192,7 @@ public:
    S32 getTeam() { return mTeam; }
    void setTeam(S32 team) { mTeam = team; }    
 
-   Game *getGame() { return mGame; }
+   Game *getGame() const { return mGame; }
    void setGame(Game *game) { mGame = game; }
 
    virtual void addToGame(Game *game);
@@ -200,8 +200,8 @@ public:
 
    // DatabaseObject methods
    virtual GridDatabase *getGridDatabase();     // BotNavMeshZones have their own GridDatabase
-   virtual bool getCollisionPoly(Vector<Point> &polyPoints);
-   virtual bool getCollisionCircle(U32 stateIndex, Point &point, float &radius);
+   virtual bool getCollisionPoly(Vector<Point> &polyPoints) const;
+   virtual bool getCollisionCircle(U32 stateIndex, Point &point, float &radius) const;
 
    virtual bool processArguments(S32 argc, const char**argv, Game *game) { return true; }
 
@@ -213,11 +213,11 @@ public:
 
 
    // Geometry methods
-   virtual GeomType getGeomType() { return mGeometry->getGeomType(); }
-   virtual Point getVert(S32 index) { return mGeometry->getVert(index); }
+   virtual GeomType getGeomType() const { return mGeometry->getGeomType(); }
+   virtual Point getVert(S32 index) const { return mGeometry->getVert(index); }
    virtual void setVert(const Point &point, S32 index) { mGeometry->setVert(point, index); }
 
-   S32 getVertCount() { return mGeometry->getVertCount(); }
+   S32 getVertCount() const { return mGeometry->getVertCount(); }
    void clearVerts() { mGeometry->clearVerts(); }
    bool addVert(const Point &point)  { return mGeometry->addVert(point); }
    bool addVertFront(Point vert)  { return mGeometry->addVertFront(vert); }
@@ -231,10 +231,10 @@ public:
    void unselectVerts() { mGeometry->unselectVerts(); }
    bool vertSelected(S32 vertIndex) { return mGeometry->vertSelected(vertIndex); }
 
-   Vector<Point> *getOutline() { return mGeometry->getOutline(); }
-   Vector<Point> *getFill() { return mGeometry->getFill(); }
-   Point getCentroid() { return mGeometry->getCentroid(); }
-   F32 getLabelAngle() { return mGeometry->getLabelAngle(); }
+   Vector<Point> *getOutline() const { return mGeometry->getOutline(); }
+   Vector<Point> *getFill() const { return mGeometry->getFill(); }
+   Point getCentroid() const { return mGeometry->getCentroid(); }
+   F32 getLabelAngle() const { return mGeometry->getLabelAngle(); }
 
    void packGeom(GhostConnection *connection, BitStream *stream) { mGeometry->packGeom(connection, stream); }
    void unpackGeom(GhostConnection *connection, BitStream *stream) { mGeometry->unpackGeom(connection, stream); }
@@ -305,7 +305,7 @@ public:
 
    virtual S32 getRenderSortValue() { return 2; }
 
-   Rect getBounds(U32 stateIndex);
+   Rect getBounds(U32 stateIndex) const;
 
    const Move &getCurrentMove() { return mCurrentMove; }
    const Move &getLastMove() { return mLastMove; }

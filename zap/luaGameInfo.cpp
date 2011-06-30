@@ -91,9 +91,9 @@ S32 LuaGameInfo::getGameTimeRemaining(lua_State *L) { return returnInt(L, gServe
 S32 LuaGameInfo::getLeadingScore(lua_State *L)      { return returnInt(L, gServerGame->getGameType()->getLeadingScore()); }
 S32 LuaGameInfo::getLeadingTeam(lua_State *L)       { return returnInt(L, gServerGame->getGameType()->getLeadingTeam() + 1); }
 
-S32 LuaGameInfo::getTeamCount(lua_State *L)         { return returnInt(L, gServerGame->getGameType()->mTeams.size()); }
+S32 LuaGameInfo::getTeamCount(lua_State *L)         { return returnInt(L, gServerGame->getTeamCount()); }
 
-S32 LuaGameInfo::getLevelName(lua_State *L)         { return returnString(L, gServerGame->getGameType()->mLevelName.getString()); }
+S32 LuaGameInfo::getLevelName(lua_State *L)         { return returnString(L, gServerGame->getGameType()->getLevelName()->getString()); }
 S32 LuaGameInfo::getGridSize(lua_State *L)          { return returnFloat(L, gServerGame->getGridSize()); }
 S32 LuaGameInfo::isTeamGame(lua_State *L)        { return returnBool(L, gServerGame->getGameType()->isTeamGame()); }
 S32 LuaGameInfo::isNexusOpen(lua_State *L)
@@ -125,16 +125,17 @@ S32 LuaGameInfo::getPlayers(lua_State *L)
    if(gServerGame->getGameType() == NULL)
       return returnNil(L);
 
-   TNLAssertV( gServerGame->getPlayerCount() == gServerGame->getGameType()->mClientList.size(), ("Mismatched player counts (%s v %s)!", 
-               gServerGame->getPlayerCount(),   gServerGame->getGameType()->mClientList.size()) );
+   S32 clientCount = gServerGame->getGameType()->getClientCount();
+
+   TNLAssertV( clientCount == gServerGame->getPlayerCount(), ("Mismatched player counts (%s v %s)!", clientCount, gServerGame->getPlayerCount()) );
 
    S32 pushed = 0;     // Count of pushed objects
 
    lua_newtable(L);    // Create a table, with no slots pre-allocated for our data
 
-   for(S32 i = 0; i < gServerGame->getGameType()->mClientList.size(); i++)
+   for(S32 i = 0; i < clientCount; i++)
    {
-      ClientRef *clientRef = gServerGame->getGameType()->mClientList[i];
+      ClientRef *clientRef = gServerGame->getGameType()->getClient(i);
 
       if(clientRef->getPlayerInfo()->isDefunct())     // Skip defunct players
          continue;

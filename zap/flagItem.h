@@ -43,6 +43,8 @@ private:
    Point mInitialPos;                 // Where flag was "born"
    bool mIsAtHome;
 
+   const Vector<FlagSpawn> *getSpawnPoints();
+
 protected:
    U32 mFlagCount;                    // How many flags does this represet?
 

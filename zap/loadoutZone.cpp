@@ -138,7 +138,7 @@ void LoadoutZone::onAddedToGame(Game *theGame)
 
 
 // More precise boundary for precise collision detection
-bool LoadoutZone::getCollisionPoly(Vector<Point> &polyPoints)
+bool LoadoutZone::getCollisionPoly(Vector<Point> &polyPoints) const
 {
    polyPoints = *getOutline();
    return true;

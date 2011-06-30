@@ -195,7 +195,7 @@ bool Barrier::unionBarriers(const Vector<DatabaseObject *> &barriers, Vector<Vec
 
 
 // Processes mPoints and fills polyPoints 
-bool Barrier::getCollisionPoly(Vector<Point> &polyPoints)
+bool Barrier::getCollisionPoly(Vector<Point> &polyPoints) const
 {
    if (mSolid)
       polyPoints = mPoints;
@@ -451,7 +451,7 @@ string WallItem::toString()
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-Color EDITOR_WALL_FILL_COLOR(.5, .5, 1); 
+const Color EDITOR_WALL_FILL_COLOR(.5, .5, 1); 
 
 TNL_IMPLEMENT_NETOBJECT(PolyWall);
 
@@ -497,7 +497,7 @@ void PolyWall::render()
 
 void PolyWall::renderFill()
 {
-   renderPolygonFill(getFill(), EDITOR_WALL_FILL_COLOR, 1);
+   renderPolygonFill(getFill(), &EDITOR_WALL_FILL_COLOR, 1);
 }
 
 
@@ -511,9 +511,8 @@ void PolyWall::renderEditor(F32 currentScale)
 
 void PolyWall::renderDock()
 {
-   renderPolygonFill(getFill(), EDITOR_WALL_FILL_COLOR, 1);
-   glColor(Colors::blue);
-   renderPolygonOutline(getOutline());
+   renderPolygonFill(getFill(), &EDITOR_WALL_FILL_COLOR);
+   renderPolygonOutline(getOutline(), &Colors::blue);
 }
 
 
@@ -882,7 +881,10 @@ void WallSegment::renderFill(bool beingDragged, bool showingReferenceShip)
    glDisableBlendfromLineSmooth;
    
    // Use true below because all segments are triangulated
-   renderWallFill(&triangulatedFillPoints, true, (useGameColor ? gIniSettings.wallFillColor : EDITOR_WALL_FILL_COLOR) * (beingDragged ? 0.5 : 1));   
+   Color fillColor = useGameColor ? gIniSettings.wallFillColor : EDITOR_WALL_FILL_COLOR;
+   fillColor *= beingDragged ? 0.5 : 1;
+
+   renderWallFill(&triangulatedFillPoints, true, fillColor);   
    glEnableBlendfromLineSmooth;
 }
 

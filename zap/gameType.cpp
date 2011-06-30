@@ -336,10 +336,6 @@ void GameType::idle(GameObject::IdleCallPath path)
 
    if(isGhost())     // i.e. client only
    {
-      // Update overlay message timers
-      mLevelInfoDisplayTimer.update(deltaT);
-      mInputModeChangeAlertDisplayTimer.update(deltaT);
-
       mGameTimer.update(deltaT);
       mZoneGlowTimer.update(deltaT);
 
@@ -392,7 +388,7 @@ void GameType::idle(GameObject::IdleCallPath path)
    // Need more asteroids?
    for(S32 i = 0; i < mAsteroidSpawnPoints.size(); i++)
    {
-      if(mAsteroidSpawnPoints[i].timer.update(deltaT))
+      if(mAsteroidSpawnPoints[i].updateTimer(deltaT))
       {
          Asteroid *asteroid = dynamic_cast<Asteroid *>(TNL::Object::create("Asteroid"));   // Create a new asteroid
 
@@ -402,7 +398,7 @@ void GameType::idle(GameObject::IdleCallPath path)
 
          asteroid->addToGame(gServerGame);                                                 // And add it to the list of game objects
 
-         mAsteroidSpawnPoints[i].timer.reset();                                            // Reset the spawn timer
+         mAsteroidSpawnPoints[i].resetTimer();                                             // Reset the spawn timer
       }
    }
 
@@ -441,281 +437,23 @@ void GameType::idle(GameObject::IdleCallPath path)
 }
 
 
-// Sorts players by score, high to low
-S32 QSORT_CALLBACK playerScoreSort(RefPtr<ClientRef> *a, RefPtr<ClientRef> *b)
-{
-   return b->getPointer()->getScore() - a->getPointer()->getScore();
-}
 
-
-// Sorts teams by score, high to low
-S32 QSORT_CALLBACK teamScoreSort(Team *a, Team *b)
-{
-   return b->getScore() - a->getScore();  
-}
-
-
-// Sorts teams by player counts, high to low
-S32 QSORT_CALLBACK teamSizeSort(Team *a, Team *b)
-{
-   return (b->numPlayers + b->numBots) - (a->numPlayers + a->numBots);
-}
+//// Sorts teams by player counts, high to low
+//S32 QSORT_CALLBACK teamSizeSort(Team *a, Team *b)
+//{
+//   return (b->numPlayers + b->numBots) - (a->numPlayers + a->numBots);
+//}
 
 
 extern IniSettings gIniSettings;
 
 void GameType::renderInterfaceOverlay(bool scoreboardVisible)
 {
-   S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
-
-   if(mLevelInfoDisplayTimer.getCurrent() || gClientGame->mGameUserInterface->mMissionOverlayActive)
-   {
-      F32 alpha = 1;
-      if(mLevelInfoDisplayTimer.getCurrent() < 1000 && !gClientGame->mGameUserInterface->mMissionOverlayActive)
-         alpha = mLevelInfoDisplayTimer.getCurrent() * 0.001f;
-
-      glEnableBlend;
-         glColor4f(1, 1, 1, alpha);
-         UserInterface::drawCenteredStringf(canvasHeight / 2 - 180, 30, "Level: %s", mLevelName.getString());
-         UserInterface::drawCenteredStringf(canvasHeight / 2 - 140, 30, "Game Type: %s", getGameTypeString());
-         glColor4f(0, 1, 1, alpha);
-         UserInterface::drawCenteredString(canvasHeight / 2 - 100, 20, getInstructionString());
-         glColor4f(1, 0, 1, alpha);
-         UserInterface::drawCenteredString(canvasHeight / 2 - 75, 20, mLevelDescription.getString());
-
-         glColor4f(0, 1, 0, alpha);
-         UserInterface::drawCenteredStringf(canvasHeight - 100, 20, "Press [%s] to see this information again", keyCodeToString(keyMISSION));
-
-         if(strcmp(mLevelCredits.getString(), ""))    // Credits string is not empty
-         {
-            glColor4f(1, 0, 0, alpha);
-            UserInterface::drawCenteredStringf(canvasHeight / 2 + 50, 20, "%s", mLevelCredits.getString());
-         }
-
-         glColor4f(1, 1, 0, alpha);
-         UserInterface::drawCenteredStringf(canvasHeight / 2 - 50, 20, "Score to Win: %d", mWinningScore);
-
-      glDisableBlend;
-
-      mInputModeChangeAlertDisplayTimer.reset(0);     // Supress mode change alert if this message is displayed...
-   }
-
-   if(mInputModeChangeAlertDisplayTimer.getCurrent() != 0)
-   {
-      // Display alert about input mode changing
-      F32 alpha = 1;
-      if(mInputModeChangeAlertDisplayTimer.getCurrent() < 1000)
-         alpha = mInputModeChangeAlertDisplayTimer.getCurrent() * 0.001f;
-
-      glEnableBlend;
-      glColor4f(1, 0.5 , 0.5, alpha);
-      UserInterface::drawCenteredStringf(UserInterface::vertMargin + 130, 20, "Input mode changed to %s", 
-                                         gIniSettings.inputMode == Joystick ? "Joystick" : "Keyboard");
-      glDisableBlend;
-   }
-
-   if((mGameOver || scoreboardVisible) && mTeams.size() > 0)      // Render scoreboard
-   {
-      U32 totalWidth = gScreenInfo.getGameCanvasWidth() - UserInterface::horizMargin * 2;
-      S32 teams = isTeamGame() ? mTeams.size() : 1;
-
-      U32 columnCount = min(teams, 2);
-
-      U32 teamWidth = totalWidth / columnCount;
-      S32 maxTeamPlayers = 0;
-      countTeamPlayers();
-
-      // Check to make sure at least one team has at least one player...
-      for(S32 i = 0; i < mTeams.size(); i++)
-      {
-         if(isTeamGame())
-         {     // (braces required)
-            if(mTeams[i].numPlayers + mTeams[i].numBots > maxTeamPlayers)
-               maxTeamPlayers = mTeams[i].numPlayers + mTeams[i].numBots;
-         }
-         else
-            maxTeamPlayers += mTeams[i].numPlayers + mTeams[i].numBots;
-      }
-      // ...if not, then go home!
-      if(!maxTeamPlayers)
-         return;
-
-      U32 teamAreaHeight = isTeamGame() ? 40 : 0;
-      U32 numTeamRows = (mTeams.size() + 1) >> 1;
-
-      U32 totalHeight = (gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin * 2) / numTeamRows - (numTeamRows - 1) * 2;
-      U32 maxHeight = min(30, (totalHeight - teamAreaHeight) / maxTeamPlayers);
-
-      U32 sectionHeight = (teamAreaHeight + maxHeight * maxTeamPlayers);
-      totalHeight = sectionHeight * numTeamRows + (numTeamRows - 1) * 2;
-
-      for(S32 i = 0; i < teams; i++)
-      {
-         S32 yt = (gScreenInfo.getGameCanvasHeight() - totalHeight) / 2 + (i >> 1) * (sectionHeight + 2);  // y-top
-         S32 yb = yt + sectionHeight;     // y-bottom
-         S32 xl = 10 + (i & 1) * teamWidth;
-         S32 xr = xl + teamWidth - 2;
-
-         Color c = getTeamColor(i);
-         glEnableBlend;
-
-         glColor(c, 0.6);
-         glBegin(GL_POLYGON);
-            glVertex2i(xl, yt);
-            glVertex2i(xr, yt);
-            glVertex2i(xr, yb);
-            glVertex2i(xl, yb);
-         glEnd();
-
-         glDisableBlend;
-
-         glColor3f(1,1,1);
-         if(isTeamGame())     // Render team scores
-         {
-            renderFlag(F32(xl + 20), F32(yt + 18), c);
-            renderFlag(F32(xr - 20), F32(yt + 18), c);
-
-            glColor3f(1,1,1);
-            glBegin(GL_LINES);
-               glVertex2i(xl, yt + S32(teamAreaHeight));
-               glVertex2i(xr, yt + S32(teamAreaHeight));
-            glEnd();
-
-            UserInterface::drawString(xl + 40, yt + 2, 30, getTeamName(i).getString());
-            UserInterface::drawStringf(xr - 140, yt + 2, 30, "%d", mTeams[i].getScore());
-         }
-
-
-         // Now for player scores.  First build a list, then sort it, then display it.
-
-         Vector<RefPtr<ClientRef> > playerScores;
-
-         for(S32 j = 0; j < mClientList.size(); j++)
-         {
-            if(mClientList[j]->getTeam() == i || !isTeamGame())
-               playerScores.push_back(mClientList[j]);
-         }
-
-         playerScores.sort(playerScoreSort);
-
-         S32 curRowY = yt + teamAreaHeight + 1;
-         S32 fontSize = U32(maxHeight * 0.8f);
-
-         for(S32 j = 0; j < playerScores.size(); j++)
-         {
-            static const char *bot = "B ";
-            S32 botsize = UserInterface::getStringWidth(F32(fontSize) * 0.5f, bot);
-            S32 x = xl + 40;
-
-            // Add the mark of the bot
-            if(playerScores[j]->isRobot)
-               UserInterface::drawString(x - botsize, curRowY + fontSize / 4 + 2, fontSize / 2, bot); 
-
-            UserInterface::drawString(x, curRowY, fontSize, playerScores[j]->name.getString());
-
-            static char buff[255] = "";
-
-            if(isTeamGame())
-               dSprintf(buff, sizeof(buff), "%2.2f", (F32)playerScores[j]->getRating());
-            else
-               dSprintf(buff, sizeof(buff), "%d", playerScores[j]->getScore());
-
-            UserInterface::drawString(xr - (120 + S32(UserInterface::getStringWidth(F32(fontSize), buff))), curRowY, fontSize, buff);
-            UserInterface::drawStringf(xr - 70, curRowY, fontSize, "%d", playerScores[j]->ping);
-            curRowY += maxHeight;
-         }
-      }
-   }
-   else if(mTeams.size() > 1 && isTeamGame())      // Render team scores in lower-right corner when scoreboard is off
-   {
-      S32 lroff = getLowerRightCornerScoreboardOffsetFromBottom();
-
-      // Build a list of teams, so we can sort by score
-      Vector<Team> teams;
-
-      for(S32 i = 0; i < mTeams.size(); i++)
-      {
-         teams.push_back(mTeams[i]);
-         teams[i].mId = i;
-      }
-
-      teams.sort(teamScoreSort);    
-
-      S32 maxScore = getLeadingScore();
-
-      const S32 textsize = 32;
-      S32 xpos = gScreenInfo.getGameCanvasWidth() - UserInterface::horizMargin - mDigitsNeededToDisplayScore * 
-                                                                                 UserInterface::getStringWidth(F32(textsize), "0");
-
-      for(S32 i = 0; i < teams.size(); i++)
-      {
-         S32 ypos = gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin - lroff - (teams.size() - i - 1) * 38;
-
-         glColor3f(1,0,1);
-         if(teamHasFlag(teams[i].getId()))
-            UserInterface::drawString(xpos - 50, ypos + 3, 18, "*");
-
-         renderFlag(F32(xpos - 20), F32(ypos + 18), teams[i].color);
-         glColor3f(1,1,1);
-         UserInterface::drawStringf(xpos, ypos, textsize, "%d", teams[i].getScore());
-      }
-   }
-
-   //else if(mTeams.size() > 0 && !isTeamGame())   // Render leaderboard for non-team games
-   //{
-   //   S32 lroff = getLowerRightCornerScoreboardOffsetFromBottom();
-
-   //   // Build a list of teams, so we can sort by score
-   //   Vector<RefPtr<ClientRef> > leaderboardList;
-
-   //   // Add you to the leaderboard
-   //   if(mLocalClient)
-   //   {
-   //      leaderboardList.push_back(mLocalClient);
-   //      logprintf("Score = %d", mLocalClient->getScore());
-   //   }
-
-   //   // Get leading player
-   //   ClientRef *winningClient = mClientList[0];
-   //   for(S32 i = 1; i < mClientList.size(); i++)
-   //   {
-   //      if(mClientList[i]->getScore() > winningClient->getScore())
-   //      {
-   //         winningClient = mClientList[i];
-   //      }
-   //   }
-
-   //   // Add leader to the leaderboard
-   //   leaderboardList.push_back(winningClient);
-
-   //   const S32 textsize = 20;
-
-   //   for(S32 i = 0; i < leaderboardList.size(); i++)
-   //   {
-   //      const char* prefix = "";
-   //      if(i == leaderboardList.size() - 1)
-   //      {
-   //         prefix = "Leader:";
-   //      }
-   //      const char* name = leaderboardList[i]->name.getString();
-   //      S32 score = leaderboardList[i]->getScore();
-
-   //      S32 xpos = gScreenInfo.getGameCanvasWidth() - UserInterface::horizMargin - 
-   //                 UserInterface::getStringWidthf(textsize, "%s %s %d", prefix, name, score);
-   //      S32 ypos = gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin - lroff - i * 24;
-
-   //      glColor3f(1, 1, 1);
-   //      UserInterface::drawStringf(xpos, ypos, textsize, "%s %s %d", prefix, name, score);
-   //   }
-   //}
-
-   renderTimeLeft();
-   renderTalkingClients();
-   renderDebugStatus();
+   getGame()->getUserInterface()->renderBasicInterfaceOverlay(this, scoreboardVisible);
 }
 
 
-void GameType::renderObjectiveArrow(GameObject *target, Color c, F32 alphaMod)
+void GameType::renderObjectiveArrow(const GameObject *target, const Color *c, F32 alphaMod) const
 {
    if(!target)
       return;
@@ -739,11 +477,11 @@ void GameType::renderObjectiveArrow(GameObject *target, Color c, F32 alphaMod)
    if(r.min.y > nearestPoint.y)
       nearestPoint.y = r.min.y;
 
-   renderObjectiveArrow(nearestPoint, c, alphaMod);
+   renderObjectiveArrow(&nearestPoint, c, alphaMod);
 }
 
 
-void GameType::renderObjectiveArrow(Point nearestPoint, Color c, F32 alphaMod)
+void GameType::renderObjectiveArrow(const Point *nearestPoint, const Color *outlineColor, F32 alphaMod) const
 {
    GameConnection *gc = gClientGame->getConnectionToServer();
    GameObject *co = NULL;
@@ -787,20 +525,21 @@ void GameType::renderObjectiveArrow(Point nearestPoint, Color c, F32 alphaMod)
    Point p2 = rp - arrowDir * 23 * scale + crossVec * 8 * scale;
    Point p3 = rp - arrowDir * 23 * scale - crossVec * 8 * scale;
 
+   Color fillColor = *outlineColor;    // Create local copy
+   fillColor *= .7;
 
    glEnableBlend;
-   glColor(c * 0.7, alpha);
-   glBegin(GL_POLYGON);    // Fill
-      glVertex(rp);
-      glVertex(p2);
-      glVertex(p3);
-   glEnd();
-   glColor(c, alpha);
-   glBegin(GL_LINE_LOOP);  // Outline
-      glVertex(rp);
-      glVertex(p2);
-      glVertex(p3);
-   glEnd();
+
+   for(S32 i = 1; i <= 0; i--)
+   {
+      glColor(i ? &fillColor : outlineColor, alpha);
+      glBegin(i ? GL_POLYGON : GL_LINE_LOOP);    
+         glVertex(rp);
+         glVertex(p2);
+         glVertex(p3);
+      glEnd();
+   }
+
    glDisableBlend;
 
    Point cen = rp - arrowDir * 12;
@@ -810,109 +549,6 @@ void GameType::renderObjectiveArrow(Point nearestPoint, Color c, F32 alphaMod)
 
    // Add an icon to the objective arrow...  kind of lame.
    //renderSmallFlag(cen, c, alpha);
-}
-
-
-void GameType::renderTimeLeft()
-{
-   U32 timeLeft = getRemainingGameTime();      // Time remaining in game
-
-   const S32 size = 20;       // Size of time
-   const S32 gtsize = 12;     // Size of game type/score indicator
-   
-   S32 len = UserInterface::getStringWidthf(gtsize, "[%s/%d]", getShortName(), mWinningScore);
-
-   glColor3f(0,1,1);
-   UserInterface::drawStringf(gScreenInfo.getGameCanvasWidth() - UserInterface::horizMargin - 65 - len - 5,
-                              gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin - 20 + ((size - gtsize) / 2) + 2, 
-                              gtsize, "[%s/%d]", getShortName(), mWinningScore);
-
-   S32 x = gScreenInfo.getGameCanvasWidth() - UserInterface::horizMargin - 65;
-   S32 y = gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin - 20;
-   glColor3f(1,1,1);
-
-   if(mGameTimer.getPeriod() == 0)
-      UserInterface::drawString(x, y, size, "Unlim.");
-   else
-   {
-      U32 minsRemaining = timeLeft / 60;
-      U32 secsRemaining = timeLeft - (minsRemaining * 60);
-
-      UserInterface::drawStringf(x, y, size, "%02d:%02d", minsRemaining, secsRemaining);
-   }
-}
-
-
-void GameType::renderTalkingClients()
-{
-   S32 y = 150;
-   for(S32 i = 0; i < mClientList.size(); i++)
-   {
-      if(mClientList[i]->voiceSFX->isPlaying())
-      {
-         Color teamColor = mTeams[mClientList[i]->getTeam()].color;
-         glColor(teamColor);
-         UserInterface::drawString(10, y, 20, mClientList[i]->name.getString());
-         y += 25;
-      }
-   }
-}
-
-
-void GameType::renderDebugStatus()
-{
-   // When bots are frozen, render large pause icon in lower left
-   if(Robot::isPaused())
-   {
-      glColor3f(1,1,1);
-
-      const S32 PAUSE_HEIGHT = 40;
-      const S32 PAUSE_WIDTH = 15;
-      const S32 PAUSE_GAP = 8;
-      const S32 BOX_INSET = 5;
-      const S32 BOX_THICKNESS = 4;
-      const S32 BOX_HEIGHT = PAUSE_HEIGHT + 2 * PAUSE_GAP + BOX_THICKNESS;
-      const S32 BOX_WIDTH = 280;
-      const S32 TEXT_SIZE = 20;
-
-      S32 x, y;
-
-      // Draw box
-      x = UserInterface::vertMargin + BOX_THICKNESS / 2 - 3;
-      y = gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin;
-
-      for(S32 i = 1; i >= 0; i--)
-      {
-         glColor(i ? Colors::black : Colors::white);
-         glBegin(i ? GL_POLYGON: GL_LINE_LOOP); 
-            glVertex2i(x,             y);
-            glVertex2i(x + BOX_WIDTH, y);
-            glVertex2i(x + BOX_WIDTH, y - BOX_HEIGHT);
-            glVertex2i(x,             y - BOX_HEIGHT);
-         glEnd();
-      }
-
-
-      // Draw Pause symbol
-      x = UserInterface::vertMargin + BOX_THICKNESS + BOX_INSET;
-      y = gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin - BOX_THICKNESS - BOX_INSET;
-
-      for(S32 i = 0; i < 2; i++)
-      {
-         glBegin(GL_POLYGON);    // Filled rectangle
-            glVertex2i(x,               y);
-            glVertex2i(x + PAUSE_WIDTH, y);
-            glVertex2i(x + PAUSE_WIDTH, y - PAUSE_HEIGHT);
-            glVertex2i(x,               y - PAUSE_HEIGHT);
-         glEnd();
-
-         x += PAUSE_WIDTH + PAUSE_GAP;
-      }
-
-      x += BOX_INSET;
-      y -= (TEXT_SIZE + BOX_INSET + BOX_THICKNESS + 3);
-      UserInterface::drawString(x, y, TEXT_SIZE, "STEP: Alt-], Ctrl-]");
-   }
 }
 
 
@@ -945,20 +581,22 @@ VersionedGameStats GameType::getGameStats()
    gameStats->isTeamGame = isTeamGame();
    gameStats->levelName = mLevelName.getString();
    gameStats->gameType = getGameTypeString();
-   gameStats->teamCount = mTeams.size(); // is this needed?, currently Not sent, instead, can use gameStats->teamStats.size()
+   gameStats->teamCount = mGame->getTeamCount(); // is this needed?, currently Not sent, instead, can use gameStats->teamStats.size()
    gameStats->build_version = BUILD_VERSION;
    gameStats->build_version = CS_PROTOCOL_VERSION; // This is not send, but may be used for logging
 
-   gameStats->teamStats.resize(mTeams.size());
-   for(S32 i = 0; i < mTeams.size(); i++)
+   gameStats->teamStats.resize(mGame->getTeamCount());
+
+   for(S32 i = 0; i < mGame->getTeamCount(); i++)
    {
       TeamStats *teamStats = &gameStats->teamStats[i];
 
-      teamStats->intColor = mTeams[i].color.toU32();
-      teamStats->hexColor = mTeams[i].color.toHexString();
+      const Color *color = mGame->getTeamColor(i);
+      teamStats->intColor = color->toU32();
+      teamStats->hexColor = color->toHexString();
 
-      teamStats->name = mTeams[i].getName().getString();
-      teamStats->score = mTeams[i].getScore();
+      teamStats->name = mGame->getTeam(i)->getName().getString();
+      teamStats->score = ((Team *)(mGame->getTeam(i)))->getScore();
       for(S32 j = 0; j < mClientList.size(); j++)
       {
          // Only looking for players on the current team
@@ -1004,6 +642,25 @@ VersionedGameStats GameType::getGameStats()
 }
 
 
+// Sorts players by score, high to low
+S32 QSORT_CALLBACK playerScoreSort(RefPtr<ClientRef> *a, RefPtr<ClientRef> *b)
+{
+   return b->getPointer()->getScore() - a->getPointer()->getScore();
+}
+
+
+void GameType::getSortedPlayerScores(S32 teamIndex, Vector<RefPtr<ClientRef> > &playerScores) const
+{
+   for(S32 j = 0; j < getClientCount(); j++)
+      if(!isTeamGame() || getClient(j)->getTeam() == teamIndex)
+         playerScores.push_back(getClient(j));
+
+   playerScores.sort(playerScoreSort);
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 class InsertStatsToDatabaseThread : public TNL::Thread
 {
@@ -1103,22 +760,22 @@ void GameType::onGameOver()
    if(isTeamGame())   // Team game -> find top team
    {
       S32 teamWinner = 0;
-      S32 winningScore = mTeams[0].getScore();
-      for(S32 i = 1; i < mTeams.size(); i++)
+      S32 winningScore = ((Team *)(mGame->getTeam(0)))->getScore();
+      for(S32 i = 1; i < mGame->getTeamCount(); i++)
       {
-         if(mTeams[i].getScore() == winningScore)
+         if(((Team *)(mGame->getTeam(i)))->getScore() == winningScore)
             tied = true;
-         else if(mTeams[i].getScore() > winningScore)
+         else if(((Team *)(mGame->getTeam(i)))->getScore() > winningScore)
          {
             teamWinner = i;
-            winningScore = mTeams[i].getScore();
+            winningScore = ((Team *)(mGame->getTeam(i)))->getScore();
             tied = false;
          }
       }
       if(!tied)
       {
          e.push_back(teamString);
-         e.push_back(mTeams[teamWinner].getName());
+         e.push_back(mGame->getTeam(teamWinner)->getName());
       }
    }
    else                    // Individual game -> find player with highest score
@@ -1239,25 +896,26 @@ bool GameType::processLevelParam(S32 argc, const char **argv)
 {
    if(!stricmp(argv[0], "Team"))
    {
-      if(mTeams.size() < gMaxTeams)   // Too many teams?
+      if(mGame->getTeamCount() < gMaxTeams)   // Too many teams?
       {
-         Team team;
-         team.readTeamFromLevelLine(argc, argv);
-   
-         if(team.numPlayers != -1)
-            mTeams.push_back(team);
+         boost::shared_ptr<Team> team = boost::shared_ptr<Team>(new Team);
+         if(team->readTeamFromLevelLine(argc, argv))
+            mGame->addTeam(team);
       }
    }
+   // TODO: Create better way to change team details from level scripts: https://code.google.com/p/bitfighter/issues/detail?id=106
    else if(!stricmp(argv[0], "TeamChange"))   // For level script. Could be removed when there is a better way to change team names and colors.
    {
       if(argc >= 2)   // Enough arguments?
       {
-         Team team;
-         S32 teamNumber = atoi(argv[1]);   //Team number to change
-         team.readTeamFromLevelLine(argc-1, argv+1);    //skip one arg
-   
-         if(team.numPlayers + team.numBots != -1 && teamNumber < mTeams.size() && teamNumber >= 0)
-            mTeams[teamNumber] = team;
+         S32 teamNumber = atoi(argv[1]);   // Team number to change
+
+         if(teamNumber >= 0 && teamNumber < mGame->getTeamCount())
+         {
+            boost::shared_ptr<Team> team = boost::shared_ptr<Team>(new Team);
+            team->readTeamFromLevelLine(argc-1, argv+1);          // skip one arg
+            mGame->addTeam(team);
+         }
       }
    }
    else if(!stricmp(argv[0], "Specials"))
@@ -1416,18 +1074,20 @@ void GameType::spawnRobot(Robot *robot)
 }
 
 
-Point GameType::getSpawnPoint(S32 team)
+Point GameType::getSpawnPoint(S32 teamIndex)
 {
-   // out of range team number
-   if(team < 0 || team >= mTeams.size())
+   // Invalid team id
+   if(teamIndex < 0 || teamIndex >= mGame->getTeamCount())
       return Point(0,0);
+
+   Team *team = (Team *)mGame->getTeam(teamIndex);
 
    // If team has no spawn points, we'll just have them spawn at 0,0
-   if(mTeams[team].spawnPoints.size() == 0)
+   if(team->getSpawnPointCount() == 0)
       return Point(0,0);
 
-   S32 spawnIndex = TNL::Random::readI() % mTeams[team].spawnPoints.size();    // Pick random spawn point
-   return mTeams[team].spawnPoints[spawnIndex];
+   S32 spawnIndex = TNL::Random::readI() % team->getSpawnPointCount();    // Pick random spawn point
+   return team->getSpawnPoint(spawnIndex);
 }
 
 
@@ -1689,22 +1349,25 @@ void GameType::queryItemsOfInterest()
 
 // Team in range?    Currently not used.
 // Could use it for processArguments, but out of range will be UNKNOWN name and should not cause any errors.
-bool GameType::checkTeamRange(S32 team){
-   return (team < mTeams.size() && team >= -2);
+bool GameType::checkTeamRange(S32 team)
+{
+   return (team < mGame->getTeamCount() && team >= -2);
 }
 
-// Zero teams will crash.
+
+// Zero teams will crash, returns true if we had to add a default team
 bool GameType::makeSureTeamCountIsNotZero()
 {
-   if(mTeams.size() == 0) {
-      Team team;
-      team.setName("Missing Team");
-      team.color.r = 0;
-      team.color.g = 0;
-      team.color.b = 1;
-      mTeams.push_back(team);
+   if(mGame->getTeamCount() == 0) 
+   {
+      boost::shared_ptr<Team> team = boost::shared_ptr<Team>(new Team);
+      team->setName("Missing Team");
+      team->setColor(0,0,1);
+      mGame->addTeam(team);
+
       return true;
    }
+
    return false;
 }
 
@@ -1714,14 +1377,9 @@ extern Color gHostileTeamColor;
 
 // This method can be overridden by other game types that handle colors differently
 // TODO: Combine with EditorGame::getTeamColor
-Color GameType::getTeamColor(S32 team)
+const Color *GameType::getTeamColor(S32 teamIndex) const
 {
-   if(team == Item::TEAM_NEUTRAL || team >= mTeams.size() || team < Item::TEAM_HOSTILE)
-      return gNeutralTeamColor;
-   else if(team == Item::TEAM_HOSTILE)
-      return gHostileTeamColor;
-   else
-      return mTeams[team].color;
+   return getGame()->getTeamColor(teamIndex);
 }
 
 
@@ -1736,29 +1394,13 @@ S32 GameType::getTeam(const char *playerName)
 }
 
 
-//There is a bigger need to use StringTableEntry and not const char *
-//    mainly to prevent errors on CTF neutral flag and out of range team number.
-StringTableEntry GameType::getTeamName(S32 team)
-{
-   
-   if(team >= 0 && team < mTeams.size())
-      return mTeams[team].getName();
-   else if(team == -2)
-      return StringTableEntry("Hostile");
-   else if(team == -1)
-      return StringTableEntry("Neutral");
-   else
-      return StringTableEntry("UNKNOWN");
-}
-
-
-Color GameType::getTeamColor(GameObject *theObject)
+const Color *GameType::getTeamColor(GameObject *theObject)
 {
    return getTeamColor(theObject->getTeam());
 }
 
 
-Color GameType::getShipColor(Ship *s)
+const Color *GameType::getShipColor(Ship *s)
 {
    return getTeamColor(s->getTeam());
 }
@@ -1767,27 +1409,31 @@ Color GameType::getShipColor(Ship *s)
 // Make sure that the mTeams[] structure has the proper player counts
 // Needs to be called manually before accessing the structure
 // Rating may only work on server... not tested on client
-void GameType::countTeamPlayers()
+void GameType::countTeamPlayers() const
 {
-   for(S32 i = 0; i < mTeams.size(); i++)
-   {
-      mTeams[i].numPlayers = 0;
-      mTeams[i].numBots = 0;
-      mTeams[i].rating = 0;
-   }
+   for(S32 i = 0; i < mGame->getTeamCount(); i++)
+      ((Team *)mGame->getTeam(i))->clearStats();
 
    for(S32 i = 0; i < mClientList.size(); i++)
    {
-      if(mClientList[i]->getTeam() >= 0 && mClientList[i]->getTeam() < mTeams.size())
-      { // robot could be neutral or hostile, skip out of range team numbers.
+      S32 teamIndex = mClientList[i]->getTeam();
+
+      if(teamIndex >= 0 && teamIndex < mGame->getTeamCount())
+      { 
+         // Robot could be neutral or hostile, skip out of range team numbers
+         Team *team = (Team *)mGame->getTeam(teamIndex);
+
          if(mClientList[i]->isRobot)
-            mTeams[mClientList[i]->getTeam()].numBots++;
+            team->incrementBotCount();
          else
-            mTeams[mClientList[i]->getTeam()].numPlayers++;
+            team->incrementPlayerCount();
 
          GameConnection *cc = mClientList[i]->clientConnection;
+
+         const F32 BASE_RATING = .1;
+
          if(cc)
-            mTeams[mClientList[i]->getTeam()].rating += max(getCurrentRating(cc), .1f);
+            team->addRating(max(getCurrentRating(cc), BASE_RATING));
       }
    }
 }
@@ -1811,24 +1457,27 @@ void GameType::serverAddClient(GameConnection *theClient)
    countTeamPlayers();     // Also calcs team ratings
 
    // Figure out how many players the team with the fewest players has
-   S32 minPlayers = mTeams[0].numPlayers + mTeams[0].numBots ;
+   Team *team = (Team *)mGame->getTeam(0);
+   S32 minPlayers = team->getPlayerCount() + team->getBotCount();
 
-   for(S32 i = 1; i < mTeams.size(); i++)
+   for(S32 i = 1; i < mGame->getTeamCount(); i++)
    {
-      if(mTeams[i].numPlayers + mTeams[i].numBots < minPlayers)
-         minPlayers = mTeams[i].numPlayers + mTeams[i].numBots;
+      team = (Team *)mGame->getTeam(i);
+      if(team->getPlayerBotCount() < minPlayers)
+         minPlayers = team->getPlayerBotCount();
    }
 
    // Of the teams with minPlayers, find the one with the lowest total rating...
    S32 minTeamIndex = 0;
    F32 minRating = F32_MAX;
 
-   for(S32 i = 0; i < mTeams.size(); i++)
+   for(S32 i = 0; i < mGame->getTeamCount(); i++)
    {
-      if(mTeams[i].numPlayers + mTeams[i].numBots == minPlayers && mTeams[i].rating < minRating)
+      team = (Team *)mGame->getTeam(i);
+      if(team->getPlayerBotCount() == minPlayers && team->getRating() < minRating)
       {
          minTeamIndex = i;
-         minRating = mTeams[i].rating;
+         minRating = team->getRating();
       }
    }
 
@@ -1838,7 +1487,7 @@ void GameType::serverAddClient(GameConnection *theClient)
       Ship *ship = dynamic_cast<Ship *>(theClient->getControlObject());
       if(ship)
       {
-         if(ship->getTeam() >= 0 && ship->getTeam() < mTeams.size()) // no more neutral or hostile bots
+         if(ship->getTeam() >= 0 && ship->getTeam() < mGame->getTeamCount()) // no more neutral or hostile bots
             minTeamIndex = ship->getTeam();
       }
       ship->setMaskBits(Ship::ChangeTeamMask);  // This is needed to avoid gray robot ships when using /addbot
@@ -1966,10 +1615,11 @@ void GameType::updateScore(Ship *ship, ScoringEvent scoringEvent, S32 data)
 
 // Handle both individual scores and team scores
 // Runs on server only
-void GameType::updateScore(ClientRef *player, S32 team, ScoringEvent scoringEvent, S32 data)
+void GameType::updateScore(ClientRef *player, S32 teamIndex, ScoringEvent scoringEvent, S32 data)
 {
    if(mGameOver)     // freeze score while game over.
       return;
+
    S32 newScore = S32_MIN;
 
    if(player != NULL)
@@ -1997,27 +1647,28 @@ void GameType::updateScore(ClientRef *player, S32 team, ScoringEvent scoringEven
    if(isTeamGame())
    {
       // Just in case...  completely superfluous, gratuitous check
-      if(team < 0 || team >= mTeams.size())
+      if(teamIndex < 0 || teamIndex >= mGame->getTeamCount())
          return;
 
       S32 points = getEventScore(TeamScore, scoringEvent, data);
       if(points == 0)
          return;
 
-      mTeams[team].addScore(points);
+      Team *team = (Team *)mGame->getTeam(teamIndex);
+      team->addScore(points);
 
       // This is kind of a hack to emulate adding a point to every team *except* the scoring team.  The scoring team has its score
       // deducted, then the same amount is added to every team.  Assumes that points < 0.
       if(scoringEvent == ScoreGoalOwnTeam)
       {
-         for(S32 i = 0; i < mTeams.size(); i++)
+         for(S32 i = 0; i < mGame->getTeamCount(); i++)
          {
-            mTeams[i].addScore(-points);                    // Add magnitiude of negative score to all teams
-            s2cSetTeamScore(i, mTeams[i].getScore());       // Broadcast result
+            ((Team *)mGame->getTeam(teamIndex))->addScore(-points);            // Add magnitiude of negative score to all teams
+            s2cSetTeamScore(i, ((Team *)(mGame->getTeam(i)))->getScore());     // Broadcast result
          }
       }
       else  // All other scoring events
-         s2cSetTeamScore(team, mTeams[team].getScore());    // Broadcast new team score
+         s2cSetTeamScore(teamIndex, team->getScore());     // Broadcast new team score
 
       updateLeadingTeamAndScore();
       newScore = mLeadingTeamScore;
@@ -2034,16 +1685,16 @@ void GameType::updateLeadingTeamAndScore()
    mDigitsNeededToDisplayScore = -1;
 
    // Find the leading team...
-   for(S32 i = 0; i < mTeams.size(); i++)
+   for(S32 i = 0; i < mGame->getTeamCount(); i++)
    {
-      S32 score = mTeams[i].getScore();
+      S32 score = ((Team *)(mGame->getTeam(i)))->getScore();
       S32 digits = score == 0 ? 1 : (S32(log10(F32(abs(score)))) + (score < 0 ? 2 : 1));
 
       mDigitsNeededToDisplayScore = max(digits, mDigitsNeededToDisplayScore);
 
       if(score > mLeadingTeamScore)
       {
-         mLeadingTeamScore = mTeams[i].getScore();
+         mLeadingTeamScore = ((Team *)(mGame->getTeam(i)))->getScore();
          mLeadingTeam = i;
       }
    }
@@ -2143,14 +1794,14 @@ static void switchTeamsCallback(U32 unused)
       return;
 
    // If there are only two teams, just switch teams and skip the rigamarole
-   if(gt->mTeams.size() == 2)
+   if(gClientGame->getTeamCount() == 2)
    {
       Ship *ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());  // Returns player's ship...
       if(!ship)
          return;
 
-      gt->c2sChangeTeams(1 - ship->getTeam());                 // If two teams, team will either be 0 or 1, so "1 - " will toggle
-      UserInterface::reactivateMenu(*gClientGame->mGameUserInterface);       // Jump back into the game (this option takes place immediately)
+      gt->c2sChangeTeams(1 - ship->getTeam());                          // If two teams, team will either be 0 or 1, so "1 - " will toggle
+      UserInterface::reactivateMenu(gClientGame->getUserInterface());   // Jump back into the game (this option takes place immediately)
    }
    else
    {
@@ -2163,7 +1814,7 @@ static void switchTeamsCallback(U32 unused)
 // Add any additional game-specific menu items, processed below
 void GameType::addClientGameMenuOptions(Vector<MenuItem *> &menuOptions)
 {
-   if(isTeamGame() && mTeams.size() > 1 && !mBetweenLevels)
+   if(isTeamGame() && mGame->getTeamCount() > 1 && !mBetweenLevels)
    {
       GameConnection *gc = gClientGame->getConnectionToServer();
 
@@ -2188,7 +1839,7 @@ static void switchPlayersTeamCallback(U32 unused)
 // Add any additional game-specific admin menu items, processed below
 void GameType::addAdminGameMenuOptions(Vector<MenuItem *> &menuOptions)
 {
-   if(isTeamGame() && mTeams.size() > 1)
+   if(isTeamGame() && mGame->getTeamCount() > 1)
       menuOptions.push_back(new MenuItem(0, "CHANGE A PLAYER'S TEAM", switchPlayersTeamCallback, "", KEY_C));
 }
 
@@ -2213,21 +1864,25 @@ GAMETYPE_RPC_S2C(GameType, s2cSetLevelInfo, (StringTableEntry levelName, StringT
    mLevelHasLoadoutZone = levelHasLoadoutZone;           // Need to pass this because we won't know for sure when the loadout zones will be sent, so searching for them is difficult
 
    ClientGame *clientGame = dynamic_cast<ClientGame *>(getGame());
-   TNLAssert(clientGame, "clientGame is NULL");
-   if(!clientGame) return;
 
-   clientGame->mObjectsLoaded = 0;                      // Reset item counter
-   clientGame->mGameUserInterface->mShowProgressBar = true;           // Show progress bar
-   //gClientGame->setInCommanderMap(true);               // If we change here, need to tell the server we are in this mode.
+   TNLAssert(clientGame, "clientGame is NULL");
+   if(!clientGame) 
+      return;
+
+   clientGame->mObjectsLoaded = 0;                               // Reset item counter
+   clientGame->getUserInterface()->mShowProgressBar = true;      // Show progress bar
+   //gClientGame->setInCommanderMap(true);                       // If we change here, need to tell the server we are in this mode.
    //gClientGame->resetZoomDelta();
 
-   mLevelInfoDisplayTimer.reset(LevelInfoDisplayTime);   // Start displaying the level info, now that we have it
+   clientGame->getUserInterface()->resetLevelInfoDisplayTimer(); // Start displaying the level info, now that we have it
 
    // Now we know all we need to initialize our loadout options
-   clientGame->mGameUserInterface->initializeLoadoutOptions(engineerEnabled);
+   clientGame->getUserInterface()->initializeLoadoutOptions(engineerEnabled);
 }
 
+
 extern string gLevelChangePassword;
+
 GAMETYPE_RPC_C2S(GameType, c2sAddTime, (U32 time), (time))
 {
    GameConnection *source = dynamic_cast<GameConnection *>(NetObject::getRPCSourceConnection());
@@ -2235,13 +1890,9 @@ GAMETYPE_RPC_C2S(GameType, c2sAddTime, (U32 time), (time))
    if(!source->isLevelChanger())                         // Level changers and above
       return;
 
-   // use voting when no level change password and more then 1 players
-   if(!source->isAdmin() && gLevelChangePassword.length() == 0 && gServerGame->getPlayerCount() > 1)
-   {
-      if(gServerGame->voteStart(source, 1, time))
-         return;
-   }
-
+   // Use voting when no level change password and more then 1 players
+   if(!source->isAdmin() && gLevelChangePassword.length() == 0 && gServerGame->getPlayerCount() > 1 && gServerGame->voteStart(source, 1, time))
+      return;
 
    mGameTimer.extend(time);                         // Increase "official time"
    s2cSetTimeRemaining(mGameTimer.getCurrent());    // Broadcast time to clients
@@ -2291,10 +1942,10 @@ void GameType::addTime(U32 time)
 // Change client's team.  If team == -1, then pick next team
 void GameType::changeClientTeam(GameConnection *source, S32 team)
 {
-   if(mTeams.size() <= 1)     // Can't change if there's only one team...
+   if(mGame->getTeamCount() <= 1)     // Can't change if there's only one team...
       return;
 
-   if(team >= mTeams.size())     // Don't allow out of range team, Negative is allowed.
+   if(team >= mGame->getTeamCount())  // Don't allow out of range team, Negative is allowed.
       return;
 
    ClientRef *cl = source->getClientRef();
@@ -2327,14 +1978,14 @@ void GameType::changeClientTeam(GameConnection *source, S32 team)
       cl->respawnTimer.clear();     // If we've just died, this will keep a second copy of ourselves from appearing
    }
 
-   if(team < 0)                                          // If no team provided...
-      cl->setTeam((cl->getTeam() + 1) % mTeams.size());  // ...find the next one...
-   else                                                  // ...otherwise...
-      cl->setTeam(team);                                 // ...use the one provided
+   if(team < 0)                                                  // If no team provided...
+      cl->setTeam((cl->getTeam() + 1) % mGame->getTeamCount());  // ...find the next one...
+   else                                                          // ...otherwise...
+      cl->setTeam(team);                                         // ...use the one provided
 
    if(cl->getTeam() >= 0) s2cClientJoinedTeam(cl->name, cl->getTeam());         // Announce the change
-   spawnShip(source);                                    // Create a new ship
-   cl->clientConnection->switchedTeamCount++;            // Count number of times team is switched.
+   spawnShip(source);                                            // Create a new ship
+   cl->clientConnection->switchedTeamCount++;                    // Count number of times team is switched.
 }
 
 
@@ -2355,7 +2006,8 @@ GAMETYPE_RPC_S2C(GameType, s2cAddClient,
 
    ClientGame *clientGame = dynamic_cast<ClientGame *>(getGame());
    TNLAssert(clientGame, "clientGame is NULL");
-   if(!clientGame) return;
+   if(!clientGame) 
+      return;
 
    if(isMyClient)
    {
@@ -2363,17 +2015,17 @@ GAMETYPE_RPC_S2C(GameType, s2cAddClient,
 
       // Now we'll check if we need an updated scoreboard... this only needed to handle use case of user
       // holding Tab while one game transitions to the next.  Without it, ratings will be reported as 0.
-      if(clientGame->mGameUserInterface->isInScoreboardMode())
+      if(clientGame->getUserInterface()->isInScoreboardMode())
       {
          GameType *g = clientGame->getGameType();
          if(g)
             g->c2sRequestScoreboardUpdates(true);
       }
-      clientGame->mGameUserInterface->displayMessage(Color(0.6f, 0.6f, 0.8f), "Welcome to the game!");
+      clientGame->getUserInterface()->displayMessage(Color(0.6f, 0.6f, 0.8f), "Welcome to the game!");
    }
    else
    {
-      clientGame->mGameUserInterface->displayMessage(Color(0.6f, 0.6f, 0.8f), "%s joined the game.", name.getString());      
+      clientGame->getUserInterface()->displayMessage(Color(0.6f, 0.6f, 0.8f), "%s joined the game.", name.getString());      
       if(playAlert)
          SoundSystem::playSoundEffect(SFXPlayerJoined, 1);
    }
@@ -2419,9 +2071,10 @@ GAMETYPE_RPC_S2C(GameType, s2cRenameClient, (StringTableEntry oldName, StringTab
    }
    ClientGame *clientGame = dynamic_cast<ClientGame *>(getGame());
    TNLAssert(clientGame, "clientGame is NULL");
-   if(!clientGame) return;
+   if(!clientGame) 
+      return;
 
-   clientGame->mGameUserInterface->displayMessage(Color(0.6f, 0.6f, 0.8f), "%s changed to %s", oldName.getString(), newName.getString());
+   clientGame->getUserInterface()->displayMessage(Color(0.6f, 0.6f, 0.8f), "%s changed to %s", oldName.getString(), newName.getString());
 }
 
 // Server notifies clients that a player has left the game
@@ -2436,29 +2089,35 @@ GAMETYPE_RPC_S2C(GameType, s2cRemoveClient, (StringTableEntry name), (name))
       }
    }
    ClientGame *clientGame = dynamic_cast<ClientGame *>(getGame());
-   TNLAssert(clientGame, "clientGame is NULL");
-   if(!clientGame) return;
 
-   clientGame->mGameUserInterface->displayMessage(Color(0.6f, 0.6f, 0.8f), "%s left the game.", name.getString());
+   TNLAssert(clientGame, "clientGame is NULL");
+   if(!clientGame) 
+      return;
+
+   clientGame->getUserInterface()->displayMessage(Color(0.6f, 0.6f, 0.8f), "%s left the game.", name.getString());
    SoundSystem::playSoundEffect(SFXPlayerLeft, 1);
 }
 
+
 GAMETYPE_RPC_S2C(GameType, s2cAddTeam, (StringTableEntry teamName, F32 r, F32 g, F32 b), (teamName, r, g, b))
 {
-   Team team;
-   team.setName(teamName);
-   team.color.r = r;
-   team.color.g = g;
-   team.color.b = b;
-   mTeams.push_back(team);
+   boost::shared_ptr<Team> team = boost::shared_ptr<Team>(new Team);
+
+   team->setName(teamName);
+   team->setColor(r,g,b);
+
+   mGame->addTeam(team);
 }
+
 
 GAMETYPE_RPC_S2C(GameType, s2cSetTeamScore, (RangedU32<0, GameType::gMaxTeams> teamIndex, U32 score), (teamIndex, score))
 {
-   TNLAssert(teamIndex < U32(mTeams.size()), "teamIndex out of range")
-   if(teamIndex >= U32(mTeams.size()))
+   TNLAssert(teamIndex < U32(mGame->getTeamCount()), "teamIndex out of range");
+
+   if(teamIndex >= U32(mGame->getTeamCount()))
       return;
-   mTeams[teamIndex].setScore(score);
+   
+   ((Team *)mGame->getTeam(teamIndex))->setScore(score);
    updateLeadingTeamAndScore();    
 }
 
@@ -2479,7 +2138,7 @@ GAMETYPE_RPC_S2C(GameType, s2cChangeScoreToWin, (U32 winningScore, StringTableEn
    TNLAssert(clientGame, "clientGame is NULL");
    if(!clientGame) return;
 
-   clientGame->mGameUserInterface->displayMessage(Color(0.6f, 1, 0.8f) /*Nuclear green */, 
+   clientGame->getUserInterface()->displayMessage(Color(0.6f, 1, 0.8f) /*Nuclear green */, 
                "%s changed the winning score to %d.", changer.getString(), mWinningScore);
 }
 
@@ -2500,9 +2159,9 @@ GAMETYPE_RPC_S2C(GameType, s2cClientJoinedTeam,
    if(!clientGame) return;
 
    if(clientGame->getGameType()->mLocalClient && name == clientGame->getGameType()->mLocalClient->name)      
-      clientGame->mGameUserInterface->displayMessage(Color(0.6f, 0.6f, 0.8f), "You have joined team %s.", getTeamName(teamIndex).getString());
+      clientGame->getUserInterface()->displayMessage(Color(0.6f, 0.6f, 0.8f), "You have joined team %s.", getGame()->getTeamName(teamIndex).getString());
    else
-      clientGame->mGameUserInterface->displayMessage(Color(0.6f, 0.6f, 0.8f), "%s joined team %s.", name.getString(), getTeamName(teamIndex).getString());
+      clientGame->getUserInterface()->displayMessage(Color(0.6f, 0.6f, 0.8f), "%s joined team %s.", name.getString(), getGame()->getTeamName(teamIndex).getString());
 
    // Make this client forget about any mines or spybugs he knows about... it's a bit of a kludge to do this here,
    // but this RPC only runs when a player joins the game or changes teams, so this will never hurt, and we can
@@ -2534,7 +2193,7 @@ GAMETYPE_RPC_S2C(GameType, s2cClientBecameAdmin, (StringTableEntry name), (name)
    if(!clientGame) return;
 
    if(clientGame->getGameType()->mClientList.size() && name != clientGame->getGameType()->mLocalClient->name)    // Don't show message to self
-      clientGame->mGameUserInterface->displayMessage(Color(0,1,1), "%s has been granted administrator access.", name.getString());
+      clientGame->getUserInterface()->displayMessage(Color(0,1,1), "%s has been granted administrator access.", name.getString());
 }
 
 
@@ -2549,7 +2208,7 @@ GAMETYPE_RPC_S2C(GameType, s2cClientBecameLevelChanger, (StringTableEntry name),
    if(!clientGame) return;
 
    if(clientGame->getGameType()->mClientList.size() && name != clientGame->getGameType()->mLocalClient->name)    // Don't show message to self
-      clientGame->mGameUserInterface->displayMessage(Color(0,1,1), "%s can now change levels.", name.getString());
+      clientGame->getUserInterface()->displayMessage(Color(0,1,1), "%s can now change levels.", name.getString());
 }
 
 // Runs after the server knows that the client is available and addressable via the getGhostIndex()
@@ -2564,10 +2223,13 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
                    barrierExtents.min.x, barrierExtents.min.y, barrierExtents.max.x, barrierExtents.max.y, 
                    mLevelHasLoadoutZone, mEngineerEnabled);
 
-   for(S32 i = 0; i < mTeams.size(); i++)
+   for(S32 i = 0; i < mGame->getTeamCount(); i++)
    {
-      s2cAddTeam(mTeams[i].getName(), mTeams[i].color.r, mTeams[i].color.g, mTeams[i].color.b);
-      s2cSetTeamScore(i, mTeams[i].getScore());
+      Team *team = (Team *)mGame->getTeam(i);
+      const Color *color = team->getColor();
+
+      s2cAddTeam(team->getName(), color->r, color->g, color->b);
+      s2cSetTeamScore(i, team->getScore());
    }
 
    // Add all the client and team information
@@ -2576,7 +2238,8 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
       bool localClient = mClientList[i]->clientConnection == theConnection;
 
       s2cAddClient(mClientList[i]->name, localClient, mClientList[i]->clientConnection->isAdmin(), mClientList[i]->isRobot, false);
-      if(mClientList[i]->getTeam() >= 0) s2cClientJoinedTeam(mClientList[i]->name, mClientList[i]->getTeam());
+      if(mClientList[i]->getTeam() >= 0) 
+         s2cClientJoinedTeam(mClientList[i]->name, mClientList[i]->getTeam());
    }
 
    //for(S32 i = 0; i < Robot::robots.size(); i++)  //Robot is part of mClientList
@@ -2614,11 +2277,11 @@ GAMETYPE_RPC_S2C(GameType, s2cSyncMessagesComplete, (U32 sequence), (sequence))
    clientGame->computeWorldObjectExtents();          // Make sure our world extents reflect all the objects we've loaded
    Barrier::prepareRenderingGeometry(clientGame);    // Get walls ready to render
 
-   clientGame->mGameUserInterface->mShowProgressBar = false;
+   clientGame->getUserInterface()->mShowProgressBar = false;
    //gClientGame->setInCommanderMap(false);          // Start game in regular mode, If we change here, need to tell the server we are in this mode. Map can change while in commander map.
    //gClientGame->clearZoomDelta();                  // No in zoom effect
    
-   clientGame->mGameUserInterface->mProgressBarFadeTimer.reset(1000);
+   clientGame->getUserInterface()->mProgressBarFadeTimer.reset(1000);
 }
 
 
@@ -2653,23 +2316,25 @@ GAMETYPE_RPC_S2C(GameType, s2cAddBarriers, (Vector<F32> verts, F32 width, bool s
 
 GameConnection *findClient(GameType *gt, const char *name)
 {
-   for(S32 i = 0; i < gt->mClientList.size(); i++)
+   for(S32 i = 0; i < gt->getClientCount(); i++)
    {
-      const char *found = gt->mClientList[i]->clientConnection->getClientName().getString();
+      const char *found = gt->getClient(i)->clientConnection->getClientName().getString();
       if(!stricmp(name, found))
-         return gt->mClientList[i]->clientConnection;
+         return gt->getClient(i)->clientConnection;
    }
+
    GameConnection *client = NULL;
-   for(S32 i = 0; i < gt->mClientList.size(); i++)
+   for(S32 i = 0; i < gt->getClientCount(); i++)
    {
-      const char *found = gt->mClientList[i]->clientConnection->getClientName().getString();
+      const char *found = gt->getClient(i)->clientConnection->getClientName().getString();
       if(strstr(found, name))
       {
          if(client)
             return NULL;
-         client = gt->mClientList[i]->clientConnection;
+         client = gt->getClient(i)->clientConnection;
       }
    }
+
    return client;
 }
 
@@ -3021,16 +2686,16 @@ GAMETYPE_RPC_S2C(GameType, s2cDisplayChatPM, (StringTableEntry fromName, StringT
 
    Color theColor = Color(1,1,0);
    if(mLocalClient->name == toName && toName == fromName)      // Message sent to self
-      clientGame->mGameUserInterface->displayChatMessage(theColor, "%s: %s", toName.getString(), message.getString());
+      clientGame->getUserInterface()->displayChatMessage(theColor, "%s: %s", toName.getString(), message.getString());
 
    else if(mLocalClient->name == toName)                       // To this player
-      clientGame->mGameUserInterface->displayChatMessage(theColor, "from %s: %s", fromName.getString(), message.getString());
+      clientGame->getUserInterface()->displayChatMessage(theColor, "from %s: %s", fromName.getString(), message.getString());
 
    else if(mLocalClient->name == fromName)                     // From this player
-      clientGame->mGameUserInterface->displayChatMessage(theColor, "to %s: %s", toName.getString(), message.getString());
+      clientGame->getUserInterface()->displayChatMessage(theColor, "to %s: %s", toName.getString(), message.getString());
 
    else                // Should never get here... shouldn't be able to see PM that is not from or not to you
-      clientGame->mGameUserInterface->displayMessage(theColor, "from %s to %s: %s", fromName.getString(), toName.getString(), message.getString());
+      clientGame->getUserInterface()->displayMessage(theColor, "from %s to %s: %s", fromName.getString(), toName.getString(), message.getString());
 }
 
 
@@ -3039,11 +2704,11 @@ GAMETYPE_RPC_S2C(GameType, s2cDisplayChatMessage, (bool global, StringTableEntry
    ClientGame *clientGame = dynamic_cast<ClientGame *>(getGame());
    TNLAssert(clientGame, "clientGame is NULL");
 
-   if(!clientGame || clientGame->mGameUserInterface->isOnMuteList(clientName.getString()))
+   if(!clientGame || clientGame->getUserInterface()->isOnMuteList(clientName.getString()))
       return;
 
    Color theColor = global ? gGlobalChatColor : gTeamChatColor;
-   clientGame->mGameUserInterface->displayChatMessage(theColor, "%s: %s", clientName.getString(), message.getString());
+   clientGame->getUserInterface()->displayChatMessage(theColor, "%s: %s", clientName.getString(), message.getString());
 }
 
 
@@ -3052,10 +2717,12 @@ GAMETYPE_RPC_S2C(GameType, s2cDisplayChatMessageSTE, (bool global, StringTableEn
 {
    Color theColor = global ? gGlobalChatColor : gTeamChatColor;
    ClientGame *clientGame = dynamic_cast<ClientGame *>(getGame());
-   TNLAssert(clientGame, "clientGame is NULL");
-   if(!clientGame) return;
 
-   clientGame->mGameUserInterface->displayChatMessage(theColor, "%s: %s", clientName.getString(), message.getString());
+   TNLAssert(clientGame, "clientGame is NULL");
+   if(!clientGame) 
+      return;
+
+   clientGame->getUserInterface()->displayChatMessage(theColor, "%s: %s", clientName.getString(), message.getString());
 }
 
 
@@ -3195,21 +2862,21 @@ GAMETYPE_RPC_S2C(GameType, s2cKillMessage, (StringTableEntry victim, StringTable
    {
       if(killer == victim)
          if(killerDescr == "mine")
-            clientGame->mGameUserInterface->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s was destroyed by own mine", victim.getString());
+            clientGame->getUserInterface()->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s was destroyed by own mine", victim.getString());
          else
-            clientGame->mGameUserInterface->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s zapped self", victim.getString());
+            clientGame->getUserInterface()->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s zapped self", victim.getString());
       else
          if(killerDescr == "mine")
-            clientGame->mGameUserInterface->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s was destroyed by mine put down by %s", victim.getString(), killer.getString());
+            clientGame->getUserInterface()->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s was destroyed by mine put down by %s", victim.getString(), killer.getString());
          else
-            clientGame->mGameUserInterface->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s zapped %s", killer.getString(), victim.getString());
+            clientGame->getUserInterface()->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s zapped %s", killer.getString(), victim.getString());
    }
    else if(killerDescr == "mine")   // Killer was some object with its own kill description string
-      clientGame->mGameUserInterface->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s got blown up by a mine", victim.getString());
+      clientGame->getUserInterface()->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s got blown up by a mine", victim.getString());
    else if(killerDescr != "")
-      clientGame->mGameUserInterface->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s %s", victim.getString(), killerDescr.getString());
+      clientGame->getUserInterface()->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s %s", victim.getString(), killerDescr.getString());
    else         // Killer unknown
-      clientGame->mGameUserInterface->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s got zapped", victim.getString());
+      clientGame->getUserInterface()->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s got zapped", victim.getString());
 }
 
 

@@ -61,9 +61,9 @@ public:
       return false;
    }
 
-   U32 getCurrent() { return mCurrentCounter; }    // Return amount of time left on timer
+   U32 getCurrent() const{ return mCurrentCounter; }    // Return amount of time left on timer
 
-   F32 getFraction()                               // Return fraction of original time left on timer
+   F32 getFraction() const                              // Return fraction of original time left on timer
    {
       if(!mPeriod)
          return 0;
@@ -71,16 +71,25 @@ public:
    }
 
    void setPeriod(U32 period) { mPeriod = period; }
-   U32 getPeriod() { return mPeriod; }
+   U32 getPeriod() const { return mPeriod; }
    void reset() { mCurrentCounter = mPeriod; }     // Start timer over, using last time set
+
 
    // Extend will add or remove time from the timer in a way that preserves overall timer duration
    void extend(S32 time) { 
       U32 U32time = U32(ABS(time));
-      if(time > 0) { mPeriod += U32time; mCurrentCounter += U32time; } 
-      else { mPeriod         = mPeriod         > U32time ? mPeriod - U32time         : 0; 
-             mCurrentCounter = mCurrentCounter > U32time ? mCurrentCounter - U32time : 0; }
+      if(time > 0) 
+      { 
+         mPeriod += U32time; 
+         mCurrentCounter += U32time; 
+      } 
+      else 
+      { 
+         mPeriod         = mPeriod         > U32time ? mPeriod - U32time         : 0; 
+         mCurrentCounter = mCurrentCounter > U32time ? mCurrentCounter - U32time : 0; 
+      }
    }
+
 
    void reset(U32 newCounter, U32 newPeriod = 0)   // Start timer over, setting timer to the time specified
    {

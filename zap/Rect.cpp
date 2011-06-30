@@ -61,7 +61,7 @@ Rect::Rect(const TNL::Vector<Point> &p)
    set(p);
 }
 
-Point Rect::getCenter()
+Point Rect::getCenter() const
 {
    return (max + min) * 0.5;
 }
@@ -210,7 +210,7 @@ F32 Rect::getHeight()
    return max.y - min.y;
 }
 
-Point Rect::getExtents()
+Point Rect::getExtents() const
 {
    return max - min;
 }

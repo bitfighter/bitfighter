@@ -48,7 +48,7 @@ public:
    S32 getRenderSortValue();
 
    void onAddedToGame(Game *theGame);
-   bool getCollisionPoly(Vector<Point> &polyPoints);
+   bool getCollisionPoly(Vector<Point> &polyPoints) const;
    bool collide(GameObject *hitObject);
 
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);

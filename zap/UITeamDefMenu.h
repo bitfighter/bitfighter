@@ -56,10 +56,10 @@ private:
    S32 selectedIndex;          // Highlighted menu item
    S32 changingItem;           // Index of key we're changing (in keyDef mode), -1 otherwise
 
-   bool mEditing;               // true if editing selectedIndex, false if not
+   bool mEditing;              // true if editing selectedIndex, false if not
 
 public:
-   TeamDefUserInterface();      // Constructor
+   TeamDefUserInterface();     // Constructor
    const char *mMenuTitle;
    const char *mMenuSubTitle;
    Color mMenuSubTitleColor;

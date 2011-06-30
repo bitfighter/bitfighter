@@ -181,7 +181,7 @@ void SpeedZone::computeExtent()
 
 
 // More precise boundary for more precise collision detection
-bool SpeedZone::getCollisionPoly(Vector<Point> &polyPoints)
+bool SpeedZone::getCollisionPoly(Vector<Point> &polyPoints) const
 {
    polyPoints.resize(mPolyBounds.size());
 

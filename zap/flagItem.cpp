@@ -98,6 +98,12 @@ void FlagItem::onAddedToGame(Game *theGame)
 }
 
 
+static bool isTeamFlagSpawn(GameType *gt, S32 team)
+{
+   return gt->isTeamFlagGame() && team >= 0 && team < gt->getGame()->getTeamCount();
+}
+
+
 bool FlagItem::processArguments(S32 argc, const char **argv, Game *game)
 {
    if(argc < 3)         // FlagItem <team> <x> <y> {time}
@@ -117,10 +123,12 @@ bool FlagItem::processArguments(S32 argc, const char **argv, Game *game)
    GameType *gt = game->getGameType();
    if(gt)
    {
-   if(!gt->isTeamFlagGame() || mTeam < 0 || mTeam >= gt->mTeams.size())
-      gt->mFlagSpawnPoints.push_back(FlagSpawn(mInitialPos, time));
-   else
-      gt->mTeams[mTeam].flagSpawnPoints.push_back(FlagSpawn(mInitialPos, time));
+      FlagSpawn spawn = FlagSpawn(mInitialPos, time);
+
+      if(isTeamFlagSpawn(gt, mTeam)) 
+         ((Team *)(game->getTeam(mTeam)))->addFlagSpawn(spawn);
+      else                                                                        
+         gt->addFlagSpawn(spawn);
    }
 
    return true;
@@ -160,6 +168,7 @@ void FlagItem::idle(GameObject::IdleCallPath path)
       return;
 }
 
+
 void FlagItem::mountToShip(Ship *theShip)
 {
    Parent::mountToShip(theShip);
@@ -169,21 +178,29 @@ void FlagItem::mountToShip(Ship *theShip)
 }
 
 
+const Vector<FlagSpawn> *FlagItem::getSpawnPoints()
+{
+   Game *game = getGame();
+   GameType *gt = game->getGameType();
+
+
+   if(isTeamFlagSpawn(gt, mTeam))    
+      return ((Team *)(game->getTeam(mTeam)))->getFlagSpawns();
+   else             
+      return gt->getFlagSpawns();
+}
+
 
 void FlagItem::sendHome()
 {
    // Now that we have flag spawn points, we'll simply redefine "initial pos" as a random selection of the flag spawn points
    // Everything else should remain as it was
 
-   // First, make list of valid spawn points -- start with a list of all spawn points, then remove any occupied ones
+   // First, make a temp list of valid spawn points -- start with a list of all spawn points, then remove any occupied ones
 
-   Vector<FlagSpawn> spawnPoints;
-   GameType *gt = getGame()->getGameType();
-
-   if(!gt->isTeamFlagGame() || mTeam < 0 || mTeam >= gt->mTeams.size())     // Neutral or hostile flag in a team game
-      spawnPoints = gt->mFlagSpawnPoints;
-   else              // Team flag
-      spawnPoints = gt->mTeams[mTeam].flagSpawnPoints;
+   Vector<FlagSpawn> spawnPoints = *getSpawnPoints();    // Makes a copy?  Hopefully!
+   Game *game = getGame();
+   GameType *gt = game->getGameType();
 
    // Now remove the occupied spots from our list of potential spawns
    for(S32 i = 0; i < gt->mFlags.size(); i++)

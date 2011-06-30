@@ -134,14 +134,14 @@ void UserInterface::setMenuID(UIID menuID)
 
 
 // Retrieve interface's id
-UIID UserInterface::getMenuID()
+UIID UserInterface::getMenuID() const
 {
    return mInternalMenuID;
 }
 
 
 // Retrieve previous interface's name
-UIID UserInterface::getPrevMenuID()
+UIID UserInterface::getPrevMenuID() const
 {
    if(prevUIs.size())
       return prevUIs.last()->mInternalMenuID;
@@ -161,11 +161,11 @@ void UserInterface::reactivatePrevUI()
 }
 
 
-// Like above, except we specify a target menu to go to.
-void UserInterface::reactivateMenu(UserInterface target)
+// Like above, except we specify a target menu to go to
+void UserInterface::reactivateMenu(const UserInterface *target)
 {
    // Keep discarding menus until we find the one we want
-   while( prevUIs.size() && (prevUIs.last()->getMenuID() != target.getMenuID()) )
+   while( prevUIs.size() && (prevUIs.last()->getMenuID() != target->getMenuID()) )
       prevUIs.pop_back();
 
    if(!prevUIs.size())

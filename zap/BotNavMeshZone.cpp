@@ -95,7 +95,7 @@ Point BotNavMeshZone::getCenter()
 
 void BotNavMeshZone::render(S32 layerIndex)    
 {
-   if(!gClientGame->mGameUserInterface->mDebugShowMeshZones)
+   if(!gClientGame->getUserInterface()->isShowingDebugMeshZones())
       return;
 
    if(layerIndex == 0)
@@ -163,7 +163,7 @@ void BotNavMeshZone::onAddedToGame(Game *theGame)
 
 
 // More precise boundary for precise collision detection
-bool BotNavMeshZone::getCollisionPoly(Vector<Point> &polyPoints)
+bool BotNavMeshZone::getCollisionPoly(Vector<Point> &polyPoints) const
 {
    polyPoints = *getOutline();
    return true;

@@ -200,7 +200,7 @@ void PasswordEntryUserInterface::render()
 
    if(gClientGame->getConnectionToServer())
    {
-      gClientGame->mGameUserInterface->render();
+      gClientGame->getUserInterface()->render();
       glColor4f(0, 0, 0, 0.5);
       glEnableBlend;
          glBegin(GL_POLYGON);

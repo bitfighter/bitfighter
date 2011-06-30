@@ -38,20 +38,25 @@ static const S32 MAX_NAME_LEN = 256;
 
 class AbstractTeam
 {
-protected:
-   LineEditor _name;
+private:
+   Color mColor;
+
 public:
    static const S32 MAX_TEAM_NAME_LENGTH = 32;
 
-   Color color;
-   S32 numPlayers;      // Number of human players --> Needs to be computed before use, not dynamically tracked (see countTeamPlayers())
-   S32 numBots;         // Number of robot players --> Needs to be computed before use, not dynamically tracked
+   void setColor(F32 r, F32 g, F32 b) { mColor.set(r,g,b); } 
+   const Color *getColor() const { return &mColor; }
 
-   virtual void setName(const char *name) { _name.setString(name); }
-   virtual StringTableEntry getName() { return StringTableEntry(_name.c_str()); }  // Wrap in STE to make signatures match... lame.
-   LineEditor *getLineEditor() { return &_name; }
+   virtual void setName(const char *name) = 0;
+   virtual StringTableEntry getName() = 0;
 
-   void readTeamFromLevelLine(S32 argc, const char **argv);          // Read team info from level line
+   bool readTeamFromLevelLine(S32 argc, const char **argv);          // Read team info from level line
+
+   void alterRed(F32 amt);
+   void alterGreen(F32 amt);
+   void alterBlue(F32 amt);
+
+
 };
 
 ////////////////////////////////////////
@@ -61,30 +66,53 @@ public:
 class Team : public AbstractTeam
 {  
 private:
-   //static U32 mNextId;     // The problem is it never goes back to zero, so it keeps counting up and up, to > 100 ?
-                  // As with any statics, it can cause problems with (in the future) multiplayer split screen clients in one game
+   StringTableEntry mName;
 
-protected:
+   S32 mPlayerCount;      // Number of human players --> Needs to be computed before use, not dynamically tracked (see countTeamPlayers())
+   S32 mBotCount;         // Number of robot players --> Needs to be computed before use, not dynamically tracked
+
    S32 mScore;
+   F32 mRating; 
+
+   Vector<Point> mSpawnPoints;
+   Vector<FlagSpawn> mFlagSpawns;       // List of places for team flags to spawn
 
 public:
-   S32 mId;                // Helps keep track of teams after they've been sorted
-   StringTableEntry _name;
-   Vector<Point> spawnPoints;
-   Vector<FlagSpawn> flagSpawnPoints;   // List of places for team flags to spawn
+   S32 mId;                             // Helps keep track of teams after they've been sorted
 
-   F32 rating; 
+   Team() { mPlayerCount = 0; mBotCount = 0; mScore = 0; mRating = 0; }  // Quickie constructor
 
-   Team() { numPlayers = 0; numBots = 0; mScore = 0; rating = 0;}// mId = mNextId++;}     // Quickie constructor
+   void setName(const char *name) { mName.set(name); }
+   void setName(StringTableEntry name) { mName = name; }
 
-   void setName(const char *name) { _name = name; }
-   void setName(StringTableEntry name) { _name = name; }
-   StringTableEntry getName() { return _name.getString(); }
+   S32 getSpawnPointCount() const { return mSpawnPoints.size(); }
+   Point getSpawnPoint(S32 index) const { return mSpawnPoints[index]; }
+   void addSpawnPoint(Point point) { mSpawnPoints.push_back(point); }
 
-   S32 getScore() { return mScore; }
+   void addFlagSpawn(FlagSpawn flagSpawn) { mFlagSpawns.push_back(flagSpawn); }
+   const Vector<FlagSpawn> *getFlagSpawns() const { return &mFlagSpawns; }
+  
+
+   StringTableEntry getName() { return mName; }  
+
    S32 getId() { return mId; }
+   
+   S32 getScore() { return mScore; }
    void setScore(S32 score) { mScore = score; }
    void addScore(S32 score) { mScore += score; }
+
+   F32 getRating() { return mRating; }
+   void addRating(F32 rating) { mRating += rating; }
+
+   void clearStats();
+
+   // Note that these values need to be precalulated before they are ready for use; they are not dynamically updated!
+   S32 getPlayerCount() { return mPlayerCount; }                  // Get number of human players on team
+   S32 getBotCount() { return mBotCount; }                        // Get number of bots on team
+   S32 getPlayerBotCount() { return mPlayerCount + mBotCount; }   // Get total number of players/bots on team
+
+   void incrementPlayerCount() { mPlayerCount++; }
+   void incrementBotCount() { mBotCount++; }
 };
 
 
@@ -94,8 +122,15 @@ public:
 // Class for managing teams in the editor
 class TeamEditor : public AbstractTeam
 {
+private:
+   LineEditor mNameEditor;
+
 public:
-   TeamEditor() { _name = LineEditor(MAX_TEAM_NAME_LENGTH); numPlayers = 0; }     // Quickie constructor
+   TeamEditor() { mNameEditor = LineEditor(MAX_TEAM_NAME_LENGTH); }              // Quickie constructor
+
+   LineEditor *getLineEditor() { return &mNameEditor; }
+   void setName(const char *name) { mNameEditor.setString(name); }
+   StringTableEntry getName() { return StringTableEntry(mNameEditor.c_str()); }  // Wrap in STE to make signatures match
 };
 
 
@@ -106,14 +141,14 @@ class LuaTeamInfo : public LuaObject
 {
 
 private:
-   S32 mTeamIndex;                  // Robots could potentially be on neutral or hostile team; maybe observer player could too
-   Team mTeam;
+   S32 mTeamIndex;                // Robots could potentially be on neutral or hostile team; maybe observer player could too
+   Team *mTeam;
 
 public:
-   LuaTeamInfo(lua_State *L);      // Lua constructor
-   LuaTeamInfo(Team team);         // C++ constructor
+   LuaTeamInfo(lua_State *L);     // Lua constructor
+   LuaTeamInfo(Team *team);       // C++ constructor
 
-   ~LuaTeamInfo();                 // Destructor
+   ~LuaTeamInfo();                // Destructor
 
    static const char className[];
 

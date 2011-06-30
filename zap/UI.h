@@ -239,8 +239,8 @@ public:
 
    static void dumpPreviousQueue();          // List all items in the previous list
    void setMenuID(UIID menuID);              // Set interface's name
-   UIID getMenuID();                         // Retrieve interface's name
-   UIID getPrevMenuID();                     // Retrieve previous interface's name
+   UIID getMenuID() const;                   // Retrieve interface's name
+   UIID getPrevMenuID() const;               // Retrieve previous interface's name
 
    static S32 vertMargin, horizMargin;
    static S32 messageMargin;
@@ -264,7 +264,7 @@ public:
    void renderConsole();      // Render game console
 
    static void reactivatePrevUI();
-   static void reactivateMenu(UserInterface target);
+   static void reactivateMenu(const UserInterface *target);
 
    KeyCode convertJoystickToKeyboard(KeyCode keyCode);
 

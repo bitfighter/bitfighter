@@ -67,10 +67,10 @@ void CTFGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
 
          Vector<StringTableEntry> e;
          e.push_back(theShip->getName());
-         e.push_back(getTeamName(theFlag->getTeam()));
+         e.push_back(getGame()->getTeamName(theFlag->getTeam()));
 
-         for(S32 i = 0; i < mClientList.size(); i++)
-            mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagReturn, returnString, e);
+         for(S32 i = 0; i < getClientCount(); i++)
+            getClient(i)->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagReturn, returnString, e);
 
          theFlag->sendHome();
 
@@ -88,9 +88,10 @@ void CTFGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
                static StringTableEntry capString("%e0 captured the %e1 flag!");
                Vector<StringTableEntry> e;
                e.push_back(theShip->getName());
-               e.push_back(getTeamName(mountedFlag->getTeam()));
-               for(S32 i = 0; i < mClientList.size(); i++)
-                  mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagCapture, capString, e);
+               e.push_back(getGame()->getTeamName(mountedFlag->getTeam()));
+
+               for(S32 i = 0; i < getClientCount(); i++)
+                  getClient(i)->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagCapture, capString, e);
 
                mountedFlag->dismount();
                mountedFlag->sendHome();
@@ -110,9 +111,10 @@ void CTFGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
          static StringTableEntry takeString("%e0 took the %e1 flag!");
          Vector<StringTableEntry> e;
          e.push_back(theShip->getName());
-         e.push_back(getTeamName(theFlag->getTeam()));
-         for(S32 i = 0; i < mClientList.size(); i++)
-            mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagSnatch, takeString, e);
+         e.push_back(getGame()->getTeamName(theFlag->getTeam()));
+
+         for(S32 i = 0; i < getClientCount(); i++)
+            getClient(i)->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagSnatch, takeString, e);
 
          theFlag->mountToShip(theShip);
       }
@@ -132,10 +134,10 @@ void CTFGameType::itemDropped(Ship *ship, Item *item)
 
       Vector<StringTableEntry> e;
       e.push_back(ship->getName());
-      e.push_back(getTeamName(flag->getTeam()));
+      e.push_back(getGame()->getTeamName(flag->getTeam()));
 
-      for(S32 i = 0; i < mClientList.size(); i++)
-         mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagDrop, dropString, e);
+      for(S32 i = 0; i < getClientCount(); i++)
+         getClient(i)->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagDrop, dropString, e);
    }
 }
 
@@ -189,15 +191,11 @@ void CTFGameType::renderInterfaceOverlay(bool scoreboardVisible)
 }
 
 
-bool CTFGameType::teamHasFlag(S32 teamId)
+bool CTFGameType::teamHasFlag(S32 teamId) const
 {
    for(S32 i = 0; i < mFlags.size(); i++)
-   {
-      //TNLAssert(mFlags[i], "NULL flag");
-      if(mFlags[i])
-         if(mFlags[i]->isMounted() && mFlags[i]->getMount() && mFlags[i]->getMount()->getTeam() == (S32)teamId)
-            return true;
-   }
+      if(mFlags[i] && mFlags[i]->isMounted() && mFlags[i]->getMount() && mFlags[i]->getMount()->getTeam() == (S32)teamId)
+         return true;
 
    return false;
 }
