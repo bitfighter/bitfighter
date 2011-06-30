@@ -234,6 +234,7 @@ public:
    AbstractTeam *getTeam(S32 teamIndex) const;
    void addTeam(boost::shared_ptr<AbstractTeam> team);
    void addTeam(boost::shared_ptr<AbstractTeam> team, S32 index);
+   virtual boost::shared_ptr<AbstractTeam> getNewTeam() = 0;
    void removeTeam(S32 teamIndex);
    void clearTeams();
    StringTableEntry getTeamName(S32 teamIndex) const;   // Return the name of the team
@@ -295,7 +296,7 @@ public:
 class GameGame : public Game
 {
 public:
-   GameGame(const Address &theBindAddress) : Game(theBindAddress) { /* Do nothing */};      // Constructor
+   GameGame(const Address &theBindAddress) : Game(theBindAddress) { /* Do nothing */ };      // Constructor
    virtual ~GameGame() { /* Do nothing */ };     // Destructor
 };
  
@@ -423,6 +424,8 @@ public:
    S32 addLevelInfo(const char *filename, LevelInfo &info);
 
    HostingModePhases hostingModePhase;
+
+   boost::shared_ptr<AbstractTeam> getNewTeam();
 };
 
 
@@ -494,6 +497,8 @@ public:
 
    void suspendGame()   { mGameSuspended = true; }
    void unsuspendGame() { mGameSuspended = false; }
+
+   boost::shared_ptr<AbstractTeam> getNewTeam();
 };
 
 
@@ -527,10 +532,9 @@ public:
 
    boost::shared_ptr<GridDatabase> getGridDatabase() { return mEditorDatabase; }
 
-   void setGridDatabase(boost::shared_ptr<GridDatabase> database) { 
-      //TNLAssert(dynamic_cast<EditorObjectDatabase *>(database), "Uh oh...");
-      mEditorDatabase = boost::dynamic_pointer_cast<EditorObjectDatabase>(database); 
-   }
+   void setGridDatabase(boost::shared_ptr<GridDatabase> database) { mEditorDatabase = boost::dynamic_pointer_cast<EditorObjectDatabase>(database); }
+
+   boost::shared_ptr<AbstractTeam> getNewTeam();
 };
 
 

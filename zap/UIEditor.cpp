@@ -962,7 +962,7 @@ void EditorUserInterface::teamsHaveChanged()
       {
          AbstractTeam *team = getGame()->getTeam(i);
 
-         if(team->getColor() != mOldTeams[i].getColor() || team->getName() != mOldTeams[i].getName())   // Color(s) or names(s) have changed
+         if(mOldTeams[i].color != team->getColor() || mOldTeams[i].name != team->getName().getString()) // Color(s) or names(s) have changed
          {
             teamsChanged = true;
             break;

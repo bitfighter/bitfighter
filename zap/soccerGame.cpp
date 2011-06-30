@@ -332,6 +332,7 @@ bool SoccerBallItem::processArguments(S32 argc, const char **argv, Game *game)
    // Add the ball's starting point to the list of flag spawn points
    gServerGame->getGameType()->addFlagSpawn(FlagSpawn(initialPos, 0));
 
+
    return true;
 }
 

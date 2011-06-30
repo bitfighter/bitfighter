@@ -823,6 +823,12 @@ StringTableEntry ServerGame::getCurrentLevelType()
 }
 
 
+boost::shared_ptr<AbstractTeam> ServerGame::getNewTeam()
+{
+   return boost::shared_ptr<AbstractTeam>(new Team());
+}
+
+
 bool ServerGame::processPseudoItem(S32 argc, const char **argv)
 {
    if(!stricmp(argv[0], "Spawn"))
@@ -1884,6 +1890,14 @@ void ClientGame::drawStars(F32 alphaFrac, Point cameraPos, Point visibleExtent)
    glDisableClientState(GL_VERTEX_ARRAY);
 }
 
+
+boost::shared_ptr<AbstractTeam> ClientGame::getNewTeam() 
+{ 
+   TNLAssert(false, "This should never be called"); 
+   return boost::shared_ptr<AbstractTeam>(new Team); 
+}
+
+
 S32 QSORT_CALLBACK renderSortCompare(GameObject **a, GameObject **b)
 {
    return (*a)->getRenderSortValue() - (*b)->getRenderSortValue();
@@ -2300,6 +2314,12 @@ EditorGame::EditorGame() : Game(Address())
 const Color *EditorGame::getTeamColor(S32 teamIndex) const
 {
    return Game::getBasicTeamColor(this, teamIndex); 
+}
+
+
+boost::shared_ptr<AbstractTeam> EditorGame::getNewTeam()
+{
+   return boost::shared_ptr<AbstractTeam>(new TeamEditor());
 }
 
 

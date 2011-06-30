@@ -125,8 +125,12 @@ bool FlagItem::processArguments(S32 argc, const char **argv, Game *game)
    {
       FlagSpawn spawn = FlagSpawn(mInitialPos, time);
 
-      if(isTeamFlagSpawn(gt, mTeam)) 
-         ((Team *)(game->getTeam(mTeam)))->addFlagSpawn(spawn);
+      if(isTeamFlagSpawn(gt, mTeam))
+      {
+         Team *team = dynamic_cast<Team *>(game->getTeam(mTeam));
+         if(team)
+            team->addFlagSpawn(spawn);
+      }
       else                                                                        
          gt->addFlagSpawn(spawn);
    }

@@ -898,7 +898,7 @@ bool GameType::processLevelParam(S32 argc, const char **argv)
    {
       if(mGame->getTeamCount() < gMaxTeams)   // Too many teams?
       {
-         boost::shared_ptr<Team> team = boost::shared_ptr<Team>(new Team);
+         boost::shared_ptr<AbstractTeam> team = mGame->getNewTeam();
          if(team->readTeamFromLevelLine(argc, argv))
             mGame->addTeam(team);
       }

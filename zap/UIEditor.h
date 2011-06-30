@@ -265,9 +265,9 @@ public:
 
    void doneEditingAttributes(EditorAttributeMenuUI *editor, EditorObject *object);   // Gets run when user exits attribute editor
 
-   void clearUndoHistory();          // Wipe undo/redo history
+   void clearUndoHistory();        // Wipe undo/redo history
 
-   Vector<TeamEditor> mOldTeams;     // Team list from before we run team editor, so we can see what changed
+   Vector<TeamInfo> mOldTeams;     // Team list from before we run team editor, so we can see what changed
 
    GridDatabase *getGridDatabase() { return &mGridDatabase; }
 

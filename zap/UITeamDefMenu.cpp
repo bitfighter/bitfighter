@@ -94,17 +94,18 @@ static const U32 itemHeight = fontsize + 5;
 
 void TeamDefUserInterface::onActivate()
 {
-   selectedIndex = 0;                     // First item selected when we begin
-   mEditing = false;                      // Not editing anything by default
+   selectedIndex = 0;                                 // First item selected when we begin
+   mEditing = false;                                  // Not editing anything by default
 
    S32 teamCount = gEditorGame->getTeamCount();
-   gEditorUserInterface.mOldTeams.clear();
-   gEditorUserInterface.mOldTeams.reserve(teamCount);    // To avoid unnecessary reallocations
+   gEditorUserInterface.mOldTeams.resize(teamCount);  // Avoid unnecessary reallocations
 
    for(S32 i = 0; i < teamCount; i++)
    {
-      TeamEditor team = *((TeamEditor *)gEditorGame->getTeam(i));    // Makes a copy of team, puts it in oldTeams
-      gEditorUserInterface.mOldTeams.push_back(team);   
+      AbstractTeam *team = gEditorGame->getTeam(i);
+
+      gEditorUserInterface.mOldTeams[i].color = team->getColor();
+      gEditorUserInterface.mOldTeams[i].name = team->getName().getString();
    }
 
    // Display an intitial message to users
