@@ -1810,7 +1810,7 @@ extern Color gNeutralTeamColor;
 extern Color gHostileTeamColor;
 
 // Generic color function, works in most cases (static method)
-const Color *Game::getBasicTeamColor(const Game *game, S32 teamId) const
+const Color *Game::getBasicTeamColor(const Game *game, S32 teamId)
 {
    TNLAssert(teamId < game->getTeamCount() || teamId < Item::TEAM_HOSTILE, "Invalid team id!");
 

@@ -185,8 +185,7 @@ public:
    virtual bool isTestServer() { return false; }     // Overridden in ServerGame
 
    virtual const Color *getTeamColor(S32 teamId) const { return &Colors::white; }  // ClientGame and EditorGame will override
-   const Color *getBasicTeamColor(const Game *game, S32 teamId) const;             // Color function used in most cases, overridden by some games
-
+   static const Color *getBasicTeamColor(const Game *game, S32 teamId);            // Color function used in most cases, overridden by some games
 
    ModuleInfo *getModuleInfo(ShipModule module) { return &mModuleInfos[(U32)module]; }
    
@@ -492,8 +491,6 @@ public:
 
    U32 getPlayerAndRobotCount();    // Returns number of human and robot players
    U32 getPlayerCount();            // Returns number of human players
-
-   static const Color *getBasicTeamColor(Game *game, S32 teamId);
 
    void suspendGame()   { mGameSuspended = true; }
    void unsuspendGame() { mGameSuspended = false; }

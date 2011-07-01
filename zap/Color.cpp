@@ -69,7 +69,13 @@ Color::Color(U32 rgbInt)
 
 
 
-void Color::read(const char **argv) { r = (float) atof(argv[0]); g = (float) atof(argv[1]); b = (float) atof(argv[2]); }
+void Color::read(const char **argv) 
+{ 
+   r = (float) atof(argv[0]); 
+   g = (float) atof(argv[1]); 
+   b = (float) atof(argv[2]); 
+
+}
 
 void Color::interp(float t, const Color &c1, const Color &c2)
 {
@@ -84,7 +90,10 @@ void Color::set(const Color &c) { r = c.r; g = c.g; b = c.b; }
 void Color::set(const string &s)
 {
    Vector<string> list;
-   parseString(s.c_str(), list, ',');
+   parseString(s.c_str(), list, ' ');
+
+   if(list.size() < 3)
+      parseString(s.c_str(), list, ',');
 
    if(list.size() >= 3)
    {
@@ -97,7 +106,7 @@ void Color::set(const string &s)
 
 string Color::toRGBString() const 
 { 
-   return ftos(r, 3) + "," + ftos(g, 3) + "," + ftos(b, 3); 
+   return ftos(r, 3) + " " + ftos(g, 3) + " " + ftos(b, 3); 
 }
 
 

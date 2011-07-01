@@ -1376,10 +1376,9 @@ extern Color gNeutralTeamColor;
 extern Color gHostileTeamColor;
 
 // This method can be overridden by other game types that handle colors differently
-// TODO: Combine with EditorGame::getTeamColor
 const Color *GameType::getTeamColor(S32 teamIndex) const
 {
-   return getGame()->getTeamColor(teamIndex);
+   return Game::getBasicTeamColor(mGame, teamIndex);
 }
 
 
