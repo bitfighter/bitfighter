@@ -40,7 +40,7 @@ public:
 	F32 slipAmount;   // 0.0 to 1.0 , lower = more slippy
 
    SlipZone();       // Constructor
-   SlipZone *SlipZone::clone() const;
+   SlipZone *clone() const;
 
    bool processArguments(S32 argc, const char **argv, Game *game);
 

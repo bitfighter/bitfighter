@@ -1,9 +1,8 @@
 the mac OpenAL-Soft.framework is compiled from the sources in the folder 'openal-soft'
 
-it is git revision 4a1c0fedca9c15cf7a6f6949f64a58472a929be3
-chosen because of the coreaudio backend was committed right before it
+checked out git revision 1b773a858534693056161c90702c4cdb013e8a64
 
 Changes to the revision:
  - add in config.h from running CMAKE
  - make sure to compile with -DAL_ALEXT_PROTOTYPES
- - link against Carbon and AudioUnit frameworks
+ - link against Carbon, CoreAudio, AudioUnit, AudioToolkit frameworks

@@ -205,7 +205,7 @@ U32 Platform::getRealMilliseconds()
       return tickCount;
    )
 
-   tickCount = GetTickCount();
+   tickCount = timeGetTime();   //needs winmm.lib, more accurate then GetTickCount();
 
    TNL_JOURNAL_WRITE_BLOCK ( getRealMilliseconds,
       TNL_JOURNAL_WRITE( (tickCount) );

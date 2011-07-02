@@ -59,8 +59,9 @@ AL_API ALvoid AL_APIENTRY alGenFilters(ALsizei n, ALuint *filters)
                 break;
             }
 
-            filter->filter = ALTHUNK_ADDENTRY(filter);
-            err = InsertUIntMapEntry(&device->FilterMap, filter->filter, filter);
+            err = ALTHUNK_ADDENTRY(filter, &filter->filter);
+            if(err == AL_NO_ERROR)
+                err = InsertUIntMapEntry(&device->FilterMap, filter->filter, filter);
             if(err != AL_NO_ERROR)
             {
                 ALTHUNK_REMOVEENTRY(filter->filter);
@@ -187,6 +188,13 @@ AL_API ALvoid AL_APIENTRY alFilteriv(ALuint filter, ALenum param, ALint *piValue
     ALCcontext *Context;
     ALCdevice  *Device;
 
+    switch(param)
+    {
+        case AL_FILTER_TYPE:
+            alFilteri(filter, param, piValues[0]);
+            return;
+    }
+
     Context = GetContextSuspended();
     if(!Context) return;
 
@@ -195,10 +203,6 @@ AL_API ALvoid AL_APIENTRY alFilteriv(ALuint filter, ALenum param, ALint *piValue
     {
         switch(param)
         {
-        case AL_FILTER_TYPE:
-            alFilteri(filter, param, piValues[0]);
-            break;
-
         default:
             alSetError(Context, AL_INVALID_ENUM);
             break;
@@ -228,14 +232,16 @@ AL_API ALvoid AL_APIENTRY alFilterf(ALuint filter, ALenum param, ALfloat flValue
             switch(param)
             {
             case AL_LOWPASS_GAIN:
-                if(flValue >= 0.0f && flValue <= 1.0f)
+                if(flValue >= AL_LOWPASS_MIN_GAIN &&
+                   flValue <= AL_LOWPASS_MAX_GAIN)
                     ALFilter->Gain = flValue;
                 else
                     alSetError(Context, AL_INVALID_VALUE);
                 break;
 
             case AL_LOWPASS_GAINHF:
-                if(flValue >= 0.0f && flValue <= 1.0f)
+                if(flValue >= AL_LOWPASS_MIN_GAINHF &&
+                   flValue <= AL_LOWPASS_MAX_GAINHF)
                     ALFilter->GainHF = flValue;
                 else
                     alSetError(Context, AL_INVALID_VALUE);
@@ -260,26 +266,8 @@ AL_API ALvoid AL_APIENTRY alFilterf(ALuint filter, ALenum param, ALfloat flValue
 
 AL_API ALvoid AL_APIENTRY alFilterfv(ALuint filter, ALenum param, ALfloat *pflValues)
 {
-    ALCcontext *Context;
-    ALCdevice  *Device;
-
-    Context = GetContextSuspended();
-    if(!Context) return;
-
-    Device = Context->Device;
-    if(LookupFilter(Device->FilterMap, filter) != NULL)
-    {
-        switch(param)
-        {
-        default:
-            alFilterf(filter, param, pflValues[0]);
-            break;
-        }
-    }
-    else
-        alSetError(Context, AL_INVALID_NAME);
-
-    ProcessContext(Context);
+    /* There are currently no multi-value filter parameters */
+    alFilterf(filter, param, pflValues[0]);
 }
 
 AL_API ALvoid AL_APIENTRY alGetFilteri(ALuint filter, ALenum param, ALint *piValue)
@@ -316,6 +304,13 @@ AL_API ALvoid AL_APIENTRY alGetFilteriv(ALuint filter, ALenum param, ALint *piVa
     ALCcontext *Context;
     ALCdevice  *Device;
 
+    switch(param)
+    {
+        case AL_FILTER_TYPE:
+            alGetFilteri(filter, param, piValues);
+            return;
+    }
+
     Context = GetContextSuspended();
     if(!Context) return;
 
@@ -324,10 +319,6 @@ AL_API ALvoid AL_APIENTRY alGetFilteriv(ALuint filter, ALenum param, ALint *piVa
     {
         switch(param)
         {
-        case AL_FILTER_TYPE:
-            alGetFilteri(filter, param, piValues);
-            break;
-
         default:
             alSetError(Context, AL_INVALID_ENUM);
             break;
@@ -383,28 +374,24 @@ AL_API ALvoid AL_APIENTRY alGetFilterf(ALuint filter, ALenum param, ALfloat *pfl
 
 AL_API ALvoid AL_APIENTRY alGetFilterfv(ALuint filter, ALenum param, ALfloat *pflValues)
 {
-    ALCcontext *Context;
-    ALCdevice  *Device;
-
-    Context = GetContextSuspended();
-    if(!Context) return;
-
-    Device = Context->Device;
-    if(LookupFilter(Device->FilterMap, filter) != NULL)
-    {
-        switch(param)
-        {
-        default:
-            alGetFilterf(filter, param, pflValues);
-            break;
-        }
-    }
-    else
-        alSetError(Context, AL_INVALID_NAME);
-
-    ProcessContext(Context);
+    /* There are currently no multi-value filter parameters */
+    alGetFilterf(filter, param, pflValues);
 }
 
+
+ALfloat lpCoeffCalc(ALfloat g, ALfloat cw)
+{
+    ALfloat a = 0.0f;
+
+    /* Be careful with gains < 0.01, as that causes the coefficient
+     * head towards 1, which will flatten the signal */
+    g = __max(g, 0.01f);
+    if(g < 0.9999f) /* 1-epsilon */
+        a = (1 - g*cw - aluSqrt(2*g*(1-cw) - g*g*(1 - cw*cw))) /
+            (1 - g);
+
+    return a;
+}
 
 ALvoid ReleaseALFilters(ALCdevice *device)
 {
@@ -426,6 +413,6 @@ static void InitFilterParams(ALfilter *filter, ALenum type)
 {
     filter->type = type;
 
-    filter->Gain = 1.0;
-    filter->GainHF = 1.0;
+    filter->Gain = AL_LOWPASS_DEFAULT_GAIN;
+    filter->GainHF = AL_LOWPASS_DEFAULT_GAINHF;
 }

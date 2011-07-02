@@ -26,13 +26,15 @@
 #include "alMain.h"
 #include "AL/al.h"
 #include "AL/alc.h"
-#ifdef HAVE_DLFCN_H
-#include <dlfcn.h>
-#endif
 
 #include <portaudio.h>
 
+
+static const ALCchar pa_device[] = "PortAudio Default";
+
+
 static void *pa_handle;
+#ifdef HAVE_DYNLOAD
 #define MAKE_FUNC(x) static typeof(x) * p##x
 MAKE_FUNC(Pa_Initialize);
 MAKE_FUNC(Pa_Terminate);
@@ -45,9 +47,16 @@ MAKE_FUNC(Pa_GetDefaultOutputDevice);
 MAKE_FUNC(Pa_GetStreamInfo);
 #undef MAKE_FUNC
 
-
-static const ALCchar pa_device[] = "PortAudio Default";
-
+#define Pa_Initialize                  pPa_Initialize
+#define Pa_Terminate                   pPa_Terminate
+#define Pa_GetErrorText                pPa_GetErrorText
+#define Pa_StartStream                 pPa_StartStream
+#define Pa_StopStream                  pPa_StopStream
+#define Pa_OpenStream                  pPa_OpenStream
+#define Pa_CloseStream                 pPa_CloseStream
+#define Pa_GetDefaultOutputDevice      pPa_GetDefaultOutputDevice
+#define Pa_GetStreamInfo               pPa_GetStreamInfo
+#endif
 
 void *pa_load(void)
 {
@@ -55,68 +64,48 @@ void *pa_load(void)
     {
         PaError err;
 
+#ifdef HAVE_DYNLOAD
 #ifdef _WIN32
-        pa_handle = LoadLibrary("portaudio.dll");
-#define LOAD_FUNC(x) do { \
-    p##x = (typeof(p##x))GetProcAddress(pa_handle, #x); \
-    if(!(p##x)) { \
-        AL_PRINT("Could not load %s from portaudio.dll\n", #x); \
-        FreeLibrary(pa_handle); \
-        pa_handle = NULL; \
-        return NULL; \
-    } \
-} while(0)
-
-#elif defined(HAVE_DLFCN_H)
-
-    const char *str;
-#if defined(__APPLE__) && defined(__MACH__)
+# define PALIB "portaudio.dll"
+#elif defined(__APPLE__) && defined(__MACH__)
 # define PALIB "libportaudio.2.dylib"
+#elif defined(__OpenBSD__)
+# define PALIB "libportaudio.so"
 #else
 # define PALIB "libportaudio.so.2"
 #endif
-        pa_handle = dlopen(PALIB, RTLD_NOW);
-        dlerror();
 
-#define LOAD_FUNC(f) do { \
-    p##f = (typeof(f)*)dlsym(pa_handle, #f); \
-    if((str=dlerror()) != NULL) \
-    { \
-        dlclose(pa_handle); \
-        pa_handle = NULL; \
-        AL_PRINT("Could not load %s from "PALIB": %s\n", #f, str); \
-        return NULL; \
-    } \
-} while(0)
-
-#else
-        pa_handle = (void*)0xDEADBEEF;
-#define LOAD_FUNC(f) p##f = f
-#endif
-
+        pa_handle = LoadLib(PALIB);
         if(!pa_handle)
             return NULL;
 
-LOAD_FUNC(Pa_Initialize);
-LOAD_FUNC(Pa_Terminate);
-LOAD_FUNC(Pa_GetErrorText);
-LOAD_FUNC(Pa_StartStream);
-LOAD_FUNC(Pa_StopStream);
-LOAD_FUNC(Pa_OpenStream);
-LOAD_FUNC(Pa_CloseStream);
-LOAD_FUNC(Pa_GetDefaultOutputDevice);
-LOAD_FUNC(Pa_GetStreamInfo);
-
+#define LOAD_FUNC(f) do {                                                     \
+    p##f = GetSymbol(pa_handle, #f);                                          \
+    if(p##f == NULL)                                                          \
+    {                                                                         \
+        CloseLib(pa_handle);                                                  \
+        pa_handle = NULL;                                                     \
+        return NULL;                                                          \
+    }                                                                         \
+} while(0)
+        LOAD_FUNC(Pa_Initialize);
+        LOAD_FUNC(Pa_Terminate);
+        LOAD_FUNC(Pa_GetErrorText);
+        LOAD_FUNC(Pa_StartStream);
+        LOAD_FUNC(Pa_StopStream);
+        LOAD_FUNC(Pa_OpenStream);
+        LOAD_FUNC(Pa_CloseStream);
+        LOAD_FUNC(Pa_GetDefaultOutputDevice);
+        LOAD_FUNC(Pa_GetStreamInfo);
 #undef LOAD_FUNC
-
-        if((err=pPa_Initialize()) != paNoError)
-        {
-            AL_PRINT("Pa_Initialize() returned an error: %s\n", pPa_GetErrorText(err));
-#ifdef _WIN32
-            FreeLibrary(pa_handle);
-#elif defined(HAVE_DLFCN_H)
-            dlclose(pa_handle);
+#else
+        pa_handle = (void*)0xDEADBEEF;
 #endif
+
+        if((err=Pa_Initialize()) != paNoError)
+        {
+            AL_PRINT("Pa_Initialize() returned an error: %s\n", Pa_GetErrorText(err));
+            CloseLib(pa_handle);
             pa_handle = NULL;
             return NULL;
         }
@@ -165,7 +154,6 @@ static int pa_capture_cb(const void *inputBuffer, void *outputBuffer,
 
 static ALCboolean pa_open_playback(ALCdevice *device, const ALCchar *deviceName)
 {
-    const PaStreamInfo *streamInfo;
     PaStreamParameters outParams;
     pa_data *data;
     PaError err;
@@ -185,7 +173,7 @@ static ALCboolean pa_open_playback(ALCdevice *device, const ALCchar *deviceName)
 
     outParams.device = GetConfigValueInt("port", "device", -1);
     if(outParams.device < 0)
-        outParams.device = pPa_GetDefaultOutputDevice();
+        outParams.device = Pa_GetDefaultOutputDevice();
     outParams.suggestedLatency = (device->UpdateSize*device->NumUpdates) /
                                  (float)device->Frequency;
     outParams.hostApiSpecificStreamInfo = NULL;
@@ -208,23 +196,37 @@ static ALCboolean pa_open_playback(ALCdevice *device, const ALCchar *deviceName)
             outParams.sampleFormat = paFloat32;
             break;
     }
-    outParams.channelCount = ChannelsFromDevFmt(device->FmtChans);
+    outParams.channelCount = ((device->FmtChans == DevFmtMono) ? 1 : 2);
 
     SetDefaultChannelOrder(device);
 
-    err = pPa_OpenStream(&data->stream, NULL, &outParams, device->Frequency,
-                         device->UpdateSize, paNoFlag, pa_callback, device);
+    err = Pa_OpenStream(&data->stream, NULL, &outParams, device->Frequency,
+                        device->UpdateSize, paNoFlag, pa_callback, device);
     if(err != paNoError)
     {
-        AL_PRINT("Pa_OpenStream() returned an error: %s\n", pPa_GetErrorText(err));
+        AL_PRINT("Pa_OpenStream() returned an error: %s\n", Pa_GetErrorText(err));
         device->ExtraData = NULL;
         free(data);
         return ALC_FALSE;
     }
-    streamInfo = pPa_GetStreamInfo(data->stream);
 
     device->szDeviceName = strdup(deviceName);
-    device->Frequency = streamInfo->sampleRate;
+
+    if((ALuint)outParams.channelCount != ChannelsFromDevFmt(device->FmtChans))
+    {
+        if(outParams.channelCount != 1 && outParams.channelCount != 2)
+        {
+            AL_PRINT("Unhandled channel count: %u\n", outParams.channelCount);
+            Pa_CloseStream(data->stream);
+            device->ExtraData = NULL;
+            free(data);
+            return ALC_FALSE;
+        }
+        if((device->Flags&DEVICE_CHANNELS_REQUEST))
+            AL_PRINT("Failed to set %s, got %u channels instead\n", DevFmtChannelsString(device->FmtChans), outParams.channelCount);
+        device->Flags &= ~DEVICE_CHANNELS_REQUEST;
+        device->FmtChans = ((outParams.channelCount==1) ? DevFmtMono : DevFmtStereo);
+    }
 
     return ALC_TRUE;
 }
@@ -234,9 +236,9 @@ static void pa_close_playback(ALCdevice *device)
     pa_data *data = (pa_data*)device->ExtraData;
     PaError err;
 
-    err = pPa_CloseStream(data->stream);
+    err = Pa_CloseStream(data->stream);
     if(err != paNoError)
-        AL_PRINT("Error closing stream: %s\n", pPa_GetErrorText(err));
+        AL_PRINT("Error closing stream: %s\n", Pa_GetErrorText(err));
 
     free(data);
     device->ExtraData = NULL;
@@ -248,14 +250,20 @@ static ALCboolean pa_reset_playback(ALCdevice *device)
     const PaStreamInfo *streamInfo;
     PaError err;
 
-    streamInfo = pPa_GetStreamInfo(data->stream);
-    device->Frequency = streamInfo->sampleRate;
+    streamInfo = Pa_GetStreamInfo(data->stream);
+    if(device->Frequency != streamInfo->sampleRate)
+    {
+        if((device->Flags&DEVICE_FREQUENCY_REQUEST))
+            AL_PRINT("PortAudio does not support changing sample rates (wanted %dhz, got %.1fhz)\n", device->Frequency, streamInfo->sampleRate);
+        device->Flags &= ~DEVICE_FREQUENCY_REQUEST;
+        device->Frequency = streamInfo->sampleRate;
+    }
     device->UpdateSize = data->update_size;
 
-    err = pPa_StartStream(data->stream);
+    err = Pa_StartStream(data->stream);
     if(err != paNoError)
     {
-        AL_PRINT("Pa_StartStream() returned an error: %s\n", pPa_GetErrorText(err));
+        AL_PRINT("Pa_StartStream() returned an error: %s\n", Pa_GetErrorText(err));
         return ALC_FALSE;
     }
 
@@ -267,9 +275,9 @@ static void pa_stop_playback(ALCdevice *device)
     pa_data *data = (pa_data*)device->ExtraData;
     PaError err;
 
-    err = pPa_StopStream(data->stream);
+    err = Pa_StopStream(data->stream);
     if(err != paNoError)
-        AL_PRINT("Error stopping stream: %s\n", pPa_GetErrorText(err));
+        AL_PRINT("Error stopping stream: %s\n", Pa_GetErrorText(err));
 }
 
 
@@ -305,7 +313,7 @@ static ALCboolean pa_open_capture(ALCdevice *device, const ALCchar *deviceName)
 
     inParams.device = GetConfigValueInt("port", "capture", -1);
     if(inParams.device < 0)
-        inParams.device = pPa_GetDefaultOutputDevice();
+        inParams.device = Pa_GetDefaultOutputDevice();
     inParams.suggestedLatency = 0.0f;
     inParams.hostApiSpecificStreamInfo = NULL;
 
@@ -329,11 +337,11 @@ static ALCboolean pa_open_capture(ALCdevice *device, const ALCchar *deviceName)
     }
     inParams.channelCount = ChannelsFromDevFmt(device->FmtChans);
 
-    err = pPa_OpenStream(&data->stream, &inParams, NULL, device->Frequency,
-                         paFramesPerBufferUnspecified, paNoFlag, pa_capture_cb, device);
+    err = Pa_OpenStream(&data->stream, &inParams, NULL, device->Frequency,
+                        paFramesPerBufferUnspecified, paNoFlag, pa_capture_cb, device);
     if(err != paNoError)
     {
-        AL_PRINT("Pa_OpenStream() returned an error: %s\n", pPa_GetErrorText(err));
+        AL_PRINT("Pa_OpenStream() returned an error: %s\n", Pa_GetErrorText(err));
         goto error;
     }
 
@@ -353,9 +361,9 @@ static void pa_close_capture(ALCdevice *device)
     pa_data *data = (pa_data*)device->ExtraData;
     PaError err;
 
-    err = pPa_CloseStream(data->stream);
+    err = Pa_CloseStream(data->stream);
     if(err != paNoError)
-        AL_PRINT("Error closing stream: %s\n", pPa_GetErrorText(err));
+        AL_PRINT("Error closing stream: %s\n", Pa_GetErrorText(err));
 
     free(data);
     device->ExtraData = NULL;
@@ -366,9 +374,9 @@ static void pa_start_capture(ALCdevice *device)
     pa_data *data = device->ExtraData;
     PaError err;
 
-    err = pPa_StartStream(data->stream);
+    err = Pa_StartStream(data->stream);
     if(err != paNoError)
-        AL_PRINT("Error starting stream: %s\n", pPa_GetErrorText(err));
+        AL_PRINT("Error starting stream: %s\n", Pa_GetErrorText(err));
 }
 
 static void pa_stop_capture(ALCdevice *device)
@@ -376,9 +384,9 @@ static void pa_stop_capture(ALCdevice *device)
     pa_data *data = (pa_data*)device->ExtraData;
     PaError err;
 
-    err = pPa_StopStream(data->stream);
+    err = Pa_StopStream(data->stream);
     if(err != paNoError)
-        AL_PRINT("Error stopping stream: %s\n", pPa_GetErrorText(err));
+        AL_PRINT("Error stopping stream: %s\n", Pa_GetErrorText(err));
 }
 
 static void pa_capture_samples(ALCdevice *device, ALCvoid *buffer, ALCuint samples)
@@ -419,24 +427,28 @@ void alc_pa_deinit(void)
 {
     if(pa_handle)
     {
-        pPa_Terminate();
-#ifdef _WIN32
-        FreeLibrary(pa_handle);
-#elif defined(HAVE_DLFCN_H)
-        dlclose(pa_handle);
+        Pa_Terminate();
+#ifdef HAVE_DYNLOAD
+        CloseLib(pa_handle);
 #endif
         pa_handle = NULL;
     }
 }
 
-void alc_pa_probe(int type)
+void alc_pa_probe(enum DevProbe type)
 {
     if(!pa_load()) return;
 
-    if(type == DEVICE_PROBE)
-        AppendDeviceList(pa_device);
-    else if(type == ALL_DEVICE_PROBE)
-        AppendAllDeviceList(pa_device);
-    else if(type == CAPTURE_DEVICE_PROBE)
-        AppendCaptureDeviceList(pa_device);
+    switch(type)
+    {
+        case DEVICE_PROBE:
+            AppendDeviceList(pa_device);
+            break;
+        case ALL_DEVICE_PROBE:
+            AppendAllDeviceList(pa_device);
+            break;
+        case CAPTURE_DEVICE_PROBE:
+            AppendCaptureDeviceList(pa_device);
+            break;
+    }
 }

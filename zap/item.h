@@ -81,8 +81,8 @@ public:
 
    bool processArguments(S32 argc, const char **argv, Game *game);
 
-   U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
-   void unpackUpdate(GhostConnection *connection, BitStream *stream);
+   virtual U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
+   virtual void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
    void setActualPos(const Point &p);
    void setActualVel(const Point &vel);

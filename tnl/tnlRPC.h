@@ -143,7 +143,8 @@ enum RPCDirection {
 enum RPCGuaranteeType {
    RPCGuaranteedOrdered = NetEvent::GuaranteedOrdered, ///< RPC event delivery is guaranteed and will be processed in the order it was sent relative to other ordered events and RPCs
    RPCGuaranteed        = NetEvent::Guaranteed,        ///< RPC event delivery is guaranteed and will be processed in the order it was received
-   RPCUnguaranteed      = NetEvent::Unguaranteed       ///< Event delivery is not guaranteed - however, the event will remain ordered relative to other unguaranteed events
+   RPCUnguaranteed      = NetEvent::Unguaranteed,       ///< Event delivery is not guaranteed - however, the event will remain ordered relative to other unguaranteed events
+   RPCGuaranteedOrderedBigData = NetEvent::GuaranteedOrderedBigData ///< Bigger data size support
 };
 
 /// Macro used to declare the implementation of an RPC method on an EventConnection subclass.

@@ -1822,7 +1822,7 @@ S32 LuaShip::getReqLoadout(lua_State *L)
 {
    U32 loadoutItems[ShipModuleCount + ShipWeaponCount];
    GameConnection *gc = thisShip->getOwner();
-   const Vector<U32> requestedLoadout = gc ? gc->getLoadout() : NULL;
+   const Vector<U32> requestedLoadout = gc ? gc->getLoadout() : Vector<U32>();
    if(!gc || requestedLoadout.size() != ShipModuleCount + ShipWeaponCount)    // Robots and clients starts at zero size requested loadout.
       return getCurrLoadout(L);
 

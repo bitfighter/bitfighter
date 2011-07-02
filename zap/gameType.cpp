@@ -147,7 +147,6 @@ GameType::GameType() : mScoreboardUpdateTimer(1000) , mGameTimer(DefaultGameTime
    mShowAllBots = false;
    mTotalGamePlay = 0;
    mAllowSoccerPickup = true;
-   mHaveSoccer = false;           // level have soccer balls, used for s2cSoccerCollide
    mAllowAddBot = true;
    mBotZoneCreationFailed = false;
 }
@@ -712,28 +711,6 @@ void GameType::saveGameStats()
    if(masterConn)
    {
       masterConn->s2mSendStatistics(stats);
-      // below: it can send much bigger data for stats. (requires master update)
-      /*
-      BitStream s;
-      const U32 partsSize = 512;   // max 1023, limited by ByteBufferSizeBitSize=10
-      Types::write(s, stats);
-      U32 size = s.getBytePosition();
-      for(U32 i=0; i<size; i+=partsSize)
-      {
-         if(i+partsSize < size)
-         {
-            ByteBuffer *bytebuffer = new ByteBuffer(&s.getBuffer()[i], partsSize);
-            bytebuffer->takeOwnership();  // may have to use this to prevent errors.
-            masterConn->s2mSendDataParts(0, ByteBufferPtr(bytebuffer));
-         }
-         else
-         {
-            ByteBuffer *bytebuffer = new ByteBuffer(&s.getBuffer()[i], size-i);
-            bytebuffer->takeOwnership();
-            masterConn->s2mSendDataParts(1, ByteBufferPtr(bytebuffer));
-         }
-      }
-      */
    }
 
    if(gIniSettings.logStats)
@@ -2762,9 +2739,23 @@ GAMETYPE_RPC_C2S(GameType, c2sDropItem, (), ())
 }
 
 
-GAMETYPE_RPC_C2S(GameType, c2sResendItemStatus, (U16 itemId), (itemId))
+//GAMETYPE_RPC_C2S(GameType, c2sResendItemStatus, (U16 itemId), (itemId))  // probably want RPCUnguaranteed to avoid problems with unable to or delayed change weapons and chat
+TNL_IMPLEMENT_NETOBJECT_RPC(GameType, c2sResendItemStatus, (U16 itemId), (itemId), NetClassGroupGameMask, RPCUnguaranteed, RPCToGhostParent, 0)
 {
-   GameConnection *source = (GameConnection *) getRPCSourceConnection();
+   //GameConnection *source = (GameConnection *) getRPCSourceConnection();  // not used
+
+   if(mCacheResendItem.size() == 0)
+      mCacheResendItem.resize(1024);
+
+   for(S32 i=0; i < 1024; i += 256)
+   {
+      Item *item = mCacheResendItem[S32(itemId & 255) | i];
+      if(item && item->getItemId() == itemId)
+      {
+         item->setPositionMask();
+         return;
+      }
+   }
 
    fillVector.clear();
    getGridDatabase()->findObjects(fillVector);
@@ -2775,6 +2766,15 @@ GAMETYPE_RPC_C2S(GameType, c2sResendItemStatus, (U16 itemId), (itemId))
       if(item && item->getItemId() == itemId)
       {
          item->setPositionMask();
+         for(S32 j=0; j < 1024; j += 256)
+         {
+            if(mCacheResendItem[S32(itemId & 255) | j].isNull())
+            {
+               mCacheResendItem[S32(itemId & 255) | j].set(item);
+            }
+            return;
+         }
+         mCacheResendItem[S32(itemId & 255) | (TNL::Random::readI(0,3) * 256)].set(item);
          break;
       }
    }

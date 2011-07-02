@@ -453,11 +453,11 @@ void idle()
          hostGame();
    }
 
+/*
    static S64 lastTimer = Platform::getHighPrecisionTimerValue(); // accurate, but possible wrong speed when overclocking or underclocking CPU
    static U32 lastTimer2 = Platform::getRealMilliseconds();  // right speed
    static F64 unusedFraction = 0;
    static S32 timerElapsed2 = 0;
-   static S32 integerTime = 0;
 
    S64 currentTimer = Platform::getHighPrecisionTimerValue();
    U32 currentTimer2 = Platform::getRealMilliseconds();
@@ -483,8 +483,17 @@ void idle()
    }
    lastTimer2 = currentTimer2;
    integerTime += integerTime1;
-   if(integerTime < -500 || integerTime > 5000)
-      integerTime = 0;
+   */
+
+   static S32 integerTime = 0;   // static, as we need to keep holding the value that was set
+   static U32 prevTimer = 0;
+
+	U32 currentTimer = Platform::getRealMilliseconds();
+	integerTime += currentTimer - prevTimer;
+	prevTimer = currentTimer;
+
+	if(integerTime < -500 || integerTime > 5000)
+      integerTime = 10;
 
    U32 sleepTime = 1;
 
@@ -492,6 +501,7 @@ void idle()
          (!gDedicatedServer && integerTime >= S32(1000 / gIniSettings.maxFPS)) )
    {
       gameIdle(U32(integerTime));
+      display();    // Draw the screen
       integerTime = 0;
       if(!gDedicatedServer)
          sleepTime = 0;      // Live player at the console, but if we're running > 100 fps, we can afford a nap
@@ -517,7 +527,6 @@ void idle()
    }
    // END SDL event polling
 
-   display();    // Draw the screen
 
    // Sleep a bit so we don't saturate the system. For a non-dedicated server,
    // sleep(0) helps reduce the impact of OpenGL on windows.

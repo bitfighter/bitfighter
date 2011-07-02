@@ -78,22 +78,38 @@ static __inline ALvoid aluMatrixVector(ALfloat *vector,ALfloat w,ALfloat matrix[
 
 ALvoid CalcNonAttnSourceParams(ALsource *ALSource, const ALCcontext *ALContext)
 {
+    static const ALfloat angles_Mono[1] = { 0.0f };
+    static const ALfloat angles_Stereo[2] = { -30.0f, 30.0f };
+    static const ALfloat angles_Rear[2] = { -150.0f, 150.0f };
+    static const ALfloat angles_Quad[4] = { -45.0f, 45.0f, -135.0f, 135.0f };
+    static const ALfloat angles_X51[6] = { -30.0f, 30.0f, 0.0f, 0.0f,
+                                           -110.0f, 110.0f };
+    static const ALfloat angles_X61[7] = { -30.0f, 30.0f, 0.0f, 0.0f,
+                                           180.0f, -90.0f, 90.0f };
+    static const ALfloat angles_X71[8] = { -30.0f, 30.0f, 0.0f, 0.0f,
+                                           -110.0f, 110.0f, -90.0f, 90.0f };
+
+    ALCdevice *Device = ALContext->Device;
     ALfloat SourceVolume,ListenerGain,MinVolume,MaxVolume;
     ALbufferlistitem *BufferListItem;
     enum DevFmtChannels DevChans;
     enum FmtChannels Channels;
+    ALfloat (*SrcMatrix)[MAXCHANNELS];
     ALfloat DryGain, DryGainHF;
     ALfloat WetGain[MAX_SENDS];
     ALfloat WetGainHF[MAX_SENDS];
     ALint NumSends, Frequency;
-    ALboolean DupStereo;
+    const ALfloat *SpeakerGain;
+    const ALfloat *angles = NULL;
+    ALint num_channels = 0;
+    ALint lfe_chan = -1;
     ALfloat Pitch;
     ALfloat cw;
-    ALint i;
+    ALuint pos;
+    ALint i, c;
 
     /* Get device properties */
     DevChans  = ALContext->Device->FmtChans;
-    DupStereo = ALContext->Device->DuplicateStereo;
     NumSends  = ALContext->Device->NumAuxSends;
     Frequency = ALContext->Device->Frequency;
 
@@ -114,8 +130,8 @@ ALvoid CalcNonAttnSourceParams(ALsource *ALSource, const ALCcontext *ALContext)
         ALbuffer *ALBuffer;
         if((ALBuffer=BufferListItem->buffer) != NULL)
         {
-            ALint maxstep = STACK_DATA_SIZE / FrameSizeFromFmt(ALBuffer->FmtChannels,
-                                                               ALBuffer->FmtType);
+            ALint maxstep = STACK_DATA_SIZE / ALSource->NumChannels /
+                                              ALSource->SampleSize;
             maxstep -= ResamplerPadding[ALSource->Resampler] +
                        ResamplerPrePadding[ALSource->Resampler] + 1;
             maxstep = min(maxstep, INT_MAX>>FRACTIONBITS);
@@ -131,6 +147,12 @@ ALvoid CalcNonAttnSourceParams(ALsource *ALSource, const ALCcontext *ALContext)
             }
 
             Channels = ALBuffer->FmtChannels;
+
+            ALSource->Params.DoMix = ((Device->Flags&DEVICE_USE_HRTF) ?
+                SelectHrtfMixer(ALBuffer, (ALSource->Params.Step==FRACTIONONE) ?
+                                          POINT_RESAMPLER : ALSource->Resampler) :
+                SelectMixer(ALBuffer, (ALSource->Params.Step==FRACTIONONE) ?
+                                      POINT_RESAMPLER : ALSource->Resampler));
             break;
         }
         BufferListItem = BufferListItem->next;
@@ -150,105 +172,121 @@ ALvoid CalcNonAttnSourceParams(ALsource *ALSource, const ALCcontext *ALContext)
             break;
     }
 
+    SrcMatrix = ALSource->Params.DryGains;
     for(i = 0;i < MAXCHANNELS;i++)
     {
-        ALuint i2;
-        for(i2 = 0;i2 < MAXCHANNELS;i2++)
-            ALSource->Params.DryGains[i][i2] = 0.0f;
+        for(c = 0;c < MAXCHANNELS;c++)
+            SrcMatrix[i][c] = 0.0f;
     }
-
     switch(Channels)
     {
     case FmtMono:
-        ALSource->Params.DryGains[0][FRONT_CENTER]  = DryGain * ListenerGain;
+        angles = angles_Mono;
+        num_channels = 1;
         break;
     case FmtStereo:
-        if(DupStereo == AL_FALSE)
+        if((ALContext->Device->Flags&DEVICE_DUPLICATE_STEREO))
         {
-            ALSource->Params.DryGains[0][FRONT_LEFT]  = DryGain * ListenerGain;
-            ALSource->Params.DryGains[1][FRONT_RIGHT] = DryGain * ListenerGain;
-        }
-        else
-        {
-            switch(DevChans)
+            DryGain *= aluSqrt(2.0f/4.0f);
+            for(c = 0;c < 2;c++)
             {
-            case DevFmtMono:
-            case DevFmtStereo:
-                ALSource->Params.DryGains[0][FRONT_LEFT]  = DryGain * ListenerGain;
-                ALSource->Params.DryGains[1][FRONT_RIGHT] = DryGain * ListenerGain;
-                break;
+                pos = aluCart2LUTpos(cos(angles_Rear[c] * (M_PI/180.0)),
+                                     sin(angles_Rear[c] * (M_PI/180.0)));
+                SpeakerGain = Device->PanningLUT[pos];
 
-            case DevFmtQuad:
-            case DevFmtX51:
-                DryGain *= aluSqrt(2.0f/4.0f);
-                ALSource->Params.DryGains[0][FRONT_LEFT]  = DryGain * ListenerGain;
-                ALSource->Params.DryGains[1][FRONT_RIGHT] = DryGain * ListenerGain;
-                ALSource->Params.DryGains[0][BACK_LEFT]   = DryGain * ListenerGain;
-                ALSource->Params.DryGains[1][BACK_RIGHT]  = DryGain * ListenerGain;
-                break;
-
-            case DevFmtX61:
-                DryGain *= aluSqrt(2.0f/4.0f);
-                ALSource->Params.DryGains[0][FRONT_LEFT]  = DryGain * ListenerGain;
-                ALSource->Params.DryGains[1][FRONT_RIGHT] = DryGain * ListenerGain;
-                ALSource->Params.DryGains[0][SIDE_LEFT]   = DryGain * ListenerGain;
-                ALSource->Params.DryGains[1][SIDE_RIGHT]  = DryGain * ListenerGain;
-                break;
-
-            case DevFmtX71:
-                DryGain *= aluSqrt(2.0f/6.0f);
-                ALSource->Params.DryGains[0][FRONT_LEFT]  = DryGain * ListenerGain;
-                ALSource->Params.DryGains[1][FRONT_RIGHT] = DryGain * ListenerGain;
-                ALSource->Params.DryGains[0][BACK_LEFT]   = DryGain * ListenerGain;
-                ALSource->Params.DryGains[1][BACK_RIGHT]  = DryGain * ListenerGain;
-                ALSource->Params.DryGains[0][SIDE_LEFT]   = DryGain * ListenerGain;
-                ALSource->Params.DryGains[1][SIDE_RIGHT]  = DryGain * ListenerGain;
-                break;
+                for(i = 0;i < (ALint)Device->NumChan;i++)
+                {
+                    Channel chan = Device->Speaker2Chan[i];
+                    SrcMatrix[c][chan] += DryGain * ListenerGain *
+                                          SpeakerGain[chan];
+                }
             }
         }
+        angles = angles_Stereo;
+        num_channels = 2;
         break;
 
     case FmtRear:
-        ALSource->Params.DryGains[0][BACK_LEFT]  = DryGain * ListenerGain;
-        ALSource->Params.DryGains[1][BACK_RIGHT] = DryGain * ListenerGain;
+        angles = angles_Rear;
+        num_channels = 2;
         break;
 
     case FmtQuad:
-        ALSource->Params.DryGains[0][FRONT_LEFT]  = DryGain * ListenerGain;
-        ALSource->Params.DryGains[1][FRONT_RIGHT] = DryGain * ListenerGain;
-        ALSource->Params.DryGains[2][BACK_LEFT]   = DryGain * ListenerGain;
-        ALSource->Params.DryGains[3][BACK_RIGHT]  = DryGain * ListenerGain;
+        angles = angles_Quad;
+        num_channels = 4;
         break;
 
     case FmtX51:
-        ALSource->Params.DryGains[0][FRONT_LEFT]   = DryGain * ListenerGain;
-        ALSource->Params.DryGains[1][FRONT_RIGHT]  = DryGain * ListenerGain;
-        ALSource->Params.DryGains[2][FRONT_CENTER] = DryGain * ListenerGain;
-        ALSource->Params.DryGains[3][LFE]          = DryGain * ListenerGain;
-        ALSource->Params.DryGains[4][BACK_LEFT]    = DryGain * ListenerGain;
-        ALSource->Params.DryGains[5][BACK_RIGHT]   = DryGain * ListenerGain;
+        angles = angles_X51;
+        num_channels = 6;
+        lfe_chan = 3;
         break;
 
     case FmtX61:
-        ALSource->Params.DryGains[0][FRONT_LEFT]   = DryGain * ListenerGain;
-        ALSource->Params.DryGains[1][FRONT_RIGHT]  = DryGain * ListenerGain;
-        ALSource->Params.DryGains[2][FRONT_CENTER] = DryGain * ListenerGain;
-        ALSource->Params.DryGains[3][LFE]          = DryGain * ListenerGain;
-        ALSource->Params.DryGains[4][BACK_CENTER]  = DryGain * ListenerGain;
-        ALSource->Params.DryGains[5][SIDE_LEFT]    = DryGain * ListenerGain;
-        ALSource->Params.DryGains[6][SIDE_RIGHT]   = DryGain * ListenerGain;
+        angles = angles_X61;
+        num_channels = 7;
+        lfe_chan = 3;
         break;
 
     case FmtX71:
-        ALSource->Params.DryGains[0][FRONT_LEFT]   = DryGain * ListenerGain;
-        ALSource->Params.DryGains[1][FRONT_RIGHT]  = DryGain * ListenerGain;
-        ALSource->Params.DryGains[2][FRONT_CENTER] = DryGain * ListenerGain;
-        ALSource->Params.DryGains[3][LFE]          = DryGain * ListenerGain;
-        ALSource->Params.DryGains[4][BACK_LEFT]    = DryGain * ListenerGain;
-        ALSource->Params.DryGains[5][BACK_RIGHT]   = DryGain * ListenerGain;
-        ALSource->Params.DryGains[6][SIDE_LEFT]    = DryGain * ListenerGain;
-        ALSource->Params.DryGains[7][SIDE_RIGHT]   = DryGain * ListenerGain;
+        angles = angles_X71;
+        num_channels = 8;
+        lfe_chan = 3;
         break;
+    }
+
+    if((Device->Flags&DEVICE_USE_HRTF))
+    {
+        for(c = 0;c < num_channels;c++)
+        {
+            const ALshort *hrtf_left, *hrtf_right;
+
+            if(c == lfe_chan)
+            {
+                /* Skip LFE */
+                ALSource->Params.HrtfDelay[c][0] = 0;
+                ALSource->Params.HrtfDelay[c][1] = 0;
+                for(i = 0;i < HRIR_LENGTH;i++)
+                {
+                    ALSource->Params.HrtfCoeffs[c][i][0] = 0.0f;
+                    ALSource->Params.HrtfCoeffs[c][i][1] = 0.0f;
+                }
+                continue;
+            }
+
+            GetHrtfCoeffs(0.0, angles[c] * (M_PI/180.0),
+                          &hrtf_left, &hrtf_right,
+                          &ALSource->Params.HrtfDelay[c][0],
+                          &ALSource->Params.HrtfDelay[c][1]);
+            for(i = 0;i < HRIR_LENGTH;i++)
+            {
+                ALSource->Params.HrtfCoeffs[c][i][0] =
+                               hrtf_left[i]*(1.0/32767.0)*DryGain*ListenerGain;
+                ALSource->Params.HrtfCoeffs[c][i][1] =
+                              hrtf_right[i]*(1.0/32767.0)*DryGain*ListenerGain;
+            }
+        }
+    }
+    else
+    {
+        for(c = 0;c < num_channels;c++)
+        {
+            if(c == lfe_chan) /* Special-case LFE */
+            {
+                SrcMatrix[c][LFE] += DryGain * ListenerGain;
+                continue;
+            }
+            pos = aluCart2LUTpos(cos(angles[c] * (M_PI/180.0)),
+                                 sin(angles[c] * (M_PI/180.0)));
+            SpeakerGain = Device->PanningLUT[pos];
+
+            for(i = 0;i < (ALint)Device->NumChan;i++)
+            {
+                Channel chan = Device->Speaker2Chan[i];
+                SrcMatrix[c][chan] += DryGain * ListenerGain *
+                                      SpeakerGain[chan];
+            }
+        }
     }
 
     for(i = 0;i < NumSends;i++)
@@ -289,10 +327,10 @@ ALvoid CalcNonAttnSourceParams(ALsource *ALSource, const ALCcontext *ALContext)
 ALvoid CalcSourceParams(ALsource *ALSource, const ALCcontext *ALContext)
 {
     const ALCdevice *Device = ALContext->Device;
-    ALfloat InnerAngle,OuterAngle,Angle,Distance,OrigDist;
+    ALfloat InnerAngle,OuterAngle,Angle,Distance,ClampedDist;
     ALfloat Direction[3],Position[3],SourceToListener[3];
     ALfloat Velocity[3],ListenerVel[3];
-    ALfloat MinVolume,MaxVolume,MinDist,MaxDist,Rolloff,OuterGainHF;
+    ALfloat MinVolume,MaxVolume,MinDist,MaxDist,Rolloff;
     ALfloat ConeVolume,ConeHF,SourceVolume,ListenerGain;
     ALfloat DopplerFactor, DopplerVelocity, SpeedOfSound;
     ALfloat AirAbsorptionFactor;
@@ -340,9 +378,8 @@ ALvoid CalcSourceParams(ALsource *ALSource, const ALCcontext *ALContext)
     MinDist      = ALSource->flRefDistance;
     MaxDist      = ALSource->flMaxDistance;
     Rolloff      = ALSource->flRollOffFactor;
-    InnerAngle   = ALSource->flInnerAngle;
-    OuterAngle   = ALSource->flOuterAngle;
-    OuterGainHF  = ALSource->OuterGainHF;
+    InnerAngle   = ALSource->flInnerAngle * ConeScale;
+    OuterAngle   = ALSource->flOuterAngle * ConeScale;
     AirAbsorptionFactor = ALSource->AirAbsorptionFactor;
 
     //1. Translate Listener to origin (convert to head relative)
@@ -386,7 +423,7 @@ ALvoid CalcSourceParams(ALsource *ALSource, const ALCcontext *ALContext)
 
     //2. Calculate distance attenuation
     Distance = aluSqrt(aluDotproduct(Position, Position));
-    OrigDist = Distance;
+    ClampedDist = Distance;
 
     Attenuation = 1.0f;
     for(i = 0;i < NumSends;i++)
@@ -397,62 +434,62 @@ ALvoid CalcSourceParams(ALsource *ALSource, const ALCcontext *ALContext)
         if(ALSource->Send[i].Slot &&
            (ALSource->Send[i].Slot->effect.type == AL_EFFECT_REVERB ||
             ALSource->Send[i].Slot->effect.type == AL_EFFECT_EAXREVERB))
-            RoomRolloff[i] += ALSource->Send[i].Slot->effect.Reverb.RoomRolloffFactor;
+            RoomRolloff[i] += ALSource->Send[i].Slot->effect.Params.Reverb.RoomRolloffFactor;
     }
 
     switch(ALContext->SourceDistanceModel ? ALSource->DistanceModel :
                                             ALContext->DistanceModel)
     {
         case AL_INVERSE_DISTANCE_CLAMPED:
-            Distance=__max(Distance,MinDist);
-            Distance=__min(Distance,MaxDist);
+            ClampedDist=__max(ClampedDist,MinDist);
+            ClampedDist=__min(ClampedDist,MaxDist);
             if(MaxDist < MinDist)
                 break;
             //fall-through
         case AL_INVERSE_DISTANCE:
             if(MinDist > 0.0f)
             {
-                if((MinDist + (Rolloff * (Distance - MinDist))) > 0.0f)
-                    Attenuation = MinDist / (MinDist + (Rolloff * (Distance - MinDist)));
+                if((MinDist + (Rolloff * (ClampedDist - MinDist))) > 0.0f)
+                    Attenuation = MinDist / (MinDist + (Rolloff * (ClampedDist - MinDist)));
                 for(i = 0;i < NumSends;i++)
                 {
-                    if((MinDist + (RoomRolloff[i] * (Distance - MinDist))) > 0.0f)
-                        RoomAttenuation[i] = MinDist / (MinDist + (RoomRolloff[i] * (Distance - MinDist)));
+                    if((MinDist + (RoomRolloff[i] * (ClampedDist - MinDist))) > 0.0f)
+                        RoomAttenuation[i] = MinDist / (MinDist + (RoomRolloff[i] * (ClampedDist - MinDist)));
                 }
             }
             break;
 
         case AL_LINEAR_DISTANCE_CLAMPED:
-            Distance=__max(Distance,MinDist);
-            Distance=__min(Distance,MaxDist);
+            ClampedDist=__max(ClampedDist,MinDist);
+            ClampedDist=__min(ClampedDist,MaxDist);
             if(MaxDist < MinDist)
                 break;
             //fall-through
         case AL_LINEAR_DISTANCE:
             if(MaxDist != MinDist)
             {
-                Attenuation = 1.0f - (Rolloff*(Distance-MinDist)/(MaxDist - MinDist));
+                Attenuation = 1.0f - (Rolloff*(ClampedDist-MinDist)/(MaxDist - MinDist));
                 Attenuation = __max(Attenuation, 0.0f);
                 for(i = 0;i < NumSends;i++)
                 {
-                    RoomAttenuation[i] = 1.0f - (RoomRolloff[i]*(Distance-MinDist)/(MaxDist - MinDist));
+                    RoomAttenuation[i] = 1.0f - (RoomRolloff[i]*(ClampedDist-MinDist)/(MaxDist - MinDist));
                     RoomAttenuation[i] = __max(RoomAttenuation[i], 0.0f);
                 }
             }
             break;
 
         case AL_EXPONENT_DISTANCE_CLAMPED:
-            Distance=__max(Distance,MinDist);
-            Distance=__min(Distance,MaxDist);
+            ClampedDist=__max(ClampedDist,MinDist);
+            ClampedDist=__min(ClampedDist,MaxDist);
             if(MaxDist < MinDist)
                 break;
             //fall-through
         case AL_EXPONENT_DISTANCE:
-            if(Distance > 0.0f && MinDist > 0.0f)
+            if(ClampedDist > 0.0f && MinDist > 0.0f)
             {
-                Attenuation = aluPow(Distance/MinDist, -Rolloff);
+                Attenuation = aluPow(ClampedDist/MinDist, -Rolloff);
                 for(i = 0;i < NumSends;i++)
-                    RoomAttenuation[i] = aluPow(Distance/MinDist, -RoomRolloff[i]);
+                    RoomAttenuation[i] = aluPow(ClampedDist/MinDist, -RoomRolloff[i]);
             }
             break;
 
@@ -460,14 +497,12 @@ ALvoid CalcSourceParams(ALsource *ALSource, const ALCcontext *ALContext)
             break;
     }
 
-    // Source Gain + Attenuation
-    DryGain = SourceVolume * Attenuation;
-    for(i = 0;i < NumSends;i++)
-        WetGain[i] = SourceVolume * RoomAttenuation[i];
-
     EffectiveDist = 0.0f;
     if(MinDist > 0.0f && Attenuation < 1.0f)
         EffectiveDist = (MinDist/Attenuation - MinDist)*MetersPerUnit;
+
+    // Source Gain + Attenuation
+    DryGain = SourceVolume * Attenuation;
 
     // Distance-based air absorption
     if(AirAbsorptionFactor > 0.0f && EffectiveDist > 0.0f)
@@ -484,36 +519,22 @@ ALvoid CalcSourceParams(ALsource *ALSource, const ALCcontext *ALContext)
     }
 
     //3. Apply directional soundcones
-    Angle = aluAcos(aluDotproduct(Direction,SourceToListener)) * 180.0f/M_PI;
+    Angle = aluAcos(aluDotproduct(Direction,SourceToListener)) * (180.0/M_PI);
     if(Angle >= InnerAngle && Angle <= OuterAngle)
     {
         ALfloat scale = (Angle-InnerAngle) / (OuterAngle-InnerAngle);
-        ConeVolume = (1.0f+(ALSource->flOuterGain-1.0f)*scale);
-        ConeHF = (1.0f+(OuterGainHF-1.0f)*scale);
+        ConeVolume = lerp(1.0, ALSource->flOuterGain, scale);
+        ConeHF = lerp(1.0, ALSource->OuterGainHF, scale);
     }
     else if(Angle > OuterAngle)
     {
-        ConeVolume = (1.0f+(ALSource->flOuterGain-1.0f));
-        ConeHF = (1.0f+(OuterGainHF-1.0f));
+        ConeVolume = ALSource->flOuterGain;
+        ConeHF = ALSource->OuterGainHF;
     }
     else
     {
         ConeVolume = 1.0f;
         ConeHF = 1.0f;
-    }
-
-    // Apply some high-frequency attenuation for sources behind the listener
-    // NOTE: This should be aluDotproduct({0,0,-1}, ListenerToSource), however
-    // that is equivalent to aluDotproduct({0,0,1}, SourceToListener), which is
-    // the same as SourceToListener[2]
-    Angle = aluAcos(SourceToListener[2]) * 180.0f/M_PI;
-    // Sources within the minimum distance attenuate less
-    if(OrigDist < MinDist)
-        Angle *= OrigDist/MinDist;
-    if(Angle > 90.0f)
-    {
-        ALfloat scale = (Angle-90.0f) / (180.1f-90.0f); // .1 to account for fp errors
-        ConeHF *= 1.0f - (Device->HeadDampen*scale);
     }
 
     DryGain *= ConeVolume;
@@ -537,6 +558,7 @@ ALvoid CalcSourceParams(ALsource *ALSource, const ALCcontext *ALContext)
 
         if(Slot->AuxSendAuto)
         {
+            WetGain[i] = SourceVolume * RoomAttenuation[i];
             if(ALSource->WetGainAuto)
                 WetGain[i] *= ConeVolume;
             if(ALSource->WetGainHFAuto)
@@ -558,10 +580,10 @@ ALvoid CalcSourceParams(ALsource *ALSource, const ALCcontext *ALContext)
                  */
                 WetGain[i] *= aluPow(10.0f, EffectiveDist /
                                             (SPEEDOFSOUNDMETRESPERSEC *
-                                             Slot->effect.Reverb.DecayTime) *
-                                            -60.0 / 20.0);
+                                             Slot->effect.Params.Reverb.DecayTime) *
+                                            (-60.0/20.0));
 
-                WetGainHF[i] *= aluPow(Slot->effect.Reverb.AirAbsorptionGainHF,
+                WetGainHF[i] *= aluPow(Slot->effect.Params.Reverb.AirAbsorptionGainHF,
                                        AirAbsorptionFactor * EffectiveDist);
             }
         }
@@ -623,8 +645,8 @@ ALvoid CalcSourceParams(ALsource *ALSource, const ALCcontext *ALContext)
         ALbuffer *ALBuffer;
         if((ALBuffer=BufferListItem->buffer) != NULL)
         {
-            ALint maxstep = STACK_DATA_SIZE / FrameSizeFromFmt(ALBuffer->FmtChannels,
-                                                               ALBuffer->FmtType);
+            ALint maxstep = STACK_DATA_SIZE / ALSource->NumChannels /
+                                              ALSource->SampleSize;
             maxstep -= ResamplerPadding[ALSource->Resampler] +
                        ResamplerPrePadding[ALSource->Resampler] + 1;
             maxstep = min(maxstep, INT_MAX>>FRACTIONBITS);
@@ -638,54 +660,80 @@ ALvoid CalcSourceParams(ALsource *ALSource, const ALCcontext *ALContext)
                 if(ALSource->Params.Step == 0)
                     ALSource->Params.Step = 1;
             }
+
+            ALSource->Params.DoMix = ((Device->Flags&DEVICE_USE_HRTF) ?
+                SelectHrtfMixer(ALBuffer, (ALSource->Params.Step==FRACTIONONE) ?
+                                          POINT_RESAMPLER : ALSource->Resampler) :
+                SelectMixer(ALBuffer, (ALSource->Params.Step==FRACTIONONE) ?
+                                      POINT_RESAMPLER : ALSource->Resampler));
             break;
         }
         BufferListItem = BufferListItem->next;
     }
 
     // Use energy-preserving panning algorithm for multi-speaker playback
-    length = __max(OrigDist, MinDist);
-    if(length > 0.0f)
+    if((Device->Flags&DEVICE_USE_HRTF))
     {
-        ALfloat invlen = 1.0f/length;
-        Position[0] *= invlen;
-        Position[1] *= invlen;
-        Position[2] *= invlen;
-    }
+        const ALshort *hrtf_left, *hrtf_right;
 
-    pos = aluCart2LUTpos(-Position[2], Position[0]);
-    SpeakerGain = &Device->PanningLUT[MAXCHANNELS * pos];
+        if(Distance > 0.0f)
+        {
+            ALfloat invlen = 1.0f/Distance;
+            Position[0] *= invlen;
+            Position[1] *= invlen;
+            Position[2] *= invlen;
+        }
 
-    DirGain = aluSqrt(Position[0]*Position[0] + Position[2]*Position[2]);
-    // elevation adjustment for directional gain. this sucks, but
-    // has low complexity
-    AmbientGain = aluSqrt(1.0/Device->NumChan);
-    for(s = 0;s < MAXCHANNELS;s++)
-    {
-        ALuint s2;
-        for(s2 = 0;s2 < MAXCHANNELS;s2++)
-            ALSource->Params.DryGains[s][s2] = 0.0f;
+        GetHrtfCoeffs(asin(Position[1]), atan2(Position[0], -Position[2]*ZScale),
+                      &hrtf_left, &hrtf_right,
+                      &ALSource->Params.HrtfDelay[0][0],
+                      &ALSource->Params.HrtfDelay[0][1]);
+        for(i = 0;i < HRIR_LENGTH;i++)
+        {
+            ALSource->Params.HrtfCoeffs[0][i][0] = hrtf_left[i]*(1.0/32767.0) * DryGain;
+            ALSource->Params.HrtfCoeffs[0][i][1] = hrtf_right[i]*(1.0/32767.0) * DryGain;
+        }
     }
-    for(s = 0;s < (ALsizei)Device->NumChan;s++)
+    else
     {
-        Channel chan = Device->Speaker2Chan[s];
-        ALfloat gain = AmbientGain + (SpeakerGain[chan]-AmbientGain)*DirGain;
-        ALSource->Params.DryGains[0][chan] = DryGain * gain;
+        length = __max(Distance, MinDist);
+        if(length > 0.0f)
+        {
+            ALfloat invlen = 1.0f/length;
+            Position[0] *= invlen;
+            Position[1] *= invlen;
+            Position[2] *= invlen;
+        }
+
+        pos = aluCart2LUTpos(-Position[2]*ZScale, Position[0]);
+        SpeakerGain = Device->PanningLUT[pos];
+
+        DirGain = aluSqrt(Position[0]*Position[0] + Position[2]*Position[2]);
+        // elevation adjustment for directional gain. this sucks, but
+        // has low complexity
+        AmbientGain = aluSqrt(1.0/Device->NumChan);
+        for(s = 0;s < MAXCHANNELS;s++)
+        {
+            ALuint s2;
+            for(s2 = 0;s2 < MAXCHANNELS;s2++)
+                ALSource->Params.DryGains[s][s2] = 0.0f;
+        }
+        for(s = 0;s < (ALsizei)Device->NumChan;s++)
+        {
+            Channel chan = Device->Speaker2Chan[s];
+            ALfloat gain = lerp(AmbientGain, SpeakerGain[chan], DirGain);
+            ALSource->Params.DryGains[0][chan] = DryGain * gain;
+        }
     }
 
     /* Update filter coefficients. */
     cw = cos(2.0*M_PI * LOWPASSFREQCUTOFF / Frequency);
 
-    /* Spatialized sources use four chained one-pole filters, so we need to
-     * take the fourth root of the squared gain, which is the same as the
-     * square root of the base gain. */
-    ALSource->Params.iirFilter.coeff = lpCoeffCalc(aluSqrt(DryGainHF), cw);
-
+    ALSource->Params.iirFilter.coeff = lpCoeffCalc(DryGainHF, cw);
     for(i = 0;i < NumSends;i++)
     {
-        /* The wet path uses two chained one-pole filters, so take the
-         * base gain (square root of the squared gain) */
-        ALSource->Params.Send[i].iirFilter.coeff = lpCoeffCalc(WetGainHF[i], cw);
+        ALfloat a = lpCoeffCalc(WetGainHF[i]*WetGainHF[i], cw);
+        ALSource->Params.Send[i].iirFilter.coeff = a;
     }
 }
 
@@ -724,6 +772,9 @@ static const Channel QuadChans[] = { FRONT_LEFT, FRONT_RIGHT,
 static const Channel X51Chans[] = { FRONT_LEFT, FRONT_RIGHT,
                                     FRONT_CENTER, LFE,
                                     BACK_LEFT, BACK_RIGHT };
+static const Channel X51SideChans[] = { FRONT_LEFT, FRONT_RIGHT,
+                                        FRONT_CENTER, LFE,
+                                        SIDE_LEFT, SIDE_RIGHT };
 static const Channel X61Chans[] = { FRONT_LEFT, FRONT_LEFT,
                                     FRONT_CENTER, LFE, BACK_CENTER,
                                     SIDE_LEFT, SIDE_RIGHT };
@@ -733,22 +784,17 @@ static const Channel X71Chans[] = { FRONT_LEFT, FRONT_RIGHT,
                                     SIDE_LEFT, SIDE_RIGHT };
 
 #define DECL_TEMPLATE(T, chans,N, func)                                       \
-static void Write_##T##_##chans(ALCdevice *device, T *buffer, ALuint SamplesToDo)\
+static void Write_##T##_##chans(ALCdevice *device, T *RESTRICT buffer,        \
+                                ALuint SamplesToDo)                           \
 {                                                                             \
-    ALfloat (*DryBuffer)[MAXCHANNELS] = device->DryBuffer;                    \
-    ALfloat (*Matrix)[MAXCHANNELS] = device->ChannelMatrix;                   \
+    ALfloat (*RESTRICT DryBuffer)[MAXCHANNELS] = device->DryBuffer;           \
     const ALuint *ChanMap = device->DevChannels;                              \
-    ALuint i, j, c;                                                           \
+    ALuint i, j;                                                              \
                                                                               \
     for(i = 0;i < SamplesToDo;i++)                                            \
     {                                                                         \
         for(j = 0;j < N;j++)                                                  \
-        {                                                                     \
-            ALfloat samp = 0.0f;                                              \
-            for(c = 0;c < MAXCHANNELS;c++)                                    \
-                samp += DryBuffer[i][c] * Matrix[chans[j]][c];                \
-            buffer[ChanMap[chans[j]]] = func(samp);                           \
-        }                                                                     \
+            buffer[ChanMap[chans[j]]] = func(DryBuffer[i][chans[j]]);         \
         buffer += N;                                                          \
     }                                                                         \
 }
@@ -756,56 +802,58 @@ static void Write_##T##_##chans(ALCdevice *device, T *buffer, ALuint SamplesToDo
 DECL_TEMPLATE(ALfloat, MonoChans,1, aluF2F)
 DECL_TEMPLATE(ALfloat, QuadChans,4, aluF2F)
 DECL_TEMPLATE(ALfloat, X51Chans,6, aluF2F)
+DECL_TEMPLATE(ALfloat, X51SideChans,6, aluF2F)
 DECL_TEMPLATE(ALfloat, X61Chans,7, aluF2F)
 DECL_TEMPLATE(ALfloat, X71Chans,8, aluF2F)
 
 DECL_TEMPLATE(ALushort, MonoChans,1, aluF2US)
 DECL_TEMPLATE(ALushort, QuadChans,4, aluF2US)
 DECL_TEMPLATE(ALushort, X51Chans,6, aluF2US)
+DECL_TEMPLATE(ALushort, X51SideChans,6, aluF2US)
 DECL_TEMPLATE(ALushort, X61Chans,7, aluF2US)
 DECL_TEMPLATE(ALushort, X71Chans,8, aluF2US)
 
 DECL_TEMPLATE(ALshort, MonoChans,1, aluF2S)
 DECL_TEMPLATE(ALshort, QuadChans,4, aluF2S)
 DECL_TEMPLATE(ALshort, X51Chans,6, aluF2S)
+DECL_TEMPLATE(ALshort, X51SideChans,6, aluF2S)
 DECL_TEMPLATE(ALshort, X61Chans,7, aluF2S)
 DECL_TEMPLATE(ALshort, X71Chans,8, aluF2S)
 
 DECL_TEMPLATE(ALubyte, MonoChans,1, aluF2UB)
 DECL_TEMPLATE(ALubyte, QuadChans,4, aluF2UB)
 DECL_TEMPLATE(ALubyte, X51Chans,6, aluF2UB)
+DECL_TEMPLATE(ALubyte, X51SideChans,6, aluF2UB)
 DECL_TEMPLATE(ALubyte, X61Chans,7, aluF2UB)
 DECL_TEMPLATE(ALubyte, X71Chans,8, aluF2UB)
 
 DECL_TEMPLATE(ALbyte, MonoChans,1, aluF2B)
 DECL_TEMPLATE(ALbyte, QuadChans,4, aluF2B)
 DECL_TEMPLATE(ALbyte, X51Chans,6, aluF2B)
+DECL_TEMPLATE(ALbyte, X51SideChans,6, aluF2B)
 DECL_TEMPLATE(ALbyte, X61Chans,7, aluF2B)
 DECL_TEMPLATE(ALbyte, X71Chans,8, aluF2B)
 
 #undef DECL_TEMPLATE
 
 #define DECL_TEMPLATE(T, chans,N, func)                                       \
-static void Write_##T##_##chans(ALCdevice *device, T *buffer, ALuint SamplesToDo)\
+static void Write_##T##_##chans(ALCdevice *device, T *RESTRICT buffer,        \
+                                ALuint SamplesToDo)                           \
 {                                                                             \
-    ALfloat (*DryBuffer)[MAXCHANNELS] = device->DryBuffer;                    \
-    ALfloat (*Matrix)[MAXCHANNELS] = device->ChannelMatrix;                   \
+    ALfloat (*RESTRICT DryBuffer)[MAXCHANNELS] = device->DryBuffer;           \
     const ALuint *ChanMap = device->DevChannels;                              \
-    ALuint i, j, c;                                                           \
+    ALuint i, j;                                                              \
                                                                               \
     if(device->Bs2b)                                                          \
     {                                                                         \
         for(i = 0;i < SamplesToDo;i++)                                        \
         {                                                                     \
-            float samples[2] = { 0.0f, 0.0f };                                \
-            for(c = 0;c < MAXCHANNELS;c++)                                    \
-            {                                                                 \
-                samples[0] += DryBuffer[i][c]*Matrix[FRONT_LEFT][c];          \
-                samples[1] += DryBuffer[i][c]*Matrix[FRONT_RIGHT][c];         \
-            }                                                                 \
+            float samples[2];                                                 \
+            samples[0] = DryBuffer[i][chans[0]];                              \
+            samples[1] = DryBuffer[i][chans[1]];                              \
             bs2b_cross_feed(device->Bs2b, samples);                           \
-            buffer[ChanMap[FRONT_LEFT]]  = func(samples[0]);                  \
-            buffer[ChanMap[FRONT_RIGHT]] = func(samples[1]);                  \
+            buffer[ChanMap[chans[0]]]  = func(samples[0]);                    \
+            buffer[ChanMap[chans[1]]] = func(samples[1]);                     \
             buffer += 2;                                                      \
         }                                                                     \
     }                                                                         \
@@ -814,12 +862,7 @@ static void Write_##T##_##chans(ALCdevice *device, T *buffer, ALuint SamplesToDo
         for(i = 0;i < SamplesToDo;i++)                                        \
         {                                                                     \
             for(j = 0;j < N;j++)                                              \
-            {                                                                 \
-                ALfloat samp = 0.0f;                                          \
-                for(c = 0;c < MAXCHANNELS;c++)                                \
-                    samp += DryBuffer[i][c] * Matrix[chans[j]][c];            \
-                buffer[ChanMap[chans[j]]] = func(samp);                       \
-            }                                                                 \
+                buffer[ChanMap[chans[j]]] = func(DryBuffer[i][chans[j]]);     \
             buffer += N;                                                      \
         }                                                                     \
     }                                                                         \
@@ -833,7 +876,7 @@ DECL_TEMPLATE(ALbyte, StereoChans,2, aluF2B)
 
 #undef DECL_TEMPLATE
 
-#define DECL_TEMPLATE(T, func)                                                \
+#define DECL_TEMPLATE(T)                                                      \
 static void Write_##T(ALCdevice *device, T *buffer, ALuint SamplesToDo)       \
 {                                                                             \
     switch(device->FmtChans)                                                  \
@@ -850,6 +893,9 @@ static void Write_##T(ALCdevice *device, T *buffer, ALuint SamplesToDo)       \
         case DevFmtX51:                                                       \
             Write_##T##_X51Chans(device, buffer, SamplesToDo);                \
             break;                                                            \
+        case DevFmtX51Side:                                                   \
+            Write_##T##_X51SideChans(device, buffer, SamplesToDo);            \
+            break;                                                            \
         case DevFmtX61:                                                       \
             Write_##T##_X61Chans(device, buffer, SamplesToDo);                \
             break;                                                            \
@@ -859,11 +905,11 @@ static void Write_##T(ALCdevice *device, T *buffer, ALuint SamplesToDo)       \
     }                                                                         \
 }
 
-DECL_TEMPLATE(ALfloat, aluF2F)
-DECL_TEMPLATE(ALushort, aluF2US)
-DECL_TEMPLATE(ALshort, aluF2S)
-DECL_TEMPLATE(ALubyte, aluF2UB)
-DECL_TEMPLATE(ALbyte, aluF2B)
+DECL_TEMPLATE(ALfloat)
+DECL_TEMPLATE(ALushort)
+DECL_TEMPLATE(ALshort)
+DECL_TEMPLATE(ALubyte)
+DECL_TEMPLATE(ALbyte)
 
 #undef DECL_TEMPLATE
 
@@ -899,8 +945,6 @@ ALvoid aluMixData(ALCdevice *device, ALvoid *buffer, ALsizei size)
         ctx_end = ctx + device->NumContexts;
         while(ctx != ctx_end)
         {
-            SuspendContext(*ctx);
-
             src = (*ctx)->ActiveSources;
             src_end = src + (*ctx)->ActiveSourceCount;
             while(src != src_end)
@@ -946,7 +990,6 @@ ALvoid aluMixData(ALCdevice *device, ALvoid *buffer, ALsizei size)
                     ALEffectSlot->WetBuffer[i] = 0.0f;
             }
 
-            ProcessContext(*ctx);
             ctx++;
         }
         ProcessContext(NULL);
@@ -1007,8 +1050,6 @@ ALvoid aluHandleDisconnect(ALCdevice *device)
         ALsource *source;
         ALsizei pos;
 
-        SuspendContext(Context);
-
         for(pos = 0;pos < Context->SourceMap.size;pos++)
         {
             source = Context->SourceMap.array[pos].value;
@@ -1020,7 +1061,6 @@ ALvoid aluHandleDisconnect(ALCdevice *device)
                 source->position_fraction = 0;
             }
         }
-        ProcessContext(Context);
     }
 
     device->Connected = ALC_FALSE;

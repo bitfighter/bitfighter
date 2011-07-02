@@ -148,6 +148,8 @@ private:
    Timer mScoreboardUpdateTimer;    
    Timer mGameTimeUpdateTimer;
 
+   Vector<SafePtr<Item> > mCacheResendItem;  // speed up c2sResendItemStatus
+
 public:
    enum GameTypes
    {

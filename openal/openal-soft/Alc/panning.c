@@ -166,45 +166,21 @@ ALint aluCart2LUTpos(ALfloat re, ALfloat im)
 ALvoid aluInitPanning(ALCdevice *Device)
 {
     ALfloat SpeakerAngle[MAXCHANNELS];
-    ALfloat (*Matrix)[MAXCHANNELS];
     Channel *Speaker2Chan;
     ALfloat Alpha, Theta;
-    ALfloat *PanningLUT;
-    ALint pos, offset;
-    ALuint s, s2;
-
-    for(s = 0;s < MAXCHANNELS;s++)
-    {
-        for(s2 = 0;s2 < MAXCHANNELS;s2++)
-            Device->ChannelMatrix[s][s2] = ((s==s2) ? 1.0f : 0.0f);
-    }
+    ALint pos;
+    ALuint s;
 
     Speaker2Chan = Device->Speaker2Chan;
-    Matrix = Device->ChannelMatrix;
     switch(Device->FmtChans)
     {
         case DevFmtMono:
-            Matrix[FRONT_CENTER][FRONT_LEFT]  = aluSqrt(0.5);
-            Matrix[FRONT_CENTER][FRONT_RIGHT] = aluSqrt(0.5);
-            Matrix[FRONT_CENTER][SIDE_LEFT]   = aluSqrt(0.5);
-            Matrix[FRONT_CENTER][SIDE_RIGHT]  = aluSqrt(0.5);
-            Matrix[FRONT_CENTER][BACK_LEFT]   = aluSqrt(0.5);
-            Matrix[FRONT_CENTER][BACK_RIGHT]  = aluSqrt(0.5);
-            Matrix[FRONT_CENTER][BACK_CENTER] = 1.0f;
             Device->NumChan = 1;
             Speaker2Chan[0] = FRONT_CENTER;
             SpeakerAngle[0] = 0.0f * M_PI/180.0f;
             break;
 
         case DevFmtStereo:
-            Matrix[FRONT_LEFT][FRONT_CENTER]  = aluSqrt(0.5);
-            Matrix[FRONT_LEFT][SIDE_LEFT]     = 1.0f;
-            Matrix[FRONT_LEFT][BACK_LEFT]     = 1.0f;
-            Matrix[FRONT_LEFT][BACK_CENTER]   = aluSqrt(0.5);
-            Matrix[FRONT_RIGHT][FRONT_CENTER] = aluSqrt(0.5);
-            Matrix[FRONT_RIGHT][SIDE_RIGHT]   = 1.0f;
-            Matrix[FRONT_RIGHT][BACK_RIGHT]   = 1.0f;
-            Matrix[FRONT_RIGHT][BACK_CENTER]  = aluSqrt(0.5);
             Device->NumChan = 2;
             Speaker2Chan[0] = FRONT_LEFT;
             Speaker2Chan[1] = FRONT_RIGHT;
@@ -214,14 +190,6 @@ ALvoid aluInitPanning(ALCdevice *Device)
             break;
 
         case DevFmtQuad:
-            Matrix[FRONT_LEFT][FRONT_CENTER]  = aluSqrt(0.5);
-            Matrix[FRONT_LEFT][SIDE_LEFT]     = aluSqrt(0.5);
-            Matrix[FRONT_RIGHT][FRONT_CENTER] = aluSqrt(0.5);
-            Matrix[FRONT_RIGHT][SIDE_RIGHT]   = aluSqrt(0.5);
-            Matrix[BACK_LEFT][SIDE_LEFT]      = aluSqrt(0.5);
-            Matrix[BACK_LEFT][BACK_CENTER]    = aluSqrt(0.5);
-            Matrix[BACK_RIGHT][SIDE_RIGHT]    = aluSqrt(0.5);
-            Matrix[BACK_RIGHT][BACK_CENTER]   = aluSqrt(0.5);
             Device->NumChan = 4;
             Speaker2Chan[0] = BACK_LEFT;
             Speaker2Chan[1] = FRONT_LEFT;
@@ -235,12 +203,6 @@ ALvoid aluInitPanning(ALCdevice *Device)
             break;
 
         case DevFmtX51:
-            Matrix[FRONT_LEFT][SIDE_LEFT]   = aluSqrt(0.5);
-            Matrix[FRONT_RIGHT][SIDE_RIGHT] = aluSqrt(0.5);
-            Matrix[BACK_LEFT][SIDE_LEFT]    = aluSqrt(0.5);
-            Matrix[BACK_LEFT][BACK_CENTER]  = aluSqrt(0.5);
-            Matrix[BACK_RIGHT][SIDE_RIGHT]  = aluSqrt(0.5);
-            Matrix[BACK_RIGHT][BACK_CENTER] = aluSqrt(0.5);
             Device->NumChan = 5;
             Speaker2Chan[0] = BACK_LEFT;
             Speaker2Chan[1] = FRONT_LEFT;
@@ -255,11 +217,22 @@ ALvoid aluInitPanning(ALCdevice *Device)
             SetSpeakerArrangement("layout_51CHN", SpeakerAngle, Speaker2Chan, Device->NumChan);
             break;
 
+        case DevFmtX51Side:
+            Device->NumChan = 5;
+            Speaker2Chan[0] = SIDE_LEFT;
+            Speaker2Chan[1] = FRONT_LEFT;
+            Speaker2Chan[2] = FRONT_CENTER;
+            Speaker2Chan[3] = FRONT_RIGHT;
+            Speaker2Chan[4] = SIDE_RIGHT;
+            SpeakerAngle[0] = -90.0f * M_PI/180.0f;
+            SpeakerAngle[1] = -30.0f * M_PI/180.0f;
+            SpeakerAngle[2] =   0.0f * M_PI/180.0f;
+            SpeakerAngle[3] =  30.0f * M_PI/180.0f;
+            SpeakerAngle[4] =  90.0f * M_PI/180.0f;
+            SetSpeakerArrangement("layout_51SIDECHN", SpeakerAngle, Speaker2Chan, Device->NumChan);
+            break;
+
         case DevFmtX61:
-            Matrix[BACK_CENTER][BACK_LEFT]  = aluSqrt(0.5);
-            Matrix[BACK_CENTER][BACK_RIGHT] = aluSqrt(0.5);
-            Matrix[SIDE_LEFT][BACK_LEFT]    = aluSqrt(0.5);
-            Matrix[SIDE_RIGHT][BACK_RIGHT]  = aluSqrt(0.5);
             Device->NumChan = 6;
             Speaker2Chan[0] = SIDE_LEFT;
             Speaker2Chan[1] = FRONT_LEFT;
@@ -277,8 +250,6 @@ ALvoid aluInitPanning(ALCdevice *Device)
             break;
 
         case DevFmtX71:
-            Matrix[BACK_LEFT][BACK_CENTER]  = aluSqrt(0.5);
-            Matrix[BACK_RIGHT][BACK_CENTER] = aluSqrt(0.5);
             Device->NumChan = 7;
             Speaker2Chan[0] = BACK_LEFT;
             Speaker2Chan[1] = SIDE_LEFT;
@@ -298,36 +269,17 @@ ALvoid aluInitPanning(ALCdevice *Device)
             break;
     }
 
-    if(GetConfigValueBool(NULL, "scalemix", 0))
-    {
-        ALfloat maxout = 1.0f;
-        for(s = 0;s < MAXCHANNELS;s++)
-        {
-            ALfloat out = 0.0f;
-            for(s2 = 0;s2 < MAXCHANNELS;s2++)
-                out += Device->ChannelMatrix[s][s2];
-            maxout = __max(maxout, out);
-        }
-
-        maxout = 1.0f/maxout;
-        for(s = 0;s < MAXCHANNELS;s++)
-        {
-            for(s2 = 0;s2 < MAXCHANNELS;s2++)
-                Device->ChannelMatrix[s][s2] *= maxout;
-        }
-    }
-
-    PanningLUT = Device->PanningLUT;
     for(pos = 0; pos < LUT_NUM; pos++)
     {
+        ALfloat *PanningLUT = Device->PanningLUT[pos];
+
         /* clear all values */
-        offset = MAXCHANNELS * pos;
         for(s = 0; s < MAXCHANNELS; s++)
-            PanningLUT[offset+s] = 0.0f;
+            PanningLUT[s] = 0.0f;
 
         if(Device->NumChan == 1)
         {
-            PanningLUT[offset + Speaker2Chan[0]] = 1.0f;
+            PanningLUT[Speaker2Chan[0]] = 1.0f;
             continue;
         }
 
@@ -342,8 +294,8 @@ ALvoid aluInitPanning(ALCdevice *Device)
                 /* source between speaker s and speaker s+1 */
                 Alpha = M_PI_2 * (Theta-SpeakerAngle[s]) /
                                  (SpeakerAngle[s+1]-SpeakerAngle[s]);
-                PanningLUT[offset + Speaker2Chan[s]]   = cos(Alpha);
-                PanningLUT[offset + Speaker2Chan[s+1]] = sin(Alpha);
+                PanningLUT[Speaker2Chan[s]]   = cos(Alpha);
+                PanningLUT[Speaker2Chan[s+1]] = sin(Alpha);
                 break;
             }
         }
@@ -354,8 +306,8 @@ ALvoid aluInitPanning(ALCdevice *Device)
                 Theta += 2.0f * M_PI;
             Alpha = M_PI_2 * (Theta-SpeakerAngle[s]) /
                              (2.0f * M_PI + SpeakerAngle[0]-SpeakerAngle[s]);
-            PanningLUT[offset + Speaker2Chan[s]] = cos(Alpha);
-            PanningLUT[offset + Speaker2Chan[0]] = sin(Alpha);
+            PanningLUT[Speaker2Chan[s]] = cos(Alpha);
+            PanningLUT[Speaker2Chan[0]] = sin(Alpha);
         }
     }
 }

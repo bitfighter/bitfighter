@@ -192,7 +192,13 @@ static ALCboolean solaris_reset_playback(ALCdevice *device)
         return ALC_FALSE;
     }
 
-    device->Frequency = info.play.sample_rate;
+    if(device->Frequency != info.play.sample_rate)
+    {
+        if((device->Flags&DEVICE_FREQUENCY_REQUEST))
+            AL_PRINT("Failed to set requested frequency %dhz, got %dhz instead\n", device->Frequency, info.play.sample_rate);
+        device->Flags &= ~DEVICE_FREQUENCY_REQUEST;
+        device->Frequency = info.play.sample_rate;
+    }
     device->UpdateSize = (info.play.buffer_size/device->NumUpdates) + 1;
 
     data->data_size = device->UpdateSize * frameSize;
@@ -267,7 +273,7 @@ static ALCuint solaris_available_samples(ALCdevice *pDevice)
 }
 
 
-BackendFuncs solaris_funcs = {
+static const BackendFuncs solaris_funcs = {
     solaris_open_playback,
     solaris_close_playback,
     solaris_reset_playback,
@@ -289,7 +295,7 @@ void alc_solaris_deinit(void)
 {
 }
 
-void alc_solaris_probe(int type)
+void alc_solaris_probe(enum DevProbe type)
 {
 #ifdef HAVE_STAT
     struct stat buf;
@@ -297,8 +303,15 @@ void alc_solaris_probe(int type)
         return;
 #endif
 
-    if(type == DEVICE_PROBE)
-        AppendDeviceList(solaris_device);
-    else if(type == ALL_DEVICE_PROBE)
-        AppendAllDeviceList(solaris_device);
+    switch(type)
+    {
+        case DEVICE_PROBE:
+            AppendDeviceList(solaris_device);
+            break;
+        case ALL_DEVICE_PROBE:
+            AppendAllDeviceList(solaris_device);
+            break;
+        case CAPTURE_DEVICE_PROBE:
+            break;
+    }
 }

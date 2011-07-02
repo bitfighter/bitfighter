@@ -348,6 +348,7 @@ public:
    S32 mVoteYes;
    S32 mVoteNo;
    S32 mVoteNumber;
+   StringPtr mVoteString;
    S32 mNextLevel;
 
    //SafePtr<GameConnection> mVoteClientConnection;
