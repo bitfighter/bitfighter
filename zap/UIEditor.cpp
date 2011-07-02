@@ -3680,12 +3680,10 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
          {
             EditorObject *p = objList->get(i);
 
-            // Make sure we are writing wall items on first pass, non-wall items next
-            if((p->getObjectTypeMask() & (BarrierType | PolyWallType)) != (j == 0))
-               continue;
-
-            p->saveItem(f);
-
+            // Writing wall items on first pass, non-wall items next -- that will make sure mountable items have something to grab onto
+            if((j == 0) && (p->getObjectTypeMask() & (BarrierType | PolyWallType)) || 
+               (j == 1) && (p->getObjectTypeMask() &~ (BarrierType | PolyWallType)) )
+               p->saveItem(f);
          }
       fclose(f);
    }

@@ -28,6 +28,8 @@
 #include "moveObject.h"    // For def of ActualState
 #include "EditorObject.h"  // For def of EditorObject
 
+#include <map>
+
 namespace Zap
 {
 
@@ -383,13 +385,36 @@ EditorObjectDatabase &EditorObjectDatabase::operator= (const EditorObjectDatabas
    copy(database);
    return *this;
 }
+
+
+typedef map<DatabaseObject *, EditorObject *> dbMap;
+
+static DatabaseObject *getObject(dbMap &dbObjectMap, DatabaseObject *theObject)
+{
+   // Check if this object has already been found
+   dbMap::iterator iter = dbObjectMap.find(theObject);
+
+   if(iter != dbObjectMap.end()) // Found an existing copy -- use that
+      return iter->second;
+
+   else                          // This is a new object, copy and add to our map
+   {
+      EditorObject *newObject = dynamic_cast<EditorObject *>(theObject)->newCopy();
+
+      pair<dbMap::iterator, bool> retval;
+      retval = dbObjectMap.insert(pair<DatabaseObject *, EditorObject *>(theObject, newObject));
+
+      TNLAssert(retval.second, "Invalid attempt to insert object into map (duplicate insert?)");
+
+      return newObject;
+   }
+}
  
 
 // Copy contents of source into this
 void EditorObjectDatabase::copy(const EditorObjectDatabase &source)
 {
-
-logprintf("Copying database (active= %p) to %p", &source, this);
+   dbMap dbObjectMap;
 
    for(U32 x = 0; x < BucketRowCount; x++)
       for(U32 y = 0; y < BucketRowCount; y++)
@@ -398,17 +423,11 @@ logprintf("Copying database (active= %p) to %p", &source, this);
 
          for(BucketEntry *walk = source.mBuckets[x & BucketMask][y & BucketMask]; walk; walk = walk->nextInBucket)
          {
+            BucketEntry *be = mChunker.alloc();                // Create a slot for our new object
             DatabaseObject *theObject = walk->theObject;
 
-            BucketEntry *be = mChunker.alloc();
-            be->theObject = dynamic_cast<EditorObject *>(theObject)->newCopy();  // TODO: <<<===!!!!!!  use dict to avoid copying same object twice
-
-BfObject *objxx = dynamic_cast<BfObject *>(theObject);
-Geometry *geomx = objxx->mGeometry.get();
-Geometry *geom2x = dynamic_cast<BfObject *>(be->theObject)->mGeometry.get();
-
-logprintf("Copied object %p(%s) to %p, new copy inserted into %p", geomx, geomx->getVert(0).toString().c_str(),geom2x, this);
-
+            DatabaseObject *object = getObject(dbObjectMap, theObject);    // Returns a pointer to a new or existing copy of theObject
+            be->theObject = object;
 
             be->nextInBucket = mBuckets[x & BucketMask][y & BucketMask];
             mBuckets[x & BucketMask][y & BucketMask] = be;
@@ -421,13 +440,13 @@ logprintf("Copied object %p(%s) to %p, new copy inserted into %p", geomx, geomx-
 
    for(S32 i = 0; i < source.mAllEditorObjects.size(); i++)
    {
-      mAllEditorObjects[i] = source.mAllEditorObjects[i]->newCopy(); // ===>  use same dict to copy pointers to object copies we just made above
-logprintf("oldgame = %p, newgame = %p", source.mAllEditorObjects[i]->getGame(), mAllEditorObjects[i]->getGame());
-      mAllObjects[i] = mAllEditorObjects[i];
+      dbMap::iterator iter = dbObjectMap.find(source.mAllEditorObjects[i]);
+      TNLAssert(iter != dbObjectMap.end(), "Could not find object in our database copy map!") ;
+
+      mAllEditorObjects[i] = iter->second;
+      mAllObjects[i] = iter->second;
    }
-
 }
-
 
 
 void EditorObjectDatabase::addToDatabase(DatabaseObject *object, const Rect &extents)
