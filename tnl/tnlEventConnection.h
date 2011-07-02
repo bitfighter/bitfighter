@@ -164,7 +164,7 @@ public:
    TNL_DECLARE_RPC(s2rTNLSendDataParts, (U8 type, ByteBufferPtr data));
 private:
    TNL::ByteBuffer *mTNLDataBuffer;
-   NetEvent *EventConnection::unpackNetEvent(BitStream *bstream);
+   NetEvent *unpackNetEvent(BitStream *bstream);
 
 };
 
