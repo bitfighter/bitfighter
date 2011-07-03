@@ -186,7 +186,7 @@ void TeamDefUserInterface::render()
 
          char colorstr[16];                  // "(100, 100, 100)" + 1 for null
          const Color *color = gEditorGame->getTeamColor(j);
-         dSprintf(colorstr, sizeof(colorstr), "(%d, %d, %d)", S32(color->r * 100), S32(color->g * 100), S32(color->b * 100));
+         dSprintf(colorstr, sizeof(colorstr), "(%d, %d, %d)", S32(color->r * 100 + 0.5), S32(color->g * 100 + 0.5), S32(color->b * 100 + 0.5));
          
          static const char *nameColorStr = "%s  %s";
 
