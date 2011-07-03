@@ -70,8 +70,8 @@ public:
    void renderInterfaceOverlay(bool scoreboardVisible);
 
    GameTypes getGameType() { return HTFGame; }
-   const char *getGameTypeString() { return "Hold the Flag"; }
-   const char *getShortName() { return "HTF"; }
+   const char *getGameTypeString() const { return "Hold the Flag"; }
+   const char *getShortName() const { return "HTF"; }
    const char *getInstructionString() { return "Hold the flags at your capture zones!"; }
    bool isTeamGame() { return true; }
    bool canBeTeamGame() { return true; }

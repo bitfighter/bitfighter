@@ -286,6 +286,7 @@
     <ClInclude Include="freeglut_stroke_roman.h" />
     <ClInclude Include="gameStats.h" />
     <ClInclude Include="Geometry.h" />
+    <ClInclude Include="HTFGame.h" />
     <ClInclude Include="loadoutHelper.h" />
     <ClInclude Include="..\zap\loadoutZone.h" />
     <ClInclude Include="..\zap\lpc10.h" />
@@ -352,6 +353,7 @@
     <ClInclude Include="dataConnection.h" />
     <ClInclude Include="helperMenu.h" />
     <ClInclude Include="oglconsole.h" />
+    <ClInclude Include="retrieveGame.h" />
     <ClInclude Include="SimpleLine.h" />
     <ClInclude Include="SlipZone.h" />
     <ClInclude Include="stringUtils.h" />
@@ -359,6 +361,7 @@
     <ClInclude Include="UIEditorMenus.h" />
     <ClInclude Include="UIMenuItems.h" />
     <ClInclude Include="version.h" />
+    <ClInclude Include="zoneControlGame.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\zap\ZAP.rc" />

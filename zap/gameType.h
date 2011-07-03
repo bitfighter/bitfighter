@@ -194,7 +194,7 @@ public:
    static const char *validateGameType(const char *gtype);           // Returns a valid gameType, defaulting to gDefaultGameTypeIndex if needed
 
    virtual GameTypes getGameType() { return BitmatchGame; }
-   virtual const char *getGameTypeString() const { return "Bitmatch"; }                            // Will be overridden by other games
+   virtual const char *getGameTypeString() const { return "Bitmatch"; } const                      // Will be overridden by other games
    virtual const char *getShortName() const { return "BM"; }                                             //          -- ditto --
    virtual const char *getInstructionString() const { return "Blast as many ships as you can!"; }  //          -- ditto --
    virtual bool isTeamGame() const { return mGame->getTeamCount() > 1; }                           // Team game if we have teams.  Otherwise it's every man for himself.

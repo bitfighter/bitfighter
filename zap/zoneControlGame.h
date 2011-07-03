@@ -69,8 +69,8 @@ public:
    void shipTouchZone(Ship *ship, GoalZone *zone);
 
    GameTypes getGameType() { return ZoneControlGame; }
-   const char *getGameTypeString() { return "Zone Control"; }
-   const char *getShortName() { return "ZC"; }
+   const char *getGameTypeString() const { return "Zone Control"; }
+   const char *getShortName() const { return "ZC"; }
    const char *getInstructionString() { return "Capture all the zones by carrying the flag into them! "; }
    bool isTeamGame() { return true; }
    bool canBeTeamGame() { return true; }

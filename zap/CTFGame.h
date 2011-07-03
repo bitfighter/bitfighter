@@ -49,7 +49,7 @@ public:
    bool teamHasFlag(S32 teamId) const;
 
    GameTypes getGameType() { return CTFGame; }
-   const char *getGameTypeString() { return "Capture the Flag"; }
+   const char *getGameTypeString() const { return "Capture the Flag"; }
    const char *getShortName() const { return "CTF"; }
    const char *getInstructionString() { return "Take the opposing team's flag and touch it to your flag!"; }
    

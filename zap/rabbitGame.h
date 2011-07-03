@@ -90,7 +90,7 @@ public:
    void onFlagReturned();
 
    GameTypes getGameType() { return RabbitGame; }
-   const char *getGameTypeString() { return "Rabbit"; }
+   const char *getGameTypeString() const { return "Rabbit"; }
    const char *getShortName() const { return "Rab"; }
    const char *getInstructionString() { return "Grab the flag and hold it for as long as you can!"; }
    bool isTeamGame() { return getGame()->getTeamCount() != 1; }

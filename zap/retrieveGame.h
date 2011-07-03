@@ -74,8 +74,8 @@ public:
    bool isTeamFlagGame() { return true; }
 
    GameTypes getGameType() { return RetrieveGame; }
-   const char *getGameTypeString() { return "Retrieve"; }
-   const char *getShortName() { return "Ret"; }
+   const char *getGameTypeString() const { return "Retrieve"; }
+   const char *getShortName() const { return "Ret"; }
    const char *getInstructionString() { return "Find all the flags, and bring them to your capture zones!"; }
    bool isTeamGame() { return true; }
    bool canBeTeamGame() { return true; }
