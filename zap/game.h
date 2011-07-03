@@ -126,6 +126,30 @@ private:
 
    Vector<boost::shared_ptr<AbstractTeam> > mTeams;       // List of teams
 
+   bool mEngineerEnabled;
+   bool mBotsAllowed;
+   bool mSoccerPickupAllowed;
+
+   // Info about current level
+   StringTableEntry mLevelName;
+   StringTableEntry mLevelDescription;
+   StringTableEntry mLevelCredits;
+
+   S32 mMinRecPlayers;         // Recommended min players for this level
+   S32 mMaxRecPlayers;         // Recommended max players for this level
+
+
+   // Functions for handling individual level parameters read in processLevelParam; some may be game-specific
+   void onReadTeamParam(S32 argc, const char **argv);
+   void onReadTeamChangeParam(S32 argc, const char **argv);
+   void onReadSpecialsParam(S32 argc, const char **argv);
+   void onReadSoccerPickupParam(S32 argc, const char **argv);
+   void onReadScriptParam(S32 argc, const char **argv);
+   void onReadLevelNameParam(S32 argc, const char **argv);
+   void onReadLevelDescriptionParam(S32 argc, const char **argv);
+   void onReadLevelCreditsParam(S32 argc, const char **argv);
+   
+
 protected:
    virtual void cleanUp();
    U32 mNextMasterTryTime;
@@ -156,6 +180,9 @@ protected:
 
    bool mGameSuspended;       // True if we're in "suspended animation" mode
 
+   string mScriptName;                    // Name of levelgen script, if any
+   Vector<string> mScriptArgs;            // List of script params  
+
 
 public:
    static const S32 DefaultGridSize = 255;   // Size of "pages", represented by floats for intrapage locations (i.e. pixels per integer)
@@ -177,6 +204,7 @@ public:
 
    virtual GameUserInterface *getUserInterface() = 0;
 
+   void setScript(const Vector<string> &args);
 
    Rect getWorldExtents() { return mWorldExtents; }
 
@@ -196,9 +224,38 @@ public:
 
    U32 getTimeUnconnectedToMaster() { return mTimeUnconnectedToMaster; }
 
+   bool isEngineerEnabled() { return mEngineerEnabled; }
+   void setEngineerEnabled(bool enabled) { mEngineerEnabled = enabled; }
+
+   bool areBotsAllowed() { return mBotsAllowed; }
+   void setBotsAllowed(bool allowed) { mBotsAllowed = allowed; }
+
+   bool isSoccerPickupAllowed() { return mSoccerPickupAllowed; }
+
+   const StringTableEntry *getLevelName() const { return &mLevelName; }
+   void setLevelName(const StringTableEntry &levelName) { mLevelName = levelName; }
+
+   const StringTableEntry *getLevelDescription() const { return &mLevelDescription; }
+   void setLevelDescription(const StringTableEntry &levelDescription) { mLevelDescription = levelDescription; }
+
+   const StringTableEntry *getLevelCredits() const { return &mLevelCredits; }
+   void setLevelCredits(const StringTableEntry &levelCredits) { mLevelCredits = levelCredits; }
+
+   S32 getMinRecPlayers() { return mMinRecPlayers; }
+   void setMinRecPlayers(S32 minPlayers) { mMinRecPlayers = minPlayers; }
+
+   S32 getMaxRecPlayers() { return mMaxRecPlayers; }
+   void setMaxRecPlayers(S32 maxPlayers) { mMaxRecPlayers = maxPlayers; }
+
+   void resetLevelInfo();
 
    virtual void processLevelLoadLine(U32 argc, U32 id, const char **argv);      // Only used by ServerGame and EditorGame
+   bool processLevelParam(S32 argc, const char **argv);
+   string toString();
+   string getScriptLine() const;
+
    virtual bool processPseudoItem(S32 argc, const char **argv) { return false; }
+
    void setGameTime(F32 time);                                          // Only used during level load process
 
 
@@ -233,6 +290,7 @@ public:
    AbstractTeam *getTeam(S32 teamIndex) const;
    void addTeam(boost::shared_ptr<AbstractTeam> team);
    void addTeam(boost::shared_ptr<AbstractTeam> team, S32 index);
+   void replaceTeam(boost::shared_ptr<AbstractTeam> team, S32 index);
    virtual boost::shared_ptr<AbstractTeam> getNewTeam() = 0;
    void removeTeam(S32 teamIndex);
    void clearTeams();

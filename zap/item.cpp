@@ -75,6 +75,15 @@ bool Item::processArguments(S32 argc, const char **argv, Game *game)
 }
 
 
+// Server only
+string Item::toString()
+{
+   Point pos = getVert(0) / getGame()->getGridSize();
+
+   return string(getClassName()) + " " + pos.toString();
+}
+
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 

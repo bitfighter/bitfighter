@@ -1359,7 +1359,7 @@ void GameUserInterface::getMapHandler(GameUserInterface *gui, const Vector<strin
          gui->remoteLevelDownloadFilename = words[1];
       else
          gui->remoteLevelDownloadFilename = "downloaded_" + makeFilenameFromString(gClientGame->getGameType() ?
-               gClientGame->getGameType()->getLevelName()->getString() : "Level");
+               gClientGame->getLevelName()->getString() : "Level");
 
       // Add an extension if needed
       if(gui->remoteLevelDownloadFilename.find(".") == string::npos)
@@ -2449,21 +2449,21 @@ void GameUserInterface::renderScoreboard(const GameType *gameType)
          alpha = mLevelInfoDisplayTimer.getCurrent() * 0.001f;
 
       glEnableBlend;
-         glColor4f(1, 1, 1, alpha);
-         UserInterface::drawCenteredStringf(canvasHeight / 2 - 180, 30, "Level: %s", gameType->getLevelName()->getString());
+         glColor(Colors::white, alpha);
+         UserInterface::drawCenteredStringf(canvasHeight / 2 - 180, 30, "Level: %s", gameType->getGame()->getLevelName()->getString());
          UserInterface::drawCenteredStringf(canvasHeight / 2 - 140, 30, "Game Type: %s", gameType->getGameTypeString());
-         glColor4f(0, 1, 1, alpha);
+         glColor(Colors::cyan, alpha);
          UserInterface::drawCenteredString(canvasHeight / 2 - 100, 20, gameType->getInstructionString());
-         glColor4f(1, 0, 1, alpha);
-         UserInterface::drawCenteredString(canvasHeight / 2 - 75, 20, gameType->getLevelDescription()->getString());
+         glColor(Colors::magenta, alpha);
+         UserInterface::drawCenteredString(canvasHeight / 2 - 75, 20, gameType->getGame()->getLevelDescription()->getString());
 
-         glColor4f(0, 1, 0, alpha);
+         glColor(Colors::green, alpha);
          UserInterface::drawCenteredStringf(canvasHeight - 100, 20, "Press [%s] to see this information again", keyCodeToString(keyMISSION));
 
-         if(gameType->getLevelCredits()->isNull())    // Credits string is not empty
+         if(gameType->getGame()->getLevelCredits()->isNull())    // Display credits if it's not empty
          {
-            glColor4f(1, 0, 0, alpha);
-            UserInterface::drawCenteredStringf(canvasHeight / 2 + 50, 20, "%s", gameType->getLevelCredits()->getString());
+            glColor(Colors::red, alpha);
+            UserInterface::drawCenteredStringf(canvasHeight / 2 + 50, 20, "%s", gameType->getGame()->getLevelCredits()->getString());
          }
 
          glColor4f(1, 1, 0, alpha);
@@ -2614,20 +2614,20 @@ void GameUserInterface::renderBasicInterfaceOverlay(const GameType *gameType, bo
 
       glEnableBlend;
          glColor4f(1, 1, 1, alpha);
-         UserInterface::drawCenteredStringf(canvasHeight / 2 - 180, 30, "Level: %s", gameType->getLevelName()->getString());
+         UserInterface::drawCenteredStringf(canvasHeight / 2 - 180, 30, "Level: %s", gameType->getGame()->getLevelName()->getString());
          UserInterface::drawCenteredStringf(canvasHeight / 2 - 140, 30, "Game Type: %s", gameType->getGameTypeString());
          glColor4f(0, 1, 1, alpha);
          UserInterface::drawCenteredString(canvasHeight / 2 - 100, 20, gameType->getInstructionString());
          glColor4f(1, 0, 1, alpha);
-         UserInterface::drawCenteredString(canvasHeight / 2 - 75, 20, gameType->getLevelDescription()->getString());
+         UserInterface::drawCenteredString(canvasHeight / 2 - 75, 20, gameType->getGame()->getLevelDescription()->getString());
 
          glColor4f(0, 1, 0, alpha);
          UserInterface::drawCenteredStringf(canvasHeight - 100, 20, "Press [%s] to see this information again", keyCodeToString(keyMISSION));
 
-         if(gameType->getLevelCredits()->isNotNull())    // Credits string is not empty
+         if(gameType->getGame()->getLevelCredits()->isNotNull())    // Only render credits string if it's is not empty
          {
             glColor4f(1, 0, 0, alpha);
-            UserInterface::drawCenteredStringf(canvasHeight / 2 + 50, 20, "%s", gameType->getLevelCredits()->getString());
+            UserInterface::drawCenteredStringf(canvasHeight / 2 + 50, 20, "%s", gameType->getGame()->getLevelCredits()->getString());
          }
 
          glColor4f(1, 1, 0, alpha);

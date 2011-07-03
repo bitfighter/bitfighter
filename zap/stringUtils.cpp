@@ -98,8 +98,19 @@ string ftos(F32 f, S32 digits)
 {
    char outString[100];
    dSprintf(outString, sizeof(outString), (string("%2.") + itos(digits) + "f").c_str(), f);
-   return outString;
+
+   // Strip any trailing zeros -- there may be more efficient ways of doing this
+   string str(outString);
+
+   while(str[str.length() - 1]  == '0')
+      str.erase(str.length() - 1);
+
+   if(str[str.length() - 1] == '.')
+      str.erase(str.length() - 1);
+
+   return str;
 }
+
 
 string ftos(F32 f)
 {

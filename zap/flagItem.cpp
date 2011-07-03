@@ -98,9 +98,9 @@ void FlagItem::onAddedToGame(Game *theGame)
 }
 
 
-static bool isTeamFlagSpawn(GameType *gt, S32 team)
+static bool isTeamFlagSpawn(Game *game, S32 team)
 {
-   return gt->isTeamFlagGame() && team >= 0 && team < gt->getGame()->getTeamCount();
+   return game->getGameType()->isTeamFlagGame() && team >= 0 && team < game->getTeamCount();
 }
 
 
@@ -125,7 +125,7 @@ bool FlagItem::processArguments(S32 argc, const char **argv, Game *game)
    {
       FlagSpawn spawn = FlagSpawn(mInitialPos, time);
 
-      if(isTeamFlagSpawn(gt, mTeam))
+      if(isTeamFlagSpawn(game, mTeam))
       {
          Team *team = dynamic_cast<Team *>(game->getTeam(mTeam));
          if(team)
@@ -187,8 +187,9 @@ const Vector<FlagSpawn> *FlagItem::getSpawnPoints()
    Game *game = getGame();
    GameType *gt = game->getGameType();
 
+   TNLAssert(gt, "Invalid gameType!");
 
-   if(isTeamFlagSpawn(gt, mTeam))    
+   if(isTeamFlagSpawn(game, mTeam))    
       return ((Team *)(game->getTeam(mTeam)))->getFlagSpawns();
    else             
       return gt->getFlagSpawns();

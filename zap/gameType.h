@@ -118,7 +118,6 @@ private:
 
    Vector<SafePtr<Object> > mSpyBugs;    // List of all spybugs in the game, could be added and destroyed in-game
    bool mLevelHasLoadoutZone;
-   bool mEngineerEnabled;
    bool mShowAllBots;
    U32 mTotalGamePlay;
 
@@ -127,10 +126,6 @@ private:
    Vector<BarrierRec> mBarriers;
 
    void sendChatDisplayEvent(ClientRef *clientRef, bool global, const char *message, NetEvent *theEvent);      // In-game chat message
-
-   StringTableEntry mLevelName;
-   StringTableEntry mLevelDescription;
-   StringTableEntry mLevelCredits;
 
    S32 mWinningScore;               // Game over when team (or player in individual games) gets this score
    S32 mLeadingTeam;                // Team with highest score
@@ -193,9 +188,9 @@ public:
       ScoringEventsCount
    };
 
-   static const S32 gMaxTeams = 9;                                   // Max teams allowed -- careful changing this; used for RPC ranges
+   static const S32 MAX_TEAMS = 9;                                   // Max teams allowed -- careful changing this; used for RPC ranges
    static const S32 gFirstTeamNumber = -2;                           // First team is "Hostile to All" with index -2
-   static const U32 gMaxTeamCount = gMaxTeams - gFirstTeamNumber;    // Number of possible teams, including Neutral and Hostile to All
+   static const U32 gMaxTeamCount = MAX_TEAMS - gFirstTeamNumber;    // Number of possible teams, including Neutral and Hostile to All
    static const char *validateGameType(const char *gtype);           // Returns a valid gameType, defaulting to gDefaultGameTypeIndex if needed
 
    virtual GameTypes getGameType() { return BitmatchGame; }
@@ -217,7 +212,6 @@ public:
 
    S32 getLeadingScore() const { return mLeadingTeamScore; }
    S32 getLeadingTeam() const { return mLeadingTeam; }
-   bool engineerIsEnabled() const { return mEngineerEnabled; }
 
    void catalogSpybugs();     // Rebuild a list of spybugs in the game
    void addSpyBug(SpyBug *spybug);
@@ -268,23 +262,14 @@ public:
 
    virtual ClientRef *allocClientRef() { return new ClientRef; }
 
-   string mScriptName;                    // Name of script
-   Vector<string> mScriptArgs;            // List of script params  
-
    S32 getFlagSpawnCount() const { return mFlagSpawnPoints.size(); }
    const FlagSpawn *getFlagSpawn(S32 index) const { return &mFlagSpawnPoints[index]; }
    const Vector<FlagSpawn> *getFlagSpawns() const { return &mFlagSpawnPoints; }
    void addFlagSpawn(FlagSpawn flagSpawn) { mFlagSpawnPoints.push_back(flagSpawn); }
    void addAsteroidSpawn(AsteroidSpawn asteroidSpawn) { mAsteroidSpawnPoints.push_back(asteroidSpawn); }
 
-   const StringTableEntry *getLevelName() const { return &mLevelName; }
-   const StringTableEntry *getLevelDescription() const { return &mLevelDescription; }
-   const StringTableEntry *getLevelCredits() const { return &mLevelCredits; }
-
    Rect mViewBoundsWhileLoading;    // Show these view bounds while loading the map
    S32 mObjectsExpected;      // Count of objects we expect to get with this level (for display purposes only)
-   S32 minRecPlayers;         // Recommended min players for this level
-   S32 maxRecPlayers;         // Recommended max players for this level
 
    struct ItemOfInterest
    {
@@ -300,10 +285,8 @@ public:
 
    bool isGameOver() const { return mGameOver; }
 
-   bool mAllowSoccerPickup;         // Soccer balls only
    bool mHaveSoccer;                // Does level have soccer balls? used to determine weather or not to send s2cSoccerCollide
 
-   bool mAllowAddBot;
    bool mBotZoneCreationFailed;
 
    enum {
@@ -346,6 +329,8 @@ public:
    ClientRef *findClientRef(const StringTableEntry &name);
 
    bool processArguments(S32 argc, const char **argv, Game *game);
+   string toString();
+
    virtual void addGameSpecificParameterMenuItems(Vector<MenuItem *> &menuItems);
 
    void onAddedToGame(Game *theGame);
@@ -406,16 +391,13 @@ public:
    void performScopeQuery(GhostConnection *connection);
    virtual void performProxyScopeQuery(GameObject *scopeObject, GameConnection *connection);
 
-   // Functions related to loading levels
-   virtual bool processLevelParam(S32 argc, const char **argv);      // Things like LevelName and other level parameters
-
    void onGhostAvailable(GhostConnection *theConnection);
    TNL_DECLARE_RPC(s2cSetLevelInfo, (StringTableEntry levelName, StringTableEntry levelDesc, S32 teamScoreLimit, StringTableEntry levelCreds, 
                                      S32 objectCount, F32 lx, F32 ly, F32 ux, F32 uy, bool levelHasLoadoutZone, bool engineerEnabled));
    TNL_DECLARE_RPC(s2cAddBarriers, (Vector<F32> barrier, F32 width, bool solid));
    TNL_DECLARE_RPC(s2cAddTeam, (StringTableEntry teamName, F32 r, F32 g, F32 b));
    TNL_DECLARE_RPC(s2cAddClient, (StringTableEntry clientName, bool isMyClient, bool isAdmin, bool isRobot, bool playAlert));
-   TNL_DECLARE_RPC(s2cClientJoinedTeam, (StringTableEntry clientName, RangedU32<0, gMaxTeams> teamIndex));
+   TNL_DECLARE_RPC(s2cClientJoinedTeam, (StringTableEntry clientName, RangedU32<0, MAX_TEAMS> teamIndex));
    TNL_DECLARE_RPC(s2cClientBecameAdmin, (StringTableEntry clientName));
    TNL_DECLARE_RPC(s2cClientBecameLevelChanger, (StringTableEntry clientName));
 
@@ -442,7 +424,7 @@ public:
    void updateRatings();               // Update everyone's game-normalized ratings at the end of the game
 
 
-   TNL_DECLARE_RPC(s2cSetTeamScore, (RangedU32<0, gMaxTeams> teamIndex, U32 score));
+   TNL_DECLARE_RPC(s2cSetTeamScore, (RangedU32<0, MAX_TEAMS> teamIndex, U32 score));
 
    TNL_DECLARE_RPC(c2sRequestScoreboardUpdates, (bool updates));
    TNL_DECLARE_RPC(s2cScoreboardUpdate, (Vector<RangedU32<0, MaxPing> > pingTimes, Vector<SignedInt<24> > scores, Vector<RangedU32<0,200> > ratings));

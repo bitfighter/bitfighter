@@ -97,6 +97,9 @@ Game::Game(const Address &theBindAddress) : mDatabase(new GridDatabase())     //
 
    mNetInterface = new GameNetInterface(theBindAddress, this);
    mHaveTriedToConnectToMaster = false;
+
+   mEngineerEnabled = false;
+   mBotsAllowed = true;
 }
 
 
@@ -187,6 +190,12 @@ void Game::addTeam(boost::shared_ptr<AbstractTeam> team, S32 index)
 }
 
 
+void Game::replaceTeam(boost::shared_ptr<AbstractTeam> team, S32 index)
+{
+   mTeams[index] = team;
+}
+
+
 void Game::clearTeams()
 {
    mTeams.clear();
@@ -199,6 +208,25 @@ void Game::setGameType(GameType *theGameType)      // TODO==> Need to store game
    mGameType = theGameType;
 }
 
+
+void Game::resetLevelInfo()
+{
+   mEngineerEnabled = false;
+   mBotsAllowed = true;
+   mSoccerPickupAllowed = false;
+
+   mLevelName = "";
+   mLevelDescription = "";
+   mLevelCredits = ""; 
+
+   mScriptName = ""; 
+   mScriptArgs.clear(); 
+
+   mMinRecPlayers = -1;
+   mMaxRecPlayers = -1;
+
+   setGridSize(DefaultGridSize);
+}
 
 static string origFilename;      // Name of file we're trying to load
 
@@ -255,7 +283,7 @@ void Game::processLevelLoadLine(U32 argc, U32 id, const char **argv)
    //   }
    //}
 
-   if(getGameType() && mGameType->processLevelParam(argc, argv)) 
+   if(getGameType() && processLevelParam(argc, argv)) 
    {
       // Do nothing here
    }
@@ -309,6 +337,209 @@ void Game::processLevelLoadLine(U32 argc, U32 id, const char **argv)
          }
       }
    }
+}
+
+
+// Returns true if we've handled the line (even if it handling it means that the line was bogus); returns false if
+// caller needs to create an object based on the line
+bool Game::processLevelParam(S32 argc, const char **argv)
+{
+   if(!stricmp(argv[0], "Team"))
+      onReadTeamParam(argc, argv);
+
+   // TODO: Create better way to change team details from level scripts: https://code.google.com/p/bitfighter/issues/detail?id=106
+   else if(!stricmp(argv[0], "TeamChange"))   // For level script. Could be removed when there is a better way to change team names and colors.
+      onReadTeamChangeParam(argc, argv);
+
+   else if(!stricmp(argv[0], "Specials"))
+      onReadSpecialsParam(argc, argv);
+   
+   else if(!stricmp(argv[0], "SoccerPickup"))  // option for old style soccer, this option might get moved or removed
+      onReadSoccerPickupParam(argc, argv);
+
+   else if(!strcmp(argv[0], "Script"))
+      onReadScriptParam(argc, argv);
+
+   else if(!stricmp(argv[0], "LevelName"))
+      onReadLevelNameParam(argc, argv);
+   
+   else if(!stricmp(argv[0], "LevelDescription"))
+      onReadLevelDescriptionParam(argc, argv);
+
+   else if(!stricmp(argv[0], "LevelCredits"))
+      onReadLevelCreditsParam(argc, argv);
+   else if(!stricmp(argv[0], "MinPlayers"))     // Recommend a min number of players for this map
+   {
+      if(argc > 1)
+         mMinRecPlayers = atoi(argv[1]);
+   }
+   else if(!stricmp(argv[0], "MaxPlayers"))     // Recommend a max number of players for this map
+   {
+      if(argc > 1)
+         mMaxRecPlayers = atoi(argv[1]);
+   }
+   else
+      return false;     // Line not processed; perhaps the caller can handle it?
+
+   return true;         // Line processed; caller can ignore it
+}
+
+
+// Write out the game processed above; returns multiline string
+string Game::toString()
+{
+   string str;
+
+   str = getGameType()->toString() + "\n";
+
+   str += string("LevelName ") + mLevelName.getString() + "\n";
+   str += string("LevelDescription ") + mLevelDescription.getString() + "\n";
+   str += string("LevelCredits ") + mLevelCredits.getString() + "\n";
+
+   for(S32 i = 0; i < mTeams.size(); i++)
+      str += mTeams[i]->toString() + "\n";
+
+   str += string("Specials") + (mEngineerEnabled ? " Engineer" : "") + (!mBotsAllowed ? " NoBots" : "") + "\n";
+
+   if(mSoccerPickupAllowed)
+      str += "SoccerPickup\n";
+
+   if(mScriptName != "")
+      str += "Script " + getScriptLine() + "\n";
+
+   str += string("MinPlayers") + (mMinRecPlayers >= 0 ? " " + itos(mMinRecPlayers) : "") + "\n";
+   str += string("MaxPlayers") + (mMaxRecPlayers >= 0 ? " " + itos(mMaxRecPlayers) : "") + "\n";
+
+   return str;
+}
+
+
+string Game::getScriptLine() const
+{
+   string str;
+
+   if(mScriptName == "")
+      return "";
+
+   str += mScriptName;
+   
+   if(mScriptArgs.size() > 0)
+      str += " " + concatenate(mScriptArgs);
+
+   return str;
+}
+
+
+void Game::onReadTeamParam(S32 argc, const char **argv)
+{
+   if(getTeamCount() < GameType::MAX_TEAMS)   // Too many teams?
+   {
+      boost::shared_ptr<AbstractTeam> team = getNewTeam();
+      if(team->processArguments(argc, argv))
+         addTeam(team);
+   }
+}
+
+
+// Only occurs in scripts
+void Game::onReadTeamChangeParam(S32 argc, const char **argv)
+{
+   if(argc >= 2)   // Enough arguments?
+   {
+      S32 teamNumber = atoi(argv[1]);   // Team number to change
+
+      if(teamNumber >= 0 && teamNumber < getTeamCount())
+      {
+         boost::shared_ptr<AbstractTeam> team = getNewTeam();
+         team->processArguments(argc-1, argv+1);          // skip one arg
+         replaceTeam(team, teamNumber);
+      }
+   }
+}
+
+
+void Game::onReadSpecialsParam(S32 argc, const char **argv)
+{         
+   // Examine items on the specials line
+   for(S32 i = 1; i < argc; i++)
+   {
+      if(!stricmp(argv[i], "Engineer" ) )
+         mEngineerEnabled = true;
+
+      else if(!stricmp(argv[i], "NoBots" ) )
+         mBotsAllowed = false;
+   }
+}
+
+
+void Game::onReadSoccerPickupParam(S32 argc, const char **argv)
+{
+   if(argc < 2)
+   {
+      logprintf(LogConsumer::LogWarning, "Improperly formed SoccerPickup parameter");
+   }
+   mSoccerPickupAllowed =
+      !stricmp(argv[1], "yes") ||
+      !stricmp(argv[1], "enable") ||
+      !stricmp(argv[1], "on") ||
+      !stricmp(argv[1], "activate") ||
+      !stricmp(argv[1], "1");
+}
+
+
+void Game::onReadScriptParam(S32 argc, const char **argv)
+{
+   Vector<string> args;
+
+   for(S32 i = 0; i < argc; i++)
+      args.push_back(argv[i]);
+
+   setScript(args);
+}
+
+
+void Game::setScript(const Vector<string> &args)
+{
+   mScriptName = args.size() > 0 ? args[0] : "";
+
+   mScriptArgs.clear();       // Clear out any args from a previous Script line
+   for(S32 i = 1; i < args.size(); i++)
+      mScriptArgs.push_back(args[i]);
+}
+
+
+static string getString(S32 argc, const char **argv)
+{
+   string s;
+   for(S32 i = 1; i < argc; i++)
+   {
+      s += argv[i];
+      if(i < argc - 1)
+         s += " ";
+   }
+
+   return s;
+}
+
+
+void Game::onReadLevelNameParam(S32 argc, const char **argv)
+{
+   string s = getString(argc, argv);
+   mLevelName.set(s.substr(0, MAX_GAME_NAME_LEN).c_str());
+}
+
+
+void Game::onReadLevelDescriptionParam(S32 argc, const char **argv)
+{
+   string s = getString(argc, argv);
+   mLevelDescription.set(s.substr(0, MAX_GAME_DESCR_LEN).c_str());
+}
+
+
+void Game::onReadLevelCreditsParam(S32 argc, const char **argv)
+{
+   string s = getString(argc, argv);
+   mLevelCredits.set(s.substr(0, MAX_GAME_DESCR_LEN).c_str());
 }
 
 
@@ -1130,7 +1361,7 @@ extern OGLCONSOLE_Console gConsole;
 bool ServerGame::loadLevel(const string &origFilename2)
 {
    origFilename = origFilename2;
-   setGridSize(DefaultGridSize);
+   resetLevelInfo();
 
    mObjectsLoaded = 0;
 
@@ -1161,20 +1392,20 @@ bool ServerGame::loadLevel(const string &origFilename2)
 
 
    // If there was a script specified in the level file, now might be a fine time to try running it!
-   if(getGameType()->mScriptName != "")
+   if(mScriptName != "")
    {
-      string name = ConfigDirectories::findLevelGenScript(getGameType()->mScriptName);  // Find full name of levelgen script
+      string name = ConfigDirectories::findLevelGenScript(mScriptName);  // Find full name of levelgen script
 
       if(name == "")
       {
          logprintf(LogConsumer::LogWarning, "Warning: Could not find script \"%s\" in level\"%s\"", 
-                                    getGameType()->mScriptName.c_str(), origFilename.c_str());
+                                    mScriptName.c_str(), origFilename.c_str());
          return false;
       }
 
       // The script file will be the first argument, subsequent args will be passed on to the script.
       // Now we've crammed all our action into the constructor... is this ok design?
-      LuaLevelGenerator levelgen = LuaLevelGenerator(name, getGameType()->mScriptArgs, getGridSize(), getGridDatabase().get(), this, gConsole);
+      LuaLevelGenerator levelgen = LuaLevelGenerator(name, mScriptArgs, getGridSize(), getGridDatabase().get(), this, gConsole);
    }
 
    // script specified in INI globalLevelLoadScript
@@ -1185,13 +1416,13 @@ bool ServerGame::loadLevel(const string &origFilename2)
       if(name == "")
       {
          logprintf(LogConsumer::LogWarning, "Warning: Could not find script \"%s\" in globalLevelScript", 
-                                    getGameType()->mScriptName.c_str(), origFilename.c_str());
+                                    mScriptName.c_str(), origFilename.c_str());
          return false;
       }
 
       // The script file will be the first argument, subsequent args will be passed on to the script.
       // Now we've crammed all our action into the constructor... is this ok design?
-      LuaLevelGenerator levelgen = LuaLevelGenerator(name, getGameType()->mScriptArgs, getGridSize(), getGridDatabase().get(), this, gConsole);
+      LuaLevelGenerator levelgen = LuaLevelGenerator(name, mScriptArgs, getGridSize(), getGridDatabase().get(), this, gConsole);
    }
 
    //  Check after script, script might add Teams
@@ -2314,7 +2545,7 @@ extern EditorUserInterface gEditorUserInterface;
 // Constructor
 EditorGame::EditorGame() : Game(Address()) 
 { 
-   setGridSize((F32)DefaultGridSize); 
+   resetLevelInfo(); 
    mWallSegmentManager = gEditorUserInterface.getWallSegmentManager();
    //mEditorDatabase = boost::shared_ptr<EditorObjectDatabase>();
    mEditorDatabase = boost::shared_ptr<EditorObjectDatabase>(new EditorObjectDatabase());

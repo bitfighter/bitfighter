@@ -68,22 +68,18 @@ private:
    void processSelection(U32 index) { }         // Needed for MenuUserInterface subclassing... does nothing
 
    bool anythingChanged();                      // Compare list of parameters from before and after a session in the GameParams menu.  Did anything get changed??
-   void buildGameParamList();                   // Take the info from our menus and create a list of lines we can stick in a level file (which we'll store in gameParams)
+   void buildGameParamList(Game *game);         // Take the info from our menus and create a list of lines we can stick in a level file (which we'll store in gameParams)
 
-   Vector<string> origGameParams;    // Copy of the game parameters as specified when we activated the GameParameters, used to compare before and after to detect changes
+   string origGameParams;            // Copy of the game parameters as specified when we activated the GameParameters, used to compare before and after to detect changes
 
    S32 mQuitItemIndex;               // Index of our quit item -- will vary depending on how many game-specific parameters there are
    S32 mGameSpecificParams;          // How many game specific parameters do we have?
-
-   //string getParamVal(string paramName);      // Find value in our list of params
 
    virtual S32 getTextSize() { return 18; }
    virtual S32 getGap() { return 12; }
 
 public:
    GameParamUserInterface();   // Constructor
-
-   Vector<string> gameParams;  // Assorted game params, such as gridSize et al
 
    S32 selectedIndex;          // Highlighted menu item
    S32 changingItem;           // Index of key we're changing (in keyDef mode), -1 otherwise
@@ -94,8 +90,6 @@ public:
 
    void onActivate();
    void onEscape();
-
-   bool ignoreGameParams;
 };
 
 extern GameParamUserInterface gGameParamUserInterface;

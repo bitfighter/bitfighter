@@ -33,7 +33,7 @@ namespace Zap
 //U32 Team::mNextId = 0; // ???  when does it go back to zero?
 
 // Read team from level file params
-bool AbstractTeam::readTeamFromLevelLine(S32 argc, const char **argv)
+bool AbstractTeam::processArguments(S32 argc, const char **argv)
 {
    if(argc < 5)               // Not enough arguments!
       return false;
@@ -42,6 +42,12 @@ bool AbstractTeam::readTeamFromLevelLine(S32 argc, const char **argv)
    mColor.read(argv + 2);
 
    return true;
+}
+
+
+string AbstractTeam::toString()
+{
+   return string("Team ") + getName().getString() + " " + mColor.toRGBString();
 }
 
 

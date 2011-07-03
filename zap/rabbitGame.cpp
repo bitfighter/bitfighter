@@ -98,10 +98,16 @@ bool RabbitGameType::processArguments(S32 argc, const char **argv, Game *game)
    if(!Parent::processArguments(argc, argv, game))
       return false;
 
-   mFlagReturnTimer = U32(atof(argv[2]) * 1000);
-   mFlagScoreTimer = U32(1.0f / atof(argv[3]) * 60 * 1000); //secs per point
+   mFlagReturnTimer = atoi(argv[2]) * 1000;
+   mFlagScoreTimer = U32(1.0f / atof(argv[3]) * 60 * 1000); // secs per point
 
    return true;
+}
+
+
+string RabbitGameType::toString()
+{
+   return Parent::toString() + itos(U32(mFlagReturnTimer / 1000)) + itos(U32(1.0f / F32(mFlagScoreTimer) / 60.0f / 1000.0f));
 }
 
 

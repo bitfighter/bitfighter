@@ -63,6 +63,7 @@ public:
    }
 
    bool processArguments(S32 argc, const char **argv, Game *game);
+   string toString();
 
    void addGameSpecificParameterMenuItems(Vector<MenuItem *> &menuItems);
 

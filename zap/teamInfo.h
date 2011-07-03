@@ -50,7 +50,8 @@ public:
    virtual void setName(const char *name) = 0;
    virtual StringTableEntry getName() = 0;
 
-   bool readTeamFromLevelLine(S32 argc, const char **argv);          // Read team info from level line
+   bool processArguments(S32 argc, const char **argv);          // Read team info from level line
+   string toString();
 
    void alterRed(F32 amt);
    void alterGreen(F32 amt);

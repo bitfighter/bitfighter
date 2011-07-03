@@ -199,7 +199,7 @@ public:
    virtual string getValueForDisplayingInMenu() { return mIndex ? " Engineer" : ""; }
    virtual string getValueForWritingToLevelFile() { return mIndex ? "yes" : "no"; }
    virtual void setValue(const string &val) { mIndex = (val == "yes") ? 1 : 0; }
-   virtual S32 getIntValue() { return mIndex; }
+   virtual S32 getIntValue() { return mIndex; }    // 0 == false == no, 1 == true == yes
    virtual void setIntValue(S32 value) { mIndex = (value == 0) ? 0 : 1; }
 };
 

@@ -32,7 +32,7 @@
 #include "keyCode.h"
 #include "IniFile.h"
 #include "config.h"
-#include "gameType.h"      // For gMaxTeams
+#include "gameType.h"      // For MAX_TEAMS
 
 #include "SDL/SDL.h"
 #include "SDL/SDL_opengl.h"
@@ -292,7 +292,7 @@ void TeamDefUserInterface::onKeyDown(KeyCode keyCode, char ascii)
   
    else if(keyCode == KEY_INSERT || keyCode == KEY_EQUALS)           // Ins or Plus (equals) - Add new item
    {
-      S32 maxTeams = GameType::gMaxTeams;    // A bit pedantic, perhaps, but using this fixes an odd link error in Linux
+      S32 maxTeams = GameType::MAX_TEAMS;    // A bit pedantic, perhaps, but using this fixes an odd link error in Linux
       if(gEditorGame->getTeamCount() >= maxTeams)
       {
          errorMsgTimer.reset(errorMsgDisplayTime);

@@ -334,9 +334,16 @@ bool SoccerBallItem::processArguments(S32 argc, const char **argv, Game *game)
    gServerGame->getGameType()->addFlagSpawn(FlagSpawn(initialPos, 0));
 
 
-   mAllowPickup = gServerGame->getGameType()->mAllowSoccerPickup;
+   mAllowPickup = getGame()->isSoccerPickupAllowed();
 
    return true;
+}
+
+
+// Yes, this method is superfluous, but makes it clear that it wasn't forgotten... always include toString() alongside processArguments()!
+string SoccerBallItem::toString()
+{
+   return Parent::toString();
 }
 
 

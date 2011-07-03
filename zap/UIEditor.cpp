@@ -635,10 +635,11 @@ void EditorUserInterface::loadLevel()
    clearLevelGenItems();
    mLoadTarget = (EditorObjectDatabase *)gEditorGame->getGridDatabase().get();
    mGameTypeArgs.clear();
-   gGameParamUserInterface.gameParams.clear();
+
    gGameParamUserInterface.savedMenuItems.clear();          // clear() because this is not a pointer vector
    gGameParamUserInterface.menuItems.deleteAndClear();      // Keeps interface from using our menuItems to rebuild savedMenuItems
-   gEditorGame->setGridSize(Game::DefaultGridSize);         // Used in editor for scaling walls and text items appropriately
+
+   gEditorGame->resetLevelInfo();
 
    gEditorGame->setGameType(new GameType());
    //gEditorGame->setGameType(NULL);
@@ -652,19 +653,13 @@ void EditorUserInterface::loadLevel()
       makeSureThereIsAtLeastOneTeam(); // Make sure we at least have one team
       validateTeams();                 // Make sure every item has a valid team
       validateLevel();                 // Check level for errors (like too few spawns)
-      gGameParamUserInterface.ignoreGameParams = false;
    }
    else     
    {
       // New level!
       makeSureThereIsAtLeastOneTeam();                               // Make sure we at least have one team, like the man said.
-      gGameParamUserInterface.gameParams.push_back("GameType 10 8"); // A nice, generic game type that we can default to
-
-      if(gIniSettings.name != gIniSettings.defaultName)
-         gGameParamUserInterface.gameParams.push_back("LevelCredits " + gIniSettings.name);  // Prepoluate level credits
-
-      gGameParamUserInterface.ignoreGameParams = true;               // Don't rely on the above for populating GameParameters menus... only to make sure something is there if we save
    }
+
    clearUndoHistory();                 // Clean out undo/redo buffers
    clearSelection();                   // Nothing starts selected
    mShowMode = ShowAllObjects;         // Turn everything on
@@ -3664,13 +3659,9 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
       if(!f)
          throw(SaveException("Could not open file for writing"));
 
-      // Write out our game parameters --> first one will be the gameType, along with all required parameters
-      for(S32 i = 0; i < gGameParamUserInterface.gameParams.size(); i++)
-         if(gGameParamUserInterface.gameParams[i].substr(0, 5) != "Team ")  // Don't write out teams here... do it below!
-            s_fprintf(f, "%s\n", gGameParamUserInterface.gameParams[i].c_str());
+      // Write out basic game parameters, including gameType info
+      s_fprintf(f, "%s", getGame()->toString().c_str());    // Note that this toString appends a newline char; most don't
 
-      for(S32 i = 0; i < getGame()->getTeamCount(); i++)
-         s_fprintf(f, "Team %s %s\n", getGame()->getTeam(i)->getName().getString(), getGame()->getTeam(i)->getColor()->toRGBString());
 
       // Write out all level items (do two passes; walls first, non-walls next, so turrets & forcefields have something to grab onto)
       const Vector<EditorObject *> *objList = getObjectList();

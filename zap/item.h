@@ -80,6 +80,7 @@ public:
    void idle(GameObject::IdleCallPath path);
 
    bool processArguments(S32 argc, const char **argv, Game *game);
+   string toString();
 
    virtual U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    virtual void unpackUpdate(GhostConnection *connection, BitStream *stream);

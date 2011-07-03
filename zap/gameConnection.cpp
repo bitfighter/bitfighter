@@ -412,15 +412,14 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sEngineerDeployObject, (RangedU32<0,Engineer
 {
    sEngineerDeployObject(type);
 }
-// Server only, robots can run this, bypassing the net interface. Return True if successful deploy.
+// Server only, robots can run this, bypassing the net interface. Return true if successfuly deployed.
 bool GameConnection::sEngineerDeployObject(U32 type)
 {
    Ship *ship = dynamic_cast<Ship *>(getControlObject());
    if(!ship)                                          // Not a good sign...
       return false;                                   // ...bail
 
-   GameType *gt = ship->getGame()->getGameType();
-   if(!(gt && gt->engineerIsEnabled()))               // Something fishy going on here...
+   if(!ship->getGame()->isEngineerEnabled())          // Something fishy going on here...
       return false;                                   // ...bail
 
    EngineerModuleDeployer deployer;

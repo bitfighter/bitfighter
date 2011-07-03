@@ -66,7 +66,7 @@ extern  F32 getCurrentRating(GameConnection *conn);      //in game.cpp
 //UITeamDefMenu.cpp requires that this have actual storage (for some reason).
 // I don't even know what that means!! -CE
 #ifdef TNL_OS_MAC_OSX
-const S32 GameType::gMaxTeams;
+const S32 GameType::MAX_TEAMS;
 #endif
 
 //static Timer mTestTimer(10 * 1000);
@@ -136,19 +136,14 @@ GameType::GameType() : mScoreboardUpdateTimer(1000) , mGameTimer(DefaultGameTime
    mLeadingTeam = -1;
    mLeadingTeamScore = 0;
    mDigitsNeededToDisplayScore = 1;
-   minRecPlayers = -1;
-   maxRecPlayers = -1;
    mCanSwitchTeams = true;       // Players can switch right away
    mLocalClient = NULL;          // Will be assigned by the server after a connection is made
    mZoneGlowTimer.setPeriod(mZoneGlowTime);
    mGlowingZoneTeam = -1;        // By default, all zones glow
    mLevelHasLoadoutZone = false;
-   mEngineerEnabled = false;     // Is engineer module allowed?  By default, no
    mShowAllBots = false;
    mTotalGamePlay = 0;
-   mAllowSoccerPickup = true;
-   mAllowAddBot = true;
-   mBotZoneCreationFailed = false;
+   mBotZoneCreationFailed = false;   
 }
 
 
@@ -163,6 +158,12 @@ bool GameType::processArguments(S32 argc, const char **argv, Game *game)
       mWinningScore = atoi(argv[1]);
 
    return true;
+}
+
+
+string GameType::toString()
+{
+   return string(getClassName()) + " " + ftos(F32(getTotalGameTime()) / 60, 3) + " " + itos(mWinningScore);
 }
 
 
@@ -578,7 +579,7 @@ VersionedGameStats GameType::getGameStats()
    gameStats->playerCount = 0; //mClientList.size(); ... will count number of players.
    gameStats->duration = mTotalGamePlay / 1000;
    gameStats->isTeamGame = isTeamGame();
-   gameStats->levelName = mLevelName.getString();
+   gameStats->levelName = mGame->getLevelName()->getString();
    gameStats->gameType = getGameTypeString();
    gameStats->teamCount = mGame->getTeamCount(); // is this needed?, currently Not sent, instead, can use gameStats->teamStats.size()
    gameStats->build_version = BUILD_VERSION;
@@ -867,123 +868,6 @@ void GameType::onAddedToGame(Game *game)
 }
 
 
-// Returns true if we've handled the line (even if it handling it means that the line was bogus); returns false if
-// caller needs to create an object based on the line
-bool GameType::processLevelParam(S32 argc, const char **argv)
-{
-   if(!stricmp(argv[0], "Team"))
-   {
-      if(mGame->getTeamCount() < gMaxTeams)   // Too many teams?
-      {
-         boost::shared_ptr<AbstractTeam> team = mGame->getNewTeam();
-         if(team->readTeamFromLevelLine(argc, argv))
-            mGame->addTeam(team);
-      }
-   }
-   // TODO: Create better way to change team details from level scripts: https://code.google.com/p/bitfighter/issues/detail?id=106
-   else if(!stricmp(argv[0], "TeamChange"))   // For level script. Could be removed when there is a better way to change team names and colors.
-   {
-      if(argc >= 2)   // Enough arguments?
-      {
-         S32 teamNumber = atoi(argv[1]);   // Team number to change
-
-         if(teamNumber >= 0 && teamNumber < mGame->getTeamCount())
-         {
-            boost::shared_ptr<Team> team = boost::shared_ptr<Team>(new Team);
-            team->readTeamFromLevelLine(argc-1, argv+1);          // skip one arg
-            mGame->addTeam(team);
-         }
-      }
-   }
-   else if(!stricmp(argv[0], "Specials"))
-   {         
-      // Examine items on the specials line
-      for(S32 i = 1; i < argc; i++)
-      {
-         if(!stricmp(argv[i], "Engineer" ) )
-            mEngineerEnabled = true;
-         if(!stricmp(argv[i], "NoBots" ) )
-            mAllowAddBot = false;
-      }
-   }
-   else if(!stricmp(argv[0], "SoccerPickup"))  // option for old style soccer, this option might get moved or removed
-   {
-      if(argc < 2)
-      {
-         logprintf(LogConsumer::LogWarning, "Improperly formed SoccerPickup parameter");
-      }
-      mAllowSoccerPickup =
-         !stricmp(argv[0], "yes") ||
-         !stricmp(argv[0], "enable") ||
-         !stricmp(argv[0], "on") ||
-         !stricmp(argv[0], "activate") ||
-         !stricmp(argv[0], "1");
-   }
-   else if(!strcmp(argv[0], "Script"))
-   {
-      mScriptArgs.clear();    // Clear out any args from a previous Script line
-
-      if(argc <= 1)      // At a minimum, we need a script name
-         mScriptName = "";
-
-      else
-      {
-         mScriptName = argv[1];
-   
-         for(S32 i = 2; i < argc; i++)
-            mScriptArgs.push_back(string(argv[i]));    // Use string to make a const char copy of the param
-      }
-   }
-   else if(!stricmp(argv[0], "LevelName"))
-   {
-      string s;
-      for(S32 i = 1; i < argc; i++)
-      {
-         s += argv[i];
-         if(i < argc - 1)
-            s += " ";
-      }
-      mLevelName.set(s.substr(0, MAX_GAME_NAME_LEN).c_str());
-   }
-   else if(!stricmp(argv[0], "LevelDescription"))
-   {
-      string s;
-      for(S32 i = 1; i < argc; i++)
-      {
-         s += argv[i];
-         if(i < argc - 1)
-            s += " ";
-      }
-      mLevelDescription.set(s.substr(0, MAX_GAME_DESCR_LEN).c_str());
-   }
-   else if(!stricmp(argv[0], "LevelCredits"))
-   {
-      string s;
-      for(S32 i = 1; i < argc; i++)
-      {
-         s += argv[i];
-         if(i < argc - 1)
-            s += " ";
-      }
-      mLevelCredits.set(s.substr(0, MAX_GAME_DESCR_LEN).c_str());
-   }
-   else if(!stricmp(argv[0], "MinPlayers"))     // Recommend a min numbrt of players for this map
-   {
-      if(argc > 1)
-         minRecPlayers = atoi(argv[1]);
-   }
-   else if(!stricmp(argv[0], "MaxPlayers"))     // Recommend a max players for this map
-   {
-      if(argc > 1)
-         maxRecPlayers = atoi(argv[1]);
-   }
-   else
-      return false;     // Line not processed; perhaps the caller can handle it?
-
-   return true;         // Line processed; caller can ignore it
-}
-
-
 // Find client object given a player name
 ClientRef *GameType::findClientRef(const StringTableEntry &name)
 {
@@ -1091,24 +975,29 @@ void GameType::setClientShipLoadout(ClientRef *cl, const Vector<U32> &loadout, b
 
    for(S32 i = 0; i < ShipModuleCount; i++)
    {
-      if(loadout[i] >= U32(ModuleCount)) // bad number. Might crash server if trying to continue...
+      if(loadout[i] >= U32(ModuleCount))   // Invalid number.  Might crash server if trying to continue...
          return;
-      if(!engineerIsEnabled() && (loadout[i] == ModuleEngineer)) // Reject engineer if not enabled
+
+      if(!getGame()->isEngineerEnabled() && (loadout[i] == ModuleEngineer)) // Reject engineer if not enabled
          return;
-      if((loadout[i] == ModuleSensor))  // allow spyBug when using Sensor
+
+      if((loadout[i] == ModuleSensor))    // Allow spyBug when using Sensor
          spyBugAllowed = true;
    }
 
    for(S32 i = ShipModuleCount; i < ShipWeaponCount + ShipModuleCount; i++)
    {
-      if(loadout[i] >= U32(WeaponCount)) // bad number.
+      if(loadout[i] >= U32(WeaponCount))  // Invalid number
          return;
+
       if(loadout[i] == WeaponSpyBug && !spyBugAllowed) // Reject spybug when not using ModuleSensor
          return;
-      if(loadout[i] == WeaponTurret) // Reject WeaponTurret
+
+      if(loadout[i] == WeaponTurret)      // Reject WeaponTurret
          return;
+
 #if CS_PROTOCOL_VERSION == 32
-      if(loadout[i] == WeaponHeatSeeker) // Reject HeatSeeker, Not supported yet
+      if(loadout[i] == WeaponHeatSeeker)  // Reject HeatSeeker, Not supported yet
          return;
 #endif
    }
@@ -1829,12 +1718,14 @@ GAMETYPE_RPC_S2C(GameType, s2cSetLevelInfo, (StringTableEntry levelName, StringT
                                                 levelCreds, objectCount, lx, ly, ux, uy, 
                                                 levelHasLoadoutZone, engineerEnabled))
 {
-   mLevelName = levelName;
-   mLevelDescription = levelDesc;
-   mLevelCredits = levelCreds;
+   mGame->setLevelName(levelName);
+   mGame->setLevelDescription(levelDesc);
+   mGame->setLevelCredits(levelCreds);
+
    mWinningScore = teamScoreLimit;
    mObjectsExpected = objectCount;
-   mEngineerEnabled = engineerEnabled;
+
+   getGame()->setEngineerEnabled(engineerEnabled);
 
    mViewBoundsWhileLoading = Rect(lx, ly, ux, uy);
    mLevelHasLoadoutZone = levelHasLoadoutZone;           // Need to pass this because we won't know for sure when the loadout zones will be sent, so searching for them is difficult
@@ -2086,7 +1977,7 @@ GAMETYPE_RPC_S2C(GameType, s2cAddTeam, (StringTableEntry teamName, F32 r, F32 g,
 }
 
 
-GAMETYPE_RPC_S2C(GameType, s2cSetTeamScore, (RangedU32<0, GameType::gMaxTeams> teamIndex, U32 score), (teamIndex, score))
+GAMETYPE_RPC_S2C(GameType, s2cSetTeamScore, (RangedU32<0, GameType::MAX_TEAMS> teamIndex, U32 score), (teamIndex, score))
 {
    TNLAssert(teamIndex < U32(mGame->getTeamCount()), "teamIndex out of range");
 
@@ -2121,7 +2012,7 @@ GAMETYPE_RPC_S2C(GameType, s2cChangeScoreToWin, (U32 winningScore, StringTableEn
 
 // Announce a new player has joined the team
 GAMETYPE_RPC_S2C(GameType, s2cClientJoinedTeam, 
-                (StringTableEntry name, RangedU32<0, GameType::gMaxTeams> teamIndex), 
+                (StringTableEntry name, RangedU32<0, GameType::MAX_TEAMS> teamIndex), 
                 (name, teamIndex))
 {
    ClientRef *cl = findClientRef(name);      // Will be us, if we changed teams
@@ -2195,9 +2086,9 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
 
    Rect barrierExtents = gServerGame->computeBarrierExtents();
 
-   s2cSetLevelInfo(mLevelName, mLevelDescription, mWinningScore, mLevelCredits, gServerGame->mObjectsLoaded, 
+   s2cSetLevelInfo(*mGame->getLevelName(), *mGame->getLevelDescription(), mWinningScore, *mGame->getLevelCredits(), getGame()->mObjectsLoaded, 
                    barrierExtents.min.x, barrierExtents.min.y, barrierExtents.max.x, barrierExtents.max.y, 
-                   mLevelHasLoadoutZone, mEngineerEnabled);
+                   mLevelHasLoadoutZone, getGame()->isEngineerEnabled());
 
    for(S32 i = 0; i < mGame->getTeamCount(); i++)
    {
@@ -2411,7 +2302,7 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
       if(mBotZoneCreationFailed)
          clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Zone creation failure.  Bots disabled");
 
-      else if(!mAllowAddBot && !clientRef->clientConnection->isAdmin())  // not admin, no robotScript
+      else if(!getGame()->areBotsAllowed() && !clientRef->clientConnection->isAdmin())  // not admin, no robotScript
          clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! This level does not allow robots");
 
       else if(!clientRef->clientConnection->isAdmin() && gIniSettings.defaultRobotScript == "" && args.size() < 2)  // not admin, no robotScript
