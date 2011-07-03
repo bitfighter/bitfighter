@@ -1195,8 +1195,8 @@ LevelInfo getLevelInfo(char *level, S32 size)
    LevelInfo levelInfo;
    levelInfo.levelName = "";
    levelInfo.levelType = "Bitmatch";
-   levelInfo.minRecPlayers = -1;
-   levelInfo.maxRecPlayers = -1;
+   levelInfo.minRecPlayers = 0;
+   levelInfo.maxRecPlayers = 0;
 
    while(cur < size)
    {

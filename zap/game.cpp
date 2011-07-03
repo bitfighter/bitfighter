@@ -222,8 +222,8 @@ void Game::resetLevelInfo()
    mScriptName = ""; 
    mScriptArgs.clear(); 
 
-   mMinRecPlayers = -1;
-   mMaxRecPlayers = -1;
+   mMinRecPlayers = 0;
+   mMaxRecPlayers = 0;
 
    setGridSize(DefaultGridSize);
 }
@@ -407,8 +407,8 @@ string Game::toString()
    if(mScriptName != "")
       str += "Script " + getScriptLine() + "\n";
 
-   str += string("MinPlayers") + (mMinRecPlayers >= 0 ? " " + itos(mMinRecPlayers) : "") + "\n";
-   str += string("MaxPlayers") + (mMaxRecPlayers >= 0 ? " " + itos(mMaxRecPlayers) : "") + "\n";
+   str += string("MinPlayers") + (mMinRecPlayers > 0 ? " " + itos(mMinRecPlayers) : "") + "\n";
+   str += string("MaxPlayers") + (mMaxRecPlayers > 0 ? " " + itos(mMaxRecPlayers) : "") + "\n";
 
    return str;
 }
