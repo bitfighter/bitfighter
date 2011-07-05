@@ -636,8 +636,8 @@ void EditorUserInterface::loadLevel()
    mLoadTarget = (EditorObjectDatabase *)gEditorGame->getGridDatabase().get();
    mGameTypeArgs.clear();
 
-   gGameParamUserInterface.savedMenuItems.clear();          // clear() because this is not a pointer vector
-   gGameParamUserInterface.menuItems.deleteAndClear();      // Keeps interface from using our menuItems to rebuild savedMenuItems
+   gGameParamUserInterface.savedMenuItems.clear();    // clear() because this is not a pointer vector
+   gGameParamUserInterface.menuItems.clear();         // Keeps interface from using our menuItems to rebuild savedMenuItems
 
    gEditorGame->resetLevelInfo();
 
@@ -3853,15 +3853,15 @@ void quitEditorCallback(U32 unused)
 
 void EditorMenuUserInterface::setupMenus()
 {
-   menuItems.deleteAndClear();
-   menuItems.push_back(new MenuItem(0, "RETURN TO EDITOR", reactivatePrevUICallback,    "", KEY_R));
-   menuItems.push_back(getWindowModeMenuItem());
-   menuItems.push_back(new MenuItem(0, "TEST LEVEL",       testLevelCallback,           "", KEY_T));
-   menuItems.push_back(new MenuItem(0, "SAVE LEVEL",       returnToEditorCallback,      "", KEY_S));
-   menuItems.push_back(new MenuItem(0, "INSTRUCTIONS",     activateHelpCallback,        "", KEY_I, keyHELP));
-   menuItems.push_back(new MenuItem(0, "LEVEL PARAMETERS", activateLevelParamsCallback, "", KEY_L, KEY_F3));
-   menuItems.push_back(new MenuItem(0, "MANAGE TEAMS",     activateTeamDefCallback,     "", KEY_M, KEY_F2));
-   menuItems.push_back(new MenuItem(0, "QUIT",             quitEditorCallback,          "", KEY_Q, KEY_UNKNOWN));
+   menuItems.clear();
+   menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(0, "RETURN TO EDITOR", reactivatePrevUICallback,    "", KEY_R)));
+   menuItems.push_back(boost::shared_ptr<MenuItem>(getWindowModeMenuItem()));
+   menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(0, "TEST LEVEL",       testLevelCallback,           "", KEY_T)));
+   menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(0, "SAVE LEVEL",       returnToEditorCallback,      "", KEY_S)));
+   menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(0, "INSTRUCTIONS",     activateHelpCallback,        "", KEY_I, keyHELP)));
+   menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(0, "LEVEL PARAMETERS", activateLevelParamsCallback, "", KEY_L, KEY_F3)));
+   menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(0, "MANAGE TEAMS",     activateTeamDefCallback,     "", KEY_M, KEY_F2)));
+   menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(0, "QUIT",             quitEditorCallback,          "", KEY_Q, KEY_UNKNOWN)));
 }
 
 

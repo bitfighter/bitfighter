@@ -38,7 +38,7 @@ string levelGenFile;     // Exists here so exception handler will know what file
 
 
 // C++ Constructor
-LuaLevelGenerator::LuaLevelGenerator(const string &scriptName, const Vector<string> &scriptArgs, F32 gridSize, GridDatabase *gridDatabase, 
+LuaLevelGenerator::LuaLevelGenerator(const string &scriptName, const Vector<string> *scriptArgs, F32 gridSize, GridDatabase *gridDatabase, 
                                      LevelLoader *caller, OGLCONSOLE_Console console)
 {
    if(!fileExists(scriptName))      // Files should be checked before we get here, so this should never happen
@@ -360,7 +360,7 @@ bool LuaLevelGenerator::loadLevelGenHelperFunctions(lua_State *L)
 }
 
 
-void LuaLevelGenerator::runScript(lua_State *L, const string &scriptName, const Vector<string> &scriptArgs, F32 gridSize)
+void LuaLevelGenerator::runScript(lua_State *L, const string &scriptName, const Vector<string> *scriptArgs, F32 gridSize)
 {
    // Register this class Luna
    Lunar<LuaLevelGenerator>::Register(L);

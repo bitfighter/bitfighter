@@ -1515,7 +1515,7 @@ bool Robot::startLua()
    lua_pushlightuserdata(L, (void *)this);
    lua_setglobal(L, "Robot");
 
-   LuaObject::setLuaArgs(L, mFilename, mArgs);    // Put our args in to the Lua table "args"
+   LuaObject::setLuaArgs(L, mFilename, &mArgs);    // Put our args in to the Lua table "args"
 
 
    if(!loadLuaHelperFunctions(L, "robot"))

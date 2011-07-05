@@ -93,9 +93,9 @@ S32 LuaGameInfo::getLeadingTeam(lua_State *L)       { return returnInt(L, gServe
 
 S32 LuaGameInfo::getTeamCount(lua_State *L)         { return returnInt(L, gServerGame->getTeamCount()); }
 
-S32 LuaGameInfo::getLevelName(lua_State *L)         { return returnString(L, gServerGame->getLevelName()->getString()); }
+S32 LuaGameInfo::getLevelName(lua_State *L)         { return returnString(L, gServerGame->getGameType()->getLevelName()->getString()); }
 S32 LuaGameInfo::getGridSize(lua_State *L)          { return returnFloat(L, gServerGame->getGridSize()); }
-S32 LuaGameInfo::isTeamGame(lua_State *L)        { return returnBool(L, gServerGame->getGameType()->isTeamGame()); }
+S32 LuaGameInfo::isTeamGame(lua_State *L)           { return returnBool(L, gServerGame->getGameType()->isTeamGame()); }
 S32 LuaGameInfo::isNexusOpen(lua_State *L)
 {
    HuntersGameType *theGameType = dynamic_cast<HuntersGameType *>(gServerGame->getGameType());

@@ -135,6 +135,13 @@ string replaceString( const string &strString, const string &strOld, const strin
 }
 
 
+// Remove any extension from filename
+string stripExtension(string filename)
+{
+   return filename.substr(0, filename.find_last_of('.'));
+}
+
+
 //// From http://stackoverflow.com/questions/11635/case-insensitive-string-comparison-in-c
 //bool caseInsensitiveStringCompare(const string &str1, const string &str2) {
 //    if (str1.size() != str2.size()) {

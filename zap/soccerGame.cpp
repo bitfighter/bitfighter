@@ -330,11 +330,14 @@ bool SoccerBallItem::processArguments(S32 argc, const char **argv, Game *game)
 
    initialPos = mMoveState[ActualState].pos;
 
+   GameType *gameType = getGame()->getGameType();
+   TNLAssert(gameType, "Blech!");
+
    // Add the ball's starting point to the list of flag spawn points
-   gServerGame->getGameType()->addFlagSpawn(FlagSpawn(initialPos, 0));
+   gameType->addFlagSpawn(FlagSpawn(initialPos, 0));
 
 
-   mAllowPickup = getGame()->isSoccerPickupAllowed();
+   mAllowPickup = gameType->isSoccerPickupAllowed();
 
    return true;
 }

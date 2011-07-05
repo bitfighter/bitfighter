@@ -66,11 +66,10 @@ protected:
    
 
 public:
-   MenuUserInterface();                                     // Constructor
-   ~MenuUserInterface() { menuItems.deleteAndClear(); }     // Destructor -- will this make valgrind happy???
+   MenuUserInterface();                            // Constructor
 
    bool itemSelectedWithMouse;
-   Vector<MenuItem *> menuItems;
+   Vector<boost::shared_ptr<MenuItem> > menuItems;
 
    static const S32 MOUSE_SCROLL_INTERVAL = 100;
 

@@ -67,6 +67,7 @@ string ftos(float f);
 
 
 string replaceString(const string &strString, const string &strOld, const string &strNew);
+string stripExtension(string filename);
 
 string listToString(Vector<string> &words, char seperator);
 

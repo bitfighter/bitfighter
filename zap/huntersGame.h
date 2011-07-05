@@ -75,7 +75,9 @@ public:
    bool isCarryingItems(Ship *ship);
    void itemDropped(Ship *ship, Item *item);
 
-   void addGameSpecificParameterMenuItems(Vector<MenuItem *> &menuItems);
+   const char **getGameParameterMenuKeys();
+   boost::shared_ptr<MenuItem> getMenuItem(const char *key);
+   bool saveMenuItem(const MenuItem *menuItem, const char *key);
 
    void addNexus(HuntersNexusObject *theObject);
    void shipTouchNexus(Ship *ship, HuntersNexusObject *nexus);

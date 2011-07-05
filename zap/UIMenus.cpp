@@ -56,7 +56,7 @@ extern U32 gUseStickNumber;
 
 
 // Sorts alphanumerically by menuItem's prompt  ==> used for getting levels in the right order and such
-S32 QSORT_CALLBACK menuItemValueSort(MenuItem **a, MenuItem **b)
+S32 QSORT_CALLBACK menuItemValueSort(boost::shared_ptr<MenuItem> *a, boost::shared_ptr<MenuItem> *b)
 {
    return stricmp((*a)->getPrompt().c_str(), (*b)->getPrompt().c_str());
 }
@@ -599,13 +599,13 @@ MainMenuUserInterface::MainMenuUserInterface()
    mNeedToUpgrade = false;                         // Assume we're up-to-date until we hear from the master
    mShowedUpgradeAlert = false;                    // So we don't show the upgrade message more than once
 
-   menuItems.push_back(new MenuItem(0, "JOIN LAN/INTERNET GAME", joinSelectedCallback,    "", KEY_J));
-   menuItems.push_back(new MenuItem(0, "HOST GAME",              hostSelectedCallback,    "", KEY_H));
-   menuItems.push_back(new MenuItem(0, "INSTRUCTIONS",           helpSelectedCallback,    "", KEY_I, keyHELP));
-   menuItems.push_back(new MenuItem(0, "OPTIONS",                optionsSelectedCallback, "", KEY_O));
-   menuItems.push_back(new MenuItem(0, "LEVEL EDITOR",           editorSelectedCallback,  "", KEY_L, KEY_E));
-   menuItems.push_back(new MenuItem(0, "CREDITS",                creditsSelectedCallback, "", KEY_C));
-   menuItems.push_back(new MenuItem(0, "QUIT",                   quitSelectedCallback,    "", KEY_Q));
+   menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(0, "JOIN LAN/INTERNET GAME", joinSelectedCallback,    "", KEY_J)));
+   menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(0, "HOST GAME",              hostSelectedCallback,    "", KEY_H)));
+   menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(0, "INSTRUCTIONS",           helpSelectedCallback,    "", KEY_I, keyHELP)));
+   menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(0, "OPTIONS",                optionsSelectedCallback, "", KEY_O)));
+   menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(0, "LEVEL EDITOR",           editorSelectedCallback,  "", KEY_L, KEY_E)));
+   menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(0, "CREDITS",                creditsSelectedCallback, "", KEY_C)));
+   menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(0, "QUIT",                   quitSelectedCallback,    "", KEY_Q)));
 }
 
 
@@ -845,7 +845,7 @@ static void setInputModeCallback(U32 val)
 
    if(sticks != gJoystickNames.size())
    {
-      ToggleMenuItem *menuItem = dynamic_cast<ToggleMenuItem *>(gOptionsMenuUserInterface.menuItems[INPUT_MODE_MENU_ITEM_INDEX]);
+      ToggleMenuItem *menuItem = dynamic_cast<ToggleMenuItem *>(gOptionsMenuUserInterface.menuItems[INPUT_MODE_MENU_ITEM_INDEX].get());
 
       if(menuItem)
          addStickOptions(&menuItem->mOptions);
@@ -887,22 +887,27 @@ MenuItem *getWindowModeMenuItem()
 
 void OptionsMenuUserInterface::setupMenus()
 {
-   menuItems.deleteAndClear();
+   menuItems.clear();
    
    Vector<string> opts;
    opts.push_back("ABSOLUTE");
    opts.push_back("RELATIVE");
-   menuItems.push_back(new ToggleMenuItem("CONTROLS:", opts, gIniSettings.controlsRelative ? 1 : 0, true, 
-                       setControlsCallback, "Set controls to absolute or relative mode",    KEY_C));
+   menuItems.push_back(boost::shared_ptr<MenuItem>(new ToggleMenuItem("CONTROLS:", opts, gIniSettings.controlsRelative ? 1 : 0, true, 
+                                                   setControlsCallback, "Set controls to absolute or relative mode",    KEY_C)));
 
-   menuItems.push_back(getWindowModeMenuItem());
+   menuItems.push_back(boost::shared_ptr<MenuItem>(getWindowModeMenuItem()));
 
    InitJoystick();   // Refresh joystick list
 
    addStickOptions(&opts);
 
-   menuItems.push_back(new ToggleMenuItem("PRIMARY INPUT:", opts, gIniSettings.inputMode == Keyboard ? 0 : gUseStickNumber, true, 
-                       setInputModeCallback, "Specify whether you want to play with your keyboard or joystick", KEY_P, KEY_I));
+   menuItems.push_back(boost::shared_ptr<MenuItem>(new ToggleMenuItem("PRIMARY INPUT:", 
+                                                                      opts, 
+                                                                      gIniSettings.inputMode == Keyboard ? 0 : gUseStickNumber, 
+                                                                      true, 
+                                                                      setInputModeCallback, 
+                                                                      "Specify whether you want to play with your keyboard or joystick", 
+                                                                      KEY_P, KEY_I)));
 
    INPUT_MODE_MENU_ITEM_INDEX = menuItems.size() - 1;
 
@@ -913,23 +918,24 @@ void OptionsMenuUserInterface::setupMenus()
    // Simple bounds check -- could be GenericController, UnknownController, or NoController
    U32 selectedOption = gIniSettings.joystickType < ControllerTypeCount ? gIniSettings.joystickType : 0;
 
-   menuItems.push_back(new ToggleMenuItem("JOYSTICK:", opts, selectedOption, true, 
-                       setControllerCallback, "Choose which joystick to use in joystick mode", KEY_J));
+   menuItems.push_back(boost::shared_ptr<MenuItem>(new ToggleMenuItem("JOYSTICK:", opts, selectedOption, true, 
+                       setControllerCallback, "Choose which joystick to use in joystick mode", KEY_J)));
 
-   menuItems.push_back(new MenuItem(menuItems.size(), "DEFINE KEYS / BUTTONS", defineKeysCallback, "Remap keyboard or joystick controls", KEY_D, KEY_K));
+   menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(menuItems.size(), "DEFINE KEYS / BUTTONS", defineKeysCallback, 
+                                                                "Remap keyboard or joystick controls", KEY_D, KEY_K)));
 
    opts.clear();
    for(S32 i = 0; i <= 10; i++)
       opts.push_back(getVolMsg( F32(i) / 10 ));
 
-   menuItems.push_back(new ToggleMenuItem("SFX VOLUME:",        opts, U32((gIniSettings.sfxVolLevel + 0.05) * 10.0), false, 
-                       setSFXVolumeCallback,   "Set sound effects volume", KEY_S));
+   menuItems.push_back(boost::shared_ptr<MenuItem>(new ToggleMenuItem("SFX VOLUME:",        opts, U32((gIniSettings.sfxVolLevel + 0.05) * 10.0), false, 
+                       setSFXVolumeCallback,   "Set sound effects volume", KEY_S)));
 
-   menuItems.push_back(new ToggleMenuItem("MUSIC VOLUME:",      opts, U32((gIniSettings.musicVolLevel + 0.05) * 10.0), false,
-                       setMusicVolumeCallback, "Set music volume", KEY_M));
+   menuItems.push_back(boost::shared_ptr<MenuItem>(new ToggleMenuItem("MUSIC VOLUME:",      opts, U32((gIniSettings.musicVolLevel + 0.05) * 10.0), false,
+                       setMusicVolumeCallback, "Set music volume", KEY_M)));
 
-   menuItems.push_back(new ToggleMenuItem("VOICE CHAT VOLUME:", opts, U32((gIniSettings.voiceChatVolLevel + 0.05) * 10.0), false, 
-                       setVoiceVolumeCallback, "Set voice chat volume",    KEY_V));
+   menuItems.push_back(boost::shared_ptr<MenuItem>(new ToggleMenuItem("VOICE CHAT VOLUME:", opts, U32((gIniSettings.voiceChatVolLevel + 0.05) * 10.0), false, 
+                       setVoiceVolumeCallback, "Set voice chat volume",    KEY_V)));
 
    // No music yet, so keep this out to keep menus from getting too long.  Uncomment when we have music.
    //menuItems.push_back(new MenuItem("MUSIC VOLUME:", getVolMsg(gIniSettings.musicVolLevel), 6, KEY_M, KEY_UNKNOWN));
@@ -937,8 +943,8 @@ void OptionsMenuUserInterface::setupMenus()
    opts.clear();
    opts.push_back("DISABLED");
    opts.push_back("ENABLED");
-   menuItems.push_back(new ToggleMenuItem("VOICE ECHO:", opts, gIniSettings.echoVoice ? 1 : 0, true, 
-                       setVoiceEchoCallback, "Toggle whether you hear your voice on voice chat",  KEY_E));
+   menuItems.push_back(boost::shared_ptr<MenuItem>(new ToggleMenuItem("VOICE ECHO:", opts, gIniSettings.echoVoice ? 1 : 0, true, 
+                                                   setVoiceEchoCallback, "Toggle whether you hear your voice on voice chat",  KEY_E)));
 }
 
 
@@ -1044,11 +1050,11 @@ static void nameAndPasswordAcceptCallback(U32 unused)
 
 void NameEntryUserInterface::setupMenu()
 {
-   menuItems.deleteAndClear();
+   menuItems.clear();
 
-   menuItems.push_back(new MenuItem(0, "OK", nameAndPasswordAcceptCallback, ""));
-   menuItems.push_back(new EditableMenuItem("NICKNAME:", gClientInfo.name, "ChumpChange", "", MAX_PLAYER_NAME_LENGTH));
-   menuItems.push_back(new EditableMenuItem("PASSWORD:", gPlayerPassword, "", "", MAX_PLAYER_PASSWORD_LENGTH));
+   menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(0, "OK", nameAndPasswordAcceptCallback, "")));
+   menuItems.push_back(boost::shared_ptr<MenuItem>(new EditableMenuItem("NICKNAME:", gClientInfo.name, "ChumpChange", "", MAX_PLAYER_NAME_LENGTH)));
+   menuItems.push_back(boost::shared_ptr<MenuItem>(new EditableMenuItem("PASSWORD:", gPlayerPassword, "", "", MAX_PLAYER_PASSWORD_LENGTH)));
    
    menuItems[1]->setFilter(LineEditor::noQuoteFilter);      // quotes are incompatible with PHPBB3 logins
    menuItems[2]->setSecret(true);
@@ -1137,29 +1143,29 @@ static void startHostingCallback(U32 unused)
 
 void HostMenuUserInterface::setupMenus()
 {
-   menuItems.deleteAndClear();
+   menuItems.clear();
 
-   menuItems.push_back(new MenuItem(0, "START HOSTING", startHostingCallback, "", KEY_H));
+   menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(0, "START HOSTING", startHostingCallback, "", KEY_H)));
 
-   menuItems.push_back(new EditableMenuItem("SERVER NAME:", gHostName, "<Bitfighter Host>", "", QueryServersUserInterface::MaxServerNameLen,  KEY_N));
+   menuItems.push_back(boost::shared_ptr<MenuItem>(new EditableMenuItem("SERVER NAME:", gHostName, "<Bitfighter Host>", "", QueryServersUserInterface::MaxServerNameLen,  KEY_N)));
 
-   menuItems.push_back(new EditableMenuItem("DESCRIPTION:", gHostDescr, "<Empty>",                    
-                                           "", QueryServersUserInterface::MaxServerDescrLen, KEY_D));
+   menuItems.push_back(boost::shared_ptr<MenuItem>(new EditableMenuItem("DESCRIPTION:", gHostDescr, "<Empty>",                    
+                                                                        "", QueryServersUserInterface::MaxServerDescrLen, KEY_D)));
 
-   menuItems.push_back(new EditableMenuItem("LEVEL CHANGE PASSWORD:", gLevelChangePassword, "<Anyone can change levels>", 
-                                            "", MAX_PASSWORD_LENGTH, KEY_L));
+   menuItems.push_back(boost::shared_ptr<MenuItem>(new EditableMenuItem("LEVEL CHANGE PASSWORD:", gLevelChangePassword, "<Anyone can change levels>", 
+                                                                        "", MAX_PASSWORD_LENGTH, KEY_L)));
 
-   menuItems.push_back(new EditableMenuItem("ADMIN PASSWORD:",        gAdminPassword,       "<No remote admin access>",   
-                                            "", MAX_PASSWORD_LENGTH, KEY_A));
+   menuItems.push_back(boost::shared_ptr<MenuItem>(new EditableMenuItem("ADMIN PASSWORD:",        gAdminPassword,       "<No remote admin access>",   
+                                                                        "", MAX_PASSWORD_LENGTH, KEY_A)));
 
-   menuItems.push_back(new EditableMenuItem("CONNECTION PASSWORD:",   gServerPassword,      "<Anyone can connect>",       
-                                            "", MAX_PASSWORD_LENGTH, KEY_C));
+   menuItems.push_back(boost::shared_ptr<MenuItem>(new EditableMenuItem("CONNECTION PASSWORD:",   gServerPassword,      "<Anyone can connect>",       
+                                                   "", MAX_PASSWORD_LENGTH, KEY_C)));
 
-   menuItems.push_back(new YesNoMenuItem("ALLOW MAP DOWNLOADS:", gIniSettings.allowGetMap, NULL, "", KEY_M));
+   menuItems.push_back(boost::shared_ptr<MenuItem>(new YesNoMenuItem("ALLOW MAP DOWNLOADS:", gIniSettings.allowGetMap, NULL, "", KEY_M)));
 
-   //menuItems.push_back(new CounterMenuItem("MAXIMUM PLAYERS:",   gIniSettings.maxplayers, 1, 2, MAX_PLAYERS, "", "", "", KEY_P));
-   //menuItems.push_back(new EditableMenuItem("PORT:",                  "28000",              "Use default of 28000", 
-   //                                         "", 10, KEY_P));
+   //menuItems.push_back(boost::shared_ptr<MenuItem>(new CounterMenuItem("MAXIMUM PLAYERS:",   gIniSettings.maxplayers, 1, 2, MAX_PLAYERS, "", "", "", KEY_P)));
+   //menuItems.push_back(boost::shared_ptr<MenuItem>(new EditableMenuItem("PORT:",                  "28000",              "Use default of 28000", 
+   //                                         "", 10, KEY_P)));
 }
 
 
@@ -1175,12 +1181,12 @@ void HostMenuUserInterface::onEscape()
 // Save parameters in INI file
 void HostMenuUserInterface::saveSettings()
 {
-   gHostName            = gIniSettings.hostname            = menuItems[OPT_NAME]->getValueForWritingToLevelFile();
-   gHostDescr           = gIniSettings.hostdescr           = menuItems[OPT_DESCR]->getValueForWritingToLevelFile();
-   gLevelChangePassword = gIniSettings.levelChangePassword = menuItems[OPT_LVL_PASS]->getValueForWritingToLevelFile();
-   gAdminPassword       = gIniSettings.adminPassword       = menuItems[OPT_ADMIN_PASS]->getValueForWritingToLevelFile();    
-   gServerPassword      = gIniSettings.serverPassword      = menuItems[OPT_PASS]->getValueForWritingToLevelFile();
-   gIniSettings.allowGetMap                                = menuItems[OPT_GETMAP]->getValueForWritingToLevelFile() == "yes";
+   gHostName            = gIniSettings.hostname            = menuItems[OPT_NAME]->getValue();
+   gHostDescr           = gIniSettings.hostdescr           = menuItems[OPT_DESCR]->getValue();
+   gLevelChangePassword = gIniSettings.levelChangePassword = menuItems[OPT_LVL_PASS]->getValue();
+   gAdminPassword       = gIniSettings.adminPassword       = menuItems[OPT_ADMIN_PASS]->getValue();    
+   gServerPassword      = gIniSettings.serverPassword      = menuItems[OPT_PASS]->getValue();
+   gIniSettings.allowGetMap                                = menuItems[OPT_GETMAP]->getValue() == "yes";
    //gIniSettings.maxplayers                                 = menuItems[OPT_MAX_PLAYERS]->getIntValue();
 
    saveSettingsToINI();
@@ -1318,12 +1324,12 @@ static void kickPlayerCallback(U32 unused)
 
 void GameMenuUserInterface::buildMenu()
 {
-   menuItems.deleteAndClear();
+   menuItems.clear();
 
    lastInputMode = gIniSettings.inputMode;      // Save here so we can see if we need to display alert msg if input mode changes
 
-   menuItems.push_back(new MenuItem(0, "OPTIONS",      optionsSelectedCallback, "", KEY_O));
-   menuItems.push_back(new MenuItem(0, "INSTRUCTIONS", helpSelectedCallback,    "", KEY_I, keyHELP));
+   menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(0, "OPTIONS",      optionsSelectedCallback, "", KEY_O)));
+   menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(0, "INSTRUCTIONS", helpSelectedCallback,    "", KEY_I, keyHELP)));
    GameType *theGameType = gClientGame->getGameType();
 
    // Add any game-specific menu items
@@ -1338,12 +1344,12 @@ void GameMenuUserInterface::buildMenu()
    {
       if(gc->isLevelChanger())
       {
-         menuItems.push_back(new MenuItem(0, "PLAY DIFFERENT LEVEL", chooseNewLevelCallback, "", KEY_L, KEY_P));
-         menuItems.push_back(new MenuItem(0, "ADD TIME (2 MINS)",    addTwoMinsCallback,     "", KEY_T, KEY_2));
-         menuItems.push_back(new MenuItem(0, "RESTART LEVEL",        restartGameCallback,    "", KEY_R));
+         menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(0, "PLAY DIFFERENT LEVEL", chooseNewLevelCallback, "", KEY_L, KEY_P)));
+         menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(0, "ADD TIME (2 MINS)",    addTwoMinsCallback,     "", KEY_T, KEY_2)));
+         menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(0, "RESTART LEVEL",        restartGameCallback,    "", KEY_R)));
       }
       else
-         menuItems.push_back(new MenuItem(0, "ENTER LEVEL CHANGE PASSWORD", levelChangePWCallback, "", KEY_L, KEY_P));
+         menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(0, "ENTER LEVEL CHANGE PASSWORD", levelChangePWCallback, "", KEY_L, KEY_P)));
 
       if(gc->isAdmin())
       {
@@ -1356,16 +1362,17 @@ void GameMenuUserInterface::buildMenu()
             theGameType->addAdminGameMenuOptions(menuItems);
          }
 
-         menuItems.push_back(new MenuItem(0, "KICK A PLAYER", kickPlayerCallback, "", KEY_K));
+         menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(0, "KICK A PLAYER", kickPlayerCallback, "", KEY_K)));
       }
       else
-         menuItems.push_back(new MenuItem(0, "ENTER ADMIN PASSWORD", adminPWCallback, "", KEY_A, KEY_E));
+         menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(0, "ENTER ADMIN PASSWORD", adminPWCallback, "", KEY_A, KEY_E)));
    }
 
    if(cameFrom(EditorUI))    // Came from editor
-      menuItems.push_back(new MenuItem(0, "RETURN TO EDITOR", endGameCallback, "", KEY_Q, (cameFrom(EditorUI) ? KEY_R : KEY_UNKNOWN) ));
+      menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(0, "RETURN TO EDITOR", endGameCallback, "", KEY_Q, 
+                                                                   (cameFrom(EditorUI) ? KEY_R : KEY_UNKNOWN) )));
    else
-      menuItems.push_back(new MenuItem(0, "QUIT GAME",        endGameCallback, "", KEY_Q));
+      menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(0, "QUIT GAME",        endGameCallback, "", KEY_Q)));
 }
 
 
@@ -1428,10 +1435,10 @@ void LevelMenuUserInterface::onActivate()
    if(!gc || !gc->mLevelInfos.size())
       return;
 
-   menuItems.deleteAndClear();
+   menuItems.clear();
 
    char c[] = "A";   // Shortcut key
-   menuItems.push_back(new MenuItem(0, ALL_LEVELS, selectLevelTypeCallback, "", stringToKeyCode(c)));
+   menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(0, ALL_LEVELS, selectLevelTypeCallback, "", stringToKeyCode(c))));
 
    // Cycle through all levels, looking for unique type strings
    for(S32 i = 0; i < gc->mLevelInfos.size(); i++)
@@ -1445,14 +1452,16 @@ void LevelMenuUserInterface::onActivate()
       if(j == menuItems.size())     // Must be a new type
       {
          strncpy(c, gc->mLevelInfos[i].levelType.getString(), 1);
-         menuItems.push_back(new MenuItem(i + 1, gc->mLevelInfos[i].levelType.getString(), selectLevelTypeCallback, "", stringToKeyCode(c)));
+         menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(i + 1, gc->mLevelInfos[i].levelType.getString(), 
+                                                                      selectLevelTypeCallback, "", stringToKeyCode(c))));
       }
    }
 
    menuItems.sort(menuItemValueSort);
 
    if((gc->mSendableFlags & 1) && !gc->isLocalConnection())   // local connection is useless, already have all maps..
-      menuItems.push_back(new MenuItem(UPLOAD_LEVELS_MENUID, UPLOAD_LEVELS, selectLevelTypeCallback, "", stringToKeyCode(c)));
+      menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(UPLOAD_LEVELS_MENUID, UPLOAD_LEVELS, 
+                                                                   selectLevelTypeCallback, "", stringToKeyCode(c))));
 }
 
 
@@ -1513,7 +1522,7 @@ void LevelMenuSelectUserInterface::onActivate()
    if(!gc || !gc->mLevelInfos.size())
       return;
 
-   menuItems.deleteAndClear();
+   menuItems.clear();
 
    mLevels.clear();
 
@@ -1526,7 +1535,7 @@ void LevelMenuSelectUserInterface::onActivate()
       for(S32 i=0; i < mLevels.size(); i++)
       {
          c[0] = mLevels[i].c_str()[0];
-         menuItems.push_back(new MenuItem(i | UPLOAD_LEVELS_BIT, mLevels[i].c_str(), processLevelSelectionCallback, "", stringToKeyCode(c)));
+         menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(i | UPLOAD_LEVELS_BIT, mLevels[i].c_str(), processLevelSelectionCallback, "", stringToKeyCode(c))));
       }
    }
  
@@ -1538,7 +1547,8 @@ void LevelMenuSelectUserInterface::onActivate()
          !strcmp(category.c_str(), ALL_LEVELS) )
       {
          c[0] = gc->mLevelInfos[i].levelName.getString()[0];
-         menuItems.push_back(new MenuItem(i, gc->mLevelInfos[i].levelName.getString(), processLevelSelectionCallback, "", stringToKeyCode(c)));
+         menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(i, gc->mLevelInfos[i].levelName.getString(), 
+                                                                      processLevelSelectionCallback, "", stringToKeyCode(c))));
       }
    }
 
@@ -1634,7 +1644,7 @@ void PlayerMenuUserInterface::playerSelected(U32 index)
 // By putting the menu building code in render, menus can be dynamically updated
 void PlayerMenuUserInterface::render()
 {
-   menuItems.deleteAndClear();
+   menuItems.clear();
    GameType *gt = gClientGame->getGameType();
    if (!gt)
       return;
@@ -1653,7 +1663,8 @@ void PlayerMenuUserInterface::render()
       // Will be used to show admin/player/robot prefix on menu
       PlayerType pt = client->isRobot ? PlayerTypeRobot : (client->isAdmin ? PlayerTypeAdmin : PlayerTypePlayer);    
 
-      menuItems.push_back(new PlayerMenuItem(i, client->name.getString(), playerSelectedCallback, stringToKeyCode(c), pt));
+      PlayerMenuItem *newItem = new PlayerMenuItem(i, client->name.getString(), playerSelectedCallback, stringToKeyCode(c), pt);
+      menuItems.push_back(boost::shared_ptr<MenuItem>(newItem));
       menuItems.last()->setUnselectedColor(gt->getTeamColor(client->getTeam()));
    }
 
@@ -1719,7 +1730,7 @@ void TeamMenuUserInterface::processSelection(U32 index)
 // By reconstructing our menu at render time, changes to teams caused by others will be reflected immediately
 void TeamMenuUserInterface::render()
 {
-   menuItems.deleteAndClear();
+   menuItems.clear();
 
    GameType *gt = gClientGame->getGameType();
    if (!gt)
@@ -1737,7 +1748,7 @@ void TeamMenuUserInterface::render()
 
       bool isCurrent = (i == gt->getTeam(nameToChange.c_str()));
       
-      menuItems.push_back(new TeamMenuItem(i, team, processTeamSelectionCallback, stringToKeyCode(c), isCurrent));
+      menuItems.push_back(boost::shared_ptr<MenuItem>(new TeamMenuItem(i, team, processTeamSelectionCallback, stringToKeyCode(c), isCurrent)));
    }
 
    string name = "";

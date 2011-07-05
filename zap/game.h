@@ -126,19 +126,6 @@ private:
 
    Vector<boost::shared_ptr<AbstractTeam> > mTeams;       // List of teams
 
-   bool mEngineerEnabled;
-   bool mBotsAllowed;
-   bool mSoccerPickupAllowed;
-
-   // Info about current level
-   StringTableEntry mLevelName;
-   StringTableEntry mLevelDescription;
-   StringTableEntry mLevelCredits;
-
-   S32 mMinRecPlayers;         // Recommended min players for this level
-   S32 mMaxRecPlayers;         // Recommended max players for this level
-
-
    // Functions for handling individual level parameters read in processLevelParam; some may be game-specific
    void onReadTeamParam(S32 argc, const char **argv);
    void onReadTeamChangeParam(S32 argc, const char **argv);
@@ -180,10 +167,6 @@ protected:
 
    bool mGameSuspended;       // True if we're in "suspended animation" mode
 
-   string mScriptName;                    // Name of levelgen script, if any
-   Vector<string> mScriptArgs;            // List of script params  
-
-
 public:
    static const S32 DefaultGridSize = 255;   // Size of "pages", represented by floats for intrapage locations (i.e. pixels per integer)
    static const S32 MIN_GRID_SIZE = 5;       // Ridiculous, it's true, but we step by our minimum value, so we can't make this too high
@@ -204,8 +187,6 @@ public:
 
    virtual GameUserInterface *getUserInterface() = 0;
 
-   void setScript(const Vector<string> &args);
-
    Rect getWorldExtents() { return mWorldExtents; }
 
    virtual U32 getPlayerCount() = 0;         // Implemented differently on client and server
@@ -224,35 +205,11 @@ public:
 
    U32 getTimeUnconnectedToMaster() { return mTimeUnconnectedToMaster; }
 
-   bool isEngineerEnabled() { return mEngineerEnabled; }
-   void setEngineerEnabled(bool enabled) { mEngineerEnabled = enabled; }
-
-   bool areBotsAllowed() { return mBotsAllowed; }
-   void setBotsAllowed(bool allowed) { mBotsAllowed = allowed; }
-
-   bool isSoccerPickupAllowed() { return mSoccerPickupAllowed; }
-
-   const StringTableEntry *getLevelName() const { return &mLevelName; }
-   void setLevelName(const StringTableEntry &levelName) { mLevelName = levelName; }
-
-   const StringTableEntry *getLevelDescription() const { return &mLevelDescription; }
-   void setLevelDescription(const StringTableEntry &levelDescription) { mLevelDescription = levelDescription; }
-
-   const StringTableEntry *getLevelCredits() const { return &mLevelCredits; }
-   void setLevelCredits(const StringTableEntry &levelCredits) { mLevelCredits = levelCredits; }
-
-   S32 getMinRecPlayers() { return mMinRecPlayers; }
-   void setMinRecPlayers(S32 minPlayers) { mMinRecPlayers = minPlayers; }
-
-   S32 getMaxRecPlayers() { return mMaxRecPlayers; }
-   void setMaxRecPlayers(S32 maxPlayers) { mMaxRecPlayers = maxPlayers; }
-
    void resetLevelInfo();
 
    virtual void processLevelLoadLine(U32 argc, U32 id, const char **argv);      // Only used by ServerGame and EditorGame
    bool processLevelParam(S32 argc, const char **argv);
    string toString();
-   string getScriptLine() const;
 
    virtual bool processPseudoItem(S32 argc, const char **argv) { return false; }
 

@@ -42,17 +42,17 @@
 namespace Zap
 {
 
-void LuaObject::setLuaArgs(lua_State *L, const string &scriptname, const Vector<string> &args)
+void LuaObject::setLuaArgs(lua_State *L, const string &scriptname, const Vector<string> *args)
 {
    // Now pass in any args specified in the level file.  By convention, we'll pass in the name of the robot/script as the 0th element.
-   lua_createtable(L, args.size() + 1, 0);
+   lua_createtable(L, args->size() + 1, 0);
 
    lua_pushstring(L, scriptname.c_str());
    lua_rawseti(L, -2, 0);
 
-   for(S32 i = 0; i < args.size(); i++)
+   for(S32 i = 0; i < args->size(); i++)
    {
-      lua_pushstring(L, args[i].c_str());
+      lua_pushstring(L, args->get(i).c_str());
       lua_rawseti(L, -2, i + 1);
    }
    lua_setglobal(L, "arg");

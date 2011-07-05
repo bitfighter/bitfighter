@@ -86,6 +86,7 @@ const char *gGameTypeNames[] = {
    NULL  // Last item must be NULL
 };
 
+
 S32 gDefaultGameTypeIndex = 0;  // What we'll default to if the name provided is invalid or missing... i.e. GameType ==> Bitmatch
 
 // mini   http://patorjk.com/software/taag/
@@ -127,12 +128,12 @@ ClientRef::~ClientRef()
 TNL_IMPLEMENT_NETOBJECT(GameType);
 
 // Constructor
-GameType::GameType() : mScoreboardUpdateTimer(1000) , mGameTimer(DefaultGameTime) , mGameTimeUpdateTimer(30000)
+GameType::GameType(S32 winningScore) : mScoreboardUpdateTimer(1000) , mGameTimer(DefaultGameTime) , mGameTimeUpdateTimer(30000)
 {
    mNetFlags.set(Ghostable);
    mBetweenLevels = true;
    mGameOver = false;
-   mWinningScore = DefaultWinningScore;
+   mWinningScore = winningScore;
    mLeadingTeam = -1;
    mLeadingTeamScore = 0;
    mDigitsNeededToDisplayScore = 1;
@@ -143,7 +144,13 @@ GameType::GameType() : mScoreboardUpdateTimer(1000) , mGameTimer(DefaultGameTime
    mLevelHasLoadoutZone = false;
    mShowAllBots = false;
    mTotalGamePlay = 0;
-   mBotZoneCreationFailed = false;   
+   mBotZoneCreationFailed = false;
+
+   mMinRecPlayers = 0;
+   mMaxRecPlayers = 0;
+
+   mEngineerEnabled = false;
+   mBotsAllowed = true;
 }
 
 
@@ -174,11 +181,152 @@ void GameType::addToGame(Game *game)
 }
 
 
-// Create some game-specific menu items for the GameParameters menu
-void GameType::addGameSpecificParameterMenuItems(Vector<MenuItem *> &menuItems)
+// Menu items we want to show
+const char **GameType::getGameParameterMenuKeys()
 {
-   menuItems.push_back(new TimeCounterMenuItem("Game Time:", 8 * 60, 99*60, "Unlimited", "Time game will last"));
-   menuItems.push_back(new CounterMenuItem("Score to Win:", 10, 1, 1, 99, "points", "", "Game ends when one team gets this score"));
+    static const char *items[] = {
+      "Level Name",
+      "Level Descr",
+      "Level Credits",
+      "Levelgen Script",
+      "Game Time",
+      "Win Score",
+      "Grid Size",
+      "Min Players",
+      "Max Players",
+      "Allow Engr",
+      "" };
+
+      return items;
+}
+
+
+// Definitions for those items
+boost::shared_ptr<MenuItem> GameType::getMenuItem(const char *key)
+{
+   if(!strcmp(key, "Level Name"))
+   {
+      MenuItem *item = new EditableMenuItem("Level Name:", 
+                                            mLevelName.getString(),
+                                            "", 
+                                            "The level's name -- pick a good one!",  
+                                            MAX_GAME_NAME_LEN);   
+
+      item->setFilter(LineEditor::allAsciiFilter);
+
+      return boost::shared_ptr<MenuItem>(item);
+   }
+   else if(!strcmp(key, "Level Descr"))
+   	return boost::shared_ptr<MenuItem>(new EditableMenuItem("Level Descr:", 
+                                                              mLevelDescription.getString(), 
+                                                              "", 
+                                                              "A brief description of the level",                     
+                                                              MAX_GAME_DESCR_LEN));
+   else if(!strcmp(key, "Level Credits"))
+   	return boost::shared_ptr<MenuItem>(new EditableMenuItem("Level By:",       
+                                                              mLevelCredits.getString(), 
+                                                              "", 
+                                                              "Who created this level",                                  
+                                                              MAX_GAME_DESCR_LEN));
+   else if(!strcmp(key, "Levelgen Script"))
+   	return boost::shared_ptr<MenuItem>(new EditableMenuItem("Levelgen Script:", 
+                                                              getScriptLine(), 
+                                                              "<None>", 
+                                                              "Levelgen script & args to be run when level is loaded",  
+                                                              255));
+   else if(!strcmp(key, "Game Time"))
+      return boost::shared_ptr<MenuItem>(new TimeCounterMenuItem("Game Time:", getTotalGameTime(), 99*60, "Unlimited", "Time game will last"));
+   else if(!strcmp(key, "Win Score"))
+      return boost::shared_ptr<MenuItem>(new CounterMenuItem("Score to Win:", getWinningScore(), 1, 1, 99, "points", "", "Game ends when one team gets this score"));
+   else if(!strcmp(key, "Grid Size"))
+      return boost::shared_ptr<MenuItem>(new CounterMenuItem("Grid Size:",       
+                                                             getGame()->getGridSize(),
+                                                             Game::MIN_GRID_SIZE,      // increment
+                                                             Game::MIN_GRID_SIZE,      // min val
+                                                             Game::MAX_GRID_SIZE,      // max val
+                                                             "pixels",                 // units
+                                                             "", 
+                                                             "\"Magnification factor.\" Larger values lead to larger levels.  Default is 255."));
+   else if(!strcmp(key, "Min Players"))
+   	return boost::shared_ptr<MenuItem>(new CounterMenuItem("Min Players:",       
+                                                             mMinRecPlayers,     // value
+                                                             1,                  // increment
+                                                             0,                  // min val
+                                                             MAX_PLAYERS,        // max val
+                                                             "players",          // units
+                                                             "N/A", 
+                                                             "Min. players you would recommend for this level (to help server select the next level)"));
+   else if(!strcmp(key, "Max Players"))
+   	return boost::shared_ptr<MenuItem>(new CounterMenuItem("Max Players:",       
+                                                             mMaxRecPlayers,     // value
+                                                             1,                  // increment
+                                                             0,                  // min val
+                                                             MAX_PLAYERS,        // max val
+                                                             "players",          // units
+                                                             "N/A",
+                                                             "Max. players you would recommend for this level (to help server select the next level)"));
+   else if(!strcmp(key, "Allow Engr"))
+   	return boost::shared_ptr<MenuItem>(new YesNoMenuItem("Allow Engineer Module:",       
+                                                           mEngineerEnabled,
+                                                           NULL,
+                                                           "Allow players to use the Engineer module?"));
+   else
+      return boost::shared_ptr<MenuItem>();     // NULLish pointer
+}
+
+
+bool GameType::saveMenuItem(const MenuItem *menuItem, const char *key)
+{
+   if(!strcmp(key, "Level Name"))
+      setLevelName(menuItem->getValue());
+   else if(!strcmp(key, "Level Descr"))
+      setLevelDescription(menuItem->getValue());
+   else if(!strcmp(key, "Level Credits"))
+      setLevelCredits(menuItem->getValue());
+   else if(!strcmp(key, "Levelgen Script"))
+      setScript(parseString(menuItem->getValue()));
+   else if(!strcmp(key, "Game Time"))
+      setGameTime(menuItem->getIntValue());
+   else if(!strcmp(key, "Win Score"))
+      setWinningScore(menuItem->getIntValue());
+   else if(!strcmp(key, "Grid Size"))
+      gEditorGame->setGridSize(menuItem->getIntValue());
+   else if(!strcmp(key, "Min Players"))
+       setMinRecPlayers(menuItem->getIntValue());
+   else if(!strcmp(key, "Max Players"))
+      setMaxRecPlayers(menuItem->getIntValue());
+   else if(!strcmp(key, "Allow Engr"))
+      setEngineerEnabled(menuItem->getIntValue());
+   else
+      return false;
+
+   return true;
+}
+
+
+string GameType::getScriptLine() const
+{
+   string str;
+
+   if(mScriptName == "")
+      return "";
+
+   str += mScriptName;
+   
+   if(mScriptArgs.size() > 0)
+      str += " " + concatenate(mScriptArgs);
+
+   return str;
+}
+
+
+void GameType::setScript(const Vector<string> &args)
+{
+   mScriptName = args.size() > 0 ? args[0] : "";
+
+   mScriptArgs.clear();       // Clear out any args from a previous Script line
+   for(S32 i = 1; i < args.size(); i++)
+      mScriptArgs.push_back(args[i]);
 }
 
 
@@ -579,7 +727,7 @@ VersionedGameStats GameType::getGameStats()
    gameStats->playerCount = 0; //mClientList.size(); ... will count number of players.
    gameStats->duration = mTotalGamePlay / 1000;
    gameStats->isTeamGame = isTeamGame();
-   gameStats->levelName = mGame->getLevelName()->getString();
+   gameStats->levelName = mLevelName.getString();
    gameStats->gameType = getGameTypeString();
    gameStats->teamCount = mGame->getTeamCount(); // is this needed?, currently Not sent, instead, can use gameStats->teamStats.size()
    gameStats->build_version = BUILD_VERSION;
@@ -978,7 +1126,7 @@ void GameType::setClientShipLoadout(ClientRef *cl, const Vector<U32> &loadout, b
       if(loadout[i] >= U32(ModuleCount))   // Invalid number.  Might crash server if trying to continue...
          return;
 
-      if(!getGame()->isEngineerEnabled() && (loadout[i] == ModuleEngineer)) // Reject engineer if not enabled
+      if(!mEngineerEnabled && (loadout[i] == ModuleEngineer)) // Reject engineer if not enabled
          return;
 
       if((loadout[i] == ModuleSensor))    // Allow spyBug when using Sensor
@@ -1677,18 +1825,18 @@ static void switchTeamsCallback(U32 unused)
 
 
 // Add any additional game-specific menu items, processed below
-void GameType::addClientGameMenuOptions(Vector<MenuItem *> &menuOptions)
+void GameType::addClientGameMenuOptions(Vector<boost::shared_ptr<MenuItem> > &menuOptions)
 {
    if(isTeamGame() && mGame->getTeamCount() > 1 && !mBetweenLevels)
    {
       GameConnection *gc = gClientGame->getConnectionToServer();
 
       if(mCanSwitchTeams || (gc && gc->isAdmin()))
-         menuOptions.push_back(new MenuItem(0, "SWITCH TEAMS", switchTeamsCallback, "", KEY_S, KEY_T));
+         menuOptions.push_back(boost::shared_ptr<MenuItem>(new MenuItem(0, "SWITCH TEAMS", switchTeamsCallback, "", KEY_S, KEY_T)));
       else
       {
-         menuOptions.push_back(new MessageMenuItem("WAITING FOR SERVER TO ALLOW", Colors::red));
-         menuOptions.push_back(new MessageMenuItem("YOU TO SWITCH TEAMS AGAIN", Colors::red));
+         menuOptions.push_back(boost::shared_ptr<MenuItem>(new MessageMenuItem("WAITING FOR SERVER TO ALLOW", Colors::red)));
+         menuOptions.push_back(boost::shared_ptr<MenuItem>(new MessageMenuItem("YOU TO SWITCH TEAMS AGAIN", Colors::red)));
       }
    }
 }
@@ -1702,10 +1850,10 @@ static void switchPlayersTeamCallback(U32 unused)
 
 
 // Add any additional game-specific admin menu items, processed below
-void GameType::addAdminGameMenuOptions(Vector<MenuItem *> &menuOptions)
+void GameType::addAdminGameMenuOptions(Vector<boost::shared_ptr<MenuItem> > &menuOptions)
 {
    if(isTeamGame() && mGame->getTeamCount() > 1)
-      menuOptions.push_back(new MenuItem(0, "CHANGE A PLAYER'S TEAM", switchPlayersTeamCallback, "", KEY_C));
+      menuOptions.push_back(boost::shared_ptr<MenuItem>(new MenuItem(0, "CHANGE A PLAYER'S TEAM", switchPlayersTeamCallback, "", KEY_C)));
 }
 
 
@@ -1718,14 +1866,14 @@ GAMETYPE_RPC_S2C(GameType, s2cSetLevelInfo, (StringTableEntry levelName, StringT
                                                 levelCreds, objectCount, lx, ly, ux, uy, 
                                                 levelHasLoadoutZone, engineerEnabled))
 {
-   mGame->setLevelName(levelName);
-   mGame->setLevelDescription(levelDesc);
-   mGame->setLevelCredits(levelCreds);
+   mLevelName = levelName;
+   mLevelDescription = levelDesc;
+   mLevelCredits = levelCreds;
 
    mWinningScore = teamScoreLimit;
    mObjectsExpected = objectCount;
 
-   getGame()->setEngineerEnabled(engineerEnabled);
+   mEngineerEnabled = engineerEnabled;
 
    mViewBoundsWhileLoading = Rect(lx, ly, ux, uy);
    mLevelHasLoadoutZone = levelHasLoadoutZone;           // Need to pass this because we won't know for sure when the loadout zones will be sent, so searching for them is difficult
@@ -2086,9 +2234,9 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
 
    Rect barrierExtents = gServerGame->computeBarrierExtents();
 
-   s2cSetLevelInfo(*mGame->getLevelName(), *mGame->getLevelDescription(), mWinningScore, *mGame->getLevelCredits(), getGame()->mObjectsLoaded, 
+   s2cSetLevelInfo(mLevelName, mLevelDescription, mWinningScore, mLevelCredits, getGame()->mObjectsLoaded, 
                    barrierExtents.min.x, barrierExtents.min.y, barrierExtents.max.x, barrierExtents.max.y, 
-                   mLevelHasLoadoutZone, getGame()->isEngineerEnabled());
+                   mLevelHasLoadoutZone, isEngineerEnabled());
 
    for(S32 i = 0; i < mGame->getTeamCount(); i++)
    {
@@ -2302,7 +2450,7 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
       if(mBotZoneCreationFailed)
          clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Zone creation failure.  Bots disabled");
 
-      else if(!getGame()->areBotsAllowed() && !clientRef->clientConnection->isAdmin())  // not admin, no robotScript
+      else if(!areBotsAllowed() && !clientRef->clientConnection->isAdmin())  // not admin, no robotScript
          clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! This level does not allow robots");
 
       else if(!clientRef->clientConnection->isAdmin() && gIniSettings.defaultRobotScript == "" && args.size() < 2)  // not admin, no robotScript

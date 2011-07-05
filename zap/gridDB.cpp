@@ -46,18 +46,15 @@ GridDatabase::GridDatabase()
    for(U32 i = 0; i < BucketRowCount; i++)
       for(U32 j = 0; j < BucketRowCount; j++)
          mBuckets[i][j] = NULL;
-
-   printf("Creating database %p\n", this);
 }
-
 
 
 // Destructor
 GridDatabase::~GridDatabase()       
 {
    // Do nothing for the moment
-   logprintf("destroying database %p", this);
 }
+
 
 void GridDatabase::addToDatabase(DatabaseObject *theObject, const Rect &extents)
 {

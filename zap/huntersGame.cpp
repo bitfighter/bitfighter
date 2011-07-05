@@ -94,7 +94,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(HuntersGameType, s2cHuntersMessage,
 }
 
 // Constructor
-HuntersGameType::HuntersGameType() : GameType()
+HuntersGameType::HuntersGameType() : GameType(100)
 {
    mNexusClosedTime = 60 * 1000;
    mNexusOpenTime = 15 * 1000;
@@ -175,11 +175,12 @@ void HuntersGameType::itemDropped(Ship *ship, Item *item)
 {
    //HuntersFlagItem *flag = findFirstNexusFlag(ship);  //  This line causes multiple "Drop Flag" messages when ship carry multiple items.
    HuntersFlagItem *flag = dynamic_cast<HuntersFlagItem *>(item);
-   if(! flag)
+   if(!flag)
       return;
 
-   U32 flagCount = flag ? flag->getFlagCount() : 0;
-   if(flagCount == 0)
+   U32 flagCount = flag->getFlagCount();
+   TNLAssert(flagCount > 0, "Looks like that check _is_ needed after all... remove assert and comment below!");
+   if(flagCount == 0)      // <=== probably unneeded
       return;
 
    Vector<StringTableEntry> e;
@@ -199,14 +200,54 @@ void HuntersGameType::itemDropped(Ship *ship, Item *item)
 }
 
 
-// Create some game-specific menu items for the GameParameters menu from the arguments processed above...
-void HuntersGameType::addGameSpecificParameterMenuItems(Vector<MenuItem *> &menuItems)
+// Any unique items defined here must be handled in both getMenuItem() and saveMenuItem() below!
+const char **HuntersGameType::getGameParameterMenuKeys()
 {
-   menuItems.push_back(new TimeCounterMenuItem("Game Time:", getTotalGameTime(), 99*60, "Unlimited", "Time game will last"));
-   menuItems.push_back(new TimeCounterMenuItem("Time for Nexus to Open:", mNexusClosedTime / 1000, 99*60, "Never", "Time it takes for the Nexus to open"));
-   menuItems.push_back(new TimeCounterMenuItemSeconds("Time Nexus Remains Open:", mNexusOpenTime / 1000, 99*60, "Always", "Time that the Nexus will remain open"));
-   menuItems.push_back(new CounterMenuItem("Score to Win:", getWinningScore(), 100, 100, 20000, "points", "", "Game ends when one player or team gets this score"));
+    static const char *items[] = {
+      "Level Name",
+      "Level Descr",
+      "Level Credits",
+      "Levelgen Script",
+      "Game Time",
+      "Nexus Time to Open",      // <=== defined here
+      "Nexus Time Remain Open",  // <=== defined here
+      "Nexus Win Score",         // <=== defined here
+      "Grid Size",
+      "Min Players",
+      "Max Players",
+      "Allow Engr",
+      "" };
+
+      return items;
 }
+
+
+// Definitions for those items
+boost::shared_ptr<MenuItem> HuntersGameType::getMenuItem(const char *key)
+{
+   if(!strcmp(key, "Nexus Time to Open"))
+   	return boost::shared_ptr<MenuItem>(new TimeCounterMenuItem("Time for Nexus to Open:", mNexusClosedTime / 1000, 99*60, "Never", "Time it takes for the Nexus to open"));
+   else if(!strcmp(key, "Nexus Time Remain Open"))
+      return boost::shared_ptr<MenuItem>(new TimeCounterMenuItemSeconds("Time Nexus Remains Open:", mNexusOpenTime / 1000, 99*60, "Always", "Time that the Nexus will remain open"));
+   else if(!strcmp(key, "Nexus Win Score"))
+      return boost::shared_ptr<MenuItem>(new CounterMenuItem("Score to Win:", getWinningScore(), 100, 100, 20000, "points", "", "Game ends when one player or team gets this score"));
+   else return Parent::getMenuItem(key);
+}
+
+
+bool HuntersGameType::saveMenuItem(const MenuItem *menuItem, const char *key)
+{
+   if(!strcmp(key, "Nexus Time to Open"))
+      mNexusOpenTime = menuItem->getIntValue();
+   else if(!strcmp(key, "Nexus Time Remain Open"))
+      mNexusClosedTime = menuItem->getIntValue();
+   else if(!strcmp(key, "Nexus Win Score"))
+      setWinningScore(menuItem->getIntValue());
+   else return Parent::saveMenuItem(menuItem, key);
+
+   return true;
+}
+
 
 TNL_IMPLEMENT_NETOBJECT(HuntersNexusObject);
 

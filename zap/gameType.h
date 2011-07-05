@@ -35,6 +35,7 @@
 #include "statistics.h"
 
 #include <string>
+#include <boost/shared_ptr.hpp>
    
 
 namespace Zap
@@ -136,6 +137,21 @@ private:
    bool mBetweenLevels;             // We'll need to prohibit certain things (like team changes) when game is in an "intermediate" state
    bool mGameOver;                  // Set to true when an end condition is met
 
+   bool mEngineerEnabled;
+   bool mBotsAllowed;
+   bool mSoccerPickupAllowed;
+
+   // Info about current level
+   StringTableEntry mLevelName;
+   StringTableEntry mLevelDescription;
+   StringTableEntry mLevelCredits;
+
+   string mScriptName;                    // Name of levelgen script, if any
+   Vector<string> mScriptArgs;            // List of script params  
+
+   S32 mMinRecPlayers;         // Recommended min players for this level
+   S32 mMaxRecPlayers;         // Recommended max players for this level
+
    Vector<FlagSpawn> mFlagSpawnPoints;           // List of non-team specific spawn points for flags
    Vector<AsteroidSpawn> mAsteroidSpawnPoints;   // List of spawn points for asteroids
 
@@ -194,8 +210,8 @@ public:
    static const char *validateGameType(const char *gtype);           // Returns a valid gameType, defaulting to gDefaultGameTypeIndex if needed
 
    virtual GameTypes getGameType() { return BitmatchGame; }
-   virtual const char *getGameTypeString() const { return "Bitmatch"; } const                      // Will be overridden by other games
-   virtual const char *getShortName() const { return "BM"; }                                             //          -- ditto --
+   virtual const char *getGameTypeString() const { return "Bitmatch"; }                            // Will be overridden by other games
+   virtual const char *getShortName() const { return "BM"; }                                       //          -- ditto --
    virtual const char *getInstructionString() const { return "Blast as many ships as you can!"; }  //          -- ditto --
    virtual bool isTeamGame() const { return mGame->getTeamCount() > 1; }                           // Team game if we have teams.  Otherwise it's every man for himself.
    virtual bool canBeTeamGame() { return true; }
@@ -203,6 +219,7 @@ public:
    virtual bool teamHasFlag(S32 teamId) const { return false; }
    S32 getWinningScore() const { return mWinningScore; }
    void setWinningScore(S32 score) { mWinningScore = score; }
+
    void setGameTime(F32 timeInSeconds) { mGameTimer.reset(U32(timeInSeconds) * 1000); }
 
    U32 getTotalGameTime() const { return (mGameTimer.getPeriod() / 1000); }      // In seconds
@@ -320,7 +337,7 @@ public:
    static Vector<SignedInt<24> > mScores;
    static Vector<RangedU32<0, 200> > mRatings;
 
-   GameType();    // Constructor
+   GameType(S32 winningScore = DefaultWinningScore);    // Constructor
 
    virtual void addToGame(Game *game);
 
@@ -331,7 +348,40 @@ public:
    bool processArguments(S32 argc, const char **argv, Game *game);
    string toString();
 
-   virtual void addGameSpecificParameterMenuItems(Vector<MenuItem *> &menuItems);
+   virtual const char **getGameParameterMenuKeys();
+   virtual boost::shared_ptr<MenuItem> getMenuItem(const char *key);
+   virtual bool saveMenuItem(const MenuItem *menuItem, const char *key);
+
+
+   const StringTableEntry *getLevelName() const { return &mLevelName; }
+   void setLevelName(const StringTableEntry &levelName) { mLevelName = levelName; }
+
+   const StringTableEntry *getLevelDescription() const { return &mLevelDescription; }
+   void setLevelDescription(const StringTableEntry &levelDescription) { mLevelDescription = levelDescription; }
+
+   const StringTableEntry *getLevelCredits() const { return &mLevelCredits; }
+   void setLevelCredits(const StringTableEntry &levelCredits) { mLevelCredits = levelCredits; }
+
+   S32 getMinRecPlayers() { return mMinRecPlayers; }
+   void setMinRecPlayers(S32 minPlayers) { mMinRecPlayers = minPlayers; }
+
+   S32 getMaxRecPlayers() { return mMaxRecPlayers; }
+   void setMaxRecPlayers(S32 maxPlayers) { mMaxRecPlayers = maxPlayers; }
+
+   bool isEngineerEnabled() { return mEngineerEnabled; }
+   void setEngineerEnabled(bool enabled) { mEngineerEnabled = enabled; }
+
+   bool areBotsAllowed() { return mBotsAllowed; }
+   void setBotsAllowed(bool allowed) { mBotsAllowed = allowed; }
+   
+   bool isSoccerPickupAllowed() { return mSoccerPickupAllowed; }
+   void setSoccerPickupAllowed(bool allowed) { mSoccerPickupAllowed = allowed; }
+
+   string getScriptLine() const;
+   void setScript(const Vector<string> &args);
+
+   string getScriptName() const { return mScriptName; }
+   const Vector<string> *getScriptArgs() { return &mScriptArgs; }
 
    void onAddedToGame(Game *theGame);
 
@@ -438,10 +488,10 @@ public:
    TNL_DECLARE_RPC(c2sResendItemStatus, (U16 itemId));
 
    // Handle additional game-specific menu options for the client and the admin
-   virtual void addClientGameMenuOptions(Vector<MenuItem *> &menuOptions);
+   virtual void addClientGameMenuOptions(Vector<boost::shared_ptr<MenuItem> > &menuOptions);
    //virtual void processClientGameMenuOption(U32 index);                        // Param used only to hold team, at the moment
 
-   virtual void addAdminGameMenuOptions(Vector<MenuItem *> &menuOptions);
+   virtual void addAdminGameMenuOptions(Vector<boost::shared_ptr<MenuItem> > &menuOptions);
 
    TNL_DECLARE_RPC(c2sAddTime, (U32 time));                                    // Admin is adding time to the game
    TNL_DECLARE_RPC(c2sChangeTeams, (S32 team));                                // Player wants to change teams

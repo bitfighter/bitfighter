@@ -65,10 +65,9 @@ public:
 class GameParamUserInterface : public MenuUserInterface     // By subclassing this, I hoped to get the mouse stuff to automatically work, but it didn't.  <sigh>
 {
 private:
-   void processSelection(U32 index) { }         // Needed for MenuUserInterface subclassing... does nothing
+   void processSelection(U32 index) { }   // Needed for MenuUserInterface subclassing... does nothing
 
-   bool anythingChanged();                      // Compare list of parameters from before and after a session in the GameParams menu.  Did anything get changed??
-   void buildGameParamList(Game *game);         // Take the info from our menus and create a list of lines we can stick in a level file (which we'll store in gameParams)
+   bool anythingChanged();           // Compare list of parameters from before and after a session in the GameParams menu.  Did anything get changed??
 
    string origGameParams;            // Copy of the game parameters as specified when we activated the GameParameters, used to compare before and after to detect changes
 
@@ -77,6 +76,10 @@ private:
 
    virtual S32 getTextSize() { return 18; }
    virtual S32 getGap() { return 12; }
+
+   typedef map<const char *, boost::shared_ptr<MenuItem> > MenuItemMap;
+   MenuItemMap mMenuItemMap;
+
 
 public:
    GameParamUserInterface();   // Constructor

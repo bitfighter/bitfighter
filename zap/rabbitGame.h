@@ -65,7 +65,9 @@ public:
    bool processArguments(S32 argc, const char **argv, Game *game);
    string toString();
 
-   void addGameSpecificParameterMenuItems(Vector<MenuItem *> &menuItems);
+   const char **getGameParameterMenuKeys();
+   boost::shared_ptr<MenuItem> getMenuItem(const char *key);
+   bool saveMenuItem(const MenuItem *menuItem, const char *key);
 
    void idle(GameObject::IdleCallPath path);
 
@@ -88,6 +90,9 @@ public:
    void onFlaggerDead(Ship *killerShip);
    void onFlaggerKill(Ship *rabbitShip);
    void onFlagReturned();
+
+   void setFlagScore(S32 pointsPerMinute);
+   S32 getFlagScore() ;
 
    GameTypes getGameType() { return RabbitGame; }
    const char *getGameTypeString() const { return "Rabbit"; }

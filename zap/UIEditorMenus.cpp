@@ -95,11 +95,11 @@ GoFastEditorAttributeMenuUI::GoFastEditorAttributeMenuUI()
    setMenuID(GoFastAttributeEditorUI);
    menuItems.resize(2);
 
-   menuItems[0] = new CounterMenuItem("Speed", 100, 100, SpeedZone::minSpeed, SpeedZone::maxSpeed, "", "Really slow", "");
-   setMenuColors(menuItems[0]);
+   menuItems[0] = boost::shared_ptr<MenuItem>(new CounterMenuItem("Speed", 100, 100, SpeedZone::minSpeed, SpeedZone::maxSpeed, "", "Really slow", ""));
+   setMenuColors(menuItems[0].get());
 
-   menuItems[1] = new YesNoMenuItem("Snapping", true, NULL, "");
-   setMenuColors(menuItems[1]);
+   menuItems[1] = boost::shared_ptr<MenuItem>(new YesNoMenuItem("Snapping", true, NULL, ""));
+   setMenuColors(menuItems[1].get());
 }
 
 
@@ -151,7 +151,7 @@ TextItemEditorAttributeMenuUI::TextItemEditorAttributeMenuUI()
    menuItem->setTextEditedCallback(textEditedCallback);
    setMenuColors(menuItem);
 
-   menuItems[0] = menuItem;
+   menuItems[0] = boost::shared_ptr<MenuItem>(menuItem);
 }
 
 

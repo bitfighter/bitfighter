@@ -95,7 +95,7 @@ public:
    S32 getIndex() { return mIndex; }
 
    virtual string getPrompt() { return mPrompt; }
-   virtual string getValue() { return mPrompt; } 
+   virtual string getValue() const { return mPrompt; } 
 
    virtual void setSecret(bool secret) { /* Do nothing */ }
 
@@ -104,7 +104,7 @@ public:
    
    virtual const char *getSpecialEditingInstructions() { return ""; }
    virtual string getValueForDisplayingInMenu() { return ""; }
-   virtual S32 getIntValue() { return 0; }
+   virtual S32 getIntValue() const { return 0; }
    virtual string getValueForWritingToLevelFile() { return itos(getIntValue()); }
    virtual void setValue(const string &val) { /* Do nothing */ }
    virtual void setIntValue(S32 val) { /* Do nothing */ }
@@ -177,7 +177,7 @@ public:
    virtual S32 getValueIndex() { return mIndex; }
    virtual void setValueIndex(U32 index) { mIndex = index; }
    
-   virtual string getValue() { return mOptions[mIndex]; } 
+   virtual string getValue() const { return mOptions[mIndex]; } 
 
    virtual void render(S32 xpos, S32 ypos, S32 textsize, bool isSelected);
    virtual bool handleKey(KeyCode keyCode, char ascii);
@@ -199,7 +199,7 @@ public:
    virtual string getValueForDisplayingInMenu() { return mIndex ? " Engineer" : ""; }
    virtual string getValueForWritingToLevelFile() { return mIndex ? "yes" : "no"; }
    virtual void setValue(const string &val) { mIndex = (val == "yes") ? 1 : 0; }
-   virtual S32 getIntValue() { return mIndex; }    // 0 == false == no, 1 == true == yes
+   virtual S32 getIntValue() const { return mIndex; }    // 0 == false == no, 1 == true == yes
    virtual void setIntValue(S32 value) { mIndex = (value == 0) ? 0 : 1; }
 };
 
@@ -229,9 +229,9 @@ public:
    virtual MenuItemTypes getItemType() { return CounterMenuItemType; }
    virtual string getValueForDisplayingInMenu() { return itos(mValue); }
    virtual const char *getUnits() { return mUnits.c_str(); }
-   virtual S32 getIntValue() { return mValue; }
+   virtual S32 getIntValue() const { return mValue; }
    virtual void setValue(const string &val) { mValue = atoi(val.c_str()); }
-   virtual string getValue() { return itos(mValue); }
+   virtual string getValue() const { return itos(mValue); }
    virtual void setIntValue(S32 val) { mValue = val; }
    virtual const char *getSpecialEditingInstructions() { return "Use [<-] and [->] keys to change value.  Use [Shift] for bigger change."; }
    virtual bool handleKey(KeyCode keyCode, char ascii);
@@ -309,7 +309,7 @@ public:
    virtual string getValueForWritingToLevelFile() { return mLineEditor.getString(); }
    virtual string getValueForDisplayingInMenu() { return mLineEditor.getString(); }
 
-   virtual string getValue() { return mLineEditor.getString(); } 
+   virtual string getValue() const { return mLineEditor.getString(); } 
    void setValue(const string &val) { mLineEditor.setString(val); }
 
    virtual void setFilter(LineEditor::LineEditorFilter filter) { mLineEditor.setFilter(filter); }

@@ -99,7 +99,7 @@ bool RabbitGameType::processArguments(S32 argc, const char **argv, Game *game)
       return false;
 
    mFlagReturnTimer = atoi(argv[2]) * 1000;
-   mFlagScoreTimer = U32(1.0f / atof(argv[3]) * 60 * 1000); // secs per point
+   setFlagScore(atoi(argv[3]));
 
    return true;
 }
@@ -107,19 +107,68 @@ bool RabbitGameType::processArguments(S32 argc, const char **argv, Game *game)
 
 string RabbitGameType::toString()
 {
-   return Parent::toString() + itos(U32(mFlagReturnTimer / 1000)) + itos(U32(1.0f / F32(mFlagScoreTimer) / 60.0f / 1000.0f));
+   return Parent::toString() + itos(U32(mFlagReturnTimer / 1000)) + itos(getFlagScore());
 }
 
 
-// Create some game-specific menu items for the GameParameters menu from the arguments processed above...
-void RabbitGameType::addGameSpecificParameterMenuItems(Vector<MenuItem *> &menuItems)
+// Any unique items defined here must be handled in both getMenuItem() and saveMenuItem() below!
+const char **RabbitGameType::getGameParameterMenuKeys()
 {
-   menuItems.push_back(new TimeCounterMenuItem("Game Time:", 8 * 60, 99*60, "Unlimited", "Time game will last"));
-   menuItems.push_back(new CounterMenuItem("Score to Win:", 60, 5, 5, 500, "points", "", "Game ends when one player or team gets this score"));
-   menuItems.push_back(new CounterMenuItem("Flag Return Timer:", 10, 1, 1, 99, "secs", "", "Time it takes for an uncaptured flag to return home"));
-   menuItems.push_back(new CounterMenuItem("Point Earn Rate:", 30, 1, 1, 99, "points per minute", "", "Rate player holding the flag accrues points"));
+    static const char *items[] = {
+      "Level Name",
+      "Level Descr",
+      "Level Credits",
+      "Levelgen Script",
+      "Game Time",
+      "Flag Return Time",   // <=== defined here
+      "Win Score",        
+      "Point Earn Rate",    // <=== defined here
+      "Grid Size",
+      "Min Players",
+      "Max Players",
+      "Allow Engr",
+      "" };
+
+      return items;
 }
- 
+
+
+// Definitions for those items
+boost::shared_ptr<MenuItem> RabbitGameType::getMenuItem(const char *key)
+{
+   if(!strcmp(key, "Flag Return Time"))
+   	return boost::shared_ptr<MenuItem>(new CounterMenuItem("Flag Return Timer:", mFlagReturnTimer / 1000, 1, 1, 99, 
+                                                             "secs", "", "Time it takes for an uncaptured flag to return home"));
+   else if(!strcmp(key, "Point Earn Rate"))
+      return boost::shared_ptr<MenuItem>(new CounterMenuItem("Point Earn Rate:", getFlagScore(), 1, 1, 99, 
+                                                             "points per minute", "", "Rate player holding the flag accrues points"));
+   else return Parent::getMenuItem(key);
+}
+
+
+bool RabbitGameType::saveMenuItem(const MenuItem *menuItem, const char *key)
+{
+   if(!strcmp(key, "Flag Return Time"))
+      mFlagReturnTimer = menuItem->getIntValue() * 1000;
+   else if(!strcmp(key, "Point Earn Rate"))
+      setFlagScore(menuItem->getIntValue());
+   else return Parent::saveMenuItem(menuItem, key);
+
+   return true;
+}
+
+
+void RabbitGameType::setFlagScore(S32 pointsPerMinute)     
+{
+   mFlagScoreTimer = U32(1.0f / F32(pointsPerMinute) * 60 * 1000);   // Convert to ms per point
+}
+
+
+S32 RabbitGameType::getFlagScore()     
+{
+   return S32(1.0f / F32(mFlagScoreTimer) / 60.0f / 1000.0f);        // Convert to points per minute
+}
+
 
 bool RabbitGameType::objectCanDamageObject(GameObject *damager, GameObject *victim)
 {
