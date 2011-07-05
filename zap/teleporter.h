@@ -74,6 +74,8 @@ public:
    U32 timeout;
    U32 mTime;
 
+   U32 mTeleporterDelay;
+
    static const S32 TELEPORTER_RADIUS = 75;  // Overall size of the teleporter
    virtual bool processArguments(S32 argc, const char **argv, Game *game);
    string toString();

@@ -54,6 +54,7 @@ Teleporter::Teleporter() : SimpleLine(TeleportType)
 
    timeout = 0;
    mTime = 0;
+   mTeleporterDelay = TeleporterDelay;
 }
 
 
@@ -82,8 +83,28 @@ void Teleporter::onAddedToGame(Game *theGame)
 }
 
 
-bool Teleporter::processArguments(S32 argc, const char **argv, Game *game)
+bool Teleporter::processArguments(S32 argc2, const char **argv2, Game *game)
 {
+   S32 argc = 0;
+   const char *argv[8];
+
+   for(S32 i = 0; i < argc2; i++)      // The idea here is to allow optional R3.5 for rotate at speed of 3.5
+   {
+      char firstChar = argv2[i][0];    // First character of arg
+
+      if(!strnicmp(argv2[i], "Delay=", 6))
+         mTeleporterDelay = U32(atof(&argv2[i][6]) * 1000);
+
+      if((firstChar < 'a' || firstChar > 'z') && (firstChar < 'A' || firstChar > 'Z'))    // firstChar is not a letter
+      {
+         if(argc < 8)
+         {  
+            argv[argc] = argv2[i];
+            argc++;
+         }
+      }
+   }
+
    if(argc != 4)
       return false;
 
@@ -147,10 +168,13 @@ U32 Teleporter::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
    {
       getVert(0).write(stream);
 
-      stream->write(mDests.size());
+      stream->writeInt(mDests.size(), 16);
 
       for(S32 i = 0; i < mDests.size(); i++)
          mDests[i].write(stream);
+
+      if(stream->writeFlag(mTeleporterDelay != TeleporterDelay))
+         stream->writeInt(mTeleporterDelay, 32);
    }
 
    if(stream->writeFlag((updateMask & TeleportMask) && !isInitial))    // Basically, this gets triggered if a ship passes through
@@ -161,24 +185,23 @@ U32 Teleporter::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
 
 void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
-   S32 count;
    if(stream->readFlag())
    {
+      U32 count;
       Point pos;
       pos.read(stream);
       setVert(pos, 0);
 
-      stream->read(&count);
-      mDests.clear();
+      count = stream->readInt(16);
+      mDests.resize(count);
 
-      Point p;    // Reusable container
-      for(S32 i = 0; i < count; i++)
-      {
-         p.read(stream);
-         mDests.push_back(p);
-      }
+      for(U32 i = 0; i < count; i++)
+         mDests[i].read(stream);
       
       setExtent(Rect(pos, TELEPORTER_RADIUS));
+
+      if(stream->readFlag())
+         mTeleporterDelay = stream->readInt(32);
    }
 
    if(stream->readFlag() && isGhost())
@@ -190,7 +213,7 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
       SoundSystem::playSoundEffect(SFXTeleportIn, mDests[dest], Point());
 
       SoundSystem::playSoundEffect(SFXTeleportOut, getVert(0), Point());
-      timeout = TeleporterDelay;
+      timeout = mTeleporterDelay;
    }
 }
 
@@ -228,7 +251,7 @@ void Teleporter::idle(GameObject::IdleCallPath path)
       if((pos - s->getActualPos()).len() < TeleporterTriggerRadius)
       {
          isTriggered = true;
-         timeout = TeleporterDelay;    // Temporarily disable teleporter
+         timeout = mTeleporterDelay;    // Temporarily disable teleporter
          // break; <=== maybe, need to test
       }
    }
@@ -261,12 +284,15 @@ inline Point polarToRect(Point p)
 void Teleporter::render()
 {
    F32 r;
-   if(timeout > TeleporterExpandTime)
-      r = (timeout - TeleporterExpandTime) / F32(TeleporterDelay - TeleporterExpandTime);
-   else
+   if(timeout > TeleporterExpandTime - TeleporterDelay + mTeleporterDelay)
+      r = (timeout - TeleporterExpandTime + TeleporterDelay - mTeleporterDelay) / F32(TeleporterDelay - TeleporterExpandTime);
+   else if(timeout < TeleporterExpandTime)
       r = F32(TeleporterExpandTime - timeout) / F32(TeleporterExpandTime);
+   else
+      r = 0;
 
-   renderTeleporter(getVert(0), 0, true, mTime, r, TELEPORTER_RADIUS, 1.0, mDests, false);
+   if(r != 0)
+      renderTeleporter(getVert(0), 0, true, mTime, r, TELEPORTER_RADIUS, 1.0, mDests, false);
 }
 
 

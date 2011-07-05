@@ -323,21 +323,44 @@ SoccerBallItem *SoccerBallItem::clone() const
 const char SoccerBallItem::className[] = "SoccerBallItem";      // Class name as it appears to Lua scripts
 
 
-bool SoccerBallItem::processArguments(S32 argc, const char **argv, Game *game)
+bool SoccerBallItem::processArguments(S32 argc2, const char **argv2, Game *game)
 {
+   S32 argc = 0;
+   const char *argv[16];
+
+   GameType *gameType = game->getGameType();
+   TNLAssert(gameType, "Blech!");
+   mAllowPickup = gameType->isSoccerPickupAllowed();
+
+   for(S32 i = 0; i < argc2; i++)      // The idea here is to allow optional R3.5 for rotate at speed of 3.5
+   {
+      char firstChar = argv2[i][0];    // First character of arg
+
+      if(!stricmp(argv2[i], "Pickup=yes"))
+         mAllowPickup = true;
+      else if(!stricmp(argv2[i], "Pickup=no"))
+         mAllowPickup = false;
+
+      if((firstChar < 'a' || firstChar > 'z') && (firstChar < 'A' || firstChar > 'Z'))    // firstChar is not a letter
+      {
+         if(argc < 16)
+         {  
+            argv[argc] = argv2[i];
+            argc++;
+         }
+      }
+   }
+
    if(!Parent::processArguments(argc, argv, game))
       return false;
 
    initialPos = mMoveState[ActualState].pos;
 
-   GameType *gameType = getGame()->getGameType();
-   TNLAssert(gameType, "Blech!");
 
    // Add the ball's starting point to the list of flag spawn points
    gameType->addFlagSpawn(FlagSpawn(initialPos, 0));
 
 
-   mAllowPickup = gameType->isSoccerPickupAllowed();
 
    return true;
 }
