@@ -183,11 +183,11 @@ void Point::write(TNL::BitStream *stream)
 }
 
 
+extern std::string ftos(F32);     // In stringUtils.cpp
+
 std::string Point::toString()
 {
-   char outString[100];
-   dSprintf(outString, sizeof(outString), "%2.5f %2.5f", x, y);
-   return outString;
+   return ftos(x) + " " + ftos(y);
 }
 
 };	// namespace

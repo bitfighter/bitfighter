@@ -94,14 +94,8 @@ string itos(S64 i)
 }
 
 
-string ftos(F32 f, S32 digits)
+string stripZeros(string str)
 {
-   char outString[100];
-   dSprintf(outString, sizeof(outString), (string("%2.") + itos(digits) + "f").c_str(), f);
-
-   // Strip any trailing zeros -- there may be more efficient ways of doing this
-   string str(outString);
-
    while(str[str.length() - 1]  == '0')
       str.erase(str.length() - 1);
 
@@ -112,11 +106,21 @@ string ftos(F32 f, S32 digits)
 }
 
 
+string ftos(F32 f, S32 digits)
+{
+   char outString[100];
+   dSprintf(outString, sizeof(outString), (string("%2.") + itos(digits) + "f").c_str(), f);
+
+   return stripZeros(outString);
+}
+
+
 string ftos(F32 f)
 {
    char outString[100];
-   dSprintf(outString, sizeof(outString),  "%f", f);
-   return outString;
+   dSprintf(outString, sizeof(outString), "%f", f);
+
+   return stripZeros(outString);
 }
 
 

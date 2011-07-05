@@ -2925,6 +2925,8 @@ extern string itos(U64);
 
 extern string ftos(F32, S32);
 
+extern string stripZeros(string str);
+
 // Handle key presses
 void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 {
