@@ -351,8 +351,11 @@ bool SoccerBallItem::processArguments(S32 argc2, const char **argv2, Game *game)
    const char *argv[16];
 
    GameType *gameType = game->getGameType();
-   TNLAssert(gameType, "Blech!");
-   mAllowPickup = gameType->isSoccerPickupAllowed();
+
+   SoccerGameType *sgt = dynamic_cast<SoccerGameType *>(gameType);
+   TNLAssert(sgt, "Blech!");
+
+   mAllowPickup = sgt->isSoccerPickupAllowed();
 
    for(S32 i = 0; i < argc2; i++)      // The idea here is to allow optional R3.5 for rotate at speed of 3.5
    {
@@ -378,13 +381,9 @@ bool SoccerBallItem::processArguments(S32 argc2, const char **argv2, Game *game)
 
    initialPos = mMoveState[ActualState].pos;
 
-   GameType *gameType = getGame()->getGameType();
-   TNLAssert(gameType, "Blech!");
-
    // Add the ball's starting point to the list of flag spawn points
    gameType->addFlagSpawn(FlagSpawn(initialPos, 0));
 
-   SoccerGameType *sgt = dynamic_cast<SoccerGameType *>(gameType);
    if(sgt)
       mAllowPickup = sgt->isSoccerPickupAllowed();
    else
