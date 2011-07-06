@@ -304,6 +304,33 @@ bool GameType::saveMenuItem(const MenuItem *menuItem, const char *key)
 }
 
 
+bool GameType::processSpecialsParam(const char *param)
+{
+   if(!stricmp(param, "Engineer"))
+      setEngineerEnabled(true);
+   else if(!stricmp(param, "NoBots"))
+      setBotsAllowed(false);
+   else
+      return false;
+
+   return true;
+}
+
+
+string GameType::getSpecialsLine()
+{
+   string specialsLine = "Specials";
+
+   if(isEngineerEnabled())
+      specialsLine += " Engineer";
+
+   if(!areBotsAllowed())
+      specialsLine += " NoBots";
+
+   return specialsLine;
+}
+
+
 string GameType::getScriptLine() const
 {
    string str;

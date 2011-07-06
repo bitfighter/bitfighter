@@ -139,7 +139,6 @@ private:
 
    bool mEngineerEnabled;
    bool mBotsAllowed;
-   bool mSoccerPickupAllowed;
 
    // Info about current level
    StringTableEntry mLevelName;
@@ -352,6 +351,9 @@ public:
    virtual boost::shared_ptr<MenuItem> getMenuItem(const char *key);
    virtual bool saveMenuItem(const MenuItem *menuItem, const char *key);
 
+   virtual bool processSpecialsParam(const char *param);
+   virtual string getSpecialsLine();
+
 
    const StringTableEntry *getLevelName() const { return &mLevelName; }
    void setLevelName(const StringTableEntry &levelName) { mLevelName = levelName; }
@@ -374,9 +376,6 @@ public:
    bool areBotsAllowed() { return mBotsAllowed; }
    void setBotsAllowed(bool allowed) { mBotsAllowed = allowed; }
    
-   bool isSoccerPickupAllowed() { return mSoccerPickupAllowed; }
-   void setSoccerPickupAllowed(bool allowed) { mSoccerPickupAllowed = allowed; }
-
    string getScriptLine() const;
    void setScript(const Vector<string> &args);
 

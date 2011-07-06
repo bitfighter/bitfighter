@@ -97,6 +97,28 @@ TNL_IMPLEMENT_NETOBJECT_RPC(SoccerGameType, s2cSoccerScoreMessage,
 }
 
 
+bool SoccerGameType::processSpecialsParam(const char *param)
+{
+   if(!strcmp(param, "SoccerPickup"))
+      mSoccerPickupAllowed = true;
+   else
+      return Parent::processSpecialsParam(param);
+
+   return true;
+}
+
+
+string SoccerGameType::getSpecialsLine()
+{
+   string specialsLine = Parent::getSpecialsLine();
+
+   if(mSoccerPickupAllowed)
+      return specialsLine + " SoccerPickup";
+   //else
+      return specialsLine;
+}
+
+
 void SoccerGameType::addZone(GoalZone *theZone)
 {
    mGoals.push_back(theZone);
@@ -320,6 +342,7 @@ SoccerBallItem *SoccerBallItem::clone() const
    return new SoccerBallItem(*this);
 }
 
+
 const char SoccerBallItem::className[] = "SoccerBallItem";      // Class name as it appears to Lua scripts
 
 
@@ -336,8 +359,14 @@ bool SoccerBallItem::processArguments(S32 argc, const char **argv, Game *game)
    // Add the ball's starting point to the list of flag spawn points
    gameType->addFlagSpawn(FlagSpawn(initialPos, 0));
 
-
-   mAllowPickup = gameType->isSoccerPickupAllowed();
+   SoccerGameType *sgt = dynamic_cast<SoccerGameType *>(gameType);
+   if(sgt)
+      mAllowPickup = sgt->isSoccerPickupAllowed();
+   else
+   {
+      TNLAssert(false, "How did we get here???");
+      mAllowPickup = false;
+   }
 
    return true;
 }

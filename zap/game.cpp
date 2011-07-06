@@ -63,6 +63,9 @@
 #include <math.h>
 
 
+#include "soccerGame.h"
+
+
 using namespace TNL;
 
 namespace Zap
@@ -400,10 +403,7 @@ string Game::toString()
    for(S32 i = 0; i < mTeams.size(); i++)
       str += mTeams[i]->toString() + "\n";
 
-   str += string("Specials") + (gameType->isEngineerEnabled() ? " Engineer" : "") + (!gameType->areBotsAllowed() ? " NoBots" : "") + "\n";
-
-   if(gameType->isSoccerPickupAllowed())
-      str += "SoccerPickup\n";
+   str += gameType->getSpecialsLine() + "\n";
 
    if(gameType->getScriptName() != "")
       str += "Script " + gameType->getScriptLine() + "\n";
@@ -445,30 +445,33 @@ void Game::onReadTeamChangeParam(S32 argc, const char **argv)
 
 void Game::onReadSpecialsParam(S32 argc, const char **argv)
 {         
-   // Examine items on the specials line
    for(S32 i = 1; i < argc; i++)
-   {
-      if(!stricmp(argv[i], "Engineer" ) )
-         getGameType()->setEngineerEnabled(true);
-
-      else if(!stricmp(argv[i], "NoBots" ) )
-         getGameType()->setBotsAllowed(false);
-   }
+      if(!getGameType()->processSpecialsParam(argv[i]))
+         logprintf(LogConsumer::MsgType::LogWarning, "Invalid specials parameter: %s", argv[i]);
 }
 
 
 void Game::onReadSoccerPickupParam(S32 argc, const char **argv)
 {
+   logprintf(LogConsumer::LogWarning, "Level uses deprecated SoccerPickup line... parameter will be removed in 017!");
+
    if(argc < 2)
    {
-      logprintf(LogConsumer::LogWarning, "Improperly formed SoccerPickup parameter");
+      logprintf(LogConsumer::LogWarning, "Improperly formed (and deprecated!!) SoccerPickup parameter");
+      return;
    }
-   getGameType()->setSoccerPickupAllowed(
-      !stricmp(argv[1], "yes") ||
-      !stricmp(argv[1], "enable") ||
-      !stricmp(argv[1], "on") ||
-      !stricmp(argv[1], "activate") ||
-      !stricmp(argv[1], "1") );
+
+   SoccerGameType *sgt = dynamic_cast<SoccerGameType *>(getGameType());
+
+   if(sgt)
+   {
+      sgt->setSoccerPickupAllowed(
+         !stricmp(argv[1], "yes") ||
+         !stricmp(argv[1], "enable") ||
+         !stricmp(argv[1], "on") ||
+         !stricmp(argv[1], "activate") ||
+         !stricmp(argv[1], "1") );
+   }
 }
 
 

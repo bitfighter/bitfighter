@@ -50,6 +50,8 @@ XXX need to document timers, new luavec stuff XXX
 <h2>Bug Fixes</h2>
 <ul>
 <li>Fix team bitmatch suicide score. 
+<li>Deprecated SoccerPickup parameter -- now stored as an option on the Specials line.  Will be completely removed in 017.  Easiest fix is to load
+    level into editor and save; parameter will be properly rewritten.
 </ul>
 */
 
