@@ -135,7 +135,7 @@ LuaTeamInfo::LuaTeamInfo(Team *team)
 
    const char *teamName = team->getName().getString();
 
-   Vector<shared_ptr<Team> > teams = gServerGame->getTeamCount();
+   Vector<boost::shared_ptr<Team> > teams = gServerGame->getTeamCount();
 
    for(S32 i = 0; i < gServerGame->getTeamCount(); i++)
       if(!strcmp(gServerGame->getTeam(i)->getName().getString(), teamName))
