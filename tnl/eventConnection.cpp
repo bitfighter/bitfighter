@@ -257,12 +257,13 @@ void EventConnection::writePacket(BitStream *bstream, PacketNotify *pnotify)
    Parent::writePacket(bstream, pnotify);
    EventPacketNotify *notify = static_cast<EventPacketNotify *>(pnotify);
    
+   bool have_something_to_send = bstream->getBitPosition() >= 128;
+
    if(mConnectionParameters.mDebugObjectSizes)
       bstream->writeInt(DebugChecksum, 32);
 
    EventNote *packQueueHead = NULL, *packQueueTail = NULL;
 
-   bool have_something_to_send = false;
    while(mUnorderedSendEventQueueHead)
    {
       if(bstream->isFull())
