@@ -46,6 +46,7 @@ private:
 
 
 public:
+   SoccerGameType();
    bool processSpecialsParam(const char *param);
    string getSpecialsLine();
 

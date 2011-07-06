@@ -34,8 +34,11 @@
 namespace Zap
 {
 
-class Ship;
-class SoccerBallItem;
+SoccerGameType::SoccerGameType()
+{
+   mSoccerPickupAllowed = false;   // make sure it is always false
+}
+
 
 TNL_IMPLEMENT_NETOBJECT(SoccerGameType);
 
@@ -353,9 +356,9 @@ bool SoccerBallItem::processArguments(S32 argc2, const char **argv2, Game *game)
    GameType *gameType = game->getGameType();
 
    SoccerGameType *sgt = dynamic_cast<SoccerGameType *>(gameType);
-   TNLAssert(sgt, "Blech!");
+   TNLAssert(sgt, "Blech! sgt is NULL, not SoccerGameType");
 
-   mAllowPickup = sgt->isSoccerPickupAllowed();
+   mAllowPickup = sgt ? sgt->isSoccerPickupAllowed() : false;  // to avoid error on non-soccer game type
 
    for(S32 i = 0; i < argc2; i++)      // The idea here is to allow optional R3.5 for rotate at speed of 3.5
    {
@@ -383,14 +386,6 @@ bool SoccerBallItem::processArguments(S32 argc2, const char **argv2, Game *game)
 
    // Add the ball's starting point to the list of flag spawn points
    gameType->addFlagSpawn(FlagSpawn(initialPos, 0));
-
-   if(sgt)
-      mAllowPickup = sgt->isSoccerPickupAllowed();
-   else
-   {
-      TNLAssert(false, "How did we get here???");
-      mAllowPickup = false;
-   }
 
    return true;
 }
