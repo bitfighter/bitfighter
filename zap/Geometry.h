@@ -111,7 +111,7 @@ public:
    ~PointGeometry() {  /* TNLAssert(false, "deleting!");*/ }      // Destructor
 
    GeomType getGeomType() { return geomPoint; }
-   Point getVert(S32 index) { return mPos; }
+   virtual Point getVert(S32 index) { return mPos; }
    void setVert(const Point &pos, S32 index) { mPos = pos; }
 
    S32 getVertCount() { return 1; }

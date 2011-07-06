@@ -108,7 +108,7 @@ public:
 
    /////
    // Editor stuff
-   Point getVert(S32 index) { return mAnchorPoint; }
+   Point getVert(S32 index) const { return mAnchorPoint; }
    void setVert(const Point &pos, S32 index) { mAnchorPoint = pos; }
    
    string toString();
