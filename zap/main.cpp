@@ -50,8 +50,12 @@ XXX need to document timers, new luavec stuff XXX
 <h2>Bug Fixes</h2>
 <ul>
 <li>Fix team bitmatch suicide score. 
+<li>Teleporter, added Delay option in levels for teleporters
+<li>SoccerBallItem, added individual Pickup=yes or no
 <li>Deprecated SoccerPickup parameter -- now stored as an option on the Specials line.  Will be completely removed in 017.  Easiest fix is to load
     level into editor and save; parameter will be properly rewritten.
+<li>Reduced CPU usage for overlapping asteroids
+<li>LUA added copyMoveFromObject, LUA getCurrLoaduot and getReqLoadout can now be used for ships
 </ul>
 */
 
