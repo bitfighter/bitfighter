@@ -2141,12 +2141,16 @@ GAMETYPE_RPC_S2C(GameType, s2cRemoveClient, (StringTableEntry name), (name))
 }
 
 
-GAMETYPE_RPC_S2C(GameType, s2cAddTeam, (StringTableEntry teamName, F32 r, F32 g, F32 b), (teamName, r, g, b))
+GAMETYPE_RPC_S2C(GameType, s2cAddTeam, (StringTableEntry teamName, F32 r, F32 g, F32 b, U32 score, bool firstTeam), (teamName, r, g, b, score, firstTeam))
 {
+   if(firstTeam)
+      mGame->clearTeams();
+
    boost::shared_ptr<Team> team = boost::shared_ptr<Team>(new Team);
 
    team->setName(teamName);
    team->setColor(r,g,b);
+   team->setScore(score);
 
    mGame->addTeam(team);
 }
@@ -2270,8 +2274,7 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
       Team *team = (Team *)mGame->getTeam(i);
       const Color *color = team->getColor();
 
-      s2cAddTeam(team->getName(), color->r, color->g, color->b);
-      s2cSetTeamScore(i, team->getScore());
+      s2cAddTeam(team->getName(), color->r, color->g, color->b, team->getScore(), i == 0);
    }
 
    // Add all the client and team information

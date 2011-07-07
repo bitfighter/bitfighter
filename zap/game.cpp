@@ -759,6 +759,7 @@ void Game::cleanUp()
       mDatabase->removeFromDatabase(fillVector[i], fillVector[i]->getExtent());
       delete dynamic_cast<Object *>(fillVector[i]); // dynamic_cast might be needed to avoid errors.
    }
+   mTeams.resize(0);
 }
 
 

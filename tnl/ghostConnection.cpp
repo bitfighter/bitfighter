@@ -324,7 +324,7 @@ void GhostConnection::writePacket(BitStream *bstream, PacketNotify *pnotify)
    bstream->writeInt(sendSize - 3, 3); // 0-7 3 bit number
 
    U32 count = 0;
-   bool have_something_to_send = false;
+   bool have_something_to_send = bstream->getBitPosition() >= 256;
    for(S32 i = mGhostZeroUpdateIndex - 1; i >= 0 && !bstream->isFull(); i--)
    {
       GhostInfo *walk = mGhostArray[i];
