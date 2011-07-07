@@ -460,9 +460,8 @@ void EngineeredObject::computeExtent()
 {
    Vector<Point> v;
    getCollisionPoly(v);
-   Rect r(v);
 
-   setExtent(r);
+   setExtent(Rect(v));
 }
 
 
@@ -734,6 +733,7 @@ bool ForceFieldProjector::getCollisionPoly(Vector<Point> &polyPoints) const
    getGeom(mAnchorPoint, mAnchorNormal, polyPoints);
    return true;
 }
+
 
 Vector<Point> ForceFieldProjector::getBufferForBotZone()
 {

@@ -151,9 +151,7 @@ void BotNavMeshZone::addToGame(Game *game)
    // the way an ordinary game object would be.  So we won't.
    mGame = game;
    
-   Vector<Point> polyPoints;
-   getCollisionPoly(polyPoints);
-   setExtent(Rect(polyPoints));
+   setExtent();
    addToDatabase();
 }
 

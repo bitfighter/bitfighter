@@ -75,7 +75,6 @@ void BfObject::removeFromGame()
 }
 
 
-
 bool BfObject::getCollisionPoly(Vector<Point> &polyPoints) const
 {
    return false;
