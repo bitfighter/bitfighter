@@ -229,11 +229,11 @@ public:
    virtual const char *getOnDockName() = 0;
    virtual const char *getOnScreenName() = 0;
 
-   virtual const char *getClassName() = 0;
+   virtual const char *getClassName() const = 0;
 
    virtual S32 getDefaultRespawnTime() = 0;
 
-   virtual string toString();
+   virtual string toString(F32 gridSize) const;
 
    Point getPos() const { return getVert(0); }     // For readability 
 
@@ -260,10 +260,10 @@ public:
    const char *getOnDockName() { return "Spawn"; }
    const char *getOnScreenName() { return "Spawn"; }
 
-   const char *getClassName() { return "Spawn"; }
+   const char *getClassName() const { return "Spawn"; }
 
    bool processArguments(S32 argc, const char **argv, Game *game);
-   string toString();
+   string toString(F32 gridSize) const;
 
    S32 getDefaultRespawnTime() { return 0; }    // Somewhat meaningless in this context
 
@@ -291,7 +291,7 @@ public:
    const char *getOnDockName() { return "ASP"; }
    const char *getOnScreenName() { return "AsteroidSpawn"; }
 
-   const char *getClassName() { return "AsteroidSpawn"; }
+   const char *getClassName() const { return "AsteroidSpawn"; }
 
    S32 getDefaultRespawnTime() { return DEFAULT_RESPAWN_TIME; }
 
@@ -319,7 +319,7 @@ public:
    const char *getOnDockName() { return "FlagSpawn"; }
    const char *getOnScreenName() { return "FlagSpawn"; }
 
-   const char *getClassName() { return "FlagSpawn"; }
+   const char *getClassName() const { return "FlagSpawn"; }
 
    S32 getDefaultRespawnTime() { return DEFAULT_RESPAWN_TIME; }
 

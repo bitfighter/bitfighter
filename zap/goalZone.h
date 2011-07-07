@@ -78,7 +78,7 @@ public:
    const char *getPrettyNamePlural() { return "Goal zones"; }
    const char *getOnDockName() { return "Goal"; }
    const char *getOnScreenName() { return "Goal"; }
-   string toString();
+   string toString(F32 gridSize) const;
 
    void renderEditor(F32 currentScale);
    void renderDock();

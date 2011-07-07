@@ -87,7 +87,7 @@ public:
    S32 selectedIndex;          // Highlighted menu item
    S32 changingItem;           // Index of key we're changing (in keyDef mode), -1 otherwise
 
-   void updateMenuItems(GameType *gameType);
+   void updateMenuItems(Game *game);
 
    Vector<SavedMenuItem> savedMenuItems;   
 

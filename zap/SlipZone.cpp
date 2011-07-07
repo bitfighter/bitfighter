@@ -112,9 +112,9 @@ bool SlipZone::processArguments(S32 argc2, const char **argv2, Game *game)
 }
 
 
-string SlipZone::toString()
+string SlipZone::toString(F32 gridSize) const
 {
-   return string(getClassName()) + " " + ftos(slipAmount, 3) + " " + geomToString(getGame()->getGridSize());
+   return string(getClassName()) + " " + ftos(slipAmount, 3) + " " + geomToString(gridSize);
 }
 
 

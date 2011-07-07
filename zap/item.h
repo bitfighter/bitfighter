@@ -80,7 +80,7 @@ public:
    void idle(GameObject::IdleCallPath path);
 
    bool processArguments(S32 argc, const char **argv, Game *game);
-   string toString();
+   string toString(F32 gridSize) const;
 
    virtual U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    virtual void unpackUpdate(GhostConnection *connection, BitStream *stream);
@@ -161,7 +161,7 @@ public:
    EditorItem(Point p = Point(0,0), bool collideable = false, float radius = 1, float mass = 1);   // Constructor
 
    // Some properties about the item that will be needed in the editor
-   string toString();
+   string toString(F32 gridSize) const;
 
    virtual void renderEditor(F32 currentScale);
    virtual F32 getEditorRadius(F32 currentScale);
@@ -191,7 +191,7 @@ public:
    PickupItem(Point p = Point(), float radius = 1, S32 repopDelay = 20000);      // Constructor
 
    bool processArguments(S32 argc, const char **argv, Game *game);
-   string toString();
+   string toString(F32 gridSize) const;
 
    void idle(GameObject::IdleCallPath path);
    bool isVisible() { return mIsVisible; }

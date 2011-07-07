@@ -362,9 +362,9 @@ Color EditorObject::getDrawColor()
 }
 
 
-void EditorObject::saveItem(FILE *f)
+void EditorObject::saveItem(FILE *f, F32 gridSize)
 {
-   s_fprintf(f, "%s\n", toString().c_str());
+   s_fprintf(f, "%s\n", toString(gridSize).c_str());
 }
 
 

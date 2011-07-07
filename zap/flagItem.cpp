@@ -139,12 +139,9 @@ bool FlagItem::processArguments(S32 argc, const char **argv, Game *game)
 }
 
 
-string FlagItem::toString()
+string FlagItem::toString(F32 gridSize) const
 {
-   Point pos = getVert(0) / getGame()->getGridSize();
-   char outString[LevelLoader::MAX_LEVEL_LINE_LENGTH];
-   dSprintf(outString, sizeof(outString), "%s %d %g %g", Object::getClassName(), mTeam, pos.x, pos.y);
-   return outString;
+   return string(getClassName()) + " " + itos(mTeam) + " " + geomToString(gridSize);
 }
 
 

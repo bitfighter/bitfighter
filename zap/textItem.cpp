@@ -158,13 +158,9 @@ bool TextItem::processArguments(S32 argc, const char **argv, Game *game)
 }
 
 
-string TextItem::toString()
+string TextItem::toString(F32 gridSize) const
 {
-   F32 gs = getGame()->getGridSize();
-   Point pos = getVert(0) / gs;
-   Point dir = getVert(1) / gs;
-
-   return string(getClassName()) + " " + itos(mTeam) + " " + pos.toString() + " " + dir.toString() + " " + ftos(mSize, 3) + " " + mText;
+   return string(getClassName()) + " " + itos(mTeam) + " " + geomToString(gridSize) + " " + ftos(mSize, 3) + " " + mText;
 }
 
 
@@ -411,9 +407,9 @@ bool LineItem::processArguments(S32 argc, const char **argv, Game *game)
 }
 
 
-string LineItem::toString()
+string LineItem::toString(F32 gridSize) const
 {
-   return string(getClassName()) + " " + itos(mTeam) + " " + itos(getWidth()) + " " + geomToString(getGame()->getGridSize());
+   return string(getClassName()) + " " + itos(mTeam) + " " + itos(getWidth()) + " " + geomToString(gridSize);
 }
 
 

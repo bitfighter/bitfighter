@@ -392,9 +392,9 @@ bool SoccerBallItem::processArguments(S32 argc2, const char **argv2, Game *game)
 
 
 // Yes, this method is superfluous, but makes it clear that it wasn't forgotten... always include toString() alongside processArguments()!
-string SoccerBallItem::toString()
+string SoccerBallItem::toString(F32 gridSize) const
 {
-   return Parent::toString();
+   return Parent::toString(gridSize);
 }
 
 

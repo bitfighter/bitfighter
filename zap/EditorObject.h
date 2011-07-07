@@ -135,8 +135,8 @@ public:
    virtual const char *getVertLabel(S32 index) { return ""; }     // Label for vertex, if any... only overridden by SimpleLine objects
 
 
-   void saveItem(FILE *f);
-   virtual string toString() = 0; 
+   void saveItem(FILE *f, F32 gridSize);
+   virtual string toString(F32 gridSize) const = 0; 
 
    Vector<Point> extendedEndPoints;                            // these are computed but not stored in barrier... not sure how to merge
 
@@ -155,7 +155,7 @@ public:
    void decreaseWidth(S32 amt);  // Wall only
    void increaseWidth(S32 amt);  // Wall only
    void setWidth(S32 width);
-   S32 getWidth() { return mWidth; }
+   S32 getWidth() const { return mWidth; }
    ////
 
    void moveTo(const Point &pos, S32 snapVertex = 0);    // Move object to location, specifying (optional) vertex to be positioned at pos

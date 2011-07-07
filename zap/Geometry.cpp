@@ -54,10 +54,10 @@ Rect PointGeometry::getExtents()
 }
 
 
-string PointGeometry::geomToString(F32 gridSize)
+string PointGeometry::geomToString(F32 gridSize) const
 {
-   Point pos = mPos / gridSize;
-   return pos.toString();
+   Point pos = mPos; 
+   return (pos / gridSize).toString();
 }
 
 
@@ -108,12 +108,12 @@ Rect SimpleLineGeometry::getExtents()
 }
 
 
-string SimpleLineGeometry::geomToString(F32 gridSize)
+string SimpleLineGeometry::geomToString(F32 gridSize) const
 {
-   Point fromPos = mFromPos / gridSize;
-   Point toPos = mToPos / gridSize;
+   Point fromPos = mFromPos;
+   Point toPos = mToPos;
 
-   return fromPos.toString() + " " + toPos.toString();
+   return (fromPos / gridSize).toString() + " " + (toPos / gridSize).toString();
 }
 
 
@@ -311,7 +311,7 @@ Rect PolylineGeometry::getExtents()
 }
 
 
-string PolylineGeometry::geomToString(F32 gridSize)
+string PolylineGeometry::geomToString(F32 gridSize) const
 {
    string bounds = "";
    S32 size = mPolyBounds.size();
@@ -319,7 +319,8 @@ string PolylineGeometry::geomToString(F32 gridSize)
    Point p;
    for(S32 i = 0; i < size; i++)
    {
-      p = mPolyBounds[i] / gridSize;
+      p = mPolyBounds[i];
+      p /= gridSize;
       bounds += p.toString() + (i < size - 1 ? " " : "");
    }
 

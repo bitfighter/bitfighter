@@ -131,7 +131,7 @@ void Rect::set(const Point &p, member_type size)
 }
 
 // Rect contains the point
-bool Rect::contains(const Point &p)
+bool Rect::contains(const Point &p) const
 {
    return p.x >= min.x && p.x <= max.x && p.y >= min.y && p.y <= max.y;
 }
@@ -169,7 +169,7 @@ bool Rect::intersectsOrBorders(const Rect &r)
 
 
 // Does rect intersect line defined by p1 and p2?
-bool Rect::intersects(const Point &p1, const Point &p2)
+bool Rect::intersects(const Point &p1, const Point &p2) const
 {
    return ( segmentsIntersect(p1, p2, Point(min.x, min.y), Point(min.x, max.y)) ||
          segmentsIntersect(p1, p2, Point(min.x, max.y), Point(max.x, max.y)) ||
@@ -200,12 +200,12 @@ void Rect::offset(const Point &offset)
    max += offset;
 }
 
-F32 Rect::getWidth()
+F32 Rect::getWidth() const
 {
    return max.x - min.x;
 }
 
-F32 Rect::getHeight()
+F32 Rect::getHeight() const
 {
    return max.y - min.y;
 }

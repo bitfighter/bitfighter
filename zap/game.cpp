@@ -447,7 +447,7 @@ void Game::onReadSpecialsParam(S32 argc, const char **argv)
 {         
    for(S32 i = 1; i < argc; i++)
       if(!getGameType()->processSpecialsParam(argv[i]))
-         logprintf(LogConsumer::MsgType::LogWarning, "Invalid specials parameter: %s", argv[i]);
+         logprintf(LogConsumer::LogWarning, "Invalid specials parameter: %s", argv[i]);
 }
 
 

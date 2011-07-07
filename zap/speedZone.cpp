@@ -256,14 +256,9 @@ bool SpeedZone::processArguments(S32 argc2, const char **argv2, Game *game)
 
 
 // Editor
-string SpeedZone::toString()
+string SpeedZone::toString(F32 gridSize) const
 {
-   F32 gs = getGame()->getGridSize();
-
-   Point pos = getVert(0) / gs;
-   Point dir = getVert(1) / gs;
-
-   return string(getClassName()) + " " + pos.toString() + " " + dir.toString() + " " + itos(mSpeed);
+   return string(getClassName()) + " " + geomToString(gridSize) + " " + itos(mSpeed);
 }
 
 

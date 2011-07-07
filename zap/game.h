@@ -220,7 +220,7 @@ public:
 
    void deleteObjects(U32 typeMask);
 
-   F32 getGridSize() { return mGridSize; }
+   F32 getGridSize() const { return mGridSize; }
    void setGridSize(F32 gridSize);
 
    static Point getScopeRange(bool sensorIsActive) { return sensorIsActive ? Point(PLAYER_SENSOR_VISUAL_DISTANCE_HORIZONTAL + PLAYER_SCOPE_MARGIN,

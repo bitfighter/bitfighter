@@ -239,7 +239,7 @@ public:
    void packGeom(GhostConnection *connection, BitStream *stream) { mGeometry->packGeom(connection, stream); }
    void unpackGeom(GhostConnection *connection, BitStream *stream) { mGeometry->unpackGeom(connection, stream); }
 
-   string geomToString(F32 gridSize) { return mGeometry->geomToString(gridSize); }
+   string geomToString(F32 gridSize) const { return mGeometry->geomToString(gridSize); }
    void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize) { mGeometry->readGeom(argc, argv, firstCoord, gridSize); }
 
 

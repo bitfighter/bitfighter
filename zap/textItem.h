@@ -68,7 +68,7 @@ public:
    S32 getRenderSortValue();
 
    bool processArguments(S32 argc, const char **argv, Game *game);  // Create objects from parameters stored in level file
-   string toString();
+   string toString(F32 gridSize) const;
 
    void onAddedToGame(Game *theGame);  
    void computeExtent();                                            // Bounding box for quick collision-possibility elimination
@@ -152,7 +152,7 @@ public:
  
    /////
    // Editor methods
-   string toString();
+   string toString(F32 gridSize) const;
    void renderEditor(F32 currentScale);
 
    // Some properties about the item that will be needed in the editor

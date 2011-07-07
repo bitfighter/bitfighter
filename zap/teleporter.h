@@ -78,7 +78,7 @@ public:
 
    static const S32 TELEPORTER_RADIUS = 75;  // Overall size of the teleporter
    virtual bool processArguments(S32 argc, const char **argv, Game *game);
-   string toString();
+   string toString(F32 gridSize) const;
 
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);

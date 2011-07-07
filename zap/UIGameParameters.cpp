@@ -63,7 +63,7 @@ GameParamUserInterface::GameParamUserInterface() : MenuUserInterface()
 void GameParamUserInterface::onActivate()
 {
    selectedIndex = 0;                            // First item selected when we begin
-   updateMenuItems(gEditorGame->getGameType());
+   updateMenuItems(gEditorGame);
    origGameParams = gEditorGame->toString();     // Save a copy of the params coming in for comparison when we leave to see what changed
    SDL_ShowCursor(SDL_DISABLE);
 }
@@ -78,8 +78,7 @@ static void changeGameTypeCallback(U32 gtIndex)
    TNL::Object *theObject = TNL::Object::create(gGameTypeNames[gtIndex]);   // Instantiate our gameType object
    GameType *gt = dynamic_cast<GameType *>(theObject);                      // and cast it to GameType
 
-   gEditorGame->setGameType(gt);
-   gGameParamUserInterface.updateMenuItems(gt);
+   gGameParamUserInterface.updateMenuItems(gEditorGame);
 }
 
 
@@ -102,31 +101,6 @@ static void buildGameTypeList()
 }
 
 
-// Simply breaks down gameParams into a map that looks like paramName, paramValue
-// First word is assumed to be the name, rest of the line is the value
-//static map<string,string> makeParamMap(const Vector<string> &gameParams)
-//{
-//   map<string,string> paramMap;
-//
-//   const string delimiters = " \t";       // Spaces or tabs delimit our lines
-//
-//   for(S32 i = 0; i < gameParams.size(); i++)
-//   {
-//      string str = gameParams[i];
-//      string::size_type lastPos = str.find_first_not_of(delimiters, 0);    // Skip any leading delimiters
-//      string::size_type pos     = str.find_first_of(delimiters, lastPos);  // Find first "non-delimiter"
-//
-//      string key = str.substr(lastPos, pos - lastPos);
-//      lastPos = min(str.find_first_not_of(delimiters, pos), str.size());   // Skip delimiters.  Note the "not_of"!
-//      string val = str.substr(lastPos, str.size() - lastPos);
-//
-//      paramMap[key] = val;
-//   }
-//
-//   return paramMap;
-//}
-
-
 #ifndef WIN32
 extern const S32 Game::MIN_GRID_SIZE;     // Needed by gcc, cause errors in VC++... and for Mac?
 extern const S32 Game::MAX_GRID_SIZE;
@@ -144,9 +118,10 @@ static S32 getGameTypeIndex(const char *gt)
 
 
 
-void GameParamUserInterface::updateMenuItems(GameType *gameType)
+void GameParamUserInterface::updateMenuItems(Game *game)
 {
-   //map<string, string> paramMap = makeParamMap(gameParams);
+   GameType *gameType = game->getGameType();
+   TNLAssert(gameType, "Invalid game type!");
 
    if(gameTypes.size() == 0)     // Should only be run once, as these gameTypes will not change during the session
       buildGameTypeList();
@@ -180,7 +155,7 @@ void GameParamUserInterface::updateMenuItems(GameType *gameType)
          menuItem = iter->second;
       else                 // Item not found
       {
-         menuItem = gameType->getMenuItem(keys[i]);
+         menuItem = gameType->getMenuItem(game, keys[i]);
          TNLAssert(menuItem.get(), "Failed to make a new menu item!");
 
          mMenuItemMap.insert(pair<const char *, boost::shared_ptr<MenuItem> >(keys[i], menuItem));

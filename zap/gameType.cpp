@@ -168,7 +168,7 @@ bool GameType::processArguments(S32 argc, const char **argv, Game *game)
 }
 
 
-string GameType::toString()
+string GameType::toString() const
 {
    return string(getClassName()) + " " + ftos(F32(getTotalGameTime()) / 60, 3) + " " + itos(mWinningScore);
 }
@@ -202,7 +202,7 @@ const char **GameType::getGameParameterMenuKeys()
 
 
 // Definitions for those items
-boost::shared_ptr<MenuItem> GameType::getMenuItem(const char *key)
+boost::shared_ptr<MenuItem> GameType::getMenuItem(const Game *game, const char *key)
 {
    if(!strcmp(key, "Level Name"))
    {
@@ -240,7 +240,7 @@ boost::shared_ptr<MenuItem> GameType::getMenuItem(const char *key)
       return boost::shared_ptr<MenuItem>(new CounterMenuItem("Score to Win:", getWinningScore(), 1, 1, 99, "points", "", "Game ends when one team gets this score"));
    else if(!strcmp(key, "Grid Size"))
       return boost::shared_ptr<MenuItem>(new CounterMenuItem("Grid Size:",       
-                                                             getGame()->getGridSize(),
+                                                             game->getGridSize(),
                                                              Game::MIN_GRID_SIZE,      // increment
                                                              Game::MIN_GRID_SIZE,      // min val
                                                              Game::MAX_GRID_SIZE,      // max val

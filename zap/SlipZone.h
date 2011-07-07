@@ -60,7 +60,7 @@ public:
    const char *getPrettyNamePlural() { return "Inertia zones"; }
    const char *getOnDockName() { return "Inertia"; }
    const char *getOnScreenName() { return "Inertia"; }
-   string toString();
+   string toString(F32 gridSize) const;
 
    void renderEditor(F32 currentScale);
 

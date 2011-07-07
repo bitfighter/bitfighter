@@ -91,7 +91,7 @@ public:
    S32 getRenderSortValue();
 
    bool processArguments(S32 argc, const char **argv, Game *game);  // Create objects from parameters stored in level file
-   string toString();
+   string toString(F32 gridSize) const;
 
    void onAddedToGame(Game *theGame);
    void computeExtent();                                            // Bounding box for quick collision-possibility elimination

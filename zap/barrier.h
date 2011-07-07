@@ -128,7 +128,7 @@ public:
    bool canBeNeutral() { return false; }
 
 
-   string toString();
+   string toString(F32 gridSize) const;
 };
 
 
@@ -164,7 +164,7 @@ public:
    const char *getPrettyNamePlural() { return "PolyWalls"; }
    const char *getOnDockName() { return "PolyWall"; }
    const char *getOnScreenName() { return "PolyWall"; }
-   string toString();
+   string toString(F32 gridSize) const;
 
    /////
    // Lua interface  ==>  don't need these!!

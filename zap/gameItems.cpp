@@ -247,12 +247,10 @@ bool AbstractSpawn::processArguments(S32 argc, const char **argv, Game *game)
 }
 
 
-string AbstractSpawn::toString()
+string AbstractSpawn::toString(F32 gridSize) const
 {
-   Point pos = getVert(0) / getGame()->getGridSize();
-
    // AsteroidSpawn|FlagSpawn <x> <y> <time>
-   return string(getClassName()) + " " + pos.toString() + " " + itos(mSpawnTime);
+   return string(getClassName()) + " " + geomToString(gridSize) + " " + itos(mSpawnTime);
 }
 
 
@@ -290,12 +288,10 @@ bool Spawn::processArguments(S32 argc, const char **argv, Game *game)
 }
 
 
-string Spawn::toString()
+string Spawn::toString(F32 gridSize) const
 {
-   Point pos = getVert(0) / getGame()->getGridSize();
-
    // Spawn <team> <x> <y> 
-   return string(getClassName()) + " " + itos(mTeam) + " " + pos.toString();
+   return string(getClassName()) + " " + itos(mTeam) + " " + geomToString(gridSize);
 }
 
 

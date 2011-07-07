@@ -60,7 +60,7 @@ public:
 
    void set(const Point &p, member_type size);   // Takes point and "radius"
 
-   bool contains(const Point &p);    // Rect contains the point
+   bool contains(const Point &p) const;          // Returns true if rect contains p
 
    void unionPoint(const Point &p);
 
@@ -73,15 +73,15 @@ public:
    bool intersectsOrBorders(const Rect &r);
 
    // Does rect intersect line defined by p1 and p2?
-   bool intersects(const Point &p1, const Point &p2);
+   bool intersects(const Point &p1, const Point &p2) const;
 
    void expand(const Point &delta);
    void expandToInt(const Point &delta);
 
    void offset(const Point &offset);
 
-   TNL::F32 getWidth();
-   TNL::F32 getHeight();
+   TNL::F32 getWidth() const;
+   TNL::F32 getHeight() const;
 
    Point getExtents() const;
 

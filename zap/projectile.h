@@ -45,7 +45,7 @@ public:
 
    static const char className[];
    static Lunar<LuaProjectile>::RegType methods[];
-   static const char *getClassName() { return "LuaProjectile"; }
+   const char *getClassName() const { return "LuaProjectile"; }
 
    virtual S32 getWeapon(lua_State *L) { TNLAssert(false, "Unimplemented method!"); return 0; };    // Return info about the weapon/projectile
 
@@ -249,7 +249,7 @@ public:
    bool canBeHostile() { return false; }
    bool canBeNeutral() { return false; }
 
-   string toString();
+   string toString(F32 gridSize) const;
 
    /////
    // Lua interface
@@ -314,7 +314,7 @@ public:
    bool canBeHostile() { return false; }
    bool canBeNeutral() { return true; }
 
-   string toString();
+   string toString(F32 gridSize) const;
 
    /////
    // Lua interface

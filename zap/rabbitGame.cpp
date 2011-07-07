@@ -134,7 +134,7 @@ const char **RabbitGameType::getGameParameterMenuKeys()
 
 
 // Definitions for those items
-boost::shared_ptr<MenuItem> RabbitGameType::getMenuItem(const char *key)
+boost::shared_ptr<MenuItem> RabbitGameType::getMenuItem(const Game *game, const char *key)
 {
    if(!strcmp(key, "Flag Return Time"))
    	return boost::shared_ptr<MenuItem>(new CounterMenuItem("Flag Return Timer:", mFlagReturnTimer / 1000, 1, 1, 99, 
@@ -142,7 +142,7 @@ boost::shared_ptr<MenuItem> RabbitGameType::getMenuItem(const char *key)
    else if(!strcmp(key, "Point Earn Rate"))
       return boost::shared_ptr<MenuItem>(new CounterMenuItem("Point Earn Rate:", getFlagScore(), 1, 1, 99, 
                                                              "points per minute", "", "Rate player holding the flag accrues points"));
-   else return Parent::getMenuItem(key);
+   else return Parent::getMenuItem(game, key);
 }
 
 

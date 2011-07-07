@@ -345,10 +345,10 @@ public:
    ClientRef *findClientRef(const StringTableEntry &name);
 
    bool processArguments(S32 argc, const char **argv, Game *game);
-   string toString();
+   string toString() const;
 
    virtual const char **getGameParameterMenuKeys();
-   virtual boost::shared_ptr<MenuItem> getMenuItem(const char *key);
+   virtual boost::shared_ptr<MenuItem> getMenuItem(const Game *game, const char *key);
    virtual bool saveMenuItem(const MenuItem *menuItem, const char *key);
 
    virtual bool processSpecialsParam(const char *param);

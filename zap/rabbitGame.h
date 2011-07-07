@@ -66,7 +66,7 @@ public:
    string toString();
 
    const char **getGameParameterMenuKeys();
-   boost::shared_ptr<MenuItem> getMenuItem(const char *key);
+   boost::shared_ptr<MenuItem> getMenuItem(const Game *game, const char *key);
    bool saveMenuItem(const MenuItem *menuItem, const char *key);
 
    void idle(GameObject::IdleCallPath path);

@@ -58,7 +58,7 @@ private:
 public:
    HuntersGameType();      // Constructor
    bool processArguments(S32 argc, const char **argv, Game *game);
-   string toString();
+   string toString() const;
 
    bool mNexusIsOpen;      // Is the nexus open?
    S32 getNexusTimeLeft() {return mNexusTimer.getCurrent(); }
@@ -76,7 +76,7 @@ public:
    void itemDropped(Ship *ship, Item *item);
 
    const char **getGameParameterMenuKeys();
-   boost::shared_ptr<MenuItem> getMenuItem(const char *key);
+   boost::shared_ptr<MenuItem> getMenuItem(const Game *game, const char *key);
    bool saveMenuItem(const MenuItem *menuItem, const char *key);
 
    void addNexus(HuntersNexusObject *theObject);
@@ -191,7 +191,7 @@ public:
    const char *getPrettyNamePlural() { return "Nexii"; }
    const char *getOnDockName() { return "Nexus"; }
    const char *getOnScreenName() { return "Nexus"; }
-   string toString();
+   string toString(F32 gridSiz) const;
    
    void renderEditor(F32 currentScale);
 

@@ -318,10 +318,12 @@ bool EngineeredObject::processArguments(S32 argc, const char **argv, Game *game)
 }
 
 
-string EngineeredObject::toString()
+string EngineeredObject::toString(F32 gridSize) const
 {
-   return string(Object::getClassName()) + " " + itos(mTeam) + " " + (Point(mAnchorPoint) / getGame()->getGridSize()).toString() + " " + itos(mHealRate);
+   //geomToString(gridSize) was (Point(mAnchorPoint) / gridSize).toString()  ==> still work?
+   return string(Object::getClassName()) + " " + itos(mTeam) + " " + geomToString(gridSize) + " " + itos(mHealRate);
 }
+
 
 // This is used for both positioning items in-game and for snapping them to walls in the editor --> static method
 // Polulates anchor and normal

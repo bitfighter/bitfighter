@@ -76,11 +76,9 @@ bool Item::processArguments(S32 argc, const char **argv, Game *game)
 
 
 // Server only
-string Item::toString()
+string Item::toString(F32 gridSize) const
 {
-   Point pos = getVert(0) / getGame()->getGridSize();
-
-   return string(getClassName()) + " " + pos.toString();
+   return string(getClassName()) + " " + geomToString(gridSize);
 }
 
 
@@ -127,10 +125,9 @@ void EditorPointObject::addToDock(Game *game, const Point &point)
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-string EditorItem::toString()
+string EditorItem::toString(F32 gridSize) const
 {
-   F32 gs = getGame()->getGridSize();
-   return string(getClassName()) + " " + (getVert(0) / gs).toString();
+   return string(getClassName()) + " " + geomToString(gridSize);
 }
 
 
@@ -542,10 +539,9 @@ bool PickupItem::processArguments(S32 argc, const char **argv, Game *game)
 }
 
 
-string PickupItem::toString()
+string PickupItem::toString(F32 gridSize) const
 {
-   F32 gs = getGame()->getGridSize();
-   return string(getClassName()) + " " + (getVert(0) / gs).toString() + " " + (mRepopDelay != -1 ? itos(mRepopDelay / 1000) : "");
+   return string(getClassName()) + " " + geomToString(gridSize) + " " + (mRepopDelay != -1 ? itos(mRepopDelay / 1000) : "");
 }
 
 

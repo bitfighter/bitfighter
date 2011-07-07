@@ -133,9 +133,9 @@ bool GoalZone::processArguments(S32 argc2, const char **argv2, Game *game)
 }
 
 
-string GoalZone::toString()
+string GoalZone::toString(F32 gridSize) const
 {
-   return string(getClassName()) + " " + itos(mTeam) + " " + geomToString(getGame()->getGridSize());
+   return string(getClassName()) + " " + itos(mTeam) + " " + geomToString(gridSize);
 }
 
 

@@ -125,7 +125,7 @@ bool HuntersGameType::processArguments(S32 argc, const char **argv, Game *game)
 }
 
 
-string HuntersGameType::toString()
+string HuntersGameType::toString() const
 {
    return string(getClassName()) + " " + ftos(F32(getTotalGameTime()) / 60 , 3) + " " + ftos(F32(mNexusClosedTime) / 60 / 1000, 3) + " " + 
                                          ftos(F32(mNexusOpenTime) / 1000, 3) + " " + itos(getWinningScore());
@@ -223,7 +223,7 @@ const char **HuntersGameType::getGameParameterMenuKeys()
 
 
 // Definitions for those items
-boost::shared_ptr<MenuItem> HuntersGameType::getMenuItem(const char *key)
+boost::shared_ptr<MenuItem> HuntersGameType::getMenuItem(const Game *game, const char *key)
 {
    if(!strcmp(key, "Nexus Time to Open"))
    	return boost::shared_ptr<MenuItem>(new TimeCounterMenuItem("Time for Nexus to Open:", mNexusClosedTime / 1000, 99*60, "Never", "Time it takes for the Nexus to open"));
@@ -231,7 +231,7 @@ boost::shared_ptr<MenuItem> HuntersGameType::getMenuItem(const char *key)
       return boost::shared_ptr<MenuItem>(new TimeCounterMenuItemSeconds("Time Nexus Remains Open:", mNexusOpenTime / 1000, 99*60, "Always", "Time that the Nexus will remain open"));
    else if(!strcmp(key, "Nexus Win Score"))
       return boost::shared_ptr<MenuItem>(new CounterMenuItem("Score to Win:", getWinningScore(), 100, 100, 20000, "points", "", "Game ends when one player or team gets this score"));
-   else return Parent::getMenuItem(key);
+   else return Parent::getMenuItem(game, key);
 }
 
 
@@ -712,9 +712,9 @@ bool HuntersNexusObject::processArguments(S32 argc2, const char **argv2, Game *g
 }
 
 
-string HuntersNexusObject::toString()
+string HuntersNexusObject::toString(F32 gridSize) const
 {
-   return string(getClassName()) + " " + geomToString(getGame()->getGridSize());
+   return string(getClassName()) + " " + geomToString(gridSize);
 }
 
 

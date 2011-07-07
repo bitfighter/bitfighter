@@ -149,14 +149,9 @@ bool Teleporter::processArguments(S32 argc2, const char **argv2, Game *game)
 }
 
 
-string Teleporter::toString()
+string Teleporter::toString(F32 gridSize) const
 {
-   F32 gs = getGame()->getGridSize();
-   
-   Point pos = getVert(0) / gs;
-   Point dest = getVert(1) / gs;
-
-   return string(getClassName()) + " " + pos.toString() + " " + dest.toString();
+   return string(getClassName()) + " " + geomToString(gridSize);
 }
 
 

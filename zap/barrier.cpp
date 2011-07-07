@@ -155,9 +155,9 @@ Barrier::Barrier(const Vector<Point> &points, F32 width, bool solid)
 }
 
 
-void Barrier::onAddedToGame(Game *theGame)
+void Barrier::onAddedToGame(Game *game)
 {
-  getGame()->mObjectsLoaded++;
+  game->mObjectsLoaded++;
 }
 
 
@@ -442,9 +442,9 @@ void WallItem::processEndPoints()
 }
 
 
-string WallItem::toString()
+string WallItem::toString(F32 gridSize) const
 {
-   return "BarrierMaker " + itos(S32(F32(mWidth))) + " " + geomToString(getGame()->getGridSize());
+   return "BarrierMaker " + itos(S32(F32(mWidth))) + " " + geomToString(gridSize);
 }
 
 
@@ -528,9 +528,9 @@ bool PolyWall::processArguments(S32 argc, const char **argv, Game *game)
 }
 
 
-string PolyWall::toString()
+string PolyWall::toString(F32 gridSize) const
 {
-   return string(getClassName()) + " " + geomToString(getGame()->getGridSize());
+   return string(getClassName()) + " " + geomToString(gridSize);
 }
 
 

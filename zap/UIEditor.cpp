@@ -3676,7 +3676,7 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
             // Writing wall items on first pass, non-wall items next -- that will make sure mountable items have something to grab onto
             if((j == 0) && (p->getObjectTypeMask() & (BarrierType | PolyWallType)) || 
                (j == 1) && (p->getObjectTypeMask() &~ (BarrierType | PolyWallType)) )
-               p->saveItem(f);
+               p->saveItem(f, getGame()->getGridSize());
          }
       fclose(f);
    }

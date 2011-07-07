@@ -83,7 +83,7 @@ public:
    virtual void packGeom(GhostConnection *connection, BitStream *stream) = 0;
    virtual void unpackGeom(GhostConnection *connection, BitStream *stream) = 0; 
 
-   virtual string geomToString(F32 gridSize) = 0;
+   virtual string geomToString(F32 gridSize) const = 0;
    virtual void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize) = 0;
 
    virtual boost::shared_ptr<Geometry> copyGeometry() = 0;
@@ -137,7 +137,7 @@ public:
    void packGeom(GhostConnection *connection, BitStream *stream);
    void unpackGeom(GhostConnection *connection, BitStream *stream); 
 
-   string geomToString(F32 gridSize);
+   string geomToString(F32 gridSize) const;
    void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize);
 
    boost::shared_ptr<Geometry> copyGeometry();
@@ -189,7 +189,7 @@ public:
    void packGeom(GhostConnection *connection, BitStream *stream);
    void unpackGeom(GhostConnection *connection, BitStream *stream); 
 
-   string geomToString(F32 gridSize);
+   string geomToString(F32 gridSize) const;
    void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize);
 
    boost::shared_ptr<Geometry> copyGeometry();
@@ -246,7 +246,7 @@ public:
    void packGeom(GhostConnection *connection, BitStream *stream);
    void unpackGeom(GhostConnection *connection, BitStream *stream); 
 
-   string geomToString(F32 gridSize);
+   string geomToString(F32 gridSize) const;
    virtual void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize);
 
    virtual boost::shared_ptr<Geometry> copyGeometry();

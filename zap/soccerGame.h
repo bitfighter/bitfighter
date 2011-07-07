@@ -118,7 +118,7 @@ public:
    void damageObject(DamageInfo *theInfo);
    void idle(GameObject::IdleCallPath path);
    bool processArguments(S32 argc, const char **argv, Game *game);
-   string toString();
+   string toString(F32 gridSize) const;
 
    void onAddedToGame(Game *theGame);
    void onItemDropped();

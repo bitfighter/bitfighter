@@ -89,7 +89,7 @@ public:
    S32 getReqLoadout(lua_State *L);
 
    GameObject *getGameObject();
-   static const char *getClassName() { return "LuaShip"; }
+   const char *getClassName() const { return "LuaShip"; }
 
    void push(lua_State *L) {  Lunar<LuaShip>::push(L, this, false); }      // Push item onto stack
 

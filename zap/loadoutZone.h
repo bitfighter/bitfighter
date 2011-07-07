@@ -60,7 +60,7 @@ public:
    const char *getPrettyNamePlural() { return "Loadout zones"; }
    const char *getOnDockName() { return "Loadout"; }
    const char *getOnScreenName() { return "Loadout"; }
-   string toString();
+   string toString(F32 gridSize) const;
 
    void renderEditor(F32 currentScale);
    void renderDock();

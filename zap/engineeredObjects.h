@@ -111,7 +111,7 @@ public:
    Point getVert(S32 index) const { return mAnchorPoint; }
    void setVert(const Point &pos, S32 index) { mAnchorPoint = pos; }
    
-   string toString();
+   string toString(F32 gridSize) const;
 
    /////
    // LuaItem interface

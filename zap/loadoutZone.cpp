@@ -122,9 +122,9 @@ bool LoadoutZone::processArguments(S32 argc2, const char **argv2, Game *game)
 }
 
 
-string LoadoutZone::toString()
+string LoadoutZone::toString(F32 gridSize) const
 {
-   return string(getClassName()) + " " + itos(mTeam) + " " + geomToString(getGame()->getGridSize());
+   return string(getClassName()) + " " + itos(mTeam) + " " + geomToString(gridSize);
 }
 
 
