@@ -637,6 +637,8 @@ Mine::Mine(Point pos, Ship *planter) : GrenadeProjectile(pos, Point())
 
    mArmed = false;
    mKillString = "mine";      // Triggers special message when player killed
+
+   setExtent(Rect(pos, pos));
 }
 
 
@@ -840,6 +842,8 @@ SpyBug::SpyBug(Point pos, Ship *planter) : GrenadeProjectile(pos, Point())
       mTeam = -1;
       setOwner(NULL);
    }
+
+   setExtent(Rect(pos, pos));
 }
 
 
