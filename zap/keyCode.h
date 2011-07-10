@@ -46,11 +46,10 @@ bool getKeyState(KeyCode keyCode);              // Return current key state (t=d
 void resetKeyStates();                          // Initialize key states
 void dumpKeyStates();                           // Log key states for testing
 void checkModifierKeyState();                   // Handle Ctrl, Shift, Alt
-//KeyCode standardSDLKeyToKeyCode(int key);       // Convert SDL keycodes to our KeyCode system
 
-//KeyCode standardGLUTKeyToKeyCode(int key);      // Convert standard keys to KeyCode
-//KeyCode specialGLUTKeyToKeyCode(int key);       // Convert special keys to KeyCode
 KeyCode standardSDLKeyToKeyCode(int key);       // Convert SDL keys to KeyCode
+int keyCodeToSDLKey(KeyCode keyCode);           // Take a KeyCode and return the SDL equivalent
+
 char keyToAscii(int unicode, KeyCode keyCode);  // Return a printable ascii char, if possible
 bool isControllerButton(KeyCode keyCode);       // Does keyCode represent a controller button?
 
