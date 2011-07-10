@@ -105,17 +105,18 @@ void setKeyState(KeyCode keyCode, bool state)
 // Returns true of key is down, false if it is up
 bool getKeyState(KeyCode keyCode)
 {
+   //logprintf("State: key %d is %s", keyCode, keyIsDown[(int) keyCode] ? "down" : "up");
+      // Handle some special cases:
    if(keyCode == KEY_CTRL)
-      return SDL_GetModState() & KMOD_CTRL;
-   else if(keyCode == KEY_SHIFT)
-      return SDL_GetModState() & KMOD_SHIFT;
+      return(keyIsDown[(int) KEY_LCTRL] || keyIsDown[(int) KEY_RCTRL]);
    else if(keyCode == KEY_ALT)
-      return SDL_GetModState() & KMOD_ALT;
+      return(keyIsDown[(int) KEY_LALT] || keyIsDown[(int) KEY_RALT]);
+   else if(keyCode == KEY_SHIFT)
+      return(keyIsDown[(int) KEY_LSHIFT] || keyIsDown[(int) KEY_RSHIFT]);
    else if(keyCode == KEY_META)
-      return SDL_GetModState() & KMOD_META;
-
-   Uint8 *keystate = SDL_GetKeyState(NULL);
-   return(keystate[keyCodeToSDLKey(keyCode)]); 
+      return(keyIsDown[(int) KEY_LMETA] || keyIsDown[(int) KEY_RMETA]);
+   else
+      return keyIsDown[(int) keyCode];
 }
 
 
