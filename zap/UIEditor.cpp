@@ -502,16 +502,16 @@ void EditorUserInterface::undo(bool addToRedoStack)
    gEditorGame->setGridDatabase(boost::dynamic_pointer_cast<GridDatabase>(mUndoItems[mLastUndoIndex % UNDO_STATES]));
    //restoreItems(mUndoItems[mLastUndoIndex % UNDO_STATES]);
 
-logprintf("Undo -- now using database %p", gEditorGame->getGridDatabase().get());
-fillVector.clear();
-gEditorGame->getGridDatabase()->findObjects(fillVector);
-for(S32 i = 0; i < fillVector.size(); i++)
-{
-   BfObject *o = dynamic_cast<BfObject *>(fillVector[i]);
-   F32 x = o->getVert(0).x;
-   F32 y = o->getVert(0).y;
-   logprintf("contains object (%f,%f) ==> %p",x,y,o->mGeometry.get());
-}
+//logprintf("Undo -- now using database %p", gEditorGame->getGridDatabase().get());
+//fillVector.clear();
+//gEditorGame->getGridDatabase()->findObjects(fillVector);
+//for(S32 i = 0; i < fillVector.size(); i++)
+//{
+//   BfObject *o = dynamic_cast<BfObject *>(fillVector[i]);
+//   F32 x = o->getVert(0).x;
+//   F32 y = o->getVert(0).y;
+//   logprintf("contains object (%f,%f) ==> %p",x,y,o->mGeometry.get());
+//}
 
    rebuildEverything();
 
