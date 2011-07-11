@@ -114,6 +114,7 @@ OBJECTS_ZAP=\
    Rect.o\
    retrieveGame.o\
    robot.o\
+   ScreenInfo.o\
    screenShooter.o\
    SoundSystem.o\
    SoundEffect.o\

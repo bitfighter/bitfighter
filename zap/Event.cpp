@@ -13,6 +13,7 @@
 #include "UIDiagnostics.h"
 #include "IniFile.h"
 #include "screenShooter.h"
+#include "ScreenInfo.h"
 
 #include "SDL/SDL_opengl.h"
 
@@ -54,10 +55,7 @@ void Event::onEvent(SDL_Event* event)
          break;
 
       case SDL_MOUSEMOTION:
-            onMouseMoved(event->motion.x, event->motion.y, event->motion.xrel, event->motion.yrel, (event->motion.state
-                  & SDL_BUTTON(SDL_BUTTON_LEFT)) != 0, (event->motion.state
-                  & SDL_BUTTON(SDL_BUTTON_RIGHT)) != 0, (event->motion.state
-                  & SDL_BUTTON(SDL_BUTTON_MIDDLE)) != 0);
+            onMouseMoved(event->motion.x, event->motion.y);
          break;
 
       case SDL_MOUSEBUTTONDOWN:
@@ -215,7 +213,7 @@ void Event::onMouseBlur()
 
 }
 
-void Event::onMouseMoved(S32 x, S32 y, S32 relX, S32 relY, bool Left, bool Right, bool Middle)
+void Event::onMouseMoved(S32 x, S32 y)
 {
    setMousePos(x, y);
 

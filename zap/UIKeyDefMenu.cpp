@@ -34,6 +34,7 @@
 #include "config.h"
 #include "game.h"    // For gClientGame
 #include "Colors.h"
+#include "ScreenInfo.h"
 
 #include "SDL/SDL.h"
 #include "SDL/SDL_opengl.h"

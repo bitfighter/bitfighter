@@ -28,6 +28,7 @@
 #include "gameObjectRender.h"    // For renderBitfighterLogo
 
 #include "../tnl/tnlRandom.h"
+#include "ScreenInfo.h"
 
 #include "SDL/SDL_opengl.h"
 

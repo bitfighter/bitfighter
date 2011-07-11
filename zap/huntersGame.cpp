@@ -33,6 +33,7 @@
 #include "GeomUtils.h"      // For centroid calculation for labeling
 #include "stringUtils.h"         // For itos
 #include "Colors.h"
+#include "ScreenInfo.h"
 
 #include "SDL/SDL_opengl.h"
 

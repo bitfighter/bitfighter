@@ -28,7 +28,7 @@ public:
    static void onKeyUp(SDLKey key, SDLMod mod, TNL::U16 unicode);
    static void onMouseFocus();
    static void onMouseBlur();
-   static void onMouseMoved(TNL::S32 x, TNL::S32 y, TNL::S32 relX, TNL::S32 relY, bool Left, bool Right, bool Middle);
+   static void onMouseMoved(TNL::S32 x, TNL::S32 y);
    static void onMouseWheel(bool Up, bool Down);  //Not implemented
    static void onMouseLeftButtonDown(TNL::S32 x, TNL::S32 y);
    static void onMouseLeftButtonUp(TNL::S32 x, TNL::S32 y);

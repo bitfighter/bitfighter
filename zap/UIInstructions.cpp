@@ -38,6 +38,7 @@
 #include "GeomUtils.h"      // For polygon triangulation
 #include "config.h"
 #include "Colors.h"
+#include "ScreenInfo.h"
 
 #include "SDL/SDL_opengl.h"
 

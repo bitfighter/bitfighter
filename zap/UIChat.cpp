@@ -32,6 +32,7 @@
 #include "UIGame.h"  // For putting private messages into game console
 #include "UIDiagnostics.h"
 #include "Colors.h"
+#include "ScreenInfo.h"
 
 #include "SDL/SDL_opengl.h"
 

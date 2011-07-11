@@ -57,6 +57,7 @@
 #include "stringUtils.h"
 
 #include "oglconsole.h"          // Our console object
+#include "ScreenInfo.h"
 
 #include "SDL/SDL.h"
 #include "SDL/SDL_opengl.h"

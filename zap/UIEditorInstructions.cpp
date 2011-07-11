@@ -37,6 +37,7 @@
 #include "UIEditor.h"
 #include "gameObjectRender.h"
 #include "GeomUtils.h"      // For polygon triangulation
+#include "ScreenInfo.h"
 
 #include "SDL/SDL_opengl.h"
 

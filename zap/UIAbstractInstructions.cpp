@@ -26,6 +26,7 @@
 #include "UIAbstractInstructions.h"
 #include "Color.h"
 #include "Colors.h"
+#include "ScreenInfo.h"
 
 #include "SDL/SDL_opengl.h"
 

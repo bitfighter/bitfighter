@@ -42,6 +42,7 @@
 #include "IniFile.h"
 #include "config.h"
 #include "Colors.h"
+#include "ScreenInfo.h"
 
 #include "SDL/SDL.h"
 #include "SDL/SDL_opengl.h"

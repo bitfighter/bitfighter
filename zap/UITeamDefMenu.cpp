@@ -33,6 +33,7 @@
 #include "IniFile.h"
 #include "config.h"
 #include "gameType.h"      // For MAX_TEAMS
+#include "ScreenInfo.h"
 
 #include "SDL/SDL.h"
 #include "SDL/SDL_opengl.h"

@@ -131,6 +131,7 @@ using namespace TNL;
 #include "Colors.h"
 #include "screenShooter.h"
 #include "Event.h"
+#include "ScreenInfo.h"
 
 #include "SDL/SDL.h"
 #include "SDL/SDL_opengl.h"

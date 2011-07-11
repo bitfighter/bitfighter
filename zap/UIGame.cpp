@@ -48,6 +48,7 @@
 #include "md5wrapper.h"          // For submission of passwords
 #include "oglconsole.h"          // Our console object
 #include "config.h"              // for Getmap level dir
+#include "ScreenInfo.h"
 
 #include "../tnl/tnlEndian.h"
 

@@ -27,6 +27,7 @@
 
 #include "UIMenuItems.h"
 #include "UI.h"
+#include "ScreenInfo.h"
 
 #include "SDL/SDL_opengl.h"
 

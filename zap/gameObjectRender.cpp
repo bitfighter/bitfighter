@@ -36,6 +36,7 @@
 #include "BotNavMeshZone.h"         // For Border def
 #include "version.h"
 #include "config.h"     // Only for testing burst graphics below
+#include "ScreenInfo.h"
 
 #include "SDL/SDL_opengl.h"
 

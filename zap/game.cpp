@@ -50,6 +50,7 @@
 #include "UINameEntry.h"
 #include "UIEditor.h"         // For EditorUserInterface def, needed by EditorGame stuff
 #include "BotNavMeshZone.h"      // For zone clearing code
+#include "ScreenInfo.h"
 
 #include "tnl.h"
 #include "tnlRandom.h"

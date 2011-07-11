@@ -1056,6 +1056,14 @@
 			RelativePath=".\Rect.h"
 			>
 		</File>
+      <File
+         RelativePath=".\ScreenInfo.cpp"
+         >
+      </File>
+      <File
+         RelativePath=".\ScreenInfo.h"
+         >
+      </File>
 		<File
 			RelativePath=".\screenShooter.cpp"
 			>
