@@ -1035,6 +1035,8 @@ void QueryServersUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       leaveGlobalChat();
       gMainMenuUserInterface.activate();
    }
+   else if(keyCode == keyDIAG)            // Turn on diagnostic overlay
+      gDiagnosticInterface.activate();
    else if(keyCode == keyOUTGAMECHAT)           // Toggle half-height servers, full-height servers, and full chat overlay
    {
       mShowChat = !mShowChat;

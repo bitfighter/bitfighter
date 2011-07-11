@@ -1025,6 +1025,8 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       setBusyChatting(true);
       gChatInterface.activate();
    }
+   else if(keyCode == keyDIAG)            // Turn on diagnostic overlay
+      gDiagnosticInterface.activate();
    else if(keyCode == keyMISSION)
    {
       mMissionOverlayActive = true;

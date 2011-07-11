@@ -340,6 +340,11 @@ void TeamDefUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       UserInterface::playBoop();
       SDL_ShowCursor(SDL_DISABLE);
    }
+   else if(keyCode == keyDIAG)     // Turn on diagnostic overlay
+   {
+      gDiagnosticInterface.activate();
+      UserInterface::playBoop();
+   }
    else if(keyCode == keyOUTGAMECHAT)     // Turn on Global Chat overlay
    {
       gChatInterface.activate();

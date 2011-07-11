@@ -512,6 +512,11 @@ bool MenuUserInterface::processKeys(KeyCode keyCode, char ascii)
       gChatInterface.activate();
       UserInterface::playBoop();
    }
+   else if(keyCode == keyDIAG)            // Turn on diagnostic overlay
+   {
+      gDiagnosticInterface.activate();
+      UserInterface::playBoop();
+   }
 
    return true;      // Probably wrong, but doesn't really matter at this point
 }

@@ -766,6 +766,8 @@ void InstructionsUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    }
    else if(keyCode == keyOUTGAMECHAT)     // Turn on Global Chat overlay
       gChatInterface.activate();
+   else if(keyCode == keyDIAG)            // Turn on diagnostic overlay
+      gDiagnosticInterface.activate();
    else if(keyCode == keyHELP || keyCode == KEY_ESCAPE  || keyCode == BUTTON_BACK)
       exitInstructions();
 }

@@ -366,6 +366,11 @@ void KeyDefMenuUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       UserInterface::playBoop();
       gChatInterface.activate();
    }
+   else if(keyCode == keyDIAG)     // Turn on diagnostic overlay
+   {
+      UserInterface::playBoop();
+      gDiagnosticInterface.activate();
+   }
 
 }
 

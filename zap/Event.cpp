@@ -185,10 +185,6 @@ void Event::onKeyDown(SDLKey key, SDLMod mod, U16 unicode)
    else if(key == SDLK_q && (mod & KMOD_CTRL))
       gScreenshooter.phase = 1;
 
-   // Turn on diagnostic overlay -- can be used anywhere
-   else if(key == SDLK_F7)
-      gDiagnosticInterface.activate();
-
    // The rest
    else
    {
