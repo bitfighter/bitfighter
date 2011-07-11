@@ -1853,6 +1853,7 @@ int main(int argc, char **argv)
 
       InitSdlVideo();         // Get our main SDL rendering window all set up
       SDL_EnableUNICODE(1);   // Activate unicode ==> http://sdl.beuc.net/sdl.wiki/SDL_EnableUNICODE
+      SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
 
       // Put 0,0 at the center of the screen
       //glTranslatef(gScreenInfo.getGameCanvasWidth() / 2, gScreenInfo.getGameCanvasHeight() / 2, 0);     
