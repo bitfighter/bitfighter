@@ -881,7 +881,8 @@ void GameUserInterface::onMouseMoved()
       if(!ship)      // Can sometimes happen when switching levels. This will stop the ensuing crashing.
          return;
 
-      Point p = gClientGame->worldToScreenPoint( &ship->getRenderPos() );
+      Point o = ship->getRenderPos();  // To avoid taking address of temporary
+      Point p = gClientGame->worldToScreenPoint( &o );
 
       mCurrentMove.angle = atan2(mMousePoint.y + gScreenInfo.getGameCanvasHeight() / 2 - p.y, 
                                  mMousePoint.x + gScreenInfo.getGameCanvasWidth() / 2 - p.x);

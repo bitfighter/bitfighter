@@ -37,8 +37,6 @@ using namespace std;
 namespace Zap
 {
 
-enum KeyCode;
-
 //
 // Class to manage all sorts of single-line editing tasks
 //

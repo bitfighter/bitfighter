@@ -173,6 +173,8 @@ void Event::onInputBlur()
 
 void Event::onKeyDown(SDLKey key, SDLMod mod, U16 unicode)
 {
+//   logprintf("Key: %d; Mod: %d", key, mod);
+
    // Global modifiers
 
    // ALT + ENTER --> toggles window mode/full screen
@@ -190,7 +192,7 @@ void Event::onKeyDown(SDLKey key, SDLMod mod, U16 unicode)
    // The rest
    else
    {
-      KeyCode keyCode = standardSDLKeyToKeyCode(key);
+      KeyCode keyCode = sdlKeyToKeyCode(key);
       setKeyState(keyCode, true);
 
       if(UserInterface::current)
@@ -200,7 +202,7 @@ void Event::onKeyDown(SDLKey key, SDLMod mod, U16 unicode)
 
 void Event::onKeyUp(SDLKey key, SDLMod mod, U16 unicode)
 {
-   KeyCode keyCode = standardSDLKeyToKeyCode(key);
+   KeyCode keyCode = sdlKeyToKeyCode(key);
    setKeyState(keyCode, false);
 
    if(UserInterface::current)

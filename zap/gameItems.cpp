@@ -386,7 +386,8 @@ void FlagSpawn::renderEditor(F32 currentScale)
    glPushMatrix();
       glTranslatef(pos.x + 1, pos.y, 0);
       glScalef(0.4/currentScale, 0.4/currentScale, 1);
-      renderFlag(0, 0, &getTeamColor(mTeam));
+      Color color = getTeamColor(mTeam);  // To avoid taking address of temporary
+      renderFlag(0, 0, &color);
 
       glColor(Colors::white);
       drawCircle(-4, 0, 26);
