@@ -31,9 +31,10 @@ namespace Zap {
 
 ScreenInfo::ScreenInfo()
 {
-      resetGameCanvasSize();        // Initialize GameCanvasSize vars
-      setWindowSize(GAME_WIDTH, GAME_HEIGHT);      // In case these are used in a calculation before they're set... avoids spurious divide by 0
-      mWindowMousePos.set(-1,-1);   // -1 is used to indicate initial run
+   MIN_SCALING_FACTOR = 0.15f;
+   resetGameCanvasSize();        // Initialize GameCanvasSize vars
+   setWindowSize(GAME_WIDTH, GAME_HEIGHT);      // In case these are used in a calculation before they're set... avoids spurious divide by 0
+   mWindowMousePos.set(-1,-1);   // -1 is used to indicate initial run
 }
 
 // Can't initialize until SDL has been set up
@@ -46,12 +47,29 @@ void ScreenInfo::init(S32 physicalScreenWidth, S32 physicalScreenHeight)
    F32 gameCanvasRatio = (F32)mGameCanvasWidth / (F32)mGameCanvasHeight;
 
    mIsLandscape = physicalScreenRatio >= gameCanvasRatio;
-   mScalingRatio = mIsLandscape ? (F32)mPhysicalScreenHeight / (F32)mGameCanvasHeight : (F32)mPhysicalScreenWidth / (F32)mGameCanvasWidth;
+
+   mScalingRatioX = mIsLandscape ?  (F32)mPhysicalScreenWidth / (F32)mGameCanvasWidth : (F32)mPhysicalScreenHeight / (F32)mGameCanvasHeight;
+   mScalingRatioY = mIsLandscape ? (F32)mPhysicalScreenHeight / (F32)mGameCanvasHeight : (F32)mPhysicalScreenWidth / (F32)mGameCanvasWidth;
+
+//   logprintf("mIsLandscape: %d", mIsLandscape);
+//
+//   logprintf("physicalScreenWidth: %d", physicalScreenWidth);
+//   logprintf("physicalScreenHeight: %d", physicalScreenHeight);
+//   logprintf("physicalScreenRatio: %f", physicalScreenRatio);
+//   logprintf("gameCanvasRatio: %f", gameCanvasRatio);
+//
+//   logprintf("mPhysicalScreenWidth: %d", mPhysicalScreenWidth);
+//   logprintf("mPhysicalScreenHeight: %d", mPhysicalScreenHeight);
+//   logprintf("mGameCanvasWidth: %d", mGameCanvasWidth);
+//   logprintf("mGameCanvasHeight: %d", mGameCanvasHeight);
+//
+//   logprintf("mScalingRatioX: %f", mScalingRatioX);
+//   logprintf("mScalingRatioY: %f", mScalingRatioY);
 
    mHardwareSurface = false;
 }
 
-F32 ScreenInfo::getMinScalingFactor() {return 0.15f; }
+F32 ScreenInfo::getMinScalingFactor() {return MIN_SCALING_FACTOR; }
 
 void ScreenInfo::setWindowSize(S32 width, S32 height) { mWindowWidth = width; mWindowHeight = height; }
 S32 ScreenInfo::getWindowWidth() { return mWindowWidth; }
@@ -64,12 +82,12 @@ S32 ScreenInfo::getPhysicalScreenHeight() { return mPhysicalScreenHeight; }
 // Game canvas size in physical pixels, assuming full screen unstretched mode
 S32 ScreenInfo::getDrawAreaWidth()
 {
-   return mIsLandscape ? S32((F32)mGameCanvasWidth * mScalingRatio) : mPhysicalScreenWidth;
+   return mIsLandscape ? S32((F32)mGameCanvasWidth * mScalingRatioY) : mPhysicalScreenWidth;
 }
 
 S32 ScreenInfo::getDrawAreaHeight()
 {
-   return mIsLandscape ? mPhysicalScreenHeight : S32((F32)mGameCanvasHeight * mScalingRatio);
+   return mIsLandscape ? mPhysicalScreenHeight : S32((F32)mGameCanvasHeight * mScalingRatioX);
 }
 
 // Dimensions of black bars in physical pixels in full-screen unstretched mode.  Does not reflect current window mode
@@ -113,12 +131,12 @@ S32 ScreenInfo::getGameCanvasHeight() { return mGameCanvasHeight; }     // canva
 // Dimensions of black bars in game-sized pixels
 S32 ScreenInfo::getHorizDrawMargin()
 {
-   return mIsLandscape ? S32(getHorizPhysicalMargin() / mScalingRatio) : 0;
+   return mIsLandscape ? S32(getHorizPhysicalMargin() / mScalingRatioY) : 0;
 }
 
 S32 ScreenInfo::getVertDrawMargin()
 {
-   return mIsLandscape ? 0 : S32(getVertPhysicalMargin() / mScalingRatio);
+   return mIsLandscape ? 0 : S32(getVertPhysicalMargin() / mScalingRatioX);
 }
 
 bool ScreenInfo::isLandscape() { return mIsLandscape; }     // Whether physical screen is landscape, or at least more landscape than our game window
@@ -132,16 +150,12 @@ Point ScreenInfo::convertWindowToCanvasCoord(const Point &p, DisplayMode mode) {
 
 Point ScreenInfo::convertWindowToCanvasCoord(S32 x, S32 y, DisplayMode mode)
 {
-//   logprintf("Point: %d, %d || canvas %2.0f, %2.0f ||margin h/v: %d/%d || window w/h: %d,%d || canvas w/h %d,%d ||physicalMargin: %d,%d\n",
-//         x,
-//         y,
+//   logprintf("Point: %d, %d || canvas %2.0f, %2.0f ||margin h/v: %d/%d || window w/h: %d,%d || canvas w/h %d,%d\n",
+//         x, y,
 //         mCanvasMousePos.x, mCanvasMousePos.y,
-//         getHorizPhysicalMargin(mode),
-//         getVertPhysicalMargin(mode),getWindowWidth(),getWindowHeight(),
-//         mGameCanvasWidth,
-//         mGameCanvasHeight,
-//         getHorizPhysicalMargin(mode),
-//         getVertPhysicalMargin(mode)
+//         getHorizPhysicalMargin(mode), getVertPhysicalMargin(mode),
+//         getWindowWidth(),getWindowHeight(),
+//         mGameCanvasWidth, mGameCanvasHeight
 //         );
 
    return Point((x - getHorizPhysicalMargin(mode)) * getGameCanvasWidth()  / (getWindowWidth()  - 2 * getHorizPhysicalMargin(mode)),

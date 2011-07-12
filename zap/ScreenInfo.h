@@ -42,22 +42,21 @@ private:
    static const TNL::S32 GAME_WIDTH = 800;
    static const TNL::S32 GAME_HEIGHT = 600;
 
-   //static const F32 MIN_SCALING_FACTOR = 0.15;       // Limits minimum window size
-   //... TODO: Fix error: error C2864: 'Zap::ScreenInfo::MIN_SCALING_FACTOR' : only static const integral data members can be initialized within a class
+   TNL::F32 MIN_SCALING_FACTOR;       // Limits minimum window size
 
    Point mWindowMousePos, mCanvasMousePos;
 
    TNL::S32 mPhysicalScreenWidth, mPhysicalScreenHeight;
    TNL::S32 mGameCanvasWidth, mGameCanvasHeight;     // Size of screen; in game, will always be 800x600, but may be different in editor fullscreen
    TNL::S32 mWindowWidth, mWindowHeight;             // Window dimensions in physical pixels
-   TNL::F32 mScalingRatio;                           // Ratio of physical pixels to virtual pixels
+   TNL::F32 mScalingRatioX, mScalingRatioY;          // Ratio of physical pixels to virtual pixels
    bool mIsLandscape;                           // Is our screen landscape or portrait?
    bool mHardwareSurface;                       // Is our screen going to use a hardware surface?
 
 public:
    ScreenInfo();      // Constructor
 
-   TNL::F32 getMinScalingFactor(); //{return MIN_SCALING_FACTOR; }
+   TNL::F32 getMinScalingFactor();
 
    // Can't initialize until SDL has been set up
    void init(TNL::S32 physicalScreenWidth, TNL::S32 physicalScreenHeight);

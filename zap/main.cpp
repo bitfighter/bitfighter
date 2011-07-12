@@ -1628,6 +1628,9 @@ void actualizeScreenMode(bool changingInterfaces)
    if(SDL_SetVideoMode(sdlWindowWidth, sdlWindowHeight, 0, sdlVideoFlags) == NULL)
          logprintf(LogConsumer::LogFatalError, "Setting display mode failed: %s", SDL_GetError());
 
+   // Now save the new window dimensions in ScreenInfo
+   gScreenInfo.setWindowSize(sdlWindowWidth, sdlWindowHeight);
+
    glClearColor( 0, 0, 0, 0 );
 
    glViewport(0, 0, sdlWindowWidth, sdlWindowHeight);
