@@ -193,10 +193,10 @@ public:
    void setTeam(S32 team) { mTeam = team; }    
 
    Game *getGame() const { return mGame; }
-   void setGame(Game *game) { mGame = game; }
 
    virtual void addToGame(Game *game);
    virtual void removeFromGame();
+   void clearGame() { mGame = NULL; }
 
    // DatabaseObject methods
    virtual GridDatabase *getGridDatabase();     // BotNavMeshZones have their own GridDatabase

@@ -275,7 +275,7 @@ public:
 
    EditorObject *getSnapItem() { return mSnapObject; }
    S32 getSnapVertexIndex() { return mSnapVertexIndex; }
-   void rebuildEverything();        // Does lots of things in undo, redo, and add items from script
+   void rebuildEverything();                  // Does lots of things in undo, redo, and add items from script
    static void resnapAllEngineeredItems();
 
    void onBeforeRunScriptFromConsole();

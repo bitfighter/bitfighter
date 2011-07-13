@@ -541,16 +541,6 @@ void EditorUserInterface::redo()
 }
 
 
-// After undoing/redoing, some objects may have NULL games as a consequence of our object copying methodology.
-// TODO: Get rid of this!!
-void EditorUserInterface::makeSureAllObjectsHaveValidGame()
-{
-   const Vector<EditorObject *> *objList = getObjectList();
-   for(S32 i = 0; i < objList->size(); i++)
-      objList->get(i)->setGame(gEditorGame);
-}
-
-
 void EditorUserInterface::rebuildEverything()
 {
    mWallSegmentManager.recomputeAllWallGeometry();
@@ -1886,6 +1876,8 @@ void EditorUserInterface::copySelection()
          ////////////////////////
          EditorObject *newItem =  objList->get(i)->newCopy();   
          newItem->setSelected(false);
+         //newItem->addToGame();
+         
 
          //newItem->addToGame(gEditorGame);
 
@@ -1927,7 +1919,8 @@ void EditorUserInterface::pasteSelection()
 
       EditorObject *newObj = mClipboard[i]->newCopy();
       newObj->setExtent();
-      newObj->addToGame(gEditorGame);
+      //newObj->addToGame(gEditorGame);
+      newObj->addToDatabase();
 
       newObj->setSerialNumber(getNextItemId());
       newObj->setSelected(true);
@@ -2421,15 +2414,14 @@ void EditorUserInterface::startDraggingDockItem()
    item->newObjectFromDock(getGridSize());
 
    //item->initializeEditor(getGridSize());    // Override this to define some initial geometry for your object... 
-   item->setDockItem(false);
 
    // Offset lets us drag an item out from the dock by an amount offset from the 0th vertex.  This makes placement seem more natural.
    Point pos = snapPoint(convertCanvasToLevelCoord(mMousePos), true) - item->getInitialPlacementOffset(getGridSize());
    item->moveTo(pos);
       
    item->setWidth((mDockItems[mDraggingDockItem]->getGeomType() == geomPoly) ? .7 : 1);      // TODO: Still need this?
-
-   item->addToGame(gEditorGame);
+   item->setDockItem(false);
+   item->addToDatabase();          // Dock items have the game set, but are not in the spatial database... 
 
    // A little hack here to keep the polywall fill from appearing to be left behind behind the dock
    //if(item->getObjectTypeMask() & PolyWallType)
