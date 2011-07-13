@@ -48,7 +48,7 @@ protected:
 
 public:
    SimpleLine(GameObjectType objectType = UnknownType);       // Constructor
-   SimpleLine(const SimpleLine &simpleLine);                  // Copy constructor
+   //SimpleLine(const SimpleLine &simpleLine);                  // Copy constructor
 
    //virtual void copyAttrs(SimpleLine *target);
 

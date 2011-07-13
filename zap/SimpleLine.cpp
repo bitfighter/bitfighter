@@ -43,10 +43,10 @@ SimpleLine::SimpleLine(GameObjectType objectType) : EditorObject(objectType)
 
 
 // Copy constructor -- make sure each copy gets its own geometry object
-SimpleLine::SimpleLine(const SimpleLine &simpleLine)
-{
-   mGeometry = boost::shared_ptr<Geometry>(new SimpleLineGeometry(*((SimpleLineGeometry *)simpleLine.mGeometry.get())));  
-}
+//SimpleLine::SimpleLine(const SimpleLine &simpleLine)
+//{
+//   mGeometry = boost::shared_ptr<Geometry>(new SimpleLineGeometry(*((SimpleLineGeometry *)simpleLine.mGeometry.get())));  
+//}
 
 
 //void SimpleLine::copyAttrs(SimpleLine *target)

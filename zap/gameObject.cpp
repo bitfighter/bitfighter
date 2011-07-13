@@ -321,16 +321,11 @@ void GameObject::addToGame(Game *game)
 {
    BfObject::addToGame(game);
    // constists of:
-//mGame = game;
-//addToDatabase();
+   //    mGame = game;
+   //    addToDatabase();
 
    setCreationTime(game->getCurrentTime());
    onAddedToGame(game);
-   // for gameType conssists of:
-   //   game->setGameType(this);
-   //if(getGame()->isServer())
-   //   mShowAllBots = getGame()->isTestServer();  // Default to true to show all bots if on testing mode
-
 }
 
 

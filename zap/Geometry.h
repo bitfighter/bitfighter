@@ -94,6 +94,9 @@ public:
    virtual void onPointsChanged() = 0;
 
    void disableTriangluation() { mTriangluationDisabled = true; }
+
+   virtual void flipHorizontal(const Point &boundingBoxMin, const Point &boundingBoxMax) = 0;
+   virtual void flipVertical(const Point &boundingBoxMin, const Point &boundingBoxMax) = 0;
 };
 
 
@@ -145,6 +148,9 @@ public:
    Rect getExtents();
 
    void onPointsChanged() { /* Do nothing */ }
+
+   void flipHorizontal(const Point &boundingBoxMin, const Point &boundingBoxMax);
+   void flipVertical(const Point &boundingBoxMin, const Point &boundingBoxMax);
 };
 
 
@@ -197,6 +203,9 @@ public:
    Rect getExtents();
 
    void onPointsChanged() { /* Do nothing */ }
+
+   void flipHorizontal(const Point &boundingBoxMin, const Point &boundingBoxMax);
+   void flipVertical(const Point &boundingBoxMin, const Point &boundingBoxMax);
 };
 
 
@@ -254,6 +263,9 @@ public:
    Rect getExtents();
 
    virtual void onPointsChanged();
+
+   void flipHorizontal(const Point &boundingBoxMin, const Point &boundingBoxMax);
+   void flipVertical(const Point &boundingBoxMin, const Point &boundingBoxMax);
 };
 
 

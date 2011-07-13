@@ -73,6 +73,19 @@ boost::shared_ptr<Geometry> PointGeometry::copyGeometry() const
 }
 
 
+void PointGeometry::flipHorizontal(const Point &boundingBoxMin, const Point &boundingBoxMax)
+{
+   mPos.x = boundingBoxMin.x + (boundingBoxMax.x - mPos.x);
+
+}
+
+
+void PointGeometry::flipVertical(const Point &boundingBoxMin, const Point &boundingBoxMax)
+{
+   mPos.y = boundingBoxMin.y + (boundingBoxMax.y - mPos.y);
+}
+
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -128,6 +141,19 @@ boost::shared_ptr<Geometry> SimpleLineGeometry::copyGeometry() const
     return boost::shared_ptr<Geometry>(new SimpleLineGeometry(*this));
 }
 
+
+void SimpleLineGeometry::flipHorizontal(const Point &boundingBoxMin, const Point &boundingBoxMax)
+{
+   mFromPos.x = boundingBoxMin.x + (boundingBoxMax.x - mFromPos.x);
+   mToPos.x = boundingBoxMin.x + (boundingBoxMax.x - mToPos.x);
+}
+
+
+void SimpleLineGeometry::flipVertical(const Point &boundingBoxMin, const Point &boundingBoxMax)
+{
+   mFromPos.y = boundingBoxMin.y + (boundingBoxMax.y - mFromPos.y);
+   mToPos.y = boundingBoxMin.y + (boundingBoxMax.y - mToPos.y);
+}
 
 
 ////////////////////////////////////////
@@ -367,6 +393,20 @@ void PolylineGeometry::readGeom(S32 argc, const char **argv, S32 firstCoord, F32
 boost::shared_ptr<Geometry> PolylineGeometry::copyGeometry() const
 {
     return boost::shared_ptr<Geometry>(new PolylineGeometry(*this));
+}
+
+
+void PolylineGeometry::flipHorizontal(const Point &boundingBoxMin, const Point &boundingBoxMax)
+{
+   for(S32 i = 0; i < mPolyBounds.size(); i++)
+      mPolyBounds[i].x = boundingBoxMin.x + (boundingBoxMax.x - mPolyBounds[i].x);
+}
+
+
+void PolylineGeometry::flipVertical(const Point &boundingBoxMin, const Point &boundingBoxMax)
+{
+   for(S32 i = 0; i < mPolyBounds.size(); i++)
+      mPolyBounds[i].y = boundingBoxMax.y + (boundingBoxMax.y - mPolyBounds[i].y);
 }
 
 

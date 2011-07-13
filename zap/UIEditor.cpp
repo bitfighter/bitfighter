@@ -499,8 +499,6 @@ void EditorUserInterface::undo(bool addToRedoStack)
 
    gEditorGame->setGridDatabase(boost::dynamic_pointer_cast<GridDatabase>(mUndoItems[mLastUndoIndex % UNDO_STATES]));
 
-   makeSureAllObjectsHaveValidGame();
-
    //restoreItems(mUndoItems[mLastUndoIndex % UNDO_STATES]);
 
 //logprintf("Undo -- now using database %p", gEditorGame->getGridDatabase().get());
@@ -532,8 +530,6 @@ void EditorUserInterface::redo()
       //restoreItems(mUndoItems[mLastUndoIndex % UNDO_STATES]);   
       gEditorGame->setGridDatabase(mUndoItems[mLastUndoIndex % UNDO_STATES]);
       TNLAssert(mUndoItems[mLastUndoIndex % UNDO_STATES], "null!");
-
-      makeSureAllObjectsHaveValidGame();
 
       rebuildEverything();
       validateLevel();
@@ -2412,6 +2408,7 @@ void EditorUserInterface::startDraggingDockItem()
    // Instantiate object so we are in essence dragging a non-dock item
    EditorObject *item = mDockItems[mDraggingDockItem]->newCopy();
    item->newObjectFromDock(getGridSize());
+   item->setExtent();
 
    //item->initializeEditor(getGridSize());    // Override this to define some initial geometry for your object... 
 
