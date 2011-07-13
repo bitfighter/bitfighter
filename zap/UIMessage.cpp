@@ -29,6 +29,7 @@
 #include "UIMessage.h"
 #include "UIMenus.h"
 #include "Colors.h"
+#include "ScreenInfo.h"
 
 #include "SDL/SDL_opengl.h"
 

@@ -202,8 +202,7 @@ bool SpeedZone::processArguments(S32 argc2, const char **argv2, Game *game)
    {
       char firstChar = argv2[i][0];    // First character of arg
 
-      if((firstChar >= 'a' && firstChar <= 'z') || (firstChar >= 'A' || firstChar <= 'Z'))
-      switch(firstChar)
+      if((firstChar >= 'a' && firstChar <= 'z') || (firstChar >= 'A' && firstChar <= 'Z'))
       {
          if(firstChar = 'R') // 015a
             mRotateSpeed = atof(&argv2[i][1]);   // using second char to handle number, "R3.4" or "R-1.7"

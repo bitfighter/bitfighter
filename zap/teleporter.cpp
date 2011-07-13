@@ -92,7 +92,7 @@ bool Teleporter::processArguments(S32 argc2, const char **argv2, Game *game)
    {
       char firstChar = argv2[i][0];    // First character of arg
 
-      if((firstChar >= 'a' && firstChar <= 'z') || (firstChar >= 'A' || firstChar <= 'Z'))  // starts with a letter
+      if((firstChar >= 'a' && firstChar <= 'z') || (firstChar >= 'A' && firstChar <= 'Z'))  // starts with a letter
       {
          if(!strnicmp(argv2[i], "Delay=", 6))
             mTeleporterDelay = U32(atof(&argv2[i][6]) * 1000);

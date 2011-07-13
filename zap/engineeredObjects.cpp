@@ -1070,7 +1070,7 @@ bool Turret::processArguments(S32 argc2, const char **argv2, Game *game)
    for(S32 i = 0; i < argc2; i++)
    {
       char firstChar = argv2[i][0];
-      if((firstChar >= 'a' && firstChar <= 'z') || (firstChar >= 'A' || firstChar <= 'Z'))  // starts with a letter
+      if((firstChar >= 'a' && firstChar <= 'z') || (firstChar >= 'A' && firstChar <= 'Z'))  // starts with a letter
       {
          if(!strncmp(argv2[i], "W=", 2))  // W= is in 015a
          {

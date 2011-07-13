@@ -30,6 +30,7 @@
 #include "game.h"
 #include "gameConnection.h"
 #include "UIRebindKeys.h"
+#include "ScreenInfo.h"
 
 #include "SDL/SDL_opengl.h"
 
