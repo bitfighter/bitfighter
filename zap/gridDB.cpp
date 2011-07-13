@@ -197,6 +197,32 @@ void GridDatabase::findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVecto
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+// Constructor
+DatabaseObject::DatabaseObject() 
+{
+   initialize();
+}    
+
+
+// Copy constructor
+DatabaseObject::DatabaseObject(const DatabaseObject &t) 
+{  
+   initialize();
+   mObjectTypeMask = t.mObjectTypeMask; 
+   mObjectTypeNumber = t.mObjectTypeNumber; 
+}
+
+
+// Code that needs to run for both constructor and copy constructor
+void DatabaseObject::initialize() 
+{
+   mLastQueryId = 0; 
+   mExtent = Rect(); 
+   mInDatabase = false; 
+}
+
+
+
 // Find objects along a ray, returning first discovered object, along with time of
 // that collision and a Point representing the normal angle at intersection point
 //             (at least I think that's what's going on here - CE)
@@ -304,7 +330,7 @@ void DatabaseObject::addToDatabase()
       return;
 
    mInDatabase = true;
-   getGridDatabase()->addToDatabase(this, extent);
+   getGridDatabase()->addToDatabase(this, mExtent);
 }
 
 
@@ -314,7 +340,7 @@ void DatabaseObject::removeFromDatabase()
       return;
 
    mInDatabase = false;
-   getGridDatabase()->removeFromDatabase(this, extent);
+   getGridDatabase()->removeFromDatabase(this, mExtent);
 }
 
 
@@ -326,12 +352,12 @@ void DatabaseObject::setExtent(const Rect &extents)
    if(mInDatabase && gridDB != NULL)
    {
       // Remove from the extents database for current extents...
-      gridDB->removeFromDatabase(this, extent);    // old extent
+      gridDB->removeFromDatabase(this, mExtent);    // old extent
       // ...and re-add for the new extent
       gridDB->addToDatabase(this, extents);
    }
 
-   extent.set(extents);
+   mExtent.set(extents);
 }
 
 

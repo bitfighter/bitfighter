@@ -50,7 +50,7 @@ friend class GridDatabase;
 
 private:
    U32 mLastQueryId;
-   Rect extent;
+   Rect mExtent;
    bool mInDatabase;
 
 protected:
@@ -58,17 +58,17 @@ protected:
    U8 mObjectTypeNumber;
 
 public:
-   DatabaseObject() { mLastQueryId = 0; extent = Rect(); mInDatabase = false; }    // Quickie constructor
-   DatabaseObject(const DatabaseObject &t) {  mLastQueryId = 0; extent = Rect(); mInDatabase = false; 
-   mObjectTypeMask = t.mObjectTypeMask; mObjectTypeNumber = t.mObjectTypeNumber; }
+   DatabaseObject();                            // Constructor
+   DatabaseObject(const DatabaseObject &t);     // Copy constructor
 
+   void initialize();
 
    U32 getObjectTypeMask() { return mObjectTypeMask; }   
    void setObjectTypeMask(U32 objectTypeMask) { mObjectTypeMask = objectTypeMask; }
    U8 getObjectTypeNumber() { return mObjectTypeNumber; }   
    void setObjectTypeNumber(U8 objectTypeNumber) { mObjectTypeNumber = objectTypeNumber; }
 
-   Rect getExtent() { return extent; }
+   Rect getExtent() { return mExtent; }
    void setExtent(const Rect &extentRect);
 
    virtual GridDatabase *getGridDatabase() = 0;
