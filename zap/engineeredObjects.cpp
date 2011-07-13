@@ -1066,14 +1066,13 @@ Vector<Point> Turret::getBufferForBotZone()
 bool Turret::processArguments(S32 argc2, const char **argv2, Game *game)
 {
    S32 argc1 = 0;
-   const char *argv1[128];
+   const char *argv1[32];
    for(S32 i = 0; i < argc2; i++)
    {
-      char c = argv2[i][0];
-      switch(c)
+      char firstChar = argv2[i][0];
+      if((firstChar >= 'a' && firstChar <= 'z') || (firstChar >= 'A' || firstChar <= 'Z'))  // starts with a letter
       {
-      case 'W':
-         if(argv2[i][1] == '=')
+         if(!strncmp(argv2[i], "W=", 2))  // W= is in 015a
          {
             S32 w=0;
             while(w < WeaponCount && stricmp(gWeapons[w].name.getString(), &argv2[i][2]))
@@ -1083,13 +1082,15 @@ bool Turret::processArguments(S32 argc2, const char **argv2, Game *game)
             break;
          }
       }
-      if((c < 'a' || c > 'z') && (c < 'A' || c > 'Z'))
+      else
       {
-         if(argc1 < 128)
-         {  argv1[argc1] = argv2[i];
+         if(argc1 < 32)
+         {
+            argv1[argc1] = argv2[i];
             argc1++;
          }
       }
+      
    }
 
    bool returnBool = EngineeredObject::processArguments(argc1, argv1, game);
@@ -1097,6 +1098,13 @@ bool Turret::processArguments(S32 argc2, const char **argv2, Game *game)
    return returnBool;
 }
 
+string Turret::toString(F32 gridSize) const
+{
+   string out = EngineeredObject::toString(gridSize);
+   if(mWeaponFireType != WeaponTurret)
+      out = out + " W=" + gWeapons[mWeaponFireType].name.getString();
+   return out;
+}
 
 // static method
 void Turret::getGeom(const Point &anchor, const Point &normal, Vector<Point> &polyPoints)

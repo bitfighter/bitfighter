@@ -111,7 +111,7 @@ public:
    Point getVert(S32 index) const { return mAnchorPoint; }
    void setVert(const Point &pos, S32 index) { mAnchorPoint = pos; }
    
-   string toString(F32 gridSize) const;
+   virtual string toString(F32 gridSize) const;
 
    /////
    // LuaItem interface
@@ -261,6 +261,7 @@ public:
 
    S32 mWeaponFireType;
    bool processArguments(S32 argc, const char **argv, Game *game);
+   string toString(F32 gridSize) const;
 
    static const S32 defaultRespawnTime = 0;
 
