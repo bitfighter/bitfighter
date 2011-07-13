@@ -498,6 +498,11 @@ void EditorUserInterface::undo(bool addToRedoStack)
    mLastUndoIndex--;
 
    gEditorGame->setGridDatabase(boost::dynamic_pointer_cast<GridDatabase>(mUndoItems[mLastUndoIndex % UNDO_STATES]));
+
+   const Vector<EditorObject *> *objList = getObjectList();
+   for(S32 i = 0; i < objList->size(); i++)
+      objList->get(i)->setGame(gEditorGame);
+
    //restoreItems(mUndoItems[mLastUndoIndex % UNDO_STATES]);
 
 //logprintf("Undo -- now using database %p", gEditorGame->getGridDatabase().get());
