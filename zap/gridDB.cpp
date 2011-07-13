@@ -141,7 +141,7 @@ void GridDatabase::findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVecto
 
             if(theObject->mLastQueryId != mQueryId &&                                                             // Object hasn't been queried; and
                ((theObject->getObjectTypeMask() & typeMask) || theObject->getObjectTypeNumber() == typeNumber) && // is of the right type; and
-               (!extents || theObject->extent.intersects(*extents)) )                                             // overlaps our extents (if passed)
+               (!extents || theObject->mExtent.intersects(*extents)) )                                             // overlaps our extents (if passed)
             {
                walk->theObject->mLastQueryId = mQueryId;    // Flag the object so we know we've already visited it
                fillVector.push_back(walk->theObject);       // And save it as a found item
