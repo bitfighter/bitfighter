@@ -81,8 +81,6 @@ const U32 ControllerButtonDPadRight = 1 << 13;
 
 // The following functions are defined differently on each platform in the the platInput.cpp files
 
-void getModifierState( bool &shiftDown, bool &controlDown, bool &altDown );
-
 void InitJoystick();
 ControllerTypeType autodetectJoystickType();
 void ShutdownJoystick();

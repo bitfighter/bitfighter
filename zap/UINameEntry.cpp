@@ -32,6 +32,7 @@
 #include "gameConnection.h"
 #include "config.h"
 #include "md5wrapper.h"
+#include "ScreenInfo.h"
 
 #include "SDL/SDL_opengl.h"
 

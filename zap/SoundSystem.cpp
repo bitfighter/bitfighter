@@ -369,7 +369,8 @@ void SoundSystem::playSoundEffect(SFXHandle& effect)
       for(S32 i = 0; i < gPlayList.size(); i++)
          if(effect == gPlayList[i].getPointer())
             return;
-      gPlayList.push_back(effect);
+      if(gPlayList.size() < 100)  // limit sounds, as search takes too long when list is big
+         gPlayList.push_back(effect);
    }
 }
 

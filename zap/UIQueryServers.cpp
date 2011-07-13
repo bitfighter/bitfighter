@@ -35,6 +35,7 @@
 #include "UIChat.h"
 #include "UIDiagnostics.h"
 #include "keyCode.h"
+#include "ScreenInfo.h"
 
 #include "SDL/SDL.h"
 #include "SDL/SDL_opengl.h"
@@ -1035,6 +1036,8 @@ void QueryServersUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       leaveGlobalChat();
       gMainMenuUserInterface.activate();
    }
+   else if(keyCode == keyDIAG)            // Turn on diagnostic overlay
+      gDiagnosticInterface.activate();
    else if(keyCode == keyOUTGAMECHAT)           // Toggle half-height servers, full-height servers, and full chat overlay
    {
       mShowChat = !mShowChat;

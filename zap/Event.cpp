@@ -13,6 +13,7 @@
 #include "UIDiagnostics.h"
 #include "IniFile.h"
 #include "screenShooter.h"
+#include "ScreenInfo.h"
 
 #include "SDL/SDL_opengl.h"
 
@@ -54,10 +55,7 @@ void Event::onEvent(SDL_Event* event)
          break;
 
       case SDL_MOUSEMOTION:
-            onMouseMoved(event->motion.x, event->motion.y, event->motion.xrel, event->motion.yrel, (event->motion.state
-                  & SDL_BUTTON(SDL_BUTTON_LEFT)) != 0, (event->motion.state
-                  & SDL_BUTTON(SDL_BUTTON_RIGHT)) != 0, (event->motion.state
-                  & SDL_BUTTON(SDL_BUTTON_MIDDLE)) != 0);
+            onMouseMoved(event->motion.x, event->motion.y);
          break;
 
       case SDL_MOUSEBUTTONDOWN:
@@ -173,6 +171,8 @@ void Event::onInputBlur()
 
 void Event::onKeyDown(SDLKey key, SDLMod mod, U16 unicode)
 {
+//   logprintf("Key: %d; Mod: %d", key, mod);
+
    // Global modifiers
 
    // ALT + ENTER --> toggles window mode/full screen
@@ -183,14 +183,10 @@ void Event::onKeyDown(SDLKey key, SDLMod mod, U16 unicode)
    else if(key == SDLK_q && (mod & KMOD_CTRL))
       gScreenshooter.phase = 1;
 
-   // Turn on diagnostic overlay -- can be used anywhere
-   else if(key == SDLK_F7)
-      gDiagnosticInterface.activate();
-
    // The rest
    else
    {
-      KeyCode keyCode = standardSDLKeyToKeyCode(key);
+      KeyCode keyCode = sdlKeyToKeyCode(key);
       setKeyState(keyCode, true);
 
       if(UserInterface::current)
@@ -200,7 +196,7 @@ void Event::onKeyDown(SDLKey key, SDLMod mod, U16 unicode)
 
 void Event::onKeyUp(SDLKey key, SDLMod mod, U16 unicode)
 {
-   KeyCode keyCode = standardSDLKeyToKeyCode(key);
+   KeyCode keyCode = sdlKeyToKeyCode(key);
    setKeyState(keyCode, false);
 
    if(UserInterface::current)
@@ -217,7 +213,7 @@ void Event::onMouseBlur()
 
 }
 
-void Event::onMouseMoved(S32 x, S32 y, S32 relX, S32 relY, bool Left, bool Right, bool Middle)
+void Event::onMouseMoved(S32 x, S32 y)
 {
    setMousePos(x, y);
 
@@ -338,31 +334,25 @@ void Event::onRestore()
 
 }
 
+// We don't need to worry about this event in fullscreen modes because it is never fired with SDL
 void Event::onResize(S32 width, S32 height)
 {
-   // If we are entering fullscreen mode, then we don't want to mess around with proportions and all that.  Just save window size and get out.
-   if(gIniSettings.displayMode == DISPLAY_MODE_FULL_SCREEN_STRETCHED || gIniSettings.displayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED)
-      gScreenInfo.setWindowSize(width, height);
+   S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
+   S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
 
+   // Constrain window to correct proportions...
+   if((width - canvasWidth) > (height - canvasHeight))      // Wider than taller  (is this right? mixing virtual and physical pixels)
+      gIniSettings.winSizeFact = max((F32) height / (F32)canvasHeight, gScreenInfo.getMinScalingFactor());
    else
-   {
-      S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
-      S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
+      gIniSettings.winSizeFact = max((F32) width / (F32)canvasWidth, gScreenInfo.getMinScalingFactor());
 
-      // Constrain window to correct proportions...
-      if((width - canvasWidth) > (height - canvasHeight))      // Wider than taller  (is this right? mixing virtual and physical pixels)
-         gIniSettings.winSizeFact = max((F32) height / (F32)canvasHeight, gScreenInfo.getMinScalingFactor());
-      else
-         gIniSettings.winSizeFact = max((F32) width / (F32)canvasWidth, gScreenInfo.getMinScalingFactor());
+   S32 newWidth  = (S32)floor(canvasWidth  * gIniSettings.winSizeFact + 0.5f);   // virtual * (physical/virtual) = physical, fix rounding problem
+   S32 newHeight = (S32)floor(canvasHeight * gIniSettings.winSizeFact + 0.5f);
 
-      S32 newWidth  = (S32)floor(canvasWidth  * gIniSettings.winSizeFact + 0.5f);   // virtual * (physical/virtual) = physical, fix rounding problem
-      S32 newHeight = (S32)floor(canvasHeight * gIniSettings.winSizeFact + 0.5f);
-
-      S32 flags = 0;
-      flags = gScreenInfo.isHardwareSurface() ? SDL_OPENGL | SDL_HWSURFACE | SDL_RESIZABLE : SDL_OPENGL | SDL_RESIZABLE;
-      SDL_SetVideoMode(newWidth, newHeight, 0, flags);
-      gScreenInfo.setWindowSize(newWidth, newHeight);
-   }
+   S32 flags = 0;
+   flags = gScreenInfo.isHardwareSurface() ? SDL_OPENGL | SDL_HWSURFACE | SDL_RESIZABLE : SDL_OPENGL | SDL_RESIZABLE;
+   SDL_SetVideoMode(newWidth, newHeight, 0, flags);
+   gScreenInfo.setWindowSize(newWidth, newHeight);
 
    glViewport(0, 0, gScreenInfo.getWindowWidth(), gScreenInfo.getWindowHeight());
    OGLCONSOLE_Reshape();

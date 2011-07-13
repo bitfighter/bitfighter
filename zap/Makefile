@@ -29,7 +29,7 @@ EXEFILE=bitfighter
 SFX_LFLAGS=-lopenal -lspeex -lvorbis
 
 # graphics linker flags
-GFX_LFLAGS=-lSDL -lGL -lX11
+GFX_LFLAGS=-lSDL -lGL
 
 # Other needed linker flags
 LFLAGS=-lstdc++ -lm -ldl
@@ -114,6 +114,7 @@ OBJECTS_ZAP=\
    Rect.o\
    retrieveGame.o\
    robot.o\
+   ScreenInfo.o\
    screenShooter.o\
    SoundSystem.o\
    SoundEffect.o\

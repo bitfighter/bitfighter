@@ -201,6 +201,7 @@
     <ClCompile Include="..\zap\rabbitGame.cpp" />
     <ClCompile Include="..\zap\retrieveGame.cpp" />
     <ClCompile Include="..\zap\robot.cpp" />
+    <ClCompile Include="..\zap\ScreenInfo.cpp" />
     <ClCompile Include="..\zap\screenShooter.cpp" />
     <ClCompile Include="..\zap\SoundSystem.cpp" />
     <ClCompile Include="..\zap\SoundEffect.cpp" />
@@ -315,6 +316,7 @@
     <ClInclude Include="..\zap\resource.h" />
     <ClInclude Include="..\zap\robot.h" />
     <ClInclude Include="..\zap\screenShooter.h" />
+    <ClInclude Include="..\zap\ScreenInfo.h" />
     <ClInclude Include="..\zap\SFXProfile.h" />
     <ClInclude Include="..\zap\SoundSystem.h" />
     <ClInclude Include="..\zap\SoundEffect.h" />

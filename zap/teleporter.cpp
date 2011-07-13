@@ -92,10 +92,12 @@ bool Teleporter::processArguments(S32 argc2, const char **argv2, Game *game)
    {
       char firstChar = argv2[i][0];    // First character of arg
 
-      if(!strnicmp(argv2[i], "Delay=", 6))
-         mTeleporterDelay = U32(atof(&argv2[i][6]) * 1000);
-
-      if((firstChar < 'a' || firstChar > 'z') && (firstChar < 'A' || firstChar > 'Z'))    // firstChar is not a letter
+      if((firstChar >= 'a' && firstChar <= 'z') || (firstChar >= 'A' && firstChar <= 'Z'))  // starts with a letter
+      {
+         if(!strnicmp(argv2[i], "Delay=", 6))
+            mTeleporterDelay = U32(atof(&argv2[i][6]) * 1000);
+      }
+      else
       {
          if(argc < 8)
          {  
@@ -151,7 +153,10 @@ bool Teleporter::processArguments(S32 argc2, const char **argv2, Game *game)
 
 string Teleporter::toString(F32 gridSize) const
 {
-   return string(getClassName()) + " " + geomToString(gridSize);
+   string out = string(getClassName()) + " " + geomToString(gridSize);
+   if(mTeleporterDelay != TeleporterDelay)
+      out += " Delay=" + ftos(mTeleporterDelay / 1000.f, 3);
+   return out;
 }
 
 

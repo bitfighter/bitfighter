@@ -48,6 +48,7 @@
 #include "md5wrapper.h"          // For submission of passwords
 #include "oglconsole.h"          // Our console object
 #include "config.h"              // for Getmap level dir
+#include "ScreenInfo.h"
 
 #include "../tnl/tnlEndian.h"
 
@@ -881,7 +882,8 @@ void GameUserInterface::onMouseMoved()
       if(!ship)      // Can sometimes happen when switching levels. This will stop the ensuing crashing.
          return;
 
-      Point p = gClientGame->worldToScreenPoint( &ship->getRenderPos() );
+      Point o = ship->getRenderPos();  // To avoid taking address of temporary
+      Point p = gClientGame->worldToScreenPoint( &o );
 
       mCurrentMove.angle = atan2(mMousePoint.y + gScreenInfo.getGameCanvasHeight() / 2 - p.y, 
                                  mMousePoint.x + gScreenInfo.getGameCanvasWidth() / 2 - p.x);
@@ -1024,6 +1026,8 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       setBusyChatting(true);
       gChatInterface.activate();
    }
+   else if(keyCode == keyDIAG)            // Turn on diagnostic overlay
+      gDiagnosticInterface.activate();
    else if(keyCode == keyMISSION)
    {
       mMissionOverlayActive = true;

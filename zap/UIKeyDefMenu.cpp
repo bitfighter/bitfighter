@@ -34,6 +34,7 @@
 #include "config.h"
 #include "game.h"    // For gClientGame
 #include "Colors.h"
+#include "ScreenInfo.h"
 
 #include "SDL/SDL.h"
 #include "SDL/SDL_opengl.h"
@@ -365,6 +366,11 @@ void KeyDefMenuUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    {
       UserInterface::playBoop();
       gChatInterface.activate();
+   }
+   else if(keyCode == keyDIAG)     // Turn on diagnostic overlay
+   {
+      UserInterface::playBoop();
+      gDiagnosticInterface.activate();
    }
 
 }

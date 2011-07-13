@@ -47,7 +47,8 @@ void resetKeyStates();                          // Initialize key states
 void dumpKeyStates();                           // Log key states for testing
 void checkModifierKeyState();                   // Handle Ctrl, Shift, Alt
 
-KeyCode standardSDLKeyToKeyCode(int key);       // Convert SDL keys to KeyCode
+KeyCode sdlKeyToKeyCode(int key);       // Convert SDL keys to KeyCode
+
 int keyCodeToSDLKey(KeyCode keyCode);           // Take a KeyCode and return the SDL equivalent
 
 char keyToAscii(int unicode, KeyCode keyCode);  // Return a printable ascii char, if possible

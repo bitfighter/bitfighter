@@ -131,6 +131,7 @@ using namespace TNL;
 #include "Colors.h"
 #include "screenShooter.h"
 #include "Event.h"
+#include "ScreenInfo.h"
 
 #include "SDL/SDL.h"
 #include "SDL/SDL_opengl.h"
@@ -1627,6 +1628,9 @@ void actualizeScreenMode(bool changingInterfaces)
    if(SDL_SetVideoMode(sdlWindowWidth, sdlWindowHeight, 0, sdlVideoFlags) == NULL)
          logprintf(LogConsumer::LogFatalError, "Setting display mode failed: %s", SDL_GetError());
 
+   // Now save the new window dimensions in ScreenInfo
+   gScreenInfo.setWindowSize(sdlWindowWidth, sdlWindowHeight);
+
    glClearColor( 0, 0, 0, 0 );
 
    glViewport(0, 0, sdlWindowWidth, sdlWindowHeight);
@@ -1853,6 +1857,7 @@ int main(int argc, char **argv)
 
       InitSdlVideo();         // Get our main SDL rendering window all set up
       SDL_EnableUNICODE(1);   // Activate unicode ==> http://sdl.beuc.net/sdl.wiki/SDL_EnableUNICODE
+      SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
 
       // Put 0,0 at the center of the screen
       //glTranslatef(gScreenInfo.getGameCanvasWidth() / 2, gScreenInfo.getGameCanvasHeight() / 2, 0);     

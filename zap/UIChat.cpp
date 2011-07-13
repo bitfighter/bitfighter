@@ -30,7 +30,9 @@
 #include "UINameEntry.h"
 #include "UIMenus.h"
 #include "UIGame.h"  // For putting private messages into game console
+#include "UIDiagnostics.h"
 #include "Colors.h"
+#include "ScreenInfo.h"
 
 #include "SDL/SDL_opengl.h"
 
@@ -426,6 +428,8 @@ void ChatUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 {
    if(keyCode == keyOUTGAMECHAT)
       onOutGameChat();
+   else if(keyCode == keyDIAG)            // Turn on diagnostic overlay
+      gDiagnosticInterface.activate();
    else if(keyCode == KEY_ESCAPE)
       onEscape();
    else if (keyCode == KEY_ENTER)                // Submits message

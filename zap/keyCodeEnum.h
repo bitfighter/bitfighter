@@ -58,14 +58,9 @@ enum KeyCode {
    // Locks
    KEY_NUMLOCK, KEY_CAPSLOCK, KEY_SCROLLOCK,
 
-   // Modifiers
-   KEY_RSHIFT, KEY_LSHIFT, KEY_RCTRL, KEY_LCTRL,
-   KEY_RALT, KEY_LALT, KEY_RMETA, KEY_LMETA,
-   KEY_LSUPER, KEY_RSUPER,
-   
-   // And these are psudeo modifers, that may represent multiple events
+   // And these are pseudo modifers, that may represent multiple events
    // (e.g. KEY_SHIFT means KEY_LSHIFT or KEY_RSHIFT)
-   KEY_SHIFT,   KEY_CTRL,   KEY_ALT,   KEY_META,
+   KEY_SHIFT,   KEY_CTRL,   KEY_ALT,   KEY_META,  KEY_SUPER,
 
    // Some keys in SDL that were not in GLUT
    KEY_CLEAR, KEY_PAUSE, KEY_EXCLAIM, KEY_DOUBLEQUOTE, KEY_HASH, KEY_DOLLAR,

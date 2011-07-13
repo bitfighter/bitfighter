@@ -57,6 +57,7 @@
 #include "stringUtils.h"
 
 #include "oglconsole.h"          // Our console object
+#include "ScreenInfo.h"
 
 #include "SDL/SDL.h"
 #include "SDL/SDL_opengl.h"
@@ -3187,15 +3188,15 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    }
    else if(keyCode == KEY_Z)
    {
-      if(getKeyState(KEY_LCTRL) && getKeyState(KEY_LSHIFT))   // Ctrl-Shift-Z - Redo
+      if(getKeyState(KEY_CTRL) && getKeyState(KEY_SHIFT))   // Ctrl-Shift-Z - Redo
          redo();
-      else if(getKeyState(KEY_LCTRL))    // Ctrl-Z - Undo
+      else if(getKeyState(KEY_CTRL))    // Ctrl-Z - Undo
          undo(true);
       else                              // Z - Reset veiw
         centerView();
    }
    else if(keyCode == KEY_R)
-      if(getKeyState(KEY_LCTRL) && getKeyState(KEY_LSHIFT))      // Ctrl-Shift-R - Rotate by arbitrary amount
+      if(getKeyState(KEY_CTRL) && getKeyState(KEY_SHIFT))      // Ctrl-Shift-R - Rotate by arbitrary amount
       {
          if(!anyItemsSelected())
             return;
@@ -3217,7 +3218,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       copyScriptItemsToEditor();
    }
 
-   else if((keyCode == KEY_UP) && !getKeyState(KEY_CTRL) || keyCode == KEY_W)  // W or Up - Pan up
+   else if(((keyCode == KEY_UP) && !getKeyState(KEY_CTRL)) || keyCode == KEY_W)  // W or Up - Pan up
       mUp = true;
    else if(keyCode == KEY_UP && getKeyState(KEY_CTRL))      // Ctrl-Up - Zoom in
       mIn = true;
@@ -3326,6 +3327,8 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    }
    else if(keyCode == keyOUTGAMECHAT)     // Turn on Global Chat overlay
       gChatInterface.activate();
+   else if(keyCode == keyDIAG)            // Turn on diagnostic overlay
+      gDiagnosticInterface.activate();
    else if(keyCode == KEY_ESCAPE)           // Activate the menu
    {
       UserInterface::playBoop();

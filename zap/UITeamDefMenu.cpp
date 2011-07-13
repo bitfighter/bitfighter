@@ -33,6 +33,7 @@
 #include "IniFile.h"
 #include "config.h"
 #include "gameType.h"      // For MAX_TEAMS
+#include "ScreenInfo.h"
 
 #include "SDL/SDL.h"
 #include "SDL/SDL_opengl.h"
@@ -339,6 +340,11 @@ void TeamDefUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          selectedIndex = 0;
       UserInterface::playBoop();
       SDL_ShowCursor(SDL_DISABLE);
+   }
+   else if(keyCode == keyDIAG)     // Turn on diagnostic overlay
+   {
+      gDiagnosticInterface.activate();
+      UserInterface::playBoop();
    }
    else if(keyCode == keyOUTGAMECHAT)     // Turn on Global Chat overlay
    {

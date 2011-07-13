@@ -55,14 +55,6 @@ namespace Zap
 
 bool gJoystickInit = false;
 
-void getModifierState(bool &shiftDown, bool &controlDown, bool &altDown)
-{
-   UInt32 modKeys = GetCurrentEventKeyModifiers();
-   shiftDown = (modKeys & shiftKey) != 0;
-   controlDown = (modKeys & controlKey) != 0;
-   altDown = (modKeys & optionKey) != 0;
-}
-
 enum AxisIndex
 {
    AxisX,

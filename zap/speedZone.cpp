@@ -202,18 +202,16 @@ bool SpeedZone::processArguments(S32 argc2, const char **argv2, Game *game)
    {
       char firstChar = argv2[i][0];    // First character of arg
 
-      switch(firstChar)
+      if((firstChar >= 'a' && firstChar <= 'z') || (firstChar >= 'A' && firstChar <= 'Z'))
       {
-         case 'R': 
-            mRotateSpeed = atof(&argv2[i][1]); 
-            break;  // using second char to handle number, "R3.4" or "R-1.7"
-         case 'S':
-            if(!strcmp(argv2[i], "SnapEnable"))
-               mSnapLocation = true;
-            break;
+         if(firstChar = 'R') // 015a
+            mRotateSpeed = atof(&argv2[i][1]);   // using second char to handle number, "R3.4" or "R-1.7"
+         else if(!strnicmp(argv2[i], "Rotate=", 7))  // 016, same as 'R', better name
+            mRotateSpeed = atof(&argv2[i][7]);   // "Rotate=3.4" or "Rotate=-1.7"
+         else if(!stricmp(argv2[i], "SnapEnable"))
+            mSnapLocation = true;
       }
-
-      if((firstChar < 'a' || firstChar > 'z') && (firstChar < 'A' || firstChar > 'Z'))    // firstChar is not a letter
+      else
       {
          if(argc < 8)
          {  
@@ -258,7 +256,12 @@ bool SpeedZone::processArguments(S32 argc2, const char **argv2, Game *game)
 // Editor
 string SpeedZone::toString(F32 gridSize) const
 {
-   return string(getClassName()) + " " + geomToString(gridSize) + " " + itos(mSpeed);
+   string out = string(getClassName()) + " " + geomToString(gridSize) + " " + itos(mSpeed);
+   if(mSnapLocation)
+      out += " SnapEnable";
+   if(mRotateSpeed != 0)
+      out += " Rotate=" + ftos(mRotateSpeed, 4);
+   return out;
 }
 
 

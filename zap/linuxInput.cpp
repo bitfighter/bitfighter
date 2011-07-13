@@ -28,10 +28,6 @@
 
 #ifndef ZAP_DEDICATED
 
-#include <X11/Xlib.h>
-#include <X11/keysym.h>
-
-
 //some joystick code was taken from http://coding.derkeiler.com/Archive/General/comp.programming/2007-05/msg00480.html
 // need to include /usr/include/linux/joystick.h
 #include <fcntl.h>
@@ -46,7 +42,6 @@ namespace Zap
 bool gJoystickInit = false;
 
 #ifndef ZAP_DEDICATED
-static Display *Xdisplay = XOpenDisplay(NULL);
 
 
 const U32 MAX_AXIS = 32;
@@ -72,26 +67,6 @@ extern Vector<string> gJoystickNames;
 extern U32 gUseStickNumber;
 
 #endif
-
-
-
-void getModifierState(bool &shiftDown, bool &controlDown, bool &altDown)
-{
-#ifndef ZAP_DEDICATED
-   char key_map_stat[32];
-   XQueryKeymap(Xdisplay, key_map_stat);
-
-   // This can most definitely be simplified
-   altDown = (((key_map_stat[XKeysymToKeycode(Xdisplay,XK_Alt_L) >> 3] >> (XKeysymToKeycode(Xdisplay,XK_Alt_L) & 7)) & 1) ||
-         ((key_map_stat[XKeysymToKeycode(Xdisplay,XK_Alt_R) >> 3] >> (XKeysymToKeycode(Xdisplay,XK_Alt_R) & 7)) & 1));
-
-   shiftDown = (((key_map_stat[XKeysymToKeycode(Xdisplay,XK_Shift_L) >> 3] >> (XKeysymToKeycode(Xdisplay,XK_Shift_L) & 7)) & 1) ||
-         ((key_map_stat[XKeysymToKeycode(Xdisplay,XK_Shift_R) >> 3] >> (XKeysymToKeycode(Xdisplay,XK_Shift_R) & 7)) & 1));
-
-   controlDown = (((key_map_stat[XKeysymToKeycode(Xdisplay,XK_Control_L) >> 3] >> (XKeysymToKeycode(Xdisplay,XK_Control_L) & 7)) & 1) ||
-         ((key_map_stat[XKeysymToKeycode(Xdisplay,XK_Control_R) >> 3] >> (XKeysymToKeycode(Xdisplay,XK_Control_R) & 7)) & 1));
-#endif
-}
 
 
 // Joystick code loosely based on http://coding.derkeiler.com/Archive/General/comp.programming/2007-05/msg00480.html

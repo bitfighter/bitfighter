@@ -38,13 +38,6 @@ namespace Zap
 
 extern const char *gWindowTitle;
 
-void getModifierState( bool &shiftDown, bool &controlDown, bool &altDown )
-{
-   shiftDown = ( GetKeyState( VK_SHIFT ) & 0xFF00 ) != 0;
-   controlDown = ( GetKeyState( VK_CONTROL ) & 0xFF00 ) != 0;
-   altDown = ( GetKeyState( VK_MENU ) & 0xFF00 ) != 0;
-}
-
 void checkMousePos(S32 maxdx, S32 maxdy)
 {
    char windowName[256];

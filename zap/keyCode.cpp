@@ -37,9 +37,9 @@
 
 #include "zapjournal.h"    // For journaling support
 
-#include "SDL/SDL.h"
-
 #include <ctype.h>
+
+#include "SDL/SDL.h"
 
 using namespace TNL;
 
@@ -105,17 +105,7 @@ void setKeyState(KeyCode keyCode, bool state)
 // Returns true of key is down, false if it is up
 bool getKeyState(KeyCode keyCode)
 {
-   //logprintf("State: key %d is %s", keyCode, keyIsDown[(int) keyCode] ? "down" : "up");
-      // Handle some special cases:
-   if(keyCode == KEY_CTRL)
-      return(keyIsDown[(int) KEY_LCTRL] || keyIsDown[(int) KEY_RCTRL]);
-   else if(keyCode == KEY_ALT)
-      return(keyIsDown[(int) KEY_LALT] || keyIsDown[(int) KEY_RALT]);
-   else if(keyCode == KEY_SHIFT)
-      return(keyIsDown[(int) KEY_LSHIFT] || keyIsDown[(int) KEY_RSHIFT]);
-   else if(keyCode == KEY_META)
-      return(keyIsDown[(int) KEY_LMETA] || keyIsDown[(int) KEY_RMETA]);
-   else
+//   logprintf("State: key %d is %s", keyCode, keyIsDown[(int) keyCode] ? "down" : "up");
       return keyIsDown[(int) keyCode];
 }
 
@@ -142,9 +132,8 @@ char keyToAscii(int unicode, KeyCode keyCode)
 }
 
 
-
 // Translate SDL standard keys to our KeyCodes
-KeyCode standardSDLKeyToKeyCode(S32 key)
+KeyCode sdlKeyToKeyCode(int key)
 {
    switch(key)
    {
@@ -582,25 +571,20 @@ KeyCode standardSDLKeyToKeyCode(S32 key)
 	   case SDLK_SCROLLOCK:
 		   return KEY_SCROLLOCK;
 	   case SDLK_RSHIFT:
-		   return KEY_RSHIFT;
 	   case SDLK_LSHIFT:
-		   return KEY_LSHIFT;
+		   return KEY_SHIFT;
 	   case SDLK_RCTRL:
-		   return KEY_RCTRL;
 	   case SDLK_LCTRL:
-		   return KEY_LCTRL;
+		   return KEY_CTRL;
 	   case SDLK_RALT:
-		   return KEY_RALT;
 	   case SDLK_LALT:
-		   return KEY_LALT;
+		   return KEY_ALT;
 	   case SDLK_RMETA:
-		   return KEY_RMETA;
 	   case SDLK_LMETA:
-		   return KEY_LMETA;
+		   return KEY_META;
 	   case SDLK_LSUPER:
-		   return KEY_LSUPER;
 	   case SDLK_RSUPER:
-		   return KEY_RSUPER;
+		   return KEY_SUPER;
 	   case SDLK_MODE:
 		   return KEY_MODE;
 	   case SDLK_COMPOSE:
@@ -1067,26 +1051,6 @@ S32 keyCodeToSDLKey(KeyCode keyCode)
 		   return SDLK_CAPSLOCK;
 	   case KEY_SCROLLOCK:
 		   return SDLK_SCROLLOCK;
-	   case KEY_RSHIFT:
-		   return SDLK_RSHIFT;
-	   case KEY_LSHIFT:
-		   return SDLK_LSHIFT;
-	   case KEY_RCTRL:
-		   return SDLK_RCTRL;
-	   case KEY_LCTRL:
-		   return SDLK_LCTRL;
-	   case KEY_RALT:
-		   return SDLK_RALT;
-	   case KEY_LALT:
-		   return SDLK_LALT;
-	   case KEY_RMETA:
-		   return SDLK_RMETA;
-	   case KEY_LMETA:
-		   return SDLK_LMETA;
-	   case KEY_LSUPER:
-		   return SDLK_LSUPER;
-	   case KEY_RSUPER:
-		   return SDLK_RSUPER;
 	   case KEY_MODE:
 		   return SDLK_MODE;
 	   case KEY_COMPOSE:
@@ -1289,6 +1253,10 @@ const char *keyCodeToString(KeyCode keyCode)
          return "Alt";
    case KEY_CTRL:
          return "Ctrl";
+   case KEY_META:
+         return "Meta";
+   case KEY_SUPER:
+         return "Super";
    case MOUSE_LEFT:
       return "Left-mouse";
    case MOUSE_MIDDLE:
@@ -1352,6 +1320,7 @@ const char *keyCodeToString(KeyCode keyCode)
    case KEY_CTRL_S:
       return "Ctrl-S";
    default:
+//      logprintf("undefined keycode number: %d", keyCode);
       return "Undefined key";
    }
 }

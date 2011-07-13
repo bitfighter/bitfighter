@@ -31,6 +31,7 @@
 #include "masterConnection.h"
 #include "input.h"
 #include "version.h"
+#include "ScreenInfo.h"
 
 #include "tnl.h"
 

@@ -42,6 +42,7 @@
 #include "IniFile.h"
 #include "config.h"
 #include "Colors.h"
+#include "ScreenInfo.h"
 
 #include "SDL/SDL.h"
 #include "SDL/SDL_opengl.h"
@@ -510,6 +511,11 @@ bool MenuUserInterface::processKeys(KeyCode keyCode, char ascii)
    else if(keyCode == keyOUTGAMECHAT)     // Turn on Global Chat overlay
    {
       gChatInterface.activate();
+      UserInterface::playBoop();
+   }
+   else if(keyCode == keyDIAG)            // Turn on diagnostic overlay
+   {
+      gDiagnosticInterface.activate();
       UserInterface::playBoop();
    }
 
