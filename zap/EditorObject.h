@@ -96,7 +96,7 @@ public:
    virtual void addToDock(Game *game, const Point &point);
 
 
-    void renderDockItemLabel(const Point &pos, const char *label, F32 yOffset = 0);    // This could be moved anywhere... it's essentially a static method
+   void renderDockItemLabel(const Point &pos, const char *label, F32 yOffset = 0);    // This could be moved anywhere... it's essentially a static method
 
    // Offset lets us drag an item out from the dock by an amount offset from the 0th vertex.  This makes placement seem more natural.
    virtual Point getInitialPlacementOffset(F32 gridSize) { return Point(0,0); }

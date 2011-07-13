@@ -67,7 +67,7 @@ void PointGeometry::readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gr
 }
 
 
-boost::shared_ptr<Geometry> PointGeometry::copyGeometry()
+boost::shared_ptr<Geometry> PointGeometry::copyGeometry() const
 {
     return boost::shared_ptr<Geometry>(new PointGeometry(*this));
 }
@@ -123,7 +123,7 @@ void SimpleLineGeometry::readGeom(S32 argc, const char **argv, S32 firstCoord, F
 }
 
 
-boost::shared_ptr<Geometry> SimpleLineGeometry::copyGeometry()
+boost::shared_ptr<Geometry> SimpleLineGeometry::copyGeometry() const
 {
     return boost::shared_ptr<Geometry>(new SimpleLineGeometry(*this));
 }
@@ -364,7 +364,7 @@ void PolylineGeometry::readGeom(S32 argc, const char **argv, S32 firstCoord, F32
 }
 
 
-boost::shared_ptr<Geometry> PolylineGeometry::copyGeometry()
+boost::shared_ptr<Geometry> PolylineGeometry::copyGeometry() const
 {
     return boost::shared_ptr<Geometry>(new PolylineGeometry(*this));
 }
@@ -392,9 +392,10 @@ void PolygonGeometry::onPointsChanged()
 }
 
 
-boost::shared_ptr<Geometry> PolygonGeometry::copyGeometry()
+boost::shared_ptr<Geometry> PolygonGeometry::copyGeometry() const
 {
-    return boost::shared_ptr<Geometry>(new PolygonGeometry(*this));
+   PolygonGeometry *newGeom = new PolygonGeometry(*this);
+   return boost::shared_ptr<Geometry>(newGeom);
 }
 
 

@@ -131,8 +131,8 @@ EditorUserInterface::EditorUserInterface() : mGridDatabase(GridDatabase())     /
    mShowMode = ShowAllObjects; 
    mWasTesting = false;
 
-   mSnapVertex_i = NULL;
-   mSnapVertex_j = NONE;
+   mSnapObject = NULL;
+   mSnapVertexIndex = NONE;
    mItemHit = NULL;
    mEdgeHit = NONE;
 
@@ -260,11 +260,8 @@ EditorUserInterface::~EditorUserInterface()
 
    mDockItems.clear();
    mLevelGenItems.clear();
-   mClipboard.deleteAndClear();
+   mClipboard.clear();
    delete mNewItem;
-
-   //for(S32 i = 0; i < UNDO_STATES; i++)
-   //   mUndoItems[i].deleteAndClear();
 }
 
 
@@ -486,8 +483,8 @@ void EditorUserInterface::undo(bool addToRedoStack)
    if(!undoAvailable())
       return;
 
-   mSnapVertex_i = NULL;
-   mSnapVertex_j = NONE;
+   mSnapObject = NULL;
+   mSnapVertexIndex = NONE;
 
    if(mLastUndoIndex == mLastRedoIndex && !mRedoingAnUndo)
    {
@@ -524,8 +521,8 @@ void EditorUserInterface::redo()
 {
    if(mLastRedoIndex != mLastUndoIndex)      // If there's a redo state available...
    {
-      mSnapVertex_i = NULL;
-      mSnapVertex_j = NONE;
+      mSnapObject = NULL;
+      mSnapVertexIndex = NONE;
 
       mLastUndoIndex++;
       //restoreItems(mUndoItems[mLastUndoIndex % UNDO_STATES]);   
@@ -629,8 +626,8 @@ void EditorUserInterface::loadLevel()
    // Initialize
    clearDatabase(gEditorGame->getGridDatabase().get());
    getGame()->clearTeams();
-   mSnapVertex_i = NULL;
-   mSnapVertex_j = NONE;
+   mSnapObject = NULL;
+   mSnapVertexIndex = NONE;
    mAddingVertex = false;
    clearLevelGenItems();
    mLoadTarget = (EditorObjectDatabase *)gEditorGame->getGridDatabase().get();
@@ -1195,9 +1192,9 @@ Point EditorUserInterface::snapPoint(Point const &p, bool snapWhileOnDock)
             objList->get(i)->setSnapped(false);
    
       // Turrets & forcefields: Snap to a wall edge as first (and only) choice
-      if((mSnapVertex_i->getObjectTypeMask() & EngineeredType))
+      if((mSnapObject->getObjectTypeMask() & EngineeredType))
       {
-         EngineeredObject *engrObj = dynamic_cast<EngineeredObject *>(mSnapVertex_i);
+         EngineeredObject *engrObj = dynamic_cast<EngineeredObject *>(mSnapObject);
          return engrObj->mountToWall(snapPointToLevelGrid(p));
       }
    }
@@ -1206,7 +1203,7 @@ Point EditorUserInterface::snapPoint(Point const &p, bool snapWhileOnDock)
    F32 minDist = maxSnapDist;
 
    // Where will we be snapping things?
-   bool snapToWallCorners = !mSnapDisabled && mDraggingObjects && !(mSnapVertex_i->getObjectTypeMask() & BarrierType) && mSnapVertex_i->getGeomType() != geomPoly;
+   bool snapToWallCorners = !mSnapDisabled && mDraggingObjects && !(mSnapObject->getObjectTypeMask() & BarrierType) && mSnapObject->getGeomType() != geomPoly;
    bool snapToLevelGrid = !mSnapDisabled;
 
 
@@ -1431,8 +1428,8 @@ void EditorUserInterface::renderDock(F32 width)    // width is current wall widt
    // Draw coordinates on dock -- if we're moving an item, show the coords of the snap vertex, otherwise show the coords of the
    // snapped mouse position
    Point pos;
-   if(mSnapVertex_i)
-      pos = mSnapVertex_i->getVert(mSnapVertex_j);
+   if(mSnapObject)
+      pos = mSnapObject->getVert(mSnapVertexIndex);
    else
       pos = snapPoint(convertCanvasToLevelCoord(mMousePos));
 
@@ -1705,8 +1702,8 @@ void EditorUserInterface::render()
       }
 
    // Render our snap vertex as a hollow magenta box
-   if(!mShowingReferenceShip && mSnapVertex_i && mSnapVertex_i->isSelected() && mSnapVertex_j != NONE)      
-      renderVertex(SnappingVertex, mSnapVertex_i->getVert(mSnapVertex_j) * mCurrentScale + mCurrentOffset, NO_NUMBER/*, alpha*/);  
+   if(!mShowingReferenceShip && mSnapObject && mSnapObject->isSelected() && mSnapVertexIndex != NONE)      
+      renderVertex(SnappingVertex, mSnapObject->getVert(mSnapVertexIndex) * mCurrentScale + mCurrentOffset, NO_NUMBER/*, alpha*/);  
 
 
    if(mDragSelecting)      // Draw box for selecting items
@@ -1857,17 +1854,32 @@ void EditorUserInterface::copySelection()
    {
       if(objList->get(i)->isSelected())
       {
+         ////////////////////////
+
+   
+   //// Offset lets us drag an item out from the dock by an amount offset from the 0th vertex.  This makes placement seem more natural.
+   //Point pos = snapPoint(convertCanvasToLevelCoord(mMousePos), true) - item->getInitialPlacementOffset(getGridSize());
+   //item->moveTo(pos);
+   //   
+
+
+   //mDraggingDockItem = NONE;    // Because now we're dragging a real item
+   //validateLevel();             // Check level for errors
+
+
+         ////////////////////////
          EditorObject *newItem =  objList->get(i)->newCopy();   
-         newItem->setGame(NULL);          // Game needs to be cleared before we can add this to the game
          newItem->setSelected(false);
+
+         //newItem->addToGame(gEditorGame);
 
          if(!alreadyCleared)  // Make sure we only purge the existing clipboard if we'll be putting someting new there
          {
-            mClipboard.deleteAndClear();
+            mClipboard.clear();
             alreadyCleared = true;
          }
 
-         mClipboard.push_back(newItem);
+         mClipboard.push_back(boost::shared_ptr<EditorObject>(newItem));
       }
    }
 }
@@ -1898,7 +1910,7 @@ void EditorUserInterface::pasteSelection()
       offset = firstPoint - mClipboard[i]->getVert(0);
 
       EditorObject *newObj = mClipboard[i]->newCopy();
-
+      newObj->setExtent();
       newObj->addToGame(gEditorGame);
 
       newObj->setSerialNumber(getNextItemId());
@@ -2319,13 +2331,13 @@ void EditorUserInterface::onMouseDragged()
 
    findSnapVertex();
 
-   if(!mSnapVertex_i || mSnapVertex_j == NONE)
+   if(!mSnapObject || mSnapVertexIndex == NONE)
       return;
    
    
    if(!mDraggingObjects)      // Just started dragging
    {
-      mMoveOrigin = mSnapVertex_i->getVert(mSnapVertex_j);
+      mMoveOrigin = mSnapObject->getVert(mSnapVertexIndex);
       mOriginalVertLocations.clear();
 
       const Vector<EditorObject *> *objList = getObjectList();
@@ -2352,7 +2364,7 @@ void EditorUserInterface::onMouseDragged()
    // The thinking here is that for large items -- walls, polygons, etc., we may grab an item far from its snap vertex, and we
    // want to factor that offset into our calculations.  For point items (and vertices), we don't really care about any slop
    // in the selection, and we just want the damn thing where we put it.
-   if(mSnapVertex_i->getGeomType() == geomPoint || (mItemHit && mItemHit->anyVertsSelected()))
+   if(mSnapObject->getGeomType() == geomPoint || (mItemHit && mItemHit->anyVertsSelected()))
       delta = snapPoint(convertCanvasToLevelCoord(mMousePos)) - mMoveOrigin;
    else
       delta = (snapPoint(convertCanvasToLevelCoord(mMousePos) + mMoveOrigin - mMouseDownPos) - mMoveOrigin );
@@ -2390,7 +2402,6 @@ void EditorUserInterface::startDraggingDockItem()
 {
    // Instantiate object so we are in essence dragging a non-dock item
    EditorObject *item = mDockItems[mDraggingDockItem]->newCopy();
-   item->setGame(NULL);          // Game needs to be cleared before we can add this to the game
    item->newObjectFromDock(getGridSize());
 
    //item->initializeEditor(getGridSize());    // Override this to define some initial geometry for your object... 
@@ -2430,7 +2441,7 @@ void EditorUserInterface::startDraggingDockItem()
 }
 
 
-// Sets mSnapVertex_i and mSnapVertex_j based on the vertex closest to the cursor that is part of the selected set
+// Sets mSnapObject and mSnapVertexIndex based on the vertex closest to the cursor that is part of the selected set
 // What we really want is the closest vertex in the closest feature
 void EditorUserInterface::findSnapVertex()
 {
@@ -2439,8 +2450,8 @@ void EditorUserInterface::findSnapVertex()
    if(mDraggingObjects)    // Don't change snap vertex once we're dragging
       return;
 
-   mSnapVertex_i = NULL;
-   mSnapVertex_j = NONE;
+   mSnapObject = NULL;
+   mSnapVertexIndex = NONE;
 
    Point mouseLevelCoord = convertCanvasToLevelCoord(mMousePos);
 
@@ -2450,7 +2461,7 @@ void EditorUserInterface::findSnapVertex()
       // If we've hit an edge, restrict our search to the two verts that make up that edge
       if(mEdgeHit != NONE)
       {
-         mSnapVertex_i = mItemHit;     // Regardless of vertex, this is our hit item
+         mSnapObject = mItemHit;     // Regardless of vertex, this is our hit item
          S32 v1 = mEdgeHit;
          S32 v2 = mEdgeHit + 1;
 
@@ -2459,7 +2470,7 @@ void EditorUserInterface::findSnapVertex()
             v2 = 0;
 
          // Find closer vertex: v1 or v2
-         mSnapVertex_j = (mItemHit->getVert(v1).distSquared(mouseLevelCoord) < 
+         mSnapVertexIndex = (mItemHit->getVert(v1).distSquared(mouseLevelCoord) < 
                           mItemHit->getVert(v2).distSquared(mouseLevelCoord)) ? v1 : v2;
 
          return;
@@ -2473,8 +2484,8 @@ void EditorUserInterface::findSnapVertex()
          if(dist < closestDist)
          {
             closestDist = dist;
-            mSnapVertex_i = mItemHit;
-            mSnapVertex_j = j;
+            mSnapObject = mItemHit;
+            mSnapVertexIndex = j;
          }
       }
       return;
@@ -2492,8 +2503,8 @@ void EditorUserInterface::findSnapVertex()
          // If we find a selected vertex, there will be only one, and this is our snap point
          if(obj->vertSelected(j))
          {
-            mSnapVertex_i = obj;
-            mSnapVertex_j = j;
+            mSnapObject = obj;
+            mSnapVertexIndex = j;
             return;     
          }
       }
@@ -2545,8 +2556,8 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
                deleted = true;
 
                geomChanged = true;
-               mSnapVertex_i = NULL;
-               mSnapVertex_j = NONE;
+               mSnapObject = NULL;
+               mSnapVertexIndex = NONE;
             }
          }
 
@@ -2628,7 +2639,6 @@ void EditorUserInterface::splitBarrier()
 
                // Create a poor man's copy
                EditorObject *newItem = obj->newCopy();
-               newItem->setGame(NULL);          // Game needs to be cleared before we can add this to the game
                newItem->setTeam(-1);
                newItem->setWidth(obj->getWidth());
                newItem->clearVerts();
@@ -2773,8 +2783,8 @@ void EditorUserInterface::deleteItem(S32 itemIndex)
       gEditorGame->getGridDatabase()->removeFromDatabase(obj, obj->getExtent());
 
    // Reset a bunch of things
-   mSnapVertex_i = NULL;
-   mSnapVertex_j = NONE;
+   mSnapObject = NULL;
+   mSnapVertexIndex = NONE;
    mItemToLightUp = NULL;
 
    validateLevel();
@@ -2800,7 +2810,6 @@ void EditorUserInterface::insertNewItem(GameObjectType itemType)
       if(mDockItems[i]->getObjectTypeMask() & itemType)
       {
          newObject = mDockItems[i]->newCopy();
-         newObject->setGame(NULL);          // Game needs to be cleared before we can add this to the game
          newObject->initializeEditor();
          newObject->onGeomChanged();
 
@@ -3529,7 +3538,7 @@ void EditorUserInterface::onFinishedDragging()
       if(mDraggingDockItem == NONE)    // Not dragging from dock - user is moving object around screen
       {
          // If our snap vertex has moved then all selected items have moved
-         bool itemsMoved = mSnapVertex_i->getVert(mSnapVertex_j) != mMoveOrigin;
+         bool itemsMoved = mSnapObject->getVert(mSnapVertexIndex) != mMoveOrigin;
 
          if(itemsMoved)    // Move consumated... update any moved items, and save our autosave
          {

@@ -408,6 +408,11 @@ public:
    Object();
    virtual ~Object();
 
+   Object(const Object &copy);
+
+
+   void initialize();      // Code common to the constructor and the copy constructor
+
    /// Object destroy self call (from RefPtr).
    ///
    /// @note Override if this class has specially allocated memory.

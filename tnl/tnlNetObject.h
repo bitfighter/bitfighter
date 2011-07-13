@@ -240,6 +240,7 @@ public:
    NetObject();
    ~NetObject();
 
+
    /// collapseDirtyList pushes all the mDirtyMaskBits down into
    /// the GhostInfo's for each object, and clears out the dirty
    /// list.

@@ -923,6 +923,7 @@ static Color getGoalZoneOutlineColor(const Color &c, F32 glowFraction)
 }
 
 
+// TODO: Consider replacing yellow with team color to indicate who scored!
 static Color getGoalZoneFillColor(const Color *c, bool isFlashing, F32 glowFraction)
 {
    F32 alpha = isFlashing ? 0.75 : 0.5;

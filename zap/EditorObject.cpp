@@ -373,9 +373,12 @@ void EditorObject::saveItem(FILE *f, F32 gridSize)
 EditorObject *EditorObject::newCopy()
 {
    EditorObject *newObject = clone();     // TODO: Wrap in shared_ptr?
+
    newObject->mGeometry = mGeometry->copyGeometry();
 
-   //newObject->initializeEditor();
+   newObject->setGame(NULL);
+
+   newObject->initializeEditor();         // Unselects all vertices
 
    return newObject;
 }

@@ -86,7 +86,7 @@ public:
    virtual string geomToString(F32 gridSize) const = 0;
    virtual void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize) = 0;
 
-   virtual boost::shared_ptr<Geometry> copyGeometry() = 0;
+   virtual boost::shared_ptr<Geometry> copyGeometry() const = 0;
    void newGeomCopy();
 
    virtual Rect getExtents() = 0;
@@ -140,7 +140,7 @@ public:
    string geomToString(F32 gridSize) const;
    void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize);
 
-   boost::shared_ptr<Geometry> copyGeometry();
+   boost::shared_ptr<Geometry> copyGeometry() const;
 
    Rect getExtents();
 
@@ -192,7 +192,7 @@ public:
    string geomToString(F32 gridSize) const;
    void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize);
 
-   boost::shared_ptr<Geometry> copyGeometry();
+   boost::shared_ptr<Geometry> copyGeometry() const;
 
    Rect getExtents();
 
@@ -249,7 +249,7 @@ public:
    string geomToString(F32 gridSize) const;
    virtual void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize);
 
-   virtual boost::shared_ptr<Geometry> copyGeometry();
+   virtual boost::shared_ptr<Geometry> copyGeometry() const;
 
    Rect getExtents();
 
@@ -278,7 +278,7 @@ public:
 
    virtual void onPointsChanged();
 
-   boost::shared_ptr<Geometry> copyGeometry();
+   boost::shared_ptr<Geometry> copyGeometry() const;
 };
 
 

@@ -168,7 +168,7 @@ private:
 
    void autoSave();                    // Hope for the best, prepare for the worst
 
-   Vector<EditorObject *> mClipboard;    // Items on clipboard
+   Vector<boost::shared_ptr<EditorObject> > mClipboard;    // Items on clipboard
 
    bool mLastUndoStateWasBarrierWidthChange;
 
@@ -216,8 +216,8 @@ private:
    S32 findHitItemOnDock(Point canvasPos);
 
    void findSnapVertex();
-   EditorObject *mSnapVertex_i;
-   S32 mSnapVertex_j;
+   EditorObject *mSnapObject;
+   S32 mSnapVertexIndex;
 
    S32 mEdgeHit;
    S32 mVertexHit;
@@ -273,8 +273,8 @@ public:
 
    //static void setTranslationAndScale(const Point &pos);
 
-   EditorObject *getSnapItem() { return mSnapVertex_i; }
-   S32 getSnapVertexIndex() { return mSnapVertex_j; }
+   EditorObject *getSnapItem() { return mSnapObject; }
+   S32 getSnapVertexIndex() { return mSnapVertexIndex; }
    void rebuildEverything();        // Does lots of things in undo, redo, and add items from script
    static void resnapAllEngineeredItems();
 

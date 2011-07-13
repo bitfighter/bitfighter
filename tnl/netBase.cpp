@@ -171,9 +171,22 @@ void NetClassRep::logBitUsage()
 
 Object::Object()
 {
-   mFirstObjectRef = NULL;
-   mRefCount = 0;
+   initialize();
 }
+
+
+Object::Object(const Object &copy) 
+{ 
+   initialize();
+}
+
+
+void Object::initialize()
+{
+   mFirstObjectRef = NULL; 
+   mRefCount = 0; 
+}
+
 
 Object::~Object()
 {

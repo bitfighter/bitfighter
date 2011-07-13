@@ -50,6 +50,7 @@ Lunar<GoalZone>::RegType GoalZone::methods[] =
 };
 
 
+// Constructor
 GoalZone::GoalZone()
 {
    mTeam = -1;
@@ -60,11 +61,12 @@ GoalZone::GoalZone()
    mHasFlag = false;
    mScore = 1;    // For now...
 }
-
+ 
 
 GoalZone *GoalZone::clone() const
 {
-   return new GoalZone(*this);
+   GoalZone *goalZone = new GoalZone(*this);
+   return goalZone;
 }
 
 
@@ -83,7 +85,7 @@ void GoalZone::render()
 
 void GoalZone::renderEditor(F32 currentScale)
 {
-   renderGoalZone(getGame()->getTeamColor(getTeam()), getOutline(), getFill(), getCentroid(), getLabelAngle(), isFlashing());
+   renderGoalZone(getGame()->getTeamColor(getTeam()), getOutline(), getFill(), getCentroid(), getLabelAngle(), false);
    EditorPolygon::renderEditor(currentScale);
 }
 
