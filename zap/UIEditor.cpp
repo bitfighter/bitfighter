@@ -499,9 +499,7 @@ void EditorUserInterface::undo(bool addToRedoStack)
 
    gEditorGame->setGridDatabase(boost::dynamic_pointer_cast<GridDatabase>(mUndoItems[mLastUndoIndex % UNDO_STATES]));
 
-   const Vector<EditorObject *> *objList = getObjectList();
-   for(S32 i = 0; i < objList->size(); i++)
-      objList->get(i)->setGame(gEditorGame);
+   makeSureAllObjectsHaveValidGame();
 
    //restoreItems(mUndoItems[mLastUndoIndex % UNDO_STATES]);
 
@@ -535,9 +533,21 @@ void EditorUserInterface::redo()
       gEditorGame->setGridDatabase(mUndoItems[mLastUndoIndex % UNDO_STATES]);
       TNLAssert(mUndoItems[mLastUndoIndex % UNDO_STATES], "null!");
 
+      makeSureAllObjectsHaveValidGame();
+
       rebuildEverything();
       validateLevel();
    }
+}
+
+
+// After undoing/redoing, some objects may have NULL games as a consequence of our object copying methodology.
+// TODO: Get rid of this!!
+void EditorUserInterface::makeSureAllObjectsHaveValidGame()
+{
+   const Vector<EditorObject *> *objList = getObjectList();
+   for(S32 i = 0; i < objList->size(); i++)
+      objList->get(i)->setGame(gEditorGame);
 }
 
 
