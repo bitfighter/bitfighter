@@ -448,6 +448,15 @@ string WallItem::toString(F32 gridSize) const
 }
 
 
+void WallItem::scale(const Point &center, F32 scale)
+{
+   EditorObject::scale(center, scale);
+
+   // Adjust the wall thickness
+   mWidth = min(max(mWidth * scale, static_cast<float>(LineItem::MIN_LINE_WIDTH)), static_cast<float>(LineItem::MAX_LINE_WIDTH));
+}
+
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 

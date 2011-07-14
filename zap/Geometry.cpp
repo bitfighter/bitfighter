@@ -51,6 +51,14 @@ void Geometry::rotateAboutPoint(const Point &center, F32 angle)
 }
 
 
+// Make object bigger or smaller
+void Geometry::scale(const Point &center, F32 scale) 
+{
+   for(S32 j = 0; j < getVertCount(); j++)
+      setVert((getVert(j) - center) * scale + center, j);
+}
+
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 

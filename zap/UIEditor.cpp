@@ -1943,7 +1943,7 @@ void EditorUserInterface::scaleSelection(F32 scale)
    computeSelectionMinMax(min, max);
    Point ctr = (min + max) * 0.5;
 
-   if(scale > 1 && min.distanceTo(max) * scale > 50)    // If walls get too big, they'll bog down the db
+   if(scale > 1 && min.distanceTo(max) * scale  > 50 * getGridSize())    // If walls get too big, they'll bog down the db
       return;
 
    const Vector<EditorObject *> *objList = getObjectList();

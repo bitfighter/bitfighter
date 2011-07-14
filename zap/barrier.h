@@ -127,6 +127,7 @@ public:
    bool canBeHostile() { return false; }
    bool canBeNeutral() { return false; }
 
+   void scale(const Point &center, F32 scale);
 
    string toString(F32 gridSize) const;
 };

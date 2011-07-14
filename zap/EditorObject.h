@@ -182,26 +182,9 @@ public:
    void rotateAboutPoint(const Point &origin, F32 angle) { mGeometry->rotateAboutPoint(origin, angle); onGeomChanged(); }
    void flipHorizontal(F32 minX, F32 maxX) { mGeometry->flipHorizontal(minX, maxX); onGeomChanged(); };
    void flipVertical(F32 minY, F32 maxY) { mGeometry->flipVertical(minY, maxY); onGeomChanged(); };
-   void scale(const Point &center, F32 scale) { };
+   virtual void scale(const Point &center, F32 scale) { mGeometry->scale(center, scale); onGeomChanged(); }
 
-
-
-   // Make object bigger or smaller
-//void EditorObject::scale(const Point &center, F32 scale)
-//{
-//   for(S32 j = 0; j < mVerts.size(); j++)
-//      mVerts[j].set((mVerts[j] - center) * scale + center);
-//
-//   // Scale the wall width, within limits
-//   if(index == ItemBarrierMaker)
-//      width = min(max(width * scale, static_cast<float>(LineItem::MIN_LINE_WIDTH)), static_cast<float>(LineItem::MAX_LINE_WIDTH));
-//
-//   onGeomChanged();
-//}
-
-
-  /////
-
+   /////
    S32 getItemId() { return mItemId; }
    void setItemId(S32 itemId) { mItemId = itemId; }
    
