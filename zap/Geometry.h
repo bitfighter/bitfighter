@@ -97,6 +97,8 @@ public:
 
    virtual void flipHorizontal(F32 boundingBoxMinX, F32 boundingBoxMaxX) = 0;
    virtual void flipVertical(F32 boundingBoxMinY, F32 boundingBoxMaxY) = 0;
+
+   virtual void rotateAboutPoint(const Point &center, F32 angle);
 };
 
 

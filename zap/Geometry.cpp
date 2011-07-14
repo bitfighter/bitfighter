@@ -36,6 +36,24 @@ using namespace TNL;
 namespace Zap
 {
 
+void Geometry::rotateAboutPoint(const Point &center, F32 angle)
+{
+   F32 sinTheta = sin(angle * Float2Pi / 360.0f);
+   F32 cosTheta = cos(angle * Float2Pi / 360.0f);
+
+   for(S32 j = 0; j < getVertCount(); j++)
+   {
+      Point v = getVert(j) - center;
+      Point n(v.x * cosTheta + v.y * sinTheta, v.y * cosTheta - v.x * sinTheta);
+
+      setVert(n + center, j);
+   }
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 void PointGeometry::packGeom(GhostConnection *connection, BitStream *stream)
 {
    mPos.write(stream);

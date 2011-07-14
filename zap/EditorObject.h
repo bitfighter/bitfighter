@@ -179,26 +179,12 @@ public:
 
    /////
    // Geometry operations  -- can we provide standard implementations of these?
-   void rotateAboutPoint(const Point &origin, F32 angle) { };
+   void rotateAboutPoint(const Point &origin, F32 angle) { mGeometry->rotateAboutPoint(origin, angle); onGeomChanged(); }
    void flipHorizontal(F32 minX, F32 maxX) { mGeometry->flipHorizontal(minX, maxX); onGeomChanged(); };
    void flipVertical(F32 minY, F32 maxY) { mGeometry->flipVertical(minY, maxY); onGeomChanged(); };
    void scale(const Point &center, F32 scale) { };
 
-//void WorldItem::rotateAboutPoint(const Point &center, F32 angle)
-//{
-//   F32 sinTheta = sin(angle * Float2Pi / 360.0f);
-//   F32 cosTheta = cos(angle * Float2Pi / 360.0f);
-//
-//   for(S32 j = 0; j < mVerts.size(); j++)
-//   {
-//      Point v = mVerts[j] - center;
-//      Point n(v.x * cosTheta + v.y * sinTheta, v.y * cosTheta - v.x * sinTheta);
-//
-//      mVerts[j] = n + center;
-//   }
-//
-//   onGeomChanged();
-//}
+
 
    // Make object bigger or smaller
 //void EditorObject::scale(const Point &center, F32 scale)
