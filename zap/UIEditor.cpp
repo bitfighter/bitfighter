@@ -2823,7 +2823,7 @@ void EditorUserInterface::insertNewItem(GameObjectType itemType)
       }
    TNLAssert(newObject, "Couldn't create object in insertNewItem()");
 
-   newObject->moveTo(snapPoint(convertCanvasToLevelCoord(mMousePos)));
+   newObject->moveTo(snapPoint(mMousePos));
    newObject->addToGame(gEditorGame);    
 
    validateLevel();
