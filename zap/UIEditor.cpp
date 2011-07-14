@@ -1981,7 +1981,7 @@ void EditorUserInterface::rotateSelection(F32 angle)
 void EditorUserInterface::computeSelectionMinMax(Point &min, Point &max)
 {
    min.set(F32_MAX, F32_MAX);
-   max.set(F32_MIN, F32_MIN);
+   max.set(-F32_MAX, -F32_MAX);
 
    const Vector<EditorObject *> *objList = getObjectList();
 
@@ -2092,7 +2092,7 @@ void EditorUserInterface::flipSelectionHorizontal()
 
    for(S32 i = 0; i < objList->size(); i++)
       if(objList->get(i)->isSelected())
-         objList->get(i)->flipHorizontal(min, max);
+         objList->get(i)->flipHorizontal(min.x, max.x);
 
    mNeedToSave = true;
    autoSave();
@@ -2113,7 +2113,7 @@ void EditorUserInterface::flipSelectionVertical()
 
    for(S32 i = 0; i < objList->size(); i++)
       if(objList->get(i)->isSelected())
-         objList->get(i)->flipVertical(min, max);
+         objList->get(i)->flipVertical(min.y, max.y);
 
    mNeedToSave = true;
    autoSave();

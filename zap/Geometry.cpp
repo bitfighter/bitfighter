@@ -73,16 +73,15 @@ boost::shared_ptr<Geometry> PointGeometry::copyGeometry() const
 }
 
 
-void PointGeometry::flipHorizontal(const Point &boundingBoxMin, const Point &boundingBoxMax)
+void PointGeometry::flipHorizontal(F32 boundingBoxMinX, F32 boundingBoxMaxX)
 {
-   mPos.x = boundingBoxMin.x + (boundingBoxMax.x - mPos.x);
-
+   mPos.x = boundingBoxMinX + (boundingBoxMaxX - mPos.x);
 }
 
 
-void PointGeometry::flipVertical(const Point &boundingBoxMin, const Point &boundingBoxMax)
+void PointGeometry::flipVertical(F32 boundingBoxMinY, F32 boundingBoxMaxY)
 {
-   mPos.y = boundingBoxMin.y + (boundingBoxMax.y - mPos.y);
+   mPos.y = boundingBoxMinY + (boundingBoxMaxY - mPos.y);
 }
 
 
@@ -142,17 +141,17 @@ boost::shared_ptr<Geometry> SimpleLineGeometry::copyGeometry() const
 }
 
 
-void SimpleLineGeometry::flipHorizontal(const Point &boundingBoxMin, const Point &boundingBoxMax)
+void SimpleLineGeometry::flipHorizontal(F32 boundingBoxMinX, F32 boundingBoxMaxX)
 {
-   mFromPos.x = boundingBoxMin.x + (boundingBoxMax.x - mFromPos.x);
-   mToPos.x = boundingBoxMin.x + (boundingBoxMax.x - mToPos.x);
+   mFromPos.x = boundingBoxMinX + (boundingBoxMaxX - mFromPos.x);
+   mToPos.x = boundingBoxMinX + (boundingBoxMaxX - mToPos.x);
 }
 
 
-void SimpleLineGeometry::flipVertical(const Point &boundingBoxMin, const Point &boundingBoxMax)
+void SimpleLineGeometry::flipVertical(F32 boundingBoxMinY, F32 boundingBoxMaxY)
 {
-   mFromPos.y = boundingBoxMin.y + (boundingBoxMax.y - mFromPos.y);
-   mToPos.y = boundingBoxMin.y + (boundingBoxMax.y - mToPos.y);
+   mFromPos.y = boundingBoxMinY + (boundingBoxMaxY - mFromPos.y);
+   mToPos.y = boundingBoxMinY + (boundingBoxMaxY - mToPos.y);
 }
 
 
@@ -396,17 +395,17 @@ boost::shared_ptr<Geometry> PolylineGeometry::copyGeometry() const
 }
 
 
-void PolylineGeometry::flipHorizontal(const Point &boundingBoxMin, const Point &boundingBoxMax)
+void PolylineGeometry::flipHorizontal(F32 boundingBoxMinX, F32 boundingBoxMaxX)
 {
    for(S32 i = 0; i < mPolyBounds.size(); i++)
-      mPolyBounds[i].x = boundingBoxMin.x + (boundingBoxMax.x - mPolyBounds[i].x);
+      mPolyBounds[i].x = boundingBoxMinX + (boundingBoxMaxX - mPolyBounds[i].x);
 }
 
 
-void PolylineGeometry::flipVertical(const Point &boundingBoxMin, const Point &boundingBoxMax)
+void PolylineGeometry::flipVertical(F32 boundingBoxMinY, F32 boundingBoxMaxY)
 {
    for(S32 i = 0; i < mPolyBounds.size(); i++)
-      mPolyBounds[i].y = boundingBoxMax.y + (boundingBoxMax.y - mPolyBounds[i].y);
+      mPolyBounds[i].y = boundingBoxMinY + (boundingBoxMaxY - mPolyBounds[i].y);
 }
 
 

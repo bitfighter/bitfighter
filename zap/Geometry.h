@@ -95,8 +95,8 @@ public:
 
    void disableTriangluation() { mTriangluationDisabled = true; }
 
-   virtual void flipHorizontal(const Point &boundingBoxMin, const Point &boundingBoxMax) = 0;
-   virtual void flipVertical(const Point &boundingBoxMin, const Point &boundingBoxMax) = 0;
+   virtual void flipHorizontal(F32 boundingBoxMinX, F32 boundingBoxMaxX) = 0;
+   virtual void flipVertical(F32 boundingBoxMinY, F32 boundingBoxMaxY) = 0;
 };
 
 
@@ -149,8 +149,8 @@ public:
 
    void onPointsChanged() { /* Do nothing */ }
 
-   void flipHorizontal(const Point &boundingBoxMin, const Point &boundingBoxMax);
-   void flipVertical(const Point &boundingBoxMin, const Point &boundingBoxMax);
+   void flipHorizontal(F32 boundingBoxMinX, F32 boundingBoxMaxX) ;
+   void flipVertical(F32 boundingBoxMinY, F32 boundingBoxMaxY) ;
 };
 
 
@@ -204,8 +204,8 @@ public:
 
    void onPointsChanged() { /* Do nothing */ }
 
-   void flipHorizontal(const Point &boundingBoxMin, const Point &boundingBoxMax);
-   void flipVertical(const Point &boundingBoxMin, const Point &boundingBoxMax);
+   void flipHorizontal(F32 boundingBoxMinX, F32 boundingBoxMaxX) ;
+   void flipVertical(F32 boundingBoxMinY, F32 boundingBoxMaxY) ;
 };
 
 
@@ -264,8 +264,8 @@ public:
 
    virtual void onPointsChanged();
 
-   void flipHorizontal(const Point &boundingBoxMin, const Point &boundingBoxMax);
-   void flipVertical(const Point &boundingBoxMin, const Point &boundingBoxMax);
+   void flipHorizontal(F32 boundingBoxMinX, F32 boundingBoxMaxX) ;
+   void flipVertical(F32 boundingBoxMinY, F32 boundingBoxMaxY) ;
 };
 
 

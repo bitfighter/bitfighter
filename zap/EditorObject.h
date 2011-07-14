@@ -180,8 +180,8 @@ public:
    /////
    // Geometry operations  -- can we provide standard implementations of these?
    void rotateAboutPoint(const Point &origin, F32 angle) { };
-   void flipHorizontal(const Point &min, const Point &max) { mGeometry->flipHorizontal(min, max); onGeomChanged(); };
-   void flipVertical(const Point &min, const Point &max) { mGeometry->flipVertical(min, max); onGeomChanged(); };
+   void flipHorizontal(F32 minX, F32 maxX) { mGeometry->flipHorizontal(minX, maxX); onGeomChanged(); };
+   void flipVertical(F32 minY, F32 maxY) { mGeometry->flipVertical(minY, maxY); onGeomChanged(); };
    void scale(const Point &center, F32 scale) { };
 
 //void WorldItem::rotateAboutPoint(const Point &center, F32 angle)
