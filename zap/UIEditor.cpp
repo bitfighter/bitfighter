@@ -2133,7 +2133,7 @@ void EditorUserInterface::findHitItemAndEdge()
 
    // Do this in two passes -- the first we only consider selected items, the second pass will consider all targets.
    // This will give priority to moving vertices of selected items
-   for(S32 firstPass = 1; firstPass >= 0; firstPass--)   // firstPass will be true the first time through, false the second time
+   for(S32 firstPass = 1; firstPass >= 0; firstPass--)     // firstPass will be true the first time through, false the second time
    {
       for(S32 i = objList->size() - 1; i >= 0; i--)        // Go in reverse order to prioritize items drawn on top
       {
@@ -2177,9 +2177,9 @@ void EditorUserInterface::findHitItemAndEdge()
          Point p1 = convertLevelToCanvasCoord(obj->getVert(0));
          Point closest;
          
-         for(S32 j = 0; j < obj->getVertCount() - 1; j++)
+         for(S32 j = 0; j < verts.size() - 1; j++)
          {
-            Point p2 = convertLevelToCanvasCoord(obj->getVert(j+1));
+            Point p2 = convertLevelToCanvasCoord(verts[j+1]);
             
             if(findNormalPoint(mMousePos, p1, p2, closest))
             {
