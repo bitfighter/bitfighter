@@ -2817,6 +2817,7 @@ void EditorUserInterface::insertNewItem(GameObjectType itemType)
          newObject = mDockItems[i]->newCopy();
          newObject->initializeEditor();
          newObject->onGeomChanged();
+         newObject->clearGame();
 
          break;
       }

@@ -44,7 +44,8 @@ TNL_IMPLEMENT_NETOBJECT(RepairItem);
 // Constructor
 RepairItem::RepairItem(Point pos) : PickupItem(pos, REPAIR_ITEM_RADIUS, DEFAULT_RESPAWN_TIME * 1000) 
 { 
-   // Do nothing 
+   mObjectTypeMask |= RepairItemType;
+   mObjectTypeNumber = RepairItemTypeNumber;
 }
 
 
@@ -134,7 +135,8 @@ TNL_IMPLEMENT_NETOBJECT(EnergyItem);
 // Constructor
 EnergyItem::EnergyItem(Point p) : PickupItem(p, 20, DEFAULT_RESPAWN_TIME * 1000) 
 { 
-   // Do nothing 
+   mObjectTypeMask |= EnergyItemType;
+   mObjectTypeNumber = EnergyItemTypeNumber;
 };   
 
 
@@ -217,8 +219,8 @@ AbstractSpawn::AbstractSpawn(const Point &pos, S32 time, GameObjectType objType)
 
 void AbstractSpawn::setRespawnTime(S32 time)       // in seconds
 {
-      mSpawnTime = time;
-      mTimer.setPeriod(time);
+   mSpawnTime = time;
+   mTimer.setPeriod(time);
 }
 
 
