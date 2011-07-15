@@ -32,16 +32,9 @@ namespace Zap
 // Constructor
 Statistics::Statistics() : mShots(WeaponCount), mHits(WeaponCount)
 {
-   for(S32 i = 0; i < WeaponCount; i++)
-   {
-      mShots.push_back(0);
-      mHits.push_back(0);
-   }
-
-   mKills = 0;
-   mDeaths = 0;
-   mSuicides = 0;
-   mFratricides = 0;
+   mShots.resize(WeaponCount);
+   mHits.resize(WeaponCount);
+   resetStatistics();
 }
 
 void Statistics::countShot(S32 weaponType)      // --> S32 should be WeaponType

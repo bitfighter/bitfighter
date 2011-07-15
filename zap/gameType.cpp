@@ -756,9 +756,7 @@ VersionedGameStats GameType::getGameStats()
    gameStats->isTeamGame = isTeamGame();
    gameStats->levelName = mLevelName.getString();
    gameStats->gameType = getGameTypeString();
-   gameStats->teamCount = mGame->getTeamCount(); // is this needed?, currently Not sent, instead, can use gameStats->teamStats.size()
    gameStats->build_version = BUILD_VERSION;
-   gameStats->build_version = CS_PROTOCOL_VERSION; // This is not send, but may be used for logging
 
    gameStats->teamStats.resize(mGame->getTeamCount());
 
@@ -873,14 +871,14 @@ void GameType::saveGameStats()
 #ifdef TNL_ENABLE_ASSERTS
    {
       // This is to find any errors with write/read
-      VersionedGameStats_testing = true;
       BitStream s;
       VersionedGameStats stats2;
       Types::write(s, stats);
+      U32 size = s.getBitPosition();
       s.setBitPosition(0);
       Types::read(s, &stats2);
       TNLAssert(s.isValid(), "Stats not valid, problem with gameStats.cpp read/write");
-      VersionedGameStats_testing = false;
+      TNLAssert(size == s.getBitPosition(), "Stats not equal size, problem with gameStats.cpp read/write");
    }
 #endif
  

@@ -58,12 +58,13 @@ struct PlayerStats
    S32 kills;
    S32 deaths;
    S32 suicides;
-   //bool switchedTeams;
    S32 switchedTeamCount;
    Vector<WeaponStats> weaponStats;
 
    bool isAdmin;
    bool isLevelChanger; // might not be needed...
+
+   bool isHosting;
 };
 
 
@@ -92,7 +93,6 @@ struct GameStats
    S32 playerCount;
    S32 duration;     // game length in seconds
    bool isTeamGame;
-   S32 teamCount;
    bool isTied;
    Vector<TeamStats> teamStats;     // for team games
 };
@@ -116,11 +116,6 @@ extern void logGameStats(VersionedGameStats *stats);
 
 };    // end namespace Zap
 
-
-// TNL_DEBUG will enable TNL_ENABLE_ASSERTS in tnlTypes.h
-#ifdef TNL_ENABLE_ASSERTS
-extern bool VersionedGameStats_testing;
-#endif
 
 
 namespace Types
