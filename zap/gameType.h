@@ -214,7 +214,7 @@ public:
    virtual const char *getGameTypeString() const { return "Bitmatch"; }                            // Will be overridden by other games
    virtual const char *getShortName() const { return "BM"; }                                       //          -- ditto --
    virtual const char *getInstructionString() const { return "Blast as many ships as you can!"; }  //          -- ditto --
-   virtual bool isTeamGame() const { return mGame->getTeamCount() > 1; }                           // Team game if we have teams.  Otherwise it's every man for himself.
+   virtual bool isTeamGame() const;                                                                // Team game if we have teams.  Otherwise it's every man for himself.
    virtual bool canBeTeamGame() { return true; }
    virtual bool canBeIndividualGame() { return true; }
    virtual bool teamHasFlag(S32 teamId) const { return false; }

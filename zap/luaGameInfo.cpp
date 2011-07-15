@@ -28,6 +28,8 @@
 #include "playerInfo.h"
 #include "gameType.h"
 #include "huntersGame.h"
+#include "game.h"
+
 
 
 namespace Zap

@@ -30,6 +30,7 @@
 #include "projectile.h"
 #include "gameObjectRender.h"
 #include "goalZone.h"
+#include "game.h"
 
 namespace Zap
 {

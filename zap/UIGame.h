@@ -55,6 +55,8 @@ enum HelpCategories {
    COMMAND_CATEGORIES
 };
 
+class GameUserInterface;
+
 struct CommandInfo {
    string cmdName;
    void (*cmdCallback)(GameUserInterface *obj, const Vector<string> &args);

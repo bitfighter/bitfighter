@@ -64,7 +64,7 @@ public:
    S32 getNexusTimeLeft() {return mNexusTimer.getCurrent(); }
 
    // Info about this game type:
-   bool isTeamGame() { return getGame()->getTeamCount() > 1; }
+   //bool isTeamGame() { return getGame()->getTeamCount() > 1; }
    bool isFlagGame() { return true; }         // Well, technically not, but we'll morph flags to our own uses as we load the level
    bool isTeamFlagGame() { return false; }    // Ditto... team info will be ignored... no need to show warning in editor
 

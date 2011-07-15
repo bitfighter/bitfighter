@@ -32,6 +32,7 @@
 #include "polygon.h"
 #include "ship.h"
 #include "SlipZone.h"
+#include "game.h"
 
 namespace Zap
 {

@@ -28,6 +28,7 @@
 #include "UIGame.h"
 #include "Color.h"      // For Color def
 #include "Colors.h"
+#include "game.h"
 
 #include "SDL/SDL_opengl.h"
 

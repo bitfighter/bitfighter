@@ -29,6 +29,7 @@
 #include "GeomUtils.h"              // For polygon triangulation
 #include "engineeredObjects.h"      // For forcefieldprojector def
 #include "gameType.h"               // For BarrierRec struct
+#include "game.h"
 
 #include "SDL/SDL_opengl.h"
 

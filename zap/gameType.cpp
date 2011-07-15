@@ -40,6 +40,7 @@
 #include "gameStats.h"      // For VersionedGameStats def
 #include "version.h"
 #include "Colors.h"
+#include "game.h"
 
 #include "../master/database.h"
 
@@ -986,6 +987,8 @@ F32 GameType::getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 upda
 {
    return F32_MAX;      // High priority!!
 }
+
+bool GameType::isTeamGame() const { return mGame->getTeamCount() > 1; }   // Team game if we have teams.  Otherwise it's every man for himself.
 
 
 // Find all spubugs in the game, and store them for future reference

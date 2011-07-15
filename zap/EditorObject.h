@@ -31,6 +31,7 @@
 
 #include "Point.h"
 #include "tnlVector.h"
+#include "Color.h"
 
 
 using namespace std;

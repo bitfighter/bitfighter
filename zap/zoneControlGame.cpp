@@ -28,6 +28,7 @@
 #include "ship.h"
 #include "flagItem.h"
 #include "gameObjectRender.h"
+#include "game.h"
 
 namespace Zap
 {

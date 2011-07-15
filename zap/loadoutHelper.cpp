@@ -28,6 +28,7 @@
 #include "UIMenus.h"
 #include "gameType.h"
 #include "Colors.h"
+#include "game.h"
 
 #include "SDL/SDL_opengl.h"
 
@@ -37,6 +38,31 @@ namespace Zap
 
 Vector<LoadoutItem> gLoadoutModules;
 Vector<LoadoutItem> gLoadoutWeapons;
+
+LoadoutItem::LoadoutItem() {TNLAssert(false, "Do nothing, Should never be used"); }
+
+LoadoutItem::LoadoutItem(KeyCode key, KeyCode button, U32 index)      // Shortcut for modules -- use info from ModuleInfos
+{
+   ModuleInfo *moduleInfo = gClientGame->getModuleInfo((ShipModule) index);
+
+   this->key = key;
+   this->button = button;
+   this->index = index;
+   this->text = moduleInfo->getMenuName();
+   this->help = moduleInfo->getMenuHelp();
+   this->requires = ModuleNone;     // Currently, no modules depend on any other
+}
+
+LoadoutItem::LoadoutItem(KeyCode key, KeyCode button, U32 index, const char *text, const char *help, ShipModule requires) 
+{
+   this->key = key;
+   this->button = button;
+   this->index = index;
+   this->text = text;
+   this->help = help;
+   this->requires = requires;
+}
+
 
 // Gets called at the beginning of every game; available options may change based on level
 void LoadoutHelper::initialize(bool includeEngineer)

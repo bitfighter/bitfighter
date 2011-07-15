@@ -31,6 +31,7 @@
 #include "ship.h"
 #include "SoundSystem.h"
 #include "speedZone.h"
+#include "game.h"
 
 #include <math.h>
 

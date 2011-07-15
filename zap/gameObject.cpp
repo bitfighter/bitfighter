@@ -28,6 +28,7 @@
 #include "gameType.h"
 #include "ship.h"
 #include "GeomUtils.h"
+#include "game.h"
 
 #include "projectile.h"
 

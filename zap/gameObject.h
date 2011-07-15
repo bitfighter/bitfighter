@@ -26,8 +26,9 @@
 #ifndef _GAMEOBJECT_H_
 #define _GAMEOBJECT_H_
 
+#include "gameConnection.h"
 #include "gridDB.h"        // For DatabaseObject
-#include "game.h"
+#include "tnlNetObject.h"
 
 #include "luaObject.h"     // For LuaObject def and returnInt method
 #include "lua.h"           // For push prototype
@@ -43,6 +44,7 @@ namespace Zap
 {
 
 class GridDatabase;
+class Game;
 
 enum GameObjectType
 {

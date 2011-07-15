@@ -46,6 +46,7 @@
 #include "Colors.h"
 #include "robot.h"            // For EventManager def
 #include "stringUtils.h"      // For itos
+#include "game.h"
 
 #include "SDL/SDL_opengl.h"
 
@@ -166,6 +167,7 @@ void Ship::onGhostRemove()
    updateModuleSounds();
 }
 
+void Ship::engineerBuildObject() { mEnergy -= getGame()->getModuleInfo(ModuleEngineer)->getPerUseCost(); }
 
 bool Ship::processArguments(S32 argc, const char **argv, Game *game)
 {

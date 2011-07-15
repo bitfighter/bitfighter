@@ -32,6 +32,7 @@ using namespace TNL;
 #include "SoundSystem.h"
 #include "gameObjectRender.h"
 #include "Colors.h"
+#include "game.h"
 
 #include "SDL/SDL_opengl.h"
 #include "UI.h"

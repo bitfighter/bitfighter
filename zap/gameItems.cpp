@@ -32,6 +32,7 @@
 #include "SoundSystem.h"
 #include "Colors.h"
 #include "stringUtils.h"
+#include "game.h"
 
 #include "SDL/SDL_opengl.h"
 #include "UI.h"
