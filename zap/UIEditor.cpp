@@ -1205,9 +1205,8 @@ Point EditorUserInterface::snapPoint(Point const &p, bool snapWhileOnDock)
    F32 minDist = maxSnapDist;
 
    // Where will we be snapping things?
-   bool snapToWallCorners = !mSnapDisabled && mDraggingObjects && !(mSnapObject->getObjectTypeMask() & BarrierType) && mSnapObject->getGeomType() != geomPoly;
+   bool snapToWallCorners = !mSnapDisabled && mDraggingObjects && !(mSnapObject->getObjectTypeMask() & BarrierType);
    bool snapToLevelGrid = !mSnapDisabled;
-
 
    if(snapToLevelGrid)     // Lowest priority
    {
