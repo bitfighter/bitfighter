@@ -68,10 +68,13 @@ void Event::updateJoyAxesDirections(U32 axisMask, S16 value)
 
    // Update our global joystick input data, use a sensitivity threshold to take care of calibration issues
    // Also, normalize the input value to a floating point scale of 0 to 1
-   F32 normalValue = 0.0f;
-   if (value < -Joystick::SensitivityThreshold || value > Joystick::SensitivityThreshold)
-      // Input value comes in on a scale of -32768 to 32767
+   F32 normalValue;
+   if (value < -Joystick::SensitivityThreshold)
+      normalValue = fabs((F32)(value + Joystick::SensitivityThreshold)/(F32)(S16_MAX - Joystick::SensitivityThreshold));
+   else if (value > Joystick::SensitivityThreshold)
       normalValue = fabs((F32)(value - Joystick::SensitivityThreshold)/(F32)(S16_MAX - Joystick::SensitivityThreshold));
+   else
+      normalValue = 0.0f;
 
    Joystick::JoystickInputData[axesDirectionIndex].value = normalValue;
 
@@ -80,7 +83,7 @@ void Event::updateJoyAxesDirections(U32 axisMask, S16 value)
    // Set the mask if it is above the digital threshold
    bool keyState = false;
    U32 currentKeyCodeMask = 0;
-   if (value < -0.5 || value > 0.5)
+   if (normalValue < -0.5 || normalValue > 0.5)
    {
       keyState = true;
       currentKeyCodeMask |= detectedAxesDirectionMask;
