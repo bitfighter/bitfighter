@@ -11,7 +11,7 @@
 #
 # Building with make on Windows is still higly experiemntal. You will probably need
 # to add
-#     WFLAGS="-DWIN32 -D_STDCALL_SUPPORTED" THREADLIB= GLUT=-lglut32 INPUT=winJoystick.o
+#     WFLAGS="-DWIN32 -D_STDCALL_SUPPORTED" THREADLIB=
 # to the make command line to have any hope of getting it to work!  :-)
 #
 #
@@ -22,7 +22,6 @@ DEBUG=-g
 INCLUDES=-I../tnl -I../openal -I../Triangle -I../recast -I../clipper -I../alure -I../libspeex -I../boost
 CC=gcc $(DEBUG) $(INCLUDES) -DTNL_ENABLE_LOGGING -W $(OPTIMIZE)
 THREADLIB= -lpthread
-INPUT=linuxInput.o 
 EXEFILE=bitfighter
 
 # sound linker flags
@@ -91,10 +90,10 @@ OBJECTS_ZAP=\
    gridDB.o\
    helperMenu.o\
    huntersGame.o\
-   input.o\
    item.o\
+   Joystick.o\
+   JoystickRender.o\
    lineEditor.o\
-   $(INPUT)\
    loadoutHelper.o\
    luaGameInfo.o\
    luaLevelGenerator.o\
@@ -137,16 +136,17 @@ OBJECTS_ZAP=\
    lpc10dec.o\
    md5wrapper.o\
    md5.o\
-   BotNavMeshZone.o\
-   OpenglUtils.o\
-   Colors.o\
    ../master/masterInterface.o\
    ../master/database.o\
    ../sqlite/sqlite3.o\
    ../Triangle/triangle.o\
    ../recast/RecastAlloc.o\
    ../recast/RecastMesh.o\
-   ../clipper/clipper.o
+   ../clipper/clipper.o\
+   BotNavMeshZone.o\
+   OpenglUtils.o\
+   Colors.o
+# These last classes MUST be in this order for the linker to work
 
 
 .c.o:

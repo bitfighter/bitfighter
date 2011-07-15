@@ -23,18 +23,42 @@
 //
 //------------------------------------------------------------------------------------
 
-#ifndef _INPUT_H_
-#define _INPUT_H_
+#ifndef JOYSTICKRENDER_H_
+#define JOYSTICKRENDER_H_
 
+#include "tnlTypes.h"
+#include "keyCode.h"
+#include "Point.h"
+#include "Joystick.h"
 
 namespace Zap
 {
 
-enum InputMode {
-   Keyboard = 0,
-   Joystick = 1
+class JoystickRender
+{
+private:
+   static const TNL::S32 roundButtonRadius = 9;
+   static const TNL::S32 rectButtonWidth = 24;
+   static const TNL::S32 rectButtonHeight = 17;
+   static const TNL::S32 smallRectButtonWidth = 19;
+
+public:
+   JoystickRender();
+   virtual ~JoystickRender();
+
+
+   static void renderControllerButton(TNL::F32 x, TNL::F32 y, KeyCode keyCode, bool activated, TNL::S32 offset = 0);
+   static TNL::S32 getControllerButtonRenderedSize(KeyCode keyCode);
+
+   static void renderDPad(Point center, TNL::F32 radius, bool upActivated, bool downActivated, bool leftActivated,
+         bool rightActivated, const char *msg1, const char *msg2);
+   static void renderSmallRectButton(Point loc, const char *label, AlignType align, bool activated);
+   static void renderRectButton(Point loc, const char *label, AlignType align, bool activated);
+   static void renderRoundButton(Point loc, const char *label, AlignType align, bool activated);
+
+   static inline void setButtonColor(bool activated);
 };
 
-};
+} /* namespace Zap */
 
-#endif
+#endif /* JOYSTICKRENDER_H_ */

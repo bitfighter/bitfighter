@@ -23,13 +23,6 @@
 //
 //------------------------------------------------------------------------------------
 
-// The idea behind this code is to create an intermediary between GLUT and Zap for handling keyboard
-// and other inputs.  GLUT does some crazy things that make life difficult (like handling "regular",
-// "special" and "modifier" keys separately and differently), so we'll try to create a simple, sane system
-// for monitoring key states.  By consolodating regular, special, and modifier keys, we should be able
-// to create a fairly simple system for letting users customize their keyboard layout.
-// -CE
-
 #include "keyCode.h"
 
 #include "../tnl/tnlJournal.h"
@@ -1076,6 +1069,82 @@ S32 keyCodeToSDLKey(KeyCode keyCode)
       default:
          logprintf(LogConsumer::LogWarning, "Unknown keyCode detected: %d", keyCode);
          return SDLK_UNKNOWN;
+   }
+}
+
+
+KeyCode joyButtonToKeyCode(int buttonIndex)
+{
+   switch(buttonIndex)
+   {
+      case 0:
+         return BUTTON_1;
+      case 1:
+         return BUTTON_2;
+      case 2:
+         return BUTTON_3;
+      case 3:
+         return BUTTON_4;
+      case 4:
+         return BUTTON_5;
+      case 5:
+         return BUTTON_6;
+      case 6:
+         return BUTTON_7;
+      case 7:
+         return BUTTON_8;
+      case 8:
+         return BUTTON_START;
+      case 9:
+         return BUTTON_BACK;
+      case 10:
+         return BUTTON_DPAD_UP;
+      case 11:
+         return BUTTON_DPAD_DOWN;
+      case 12:
+         return BUTTON_DPAD_LEFT;
+      case 13:
+         return BUTTON_DPAD_RIGHT;
+      default:
+         return BUTTON_UNKNOWN;
+   }
+}
+
+
+S32 keyCodeToButtonIndex(KeyCode keyCode)
+{
+   switch(keyCode)
+   {
+      case BUTTON_1:
+         return 0;
+      case BUTTON_2:
+         return 1;
+      case BUTTON_3:
+         return 2;
+      case BUTTON_4:
+         return 3;
+      case BUTTON_5:
+         return 4;
+      case BUTTON_6:
+         return 5;
+      case BUTTON_7:
+         return 6;
+      case BUTTON_8:
+         return 7;
+      case BUTTON_START:
+         return 8;
+      case BUTTON_BACK:
+         return 9;
+      case BUTTON_DPAD_UP:
+         return 10;
+      case BUTTON_DPAD_DOWN:
+         return 11;
+      case BUTTON_DPAD_LEFT:
+         return 12;
+      case BUTTON_DPAD_RIGHT:
+         return 13;
+      default:
+         return 9999;
    }
 }
 

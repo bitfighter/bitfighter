@@ -117,7 +117,7 @@ ToggleMenuItem::ToggleMenuItem(string title, Vector<string> options, U32 currOpt
 void ToggleMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
 {
    UserInterface::drawCenteredStringPair(xpos, ypos, textsize, *getColor(isSelected), *getValueColor(isSelected), 
-                                         getPrompt().c_str(), mOptions[mIndex].c_str());
+      getPrompt().c_str(), mIndex < U32(mOptions.size()) ? mOptions[mIndex].c_str() : "INDEX OUT OF RANGE");
 }
 
 

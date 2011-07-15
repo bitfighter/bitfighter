@@ -32,6 +32,7 @@
 #include "config.h"
 #include "Colors.h"
 #include "game.h"
+#include "JoystickRender.h"
 
 #include "SDL/SDL_opengl.h"
 
@@ -39,7 +40,6 @@
 
 namespace Zap
 {
-void renderControllerButton(F32 x, F32 y, KeyCode keyCode, bool activated);
 
 Vector<QuickChatNode> gQuickChatTree;      // Holds our tree of QuickChat groups and messages, as defined in the INI file
 
@@ -53,7 +53,6 @@ extern IniSettings gIniSettings;
 extern Color gGlobalChatColor;
 extern Color gTeamChatColor;
 extern Color gErrorMessageTextColor;
-extern S32 getControllerButtonRenderedSize(KeyCode keyCode);
 
 
 // Returns true if there was something to render, false if our current chat tree position has nothing to render.  This can happen
@@ -118,13 +117,13 @@ void QuickChatHelper::render()
 
          // Draw key controls for selecting quick chat items
          if(inputMode == Joystick && renderNodes[i].buttonCode != KEY_UNKNOWN)     // Only draw joystick buttons when in joystick mode
-            renderControllerButton(xPos, yPos, renderNodes[i].buttonCode, false, 0);
+            JoystickRender::renderControllerButton(xPos, yPos, renderNodes[i].buttonCode, false, 0);
 
          Color color = renderNodes[i].teamOnly ? gTeamChatColor : gGlobalChatColor;
          if(showKeys)
          {
             glColor(color);
-            renderControllerButton(xPos + indent, yPos, renderNodes[i].keyCode, false, 0); 
+            JoystickRender::renderControllerButton(xPos + indent, yPos, renderNodes[i].keyCode, false, 0);
          }
  
          glColor(color);

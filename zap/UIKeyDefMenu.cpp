@@ -35,6 +35,7 @@
 #include "game.h"    // For gClientGame
 #include "Colors.h"
 #include "ScreenInfo.h"
+#include "JoystickRender.h"
 
 #include "SDL/SDL.h"
 #include "SDL/SDL_opengl.h"
@@ -239,7 +240,7 @@ void KeyDefMenuUserInterface::render()
          else
             glColor3f(1, 1, 1);
 
-         renderControllerButton((S32)(canvasWidth * (menuItems[i].mColumn == 1 ? 0.25 : 0.75)) + horizMargin, y + offset, *menuItems[i].primaryControl, dupe, 10);
+         JoystickRender::renderControllerButton((S32)(canvasWidth * (menuItems[i].mColumn == 1 ? 0.25 : 0.75)) + horizMargin, y + offset, *menuItems[i].primaryControl, dupe, 10);
       }
    }
    

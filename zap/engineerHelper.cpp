@@ -29,6 +29,7 @@
 #include "Color.h"      // For Color def
 #include "Colors.h"
 #include "game.h"
+#include "JoystickRender.h"
 
 #include "SDL/SDL_opengl.h"
 
@@ -74,12 +75,12 @@ void EngineerHelper::render()
          // Draw key controls for selecting the object to be created
 
          if(gIniSettings.inputMode == Joystick)     // Only draw joystick buttons when in joystick mode
-            renderControllerButton(UserInterface::horizMargin + (showKeys ? 0 : 20), yPos, mEngineerCostructionItemInfos[i].mButton, false);
+            JoystickRender::renderControllerButton(UserInterface::horizMargin + (showKeys ? 0 : 20), yPos, mEngineerCostructionItemInfos[i].mButton, false);
 
          if(showKeys)
          {
             glColor3f(1, 1, 1);     // Render key in white
-            renderControllerButton(UserInterface::horizMargin + 20, yPos, mEngineerCostructionItemInfos[i].mKey, false);
+            JoystickRender::renderControllerButton(UserInterface::horizMargin + 20, yPos, mEngineerCostructionItemInfos[i].mKey, false);
          }
 
          glColor(0.1, 1.0, 0.1);     

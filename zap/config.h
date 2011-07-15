@@ -34,12 +34,15 @@
 
 #include "tnlTypes.h"
 #include "tnlNetStringTable.h"
+#include "tnlVector.h"
 #include "Color.h"      // For Color def
 
 #include "input.h"
 #include <string>
 
+// TODO: get rid of these and add std:: and TNL:: to the various types
 using namespace std;
+using namespace TNL;
 
 
 namespace Zap

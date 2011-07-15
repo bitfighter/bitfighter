@@ -51,6 +51,7 @@
 #include "UIEditor.h"         // For EditorUserInterface def, needed by EditorGame stuff
 #include "BotNavMeshZone.h"      // For zone clearing code
 #include "ScreenInfo.h"
+#include "Joystick.h"
 
 #include "tnl.h"
 #include "tnlRandom.h"
@@ -61,7 +62,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include <sys/stat.h>
-#include <math.h>
+#include <cmath>
 
 
 #include "soccerGame.h"
@@ -534,8 +535,6 @@ void Game::setGameTime(F32 time)
       gt->setGameTime(U32(time * 60));
 }
 
-
-extern bool gReadyToConnectToMaster;
 
 // If there is no valid connection to master server, perodically try to create one.
 // If user is playing a game they're hosting, they should get one master connection
@@ -1451,8 +1450,6 @@ void ServerGame::removeClient(GameConnection *theConnection)
 }
 
 
-extern S32 moveObjectHitLimit;
-
 // Top-level idle loop for server, runs only on the server by definition
 void ServerGame::idle(U32 timeDelta)
 {
@@ -1819,9 +1816,91 @@ void ClientGame::setConnectionToServer(GameConnection *theConnection)
    theConnection->mClientGame = this;
 }
 
-
-extern void JoystickUpdateMove(Move *theMove);
 extern IniSettings gIniSettings;
+
+extern bool gShowAimVector;
+
+static void joystickUpdateMove(Move *theMove)
+{
+   // One of each of left/right axis and up/down axis should be 0 by this point
+   // but let's guarantee it..   why?
+   if(Joystick::JoystickInputData[MoveAxesLeft].value > 0)
+   {
+      theMove->left = Joystick::JoystickInputData[MoveAxesLeft].value;
+      theMove->right = 0;
+   }
+   else
+   {
+      theMove->left = 0;
+      theMove->right = Joystick::JoystickInputData[MoveAxesRight].value;
+   }
+
+   if(Joystick::JoystickInputData[MoveAxesUp].value > 0)
+   {
+      theMove->up = Joystick::JoystickInputData[MoveAxesUp].value;
+      theMove->down = 0;
+   }
+   else
+   {
+      theMove->up = 0;
+      theMove->down = Joystick::JoystickInputData[MoveAxesDown].value;
+   }
+
+   logprintf(
+         "Joystick axis values. Move: Left: %f, Right: %f, Up: %f, Down: %f\nShoot: Left: %f, Right: %f, Up: %f, Down: %f ",
+         Joystick::JoystickInputData[MoveAxesLeft].value, Joystick::JoystickInputData[MoveAxesRight].value,
+         Joystick::JoystickInputData[MoveAxesUp].value, Joystick::JoystickInputData[MoveAxesDown].value,
+         Joystick::JoystickInputData[ShootAxesLeft].value, Joystick::JoystickInputData[ShootAxesRight].value,
+         Joystick::JoystickInputData[ShootAxesUp].value, Joystick::JoystickInputData[ShootAxesDown].value
+         );
+
+   logprintf(
+            "Move values. Move: Left: %f, Right: %f, Up: %f, Down: %f",
+            theMove->left, theMove->right,
+            theMove->up, theMove->down
+            );
+
+
+   // Goofball implementation of enableExperimentalAimMode here replicates old behavior when setting is disabled
+   F32 x, y;
+   if (Joystick::JoystickInputData[ShootAxesLeft].value > 0)
+      x = -Joystick::JoystickInputData[ShootAxesLeft].value;
+   else
+      x = Joystick::JoystickInputData[ShootAxesRight].value;
+
+
+   if (Joystick::JoystickInputData[ShootAxesUp].value > 0)
+      y = -Joystick::JoystickInputData[ShootAxesUp].value;
+   else
+      y = Joystick::JoystickInputData[ShootAxesDown].value;
+
+   logprintf("XY from shoot axes. x: %f, y: %f", x, y);
+
+   Point p(x, y);
+   F32 plen = p.len();
+
+   F32 maxplen = max(fabs(p.x), fabs(p.y));
+
+   F32 fact = gIniSettings.enableExperimentalAimMode ? maxplen : plen;
+
+   if(fact > (gIniSettings.enableExperimentalAimMode ? 0.95 : 0.50))    // It requires a large movement to actually fire...
+   {
+      theMove->angle = atan2(p.y, p.x);
+      theMove->fire = true;
+      gShowAimVector = true;
+   }
+   else if(fact > 0.25)   // ...but you can change aim with a smaller one
+   {
+      theMove->angle = atan2(p.y, p.x);
+      theMove->fire = false;
+      gShowAimVector = true;
+   }
+   else
+   {
+      theMove->fire = false;
+      gShowAimVector = false;
+   }
+}
 
 U32 prevTimeDelta=0;
 
@@ -1872,7 +1951,7 @@ void ClientGame::idle(U32 timeDelta)
    // We'll also run this while in the menus so if we enter keyboard mode accidentally, it won't
    // kill the joystick.  The design of combining joystick input and move updating really sucks.
    if(gIniSettings.inputMode == Joystick || UserInterface::current == &gOptionsMenuUserInterface)
-      JoystickUpdateMove(theMove);
+      joystickUpdateMove(theMove);
 
 
    theMove->time = timeDelta + prevTimeDelta;

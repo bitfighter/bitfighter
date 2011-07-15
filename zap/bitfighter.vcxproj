@@ -165,7 +165,6 @@
     <ClCompile Include="..\zap\HTFGame.cpp" />
     <ClCompile Include="..\zap\huntersGame.cpp" />
     <ClCompile Include="..\zap\IniFile.cpp" />
-    <ClCompile Include="..\zap\input.cpp" />
     <ClCompile Include="..\zap\item.cpp" />
     <ClCompile Include="..\zap\keyCode.cpp" />
     <ClCompile Include="..\zap\lineEditor.cpp" />
@@ -175,6 +174,8 @@
     <ClCompile Include="gameStats.cpp" />
     <ClCompile Include="Geometry.cpp" />
     <ClCompile Include="helperMenu.cpp" />
+    <ClCompile Include="Joystick.cpp" />
+    <ClCompile Include="JoystickRender.cpp" />
     <ClCompile Include="loadoutHelper.cpp" />
     <ClCompile Include="..\zap\loadoutZone.cpp" />
     <ClCompile Include="..\zap\lpc10dec.c" />
@@ -234,7 +235,6 @@
     <ClCompile Include="..\zap\UITeamDefMenu.cpp" />
     <ClCompile Include="..\zap\UIYesNo.cpp" />
     <ClCompile Include="..\zap\voiceCodec.cpp" />
-    <ClCompile Include="..\zap\winJoystick.cpp" />
     <ClCompile Include="..\zap\zoneControlGame.cpp" />
     <ClCompile Include="dataConnection.cpp" />
     <ClCompile Include="oglconsole.c" />
@@ -278,6 +278,8 @@
     <ClInclude Include="..\zap\IniFile.h" />
     <ClInclude Include="..\zap\input.h" />
     <ClInclude Include="..\zap\item.h" />
+    <ClCompile Include="Joystick.h" />
+    <ClCompile Include="JoystickRender.h" />
     <ClInclude Include="..\zap\keyCode.h" />
     <ClInclude Include="..\zap\lineEditor.h" />
     <ClInclude Include="EditorObject.h" />

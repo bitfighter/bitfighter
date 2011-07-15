@@ -925,11 +925,15 @@
 			>
 		</File>
 		<File
-			RelativePath=".\input.cpp"
+			RelativePath=".\input.h"
 			>
 		</File>
 		<File
-			RelativePath=".\input.h"
+			RelativePath=".\Joystick.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\JoystickRender.cpp"
 			>
 		</File>
 		<File
@@ -1056,14 +1060,14 @@
 			RelativePath=".\Rect.h"
 			>
 		</File>
-      <File
-         RelativePath=".\ScreenInfo.cpp"
-         >
-      </File>
-      <File
-         RelativePath=".\ScreenInfo.h"
-         >
-      </File>
+		<File
+			RelativePath=".\ScreenInfo.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\ScreenInfo.h"
+			>
+		</File>
 		<File
 			RelativePath=".\screenShooter.cpp"
 			>
@@ -1134,10 +1138,6 @@
 		</File>
 		<File
 			RelativePath=".\UIRebindKeys.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\winJoystick.cpp"
 			>
 		</File>
 		<File

@@ -29,6 +29,7 @@
 #include "gameType.h"
 #include "Colors.h"
 #include "game.h"
+#include "JoystickRender.h"
 
 #include "SDL/SDL_opengl.h"
 
@@ -155,12 +156,12 @@ void LoadoutHelper::render()
       if(isValidItem(i))
       {
          if(gIniSettings.inputMode == Joystick)     // Only draw joystick buttons when in joystick mode
-            renderControllerButton(UserInterface::horizMargin + (showKeys ? 0 : 20), yPos, list->get(i).button, false);
+            JoystickRender::renderControllerButton(UserInterface::horizMargin + (showKeys ? 0 : 20), yPos, list->get(i).button, false);
 
          if(showKeys)
          {
             glColor3f(1, 1, 1);     // Render key in white
-            renderControllerButton(UserInterface::horizMargin + 20, yPos, list->get(i).key, false);
+            JoystickRender::renderControllerButton(UserInterface::horizMargin + 20, yPos, list->get(i).key, false);
          }
 
          if(selected)

@@ -132,6 +132,7 @@ using namespace TNL;
 #include "screenShooter.h"
 #include "Event.h"
 #include "ScreenInfo.h"
+#include "Joystick.h"
 
 #include "SDL/SDL.h"
 #include "SDL/SDL_opengl.h"
@@ -174,8 +175,6 @@ md5wrapper md5;
 bool gShowAimVector = false;     // Do we render an aim vector?  This should probably not be a global, but until we find a better place for it...
 bool gDisableShipKeyboardInput;  // Disable ship movement while user is in menus
 
-U32 gUseStickNumber = 1;         // Which joystick do you want to use (1 = first, which is typical)
-
 CIniFile gINI("dummy");          // This is our INI file.  Filename set down in main(), but compiler seems to want an arg here.
 
 CmdLineSettings gCmdLineSettings;
@@ -183,8 +182,6 @@ CmdLineSettings gCmdLineSettings;
 ConfigDirectories gConfigDirs;
 
 IniSettings gIniSettings;
-
-ControllerTypeType gAutoDetectedJoystickType;   // Remember what sort of joystick was found for diagnostic purposes
 
 OGLCONSOLE_Console gConsole;     // For the moment, we'll just have one console for levelgens and bots.  This may change later.
 
@@ -213,8 +210,6 @@ Address gBindAddress(IPProtocol, Address::Any, 28000);      // Good for now, may
 // Above is equivalent to ("IP:Any:28000")
 
 Vector<StringTableEntry> gLevelSkipList;  // Levels we'll never load, to create a semi-delete function for remote server mgt
-
-Vector<string> gJoystickNames;
 
 extern NameEntryUserInterface gNameEntryUserInterface;
 
@@ -674,7 +669,7 @@ void onExit()
 
    OGLCONSOLE_Quit();
    SoundSystem::shutdown();
-   ShutdownJoystick();
+   Joystick::shutdownJoystick();
 
    // Save settings to capture window position
    saveWindowMode();
@@ -1092,7 +1087,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
       else if(!stricmp(argv[i], "-usestick")) // additional arg required
       {
          if(hasAdditionalArg)
-            gUseStickNumber = atoi(argv[i+1]);           //  TODO: should be part of gCmdLineSettings
+            Joystick::UseJoystickNumber = atoi(argv[i+1]) - 1;  // zero-indexed     //  TODO: should be part of gCmdLineSettings
          else
          {
             logprintf(LogConsumer::LogError, "You must specify the joystick you want to use with the -usestick option");
@@ -1845,10 +1840,11 @@ int main(int argc, char **argv)
    if(gClientGame)     // That is, we're starting up in interactive mode, as opposed to running a dedicated server
    {
       FXManager::init();                                    // Get ready for sparks!!  C'mon baby!!
-      InitJoystick();
+      Joystick::populateJoystickStaticData();               // Build static data needed for joysticks
+      Joystick::initJoystick();                             // Initialize joystick system
       resetKeyStates();                                     // Reset keyboard state mapping to show no keys depressed
-      gAutoDetectedJoystickType = autodetectJoystickType();
-      setJoystick(gAutoDetectedJoystickType);               // Will override INI settings, so process INI first
+      ControllerTypeType controllerType = Joystick::autodetectJoystickType();
+      setJoystick(controllerType);               // Will override INI settings, so process INI first
 
       // On OS X, make sure we're in the right directory
 #ifdef TNL_OS_MAC_OSX

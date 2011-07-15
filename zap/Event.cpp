@@ -14,6 +14,7 @@
 #include "IniFile.h"
 #include "screenShooter.h"
 #include "ScreenInfo.h"
+#include "Joystick.h"
 
 #include "SDL/SDL_opengl.h"
 
@@ -32,7 +33,7 @@ Event::~Event()
 {
 }
 
-void setMousePos(S32 x, S32 y)
+void Event::setMousePos(S32 x, S32 y)
 {
    DisplayMode reportedDisplayMode = gIniSettings.displayMode;
 
@@ -41,6 +42,86 @@ void setMousePos(S32 x, S32 y)
 
    gScreenInfo.setMousePos(x, y, reportedDisplayMode);
 }
+
+// Argument of axisMask is one of the 4 axes:
+//    MoveAxisLeftRightMask, MoveAxisUpDownMask, ShootAxisLeftRightMask, ShootAxisUpDownMask
+void Event::updateJoyAxesDirections(U32 axisMask, S16 value)
+{
+   // Get our current joystick-axis-direction
+   U32 detectedAxesDirectionMask;
+   if (value < 0)
+      detectedAxesDirectionMask = axisMask & NegativeAxesMask;
+   else
+      detectedAxesDirectionMask = axisMask & PositiveAxesMask;
+
+
+   // Get the specific axes direction index from the mask we've detected
+   // from enum JoystickAxesDirections
+   U32 axesDirectionIndex = 0;
+   for (S32 i = 0; i < MaxAxesDirections; i++)
+      if(Joystick::JoystickInputData[i].axesMask & detectedAxesDirectionMask)
+      {
+         axesDirectionIndex = i;
+         break;
+      }
+
+
+   // Update our global joystick input data, use a sensitivity threshold to take care of calibration issues
+   // Also, normalize the input value to a floating point scale of 0 to 1
+   F32 normalValue = 0.0f;
+   if (value < -Joystick::SensitivityThreshold || value > Joystick::SensitivityThreshold)
+      // Input value comes in on a scale of -32768 to 32767
+      normalValue = fabs((F32)(value - Joystick::SensitivityThreshold)/(F32)(S16_MAX - Joystick::SensitivityThreshold));
+
+   Joystick::JoystickInputData[axesDirectionIndex].value = normalValue;
+
+
+   // Determine what to set the KeyCode key state, it is binary so set the threshold has half -> 0.5
+   // Set the mask if it is above the digital threshold
+   bool keyState = false;
+   U32 currentKeyCodeMask = 0;
+   if (value < -0.5 || value > 0.5)
+   {
+      keyState = true;
+      currentKeyCodeMask |= detectedAxesDirectionMask;
+   }
+
+
+   // Only change KeyCode key state if the axis has changed.  Time to be tricky..
+   U32 keyCodeDownDeltaMask = currentKeyCodeMask & ~Joystick::AxesKeyCodeMask;
+   U32 keyCodeUpDeltaMask = ~currentKeyCodeMask & Joystick::AxesKeyCodeMask;
+
+   for (S32 i = 0; i < MaxAxesDirections; i++)
+   {
+      // If the current axes direction is set in the keyCodeDownDeltaMask, set the key down
+      if (Joystick::JoystickInputData[i].axesDirection & keyCodeDownDeltaMask)
+      {
+         setKeyState(Joystick::JoystickInputData[i].keyCode, true);
+
+         if(UserInterface::current)
+            UserInterface::current->onKeyDown(Joystick::JoystickInputData[i].keyCode, 0);
+
+         continue;
+      }
+
+      // If the current axes direction is set in the keyCodeUpDeltaMask, set the key up
+      if (Joystick::JoystickInputData[i].axesDirection & keyCodeUpDeltaMask)
+      {
+         setKeyState(Joystick::JoystickInputData[i].keyCode, false);
+
+         if(UserInterface::current)
+            UserInterface::current->onKeyUp(Joystick::JoystickInputData[i].keyCode);
+      }
+   }
+
+
+   // Finally alter the global axes KeyCode mask to reflect the current keyState
+   if (keyState)     // Set the bit to 1 in the global mask
+      Joystick::AxesKeyCodeMask |= currentKeyCodeMask;
+   else              // Set the bit to 0 in the global mask
+      Joystick::AxesKeyCodeMask &= ~currentKeyCodeMask;
+}
+
 
 void Event::onEvent(SDL_Event* event)
 {
@@ -62,15 +143,15 @@ void Event::onEvent(SDL_Event* event)
          switch (event->button.button)
          {
             case SDL_BUTTON_LEFT:
-               onMouseLeftButtonDown(event->button.x, event->button.y);
+               onMouseButtonDown(event->button.x, event->button.y, MOUSE_LEFT);
                break;
 
             case SDL_BUTTON_RIGHT:
-               onMouseRightButtonDown(event->button.x, event->button.y);
+               onMouseButtonDown(event->button.x, event->button.y, MOUSE_RIGHT);
                break;
 
             case SDL_BUTTON_MIDDLE:
-               onMouseMiddleButtonDown(event->button.x, event->button.y);
+               onMouseButtonDown(event->button.x, event->button.y, MOUSE_MIDDLE);
                break;
          }
          break;
@@ -79,15 +160,15 @@ void Event::onEvent(SDL_Event* event)
          switch (event->button.button)
          {
             case SDL_BUTTON_LEFT:
-               onMouseLeftButtonUp(event->button.x, event->button.y);
+               onMouseButtonUp(event->button.x, event->button.y, MOUSE_LEFT);
                break;
 
             case SDL_BUTTON_RIGHT:
-               onMouseRightButtonUp(event->button.x, event->button.y);
+               onMouseButtonUp(event->button.x, event->button.y, MOUSE_RIGHT);
                break;
 
             case SDL_BUTTON_MIDDLE:
-               onMouseMiddleButtonUp(event->button.x, event->button.y);
+               onMouseButtonUp(event->button.x, event->button.y, MOUSE_MIDDLE);
                break;
          }
          break;
@@ -96,13 +177,14 @@ void Event::onEvent(SDL_Event* event)
          onJoyAxis(event->jaxis.which, event->jaxis.axis, event->jaxis.value);
          break;
 
-      case SDL_JOYBALLMOTION:
-         onJoyBall(event->jball.which, event->jball.ball, event->jball.xrel, event->jball.yrel);
-         break;
-
-      case SDL_JOYHATMOTION:
-         onJoyHat(event->jhat.which, event->jhat.hat, event->jhat.value);
-         break;
+         // TODO:  Do we need joyball and joyhat?
+//      case SDL_JOYBALLMOTION:
+//         onJoyBall(event->jball.which, event->jball.ball, event->jball.xrel, event->jball.yrel);
+//         break;
+//
+//      case SDL_JOYHATMOTION:
+//         onJoyHat(event->jhat.which, event->jhat.hat, event->jhat.value);
+//         break;
 
       case SDL_JOYBUTTONDOWN:
          onJoyButtonDown(event->jbutton.which, event->jbutton.button);
@@ -227,91 +309,83 @@ void Event::onMouseWheel(bool Up, bool Down)
 
 }
 
-void Event::onMouseLeftButtonDown(S32 x, S32 y)
+void Event::onMouseButtonDown(S32 x, S32 y, KeyCode keyCode)
 {
    setMousePos(x, y);
 
    if(!UserInterface::current)
       return;    // Bail if no current UI
 
-   setKeyState(MOUSE_LEFT, true);
+   setKeyState(keyCode, true);
 
-   UserInterface::current->onKeyDown(MOUSE_LEFT, 0);
+   UserInterface::current->onKeyDown(keyCode, 0);
 }
 
-void Event::onMouseLeftButtonUp(S32 x, S32 y)
+void Event::onMouseButtonUp(S32 x, S32 y, KeyCode keyCode)
 {
    setMousePos(x, y);
 
    if(!UserInterface::current)
       return;    // Bail if no current UI
 
-   setKeyState(MOUSE_LEFT, false);
+   setKeyState(keyCode, false);
 
-   UserInterface::current->onKeyUp(MOUSE_LEFT);
+   UserInterface::current->onKeyUp(keyCode);
 }
 
-void Event::onMouseRightButtonDown(S32 x, S32 y)
+
+void Event::onJoyAxis(U8 whichJoystick, U8 axis, S16 value)
 {
-   setMousePos(x, y);
+   // If we are using a predefined controller, get the appropriate axis
+   if (gIniSettings.joystickType < ControllerTypeCount)
+   {
+      // Left/Right movement axis
+      if(axis == Joystick::PredefinedJoystickList[gIniSettings.joystickType].moveAxesSdlIndex[0])
+         updateJoyAxesDirections(MoveAxisLeftRightMask,  value);
 
-   if(!UserInterface::current)
-      return;    // Bail if no current UI
+      // Up/down movement axis
+      if(axis == Joystick::PredefinedJoystickList[gIniSettings.joystickType].moveAxesSdlIndex[1])
+         updateJoyAxesDirections(MoveAxisUpDownMask,  value);
 
-   setKeyState(MOUSE_RIGHT, true);
+      // Left/Right shooting axis
+      if(axis == Joystick::PredefinedJoystickList[gIniSettings.joystickType].shootAxesSdlIndex[0])
+         updateJoyAxesDirections(ShootAxisLeftRightMask, value);
 
-   UserInterface::current->onKeyDown(MOUSE_RIGHT, 0);
+      // Up/down shooting axis
+      if(axis == Joystick::PredefinedJoystickList[gIniSettings.joystickType].shootAxesSdlIndex[1])
+         updateJoyAxesDirections(ShootAxisUpDownMask, value);
+   }
+   // Else just use the first 4 axis for fun
+   else {
+      if (axis == 0)
+         updateJoyAxesDirections(MoveAxisLeftRightMask,  value);
+      if (axis == 1)
+         updateJoyAxesDirections(MoveAxisUpDownMask,  value);
+      if (axis == 2)
+         updateJoyAxesDirections(ShootAxisLeftRightMask, value);
+      if (axis == 3)
+         updateJoyAxesDirections(ShootAxisUpDownMask, value);
+   }
 }
 
-void Event::onMouseRightButtonUp(S32 x, S32 y)
-{
-   setMousePos(x, y);
-
-   if(!UserInterface::current)
-      return;    // Bail if no current UI
-
-   setKeyState(MOUSE_RIGHT, false);
-
-   UserInterface::current->onKeyUp(MOUSE_RIGHT);
-}
-
-void Event::onMouseMiddleButtonDown(S32 x, S32 y)
-{
-   setMousePos(x, y);
-
-   if(!UserInterface::current)
-      return;    // Bail if no current UI
-
-   setKeyState(MOUSE_MIDDLE, true);
-
-   UserInterface::current->onKeyDown(MOUSE_MIDDLE, 0);
-}
-
-void Event::onMouseMiddleButtonUp(S32 x, S32 y)
-{
-   setMousePos(x, y);
-
-   if(!UserInterface::current)
-      return;    // Bail if no current UI
-
-   setKeyState(MOUSE_MIDDLE, false);
-
-   UserInterface::current->onKeyUp(MOUSE_MIDDLE);
-}
-
-void Event::onJoyAxis(U8 which, U8 axis, S16 value)
-{
-
-}
+extern KeyCode joyButtonToKeyCode(int buttonIndex);
 
 void Event::onJoyButtonDown(U8 which, U8 button)
 {
+   KeyCode keyCode = joyButtonToKeyCode(Joystick::remapJoystickButton(button));
+   setKeyState(keyCode, true);
 
+   if(UserInterface::current)
+      UserInterface::current->onKeyDown(keyCode, 0);
 }
 
 void Event::onJoyButtonUp(U8 which, U8 button)
 {
+   KeyCode keyCode = joyButtonToKeyCode(button);
+   setKeyState(keyCode, false);
 
+   if(UserInterface::current)
+      UserInterface::current->onKeyUp(keyCode);
 }
 
 void Event::onJoyHat(U8 which, U8 hat, U8 value)

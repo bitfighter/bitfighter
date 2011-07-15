@@ -15,6 +15,9 @@
 namespace Zap {
 
 class Event {
+private:
+   static void setMousePos(TNL::S32 x, TNL::S32 y);
+   static void updateJoyAxesDirections(TNL::U32 axisMask, TNL::S16 value);
 
 public:
    Event();
@@ -30,12 +33,8 @@ public:
    static void onMouseBlur();
    static void onMouseMoved(TNL::S32 x, TNL::S32 y);
    static void onMouseWheel(bool Up, bool Down);  //Not implemented
-   static void onMouseLeftButtonDown(TNL::S32 x, TNL::S32 y);
-   static void onMouseLeftButtonUp(TNL::S32 x, TNL::S32 y);
-   static void onMouseRightButtonDown(TNL::S32 x, TNL::S32 y);
-   static void onMouseRightButtonUp(TNL::S32 x, TNL::S32 y);
-   static void onMouseMiddleButtonDown(TNL::S32 x, TNL::S32 y);
-   static void onMouseMiddleButtonUp(TNL::S32 x, TNL::S32 y);
+   static void onMouseButtonDown(TNL::S32 x, TNL::S32 y, KeyCode keyCode);
+   static void onMouseButtonUp(TNL::S32 x, TNL::S32 y, KeyCode keyCode);
    static void onJoyAxis(TNL::U8 which, TNL::U8 axis, TNL::S16 value);
    static void onJoyButtonDown(TNL::U8 which, TNL::U8 button);
    static void onJoyButtonUp(TNL::U8 which, TNL::U8 button);

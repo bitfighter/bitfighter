@@ -27,6 +27,7 @@
 #include "helperMenu.h"
 #include "UIGame.h"     // For mGameUserInterface
 #include "game.h"
+#include "JoystickRender.h"
 
 #include "SDL/SDL_opengl.h"
 
@@ -60,10 +61,7 @@ bool HelperMenu::processKeyCode(KeyCode keyCode)
    return false;
 }
 
-
-extern void renderControllerButton(F32 x, F32 y, KeyCode keyCode, bool activated, S32 offset);
 extern IniSettings gIniSettings;
-extern S32 getControllerButtonRenderedSize(KeyCode keyCode);
 
 void HelperMenu::drawMenuBorderLine(S32 yPos, const Color &color)
 {
@@ -80,7 +78,7 @@ void HelperMenu::drawMenuBorderLine(S32 yPos, const Color &color)
 void HelperMenu::drawMenuCancelText(S32 yPos, const Color &color, S32 fontSize)
 {
 
-   S32 butSize = getControllerButtonRenderedSize(BUTTON_BACK);
+   S32 butSize = JoystickRender::getControllerButtonRenderedSize(BUTTON_BACK);
    const S32 fontSizeSm = fontSize - 4;
 
    glColor(color);
@@ -92,7 +90,7 @@ void HelperMenu::drawMenuCancelText(S32 yPos, const Color &color, S32 fontSize)
    {
       S32 xPos = UserInterface::horizMargin;
       xPos += UserInterface::drawStringAndGetWidth( xPos, yPos, fontSizeSm, "Press ");
-      renderControllerButton(xPos, yPos, BUTTON_BACK, false, butSize / 2);
+      JoystickRender::renderControllerButton(xPos, yPos, BUTTON_BACK, false, butSize / 2);
       xPos += butSize;
       glColor(color);
       UserInterface::drawString( xPos, yPos, fontSizeSm, " to cancel");

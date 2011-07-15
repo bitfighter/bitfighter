@@ -29,6 +29,7 @@
 #include "quickChatHelper.h"
 #include "gameLoader.h"    // For LevelListLoader::levelList
 #include "version.h"
+#include "Joystick.h"
 
 #ifdef _MSC_VER
 #pragma warning (disable: 4996)     // Disable POSIX deprecation, certain security warnings that seem to be specific to VC++
@@ -271,7 +272,7 @@ static void loadGeneralSettings()
    gIniSettings.verboseHelpMessages  = gINI.GetValueYN(section, "VerboseHelpMessages", gIniSettings.verboseHelpMessages);
    gIniSettings.showKeyboardKeys     = gINI.GetValueYN(section, "ShowKeyboardKeysInStickMode", gIniSettings.showKeyboardKeys);
 
-   gIniSettings.joystickType = stringToJoystickType(gINI.GetValue(section, "JoystickType", joystickTypeToString(gIniSettings.joystickType)));
+   gIniSettings.joystickType = Joystick::stringToJoystickType(gINI.GetValue(section, "JoystickType", Joystick::joystickTypeToString(gIniSettings.joystickType)).c_str());
 
    gIniSettings.winXPos = max(gINI.GetValueI(section, "WindowXPos", gIniSettings.winXPos), 0);    // Restore window location
    gIniSettings.winYPos = max(gINI.GetValueI(section, "WindowYPos", gIniSettings.winYPos), 0);
@@ -1040,77 +1041,78 @@ static void writeDefaultQuickChatMessages()
       gINI.SetValue("QuickChatMessagesGroup7_Message7", "Message", "Yoohoo!");
 }
 
-
-void readJoystick()
-{
-   gJoystickMapping.enable = gINI.GetValueYN("Joystick", "Enable", false);
-   for(U32 i=0; i<MaxJoystickAxes*2; i++)
-   {
-      Vector<string> buttonList;
-      parseString(gINI.GetValue("Joystick", "Axes" + itos(i), i<8 ? itos(i+16) : "").c_str(), buttonList, ',');
-      gJoystickMapping.axes[i] = 0;
-      for(S32 j=0; j<buttonList.size(); j++)
-      {
-         gJoystickMapping.axes[i] |= 1 << atoi(buttonList[j].c_str());
-      }
-   }
-   for(U32 i=0; i<32; i++)
-   {
-      Vector<string> buttonList;
-      parseString(gINI.GetValue("Joystick", "Button" + itos(i), i<10 ? itos(i) : "").c_str(), buttonList, ',');
-      gJoystickMapping.button[i] = 0;
-      for(S32 j=0; j<buttonList.size(); j++)
-      {
-         gJoystickMapping.button[i] |= 1 << atoi(buttonList[j].c_str());
-      }
-   }
-   for(U32 i=0; i<4; i++)
-   {
-      Vector<string> buttonList;
-      parseString(gINI.GetValue("Joystick", "Pov" + itos(i), itos(i+10)).c_str(), buttonList, ',');
-      gJoystickMapping.pov[i] = 0;
-      for(S32 j=0; j<buttonList.size(); j++)
-      {
-         gJoystickMapping.pov[i] |= 1 << atoi(buttonList[j].c_str());
-      }
-   }
-}
-
-void writeJoystick()
-{
-   gINI.setValueYN("Joystick", "Enable", gJoystickMapping.enable);
-   ///for(listToString(alwaysPingList, ',')
-   for(U32 i=0; i<MaxJoystickAxes*2; i++)
-   {
-      Vector<string> buttonList;
-      for(U32 j=0; j<32; j++)
-      {
-         if(gJoystickMapping.axes[i] & (1 << j))
-            buttonList.push_back(itos(j));
-      }
-      gINI.SetValue("Joystick", "Axes" + itos(i), listToString(buttonList, ','));
-   }
-   for(U32 i=0; i<32; i++)
-   {
-      Vector<string> buttonList;
-      for(U32 j=0; j<32; j++)
-      {
-         if(gJoystickMapping.button[i] & (1 << j))
-            buttonList.push_back(itos(j));
-      }
-      gINI.SetValue("Joystick", "Button" + itos(i), listToString(buttonList, ','));
-   }
-   for(U32 i=0; i<4; i++)
-   {
-      Vector<string> buttonList;
-      for(U32 j=0; j<32; j++)
-      {
-         if(gJoystickMapping.pov[i] & (1 << j))
-            buttonList.push_back(itos(j));
-      }
-      gINI.SetValue("Joystick", "Pov" + itos(i), listToString(buttonList, ','));
-   }
-}
+// TODO:  reimplement joystick mapping methods for future custom joystick
+// mappings with axes as well as buttons
+//void readJoystick()
+//{
+//   gJoystickMapping.enable = gINI.GetValueYN("Joystick", "Enable", false);
+//   for(U32 i=0; i<MaxJoystickAxes*2; i++)
+//   {
+//      Vector<string> buttonList;
+//      parseString(gINI.GetValue("Joystick", "Axes" + itos(i), i<8 ? itos(i+16) : "").c_str(), buttonList, ',');
+//      gJoystickMapping.axes[i] = 0;
+//      for(S32 j=0; j<buttonList.size(); j++)
+//      {
+//         gJoystickMapping.axes[i] |= 1 << atoi(buttonList[j].c_str());
+//      }
+//   }
+//   for(U32 i=0; i<32; i++)
+//   {
+//      Vector<string> buttonList;
+//      parseString(gINI.GetValue("Joystick", "Button" + itos(i), i<10 ? itos(i) : "").c_str(), buttonList, ',');
+//      gJoystickMapping.button[i] = 0;
+//      for(S32 j=0; j<buttonList.size(); j++)
+//      {
+//         gJoystickMapping.button[i] |= 1 << atoi(buttonList[j].c_str());
+//      }
+//   }
+//   for(U32 i=0; i<4; i++)
+//   {
+//      Vector<string> buttonList;
+//      parseString(gINI.GetValue("Joystick", "Pov" + itos(i), itos(i+10)).c_str(), buttonList, ',');
+//      gJoystickMapping.pov[i] = 0;
+//      for(S32 j=0; j<buttonList.size(); j++)
+//      {
+//         gJoystickMapping.pov[i] |= 1 << atoi(buttonList[j].c_str());
+//      }
+//   }
+//}
+//
+//void writeJoystick()
+//{
+//   gINI.setValueYN("Joystick", "Enable", gJoystickMapping.enable);
+//   ///for(listToString(alwaysPingList, ',')
+//   for(U32 i=0; i<MaxJoystickAxes*2; i++)
+//   {
+//      Vector<string> buttonList;
+//      for(U32 j=0; j<32; j++)
+//      {
+//         if(gJoystickMapping.axes[i] & (1 << j))
+//            buttonList.push_back(itos(j));
+//      }
+//      gINI.SetValue("Joystick", "Axes" + itos(i), listToString(buttonList, ','));
+//   }
+//   for(U32 i=0; i<32; i++)
+//   {
+//      Vector<string> buttonList;
+//      for(U32 j=0; j<32; j++)
+//      {
+//         if(gJoystickMapping.button[i] & (1 << j))
+//            buttonList.push_back(itos(j));
+//      }
+//      gINI.SetValue("Joystick", "Button" + itos(i), listToString(buttonList, ','));
+//   }
+//   for(U32 i=0; i<4; i++)
+//   {
+//      Vector<string> buttonList;
+//      for(U32 j=0; j<32; j++)
+//      {
+//         if(gJoystickMapping.pov[i] & (1 << j))
+//            buttonList.push_back(itos(j));
+//      }
+//      gINI.SetValue("Joystick", "Pov" + itos(i), listToString(buttonList, ','));
+//   }
+//}
 
 
 // Option default values are stored here, in the 3rd prarm of the GetValue call
@@ -1135,7 +1137,7 @@ void loadSettingsFromINI()
 
    loadQuickChatMessages();
 
-   readJoystick();
+//   readJoystick();
 
    saveSettingsToINI();      // Save to fill in any missing settings
 }
@@ -1294,7 +1296,7 @@ static void writeSettings()
    gINI.setValueYN(section, "VerboseHelpMessages", gIniSettings.verboseHelpMessages);
    gINI.setValueYN(section, "ShowKeyboardKeysInStickMode", gIniSettings.showKeyboardKeys);
 
-   gINI.SetValue  (section, "JoystickType", joystickTypeToString(gIniSettings.joystickType));
+   gINI.SetValue  (section, "JoystickType", Joystick::joystickTypeToString(gIniSettings.joystickType));
    gINI.SetValue  (section, "MasterServerAddressList", gIniSettings.masterAddress);
    gINI.SetValue  (section, "DefaultName", gIniSettings.defaultName);
    gINI.SetValue  (section, "LastName", gIniSettings.lastName);
@@ -1802,13 +1804,11 @@ string ConfigDirectories::findBotFile(const string &filename)           // stati
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-extern U32 gUseStickNumber;
-
 // Returns display-friendly mode designator like "Keyboard" or "Joystick 1"
 string IniSettings::getInputMode()
 {
    if(gIniSettings.inputMode == Joystick)
-      return "Joystick " + itos(gUseStickNumber);
+      return "Joystick " + itos(Joystick::UseJoystickNumber);
    else
       return "Keyboard";
 }

@@ -43,6 +43,8 @@
 #include "config.h"
 #include "Colors.h"
 #include "ScreenInfo.h"
+#include "Joystick.h"
+#include "JoystickRender.h"
 
 #include "SDL/SDL.h"
 #include "SDL/SDL_opengl.h"
@@ -53,8 +55,6 @@
 
 namespace Zap
 {
-extern U32 gUseStickNumber;
-
 
 // Sorts alphanumerically by menuItem's prompt  ==> used for getting levels in the right order and such
 S32 QSORT_CALLBACK menuItemValueSort(boost::shared_ptr<MenuItem> *a, boost::shared_ptr<MenuItem> *b)
@@ -156,8 +156,6 @@ S32 MenuUserInterface::getYStart()
 
 
 extern IniSettings gIniSettings;
-extern void renderControllerButton(F32 x, F32 y, KeyCode keyCode, bool activated, S32 offset);
-extern S32 getControllerButtonRenderedSize(KeyCode keyCode);
 
 static void renderMenuInstructions()
 {
@@ -173,33 +171,35 @@ static void renderMenuInstructions()
      UserInterface::drawCenteredString(y, size, "UP, DOWN to choose | ENTER to select | ESC exits menu");
    else
    {
-     S32 totalWidth = getControllerButtonRenderedSize(BUTTON_DPAD_UP) + getControllerButtonRenderedSize(BUTTON_DPAD_DOWN) +
-                  getControllerButtonRenderedSize(BUTTON_START) +   getControllerButtonRenderedSize(BUTTON_BACK) +
-                  UserInterface::getStringWidth(size, "to choose |  to select |  exits menu");
+     S32 totalWidth = JoystickRender::getControllerButtonRenderedSize(BUTTON_DPAD_UP) +
+           JoystickRender::getControllerButtonRenderedSize(BUTTON_DPAD_DOWN) +
+           JoystickRender::getControllerButtonRenderedSize(BUTTON_START) +
+           JoystickRender::getControllerButtonRenderedSize(BUTTON_BACK) +
+           UserInterface::getStringWidth(size, "to choose |  to select |  exits menu");
 
      S32 x = canvasWidth / 2 - UserInterface::horizMargin - totalWidth/2;
 
-     renderControllerButton(x, y, BUTTON_DPAD_UP, false);
-     x += getControllerButtonRenderedSize(BUTTON_DPAD_UP) + UserInterface::getStringWidth(size, " ");
+     JoystickRender::renderControllerButton(x, y, BUTTON_DPAD_UP, false);
+     x += JoystickRender::getControllerButtonRenderedSize(BUTTON_DPAD_UP) + UserInterface::getStringWidth(size, " ");
 
-     renderControllerButton(x, y, BUTTON_DPAD_DOWN, false);
-     x += getControllerButtonRenderedSize(BUTTON_DPAD_DOWN) + UserInterface::getStringWidth(size, " ");
+     JoystickRender::renderControllerButton(x, y, BUTTON_DPAD_DOWN, false);
+     x += JoystickRender::getControllerButtonRenderedSize(BUTTON_DPAD_DOWN) + UserInterface::getStringWidth(size, " ");
 
      glColor3f(1,1,1);
      static const char *msg1 = "to choose | ";
      UserInterface::drawString(x, y, size, msg1);
      x += UserInterface::getStringWidth(size, msg1);
 
-     renderControllerButton(x, y + 4, BUTTON_START, false);
-     x += getControllerButtonRenderedSize(BUTTON_START);
+     JoystickRender::renderControllerButton(x, y + 4, BUTTON_START, false);
+     x += JoystickRender::getControllerButtonRenderedSize(BUTTON_START);
 
      glColor3f(1,1,1);
      static const char *msg2 = "to select | ";
      UserInterface::drawString(x, y, size, msg2);
      x += UserInterface::getStringWidth(size, msg2);
 
-     renderControllerButton(x + 4, y + 4, BUTTON_BACK, false);
-     x += getControllerButtonRenderedSize(BUTTON_BACK) + 4;
+     JoystickRender::renderControllerButton(x + 4, y + 4, BUTTON_BACK, false);
+     x += JoystickRender::getControllerButtonRenderedSize(BUTTON_BACK) + 4;
 
      glColor3f(1,1,1);
      UserInterface::drawString(x, y, size, "exits menu");
@@ -754,9 +754,7 @@ void MainMenuUserInterface::onEscape()
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-extern CmdLineSettings gCmdLineSettings;
 extern IniSettings gIniSettings;
-extern CIniFile gINI;
 
 OptionsMenuUserInterface gOptionsMenuUserInterface;
 
@@ -830,14 +828,12 @@ static void setControllerCallback(U32 jsType)
 }
 
 
-extern Vector<string> gJoystickNames;
-
 static void addStickOptions(Vector<string> *opts)
 {
    opts->clear();
    opts->push_back("KEYBOARD");
    
-   for(S32 i = 0; i < gJoystickNames.size(); i++)
+   for(S32 i = 0; i < Joystick::DetectedJoystickNameList.size(); i++)
       opts->push_back(string("JOYSTICK ") + itos(i+1));
 }
 
@@ -846,30 +842,30 @@ static S32 INPUT_MODE_MENU_ITEM_INDEX = 0;
 
 static void setInputModeCallback(U32 val)
 {
-   S32 sticks = gJoystickNames.size();
-   InitJoystick();      // Will allow people to plug in joystick while in this menu...
+   S32 sticks = Joystick::DetectedJoystickNameList.size();
+   Joystick::initJoystick();      // Will allow people to plug in joystick while in this menu...
 
-   if(sticks != gJoystickNames.size())
+   if(sticks != Joystick::DetectedJoystickNameList.size())
    {
       ToggleMenuItem *menuItem = dynamic_cast<ToggleMenuItem *>(gOptionsMenuUserInterface.menuItems[INPUT_MODE_MENU_ITEM_INDEX].get());
 
       if(menuItem)
          addStickOptions(&menuItem->mOptions);
 
-      if(val > (U32)gJoystickNames.size())
+      if(val > (U32)Joystick::DetectedJoystickNameList.size())
       {
          val = 0;
          menuItem->setValueIndex(0);
       }
 
       // Special case handler for common situation
-      if(sticks == 0 && gJoystickNames.size() == 1)      // User just plugged a stick in
+      if(sticks == 0 && Joystick::DetectedJoystickNameList.size() == 1)      // User just plugged a stick in
          menuItem->setValueIndex(1);
    }
 
    gIniSettings.inputMode = (val == 0) ? Keyboard : Joystick;
    if(val >= 1) 
-      gUseStickNumber = val;
+      Joystick::UseJoystickNumber = val;
 }
 
 
@@ -903,13 +899,13 @@ void OptionsMenuUserInterface::setupMenus()
 
    menuItems.push_back(boost::shared_ptr<MenuItem>(getWindowModeMenuItem()));
 
-   InitJoystick();   // Refresh joystick list
+   Joystick::initJoystick();   // Refresh joystick list
 
    addStickOptions(&opts);
 
    menuItems.push_back(boost::shared_ptr<MenuItem>(new ToggleMenuItem("PRIMARY INPUT:", 
                                                                       opts, 
-                                                                      gIniSettings.inputMode == Keyboard ? 0 : gUseStickNumber, 
+                                                                      (U32)gIniSettings.inputMode,
                                                                       true, 
                                                                       setInputModeCallback, 
                                                                       "Specify whether you want to play with your keyboard or joystick", 
@@ -919,7 +915,7 @@ void OptionsMenuUserInterface::setupMenus()
 
    opts.clear();
    for(S32 i = 0; i < ControllerTypeCount; i++)
-      opts.push_back(joystickTypeToPrettyString(i));
+      opts.push_back(Joystick::joystickTypeToPrettyString(i));
 
    // Simple bounds check -- could be GenericController, UnknownController, or NoController
    U32 selectedOption = gIniSettings.joystickType < ControllerTypeCount ? gIniSettings.joystickType : 0;

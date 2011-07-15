@@ -33,6 +33,7 @@
 #include "gameNetInterface.h"
 #include "gameObject.h"
 #include "version.h"
+#include "Joystick.h"
 
 #include "SharedConstants.h"    // For AuthenticationStatus enum
 
@@ -338,8 +339,6 @@ string MasterServerConnection::getMasterName()
 }
 
 
-extern Vector<string> gJoystickNames;
-
 // Send a connection request to the master server.  Also, tell them a little about ourselves.
 // Note that most of these parameters are completely bogus...  but even if they're not currently used, we gotta send something.
 void MasterServerConnection::writeConnectRequest(BitStream *bstream)
@@ -353,7 +352,7 @@ void MasterServerConnection::writeConnectRequest(BitStream *bstream)
    bstream->write(BUILD_VERSION);            // Current build of this game
 
    // First controller's autodetect string (for research purposes!)
-   bstream->writeString(gJoystickNames.size() > 0 ? gJoystickNames[0].c_str() : "");  
+   bstream->writeString(Joystick::DetectedJoystickNameList.size() > 0 ? Joystick::DetectedJoystickNameList[0] : "");
 
 
    if(bstream->writeFlag(mIsGameServer))     // We're a server, tell the master a little about us

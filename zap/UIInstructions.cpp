@@ -39,6 +39,7 @@
 #include "config.h"
 #include "Colors.h"
 #include "ScreenInfo.h"
+#include "JoystickRender.h"
 
 #include "SDL/SDL_opengl.h"
 
@@ -216,7 +217,7 @@ static ControlString controlsGamepad[] = {
          { NULL, NULL },
       };
 
-extern void renderControllerButton(F32 x, F32 y, U32 buttonIndex, U32 keyIndex, bool activated, S32 offset);
+
 extern CmdLineSettings gCmdLineSettings;
 extern IniSettings gIniSettings;
 
@@ -284,10 +285,10 @@ void InstructionsUserInterface::renderPage1()
 
          // Some special cases
          //if((OptionsMenuUserInterface::joystickType == LogitechDualAction || OptionsMenuUserInterface::joystickType == PS2DualShock) && (i == 2))     // TODO: Test this...
-         //   renderControllerButton(col2, y + 4, BUTTON_7, false);
+         //   JoystickRender::renderControllerButton(col2, y + 4, BUTTON_7, false);
 
          //if((OptionsMenuUserInterface::joystickType == LogitechDualAction || OptionsMenuUserInterface::joystickType == PS2DualShock) && (i == 3))
-         //   renderControllerButton(col2, y + 4, BUTTON_8, false);
+         //   JoystickRender::renderControllerButton(col2, y + 4, BUTTON_8, false);
 
          glColor(keyColor);
 
@@ -307,7 +308,7 @@ void InstructionsUserInterface::renderPage1()
                drawStringf(col2, y + 4, 15, "[%s] [%s] [%s]", keyCodeToString(keyLEFT[Keyboard]), keyCodeToString(keyDOWN[Keyboard]), keyCodeToString(keyRIGHT[Keyboard]));
          }
          else
-            renderControllerButton(contCol, y + 4, *controls[i].primaryControlIndex, false, 10);
+            JoystickRender::renderControllerButton(contCol, y + 4, *controls[i].primaryControlIndex, false, 10);
       }
 
       y += 26;

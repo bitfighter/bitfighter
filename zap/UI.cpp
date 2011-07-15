@@ -39,6 +39,7 @@ using namespace TNL;
 #include "Colors.h"
 #include "OpenglUtils.h"
 #include "ScreenInfo.h"
+#include "Joystick.h"
 
 #include <string>
 #include <stdarg.h>     // For va_args
@@ -233,7 +234,6 @@ KeyCode UserInterface::convertJoystickToKeyboard(KeyCode keyCode)
 }
 
 
-extern U32 gRawJoystickButtonInputs;
 extern CmdLineSettings gCmdLineSettings;
 extern IniSettings gIniSettings;
 extern ServerGame *gServerGame;
@@ -305,8 +305,8 @@ void UserInterface::renderCurrent()    // static
       glColor3f(1, 0, 1);
       vpos += 23;
       hpos = horizMargin;
-      for(U32 i = 0; i < MaxJoystickButtons; i++)
-         if(gRawJoystickButtonInputs & (1 << i))
+      for(U32 i = 0; i < MaxControllerButtons; i++)
+         if(Joystick::ButtonMask & (1 << i))
          {
             drawStringf( hpos, vpos, 18, "RawBut [%d]", i );
             hpos += getStringWidthf(18, "RawBut [%d]", i ) + 5;
