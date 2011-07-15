@@ -40,7 +40,6 @@
 
 #include "dataConnection.h"      // For DataSender
 
-#include "UIChat.h"
 
 #include "boost/smart_ptr/shared_ptr.hpp"
 

@@ -290,5 +290,7 @@ bool LoadoutHelper::processKeyCode(KeyCode keyCode)
    return true;
 }
 
+KeyCode LoadoutHelper::getActivationKey() { return keyLOADOUT[gIniSettings.inputMode]; }
+
 };
 

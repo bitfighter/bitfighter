@@ -26,10 +26,12 @@
 #include "SimpleLine.h"
 #include "gameObjectRender.h"
 #include "Colors.h"
+#include "config.h"
 
 #include <math.h>
 
 #include "SDL/SDL_opengl.h"
+#include "UI.h"
 
 namespace Zap
 {

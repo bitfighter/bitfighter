@@ -83,7 +83,7 @@ private:
    S32 mCurrentIndex;
 
    virtual const char *getCancelMessage() { return "Modifications canceled -- ship design unchanged."; }
-   virtual KeyCode getActivationKey() { return keyLOADOUT[gIniSettings.inputMode]; }
+   virtual KeyCode getActivationKey();
 
    bool isValidItem(S32 index);    // Do we have the required prerequisites for this item?
 
