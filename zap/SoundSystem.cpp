@@ -286,6 +286,10 @@ void SoundSystem::init()
       currentlyPlayingIndex = 0;
       gMusicValid = true;
       musicState = MusicStopped;
+
+      // Initialize to the proper volume level
+      musicVolume = gIniSettings.musicVolLevel;
+      alSourcef(musicSource, AL_GAIN, musicVolume);
    }
 
    // Set up voice chat buffers
