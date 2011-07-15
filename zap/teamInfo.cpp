@@ -26,6 +26,7 @@
 #include "teamInfo.h"
 #include "playerInfo.h"
 #include "gameType.h"
+#include "game.h"
 
 namespace Zap
 {

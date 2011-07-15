@@ -32,8 +32,10 @@ using namespace TNL;
 #include "SoundSystem.h"
 #include "gameObjectRender.h"
 #include "Colors.h"
+#include "game.h"
 
 #include "SDL/SDL_opengl.h"
+#include "UI.h"
 
 #include <math.h>
 
@@ -127,6 +129,7 @@ bool Teleporter::processArguments(S32 argc2, const char **argv2, Game *game)
    foundObjects.clear();
    game->getGridDatabase()->findObjects(TeleportType, foundObjects, Rect(pos, 1));
 
+   if(! dynamic_cast<EditorGame *>(game))  // Editor does not handle multi dest teleporter yet..
    for(S32 i = 0; i < foundObjects.size(); i++)
    {
       Teleporter *tel = dynamic_cast<Teleporter *>(foundObjects[i]);

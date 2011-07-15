@@ -34,6 +34,7 @@
 #include "engineeredObjects.h"   // For Turret and ForceFieldProjector methods in generating zones
 #include "../recast/Recast.h"    // For zone generation
 #include "../recast/RecastAlloc.h"
+#include "game.h"
 
 #include <vector>
 #include <math.h>

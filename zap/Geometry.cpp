@@ -27,6 +27,7 @@
 #include "GeomUtils.h"              // For polygon triangulation
 
 #include "Rect.h"
+#include <math.h>
 
 //#include "boost/smart_ptr/shared_ptr.hpp"
 

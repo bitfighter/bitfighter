@@ -54,6 +54,7 @@
 #include "config.h"              // for gIniSettings.defaultRobotScript
 #include "GeomUtils.h"
 #include "oglconsole.h"
+#include "game.h"
 
 #include "SDL/SDL_opengl.h"
 

@@ -28,6 +28,7 @@
 
 #include "gameObject.h"     
 #include "Point.h"
+#include "Color.h"
 
 namespace Zap
 {

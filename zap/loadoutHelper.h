@@ -44,29 +44,11 @@ struct LoadoutItem
    const char *help;       // An additional bit of help text, also displayed on loadout menu
    ShipModule requires;    // Item requires this module be part of loadout (used only for spy-bugs)
 
-   LoadoutItem() { /* Do nothing */ };      // Should never be used
+   LoadoutItem(); // { /* Do nothing */ };      // Should never be used
 
-   LoadoutItem(KeyCode key, KeyCode button, U32 index)      // Shortcut for modules -- use info from ModuleInfos
-   {
-      ModuleInfo *moduleInfo = gClientGame->getModuleInfo((ShipModule) index);
+   LoadoutItem(KeyCode key, KeyCode button, U32 index);      // Shortcut for modules -- use info from ModuleInfos
 
-      this->key = key;
-      this->button = button;
-      this->index = index;
-      this->text = moduleInfo->getMenuName();
-      this->help = moduleInfo->getMenuHelp();
-      this->requires = ModuleNone;     // Currently, no modules depend on any other
-   }
-
-   LoadoutItem(KeyCode key, KeyCode button, U32 index, const char *text, const char *help, ShipModule requires) 
-   {
-      this->key = key;
-      this->button = button;
-      this->index = index;
-      this->text = text;
-      this->help = help;
-      this->requires = requires;
-   }
+   LoadoutItem(KeyCode key, KeyCode button, U32 index, const char *text, const char *help, ShipModule requires);
 };
 
 
@@ -83,7 +65,7 @@ private:
    S32 mCurrentIndex;
 
    virtual const char *getCancelMessage() { return "Modifications canceled -- ship design unchanged."; }
-   virtual KeyCode getActivationKey() { return keyLOADOUT[gIniSettings.inputMode]; }
+   virtual KeyCode getActivationKey();
 
    bool isValidItem(S32 index);    // Do we have the required prerequisites for this item?
 

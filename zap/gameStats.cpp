@@ -121,22 +121,6 @@ S32 QSORT_CALLBACK teamScoreSort(TeamStats *a, TeamStats *b)
 };
 
 
-#ifdef TNL_ENABLE_ASSERTS
-bool VersionedGameStats_testing = false;
-U32 VersionedGameStats_ReadSize;
-U32 VersionedGameStats_WriteSize;
-#define VersionedGameStats_write_start(s) {VersionedGameStats_WriteSize = s.getBitPosition();}
-#define VersionedGameStats_write_end(s) {VersionedGameStats_WriteSize = s.getBitPosition() - VersionedGameStats_WriteSize;}
-#define VersionedGameStats_read_start(s) {VersionedGameStats_ReadSize = s.getBitPosition();}
-#define VersionedGameStats_read_end(s) {VersionedGameStats_ReadSize = s.getBitPosition() - VersionedGameStats_ReadSize; \
-   TNLAssert((!VersionedGameStats_testing) || VersionedGameStats_WriteSize == VersionedGameStats_ReadSize, "VersionedGameStats Read and write size is not equal. They must be equal size to prevent network errors.")}
-#else
-#define VersionedGameStats_write_start(s)
-#define VersionedGameStats_write_end(s)
-#define VersionedGameStats_read_start(s)
-#define VersionedGameStats_read_end(s)
-#endif
-
 
 
 namespace Types
@@ -155,23 +139,23 @@ namespace Types
 
 
    void read(TNL::BitStream &s, Zap::WeaponStats *val)
-	{
+   {
       val->weaponType = WeaponType(readU8(s));
       val->shots = readU16(s);
       val->hits = readU16(s);
-	}
+   }
 
 
    void write(TNL::BitStream &s, Zap::WeaponStats &val)
-	{
+   {
       write(s, U8(val.weaponType));
       write(s, U16(val.shots));
       write(s, U16(val.hits));
-	}
+   }
 
 
    void read(TNL::BitStream &s, Zap::PlayerStats *val)
-	{
+   {
       val->name = readString(s);
       val->points = readS32(s);
       val->kills = readU16(s);
@@ -184,8 +168,8 @@ namespace Types
       val->isLevelChanger = s.readFlag();
       val->isAuthenticated = false; //s.readFlag();  // we may set this by comparing Nonce id.
       val->nonce.read(&s);
-		read(s, &val->weaponStats);
-	}
+      read(s, &val->weaponStats);
+   }
 
 
    void write(TNL::BitStream &s, Zap::PlayerStats &val)
@@ -202,7 +186,7 @@ namespace Types
       val.nonce.write(&s);
 
       write(s, val.weaponStats);
-	}
+   }
 
 
    void read(TNL::BitStream &s, Zap::TeamStats *val)
@@ -213,8 +197,8 @@ namespace Types
       val->intColor = s.readInt(24); // 24 bit color
       val->hexColor = Color(val->intColor).toHexString();
 
-		read(s, &val->playerStats);
-	}
+      read(s, &val->playerStats);
+   }
 
 
    void write(TNL::BitStream &s, Zap::TeamStats &val)
@@ -223,11 +207,11 @@ namespace Types
       write(s, S32(val.score));
       s.writeInt(val.intColor, 24);    // 24 bit color
       write(s, val.playerStats);
-	}
+   }
 
 
    void read(TNL::BitStream &s, Zap::GameStats *val)
-	{
+   {
       val->isOfficial = s.readFlag();
       val->playerCount = readU16(s);
       val->duration = readU16(s);             // game length in seconds
@@ -235,12 +219,11 @@ namespace Types
       val->gameType = readString(s);
       val->levelName = readString(s);
       read(s, &val->teamStats);
-      val->teamCount = val->teamStats.size(); // is this needed?  ==> probably not (CE)
-	}
+   }
 
 
    void write(TNL::BitStream &s, Zap::GameStats &val)
-	{
+   {
       s.writeFlag(val.isOfficial);
       write(s, U16(val.playerCount));
       write(s, U16(val.duration));     // game length in seconds
@@ -248,27 +231,34 @@ namespace Types
       writeString(s, val.gameType);
       writeString(s, val.levelName);
       write(s, val.teamStats);
-	}
+   }
 
-	
+   
    /// Reads objects from a BitStream
    void read(TNL::BitStream &s, VersionedGameStats *val)
    {
-      VersionedGameStats_read_start(s);
       val->version = readU8(s);  // Read version number
-      read(s, &val->gameStats);  // This is not Vector, goes directly to read(s, Zap::GameStats *val)
+      read(s, &val->gameStats);
 
-      // Stop here if TNL_ENABLE_ASSERTS is on, and write/read size is not matched
-      VersionedGameStats_read_end(s);
-      if(s.isValid())
-         val->valid = true;
+      val->valid = true; // lets start as valid = true.
+
+
+      if(val->version >= 1)
+      {
+         // extra read code goes here...
+      }
+
+      if(val->version >= 2)  // this might happen with outdated master..
+         val->valid = false;
+
+      if(!s.isValid())
+         val->valid = false;
    }
 
 
    /// Writes objects into a BitStream. Server write and send to master.
    void write(TNL::BitStream &s, VersionedGameStats &val)
    {
-      VersionedGameStats_write_start(s);
       write(s, U8(val.CURRENT_VERSION));       // Send current version
       write(s, val.gameStats);
 
@@ -277,7 +267,10 @@ namespace Types
       // write(number) writes 8 bit int when number is U8
       // write(U16(number)) always writes 16 bit when number is U8, S32, or any other type
 
+      if(val.CURRENT_VERSION >= 1)
+      {
+         // extra write code goes here, match up with read code above...
+      }
 
-      VersionedGameStats_write_end(s);
    }
 }

@@ -26,6 +26,7 @@
 
 #include "helperMenu.h"
 #include "UIGame.h"     // For mGameUserInterface
+#include "game.h"
 
 #include "SDL/SDL_opengl.h"
 

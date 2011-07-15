@@ -27,6 +27,7 @@
 #include "ship.h"
 #include "UIGame.h"
 #include "flagItem.h"
+#include "game.h"
 
 #include <stdio.h>
 

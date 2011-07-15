@@ -202,7 +202,7 @@ static string insertStatsGame(Query *query, sqlite3 *sqliteDb, const GameStats *
                                        "duration_seconds, level_name, is_team_game, team_count) "
                 "VALUES( " + itos(serverId) + ", '" + gameStats->gameType + "', " + btos(gameStats->isOfficial) + ", " + itos(gameStats->playerCount) + ", " +
                              itos(gameStats->duration) + ", '" + sanitize(gameStats->levelName) + "', " + btos(gameStats->isTeamGame) + ", " + 
-                             itos(gameStats->teamCount)  + ");";
+                             itos(gameStats->teamStats.size())  + ");";
 
    string gameId = runQuery(query, sqliteDb, sql);
 

@@ -34,6 +34,7 @@
 #include "stringUtils.h"         // For itos
 #include "Colors.h"
 #include "ScreenInfo.h"
+#include "game.h"
 
 #include "SDL/SDL_opengl.h"
 

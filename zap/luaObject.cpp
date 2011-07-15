@@ -37,6 +37,7 @@
 #include "teleporter.h"
 #include "engineeredObjects.h"    // For getItem()
 #include "playerInfo.h"           // For playerInfo def
+#include "config.h"
 
 
 namespace Zap

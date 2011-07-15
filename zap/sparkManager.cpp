@@ -27,8 +27,10 @@
 #include "teleporter.h"
 #include "gameObjectRender.h"
 #include "Colors.h"
+#include "config.h"
 
 #include "SDL/SDL_opengl.h"
+#include "UI.h"
 
 #include <math.h>
 

@@ -29,6 +29,7 @@
 #include "Colors.h"
 
 #include "SDL/SDL_opengl.h"
+#include "UI.h"
 
 namespace Zap
 {

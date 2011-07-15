@@ -31,6 +31,7 @@
 #include "UIMenus.h"
 #include "config.h"
 #include "Colors.h"
+#include "game.h"
 
 #include "SDL/SDL_opengl.h"
 

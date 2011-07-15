@@ -29,6 +29,7 @@
 #include "SoundSystem.h"
 #include "flagItem.h"
 #include "Colors.h"
+#include "game.h"
 
 #include <stdio.h>
 

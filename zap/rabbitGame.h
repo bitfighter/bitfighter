@@ -98,7 +98,7 @@ public:
    const char *getGameTypeString() const { return "Rabbit"; }
    const char *getShortName() const { return "Rab"; }
    const char *getInstructionString() { return "Grab the flag and hold it for as long as you can!"; }
-   bool isTeamGame() { return getGame()->getTeamCount() != 1; }
+   //bool isTeamGame() { return getGame()->getTeamCount() != 1; }
    bool canBeTeamGame() { return true; }
    bool canBeIndividualGame() { return true; }
 

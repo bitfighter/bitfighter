@@ -26,6 +26,7 @@
 #include "goalZone.h"
 #include "gameType.h"
 #include "gameObjectRender.h"
+#include "game.h"
 
 
 namespace Zap

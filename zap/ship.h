@@ -228,7 +228,7 @@ public:
 
    bool isModuleActive(ShipModule mod) { return mModuleActive[mod]; }
 
-   void engineerBuildObject() { mEnergy -= getGame()->getModuleInfo(ModuleEngineer)->getPerUseCost(); }
+   void engineerBuildObject();
 
    bool hasModule(ShipModule mod)
    {
