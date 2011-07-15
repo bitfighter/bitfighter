@@ -773,7 +773,7 @@ void WallSegmentManager::deleteSegments(S32 owner)
 }
 
 
-void WallSegmentManager::renderWalls(bool convert, bool draggingObjects, bool showingReferenceShip, F32 alpha)
+void WallSegmentManager::renderWalls(bool draggingObjects, bool showingReferenceShip, bool showSnapVertices, F32 alpha)
 {
    fillVector.clear();
    gEditorGame->getGridDatabase()->findObjects(WallType, fillVector);
@@ -781,6 +781,7 @@ void WallSegmentManager::renderWalls(bool convert, bool draggingObjects, bool sh
    for(S32 i = 0; i < mWallSegments.size(); i++)
    {  
       bool isBeingDragged = false;
+
       if(draggingObjects)
       {
          for(S32 j = 0; j < fillVector.size(); j++)
@@ -798,6 +799,22 @@ void WallSegmentManager::renderWalls(bool convert, bool draggingObjects, bool sh
    }
 
    renderWallEdges(&mWallEdgePoints);      // Render wall outlines
+
+   if(showSnapVertices)
+   {
+      glLineWidth(gLineWidth1);
+
+      glColor(Colors::magenta);
+      for(S32 i = 0; i < mWallEdgePoints.size(); i++)
+         drawCircle(mWallEdgePoints[i], 5);
+
+      glLineWidth(gDefaultLineWidth);
+   }
+
+   //// Render snap targets at each wall edge vertex
+   //if(showSnapVertices)
+   //   for(S32 i = 0; i < mWallEdgePoints.size(); i++)
+   //      EditorUserInterface::renderSnapTarget(mWallEdgePoints[i]);
 }
 
 

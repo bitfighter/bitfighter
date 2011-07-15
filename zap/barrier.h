@@ -296,7 +296,7 @@ public:
  
    ////////////////
    // Render functions
-   void renderWalls(bool convert, bool isBeingDragged, bool showingReferenceShip, F32 alpha);
+   void renderWalls(bool isBeingDragged, bool showingReferenceShip, bool showSnapVertices, F32 alpha);
 };
 
 

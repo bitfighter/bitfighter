@@ -1205,7 +1205,7 @@ Point EditorUserInterface::snapPoint(Point const &p, bool snapWhileOnDock)
    F32 minDist = maxSnapDist;
 
    // Where will we be snapping things?
-   bool snapToWallCorners = !mSnapDisabled && mDraggingObjects && !(mSnapObject->getObjectTypeMask() & BarrierType);
+   bool snapToWallCorners = getSnapToWallCorners();
    bool snapToLevelGrid = !mSnapDisabled;
 
    if(snapToLevelGrid)     // Lowest priority
@@ -1213,7 +1213,6 @@ Point EditorUserInterface::snapPoint(Point const &p, bool snapWhileOnDock)
       snapPoint = snapPointToLevelGrid(p);
       minDist = snapPoint.distSquared(p);
    }
-
 
    // Now look for other things we might want to snap to
    for(S32 i = 0; i < objList->size(); i++)
@@ -1239,6 +1238,12 @@ Point EditorUserInterface::snapPoint(Point const &p, bool snapWhileOnDock)
       checkCornersForSnap(p, WallSegmentManager::mWallEdges, minDist, snapPoint);
 
    return snapPoint;
+}
+
+
+bool EditorUserInterface::getSnapToWallCorners()
+{
+   return !mSnapDisabled && mDraggingObjects && !(mSnapObject->getObjectTypeMask() & BarrierType);
 }
 
 
@@ -1616,7 +1621,7 @@ void EditorUserInterface::render()
          }
       }
    
-      mWallSegmentManager.renderWalls(true, mDraggingObjects, mShowingReferenceShip, getRenderingAlpha(false/*isScriptItem*/));
+      mWallSegmentManager.renderWalls(mDraggingObjects, mShowingReferenceShip, getSnapToWallCorners(), getRenderingAlpha(false/*isScriptItem*/));
    glPopMatrix();
 
    // == Normal items ==
@@ -1805,6 +1810,17 @@ void EditorUserInterface::render()
 const Color *EditorUserInterface::getTeamColor(S32 team) const
 {
    return getGame()->getTeamColor(team);
+}
+
+
+void EditorUserInterface::renderSnapTarget(const Point &target)
+{
+   glLineWidth(gLineWidth1);
+
+   glColor(Colors::magenta);
+   drawCircle(target, 5);
+
+   glLineWidth(gDefaultLineWidth);
 }
 
 

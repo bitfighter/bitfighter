@@ -349,6 +349,11 @@ public:
    Point snapPoint(Point const &p, bool snapWhileOnDock = false);
    Point snapPointToLevelGrid(Point const &p);
 
+   bool getSnapToWallCorners();     // Returns true if wall corners are active snap targets
+
+   static void renderSnapTarget(const Point &target);
+
+
    static S32 checkEdgesForSnap(const Point &clickPoint, const Vector<Point> &points, bool abcFormat, F32 &minDist, Point &snapPoint);
    static S32 checkEdgesForSnap(const Point &clickPoint,  const Vector<WallEdge *> &edges, bool abcFormat, F32 &minDist, Point &snapPoint);
 
