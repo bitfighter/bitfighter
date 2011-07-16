@@ -49,7 +49,7 @@ bool HelperMenu::processKeyCode(KeyCode keyCode)
    // from the loadout menu.
    if(keyCode == KEY_ESCAPE || keyCode == KEY_BACKSPACE ||
       keyCode == KEY_LEFT   || keyCode == BUTTON_DPAD_LEFT ||
-      keyCode == BUTTON_BACK || (gIniSettings.inputMode == Keyboard && keyCode == getActivationKey()) )
+      keyCode == BUTTON_BACK || (gIniSettings.inputMode == InputModeKeyboard && keyCode == getActivationKey()) )
    {
       exitHelper();      // Return to play mode, ship design unchanged
       if(gIniSettings.verboseHelpMessages)
@@ -84,7 +84,7 @@ void HelperMenu::drawMenuCancelText(S32 yPos, const Color &color, S32 fontSize)
    glColor(color);
 
    // RenderedSize will be -1 if the button is not defined
-   if(gIniSettings.inputMode == Keyboard || butSize == -1)
+   if(gIniSettings.inputMode == InputModeKeyboard || butSize == -1)
       UserInterface::drawStringf( UserInterface::horizMargin, yPos, fontSizeSm, "Press [%s] to cancel", keyCodeToString(KEY_ESCAPE) );
    else
    {

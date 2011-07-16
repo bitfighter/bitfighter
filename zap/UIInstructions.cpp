@@ -171,24 +171,24 @@ static ControlString controlsKeyboard[] = {
          { "Move ship", &dummyMoveShipKeysUD},
          { " ", &dummyMoveShipKeysLR},
          { "Aim ship", &dummyMouse },
-         { "Fire weapon", &keyFIRE[Keyboard] },
-         { "Activate module 1", &keyMOD1[Keyboard] },
-         { "Activate module 2", &keyMOD2[Keyboard] },
+         { "Fire weapon", &keyFIRE[InputModeKeyboard] },
+         { "Activate module 1", &keyMOD1[InputModeKeyboard] },
+         { "Activate module 2", &keyMOD2[InputModeKeyboard] },
          { "-", NULL },
-         { "Open ship config menu", &keyLOADOUT[Keyboard] },
-         { "Toggle map view", &keyCMDRMAP[Keyboard] },
-         { "Drop flag", &keyDROPITEM[Keyboard] },
-         { "Show scoreboard", &keySCRBRD[Keyboard] },
+         { "Open ship config menu", &keyLOADOUT[InputModeKeyboard] },
+         { "Toggle map view", &keyCMDRMAP[InputModeKeyboard] },
+         { "Drop flag", &keyDROPITEM[InputModeKeyboard] },
+         { "Show scoreboard", &keySCRBRD[InputModeKeyboard] },
          { NULL, NULL },      // End col 1
-         { "Cycle current weapon", &keyADVWEAP[Keyboard] },
-         { "Select weapon 1", &keySELWEAP1[Keyboard] },
-         { "Select weapon 2", &keySELWEAP2[Keyboard] },
-         { "Select weapon 3", &keySELWEAP3[Keyboard] },
+         { "Cycle current weapon", &keyADVWEAP[InputModeKeyboard] },
+         { "Select weapon 1", &keySELWEAP1[InputModeKeyboard] },
+         { "Select weapon 2", &keySELWEAP2[InputModeKeyboard] },
+         { "Select weapon 3", &keySELWEAP3[InputModeKeyboard] },
          { "-", NULL },
-         { "Open QuickChat menu", &keyQUICKCHAT[Keyboard] },
-         { "Chat to team", &keyTEAMCHAT[Keyboard] },
-         { "Chat to everyone", &keyGLOBCHAT[Keyboard] },
-         { "Record voice chat", &keyTOGVOICE[Keyboard] },
+         { "Open QuickChat menu", &keyQUICKCHAT[InputModeKeyboard] },
+         { "Chat to team", &keyTEAMCHAT[InputModeKeyboard] },
+         { "Chat to everyone", &keyGLOBCHAT[InputModeKeyboard] },
+         { "Record voice chat", &keyTOGVOICE[InputModeKeyboard] },
          { "Message display mode", &dummyMsgMode },
          { "Save screenshot", &dummySSMode },
          { NULL, NULL },   // End col 2
@@ -197,23 +197,23 @@ static ControlString controlsKeyboard[] = {
 static ControlString controlsGamepad[] = {
          { "Move Ship", &dummyStickLeft },
          { "Aim Ship/Fire Weapon", &dummyStickRight },
-         { "Activate module 1", &keyMOD1[Joystick] },
-         { "Activate module 2", &keyMOD2[Joystick] },
+         { "Activate module 1", &keyMOD1[InputModeJoystick] },
+         { "Activate module 2", &keyMOD2[InputModeJoystick] },
          { "-", NULL },
-         { "Open ship config menu", &keyLOADOUT[Joystick] },
-         { "Toggle map view", &keyCMDRMAP[Joystick] },
-         { "Drop flag", &keyDROPITEM[Joystick] },
-         { "Show scoreboard", &keySCRBRD[Joystick] },
+         { "Open ship config menu", &keyLOADOUT[InputModeJoystick] },
+         { "Toggle map view", &keyCMDRMAP[InputModeJoystick] },
+         { "Drop flag", &keyDROPITEM[InputModeJoystick] },
+         { "Show scoreboard", &keySCRBRD[InputModeJoystick] },
          { NULL, NULL },
-         { "Cycle current weapon", &keyADVWEAP[Joystick] },
-         { "Select weapon 1", &keySELWEAP1[Joystick] },
-         { "Select weapon 2", &keySELWEAP2[Joystick] },
-         { "Select weapon 3", &keySELWEAP3[Joystick] },
+         { "Cycle current weapon", &keyADVWEAP[InputModeJoystick] },
+         { "Select weapon 1", &keySELWEAP1[InputModeJoystick] },
+         { "Select weapon 2", &keySELWEAP2[InputModeJoystick] },
+         { "Select weapon 3", &keySELWEAP3[InputModeJoystick] },
          { "-", NULL },
-         { "Open QuickChat menu", &keyQUICKCHAT[Joystick] },
-         { "Chat to team", &keyTEAMCHAT[Joystick] },
-         { "Chat to everyone", &keyGLOBCHAT[Joystick] },
-         { "Record voice chat", &keyTOGVOICE[Joystick] },
+         { "Open QuickChat menu", &keyQUICKCHAT[InputModeJoystick] },
+         { "Chat to team", &keyTEAMCHAT[InputModeJoystick] },
+         { "Chat to everyone", &keyGLOBCHAT[InputModeJoystick] },
+         { "Record voice chat", &keyTOGVOICE[InputModeJoystick] },
          { NULL, NULL },
       };
 
@@ -245,7 +245,7 @@ void InstructionsUserInterface::renderPage1()
    static const Color keyColor = Colors::white;      // white
    static const Color secColor = Colors::yellow;
 
-   ControlString *controls = (gIniSettings.inputMode == Keyboard) ? controlsKeyboard : controlsGamepad;
+   ControlString *controls = (gIniSettings.inputMode == InputModeKeyboard) ? controlsKeyboard : controlsGamepad;
 
    glColor(secColor);
    drawString(col1, starty, 20, "Action");
@@ -295,17 +295,17 @@ void InstructionsUserInterface::renderPage1()
          // We'll also handle special case of arrow keys...
          if (*controls[i].primaryControlIndex == KEYS_UP_DOWN)
          {     // (braces needed)
-            if (keyLEFT[Keyboard] == KEY_LEFT && keyRIGHT[Keyboard] == KEY_RIGHT && keyUP[Keyboard] == KEY_UP && keyDOWN[Keyboard] == KEY_DOWN)
+            if (keyLEFT[InputModeKeyboard] == KEY_LEFT && keyRIGHT[InputModeKeyboard] == KEY_RIGHT && keyUP[InputModeKeyboard] == KEY_UP && keyDOWN[InputModeKeyboard] == KEY_DOWN)
                drawString(contCol, y, 18, "Arrow Keys");
             else     // Center Up key above Down key
-               drawStringf(contCol + getStringWidthf(15, "[%s] ", keyCodeToString(keyLEFT[Keyboard])), y + 4, 15, "[%s]", keyCodeToString(keyUP[Keyboard]));
+               drawStringf(contCol + getStringWidthf(15, "[%s] ", keyCodeToString(keyLEFT[InputModeKeyboard])), y + 4, 15, "[%s]", keyCodeToString(keyUP[InputModeKeyboard]));
          }
          else if (*controls[i].primaryControlIndex == KEYS_LEFT_RIGHT)
          {     // (braces needed)
-            if (keyLEFT[Keyboard] == KEY_LEFT && keyRIGHT[Keyboard] == KEY_RIGHT && keyUP[Keyboard] == KEY_UP && keyDOWN[Keyboard] == KEY_DOWN)
+            if (keyLEFT[InputModeKeyboard] == KEY_LEFT && keyRIGHT[InputModeKeyboard] == KEY_RIGHT && keyUP[InputModeKeyboard] == KEY_UP && keyDOWN[InputModeKeyboard] == KEY_DOWN)
                y -= 26;    // Hide this line
             else
-               drawStringf(col2, y + 4, 15, "[%s] [%s] [%s]", keyCodeToString(keyLEFT[Keyboard]), keyCodeToString(keyDOWN[Keyboard]), keyCodeToString(keyRIGHT[Keyboard]));
+               drawStringf(col2, y + 4, 15, "[%s] [%s] [%s]", keyCodeToString(keyLEFT[InputModeKeyboard]), keyCodeToString(keyDOWN[InputModeKeyboard]), keyCodeToString(keyRIGHT[InputModeKeyboard]));
          }
          else
             JoystickRender::renderControllerButton(contCol, y + 4, *controls[i].primaryControlIndex, false, 10);

@@ -68,13 +68,13 @@ void EngineerHelper::render()
       UserInterface::drawString(UserInterface::horizMargin, yPos, fontSize, "What do you want to Engineer?");
       yPos += fontSize + 10;
 
-      bool showKeys = gIniSettings.showKeyboardKeys || gIniSettings.inputMode == Keyboard;
+      bool showKeys = gIniSettings.showKeyboardKeys || gIniSettings.inputMode == InputModeKeyboard;
 
       for(S32 i = 0; i < mEngineerCostructionItemInfos.size(); i++)
       {
          // Draw key controls for selecting the object to be created
 
-         if(gIniSettings.inputMode == Joystick)     // Only draw joystick buttons when in joystick mode
+         if(gIniSettings.inputMode == InputModeJoystick)     // Only draw joystick buttons when in joystick mode
             JoystickRender::renderControllerButton(UserInterface::horizMargin + (showKeys ? 0 : 20), yPos, mEngineerCostructionItemInfos[i].mButton, false);
 
          if(showKeys)

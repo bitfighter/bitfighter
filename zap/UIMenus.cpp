@@ -167,7 +167,7 @@ static void renderMenuInstructions()
 
     glColor3f(1, 1, 1);     // white
 
-   if(gIniSettings.inputMode == Keyboard)
+   if(gIniSettings.inputMode == InputModeKeyboard)
      UserInterface::drawCenteredString(y, size, "UP, DOWN to choose | ENTER to select | ESC exits menu");
    else
    {
@@ -863,7 +863,7 @@ static void setInputModeCallback(U32 val)
          menuItem->setValueIndex(1);
    }
 
-   gIniSettings.inputMode = (val == 0) ? Keyboard : Joystick;
+   gIniSettings.inputMode = (val == 0) ? InputModeKeyboard : InputModeJoystick;
    if(val >= 1) 
       Joystick::UseJoystickNumber = val;
 }

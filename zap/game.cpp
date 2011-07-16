@@ -1950,7 +1950,7 @@ void ClientGame::idle(U32 timeDelta)
    // Overwrite theMove if we're using joystick (also does some other essential joystick stuff)
    // We'll also run this while in the menus so if we enter keyboard mode accidentally, it won't
    // kill the joystick.  The design of combining joystick input and move updating really sucks.
-   if(gIniSettings.inputMode == Joystick || UserInterface::current == &gOptionsMenuUserInterface)
+   if(gIniSettings.inputMode == InputModeJoystick || UserInterface::current == &gOptionsMenuUserInterface)
       joystickUpdateMove(theMove);
 
 

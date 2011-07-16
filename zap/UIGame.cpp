@@ -610,7 +610,7 @@ extern IniSettings gIniSettings;
 // Draw the reticle (i.e. the mouse cursor) if we are using keyboard/mouse
 void GameUserInterface::renderReticle()
 {
-   if(gIniSettings.inputMode == Keyboard)
+   if(gIniSettings.inputMode == InputModeKeyboard)
    {
 #if 0 // TNL_OS_WIN32
       Point realMousePoint = mMousePoint;
@@ -1190,8 +1190,8 @@ void GameUserInterface::processPlayModeKey(KeyCode keyCode, char ascii)
       else if(keyCode == keyDROPITEM[inputMode])
          dropItem();
 
-      else if(inputMode == Joystick)      // Check if the user is trying to use keyboard to move when in joystick mode
-         if(keyCode == keyUP[Keyboard] || keyCode == keyDOWN[Keyboard] || keyCode == keyLEFT[Keyboard] || keyCode == keyRIGHT[Keyboard])
+      else if(inputMode == InputModeJoystick)      // Check if the user is trying to use keyboard to move when in joystick mode
+         if(keyCode == keyUP[InputModeKeyboard] || keyCode == keyDOWN[InputModeKeyboard] || keyCode == keyLEFT[InputModeKeyboard] || keyCode == keyRIGHT[InputModeKeyboard])
             mWrongModeMsgDisplay.reset(WRONG_MODE_MSG_DISPLAY_TIME);
    }
 }
@@ -2490,7 +2490,7 @@ void GameUserInterface::renderScoreboard(const GameType *gameType)
       glEnableBlend;
       glColor4f(1, 0.5 , 0.5, alpha);
       UserInterface::drawCenteredStringf(UserInterface::vertMargin + 130, 20, "Input mode changed to %s", 
-                                         gIniSettings.inputMode == Joystick ? "Joystick" : "Keyboard");
+                                         gIniSettings.inputMode == InputModeJoystick ? "Joystick" : "Keyboard");
       glDisableBlend;
    }
 
@@ -2654,7 +2654,7 @@ void GameUserInterface::renderBasicInterfaceOverlay(const GameType *gameType, bo
       glEnableBlend;
       glColor4f(1, 0.5 , 0.5, alpha);
       UserInterface::drawCenteredStringf(UserInterface::vertMargin + 130, 20, "Input mode changed to %s", 
-                                         gIniSettings.inputMode == Joystick ? "Joystick" : "Keyboard");
+                                         gIniSettings.inputMode == InputModeJoystick ? "Joystick" : "Keyboard");
       glDisableBlend;
    }
 
