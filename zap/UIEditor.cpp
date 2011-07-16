@@ -2281,7 +2281,7 @@ void EditorUserInterface::onMouseMoved()
 
    mouseIgnore = true;
 
-   if(getKeyState(MOUSE_LEFT))
+   if(getKeyState(MOUSE_LEFT) || getKeyState(MOUSE_RIGHT))
    {
       onMouseDragged();
       return;
@@ -3014,7 +3014,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    // Ctrl-left click is same as right click for Mac users
    else if(keyCode == MOUSE_RIGHT || (keyCode == MOUSE_LEFT && getKeyState(KEY_CTRL)))
    {
-      if(getKeyState(MOUSE_LEFT) && !getKeyState(KEY_CTRL))    // Prevent weirdness
+      if(getKeyState(MOUSE_LEFT) && !getKeyState(KEY_CTRL))        // Prevent weirdness
          return;  
 
       mMousePos.set(gScreenInfo.getMousePos());
@@ -3025,6 +3025,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          {
             mNewItem->addVert(snapPoint(convertCanvasToLevelCoord(mMousePos)));
             mNewItem->onGeomChanging();
+            
          }
          
          return;
@@ -3156,7 +3157,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
                   mItemHit->selectVert(mVertexHit);
                }
             }
-            else if(mItemHit)                                                        // Hit a non-point item, but not a vertex
+            else if(mItemHit)                                                          // Hit a non-point item, but not a vertex
             {
                clearSelection();
                mItemHit->setSelected(true);
