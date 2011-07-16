@@ -59,6 +59,7 @@ void Event::updateJoyAxesDirections(U32 axisMask, S16 value)
    // from enum JoystickAxesDirections
    U32 axesDirectionIndex = 0;
    for (S32 i = 0; i < MaxAxesDirections; i++)
+      //if((1 << i) == detectedAxesDirectionMask)
       if(Joystick::JoystickInputData[i].axesMask & detectedAxesDirectionMask)
       {
          axesDirectionIndex = i;

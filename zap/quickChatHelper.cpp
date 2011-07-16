@@ -84,7 +84,7 @@ void QuickChatHelper::render()
    // Then draw bottom up...
    while(walk != mCurNode)
    {     // When we're using a controller, don't present options with no defined controller key
-      if(gQuickChatTree[walk].depth == matchLevel && ( (inputMode == Keyboard) || gIniSettings.showKeyboardKeys || (gQuickChatTree[walk].buttonCode != KEY_UNKNOWN) ))
+      if(gQuickChatTree[walk].depth == matchLevel && ( (inputMode == InputModeKeyboard) || gIniSettings.showKeyboardKeys || (gQuickChatTree[walk].buttonCode != KEY_UNKNOWN) ))
          renderNodes.push_back(gQuickChatTree[walk]);
       walk--;
    }
@@ -106,7 +106,7 @@ void QuickChatHelper::render()
    }
    else
    {
-      bool showKeys = gIniSettings.showKeyboardKeys || (inputMode == Keyboard);
+      bool showKeys = gIniSettings.showKeyboardKeys || (inputMode == InputModeKeyboard);
 
       S32 xPosBase = UserInterface::horizMargin + (showKeys ? 0 : indent);
       S32 messageIndent = (matchLevel == 1) ? indent : 0;    // No indenting on submenus
@@ -116,7 +116,7 @@ void QuickChatHelper::render()
          S32 xPos = xPosBase + (renderNodes[i].isMsgItem ? messageIndent : 0);
 
          // Draw key controls for selecting quick chat items
-         if(inputMode == Joystick && renderNodes[i].buttonCode != KEY_UNKNOWN)     // Only draw joystick buttons when in joystick mode
+         if(inputMode == InputModeJoystick && renderNodes[i].buttonCode != KEY_UNKNOWN)     // Only draw joystick buttons when in joystick mode
             JoystickRender::renderControllerButton(xPos, yPos, renderNodes[i].buttonCode, false, 0);
 
          Color color = renderNodes[i].teamOnly ? gTeamChatColor : gGlobalChatColor;

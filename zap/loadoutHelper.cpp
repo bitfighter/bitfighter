@@ -151,11 +151,11 @@ void LoadoutHelper::render()
       }
 
       // Draw key controls for selecting loadout items
-      bool showKeys = gIniSettings.showKeyboardKeys || gIniSettings.inputMode == Keyboard;
+      bool showKeys = gIniSettings.showKeyboardKeys || gIniSettings.inputMode == InputModeKeyboard;
 
       if(isValidItem(i))
       {
-         if(gIniSettings.inputMode == Joystick)     // Only draw joystick buttons when in joystick mode
+         if(gIniSettings.inputMode == InputModeJoystick)     // Only draw joystick buttons when in joystick mode
             JoystickRender::renderControllerButton(UserInterface::horizMargin + (showKeys ? 0 : 20), yPos, list->get(i).button, false);
 
          if(showKeys)

@@ -31,8 +31,8 @@ namespace Zap
 {
 
 enum InputMode {
-   Keyboard = 0,
-   Joystick = 1
+   InputModeKeyboard = 0,
+   InputModeJoystick = 1
 };
 
 };

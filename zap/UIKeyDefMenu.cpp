@@ -83,67 +83,67 @@ void KeyDefMenuUserInterface::onActivate()
    errorMsgTimer.reset(errorMsgDisplayTime);
    errorMsg = "";
 
-   if(gIniSettings.inputMode == Joystick)
+   if(gIniSettings.inputMode == InputModeJoystick)
       mMenuSubTitle = "Input Mode: Joystick";
    else
       mMenuSubTitle = "Input Mode: Keyboard";
 
    mMenuSubTitleColor = Colors::white;   // white
 
-   if (gIniSettings.inputMode == Joystick)
+   if (gIniSettings.inputMode == InputModeJoystick)
    {
       itemsPerCol = 7;           // Approx. half of the items we have
 
       // Col 1
-      menuItems.push_back(KeyDefMenuItem("Advance Weapon", 0, 1, &keyADVWEAP[Joystick], "Toggles your weapons, use as an alternative to Select Weapon commands"));
-      menuItems.push_back(KeyDefMenuItem("Activate Module 1", 1, 1, &keyMOD1[Joystick], "Module 1 will be active while this key/button is held down"));
-      menuItems.push_back(KeyDefMenuItem("Activate Module 2", 2, 1, &keyMOD2[Joystick], "Module 2 will be active while this key/button is held down"));
-      menuItems.push_back(KeyDefMenuItem("Drop Flag", 2, 1, &keyDROPITEM[Joystick], ""));
+      menuItems.push_back(KeyDefMenuItem("Advance Weapon", 0, 1, &keyADVWEAP[InputModeJoystick], "Toggles your weapons, use as an alternative to Select Weapon commands"));
+      menuItems.push_back(KeyDefMenuItem("Activate Module 1", 1, 1, &keyMOD1[InputModeJoystick], "Module 1 will be active while this key/button is held down"));
+      menuItems.push_back(KeyDefMenuItem("Activate Module 2", 2, 1, &keyMOD2[InputModeJoystick], "Module 2 will be active while this key/button is held down"));
+      menuItems.push_back(KeyDefMenuItem("Drop Flag", 2, 1, &keyDROPITEM[InputModeJoystick], ""));
 
-      menuItems.push_back(KeyDefMenuItem("Config. Ship Loadouts", 3, 1, &keyLOADOUT[Joystick], ""));
-      menuItems.push_back(KeyDefMenuItem("Toggle Map Mode", 4, 1, &keyCMDRMAP[Joystick], ""));
-      menuItems.push_back(KeyDefMenuItem("Show Scoreboard", 5, 1, &keySCRBRD[Joystick], "Scoreboard will be visible while this key/button is held down"));
+      menuItems.push_back(KeyDefMenuItem("Config. Ship Loadouts", 3, 1, &keyLOADOUT[InputModeJoystick], ""));
+      menuItems.push_back(KeyDefMenuItem("Toggle Map Mode", 4, 1, &keyCMDRMAP[InputModeJoystick], ""));
+      menuItems.push_back(KeyDefMenuItem("Show Scoreboard", 5, 1, &keySCRBRD[InputModeJoystick], "Scoreboard will be visible while this key/button is held down"));
 
       // Col 2
       firstItemInCol2 = 7;
-      menuItems.push_back(KeyDefMenuItem("Select Weapon 1", 6, 2, &keySELWEAP1[Joystick], "Use as an alternative to Advance Weapon"));
-      menuItems.push_back(KeyDefMenuItem("Select Weapon 2", 7, 2, &keySELWEAP2[Joystick], "Use as an alternative to Advance Weapon"));
-      menuItems.push_back(KeyDefMenuItem("Select Weapon 3", 8, 2, &keySELWEAP3[Joystick], "Use as an alternative to Advance Weapon"));
-      menuItems.push_back(KeyDefMenuItem("Quick Chat", 9, 2, &keyQUICKCHAT[Joystick], ""));
-      menuItems.push_back(KeyDefMenuItem("Team Chat", 10, 2, &keyTEAMCHAT[Joystick], ""));
-      menuItems.push_back(KeyDefMenuItem("Global Chat", 11, 2, &keyGLOBCHAT[Joystick], ""));
-      menuItems.push_back(KeyDefMenuItem("Enter Command", 12, 2, &keyCMDCHAT[Joystick], ""));
-      menuItems.push_back(KeyDefMenuItem("Record Voice Msg", 13, 2, &keyTOGVOICE[Joystick], ""));
+      menuItems.push_back(KeyDefMenuItem("Select Weapon 1", 6, 2, &keySELWEAP1[InputModeJoystick], "Use as an alternative to Advance Weapon"));
+      menuItems.push_back(KeyDefMenuItem("Select Weapon 2", 7, 2, &keySELWEAP2[InputModeJoystick], "Use as an alternative to Advance Weapon"));
+      menuItems.push_back(KeyDefMenuItem("Select Weapon 3", 8, 2, &keySELWEAP3[InputModeJoystick], "Use as an alternative to Advance Weapon"));
+      menuItems.push_back(KeyDefMenuItem("Quick Chat", 9, 2, &keyQUICKCHAT[InputModeJoystick], ""));
+      menuItems.push_back(KeyDefMenuItem("Team Chat", 10, 2, &keyTEAMCHAT[InputModeJoystick], ""));
+      menuItems.push_back(KeyDefMenuItem("Global Chat", 11, 2, &keyGLOBCHAT[InputModeJoystick], ""));
+      menuItems.push_back(KeyDefMenuItem("Enter Command", 12, 2, &keyCMDCHAT[InputModeJoystick], ""));
+      menuItems.push_back(KeyDefMenuItem("Record Voice Msg", 13, 2, &keyTOGVOICE[InputModeJoystick], ""));
    }
    else     // Keyboard mode
    {
       itemsPerCol = 9;           // Approx. half of the items we have
 
       // Col 1
-      menuItems.push_back(KeyDefMenuItem("Ship Up", 0, 1, &keyUP[Keyboard], ""));
-      menuItems.push_back(KeyDefMenuItem("Ship Down", 1, 1, &keyDOWN[Keyboard], ""));
-      menuItems.push_back(KeyDefMenuItem("Ship Left", 2, 1, &keyLEFT[Keyboard], ""));
-      menuItems.push_back(KeyDefMenuItem("Ship Right", 3, 1, &keyRIGHT[Keyboard], ""));
-      menuItems.push_back(KeyDefMenuItem("Fire", 4, 1, &keyFIRE[Keyboard], "The mouse will always be used to aim your ship"));
-      menuItems.push_back(KeyDefMenuItem("Activate Module 1", 5, 1, &keyMOD1[Keyboard], "Module 1 will be active while this key/button is held down"));
-      menuItems.push_back(KeyDefMenuItem("Activate Module 2", 6, 1, &keyMOD2[Keyboard], "Module 2 will be active while this key/button is held down"));
-      menuItems.push_back(KeyDefMenuItem("Drop Flag", 2, 1, &keyDROPITEM[Keyboard], "Drop flag when this key is pressed"));
-      menuItems.push_back(KeyDefMenuItem("Toggle Map Mode", 7, 1, &keyCMDRMAP[Keyboard], ""));
-      menuItems.push_back(KeyDefMenuItem("Show Scoreboard", 8, 1, &keySCRBRD[Keyboard], "Scoreboard will be visible while this key/button is held down"));
+      menuItems.push_back(KeyDefMenuItem("Ship Up", 0, 1, &keyUP[InputModeKeyboard], ""));
+      menuItems.push_back(KeyDefMenuItem("Ship Down", 1, 1, &keyDOWN[InputModeKeyboard], ""));
+      menuItems.push_back(KeyDefMenuItem("Ship Left", 2, 1, &keyLEFT[InputModeKeyboard], ""));
+      menuItems.push_back(KeyDefMenuItem("Ship Right", 3, 1, &keyRIGHT[InputModeKeyboard], ""));
+      menuItems.push_back(KeyDefMenuItem("Fire", 4, 1, &keyFIRE[InputModeKeyboard], "The mouse will always be used to aim your ship"));
+      menuItems.push_back(KeyDefMenuItem("Activate Module 1", 5, 1, &keyMOD1[InputModeKeyboard], "Module 1 will be active while this key/button is held down"));
+      menuItems.push_back(KeyDefMenuItem("Activate Module 2", 6, 1, &keyMOD2[InputModeKeyboard], "Module 2 will be active while this key/button is held down"));
+      menuItems.push_back(KeyDefMenuItem("Drop Flag", 2, 1, &keyDROPITEM[InputModeKeyboard], "Drop flag when this key is pressed"));
+      menuItems.push_back(KeyDefMenuItem("Toggle Map Mode", 7, 1, &keyCMDRMAP[InputModeKeyboard], ""));
+      menuItems.push_back(KeyDefMenuItem("Show Scoreboard", 8, 1, &keySCRBRD[InputModeKeyboard], "Scoreboard will be visible while this key/button is held down"));
 
       // Col 2
       firstItemInCol2 = 10;
-      menuItems.push_back(KeyDefMenuItem("Select Weapon 1", 9, 2, &keySELWEAP1[Keyboard], "Use as an alternative to Advance Weapon"));
-      menuItems.push_back(KeyDefMenuItem("Select Weapon 2", 10, 2, &keySELWEAP2[Keyboard], "Use as an alternative to Advance Weapon"));
-      menuItems.push_back(KeyDefMenuItem("Select Weapon 3", 11, 2, &keySELWEAP3[Keyboard], "Use as an alternative to Advance Weapon"));
-      menuItems.push_back(KeyDefMenuItem("Advance Weapon", 12, 2, &keyADVWEAP[Keyboard], "Toggles your weapons, use as an alternative to Select Weapon commands"));
-      menuItems.push_back(KeyDefMenuItem("Configure Ship Loadouts", 13, 2, &keyLOADOUT[Keyboard], ""));
-      menuItems.push_back(KeyDefMenuItem("Quick Chat", 14, 2, &keyQUICKCHAT[Keyboard], ""));
-      menuItems.push_back(KeyDefMenuItem("Team Chat", 15, 2, &keyTEAMCHAT[Keyboard], ""));
-      menuItems.push_back(KeyDefMenuItem("Global Chat", 16, 2, &keyGLOBCHAT[Keyboard], ""));
-      menuItems.push_back(KeyDefMenuItem("Enter Command", 17, 2, &keyCMDCHAT[Keyboard], ""));
+      menuItems.push_back(KeyDefMenuItem("Select Weapon 1", 9, 2, &keySELWEAP1[InputModeKeyboard], "Use as an alternative to Advance Weapon"));
+      menuItems.push_back(KeyDefMenuItem("Select Weapon 2", 10, 2, &keySELWEAP2[InputModeKeyboard], "Use as an alternative to Advance Weapon"));
+      menuItems.push_back(KeyDefMenuItem("Select Weapon 3", 11, 2, &keySELWEAP3[InputModeKeyboard], "Use as an alternative to Advance Weapon"));
+      menuItems.push_back(KeyDefMenuItem("Advance Weapon", 12, 2, &keyADVWEAP[InputModeKeyboard], "Toggles your weapons, use as an alternative to Select Weapon commands"));
+      menuItems.push_back(KeyDefMenuItem("Configure Ship Loadouts", 13, 2, &keyLOADOUT[InputModeKeyboard], ""));
+      menuItems.push_back(KeyDefMenuItem("Quick Chat", 14, 2, &keyQUICKCHAT[InputModeKeyboard], ""));
+      menuItems.push_back(KeyDefMenuItem("Team Chat", 15, 2, &keyTEAMCHAT[InputModeKeyboard], ""));
+      menuItems.push_back(KeyDefMenuItem("Global Chat", 16, 2, &keyGLOBCHAT[InputModeKeyboard], ""));
+      menuItems.push_back(KeyDefMenuItem("Enter Command", 17, 2, &keyCMDCHAT[InputModeKeyboard], ""));
 
-      menuItems.push_back(KeyDefMenuItem("Record Voice Msg", 18, 2, &keyTOGVOICE[Keyboard], ""));
+      menuItems.push_back(KeyDefMenuItem("Record Voice Msg", 18, 2, &keyTOGVOICE[InputModeKeyboard], ""));
    }
 }
 
@@ -247,7 +247,7 @@ void KeyDefMenuUserInterface::render()
 
    // Draw some suggestions
    glColor3f(1, 1, 0);
-   if(gIniSettings.inputMode == Joystick)
+   if(gIniSettings.inputMode == InputModeJoystick)
       drawCenteredString(canvasHeight - vertMargin - 90, 15, "HINT: You will be using the left joystick to steer, the right to fire");
    else 
       drawCenteredString(canvasHeight - vertMargin - 90, 15, "HINT: You will be using the mouse to aim, so make good use of your mouse buttons");

@@ -422,14 +422,14 @@ void gameIdle(U32 integerTime)
    {
       if(gClientGame2)
       {
-         gIniSettings.inputMode = Joystick;
+         gIniSettings.inputMode = InputModeJoystick;
          gClientGame1->mUserInterfaceData->get();
          gClientGame2->mUserInterfaceData->set();
 
          gClientGame = gClientGame2;
          gClientGame->idle(integerTime);
 
-         gIniSettings.inputMode = Keyboard;
+         gIniSettings.inputMode = InputModeKeyboard;
          gClientGame2->mUserInterfaceData->get();
          gClientGame1->mUserInterfaceData->set();
       }
@@ -1681,9 +1681,9 @@ void setJoystick(ControllerTypeType jsType)
 
    // Set primary input to joystick if any controllers were found, even a generic one
    if(jsType == NoController || jsType == UnknownController)
-      gIniSettings.inputMode = Keyboard;
+      gIniSettings.inputMode = InputModeKeyboard;
    else
-      gIniSettings.inputMode = Joystick;
+      gIniSettings.inputMode = InputModeJoystick;
 }
 
 

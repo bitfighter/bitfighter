@@ -74,7 +74,7 @@ void IniSettings::init()
    maxDedicatedFPS = 100;             // Max FPS on dedicated server
    maxFPS = 100;                      // Max FPS on client/non-dedicated server
 
-   inputMode = Keyboard;              // Joystick or Keyboard
+   inputMode = InputModeKeyboard;     // Joystick or Keyboard
    masterAddress = "IP:67.18.11.66:25955";   // Default address of our master server
    name = "";                         // Player name (none by default)
    defaultName = "ChumpChange";       // Name used if user hits <enter> on name entry screen
@@ -449,50 +449,50 @@ static void loadKeyBindings()
 {                                
    string section = "KeyboardKeyBindings";
 
-   keySELWEAP1[Keyboard]  = getKeyCode(section, "SelWeapon1",      KEY_1);
-   keySELWEAP2[Keyboard]  = getKeyCode(section, "SelWeapon2",      KEY_2);
-   keySELWEAP3[Keyboard]  = getKeyCode(section, "SelWeapon3",      KEY_3);
-   keyADVWEAP[Keyboard]   = getKeyCode(section, "SelNextWeapon",   KEY_E);
-   keyCMDRMAP[Keyboard]   = getKeyCode(section, "ShowCmdrMap",     KEY_C);
-   keyTEAMCHAT[Keyboard]  = getKeyCode(section, "TeamChat",        KEY_T);
-   keyGLOBCHAT[Keyboard]  = getKeyCode(section, "GlobalChat",      KEY_G);
-   keyQUICKCHAT[Keyboard] = getKeyCode(section, "QuickChat",       KEY_V);
-   keyCMDCHAT[Keyboard]   = getKeyCode(section, "Command",         KEY_SLASH);
-   keyLOADOUT[Keyboard]   = getKeyCode(section, "ShowLoadoutMenu", KEY_Z);
-   keyMOD1[Keyboard]      = getKeyCode(section, "ActivateModule1", KEY_SPACE);
-   keyMOD2[Keyboard]      = getKeyCode(section, "ActivateModule2", MOUSE_RIGHT);
-   keyFIRE[Keyboard]      = getKeyCode(section, "Fire",            MOUSE_LEFT);
-   keyDROPITEM[Keyboard]  = getKeyCode(section, "DropItem",        KEY_B);
+   keySELWEAP1[InputModeKeyboard]  = getKeyCode(section, "SelWeapon1",      KEY_1);
+   keySELWEAP2[InputModeKeyboard]  = getKeyCode(section, "SelWeapon2",      KEY_2);
+   keySELWEAP3[InputModeKeyboard]  = getKeyCode(section, "SelWeapon3",      KEY_3);
+   keyADVWEAP[InputModeKeyboard]   = getKeyCode(section, "SelNextWeapon",   KEY_E);
+   keyCMDRMAP[InputModeKeyboard]   = getKeyCode(section, "ShowCmdrMap",     KEY_C);
+   keyTEAMCHAT[InputModeKeyboard]  = getKeyCode(section, "TeamChat",        KEY_T);
+   keyGLOBCHAT[InputModeKeyboard]  = getKeyCode(section, "GlobalChat",      KEY_G);
+   keyQUICKCHAT[InputModeKeyboard] = getKeyCode(section, "QuickChat",       KEY_V);
+   keyCMDCHAT[InputModeKeyboard]   = getKeyCode(section, "Command",         KEY_SLASH);
+   keyLOADOUT[InputModeKeyboard]   = getKeyCode(section, "ShowLoadoutMenu", KEY_Z);
+   keyMOD1[InputModeKeyboard]      = getKeyCode(section, "ActivateModule1", KEY_SPACE);
+   keyMOD2[InputModeKeyboard]      = getKeyCode(section, "ActivateModule2", MOUSE_RIGHT);
+   keyFIRE[InputModeKeyboard]      = getKeyCode(section, "Fire",            MOUSE_LEFT);
+   keyDROPITEM[InputModeKeyboard]  = getKeyCode(section, "DropItem",        KEY_B);
 
-   keyTOGVOICE[Keyboard]  = getKeyCode(section, "VoiceChat",       KEY_R);
-   keyUP[Keyboard]        = getKeyCode(section, "ShipUp",          KEY_W);
-   keyDOWN[Keyboard]      = getKeyCode(section, "ShipDown",        KEY_S);
-   keyLEFT[Keyboard]      = getKeyCode(section, "ShipLeft",        KEY_A);
-   keyRIGHT[Keyboard]     = getKeyCode(section, "ShipRight",       KEY_D);
-   keySCRBRD[Keyboard]    = getKeyCode(section, "ShowScoreboard",  KEY_TAB);
+   keyTOGVOICE[InputModeKeyboard]  = getKeyCode(section, "VoiceChat",       KEY_R);
+   keyUP[InputModeKeyboard]        = getKeyCode(section, "ShipUp",          KEY_W);
+   keyDOWN[InputModeKeyboard]      = getKeyCode(section, "ShipDown",        KEY_S);
+   keyLEFT[InputModeKeyboard]      = getKeyCode(section, "ShipLeft",        KEY_A);
+   keyRIGHT[InputModeKeyboard]     = getKeyCode(section, "ShipRight",       KEY_D);
+   keySCRBRD[InputModeKeyboard]    = getKeyCode(section, "ShowScoreboard",  KEY_TAB);
 
    section = "JoystickKeyBindings";
 
-   keySELWEAP1[Joystick]  = getKeyCode(section, "SelWeapon1",      KEY_1);
-   keySELWEAP2[Joystick]  = getKeyCode(section, "SelWeapon2",      KEY_2);
-   keySELWEAP3[Joystick]  = getKeyCode(section, "SelWeapon3",      KEY_3);
-   keyADVWEAP[Joystick]   = getKeyCode(section, "SelNextWeapon",   BUTTON_1);
-   keyCMDRMAP[Joystick]   = getKeyCode(section, "ShowCmdrMap",     BUTTON_2);
-   keyTEAMCHAT[Joystick]  = getKeyCode(section, "TeamChat",        KEY_T);
-   keyGLOBCHAT[Joystick]  = getKeyCode(section, "GlobalChat",      KEY_G);
-   keyQUICKCHAT[Joystick] = getKeyCode(section, "QuickChat",       BUTTON_3);
-   keyCMDCHAT[Joystick]   = getKeyCode(section, "Command",         KEY_SLASH);
-   keyLOADOUT[Joystick]   = getKeyCode(section, "ShowLoadoutMenu", BUTTON_4);
-   keyMOD1[Joystick]      = getKeyCode(section, "ActivateModule1", BUTTON_7);
-   keyMOD2[Joystick]      = getKeyCode(section, "ActivateModule2", BUTTON_6);
-   keyFIRE[Joystick]      = getKeyCode(section, "Fire",            MOUSE_LEFT);
-   keyDROPITEM[Joystick]  = getKeyCode(section, "DropItem",        BUTTON_8);
-   keyTOGVOICE[Joystick]  = getKeyCode(section, "VoiceChat",       KEY_R);
-   keyUP[Joystick]        = getKeyCode(section, "ShipUp",          KEY_UP);
-   keyDOWN[Joystick]      = getKeyCode(section, "ShipDown",        KEY_DOWN);
-   keyLEFT[Joystick]      = getKeyCode(section, "ShipLeft",        KEY_LEFT);
-   keyRIGHT[Joystick]     = getKeyCode(section, "ShipRight",       KEY_RIGHT);
-   keySCRBRD[Joystick]    = getKeyCode(section, "ShowScoreboard",  BUTTON_5);
+   keySELWEAP1[InputModeJoystick]  = getKeyCode(section, "SelWeapon1",      KEY_1);
+   keySELWEAP2[InputModeJoystick]  = getKeyCode(section, "SelWeapon2",      KEY_2);
+   keySELWEAP3[InputModeJoystick]  = getKeyCode(section, "SelWeapon3",      KEY_3);
+   keyADVWEAP[InputModeJoystick]   = getKeyCode(section, "SelNextWeapon",   BUTTON_1);
+   keyCMDRMAP[InputModeJoystick]   = getKeyCode(section, "ShowCmdrMap",     BUTTON_2);
+   keyTEAMCHAT[InputModeJoystick]  = getKeyCode(section, "TeamChat",        KEY_T);
+   keyGLOBCHAT[InputModeJoystick]  = getKeyCode(section, "GlobalChat",      KEY_G);
+   keyQUICKCHAT[InputModeJoystick] = getKeyCode(section, "QuickChat",       BUTTON_3);
+   keyCMDCHAT[InputModeJoystick]   = getKeyCode(section, "Command",         KEY_SLASH);
+   keyLOADOUT[InputModeJoystick]   = getKeyCode(section, "ShowLoadoutMenu", BUTTON_4);
+   keyMOD1[InputModeJoystick]      = getKeyCode(section, "ActivateModule1", BUTTON_7);
+   keyMOD2[InputModeJoystick]      = getKeyCode(section, "ActivateModule2", BUTTON_6);
+   keyFIRE[InputModeJoystick]      = getKeyCode(section, "Fire",            MOUSE_LEFT);
+   keyDROPITEM[InputModeJoystick]  = getKeyCode(section, "DropItem",        BUTTON_8);
+   keyTOGVOICE[InputModeJoystick]  = getKeyCode(section, "VoiceChat",       KEY_R);
+   keyUP[InputModeJoystick]        = getKeyCode(section, "ShipUp",          KEY_UP);
+   keyDOWN[InputModeJoystick]      = getKeyCode(section, "ShipDown",        KEY_DOWN);
+   keyLEFT[InputModeJoystick]      = getKeyCode(section, "ShipLeft",        KEY_LEFT);
+   keyRIGHT[InputModeJoystick]     = getKeyCode(section, "ShipRight",       KEY_RIGHT);
+   keySCRBRD[InputModeJoystick]    = getKeyCode(section, "ShowScoreboard",  BUTTON_5);
 
    // The following key bindings are not user-defineable at the moment, mostly because we want consistency
    // throughout the game, and that would require some real constraints on what keys users could choose.
@@ -510,49 +510,49 @@ static void writeKeyBindings()
 
    section = "KeyboardKeyBindings";
 
-   gINI.SetValue(section, "SelWeapon1",      keyCodeToString(keySELWEAP1[Keyboard]));
-   gINI.SetValue(section, "SelWeapon2",      keyCodeToString(keySELWEAP2[Keyboard]));
-   gINI.SetValue(section, "SelWeapon3",      keyCodeToString(keySELWEAP3[Keyboard]));
-   gINI.SetValue(section, "SelNextWeapon",   keyCodeToString(keyADVWEAP[Keyboard]));
-   gINI.SetValue(section, "ShowCmdrMap",     keyCodeToString(keyCMDRMAP[Keyboard]));
-   gINI.SetValue(section, "TeamChat",        keyCodeToString(keyTEAMCHAT[Keyboard]));
-   gINI.SetValue(section, "GlobalChat",      keyCodeToString(keyGLOBCHAT[Keyboard]));
-   gINI.SetValue(section, "QuickChat",       keyCodeToString(keyQUICKCHAT[Keyboard]));
-   gINI.SetValue(section, "Command",         keyCodeToString(keyCMDCHAT[Keyboard]));
-   gINI.SetValue(section, "ShowLoadoutMenu", keyCodeToString(keyLOADOUT[Keyboard]));
-   gINI.SetValue(section, "ActivateModule1", keyCodeToString(keyMOD1[Keyboard]));
-   gINI.SetValue(section, "ActivateModule2", keyCodeToString(keyMOD2[Keyboard]));
-   gINI.SetValue(section, "Fire",            keyCodeToString(keyFIRE[Keyboard]));
-   gINI.SetValue(section, "DropItem",        keyCodeToString(keyDROPITEM[Keyboard]));
-   gINI.SetValue(section, "VoiceChat",       keyCodeToString(keyTOGVOICE[Keyboard]));
-   gINI.SetValue(section, "ShipUp",          keyCodeToString(keyUP[Keyboard]));
-   gINI.SetValue(section, "ShipDown",        keyCodeToString(keyDOWN[Keyboard]));
-   gINI.SetValue(section, "ShipLeft",        keyCodeToString(keyLEFT[Keyboard]));
-   gINI.SetValue(section, "ShipRight",       keyCodeToString(keyRIGHT[Keyboard]));
-   gINI.SetValue(section, "ShowScoreboard",  keyCodeToString(keySCRBRD[Keyboard]));
+   gINI.SetValue(section, "SelWeapon1",      keyCodeToString(keySELWEAP1[InputModeKeyboard]));
+   gINI.SetValue(section, "SelWeapon2",      keyCodeToString(keySELWEAP2[InputModeKeyboard]));
+   gINI.SetValue(section, "SelWeapon3",      keyCodeToString(keySELWEAP3[InputModeKeyboard]));
+   gINI.SetValue(section, "SelNextWeapon",   keyCodeToString(keyADVWEAP[InputModeKeyboard]));
+   gINI.SetValue(section, "ShowCmdrMap",     keyCodeToString(keyCMDRMAP[InputModeKeyboard]));
+   gINI.SetValue(section, "TeamChat",        keyCodeToString(keyTEAMCHAT[InputModeKeyboard]));
+   gINI.SetValue(section, "GlobalChat",      keyCodeToString(keyGLOBCHAT[InputModeKeyboard]));
+   gINI.SetValue(section, "QuickChat",       keyCodeToString(keyQUICKCHAT[InputModeKeyboard]));
+   gINI.SetValue(section, "Command",         keyCodeToString(keyCMDCHAT[InputModeKeyboard]));
+   gINI.SetValue(section, "ShowLoadoutMenu", keyCodeToString(keyLOADOUT[InputModeKeyboard]));
+   gINI.SetValue(section, "ActivateModule1", keyCodeToString(keyMOD1[InputModeKeyboard]));
+   gINI.SetValue(section, "ActivateModule2", keyCodeToString(keyMOD2[InputModeKeyboard]));
+   gINI.SetValue(section, "Fire",            keyCodeToString(keyFIRE[InputModeKeyboard]));
+   gINI.SetValue(section, "DropItem",        keyCodeToString(keyDROPITEM[InputModeKeyboard]));
+   gINI.SetValue(section, "VoiceChat",       keyCodeToString(keyTOGVOICE[InputModeKeyboard]));
+   gINI.SetValue(section, "ShipUp",          keyCodeToString(keyUP[InputModeKeyboard]));
+   gINI.SetValue(section, "ShipDown",        keyCodeToString(keyDOWN[InputModeKeyboard]));
+   gINI.SetValue(section, "ShipLeft",        keyCodeToString(keyLEFT[InputModeKeyboard]));
+   gINI.SetValue(section, "ShipRight",       keyCodeToString(keyRIGHT[InputModeKeyboard]));
+   gINI.SetValue(section, "ShowScoreboard",  keyCodeToString(keySCRBRD[InputModeKeyboard]));
 
    section = "JoystickKeyBindings";
 
-   gINI.SetValue(section, "SelWeapon1",      keyCodeToString(keySELWEAP1[Joystick]));
-   gINI.SetValue(section, "SelWeapon2",      keyCodeToString(keySELWEAP2[Joystick]));
-   gINI.SetValue(section, "SelWeapon3",      keyCodeToString(keySELWEAP3[Joystick]));
-   gINI.SetValue(section, "SelNextWeapon",   keyCodeToString(keyADVWEAP[Joystick]));
-   gINI.SetValue(section, "ShowCmdrMap",     keyCodeToString(keyCMDRMAP[Joystick]));
-   gINI.SetValue(section, "TeamChat",        keyCodeToString(keyTEAMCHAT[Joystick]));
-   gINI.SetValue(section, "GlobalChat",      keyCodeToString(keyGLOBCHAT[Joystick]));
-   gINI.SetValue(section, "QuickChat",       keyCodeToString(keyQUICKCHAT[Joystick]));
-   gINI.SetValue(section, "Command",         keyCodeToString(keyCMDCHAT[Joystick]));
-   gINI.SetValue(section, "ShowLoadoutMenu", keyCodeToString(keyLOADOUT[Joystick]));
-   gINI.SetValue(section, "ActivateModule1", keyCodeToString(keyMOD1[Joystick]));
-   gINI.SetValue(section, "ActivateModule2", keyCodeToString(keyMOD2[Joystick]));
-   gINI.SetValue(section, "Fire",            keyCodeToString(keyFIRE[Joystick]));
-   gINI.SetValue(section, "DropItem",        keyCodeToString(keyDROPITEM[Joystick]));
-   gINI.SetValue(section, "VoiceChat",       keyCodeToString(keyTOGVOICE[Joystick]));
-   gINI.SetValue(section, "ShipUp",          keyCodeToString(keyUP[Joystick]));
-   gINI.SetValue(section, "ShipDown",        keyCodeToString(keyDOWN[Joystick]));
-   gINI.SetValue(section, "ShipLeft",        keyCodeToString(keyLEFT[Joystick]));
-   gINI.SetValue(section, "ShipRight",       keyCodeToString(keyRIGHT[Joystick]));
-   gINI.SetValue(section, "ShowScoreboard",  keyCodeToString(keySCRBRD[Joystick]));
+   gINI.SetValue(section, "SelWeapon1",      keyCodeToString(keySELWEAP1[InputModeJoystick]));
+   gINI.SetValue(section, "SelWeapon2",      keyCodeToString(keySELWEAP2[InputModeJoystick]));
+   gINI.SetValue(section, "SelWeapon3",      keyCodeToString(keySELWEAP3[InputModeJoystick]));
+   gINI.SetValue(section, "SelNextWeapon",   keyCodeToString(keyADVWEAP[InputModeJoystick]));
+   gINI.SetValue(section, "ShowCmdrMap",     keyCodeToString(keyCMDRMAP[InputModeJoystick]));
+   gINI.SetValue(section, "TeamChat",        keyCodeToString(keyTEAMCHAT[InputModeJoystick]));
+   gINI.SetValue(section, "GlobalChat",      keyCodeToString(keyGLOBCHAT[InputModeJoystick]));
+   gINI.SetValue(section, "QuickChat",       keyCodeToString(keyQUICKCHAT[InputModeJoystick]));
+   gINI.SetValue(section, "Command",         keyCodeToString(keyCMDCHAT[InputModeJoystick]));
+   gINI.SetValue(section, "ShowLoadoutMenu", keyCodeToString(keyLOADOUT[InputModeJoystick]));
+   gINI.SetValue(section, "ActivateModule1", keyCodeToString(keyMOD1[InputModeJoystick]));
+   gINI.SetValue(section, "ActivateModule2", keyCodeToString(keyMOD2[InputModeJoystick]));
+   gINI.SetValue(section, "Fire",            keyCodeToString(keyFIRE[InputModeJoystick]));
+   gINI.SetValue(section, "DropItem",        keyCodeToString(keyDROPITEM[InputModeJoystick]));
+   gINI.SetValue(section, "VoiceChat",       keyCodeToString(keyTOGVOICE[InputModeJoystick]));
+   gINI.SetValue(section, "ShipUp",          keyCodeToString(keyUP[InputModeJoystick]));
+   gINI.SetValue(section, "ShipDown",        keyCodeToString(keyDOWN[InputModeJoystick]));
+   gINI.SetValue(section, "ShipLeft",        keyCodeToString(keyLEFT[InputModeJoystick]));
+   gINI.SetValue(section, "ShipRight",       keyCodeToString(keyRIGHT[InputModeJoystick]));
+   gINI.SetValue(section, "ShowScoreboard",  keyCodeToString(keySCRBRD[InputModeJoystick]));
 }
 
 
@@ -1807,7 +1807,7 @@ string ConfigDirectories::findBotFile(const string &filename)           // stati
 // Returns display-friendly mode designator like "Keyboard" or "Joystick 1"
 string IniSettings::getInputMode()
 {
-   if(gIniSettings.inputMode == Joystick)
+   if(gIniSettings.inputMode == InputModeJoystick)
       return "Joystick " + itos(Joystick::UseJoystickNumber);
    else
       return "Keyboard";

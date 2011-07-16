@@ -256,7 +256,7 @@ void UserInterface::renderCurrent()    // static
    
    if(gClientGame2)
    {
-      gIniSettings.inputMode = Joystick;
+      gIniSettings.inputMode = InputModeJoystick;
       gClientGame = gClientGame2;
       gClientGame1->mUserInterfaceData->get();
       gClientGame2->mUserInterfaceData->set();
@@ -274,7 +274,7 @@ void UserInterface::renderCurrent()    // static
       gClientGame2->mUserInterfaceData->get();
       gClientGame1->mUserInterfaceData->set();
       glViewport(0, 0, gScreenInfo.getWindowWidth()/2, gScreenInfo.getWindowHeight());
-      gIniSettings.inputMode = Keyboard;
+      gIniSettings.inputMode = InputModeKeyboard;
    }
 
    glMatrixMode(GL_MODELVIEW);
