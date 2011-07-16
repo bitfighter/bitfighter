@@ -36,7 +36,7 @@ namespace Zap {
 
 // Linker needs these declared like this, why?
 // private
-SDL_Joystick *Joystick::sdlJoystick;
+SDL_Joystick *Joystick::sdlJoystick = NULL;
 
 // public
 TNL::U32 Joystick::ButtonMask = 0;
@@ -307,9 +307,12 @@ void Joystick::populatePredefinedJoystickList()
    for (S32 i = 0; i < ControllerTypeCount; i++)
    {
       info.buttonCount = buttonCount[i];
-      *(info.moveAxesSdlIndex) = *moveAxes[i];
-      *(info.shootAxesSdlIndex) = *shootAxes[i];
-      *(info.buttonMappings) = *buttonRemap[i];
+      info.moveAxesSdlIndex[0] = moveAxes[i][0];
+      info.moveAxesSdlIndex[1] = moveAxes[i][1];
+      info.shootAxesSdlIndex[0] = shootAxes[i][0];
+      info.shootAxesSdlIndex[1] = shootAxes[i][1];
+      for (S32 j = 0; j < MaxControllerButtons; j++)
+         info.buttonMappings[j] = buttonRemap[i][j];
 
       PredefinedJoystickList.push_back(info);
    }
