@@ -1624,13 +1624,17 @@ void EditorUserInterface::render()
       mWallSegmentManager.renderWalls(mDraggingObjects, mShowingReferenceShip, getSnapToWallCorners(), getRenderingAlpha(false/*isScriptItem*/));
    glPopMatrix();
 
+   
+
    // == Normal items ==
    // Draw map items (teleporters, etc.) that are not being dragged, and won't have any text labels  (below the dock)
+   // Don't render polywalls, as we've alrady drawn those.
    for(S32 i = 0; i < objList->size(); i++)
    {
       EditorObject *obj = objList->get(i);
-      if(!(mDraggingObjects && obj->isSelected()))
-         obj->render(false, mShowingReferenceShip, mShowMode);
+      if(obj->getObjectTypeMask() != PolyWallType)
+         if(!(mDraggingObjects && obj->isSelected()))
+            obj->render(false, mShowingReferenceShip, mShowMode);
    }
 
    // == Selected items ==
