@@ -124,7 +124,7 @@ void backToMainMenuCallback()
 extern EditorGame *gEditorGame;
 
 // Constructor
-EditorUserInterface::EditorUserInterface() : mGridDatabase(GridDatabase())     // false --> not using game coords
+EditorUserInterface::EditorUserInterface()     // false --> not using game coords
 {
    setMenuID(EditorUI);
 
@@ -142,8 +142,8 @@ EditorUserInterface::EditorUserInterface() : mGridDatabase(GridDatabase())     /
    mUndoItems.resize(UNDO_STATES);     // Create slots for all our undos... also creates a ton of empty dbs.  Maybe we should be using pointers?
 
    // Pass the gridDatabase on to these other objects, so they can have local access
-   WallSegment::setGridDatabase(&mGridDatabase);      // Still needed?  Can do this via editorGame?
-   WallSegmentManager::setGridDatabase(&mGridDatabase);
+   //WallSegment::setGridDatabase(&mGridDatabase);      // Still needed?  Can do this via editorGame?
+   //WallSegmentManager::setGridDatabase(&mGridDatabase);
 }
 
 
@@ -537,9 +537,18 @@ void EditorUserInterface::redo()
 }
 
 
+// We can do better than this!
+static Game *getGame() 
+{
+   return gEditorGame;
+}
+
+
 void EditorUserInterface::rebuildEverything()
 {
-   mWallSegmentManager.recomputeAllWallGeometry();
+   Game *game = getGame();
+
+   game->getWallSegmentManager()->recomputeAllWallGeometry(game);
    resnapAllEngineeredItems();
 
    mNeedToSave = (mAllUndoneUndoLevel != mLastUndoIndex);
@@ -598,12 +607,6 @@ void EditorUserInterface::setLevelGenScriptName(string line)
 }
 
 
-static Game *getGame() 
-{
-   return gEditorGame;
-}
-
-
 void EditorUserInterface::makeSureThereIsAtLeastOneTeam()
 {
    if(getGame()->getTeamCount() == 0)
@@ -625,28 +628,30 @@ extern ConfigDirectories gConfigDirs;
 // Loads a level
 void EditorUserInterface::loadLevel()
 {
+   Game *game = getGame();
+
    // Initialize
    clearDatabase(gEditorGame->getGridDatabase().get());
-   getGame()->clearTeams();
+   game->clearTeams();
    mSnapObject = NULL;
    mSnapVertexIndex = NONE;
    mAddingVertex = false;
    clearLevelGenItems();
-   mLoadTarget = (EditorObjectDatabase *)gEditorGame->getGridDatabase().get();
+   mLoadTarget = (EditorObjectDatabase *)game->getGridDatabase().get();
    mGameTypeArgs.clear();
 
    gGameParamUserInterface.savedMenuItems.clear();    // clear() because this is not a pointer vector
    gGameParamUserInterface.menuItems.clear();         // Keeps interface from using our menuItems to rebuild savedMenuItems
 
-   gEditorGame->resetLevelInfo();
+   game->resetLevelInfo();
 
-   gEditorGame->setGameType(new GameType());
+   game->setGameType(new GameType());
    //gEditorGame->setGameType(NULL);
 
    char fileBuffer[1024];
    dSprintf(fileBuffer, sizeof(fileBuffer), "%s/%s", gConfigDirs.levelDir.c_str(), mEditFileName.c_str());
 
-   if(gEditorGame->loadLevelFromFile(fileBuffer))   // Process level file --> returns true if file found and loaded, false if not (assume it's a new level)
+   if(game->loadLevelFromFile(fileBuffer))   // Process level file --> returns true if file found and loaded, false if not (assume it's a new level)
    {
       // Loaded a level!
       makeSureThereIsAtLeastOneTeam(); // Make sure we at least have one team
@@ -672,7 +677,7 @@ void EditorUserInterface::loadLevel()
    //for(S32 i = 0; i < objList->size(); i++)
    //   objList->get(i)->processEndPoints();
 
-   mWallSegmentManager.recomputeAllWallGeometry();
+   game->getWallSegmentManager()->recomputeAllWallGeometry(getGame());
    
    // Snap all engineered items to the closest wall, if one is found
    resnapAllEngineeredItems();
@@ -1235,7 +1240,7 @@ Point EditorUserInterface::snapPoint(Point const &p, bool snapWhileOnDock)
 
    // Search for a corner to snap to - by using wall edges, we'll also look for intersections between segments
    if(snapToWallCorners)
-      checkCornersForSnap(p, WallSegmentManager::mWallEdges, minDist, snapPoint);
+      checkCornersForSnap(p, getGame()->getWallSegmentManager()->mWallEdges, minDist, snapPoint);
 
    return snapPoint;
 }
@@ -1607,8 +1612,6 @@ void EditorUserInterface::render()
 
    const Vector<EditorObject *> *objList = getObjectList();
 
-//if(objList->size() > 0)logprintf("rendering %p from db %p", objList->get(0), gEditorGame->getGridDatabase().get());
-
    glPushMatrix();  
       setLevelToCanvasCoordConversion();
       for(S32 i = 0; i < objList->size(); i++)
@@ -1621,7 +1624,8 @@ void EditorUserInterface::render()
          }
       }
    
-      mWallSegmentManager.renderWalls(mDraggingObjects, mShowingReferenceShip, getSnapToWallCorners(), getRenderingAlpha(false/*isScriptItem*/));
+      getGame()->getWallSegmentManager()->renderWalls(
+                     mDraggingObjects, mShowingReferenceShip, getSnapToWallCorners(), getRenderingAlpha(false/*isScriptItem*/));
    glPopMatrix();
 
    
@@ -2285,6 +2289,7 @@ void EditorUserInterface::onMouseMoved()
 
    mouseIgnore = true;
 
+   // Doing this with MOUSE_RIGHT allows you to drag a vertex you just placed by holding the right-mouse button
    if(getKeyState(MOUSE_LEFT) || getKeyState(MOUSE_RIGHT))
    {
       onMouseDragged();
@@ -2394,7 +2399,6 @@ void EditorUserInterface::onMouseDragged()
       delta = (snapPoint(convertCanvasToLevelCoord(mMousePos) + mMoveOrigin - mMouseDownPos) - mMoveOrigin );
 
 
-
    // Update coordinates of dragged item
    const Vector<EditorObject *> *objList = getObjectList();
 
@@ -2408,7 +2412,10 @@ void EditorUserInterface::onMouseDragged()
       {
          for(S32 j = 0; j < obj->getVertCount(); j++)
             if(obj->isSelected() || obj->vertSelected(j))
-               obj->setVert(mOriginalVertLocations[count++] + delta, j);
+            {
+               obj->setVert(mOriginalVertLocations[count] + delta, j);
+               count++;
+            }
 
          // If we are dragging a vertex, and not the entire item, we are changing the geom, so notify the item
          if(obj->anyVertsSelected())
@@ -2789,22 +2796,25 @@ void EditorUserInterface::deleteItem(S32 itemIndex)
    const Vector<EditorObject *> *objList = getObjectList();
    EditorObject *obj = objList->get(itemIndex);
 
+   Game *game = getGame();
+   WallSegmentManager *wallSegmentManager = game->getWallSegmentManager();
+
    S32 mask = obj->getObjectTypeMask();
 
    if(mask & (BarrierType | PolyWallType))
    {
       // Need to recompute boundaries of any intersecting walls
-      mWallSegmentManager.invalidateIntersectingSegments(obj);    // Mark intersecting segments invalid
-      mWallSegmentManager.deleteSegments(obj->getItemId());       // Delete the segments associated with the wall
+      wallSegmentManager->invalidateIntersectingSegments(obj);    // Mark intersecting segments invalid
+      wallSegmentManager->deleteSegments(obj->getItemId());       // Delete the segments associated with the wall
 
-      gEditorGame->getGridDatabase()->removeFromDatabase(obj, obj->getExtent());
+      game->getGridDatabase()->removeFromDatabase(obj, obj->getExtent());
 
-      mWallSegmentManager.recomputeAllWallGeometry();             // Recompute wall edges
+      wallSegmentManager->recomputeAllWallGeometry(getGame());    // Recompute wall edges
       resnapAllEngineeredItems();         // Really only need to resnap items that were attached to deleted wall... but we
                                           // don't yet have a method to do that, and I'm feeling lazy at the moment
    }
    else
-      gEditorGame->getGridDatabase()->removeFromDatabase(obj, obj->getExtent());
+      game->getGridDatabase()->removeFromDatabase(obj, obj->getExtent());
 
    // Reset a bunch of things
    mSnapObject = NULL;
@@ -3029,7 +3039,6 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          {
             mNewItem->addVert(snapPoint(convertCanvasToLevelCoord(mMousePos)));
             mNewItem->onGeomChanging();
-            
          }
          
          return;

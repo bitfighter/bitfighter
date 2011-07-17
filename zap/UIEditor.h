@@ -136,9 +136,6 @@ private:
    ShowMode mShowMode;
    bool mHasBotNavZones;
 
-   GridDatabase mGridDatabase;
-   WallSegmentManager mWallSegmentManager;
-
    enum {
       saveMsgDisplayTime = 4000,
       warnMsgDisplayTime = 4000,
@@ -256,7 +253,6 @@ public:
    void restoreItems(const Vector<string> &from);
 
    Vector<string> mGameTypeArgs;
-   WallSegmentManager *getWallSegmentManager() { return &mWallSegmentManager; }
 
    bool isShowingReferenceShip() { return mShowingReferenceShip; }
 
@@ -268,10 +264,6 @@ public:
    void clearUndoHistory();        // Wipe undo/redo history
 
    Vector<TeamInfo> mOldTeams;     // Team list from before we run team editor, so we can see what changed
-
-   GridDatabase *getGridDatabase() { return &mGridDatabase; }
-
-   //static void setTranslationAndScale(const Point &pos);
 
    EditorObject *getSnapItem() { return mSnapObject; }
    S32 getSnapVertexIndex() { return mSnapVertexIndex; }

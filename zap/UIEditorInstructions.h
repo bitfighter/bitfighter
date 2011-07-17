@@ -39,6 +39,8 @@ private:
    U32 mCurPage;
    Timer mAnimTimer;
    S32 mAnimStage;
+   WallSegmentManager mWallSegmentManager;
+
 public:
    EditorInstructionsUserInterface();      // Constructor
    void render();

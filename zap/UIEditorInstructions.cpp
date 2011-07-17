@@ -379,12 +379,12 @@ void EditorInstructionsUserInterface::renderPageWalls()
       // Create a series of WallSegments, each representing a sequential pair of vertices on our wall
       for(S32 i = 0; i < extendedEndPoints.size(); i += 2)
       {
-         WallSegment *newSegment = new WallSegment(extendedEndPoints[i], extendedEndPoints[i+1], width);    // Create a new segment
+         WallSegment *newSegment = new WallSegment(mWallSegmentManager.getGridDatabase(), extendedEndPoints[i], extendedEndPoints[i+1], width);    // Create a new segment
          wallSegments.push_back(newSegment);                   // Add it to our segment list
       }
 
       Vector<Point> edges;
-      WallSegmentManager::clipAllWallEdges(wallSegments, edges);      // Remove interior wall outline fragments
+      mWallSegmentManager.clipAllWallEdges(wallSegments, edges);      // Remove interior wall outline fragments
 
       for(S32 i = 0; i < wallSegments.size(); i++)
          wallSegments[i]->renderFill(false, false);

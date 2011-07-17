@@ -102,6 +102,15 @@ Game::Game(const Address &theBindAddress) : mDatabase(new GridDatabase())     //
 
    mNetInterface = new GameNetInterface(theBindAddress, this);
    mHaveTriedToConnectToMaster = false;
+
+   mWallSegmentManager = new WallSegmentManager();
+}
+
+
+// Destructor
+Game::~Game()
+{
+   delete mWallSegmentManager;
 }
 
 
@@ -2607,7 +2616,6 @@ extern EditorUserInterface gEditorUserInterface;
 EditorGame::EditorGame() : Game(Address()) 
 { 
    resetLevelInfo(); 
-   mWallSegmentManager = gEditorUserInterface.getWallSegmentManager();
    //mEditorDatabase = boost::shared_ptr<EditorObjectDatabase>();
    mEditorDatabase = boost::shared_ptr<EditorObjectDatabase>(new EditorObjectDatabase());
    TNLAssert(mEditorDatabase, "WTF???");

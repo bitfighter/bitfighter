@@ -419,7 +419,8 @@ void WallItem::onGeomChanged()
    //if(getObjectTypeMask() & ItemPolyWall)     // Prepare interior fill triangulation
    //   initializePolyGeom();          // Triangulate, find centroid, calc extents
 
-   gEditorGame->getWallSegmentManager()->computeWallSegmentIntersections(this);
+   Game *game = getGame();
+   game->getWallSegmentManager()->computeWallSegmentIntersections(getGame(), this);
 
    // Find any forcefields that might intersect our new wall segment and recalc their endpoints
    Rect aoi = getExtent();    
@@ -544,6 +545,31 @@ string PolyWall::toString(F32 gridSize) const
 }
 
 
+void PolyWall::onGeomChanged()
+{
+   //if(getObjectTypeMask() & ItemPolyWall)     // Prepare interior fill triangulation
+   //   initializePolyGeom();          // Triangulate, find centroid, calc extents
+
+   Parent::onGeomChanged();
+
+   gEditorGame->getWallSegmentManager()->computeWallSegmentIntersections(getGame(), this);
+
+   // Find any forcefields that might intersect our new wall segment and recalc their endpoints
+   Rect aoi = getExtent();    
+    // A FF could extend into our area of interest from quite a distance, so expand search region accordingly
+   aoi.expand(Point(ForceField::MAX_FORCEFIELD_LENGTH, ForceField::MAX_FORCEFIELD_LENGTH));  
+
+   fillVector.clear();
+   gEditorGame->getGridDatabase()->findObjects(ForceFieldProjectorType, fillVector, aoi);     
+
+   for(S32 i = 0; i < fillVector.size(); i++)
+   {
+      ForceFieldProjector *ffp = dynamic_cast<ForceFieldProjector *>(fillVector[i]);
+      ffp->findForceFieldEnd();
+   }
+}
+
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -575,15 +601,29 @@ WallEdge::~WallEdge()
 ////////////////////////////////////////
 
 // Declare/initialize static variables
-Vector<WallEdge *> WallSegmentManager::mWallEdges; 
-Vector<Point>  WallSegmentManager::mWallEdgePoints;
-GridDatabase *WallSegmentManager::mGridDatabase;   
+//Vector<WallEdge *> WallSegmentManager::mWallEdges; 
+//Vector<Point>  WallSegmentManager::mWallEdgePoints;
+//GridDatabase *WallSegmentManager::mGridDatabase;   
 GridDatabase WallEdge::mGridDatabase;
 
 
-void WallSegmentManager::recomputeAllWallGeometry()
+// Constructor
+WallSegmentManager::WallSegmentManager()
 {
-   buildAllWallSegmentEdgesAndPoints();
+   mGridDatabase = new GridDatabase();
+}
+
+
+// Destructor
+WallSegmentManager::~WallSegmentManager()
+{
+   delete mGridDatabase;
+}
+
+
+void WallSegmentManager::recomputeAllWallGeometry(Game *game)
+{
+   buildAllWallSegmentEdgesAndPoints(game);
 
    mWallEdgePoints.clear();
 
@@ -606,19 +646,19 @@ void WallSegmentManager::recomputeAllWallGeometry()
 
 
 // Delete all segments, then find all walls and build a new set of segments
-void WallSegmentManager::buildAllWallSegmentEdgesAndPoints()
+void WallSegmentManager::buildAllWallSegmentEdgesAndPoints(Game *game)
 {
    deleteAllSegments();
 
    fillVector.clear();
 
-   gEditorGame->getGridDatabase()->findObjects(WallType, fillVector);
+   game->getGridDatabase()->findObjects(WallType, fillVector);
 
    Vector<DatabaseObject *> engrObjects;
-   gEditorGame->getGridDatabase()->findObjects(EngineeredType, engrObjects);   // All engineered objects
+   game->getGridDatabase()->findObjects(EngineeredType, engrObjects);   // All engineered objects
 
    for(S32 i = 0; i < fillVector.size(); i++)
-      gEditorGame->getWallSegmentManager()->buildWallSegmentEdgesAndPoints(fillVector[i], engrObjects);
+      game->getWallSegmentManager()->buildWallSegmentEdgesAndPoints(fillVector[i], engrObjects);
 }
 
 
@@ -644,7 +684,7 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(DatabaseObject *dbObject
    S32 count = mWallSegments.size(); 
 
    for(S32 i = 0; i < count; i++)
-      if(mWallSegments[i]->mOwner == wall->getSerialNumber())      // Segment belongs to item
+      if(mWallSegments[i]->getOwner() == wall->getSerialNumber())      // Segment belongs to item
          for(S32 j = 0; j < engrObjects.size(); j++)
          {
             EngineeredObject *engrObj = dynamic_cast<EngineeredObject *>(engrObjects[j]);
@@ -661,7 +701,7 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(DatabaseObject *dbObject
 
    if(wall->getObjectTypeMask() & PolyWallType)
    {
-      WallSegment *newSegment = new WallSegment(*wall->getOutline(), wall->getSerialNumber());
+      WallSegment *newSegment = new WallSegment(mGridDatabase, *wall->getOutline(), wall->getSerialNumber());
       mWallSegments.push_back(newSegment);
    }
    else     // Tranditional wall
@@ -669,7 +709,7 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(DatabaseObject *dbObject
       // Create a series of WallSegments, each representing a sequential pair of vertices on our wall
       for(S32 i = 0; i < wall->extendedEndPoints.size(); i += 2)
       {
-         WallSegment *newSegment = new WallSegment(wall->extendedEndPoints[i], wall->extendedEndPoints[i+1], 
+         WallSegment *newSegment = new WallSegment(mGridDatabase, wall->extendedEndPoints[i], wall->extendedEndPoints[i+1], 
                                                    wall->getWidth(), wall->getSerialNumber());    // Create the segment
          mWallSegments.push_back(newSegment);          // And add it to our master segment list
       }
@@ -716,7 +756,7 @@ void WallSegmentManager::invalidateIntersectingSegments(EditorObject *item)
    // Before we update our edges, we need to mark all intersecting segments using the invalid flag.
    // These will need new walls after we've moved our segment.
    for(S32 i = 0; i < mWallSegments.size(); i++)
-      if(mWallSegments[i]->mOwner == item->getSerialNumber())      // Segment belongs to our item; look it up in the database
+      if(mWallSegments[i]->getOwner() == item->getSerialNumber())      // Segment belongs to our item; look it up in the database
          getGridDatabase()->findObjects(BarrierType, fillVector, mWallSegments[i]->getExtent());
 
    for(S32 i = 0; i < fillVector.size(); i++)
@@ -725,30 +765,30 @@ void WallSegmentManager::invalidateIntersectingSegments(EditorObject *item)
 
       // Reset the edges of all invalidated segments to their factory settings
       intersectingSegment->resetEdges();   
-      intersectingSegment->invalid = true;
+      intersectingSegment->invalidate();
    }
 
    buildWallSegmentEdgesAndPoints(item);
 
    // Invalidate all segments that potentially intersect the changed segment in its new location
    for(S32 i = 0; i < mWallSegments.size(); i++)
-      if(mWallSegments[i]->mOwner == item->getSerialNumber())      // Segment belongs to our item, compare to all others
+      if(mWallSegments[i]->getOwner() == item->getSerialNumber())      // Segment belongs to our item, compare to all others
       {
          fillVector.clear();
          getGridDatabase()->findObjects(BarrierType, fillVector, mWallSegments[i]->getExtent());
       }
 
    for(S32 i = 0; i < fillVector.size(); i++)
-      dynamic_cast<WallSegment *>(fillVector[i])->invalid = true;
+      dynamic_cast<WallSegment *>(fillVector[i])->invalidate();
 }
 
 
 // Called when a wall segment has somehow changed.  All current and previously intersecting segments 
 // need to be recomputed.
-void WallSegmentManager::computeWallSegmentIntersections(EditorObject *item)
+void WallSegmentManager::computeWallSegmentIntersections(Game *game, EditorObject *item)
 {
    invalidateIntersectingSegments(item);     // TODO: Is this step still needed?  similar things, both run buildWallSegmentEdgesAndPoints()
-   recomputeAllWallGeometry();
+   recomputeAllWallGeometry(game);
 }
 
 
@@ -764,7 +804,7 @@ void WallSegmentManager::deleteSegments(S32 owner)
    S32 count = mWallSegments.size();
 
    for(S32 i = 0; i < count; i++)
-      if(mWallSegments[i]->mOwner == owner)
+      if(mWallSegments[i]->getOwner() == owner)
       {
          delete mWallSegments[i];    // Destructor will remove segment from database
          mWallSegments.erase_fast(i);
@@ -788,7 +828,7 @@ void WallSegmentManager::renderWalls(bool draggingObjects, bool showingReference
          for(S32 j = 0; j < fillVector.size(); j++)
          {
             EditorObject *obj = dynamic_cast<EditorObject *>(fillVector[j]);
-            if(obj->isSelected() && obj->getItemId() == mWallSegments[i]->mOwner)
+            if(obj->isSelected() && obj->getItemId() == mWallSegments[i]->getOwner())
             {
                isBeingDragged = true;
                break;
@@ -822,12 +862,13 @@ void WallSegmentManager::renderWalls(bool draggingObjects, bool showingReference
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-GridDatabase *WallSegment::mGridDatabase; // Declare static variable
+//GridDatabase *WallSegment::mGridDatabase; // Declare static variable
 
 
 // Regular constructor
-WallSegment::WallSegment(const Point &start, const Point &end, F32 width, S32 owner) 
+WallSegment::WallSegment(GridDatabase *gridDatabase, const Point &start, const Point &end, F32 width, S32 owner) 
 { 
+   mGridDatabase = gridDatabase;
    // Calculate segment corners by expanding the extended end points into a rectangle
    Barrier::expandCenterlineToOutline(start, end, width, corners);   
    init(owner);
@@ -835,8 +876,10 @@ WallSegment::WallSegment(const Point &start, const Point &end, F32 width, S32 ow
 
 
 // PolyWall constructor
-WallSegment::WallSegment(const Vector<Point> &points, S32 owner)
+WallSegment::WallSegment(GridDatabase *gridDatabase, const Vector<Point> &points, S32 owner)
 {
+   mGridDatabase = gridDatabase;
+
    corners = points;
 
    if(isWoundClockwise(points))

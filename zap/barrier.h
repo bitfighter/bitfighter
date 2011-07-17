@@ -138,6 +138,8 @@ public:
 
 class PolyWall : public EditorPolygon     // Don't need GameObject component of this...
 {
+   typedef EditorPolygon Parent;
+
 private:
    //typedef EditorObject Parent;
    //void computeExtent();
@@ -156,6 +158,9 @@ public:
    void renderEditor(F32 currentScale);
 
    S32 getRenderSortValue() { return -1; }
+
+   virtual void onGeomChanged();
+   virtual void onItemDragging() { /* Do nothing */ }
 
    //bool getCollisionPoly(Vector<Point> &polyPoints);
 
@@ -190,22 +195,26 @@ private:
 class WallSegment : public DatabaseObject
 {
 private:
-   static GridDatabase *mGridDatabase;    // Database of segments
+   GridDatabase *mGridDatabase;    
    GridDatabase *getGridDatabase() { return mGridDatabase; }      
+   S32 mOwner;
 
-   void init(S32 owner);
+  void init(S32 owner);
+  bool invalid;              // A flag for marking segments in need of processing
 
 public:
-   WallSegment(const Point &start, const Point &end, F32 width, S32 owner = -1);    // Normal wall segment
-   WallSegment(const Vector<Point> &points, S32 owner = -1);                        // PolyWall 
+   WallSegment(GridDatabase *gridDatabase, const Point &start, const Point &end, F32 width, S32 owner = -1);    // Normal wall segment
+   WallSegment(GridDatabase *gridDatabase, const Vector<Point> &points, S32 owner = -1);                        // PolyWall 
    ~WallSegment();
 
+   // TODO: Make these private
    Vector<Point> edges;    
    Vector<Point> corners;
    Vector<Point> triangulatedFillPoints;
-   S32 mOwner;
 
-   bool invalid;              // A flag for marking segments in need of processing
+
+   S32 getOwner() { return mOwner; }
+   void invalidate() { invalid = true; }
 
    void resetEdges();         // Compute basic edges from corner points
    void computeBoundingBox(); // Computes bounding box based on the corners, updates database
@@ -214,8 +223,6 @@ public:
 
    ////////////////////
    //  DatabaseObject methods
-   static void setGridDatabase(GridDatabase *database) { mGridDatabase = database; }
-
 
    // Note that the poly returned here is different than what you might expect -- it is composed of the edges,
    // not the corners, and is thus in A-B, C-D, E-F format rather than the more typical A-B-C-D format returned
@@ -265,34 +272,35 @@ class EditorObject;
 class WallSegmentManager
 {
 private:
-   static GridDatabase *mGridDatabase;
+   GridDatabase *mGridDatabase;
 
 public:
-   WallSegmentManager()  { /* Do nothing */ }
+   WallSegmentManager();      // Constructor
+   ~WallSegmentManager();     // Destructor
 
-   static GridDatabase *getGridDatabase() { return mGridDatabase; } 
-   static void setGridDatabase(GridDatabase *gridDatabase) { mGridDatabase = gridDatabase; }
+   GridDatabase *getGridDatabase() { return mGridDatabase; } 
+   //void setGridDatabase(GridDatabase *gridDatabase) { mGridDatabase = gridDatabase; }
 
    Vector<WallSegment *> mWallSegments;      
-   static Vector<WallEdge *> mWallEdges;        // For mounting forcefields/turrets
-   static Vector<Point> mWallEdgePoints;        // For rendering
+   Vector<WallEdge *> mWallEdges;        // For mounting forcefields/turrets
+   Vector<Point> mWallEdgePoints;               // For rendering
 
-   void buildAllWallSegmentEdgesAndPoints();
+   void buildAllWallSegmentEdgesAndPoints(Game *game);
    void deleteSegments(S32 owner);              // Delete all segments owned by specified WorldItem
    void deleteAllSegments();
 
    // Recalucate edge geometry for all walls when item has changed
-   void computeWallSegmentIntersections(EditorObject *item); 
+   void computeWallSegmentIntersections(Game *game, EditorObject *item); 
 
    // Takes a wall, finds all intersecting segments, and marks them invalid
    void invalidateIntersectingSegments(EditorObject *item);
 
    void buildWallSegmentEdgesAndPoints(DatabaseObject *object);
    void buildWallSegmentEdgesAndPoints(DatabaseObject *object, const Vector<DatabaseObject *> &engrObjects);
-   void recomputeAllWallGeometry();
+   void recomputeAllWallGeometry(Game *game);
 
    // Populate wallEdges
-   static void clipAllWallEdges(const Vector<WallSegment *> &wallSegments, Vector<Point> &wallEdges);
+   void clipAllWallEdges(const Vector<WallSegment *> &wallSegments, Vector<Point> &wallEdges);
  
    ////////////////
    // Render functions

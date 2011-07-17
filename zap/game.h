@@ -101,6 +101,7 @@ class GameConnection;
 class Ship;
 class GameUserInterface;
 struct UserInterfaceData;
+class WallSegmentManager;
 
 class AbstractTeam;
 class Team;
@@ -119,6 +120,9 @@ private:
    U32 mTimeUnconnectedToMaster;      // Time that we've been unconnected to the master
    bool mHaveTriedToConnectToMaster;
 
+   WallSegmentManager *mWallSegmentManager;     
+
+
    // Info about modules -- access via getModuleInfo()
    Vector<ModuleInfo> mModuleInfos;
    void buildModuleInfos();
@@ -135,7 +139,6 @@ private:
    void onReadLevelDescriptionParam(S32 argc, const char **argv);
    void onReadLevelCreditsParam(S32 argc, const char **argv);
    
-
 protected:
    virtual void cleanUp();
    U32 mNextMasterTryTime;
@@ -182,7 +185,7 @@ public:
    static const S32 PLAYER_COUNT_UNAVAILABLE = -1;
 
    Game(const Address &theBindAddress);      // Constructor
-   virtual ~Game() { /* Do nothing */ };     // Destructor
+   virtual ~Game();                          // Destructor
 
    virtual GameUserInterface *getUserInterface() = 0;
 
@@ -197,6 +200,8 @@ public:
 
    ModuleInfo *getModuleInfo(ShipModule module) { return &mModuleInfos[(U32)module]; }
    
+   WallSegmentManager *getWallSegmentManager() const { return mWallSegmentManager; }      // Looks like this is only used in EditorGame...  TODO: Move back to EditorGame()
+
    void computeWorldObjectExtents();
    Rect computeBarrierExtents();
 
@@ -517,7 +522,6 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class WallSegmentManager;
 
 class EditorGame : public Game
 {
@@ -537,10 +541,6 @@ public:
    const Color *getTeamColor(S32 teamIndex) const;
 
    bool processPseudoItem(S32 argc, const char **argv);
-
-   WallSegmentManager *mWallSegmentManager;     
-   WallSegmentManager *getWallSegmentManager() { return mWallSegmentManager; }
-   void setWallSegmentManager(WallSegmentManager *wallSegmentManager) { mWallSegmentManager = wallSegmentManager; }
 
    boost::shared_ptr<GridDatabase> getGridDatabase() { return mEditorDatabase; }
 

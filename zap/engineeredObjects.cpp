@@ -599,7 +599,7 @@ void EngineeredObject::healObject(S32 time)
 Point EngineeredObject::mountToWall(const Point &pos)
 {  
    GridDatabase *wallEdgeDatabase = WallEdge::getWallEdgeDatabase();
-   GridDatabase *wallSegDatabase = WallSegmentManager::getGridDatabase();     // Get database containing walls
+   GridDatabase *wallSegDatabase = getGame()->getWallSegmentManager()->getGridDatabase();     // Get database containing walls
 
    Point anchor, nrml;
 
@@ -800,7 +800,7 @@ void ForceFieldProjector::findForceFieldEnd()
    Point start = getForceFieldStartPoint(getVert(0), mAnchorNormal);
 
    // Pass in database containing WallSegments
-   if(ForceField::findForceFieldEnd(WallSegmentManager::getGridDatabase(), start, mAnchorNormal, forceFieldEnd, &collObj))
+   if(ForceField::findForceFieldEnd(getGame()->getWallSegmentManager()->getGridDatabase(), start, mAnchorNormal, forceFieldEnd, &collObj))
       setEndSegment(dynamic_cast<WallSegment *>(collObj));
    else
       setEndSegment(NULL);
