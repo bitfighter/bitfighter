@@ -105,7 +105,10 @@ public:
    Ship *getMount();
    void dismount();
    void render();
-   virtual void renderItem(Point pos) = 0;
+
+   virtual void setVert(const Point &point, S32 index);
+
+   virtual void renderItem(Point pos) = 0;      // Does actual rendering, allowing render() to be generic for all Items
 
    virtual void onMountDestroyed();
    virtual void onItemDropped();

@@ -772,18 +772,35 @@ void Mine::renderItem(Point pos)
    if(exploded)
       return;
 
-   TNLAssert(gClientGame->getConnectionToServer(), "Invalid connection to server in Mine//projectile.cpp");
-   Ship *ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
+   bool visible, armed;
 
-   if(!ship)
-      return;
+   Game *game = getGame();
+   ClientGame *clientGame = dynamic_cast<ClientGame *>(game);
 
-   // Can see mine if laid by teammate in team game || sensor is active ||
-   //  you laid it yourself
-   bool visible = ( (ship->getTeam() == getTeam()) && getGame()->getGameType()->isTeamGame() ) || ship->isModuleActive(ModuleSensor) ||
-      (getGame()->getGameType()->mLocalClient && getGame()->getGameType()->mLocalClient->name == mSetBy);
+   if(clientGame)
+   {
+      TNLAssert(clientGame->getConnectionToServer(), "Invalid connection to server in Mine//projectile.cpp");
+      Ship *ship = dynamic_cast<Ship *>(clientGame->getConnectionToServer()->getControlObject());
 
-   renderMine(pos, mArmed, visible);
+      if(!ship)
+         return;
+
+      armed = mArmed;
+
+      GameType *gameType = clientGame->getGameType();
+
+      // Can see mine if laid by teammate in team game || sensor is active ||
+      // you laid it yourself
+      visible = ( (ship->getTeam() == getTeam()) && gameType->isTeamGame() ) || ship->isModuleActive(ModuleSensor) ||
+                  (gameType->mLocalClient && gameType->mLocalClient->name == mSetBy);
+   }
+   else     // Must be in editor?
+   {
+      armed = true;
+      visible = true;
+   }
+
+      renderMine(pos, armed, visible);
 }
 
 
@@ -961,15 +978,28 @@ void SpyBug::renderItem(Point pos)
    if(exploded)
       return;
 
-   TNLAssert(gClientGame->getConnectionToServer(), "Invalid connection to server in SpyBug//projectile.cpp");
-   Ship *ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
-   if(!ship)
-      return;
+   bool visible;
 
-   // Can see bug if laid by teammate in team game || sensor is active ||
-   //       you laid it yourself || spyBug is neutral
-   bool visible = ( ((ship->getTeam() == getTeam()) && getGame()->getGameType()->isTeamGame()) || ship->isModuleActive(ModuleSensor) ||
-            (getGame()->getGameType()->mLocalClient && getGame()->getGameType()->mLocalClient->name == mSetBy) || getTeam() == -1);
+   Game *game = getGame();
+   ClientGame *clientGame = dynamic_cast<ClientGame *>(game);
+
+   if(clientGame)
+   {
+      TNLAssert(clientGame->getConnectionToServer(), "Invalid connection to server in SpyBug//projectile.cpp");
+      Ship *ship = dynamic_cast<Ship *>(clientGame->getConnectionToServer()->getControlObject());
+
+      if(!ship)
+         return;
+
+      GameType *gameType = clientGame->getGameType();
+
+      // Can see bug if laid by teammate in team game || sensor is active ||
+      //       you laid it yourself                   || spyBug is neutral
+      visible = ( ((ship->getTeam() == getTeam()) && gameType->isTeamGame())         || ship->isModuleActive(ModuleSensor) ||
+                  (gameType->mLocalClient && gameType->mLocalClient->name == mSetBy) || getTeam() == TEAM_NEUTRAL);
+   }
+   else     // Must be in editor?
+      visible = true;
 
    renderSpyBug(pos, visible);
 }

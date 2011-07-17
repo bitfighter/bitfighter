@@ -263,11 +263,11 @@ extern void renderPolygon(const Vector<Point> &fillPoints, const Vector<Point> &
 static const S32 asteroidDesign = 2;      // Design we'll use for all asteroids in editor
 
 // Items are rendered in index order, so those with a higher index get drawn later, and hence, on top
-void EditorObject::render(bool isScriptItem, bool showingReferenceShip, ShowMode showMode)    // TODO: pass scale
+void EditorObject::renderInEditor(bool isScriptItem, bool showingReferenceShip, ShowMode showMode)    // TODO: pass scale
 {
    const S32 instrSize = 9;      // Size of instructions for special items
    const S32 attrSize = 10;
-
+   
    Point pos, dest;
    F32 alpha = getRenderingAlpha(isScriptItem);
 
@@ -279,9 +279,9 @@ void EditorObject::render(bool isScriptItem, bool showingReferenceShip, ShowMode
    else 
       glColor(getDrawColor(), alpha);
 
-   glEnableBlend;        // Enable transparency
-
    S32 snapIndex = gEditorUserInterface.getSnapVertexIndex();
+
+   glEnableBlend;        // Enable transparency
 
    // Override drawColor for this special case
    if(anyVertsSelected())
@@ -294,27 +294,25 @@ void EditorObject::render(bool isScriptItem, bool showingReferenceShip, ShowMode
       if(mLitUp)
          highlightDockItem();
    }
-   else if(showingReferenceShip)
+   else  // Not a dock item
    {
       glPushMatrix();
          setLevelToCanvasCoordConversion();
-         BfObject::render();
-      glPopMatrix();
-   }
-   else
-   {
-      glPushMatrix();
-         setLevelToCanvasCoordConversion();
-         renderEditor(gEditorUserInterface.getCurrentScale());
-      glPopMatrix();
+         if(showingReferenceShip)
+            render();
+         else
+            renderEditor(gEditorUserInterface.getCurrentScale());
+      glPopMatrix();   
 
-      
-      // Label item with instruction message describing what happens if user presses enter
-      if(isSelected() && !isBeingEdited())
-         renderItemText(getInstructionMsg(), -1, gEditorUserInterface.getCurrentScale());
+      if(!showingReferenceShip)
+      {
+         // Label item with instruction message describing what happens if user presses enter
+         if(isSelected() && !isBeingEdited())
+            renderItemText(getInstructionMsg(), -1, gEditorUserInterface.getCurrentScale());
 
-      renderAndLabelHighlightedVertices(gEditorUserInterface.getCurrentScale());
-      renderAttribs(gEditorUserInterface.getCurrentScale());
+         renderAndLabelHighlightedVertices(gEditorUserInterface.getCurrentScale());
+         renderAttribs(gEditorUserInterface.getCurrentScale());
+      }
    }
 
    glDisableBlend;

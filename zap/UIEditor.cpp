@@ -645,8 +645,9 @@ void EditorUserInterface::loadLevel()
 
    game->resetLevelInfo();
 
-   game->setGameType(new GameType());
-   //gEditorGame->setGameType(NULL);
+   GameType *g = new GameType;
+   g->addToGame(getGame());
+   game->setGameType(g);
 
    char fileBuffer[1024];
    dSprintf(fileBuffer, sizeof(fileBuffer), "%s/%s", gConfigDirs.levelDir.c_str(), mEditFileName.c_str());
@@ -1605,7 +1606,7 @@ void EditorUserInterface::render()
    glPopMatrix();
 
    for(S32 i = 0; i < mLevelGenItems.size(); i++)
-      mLevelGenItems[i]->render(true, mShowingReferenceShip, mShowMode);
+      mLevelGenItems[i]->renderInEditor(true, mShowingReferenceShip, mShowMode);
    
    // Render polyWall item fill just before rendering regular walls.  This will create the effect of all walls merging together.  
    // PolyWall outlines are already part of the wallSegmentManager, so will be rendered along with those of regular walls.
@@ -1638,7 +1639,7 @@ void EditorUserInterface::render()
       EditorObject *obj = objList->get(i);
       if(obj->getObjectTypeMask() != PolyWallType)
          if(!(mDraggingObjects && obj->isSelected()))
-            obj->render(false, mShowingReferenceShip, mShowMode);
+            obj->renderInEditor(false, mShowingReferenceShip, mShowMode);
    }
 
    // == Selected items ==
@@ -1648,7 +1649,7 @@ void EditorUserInterface::render()
    {
       EditorObject *obj = objList->get(i);
       if(obj->isSelected() || obj->isLitUp())
-         obj->render(false, mShowingReferenceShip, mShowMode);
+         obj->renderInEditor(false, mShowingReferenceShip, mShowMode);
    }
 
 
@@ -1712,7 +1713,7 @@ void EditorUserInterface::render()
       {
          EditorObject *obj = objList->get(i);
          if(obj->isSelected() && obj->getObjectTypeMask() & ~BarrierType)    // Object is selected and is not a wall
-            obj->render(false, mShowingReferenceShip, mShowMode);
+            obj->renderInEditor(false, mShowingReferenceShip, mShowMode);
       }
 
    // Render our snap vertex as a hollow magenta box
@@ -1755,7 +1756,7 @@ void EditorUserInterface::render()
    if(!mShowingReferenceShip)
       for(S32 i = 0; i < mDockItems.size(); i++)
       {
-         mDockItems[i]->render(false, false, mShowMode);
+         mDockItems[i]->renderInEditor(false, false, mShowMode);
          mDockItems[i]->setLitUp(false);
       }
 

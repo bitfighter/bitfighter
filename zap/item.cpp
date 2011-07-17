@@ -144,6 +144,13 @@ void Item::render()
 }
 
 
+void Item::setVert(const Point &point, S32 index) 
+{ 
+   TNLAssert(getGame() == NULL || getGame() == gEditorGame, "Where is setVert used outside editor context???");
+   Parent::setVert(point, index);
+   mMoveState[RenderState].pos = point;      // Keep render state in-sync with the geom
+}
+
 // This scaling factor allows us to draw actual item, letting it grow and shrink with editor scale, but places a limit on how small it will get
 F32 EditorItem::getEditorRenderScaleFactor(F32 currentScale)
 {

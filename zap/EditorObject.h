@@ -139,10 +139,10 @@ public:
    void saveItem(FILE *f, F32 gridSize);
    virtual string toString(F32 gridSize) const = 0; 
 
-   Vector<Point> extendedEndPoints;                            // these are computed but not stored in barrier... not sure how to merge
+   Vector<Point> extendedEndPoints;                            // These are computed but not stored in barrier... not sure how to merge
 
    // Dock item rendering methods
-   virtual void renderDock() { TNLAssert(false, "renderDock not implemented!"); };
+   virtual void renderDock() { TNLAssert(false, "renderDock not implemented!"); }   // Need not be abstract -- some of our objects do not go on dock
    virtual void labelDockItem();
    virtual void highlightDockItem();
 
@@ -227,7 +227,7 @@ public:
    //////////////
 
    //TODO: Get rid of this altogether
-   void render(bool isScriptItem, bool showingReferenceShip, ShowMode showMode);
+   void renderInEditor(bool isScriptItem, bool showingReferenceShip, ShowMode showMode);
 
 };
 

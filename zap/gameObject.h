@@ -184,7 +184,6 @@ protected:
    Game *mGame;
    S32 mTeam;
 
-public:     //TODO: remveo this line, should be protected
    boost::shared_ptr<Geometry> mGeometry;
 
 public:

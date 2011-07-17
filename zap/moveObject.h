@@ -62,7 +62,7 @@ protected:
    bool mInterpolating;
 
 public:
-   struct MoveState  // need public, not protected, for SpeedZone handling...
+   struct MoveState  // need public, not protected, for SpeedZone handling...  TODO: fix this flaw
    {
       Point pos;        // Actual position of the ship/object
       float angle;      // Actual angle of the ship/object
