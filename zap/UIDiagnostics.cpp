@@ -377,7 +377,7 @@ void DiagnosticUserInterface::render()
          drawCenteredString2Col(ypos, textsize, true, "No joysticks detected");
       else
          drawCenteredStringPair2Colf(ypos, textsize, true, "Autodetect Str.:", "%s", 
-               Joystick::DetectedJoystickNameList[index] == "" ? Joystick::DetectedJoystickNameList[index] : "<None>");
+               (U32(index) >= U32(Joystick::DetectedJoystickNameList.size()) || Joystick::DetectedJoystickNameList[index] == "") ? "<None>" : Joystick::DetectedJoystickNameList[index]);
 
       ypos += textsize + gap;
       ypos += textsize + gap;

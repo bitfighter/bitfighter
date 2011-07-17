@@ -36,16 +36,29 @@ namespace Zap {
 
 // Linker needs these declared like this, why?
 // private
-SDL_Joystick *Joystick::sdlJoystick;
+SDL_Joystick *Joystick::sdlJoystick = NULL;
 
 // public
-TNL::U32 Joystick::ButtonMask = 0;
 TNL::Vector<const char *> Joystick::DetectedJoystickNameList;
-TNL::S16 Joystick::SensitivityThreshold = 0;
-TNL::S32 Joystick::UseJoystickNumber = 0;
 TNL::Vector<JoystickInfo> Joystick::PredefinedJoystickList;
-JoystickInput Joystick::JoystickInputData[MaxAxesDirections];
+
+TNL::U32 Joystick::ButtonMask = 0;
+TNL::S16 Joystick::SensitivityThreshold = 3200;  // out of 32767
+TNL::S32 Joystick::UseJoystickNumber = 0;
 TNL::U32 Joystick::AxesKeyCodeMask = 0;
+
+
+// Needs to be Aligned with JoystickAxesDirections
+JoystickInput Joystick::JoystickInputData[MaxAxesDirections] = {
+      {MoveAxesLeft,   MoveAxesLeftMask,   STICK_1_LEFT,  0.0f},
+      {MoveAxesRight,  MoveAxesRightMask,  STICK_1_RIGHT, 0.0f},
+      {MoveAxesUp,     MoveAxesUpMask,     STICK_1_UP,    0.0f},
+      {MoveAxesDown,   MoveAxesDownMask,   STICK_1_DOWN,  0.0f},
+      {ShootAxesLeft,  ShootAxesLeftMask,  STICK_2_LEFT,  0.0f},
+      {ShootAxesRight, ShootAxesRightMask, STICK_2_RIGHT, 0.0f},
+      {ShootAxesUp,    ShootAxesUpMask,    STICK_2_UP,    0.0f},
+      {ShootAxesDown,  ShootAxesDownMask,  STICK_2_DOWN,  0.0f},
+};
 
 
 Joystick::Joystick() {
@@ -110,25 +123,6 @@ bool Joystick::initJoystick()
 
 void Joystick::populateJoystickStaticData()
 {
-   UseJoystickNumber = 0;
-   SensitivityThreshold = 3200;  // out of 32767
-   AxesKeyCodeMask = 0;
-
-//   // Needs to be Aligned with JoystickAxesDirections
-   JoystickInput joystickInput[MaxAxesDirections] = {
-         {MoveAxesLeft,   MoveAxesLeftMask,   STICK_1_LEFT,  0.0f},
-         {MoveAxesRight,  MoveAxesRightMask,  STICK_1_RIGHT, 0.0f},
-         {MoveAxesUp,     MoveAxesUpMask,     STICK_1_UP,    0.0f},
-         {MoveAxesDown,   MoveAxesDownMask,   STICK_1_DOWN,  0.0f},
-         {ShootAxesLeft,  ShootAxesLeftMask,  STICK_2_LEFT,  0.0f},
-         {ShootAxesRight, ShootAxesRightMask, STICK_2_RIGHT, 0.0f},
-         {ShootAxesUp,    ShootAxesUpMask,    STICK_2_UP,    0.0f},
-         {ShootAxesDown,  ShootAxesDownMask,  STICK_2_DOWN,  0.0f},
-   };
-
-   *JoystickInputData = *joystickInput;
-
-
    populatePredefinedJoystickList();
 }
 
@@ -290,31 +284,19 @@ void Joystick::populatePredefinedJoystickList()
          }
    };
 
-   // Finally tie it all together
-//   PredefinedJoystickList = {
-//         {9,  {0,1}, shootAxes[LogitechWingman],             buttonRemap[LogitechWingman]},
-//         {10, {0,1}, shootAxes[LogitechDualAction],          buttonRemap[LogitechDualAction]},
-//         {9,  {0,1}, shootAxes[SaitekDualAnalogP880],        buttonRemap[SaitekDualAnalogP880]},
-//         {10, {0,1}, shootAxes[SaitekDualAnalogRumblePad],   buttonRemap[SaitekDualAnalogRumblePad]},
-//         {10, {0,1}, shootAxes[PS2DualShock],                buttonRemap[PS2DualShock]},
-//         {10, {0,1}, shootAxes[PS2DualShockConversionCable], buttonRemap[PS2DualShockConversionCable]},
-//         {10, {0,1}, shootAxes[PS3DualShock],                buttonRemap[PS3DualShock]},
-//         {10, {0,1}, shootAxes[XBoxController],              buttonRemap[XBoxController]},
-//         {14, {0,1}, shootAxes[XBoxControllerOnXBox],        buttonRemap[XBoxControllerOnXBox]},
-//   };
-
    JoystickInfo info;
    for (S32 i = 0; i < ControllerTypeCount; i++)
    {
       info.buttonCount = buttonCount[i];
-      *(info.moveAxesSdlIndex) = *moveAxes[i];
-      *(info.shootAxesSdlIndex) = *shootAxes[i];
-      *(info.buttonMappings) = *buttonRemap[i];
+      info.moveAxesSdlIndex[0] = moveAxes[i][0];
+      info.moveAxesSdlIndex[1] = moveAxes[i][1];
+      info.shootAxesSdlIndex[0] = shootAxes[i][0];
+      info.shootAxesSdlIndex[1] = shootAxes[i][1];
+      for (S32 j = 0; j < MaxControllerButtons; j++)
+         info.buttonMappings[j] = buttonRemap[i][j];
 
       PredefinedJoystickList.push_back(info);
    }
-
-   logprintf("Predefined Joystick Count: %d", PredefinedJoystickList.size());
 }
 
 
