@@ -48,12 +48,8 @@ protected:
 
 public:
    SimpleLine(GameObjectType objectType = UnknownType);       // Constructor
-   //SimpleLine(const SimpleLine &simpleLine);                  // Copy constructor
-
-   //virtual void copyAttrs(SimpleLine *target);
 
    // Some properties about the item that will be needed in the editor
-
    virtual const char *getOnDockName() = 0;
 
    void renderDock();     // Render item on the dock

@@ -36,6 +36,10 @@ namespace Zap
 // Provide editor related methods to the polygon class
 class EditorPolygon : public EditorObject, public GameObject, public LuaItem
 {
+   typedef GameObject Parent;
+   typedef EditorObject EditorParent;
+
+private:
    virtual void renderItemText(const char *text, S32 offset, F32 currentScale);
    virtual void labelDockItem();
 

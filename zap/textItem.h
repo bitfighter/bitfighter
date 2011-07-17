@@ -39,7 +39,7 @@ static const S32 MAX_TEXTITEM_LEN = 255;
 
 class TextItem : public SimpleLine
 {
-   typedef GameObject Parent;
+   typedef SimpleLine Parent;
 
 private:
    F32 mSize;            // Text size

@@ -96,7 +96,7 @@ public:
 
    virtual void addToDock(Game *game, const Point &point);
 
-
+   void assignNewSerialNumber() { mSerialNumber = mNextSerialNumber++; }
    void renderDockItemLabel(const Point &pos, const char *label, F32 yOffset = 0);    // This could be moved anywhere... it's essentially a static method
 
    // Offset lets us drag an item out from the dock by an amount offset from the 0th vertex.  This makes placement seem more natural.
@@ -121,7 +121,7 @@ public:
 
    void setSnapped(bool snapped) { /* Do nothing */ }          // Overridden in EngineeredObject
 
-   virtual void newObjectFromDock(F32 gridSize) { /* Do nothing */ }   // Called when item dragged from dock to editor -- overridden by Polygon and SimpleLine
+   virtual void newObjectFromDock(F32 gridSize);   // Called when item dragged from dock to editor -- overridden by several objects
 
 
    // Keep track which vertex, if any is lit up in the currently selected item

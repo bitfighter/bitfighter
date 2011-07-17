@@ -114,6 +114,8 @@ static const F32 INITIAL_WIDTH = 0.3;
 // Called when we create a brand new object and insert it in the editor, like when we drag a new item from the dock
 void EditorPolygon::newObjectFromDock(F32 gridSize)
 {
+   EditorParent::newObjectFromDock(gridSize);
+
    F32 w = INITIAL_HEIGHT * gridSize / 2;
    F32 h = INITIAL_WIDTH * gridSize / 2;
 

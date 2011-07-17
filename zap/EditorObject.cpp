@@ -64,7 +64,7 @@ EditorObject::EditorObject(GameObjectType objectType)
    mSelected = false; 
    setObjectTypeMask(objectType); 
    mIsBeingEdited = false;
-   mSerialNumber = mNextSerialNumber++;
+   assignNewSerialNumber();
 }
 
 
@@ -376,7 +376,6 @@ EditorObject *EditorObject::newCopy()
    EditorObject *newObject = clone();     // TODO: Wrap in shared_ptr?
 
    newObject->mGeometry = mGeometry->copyGeometry();
-   mSerialNumber = mNextSerialNumber++;
 
    //newObject->setGame(NULL);
 
@@ -419,6 +418,13 @@ void EditorObject::unselect()
 
    unselectVerts();
 }
+
+
+// Called when item dragged from dock to editor
+void EditorObject::newObjectFromDock(F32 gridSize) 
+{  
+   assignNewSerialNumber();
+}   
 
 
 //void EditorObject::initializePolyGeom()

@@ -1929,14 +1929,15 @@ void EditorUserInterface::pasteSelection()
    {
       offset = firstPoint - mClipboard[i]->getVert(0);
 
-      EditorObject *newObj = mClipboard[i]->newCopy();
-      newObj->setExtent();
-      //newObj->addToGame(gEditorGame);
-      newObj->addToDatabase();
+      EditorObject *newObject = mClipboard[i]->newCopy();
+      newObject->assignNewSerialNumber();
+      newObject->setExtent();
+      //newObject->addToGame(gEditorGame);
+      newObject->addToDatabase();
 
-      newObj->setSelected(true);
-      newObj->moveTo(pos + offset);
-      newObj->onGeomChanged();
+      newObject->setSelected(true);
+      newObject->moveTo(pos + offset);
+      newObject->onGeomChanged();
    }
 
    validateLevel();

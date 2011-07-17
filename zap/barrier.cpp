@@ -517,6 +517,7 @@ void PolyWall::renderEditor(F32 currentScale)
    glColor(HIGHLIGHT_COLOR);
    renderPolygonOutline(getOutline());
    EditorPolygon::renderEditor(currentScale);
+   UserInterface::drawStringf(getCentroid().x, getCentroid().y, 20, "%d", mSerialNumber);
 }
 
 

@@ -83,7 +83,7 @@ TextItem *TextItem::clone() const
 
 void TextItem::newObjectFromDock(F32 gridSize)
 {
-   SimpleLine::newObjectFromDock(gridSize);
+   Parent::newObjectFromDock(gridSize);
 
    mText = "Your text here";
    recalcTextSize();
