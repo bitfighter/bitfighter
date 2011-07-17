@@ -190,8 +190,6 @@ public:
    void setItemId(S32 itemId) { mItemId = itemId; }
    
    S32 getSerialNumber() { return mSerialNumber; }
-   void setSerialNumber(S32 serialNumber) { mSerialNumber = serialNumber; }
-
 
    bool isSelected() { return mSelected; }
    void setSelected(bool selected) { mSelected = selected; }

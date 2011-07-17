@@ -376,6 +376,7 @@ EditorObject *EditorObject::newCopy()
    EditorObject *newObject = clone();     // TODO: Wrap in shared_ptr?
 
    newObject->mGeometry = mGeometry->copyGeometry();
+   mSerialNumber = mNextSerialNumber++;
 
    //newObject->setGame(NULL);
 

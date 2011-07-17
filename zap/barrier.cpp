@@ -657,6 +657,7 @@ void WallSegmentManager::buildAllWallSegmentEdgesAndPoints(Game *game)
    Vector<DatabaseObject *> engrObjects;
    game->getGridDatabase()->findObjects(EngineeredType, engrObjects);   // All engineered objects
 
+   // Iterate over all our wall objects
    for(S32 i = 0; i < fillVector.size(); i++)
       game->getWallSegmentManager()->buildWallSegmentEdgesAndPoints(fillVector[i], engrObjects);
 }
@@ -677,7 +678,7 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(DatabaseObject *dbObject
 
    Vector<EngineeredObject *> eosOnDeletedSegs;    // A list of engr objects terminating on the wall segment that we'll be deleting
 
-   EditorObject *wall = dynamic_cast<EditorObject *>(dbObject);    // Wall we're deleting and rebuilding
+   EditorObject *wall = dynamic_cast<EditorObject *>(dbObject);        // Wall we're deleting and rebuilding
 
    TNLAssert(wall, "Bad cast -- expected an EditorObject!");
 
@@ -734,7 +735,7 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(DatabaseObject *dbObject
 }
 
 
-// Static method, used above and from instructions
+// Used above and from instructions
 void WallSegmentManager::clipAllWallEdges(const Vector<WallSegment *> &wallSegments, Vector<Point> &wallEdges)
 {
    Vector<Vector<Point> > inputPolygons, solution;

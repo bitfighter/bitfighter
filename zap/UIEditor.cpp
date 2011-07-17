@@ -1858,13 +1858,6 @@ void EditorUserInterface::clearSelection()
 }
 
 
-static S32 getNextItemId()
-{
-   static S32 nextItemId = 0;
-   return nextItemId++;
-}
-
-
 // Copy selection to the clipboard
 void EditorUserInterface::copySelection()
 {
@@ -1941,7 +1934,6 @@ void EditorUserInterface::pasteSelection()
       //newObj->addToGame(gEditorGame);
       newObj->addToDatabase();
 
-      newObj->setSerialNumber(getNextItemId());
       newObj->setSelected(true);
       newObj->moveTo(pos + offset);
       newObj->onGeomChanged();
