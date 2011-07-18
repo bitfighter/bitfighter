@@ -293,14 +293,12 @@ public:
    void onMouseMoved();
    void onMouseDragged();
    void startDraggingDockItem();
+   EditorObject *copyDockItem(S32 index);
    bool mouseIgnore;
-
 
    void populateDock();                         // Load up dock with game-specific items to drag and drop
    void addToDock(EditorObject* object);
    void addDockObject(EditorObject *object, F32 xPos, F32 yPos);
-
-   void addToEditor(EditorObject* object);
 
    string mScriptLine;                          // Script and args, if any
    void setHasNavMeshZones(bool hasZones) { mHasBotNavZones = hasZones; }

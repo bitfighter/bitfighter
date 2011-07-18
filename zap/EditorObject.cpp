@@ -375,8 +375,6 @@ EditorObject *EditorObject::newCopy()
 
    newObject->mGeometry = mGeometry->copyGeometry();
 
-   //newObject->setGame(NULL);
-
    newObject->initializeEditor();         // Unselects all vertices
 
    return newObject;

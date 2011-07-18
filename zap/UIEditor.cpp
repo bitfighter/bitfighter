@@ -163,12 +163,6 @@ void EditorUserInterface::addToDock(EditorObject* object)
 }
 
 
-void EditorUserInterface::addToEditor(EditorObject* object)
-{
-   //mItems.push_back(boost::shared_ptr<EditorObject>(object));
-}
-
-
 void EditorUserInterface::addDockObject(EditorObject *object, F32 xPos, F32 yPos)
 {
    object->addToDock(gEditorGame, Point(xPos, yPos));       
@@ -423,9 +417,6 @@ void EditorUserInterface::restoreItems(const Vector<string> &from)
       }
 
       gEditorGame->processLevelLoadLine(args_count, 0, args_char);      // TODO: Id is wrong; shouldn't be 0
-
-      //newObject->addToEditor(gEditorGame);
-      //newObject->processArguments(args_count, args_char);
    }
 }
    
@@ -2422,13 +2413,23 @@ void EditorUserInterface::onMouseDragged()
 }
 
 
+EditorObject *EditorUserInterface::copyDockItem(S32 index)
+{
+   // Instantiate object so we are in essence dragging a non-dock item
+   EditorObject *newObject = mDockItems[index]->newCopy();
+   newObject->newObjectFromDock(getGridSize());
+   newObject->setExtent();
+   newObject->setDockItem(false);
+   newObject->clearGame();
+
+   return newObject;
+}
+
+
 // User just dragged an item off the dock
 void EditorUserInterface::startDraggingDockItem()
 {
-   // Instantiate object so we are in essence dragging a non-dock item
-   EditorObject *item = mDockItems[mDraggingDockItem]->newCopy();
-   item->newObjectFromDock(getGridSize());
-   item->setExtent();
+   EditorObject *item = copyDockItem(mDraggingDockItem);
 
    //item->initializeEditor(getGridSize());    // Override this to define some initial geometry for your object... 
 
@@ -2437,12 +2438,7 @@ void EditorUserInterface::startDraggingDockItem()
    item->moveTo(pos);
       
    item->setWidth((mDockItems[mDraggingDockItem]->getGeomType() == geomPoly) ? .7 : 1);      // TODO: Still need this?
-   item->setDockItem(false);
-   item->addToDatabase();          // Dock items have the game set, but are not in the spatial database... 
-
-   // A little hack here to keep the polywall fill from appearing to be left behind behind the dock
-   //if(item->getObjectTypeMask() & PolyWallType)
-   //   item->clearPolyFillPoints();
+   item->addToGame(getGame());          
 
    clearSelection();            // No items are selected...
    item->setSelected(true);     // ...except for the new one
@@ -2829,7 +2825,7 @@ void EditorUserInterface::insertNewItem(GameObjectType itemType)
    clearSelection();
    saveUndoState();
 
-   S32 team = -1;
+   S32 team = TEAM_NEUTRAL;
 
    EditorObject *newObject = NULL;
 
@@ -2837,17 +2833,14 @@ void EditorUserInterface::insertNewItem(GameObjectType itemType)
    for(S32 i = 0; i < mDockItems.size(); i++)
       if(mDockItems[i]->getObjectTypeMask() & itemType)
       {
-         newObject = mDockItems[i]->newCopy();
-         newObject->initializeEditor();
-         newObject->onGeomChanged();
-         newObject->clearGame();
-
+         newObject = copyDockItem(i);
          break;
       }
    TNLAssert(newObject, "Couldn't create object in insertNewItem()");
 
-   newObject->moveTo(snapPoint(mMousePos));
-   newObject->addToGame(gEditorGame);    
+   newObject->moveTo(snapPoint(convertCanvasToLevelCoord(mMousePos)));
+   newObject->addToGame(getGame());    
+   newObject->onGeomChanged();
 
    validateLevel();
    mNeedToSave = true;
