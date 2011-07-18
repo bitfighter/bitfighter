@@ -409,7 +409,6 @@
 		73D2F37312E2D7E800EA5EBE /* huntersGame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2BC12E2D7E800EA5EBE /* huntersGame.cpp */; };
 		73D2F37412E2D7E800EA5EBE /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 73D2F2BE12E2D7E800EA5EBE /* Info.plist */; };
 		73D2F37512E2D7E800EA5EBE /* IniFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2BF12E2D7E800EA5EBE /* IniFile.cpp */; };
-		73D2F37612E2D7E800EA5EBE /* input.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2C112E2D7E800EA5EBE /* input.cpp */; };
 		73D2F37712E2D7E800EA5EBE /* item.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2C312E2D7E800EA5EBE /* item.cpp */; };
 		73D2F37812E2D7E800EA5EBE /* keyCode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2C512E2D7E800EA5EBE /* keyCode.cpp */; };
 		73D2F37912E2D7E800EA5EBE /* keymap.txt in Resources */ = {isa = PBXBuildFile; fileRef = 73D2F2C812E2D7E800EA5EBE /* keymap.txt */; };
@@ -429,7 +428,6 @@
 		73D2F38A12E2D7E800EA5EBE /* move.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2E512E2D7E800EA5EBE /* move.cpp */; };
 		73D2F38B12E2D7E800EA5EBE /* moveObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2E712E2D7E800EA5EBE /* moveObject.cpp */; };
 		73D2F38C12E2D7E800EA5EBE /* oglconsole.c in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2E912E2D7E800EA5EBE /* oglconsole.c */; };
-		73D2F38D12E2D7E800EA5EBE /* osxInput.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2EB12E2D7E800EA5EBE /* osxInput.cpp */; };
 		73D2F38E12E2D7E800EA5EBE /* packedfont.c in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2EC12E2D7E800EA5EBE /* packedfont.c */; };
 		73D2F38F12E2D7E800EA5EBE /* playerInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2ED12E2D7E800EA5EBE /* playerInfo.cpp */; };
 		73D2F39012E2D7E800EA5EBE /* projectile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2F212E2D7E800EA5EBE /* projectile.cpp */; };
@@ -500,7 +498,6 @@
 		73D2F3E612E2D7E800EA5EBE /* huntersGame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2BC12E2D7E800EA5EBE /* huntersGame.cpp */; };
 		73D2F3E712E2D7E800EA5EBE /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 73D2F2BE12E2D7E800EA5EBE /* Info.plist */; };
 		73D2F3E812E2D7E800EA5EBE /* IniFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2BF12E2D7E800EA5EBE /* IniFile.cpp */; };
-		73D2F3E912E2D7E800EA5EBE /* input.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2C112E2D7E800EA5EBE /* input.cpp */; };
 		73D2F3EA12E2D7E800EA5EBE /* item.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2C312E2D7E800EA5EBE /* item.cpp */; };
 		73D2F3EB12E2D7E800EA5EBE /* keyCode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2C512E2D7E800EA5EBE /* keyCode.cpp */; };
 		73D2F3EC12E2D7E800EA5EBE /* keymap.txt in Resources */ = {isa = PBXBuildFile; fileRef = 73D2F2C812E2D7E800EA5EBE /* keymap.txt */; };
@@ -520,7 +517,6 @@
 		73D2F3FD12E2D7E800EA5EBE /* move.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2E512E2D7E800EA5EBE /* move.cpp */; };
 		73D2F3FE12E2D7E800EA5EBE /* moveObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2E712E2D7E800EA5EBE /* moveObject.cpp */; };
 		73D2F3FF12E2D7E800EA5EBE /* oglconsole.c in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2E912E2D7E800EA5EBE /* oglconsole.c */; };
-		73D2F40012E2D7E800EA5EBE /* osxInput.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2EB12E2D7E800EA5EBE /* osxInput.cpp */; };
 		73D2F40112E2D7E800EA5EBE /* packedfont.c in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2EC12E2D7E800EA5EBE /* packedfont.c */; };
 		73D2F40212E2D7E800EA5EBE /* playerInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2ED12E2D7E800EA5EBE /* playerInfo.cpp */; };
 		73D2F40312E2D7E800EA5EBE /* projectile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2F212E2D7E800EA5EBE /* projectile.cpp */; };
@@ -692,6 +688,9 @@
 		9462C40311D7D82700791A0B /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9462C40211D7D82700791A0B /* IOKit.framework */; };
 		9462C41711D7D95600791A0B /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9462C41611D7D95600791A0B /* Carbon.framework */; };
 		94B7EAC011D7DABC0083AEAF /* Bitfighter.icns in Resources */ = {isa = PBXBuildFile; fileRef = 94B7EABF11D7DABC0083AEAF /* Bitfighter.icns */; };
+		D37210E413D4E481008E86F6 /* Joystick.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D37210E013D4E481008E86F6 /* Joystick.cpp */; };
+		D37210E513D4E481008E86F6 /* JoystickRender.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D37210E213D4E481008E86F6 /* JoystickRender.cpp */; };
+		D37210EB13D4E4C1008E86F6 /* ScreenInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D37210E913D4E4C1008E86F6 /* ScreenInfo.cpp */; };
 		D3A9DC4F139C930300FC8814 /* codec_vorbisfile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D3A9DC4E139C930300FC8814 /* codec_vorbisfile.cpp */; };
 		D3A9DCBC139C9A4700FC8814 /* Geometry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D3A9DCBA139C9A4700FC8814 /* Geometry.cpp */; };
 		D3A9DCCA139C9A9000FC8814 /* UIEditorMenus.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D3A9DCC8139C9A9000FC8814 /* UIEditorMenus.cpp */; };
@@ -1307,7 +1306,6 @@
 		73D2F2BE12E2D7E800EA5EBE /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		73D2F2BF12E2D7E800EA5EBE /* IniFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IniFile.cpp; path = ../../../zap/IniFile.cpp; sourceTree = SOURCE_ROOT; };
 		73D2F2C012E2D7E800EA5EBE /* IniFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IniFile.h; path = ../../../zap/IniFile.h; sourceTree = SOURCE_ROOT; };
-		73D2F2C112E2D7E800EA5EBE /* input.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = input.cpp; path = ../../../zap/input.cpp; sourceTree = SOURCE_ROOT; };
 		73D2F2C212E2D7E800EA5EBE /* input.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = input.h; path = ../../../zap/input.h; sourceTree = SOURCE_ROOT; };
 		73D2F2C312E2D7E800EA5EBE /* item.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = item.cpp; path = ../../../zap/item.cpp; sourceTree = SOURCE_ROOT; };
 		73D2F2C412E2D7E800EA5EBE /* item.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = item.h; path = ../../../zap/item.h; sourceTree = SOURCE_ROOT; };
@@ -1346,7 +1344,6 @@
 		73D2F2E812E2D7E800EA5EBE /* moveObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = moveObject.h; path = ../../../zap/moveObject.h; sourceTree = SOURCE_ROOT; };
 		73D2F2E912E2D7E800EA5EBE /* oglconsole.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = oglconsole.c; path = ../../../zap/oglconsole.c; sourceTree = SOURCE_ROOT; };
 		73D2F2EA12E2D7E800EA5EBE /* oglconsole.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = oglconsole.h; path = ../../../zap/oglconsole.h; sourceTree = SOURCE_ROOT; };
-		73D2F2EB12E2D7E800EA5EBE /* osxInput.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = osxInput.cpp; path = ../../../zap/osxInput.cpp; sourceTree = SOURCE_ROOT; };
 		73D2F2EC12E2D7E800EA5EBE /* packedfont.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = packedfont.c; path = ../../../zap/packedfont.c; sourceTree = SOURCE_ROOT; };
 		73D2F2ED12E2D7E800EA5EBE /* playerInfo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = playerInfo.cpp; path = ../../../zap/playerInfo.cpp; sourceTree = SOURCE_ROOT; };
 		73D2F2EE12E2D7E800EA5EBE /* playerInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = playerInfo.h; path = ../../../zap/playerInfo.h; sourceTree = SOURCE_ROOT; };
@@ -1616,6 +1613,12 @@
 		9462C40211D7D82700791A0B /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
 		9462C41611D7D95600791A0B /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = System/Library/Frameworks/Carbon.framework; sourceTree = SDKROOT; };
 		94B7EABF11D7DABC0083AEAF /* Bitfighter.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = Bitfighter.icns; sourceTree = "<group>"; };
+		D37210E013D4E481008E86F6 /* Joystick.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Joystick.cpp; path = ../../../zap/Joystick.cpp; sourceTree = SOURCE_ROOT; };
+		D37210E113D4E481008E86F6 /* Joystick.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Joystick.h; path = ../../../zap/Joystick.h; sourceTree = SOURCE_ROOT; };
+		D37210E213D4E481008E86F6 /* JoystickRender.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JoystickRender.cpp; path = ../../../zap/JoystickRender.cpp; sourceTree = SOURCE_ROOT; };
+		D37210E313D4E481008E86F6 /* JoystickRender.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JoystickRender.h; path = ../../../zap/JoystickRender.h; sourceTree = SOURCE_ROOT; };
+		D37210E913D4E4C1008E86F6 /* ScreenInfo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ScreenInfo.cpp; path = ../../../zap/ScreenInfo.cpp; sourceTree = SOURCE_ROOT; };
+		D37210EA13D4E4C1008E86F6 /* ScreenInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ScreenInfo.h; path = ../../../zap/ScreenInfo.h; sourceTree = SOURCE_ROOT; };
 		D3A9DC2D139C925E00FC8814 /* codec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = codec.h; sourceTree = "<group>"; };
 		D3A9DC2E139C925E00FC8814 /* vorbisenc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vorbisenc.h; sourceTree = "<group>"; };
 		D3A9DC2F139C925E00FC8814 /* vorbisfile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vorbisfile.h; sourceTree = "<group>"; };
@@ -1627,6 +1630,7 @@
 		D3A9DCDE139C9B2300FC8814 /* EditorObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = EditorObject.cpp; path = ../../../zap/EditorObject.cpp; sourceTree = SOURCE_ROOT; };
 		D3A9DCDF139C9B2300FC8814 /* EditorObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = EditorObject.h; path = ../../../zap/EditorObject.h; sourceTree = SOURCE_ROOT; };
 		D3AAAE97139C0C6C006DA288 /* libalure.map */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = libalure.map; sourceTree = "<group>"; };
+		D3ACF1E613D4E61D0048E91A /* Compile Bitfighter Alone (Requires Frameworks)-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Compile Bitfighter Alone (Requires Frameworks)-Info.plist"; sourceTree = "<group>"; };
 		D3B2F665139C0AFC004AEE67 /* SimpleLine.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SimpleLine.cpp; path = ../../../zap/SimpleLine.cpp; sourceTree = SOURCE_ROOT; };
 		D3B2F666139C0AFC004AEE67 /* SimpleLine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SimpleLine.h; path = ../../../zap/SimpleLine.h; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
@@ -1833,6 +1837,7 @@
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
 				73EE611F13BA398D009931CD /* AudioToolbox.framework */,
+				D3ACF1E613D4E61D0048E91A /* Compile Bitfighter Alone (Requires Frameworks)-Info.plist */,
 			);
 			name = Bitfighter;
 			sourceTree = "<group>";
@@ -2410,6 +2415,12 @@
 		73D2F27E12E2D6D800EA5EBE /* zap */ = {
 			isa = PBXGroup;
 			children = (
+				D37210E913D4E4C1008E86F6 /* ScreenInfo.cpp */,
+				D37210EA13D4E4C1008E86F6 /* ScreenInfo.h */,
+				D37210E013D4E481008E86F6 /* Joystick.cpp */,
+				D37210E113D4E481008E86F6 /* Joystick.h */,
+				D37210E213D4E481008E86F6 /* JoystickRender.cpp */,
+				D37210E313D4E481008E86F6 /* JoystickRender.h */,
 				7385200C13ABFDDB00D88D2A /* SDLMain.h */,
 				7385200D13ABFDDB00D88D2A /* SDLMain.m */,
 				73851F6713ABF55000D88D2A /* Colors.cpp */,
@@ -2506,7 +2517,6 @@
 				73D2F2BE12E2D7E800EA5EBE /* Info.plist */,
 				73D2F2BF12E2D7E800EA5EBE /* IniFile.cpp */,
 				73D2F2C012E2D7E800EA5EBE /* IniFile.h */,
-				73D2F2C112E2D7E800EA5EBE /* input.cpp */,
 				73D2F2C212E2D7E800EA5EBE /* input.h */,
 				73D2F2C312E2D7E800EA5EBE /* item.cpp */,
 				73D2F2C412E2D7E800EA5EBE /* item.h */,
@@ -2545,7 +2555,6 @@
 				73D2F2E812E2D7E800EA5EBE /* moveObject.h */,
 				73D2F2E912E2D7E800EA5EBE /* oglconsole.c */,
 				73D2F2EA12E2D7E800EA5EBE /* oglconsole.h */,
-				73D2F2EB12E2D7E800EA5EBE /* osxInput.cpp */,
 				73D2F2EC12E2D7E800EA5EBE /* packedfont.c */,
 				73D2F2ED12E2D7E800EA5EBE /* playerInfo.cpp */,
 				73D2F2EE12E2D7E800EA5EBE /* playerInfo.h */,
@@ -3503,7 +3512,6 @@
 				73D2F37212E2D7E800EA5EBE /* HTFGame.cpp in Sources */,
 				73D2F37312E2D7E800EA5EBE /* huntersGame.cpp in Sources */,
 				73D2F37512E2D7E800EA5EBE /* IniFile.cpp in Sources */,
-				73D2F37612E2D7E800EA5EBE /* input.cpp in Sources */,
 				73D2F37712E2D7E800EA5EBE /* item.cpp in Sources */,
 				73D2F37812E2D7E800EA5EBE /* keyCode.cpp in Sources */,
 				73D2F37B12E2D7E800EA5EBE /* lineEditor.cpp in Sources */,
@@ -3522,7 +3530,6 @@
 				73D2F38A12E2D7E800EA5EBE /* move.cpp in Sources */,
 				73D2F38B12E2D7E800EA5EBE /* moveObject.cpp in Sources */,
 				73D2F38C12E2D7E800EA5EBE /* oglconsole.c in Sources */,
-				73D2F38D12E2D7E800EA5EBE /* osxInput.cpp in Sources */,
 				73D2F38E12E2D7E800EA5EBE /* packedfont.c in Sources */,
 				73D2F38F12E2D7E800EA5EBE /* playerInfo.cpp in Sources */,
 				73D2F39012E2D7E800EA5EBE /* projectile.cpp in Sources */,
@@ -3838,7 +3845,6 @@
 				73D2F3E512E2D7E800EA5EBE /* HTFGame.cpp in Sources */,
 				73D2F3E612E2D7E800EA5EBE /* huntersGame.cpp in Sources */,
 				73D2F3E812E2D7E800EA5EBE /* IniFile.cpp in Sources */,
-				73D2F3E912E2D7E800EA5EBE /* input.cpp in Sources */,
 				73D2F3EA12E2D7E800EA5EBE /* item.cpp in Sources */,
 				73D2F3EB12E2D7E800EA5EBE /* keyCode.cpp in Sources */,
 				73D2F3EE12E2D7E800EA5EBE /* lineEditor.cpp in Sources */,
@@ -3857,7 +3863,6 @@
 				73D2F3FD12E2D7E800EA5EBE /* move.cpp in Sources */,
 				73D2F3FE12E2D7E800EA5EBE /* moveObject.cpp in Sources */,
 				73D2F3FF12E2D7E800EA5EBE /* oglconsole.c in Sources */,
-				73D2F40012E2D7E800EA5EBE /* osxInput.cpp in Sources */,
 				73D2F40112E2D7E800EA5EBE /* packedfont.c in Sources */,
 				73D2F40212E2D7E800EA5EBE /* playerInfo.cpp in Sources */,
 				73D2F40312E2D7E800EA5EBE /* projectile.cpp in Sources */,
@@ -3922,6 +3927,9 @@
 				73851F7113ABF55000D88D2A /* Event.cpp in Sources */,
 				73851F7213ABF55000D88D2A /* OpenglUtils.cpp in Sources */,
 				7385200E13ABFDDB00D88D2A /* SDLMain.m in Sources */,
+				D37210E413D4E481008E86F6 /* Joystick.cpp in Sources */,
+				D37210E513D4E481008E86F6 /* JoystickRender.cpp in Sources */,
+				D37210EB13D4E4C1008E86F6 /* ScreenInfo.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
