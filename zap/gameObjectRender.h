@@ -126,6 +126,9 @@ extern void renderGoalZone(const Color *c, const Vector<Point> *outline, const V
 extern void renderNexus(const Vector<Point> *outline, const Vector<Point> *fill, Point centroid, F32 labelAngle, 
                         bool open, F32 glowFraction, F32 scaleFact = 1);
 
+extern void renderNexus(const Vector<Point> *outline, const Vector<Point> *fill, bool open, F32 glowFraction);
+
+
 
 extern void renderSlipZone(const Vector<Point> *bounds, const Vector<Point> *boundsFill, const Point &centroid);
 extern void renderPolygonLabel(const Point &centroid, F32 angle, F32 size, const char *text, F32 scaleFact = 1);
@@ -164,7 +167,9 @@ void renderAsteroid(const Point &pos, S32 design, F32 scaleFact, const Color *co
 void renderResourceItem(const Point &pos, F32 alpha = 1);
 void renderResourceItem(const Point &pos, F32 scaleFactor, const Color *color, F32 alpha);
 
-void renderSoccerBall(const Point &pos, F32 alpha = 1);
+void renderSoccerBall(const Point &pos, F32 size);
+void renderSoccerBall(const Point &pos);
+
 void renderTextItem(const Point &pos, const Point &dir, F32 size, const string &text, const Color *color);
 
 

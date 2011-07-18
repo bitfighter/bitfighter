@@ -746,6 +746,14 @@ void HuntersNexusObject::render()
 }
 
 
+void HuntersNexusObject::renderDock()
+{
+  renderNexus(getOutline(), getFill(), false, 0);
+}
+
+
+
+
 void HuntersNexusObject::renderEditor(F32 currentScale)
 {
    render();

@@ -962,22 +962,36 @@ void renderGoalZone(const Color *c, const Vector<Point> *outline, const Vector<P
 extern Color gNexusOpenColor;
 extern Color gNexusClosedColor;
 
-void renderNexus(const Vector<Point> *outline, const Vector<Point> *fill, Point centroid, F32 labelAngle, bool open, 
-                 F32 glowFraction, F32 scaleFact)
+static Color getNexusBaseColor(bool open, F32 glowFraction)
 {
-   Color baseColor;
+   Color color;
 
    if(open)
-      baseColor.interp(glowFraction, Colors::yellow, gNexusOpenColor);
+      color.interp(glowFraction, Colors::yellow, gNexusOpenColor);
    else
-      baseColor = gNexusClosedColor;
+      color = gNexusClosedColor;
+
+   return color;
+}
+
+
+void renderNexus(const Vector<Point> *outline, const Vector<Point> *fill, bool open, F32 glowFraction)
+{
+   Color baseColor = getNexusBaseColor(open, glowFraction);
 
    Color fillColor = Color(baseColor * (glowFraction * glowFraction  + (1 - glowFraction * glowFraction) * 0.5));
    Color outlineColor = fillColor * 0.7;
 
    renderPolygon(fill, outline, &fillColor, &outlineColor);
+}
 
-   glColor(baseColor);
+
+void renderNexus(const Vector<Point> *outline, const Vector<Point> *fill, Point centroid, F32 labelAngle, bool open, 
+                 F32 glowFraction, F32 scaleFact)
+{
+   renderNexus(outline, fill, open, glowFraction);
+
+   glColor(getNexusBaseColor(open, glowFraction));
    renderPolygonLabel(centroid, labelAngle, 25, "NEXUS", scaleFact);
 }
 
@@ -1496,10 +1510,16 @@ void renderResourceItem(const Point &pos, F32 alpha)
 }
 
 
-void renderSoccerBall(const Point &pos, F32 alpha)
+void renderSoccerBall(const Point &pos, F32 size)
 {
-   glColor4f(1, 1, 1, alpha);
-   drawCircle(pos, SoccerBallItem::SOCCER_BALL_RADIUS);
+   glColor(Colors::white);
+   drawCircle(pos, size);
+}
+
+
+void renderSoccerBall(const Point &pos)
+{
+   renderSoccerBall(pos, SoccerBallItem::SOCCER_BALL_RADIUS);
 }
 
 

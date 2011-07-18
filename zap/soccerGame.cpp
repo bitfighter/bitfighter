@@ -461,9 +461,12 @@ void SoccerBallItem::renderItem(Point pos)
 }
 
 
+// Not sure why VC++ wants this extern here... try removing it later; it's really not needed
+extern void renderSoccerBall(const Point &pos, F32 size);
+
 void SoccerBallItem::renderDock()
 {
-   renderItem(getVert(0));
+   renderSoccerBall(getVert(0), 7);
 }
 
 
