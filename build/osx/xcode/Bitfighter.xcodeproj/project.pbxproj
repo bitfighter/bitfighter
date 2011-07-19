@@ -1630,7 +1630,6 @@
 		D3A9DCDE139C9B2300FC8814 /* EditorObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = EditorObject.cpp; path = ../../../zap/EditorObject.cpp; sourceTree = SOURCE_ROOT; };
 		D3A9DCDF139C9B2300FC8814 /* EditorObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = EditorObject.h; path = ../../../zap/EditorObject.h; sourceTree = SOURCE_ROOT; };
 		D3AAAE97139C0C6C006DA288 /* libalure.map */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = libalure.map; sourceTree = "<group>"; };
-		D3ACF1E613D4E61D0048E91A /* Compile Bitfighter Alone (Requires Frameworks)-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Compile Bitfighter Alone (Requires Frameworks)-Info.plist"; sourceTree = "<group>"; };
 		D3B2F665139C0AFC004AEE67 /* SimpleLine.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SimpleLine.cpp; path = ../../../zap/SimpleLine.cpp; sourceTree = SOURCE_ROOT; };
 		D3B2F666139C0AFC004AEE67 /* SimpleLine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SimpleLine.h; path = ../../../zap/SimpleLine.h; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
@@ -1837,7 +1836,6 @@
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
 				73EE611F13BA398D009931CD /* AudioToolbox.framework */,
-				D3ACF1E613D4E61D0048E91A /* Compile Bitfighter Alone (Requires Frameworks)-Info.plist */,
 			);
 			name = Bitfighter;
 			sourceTree = "<group>";
@@ -4107,6 +4105,326 @@
 			};
 			name = Release;
 		};
+		730F1B5C13D52189004EE354 /* release x86_64 */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_VERSION = 4.2;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					../libspeex,
+					../openal,
+					../glut,
+					../tnl,
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				ONLY_ACTIVE_ARCH = NO;
+				PREBINDING = NO;
+				SDKROOT = macosx10.6;
+				VALID_ARCHS = x86_64;
+			};
+			name = "release x86_64";
+		};
+		730F1B5D13D52189004EE354 /* release x86_64 */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				COPY_PHASE_STRIP = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../../../lib\"",
+					"\"$(SRCROOT)/../tools\"",
+					"\"$(SRCROOT)/build/Release\"",
+					"\"$(SRCROOT)/build/Debug\"",
+				);
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = Bitfighter_Prefix.pch;
+				GCC_VERSION = 4.2;
+				HEADER_SEARCH_PATHS = (
+					../../../libspeex,
+					../../../libogg,
+					../../../libvorbis,
+					../../../boost,
+					../../../openal,
+					../../../glut,
+					../../../tnl,
+				);
+				INFOPLIST_FILE = "Bitfighter-Info.plist";
+				INSTALL_PATH = "$(HOME)/Applications";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../../../lib/Speex.framework/Versions/A\"",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				OTHER_CFLAGS = "-DTNL_ENABLE_LOGGING";
+				PRODUCT_NAME = Bitfighter;
+				SDKROOT = macosx10.6;
+				VALID_ARCHS = x86_64;
+			};
+			name = "release x86_64";
+		};
+		730F1B5E13D52189004EE354 /* release x86_64 */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_VERSION = A;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				HEADER_SEARCH_PATHS = (
+					"../../../openal/openal-soft",
+					"../../../openal/openal-soft/include",
+					"../../../openal/openal-soft/OpenAL32/Include",
+				);
+				INFOPLIST_FILE = "OpenAL-Soft-Info.plist";
+				INSTALL_PATH = "@executable_path/../Frameworks";
+				OTHER_CFLAGS = "-DAL_ALEXT_PROTOTYPES";
+				PREBINDING = NO;
+				PRODUCT_NAME = "OpenAL-Soft";
+				USE_HEADERMAP = NO;
+			};
+			name = "release x86_64";
+		};
+		730F1B5F13D52189004EE354 /* release x86_64 */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_VERSION = A;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GENERATE_MASTER_OBJECT_FILE = NO;
+				HEADER_SEARCH_PATHS = (
+					../../../lib,
+					../../../libogg,
+					../../../libvorbis,
+					../../../alure,
+				);
+				INFOPLIST_FILE = "ALURE-Info.plist";
+				INSTALL_PATH = "@executable_path/../Frameworks";
+				PREBINDING = NO;
+				PRODUCT_NAME = ALURE;
+				USE_HEADERMAP = NO;
+			};
+			name = "release x86_64";
+		};
+		730F1B6013D52189004EE354 /* release x86_64 */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_VERSION = A;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "";
+				HEADER_SEARCH_PATHS = "";
+				INFOPLIST_FILE = "luavec-Info.plist";
+				INSTALL_PATH = "@executable_path/../Frameworks";
+				PREBINDING = NO;
+				PRODUCT_NAME = luavec;
+			};
+			name = "release x86_64";
+		};
+		730F1B6113D52189004EE354 /* release x86_64 */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				FRAMEWORK_VERSION = A;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "";
+				HEADER_SEARCH_PATHS = ../libtomcrypt;
+				INFOPLIST_FILE = "libtomcrypt-Info.plist";
+				INSTALL_PATH = "@executable_path/../Frameworks";
+				OTHER_LDFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = libtomcrypt;
+				USER_HEADER_SEARCH_PATHS = "";
+			};
+			name = "release x86_64";
+		};
+		730F1B6213D52189004EE354 /* release x86_64 */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_SEARCH_PATHS = "";
+				FRAMEWORK_VERSION = A;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "";
+				HEADER_SEARCH_PATHS = "";
+				INFOPLIST_FILE = "tnl-Info.plist";
+				INSTALL_PATH = "@executable_path/../Frameworks";
+				OTHER_CFLAGS = "-DTNL_ENABLE_LOGGING";
+				PREBINDING = NO;
+				PRODUCT_NAME = tnl;
+			};
+			name = "release x86_64";
+		};
+		730F1B6313D52189004EE354 /* release x86_64 */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_VERSION = A;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				INFOPLIST_FILE = "Ogg-Info.plist";
+				INSTALL_PATH = "@executable_path/../Frameworks";
+				PREBINDING = NO;
+				PRODUCT_NAME = Ogg;
+			};
+			name = "release x86_64";
+		};
+		730F1B6413D52189004EE354 /* release x86_64 */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_VERSION = A;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					__MACOSX__,
+					FLOATING_POINT,
+					"EXPORT=__attribute__((visibility(\\\"default\\\")))",
+				);
+				HEADER_SEARCH_PATHS = "";
+				INFOPLIST_FILE = "Speex-Info.plist";
+				INSTALL_PATH = "@executable_path/../Frameworks";
+				PREBINDING = NO;
+				PRODUCT_NAME = Speex;
+			};
+			name = "release x86_64";
+		};
+		730F1B6513D52189004EE354 /* release x86_64 */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_VERSION = A;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				HEADER_SEARCH_PATHS = (
+					../../../libogg,
+					../../../libvorbis,
+				);
+				INFOPLIST_FILE = "Vorbis-Info.plist";
+				INSTALL_PATH = "@executable_path/../Frameworks";
+				PREBINDING = NO;
+				PRODUCT_NAME = Vorbis;
+			};
+			name = "release x86_64";
+		};
+		730F1B6613D52189004EE354 /* release x86_64 */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = Bitfighter_Prefix.pch;
+				HEADER_SEARCH_PATHS = (
+					../../../tnl,
+					../../../openal,
+					../../../glut,
+				);
+				INFOPLIST_FILE = "Bitfighterd-Info.plist";
+				INSTALL_PATH = "$(HOME)/Applications";
+				OTHER_CFLAGS = (
+					"-DTNL_ENABLE_LOGGING",
+					"-DZAP_DEDICATED",
+				);
+				PRODUCT_NAME = Bitfighterd;
+			};
+			name = "release x86_64";
+		};
+		730F1B6713D52189004EE354 /* release x86_64 */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = "Create Bitfighter Game Release";
+			};
+			name = "release x86_64";
+		};
+		730F1B6813D52189004EE354 /* release x86_64 */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = "Create Bitfighter Dedicated Server Release";
+			};
+			name = "release x86_64";
+		};
+		730F1B6913D52189004EE354 /* release x86_64 */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = "Compile Frameworks";
+			};
+			name = "release x86_64";
+		};
 		7375E29113690E1A00F71273 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -4298,6 +4616,324 @@
 				ZERO_LINK = NO;
 			};
 			name = Release;
+		};
+		73852FBE13D51A7500FA74BB /* Debug x86_64 */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_VERSION = 4.0;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					../libspeex,
+					../openal,
+					../glut,
+					../tnl,
+				);
+				ONLY_ACTIVE_ARCH = YES;
+				PREBINDING = NO;
+				SDKROOT = macosx10.4;
+			};
+			name = "Debug x86_64";
+		};
+		73852FBF13D51A7500FA74BB /* Debug x86_64 */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				COPY_PHASE_STRIP = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../../../lib\"",
+					"\"$(SRCROOT)/../tools\"",
+					"\"$(SRCROOT)/build/Release\"",
+					"\"$(SRCROOT)/build/Debug\"",
+				);
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = Bitfighter_Prefix.pch;
+				GCC_VERSION = 4.2;
+				HEADER_SEARCH_PATHS = (
+					../../../libspeex,
+					../../../libogg,
+					../../../libvorbis,
+					../../../boost,
+					../../../openal,
+					../../../glut,
+					../../../tnl,
+				);
+				INFOPLIST_FILE = "Bitfighter-Info.plist";
+				INSTALL_PATH = "$(HOME)/Applications";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../../../lib/Speex.framework/Versions/A\"",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				OTHER_CFLAGS = "-DTNL_ENABLE_LOGGING";
+				PRODUCT_NAME = Bitfighter;
+				SDKROOT = macosx10.6;
+				VALID_ARCHS = x86_64;
+			};
+			name = "Debug x86_64";
+		};
+		73852FC013D51A7500FA74BB /* Debug x86_64 */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_VERSION = A;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				HEADER_SEARCH_PATHS = (
+					"../../../openal/openal-soft",
+					"../../../openal/openal-soft/include",
+					"../../../openal/openal-soft/OpenAL32/Include",
+				);
+				INFOPLIST_FILE = "OpenAL-Soft-Info.plist";
+				INSTALL_PATH = "@executable_path/../Frameworks";
+				OTHER_CFLAGS = "-DAL_ALEXT_PROTOTYPES";
+				PREBINDING = NO;
+				PRODUCT_NAME = "OpenAL-Soft";
+				USE_HEADERMAP = NO;
+			};
+			name = "Debug x86_64";
+		};
+		73852FC113D51A7500FA74BB /* Debug x86_64 */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_VERSION = A;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GENERATE_MASTER_OBJECT_FILE = NO;
+				HEADER_SEARCH_PATHS = (
+					../../../lib,
+					../../../libogg,
+					../../../libvorbis,
+					../../../alure,
+				);
+				INFOPLIST_FILE = "ALURE-Info.plist";
+				INSTALL_PATH = "@executable_path/../Frameworks";
+				PREBINDING = NO;
+				PRODUCT_NAME = ALURE;
+				USE_HEADERMAP = NO;
+			};
+			name = "Debug x86_64";
+		};
+		73852FC213D51A7500FA74BB /* Debug x86_64 */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_VERSION = A;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "";
+				HEADER_SEARCH_PATHS = "";
+				INFOPLIST_FILE = "luavec-Info.plist";
+				INSTALL_PATH = "@executable_path/../Frameworks";
+				PREBINDING = NO;
+				PRODUCT_NAME = luavec;
+			};
+			name = "Debug x86_64";
+		};
+		73852FC313D51A7500FA74BB /* Debug x86_64 */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				FRAMEWORK_VERSION = A;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "";
+				HEADER_SEARCH_PATHS = ../libtomcrypt;
+				INFOPLIST_FILE = "libtomcrypt-Info.plist";
+				INSTALL_PATH = "@executable_path/../Frameworks";
+				OTHER_LDFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = libtomcrypt;
+				USER_HEADER_SEARCH_PATHS = "";
+			};
+			name = "Debug x86_64";
+		};
+		73852FC413D51A7500FA74BB /* Debug x86_64 */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_SEARCH_PATHS = "";
+				FRAMEWORK_VERSION = A;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "";
+				HEADER_SEARCH_PATHS = "";
+				INFOPLIST_FILE = "tnl-Info.plist";
+				INSTALL_PATH = "@executable_path/../Frameworks";
+				OTHER_CFLAGS = "-DTNL_ENABLE_LOGGING";
+				PREBINDING = NO;
+				PRODUCT_NAME = tnl;
+			};
+			name = "Debug x86_64";
+		};
+		73852FC513D51A7500FA74BB /* Debug x86_64 */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_VERSION = A;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				INFOPLIST_FILE = "Ogg-Info.plist";
+				INSTALL_PATH = "@executable_path/../Frameworks";
+				PREBINDING = NO;
+				PRODUCT_NAME = Ogg;
+			};
+			name = "Debug x86_64";
+		};
+		73852FC613D51A7500FA74BB /* Debug x86_64 */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_VERSION = A;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					__MACOSX__,
+					FLOATING_POINT,
+					"EXPORT=__attribute__((visibility(\\\"default\\\")))",
+				);
+				HEADER_SEARCH_PATHS = "";
+				INFOPLIST_FILE = "Speex-Info.plist";
+				INSTALL_PATH = "@executable_path/../Frameworks";
+				PREBINDING = NO;
+				PRODUCT_NAME = Speex;
+			};
+			name = "Debug x86_64";
+		};
+		73852FC713D51A7500FA74BB /* Debug x86_64 */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_VERSION = A;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				HEADER_SEARCH_PATHS = (
+					../../../libogg,
+					../../../libvorbis,
+				);
+				INFOPLIST_FILE = "Vorbis-Info.plist";
+				INSTALL_PATH = "@executable_path/../Frameworks";
+				PREBINDING = NO;
+				PRODUCT_NAME = Vorbis;
+			};
+			name = "Debug x86_64";
+		};
+		73852FC813D51A7500FA74BB /* Debug x86_64 */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = Bitfighter_Prefix.pch;
+				HEADER_SEARCH_PATHS = (
+					../../../tnl,
+					../../../openal,
+					../../../glut,
+				);
+				INFOPLIST_FILE = "Bitfighterd-Info.plist";
+				INSTALL_PATH = "$(HOME)/Applications";
+				OTHER_CFLAGS = (
+					"-DTNL_ENABLE_LOGGING",
+					"-DZAP_DEDICATED",
+				);
+				PRODUCT_NAME = Bitfighterd;
+			};
+			name = "Debug x86_64";
+		};
+		73852FC913D51A7500FA74BB /* Debug x86_64 */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = "Create Bitfighter Game Release";
+			};
+			name = "Debug x86_64";
+		};
+		73852FCA13D51A7500FA74BB /* Debug x86_64 */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = "Create Bitfighter Dedicated Server Release";
+			};
+			name = "Debug x86_64";
+		};
+		73852FCB13D51A7500FA74BB /* Debug x86_64 */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = "Compile Frameworks";
+			};
+			name = "Debug x86_64";
 		};
 		7386B9FD136FE3010094A660 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -4673,126 +5309,154 @@
 			buildConfigurations = (
 				033F6AE412D190F30023D4C6 /* Debug */,
 				033F6AE512D190F30023D4C6 /* Release */,
+				73852FCA13D51A7500FA74BB /* Debug x86_64 */,
+				730F1B6813D52189004EE354 /* release x86_64 */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 		033F6B0512D192160023D4C6 /* Build configuration list for PBXAggregateTarget "Compile Frameworks Only" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				033F6AFA12D191B40023D4C6 /* Debug */,
 				033F6AFB12D191B40023D4C6 /* Release */,
+				73852FCB13D51A7500FA74BB /* Debug x86_64 */,
+				730F1B6913D52189004EE354 /* release x86_64 */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 		03AD17D912CE2BC700274A25 /* Build configuration list for PBXAggregateTarget "Create Bitfighter Game Release" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				03AD17D012CE2BBF00274A25 /* Debug */,
 				03AD17D112CE2BBF00274A25 /* Release */,
+				73852FC913D51A7500FA74BB /* Debug x86_64 */,
+				730F1B6713D52189004EE354 /* release x86_64 */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 		7375E29813690E4900F71273 /* Build configuration list for PBXNativeTarget "luavec" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				7375E29113690E1A00F71273 /* Debug */,
 				7375E29213690E1A00F71273 /* Release */,
+				73852FC213D51A7500FA74BB /* Debug x86_64 */,
+				730F1B6013D52189004EE354 /* release x86_64 */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 		737826AE12960DDF007333BE /* Build configuration list for PBXNativeTarget "Bitfighterd" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				737826AF12960DDF007333BE /* Debug */,
 				737826B012960DDF007333BE /* Release */,
+				73852FC813D51A7500FA74BB /* Debug x86_64 */,
+				730F1B6613D52189004EE354 /* release x86_64 */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 		737CE47312904ED100D732B7 /* Build configuration list for PBXNativeTarget "libtomcrypt" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				737CE46D12904E9E00D732B7 /* Debug */,
 				737CE46E12904E9E00D732B7 /* Release */,
+				73852FC313D51A7500FA74BB /* Debug x86_64 */,
+				730F1B6113D52189004EE354 /* release x86_64 */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 		737CE6211290553D00D732B7 /* Build configuration list for PBXNativeTarget "tnl" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				737CE61F1290553D00D732B7 /* Debug */,
 				737CE6201290553D00D732B7 /* Release */,
+				73852FC413D51A7500FA74BB /* Debug x86_64 */,
+				730F1B6213D52189004EE354 /* release x86_64 */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 		7386B9FF136FE3010094A660 /* Build configuration list for PBXNativeTarget "ALURE" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				7386B9FD136FE3010094A660 /* Debug */,
 				7386B9FE136FE3010094A660 /* Release */,
+				73852FC113D51A7500FA74BB /* Debug x86_64 */,
+				730F1B5F13D52189004EE354 /* release x86_64 */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 		7388F023139D5993003C6BB0 /* Build configuration list for PBXNativeTarget "Ogg" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				7388F021139D5993003C6BB0 /* Debug */,
 				7388F022139D5993003C6BB0 /* Release */,
+				73852FC513D51A7500FA74BB /* Debug x86_64 */,
+				730F1B6313D52189004EE354 /* release x86_64 */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 		7388F04B139D5A06003C6BB0 /* Build configuration list for PBXNativeTarget "Speex" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				7388F049139D5A06003C6BB0 /* Debug */,
 				7388F04A139D5A06003C6BB0 /* Release */,
+				73852FC613D51A7500FA74BB /* Debug x86_64 */,
+				730F1B6413D52189004EE354 /* release x86_64 */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 		7388F05E139D5A29003C6BB0 /* Build configuration list for PBXNativeTarget "Vorbis" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				7388F05C139D5A29003C6BB0 /* Debug */,
 				7388F05D139D5A29003C6BB0 /* Release */,
+				73852FC713D51A7500FA74BB /* Debug x86_64 */,
+				730F1B6513D52189004EE354 /* release x86_64 */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 		73B0FB5F1370AA170019AE4E /* Build configuration list for PBXNativeTarget "OpenAL-Soft" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				73B0FB5D1370A9F90019AE4E /* Debug */,
 				73B0FB5E1370A9F90019AE4E /* Release */,
+				73852FC013D51A7500FA74BB /* Debug x86_64 */,
+				730F1B5E13D52189004EE354 /* release x86_64 */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 		C01FCF4A08A954540054247B /* Build configuration list for PBXNativeTarget "Bitfighter" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				C01FCF4B08A954540054247B /* Debug */,
 				C01FCF4C08A954540054247B /* Release */,
+				73852FBF13D51A7500FA74BB /* Debug x86_64 */,
+				730F1B5D13D52189004EE354 /* release x86_64 */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 		C01FCF4E08A954540054247B /* Build configuration list for PBXProject "Bitfighter" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				C01FCF4F08A954540054247B /* Debug */,
 				C01FCF5008A954540054247B /* Release */,
+				73852FBE13D51A7500FA74BB /* Debug x86_64 */,
+				730F1B5C13D52189004EE354 /* release x86_64 */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
 	};
