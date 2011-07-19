@@ -130,6 +130,8 @@ public:
    void scale(const Point &center, F32 scale);
 
    string toString(F32 gridSize) const;
+
+   void setWidth(S32 width);
 };
 
 

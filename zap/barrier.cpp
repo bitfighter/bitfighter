@@ -446,7 +446,7 @@ void WallItem::processEndPoints()
 
 string WallItem::toString(F32 gridSize) const
 {
-   return "BarrierMaker " + itos(S32(F32(mWidth))) + " " + geomToString(gridSize);
+   return "BarrierMaker " + itos(getWidth()) + " " + geomToString(gridSize);
 }
 
 
@@ -455,8 +455,15 @@ void WallItem::scale(const Point &center, F32 scale)
    EditorObject::scale(center, scale);
 
    // Adjust the wall thickness
-   mWidth = min(max(mWidth * scale, static_cast<float>(LineItem::MIN_LINE_WIDTH)), static_cast<float>(LineItem::MAX_LINE_WIDTH));
+   setWidth(getWidth() * scale);
 }
+
+
+void WallItem::setWidth(S32 width) 
+{         
+   LineItem::setWidth(width, Barrier::MIN_BARRIER_WIDTH, Barrier::MAX_BARRIER_WIDTH);     // Why do we need LineItem:: prefix here???
+}
+
 
 
 ////////////////////////////////////////
@@ -707,11 +714,15 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(DatabaseObject *dbObject
    }
    else     // Tranditional wall
    {
+      WallItem *wallItem = dynamic_cast<WallItem *>(wall);        
+
+      TNLAssert(wallItem, "Bad cast -- expected an WallItem!");
+
       // Create a series of WallSegments, each representing a sequential pair of vertices on our wall
       for(S32 i = 0; i < wall->extendedEndPoints.size(); i += 2)
       {
-         WallSegment *newSegment = new WallSegment(mGridDatabase, wall->extendedEndPoints[i], wall->extendedEndPoints[i+1], 
-                                                   wall->getWidth(), wall->getSerialNumber());    // Create the segment
+         WallSegment *newSegment = new WallSegment(mGridDatabase, wallItem->extendedEndPoints[i], wallItem->extendedEndPoints[i+1], 
+                                                   wallItem->getWidth(), wallItem->getSerialNumber());    // Create the segment
          mWallSegments.push_back(newSegment);          // And add it to our master segment list
       }
    }

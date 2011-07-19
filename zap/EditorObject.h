@@ -83,9 +83,6 @@ protected:
    Color getTeamColor(S32 teamId);
    Color getDrawColor();
 
-   S32 mWidth;    // Walls, lines only
-
-
 public:
    EditorObject(GameObjectType objectType = UnknownType);      // Constructor
    virtual ~EditorObject();                                    // Virtual destructor
@@ -151,13 +148,6 @@ public:
 
    // TODO: Get rid of this ==> most of this code already in polygon
    void initializePolyGeom();     // Once we have our points, do some geom preprocessing ==> only for polygons
-
-   //// For walls only
-   void decreaseWidth(S32 amt);  // Wall only
-   void increaseWidth(S32 amt);  // Wall only
-   void setWidth(S32 width);
-   S32 getWidth() const { return mWidth; }
-   ////
 
    void moveTo(const Point &pos, S32 snapVertex = 0);    // Move object to location, specifying (optional) vertex to be positioned at pos
    void offset(const Point &offset);                     // Offset object by a certain amount

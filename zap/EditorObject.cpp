@@ -453,55 +453,6 @@ void EditorObject::offset(const Point &offset)
 }
 
 
-void EditorObject::increaseWidth(S32 amt)
-{
-   S32 width = getWidth();
-   width += amt - (S32) width % amt;    // Handles rounding
-
-   setWidth(width);
-   onGeomChanged();
-}
-
-
-void EditorObject::decreaseWidth(S32 amt)
-{
-   S32 width = getWidth();
-   width -= ((S32) width % amt) ? (S32) width % amt : amt;      // Dirty, ugly thing
-
-   setWidth(width);
-   onGeomChanged();
-}
-
-
-void EditorObject::setWidth(S32 width) 
-{         
-   // Bounds check
-   if(width < Barrier::MIN_BARRIER_WIDTH)
-      width = Barrier::MIN_BARRIER_WIDTH;
-   else if(width > Barrier::MAX_BARRIER_WIDTH)
-      width = Barrier::MAX_BARRIER_WIDTH; 
-
-   mWidth = width; 
-}
-
-
-//// Radius of item in editor -- TODO: Push down to objects
-//S32 EditorObject::getEditorRadius(F32 scale)
-//{
-//   if(getObjectTypeMask() & TestItemType)
-//      return TestItem::TEST_ITEM_RADIUS;
-//   else if(getObjectTypeMask() & ResourceItemType)
-//      return ResourceItem::RESOURCE_ITEM_RADIUS;
-//   else if(getObjectTypeMask() & AsteroidType)
-//      return S32((F32)Asteroid::ASTEROID_RADIUS * 0.75f);
-//   else if(getObjectTypeMask() & SoccerBallItemType)
-//      return SoccerBallItem::SOCCER_BALL_RADIUS;
-//   else if(getObjectTypeMask() & TurretType && renderFull(getObjectTypeMask(), scale, mDockItem, mSnapped))
-//      return 25;
-//   else return NONE;    // Use default
-//}
-
-
 Point EditorObject::getEditorSelectionOffset(F32 scale)
 {
    return Point(0,0);     // No offset for most items

@@ -470,4 +470,39 @@ void LineItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 }
 
 
+void LineItem::setWidth(S32 width, S32 min, S32 max)
+{
+   // Bounds check
+   if(width < min)
+      width = min;
+   else if(width > max)
+      width = max; 
+
+   mWidth = width; 
+}
+
+
+void LineItem::setWidth(S32 width) 
+{         
+   setWidth(width, LineItem::MIN_LINE_WIDTH, LineItem::MAX_LINE_WIDTH);
+}
+
+
+void LineItem::changeWidth(S32 amt)
+{
+   S32 width = mWidth;
+
+   if(amt > 0)
+      width += amt - (S32) width % amt;    // Handles rounding
+   else
+   {
+      amt *= -1;
+      width -= ((S32) width % amt) ? (S32) width % amt : amt;      // Dirty, ugly thing
+   }
+
+   setWidth(width);
+   onGeomChanged();
+}
+
+
 };

@@ -131,6 +131,8 @@ private:
    typedef GameObject Parent;
    Vector<Point> mRenderPoints;     // Precomputed points used for rendering linework
 
+   S32 mWidth;    
+
 public:
    LineItem();                      // Constructor
    LineItem *clone() const;
@@ -154,6 +156,13 @@ public:
    // Editor methods
    string toString(F32 gridSize) const;
    void renderEditor(F32 currentScale);
+
+   // Thickness-related
+   virtual void setWidth(S32 width);
+   void setWidth(S32 width, S32 min, S32 max);
+   S32 getWidth() const { return mWidth; }
+   void changeWidth(S32 amt);  
+
 
    // Some properties about the item that will be needed in the editor
    const char *getEditorHelpString() { return "Draws a line on the map.  Visible only to team, or to all if neutral."; }  

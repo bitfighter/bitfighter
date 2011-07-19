@@ -2703,7 +2703,6 @@ bool EditorGame::processPseudoItem(S32 argc, const char **argv)
          if(!stricmp(argv[0], "BarrierMakerS"))
          {
             logprintf(LogConsumer::LogWarning, "BarrierMakerS has been deprecated.  Please use PolyWall instead.");
-            newObject->setWidth(F32(atof(argv[1])));
 
             skipArgs = 1;
          }

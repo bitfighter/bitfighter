@@ -320,8 +320,7 @@ public:
    void teamsHaveChanged();            // Another team validation routine, used when all items have valid teams, but the teams themselves change
    void makeSureThereIsAtLeastOneTeam();
 
-   void incBarrierWidth(S32 amt);      // Increase selected wall thickness by amt
-   void decBarrierWidth(S32 amt);      // Decrease selected wall thickness by amt
+   void changeBarrierWidth(S32 amt);   // Increase selected wall thickness by amt
 
    bool saveLevel(bool showFailMessages, bool showSuccessMessages, bool autosave = false);
    void testLevel();
