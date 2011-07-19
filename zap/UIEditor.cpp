@@ -123,6 +123,13 @@ void backToMainMenuCallback()
 
 extern EditorGame *gEditorGame;
 
+// We can do better than this!
+static Game *getGame() 
+{
+   return gEditorGame;
+}
+
+
 // Constructor
 EditorUserInterface::EditorUserInterface()     // false --> not using game coords
 {
@@ -150,7 +157,7 @@ EditorUserInterface::EditorUserInterface()     // false --> not using game coord
 // Encapsulate some ugliness
 static const Vector<EditorObject *> *getObjectList()
 {
-   return ((EditorObjectDatabase *)gEditorGame->getGridDatabase().get())->getObjectList();
+   return ((EditorObjectDatabase *)getGame()->getGridDatabase().get())->getObjectList();
 }
 
 
@@ -165,7 +172,7 @@ void EditorUserInterface::addToDock(EditorObject* object)
 
 void EditorUserInterface::addDockObject(EditorObject *object, F32 xPos, F32 yPos)
 {
-   object->addToDock(gEditorGame, Point(xPos, yPos));       
+   object->addToDock(getGame(), Point(xPos, yPos));       
    object->setTeam(mCurrentTeam);
 }
 
@@ -202,7 +209,7 @@ void EditorUserInterface::populateDock()
       addDockObject(new TextItem(), xPos, yPos);
       yPos += spacer;
 
-      if(gEditorGame->getGameType()->getGameType() == GameType::SoccerGame)
+      if(getGame()->getGameType()->getGameType() == GameType::SoccerGame)
          addDockObject(new SoccerBallItem(), xPos, yPos);
       else
          addDockObject(new FlagItem(), xPos, yPos);
@@ -229,7 +236,7 @@ void EditorUserInterface::populateDock()
       addDockObject(new LoadoutZone(), xPos, yPos);
       yPos += 25;
 
-      if(gEditorGame->getGameType()->getGameType() == GameType::NexusGame)
+      if(getGame()->getGameType()->getGameType() == GameType::NexusGame)
       {
          addDockObject(new HuntersNexusObject(), xPos, yPos);
          yPos += 25;
@@ -251,7 +258,7 @@ static Vector<DatabaseObject *> fillVector;     // Reusable container
 // Destructor -- unwind things in an orderly fashion
 EditorUserInterface::~EditorUserInterface()
 {
-   clearDatabase(gEditorGame->getGridDatabase().get());
+   clearDatabase(getGame()->getGridDatabase().get());
 
    mDockItems.clear();
    mLevelGenItems.clear();
@@ -320,7 +327,7 @@ void renderVertex(VertexRenderStyles style, const Point &v, S32 number)
 
 inline F32 getGridSize()
 {
-   return gEditorGame->getGridSize();
+   return getGame()->getGridSize();
 }
 
 
@@ -395,7 +402,7 @@ void EditorUserInterface::deleteUndoState()
 
 void EditorUserInterface::restoreItems(const Vector<string> &from)
 {
-   GridDatabase *db = gEditorGame->getGridDatabase().get();
+   GridDatabase *db = getGame()->getGridDatabase().get();
    clearDatabase(db);
 
    Vector<string> args;
@@ -416,7 +423,7 @@ void EditorUserInterface::restoreItems(const Vector<string> &from)
          args_count++;
       }
 
-      gEditorGame->processLevelLoadLine(args_count, 0, args_char);      // TODO: Id is wrong; shouldn't be 0
+      getGame()->processLevelLoadLine(args_count, 0, args_char);      // TODO: Id is wrong; shouldn't be 0
    }
 }
    
@@ -442,7 +449,7 @@ void EditorUserInterface::saveUndoState()
 
    //copyItems(getObjectList(), mUndoItems[mLastUndoIndex % UNDO_STATES]);
 
-   boost::shared_ptr<EditorObjectDatabase> eod = dynamic_pointer_cast<EditorObjectDatabase>(gEditorGame->getGridDatabase());
+   boost::shared_ptr<EditorObjectDatabase> eod = dynamic_pointer_cast<EditorObjectDatabase>(getGame()->getGridDatabase());
    TNLAssert(eod, "bad!");
 
    EditorObjectDatabase *newDB = eod.get();     
@@ -488,7 +495,7 @@ void EditorUserInterface::undo(bool addToRedoStack)
 
    mLastUndoIndex--;
 
-   gEditorGame->setGridDatabase(boost::dynamic_pointer_cast<GridDatabase>(mUndoItems[mLastUndoIndex % UNDO_STATES]));
+   (dynamic_cast<EditorGame *>(getGame()))->setGridDatabase(boost::dynamic_pointer_cast<GridDatabase>(mUndoItems[mLastUndoIndex % UNDO_STATES]));
 
    //restoreItems(mUndoItems[mLastUndoIndex % UNDO_STATES]);
 
@@ -519,19 +526,12 @@ void EditorUserInterface::redo()
 
       mLastUndoIndex++;
       //restoreItems(mUndoItems[mLastUndoIndex % UNDO_STATES]);   
-      gEditorGame->setGridDatabase(mUndoItems[mLastUndoIndex % UNDO_STATES]);
+      (dynamic_cast<EditorGame *>(getGame()))->setGridDatabase(mUndoItems[mLastUndoIndex % UNDO_STATES]);
       TNLAssert(mUndoItems[mLastUndoIndex % UNDO_STATES], "null!");
 
       rebuildEverything();
       validateLevel();
    }
-}
-
-
-// We can do better than this!
-static Game *getGame() 
-{
-   return gEditorGame;
 }
 
 
@@ -552,7 +552,7 @@ void EditorUserInterface::resnapAllEngineeredItems()
 {
    fillVector.clear();
 
-   gEditorGame->getGridDatabase()->findObjects(EngineeredType, fillVector);
+   getGame()->getGridDatabase()->findObjects(EngineeredType, fillVector);
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
@@ -622,7 +622,7 @@ void EditorUserInterface::loadLevel()
    Game *game = getGame();
 
    // Initialize
-   clearDatabase(gEditorGame->getGridDatabase().get());
+   clearDatabase(getGame()->getGridDatabase().get());
    game->clearTeams();
    mSnapObject = NULL;
    mSnapVertexIndex = NONE;
@@ -701,7 +701,7 @@ void EditorUserInterface::copyScriptItemsToEditor()
    saveUndoState();
 
    for(S32 i = 0; i < mLevelGenItems.size(); i++)
-      mLevelGenItems[i]->addToGame(gEditorGame);
+      mLevelGenItems[i]->addToGame(getGame());
       
    mLevelGenItems.clear();    // Don't want to delete these objects... we just handed them off to the database!
 
@@ -732,7 +732,7 @@ void EditorUserInterface::runLevelGenScript()
    runScript(scriptName, scriptArgs);
 
    // Reset the target
-   mLoadTarget = (EditorObjectDatabase *)gEditorGame->getGridDatabase().get();
+   mLoadTarget = (EditorObjectDatabase *)getGame()->getGridDatabase().get();
 }
 
 
@@ -750,7 +750,7 @@ void EditorUserInterface::runScript(const string &scriptName, const Vector<strin
 
    // TODO: Uncomment the following, make it work again (commented out during refactor of editor load process)
    // Load the items
-   //LuaLevelGenerator(name, args, gEditorGame->getGridSize(), getGridDatabase(), this, gConsole);
+   //LuaLevelGenerator(name, args, getGame()->getGridSize(), getGridDatabase(), this, gConsole);
    
    // Process new items
    // Not sure about all this... may need to test
@@ -800,9 +800,11 @@ void EditorUserInterface::validateLevel()
 
    for(S32 i = 0; i < teamCount; i++)      // Initialize vector
       foundSpawn[i] = false;
+
+   GridDatabase *gridDatabase = getGame()->getGridDatabase().get();
       
    fillVector.clear();
-   gEditorGame->getGridDatabase()->findObjects(ShipSpawnType, fillVector);
+   gridDatabase->findObjects(ShipSpawnType, fillVector);
    for(S32 i = 0; i < fillVector.size(); i++)
    {
       Spawn *spawn = dynamic_cast<Spawn *>(fillVector[i]);
@@ -815,17 +817,17 @@ void EditorUserInterface::validateLevel()
    }
 
    fillVector.clear();
-   gEditorGame->getGridDatabase()->findObjects(SoccerBallItemType, fillVector);
+   gridDatabase->findObjects(SoccerBallItemType, fillVector);
    if(fillVector.size() > 0)
       foundSoccerBall = true;
 
    fillVector.clear();
-   gEditorGame->getGridDatabase()->findObjects(NexusType, fillVector);
+   gridDatabase->findObjects(NexusType, fillVector);
    if(fillVector.size() > 0)
       foundNexus = true;
 
    fillVector.clear();
-   gEditorGame->getGridDatabase()->findObjects(FlagType, fillVector);
+   gridDatabase->findObjects(FlagType, fillVector);
    for (S32 i = 0; i < fillVector.size(); i++)
    {
       foundFlags = true;
@@ -838,7 +840,7 @@ void EditorUserInterface::validateLevel()
    }
 
    fillVector.clear();
-   gEditorGame->getGridDatabase()->findObjects(FlagSpawnType, fillVector);
+   gridDatabase->findObjects(FlagSpawnType, fillVector);
    for(S32 i = 0; i < fillVector.size(); i++)
    {
       FlagSpawn *flagSpawn = dynamic_cast<FlagSpawn *>(fillVector[i]);
@@ -851,21 +853,23 @@ void EditorUserInterface::validateLevel()
 
    // "Unversal errors" -- levelgens can't (yet) change gametype
 
+   GameType *gameType = getGame()->getGameType();
+
    // Check for soccer ball in a a game other than SoccerGameType. Doesn't crash no more.
-   if(foundSoccerBall && gEditorGame->getGameType()->getGameType() != GameType::SoccerGame)
+   if(foundSoccerBall && gameType->getGameType() != GameType::SoccerGame)
       mLevelWarnings.push_back("WARNING: Soccer ball can only be used in soccer game.");
 
    // Check for the nexus object in a non-hunter game. Does not affect gameplay in non-hunter game.
-   if(foundNexus && gEditorGame->getGameType()->getGameType() != GameType::NexusGame)
+   if(foundNexus && gameType->getGameType() != GameType::NexusGame)
       mLevelWarnings.push_back("WARNING: Nexus object can only be used in Hunters game.");
 
    // Check for missing nexus object in a hunter game.  This cause mucho dolor!
-   if(!foundNexus && gEditorGame->getGameType()->getGameType() == GameType::NexusGame)
+   if(!foundNexus && gameType->getGameType() == GameType::NexusGame)
       mLevelErrorMsgs.push_back("ERROR: Nexus game must have a Nexus.");
 
-   if(foundFlags && !gEditorGame->getGameType()->isFlagGame())
+   if(foundFlags && !gameType->isFlagGame())
       mLevelWarnings.push_back("WARNING: This game type does not use flags.");
-   else if(foundTeamFlags && !gEditorGame->getGameType()->isTeamFlagGame())
+   else if(foundTeamFlags && !gameType->isTeamFlagGame())
       mLevelWarnings.push_back("WARNING: This game type does not use team flags.");
 
    // Check for team flag spawns on games with no team flags
@@ -905,7 +909,7 @@ void EditorUserInterface::validateLevel()
 void EditorUserInterface::validateTeams()
 {
    fillVector.clear();
-   gEditorGame->getGridDatabase()->findObjects(fillVector);
+   getGame()->getGridDatabase()->findObjects(fillVector);
    
    validateTeams(fillVector);
 }
@@ -1679,7 +1683,7 @@ void EditorUserInterface::render()
    else  
    {
       fillVector.clear();
-      gEditorGame->getGridDatabase()->findObjects(BarrierType | LineType, fillVector);
+      getGame()->getGridDatabase()->findObjects(BarrierType | LineType, fillVector);
 
       for(S32 i = 0; i < fillVector.size(); i++)
       {
@@ -1864,26 +1868,8 @@ void EditorUserInterface::copySelection()
    {
       if(objList->get(i)->isSelected())
       {
-         ////////////////////////
-
-   
-   //// Offset lets us drag an item out from the dock by an amount offset from the 0th vertex.  This makes placement seem more natural.
-   //Point pos = snapPoint(convertCanvasToLevelCoord(mMousePos), true) - item->getInitialPlacementOffset(getGridSize());
-   //item->moveTo(pos);
-   //   
-
-
-   //mDraggingDockItem = NONE;    // Because now we're dragging a real item
-   //validateLevel();             // Check level for errors
-
-
-         ////////////////////////
          EditorObject *newItem =  objList->get(i)->newCopy();   
          newItem->setSelected(false);
-         //newItem->addToGame();
-         
-
-         //newItem->addToGame(gEditorGame);
 
          if(!alreadyCleared)  // Make sure we only purge the existing clipboard if we'll be putting someting new there
          {
@@ -1924,7 +1910,6 @@ void EditorUserInterface::pasteSelection()
       EditorObject *newObject = mClipboard[i]->newCopy();
       newObject->assignNewSerialNumber();
       newObject->setExtent();
-      //newObject->addToGame(gEditorGame);
       newObject->addToDatabase();
 
       newObject->setSelected(true);
@@ -2679,7 +2664,7 @@ void EditorUserInterface::splitBarrier()
                obj->onGeomChanged();
                newItem->onGeomChanged();
                //mItems.push_back(boost::shared_ptr<EditorObject>(newItem));
-               newItem->addToGame(gEditorGame);
+               newItem->addToGame(getGame());
 
                goto done2;                         // Yes, gotos are naughty, but they just work so well sometimes...
             }
@@ -3093,7 +3078,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
             delete mNewItem;
          else
          {
-            mNewItem->addToGame(gEditorGame);
+            mNewItem->addToGame(getGame());
             mNewItem->onGeomChanged();          // Walls need to be added to editor BEFORE onGeomChanged() is run!
          }
 
@@ -3501,9 +3486,9 @@ void EditorUserInterface::onKeyUp(KeyCode keyCode)
             fillVector.clear();
 
             if(mShowMode == ShowWallsOnly)
-               gEditorGame->getGridDatabase()->findObjects(BarrierType | PolyWallType, fillVector);
+               getGame()->getGridDatabase()->findObjects(BarrierType | PolyWallType, fillVector);
             else
-               gEditorGame->getGridDatabase()->findObjects(fillVector);
+               getGame()->getGridDatabase()->findObjects(fillVector);
 
 
             for(S32 i = 0; i < fillVector.size(); i++)
@@ -3746,7 +3731,7 @@ extern CmdLineSettings gCmdLineSettings;
 void EditorUserInterface::testLevel()
 {
    bool gameTypeError = false;
-   if(!gEditorGame->getGameType())     // Not sure this could really happen anymore...  TODO: Make sure we always have a valid gametype
+   if(!getGame()->getGameType())     // Not sure this could really happen anymore...  TODO: Make sure we always have a valid gametype
       gameTypeError = true;
 
    // With all the map loading error fixes, game should never crash!
