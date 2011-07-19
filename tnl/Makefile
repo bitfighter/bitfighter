@@ -2,7 +2,7 @@
 # From Bitfigher (http://bitfighter.org)
 
 OPTIMIZE=-O2
-DEBUG=-g
+DEBUG=-g -DTNL_DEBUG
 CC=g++ $(DEBUG) -DTNL_ENABLE_LOGGING -I../libtomcrypt/src/headers -I../libtomcrypt $(OPTIMIZE)
 
 
