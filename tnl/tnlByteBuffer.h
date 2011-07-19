@@ -77,7 +77,7 @@ public:
    }
 
    /// Copy constructor!
-   ByteBuffer(const ByteBuffer &theBuffer)
+   ByteBuffer(const ByteBuffer &theBuffer) : Object(theBuffer)
    {
       mBufSize = theBuffer.mBufSize;
       mDataPtr = theBuffer.mDataPtr;

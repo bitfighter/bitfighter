@@ -65,60 +65,6 @@ public:
    ByteBufferPtr decompressBuffer(ByteBufferRef compressedBuffer);
 };
 
-/// The LPC10VoiceEncoder class implements the HawkVoice LPC10 codec
-/// compressor.
-class LPC10VoiceEncoder : public VoiceEncoder
-{
-   void *encoderState;
-   U32 getSamplesPerFrame();
-   U32 getMaxCompressedFrameSize();
-   U32 compressFrame(S16 *samplePtr, U8 *outputPtr);
-public:
-   LPC10VoiceEncoder();
-   ~LPC10VoiceEncoder();
-};
-
-/// The LPC10VoiceDecoder class implements the HawkVoice LPC10 codec
-/// decompressor.
-class LPC10VoiceDecoder : public VoiceDecoder
-{
-   void *decoderState;
-   U32 getSamplesPerFrame();
-   U32 getAvgCompressedFrameSize();
-
-   U32 decompressFrame(S16 *framePtr, U8 *inputPtr, U32 inSize);
-public:
-   LPC10VoiceDecoder();
-   ~LPC10VoiceDecoder();
-};
-
-/// The GSMVoiceEncoder class implements the HawkVoice GSM codec
-/// compressor.
-class GSMVoiceEncoder : public VoiceEncoder
-{
-   void *encoderState;
-   U32 getSamplesPerFrame();
-   U32 getMaxCompressedFrameSize();
-   U32 compressFrame(S16 *samplePtr, U8 *outputPtr);
-public:
-   GSMVoiceEncoder();
-   ~GSMVoiceEncoder();
-};
-
-/// The GSMVoiceDecoder class implements the HawkVoice GSM codec
-/// decompressor.
-class GSMVoiceDecoder : public VoiceDecoder
-{
-   void *decoderState;
-   U32 getSamplesPerFrame();
-   U32 getAvgCompressedFrameSize();
-
-   U32 decompressFrame(S16 *framePtr, U8 *inputPtr, U32 inSize);
-public:
-   GSMVoiceDecoder();
-   ~GSMVoiceDecoder();
-};
-
 /// The SpeexVoiceEncoder class implements the Speex codec
 /// compressor.
 class SpeexVoiceEncoder : public VoiceEncoder
@@ -132,7 +78,7 @@ class SpeexVoiceEncoder : public VoiceEncoder
    U32 compressFrame(S16 *samplePtr, U8 *outputPtr);
 public:
    SpeexVoiceEncoder();
-   ~SpeexVoiceEncoder();
+   virtual ~SpeexVoiceEncoder();
 };
 
 /// The SpeexVoiceDecoder class implements the Speex codec
@@ -149,7 +95,7 @@ class SpeexVoiceDecoder : public VoiceDecoder
    U32 decompressFrame(S16 *framePtr, U8 *inputPtr, U32 inSize);
 public:
    SpeexVoiceDecoder();
-   ~SpeexVoiceDecoder();
+   virtual ~SpeexVoiceDecoder();
 };
 
 };

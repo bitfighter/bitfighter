@@ -18,7 +18,7 @@
 #######################################
 
 OPTIMIZE=-O2
-DEBUG=-g
+DEBUG=-g -DTNL_DEBUG
 INCLUDES=-I../tnl -I../openal -I../Triangle -I../recast -I../clipper -I../alure -I../libspeex -I../boost
 CC=gcc $(DEBUG) $(INCLUDES) -DTNL_ENABLE_LOGGING -W $(OPTIMIZE)
 THREADLIB= -lpthread
@@ -129,11 +129,6 @@ OBJECTS_ZAP=\
    textItem.o\
    voiceCodec.o\
    zoneControlGame.o\
-   gsm_encode.o\
-   gsm_decode.o\
-   gsm_state.o\
-   lpc10enc.o\
-   lpc10dec.o\
    md5wrapper.o\
    md5.o\
    ../master/masterInterface.o\

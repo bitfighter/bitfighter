@@ -155,9 +155,6 @@
     <ClCompile Include="..\zap\gameWeapons.cpp" />
     <ClCompile Include="..\zap\goalZone.cpp" />
     <ClCompile Include="..\zap\gridDB.cpp" />
-    <ClCompile Include="..\zap\gsm_decode.c" />
-    <ClCompile Include="..\zap\gsm_encode.c" />
-    <ClCompile Include="..\zap\gsm_state.c" />
     <ClCompile Include="..\zap\HTFGame.cpp" />
     <ClCompile Include="..\zap\huntersGame.cpp" />
     <ClCompile Include="..\zap\IniFile.cpp" />
@@ -174,8 +171,6 @@
     <ClCompile Include="JoystickRender.cpp" />
     <ClCompile Include="loadoutHelper.cpp" />
     <ClCompile Include="..\zap\loadoutZone.cpp" />
-    <ClCompile Include="..\zap\lpc10dec.c" />
-    <ClCompile Include="..\zap\lpc10enc.c" />
     <ClCompile Include="..\zap\luaGameInfo.cpp" />
     <ClCompile Include="..\zap\luaLevelGenerator.cpp" />
     <ClCompile Include="..\zap\luaObject.cpp" />
@@ -269,7 +264,6 @@
     <ClInclude Include="..\zap\gameWeapons.h" />
     <ClInclude Include="..\zap\goalZone.h" />
     <ClInclude Include="..\zap\gridDB.h" />
-    <ClInclude Include="..\zap\gsm.h" />
     <ClInclude Include="..\zap\huntersGame.h" />
     <ClInclude Include="..\zap\IniFile.h" />
     <ClInclude Include="..\zap\input.h" />
@@ -288,7 +282,6 @@
     <ClInclude Include="HTFGame.h" />
     <ClInclude Include="loadoutHelper.h" />
     <ClInclude Include="..\zap\loadoutZone.h" />
-    <ClInclude Include="..\zap\lpc10.h" />
     <ClInclude Include="..\zap\lua.h" />
     <ClInclude Include="..\zap\luaGameInfo.h" />
     <ClInclude Include="..\zap\luaLevelGenerator.h" />
@@ -305,7 +298,6 @@
     <ClInclude Include="..\zap\Color.h" />
     <ClInclude Include="..\zap\Colors.h" />
     <ClInclude Include="..\zap\polygon.h" />
-    <ClInclude Include="..\zap\private.h" />
     <ClInclude Include="..\zap\projectile.h" />
     <ClInclude Include="OpenglUtils.h" />
     <ClInclude Include="pointainer.h" />
