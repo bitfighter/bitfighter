@@ -516,34 +516,6 @@
 			Name="SoundAndVoice"
 			>
 			<File
-				RelativePath=".\gsm.h"
-				>
-			</File>
-			<File
-				RelativePath=".\gsm_decode.c"
-				>
-			</File>
-			<File
-				RelativePath=".\gsm_encode.c"
-				>
-			</File>
-			<File
-				RelativePath=".\gsm_state.c"
-				>
-			</File>
-			<File
-				RelativePath=".\lpc10.h"
-				>
-			</File>
-			<File
-				RelativePath=".\lpc10dec.c"
-				>
-			</File>
-			<File
-				RelativePath=".\lpc10enc.c"
-				>
-			</File>
-			<File
 				RelativePath=".\SFXProfile.h"
 				>
 			</File>

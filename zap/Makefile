@@ -129,11 +129,6 @@ OBJECTS_ZAP=\
    textItem.o\
    voiceCodec.o\
    zoneControlGame.o\
-   gsm_encode.o\
-   gsm_decode.o\
-   gsm_state.o\
-   lpc10enc.o\
-   lpc10dec.o\
    md5wrapper.o\
    md5.o\
    ../master/masterInterface.o\
