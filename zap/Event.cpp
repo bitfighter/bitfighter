@@ -47,24 +47,31 @@ void Event::setMousePos(S32 x, S32 y)
 //    MoveAxisLeftRightMask, MoveAxisUpDownMask, ShootAxisLeftRightMask, ShootAxisUpDownMask
 void Event::updateJoyAxesDirections(U32 axisMask, S16 value)
 {
-   // Get our current joystick-axis-direction
-   U32 detectedAxesDirectionMask;
+   // Get our current joystick-axis-direction and its opposite on the same axis
+   U32 detectedAxesDirectionMask = 0;
+   U32 oppositeDetectedAxesDirectionMask = 0;
    if (value < 0)
+   {
       detectedAxesDirectionMask = axisMask & NegativeAxesMask;
+      oppositeDetectedAxesDirectionMask = axisMask & PositiveAxesMask;
+   }
    else
+   {
       detectedAxesDirectionMask = axisMask & PositiveAxesMask;
+      oppositeDetectedAxesDirectionMask = axisMask & NegativeAxesMask;
+   }
 
-
-   // Get the specific axes direction index from the mask we've detected
+   // Get the specific axes direction index (and opposite) from the mask we've detected
    // from enum JoystickAxesDirections
    U32 axesDirectionIndex = 0;
+   U32 oppositeAxesDirectionIndex = 0;
    for (S32 i = 0; i < MaxAxesDirections; i++)
-      //if((1 << i) == detectedAxesDirectionMask)
+   {
       if(Joystick::JoystickInputData[i].axesMask & detectedAxesDirectionMask)
-      {
          axesDirectionIndex = i;
-         break;
-      }
+      if(Joystick::JoystickInputData[i].axesMask & oppositeDetectedAxesDirectionMask)
+         oppositeAxesDirectionIndex = i;
+   }
 
 
    // Update our global joystick input data, use a sensitivity threshold to take care of calibration issues
@@ -78,6 +85,10 @@ void Event::updateJoyAxesDirections(U32 axisMask, S16 value)
       normalValue = 0.0f;
 
    Joystick::JoystickInputData[axesDirectionIndex].value = normalValue;
+
+
+   // Now set the opposite axis back to zero
+   Joystick::JoystickInputData[oppositeAxesDirectionIndex].value = 0.0f;
 
 
    // Determine what to set the KeyCode key state, it is binary so set the threshold has half -> 0.5
