@@ -129,7 +129,6 @@ using namespace TNL;
 #include "md5wrapper.h"
 #include "version.h"
 #include "Colors.h"
-#include "screenShooter.h"
 #include "Event.h"
 #include "ScreenInfo.h"
 #include "Joystick.h"
@@ -214,8 +213,6 @@ Vector<StringTableEntry> gLevelSkipList;  // Levels we'll never load, to create 
 extern NameEntryUserInterface gNameEntryUserInterface;
 
 ScreenInfo gScreenInfo;
-
-Screenshooter gScreenshooter;    // For taking screen shots
 
 ZapJournal gZapJournal;          // Our main journaling object
 

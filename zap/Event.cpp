@@ -12,7 +12,7 @@
 #include "UIMenus.h"
 #include "UIDiagnostics.h"
 #include "IniFile.h"
-#include "screenShooter.h"
+#include "ScreenShooter.h"
 #include "ScreenInfo.h"
 #include "Joystick.h"
 
@@ -278,7 +278,7 @@ void Event::onKeyDown(SDLKey key, SDLMod mod, U16 unicode)
 
    // CTRL + Q --> screenshot!
    else if(key == SDLK_q && (mod & KMOD_CTRL))
-      gScreenshooter.phase = 1;
+      ScreenShooter::saveScreenshot();
 
    // The rest
    else
