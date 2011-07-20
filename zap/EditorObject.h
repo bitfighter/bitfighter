@@ -48,10 +48,8 @@ static const S32 NONE = -1;
 
 enum ShowMode
 {
-   ShowAllButNavZones,
    ShowAllObjects,
    ShowWallsOnly,
-   NavZoneMode,
    ShowModesCount
 };
 

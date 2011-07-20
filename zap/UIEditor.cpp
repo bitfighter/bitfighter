@@ -1090,8 +1090,6 @@ void EditorUserInterface::onActivate()
 
    mGameTypeArgs.clear();
 
-   mHasBotNavZones = false;
-
    loadLevel();
    setCurrentTeam(0);
 
@@ -1407,7 +1405,7 @@ S32 getDockHeight(ShowMode mode)
 {
    if(mode == ShowWallsOnly)
       return 62;
-   else  // mShowMode == ShowAllObjects || mShowMode == ShowAllButNavZones
+   else  // mShowMode == ShowAllObjects
       return gScreenInfo.getGameCanvasHeight() - 2 * EditorUserInterface::vertMargin;
 }
 
@@ -1572,10 +1570,6 @@ const char *getModeMessage(ShowMode mode)
 {
    if(mode == ShowWallsOnly)
       return "Wall editing mode.  Hit Ctrl-A to change.";
-   else if(mode == ShowAllButNavZones)
-      return "NavMesh zones hidden.  Hit Ctrl-A to change.";
-   else if(mode == NavZoneMode)
-      return "NavMesh editing mode.  Hit Ctrl-A to change.";
    else     // Normal mode
       return "";
 }
@@ -3233,8 +3227,6 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    else if(keyCode == KEY_A && getKeyState(KEY_CTRL))            // Ctrl-A - toggle see all objects
    {
       mShowMode = (ShowMode) ((U32)mShowMode + 1);
-      //if(mShowMode == ShowAllButNavZones && !mHasBotNavZones)    // Skip hiding NavZones if we don't have any
-      //   mShowMode = (ShowMode) ((U32)mShowMode + 1);
 
       if(mShowMode == ShowModesCount)
          mShowMode = (ShowMode) 0;     // First mode

@@ -46,7 +46,6 @@ public:
    void render();
    void renderPageCommands(S32 page);
    void renderPageWalls();
-   void renderPageZones();
  
 
    void onKeyDown(KeyCode keyCode, char ascii);

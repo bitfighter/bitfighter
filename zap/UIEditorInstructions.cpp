@@ -109,14 +109,13 @@ void EditorInstructionsUserInterface::onActivate()
    Triangulate::Process(sample5o, sample5f);
 }
 
-static const U32 NUM_PAGES = 5;
+static const U32 NUM_PAGES = 4;
 
 
 const char *pageHeadersEditor[] = {
    "BASIC COMMANDS",
    "ADVANCED COMMANDS",
    "WALLS AND LINES",
-   "BOT NAV ZONES",
    "SCRIPTING CONSOLE"
 };
 
@@ -159,9 +158,6 @@ void EditorInstructionsUserInterface::render()
          renderPageWalls();
          break;
       case 4:
-         renderPageZones();
-         break;
-      case 5:
          renderConsoleCommands("Open the console by pressing [/]", consoleCommands1);
          break;
    }
@@ -440,79 +436,6 @@ void EditorInstructionsUserInterface::renderPageWalls()
 extern const Color BORDER_FILL_COLOR;
 extern const F32 BORDER_FILL_ALPHA;
 extern const F32 BORDER_WIDTH;
-
-void EditorInstructionsUserInterface::renderPageZones()
-{
-   // 4 static images, followed by some text
-   S32 col1x = 200;
-   S32 col2x = 600;
-
-   S32 ypos = 45;
-   S32 textSize = 18;
-   F32 scale = .7;
- 
-   glColor(Colors::yellow);
-   drawCenteredString(ypos, textSize, "Bot NavZones help bots navigate a level.  If the level does");
-   ypos += 25;
-   drawCenteredString(ypos, textSize, "not use bots, you don't need NavZones.");
-   ypos += 25;
-   drawCenteredString(ypos, textSize, "See the Wiki for more details (bitfighter.org)");
-   ypos += 40;
-
-   glColor(Colors::cyan);
-   drawCenteredString(ypos, textSize, "Use Ctrl-A to enter/exit NavZone Editing Mode");
-   ypos += 25;
-   drawCenteredString(ypos, textSize, "See NavZones in-game using /dzones command");
-   ypos += 80;
-
-   //////////
-
-   glPushMatrix();
-      glTranslatef(col1x, ypos, 0);
-      glScalef(scale, scale, 1);
-      renderNavMeshZone(&sample1o, &sample1f, findCentroid(sample1o), -1, true);
-   glPopMatrix();
-
-   glColor3f(0,1,0);      // Green
-   drawStringc(col1x, ypos + 50, textSize, "Convex - Good!");
-
-   //////////
-
-   glPushMatrix();
-      glTranslatef(col2x, ypos, 0);
-      glScalef(scale, scale, 1);
-      renderNavMeshZone(&sample2o, &sample2f, findCentroid(sample2o), -1, false);
-   glPopMatrix();
-
-   glColor3f(1,0,0);      // Red
-   drawStringc(col2x, ypos + 50, textSize, "Not Convex - Bad!");
-   
-   //////////
-
-   ypos += 160;
-
-    glPushMatrix();
-      glTranslatef(col1x, ypos, 0);
-      glScalef(scale, scale, 1);
-      renderNavMeshZone(&sample3o, &sample3f, findCentroid(sample3o), -1, true);
-      renderNavMeshZone(&sample4o, &sample4f, findCentroid(sample4o), -1, true);
-      renderNavMeshBorder(border34, 1, BORDER_FILL_COLOR, BORDER_FILL_ALPHA, BORDER_WIDTH);
-   glPopMatrix();
-
-   glColor3f(0,1,0);      // Green
-   drawStringc(col1x, ypos + 50, textSize, "Snapped - Good!");
-
-
-   glPushMatrix();
-      glTranslatef(col2x, ypos, 0);
-      glScalef(scale, scale, 1);
-      renderNavMeshZone(&sample3o, &sample3f, findCentroid(sample3o), -1, true);
-      renderNavMeshZone(&sample5o, &sample5f, findCentroid(sample5o), -1, true);
-   glPopMatrix();
-
-   glColor3f(1,0,0);      // Red
-   drawStringc(col2x, ypos + 50, textSize, "Not Snapped - Bad!");
-}
 
 
 void EditorInstructionsUserInterface::nextPage()

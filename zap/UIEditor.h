@@ -134,7 +134,6 @@ private:
    bool mSnapDisabled;
 
    ShowMode mShowMode;
-   bool mHasBotNavZones;
 
    enum {
       saveMsgDisplayTime = 4000,
@@ -301,7 +300,6 @@ public:
    void addDockObject(EditorObject *object, F32 xPos, F32 yPos);
 
    string mScriptLine;                          // Script and args, if any
-   void setHasNavMeshZones(bool hasZones) { mHasBotNavZones = hasZones; }
 
    void idle(U32 timeDelta);
    void deleteSelection(bool objectsOnly);      // Delete selected items (true = items only, false = items & vertices)
