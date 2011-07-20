@@ -1623,7 +1623,6 @@ void EditorUserInterface::render()
                      mDraggingObjects, mShowingReferenceShip, getSnapToWallCorners(), getRenderingAlpha(false/*isScriptItem*/));
    glPopMatrix();
 
-   
 
    // == Normal items ==
    // Draw map items (teleporters, etc.) that are not being dragged, and won't have any text labels  (below the dock)
@@ -1631,10 +1630,12 @@ void EditorUserInterface::render()
    for(S32 i = 0; i < objList->size(); i++)
    {
       EditorObject *obj = objList->get(i);
+
       if(obj->getObjectTypeMask() != PolyWallType)
          if(!(mDraggingObjects && obj->isSelected()))
             obj->renderInEditor(false, mShowingReferenceShip, mShowMode);
    }
+
 
    // == Selected items ==
    // Draw map items (teleporters, etc.) that are are selected and/or lit up, so label is readable (still below the dock)

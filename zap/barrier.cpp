@@ -829,24 +829,24 @@ void WallSegmentManager::deleteSegments(S32 owner)
 void WallSegmentManager::renderWalls(bool draggingObjects, bool showingReferenceShip, bool showSnapVertices, F32 alpha)
 {
    fillVector.clear();
-   gEditorGame->getGridDatabase()->findObjects(WallType, fillVector);
+   mGridDatabase->findObjects(WallType, fillVector);
 
    for(S32 i = 0; i < mWallSegments.size(); i++)
    {  
       bool isBeingDragged = false;
 
-      if(draggingObjects)
+     /* if(draggingObjects)
       {
          for(S32 j = 0; j < fillVector.size(); j++)
          {
-            EditorObject *obj = dynamic_cast<EditorObject *>(fillVector[j]);
+            WallSegment *obj = dynamic_cast<WallSegment *>(fillVector[j]);
             if(obj->isSelected() && obj->getItemId() == mWallSegments[i]->getOwner())
             {
                isBeingDragged = true;
                break;
             }
          }
-      }
+      }*/
 
       mWallSegments[i]->renderFill(isBeingDragged, showingReferenceShip);
    }
@@ -873,9 +873,6 @@ void WallSegmentManager::renderWalls(bool draggingObjects, bool showingReference
 
 ////////////////////////////////////////
 ////////////////////////////////////////
-
-//GridDatabase *WallSegment::mGridDatabase; // Declare static variable
-
 
 // Regular constructor
 WallSegment::WallSegment(GridDatabase *gridDatabase, const Point &start, const Point &end, F32 width, S32 owner) 

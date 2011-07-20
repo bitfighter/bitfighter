@@ -127,6 +127,8 @@ public:
    bool canBeHostile() { return false; }
    bool canBeNeutral() { return false; }
 
+   const Color *getEditorRenderColor() const { return &Colors::gray50; }      // Unselected wall spine color
+
    void scale(const Point &center, F32 scale);
 
    string toString(F32 gridSize) const;

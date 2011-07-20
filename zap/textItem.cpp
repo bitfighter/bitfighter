@@ -377,10 +377,20 @@ void LineItem::render()
 
 void LineItem::renderEditor(F32 currentScale)
 {
-   glColor(getGame()->getTeamColor(mTeam));
+   if(!mSelected)
+      glColor(getEditorRenderColor());
+   else
+      glColor(SELECT_COLOR);
+
    renderPointVector(getOutline(), GL_LINE_STRIP);
 
    renderLinePolyVertices(currentScale);
+}
+
+
+const Color *LineItem::getEditorRenderColor() const 
+{ 
+   return getGame()->getTeamColor(mTeam); 
 }
 
 
