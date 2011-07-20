@@ -73,7 +73,7 @@ void ScreenShooter::saveScreenshot()
    S32 height = gScreenInfo.getWindowHeight();
 
    // Allocate buffer
-   GLubyte *screenBuffer = new GLubyte[BitsPerPixel * width * height];  // Glubyte * 3 = 24 bits
+   GLubyte *screenBuffer = new GLubyte[(BitsPerPixel/BitDepth) * width * height];  // Glubyte * 3 = 24 bits
    png_bytep *rows = new png_bytep[height];
 
    // Read pixels from buffer - slow operation
