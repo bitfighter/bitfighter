@@ -239,7 +239,7 @@ public:
    MasterServerConnection *getConnectionToMaster();
 
    GameNetInterface *getNetInterface();
-   virtual boost::shared_ptr<GridDatabase> getGridDatabase() { return mDatabase; }    // EditorGame, for example, returns an EditorObjectDatabase
+   virtual GridDatabase *getGridDatabase() { return mDatabase.get(); }    // EditorGame, for example, returns an EditorObjectDatabase
 
    const Vector<SafePtr<GameObject> > &getScopeAlwaysList() { return mScopeAlwaysList; }
 
@@ -542,7 +542,7 @@ public:
 
    bool processPseudoItem(S32 argc, const char **argv);
 
-   boost::shared_ptr<GridDatabase> getGridDatabase() { return mEditorDatabase; }
+   GridDatabase *getGridDatabase() { return mEditorDatabase.get(); }
 
    void setGridDatabase(boost::shared_ptr<GridDatabase> database) { mEditorDatabase = boost::dynamic_pointer_cast<EditorObjectDatabase>(database); }
 

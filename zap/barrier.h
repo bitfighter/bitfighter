@@ -279,29 +279,28 @@ private:
    GridDatabase *mGridDatabase;
 
 public:
-   WallSegmentManager();      // Constructor
-   ~WallSegmentManager();     // Destructor
+   WallSegmentManager();   // Constructor
+   ~WallSegmentManager();  // Destructor
 
    GridDatabase *getGridDatabase() { return mGridDatabase; } 
-   //void setGridDatabase(GridDatabase *gridDatabase) { mGridDatabase = gridDatabase; }
 
    Vector<WallSegment *> mWallSegments;      
    Vector<WallEdge *> mWallEdges;        // For mounting forcefields/turrets
    Vector<Point> mWallEdgePoints;               // For rendering
 
-   void buildAllWallSegmentEdgesAndPoints(Game *game);
+   void buildAllWallSegmentEdgesAndPoints(GridDatabase *gameDatabase);
    void deleteSegments(S32 owner);              // Delete all segments owned by specified WorldItem
    void deleteAllSegments();
 
    // Recalucate edge geometry for all walls when item has changed
-   void computeWallSegmentIntersections(Game *game, EditorObject *item); 
+   void computeWallSegmentIntersections(GridDatabase *gameDatabase, EditorObject *item); 
 
    // Takes a wall, finds all intersecting segments, and marks them invalid
-   void invalidateIntersectingSegments(EditorObject *item);
+   void invalidateIntersectingSegments(GridDatabase *gameDatabase, EditorObject *item);
 
-   void buildWallSegmentEdgesAndPoints(DatabaseObject *object);
-   void buildWallSegmentEdgesAndPoints(DatabaseObject *object, const Vector<DatabaseObject *> &engrObjects);
-   void recomputeAllWallGeometry(Game *game);
+   void buildWallSegmentEdgesAndPoints(GridDatabase *gameDatabase, DatabaseObject *object);
+   void buildWallSegmentEdgesAndPoints(GridDatabase *gameDatabase, DatabaseObject *object, const Vector<DatabaseObject *> &engrObjects);
+   void recomputeAllWallGeometry(GridDatabase *gameDatabase);
 
    // Populate wallEdges
    void clipAllWallEdges(const Vector<WallSegment *> &wallSegments, Vector<Point> &wallEdges);

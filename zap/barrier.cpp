@@ -420,7 +420,7 @@ void WallItem::onGeomChanged()
    //   initializePolyGeom();          // Triangulate, find centroid, calc extents
 
    Game *game = getGame();
-   game->getWallSegmentManager()->computeWallSegmentIntersections(getGame(), this);
+   game->getWallSegmentManager()->computeWallSegmentIntersections(game->getGridDatabase(), this);
 
    // Find any forcefields that might intersect our new wall segment and recalc their endpoints
    Rect aoi = getExtent();    
@@ -428,7 +428,7 @@ void WallItem::onGeomChanged()
    aoi.expand(Point(ForceField::MAX_FORCEFIELD_LENGTH, ForceField::MAX_FORCEFIELD_LENGTH));  
 
    fillVector.clear();
-   gEditorGame->getGridDatabase()->findObjects(ForceFieldProjectorType, fillVector, aoi);     
+   getGame()->getGridDatabase()->findObjects(ForceFieldProjectorType, fillVector, aoi);     
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
@@ -559,7 +559,7 @@ void PolyWall::onGeomChanged()
 
    Parent::onGeomChanged();
 
-   gEditorGame->getWallSegmentManager()->computeWallSegmentIntersections(getGame(), this);
+   getGame()->getWallSegmentManager()->computeWallSegmentIntersections(getGame()->getGridDatabase(), this);
 
    // Find any forcefields that might intersect our new wall segment and recalc their endpoints
    Rect aoi = getExtent();    
@@ -567,7 +567,7 @@ void PolyWall::onGeomChanged()
    aoi.expand(Point(ForceField::MAX_FORCEFIELD_LENGTH, ForceField::MAX_FORCEFIELD_LENGTH));  
 
    fillVector.clear();
-   gEditorGame->getGridDatabase()->findObjects(ForceFieldProjectorType, fillVector, aoi);     
+   getGame()->getGridDatabase()->findObjects(ForceFieldProjectorType, fillVector, aoi);     
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
@@ -628,9 +628,9 @@ WallSegmentManager::~WallSegmentManager()
 }
 
 
-void WallSegmentManager::recomputeAllWallGeometry(Game *game)
+void WallSegmentManager::recomputeAllWallGeometry(GridDatabase *gameDatabase)
 {
-   buildAllWallSegmentEdgesAndPoints(game);
+   buildAllWallSegmentEdgesAndPoints(gameDatabase);
 
    mWallEdgePoints.clear();
 
@@ -653,33 +653,33 @@ void WallSegmentManager::recomputeAllWallGeometry(Game *game)
 
 
 // Delete all segments, then find all walls and build a new set of segments
-void WallSegmentManager::buildAllWallSegmentEdgesAndPoints(Game *game)
+void WallSegmentManager::buildAllWallSegmentEdgesAndPoints(GridDatabase *gameDatabase)
 {
    deleteAllSegments();
 
    fillVector.clear();
 
-   game->getGridDatabase()->findObjects(WallType, fillVector);
+   gameDatabase->findObjects(WallType, fillVector);
 
    Vector<DatabaseObject *> engrObjects;
-   game->getGridDatabase()->findObjects(EngineeredType, engrObjects);   // All engineered objects
+   gameDatabase->findObjects(EngineeredType, engrObjects);   // All engineered objects
 
    // Iterate over all our wall objects
    for(S32 i = 0; i < fillVector.size(); i++)
-      game->getWallSegmentManager()->buildWallSegmentEdgesAndPoints(fillVector[i], engrObjects);
+      buildWallSegmentEdgesAndPoints(gameDatabase, fillVector[i], engrObjects);
 }
 
 
-void WallSegmentManager::buildWallSegmentEdgesAndPoints(DatabaseObject *dbObject)
+void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *gameDatabase, DatabaseObject *dbObject)
 {
    fillVector.clear();
-   gEditorGame->getGridDatabase()->findObjects(EngineeredType, fillVector);    // All engineered objects
+   gameDatabase->findObjects(EngineeredType, fillVector);    // All engineered objects
 
-   buildWallSegmentEdgesAndPoints(dbObject, fillVector);
+   buildWallSegmentEdgesAndPoints(gameDatabase, dbObject, fillVector);
 }
 
 
-void WallSegmentManager::buildWallSegmentEdgesAndPoints(DatabaseObject *dbObject, const Vector<DatabaseObject *> &engrObjects)
+void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *gameDatabase, DatabaseObject *dbObject, const Vector<DatabaseObject *> &engrObjects)
 {
    // Find any engineered objects that terminate on this wall, and mark them for resnapping later
 
@@ -761,7 +761,7 @@ void WallSegmentManager::clipAllWallEdges(const Vector<WallSegment *> &wallSegme
 
 
 // Takes a wall, finds all intersecting segments, and marks them invalid
-void WallSegmentManager::invalidateIntersectingSegments(EditorObject *item)
+void WallSegmentManager::invalidateIntersectingSegments(GridDatabase *gameDatabase, EditorObject *item)
 {
    fillVector.clear();
 
@@ -780,7 +780,7 @@ void WallSegmentManager::invalidateIntersectingSegments(EditorObject *item)
       intersectingSegment->invalidate();
    }
 
-   buildWallSegmentEdgesAndPoints(item);
+   buildWallSegmentEdgesAndPoints(gameDatabase, item);
 
    // Invalidate all segments that potentially intersect the changed segment in its new location
    for(S32 i = 0; i < mWallSegments.size(); i++)
@@ -797,10 +797,10 @@ void WallSegmentManager::invalidateIntersectingSegments(EditorObject *item)
 
 // Called when a wall segment has somehow changed.  All current and previously intersecting segments 
 // need to be recomputed.
-void WallSegmentManager::computeWallSegmentIntersections(Game *game, EditorObject *item)
+void WallSegmentManager::computeWallSegmentIntersections(GridDatabase *gameDatabase, EditorObject *item)
 {
-   invalidateIntersectingSegments(item);     // TODO: Is this step still needed?  similar things, both run buildWallSegmentEdgesAndPoints()
-   recomputeAllWallGeometry(game);
+   invalidateIntersectingSegments(gameDatabase, item);  // TODO: Is this step still needed?  similar things, both run buildWallSegmentEdgesAndPoints()
+   recomputeAllWallGeometry(gameDatabase);
 }
 
 
@@ -920,8 +920,6 @@ void WallSegment::init(S32 owner)
 }
 
 
-extern EditorGame *gEditorGame;
-
 // Destructor
 WallSegment::~WallSegment()
 { 
@@ -933,7 +931,7 @@ WallSegment::~WallSegment()
    // This is a last-ditch effort to ensure that the pointers point at something real.
 
    //fillVector.clear();
-   //gEditorGame->getGridDatabase()->findObjects(ForceFieldProjectorType, fillVector);
+   //mGame->getGridDatabase()->findObjects(ForceFieldProjectorType, fillVector);
 
    //for(S32 i = 0; i < fillVector.size(); i++)
    //{

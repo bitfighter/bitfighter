@@ -1395,7 +1395,7 @@ bool ServerGame::loadLevel(const string &origFilename2)
 
       // The script file will be the first argument, subsequent args will be passed on to the script.
       // Now we've crammed all our action into the constructor... is this ok design?
-      LuaLevelGenerator levelgen = LuaLevelGenerator(name, getGameType()->getScriptArgs(), getGridSize(), getGridDatabase().get(), this, gConsole);
+      LuaLevelGenerator levelgen = LuaLevelGenerator(name, getGameType()->getScriptArgs(), getGridSize(), getGridDatabase(), this, gConsole);
    }
 
    // Script specified in INI globalLevelLoadScript
@@ -1412,7 +1412,7 @@ bool ServerGame::loadLevel(const string &origFilename2)
 
       // The script file will be the first argument, subsequent args will be passed on to the script.
       // Now we've crammed all our action into the constructor... is this ok design?
-      LuaLevelGenerator levelgen = LuaLevelGenerator(name, getGameType()->getScriptArgs(), getGridSize(), getGridDatabase().get(), this, gConsole);
+      LuaLevelGenerator levelgen = LuaLevelGenerator(name, getGameType()->getScriptArgs(), getGridSize(), getGridDatabase(), this, gConsole);
    }
 
    //  Check after script, script might add Teams

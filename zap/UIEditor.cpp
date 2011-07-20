@@ -157,7 +157,7 @@ EditorUserInterface::EditorUserInterface()     // false --> not using game coord
 // Encapsulate some ugliness
 static const Vector<EditorObject *> *getObjectList()
 {
-   return ((EditorObjectDatabase *)getGame()->getGridDatabase().get())->getObjectList();
+   return ((EditorObjectDatabase *)getGame()->getGridDatabase())->getObjectList();
 }
 
 
@@ -258,7 +258,7 @@ static Vector<DatabaseObject *> fillVector;     // Reusable container
 // Destructor -- unwind things in an orderly fashion
 EditorUserInterface::~EditorUserInterface()
 {
-   clearDatabase(getGame()->getGridDatabase().get());
+   clearDatabase(getGame()->getGridDatabase());
 
    mDockItems.clear();
    mLevelGenItems.clear();
@@ -402,7 +402,7 @@ void EditorUserInterface::deleteUndoState()
 
 void EditorUserInterface::restoreItems(const Vector<string> &from)
 {
-   GridDatabase *db = getGame()->getGridDatabase().get();
+   GridDatabase *db = getGame()->getGridDatabase();
    clearDatabase(db);
 
    Vector<string> args;
@@ -449,10 +449,10 @@ void EditorUserInterface::saveUndoState()
 
    //copyItems(getObjectList(), mUndoItems[mLastUndoIndex % UNDO_STATES]);
 
-   boost::shared_ptr<EditorObjectDatabase> eod = dynamic_pointer_cast<EditorObjectDatabase>(getGame()->getGridDatabase());
+   EditorObjectDatabase *eod = dynamic_cast<EditorObjectDatabase *>(getGame()->getGridDatabase());
    TNLAssert(eod, "bad!");
 
-   EditorObjectDatabase *newDB = eod.get();     
+   EditorObjectDatabase *newDB = eod;     
    mUndoItems[mLastUndoIndex % UNDO_STATES] = boost::shared_ptr<EditorObjectDatabase>(new EditorObjectDatabase(*newDB));  // Make a copy
 
    mLastUndoIndex++;
@@ -539,7 +539,7 @@ void EditorUserInterface::rebuildEverything()
 {
    Game *game = getGame();
 
-   game->getWallSegmentManager()->recomputeAllWallGeometry(game);
+   game->getWallSegmentManager()->recomputeAllWallGeometry(game->getGridDatabase());
    resnapAllEngineeredItems();
 
    mNeedToSave = (mAllUndoneUndoLevel != mLastUndoIndex);
@@ -622,13 +622,13 @@ void EditorUserInterface::loadLevel()
    Game *game = getGame();
 
    // Initialize
-   clearDatabase(getGame()->getGridDatabase().get());
+   clearDatabase(getGame()->getGridDatabase());
    game->clearTeams();
    mSnapObject = NULL;
    mSnapVertexIndex = NONE;
    mAddingVertex = false;
    clearLevelGenItems();
-   mLoadTarget = (EditorObjectDatabase *)game->getGridDatabase().get();
+   mLoadTarget = (EditorObjectDatabase *)game->getGridDatabase();
    mGameTypeArgs.clear();
 
    gGameParamUserInterface.savedMenuItems.clear();    // clear() because this is not a pointer vector
@@ -669,7 +669,7 @@ void EditorUserInterface::loadLevel()
    //for(S32 i = 0; i < objList->size(); i++)
    //   objList->get(i)->processEndPoints();
 
-   game->getWallSegmentManager()->recomputeAllWallGeometry(getGame());
+   game->getWallSegmentManager()->recomputeAllWallGeometry(getGame()->getGridDatabase());
    
    // Snap all engineered items to the closest wall, if one is found
    resnapAllEngineeredItems();
@@ -732,7 +732,7 @@ void EditorUserInterface::runLevelGenScript()
    runScript(scriptName, scriptArgs);
 
    // Reset the target
-   mLoadTarget = (EditorObjectDatabase *)getGame()->getGridDatabase().get();
+   mLoadTarget = (EditorObjectDatabase *)getGame()->getGridDatabase();
 }
 
 
@@ -801,7 +801,7 @@ void EditorUserInterface::validateLevel()
    for(S32 i = 0; i < teamCount; i++)      // Initialize vector
       foundSpawn[i] = false;
 
-   GridDatabase *gridDatabase = getGame()->getGridDatabase().get();
+   GridDatabase *gridDatabase = getGame()->getGridDatabase();
       
    fillVector.clear();
    gridDatabase->findObjects(ShipSpawnType, fillVector);
@@ -2761,12 +2761,12 @@ void EditorUserInterface::deleteItem(S32 itemIndex)
    if(mask & (BarrierType | PolyWallType))
    {
       // Need to recompute boundaries of any intersecting walls
-      wallSegmentManager->invalidateIntersectingSegments(obj);    // Mark intersecting segments invalid
-      wallSegmentManager->deleteSegments(obj->getItemId());       // Delete the segments associated with the wall
+      wallSegmentManager->invalidateIntersectingSegments(getGame()->getGridDatabase(), obj); // Mark intersecting segments invalid
+      wallSegmentManager->deleteSegments(obj->getItemId());                                  // Delete the segments associated with the wall
 
       game->getGridDatabase()->removeFromDatabase(obj, obj->getExtent());
 
-      wallSegmentManager->recomputeAllWallGeometry(getGame());    // Recompute wall edges
+      wallSegmentManager->recomputeAllWallGeometry(getGame()->getGridDatabase());    // Recompute wall edges
       resnapAllEngineeredItems();         // Really only need to resnap items that were attached to deleted wall... but we
                                           // don't yet have a method to do that, and I'm feeling lazy at the moment
    }
