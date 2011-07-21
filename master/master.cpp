@@ -24,6 +24,7 @@
 
 #include "../zap/SharedConstants.h"
 
+#include "master.h"
 #include "masterInterface.h"
 #include "authenticator.h"    // For authenticating users against the PHPBB3 database
 #include "database.h"         // For writing to the database
@@ -77,18 +78,6 @@ string gStatsDatabasePassword;
 bool gWriteStatsToMySql;
 
 
-class MasterServerConnection;
-
-class GameConnectRequest
-{
-public:
-   SafePtr<MasterServerConnection> initiator;
-   SafePtr<MasterServerConnection> host;
-
-   U32 initiatorQueryId;
-   U32 hostQueryId;
-   U32 requestTime;
-};
 
 //// TODO: Get this from stringUtils... doesn't work for some reason.  Too tired to track it down at the moment...
 //std::string itos(S32 i)
@@ -187,97 +176,9 @@ static const char *sanitizeForJson(const char *value)
 }
 
 
-class MasterServerConnection : public MasterServerInterface
-{
-private:
-   typedef MasterServerInterface Parent;
-
-protected:
-
-   /// @name Linked List
-   ///
-   /// The server stores its connections on a linked list.
-   ///
-   /// @{
-
-   ///
-   MasterServerConnection *mNext;
-   MasterServerConnection *mPrev;
-
-   /// @}
-
-   /// @name Globals
-   /// @{
-
-   ///
-   static MasterServerConnection             gServerList;      // List of servers we know about
-   static MasterServerConnection             gClientList;      // List of clients who are connected
-public:
-   static Vector<GameConnectRequest *>       gConnectList;
-protected:
-
-   /// @}
-
-
-   /// @name Connection Info
-   ///
-   /// General information about this connection.
-   ///
-   /// @{
-
-   ///
-   bool             mIsGameServer;     ///< True if this is a game server.
-   U32              mStrikeCount;      ///< Number of "strikes" this connection has... 3 strikes and you're out!
-   U32              mLastQueryId;      ///< The last query id for info from this master.
-   U32              mLastActivityTime; ///< The last time we got a request or an update from this host.
-
-   /// A list of connection requests we're working on fulfilling for this connection.
-   Vector< GameConnectRequest* > mConnectList;
-
-   /// @}
-
-   /// @name Server Info
-   ///
-   /// This info is filled in if this connection maps to a
-   /// game server.
-   ///
-   /// @{
-
-   U32              mRegionCode;        ///< The region code in which this server operates.
-   StringTableEntry mVersionString;     ///< The unique version string for this server or client
-                                        ///< Only used in version 0 protocol.  In subsequent versions, the Version vars
-                                        ///< below will hold actual version numbers, and this var will hold a "+".
-
-   U32              mCMProtocolVersion; ///< Version of the protocol we'll be using to converse with the client
-   U32              mCSProtocolVersion; ///< Protocol version client will use to talk to server (client can only play with others 
-                                        ///     using this same version)
-   U32              mClientBuild;       ///< Build number of the client (different builds may use same protocols)
-
-   // The following are mostly dummy values at the moment... we may use them later.
-   U32              mCPUSpeed;          ///< The CPU speed of this server.
-   U32              mInfoFlags;         ///< Info flags describing this server.
-   U32              mPlayerCount;       ///< Current number of players on this server.
-   U32              mMaxPlayers;        ///< Maximum number of players on this server.
-   U32              mNumBots;           ///< Current number of bots on this server.
-
-   StringTableEntry mLevelName;
-   StringTableEntry mLevelType;
-   StringTableEntry mPlayerOrServerName;       ///< Player's nickname, hopefully unique, but not enforced, or server's name
-   Nonce mPlayerId;                            ///< (Hopefully) unique ID of this player
-
-   bool mAuthenticated;                        ///< True if user was authenticated, false if not
-   StringTableEntry mServerDescr;              ///< Server description
-   bool isInGlobalChat;
-
-   StringTableEntry mAutoDetectStr;             // Player's joystick autodetect string, for research purposes
-
-   /// @}
-
-public:
-
    /// Constructor initializes the linked list info with "safe" values
    /// so we don't explode if we destruct right away.
-   MasterServerConnection()
+   MasterServerConnection::MasterServerConnection()
    {
       mStrikeCount = 0; 
       mLastActivityTime = 0;
@@ -290,7 +191,7 @@ public:
    }
 
    /// Destructor removes the connection from the doubly linked list of server connections
-   ~MasterServerConnection()
+   MasterServerConnection::~MasterServerConnection()
    {
       // Unlink it if it's in the list
       mPrev->mNext = mNext;
@@ -316,7 +217,7 @@ public:
    }
 
    /// Adds this connection to the doubly linked list of servers
-   void linkToServerList()
+   void MasterServerConnection::linkToServerList()
    {
       mNext = gServerList.mNext;
       mPrev = gServerList.mNext->mPrev;
@@ -330,7 +231,7 @@ public:
    }
 
 
-   void linkToClientList()
+   void MasterServerConnection::linkToClientList()
    {
       mNext = gClientList.mNext;
       mPrev = gClientList.mNext->mPrev;
@@ -343,20 +244,11 @@ public:
       logprintf(LogConsumer::LogConnection, "CLIENT_CONNECT\t%s\t%s", getTimeStamp().c_str(), mPlayerOrServerName.getString());
    }
 
-   enum PHPBB3AuthenticationStatus {
-      Authenticated,
-      CantConnect,
-      UnknownUser,
-      WrongPassword,
-      InvalidUsername,
-      Unsupported,
-      UnknownStatus
-   };
-
-#ifdef VERIFY_PHPBB3    // Defined in Linux Makefile, not in VC++ project
 
    // Check username & password against database
-   PHPBB3AuthenticationStatus verifyCredentials(string &username, string password)
+   MasterServerConnection::PHPBB3AuthenticationStatus MasterServerConnection::verifyCredentials(string &username, string password)
+
+#ifdef VERIFY_PHPBB3    // Defined in Linux Makefile, not in VC++ project
    {
       Authenticator authenticator;
 
@@ -383,9 +275,7 @@ public:
          }
       }
    }
-#else
-      // Check name & pw against database
-   PHPBB3AuthenticationStatus verifyCredentials(string name, string password)
+#else // verifyCredentials
    {
       return Unsupported;
    }
@@ -398,7 +288,7 @@ public:
    // The query server method builds a piecewise list of servers
    // that match the client's particular filter criteria and
    // sends it to the client, followed by a QueryServersDone RPC.
-   TNL_DECLARE_RPC_OVERRIDE(c2mQueryServers,
+   TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mQueryServers,
                 (U32 queryId, U32 regionMask, U32 minPlayers, U32 maxPlayers,
                  U32 infoFlags, U32 maxBots, U32 minCPUSpeed,
                  StringTableEntry gameType, StringTableEntry missionType)
@@ -462,7 +352,7 @@ public:
    /// connected to it.  A client whose last activity time falls
    /// within the specified delta gets a strike... 3 strikes and
    /// you're out!  Strikes go away after being good for a while.
-   void checkActivityTime(U32 timeDeltaMinimum)
+   void MasterServerConnection::checkActivityTime(U32 timeDeltaMinimum)
    {
       U32 currentTime = Platform::getRealMilliseconds();
       if(currentTime - mLastActivityTime < timeDeltaMinimum)
@@ -481,7 +371,7 @@ public:
       mLastActivityTime = currentTime;
    }
 
-   void removeConnectRequest(GameConnectRequest *gcr)
+   void MasterServerConnection::removeConnectRequest(GameConnectRequest *gcr)
    {
       for(S32 j = 0; j < mConnectList.size(); j++)
       {
@@ -493,7 +383,7 @@ public:
       }
    }
 
-   GameConnectRequest *findAndRemoveRequest(U32 requestId)
+   GameConnectRequest *MasterServerConnection::findAndRemoveRequest(U32 requestId)
    {
       GameConnectRequest *req = NULL;
       for(S32 j = 0; j < mConnectList.size(); j++)
@@ -522,7 +412,7 @@ public:
    }
 
 
-   MasterServerConnection *findClient(Nonce &clientId)   // Should be const, but that won't compile for reasons not yet determined!!
+   MasterServerConnection *MasterServerConnection::findClient(Nonce &clientId)   // Should be const, but that won't compile for reasons not yet determined!!
    {
       if(!clientId.isValid())
          return NULL;
@@ -537,7 +427,7 @@ public:
 
    // Write a current count of clients/servers for display on a website, using JSON format
    // This gets updated whenver we gain or lose a server, at most every REWRITE_TIME ms
-   static void writeClientServerList_JSON()
+   void MasterServerConnection::writeClientServerList_JSON()
    {
       if(gJasonOutFile == "")
          return;
@@ -615,10 +505,8 @@ public:
    }
    */
 
-   bool isAuthenticated() { return mAuthenticated; }
-
    // This is called when a client wishes to arrange a connection with a server
-   TNL_DECLARE_RPC_OVERRIDE(c2mRequestArrangedConnection, (U32 requestId, IPAddress remoteAddress, IPAddress internalAddress,
+   TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mRequestArrangedConnection, (U32 requestId, IPAddress remoteAddress, IPAddress internalAddress,
                                                            ByteBufferPtr connectionParameters) )
    {
       // First, make sure that we're connected with the server that they're requesting a connection with
@@ -687,7 +575,7 @@ public:
    /// should be sent back as the requestId field.  The internalAddress is the server's self-determined IP address.
 
    // Called to indicate a connect request is being accepted.
-   TNL_DECLARE_RPC_OVERRIDE(s2mAcceptArrangedConnection, (U32 requestId, IPAddress internalAddress, ByteBufferPtr connectionData))
+   TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mAcceptArrangedConnection, (U32 requestId, IPAddress internalAddress, ByteBufferPtr connectionData))
    {
       GameConnectRequest *req = findAndRemoveRequest(requestId);
       if(!req)
@@ -724,7 +612,7 @@ public:
 
 
    // TODO: Delete after 014
-   TNL_DECLARE_RPC_OVERRIDE(c2mAcceptArrangedConnection, (U32 requestId, IPAddress internalAddress, ByteBufferPtr connectionData))
+   TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mAcceptArrangedConnection, (U32 requestId, IPAddress internalAddress, ByteBufferPtr connectionData))
    {
       GameConnectRequest *req = findAndRemoveRequest(requestId);
       if(!req)
@@ -761,7 +649,7 @@ public:
 
 
    // TODO: Delete after 014 -- replaced with identical s2mRejectArrangedConnection
-   TNL_DECLARE_RPC_OVERRIDE(c2mRejectArrangedConnection, (U32 requestId, ByteBufferPtr rejectData))
+   TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mRejectArrangedConnection, (U32 requestId, ByteBufferPtr rejectData))
    {
       GameConnectRequest *req = findAndRemoveRequest(requestId);
       if(!req)
@@ -780,7 +668,7 @@ public:
    // s2mRejectArrangedConnection notifies the Master Server that the server is rejecting the arranged connection
    // request specified by the requestId.  The rejectData will be passed along to the requesting client.
    // Called to indicate a connect request is being rejected.
-   TNL_DECLARE_RPC_OVERRIDE(s2mRejectArrangedConnection, (U32 requestId, ByteBufferPtr rejectData))
+   TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mRejectArrangedConnection, (U32 requestId, ByteBufferPtr rejectData))
    {
       GameConnectRequest *req = findAndRemoveRequest(requestId);
       if(!req)
@@ -798,7 +686,7 @@ public:
 
 
    // TODO: Delete after 014 -- replaced with identical s2mUpdateServerStatus
-   TNL_DECLARE_RPC_OVERRIDE(c2mUpdateServerStatus, (
+   TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mUpdateServerStatus, (
       StringTableEntry levelName, StringTableEntry levelType,
       U32 botCount, U32 playerCount, U32 maxPlayers, U32 infoFlags))
    {
@@ -829,7 +717,7 @@ public:
    // s2mUpdateServerStatus updates the status of a server to the Master Server, specifying the current game
    // and mission types, any player counts and the current info flags.
    // Updates the master with the current status of a game server.
-   TNL_DECLARE_RPC_OVERRIDE(s2mUpdateServerStatus, (StringTableEntry levelName, StringTableEntry levelType,
+   TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mUpdateServerStatus, (StringTableEntry levelName, StringTableEntry levelType,
                                                     U32 botCount, U32 playerCount, U32 maxPlayers, U32 infoFlags))
    {
       // Only accept updates from game servers
@@ -857,7 +745,7 @@ public:
 
 
    // Send player statistics to the master server     ==> deprecated
-   TNL_DECLARE_RPC_OVERRIDE(s2mSendPlayerStatistics, (StringTableEntry playerName, 
+   TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mSendPlayerStatistics, (StringTableEntry playerName, 
                                                       U16 kills, U16 deaths, U16 suicides, Vector<U16> shots, Vector<U16> hits))
    {
       S32 totalShots = 0, totalHits = 0;
@@ -873,7 +761,7 @@ public:
    }
 
    // Send player statistics to the master server     ==> deprecated as of 015
-   TNL_DECLARE_RPC_OVERRIDE(s2mSendPlayerStatistics_2, (StringTableEntry playerName, StringTableEntry teamName, 
+   TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mSendPlayerStatistics_2, (StringTableEntry playerName, StringTableEntry teamName, 
                                                         U16 kills, U16 deaths, U16 suicides, Vector<U16> shots, Vector<U16> hits))
    {
       S32 totalShots = 0, totalHits = 0;
@@ -891,7 +779,7 @@ public:
 
 
    //// Send player statistics to the master server
-   //TNL_DECLARE_RPC_OVERRIDE(s2mSendPlayerStatistics_3, (StringTableEntry playerName, Vector<U8> id, bool isBot, 
+   //TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mSendPlayerStatistics_3, (StringTableEntry playerName, Vector<U8> id, bool isBot, 
    //                                                     StringTableEntry teamName, S32 score,
    //                                                     U16 kills, U16 deaths, U16 suicides, Vector<U16> shots, Vector<U16> hits))
    //{
@@ -922,35 +810,35 @@ public:
 
 
    // Send game statistics to the master server  ==> Deprecated
-   TNL_DECLARE_RPC_OVERRIDE(s2mSendGameStatistics, (StringTableEntry gameType, StringTableEntry levelName, 
+   TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mSendGameStatistics, (StringTableEntry gameType, StringTableEntry levelName, 
                                                     RangedU32<0,128> players, S16 timeInSecs))
    {
-      string timestr = itos(timeInSecs / 60) + ":";
-      timestr += ((timeInSecs % 60 < 10) ? "0" : "") + itos(timeInSecs % 60);
+      //string timestr = itos(timeInSecs / 60) + ":";
+      //timestr += ((timeInSecs % 60 < 10) ? "0" : "") + itos(timeInSecs % 60);
 
       // GAME | GameType | Time | Level name | players | time
-      logprintf(LogConsumer::StatisticsFilter, "GAME\t%s\t%s\t%s\t%d\t%s", 
-                    getTimeStamp().c_str(), gameType.getString(), levelName.getString(), players.value, timestr.c_str() );
+      //logprintf(LogConsumer::StatisticsFilter, "GAME\t%s\t%s\t%s\t%d\t%s", 
+      //              getTimeStamp().c_str(), gameType.getString(), levelName.getString(), players.value, timestr.c_str() );
    }
 
 
    // Send game statistics to the master server   ==> Deprecated starting in 015
-   TNL_DECLARE_RPC_OVERRIDE(s2mSendGameStatistics_2, (StringTableEntry gameType, StringTableEntry levelName, 
+   TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mSendGameStatistics_2, (StringTableEntry gameType, StringTableEntry levelName, 
                                                       Vector<StringTableEntry> teams, Vector<S32> teamScores,
                                                       Vector<RangedU32<0,256> > colorR, Vector<RangedU32<0,256> > colorG, Vector<RangedU32<0,256> > colorB, 
                                                       RangedU32<0,128> players, S16 timeInSecs))
    {
-      string timestr = itos(timeInSecs / 60) + ":";
-      timestr += ((timeInSecs % 60 < 10) ? "0" : "") + itos(timeInSecs % 60);
+      //string timestr = itos(timeInSecs / 60) + ":";
+      //timestr += ((timeInSecs % 60 < 10) ? "0" : "") + itos(timeInSecs % 60);
 
       // GAME | stats version (2) | GameType | time | level name | teams | players | time
-      logprintf(LogConsumer::StatisticsFilter, "GAME\t2\t%s\t%s\t%s\t%d\t%d\t%s", 
-                     getTimeStamp().c_str(), gameType.getString(), levelName.getString(), teams.size(), players.value, timestr.c_str() );
+      //logprintf(LogConsumer::StatisticsFilter, "GAME\t2\t%s\t%s\t%s\t%d\t%d\t%s", 
+      //               getTimeStamp().c_str(), gameType.getString(), levelName.getString(), teams.size(), players.value, timestr.c_str() );
 
       // TEAM | stats version (2) | team name | score | R | G |B
-      for(S32 i = 0; i < teams.size(); i++)
-         logprintf(LogConsumer::StatisticsFilter, "TEAM\t2\t%s\t%d\t%d\t%d\t%d", 
-                     teams[i].getString(), teamScores[i], (U32)colorR[i], (U32)colorG[i], (U32)colorB[i]);
+      //for(S32 i = 0; i < teams.size(); i++)
+      //   logprintf(LogConsumer::StatisticsFilter, "TEAM\t2\t%s\t%d\t%d\t%d\t%d", 
+      //               teams[i].getString(), teamScores[i], (U32)colorR[i], (U32)colorG[i], (U32)colorB[i]);
    }
 
    /////////////////////////////////////////////////////////////////////////////////////
@@ -960,7 +848,7 @@ public:
 
    // Send game statistics to the master server   ==> Current as of 015
    // Note that teams are sent in descending order, most players to fewest  
- //  TNL_DECLARE_RPC_OVERRIDE(s2mSendGameStatistics_3, (StringTableEntry gameType, bool teamGame, StringTableEntry levelName, 
+ //  TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mSendGameStatistics_3, (StringTableEntry gameType, bool teamGame, StringTableEntry levelName, 
  //                                                     Vector<StringTableEntry> teams, Vector<S32> teamScores,
  //                                                     Vector<RangedU32<0,0xFFFFFF> > color, 
  //                                                     U16 timeInSecs, Vector<StringTableEntry> playerNames, Vector<Vector<U8> > playerIds,
@@ -969,7 +857,7 @@ public:
  //                                                     Vector<U16> teamSwitchCount, Vector<Vector<U16> > shots, Vector<Vector<U16> > hits))
  //  {
    //
- ////  TNL_DECLARE_RPC_OVERRIDE(s2mSendGameStatistics_3, (GameStatistics3 gameStat))
+ ////  TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mSendGameStatistics_3, (GameStatistics3 gameStat))
    ////{
  ////     StringTableEntry gameType = gameStat.gameType;
  ////     bool teamGame = gameStat.teamGame;
@@ -1167,7 +1055,7 @@ public:
  //     dbWriter.insertStats(gameStats);
  //  }
 
-   void processIsAuthenticated(GameStats *gameStats)
+   void MasterServerConnection::processIsAuthenticated(GameStats *gameStats)
    {
       for(S32 i = 0; i < gameStats->teamStats.size(); i++)
       {
@@ -1183,7 +1071,7 @@ public:
    }
 
 
-   void SaveStatistics(VersionedGameStats &stats)
+   void MasterServerConnection::SaveStatistics(VersionedGameStats &stats)
    {
       if(!stats.valid)
       {
@@ -1217,14 +1105,14 @@ public:
       databaseWriter.insertStats(*gameStats);
 
    }
-   TNL_DECLARE_RPC_OVERRIDE(s2mSendStatistics, (VersionedGameStats stats))
+   TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mSendStatistics, (VersionedGameStats stats))
    {
       SaveStatistics(stats);
    }
 
 
    // Game server wants to know if user name has been verified
-   TNL_DECLARE_RPC_OVERRIDE(s2mRequestAuthentication, (Vector<U8> id, StringTableEntry name))
+   TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mRequestAuthentication, (Vector<U8> id, StringTableEntry name))
    {
       Nonce clientId(id);     // Reconstitute our id
 
@@ -1249,7 +1137,7 @@ public:
    }
 
 
-   string cleanName(string name)
+   string MasterServerConnection::cleanName(string name)
    {
       trim(name);
       if(name == "")
@@ -1259,7 +1147,7 @@ public:
    }
 
 
-   bool readConnectRequest(BitStream *bstream, NetConnection::TerminationReason &reason)
+   bool MasterServerConnection::readConnectRequest(BitStream *bstream, NetConnection::TerminationReason &reason)
    {
       if(!Parent::readConnectRequest(bstream, reason))
          return false;
@@ -1453,7 +1341,7 @@ public:
    //}
 
 
-   TNL_DECLARE_RPC_OVERRIDE(c2mJoinGlobalChat, ())
+   TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mJoinGlobalChat, ())
    { 
       isInGlobalChat = true;
       
@@ -1471,7 +1359,7 @@ public:
    }
 
 
-   TNL_DECLARE_RPC_OVERRIDE(c2mLeaveGlobalChat, ())
+   TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mLeaveGlobalChat, ())
    {
       isInGlobalChat = false;
 
@@ -1482,7 +1370,7 @@ public:
 
 
    // Got out-of-game chat message from client, need to relay it to others
-   TNL_DECLARE_RPC_OVERRIDE(c2mSendChat, (StringPtr message))
+   TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mSendChat, (StringPtr message))
    {
       bool isPrivate = false;
       char privateTo[MAX_PLAYER_NAME_LENGTH + 1];
@@ -1541,9 +1429,6 @@ public:
          logprintf(LogConsumer::LogChat, "Relayed chat msg from %s: %s", mPlayerOrServerName.getString(), message.getString());
    }
 
-   TNL_DECLARE_NETCONNECTION(MasterServerConnection);
-
-};
 
 TNL_IMPLEMENT_NETCONNECTION(MasterServerConnection, NetClassGroupMaster, true);
 

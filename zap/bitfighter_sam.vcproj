@@ -42,12 +42,12 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions="/MP2"
 				Optimization="0"
 				FavorSizeOrSpeed="1"
-				AdditionalIncludeDirectories="../tnl;.;../boost;../openal;../libspeex;../libsdl;../lua/include"
+				AdditionalIncludeDirectories="../tnl;../boost;../libsdl;../openal;../libspeex;../libpng;../zlib"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;TNL_ENABLE_LOGGING;TNL_DEBUG;SAM_ONLY"
 				GeneratePreprocessedFile="0"
-				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				RuntimeTypeInfo="true"
@@ -70,7 +70,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				LinkLibraryDependencies="false"
-				AdditionalDependencies="../lib/OpenAL32.lib ../lib/libogg.lib ../lib/libvorbis.lib ../lib/libvorbisfile.lib ../lib/libspeex.lib ../lib/ALURE32.lib wsock32.lib ../lib/tnld.lib ../lib/libtomcryptd.lib ../lib/lua-vec-d.lib ../lib/SDL.lib ../lib/SDLmain.lib opengl32.lib winmm.lib"
+				AdditionalDependencies="../lib/OpenAL32.lib ../lib/libogg.lib ../lib/libvorbis.lib ../lib/libvorbisfile.lib ../lib/libspeex.lib ../lib/ALURE32.lib wsock32.lib ../lib/tnld.lib ../lib/libtomcryptd.lib ../lib/lua-vec-d.lib ../lib/SDL.lib ../lib/SDLmain.lib opengl32.lib winmm.lib ../lib/libpng14.lib ../lib/zlib.lib"
 				OutputFile="../exe/Bitfighter_d.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="../tnl;../lib"
@@ -129,10 +129,11 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions="/MP2"
 				Optimization="2"
 				FavorSizeOrSpeed="1"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="../tnl;../boost;../libsdl;../openal;../libspeex"
+				AdditionalIncludeDirectories="../tnl;../boost;../libsdl;../openal;../libspeex;../libpng;../zlib"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;TNL_ENABLE_LOGGING;_SECURE_SCL=0"
 				RuntimeLibrary="0"
 				EnableEnhancedInstructionSet="0"
@@ -156,7 +157,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				LinkLibraryDependencies="false"
-				AdditionalDependencies="../lib/OpenAL32.lib ../lib/libogg.lib ../lib/libspeex.lib ../lib/libvorbis.lib ../lib/libvorbisfile.lib ../lib/ALURE32.lib wsock32.lib ../lib/tnl.lib ../lib/libtomcrypt.lib ../lib/lua-vec.lib ../lib/SDL.lib ../lib/SDLmain.lib opengl32.lib winmm.lib"
+				AdditionalDependencies="../lib/OpenAL32.lib ../lib/libogg.lib ../lib/libspeex.lib ../lib/libvorbis.lib ../lib/libvorbisfile.lib ../lib/ALURE32.lib wsock32.lib ../lib/tnl.lib ../lib/libtomcrypt.lib ../lib/lua-vec.lib ../lib/SDL.lib ../lib/SDLmain.lib opengl32.lib winmm.lib ../lib/libpng14.lib ../lib/zlib.lib"
 				OutputFile="..\exe\Bitfighter.exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="../tnl;../lib"
@@ -218,12 +219,12 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions="/MP2"
 				Optimization="0"
 				FavorSizeOrSpeed="1"
-				AdditionalIncludeDirectories="../tnl;.;../boost;../openal;../libspeex;../libsdl;../lua/include;../mysql++;&quot;C:\Program Files\MySQL\MySQL Server 5.1\include&quot;"
+				AdditionalIncludeDirectories="../tnl;../boost;../libsdl;../openal;../libspeex;../libpng;../zlib;&quot;../mysql++&quot;;&quot;C:\Program Files\MySQL\MySQL Server 5.1\include&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;TNL_ENABLE_LOGGING;TNL_DEBUG;BF_WRITE_TO_MYSQL;MYSQLPP_NO_DLL;SAM_ONLY"
 				GeneratePreprocessedFile="0"
-				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				RuntimeTypeInfo="true"
@@ -246,7 +247,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				LinkLibraryDependencies="false"
-				AdditionalDependencies="../lib/OpenAL32.lib ../lib/libogg.lib ../lib/libspeex.lib ../lib/libvorbis.lib ../lib/libvorbisfile.lib ../lib/ALURE32.lib wsock32.lib ../lib/tnld.lib ../lib/libtomcryptd.lib ../lib/lua-vec-d.lib ../lib/mysqlppd.lib Ws2_32.lib ../lib/SDL.lib ../lib/SDLmain.lib opengl32.lib winmm.lib"
+				AdditionalDependencies="../lib/OpenAL32.lib ../lib/libogg.lib ../lib/libspeex.lib ../lib/libvorbis.lib ../lib/libvorbisfile.lib ../lib/ALURE32.lib wsock32.lib ../lib/tnld.lib ../lib/libtomcryptd.lib ../lib/lua-vec-d.lib ../lib/mysqlppd.lib Ws2_32.lib ../lib/SDL.lib ../lib/SDLmain.lib opengl32.lib winmm.lib ../lib/libpng14.lib ../lib/zlib.lib"
 				OutputFile="../exe/Bitfighter_mysql_d.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="../tnl;../lib"
@@ -305,10 +306,11 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions="/MP2"
 				Optimization="2"
 				FavorSizeOrSpeed="1"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="../tnl;../boost;../libsdl;../openal;../libspeex;&quot;../mysql++&quot;;&quot;C:\Program Files\MySQL\MySQL Server 5.1\include&quot;"
+				AdditionalIncludeDirectories="../tnl;../boost;../libsdl;../openal;../libspeex;../libpng;../zlib;&quot;../mysql++&quot;;&quot;C:\Program Files\MySQL\MySQL Server 5.1\include&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;TNL_ENABLE_LOGGING;_SECURE_SCL=0;BF_WRITE_TO_MYSQL;MYSQLPP_NO_DLL"
 				RuntimeLibrary="0"
 				EnableEnhancedInstructionSet="0"
@@ -332,7 +334,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				LinkLibraryDependencies="false"
-				AdditionalDependencies="../lib/OpenAL32.lib ../lib/libogg.lib ../lib/libspeex.lib ../lib/libvorbis.lib ../lib/libvorbisfile.lib ../lib/ALURE32.lib wsock32.lib ../lib/tnl.lib ../lib/libtomcrypt.lib ../lib/lua-vec.lib ../lib/mysqlpp.lib ../lib/SDL.lib ../lib/SDLmain.lib opengl32.lib winmm.lib"
+				AdditionalDependencies="../lib/OpenAL32.lib ../lib/libogg.lib ../lib/libspeex.lib ../lib/libvorbis.lib ../lib/libvorbisfile.lib ../lib/ALURE32.lib wsock32.lib ../lib/tnl.lib ../lib/libtomcrypt.lib ../lib/lua-vec.lib ../lib/mysqlpp.lib ../lib/SDL.lib ../lib/SDLmain.lib opengl32.lib winmm.lib ../lib/libpng14.lib ../lib/zlib.lib"
 				OutputFile="..\exe\Bitfighter_mysql.exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="../tnl;../lib"
