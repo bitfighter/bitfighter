@@ -48,7 +48,6 @@ ScreenShooter::~ScreenShooter()
 {
 }
 
-extern string joindir(const string &path, const string &filename);
 extern ConfigDirectories gConfigDirs;
 
 // Thanks to the good developers of naev for excellent code to base this off of.

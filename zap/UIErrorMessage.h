@@ -41,7 +41,7 @@ public:
    const char *mInstr;
    const char *mMessage[MAX_LINES];
    void onActivate();
-   void setMessage (U32 id, const char *message);
+   void setMessage (S32 id, const char *message);
    void setTitle(const char *message);
    void reset();
    void setInstr(const char *message);

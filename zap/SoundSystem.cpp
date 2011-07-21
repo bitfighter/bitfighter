@@ -202,8 +202,6 @@ static S32 currentlyPlayingIndex;
 extern ConfigDirectories gConfigDirs;
 extern bool gDedicatedServer;
 
-extern string joindir(const string &path, const string &filename);
-
 SoundSystem::SoundSystem()
 {
 }

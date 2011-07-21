@@ -55,6 +55,7 @@
 #include "GeomUtils.h"
 #include "oglconsole.h"
 #include "game.h"
+#include "stringUtils.h"
 
 #include "SDL/SDL_opengl.h"
 
@@ -1445,7 +1446,6 @@ void Robot::startBots()
 
 
 extern ConfigDirectories gConfigDirs;
-extern string joindir(const string &path, const string &filename);
 
 bool Robot::startLua()
 {

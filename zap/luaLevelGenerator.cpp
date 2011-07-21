@@ -315,7 +315,6 @@ S32 LuaLevelGenerator::getPlayerCount(lua_State *L)
 
 
 extern ConfigDirectories gConfigDirs;
-extern string joindir(const string &path, const string &filename);
 
 // TODO: This is almost identical to the same-named function in robot.cpp, but each call their own logError function.  How can we combine?
 bool LuaLevelGenerator::loadLuaHelperFunctions(lua_State *L, const char *caller)

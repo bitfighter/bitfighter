@@ -91,7 +91,8 @@ bool makeSureFolderExists(const string &dir);      // Like the man said: Make su
 bool getFilesFromFolder(const string& dir, Vector<string>& files, const string& extension = "");
 
 
-// Two different variations on joining file and folder names
+// Different variations on joining file and folder names
+string joindir(const string &path, const string &filename);
 string strictjoindir(const string &part1, const string &part2);
 string strictjoindir(const string &part1, const string &part2, const string &part3);
 

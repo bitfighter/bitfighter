@@ -57,7 +57,7 @@ void ErrorMessageUserInterface::reset()
 }
 
 // First line is 1
-void ErrorMessageUserInterface::setMessage(U32 id, const char *message)
+void ErrorMessageUserInterface::setMessage(S32 id, const char *message)
 {
    TNLAssert(id >= 1 && id <= MAX_LINES, "Invalid line id!");
    mMessage[id-1] = message;

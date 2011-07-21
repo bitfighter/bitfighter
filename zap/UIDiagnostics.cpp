@@ -390,7 +390,7 @@ void DiagnosticUserInterface::render()
       glColor3f(1, 0, 1);
       drawString(rawAxisPosX, rawAxisPosY-40, textsize - 2, "Raw Analog Axis:");
       glBegin(GL_LINES);
-      for(U32 i = 0; i < Joystick::rawAxisCount; i++) // shows RAW axis inputs
+      for(S32 i = 0; i < Joystick::rawAxisCount; i++) // shows RAW axis inputs
       {
          glColor3f(0.5,0,0);
          glVertex2f(i*8+rawAxisPosX, rawAxisPosY - 20);

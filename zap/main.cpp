@@ -132,6 +132,7 @@ using namespace TNL;
 #include "Event.h"
 #include "ScreenInfo.h"
 #include "Joystick.h"
+#include "stringUtils.h"
 
 #include "SDL/SDL.h"
 #include "SDL/SDL_opengl.h"
@@ -546,21 +547,6 @@ void dedicatedServerLoop()
 {
    for(;;)        // Loop forever!
       idle();     // Idly!
-}
-
-
-string joindir(const string &path, const string &filename)
-{
-   // If there is no path, there's nothing to join -- just return filename
-   if(path == "")
-      return filename;
-
-   // Does path already have a trailing delimiter?  If so, we'll use that.
-   if(path[path.length() - 1] == '\\' || path[path.length() - 1] == '/')
-      return path + filename;
-
-   // Otherwise, join with a delimeter.  This works on Win, OS X, and Linux.
-   return path + "/" + filename;
 }
 
 ////////////////////////////////////////

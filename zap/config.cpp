@@ -1559,7 +1559,6 @@ void writeSkipList()
 //////////////////////////////////
 //////////////////////////////////
 
-extern string joindir(const string &path, const string &filename);
 extern CmdLineSettings gCmdLineSettings;
 
 string resolutionHelper(const string &cmdLineDir, const string &rootDataDir, const string &subdir)
