@@ -73,7 +73,7 @@ void ScreenShooter::saveScreenshot()
    S32 height = gScreenInfo.getWindowHeight();
 
    // Allocate buffer
-   GLubyte *screenBuffer = new GLubyte[(BitsPerPixel/BitDepth) * width * height];  // Glubyte * 3 = 24 bits
+   GLubyte *screenBuffer = new GLubyte[BytesPerPixel * width * height];  // Glubyte * 3 = 24 bits
    png_bytep *rows = new png_bytep[height];
 
    // Read pixels from buffer - slow operation
@@ -82,7 +82,7 @@ void ScreenShooter::saveScreenshot()
 
    // Convert Data
    for (S32 i = 0; i < height; i++)
-      rows[i] = &screenBuffer[(height - i - 1) * ((BitsPerPixel/BitDepth) * width)];  // Backwards!
+      rows[i] = &screenBuffer[(height - i - 1) * (BytesPerPixel * width)];  // Backwards!
 
    // Write the PNG!
    if(!writePNG(fullFilename.c_str(), rows, width, height, PNG_COLOR_TYPE_RGB, BitDepth))
