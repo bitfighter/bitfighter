@@ -2076,8 +2076,8 @@ Move *GameUserInterface::getCurrentMove()
    if((mCurrentMode != ChatMode) && !gDisableShipKeyboardInput && !OGLCONSOLE_GetVisibility())
    {
       InputMode inputMode = gIniSettings.inputMode;
-		mCurrentMove.x = (!mRightDisabled && getKeyState(keyRIGHT[inputMode]) ? 1 : 0) - (!mLeftDisabled && getKeyState(keyLEFT[inputMode]) ? 1 : 0);
-      mCurrentMove.y = (!mUpDisabled && getKeyState(keyUP[inputMode]) ? 1 : 0) - (!mDownDisabled && getKeyState(keyDOWN[inputMode]) ? 1 : 0);
+      mCurrentMove.x = (!mRightDisabled && getKeyState(keyRIGHT[inputMode]) ? 1 : 0) - (!mLeftDisabled && getKeyState(keyLEFT[inputMode]) ? 1 : 0);
+      mCurrentMove.y = (!mDownDisabled && getKeyState(keyDOWN[inputMode]) ? 1 : 0) - (!mUpDisabled && getKeyState(keyUP[inputMode]) ? 1 : 0);
 
       mCurrentMove.fire = mFiring;
 
