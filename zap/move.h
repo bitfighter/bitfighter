@@ -26,6 +26,7 @@
 #ifndef _MOVE_H_
 #define _MOVE_H_
 
+#include "Point.h"
 #include "../tnl/tnlLog.h"
 #include "../tnl/tnlTypes.h"
 #include "../tnl/tnlBitStream.h"
@@ -51,13 +52,10 @@ inline F32 unitToRadians(F32 angle)    { return angle * Float2Pi; }
 
 
 // Can represent a move by a human player or a robot
-struct Move
+class Move : public Point
 {
-   float left;
-   float right;
-   float up;
-   float down;
-   float angle;
+public:
+   F32 angle;
    bool fire;
    bool module[ShipModuleCount];    // Is given module active?
    U32 time;

@@ -31,6 +31,7 @@
 #include "gameType.h"
 #include "gameNetInterface.h"
 #include "gameObjectRender.h"
+#include "Colors.h"
 
 namespace Zap
 {

@@ -35,6 +35,7 @@
 //#include "UIEditor.h"      // For EditorUserInterface->getDatabase, and WallSegment def  TODO: can we get rid of this somehow?
 #include "Colors.h"
 #include "game.h"
+#include "stringUtils.h"
 
 #include <math.h>
 

@@ -226,7 +226,6 @@ GameConnection *GameConnection::getNextClient()
 void GameConnection::setClientRef(ClientRef *theRef)
 {
    TNLAssert(theRef, "NULL ClientRef!");
-   TNLAssert(mClientRef.isNull(), "ClientRef have already been set, did you forget to delete ClientRef?");
    mClientRef = theRef;
 }
 

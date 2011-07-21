@@ -78,9 +78,9 @@ void Event::updateJoyAxesDirections(U32 axisMask, S16 value)
    // Also, normalize the input value to a floating point scale of 0 to 1
    F32 normalValue;
    if (value < -Joystick::SensitivityThreshold)
-      normalValue = fabs((F32)(value + Joystick::SensitivityThreshold)/(F32)(S16_MAX - Joystick::SensitivityThreshold));
+      normalValue = (F32)(-value - Joystick::SensitivityThreshold)/(F32)(S16_MAX - Joystick::SensitivityThreshold);
    else if (value > Joystick::SensitivityThreshold)
-      normalValue = fabs((F32)(value - Joystick::SensitivityThreshold)/(F32)(S16_MAX - Joystick::SensitivityThreshold));
+      normalValue = (F32)(value - Joystick::SensitivityThreshold)/(F32)(S16_MAX - Joystick::SensitivityThreshold);
    else
       normalValue = 0.0f;
 

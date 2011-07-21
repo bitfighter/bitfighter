@@ -1832,59 +1832,29 @@ static void joystickUpdateMove(Move *theMove)
 {
    // One of each of left/right axis and up/down axis should be 0 by this point
    // but let's guarantee it..   why?
-   if(Joystick::JoystickInputData[MoveAxesLeft].value > 0)
-   {
-      theMove->left = Joystick::JoystickInputData[MoveAxesLeft].value;
-      theMove->right = 0;
-   }
-   else
-   {
-      theMove->left = 0;
-      theMove->right = Joystick::JoystickInputData[MoveAxesRight].value;
-   }
+   theMove->x = Joystick::JoystickInputData[MoveAxesRight].value - Joystick::JoystickInputData[MoveAxesLeft].value;
+   theMove->y = Joystick::JoystickInputData[MoveAxesDown].value - Joystick::JoystickInputData[MoveAxesUp].value;
 
-   if(Joystick::JoystickInputData[MoveAxesUp].value > 0)
-   {
-      theMove->up = Joystick::JoystickInputData[MoveAxesUp].value;
-      theMove->down = 0;
-   }
-   else
-   {
-      theMove->up = 0;
-      theMove->down = Joystick::JoystickInputData[MoveAxesDown].value;
-   }
+   //logprintf(
+   //      "Joystick axis values. Move: Left: %f, Right: %f, Up: %f, Down: %f\nShoot: Left: %f, Right: %f, Up: %f, Down: %f ",
+   //      Joystick::JoystickInputData[MoveAxesLeft].value, Joystick::JoystickInputData[MoveAxesRight].value,
+   //      Joystick::JoystickInputData[MoveAxesUp].value, Joystick::JoystickInputData[MoveAxesDown].value,
+   //      Joystick::JoystickInputData[ShootAxesLeft].value, Joystick::JoystickInputData[ShootAxesRight].value,
+   //      Joystick::JoystickInputData[ShootAxesUp].value, Joystick::JoystickInputData[ShootAxesDown].value
+   //      );
 
-   logprintf(
-         "Joystick axis values. Move: Left: %f, Right: %f, Up: %f, Down: %f\nShoot: Left: %f, Right: %f, Up: %f, Down: %f ",
-         Joystick::JoystickInputData[MoveAxesLeft].value, Joystick::JoystickInputData[MoveAxesRight].value,
-         Joystick::JoystickInputData[MoveAxesUp].value, Joystick::JoystickInputData[MoveAxesDown].value,
-         Joystick::JoystickInputData[ShootAxesLeft].value, Joystick::JoystickInputData[ShootAxesRight].value,
-         Joystick::JoystickInputData[ShootAxesUp].value, Joystick::JoystickInputData[ShootAxesDown].value
-         );
-
-   logprintf(
-            "Move values. Move: Left: %f, Right: %f, Up: %f, Down: %f",
-            theMove->left, theMove->right,
-            theMove->up, theMove->down
-            );
+   //logprintf(
+   //         "Move values. Move: Left: %f, Right: %f, Up: %f, Down: %f",
+   //         theMove->left, theMove->right,
+   //         theMove->up, theMove->down
+   //         );
 
 
    // Goofball implementation of enableExperimentalAimMode here replicates old behavior when setting is disabled
-   F32 x, y;
-   if (Joystick::JoystickInputData[ShootAxesLeft].value > 0)
-      x = -Joystick::JoystickInputData[ShootAxesLeft].value;
-   else
-      x = Joystick::JoystickInputData[ShootAxesRight].value;
 
+   //logprintf("XY from shoot axes. x: %f, y: %f", x, y);
 
-   if (Joystick::JoystickInputData[ShootAxesUp].value > 0)
-      y = -Joystick::JoystickInputData[ShootAxesUp].value;
-   else
-      y = Joystick::JoystickInputData[ShootAxesDown].value;
-
-   logprintf("XY from shoot axes. x: %f, y: %f", x, y);
-
-   Point p(x, y);
+   Point p(Joystick::JoystickInputData[ShootAxesRight].value - Joystick::JoystickInputData[ShootAxesLeft].value, Joystick::JoystickInputData[ShootAxesDown].value - Joystick::JoystickInputData[ShootAxesUp].value);
    F32 plen = p.len();
 
    F32 maxplen = max(fabs(p.x), fabs(p.y));

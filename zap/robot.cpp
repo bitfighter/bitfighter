@@ -356,10 +356,8 @@ S32 LuaRobot::setThrust(lua_State *L)
 
    Move move = thisRobot->getCurrentMove();
 
-   move.up = sin(ang) <= 0 ? -vel * sin(ang) : 0;
-   move.down = sin(ang) > 0 ? vel * sin(ang) : 0;
-   move.right = cos(ang) >= 0 ? vel * cos(ang) : 0;
-   move.left = cos(ang) < 0 ? -vel * cos(ang) : 0;
+   move.x = vel * cos(ang);
+   move.y = vel * sin(ang);
 
    thisRobot->setCurrentMove(move);
 
@@ -480,10 +478,8 @@ S32 LuaRobot::setThrustPt(lua_State *L)      // (number, point)
 
    Move move = thisRobot->getCurrentMove();
 
-   move.up = sin(ang) < 0 ? -vel * sin(ang) : 0;
-   move.down = sin(ang) > 0 ? vel * sin(ang) : 0;
-   move.right = cos(ang) > 0 ? vel * cos(ang) : 0;
-   move.left = cos(ang) < 0 ? -vel * cos(ang) : 0;
+   move.x = vel * cos(ang);
+   move.y = vel * sin(ang);
 
    thisRobot->setCurrentMove(move);
 
@@ -506,10 +502,8 @@ S32 LuaRobot::setThrustToPt(lua_State *L)
 
    F32 vel = dist / ((F32) move.time);      // v = d / t, t is in ms
 
-   move.up = sin(ang) < 0 ? -vel * sin(ang) : 0;
-   move.down = sin(ang) > 0 ? vel * sin(ang) : 0;
-   move.right = cos(ang) > 0 ? vel * cos(ang) : 0;
-   move.left = cos(ang) < 0 ? -vel * cos(ang) : 0;
+   move.x = vel * cos(ang);
+   move.y = vel * sin(ang);
 
    thisRobot->setCurrentMove(move);
 
@@ -1866,10 +1860,8 @@ void Robot::idle(GameObject::IdleCallPath path)
       // Clear out current move.  It will get set just below with the lua call, but if that function
       // doesn't set the various move components, we want to make sure that they default to 0.
       mCurrentMove.fire = false;
-      mCurrentMove.up = 0;
-      mCurrentMove.down = 0;
-      mCurrentMove.right = 0;
-      mCurrentMove.left = 0;
+      mCurrentMove.x = 0;
+      mCurrentMove.y = 0;
 
       if(isRunningScript)
       {

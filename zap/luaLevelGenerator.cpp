@@ -27,6 +27,8 @@
 #include "gameType.h"
 #include "config.h"     // For definition of ConfigDirectories struct
 #include "game.h"
+#include "stringUtils.h"
+
 namespace Zap
 {
 
