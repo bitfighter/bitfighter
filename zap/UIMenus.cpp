@@ -912,7 +912,7 @@ void OptionsMenuUserInterface::setupMenus()
    INPUT_MODE_MENU_ITEM_INDEX = menuItems.size() - 1;
 
    opts.clear();
-   for(S32 i = 0; i < ControllerTypeCount; i++)
+   for(S32 i = 0; i < ControllerTypeCount + 3; i++)
       opts.push_back(Joystick::joystickTypeToPrettyString(i));
 
    // Simple bounds check -- could be GenericController, UnknownController, or NoController

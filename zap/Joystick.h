@@ -138,6 +138,8 @@ public:
    virtual ~Joystick();
 
    static TNL::U32 ButtonMask;
+	static const TNL::S32 rawAxisCount = 32;
+	static TNL::F32 rawAxis[rawAxisCount];
    static TNL::Vector<const char *> DetectedJoystickNameList;   // All detected joystick names
 
    // static data

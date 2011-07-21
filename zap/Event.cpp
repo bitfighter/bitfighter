@@ -351,6 +351,9 @@ void Event::onMouseButtonUp(S32 x, S32 y, KeyCode keyCode)
 
 void Event::onJoyAxis(U8 whichJoystick, U8 axis, S16 value)
 {
+   if(axis < Joystick::rawAxisCount)
+      Joystick::rawAxis[axis] = (F32)value / (F32)S16_MAX;
+
    // If we are using a predefined controller, get the appropriate axis
    if (gIniSettings.joystickType < ControllerTypeCount)
    {

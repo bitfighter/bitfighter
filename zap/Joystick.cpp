@@ -43,6 +43,7 @@ TNL::Vector<const char *> Joystick::DetectedJoystickNameList;
 TNL::Vector<JoystickInfo> Joystick::PredefinedJoystickList;
 
 TNL::U32 Joystick::ButtonMask = 0;
+TNL::F32 Joystick::rawAxis[Joystick::rawAxisCount];
 TNL::S16 Joystick::SensitivityThreshold = 3200;  // out of 32767
 TNL::S32 Joystick::UseJoystickNumber = 0;
 TNL::U32 Joystick::AxesKeyCodeMask = 0;
