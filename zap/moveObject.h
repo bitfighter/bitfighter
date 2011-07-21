@@ -26,8 +26,6 @@
 #ifndef _MOVEOBJECT_H_
 #define _MOVEOBJECT_H_
 
-#include "tnlTypes.h"
-
 #include "gameObject.h" 
 
 

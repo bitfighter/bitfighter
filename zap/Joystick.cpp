@@ -355,7 +355,6 @@ ControllerTypeType Joystick::autodetectJoystickType()
 }
 
 
-extern IniSettings gIniSettings;
 
 U8 Joystick::remapJoystickButton(U8 button)
 {

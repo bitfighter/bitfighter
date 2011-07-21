@@ -353,7 +353,6 @@ void Ship::selectWeapon()
 
 
 extern CmdLineSettings gCmdLineSettings;
-extern IniSettings gIniSettings;
 
 void Ship::selectWeapon(U32 weaponIdx)
 {
@@ -1507,7 +1506,6 @@ void Ship::emitMovementSparks()
 
 
 extern bool gShowAimVector;
-extern IniSettings gIniSettings;
 
 void Ship::render(S32 layerIndex)
 {

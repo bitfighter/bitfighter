@@ -26,6 +26,7 @@
 #include "JoystickRender.h"
 #include "UI.h"
 #include "gameObjectRender.h"
+#include "config.h"
 
 #include "SDL/SDL_opengl.h"
 
@@ -212,7 +213,6 @@ void JoystickRender::renderDPad(Point center, F32 radius, bool upActivated, bool
 }
 
 
-extern IniSettings gIniSettings;
 extern S32 keyCodeToButtonIndex(KeyCode keyCode);
 
 // Only partially implemented at the moment...

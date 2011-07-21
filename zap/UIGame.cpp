@@ -604,7 +604,6 @@ void GameUserInterface::renderProgressBar()
 
 
 extern CmdLineSettings gCmdLineSettings;
-extern IniSettings gIniSettings;
 
 // Draw the reticle (i.e. the mouse cursor) if we are using keyboard/mouse
 void GameUserInterface::renderReticle()
@@ -1243,7 +1242,6 @@ void GameUserInterface::changeServerNameDescr(GameConnection *gc, GameConnection
    gc->changeParam(allWords.c_str(), type);
 }
 
-extern CIniFile gINI;
 extern md5wrapper md5;
 
 void GameUserInterface::changePassword(GameConnection *gc, GameConnection::ParamType type, const Vector<string> &words, bool required)

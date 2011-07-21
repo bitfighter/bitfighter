@@ -27,11 +27,8 @@
 #define _BOTNAVMESHZONES_H_
 
 #include "gameObject.h"
-#include "gameType.h"
-#include "gameNetInterface.h"
-#include "UI.h"
-#include "gameObjectRender.h"
 #include "polygon.h"
+#include "ship.h"
 
 #include "tnlNetBase.h"
 

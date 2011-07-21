@@ -155,7 +155,6 @@ S32 MenuUserInterface::getYStart()
 }
 
 
-extern IniSettings gIniSettings;
 
 static void renderMenuInstructions()
 {
@@ -754,7 +753,6 @@ void MainMenuUserInterface::onEscape()
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-extern IniSettings gIniSettings;
 
 OptionsMenuUserInterface gOptionsMenuUserInterface;
 

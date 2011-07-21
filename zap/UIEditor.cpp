@@ -3790,7 +3790,6 @@ void EditorMenuUserInterface::onActivate()
 }
 
 
-extern IniSettings gIniSettings;
 extern MenuItem *getWindowModeMenuItem();
 
 //////////

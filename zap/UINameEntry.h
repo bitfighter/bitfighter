@@ -95,7 +95,6 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-extern IniSettings gIniSettings;
 
 class LevelNameEntryUserInterface : public TextEntryUserInterface
 {

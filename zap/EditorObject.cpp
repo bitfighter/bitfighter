@@ -35,6 +35,7 @@
 #include "huntersGame.h"
 #include "Colors.h"
 #include "game.h"
+#include "config.h"
 
 #include "Geometry.h"            // For GeomType enum
 

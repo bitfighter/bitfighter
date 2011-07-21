@@ -29,13 +29,17 @@
 
 #include "Point.h"
 #include "Rect.h"
-#include "tnlTypes.h"
-#include "tnlGhostConnection.h"
+#include "tnlVector.h"
 
-#include "boost/smart_ptr/shared_ptr.hpp"
+namespace TNL{
+   class GhostConnection; // speeds up compiler, or use #include "tnlGhostConnection.h"
+   class BitStream;
+}
+namespace boost{ template<class T> class shared_ptr; }      // or use #include "boost/smart_ptr/shared_ptr.hpp"
 
 using namespace std;
 using namespace TNL;
+
 
 namespace Zap
 {

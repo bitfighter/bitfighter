@@ -202,7 +202,6 @@ TNL_IMPLEMENT_NETCONNECTION(DataConnection, NetClassGroupGame, true);
 
 
 extern string gAdminPassword;
-extern IniSettings gIniSettings;
 extern md5wrapper md5;
 
 // Client sends this message to set up the coming transfer.  Server checks for the password, and then, if the client is requesting

@@ -219,7 +219,6 @@ static ControlString controlsGamepad[] = {
 
 
 extern CmdLineSettings gCmdLineSettings;
-extern IniSettings gIniSettings;
 
 // This has become rather ugly and inelegant.  Sorry!
 void InstructionsUserInterface::renderPage1()

@@ -30,6 +30,7 @@
 #include "Colors.h"
 #include "game.h"
 #include "JoystickRender.h"
+#include "config.h"
 
 #include "SDL/SDL_opengl.h"
 

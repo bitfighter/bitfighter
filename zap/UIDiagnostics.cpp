@@ -46,7 +46,6 @@ namespace Zap
 
 extern string gHostName, gHostDescr;
 extern CmdLineSettings gCmdLineSettings;
-extern IniSettings gIniSettings;
 extern F32 gSimulatedPacketLoss;
 extern string gServerPassword;
 extern string gAdminPassword;

@@ -30,6 +30,7 @@
 #include "gameLoader.h"    // For LevelListLoader::levelList
 #include "version.h"
 #include "Joystick.h"
+#include "stringUtils.h"
 
 #ifdef _MSC_VER
 #pragma warning (disable: 4996)     // Disable POSIX deprecation, certain security warnings that seem to be specific to VC++
@@ -143,8 +144,6 @@ void IniSettings::init()
 }
 
 
-extern CIniFile gINI;
-extern IniSettings gIniSettings;
 extern string lcase(string strToConvert);
 
 // Sorts alphanumerically

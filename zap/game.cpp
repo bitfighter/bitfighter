@@ -1825,7 +1825,6 @@ void ClientGame::setConnectionToServer(GameConnection *theConnection)
    theConnection->mClientGame = this;
 }
 
-extern IniSettings gIniSettings;
 
 extern bool gShowAimVector;
 

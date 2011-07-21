@@ -118,7 +118,6 @@ void TextEntryUserInterface::setString(string str)
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-extern IniSettings gIniSettings;
 
 LevelNameEntryUserInterface gLevelNameEntryUserInterface;
 

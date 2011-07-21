@@ -51,7 +51,6 @@ KeyDefMenuUserInterface gKeyDefMenuUserInterface;
 
 extern bool gDisableShipKeyboardInput;
 extern CmdLineSettings gCmdLineSettings;
-extern IniSettings gIniSettings;
 
 
 // Constructor

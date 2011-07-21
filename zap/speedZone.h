@@ -30,13 +30,11 @@
 #include "gameObject.h"
 #include "gameType.h"
 #include "gameNetInterface.h"
-#include "UI.h"
 #include "gameObjectRender.h"
-#include "ship.h"
-#include "Colors.h"
 
 namespace Zap
 {
+class EditorAttributeMenuUI;
 
 class SpeedZone : public SimpleLine
 {

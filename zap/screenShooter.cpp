@@ -509,7 +509,6 @@ extern ConfigDirectories gConfigDirs;
 extern string joindir(const string &path, const string &filename);
 extern void setOrtho(GLdouble left, GLdouble right, GLdouble bottom, GLdouble top);
 extern void actualizeScreenMode(bool changingInterfaces, bool first = false);
-extern IniSettings gIniSettings;
 
 void Screenshooter::saveScreenshot()
 {

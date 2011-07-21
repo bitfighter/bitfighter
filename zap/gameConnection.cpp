@@ -226,6 +226,7 @@ GameConnection *GameConnection::getNextClient()
 void GameConnection::setClientRef(ClientRef *theRef)
 {
    TNLAssert(theRef, "NULL ClientRef!");
+   TNLAssert(mClientRef.isNull(), "ClientRef have already been set, did you forget to delete ClientRef?");
    mClientRef = theRef;
 }
 
@@ -493,7 +494,6 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sLevelChangePassword, (StringPtr pass), (pas
 }
 
 
-extern CIniFile gINI;
 extern string gHostName;
 extern string gHostDescr;
 extern ServerGame *gServerGame;
@@ -1312,7 +1312,6 @@ bool GameConnection::s2rUploadFile(const char *filename, U8 type)
 
 
 
-extern IniSettings gIniSettings;
 extern Nonce gClientId;
 
 // Send password, client's name, and version info to game server
