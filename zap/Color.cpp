@@ -27,6 +27,7 @@
 #include "stringUtils.h"
 
 using namespace TNL;
+using namespace std;
 
 namespace Zap
 {
