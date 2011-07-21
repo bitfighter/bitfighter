@@ -352,7 +352,7 @@ static const char *sanitizeForJson(const char *value)
    /// connected to it.  A client whose last activity time falls
    /// within the specified delta gets a strike... 3 strikes and
    /// you're out!  Strikes go away after being good for a while.
-   void MasterServerConnection::checkActivityTime(U32 timeDeltaMinimum)
+   bool MasterServerConnection::checkActivityTime(U32 timeDeltaMinimum)
    {
       U32 currentTime = Platform::getRealMilliseconds();
       if(currentTime - mLastActivityTime < timeDeltaMinimum)
@@ -363,12 +363,14 @@ static const char *sanitizeForJson(const char *value)
             logprintf(LogConsumer::LogConnection, "User %s Disconnect due to flood control set at %i milliseconds", 
                                                   mPlayerOrServerName.getString(), timeDeltaMinimum);
             disconnect(ReasonFloodControl, "");
+            return false;
          }
       }
       else if(mStrikeCount > 0)
          mStrikeCount--;
 
       mLastActivityTime = currentTime;
+      return true;
    }
 
    void MasterServerConnection::removeConnectRequest(GameConnectRequest *gcr)
@@ -611,58 +613,6 @@ static const char *sanitizeForJson(const char *value)
    }
 
 
-   // TODO: Delete after 014
-   TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mAcceptArrangedConnection, (U32 requestId, IPAddress internalAddress, ByteBufferPtr connectionData))
-   {
-      GameConnectRequest *req = findAndRemoveRequest(requestId);
-      if(!req)
-         return;
-
-      Address theAddress = getNetAddress();
-      Vector<IPAddress> possibleAddresses;
-
-      theAddress.port++;
-      possibleAddresses.push_back(theAddress.toIPAddress());
-
-      theAddress.port--;
-      possibleAddresses.push_back(theAddress.toIPAddress());
-
-      Address theInternalAddress(internalAddress);
-      Address anyAddress;
-      if(!theInternalAddress.isEqualAddress(anyAddress) && theInternalAddress != theAddress)
-         possibleAddresses.push_back(internalAddress);
-
-
-      char buffer[256];
-      strcpy(buffer, getNetAddress().toString());
-
-      logprintf(LogConsumer::LogConnectionManager, "[%s] Server: %s accept connection request from %s", getTimeStamp().c_str(), buffer,
-                                                        req->initiator.isValid() ? req->initiator->getNetAddress().toString() : "Unknown");
-
-      // If we still know about the requestor, tell him his connection was accepted...
-      if(req->initiator.isValid())
-         req->initiator->m2cArrangedConnectionAccepted(req->initiatorQueryId, possibleAddresses, connectionData);
-
-      delete req;
-   }
-
-
-
-   // TODO: Delete after 014 -- replaced with identical s2mRejectArrangedConnection
-   TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mRejectArrangedConnection, (U32 requestId, ByteBufferPtr rejectData))
-   {
-      GameConnectRequest *req = findAndRemoveRequest(requestId);
-      if(!req)
-         return;
-
-      logprintf(LogConsumer::LogConnectionManager, "[%s] Server: %s reject connection request from %s",
-                                                        getTimeStamp().c_str(), getNetAddress().toString(),
-                                                        req->initiator.isValid() ? req->initiator->getNetAddress().toString() : "Unknown");    
-      if(req->initiator.isValid())
-         req->initiator->m2cArrangedConnectionRejected(req->initiatorQueryId, rejectData);
-
-      delete req;
-   }
 
 
    // s2mRejectArrangedConnection notifies the Master Server that the server is rejecting the arranged connection
@@ -682,35 +632,6 @@ static const char *sanitizeForJson(const char *value)
          req->initiator->m2cArrangedConnectionRejected(req->initiatorQueryId, rejectData);
 
       delete req;
-   }
-
-
-   // TODO: Delete after 014 -- replaced with identical s2mUpdateServerStatus
-   TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mUpdateServerStatus, (
-      StringTableEntry levelName, StringTableEntry levelType,
-      U32 botCount, U32 playerCount, U32 maxPlayers, U32 infoFlags))
-   {
-      // If we didn't know we were a game server, don't accept updates
-      if(!mIsGameServer)
-         return;
-
-      //Update only if anything is different
-      if(mLevelName   != levelName   || mLevelType  != levelType  || mNumBots   != botCount ||
-         mPlayerCount != playerCount || mMaxPlayers != maxPlayers || mInfoFlags != infoFlags )
-      {
-         mLevelName = levelName;
-         mLevelType = levelType;
-
-         mNumBots = botCount;
-         mPlayerCount = playerCount;
-         mMaxPlayers = maxPlayers;
-         mInfoFlags = infoFlags;
-
-         // Check to ensure we're not getting flooded with these requests
-         checkActivityTime(4000);      // 4 secs     version 014 send status every 5 seconds
-
-         gNeedToWriteStatus = true;
-      }
    }
 
 
@@ -737,7 +658,7 @@ static const char *sanitizeForJson(const char *value)
          mInfoFlags = infoFlags;
 
          // Check to ensure we're not getting flooded with these requests
-         checkActivityTime(15000);      // 15 secs
+         checkActivityTime(4000);      // 4 secs     version 014 send status every 5 seconds
 
          gNeedToWriteStatus = true;
       }
@@ -1073,6 +994,9 @@ static const char *sanitizeForJson(const char *value)
 
    void MasterServerConnection::SaveStatistics(VersionedGameStats &stats)
    {
+      if(!checkActivityTime(6000))
+         return;
+
       if(!stats.valid)
       {
          logprintf(LogConsumer::LogWarning, "Invalid stats %d %s %s", stats.version, getNetAddressString(), mPlayerOrServerName.getString());

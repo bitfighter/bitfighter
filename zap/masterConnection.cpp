@@ -156,15 +156,6 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sClientRequestedArrangedCon
    conn->connectArranged(getInterface(), fullPossibleAddresses, nonce, serverNonce, theSharedData, false);
 }
 
-         // TODO: Delete after 014 -- replaced with identical m2sClientRequestedArrangedConnection above
-         // It is safe to say the master will never send this anymore in game version 014 and later.
-         TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cClientRequestedArrangedConnection, 
-                                    (U32 requestId, Vector<IPAddress> possibleAddresses,
-                                     ByteBufferPtr connectionParameters))
-         {
-            logprintf(LogConsumer::LogError, "Master attempts to use outdated protocol. m2sClientRequestedArrangedConnection");
-         }
-
 
 extern ClientInfo gClientInfo;
 
