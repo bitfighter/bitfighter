@@ -30,8 +30,9 @@
 
 #include "tnlLog.h"
 
-#include "string.h"
 #include "SDL/SDL_opengl.h"
+
+#include "string.h"
 
 using namespace TNL;
 using namespace std;
@@ -108,7 +109,11 @@ bool ScreenShooter::writePNG(const char *file_name, png_bytep *rows, S32 width, 
    }
 
    // Build out PNG container
-   pngContainer = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+   if (!(pngContainer = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL))) {
+      logprintf(LogConsumer::LogError, "Unable to create PNG container.");
+      fclose(file);
+      return false;
+   }
 
    // Build out PNG information
    pngInfo = png_create_info_struct(pngContainer);
@@ -125,6 +130,7 @@ bool ScreenShooter::writePNG(const char *file_name, png_bytep *rows, S32 width, 
    png_write_image(pngContainer, rows);
    png_write_end(pngContainer, NULL);
 
+   // Destroy memory allocated to the PNG container
    png_destroy_write_struct(&pngContainer, &pngInfo);
 
    // Close the file
