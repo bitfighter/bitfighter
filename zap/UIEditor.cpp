@@ -275,7 +275,7 @@ void EditorUserInterface::clearDatabase(GridDatabase *database)
    for(S32 i = 0; i < fillVector.size(); i++)
    {
       database->removeFromDatabase(fillVector[i], fillVector[i]->getExtent());
-      //delete fillVector[i];
+      delete dynamic_cast<GameObject *>(fillVector[i]);  // dynamic_cast needed to properly delete?
    }
 }
 

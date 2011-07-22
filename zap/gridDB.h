@@ -95,6 +95,7 @@ private:
 
    void findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector, const Rect *extents, S32 minx, S32 miny, S32 maxx, S32 maxy, U8 typeNumber = U8_MAX);
    static U32 mQueryId;
+   static U32 mCountGridDatabase;
 
 protected:
    Vector<DatabaseObject *> mAllObjects;
@@ -111,9 +112,9 @@ public:
       BucketEntry *nextInBucket;
    };
 
-   
+   static ClassChunker<BucketEntry> *mChunker;  // if not a pointer, then somehow static get destroyed first then non-static when game is quitting, crashing it.
+
    BucketEntry *mBuckets[BucketRowCount][BucketRowCount];
-   static ClassChunker<BucketEntry> mChunker;
 
    GridDatabase();                              // Constructor
    virtual ~GridDatabase();                     // Destructor
@@ -132,6 +133,7 @@ public:
    
    virtual void addToDatabase(DatabaseObject *theObject, const Rect &extents);
    virtual void removeFromDatabase(DatabaseObject *theObject, const Rect &extents);
+   void removeEverythingFromDatabase();
 
    S32 getObjectCount() { return mAllObjects.size(); }      // Return the number of objects currently in the database
    DatabaseObject *getObjectByIndex(S32 index);             // Kind of hacky, kind of useful

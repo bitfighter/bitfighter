@@ -36,11 +36,19 @@ namespace Zap
 //class BucketEntry;
 
 U32 GridDatabase::mQueryId = 0;
-ClassChunker<GridDatabase::BucketEntry> GridDatabase::mChunker;
+ClassChunker<GridDatabase::BucketEntry> *GridDatabase::mChunker = NULL;
+U32 GridDatabase::mCountGridDatabase = 0;
 
 // Constructor
 GridDatabase::GridDatabase()
 {
+   if(mChunker == NULL)
+   {
+      mChunker = new ClassChunker<BucketEntry>();
+   }
+   mCountGridDatabase++;
+
+
    mQueryId = 0;
 
    for(U32 i = 0; i < BucketRowCount; i++)
@@ -52,7 +60,12 @@ GridDatabase::GridDatabase()
 // Destructor
 GridDatabase::~GridDatabase()       
 {
-   // Do nothing for the moment
+   removeEverythingFromDatabase();
+
+   TNLAssert(mChunker != NULL || mCountGridDatabase != 0, "running GridDatabase Destructor without initalizing?")
+   mCountGridDatabase--;
+   if(mCountGridDatabase == 0)
+      delete mChunker;
 }
 
 
@@ -66,15 +79,15 @@ void GridDatabase::addToDatabase(DatabaseObject *theObject, const Rect &extents)
    maxx = S32(extents.max.x * widthDiv);
    maxy = S32(extents.max.y * widthDiv);
 
-   if(maxx > minx + BucketRowCount)
-      maxx = minx + BucketRowCount;
-   if(maxy > miny + BucketRowCount)
-      maxy = miny + BucketRowCount;
+   if(maxx >= minx + BucketRowCount)
+      maxx = minx + BucketRowCount - 1;
+   if(maxy >= miny + BucketRowCount)
+      maxy = miny + BucketRowCount - 1;
 
    for(S32 x = minx; x <= maxx; x++)
       for(S32 y = miny; y <= maxy; y++)
       {
-         BucketEntry *be = mChunker.alloc();
+         BucketEntry *be = mChunker->alloc();
          be->theObject = theObject;
          be->nextInBucket = mBuckets[x & BucketMask][y & BucketMask];
          mBuckets[x & BucketMask][y & BucketMask] = be;
@@ -84,6 +97,22 @@ void GridDatabase::addToDatabase(DatabaseObject *theObject, const Rect &extents)
    mAllObjects.push_back(theObject);
 }
 
+void GridDatabase::removeEverythingFromDatabase()
+{
+   for(S32 x = 0; x < BucketRowCount; x++)
+   {
+      for(S32 y = 0; y < BucketRowCount; y++)
+      {
+         for(BucketEntry *walk = mBuckets[x & BucketMask][y & BucketMask]; walk; )
+         {
+            BucketEntry *rem = walk;
+            walk = rem->nextInBucket;
+            mChunker->free(rem);
+         }
+      }
+   }
+   mAllObjects.clear();
+}
 
 void GridDatabase::removeFromDatabase(DatabaseObject *theObject, const Rect &extents)
 {
@@ -95,10 +124,10 @@ void GridDatabase::removeFromDatabase(DatabaseObject *theObject, const Rect &ext
    maxx = S32(extents.max.x * widthDiv);
    maxy = S32(extents.max.y * widthDiv);
 
-   if(maxx > minx + BucketRowCount)
-      maxx = minx + BucketRowCount;
-   if(maxy > miny + BucketRowCount)
-      maxy = miny + BucketRowCount;
+   if(maxx >= minx + BucketRowCount)
+      maxx = minx + BucketRowCount - 1;
+   if(maxy >= miny + BucketRowCount)
+      maxy = miny + BucketRowCount - 1;
 
 
    for(S32 x = minx; x <= maxx; x++)
@@ -111,7 +140,7 @@ void GridDatabase::removeFromDatabase(DatabaseObject *theObject, const Rect &ext
             {
                BucketEntry *rem = *walk;
                *walk = rem->nextInBucket;
-               mChunker.free(rem);
+               mChunker->free(rem);
                break;
             }
          }
@@ -447,7 +476,7 @@ void EditorObjectDatabase::copy(const EditorObjectDatabase &source)
 
          for(BucketEntry *walk = source.mBuckets[x & BucketMask][y & BucketMask]; walk; walk = walk->nextInBucket)
          {
-            BucketEntry *be = mChunker.alloc();                // Create a slot for our new object
+            BucketEntry *be = mChunker->alloc();                // Create a slot for our new object
             DatabaseObject *theObject = walk->theObject;
 
             DatabaseObject *object = getObject(dbObjectMap, theObject);    // Returns a pointer to a new or existing copy of theObject
