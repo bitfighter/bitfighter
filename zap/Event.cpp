@@ -95,11 +95,13 @@ void Event::updateJoyAxesDirections(U32 axisMask, S16 value)
    // Set the mask if it is above the digital threshold
    bool keyState = false;
    U32 currentKeyCodeMask = 0;
-   if (normalValue < -0.5 || normalValue > 0.5)
-   {
-      keyState = true;
-      currentKeyCodeMask |= detectedAxesDirectionMask;
-   }
+
+   for (S32 i = 0; i < MaxAxesDirections; i++)
+      if (fabs(Joystick::JoystickInputData[i].value) > 0.5)
+      {
+         keyState = true;
+         currentKeyCodeMask |= (1 << i);
+      }
 
 
    // Only change KeyCode key state if the axis has changed.  Time to be tricky..
@@ -109,7 +111,7 @@ void Event::updateJoyAxesDirections(U32 axisMask, S16 value)
    for (S32 i = 0; i < MaxAxesDirections; i++)
    {
       // If the current axes direction is set in the keyCodeDownDeltaMask, set the key down
-      if (Joystick::JoystickInputData[i].axesDirection & keyCodeDownDeltaMask)
+      if (Joystick::JoystickInputData[i].axesMask & keyCodeDownDeltaMask)
       {
          setKeyState(Joystick::JoystickInputData[i].keyCode, true);
 
@@ -120,7 +122,7 @@ void Event::updateJoyAxesDirections(U32 axisMask, S16 value)
       }
 
       // If the current axes direction is set in the keyCodeUpDeltaMask, set the key up
-      if (Joystick::JoystickInputData[i].axesDirection & keyCodeUpDeltaMask)
+      if (Joystick::JoystickInputData[i].axesMask & keyCodeUpDeltaMask)
       {
          setKeyState(Joystick::JoystickInputData[i].keyCode, false);
 
@@ -131,10 +133,7 @@ void Event::updateJoyAxesDirections(U32 axisMask, S16 value)
 
 
    // Finally alter the global axes KeyCode mask to reflect the current keyState
-   if (keyState)     // Set the bit to 1 in the global mask
-      Joystick::AxesKeyCodeMask |= currentKeyCodeMask;
-   else              // Set the bit to 0 in the global mask
-      Joystick::AxesKeyCodeMask &= ~currentKeyCodeMask;
+      Joystick::AxesKeyCodeMask = currentKeyCodeMask;
 }
 
 

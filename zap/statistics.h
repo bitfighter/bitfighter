@@ -26,7 +26,7 @@
 #ifndef _STATISTICS_H_
 #define _STATISTICS_H_
 
-//#include "gameWeapons.h"      // For WeaponType enum      ==> including this makes things puke
+#include "gameWeapons.h"      // For WeaponType enum
 #include "tnlTypes.h"
 #include "tnlVector.h"
 
@@ -40,8 +40,8 @@ namespace Zap
 class Statistics
 {
 private:
-   Vector<U16> mShots;
-   Vector<U16> mHits;
+   U16 mShots[WeaponCount];
+   U16 mHits[WeaponCount];
 
    U16 mKills;          // Enemy kills
    U16 mDeaths;         // Times died
@@ -51,17 +51,17 @@ private:
 public:
    Statistics();        // Constructor
 
-   void countShot(S32 weaponType);    // Record a shot      // --> S32 should be WeaponType
-   void countHit(S32 weaponType);     // Record a hit       // --> S32 should be WeaponType
+   void countShot(WeaponType weaponType);    // Record a shot
+   void countHit(WeaponType weaponType);     // Record a hit
 
    S32 getShots();
-   S32 getShots(S32 weaponType);    // --> S32 should be WeaponType
+   S32 getShots(WeaponType weaponType);
 
    S32 getHits();
-   S32 getHits(S32 weaponType);     // --> S32 should be WeaponType
+   S32 getHits(WeaponType weaponType);
 
    F32 getHitRate();                  // Report overall hit rate
-   F32 getHitRate(S32 weaponType);    // Report hit rate for specified weapon      // --> S32 should be WeaponType
+   F32 getHitRate(WeaponType weaponType);    // Report hit rate for specified weapon
 
    void addKill();      // Player killed another player
    U16 getKills();      // Report cumulated kills
