@@ -40,6 +40,7 @@ namespace Zap
 
 extern Color gErrorMessageTextColor;
 
+MessageUserInterface::MessageUserInterface(Game *game) : Parent(game) { /* Do nothing */ }
 
 void MessageUserInterface::onActivate()
 {
@@ -50,7 +51,7 @@ void MessageUserInterface::onActivate()
 
 void MessageUserInterface::reset()
 {
-   mTitle = "Message";     // Default title
+   mTitle = (char*)"Message";     // Default title
    mWidth = gScreenInfo.getGameCanvasWidth() - 200;
    mHeight = gScreenInfo.getGameCanvasHeight() - 200;
    mFadeTime = 0;          // 0 --> "Hit any key to continue"
@@ -59,12 +60,12 @@ void MessageUserInterface::reset()
    mBox = true;
 
    for(S32 i = 0; i < mNumLines; i++)
-      mMessage[i] = "";
+      mMessage[i] = (char*)"";
 }
 
 
 // First line is 1
-void MessageUserInterface::setMessage(U32 id, char *message)
+void MessageUserInterface::setMessage(S32 id, char *message)
 {
    if (id < 1 || id > mNumLines)       // Protect devs from themselves...
       logprintf(LogConsumer::LogError, "Invalid line number in setMessage: %d", id);
@@ -98,7 +99,7 @@ void MessageUserInterface::setStyle(U32 style)
    mBox = false;
    mMessageColor = gErrorMessageTextColor;
    mVertOffset = 0;
-   mTitle = "";
+   mTitle = (char*)"";
 }
 
 

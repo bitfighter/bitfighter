@@ -155,7 +155,6 @@ GameType::GameType(S32 winningScore) : mScoreboardUpdateTimer(1000) , mGameTimer
 }
 
 
-static Vector<DatabaseObject *> fillVector;     // Reusable container
 
 bool GameType::processArguments(S32 argc, const char **argv, Game *game)
 {

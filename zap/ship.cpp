@@ -65,7 +65,6 @@ static const bool showCloakedTeammates = true;    // Set to true to allow player
 namespace Zap
 {
 
-static Vector<DatabaseObject *> fillVector;
 
 TNL_IMPLEMENT_NETOBJECT(Ship);
 

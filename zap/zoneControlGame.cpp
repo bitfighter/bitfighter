@@ -243,7 +243,6 @@ bool ZoneControlGameType::teamHasFlag(S32 teamId)
 }
 
 
-static Vector<DatabaseObject *> fillVector;
 
 // A major scoring event has ocurred -- in this case, it's a touchdown
 void ZoneControlGameType::majorScoringEventOcurred(S32 team)

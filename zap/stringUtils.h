@@ -99,6 +99,7 @@ std::string trim(const std::string &source, const std::string &t = " ");
 
 TNL::S32 countCharInString(const std::string &source, char search);
 
+const TNL::U32 MAX_FILE_NAME_LEN = 128;     // Completely arbitrary
 std::string makeFilenameFromString(const char *levelname);
 
 };

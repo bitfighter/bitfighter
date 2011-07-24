@@ -48,7 +48,6 @@ static bool forceFieldEdgesIntersectPoints(const Vector<Point> &points, const Ve
 }
 
 
-static Vector<DatabaseObject *> fillVector;
 
 // Returns true if deploy point is valid, false otherwise.  deployPosition and deployNormal are populated if successful.
 bool EngineerModuleDeployer::findDeployPoint(Ship *ship, Point &deployPosition, Point &deployNormal)
@@ -144,7 +143,6 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(Ship *ship, U32 objectTyp
    DatabaseObject *collObj;
    ForceField::findForceFieldEnd(ship->getGridDatabase(), forceFieldStart, mDeployNormal, forceFieldEnd, &collObj);
 
-   Vector<DatabaseObject *> fillVector;
    bool collision = false;
 
    // Check for collisions with existing projectors
@@ -154,6 +152,7 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(Ship *ship, U32 objectTyp
    Vector<Point> candidateForceFieldGeom;
    ForceField::getGeom(forceFieldStart, forceFieldEnd, candidateForceFieldGeom);
 
+   fillVector.clear();
    ship->getGridDatabase()->findObjects(ForceFieldProjectorType, fillVector, queryRect);
 
    Vector<Point> ffpGeom;     // Geom of any projectors we find
@@ -1308,7 +1307,7 @@ void Turret::idle(IdleCallPath path)
          Point velocity;
 
          // String handling in C++ is such a mess!!!
-         string killer = string("got blasted by ") + getGame()->getTeam(mTeam)->getName().getString() + " turret";
+         string killer = string("got blasted by ") + getGame()->getTeamName(mTeam).getString() + " turret";
          mKillString = killer.c_str();
 
          createWeaponProjectiles(WeaponType(mWeaponFireType), bestDelta, aimPos, velocity, mWeaponFireType == WeaponBurst ? 45.f : 35.f, this);

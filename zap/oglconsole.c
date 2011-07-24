@@ -310,7 +310,7 @@ _OGLCONSOLE_Console *userConsole = NULL;
 /* Set the callback for a console */
 void OGLCONSOLE_EnterKey(void(*cbfun)(void *game, OGLCONSOLE_Console console, char *cmd))
 {
-    programConsole->enterKeyCallback = cbfun;
+    programConsole->enterKeyCallback = (void*)cbfun;
 }
 
 static
