@@ -225,6 +225,7 @@ private:
 
    void computeSelectionMinMax(Point &min, Point &max);
    bool mouseOnDock();                // Return whether mouse is currently over the dock
+   bool mNeedToSave;                  // Have we modified the level such that we need to save?
 
    //void processLevelLoadLine(U32 argc, U32 id, const char **argv);
 
@@ -251,7 +252,6 @@ public:
 
    string getLevelFileName();
    void loadLevel();
-   bool mNeedToSave;          // Have we modified the level such that we need to save?
    U32 mAllUndoneUndoLevel;   // What undo level reflects everything back just the
 
    void saveUndoState();
@@ -285,6 +285,8 @@ public:
 
    const Color *getTeamColor(S32 teamId) const;
 
+   bool getNeedToSave() const { return mNeedToSave; }
+   void setNeedToSave(bool needToSave) { mNeedToSave = needToSave; }
 
    bool mDraggingObjects;     // Should be private
 

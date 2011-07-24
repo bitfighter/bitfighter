@@ -133,6 +133,10 @@ EditorUserInterface::EditorUserInterface(Game *game) : Parent(game)
    mItemHit = NULL;
    mEdgeHit = NONE;
 
+   setNeedToSave(false);
+
+   mNewItem = NULL;
+
    mLastUndoStateWasBarrierWidthChange = false;
 
    mUndoItems.resize(UNDO_STATES);     // Create slots for all our undos... also creates a ton of empty dbs.  Maybe we should be using pointers?
@@ -432,7 +436,7 @@ void EditorUserInterface::saveUndoState()
       mAllUndoneUndoLevel -= 1;     // If this falls below 0, then we can't undo our way out of needing to save
    }
    
-   mNeedToSave = (mAllUndoneUndoLevel != mLastUndoIndex);
+   setNeedToSave(mAllUndoneUndoLevel != mLastUndoIndex);
    mRedoingAnUndo = false;
    mLastUndoStateWasBarrierWidthChange = false;
 }
@@ -496,7 +500,7 @@ void EditorUserInterface::rebuildEverything()
    game->getWallSegmentManager()->recomputeAllWallGeometry(game->getGridDatabase());
    resnapAllEngineeredItems();
 
-   mNeedToSave = (mAllUndoneUndoLevel != mLastUndoIndex);
+   setNeedToSave(mAllUndoneUndoLevel != mLastUndoIndex);
    mItemToLightUp = NULL;
    autoSave();
 }
@@ -608,7 +612,7 @@ void EditorUserInterface::loadLevel()
    clearUndoHistory();                 // Clean out undo/redo buffers
    clearSelection();                   // Nothing starts selected
    mShowMode = ShowAllObjects;         // Turn everything on
-   mNeedToSave = false;                // Why save when we just loaded?
+   setNeedToSave(false);               // Why save when we just loaded?
    mAllUndoneUndoLevel = mLastUndoIndex;
    populateDock();                     // Add game-specific items to the dock
 
@@ -927,7 +931,7 @@ void EditorUserInterface::teamsHaveChanged()
    validateTeams(hackyjunk);
 
    validateLevel();          // Revalidate level -- if teams have changed, requirements for spawns have too
-   mNeedToSave = true;
+   setNeedToSave(true);
    autoSave();
    mAllUndoneUndoLevel = -1; // This change can't be undone
 }
@@ -1865,7 +1869,7 @@ void EditorUserInterface::pasteSelection()
    }
 
    validateLevel();
-   mNeedToSave = true;
+   setNeedToSave(true);
    autoSave();
 }
 
@@ -1892,7 +1896,7 @@ void EditorUserInterface::scaleSelection(F32 scale)
       if(objList->get(i)->isSelected())
          objList->get(i)->scale(ctr, scale);
 
-   mNeedToSave = true;
+   setNeedToSave(true);
    autoSave();
 }
 
@@ -1911,7 +1915,7 @@ void EditorUserInterface::rotateSelection(F32 angle)
       if(objList->get(i)->isSelected())
          objList->get(i)->rotateAboutPoint(Point(0,0), angle);
 
-   mNeedToSave = true;
+   setNeedToSave(true);
    autoSave();
 }
 
@@ -1951,7 +1955,8 @@ void EditorUserInterface::setCurrentTeam(S32 currentTeam)
    mCurrentTeam = currentTeam;
    bool anyChanged = false;
 
-   saveUndoState();
+   if(anythingSelected())
+      saveUndoState();
 
    if(currentTeam >= getGame()->getTeamCount())
    {
@@ -2015,7 +2020,7 @@ void EditorUserInterface::setCurrentTeam(S32 currentTeam)
    {
       setWarnMessage("", "");
       validateLevel();
-      mNeedToSave = true;
+      setNeedToSave(true);
       autoSave();
    }
 }
@@ -2037,7 +2042,7 @@ void EditorUserInterface::flipSelectionHorizontal()
       if(objList->get(i)->isSelected())
          objList->get(i)->flipHorizontal(min.x, max.x);
 
-   mNeedToSave = true;
+   setNeedToSave(true);
    autoSave();
 }
 
@@ -2058,7 +2063,7 @@ void EditorUserInterface::flipSelectionVertical()
       if(objList->get(i)->isSelected())
          objList->get(i)->flipVertical(min.y, max.y);
 
-   mNeedToSave = true;
+   setNeedToSave(true);
    autoSave();
 }
 
@@ -2533,7 +2538,7 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
 
    if(deleted)
    {
-      mNeedToSave = true;
+      setNeedToSave(true);
       autoSave();
 
       mItemToLightUp = NULL;     // In case we just deleted a lit item; not sure if really needed, as we do this above
@@ -2611,7 +2616,7 @@ done2:
    if(split)
    {
       clearSelection();
-      mNeedToSave = true;
+      setNeedToSave(true);
       autoSave();
    }
 }
@@ -2697,7 +2702,7 @@ void EditorUserInterface::joinBarrier()
    if(joinedItem != NONE)
    {
       clearSelection();
-      mNeedToSave = true;
+      setNeedToSave(true);
       autoSave();
       objList->get(joinedItem)->onGeomChanged();
    }
@@ -2766,7 +2771,7 @@ void EditorUserInterface::insertNewItem(GameObjectType itemType)
    newObject->onGeomChanged();
 
    validateLevel();
-   mNeedToSave = true;
+   setNeedToSave(true);
    autoSave();
 }
 
@@ -3493,7 +3498,7 @@ void EditorUserInterface::onFinishedDragging()
                if(objList->get(i)->isSelected() || objList->get(i)->anyVertsSelected())
                   objList->get(i)->onGeomChanged();
 
-            mNeedToSave = true;
+            setNeedToSave(true);
             autoSave();
 
             return;
@@ -3800,7 +3805,7 @@ void quitEditorCallback(Game *game, U32 unused)
 {
    EditorUserInterface *editorUI = game->getUIManager()->getEditorUserInterface();
 
-   if(editorUI->mNeedToSave)
+   if(editorUI->getNeedToSave())
    {
       YesNoUserInterface *ui = game->getUIManager()->getYesNoUserInterface();
 
@@ -3814,7 +3819,7 @@ void quitEditorCallback(Game *game, U32 unused)
       ui->activate();
    }
    else
-      editorUI->reactivateMenu(game->getUIManager()->getEditorUserInterface());
+     backToMainMenuCallback(game);
 
    editorUI->clearUndoHistory();        // Clear up a little memory
 }

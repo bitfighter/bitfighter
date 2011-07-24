@@ -192,7 +192,7 @@ void GameParamUserInterface::onEscape()
    {
       EditorUserInterface *ui = getGame()->getUIManager()->getEditorUserInterface();
 
-      ui->mNeedToSave = true;        // Need to save to retain our changes
+      ui->setNeedToSave(true);       // Need to save to retain our changes
       ui->mAllUndoneUndoLevel = -1;  // This change can't be undone
       ui->validateLevel();
    }

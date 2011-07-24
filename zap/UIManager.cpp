@@ -74,6 +74,8 @@ MainMenuUserInterface *UIManager::getMainMenuUserInterface()
 }
 
 
+auto_ptr<EditorUserInterface> UIManager::mEditorUserInterface;
+
 EditorUserInterface *UIManager::getEditorUserInterface()
 {
    // Lazily initialize
