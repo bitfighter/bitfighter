@@ -48,10 +48,10 @@ private:
    U32 mVertOffset;
 
 public:
-   MessageUserInterface(Game *game) : Parent(game) { /* Do nothing */ }     // Constructor
+   MessageUserInterface(Game *game);     // Constructor
    char *mMessage[mNumLines];
    void onActivate();
-   void setMessage (U32 id, char *message);  // Set a line of message
+   void setMessage (S32 id, char *message);  // Set a line of message
    void setTitle(char *message);             // Set menu title
    void setSize(U32 width, U32 height);      // Set size of menu
    void setFadeTime(U32 time);

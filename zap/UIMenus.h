@@ -324,9 +324,6 @@ public:
       ActionCount,
    } action;
 
-private:
-   typedef MenuUserInterface Parent;
-public:
    PlayerMenuUserInterface(Game *game);        // Constructor
 
    void render();
