@@ -78,6 +78,37 @@ float gLineWidth4 = 4.0f;
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+// Constructor
+UserInterface::UserInterface(Game *game)
+{
+   mGame = game;
+}
+
+
+ClientGame *UserInterface::getClientGame()
+{
+   ClientGame *clientGame = dynamic_cast<ClientGame *>(mGame);
+   TNLAssert(clientGame, "Bad cast!");
+
+   return clientGame;
+}
+
+
+EditorGame *UserInterface::getEditorGame()
+{
+   EditorGame *editorGame = dynamic_cast<EditorGame *>(mGame);
+   TNLAssert(editorGame, "Bad cast!");
+
+   return editorGame;
+}
+
+
+UIManager *UserInterface::getUIManager() 
+{ 
+   return mGame->getUIManager(); 
+}
+
+
 
 void UserInterface::activate(bool save)
 {
@@ -171,7 +202,7 @@ void UserInterface::reactivateMenu(const UserInterface *target)
       prevUIs.pop_back();
 
    if(!prevUIs.size())
-      gMainMenuUserInterface.reactivate();      // Fallback if everything else has failed
+      getGame()->getUIManager()->getMainMenuUserInterface()->reactivate();      // Fallback if everything else has failed
    else
       // Now that the next one is our target, when we reactivate, we'll be where we want to be
       reactivatePrevUI();

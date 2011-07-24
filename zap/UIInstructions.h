@@ -34,11 +34,13 @@ namespace Zap
 
 class InstructionsUserInterface : public AbstractInstructionsUserInterface
 {
+   typedef AbstractInstructionsUserInterface Parent;
+
 private:
    U32 mCurPage;
 
 public:
-   InstructionsUserInterface();      // Constructor
+   InstructionsUserInterface(Game *game);      // Constructor
    void render();
    void renderPage1();
    void renderPage2();
@@ -53,8 +55,6 @@ public:
    void onActivate();
    void exitInstructions();
 };
-
-extern InstructionsUserInterface gInstructionsUserInterface;
 
 };
 

@@ -46,16 +46,11 @@
 
 namespace Zap
 {
-
-KeyDefMenuUserInterface gKeyDefMenuUserInterface;
-
 extern bool gDisableShipKeyboardInput;
 extern CmdLineSettings gCmdLineSettings;
-extern IniSettings gIniSettings;
-
 
 // Constructor
-KeyDefMenuUserInterface::KeyDefMenuUserInterface()
+KeyDefMenuUserInterface::KeyDefMenuUserInterface(Game *game) : Parent(game)
 {
    setMenuID(KeyDefUI);
    mMenuTitle = "Define Keys";
@@ -83,14 +78,14 @@ void KeyDefMenuUserInterface::onActivate()
    errorMsgTimer.reset(errorMsgDisplayTime);
    errorMsg = "";
 
-   if(gIniSettings.inputMode == InputModeJoystick)
+   if(getGame()->getIniSettings()->inputMode == InputModeJoystick)
       mMenuSubTitle = "Input Mode: Joystick";
    else
       mMenuSubTitle = "Input Mode: Keyboard";
 
    mMenuSubTitleColor = Colors::white;   // white
 
-   if (gIniSettings.inputMode == InputModeJoystick)
+   if(getGame()->getIniSettings()->inputMode == InputModeJoystick)
    {
       itemsPerCol = 7;           // Approx. half of the items we have
 
@@ -147,19 +142,20 @@ void KeyDefMenuUserInterface::onActivate()
    }
 }
 
+
 void KeyDefMenuUserInterface::idle(U32 timeDelta)
 {
    errorMsgTimer.update(timeDelta);
 }
 
 // Finds out if key is already assigned to something else
-inline bool isDuplicate(S32 key)
+inline bool isDuplicate(S32 key, const Vector<KeyDefMenuItem> &menuItems)
 {
-   S32 size = gKeyDefMenuUserInterface.menuItems.size();
+   S32 size = menuItems.size();
    S32 count = 0;
 
    for(S32 i = 0; i < size && count < 2; i++)
-      if(*gKeyDefMenuUserInterface.menuItems[i].primaryControl == *gKeyDefMenuUserInterface.menuItems[key].primaryControl)
+      if(*menuItems[i].primaryControl == *menuItems[key].primaryControl)
          count++;
 
    return count >= 2;
@@ -234,7 +230,7 @@ void KeyDefMenuUserInterface::render()
       }
       else
       {
-         bool dupe = isDuplicate(i); 
+         bool dupe = isDuplicate(i, menuItems); 
          if(dupe)
             glColor3f(1,0,0);
          else
@@ -247,7 +243,7 @@ void KeyDefMenuUserInterface::render()
 
    // Draw some suggestions
    glColor3f(1, 1, 0);
-   if(gIniSettings.inputMode == InputModeJoystick)
+   if(getGame()->getIniSettings()->inputMode == InputModeJoystick)
       drawCenteredString(canvasHeight - vertMargin - 90, 15, "HINT: You will be using the left joystick to steer, the right to fire");
    else 
       drawCenteredString(canvasHeight - vertMargin - 90, 15, "HINT: You will be using the mouse to aim, so make good use of your mouse buttons");
@@ -276,7 +272,7 @@ void KeyDefMenuUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    // KeyCode entry
    if(changingItem > -1)
    {
-      UserInterface::playBoop();
+      playBoop();
 
       if(keyCode == KEY_ESCAPE || keyCode == BUTTON_BACK)
       {
@@ -318,12 +314,12 @@ void KeyDefMenuUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    // We're not doing KeyCode entry, so let's try menu navigation
    if(keyCode == KEY_SPACE || keyCode == KEY_ENTER || keyCode == BUTTON_START || keyCode == MOUSE_LEFT)      // Set key for selected item
    {
-      UserInterface::playBoop();
+      playBoop();
       changingItem = selectedIndex;
    }
    else if(keyCode == KEY_RIGHT  || keyCode == BUTTON_DPAD_RIGHT || keyCode == KEY_LEFT || keyCode == BUTTON_DPAD_LEFT)    // Change col
    {
-      UserInterface::playBoop();
+      playBoop();
 
       if(menuItems[selectedIndex].mColumn == 1)    // Switching to right column
          selectedIndex += firstItemInCol2;
@@ -338,14 +334,14 @@ void KeyDefMenuUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    }
    else if(keyCode == KEY_ESCAPE || keyCode == BUTTON_BACK)       // Quit
    {
-      UserInterface::playBoop();
+      playBoop();
       saveSettingsToINI();
 
       UserInterface::reactivatePrevUI();      //gOptionsMenuUserInterface
    }
    else if(keyCode == KEY_UP || keyCode == BUTTON_DPAD_UP)        // Prev item
    {
-      UserInterface::playBoop();
+      playBoop();
 
       selectedIndex--;
       if(selectedIndex < 0)
@@ -355,7 +351,7 @@ void KeyDefMenuUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    }
    else if(keyCode == KEY_DOWN || keyCode == BUTTON_DPAD_DOWN)    // Next item
    {
-      UserInterface::playBoop();
+      playBoop();
 
       selectedIndex++;
       if(selectedIndex >= menuItems.size())
@@ -365,13 +361,13 @@ void KeyDefMenuUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    }
    else if(keyCode == keyOUTGAMECHAT)     // Turn on Global Chat overlay
    {
-      UserInterface::playBoop();
-      gChatInterface.activate();
+      playBoop();
+      getGame()->getUIManager()->getChatUserInterface()->activate();
    }
    else if(keyCode == keyDIAG)     // Turn on diagnostic overlay
    {
-      UserInterface::playBoop();
-      gDiagnosticInterface.activate();
+      playBoop();
+      getGame()->getUIManager()->getDiagnosticUserInterface()->activate();
    }
 
 }

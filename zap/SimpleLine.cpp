@@ -119,17 +119,17 @@ void SimpleLine::renderEditor(F32 currentScale)
 
 
 // Offset: negative below the item, positive above
-void SimpleLine::renderItemText(const char *text, S32 offset, F32 currentScale)
+void SimpleLine::renderItemText(const char *text, S32 offset, F32 currentScale, const Point &currentOffset)
 {
    glColor(INSTRUCTION_TEXTCOLOR);
    S32 off = (INSTRUCTION_TEXTSIZE + INSTRUCTION_TEXTGAP) * offset - 10 - ((offset > 0) ? 5 : 0);
-   UserInterface::drawStringf_2pt(convertLevelToCanvasCoord(getVert(0)), 
-                                  convertLevelToCanvasCoord(getVert(1)), 
+   UserInterface::drawStringf_2pt(getVert(0) * currentScale * currentOffset, 
+                                  getVert(1) * currentScale * currentOffset, 
                                   F32(INSTRUCTION_TEXTSIZE), F32(off), text);
 }
 
 
-void SimpleLine::addToDock(Game *game, const Point &point)
+void SimpleLine::addToDock(EditorGame *game, const Point &point)
 {
    setVert(point, 0);
    EditorParent::addToDock(game, point);

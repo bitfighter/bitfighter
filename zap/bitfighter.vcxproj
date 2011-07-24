@@ -233,6 +233,7 @@
     <ClCompile Include="stringUtils.cpp" />
     <ClCompile Include="UIAbstractInstructions.cpp" />
     <ClCompile Include="UIEditorMenus.cpp" />
+    <ClCompile Include="UIManager.cpp" />
     <ClCompile Include="UIMenuItems.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -351,6 +352,7 @@
     <ClInclude Include="stringUtils.h" />
     <ClInclude Include="UIAbstractInstructions.h" />
     <ClInclude Include="UIEditorMenus.h" />
+    <ClInclude Include="UIManager.h" />
     <ClInclude Include="UIMenuItems.h" />
     <ClInclude Include="version.h" />
     <ClInclude Include="zoneControlGame.h" />

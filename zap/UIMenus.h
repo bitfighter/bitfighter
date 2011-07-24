@@ -40,6 +40,8 @@ using namespace std;
 // This class is the template for most all of our menus...
 class MenuUserInterface : public UserInterface
 {
+   typedef UserInterface Parent;
+
 private:
    S32 getYStart();     // Get vert pos of first menu item
    S32 getOffset(); 
@@ -63,10 +65,9 @@ protected:
    // Handle keyboard input while a menu is displayed
    virtual bool processMenuSpecificKeys(KeyCode keyCode, char ascii);
    virtual bool processKeys(KeyCode keyCode, char ascii);
-   
 
 public:
-   MenuUserInterface();                            // Constructor
+   MenuUserInterface(Game *game);      // Constructor
 
    bool itemSelectedWithMouse;
    Vector<boost::shared_ptr<MenuItem> > menuItems;
@@ -100,8 +101,9 @@ public:
 // <--- DO NOT SUBCLASS MainMenuUserInterface!! (unless you override onActivate) ---> //
 class MainMenuUserInterface : public MenuUserInterface
 {
-private:
    typedef MenuUserInterface Parent;
+
+private:
    char motd[MOTD_LEN];
    U32 motdArriveTime;
    Timer mFadeInTimer;        // Track the brief fade in interval the first time menu is shown
@@ -120,7 +122,7 @@ private:
    void renderExtras();
 
 public:
-   MainMenuUserInterface();                     // Constructor
+   MainMenuUserInterface(Game *game);           // Constructor
    void processSelection(U32 index);
    void onEscape();
    void render();
@@ -136,21 +138,15 @@ public:
 };
 
 
-// the use of #define and _pointer is only to fix black text in main menu.
-extern MainMenuUserInterface *gMainMenuUserInterface_pointer;
-#define gMainMenuUserInterface (*gMainMenuUserInterface_pointer)
-
-
 ////////////////////////////////////////
 ////////////////////////////////////////
 
 class OptionsMenuUserInterface : public MenuUserInterface
 {
-private:
    typedef MenuUserInterface Parent;
 
 public:
-   OptionsMenuUserInterface();               // Constructor
+   OptionsMenuUserInterface(Game *game);        // Constructor
    void processSelection(U32 index) { }         // Process selected menu item when right arrow is pressed
    void processShiftSelection(U32 index) { }    // And when the left arrow is pressed
    void onEscape();
@@ -158,8 +154,6 @@ public:
    void onActivate();
    void toggleDisplayMode();
 };
-
-extern OptionsMenuUserInterface gOptionsMenuUserInterface;
 
 
 ////////////////////////////////////////
@@ -190,7 +184,7 @@ private:
    S32 mEditingIndex;                        // Index of item we're editing, -1 if none
 
 public:
-   HostMenuUserInterface();                  // Constructor
+   HostMenuUserInterface(Game *game);        // Constructor
    void onEscape();
    void setupMenus();
    void onActivate();
@@ -205,8 +199,6 @@ public:
    void clearLevelLoadDisplay();
 };
 
-extern HostMenuUserInterface gHostMenuUserInterface;
-
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -218,7 +210,7 @@ private:
    NetConnection::TerminationReason mReason;
 
 public:
-   NameEntryUserInterface();                    // Constructor
+   NameEntryUserInterface(Game *game);    // Constructor
    void processSelection(U32 index) { }         // Process selected menu item when right arrow is pressed
    void processShiftSelection(U32 index) { }    // And when the left arrow is pressed
    void onEscape();
@@ -227,8 +219,6 @@ public:
    void setReactivationReason(NetConnection::TerminationReason r);
 };
 
-
-extern NameEntryUserInterface gNameEntryUserInterface;
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -256,15 +246,13 @@ private:
    void buildMenu();
 
 public:
-   GameMenuUserInterface();            // Constructor
+   GameMenuUserInterface(Game *game);            // Constructor
 
    void idle(U32 timeDelta);
    void onActivate();
    void onReactivate();
    void onEscape();
 };
-
-extern GameMenuUserInterface gGameMenuUserInterface;
 
 
 ////////////////////////////////////////
@@ -276,12 +264,10 @@ private:
    typedef MenuUserInterface Parent;
 
 public:
-   LevelMenuUserInterface();        // Constructor
+   LevelMenuUserInterface(Game *game);        // Constructor
    void onActivate();
    void onEscape();
 };
-
-extern LevelMenuUserInterface gLevelMenuUserInterface;
 
 
 ////////////////////////////////////////
@@ -289,12 +275,13 @@ extern LevelMenuUserInterface gLevelMenuUserInterface;
 
 class LevelMenuSelectUserInterface : public MenuUserInterface
 {
-private:
    typedef MenuUserInterface Parent;
+
+private:
    Vector<string> mLevels;
 
 public:
-   LevelMenuSelectUserInterface();        // Constructor
+   LevelMenuSelectUserInterface(Game *game);        // Constructor
    string category;
    void onActivate();
    bool processMenuSpecificKeys(KeyCode keyCode, char ascii);  // Custom key handling for level selection menus
@@ -303,16 +290,15 @@ public:
    void onEscape();
 };
 
-extern LevelMenuSelectUserInterface gLevelMenuSelectUserInterface;
-
 
 ////////////////////////////////////////
 ////////////////////////////////////////
 
 class AdminMenuUserInterface : public MenuUserInterface
 {
-private:
    typedef MenuUserInterface Parent;
+
+private:
    SafePtr<GameType> mGameType;
 
 public:
@@ -329,6 +315,8 @@ public:
 
 class PlayerMenuUserInterface : public MenuUserInterface
 {
+   typedef MenuUserInterface Parent;
+
 public:
    enum Action {
       Kick,
@@ -339,14 +327,12 @@ public:
 private:
    typedef MenuUserInterface Parent;
 public:
-   PlayerMenuUserInterface();        // Constructor
+   PlayerMenuUserInterface(Game *game);        // Constructor
 
    void render();
    void playerSelected(U32 index);
    void onEscape();
 };
-
-extern PlayerMenuUserInterface gPlayerMenuUserInterface;
 
 
 ////////////////////////////////////////
@@ -354,18 +340,16 @@ extern PlayerMenuUserInterface gPlayerMenuUserInterface;
 
 class TeamMenuUserInterface : public MenuUserInterface
 {
-private:
    typedef MenuUserInterface Parent;
+
 public:
-   TeamMenuUserInterface();        // Constructor
+   TeamMenuUserInterface(Game *game);        // Constructor
    void render();
    void onEscape();
    string nameToChange;
 
    void processSelection(U32 index);
 };
-
-extern TeamMenuUserInterface gTeamMenuUserInterface;
 
 };
 

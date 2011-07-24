@@ -39,8 +39,9 @@ namespace Zap
 MenuItem::MenuItem() { TNLAssert(false, "Do not use this constructor!"); }    // Default constructor
 
    // Constructor
-MenuItem::MenuItem(S32 index, const string &prompt, void (*callback)(U32), const string &help, KeyCode k1, KeyCode k2)
+MenuItem::MenuItem(Game *game, S32 index, const string &prompt, void (*callback)(Game *, U32), const string &help, KeyCode k1, KeyCode k2)
 {
+   mGame = game;
    mPrompt = prompt;
    key1 = k1;
    key2 = k2;
@@ -79,7 +80,7 @@ bool MenuItem::handleKey(KeyCode keyCode, char ascii)
    {
       UserInterface::playBoop();
       if(mCallback)
-         mCallback(mIndex);
+         mCallback(mGame, mIndex);
 
       return true;
    }
@@ -93,18 +94,19 @@ bool MenuItem::handleKey(KeyCode keyCode, char ascii)
 ////////////////////////////////////
 ////////////////////////////////////
 
-ValueMenuItem::ValueMenuItem(S32 index, const string &text, void (*callback)(U32), const string &help, KeyCode k1, KeyCode k2) :
-      MenuItem(index, text, callback, help, k1, k2)
+ValueMenuItem::ValueMenuItem(Game *game, S32 index, const string &text, void (*callback)(Game *, U32), const string &help, KeyCode k1, KeyCode k2) :
+      MenuItem(game, index, text, callback, help, k1, k2)
 {
    mSelectedValueColor = Colors::cyan;
    mUnselectedValueColor = Colors::cyan;
 }
 
+
 ////////////////////////////////////
 ////////////////////////////////////
 
-ToggleMenuItem::ToggleMenuItem(string title, Vector<string> options, U32 currOption, bool wrap, void (*callback)(U32), string help, KeyCode k1, KeyCode k2) :
-      ValueMenuItem(-1, title, callback, help, k1, k2)
+ToggleMenuItem::ToggleMenuItem(Game *game, string title, Vector<string> options, U32 currOption, bool wrap, void (*callback)(Game *, U32), string help, KeyCode k1, KeyCode k2) :
+      ValueMenuItem(game, -1, title, callback, help, k1, k2)
 {
    mValue = "";
    mIndex = currOption;
@@ -130,7 +132,7 @@ bool ToggleMenuItem::handleKey(KeyCode keyCode, char ascii)
       mIndex = (mIndex == (U32)mOptions.size() - 1) ? nextValAfterWrap : mIndex + 1;
 
       if(mCallback)
-         mCallback(mIndex);
+         mCallback(getGame(), mIndex);
 
       UserInterface::playBoop();
       return true;
@@ -141,7 +143,7 @@ bool ToggleMenuItem::handleKey(KeyCode keyCode, char ascii)
       mIndex = (mIndex == 0) ? nextValAfterWrap : mIndex - 1;
       
       if(mCallback)
-         mCallback(mIndex);
+         mCallback(getGame(), mIndex);
 
       UserInterface::playBoop();
       return true;
@@ -152,7 +154,7 @@ bool ToggleMenuItem::handleKey(KeyCode keyCode, char ascii)
       mIndex = (mIndex == (U32)mOptions.size() - 1) ? nextValAfterWrap : mIndex + 1;
 
       if(mCallback)
-         mCallback(mIndex);
+         mCallback(getGame(), mIndex);
 
       UserInterface::playBoop();
       return true;
@@ -167,7 +169,7 @@ bool ToggleMenuItem::handleKey(KeyCode keyCode, char ascii)
             mIndex = index;
             
             if(mCallback)
-               mCallback(mIndex);
+               mCallback(getGame(), mIndex);
 
             UserInterface::playBoop();
             return true;
@@ -182,8 +184,8 @@ bool ToggleMenuItem::handleKey(KeyCode keyCode, char ascii)
 ////////////////////////////////////
 
 
-YesNoMenuItem::YesNoMenuItem(string title, bool currOption, void (*callback)(U32), string help, KeyCode k1, KeyCode k2) :
-      ToggleMenuItem(title, Vector<string>(), currOption, true, callback, help, k1, k2)
+YesNoMenuItem::YesNoMenuItem(Game *game, string title, bool currOption, void (*callback)(Game *, U32), string help, KeyCode k1, KeyCode k2) :
+      ToggleMenuItem(game, title, Vector<string>(), currOption, true, callback, help, k1, k2)
 {
    mValue = "";
    mIndex = currOption;
@@ -197,9 +199,9 @@ YesNoMenuItem::YesNoMenuItem(string title, bool currOption, void (*callback)(U32
 ////////////////////////////////////
 ////////////////////////////////////
 
-CounterMenuItem::CounterMenuItem(const string &title, S32 value, S32 step, S32 minVal, S32 maxVal, const string &units, const string &minMsg, const string &help,
-                KeyCode k1, KeyCode k2) :
-   ValueMenuItem(-1, title, NULL, help, k1, k2)
+CounterMenuItem::CounterMenuItem(Game *game, const string &title, S32 value, S32 step, S32 minVal, S32 maxVal, const string &units, 
+                                 const string &minMsg, const string &help, KeyCode k1, KeyCode k2) :
+   ValueMenuItem(game, -1, title, NULL, help, k1, k2)
 {
    mValue = value;
    mStep = step;
@@ -273,9 +275,9 @@ void CounterMenuItem::decrement(S32 fact)
 ////////////////////////////////////
 ////////////////////////////////////
 
-TimeCounterMenuItem::TimeCounterMenuItem(const string &title, S32 value, S32 maxVal, const string &zeroMsg, const string &help,
+TimeCounterMenuItem::TimeCounterMenuItem(Game *game, const string &title, S32 value, S32 maxVal, const string &zeroMsg, const string &help,
                     S32 step, KeyCode k1, KeyCode k2) :
-   CounterMenuItem(title, value, step, 0, maxVal, "", zeroMsg, help, k1, k2)
+   CounterMenuItem(game, title, value, step, 0, maxVal, "", zeroMsg, help, k1, k2)
 {
    // Do nothing
 }
@@ -284,21 +286,23 @@ TimeCounterMenuItem::TimeCounterMenuItem(const string &title, S32 value, S32 max
 ////////////////////////////////////
 ////////////////////////////////////
 
-TimeCounterMenuItemSeconds::TimeCounterMenuItemSeconds(const string &title, S32 value, S32 maxVal, const string &zeroMsg, const string &help,
-                KeyCode k1, KeyCode k2) :
-   TimeCounterMenuItem(title, value, maxVal, zeroMsg, help, 1, k1, k2)
+TimeCounterMenuItemSeconds::TimeCounterMenuItemSeconds(Game *game, const string &title, S32 value, S32 maxVal, const string &zeroMsg, 
+                                                       const string &help, KeyCode k1, KeyCode k2) :
+   TimeCounterMenuItem(game, title, value, maxVal, zeroMsg, help, 1, k1, k2)
 {
    // Do nothing
 }
 
+
 ////////////////////////////////////
 ////////////////////////////////////
 
-PlayerMenuItem::PlayerMenuItem(S32 index, const char *text, void (*callback)(U32), KeyCode k1, PlayerType type) :
-      MenuItem(index, text, callback, "", k1, KEY_UNKNOWN)
+PlayerMenuItem::PlayerMenuItem(Game *game, S32 index, const char *text, void (*callback)(Game *, U32), KeyCode k1, PlayerType type) :
+      MenuItem(game, index, text, callback, "", k1, KEY_UNKNOWN)
 {
    mType = type;
 }
+
 
 void PlayerMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
 {
@@ -320,8 +324,8 @@ void PlayerMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
 ////////////////////////////////////
 ////////////////////////////////////
 
-TeamMenuItem::TeamMenuItem(S32 index, AbstractTeam *team, void (*callback)(U32), KeyCode keyCode, bool isCurrent) :
-               MenuItem(index, team->getName().getString(), callback, "", keyCode, KEY_UNKNOWN)
+TeamMenuItem::TeamMenuItem(Game *game, S32 index, AbstractTeam *team, void (*callback)(Game *, U32), KeyCode keyCode, bool isCurrent) :
+               MenuItem(game, index, team->getName().getString(), callback, "", keyCode, KEY_UNKNOWN)
 {
    mTeam = team;
    mIsCurrent = isCurrent;
@@ -343,14 +347,15 @@ void TeamMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
 ////////////////////////////////////
 ////////////////////////////////////
 
-EditableMenuItem::EditableMenuItem(string title, string val, string emptyVal, string help, U32 maxLen, KeyCode k1, KeyCode k2) :
-         ValueMenuItem(-1, title, NULL, help, k1, k2),
+EditableMenuItem::EditableMenuItem(Game *game, string title, string val, string emptyVal, string help, U32 maxLen, KeyCode k1, KeyCode k2) :
+         ValueMenuItem(game, -1, title, NULL, help, k1, k2),
          mLineEditor(LineEditor(maxLen, val))
 {
    mEmptyVal = emptyVal;
    mEnterAdvancesItem = true;
    mTextEditedCallback = NULL;
 }
+
 
 void EditableMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
 {
@@ -399,8 +404,8 @@ bool EditableMenuItem::handleKey(KeyCode keyCode, char ascii)
 ////////////////////////////////////
 ////////////////////////////////////
 
-MaskedEditableMenuItem::MaskedEditableMenuItem(string title, string val, string emptyVal, string help, U32 maxLen, KeyCode k1, KeyCode k2) :
-   EditableMenuItem(title, val, emptyVal, help, maxLen, k1, k2)
+MaskedEditableMenuItem::MaskedEditableMenuItem(Game *game, string title, string val, string emptyVal, string help, U32 maxLen, KeyCode k1, KeyCode k2) :
+   EditableMenuItem(game, title, val, emptyVal, help, maxLen, k1, k2)
 {
    mLineEditor.setSecret(true);
 }

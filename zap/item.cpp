@@ -107,17 +107,20 @@ EditorPointObject::EditorPointObject(GameObjectType objectType) : EditorObject(o
 //}
 
 
+
 // Offset: negative below the item, positive above
-void EditorPointObject::renderItemText(const char *text, S32 offset, F32 currentScale)
+void EditorPointObject::renderItemText(const char *text, S32 offset, F32 currentScale, const Point &currentOffset)
 {
    glColor(INSTRUCTION_TEXTCOLOR);
    S32 off = (INSTRUCTION_TEXTSIZE + INSTRUCTION_TEXTGAP) * offset - 10 - ((offset > 0) ? 5 : 0);
-   Point pos = convertLevelToCanvasCoord(getVert(0));
+
+   Point pos = getVert(0) * currentScale + currentOffset;
+
    UserInterface::drawCenteredString(pos.x, pos.y - off, INSTRUCTION_TEXTSIZE, text);
 }
 
 
-void EditorPointObject::addToDock(Game *game, const Point &point)
+void EditorPointObject::addToDock(EditorGame *game, const Point &point)
 {
    setVert(point, 0);
    Parent::addToDock(game, point);
@@ -165,7 +168,7 @@ void EditorItem::renderEditor(F32 currentScale)
    F32 scaleFact = getEditorRenderScaleFactor(currentScale);
 
    glPushMatrix();
-      glScalef(scaleFact, scaleFact, 1);
+      glScale(scaleFact);
 
       renderItem(getVert(0) / scaleFact);                    
    glPopMatrix();

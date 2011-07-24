@@ -34,6 +34,8 @@ namespace Zap
 
 class RebindKeysUserInterface : public UserInterface
 {
+   typedef UserInterface Parent;
+
 private:
    static const S32 BUFFER_LENGTH = 32;
 
@@ -43,16 +45,9 @@ protected:
    U32 cursorPos;
    bool secret;
    bool resetOnActivate;
+
 public:
-   RebindKeysUserInterface()
-   {
-      title = "ENTER TEXT:";
-      buffer[0] = 0;
-      memset(buffer, 0, sizeof(buffer));
-      secret = false;
-      cursorPos = 0;
-      resetOnActivate = true;
-   }
+   RebindKeysUserInterface(Game *game);      // Constructor
 
    void onActivate();
    void render();

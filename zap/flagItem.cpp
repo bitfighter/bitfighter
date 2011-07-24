@@ -257,10 +257,9 @@ void FlagItem::renderItem(Point pos)
 
 void FlagItem::renderDock()
 {
-   Point p = getVert(0);
    glPushMatrix();
-      glTranslatef(p.x, p.y, 0);
-      glScalef(0.6, 0.6, 1);
+      glTranslate(getVert(0));
+      glScale(0.6);
       renderFlag(0, 0, getGame()->getTeamColor(mTeam));
    glPopMatrix();   
 }

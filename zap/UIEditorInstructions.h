@@ -35,6 +35,8 @@ namespace Zap
 
 class EditorInstructionsUserInterface : public AbstractInstructionsUserInterface
 {
+   typedef AbstractInstructionsUserInterface Parent;
+
 private:
    U32 mCurPage;
    Timer mAnimTimer;
@@ -42,7 +44,7 @@ private:
    WallSegmentManager mWallSegmentManager;
 
 public:
-   EditorInstructionsUserInterface();      // Constructor
+   EditorInstructionsUserInterface(Game *game);      // Constructor
    void render();
    void renderPageCommands(S32 page);
    void renderPageWalls();
@@ -57,8 +59,6 @@ public:
    void exitInstructions();
    void idle(U32 timeDelta);
 };
-
-extern EditorInstructionsUserInterface gEditorInstructionsUserInterface;
 
 };
 

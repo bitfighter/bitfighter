@@ -50,12 +50,6 @@ namespace Zap
 S32 EditorObject::mNextSerialNumber = 0;
 
 
-inline F32 getGridSize()
-{
-   return gEditorGame->getGridSize();
-}
-
-
 // Constructor
 EditorObject::EditorObject(GameObjectType objectType) 
 { 
@@ -89,14 +83,18 @@ EditorObject::~EditorObject()
 //}
 
 
-void EditorObject::addToDock(Game *game, const Point &point)
+void EditorObject::addToDock(EditorGame *game, const Point &point)
 {
    mGame = game;
+
    mDockItem = true;
    
    unselectVerts();
 
-   gEditorUserInterface.addToDock(this);
+   EditorUserInterface *ui = game->getUIManager()->getEditorUserInterface();
+   ui->addToDock(this);
+
+   //game->getEditorUserInterface()->addToDock(this);
 }
 
 
@@ -107,22 +105,13 @@ static F32 getRenderingAlpha(bool isScriptItem)
 }
 
 
-// TODO: Merge with copy in editor, if it's really needed
-inline Point convertLevelToCanvasCoord(const Point &point, bool convert = true) 
-{ 
-   return gEditorUserInterface.convertLevelToCanvasCoord(point, convert); 
-}
-
-
 // Replaces the need to do a convertLevelToCanvasCoord on every point before rendering
-static void setLevelToCanvasCoordConversion()
+static void setLevelToCanvasCoordConversion(Game *game)
 {
-   F32 scale =  gEditorUserInterface.getCurrentScale();
-   Point offset = gEditorUserInterface.getCurrentOffset();
-
-   glTranslatef(offset.x, offset.y, 0);
-   glScalef(scale, scale, 1);
+   glTranslate(game->getUIManager()->getEditorUserInterface()->getCurrentOffset());
+   glScale(game->getUIManager()->getEditorUserInterface()->getCurrentScale());
 } 
+
 
 // TODO: merge with UIEditor versions
 static const Color grayedOutColorBright = Colors::gray50;
@@ -185,13 +174,6 @@ static void labelVertex(Point pos, S32 radius, const char *itemLabelTop, const c
 }
 
 
-// TODO: Fina a way to do this sans global
-Point EditorObject::convertLevelToCanvasCoord(const Point &pt) 
-{ 
-   return gEditorUserInterface.convertLevelToCanvasCoord(pt); 
-}
-
-
 static const Color INSTRUCTION_TEXTCOLOR(1,1,1);      // TODO: Put in editor
 
 void EditorObject::renderAttribs(F32 currentScale)
@@ -209,7 +191,7 @@ void EditorObject::renderAttribs(F32 currentScale)
          for(S32 i = 0; i < menuSize; i++)       
          {
             string txt = attrMenu->menuItems[i]->getPrompt() + ": " + attrMenu->menuItems[i]->getValue();      // TODO: Make this concatenation a method on the menuItems themselves?
-            renderItemText(txt.c_str(), menuSize - i, 1);
+            renderItemText(txt.c_str(), menuSize - i, 1, Point(0,0));
          }
       }
    }
@@ -227,7 +209,7 @@ void EditorObject::renderAndLabelHighlightedVertices(F32 currentScale)
       {
          glColor((vertSelected(i) || mSelected) ? SELECT_COLOR : HIGHLIGHT_COLOR);
 
-         Point pos = gEditorUserInterface.convertLevelToCanvasCoord(getVert(i));
+         Point pos = mGame->getUIManager()->getEditorUserInterface()->convertLevelToCanvasCoord(getVert(i));
 
          drawSquare(pos, radius);
          labelVertex(pos, radius, getOnScreenName(), getVertLabel(i));
@@ -273,19 +255,25 @@ void EditorObject::renderInEditor(bool isScriptItem, bool showingReferenceShip, 
 
    bool hideit = (showMode == ShowWallsOnly) && !(showingReferenceShip && !mDockItem);
 
+   EditorGame *game = dynamic_cast<EditorGame *>(mGame);
+   TNLAssert(game, "Bad cast!");
+
    Color drawColor;
    if(hideit)
       glColor(grayedOutColorBright, alpha);
    else 
       glColor(getDrawColor(), alpha);
 
-   S32 snapIndex = gEditorUserInterface.getSnapVertexIndex();
+   S32 snapIndex = game->getUIManager()->getEditorUserInterface()->getSnapVertexIndex();
 
    glEnableBlend;        // Enable transparency
 
    // Override drawColor for this special case
    if(anyVertsSelected())
       drawColor = *SELECT_COLOR;
+
+   F32 currentScale = game->getUIManager()->getEditorUserInterface()->getCurrentScale();
+   Point currentOffset = game->getUIManager()->getEditorUserInterface()->getCurrentOffset(); 
      
    if(mDockItem)
    {
@@ -297,21 +285,21 @@ void EditorObject::renderInEditor(bool isScriptItem, bool showingReferenceShip, 
    else  // Not a dock item
    {
       glPushMatrix();
-         setLevelToCanvasCoordConversion();
+         setLevelToCanvasCoordConversion(game);
          if(showingReferenceShip)
             render();
          else
-            renderEditor(gEditorUserInterface.getCurrentScale());
+            renderEditor(currentScale);
       glPopMatrix();   
 
       if(!showingReferenceShip)
       {
          // Label item with instruction message describing what happens if user presses enter
          if(isSelected() && !isBeingEdited())
-            renderItemText(getInstructionMsg(), -1, gEditorUserInterface.getCurrentScale());
+            renderItemText(getInstructionMsg(), -1, currentScale, currentOffset);
 
-         renderAndLabelHighlightedVertices(gEditorUserInterface.getCurrentScale());
-         renderAttribs(gEditorUserInterface.getCurrentScale());
+         renderAndLabelHighlightedVertices(currentScale);
+         renderAttribs(currentScale);
       }
    }
 
@@ -331,7 +319,12 @@ void EditorObject::renderPolylineCenterline(F32 alpha)
       glColor(getTeamColor(mTeam), alpha);
 
    glLineWidth(WALL_SPINE_WIDTH);
-   EditorUserInterface::renderPolyline(getOutline());
+
+   glPushMatrix();
+      setLevelToCanvasCoordConversion(getGame());
+      renderPointVector(getOutline(), GL_LINE_STRIP);
+   glPopMatrix();
+
    glLineWidth(gDefaultLineWidth);
 }
 
@@ -383,7 +376,7 @@ EditorObject *EditorObject::newCopy()
 
 Color EditorObject::getTeamColor(S32 teamId) 
 { 
-   return gEditorUserInterface.getTeamColor(teamId);
+   return mGame->getTeamColor(teamId);
 }
 
 

@@ -26,6 +26,7 @@
 #ifndef _UI_H_
 #define _UI_H_
 
+#include "UIManager.h"
 #include "keyCode.h"
 #include "SharedConstants.h"
 #include "timer.h"
@@ -123,6 +124,11 @@ template<class T, class U, class V>
       static void glTranslate(T in_x, U in_y, V in_z) { glTranslatef(static_cast<TNL::F32>(in_x), static_cast<TNL::F32>(in_y), static_cast<TNL::F32>(in_z)); }
 
 
+class Game;
+class ClientGame;
+class EditorGame;
+
+class UIManager;
 
 class UserInterface
 {
@@ -131,7 +137,10 @@ private:
    static void doDrawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string, bool fixed);
    static void doDrawAngleString(S32 x, S32 y, F32 size, F32 angle, const char *string, bool fixed);
 
+   Game *mGame;
+
 public:
+   UserInterface(Game *game);                // Constructor
    static const S32 MAX_PASSWORD_LENGTH = 32;      // Arbitrary, doesn't matter, but needs to be _something_
 
    static UserInterface *current;            // Currently active menu
@@ -141,6 +150,12 @@ public:
    void setMenuID(UIID menuID);              // Set interface's name
    UIID getMenuID() const;                   // Retrieve interface's name
    UIID getPrevMenuID() const;               // Retrieve previous interface's name
+
+   Game *getGame() { return mGame; }
+   ClientGame *getClientGame();
+   EditorGame *getEditorGame();
+
+   UIManager *getUIManager();
 
    static S32 vertMargin, horizMargin;
    static S32 messageMargin;
@@ -163,8 +178,8 @@ public:
 
    void renderConsole();      // Render game console
 
-   static void reactivatePrevUI();
-   static void reactivateMenu(const UserInterface *target);
+   void reactivatePrevUI();
+   void reactivateMenu(const UserInterface *target);
 
    KeyCode convertJoystickToKeyboard(KeyCode keyCode);
 

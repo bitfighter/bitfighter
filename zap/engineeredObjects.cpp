@@ -786,7 +786,6 @@ void ForceFieldProjector::renderEditor(F32 currentScale)
 
 
 class EditorUserInterface;
-extern EditorUserInterface gEditorUserInterface;
 
 // Determine on which segment forcefield lands -- only used in the editor, wraps ForceField::findForceFieldEnd()
 void ForceFieldProjector::findForceFieldEnd()

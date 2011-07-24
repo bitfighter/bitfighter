@@ -76,12 +76,14 @@ public:
 // Credits UI
 class CreditsUserInterface : public UserInterface
 {
+   typedef UserInterface Parent;
+
 private:
    Vector<CreditsFX *> fxList;
 
 public:
-   CreditsUserInterface();        // Constructor
-   ~CreditsUserInterface();       // Destructor
+   CreditsUserInterface(Game *game);   // Constructor
+   ~CreditsUserInterface();            // Destructor
 
    void onActivate();
    void onReactivate();
@@ -91,13 +93,15 @@ public:
    void quit();
    void onKeyDown(KeyCode keyCode, char ascii);
 };
-extern CreditsUserInterface gCreditsUserInterface;
 
 
-
+////////////////////////////////////////
+////////////////////////////////////////
 // Splash UI -- provides short animation at startup and at beginning of credits
 class SplashUserInterface : public UserInterface
 {
+   typedef UserInterface Parent;
+
    enum {                // All times in ms
      spinTime = 1500,
      restTime = 150,
@@ -110,7 +114,7 @@ private:
    S32 mType;             // Type of animation (twirl, zoom out, etc.)
 
 public:
-   SplashUserInterface();      // Constructor
+   SplashUserInterface(Game *game);      // Constructor
 
    void onActivate();
    void idle(U32 timeDelta);
@@ -118,8 +122,6 @@ public:
    void quit();
    void onKeyDown(KeyCode keyCode, char ascii);
 };
-
-extern SplashUserInterface gSplashUserInterface;
 
 }
 

@@ -106,6 +106,10 @@ class WallSegmentManager;
 class AbstractTeam;
 class Team;
 class TeamEditor;
+class UIManager;
+
+struct IniSettings;
+extern IniSettings gIniSettings;
 
 /// Base class for server and client Game subclasses.  The Game
 /// base class manages all the objects in the game simulation on
@@ -122,6 +126,7 @@ private:
 
    WallSegmentManager *mWallSegmentManager;     
 
+   UIManager *mUIManager;
 
    // Info about modules -- access via getModuleInfo()
    Vector<ModuleInfo> mModuleInfos;
@@ -211,6 +216,8 @@ public:
 
    void resetLevelInfo();
 
+   UIManager *getUIManager() { return mUIManager; }
+
    virtual void processLevelLoadLine(U32 argc, U32 id, const char **argv);      // Only used by ServerGame and EditorGame
    bool processLevelParam(S32 argc, const char **argv);
    string toString();
@@ -218,7 +225,6 @@ public:
    virtual bool processPseudoItem(S32 argc, const char **argv) { return false; }
 
    void setGameTime(F32 time);                                          // Only used during level load process
-
 
    void addToDeleteList(GameObject *theObject, U32 delay);
 
@@ -257,9 +263,10 @@ public:
    void clearTeams();
    StringTableEntry getTeamName(S32 teamIndex) const;   // Return the name of the team
 
-
    void setGameType(GameType *theGameType);
    void processDeleteList(U32 timeDelta);
+
+   IniSettings *getIniSettings() { return &gIniSettings; }
 
    bool isSuspended() { return mGameSuspended; }
 
@@ -267,8 +274,10 @@ public:
 
    void setReadyToConnectToMaster(bool ready) { mReadyToConnectToMaster = ready; }
 
-   S32 mObjectsLoaded;        // Objects in a given level, used for status bar.  On server it's objects loaded from file, on client, it's objects dl'ed from server.
+   // Objects in a given level, used for status bar.  On server it's objects loaded from file, on client, it's objects dl'ed from server.
+   S32 mObjectsLoaded;        
 };
+
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -474,6 +483,8 @@ private:
    GameUserInterface *mGameUserInterface;
 
 
+
+
 public:
    ClientGame(const Address &bindAddress);
    ~ClientGame();
@@ -507,8 +518,6 @@ public:
 
    const Color *getTeamColor(S32 teamIndex) const;
 
-   GameUserInterface *getUserInterface() { return mGameUserInterface; }
-
    U32 getPlayerAndRobotCount();    // Returns number of human and robot players
    U32 getPlayerCount();            // Returns number of human players
 
@@ -516,6 +525,11 @@ public:
    void unsuspendGame() { mGameSuspended = false; }
 
    boost::shared_ptr<AbstractTeam> getNewTeam();
+
+   /////
+   // Interface methods
+   GameUserInterface *getUserInterface() { return mGameUserInterface; }
+
 };
 
 
@@ -527,12 +541,11 @@ class EditorGame : public Game
 {
 private:
    boost::shared_ptr<EditorObjectDatabase> mEditorDatabase;
-
+   
 public:
-   EditorGame();
+   EditorGame();     // Constructor
 
    GameUserInterface *getUserInterface() { return NULL; }      // Not sure about this...
-
 
    U32 getPlayerCount() { return 0; }
    bool isServer() { return false; }

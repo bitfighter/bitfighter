@@ -59,6 +59,7 @@ enum ShowMode
 
 class EditorAttributeMenuUI;
 class WallSegment;
+class EditorGame;
 
 class EditorObject : virtual public BfObject   // Interface class  -- All editor objects need to implement this
 {
@@ -68,7 +69,6 @@ private:
 
    bool mIsBeingEdited;
    static S32 mNextSerialNumber;
-
 
 protected:
    bool mDockItem;      // True if this item lives on the dock
@@ -89,7 +89,7 @@ public:
 
    EditorObject *newCopy();         // Copies object        // TODO: Will become call to clone, delete method
 
-   virtual void addToDock(Game *game, const Point &point);
+   virtual void addToDock(EditorGame *game, const Point &point);
 
    void assignNewSerialNumber() { mSerialNumber = mNextSerialNumber++; }
    void renderDockItemLabel(const Point &pos, const char *label, F32 yOffset = 0);    // This could be moved anywhere... it's essentially a static method
@@ -101,10 +101,8 @@ public:
    virtual Point getEditorSelectionOffset(F32 currentScale);  
 
    void renderAndLabelHighlightedVertices(F32 currentScale);   // Render selected and highlighted vertices, called from renderEditor
-   virtual void renderItemText(const char *text, S32 offset, F32 currentScale) { };    // Render some text, with specified vertical offset
+   virtual void renderItemText(const char *text, S32 offset, F32 currentScale, const Point &currentOffset) { };    // Render some text, with specified vertical offset
    virtual void renderEditor(F32 currentScale) { TNLAssert(false, "renderEditor not implemented!"); }
-
-   Point convertLevelToCanvasCoord(const Point &pt);
 
    // Should we show item attributes when it is selected? (only overridden by TextItem)
    virtual bool showAttribsWhenSelected() { return true; }                             

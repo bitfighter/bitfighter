@@ -3,13 +3,13 @@
 #ifndef _OGLCONSOLE_H
 #define _OGLCONSOLE_H
 
-
 /* Opaque to you you lowly user */
 typedef struct _OGLCONSOLE_Console *OGLCONSOLE_Console;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
 
 
 /* Initialize/uninitialize OGLConsole */
@@ -37,7 +37,7 @@ void OGLCONSOLE_Print(const char *s, ...);
 void OGLCONSOLE_Output(OGLCONSOLE_Console console, const char *s, ...);
 
 /* Register a callback with the console */
-void OGLCONSOLE_EnterKey(void(*cbfun)(OGLCONSOLE_Console console, char *cmd));
+void OGLCONSOLE_EnterKey(void(*cbfun)(void *game, OGLCONSOLE_Console console, char *cmd));
 
 /* This function tries to handle the incoming keydown event. In the future there may
  * be non-SDL analogs for input systems such as GLUT. Returns true if the event

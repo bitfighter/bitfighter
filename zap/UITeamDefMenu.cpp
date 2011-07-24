@@ -76,10 +76,8 @@ TeamPreset gTeamPresets[] = {
 //Team Peach 1 0.7 0
 
 
-TeamDefUserInterface gTeamDefUserInterface;
-
 // Constructor
-TeamDefUserInterface::TeamDefUserInterface()
+TeamDefUserInterface::TeamDefUserInterface(Game *game) : Parent(game)
 {
    setMenuID(TeamDefUI);
    mMenuTitle = "Configure Teams";
@@ -98,15 +96,17 @@ void TeamDefUserInterface::onActivate()
    selectedIndex = 0;                                 // First item selected when we begin
    mEditing = false;                                  // Not editing anything by default
 
-   S32 teamCount = gEditorGame->getTeamCount();
-   gEditorUserInterface.mOldTeams.resize(teamCount);  // Avoid unnecessary reallocations
+   EditorUserInterface *ui = getGame()->getUIManager()->getEditorUserInterface();
+   S32 teamCount = getGame()->getTeamCount();
+
+   ui->mOldTeams.resize(teamCount);  // Avoid unnecessary reallocations
 
    for(S32 i = 0; i < teamCount; i++)
    {
-      AbstractTeam *team = gEditorGame->getTeam(i);
+      AbstractTeam *team = getGame()->getTeam(i);
 
-      gEditorUserInterface.mOldTeams[i].color = team->getColor();
-      gEditorUserInterface.mOldTeams[i].name = team->getName().getString();
+      ui->mOldTeams[i].color = team->getColor();
+      ui->mOldTeams[i].name = team->getName().getString();
    }
 
    // Display an intitial message to users
@@ -114,6 +114,7 @@ void TeamDefUserInterface::onActivate()
    errorMsg = "";
    SDL_ShowCursor(SDL_DISABLE);
 }
+
 
 void TeamDefUserInterface::idle(U32 timeDelta)
 {
@@ -224,10 +225,12 @@ void TeamDefUserInterface::render()
 void TeamDefUserInterface::onEscape()
 {
    // Make sure there is at least one team left...
-   gEditorUserInterface.makeSureThereIsAtLeastOneTeam();
-   gEditorUserInterface.teamsHaveChanged();
+   EditorUserInterface *ui = getGame()->getUIManager()->getEditorUserInterface();
 
-   UserInterface::reactivatePrevUI();
+   ui->makeSureThereIsAtLeastOneTeam();
+   ui->teamsHaveChanged();
+
+   ui->reactivatePrevUI();
 }
 
 
@@ -321,7 +324,7 @@ void TeamDefUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 
    else if(keyCode == KEY_ESCAPE || keyCode == BUTTON_BACK)       // Quit
    {
-      UserInterface::playBoop();
+      playBoop();
       onEscape();
    }
    else if(keyCode == KEY_UP || keyCode == BUTTON_DPAD_UP)        // Prev item
@@ -329,7 +332,7 @@ void TeamDefUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       selectedIndex--;
       if(selectedIndex < 0)
          selectedIndex = gEditorGame->getTeamCount() - 1;
-      UserInterface::playBoop();
+      playBoop();
       SDL_ShowCursor(SDL_DISABLE);
 
    }
@@ -338,18 +341,18 @@ void TeamDefUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       selectedIndex++;
       if(selectedIndex >= gEditorGame->getTeamCount())
          selectedIndex = 0;
-      UserInterface::playBoop();
+      playBoop();
       SDL_ShowCursor(SDL_DISABLE);
    }
    else if(keyCode == keyDIAG)     // Turn on diagnostic overlay
    {
-      gDiagnosticInterface.activate();
-      UserInterface::playBoop();
+      getGame()->getUIManager()->getDiagnosticUserInterface()->activate();
+      playBoop();
    }
    else if(keyCode == keyOUTGAMECHAT)     // Turn on Global Chat overlay
    {
-      gChatInterface.activate();
-      UserInterface::playBoop();
+      getGame()->getUIManager()->getChatUserInterface()->activate();
+      playBoop();
    }
 }
 

@@ -70,11 +70,8 @@ const char *gGameCredits[] = {
 
 static bool quitting = false;
 
-
-CreditsUserInterface gCreditsUserInterface;
-
 // Constructor
-CreditsUserInterface::CreditsUserInterface()
+CreditsUserInterface::CreditsUserInterface(Game *game) : Parent(game)
 {
    setMenuID(CreditsUI);
 }
@@ -96,7 +93,7 @@ CreditsUserInterface::~CreditsUserInterface()
 void CreditsUserInterface::onActivate()
 {
    quitting = false;
-   gSplashUserInterface.activate();          // Show splash animation at beginning of credits
+   getGame()->getUIManager()->getSplashUserInterface()->activate();          // Show splash animation at beginning of credits
 
    // Construct the creditsfx objects here, they will
    // get properly deleted when the CreditsUI
@@ -167,7 +164,7 @@ void CreditsUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 CreditsFX::CreditsFX()
 {
    activated = false;
-   gCreditsUserInterface.addFX(this);
+   gClientGame->getUIManager()->getCreditsUserInterface()->addFX(this);
 }
 
 // Constructor
@@ -243,10 +240,8 @@ void CreditsScroller::render()
 
 //////////////////////////////////
 
-SplashUserInterface gSplashUserInterface;
-
 // Constructor
-SplashUserInterface::SplashUserInterface()
+SplashUserInterface::SplashUserInterface(Game *game) : Parent(game)
 {
    setMenuID(SplashUI);
 }

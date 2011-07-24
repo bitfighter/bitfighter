@@ -90,6 +90,11 @@ extern void renderFlag(F32 x, F32 y, const Color *flagColor, const Color *mastCo
 
 extern void renderPointVector(const Vector<Point> *points, U32 geomType);
 
+extern void glScale(F32 scaleFactor);
+extern void glTranslate(const Point &pos);
+
+
+
 //extern void renderFlag(Point pos, Color c, F32 timerFraction);
 extern void renderSmallFlag(const Point &pos, const Color &c, F32 parentAlpha);
 

@@ -26,6 +26,7 @@
 #include "UIEditorMenus.h"
 #include "textItem.h"
 #include "speedZone.h"
+#include "game.h"
 
 namespace Zap
 {
@@ -43,14 +44,16 @@ static const S32 ATTR_TEXTSIZE = 10;                                          //
 void EditorAttributeMenuUI::render()
 {
    // Draw the underlying editor screen
-   gEditorUserInterface.render();     // better way than global?
+   prevUIs.last()->render();
 
  /*  if(mRenderInstructions)
       renderMenuInstructions();*/
+
+   EditorUserInterface *ui = getUIManager()->getEditorUserInterface();
    
    S32 gap = 3;
-   Point offset = gEditorUserInterface.getCurrentOffset();
-   Point center = (mObject->getVert(0) + mObject->getVert(1)) * gEditorUserInterface.getCurrentScale() / 2 + offset;
+   Point offset = ui->getCurrentOffset();
+   Point center = (mObject->getVert(0) + mObject->getVert(1)) * ui->getCurrentScale() / 2 + offset;
 
    S32 count = menuItems.size();
    S32 yStart = S32(center.y) - count * (ATTR_TEXTSIZE + gap) - 10;
@@ -70,7 +73,7 @@ void EditorAttributeMenuUI::doneEditing(EditorObject *object)
    if(object == mObject)   
    {
       mObject->setIsBeingEdited(false);
-      gEditorUserInterface.doneEditingAttributes(this, mObject); 
+      dynamic_cast<EditorGame *>(getGame())->getUIManager()->getEditorUserInterface()->doneEditingAttributes(this, mObject); 
    }
 }
 
@@ -90,15 +93,15 @@ static void setMenuColors(MenuItem *menuItem)
 ////////////////////////////////////////
 
 // Constructor
-GoFastEditorAttributeMenuUI::GoFastEditorAttributeMenuUI()
+GoFastEditorAttributeMenuUI::GoFastEditorAttributeMenuUI(Game *game) : Parent(game)
 {
    setMenuID(GoFastAttributeEditorUI);
    menuItems.resize(2);
 
-   menuItems[0] = boost::shared_ptr<MenuItem>(new CounterMenuItem("Speed", 100, 100, SpeedZone::minSpeed, SpeedZone::maxSpeed, "", "Really slow", ""));
+   menuItems[0] = boost::shared_ptr<MenuItem>(new CounterMenuItem(game, "Speed", 100, 100, SpeedZone::minSpeed, SpeedZone::maxSpeed, "", "Really slow", ""));
    setMenuColors(menuItems[0].get());
 
-   menuItems[1] = boost::shared_ptr<MenuItem>(new YesNoMenuItem("Snapping", true, NULL, ""));
+   menuItems[1] = boost::shared_ptr<MenuItem>(new YesNoMenuItem(game, "Snapping", true, NULL, ""));
    setMenuColors(menuItems[1].get());
 }
 
@@ -140,13 +143,13 @@ static void textEditedCallback(string text)
 
 
 // Constructor
-TextItemEditorAttributeMenuUI::TextItemEditorAttributeMenuUI()
+TextItemEditorAttributeMenuUI::TextItemEditorAttributeMenuUI(Game *game) : Parent(game)
 {
    setMenuID(TextItemAttributeEditorUI);
 
    menuItems.resize(1);
 
-   EditableMenuItem *menuItem = new EditableMenuItem("Text: ", "Blah", "", "", MAX_TEXTITEM_LEN);
+   EditableMenuItem *menuItem = new EditableMenuItem(game, "Text: ", "Blah", "", "", MAX_TEXTITEM_LEN);
 
    menuItem->setTextEditedCallback(textEditedCallback);
    setMenuColors(menuItem);

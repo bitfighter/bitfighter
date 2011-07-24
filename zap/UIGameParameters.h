@@ -64,8 +64,11 @@ public:
 ////////////////////////////////////
 ////////////////////////////////////
 
-class GameParamUserInterface : public MenuUserInterface     // By subclassing this, I hoped to get the mouse stuff to automatically work, but it didn't.  <sigh>
+// By subclassing MenuUserInterface, I hoped to get the mouse stuff to automatically work, but it didn't.  <sigh>
+class GameParamUserInterface : public MenuUserInterface     
 {
+   typedef MenuUserInterface Parent;
+
 private:
    void processSelection(U32 index) { }   // Needed for MenuUserInterface subclassing... does nothing
 
@@ -84,20 +87,16 @@ private:
 
 
 public:
-   GameParamUserInterface();   // Constructor
+   GameParamUserInterface(Game *game);   // Constructor
 
    S32 selectedIndex;          // Highlighted menu item
    S32 changingItem;           // Index of key we're changing (in keyDef mode), -1 otherwise
 
-   void updateMenuItems(Game *game);
-
-   Vector<SavedMenuItem> savedMenuItems;   
+   void updateMenuItems();
 
    void onActivate();
    void onEscape();
 };
-
-extern GameParamUserInterface gGameParamUserInterface;
 
 };
 

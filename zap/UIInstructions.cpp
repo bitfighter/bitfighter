@@ -46,18 +46,18 @@
 namespace Zap
 {
 
-InstructionsUserInterface gInstructionsUserInterface;
-
 // Constructor
-InstructionsUserInterface::InstructionsUserInterface()
+InstructionsUserInterface::InstructionsUserInterface(Game *game) : Parent(game)
 {
    setMenuID(InstructionsUI);
 }
+
 
 void InstructionsUserInterface::onActivate()
 {
    mCurPage = 1;
 }
+
 
 static const U32 NUM_PAGES = 12;
 
@@ -378,7 +378,7 @@ void InstructionsUserInterface::renderPage2()
       drawString(105, y, 20, moduleDescriptions[i]);
       glPushMatrix();
       glTranslatef(60, y + 10, 0);
-      glScalef(0.7, 0.7, 1);
+      glScale(0.7);
       glRotatef(-90, 0, 0, 1);
 
       static F32 thrusts[4] =  { 1, 0, 0, 0 };
@@ -510,8 +510,8 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
       renderCenteredString(start + Point(0, 25), (S32)17, desc);
 
       glPushMatrix();
-      glTranslatef(objStart.x, objStart.y, 0);
-      glScalef(0.7, 0.7, 1);
+      glTranslate(objStart);
+      glScale(0.7);
 
 
       // TODO: Do this once, elsewhere
@@ -748,7 +748,7 @@ void InstructionsUserInterface::prevPage()
 
 void InstructionsUserInterface::exitInstructions()
 {
-   UserInterface::playBoop();
+   playBoop();
    reactivatePrevUI();      //mGameUserInterface
 }
 
@@ -757,19 +757,19 @@ void InstructionsUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 {
    if(keyCode == KEY_LEFT || keyCode == BUTTON_DPAD_LEFT || keyCode == BUTTON_DPAD_UP || keyCode == KEY_UP)
    {
-      UserInterface::playBoop();
+      playBoop();
       prevPage();
    }
    else if(keyCode == KEY_RIGHT || keyCode == KEY_SPACE || keyCode == BUTTON_DPAD_RIGHT ||
            keyCode == BUTTON_DPAD_DOWN || keyCode == KEY_ENTER || keyCode == KEY_DOWN)
    {
-      UserInterface::playBoop();
+      playBoop();
       nextPage();
    }
    else if(keyCode == keyOUTGAMECHAT)     // Turn on Global Chat overlay
-      gChatInterface.activate();
+      getGame()->getUIManager()->getChatUserInterface()->activate();
    else if(keyCode == keyDIAG)            // Turn on diagnostic overlay
-      gDiagnosticInterface.activate();
+      getGame()->getUIManager()->getDiagnosticUserInterface()->activate();
    else if(keyCode == keyHELP || keyCode == KEY_ESCAPE  || keyCode == BUTTON_BACK)
       exitInstructions();
 }

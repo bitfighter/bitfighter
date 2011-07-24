@@ -308,7 +308,7 @@ _OGLCONSOLE_Console *programConsole = NULL;
 _OGLCONSOLE_Console *userConsole = NULL;
 
 /* Set the callback for a console */
-void OGLCONSOLE_EnterKey(void(*cbfun)(OGLCONSOLE_Console console, char *cmd))
+void OGLCONSOLE_EnterKey(void(*cbfun)(void *game, OGLCONSOLE_Console console, char *cmd))
 {
     programConsole->enterKeyCallback = cbfun;
 }
@@ -413,10 +413,10 @@ void OGLCONSOLE_Reshape()
 OGLCONSOLE_Console OGLCONSOLE_Create()
 {
     _OGLCONSOLE_Console *console;
-
+    
 #ifndef ZAP_DEDICATED
     /* If font hasn't been created, we create it */
-    if (!glIsTexture(OGLCONSOLE_glFontHandle))
+    if(!glIsTexture(OGLCONSOLE_glFontHandle))
         OGLCONSOLE_CreateFont();
 #endif
 

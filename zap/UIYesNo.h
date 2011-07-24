@@ -36,17 +36,16 @@ namespace Zap
 class YesNoUserInterface : public ErrorMessageUserInterface
 {
 private:
-   void (*mYesFunction)();
-   void (*mNoFunction)();
+   void (*mYesFunction)(Game *game);
+   void (*mNoFunction)(Game *game);
+
 public:
-   YesNoUserInterface();      // Constructor
+   YesNoUserInterface(Game *game);      // Constructor
    void reset();
    void onKeyDown(KeyCode keyCode, char ascii);
-   void registerYesFunction(void(*ptr)());
-   void registerNoFunction(void(*ptr)());
+   void registerYesFunction(void(*ptr)(Game *));
+   void registerNoFunction(void(*ptr)(Game *));
 };
-
-extern YesNoUserInterface gYesNoUserInterface;
 
 }
 

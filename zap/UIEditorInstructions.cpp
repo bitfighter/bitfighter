@@ -46,15 +46,12 @@
 namespace Zap
 {
 
-EditorInstructionsUserInterface gEditorInstructionsUserInterface;
-
-
 static Vector<Point> sample1o, sample2o, sample3o, sample4o, sample5o;     // outline
 static Vector<Point> sample1f, sample2f, sample3f, sample4f, sample5f;     // fill
 static Border border34;
 
 // Constructor
-EditorInstructionsUserInterface::EditorInstructionsUserInterface()
+EditorInstructionsUserInterface::EditorInstructionsUserInterface(Game *game) : Parent(game)
 {
    setMenuID(EditorInstructionsUI);
 }
@@ -128,8 +125,6 @@ static ControlStringsEditor consoleCommands1[] = {
    { NULL, NULL },      // End of list
 };
 
-
-extern EditorUserInterface gEditorUserInterface;
 
 void EditorInstructionsUserInterface::render()
 {
@@ -475,8 +470,8 @@ void EditorInstructionsUserInterface::idle(U32 timeDelta)
 
 void EditorInstructionsUserInterface::exitInstructions()
 {
-   UserInterface::playBoop();
-   reactivatePrevUI();      //gEditorUserInterface, probably
+   playBoop();
+   reactivatePrevUI();      // To EditorUserInterface, probably
 }
 
 
@@ -484,19 +479,19 @@ void EditorInstructionsUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 {
    if(keyCode == KEY_LEFT || keyCode == BUTTON_DPAD_LEFT || keyCode == BUTTON_DPAD_UP || keyCode == KEY_UP)
    {
-      UserInterface::playBoop();
+      playBoop();
       prevPage();
    }
    else if(keyCode == KEY_RIGHT || keyCode == KEY_SPACE || keyCode == BUTTON_DPAD_RIGHT ||
            keyCode == BUTTON_DPAD_DOWN || keyCode == KEY_ENTER || keyCode == KEY_DOWN)
    {
-      UserInterface::playBoop();
+      playBoop();
       nextPage();
    }
    else if(keyCode == keyOUTGAMECHAT)     // Turn on Global Chat overlay
-      gChatInterface.activate();
+      getGame()->getUIManager()->getChatUserInterface()->activate();
    else if(keyCode == keyDIAG)            // Turn on diagnostic overlay
-      gDiagnosticInterface.activate();
+      getGame()->getUIManager()->getDiagnosticUserInterface()->activate();
    else if(keyCode == keyHELP || keyCode == KEY_ESCAPE  || keyCode == BUTTON_BACK)
       exitInstructions();
 }

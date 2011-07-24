@@ -350,7 +350,7 @@ public:
    string toString() const;
 
    virtual const char **getGameParameterMenuKeys();
-   virtual boost::shared_ptr<MenuItem> getMenuItem(const Game *game, const char *key);
+   virtual boost::shared_ptr<MenuItem> getMenuItem(Game *game, const char *key);
    virtual bool saveMenuItem(const MenuItem *menuItem, const char *key);
 
    virtual bool processSpecialsParam(const char *param);
@@ -489,7 +489,7 @@ public:
    TNL_DECLARE_RPC(c2sResendItemStatus, (U16 itemId));
 
    // Handle additional game-specific menu options for the client and the admin
-   virtual void addClientGameMenuOptions(Vector<boost::shared_ptr<MenuItem> > &menuOptions);
+   virtual void addClientGameMenuOptions(ClientGame *game, Vector<boost::shared_ptr<MenuItem> > &menuOptions);
    //virtual void processClientGameMenuOption(U32 index);                        // Param used only to hold team, at the moment
 
    virtual void addAdminGameMenuOptions(Vector<boost::shared_ptr<MenuItem> > &menuOptions);

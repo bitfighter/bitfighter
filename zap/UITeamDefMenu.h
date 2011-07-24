@@ -49,6 +49,8 @@ struct TeamPreset
 
 class TeamDefUserInterface : public UserInterface
 {
+   typedef UserInterface Parent;
+
 private:
    Timer errorMsgTimer;
    string errorMsg;
@@ -59,7 +61,7 @@ private:
    bool mEditing;              // true if editing selectedIndex, false if not
 
 public:
-   TeamDefUserInterface();     // Constructor
+   TeamDefUserInterface(Game *game);     // Constructor
    const char *mMenuTitle;
    const char *mMenuSubTitle;
    Color mMenuSubTitleColor;
@@ -72,10 +74,7 @@ public:
 
    void onActivate();
    void onEscape();
-      
 };
-
-extern TeamDefUserInterface gTeamDefUserInterface;
 
 };
 

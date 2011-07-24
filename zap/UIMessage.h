@@ -34,8 +34,10 @@ namespace Zap
 
 class MessageUserInterface : public UserInterface
 {
+   typedef UserInterface Parent;
+
 private:
-   enum { mNumLines = 9 };
+   static const S32 mNumLines = 9;
    char *mTitle;
    U32 mHeight;
    U32 mWidth;
@@ -46,6 +48,7 @@ private:
    U32 mVertOffset;
 
 public:
+   MessageUserInterface(Game *game) : Parent(game) { /* Do nothing */ }     // Constructor
    char *mMessage[mNumLines];
    void onActivate();
    void setMessage (U32 id, char *message);  // Set a line of message
@@ -60,7 +63,6 @@ public:
    void onKeyDown(KeyCode keyCode, char ascii);
 };
 
-extern MessageUserInterface gMsgUserInterface;
 
 }
 

@@ -40,8 +40,6 @@ namespace Zap
 
 extern Color gErrorMessageTextColor;
 
-// Instantiate our MessageUI object
-MessageUserInterface gMsgUserInterface;
 
 void MessageUserInterface::onActivate()
 {
@@ -109,7 +107,7 @@ void MessageUserInterface::quit()
    if(prevUIs.size())
       UserInterface::reactivatePrevUI();
    else
-      gMainMenuUserInterface.activate();
+      getGame()->getUIManager()->getMainMenuUserInterface()->activate();
 }
 
 void MessageUserInterface::onKeyDown(KeyCode keyCode, char ascii)

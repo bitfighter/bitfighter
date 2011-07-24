@@ -41,13 +41,12 @@ static const S32 INSTRUCTION_TEXTGAP = 3;
 static const Color ACTIVE_SPECIAL_ATTRIBUTE_COLOR = Color(.6, .6, .6);    
 static const Color INACTIVE_SPECIAL_ATTRIBUTE_COLOR = Color(.6, .6, .6);      // already in editor, called inactiveSpecialAttributeColor
 
-
 // Offset: negative below the item, positive above
-void EditorPolygon::renderItemText(const char *text, S32 offset, F32 currentScale)
+void EditorPolygon::renderItemText(const char *text, S32 offset, F32 currentScale, const Point &currentOffset)
 {
    glColor(INSTRUCTION_TEXTCOLOR);
    S32 off = (INSTRUCTION_TEXTSIZE + INSTRUCTION_TEXTGAP) * offset - 10 - ((offset > 0) ? 5 : 0);
-   Point pos = convertLevelToCanvasCoord(getVert(0));
+   Point pos = getVert(0) * currentScale + currentOffset;
    UserInterface::drawCenteredString(pos.x, pos.y - off, INSTRUCTION_TEXTSIZE, text);
 }
 
@@ -93,7 +92,7 @@ void EditorPolygon::labelDockItem()
 }
 
 
-void EditorPolygon::addToDock(Game *game, const Point &point)
+void EditorPolygon::addToDock(EditorGame *game, const Point &point)
 {
    F32 h = 16;    // Entire height
    F32 w = 20;    // Half the width

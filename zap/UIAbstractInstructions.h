@@ -41,8 +41,13 @@ struct ControlStringsEditor
 
 class AbstractInstructionsUserInterface : public UserInterface
 {
+   typedef UserInterface Parent;
+
 protected:
    void renderConsoleCommands(const char *activationInstruction, ControlStringsEditor cmdList[]);
+
+public:
+   AbstractInstructionsUserInterface(Game *game) : Parent(game) { /* Do nothing */ }      // Constructor
 };
 
 }

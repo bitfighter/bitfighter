@@ -47,13 +47,13 @@ class Button
 private:
    S32 mX, mY, mTextSize, mPadding;
    const char *mLabel;
-   void (*mOnClickCallback)();
+   void (*mOnClickCallback)(Game *);
    bool mouseOver(F32 mouseX, F32 mouseY);
    bool mTransparent;
    Color mBgColor, mFgColor, mHlColor;
 
 public:
-   Button(S32 x, S32 y, S32 textSize, S32 padding, const char *label, Color fgColor, Color hlColor, void(*callback)());   // Constructor
+   Button(S32 x, S32 y, S32 textSize, S32 padding, const char *label, Color fgColor, Color hlColor, void(*callback)(Game *));   // Constructor
 
    void render(F32 mouseX, F32 mouseY);
    void onClick(F32 mouseX, F32 mouseY);
@@ -111,7 +111,7 @@ private:
    bool mouseInHeaderRow(const Point *pos);
 
 public:
-   QueryServersUserInterface();      // Constructor
+   QueryServersUserInterface(Game *game);      // Constructor
    bool mRecievedListOfServersFromMaster;
    Nonce mNonce;
    U32 pendingPings;
@@ -212,10 +212,10 @@ public:
    S32 getServersPerPage();
    bool isMouseOverDivider();
 
-   void onActivate();         // Run when select server screeen is displayed
-   void idle(U32 t);          // Idle loop
+   void onActivate();            // Run when select server screeen is displayed
+   void idle(U32 t);             // Idle loop
 
-   void render();             // Draw the screen
+   void render();                // Draw the screen
 
    void addPingServers(const Vector<IPAddress> &ipList);    // Add many addresses
    void addHiddenServer(Address addr, U32 time);            // Add server to list of servers we don't show the user
@@ -229,7 +229,6 @@ public:
                          U32 playerCount, U32 maxPlayers, U32 botCount, bool dedicated, bool test, bool passwordRequired);
 };
 
-extern QueryServersUserInterface gQueryServersUserInterface;
 
 };
 

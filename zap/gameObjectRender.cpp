@@ -58,7 +58,7 @@ void glVertex(const Point &p)
 }
 
 
-void  glScale(F32 scaleFactor)
+void glScale(F32 scaleFactor)
 {
     glScalef(scaleFactor, scaleFactor, 1);
 }

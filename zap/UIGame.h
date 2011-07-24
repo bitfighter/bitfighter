@@ -244,10 +244,10 @@ private:
 
    //Vector<string> mChatCmds;        // List of all commands we can type at chat prompt, for <tab> completion
 
-   Mode mCurrentMode;               // Current game mode
+   Mode mCurrentMode;                // Current game mode
 
 public:
-   GameUserInterface();             // Constructor
+   GameUserInterface(Game *game);    // Constructor
    ~GameUserInterface();             // Destructor
 
    bool displayInputModeChangeAlert;
@@ -301,8 +301,8 @@ public:
    void onMouseMoved(S32 x, S32 y);
    void onMouseMoved();
 
-   void onActivate();               // Gets run when interface is first activated
-   void onReactivate();             // Gets run when interface is subsequently reactivated
+   void onActivate();                 // Gets run when interface is first activated
+   void onReactivate();               // Gets run when interface is subsequently reactivated
 
    string remoteLevelDownloadFilename;
    //ofstream mOutputFile;            // For saving downloaded levels

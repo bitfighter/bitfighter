@@ -35,11 +35,12 @@ namespace Zap
 // Diagnostics UI
 class DiagnosticUserInterface : public UserInterface
 {
+   typedef UserInterface Parent;
 private:
    bool mActive;
    S32 mCurPage;
 public:
-   DiagnosticUserInterface();     // Constructor
+   DiagnosticUserInterface(Game *game);     // Constructor
    void onActivate();
    void idle(U32 t) { }
    void render();
@@ -48,8 +49,6 @@ public:
    bool isActive();
 };
 
-
-extern DiagnosticUserInterface gDiagnosticInterface;
 
 }
 

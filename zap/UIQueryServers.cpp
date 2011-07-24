@@ -69,24 +69,21 @@ static const U32 AREA_BETWEEN_BOTTOM_OF_SERVER_LIST_AND_DIVIDER = (SEL_SERVER_IN
 #define BOTTOM_OF_CHAT_WINDOW (gScreenInfo.getGameCanvasHeight() - vertMargin / 2 - CHAT_NAMELIST_SIZE)
 
 
-// Our one and only instantiation of this interface!
-QueryServersUserInterface gQueryServersUserInterface;
-
-
 // Button callbacks
-static void nextButtonClickedCallback()
+static void nextButtonClickedCallback(Game *game)
 {
-   gQueryServersUserInterface.advancePage();
+   game->getUIManager()->getQueryServersUserInterface()->advancePage();
 }
 
-static void prevButtonClickedCallback()
+
+static void prevButtonClickedCallback(Game *game)
 {
-   gQueryServersUserInterface.backPage();
+   game->getUIManager()->getQueryServersUserInterface()->backPage();
 }
 
 
 // Constructor
-QueryServersUserInterface::QueryServersUserInterface()
+QueryServersUserInterface::QueryServersUserInterface(Game *game) : UserInterface(game)
 {
    setMenuID(QueryServersScreenUI);
    mLastUsedServerId = 0;
@@ -759,7 +756,7 @@ void QueryServersUserInterface::render()
                   drawString(0, 0, SERVER_ENTRY_TEXTSIZE, "?");
                else
                {
-                  glScalef(3.65, 3.65, 1);
+                  glScale(3.65);
                   renderLockIcon();
                }
             glPopMatrix();
@@ -1032,19 +1029,20 @@ void QueryServersUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    }
    else if(keyCode == KEY_ESCAPE)  // Return to main menu
    {
-      UserInterface::playBoop();
+      playBoop();
       leaveGlobalChat();
-      gMainMenuUserInterface.activate();
+      getGame()->getUIManager()->getMainMenuUserInterface()->activate();
    }
    else if(keyCode == keyDIAG)            // Turn on diagnostic overlay
-      gDiagnosticInterface.activate();
+      getGame()->getUIManager()->getDiagnosticUserInterface()->activate();
    else if(keyCode == keyOUTGAMECHAT)           // Toggle half-height servers, full-height servers, and full chat overlay
    {
       mShowChat = !mShowChat;
       if(mShowChat) 
       {
-         gChatInterface.activate();
-         gChatInterface.setRenderUnderlyingUI(false);    // Don't want this screen to bleed through...
+         ChatUserInterface *ui = getGame()->getUIManager()->getChatUserInterface();
+         ui->activate();
+         ui->setRenderUnderlyingUI(false);    // Don't want this screen to bleed through...
       }
    }
 
@@ -1359,7 +1357,7 @@ void QueryServersUserInterface::issueChat()
 ////////////////////////////////////////
 
 // Contstructor -- x,y are UL corner of button
-Button::Button(S32 x, S32 y, S32 textSize, S32 padding, const char *label, Color fgColor, Color hlColor, void (*onClickCallback)())
+Button::Button(S32 x, S32 y, S32 textSize, S32 padding, const char *label, Color fgColor, Color hlColor, void (*onClickCallback)(Game *))
 {
    mX = x;
    mY = y;
@@ -1383,7 +1381,7 @@ bool Button::mouseOver(F32 mouseX, F32 mouseY)
 void Button::onClick(F32 mouseX, F32 mouseY)
 {
    if(mOnClickCallback && mouseOver(mouseX, mouseY))
-      mOnClickCallback();
+      mOnClickCallback(gClientGame);
 }
 
 

@@ -44,6 +44,7 @@ protected:
       EditorObject *mObject;      // Object whose attributes are being edited
 
 public:
+   EditorAttributeMenuUI(Game *game) : Parent(game) { /* Do nothing */ }    // Constructor
    EditorObject *getObject() { return mObject; }
    virtual void startEditing(EditorObject *object) { mObject = object; }
    virtual void doneEditing(EditorObject *object);
@@ -60,7 +61,7 @@ class GoFastEditorAttributeMenuUI : public EditorAttributeMenuUI
    typedef EditorAttributeMenuUI Parent;
 
 public:
-   GoFastEditorAttributeMenuUI();        // Constructor
+   GoFastEditorAttributeMenuUI(Game *game);    // Constructor
    void startEditing(EditorObject *object);
    void doneEditing(EditorObject *object);
 };
@@ -74,7 +75,7 @@ class TextItemEditorAttributeMenuUI : public EditorAttributeMenuUI
    typedef EditorAttributeMenuUI Parent;
 
 public:
-   TextItemEditorAttributeMenuUI();        // Constructor
+   TextItemEditorAttributeMenuUI(Game *game);   // Constructor
    void startEditing(EditorObject *object);
    void doneEditing(EditorObject *object);
 };

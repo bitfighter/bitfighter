@@ -775,14 +775,14 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsAdmin, (bool granted), (granted),
       {
          // Either display the message in the menu subtitle (if the menu is active), or in the message area if not
          if(UserInterface::current->getMenuID() == GameMenuUI)
-            gGameMenuUserInterface.mMenuSubTitle = adminPassSuccessMsg;
+            mClientGame->getUIManager()->getGameMenuUserInterface()->mMenuSubTitle = adminPassSuccessMsg;
          else
             mClientGame->getUserInterface()->displayMessage(gCmdChatColor, adminPassSuccessMsg);
       }
       else
       {
          if(UserInterface::current->getMenuID() == GameMenuUI)
-            gGameMenuUserInterface.mMenuSubTitle = adminPassFailureMsg;
+            mClientGame->getUIManager()->getGameMenuUserInterface()->mMenuSubTitle = adminPassFailureMsg;
          else
             mClientGame->getUserInterface()->displayMessage(gCmdChatColor, adminPassFailureMsg);
       }
@@ -831,14 +831,14 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsLevelChanger, (bool granted, bool noti
       {
          // Either display the message in the menu subtitle (if the menu is active), or in the message area if not
          if(UserInterface::current->getMenuID() == GameMenuUI)
-            gGameMenuUserInterface.mMenuSubTitle = levelPassSuccessMsg;
+            mClientGame->getUIManager()->getGameMenuUserInterface()->mMenuSubTitle = levelPassSuccessMsg;
          else
             mClientGame->getUserInterface()->displayMessage(gCmdChatColor, levelPassSuccessMsg);
       }
       else
       {
          if(UserInterface::current->getMenuID() == GameMenuUI)
-            gGameMenuUserInterface.mMenuSubTitle = levelPassFailureMsg;
+            mClientGame->getUIManager()->getGameMenuUserInterface()->mMenuSubTitle = levelPassFailureMsg;
          else
             mClientGame->getUserInterface()->displayMessage(gCmdChatColor, levelPassFailureMsg);
       }
@@ -1020,14 +1020,15 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayMessage,
 TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayMessageBox, (StringTableEntry title, StringTableEntry instr, Vector<StringTableEntry> message),
                   (title, instr, message), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
-   gErrorMsgUserInterface.reset();
-   gErrorMsgUserInterface.setTitle(title.getString());
-   gErrorMsgUserInterface.setInstr(instr.getString());
+   ErrorMessageUserInterface *ui = gClientGame->getUIManager()->getErrorMsgUserInterface();
+   ui->reset();
+   ui->setTitle(title.getString());
+   ui->setInstr(instr.getString());
 
    for(S32 i = 0; i < message.size(); i++)
-      gErrorMsgUserInterface.setMessage(i+1, message[i].getString());      // UIErrorMsgInterface ==> first line = 1
+      ui->setMessage(i+1, message[i].getString());      // UIErrorMsgInterface ==> first line = 1
 
-   gErrorMsgUserInterface.activate();
+   ui->activate();
 }
 
 
@@ -1324,18 +1325,19 @@ void GameConnection::writeConnectRequest(BitStream *stream)
 
  
    string serverPW;
+   string lastServerName = gClientGame->getUIManager()->getQueryServersUserInterface()->getLastSelectedServerName();
 
    // If we're local, just use the password we already know because, you know, we're the server
    if(isLocal)
       serverPW = md5.getSaltedHashFromString(gServerPassword);
 
    // If we have a saved password for this server, use that
-   else if(gINI.GetValue("SavedServerPasswords", gQueryServersUserInterface.getLastSelectedServerName()) != "")
-      serverPW = md5.getSaltedHashFromString(gINI.GetValue("SavedServerPasswords", gQueryServersUserInterface.getLastSelectedServerName())); 
+   else if(gINI.GetValue("SavedServerPasswords", lastServerName) != "")
+      serverPW = md5.getSaltedHashFromString(gINI.GetValue("SavedServerPasswords", lastServerName)); 
 
    // Otherwise, use whatever's in the interface entry box
    else 
-      serverPW = gServerPasswordEntryUserInterface.getSaltedHashText();
+      serverPW = gClientGame->getUIManager()->getServerPasswordEntryUserInterface()->getSaltedHashText();
 
    // Write some info about the client... name, id, and verification status
    stream->writeString(serverPW.c_str());
@@ -1518,11 +1520,14 @@ void GameConnection::onConnectionEstablished()
       // If we entered a password, and it worked, let's save it for next time.  If we arrive here and the saved password is empty
       // it means that the user entered a good password.  So we save.
       bool isLocal = gServerGame;
+      
+      string lastServerName = mClientGame->getUIManager()->getQueryServersUserInterface()->getLastSelectedServerName();
 
-      if(!isLocal && gINI.GetValue("SavedServerPasswords", gQueryServersUserInterface.getLastSelectedServerName()) == "")
+      if(!isLocal && gINI.GetValue("SavedServerPasswords", lastServerName) == "")
       {
-         gINI.SetValue("SavedServerPasswords", gQueryServersUserInterface.getLastSelectedServerName(),      
-                       gServerPasswordEntryUserInterface.getText(), true);
+         const char *password = mClientGame->getUIManager()->getServerPasswordEntryUserInterface()->getText();
+
+         gINI.SetValue("SavedServerPasswords", lastServerName, password, true);
       }
 
       if(!isLocalConnection()){          // might use /connect , want to add to list after successfully connected. Does nothing while connected to master.
@@ -1583,55 +1588,57 @@ void GameConnection::onConnectionTerminated(NetConnection::TerminationReason rea
 
 
       if(UserInterface::cameFrom(EditorUI))
-         UserInterface::reactivateMenu(&gEditorUserInterface);
+         mClientGame->getUIManager()->getEditorUserInterface()->reactivateMenu(mClientGame->getUIManager()->getEditorUserInterface());
       else
-         UserInterface::reactivateMenu(&gMainMenuUserInterface);
+         mClientGame->getUIManager()->getEditorUserInterface()->reactivateMenu(mClientGame->getUIManager()->getMainMenuUserInterface());
 
       mClientGame->unsuspendGame();
 
       // Display a context-appropriate error message
-      gErrorMsgUserInterface.reset();
-      gErrorMsgUserInterface.setTitle("Connection Terminated");
+      ErrorMessageUserInterface *ui = mClientGame->getUIManager()->getErrorMsgUserInterface();
+
+      ui->reset();
+      ui->setTitle("Connection Terminated");
 
       switch(reason)
       {
          case NetConnection::ReasonTimedOut:
-            gErrorMsgUserInterface.setMessage(2, "Your connection timed out.  Please try again later.");
-            gErrorMsgUserInterface.activate();
+            ui->setMessage(2, "Your connection timed out.  Please try again later.");
+            ui->activate();
             break;
 
          case NetConnection::ReasonPuzzle:
-            gErrorMsgUserInterface.setMessage(2, "Unable to connect to the server.  Recieved message:");
-            gErrorMsgUserInterface.setMessage(3, "Invalid puzzle solution");
-            gErrorMsgUserInterface.setMessage(5, "Please try a different game server, or try again later.");
-            gErrorMsgUserInterface.activate();
+            ui->setMessage(2, "Unable to connect to the server.  Recieved message:");
+            ui->setMessage(3, "Invalid puzzle solution");
+            ui->setMessage(5, "Please try a different game server, or try again later.");
+            ui->activate();
             break;
 
          case NetConnection::ReasonKickedByAdmin:
-            gErrorMsgUserInterface.setMessage(2, "You were kicked off the server by an admin,");
-            gErrorMsgUserInterface.setMessage(3, "and have been temporarily banned.");
-            gErrorMsgUserInterface.setMessage(5, "You can try another server, host your own,");
-            gErrorMsgUserInterface.setMessage(6, "or try the server that kicked you again later.");
-            gNameEntryUserInterface.activate();
-            gErrorMsgUserInterface.activate();
+            ui->setMessage(2, "You were kicked off the server by an admin,");
+            ui->setMessage(3, "and have been temporarily banned.");
+            ui->setMessage(5, "You can try another server, host your own,");
+            ui->setMessage(6, "or try the server that kicked you again later.");
+            mClientGame->getUIManager()->getNameEntryUserInterface()->activate();
+            ui->activate();
 
             // Add this server to our list of servers not to display for a spell...
-            gQueryServersUserInterface.addHiddenServer(getNetAddress(), Platform::getRealMilliseconds() + BanDuration);
+            mClientGame->getUIManager()->getQueryServersUserInterface()->addHiddenServer(getNetAddress(), Platform::getRealMilliseconds() + BanDuration);
             break;
 
          case NetConnection::ReasonFloodControl:
-            gErrorMsgUserInterface.setMessage(2, "Your connection was rejected by the server");
-            gErrorMsgUserInterface.setMessage(3, "because you sent too many connection requests.");
-            gErrorMsgUserInterface.setMessage(5, "Please try a different game server, or try again later.");
-            gNameEntryUserInterface.activate();
-            gErrorMsgUserInterface.activate();
+            ui->setMessage(2, "Your connection was rejected by the server");
+            ui->setMessage(3, "because you sent too many connection requests.");
+            ui->setMessage(5, "Please try a different game server, or try again later.");
+            mClientGame->getUIManager()->getNameEntryUserInterface()->activate();
+            ui->activate();
             break;
 
          case NetConnection::ReasonShutdown:
-            gErrorMsgUserInterface.setMessage(2, "Remote server shut down.");
-            gErrorMsgUserInterface.setMessage(4, "Please try a different server,");
-            gErrorMsgUserInterface.setMessage(5, "or host a game of your own!");
-            gErrorMsgUserInterface.activate();
+            ui->setMessage(2, "Remote server shut down.");
+            ui->setMessage(4, "Please try a different server,");
+            ui->setMessage(5, "or host a game of your own!");
+            ui->activate();
             break;
 
          case NetConnection::ReasonSelfDisconnect:
@@ -1640,9 +1647,9 @@ void GameConnection::onConnectionTerminated(NetConnection::TerminationReason rea
             break;
 
          default:
-            gErrorMsgUserInterface.setMessage(1, "Unable to connect to the server for reasons unknown.");
-            gErrorMsgUserInterface.setMessage(3, "Please try a different game server, or try again later.");
-            gErrorMsgUserInterface.activate();
+            ui->setMessage(1, "Unable to connect to the server for reasons unknown.");
+            ui->setMessage(3, "Please try a different game server, or try again later.");
+            ui->activate();
       }
    }
    else     // Server
@@ -1673,49 +1680,59 @@ void GameConnection::onConnectTerminated(TerminationReason reason, const char *n
       if(reason == ReasonNeedServerPassword)
       {
          // We have the wrong password, let's make sure it's not saved
-         gINI.deleteKey("SavedServerPasswords", gQueryServersUserInterface.getLastSelectedServerName());
+         string serverName = gClientGame->getUIManager()->getQueryServersUserInterface()->getLastSelectedServerName();
+         gINI.deleteKey("SavedServerPasswords", serverName);
 
-         gServerPasswordEntryUserInterface.setConnectServer(getNetAddress());
-         gServerPasswordEntryUserInterface.activate();
+         ServerPasswordEntryUserInterface *ui = gClientGame->getUIManager()->getServerPasswordEntryUserInterface();
+         ui->setConnectServer(getNetAddress());
+         ui->activate();
       }
       else if(reason == ReasonServerFull)
       {
-         UserInterface::reactivateMenu(&gMainMenuUserInterface);
+         gClientGame->getUIManager()->getMainMenuUserInterface()->reactivateMenu(gClientGame->getUIManager()->getMainMenuUserInterface());
 
          // Display a context-appropriate error message
-         gErrorMsgUserInterface.reset();
-         gErrorMsgUserInterface.setTitle("Connection Terminated");
+         ErrorMessageUserInterface *ui = gClientGame->getUIManager()->getErrorMsgUserInterface();
+         ui->reset();
+         ui->setTitle("Connection Terminated");
 
-         gMainMenuUserInterface.activate();
-         gErrorMsgUserInterface.setMessage(2, "Could not connect to server");
-         gErrorMsgUserInterface.setMessage(3, "because server is full.");
-         gErrorMsgUserInterface.setMessage(5, "Please try a different server, or try again later.");
-         gErrorMsgUserInterface.activate();
+         gClientGame->getUIManager()->getMainMenuUserInterface()->activate();
+
+         ui->setMessage(2, "Could not connect to server");
+         ui->setMessage(3, "because server is full.");
+         ui->setMessage(5, "Please try a different server, or try again later.");
+         ui->activate();
       }
       else if(reason == ReasonKickedByAdmin)
       {
-         gErrorMsgUserInterface.reset();
-         gErrorMsgUserInterface.setTitle("Connection Terminated");
+         ErrorMessageUserInterface *ui = gClientGame->getUIManager()->getErrorMsgUserInterface();
 
-         gErrorMsgUserInterface.setMessage(2, "You were kicked off the server by an admin,");
-         gErrorMsgUserInterface.setMessage(3, "and have been temporarily banned.");
-         gErrorMsgUserInterface.setMessage(5, "You can try another server, host your own,");
-         gErrorMsgUserInterface.setMessage(6, "or try the server that kicked you again later.");
-         gMainMenuUserInterface.activate();
-         gErrorMsgUserInterface.activate();
+         ui->reset();
+         ui->setTitle("Connection Terminated");
+
+         ui->setMessage(2, "You were kicked off the server by an admin,");
+         ui->setMessage(3, "and have been temporarily banned.");
+         ui->setMessage(5, "You can try another server, host your own,");
+         ui->setMessage(6, "or try the server that kicked you again later.");
+
+         gClientGame->getUIManager()->getMainMenuUserInterface()->activate();
+         ui->activate();
       }
       else  // Looks like the connection failed for some unknown reason.  Server died?
       {
-         UserInterface::reactivateMenu(&gMainMenuUserInterface);
+         gClientGame->getUIManager()->getMainMenuUserInterface()->reactivateMenu(gClientGame->getUIManager()->getMainMenuUserInterface());
+
+         ErrorMessageUserInterface *ui = gClientGame->getUIManager()->getErrorMsgUserInterface();
 
          // Display a context-appropriate error message
-         gErrorMsgUserInterface.reset();
-         gErrorMsgUserInterface.setTitle("Connection Terminated");
+         ui->reset();
+         ui->setTitle("Connection Terminated");
 
-         gMainMenuUserInterface.activate();
-         gErrorMsgUserInterface.setMessage(2, "Lost connection with the server.");
-         gErrorMsgUserInterface.setMessage(3, "Unable to join game.  Please try again.");
-         gErrorMsgUserInterface.activate();
+         gClientGame->getUIManager()->getMainMenuUserInterface()->activate();
+
+         ui->setMessage(2, "Lost connection with the server.");
+         ui->setMessage(3, "Unable to join game.  Please try again.");
+         ui->activate();
       }
    }
 }

@@ -116,10 +116,12 @@ void AbstractChat::playerJoinedGlobalChat(const StringTableEntry &playerNick)
 
 void AbstractChat::playerLeftGlobalChat(const StringTableEntry &playerNick)
 {
-   for(S32 i = 0; i < gChatInterface.mPlayersInGlobalChat.size(); i++)
-      if(gChatInterface.mPlayersInGlobalChat[i] == playerNick)
+   ChatUserInterface *ui = gClientGame->getUIManager()->getChatUserInterface();
+
+   for(S32 i = 0; i < ui->mPlayersInGlobalChat.size(); i++)
+      if(ui->mPlayersInGlobalChat[i] == playerNick)
       {
-         gChatInterface.mPlayersInGlobalChat.erase_fast(i);
+         ui->mPlayersInGlobalChat.erase_fast(i);
          newMessage(gClientInfo.name, "----- Player " + string(playerNick.getString()) + " left the conversation -----", false, true);
          SoundSystem::playSoundEffect(SFXPlayerLeft, gIniSettings.sfxVolLevel);   // Make sound?
          break;
@@ -275,8 +277,8 @@ void AbstractChat::renderMessageComposition(S32 ypos)
 void AbstractChat::deliverPrivateMessage(const char *sender, const char *message)
 {
    // If player not in UIChat or UIQueryServers, then display message in-game if possible.  2 line message.
-   if(UserInterface::current->getMenuID() != gChatInterface.getMenuID() &&
-      UserInterface::current->getMenuID() != gQueryServersUserInterface.getMenuID() )
+   UIID currId = UserInterface::current->getMenuID();
+   if(currId != ChatUI && currId != QueryServersScreenUI )
    {
       gClientGame->getUserInterface()->displayChatMessage(GameUserInterface::privateF5MessageDisplayedInGameColor,
          "Private message from %s: Press [%s] to enter chat mode", sender, keyCodeToString(keyOUTGAMECHAT));
@@ -330,7 +332,7 @@ void AbstractChat::renderChatters(S32 xpos, S32 ypos)
 ////////////////////////////////////////
 
 // Constructor
-ChatUserInterface::ChatUserInterface()
+ChatUserInterface::ChatUserInterface(Game *game) : Parent(game)
 {
    setMenuID(GlobalChatUI);
 }
@@ -349,7 +351,7 @@ static const S32 MENU_SUBTITLE_SIZE = 18;
 
 void ChatUserInterface::render()
 {
-   if (mRenderUnderlyingUI && prevUIs.size())           // If there is an underlying menu...
+   if(mRenderUnderlyingUI && prevUIs.size())           // If there is an underlying menu...
    {
       prevUIs.last()->render();  // ...render it...
       glColor4f(0, 0, 0, 0.75);  // ... and dim it out a bit, nay, a lot
@@ -429,7 +431,7 @@ void ChatUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    if(keyCode == keyOUTGAMECHAT)
       onOutGameChat();
    else if(keyCode == keyDIAG)            // Turn on diagnostic overlay
-      gDiagnosticInterface.activate();
+      getGame()->getUIManager()->getDiagnosticUserInterface()->activate();
    else if(keyCode == KEY_ESCAPE)
       onEscape();
    else if (keyCode == KEY_ENTER)                // Submits message
@@ -446,7 +448,7 @@ extern bool gDisableShipKeyboardInput;
 // Run when UIChat is called in normal UI mode
 void ChatUserInterface::onActivate()
 {
-   MasterServerConnection *conn = gClientGame->getConnectionToMaster();
+   MasterServerConnection *conn = getGame()->getConnectionToMaster();
    if(conn)
       conn->c2mJoinGlobalChat();
 
@@ -466,17 +468,15 @@ void ChatUserInterface::onEscape()
 {
    leaveGlobalChat();
    UserInterface::reactivatePrevUI();
-   UserInterface::playBoop();
+   playBoop();
 }
 
-
-ChatUserInterface gChatInterface;
 
 ////////////////////////////////////////
 ////////////////////////////////////////
 
 // Constructor
-SuspendedUserInterface::SuspendedUserInterface()
+SuspendedUserInterface::SuspendedUserInterface(Game *game) : Parent(game)
 {
    setMenuID(SuspendedUI);
 }
@@ -515,9 +515,6 @@ void SuspendedUserInterface::onOutGameChat()
 {
    // Do nothing
 }
-
-SuspendedUserInterface gSuspendedInterface;
-
 
 };
 

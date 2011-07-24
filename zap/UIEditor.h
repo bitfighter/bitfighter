@@ -109,8 +109,10 @@ class EditorAttributeMenuUI;
 
 class EditorUserInterface : public UserInterface
 {
+   typedef UserInterface Parent;
+
 public:
-   EditorUserInterface();  // Constructor
+   EditorUserInterface(Game *game);  // Constructor
 
    enum SpecialAttribute   // Some items have special attributes.  These are the ones
    {                       // we can edit in the editor
@@ -143,7 +145,9 @@ private:
    Timer mSaveMsgTimer;
    Timer mWarnMsgTimer;
 
-   //Vector<Vector</*EditorObject **/string> > mUndoItems;  // Undo/redo history  [[note that g++ requires space btwn >>]]
+   const Vector<EditorObject *> *getObjectList();     // Convenience method
+
+
    Vector<boost::shared_ptr<EditorObjectDatabase> > mUndoItems;  // Undo/redo history 
    Point mMoveOrigin;                           // Point representing where items were moved "from" for figuring out how far they moved
    Vector<Point> mOriginalVertLocations;
@@ -170,7 +174,7 @@ private:
 
    EditorObject *mItemToLightUp;
  
-   string mEditFileName;                      // Manipulate with get/setLevelFileName
+   string mEditFileName;            // Manipulate with get/setLevelFileName
 
    EditorObject *mNewItem;
    F32 mCurrentScale;
@@ -230,6 +234,8 @@ private:
 
    void onFinishedDragging();    // Called when we're done dragging an object
 
+   void resnapAllEngineeredItems();
+
 protected:
    void onActivate();
    void onReactivate();
@@ -267,13 +273,14 @@ public:
    EditorObject *getSnapItem() { return mSnapObject; }
    S32 getSnapVertexIndex() { return mSnapVertexIndex; }
    void rebuildEverything();                  // Does lots of things in undo, redo, and add items from script
-   static void resnapAllEngineeredItems();
 
    void onBeforeRunScriptFromConsole();
    void onAfterRunScriptFromConsole();
 
    void render();
-   static void renderPolyline(const Vector<Point> *verts);
+   void renderPolyline(const Vector<Point> *verts);
+
+   void setLevelToCanvasCoordConversion();
 
 
    const Color *getTeamColor(S32 teamId) const;
@@ -360,8 +367,9 @@ public:
 
 class EditorMenuUserInterface : public MenuUserInterface
 {
-private:
    typedef MenuUserInterface Parent;
+
+private:
    void setupMenus();
    void processSelection(U32 index);
    void processShiftSelection(U32 index);
@@ -371,11 +379,9 @@ protected:
    void onActivate();
 
 public:
-   EditorMenuUserInterface();    // Constructor
+   EditorMenuUserInterface(Game *game);    // Constructor
 };
 
-extern EditorUserInterface gEditorUserInterface;
-extern EditorMenuUserInterface gEditorMenuUserInterface;
 
 };
 

@@ -211,8 +211,6 @@ Address gBindAddress(IPProtocol, Address::Any, 28000);      // Good for now, may
 
 Vector<StringTableEntry> gLevelSkipList;  // Levels we'll never load, to create a semi-delete function for remote server mgt
 
-extern NameEntryUserInterface gNameEntryUserInterface;
-
 ScreenInfo gScreenInfo;
 
 Screenshooter gScreenshooter;    // For taking screen shots
@@ -255,22 +253,25 @@ void abortHosting_noLevels()
    }
    else
    {
-      gErrorMsgUserInterface.reset();
-      gErrorMsgUserInterface.setTitle("HOUSTON, WE HAVE A PROBLEM");
-      gErrorMsgUserInterface.setMessage(1, "No levels were loaded.  Cannot host a game.");
-      gErrorMsgUserInterface.setMessage(3, "Check the LevelDir parameter in your INI file,");
-      gErrorMsgUserInterface.setMessage(4, "or your command-line parameters to make sure");
-      gErrorMsgUserInterface.setMessage(5, "you have correctly specified a folder containing");
-      gErrorMsgUserInterface.setMessage(6, "valid level files.");
-      gErrorMsgUserInterface.setMessage(8, "Trying to load levels from folder:");
-      gErrorMsgUserInterface.setMessage(9, gConfigDirs.levelDir == "" ? "<<Unresolvable>>" : gConfigDirs.levelDir.c_str());
-      gErrorMsgUserInterface.activate();
+      ErrorMessageUserInterface *ui = gClientGame->getUIManager()->getErrorMsgUserInterface();
+
+      ui->reset();
+      ui->setTitle("HOUSTON, WE HAVE A PROBLEM");
+      ui->setMessage(1, "No levels were loaded.  Cannot host a game.");
+      ui->setMessage(3, "Check the LevelDir parameter in your INI file,");
+      ui->setMessage(4, "or your command-line parameters to make sure");
+      ui->setMessage(5, "you have correctly specified a folder containing");
+      ui->setMessage(6, "valid level files.");
+      ui->setMessage(8, "Trying to load levels from folder:");
+      ui->setMessage(9, gConfigDirs.levelDir == "" ? "<<Unresolvable>>" : gConfigDirs.levelDir.c_str());
+      ui->activate();
    }
    delete gServerGame;
    gServerGame = NULL;
 
-   gHostMenuUserInterface.levelLoadDisplayDisplay = false;
-   gHostMenuUserInterface.levelLoadDisplayFadeTimer.clear();
+   HostMenuUserInterface *ui = gClientGame->getUIManager()->getHostMenuUserInterface();
+   ui->levelLoadDisplayDisplay = false;
+   ui->levelLoadDisplayFadeTimer.clear();
 
    return;
 }
@@ -344,7 +345,9 @@ void initHostGame(Address bindAddress, Vector<string> &levelList, bool testMode)
    {
       gServerGame->buildLevelList(levelList);     // Take levels in gLevelList and create a set of empty levelInfo records
       gServerGame->resetLevelLoadIndex();
-      gHostMenuUserInterface.levelLoadDisplayDisplay = true;
+
+      if(gClientGame)
+         gClientGame->getUIManager()->getHostMenuUserInterface()->levelLoadDisplayDisplay = true;
    }
    else
    {
@@ -381,8 +384,10 @@ void hostGame()
       return;
    }
 
-   gHostMenuUserInterface.levelLoadDisplayDisplay = false;
-   gHostMenuUserInterface.levelLoadDisplayFadeTimer.reset();
+   HostMenuUserInterface *ui = gClientGame->getUIManager()->getHostMenuUserInterface();
+
+   ui->levelLoadDisplayDisplay = false;
+   ui->levelLoadDisplayFadeTimer.reset();
 
    if(!gDedicatedServer)                  // If this isn't a dedicated server...
       joinGame(Address(), false, true);   // ...then we'll play, too!
@@ -647,7 +652,7 @@ void endGame()
    delete gServerGame;
    gServerGame = NULL;
 
-   gHostMenuUserInterface.levelLoadDisplayDisplay = false;
+   gClientGame->getUIManager()->getHostMenuUserInterface()->levelLoadDisplayDisplay = false;
 
    if(gDedicatedServer)
       exitGame();
@@ -1244,10 +1249,7 @@ void processStartupParams()
       gPlayerPassword = gIniSettings.lastPassword;
 
 
-   // Put any saved filename into the editor file entry thingy
-   gLevelNameEntryUserInterface.setString(gIniSettings.lastEditorName);
-
-
+   
    if(gCmdLineSettings.serverPassword != "")
       gServerPassword = gCmdLineSettings.serverPassword;
    else if(gIniSettings.serverPassword != "")
@@ -1323,6 +1325,9 @@ void processStartupParams()
       gClientGame1 = new ClientGame(Address());   //   Let the system figure out IP address and assign a port
       gClientGame = gClientGame1;
       gEditorGame = new EditorGame();
+
+       // Put any saved filename into the editor file entry thingy
+      gClientGame->getUIManager()->getLevelNameEntryUserInterface()->setString(gIniSettings.lastEditorName);
    }
    //gClientGame2 = new ClientGame(Address());   //  !!! 2-player split-screen game in same game.
 
@@ -1330,19 +1335,19 @@ void processStartupParams()
    // Not immediately starting a connection...  start out with name entry or main menu
    if(!gDedicatedServer)
    {
-      gMainMenuUserInterface_pointer = new MainMenuUserInterface();
+      //gMainMenuUserInterface_pointer = new MainMenuUserInterface(gClientGame);   // ??? Not sure which clientGame should go here... -CE
       if(gIniSettings.name == "")
       {
          if(gClientGame2)
          {
             gClientGame = gClientGame2;
             gClientGame1->mUserInterfaceData->get();
-            gNameEntryUserInterface.activate();
+            gClientGame->getUIManager()->getNameEntryUserInterface()->activate();
             gClientGame2->mUserInterfaceData->get();
             gClientGame1->mUserInterfaceData->set();
             gClientGame = gClientGame1;
          }
-         gNameEntryUserInterface.activate();
+         gClientGame->getUIManager()->getNameEntryUserInterface()->activate();
          seedRandomNumberGenerator(gIniSettings.lastName);
          gClientInfo.id.getRandom();                           // Generate a player ID
       }
@@ -1352,13 +1357,12 @@ void processStartupParams()
          {
             gClientGame = gClientGame2;
             gClientGame1->mUserInterfaceData->get();
-            gMainMenuUserInterface.activate();
 
             gClientGame2->mUserInterfaceData->get();
             gClientGame1->mUserInterfaceData->set();
             gClientGame = gClientGame1;
          }
-         gMainMenuUserInterface.activate();
+         gClientGame->getUIManager()->getMainMenuUserInterface()->activate();
 
          gClientGame->setReadyToConnectToMaster(true);         // Set elsewhere if in dedicated server mode
          seedRandomNumberGenerator(gIniSettings.name);
@@ -1859,13 +1863,13 @@ int main(int argc, char **argv)
       //glTranslatef(gScreenInfo.getGameCanvasWidth() / 2, gScreenInfo.getGameCanvasHeight() / 2, 0);     
 
       atexit(onExit);
-      actualizeScreenMode(false);               // Create a display window
+      actualizeScreenMode(false);            // Create a display window
 
-      gConsole = OGLCONSOLE_Create();                 // Create our console *after* the screen mode has been actualized
+      gConsole = OGLCONSOLE_Create();        // Create our console *after* the screen mode has been actualized
 
 #ifdef USE_BFUP
       if(gIniSettings.useUpdater)
-         launchUpdater(argv[0]);                   // Spawn external updater tool to check for new version of Bitfighter -- Windows only
+         launchUpdater(argv[0]);             // Spawn external updater tool to check for new version of Bitfighter -- Windows only
 #endif
 
    }

@@ -37,9 +37,17 @@
 namespace Zap
 {
 
-//
-//    Is this actually used???
-//
+// Constructor
+RebindKeysUserInterface::RebindKeysUserInterface(Game *game) : Parent(game)
+{
+   title = "ENTER TEXT:";
+   buffer[0] = 0;
+   memset(buffer, 0, sizeof(buffer));
+   secret = false;
+   cursorPos = 0;
+   resetOnActivate = true;
+}
+
 
 void RebindKeysUserInterface::onActivate()
 {

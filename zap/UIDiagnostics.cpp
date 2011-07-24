@@ -55,9 +55,6 @@ extern U32 gSimulatedLag;
 extern U32 getServerMaxPlayers();
 extern Address gBindAddress;
 
-DiagnosticUserInterface gDiagnosticInterface;
-
-
 static const char *pageHeaders[] = {
    "PLAYING",
    "FOLDERS",
@@ -69,16 +66,18 @@ static const S32 NUM_PAGES = 3;
 
 
 // Constructor
-DiagnosticUserInterface::DiagnosticUserInterface()
+DiagnosticUserInterface::DiagnosticUserInterface(Game *game) : Parent(game)
 {
    setMenuID(DiagnosticsScreenUI);
 }
+
 
 void DiagnosticUserInterface::onActivate()
 {
    mActive = true;
    mCurPage = 0;
 }
+
 
 bool DiagnosticUserInterface::isActive()
 {
@@ -352,8 +351,9 @@ void DiagnosticUserInterface::render()
 
       textsize = 16;
 
-      drawCenteredString2Colf(ypos, textsize, false, "%s", gMainMenuUserInterface.getNeedToUpgrade() ? 
-                                                           "<<Update available>>" : "<<Current version>>");
+      bool needToUpgrade = getGame()->getUIManager()->getMainMenuUserInterface()->getNeedToUpgrade();
+
+      drawCenteredString2Colf(ypos, textsize, false, "%s", needToUpgrade ? "<<Update available>>" : "<<Current version>>");
       ypos += textsize + gap;
       // This following line is a bit of a beast, but it will return a valid result at any stage of being in or out of a game.
       // If the server modifies a user name to make it unique, this will display the modified version.

@@ -128,16 +128,18 @@ public:
 
 class ChatUserInterface : public UserInterface, public AbstractChat
 {
+   typedef UserInterface Parent;
+
 private:
    Color mMenuSubTitleColor;
 
    virtual void renderHeader();
    //virtual void renderFooter();
-   virtual void onOutGameChat();    // What to do if user presses [F5]
+   virtual void onOutGameChat();       // What to do if user presses [F5]
    bool mRenderUnderlyingUI;
 
 public:
-   ChatUserInterface();             // Constructor
+   ChatUserInterface(Game *game);      // Constructor
 
    // UI related
    void render();
@@ -153,22 +155,22 @@ public:
    void setRenderUnderlyingUI(bool render) { mRenderUnderlyingUI = render; }
 };
 
-extern ChatUserInterface gChatInterface;
 
 ///////////////////////////////////////
 ///////////////////////////////////////
 
 class SuspendedUserInterface : public ChatUserInterface
 {
+   typedef ChatUserInterface Parent;
+
 private:
    void renderHeader();
-   void onOutGameChat();      // What to do if user presses [F5]
+   void onOutGameChat();                  // What to do if user presses [F5]
 
 public:
-   SuspendedUserInterface();          // Constructor
+   SuspendedUserInterface(Game *game);    // Constructor
 };
 
-extern SuspendedUserInterface gSuspendedInterface;
 
 };
 

@@ -58,6 +58,8 @@ struct KeyDefMenuItem
 
 class KeyDefMenuUserInterface : public UserInterface
 {
+   typedef UserInterface Parent;
+
 private:
    S32 itemsPerCol;           // Approx. half of the items we have
    Timer errorMsgTimer;
@@ -65,8 +67,8 @@ private:
    static const S32 errorMsgDisplayTime = 6000;
 
 public:
-   KeyDefMenuUserInterface();          // Constructor
-   Vector<KeyDefMenuItem> menuItems; // Array of menu items
+   KeyDefMenuUserInterface(Game *game);   // Constructor
+   Vector<KeyDefMenuItem> menuItems;      // Array of menu items
    const char *mMenuTitle;
    const char *mMenuSubTitle;
    Color mMenuSubTitleColor;
@@ -84,8 +86,6 @@ public:
 
    void onActivate();
 };
-
-extern KeyDefMenuUserInterface gKeyDefMenuUserInterface;
 
 };
 

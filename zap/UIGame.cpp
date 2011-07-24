@@ -78,7 +78,7 @@ Color GameUserInterface::privateF5MessageDisplayedInGameColor(Colors::blue);
 static void makeCommandCandidateList();      // Forward delcaration
 
 // Constructor
-GameUserInterface::GameUserInterface()
+GameUserInterface::GameUserInterface(Game *game) : UserInterface(game)
 {
    //mOutputFile = NULL;
    bool mLeftDisabled = false; // Fix some uninitalized variables (randomly was true)
@@ -149,24 +149,24 @@ GameUserInterface::~GameUserInterface()
    //   fclose(mOutputFile);
 }
 
-void processGameConsoleCommand(OGLCONSOLE_Console console, char *cmd)
+void processGameConsoleCommand(void *gamePtr, OGLCONSOLE_Console console, char *cmd)
 {
-    if(!strncmp(cmd, "quit", 4) || !strncmp(cmd, "exit", 4)) 
-       OGLCONSOLE_HideConsole();
+   if(!strncmp(cmd, "quit", 4) || !strncmp(cmd, "exit", 4)) 
+      OGLCONSOLE_HideConsole();
 
-    else if(!strncmp(cmd, "help", 4) || !strncmp(cmd, "?", 1)) 
-       OGLCONSOLE_Output(console, "Commands: help; quit\n");
+   else if(!strncmp(cmd, "help", 4) || !strncmp(cmd, "?", 1)) 
+      OGLCONSOLE_Output(console, "Commands: help; quit\n");
 
-    else if(!strncmp(cmd, "add", 3))
-    {
-        int a, b;
-        if (sscanf(cmd, "add %i %i", &a, &b) == 2)
-        {
-            OGLCONSOLE_Output(console, "%i + %i = %i\n", a, b, a+b);
-            return;
-        }
+   else if(!strncmp(cmd, "add", 3))
+   {
+      int a, b;
+      if(sscanf(cmd, "add %i %i", &a, &b) == 2)
+      {
+         OGLCONSOLE_Output(console, "%i + %i = %i\n", a, b, a+b);
+         return;
+      }
 
-        OGLCONSOLE_Output(console, "usage: add INT INT\n");
+      OGLCONSOLE_Output(console, "usage: add INT INT\n");
     }
 
     else
@@ -396,8 +396,9 @@ void GameUserInterface::idle(U32 timeDelta)
    mFrameIndex++;
 
    // Should we move this timer over to UIGame??
-   if(gHostMenuUserInterface.levelLoadDisplayFadeTimer.update(timeDelta))
-      gHostMenuUserInterface.clearLevelLoadDisplay();
+   HostMenuUserInterface *ui = gClientGame->getUIManager()->getHostMenuUserInterface();
+   if(ui->levelLoadDisplayFadeTimer.update(timeDelta))
+      ui->clearLevelLoadDisplay();
 }
 
 
@@ -410,7 +411,7 @@ extern void checkMousePos(S32 maxdx, S32 maxdy);
 void GameUserInterface::render()
 {
    glColor3f(0.0, 0.0, 0.0);
-   if(!gClientGame->isConnectedToServer())
+   if(!getClientGame()->isConnectedToServer())
    {
       glColor3f(1, 1, 1);
       drawCenteredString(260, 30, "Connecting to server...");
@@ -450,7 +451,7 @@ void GameUserInterface::render()
       renderCurrentChat();       // Render any chat msg user is composing
       renderLoadoutIndicators(); // Draw indicators for the various loadout items
 
-      gHostMenuUserInterface.renderProgressListItems();  // This is the list of levels loaded while hosting
+      getGame()->getUIManager()->getHostMenuUserInterface()->renderProgressListItems();  // This is the list of levels loaded while hosting
 
       renderProgressBar();       // This is the status bar that shows progress of loading this level
 
@@ -897,7 +898,7 @@ void GameUserInterface::onMouseMoved()
 // Enter QuickChat, Loadout, or Engineer mode
 void GameUserInterface::enterMode(GameUserInterface::Mode mode)
 {
-   UserInterface::playBoop();
+   playBoop();
    mCurrentMode = mode;
 
    if(mode == QuickChatMode)
@@ -1006,14 +1007,14 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    }
    else if(keyCode == keyHELP)          // Turn on help screen
    {
-      UserInterface::playBoop();
+      playBoop();
+
+      InstructionsUserInterface *instrUI = getGame()->getUIManager()->getInstructionsUserInterface();
 
       if(mCurrentMode == ChatMode)
-         gInstructionsUserInterface.activateInCommandMode();
+         instrUI->activateInCommandMode();
       else
-         gInstructionsUserInterface.activate();
-
-
+         instrUI->activate();
    }
    // Shift-/ toggles console window for the moment  (Ctrl-/ fails in glut!)
    // Don't want to open console while chatting, do we?  Only open when not in any special mode.
@@ -1024,10 +1025,10 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    else if(keyCode == keyOUTGAMECHAT)
    {
       setBusyChatting(true);
-      gChatInterface.activate();
+      getGame()->getUIManager()->getChatUserInterface()->activate();
    }
    else if(keyCode == keyDIAG)            // Turn on diagnostic overlay
-      gDiagnosticInterface.activate();
+      getGame()->getUIManager()->getDiagnosticUserInterface()->activate();
    else if(keyCode == keyMISSION)
    {
       mMissionOverlayActive = true;
@@ -1130,17 +1131,17 @@ void GameUserInterface::processPlayModeKey(KeyCode keyCode, char ascii)
          return;
       }
 
-      UserInterface::playBoop();
+      playBoop();
 
       if(!gClientGame->isConnectedToServer())      // Perhaps we're still joining?
       {
          endGame();
-         gMainMenuUserInterface.activate();
+         getGame()->getUIManager()->getMainMenuUserInterface()->activate();
       }
       else
       {
          setBusyChatting(true);
-         gGameMenuUserInterface.activate();
+         getGame()->getUIManager()->getGameMenuUserInterface()->activate();
       }
    }     
    else if(keyCode == keyCMDRMAP[inputMode])
@@ -1151,7 +1152,7 @@ void GameUserInterface::processPlayModeKey(KeyCode keyCode, char ascii)
       if(!mInScoreboardMode)    // We're activating the scoreboard
       {
          mInScoreboardMode = true;
-         GameType *gameType = gClientGame->getGameType();
+         GameType *gameType = getGame()->getGameType();
          if(gameType)
             gameType->c2sRequestScoreboardUpdates(true);
       }
@@ -2430,16 +2431,16 @@ void GameUserInterface::VoiceRecorder::process()
 
 void GameUserInterface::suspendGame()
 {
-   gClientGame->getConnectionToServer()->suspendGame();     // Tell server we're suspending
-   gClientGame->suspendGame();                              // Suspend locally
-   gSuspendedInterface.activate();                          // And enter chat mode
+   getClientGame()->getConnectionToServer()->suspendGame();     // Tell server we're suspending
+   getClientGame()->suspendGame();                              // Suspend locally
+   getGame()->getUIManager()->getSuspendedUserInterface()->activate();          // And enter chat mode
 }
 
 
 void GameUserInterface::unsuspendGame()
 {
-   gClientGame->unsuspendGame();                            // Unsuspend locally
-   gClientGame->getConnectionToServer()->unsuspendGame();   // Tell the server we're unsuspending
+   getClientGame()->unsuspendGame();                            // Unsuspend locally
+   getClientGame()->getConnectionToServer()->unsuspendGame();   // Tell the server we're unsuspending
 }
 
 

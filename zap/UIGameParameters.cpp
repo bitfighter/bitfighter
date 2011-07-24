@@ -48,13 +48,11 @@
 namespace Zap
 {
 
-GameParamUserInterface gGameParamUserInterface;
-
-
 // Constructor
-GameParamUserInterface::GameParamUserInterface() : MenuUserInterface()
+GameParamUserInterface::GameParamUserInterface(Game *game) : Parent(game)
 {
    setMenuID(GameParamsUI);
+   
    mMenuTitle = "Game Parameters Menu";
    mMenuSubTitle = "";
 }
@@ -62,9 +60,9 @@ GameParamUserInterface::GameParamUserInterface() : MenuUserInterface()
 
 void GameParamUserInterface::onActivate()
 {
-   selectedIndex = 0;                            // First item selected when we begin
-   updateMenuItems(gEditorGame);
-   origGameParams = gEditorGame->toString();     // Save a copy of the params coming in for comparison when we leave to see what changed
+   selectedIndex = 0;                      // First item selected when we begin
+   updateMenuItems();   
+   origGameParams = getGame()->toString();     // Save a copy of the params coming in for comparison when we leave to see what changed
    SDL_ShowCursor(SDL_DISABLE);
 }
 
@@ -73,21 +71,15 @@ extern const char *gGameTypeNames[];
 extern S32 gDefaultGameTypeIndex;
 
 
-static void changeGameTypeCallback(U32 gtIndex)
+static void changeGameTypeCallback(Game *game, U32 gtIndex)
 {
    TNL::Object *theObject = TNL::Object::create(gGameTypeNames[gtIndex]);   // Instantiate our gameType object
    GameType *gt = dynamic_cast<GameType *>(theObject);                      // and cast it to GameType
 
-   gt->addToGame(gEditorGame);
-   gEditorGame->setGameType(gt);
+   gt->addToGame(game);
+   game->setGameType(gt);
 
-   gGameParamUserInterface.updateMenuItems(gEditorGame);
-}
-
-
-static void backToEditorCallback(U32 unused)
-{
-   gGameParamUserInterface.onEscape();
+   game->getUIManager()->getGameParamUserInterface()->updateMenuItems();
 }
 
 
@@ -121,9 +113,9 @@ static S32 getGameTypeIndex(const char *gt)
 
 
 
-void GameParamUserInterface::updateMenuItems(Game *game)
+void GameParamUserInterface::updateMenuItems()
 {
-   GameType *gameType = game->getGameType();
+   GameType *gameType = getGame()->getGameType();
    TNLAssert(gameType, "Invalid game type!");
 
    if(gameTypes.size() == 0)     // Should only be run once, as these gameTypes will not change during the session
@@ -131,7 +123,8 @@ void GameParamUserInterface::updateMenuItems(Game *game)
 
    menuItems.clear();
 
-   menuItems.push_back(boost::shared_ptr<MenuItem>(new ToggleMenuItem("Game Type:",       
+   menuItems.push_back(boost::shared_ptr<MenuItem>(new ToggleMenuItem(getGame(),
+                                                                      "Game Type:",       
                                                                       gameTypes,
                                                                       getGameTypeIndex(gameType->getClassName()),
                                                                       true,
@@ -139,8 +132,9 @@ void GameParamUserInterface::updateMenuItems(Game *game)
                                                                       gameType->getInstructionString())));
 
 
-   string fn = stripExtension(gEditorUserInterface.getLevelFileName());
-   menuItems.push_back(boost::shared_ptr<MenuItem>(new EditableMenuItem("Filename:",                         // name
+   string fn = stripExtension(getGame()->getUIManager()->getEditorUserInterface()->getLevelFileName());
+   menuItems.push_back(boost::shared_ptr<MenuItem>(new EditableMenuItem(getGame(),
+                                                                        "Filename:",                         // name
                                                                         fn,                                  // val
                                                                         "",                                  // empty val
                                                                         "File where this level is stored",   // help
@@ -158,7 +152,7 @@ void GameParamUserInterface::updateMenuItems(Game *game)
          menuItem = iter->second;
       else                 // Item not found
       {
-         menuItem = gameType->getMenuItem(game, keys[i]);
+         menuItem = gameType->getMenuItem(getGame(), keys[i]);
          TNLAssert(menuItem.get(), "Failed to make a new menu item!");
 
          mMenuItemMap.insert(pair<const char *, boost::shared_ptr<MenuItem> >(keys[i], menuItem));
@@ -176,9 +170,9 @@ void GameParamUserInterface::onEscape()
 {
    S32 gameTypeIndex = dynamic_cast<ToggleMenuItem *>(menuItems[0].get())->getValueIndex();
 
-   gEditorUserInterface.setLevelFileName(menuItems[1]->getValue());  
+   getGame()->getUIManager()->getEditorUserInterface()->setLevelFileName(menuItems[1]->getValue());  
 
-   GameType *gameType = gEditorGame->getGameType();
+   GameType *gameType = getGame()->getGameType();
 
    const char **keys = gameType->getGameParameterMenuKeys();
 
@@ -196,9 +190,11 @@ void GameParamUserInterface::onEscape()
 
    if(anythingChanged())
    {
-      gEditorUserInterface.mNeedToSave = true;        // Need to save to retain our changes
-      gEditorUserInterface.mAllUndoneUndoLevel = -1;  // This change can't be undone
-      gEditorUserInterface.validateLevel();
+      EditorUserInterface *ui = getGame()->getUIManager()->getEditorUserInterface();
+
+      ui->mNeedToSave = true;        // Need to save to retain our changes
+      ui->mAllUndoneUndoLevel = -1;  // This change can't be undone
+      ui->validateLevel();
    }
 
    // Now back to our previously scheduled program...  (which will be the editor, of course)
@@ -208,7 +204,7 @@ void GameParamUserInterface::onEscape()
 
 bool GameParamUserInterface::anythingChanged()
 {
-   return origGameParams != gEditorGame->toString();
+   return origGameParams != getGame()->toString();
 }
 
 

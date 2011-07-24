@@ -37,6 +37,8 @@ namespace Zap
 
 static const S32 MAX_TEXTITEM_LEN = 255;
 
+class EditorGame;
+
 class TextItem : public SimpleLine
 {
    typedef SimpleLine Parent;
@@ -73,7 +75,7 @@ public:
    void onAddedToGame(Game *theGame);  
    void computeExtent();                                            // Bounding box for quick collision-possibility elimination
 
-   EditorAttributeMenuUI *getAttributeMenu();
+   EditorAttributeMenuUI *getAttributeMenu(EditorGame *game);
 
    bool getCollisionPoly(Vector<Point> &polyPoints) const;          // More precise boundary for precise collision detection
    bool collide(GameObject *hitObject);

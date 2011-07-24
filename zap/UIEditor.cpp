@@ -74,8 +74,6 @@ using namespace boost;
 namespace Zap
 {
 
-EditorUserInterface gEditorUserInterface;
-
 const S32 DOCK_WIDTH = 50;
 const F32 MIN_SCALE = .05;        // Most zoomed-in scale
 const F32 MAX_SCALE = 2.5;        // Most zoomed-out scale
@@ -106,32 +104,23 @@ enum EntryMode {
 static EntryMode entryMode;
 static Vector<ZoneBorder> zoneBorders;
 
-void saveLevelCallback()
+static void saveLevelCallback(Game *game)
 {
-   if(gEditorUserInterface.saveLevel(true, true))
-      UserInterface::reactivateMenu(&gMainMenuUserInterface);
+   if(game->getUIManager()->getEditorUserInterface()->saveLevel(true, true))
+      game->getUIManager()->getEditorUserInterface()->reactivateMenu(game->getUIManager()->getMainMenuUserInterface());    // Huh??!??!?
    else
-      gEditorUserInterface.reactivate();
+      game->getUIManager()->getEditorUserInterface()->reactivate();
 }
 
 
-void backToMainMenuCallback()
+void backToMainMenuCallback(Game *game)
 {
-   UserInterface::reactivateMenu(&gMainMenuUserInterface);
-}
-
-
-extern EditorGame *gEditorGame;
-
-// We can do better than this!
-static Game *getGame() 
-{
-   return gEditorGame;
+   game->getUIManager()->getMainMenuUserInterface()->reactivateMenu(game->getUIManager()->getMainMenuUserInterface());    // What??!??!?
 }
 
 
 // Constructor
-EditorUserInterface::EditorUserInterface()     // false --> not using game coords
+EditorUserInterface::EditorUserInterface(Game *game) : Parent(game)
 {
    setMenuID(EditorUI);
 
@@ -147,15 +136,11 @@ EditorUserInterface::EditorUserInterface()     // false --> not using game coord
    mLastUndoStateWasBarrierWidthChange = false;
 
    mUndoItems.resize(UNDO_STATES);     // Create slots for all our undos... also creates a ton of empty dbs.  Maybe we should be using pointers?
-
-   // Pass the gridDatabase on to these other objects, so they can have local access
-   //WallSegment::setGridDatabase(&mGridDatabase);      // Still needed?  Can do this via editorGame?
-   //WallSegmentManager::setGridDatabase(&mGridDatabase);
 }
 
 
 // Encapsulate some ugliness
-static const Vector<EditorObject *> *getObjectList()
+const Vector<EditorObject *> *EditorUserInterface::getObjectList()
 {
    return ((EditorObjectDatabase *)getGame()->getGridDatabase())->getObjectList();
 }
@@ -172,7 +157,7 @@ void EditorUserInterface::addToDock(EditorObject* object)
 
 void EditorUserInterface::addDockObject(EditorObject *object, F32 xPos, F32 yPos)
 {
-   object->addToDock(getGame(), Point(xPos, yPos));       
+   object->addToDock(getEditorGame(), Point(xPos, yPos));       
    object->setTeam(mCurrentTeam);
 }
 
@@ -325,20 +310,14 @@ void renderVertex(VertexRenderStyles style, const Point &v, S32 number)
 }
 
 
-inline F32 getGridSize()
-{
-   return getGame()->getGridSize();
-}
-
-
 // Replaces the need to do a convertLevelToCanvasCoord on every point before rendering
-static void setLevelToCanvasCoordConversion()
+void EditorUserInterface::setLevelToCanvasCoordConversion()
 {
-   F32 scale =  gEditorUserInterface.getCurrentScale();
-   Point offset = gEditorUserInterface.getCurrentOffset();
+   F32 scale =  getCurrentScale();
+   Point offset = getCurrentOffset();
 
-   glTranslatef(offset.x, offset.y, 0);
-   glScalef(scale, scale, 1);
+   glTranslate(offset);
+   glScale(scale);
 } 
 
 
@@ -354,18 +333,6 @@ void EditorUserInterface::renderPolyline(const Vector<Point> *verts)
 
 extern Color gNeutralTeamColor;
 extern Color gHostileTeamColor;
-
-
-inline F32 getCurrentScale()
-{
-   return gEditorUserInterface.getCurrentScale();
-}
-
-
-inline Point convertLevelToCanvasCoord(const Point &point, bool convert = true) 
-{ 
-   return gEditorUserInterface.convertLevelToCanvasCoord(point, convert); 
-}
 
 
 ////////////////////////////////////
@@ -497,19 +464,6 @@ void EditorUserInterface::undo(bool addToRedoStack)
 
    (dynamic_cast<EditorGame *>(getGame()))->setGridDatabase(boost::dynamic_pointer_cast<GridDatabase>(mUndoItems[mLastUndoIndex % UNDO_STATES]));
 
-   //restoreItems(mUndoItems[mLastUndoIndex % UNDO_STATES]);
-
-//logprintf("Undo -- now using database %p", gEditorGame->getGridDatabase().get());
-//fillVector.clear();
-//gEditorGame->getGridDatabase()->findObjects(fillVector);
-//for(S32 i = 0; i < fillVector.size(); i++)
-//{
-//   BfObject *o = dynamic_cast<BfObject *>(fillVector[i]);
-//   F32 x = o->getVert(0).x;
-//   F32 y = o->getVert(0).y;
-//   logprintf("contains object (%f,%f) ==> %p",x,y,o->mGeometry.get());
-//}
-
    rebuildEverything();
 
    mLastUndoStateWasBarrierWidthChange = false;
@@ -619,31 +573,26 @@ extern ConfigDirectories gConfigDirs;
 // Loads a level
 void EditorUserInterface::loadLevel()
 {
-   Game *game = getGame();
-
    // Initialize
    clearDatabase(getGame()->getGridDatabase());
-   game->clearTeams();
+   getGame()->clearTeams();
    mSnapObject = NULL;
    mSnapVertexIndex = NONE;
    mAddingVertex = false;
    clearLevelGenItems();
-   mLoadTarget = (EditorObjectDatabase *)game->getGridDatabase();
+   mLoadTarget = (EditorObjectDatabase *)getGame()->getGridDatabase();
    mGameTypeArgs.clear();
 
-   gGameParamUserInterface.savedMenuItems.clear();    // clear() because this is not a pointer vector
-   gGameParamUserInterface.menuItems.clear();         // Keeps interface from using our menuItems to rebuild savedMenuItems
-
-   game->resetLevelInfo();
+   getGame()->resetLevelInfo();
 
    GameType *g = new GameType;
    g->addToGame(getGame());
-   game->setGameType(g);
+   getGame()->setGameType(g);
 
    char fileBuffer[1024];
    dSprintf(fileBuffer, sizeof(fileBuffer), "%s/%s", gConfigDirs.levelDir.c_str(), mEditFileName.c_str());
 
-   if(game->loadLevelFromFile(fileBuffer))   // Process level file --> returns true if file found and loaded, false if not (assume it's a new level)
+   if(getGame()->loadLevelFromFile(fileBuffer))   // Process level file --> returns true if file found and loaded, false if not (assume it's a new level)
    {
       // Loaded a level!
       makeSureThereIsAtLeastOneTeam(); // Make sure we at least have one team
@@ -669,14 +618,14 @@ void EditorUserInterface::loadLevel()
    //for(S32 i = 0; i < objList->size(); i++)
    //   objList->get(i)->processEndPoints();
 
-   game->getWallSegmentManager()->recomputeAllWallGeometry(getGame()->getGridDatabase());
+   getGame()->getWallSegmentManager()->recomputeAllWallGeometry(getGame()->getGridDatabase());
    
    // Snap all engineered items to the closest wall, if one is found
    resnapAllEngineeredItems();
 
    // Run onGeomChanged for all non-wall items (engineered items already had onGeomChanged run during resnap operation)
    /*fillVector.clear();
-   gEditorGame->getGridDatabase()->findObjects(~(BarrierType | EngineeredType), fillVector);
+   mGame->getGridDatabase()->findObjects(~(BarrierType | EngineeredType), fillVector);
    for(S32 i = 0; i < fillVector.size(); i++)
    {
       EditorObject *obj = dynamic_cast<EditorObject *>(fillVector[i]);
@@ -750,7 +699,7 @@ void EditorUserInterface::runScript(const string &scriptName, const Vector<strin
 
    // TODO: Uncomment the following, make it work again (commented out during refactor of editor load process)
    // Load the items
-   //LuaLevelGenerator(name, args, getGame()->getGridSize(), getGridDatabase(), this, gConsole);
+   //LuaLevelGenerator(name, args, mGame->getGridSize(), getGridDatabase(), this, gConsole);
    
    // Process new items
    // Not sure about all this... may need to test
@@ -992,13 +941,16 @@ string EditorUserInterface::getLevelFileName()
 
 // Handle console input
 // Valid commands: help, run, clear, quit, exit
-void processEditorConsoleCommand(OGLCONSOLE_Console console, char *cmdline)
+void processEditorConsoleCommand(void *gamePtr, OGLCONSOLE_Console console, char *cmdline)
 {
+   Game *game = (Game *)gamePtr;
+
    Vector<string> words = parseString(cmdline);
    if(words.size() == 0)
       return;
 
    string cmd = lcase(words[0]);
+   EditorUserInterface *ui = game->getUIManager()->getEditorUserInterface();
 
    if(cmd == "quit" || cmd == "exit") 
       OGLCONSOLE_HideConsole();
@@ -1012,20 +964,20 @@ void processEditorConsoleCommand(OGLCONSOLE_Console console, char *cmdline)
          OGLCONSOLE_Output(console, "Usage: run <script_name> {args}\n");
       else
       {
-         gEditorUserInterface.saveUndoState();
+         ui->saveUndoState();
          words.erase(0);         // Get rid of "run", leaving script name and args
 
          string name = words[0];
          words.erase(0);
 
-         gEditorUserInterface.onBeforeRunScriptFromConsole();
-         gEditorUserInterface.runScript(name, words);
-         gEditorUserInterface.onAfterRunScriptFromConsole();
+         ui->onBeforeRunScriptFromConsole();
+         ui->runScript(name, words);
+         ui->onAfterRunScriptFromConsole();
       }
    }   
 
    else if(cmd == "clear")
-      gEditorUserInterface.clearLevelGenItems();
+      ui->clearLevelGenItems();
 
    else
       OGLCONSOLE_Output(console, "Unknown command: %s\n", cmd.c_str());
@@ -1059,16 +1011,17 @@ void EditorUserInterface::onActivate()
 {
    if(gConfigDirs.levelDir == "")      // Never did resolve a leveldir... no editing for you!
    {
-      gEditorUserInterface.reactivatePrevUI();     // Must come before the error msg, so it will become the previous UI when that one exits
+      reactivatePrevUI();     // Must come before the error msg, so it will become the previous UI when that one exits
 
-      gErrorMsgUserInterface.reset();
-      gErrorMsgUserInterface.setTitle("HOUSTON, WE HAVE A PROBLEM");
-      gErrorMsgUserInterface.setMessage(1, "No valid level folder was found..."); 
-      gErrorMsgUserInterface.setMessage(2, "cannot start the level editor");
-      gErrorMsgUserInterface.setMessage(4, "Check the LevelDir parameter in your INI file,");
-      gErrorMsgUserInterface.setMessage(5, "or your command-line parameters to make sure");
-      gErrorMsgUserInterface.setMessage(6, "you have correctly specified a valid folder.");
-      gErrorMsgUserInterface.activate();
+      ErrorMessageUserInterface *ui = getGame()->getUIManager()->getErrorMsgUserInterface();
+      ui->reset();
+      ui->setTitle("HOUSTON, WE HAVE A PROBLEM");
+      ui->setMessage(1, "No valid level folder was found..."); 
+      ui->setMessage(2, "cannot start the level editor");
+      ui->setMessage(4, "Check the LevelDir parameter in your INI file,");
+      ui->setMessage(5, "or your command-line parameters to make sure");
+      ui->setMessage(6, "you have correctly specified a valid folder.");
+      ui->activate();
 
       return;
    }
@@ -1078,7 +1031,7 @@ void EditorUserInterface::onActivate()
    {
       // Don't save this menu (false, below).  That way, if the user escapes out, and is returned to the "previous"
       // UI, they will get back to where they were before (prob. the main menu system), not back to here.
-      gLevelNameEntryUserInterface.activate(false);
+      getGame()->getUIManager()->getLevelNameEntryUserInterface()->activate(false);
 
       return;
    }
@@ -1170,7 +1123,7 @@ Point EditorUserInterface::snapPointToLevelGrid(Point const &p)
       return p;
 
    // First, find a snap point based on our grid
-   F32 factor = (showMinorGridLines() ? 0.1 : 0.5) * getGridSize();     // Tenths or halves -- major gridlines are gridsize pixels apart
+   F32 factor = (showMinorGridLines() ? 0.1 : 0.5) * getGame()->getGridSize();     // Tenths or halves -- major gridlines are gridsize pixels apart
 
    return Point(floor(p.x / factor + 0.5) * factor, floor(p.y / factor + 0.5) * factor);
 }
@@ -1360,7 +1313,7 @@ void EditorUserInterface::renderGrid()
    {
       if(i && showMinorGridLines() || !i)      // Minor then major gridlines
       {
-         F32 gridScale = mCurrentScale * getGridSize() * (i ? 0.1 : 1);    // Major gridlines are gridSize() pixels apart   
+         F32 gridScale = mCurrentScale * getGame()->getGridSize() * (i ? 0.1 : 1);    // Major gridlines are gridSize() pixels apart   
          F32 color = (i ? .2 : .4) * colorFact;
 
          F32 xStart = fmod(mCurrentOffset.x, gridScale);
@@ -1536,8 +1489,8 @@ void EditorUserInterface::renderReferenceShip()
    static F32 thrusts[4] =  { 1, 0, 0, 0 };
 
    glPushMatrix();
-      glTranslatef(mMousePos.x, mMousePos.y, 0);
-      glScalef(mCurrentScale / getGridSize(), mCurrentScale / getGridSize(), 1);
+      glTranslate(mMousePos);
+      glScale(mCurrentScale / getGame()->getGridSize());
       glRotatef(90, 0, 0, 1);
       renderShip(&Colors::red, 1, thrusts, 1, 5, 0, false, false, false, false);
       glRotatef(-90, 0, 0, 1);
@@ -1807,7 +1760,7 @@ void EditorUserInterface::render()
 
 const Color *EditorUserInterface::getTeamColor(S32 team) const
 {
-   return getGame()->getTeamColor(team);
+   return gEditorGame->getTeamColor(team);
 }
 
 
@@ -1930,7 +1883,7 @@ void EditorUserInterface::scaleSelection(F32 scale)
    computeSelectionMinMax(min, max);
    Point ctr = (min + max) * 0.5;
 
-   if(scale > 1 && min.distanceTo(max) * scale  > 50 * getGridSize())    // If walls get too big, they'll bog down the db
+   if(scale > 1 && min.distanceTo(max) * scale  > 50 * getGame()->getGridSize())    // If walls get too big, they'll bog down the db
       return;
 
    const Vector<EditorObject *> *objList = getObjectList();
@@ -2003,11 +1956,14 @@ void EditorUserInterface::setCurrentTeam(S32 currentTeam)
    if(currentTeam >= getGame()->getTeamCount())
    {
       char msg[255];
+
       if(getGame()->getTeamCount() == 1)
          dSprintf(msg, sizeof(msg), "Only 1 team has been configured.");
       else
          dSprintf(msg, sizeof(msg), "Only %d teams have been configured.", getGame()->getTeamCount());
-      gEditorUserInterface.setWarnMessage(msg, "Hit [F2] to configure teams.");
+
+      setWarnMessage(msg, "Hit [F2] to configure teams.");
+
       return;
    }
 
@@ -2057,7 +2013,7 @@ void EditorUserInterface::setCurrentTeam(S32 currentTeam)
 
    if(anyChanged)
    {
-      gEditorUserInterface.setWarnMessage("", "");
+      setWarnMessage("", "");
       validateLevel();
       mNeedToSave = true;
       autoSave();
@@ -2396,7 +2352,7 @@ EditorObject *EditorUserInterface::copyDockItem(S32 index)
 {
    // Instantiate object so we are in essence dragging a non-dock item
    EditorObject *newObject = mDockItems[index]->newCopy();
-   newObject->newObjectFromDock(getGridSize());
+   newObject->newObjectFromDock(getGame()->getGridSize());
    newObject->setExtent();
    newObject->setDockItem(false);
    newObject->clearGame();
@@ -2413,7 +2369,7 @@ void EditorUserInterface::startDraggingDockItem()
    //item->initializeEditor(getGridSize());    // Override this to define some initial geometry for your object... 
 
    // Offset lets us drag an item out from the dock by an amount offset from the 0th vertex.  This makes placement seem more natural.
-   Point pos = snapPoint(convertCanvasToLevelCoord(mMousePos), true) - item->getInitialPlacementOffset(getGridSize());
+   Point pos = snapPoint(convertCanvasToLevelCoord(mMousePos), true) - item->getInitialPlacementOffset(getGame()->getGridSize());
    item->moveTo(pos);
       
    //item->setWidth((mDockItems[mDraggingDockItem]->getGeomType() == geomPoly) ? .7 : 1);      // TODO: Still need this?
@@ -2761,12 +2717,12 @@ void EditorUserInterface::deleteItem(S32 itemIndex)
    if(mask & (BarrierType | PolyWallType))
    {
       // Need to recompute boundaries of any intersecting walls
-      wallSegmentManager->invalidateIntersectingSegments(getGame()->getGridDatabase(), obj); // Mark intersecting segments invalid
-      wallSegmentManager->deleteSegments(obj->getItemId());                                  // Delete the segments associated with the wall
+      wallSegmentManager->invalidateIntersectingSegments(game->getGridDatabase(), obj); // Mark intersecting segments invalid
+      wallSegmentManager->deleteSegments(obj->getItemId());                             // Delete the segments associated with the wall
 
       game->getGridDatabase()->removeFromDatabase(obj, obj->getExtent());
 
-      wallSegmentManager->recomputeAllWallGeometry(getGame()->getGridDatabase());    // Recompute wall edges
+      wallSegmentManager->recomputeAllWallGeometry(game->getGridDatabase());            // Recompute wall edges
       resnapAllEngineeredItems();         // Really only need to resnap items that were attached to deleted wall... but we
                                           // don't yet have a method to do that, and I'm feeling lazy at the moment
    }
@@ -3172,7 +3128,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    else if(keyCode == KEY_L && getKeyState(KEY_CTRL) && getKeyState(KEY_SHIFT))
    {
       loadLevel();                        // Ctrl-Shift-L - Reload level
-      gEditorUserInterface.setSaveMessage("Reloaded " + getLevelFileName(), true);
+      setSaveMessage("Reloaded " + getLevelFileName(), true);
    }
    else if(keyCode == KEY_Z)
    {
@@ -3220,7 +3176,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    else if(keyCode == KEY_S)
    {
       if(getKeyState(KEY_CTRL))           // Ctrl-S - Save
-         gEditorUserInterface.saveLevel(true, true);
+         saveLevel(true, true);
       else                                // S - Pan down
          mDown = true;
    }
@@ -3280,13 +3236,13 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       mOut = true;
    else if(keyCode == KEY_F3)             // F3 - Level Parameter Editor
    {
-      UserInterface::playBoop();
-      gGameParamUserInterface.activate();
+      playBoop();
+      getGame()->getUIManager()->getGameParamUserInterface()->activate();
    }
    else if(keyCode == KEY_F2)             // F2 - Team Editor Menu
    {
-      gTeamDefUserInterface.activate();
-      UserInterface::playBoop();
+      getGame()->getUIManager()->getTeamDefUserInterface()->activate();
+      playBoop();
    }
    else if(keyCode == KEY_T)              // T - Teleporter
       insertNewItem(TeleportType);
@@ -3308,17 +3264,17 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          deleteSelection(false);
    else if(keyCode == keyHELP)            // Turn on help screen
    {
-      gEditorInstructionsUserInterface.activate();
-      UserInterface::playBoop();
+      getGame()->getUIManager()->getEditorInstructionsUserInterface()->activate();
+      playBoop();
    }
    else if(keyCode == keyOUTGAMECHAT)     // Turn on Global Chat overlay
-      gChatInterface.activate();
+      getGame()->getUIManager()->getChatUserInterface()->activate();
    else if(keyCode == keyDIAG)            // Turn on diagnostic overlay
-      gDiagnosticInterface.activate();
+      getGame()->getUIManager()->getDiagnosticUserInterface()->activate();
    else if(keyCode == KEY_ESCAPE)           // Activate the menu
    {
-      UserInterface::playBoop();
-      gEditorMenuUserInterface.activate();
+      playBoop();
+      getGame()->getUIManager()->getEditorMenuUserInterface()->activate();
    }
    else if(keyCode == KEY_SPACE)
       mSnapDisabled = true;
@@ -3642,13 +3598,15 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
       // Check if we have a valid (i.e. non-null) filename
       if(saveName == "")
       {
-         gErrorMsgUserInterface.reset();
-         gErrorMsgUserInterface.setTitle("INVALID FILE NAME");
-         gErrorMsgUserInterface.setMessage(1, "The level file name is invalid or empty.  The level cannot be saved.");
-         gErrorMsgUserInterface.setMessage(2, "To correct the problem, please change the file name using the");
-         gErrorMsgUserInterface.setMessage(3, "Game Parameters menu, which you can access by pressing [F3].");
+         ErrorMessageUserInterface *ui = getGame()->getUIManager()->getErrorMsgUserInterface();
 
-         gErrorMsgUserInterface.activate();
+         ui->reset();
+         ui->setTitle("INVALID FILE NAME");
+         ui->setMessage(1, "The level file name is invalid or empty.  The level cannot be saved.");
+         ui->setMessage(2, "To correct the problem, please change the file name using the");
+         ui->setMessage(3, "Game Parameters menu, which you can access by pressing [F3].");
+
+         ui->activate();
 
          return false;
       }
@@ -3681,7 +3639,7 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
    catch (SaveException &e)
    {
       if(showFailMessages)
-         gEditorUserInterface.setSaveMessage("Error Saving: " + string(e.what()), false);
+         setSaveMessage("Error Saving: " + string(e.what()), false);
       return false;
    }
 
@@ -3692,16 +3650,16 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
    }
 
    if(showSuccessMessages)
-      gEditorUserInterface.setSaveMessage("Saved " + getLevelFileName(), true);
+      setSaveMessage("Saved " + getLevelFileName(), true);
 
    return true;
 }
 
 
 // We need some local hook into the testLevelStart() below.  Ugly but apparently necessary.
-void testLevelStart_local()
+void testLevelStart_local(Game *game)
 {
-   gEditorUserInterface.testLevelStart();
+   game->getUIManager()->getEditorUserInterface()->testLevelStart();
 }
 
 
@@ -3718,25 +3676,27 @@ void EditorUserInterface::testLevel()
    validateLevel();
    if(mLevelErrorMsgs.size() || mLevelWarnings.size() || gameTypeError)
    {
-      gYesNoUserInterface.reset();
-      gYesNoUserInterface.setTitle("LEVEL HAS PROBLEMS");
+      YesNoUserInterface *ui = getGame()->getUIManager()->getYesNoUserInterface();
+
+      ui->reset();
+      ui->setTitle("LEVEL HAS PROBLEMS");
 
       S32 line = 1;
       for(S32 i = 0; i < mLevelErrorMsgs.size(); i++)
-         gYesNoUserInterface.setMessage(line++, mLevelErrorMsgs[i].c_str());
+         ui->setMessage(line++, mLevelErrorMsgs[i].c_str());
 
       for(S32 i = 0; i < mLevelWarnings.size(); i++)
-         gYesNoUserInterface.setMessage(line++, mLevelWarnings[i].c_str());
+         ui->setMessage(line++, mLevelWarnings[i].c_str());
 
       if(gameTypeError)
       {
-         gYesNoUserInterface.setMessage(line++, "ERROR: GameType is invalid.");
-         gYesNoUserInterface.setMessage(line++, "(Fix in Level Parameters screen [F3])");
+         ui->setMessage(line++, "ERROR: GameType is invalid.");
+         ui->setMessage(line++, "(Fix in Level Parameters screen [F3])");
       }
 
-      gYesNoUserInterface.setInstr("Press [Y] to start, [ESC] to cancel");
-      gYesNoUserInterface.registerYesFunction(testLevelStart_local);   // testLevelStart_local() just calls testLevelStart() below
-      gYesNoUserInterface.activate();
+      ui->setInstr("Press [Y] to start, [ESC] to cancel");
+      ui->registerYesFunction(testLevelStart_local);   // testLevelStart_local() just calls testLevelStart() below
+      ui->activate();
 
       return;
    }
@@ -3773,10 +3733,9 @@ void EditorUserInterface::testLevelStart()
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-EditorMenuUserInterface gEditorMenuUserInterface;
 
 // Constructor
-EditorMenuUserInterface::EditorMenuUserInterface()
+EditorMenuUserInterface::EditorMenuUserInterface(Game *game) : Parent(game)
 {
    setMenuID(EditorMenuUI);
    mMenuTitle = "EDITOR MENU";
@@ -3791,62 +3750,73 @@ void EditorMenuUserInterface::onActivate()
 
 
 extern IniSettings gIniSettings;
-extern MenuItem *getWindowModeMenuItem();
+extern MenuItem *getWindowModeMenuItem(Game *game);
 
 //////////
 // Editor menu callbacks
 //////////
 
-void reactivatePrevUICallback(U32 unused)
+void reactivatePrevUICallback(Game *game, U32 unused)
 {
-   gEditorUserInterface.reactivatePrevUI();
-}
-
-static void testLevelCallback(U32 unused)
-{
-   gEditorUserInterface.testLevel();
+   game->getUIManager()->getEditorUserInterface()->reactivatePrevUI();
 }
 
 
-void returnToEditorCallback(U32 unused)
+static void testLevelCallback(Game *game, U32 unused)
 {
-   gEditorUserInterface.saveLevel(true, true);  // Save level
-   gEditorUserInterface.setSaveMessage("Saved " + gEditorUserInterface.getLevelFileName(), true);
-   gEditorUserInterface.reactivatePrevUI();        // Return to editor
+   game->getUIManager()->getEditorUserInterface()->testLevel();
 }
 
-static void activateHelpCallback(U32 unused)
+
+void returnToEditorCallback(Game *game, U32 unused)
 {
-   gEditorInstructionsUserInterface.activate();
+   EditorUserInterface *ui = game->getUIManager()->getEditorUserInterface();
+
+   ui->saveLevel(true, true);     // Save level
+   ui->setSaveMessage("Saved " + ui->getLevelFileName(), true);
+   ui->reactivatePrevUI();        // Return to editor
 }
 
-static void activateLevelParamsCallback(U32 unused)
+
+static void activateHelpCallback(Game *game, U32 unused)
 {
-   gGameParamUserInterface.activate();
+   game->getUIManager()->getEditorInstructionsUserInterface()->activate();
 }
 
-static void activateTeamDefCallback(U32 unused)
+
+static void activateLevelParamsCallback(Game *game, U32 unused)
 {
-   gTeamDefUserInterface.activate();
+   game->getUIManager()->getGameParamUserInterface()->activate();
 }
 
-void quitEditorCallback(U32 unused)
+
+static void activateTeamDefCallback(Game *game, U32 unused)
 {
-   if(gEditorUserInterface.mNeedToSave)
+   game->getUIManager()->getTeamDefUserInterface()->activate();
+}
+
+
+void quitEditorCallback(Game *game, U32 unused)
+{
+   EditorUserInterface *editorUI = game->getUIManager()->getEditorUserInterface();
+
+   if(editorUI->mNeedToSave)
    {
-      gYesNoUserInterface.reset();
-      gYesNoUserInterface.setInstr("Press [Y] to save, [N] to quit [ESC] to cancel");
-      gYesNoUserInterface.setTitle("SAVE YOUR EDITS?");
-      gYesNoUserInterface.setMessage(1, "You have not saved your edits to the level.");
-      gYesNoUserInterface.setMessage(3, "Do you want to?");
-      gYesNoUserInterface.registerYesFunction(saveLevelCallback);
-      gYesNoUserInterface.registerNoFunction(backToMainMenuCallback);
-      gYesNoUserInterface.activate();
+      YesNoUserInterface *ui = game->getUIManager()->getYesNoUserInterface();
+
+      ui->reset();
+      ui->setInstr("Press [Y] to save, [N] to quit [ESC] to cancel");
+      ui->setTitle("SAVE YOUR EDITS?");
+      ui->setMessage(1, "You have not saved your edits to the level.");
+      ui->setMessage(3, "Do you want to?");
+      ui->registerYesFunction(saveLevelCallback);
+      ui->registerNoFunction(backToMainMenuCallback);
+      ui->activate();
    }
    else
-      gEditorUserInterface.reactivateMenu(&gMainMenuUserInterface);
+      editorUI->reactivateMenu(game->getUIManager()->getEditorUserInterface());
 
-   gEditorUserInterface.clearUndoHistory();        // Clear up a little memory
+   editorUI->clearUndoHistory();        // Clear up a little memory
 }
 
 //////////
@@ -3854,14 +3824,14 @@ void quitEditorCallback(U32 unused)
 void EditorMenuUserInterface::setupMenus()
 {
    menuItems.clear();
-   menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(0, "RETURN TO EDITOR", reactivatePrevUICallback,    "", KEY_R)));
-   menuItems.push_back(boost::shared_ptr<MenuItem>(getWindowModeMenuItem()));
-   menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(0, "TEST LEVEL",       testLevelCallback,           "", KEY_T)));
-   menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(0, "SAVE LEVEL",       returnToEditorCallback,      "", KEY_S)));
-   menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(0, "INSTRUCTIONS",     activateHelpCallback,        "", KEY_I, keyHELP)));
-   menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(0, "LEVEL PARAMETERS", activateLevelParamsCallback, "", KEY_L, KEY_F3)));
-   menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(0, "MANAGE TEAMS",     activateTeamDefCallback,     "", KEY_M, KEY_F2)));
-   menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(0, "QUIT",             quitEditorCallback,          "", KEY_Q, KEY_UNKNOWN)));
+   menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(getGame(), 0, "RETURN TO EDITOR", reactivatePrevUICallback,    "", KEY_R)));
+   menuItems.push_back(boost::shared_ptr<MenuItem>(getWindowModeMenuItem(getGame())));
+   menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(getGame(), 0, "TEST LEVEL",       testLevelCallback,           "", KEY_T)));
+   menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(getGame(), 0, "SAVE LEVEL",       returnToEditorCallback,      "", KEY_S)));
+   menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(getGame(), 0, "INSTRUCTIONS",     activateHelpCallback,        "", KEY_I, keyHELP)));
+   menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(getGame(), 0, "LEVEL PARAMETERS", activateLevelParamsCallback, "", KEY_L, KEY_F3)));
+   menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(getGame(), 0, "MANAGE TEAMS",     activateTeamDefCallback,     "", KEY_M, KEY_F2)));
+   menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(getGame(), 0, "QUIT",             quitEditorCallback,          "", KEY_Q, KEY_UNKNOWN)));
 }
 
 

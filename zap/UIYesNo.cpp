@@ -33,21 +33,19 @@
 namespace Zap
 {
 
-YesNoUserInterface gYesNoUserInterface;
-
 // Constructor
-YesNoUserInterface::YesNoUserInterface()
+YesNoUserInterface::YesNoUserInterface(Game *game) : ErrorMessageUserInterface(game)
 {
    setMenuID(YesOrNoUI);
    reset();
 }
 
-void YesNoUserInterface::registerYesFunction(void(*ptr)())
+void YesNoUserInterface::registerYesFunction(void(*ptr)(Game *game))
 {
    mYesFunction = ptr;
 }
 
-void YesNoUserInterface::registerNoFunction(void(*ptr)())
+void YesNoUserInterface::registerNoFunction(void(*ptr)(Game *game))
 {
    mNoFunction = ptr;
 }
@@ -62,19 +60,20 @@ void YesNoUserInterface::reset()
    mNoFunction = NULL;
 }
 
+
 void YesNoUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 {
    if(keyCode == KEY_Y)
    {
       if(mYesFunction)
-         mYesFunction();
+         mYesFunction(getGame());
       else
          quit();
    }
    else if(keyCode == KEY_N)
    {
       if(mNoFunction)
-         mNoFunction();
+         mNoFunction(getGame());
       else
          quit();
    }

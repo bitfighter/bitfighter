@@ -35,7 +35,7 @@ namespace Zap
 class ErrorMessageUserInterface : public UserInterface
 {
 public:
-   ErrorMessageUserInterface();      // Constructor
+   ErrorMessageUserInterface(Game *game);      // Constructor
    const static S32 MAX_LINES = 9;
    const char *mTitle;
    const char *mInstr;
@@ -51,7 +51,6 @@ public:
    void onKeyDown(KeyCode keyCode, char ascii);
 };
 
-extern ErrorMessageUserInterface gErrorMsgUserInterface;
 
 }
 

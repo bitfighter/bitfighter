@@ -45,18 +45,20 @@
 #include "robot.h"
 #include "shipItems.h"           // For moduleInfos
 #include "stringUtils.h"
-#include "UIGame.h"
-#include "UIMenus.h"
-#include "UINameEntry.h"
-#include "UIEditor.h"         // For EditorUserInterface def, needed by EditorGame stuff
+
 #include "BotNavMeshZone.h"      // For zone clearing code
 #include "ScreenInfo.h"
 #include "Joystick.h"
+
+#include "UIGame.h"
+#include "UIGameParameters.h"
 
 #include "tnl.h"
 #include "tnlRandom.h"
 #include "tnlGhostConnection.h"
 #include "tnlNetInterface.h"
+
+#include "md5wrapper.h"
 
 #include "SDL/SDL_opengl.h"
 
@@ -91,6 +93,8 @@ extern ScreenInfo gScreenInfo;
 // Constructor
 Game::Game(const Address &theBindAddress) : mDatabase(new GridDatabase())     //? was without new
 {
+   mUIManager = new UIManager(this);                  // gets deleted in destructor
+
    buildModuleInfos();
    mNextMasterTryTime = 0;
    mReadyToConnectToMaster = false;
@@ -103,7 +107,7 @@ Game::Game(const Address &theBindAddress) : mDatabase(new GridDatabase())     //
    mNetInterface = new GameNetInterface(theBindAddress, this);
    mHaveTriedToConnectToMaster = false;
 
-   mWallSegmentManager = new WallSegmentManager();
+   mWallSegmentManager = new WallSegmentManager();    // gets deleted in destructor
 }
 
 
@@ -111,6 +115,7 @@ Game::Game(const Address &theBindAddress) : mDatabase(new GridDatabase())     //
 Game::~Game()
 {
    delete mWallSegmentManager;
+   delete mUIManager;
 }
 
 
@@ -275,24 +280,8 @@ void Game::processLevelLoadLine(U32 argc, U32 id, const char **argv)
       if(!validArgs || strcmp(gt->getClassName(), argv[0]))
          throw LevelLoadException("Improperly formed GameType parameter");
       
-      // Save the args (which we already have split out) for easier handling in the Game Parameter Editor
-      //for(U32 i = 1; i < argc; i++)
-      //   gEditorUserInterface.mGameTypeArgs.push_back(argv[i]);
-
       return;
    }
-
-   //// If we're here, and we don't yet have a gameType, create a default one.  This is an emergency fallback, and shouldn't be relied on.
-   //if(!mGameType)
-   //{
-   //   TNL::Object *theObject = TNL::Object::create(GameType::validateGameType("GameType"));   // GameType ==> Bitmatch ==> default type     
-   //   GameType *gt = dynamic_cast<GameType *>(theObject);  // Force our new object to be a GameObject
-
-   //   if(gt)
-   //   {
-   //      gt->addToGame(this);
-   //   }
-   //}
 
    if(getGameType() && processLevelParam(argc, argv)) 
    {
@@ -596,10 +585,12 @@ Game::DeleteRef::DeleteRef(GameObject *o, U32 d)
    delay = d;
 }
 
+
 void Game::addToDeleteList(GameObject *theObject, U32 delay)
 {
    mPendingDeleteObjects.push_back(DeleteRef(theObject, delay));
 }
+
 
 // Cycle through our pending delete list, and either delete an object or update its timer
 void Game::processDeleteList(U32 timeDelta)
@@ -1345,6 +1336,7 @@ inline string getPathFromFilename( const string& filename )
 
 
 extern OGLCONSOLE_Console gConsole;
+extern md5wrapper md5;
 
 bool ServerGame::loadLevel(const string &origFilename2)
 {
@@ -1763,7 +1755,7 @@ S32 ServerGame::addLevelInfo(const char *filename, LevelInfo &info)
 // Constructor
 ClientGame::ClientGame(const Address &bindAddress) : GameGame(bindAddress)
 {
-   mGameUserInterface = new GameUserInterface();
+   mGameUserInterface = new GameUserInterface(this);
    mUserInterfaceData = new UserInterfaceData();
    mInCommanderMap = false;
    mCommanderZoomDelta = 0;
@@ -1959,7 +1951,7 @@ void ClientGame::idle(U32 timeDelta)
    // Overwrite theMove if we're using joystick (also does some other essential joystick stuff)
    // We'll also run this while in the menus so if we enter keyboard mode accidentally, it won't
    // kill the joystick.  The design of combining joystick input and move updating really sucks.
-   if(gIniSettings.inputMode == InputModeJoystick || UserInterface::current == &gOptionsMenuUserInterface)
+   if(getIniSettings()->inputMode == InputModeJoystick || UserInterface::current == getUIManager()->getOptionsMenuUserInterface())
       joystickUpdateMove(theMove);
 
 
@@ -2135,8 +2127,6 @@ const Color *Game::getBasicTeamColor(const Game *game, S32 teamId)
 }
 
 
-extern OptionsMenuUserInterface gOptionsMenuUserInterface;
-
 void ClientGame::drawStars(F32 alphaFrac, Point cameraPos, Point visibleExtent)
 {
    const F32 starChunkSize = 1024;        // Smaller numbers = more dense stars
@@ -2181,9 +2171,9 @@ void ClientGame::drawStars(F32 alphaFrac, Point cameraPos, Point visibleExtent)
       for(F32 yPage = upperLeft.y + fy1; yPage < lowerRight.y + fy2; yPage++)
       {
          glPushMatrix();
-         glScalef(starChunkSize, starChunkSize, 1);   // Creates points with coords btwn 0 and starChunkSize
+         glScale(starChunkSize);   // Creates points with coords btwn 0 and starChunkSize
 
-         if (gIniSettings.starsInDistance)
+         if(gIniSettings.starsInDistance)
             glTranslatef(xPage + (cameraPos.x / starDist), yPage + (cameraPos.y / starDist), 0);
          else
             glTranslatef(xPage, yPage, 0);
@@ -2315,8 +2305,7 @@ void ClientGame::renderCommander()
    // Put (0,0) at the center of the screen
    glTranslatef(gScreenInfo.getGameCanvasWidth() / 2, gScreenInfo.getGameCanvasHeight() / 2, 0);    
 
-   Point visScale(canvasWidth / modVisSize.x, canvasHeight / modVisSize.y );
-   glScalef(visScale.x, visScale.y, 1);
+   glScalef(canvasWidth / modVisSize.x, canvasHeight / modVisSize.y, 1);
 
    Point offset = (mWorldExtents.getCenter() - position) * zoomFrac + position;
    glTranslatef(-offset.x, -offset.y, 0);
@@ -2610,10 +2599,8 @@ void ClientGame::render()
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-extern EditorUserInterface gEditorUserInterface;
-
 // Constructor
-EditorGame::EditorGame() : Game(Address()) 
+EditorGame::EditorGame() : Game(Address())
 { 
    resetLevelInfo(); 
    //mEditorDatabase = boost::shared_ptr<EditorObjectDatabase>();

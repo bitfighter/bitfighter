@@ -355,8 +355,8 @@ void AsteroidSpawn::renderEditor(F32 currentScale)
    Point pos = getVert(0);
 
    glPushMatrix();
-      glTranslatef(pos.x, pos.y, 0);
-      glScalef(1/currentScale, 1/currentScale, 1);    // Make item draw at constant size, regardless of zoom
+      glTranslate(pos);
+      glScale(1/currentScale);    // Make item draw at constant size, regardless of zoom
       renderAsteroidSpawn(Point(0,0));
    glPopMatrix();   
 }

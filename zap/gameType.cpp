@@ -203,11 +203,12 @@ const char **GameType::getGameParameterMenuKeys()
 
 
 // Definitions for those items
-boost::shared_ptr<MenuItem> GameType::getMenuItem(const Game *game, const char *key)
+boost::shared_ptr<MenuItem> GameType::getMenuItem(Game *game, const char *key)
 {
    if(!strcmp(key, "Level Name"))
    {
-      MenuItem *item = new EditableMenuItem("Level Name:", 
+      MenuItem *item = new EditableMenuItem(game, 
+                                            "Level Name:", 
                                             mLevelName.getString(),
                                             "", 
                                             "The level's name -- pick a good one!",  
@@ -218,29 +219,33 @@ boost::shared_ptr<MenuItem> GameType::getMenuItem(const Game *game, const char *
       return boost::shared_ptr<MenuItem>(item);
    }
    else if(!strcmp(key, "Level Descr"))
-   	return boost::shared_ptr<MenuItem>(new EditableMenuItem("Level Descr:", 
+   	return boost::shared_ptr<MenuItem>(new EditableMenuItem(game,
+                                                              "Level Descr:", 
                                                               mLevelDescription.getString(), 
                                                               "", 
                                                               "A brief description of the level",                     
                                                               MAX_GAME_DESCR_LEN));
    else if(!strcmp(key, "Level Credits"))
-   	return boost::shared_ptr<MenuItem>(new EditableMenuItem("Level By:",       
+   	return boost::shared_ptr<MenuItem>(new EditableMenuItem(game,
+                                                              "Level By:",       
                                                               mLevelCredits.getString(), 
                                                               "", 
                                                               "Who created this level",                                  
                                                               MAX_GAME_DESCR_LEN));
    else if(!strcmp(key, "Levelgen Script"))
-   	return boost::shared_ptr<MenuItem>(new EditableMenuItem("Levelgen Script:", 
+   	return boost::shared_ptr<MenuItem>(new EditableMenuItem(game,
+                                                              "Levelgen Script:", 
                                                               getScriptLine(), 
                                                               "<None>", 
                                                               "Levelgen script & args to be run when level is loaded",  
                                                               255));
    else if(!strcmp(key, "Game Time"))
-      return boost::shared_ptr<MenuItem>(new TimeCounterMenuItem("Game Time:", getTotalGameTime(), 99*60, "Unlimited", "Time game will last"));
+      return boost::shared_ptr<MenuItem>(new TimeCounterMenuItem(game, "Game Time:", getTotalGameTime(), 99*60, "Unlimited", "Time game will last"));
    else if(!strcmp(key, "Win Score"))
-      return boost::shared_ptr<MenuItem>(new CounterMenuItem("Score to Win:", getWinningScore(), 1, 1, 99, "points", "", "Game ends when one team gets this score"));
+      return boost::shared_ptr<MenuItem>(new CounterMenuItem(game,"Score to Win:", getWinningScore(), 1, 1, 99, "points", "", "Game ends when one team gets this score"));
    else if(!strcmp(key, "Grid Size"))
-      return boost::shared_ptr<MenuItem>(new CounterMenuItem("Grid Size:",       
+      return boost::shared_ptr<MenuItem>(new CounterMenuItem(game,
+                                                             "Grid Size:",       
                                                              game->getGridSize(),
                                                              Game::MIN_GRID_SIZE,      // increment
                                                              Game::MIN_GRID_SIZE,      // min val
@@ -249,7 +254,8 @@ boost::shared_ptr<MenuItem> GameType::getMenuItem(const Game *game, const char *
                                                              "", 
                                                              "\"Magnification factor.\" Larger values lead to larger levels.  Default is 255."));
    else if(!strcmp(key, "Min Players"))
-   	return boost::shared_ptr<MenuItem>(new CounterMenuItem("Min Players:",       
+   	return boost::shared_ptr<MenuItem>(new CounterMenuItem(game,
+                                                             "Min Players:",       
                                                              mMinRecPlayers,     // value
                                                              1,                  // increment
                                                              0,                  // min val
@@ -258,7 +264,8 @@ boost::shared_ptr<MenuItem> GameType::getMenuItem(const Game *game, const char *
                                                              "N/A", 
                                                              "Min. players you would recommend for this level (to help server select the next level)"));
    else if(!strcmp(key, "Max Players"))
-   	return boost::shared_ptr<MenuItem>(new CounterMenuItem("Max Players:",       
+   	return boost::shared_ptr<MenuItem>(new CounterMenuItem(game,
+                                                             "Max Players:",       
                                                              mMaxRecPlayers,     // value
                                                              1,                  // increment
                                                              0,                  // min val
@@ -267,7 +274,8 @@ boost::shared_ptr<MenuItem> GameType::getMenuItem(const Game *game, const char *
                                                              "N/A",
                                                              "Max. players you would recommend for this level (to help server select the next level)"));
    else if(!strcmp(key, "Allow Engr"))
-   	return boost::shared_ptr<MenuItem>(new YesNoMenuItem("Allow Engineer Module:",       
+   	return boost::shared_ptr<MenuItem>(new YesNoMenuItem(game,
+                                                           "Allow Engineer Module:",       
                                                            mEngineerEnabled,
                                                            NULL,
                                                            "Allow players to use the Engineer module?"));
@@ -291,7 +299,7 @@ bool GameType::saveMenuItem(const MenuItem *menuItem, const char *key)
    else if(!strcmp(key, "Win Score"))
       setWinningScore(menuItem->getIntValue());
    else if(!strcmp(key, "Grid Size"))
-      gEditorGame->setGridSize(menuItem->getIntValue());
+      getGame()->setGridSize(menuItem->getIntValue());
    else if(!strcmp(key, "Min Players"))
        setMinRecPlayers(menuItem->getIntValue());
    else if(!strcmp(key, "Max Players"))
@@ -1828,52 +1836,55 @@ S32 GameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S3
 
 extern ClientInfo gClientInfo;
 
-static void switchTeamsCallback(U32 unused)
+static void switchTeamsCallback(Game *game, U32 unused)
 {
-   GameType *gt = gClientGame->getGameType();
+   GameType *gt = game->getGameType();
    if(!gt)
       return;
 
    // If there are only two teams, just switch teams and skip the rigamarole
-   if(gClientGame->getTeamCount() == 2)
+   if(game->getTeamCount() == 2)
    {
       Ship *ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());  // Returns player's ship...
       if(!ship)
          return;
 
-      gt->c2sChangeTeams(1 - ship->getTeam());                          // If two teams, team will either be 0 or 1, so "1 - " will toggle
-      UserInterface::reactivateMenu(gClientGame->getUserInterface());   // Jump back into the game (this option takes place immediately)
+      gt->c2sChangeTeams(1 - ship->getTeam());                   // If two teams, team will either be 0 or 1, so "1 - " will toggle
+      game->getUserInterface()->reactivateMenu(game->getUserInterface());   // Jump back into the game (this option takes place immediately)
    }
    else
    {
-      gTeamMenuUserInterface.activate();     // Show menu to let player select a new team
-      gTeamMenuUserInterface.nameToChange = gClientInfo.name;
+      TeamMenuUserInterface *ui = game->getUIManager()->getTeamMenuUserInterface();
+      ui->activate();     // Show menu to let player select a new team
+      ui->nameToChange = gClientInfo.name;
    }
  }
 
 
 // Add any additional game-specific menu items, processed below
-void GameType::addClientGameMenuOptions(Vector<boost::shared_ptr<MenuItem> > &menuOptions)
+void GameType::addClientGameMenuOptions(ClientGame *game, Vector<boost::shared_ptr<MenuItem> > &menuOptions)
 {
    if(isTeamGame() && mGame->getTeamCount() > 1 && !mBetweenLevels)
    {
-      GameConnection *gc = gClientGame->getConnectionToServer();
+      GameConnection *gc = game->getConnectionToServer();
 
       if(mCanSwitchTeams || (gc && gc->isAdmin()))
-         menuOptions.push_back(boost::shared_ptr<MenuItem>(new MenuItem(0, "SWITCH TEAMS", switchTeamsCallback, "", KEY_S, KEY_T)));
+         menuOptions.push_back(boost::shared_ptr<MenuItem>(new MenuItem(game, 0, "SWITCH TEAMS", switchTeamsCallback, "", KEY_S, KEY_T)));
       else
       {
-         menuOptions.push_back(boost::shared_ptr<MenuItem>(new MessageMenuItem("WAITING FOR SERVER TO ALLOW", Colors::red)));
-         menuOptions.push_back(boost::shared_ptr<MenuItem>(new MessageMenuItem("YOU TO SWITCH TEAMS AGAIN", Colors::red)));
+         menuOptions.push_back(boost::shared_ptr<MenuItem>(new MessageMenuItem(game, "WAITING FOR SERVER TO ALLOW", Colors::red)));
+         menuOptions.push_back(boost::shared_ptr<MenuItem>(new MessageMenuItem(game, "YOU TO SWITCH TEAMS AGAIN", Colors::red)));
       }
    }
 }
 
 
-static void switchPlayersTeamCallback(U32 unused)
+static void switchPlayersTeamCallback(Game *game, U32 unused)
 {
-   gPlayerMenuUserInterface.action = PlayerMenuUserInterface::ChangeTeam;
-   gPlayerMenuUserInterface.activate();
+   PlayerMenuUserInterface *ui = game->getUIManager()->getPlayerMenuUserInterface();
+
+   ui->action = PlayerMenuUserInterface::ChangeTeam;
+   ui->activate();
 }
 
 
@@ -1881,7 +1892,7 @@ static void switchPlayersTeamCallback(U32 unused)
 void GameType::addAdminGameMenuOptions(Vector<boost::shared_ptr<MenuItem> > &menuOptions)
 {
    if(isTeamGame() && mGame->getTeamCount() > 1)
-      menuOptions.push_back(boost::shared_ptr<MenuItem>(new MenuItem(0, "CHANGE A PLAYER'S TEAM", switchPlayersTeamCallback, "", KEY_C)));
+      menuOptions.push_back(boost::shared_ptr<MenuItem>(new MenuItem(mGame, 0, "CHANGE A PLAYER'S TEAM", switchPlayersTeamCallback, "", KEY_C)));
 }
 
 
