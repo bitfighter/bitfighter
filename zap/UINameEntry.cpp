@@ -131,6 +131,18 @@ void TextEntryUserInterface::setString(string str)
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+// Constructor
+LevelNameEntryUserInterface::LevelNameEntryUserInterface(Game *game) : Parent(game)     
+{
+   setMenuID(LevelNameEntryUI);
+   title = "ENTER LEVEL TO EDIT:";
+   instr1 = "Enter an existing level, or create your own!";
+   instr2 = "<- and -> keys retrieve existing level names";
+   resetOnActivate = false;
+   lineEditor.setFilter(LineEditor::fileNameFilter);
+   lineEditor.mMaxLen = MAX_FILE_NAME_LEN;
+}
+
 
 void LevelNameEntryUserInterface::onEscape()
 {
@@ -189,6 +201,8 @@ void LevelNameEntryUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 }
 
 
+extern CIniFile gINI;
+
 void LevelNameEntryUserInterface::onAccept(const char *name)
 {
    EditorUserInterface *ui = getGame()->getUIManager()->getEditorUserInterface();
@@ -198,7 +212,9 @@ void LevelNameEntryUserInterface::onAccept(const char *name)
    
    // Get that baby into the INI file
    getGame()->getIniSettings()->lastEditorName = name;
-   saveSettingsToINI();             
+   saveSettingsToINI(&gINI);             
+   // Should be...
+   //getGame()->getIniSettings()->saveSettingsToDisk();
 }
 
 

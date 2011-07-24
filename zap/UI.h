@@ -150,6 +150,7 @@ public:
    UIID getPrevMenuID() const;               // Retrieve previous interface's name
 
    Game *getGame() { return mGame; }
+
    ClientGame *getClientGame();
    EditorGame *getEditorGame();
 

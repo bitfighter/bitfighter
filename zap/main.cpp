@@ -642,7 +642,7 @@ void endGame()
 }
 
 
-extern void saveWindowMode();
+extern void saveWindowMode(CIniFile *ini);
 extern void saveWindowPosition(S32 x, S32 y);
 
 // Run when we're quitting the game, returning to the OS
@@ -660,13 +660,13 @@ void onExit()
    Joystick::shutdownJoystick();
 
    // Save settings to capture window position
-   saveWindowMode();
+   saveWindowMode(&gINI);
 
    // TODO: reimplement window position saving with SDL
    //   if(gIniSettings.displayMode == DISPLAY_MODE_WINDOWED)
    //      saveWindowPosition(glutGet(GLUT_WINDOW_X), glutGet(GLUT_WINDOW_Y));
 
-   saveSettingsToINI();    // Writes settings to the INI, then saves it to disk
+   saveSettingsToINI(&gINI);    // Writes settings to the INI, then saves it to disk
 
    NetClassRep::logBitUsage();
    TNL::logprintf("Bye!");
@@ -1806,7 +1806,7 @@ int main(int argc, char **argv)
 
    gZapJournal.processNextJournalEntry();    // If we're replaying a journal, this will cause the cmd line params to be read from the saved journal
 
-   loadSettingsFromINI();                    // Read INI
+   loadSettingsFromINI(&gINI);               // Read INI
 
    processStartupParams();                   // And merge command line params and INI settings
    Ship::computeMaxFireDelay();              // Look over weapon info and get some ranges, which we'll need before we start sending data

@@ -257,11 +257,12 @@ struct IniSettings      // With defaults specified
 };
 
 extern IniSettings gIniSettings;
+class CIniFile;
 
-void saveSettingsToINI();
-void loadSettingsFromINI();
+void saveSettingsToINI(CIniFile *ini);
+void loadSettingsFromINI(CIniFile *ini);
 
-void writeSkipList();
+void writeSkipList(CIniFile *ini);
 
 };
 

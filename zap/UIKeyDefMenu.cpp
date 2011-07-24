@@ -335,7 +335,7 @@ void KeyDefMenuUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    else if(keyCode == KEY_ESCAPE || keyCode == BUTTON_BACK)       // Quit
    {
       playBoop();
-      saveSettingsToINI();
+      saveSettingsToINI(&gINI);
 
       UserInterface::reactivatePrevUI();      //gOptionsMenuUserInterface
    }

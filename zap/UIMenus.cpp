@@ -994,7 +994,7 @@ void OptionsMenuUserInterface::toggleDisplayMode()
 // Save options to INI file, and return to our regularly scheduled program
 void OptionsMenuUserInterface::onEscape()
 {
-   saveSettingsToINI();
+   saveSettingsToINI(&gINI);
    reactivatePrevUI();      //mGameUserInterface
 }
 
@@ -1047,7 +1047,7 @@ static void nameAndPasswordAcceptCallback(Game *game, U32 unused)
    game->getIniSettings()->lastName     = gClientInfo.name = ui->menuItems[1]->getValueForWritingToLevelFile();
    game->getIniSettings()->lastPassword = gPlayerPassword  = ui->menuItems[2]->getValueForWritingToLevelFile();
 
-   saveSettingsToINI();             // Get that baby into the INI file
+   saveSettingsToINI(&gINI);             // Get that baby into the INI file
 
    gClientGame->setReadyToConnectToMaster(true);
    seedRandomNumberGenerator(gClientInfo.name);
@@ -1196,7 +1196,7 @@ void HostMenuUserInterface::saveSettings()
    gIniSettings.allowGetMap                                = menuItems[OPT_GETMAP]->getValue() == "yes";
    //gIniSettings.maxplayers                                 = menuItems[OPT_MAX_PLAYERS]->getIntValue();
 
-   saveSettingsToINI();
+   saveSettingsToINI(&gINI);
 }
 
 

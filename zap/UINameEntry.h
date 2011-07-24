@@ -96,16 +96,7 @@ private:
    Vector<string> mLevels;
 
 public:
-   LevelNameEntryUserInterface(Game *game) : Parent(game)      // Constructor
-   {
-      setMenuID(LevelNameEntryUI);
-      title = "ENTER LEVEL TO EDIT:";
-      instr1 = "Enter an existing level, or create your own!";
-      instr2 = "<- and -> keys retrieve existing level names";
-      resetOnActivate = false;
-      lineEditor.setFilter(LineEditor::fileNameFilter);
-      lineEditor.mMaxLen = MAX_FILE_NAME_LEN;
-   }
+   LevelNameEntryUserInterface(Game *game);      // Constructor
 
    virtual void onKeyDown(KeyCode keyCode, char ascii);
    virtual void onAccept(const char *text);

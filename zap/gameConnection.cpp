@@ -553,8 +553,8 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
       {
          // Add level to our skip list.  Deleting it from the active list of levels is more of a challenge...
          gLevelSkipList.push_back(gServerGame->getCurrentLevelFileName());
-         writeSkipList();     // Write skipped levels to INI
-         gINI.WriteFile();    // Save new INI settings to disk
+         writeSkipList(&gINI);     // Write skipped levels to INI
+         gINI.WriteFile();         // Save new INI settings to disk
       }
    }
 
