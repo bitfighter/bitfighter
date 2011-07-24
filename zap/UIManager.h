@@ -90,7 +90,6 @@ private:
    auto_ptr<HostMenuUserInterface> mHostMenuUserInterface;
    auto_ptr<GameMenuUserInterface> mGameMenuUserInterface;
    auto_ptr<ErrorMessageUserInterface> mErrorMsgUserInterface;
-   auto_ptr<LevelNameEntryUserInterface> mLevelNameEntryUserInterface;
    auto_ptr<InstructionsUserInterface> mInstructionsUserInterface;
    auto_ptr<OptionsMenuUserInterface> mOptionsMenuUserInterface;
    auto_ptr<KeyDefMenuUserInterface> mKeyDefMenuUserInterface;
@@ -103,6 +102,8 @@ private:
    auto_ptr<SplashUserInterface> mSplashUserInterface;
    auto_ptr<TeamDefUserInterface> mTeamDefUserInterface;
 
+      
+   static auto_ptr<LevelNameEntryUserInterface> mLevelNameEntryUserInterface;
    static auto_ptr<EditorUserInterface> mEditorUserInterface;
 
 public:

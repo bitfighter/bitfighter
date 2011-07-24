@@ -226,6 +226,8 @@ ErrorMessageUserInterface *UIManager::getErrorMsgUserInterface()
 }
 
 
+auto_ptr<LevelNameEntryUserInterface> UIManager::mLevelNameEntryUserInterface;
+
 LevelNameEntryUserInterface *UIManager::getLevelNameEntryUserInterface()
 {
    // Lazily initialize
