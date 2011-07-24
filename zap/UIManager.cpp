@@ -78,7 +78,7 @@ EditorUserInterface *UIManager::getEditorUserInterface()
 {
    // Lazily initialize
    if(!mEditorUserInterface.get())
-      mEditorUserInterface = auto_ptr<EditorUserInterface>(new EditorUserInterface(gEditorGame));
+      mEditorUserInterface = auto_ptr<EditorUserInterface>(new EditorUserInterface(new EditorGame()));
 
    return mEditorUserInterface.get();
 }
