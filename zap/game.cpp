@@ -87,6 +87,8 @@ EditorGame *gEditorGame = NULL;
 
 extern ScreenInfo gScreenInfo;
 
+static Vector<DatabaseObject *> fillVector2;
+
 //-----------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------
 
@@ -1672,17 +1674,17 @@ void ServerGame::idle(U32 timeDelta)
    // Compute it here to save recomputing it for every robot and other method that relies on it.
    computeWorldObjectExtents();
 
-   fillVector.clear();
-   mDatabase->findObjects(fillVector);
+   fillVector2.clear();  // need to have our own local fillVector
+   mDatabase->findObjects(fillVector2);
 
 
    // Visit each game object, handling moves and running its idle method
-   for(S32 i = 0; i < fillVector.size(); i++)
+   for(S32 i = 0; i < fillVector2.size(); i++)
    {
-      if(fillVector[i]->getObjectTypeMask() & DeletedType)
+      if(fillVector2[i]->getObjectTypeMask() & DeletedType)
          continue;
 
-      GameObject *obj = dynamic_cast<GameObject *>(fillVector[i]);
+      GameObject *obj = dynamic_cast<GameObject *>(fillVector2[i]);
       TNLAssert(obj, "Bad cast!");
 
       // Here is where the time gets set for all the various object moves
@@ -1949,15 +1951,15 @@ void ClientGame::idle(U32 timeDelta)
       theMove->time = timeDelta;
       theMove->prepare();           // Pack and unpack the move for consistent rounding errors
 
-      fillVector.clear();
-      mDatabase->findObjects(fillVector);
+      fillVector2.clear();  // need to have our own local fillVector
+      mDatabase->findObjects(fillVector2);
 
-      for(S32 i = 0; i < fillVector.size(); i++)
+      for(S32 i = 0; i < fillVector2.size(); i++)
       {
-         if(fillVector[i]->getObjectTypeMask() & DeletedType)
+         if(fillVector2[i]->getObjectTypeMask() & DeletedType)
             continue;
 
-         GameObject *obj = dynamic_cast<GameObject *>(fillVector[i]);
+         GameObject *obj = dynamic_cast<GameObject *>(fillVector2[i]);
          TNLAssert(obj, "Bad cast!");
 
          if(obj == controlObject)

@@ -413,7 +413,6 @@ S32 countCharInString(const string &source, char search)
 }
 
 
-static const U32 MAX_FILE_NAME_LEN = 128;     // Completely arbitrary
 
 string makeFilenameFromString(const char *levelname)
 {

@@ -787,6 +787,10 @@
 			</File>
 		</Filter>
 		<File
+			RelativePath=".\bitfighter1.rc"
+			>
+		</File>
+		<File
 			RelativePath="..\clipper\clipper.cpp"
 			>
 		</File>
@@ -1035,6 +1039,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\resource2.h"
+			>
+		</File>
+		<File
 			RelativePath=".\ScreenInfo.cpp"
 			>
 		</File>
@@ -1103,6 +1111,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\UIManager.cpp"
+			>
+		</File>
+		<File
 			RelativePath=".\UIMenuItems.cpp"
 			>
 		</File>
@@ -1112,6 +1124,10 @@
 		</File>
 		<File
 			RelativePath=".\UIRebindKeys.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\zap_win_icon.ico"
 			>
 		</File>
 		<File

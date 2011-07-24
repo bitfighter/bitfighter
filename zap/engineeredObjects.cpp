@@ -152,6 +152,7 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(Ship *ship, U32 objectTyp
    Vector<Point> candidateForceFieldGeom;
    ForceField::getGeom(forceFieldStart, forceFieldEnd, candidateForceFieldGeom);
 
+   fillVector.clear();
    ship->getGridDatabase()->findObjects(ForceFieldProjectorType, fillVector, queryRect);
 
    Vector<Point> ffpGeom;     // Geom of any projectors we find
