@@ -1307,7 +1307,7 @@ void Turret::idle(IdleCallPath path)
          Point velocity;
 
          // String handling in C++ is such a mess!!!
-         string killer = string("got blasted by ") + getGame()->getTeam(mTeam)->getName().getString() + " turret";
+         string killer = string("got blasted by ") + getGame()->getTeamName(mTeam).getString() + " turret";
          mKillString = killer.c_str();
 
          createWeaponProjectiles(WeaponType(mWeaponFireType), bestDelta, aimPos, velocity, mWeaponFireType == WeaponBurst ? 45.f : 35.f, this);

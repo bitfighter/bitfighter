@@ -2086,14 +2086,16 @@ extern Color gHostileTeamColor;
 // Generic color function, works in most cases (static method)
 const Color *Game::getBasicTeamColor(const Game *game, S32 teamId)
 {
-   TNLAssert(teamId < game->getTeamCount() || teamId < Item::TEAM_HOSTILE, "Invalid team id!");
+   //TNLAssert(teamId < game->getTeamCount() || teamId < Item::TEAM_HOSTILE, "Invalid team id!");
 
    if(teamId == Item::TEAM_NEUTRAL)
       return &gNeutralTeamColor;
    else if(teamId == Item::TEAM_HOSTILE)
       return &gHostileTeamColor;
+   else if((U32)teamId < (U32)game->getTeamCount())
+      return game->getTeam(teamId)->getColor();
    else
-      return game->getTeam(teamId)->getColor();  
+      return &Colors::magenta;  // a level can make team number out of range, throw in some rarely used color to let user know an object is out of range team number
 }
 
 
