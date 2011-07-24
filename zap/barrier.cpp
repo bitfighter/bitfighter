@@ -96,7 +96,6 @@ void BarrierRec::constructBarriers(Game *theGame)
 }
 
 
-static Vector<DatabaseObject *> fillVector;     // Reusable container for searching gridDatabases
 
 
 ////////////////////////////////////////

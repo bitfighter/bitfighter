@@ -612,7 +612,6 @@ void Game::processDeleteList(U32 timeDelta)
 }
 
 
-static Vector<DatabaseObject *> fillVector;     // Reusable container
 
 
 // Delete all objects of specified type  --> currently only used to remove all walls from the game

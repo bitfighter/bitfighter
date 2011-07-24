@@ -23,6 +23,9 @@
 //
 //------------------------------------------------------------------------------------
 
+#ifndef _LOADOUTZONE_H_6742_
+#define _LOADOUTZONE_H_6742_
+
 #include "gameObject.h"
 #include "gameType.h"
 #include "gameNetInterface.h"
@@ -84,3 +87,4 @@ private:
 };
 
 
+#endif

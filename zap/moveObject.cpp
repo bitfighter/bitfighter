@@ -124,7 +124,6 @@ void MoveObject::updateExtent()
 //    }
 // }
 
-static Vector<DatabaseObject *> fillVector;
 
 // See http://flipcode.com/archives/Theory_Practice-Issue_01_Collision_Detection.shtml --> Example 1  May or may not be relevant
 F32 MoveObject::computeMinSeperationTime(U32 stateIndex, MoveObject *contactShip, Point intendedPos)

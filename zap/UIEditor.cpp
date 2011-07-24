@@ -238,7 +238,6 @@ void EditorUserInterface::populateDock()
 }
 
 
-static Vector<DatabaseObject *> fillVector;     // Reusable container
 
 // Destructor -- unwind things in an orderly fashion
 EditorUserInterface::~EditorUserInterface()

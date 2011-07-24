@@ -77,7 +77,6 @@ extern ServerGame *gServerGame;
 
 
 
-static Vector<DatabaseObject *> fillVector;      // Reusable workspace for writing lists of objects
 
 static EventManager eventManager;                // Singleton event manager, one copy is used by all bots
 
@@ -1805,7 +1804,7 @@ bool Robot::canSeePoint(Point point)
 
    Vector<Point> otherPoints;
    Rect queryRect(thisPoints);
-   Vector<DatabaseObject *> fillVector;
+   fillVector.clear();
    findObjects(CollideableType, fillVector, queryRect);
 
    for(S32 i=0; i < fillVector.size(); i++)

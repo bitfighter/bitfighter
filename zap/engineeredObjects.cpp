@@ -48,7 +48,6 @@ static bool forceFieldEdgesIntersectPoints(const Vector<Point> &points, const Ve
 }
 
 
-static Vector<DatabaseObject *> fillVector;
 
 // Returns true if deploy point is valid, false otherwise.  deployPosition and deployNormal are populated if successful.
 bool EngineerModuleDeployer::findDeployPoint(Ship *ship, Point &deployPosition, Point &deployNormal)
@@ -144,7 +143,6 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(Ship *ship, U32 objectTyp
    DatabaseObject *collObj;
    ForceField::findForceFieldEnd(ship->getGridDatabase(), forceFieldStart, mDeployNormal, forceFieldEnd, &collObj);
 
-   Vector<DatabaseObject *> fillVector;
    bool collision = false;
 
    // Check for collisions with existing projectors

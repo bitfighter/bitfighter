@@ -270,8 +270,6 @@ DatabaseObject *GridDatabase::findObjectLOS(U32 typeMask, U32 stateIndex, bool f
 {
    Rect queryRect(rayStart, rayEnd);
 
-   static Vector<DatabaseObject *> fillVector;
-
    fillVector.clear();
 
    findObjects(typeMask, fillVector, queryRect, typeNumber);
@@ -537,6 +535,7 @@ const Vector<EditorObject *> *EditorObjectDatabase::getObjectList()
    return &mAllEditorObjects;
 }
 
+Vector<DatabaseObject *> fillVector;     // Reusable container for searching gridDatabases
 
 };
 

@@ -187,7 +187,7 @@ void BotNavMeshZone::unpackUpdate(GhostConnection *connection, BitStream *stream
 // Returns ID of zone containing specified point
 U16 BotNavMeshZone::findZoneContaining(const Point &p)
 {
-   Vector<DatabaseObject *> fillVector;
+   fillVector.clear();
    gServerGame->getBotZoneDatabase()->findObjects(0, fillVector, 
                               Rect(p - Point(0.1f,0.1f),p + Point(0.1f,0.1f)), BotNavMeshZoneTypeNumber);  // Slightly extend Rect, it can be on the edge of zone
 

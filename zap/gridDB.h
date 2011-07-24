@@ -166,6 +166,7 @@ public:
    void removeFromDatabase(DatabaseObject *theObject, const Rect &extents);
 };
 
+extern Vector<DatabaseObject *> fillVector;     // Reusable container for searching gridDatabases
 };
 
 #endif
