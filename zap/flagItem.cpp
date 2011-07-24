@@ -27,6 +27,7 @@
 #include "gameItems.h"     // For FlagSpawn def
 #include "gameType.h"
 #include "game.h"
+#include "stringUtils.h"
 
 #include "SDL/SDL_opengl.h"
 

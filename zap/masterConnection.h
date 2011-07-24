@@ -73,10 +73,6 @@ public:
    TNL_DECLARE_RPC_OVERRIDE(m2sClientRequestedArrangedConnection, (U32 requestId, Vector<IPAddress> possibleAddresses,
       ByteBufferPtr connectionParameters));
 
-         // TODO: Delete after 014 -- replaced with identical m2sClientRequestedArrangedConnection above
-         TNL_DECLARE_RPC_OVERRIDE(m2cClientRequestedArrangedConnection, 
-               (U32 requestId, Vector<IPAddress> possibleAddresses, ByteBufferPtr connectionParameters));
-
    TNL_DECLARE_RPC_OVERRIDE(m2cArrangedConnectionAccepted, 
                (U32 requestId, Vector<IPAddress> possibleAddresses, ByteBufferPtr connectionData));
    TNL_DECLARE_RPC_OVERRIDE(m2cArrangedConnectionRejected, (U32 requestId, ByteBufferPtr rejectData));

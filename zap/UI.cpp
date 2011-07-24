@@ -266,7 +266,6 @@ KeyCode UserInterface::convertJoystickToKeyboard(KeyCode keyCode)
 
 
 extern CmdLineSettings gCmdLineSettings;
-extern IniSettings gIniSettings;
 extern ServerGame *gServerGame;
 extern ClientGame *gClientGame1;
 extern ClientGame *gClientGame2;

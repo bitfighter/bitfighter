@@ -34,6 +34,7 @@
 #include "gameObject.h"
 #include "version.h"
 #include "Joystick.h"
+#include "config.h"
 
 #include "SharedConstants.h"    // For AuthenticationStatus enum
 
@@ -159,15 +160,6 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sClientRequestedArrangedCon
    conn->connectArranged(getInterface(), fullPossibleAddresses, nonce, serverNonce, theSharedData, false);
 }
 
-         // TODO: Delete after 014 -- replaced with identical m2sClientRequestedArrangedConnection above
-         // It is safe to say the master will never send this anymore in game version 014 and later.
-         TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cClientRequestedArrangedConnection, 
-                                    (U32 requestId, Vector<IPAddress> possibleAddresses,
-                                     ByteBufferPtr connectionParameters))
-         {
-            logprintf(LogConsumer::LogError, "Master attempts to use outdated protocol. m2sClientRequestedArrangedConnection");
-         }
-
 
 extern ClientInfo gClientInfo;
 
@@ -261,19 +253,19 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sSetAuthenticated, (Vector<
             for(GameConnection *walk2 = GameConnection::getClientList(); walk2; walk2 = walk2->getNextClient())
             {
                if(walk2->getClientName() == name && !walk2->isAuthenticated() )
-					{
+               {
                   //walk2->setClientName(GameConnection::makeUnique(walk2->getClientName().getString()).c_str());
-						updateClientChangedName(walk2, GameConnection::makeUnique(walk2->getClientName().getString()).c_str());
+                  updateClientChangedName(walk2, GameConnection::makeUnique(walk2->getClientName().getString()).c_str());
                           //makeUnique will think the name is in use by self, and rename it.
 
-					}
+               }
             }
-				StringTableEntry oldName = walk->getClientName();
-				walk->setClientName(StringTableEntry(""));       //avoid unique self
-				StringTableEntry uniqueName = GameConnection::makeUnique(name.getString()).c_str();  //new name
-				walk->setClientName(oldName);                   //restore name to properly get it updated to clients.
+            StringTableEntry oldName = walk->getClientName();
+            walk->setClientName(StringTableEntry(""));       //avoid unique self
+            StringTableEntry uniqueName = GameConnection::makeUnique(name.getString()).c_str();  //new name
+            walk->setClientName(oldName);                   //restore name to properly get it updated to clients.
             if(walk->getClientName() != uniqueName)
-					updateClientChangedName(walk, uniqueName);
+               updateClientChangedName(walk, uniqueName);
          }
          else if(status == AuthenticationStatusUnauthenticatedName)
          {  // braces needed

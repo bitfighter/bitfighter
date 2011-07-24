@@ -29,7 +29,6 @@
 #include "timer.h"
 #include "flagItem.h"
 #include "teamInfo.h"
-#include "UIMenuItems.h"   // For MenuItem defs needed in addGameSpecificParameterMenuItems() and overrides
 #include "gameItems.h"     // For AsteroidSpawn and FlagSpawn
 #include "gameStats.h"     // For VersionedGameStats
 #include "statistics.h"

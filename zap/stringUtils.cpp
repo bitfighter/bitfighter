@@ -342,6 +342,22 @@ bool getFilesFromFolder(const string& dir, Vector<string>& files, const string& 
    closedir(dp);
    return true;
 }
+
+
+// Join a directory and filename strings in a platform-specific way
+string joindir(const string &path, const string &filename)
+{
+   // If there is no path, there's nothing to join -- just return filename
+   if(path == "")
+      return filename;
+
+   // Does path already have a trailing delimiter?  If so, we'll use that.
+   if(path[path.length() - 1] == '\\' || path[path.length() - 1] == '/')
+      return path + filename;
+
+   // Otherwise, join with a delimeter.  This works on Win, OS X, and Linux.
+   return path + "/" + filename;
+}
    
 
 // Join without checking for blank parts

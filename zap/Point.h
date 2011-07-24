@@ -26,7 +26,7 @@
 #ifndef _POINT_H_
 #define _POINT_H_
 
-#include "tnlBitStream.h"
+namespace TNL{ class BitStream; } // or #include "tnlBitStream.h"
 #include <string>
 
 // forward declarations

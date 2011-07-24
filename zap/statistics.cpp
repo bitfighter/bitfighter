@@ -30,21 +30,21 @@ namespace Zap
 {
 
 // Constructor
-Statistics::Statistics() : mShots(WeaponCount), mHits(WeaponCount)
+Statistics::Statistics()
 {
-   mShots.resize(WeaponCount);
-   mHits.resize(WeaponCount);
    resetStatistics();
 }
 
-void Statistics::countShot(S32 weaponType)      // --> S32 should be WeaponType
+void Statistics::countShot(WeaponType weaponType)
 {
+   TNLAssert(weaponType < WeaponCount, "Out of range");
    mShots[(S32) weaponType]++;
 }
 
 
-void Statistics::countHit(S32 weaponType)    // --> S32 should be WeaponType
+void Statistics::countHit(WeaponType weaponType)
 {
+   TNLAssert(weaponType < WeaponCount, "Out of range");
    mHits[(S32) weaponType]++;
 }
 
@@ -60,7 +60,7 @@ S32 Statistics::getShots()
 }
 
 
-S32 Statistics::getShots(S32 weaponType)     // --> S32 should be WeaponType
+S32 Statistics::getShots(WeaponType weaponType)
 {
    return mShots[(S32)weaponType];
 }
@@ -68,13 +68,21 @@ S32 Statistics::getShots(S32 weaponType)     // --> S32 should be WeaponType
 
 Vector<U16> Statistics::getShotsVector()
 {
-   return mShots;
+   Vector<U16>(shots);
+   shots.resize(WeaponCount);
+   for(S32 i = 0; i < WeaponCount; i++)
+      shots[i] = mShots[i];
+   return shots;
 }
-   
+
 
 Vector<U16> Statistics::getHitsVector()
 {
-   return mHits;
+   Vector<U16>(hits);
+   hits.resize(WeaponCount);
+   for(S32 i = 0; i < WeaponCount; i++)
+      hits[i] = mHits[i];
+   return hits;
 }
 
 
@@ -89,7 +97,7 @@ S32 Statistics::getHits()
 }
 
 
-S32 Statistics::getHits(S32 weaponType)     // --> S32 should be WeaponType
+S32 Statistics::getHits(WeaponType weaponType)
 {
    return mHits[(S32)weaponType];
 }
@@ -103,7 +111,7 @@ F32 Statistics::getHitRate()
 
 
 // Report hit rate for specified weapon
-F32 Statistics::getHitRate(S32 weaponType)     // --> S32 should be WeaponType
+F32 Statistics::getHitRate(WeaponType weaponType)
 {
    return (F32)mHits[(S32)weaponType] / (F32)mShots[(S32)weaponType];
 }

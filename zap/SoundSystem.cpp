@@ -199,11 +199,8 @@ static ALfloat musicVolume = 0;
 static Vector<string> musicList;
 static S32 currentlyPlayingIndex;
 
-extern IniSettings gIniSettings;
 extern ConfigDirectories gConfigDirs;
 extern bool gDedicatedServer;
-
-extern string joindir(const string &path, const string &filename);
 
 SoundSystem::SoundSystem()
 {

@@ -55,7 +55,6 @@ extern float gDefaultLineWidth;
 extern float gLineWidth3;
 extern float gLineWidth4;
 
-extern IniSettings gIniSettings;    // For linesmoothing settings
 
 
 #define glEnableBlend { if(!gIniSettings.useLineSmoothing) glEnable(GL_BLEND); }

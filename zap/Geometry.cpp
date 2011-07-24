@@ -29,8 +29,9 @@
 #include "Rect.h"
 #include <math.h>
 
-//#include "boost/smart_ptr/shared_ptr.hpp"
-
+// #include "tnlGhostConnection.h"  // appears to not be needed in here, as we are only handling pointer of GhostConnection
+#include "tnlBitStream.h"
+#include "boost/smart_ptr/shared_ptr.hpp"
 
 using namespace TNL;
 

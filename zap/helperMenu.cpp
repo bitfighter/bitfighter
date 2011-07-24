@@ -61,7 +61,6 @@ bool HelperMenu::processKeyCode(KeyCode keyCode)
    return false;
 }
 
-extern IniSettings gIniSettings;
 
 void HelperMenu::drawMenuBorderLine(S32 yPos, const Color &color)
 {

@@ -24,6 +24,7 @@
 //------------------------------------------------------------------------------------
 
 #include "move.h"
+#include <math.h>
 
 namespace Zap
 {
@@ -31,7 +32,6 @@ namespace Zap
 // Constructor
 Move::Move()
 {
-   left = right = up = down = angle = 0;
    fire = false; time = 32;
    for(U32 i = 0; i < (U32)ShipModuleCount; i++)
       module[i] = false;
@@ -44,10 +44,8 @@ bool Move::isEqualMove(Move *prev)
    for(U32 i = 0; i < (U32)ShipModuleCount; i++)
       modsUnchanged = modsUnchanged && (prev->module[i] == module[i]);
 
-   return   prev->left == left &&
-            prev->right == right &&
-            prev->up == up &&
-            prev->down == down &&
+   return   prev->x == x &&
+            prev->y == y &&
             prev->angle == angle &&
             prev->fire == fire &&
             modsUnchanged;
@@ -57,13 +55,14 @@ void Move::pack(BitStream *stream, Move *prev, bool packTime)
 {
    if(!stream->writeFlag(prev && isEqualMove(prev)))
       {
-      stream->writeFloat(left, 4);
-      stream->writeFloat(right, 4);
-      stream->writeFloat(up, 4);
-      stream->writeFloat(down, 4);
+      stream->writeFloat(fabs(x), 5);
+      stream->writeFlag(x < 0);
+      stream->writeFloat(fabs(y), 5);
+      stream->writeFlag(y < 0);
+
       //RDW This needs to be signed.
       //Otherwise, the ship can't face up!
-      S32 writeAngle = S32(radiansToUnit(angle) * 0xFFF);
+      S32 writeAngle = S32(radiansToUnit(angle) * 0x1000);
       //RDW Should this be writeSignedInt?
       //The BitStream header leads me to believe it should.
       stream->writeInt(writeAngle, 12);
@@ -80,10 +79,11 @@ void Move::unpack(BitStream *stream, bool unpackTime)
 {
    if(!stream->readFlag())
    {
-      left = stream->readFloat(4);
-      right = stream->readFloat(4);
-      up = stream->readFloat(4);
-      down = stream->readFloat(4);
+      x = stream->readFloat(5);
+      if(stream->readFlag()) x = -x;
+      y = stream->readFloat(5);
+      if(stream->readFlag()) y = -y;
+
       angle = unitToRadians(stream->readInt(12) / F32(0xFFF));
       fire = stream->readFlag();
       for(U32 i = 0; i < (U32)ShipModuleCount; i++)

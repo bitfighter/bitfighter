@@ -39,7 +39,6 @@ using namespace TNL;
 namespace Zap
 {
 
-extern IniSettings gIniSettings;
 
 namespace FXManager
 {

@@ -271,7 +271,7 @@ bool LevelLoader::loadLevelFromFile(const char *filename)
       }
       cur++;   // Advance cursor past that last \n, now points to first char of second line in chunk
 
-      TNLAssert(cur >= 0 && cur < sizeof(levelChunk), "LevelLoader::loadLevelFromFile, Cur out of range");
+      TNLAssert(cur >= 0 && cur < (S32)sizeof(levelChunk), "LevelLoader::loadLevelFromFile, Cur out of range");
 
       char c = levelChunk[cur];     // Read a char, hold onto it for a second
       levelChunk[cur] = 0;          // Replace it with null
@@ -317,7 +317,6 @@ S32 QSORT_CALLBACK alphaSort(string *a, string *b)
 
 extern ConfigDirectories gConfigDirs;
 extern CmdLineSettings gCmdLineSettings;
-extern IniSettings gIniSettings;
 extern Vector<StringTableEntry> gLevelSkipList;
 
 // Create a list of levels for hosting a game, but does not read the files or do any validation of them

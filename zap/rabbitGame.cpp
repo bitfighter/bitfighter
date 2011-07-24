@@ -30,6 +30,7 @@
 #include "flagItem.h"
 #include "Colors.h"
 #include "game.h"
+#include "UIMenuItems.h"
 
 #include <stdio.h>
 

@@ -129,10 +129,10 @@ using namespace TNL;
 #include "md5wrapper.h"
 #include "version.h"
 #include "Colors.h"
-#include "screenShooter.h"
 #include "Event.h"
 #include "ScreenInfo.h"
 #include "Joystick.h"
+#include "stringUtils.h"
 
 #include "SDL/SDL.h"
 #include "SDL/SDL_opengl.h"
@@ -212,8 +212,6 @@ Address gBindAddress(IPProtocol, Address::Any, 28000);      // Good for now, may
 Vector<StringTableEntry> gLevelSkipList;  // Levels we'll never load, to create a semi-delete function for remote server mgt
 
 ScreenInfo gScreenInfo;
-
-Screenshooter gScreenshooter;    // For taking screen shots
 
 ZapJournal gZapJournal;          // Our main journaling object
 
@@ -554,21 +552,6 @@ void dedicatedServerLoop()
 {
    for(;;)        // Loop forever!
       idle();     // Idly!
-}
-
-
-string joindir(const string &path, const string &filename)
-{
-   // If there is no path, there's nothing to join -- just return filename
-   if(path == "")
-      return filename;
-
-   // Does path already have a trailing delimiter?  If so, we'll use that.
-   if(path[path.length() - 1] == '\\' || path[path.length() - 1] == '/')
-      return path + filename;
-
-   // Otherwise, join with a delimeter.  This works on Win, OS X, and Linux.
-   return path + "/" + filename;
 }
 
 ////////////////////////////////////////

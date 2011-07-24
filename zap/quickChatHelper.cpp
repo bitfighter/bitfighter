@@ -49,7 +49,6 @@ QuickChatHelper::QuickChatHelper()
 }
 
 extern CmdLineSettings gCmdLineSettings;
-extern IniSettings gIniSettings;
 extern Color gGlobalChatColor;
 extern Color gTeamChatColor;
 extern Color gErrorMessageTextColor;

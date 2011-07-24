@@ -30,6 +30,7 @@
 #include "Colors.h"
 #include "game.h"
 #include "JoystickRender.h"
+#include "config.h"
 
 #include "SDL/SDL_opengl.h"
 
@@ -103,7 +104,6 @@ void LoadoutHelper::onMenuShow()
 }
 
 
-extern IniSettings gIniSettings;
 
 // First, we work with modules, then with weapons
 #define getList(ct)  ((ct < ShipModuleCount) ? &gLoadoutModules : &gLoadoutWeapons)

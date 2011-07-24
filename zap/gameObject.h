@@ -30,11 +30,11 @@
 #include "gridDB.h"        // For DatabaseObject
 #include "tnlNetObject.h"
 
-#include "luaObject.h"     // For LuaObject def and returnInt method
-#include "lua.h"           // For push prototype
 #include "Geometry.h"      // For GeomType enum
 
 #include "boost/smart_ptr/shared_ptr.hpp"
+
+struct lua_State;  // or #include "lua.h"
 
 #ifdef TNL_OS_WIN32 
 #  pragma warning( disable : 4250)
@@ -356,8 +356,8 @@ public:
 
    void setScopeAlways();
 
-   S32 getTeamIndx(lua_State *L) { return LuaObject::returnInt(L, mTeam + 1); }             // Return item team to Lua
-   virtual void push(lua_State *L) { TNLAssert(false, "Unimplemented push function!"); }    // Lua-aware classes will implement this
+   S32 getTeamIndx(lua_State *L);            // Return item team to Lua
+   virtual void push(lua_State *L);    // Lua-aware classes will implement this
 };
 
 

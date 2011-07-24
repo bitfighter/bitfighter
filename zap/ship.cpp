@@ -212,7 +212,7 @@ void Ship::processMove(U32 stateIndex)
                 (hasModule(ModuleArmor) ? ARMOR_SPEED_PENALTY_FACT : 1);
 
    F32 time = mCurrentMove.time * 0.001;
-   Point requestVel(mCurrentMove.right - mCurrentMove.left, mCurrentMove.down - mCurrentMove.up);
+   Point requestVel(mCurrentMove.x, mCurrentMove.y);
 
    const S32 MAX_CONTROLLABLE_SPEED = 1000;     // 1000 is completely arbitrary, but it seems to work well...
    if(mMoveState[stateIndex].vel.len() > MAX_CONTROLLABLE_SPEED)     
@@ -353,7 +353,6 @@ void Ship::selectWeapon()
 
 
 extern CmdLineSettings gCmdLineSettings;
-extern IniSettings gIniSettings;
 
 void Ship::selectWeapon(U32 weaponIdx)
 {
@@ -630,9 +629,7 @@ void Ship::processEnergy()
 
 
    // No boost if we're not moving
-    if(mModuleActive[ModuleBoost] &&
-       mCurrentMove.up == 0 && mCurrentMove.down == 0 &&
-       mCurrentMove.left == 0 && mCurrentMove.right == 0)
+   if(mModuleActive[ModuleBoost] && mCurrentMove.x == 0 && mCurrentMove.y == 0)
    {
       mModuleActive[ModuleBoost] = false;
    }
@@ -1463,7 +1460,7 @@ void Ship::emitMovementSparks()
       return;
 
    // Finally, do some particles
-   Point velDir(mCurrentMove.right - mCurrentMove.left, mCurrentMove.down - mCurrentMove.up);
+   Point velDir(mCurrentMove.x, mCurrentMove.y);
    F32 len = velDir.len();
 
    if(len > 0)
@@ -1507,7 +1504,6 @@ void Ship::emitMovementSparks()
 
 
 extern bool gShowAimVector;
-extern IniSettings gIniSettings;
 
 void Ship::render(S32 layerIndex)
 {
@@ -1661,7 +1657,7 @@ void Ship::render(S32 layerIndex)
 
 void Ship::calcThrustComponents(F32 *thrusts)
 {
-   Point velDir(mCurrentMove.right - mCurrentMove.left, mCurrentMove.down - mCurrentMove.up);
+   Point velDir(mCurrentMove.x, mCurrentMove.y);
    F32 len = velDir.len();
 
    for(U32 i = 0; i < 4; i++)

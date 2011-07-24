@@ -30,6 +30,8 @@
 #include "engineeredObjects.h"      // For forcefieldprojector def
 #include "gameType.h"               // For BarrierRec struct
 #include "game.h"
+#include "config.h"
+#include "UI.h"  // for glColor(Color)
 
 #include "SDL/SDL_opengl.h"
 

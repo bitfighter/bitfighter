@@ -34,6 +34,8 @@
 
 #include <math.h>
 
+#include "luaObject.h"     // For LuaObject def and returnInt method
+#include "lua.h"           // For push prototype
 
 using namespace TNL;
 
@@ -496,6 +498,14 @@ bool GameObject::onGhostAdd(GhostConnection *theConnection)
    return true;
 }
 
+S32 GameObject::getTeamIndx(lua_State *L)  // Return item team to Lua
+{
+   return LuaObject::returnInt(L, mTeam + 1);
+}
+void GameObject::push(lua_State *L) // Lua-aware classes will implement this
+{
+   TNLAssert(false, "Unimplemented push function!");
+}
 
 };
 

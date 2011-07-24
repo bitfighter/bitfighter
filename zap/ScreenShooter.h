@@ -23,37 +23,31 @@
 //
 //------------------------------------------------------------------------------------
 
-#ifndef _UIERRORMSG_H_
-#define _UIERRORMSG_H_
+#ifndef SCREENSHOOTER_H_
+#define SCREENSHOOTER_H_
 
-#include "UI.h"
-#include "game.h"
+#include "tnlTypes.h"
+
+#include "png.h"
 
 namespace Zap
 {
 
-class ErrorMessageUserInterface : public UserInterface
+class ScreenShooter
 {
+private:
+   static const TNL::S32 BitDepth = 8;
+   static const TNL::S32 BytesPerPixel = 3;  // 3 bytes = 24 bits
+
+   static bool writePNG(const char *file_name, png_bytep *rows,
+         TNL::S32 width, TNL::S32 height, TNL::S32 colorType, TNL::S32 bitDepth);
+
 public:
-   ErrorMessageUserInterface(Game *game);      // Constructor
-   const static S32 MAX_LINES = 9;
-   const char *mTitle;
-   const char *mInstr;
-   const char *mMessage[MAX_LINES];
-   void onActivate();
-   void setMessage (S32 id, const char *message);
-   void setTitle(const char *message);
-   void reset();
-   void setInstr(const char *message);
-   void idle(U32 t) { }
-   void render();
-   void quit();
-   void onKeyDown(KeyCode keyCode, char ascii);
+   ScreenShooter();
+   virtual ~ScreenShooter();
+
+   static void saveScreenshot();
 };
 
-
-}
-
-#endif
-
-
+} /* namespace Zap */
+#endif /* SCREENSHOOTER_H_ */

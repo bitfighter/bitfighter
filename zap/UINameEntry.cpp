@@ -131,7 +131,6 @@ void TextEntryUserInterface::setString(string str)
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-extern IniSettings gIniSettings;
 
 void LevelNameEntryUserInterface::onEscape()
 {

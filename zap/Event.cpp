@@ -12,7 +12,7 @@
 #include "UIMenus.h"
 #include "UIDiagnostics.h"
 #include "IniFile.h"
-#include "screenShooter.h"
+#include "ScreenShooter.h"
 #include "ScreenInfo.h"
 #include "Joystick.h"
 
@@ -78,9 +78,9 @@ void Event::updateJoyAxesDirections(U32 axisMask, S16 value)
    // Also, normalize the input value to a floating point scale of 0 to 1
    F32 normalValue;
    if (value < -Joystick::SensitivityThreshold)
-      normalValue = fabs((F32)(value + Joystick::SensitivityThreshold)/(F32)(S16_MAX - Joystick::SensitivityThreshold));
+      normalValue = (F32)(-value - Joystick::SensitivityThreshold)/(F32)(S16_MAX - Joystick::SensitivityThreshold);
    else if (value > Joystick::SensitivityThreshold)
-      normalValue = fabs((F32)(value - Joystick::SensitivityThreshold)/(F32)(S16_MAX - Joystick::SensitivityThreshold));
+      normalValue = (F32)(value - Joystick::SensitivityThreshold)/(F32)(S16_MAX - Joystick::SensitivityThreshold);
    else
       normalValue = 0.0f;
 
@@ -95,11 +95,13 @@ void Event::updateJoyAxesDirections(U32 axisMask, S16 value)
    // Set the mask if it is above the digital threshold
    bool keyState = false;
    U32 currentKeyCodeMask = 0;
-   if (normalValue < -0.5 || normalValue > 0.5)
-   {
-      keyState = true;
-      currentKeyCodeMask |= detectedAxesDirectionMask;
-   }
+
+   for (S32 i = 0; i < MaxAxesDirections; i++)
+      if (fabs(Joystick::JoystickInputData[i].value) > 0.5)
+      {
+         keyState = true;
+         currentKeyCodeMask |= (1 << i);
+      }
 
 
    // Only change KeyCode key state if the axis has changed.  Time to be tricky..
@@ -109,7 +111,7 @@ void Event::updateJoyAxesDirections(U32 axisMask, S16 value)
    for (S32 i = 0; i < MaxAxesDirections; i++)
    {
       // If the current axes direction is set in the keyCodeDownDeltaMask, set the key down
-      if (Joystick::JoystickInputData[i].axesDirection & keyCodeDownDeltaMask)
+      if (Joystick::JoystickInputData[i].axesMask & keyCodeDownDeltaMask)
       {
          setKeyState(Joystick::JoystickInputData[i].keyCode, true);
 
@@ -120,7 +122,7 @@ void Event::updateJoyAxesDirections(U32 axisMask, S16 value)
       }
 
       // If the current axes direction is set in the keyCodeUpDeltaMask, set the key up
-      if (Joystick::JoystickInputData[i].axesDirection & keyCodeUpDeltaMask)
+      if (Joystick::JoystickInputData[i].axesMask & keyCodeUpDeltaMask)
       {
          setKeyState(Joystick::JoystickInputData[i].keyCode, false);
 
@@ -131,10 +133,7 @@ void Event::updateJoyAxesDirections(U32 axisMask, S16 value)
 
 
    // Finally alter the global axes KeyCode mask to reflect the current keyState
-   if (keyState)     // Set the bit to 1 in the global mask
-      Joystick::AxesKeyCodeMask |= currentKeyCodeMask;
-   else              // Set the bit to 0 in the global mask
-      Joystick::AxesKeyCodeMask &= ~currentKeyCodeMask;
+      Joystick::AxesKeyCodeMask = currentKeyCodeMask;
 }
 
 
@@ -280,7 +279,7 @@ void Event::onKeyDown(SDLKey key, SDLMod mod, U16 unicode)
 
    // CTRL + Q --> screenshot!
    else if(key == SDLK_q && (mod & KMOD_CTRL))
-      gScreenshooter.phase = 1;
+      ScreenShooter::saveScreenshot();
 
    // The rest
    else
@@ -354,6 +353,9 @@ void Event::onMouseButtonUp(S32 x, S32 y, KeyCode keyCode)
 
 void Event::onJoyAxis(U8 whichJoystick, U8 axis, S16 value)
 {
+   if(axis < Joystick::rawAxisCount)
+      Joystick::rawAxis[axis] = (F32)value / (F32)S16_MAX;
+
    // If we are using a predefined controller, get the appropriate axis
    if (gIniSettings.joystickType < ControllerTypeCount)
    {

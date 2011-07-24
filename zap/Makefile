@@ -28,7 +28,8 @@ EXEFILE=bitfighter
 SFX_LFLAGS=-lopenal -lspeex -lvorbis
 
 # graphics linker flags
-GFX_LFLAGS=-lSDL -lGL
+PNG_LFLAGS:=$(shell pkg-config --libs libpng)
+GFX_LFLAGS=-lSDL -lGL $(PNG_LFLAGS)
 
 # Other needed linker flags
 LFLAGS=-lstdc++ -lm -ldl
@@ -114,7 +115,7 @@ OBJECTS_ZAP=\
    retrieveGame.o\
    robot.o\
    ScreenInfo.o\
-   screenShooter.o\
+   ScreenShooter.o\
    SoundSystem.o\
    SoundEffect.o\
    ship.o\

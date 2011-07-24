@@ -605,7 +605,6 @@ void GameUserInterface::renderProgressBar()
 
 
 extern CmdLineSettings gCmdLineSettings;
-extern IniSettings gIniSettings;
 
 // Draw the reticle (i.e. the mouse cursor) if we are using keyboard/mouse
 void GameUserInterface::renderReticle()
@@ -1244,7 +1243,6 @@ void GameUserInterface::changeServerNameDescr(GameConnection *gc, GameConnection
    gc->changeParam(allWords.c_str(), type);
 }
 
-extern CIniFile gINI;
 extern md5wrapper md5;
 
 void GameUserInterface::changePassword(GameConnection *gc, GameConnection::ParamType type, const Vector<string> &words, bool required)
@@ -2079,10 +2077,8 @@ Move *GameUserInterface::getCurrentMove()
    if((mCurrentMode != ChatMode) && !gDisableShipKeyboardInput && !OGLCONSOLE_GetVisibility())
    {
       InputMode inputMode = gIniSettings.inputMode;
-      mCurrentMove.up = !mUpDisabled && getKeyState(keyUP[inputMode]) ? 1 : 0;
-      mCurrentMove.down = !mDownDisabled && getKeyState(keyDOWN[inputMode]) ? 1 : 0;
-      mCurrentMove.left = !mLeftDisabled && getKeyState(keyLEFT[inputMode]) ? 1 : 0;
-      mCurrentMove.right = !mRightDisabled && getKeyState(keyRIGHT[inputMode]) ? 1 : 0;
+      mCurrentMove.x = (!mRightDisabled && getKeyState(keyRIGHT[inputMode]) ? 1 : 0) - (!mLeftDisabled && getKeyState(keyLEFT[inputMode]) ? 1 : 0);
+      mCurrentMove.y = (!mDownDisabled && getKeyState(keyDOWN[inputMode]) ? 1 : 0) - (!mUpDisabled && getKeyState(keyUP[inputMode]) ? 1 : 0);
 
       mCurrentMove.fire = mFiring;
 
@@ -2091,10 +2087,8 @@ Move *GameUserInterface::getCurrentMove()
    }
    else
    {
-      mCurrentMove.up = 0;
-      mCurrentMove.down = 0;
-      mCurrentMove.left = 0;
-      mCurrentMove.right = 0;
+      mCurrentMove.x = 0;
+      mCurrentMove.y = 0;
 
       mCurrentMove.fire = mFiring;     // should be false?
 
@@ -2109,40 +2103,22 @@ Move *GameUserInterface::getCurrentMove()
    {
       mTransformedMove = mCurrentMove;
 
-      Point moveDir(mCurrentMove.right - mCurrentMove.left,
-                    mCurrentMove.up - mCurrentMove.down);
+      Point moveDir(mCurrentMove.x,
+                    mCurrentMove.y);
 
       Point angleDir(cos(mCurrentMove.angle), sin(mCurrentMove.angle));
 
       Point rightAngleDir(-angleDir.y, angleDir.x);
       Point newMoveDir = angleDir * moveDir.y + rightAngleDir * moveDir.x;
 
-      if(newMoveDir.x > 0)
-      {
-         mTransformedMove.right = newMoveDir.x;
-         mTransformedMove.left = 0;
-      }
-      else
-      {
-         mTransformedMove.right = 0;
-         mTransformedMove.left = -newMoveDir.x;
-      }
-      if(newMoveDir.y > 0)
-      {
-         mTransformedMove.down = newMoveDir.y;
-         mTransformedMove.up = 0;
-      }
-      else
-      {
-         mTransformedMove.down = 0;
-         mTransformedMove.up = -newMoveDir.y;
-      }
+      mTransformedMove.x = newMoveDir.x;
+      mTransformedMove.y = newMoveDir.y;
 
       // Sanity checks
-      mTransformedMove.right = min(1.0f, mTransformedMove.right);
-      mTransformedMove.left  = min(1.0f, mTransformedMove.left);
-      mTransformedMove.up    = min(1.0f, mTransformedMove.up);
-      mTransformedMove.down  = min(1.0f, mTransformedMove.down);
+      mTransformedMove.x = min(1.0f, mTransformedMove.x);
+      mTransformedMove.y = min(1.0f, mTransformedMove.y);
+      mTransformedMove.x = max(-1.0f, mTransformedMove.x);
+      mTransformedMove.y = max(-1.0f, mTransformedMove.y);
 
       return &mTransformedMove;
    }

@@ -43,6 +43,7 @@ TNL::Vector<const char *> Joystick::DetectedJoystickNameList;
 TNL::Vector<JoystickInfo> Joystick::PredefinedJoystickList;
 
 TNL::U32 Joystick::ButtonMask = 0;
+TNL::F32 Joystick::rawAxis[Joystick::rawAxisCount];
 TNL::S16 Joystick::SensitivityThreshold = 3200;  // out of 32767
 TNL::S32 Joystick::UseJoystickNumber = 0;
 TNL::U32 Joystick::AxesKeyCodeMask = 0;
@@ -152,12 +153,12 @@ void Joystick::populatePredefinedJoystickList()
    // Unfortunately, Linux and Windows map joystick axes differently
    // XXX: are they still different with SDL?
    //                                               Wingmn  DualAct  P880  RumbPad   PS2   PS2-Conv  PS3     XBox  XBoxOnXBox
-#ifdef TNL_OS_LINUX
-   //                      ? = untested                ?     works     ?       ?       ?       ?       ?       ?       ?
+//#ifdef TNL_OS_LINUX
+   //               ? = untested                ?     works     ?       ?       ?       ?       ?       ?       ?
    U32 shootAxes[ControllerTypeCount][2] = { {5, 6}, {2, 3}, {5, 2}, {5, 2}, {2, 5}, {5, 2}, {2, 3}, {3, 4}, {3, 4} };
-#else
-   U32 shootAxes[ControllerTypeCount][2] = { {5, 6}, {2, 5}, {5, 2}, {5, 2}, {2, 5}, {5, 2}, {2, 3}, {3, 4}, {3, 4} };
-#endif
+//#else
+//   U32 shootAxes[ControllerTypeCount][2] = { {5, 6}, {2, 5}, {5, 2}, {5, 2}, {2, 5}, {5, 2}, {2, 3}, {3, 4}, {3, 4} };
+//#endif
 
    U32 moveAxes[ControllerTypeCount][2] = { {0, 1}, {0, 1}, {0, 1}, {0, 1}, {0, 1}, {0, 1}, {0, 1}, {0, 1}, {0, 1} };
 
@@ -355,7 +356,6 @@ ControllerTypeType Joystick::autodetectJoystickType()
 }
 
 
-extern IniSettings gIniSettings;
 
 U8 Joystick::remapJoystickButton(U8 button)
 {

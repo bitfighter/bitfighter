@@ -31,7 +31,7 @@
 #include "shipItems.h"           // For EngineerBuildObjects enum
 #include "dataConnection.h"      // For DataSendable interface
 #include "statistics.h"
-#include "SoundSystem.h"
+#include "SoundSystem.h"           // for NumSFXBuffers
 
 #include "tnlNetConnection.h"
 #include "timer.h"

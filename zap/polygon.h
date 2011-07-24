@@ -28,6 +28,7 @@
 
 #include "gameObject.h"
 #include "EditorObject.h"     // For EditorPolygon parentage
+#include "luaObject.h"
 
 namespace Zap
 {

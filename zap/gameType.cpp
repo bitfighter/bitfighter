@@ -629,7 +629,6 @@ void GameType::idle(GameObject::IdleCallPath path)
 //}
 
 
-extern IniSettings gIniSettings;
 
 void GameType::renderInterfaceOverlay(bool scoreboardVisible)
 {

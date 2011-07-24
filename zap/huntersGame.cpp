@@ -35,6 +35,7 @@
 #include "Colors.h"
 #include "ScreenInfo.h"
 #include "game.h"
+#include "UIMenuItems.h"
 
 #include "SDL/SDL_opengl.h"
 

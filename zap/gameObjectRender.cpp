@@ -48,7 +48,6 @@
 namespace Zap
 {
 
-extern IniSettings gIniSettings;    // For linesmoothing settings
 
 const float gShapeLineWidth = 2.0f;
 
