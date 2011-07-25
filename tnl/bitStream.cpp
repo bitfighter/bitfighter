@@ -257,6 +257,7 @@ bool BitStream::read(ByteBuffer *theBuffer)
 
 U32 BitStream::readInt(U8 bitCount)
 {
+   TNLAssert(bitCount <= 32, "bitCount must be less then 32, for 64 bit, use readInt64");
    U32 ret = 0;
    readBits(bitCount, &ret);
    ret = convertLEndianToHost(ret);
@@ -270,8 +271,30 @@ U32 BitStream::readInt(U8 bitCount)
    return ret;
 }
 
+U64 BitStream::readInt64(U8 bitCount)
+{
+   U64 ret = 0;
+   readBits(bitCount, &ret);
+   ret = convertLEndianToHost(ret);
+
+   // Clear bits that we didn't read.
+   if(bitCount == 64)
+      return ret;
+   else
+      ret &= (U64(1) << bitCount) - 1;
+
+   return ret;
+}
+
 
 void BitStream::writeInt(U32 val, U8 bitCount)
+{
+   TNLAssert(bitCount <= 32, "bitCount must be less then 32, for 64 bit, use writeInt64");
+   val = convertHostToLEndian(val);
+   writeBits(bitCount, &val);
+}
+
+void BitStream::writeInt64(U64 val, U8 bitCount)
 {
    val = convertHostToLEndian(val);
    writeBits(bitCount, &val);

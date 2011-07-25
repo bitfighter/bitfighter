@@ -26,7 +26,7 @@
 #ifndef _SHIPITEMS_H_
 #define _SHIPITEMS_H_
 
-#include "../tnl/tnlTypes.h"
+#include "../tnl/tnlAssert.h"
 
 namespace Zap
 {

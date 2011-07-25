@@ -30,6 +30,10 @@
 #ifndef _TNL_TYPES_H_
 #include "tnlTypes.h"
 #endif
+#if !defined(_TNL_PLATFORM_H_) && defined(TNL_ENABLE_ASSERTS)
+#include "tnlPlatform.h"
+#endif
+
 
 // More than you ever wanted to know about asserts: http://cnicholson.net/2009/02/stupid-c-tricks-adventures-in-assert/
 

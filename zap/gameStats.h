@@ -27,6 +27,7 @@
 #define _GAMESTATS_H_
 
 #include "gameWeapons.h"
+#include "shipItems.h"
 
 #include "tnlTypes.h"
 #include "tnlVector.h"
@@ -44,8 +45,14 @@ struct WeaponStats
    WeaponType weaponType;
    U16 shots;
    U16 hits;
+   U16 hitBy;
 };
 
+struct ModuleStats 
+{
+   ShipModule shipModule;
+   U16 seconds;
+};
 
 struct PlayerStats
 {
@@ -55,16 +62,18 @@ struct PlayerStats
    bool isRobot;
    string gameResult;
    S32 points;
-   S32 kills;
-   S32 deaths;
-   S32 suicides;
-   S32 switchedTeamCount;
+   U16 kills;
+   U16 deaths;
+   U16 suicides;
+   U8 switchedTeamCount;
    Vector<WeaponStats> weaponStats;
+   Vector<ModuleStats> moduleStats;
 
    bool isAdmin;
-   bool isLevelChanger; // might not be needed...
-
+   bool isLevelChanger;
    bool isHosting;
+
+   U16 fratricides;  // count of killing your team
 };
 
 
@@ -100,7 +109,7 @@ struct GameStats
 
 struct VersionedGameStats
 {
-   static const U8 CURRENT_VERSION = 0;
+   static const U8 CURRENT_VERSION = 1;
 
    U8 version;
    bool valid;
@@ -120,14 +129,16 @@ extern void logGameStats(VersionedGameStats *stats);
 
 namespace Types
 {
-   extern void read(TNL::BitStream &s, Zap::WeaponStats *val);
-   extern void write(TNL::BitStream &s, Zap::WeaponStats &val);
-   extern void read(TNL::BitStream &s, Zap::PlayerStats *val);
-   extern void write(TNL::BitStream &s, Zap::PlayerStats &val);
-   extern void read(TNL::BitStream &s, Zap::TeamStats *val);
-   extern void write(TNL::BitStream &s, Zap::TeamStats &val);
-   extern void read(TNL::BitStream &s, Zap::GameStats *val);
-   extern void write(TNL::BitStream &s, Zap::GameStats &val);
+   extern void read(TNL::BitStream &s, Zap::WeaponStats *val, U8 version);
+   extern void write(TNL::BitStream &s, Zap::WeaponStats &val, U8 version);
+   extern void read(TNL::BitStream &s, Zap::ModuleStats *val, U8 version);
+   extern void write(TNL::BitStream &s, Zap::ModuleStats &val, U8 version);
+   extern void read(TNL::BitStream &s, Zap::PlayerStats *val, U8 version);
+   extern void write(TNL::BitStream &s, Zap::PlayerStats &val, U8 version);
+   extern void read(TNL::BitStream &s, Zap::TeamStats *val, U8 version);
+   extern void write(TNL::BitStream &s, Zap::TeamStats &val, U8 version);
+   extern void read(TNL::BitStream &s, Zap::GameStats *val, U8 version);
+   extern void write(TNL::BitStream &s, Zap::GameStats &val, U8 version);
    extern void read(TNL::BitStream &s, Zap::VersionedGameStats *val);
    extern void write(TNL::BitStream &s, Zap::VersionedGameStats &val);
 };

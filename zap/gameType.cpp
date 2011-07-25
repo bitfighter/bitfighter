@@ -218,21 +218,21 @@ boost::shared_ptr<MenuItem> GameType::getMenuItem(Game *game, const char *key)
       return boost::shared_ptr<MenuItem>(item);
    }
    else if(!strcmp(key, "Level Descr"))
-   	return boost::shared_ptr<MenuItem>(new EditableMenuItem(game,
+      return boost::shared_ptr<MenuItem>(new EditableMenuItem(game,
                                                               "Level Descr:", 
                                                               mLevelDescription.getString(), 
                                                               "", 
                                                               "A brief description of the level",                     
                                                               MAX_GAME_DESCR_LEN));
    else if(!strcmp(key, "Level Credits"))
-   	return boost::shared_ptr<MenuItem>(new EditableMenuItem(game,
+      return boost::shared_ptr<MenuItem>(new EditableMenuItem(game,
                                                               "Level By:",       
                                                               mLevelCredits.getString(), 
                                                               "", 
                                                               "Who created this level",                                  
                                                               MAX_GAME_DESCR_LEN));
    else if(!strcmp(key, "Levelgen Script"))
-   	return boost::shared_ptr<MenuItem>(new EditableMenuItem(game,
+      return boost::shared_ptr<MenuItem>(new EditableMenuItem(game,
                                                               "Levelgen Script:", 
                                                               getScriptLine(), 
                                                               "<None>", 
@@ -253,7 +253,7 @@ boost::shared_ptr<MenuItem> GameType::getMenuItem(Game *game, const char *key)
                                                              "", 
                                                              "\"Magnification factor.\" Larger values lead to larger levels.  Default is 255."));
    else if(!strcmp(key, "Min Players"))
-   	return boost::shared_ptr<MenuItem>(new CounterMenuItem(game,
+      return boost::shared_ptr<MenuItem>(new CounterMenuItem(game,
                                                              "Min Players:",       
                                                              mMinRecPlayers,     // value
                                                              1,                  // increment
@@ -263,7 +263,7 @@ boost::shared_ptr<MenuItem> GameType::getMenuItem(Game *game, const char *key)
                                                              "N/A", 
                                                              "Min. players you would recommend for this level (to help server select the next level)"));
    else if(!strcmp(key, "Max Players"))
-   	return boost::shared_ptr<MenuItem>(new CounterMenuItem(game,
+      return boost::shared_ptr<MenuItem>(new CounterMenuItem(game,
                                                              "Max Players:",       
                                                              mMaxRecPlayers,     // value
                                                              1,                  // increment
@@ -273,7 +273,7 @@ boost::shared_ptr<MenuItem> GameType::getMenuItem(Game *game, const char *key)
                                                              "N/A",
                                                              "Max. players you would recommend for this level (to help server select the next level)"));
    else if(!strcmp(key, "Allow Engr"))
-   	return boost::shared_ptr<MenuItem>(new YesNoMenuItem(game,
+      return boost::shared_ptr<MenuItem>(new YesNoMenuItem(game,
                                                            "Allow Engineer Module:",       
                                                            mEngineerEnabled,
                                                            NULL,
@@ -797,23 +797,32 @@ VersionedGameStats GameType::getGameStats()
          playerStats->kills          = statistics->getKills();
          playerStats->deaths         = statistics->getDeaths();
          playerStats->suicides       = statistics->getSuicides();
+         playerStats->fratricides    = statistics->getFratricides();
          playerStats->switchedTeamCount = mClientList[j]->clientConnection->switchedTeamCount;
          playerStats->isAdmin        = mClientList[j]->clientConnection->isAdmin();
          playerStats->isLevelChanger = mClientList[j]->clientConnection->isLevelChanger();
-         playerStats->isAuthenticated = mClientList[j]->clientConnection->isAuthenticated();  // not sent, but may be used for logging stats
+         playerStats->isAuthenticated = mClientList[j]->clientConnection->isAuthenticated();
+         playerStats->isHosting     = mClientList[j]->clientConnection->isLocalConnection();
 
          Vector<U16> shots = statistics->getShotsVector();
          Vector<U16> hits = statistics->getHitsVector();
          for(S32 k = 0; k < shots.size(); k++)
          {
-            if(shots[k] != 0 || hits[k] != 0)
-            {
-               WeaponStats weaponStats;
-               weaponStats.weaponType = WeaponType(k);
-               weaponStats.shots = shots[k];
-               weaponStats.hits = hits[k];
+            WeaponStats weaponStats;
+            weaponStats.weaponType = WeaponType(k);
+            weaponStats.shots = shots[k];
+            weaponStats.hits = hits[k];
+            weaponStats.hitBy = statistics->getHitBy(WeaponType(k));
+            if(weaponStats.shots != 0 || weaponStats.hits != 0 || weaponStats.hitBy != 0)
                playerStats->weaponStats.push_back(weaponStats);
-            }
+         }
+         for(S32 k = 0; k < ; k++)
+         {
+            ModuleStats moduleStats;
+            moduleStats.shipModule = ShipModule(k);
+            moduleStats.seconds = statistics->getModuleUsed(k) / 1000.f;
+            if(moduleStats.seconds != 0)
+               playerStats->moduleStats.push_back(moduleStats);
          }
          gameStats->playerCount++;
       }

@@ -23,8 +23,8 @@
 //
 //------------------------------------------------------------------------------------
 
-//#include "config.h"
 #include "gameStats.h"
+//#include "config.h"
 #include "../master/database.h"
 #include "gameWeapons.h"         // For WeaponType enum
 
@@ -39,6 +39,25 @@
 
 using namespace TNL;
 using namespace Zap;
+
+
+
+U32 calculateChecksum(BitStream &s, U32 length, U32 bitStart = 0)
+{
+   U64 sum = length;
+   U32 prevPos = s.getBitPosition();
+   s.setBitPosition(bitStart);
+   while(s.getBitPosition() < bitStart + length - 64)
+   {
+      U64 n;
+      s.read(&n);
+      sum += n;
+   }
+   sum += s.readInt64(((length - 1) & 63) + 1);
+   s.setBitPosition(prevPos);
+   return U32(sum >> 32) + U32(sum);
+}
+
 
 namespace Zap
 
@@ -138,23 +157,42 @@ namespace Types
    U8 VersionedGameStats_readingVersion;
 
 
-   void read(TNL::BitStream &s, Zap::WeaponStats *val)
+   void read(TNL::BitStream &s, Zap::WeaponStats *val, U8 version)
    {
       val->weaponType = WeaponType(readU8(s));
       val->shots = readU16(s);
       val->hits = readU16(s);
+      if(version >= 1)
+         val->hitBy = readU16(s);
+      else
+         val->hitBy = 0;
    }
 
 
-   void write(TNL::BitStream &s, Zap::WeaponStats &val)
+   void write(TNL::BitStream &s, Zap::WeaponStats &val, U8 version)
    {
       write(s, U8(val.weaponType));
       write(s, U16(val.shots));
       write(s, U16(val.hits));
+      if(version >= 1)
+         write(s, U16(val.hitBy));
+   }
+
+   void read(TNL::BitStream &s, Zap::ModuleStats *val, U8 version)
+   {
+      val->weaponType = ShipModule(readU8(s));
+      val->shots = readU16(s);
    }
 
 
-   void read(TNL::BitStream &s, Zap::PlayerStats *val)
+   void write(TNL::BitStream &s, Zap::ModuleStats &val, U8 version)
+   {
+      write(s, U8(val.ShipModule));
+      write(s, U16(val.));
+   }
+
+
+   void read(TNL::BitStream &s, Zap::PlayerStats *val, U8 version)
    {
       val->name = readString(s);
       val->points = readS32(s);
@@ -168,11 +206,24 @@ namespace Types
       val->isLevelChanger = s.readFlag();
       val->isAuthenticated = false; //s.readFlag();  // we may set this by comparing Nonce id.
       val->nonce.read(&s);
-      read(s, &val->weaponStats);
+      read(s, &val->weaponStats, version);
+      if(version >= 1)
+      {
+         val->isAuthenticated = s.readFlag();
+         val->isHosting = s.readFlag();
+         val->fratricides = readU16(s);
+         read(s, &val->moduleStats, version);
+      }
+      else
+      {
+         val->isAuthenticated = false;
+         val->isHosting = false;
+         val->fratricides = 0;
+      }
    }
 
 
-   void write(TNL::BitStream &s, Zap::PlayerStats &val)
+   void write(TNL::BitStream &s, Zap::PlayerStats &val, U8 version)
    {
       writeString(s, val.name);
       write(s, S32(val.points));
@@ -184,12 +235,18 @@ namespace Types
       s.writeFlag(val.isAdmin);
       s.writeFlag(val.isLevelChanger);
       val.nonce.write(&s);
-
-      write(s, val.weaponStats);
+      write(s, val.weaponStats, version);
+      if(version >= 1)
+      {
+         s.writeFlag(val.isAuthenticated);
+         s.writeFlag(val.isHosting);
+         write(s, U16(val.fratricides));
+         write(s, val.moduleStats, version);
+      }
    }
 
 
-   void read(TNL::BitStream &s, Zap::TeamStats *val)
+   void read(TNL::BitStream &s, Zap::TeamStats *val, U8 version)
    {
       val->name = readString(s);
       val->score = readS32(s);
@@ -197,20 +254,20 @@ namespace Types
       val->intColor = s.readInt(24); // 24 bit color
       val->hexColor = Color(val->intColor).toHexString();
 
-      read(s, &val->playerStats);
+      read(s, &val->playerStats, version);
    }
 
 
-   void write(TNL::BitStream &s, Zap::TeamStats &val)
+   void write(TNL::BitStream &s, Zap::TeamStats &val, U8 version)
    {
       writeString(s, val.name);
       write(s, S32(val.score));
       s.writeInt(val.intColor, 24);    // 24 bit color
-      write(s, val.playerStats);
+      write(s, val.playerStats, version);
    }
 
 
-   void read(TNL::BitStream &s, Zap::GameStats *val)
+   void read(TNL::BitStream &s, Zap::GameStats *val, U8 version)
    {
       val->isOfficial = s.readFlag();
       val->playerCount = readU16(s);
@@ -218,11 +275,11 @@ namespace Types
       val->isTeamGame = s.readFlag();
       val->gameType = readString(s);
       val->levelName = readString(s);
-      read(s, &val->teamStats);
+      read(s, &val->teamStats, version);
    }
 
 
-   void write(TNL::BitStream &s, Zap::GameStats &val)
+   void write(TNL::BitStream &s, Zap::GameStats &val, U8 version)
    {
       s.writeFlag(val.isOfficial);
       write(s, U16(val.playerCount));
@@ -230,37 +287,41 @@ namespace Types
       s.writeFlag(val.isTeamGame);
       writeString(s, val.gameType);
       writeString(s, val.levelName);
-      write(s, val.teamStats);
+      write(s, val.teamStats, version);
    }
 
    
    /// Reads objects from a BitStream
    void read(TNL::BitStream &s, VersionedGameStats *val)
    {
+      U32 bitStart = s.getBitPosition();
       val->version = readU8(s);  // Read version number
-      read(s, &val->gameStats);
+      val->valid = false;
 
-      val->valid = true; // lets start as valid = true.
+      if(val->version > VersionedGameStats::CURRENT_VERSION)  // this might happen with outdated master
+         return;
 
+      read(s, &val->gameStats, val->version);
 
-      if(val->version >= 1)
+      if(!s.isValid() || val->gameStats.teamStats.size() == 0)  // team size should never be zero
+         return;
+
+      if(val->version >= 1)  // protect against incomplete or damaged data
       {
-         // extra read code goes here...
+         U32 actualChecksum = calculateChecksum(s, bitStart, s.getBitPosition() - bitStart);
+         val->valid = (actualChecksum == readU32(s));
       }
-
-      if(val->version >= 2)  // this might happen with outdated master..
-         val->valid = false;
-
-      if(!s.isValid())
-         val->valid = false;
+      else
+         val->valid = true;
    }
 
 
    /// Writes objects into a BitStream. Server write and send to master.
    void write(TNL::BitStream &s, VersionedGameStats &val)
    {
+      U32 bitStart = s.getBitPosition();
       write(s, U8(val.CURRENT_VERSION));       // Send current version
-      write(s, val.gameStats);
+      write(s, val.gameStats, val.CURRENT_VERSION);
 
       // To clarify what this does...
       // write(number) writes 32 bit int when number is S32
@@ -269,7 +330,8 @@ namespace Types
 
       if(val.CURRENT_VERSION >= 1)
       {
-         // extra write code goes here, match up with read code above...
+         U32 checksum = calculateChecksum(s, bitStart, s.getBitPosition() - bitStart);
+         s.write(U32(checksum));
       }
 
    }

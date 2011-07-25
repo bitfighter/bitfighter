@@ -620,7 +620,7 @@ void Ship::processEnergy()
    for(S32 i = 0; i < ShipModuleCount; i++)   
       // If you have passive module, it's always active, no restrictions, but is off for energy consumption purposes
       if(getGame()->getModuleInfo(mModule[i])->getUseType() == ModuleUsePassive)    
-         mModuleActive[mModule[i]] = false;         
+         mModuleActive[mModule[i]] = true;         // needs to be true to allow stats counting
 
       // No (active) modules if we're too hot or game has disallowed them
       else if(mCurrentMove.module[i] && !mCooldown && allowed)  
@@ -679,6 +679,9 @@ void Ship::processEnergy()
          S32 EnergyUsed = S32(getGame()->getModuleInfo((ShipModule) i)->getEnergyDrain() * scaleFactor);
          mEnergy -= EnergyUsed;
          anyActive = anyActive || (EnergyUsed != 0);   // to prevent armor and engineer stop energy recharge.
+         GameConnection *gc = getOwner();
+         if(gc)
+            gc->mStatistics.addModuleUsed(ShipModule(i), mCurrentMove.time);
       }
    }
 
@@ -765,6 +768,12 @@ void Ship::damageObject(DamageInfo *theInfo)
    }
    else if(mHealth > 1)
       mHealth = 1;
+
+   Projectile *projectile = dynamic_cast<Projectile *>(theInfo->damagingObject);
+   if(victimOwner && projectile)
+   {
+      victimOwner->mStatistics.countHitBy(projectile->mWeaponType);
+   }
 }
 
 
@@ -784,7 +793,7 @@ void Ship::onAddedToGame(Game *game)
 
 void Ship::updateModuleSounds()
 {
-   static S32 moduleSFXs[ModuleCount] =
+   const S32 moduleSFXs[ModuleCount] =
    {
       SFXShieldActive,
       SFXShipBoost,
@@ -792,11 +801,12 @@ void Ship::updateModuleSounds()
       SFXRepairActive,
       SFXUIBoop, // Need better sound...
       SFXCloakActive,
+      SFXNone, // armor
    };
 
    for(U32 i = 0; i < ModuleCount; i++)
    {
-      if(mModuleActive[i])
+      if(mModuleActive[i] && moduleSFXs[i] != SFXNone)
       {
          if(mModuleSound[i].isValid())
             SoundSystem::setMovementParams(mModuleSound[i], mMoveState[RenderState].pos, mMoveState[RenderState].vel);

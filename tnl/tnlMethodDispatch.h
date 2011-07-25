@@ -159,9 +159,9 @@ namespace Types
    }*/
 
 
-   /// Reads a Vector of objects from a BitStream.
    const TNL::U32 VectorSizeNumberSize = (1 << VectorSizeBitSize8) - 1;       // 255
 
+   /// Reads a Vector of objects from a BitStream.
    template <typename T> inline void read(TNL::BitStream &s, TNL::Vector<T> *val)
    {
       TNL::U32 size = s.readInt(VectorSizeBitSize8);    // Max 254 -- sending 255 signals that we'll be sending another 2 bytes with larger size
@@ -195,6 +195,43 @@ namespace Types
 
       for(TNL::S32 i = 0; i < val.size(); i++)
          write(s, val[i]);
+   }
+
+   /// Writes a Vector of objects into a BitStream.
+   /// allows passing an argument through a vector
+   template <typename T, typename A> inline void read(TNL::BitStream &s, TNL::Vector<T> *val, A arg1)
+   {
+      TNL::U32 size = s.readInt(VectorSizeBitSize8);    // Max 254 -- sending 255 signals that we'll be sending another 2 bytes with larger size
+      if(size == VectorSizeNumberSize)                  // Older clients were limited to 255 elements, so we resort to this scheme to remain compatible
+         size = s.readInt(VectorSizeBitSize16) + VectorSizeNumberSize;
+
+      val->resize(size);
+      for(TNL::S32 i = 0; i < val->size(); i++)
+      {
+         TNLAssert(s.isValid(), "Error reading vector");
+         if(!s.isValid())      // Error, don't read any more!
+            break;        
+
+         read(s, &((*val)[i]), arg1);
+      }
+   }
+
+   /// Writes a Vector of objects into a BitStream.
+   template <typename T, typename A> void write(TNL::BitStream &s, TNL::Vector<T> &val, A arg1)
+   {
+      if(val.size() >= (TNL::S32)VectorSizeNumberSize)  // Large vector, more than 255 elements
+      {
+         // Note that if we enter this block, this function will not work with older versions.  If we stay out, it will be compatible.
+         TNLAssert((val.size() - VectorSizeNumberSize) < (1 << VectorSizeBitSize16), "Vector too big");
+
+         s.writeInt(VectorSizeNumberSize, VectorSizeBitSize8);
+         s.writeInt(val.size() - VectorSizeNumberSize, VectorSizeBitSize16);
+      }
+      else
+         s.writeInt(val.size(), VectorSizeBitSize8);
+
+      for(TNL::S32 i = 0; i < val.size(); i++)
+         write(s, val[i], arg1);
    }
 
 
