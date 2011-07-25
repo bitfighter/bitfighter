@@ -27,8 +27,9 @@
 #define _STATISTICS_H_
 
 #include "gameWeapons.h"      // For WeaponType enum
-#include "ShipItems.h" // for ModuleCount
+#include "shipItems.h" // for ModuleCount
 #include "tnlTypes.h"
+#include "tnlVector.h"
 
 
 using namespace TNL;

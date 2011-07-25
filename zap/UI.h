@@ -268,7 +268,8 @@ public:
 
    static F32 getStringWidthF32(F32 size, const char *string);    // TODO: make functions above return F32 and get rid of this one
 
-   static U32 drawWrapText(char *text, S32 xpos, S32 ypos, S32 width, S32 ypos_end, S32 lineHeight, S32 fontSize, bool alignBottom = false, bool draw = true);
+   static U32 drawWrapText(char *text, S32 xpos, S32 ypos, S32 width, S32 ypos_end,
+         S32 lineHeight, S32 fontSize, S32 multiLineIndentation = 0, bool alignBottom = false, bool draw = true);
 
    static void playBoop();    // Make some noise!
 };

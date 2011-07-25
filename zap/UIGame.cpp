@@ -746,9 +746,6 @@ void GameUserInterface::renderLoadoutIndicators()
 }
 
 
-static const S32 FONTSIZE = 14;
-static const S32 FONT_GAP = 4;
-
 // Render any incoming server msgs
 void GameUserInterface::renderMessageDisplay()
 {
@@ -759,7 +756,7 @@ void GameUserInterface::renderMessageDisplay()
 
    msgCount = MessageDisplayCount;  // Short form
 
-   S32 y_end = y + msgCount * (FONTSIZE + FONT_GAP);
+   S32 y_end = y + msgCount * (SERVER_MSG_FONT_SIZE + SERVER_MSG_FONT_GAP);
 
    for(S32 i = msgCount - 1; i >= 0; i--)
    {
@@ -768,20 +765,17 @@ void GameUserInterface::renderMessageDisplay()
          glColor(mDisplayMessageColor[i]);
          //drawString(UserInterface::horizMargin, y, FONTSIZE, mDisplayMessage[i]);
          //y += FONTSIZE + FONT_GAP;
-         y += (FONTSIZE + FONT_GAP)
+         y += (SERVER_MSG_FONT_SIZE + SERVER_MSG_FONT_GAP)
             * UserInterface::drawWrapText(mDisplayMessage[i], UserInterface::horizMargin, y,
                750, // wrap width
                y_end, // ypos_end
-               FONTSIZE + FONT_GAP, // line height
-               FONTSIZE, // font size
+               SERVER_MSG_FONT_SIZE + SERVER_MSG_FONT_GAP, // line height
+               SERVER_MSG_FONT_SIZE, // font size
                false); // align top
       }
    }
 }
 
-
-static const S32 CHAT_FONTSIZE = 12;
-static const S32 CHAT_FONT_GAP = 3;
 
 // Render any incoming player chat msgs
 void GameUserInterface::renderChatMessageDisplay()
@@ -796,7 +790,7 @@ void GameUserInterface::renderChatMessageDisplay()
    else
       msgCount = ChatMessageDisplayCount;  // Short form
 
-   S32 y_end = y - msgCount * (CHAT_FONTSIZE + CHAT_FONT_GAP);
+   S32 y_end = y - msgCount * (CHAT_FONT_SIZE + CHAT_FONT_GAP);
 
    if(mHelper)
       glEnableBlend;
@@ -806,18 +800,19 @@ void GameUserInterface::renderChatMessageDisplay()
       {
          if(mDisplayChatMessage[i][0])
          {
-            if (mHelper)
+            if (mHelper)   // fade out text if a helper menu is active
                glColor(mDisplayChatMessageColor[i], 0.2);
             else
                glColor(mDisplayChatMessageColor[i]);
 
             //drawString(UserInterface::horizMargin, y, CHAT_FONTSIZE, mDisplayChatMessage[i]);
-            y -= (CHAT_FONTSIZE + CHAT_FONT_GAP)
+            y -= (CHAT_FONT_SIZE + CHAT_FONT_GAP)
                * UserInterface::drawWrapText(mDisplayChatMessage[i], UserInterface::horizMargin, y,
                   700, // wrap width
                   y_end, // ypos_end
-                  CHAT_FONTSIZE + CHAT_FONT_GAP, // line height
-                  CHAT_FONTSIZE, // font size
+                  CHAT_FONT_SIZE + CHAT_FONT_GAP, // line height
+                  CHAT_FONT_SIZE, // font size
+                  CHAT_MULTILINE_INDENT, // how much extra to indent if chat has muliple lines
                   true); // align bottom
          }
       }
@@ -826,18 +821,19 @@ void GameUserInterface::renderChatMessageDisplay()
       {
          if(mStoreChatMessage[i][0])
          {
-            if (mHelper)
+            if (mHelper)   // fade out text if a helper menu is active
                glColor(mStoreChatMessageColor[i], 0.2);
             else
                glColor(mStoreChatMessageColor[i]);
 
             //drawString(UserInterface::horizMargin, y, CHAT_FONTSIZE, mStoreChatMessage[i]);
-            y -= (CHAT_FONTSIZE + CHAT_FONT_GAP)
+            y -= (CHAT_FONT_SIZE + CHAT_FONT_GAP)
                * UserInterface::drawWrapText(mStoreChatMessage[i], UserInterface::horizMargin, y,
                   700, // wrap width
                   y_end, // ypos_end
-                  CHAT_FONTSIZE + CHAT_FONT_GAP, // line height
-                  CHAT_FONTSIZE, // font size
+                  CHAT_FONT_SIZE + CHAT_FONT_GAP, // line height
+                  CHAT_FONT_SIZE, // font size
+                  CHAT_MULTILINE_INDENT, // how much extra to indent if chat has muliple lines
                   true); // align bottom
          }
       }
@@ -1773,12 +1769,12 @@ void GameUserInterface::renderCurrentChat()
    if(! (gClientGame && gClientGame->getConnectionToServer()))
       return;
 
-   S32 promptSize = getStringWidth(CHAT_FONTSIZE, promptStr);
-   S32 nameSize = getStringWidthf(CHAT_FONTSIZE, "%s: ", gClientGame->getConnectionToServer()->getClientName().getString());
+   S32 promptSize = getStringWidth(CHAT_FONT_SIZE, promptStr);
+   S32 nameSize = getStringWidthf(CHAT_FONT_SIZE, "%s: ", gClientGame->getConnectionToServer()->getClientName().getString());
    S32 nameWidth = max(nameSize, promptSize);
    // Above block repeated below...
 
-   const S32 ypos = chatMessageMargin + CHAT_FONTSIZE + (2 * CHAT_FONT_GAP) + 5;
+   const S32 ypos = chatMessageMargin + CHAT_FONT_SIZE + (2 * CHAT_FONT_GAP) + 5;
 
    S32 boxWidth = gScreenInfo.getGameCanvasWidth() - 2 * horizMargin - (nameWidth - promptSize) - 230;
 
@@ -1792,8 +1788,8 @@ void GameUserInterface::renderCurrentChat()
       glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
          glVertex2f(horizMargin, ypos - 3);
          glVertex2f(horizMargin + boxWidth, ypos - 3);
-         glVertex2f(horizMargin + boxWidth, ypos + CHAT_FONTSIZE + 7);
-         glVertex2f(horizMargin, ypos + CHAT_FONTSIZE + 7);
+         glVertex2f(horizMargin + boxWidth, ypos + CHAT_FONT_SIZE + 7);
+         glVertex2f(horizMargin, ypos + CHAT_FONT_SIZE + 7);
       glEnd();
    }
    glDisableBlend;
@@ -1801,23 +1797,23 @@ void GameUserInterface::renderCurrentChat()
    glColor(baseColor);
 
    // Display prompt
-   S32 promptWidth = getStringWidth(CHAT_FONTSIZE, promptStr);
+   S32 promptWidth = getStringWidth(CHAT_FONT_SIZE, promptStr);
    S32 xStartPos = horizMargin + 3 + promptWidth;
 
-   drawString(horizMargin + 3, ypos, CHAT_FONTSIZE, promptStr);  // draw prompt
+   drawString(horizMargin + 3, ypos, CHAT_FONT_SIZE, promptStr);  // draw prompt
 
    // Display typed text
    string displayString = mLineEditor.getString();
-   S32 displayWidth = getStringWidth(CHAT_FONTSIZE, displayString.c_str());
+   S32 displayWidth = getStringWidth(CHAT_FONT_SIZE, displayString.c_str());
 
    // If the string goes too far out of bounds, display it chopped off at the front to give more room to type
    while (displayWidth > boxWidth - promptWidth - 16)  // 16 -> Account for margin and cursor
    {
       displayString = displayString.substr(25, string::npos);  // 25 -> # chars to chop off displayed text if overflow
-      displayWidth = getStringWidth(CHAT_FONTSIZE, displayString.c_str());
+      displayWidth = getStringWidth(CHAT_FONT_SIZE, displayString.c_str());
    }
 
-   drawString(xStartPos, ypos, CHAT_FONTSIZE, displayString.c_str());
+   drawString(xStartPos, ypos, CHAT_FONT_SIZE, displayString.c_str());
 
    // If we've just finished entering a chat cmd, show next parameter
    if(isCmdChat())
@@ -1836,7 +1832,7 @@ void GameUserInterface::renderCurrentChat()
                if(chatCmds[i].cmdArgCount >= words.size() && line[line.size() - 1] == ' ')
                {
                   glColor(baseColor * .5);
-                  drawString(xStartPos + displayWidth, ypos, CHAT_FONTSIZE, chatCmds[i].helpArgString[words.size() - 1].c_str());
+                  drawString(xStartPos + displayWidth, ypos, CHAT_FONT_SIZE, chatCmds[i].helpArgString[words.size() - 1].c_str());
                }
 
                break;
@@ -1846,7 +1842,7 @@ void GameUserInterface::renderCurrentChat()
    }
 
    glColor(baseColor);
-   mLineEditor.drawCursor(xStartPos, ypos, CHAT_FONTSIZE, displayWidth);
+   mLineEditor.drawCursor(xStartPos, ypos, CHAT_FONT_SIZE, displayWidth);
 }
 
 
@@ -2013,13 +2009,13 @@ void GameUserInterface::processChatModeKey(KeyCode keyCode, char ascii)
       // Protect against crashes while game is initializing (because we look at the ship for the player's name)
       if(gClientGame->getConnectionToServer())     // gClientGame cannot be NULL here
       {
-         S32 promptSize = getStringWidth(CHAT_FONTSIZE, mCurrentChatType == TeamChat ? "(Team): " : "(Global): ");
+         S32 promptSize = getStringWidth(CHAT_FONT_SIZE, mCurrentChatType == TeamChat ? "(Team): " : "(Global): ");
 
          //Ship *ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
          //if(!ship)
          //   return;  // problem with unable to type something while trying to respawn.
 
-         S32 nameSize = getStringWidthf(CHAT_FONTSIZE, "%s: ", gClientGame->getConnectionToServer()->getClientName().getString());
+         S32 nameSize = getStringWidthf(CHAT_FONT_SIZE, "%s: ", gClientGame->getConnectionToServer()->getClientName().getString());
          S32 nameWidth = max(nameSize, promptSize);
          // Above block repeated above
 

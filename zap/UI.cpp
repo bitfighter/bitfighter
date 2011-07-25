@@ -788,7 +788,8 @@ void UserInterface::renderMessageBox(const char *title, const char *instr, const
 }
 
 
-U32 UserInterface::drawWrapText(char *text, S32 xpos, S32 ypos, S32 width, S32 ypos_end, S32 lineHeight, S32 fontSize, bool alignBottom, bool draw)
+U32 UserInterface::drawWrapText(char *text, S32 xpos, S32 ypos, S32 width, S32 ypos_end,
+      S32 lineHeight, S32 fontSize, S32 multiLineIndentation, bool alignBottom, bool draw)
 {
    U32 lines = 0;
    U32 lineStartIndex = 0;
@@ -802,7 +803,7 @@ U32 UserInterface::drawWrapText(char *text, S32 xpos, S32 ypos, S32 width, S32 y
    {
       char c = text[lineEndIndex];  // Store character
       text[lineEndIndex] = 0;  // Temporarily set this index as char array terminator
-      bool overWidthLimit = UserInterface::getStringWidth(fontSize, &text[lineStartIndex]) > width;
+      bool overWidthLimit = UserInterface::getStringWidth(fontSize, &text[lineStartIndex]) > (width - multiLineIndentation);
       text[lineEndIndex] = c;  // Now set it back again
 
       // If this character is a space, keep track in case we need to split here
@@ -843,7 +844,10 @@ U32 UserInterface::drawWrapText(char *text, S32 xpos, S32 ypos, S32 width, S32 y
          {
             char c = text[lineEndIndex];  // Store character
             text[lineEndIndex] = 0;  // Temporarily set this index as char array terminator
-            UserInterface::drawString(xpos, ypos, fontSize, &text[lineStartIndex]);
+            if (i == 0)   // Don't draw the extra margin if it is the first line
+               UserInterface::drawString(xpos, ypos, fontSize, &text[lineStartIndex]);
+            else
+               UserInterface::drawString(xpos + multiLineIndentation, ypos, fontSize, &text[lineStartIndex]);
             text[lineEndIndex] = c;  // Now set it back again
          }
          lines++;
@@ -863,7 +867,12 @@ U32 UserInterface::drawWrapText(char *text, S32 xpos, S32 ypos, S32 width, S32 y
       if(ypos >= ypos_end || !alignBottom)
       {
          if(draw)
-            UserInterface::drawString(xpos, ypos, fontSize, &text[lineStartIndex]);
+         {
+            if (seperator.size() == 0)  // Don't draw the extra margin if it is the only line
+               UserInterface::drawString(xpos, ypos, fontSize, &text[lineStartIndex]);
+            else
+               UserInterface::drawString(xpos + multiLineIndentation, ypos, fontSize, &text[lineStartIndex]);
+         }
 
          lines++;
       }
