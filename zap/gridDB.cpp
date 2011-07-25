@@ -536,8 +536,8 @@ const Vector<EditorObject *> *EditorObjectDatabase::getObjectList()
    return &mAllEditorObjects;
 }
 
-Vector<DatabaseObject *> fillVector;     // Reusable container for searching gridDatabases
 
 };
 
+Vector<Zap::DatabaseObject *> fillVector;     // Reusable container for searching gridDatabases
 
