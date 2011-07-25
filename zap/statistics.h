@@ -27,8 +27,8 @@
 #define _STATISTICS_H_
 
 #include "gameWeapons.h"      // For WeaponType enum
+#include "ShipItems.h" // for ModuleCount
 #include "tnlTypes.h"
-#include "tnlVector.h"
 
 
 using namespace TNL;
@@ -42,17 +42,21 @@ class Statistics
 private:
    U16 mShots[WeaponCount];
    U16 mHits[WeaponCount];
+   U16 mHitBy[WeaponCount];
+   U32 mModuleUsedTime[ModuleCount];
 
    U16 mKills;          // Enemy kills
    U16 mDeaths;         // Times died
    U16 mSuicides;       // Self kills
    U16 mFratricides;    // Tammate kills
 
+
 public:
    Statistics();        // Constructor
 
    void countShot(WeaponType weaponType);    // Record a shot
    void countHit(WeaponType weaponType);     // Record a hit
+   void countHitBy(WeaponType weaponType);   // got hit by which weapon?
 
    S32 getShots();
    S32 getShots(WeaponType weaponType);
@@ -62,6 +66,11 @@ public:
 
    F32 getHitRate();                  // Report overall hit rate
    F32 getHitRate(WeaponType weaponType);    // Report hit rate for specified weapon
+
+   S32 getHitBy(WeaponType weaponType);
+
+   void addModuleUsed(ShipModule, U32 milliseconds);
+   U32 getModuleUsed(ShipModule);
 
    void addKill();      // Player killed another player
    U16 getKills();      // Report cumulated kills

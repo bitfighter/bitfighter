@@ -144,8 +144,12 @@ public:
 
    /// Writes an unsigned integer value between 0 and 2^(bitCount - 1) into the stream.
    void writeInt(U32 value, U8 bitCount);
+   /// Writes an unsigned integer value between 0 and 2^(bitCount - 1) into the stream.
+   void writeInt64(U64 value, U8 bitCount);
    /// Reads an unsigned integer value between 0 and 2^(bitCount - 1) from the stream.
    U32  readInt(U8 bitCount);
+   /// Reads 64-bit unsigned integer value between 0 and 2^(bitCount - 1) from the stream.
+   U64  readInt64(U8 bitCount);
 
    /// Writes an unsigned integer value between 0 and 2^(bitCount -1) into the stream at the specified position, without changing the current write position.
    void writeIntAt(U32 value, U8 bitCount, U32 bitPosition);

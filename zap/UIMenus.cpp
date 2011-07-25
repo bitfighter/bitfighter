@@ -592,7 +592,6 @@ static void quitSelectedCallback(Game *game, U32 unused)
 }
 
 //////////
-MainMenuUserInterface *gMainMenuUserInterface_pointer;
 
 // Constructor
 MainMenuUserInterface::MainMenuUserInterface(Game *game) : Parent(game)

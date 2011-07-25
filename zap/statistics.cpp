@@ -48,6 +48,12 @@ void Statistics::countHit(WeaponType weaponType)
    mHits[(S32) weaponType]++;
 }
 
+void Statistics::countHitBy(WeaponType weaponType)
+{
+   TNLAssert(weaponType < WeaponCount, "Out of range");
+   mHitBy[(S32) weaponType]++;
+}
+
 
 S32 Statistics::getShots()
 {
@@ -116,6 +122,22 @@ F32 Statistics::getHitRate(WeaponType weaponType)
    return (F32)mHits[(S32)weaponType] / (F32)mShots[(S32)weaponType];
 }
 
+S32 Statistics::getHitBy(WeaponType weaponType)
+{
+   return mHitBy[(S32)weaponType];
+}
+
+void Statistics::addModuleUsed(ShipModule module, U32 milliseconds)
+{
+   TNLAssert(U32(module) < U32(ModuleCount), "ShipModule out of range");
+   mModuleUsedTime[(S32)module] += milliseconds;
+}
+U32 Statistics::getModuleUsed(ShipModule module)
+{
+   TNLAssert(U32(module) < U32(ModuleCount), "ShipModule out of range");
+   return mModuleUsedTime[(S32)module];
+}
+
 
 // Player killed another player
 void Statistics::addKill()
@@ -180,7 +202,11 @@ void Statistics::resetStatistics()
    {
       mShots[i] = 0;
       mHits[i] = 0;
+      mHitBy[i] = 0;
    }
+   for(S32 i = 0; i < ModuleCount; i++)
+      mModuleUsedTime[i] = 0;
+
 }
 
 }
