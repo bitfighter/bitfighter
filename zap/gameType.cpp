@@ -816,11 +816,11 @@ VersionedGameStats GameType::getGameStats()
             if(weaponStats.shots != 0 || weaponStats.hits != 0 || weaponStats.hitBy != 0)
                playerStats->weaponStats.push_back(weaponStats);
          }
-         for(S32 k = 0; k < ; k++)
+         for(S32 k = 0; k < ModuleCount; k++)
          {
             ModuleStats moduleStats;
             moduleStats.shipModule = ShipModule(k);
-            moduleStats.seconds = statistics->getModuleUsed(k) / 1000.f;
+            moduleStats.seconds = statistics->getModuleUsed(ShipModule(k)) / 1000.f;
             if(moduleStats.seconds != 0)
                playerStats->moduleStats.push_back(moduleStats);
          }

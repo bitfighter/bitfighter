@@ -180,15 +180,15 @@ namespace Types
 
    void read(TNL::BitStream &s, Zap::ModuleStats *val, U8 version)
    {
-      val->weaponType = ShipModule(readU8(s));
-      val->shots = readU16(s);
+      val->shipModule = ShipModule(readU8(s));
+      val->seconds = readU16(s);
    }
 
 
    void write(TNL::BitStream &s, Zap::ModuleStats &val, U8 version)
    {
-      write(s, U8(val.ShipModule));
-      write(s, U16(val.));
+      write(s, U8(val.shipModule));
+      write(s, U16(val.seconds));
    }
 
 
