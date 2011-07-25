@@ -314,27 +314,16 @@ public:
    }
 };
 
-////////////////////////////////////////
-////////////////////////////////////////
-
-// Provide a place for things we want in Client & Server Game, but not in EditorGame
-// TODO: rename this Game, and rename Game something else...  Framework?
-
-class GameGame : public Game
-{
-public:
-   GameGame(const Address &theBindAddress) : Game(theBindAddress) { /* Do nothing */ };      // Constructor
-   virtual ~GameGame() { /* Do nothing */ };     // Destructor
-};
- 
 
 ////////////////////////////////////////
 ////////////////////////////////////////
 
 class ClientRef;
 
-class ServerGame : public GameGame
+class ServerGame : public Game
 {
+   typedef Game Parent;
+
 private:
    enum {
       LevelSwitchTime = 5000,
@@ -460,9 +449,9 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class ClientGame : public GameGame
+class ClientGame : public Game
 {
-   typedef GameGame Parent;
+   typedef Game Parent;
 
 private:
    enum {
@@ -547,19 +536,19 @@ public:
 
    GameUserInterface *getUserInterface() { return NULL; }      // Not sure about this...
 
-   U32 getPlayerCount() { return 0; }
+   U32 getPlayerCount() { return 0; }                          // Client's version might be ok, not sure this is ever used
    bool isServer() { return false; }
    void idle(U32 timeDelta) { /* Do nothing */ }
 
-   const Color *getTeamColor(S32 teamIndex) const;
+   const Color *getTeamColor(S32 teamIndex) const;             // Client's version might be ok
 
-   bool processPseudoItem(S32 argc, const char **argv);
+   bool processPseudoItem(S32 argc, const char **argv);        // Not in client...
 
    GridDatabase *getGridDatabase() { return mEditorDatabase.get(); }
 
    void setGridDatabase(boost::shared_ptr<GridDatabase> database) { mEditorDatabase = boost::dynamic_pointer_cast<EditorObjectDatabase>(database); }
 
-   boost::shared_ptr<AbstractTeam> getNewTeam();
+   boost::shared_ptr<AbstractTeam> getNewTeam();               // Editor returns TeamEditor, client returns Team
 };
 
 

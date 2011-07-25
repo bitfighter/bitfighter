@@ -229,20 +229,6 @@ void Game::setGameType(GameType *theGameType)      // TODO==> Need to store game
 
 void Game::resetLevelInfo()
 {
-  /* mEngineerEnabled = false;
-   mBotsAllowed = true;
-   mSoccerPickupAllowed = false;
-
-   mLevelName = "";
-   mLevelDescription = "";
-   mLevelCredits = ""; 
-
-   mScriptName = ""; 
-   mScriptArgs.clear(); 
-
-   mMinRecPlayers = 0;
-   mMaxRecPlayers = 0;
-*/
    setGridSize(DefaultGridSize);
 }
 
@@ -707,7 +693,7 @@ extern string gHostName;
 extern string gHostDescr;
 
 // Constructor
-ServerGame::ServerGame(const Address &theBindAddress, U32 maxPlayers, const char *hostName, bool testMode) : GameGame(theBindAddress)
+ServerGame::ServerGame(const Address &theBindAddress, U32 maxPlayers, const char *hostName, bool testMode) : Game(theBindAddress)
 {
    mVoteTimer = 0;
    mNextLevel = NEXT_LEVEL;
@@ -1754,7 +1740,7 @@ S32 ServerGame::addLevelInfo(const char *filename, LevelInfo &info)
 
 
 // Constructor
-ClientGame::ClientGame(const Address &bindAddress) : GameGame(bindAddress)
+ClientGame::ClientGame(const Address &bindAddress) : Game(bindAddress)
 {
    mGameUserInterface = new GameUserInterface(this);
    mUserInterfaceData = new UserInterfaceData();
@@ -2071,12 +2057,14 @@ U32 ClientGame::getPlayerCount()
 
 const Color *ClientGame::getTeamColor(S32 teamId) const
 {
-   GameType *gameType = getGameType();
+   // In editor: 
+   // return Game::getBasicTeamColor(this, teamIndex);
+   GameType *gameType = getGameType();   
 
    if(!gameType)
-      return Parent::getTeamColor(teamId);      // returns white
+      return Parent::getTeamColor(teamId);   // Returns white
 
-   return gameType->getTeamColor(teamId);
+   return gameType->getTeamColor(teamId);    // return Game::getBasicTeamColor(mGame, teamIndex); by default, overridden by certain gametypes...
 }
 
 
