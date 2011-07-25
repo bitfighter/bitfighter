@@ -142,8 +142,7 @@ OBJECTS_ZAP=\
    ../recast/RecastMesh.o\
    ../clipper/clipper.o\
    BotNavMeshZone.o\
-   OpenglUtils.o\
-   Colors.o
+   OpenglUtils.o
 # These last classes MUST be in this order for the linker to work
 
 

@@ -57,8 +57,6 @@ Lunar<LuaProjectile>::RegType LuaProjectile::methods[] =
 
 //===========================================
 
-static Vector<DatabaseObject*> fillVector;
-
 TNL_IMPLEMENT_NETOBJECT(Projectile);
 
 // Constructor
