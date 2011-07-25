@@ -558,7 +558,6 @@ public:
 
 extern ServerGame *gServerGame;
 extern ClientGame *gClientGame;
-extern EditorGame *gEditorGame;
 
 extern Vector<string> gMasterAddress;
 

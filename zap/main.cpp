@@ -1307,7 +1307,6 @@ void processStartupParams()
    {
       gClientGame1 = new ClientGame(Address());   //   Let the system figure out IP address and assign a port
       gClientGame = gClientGame1;
-      gEditorGame = new EditorGame();
 
        // Put any saved filename into the editor file entry thingy
       gClientGame->getUIManager()->getLevelNameEntryUserInterface()->setString(gIniSettings.lastEditorName);

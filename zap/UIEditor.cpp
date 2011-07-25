@@ -1762,9 +1762,9 @@ void EditorUserInterface::render()
 }
 
 
-const Color *EditorUserInterface::getTeamColor(S32 team) const
+const Color *EditorUserInterface::getTeamColor(S32 team)
 {
-   return gEditorGame->getTeamColor(team);
+   return getEditorGame()->getTeamColor(team);
 }
 
 

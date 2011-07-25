@@ -283,7 +283,7 @@ public:
    void setLevelToCanvasCoordConversion();
 
 
-   const Color *getTeamColor(S32 teamId) const;
+   const Color *getTeamColor(S32 teamId);
 
    bool getNeedToSave() const { return mNeedToSave; }
    void setNeedToSave(bool needToSave) { mNeedToSave = needToSave; }

@@ -187,7 +187,6 @@
     <ClCompile Include="..\zap\Point.cpp" />
     <ClCompile Include="..\zap\Rect.cpp" />
     <ClCompile Include="..\zap\Color.cpp" />
-    <ClCompile Include="..\zap\Colors.cpp" />
     <ClCompile Include="OpenglUtils.cpp" />
     <ClCompile Include="quickChatHelper.cpp" />
     <ClCompile Include="..\zap\rabbitGame.cpp" />
