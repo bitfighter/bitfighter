@@ -27,8 +27,10 @@
 #define _STATISTICS_H_
 
 #include "gameWeapons.h"      // For WeaponType enum
-#include "ShipItems.h" // for ModuleCount
+#include "ShipItems.h"        // for ModuleCount
+
 #include "tnlTypes.h"
+#include "tnlVector.h"
 
 
 using namespace TNL;
@@ -60,9 +62,11 @@ public:
 
    S32 getShots();
    S32 getShots(WeaponType weaponType);
+   Vector<U16> getShotsVector();
 
    S32 getHits();
    S32 getHits(WeaponType weaponType);
+   Vector<U16> getHitsVector();
 
    F32 getHitRate();                  // Report overall hit rate
    F32 getHitRate(WeaponType weaponType);    // Report hit rate for specified weapon
@@ -83,10 +87,6 @@ public:
 
    void addFratricide();   // Player killed teammate
    U16 getFratricides();   // Report cumulated fratricides
-
-
-   Vector<U16> getShotsVector();
-   Vector<U16> getHitsVector();
 
    void resetStatistics();   // Reset Player Statistics (used at end of match)
 };
