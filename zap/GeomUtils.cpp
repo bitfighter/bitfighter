@@ -216,7 +216,7 @@ bool pointInTriangle(Point p, Point a, Point b, Point c)
 // Check if circle at inCenter with radius^2 = inRadiusSq intersects with a polygon.
 // Function returns true when it does and the intersection point is in outPoint
 // Works only for convex hulls.. maybe no longer true... may work for all polys now
-bool polygonCircleIntersect(const Point *inVertices, int inNumVertices, const Point &inCenter, F32 inRadiusSq, Point &outPoint)
+bool polygonCircleIntersect(const Point *inVertices, int inNumVertices, const Point &inCenter, F32 inRadiusSq, Point &outPoint, Point *ignoreVelocityEpsilon)
 {
    // Check if the center is inside the polygon  ==> now works for all polys
    if(PolygonContains2(inVertices, inNumVertices, inCenter))
@@ -238,11 +238,12 @@ bool polygonCircleIntersect(const Point *inVertices, int inNumVertices, const Po
          // Closest point is v1
          F32 dist_sq = v1_center.lenSquared();
          if (dist_sq <= inRadiusSq)
-         {
-            collision = true;
-            outPoint = *v1;
-            inRadiusSq = dist_sq;
-         }
+            if(!ignoreVelocityEpsilon || ignoreVelocityEpsilon->dot((*v1) - inCenter) > 0)
+            {
+               collision = true;
+               outPoint = *v1;
+               inRadiusSq = dist_sq;
+            }
       }
       else
       {
@@ -253,11 +254,12 @@ bool polygonCircleIntersect(const Point *inVertices, int inNumVertices, const Po
             Point point = *v1 + v1_v2 * (fraction / v1_v2_len_sq);
             F32 dist_sq = (point - inCenter).lenSquared();
             if (dist_sq <= inRadiusSq)
-            {
-               collision = true;
-               outPoint = point;
-               inRadiusSq = dist_sq;
-            }
+               if(!ignoreVelocityEpsilon || ignoreVelocityEpsilon->dot(point - inCenter) > 0)
+               {
+                  collision = true;
+                  outPoint = point;
+                  inRadiusSq = dist_sq;
+               }
          }
       }
    }
@@ -666,12 +668,13 @@ bool SweptCircleEdgeVertexIntersect(const Point *inVertices, int inNumVertices, 
       F32 b1 = inB + 2.0f * inDelta.dot(bv1);
       F32 c1 = inC - bv1.lenSquared();
       if (FindLowestRootInInterval(a1, b1, c1, upper_bound, t))
-      {
-         // We have a collision
-         collision = true;
-         upper_bound = t;
-         outPoint = *v1;
-      }
+         if(inDelta.dot((*v1) - inBegin) > 0)
+         {
+            // We have a collision
+            collision = true;
+            upper_bound = t;
+            outPoint = *v1;
+         }
 
       // Check if circle hits the edge
       Point v1v2 = *v2 - *v1;
@@ -687,10 +690,14 @@ bool SweptCircleEdgeVertexIntersect(const Point *inVertices, int inNumVertices, 
          F32 f = t * v1v2_dot_delta - v1v2_dot_bv1;
          if (f >= 0.0f && f <= v1v2_len_sq)
          {
-            // We have a collision
-            collision = true;
-            upper_bound = t;
-            outPoint = *v1 + v1v2 * (f / v1v2_len_sq);
+            Point p(*v1 + v1v2 * (f / v1v2_len_sq));
+            if(inDelta.dot(p - inBegin) > 0)
+            {
+               // We have a collision
+               collision = true;
+               upper_bound = t;
+               outPoint = p;
+            }
          }
       }
    }
@@ -702,11 +709,11 @@ bool SweptCircleEdgeVertexIntersect(const Point *inVertices, int inNumVertices, 
    return true;
 }
 
-// I believe this will work only for convex polygons
+// Should work with any polygons, convex and concave
 bool PolygonSweptCircleIntersect(const Point *inVertices, int inNumVertices, const Point &inBegin, const Point &inDelta, F32 inRadius, Point &outPoint, F32 &outFraction)
 {
    // Test if circle intersects at t = 0
-   if(polygonCircleIntersect(inVertices, inNumVertices, inBegin, inRadius * inRadius, outPoint))
+   if(polygonCircleIntersect(inVertices, inNumVertices, inBegin, inRadius * inRadius, outPoint, (Point *)&inDelta))
    {
       outFraction = 0;
       return true;
