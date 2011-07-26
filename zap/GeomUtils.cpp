@@ -980,7 +980,9 @@ void offsetPolygon(const Vector<Point>& inputPoly, Vector<Point>& outputPoly, co
    // Downscale
    tempVector = downscaleClipperPoints(polygons);
 
-   outputPoly = tempVector[0];
+   TNLAssert(tempVector.size() != 0, "tempVector empty, is Turret::mAnchorNormal point set to (0,0)?");
+   if(tempVector.size() != 0)
+      outputPoly = tempVector[0];
 }
 
 

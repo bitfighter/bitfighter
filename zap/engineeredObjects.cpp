@@ -301,10 +301,15 @@ bool EngineeredObject::processArguments(S32 argc, const char **argv, Game *game)
    Point normal, anchor;
 
    if(!findAnchorPointAndNormal(game->getGridDatabase(), pos, MAX_SNAP_DISTANCE, true, anchor, normal))
-      return false;      // Found no mount point
-
-   mAnchorPoint.set(anchor + normal);
-   mAnchorNormal.set(normal);
+   {
+      mAnchorPoint.set(pos);      // Found no mount point, but for editor, needs to set the position
+      mAnchorNormal.set(1,0);
+   }
+   else
+   {
+      mAnchorPoint.set(anchor + normal);
+      mAnchorNormal.set(normal);
+   }
    computeExtent();
 
    if(mHealth != 0)
@@ -322,7 +327,8 @@ bool EngineeredObject::processArguments(S32 argc, const char **argv, Game *game)
 string EngineeredObject::toString(F32 gridSize) const
 {
    //geomToString(gridSize) was (Point(mAnchorPoint) / gridSize).toString()  ==> still work?
-   return string(Object::getClassName()) + " " + itos(mTeam) + " " + geomToString(gridSize) + " " + itos(mHealRate);
+   //geomToString(gridSize) not working? geomToString(gridSize) is always "0 0"
+   return string(Object::getClassName()) + " " + itos(mTeam) + " " + (Point(mAnchorPoint) / gridSize).toString() + " " + itos(mHealRate);
 }
 
 

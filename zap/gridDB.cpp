@@ -539,5 +539,6 @@ const Vector<EditorObject *> *EditorObjectDatabase::getObjectList()
 
 };
 
-Vector<Zap::DatabaseObject *> fillVector;     // Reusable container for searching gridDatabases
-
+// Reusable container for searching gridDatabases
+// putting it outside of Zap namespace seems to help with debugging showing whats inside fillVector  (debugger forgets to add Zap::)
+Vector<Zap::DatabaseObject *> fillVector;
