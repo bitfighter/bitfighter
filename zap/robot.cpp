@@ -1847,7 +1847,7 @@ void Robot::idle(GameObject::IdleCallPath path)
       TNLAssert(deltaT != 0, "Robot::idle Time is zero")   // Time should never be zero anymore
 
       // Check to see if we need to respawn this robot
-      if(hasExploded)
+      if(hasExploded && isRunningScript)
       {
          if(!gameConnectionInitalized)  // After gameConnection is initalized, bot should spawn
            spawn();
