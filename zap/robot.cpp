@@ -1709,7 +1709,6 @@ bool Robot::processArguments(S32 argc, const char **argv, Game *game)
 }
 
 
-extern OGLCONSOLE_Console gConsole;     //  main.cpp
 // Some rudimentary robot error logging.  Perhaps, someday, will become a sort of in-game error console.
 // For now, though, pass all errors through here.
 void Robot::logError(const char *format, ...)
@@ -1824,7 +1823,7 @@ void Robot::render(S32 layerIndex)
    if(isGhost())                                      // Client rendering client's objects
       Parent::render(layerIndex);
 
-   else if(layerIndex = 1 && flightPlan.size() != 0)  // Client hosting is rendering server objects
+   else if(layerIndex == 1 && flightPlan.size() != 0)  // Client hosting is rendering server objects
    {
       glColor3f(1,1,0);       // yellow
       glBegin(GL_LINE_STRIP);
