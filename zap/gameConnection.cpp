@@ -412,6 +412,8 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sEngineerDeployObject, (RangedU32<0,Engineer
 {
    sEngineerDeployObject(type);
 }
+
+
 // Server only, robots can run this, bypassing the net interface. Return true if successfuly deployed.
 bool GameConnection::sEngineerDeployObject(U32 type)
 {
@@ -424,7 +426,7 @@ bool GameConnection::sEngineerDeployObject(U32 type)
 
    EngineerModuleDeployer deployer;
 
-   if(!deployer.canCreateObjectAtLocation(ship, type))     
+   if(!deployer.canCreateObjectAtLocation(gServerGame->getGameObjDatabase(), ship, type))     
       s2cDisplayMessage(GameConnection::ColorRed, SFXNone, deployer.getErrorMessage().c_str());
 
    else if(deployer.deployEngineeredItem(this, type))

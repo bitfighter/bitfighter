@@ -90,6 +90,7 @@ public:
    EditorObject *newCopy();         // Copies object        // TODO: Will become call to clone, delete method
 
    virtual void addToDock(EditorGame *game, const Point &point);
+   void addToEditor(Game *game);
 
    void assignNewSerialNumber() { mSerialNumber = mNextSerialNumber++; }
    void renderDockItemLabel(const Point &pos, const char *label, F32 yOffset = 0);    // This could be moved anywhere... it's essentially a static method

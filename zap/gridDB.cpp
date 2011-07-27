@@ -247,7 +247,7 @@ void DatabaseObject::initialize()
 {
    mLastQueryId = 0; 
    mExtent = Rect(); 
-   mInDatabase = false; 
+   mDatabase = NULL;
 }
 
 
@@ -352,32 +352,34 @@ DatabaseObject *GridDatabase::getObjectByIndex(S32 index)
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-void DatabaseObject::addToDatabase()
+void DatabaseObject::addToDatabase(GridDatabase *database)
 {
-   if(mInDatabase || !getIsDatabasable())
+   if(mDatabase)
       return;
 
-   mInDatabase = true;
-   getGridDatabase()->addToDatabase(this, mExtent);
+   mDatabase = database;
+
+   if(isDatabasable())
+      database->addToDatabase(this, mExtent);
 }
 
 
 void DatabaseObject::removeFromDatabase()
 {
-   if(!mInDatabase)
+   if(!mDatabase)
       return;
 
-   mInDatabase = false;
-   getGridDatabase()->removeFromDatabase(this, mExtent);
+   getDatabase()->removeFromDatabase(this, mExtent);
+   mDatabase = NULL;
 }
 
 
 // Update object's extents in the database -- will not add object to database if it's not already in it
 void DatabaseObject::setExtent(const Rect &extents)
 {
-   GridDatabase *gridDB = getGridDatabase();
+   GridDatabase *gridDB = getDatabase();
 
-   if(mInDatabase && gridDB != NULL)
+   if(gridDB)
    {
       // Remove from the extents database for current extents...
       gridDB->removeFromDatabase(this, mExtent);    // old extent

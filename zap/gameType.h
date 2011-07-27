@@ -339,7 +339,7 @@ public:
 
    GameType(S32 winningScore = DefaultWinningScore);    // Constructor
 
-   virtual void addToGame(Game *game);
+   virtual void addToGame(Game *game, GridDatabase *database);
 
    void countTeamPlayers() const;
 
@@ -427,7 +427,7 @@ public:
 
    S32 getTeam(const char *playerName);               // Given a player, return their team
 
-   virtual bool getIsDatabasable() { return false; }  // Makes no sense to insert a GameType in our spatial database!
+   virtual bool isDatabasable() { return false; }     // Makes no sense to insert a GameType in our spatial database!
 
    // gameType flag methods for CTF, Rabbit, Football
    virtual void addFlag(FlagItem *flag) {  mFlags.push_back(flag);  }

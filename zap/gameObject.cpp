@@ -52,19 +52,13 @@ BfObject::BfObject()
 }
 
 
-GridDatabase *BfObject::getGridDatabase() 
-{ 
-   return mGame ? mGame->getGridDatabase() : NULL; 
-}
-
-
-void BfObject::addToGame(Game *game)
+void BfObject::addToGame(Game *game, GridDatabase *database)
 {   
    TNLAssert(mGame == NULL, "Error: Object already in a game in GameObject::addToGame.");
    TNLAssert(game != NULL,  "Error: theGame is NULL in GameObject::addToGame.");
 
    mGame = game;
-   addToDatabase();
+   addToDatabase(database);
 }
 
 
@@ -298,11 +292,13 @@ S32 GameObject::radiusDamage(Point pos, S32 innerRad, S32 outerRad, U32 typemask
    return shipsHit;
 }
 
+
 void GameObject::findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector, const Rect &ext, U8 typeNumber)
 {
-   GridDatabase *gridDB = getGridDatabase();
+   GridDatabase *gridDB = getDatabase();
    if(!gridDB)
       return;
+
    gridDB->findObjects(typeMask, fillVector, ext, typeNumber);
 }
 
@@ -310,7 +306,8 @@ void GameObject::findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector,
 GameObject *GameObject::findObjectLOS(U32 typeMask, U32 stateIndex, Point rayStart, Point rayEnd, 
                                       float &collisionTime, Point &collisionNormal, U8 typeNumber)
 {
-   GridDatabase *gridDB = getGridDatabase();
+   GridDatabase *gridDB = getDatabase();
+
    if(!gridDB)
       return NULL;
 
@@ -319,9 +316,9 @@ GameObject *GameObject::findObjectLOS(U32 typeMask, U32 stateIndex, Point raySta
 }
 
 
-void GameObject::addToGame(Game *game)
+void GameObject::addToGame(Game *game, GridDatabase *database)
 {
-   BfObject::addToGame(game);
+   BfObject::addToGame(game, database);
    // constists of:
    //    mGame = game;
    //    addToDatabase();
@@ -493,15 +490,18 @@ void GameObject::readCompressedVelocity(Point &vel, U32 max, BitStream *stream)
 
 bool GameObject::onGhostAdd(GhostConnection *theConnection)
 {
-   addToGame(gClientGame);
+   addToGame(gClientGame, gClientGame->getGameObjDatabase());
    return true;
 }
+
 
 S32 GameObject::getTeamIndx(lua_State *L)  // Return item team to Lua
 {
    return LuaObject::returnInt(L, mTeam + 1);
 }
-void GameObject::push(lua_State *L) // Lua-aware classes will implement this
+
+
+void GameObject::push(lua_State *L)       // Lua-aware classes will implement this
 {
    TNLAssert(false, "Unimplemented push function!");
 }

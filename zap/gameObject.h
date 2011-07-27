@@ -91,6 +91,7 @@ enum GameObjectType
    ShipSpawnType = BIT(13),            // BulletType
    FlagSpawnType = BIT(1),            // ShipType
    AsteroidSpawnType = BIT(17),        // BotZone
+   WallSegmentType = BIT(13),          // Used only in wallSegmentDatabase, so this is OK for the moment
 
 
    // Derived types:
@@ -195,12 +196,11 @@ public:
 
    Game *getGame() const { return mGame; }
 
-   virtual void addToGame(Game *game);
+   virtual void addToGame(Game *game, GridDatabase *database);
    virtual void removeFromGame();
    void clearGame() { mGame = NULL; }
 
    // DatabaseObject methods
-   virtual GridDatabase *getGridDatabase();     // BotNavMeshZones have their own GridDatabase
    virtual bool getCollisionPoly(Vector<Point> &polyPoints) const;
    virtual bool getCollisionCircle(U32 stateIndex, Point &point, float &radius) const;
 
@@ -276,7 +276,7 @@ public:
    GameObject();                             // Constructor
    ~GameObject() { removeFromGame(); }       // Destructor
 
-   virtual void addToGame(Game *game);       // BotNavMeshZone has its own addToGame
+   virtual void addToGame(Game *game, GridDatabase *database);       // BotNavMeshZone has its own addToGame
    virtual void onAddedToGame(Game *game);
 
    U32 getCreationTime() { return mCreationTime; }

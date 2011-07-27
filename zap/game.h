@@ -124,7 +124,7 @@ private:
    U32 mTimeUnconnectedToMaster;      // Time that we've been unconnected to the master
    bool mHaveTriedToConnectToMaster;
 
-   WallSegmentManager *mWallSegmentManager;     
+   WallSegmentManager *mWallSegmentManager;    
 
    UIManager *mUIManager;
 
@@ -145,6 +145,9 @@ private:
    void onReadLevelCreditsParam(S32 argc, const char **argv);
    
 protected:
+
+boost::shared_ptr<EditorObjectDatabase> mEditorDatabase;    // TODO: Move to clientGame
+
    virtual void cleanUp();
    U32 mNextMasterTryTime;
    bool mReadyToConnectToMaster;
@@ -161,7 +164,7 @@ protected:
       DeleteRef(GameObject *o = NULL, U32 d = 0);
    };
 
-   boost::shared_ptr<GridDatabase> mDatabase;                // Database for all normal objects
+   boost::shared_ptr<GridDatabase> mGameObjDatabase;                // Database for all normal objects
 
    Vector<DeleteRef> mPendingDeleteObjects;
    Vector<SafePtr<GameObject> > mScopeAlwaysList;
@@ -218,7 +221,7 @@ public:
 
    UIManager *getUIManager() { return mUIManager; }
 
-   virtual void processLevelLoadLine(U32 argc, U32 id, const char **argv);      // Only used by ServerGame and EditorGame
+   virtual void processLevelLoadLine(U32 argc, U32 id, const char **argv, GridDatabase *database);  // Only used by ServerGame and EditorGame
    bool processLevelParam(S32 argc, const char **argv);
    string toString();
 
@@ -245,7 +248,11 @@ public:
    MasterServerConnection *getConnectionToMaster();
 
    GameNetInterface *getNetInterface();
-   virtual GridDatabase *getGridDatabase() { return mDatabase.get(); }    // EditorGame, for example, returns an EditorObjectDatabase
+   virtual GridDatabase *getGameObjDatabase() { return mGameObjDatabase.get(); }    
+
+   EditorObjectDatabase *getEditorDatabase() { return mEditorDatabase.get(); }      // TODO: Only for clientGame
+   void setEditorDatabase(boost::shared_ptr<GridDatabase> database) { mEditorDatabase = boost::dynamic_pointer_cast<EditorObjectDatabase>(database); }
+
 
    const Vector<SafePtr<GameObject> > &getScopeAlwaysList() { return mScopeAlwaysList; }
 
@@ -528,9 +535,6 @@ public:
 
 class EditorGame : public Game
 {
-private:
-   boost::shared_ptr<EditorObjectDatabase> mEditorDatabase;
-   
 public:
    EditorGame();     // Constructor
 
@@ -544,9 +548,7 @@ public:
 
    bool processPseudoItem(S32 argc, const char **argv);        // Not in client...
 
-   GridDatabase *getGridDatabase() { return mEditorDatabase.get(); }
-
-   void setGridDatabase(boost::shared_ptr<GridDatabase> database) { mEditorDatabase = boost::dynamic_pointer_cast<EditorObjectDatabase>(database); }
+   GridDatabase *getGridDatabase() { TNLAssert(false, "bad"); return mEditorDatabase.get(); }
 
    boost::shared_ptr<AbstractTeam> getNewTeam();               // Editor returns TeamEditor, client returns Team
 };

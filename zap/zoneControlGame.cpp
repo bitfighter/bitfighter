@@ -249,7 +249,7 @@ void ZoneControlGameType::majorScoringEventOcurred(S32 team)
 {
    // Find all zones...
    fillVector.clear();
-   getGame()->getGridDatabase()->findObjects(GoalZoneType, fillVector);
+   getGame()->getGameObjDatabase()->findObjects(GoalZoneType, fillVector);
 
    // ...and make sure they're not flashing...
    for(S32 i = 0; i < fillVector.size(); i++)

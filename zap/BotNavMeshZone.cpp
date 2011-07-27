@@ -153,7 +153,7 @@ void BotNavMeshZone::addToGame(Game *game)
    mGame = game;
    
    setExtent();
-   addToDatabase();
+   addToDatabase(game->getGameObjDatabase());
 }
 
 
@@ -519,13 +519,13 @@ bool BotNavMeshZone::buildBotMeshZones(ServerGame *game)
    Vector<Vector<Point> > solution;
 
    Vector<DatabaseObject *> barrierList;
-   game->getGridDatabase()->findObjects(BarrierType, barrierList, bounds);
+   game->getGameObjDatabase()->findObjects(BarrierType, barrierList, bounds);
 
    Vector<DatabaseObject *> turretList;
-   game->getGridDatabase()->findObjects(TurretType, turretList, bounds);
+   game->getGameObjDatabase()->findObjects(TurretType, turretList, bounds);
 
    Vector<DatabaseObject *> forceFieldProjectorList;
-   game->getGridDatabase()->findObjects(ForceFieldProjectorType, forceFieldProjectorList, bounds);
+   game->getGameObjDatabase()->findObjects(ForceFieldProjectorType, forceFieldProjectorList, bounds);
 
    // Merge bot zone buffers from barriers, turrets, and forcefield projectors
    if(!mergeBotZoneBuffers(barrierList, turretList, forceFieldProjectorList, solution))

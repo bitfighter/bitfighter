@@ -142,7 +142,7 @@ bool EngineerHelper::processKeyCode(KeyCode keyCode)
          // Check deployment status on client; will be checked again on server, but server will only handle likely valid placements
          EngineerModuleDeployer deployer;
          
-         if(deployer.canCreateObjectAtLocation(ship, mEngineerCostructionItemInfos[mSelectedItem].mObjectType))     
+         if(deployer.canCreateObjectAtLocation(gClientGame->getGameObjDatabase(), ship, mEngineerCostructionItemInfos[mSelectedItem].mObjectType))     
          {
             GameConnection *gc = gClientGame->getConnectionToServer();
             if(gc)

@@ -36,6 +36,8 @@ using namespace TNL;
 namespace Zap
 {
 
+class GridDatabase;
+
 class LevelLoader
 {
 public:
@@ -46,11 +48,11 @@ public:
 
    static const S32 MAX_LEVEL_LINE_LENGTH = 4096;  // Max total level line length we'll tolerate
 
-   bool loadLevelFromFile(const char *file);
-   void parseLevelLine(const char *string);
+   bool loadLevelFromFile(const char *file, GridDatabase *database);
+   void parseLevelLine(const char *string, GridDatabase *database);
 
    // Implementers of this class need to provide the following implementations:
-   virtual void processLevelLoadLine(TNL::U32 argc, TNL::U32 id, const char **argv) = 0;
+   virtual void processLevelLoadLine(TNL::U32 argc, TNL::U32 id, const char **argv, GridDatabase *database) = 0;
    virtual void setGameTime(TNL::F32 time) = 0;
 };
 

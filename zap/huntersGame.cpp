@@ -296,14 +296,13 @@ void HuntersGameType::onGhostAvailable(GhostConnection *theConnection)
 // If a flag is released from a ship, it will have underlying startVel, to which a random vector will be added
 void releaseFlag(Game *game, Point pos, Point startVel)
 {
-
    F32 th = TNL::Random::readF() * Float2Pi;
    F32 f = (TNL::Random::readF() * 2 - 1) * 100;
    Point vel(cos(th) * f, sin(th) * f);
    vel += startVel;
 
    HuntersFlagItem *newFlag = new HuntersFlagItem(pos, vel, true);
-   newFlag->addToGame(game);
+   newFlag->addToGame(game, game->getGameObjDatabase());
 }
 
 
@@ -523,7 +522,7 @@ void HuntersGameType::spawnShip(GameConnection *theClient)
    Parent::spawnShip(theClient);
 
    HuntersFlagItem *newFlag = new HuntersFlagItem(theClient->getControlObject()->getActualPos());
-   newFlag->addToGame(getGame());
+   newFlag->addToGame(getGame(), getGame()->getGameObjDatabase());
    newFlag->mountToShip(dynamic_cast<Ship *>(theClient->getControlObject()));    // mountToShip() can handle NULL
    newFlag->changeFlagCount(0);
 }

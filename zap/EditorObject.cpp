@@ -99,6 +99,19 @@ void EditorObject::addToDock(EditorGame *game, const Point &point)
 }
 
 
+void EditorObject::addToEditor(Game *game)
+{
+   BfObject::addToGame(game, game->getEditorDatabase());
+   // constists of:
+   //    mGame = game;
+   //    addToDatabase();
+
+   //setCreationTime(game->getCurrentTime());
+   //onAddedToGame(game);
+}
+
+
+
 // TODO: Merge with copy in editor, if it's really needed
 static F32 getRenderingAlpha(bool isScriptItem)
 {

@@ -338,7 +338,7 @@ private:
    string mErrorMessage;
 
 public:
-   bool canCreateObjectAtLocation(Ship *ship, U32 objectType);             // Check potential deployment position
+   bool canCreateObjectAtLocation(GridDatabase *database, Ship *ship, U32 objectType);    // Check potential deployment position
    bool deployEngineeredItem(GameConnection *connection, U32 objectType);  // Deploy!
    string getErrorMessage() { return mErrorMessage; }
 

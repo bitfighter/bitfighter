@@ -91,7 +91,7 @@ string EngineerModuleDeployer::checkResourcesAndEnergy(Ship *ship)
 
 // Returns "" if location is OK, otherwise returns an error message
 // Runs on client and server
-bool EngineerModuleDeployer::canCreateObjectAtLocation(Ship *ship, U32 objectType)
+bool EngineerModuleDeployer::canCreateObjectAtLocation(GridDatabase *database, Ship *ship, U32 objectType)
 {
    string msg;
 
@@ -121,7 +121,7 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(Ship *ship, U32 objectTyp
          return false;
    }
 
-   if(!EngineeredObject::checkDeploymentPosition(bounds, ship->getGridDatabase()))
+   if(!EngineeredObject::checkDeploymentPosition(bounds, database))
    {
       mErrorMessage = "!!! Cannot deploy item at this location";
       return false;
@@ -141,7 +141,7 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(Ship *ship, U32 objectTyp
    // Now we can find the point where the forcefield would end if this were a valid position
    Point forceFieldEnd;
    DatabaseObject *collObj;
-   ForceField::findForceFieldEnd(ship->getGridDatabase(), forceFieldStart, mDeployNormal, forceFieldEnd, &collObj);
+   ForceField::findForceFieldEnd(database, forceFieldStart, mDeployNormal, forceFieldEnd, &collObj);
 
    bool collision = false;
 
@@ -153,7 +153,7 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(Ship *ship, U32 objectTyp
    ForceField::getGeom(forceFieldStart, forceFieldEnd, candidateForceFieldGeom);
 
    fillVector.clear();
-   ship->getGridDatabase()->findObjects(ForceFieldProjectorType, fillVector, queryRect);
+   database->findObjects(ForceFieldProjectorType, fillVector, queryRect);
 
    Vector<Point> ffpGeom;     // Geom of any projectors we find
 
@@ -179,7 +179,7 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(Ship *ship, U32 objectTyp
       // one could intersect the end of the other.
       fillVector.clear();
       queryRect.expand(Point(ForceField::MAX_FORCEFIELD_LENGTH, ForceField::MAX_FORCEFIELD_LENGTH));
-      ship->getGridDatabase()->findObjects(ForceFieldProjectorType, fillVector, queryRect);
+      database->findObjects(ForceFieldProjectorType, fillVector, queryRect);
 
       // Reusable containers for holding geom of any forcefields we might need to check for intersection with our candidate
       Point start, end;
@@ -229,7 +229,7 @@ bool EngineerModuleDeployer::deployEngineeredItem(GameConnection *connection, U3
    switch(objectType)
    {
       case EngineeredTurret:
-         deployedObject = new Turret(ship->getTeam(), mDeployPosition, mDeployNormal);    // Calc'ed in canCreateObjectAtLocation
+         deployedObject = new Turret(ship->getTeam(), mDeployPosition, mDeployNormal);    // Deploy pos/norm calc'ed in canCreateObjectAtLocation()
          break;
       case EngineeredForceField:
          deployedObject = new ForceFieldProjector(ship->getTeam(), mDeployPosition, mDeployNormal);
@@ -250,7 +250,7 @@ bool EngineerModuleDeployer::deployEngineeredItem(GameConnection *connection, U3
 
    ship->engineerBuildObject();     // Deducts energy
 
-   deployedObject->addToGame(gServerGame);
+   deployedObject->addToGame(gServerGame, gServerGame->getGameObjDatabase());
    deployedObject->onEnabled();
 
    Item *resource = ship->unmountItem(ResourceItemType);
@@ -300,7 +300,7 @@ bool EngineeredObject::processArguments(S32 argc, const char **argv, Game *game)
    // Find the mount point:
    Point normal, anchor;
 
-   if(!findAnchorPointAndNormal(game->getGridDatabase(), pos, MAX_SNAP_DISTANCE, true, anchor, normal))
+   if(!findAnchorPointAndNormal(game->getGameObjDatabase(), pos, MAX_SNAP_DISTANCE, true, anchor, normal))
       return false;      // Found no mount point
 
    mAnchorPoint.set(anchor + normal);
@@ -451,7 +451,7 @@ void EngineeredObject::damageObject(DamageInfo *di)
       mIsDestroyed = true;
       onDestroyed();
 
-      mResource->addToDatabase();
+      mResource->addToDatabase(getGame()->getGameObjDatabase());
       mResource->setActualPos(mAnchorPoint + mAnchorNormal * mResource->getRadius());
 
       deleteObject(500);
@@ -714,7 +714,7 @@ void ForceFieldProjector::getForceFieldStartAndEndPoints(Point &start, Point &en
    start = getForceFieldStartPoint(mAnchorPoint, mAnchorNormal);
 
    DatabaseObject *collObj;
-   ForceField::findForceFieldEnd(getGridDatabase(), getForceFieldStartPoint(mAnchorPoint, mAnchorNormal), mAnchorNormal, end, &collObj);
+   ForceField::findForceFieldEnd(getDatabase(), getForceFieldStartPoint(mAnchorPoint, mAnchorNormal), mAnchorNormal, end, &collObj);
 }
 
 
@@ -724,10 +724,10 @@ void ForceFieldProjector::onEnabled()
    Point end;
    DatabaseObject *collObj;
    
-   ForceField::findForceFieldEnd(getGridDatabase(), start, mAnchorNormal, end, &collObj);
+   ForceField::findForceFieldEnd(getDatabase(), start, mAnchorNormal, end, &collObj);
 
    mField = new ForceField(mTeam, start, end);
-   mField->addToGame(getGame());
+   mField->addToGame(getGame(), getGame()->getGameObjDatabase());
 }
 
 

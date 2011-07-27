@@ -127,7 +127,7 @@ bool Teleporter::processArguments(S32 argc2, const char **argv2, Game *game)
    bool found = false;
 
    foundObjects.clear();
-   game->getGridDatabase()->findObjects(TeleportType, foundObjects, Rect(pos, 1));
+   game->getGameObjDatabase()->findObjects(TeleportType, foundObjects, Rect(pos, 1));
 
    if(! dynamic_cast<EditorGame *>(game))  // Editor does not handle multi dest teleporter yet..
    for(S32 i = 0; i < foundObjects.size(); i++)

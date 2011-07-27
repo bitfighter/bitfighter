@@ -26,6 +26,8 @@
 #include "gameWeapons.h"
 #include "projectile.h"
 #include "ship.h"
+#include "game.h"
+
 #include "Color.h"
 #include "Colors.h"
 
@@ -61,28 +63,30 @@ void createWeaponProjectiles(WeaponType weapon, Point &dir, Point &shooterPos, P
    Point projVel = dir * F32(wi->projVelocity) + dir * shooterVel.dot(dir);
    Point firePos = shooterPos + dir * shooterRadius;
 
+   Game *game = shooter->getGame();
+
    switch(weapon)
    {
       case WeaponTriple:      // Add three bullets!
          {
             Point velPerp(projVel.y, -projVel.x);
             velPerp.normalize(40.0f);
-            (new Projectile(weapon, firePos, projVel + velPerp, shooter))->addToGame(shooter->getGame());
-            (new Projectile(weapon, firePos, projVel - velPerp, shooter))->addToGame(shooter->getGame());
+            (new Projectile(weapon, firePos, projVel + velPerp, shooter))->addToGame(game, game->getGameObjDatabase());
+            (new Projectile(weapon, firePos, projVel - velPerp, shooter))->addToGame(game, game->getGameObjDatabase());
          }
       case WeaponPhaser:
       case WeaponBounce:
       case WeaponTurret:
-         (new Projectile(weapon, firePos, projVel, shooter))->addToGame(shooter->getGame());
+         (new Projectile(weapon, firePos, projVel, shooter))->addToGame(game, game->getGameObjDatabase());
          break;
       case WeaponBurst:                                         // 0.9 to fix firing through barriers
-         (new GrenadeProjectile(shooterPos + dir * shooterRadius * 0.9, projVel, shooter))->addToGame(shooter->getGame());
+         (new GrenadeProjectile(shooterPos + dir * shooterRadius * 0.9, projVel, shooter))->addToGame(game, game->getGameObjDatabase());
          break;
       case WeaponMine:
-         (new Mine(firePos, dynamic_cast<Ship *>(shooter)))->addToGame(shooter->getGame());
+         (new Mine(firePos, dynamic_cast<Ship *>(shooter)))->addToGame(game, game->getGameObjDatabase());
          break;
      case WeaponSpyBug:
-         (new SpyBug(firePos, dynamic_cast<Ship *>(shooter)))->addToGame(shooter->getGame());
+         (new SpyBug(firePos, dynamic_cast<Ship *>(shooter)))->addToGame(game, game->getGameObjDatabase());
          break;
      default:
          break;

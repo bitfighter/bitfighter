@@ -51,7 +51,7 @@ friend class GridDatabase;
 private:
    U32 mLastQueryId;
    Rect mExtent;
-   bool mInDatabase;
+   GridDatabase *mDatabase;
 
 protected:
    U32 mObjectTypeMask;
@@ -68,22 +68,23 @@ public:
    U8 getObjectTypeNumber() { return mObjectTypeNumber; }   
    void setObjectTypeNumber(U8 objectTypeNumber) { mObjectTypeNumber = objectTypeNumber; }
 
+   GridDatabase *getDatabase() { return mDatabase; }     // Returns the database in which this object is stored, NULL if not in any database
+   void setDatabase(GridDatabase *database) { mDatabase = database; }
+
    Rect getExtent() { return mExtent; }
    void setExtent(const Rect &extentRect);
-
-   virtual GridDatabase *getGridDatabase() = 0;
 
    virtual bool getCollisionPoly(Vector<Point> &polyPoints) const = 0;
    virtual bool getCollisionCircle(U32 stateIndex, Point &point, float &radius) const = 0;
    
    virtual bool isCollisionEnabled() { return true; }
 
-   bool isInDatabase() { return mInDatabase; }
+   bool isInDatabase() { return mDatabase != NULL; }
 
-   void addToDatabase();
+   void addToDatabase(GridDatabase *database);
    void removeFromDatabase();
 
-   virtual bool getIsDatabasable() { return true; }      // Can this item actually be inserted into a database?
+   virtual bool isDatabasable() { return true; }      // Can this item actually be inserted into a database?
 };
 
 ////////////////////////////////////////

@@ -197,7 +197,7 @@ S32 LuaLevelGenerator::addWall(lua_State *L)
       logError(e.what());
    }
 
-   mCaller->parseLevelLine(line.c_str());
+   mCaller->parseLevelLine(line.c_str(), sGridDatabase);
 
    return 0;
 }
@@ -221,7 +221,7 @@ S32 LuaLevelGenerator::addItem(lua_State *L)
    for(S32 i = 0; i < argc; i++)      // argc was already bounds checked above
       argv[i] = getString(L, i + 1, methodName);
 
-   processLevelLoadLine(argc, 0, argv);      // For now, all ids are 0!
+   processLevelLoadLine(argc, 0, argv, sGridDatabase);      // For now, all ids are 0!
 
    //clearStack();
 
@@ -230,9 +230,9 @@ S32 LuaLevelGenerator::addItem(lua_State *L)
 
 
 // Let someone else do the work!
-void LuaLevelGenerator::processLevelLoadLine(int argc, U32 id, const char **argv)
+void LuaLevelGenerator::processLevelLoadLine(int argc, U32 id, const char **argv, GridDatabase *database)
 {
-   mCaller->processLevelLoadLine(argc, id, argv);
+   mCaller->processLevelLoadLine(argc, id, argv, database);
 }
 
 
@@ -244,7 +244,7 @@ S32 LuaLevelGenerator::addLevelLine(lua_State *L)
    checkArgCount(L, 1, methodName);
    const char *line = getString(L, 1, methodName);
 
-   mCaller->parseLevelLine(line);
+   mCaller->parseLevelLine(line, sGridDatabase);
 
    //clearStack();
 

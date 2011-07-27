@@ -174,9 +174,9 @@ string GameType::toString() const
 }
 
 
-void GameType::addToGame(Game *game)
+void GameType::addToGame(Game *game, GridDatabase *database)
 {
-   GameObject::addToGame(game);
+   GameObject::addToGame(game, database);
    game->setGameType(this);
 }
 
@@ -579,7 +579,7 @@ void GameType::idle(GameObject::IdleCallPath path)
 
          asteroid->setPosAng(mAsteroidSpawnPoints[i].getPos(), ang);
 
-         asteroid->addToGame(gServerGame);                                                 // And add it to the list of game objects
+         asteroid->addToGame(gServerGame, gServerGame->getGameObjDatabase());              // And add it to the list of game objects
 
          mAsteroidSpawnPoints[i].resetTimer();                                             // Reset the spawn timer
       }
@@ -1014,7 +1014,7 @@ void GameType::catalogSpybugs()
    mSpyBugs.clear();
 
    // Find all spybugs in the game, load them into mSpyBugs
-   getGame()->getGridDatabase()->findObjects(SpyBugType, spyBugs);
+   getGame()->getGameObjDatabase()->findObjects(SpyBugType, spyBugs);
 
    mSpyBugs.resize(spyBugs.size());
    for(S32 i = 0; i < spyBugs.size(); i++)
@@ -1028,6 +1028,7 @@ void GameType::addSpyBug(SpyBug *spybug)
 }
 
 
+// Only runs on server
 void GameType::addBarrier(BarrierRec barrier, Game *game)
 {
    mBarriers.push_back(barrier); 
@@ -1042,7 +1043,7 @@ void GameType::onLevelLoaded()
 
    // Figure out if this level has any loadout zones
    fillVector.clear();
-   getGridDatabase()->findObjects(LoadoutZoneType, fillVector);
+   getDatabase()->findObjects(LoadoutZoneType, fillVector);
 
    mLevelHasLoadoutZone = (fillVector.size() > 0);
 
@@ -1050,6 +1051,7 @@ void GameType::onLevelLoaded()
 }
 
 
+// Gets run in editor and game
 void GameType::onAddedToGame(Game *game)
 {
    game->setGameType(this);
@@ -1090,7 +1092,7 @@ void GameType::spawnShip(GameConnection *theClient)
       Ship *newShip = new Ship(cl->name, theClient->isAuthenticated(), teamIndex, spawnPoint);
       theClient->setControlObject(newShip);
       newShip->setOwner(theClient);
-      newShip->addToGame(getGame());
+      newShip->addToGame(getGame(), getGame()->getGameObjDatabase());
    }
 
    if(!levelHasLoadoutZone())  // || isSpawnWithLoadoutGame()
@@ -2021,7 +2023,7 @@ void GameType::changeClientTeam(GameConnection *source, S32 team)
       Rect worldBounds = getGame()->getWorldExtents();
 
       fillVector.clear();
-      getGame()->getGridDatabase()->findObjects(SpyBugType | MineType, fillVector);
+      getGame()->getGameObjDatabase()->findObjects(SpyBugType | MineType, fillVector);
 
       for(S32 i = 0; i < fillVector.size(); i++)
       {
@@ -2232,7 +2234,7 @@ GAMETYPE_RPC_S2C(GameType, s2cClientJoinedTeam,
    // but this RPC only runs when a player joins the game or changes teams, so this will never hurt, and we can
    // save the overhead of sending a separate message which, while theoretically cleaner, will never be needed practically.
    fillVector.clear();
-   clientGame->getGridDatabase()->findObjects(SpyBugType | MineType, fillVector);
+   clientGame->getGameObjDatabase()->findObjects(SpyBugType | MineType, fillVector);
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
@@ -2517,7 +2519,8 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
       else
       {
          Robot *robot = new Robot();
-         robot->addToGame(getGame());
+         robot->addToGame(getGame(), getGame()->getGameObjDatabase());
+
          S32 args_count = 0;
          const char *args_char[LevelLoader::MAX_LEVEL_LINE_ARGS];  // Convert to a format processArgs will allow
          
@@ -2846,7 +2849,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, c2sResendItemStatus, (U16 itemId), (itemId
    }
 
    fillVector.clear();
-   getGridDatabase()->findObjects(fillVector);
+   getDatabase()->findObjects(fillVector);
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {

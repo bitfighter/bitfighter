@@ -961,7 +961,7 @@ U16 LuaRobot::findClosestZone(const Point &point)
       BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(objects[i]);
       Point center = zone->getCenter();
 
-      if(gServerGame->getGridDatabase()->pointCanSeePoint(center, point))  // This is an expensive test
+      if(gServerGame->getGameObjDatabase()->pointCanSeePoint(center, point))  // This is an expensive test
       {
          closestZone = zone->getZoneId();
          break;
