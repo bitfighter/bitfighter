@@ -758,11 +758,13 @@ VersionedGameStats GameType::getGameStats()
    gameStats->serverName = gServerGame->getHostName(); // not sent, used for logging stats
 
    gameStats->isOfficial = false;
+   gameStats->isTesting = gServerGame->isTestServer();
    gameStats->playerCount = 0; //mClientList.size(); ... will count number of players.
    gameStats->duration = mTotalGamePlay / 1000;
    gameStats->isTeamGame = isTeamGame();
    gameStats->levelName = mLevelName.getString();
    gameStats->gameType = getGameTypeString();
+   gameStats->cs_protocol_version = CS_PROTOCOL_VERSION;
    gameStats->build_version = BUILD_VERSION;
 
    gameStats->teamStats.resize(mGame->getTeamCount());
@@ -777,6 +779,7 @@ VersionedGameStats GameType::getGameStats()
 
       teamStats->name = mGame->getTeam(i)->getName().getString();
       teamStats->score = ((Team *)(mGame->getTeam(i)))->getScore();
+      teamStats->gameResult = 0;  // will be filled in later
       for(S32 j = 0; j < mClientList.size(); j++)
       {
          // Only looking for players on the current team
@@ -802,10 +805,21 @@ VersionedGameStats GameType::getGameStats()
          playerStats->isAdmin        = mClientList[j]->clientConnection->isAdmin();
          playerStats->isLevelChanger = mClientList[j]->clientConnection->isLevelChanger();
          playerStats->isAuthenticated = mClientList[j]->clientConnection->isAuthenticated();
-         playerStats->isHosting     = mClientList[j]->clientConnection->isLocalConnection();
+         playerStats->isHosting      = mClientList[j]->clientConnection->isLocalConnection();
 
-         Vector<U16> shots = statistics->getShotsVector();
-         Vector<U16> hits = statistics->getHitsVector();
+         playerStats->flagPickup     = statistics->mFlagPickup;
+         playerStats->flagDrop       = statistics->mFlagDrop;
+         playerStats->flagReturn     = statistics->mFlagReturn;
+         playerStats->flagScore      = statistics->mFlagScore;
+         playerStats->crashedIntoAsteroid = statistics->mCrashedIntoAsteroid;
+         playerStats->changedLoadout = statistics->mChangedLoadout;
+         playerStats->teleport       = statistics->mTeleport;
+         playerStats->playTime       = statistics->mPlayTime / 1000;
+
+         playerStats->gameResult     = 0; // will fill in later
+
+         Vector<U32> shots = statistics->getShotsVector();
+         Vector<U32> hits = statistics->getHitsVector();
          for(S32 k = 0; k < shots.size(); k++)
          {
             WeaponStats weaponStats;
@@ -820,7 +834,7 @@ VersionedGameStats GameType::getGameStats()
          {
             ModuleStats moduleStats;
             moduleStats.shipModule = ShipModule(k);
-            moduleStats.seconds = statistics->getModuleUsed(ShipModule(k)) / 1000.f;
+            moduleStats.seconds = statistics->getModuleUsed(ShipModule(k)) / 1000;
             if(moduleStats.seconds != 0)
                playerStats->moduleStats.push_back(moduleStats);
          }

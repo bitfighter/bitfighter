@@ -99,7 +99,11 @@ namespace Zap
          r = stealString;
          team = theFlag->getZone()->getTeam();
          updateScore(team, LostFlag);
+         if(theShip->getOwner())
+            theShip->getOwner()->mStatistics.mFlagReturn++;  // used as flag steal
       }
+      if(theShip->getOwner())
+         theShip->getOwner()->mStatistics.mFlagPickup++;
 
       Vector<StringTableEntry> e;
       e.push_back(theShip->getName());
@@ -175,6 +179,9 @@ namespace Zap
 
          // Score the flag...
          updateScore(s, ReturnFlagToZone);
+
+         if(s->getOwner())
+            s->getOwner()->mStatistics.mFlagScore++;
 
          // See if all the flags are owned by one team...
          for(S32 i = 0; i < mFlags.size(); i++)

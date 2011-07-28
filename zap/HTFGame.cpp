@@ -92,7 +92,11 @@ namespace Zap
       {
          r = stealString;
          teamIndex = theFlag->getZone()->getTeam();
+         if(theShip->getOwner())
+            theShip->getOwner()->mStatistics.mFlagReturn++;  // used as flag steal
       }
+      if(theShip->getOwner())
+         theShip->getOwner()->mStatistics.mFlagPickup++;
 
       Vector<StringTableEntry> e;
       e.push_back(theShip->getName());
@@ -119,8 +123,6 @@ namespace Zap
 
       if(flag)
       {
-         static StringTableEntry aString("a");
-         static StringTableEntry theString("the");
          static StringTableEntry dropString("%e0 dropped %e1 flag!");
 
          Vector<StringTableEntry> e;
@@ -184,6 +186,9 @@ namespace Zap
          mountedFlag->setActualPos(z->getExtent().getCenter());   // Put flag smartly in center of capture zone
 
          updateScore(s, ReturnFlagToZone);
+         if(s->getOwner())
+            s->getOwner()->mStatistics.mFlagScore++;
+
       }
    }
 

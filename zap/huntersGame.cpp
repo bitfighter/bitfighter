@@ -229,7 +229,7 @@ const char **HuntersGameType::getGameParameterMenuKeys()
 boost::shared_ptr<MenuItem> HuntersGameType::getMenuItem(Game *game, const char *key)
 {
    if(!strcmp(key, "Nexus Time to Open"))
-   	return boost::shared_ptr<MenuItem>(new TimeCounterMenuItem(game, "Time for Nexus to Open:", mNexusClosedTime / 1000, 99*60, "Never", "Time it takes for the Nexus to open"));
+      return boost::shared_ptr<MenuItem>(new TimeCounterMenuItem(game, "Time for Nexus to Open:", mNexusClosedTime / 1000, 99*60, "Never", "Time it takes for the Nexus to open"));
    else if(!strcmp(key, "Nexus Time Remain Open"))
       return boost::shared_ptr<MenuItem>(new TimeCounterMenuItemSeconds(game, "Time Nexus Remains Open:", mNexusOpenTime / 1000, 99*60, "Always", "Time that the Nexus will remain open"));
    else if(!strcmp(key, "Nexus Win Score"))
@@ -601,6 +601,9 @@ void HuntersFlagItem::dropFlags(U32 flags)
 
 void HuntersFlagItem::onMountDestroyed()
 {
+   if(mMount->getOwner())
+      mMount->getOwner()->mStatistics.mFlagDrop += mFlagCount + 1;
+
    dropFlags(mFlagCount + 1);    // Drop at least one flag plus as many as the ship carries
 
    // Now delete the flag itself

@@ -149,7 +149,7 @@ void Item::render()
 
 void Item::setVert(const Point &point, S32 index) 
 { 
-   TNLAssert(getGame() == NULL || getGame() == gEditorGame, "Where is setVert used outside editor context???");
+   //TNLAssert(getGame() == NULL || getGame() == gEditorGame, "Where is setVert used outside editor context???");
    Parent::setVert(point, index);
    mMoveState[RenderState].pos = point;      // Keep render state in-sync with the geom
 }

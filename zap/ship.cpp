@@ -432,6 +432,10 @@ void Ship::idle(GameObject::IdleCallPath path)
    if(hasExploded)
       return;
 
+   if(path == GameObject::ServerIdleControlFromClient)
+      if(getOwner())
+         getOwner()->mStatistics.mPlayTime += mCurrentMove.time;
+
    Parent::idle(path);
 
    if(path == GameObject::ServerIdleMainLoop && isControlled())
@@ -773,6 +777,10 @@ void Ship::damageObject(DamageInfo *theInfo)
    if(victimOwner && projectile)
    {
       victimOwner->mStatistics.countHitBy(projectile->mWeaponType);
+   }
+   else if(mHealth == 0 && dynamic_cast<Asteroid *>(theInfo->damagingObject))
+   {
+      victimOwner->mStatistics.mCrashedIntoAsteroid++;
    }
 }
 
@@ -1249,6 +1257,9 @@ void Ship::setLoadout(const Vector<U32> &loadout, bool silent)
 
    if(theSame)      // Don't bother if ship config hasn't changed
       return;
+
+   if(getOwner())
+      getOwner()->mStatistics.mChangedLoadout++;
 
    WeaponType currentWeapon = mWeapon[mActiveWeaponIndx];
 

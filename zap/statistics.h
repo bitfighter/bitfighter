@@ -41,18 +41,27 @@ namespace Zap
 class Statistics
 {
 private:
-   U16 mShots[WeaponCount];
-   U16 mHits[WeaponCount];
-   U16 mHitBy[WeaponCount];
+   U32 mShots[WeaponCount];
+   U32 mHits[WeaponCount];
+   U32 mHitBy[WeaponCount];
    U32 mModuleUsedTime[ModuleCount];
 
-   U16 mKills;          // Enemy kills
-   U16 mDeaths;         // Times died
-   U16 mSuicides;       // Self kills
-   U16 mFratricides;    // Tammate kills
+   U32 mKills;          // Enemy kills
+   U32 mDeaths;         // Times died
+   U32 mSuicides;       // Self kills
+   U32 mFratricides;    // Tammate kills
 
 
 public:
+   U32 mFlagPickup;
+   U32 mFlagDrop;
+   U32 mFlagReturn;  // used as Flag steal in HTF and retrieve
+   U32 mFlagScore;
+   U32 mCrashedIntoAsteroid;
+   U32 mChangedLoadout;
+   U32 mTeleport;
+   U32 mPlayTime;
+
    Statistics();        // Constructor
 
    void countShot(WeaponType weaponType);    // Record a shot
@@ -74,20 +83,20 @@ public:
    U32 getModuleUsed(ShipModule);
 
    void addKill();      // Player killed another player
-   U16 getKills();      // Report cumulated kills
+   U32 getKills();      // Report cumulated kills
 
    void addDeath();     // Player got killed
-   U16 getDeaths();     // Report cumulated deaths
+   U32 getDeaths();     // Report cumulated deaths
 
    void addSuicide();   // Player killed self
-   U16 getSuicides();   // Report cumulated suicides
+   U32 getSuicides();   // Report cumulated suicides
 
    void addFratricide();   // Player killed teammate
-   U16 getFratricides();   // Report cumulated fratricides
+   U32 getFratricides();   // Report cumulated fratricides
 
 
-   Vector<U16> getShotsVector();
-   Vector<U16> getHitsVector();
+   Vector<U32> getShotsVector();
+   Vector<U32> getHitsVector();
 
    void resetStatistics();   // Reset Player Statistics (used at end of match)
 };

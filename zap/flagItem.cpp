@@ -315,6 +315,9 @@ bool FlagItem::collide(GameObject *hitObject)
 
 void FlagItem::onMountDestroyed()
 {
+   if(mMount->getOwner())
+      mMount->getOwner()->mStatistics.mFlagDrop++;
+
    onItemDropped();
 }
 

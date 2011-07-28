@@ -72,9 +72,9 @@ S32 Statistics::getShots(WeaponType weaponType)
 }
 
 
-Vector<U16> Statistics::getShotsVector()
+Vector<U32> Statistics::getShotsVector()
 {
-   Vector<U16>(shots);
+   Vector<U32>(shots);
    shots.resize(WeaponCount);
    for(S32 i = 0; i < WeaponCount; i++)
       shots[i] = mShots[i];
@@ -82,9 +82,9 @@ Vector<U16> Statistics::getShotsVector()
 }
 
 
-Vector<U16> Statistics::getHitsVector()
+Vector<U32> Statistics::getHitsVector()
 {
-   Vector<U16>(hits);
+   Vector<U32>(hits);
    hits.resize(WeaponCount);
    for(S32 i = 0; i < WeaponCount; i++)
       hits[i] = mHits[i];
@@ -146,7 +146,7 @@ void Statistics::addKill()
 }
 
 // Report cumulated kills
-U16 Statistics::getKills()
+U32 Statistics::getKills()
 {
    return mKills;
 }
@@ -159,7 +159,7 @@ void Statistics::addDeath()
 }
 
 // Report cumulated deaths
-U16 Statistics::getDeaths()
+U32 Statistics::getDeaths()
 {
    return mDeaths;
 }
@@ -172,7 +172,7 @@ void Statistics::addSuicide()
 }
 
 // Report cumulated suicides
-U16 Statistics::getSuicides()
+U32 Statistics::getSuicides()
 {
    return mSuicides;
 }
@@ -186,7 +186,7 @@ void Statistics::addFratricide()
 }
 
 // Report cumulated fratricides
-U16 Statistics::getFratricides()
+U32 Statistics::getFratricides()
 {
    return mFratricides;
 }
@@ -207,6 +207,14 @@ void Statistics::resetStatistics()
    for(S32 i = 0; i < ModuleCount; i++)
       mModuleUsedTime[i] = 0;
 
+   mFlagPickup = 0;
+   mFlagReturn = 0;
+   mFlagScore = 0;
+   mFlagDrop = 0;
+   mCrashedIntoAsteroid = 0;
+   mChangedLoadout = 0;
+   mTeleport = 0;
+   mPlayTime = 0;
 }
 
 }

@@ -139,7 +139,7 @@ const char **RabbitGameType::getGameParameterMenuKeys()
 boost::shared_ptr<MenuItem> RabbitGameType::getMenuItem(Game *game, const char *key)
 {
    if(!strcmp(key, "Flag Return Time"))
-   	return boost::shared_ptr<MenuItem>(new CounterMenuItem(game, "Flag Return Timer:", mFlagReturnTimer / 1000, 1, 1, 99, 
+      return boost::shared_ptr<MenuItem>(new CounterMenuItem(game, "Flag Return Timer:", mFlagReturnTimer / 1000, 1, 1, 99, 
                                                              "secs", "", "Time it takes for an uncaptured flag to return home"));
    else if(!strcmp(key, "Point Earn Rate"))
       return boost::shared_ptr<MenuItem>(new CounterMenuItem(game, "Point Earn Rate:", getFlagScore(), 1, 1, 99, 
@@ -175,7 +175,7 @@ S32 RabbitGameType::getFlagScore()
 bool RabbitGameType::objectCanDamageObject(GameObject *damager, GameObject *victim)
 {
    if(getGame()->getTeamCount() != 1)
-	   return Parent::objectCanDamageObject(damager, victim);
+      return Parent::objectCanDamageObject(damager, victim);
 
    if(!damager)
       return true;
@@ -201,7 +201,7 @@ bool RabbitGameType::objectCanDamageObject(GameObject *damager, GameObject *vict
 const Color *RabbitGameType::getShipColor(Ship *s)
 {
    if(getGame()->getTeamCount() != 1)
-	   return Parent::getShipColor(s);
+      return Parent::getShipColor(s);
 
    GameConnection *gc = gClientGame->getConnectionToServer();
    if(!gc)
@@ -216,7 +216,7 @@ const Color *RabbitGameType::getShipColor(Ship *s)
 Color RabbitGameType::getTeamColor(S32 team)
 {
    if(team != -1 || getGame()->getTeamCount() != 1)
-	   return Parent::getTeamColor(team);
+      return Parent::getTeamColor(team);
 
    return Color(1, 0.5, 0);      // orange neutral team, so the neutral flag is orange.
 }
@@ -248,10 +248,10 @@ void RabbitGameType::idle(GameObject::IdleCallPath path)
    {
       FlagItem *mRabbitFlag = mFlags[flagIndex];
       if(!mRabbitFlag)
-		{
+      {
          TNLAssert(false, "RabbitGameType::idle NULL mFlags");
          mFlags.erase_fast(flagIndex);
-		}
+      }
       else
       {
          if(mRabbitFlag->isMounted())
@@ -318,6 +318,10 @@ void RabbitGameType::shipTouchFlag(Ship *ship, FlagItem *flag)
    flag->mTimer.reset(mFlagScoreTimer);
 
    flag->mountToShip(ship);
+
+   if(ship->getOwner())
+      ship->getOwner()->mStatistics.mFlagPickup++;
+
 }
 
 

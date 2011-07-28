@@ -62,6 +62,9 @@ void ZoneControlGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
      getClient(i)->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagSnatch, takeString, e);
    theFlag->mountToShip(theShip);
 
+   if(theShip->getOwner())
+      theShip->getOwner()->mStatistics.mFlagPickup++;
+
    mFlagTeam = theShip->getTeam();
    s2cSetFlagTeam(mFlagTeam);
 
@@ -130,6 +133,10 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
 
 
    z->setTeam(s->getTeam());                       // Assign zone to capturing team
+
+   if(s->getOwner())
+      s->getOwner()->mStatistics.mFlagScore++;
+
 
    // Check to see if team now controls all zones...
    for(S32 i = 0; i < mZones.size(); i++)
