@@ -38,7 +38,6 @@ namespace Zap
 
 class Ship;
 class GameType;
-class EditorGame;
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -145,7 +144,7 @@ public:
    EditorPointObject(GameObjectType objectType = UnknownType);       // Constructor
 
    virtual void renderItemText(const char *text, S32 offset, F32 currentScale, const Point &currentOffset);
-   void addToDock(EditorGame *game, const Point &point);
+   void addToDock(Game *game, const Point &point);
 };
 
 

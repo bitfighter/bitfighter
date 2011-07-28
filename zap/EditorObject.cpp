@@ -84,7 +84,7 @@ EditorObject::~EditorObject()
 //}
 
 
-void EditorObject::addToDock(EditorGame *game, const Point &point)
+void EditorObject::addToDock(Game *game, const Point &point)
 {
    mGame = game;
 
@@ -94,8 +94,6 @@ void EditorObject::addToDock(EditorGame *game, const Point &point)
 
    EditorUserInterface *ui = game->getUIManager()->getEditorUserInterface();
    ui->addToDock(this);
-
-   //game->getEditorUserInterface()->addToDock(this);
 }
 
 
@@ -269,16 +267,13 @@ void EditorObject::renderInEditor(bool isScriptItem, bool showingReferenceShip, 
 
    bool hideit = (showMode == ShowWallsOnly) && !(showingReferenceShip && !mDockItem);
 
-   EditorGame *game = dynamic_cast<EditorGame *>(mGame);
-   TNLAssert(game, "Bad cast!");
-
    Color drawColor;
    if(hideit)
       glColor(grayedOutColorBright, alpha);
    else 
       glColor(getDrawColor(), alpha);
 
-   S32 snapIndex = game->getUIManager()->getEditorUserInterface()->getSnapVertexIndex();
+   S32 snapIndex = mGame->getUIManager()->getEditorUserInterface()->getSnapVertexIndex();
 
    glEnableBlend;        // Enable transparency
 
@@ -286,8 +281,8 @@ void EditorObject::renderInEditor(bool isScriptItem, bool showingReferenceShip, 
    if(anyVertsSelected())
       drawColor = *SELECT_COLOR;
 
-   F32 currentScale = game->getUIManager()->getEditorUserInterface()->getCurrentScale();
-   Point currentOffset = game->getUIManager()->getEditorUserInterface()->getCurrentOffset(); 
+   F32 currentScale = mGame->getUIManager()->getEditorUserInterface()->getCurrentScale();
+   Point currentOffset = mGame->getUIManager()->getEditorUserInterface()->getCurrentOffset(); 
      
    if(mDockItem)
    {
@@ -299,7 +294,7 @@ void EditorObject::renderInEditor(bool isScriptItem, bool showingReferenceShip, 
    else  // Not a dock item
    {
       glPushMatrix();
-         setLevelToCanvasCoordConversion(game);
+         setLevelToCanvasCoordConversion(mGame);
          if(showingReferenceShip)
             render();
          else

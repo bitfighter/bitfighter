@@ -232,6 +232,7 @@ private:
    void insertNewItem(GameObjectType itemType);                      // Insert a new object into the game
 
    bool mWasTesting;
+   GameType *mEditorGameType;    // Used to store our GameType while we're testing
 
    void onFinishedDragging();    // Called when we're done dragging an object
 

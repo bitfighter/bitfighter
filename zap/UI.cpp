@@ -94,20 +94,10 @@ ClientGame *UserInterface::getClientGame()
 }
 
 
-EditorGame *UserInterface::getEditorGame()
-{
-   EditorGame *editorGame = dynamic_cast<EditorGame *>(mGame);
-   TNLAssert(editorGame, "Bad cast!");
-
-   return editorGame;
-}
-
-
 UIManager *UserInterface::getUIManager() 
 { 
    return mGame->getUIManager(); 
 }
-
 
 
 void UserInterface::activate(bool save)

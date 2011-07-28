@@ -1054,7 +1054,7 @@ void GameType::onLevelLoaded()
 // Gets run in editor and game
 void GameType::onAddedToGame(Game *game)
 {
-   game->setGameType(this);
+   //game->setGameType(this);    // also set in GameType::addToGame(), which I think is a better place
 
    if(getGame()->isServer())
       mShowAllBots = getGame()->isTestServer();  // Default to true to show all bots if on testing mode

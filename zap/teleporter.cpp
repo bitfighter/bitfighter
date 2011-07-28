@@ -129,26 +129,25 @@ bool Teleporter::processArguments(S32 argc2, const char **argv2, Game *game)
    foundObjects.clear();
    game->getGameObjDatabase()->findObjects(TeleportType, foundObjects, Rect(pos, 1));
 
-   if(! dynamic_cast<EditorGame *>(game))  // Editor does not handle multi dest teleporter yet..
-   for(S32 i = 0; i < foundObjects.size(); i++)
-   {
-      Teleporter *tel = dynamic_cast<Teleporter *>(foundObjects[i]);
-      if(tel->getVert(0).distanceTo(pos) < 1)     // i.e These are really close!  Must be the same!  --> is always true?
+   if(!dynamic_cast<ClientGame *>(game))              // Editor handles multi-dest teleporters as separate single dest items
+      for(S32 i = 0; i < foundObjects.size(); i++)
       {
-         tel->mDests.push_back(dest);
-         found = true;
-         break;      // There will only be one!
+         Teleporter *tel = dynamic_cast<Teleporter *>(foundObjects[i]);
+         if(tel->getVert(0).distSquared(pos) < 1)     // i.e These are really close!  Must be the same!
+         {
+            tel->mDests.push_back(dest);
+            found = true;
+            break;      // There will only be one!
+         }
       }
-   }
 
-   if(!found)     // New teleporter origin
+   if(!found)           // New teleporter origin
    {
       mDests.push_back(dest);
       setExtent(Rect(pos, TELEPORTER_RADIUS));
    }
    else  
-      // Since this is really part of a different teleporter, delete this one
-      destroySelf();
+      destroySelf();    // Since this is really part of a different teleporter, delete this one
 
    return true;
 }

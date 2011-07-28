@@ -127,7 +127,6 @@ void TeamDefUserInterface::idle(U32 timeDelta)
 
 extern Color gNeutralTeamColor;
 extern Color gHostileTeamColor;
-extern EditorGame *getGame();
 
 // TODO: Clean this up a bit...  this menu was two-cols before, and some of that garbage is still here...
 void TeamDefUserInterface::render()

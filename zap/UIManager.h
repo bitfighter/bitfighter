@@ -102,9 +102,8 @@ private:
    auto_ptr<SplashUserInterface> mSplashUserInterface;
    auto_ptr<TeamDefUserInterface> mTeamDefUserInterface;
 
-      
-   static auto_ptr<LevelNameEntryUserInterface> mLevelNameEntryUserInterface;
-   static auto_ptr<EditorUserInterface> mEditorUserInterface;
+   auto_ptr<LevelNameEntryUserInterface> mLevelNameEntryUserInterface;
+   auto_ptr<EditorUserInterface> mEditorUserInterface;
 
 public:
    UIManager(Game *game);     // Constructor

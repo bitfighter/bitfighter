@@ -2152,10 +2152,10 @@ void ClientGame::drawStars(F32 alphaFrac, Point cameraPos, Point visibleExtent)
 }
 
 
+// Should only be called from Editor
 boost::shared_ptr<AbstractTeam> ClientGame::getNewTeam() 
 { 
-   TNLAssert(false, "This should never be called"); 
-   return boost::shared_ptr<AbstractTeam>(new Team); 
+   return boost::shared_ptr<AbstractTeam>(new TeamEditor());
 }
 
 
@@ -2561,29 +2561,14 @@ void ClientGame::render()
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-// Constructor
-EditorGame::EditorGame() : Game(Address())
-{ 
-   resetLevelInfo(); 
-   //mEditorDatabase = boost::shared_ptr<EditorObjectDatabase>();
-   mEditorDatabase = boost::shared_ptr<EditorObjectDatabase>(new EditorObjectDatabase());
-   TNLAssert(mEditorDatabase, "WTF???");
-}     
+//const Color *EditorGame::getTeamColor(S32 teamIndex) const
+//{
+//   return Game::getBasicTeamColor(this, teamIndex); 
+//}
 
 
-const Color *EditorGame::getTeamColor(S32 teamIndex) const
-{
-   return Game::getBasicTeamColor(this, teamIndex); 
-}
 
-
-boost::shared_ptr<AbstractTeam> EditorGame::getNewTeam()
-{
-   return boost::shared_ptr<AbstractTeam>(new TeamEditor());
-}
-
-
-bool EditorGame::processPseudoItem(S32 argc, const char **argv)
+bool ClientGame::processPseudoItem(S32 argc, const char **argv)
 {
    if(!stricmp(argv[0], "Spawn") || !stricmp(argv[0], "FlagSpawn") || !stricmp(argv[0], "AsteroidSpawn"))
    {

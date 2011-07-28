@@ -36,7 +36,7 @@
 #include "UIErrorMessage.h"
 #include "UIYesNo.h"
 #include "gameObjectRender.h"
-#include "game.h"                // For EditorGame def
+#include "game.h"                // Can delete?
 #include "gameType.h"
 #include "soccerGame.h"          // For Soccer ball radius
 #include "engineeredObjects.h"   // For Turret properties
@@ -161,7 +161,7 @@ void EditorUserInterface::addToDock(EditorObject* object)
 
 void EditorUserInterface::addDockObject(EditorObject *object, F32 xPos, F32 yPos)
 {
-   object->addToDock(getEditorGame(), Point(xPos, yPos));       
+   object->addToDock(getGame(), Point(xPos, yPos));       
    object->setTeam(mCurrentTeam);
 }
 
@@ -591,7 +591,6 @@ void EditorUserInterface::loadLevel()
 
    GameType *gameType = new GameType;
    gameType->addToGame(getGame(), getGame()->getEditorDatabase());
-   getGame()->setGameType(gameType);
 
    char fileBuffer[1024];
    dSprintf(fileBuffer, sizeof(fileBuffer), "%s/%s", gConfigDirs.levelDir.c_str(), mEditFileName.c_str());
@@ -1083,7 +1082,7 @@ void EditorUserInterface::onDeactivate()
 }
 
 
-void EditorUserInterface::onReactivate()
+void EditorUserInterface::onReactivate()     // Run when user re-enters the editor after testing, among other things
 {
    mDraggingObjects = false;  
 
@@ -1091,9 +1090,12 @@ void EditorUserInterface::onReactivate()
    {
       mWasTesting = false;
       mSaveMsgTimer.clear();
+
+      getGame()->setGameType(mEditorGameType); 
+
+      remove("editor.tmp");      // Delete temp file
    }
 
-   remove("editor.tmp");      // Delete temp file
 
    if(mCurrentTeam >= getGame()->getTeamCount())
       mCurrentTeam = 0;
@@ -1768,7 +1770,7 @@ void EditorUserInterface::render()
 
 const Color *EditorUserInterface::getTeamColor(S32 team)
 {
-   return getEditorGame()->getTeamColor(team);
+   return getGame()->getTeamColor(team);
 }
 
 
@@ -3722,6 +3724,8 @@ void EditorUserInterface::testLevelStart()
    SDL_ShowCursor(SDL_DISABLE);    // Turn off cursor
    bool nts = mNeedToSave;             // Save these parameters because they are normally reset when a level is saved.
    S32 auul = mAllUndoneUndoLevel;     // Since we're only saving a temp copy, we really shouldn't reset them...
+
+   mEditorGameType = getGame()->getGameType();     // Sock our current gametype away, will use it when we reenter the editor
 
    if(saveLevel(true, false))
    {

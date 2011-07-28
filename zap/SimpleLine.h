@@ -32,8 +32,6 @@
 namespace Zap
 {
 
-class EditorGame;
-
 
 class SimpleLine : public EditorObject, public GameObject
 {
@@ -62,7 +60,7 @@ public:
 
    virtual void newObjectFromDock(F32 gridSize);
 
-   void addToDock(EditorGame *game, const Point &point);
+   void addToDock(Game *game, const Point &point);
 };
 
 

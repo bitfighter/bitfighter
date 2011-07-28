@@ -124,8 +124,6 @@ template<class T, class U, class V>
 
 class Game;
 class ClientGame;
-class EditorGame;
-
 class UIManager;
 
 class UserInterface
@@ -152,7 +150,6 @@ public:
    Game *getGame() { return mGame; }
 
    ClientGame *getClientGame();
-   EditorGame *getEditorGame();
 
    UIManager *getUIManager();
 

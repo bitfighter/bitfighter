@@ -59,7 +59,6 @@ enum ShowMode
 
 class EditorAttributeMenuUI;
 class WallSegment;
-class EditorGame;
 
 class EditorObject : virtual public BfObject   // Interface class  -- All editor objects need to implement this
 {
@@ -89,7 +88,7 @@ public:
 
    EditorObject *newCopy();         // Copies object        // TODO: Will become call to clone, delete method
 
-   virtual void addToDock(EditorGame *game, const Point &point);
+   virtual void addToDock(Game *game, const Point &point);
    void addToEditor(Game *game);
 
    void assignNewSerialNumber() { mSerialNumber = mNextSerialNumber++; }

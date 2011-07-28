@@ -44,7 +44,7 @@ private:
    virtual void renderItemText(const char *text, S32 offset, F32 currentScale, const Point &currentOffset);
    virtual void labelDockItem();
 
-   void addToDock(EditorGame *game, const Point &point);
+   void addToDock(Game *game, const Point &point);
    virtual void renderDock();
    void highlightDockItem(); 
 

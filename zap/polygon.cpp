@@ -92,7 +92,7 @@ void EditorPolygon::labelDockItem()
 }
 
 
-void EditorPolygon::addToDock(EditorGame *game, const Point &point)
+void EditorPolygon::addToDock(Game *game, const Point &point)
 {
    F32 h = 16;    // Entire height
    F32 w = 20;    // Half the width

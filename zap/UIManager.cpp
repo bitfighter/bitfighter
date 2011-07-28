@@ -33,7 +33,7 @@
 #include "UIYesNo.h"
 #include "UIQueryServers.h"
 //#include "UIErrorMessage.h"
-#include "UIEditor.h"            // For EditorUserInterface def, needed by EditorGame stuff
+#include "UIEditor.h"            // For EditorUserInterface def, needed by EditorGame stuff  ==> can delete?
 #include "UIInstructions.h"
 #include "UIKeyDefMenu.h"
 #include "UIDiagnostics.h"
@@ -74,13 +74,11 @@ MainMenuUserInterface *UIManager::getMainMenuUserInterface()
 }
 
 
-auto_ptr<EditorUserInterface> UIManager::mEditorUserInterface;
-
 EditorUserInterface *UIManager::getEditorUserInterface()
 {
    // Lazily initialize
    if(!mEditorUserInterface.get())
-      mEditorUserInterface = auto_ptr<EditorUserInterface>(new EditorUserInterface(new EditorGame()));
+      mEditorUserInterface = auto_ptr<EditorUserInterface>(new EditorUserInterface(mGame));
 
    return mEditorUserInterface.get();
 }
@@ -225,8 +223,6 @@ ErrorMessageUserInterface *UIManager::getErrorMsgUserInterface()
    return mErrorMsgUserInterface.get();
 }
 
-
-auto_ptr<LevelNameEntryUserInterface> UIManager::mLevelNameEntryUserInterface;
 
 LevelNameEntryUserInterface *UIManager::getLevelNameEntryUserInterface()
 {

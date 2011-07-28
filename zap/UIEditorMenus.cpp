@@ -73,7 +73,7 @@ void EditorAttributeMenuUI::doneEditing(EditorObject *object)
    if(object == mObject)   
    {
       mObject->setIsBeingEdited(false);
-      dynamic_cast<EditorGame *>(getGame())->getUIManager()->getEditorUserInterface()->doneEditingAttributes(this, mObject); 
+      getGame()->getUIManager()->getEditorUserInterface()->doneEditingAttributes(this, mObject); 
    }
 }
 

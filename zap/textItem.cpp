@@ -313,7 +313,7 @@ EditorObject *TextItem::getAttributeEditorObject()
 }
 
 
-EditorAttributeMenuUI *TextItem::getAttributeMenu(EditorGame *game)
+EditorAttributeMenuUI *TextItem::getAttributeMenu(Game *game)
 {
    // Lazily initialize this -- if we're in the game, we'll never need this to be instantiated
    if(!mAttributeMenuUI)
