@@ -307,15 +307,14 @@ bool EngineeredObject::processArguments(S32 argc, const char **argv, Game *game)
    mAnchorNormal.set(normal);
    computeExtent();
 
-   if(mHealth != 0)
-   {
-      Game *prevGame = mGame;
-      mGame = game;  // needed for onEnabled
-      onEnabled();
-      mGame = prevGame;  // need to restore, or we get Assert error trying to Add To Game
-   }
-
    return true;
+}
+
+
+void EngineeredObject::onAddedToGame(Game *game)
+{
+   if(mHealth != 0)
+      onEnabled();
 }
 
 
@@ -750,6 +749,7 @@ Vector<Point> ForceFieldProjector::getBufferForBotZone()
 
    return bufferedPoints;
 }
+
 
 void ForceFieldProjector::onAddedToGame(Game *theGame)
 {
