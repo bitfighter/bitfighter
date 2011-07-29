@@ -300,8 +300,8 @@ bool EngineeredObject::processArguments(S32 argc, const char **argv, Game *game)
    // Find the mount point:
    Point normal, anchor;
 
-   // This if clause:::: should be here, or result of merge confusion?
-   if(!findAnchorPointAndNormal(game->getGridDatabase(), pos, MAX_SNAP_DISTANCE, true, anchor, normal))
+   // Anchor objects to the correct point
+   if(!findAnchorPointAndNormal(WallEdge::getWallEdgeDatabase(), pos, MAX_SNAP_DISTANCE, true, anchor, normal))
    {
       mAnchorPoint.set(pos);      // Found no mount point, but for editor, needs to set the position
       mAnchorNormal.set(1,0);
