@@ -271,6 +271,8 @@ void Teleporter::idle(GameObject::IdleCallPath path)
          Point newPos = s->getActualPos() - pos + mDests[mLastDest];    
          s->setActualPos(newPos, true);
          setMaskBits(TeleportMask);
+         if(s->getOwner())
+            s->getOwner()->mStatistics.mTeleport++;
       }
    }
 }

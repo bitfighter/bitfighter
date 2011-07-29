@@ -80,16 +80,16 @@ S32 QSORT_CALLBACK teamScoreSort(TeamStats *a, TeamStats *b)
 }
 
    // This relies on scores being sent sorted in order of descending score
-   string getResult(S32 scores, S32 score1, S32 score2, S32 currScore, bool isFirst)
+   char getResult(S32 scores, S32 score1, S32 score2, S32 currScore, bool isFirst)
    {
       if(scores == 1)      // Only one player/team, winner/loser makes no sense
-         return "X";
+         return 'X';
       else if(score1 == score2 && currScore == score1)     // Tie -- everyone with high score gets tie
-         return "T";
+         return 'T';
       else if(isFirst)     // No tie -- first one gets the win...
-         return "W";
+         return 'W';
       else                 // ...and everyone else gets the loss
-         return "L";
+         return 'L';
    }
 
 
@@ -154,95 +154,204 @@ namespace Types
    string readString(TNL::BitStream &s) { char val[256]; s.readString(val); return val; }
    void writeString(TNL::BitStream &s, const string &val) { s.writeString(val.c_str()); }
 
-   U8 VersionedGameStats_readingVersion;
 
+   // Use of this compression helps when number are likely to be a low number
+   // zero takes only 1 bit, -128 to 128 takes 10 bit, or else it will take 34 bits
+   void writeCompressedS32(TNL::BitStream &s, S32 value)
+   {
+      if(s.writeFlag(value != 0))
+      {
+         if(s.writeFlag(value <= 128 && value >= -128))
+            s.writeInt(U32(value > 0 ? value - 1 : value + 256), 8);
+         else
+            s.writeInt((U32)value, 32);
+      }
+   }
+   S32 readCompressedS32(TNL::BitStream &s)
+   {
+      if(s.readFlag())
+      {
+         if(s.readFlag())
+         {
+            S32 out = S32(s.readInt(8));
+            return out <= 127 ? out + 1 : out - 256;
+         }
+         else
+            return S32(s.readInt(32));
+      }
+      else
+         return 0;
+   }
+   // Unsigned version, 1 - 256 will take 10 bits
+   void writeCompressedU32(TNL::BitStream &s, U32 value)
+   {
+      if(s.writeFlag(value != 0))
+      {
+         if(s.writeFlag(value == (value << 24 >> 24)))
+            s.writeInt(value, 8);
+         else
+            s.writeInt(value, 32);
+      }
+   }
+   U32 readCompressedU32(TNL::BitStream &s)
+   {
+      if(s.readFlag())
+      {
+         if(s.readFlag())
+            return s.readInt(8);
+         else
+            return s.readInt(32);
+      }
+      else
+         return 0;
+   }
 
    void read(TNL::BitStream &s, Zap::WeaponStats *val, U8 version)
    {
       val->weaponType = WeaponType(readU8(s));
-      val->shots = readU16(s);
-      val->hits = readU16(s);
-      if(version >= 1)
-         val->hitBy = readU16(s);
-      else
+      if(version == 0)
+      {
+         val->shots = readU16(s);
+         val->hits = readU16(s);
          val->hitBy = 0;
+      }
+      else
+      {
+         val->shots = readCompressedU32(s);
+         val->hits = readCompressedU32(s);
+         val->hitBy = readCompressedU32(s);
+      }
    }
 
 
    void write(TNL::BitStream &s, Zap::WeaponStats &val, U8 version)
    {
       write(s, U8(val.weaponType));
-      write(s, U16(val.shots));
-      write(s, U16(val.hits));
-      if(version >= 1)
-         write(s, U16(val.hitBy));
+      if(version == 0)
+      {
+         write(s, U16(val.shots));
+         write(s, U16(val.hits));
+      }
+      else
+      {
+         writeCompressedU32(s, val.shots);
+         writeCompressedU32(s, val.hits);
+         writeCompressedU32(s, val.hitBy);
+      }
    }
 
    void read(TNL::BitStream &s, Zap::ModuleStats *val, U8 version)
    {
       val->shipModule = ShipModule(readU8(s));
-      val->seconds = readU16(s);
+      val->seconds = readCompressedU32(s);
    }
 
 
    void write(TNL::BitStream &s, Zap::ModuleStats &val, U8 version)
    {
       write(s, U8(val.shipModule));
-      write(s, U16(val.seconds));
+      writeCompressedU32(s, val.seconds);
    }
 
 
    void read(TNL::BitStream &s, Zap::PlayerStats *val, U8 version)
    {
       val->name = readString(s);
-      val->points = readS32(s);
-      val->kills = readU16(s);
-      val->deaths = readU16(s);
-      val->suicides = readU16(s);
-      val->switchedTeamCount = readU8(s);
-      //val->switchedTeams = (val->switchedTeamCount != 0);
-      val->isRobot = s.readFlag();
-      val->isAdmin = s.readFlag();
-      val->isLevelChanger = s.readFlag();
-      val->isAuthenticated = false; //s.readFlag();  // we may set this by comparing Nonce id.
-      val->nonce.read(&s);
-      read(s, &val->weaponStats, version);
-      if(version >= 1)
+      if(version == 0)
       {
-         val->isAuthenticated = s.readFlag();
-         val->isHosting = s.readFlag();
-         val->fratricides = readU16(s);
-         read(s, &val->moduleStats, version);
+         val->points = readS32(s);
+         val->kills = readU16(s);
+         val->deaths = readU16(s);
+         val->suicides = readU16(s);
+         val->switchedTeamCount = readU8(s);
+         val->isRobot = s.readFlag();
+         val->isAdmin = s.readFlag();
+         val->isLevelChanger = s.readFlag();
+         val->nonce.read(&s);
+         val->isAuthenticated = false; //s.readFlag();  // we may set this by comparing Nonce id.
+         val->isHosting = false;
+         val->fratricides = 0;
+         val->flagPickup = 0;
+         val->flagDrop = 0;
+         val->flagReturn = 0;
+         val->flagScore = 0;
+         val->crashedIntoAsteroid = 0;
+         val->changedLoadout = 0;
+         val->teleport = 0;
+         val->playTime = 0;
       }
       else
       {
-         val->isAuthenticated = false;
-         val->isHosting = false;
-         val->fratricides = 0;
+         val->points = readCompressedS32(s);
+         val->kills = readCompressedU32(s);
+         val->deaths = readCompressedU32(s);
+         val->suicides = readCompressedU32(s);
+         val->switchedTeamCount = readCompressedU32(s);
+         val->isRobot = s.readFlag();
+         val->isAdmin = s.readFlag();
+         val->isLevelChanger = s.readFlag();
+         val->isHosting = s.readFlag();
+         val->isAuthenticated = s.readFlag();
+         if(val->isAuthenticated)
+            val->nonce.read(&s); // only needed if server claims a player is authenticated
+         val->fratricides = readCompressedU32(s);
+         val->flagPickup = readCompressedU32(s);
+         val->flagDrop = readCompressedU32(s);
+         val->flagReturn = readCompressedU32(s);
+         val->flagScore = readCompressedU32(s);
+         val->crashedIntoAsteroid = readCompressedU32(s);
+         val->changedLoadout = readCompressedU32(s);
+         val->teleport = readCompressedU32(s);
+         val->playTime = readCompressedU32(s);
+         read(s, &val->moduleStats, version);
       }
+      read(s, &val->weaponStats, version);
+
+      val->gameResult = 0;  // will fill in later
    }
 
 
    void write(TNL::BitStream &s, Zap::PlayerStats &val, U8 version)
    {
       writeString(s, val.name);
-      write(s, S32(val.points));
-      write(s, U16(val.kills));
-      write(s, U16(val.deaths));
-      write(s, U16(val.suicides));
-      write(s, U8(val.switchedTeamCount));
-      s.writeFlag(val.isRobot);
-      s.writeFlag(val.isAdmin);
-      s.writeFlag(val.isLevelChanger);
-      val.nonce.write(&s);
-      write(s, val.weaponStats, version);
-      if(version >= 1)
+      if(version == 0)
       {
-         s.writeFlag(val.isAuthenticated);
+         write(s, S32(val.points));
+         write(s, U16(val.kills));
+         write(s, U16(val.deaths));
+         write(s, U16(val.suicides));
+         write(s, U8(val.switchedTeamCount));
+         s.writeFlag(val.isRobot);
+         s.writeFlag(val.isAdmin);
+         s.writeFlag(val.isLevelChanger);
+         val.nonce.write(&s);
+      }
+      else
+      {
+         writeCompressedS32(s, val.points);
+         writeCompressedU32(s, val.kills);
+         writeCompressedU32(s, val.deaths);
+         writeCompressedU32(s, val.suicides);
+         writeCompressedU32(s, val.switchedTeamCount);
+         s.writeFlag(val.isRobot);
+         s.writeFlag(val.isAdmin);
+         s.writeFlag(val.isLevelChanger);
          s.writeFlag(val.isHosting);
-         write(s, U16(val.fratricides));
+         s.writeFlag(val.isAuthenticated);
+         if(val.isAuthenticated)
+            val.nonce.write(&s); // only needed if server claims a player is authenticated
+         writeCompressedU32(s, val.fratricides);
+         writeCompressedU32(s, val.flagPickup);
+         writeCompressedU32(s, val.flagDrop);
+         writeCompressedU32(s, val.flagReturn);
+         writeCompressedU32(s, val.flagScore);
+         writeCompressedU32(s, val.crashedIntoAsteroid);
+         writeCompressedU32(s, val.changedLoadout);
+         writeCompressedU32(s, val.teleport);
+         writeCompressedU32(s, val.playTime);
          write(s, val.moduleStats, version);
       }
+      write(s, val.weaponStats, version);
    }
 
 
@@ -253,6 +362,7 @@ namespace Types
 
       val->intColor = s.readInt(24); // 24 bit color
       val->hexColor = Color(val->intColor).toHexString();
+      val->gameResult = 0;  // will fill in later
 
       read(s, &val->playerStats, version);
    }
@@ -270,20 +380,46 @@ namespace Types
    void read(TNL::BitStream &s, Zap::GameStats *val, U8 version)
    {
       val->isOfficial = s.readFlag();
-      val->playerCount = readU16(s);
-      val->duration = readU16(s);             // game length in seconds
+      if(version == 0)
+      {
+         readU16(s);                   // playerCount - calculated below
+         val->duration = readU16(s);   // game length in seconds
+         val->isTesting = false;
+         val->build_version = 0;
+      }
+      else
+      {
+         val->duration = readCompressedU32(s);
+         val->isTesting = s.readFlag();
+         val->build_version = readS32(s);
+      }
+
       val->isTeamGame = s.readFlag();
       val->gameType = readString(s);
       val->levelName = readString(s);
       read(s, &val->teamStats, version);
+
+      val->playerCount = 0;
+      for(S32 i = 0; i < val->teamStats.size(); i++)
+         val->playerCount += val->teamStats[i].playerStats.size();  // count number of players
    }
 
 
    void write(TNL::BitStream &s, Zap::GameStats &val, U8 version)
    {
       s.writeFlag(val.isOfficial);
-      write(s, U16(val.playerCount));
-      write(s, U16(val.duration));     // game length in seconds
+      if(version == 0)
+      {
+         write(s, U16(val.playerCount));
+         write(s, U16(val.duration));     // game length in seconds
+      }
+      else
+      {
+         writeCompressedU32(s, val.duration);
+         s.writeFlag(val.isTesting);
+         write(s, S32(val.build_version));
+      }
+
       s.writeFlag(val.isTeamGame);
       writeString(s, val.gameType);
       writeString(s, val.levelName);
@@ -320,6 +456,22 @@ namespace Types
    void write(TNL::BitStream &s, VersionedGameStats &val)
    {
       U32 bitStart = s.getBitPosition();
+
+#ifdef TNL_ENABLE_ASSERTS
+      for(S32 i = -200; i < 200; i++)
+      {  writeCompressedS32(s, i);
+         s.setBitPosition(bitStart);
+         TNLAssert(readCompressedS32(s) == i, "Problem with read / write CompressedS32");
+         s.setBitPosition(bitStart);
+      }
+      for(U32 i = 0; i < 400; i++)
+      {  writeCompressedU32(s, i);
+         s.setBitPosition(bitStart);
+         TNLAssert(readCompressedU32(s) == i, "Problem with read / write CompressedU32");
+         s.setBitPosition(bitStart);
+      }
+#endif
+
       write(s, U8(val.CURRENT_VERSION));       // Send current version
       write(s, val.gameStats, val.CURRENT_VERSION);
 

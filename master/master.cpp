@@ -999,7 +999,7 @@ static const char *sanitizeForJson(const char *value)
 
       if(!stats.valid)
       {
-         logprintf(LogConsumer::LogWarning, "Invalid stats %d %s %s", stats.version, getNetAddressString(), mPlayerOrServerName.getString());
+         logprintf(LogConsumer::LogWarning, "Invalid stats: version %d, %s %s", stats.version, getNetAddressString(), mPlayerOrServerName.getString());
          return;
       }
 

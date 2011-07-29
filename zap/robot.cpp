@@ -1709,7 +1709,6 @@ bool Robot::processArguments(S32 argc, const char **argv, Game *game)
 }
 
 
-extern OGLCONSOLE_Console gConsole;     //  main.cpp
 // Some rudimentary robot error logging.  Perhaps, someday, will become a sort of in-game error console.
 // For now, though, pass all errors through here.
 void Robot::logError(const char *format, ...)
@@ -1824,7 +1823,7 @@ void Robot::render(S32 layerIndex)
    if(isGhost())                                      // Client rendering client's objects
       Parent::render(layerIndex);
 
-   else if(layerIndex = 1 && flightPlan.size() != 0)  // Client hosting is rendering server objects
+   else if(layerIndex == 1 && flightPlan.size() != 0)  // Client hosting is rendering server objects
    {
       glColor3f(1,1,0);       // yellow
       glBegin(GL_LINE_STRIP);
@@ -1848,7 +1847,7 @@ void Robot::idle(GameObject::IdleCallPath path)
       TNLAssert(deltaT != 0, "Robot::idle Time is zero")   // Time should never be zero anymore
 
       // Check to see if we need to respawn this robot
-      if(hasExploded)
+      if(hasExploded && isRunningScript)
       {
          if(!gameConnectionInitalized)  // After gameConnection is initalized, bot should spawn
            spawn();

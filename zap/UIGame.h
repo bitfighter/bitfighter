@@ -246,6 +246,12 @@ private:
 
    Mode mCurrentMode;                // Current game mode
 
+   static const S32 SERVER_MSG_FONT_SIZE = 14;
+   static const S32 SERVER_MSG_FONT_GAP = 4;
+   static const S32 CHAT_FONT_SIZE = 12;
+   static const S32 CHAT_FONT_GAP = 3;
+   static const S32 CHAT_MULTILINE_INDENT = 12;
+
 public:
    GameUserInterface(Game *game);    // Constructor
    ~GameUserInterface();             // Destructor

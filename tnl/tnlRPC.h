@@ -162,7 +162,7 @@ public: \
    TNL_IMPLEMENT_NETEVENT( RPC_##className##_##name, groupMask, rpcVersion ); \
    void className::name args { if(!canPostNetEvent()) return; RPC_##className##_##name *theEvent = new RPC_##className##_##name; theEvent->mFunctorDecl.set argNames ; postNetEvent(theEvent); } \
    TNL::NetEvent * className::name##_construct args { RPC_##className##_##name *theEvent = new RPC_##className##_##name; theEvent->mFunctorDecl.set argNames ; return theEvent; } \
-   void className::name##_test args { RPC_##className##_##name *theEvent = new RPC_##className##_##name; theEvent->mFunctorDecl.set argNames ; TNL::PacketStream ps; theEvent->pack(this, &ps); ps.setBytePosition(0); theEvent->unpack(this, &ps); theEvent->process(this); } \
+   /*void className::name##_test args { RPC_##className##_##name *theEvent = new RPC_##className##_##name; theEvent->mFunctorDecl.set argNames ; TNL::PacketStream ps; theEvent->pack(this, &ps); ps.setBytePosition(0); theEvent->unpack(this, &ps); theEvent->process(this); }*/ \
    void className::name##_remote args
 
 /// Base class for RPC events.
@@ -182,10 +182,10 @@ public:
 };
 
 /// Declares an RPC method within a class declaration, which can be used for declaring methods in a superclass that will be implemented in a subclass using TNL_DECLARE_RPC and friends.
-#define TNL_DECLARE_RPC_INTERFACE(name, args) virtual void name args = 0; virtual void name##_test args = 0; virtual TNL::NetEvent * name##_construct args = 0; virtual void name##_remote args = 0
+#define TNL_DECLARE_RPC_INTERFACE(name, args) virtual void name args = 0; /*virtual void name##_test args = 0;*/ virtual TNL::NetEvent * name##_construct args = 0; virtual void name##_remote args = 0
 
 /// Declares an RPC method within a class declaration.  Creates two method prototypes - one for the host side of the RPC call, and one for the receiver, which performs the actual method.
-#define TNL_DECLARE_RPC(name, args) void name args; void name##_test args; virtual TNL::NetEvent * name##_construct args; virtual void name##_remote args
+#define TNL_DECLARE_RPC(name, args) void name args; /*void name##_test args;*/ virtual TNL::NetEvent * name##_construct args; virtual void name##_remote args
 
 /// Declares an override to an RPC method declared in a parent class.
 #define TNL_DECLARE_RPC_OVERRIDE(name, args) void name##_remote args

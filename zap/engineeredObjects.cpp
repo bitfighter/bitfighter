@@ -300,11 +300,17 @@ bool EngineeredObject::processArguments(S32 argc, const char **argv, Game *game)
    // Find the mount point:
    Point normal, anchor;
 
-   if(!findAnchorPointAndNormal(game->getGameObjDatabase(), pos, MAX_SNAP_DISTANCE, true, anchor, normal))
-      return false;      // Found no mount point
-
-   mAnchorPoint.set(anchor + normal);
-   mAnchorNormal.set(normal);
+   // This if clause:::: should be here, or result of merge confusion?
+   if(!findAnchorPointAndNormal(game->getGridDatabase(), pos, MAX_SNAP_DISTANCE, true, anchor, normal))
+   {
+      mAnchorPoint.set(pos);      // Found no mount point, but for editor, needs to set the position
+      mAnchorNormal.set(1,0);
+   }
+   else
+   {
+      mAnchorPoint.set(anchor + normal);
+      mAnchorNormal.set(normal);
+   }
    computeExtent();
 
    return true;

@@ -177,7 +177,7 @@ void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vecto
          break;
 
       F32 collisionTime = moveTime;
-      Point collisionPoint = mMoveState[stateIndex].pos;
+      Point collisionPoint;
 
       GameObject *objectHit = findFirstCollision(stateIndex, collisionTime, collisionPoint);
       if(!objectHit)    // No collision (or if isBeingDisplaced is true, we haven't been pushed into another object)
@@ -187,8 +187,7 @@ void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vecto
       }
 
       // Collision!  Advance to the point of collision
-      // Needs to be slightly away from collisionPoint to avoid getting stuck at the edge of wall
-      mMoveState[stateIndex].pos = (mMoveState[stateIndex].pos + mMoveState[stateIndex].vel * collisionTime) * 1.01 - collisionPoint * 0.01;
+      mMoveState[stateIndex].pos += mMoveState[stateIndex].vel * collisionTime;
 
       if(objectHit->getObjectTypeMask() & MoveableType)     // Collided with movable object
       {
@@ -296,13 +295,12 @@ GameObject *MoveObject::findFirstCollision(U32 stateIndex, F32 &collisionTime, P
 
       if(foundObject->getCollisionPoly(poly))
       {
-         Point cp(mMoveState[stateIndex].pos);
+         Point cp;
 
          if(PolygonSweptCircleIntersect(&poly[0], poly.size(), mMoveState[stateIndex].pos,
                                         delta, mRadius, cp, collisionFraction))
          {
-            //if((cp - mMoveState[stateIndex].pos).dot(mMoveState[stateIndex].vel) > velocityEpsilon)
-            if(cp.distanceTo(mMoveState[stateIndex].pos) > mRadius * 0.5)
+            if(cp != mMoveState[stateIndex].pos)   // avoid getting stuck inside polygon wall
             {
                bool collide1 = collide(foundObject);
                bool collide2 = foundObject->collide(this);

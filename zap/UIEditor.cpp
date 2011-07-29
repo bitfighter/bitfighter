@@ -242,7 +242,7 @@ void EditorUserInterface::populateDock()
 }
 
 
-static Vector<DatabaseObject *> fillVector;     // Reusable container
+//static Vector<DatabaseObject *> fillVector;     // Reusable container, now global in gridDB.h, having this here may cause linux compile errors
 
 // Destructor -- unwind things in an orderly fashion
 EditorUserInterface::~EditorUserInterface()

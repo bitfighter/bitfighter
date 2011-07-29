@@ -86,7 +86,7 @@ bool segmentsColinear(const Point &p1, const Point &p2, const Point &p3, const P
 bool segsOverlap(const Point &p1, const Point &p2, const Point &p3, const Point &p4, Point &overlapStart, Point &overlapEnd);
 bool zonesTouch(const TNL::Vector<Point> *zone1, const TNL::Vector<Point> *zone2, TNL::F32 scaleFact, Point &overlapStart, Point &overlapEnd);
 bool pointOnSegment(const Point &c, const Point &a, const Point &b, TNL::F32 closeEnough);
-bool polygonCircleIntersect(const Point *inVertices, int inNumVertices, const Point &inCenter, TNL::F32 inRadiusSq, Point &outPoint);
+bool polygonCircleIntersect(const Point *inVertices, int inNumVertices, const Point &inCenter, TNL::F32 inRadiusSq, Point &outPoint, Point *ignoreVelocityEpsilon = NULL);
 
 bool polygonsIntersect(const TNL::Vector<Point> &p1, const TNL::Vector<Point> &p2);
 bool polygonIntersectsSegment(const TNL::Vector<Point> &points, const Point &start, const Point &end);  // This is four times faster than the Detailed one.

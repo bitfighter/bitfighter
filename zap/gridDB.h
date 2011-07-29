@@ -167,8 +167,11 @@ public:
    void removeFromDatabase(DatabaseObject *theObject, const Rect &extents);
 };
 
-extern Vector<DatabaseObject *> fillVector;     // Reusable container for searching gridDatabases
 };
+
+// Reusable container for searching gridDatabases
+// putting it outside of Zap namespace seems to help with debugging showing whats inside fillVector  (debugger forgets to add Zap::)
+extern Vector<Zap::DatabaseObject *> fillVector;
 
 #endif
 
