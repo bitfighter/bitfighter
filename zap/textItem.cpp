@@ -424,12 +424,12 @@ string LineItem::toString(F32 gridSize) const
 }
 
 
-void LineItem::onAddedToGame(Game *theGame)
+void LineItem::onAddedToGame(Game *game)
 {
+   Parent::onAddedToGame(game);
+
    if(!isGhost())
       setScopeAlways();
-
-   getGame()->mObjectsLoaded++;
 }
 
 

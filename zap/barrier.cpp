@@ -160,7 +160,7 @@ Barrier::Barrier(const Vector<Point> &points, F32 width, bool solid)
 
 void Barrier::onAddedToGame(Game *game)
 {
-  game->mObjectsLoaded++;
+   Parent::onAddedToGame(game);
 }
 
 

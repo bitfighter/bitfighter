@@ -42,6 +42,8 @@ namespace Zap
 /// constructed as an expanded line segment.
 class Barrier : public GameObject
 {
+   typedef GameObject Parent;
+
 public:
    Vector<Point> mPoints; ///< The points of the barrier --> if only two, first will be start, second end of an old-school segment
 

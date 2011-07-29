@@ -1340,13 +1340,15 @@ bool ServerGame::loadLevel(const string &origFilename2)
       return false;
    }
 
-   if(!loadLevelFromFile(filename.c_str(), getGameObjDatabase()))
+   logprintf("1 server: %d, client %d", gServerGame->getGameObjDatabase()->getObjectCount(),gClientGame->getGameObjDatabase()->getObjectCount());
+   if(loadLevelFromFile(filename.c_str(), getGameObjDatabase()))
+      mLevelFileHash = md5.getHashFromFile(filename);    // TODO: Combine this with the reading of the file we're doing anyway in initLevelFromFile()
+   else
    {
       logprintf("Unable to process level file \"%s\".  Skipping...", origFilename.c_str());
       return false;
    }
-   else
-      mLevelFileHash = md5.getHashFromFile(filename);    // TODO: Combine this with the reading of the file we're doing anyway in initLevelFromFile()
+   logprintf("2 server: %d, client %d", gServerGame->getGameObjDatabase()->getObjectCount(),gClientGame->getGameObjDatabase()->getObjectCount());
 
    // We should have a gameType by the time we get here... but in case we don't, we'll add a default one now
    if(!getGameType())

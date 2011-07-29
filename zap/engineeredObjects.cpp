@@ -313,6 +313,8 @@ bool EngineeredObject::processArguments(S32 argc, const char **argv, Game *game)
 
 void EngineeredObject::onAddedToGame(Game *game)
 {
+   Parent::onAddedToGame(game);
+
    if(mHealth != 0)
       onEnabled();
 }
@@ -717,16 +719,21 @@ void ForceFieldProjector::getForceFieldStartAndEndPoints(Point &start, Point &en
 }
 
 
+// Forcefield projector has been turned on some how; either at the beginning of a level, or via repairing, or deploying. 
+// Runs on both client and server.
 void ForceFieldProjector::onEnabled()
 {
-   Point start = getForceFieldStartPoint(mAnchorPoint, mAnchorNormal);
-   Point end;
-   DatabaseObject *collObj;
+   if(!isGhost())
+   {
+      Point start = getForceFieldStartPoint(mAnchorPoint, mAnchorNormal);
+      Point end;
+      DatabaseObject *collObj;
    
-   ForceField::findForceFieldEnd(getDatabase(), start, mAnchorNormal, end, &collObj);
+      ForceField::findForceFieldEnd(getDatabase(), start, mAnchorNormal, end, &collObj);
 
-   mField = new ForceField(mTeam, start, end);
-   mField->addToGame(getGame(), getGame()->getGameObjDatabase());
+      mField = new ForceField(mTeam, start, end);
+      mField->addToGame(getGame(), getGame()->getGameObjDatabase());
+   }
 }
 
 
