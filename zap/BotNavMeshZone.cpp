@@ -127,7 +127,7 @@ S32 BotNavMeshZone::getRenderSortValue()
 }
 
 
-GridDatabase *BotNavMeshZone::getGridDatabase()
+GridDatabase *BotNavMeshZone::getGameObjDatabase()
 {
    TNLAssert(dynamic_cast<ServerGame *>(mGame), "Must be a server game!");
    return ((ServerGame *)mGame)->getBotZoneDatabase();
@@ -153,7 +153,7 @@ void BotNavMeshZone::addToGame(Game *game)
    mGame = game;
    
    setExtent();
-   addToDatabase(game->getGameObjDatabase());
+   addToDatabase(getGameObjDatabase());
 }
 
 
@@ -735,7 +735,7 @@ void BotNavMeshZone::linkTeleportersBotNavMeshZoneConnections(ServerGame *game)
    // Now create paths representing the teleporters
    Vector<DatabaseObject *> teleporters, dests;
 
-   game->getBotZoneDatabase()->findObjects(TeleportType, teleporters);
+   game->getGameObjDatabase()->findObjects(TeleportType, teleporters);
 
    for(S32 i = 0; i < teleporters.size(); i++)
    {

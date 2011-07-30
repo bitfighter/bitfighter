@@ -92,7 +92,7 @@ public:
    // Create objects from parameters stored in level file
    bool processArguments(S32 argc, const char **argv, Game *game);
 
-   GridDatabase *getGridDatabase();
+   GridDatabase *getGameObjDatabase();
    void addToGame(Game *theGame);
    void onAddedToGame(Game *theGame);
    Point getCenter();      // Return center of zone
