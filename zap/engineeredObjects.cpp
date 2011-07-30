@@ -301,7 +301,7 @@ bool EngineeredObject::processArguments(S32 argc, const char **argv, Game *game)
    Point normal, anchor;
 
    // Anchor objects to the correct point
-   if(!findAnchorPointAndNormal(WallEdge::getWallEdgeDatabase(), pos, MAX_SNAP_DISTANCE, true, anchor, normal))
+   if(!findAnchorPointAndNormal(game->getGameObjDatabase(), pos, MAX_SNAP_DISTANCE, true, anchor, normal))
    {
       mAnchorPoint.set(pos);      // Found no mount point, but for editor, needs to set the position
       mAnchorNormal.set(1,0);
