@@ -50,296 +50,359 @@ namespace Zap
 UIManager::UIManager(Game *game) 
 { 
    mGame = game; 
+
+   mMainMenuUserInterface = NULL;
+   mGameParamUserInterface = NULL;
+   mYesNoUserInterface = NULL;
+   mTeamMenuUserInterface = NULL;
+   mQueryServersUserInterface = NULL;
+   mServerPasswordEntryUserInterface = NULL;
+   mPlayerMenuUserInterface = NULL;
+   mNameEntryUserInterface = NULL;
+   mMessageUserInterface = NULL;
+   mLevelMenuUserInterface = NULL;
+   mLevelMenuSelectUserInterface = NULL;
+   mAdminPasswordEntryUserInterface = NULL;
+   mLevelChangePasswordEntryUserInterface = NULL;
+   mHostMenuUserInterface = NULL;
+   mGameMenuUserInterface = NULL;
+   mErrorMsgUserInterface = NULL;
+   mInstructionsUserInterface = NULL;
+   mOptionsMenuUserInterface = NULL;
+   mKeyDefMenuUserInterface = NULL;
+   mDiagnosticUserInterface = NULL;
+   mCreditsUserInterface = NULL;
+   mEditorInstructionsUserInterface = NULL;
+   mChatInterface = NULL;
+   mSuspendedUserInterface = NULL;
+   mEditorMenuUserInterface = NULL;
+   mSplashUserInterface = NULL;
+   mLevelNameEntryUserInterface = NULL;
+   mEditorUserInterface = NULL;
+}
+
+
+// Destructor
+UIManager::~UIManager()
+{
+   delete mMainMenuUserInterface;
+   delete mGameParamUserInterface;
+   delete mYesNoUserInterface;
+   delete mTeamMenuUserInterface;
+   delete mQueryServersUserInterface;
+   delete mServerPasswordEntryUserInterface;
+   delete mPlayerMenuUserInterface;
+   delete mNameEntryUserInterface;
+   delete mMessageUserInterface;
+   delete mLevelMenuUserInterface;
+   delete mLevelMenuSelectUserInterface;
+   delete mAdminPasswordEntryUserInterface;
+   delete mLevelChangePasswordEntryUserInterface;
+   delete mHostMenuUserInterface;
+   delete mGameMenuUserInterface;
+   delete mErrorMsgUserInterface;
+   delete mInstructionsUserInterface;
+   delete mOptionsMenuUserInterface;
+   delete mKeyDefMenuUserInterface;
+   delete mDiagnosticUserInterface;
+   delete mCreditsUserInterface;
+   delete mEditorInstructionsUserInterface;
+   delete mChatInterface;
+   delete mSuspendedUserInterface;
+   delete mEditorMenuUserInterface;
+   delete mSplashUserInterface;
+   delete mLevelNameEntryUserInterface;
+   delete mEditorUserInterface;
 }
 
 
 GameParamUserInterface *UIManager::getGameParamUserInterface()
 {
    // Lazily initialize
-   if(!mGameParamUserInterface.get())
-      mGameParamUserInterface = auto_ptr<GameParamUserInterface>(new GameParamUserInterface(mGame));
+   if(!mGameParamUserInterface)
+      mGameParamUserInterface = new GameParamUserInterface(mGame);
 
-   return mGameParamUserInterface.get();
+   return mGameParamUserInterface;
 }
 
 
 MainMenuUserInterface *UIManager::getMainMenuUserInterface()
 {
    // Lazily initialize
-   if(!mMainMenuUserInterface.get())
-      mMainMenuUserInterface = auto_ptr<MainMenuUserInterface>(new MainMenuUserInterface(mGame));
+   if(!mMainMenuUserInterface)
+      mMainMenuUserInterface = new MainMenuUserInterface(mGame);
 
-   return mMainMenuUserInterface.get();
+   return mMainMenuUserInterface;
 }
 
 
 EditorUserInterface *UIManager::getEditorUserInterface()
 {
    // Lazily initialize
-   if(!mEditorUserInterface.get())
-      mEditorUserInterface = auto_ptr<EditorUserInterface>(new EditorUserInterface(mGame));
+   if(!mEditorUserInterface)
+      mEditorUserInterface = new EditorUserInterface(mGame);
 
-   return mEditorUserInterface.get();
+   return mEditorUserInterface;
 }
 
 
 YesNoUserInterface *UIManager::getYesNoUserInterface()
 {
    // Lazily initialize
-   if(!mYesNoUserInterface.get())
-      mYesNoUserInterface = auto_ptr<YesNoUserInterface>(new YesNoUserInterface(mGame));
+   if(!mYesNoUserInterface)
+      mYesNoUserInterface = new YesNoUserInterface(mGame);
 
-   return mYesNoUserInterface.get();
+   return mYesNoUserInterface;
 }
 
 
 TeamMenuUserInterface *UIManager::getTeamMenuUserInterface()
 {
    // Lazily initialize
-   if(!mTeamMenuUserInterface.get())
-      mTeamMenuUserInterface = auto_ptr<TeamMenuUserInterface>(new TeamMenuUserInterface(mGame));
+   if(!mTeamMenuUserInterface)
+      mTeamMenuUserInterface = new TeamMenuUserInterface(mGame);
 
-   return mTeamMenuUserInterface.get();
+   return mTeamMenuUserInterface;
 }
 
 
 QueryServersUserInterface *UIManager::getQueryServersUserInterface()
 {
    // Lazily initialize
-   if(!mQueryServersUserInterface.get())
-      mQueryServersUserInterface = auto_ptr<QueryServersUserInterface>(new QueryServersUserInterface(mGame));
+   if(!mQueryServersUserInterface)
+      mQueryServersUserInterface = new QueryServersUserInterface(mGame);
 
-   return mQueryServersUserInterface.get();
+   return mQueryServersUserInterface;
 }
 
 
 ServerPasswordEntryUserInterface *UIManager::getServerPasswordEntryUserInterface()
 {
    // Lazily initialize
-   if(!mServerPasswordEntryUserInterface.get())
-      mServerPasswordEntryUserInterface = auto_ptr<ServerPasswordEntryUserInterface>(new ServerPasswordEntryUserInterface(mGame));
+   if(!mServerPasswordEntryUserInterface)
+      mServerPasswordEntryUserInterface = new ServerPasswordEntryUserInterface(mGame);
 
-   return mServerPasswordEntryUserInterface.get();
+   return mServerPasswordEntryUserInterface;
 }
 
 
 PlayerMenuUserInterface *UIManager::getPlayerMenuUserInterface()
 {
    // Lazily initialize
-   if(!mPlayerMenuUserInterface.get())
-      mPlayerMenuUserInterface = auto_ptr<PlayerMenuUserInterface>(new PlayerMenuUserInterface(mGame));
+   if(!mPlayerMenuUserInterface)
+      mPlayerMenuUserInterface = new PlayerMenuUserInterface(mGame);
 
-   return mPlayerMenuUserInterface.get();
+   return mPlayerMenuUserInterface;
 }
 
 
 NameEntryUserInterface *UIManager::getNameEntryUserInterface()
 {
    // Lazily initialize
-   if(!mNameEntryUserInterface.get())
-      mNameEntryUserInterface = auto_ptr<NameEntryUserInterface>(new NameEntryUserInterface(mGame));
+   if(!mNameEntryUserInterface)
+      mNameEntryUserInterface = new NameEntryUserInterface(mGame);
 
-   return mNameEntryUserInterface.get();
+   return mNameEntryUserInterface;
 }
 
 
 MessageUserInterface *UIManager::getMessageUserInterface()
 {
    // Lazily initialize
-   if(!mMessageUserInterface.get())
-      mMessageUserInterface = auto_ptr<MessageUserInterface>(new MessageUserInterface(mGame));
+   if(!mMessageUserInterface)
+      mMessageUserInterface = new MessageUserInterface(mGame);
 
-   return mMessageUserInterface.get();
+   return mMessageUserInterface;
 }
 
 
 LevelMenuUserInterface *UIManager::getLevelMenuUserInterface()
 {
    // Lazily initialize
-   if(!mLevelMenuUserInterface.get())
-      mLevelMenuUserInterface = auto_ptr<LevelMenuUserInterface>(new LevelMenuUserInterface(mGame));
+   if(!mLevelMenuUserInterface)
+      mLevelMenuUserInterface = new LevelMenuUserInterface(mGame);
 
-   return mLevelMenuUserInterface.get();
+   return mLevelMenuUserInterface;
 }
 
 
 LevelMenuSelectUserInterface *UIManager::getLevelMenuSelectUserInterface()
 {
    // Lazily initialize
-   if(!mLevelMenuSelectUserInterface.get())
-      mLevelMenuSelectUserInterface = auto_ptr<LevelMenuSelectUserInterface>(new LevelMenuSelectUserInterface(mGame));
+   if(!mLevelMenuSelectUserInterface)
+      mLevelMenuSelectUserInterface = new LevelMenuSelectUserInterface(mGame);
 
-   return mLevelMenuSelectUserInterface.get();
+   return mLevelMenuSelectUserInterface;
 }
 
 
 AdminPasswordEntryUserInterface *UIManager::getAdminPasswordEntryUserInterface()
 {
    // Lazily initialize
-   if(!mAdminPasswordEntryUserInterface.get())
-      mAdminPasswordEntryUserInterface = auto_ptr<AdminPasswordEntryUserInterface>(new AdminPasswordEntryUserInterface(mGame));
+   if(!mAdminPasswordEntryUserInterface)
+      mAdminPasswordEntryUserInterface = new AdminPasswordEntryUserInterface(mGame);
 
-   return mAdminPasswordEntryUserInterface.get();
+   return mAdminPasswordEntryUserInterface;
 }
 
 
 LevelChangePasswordEntryUserInterface *UIManager::getLevelChangePasswordEntryUserInterface()
 {
    // Lazily initialize
-   if(!mLevelChangePasswordEntryUserInterface.get())
-      mLevelChangePasswordEntryUserInterface = auto_ptr<LevelChangePasswordEntryUserInterface>(new LevelChangePasswordEntryUserInterface(mGame));
+   if(!mLevelChangePasswordEntryUserInterface)
+      mLevelChangePasswordEntryUserInterface = new LevelChangePasswordEntryUserInterface(mGame);
 
-   return mLevelChangePasswordEntryUserInterface.get();
+   return mLevelChangePasswordEntryUserInterface;
 }
 
 
 HostMenuUserInterface *UIManager::getHostMenuUserInterface()
 {
    // Lazily initialize
-   if(!mHostMenuUserInterface.get())
-      mHostMenuUserInterface = auto_ptr<HostMenuUserInterface>(new HostMenuUserInterface(mGame));
+   if(!mHostMenuUserInterface)
+      mHostMenuUserInterface = new HostMenuUserInterface(mGame);
 
-   return mHostMenuUserInterface.get();
+   return mHostMenuUserInterface;
 }
 
 
 GameMenuUserInterface *UIManager::getGameMenuUserInterface()
 {
    // Lazily initialize
-   if(!mGameMenuUserInterface.get())
-      mGameMenuUserInterface = auto_ptr<GameMenuUserInterface>(new GameMenuUserInterface(mGame));
+   if(!mGameMenuUserInterface)
+      mGameMenuUserInterface = new GameMenuUserInterface(mGame);
 
-   return mGameMenuUserInterface.get();
+   return mGameMenuUserInterface;
 }
 
 
 ErrorMessageUserInterface *UIManager::getErrorMsgUserInterface()
 {
    // Lazily initialize
-   if(!mErrorMsgUserInterface.get())
-      mErrorMsgUserInterface = auto_ptr<ErrorMessageUserInterface>(new ErrorMessageUserInterface(mGame));
+   if(!mErrorMsgUserInterface)
+      mErrorMsgUserInterface = new ErrorMessageUserInterface(mGame);
 
-   return mErrorMsgUserInterface.get();
+   return mErrorMsgUserInterface;
 }
 
 
 LevelNameEntryUserInterface *UIManager::getLevelNameEntryUserInterface()
 {
    // Lazily initialize
-   if(!mLevelNameEntryUserInterface.get())
-      mLevelNameEntryUserInterface = auto_ptr<LevelNameEntryUserInterface>(new LevelNameEntryUserInterface(mGame));
+   if(!mLevelNameEntryUserInterface)
+      mLevelNameEntryUserInterface = new LevelNameEntryUserInterface(mGame);
 
-   return mLevelNameEntryUserInterface.get();
+   return mLevelNameEntryUserInterface;
 }
 
 
 InstructionsUserInterface *UIManager::getInstructionsUserInterface()
 {
    // Lazily initialize
-   if(!mInstructionsUserInterface.get())
-      mInstructionsUserInterface = auto_ptr<InstructionsUserInterface>(new InstructionsUserInterface(mGame));
+   if(!mInstructionsUserInterface)
+      mInstructionsUserInterface = new InstructionsUserInterface(mGame);
 
-   return mInstructionsUserInterface.get();
+   return mInstructionsUserInterface;
 }
 
 
 OptionsMenuUserInterface *UIManager::getOptionsMenuUserInterface()
 {
    // Lazily initialize
-   if(!mOptionsMenuUserInterface.get())
-      mOptionsMenuUserInterface = auto_ptr<OptionsMenuUserInterface>(new OptionsMenuUserInterface(mGame));
+   if(!mOptionsMenuUserInterface)
+      mOptionsMenuUserInterface = new OptionsMenuUserInterface(mGame);
 
-   return mOptionsMenuUserInterface.get();
+   return mOptionsMenuUserInterface;
 }
 
 
 KeyDefMenuUserInterface *UIManager::getKeyDefMenuUserInterface()
 {
    // Lazily initialize
-   if(!mKeyDefMenuUserInterface.get())
-      mKeyDefMenuUserInterface = auto_ptr<KeyDefMenuUserInterface>(new KeyDefMenuUserInterface(mGame));
+   if(!mKeyDefMenuUserInterface)
+      mKeyDefMenuUserInterface = new KeyDefMenuUserInterface(mGame);
 
-   return mKeyDefMenuUserInterface.get();
+   return mKeyDefMenuUserInterface;
 }
 
 
 DiagnosticUserInterface *UIManager::getDiagnosticUserInterface()
 {
    // Lazily initialize
-   if(!mDiagnosticUserInterface.get())
-      mDiagnosticUserInterface = auto_ptr<DiagnosticUserInterface>(new DiagnosticUserInterface(mGame));
+   if(!mDiagnosticUserInterface)
+      mDiagnosticUserInterface = new DiagnosticUserInterface(mGame);
 
-   return mDiagnosticUserInterface.get();
+   return mDiagnosticUserInterface;
 }
 
 
 CreditsUserInterface *UIManager::getCreditsUserInterface()
 {
    // Lazily initialize
-   if(!mCreditsUserInterface.get())
-      mCreditsUserInterface = auto_ptr<CreditsUserInterface>(new CreditsUserInterface(mGame));
+   if(!mCreditsUserInterface)
+      mCreditsUserInterface = new CreditsUserInterface(mGame);
 
-   return mCreditsUserInterface.get();
+   return mCreditsUserInterface;
 }
 
 
 EditorInstructionsUserInterface *UIManager::getEditorInstructionsUserInterface()
 {
    // Lazily initialize
-   if(!mEditorInstructionsUserInterface.get())
-      mEditorInstructionsUserInterface = auto_ptr<EditorInstructionsUserInterface>(new EditorInstructionsUserInterface(mGame));
+   if(!mEditorInstructionsUserInterface)
+      mEditorInstructionsUserInterface = new EditorInstructionsUserInterface(mGame);
 
-   return mEditorInstructionsUserInterface.get();
+   return mEditorInstructionsUserInterface;
 }
 
 
 ChatUserInterface *UIManager::getChatUserInterface()
 {
    // Lazily initialize
-   if(!mChatInterface.get())
-      mChatInterface = auto_ptr<ChatUserInterface>(new ChatUserInterface(mGame));
+   if(!mChatInterface)
+      mChatInterface = new ChatUserInterface(mGame);
 
-   return mChatInterface.get();
+   return mChatInterface;
 }
 
 
 SuspendedUserInterface *UIManager::getSuspendedUserInterface()
 {
    // Lazily initialize
-   if(!mSuspendedUserInterface.get())
-      mSuspendedUserInterface = auto_ptr<SuspendedUserInterface>(new SuspendedUserInterface(mGame));
+   if(!mSuspendedUserInterface)
+      mSuspendedUserInterface = new SuspendedUserInterface(mGame);
 
-   return mSuspendedUserInterface.get();
+   return mSuspendedUserInterface;
 }
 
 
 EditorMenuUserInterface *UIManager::getEditorMenuUserInterface()
 {
    // Lazily initialize
-   if(!mEditorMenuUserInterface.get())
-      mEditorMenuUserInterface = auto_ptr<EditorMenuUserInterface>(new EditorMenuUserInterface(mGame));
+   if(!mEditorMenuUserInterface)
+      mEditorMenuUserInterface = new EditorMenuUserInterface(mGame);
 
-   return mEditorMenuUserInterface.get();
+   return mEditorMenuUserInterface;
 }
 
 
 SplashUserInterface *UIManager::getSplashUserInterface()
 {
    // Lazily initialize
-   if(!mSplashUserInterface.get())
-      mSplashUserInterface = auto_ptr<SplashUserInterface>(new SplashUserInterface(mGame));
+   if(!mSplashUserInterface)
+      mSplashUserInterface = new SplashUserInterface(mGame);
 
-   return mSplashUserInterface.get();
+   return mSplashUserInterface;
 }
 
 
 TeamDefUserInterface *UIManager::getTeamDefUserInterface()
 {
    // Lazily initialize
-   if(!mTeamDefUserInterface.get())
-      mTeamDefUserInterface = auto_ptr<TeamDefUserInterface>(new TeamDefUserInterface(mGame));
+   if(!mTeamDefUserInterface)
+      mTeamDefUserInterface = new TeamDefUserInterface(mGame);
 
-   return mTeamDefUserInterface.get();
+   return mTeamDefUserInterface;
 }
 
 

@@ -74,39 +74,39 @@ class UIManager
 private:
    Game *mGame;
 
-   auto_ptr<MainMenuUserInterface> mMainMenuUserInterface;
-   auto_ptr<GameParamUserInterface> mGameParamUserInterface;
-   auto_ptr<YesNoUserInterface> mYesNoUserInterface;
-   auto_ptr<TeamMenuUserInterface> mTeamMenuUserInterface;
-   auto_ptr<QueryServersUserInterface> mQueryServersUserInterface;
-   auto_ptr<ServerPasswordEntryUserInterface> mServerPasswordEntryUserInterface;
-   auto_ptr<PlayerMenuUserInterface> mPlayerMenuUserInterface;
-   auto_ptr<NameEntryUserInterface> mNameEntryUserInterface;
-   auto_ptr<MessageUserInterface> mMessageUserInterface;
-   auto_ptr<LevelMenuUserInterface> mLevelMenuUserInterface;
-   auto_ptr<LevelMenuSelectUserInterface> mLevelMenuSelectUserInterface;
-   auto_ptr<AdminPasswordEntryUserInterface> mAdminPasswordEntryUserInterface;
-   auto_ptr<LevelChangePasswordEntryUserInterface> mLevelChangePasswordEntryUserInterface;
-   auto_ptr<HostMenuUserInterface> mHostMenuUserInterface;
-   auto_ptr<GameMenuUserInterface> mGameMenuUserInterface;
-   auto_ptr<ErrorMessageUserInterface> mErrorMsgUserInterface;
-   auto_ptr<InstructionsUserInterface> mInstructionsUserInterface;
-   auto_ptr<OptionsMenuUserInterface> mOptionsMenuUserInterface;
-   auto_ptr<KeyDefMenuUserInterface> mKeyDefMenuUserInterface;
-   auto_ptr<DiagnosticUserInterface> mDiagnosticUserInterface;
-   auto_ptr<CreditsUserInterface> mCreditsUserInterface;
-   auto_ptr<EditorInstructionsUserInterface> mEditorInstructionsUserInterface;
-   auto_ptr<ChatUserInterface> mChatInterface;
-   auto_ptr<SuspendedUserInterface> mSuspendedUserInterface;
-   auto_ptr<EditorMenuUserInterface> mEditorMenuUserInterface;
-   auto_ptr<SplashUserInterface> mSplashUserInterface;
-   auto_ptr<TeamDefUserInterface> mTeamDefUserInterface;
-
-   auto_ptr<LevelNameEntryUserInterface> mLevelNameEntryUserInterface;
-   auto_ptr<EditorUserInterface> mEditorUserInterface;
+   MainMenuUserInterface *mMainMenuUserInterface;
+   GameParamUserInterface *mGameParamUserInterface;
+   YesNoUserInterface *mYesNoUserInterface;
+   TeamMenuUserInterface *mTeamMenuUserInterface;
+   QueryServersUserInterface *mQueryServersUserInterface;
+   ServerPasswordEntryUserInterface *mServerPasswordEntryUserInterface;
+   PlayerMenuUserInterface *mPlayerMenuUserInterface;
+   NameEntryUserInterface *mNameEntryUserInterface;
+   MessageUserInterface *mMessageUserInterface;
+   LevelMenuUserInterface *mLevelMenuUserInterface;
+   LevelMenuSelectUserInterface *mLevelMenuSelectUserInterface;
+   AdminPasswordEntryUserInterface *mAdminPasswordEntryUserInterface;
+   LevelChangePasswordEntryUserInterface *mLevelChangePasswordEntryUserInterface;
+   HostMenuUserInterface *mHostMenuUserInterface;
+   GameMenuUserInterface *mGameMenuUserInterface;
+   ErrorMessageUserInterface *mErrorMsgUserInterface;
+   InstructionsUserInterface *mInstructionsUserInterface;
+   OptionsMenuUserInterface *mOptionsMenuUserInterface;
+   KeyDefMenuUserInterface *mKeyDefMenuUserInterface;
+   DiagnosticUserInterface *mDiagnosticUserInterface;
+   CreditsUserInterface *mCreditsUserInterface;
+   EditorInstructionsUserInterface *mEditorInstructionsUserInterface;
+   ChatUserInterface *mChatInterface;
+   SuspendedUserInterface *mSuspendedUserInterface;
+   EditorMenuUserInterface *mEditorMenuUserInterface;
+   SplashUserInterface *mSplashUserInterface;
+   TeamDefUserInterface *mTeamDefUserInterface;
+   LevelNameEntryUserInterface *mLevelNameEntryUserInterface;
+   EditorUserInterface *mEditorUserInterface;
 
 public:
    UIManager(Game *game);     // Constructor
+   ~UIManager();              // Destructor
 
    /////
    // Interface getting methods
