@@ -77,7 +77,7 @@ public:
    S32 getPlayerCount(lua_State *L);
 
    // Implement LevelLoader abstract method
-   void processLevelLoadLine(int argc, U32 id, const char **argv, GridDatabase *database);
+   void processLevelLoadLine(int argc, U32 id, const char **argv, GridDatabase *database, const string &levelFileName);
 };
 
 

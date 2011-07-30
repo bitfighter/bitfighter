@@ -32,8 +32,7 @@
 #include "UIMessage.h"
 #include "UIYesNo.h"
 #include "UIQueryServers.h"
-//#include "UIErrorMessage.h"
-#include "UIEditor.h"            // For EditorUserInterface def, needed by EditorGame stuff  ==> can delete?
+#include "UIEditor.h"            // For EditorUserInterface def
 #include "UIInstructions.h"
 #include "UIKeyDefMenu.h"
 #include "UIDiagnostics.h"

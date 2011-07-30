@@ -112,7 +112,6 @@ static S32 getGameTypeIndex(const char *gt)
 }
 
 
-
 void GameParamUserInterface::updateMenuItems()
 {
    GameType *gameType = getGame()->getGameType();

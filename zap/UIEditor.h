@@ -256,7 +256,6 @@ public:
    U32 mAllUndoneUndoLevel;   // What undo level reflects everything back just the
 
    void saveUndoState();
-   void restoreItems(const Vector<string> &from);
 
    Vector<string> mGameTypeArgs;
 

@@ -231,12 +231,11 @@ void Game::resetLevelInfo()
    setGridSize(DefaultGridSize);
 }
 
-static string origFilename;      // Name of file we're trying to load
 
 // Process a single line of a level file, loaded in gameLoader.cpp
 // argc is the number of parameters on the line, argv is the params themselves
 // Used by ServerGame and the editor
-void Game::processLevelLoadLine(U32 argc, U32 id, const char **argv, GridDatabase *database)
+void Game::processLevelLoadLine(U32 argc, U32 id, const char **argv, GridDatabase *database, const string &levelFileName)
 {
    S32 strlenCmd = (S32) strlen(argv[0]);
 
@@ -303,7 +302,7 @@ void Game::processLevelLoadLine(U32 argc, U32 id, const char **argv, GridDatabas
 
       if(!object && !eObject)    // Well... that was a bad idea!
       {
-         logprintf(LogConsumer::LogWarning, "Unknown object type \"%s\" in level \"%s\"", obj, origFilename.c_str());
+         logprintf(LogConsumer::LogWarning, "Unknown object type \"%s\" in level \"%s\"", obj, levelFileName.c_str());
          delete theObject;
       }
       else  // object was valid
@@ -319,7 +318,7 @@ void Game::processLevelLoadLine(U32 argc, U32 id, const char **argv, GridDatabas
          }
          else
          {
-            logprintf(LogConsumer::LogWarning, "Invalid arguments in object \"%s\" in level \"%s\"", obj, origFilename.c_str());
+            logprintf(LogConsumer::LogWarning, "Invalid arguments in object \"%s\" in level \"%s\"", obj, levelFileName.c_str());
             object->destroySelf();
          }
       }
@@ -1324,19 +1323,18 @@ inline string getPathFromFilename( const string& filename )
 extern OGLCONSOLE_Console gConsole;
 extern md5wrapper md5;
 
-bool ServerGame::loadLevel(const string &origFilename2)
+bool ServerGame::loadLevel(const string &levelFileName)
 {
-   origFilename = origFilename2;
    resetLevelInfo();
 
    mObjectsLoaded = 0;
 
-   string filename = ConfigDirectories::findLevelFile(origFilename);
+   string filename = ConfigDirectories::findLevelFile(levelFileName);
 
    cleanUp();
    if(filename == "")
    {
-      logprintf("Unable to find level file \"%s\".  Skipping...", origFilename.c_str());
+      logprintf("Unable to find level file \"%s\".  Skipping...", levelFileName.c_str());
       return false;
    }
 
@@ -1345,7 +1343,7 @@ bool ServerGame::loadLevel(const string &origFilename2)
       mLevelFileHash = md5.getHashFromFile(filename);    // TODO: Combine this with the reading of the file we're doing anyway in initLevelFromFile()
    else
    {
-      logprintf("Unable to process level file \"%s\".  Skipping...", origFilename.c_str());
+      logprintf("Unable to process level file \"%s\".  Skipping...", levelFileName.c_str());
       return false;
    }
    logprintf("2 server: %d, client %d", gServerGame->getGameObjDatabase()->getObjectCount(),gClientGame->getGameObjDatabase()->getObjectCount());
@@ -1353,7 +1351,7 @@ bool ServerGame::loadLevel(const string &origFilename2)
    // We should have a gameType by the time we get here... but in case we don't, we'll add a default one now
    if(!getGameType())
    {
-      logprintf(LogConsumer::LogWarning, "Warning: Missing game type parameter in level \"%s\"", origFilename.c_str());
+      logprintf(LogConsumer::LogWarning, "Warning: Missing game type parameter in level \"%s\"", levelFileName.c_str());
       GameType *gameType = new GameType;
       gameType->addToGame(this, getGameObjDatabase());
    }
@@ -1369,7 +1367,7 @@ bool ServerGame::loadLevel(const string &origFilename2)
       if(name == "")
       {
          logprintf(LogConsumer::LogWarning, "Warning: Could not find script \"%s\" in level\"%s\"", 
-                                    scriptName.c_str(), origFilename.c_str());
+                                    scriptName.c_str(), levelFileName.c_str());
          return false;
       }
 
@@ -1386,7 +1384,7 @@ bool ServerGame::loadLevel(const string &origFilename2)
       if(name == "")
       {
          logprintf(LogConsumer::LogWarning, "Warning: Could not find script \"%s\" in globalLevelScript", 
-                                    getGameType()->getScriptName().c_str(), origFilename.c_str());
+                                    getGameType()->getScriptName().c_str(), levelFileName.c_str());
          return false;
       }
 
@@ -1397,7 +1395,7 @@ bool ServerGame::loadLevel(const string &origFilename2)
 
    //  Check after script, script might add Teams
    if(getGameType()->makeSureTeamCountIsNotZero())
-      logprintf(LogConsumer::LogWarning, "Warning: Missing Team in level \"%s\"", origFilename.c_str());
+      logprintf(LogConsumer::LogWarning, "Warning: Missing Team in level \"%s\"", levelFileName.c_str());
 
    getGameType()->onLevelLoaded();
 
@@ -2570,7 +2568,7 @@ void ClientGame::render()
 
 
 
-bool ClientGame::processPseudoItem(S32 argc, const char **argv)
+bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &levelFileName)
 {
    if(!stricmp(argv[0], "Spawn") || !stricmp(argv[0], "FlagSpawn") || !stricmp(argv[0], "AsteroidSpawn"))
    {
@@ -2590,7 +2588,7 @@ bool ClientGame::processPseudoItem(S32 argc, const char **argv)
          newObject->addToEditor(this);
       else
       {
-         logprintf(LogConsumer::LogWarning, "Invalid arguments in object \"%s\" in level \"%s\"", argv[0], origFilename.c_str());
+         logprintf(LogConsumer::LogWarning, "Invalid arguments in object \"%s\" in level \"%s\"", argv[0], levelFileName.c_str());
          delete newObject;
       }
    }

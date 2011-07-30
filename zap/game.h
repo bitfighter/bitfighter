@@ -221,7 +221,7 @@ public:
 
    UIManager *getUIManager() { return mUIManager; }
 
-   virtual void processLevelLoadLine(U32 argc, U32 id, const char **argv, GridDatabase *database);  
+   virtual void processLevelLoadLine(U32 argc, U32 id, const char **argv, GridDatabase *database, const string &levelFileName);  
    bool processLevelParam(S32 argc, const char **argv);
    string toString();
 
@@ -530,7 +530,7 @@ public:
 
    boost::shared_ptr<AbstractTeam> getNewTeam();
 
-   bool processPseudoItem(S32 argc, const char **argv);        // For loading levels in editor
+   bool processPseudoItem(S32 argc, const char **argv, const string &levelFileName);        // For loading levels in editor
 
 
    /////

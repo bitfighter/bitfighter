@@ -361,55 +361,6 @@ void EditorUserInterface::deleteUndoState()
 }
 
 
-// Experimental save to string method
-//static void copyItems(const Vector<EditorObject *> *from, Vector<string> &to)
-//{
-//   to.resize(from->size());      // Preallocation makes things go faster
-//
-//   for(S32 i = 0; i < from->size(); i++)
-//      to[i] = from->get(i)->toString();
-//}
-
-
-void EditorUserInterface::restoreItems(const Vector<string> &from)
-{
-   GridDatabase *db = getGame()->getEditorDatabase();
-   clearDatabase(db);
-
-   Vector<string> args;
-
-   for(S32 i = 0; i < from.size(); i++)
-   {
-      args = parseString(from[i]);
-
-      //EditorObject *newObject = newEditorObject(args[0].c_str());
-
-      S32 args_count = 0;
-      const char *args_char[LevelLoader::MAX_LEVEL_LINE_ARGS];  // Convert to a format processArgs will allow
-         
-      // Skip the first arg because we've already handled that one above
-      for(S32 j = 0; j < args.size() && j < LevelLoader::MAX_LEVEL_LINE_ARGS; j++)
-      {
-         args_char[j] = args[j].c_str();
-         args_count++;
-      }
-
-      getGame()->processLevelLoadLine(args_count, 0, args_char, db);      // TODO: Id is wrong; shouldn't be 0
-   }
-}
-   
-
-//static void copyItems(const Vector<EditorObject *> &from, Vector<EditorObject *> &to)
-//{
-//   to.deleteAndClear();
-//   
-//   to.resize(from.size());      // Preallocation makes things go faster
-//
-//   for(S32 i = 0; i < from.size(); i++)
-//      to[i] = from[i]->newCopy();
-//}
-
-
 // Save the current state of the editor objects for later undoing
 void EditorUserInterface::saveUndoState()
 {
@@ -483,7 +434,6 @@ void EditorUserInterface::redo()
       mSnapVertexIndex = NONE;
 
       mLastUndoIndex++;
-      //restoreItems(mUndoItems[mLastUndoIndex % UNDO_STATES]);   
       getGame()->setEditorDatabase(mUndoItems[mLastUndoIndex % UNDO_STATES]);
       TNLAssert(mUndoItems[mLastUndoIndex % UNDO_STATES], "null!");
 
