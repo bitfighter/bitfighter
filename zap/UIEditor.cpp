@@ -466,7 +466,7 @@ void EditorUserInterface::resnapAllEngineeredItems()
    {
       EngineeredObject *engrObj = dynamic_cast<EngineeredObject *>(fillVector[i]);
 
-      engrObj->mountToWall(engrObj->getVert(0));
+      engrObj->mountToWall(engrObj->getVert(0), getGame()->getWallSegmentManager()->getGridDatabase());
    }
 }
 
@@ -1106,7 +1106,7 @@ Point EditorUserInterface::snapPoint(Point const &p, bool snapWhileOnDock)
       if((mSnapObject->getObjectTypeMask() & EngineeredType))
       {
          EngineeredObject *engrObj = dynamic_cast<EngineeredObject *>(mSnapObject);
-         return engrObj->mountToWall(snapPointToLevelGrid(p));
+         return engrObj->mountToWall(snapPointToLevelGrid(p), getGame()->getWallSegmentManager()->getGridDatabase());
       }
    }
 

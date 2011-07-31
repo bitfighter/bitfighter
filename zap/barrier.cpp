@@ -584,14 +584,14 @@ void PolyWall::onGeomChanged()
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-// Declare/initialize static variables
-//GridDatabase *WallEdge::mWallSegmentDatabase; 
-
 // Constructor
-WallEdge::WallEdge(const Point &start, const Point &end) 
+WallEdge::WallEdge(const Point &start, const Point &end, GridDatabase *database) 
 { 
    mStart = start; 
    mEnd = end; 
+
+   addToDatabase(database);
+
 
    setExtent(Rect(start, end)); 
 
@@ -605,23 +605,18 @@ WallEdge::WallEdge(const Point &start, const Point &end)
 WallEdge::~WallEdge()
 {
     // Make sure object is out of the database
-   getGridDatabase()->removeFromDatabase(this, getExtent()); 
+   removeFromDatabase(); 
 }
 
 ////////////////////////////////////////
 ////////////////////////////////////////
-
-// Declare/initialize static variables
-//Vector<WallEdge *> WallSegmentManager::mWallEdges; 
-//Vector<Point>  WallSegmentManager::mWallEdgePoints;
-//GridDatabase *WallSegmentManager::mWallSegmentDatabase;   
-GridDatabase WallEdge::mWallSegmentDatabase;
 
 
 // Constructor
 WallSegmentManager::WallSegmentManager()
 {
    mWallSegmentDatabase = new GridDatabase();
+   logprintf("Creating wallsegdb %p", mWallSegmentDatabase);
 }
 
 
@@ -647,10 +642,7 @@ void WallSegmentManager::recomputeAllWallGeometry(GridDatabase *gameDatabase)
    // Add clipped wallEdges to the spatial database
    for(S32 i = 0; i < mWallEdgePoints.size(); i+=2)
    {
-      WallEdge *newEdge = new WallEdge(mWallEdgePoints[i], mWallEdgePoints[i+1]);    // Create the edge object
-      
-      newEdge->addToDatabase(mWallSegmentDatabase);
-
+      WallEdge *newEdge = new WallEdge(mWallEdgePoints[i], mWallEdgePoints[i+1], mWallSegmentDatabase);    // Create the edge object
       mWallEdges[i/2] = newEdge;
    }
 }
@@ -746,7 +738,7 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *gameDataba
 
    // Alert all forcefields terminating on any of the wall segments we deleted and potentially recreated
    for(S32 j = 0; j < eosOnDeletedSegs.size(); j++)  
-      eosOnDeletedSegs[j]->mountToWall(eosOnDeletedSegs[j]->getVert(0));
+      eosOnDeletedSegs[j]->mountToWall(eosOnDeletedSegs[j]->getVert(0), mWallSegmentDatabase);
 }
 
 

@@ -248,19 +248,14 @@ public:
 class WallEdge : public DatabaseObject
 {
 private:
-   static GridDatabase mWallSegmentDatabase;
-
    Point mStart, mEnd;
 
 public:
-   WallEdge(const Point &start = Point(), const Point &end = Point());
+   WallEdge(const Point &start, const Point &end, GridDatabase *database);
    ~WallEdge();
 
    Point *getStart() { return &mStart; }
    Point *getEnd() { return &mEnd; }
-
-   GridDatabase *getGridDatabase() { return &mWallSegmentDatabase; }      // Can't be static because it's required as part of our interfaceTODO: make private
-   static GridDatabase *getWallEdgeDatabase() { return &mWallSegmentDatabase; }    // Provide static access to our database
 
    // Note that the poly returned here is different than what you might expect -- it is composed of the edges,
    // not the corners, and is thus in A-B, C-D, E-F format rather than the more typical A-B-C-D format returned

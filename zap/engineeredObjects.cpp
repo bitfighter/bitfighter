@@ -603,9 +603,8 @@ void EngineeredObject::healObject(S32 time)
 
 
 // Find mount point or turret or forcefield closest to pos
-Point EngineeredObject::mountToWall(const Point &pos)
+Point EngineeredObject::mountToWall(const Point &pos, GridDatabase *wallEdgeDatabase)
 {  
-   GridDatabase *wallEdgeDatabase = WallEdge::getWallEdgeDatabase();
    GridDatabase *wallSegDatabase = getGame()->getWallSegmentManager()->getGridDatabase();     // Get database containing walls
 
    Point anchor, nrml;
