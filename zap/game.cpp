@@ -273,7 +273,7 @@ void Game::processLevelLoadLine(U32 argc, U32 id, const char **argv, GridDatabas
    {
       // Do nothing here
    }
-   else if(getGameType() && processPseudoItem(argc, argv)) 
+   else if(getGameType() && processPseudoItem(argc, argv, levelFileName)) 
    {
       // Do nothing here
    }
@@ -1024,7 +1024,7 @@ boost::shared_ptr<AbstractTeam> ServerGame::getNewTeam()
 }
 
 
-bool ServerGame::processPseudoItem(S32 argc, const char **argv)
+bool ServerGame::processPseudoItem(S32 argc, const char **argv, const string &levelFileName)
 {
    if(!stricmp(argv[0], "Spawn"))
    {
