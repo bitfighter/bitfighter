@@ -158,7 +158,8 @@ F32 EditorItem::getEditorRenderScaleFactor(F32 currentScale)
 {
    const F32 thresh = 0.5;      // Size at which we'll stop rendering actual size, to keep item from getting too small
 
-   return (currentScale < thresh) ? thresh / currentScale : 1;
+   //return (currentScale < thresh) ? thresh / currentScale : 1;
+   return 1;
 }
 
 

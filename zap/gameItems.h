@@ -275,9 +275,6 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-////////////////////////////////////////
-////////////////////////////////////////
-
 class AsteroidSpawn : public AbstractSpawn    
 {
 public:
@@ -430,8 +427,6 @@ public:
    const char *getOnDockName() { return "Res."; }
    const char *getOnScreenName() { return "ResourceItem"; }
 
-      //virtual S32 getDockRadius() { return 11; }
-   //F32 getEditorRadius(F32 currentScale);
    void renderDock();
 
    ///// Lua Interface
