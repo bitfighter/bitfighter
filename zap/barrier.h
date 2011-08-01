@@ -274,12 +274,16 @@ class WallSegmentManager
 {
 private:
    GridDatabase *mWallSegmentDatabase;
+   GridDatabase *mWallEdgeDatabase;
 
 public:
    WallSegmentManager();   // Constructor
    ~WallSegmentManager();  // Destructor
 
    GridDatabase *getGridDatabase() { return mWallSegmentDatabase; } 
+
+   GridDatabase *getWallSegmentDatabase() { return mWallSegmentDatabase; } 
+   GridDatabase *getWallEdgeDatabase() { return mWallEdgeDatabase; }
 
    Vector<WallSegment *> mWallSegments;      
    Vector<WallEdge *> mWallEdges;               // For mounting forcefields/turrets

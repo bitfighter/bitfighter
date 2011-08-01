@@ -462,11 +462,12 @@ void EditorUserInterface::resnapAllEngineeredItems()
 
    getGame()->getEditorDatabase()->findObjects(EngineeredType, fillVector);
 
+   WallSegmentManager *wallSegmentManager = getGame()->getWallSegmentManager();
+
    for(S32 i = 0; i < fillVector.size(); i++)
    {
       EngineeredObject *engrObj = dynamic_cast<EngineeredObject *>(fillVector[i]);
-
-      engrObj->mountToWall(engrObj->getVert(0), getGame()->getWallSegmentManager()->getGridDatabase());
+      engrObj->mountToWall(engrObj->getVert(0), wallSegmentManager->getWallEdgeDatabase(), wallSegmentManager->getWallSegmentDatabase());
    }
 }
 
@@ -1095,6 +1096,8 @@ Point EditorUserInterface::snapPoint(Point const &p, bool snapWhileOnDock)
 
    Point snapPoint(p);
 
+   WallSegmentManager *wallSegmentManager = getGame()->getWallSegmentManager();
+
    if(mDraggingObjects)
    {
       // Mark all items being dragged as no longer being snapped -- only our primary "focus" item will be snapped
@@ -1106,7 +1109,8 @@ Point EditorUserInterface::snapPoint(Point const &p, bool snapWhileOnDock)
       if((mSnapObject->getObjectTypeMask() & EngineeredType))
       {
          EngineeredObject *engrObj = dynamic_cast<EngineeredObject *>(mSnapObject);
-         return engrObj->mountToWall(snapPointToLevelGrid(p), getGame()->getWallSegmentManager()->getGridDatabase());
+         return engrObj->mountToWall(snapPointToLevelGrid(p), wallSegmentManager->getWallEdgeDatabase(), 
+                                                              wallSegmentManager->getWallSegmentDatabase());
       }
    }
 
@@ -1144,7 +1148,7 @@ Point EditorUserInterface::snapPoint(Point const &p, bool snapWhileOnDock)
 
    // Search for a corner to snap to - by using wall edges, we'll also look for intersections between segments
    if(snapToWallCorners)
-      checkCornersForSnap(p, getGame()->getWallSegmentManager()->mWallEdges, minDist, snapPoint);
+      checkCornersForSnap(p, wallSegmentManager->mWallEdges, minDist, snapPoint);
 
    return snapPoint;
 }

@@ -87,7 +87,7 @@ public:
    bool collide(GameObject *hitObject) { return true; }
    F32 getHealth() { return mHealth; }
    void healObject(S32 time);
-   Point mountToWall(const Point &pos, GridDatabase *wallEdgeDatabase);
+   Point mountToWall(const Point &pos, GridDatabase *wallEdgeDatabase, GridDatabase *wallSegmentDatabase);
 
    // Figure out where to put our turrets and forcefield projectors.  Will return NULL if no mount points found.
    static DatabaseObject *findAnchorPointAndNormal(GridDatabase *db, const Point &pos, F32 snapDist, bool format, 

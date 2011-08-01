@@ -616,7 +616,7 @@ WallEdge::~WallEdge()
 WallSegmentManager::WallSegmentManager()
 {
    mWallSegmentDatabase = new GridDatabase();
-   logprintf("Creating wallsegdb %p", mWallSegmentDatabase);
+   mWallEdgeDatabase = new GridDatabase();
 }
 
 
@@ -624,6 +624,7 @@ WallSegmentManager::WallSegmentManager()
 WallSegmentManager::~WallSegmentManager()
 {
    delete mWallSegmentDatabase;
+   delete mWallEdgeDatabase;
 }
 
 
@@ -642,7 +643,7 @@ void WallSegmentManager::recomputeAllWallGeometry(GridDatabase *gameDatabase)
    // Add clipped wallEdges to the spatial database
    for(S32 i = 0; i < mWallEdgePoints.size(); i+=2)
    {
-      WallEdge *newEdge = new WallEdge(mWallEdgePoints[i], mWallEdgePoints[i+1], mWallSegmentDatabase);    // Create the edge object
+      WallEdge *newEdge = new WallEdge(mWallEdgePoints[i], mWallEdgePoints[i+1], mWallEdgeDatabase);    // Create the edge object
       mWallEdges[i/2] = newEdge;
    }
 }
@@ -738,7 +739,7 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *gameDataba
 
    // Alert all forcefields terminating on any of the wall segments we deleted and potentially recreated
    for(S32 j = 0; j < eosOnDeletedSegs.size(); j++)  
-      eosOnDeletedSegs[j]->mountToWall(eosOnDeletedSegs[j]->getVert(0), mWallSegmentDatabase);
+      eosOnDeletedSegs[j]->mountToWall(eosOnDeletedSegs[j]->getVert(0), mWallEdgeDatabase, mWallSegmentDatabase);
 }
 
 
@@ -810,10 +811,10 @@ void WallSegmentManager::invalidateIntersectingSegments(GridDatabase *gameDataba
 
 // Called when a wall segment has somehow changed.  All current and previously intersecting segments 
 // need to be recomputed.
-void WallSegmentManager::computeWallSegmentIntersections(GridDatabase *gameDatabase, EditorObject *item)
+void WallSegmentManager::computeWallSegmentIntersections(GridDatabase *gameObjDatabase, EditorObject *item)
 {
-   invalidateIntersectingSegments(gameDatabase, item);  // TODO: Is this step still needed?  similar things, both run buildWallSegmentEdgesAndPoints()
-   recomputeAllWallGeometry(gameDatabase);
+   invalidateIntersectingSegments(gameObjDatabase, item);  // TODO: Is this step still needed?  similar things, both run buildWallSegmentEdgesAndPoints()
+   recomputeAllWallGeometry(gameObjDatabase);
 }
 
 
