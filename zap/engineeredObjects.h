@@ -41,7 +41,6 @@ private:
 protected:
    F32 mHealth;
    SafePtr<Item> mResource;
-   Point mAnchorPoint;
    Point mAnchorNormal;
    bool mIsDestroyed;
    S32 mOriginalTeam;
@@ -110,8 +109,8 @@ public:
 
    /////
    // Editor stuff
-   Point getVert(S32 index) const { return mAnchorPoint; }
-   void setVert(const Point &pos, S32 index) { mAnchorPoint = pos; }
+   //Point getVert(S32 index) const { return getVert(0); }
+   //void setVert(const Point &pos, S32 index) { mGeometry->setVert(pos, 0); }
    
    virtual string toString(F32 gridSize) const;
 
@@ -246,7 +245,7 @@ public:
    };
 
    S32 getRad(lua_State *L) { return returnInt(L, radius); }
-   S32 getLoc(lua_State *L) { return LuaObject::returnPoint(L, mAnchorPoint + mAnchorNormal * radius ); }
+   S32 getLoc(lua_State *L) { return LuaObject::returnPoint(L, getVert(0) + mAnchorNormal * radius ); }
 };
 
 
@@ -323,7 +322,7 @@ public:
 
    // LuaItem methods
    S32 getRad(lua_State *L) { return returnInt(L, TURRET_OFFSET); }
-   S32 getLoc(lua_State *L) { return LuaObject::returnPoint(L, mAnchorPoint + mAnchorNormal * (TURRET_OFFSET)); }
+   S32 getLoc(lua_State *L) { return LuaObject::returnPoint(L, getVert(0) + mAnchorNormal * (TURRET_OFFSET)); }
    S32 getAngleAim(lua_State *L) {return returnFloat(L, mCurrentAngle);};
 
 };

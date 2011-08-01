@@ -264,9 +264,9 @@ bool EngineerModuleDeployer::deployEngineeredItem(GameConnection *connection, U3
 // Constructor
 EngineeredObject::EngineeredObject(S32 team, Point anchorPoint, Point anchorNormal, GameObjectType objectType) : 
       EditorPointObject(objectType),
-      mAnchorPoint(anchorPoint),
       mAnchorNormal(anchorNormal)
 {
+   setVert(anchorPoint, 0);
    mHealth = 1.0f;
    mTeam = team;
    mOriginalTeam = mTeam;
@@ -303,12 +303,12 @@ bool EngineeredObject::processArguments(S32 argc, const char **argv, Game *game)
    // Anchor objects to the correct point
    if(!findAnchorPointAndNormal(game->getGameObjDatabase(), pos, MAX_SNAP_DISTANCE, true, anchor, normal))
    {
-      mAnchorPoint.set(pos);      // Found no mount point, but for editor, needs to set the position
+      setVert(pos, 0);      // Found no mount point, but for editor, needs to set the position
       mAnchorNormal.set(1,0);
    }
    else
    {
-      mAnchorPoint.set(anchor + normal);
+      setVert(anchor + normal, 0);
       mAnchorNormal.set(normal);
    }
    computeExtent();
@@ -328,7 +328,6 @@ void EngineeredObject::onAddedToGame(Game *game)
 
 string EngineeredObject::toString(F32 gridSize) const
 {
-   //geomToString(gridSize) was (Point(mAnchorPoint) / gridSize).toString()  ==> still work?
    return string(Object::getClassName()) + " " + itos(mTeam) + " " + geomToString(gridSize) + " " + itos(mHealRate);
 }
 
@@ -459,7 +458,7 @@ void EngineeredObject::damageObject(DamageInfo *di)
       onDestroyed();
 
       mResource->addToDatabase(getGame()->getGameObjDatabase());
-      mResource->setActualPos(mAnchorPoint + mAnchorNormal * mResource->getRadius());
+      mResource->setActualPos(getVert(0) + mAnchorNormal * mResource->getRadius());
 
       deleteObject(500);
    }
@@ -534,8 +533,8 @@ U32 EngineeredObject::packUpdate(GhostConnection *connection, U32 updateMask, Bi
 {
    if(stream->writeFlag(updateMask & InitialMask))
    {
-      stream->write(mAnchorPoint.x);
-      stream->write(mAnchorPoint.y);
+      stream->write(getVert(0).x);
+      stream->write(getVert(0).y);
       stream->write(mAnchorNormal.x);
       stream->write(mAnchorNormal.y);
    }
@@ -555,15 +554,20 @@ U32 EngineeredObject::packUpdate(GhostConnection *connection, U32 updateMask, Bi
 void EngineeredObject::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    bool initial = false;
+
+   Point pos;
    if(stream->readFlag())
    {
       initial = true;
-      stream->read(&mAnchorPoint.x);
-      stream->read(&mAnchorPoint.y);
+      stream->read(&pos.x);
+      stream->read(&pos.y);
       stream->read(&mAnchorNormal.x);
       stream->read(&mAnchorNormal.y);
       computeExtent();
    }
+
+   setVert(pos, 0);
+
    if(stream->readFlag())
       stream->read(&mTeam);
 
@@ -715,10 +719,10 @@ Point ForceFieldProjector::getForceFieldStartPoint(const Point &anchor, const Po
 
 void ForceFieldProjector::getForceFieldStartAndEndPoints(Point &start, Point &end)
 {
-   start = getForceFieldStartPoint(mAnchorPoint, mAnchorNormal);
+   start = getForceFieldStartPoint(getVert(0), mAnchorNormal);
 
    DatabaseObject *collObj;
-   ForceField::findForceFieldEnd(getDatabase(), getForceFieldStartPoint(mAnchorPoint, mAnchorNormal), mAnchorNormal, end, &collObj);
+   ForceField::findForceFieldEnd(getDatabase(), getForceFieldStartPoint(getVert(0), mAnchorNormal), mAnchorNormal, end, &collObj);
 }
 
 
@@ -728,7 +732,7 @@ void ForceFieldProjector::onEnabled()
 {
    if(!isGhost())
    {
-      Point start = getForceFieldStartPoint(mAnchorPoint, mAnchorNormal);
+      Point start = getForceFieldStartPoint(getVert(0), mAnchorNormal);
       Point end;
       DatabaseObject *collObj;
    
@@ -742,7 +746,7 @@ void ForceFieldProjector::onEnabled()
 
 bool ForceFieldProjector::getCollisionPoly(Vector<Point> &polyPoints) const
 {
-   getGeom(mAnchorPoint, mAnchorNormal, polyPoints);
+   getGeom(getVert(0), mAnchorNormal, polyPoints);
    return true;
 }
 
@@ -769,13 +773,13 @@ void ForceFieldProjector::onAddedToGame(Game *theGame)
 
 void ForceFieldProjector::render()
 {
-   renderForceFieldProjector(mAnchorPoint, mAnchorNormal, getGame()->getTeamColor(getTeam()), isEnabled());
+   renderForceFieldProjector(getVert(0), mAnchorNormal, getGame()->getTeamColor(getTeam()), isEnabled());
 }
 
 
 void ForceFieldProjector::renderDock()
 {
-   renderSquareItem(mAnchorPoint, getGame()->getTeamColor(mTeam), 1, &Colors::white, '>');
+   renderSquareItem(getVert(0), getGame()->getTeamColor(mTeam), 1, &Colors::white, '>');
 }
 
 
@@ -786,8 +790,8 @@ void ForceFieldProjector::renderEditor(F32 currentScale)
 
    if(mSnapped)
    {
-      renderForceFieldProjector(mAnchorPoint, mAnchorNormal, color, true);
-      renderForceField(ForceFieldProjector::getForceFieldStartPoint(mAnchorPoint, mAnchorNormal, scaleFact), 
+      renderForceFieldProjector(getVert(0), mAnchorNormal, color, true);
+      renderForceField(ForceFieldProjector::getForceFieldStartPoint(getVert(0), mAnchorNormal, scaleFact), 
                        forceFieldEnd, color, true, scaleFact);
    }
    else
@@ -1129,7 +1133,7 @@ void Turret::getGeom(const Point &anchor, const Point &normal, Vector<Point> &po
 
 bool Turret::getCollisionPoly(Vector<Point> &polyPoints) const
 {
-   getGeom(mAnchorPoint, mAnchorNormal, polyPoints);
+   getGeom(getVert(0), mAnchorNormal, polyPoints);
    return true;
 }
 
@@ -1145,13 +1149,13 @@ void Turret::render()
 {
    Color c = getGame()->getTeamColor(mTeam);
 
-   renderTurret(c, mAnchorPoint, mAnchorNormal, isEnabled(), mHealth, mCurrentAngle);
+   renderTurret(c, getVert(0), mAnchorNormal, isEnabled(), mHealth, mCurrentAngle);
 }
 
 
 void Turret::renderDock()
 {
-   renderSquareItem(mAnchorPoint, getGame()->getTeamColor(mTeam), 1, &Colors::white, 'T');
+   renderSquareItem(getVert(0), getGame()->getTeamColor(mTeam), 1, &Colors::white, 'T');
 }
 
 
@@ -1200,7 +1204,7 @@ void Turret::idle(IdleCallPath path)
    mFireTimer.update(mCurrentMove.time);
 
    // Choose best target:
-   Point aimPos = mAnchorPoint + mAnchorNormal * TURRET_OFFSET;
+   Point aimPos = getVert(0) + mAnchorNormal * TURRET_OFFSET;
    Point cross(mAnchorNormal.y, -mAnchorNormal.x);
 
    Rect queryRect(aimPos, aimPos);
