@@ -547,7 +547,7 @@ void EditorUserInterface::loadLevel()
    dSprintf(fileBuffer, sizeof(fileBuffer), "%s/%s", gConfigDirs.levelDir.c_str(), mEditFileName.c_str());
 
    // Process level file --> returns true if file found and loaded, false if not (assume it's a new level)
-   if(getGame()->loadLevelFromFile(fileBuffer, getGame()->getEditorDatabase()))   
+   if(getGame()->loadLevelFromFile(fileBuffer, true, getGame()->getEditorDatabase()))   
    {
       // Loaded a level!
       makeSureThereIsAtLeastOneTeam(); // Make sure we at least have one team

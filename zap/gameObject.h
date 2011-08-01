@@ -279,6 +279,8 @@ public:
    virtual void addToGame(Game *game, GridDatabase *database);       // BotNavMeshZone has its own addToGame
    virtual void onAddedToGame(Game *game);
 
+   void markAsGhost() { mNetFlags = NetObject::IsGhost; }
+
    U32 getCreationTime() { return mCreationTime; }
    void setCreationTime(U32 creationTime) { mCreationTime = creationTime; }
 

@@ -113,7 +113,7 @@ inline void addArg()
 
 // Each line of the file is handled separately by processLevelLoadLine in game.cpp or UIEditor.cpp
 
-void LevelLoader::parseLevelLine(const char *line, GridDatabase *database, const string &levelFileName)
+void LevelLoader::parseLevelLine(const char *line, GridDatabase *database, bool inEditor, const string &levelFileName)
 {
    argc = 0;
    argLen = 0;
@@ -210,7 +210,7 @@ stateLineParseDone:
       id[idLen] = 0;
       try
       {
-         processLevelLoadLine(argc, (U32)atoi(id), (const char **) argv, database, levelFileName);
+         processLevelLoadLine(argc, (U32)atoi(id), (const char **) argv, database, inEditor, levelFileName);
       }
       catch(LevelLoadException &e)
       {
@@ -227,7 +227,7 @@ stateLineParseDone:
 
 
 // Reads files by chunks, converts to lines
-bool LevelLoader::loadLevelFromFile(const char *filename, GridDatabase *database)
+bool LevelLoader::loadLevelFromFile(const char *filename, bool inEditor, GridDatabase *database)
 {
    char levelChunk[MAX_LEVEL_LINE_LENGTH];     // Data buffer for reading in chunks of our level file
    FILE *file = fopen(filename, "r");
@@ -276,7 +276,7 @@ bool LevelLoader::loadLevelFromFile(const char *filename, GridDatabase *database
       char c = levelChunk[cur];     // Read a char, hold onto it for a second
       levelChunk[cur] = 0;          // Replace it with null
 
-      parseLevelLine(levelChunk, database, filename); // ParseLevelLine will read from the beginning of the chunk until it hits the null we just inserted
+      parseLevelLine(levelChunk, database, inEditor, filename); // ParseLevelLine will read from the beginning of the chunk until it hits the null we just inserted
       levelChunk[cur] = c;                            // Replace the null with our saved char
 
       // Now get rid of that line we just processed with parseLevelLine, by copying the data starting at cur back to the beginning of our chunk

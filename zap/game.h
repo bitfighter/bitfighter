@@ -221,7 +221,7 @@ public:
 
    UIManager *getUIManager() { return mUIManager; }
 
-   virtual void processLevelLoadLine(U32 argc, U32 id, const char **argv, GridDatabase *database, const string &levelFileName);  
+   virtual void processLevelLoadLine(U32 argc, U32 id, const char **argv, GridDatabase *database, bool inEditor, const string &levelFileName);  
    bool processLevelParam(S32 argc, const char **argv);
    string toString();
 

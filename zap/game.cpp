@@ -235,7 +235,7 @@ void Game::resetLevelInfo()
 // Process a single line of a level file, loaded in gameLoader.cpp
 // argc is the number of parameters on the line, argv is the params themselves
 // Used by ServerGame and the editor
-void Game::processLevelLoadLine(U32 argc, U32 id, const char **argv, GridDatabase *database, const string &levelFileName)
+void Game::processLevelLoadLine(U32 argc, U32 id, const char **argv, GridDatabase *database, bool inEditor, const string &levelFileName)
 {
    S32 strlenCmd = (S32) strlen(argv[0]);
 
@@ -310,6 +310,10 @@ void Game::processLevelLoadLine(U32 argc, U32 id, const char **argv, GridDatabas
          computeWorldObjectExtents();    // Make sure this is current if we process a robot that needs this for intro code
 
          bool validArgs = object->processArguments(argc - 1, argv + 1, this);
+
+         // Mark the item as being a ghost (client copy of a server obect) that the object will not trigger server-side tests
+         if(inEditor)
+            object->markAsGhost();
 
          if(validArgs)
          {
@@ -1339,7 +1343,7 @@ bool ServerGame::loadLevel(const string &levelFileName)
    }
 
    logprintf("1 server: %d, client %d", gServerGame->getGameObjDatabase()->getObjectCount(),gClientGame->getGameObjDatabase()->getObjectCount());
-   if(loadLevelFromFile(filename.c_str(), getGameObjDatabase()))
+   if(loadLevelFromFile(filename.c_str(), false, getGameObjDatabase()))
       mLevelFileHash = md5.getHashFromFile(filename);    // TODO: Combine this with the reading of the file we're doing anyway in initLevelFromFile()
    else
    {

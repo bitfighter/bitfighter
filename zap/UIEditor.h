@@ -227,8 +227,6 @@ private:
    bool mouseOnDock();                // Return whether mouse is currently over the dock
    bool mNeedToSave;                  // Have we modified the level such that we need to save?
 
-   //void processLevelLoadLine(U32 argc, U32 id, const char **argv);
-
    void insertNewItem(GameObjectType itemType);                      // Insert a new object into the game
 
    bool mWasTesting;
