@@ -727,7 +727,7 @@ void ForceFieldProjector::getForceFieldStartAndEndPoints(Point &start, Point &en
 
 
 // Forcefield projector has been turned on some how; either at the beginning of a level, or via repairing, or deploying. 
-// Runs on both client and server.
+// Runs on both client and server
 void ForceFieldProjector::onEnabled()
 {
    if(!isGhost())
