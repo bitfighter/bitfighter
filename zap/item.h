@@ -156,9 +156,6 @@ class EditorItem : public Item, virtual public EditorPointObject
    typedef Item Parent;   
    typedef EditorObject EditorParent;
 
-protected:
-   F32 getEditorRenderScaleFactor(F32 currentScale);     // Calculates scaling factor for items in the editor
-
 public:
    EditorItem(Point p = Point(0,0), bool collideable = false, float radius = 1, float mass = 1);   // Constructor
 

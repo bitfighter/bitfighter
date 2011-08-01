@@ -268,7 +268,7 @@ void FlagItem::renderDock()
 
 F32 FlagItem::getEditorRadius(F32 currentScale)
 {
-   return 18 * currentScale * getEditorRenderScaleFactor(currentScale);
+   return 18 * currentScale;
 }
 
 

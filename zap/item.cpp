@@ -153,31 +153,16 @@ void Item::setVert(const Point &point, S32 index)
    mMoveState[RenderState].pos = point;      // Keep render state in-sync with the geom
 }
 
-// This scaling factor allows us to draw actual item, letting it grow and shrink with editor scale, but places a limit on how small it will get
-F32 EditorItem::getEditorRenderScaleFactor(F32 currentScale)
-{
-   const F32 thresh = 0.5;      // Size at which we'll stop rendering actual size, to keep item from getting too small
-
-   //return (currentScale < thresh) ? thresh / currentScale : 1;
-   return 1;
-}
-
 
 void EditorItem::renderEditor(F32 currentScale)
 {
-   F32 scaleFact = getEditorRenderScaleFactor(currentScale);
-
-   glPushMatrix();
-      glScale(scaleFact);
-
-      renderItem(getVert(0) / scaleFact);                    
-   glPopMatrix();
+   renderItem(getVert(0));                    
 }
 
 
 F32 EditorItem::getEditorRadius(F32 currentScale)
 {
-   return (getRadius() + 2) * currentScale * getEditorRenderScaleFactor(currentScale);
+   return (getRadius() + 2) * currentScale;
 }
 
 

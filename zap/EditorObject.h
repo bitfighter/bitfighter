@@ -107,7 +107,6 @@ public:
    // Should we show item attributes when it is selected? (only overridden by TextItem)
    virtual bool showAttribsWhenSelected() { return true; }                             
 
-   virtual F32 getEditorRenderScaleFactor(F32 mCurrentScale) { return 1; }             // Only overridden for point items
    virtual void renderAttribs(F32 currentScale);
 
    void unselect();

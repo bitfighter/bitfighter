@@ -98,7 +98,7 @@ void RepairItem::renderDock()
 
 F32 RepairItem::getEditorRadius(F32 currentScale)
 {
-   return 22 * currentScale * getEditorRenderScaleFactor(currentScale);
+   return 22 * currentScale;
 }
 
 
@@ -461,7 +461,7 @@ void Asteroid::renderDock()
 
 F32 Asteroid::getEditorRadius(F32 currentScale)
 {
-   return 75 * currentScale * getEditorRenderScaleFactor(currentScale);
+   return 75 * currentScale;
 }
 
 
@@ -791,7 +791,7 @@ void TestItem::renderDock()
 
 F32 TestItem::getEditorRadius(F32 currentScale)
 {
-   return getRadius() * currentScale * getEditorRenderScaleFactor(currentScale);
+   return getRadius() * currentScale;
 }
 
 
