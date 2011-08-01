@@ -1112,6 +1112,7 @@ bool Turret::processArguments(S32 argc2, const char **argv2, Game *game)
    return returnBool;
 }
 
+
 string Turret::toString(F32 gridSize) const
 {
    string out = EngineeredObject::toString(gridSize);
@@ -1119,6 +1120,7 @@ string Turret::toString(F32 gridSize) const
       out = out + " W=" + gWeapons[mWeaponFireType].name.getString();
    return out;
 }
+
 
 // static method
 void Turret::getGeom(const Point &anchor, const Point &normal, Vector<Point> &polyPoints)
