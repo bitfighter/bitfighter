@@ -563,10 +563,10 @@ void EngineeredObject::unpackUpdate(GhostConnection *connection, BitStream *stre
       stream->read(&pos.y);
       stream->read(&mAnchorNormal.x);
       stream->read(&mAnchorNormal.y);
+      setVert(pos, 0);
       computeExtent();
    }
 
-   setVert(pos, 0);
 
    if(stream->readFlag())
       stream->read(&mTeam);
