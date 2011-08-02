@@ -1512,7 +1512,7 @@ void EditorUserInterface::render()
    //glPopMatrix();
 
    for(S32 i = 0; i < mLevelGenItems.size(); i++)
-      mLevelGenItems[i]->renderInEditor(true, mShowingReferenceShip, mShowMode);
+      mLevelGenItems[i]->renderInEditor(mCurrentScale, mCurrentOffset, true, mShowingReferenceShip, mShowMode);
    
    // Render polyWall item fill just before rendering regular walls.  This will create the effect of all walls merging together.  
    // PolyWall outlines are already part of the wallSegmentManager, so will be rendered along with those of regular walls.
@@ -1544,7 +1544,7 @@ void EditorUserInterface::render()
 
       if(obj->getObjectTypeMask() != PolyWallType)
          if(!(mDraggingObjects && obj->isSelected()))
-            obj->renderInEditor(false, mShowingReferenceShip, mShowMode);
+            obj->renderInEditor(mCurrentScale, mCurrentOffset, false, mShowingReferenceShip, mShowMode);
    }
 
 
@@ -1555,7 +1555,7 @@ void EditorUserInterface::render()
    {
       EditorObject *obj = objList->get(i);
       if(obj->isSelected() || obj->isLitUp())
-         obj->renderInEditor(false, mShowingReferenceShip, mShowMode);
+         obj->renderInEditor(mCurrentScale, mCurrentOffset, false, mShowingReferenceShip, mShowMode);
    }
 
 
@@ -1619,7 +1619,7 @@ void EditorUserInterface::render()
       {
          EditorObject *obj = objList->get(i);
          if(obj->isSelected() && obj->getObjectTypeMask() & ~BarrierType)    // Object is selected and is not a wall
-            obj->renderInEditor(false, mShowingReferenceShip, mShowMode);
+            obj->renderInEditor(mCurrentScale, mCurrentOffset, false, mShowingReferenceShip, mShowMode);
       }
 
    // Render our snap vertex as a hollow magenta box
@@ -1662,7 +1662,7 @@ void EditorUserInterface::render()
    if(!mShowingReferenceShip)
       for(S32 i = 0; i < mDockItems.size(); i++)
       {
-         mDockItems[i]->renderInEditor(false, false, mShowMode);
+         mDockItems[i]->renderInEditor(mCurrentScale, mCurrentOffset, false, false, mShowMode);
          mDockItems[i]->setLitUp(false);
       }
 

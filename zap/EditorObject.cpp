@@ -249,7 +249,7 @@ extern void renderPolygon(const Vector<Point> &fillPoints, const Vector<Point> &
 static const S32 asteroidDesign = 2;      // Design we'll use for all asteroids in editor
 
 // Items are rendered in index order, so those with a higher index get drawn later, and hence, on top
-void EditorObject::renderInEditor(bool isScriptItem, bool showingReferenceShip, ShowMode showMode)    // TODO: pass scale
+void EditorObject::renderInEditor(F32 currentScale, const Point &currentOffset, bool isScriptItem, bool showingReferenceShip, ShowMode showMode)
 {
    const S32 instrSize = 9;      // Size of instructions for special items
    const S32 attrSize = 10;
@@ -273,9 +273,6 @@ void EditorObject::renderInEditor(bool isScriptItem, bool showingReferenceShip, 
    if(anyVertsSelected())
       drawColor = *SELECT_COLOR;
 
-   F32 currentScale = mGame->getUIManager()->getEditorUserInterface()->getCurrentScale();
-   Point currentOffset = mGame->getUIManager()->getEditorUserInterface()->getCurrentOffset(); 
-     
    if(mDockItem)
    {
       renderDock();
@@ -286,8 +283,8 @@ void EditorObject::renderInEditor(bool isScriptItem, bool showingReferenceShip, 
    else  // Not a dock item
    {
       glPushMatrix();
-         glTranslate(mGame->getUIManager()->getEditorUserInterface()->getCurrentOffset());
-         glScale(mGame->getUIManager()->getEditorUserInterface()->getCurrentScale());
+         glTranslate(currentOffset);
+         glScale(currentScale);
 
          if(showingReferenceShip)
             render();

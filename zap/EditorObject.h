@@ -212,7 +212,7 @@ public:
    //////////////
 
    //TODO: Get rid of this altogether
-   void renderInEditor(bool isScriptItem, bool showingReferenceShip, ShowMode showMode);
+   void renderInEditor(F32 currentScale, const Point &currentOffset, bool isScriptItem, bool showingReferenceShip, ShowMode showMode);
 
 };
 
