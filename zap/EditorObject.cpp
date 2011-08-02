@@ -168,10 +168,9 @@ static void renderVertex(VertexRenderStyles style, const Point &v, S32 number, F
 
 static const S32 DOCK_LABEL_SIZE = 9;      // Size to label items on the dock
 
-
-static void labelVertex(Point pos, S32 radius, const char *itemLabelTop, const char *itemLabelBottom)
+static void labelVertex(Point pos, S32 radius, const char *itemLabelTop, const char *itemLabelBottom, F32 scale)
 {
-   F32 labelSize = DOCK_LABEL_SIZE;
+   F32 labelSize = DOCK_LABEL_SIZE / scale;
 
    UserInterface::drawStringc(pos.x, pos.y - radius - labelSize - 5, labelSize, itemLabelTop);     // Above the vertex
    UserInterface::drawStringc(pos.x, pos.y + radius + 2, labelSize, itemLabelBottom);              // Below the vertex
@@ -213,10 +212,8 @@ void EditorObject::renderAndLabelHighlightedVertices(F32 currentScale)
       {
          glColor((vertSelected(i) || mSelected) ? SELECT_COLOR : HIGHLIGHT_COLOR);
 
-         Point pos = mGame->getUIManager()->getEditorUserInterface()->convertLevelToCanvasCoord(getVert(i));
-
-         drawSquare(pos, radius);
-         labelVertex(pos, radius, getOnScreenName(), getVertLabel(i));
+         drawSquare(getVert(i), radius);
+         labelVertex(getVert(i), radius, getOnScreenName(), getVertLabel(i), currentScale);
       }         
 }
 
@@ -289,19 +286,20 @@ void EditorObject::renderInEditor(F32 currentScale, const Point &currentOffset, 
          if(showingReferenceShip)
             render();
          else
-
             renderEditor(currentScale);
+
+         if(!showingReferenceShip)
+         {
+            // Label item with instruction message describing what happens if user presses enter
+            if(isSelected() && !isBeingEdited())
+               renderItemText(getInstructionMsg(), -1, currentScale, currentOffset);
+
+            renderAndLabelHighlightedVertices(currentScale);
+            renderAttribs(currentScale);
+         }
+
       glPopMatrix();   
 
-      if(!showingReferenceShip)
-      {
-         // Label item with instruction message describing what happens if user presses enter
-         if(isSelected() && !isBeingEdited())
-            renderItemText(getInstructionMsg(), -1, currentScale, currentOffset);
-
-         renderAndLabelHighlightedVertices(currentScale);
-         renderAttribs(currentScale);
-      }
    }
 
    glDisableBlend;
