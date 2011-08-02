@@ -117,14 +117,6 @@ static F32 getRenderingAlpha(bool isScriptItem)
 }
 
 
-// Replaces the need to do a convertLevelToCanvasCoord on every point before rendering
-static void setLevelToCanvasCoordConversion(Game *game)
-{
-   glTranslate(game->getUIManager()->getEditorUserInterface()->getCurrentOffset());
-   glScale(game->getUIManager()->getEditorUserInterface()->getCurrentScale());
-} 
-
-
 // TODO: merge with UIEditor versions
 static const Color grayedOutColorBright = Colors::gray50;
 static const Color grayedOutColorDim = Color(.25, .25, .25);
@@ -294,10 +286,13 @@ void EditorObject::renderInEditor(bool isScriptItem, bool showingReferenceShip, 
    else  // Not a dock item
    {
       glPushMatrix();
-         setLevelToCanvasCoordConversion(mGame);
+         glTranslate(mGame->getUIManager()->getEditorUserInterface()->getCurrentOffset());
+         glScale(mGame->getUIManager()->getEditorUserInterface()->getCurrentScale());
+
          if(showingReferenceShip)
             render();
          else
+
             renderEditor(currentScale);
       glPopMatrix();   
 
@@ -313,28 +308,6 @@ void EditorObject::renderInEditor(bool isScriptItem, bool showingReferenceShip, 
    }
 
    glDisableBlend;
-}
-
-
-// Draw barrier centerlines; wraps renderPolyline()  ==> lineItem, barrierMaker only
-void EditorObject::renderPolylineCenterline(F32 alpha)
-{
-   // Render wall centerlines
-   if(mSelected)
-      glColor(SELECT_COLOR, alpha);
-   else if(mLitUp && !anyVertsSelected())
-      glColor(*HIGHLIGHT_COLOR, alpha);
-   else
-      glColor(getTeamColor(mTeam), alpha);
-
-   glLineWidth(WALL_SPINE_WIDTH);
-
-   glPushMatrix();
-      setLevelToCanvasCoordConversion(getGame());
-      renderPointVector(getOutline(), GL_LINE_STRIP);
-   glPopMatrix();
-
-   glLineWidth(gDefaultLineWidth);
 }
 
 
