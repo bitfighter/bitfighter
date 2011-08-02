@@ -778,14 +778,14 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsAdmin, (bool granted), (granted),
          if(UserInterface::current->getMenuID() == GameMenuUI)
             mClientGame->getUIManager()->getGameMenuUserInterface()->mMenuSubTitle = adminPassSuccessMsg;
          else
-            mClientGame->getUserInterface()->displayMessage(gCmdChatColor, adminPassSuccessMsg);
+            mClientGame->displayMessage(gCmdChatColor, adminPassSuccessMsg);
       }
       else
       {
          if(UserInterface::current->getMenuID() == GameMenuUI)
             mClientGame->getUIManager()->getGameMenuUserInterface()->mMenuSubTitle = adminPassFailureMsg;
          else
-            mClientGame->getUserInterface()->displayMessage(gCmdChatColor, adminPassFailureMsg);
+            mClientGame->displayMessage(gCmdChatColor, adminPassFailureMsg);
       }
    }
 }
@@ -819,7 +819,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsLevelChanger, (bool granted, bool noti
 
    // Check for permissions being rescinded by server, will happen if admin changes level change pw
    if(isLevelChanger() && !granted)
-      mClientGame->getUserInterface()->displayMessage(gCmdChatColor, "An admin has changed the level change password; you must enter the new password to change levels.");
+      mClientGame->displayMessage(gCmdChatColor, "An admin has changed the level change password; you must enter the new password to change levels.");
 
    setIsLevelChanger(granted);
 
@@ -834,14 +834,14 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsLevelChanger, (bool granted, bool noti
          if(UserInterface::current->getMenuID() == GameMenuUI)
             mClientGame->getUIManager()->getGameMenuUserInterface()->mMenuSubTitle = levelPassSuccessMsg;
          else
-            mClientGame->getUserInterface()->displayMessage(gCmdChatColor, levelPassSuccessMsg);
+            mClientGame->displayMessage(gCmdChatColor, levelPassSuccessMsg);
       }
       else
       {
          if(UserInterface::current->getMenuID() == GameMenuUI)
             mClientGame->getUIManager()->getGameMenuUserInterface()->mMenuSubTitle = levelPassFailureMsg;
          else
-            mClientGame->getUserInterface()->displayMessage(gCmdChatColor, levelPassFailureMsg);
+            mClientGame->displayMessage(gCmdChatColor, levelPassFailureMsg);
       }
    }
 }
@@ -894,7 +894,7 @@ Color gCmdChatColor = colors[GameConnection::ColorRed];
 static void displayMessage(U32 colorIndex, U32 sfxEnum, const char *message)
 {
 
-   gClientGame->getUserInterface()->displayMessage(colors[colorIndex], "%s", message);
+   gClientGame->displayMessage(colors[colorIndex], "%s", message);
    if(sfxEnum != SFXNone)
       SoundSystem::playSoundEffect(sfxEnum);
 }

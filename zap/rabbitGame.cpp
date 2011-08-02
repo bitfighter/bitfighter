@@ -48,40 +48,40 @@ TNL_IMPLEMENT_NETOBJECT_RPC(RabbitGameType, s2cRabbitMessage, (U32 msgIndex, Str
    {
    case RabbitMsgGrab:
       SoundSystem::playSoundEffect(SFXFlagCapture);
-      clientGame->getUserInterface()->displayMessage(Color(1.0f, 0.0f, 0.0f),
+      clientGame->displayMessage(Color(1.0f, 0.0f, 0.0f),
                   "%s GRABBED the Carrot!",
                   clientName.getString());
       break;
    case RabbitMsgRabbitKill:
       SoundSystem::playSoundEffect(SFXShipHeal);
-      clientGame->getUserInterface()->displayMessage(Color(1.0f, 0.0f, 0.0f),
+      clientGame->displayMessage(Color(1.0f, 0.0f, 0.0f),
                   "%s is a rabbid rabbit!",
                   clientName.getString());
       break;
    case RabbitMsgDrop:
       SoundSystem::playSoundEffect(SFXFlagDrop);
-      clientGame->getUserInterface()->displayMessage(Color(0.0f, 1.0f, 0.0f),
+      clientGame->displayMessage(Color(0.0f, 1.0f, 0.0f),
                   "%s DROPPED the Carrot!",
                   clientName.getString());
       break;
    case RabbitMsgRabbitDead:
       SoundSystem::playSoundEffect(SFXShipExplode);
-      clientGame->getUserInterface()->displayMessage(Color(1.0f, 0.0f, 0.0f),
+      clientGame->displayMessage(Color(1.0f, 0.0f, 0.0f),
                   "%s killed the rabbit!",
                   clientName.getString());
       break;
    case RabbitMsgReturn:
       SoundSystem::playSoundEffect(SFXFlagReturn);
-      clientGame->getUserInterface()->displayMessage(Color(1.0f, 0.0f, 1.0f),
+      clientGame->displayMessage(Color(1.0f, 0.0f, 1.0f),
                   "The Carrot has been returned!");
       break;
    case RabbitMsgGameOverWin:
-      clientGame->getUserInterface()->displayMessage(Color(1.0f, 1.0f, 0.0f),
+      clientGame->displayMessage(Color(1.0f, 1.0f, 0.0f),
                   "%s is the top rabbit!",
                   clientName.getString());
       break;
    case RabbitMsgGameOverTie:
-      clientGame->getUserInterface()->displayMessage(Color(1.0f, 1.0f, 0.0f),
+      clientGame->displayMessage(Color(1.0f, 1.0f, 0.0f),
                   "No top rabbit - Carrot wins by default!");
       break;
    }

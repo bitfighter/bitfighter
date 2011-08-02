@@ -2103,11 +2103,11 @@ GAMETYPE_RPC_S2C(GameType, s2cAddClient,
          if(g)
             g->c2sRequestScoreboardUpdates(true);
       }
-      clientGame->getUserInterface()->displayMessage(Color(0.6f, 0.6f, 0.8f), "Welcome to the game!");
+      clientGame->displayMessage(Color(0.6f, 0.6f, 0.8f), "Welcome to the game!");
    }
    else
    {
-      clientGame->getUserInterface()->displayMessage(Color(0.6f, 0.6f, 0.8f), "%s joined the game.", name.getString());      
+      clientGame->displayMessage(Color(0.6f, 0.6f, 0.8f), "%s joined the game.", name.getString());      
       if(playAlert)
          SoundSystem::playSoundEffect(SFXPlayerJoined, 1);
    }
@@ -2156,7 +2156,7 @@ GAMETYPE_RPC_S2C(GameType, s2cRenameClient, (StringTableEntry oldName, StringTab
    if(!clientGame) 
       return;
 
-   clientGame->getUserInterface()->displayMessage(Color(0.6f, 0.6f, 0.8f), "%s changed to %s", oldName.getString(), newName.getString());
+   clientGame->displayMessage(Color(0.6f, 0.6f, 0.8f), "%s changed to %s", oldName.getString(), newName.getString());
 }
 
 // Server notifies clients that a player has left the game
@@ -2176,7 +2176,7 @@ GAMETYPE_RPC_S2C(GameType, s2cRemoveClient, (StringTableEntry name), (name))
    if(!clientGame) 
       return;
 
-   clientGame->getUserInterface()->displayMessage(Color(0.6f, 0.6f, 0.8f), "%s left the game.", name.getString());
+   clientGame->displayMessage(Color(0.6f, 0.6f, 0.8f), "%s left the game.", name.getString());
    SoundSystem::playSoundEffect(SFXPlayerLeft, 1);
 }
 
@@ -2224,7 +2224,7 @@ GAMETYPE_RPC_S2C(GameType, s2cChangeScoreToWin, (U32 winningScore, StringTableEn
    TNLAssert(clientGame, "clientGame is NULL");
    if(!clientGame) return;
 
-   clientGame->getUserInterface()->displayMessage(Color(0.6f, 1, 0.8f) /*Nuclear green */, 
+   clientGame->displayMessage(Color(0.6f, 1, 0.8f) /*Nuclear green */, 
                "%s changed the winning score to %d.", changer.getString(), mWinningScore);
 }
 
@@ -2245,9 +2245,9 @@ GAMETYPE_RPC_S2C(GameType, s2cClientJoinedTeam,
    if(!clientGame) return;
 
    if(clientGame->getGameType()->mLocalClient && name == clientGame->getGameType()->mLocalClient->name)      
-      clientGame->getUserInterface()->displayMessage(Color(0.6f, 0.6f, 0.8f), "You have joined team %s.", getGame()->getTeamName(teamIndex).getString());
+      clientGame->displayMessage(Color(0.6f, 0.6f, 0.8f), "You have joined team %s.", getGame()->getTeamName(teamIndex).getString());
    else
-      clientGame->getUserInterface()->displayMessage(Color(0.6f, 0.6f, 0.8f), "%s joined team %s.", name.getString(), getGame()->getTeamName(teamIndex).getString());
+      clientGame->displayMessage(Color(0.6f, 0.6f, 0.8f), "%s joined team %s.", name.getString(), getGame()->getTeamName(teamIndex).getString());
 
    // Make this client forget about any mines or spybugs he knows about... it's a bit of a kludge to do this here,
    // but this RPC only runs when a player joins the game or changes teams, so this will never hurt, and we can
@@ -2279,7 +2279,7 @@ GAMETYPE_RPC_S2C(GameType, s2cClientBecameAdmin, (StringTableEntry name), (name)
    if(!clientGame) return;
 
    if(clientGame->getGameType()->mClientList.size() && name != clientGame->getGameType()->mLocalClient->name)    // Don't show message to self
-      clientGame->getUserInterface()->displayMessage(Color(0,1,1), "%s has been granted administrator access.", name.getString());
+      clientGame->displayMessage(Color(0,1,1), "%s has been granted administrator access.", name.getString());
 }
 
 
@@ -2294,7 +2294,7 @@ GAMETYPE_RPC_S2C(GameType, s2cClientBecameLevelChanger, (StringTableEntry name),
    if(!clientGame) return;
 
    if(clientGame->getGameType()->mClientList.size() && name != clientGame->getGameType()->mLocalClient->name)    // Don't show message to self
-      clientGame->getUserInterface()->displayMessage(Color(0,1,1), "%s can now change levels.", name.getString());
+      clientGame->displayMessage(Color(0,1,1), "%s can now change levels.", name.getString());
 }
 
 // Runs after the server knows that the client is available and addressable via the getGhostIndex()
@@ -2781,7 +2781,7 @@ GAMETYPE_RPC_S2C(GameType, s2cDisplayChatPM, (StringTableEntry fromName, StringT
       clientGame->getUserInterface()->displayChatMessage(theColor, "to %s: %s", toName.getString(), message.getString());
 
    else                // Should never get here... shouldn't be able to see PM that is not from or not to you
-      clientGame->getUserInterface()->displayMessage(theColor, "from %s to %s: %s", fromName.getString(), toName.getString(), message.getString());
+      clientGame->displayMessage(theColor, "from %s to %s: %s", fromName.getString(), toName.getString(), message.getString());
 }
 
 
@@ -2971,21 +2971,21 @@ GAMETYPE_RPC_S2C(GameType, s2cKillMessage, (StringTableEntry victim, StringTable
    {
       if(killer == victim)
          if(killerDescr == "mine")
-            clientGame->getUserInterface()->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s was destroyed by own mine", victim.getString());
+            clientGame->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s was destroyed by own mine", victim.getString());
          else
-            clientGame->getUserInterface()->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s zapped self", victim.getString());
+            clientGame->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s zapped self", victim.getString());
       else
          if(killerDescr == "mine")
-            clientGame->getUserInterface()->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s was destroyed by mine put down by %s", victim.getString(), killer.getString());
+            clientGame->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s was destroyed by mine put down by %s", victim.getString(), killer.getString());
          else
-            clientGame->getUserInterface()->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s zapped %s", killer.getString(), victim.getString());
+            clientGame->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s zapped %s", killer.getString(), victim.getString());
    }
    else if(killerDescr == "mine")   // Killer was some object with its own kill description string
-      clientGame->getUserInterface()->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s got blown up by a mine", victim.getString());
+      clientGame->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s got blown up by a mine", victim.getString());
    else if(killerDescr != "")
-      clientGame->getUserInterface()->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s %s", victim.getString(), killerDescr.getString());
+      clientGame->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s %s", victim.getString(), killerDescr.getString());
    else         // Killer unknown
-      clientGame->getUserInterface()->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s got zapped", victim.getString());
+      clientGame->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s got zapped", victim.getString());
 }
 
 

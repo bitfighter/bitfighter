@@ -1862,7 +1862,7 @@ static void joystickUpdateMove(Move *theMove)
    }
 }
 
-U32 prevTimeDelta=0;
+U32 prevTimeDelta = 0;
 
 void ClientGame::idle(U32 timeDelta)
 {
@@ -1987,6 +1987,19 @@ void ClientGame::idle(U32 timeDelta)
       supressScreensaver();
       mScreenSaverTimer.reset();
    }
+}
+
+
+void ClientGame::displayMessage(const Color &msgColor, const char *format, ...)
+{
+   va_list args;
+   char message[MAX_CHAT_MSG_LENGTH]; 
+
+   va_start(args, format);
+   vsnprintf(message, sizeof(message), format, args); 
+   va_end(args);
+    
+   getUserInterface()->displayMessage(msgColor, message);
 }
 
 

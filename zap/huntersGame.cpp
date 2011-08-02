@@ -73,25 +73,25 @@ TNL_IMPLEMENT_NETOBJECT_RPC(HuntersGameType, s2cHuntersMessage,
    if(msgIndex == HuntersMsgScore)
    {
       SoundSystem::playSoundEffect(SFXFlagCapture);
-      clientGame->getUserInterface()->displayMessage(Color(0.6f, 1.0f, 0.8f),"%s returned %d flag%s to the Nexus for %d points!", clientName.getString(), flagCount, flagCount > 1 ? "s" : "", score);
+      clientGame->displayMessage(Color(0.6f, 1.0f, 0.8f),"%s returned %d flag%s to the Nexus for %d points!", clientName.getString(), flagCount, flagCount > 1 ? "s" : "", score);
    }
    else if(msgIndex == HuntersMsgYardSale)
    {
       SoundSystem::playSoundEffect(SFXFlagSnatch);
-      clientGame->getUserInterface()->displayMessage(Color(0.6f, 1.0f, 0.8f),
+      clientGame->displayMessage(Color(0.6f, 1.0f, 0.8f),
                   "%s is having a YARD SALE!",
                   clientName.getString());
    }
    else if(msgIndex == HuntersMsgGameOverWin)
    {
-      clientGame->getUserInterface()->displayMessage(Color(0.6f, 1.0f, 0.8f),
+      clientGame->displayMessage(Color(0.6f, 1.0f, 0.8f),
                      "Player %s wins the game!",
                      clientName.getString());
       SoundSystem::playSoundEffect(SFXFlagCapture);
    }
    else if(msgIndex == HuntersMsgGameOverTie)
    {
-      clientGame->getUserInterface()->displayMessage(Color(0.6f, 1.0f, 0.8f), "The game ended in a tie.");
+      clientGame->displayMessage(Color(0.6f, 1.0f, 0.8f), "The game ended in a tie.");
       SoundSystem::playSoundEffect(SFXFlagDrop);
    }
 }

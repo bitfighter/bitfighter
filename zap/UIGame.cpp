@@ -246,23 +246,25 @@ void GameUserInterface::displaySuccessMessage(const char *format, ...)
 }
 
 
-extern Color colors[];
-void GameUserInterface::displayMessage(GameConnection::MessageColors msgColorIndex, const char *format, ...)
+// A new server message is here!  We don't actually display anything here, despite the name...
+// just add it to the list, will be displayed in render()
+void GameUserInterface::displayMessagef(const Color &msgColor, const char *format, ...)
 {
    va_list args;
+   char message[MAX_CHAT_MSG_LENGTH]; 
+
    va_start(args, format);
-   vsnprintf(stringBuffer, sizeof(stringBuffer), format, args);
+   vsnprintf(message, sizeof(message), format, args); 
    va_end(args);
-   displayMessage(colors[msgColorIndex], stringBuffer);
+    
+   displayMessage(msgColor, message);
 }
 
 
-// A new server message is here!  We don't actually display anything here, despite the name...
-// just add it to the list, will be displayed in render()
-void GameUserInterface::displayMessage(const Color &msgColor, const char *format, ...)
+void GameUserInterface::displayMessage(const Color &msgColor, const char *message)
 {
    // Ignore empty message
-   if(!strcmp(format, ""))
+   if(!strcmp(message, ""))
       return;
 
    // Create a slot for our new message
@@ -273,13 +275,8 @@ void GameUserInterface::displayMessage(const Color &msgColor, const char *format
          mDisplayMessageColor[i] = mDisplayMessageColor[i-1];
       }
 
-   va_list args;
-
-   va_start(args, format);
-   vsnprintf(mDisplayMessage[0], sizeof(mDisplayMessage[0]), format, args);
-   va_end(args);
+   strncpy(mDisplayMessage[0], message, sizeof(mDisplayMessage[0]));    // Use strncpy to avoid buffer overflows
    mDisplayMessageColor[0] = msgColor;
-
    mDisplayMessageTimer.reset();
 }
 
@@ -1277,6 +1274,7 @@ void GameUserInterface::changePassword(GameConnection *gc, GameConnection::Param
 }
 
 
+// static method
 void GameUserInterface::addTimeHandler(GameUserInterface *gui, const Vector<string> &words)
 {
    if(words.size() < 2 || words[1] == "")
@@ -1297,7 +1295,7 @@ void GameUserInterface::addTimeHandler(GameUserInterface *gui, const Vector<stri
          gui->displayErrorMessage("!!! Invalid value... game time not changed");
       else
       {
-         gui->displayMessage(gCmdChatColor, "Extended game by %d minute%s", mins, (mins == 1) ? "" : "s");
+         gClientGame->displayMessage(gCmdChatColor, "Extended game by %d minute%s", mins, (mins == 1) ? "" : "s");
 
          if(gClientGame->getGameType())
             gClientGame->getGameType()->addTime(mins * 60 * 1000);
@@ -2208,19 +2206,19 @@ void GameUserInterface::setVolume(VolumeType volType, const Vector<string> &word
   {
    case SfxVolumeType:
       gIniSettings.sfxVolLevel = (F32) vol / 10.0;
-      displayMessage(gCmdChatColor, "SFX volume changed to %d %s", vol, vol == 0 ? "[MUTE]" : "");
+      displayMessagef(gCmdChatColor, "SFX volume changed to %d %s", vol, vol == 0 ? "[MUTE]" : "");
       return;
    case MusicVolumeType:
       gIniSettings.musicVolLevel = (F32) vol / 10.0;
-      displayMessage(gCmdChatColor, "Music volume changed to %d %s", vol, vol == 0 ? "[MUTE]" : "");
+      displayMessagef(gCmdChatColor, "Music volume changed to %d %s", vol, vol == 0 ? "[MUTE]" : "");
       return;
    case VoiceVolumeType:
       gIniSettings.voiceChatVolLevel = (F32) vol / 10.0;
-      displayMessage(gCmdChatColor, "Voice chat volume changed to %d %s", vol, vol == 0 ? "[MUTE]" : "");
+      displayMessagef(gCmdChatColor, "Voice chat volume changed to %d %s", vol, vol == 0 ? "[MUTE]" : "");
       return;
    case ServerAlertVolumeType:
       gClientGame->getConnectionToServer()->c2sSetServerAlertVolume((S8) vol);
-      displayMessage(gCmdChatColor, "Server alerts chat volume changed to %d %s", vol, vol == 0 ? "[MUTE]" : "");
+      displayMessagef(gCmdChatColor, "Server alerts chat volume changed to %d %s", vol, vol == 0 ? "[MUTE]" : "");
       return;
   }
 }

@@ -520,6 +520,10 @@ public:
    void idle(U32 timeDelta);
    void zoomCommanderMap();
 
+   void displayMessage(const Color &msgColor, const char *format, ...);
+   //void displayMessage(GameConnection::MessageColors msgColorIndex, const char *format, ...);
+
+
    const Color *getTeamColor(S32 teamIndex) const;
 
    U32 getPlayerAndRobotCount();    // Returns number of human and robot players
