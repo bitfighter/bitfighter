@@ -1034,25 +1034,28 @@ extern void seedRandomNumberGenerator(string name);
 // User is ready to move on... deal with it
 static void nameAndPasswordAcceptCallback(Game *game, U32 unused)
 {
-   NameEntryUserInterface *ui = game->getUIManager()->getNameEntryUserInterface();
+   ClientGame *clientGame = dynamic_cast<ClientGame *>(game);
+   TNLAssert(clientGame, "Problem!");
+
+   NameEntryUserInterface *ui = clientGame->getUIManager()->getNameEntryUserInterface();
 
    if(ui->prevUIs.size())
       ui->reactivatePrevUI();
    else
-      game->getUIManager()->getMainMenuUserInterface()->activate();
+      clientGame->getUIManager()->getMainMenuUserInterface()->activate();
 
-   gClientGame->resetMasterConnectTimer();
+   clientGame->resetMasterConnectTimer();
 
-   game->getIniSettings()->lastName     = gClientInfo.name = ui->menuItems[1]->getValueForWritingToLevelFile();
-   game->getIniSettings()->lastPassword = gPlayerPassword  = ui->menuItems[2]->getValueForWritingToLevelFile();
+   clientGame->getIniSettings()->lastName     = gClientInfo.name = ui->menuItems[1]->getValueForWritingToLevelFile();
+   clientGame->getIniSettings()->lastPassword = gPlayerPassword  = ui->menuItems[2]->getValueForWritingToLevelFile();
 
    saveSettingsToINI(&gINI);             // Get that baby into the INI file
 
-   gClientGame->setReadyToConnectToMaster(true);
+   clientGame->setReadyToConnectToMaster(true);
    seedRandomNumberGenerator(gClientInfo.name);
    //gClientInfo.id.getRandom();          // Generate a player ID - messes up with the rename and Authentication
-   if(gClientGame->getConnectionToServer())                 // Rename while in game server, if connected
-      gClientGame->getConnectionToServer()->c2sRenameClient(gClientInfo.name);
+   if(clientGame->getConnectionToServer())                 // Rename while in game server, if connected
+      clientGame->getConnectionToServer()->c2sRenameClient(gClientInfo.name);
 }
 
 

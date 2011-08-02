@@ -93,6 +93,7 @@ public:
    S32 changingItem;           // Index of key we're changing (in keyDef mode), -1 otherwise
 
    void updateMenuItems();
+   void clearCurrentGameTypeParams();
 
    void onActivate();
    void onEscape();

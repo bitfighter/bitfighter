@@ -128,6 +128,9 @@ ClientRef::~ClientRef()
 
 TNL_IMPLEMENT_NETOBJECT(GameType);
 
+struct ClientInfo;
+extern ClientInfo gClientInfo;
+
 // Constructor
 GameType::GameType(S32 winningScore) : mScoreboardUpdateTimer(1000) , mGameTimer(DefaultGameTime) , mGameTimeUpdateTimer(30000)
 {
@@ -152,6 +155,8 @@ GameType::GameType(S32 winningScore) : mScoreboardUpdateTimer(1000) , mGameTimer
 
    mEngineerEnabled = false;
    mBotsAllowed = true;
+
+   mLevelCredits = gClientInfo.name;
 }
 
 

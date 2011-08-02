@@ -60,16 +60,41 @@ GameParamUserInterface::GameParamUserInterface(Game *game) : Parent(game)
 
 void GameParamUserInterface::onActivate()
 {
-   selectedIndex = 0;                      // First item selected when we begin
+   selectedIndex = 0;                          // First item selected when we begin
+
+   // Force rebuild of all params for current gameType; this will make sure we have the latest info if we've loaded a new level,
+   // but will also preserve any values entered for gameTypes that are not current.
+   clearCurrentGameTypeParams();
+
    updateMenuItems();   
    origGameParams = getGame()->toString();     // Save a copy of the params coming in for comparison when we leave to see what changed
    SDL_ShowCursor(SDL_DISABLE);
 }
 
 
+// Find and delete any parameters associated with the current gameType
+void GameParamUserInterface::clearCurrentGameTypeParams()
+{
+   const char **keys = getGame()->getGameType()->getGameParameterMenuKeys();
+
+   S32 i = 0;
+
+   while(strcmp(keys[i], ""))
+   {
+      MenuItemMap::iterator iter = mMenuItemMap.find(keys[i]);
+
+      boost::shared_ptr<MenuItem> menuItem;
+
+      if(iter != mMenuItemMap.end())      
+         mMenuItemMap.erase(iter);
+
+      i++;
+   }
+}
+
+
 extern const char *gGameTypeNames[];
 extern S32 gDefaultGameTypeIndex;
-
 
 static void changeGameTypeCallback(Game *game, U32 gtIndex)
 {
@@ -77,8 +102,8 @@ static void changeGameTypeCallback(Game *game, U32 gtIndex)
    GameType *gt = dynamic_cast<GameType *>(theObject);                      // and cast it to GameType
 
    gt->addToGame(game, game->getEditorDatabase());
-   game->setGameType(gt);
 
+   // If we have a new gameType, we might have new game parameters; update the menu!
    game->getUIManager()->getGameParamUserInterface()->updateMenuItems();
 }
 
