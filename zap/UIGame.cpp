@@ -180,7 +180,7 @@ void GameUserInterface::onActivate()
 {
    gDisableShipKeyboardInput = false;  // Make sure our ship controls are active
    mMissionOverlayActive = false;      // Turn off the mission overlay (if it was on)
-   SDL_ShowCursor(SDL_DISABLE);    // Turn off cursor
+   SDL_ShowCursor(SDL_DISABLE);        // Turn off cursor
    onMouseMoved();                     // Make sure ship pointed is towards mouse
 
    // Clear out any lingering chat messages
