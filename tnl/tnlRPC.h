@@ -165,6 +165,8 @@ public: \
    /*void className::name##_test args { RPC_##className##_##name *theEvent = new RPC_##className##_##name; theEvent->mFunctorDecl.set argNames ; TNL::PacketStream ps; theEvent->pack(this, &ps); ps.setBytePosition(0); theEvent->unpack(this, &ps); theEvent->process(this); }*/ \
    void className::name##_remote args
 
+// those _test is not needed, removing it can reduce compile / linker memory usage
+
 /// Base class for RPC events.
 ///
 /// All declared RPC methods create subclasses of RPCEvent to send data across the wire

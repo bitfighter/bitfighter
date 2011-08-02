@@ -555,9 +555,9 @@ void EngineeredObject::unpackUpdate(GhostConnection *connection, BitStream *stre
 {
    bool initial = false;
 
-   Point pos;
    if(stream->readFlag())
    {
+      Point pos;
       initial = true;
       stream->read(&pos.x);
       stream->read(&pos.y);
