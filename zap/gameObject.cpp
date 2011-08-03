@@ -161,7 +161,9 @@ void GameObject::setActualPos(Point p)
 
 F32 GameObject::getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 updateSkips)
 {
-   GameObject *so = (GameObject *) scopeObject;
+   GameObject *so = dynamic_cast<GameObject *>(scopeObject);
+   if(!so)
+      return 0;  // GameType is not GameObject
 
    Point center = so->getExtent().getCenter();
 

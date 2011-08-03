@@ -69,7 +69,7 @@ public:
    boost::shared_ptr<MenuItem> getMenuItem(Game *game, const char *key);
    bool saveMenuItem(const MenuItem *menuItem, const char *key);
 
-   void idle(GameObject::IdleCallPath path);
+   void idle(GameObject::IdleCallPath path, U32 deltaT);
 
    void addFlag(FlagItem *flag);
    void itemDropped(Ship *ship, Item *item);

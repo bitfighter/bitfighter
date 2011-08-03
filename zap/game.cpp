@@ -1686,10 +1686,7 @@ void ServerGame::idle(U32 timeDelta)
    }
    if(mGameType)
    {
-      Move m = mGameType->getCurrentMove();
-      m.time = timeDelta;
-      mGameType->setCurrentMove(m);
-      mGameType->idle(GameObject::ServerIdleMainLoop);
+      mGameType->idle(GameObject::ServerIdleMainLoop, timeDelta);
    }
 
    processDeleteList(timeDelta);
@@ -1966,10 +1963,7 @@ void ClientGame::idle(U32 timeDelta)
       }
       if(mGameType)
       {
-         Move m = mGameType->getCurrentMove();
-         m.time = timeDelta;
-         mGameType->setCurrentMove(m);
-         mGameType->idle(GameObject::ClientIdleMainRemote);
+         mGameType->idle(GameObject::ClientIdleMainRemote, timeDelta);
       }
 
       if(controlObject)

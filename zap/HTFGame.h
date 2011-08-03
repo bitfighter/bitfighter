@@ -62,7 +62,7 @@ public:
    void shipTouchZone(Ship *s, GoalZone *z);
 
 
-   void idle(GameObject::IdleCallPath path);
+   void idle(GameObject::IdleCallPath path, U32 deltaT);
 
    // Same code as in retrieveGame, CTF
    void performProxyScopeQuery(GameObject *scopeObject, GameConnection *connection);

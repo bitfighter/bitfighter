@@ -49,9 +49,10 @@ class Item;
 class SoundEffect;
 class VoiceDecoder;
 
-class ClientRef : public Object
+class ClientRef : public NetObject
 {
 private:
+   Game *mGame;
    S32 mTeamId;
    S32 mScore;                      // Individual score for current game
    F32 mRating;                     // Skill rating from -1 to 1
@@ -112,10 +113,11 @@ public:
 };
 
 
-class GameType : public GameObject
+class GameType : public NetObject
 {
 
 private:
+   Game *mGame;
    Point getSpawnPoint(S32 team);         // Picks a spawn point for ship or robot
 
    Vector<SafePtr<Object> > mSpyBugs;    // List of all spybugs in the game, could be added and destroyed in-game
@@ -208,6 +210,9 @@ public:
    static const S32 gFirstTeamNumber = -2;                           // First team is "Hostile to All" with index -2
    static const U32 gMaxTeamCount = MAX_TEAMS - gFirstTeamNumber;    // Number of possible teams, including Neutral and Hostile to All
    static const char *validateGameType(const char *gtype);           // Returns a valid gameType, defaulting to gDefaultGameTypeIndex if needed
+
+   Game *getGame() const { return mGame; }
+   bool onGhostAdd(GhostConnection *theConnection);
 
    virtual GameTypes getGameType() { return BitmatchGame; }
    virtual const char *getGameTypeString() const { return "Bitmatch"; }                            // Will be overridden by other games
@@ -387,7 +392,7 @@ public:
 
    void onLevelLoaded();      // Server-side function run once level is loaded from file
 
-   void idle(GameObject::IdleCallPath path);
+   void idle(GameObject::IdleCallPath path, U32 deltaT);
 
    void gameOverManGameOver();
    VersionedGameStats getGameStats();

@@ -306,11 +306,10 @@ void releaseFlag(Game *game, Point pos, Point startVel)
 }
 
 
-void HuntersGameType::idle(GameObject::IdleCallPath path)
+void HuntersGameType::idle(GameObject::IdleCallPath path, U32 deltaT)
 {
-   Parent::idle(path);
+   Parent::idle(path, deltaT);
 
-   U32 deltaT = mCurrentMove.time;
    if(isGhost())     // i.e. on client
    {
       mNexusTimer.update(deltaT);

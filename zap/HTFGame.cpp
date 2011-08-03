@@ -193,9 +193,9 @@ namespace Zap
    }
 
 
-   void HTFGameType::idle(GameObject::IdleCallPath path)
+   void HTFGameType::idle(GameObject::IdleCallPath path, U32 deltaT)
    {
-      Parent::idle(path);
+      Parent::idle(path, deltaT);
 
       if(path != GameObject::ServerIdleMainLoop)
          return;
@@ -203,7 +203,7 @@ namespace Zap
       // Server only, from here on out
       for(S32 flagIndex = 0; flagIndex < mFlags.size(); flagIndex++)
       {
-         if(mFlags[flagIndex]->getZone() != NULL && mFlags[flagIndex]->mTimer.update(mCurrentMove.time))     // Flag is in a zone && it's scorin' time!
+         if(mFlags[flagIndex]->getZone() != NULL && mFlags[flagIndex]->mTimer.update(deltaT))     // Flag is in a zone && it's scorin' time!
          {
             S32 team = mFlags[flagIndex]->getZone()->getTeam();
             updateScore(team, HoldFlagInZone);     // Team only --> No logical way to award individual points for this event!!

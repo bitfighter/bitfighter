@@ -236,13 +236,11 @@ bool RabbitGameType::shipHasFlag(Ship *ship)
 }
 
 
-void RabbitGameType::idle(GameObject::IdleCallPath path)
+void RabbitGameType::idle(GameObject::IdleCallPath path, U32 deltaT)
 {
-   Parent::idle(path);
+   Parent::idle(path, deltaT);
    if(path != GameObject::ServerIdleMainLoop)
       return;
-
-   U32 deltaT = mCurrentMove.time;
 
    for(S32 flagIndex = 0; flagIndex < mFlags.size(); flagIndex++)
    {
