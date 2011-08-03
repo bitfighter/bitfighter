@@ -194,7 +194,7 @@ void EditorObject::renderAttribs(F32 currentScale)
          for(S32 i = 0; i < menuSize; i++)       
          {
             string txt = attrMenu->menuItems[i]->getPrompt() + ": " + attrMenu->menuItems[i]->getValue();      // TODO: Make this concatenation a method on the menuItems themselves?
-            renderItemText(txt.c_str(), menuSize - i, 1, Point(0,0));
+            renderItemText(txt.c_str(), menuSize - i, currentScale, Point(0,0));
          }
       }
    }
