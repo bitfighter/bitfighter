@@ -144,7 +144,7 @@ public:
    EditorPointObject(GameObjectType objectType = UnknownType);       // Constructor
 
    virtual void renderItemText(const char *text, S32 offset, F32 currentScale, const Point &currentOffset);
-   void addToDock(Game *game, const Point &point);
+   void prepareForDock(Game *game, const Point &point);
 };
 
 

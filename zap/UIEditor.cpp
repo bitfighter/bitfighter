@@ -161,8 +161,10 @@ void EditorUserInterface::addToDock(EditorObject* object)
 
 void EditorUserInterface::addDockObject(EditorObject *object, F32 xPos, F32 yPos)
 {
-   object->addToDock(getGame(), Point(xPos, yPos));       
+   object->prepareForDock(getGame(), Point(xPos, yPos));       
    object->setTeam(mCurrentTeam);
+
+   addToDock(object);
 }
 
 

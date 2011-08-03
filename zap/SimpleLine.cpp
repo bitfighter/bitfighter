@@ -127,10 +127,10 @@ void SimpleLine::renderItemText(const char *text, S32 offset, F32 currentScale, 
 }
 
 
-void SimpleLine::addToDock(Game *game, const Point &point)
+void SimpleLine::prepareForDock(Game *game, const Point &point)
 {
    setVert(point, 0);
-   EditorParent::addToDock(game, point);
+   EditorParent::prepareForDock(game, point);
 }
 
 

@@ -84,16 +84,13 @@ EditorObject::~EditorObject()
 //}
 
 
-void EditorObject::addToDock(Game *game, const Point &point)
+void EditorObject::prepareForDock(Game *game, const Point &point)
 {
    mGame = game;
 
    mDockItem = true;
    
    unselectVerts();
-
-   EditorUserInterface *ui = game->getUIManager()->getEditorUserInterface();
-   ui->addToDock(this);
 }
 
 
@@ -340,7 +337,7 @@ void EditorObject::saveItem(FILE *f, F32 gridSize)
 // Size of object in editor 
 F32 EditorObject::getEditorRadius(F32 currentScale)
 {
-   return 10 * currentScale;   
+   return 10 * currentScale;   // 10 pixels is base size
 }
 
 

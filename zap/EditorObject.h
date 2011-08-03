@@ -88,7 +88,7 @@ public:
 
    EditorObject *newCopy();         // Copies object        // TODO: Will become call to clone, delete method
 
-   virtual void addToDock(Game *game, const Point &point);
+   virtual void prepareForDock(Game *game, const Point &point);
    void addToEditor(Game *game);
 
    void assignNewSerialNumber() { mSerialNumber = mNextSerialNumber++; }

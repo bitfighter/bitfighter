@@ -120,10 +120,10 @@ void EditorPointObject::renderItemText(const char *text, S32 offset, F32 current
 }
 
 
-void EditorPointObject::addToDock(Game *game, const Point &point)
+void EditorPointObject::prepareForDock(Game *game, const Point &point)
 {
    setVert(point, 0);
-   Parent::addToDock(game, point);
+   Parent::prepareForDock(game, point);
 }
 
 
