@@ -95,6 +95,7 @@ LuaRobot::LuaRobot(lua_State *L) : LuaShip((Robot *)lua_touserdata(L, 1))
    // The following sets scads of global vars in the Lua instance that mimic the use of the enums we use everywhere
 
    // Game Objects
+/*
    setEnum(ShipType);
    setEnum(BarrierType);
    setEnum(MoveableType);
@@ -120,7 +121,45 @@ LuaRobot::LuaRobot(lua_State *L) : LuaShip((Robot *)lua_touserdata(L, 1))
    setEnum(EnergyItemType);
    setEnum(SoccerBallItemType);
    setEnum(TurretType);
-   setEnum(ForceFieldProjectorType);
+   setEnum(ForceFieldProjectorType);*/
+
+#define setEnumName(number, name) { lua_pushinteger(L, number); lua_setglobal(L, name); }
+
+   setEnumName(BarrierTypeNumber, "BarrierType");
+   setEnumName(ShipTypeNumber, "ShipType");
+   setEnumName(LineTypeNumber, "LineType");
+   setEnumName(ResourceItemTypeNumber, "ResourceItem");
+   setEnumName(TextItemTypeNumber, "TextItemType");
+   setEnumName(LoadoutZoneTypeNumber, "LoadoutZoneType");
+   setEnumName(TestItemTypeNumber, "TestItem");
+   setEnumName(FlagTypeNumber, "FlagType");
+   setEnumName(BulletTypeNumber, "BulletType");
+   setEnumName(MineTypeNumber, "MineType");
+   setEnumName(SpybugZoneTypeNumber, "SpybugZoneType");
+   setEnumName(NexusTypeNumber, "NexusType");
+   setEnumName(BotNavMeshZoneTypeNumber, "BotNavMeshZoneType");
+   setEnumName(RobotTypeNumber, "RobotType");
+   setEnumName(TeleportTypeNumber, "TeleportType");
+   setEnumName(GoalZoneTypeNumber, "GoalZoneType");
+   setEnumName(AsteroidTypeNumber, "AsteroidType");
+   setEnumName(RepairItemTypeNumber, "RepairItemType");
+   setEnumName(EnergyItemTypeNumber, "EnergyItemType");
+   setEnumName(SoccerBallItemTypeNumber, "SoccerBallItem");
+   setEnumName(WormTypeNumber, "WormType");
+   setEnumName(TurretTypeNumber, "TurretType");
+   setEnumName(ForceFieldTypeNumber, "ForceFieldType");
+   setEnumName(ForceFieldProjectorTypeNumber, "ForceFieldProjectorType");
+   setEnumName(SpeedZoneTypeNumber, "SpeedZoneType");
+   setEnumName(PolyWallTypeNumber, "PolyWallType");
+   setEnumName(ShipSpawnTypeNumber, "ShipSpawnType");
+   setEnumName(FlagSpawnTypeNumber, "FlagSpawnType");
+   setEnumName(AsteroidSpawnTypeNumber, "AsteroidSpawnType");
+   setEnumName(WallItemTypeNumber, "WallItemType");
+   setEnumName(WallEdgeTypeNumber, "WallEdgeType");
+   setEnumName(WallSegmentTypeNumber, "WallSegmentType");
+   setEnumName(GrenadeProjectileTypeNumber, "GrenadeProjectileType");
+   setEnumName(SlipZoneTypeNumber, "SlipZoneType");
+   setEnumName(SpyBugTypeNumber, "SpyBugType");
 
 
    // Modules
@@ -282,7 +321,7 @@ Lunar<LuaRobot>::RegType LuaRobot::methods[] = {
 
 S32 LuaRobot::getClassID(lua_State *L)
 {
-   return returnInt(L, RobotType);
+   return returnInt(L, RobotTypeNumber);
 }
 
 
@@ -739,18 +778,18 @@ S32 LuaRobot::findItems(lua_State *L)
    Rect queryRect(pos, pos);
    queryRect.expand(gServerGame->computePlayerVisArea(thisRobot));
 
-   return doFindItems(L, queryRect);
+   return doFindItems(L, &queryRect);
 }
 
 
 // Same but gets all visible items from whole game... out-of-scope items will be ignored
 S32 LuaRobot::findGlobalItems(lua_State *L)
 {
-   return doFindItems(L, gServerGame->getWorldExtents());
+   return doFindItems(L);
 }
 
 
-S32 LuaRobot::doFindItems(lua_State *L, Rect scope)
+S32 LuaRobot::doFindItems(lua_State *L, Rect *scope)
 {
    // objectType is a bitmask of all the different object types we might want to find.  We need to build it up here because
    // lua can't do the bitwise or'ing itself.
@@ -759,18 +798,28 @@ S32 LuaRobot::doFindItems(lua_State *L, Rect scope)
    S32 index = 1;
    S32 pushed = 0;      // Count of items actually pushed onto the stack
 
+   fillVector.clear();
+
    while(lua_isnumber(L, index))
    {
+      GridDatabase *gridDB;
       objectType |= (U32) lua_tointeger(L, index);
+
+      if(objectType == BotNavMeshZoneTypeNumber)
+         gridDB = ((ServerGame *)thisRobot->getGame())->getBotZoneDatabase();
+      else
+         gridDB = thisRobot->getGame()->getGameObjDatabase();
+
+
+      if(scope)    // Get other objects on screen-visible area only
+         gridDB->findObjects(0, fillVector, *scope, U8(lua_tointeger(L, index)));
+      else
+         gridDB->findObjects(0, fillVector, U8(lua_tointeger(L, index)));
+
       index++;
    }
 
    clearStack(L);
-
-   fillVector.clear();
-
-   thisRobot->findObjects(objectType, fillVector, scope);    // Get other objects on screen-visible area only
-
 
    lua_createtable(L, fillVector.size(), 0);    // Create a table, with enough slots pre-allocated for our data
 

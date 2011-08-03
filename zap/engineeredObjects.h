@@ -236,7 +236,7 @@ public:
 
    static Lunar<ForceFieldProjector>::RegType methods[];
 
-   S32 getClassID(lua_State *L) { return returnInt(L, ForceFieldProjectorType); }
+   S32 getClassID(lua_State *L) { return returnInt(L, ForceFieldProjectorTypeNumber); }
    void push(lua_State *L) {  Lunar<ForceFieldProjector>::push(L, this); }
 
    // LuaItem methods
@@ -317,7 +317,7 @@ public:
    static const char className[];
    static Lunar<Turret>::RegType methods[];
 
-   S32 getClassID(lua_State *L) { return returnInt(L, TurretType); }
+   S32 getClassID(lua_State *L) { return returnInt(L, TurretTypeNumber); }
    void push(lua_State *L) { Lunar<Turret>::push(L, this); }
 
    // LuaItem methods

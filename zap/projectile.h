@@ -52,7 +52,7 @@ public:
    //============================
    // LuaItem interface
 
-   virtual S32 getClassID(lua_State *L) { return returnInt(L, BulletType); } // Object's class   
+   virtual S32 getClassID(lua_State *L) { return returnInt(L, BulletTypeNumber); } // Object's class   
 
    S32 getLoc(lua_State *L) { TNLAssert(false, "Unimplemented method!"); return 0; }        // Center of item (returns point)
    S32 getRad(lua_State *L) { TNLAssert(false, "Unimplemented method!"); return 0; }        // Radius of item (returns number)
@@ -258,7 +258,7 @@ public:
    static const char className[];
    static Lunar<Mine>::RegType methods[];
 
-   virtual S32 getClassID(lua_State *L) { return returnInt(L, MineType); } // Object's class   
+   virtual S32 getClassID(lua_State *L) { return returnInt(L, MineTypeNumber); } // Object's class   
 
    S32 getLoc(lua_State *L) { return Parent::getLoc(L); }     // Center of item (returns point)
    S32 getRad(lua_State *L) { return Parent::getRad(L); }     // Radius of item (returns number)
@@ -323,7 +323,7 @@ public:
    static const char className[];
    static Lunar<SpyBug>::RegType methods[];
 
-   virtual S32 getClassID(lua_State *L) { return returnInt(L, SpyBugType); } // Object's class   
+   virtual S32 getClassID(lua_State *L) { return returnInt(L, SpyBugTypeNumber); } // Object's class   
 
    S32 getLoc(lua_State *L) { return Parent::getLoc(L); }     // Center of item (returns point)
    S32 getRad(lua_State *L) { return Parent::getRad(L); }     // Radius of item (returns number)

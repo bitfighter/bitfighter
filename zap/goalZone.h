@@ -92,7 +92,7 @@ public:
 
    GameObject *getGameObject() { return this; }   // Return the underlying GameObject
    S32 hasFlag(lua_State *L) { return returnBool(L, mHasFlag); }
-   S32 getClassID(lua_State *L) { return returnInt(L, GoalZoneType); }
+   S32 getClassID(lua_State *L) { return returnInt(L, GoalZoneTypeNumber); }
 
 //private:
   void push(lua_State *L) {  Lunar<GoalZone>::push(L, this); }

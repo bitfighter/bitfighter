@@ -100,7 +100,7 @@ public:
    static const char className[];
    static Lunar<Teleporter>::RegType methods[];
 
-   S32 getClassID(lua_State *L) { return returnInt(L, TeleportType); }   // Object's class
+   S32 getClassID(lua_State *L) { return returnInt(L, TeleportTypeNumber); }   // Object's class
    void push(lua_State *L) { Lunar<Teleporter>::push(L, this); }         // Push item onto stack
 
    S32 getLoc(lua_State *L) { return returnPoint(L, getVert(0)); }                   // Center of item (returns point)

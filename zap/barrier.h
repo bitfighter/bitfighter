@@ -187,7 +187,7 @@ public:
    static const char className[];                        // Class name as it appears to Lua scripts
    static Lunar<PolyWall>::RegType methods[];
 
-   S32 getClassID(lua_State *L) { return returnInt(L, PolyWallType); }
+   S32 getClassID(lua_State *L) { return returnInt(L, PolyWallTypeNumber); }
    TNL_DECLARE_CLASS(PolyWall);
 
 private:
