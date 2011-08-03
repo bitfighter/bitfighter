@@ -50,7 +50,7 @@ EditorAttributeMenuUI *SpeedZone::mAttributeMenuUI = NULL;
 
 
 // Constructor
-SpeedZone::SpeedZone() : SimpleLine(SpeedZoneType)
+SpeedZone::SpeedZone()
 {
    mNetFlags.set(Ghostable);
    mObjectTypeMask = SpeedZoneType | CommandMapVisType;

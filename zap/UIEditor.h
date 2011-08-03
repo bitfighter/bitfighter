@@ -269,7 +269,6 @@ public:
    Vector<TeamInfo> mOldTeams;     // Team list from before we run team editor, so we can see what changed
 
    EditorObject *getSnapItem() { return mSnapObject; }
-   S32 getSnapVertexIndex() { return mSnapVertexIndex; }
    void rebuildEverything();                  // Does lots of things in undo, redo, and add items from script
 
    void onBeforeRunScriptFromConsole();

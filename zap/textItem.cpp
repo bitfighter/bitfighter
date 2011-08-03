@@ -43,7 +43,7 @@ EditorAttributeMenuUI *TextItem::mAttributeMenuUI = NULL;
 
 
 // Constructor
-TextItem::TextItem() : SimpleLine(TextItemType)
+TextItem::TextItem()
 {
    mNetFlags.set(Ghostable);
    mObjectTypeMask = TextItemType | CommandMapVisType;     
@@ -340,7 +340,6 @@ const S32 LineItem::MAX_LINE_WIDTH;
 // Constructor
 LineItem::LineItem()
 { 
-   mGeometry = auto_ptr<Geometry>(new PolylineGeometry);
    mNetFlags.set(Ghostable);
    mObjectTypeMask |= LineType | CommandMapVisType;
    mObjectTypeNumber = LineTypeNumber;

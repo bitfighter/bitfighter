@@ -73,7 +73,7 @@ public:
 
    static Lunar<RepairItem>::RegType methods[];
 
-   S32 getClassID(lua_State *L) { return returnInt(L, RepairItemType); }
+   S32 getClassID(lua_State *L) { return returnInt(L, RepairItemTypeNumber); }
 
    S32 isVis(lua_State *L); // Is RepairItem visible? (returns boolean)
    void push(lua_State *L) {  Lunar<RepairItem>::push(L, this); }
@@ -115,7 +115,7 @@ public:
 
    static Lunar<EnergyItem>::RegType methods[];
 
-   S32 getClassID(lua_State *L) { return returnInt(L, EnergyItemType); }
+   S32 getClassID(lua_State *L) { return returnInt(L, EnergyItemTypeNumber); }
 
    S32 isVis(lua_State *L); // Is EnergyItem visible? (returns boolean)
    void push(lua_State *L) {  Lunar<EnergyItem>::push(L, this); }
@@ -195,7 +195,7 @@ public:
 
    static Lunar<Asteroid>::RegType methods[];
 
-   S32 getClassID(lua_State *L) { return returnInt(L, AsteroidType); }
+   S32 getClassID(lua_State *L) { return returnInt(L, AsteroidTypeNumber); }
 
    S32 getSize(lua_State *L);        // Index of current asteroid size (0 = initial size, 1 = next smaller, 2 = ...) (returns int)
    S32 getSizeCount(lua_State *L);   // Number of indexes of size we can have (returns int)
@@ -396,7 +396,7 @@ public:
 
    static Lunar<TestItem>::RegType methods[];
 
-   S32 getClassID(lua_State *L) { return returnInt(L, TestItemType); }
+   S32 getClassID(lua_State *L) { return returnInt(L, TestItemTypeNumber); }
    void push(lua_State *L) {  Lunar<TestItem>::push(L, this); }
 };
 
@@ -437,7 +437,7 @@ public:
 
    static Lunar<ResourceItem>::RegType methods[];
 
-   S32 getClassID(lua_State *L) { return returnInt(L, ResourceItemType); }
+   S32 getClassID(lua_State *L) { return returnInt(L, ResourceItemTypeNumber); }
    void push(lua_State *L) {  Lunar<ResourceItem>::push(L, this); }
 
 };

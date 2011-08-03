@@ -774,8 +774,11 @@ void WallSegmentManager::invalidateIntersectingSegments(GridDatabase *gameDataba
       TNLAssert(intersectingSegment, "NULL segment!");
 
       // Reset the edges of all invalidated segments to their factory settings
-      intersectingSegment->resetEdges();   
-      intersectingSegment->invalidate();
+      if(intersectingSegment)  // don't crash in release mode (when assert is disabled)
+      {
+         intersectingSegment->resetEdges();   
+         intersectingSegment->invalidate();
+      }
    }
 
    buildWallSegmentEdgesAndPoints(gameDatabase, item);

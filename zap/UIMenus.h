@@ -104,7 +104,7 @@ class MainMenuUserInterface : public MenuUserInterface
    typedef MenuUserInterface Parent;
 
 private:
-   char motd[MOTD_LEN];
+   char mMOTD[MOTD_LEN];
    U32 motdArriveTime;
    Timer mFadeInTimer;        // Track the brief fade in interval the first time menu is shown
    Timer mColorTimer;
@@ -127,7 +127,7 @@ public:
    void onEscape();
    void render();
    void idle(U32 timeDelta); 
-   void setMOTD(const char *motdString);        // Message of the day, from Master
+   void setMOTD(const char *motd);              // Message of the day, from Master
    void onActivate();
    void setNeedToUpgrade(bool needToUpgrade);   // Is client in need of an upgrade?
 

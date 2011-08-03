@@ -45,10 +45,14 @@ namespace Zap
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+// BfObject - the declerations are in BfObject.h
+
 // Constructor
 BfObject::BfObject()
 {
    mGame = NULL;
+   mObjectTypeMask = UnknownType;
+   mObjectTypeNumber = UnknownTypeNumber;
 }
 
 
@@ -104,8 +108,6 @@ GameObject::GameObject() : BfObject()
    mGame = NULL;
    mTeam = -1;
    /*mLastQueryId = 0;*/
-   mObjectTypeMask = UnknownType;
-   mObjectTypeNumber = UnknownTypeNumber;
    mDisableCollisionCount = 0;
    mCreationTime = 0;
 }

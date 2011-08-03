@@ -30,6 +30,7 @@
 #include "Point.h"
 #include "Rect.h"
 #include "tnlVector.h"
+#include "gameObject.h" // for BfObject
 
 namespace TNL{
    class GhostConnection; // speeds up compiler, or use #include "tnlGhostConnection.h"
@@ -44,73 +45,13 @@ using namespace TNL;
 namespace Zap
 {
 
- enum GeomType {           
-   geomPoint,           
-   geomSimpleLine,      
-   geomLine,            // TODO: change to geomPolyline
-   geomPoly,            // TODO: Change to geomPolygon
-   geomNone,            
-};
-
-class Geometry
-{
-protected:
-   bool mTriangluationDisabled;     // Allow optimization of adding points for polygons that will never be displayed
-
-public:
-
-   Geometry() { mTriangluationDisabled = false; }     // Constructor
-
-   virtual GeomType getGeomType() = 0;
-   virtual Point getVert(S32 index) = 0;
-   virtual void setVert(const Point &pos, S32 index) = 0;
-   virtual S32 getVertCount() = 0;
-   virtual void clearVerts() = 0;
-   virtual bool addVert(const Point &point) = 0;
-   virtual bool addVertFront(Point vert) = 0;
-   virtual bool deleteVert(S32 vertIndex) = 0;
-   virtual bool insertVert(Point vertex, S32 vertIndex) = 0;
-
-   virtual bool anyVertsSelected() = 0;
-
-   virtual void selectVert(S32 vertIndex) = 0;
-   virtual void aselectVert(S32 vertIndex) = 0;    // Select an additional vertex (remember command line ArcInfo?)
-   virtual void unselectVert(S32 vertIndex) = 0;
-   virtual void unselectVerts() = 0;
-   virtual bool vertSelected(S32 vertIndex) = 0;
-
-   virtual Vector<Point> *getOutline() = 0;
-   virtual Vector<Point> *getFill() = 0;
-   virtual Point getCentroid() = 0;
-   virtual F32 getLabelAngle() = 0;
-
-   virtual void packGeom(GhostConnection *connection, BitStream *stream) = 0;
-   virtual void unpackGeom(GhostConnection *connection, BitStream *stream) = 0; 
-
-   virtual string geomToString(F32 gridSize) const = 0;
-   virtual void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize) = 0;
-
-   virtual boost::shared_ptr<Geometry> copyGeometry() const = 0;
-   void newGeomCopy();
-
-   virtual Rect getExtents() = 0;
-
-   virtual void onPointsChanged() = 0;
-
-   void disableTriangluation() { mTriangluationDisabled = true; }
-
-   virtual void flipHorizontal(F32 boundingBoxMinX, F32 boundingBoxMaxX) = 0;
-   virtual void flipVertical(F32 boundingBoxMinY, F32 boundingBoxMaxY) = 0;
-
-   void rotateAboutPoint(const Point &center, F32 angle);
-   void scale(const Point &center, F32 scale);
-};
-
+// Geometry is in Geometry_Base.h
+// The split .h files was due to gameObject trying to include us, and we need BfObject
 
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class PointGeometry : public Geometry
+class PointGeometry : virtual public BfObject
 {
 private:
    Point mPos;
@@ -121,8 +62,8 @@ public:
    ~PointGeometry() {  /* TNLAssert(false, "deleting!");*/ }      // Destructor
 
    GeomType getGeomType() { return geomPoint; }
-   virtual Point getVert(S32 index) { return mPos; }
-   void setVert(const Point &pos, S32 index) { mPos = pos; }
+   virtual Point getVert(S32 index) const { return mPos; }
+   void setVert(const Point &pos, S32 index);
 
    S32 getVertCount() { return 1; }
 
@@ -139,8 +80,8 @@ public:
    void unselectVerts() { mPosIsSelected = false; } 
    bool vertSelected(S32 vertIndex) { return mPosIsSelected; }
 
-   Vector<Point> *getOutline() { return NULL; }
-   Vector<Point> *getFill() { return NULL; }
+   Vector<Point> *getOutline() const { return NULL; }
+   Vector<Point> *getFill() const { return NULL; }
    Point getCentroid() { return mPos; }
    F32 getLabelAngle() { return 0; }
 
@@ -150,21 +91,18 @@ public:
    string geomToString(F32 gridSize) const;
    void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize);
 
-   boost::shared_ptr<Geometry> copyGeometry() const;
+   //boost::shared_ptr<Geometry> copyGeometry() const;
 
    Rect getExtents();
 
    void onPointsChanged() { /* Do nothing */ }
-
-   void flipHorizontal(F32 boundingBoxMinX, F32 boundingBoxMaxX) ;
-   void flipVertical(F32 boundingBoxMinY, F32 boundingBoxMaxY) ;
 };
 
 
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class SimpleLineGeometry : public Geometry
+class SimpleLineGeometry : virtual public BfObject
 {
 private:
    Point mFromPos, mToPos;
@@ -176,7 +114,7 @@ public:
       //TNLAssert(false, "deleting!");
    }
    GeomType getGeomType() { return geomSimpleLine; }
-   Point getVert(S32 index) { return (index == 1) ? mToPos : mFromPos; }
+   Point getVert(S32 index) const { return (index == 1) ? mToPos : mFromPos; }
    void setVert(const Point &pos, S32 index) { if(index == 1) mToPos = pos; else mFromPos = pos; }
 
    S32 getVertCount() { return 2; }
@@ -194,8 +132,8 @@ public:
    void unselectVerts() { mFromSelected = false; mToSelected = false; } 
    bool vertSelected(S32 vertIndex) { return (vertIndex == 1) ? mToSelected : mFromSelected; }
 
-   Vector<Point> *getOutline();
-   Vector<Point> *getFill() { return NULL; }
+   Vector<Point> *getOutline() const;
+   Vector<Point> *getFill() const { return NULL; }
    Point getCentroid() { return (mFromPos + mToPos) / 2; }        // Returns midpoint of line
    F32 getLabelAngle() { return mFromPos.angleTo(mToPos); }
 
@@ -205,21 +143,18 @@ public:
    string geomToString(F32 gridSize) const;
    void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize);
 
-   boost::shared_ptr<Geometry> copyGeometry() const;
+   //boost::shared_ptr<Geometry> copyGeometry() const;
 
    Rect getExtents();
 
    void onPointsChanged() { /* Do nothing */ }
-
-   void flipHorizontal(F32 boundingBoxMinX, F32 boundingBoxMaxX) ;
-   void flipVertical(F32 boundingBoxMinY, F32 boundingBoxMaxY) ;
 };
 
 
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class PolylineGeometry : public Geometry
+class PolylineGeometry : virtual public BfObject
 {
 protected:
    Vector<Point> mPolyBounds;
@@ -236,7 +171,7 @@ public:
 
    GeomType getGeomType() { return geomLine; }
 
-   Point getVert(S32 index);
+   Point getVert(S32 index) const;
    virtual void setVert(const Point &pos, S32 index);
 
    S32 getVertCount();
@@ -254,8 +189,8 @@ public:
    void unselectVerts();
    bool vertSelected(S32 vertIndex);
 
-   Vector<Point> *getOutline() { return &mPolyBounds; }
-   virtual Vector<Point> *getFill() { return NULL; }
+   Vector<Point> *getOutline() const { return (Vector<Point> *) &mPolyBounds; }
+   virtual Vector<Point> *getFill() const { return NULL; }
    Point getCentroid() { TNLAssert(!mTriangluationDisabled, "Triangluation disabled!"); return mCentroid; }   
    virtual F32 getLabelAngle() { return 0; }
 
@@ -265,14 +200,11 @@ public:
    string geomToString(F32 gridSize) const;
    virtual void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize);
 
-   virtual boost::shared_ptr<Geometry> copyGeometry() const;
+   //virtual boost::shared_ptr<Geometry> copyGeometry() const;
 
    Rect getExtents();
 
    virtual void onPointsChanged();
-
-   void flipHorizontal(F32 boundingBoxMinX, F32 boundingBoxMaxX) ;
-   void flipVertical(F32 boundingBoxMinY, F32 boundingBoxMaxY) ;
 };
 
 
@@ -297,7 +229,7 @@ public:
 
    virtual void onPointsChanged();
 
-   boost::shared_ptr<Geometry> copyGeometry() const;
+   //boost::shared_ptr<Geometry> copyGeometry() const;
 };
 
 

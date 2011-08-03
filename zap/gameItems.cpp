@@ -211,11 +211,11 @@ S32 EnergyItem::isVis(lua_State *L) { return returnBool(L, isVisible()); }      
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-AbstractSpawn::AbstractSpawn(const Point &pos, S32 time, GameObjectType objType) : EditorPointObject(objType)
+AbstractSpawn::AbstractSpawn(const Point &pos, S32 time, GameObjectType objType)
 {
    setVert(pos, 0);
    setRespawnTime(time);
-   //mObjectTypeMask |= AsteroidType;
+   mObjectTypeMask = objType;
    //mObjectTypeNumber = AsteroidTypeNumber
 };
 

@@ -67,7 +67,7 @@ public:
 
    static Lunar<LuaShip>::RegType methods[];
 
-   virtual S32 getClassID(lua_State *L) { return returnInt(L, ShipType); }    // Robot will override this
+   virtual S32 getClassID(lua_State *L) { return returnInt(L, ShipTypeNumber); }    // Robot will override this
 
    S32 isAlive(lua_State *L);
    S32 getAngle(lua_State *L);

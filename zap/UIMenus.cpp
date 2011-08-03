@@ -600,7 +600,7 @@ MainMenuUserInterface::MainMenuUserInterface(Game *game) : Parent(game)
    mFirstTime = true;
    setMenuID(MainUI);
    mMenuTitle = "";
-   motd[0] = 0;
+   mMOTD[0] = 0;
    mMenuSubTitle = "";
    mRenderInstructions = false;
 
@@ -636,12 +636,14 @@ void MainMenuUserInterface::onActivate()
 
 
 // Set the MOTD we recieved from the master
-void MainMenuUserInterface::setMOTD(const char *motdString)
+void MainMenuUserInterface::setMOTD(const char *motd)
 {
-   strcpy(motd, motdString);     // ???
+   strncpy(mMOTD, motd, MOTD_LEN);     
+
    if(gClientGame)
       motdArriveTime = gClientGame->getCurrentTime();    // Used for scrolling the message
 }
+
 
 // Set needToUpgrade flag that tells us the client is out-of-date
 void MainMenuUserInterface::setNeedToUpgrade(bool needToUpgrade)
@@ -661,16 +663,16 @@ void MainMenuUserInterface::render()
    S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
    S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
 
-   if(motd[0])
+   if(mMOTD != "")
    {
-      U32 width = getStringWidth(20, motd);
-      glColor3f(1,1,1);
+      U32 width = getStringWidth(20, mMOTD);
+      glColor(Colors::white);
       U32 totalWidth = width + canvasWidth;
       U32 pixelsPerSec = 100;
       U32 delta = gClientGame->getCurrentTime() - motdArriveTime;
       delta = U32(delta * pixelsPerSec * 0.001) % totalWidth;
 
-      drawString(canvasWidth - delta, MOTD_POS, 20, motd);
+      drawString(canvasWidth - delta, MOTD_POS, 20, mMOTD);
    }
 
    // Fade in the menu here if we are showing it the first time...  this will tie in

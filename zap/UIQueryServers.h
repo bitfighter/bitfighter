@@ -227,6 +227,8 @@ public:
    void gotPingResponse(const Address &theAddress, const Nonce &clientNonce, U32 clientIdentityToken);
    void gotQueryResponse(const Address &theAddress, const Nonce &clientNonce, const char *serverName, const char *serverDescr, 
                          U32 playerCount, U32 maxPlayers, U32 botCount, bool dedicated, bool test, bool passwordRequired);
+
+   void gotServerListFromMaster(const Vector<IPAddress> &serverList);
 };
 
 

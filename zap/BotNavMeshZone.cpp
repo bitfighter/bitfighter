@@ -71,8 +71,6 @@ BotNavMeshZone::BotNavMeshZone(S32 id)
    mObjectTypeNumber = BotNavMeshZoneTypeNumber;
 
    mZoneId = id;
-
-   mGeometry = boost::shared_ptr<Geometry>(new PolygonGeometry);
 }
 
 

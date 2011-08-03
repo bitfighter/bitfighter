@@ -52,12 +52,11 @@ S32 EditorObject::mNextSerialNumber = 0;
 
 
 // Constructor
-EditorObject::EditorObject(GameObjectType objectType) 
+EditorObject::EditorObject() 
 { 
    mDockItem = false; 
    mLitUp = false; 
    mSelected = false; 
-   setObjectTypeMask(objectType); 
    mIsBeingEdited = false;
    assignNewSerialNumber();
 }
@@ -243,7 +242,7 @@ extern void renderPolygon(const Vector<Point> &fillPoints, const Vector<Point> &
 static const S32 asteroidDesign = 2;      // Design we'll use for all asteroids in editor
 
 // Items are rendered in index order, so those with a higher index get drawn later, and hence, on top
-void EditorObject::renderInEditor(F32 currentScale, const Point &currentOffset, bool isScriptItem, bool showingReferenceShip, ShowMode showMode)
+void EditorObject::renderInEditor(F32 currentScale, const Point &currentOffset, S32 snapIndex, bool isScriptItem, bool showingReferenceShip, ShowMode showMode)
 {
    const S32 instrSize = 9;      // Size of instructions for special items
    const S32 attrSize = 10;
@@ -258,8 +257,6 @@ void EditorObject::renderInEditor(F32 currentScale, const Point &currentOffset, 
       glColor(grayedOutColorBright, alpha);
    else 
       glColor(getDrawColor(), alpha);
-
-   S32 snapIndex = mGame->getUIManager()->getEditorUserInterface()->getSnapVertexIndex();
 
    glEnableBlend;        // Enable transparency
 
@@ -346,8 +343,6 @@ F32 EditorObject::getEditorRadius(F32 currentScale)
 EditorObject *EditorObject::newCopy()
 {
    EditorObject *newObject = clone();     // TODO: Wrap in shared_ptr?
-
-   newObject->mGeometry = mGeometry->copyGeometry();
 
    newObject->initializeEditor();         // Unselects all vertices
 

@@ -102,7 +102,7 @@ public:
    static const char className[];
    static Lunar<FlagItem>::RegType methods[];
 
-   S32 getClassID(lua_State *L) { return returnInt(L, FlagType); }
+   S32 getClassID(lua_State *L) { return returnInt(L, FlagTypeNumber); }
    
    S32 getTeamIndx(lua_State *L) { return returnInt(L, mTeam + 1); }          // Index of owning team
    S32 isInInitLoc(lua_State *L) { return returnBool(L, isAtHome()); }        // Is flag in it's initial location?

@@ -121,6 +121,7 @@ public:
    virtual ~GridDatabase();                     // Destructor
 
    static const S32 BucketWidth = 255;          // Width/height of each bucket in pixels
+   static const F32 widthDiv;
 
    DatabaseObject *findObjectLOS(U32 typeMask, U32 stateIndex, bool format, const Point &rayStart, const Point &rayEnd, 
                                  float &collisionTime, Point &surfaceNormal, U8 typeNumber = U8_MAX);

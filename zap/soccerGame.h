@@ -149,7 +149,7 @@ public:
    static const char className[];
    static Lunar<SoccerBallItem>::RegType methods[];
 
-   S32 getClassID(lua_State *L) { return returnInt(L, SoccerBallItemType); }
+   S32 getClassID(lua_State *L) { return returnInt(L, SoccerBallItemTypeNumber); }
    void push(lua_State *L) {  Lunar<SoccerBallItem>::push(L, this); }   
 
 };

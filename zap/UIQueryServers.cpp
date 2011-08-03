@@ -301,6 +301,14 @@ void QueryServersUserInterface::addPingServers(const Vector<IPAddress> &ipList)
 }
 
 
+void QueryServersUserInterface::gotServerListFromMaster(const Vector<IPAddress> &serverList)
+{
+   mRecievedListOfServersFromMaster = true;
+   addPingServers(serverList);
+}
+
+
+
 void QueryServersUserInterface::gotPingResponse(const Address &theAddress, const Nonce &theNonce, U32 clientIdentityToken)
 {
    // See if this ping is a server from the local broadcast ping:

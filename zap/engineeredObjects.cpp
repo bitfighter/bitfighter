@@ -274,6 +274,7 @@ EngineeredObject::EngineeredObject(S32 team, Point anchorPoint, Point anchorNorm
    mHealRate = 0;
    mMountSeg = NULL;
    mSnapped = false;
+   //mObjectTypeMask = ;
 }
 
 
@@ -555,9 +556,9 @@ void EngineeredObject::unpackUpdate(GhostConnection *connection, BitStream *stre
 {
    bool initial = false;
 
-   Point pos;
    if(stream->readFlag())
    {
+      Point pos;
       initial = true;
       stream->read(&pos.x);
       stream->read(&pos.y);
@@ -667,7 +668,7 @@ TNL_IMPLEMENT_NETOBJECT(ForceFieldProjector);
 ForceFieldProjector::ForceFieldProjector(S32 team, Point anchorPoint, Point anchorNormal) : EngineeredObject(team, anchorPoint, anchorNormal, ForceFieldProjectorType)
 {
    mNetFlags.set(Ghostable);
-   mObjectTypeMask |= CommandMapVisType;
+   mObjectTypeMask = ForceFieldProjectorType | CommandMapVisType;
    mObjectTypeNumber = ForceFieldProjectorTypeNumber;
 }
 
@@ -1046,7 +1047,7 @@ TNL_IMPLEMENT_NETOBJECT(Turret);
 // Constructor
 Turret::Turret(S32 team, Point anchorPoint, Point anchorNormal) : EngineeredObject(team, anchorPoint, anchorNormal, TurretType)
 {
-   mObjectTypeMask |= CommandMapVisType;
+   mObjectTypeMask = TurretType | CommandMapVisType;
    mObjectTypeNumber = TurretTypeNumber;
 
    mWeaponFireType = WeaponTurret;

@@ -210,7 +210,7 @@ private:
    Point getNextWaypoint();                          // Helper function for getWaypoint()
    U16 findClosestZone(const Point &point);          // Finds zone closest to point, used when robots get off the map
    S32 findAndReturnClosestZone(lua_State *L, const Point &point); // Wraps findClosestZone and handles returning the result to Lua
-   S32 doFindItems(lua_State *L, Rect scope);        // Worker method for various find functions
+   S32 doFindItems(lua_State *L, Rect *scope = NULL);        // Worker method for various find functions
 
    Robot *thisRobot;                                 // Pointer to an actual C++ Robot object
 

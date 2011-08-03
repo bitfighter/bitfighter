@@ -30,7 +30,7 @@
 #include "gridDB.h"        // For DatabaseObject
 #include "tnlNetObject.h"
 
-#include "Geometry.h"      // For GeomType enum
+#include "Geometry_Base.h"      // For GeomType enum
 
 #include "boost/smart_ptr/shared_ptr.hpp"
 
@@ -67,20 +67,22 @@ enum GameObjectType
    MineType            = BIT(14),
    SpyBugType          = BIT(15),
    NexusType           = BIT(16),
-   //BotNavMeshZoneType  = BIT(17),
+   //                  = BIT(17),  // Was bot zone, now this bit might be used for editor
    RobotType           = BIT(18),
    TeleportType        = BIT(19),
    GoalZoneType        = BIT(20),
 
-   AsteroidType        = BIT(21),      // Only needed for Lua and editor...
-   RepairItemType      = BIT(22),      // Only needed for Lua...
-   EnergyItemType      = BIT(23),      // Only needed for Lua...
-   SoccerBallItemType  = BIT(24),      // Only needed for Lua and indicating what the ship is carrying and editor...
+   AsteroidType        = BIT(21),      // Only needed for editor...
+   RepairItemType      = BIT(22),
+   EnergyItemType      = BIT(23),
+   SoccerBallItemType  = BIT(24),      // Only needed for indicating what the ship is carrying and editor...
    WormType            = BIT(25),
 
    TurretType          = BIT(26),      // Formerly EngineeredType
    ForceFieldProjectorType = BIT(27),  // Formerly EngineeredType
    SpeedZoneType       = BIT(28),      // Only needed for finding speed zones that we may have spawned on top of
+
+   // _______________  = BIT(29),      // FREE BIT
 
    DeletedType       = BIT(30),
    CommandMapVisType = BIT(31),        // These are objects that can be seen on the commander's map
@@ -90,7 +92,7 @@ enum GameObjectType
    PolyWallType = BIT(25),             // WormType
    ShipSpawnType = BIT(13),            // BulletType
    FlagSpawnType = BIT(1),            // ShipType
-   AsteroidSpawnType = BIT(17),        // BotZone
+   AsteroidSpawnType = BIT(17),        //
    WallSegmentType = BIT(13),          // Used only in wallSegmentDatabase, so this is OK for the moment
 
 
@@ -107,6 +109,9 @@ enum GameObjectType
    AllObjectTypes     = 0xFFFFFFFF
 };
 
+
+
+// Most of TypeNumber are used in LUA
 const U8 UnknownTypeNumber = 0;
 const U8 BarrierTypeNumber = 1;
 const U8 ShipTypeNumber = 2;
@@ -122,7 +127,7 @@ const U8 SpybugZoneTypeNumber = 11;
 const U8 NexusTypeNumber = 12;
 const U8 BotNavMeshZoneTypeNumber = 13;
 const U8 RobotTypeNumber = 14;
-const U8 TeleporterTypeNumber = 15;
+const U8 TeleportTypeNumber = 15;
 const U8 GoalZoneTypeNumber = 16;
 const U8 AsteroidTypeNumber = 17;
 const U8 RepairItemTypeNumber = 18;
@@ -130,7 +135,7 @@ const U8 EnergyItemTypeNumber = 19;
 const U8 SoccerBallItemTypeNumber = 20;
 const U8 WormTypeNumber = 21;
 const U8 TurretTypeNumber = 22;
-const U8 TurretTargetTypeNumber = 23;
+const U8 SpyBugTypeNumber = 23;
 const U8 ForceFieldTypeNumber = 24;
 const U8 ForceFieldProjectorTypeNumber = 25;
 const U8 SpeedZoneTypeNumber = 26;
@@ -143,7 +148,6 @@ const U8 WallEdgeTypeNumber = 32;
 const U8 WallSegmentTypeNumber = 33;
 const U8 GrenadeProjectileTypeNumber = 34;
 const U8 SlipZoneTypeNumber = 35;
-const U8 SpyBugTypeNumber = 36;
 
 
 
@@ -179,13 +183,11 @@ struct DamageInfo
 ////////////////////////////////////////
 
 // Interface class that feeds GameObject and EditorObject -- these things are common to in-game and editor instances of an object
-class BfObject : public DatabaseObject
+class BfObject : public DatabaseObject, public Geometry
 {
 protected:
    Game *mGame;
    S32 mTeam;
-
-   boost::shared_ptr<Geometry> mGeometry;
 
 public:
    BfObject();                  // Constructor
@@ -212,44 +214,9 @@ public:
    virtual void render(S32 layerIndex);
    virtual void render();
 
-
-   // Geometry methods
-   virtual GeomType getGeomType() const { return mGeometry->getGeomType(); }
-   virtual Point getVert(S32 index) const { return mGeometry->getVert(index); }
-   virtual void setVert(const Point &point, S32 index) { mGeometry->setVert(point, index); }
-
-   S32 getVertCount() const { return mGeometry->getVertCount(); }
-   void clearVerts() { mGeometry->clearVerts(); }
-   bool addVert(const Point &point)  { return mGeometry->addVert(point); }
-   bool addVertFront(Point vert)  { return mGeometry->addVertFront(vert); }
-   bool deleteVert(S32 vertIndex)  { return mGeometry->deleteVert(vertIndex); }
-   bool insertVert(Point vertex, S32 vertIndex)  { return mGeometry->insertVert(vertex, vertIndex); }
-
-   bool anyVertsSelected() { return mGeometry->anyVertsSelected(); }
-   void selectVert(S32 vertIndex) { mGeometry->selectVert(vertIndex); }
-   void aselectVert(S32 vertIndex) { mGeometry->aselectVert(vertIndex); }
-   void unselectVert(S32 vertIndex) { mGeometry->unselectVert(vertIndex); }
-   void unselectVerts() { mGeometry->unselectVerts(); }
-   bool vertSelected(S32 vertIndex) { return mGeometry->vertSelected(vertIndex); }
-
-   Vector<Point> *getOutline() const { return mGeometry->getOutline(); }
-   Vector<Point> *getFill() const { return mGeometry->getFill(); }
-   Point getCentroid() const { return mGeometry->getCentroid(); }
-   F32 getLabelAngle() const { return mGeometry->getLabelAngle(); }
-
-   void packGeom(GhostConnection *connection, BitStream *stream) { mGeometry->packGeom(connection, stream); }
-   void unpackGeom(GhostConnection *connection, BitStream *stream) { mGeometry->unpackGeom(connection, stream); }
-
-   string geomToString(F32 gridSize) const { return mGeometry->geomToString(gridSize); }
-   void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize) { mGeometry->readGeom(argc, argv, firstCoord, gridSize); }
-
-
-
-   virtual void setExtent() { setExtent(mGeometry->getExtents()); }                    // Set extents of object in database
+   virtual void setExtent() { setExtent(getExtents()); }                    // Set extents of object in database
    virtual void setExtent(const Rect &extent) { DatabaseObject::setExtent(extent); }   // Passthrough
-   void onPointsChanged() { mGeometry->onPointsChanged(); }
 
-   void disableTriangluation() { mGeometry->disableTriangluation(); }
 };
 
 

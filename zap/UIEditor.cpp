@@ -1514,7 +1514,7 @@ void EditorUserInterface::render()
    //glPopMatrix();
 
    for(S32 i = 0; i < mLevelGenItems.size(); i++)
-      mLevelGenItems[i]->renderInEditor(mCurrentScale, mCurrentOffset, true, mShowingReferenceShip, mShowMode);
+      mLevelGenItems[i]->renderInEditor(mCurrentScale, mCurrentOffset, mSnapVertexIndex, true, mShowingReferenceShip, mShowMode);
    
    // Render polyWall item fill just before rendering regular walls.  This will create the effect of all walls merging together.  
    // PolyWall outlines are already part of the wallSegmentManager, so will be rendered along with those of regular walls.
@@ -1546,7 +1546,7 @@ void EditorUserInterface::render()
 
       if(obj->getObjectTypeMask() != PolyWallType)
          if(!(mDraggingObjects && obj->isSelected()))
-            obj->renderInEditor(mCurrentScale, mCurrentOffset, false, mShowingReferenceShip, mShowMode);
+            obj->renderInEditor(mCurrentScale, mCurrentOffset, mSnapVertexIndex, false, mShowingReferenceShip, mShowMode);
    }
 
 
@@ -1557,7 +1557,7 @@ void EditorUserInterface::render()
    {
       EditorObject *obj = objList->get(i);
       if(obj->isSelected() || obj->isLitUp())
-         obj->renderInEditor(mCurrentScale, mCurrentOffset, false, mShowingReferenceShip, mShowMode);
+         obj->renderInEditor(mCurrentScale, mCurrentOffset, mSnapVertexIndex, false, mShowingReferenceShip, mShowMode);
    }
 
 
@@ -1601,7 +1601,8 @@ void EditorUserInterface::render()
       for(S32 i = 0; i < fillVector.size(); i++)
       {
          LineItem *obj = dynamic_cast<LineItem *>(fillVector[i]);   // Walls are a subclass of LineItem, so this will work for both
-         if((obj->isSelected() || (obj->isLitUp() && obj->isVertexLitUp(NONE))))
+			TNLAssert(obj, "LineItem NULL?");
+         if(obj && (obj->isSelected() || (obj->isLitUp() && obj->isVertexLitUp(NONE))))
          {
             width = obj->getWidth();     
             break;
@@ -1621,7 +1622,7 @@ void EditorUserInterface::render()
       {
          EditorObject *obj = objList->get(i);
          if(obj->isSelected() && obj->getObjectTypeMask() & ~BarrierType)    // Object is selected and is not a wall
-            obj->renderInEditor(mCurrentScale, mCurrentOffset, false, mShowingReferenceShip, mShowMode);
+            obj->renderInEditor(mCurrentScale, mCurrentOffset, mSnapVertexIndex, false, mShowingReferenceShip, mShowMode);
       }
 
    // Render our snap vertex as a hollow magenta box
@@ -1664,7 +1665,7 @@ void EditorUserInterface::render()
    if(!mShowingReferenceShip)
       for(S32 i = 0; i < mDockItems.size(); i++)
       {
-         mDockItems[i]->renderInEditor(mCurrentScale, mCurrentOffset, false, false, mShowMode);
+         mDockItems[i]->renderInEditor(mCurrentScale, mCurrentOffset, mSnapVertexIndex, false, false, mShowMode);
          mDockItems[i]->setLitUp(false);
       }
 
@@ -1997,12 +1998,13 @@ void EditorUserInterface::flipSelectionHorizontal()
 
    Point min, max;
    computeSelectionMinMax(min, max);
+   F32 centerX = (min.x + max.x) / 2;
 
    const Vector<EditorObject *> *objList = getObjectList();
 
    for(S32 i = 0; i < objList->size(); i++)
       if(objList->get(i)->isSelected())
-         objList->get(i)->flipHorizontal(min.x, max.x);
+         objList->get(i)->flipHorizontal(centerX);
 
    setNeedToSave(true);
    autoSave();
@@ -2018,12 +2020,13 @@ void EditorUserInterface::flipSelectionVertical()
 
    Point min, max;
    computeSelectionMinMax(min, max);
+   F32 centerY = (min.y + max.y) / 2;
 
    const Vector<EditorObject *> *objList = getObjectList();
 
    for(S32 i = 0; i < objList->size(); i++)
       if(objList->get(i)->isSelected())
-         objList->get(i)->flipVertical(min.y, max.y);
+         objList->get(i)->flipVertical(centerY);
 
    setNeedToSave(true);
    autoSave();

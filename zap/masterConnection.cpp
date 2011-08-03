@@ -24,7 +24,7 @@
 //------------------------------------------------------------------------------------
 
 #include "masterConnection.h"
-#include "UIQueryServers.h"
+//#include "UIQueryServers.h"
 #include "UIMenus.h"
 #include "UINameEntry.h"
 #include "UIChat.h"
@@ -92,11 +92,8 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cQueryServersResponse, (U32
    else  // Empty list recieved, transmission complete, send whole list on to the UI
    {
       if(gClientGame)
-      {
-         QueryServersUserInterface *ui = gClientGame->getUIManager()->getQueryServersUserInterface();
-         ui->mRecievedListOfServersFromMaster = true;
-         ui->addPingServers(mServerList);
-      }
+         gClientGame->gotServerListFromMaster(mServerList);
+
       mServerList.clear();
    }
 }
@@ -196,17 +193,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cArrangedConnectionRejected
    if(!mIsGameServer && requestId == mCurrentQueryId)
    {
       logprintf(LogConsumer::LogConnection, "Remote host rejected arranged connection...");    // Maybe player was kicked/banned?
-      // onConnectionTerminated(ReasonTimedOut, "Connection timed out"); // that is the MasterServerConnection :: onConnectTerminated, which does nothing.
-      endGame();
-
-      gClientGame->getUIManager()->getMainMenuUserInterface()->activate();
-
-      ErrorMessageUserInterface *ui = gClientGame->getUIManager()->getErrorMsgUserInterface();
-      ui->reset();
-      ui->setTitle("Connection Terminated");
-      ui->setMessage(2, "Lost connection with the server.");
-      ui->setMessage(3, "Unable to join game.  Please try again.");
-      ui->activate();
+      gClientGame->connectionToServerRejected();
    } 
 }
 
@@ -214,7 +201,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cArrangedConnectionRejected
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSetMOTD, (StringPtr masterName, StringPtr motdString))
 {
    setMasterName(masterName.getString());
-   gClientGame->getUIManager()->getMainMenuUserInterface()->setMOTD(motdString); 
+   gClientGame->setMOTD(motdString.getString()); 
 }
 
 

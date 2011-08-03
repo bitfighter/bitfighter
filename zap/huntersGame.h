@@ -202,7 +202,7 @@ public:
    static const char className[];                 // Class name as it appears to Lua scripts
    static Lunar<HuntersNexusObject>::RegType methods[];
    GameObject *getGameObject() { return this; }   // Return the underlying GameObject
-   S32 getClassID(lua_State *L) { return returnInt(L, NexusType); }
+   S32 getClassID(lua_State *L) { return returnInt(L, NexusTypeNumber); }
 private:
    void push(lua_State *L) {  Lunar<HuntersNexusObject>::push(L, this); }
 };

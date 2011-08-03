@@ -35,6 +35,7 @@
 #include "soccerGame.h"    // For getItem()
 #include "projectile.h"    // For getItem()
 #include "teleporter.h"
+#include "speedZone.h"
 #include "engineeredObjects.h"    // For getItem()
 #include "playerInfo.h"           // For playerInfo def
 #include "config.h"
@@ -96,7 +97,7 @@ S32 LuaObject::returnPoint(lua_State *L, const Point &point)
    //lua_pushnumber(L, point.y);
    //return 2;
 
-	return returnVec(L, point.x, point.y);
+   return returnVec(L, point.x, point.y);
 }
 
 
@@ -368,43 +369,37 @@ LuaItem *LuaItem::getItem(lua_State *L, S32 index, U32 type, const char *functio
 {
    switch(type)
    {
-      case ShipType:
+      case RobotTypeNumber:  // pass through
+      case ShipTypeNumber:
         return  Lunar<LuaShip>::check(L, index);
 
-      case BulletType:
-            // pass through
-      case MineType:
-            // pass through
-      case SpyBugType:
+      case BulletTypeNumber:  // pass through
+      case MineTypeNumber:
+      case SpyBugTypeNumber:
          return Lunar<LuaProjectile>::check(L, index);
 
-      case ResourceItemType:
+      case ResourceItemTypeNumber:
          return Lunar<ResourceItem>::check(L, index);
-      case TestItemType:
+      case TestItemTypeNumber:
          return Lunar<TestItem>::check(L, index);
-      case FlagType:
+      case FlagTypeNumber:
          return Lunar<FlagItem>::check(L, index);
 
-
-
-         // gofast type
-
-      case RobotType:
-         return Lunar<LuaShip>::check(L, index);
-      case TeleportType:
+      case TeleportTypeNumber:
          return Lunar<Teleporter>::check(L, index);
-      case AsteroidType:
+      case AsteroidTypeNumber:
          return Lunar<Asteroid>::check(L, index);
-      case RepairItemType:
+      case RepairItemTypeNumber:
          return Lunar<RepairItem>::check(L, index);
-      case EnergyItemType:
+      case EnergyItemTypeNumber:
          return Lunar<EnergyItem>::check(L, index);
-      case SoccerBallItemType:
+      case SoccerBallItemTypeNumber:
          return Lunar<SoccerBallItem>::check(L, index);
-      case TurretType:
+      case TurretTypeNumber:
          return Lunar<Turret>::check(L, index);
-      case ForceFieldProjectorType:
+      case ForceFieldProjectorTypeNumber:
          return Lunar<ForceFieldProjector>::check(L, index);
+
 
       default:
          char msg[256];

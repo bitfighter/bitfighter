@@ -520,6 +520,12 @@ public:
    void idle(U32 timeDelta);
    void zoomCommanderMap();
 
+   void gotServerListFromMaster(const Vector<IPAddress> &serverList);
+   void connectionToServerRejected();
+   void setMOTD(const char *motd);
+
+
+
    void displayMessage(const Color &msgColor, const char *format, ...);
    //void displayMessage(GameConnection::MessageColors msgColorIndex, const char *format, ...);
 

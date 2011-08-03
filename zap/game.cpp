@@ -46,6 +46,9 @@
 #include "shipItems.h"           // For moduleInfos
 #include "stringUtils.h"
 
+#include "UIQueryServers.h"
+#include "UIErrorMessage.h"
+
 #include "BotNavMeshZone.h"      // For zone clearing code
 #include "ScreenInfo.h"
 #include "Joystick.h"
@@ -1987,6 +1990,33 @@ void ClientGame::idle(U32 timeDelta)
       supressScreensaver();
       mScreenSaverTimer.reset();
    }
+}
+
+
+void ClientGame::gotServerListFromMaster(const Vector<IPAddress> &serverList)
+{
+   getUIManager()->getQueryServersUserInterface()->gotServerListFromMaster(serverList);
+}
+
+
+void ClientGame::connectionToServerRejected()
+{
+   getUIManager()->getMainMenuUserInterface()->activate();
+
+   ErrorMessageUserInterface *ui = getUIManager()->getErrorMsgUserInterface();
+   ui->reset();
+   ui->setTitle("Connection Terminated");
+   ui->setMessage(2, "Lost connection with the server.");
+   ui->setMessage(3, "Unable to join game.  Please try again.");
+   ui->activate();
+
+   endGame();
+}
+
+
+void ClientGame::setMOTD(const char *motd)
+{
+   getUIManager()->getMainMenuUserInterface()->setMOTD(motd); 
 }
 
 

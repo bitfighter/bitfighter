@@ -77,7 +77,7 @@ public:
    static const char className[];                        // Class name as it appears to Lua scripts
    static Lunar<LoadoutZone>::RegType methods[];
 
-   S32 getClassID(lua_State *L) { return returnInt(L, LoadoutZoneType); }
+   S32 getClassID(lua_State *L) { return returnInt(L, LoadoutZoneTypeNumber); }
 
    TNL_DECLARE_CLASS(LoadoutZone);
 private:
