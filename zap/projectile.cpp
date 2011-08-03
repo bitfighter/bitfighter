@@ -417,7 +417,7 @@ TNL_IMPLEMENT_NETOBJECT(GrenadeProjectile);
 GrenadeProjectile::GrenadeProjectile(Point pos, Point vel, GameObject *shooter): Item(pos, true, mRadius, mMass)
 {
    mObjectTypeMask = MoveableType | BulletType;
-   mObjectTypeNumber = GrenadeProjectileTypeNumber;
+   mObjectTypeNumber = BulletTypeNumber;
 
    mNetFlags.set(Ghostable);
 

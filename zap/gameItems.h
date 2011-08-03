@@ -218,7 +218,7 @@ protected:
    void setRespawnTime(S32 time);
 
 public:
-   AbstractSpawn(const Point &pos = Point(), S32 time = 0, GameObjectType objType = UnknownType); // Constructor
+   AbstractSpawn(const Point &pos = Point(), S32 time = 0); // Constructor
 
    
    virtual bool processArguments(S32 argc, const char **argv, Game *game);

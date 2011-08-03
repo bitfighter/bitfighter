@@ -135,7 +135,6 @@ LuaRobot::LuaRobot(lua_State *L) : LuaShip((Robot *)lua_touserdata(L, 1))
    setEnumName(FlagTypeNumber, "FlagType");
    setEnumName(BulletTypeNumber, "BulletType");
    setEnumName(MineTypeNumber, "MineType");
-   setEnumName(SpybugZoneTypeNumber, "SpybugZoneType");
    setEnumName(NexusTypeNumber, "NexusType");
    setEnumName(BotNavMeshZoneTypeNumber, "BotNavMeshZoneType");
    setEnumName(RobotTypeNumber, "RobotType");
@@ -157,7 +156,6 @@ LuaRobot::LuaRobot(lua_State *L) : LuaShip((Robot *)lua_touserdata(L, 1))
    setEnumName(WallItemTypeNumber, "WallItemType");
    setEnumName(WallEdgeTypeNumber, "WallEdgeType");
    setEnumName(WallSegmentTypeNumber, "WallSegmentType");
-   setEnumName(GrenadeProjectileTypeNumber, "GrenadeProjectileType");
    setEnumName(SlipZoneTypeNumber, "SlipZoneType");
    setEnumName(SpyBugTypeNumber, "SpyBugType");
 
@@ -793,7 +791,7 @@ S32 LuaRobot::doFindItems(lua_State *L, Rect *scope)
 {
    // objectType is a bitmask of all the different object types we might want to find.  We need to build it up here because
    // lua can't do the bitwise or'ing itself.
-   U32 objectType = 0;
+   U32 objectMask = 0;
 
    S32 index = 1;
    S32 pushed = 0;      // Count of items actually pushed onto the stack
@@ -803,20 +801,32 @@ S32 LuaRobot::doFindItems(lua_State *L, Rect *scope)
    while(lua_isnumber(L, index))
    {
       GridDatabase *gridDB;
-      objectType |= (U32) lua_tointeger(L, index);
+      U8 number = (U8)lua_tointeger(L, index);
 
-      if(objectType == BotNavMeshZoneTypeNumber)
-         gridDB = ((ServerGame *)thisRobot->getGame())->getBotZoneDatabase();
+      if(number < 32)
+         objectMask |= (1 << number);
       else
-         gridDB = thisRobot->getGame()->getGameObjDatabase();
+      {
+
+         if(number == BotNavMeshZoneTypeNumber)
+            gridDB = ((ServerGame *)thisRobot->getGame())->getBotZoneDatabase();
+         else
+            gridDB = thisRobot->getGame()->getGameObjDatabase();
 
 
-      if(scope)    // Get other objects on screen-visible area only
-         gridDB->findObjects(0, fillVector, *scope, U8(lua_tointeger(L, index)));
-      else
-         gridDB->findObjects(0, fillVector, U8(lua_tointeger(L, index)));
-
+         if(scope)    // Get other objects on screen-visible area only
+            gridDB->findObjects(0, fillVector, *scope, number);
+         else
+            gridDB->findObjects(0, fillVector, number);
+      }
       index++;
+   }
+   if(objectMask)
+   {
+      if(scope)    // Get other objects on screen-visible area only
+         thisRobot->getGame()->getGameObjDatabase()->findObjects(objectMask, fillVector, *scope);
+      else
+         thisRobot->getGame()->getGameObjDatabase()->findObjects(objectMask, fillVector);
    }
 
    clearStack(L);
@@ -1377,7 +1387,7 @@ Vector<Robot *> Robot::robots;
 Robot::Robot(StringTableEntry robotName, S32 team, Point pt, F32 mass) : Ship(robotName, false, team, pt, mass, true)
 {
    gameConnectionInitalized = false;
-   mObjectTypeMask = RobotType | MoveableType | CommandMapVisType | TurretTargetType;     // Override typemask set by ship
+   mObjectTypeMask = RobotType | MoveableType | CommandMapVisType;     // Override typemask set by ship
    mObjectTypeNumber = RobotTypeNumber;
 
    L = NULL;

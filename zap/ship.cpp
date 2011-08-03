@@ -77,7 +77,7 @@ TNL_IMPLEMENT_NETOBJECT(Ship);
 // Also, the following is also run by robot's constructor
 Ship::Ship(StringTableEntry playerName, bool isAuthenticated, S32 team, Point p, F32 m, bool isRobot) : MoveObject(p, CollisionRadius), mSpawnPoint(p)
 {
-   mObjectTypeMask = ShipType | MoveableType | CommandMapVisType | TurretTargetType;
+   mObjectTypeMask = ShipType | MoveableType | CommandMapVisType;
    mObjectTypeNumber = ShipTypeNumber;
    mFireTimer = 0;
 

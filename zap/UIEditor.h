@@ -227,7 +227,7 @@ private:
    bool mouseOnDock();                // Return whether mouse is currently over the dock
    bool mNeedToSave;                  // Have we modified the level such that we need to save?
 
-   void insertNewItem(GameObjectType itemType);                      // Insert a new object into the game
+   void insertNewItem(U8 itemTypeNumber);                      // Insert a new object into the game
 
    bool mWasTesting;
    GameType *mEditorGameType;    // Used to store our GameType while we're testing

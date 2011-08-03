@@ -708,7 +708,7 @@ void EditorUserInterface::validateLevel()
    GridDatabase *gridDatabase = getGame()->getEditorDatabase();
       
    fillVector.clear();
-   gridDatabase->findObjects(ShipSpawnType, fillVector);
+   gridDatabase->findObjects(0, fillVector, ShipSpawnTypeNumber);
    for(S32 i = 0; i < fillVector.size(); i++)
    {
       Spawn *spawn = dynamic_cast<Spawn *>(fillVector[i]);
@@ -744,7 +744,7 @@ void EditorUserInterface::validateLevel()
    }
 
    fillVector.clear();
-   gridDatabase->findObjects(FlagSpawnType, fillVector);
+   gridDatabase->findObjects(0, fillVector, FlagSpawnTypeNumber);
    for(S32 i = 0; i < fillVector.size(); i++)
    {
       FlagSpawn *flagSpawn = dynamic_cast<FlagSpawn *>(fillVector[i]);
@@ -2708,7 +2708,7 @@ void EditorUserInterface::deleteItem(S32 itemIndex)
 }
 
 
-void EditorUserInterface::insertNewItem(GameObjectType itemType)
+void EditorUserInterface::insertNewItem(U8 itemTypeNumber)
 {
    if(mShowMode == ShowWallsOnly || mDraggingObjects)     // No inserting when items are hidden or being dragged!
       return;
@@ -2722,7 +2722,7 @@ void EditorUserInterface::insertNewItem(GameObjectType itemType)
 
    // Find a dockItem to copy
    for(S32 i = 0; i < mDockItems.size(); i++)
-      if(mDockItems[i]->getObjectTypeMask() & itemType)
+      if(mDockItems[i]->getObjectTypeNumber() == itemTypeNumber)
       {
          newObject = copyDockItem(i);
          break;
@@ -3213,21 +3213,21 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       playBoop();
    }
    else if(keyCode == KEY_T)              // T - Teleporter
-      insertNewItem(TeleportType);
+      insertNewItem(TeleportTypeNumber);
    else if(keyCode == KEY_P)              // P - Speed Zone
-      insertNewItem(SpeedZoneType);
+      insertNewItem(SpeedZoneTypeNumber);
    else if(keyCode == KEY_G)              // G - Spawn
-      insertNewItem(ShipSpawnType);
+      insertNewItem(ShipSpawnTypeNumber);
    else if(keyCode == KEY_B && getKeyState(KEY_CTRL)) // Ctrl-B - Spy Bug
-      insertNewItem(SpyBugType);
+      insertNewItem(SpyBugTypeNumber);
    else if(keyCode == KEY_B)              // B - Repair
-      insertNewItem(RepairItemType);
+      insertNewItem(RepairItemTypeNumber);
    else if(keyCode == KEY_Y)              // Y - Turret
-      insertNewItem(TurretType);
+      insertNewItem(TurretTypeNumber);
    else if(keyCode == KEY_M)              // M - Mine
-      insertNewItem(MineType);
+      insertNewItem(MineTypeNumber);
    else if(keyCode == KEY_F)              // F - Force Field
-      insertNewItem(ForceFieldProjectorType);
+      insertNewItem(ForceFieldProjectorTypeNumber);
    else if(keyCode == KEY_BACKSPACE || keyCode == KEY_DELETE)
          deleteSelection(false);
    else if(keyCode == keyHELP)            // Turn on help screen

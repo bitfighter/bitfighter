@@ -46,64 +46,110 @@ namespace Zap
 class GridDatabase;
 class Game;
 
+// Most of TypeNumber are used in LUA
+const U8 UnknownTypeNumber = 0;
+const U8 ShipTypeNumber = 1;
+const U8 BarrierTypeNumber = 2;
+// 3 = MovableType..
+const U8 LineTypeNumber = 4;
+const U8 ResourceItemTypeNumber = 5;
+const U8 TextItemTypeNumber = 6;
+const U8 ForceFieldTypeNumber = 7;
+const U8 LoadoutZoneTypeNumber = 8;
+const U8 TestItemTypeNumber = 9;
+const U8 FlagTypeNumber = 10;
+const U8 SpeedZoneTypeNumber = 11;
+const U8 SlipZoneTypeNumber = 12;
+const U8 BulletTypeNumber = 13;
+const U8 MineTypeNumber = 14;
+const U8 SpyBugTypeNumber = 15;
+const U8 NexusTypeNumber = 16;
+// bit 17?
+const U8 RobotTypeNumber = 18;
+const U8 TeleportTypeNumber = 19;
+const U8 GoalZoneTypeNumber = 20;
+const U8 AsteroidTypeNumber = 21;
+const U8 RepairItemTypeNumber = 22;
+const U8 EnergyItemTypeNumber = 23;
+const U8 SoccerBallItemTypeNumber = 24;
+const U8 WormTypeNumber = 25;
+const U8 TurretTypeNumber = 26;
+const U8 ForceFieldProjectorTypeNumber = 27;
+
+const U8 BotNavMeshZoneTypeNumber = 64;  // seperate database
+const U8 PolyWallTypeNumber = 65;
+
+// These are probably used only in editor..
+const U8 WallItemTypeNumber = 66;
+const U8 WallEdgeTypeNumber = 67;
+const U8 WallSegmentTypeNumber = 68;
+const U8 ShipSpawnTypeNumber = 69;
+const U8 FlagSpawnTypeNumber = 70;
+const U8 AsteroidSpawnTypeNumber = 71;
+
+
+// LuaRobot uses 
+// LuaRobot::doFindItems uses TypeNumber, to speed up search, anything less then 32 will be type masked
+
+
 enum GameObjectType
 {
-   UnknownType         = BIT(0),    // First bit, BIT(0) == 1, NOT 0!  (Well, yes, 0!, but not 0.  C'mon... get a life!)
-   ShipType            = BIT(1),
-   BarrierType         = BIT(2),    // Used in both editor and game
+   UnknownType         = BIT(UnknownTypeNumber),    // First bit, BIT(0) == 1, NOT 0!  (Well, yes, 0!, but not 0.  C'mon... get a life!)
+   ShipType            = BIT(ShipTypeNumber),
+   BarrierType         = BIT(BarrierTypeNumber),    // Used in both editor and game
    MoveableType        = BIT(3),
 
-   LineType            = BIT(4),     
-   ResourceItemType    = BIT(5),
-   TextItemType        = BIT(6),    // Added during editor refactor, only used in editor
-   ForceFieldType      = BIT(7),
-   LoadoutZoneType     = BIT(8),
-   TestItemType        = BIT(9),
-   FlagType            = BIT(10),
-   TurretTargetType    = BIT(11),
-   SlipZoneType        = BIT(12),
+   LineType            = BIT(LineTypeNumber),     
+   ResourceItemType    = BIT(ResourceItemTypeNumber),
+   TextItemType        = BIT(TextItemTypeNumber),    // Added during editor refactor, only used in editor
+   ForceFieldType      = BIT(ForceFieldTypeNumber),
+   LoadoutZoneType     = BIT(LoadoutZoneTypeNumber),
+   TestItemType        = BIT(TestItemTypeNumber),
+   FlagType            = BIT(FlagTypeNumber),
+   SpeedZoneType       = BIT(SpeedZoneTypeNumber),      // Only needed for finding speed zones that we may have spawned on top of
+   SlipZoneType        = BIT(SlipZoneTypeNumber),
 
-   BulletType          = BIT(13),      // All projectiles except grenades?
-   MineType            = BIT(14),
-   SpyBugType          = BIT(15),
-   NexusType           = BIT(16),
+   BulletType          = BIT(BulletTypeNumber),      // All projectiles except grenades?
+   MineType            = BIT(MineTypeNumber),
+   SpyBugType          = BIT(SpyBugTypeNumber),
+   NexusType           = BIT(NexusTypeNumber),
    //                  = BIT(17),  // Was bot zone, now this bit might be used for editor
-   RobotType           = BIT(18),
-   TeleportType        = BIT(19),
-   GoalZoneType        = BIT(20),
+   RobotType           = BIT(RobotTypeNumber),
+   TeleportType        = BIT(TeleportTypeNumber),
+   GoalZoneType        = BIT(GoalZoneTypeNumber),
 
-   AsteroidType        = BIT(21),      // Only needed for editor...
-   RepairItemType      = BIT(22),
-   EnergyItemType      = BIT(23),
-   SoccerBallItemType  = BIT(24),      // Only needed for indicating what the ship is carrying and editor...
-   WormType            = BIT(25),
+   AsteroidType        = BIT(AsteroidTypeNumber),      // Only needed for editor...
+   RepairItemType      = BIT(RepairItemTypeNumber),
+   EnergyItemType      = BIT(EnergyItemTypeNumber),
+   SoccerBallItemType  = BIT(SoccerBallItemTypeNumber),      // Only needed for indicating what the ship is carrying and editor...
+   WormType            = BIT(WormTypeNumber),
 
-   TurretType          = BIT(26),      // Formerly EngineeredType
-   ForceFieldProjectorType = BIT(27),  // Formerly EngineeredType
-   SpeedZoneType       = BIT(28),      // Only needed for finding speed zones that we may have spawned on top of
+   TurretType          = BIT(TurretTypeNumber),      // Formerly EngineeredType
+   ForceFieldProjectorType = BIT(ForceFieldProjectorTypeNumber),  // Formerly EngineeredType
 
-   // _______________  = BIT(29),      // FREE BIT
+   // _______________  = BIT(28),      // FREE BIT
 
-   DeletedType       = BIT(30),
-   CommandMapVisType = BIT(31),        // These are objects that can be seen on the commander's map
+   DeletedType         = BIT(30),
+   CommandMapVisType   = BIT(31),        // These are objects that can be seen on the commander's map
 
    //////////
    // Types used exclusively in the editor -- will reuse some values from above
-   PolyWallType = BIT(25),             // WormType
-   ShipSpawnType = BIT(13),            // BulletType
-   FlagSpawnType = BIT(1),            // ShipType
-   AsteroidSpawnType = BIT(17),        //
-   WallSegmentType = BIT(13),          // Used only in wallSegmentDatabase, so this is OK for the moment
+   PolyWallType = BIT(29),             // WormType
+   //ShipSpawnType = BIT(13),            // BulletType
+   //FlagSpawnType = BIT(1),            // ShipType
+   //AsteroidSpawnType = BIT(17),        //
+   //WallSegmentType = BIT(13),          // Used only in wallSegmentDatabase, so this is OK for the moment
 
 
    // Derived types:
    EngineeredType     = TurretType | ForceFieldProjectorType,
-   MountableType      = TurretType | ForceFieldProjectorType,
+// MountableType      = TurretType | ForceFieldProjectorType,
    ItemType           = SoccerBallItemType | MineType | SpyBugType | AsteroidType | FlagType | ResourceItemType | 
                         TestItemType | EnergyItemType | RepairItemType,
    DamagableTypes     = ShipType | RobotType | MoveableType | BulletType | ItemType | ResourceItemType | 
                         EngineeredType | MineType | AsteroidType,
    MotionTriggerTypes = ShipType | RobotType | ResourceItemType | TestItemType | AsteroidType,
+	TurretTargetType   = ShipType | RobotType | ResourceItemType | TestItemType | SoccerBallItemType,
    CollideableType    = BarrierType | TurretType | ForceFieldProjectorType,
    WallType           = BarrierType | PolyWallType,
    AllObjectTypes     = 0xFFFFFFFF
@@ -111,43 +157,6 @@ enum GameObjectType
 
 
 
-// Most of TypeNumber are used in LUA
-const U8 UnknownTypeNumber = 0;
-const U8 BarrierTypeNumber = 1;
-const U8 ShipTypeNumber = 2;
-const U8 LineTypeNumber = 3;
-const U8 ResourceItemTypeNumber = 4;
-const U8 TextItemTypeNumber = 5;
-const U8 LoadoutZoneTypeNumber = 6;
-const U8 TestItemTypeNumber = 7;
-const U8 FlagTypeNumber = 8;
-const U8 BulletTypeNumber = 9;
-const U8 MineTypeNumber = 10;
-const U8 SpybugZoneTypeNumber = 11;
-const U8 NexusTypeNumber = 12;
-const U8 BotNavMeshZoneTypeNumber = 13;
-const U8 RobotTypeNumber = 14;
-const U8 TeleportTypeNumber = 15;
-const U8 GoalZoneTypeNumber = 16;
-const U8 AsteroidTypeNumber = 17;
-const U8 RepairItemTypeNumber = 18;
-const U8 EnergyItemTypeNumber = 19;
-const U8 SoccerBallItemTypeNumber = 20;
-const U8 WormTypeNumber = 21;
-const U8 TurretTypeNumber = 22;
-const U8 SpyBugTypeNumber = 23;
-const U8 ForceFieldTypeNumber = 24;
-const U8 ForceFieldProjectorTypeNumber = 25;
-const U8 SpeedZoneTypeNumber = 26;
-const U8 PolyWallTypeNumber = 27;
-const U8 ShipSpawnTypeNumber = 28;
-const U8 FlagSpawnTypeNumber = 29;
-const U8 AsteroidSpawnTypeNumber = 30;
-const U8 WallItemTypeNumber = 31;
-const U8 WallEdgeTypeNumber = 32;
-const U8 WallSegmentTypeNumber = 33;
-const U8 GrenadeProjectileTypeNumber = 34;
-const U8 SlipZoneTypeNumber = 35;
 
 
 

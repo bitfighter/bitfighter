@@ -211,12 +211,10 @@ S32 EnergyItem::isVis(lua_State *L) { return returnBool(L, isVisible()); }      
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-AbstractSpawn::AbstractSpawn(const Point &pos, S32 time, GameObjectType objType)
+AbstractSpawn::AbstractSpawn(const Point &pos, S32 time)
 {
    setVert(pos, 0);
    setRespawnTime(time);
-   mObjectTypeMask = objType;
-   //mObjectTypeNumber = AsteroidTypeNumber
 };
 
 
@@ -263,9 +261,9 @@ string AbstractSpawn::toString(F32 gridSize) const
 ////////////////////////////////////////
 
 // Constructor
-Spawn::Spawn(const Point &pos, S32 time) : AbstractSpawn(pos, time, ShipSpawnType)
+Spawn::Spawn(const Point &pos, S32 time) : AbstractSpawn(pos, time)
 {
-   // Do nothing
+   mObjectTypeNumber = ShipSpawnTypeNumber;
 }
 
 
@@ -322,9 +320,10 @@ void Spawn::renderDock()
 ////////////////////////////////////////
 
 // Constructor
-AsteroidSpawn::AsteroidSpawn(const Point &pos, S32 time) : AbstractSpawn(pos, time, AsteroidSpawnType)
+AsteroidSpawn::AsteroidSpawn(const Point &pos, S32 time) : AbstractSpawn(pos, time)
 {
-   // Do nothing
+   mObjectTypeNumber = AsteroidSpawnTypeNumber;
+
 }
 
 
@@ -372,9 +371,9 @@ void AsteroidSpawn::renderDock()
 ////////////////////////////////////////
 
 // Constructor
-FlagSpawn::FlagSpawn(const Point &pos, S32 time) : AbstractSpawn(pos, time, FlagSpawnType)
+FlagSpawn::FlagSpawn(const Point &pos, S32 time) : AbstractSpawn(pos, time)
 {
-   // Do nothing
+   mObjectTypeNumber = FlagSpawnTypeNumber;
 }
 
 
@@ -766,7 +765,7 @@ static const F32 TEST_ITEM_MASS = 4;
 TestItem::TestItem() : EditorItem(Point(0,0), true, TEST_ITEM_RADIUS, TEST_ITEM_MASS)
 {
    mNetFlags.set(Ghostable);
-   mObjectTypeMask |= TestItemType | TurretTargetType;
+   mObjectTypeMask |= TestItemType;
    mObjectTypeNumber = TestItemTypeNumber;
 }
 
@@ -850,7 +849,7 @@ static const F32 RESOURCE_ITEM_MASS = 1;
 ResourceItem::ResourceItem() : EditorItem(Point(0,0), true, RESOURCE_ITEM_RADIUS, RESOURCE_ITEM_MASS)
 {
    mNetFlags.set(Ghostable);
-   mObjectTypeMask |= ResourceItemType | TurretTargetType;
+   mObjectTypeMask |= ResourceItemType;
    mObjectTypeNumber = ResourceItemTypeNumber;
 }
 

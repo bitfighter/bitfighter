@@ -392,7 +392,7 @@ public:
 
    void onLevelLoaded();      // Server-side function run once level is loaded from file
 
-   void idle(GameObject::IdleCallPath path, U32 deltaT);
+   virtual void idle(GameObject::IdleCallPath path, U32 deltaT);
 
    void gameOverManGameOver();
    VersionedGameStats getGameStats();
@@ -446,7 +446,7 @@ public:
    void performScopeQuery(GhostConnection *connection);
    virtual void performProxyScopeQuery(GameObject *scopeObject, GameConnection *connection);
 
-   void onGhostAvailable(GhostConnection *theConnection);
+   virtual void onGhostAvailable(GhostConnection *theConnection);
    TNL_DECLARE_RPC(s2cSetLevelInfo, (StringTableEntry levelName, StringTableEntry levelDesc, S32 teamScoreLimit, StringTableEntry levelCreds, 
                                      S32 objectCount, F32 lx, F32 ly, F32 ux, F32 uy, bool levelHasLoadoutZone, bool engineerEnabled));
    TNL_DECLARE_RPC(s2cAddBarriers, (Vector<F32> barrier, F32 width, bool solid));

@@ -766,7 +766,7 @@ void WallSegmentManager::invalidateIntersectingSegments(GridDatabase *gameDataba
    // These will need new walls after we've moved our segment.  We'll look for those intersecting segments in our edge database.
    for(S32 i = 0; i < mWallSegments.size(); i++)
       if(mWallSegments[i]->getOwner() == item->getSerialNumber())      // Segment belongs to our item; look it up in the database
-         gameDatabase->findObjects(WallSegmentType, fillVector, mWallSegments[i]->getExtent());
+         gameDatabase->findObjects(0, fillVector, mWallSegments[i]->getExtent(), WallSegmentTypeNumber);
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
@@ -774,11 +774,8 @@ void WallSegmentManager::invalidateIntersectingSegments(GridDatabase *gameDataba
       TNLAssert(intersectingSegment, "NULL segment!");
 
       // Reset the edges of all invalidated segments to their factory settings
-      if(intersectingSegment)  // don't crash in release mode (when assert is disabled)
-      {
-         intersectingSegment->resetEdges();   
-         intersectingSegment->invalidate();
-      }
+      intersectingSegment->resetEdges();   
+      intersectingSegment->invalidate();
    }
 
    buildWallSegmentEdgesAndPoints(gameDatabase, item);
@@ -789,7 +786,7 @@ void WallSegmentManager::invalidateIntersectingSegments(GridDatabase *gameDataba
    //// Invalidate all segments that potentially intersect the changed segment in its new location
    //for(S32 i = 0; i < mWallSegments.size(); i++)
    //   if(mWallSegments[i]->getOwner() == item->getSerialNumber())      // Segment belongs to our item, compare to all others
-   //      mWallSegmentDatabase->findObjects(WallSegmentType, fillVector, mWallSegments[i]->getExtent());
+   //      mWallSegmentDatabase->findObjects(0, fillVector, mWallSegments[i]->getExtent(), WallSegmentTypeNumber);
 
    //for(S32 i = 0; i < fillVector.size(); i++)
    //{
@@ -802,7 +799,7 @@ void WallSegmentManager::invalidateIntersectingSegments(GridDatabase *gameDataba
 
    for(S32 i = 0; i < mWallSegmentDatabase->getObjectCount(); i++)
    {
-      if(mWallSegmentDatabase->getObjectByIndex(i)->getObjectTypeMask() == WallSegmentType)
+      if(mWallSegmentDatabase->getObjectByIndex(i)->getObjectTypeNumber() == WallSegmentTypeNumber)
       {
          WallSegment *wallSegment = dynamic_cast<WallSegment *>(mWallSegmentDatabase->getObjectByIndex(i));
          TNLAssert(wallSegment, "Uh oh!");
