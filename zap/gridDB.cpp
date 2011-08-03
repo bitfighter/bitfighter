@@ -163,7 +163,7 @@ void GridDatabase::findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVecto
    mQueryId++;    // Used to prevent the same item from being found in multiple buckets
 
    for(S32 x = minx; maxx - x >= 0; x++)
-      for(S32 y = miny; maxy - x >= 0; y++)
+      for(S32 y = miny; maxy - y >= 0; y++)
          for(BucketEntry *walk = mBuckets[x & BucketMask][y & BucketMask]; walk; walk = walk->nextInBucket)
          {
             DatabaseObject *theObject = walk->theObject;
