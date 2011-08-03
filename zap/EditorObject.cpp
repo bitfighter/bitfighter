@@ -212,8 +212,8 @@ void EditorObject::renderAndLabelHighlightedVertices(F32 currentScale)
       {
          glColor((vertSelected(i) || mSelected) ? SELECT_COLOR : HIGHLIGHT_COLOR);
 
-         drawSquare(getVert(i), radius);
-         labelVertex(getVert(i), radius, getOnScreenName(), getVertLabel(i), currentScale);
+         drawSquare(getVert(i), radius / currentScale);
+         labelVertex(getVert(i), radius / currentScale, getOnScreenName(), getVertLabel(i), currentScale);
       }         
 }
 
@@ -334,6 +334,13 @@ Color EditorObject::getDrawColor()
 void EditorObject::saveItem(FILE *f, F32 gridSize)
 {
    s_fprintf(f, "%s\n", toString(gridSize).c_str());
+}
+
+
+// Size of object in editor 
+F32 EditorObject::getEditorRadius(F32 currentScale)
+{
+   return 10 * currentScale;   
 }
 
 
