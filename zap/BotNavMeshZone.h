@@ -69,7 +69,7 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class BotNavMeshZone : public GameObject
+class BotNavMeshZone : public GameObject, public PolygonGeometry
 {
 private:   
    typedef GameObject Parent;

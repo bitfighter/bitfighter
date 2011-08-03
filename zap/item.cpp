@@ -94,9 +94,8 @@ static const Color INSTRUCTION_TEXTCOLOR(1,1,1);      // TODO: Put in editor
 
 
  // Constructor
-EditorPointObject::EditorPointObject(GameObjectType objectType) : EditorObject(objectType) 
+EditorPointObject::EditorPointObject(GameObjectType objectType) 
 { 
-   mGeometry = boost::shared_ptr<Geometry>(new PointGeometry); 
 }     
 
 
@@ -144,13 +143,6 @@ void Item::render()
       return;
 
    renderItem(mMoveState[RenderState].pos);
-}
-
-
-void Item::setVert(const Point &point, S32 index) 
-{ 
-   Parent::setVert(point, index);
-   mMoveState[RenderState].pos = point;      // Keep render state in-sync with the geom
 }
 
 

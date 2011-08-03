@@ -38,6 +38,8 @@ using namespace TNL;
 namespace Zap
 {
 
+
+
 void Geometry::rotateAboutPoint(const Point &center, F32 angle)
 {
    F32 sinTheta = sin(angle * Float2Pi / 360.0f);
@@ -50,7 +52,30 @@ void Geometry::rotateAboutPoint(const Point &center, F32 angle)
 
       setVert(n + center, j);
    }
+   onGeomChanged();
 }
+
+void Geometry::flipHorizontal(F32 centerX)
+{
+   for(S32 i = 0; i < getVertCount(); i++)
+   {
+      Point p = getVert(i);
+      p.x = centerX * 2 - p.x;
+      setVert(p, i);
+   }
+   onGeomChanged();
+}
+void Geometry::flipVertical(F32 centerY)
+{
+   for(S32 i = 0; i < getVertCount(); i++)
+   {
+      Point p = getVert(i);
+      p.y = centerY * 2 - p.y;
+      setVert(p, i);
+   }
+   onGeomChanged();
+}
+
 
 
 // Make object bigger or smaller
@@ -63,6 +88,14 @@ void Geometry::scale(const Point &center, F32 scale)
 
 ////////////////////////////////////////
 ////////////////////////////////////////
+
+void PointGeometry::setVert(const Point &pos, S32 index)
+{
+   mPos = pos;
+   GameObject *obj = dynamic_cast<GameObject *>(this);
+   if(obj)
+      obj->setActualPos(pos);
+}
 
 void PointGeometry::packGeom(GhostConnection *connection, BitStream *stream)
 {
@@ -95,22 +128,10 @@ void PointGeometry::readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gr
 }
 
 
-boost::shared_ptr<Geometry> PointGeometry::copyGeometry() const
-{
-    return boost::shared_ptr<Geometry>(new PointGeometry(*this));
-}
-
-
-void PointGeometry::flipHorizontal(F32 boundingBoxMinX, F32 boundingBoxMaxX)
-{
-   mPos.x = boundingBoxMinX + (boundingBoxMaxX - mPos.x);
-}
-
-
-void PointGeometry::flipVertical(F32 boundingBoxMinY, F32 boundingBoxMaxY)
-{
-   mPos.y = boundingBoxMinY + (boundingBoxMaxY - mPos.y);
-}
+//boost::shared_ptr<Geometry> PointGeometry::copyGeometry() const
+//{
+//    return boost::shared_ptr<Geometry>(new PointGeometry(*this));
+//}
 
 
 ////////////////////////////////////////
@@ -118,7 +139,7 @@ void PointGeometry::flipVertical(F32 boundingBoxMinY, F32 boundingBoxMaxY)
 
 static Vector<Point> outlinePoints(2);    // Reusable container
 
-Vector<Point> *SimpleLineGeometry::getOutline()
+Vector<Point> *SimpleLineGeometry::getOutline() const
 {
    outlinePoints.resize(2);
    outlinePoints[0] = mFromPos;
@@ -163,24 +184,10 @@ void SimpleLineGeometry::readGeom(S32 argc, const char **argv, S32 firstCoord, F
 }
 
 
-boost::shared_ptr<Geometry> SimpleLineGeometry::copyGeometry() const
-{
-    return boost::shared_ptr<Geometry>(new SimpleLineGeometry(*this));
-}
-
-
-void SimpleLineGeometry::flipHorizontal(F32 boundingBoxMinX, F32 boundingBoxMaxX)
-{
-   mFromPos.x = boundingBoxMinX + (boundingBoxMaxX - mFromPos.x);
-   mToPos.x = boundingBoxMinX + (boundingBoxMaxX - mToPos.x);
-}
-
-
-void SimpleLineGeometry::flipVertical(F32 boundingBoxMinY, F32 boundingBoxMaxY)
-{
-   mFromPos.y = boundingBoxMinY + (boundingBoxMaxY - mFromPos.y);
-   mToPos.y = boundingBoxMinY + (boundingBoxMaxY - mToPos.y);
-}
+//boost::shared_ptr<Geometry> SimpleLineGeometry::copyGeometry() const
+//{
+//    return boost::shared_ptr<Geometry>(new SimpleLineGeometry(*this));
+//}
 
 
 ////////////////////////////////////////
@@ -188,7 +195,7 @@ void SimpleLineGeometry::flipVertical(F32 boundingBoxMinY, F32 boundingBoxMaxY)
 
 extern S32 gMaxPolygonPoints;
 
-Point PolylineGeometry::getVert(S32 index) 
+Point PolylineGeometry::getVert(S32 index)  const
 { 
    return mPolyBounds[index]; 
 }
@@ -417,24 +424,10 @@ void PolylineGeometry::readGeom(S32 argc, const char **argv, S32 firstCoord, F32
 }
 
 
-boost::shared_ptr<Geometry> PolylineGeometry::copyGeometry() const
-{
-    return boost::shared_ptr<Geometry>(new PolylineGeometry(*this));
-}
-
-
-void PolylineGeometry::flipHorizontal(F32 boundingBoxMinX, F32 boundingBoxMaxX)
-{
-   for(S32 i = 0; i < mPolyBounds.size(); i++)
-      mPolyBounds[i].x = boundingBoxMinX + (boundingBoxMaxX - mPolyBounds[i].x);
-}
-
-
-void PolylineGeometry::flipVertical(F32 boundingBoxMinY, F32 boundingBoxMaxY)
-{
-   for(S32 i = 0; i < mPolyBounds.size(); i++)
-      mPolyBounds[i].y = boundingBoxMinY + (boundingBoxMaxY - mPolyBounds[i].y);
-}
+//boost::shared_ptr<Geometry> PolylineGeometry::copyGeometry() const
+//{
+//    return boost::shared_ptr<Geometry>(new PolylineGeometry(*this));
+//}
 
 
 ////////////////////////////////////////
@@ -459,11 +452,11 @@ void PolygonGeometry::onPointsChanged()
 }
 
 
-boost::shared_ptr<Geometry> PolygonGeometry::copyGeometry() const
-{
-   PolygonGeometry *newGeom = new PolygonGeometry(*this);
-   return boost::shared_ptr<Geometry>(newGeom);
-}
+//boost::shared_ptr<Geometry> PolygonGeometry::copyGeometry() const
+//{
+//   PolygonGeometry *newGeom = new PolygonGeometry(*this);
+//   return boost::shared_ptr<Geometry>(newGeom);
+//}
 
 
 

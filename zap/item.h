@@ -106,8 +106,6 @@ public:
    void dismount();
    void render();
 
-   virtual void setVert(const Point &point, S32 index);
-
    virtual void renderItem(Point pos) = 0;      // Does actual rendering, allowing render() to be generic for all Items
 
    virtual void onMountDestroyed();
@@ -126,8 +124,8 @@ public:
    virtual S32 getTeamIndx(lua_State *L) { return TEAM_NEUTRAL + 1; }              // Can be overridden for team items
    S32 isInCaptureZone(lua_State *L) { return returnBool(L, mZone.isValid()); }    // Is flag in a team's capture zone?
    S32 isOnShip(lua_State *L) { return returnBool(L, mIsMounted); }                // Is flag being carried by a ship?
-	S32 getCaptureZone(lua_State *L);
-	S32 getShip(lua_State *L);
+   S32 getCaptureZone(lua_State *L);
+   S32 getShip(lua_State *L);
    GameObject *getGameObject() { return this; }
 };
 
@@ -136,7 +134,7 @@ public:
 
 // Class with editor methods related to point things
 
-class EditorPointObject : public EditorObject
+class EditorPointObject : public EditorObject, public PointGeometry
 {
    typedef EditorObject Parent;
 
@@ -151,7 +149,7 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class EditorItem : public Item, virtual public EditorPointObject
+class EditorItem : public Item, public EditorPointObject
 {
    typedef Item Parent;   
    typedef EditorObject EditorParent;

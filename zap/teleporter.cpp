@@ -48,7 +48,7 @@ static Vector<DatabaseObject *> foundObjects;
 
 // Constructor --> need to set the pos and dest via methods like processArguments to make sure
 // that we get the multiple destination aspect of teleporters right
-Teleporter::Teleporter() : SimpleLine(TeleportType)
+Teleporter::Teleporter()
 {
    mObjectTypeMask = TeleportType | CommandMapVisType;
    mObjectTypeNumber = TeleporterTypeNumber;

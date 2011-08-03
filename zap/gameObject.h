@@ -30,7 +30,7 @@
 #include "gridDB.h"        // For DatabaseObject
 #include "tnlNetObject.h"
 
-#include "Geometry.h"      // For GeomType enum
+#include "Geometry_Base.h"      // For GeomType enum
 
 #include "boost/smart_ptr/shared_ptr.hpp"
 
@@ -130,7 +130,7 @@ const U8 EnergyItemTypeNumber = 19;
 const U8 SoccerBallItemTypeNumber = 20;
 const U8 WormTypeNumber = 21;
 const U8 TurretTypeNumber = 22;
-const U8 TurretTargetTypeNumber = 23;
+//const U8 TurretTargetTypeNumber = 23;
 const U8 ForceFieldTypeNumber = 24;
 const U8 ForceFieldProjectorTypeNumber = 25;
 const U8 SpeedZoneTypeNumber = 26;
@@ -179,13 +179,11 @@ struct DamageInfo
 ////////////////////////////////////////
 
 // Interface class that feeds GameObject and EditorObject -- these things are common to in-game and editor instances of an object
-class BfObject : public DatabaseObject
+class BfObject : public DatabaseObject, public Geometry
 {
 protected:
    Game *mGame;
    S32 mTeam;
-
-   boost::shared_ptr<Geometry> mGeometry;
 
 public:
    BfObject();                  // Constructor
@@ -212,44 +210,9 @@ public:
    virtual void render(S32 layerIndex);
    virtual void render();
 
-
-   // Geometry methods
-   virtual GeomType getGeomType() const { return mGeometry->getGeomType(); }
-   virtual Point getVert(S32 index) const { return mGeometry->getVert(index); }
-   virtual void setVert(const Point &point, S32 index) { mGeometry->setVert(point, index); }
-
-   S32 getVertCount() const { return mGeometry->getVertCount(); }
-   void clearVerts() { mGeometry->clearVerts(); }
-   bool addVert(const Point &point)  { return mGeometry->addVert(point); }
-   bool addVertFront(Point vert)  { return mGeometry->addVertFront(vert); }
-   bool deleteVert(S32 vertIndex)  { return mGeometry->deleteVert(vertIndex); }
-   bool insertVert(Point vertex, S32 vertIndex)  { return mGeometry->insertVert(vertex, vertIndex); }
-
-   bool anyVertsSelected() { return mGeometry->anyVertsSelected(); }
-   void selectVert(S32 vertIndex) { mGeometry->selectVert(vertIndex); }
-   void aselectVert(S32 vertIndex) { mGeometry->aselectVert(vertIndex); }
-   void unselectVert(S32 vertIndex) { mGeometry->unselectVert(vertIndex); }
-   void unselectVerts() { mGeometry->unselectVerts(); }
-   bool vertSelected(S32 vertIndex) { return mGeometry->vertSelected(vertIndex); }
-
-   Vector<Point> *getOutline() const { return mGeometry->getOutline(); }
-   Vector<Point> *getFill() const { return mGeometry->getFill(); }
-   Point getCentroid() const { return mGeometry->getCentroid(); }
-   F32 getLabelAngle() const { return mGeometry->getLabelAngle(); }
-
-   void packGeom(GhostConnection *connection, BitStream *stream) { mGeometry->packGeom(connection, stream); }
-   void unpackGeom(GhostConnection *connection, BitStream *stream) { mGeometry->unpackGeom(connection, stream); }
-
-   string geomToString(F32 gridSize) const { return mGeometry->geomToString(gridSize); }
-   void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize) { mGeometry->readGeom(argc, argv, firstCoord, gridSize); }
-
-
-
-   virtual void setExtent() { setExtent(mGeometry->getExtents()); }                    // Set extents of object in database
+   virtual void setExtent() { setExtent(getExtents()); }                    // Set extents of object in database
    virtual void setExtent(const Rect &extent) { DatabaseObject::setExtent(extent); }   // Passthrough
-   void onPointsChanged() { mGeometry->onPointsChanged(); }
 
-   void disableTriangluation() { mGeometry->disableTriangluation(); }
 };
 
 

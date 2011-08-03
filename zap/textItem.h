@@ -125,7 +125,7 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class LineItem : public GameObject, public EditorObject
+class LineItem : public GameObject, public PolylineGeometry, public EditorObject
 {
 private:
    typedef GameObject Parent;

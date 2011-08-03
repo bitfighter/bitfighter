@@ -28,12 +28,13 @@
 
 #include "EditorObject.h"
 //#include "UIEditor.h"      // For EditorObject (to be moved!)
+#include "Geometry.h"
 
 namespace Zap
 {
 
 
-class SimpleLine : public EditorObject, public GameObject
+class SimpleLine : public EditorObject, public GameObject, public SimpleLineGeometry
 {
    typedef GameObject Parent;
    typedef EditorObject EditorParent;
@@ -48,7 +49,7 @@ protected:
    virtual F32 getEditorRadius(F32 currentScale) { return 7; }     // Size of object (or in this case vertex) in editor
 
 public:
-   SimpleLine(GameObjectType objectType = UnknownType);       // Constructor
+   SimpleLine();       // Constructor
 
    // Some properties about the item that will be needed in the editor
    virtual const char *getOnDockName() = 0;

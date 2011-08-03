@@ -29,13 +29,14 @@
 #include "gameObject.h"
 #include "EditorObject.h"     // For EditorPolygon parentage
 #include "luaObject.h"
+#include "Geometry.h"
 
 namespace Zap
 {
 
 
 // Provide editor related methods to the polygon class
-class EditorPolygon : public EditorObject, public GameObject, public LuaItem
+class EditorPolygon : public GameObject, public EditorObject, public PolygonGeometry, public LuaItem
 {
    typedef GameObject Parent;
    typedef EditorObject EditorParent;
@@ -55,7 +56,7 @@ protected:
       void renderPolyHighlight();
 
 public:
-   EditorPolygon() { mGeometry = boost::shared_ptr<Geometry>(new PolygonGeometry); };                          // Constructor
+   //EditorPolygon() { mGeometry = boost::shared_ptr<Geometry>(new PolygonGeometry); };                          // Constructor
       //Should Copy Constructor be used here?
    //EditorPolygon(const EditorPolygon &ep) : EditorObject(ep) { mGeometry = boost::shared_ptr<Geometry>(new PolygonGeometry(*((PolygonGeometry *)ep.mGeometry.get()))); };      // Copy constructor
 

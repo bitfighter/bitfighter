@@ -1599,9 +1599,10 @@ void EditorUserInterface::render()
       for(S32 i = 0; i < fillVector.size(); i++)
       {
          LineItem *obj = dynamic_cast<LineItem *>(fillVector[i]);   // Walls are a subclass of LineItem, so this will work for both
-         if((obj->isSelected() || (obj->isLitUp() && obj->isVertexLitUp(NONE))))
+			TNLAssert(obj, "LineItem NULL?");
+         if(obj && (obj->isSelected() || (obj->isLitUp() && obj->isVertexLitUp(NONE))))
          {
-            width = obj->getWidth();     
+            width = obj->getWidth();
             break;
          }
       }
@@ -1995,12 +1996,13 @@ void EditorUserInterface::flipSelectionHorizontal()
 
    Point min, max;
    computeSelectionMinMax(min, max);
+   F32 centerX = (min.x + max.x) / 2;
 
    const Vector<EditorObject *> *objList = getObjectList();
 
    for(S32 i = 0; i < objList->size(); i++)
       if(objList->get(i)->isSelected())
-         objList->get(i)->flipHorizontal(min.x, max.x);
+         objList->get(i)->flipHorizontal(centerX);
 
    setNeedToSave(true);
    autoSave();
@@ -2016,12 +2018,13 @@ void EditorUserInterface::flipSelectionVertical()
 
    Point min, max;
    computeSelectionMinMax(min, max);
+   F32 centerY = (min.y + max.y) / 2;
 
    const Vector<EditorObject *> *objList = getObjectList();
 
    for(S32 i = 0; i < objList->size(); i++)
       if(objList->get(i)->isSelected())
-         objList->get(i)->flipVertical(min.y, max.y);
+         objList->get(i)->flipVertical(centerY);
 
    setNeedToSave(true);
    autoSave();

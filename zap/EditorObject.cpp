@@ -52,12 +52,11 @@ S32 EditorObject::mNextSerialNumber = 0;
 
 
 // Constructor
-EditorObject::EditorObject(GameObjectType objectType) 
+EditorObject::EditorObject() 
 { 
    mDockItem = false; 
    mLitUp = false; 
    mSelected = false; 
-   setObjectTypeMask(objectType); 
    mIsBeingEdited = false;
    assignNewSerialNumber();
 }
@@ -347,8 +346,6 @@ void EditorObject::saveItem(FILE *f, F32 gridSize)
 EditorObject *EditorObject::newCopy()
 {
    EditorObject *newObject = clone();     // TODO: Wrap in shared_ptr?
-
-   newObject->mGeometry = mGeometry->copyGeometry();
 
    newObject->initializeEditor();         // Unselects all vertices
 

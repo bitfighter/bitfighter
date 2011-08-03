@@ -81,7 +81,7 @@ protected:
    Color getDrawColor();
 
 public:
-   EditorObject(GameObjectType objectType = UnknownType);      // Constructor
+   EditorObject();      // Constructor
    virtual ~EditorObject();                                    // Virtual destructor
    //virtual void copyAttrs(EditorObject *target);
    virtual EditorObject *clone()  const = 0;
@@ -155,7 +155,7 @@ public:
    void renderPolylineCenterline(F32 alpha);    // Draw barrier centerlines; wraps renderPolyline()  ==> lineItem, barrierMaker only
 
    virtual void onGeomChanging();                        // Item geom is interactively changing
-   virtual void onGeomChanged() { /* To be =0 */ };      // Item changed geometry (or moved), do any internal updating that might be required
+   //virtual void onGeomChanged() { /* To be =0 */ };      // Item changed geometry (or moved), do any internal updating that might be required
 
    virtual void onItemDragging() { /* Do nothing */ };   // Item is being dragged around the screen
 
@@ -165,10 +165,10 @@ public:
 
    /////
    // Geometry operations  -- can we provide standard implementations of these?
-   void rotateAboutPoint(const Point &origin, F32 angle) { mGeometry->rotateAboutPoint(origin, angle); onGeomChanged(); }
-   void flipHorizontal(F32 minX, F32 maxX) { mGeometry->flipHorizontal(minX, maxX); onGeomChanged(); };
-   void flipVertical(F32 minY, F32 maxY) { mGeometry->flipVertical(minY, maxY); onGeomChanged(); };
-   virtual void scale(const Point &center, F32 scale) { mGeometry->scale(center, scale); onGeomChanged(); }
+	//void rotateAboutPoint(const Point &origin, F32 angle) { Geometry::rotateAboutPoint(origin, angle); onGeomChanged(); }
+   //void flipHorizontal(F32 minX, F32 maxX) { Geometry::flipHorizontal(minX, maxX); onGeomChanged(); };
+   //void flipVertical(F32 minY, F32 maxY) { Geometry::flipVertical(minY, maxY); onGeomChanged(); };
+   //virtual void scale(const Point &center, F32 scale) { Geometry::scale(center, scale); onGeomChanged(); }
 
    /////
    S32 getItemId() { return mItemId; }
