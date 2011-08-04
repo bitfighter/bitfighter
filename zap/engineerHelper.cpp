@@ -31,6 +31,7 @@
 #include "game.h"
 #include "JoystickRender.h"
 #include "config.h"
+#include "gameObjectRender.h"
 
 #include "SDL/SDL_opengl.h"
 

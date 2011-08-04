@@ -2306,7 +2306,7 @@ string ClientGame::getServerPassword()
 
 string ClientGame::getHashedServerPassword()
 {
-   return string(getUIManager()->getServerPasswordEntryUserInterface()->getSaltedHashText());
+   return getUIManager()->getServerPasswordEntryUserInterface()->getSaltedHashText();
 }
 
 
