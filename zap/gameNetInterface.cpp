@@ -127,7 +127,8 @@ void GameNetInterface::handleInfoPacket(const Address &remoteAddress, U8 packetT
             U32 clientIdentityToken;
             theNonce.read(stream);
             stream->read(&clientIdentityToken);
-            mGame->getUIManager()->getQueryServersUserInterface()->gotPingResponse(remoteAddress, theNonce, clientIdentityToken);
+            
+            dynamic_cast<ClientGame *>(mGame)->gotPingResponse(remoteAddress, theNonce, clientIdentityToken);
          }
          break;
       case Query:
@@ -178,7 +179,7 @@ void GameNetInterface::handleInfoPacket(const Address &remoteAddress, U8 packetT
             passwordRequired = stream->readFlag();
 
             // Alert the user
-            mGame->getUIManager()->getQueryServersUserInterface()->gotQueryResponse(remoteAddress, theNonce, name.getString(), descr.getString(), playerCount, maxPlayers, botCount, dedicated, test, passwordRequired);
+            dynamic_cast<ClientGame *>(mGame)->gotQueryResponse(remoteAddress, theNonce, name.getString(), descr.getString(), playerCount, maxPlayers, botCount, dedicated, test, passwordRequired);
          }
          break;
    }

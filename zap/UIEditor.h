@@ -303,7 +303,7 @@ public:
 
    void populateDock();                         // Load up dock with game-specific items to drag and drop
    void addToDock(EditorObject* object);
-   void addDockObject(EditorObject *object, S32 xPos, S32 yPos);
+   void addDockObject(EditorObject *object, F32 xPos, F32 yPos);
 
    string mScriptLine;                          // Script and args, if any
 

@@ -26,11 +26,12 @@
 #include "engineerHelper.h"
 #include "engineeredObjects.h"      // For EngineerModuleDeployer
 #include "UIGame.h"
-#include "Color.h"      // For Color def
+#include "Color.h"                  // For Color def
 #include "Colors.h"
 #include "game.h"
 #include "JoystickRender.h"
 #include "config.h"
+#include "gameObjectRender.h"       // For drawSquare
 
 #include "SDL/SDL_opengl.h"
 

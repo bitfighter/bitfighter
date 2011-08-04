@@ -532,6 +532,9 @@ public:
    // Alert users when they get a reply to their request for elevated permissions
    void gotAdminPermissionsReply(bool granted);
    void gotLevelChangePermissionsReply(bool granted);
+   void gotPingResponse(const Address &address, const Nonce &nonce, U32 clientIdentityToken);
+   void gotQueryResponse(const Address &address, const Nonce &nonce, const char *serverName, const char *serverDescr, 
+                         U32 playerCount, U32 maxPlayers, U32 botCount, bool dedicated, bool test, bool passwordRequired);
 
    void displayMessageBox(const StringTableEntry &title, const StringTableEntry &instr, const Vector<StringTableEntry> &message);
    void displayMessage(const Color &msgColor, const char *format, ...);

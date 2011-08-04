@@ -2090,6 +2090,20 @@ void ClientGame::gotLevelChangePermissionsReply(bool granted)
 }
 
 
+void ClientGame::gotPingResponse(const Address &address, const Nonce &nonce, U32 clientIdentityToken)
+{
+   getUIManager()->getQueryServersUserInterface()->gotPingResponse(address, nonce, clientIdentityToken);
+}
+
+
+void ClientGame::gotQueryResponse(const Address &address, const Nonce &nonce, const char *serverName, const char *serverDescr, 
+                                   U32 playerCount, U32 maxPlayers, U32 botCount, bool dedicated, bool test, bool passwordRequired)
+{
+   getUIManager()->getQueryServersUserInterface()->gotQueryResponse(address, nonce, serverName, serverDescr, playerCount, 
+                                                                    maxPlayers, botCount, dedicated, test, passwordRequired);
+}
+
+
 void ClientGame::displayMessageBox(const StringTableEntry &title, const StringTableEntry &instr, const Vector<StringTableEntry> &message)
 {
    ErrorMessageUserInterface *ui = getUIManager()->getErrorMsgUserInterface();
@@ -2300,13 +2314,13 @@ string ClientGame::getRequestedServerName()
 
 string ClientGame::getServerPassword()
 {
-   getUIManager()->getServerPasswordEntryUserInterface()->getText();
+   return getUIManager()->getServerPasswordEntryUserInterface()->getText();
 }
 
 
 string ClientGame::getHashedServerPassword()
 {
-   getUIManager()->getServerPasswordEntryUserInterface()->getSaltedHashText();
+   return getUIManager()->getServerPasswordEntryUserInterface()->getSaltedHashText();
 }
 
 
@@ -2321,7 +2335,7 @@ void ClientGame::supressScreensaver()
 
    // Build keypress
    tagKEYBDINPUT keyup;
-   keyup.wVk = VK_MENU;     // Some key they GLUT doesn't recognize
+   keyup.wVk = VK_MENU;     // Some key that GLUT doesn't recognize
    keyup.wScan = NULL;
    keyup.dwFlags = KEYEVENTF_KEYUP;
    keyup.time = NULL;
