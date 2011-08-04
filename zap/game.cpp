@@ -2003,6 +2003,30 @@ void ClientGame::gotServerListFromMaster(const Vector<IPAddress> &serverList)
 }
 
 
+void ClientGame::gotChatMessage(const char *playerNick, const char *message, bool isPrivate, bool isSystem)
+{
+   getUIManager()->getChatUserInterface()->newMessage(playerNick, message, isPrivate, isSystem);
+}
+
+
+void ClientGame::setPlayersInGlobalChat(const Vector<StringTableEntry> &playerNicks)
+{
+   getUIManager()->getChatUserInterface()->setPlayersInGlobalChat(playerNicks);
+}
+
+
+void ClientGame::playerJoinedGlobalChat(const StringTableEntry &playerNick)
+{
+   getUIManager()->getChatUserInterface()->playerJoinedGlobalChat(playerNick);
+}
+
+
+void ClientGame::playerLeftGlobalChat(const StringTableEntry &playerNick)
+{
+   getUIManager()->getChatUserInterface()->playerLeftGlobalChat(playerNick);
+}
+
+
 void ClientGame::connectionToServerRejected()
 {
    getUIManager()->getMainMenuUserInterface()->activate();
@@ -2022,6 +2046,13 @@ void ClientGame::setMOTD(const char *motd)
 {
    getUIManager()->getMainMenuUserInterface()->setMOTD(motd); 
 }
+
+
+void ClientGame::setNeedToUpgrade(bool needToUpgrade)
+{
+  getUIManager()->getMainMenuUserInterface()->setNeedToUpgrade(needToUpgrade);
+}
+
 
 
 void ClientGame::displayMessage(const Color &msgColor, const char *format, ...)
@@ -2150,6 +2181,57 @@ void ClientGame::onConnectionTerminated(const Address &serverAddress, NetConnect
 }
 
 
+extern ClientInfo gClientInfo;
+
+void ClientGame::onConnectionToMasterTerminated(NetConnection::TerminationReason reason, const char *reasonStr)
+{
+   ErrorMessageUserInterface *ui = getUIManager()->getErrorMsgUserInterface();
+
+   switch(reason)
+   {
+      case NetConnection::ReasonDuplicateId:
+         ui->setMessage(2, "Your connection was rejected by the server");
+         ui->setMessage(3, "because you sent a duplicate player id. Player ids are");
+         ui->setMessage(4, "generated randomly, and collisions are extremely rare.");
+         ui->setMessage(5, "Please restart Bitfighter and try again.  Statistically");
+         ui->setMessage(6, "speaking, you should never see this message again!");
+         ui->activate();
+
+         if(getConnectionToServer())
+            setReadyToConnectToMaster(false);  // New ID might cause Authentication (underline name) problems if connected to game server...
+         else
+            gClientInfo.id.getRandom();        // Get another ID, if not connected to game server
+         break;
+
+      case NetConnection::ReasonBadLogin:
+         ui->setMessage(2, "Unable to log you in with the username/password you");
+         ui->setMessage(3, "provided. If you have an account, please verify your");
+         ui->setMessage(4, "password. Otherwise, you chose a reserved name; please");
+         ui->setMessage(5, "try another.");
+         ui->setMessage(7, "Please check your credentials and try again.");
+
+         getUIManager()->getNameEntryUserInterface()->activate();
+         ui->activate();
+         break;
+
+      case NetConnection::ReasonInvalidUsername:
+         ui->setMessage(2, "Your connection was rejected by the server because");
+         ui->setMessage(3, "you sent an username that contained illegal characters.");
+         ui->setMessage(5, "Please try a different name.");
+
+         getUIManager()->getNameEntryUserInterface()->activate();
+         ui->activate();
+         break;
+
+      case NetConnection::ReasonError:
+         ui->setMessage(2, "Unable to connect to the server.  Recieved message:");
+         ui->setMessage(3, reasonStr);
+         ui->setMessage(5, "Please try a different game server, or try again later.");
+         ui->activate();
+         break;
+   }
+}
+
 extern CIniFile gINI;
 
 // This function only gets called while the player is trying to connect to a server.  Connection has not yet been established.
@@ -2213,6 +2295,24 @@ void ClientGame::onConnectTerminated(const Address &serverAddress, NetConnection
       ui->setMessage(3, "Unable to join game.  Please try again.");
       ui->activate();
    }
+}
+
+
+string ClientGame::getRequestedServerName()
+{
+   return getUIManager()->getQueryServersUserInterface()->getLastSelectedServerName();
+}
+
+
+string ClientGame::getServerPassword()
+{
+   getUIManager()->getServerPasswordEntryUserInterface()->getText();
+}
+
+
+string ClientGame::getHashedServerPassword()
+{
+   getUIManager()->getServerPasswordEntryUserInterface()->getSaltedHashText();
 }
 
 

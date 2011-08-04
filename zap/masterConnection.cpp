@@ -272,7 +272,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sSetAuthenticated, (Vector<
 // Alert user to the fact that their client is (or is not) out of date
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSendUpdgradeStatus, (bool needToUpgrade))
 {
-   gClientGame->getUIManager()->getMainMenuUserInterface()->setNeedToUpgrade(needToUpgrade);
+   gClientGame->setNeedToUpgrade(needToUpgrade);
 }
 
 
@@ -280,8 +280,15 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSendUpdgradeStatus, (bool 
 // Runs on client only (but initiated by master)
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSendChat, (StringTableEntry playerNick, bool isPrivate, StringPtr message))
 {
-   //if(!mIsGameServer)
-      gClientGame->getUIManager()->getChatUserInterface()->newMessage(playerNick.getString(), message.getString(), isPrivate, false);
+   gClientGame->gotChatMessage(playerNick.getString(), message.getString(), isPrivate, false);
+}
+
+
+// Set the list of players in chat, typically called when player joins chatroom and needs to know who's there
+// Runs on client only (but initiated by master)
+TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cPlayersInGlobalChat, (Vector<StringTableEntry> playerNicks))
+{
+   gClientGame->setPlayersInGlobalChat(playerNicks);
 }
 
 
@@ -289,18 +296,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSendChat, (StringTableEntr
 // Runs on client only (but initiated by master)
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cPlayerJoinedGlobalChat, (StringTableEntry playerNick))
 {
-   gClientGame->getUIManager()->getChatUserInterface()->playerJoinedGlobalChat(playerNick);
-}
-
-
-// Handle players joining or leaving chat session
-// Runs on client only (but initiated by master)
-TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cPlayersInGlobalChat, (Vector<StringTableEntry> playerNicks))
-{
-   gClientGame->getUIManager()->getChatUserInterface()->mPlayersInGlobalChat.clear();
-
-   for(S32 i = 0; i < playerNicks.size(); i++)
-      gClientGame->getUIManager()->getChatUserInterface()->mPlayersInGlobalChat.push_back(playerNicks[i]);
+   gClientGame->playerJoinedGlobalChat(playerNick);
 }
 
 
@@ -308,7 +304,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cPlayersInGlobalChat, (Vect
 // Runs on client only (but initiated by master)
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cPlayerLeftGlobalChat, (StringTableEntry playerNick))
 {
-   gClientGame->getUIManager()->getChatUserInterface()->playerLeftGlobalChat(playerNick);
+   gClientGame->playerLeftGlobalChat(playerNick);
 }
 
 
@@ -389,51 +385,7 @@ void MasterServerConnection::onConnectionEstablished()
 // A still-being-established connection has been terminated
 void MasterServerConnection::onConnectTerminated(TerminationReason reason, const char *reasonStr)   
 {
-   ErrorMessageUserInterface *ui = gClientGame->getUIManager()->getErrorMsgUserInterface();
-
-   switch(reason)
-   {
-      case NetConnection::ReasonDuplicateId:
-         ui->setMessage(2, "Your connection was rejected by the server");
-         ui->setMessage(3, "because you sent a duplicate player id. Player ids are");
-         ui->setMessage(4, "generated randomly, and collisions are extremely rare.");
-         ui->setMessage(5, "Please restart Bitfighter and try again.  Statistically");
-         ui->setMessage(6, "speaking, you should never see this message again!");
-         ui->activate();
-
-         if(gClientGame->getConnectionToServer())
-            gClientGame->setReadyToConnectToMaster(false);  // New ID might cause Authentication (underline name) problems if connected to game server...
-         else
-            gClientInfo.id.getRandom();                     // Get another ID, if not connected to game server
-         break;
-
-      case NetConnection::ReasonBadLogin:
-         ui->setMessage(2, "Unable to log you in with the username/password you");
-         ui->setMessage(3, "provided. If you have an account, please verify your");
-         ui->setMessage(4, "password. Otherwise, you chose a reserved name; please");
-         ui->setMessage(5, "try another.");
-         ui->setMessage(7, "Please check your credentials and try again.");
-
-         gClientGame->getUIManager()->getNameEntryUserInterface()->activate();
-         ui->activate();
-         break;
-
-      case NetConnection::ReasonInvalidUsername:
-         ui->setMessage(2, "Your connection was rejected by the server because");
-         ui->setMessage(3, "you sent an username that contained illegal characters.");
-         ui->setMessage(5, "Please try a different name.");
-
-         gClientGame->getUIManager()->getNameEntryUserInterface()->activate();
-         ui->activate();
-         break;
-
-      case NetConnection::ReasonError:
-         ui->setMessage(2, "Unable to connect to the server.  Recieved message:");
-         ui->setMessage(3, reasonStr);
-         ui->setMessage(5, "Please try a different game server, or try again later.");
-         ui->activate();
-         break;
-   }
+   gClientGame->onConnectionTerminated(getNetAddress(), reason, reasonStr);
 }
 
 

@@ -1282,7 +1282,7 @@ void GameConnection::writeConnectRequest(BitStream *stream)
 
  
    string serverPW;
-   string lastServerName = gClientGame->getUIManager()->getQueryServersUserInterface()->getLastSelectedServerName();
+   string lastServerName = gClientGame->getRequestedServerName();
 
    // If we're local, just use the password we already know because, you know, we're the server
    if(isLocal)
@@ -1294,7 +1294,7 @@ void GameConnection::writeConnectRequest(BitStream *stream)
 
    // Otherwise, use whatever's in the interface entry box
    else 
-      serverPW = gClientGame->getUIManager()->getServerPasswordEntryUserInterface()->getSaltedHashText();
+      serverPW = gClientGame->getHashedServerPassword();
 
    // Write some info about the client... name, id, and verification status
    stream->writeString(serverPW.c_str());
@@ -1478,23 +1478,26 @@ void GameConnection::onConnectionEstablished()
       // it means that the user entered a good password.  So we save.
       bool isLocal = gServerGame;
       
-      string lastServerName = mClientGame->getUIManager()->getQueryServersUserInterface()->getLastSelectedServerName();
+      string lastServerName = mClientGame->getRequestedServerName();
 
       if(!isLocal && gINI.GetValue("SavedServerPasswords", lastServerName) == "")
-      {
-         const char *password = mClientGame->getUIManager()->getServerPasswordEntryUserInterface()->getText();
+         gINI.SetValue("SavedServerPasswords", lastServerName, mClientGame->getServerPassword(), true);
 
-         gINI.SetValue("SavedServerPasswords", lastServerName, password, true);
-      }
 
-      if(!isLocalConnection()){          // might use /connect , want to add to list after successfully connected. Does nothing while connected to master.
+      if(!isLocalConnection())    // Might use /connect, want to add to list after successfully connected. Does nothing while connected to master.
+      {         
          string addr = getNetAddressString();
          bool found = false;
-         for(S32 i=0; i<prevServerListFromMaster.size(); i++)
-         {
-            if(prevServerListFromMaster[i].compare(addr) == 0) found = true;
-         }
-         if(!found) prevServerListFromMaster.push_back(addr);
+
+         for(S32 i = 0; i < prevServerListFromMaster.size(); i++)
+            if(prevServerListFromMaster[i].compare(addr) == 0) 
+            {
+               found = true;
+               break;
+            }
+
+         if(!found) 
+            prevServerListFromMaster.push_back(addr);
       }
    }
    else                 // Runs on server

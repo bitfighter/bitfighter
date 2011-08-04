@@ -108,6 +108,7 @@ public:
    void deliverPrivateMessage(const char *sender, const char *message);
 
    // Handle players joining and leaving the chat session
+   void setPlayersInGlobalChat(const Vector<StringTableEntry> &playerNicks);
    void playerJoinedGlobalChat(const StringTableEntry &playerNick);
    void playerLeftGlobalChat(const StringTableEntry &playerNick);
 

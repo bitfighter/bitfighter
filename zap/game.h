@@ -518,8 +518,16 @@ public:
    void zoomCommanderMap();
 
    void gotServerListFromMaster(const Vector<IPAddress> &serverList);
+   void gotChatMessage(const char *playerNick, const char *message, bool isPrivate, bool isSystem);
+   void setPlayersInGlobalChat(const Vector<StringTableEntry> &playerNicks);
+   void playerJoinedGlobalChat(const StringTableEntry &playerNick);
+   void playerLeftGlobalChat(const StringTableEntry &playerNick);
+
+
    void connectionToServerRejected();
    void setMOTD(const char *motd);
+   void setNeedToUpgrade(bool needToUpgrade);
+
 
    // Alert users when they get a reply to their request for elevated permissions
    void gotAdminPermissionsReply(bool granted);
@@ -529,12 +537,19 @@ public:
    void displayMessage(const Color &msgColor, const char *format, ...);
 
    void onConnectionTerminated(const Address &serverAddress, NetConnection::TerminationReason reason, const char *reasonStr);
+   void onConnectionToMasterTerminated(NetConnection::TerminationReason reason, const char *reasonStr);
+
    void onConnectTerminated(const Address &serverAddress, NetConnection::TerminationReason reason);
 
    const Color *getTeamColor(S32 teamIndex) const;
 
    U32 getPlayerAndRobotCount();    // Returns number of human and robot players
    U32 getPlayerCount();            // Returns number of human players
+
+   string getRequestedServerName();
+   string getServerPassword();
+   string getHashedServerPassword();
+
 
    void suspendGame()   { mGameSuspended = true; }
    void unsuspendGame() { mGameSuspended = false; }

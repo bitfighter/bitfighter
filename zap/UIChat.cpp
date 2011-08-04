@@ -104,6 +104,15 @@ void AbstractChat::newMessage(string from, string message, bool isPrivate, bool 
 
 extern ClientInfo gClientInfo;
 
+void AbstractChat::setPlayersInGlobalChat(const Vector<StringTableEntry> &playerNicks)
+{
+   mPlayersInGlobalChat.clear();
+
+   for(S32 i = 0; i < playerNicks.size(); i++)
+      mPlayersInGlobalChat.push_back(playerNicks[i]);
+}
+
+
 void AbstractChat::playerJoinedGlobalChat(const StringTableEntry &playerNick)
 {
    mPlayersInGlobalChat.push_back(playerNick);
