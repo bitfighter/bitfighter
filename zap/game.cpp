@@ -2300,13 +2300,13 @@ string ClientGame::getRequestedServerName()
 
 string ClientGame::getServerPassword()
 {
-   getUIManager()->getServerPasswordEntryUserInterface()->getText();
+   return string(getUIManager()->getServerPasswordEntryUserInterface()->getText());
 }
 
 
 string ClientGame::getHashedServerPassword()
 {
-   getUIManager()->getServerPasswordEntryUserInterface()->getSaltedHashText();
+   return string(getUIManager()->getServerPasswordEntryUserInterface()->getSaltedHashText());
 }
 
 
