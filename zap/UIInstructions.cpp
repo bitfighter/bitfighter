@@ -748,7 +748,7 @@ void InstructionsUserInterface::prevPage()
 void InstructionsUserInterface::exitInstructions()
 {
    playBoop();
-   reactivatePrevUI();      //mGameUserInterface
+    getUIManager()->reactivatePrevUI();      //mGameUserInterface
 }
 
 
@@ -766,9 +766,9 @@ void InstructionsUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       nextPage();
    }
    else if(keyCode == keyOUTGAMECHAT)     // Turn on Global Chat overlay
-      getGame()->getUIManager()->getChatUserInterface()->activate();
+      getUIManager()->getChatUserInterface()->activate();
    else if(keyCode == keyDIAG)            // Turn on diagnostic overlay
-      getGame()->getUIManager()->getDiagnosticUserInterface()->activate();
+      getUIManager()->getDiagnosticUserInterface()->activate();
    else if(keyCode == keyHELP || keyCode == KEY_ESCAPE  || keyCode == BUTTON_BACK)
       exitInstructions();
 }

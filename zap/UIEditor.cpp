@@ -106,16 +106,18 @@ static Vector<ZoneBorder> zoneBorders;
 
 static void saveLevelCallback(Game *game)
 {
-   if(game->getUIManager()->getEditorUserInterface()->saveLevel(true, true))
-      game->getUIManager()->getEditorUserInterface()->reactivateMenu(game->getUIManager()->getMainMenuUserInterface());    // Huh??!??!?
+   UIManager *uiManager = game->getUIManager();
+
+   if(uiManager->getEditorUserInterface()->saveLevel(true, true))
+      uiManager->reactivateMenu(uiManager->getMainMenuUserInterface());   
    else
-      game->getUIManager()->getEditorUserInterface()->reactivate();
+      uiManager->getEditorUserInterface()->reactivate();
 }
 
 
 void backToMainMenuCallback(Game *game)
 {
-   game->getUIManager()->getMainMenuUserInterface()->reactivateMenu(game->getUIManager()->getMainMenuUserInterface());    // What??!??!?
+   game->getUIManager()->reactivateMenu(game->getUIManager()->getMainMenuUserInterface());    
 }
 
 
@@ -968,9 +970,9 @@ void EditorUserInterface::onActivate()
 {
    if(gConfigDirs.levelDir == "")      // Never did resolve a leveldir... no editing for you!
    {
-      reactivatePrevUI();     // Must come before the error msg, so it will become the previous UI when that one exits
+      getUIManager()->reactivatePrevUI();     // Must come before the error msg, so it will become the previous UI when that one exits
 
-      ErrorMessageUserInterface *ui = getGame()->getUIManager()->getErrorMsgUserInterface();
+      ErrorMessageUserInterface *ui = getUIManager()->getErrorMsgUserInterface();
       ui->reset();
       ui->setTitle("HOUSTON, WE HAVE A PROBLEM");
       ui->setMessage(1, "No valid level folder was found..."); 
@@ -988,7 +990,7 @@ void EditorUserInterface::onActivate()
    {
       // Don't save this menu (false, below).  That way, if the user escapes out, and is returned to the "previous"
       // UI, they will get back to where they were before (prob. the main menu system), not back to here.
-      getGame()->getUIManager()->getLevelNameEntryUserInterface()->activate(false);
+      getUIManager()->getLevelNameEntryUserInterface()->activate(false);
 
       return;
    }
@@ -3207,11 +3209,11 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    else if(keyCode == KEY_F3)             // F3 - Level Parameter Editor
    {
       playBoop();
-      getGame()->getUIManager()->getGameParamUserInterface()->activate();
+      getUIManager()->getGameParamUserInterface()->activate();
    }
    else if(keyCode == KEY_F2)             // F2 - Team Editor Menu
    {
-      getGame()->getUIManager()->getTeamDefUserInterface()->activate();
+      getUIManager()->getTeamDefUserInterface()->activate();
       playBoop();
    }
    else if(keyCode == KEY_T)              // T - Teleporter
@@ -3234,17 +3236,17 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          deleteSelection(false);
    else if(keyCode == keyHELP)            // Turn on help screen
    {
-      getGame()->getUIManager()->getEditorInstructionsUserInterface()->activate();
+      getUIManager()->getEditorInstructionsUserInterface()->activate();
       playBoop();
    }
    else if(keyCode == keyOUTGAMECHAT)     // Turn on Global Chat overlay
-      getGame()->getUIManager()->getChatUserInterface()->activate();
+      getUIManager()->getChatUserInterface()->activate();
    else if(keyCode == keyDIAG)            // Turn on diagnostic overlay
-      getGame()->getUIManager()->getDiagnosticUserInterface()->activate();
+      getUIManager()->getDiagnosticUserInterface()->activate();
    else if(keyCode == KEY_ESCAPE)           // Activate the menu
    {
       playBoop();
-      getGame()->getUIManager()->getEditorMenuUserInterface()->activate();
+      getUIManager()->getEditorMenuUserInterface()->activate();
    }
    else if(keyCode == KEY_SPACE)
       mSnapDisabled = true;
@@ -3568,7 +3570,7 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
       // Check if we have a valid (i.e. non-null) filename
       if(saveName == "")
       {
-         ErrorMessageUserInterface *ui = getGame()->getUIManager()->getErrorMsgUserInterface();
+         ErrorMessageUserInterface *ui = getUIManager()->getErrorMsgUserInterface();
 
          ui->reset();
          ui->setTitle("INVALID FILE NAME");
@@ -3646,7 +3648,7 @@ void EditorUserInterface::testLevel()
    validateLevel();
    if(mLevelErrorMsgs.size() || mLevelWarnings.size() || gameTypeError)
    {
-      YesNoUserInterface *ui = getGame()->getUIManager()->getYesNoUserInterface();
+      YesNoUserInterface *ui = getUIManager()->getYesNoUserInterface();
 
       ui->reset();
       ui->setTitle("LEVEL HAS PROBLEMS");
@@ -3730,7 +3732,7 @@ extern MenuItem *getWindowModeMenuItem(Game *game);
 
 void reactivatePrevUICallback(Game *game, U32 unused)
 {
-   game->getUIManager()->getEditorUserInterface()->reactivatePrevUI();
+   game->getUIManager()->reactivatePrevUI();
 }
 
 
@@ -3744,9 +3746,9 @@ void returnToEditorCallback(Game *game, U32 unused)
 {
    EditorUserInterface *ui = game->getUIManager()->getEditorUserInterface();
 
-   ui->saveLevel(true, true);     // Save level
-   ui->setSaveMessage("Saved " + ui->getLevelFileName(), true);
-   ui->reactivatePrevUI();        // Return to editor
+   ui->saveLevel(true, true);                                     // Save level
+   ui->setSaveMessage("Saved " + ui->getLevelFileName(), true);   // Setup a message for the user
+   game->getUIManager()->reactivatePrevUI();                      // Return to editor
 }
 
 
@@ -3810,7 +3812,7 @@ void EditorMenuUserInterface::setupMenus()
 void EditorMenuUserInterface::onEscape()
 {
    SDL_ShowCursor(SDL_DISABLE);
-   reactivatePrevUI();
+   getUIManager()->reactivatePrevUI();
 }
 
 

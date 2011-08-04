@@ -66,46 +66,6 @@ extern float gLineWidth4;
 const U32 MAX_GAME_NAME_LEN = 32;     // Any longer, and it won't fit on-screen
 const U32 MAX_GAME_DESCR_LEN = 60;    // Any longer, and it won't fit on-screen; also limits max length of credits string
 
-
-enum UIID {
-   AdminPasswordEntryUI,
-   ChatUI,
-   CreditsUI,
-   DiagnosticsScreenUI,
-   EditorInstructionsUI,
-   EditorUI,
-   EditorMenuUI,
-   ErrorMessageUI,
-   GameMenuUI,
-   GameParamsUI,
-   GameUI,
-   GenericUI,
-   GlobalChatUI,
-   SuspendedUI,
-   HostingUI,
-   InstructionsUI,
-   KeyDefUI,
-   LevelUI,
-   LevelNameEntryUI,
-   LevelChangePasswordEntryUI,
-   LevelTypeUI,
-   MainUI,
-   NameEntryUI,
-   OptionsUI,
-   PasswordEntryUI,
-   ReservedNamePasswordEntryUI,
-   PlayerUI,
-   TeamUI,
-   QueryServersScreenUI,
-   SplashUI,
-   TeamDefUI,
-   TextEntryUI,
-   YesOrNoUI,
-   GoFastAttributeEditorUI,
-   TextItemAttributeEditorUI,
-   InvalidUI,        // Not a valid UI
-};
-
 extern void glColor(const Color &c, float alpha = 1.0);
 extern void glColor(const Color *c, float alpha = 1.0);
 
@@ -140,9 +100,7 @@ public:
    static const S32 MAX_PASSWORD_LENGTH = 32;      // Arbitrary, doesn't matter, but needs to be _something_
 
    static UserInterface *current;            // Currently active menu
-   static Vector<UserInterface *> prevUIs;   // Previously active menus
 
-   static void dumpPreviousQueue();          // List all items in the previous list
    void setMenuID(UIID menuID);              // Set interface's name
    UIID getMenuID() const;                   // Retrieve interface's name
    UIID getPrevMenuID() const;               // Retrieve previous interface's name
@@ -151,13 +109,11 @@ public:
 
    ClientGame *getClientGame();
 
-   UIManager *getUIManager();
+   UIManager *getUIManager() const;
 
    static S32 vertMargin, horizMargin;
    static S32 messageMargin;
    static S32 chatMessageMargin;
-
-   static bool cameFrom(UIID menuID);        // Did we arrive at our current interface via the specified interface?
 
    static void renderCurrent();
 
@@ -173,9 +129,6 @@ public:
    virtual void reactivate();
 
    void renderConsole();      // Render game console
-
-   void reactivatePrevUI();
-   void reactivateMenu(const UserInterface *target);
 
    KeyCode convertJoystickToKeyboard(KeyCode keyCode);
 

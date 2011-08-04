@@ -66,7 +66,6 @@ S32 UserInterface::messageMargin = UserInterface::vertMargin + gLoadoutIndicator
 S32 UserInterface::chatMessageMargin = 515;
 
 UserInterface *UserInterface::current = NULL;
-Vector<UserInterface *> UserInterface::prevUIs;    // List of peviously displayed UIs
 
 
 float gLineWidth1 = 1.0f;
@@ -94,8 +93,9 @@ ClientGame *UserInterface::getClientGame()
 }
 
 
-UIManager *UserInterface::getUIManager() 
+UIManager *UserInterface::getUIManager() const 
 { 
+   TNLAssert(mGame, "mGame is NULL!");
    return mGame->getUIManager(); 
 }
 
@@ -105,7 +105,7 @@ void UserInterface::activate(bool save)
    UserInterface *prev = current;
 
    if(current && save)        // Current is not really current any more... it's actually the previously active UI
-       prevUIs.push_back(current);
+       getUIManager()->saveUI(current);
 
    current = this;            // Now it is current
 
@@ -120,29 +120,6 @@ void UserInterface::reactivate()
 {
    current = this;
    onReactivate();
-}
-
-// Dump all items in the prevUIs vector for debugging purposes
-void UserInterface::dumpPreviousQueue()
-{
-   logprintf("Previous UI/menu tree (%d elements):", prevUIs.size());
-   for(S32 i = 0; i < prevUIs.size(); i++)
-   {
-      UserInterface *prev = prevUIs[i];
-      logprintf("    ->%d", prev->getMenuID());
-   }
-}
-
-
-// Did we arrive at our current interface via the Editor?
-// If the editor is in prevUIs, then we came from there
-bool UserInterface::cameFrom(UIID menuID)
-{
-   for(S32 i = 0; i < prevUIs.size(); i++)
-      if(prevUIs[i]->getMenuID() == menuID)
-         return true;
-
-   return false;
 }
 
 
@@ -166,36 +143,10 @@ UIID UserInterface::getMenuID() const
 // Retrieve previous interface's name
 UIID UserInterface::getPrevMenuID() const
 {
-   if(prevUIs.size())
-      return prevUIs.last()->mInternalMenuID;
+   if(getUIManager()->hasPrevUI())
+      return getUIManager()->getPrevUI()->mInternalMenuID;
    else
       return InvalidUI;
-}
-
-
-// Reactivate previous interface, going to fallback if there is none
-void UserInterface::reactivatePrevUI()
-{
-   TNLAssert(prevUIs.size(), "Trying to reactivate a non-existant UI!");
-
-   UserInterface *prev = prevUIs.last();
-   prevUIs.pop_back();
-   prev->reactivate();
-}
-
-
-// Like above, except we specify a target menu to go to
-void UserInterface::reactivateMenu(const UserInterface *target)
-{
-   // Keep discarding menus until we find the one we want
-   while( prevUIs.size() && (prevUIs.last()->getMenuID() != target->getMenuID()) )
-      prevUIs.pop_back();
-
-   if(!prevUIs.size())
-      getGame()->getUIManager()->getMainMenuUserInterface()->reactivate();      // Fallback if everything else has failed
-   else
-      // Now that the next one is our target, when we reactivate, we'll be where we want to be
-      reactivatePrevUI();
 }
 
 
@@ -890,7 +841,7 @@ UserInterfaceData::UserInterfaceData()
 void UserInterfaceData::get()
 {
    current = UserInterface::current;
-   prevUIs = UserInterface::prevUIs;
+   //prevUIs = UserInterface::prevUIs;    <=== what should this be now??
    vertMargin = UserInterface::vertMargin;
    horizMargin = UserInterface::horizMargin;
    chatMargin = UserInterface::messageMargin;
@@ -901,7 +852,7 @@ void UserInterfaceData::get()
 void UserInterfaceData::set()
 {
    UserInterface::current = current;
-   UserInterface::prevUIs = prevUIs;
+   //UserInterface::prevUIs = prevUIs;  <=== what should happen here??
    UserInterface::vertMargin = vertMargin;
    UserInterface::horizMargin = horizMargin;
    UserInterface::messageMargin = chatMargin;

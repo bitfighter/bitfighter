@@ -147,7 +147,7 @@ LevelNameEntryUserInterface::LevelNameEntryUserInterface(Game *game) : Parent(ga
 void LevelNameEntryUserInterface::onEscape()
 {
    playBoop();
-   reactivatePrevUI();      //gMainMenuUserInterface
+   getUIManager()->reactivatePrevUI();      //gMainMenuUserInterface
 }
 
 
@@ -205,7 +205,7 @@ extern CIniFile gINI;
 
 void LevelNameEntryUserInterface::onAccept(const char *name)
 {
-   EditorUserInterface *ui = getGame()->getUIManager()->getEditorUserInterface();
+   EditorUserInterface *ui = getUIManager()->getEditorUserInterface();
    ui->setLevelFileName(name);
    playBoop();
    ui->activate(false);
@@ -255,7 +255,7 @@ void PreGamePasswordEntryUserInterface::onAccept(const char *text)
 
 void PreGamePasswordEntryUserInterface::onEscape()
 {
-   getGame()->getUIManager()->getMainMenuUserInterface()->activate();
+   getUIManager()->getMainMenuUserInterface()->activate();
 }
 
 ////////////////////////////////////////
@@ -281,17 +281,17 @@ void InGamePasswordEntryUserInterface::onAccept(const char *text)
    {
       submitPassword(gc, text);
 
-      reactivatePrevUI();                                                  // Reactivating clears subtitle message, so reactivate first...
-      getGame()->getUIManager()->getGameMenuUserInterface()->mMenuSubTitle = "** checking password **";     // ...then set the message
+      getUIManager()->reactivatePrevUI();                                      // Reactivating clears subtitle message, so reactivate first...
+      getUIManager()->getGameMenuUserInterface()->mMenuSubTitle = "** checking password **";     // ...then set the message
    }
    else
-      reactivatePrevUI();                                                  // Otherwise, just reactivate the previous menu
+      getUIManager()->reactivatePrevUI();                                      // Otherwise, just reactivate the previous menu
 }
 
 
 void InGamePasswordEntryUserInterface::onEscape()
 {
-   reactivatePrevUI();
+   getUIManager()->reactivatePrevUI();
 }
 
 ////////////////////////////////////////

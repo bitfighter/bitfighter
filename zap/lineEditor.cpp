@@ -30,8 +30,6 @@
 namespace Zap
 {
 
-class UserInterface;
-
 // Constructor
 LineEditor::LineEditor(U32 maxLength, string value)
 {

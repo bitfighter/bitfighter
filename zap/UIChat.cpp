@@ -352,10 +352,10 @@ static const S32 MENU_SUBTITLE_SIZE = 18;
 
 void ChatUserInterface::render()
 {
-   if(mRenderUnderlyingUI && prevUIs.size())           // If there is an underlying menu...
+   if(mRenderUnderlyingUI && getUIManager()->hasPrevUI())           // If there is an underlying menu...
    {
-      prevUIs.last()->render();  // ...render it...
-      glColor4f(0, 0, 0, 0.75);  // ... and dim it out a bit, nay, a lot
+      getUIManager()->renderPrevUI();  // ...render it...
+      glColor4f(0, 0, 0, 0.75);        // ... and dim it out a bit, nay, a lot
       glEnableBlend;
       glBegin(GL_POLYGON);
          glVertex2f(0, 0);
@@ -432,7 +432,7 @@ void ChatUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    if(keyCode == keyOUTGAMECHAT)
       onOutGameChat();
    else if(keyCode == keyDIAG)            // Turn on diagnostic overlay
-      getGame()->getUIManager()->getDiagnosticUserInterface()->activate();
+      getUIManager()->getDiagnosticUserInterface()->activate();
    else if(keyCode == KEY_ESCAPE)
       onEscape();
    else if (keyCode == KEY_ENTER)                // Submits message
@@ -468,7 +468,7 @@ void ChatUserInterface::onOutGameChat()
 void ChatUserInterface::onEscape()
 {
    leaveGlobalChat();
-   UserInterface::reactivatePrevUI();
+   getUIManager()->reactivatePrevUI();
    playBoop();
 }
 

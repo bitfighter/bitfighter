@@ -1569,63 +1569,8 @@ void GameConnection::onConnectTerminated(TerminationReason reason, const char *n
       if(!mClientGame)
          return;
 
-      if(reason == ReasonNeedServerPassword)
-      {
-         // We have the wrong password, let's make sure it's not saved
-         string serverName = gClientGame->getUIManager()->getQueryServersUserInterface()->getLastSelectedServerName();
-         gINI.deleteKey("SavedServerPasswords", serverName);
+      mClientGame->onConnectTerminated(getNetAddress(), reason);
 
-         ServerPasswordEntryUserInterface *ui = gClientGame->getUIManager()->getServerPasswordEntryUserInterface();
-         ui->setConnectServer(getNetAddress());
-         ui->activate();
-      }
-      else if(reason == ReasonServerFull)
-      {
-         gClientGame->getUIManager()->getMainMenuUserInterface()->reactivateMenu(gClientGame->getUIManager()->getMainMenuUserInterface());
-
-         // Display a context-appropriate error message
-         ErrorMessageUserInterface *ui = gClientGame->getUIManager()->getErrorMsgUserInterface();
-         ui->reset();
-         ui->setTitle("Connection Terminated");
-
-         gClientGame->getUIManager()->getMainMenuUserInterface()->activate();
-
-         ui->setMessage(2, "Could not connect to server");
-         ui->setMessage(3, "because server is full.");
-         ui->setMessage(5, "Please try a different server, or try again later.");
-         ui->activate();
-      }
-      else if(reason == ReasonKickedByAdmin)
-      {
-         ErrorMessageUserInterface *ui = gClientGame->getUIManager()->getErrorMsgUserInterface();
-
-         ui->reset();
-         ui->setTitle("Connection Terminated");
-
-         ui->setMessage(2, "You were kicked off the server by an admin,");
-         ui->setMessage(3, "and have been temporarily banned.");
-         ui->setMessage(5, "You can try another server, host your own,");
-         ui->setMessage(6, "or try the server that kicked you again later.");
-
-         gClientGame->getUIManager()->getMainMenuUserInterface()->activate();
-         ui->activate();
-      }
-      else  // Looks like the connection failed for some unknown reason.  Server died?
-      {
-         gClientGame->getUIManager()->getMainMenuUserInterface()->reactivateMenu(gClientGame->getUIManager()->getMainMenuUserInterface());
-
-         ErrorMessageUserInterface *ui = gClientGame->getUIManager()->getErrorMsgUserInterface();
-
-         // Display a context-appropriate error message
-         ui->reset();
-         ui->setTitle("Connection Terminated");
-
-         gClientGame->getUIManager()->getMainMenuUserInterface()->activate();
-
-         ui->setMessage(2, "Lost connection with the server.");
-         ui->setMessage(3, "Unable to join game.  Please try again.");
-         ui->activate();
-      }
    }
 }
 

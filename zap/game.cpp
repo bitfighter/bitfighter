@@ -46,6 +46,8 @@
 #include "shipItems.h"           // For moduleInfos
 #include "stringUtils.h"
 
+#include "IniFile.h"             // For CIniFile def
+
 #include "UIQueryServers.h"
 #include "UIErrorMessage.h"
 
@@ -56,6 +58,7 @@
 #include "UIGame.h"
 #include "UIGameParameters.h"
 #include "UIEditor.h"
+#include "UINameEntry.h"
 
 #include "tnl.h"
 #include "tnlRandom.h"
@@ -2077,12 +2080,13 @@ void ClientGame::displayMessageBox(const StringTableEntry &title, const StringTa
 }
 
 
+// Established connection is terminated.  Compare to onConnectTerminate() below.
 void ClientGame::onConnectionTerminated(const Address &serverAddress, NetConnection::TerminationReason reason, const char *reasonStr)
 {
-   if(UserInterface::cameFrom(EditorUI))
-     getUIManager()->getEditorUserInterface()->reactivateMenu(getUIManager()->getEditorUserInterface());
+   if(getUIManager()->cameFrom(EditorUI))
+     getUIManager()->reactivateMenu(getUIManager()->getEditorUserInterface());
    else
-     getUIManager()->getEditorUserInterface()->reactivateMenu(getUIManager()->getMainMenuUserInterface());
+     getUIManager()->reactivateMenu(getUIManager()->getMainMenuUserInterface());
 
    unsuspendGame();
 
@@ -2142,6 +2146,72 @@ void ClientGame::onConnectionTerminated(const Address &serverAddress, NetConnect
          ui->setMessage(1, "Unable to connect to the server for reasons unknown.");
          ui->setMessage(3, "Please try a different game server, or try again later.");
          ui->activate();
+   }
+}
+
+
+extern CIniFile gINI;
+
+// This function only gets called while the player is trying to connect to a server.  Connection has not yet been established.
+// Compare to onConnectIONTerminated()
+void ClientGame::onConnectTerminated(const Address &serverAddress, NetConnection::TerminationReason reason)
+{
+   if(reason == NetConnection::ReasonNeedServerPassword)
+   {
+      // We have the wrong password, let's make sure it's not saved
+      string serverName = getUIManager()->getQueryServersUserInterface()->getLastSelectedServerName();
+      gINI.deleteKey("SavedServerPasswords", serverName);
+
+      ServerPasswordEntryUserInterface *ui = getUIManager()->getServerPasswordEntryUserInterface();
+      ui->setConnectServer(serverAddress);
+      ui->activate();
+   }
+   else if(reason == NetConnection::ReasonServerFull)
+   {
+      getUIManager()->reactivateMenu(getUIManager()->getMainMenuUserInterface());
+
+      // Display a context-appropriate error message
+      ErrorMessageUserInterface *ui = getUIManager()->getErrorMsgUserInterface();
+      ui->reset();
+      ui->setTitle("Connection Terminated");
+
+      getUIManager()->getMainMenuUserInterface()->activate();
+
+      ui->setMessage(2, "Could not connect to server");
+      ui->setMessage(3, "because server is full.");
+      ui->setMessage(5, "Please try a different server, or try again later.");
+      ui->activate();
+   }
+   else if(reason == NetConnection::ReasonKickedByAdmin)
+   {
+      ErrorMessageUserInterface *ui = getUIManager()->getErrorMsgUserInterface();
+
+      ui->reset();
+      ui->setTitle("Connection Terminated");
+
+      ui->setMessage(2, "You were kicked off the server by an admin,");
+      ui->setMessage(3, "and have been temporarily banned.");
+      ui->setMessage(5, "You can try another server, host your own,");
+      ui->setMessage(6, "or try the server that kicked you again later.");
+
+      getUIManager()->getMainMenuUserInterface()->activate();
+      ui->activate();
+   }
+   else  // Looks like the connection failed for some unknown reason.  Server died?
+   {
+      getUIManager()->reactivateMenu(getUIManager()->getMainMenuUserInterface());
+
+      ErrorMessageUserInterface *ui = getUIManager()->getErrorMsgUserInterface();
+
+      // Display a context-appropriate error message
+      ui->reset();
+      ui->setTitle("Connection Terminated");
+
+      getUIManager()->getMainMenuUserInterface()->activate();
+
+      ui->setMessage(2, "Lost connection with the server.");
+      ui->setMessage(3, "Unable to join game.  Please try again.");
+      ui->activate();
    }
 }
 
@@ -2453,7 +2523,7 @@ void ClientGame::renderCommander()
    if(u)
    {
       // Get info about the current player
-      GameType *gt = gClientGame->getGameType();
+      GameType *gt = getGameType();
       S32 playerTeam = -1;
 
       if(gt)

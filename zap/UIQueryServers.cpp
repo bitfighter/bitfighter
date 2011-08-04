@@ -1039,16 +1039,16 @@ void QueryServersUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    {
       playBoop();
       leaveGlobalChat();
-      getGame()->getUIManager()->getMainMenuUserInterface()->activate();
+      getUIManager()->getMainMenuUserInterface()->activate();
    }
    else if(keyCode == keyDIAG)            // Turn on diagnostic overlay
-      getGame()->getUIManager()->getDiagnosticUserInterface()->activate();
+      getUIManager()->getDiagnosticUserInterface()->activate();
    else if(keyCode == keyOUTGAMECHAT)           // Toggle half-height servers, full-height servers, and full chat overlay
    {
       mShowChat = !mShowChat;
       if(mShowChat) 
       {
-         ChatUserInterface *ui = getGame()->getUIManager()->getChatUserInterface();
+         ChatUserInterface *ui = getUIManager()->getChatUserInterface();
          ui->activate();
          ui->setRenderUnderlyingUI(false);    // Don't want this screen to bleed through...
       }

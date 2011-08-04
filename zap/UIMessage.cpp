@@ -105,11 +105,9 @@ void MessageUserInterface::setStyle(U32 style)
 
 void MessageUserInterface::quit()
 {
-   if(prevUIs.size())
-      UserInterface::reactivatePrevUI();
-   else
-      getGame()->getUIManager()->getMainMenuUserInterface()->activate();
+   getUIManager()->reactivatePrevUI();
 }
+
 
 void MessageUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 {
@@ -141,8 +139,7 @@ void MessageUserInterface::render()
       fadeFactor = 1;
 
 
-   if(prevUIs.size())                     // If there is an underlying menu...
-      prevUIs.last()->render();           // ...render it
+   getUIManager()->renderPrevUI();
 
    glEnableBlend;
 

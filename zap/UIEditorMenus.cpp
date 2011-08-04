@@ -35,7 +35,7 @@ namespace Zap
 void EditorAttributeMenuUI::onEscape()
 {
    doneEditing(mObject);
-   reactivatePrevUI();     // Back to the editor!
+   getUIManager()->reactivatePrevUI();     // Back to the editor!
 }
 
 
@@ -44,7 +44,7 @@ static const S32 ATTR_TEXTSIZE = 10;                                          //
 void EditorAttributeMenuUI::render()
 {
    // Draw the underlying editor screen
-   prevUIs.last()->render();
+   getUIManager()->getPrevUI()->render();
 
  /*  if(mRenderInstructions)
       renderMenuInstructions();*/
@@ -73,7 +73,7 @@ void EditorAttributeMenuUI::doneEditing(EditorObject *object)
    if(object == mObject)   
    {
       mObject->setIsBeingEdited(false);
-      getGame()->getUIManager()->getEditorUserInterface()->doneEditingAttributes(this, mObject); 
+      getUIManager()->getEditorUserInterface()->doneEditingAttributes(this, mObject); 
    }
 }
 

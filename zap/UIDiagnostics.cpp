@@ -83,11 +83,13 @@ bool DiagnosticUserInterface::isActive()
    return mActive;
 }
 
+
 void DiagnosticUserInterface::quit()
 {
-   UserInterface::reactivatePrevUI();  // Back to our previously scheduled program!
+   getUIManager()->reactivatePrevUI();  // Back to our previously scheduled program!
    mActive = false;
 }
+
 
 void DiagnosticUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 {
@@ -350,7 +352,7 @@ void DiagnosticUserInterface::render()
 
       textsize = 16;
 
-      bool needToUpgrade = getGame()->getUIManager()->getMainMenuUserInterface()->getNeedToUpgrade();
+      bool needToUpgrade = getUIManager()->getMainMenuUserInterface()->getNeedToUpgrade();
 
       drawCenteredString2Colf(ypos, textsize, false, "%s", needToUpgrade ? "<<Update available>>" : "<<Current version>>");
       ypos += textsize + gap;

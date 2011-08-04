@@ -529,6 +529,7 @@ public:
    void displayMessage(const Color &msgColor, const char *format, ...);
 
    void onConnectionTerminated(const Address &serverAddress, NetConnection::TerminationReason reason, const char *reasonStr);
+   void onConnectTerminated(const Address &serverAddress, NetConnection::TerminationReason reason);
 
    const Color *getTeamColor(S32 teamIndex) const;
 

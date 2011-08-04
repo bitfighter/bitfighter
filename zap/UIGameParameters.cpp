@@ -156,7 +156,7 @@ void GameParamUserInterface::updateMenuItems()
                                                                       gameType->getInstructionString())));
 
 
-   string fn = stripExtension(getGame()->getUIManager()->getEditorUserInterface()->getLevelFileName());
+   string fn = stripExtension(getUIManager()->getEditorUserInterface()->getLevelFileName());
    menuItems.push_back(boost::shared_ptr<MenuItem>(new EditableMenuItem(getGame(),
                                                                         "Filename:",                         // name
                                                                         fn,                                  // val
@@ -194,7 +194,7 @@ void GameParamUserInterface::onEscape()
 {
    S32 gameTypeIndex = dynamic_cast<ToggleMenuItem *>(menuItems[0].get())->getValueIndex();
 
-   getGame()->getUIManager()->getEditorUserInterface()->setLevelFileName(menuItems[1]->getValue());  
+   getUIManager()->getEditorUserInterface()->setLevelFileName(menuItems[1]->getValue());  
 
    GameType *gameType = getGame()->getGameType();
 
@@ -214,7 +214,7 @@ void GameParamUserInterface::onEscape()
 
    if(anythingChanged())
    {
-      EditorUserInterface *ui = getGame()->getUIManager()->getEditorUserInterface();
+      EditorUserInterface *ui = getUIManager()->getEditorUserInterface();
 
       ui->setNeedToSave(true);       // Need to save to retain our changes
       ui->mAllUndoneUndoLevel = -1;  // This change can't be undone
@@ -222,7 +222,7 @@ void GameParamUserInterface::onEscape()
    }
 
    // Now back to our previously scheduled program...  (which will be the editor, of course)
-   UserInterface::reactivatePrevUI();
+   getUIManager()->reactivatePrevUI();
 }
 
 

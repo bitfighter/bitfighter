@@ -93,7 +93,7 @@ CreditsUserInterface::~CreditsUserInterface()
 void CreditsUserInterface::onActivate()
 {
    quitting = false;
-   getGame()->getUIManager()->getSplashUserInterface()->activate();          // Show splash animation at beginning of credits
+   getUIManager()->getSplashUserInterface()->activate();          // Show splash animation at beginning of credits
 
    // Construct the creditsfx objects here, they will
    // get properly deleted when the CreditsUI
@@ -146,10 +146,12 @@ void CreditsUserInterface::render()
          fxList[i]->render();
 }
 
+
 void CreditsUserInterface::quit()
 {
-   UserInterface::reactivatePrevUI();      // gMainMenuUserInterface
+   getUIManager()->reactivatePrevUI();      // gMainMenuUserInterface
 }
+
 
 void CreditsUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 {
@@ -320,7 +322,7 @@ void SplashUserInterface::render()
 
 void SplashUserInterface::quit()
 {
-   UserInterface::reactivatePrevUI();      //gMainMenuUserInterface
+   getUIManager()->reactivatePrevUI();      //gMainMenuUserInterface
 }
 
 

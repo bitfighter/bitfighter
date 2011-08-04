@@ -406,13 +406,13 @@ void MenuUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       if(keyCode == KEY_ESCAPE)     // can only get here when hosting
       {
          gServerGame->hostingModePhase = ServerGame::NotHosting;
-         getGame()->getUIManager()->getHostMenuUserInterface()->clearLevelLoadDisplay();
+         getUIManager()->getHostMenuUserInterface()->clearLevelLoadDisplay();
          endGame();
       }
       return;
    }
 
-   MainMenuUserInterface *ui = getGame()->getUIManager()->getMainMenuUserInterface();
+   MainMenuUserInterface *ui = getUIManager()->getMainMenuUserInterface();
 
    if(!ui->mFirstTime)
       ui->showAnimation = false;    // Stop animations if a key is pressed
@@ -513,12 +513,12 @@ bool MenuUserInterface::processKeys(KeyCode keyCode, char ascii)
 
    else if(keyCode == keyOUTGAMECHAT)     // Turn on Global Chat overlay
    {
-      getGame()->getUIManager()->getChatUserInterface()->activate();
+      getUIManager()->getChatUserInterface()->activate();
       playBoop();
    }
    else if(keyCode == keyDIAG)            // Turn on diagnostic overlay
    {
-      getGame()->getUIManager()->getDiagnosticUserInterface()->activate();
+      getUIManager()->getDiagnosticUserInterface()->activate();
       playBoop();
    }
 
@@ -622,7 +622,8 @@ void MainMenuUserInterface::onActivate()
    // Time for a clean start.  No matter how we got here, there's no going back.
    // Needed mainly because the editor makes things confusing.  Now that that's been reworked,
    // it's probably not needed at all.
-   prevUIs.clear();
+   getUIManager()->clearPrevUIs();
+
    mFadeInTimer.reset(FadeInTime);
    mColorTimer.reset(ColorTime);
    mColorTimer2.reset(ColorTime2);
@@ -631,7 +632,7 @@ void MainMenuUserInterface::onActivate()
    mFirstTime = false;
 
    if(showAnimation)
-      getGame()->getUIManager()->getSplashUserInterface()->activate();   // Show splash screen the first time through
+      getUIManager()->getSplashUserInterface()->activate();   // Show splash screen the first time through
 }
 
 
@@ -728,7 +729,7 @@ void MainMenuUserInterface::renderExtras()
 
 void MainMenuUserInterface::showUpgradeAlert()
 {
-   ErrorMessageUserInterface *ui = getGame()->getUIManager()->getErrorMsgUserInterface();
+   ErrorMessageUserInterface *ui = getUIManager()->getErrorMsgUserInterface();
 
    ui->reset();
    ui->setTitle("OUTDATED VERSION");
@@ -996,7 +997,7 @@ void OptionsMenuUserInterface::toggleDisplayMode()
 void OptionsMenuUserInterface::onEscape()
 {
    saveSettingsToINI(&gINI);
-   reactivatePrevUI();      //mGameUserInterface
+   getUIManager()->reactivatePrevUI();      //mGameUserInterface
 }
 
 
@@ -1039,12 +1040,13 @@ static void nameAndPasswordAcceptCallback(Game *game, U32 unused)
    ClientGame *clientGame = dynamic_cast<ClientGame *>(game);
    TNLAssert(clientGame, "Problem!");
 
-   NameEntryUserInterface *ui = clientGame->getUIManager()->getNameEntryUserInterface();
+   UIManager *uiManager = clientGame->getUIManager();
+   NameEntryUserInterface *ui = uiManager->getNameEntryUserInterface();
 
-   if(ui->prevUIs.size())
-      ui->reactivatePrevUI();
+   if(uiManager->hasPrevUI())
+      uiManager->reactivatePrevUI();
    else
-      clientGame->getUIManager()->getMainMenuUserInterface()->activate();
+      uiManager->getMainMenuUserInterface()->activate();
 
    clientGame->resetMasterConnectTimer();
 
@@ -1185,7 +1187,7 @@ void HostMenuUserInterface::setupMenus()
 void HostMenuUserInterface::onEscape()
 {
    saveSettings();
-   reactivatePrevUI();     
+   getUIManager()->reactivatePrevUI();     
 }
 
 
@@ -1304,7 +1306,7 @@ static void addTwoMinsCallback(Game *game, U32 unused)
 {
    if(game->getGameType())
       game->getGameType()->addTime(2 * 60 * 1000);
-      game->getUIManager()->getMainMenuUserInterface()->reactivatePrevUI();     // And back to our regularly scheduled programming!
+      game->getUIManager()->reactivatePrevUI();     // And back to our regularly scheduled programming!
 }
 
 
@@ -1317,7 +1319,7 @@ static void chooseNewLevelCallback(Game *game, U32 unused)
 static void restartGameCallback(Game *game, U32 unused)
 {
    gClientGame->getConnectionToServer()->c2sRequestLevelChange(-2, false);
-   game->getUIManager()->getGameMenuUserInterface()->reactivatePrevUI();     // And back to our regularly scheduled programming! 
+   game->getUIManager()->reactivatePrevUI();     // And back to our regularly scheduled programming! 
 }
 
 
@@ -1388,9 +1390,8 @@ void GameMenuUserInterface::buildMenu()
          menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(getGame(), 0, "ENTER ADMIN PASSWORD", adminPWCallback, "", KEY_A, KEY_E)));
    }
 
-   if(cameFrom(EditorUI))    // Came from editor
-      menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(getGame(), 0, "RETURN TO EDITOR", endGameCallback, "", KEY_Q, 
-                                                                   (cameFrom(EditorUI) ? KEY_R : KEY_UNKNOWN) )));
+   if(getUIManager()->cameFrom(EditorUI))    // Came from editor
+      menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(getGame(), 0, "RETURN TO EDITOR", endGameCallback, "", KEY_Q, KEY_R)));
    else
       menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(getGame(), 0, "QUIT GAME",        endGameCallback, "", KEY_Q)));
 }
@@ -1398,7 +1399,7 @@ void GameMenuUserInterface::buildMenu()
 
 void GameMenuUserInterface::onEscape()
 {
-   reactivatePrevUI();      //mGameUserInterface
+   getUIManager()->reactivatePrevUI();      //mGameUserInterface
 
    // Show alert about input mode changing, if needed
    bool inputModesChanged = lastInputMode == gIniSettings.inputMode;
@@ -1487,7 +1488,7 @@ void LevelMenuUserInterface::onActivate()
 
 void LevelMenuUserInterface::onEscape()
 {
-   reactivatePrevUI();    // to mGameUserInterface
+   getUIManager()->reactivatePrevUI();    // to mGameUserInterface
 }
 
 
@@ -1519,7 +1520,7 @@ void LevelMenuSelectUserInterface::processSelection(U32 index)
    if((index & UPLOAD_LEVELS_BIT) && (index & (~UPLOAD_LEVELS_BIT)) < U32(mLevels.size()))
    {
       string filename = strictjoindir(gConfigDirs.levelDir, mLevels[index & (~UPLOAD_LEVELS_BIT)]);
-      if(! gc->s2rUploadFile(filename.c_str(),1))
+      if(!gc->s2rUploadFile(filename.c_str(),1))
          gClientGame->getUserInterface()->displayErrorMessage("Can't upload level: unable to read file");
    }
    else
@@ -1527,7 +1528,8 @@ void LevelMenuSelectUserInterface::processSelection(U32 index)
       // The selection index is the level to load
       gc->c2sRequestLevelChange(index, false);
    }
-   reactivateMenu(gClientGame->getUserInterface());    // Jump back to the game menu
+
+   getUIManager()->reactivateMenu(gClientGame->getUserInterface());    // Jump back to the game menu
 }
 
 
@@ -1610,7 +1612,7 @@ bool LevelMenuSelectUserInterface::processMenuSpecificKeys(KeyCode keyCode, char
 
 void LevelMenuSelectUserInterface::onEscape()
 {
-   reactivatePrevUI();    // to LevelMenuUserInterface
+   getUIManager()->reactivatePrevUI();    // to LevelMenuUserInterface
 }
 
 
@@ -1640,10 +1642,11 @@ void PlayerMenuUserInterface::playerSelected(U32 index)
          break;
       }
 
-   GameConnection *gc = gClientGame->getConnectionToServer();
+   GameConnection *gc = dynamic_cast<ClientGame *>(getGame())->getConnectionToServer();
+
    if(action == ChangeTeam)
    {
-      TeamMenuUserInterface *ui = getGame()->getUIManager()->getTeamMenuUserInterface();
+      TeamMenuUserInterface *ui = getUIManager()->getTeamMenuUserInterface();
 
       ui->activate();     // Show menu to let player select a new team
       ui->nameToChange = menuItems[index]->getPrompt();
@@ -1655,7 +1658,7 @@ void PlayerMenuUserInterface::playerSelected(U32 index)
    }
 
    if(action != ChangeTeam)                              // Unless we need to move on to the change team screen...
-      reactivateMenu(getGame()->getUserInterface());     // ...it's back to the game!
+      getUIManager()->reactivateMenu(getGame()->getUserInterface());     // ...it's back to the game!
 }
 
 
@@ -1698,7 +1701,7 @@ void PlayerMenuUserInterface::render()
 
 void PlayerMenuUserInterface::onEscape()
 {
-   reactivatePrevUI();   //mGameUserInterface
+   getUIManager()->reactivatePrevUI();   //mGameUserInterface
 }
 
 
@@ -1723,7 +1726,7 @@ void TeamMenuUserInterface::processSelection(U32 index)
    // Make sure user isn't just changing to the team they're already on...
 
    GameType *gt = getGame()->getGameType();
-   GameConnection *gc = gClientGame->getConnectionToServer();
+   GameConnection *gc = dynamic_cast<ClientGame *>(getGame())->getConnectionToServer();
    if(!gc || !gt)
       return;
 
@@ -1740,7 +1743,7 @@ void TeamMenuUserInterface::processSelection(U32 index)
       }
    }
 
-   reactivateMenu(getGame()->getUserInterface());    // Back to the game!
+   getUIManager()->reactivateMenu(getGame()->getUserInterface());    // Back to the game!
 }
 
 
@@ -1793,7 +1796,7 @@ void TeamMenuUserInterface::render()
 
 void TeamMenuUserInterface::onEscape()
 {
-   reactivatePrevUI();
+   getUIManager()->reactivatePrevUI();
 }
 
 #undef MAX_MENU_SIZE

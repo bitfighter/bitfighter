@@ -72,10 +72,12 @@ void ErrorMessageUserInterface::setInstr(const char *message)
    mInstr = message;
 }
 
+
 void ErrorMessageUserInterface::quit()
 {
-   UserInterface::reactivatePrevUI();      //gMainMenuUserInterface
+   getUIManager()->reactivatePrevUI();      //gMainMenuUserInterface
 }
+
 
 void ErrorMessageUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 {
@@ -85,8 +87,7 @@ void ErrorMessageUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 
 void ErrorMessageUserInterface::render()
 {
-   if (prevUIs.size())            // If there is an underlying menu...
-      prevUIs.last()->render();   // ...render it
+   getUIManager()->renderPrevUI();
    
    renderMessageBox(mTitle, mInstr, mMessage, MAX_LINES);
 }

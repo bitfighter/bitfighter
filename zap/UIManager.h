@@ -26,13 +26,16 @@
 #ifndef _UI_MANAGER_H_
 #define _UI_MANAGER_H_
 
+#include "tnlVector.h"
 #include <memory>
 
 using namespace std;
+using namespace TNL;
 
 namespace Zap
 {
 
+class UserInterface;
 class MainMenuUserInterface;
 class GameParamUserInterface;
 class EditorUserInterface;
@@ -67,6 +70,44 @@ class TeamDefUserInterface;
 
 class Game;
 
+enum UIID {
+   AdminPasswordEntryUI,
+   ChatUI,
+   CreditsUI,
+   DiagnosticsScreenUI,
+   EditorInstructionsUI,
+   EditorUI,
+   EditorMenuUI,
+   ErrorMessageUI,
+   GameMenuUI,
+   GameParamsUI,
+   GameUI,
+   GenericUI,
+   GlobalChatUI,
+   SuspendedUI,
+   HostingUI,
+   InstructionsUI,
+   KeyDefUI,
+   LevelUI,
+   LevelNameEntryUI,
+   LevelChangePasswordEntryUI,
+   LevelTypeUI,
+   MainUI,
+   NameEntryUI,
+   OptionsUI,
+   PasswordEntryUI,
+   ReservedNamePasswordEntryUI,
+   PlayerUI,
+   TeamUI,
+   QueryServersScreenUI,
+   SplashUI,
+   TeamDefUI,
+   TextEntryUI,
+   YesOrNoUI,
+   GoFastAttributeEditorUI,
+   TextItemAttributeEditorUI,
+   InvalidUI,        // Not a valid UI
+};
 
 class UIManager
 {
@@ -104,6 +145,9 @@ private:
    LevelNameEntryUserInterface *mLevelNameEntryUserInterface;
    EditorUserInterface *mEditorUserInterface;
 
+   Vector<UserInterface *> mPrevUIs;   // Previously active menus
+
+
 public:
    UIManager(Game *game);     // Constructor
    ~UIManager();              // Destructor
@@ -139,6 +183,15 @@ public:
    SuspendedUserInterface *getSuspendedUserInterface();
    EditorMenuUserInterface *getEditorMenuUserInterface();
    SplashUserInterface *getSplashUserInterface();
+
+   void reactivatePrevUI();
+   void reactivateMenu(const UserInterface *target);
+   UserInterface *getPrevUI();
+   bool hasPrevUI() { return mPrevUIs.size() > 0; }
+   void clearPrevUIs() { mPrevUIs.clear(); }
+   void renderPrevUI();
+   bool cameFrom(UIID menuID);        // Did we arrive at our current interface via the specified interface?
+   void saveUI(UserInterface *ui);
 };
 
 };

@@ -1539,7 +1539,7 @@ void actualizeScreenMode(bool changingInterfaces)
    //   }
 
    if(changingInterfaces)
-      UserInterface::prevUIs.last()->onPreDisplayModeChange();
+      gClientGame->getUIManager()->getPrevUI()->onPreDisplayModeChange();
    else
       UserInterface::current->onPreDisplayModeChange();
 

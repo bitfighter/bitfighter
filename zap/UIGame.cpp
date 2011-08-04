@@ -448,7 +448,7 @@ void GameUserInterface::render()
       renderCurrentChat();       // Render any chat msg user is composing
       renderLoadoutIndicators(); // Draw indicators for the various loadout items
 
-      getGame()->getUIManager()->getHostMenuUserInterface()->renderProgressListItems();  // This is the list of levels loaded while hosting
+      getUIManager()->getHostMenuUserInterface()->renderProgressListItems();  // This is the list of levels loaded while hosting
 
       renderProgressBar();       // This is the status bar that shows progress of loading this level
 
@@ -1001,7 +1001,7 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    {
       playBoop();
 
-      InstructionsUserInterface *instrUI = getGame()->getUIManager()->getInstructionsUserInterface();
+      InstructionsUserInterface *instrUI = getUIManager()->getInstructionsUserInterface();
 
       if(mCurrentMode == ChatMode)
          instrUI->activateInCommandMode();
@@ -1017,10 +1017,10 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    else if(keyCode == keyOUTGAMECHAT)
    {
       setBusyChatting(true);
-      getGame()->getUIManager()->getChatUserInterface()->activate();
+      getUIManager()->getChatUserInterface()->activate();
    }
    else if(keyCode == keyDIAG)            // Turn on diagnostic overlay
-      getGame()->getUIManager()->getDiagnosticUserInterface()->activate();
+      getUIManager()->getDiagnosticUserInterface()->activate();
    else if(keyCode == keyMISSION)
    {
       mMissionOverlayActive = true;
@@ -1128,12 +1128,12 @@ void GameUserInterface::processPlayModeKey(KeyCode keyCode, char ascii)
       if(!gClientGame->isConnectedToServer())      // Perhaps we're still joining?
       {
          endGame();
-         getGame()->getUIManager()->getMainMenuUserInterface()->activate();
+         getUIManager()->getMainMenuUserInterface()->activate();
       }
       else
       {
          setBusyChatting(true);
-         getGame()->getUIManager()->getGameMenuUserInterface()->activate();
+         getUIManager()->getGameMenuUserInterface()->activate();
       }
    }     
    else if(keyCode == keyCMDRMAP[inputMode])
@@ -2403,7 +2403,7 @@ void GameUserInterface::suspendGame()
 {
    getClientGame()->getConnectionToServer()->suspendGame();     // Tell server we're suspending
    getClientGame()->suspendGame();                              // Suspend locally
-   getGame()->getUIManager()->getSuspendedUserInterface()->activate();          // And enter chat mode
+   getUIManager()->getSuspendedUserInterface()->activate();          // And enter chat mode
 }
 
 

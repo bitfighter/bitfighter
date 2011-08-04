@@ -96,7 +96,7 @@ void TeamDefUserInterface::onActivate()
    selectedIndex = 0;                                 // First item selected when we begin
    mEditing = false;                                  // Not editing anything by default
 
-   EditorUserInterface *ui = getGame()->getUIManager()->getEditorUserInterface();
+   EditorUserInterface *ui = getUIManager()->getEditorUserInterface();
    S32 teamCount = getGame()->getTeamCount();
 
    ui->mOldTeams.resize(teamCount);  // Avoid unnecessary reallocations
@@ -224,12 +224,12 @@ void TeamDefUserInterface::render()
 void TeamDefUserInterface::onEscape()
 {
    // Make sure there is at least one team left...
-   EditorUserInterface *ui = getGame()->getUIManager()->getEditorUserInterface();
+   EditorUserInterface *ui = getUIManager()->getEditorUserInterface();
 
    ui->makeSureThereIsAtLeastOneTeam();
    ui->teamsHaveChanged();
 
-   ui->reactivatePrevUI();
+   getUIManager()->reactivatePrevUI();
 }
 
 
@@ -345,12 +345,12 @@ void TeamDefUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    }
    else if(keyCode == keyDIAG)     // Turn on diagnostic overlay
    {
-      getGame()->getUIManager()->getDiagnosticUserInterface()->activate();
+      getUIManager()->getDiagnosticUserInterface()->activate();
       playBoop();
    }
    else if(keyCode == keyOUTGAMECHAT)     // Turn on Global Chat overlay
    {
-      getGame()->getUIManager()->getChatUserInterface()->activate();
+      getUIManager()->getChatUserInterface()->activate();
       playBoop();
    }
 }

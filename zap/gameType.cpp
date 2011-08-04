@@ -1877,8 +1877,8 @@ static void switchTeamsCallback(Game *game, U32 unused)
       if(!ship)
          return;
 
-      gt->c2sChangeTeams(1 - ship->getTeam());                   // If two teams, team will either be 0 or 1, so "1 - " will toggle
-      game->getUserInterface()->reactivateMenu(game->getUserInterface());   // Jump back into the game (this option takes place immediately)
+      gt->c2sChangeTeams(1 - ship->getTeam());                          // If two teams, team will either be 0 or 1, so "1 - " will toggle
+      game->getUIManager()->reactivateMenu(game->getUserInterface());   // Jump back into the game (this option takes place immediately)
    }
    else
    {

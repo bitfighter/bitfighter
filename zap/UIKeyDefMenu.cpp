@@ -337,7 +337,7 @@ void KeyDefMenuUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       playBoop();
       saveSettingsToINI(&gINI);
 
-      UserInterface::reactivatePrevUI();      //gOptionsMenuUserInterface
+      getUIManager()->reactivatePrevUI();      //gOptionsMenuUserInterface
    }
    else if(keyCode == KEY_UP || keyCode == BUTTON_DPAD_UP)        // Prev item
    {
@@ -362,12 +362,12 @@ void KeyDefMenuUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    else if(keyCode == keyOUTGAMECHAT)     // Turn on Global Chat overlay
    {
       playBoop();
-      getGame()->getUIManager()->getChatUserInterface()->activate();
+      getUIManager()->getChatUserInterface()->activate();
    }
    else if(keyCode == keyDIAG)     // Turn on diagnostic overlay
    {
       playBoop();
-      getGame()->getUIManager()->getDiagnosticUserInterface()->activate();
+      getUIManager()->getDiagnosticUserInterface()->activate();
    }
 
 }

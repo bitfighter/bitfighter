@@ -26,6 +26,7 @@
 
 #include "UIManager.h"
 
+#include "UI.h"
 #include "UIGame.h"
 #include "UIMenus.h"
 #include "UINameEntry.h"
@@ -79,6 +80,7 @@ UIManager::UIManager(Game *game)
    mSplashUserInterface = NULL;
    mLevelNameEntryUserInterface = NULL;
    mEditorUserInterface = NULL;
+   mTeamDefUserInterface = NULL;
 }
 
 
@@ -113,6 +115,7 @@ UIManager::~UIManager()
    delete mSplashUserInterface;
    delete mLevelNameEntryUserInterface;
    delete mEditorUserInterface;
+   delete mTeamDefUserInterface;
 }
 
 
@@ -405,6 +408,64 @@ TeamDefUserInterface *UIManager::getTeamDefUserInterface()
    return mTeamDefUserInterface;
 }
 
+
+// Reactivate previous interface, going to fallback if there is none
+void UIManager::reactivatePrevUI()
+{
+   if(mPrevUIs.size())
+   {
+      UserInterface *prev = mPrevUIs.last();
+      mPrevUIs.pop_back();
+      prev->reactivate();
+   }
+   else
+      getMainMenuUserInterface()->reactivate();      // Fallback if everything else has failed
+}
+
+
+// Like above, except we specify a target menu to go to
+void UIManager::reactivateMenu(const UserInterface *target)
+{
+   // Keep discarding menus until we find the one we want
+   while( mPrevUIs.size() && (mPrevUIs.last()->getMenuID() != target->getMenuID()) )
+      mPrevUIs.pop_back();
+
+   if(mPrevUIs.size())
+      // Now that the next one is our target, when we reactivate, we'll be where we want to be
+      reactivatePrevUI();
+   else
+      getMainMenuUserInterface()->reactivate();      // Fallback if everything else has failed
+}
+
+
+UserInterface *UIManager::getPrevUI()
+{
+   return mPrevUIs.last();
+}
+
+
+void UIManager::renderPrevUI()
+{
+   if(mPrevUIs.size())
+      mPrevUIs.last()->render();
+}
+
+
+// Did we arrive at our current interface via the specified interface?
+bool UIManager::cameFrom(UIID menuID)
+{
+   for(S32 i = 0; i < mPrevUIs.size(); i++)
+      if(mPrevUIs[i]->getMenuID() == menuID)
+         return true;
+
+   return false;
+}
+
+
+void UIManager::saveUI(UserInterface *ui)
+{
+   mPrevUIs.push_back(ui);
+}
 
 
 };
