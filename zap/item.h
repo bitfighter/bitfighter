@@ -139,7 +139,7 @@ class EditorPointObject : public EditorObject, public PointGeometry
    typedef EditorObject Parent;
 
 public:
-   EditorPointObject(GameObjectType objectType = UnknownType);       // Constructor
+   EditorPointObject();       // Constructor
 
    virtual void renderItemText(const char *text, S32 offset, F32 currentScale, const Point &currentOffset);
    void addToDock(Game *game, const Point &point);

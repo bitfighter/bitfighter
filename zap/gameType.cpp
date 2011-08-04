@@ -2266,7 +2266,7 @@ GAMETYPE_RPC_S2C(GameType, s2cClientJoinedTeam,
       if(gp->mSetBy == name)
       {
          gp->mSetBy = "";                                    // No longer set-by-self
-         U32 mask = gp->getObjectTypeMask();
+         BITMASK mask = gp->getObjectTypeMask();
          gp->setObjectTypeMask(mask &= ~CommandMapVisType);  // And no longer visible on commander's map
       }
    }

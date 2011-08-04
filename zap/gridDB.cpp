@@ -158,7 +158,7 @@ void GridDatabase::removeFromDatabase(DatabaseObject *theObject, const Rect &ext
 }
 
 
-void GridDatabase::findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector, const Rect *extents, S32 minx, S32 miny, S32 maxx, S32 maxy, U8 typeNumber)
+void GridDatabase::findObjects(BITMASK typeMask, Vector<DatabaseObject *> &fillVector, const Rect *extents, S32 minx, S32 miny, S32 maxx, S32 maxy, U8 typeNumber)
 {
    mQueryId++;    // Used to prevent the same item from being found in multiple buckets
 
@@ -194,7 +194,7 @@ void GridDatabase::findObjects(Vector<DatabaseObject *> &fillVector)
 
 
 // Find all objects in database of type typeMask
-void GridDatabase::findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector, U8 typeNumber)
+void GridDatabase::findObjects(BITMASK typeMask, Vector<DatabaseObject *> &fillVector, U8 typeNumber)
 {
    for(S32 i = 0; i < mAllObjects.size(); i++)
       if((mAllObjects[i]->getObjectTypeMask() & typeMask) || (mAllObjects[i]->getObjectTypeNumber() == typeNumber))
@@ -203,7 +203,7 @@ void GridDatabase::findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVecto
 
 
 // Find all objects in &extents that are of type typeMask
-void GridDatabase::findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector, const Rect &extents, U8 typeNumber)
+void GridDatabase::findObjects(BITMASK typeMask, Vector<DatabaseObject *> &fillVector, const Rect &extents, U8 typeNumber)
 {
    S32 minx, miny, maxx, maxy;
 
@@ -253,7 +253,7 @@ void DatabaseObject::initialize()
 // Find objects along a ray, returning first discovered object, along with time of
 // that collision and a Point representing the normal angle at intersection point
 //             (at least I think that's what's going on here - CE)
-DatabaseObject *GridDatabase::findObjectLOS(U32 typeMask, U32 stateIndex, 
+DatabaseObject *GridDatabase::findObjectLOS(BITMASK typeMask, U32 stateIndex, 
                                             const Point &rayStart, const Point &rayEnd, 
                                             float &collisionTime, Point &surfaceNormal, U8 typeNumber)
 {
@@ -262,7 +262,7 @@ DatabaseObject *GridDatabase::findObjectLOS(U32 typeMask, U32 stateIndex,
 
 
 // Format is a passthrough to polygonLineIntersect().  Will be true for most items, false for walls in editor.
-DatabaseObject *GridDatabase::findObjectLOS(U32 typeMask, U32 stateIndex, bool format,
+DatabaseObject *GridDatabase::findObjectLOS(BITMASK typeMask, U32 stateIndex, bool format,
                                             const Point &rayStart, const Point &rayEnd, 
                                             float &collisionTime, Point &surfaceNormal, U8 typeNumber)
 {

@@ -247,7 +247,7 @@ void Ship::processMove(U32 stateIndex)
 
 
 // Find objects of specified type that may be under the ship, and put them in fillVector
-void Ship::findObjectsUnderShip(GameObjectType type)
+void Ship::findObjectsUnderShip(BITMASK type)
 {
    Rect rect(getActualPos(), getActualPos());
    rect.expand(Point(CollisionRadius, CollisionRadius));
@@ -258,7 +258,7 @@ void Ship::findObjectsUnderShip(GameObjectType type)
 
 
 // Returns the zone in question if this ship is in a zone of type zoneType
-GameObject *Ship::isInZone(GameObjectType zoneType)
+GameObject *Ship::isInZone(BITMASK zoneType)
 {
    findObjectsUnderShip(zoneType);
 
@@ -305,7 +305,7 @@ F32 Ship::getSlipzoneSpeedMoficationFactor()
 
 
 // Returns the object in question if this ship is on an object of type objectType
-DatabaseObject *Ship::isOnObject(GameObjectType objectType)
+DatabaseObject *Ship::isOnObject(BITMASK objectType)
 {
    findObjectsUnderShip(objectType);
 
@@ -1210,7 +1210,7 @@ S32 Ship::getFlagCount()
 }
 
 
-bool Ship::isCarryingItem(GameObjectType objectType)
+bool Ship::isCarryingItem(BITMASK objectType)
 {
    for(S32 i = mMountedItems.size() - 1; i >= 0; i--)
       if(mMountedItems[i].isValid() && mMountedItems[i]->getObjectTypeMask() & objectType)
@@ -1219,7 +1219,7 @@ bool Ship::isCarryingItem(GameObjectType objectType)
 }
 
 
-Item *Ship::unmountItem(GameObjectType objectType)
+Item *Ship::unmountItem(BITMASK objectType)
 {
    //logprintf("%s ship->unmountItem", isGhost()? "Client:" : "Server:");
    for(S32 i = mMountedItems.size() - 1; i >= 0; i--)

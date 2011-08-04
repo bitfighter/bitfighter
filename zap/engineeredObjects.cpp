@@ -262,9 +262,8 @@ bool EngineerModuleDeployer::deployEngineeredItem(GameConnection *connection, U3
 
 
 // Constructor
-EngineeredObject::EngineeredObject(S32 team, Point anchorPoint, Point anchorNormal, GameObjectType objectType) : 
-      EditorPointObject(objectType),
-      mAnchorNormal(anchorNormal)
+EngineeredObject::EngineeredObject(S32 team, Point anchorPoint, Point anchorNormal) : 
+      EditorPointObject(), mAnchorNormal(anchorNormal)
 {
    setVert(anchorPoint, 0);
    mHealth = 1.0f;
@@ -274,7 +273,6 @@ EngineeredObject::EngineeredObject(S32 team, Point anchorPoint, Point anchorNorm
    mHealRate = 0;
    mMountSeg = NULL;
    mSnapped = false;
-   //mObjectTypeMask = ;
 }
 
 
@@ -344,7 +342,7 @@ DatabaseObject *EngineeredObject::findAnchorPointAndNormal(GridDatabase *wallEdg
 
 
 DatabaseObject *EngineeredObject::findAnchorPointAndNormal(GridDatabase *wallEdgeDatabase, const Point &pos, F32 snapDist, 
-                                                           bool format, S32 wallType, Point &anchor, Point &normal)
+                                                           bool format, BITMASK wallType, Point &anchor, Point &normal)
 {
    F32 minDist = F32_MAX;
    DatabaseObject *closestWall = NULL;
@@ -665,7 +663,7 @@ static bool renderFull(F32 currentScale, bool snapped)
 TNL_IMPLEMENT_NETOBJECT(ForceFieldProjector);
 
 // Constructor
-ForceFieldProjector::ForceFieldProjector(S32 team, Point anchorPoint, Point anchorNormal) : EngineeredObject(team, anchorPoint, anchorNormal, ForceFieldProjectorType)
+ForceFieldProjector::ForceFieldProjector(S32 team, Point anchorPoint, Point anchorNormal) : EngineeredObject(team, anchorPoint, anchorNormal)
 {
    mNetFlags.set(Ghostable);
    mObjectTypeMask = ForceFieldProjectorType | CommandMapVisType;
@@ -690,7 +688,7 @@ void ForceFieldProjector::idle(GameObject::IdleCallPath path)
 
 Point ForceFieldProjector::getEditorSelectionOffset(F32 currentScale)
 {
-   return renderFull(getObjectTypeMask(), currentScale) ? Point(0, .035 * 255) : Point(0,0);
+   return renderFull(currentScale, false) ? Point(0, .035 * 255) : Point(0,0);
 }
 
 
@@ -1045,7 +1043,7 @@ void ForceField::render()
 TNL_IMPLEMENT_NETOBJECT(Turret);
 
 // Constructor
-Turret::Turret(S32 team, Point anchorPoint, Point anchorNormal) : EngineeredObject(team, anchorPoint, anchorNormal, TurretType)
+Turret::Turret(S32 team, Point anchorPoint, Point anchorNormal) : EngineeredObject(team, anchorPoint, anchorNormal)
 {
    mObjectTypeMask = TurretType | CommandMapVisType;
    mObjectTypeNumber = TurretTypeNumber;
@@ -1337,7 +1335,7 @@ void Turret::idle(IdleCallPath path)
 // For turrets, apparent selection center is not the same as the item's actual location
 Point Turret::getEditorSelectionOffset(F32 currentScale)
 {
-   return renderFull(getObjectTypeMask(), currentScale) ? Point(0, .075 * 255) : Point(0,0);
+   return renderFull(currentScale, false) ? Point(0, .075 * 255) : Point(0,0);
 }
 
 

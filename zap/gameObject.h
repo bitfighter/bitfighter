@@ -75,9 +75,9 @@ const U8 SoccerBallItemTypeNumber = 24;
 const U8 WormTypeNumber = 25;
 const U8 TurretTypeNumber = 26;
 const U8 ForceFieldProjectorTypeNumber = 27;
+const U8 PolyWallTypeNumber = 28;
 
 const U8 BotNavMeshZoneTypeNumber = 64;  // seperate database
-const U8 PolyWallTypeNumber = 65;
 
 // These are probably used only in editor..
 const U8 WallItemTypeNumber = 66;
@@ -91,70 +91,65 @@ const U8 AsteroidSpawnTypeNumber = 71;
 // LuaRobot uses 
 // LuaRobot::doFindItems uses TypeNumber, to speed up search, anything less then 32 will be type masked
 
+#define BIT2(x) (((BITMASK)1) << (x))                       ///< Returns value with bit x set (2^x)
 
-enum GameObjectType
-{
-   UnknownType         = BIT(UnknownTypeNumber),    // First bit, BIT(0) == 1, NOT 0!  (Well, yes, 0!, but not 0.  C'mon... get a life!)
-   ShipType            = BIT(ShipTypeNumber),
-   BarrierType         = BIT(BarrierTypeNumber),    // Used in both editor and game
-   MoveableType        = BIT(3),
 
-   LineType            = BIT(LineTypeNumber),     
-   ResourceItemType    = BIT(ResourceItemTypeNumber),
-   TextItemType        = BIT(TextItemTypeNumber),    // Added during editor refactor, only used in editor
-   ForceFieldType      = BIT(ForceFieldTypeNumber),
-   LoadoutZoneType     = BIT(LoadoutZoneTypeNumber),
-   TestItemType        = BIT(TestItemTypeNumber),
-   FlagType            = BIT(FlagTypeNumber),
-   SpeedZoneType       = BIT(SpeedZoneTypeNumber),      // Only needed for finding speed zones that we may have spawned on top of
-   SlipZoneType        = BIT(SlipZoneTypeNumber),
 
-   BulletType          = BIT(BulletTypeNumber),      // All projectiles except grenades?
-   MineType            = BIT(MineTypeNumber),
-   SpyBugType          = BIT(SpyBugTypeNumber),
-   NexusType           = BIT(NexusTypeNumber),
-   //                  = BIT(17),  // Was bot zone, now this bit might be used for editor
-   RobotType           = BIT(RobotTypeNumber),
-   TeleportType        = BIT(TeleportTypeNumber),
-   GoalZoneType        = BIT(GoalZoneTypeNumber),
+const BITMASK UnknownType         = BIT2(UnknownTypeNumber);    // First bit, BIT2(0) == 1, NOT 0!  (Well, yes, 0!, but not 0.  C'mon... get a life!)
+const BITMASK ShipType            = BIT2(ShipTypeNumber);
+const BITMASK BarrierType         = BIT2(BarrierTypeNumber);    // Used in both editor and game
+const BITMASK MoveableType        = BIT2(3);
 
-   AsteroidType        = BIT(AsteroidTypeNumber),      // Only needed for editor...
-   RepairItemType      = BIT(RepairItemTypeNumber),
-   EnergyItemType      = BIT(EnergyItemTypeNumber),
-   SoccerBallItemType  = BIT(SoccerBallItemTypeNumber),      // Only needed for indicating what the ship is carrying and editor...
-   WormType            = BIT(WormTypeNumber),
+const BITMASK LineType            = BIT2(LineTypeNumber);     
+const BITMASK ResourceItemType    = BIT2(ResourceItemTypeNumber);
+const BITMASK TextItemType        = BIT2(TextItemTypeNumber);    // Added during editor refactor, only used in editor
+const BITMASK ForceFieldType      = BIT2(ForceFieldTypeNumber);
+const BITMASK LoadoutZoneType     = BIT2(LoadoutZoneTypeNumber);
+const BITMASK TestItemType        = BIT2(TestItemTypeNumber);
+const BITMASK FlagType            = BIT2(FlagTypeNumber);
+const BITMASK SpeedZoneType       = BIT2(SpeedZoneTypeNumber);      // Only needed for finding speed zones that we may have spawned on top of
+const BITMASK SlipZoneType        = BIT2(SlipZoneTypeNumber);
 
-   TurretType          = BIT(TurretTypeNumber),      // Formerly EngineeredType
-   ForceFieldProjectorType = BIT(ForceFieldProjectorTypeNumber),  // Formerly EngineeredType
+const BITMASK BulletType          = BIT2(BulletTypeNumber);      // All projectiles except grenades?
+const BITMASK MineType            = BIT2(MineTypeNumber);
+const BITMASK SpyBugType          = BIT2(SpyBugTypeNumber);
+const BITMASK NexusType           = BIT2(NexusTypeNumber);
+   //                  = BIT2(17),  // Was bot zone, now this bit might be used for editor
+const BITMASK RobotType           = BIT2(RobotTypeNumber);
+const BITMASK TeleportType        = BIT2(TeleportTypeNumber);
+const BITMASK GoalZoneType        = BIT2(GoalZoneTypeNumber);
 
-   // _______________  = BIT(28),      // FREE BIT
+const BITMASK AsteroidType        = BIT2(AsteroidTypeNumber);      // Only needed for editor...
+const BITMASK RepairItemType      = BIT2(RepairItemTypeNumber);
+const BITMASK EnergyItemType      = BIT2(EnergyItemTypeNumber);
+const BITMASK SoccerBallItemType  = BIT2(SoccerBallItemTypeNumber);      // Only needed for indicating what the ship is carrying and editor...
+const BITMASK WormType            = BIT2(WormTypeNumber);
 
-   DeletedType         = BIT(30),
-   CommandMapVisType   = BIT(31),        // These are objects that can be seen on the commander's map
+const BITMASK TurretType          = BIT2(TurretTypeNumber);      // Formerly EngineeredType
+const BITMASK ForceFieldProjectorType = BIT2(ForceFieldProjectorTypeNumber);  // Formerly EngineeredType
+
+   // _______________  = BIT2(28),      // FREE BIT
+
+const BITMASK DeletedType         = BIT2(30);
+const BITMASK CommandMapVisType   = BIT2(31);        // These are objects that can be seen on the commander's map
 
    //////////
-   // Types used exclusively in the editor -- will reuse some values from above
-   PolyWallType = BIT(29),             // WormType
-   //ShipSpawnType = BIT(13),            // BulletType
-   //FlagSpawnType = BIT(1),            // ShipType
-   //AsteroidSpawnType = BIT(17),        //
-   //WallSegmentType = BIT(13),          // Used only in wallSegmentDatabase, so this is OK for the moment
+   // Types used exclusively in the editor
+const BITMASK PolyWallType = BIT2(PolyWallTypeNumber);
 
 
    // Derived types:
-   EngineeredType     = TurretType | ForceFieldProjectorType,
-// MountableType      = TurretType | ForceFieldProjectorType,
-   ItemType           = SoccerBallItemType | MineType | SpyBugType | AsteroidType | FlagType | ResourceItemType | 
-                        TestItemType | EnergyItemType | RepairItemType,
-   DamagableTypes     = ShipType | RobotType | MoveableType | BulletType | ItemType | ResourceItemType | 
-                        EngineeredType | MineType | AsteroidType,
-   MotionTriggerTypes = ShipType | RobotType | ResourceItemType | TestItemType | AsteroidType,
-	TurretTargetType   = ShipType | RobotType | ResourceItemType | TestItemType | SoccerBallItemType,
-   CollideableType    = BarrierType | TurretType | ForceFieldProjectorType,
-   WallType           = BarrierType | PolyWallType,
-   AllObjectTypes     = 0xFFFFFFFF
-};
-
+const BITMASK EngineeredType     = TurretType | ForceFieldProjectorType;
+//const BITMASK MountableType      = TurretType | ForceFieldProjectorType;
+const BITMASK ItemType           = SoccerBallItemType | MineType | SpyBugType | AsteroidType | FlagType | ResourceItemType | 
+                        TestItemType | EnergyItemType | RepairItemType;
+const BITMASK DamagableTypes     = ShipType | RobotType | MoveableType | BulletType | ItemType | ResourceItemType | 
+                        EngineeredType | MineType | AsteroidType;
+const BITMASK MotionTriggerTypes = ShipType | RobotType | ResourceItemType | TestItemType | AsteroidType;
+const BITMASK TurretTargetType   = ShipType | RobotType | ResourceItemType | TestItemType | SoccerBallItemType;
+const BITMASK CollideableType    = BarrierType | TurretType | ForceFieldProjectorType;
+const BITMASK WallType           = BarrierType | PolyWallType;
+const BITMASK AllObjectTypes     = 0xFFFFFFFF;
 
 
 
@@ -267,9 +262,9 @@ public:
    F32 getRating() { return 0; }    // TODO: Fix this
    S32 getScore() { return 0; }     // TODO: Fix this
 
-   void findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector, const Rect &extents, U8 typeNumber = U8_MAX);
+   void findObjects(BITMASK typeMask, Vector<DatabaseObject *> &fillVector, const Rect &extents, U8 typeNumber = U8_MAX);
 
-   GameObject *findObjectLOS(U32 typeMask, U32 stateIndex, Point rayStart, Point rayEnd, float &collisionTime, Point &collisionNormal, U8 typeNumber = U8_MAX);
+   GameObject *findObjectLOS(BITMASK typeMask, U32 stateIndex, Point rayStart, Point rayEnd, float &collisionTime, Point &collisionNormal, U8 typeNumber = U8_MAX);
 
    bool isControlled() { return mControllingClient.isValid(); }
 
@@ -320,7 +315,7 @@ public:
 
    virtual bool collide(GameObject *hitObject) { return false; }
 
-   S32 radiusDamage(Point pos, S32 innerRad, S32 outerRad, U32 typemask, DamageInfo &info, F32 force = 2000);
+   S32 radiusDamage(Point pos, S32 innerRad, S32 outerRad, BITMASK typemask, DamageInfo &info, F32 force = 2000);
    virtual void damageObject(DamageInfo *damageInfo);
 
    bool onGhostAdd(GhostConnection *theConnection);

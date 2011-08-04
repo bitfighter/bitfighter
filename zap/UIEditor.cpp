@@ -2053,7 +2053,7 @@ void EditorUserInterface::findHitItemAndEdge()
             continue;
          
          // Only select walls in CTRL-A mode...
-         U32 type = obj->getObjectTypeMask();
+         BITMASK type = obj->getObjectTypeMask();
          if(mShowMode == ShowWallsOnly && !(type & BarrierType) && !(type & PolyWallType))        // Only select walls in CTRL-A mode
             continue;                                                              // ...so if it's not a wall, proceed to next item
 
@@ -2680,7 +2680,7 @@ void EditorUserInterface::deleteItem(S32 itemIndex)
    Game *game = getGame();
    WallSegmentManager *wallSegmentManager = game->getWallSegmentManager();
 
-   S32 mask = obj->getObjectTypeMask();
+   BITMASK mask = obj->getObjectTypeMask();
 
    if(mask & (BarrierType | PolyWallType))
    {

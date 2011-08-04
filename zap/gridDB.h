@@ -40,6 +40,10 @@ using namespace TNL;
 namespace Zap
 {
 
+
+// use of BITMASK is to allow to easily change it between U32 or U64, depending on the number of bits we use
+typedef U64 BITMASK;
+
 // Interface for dealing with objects that can be in our spatial database.  Can be either GameObjects or
 // items in te
 class  GridDatabase;
@@ -54,7 +58,7 @@ private:
    GridDatabase *mDatabase;
 
 protected:
-   U32 mObjectTypeMask;
+   BITMASK mObjectTypeMask;
    U8 mObjectTypeNumber;
 
 public:
@@ -63,9 +67,9 @@ public:
 
    void initialize();
 
-   U32 getObjectTypeMask() { return mObjectTypeMask; }   
-   void setObjectTypeMask(U32 objectTypeMask) { mObjectTypeMask = objectTypeMask; }
-   U8 getObjectTypeNumber() { return mObjectTypeNumber; }   
+   BITMASK getObjectTypeMask() { return mObjectTypeMask; }
+   void setObjectTypeMask(BITMASK objectTypeMask) { mObjectTypeMask = objectTypeMask; }
+   U8 getObjectTypeNumber() { return mObjectTypeNumber; }
    void setObjectTypeNumber(U8 objectTypeNumber) { mObjectTypeNumber = objectTypeNumber; }
 
    GridDatabase *getDatabase() { return mDatabase; }     // Returns the database in which this object is stored, NULL if not in any database
@@ -94,7 +98,7 @@ class GridDatabase
 {
 private:
 
-   void findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector, const Rect *extents, S32 minx, S32 miny, S32 maxx, S32 maxy, U8 typeNumber = U8_MAX);
+   void findObjects(BITMASK typeMask, Vector<DatabaseObject *> &fillVector, const Rect *extents, S32 minx, S32 miny, S32 maxx, S32 maxy, U8 typeNumber = U8_MAX);
    static U32 mQueryId;
    static U32 mCountGridDatabase;
 
@@ -123,15 +127,15 @@ public:
    static const S32 BucketWidth = 255;          // Width/height of each bucket in pixels
    static const F32 widthDiv;
 
-   DatabaseObject *findObjectLOS(U32 typeMask, U32 stateIndex, bool format, const Point &rayStart, const Point &rayEnd, 
+   DatabaseObject *findObjectLOS(BITMASK typeMask, U32 stateIndex, bool format, const Point &rayStart, const Point &rayEnd, 
                                  float &collisionTime, Point &surfaceNormal, U8 typeNumber = U8_MAX);
-   DatabaseObject *findObjectLOS(U32 typeMask, U32 stateIndex, const Point &rayStart, const Point &rayEnd, 
+   DatabaseObject *findObjectLOS(BITMASK typeMask, U32 stateIndex, const Point &rayStart, const Point &rayEnd, 
                                  float &collisionTime, Point &surfaceNormal, U8 typeNumber = U8_MAX);
    bool pointCanSeePoint(const Point &point1, const Point &point2);
 
    void findObjects(Vector<DatabaseObject *> &fillVector);     // Returns all objects in the database
-   void findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector, U8 typeNumber = U8_MAX);      
-   void findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector, const Rect &extents, U8 typeNumber = U8_MAX);
+   void findObjects(BITMASK typeMask, Vector<DatabaseObject *> &fillVector, U8 typeNumber = U8_MAX);      
+   void findObjects(BITMASK typeMask, Vector<DatabaseObject *> &fillVector, const Rect &extents, U8 typeNumber = U8_MAX);
    
    virtual void addToDatabase(DatabaseObject *theObject, const Rect &extents);
    virtual void removeFromDatabase(DatabaseObject *theObject, const Rect &extents);

@@ -252,7 +252,7 @@ void Projectile::idle(GameObject::IdleCallPath path)
       if(hitObject)  // Hit something...  should we bounce?
       {
          bool bounce = false;
-         U32 typeMask = hitObject->getObjectTypeMask();
+         BITMASK typeMask = hitObject->getObjectTypeMask();
 
          if(mType == ProjectileBounce && (typeMask & BarrierType))
             bounce = true;

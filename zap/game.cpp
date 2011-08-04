@@ -605,7 +605,7 @@ void Game::processDeleteList(U32 timeDelta)
 
 
 // Delete all objects of specified type  --> currently only used to remove all walls from the game
-void Game::deleteObjects(U32 typeMask)
+void Game::deleteObjects(BITMASK typeMask)
 {
    fillVector.clear();
    mGameObjDatabase->findObjects(typeMask, fillVector);

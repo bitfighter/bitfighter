@@ -791,7 +791,7 @@ S32 LuaRobot::doFindItems(lua_State *L, Rect *scope)
 {
    // objectType is a bitmask of all the different object types we might want to find.  We need to build it up here because
    // lua can't do the bitwise or'ing itself.
-   U32 objectMask = 0;
+   BITMASK objectMask = 0;
 
    S32 index = 1;
    S32 pushed = 0;      // Count of items actually pushed onto the stack
@@ -803,8 +803,8 @@ S32 LuaRobot::doFindItems(lua_State *L, Rect *scope)
       GridDatabase *gridDB;
       U8 number = (U8)lua_tointeger(L, index);
 
-      if(number < 32)
-         objectMask |= (1 << number);
+      if(number < sizeof(BITMASK) * 8)  // number of bits BITMASK have
+         objectMask |= BIT2(number);
       else
       {
 
