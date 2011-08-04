@@ -209,6 +209,7 @@ public:
    static void drawStringfr(F32 x, F32 y, S32 size, const char *format, ...);
 
    // Draw string and get it's width
+   static S32 drawStringAndGetWidth(S32 x, S32 y, S32 size, const char *string);
    static S32 drawStringAndGetWidth(F32 x, F32 y, S32 size, const char *string);
    static S32 drawStringAndGetWidthf(F32 x, F32 y, S32 size, const char *format, ...);
 
@@ -231,6 +232,7 @@ public:
    // Draw text centered on screen (normal and formatted versions)  --> now return starting location
    static S32 drawCenteredString(S32 y, S32 size, const char *str);
    static S32 drawCenteredString(S32 x, S32 y, S32 size, const char *str);
+   static S32 drawCenteredString(F32 x, F32 y, S32 size, const char *str);
    static S32 drawCenteredStringf(S32 y, S32 size, const char *format, ...);
    static S32 drawCenteredStringf(S32 x, S32 y, S32 size, const char *format, ...);
 
@@ -262,8 +264,6 @@ public:
 
    static F32 getStringWidthf(F32 size, const char *format, ...);
    static S32 getStringWidthf(S32 size, const char *format, ...);
-
-   static F32 getStringWidthF32(F32 size, const char *string);    // TODO: make functions above return F32 and get rid of this one
 
    static U32 drawWrapText(char *text, S32 xpos, S32 ypos, S32 width, S32 ypos_end,
          S32 lineHeight, S32 fontSize, S32 multiLineIndentation = 0, bool alignBottom = false, bool draw = true);

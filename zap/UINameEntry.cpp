@@ -232,10 +232,10 @@ void PasswordEntryUserInterface::render()
       glColor4f(0, 0, 0, 0.5);
       glEnableBlend;
          glBegin(GL_POLYGON);
-            glVertex2f(0,           0);
-            glVertex2f(canvasWidth, 0);
-            glVertex2f(canvasWidth, canvasHeight);
-            glVertex2f(0,           canvasHeight);
+            glVertex2i(0,           0);
+            glVertex2i(canvasWidth, 0);
+            glVertex2i(canvasWidth, canvasHeight);
+            glVertex2i(0,           canvasHeight);
          glEnd();
       glDisableBlend;
    }

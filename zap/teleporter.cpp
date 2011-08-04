@@ -144,7 +144,7 @@ bool Teleporter::processArguments(S32 argc2, const char **argv2, Game *game)
    if(!found)           // New teleporter origin
    {
       mDests.push_back(dest);
-      setExtent(Rect(pos, TELEPORTER_RADIUS));
+      setExtent(Rect(pos, (F32)TELEPORTER_RADIUS));
    }
    else  
       destroySelf();    // Since this is really part of a different teleporter, delete this one
@@ -200,7 +200,7 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
       for(U32 i = 0; i < count; i++)
          mDests[i].read(stream);
       
-      setExtent(Rect(pos, TELEPORTER_RADIUS));
+      setExtent(Rect(pos, (F32)TELEPORTER_RADIUS));
 
       if(stream->readFlag())
          mTeleporterDelay = stream->readInt(32);
@@ -238,7 +238,7 @@ void Teleporter::idle(GameObject::IdleCallPath path)
       return;
 
    // Check for players within range.  If found, send them to dest.
-   Rect queryRect(getVert(0), TELEPORTER_RADIUS);
+   Rect queryRect(getVert(0), (F32)TELEPORTER_RADIUS);
 
    foundObjects.clear();
    findObjects(ShipType | RobotType, foundObjects, queryRect);
@@ -296,7 +296,7 @@ void Teleporter::render()
       r = 0;
 
    if(r != 0)
-      renderTeleporter(getVert(0), 0, true, mTime, r, TELEPORTER_RADIUS, 1.0, mDests, false);
+      renderTeleporter(getVert(0), 0, true, mTime, r, (F32)TELEPORTER_RADIUS, 1.0, mDests, false);
 }
 
 
@@ -305,7 +305,7 @@ void Teleporter::renderEditorItem()
    glColor(Colors::green);
 
    glLineWidth(gLineWidth3);
-   drawPolygon(getVert(0), 12, Teleporter::TELEPORTER_RADIUS, 0);
+   drawPolygon(getVert(0), 12, (F32)TELEPORTER_RADIUS, 0);
    glLineWidth(gDefaultLineWidth);
 }
 

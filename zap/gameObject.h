@@ -149,7 +149,7 @@ const BITMASK MotionTriggerTypes = ShipType | RobotType | ResourceItemType | Tes
 const BITMASK TurretTargetType   = ShipType | RobotType | ResourceItemType | TestItemType | SoccerBallItemType;
 const BITMASK CollideableType    = BarrierType | TurretType | ForceFieldProjectorType;
 const BITMASK WallType           = BarrierType | PolyWallType;
-const BITMASK AllObjectTypes     = 0xFFFFFFFF;
+const BITMASK AllObjectTypes     = U64_MAX;
 
 
 

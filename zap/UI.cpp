@@ -476,9 +476,14 @@ void UserInterface::drawStringfr(F32 x, F32 y, S32 size, const char *format, ...
 }
 
    
+S32 UserInterface::drawStringAndGetWidth(S32 x, S32 y, S32 size, const char *string)
+{
+   drawString(x, y, size, string);
+   return getStringWidth(size, string);
+}
 S32 UserInterface::drawStringAndGetWidth(F32 x, F32 y, S32 size, const char *string)
 {
-   drawString((S32) x, (S32) y, size, string);
+   drawString(x, y, size, string);
    return getStringWidth(size, string);
 }
 
@@ -506,7 +511,13 @@ S32 UserInterface::drawCenteredString(S32 y, S32 size, const char *string)
 
 S32 UserInterface::drawCenteredString(S32 x, S32 y, S32 size, const char *string)
 {
-   S32 xpos = x - getStringWidth(size, string) / 2 ;
+   S32 xpos = x - getStringWidth(size, string) / 2;
+   drawString(xpos, y, size, string);
+   return xpos;
+}
+S32 UserInterface::drawCenteredString(F32 x, F32 y, S32 size, const char *string)
+{
+   F32 xpos = x - getStringWidth(F32(size), string) / 2;
    drawString(xpos, y, size, string);
    return xpos;
 }
@@ -657,28 +668,29 @@ void UserInterface::drawString4Colf(S32 y, S32 size, U32 col, const char *format
    drawString4Col(y, size, col, buffer);
 }
 
-   
-F32 UserInterface::getStringWidthF32(F32 size, const char *string)
-{
-#ifndef ZAP_DEDICATED
-   return F32( OpenglUtils::getStringLength((const unsigned char *) string) ) * size / 120.0;
-#else
-   return 1;
-#endif
 
+
+#ifndef ZAP_DEDICATED
+S32 UserInterface::getStringWidth(S32 size, const char *string)
+{
+   return OpenglUtils::getStringLength((const unsigned char *) string) * size / 120;
+}
+F32 UserInterface::getStringWidth(F32 size, const char *string)
+{
+   return F32( OpenglUtils::getStringLength((const unsigned char *) string) ) * size / 120.f;
 }
 
+#else
 
 S32 UserInterface::getStringWidth(S32 size, const char *string)
 {
-   return getStringWidthF32(size, string);
+   return 1;
 }
-
-
 F32 UserInterface::getStringWidth(F32 size, const char *string)
 {
-   return getStringWidthF32(size, string);
+   return 1;
 }
+#endif
 
 
 F32 UserInterface::getStringWidthf(F32 size, const char *format, ...)

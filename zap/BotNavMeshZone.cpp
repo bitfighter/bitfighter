@@ -550,8 +550,8 @@ bool BotNavMeshZone::buildBotMeshZones(ServerGame *game)
    if(bounds.getWidth() < U16_MAX && bounds.getHeight() < U16_MAX)
    {
       rcPolyMesh mesh;
-      mesh.offsetX = -1 * floor(bounds.min.x + 0.5);
-      mesh.offsetY = -1 * bounds.min.y;
+      mesh.offsetX = -1 * (int)floor(bounds.min.x + 0.5f);
+      mesh.offsetY = -1 * (int)floor(bounds.min.y + 0.5f);
 
       // This works because bounds is always passed by reference.  Is this really needed?
       bounds.offset(Point(mesh.offsetX, mesh.offsetY));
@@ -946,7 +946,7 @@ Vector<Point> AStar::findPath(const Vector<BotNavMeshZone *> &zones, S32 startZo
                if (tempGcost < Gcost[zoneID])
                {
                   parentZones[zoneID] = parentZone; // Change the square's parent
-                  Gcost[zoneID] = tempGcost;        // and its G cost         
+                  Gcost[zoneID] = (F32)tempGcost;        // and its G cost         
 
                   // Because changing the G cost also changes the F cost, if
                   // the item is on the open list we need to change the item's

@@ -300,7 +300,7 @@ bool EngineeredObject::processArguments(S32 argc, const char **argv, Game *game)
    Point normal, anchor;
 
    // Anchor objects to the correct point
-   if(!findAnchorPointAndNormal(game->getGameObjDatabase(), pos, MAX_SNAP_DISTANCE, true, anchor, normal))
+   if(!findAnchorPointAndNormal(game->getGameObjDatabase(), pos, (F32)MAX_SNAP_DISTANCE, true, anchor, normal))
    {
       setVert(pos, 0);      // Found no mount point, but for editor, needs to set the position
       mAnchorNormal.set(1,0);
@@ -494,14 +494,14 @@ void EngineeredObject::explode()
 
    SoundSystem::playSoundEffect(SFXShipExplode, getActualPos(), Point());
 
-   F32 a = TNL::Random::readF() * 0.4 + 0.5;
-   F32 b = TNL::Random::readF() * 0.2 + 0.9;
-   F32 c = TNL::Random::readF() * 0.15 + 0.125;
-   F32 d = TNL::Random::readF() * 0.2 + 0.9;
+   F32 a = TNL::Random::readF() * 0.4f + 0.5f;
+   F32 b = TNL::Random::readF() * 0.2f + 0.9f;
+   F32 c = TNL::Random::readF() * 0.15f + 0.125f;
+   F32 d = TNL::Random::readF() * 0.2f + 0.9f;
 
-   FXManager::emitExplosion(getActualPos(), 0.65, ExplosionColors, EXPLOSION_COLOR_COUNT);
-   FXManager::emitBurst(getActualPos(), Point(a,c) * 0.6, Color(1,1,0.25), Color(1,0,0));
-   FXManager::emitBurst(getActualPos(), Point(b,d) * 0.6, Color(1,1,0), Color(0,1,1));
+   FXManager::emitExplosion(getActualPos(), 0.65f, ExplosionColors, EXPLOSION_COLOR_COUNT);
+   FXManager::emitBurst(getActualPos(), Point(a,c) * 0.6f, Color(1,1,0.25), Color(1,0,0));
+   FXManager::emitBurst(getActualPos(), Point(b,d) * 0.6f, Color(1,1,0), Color(0,1,1));
 
    disableCollision();
 }
@@ -591,7 +591,7 @@ void EngineeredObject::healObject(S32 time)
 
    if(mHealTimer.update(time))
    {
-      mHealth += .1;
+      mHealth += .1f;
       setMaskBits(HealthMask);
 
       if(mHealth >= 1)
@@ -618,12 +618,12 @@ Point EngineeredObject::mountToWall(const Point &pos, GridDatabase *wallEdgeData
    // it indirectly by snapping again, this time to a segment in our WallSegment database.  By using the snap point we found initially, that will
    // ensure the segment we find is associated with the edge found in the first pass.
    mountEdge = findAnchorPointAndNormal(wallEdgeDatabase, pos, 
-                               EngineeredObject::MAX_SNAP_DISTANCE, false, BarrierType, anchor, nrml);
+                               (F32)EngineeredObject::MAX_SNAP_DISTANCE, false, BarrierType, anchor, nrml);
 
    if(mountEdge)
    {
       mountSeg = findAnchorPointAndNormal(wallSegmentDatabase, anchor,     // <== passing in anchor here (found above), not pos
-                        EngineeredObject::MAX_SNAP_DISTANCE, false, BarrierType, anchor, nrml);
+                        (F32)EngineeredObject::MAX_SNAP_DISTANCE, false, BarrierType, anchor, nrml);
    }
 
    if(mountSeg)   // Found a segment we can mount to
@@ -698,7 +698,7 @@ void ForceFieldProjector::getGeom(const Point &anchor, const Point &normal, Vect
    static const S32 PROJECTOR_HALF_WIDTH = 12;  // Half the width of base of the projector, along the wall
 
    Point cross(normal.y, -normal.x);
-   cross.normalize(PROJECTOR_HALF_WIDTH);
+   cross.normalize((F32)PROJECTOR_HALF_WIDTH);
 
    geom.push_back(anchor + cross);
    geom.push_back(getForceFieldStartPoint(anchor, normal));
@@ -758,7 +758,7 @@ Vector<Point> ForceFieldProjector::getBufferForBotZone()
    if(isWoundClockwise(inputPoints))
       inputPoints.reverse();
 
-   offsetPolygon(inputPoints, bufferedPoints, BotNavMeshZone::BufferRadius);
+   offsetPolygon(inputPoints, bufferedPoints, (F32)BotNavMeshZone::BufferRadius);
 
    return bufferedPoints;
 }
@@ -1070,7 +1070,7 @@ Vector<Point> Turret::getBufferForBotZone()
    if (isWoundClockwise(inputPoints))
       inputPoints.reverse();
 
-   offsetPolygon(inputPoints, bufferedPoints, BotNavMeshZone::BufferRadius);
+   offsetPolygon(inputPoints, bufferedPoints, (F32)BotNavMeshZone::BufferRadius);
 
    return bufferedPoints;
 }
@@ -1244,7 +1244,7 @@ void Turret::idle(IdleCallPath path)
 
       // Calculate where we have to shoot to hit this...
       Point Vs = potential->getActualVel();
-      F32 S = gWeapons[mWeaponFireType].projVelocity;
+      F32 S = (F32)gWeapons[mWeaponFireType].projVelocity;
       Point d = potential->getRenderPos() - aimPos;
 
 // This could possibly be combined with LuaRobot's getFiringSolution, as it's essentially the same thing
@@ -1272,7 +1272,7 @@ void Turret::idle(IdleCallPath path)
       // See if we're gonna clobber our own stuff...
       disableCollision();
       Point delta2 = delta;
-      delta2.normalize(gWeapons[mWeaponFireType].projLiveTime * gWeapons[mWeaponFireType].projVelocity / 1000);
+      delta2.normalize(gWeapons[mWeaponFireType].projLiveTime * (F32)gWeapons[mWeaponFireType].projVelocity / 1000.f);
       GameObject *hitObject = findObjectLOS(ShipType | RobotType | BarrierType | EngineeredType, 0, aimPos, aimPos + delta2, t, n);
       enableCollision();
 

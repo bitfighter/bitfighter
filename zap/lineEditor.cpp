@@ -74,7 +74,7 @@ void LineEditor::buildMatchList(Vector<string> *candidates, const char *partial)
    {
       matchList.clear();
 
-      S32 len = strlen(partial);
+      S32 len = (S32)strlen(partial);
 
       for(S32 i = 0; i < candidates->size(); i++)
       {
@@ -89,7 +89,7 @@ void LineEditor::buildMatchList(Vector<string> *candidates, const char *partial)
 // Draw our cursor, assuming string is drawn at x,y  (vert spacing works differently than on the angle version
 void LineEditor::drawCursor(S32 x, S32 y, S32 fontSize)
 {
-   S32 width = UserInterface::getStringWidth((F32)fontSize, mLine.c_str());
+   S32 width = UserInterface::getStringWidth(fontSize, mLine.c_str());
    drawCursor(x, y, fontSize, width);
 }
 
@@ -100,7 +100,7 @@ void LineEditor::drawCursor(S32 x, S32 y, S32 fontSize, S32 startingWidth)
    if(cursorBlink)
    {
       // Get width of tiny letter in this font to use as space between text and cursor
-      S32 space = UserInterface::getStringWidth((F32)fontSize, "i");
+      S32 space = UserInterface::getStringWidth(fontSize, "i");
       UserInterface::drawString(x + startingWidth + space, y, fontSize, "_");
    }
 }
@@ -111,7 +111,7 @@ void LineEditor::drawCursorAngle(F32 x, F32 y, F32 fontSize, F32 angle)
 {
    if(cursorBlink)
    {
-      F32 w = UserInterface::getStringWidthF32(fontSize, mLine.c_str());
+      F32 w = UserInterface::getStringWidth(fontSize, mLine.c_str());
 
       F32 xpos = x + (w * cos(angle)); 
       F32 ypos = y + (w * sin(angle)); 

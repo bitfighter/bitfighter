@@ -171,13 +171,13 @@ void KeyDefMenuUserInterface::render()
    if(gClientGame->getConnectionToServer())
    {
       gClientGame->getUserInterface()->render();
-      glColor4f(0, 0, 0, 0.6);
+      glColor4f(0, 0, 0, 0.6f);
       glEnableBlend;
       glBegin(GL_POLYGON);
-         glVertex2f(0, 0);
-         glVertex2f(canvasWidth, 0);
-         glVertex2f(canvasWidth, gScreenInfo.getGameCanvasHeight());
-         glVertex2f(0, canvasHeight);
+         glVertex2i(0, 0);
+         glVertex2i(canvasWidth, 0);
+         glVertex2i(canvasWidth, gScreenInfo.getGameCanvasHeight());
+         glVertex2i(0, canvasHeight);
       glEnd();
       glDisableBlend;
    }
@@ -202,20 +202,20 @@ void KeyDefMenuUserInterface::render()
 
       if(selectedIndex == i)       // Highlight selected item
       {
-         glColor3f(0, 0, 0.4);     // Fill
+         glColor3f(0, 0, 0.4f);     // Fill
          glBegin(GL_POLYGON);
-            glVertex2f((menuItems[i].mColumn == 1 ? horizMargin : canvasWidth / 2) , y);
-            glVertex2f((menuItems[i].mColumn == 1 ? canvasWidth / 2 - horizMargin: canvasWidth - horizMargin), y);
-            glVertex2f((menuItems[i].mColumn == 1 ? canvasWidth / 2 - horizMargin: canvasWidth - horizMargin), y + height+ 1);
-            glVertex2f((menuItems[i].mColumn == 1 ? horizMargin : canvasWidth / 2), y + height + 1);
+            glVertex2i((menuItems[i].mColumn == 1 ? horizMargin : canvasWidth / 2) , y);
+            glVertex2i((menuItems[i].mColumn == 1 ? canvasWidth / 2 - horizMargin: canvasWidth - horizMargin), y);
+            glVertex2i((menuItems[i].mColumn == 1 ? canvasWidth / 2 - horizMargin: canvasWidth - horizMargin), y + height+ 1);
+            glVertex2i((menuItems[i].mColumn == 1 ? horizMargin : canvasWidth / 2), y + height + 1);
          glEnd();
 
          glColor3f(0, 0, 1);       // Outline
          glBegin(GL_LINE_LOOP);
-            glVertex2f((menuItems[i].mColumn == 1 ? horizMargin : canvasWidth / 2), y);
-            glVertex2f((menuItems[i].mColumn == 1 ? canvasWidth / 2 - horizMargin : canvasWidth - horizMargin), y);
-            glVertex2f((menuItems[i].mColumn == 1 ? canvasWidth / 2 - horizMargin : canvasWidth - horizMargin), y + height + 1);
-            glVertex2f((menuItems[i].mColumn == 1 ? horizMargin : canvasWidth / 2 ), y + height + 1);
+            glVertex2i((menuItems[i].mColumn == 1 ? horizMargin : canvasWidth / 2), y);
+            glVertex2i((menuItems[i].mColumn == 1 ? canvasWidth / 2 - horizMargin : canvasWidth - horizMargin), y);
+            glVertex2i((menuItems[i].mColumn == 1 ? canvasWidth / 2 - horizMargin : canvasWidth - horizMargin), y + height + 1);
+            glVertex2i((menuItems[i].mColumn == 1 ? horizMargin : canvasWidth / 2 ), y + height + 1);
          glEnd();
       }
 
@@ -236,7 +236,7 @@ void KeyDefMenuUserInterface::render()
          else
             glColor3f(1, 1, 1);
 
-         JoystickRender::renderControllerButton((S32)(canvasWidth * (menuItems[i].mColumn == 1 ? 0.25 : 0.75)) + horizMargin, y + offset, *menuItems[i].primaryControl, dupe, 10);
+         JoystickRender::renderControllerButton((canvasWidth * (menuItems[i].mColumn == 1 ? 0.25f : 0.75f)) + horizMargin, F32(y + offset), *menuItems[i].primaryControl, dupe, 10);
       }
    }
    

@@ -197,7 +197,7 @@ F32 GameObject::getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 up
 
    // give some extra love to things that are moving towards the scope object
    if(deltav.dot(deltap) < 0)
-      add = 0.7;
+      add = 0.7f;
 
    // and a little more love if this object has not yet been scoped.
    if(updateMask == 0xFFFFFFFF)
@@ -486,7 +486,7 @@ void GameObject::readCompressedVelocity(Point &vel, U32 max, BitStream *stream)
       //RDW This needs to be readSignedFloat.
       //See above.
       F32 theta = stream->readSignedFloat(10) * Float2Pi;
-      F32 magnitude = stream->readRangedU32(0, max);
+      F32 magnitude = (F32)stream->readRangedU32(0, max);
       vel.set(cos(theta) * magnitude, sin(theta) * magnitude);
    }
 }

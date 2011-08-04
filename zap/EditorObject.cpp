@@ -112,7 +112,7 @@ void EditorObject::addToEditor(Game *game)
 // TODO: Merge with copy in editor, if it's really needed
 static F32 getRenderingAlpha(bool isScriptItem)
 {
-   return isScriptItem ? .6 : 1;     // Script items will appear somewhat translucent
+   return isScriptItem ? .6f : 1;     // Script items will appear somewhat translucent
 }
 
 
@@ -147,7 +147,7 @@ static void renderVertex(VertexRenderStyles style, const Point &v, S32 number, F
    if(number != NO_NUMBER)     // Draw vertex numbers
    {
       glColor(Colors::white, alpha);
-      F32 txtSize = 6.0 / currentScale;
+      F32 txtSize = 6 / currentScale;
       UserInterface::drawStringf(v.x - F32(UserInterface::getStringWidthf(txtSize, "%d", number)) / 2, v.y - 3 / currentScale, txtSize, "%d", number);
    }
 }
@@ -168,7 +168,7 @@ static void renderVertex(VertexRenderStyles style, const Point &v, S32 number, F
 static const S32 DOCK_LABEL_SIZE = 9;      // Size to label items on the dock
 
 
-static void labelVertex(Point pos, S32 radius, const char *itemLabelTop, const char *itemLabelBottom)
+static void labelVertex(Point pos, F32 radius, const char *itemLabelTop, const char *itemLabelBottom)
 {
    F32 labelSize = DOCK_LABEL_SIZE;
 
@@ -225,7 +225,7 @@ void EditorObject::renderDockItemLabel(const Point &pos, const char *label, F32 
    F32 xpos = pos.x;
    F32 ypos = pos.y - DOCK_LABEL_SIZE / 2 + yOffset;
    glColor(Colors::white);
-   UserInterface::drawStringc(xpos, ypos, DOCK_LABEL_SIZE, label);
+   UserInterface::drawStringc(xpos, ypos, (F32)DOCK_LABEL_SIZE, label);
 }
 
 
@@ -374,7 +374,7 @@ void EditorObject::renderLinePolyVertices(F32 currentScale, F32 alpha)
       else if(mSelected || mLitUp || anyVertsSelected())
          renderVertex(SelectedItemVertex, v, j, currentScale, alpha);         // Hollow red boxes with number
       else
-         renderVertex(UnselectedItemVertex, v, NO_NUMBER, currentScale, alpha, currentScale > 2 ? 2 : 1);   // Solid red boxes, no number
+         renderVertex(UnselectedItemVertex, v, NO_NUMBER, currentScale, alpha, currentScale > 2 ? 2.f : 1.f);   // Solid red boxes, no number
    }
 }
 

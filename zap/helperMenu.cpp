@@ -67,9 +67,9 @@ void HelperMenu::drawMenuBorderLine(S32 yPos, const Color &color)
    glEnableBlend;
    glBegin(GL_LINES);
       glColor(color);
-      glVertex(UserInterface::horizMargin, yPos + 20);
+      glVertex2i(UserInterface::horizMargin, yPos + 20);
       glColor(color,0);    // Fade to transparent...
-      glVertex2f(400, yPos + 20);
+      glVertex2i(400, yPos + 20);
    glEnd();
    glDisableBlend;
 }
@@ -88,8 +88,8 @@ void HelperMenu::drawMenuCancelText(S32 yPos, const Color &color, S32 fontSize)
    else
    {
       S32 xPos = UserInterface::horizMargin;
-      xPos += UserInterface::drawStringAndGetWidth( xPos, yPos, fontSizeSm, "Press ");
-      JoystickRender::renderControllerButton(xPos, yPos, BUTTON_BACK, false, butSize / 2);
+      xPos += UserInterface::drawStringAndGetWidth(xPos, yPos, fontSizeSm, "Press ");
+      JoystickRender::renderControllerButton((F32)xPos, (F32)yPos, BUTTON_BACK, false, butSize / 2);
       xPos += butSize;
       glColor(color);
       UserInterface::drawString( xPos, yPos, fontSizeSm, " to cancel");

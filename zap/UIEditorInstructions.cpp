@@ -132,7 +132,7 @@ void EditorInstructionsUserInterface::render()
    drawStringf(3, 3, 25, "INSTRUCTIONS - %s", pageHeadersEditor[mCurPage - 1]);
    drawStringf(650, 3, 25, "PAGE %d/%d", mCurPage, NUM_PAGES);
    drawCenteredString(571, 20, "LEFT - previous page  RIGHT, SPACE - next page  ESC exits");
-   glColor3f(0.7, 0.7, 0.7);
+   glColor3f(0.7f, 0.7f, 0.7f);
 
    glBegin(GL_LINES);
       glVertex2f(0, 31);
@@ -230,8 +230,8 @@ void EditorInstructionsUserInterface::renderPageCommands(S32 page)
    bool done = false;
 
    glBegin(GL_LINES);
-      glVertex2f(col1, starty + 26);
-      glVertex2f(750, starty + 26);
+      glVertex2i(col1, starty + 26);
+      glVertex2i(750, starty + 26);
    glEnd();
 
    static const Color txtColor = Colors::cyan;
@@ -264,10 +264,10 @@ void EditorInstructionsUserInterface::renderPageCommands(S32 page)
       }
       else if(!strcmp(controls[i].command, "-"))      // Horiz spacer
       {
-         glColor3f(0.4, 0.4, 0.4);
+         glColor3f(0.4f, 0.4f, 0.4f);
          glBegin(GL_LINES);
-            glVertex2f(actCol, y + 13);
-            glVertex2f(actCol + 335, y + 13);
+            glVertex2i(actCol, y + 13);
+            glVertex2i(actCol + 335, y + 13);
          glEnd();
       }
       else if(!strcmp(controls[i].descr, "HEADER"))

@@ -206,9 +206,9 @@ bool SpeedZone::processArguments(S32 argc2, const char **argv2, Game *game)
       if((firstChar >= 'a' && firstChar <= 'z') || (firstChar >= 'A' && firstChar <= 'Z'))
       {
          if(firstChar = 'R') // 015a
-            mRotateSpeed = atof(&argv2[i][1]);   // using second char to handle number, "R3.4" or "R-1.7"
+            mRotateSpeed = (F32)atof(&argv2[i][1]);   // using second char to handle number, "R3.4" or "R-1.7"
          else if(!strnicmp(argv2[i], "Rotate=", 7))  // 016, same as 'R', better name
-            mRotateSpeed = atof(&argv2[i][7]);   // "Rotate=3.4" or "Rotate=-1.7"
+            mRotateSpeed = (F32)atof(&argv2[i][7]);   // "Rotate=3.4" or "Rotate=-1.7"
          else if(!stricmp(argv2[i], "SnapEnable"))
             mSnapLocation = true;
       }
@@ -339,7 +339,7 @@ void SpeedZone::collided(MoveObject *s, U32 stateIndex)
       Point diffpos = moveState->pos - pos;
       Point thisAngle = dir - pos;
       thisAngle.normalize();
-      Point newPos = thisAngle * diffpos.dot(thisAngle) + pos + impulse * 0.001;
+      Point newPos = thisAngle * diffpos.dot(thisAngle) + pos + impulse * 0.001f;
 
       Point oldVel = moveState->vel;
       Point oldPos = moveState->pos;
@@ -384,7 +384,7 @@ void SpeedZone::idle(GameObject::IdleCallPath path)
 
       dir -= getVert(0);
       F32 angle = dir.ATAN2();
-      angle += mRotateSpeed * mCurrentMove.time * 0.001;
+      angle += mRotateSpeed * mCurrentMove.time * 0.001f;
       dir.setPolar(1, angle);
       dir += getVert(0);
       setMaskBits(InitMask);
