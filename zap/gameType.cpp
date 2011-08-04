@@ -256,7 +256,7 @@ boost::shared_ptr<MenuItem> GameType::getMenuItem(Game *game, const char *key)
    else if(!strcmp(key, "Grid Size"))
       return boost::shared_ptr<MenuItem>(new CounterMenuItem(game,
                                                              "Grid Size:",       
-                                                             game->getGridSize(),
+                                                             (S32)game->getGridSize(),
                                                              Game::MIN_GRID_SIZE,      // increment
                                                              Game::MIN_GRID_SIZE,      // min val
                                                              Game::MAX_GRID_SIZE,      // max val
@@ -305,11 +305,11 @@ bool GameType::saveMenuItem(const MenuItem *menuItem, const char *key)
    else if(!strcmp(key, "Levelgen Script"))
       setScript(parseString(menuItem->getValue()));
    else if(!strcmp(key, "Game Time"))
-      setGameTime(menuItem->getIntValue());
+		setGameTime((F32)menuItem->getIntValue());
    else if(!strcmp(key, "Win Score"))
       setWinningScore(menuItem->getIntValue());
    else if(!strcmp(key, "Grid Size"))
-      getGame()->setGridSize(menuItem->getIntValue());
+      getGame()->setGridSize((F32)menuItem->getIntValue());
    else if(!strcmp(key, "Min Players"))
        setMinRecPlayers(menuItem->getIntValue());
    else if(!strcmp(key, "Max Players"))
@@ -718,7 +718,7 @@ void GameType::renderObjectiveArrow(const Point *nearestPoint, const Color *outl
    Point p3 = rp - arrowDir * 23 * scale - crossVec * 8 * scale;
 
    Color fillColor = *outlineColor;    // Create local copy
-   fillColor *= .7;
+   fillColor *= .7f;
 
    glEnableBlend;
 
@@ -1512,7 +1512,7 @@ void GameType::countTeamPlayers() const
 
          GameConnection *cc = mClientList[i]->clientConnection;
 
-         const F32 BASE_RATING = .1;
+         const F32 BASE_RATING = .1f;
 
          if(cc)
             team->addRating(max(getCurrentRating(cc), BASE_RATING));

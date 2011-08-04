@@ -168,7 +168,7 @@ void tick( F32 dT )
                if(theSpark->ttl > 0.25)
                   theSpark->alpha = 1;
                else
-                  theSpark->alpha = theSpark->ttl / 0.25;
+                  theSpark->alpha = theSpark->ttl / 0.25f;
             }
 
             i++;
@@ -199,7 +199,7 @@ void render(S32 renderPass)
          F32 radius = walk->time / F32(Teleporter::TeleportInExpandTime);
          F32 alpha = 1.0;
          if(radius > 0.5)
-            alpha = (1 - radius) / 0.5;
+            alpha = (1 - radius) / 0.5f;
          renderTeleporter(walk->pos, walk->type, false, Teleporter::TeleportInExpandTime - walk->time, radius, Teleporter::TeleportInRadius, alpha, Vector<Point>(), false);
       }
    }
@@ -249,7 +249,7 @@ void emitExplosion(Point pos, F32 size, Color *colorArray, U32 numColors)
 {
    for(U32 i = 0; i < (250.0 * size); i++)
    {
-      F32 th = TNL::Random::readF() * 2 * 3.14;
+      F32 th = TNL::Random::readF() * 2 * 3.14f;
       F32 f = (TNL::Random::readF() * 2 - 1) * 400 * size;
       U32 colorIndex = TNL::Random::readI() % numColors;
 
@@ -271,7 +271,7 @@ void emitBurst(Point pos, Point scale, Color color1, Color color2, U32 count)
    {
 
       F32 th = TNL::Random::readF() * 2 * FloatPi;
-      F32 f = (TNL::Random::readF() * 0.1 + 0.9) * 200 * size;
+      F32 f = (TNL::Random::readF() * 0.1f + 0.9f) * 200 * size;
       F32 t = TNL::Random::readF();
 
       Color r;
@@ -348,7 +348,7 @@ void FXTrail::render()
       else if(mNodes[i].boosted)
          glColor4f(1.f - t, 1.f - t, 0.f, 1.f-t);
       else
-         glColor4f(1.f - 2*t, 1.f - 2*t, 1.f, 0.7f-0.7*t);
+         glColor4f(1.f - 2 * t, 1.f - 2 * t, 1.f, 0.7f - 0.7f * t);
 
       glVertex2f(mNodes[i].pos.x, mNodes[i].pos.y);
    }

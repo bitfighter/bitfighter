@@ -54,9 +54,8 @@ extern void drawFilledEllipse(const Point &pos, F32 width, F32 height, F32 angle
 extern void drawPolygon(const Point &pos, S32 sides, F32 radius, F32 angle);
 
 //extern void glColor(const Color &c, float alpha = 1.0);
-extern void drawSquare(const Point &pos, F32 size, bool filled);
-extern void drawSquare(const Point &pos, S32 size);
-extern void drawSquare(const Point &pos, F32 size);
+extern void drawSquare(const Point &pos, F32 size, bool filled = false);
+extern void drawSquare(const Point &pos, S32 size, bool filled = false);
 extern void drawFilledSquare(const Point &pos, F32 size);
 extern void drawFilledSquare(const Point &pos, S32 size);
 extern void drawFilledSquare(const Point &pos, F32 size);

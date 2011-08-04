@@ -141,7 +141,7 @@ bool TextItem::processArguments(S32 argc, const char **argv, Game *game)
    setVert(pos, 0);
    setVert(dir, 1);
 
-   mSize = atof(argv[5]);
+   mSize = (F32)atof(argv[5]);
    mSize = max(min(mSize, (F32)MAX_TEXT_SIZE), (F32)MIN_TEXT_SIZE);      // Note that same line exists below, in recalcXXX()... combine?
 
    // Assemble any remainin args into a string
@@ -191,29 +191,29 @@ void TextItem::onAddedToGame(Game *theGame)
 // Bounding box for quick collision-possibility elimination, and display scoping purposes
 void TextItem::computeExtent()
 {
-   U32 len = UserInterface::getStringWidth(mSize, mText.c_str());
-   U32 buf = mSize / 2;     // Provides some room to accomodate descenders on letters like j and g.
+   F32 len = UserInterface::getStringWidth(mSize, mText.c_str());
+   //F32 buf = mSize / 2;     // Provides some room to accomodate descenders on letters like j and g.
 
    F32 angle =  getVert(0).angleTo(getVert(1));
    F32 sinang = sin(angle);
    F32 cosang = cos(angle);
 
-   F32 descenderFactor = .35;    // To account for y, g, j, etc.
+   F32 descenderFactor = .35f;    // To account for y, g, j, etc.
    F32 h = mSize * (1 + descenderFactor);
-   F32 w = len * 1.05;           // 1.05 adds just a little horizontal padding for certain words with trailing ys or other letters that are just a tiny bit longer than calculated
+   F32 w = len * 1.05f;           // 1.05 adds just a little horizontal padding for certain words with trailing ys or other letters that are just a tiny bit longer than calculated
    F32 x = getVert(0).x + mSize * descenderFactor * sinang;
    F32 y = getVert(0).y + mSize * descenderFactor * cosang;
 
-   F32 c1x = x - h * sinang * .5;
+   F32 c1x = x - h * sinang * .5f;
    F32 c1y = y;
 
-   F32 c2x = x + w * cosang - h * sinang * .5;
+   F32 c2x = x + w * cosang - h * sinang * .5f;
    F32 c2y = y + w * sinang;
 
-   F32 c3x = x + h * sinang * .5 + w * cosang;
+   F32 c3x = x + h * sinang * .5f + w * cosang;
    F32 c3y = y - h * cosang + w * sinang;
 
-   F32 c4x = x + h * sinang * .5;
+   F32 c4x = x + h * sinang * .5f;
    F32 c4y = y - h * cosang;
 
    F32 minx = min(c1x, min(c2x, min(c3x, c4x)));
@@ -251,7 +251,7 @@ U32 TextItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
    pos.write(stream);
    dir.write(stream);
 
-   stream->writeRangedU32(mSize, 0, MAX_TEXT_SIZE);
+   stream->writeRangedU32((U32)mSize, 0, MAX_TEXT_SIZE);
    stream->write(mTeam);
 
    stream->writeString(mText.c_str(), (U8) mText.length());      // Safe to cast text.length to U8 because we've limited it's length to MAX_TEXTITEM_LEN
@@ -272,7 +272,7 @@ void TextItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
    setVert(pos, 0);
    setVert(dir, 1);
 
-   mSize = stream->readRangedU32(0, MAX_TEXT_SIZE);
+   mSize = (F32)stream->readRangedU32(0, MAX_TEXT_SIZE);
    stream->read(&mTeam);
 
    stream->readString(txt);

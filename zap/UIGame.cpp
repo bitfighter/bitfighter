@@ -589,10 +589,10 @@ void GameUserInterface::renderProgressBar()
          S32 w = i ? width : barWidth;
 
          glBegin(i ? GL_LINE_LOOP : GL_POLYGON);
-            glVertex2f(left,     gScreenInfo.getGameCanvasHeight() - vertMargin);
-            glVertex2f(left + w, gScreenInfo.getGameCanvasHeight() - vertMargin);
-            glVertex2f(left + w, gScreenInfo.getGameCanvasHeight() - vertMargin - height);
-            glVertex2f(left,     gScreenInfo.getGameCanvasHeight() - vertMargin - height);
+            glVertex2i(left,     gScreenInfo.getGameCanvasHeight() - vertMargin);
+            glVertex2i(left + w, gScreenInfo.getGameCanvasHeight() - vertMargin);
+            glVertex2i(left + w, gScreenInfo.getGameCanvasHeight() - vertMargin - height);
+            glVertex2i(left,     gScreenInfo.getGameCanvasHeight() - vertMargin - height);
          glEnd();
       }
 
@@ -623,7 +623,7 @@ void GameUserInterface::renderReticle()
       Point offsetMouse = mMousePoint + Point(gScreenInfo.getGameCanvasWidth() / 2, gScreenInfo.getGameCanvasHeight() / 2);
 
       glEnableBlend;
-      glColor4f(0,1,0, 0.7);
+      glColor4f(0,1,0, 0.7f);
       glBegin(GL_LINES);
 
       glVertex2f(offsetMouse.x - 15, offsetMouse.y);
@@ -635,29 +635,29 @@ void GameUserInterface::renderReticle()
       {
          glColor4f(0,1,0, 0);
          glVertex2f(0, offsetMouse.y);
-         glColor4f(0,1,0, 0.7);
+         glColor4f(0,1,0, 0.7f);
          glVertex2f(offsetMouse.x - 30, offsetMouse.y);
       }
       if(offsetMouse.x < gScreenInfo.getGameCanvasWidth() - 30)
       {
-         glColor4f(0,1,0, 0.7);
+         glColor4f(0,1,0, 0.7f);
          glVertex2f(offsetMouse.x + 30, offsetMouse.y);
          glColor4f(0,1,0, 0);
-         glVertex2f(gScreenInfo.getGameCanvasWidth(), offsetMouse.y);
+         glVertex2f((F32)gScreenInfo.getGameCanvasWidth(), offsetMouse.y);
       }
       if(offsetMouse.y > 30)
       {
          glColor4f(0,1,0, 0);
          glVertex2f(offsetMouse.x, 0);
-         glColor4f(0,1,0, 0.7);
+         glColor4f(0,1,0, 0.7f);
          glVertex2f(offsetMouse.x, offsetMouse.y - 30);
       }
       if(offsetMouse.y < gScreenInfo.getGameCanvasHeight() - 30)
       {
-         glColor4f(0,1,0, 0.7);
+         glColor4f(0,1,0, 0.7f);
          glVertex2f(offsetMouse.x, offsetMouse.y + 30);
          glColor4f(0,1,0, 0);
-         glVertex2f(offsetMouse.x, gScreenInfo.getGameCanvasHeight());
+         glVertex2f(offsetMouse.x, (F32)gScreenInfo.getGameCanvasHeight());
       }
 
       glEnd();
@@ -683,10 +683,10 @@ S32 renderIndicator(S32 xPos, const char *name)
    S32 width = UserInterface::getStringWidth(fontSize, name);
 
    glBegin(GL_LINE_LOOP);
-      glVertex2f(xPos, UserInterface::vertMargin);
-      glVertex2f(xPos + width + 2 * gapSize, UserInterface::vertMargin);
-      glVertex2f(xPos + width + 2 * gapSize, UserInterface::vertMargin + fontSize + 2 * gapSize + 1);
-      glVertex2f(xPos, UserInterface::vertMargin + fontSize + 2 * gapSize + 1);
+      glVertex2i(xPos, UserInterface::vertMargin);
+      glVertex2i(xPos + width + 2 * gapSize, UserInterface::vertMargin);
+      glVertex2i(xPos + width + 2 * gapSize, UserInterface::vertMargin + fontSize + 2 * gapSize + 1);
+      glVertex2i(xPos, UserInterface::vertMargin + fontSize + 2 * gapSize + 1);
    glEnd();
 
    // Add the weapon name
@@ -798,7 +798,7 @@ void GameUserInterface::renderChatMessageDisplay()
          if(mDisplayChatMessage[i][0])
          {
             if (mHelper)   // fade out text if a helper menu is active
-               glColor(mDisplayChatMessageColor[i], 0.2);
+               glColor(mDisplayChatMessageColor[i], 0.2f);
             else
                glColor(mDisplayChatMessageColor[i]);
 
@@ -819,7 +819,7 @@ void GameUserInterface::renderChatMessageDisplay()
          if(mStoreChatMessage[i][0])
          {
             if (mHelper)   // fade out text if a helper menu is active
-               glColor(mStoreChatMessageColor[i], 0.2);
+               glColor(mStoreChatMessageColor[i], 0.2f);
             else
                glColor(mStoreChatMessageColor[i]);
 
@@ -1599,7 +1599,7 @@ void GameUserInterface::lineWidthHandler(GameUserInterface *gui, const Vector<st
       gui->displayErrorMessage("!!! Need to supply line width");
    else
    {
-      linewidth = atof(words[1].c_str());
+      linewidth = (F32)atof(words[1].c_str());
       if(linewidth < 0.125f)
          linewidth = 0.125f;
 
@@ -1781,13 +1781,13 @@ void GameUserInterface::renderCurrentChat()
 
    for(S32 i = 1; i >= 0; i--)
    {
-      glColor(baseColor, i ? .25 : .4);
+      glColor(baseColor, i ? .25f : .4f);
 
       glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
-         glVertex2f(horizMargin, ypos - 3);
-         glVertex2f(horizMargin + boxWidth, ypos - 3);
-         glVertex2f(horizMargin + boxWidth, ypos + CHAT_FONT_SIZE + 7);
-         glVertex2f(horizMargin, ypos + CHAT_FONT_SIZE + 7);
+         glVertex2i(horizMargin, ypos - 3);
+         glVertex2i(horizMargin + boxWidth, ypos - 3);
+         glVertex2i(horizMargin + boxWidth, ypos + CHAT_FONT_SIZE + 7);
+         glVertex2i(horizMargin, ypos + CHAT_FONT_SIZE + 7);
       glEnd();
    }
    glDisableBlend;
@@ -2071,8 +2071,8 @@ Move *GameUserInterface::getCurrentMove()
    if((mCurrentMode != ChatMode) && !gDisableShipKeyboardInput && !OGLCONSOLE_GetVisibility())
    {
       InputMode inputMode = gIniSettings.inputMode;
-      mCurrentMove.x = (!mRightDisabled && getKeyState(keyRIGHT[inputMode]) ? 1 : 0) - (!mLeftDisabled && getKeyState(keyLEFT[inputMode]) ? 1 : 0);
-      mCurrentMove.y = (!mDownDisabled && getKeyState(keyDOWN[inputMode]) ? 1 : 0) - (!mUpDisabled && getKeyState(keyUP[inputMode]) ? 1 : 0);
+      mCurrentMove.x = F32((!mRightDisabled && getKeyState(keyRIGHT[inputMode]) ? 1 : 0) - (!mLeftDisabled && getKeyState(keyLEFT[inputMode]) ? 1 : 0));
+      mCurrentMove.y = F32((!mDownDisabled && getKeyState(keyDOWN[inputMode]) ? 1 : 0) - (!mUpDisabled && getKeyState(keyUP[inputMode]) ? 1 : 0));
 
       mCurrentMove.fire = mFiring;
 
@@ -2205,15 +2205,15 @@ void GameUserInterface::setVolume(VolumeType volType, const Vector<string> &word
   switch(volType)
   {
    case SfxVolumeType:
-      gIniSettings.sfxVolLevel = (F32) vol / 10.0;
+      gIniSettings.sfxVolLevel = (F32) vol / 10.f;
       displayMessagef(gCmdChatColor, "SFX volume changed to %d %s", vol, vol == 0 ? "[MUTE]" : "");
       return;
    case MusicVolumeType:
-      gIniSettings.musicVolLevel = (F32) vol / 10.0;
+      gIniSettings.musicVolLevel = (F32) vol / 10.f;
       displayMessagef(gCmdChatColor, "Music volume changed to %d %s", vol, vol == 0 ? "[MUTE]" : "");
       return;
    case VoiceVolumeType:
-      gIniSettings.voiceChatVolLevel = (F32) vol / 10.0;
+      gIniSettings.voiceChatVolLevel = (F32) vol / 10.f;
       displayMessagef(gCmdChatColor, "Voice chat volume changed to %d %s", vol, vol == 0 ? "[MUTE]" : "");
       return;
    case ServerAlertVolumeType:
@@ -2280,12 +2280,12 @@ void GameUserInterface::VoiceRecorder::render()
 
       glColor3f(1, 1 ,1);
       glBegin(GL_LINES);
-      glVertex2f(10, 130);
-      glVertex2f(10, 145);
-      glVertex2f(10 + totalLineCount * 2, 130);
-      glVertex2f(10 + totalLineCount * 2, 145);
+      glVertex2i(10, 130);
+      glVertex2i(10, 145);
+      glVertex2i(10 + totalLineCount * 2, 130);
+      glVertex2i(10 + totalLineCount * 2, 145);
 
-      F32 halfway = totalLineCount * 0.5;
+      F32 halfway = totalLineCount * 0.5f;
       F32 full = amt * totalLineCount;
       for(U32 i = 1; i < full; i++)
       {
@@ -2294,8 +2294,8 @@ void GameUserInterface::VoiceRecorder::render()
          else
             glColor3f(1, 1 - (i - halfway) / halfway, 0);
 
-         glVertex2f(10 + i * 2, 130);
-         glVertex2f(10 + i * 2, 145);
+         glVertex2i(10 + i * 2, 130);
+         glVertex2i(10 + i * 2, 145);
       }
       glEnd();
    }
@@ -2510,7 +2510,7 @@ void GameUserInterface::renderScoreboard(const GameType *gameType)
       const Color *teamColor = gameType->getGame()->getTeamColor(i);
       glEnableBlend;
 
-      glColor(teamColor, 0.6);
+      glColor(teamColor, 0.6f);
       glBegin(GL_POLYGON);
          glVertex2i(xl, yt);
          glVertex2i(xr, yt);
@@ -2546,7 +2546,7 @@ void GameUserInterface::renderScoreboard(const GameType *gameType)
       for(S32 j = 0; j < playerScores.size(); j++)
       {
          static const char *bot = "B ";
-         S32 botsize = UserInterface::getStringWidth(F32(fontSize) * 0.5f, bot);
+         S32 botsize = UserInterface::getStringWidth(fontSize / 2, bot);
          S32 x = xl + 40;
 
          // Add the mark of the bot
@@ -2654,7 +2654,7 @@ void GameUserInterface::renderBasicInterfaceOverlay(const GameType *gameType, bo
 
       const S32 textsize = 32;
       S32 xpos = gScreenInfo.getGameCanvasWidth() - UserInterface::horizMargin - gameType->getDigitsNeededToDisplayScore() * 
-                                                                                 UserInterface::getStringWidth(F32(textsize), "0");
+                                                                                 UserInterface::getStringWidth(textsize, "0");
 
       for(S32 i = 0; i < teams.size(); i++)
       {

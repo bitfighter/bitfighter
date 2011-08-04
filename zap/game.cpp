@@ -228,7 +228,7 @@ void Game::setGameType(GameType *theGameType)      // TODO==> Need to store game
 
 void Game::resetLevelInfo()
 {
-   setGridSize(DefaultGridSize);
+   setGridSize((F32)DefaultGridSize);
 }
 
 
@@ -248,7 +248,7 @@ void Game::processLevelLoadLine(U32 argc, U32 id, const char **argv, GridDatabas
       if(argc < 2)
          throw LevelLoadException("Improperly formed GridSize parameter");
 
-      setGridSize(atof(argv[1]));
+      setGridSize((F32)atof(argv[1]));
       return;
    }
 
@@ -520,7 +520,7 @@ void Game::setGameTime(F32 time)
    TNLAssert(gt, "Null gametype!");
 
    if(gt)
-      gt->setGameTime(U32(time * 60));
+      gt->setGameTime(time * 60);
 }
 
 
@@ -904,7 +904,7 @@ void ServerGame::loadNextLevel()
    if(f)
    {
       char data[1024*4];  // 4 kb should be big enough to fit all parameters at the beginning of level, don't need to read everything.
-      S32 size = fread(data, 1, sizeof(data), f);
+      S32 size = (S32)fread(data, 1, sizeof(data), f);
       fclose(f);
       LevelInfo info = getLevelInfo(data, size);
       if(info.levelName == "")
@@ -2119,12 +2119,12 @@ void ClientGame::drawStars(F32 alphaFrac, Point cameraPos, Point visibleExtent)
    upperLeft.x = floor(upperLeft.x);      // Round to ints, slightly enlarging the corners to ensure
    upperLeft.y = floor(upperLeft.y);      // the entire screen is "covered" by the bounding box
 
-   lowerRight.x = floor(lowerRight.x) + 0.5;
-   lowerRight.y = floor(lowerRight.y) + 0.5;
+   lowerRight.x = floor(lowerRight.x) + 0.5f;
+   lowerRight.y = floor(lowerRight.y) + 0.5f;
 
    // Render some stars
    glPointSize( gLineWidth1 );
-   glColor3f(0.8 * alphaFrac, 0.8 * alphaFrac, 1.0 * alphaFrac);
+   glColor3f(0.8f * alphaFrac, 0.8f * alphaFrac, alphaFrac);
 
    glEnableClientState(GL_VERTEX_ARRAY);
    glVertexPointer(2, GL_FLOAT, sizeof(Point), &mStars[0]);    // Each star is a pair of floats between 0 and 1
@@ -2273,7 +2273,7 @@ void ClientGame::renderCommander()
    Point modVisSize = (worldExtents - visSize) * zoomFrac + visSize;
 
    // Put (0,0) at the center of the screen
-   glTranslatef(gScreenInfo.getGameCanvasWidth() / 2, gScreenInfo.getGameCanvasHeight() / 2, 0);    
+   glTranslatef(gScreenInfo.getGameCanvasWidth() / 2.f, gScreenInfo.getGameCanvasHeight() / 2.f, 0);    
 
    glScalef(canvasWidth / modVisSize.x, canvasHeight / modVisSize.y, 1);
 
@@ -2326,7 +2326,7 @@ void ClientGame::renderCommander()
                   Point p = ship->getRenderPos();
                   Point visExt = computePlayerVisArea(ship);
 
-                  glColor(teamColor * zoomFrac * 0.35);
+                  glColor(teamColor * zoomFrac * 0.35f);
 
                   glBegin(GL_POLYGON);
                      glVertex2f(p.x - visExt.x, p.y - visExt.y);
@@ -2351,7 +2351,7 @@ void ClientGame::renderCommander()
             {
                const Point &p = sb->getRenderPos();
                Point visExt(gSpyBugRange, gSpyBugRange);
-               glColor(teamColor * zoomFrac * 0.45);     // Slightly different color than that used for ships
+               glColor(teamColor * zoomFrac * 0.45f);     // Slightly different color than that used for ships
 
                glBegin(GL_POLYGON);
                   glVertex2f(p.x - visExt.x, p.y - visExt.y);
@@ -2360,7 +2360,7 @@ void ClientGame::renderCommander()
                   glVertex2f(p.x - visExt.x, p.y + visExt.y);
                glEnd();
 
-               glColor(teamColor * 0.8);     // Draw a marker in the middle
+               glColor(teamColor * 0.8f);     // Draw a marker in the middle
                drawCircle(u->getRenderPos(), 2);
             }
          }
@@ -2412,13 +2412,13 @@ void ClientGame::renderOverlayMap()
    S32 mapHeight = canvasHeight / 4;
    S32 mapX = UserInterface::horizMargin;        // This may need to the the UL corner, rather than the LL one
    S32 mapY = canvasHeight - UserInterface::vertMargin - mapHeight;
-   F32 mapScale = 0.10;
+   F32 mapScale = 0.1f;
 
    glBegin(GL_LINE_LOOP);
-      glVertex2f(mapX, mapY);
-      glVertex2f(mapX, mapY + mapHeight);
-      glVertex2f(mapX + mapWidth, mapY + mapHeight);
-      glVertex2f(mapX + mapWidth, mapY);
+      glVertex2i(mapX, mapY);
+      glVertex2i(mapX, mapY + mapHeight);
+      glVertex2i(mapX + mapWidth, mapY + mapHeight);
+      glVertex2i(mapX + mapWidth, mapY);
    glEnd();
 
    glEnable(GL_SCISSOR_BOX);                    // Crop to overlay map display area
@@ -2426,7 +2426,7 @@ void ClientGame::renderOverlayMap()
 
    glPushMatrix();   // Set scaling and positioning of the overlay
 
-   glTranslatef(mapX + mapWidth / 2, mapY + mapHeight / 2, 0);          // Move map off to the corner
+   glTranslatef(mapX + mapWidth / 2.f, mapY + mapHeight / 2.f, 0);          // Move map off to the corner
    glScalef(mapScale, mapScale, 1);                                     // Scale map
    glTranslatef(-position.x, -position.y, 0);                           // Put ship at the center of our overlay map area
 
@@ -2486,7 +2486,7 @@ void ClientGame::renderNormal()
    glPushMatrix();
 
    // Put (0,0) at the center of the screen
-   glTranslatef(gScreenInfo.getGameCanvasWidth() / 2, gScreenInfo.getGameCanvasHeight() / 2, 0);       
+   glTranslatef(gScreenInfo.getGameCanvasWidth() / 2.f, gScreenInfo.getGameCanvasHeight() / 2.f, 0);       
 
    Point visExt = computePlayerVisArea(dynamic_cast<Ship *>(u));
    glScalef((gScreenInfo.getGameCanvasWidth()  / 2) / visExt.x, 
@@ -2609,7 +2609,7 @@ bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &le
       {
          WallItem *wallObject = new WallItem();  
          
-         wallObject->setWidth(F32(atof(argv[1])));      // setWidth handles bounds checking
+         wallObject->setWidth(atoi(argv[1]));      // setWidth handles bounds checking
 
          wallObject->setDockItem(false);     // TODO: Needed?
          wallObject->initializeEditor();     // Only runs unselectVerts

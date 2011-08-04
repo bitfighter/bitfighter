@@ -50,7 +50,6 @@ void EngineerHelper::onMenuShow()
 }
 
 
-extern void drawSquare(const Point &pos, S32 size);
 static Point deployPosition, deployNormal;
 
 void EngineerHelper::render()

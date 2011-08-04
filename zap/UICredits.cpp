@@ -186,7 +186,7 @@ CreditsScroller::CreditsScroller()
          c.creditsLine.push_back(gGameCredits[index]);
       else   // Place credit in cache
       {
-         c.currPos.x = pos;
+         c.currPos.x = (F32)pos;
          pos += CreditGap;
          credits.push_back(c);
          c.creditsLine.clear();
@@ -228,10 +228,10 @@ void CreditsScroller::render()
 
    glColor3f(0, 0, 0);
    glBegin(GL_POLYGON);
-      glVertex2f(0, 0);
-      glVertex2f(0, 150);
-      glVertex2f(gScreenInfo.getGameCanvasWidth(), 150);
-      glVertex2f(gScreenInfo.getGameCanvasWidth(), 0);
+      glVertex2i(0, 0);
+      glVertex2i(0, 150);
+      glVertex2i(gScreenInfo.getGameCanvasWidth(), 150);
+      glVertex2i(gScreenInfo.getGameCanvasWidth(), 0);
    glEnd();
 
    renderStaticBitfighterLogo();    // And add our logo at the top of the page
@@ -281,12 +281,12 @@ void SplashUserInterface::render()
    {
       glColor3f(0, mSplashTimer.getFraction(), 1);
 
-      if(mType == 1)          // Twirl
+      if(mType == 1)          // Twirl - unused?   arguments might be wrong..
          renderBitfighterLogo(gScreenInfo.getGameCanvasHeight() / 2, 
-                             (1 - mSplashTimer.getFraction()), (1 - mSplashTimer.getFraction()) * 360.0f);
-      else if(mType == 2)     // Zoom in
+                             (1 - mSplashTimer.getFraction()), U32((1 - mSplashTimer.getFraction()) * 360.0f));
+      else if(mType == 2)     // Zoom in - unused?   arguments might be wrong..
          renderBitfighterLogo(gScreenInfo.getGameCanvasHeight() / 2, 
-                              1 + pow(mSplashTimer.getFraction(), 2) * 20.0f, (mSplashTimer.getFraction()) * 20);
+                              1 + pow(mSplashTimer.getFraction(), 2) * 20.0f, U32(mSplashTimer.getFraction() * 20));
       else if(mType == 3)     // Single letters
       {
          F32 fr = pow(mSplashTimer.getFraction(), 2);

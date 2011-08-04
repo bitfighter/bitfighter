@@ -225,14 +225,14 @@ void AbstractChat::renderMessages(U32 ypos, U32 lineCountToDisplay)  // ypos is 
             if(renderLoop)
             {
                xpos = UserInterface::horizMargin / 2;
-               xpos += UserInterface::drawStringAndGetWidthf(xpos, ypos + (CHAT_FONT_SIZE - CHAT_TIME_FONT_SIZE) / 2 + 2,  // + 2 just looks better!
+               xpos += UserInterface::drawStringAndGetWidthf((F32)xpos, F32(ypos + (CHAT_FONT_SIZE - CHAT_TIME_FONT_SIZE)) / 2.f + 2,  // + 2 just looks better!
                      CHAT_TIME_FONT_SIZE, "[%s] ", msg.time.c_str());
 
                if(!msg.isSystem)
                   xpos += UserInterface::drawStringAndGetWidth(xpos, ypos, CHAT_FONT_SIZE, msg.from.c_str());     // No sender for system message
 
                if(msg.isPrivate)
-                  xpos += UserInterface::drawStringAndGetWidthf(xpos, ypos, CHAT_FONT_SIZE, "*");
+                  xpos += UserInterface::drawStringAndGetWidth(xpos, ypos, CHAT_FONT_SIZE, "*");
 
                if(!msg.isSystem)
                   xpos += UserInterface::drawStringAndGetWidth(xpos, ypos, CHAT_FONT_SIZE, ARROW) + AFTER_ARROW_SPACE;
@@ -325,7 +325,7 @@ void AbstractChat::renderChatters(S32 xpos, S32 ypos)
 
          glColor(getColor(name));      // use it
 
-         xpos += UserInterface::drawStringAndGetWidthf(xpos, ypos, CHAT_NAMELIST_SIZE, "%s%s", name, (i < mPlayersInGlobalChat.size() - 1) ? "; " : "");
+         xpos += UserInterface::drawStringAndGetWidthf((F32)xpos, (F32)ypos, CHAT_NAMELIST_SIZE, "%s%s", name, (i < mPlayersInGlobalChat.size() - 1) ? "; " : "");
       }
 }
 
@@ -358,10 +358,10 @@ void ChatUserInterface::render()
       glColor4f(0, 0, 0, 0.75);  // ... and dim it out a bit, nay, a lot
       glEnableBlend;
       glBegin(GL_POLYGON);
-         glVertex2f(0, 0);
-         glVertex2f(gScreenInfo.getGameCanvasWidth(), 0);
-         glVertex2f(gScreenInfo.getGameCanvasWidth(), gScreenInfo.getGameCanvasHeight());
-         glVertex2f(0, gScreenInfo.getGameCanvasHeight());
+         glVertex2i(0, 0);
+         glVertex2i(gScreenInfo.getGameCanvasWidth(), 0);
+         glVertex2i(gScreenInfo.getGameCanvasWidth(), gScreenInfo.getGameCanvasHeight());
+         glVertex2i(0, gScreenInfo.getGameCanvasHeight());
       glEnd();
       glDisableBlend;
    }

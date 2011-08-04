@@ -45,7 +45,7 @@ SlipZone::SlipZone()     // Constructor
    mNetFlags.set(Ghostable);
    mObjectTypeMask = SlipZoneType | CommandMapVisType;
    mObjectTypeNumber = SlipZoneTypeNumber;
-   slipAmount = 0.1;
+   slipAmount = 0.1f;
 }
 
 
@@ -101,7 +101,7 @@ bool SlipZone::processArguments(S32 argc2, const char **argv2, Game *game)
 
    if(argc & 1)   // Odd number of arg count (7,9,11) to allow optional slipAmount arg
    {
-      slipAmount = atof(argv[0]);
+      slipAmount = (F32)atof(argv[0]);
       readGeom(argc, argv, 1, game->getGridSize());
    }
    else           // Even number of arg count (6,8,10)

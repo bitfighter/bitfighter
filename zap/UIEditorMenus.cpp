@@ -61,7 +61,7 @@ void EditorAttributeMenuUI::render()
    for(S32 i = 0; i < count; i++)
    {
       S32 y = yStart + i * (ATTR_TEXTSIZE + gap);
-      menuItems[i]->render(center.x, y, ATTR_TEXTSIZE, selectedIndex == i);
+      menuItems[i]->render((S32)center.x, y, ATTR_TEXTSIZE, selectedIndex == i);
    }
 }
 

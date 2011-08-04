@@ -198,13 +198,13 @@ void Projectile::idle(GameObject::IdleCallPath path)
    if(!collided && alive)
    {
     U32 aliveTime = getGame()->getCurrentTime() - getCreationTime();  // Age of object, in ms
-    F32 timeLeft = deltaT;
+    F32 timeLeft = (F32)deltaT;
     S32 loopcount1 = 32;
-    while(timeLeft > 0.001 && loopcount1 != 0)    // This loop is to prevent slow bounce on low frame rate / high time left.
+    while(timeLeft > 0.01f && loopcount1 != 0)    // This loop is to prevent slow bounce on low frame rate / high time left.
     {
       loopcount1--;
       // Calculate where projectile will be at the end of the current interval
-      Point endPos = pos + velocity * timeLeft * 0.001;
+      Point endPos = pos + velocity * timeLeft * 0.001f;
 
       // Check for collision along projected route of movement
       static Vector<GameObject *> disabledList;
@@ -274,7 +274,7 @@ void Projectile::idle(GameObject::IdleCallPath path)
 
             Point collisionPoint = pos + (endPos - pos) * collisionTime;
             pos = collisionPoint + surfNormal;
-            timeLeft = timeLeft * (0.99 - collisionTime);
+            timeLeft = timeLeft * (1 - collisionTime);
 
             MoveObject *obj = dynamic_cast<MoveObject *>(hitObject);
             if(obj)
@@ -283,8 +283,8 @@ void Projectile::idle(GameObject::IdleCallPath path)
                float1 = pos.distanceTo(obj->getRenderPos());
                if(float1 < obj->getRadius())
                {
-                  float1 = obj->getRadius() * 1.01 / float1;
-                  pos = pos * float1 + obj->getRenderPos() * (1.0 - float1);  // to fix bouncy stuck inside shielded ship
+                  float1 = obj->getRadius() * 1.01f / float1;
+                  pos = pos * float1 + obj->getRenderPos() * (1 - float1);  // to fix bouncy stuck inside shielded ship
                }
             }
 
@@ -375,7 +375,7 @@ void Projectile::explode(GameObject *hitObject, Point pos)
    // Do some particle spew...
    if(isGhost())
    {
-      FXManager::emitExplosion(pos, 0.3, gProjInfo[mType].sparkColors, NumSparkColors);
+      FXManager::emitExplosion(pos, 0.3f, gProjInfo[mType].sparkColors, NumSparkColors);
 
       Ship *s = dynamic_cast<Ship *>(hitObject);
 
@@ -529,7 +529,7 @@ void GrenadeProjectile::damageObject(DamageInfo *theInfo)
    Point dv = theInfo->impulseVector - mMoveState[ActualState].vel;
    Point iv = mMoveState[ActualState].pos - theInfo->collisionPoint;
    iv.normalize();
-   mMoveState[ActualState].vel += iv * dv.dot(iv) * 0.3;
+   mMoveState[ActualState].vel += iv * dv.dot(iv) * 0.3f;
 
    setMaskBits(PositionMask);
 }
@@ -810,7 +810,7 @@ void Mine::renderEditor(F32 currentScale)
 
 void Mine::renderDock()
 {
-   glColor3f(.7, .7, .7);
+   glColor3f(.7f, .7f, .7f);
    drawCircle(getVert(0), 9);
    drawLetter('M', getVert(0), Color(.7), 1);
 }
@@ -1011,9 +1011,9 @@ void SpyBug::renderEditor(F32 currentScale)
 
 void SpyBug::renderDock()
 {
-   glColor3f(.7, .7, .7);
+   glColor3f(.7f, .7f, .7f);
    drawCircle(getVert(0), 9);
-   drawLetter('S', getVert(0), Color(.7), 1);
+   drawLetter('S', getVert(0), Color(.7f), 1);
 }
 
 

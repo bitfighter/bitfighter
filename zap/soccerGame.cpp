@@ -326,7 +326,7 @@ S32 SoccerGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEve
 TNL_IMPLEMENT_NETOBJECT(SoccerBallItem);
 
 // Constructor
-SoccerBallItem::SoccerBallItem(Point pos) : EditorItem(pos, true, SoccerBallItem::SOCCER_BALL_RADIUS, 4)
+SoccerBallItem::SoccerBallItem(Point pos) : EditorItem(pos, true, (F32)SoccerBallItem::SOCCER_BALL_RADIUS, 4)
 {
    mObjectTypeMask |= CommandMapVisType | SoccerBallItemType;
    mObjectTypeNumber = SoccerBallItemTypeNumber;
@@ -485,7 +485,7 @@ void SoccerBallItem::idle(GameObject::IdleCallPath path)
 
    else if(mSendHomeTimer.getCurrent())      // Goal has been scored, waiting for ball to reset
    {
-      F32 accelFraction = 1 - (0.95 * mCurrentMove.time * 0.001f);
+      F32 accelFraction = 1 - (0.95f * mCurrentMove.time * 0.001f);
 
       mMoveState[ActualState].vel *= accelFraction;
       mMoveState[RenderState].vel *= accelFraction;
@@ -518,7 +518,7 @@ void SoccerBallItem::damageObject(DamageInfo *theInfo)
    Point dv = theInfo->impulseVector - mMoveState[ActualState].vel;
    Point iv = mMoveState[ActualState].pos - theInfo->collisionPoint;
    iv.normalize();
-   mMoveState[ActualState].vel += iv * dv.dot(iv) * 0.3;
+   mMoveState[ActualState].vel += iv * dv.dot(iv) * 0.3f;
 
    if(theInfo->damagingObject)
    {

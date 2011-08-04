@@ -202,15 +202,16 @@ public:
 
 
    // Draw strings centered at point
-   static void drawStringfc(F32 x, F32 y, S32 size, const char *format, ...);
+   static void drawStringfc(F32 x, F32 y, F32 size, const char *format, ...);
    static void drawStringc(F32 x, F32 y, F32 size, const char *string);
 
    // Draw strings right-aligned at point
-   static void drawStringfr(F32 x, F32 y, S32 size, const char *format, ...);
+   static void drawStringfr(F32 x, F32 y, F32 size, const char *format, ...);
 
    // Draw string and get it's width
    static S32 drawStringAndGetWidth(S32 x, S32 y, S32 size, const char *string);
    static S32 drawStringAndGetWidth(F32 x, F32 y, S32 size, const char *string);
+   static S32 drawStringAndGetWidthf(S32 x, S32 y, S32 size, const char *format, ...);
    static S32 drawStringAndGetWidthf(F32 x, F32 y, S32 size, const char *format, ...);
 
 
@@ -232,7 +233,7 @@ public:
    // Draw text centered on screen (normal and formatted versions)  --> now return starting location
    static S32 drawCenteredString(S32 y, S32 size, const char *str);
    static S32 drawCenteredString(S32 x, S32 y, S32 size, const char *str);
-   static S32 drawCenteredString(F32 x, F32 y, S32 size, const char *str);
+   static F32 drawCenteredString(F32 x, F32 y, S32 size, const char *str);
    static S32 drawCenteredStringf(S32 y, S32 size, const char *format, ...);
    static S32 drawCenteredStringf(S32 x, S32 y, S32 size, const char *format, ...);
 

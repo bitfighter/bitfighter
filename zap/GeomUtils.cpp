@@ -90,7 +90,6 @@ bool PolygonContains(const Point *inVertices, int inNumVertices, const Point &in
 
 #define MIN(x,y) (((x) < (y)) ? (x) : (y))
 #define MAX(x,y) (((x) > (y)) ? (x) : (y))
-#define ABS(x) (((x) > 0) ? (x) : -(x))
 
 
 // From http://local.wasp.uwa.edu.au/~pbourke/geometry/insidepoly/
@@ -394,7 +393,7 @@ bool segmentsColinear(const Point &p1, const Point &p2, const Point &p3, const P
    float numerator = ((p4.x - p3.x) * (p1.y - p3.y)) - ((p4.y - p3.y) * (p1.x - p3.x));
    float numerator2 = ((p2.x - p1.x) * (p1.y - p3.y)) - ((p2.y - p1.y) * (p1.x - p3.x));
 
-   if(ABS(denom) < smallNumber && ABS(numerator) < smallNumber && ABS(numerator2) < smallNumber)
+   if(fabs(denom) < smallNumber && fabs(numerator) < smallNumber && fabs(numerator2) < smallNumber)
     return true;    // Coincident
 
    return false;    // Not
@@ -486,7 +485,7 @@ bool pointOnSegment(const Point &c, const Point &a, const Point &b, F32 closeEno
 //
 //   if ((r >= 0) && (r <= 1)) 
 //   {
-//      return(ABS(s) < .0001);      
+//      return(fabs(s) < .0001);      
 //   }
 //   else
 //      return false;
@@ -899,11 +898,11 @@ Vector<Vector<Point> > downscaleClipperPoints(const Polygons& inputPolygons)
 {
    Vector<Vector<Point> > outputPolygons;
 
-   outputPolygons.resize(inputPolygons.size());
+   outputPolygons.resize((U32)inputPolygons.size());
 
    for(U32 i = 0; i < inputPolygons.size(); i++) 
    {
-      outputPolygons[i].resize(inputPolygons[i].size());
+      outputPolygons[i].resize((U32)inputPolygons[i].size());
 
       for(U32 j = 0; j < inputPolygons[i].size(); j++)
          outputPolygons[i][j] = Point(F32(inputPolygons[i][j].X) / CLIPPER_SCALE_FACT, F32(inputPolygons[i][j].Y) / CLIPPER_SCALE_FACT);
@@ -1276,7 +1275,7 @@ F32 angleOfLongestSide(const Vector<Point> &polyPoints)
       }
       else if(len > maxlen - .1)    // Lengths are essentially equal... align text along "more horizontal" axis
       {
-         if(ABS(p1.angleTo(p2)) < ABS(ang))
+         if(fabs(p1.angleTo(p2)) < fabs(ang))
          {
             start = p1;
             end = p2;
@@ -1363,5 +1362,4 @@ bool findIntersection(const Point &p1, const Point &p2, const Point &p3, const P
 
 #undef MIN
 #undef MAX
-#undef ABS
 

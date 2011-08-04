@@ -50,11 +50,11 @@ TeamPreset gTeamPresets[] = {
    { "Red",         1,     0,    0 },
    { "Yellow",      1,     1,    0 },
    { "Green",       0,     1,    0 },
-   { "Pink",        1,   .45, .875 },
-   { "Orange",      1,   .67,    0 },
-   { "Lilac",      .79,   .5,  .96 },
-   { "LightBlue",  .45, .875,    1 },
-   { "Ruby",       .67,    0,    0 },
+   { "Pink",        1, .45f, .875f },
+   { "Orange",      1,  .67f,    0 },
+   { "Lilac",     .79f,   .5, .96f },
+   { "LightBlue", .45f, .875f,   1 },
+   { "Ruby",      .67f,    0,    0 },
 };
 
 // Other ideas
@@ -313,13 +313,13 @@ void TeamDefUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    }
 
    else if(keyCode == KEY_R)
-      getGame()->getTeam(selectedIndex)->alterRed(getKeyState(KEY_SHIFT) ? -.01 : .01);
+      getGame()->getTeam(selectedIndex)->alterRed(getKeyState(KEY_SHIFT) ? -.01f : .01f);
 
    else if(keyCode == KEY_G)
-      getGame()->getTeam(selectedIndex)->alterGreen(getKeyState(KEY_SHIFT) ? -.01 : .01);
+      getGame()->getTeam(selectedIndex)->alterGreen(getKeyState(KEY_SHIFT) ? -.01f : .01f);
 
    else if(keyCode == KEY_B)
-      getGame()->getTeam(selectedIndex)->alterBlue(getKeyState(KEY_SHIFT) ? -.01 : .01);
+      getGame()->getTeam(selectedIndex)->alterBlue(getKeyState(KEY_SHIFT) ? -.01f : .01f);
 
    else if(keyCode == KEY_ESCAPE || keyCode == BUTTON_BACK)       // Quit
    {
