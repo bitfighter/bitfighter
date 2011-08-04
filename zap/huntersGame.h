@@ -82,7 +82,7 @@ public:
    void addNexus(HuntersNexusObject *theObject);
    void shipTouchNexus(Ship *ship, HuntersNexusObject *nexus);
    void onGhostAvailable(GhostConnection *connection);
-   void idle(GameObject::IdleCallPath path);
+   void idle(GameObject::IdleCallPath path, U32 deltaT);
    void renderInterfaceOverlay(bool scoreboardVisible);
 
    void controlObjectForClientKilled(GameConnection *theClient, GameObject *clientObject, GameObject *killerObject);

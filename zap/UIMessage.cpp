@@ -134,7 +134,7 @@ void MessageUserInterface::render()
    // Fade effect
    F32 fadeFactor;
    if(mFadeTimer.getCurrent() < 1000)      // getCurrent returns time remaining
-      fadeFactor = (F32) mFadeTimer.getCurrent() / 1000.0;
+      fadeFactor = (F32) mFadeTimer.getCurrent() / 1000.f;
    else
       fadeFactor = 1;
 
@@ -146,7 +146,7 @@ void MessageUserInterface::render()
 
    if(mBox)
    {
-      glColor4f(.3, 0, 0, fadeFactor * 0.95);    // Draw a box
+      glColor4f(.3f, 0, 0, fadeFactor * 0.95f);    // Draw a box
       glBegin(GL_POLYGON);
          glVertex(wInset + mVertOffset, hInset);
          glVertex(canvasWidth - wInset + mVertOffset, hInset);

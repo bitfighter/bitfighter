@@ -75,9 +75,9 @@ TNL_IMPLEMENT_NETOBJECT(Ship);
 // Constructor
 // Note that most of these values are set in the initial packet set from the server (see packUpdate() below)
 // Also, the following is also run by robot's constructor
-Ship::Ship(StringTableEntry playerName, bool isAuthenticated, S32 team, Point p, F32 m, bool isRobot) : MoveObject(p, CollisionRadius), mSpawnPoint(p)
+Ship::Ship(StringTableEntry playerName, bool isAuthenticated, S32 team, Point p, F32 m, bool isRobot) : MoveObject(p, (F32)CollisionRadius), mSpawnPoint(p)
 {
-   mObjectTypeMask = ShipType | MoveableType | CommandMapVisType | TurretTargetType;
+   mObjectTypeMask = ShipType | MoveableType | CommandMapVisType;
    mObjectTypeNumber = ShipTypeNumber;
    mFireTimer = 0;
 
@@ -202,7 +202,7 @@ void Ship::setActualPos(Point p, bool warp)
 // Process a move.  This will advance the position of the ship, as well as adjust its velocity and angle.
 void Ship::processMove(U32 stateIndex)
 {
-   const F32 ARMOR_ACCEL_PENALTY_FACT = 0.35;
+   const F32 ARMOR_ACCEL_PENALTY_FACT = 0.35f;
    const F32 ARMOR_SPEED_PENALTY_FACT = 1;
 
    mMoveState[LastProcessState] = mMoveState[stateIndex];
@@ -210,7 +210,7 @@ void Ship::processMove(U32 stateIndex)
    F32 maxVel = (isModuleActive(ModuleBoost) ? BoostMaxVelocity : MaxVelocity) * 
                 (hasModule(ModuleArmor) ? ARMOR_SPEED_PENALTY_FACT : 1);
 
-   F32 time = mCurrentMove.time * 0.001;
+   F32 time = mCurrentMove.time * 0.001f;
    Point requestVel(mCurrentMove.x, mCurrentMove.y);
 
    const S32 MAX_CONTROLLABLE_SPEED = 1000;     // 1000 is completely arbitrary, but it seems to work well...
@@ -247,7 +247,7 @@ void Ship::processMove(U32 stateIndex)
 
 
 // Find objects of specified type that may be under the ship, and put them in fillVector
-void Ship::findObjectsUnderShip(GameObjectType type)
+void Ship::findObjectsUnderShip(BITMASK type)
 {
    Rect rect(getActualPos(), getActualPos());
    rect.expand(Point(CollisionRadius, CollisionRadius));
@@ -258,7 +258,7 @@ void Ship::findObjectsUnderShip(GameObjectType type)
 
 
 // Returns the zone in question if this ship is in a zone of type zoneType
-GameObject *Ship::isInZone(GameObjectType zoneType)
+GameObject *Ship::isInZone(BITMASK zoneType)
 {
    findObjectsUnderShip(zoneType);
 
@@ -300,12 +300,12 @@ GameObject *Ship::isInZone(GameObjectType zoneType)
 F32 Ship::getSlipzoneSpeedMoficationFactor()
 {
    SlipZone *slipzone = dynamic_cast<SlipZone *>(isInZone(SlipZoneType));
-   return slipzone ? slipzone->slipAmount : 1.0;
+   return slipzone ? slipzone->slipAmount : 1.0f;
 }
 
 
 // Returns the object in question if this ship is on an object of type objectType
-DatabaseObject *Ship::isOnObject(GameObjectType objectType)
+DatabaseObject *Ship::isOnObject(BITMASK objectType)
 {
    findObjectsUnderShip(objectType);
 
@@ -591,7 +591,7 @@ bool Ship::findRepairTargets()
 // Repairs ALL repair targets found above
 void Ship::repairTargets()
 {
-   F32 totalRepair = RepairHundredthsPerSecond * 0.01 * mCurrentMove.time * 0.001f;
+   F32 totalRepair = RepairHundredthsPerSecond * 0.01f * mCurrentMove.time * 0.001f;
 
 //   totalRepair /= mRepairTargets.size();
 
@@ -672,7 +672,7 @@ void Ship::processEnergy()
       //}
    }
 
-   F32 scaleFactor = mCurrentMove.time * 0.001;
+   F32 scaleFactor = mCurrentMove.time * 0.001f;
 
    // Update things based on available energy...
    bool anyActive = false;
@@ -1210,7 +1210,7 @@ S32 Ship::getFlagCount()
 }
 
 
-bool Ship::isCarryingItem(GameObjectType objectType)
+bool Ship::isCarryingItem(BITMASK objectType)
 {
    for(S32 i = mMountedItems.size() - 1; i >= 0; i--)
       if(mMountedItems[i].isValid() && mMountedItems[i]->getObjectTypeMask() & objectType)
@@ -1219,7 +1219,7 @@ bool Ship::isCarryingItem(GameObjectType objectType)
 }
 
 
-Item *Ship::unmountItem(GameObjectType objectType)
+Item *Ship::unmountItem(BITMASK objectType)
 {
    //logprintf("%s ship->unmountItem", isGhost()? "Client:" : "Server:");
    for(S32 i = mMountedItems.size() - 1; i >= 0; i--)
@@ -1365,13 +1365,13 @@ void Ship::emitShipExplosion(Point pos)
 {
    SoundSystem::playSoundEffect(SFXShipExplode, pos, Point());
 
-   F32 a = TNL::Random::readF() * 0.4 + 0.5;
-   F32 b = TNL::Random::readF() * 0.2 + 0.9;
+   F32 a = TNL::Random::readF() * 0.4f + 0.5f;
+   F32 b = TNL::Random::readF() * 0.2f + 0.9f;
 
-   F32 c = TNL::Random::readF() * 0.15 + 0.125;
-   F32 d = TNL::Random::readF() * 0.2 + 0.9;
+   F32 c = TNL::Random::readF() * 0.15f + 0.125f;
+   F32 d = TNL::Random::readF() * 0.2f + 0.9f;
 
-   FXManager::emitExplosion(mMoveState[ActualState].pos, 0.9, ShipExplosionColors, NumShipExplosionColors);
+   FXManager::emitExplosion(mMoveState[ActualState].pos, 0.9f, ShipExplosionColors, NumShipExplosionColors);
    FXManager::emitBurst(pos, Point(a,c), Color(1,1,0.25), Colors::red);
    FXManager::emitBurst(pos, Point(b,d), Colors::yellow, Color(0,0.75,0));
 }
@@ -1515,7 +1515,7 @@ void Ship::emitMovementSparks()
                 thrust.interp(t, dim, light);
 
                 FXManager::emitSpark(mMoveState[RenderState].pos - shipDirs[i] * 13,
-                     -shipDirs[i] * 100 + chaos, thrust, 1.5 * TNL::Random::readF());
+                     -shipDirs[i] * 100 + chaos, thrust, 1.5f * TNL::Random::readF());
              }
           }
       }
@@ -1532,8 +1532,8 @@ void Ship::render(S32 layerIndex)
 
    F32 warpInScale = (WarpFadeInTime - mWarpInTimer.getCurrent()) / F32(WarpFadeInTime);
    F32 rotAmount = 0;      // We use rotAmount to add the spinny effect you see when a ship spawns or comes through a teleport
-   if(warpInScale < 0.8)
-      rotAmount = (0.8 - warpInScale) * 540;
+   if(warpInScale < 0.8f)
+      rotAmount = (0.8f - warpInScale) * 540;
 
    // An angle of 0 means the ship is heading down the +X axis
    // since we draw the ship pointing up the Y axis, we should rotate
@@ -1557,7 +1557,7 @@ void Ship::render(S32 layerIndex)
          str = "<<" + str + ">>";
 
       glEnableBlend;
-      F32 textAlpha = 0.5 * alpha;
+      F32 textAlpha = 0.5f * alpha;
       S32 textSize = 14;
 #ifdef TNL_OS_XBOX
       textAlpha *= 1 - gClientGame->getCommanderZoomFraction();
@@ -1566,15 +1566,15 @@ void Ship::render(S32 layerIndex)
       glLineWidth(gLineWidth1);
 #endif
       glColor4f(1,1,1,textAlpha);
-      UserInterface::drawStringc(0, 30, textSize, str.c_str());
+      UserInterface::drawStringc(0, 30, (F32)textSize, str.c_str());
 
       // Underline name if player is authenticated
       if(mIsAuthenticated)
       {
          S32 xoff = UserInterface::getStringWidth(textSize, str.c_str()) / 2;
          glBegin(GL_LINES);
-            glVertex2f(-xoff, 33 + textSize);
-            glVertex2f(xoff, 33 + textSize);
+            glVertex2i(-xoff, 33 + textSize);
+            glVertex2i(xoff, 33 + textSize);
          glEnd();
       }
 
@@ -1618,7 +1618,7 @@ void Ship::render(S32 layerIndex)
 
    // Don't completely hide local player or ships on same team
    if(localShip || (showCloakedTeammates && getTeam() == localPlayerTeam && gameType->isTeamGame()))
-      alpha = max(alpha, 0.25);     // Make sure we have at least .25 alpha
+      alpha = max(alpha, 0.25f);     // Make sure we have at least .25 alpha
    
    if(!localShip)    // Only apply sensor-makes-cloaked-ships-visible to other ships
    {
@@ -1709,7 +1709,7 @@ void Ship::calcThrustComponents(F32 *thrusts)
    
    if(isModuleActive(ModuleBoost))
       for(U32 i = 0; i < 4; i++)
-         thrusts[i] *= 1.3;
+         thrusts[i] *= 1.3f;
 }
 
 

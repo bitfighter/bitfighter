@@ -290,11 +290,11 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendLine, (StringPtr line), (line),
    if(mDataBuffer)
    {
       if(mDataBuffer->getBufferSize() < maxDataBufferSize)  // limit memory, to avoid eating too much memory.
-         mDataBuffer->appendBuffer((U8 *)line.getString(), strlen(line.getString()));
+         mDataBuffer->appendBuffer((U8 *)line.getString(), (U32)strlen(line.getString()));
    }
    else
    {
-      mDataBuffer = new ByteBuffer((U8 *)line.getString(), strlen(line.getString()));
+      mDataBuffer = new ByteBuffer((U8 *)line.getString(), (U32)strlen(line.getString()));
       mDataBuffer->takeOwnership();
    }
 
@@ -1258,7 +1258,7 @@ bool GameConnection::s2rUploadFile(const char *filename, U8 type)
       {
          ByteBuffer *bytebuffer = new ByteBuffer();
          bytebuffer->resize(512);
-         size = fread(bytebuffer->getBuffer(), 1, bytebuffer->getBufferSize(), f);
+         size = (U32)fread(bytebuffer->getBuffer(), 1, bytebuffer->getBufferSize(), f);
          if(size != partsSize)
             bytebuffer->resize(size);
          s2rSendDataParts(size == partsSize ? 0 : type, ByteBufferPtr(bytebuffer));

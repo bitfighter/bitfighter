@@ -115,7 +115,7 @@ void drawArc(const Point &pos, F32 radius, F32 startAngle, F32 endAngle)
 {
    glBegin(GL_LINE_STRIP);
 
-      for(F32 theta = startAngle; theta < endAngle; theta += 0.2)
+      for(F32 theta = startAngle; theta < endAngle; theta += 0.2f)
          glVertex2f(pos.x + cos(theta) * radius, pos.y + sin(theta) * radius);
 
       // Make sure arc makes it all the way to endAngle...  rounding errors look terrible!
@@ -167,7 +167,7 @@ void drawFilledEllipseUtil(const Point &pos, F32 width, F32 height, F32 angle, U
    F32 cosbeta = cos(angle);
 
    glBegin(glStyle);
-      for(F32 theta = 0; theta < Float2Pi; theta += 0.2)
+      for(F32 theta = 0; theta < Float2Pi; theta += 0.2f)
       {
          F32 sinalpha = sin(theta);
          F32 cosalpha = cos(theta);
@@ -216,7 +216,7 @@ void drawFilledSector(const Point &pos, F32 radius, F32 start, F32 end)
 {
    glBegin(GL_POLYGON);
 
-   for(F32 theta = start; theta < end; theta += 0.2)
+   for(F32 theta = start; theta < end; theta += 0.2f)
       glVertex2f(pos.x + cos(theta) * radius, pos.y + sin(theta) * radius);
 
    glEnd();
@@ -303,9 +303,9 @@ void renderShip(const Color *shipColor, F32 alpha, F32 thrusts[], F32 health, F3
       glColor4f(1, 0, 0, alpha);
       glBegin(GL_LINES);
          glVertex2f(xThrust, 10);
-         glVertex2f(xThrust + thrusts[2] * xThrust * 1.5, 5);
+         glVertex2f(xThrust + thrusts[2] * xThrust * 1.5f, 5);
          glVertex2f(xThrust, 0);
-         glVertex2f(xThrust + thrusts[2] * xThrust * 1.5, 5);
+         glVertex2f(xThrust + thrusts[2] * xThrust * 1.5f, 5);
       glEnd();
 
       glColor4f(1,0.5,0, alpha);
@@ -319,9 +319,9 @@ void renderShip(const Color *shipColor, F32 alpha, F32 thrusts[], F32 health, F3
       glColor4f(1,1,0, alpha);
       glBegin(GL_LINES);
          glVertex2f(xThrust, 6);
-         glVertex2f(xThrust + thrusts[2] * xThrust * 0.5, 5);
+         glVertex2f(xThrust + thrusts[2] * xThrust * 0.5f, 5);
          glVertex2f(xThrust, 4);
-         glVertex2f(xThrust + thrusts[2] * xThrust * 0.5, 5);
+         glVertex2f(xThrust + thrusts[2] * xThrust * 0.5f, 5);
       glEnd();
    }
 
@@ -346,13 +346,13 @@ void renderShip(const Color *shipColor, F32 alpha, F32 thrusts[], F32 health, F3
    for(U32 i = 0; i < lineCount; i++)
    {
       S32 yo = i * 2;
-      glVertex2f(-2, -11 + yo);   // front of ship
-      glVertex2f(2, -11 + yo);    // back of ship
+      glVertex2i(-2, -11 + yo);   // front of ship
+      glVertex2i(2, -11 + yo);    // back of ship
    }
    glEnd();
 
    // Grey outside part
-   glColor4f(0.7,0.7,0.7, alpha);
+   glColor4f(0.7f, 0.7f ,0.7f , alpha);
    glBegin(GL_LINE_LOOP);
       glVertex2f(-20, -15);
       glVertex2f(0, 25);
@@ -378,7 +378,7 @@ void renderShip(const Color *shipColor, F32 alpha, F32 thrusts[], F32 health, F3
 
       glColor4f(1,1,0, alpha);
       glBegin(GL_LINE_LOOP);
-         for(F32 theta = 0; theta <= Float2Pi; theta += 0.3)
+         for(F32 theta = 0; theta <= Float2Pi; theta += 0.3f)
             glVertex2f(cos(theta) * shieldRadius, sin(theta) * shieldRadius);
       glEnd();
    }
@@ -386,7 +386,7 @@ void renderShip(const Color *shipColor, F32 alpha, F32 thrusts[], F32 health, F3
    if(sensorActive)
    {
       glColor4f(1,1,1,alpha);
-      F32 radius = (sensorTime & 0x1FF) * 0.002;
+      F32 radius = (sensorTime & 0x1FF) * 0.002f;
       drawCircle(0, 0, radius * Ship::CollisionRadius + 4);
    }
    
@@ -403,9 +403,9 @@ void renderShipCoords(const Point &coords, bool localShip, F32 alpha)
    glEnableBlend;
       
       glLineWidth(gLineWidth1);
-      glColor4f(1,1,1,0.5 * alpha);
+      glColor4f(1, 1, 1, 0.5f * alpha);
 
-      UserInterface::drawStringc(0, 30 + (localShip ? 0 : textSize + 3), textSize, str.c_str() );
+      UserInterface::drawStringc(0, 30 + (localShip ? 0 : F32(textSize) + 3), (F32)textSize, str.c_str() );
    glDisableBlend;
    glLineWidth(gDefaultLineWidth);
 }
@@ -456,7 +456,7 @@ void renderTeleporter(const Point &pos, U32 type, bool in, S32 time, F32 radiusF
 
    static float colors[NumTypes][NumColors][3] = {
       {
-         { 0, 0.25, 0.8 },
+         { 0, 0.25, 0.8f },
          { 0, 0.5, 1 },
          { 0, 0, 1 },
          { 0, 1, 1 },
@@ -480,8 +480,8 @@ void renderTeleporter(const Point &pos, U32 type, bool in, S32 time, F32 radiusF
          Tracker &t = particles[i];
 
          t.thetaI = TNL::Random::readF() * Float2Pi;
-         t.thetaP = TNL::Random::readF() * 2 + 0.5;
-         t.dP = TNL::Random::readF() * 5 + 2.5;
+         t.thetaP = TNL::Random::readF() * 2 + 0.5f;
+         t.dP = TNL::Random::readF() * 5 + 2.5f;
          t.dI = TNL::Random::readF() * t.dP;
          t.ci = TNL::Random::readI(0, NumColors - 1);
       }
@@ -494,10 +494,10 @@ void renderTeleporter(const Point &pos, U32 type, bool in, S32 time, F32 radiusF
    if(gClientGame->getCommanderZoomFraction() > 0 || showDestOverride)
    {
       const F32 wid = 6.0;
-      const F32 alpha = showDestOverride ? 1.0 : gClientGame->getCommanderZoomFraction();
+      const F32 alpha = showDestOverride ? 1.f : gClientGame->getCommanderZoomFraction();
 
       // Show teleport destinations on commander's map only
-      glColor4f(1, 1, 1, .25 * alpha );
+      glColor4f(1, 1, 1, .25f * alpha );
 
       glEnable(GL_POLYGON_SMOOTH);
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -513,11 +513,11 @@ void renderTeleporter(const Point &pos, U32 type, bool in, S32 time, F32 radiusF
 
          F32 dist = pos.distanceTo(dests[i]);
 
-         F32 midx = pos.x + .75 * cosa * dist;
-         F32 midy = pos.y + .75 * sina * dist;
+         F32 midx = pos.x + .75f * cosa * dist;
+         F32 midy = pos.y + .75f * sina * dist;
 
          glBegin(GL_POLYGON);
-            glColor4f(1, 1, 1, .25 * alpha);
+            glColor4f(1, 1, 1, .25f * alpha);
             glVertex2f(pos.x + asina * wid, pos.y + acosa * wid);
             glVertex2f(midx + asina * wid, midy + acosa * wid);
             glVertex2f(midx - asina * wid, midy - acosa * wid);
@@ -529,7 +529,7 @@ void renderTeleporter(const Point &pos, U32 type, bool in, S32 time, F32 radiusF
             glColor4f(1, 1, 1, 0);
             glVertex2f(dests[i].x + asina * wid, dests[i].y + acosa * wid);
             glVertex2f(dests[i].x - asina * wid, dests[i].y - acosa * wid);
-            glColor4f(1, 1, 1, .25 * alpha);
+            glColor4f(1, 1, 1, .25f * alpha);
             glVertex2f(midx - asina * wid, midy - acosa * wid);
          glEnd();
       }
@@ -541,7 +541,7 @@ void renderTeleporter(const Point &pos, U32 type, bool in, S32 time, F32 radiusF
 
    glTranslate(pos);
 
-   F32 arcTime = 0.5 + (1 - radiusFraction) * 0.5;
+   F32 arcTime = 0.5f + (1 - radiusFraction) * 0.5f;
    if(!in)
       arcTime = -arcTime;
 
@@ -557,18 +557,18 @@ void renderTeleporter(const Point &pos, U32 type, bool in, S32 time, F32 radiusF
    {
       Tracker &t = particles[i];
       //glColor3f(t.c.r, t.c.g, t.c.b);
-      F32 d = (t.dP - fmod(float(t.dI + time * 0.001), (float) t.dP)) / t.dP;
+      F32 d = (t.dP - fmod(t.dI + F32(time) * 0.001f, t.dP)) / t.dP;
       F32 alphaMod = 1;
       if(d > 0.9)
          alphaMod = (1 - d) * 10;
 
-      F32 theta = fmod(float( t.thetaI + time * 0.001 * t.thetaP), (float) Float2Pi);
+      F32 theta = fmod(t.thetaI + F32(time) * 0.001f * t.thetaP, Float2Pi);
       F32 startRadius = radiusFraction * radius * d;
 
       Point start(cos(theta), sin(theta));
       Point n(-start.y, start.x);
 
-      theta -= arcTime * t.thetaP * (alphaMod + 0.05);
+      theta -= arcTime * t.thetaP * (alphaMod + 0.05f);
       d += arcTime / t.dP;
       if(d < 0)
          d = 0;
@@ -582,13 +582,13 @@ void renderTeleporter(const Point &pos, U32 type, bool in, S32 time, F32 radiusF
          F32 arcLength = (end * endRadius - start * startRadius).len();
          U32 vertexCount = (U32)(floor(arcLength / 10)) + 2;
 
-         glVertex(start * (startRadius + beamWidth * 0.3) + n * 2);
-         glVertex(start * (startRadius - beamWidth * 0.3) + n * 2);
+         glVertex(start * (startRadius + beamWidth * 0.3f) + n * 2);
+         glVertex(start * (startRadius - beamWidth * 0.3f) + n * 2);
 
          for(U32 j = 0; j <= vertexCount; j++)
          {
             F32 frac = j / F32(vertexCount);
-            F32 width = beamWidth * (1 - frac) * 0.5;
+            F32 width = beamWidth * (1 - frac) * 0.5f;
             Point p = start * (1 - frac) + end * frac;
             p.normalize();
             F32 rad = startRadius * (1 - frac) + endRadius * frac;
@@ -616,7 +616,7 @@ void renderTurret(const Color &c, Point anchor, Point normal, bool enabled, F32 
    glBegin(GL_LINE_STRIP);
       for(S32 x = -10; x <= 10; x++)
       {
-         F32 theta = x * FloatHalfPi * 0.1;
+         F32 theta = x * FloatHalfPi * 0.1f;
          Point pos = normal * cos(theta) + cross * sin(theta);
          glVertex(aimCenter + pos * 15);
       }
@@ -633,7 +633,7 @@ void renderTurret(const Color &c, Point anchor, Point normal, bool enabled, F32 
    if(enabled)
       glColor3f(1,1,1);
    else
-      glColor3f(0.6, 0.6, 0.6);
+      glColor3f(0.6f, 0.6f, 0.6f);
 
    glBegin(GL_LINE_LOOP);
       glVertex(anchor + cross * 18);
@@ -649,7 +649,7 @@ void renderTurret(const Color &c, Point anchor, Point normal, bool enabled, F32 
    glBegin(GL_LINES);
       for(S32 i = 0; i < lineHeight; i += 2)
       {
-         Point lsegStart = anchor - cross * (14 - i) + normal * 5;
+         Point lsegStart = anchor - cross * F32(14 - i) + normal * 5.f;
          Point lsegEnd = lsegStart + normal * (Turret::TURRET_OFFSET - 10);
          glVertex(lsegStart);
          glVertex(lsegEnd);
@@ -732,11 +732,11 @@ void renderFlag(F32 x, F32 y, const Color *flagColor)
 
 void renderSmallFlag(const Point &pos, const Color &c, F32 parentAlpha)
 {
-   F32 alpha = 0.75 * parentAlpha;
+   F32 alpha = 0.75f * parentAlpha;
    glEnableBlend;
    glPushMatrix();
       glTranslate(pos);
-      glScale(0.2);
+      glScale(0.2f);
 
       glColor(c, alpha);
       glBegin(GL_LINES);
@@ -762,7 +762,7 @@ void renderSmallFlag(const Point &pos, const Color &c, F32 parentAlpha)
 
 void renderCenteredString(const Point &pos, S32 size, const char *string)
 {
-   F32 width = UserInterface::getStringWidth(size, string);
+   F32 width = UserInterface::getStringWidth((F32)size, string);
    UserInterface::drawString((S32)floor(pos.x - width * 0.5), (S32)floor(pos.y - size * 0.5), size, string);
 }
 
@@ -854,7 +854,7 @@ void renderNavMeshZone(const Vector<Point> *outline, const Vector<Point> *fill, 
    Color outlineColor = isConvex ? Colors::green : Colors::red;
    Color fillColor = outlineColor * .5;
 
-   renderPolygon(fill, outline, &fillColor, &outlineColor, isSelected ? .65 : .4);
+   renderPolygon(fill, outline, &fillColor, &outlineColor, isSelected ? .65f : .4f);
 
    if(zoneId > 0)
    {
@@ -864,7 +864,7 @@ void renderNavMeshZone(const Vector<Point> *outline, const Vector<Point> *fill, 
       renderPolygonLabel(centroid, 0, 25, buf);
    }
    else if(zoneId == -2)
-      drawCentroidMark(centroid, .05);
+      drawCentroidMark(centroid, .05f);
 }
 
 
@@ -927,7 +927,7 @@ static Color getGoalZoneOutlineColor(const Color &c, F32 glowFraction)
 // TODO: Consider replacing yellow with team color to indicate who scored!
 static Color getGoalZoneFillColor(const Color *c, bool isFlashing, F32 glowFraction)
 {
-   F32 alpha = isFlashing ? 0.75 : 0.5;
+   F32 alpha = isFlashing ? 0.75f : 0.5f;
 
    return Color(Colors::yellow) * (glowFraction * glowFraction) + Color(c) * alpha * (1 - glowFraction * glowFraction);
 }
@@ -947,7 +947,7 @@ void renderGoalZone(const Color *c, const Vector<Point> *outline, const Vector<P
 void renderGoalZone(const Color *c, const Vector<Point> *outline, const Vector<Point> *fill, Point centroid, F32 labelAngle, 
                     bool isFlashing, F32 glowFraction, S32 score, F32 scaleFact)
 {
-   F32 alpha = isFlashing ? 0.75 : 0.5;
+   F32 alpha = isFlashing ? 0.75f : 0.5f;
 
    Color fillColor    = getGoalZoneFillColor(c, isFlashing, glowFraction);
    Color outlineColor = getGoalZoneOutlineColor(c, isFlashing);
@@ -978,8 +978,8 @@ void renderNexus(const Vector<Point> *outline, const Vector<Point> *fill, bool o
 {
    Color baseColor = getNexusBaseColor(open, glowFraction);
 
-   Color fillColor = Color(baseColor * (glowFraction * glowFraction  + (1 - glowFraction * glowFraction) * 0.5));
-   Color outlineColor = fillColor * 0.7;
+   Color fillColor = Color(baseColor * (glowFraction * glowFraction  + (1 - glowFraction * glowFraction) * 0.5f));
+   Color outlineColor = fillColor * 0.7f;
 
    renderPolygon(fill, outline, &fillColor, &outlineColor);
 }
@@ -1002,7 +1002,7 @@ void renderSlipZone(const Vector<Point> *bounds, const Vector<Point> *boundsFill
    glColor(theColor * 0.5);
    renderPointVector(boundsFill, GL_TRIANGLES);
 
-   glColor(theColor * 0.7);
+   glColor(theColor * 0.7f);
    renderPointVector(bounds, GL_LINE_LOOP);
 
    glPushMatrix();
@@ -1031,14 +1031,14 @@ void renderProjectile(const Point &pos, U32 type, U32 time)
          glScale(pi->scaleFactor);
 
          glPushMatrix();
-            glRotatef((time % 720) * 0.5, 0, 0, 1);
+            glRotatef((time % 720) * 0.5f, 0, 0, 1);
 
             static S16 projectilePoints1[] = { -2,2,  0,6,  2,2,  6,0,  2,-2,  0,-6,  -2,-2,  -6,0 };
             renderVertexArray(projectilePoints1, ARRAYSIZE(projectilePoints1) / 2, GL_LINE_LOOP);
 
          glPopMatrix();
 
-         glRotatef(180 - (time % 360), 0, 0, 1);
+         glRotatef(180 - F32(time % 360), 0, 0, 1);
          glColor(pi->projColors[1]);
 
          static S16 projectilePoints2[] = { -2,2,  0,8,  2,2,  8,0,  2,-2,  0,-8, -2,-2,  -8,0 };
@@ -1055,7 +1055,7 @@ void renderProjectile(const Point &pos, U32 type, U32 time)
 
       glPushMatrix();
 
-      glRotatef((time % 720), 0, 0, 1);
+      glRotatef(F32(time % 720), 0, 0, 1);
       glColor(pi->projColors[1]);
 
       static S16 projectilePoints3[] = { -2,2,  2,2,  2,-2,  -2,-2 };
@@ -1071,39 +1071,39 @@ void renderProjectile(const Point &pos, U32 type, U32 time)
 
 #define dr(x) (float) x * Float2Pi / 360     // degreesToRadians()
 
-      glRotatef( ( ((U32)(time * .15)) % 720)  , 0, 0, 1);
+      glRotatef( fmod(F32(time) * .15f, 720.f), 0, 0, 1);
       glColor(pi->projColors[1]);
 
       Point p(0,0);
-      drawCircle(p,innerR);
+      drawCircle(p, (F32)innerR);
       p.set(0,-dist);
 
-      drawCircle(p,outerR);
+      drawCircle(p, (F32)outerR);
       p.set(0,-dist);
-      drawCircle(p,outerR);
-      p.set(cos(dr(30)),-sin(dr(30)));
-      drawCircle(p*dist,outerR);
-      p.set(cos(dr(30)),sin(dr(30)));
-      drawCircle(p * dist,outerR);
-      p.set(0,dist);
-      drawCircle(p,outerR);
-      p.set(-cos(dr(30)),sin(dr(30)));
-      drawCircle(p*dist,outerR);
-      p.set(-cos(dr(30)),-sin(dr(30)));
-      drawCircle(p*dist,outerR);
+      drawCircle(p, (F32)outerR);
+      p.set(cos(dr(30)), -sin(dr(30)));
+      drawCircle(p*dist, (F32)outerR);
+      p.set(cos(dr(30)), sin(dr(30)));
+      drawCircle(p * dist, (F32)outerR);
+      p.set(0, dist);
+      drawCircle(p, (F32)outerR);
+      p.set(-cos(dr(30)), sin(dr(30)));
+      drawCircle(p*dist, (F32)outerR);
+      p.set(-cos(dr(30)), -sin(dr(30)));
+      drawCircle(p*dist, (F32)outerR);
    }
 }
 
 
 void renderMine(const Point &pos, bool armed, bool visible)
 {
-   F32 mod = 0.8;
+   F32 mod = 0.8f;
    F32 vis = .25;
    if(visible)
    {
       glColor(Colors::gray50);
       drawCircle(pos, Mine::SensorRadius);
-      mod = 0.8;
+      mod = 0.8f;
       vis = 1.0;
    }
    else
@@ -1163,7 +1163,7 @@ void renderGrenade(const Point &pos, F32 lifeLeft)
       innerVis = false;
 
    if(gIniSettings.burstGraphicsMode == 1 || gIniSettings.burstGraphicsMode == 3)
-      glColor3f(1, min(1.25 - lifeLeft, 1), 0);
+      glColor3f(1, min(1.25f - lifeLeft, 1), 0);
    else
       glColor(Colors::red);
 
@@ -1327,28 +1327,28 @@ void renderEnergyGuage(S32 energy, S32 maxEnergy, S32 cooldownThreshold)
    // Guage fill
    glBegin(GL_POLYGON);
       glColor(Colors::blue);
-      glVertex2f(UserInterface::horizMargin, canvasHeight - UserInterface::vertMargin - GUAGE_HEIGHT);
-      glVertex2f(UserInterface::horizMargin, canvasHeight - UserInterface::vertMargin);
+      glVertex2i(UserInterface::horizMargin, canvasHeight - UserInterface::vertMargin - GUAGE_HEIGHT);
+      glVertex2i(UserInterface::horizMargin, canvasHeight - UserInterface::vertMargin);
 
       glColor(Colors::cyan);
-      glVertex2f(UserInterface::horizMargin + full, canvasHeight - UserInterface::vertMargin);
-      glVertex2f(UserInterface::horizMargin + full, canvasHeight - UserInterface::vertMargin - GUAGE_HEIGHT);
+      glVertex2f(UserInterface::horizMargin + full, (F32)canvasHeight - UserInterface::vertMargin);
+      glVertex2f(UserInterface::horizMargin + full, (F32)canvasHeight - UserInterface::vertMargin - GUAGE_HEIGHT);
    glEnd();
 
    // Guage outline
    glBegin(GL_LINES);
       glColor(Colors::white);
-      glVertex2f(UserInterface::horizMargin, canvasHeight - UserInterface::vertMargin - GUAGE_HEIGHT);
-      glVertex2f(UserInterface::horizMargin, canvasHeight - UserInterface::vertMargin);
-      glVertex2f(UserInterface::horizMargin + GAUGE_WIDTH, canvasHeight - UserInterface::vertMargin - GUAGE_HEIGHT);
-      glVertex2f(UserInterface::horizMargin + GAUGE_WIDTH, canvasHeight - UserInterface::vertMargin);
+      glVertex2i(UserInterface::horizMargin, canvasHeight - UserInterface::vertMargin - GUAGE_HEIGHT);
+      glVertex2i(UserInterface::horizMargin, canvasHeight - UserInterface::vertMargin);
+      glVertex2i(UserInterface::horizMargin + GAUGE_WIDTH, canvasHeight - UserInterface::vertMargin - GUAGE_HEIGHT);
+      glVertex2i(UserInterface::horizMargin + GAUGE_WIDTH, canvasHeight - UserInterface::vertMargin);
 
       // Show safety line
-      F32 cutoffx = (cooldownThreshold * GAUGE_WIDTH) / maxEnergy;
+      S32 cutoffx = cooldownThreshold * GAUGE_WIDTH / maxEnergy;
 
       glColor(Colors::yellow);
-      glVertex2f(UserInterface::horizMargin + cutoffx, canvasHeight - UserInterface::vertMargin - 23);
-      glVertex2f(UserInterface::horizMargin + cutoffx, canvasHeight - UserInterface::vertMargin + 4);
+      glVertex2i(UserInterface::horizMargin + cutoffx, canvasHeight - UserInterface::vertMargin - 23);
+      glVertex2i(UserInterface::horizMargin + cutoffx, canvasHeight - UserInterface::vertMargin + 4);
    glEnd();
 }
 
@@ -1381,7 +1381,7 @@ void renderEnergySymbol(const Point &pos, F32 scaleFactor)
 
 void renderEnergyItem(const Point &pos, bool forEditor, const Color *overrideColor, F32 alpha)
 {
-   F32 scaleFactor = forEditor ? .45 : 1;    // Resize for editor
+   F32 scaleFactor = forEditor ? .45f : 1;    // Resize for editor
 
    glPushMatrix();
       glTranslate(pos);
@@ -1443,7 +1443,7 @@ void renderTestItem(const Point &pos, F32 alpha)
 void renderTestItem(const Point &pos, S32 size, F32 alpha)
 {
    glColor(Colors::yellow, alpha);
-   drawPolygon(pos, 7, size, 0);
+   drawPolygon(pos, 7, (F32)size, 0);
 }
 
 
@@ -1452,7 +1452,7 @@ void renderWorm(const Point &pos)
    glPushMatrix();
    glTranslate(pos);
 
-   F32 size = (F32)Worm::WORM_RADIUS * .5;
+   F32 size = (F32)Worm::WORM_RADIUS * .5f;
 
    glColor(Color(1, .1, .1));
       glBegin(GL_LINE_LOOP);
@@ -1518,7 +1518,7 @@ void renderSoccerBall(const Point &pos, F32 size)
 
 void renderSoccerBall(const Point &pos)
 {
-   renderSoccerBall(pos, SoccerBallItem::SOCCER_BALL_RADIUS);
+   renderSoccerBall(pos, (F32)SoccerBallItem::SOCCER_BALL_RADIUS);
 }
 
 
@@ -1554,9 +1554,9 @@ void renderForceFieldProjector(Point pos, Point normal, const Color *c, bool ena
 
    Color color(c);      // Create locally modifiable copy
 
-   color *= (1.0 - ForceFieldBrightnessProjector) + ForceFieldBrightnessProjector;
+   color *= (1 - ForceFieldBrightnessProjector) + ForceFieldBrightnessProjector;
 
-   glColor(enabled ? color : (color * 0.6));
+   glColor(enabled ? color : (color * 0.6f));
 
    Vector<Point> geom;
    ForceFieldProjector::getGeom(pos, normal, geom);      // fills geom from pos and normal
@@ -1571,7 +1571,7 @@ void renderForceField(Point start, Point end, Color c, bool fieldUp, F32 scaleFa
    ForceField::getGeom(start, end, geom, scaleFact);
 
    F32 ForceFieldBrightness = 0.25;
-   c = c * (1.0 - ForceFieldBrightness) + ForceFieldBrightness;
+   c = c * (1 - ForceFieldBrightness) + ForceFieldBrightness;
 
    glColor(fieldUp ? c : c * 0.5);
 
@@ -1742,7 +1742,7 @@ void renderBitfighterLogo(U32 mask)
 // Draw logo centered on screen horzontally, and on yPos vertically, scaled and rotated according to parameters
 void renderBitfighterLogo(S32 yPos, F32 scale, U32 mask)
 {
-   const F32 fact = 0.15 * scale;   // Scaling factor to make the coordinates below fit nicely on the screen (derived by trial and error)
+   const F32 fact = 0.15f * scale;   // Scaling factor to make the coordinates below fit nicely on the screen (derived by trial and error)
    
    // 3609 is the diff btwn the min and max x coords below, 594 is same for y
 
@@ -1776,15 +1776,9 @@ void drawSquare(const Point &pos, F32 size, bool filled)
 }
 
 
-void drawSquare(const Point &pos, S32 size)
+void drawSquare(const Point &pos, S32 size, bool filled)
 {
-    drawSquare(pos, F32(size), false);
-}
-
-
-void drawSquare(const Point &pos, F32 size)
-{
-    drawSquare(pos, size, false);
+    drawSquare(pos, F32(size), filled);
 }
 
 
@@ -1827,7 +1821,7 @@ void drawCircle(F32 x, F32 y, F32 radius)
 {
     glBegin(GL_LINE_LOOP);
     
-    for(F32 theta = 0; theta < Float2Pi; theta += 0.2)
+    for(F32 theta = 0; theta < Float2Pi; theta += 0.2f)
         glVertex2f(x + cos(theta) * radius, y + sin(theta) * radius);
     
     glEnd();

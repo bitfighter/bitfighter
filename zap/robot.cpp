@@ -135,7 +135,6 @@ LuaRobot::LuaRobot(lua_State *L) : LuaShip((Robot *)lua_touserdata(L, 1))
    setEnumName(FlagTypeNumber, "FlagType");
    setEnumName(BulletTypeNumber, "BulletType");
    setEnumName(MineTypeNumber, "MineType");
-   setEnumName(SpybugZoneTypeNumber, "SpybugZoneType");
    setEnumName(NexusTypeNumber, "NexusType");
    setEnumName(BotNavMeshZoneTypeNumber, "BotNavMeshZoneType");
    setEnumName(RobotTypeNumber, "RobotType");
@@ -157,7 +156,6 @@ LuaRobot::LuaRobot(lua_State *L) : LuaShip((Robot *)lua_touserdata(L, 1))
    setEnumName(WallItemTypeNumber, "WallItemType");
    setEnumName(WallEdgeTypeNumber, "WallEdgeType");
    setEnumName(WallSegmentTypeNumber, "WallSegmentType");
-   setEnumName(GrenadeProjectileTypeNumber, "GrenadeProjectileType");
    setEnumName(SlipZoneTypeNumber, "SlipZoneType");
    setEnumName(SpyBugTypeNumber, "SpyBugType");
 
@@ -407,7 +405,7 @@ S32 LuaRobot::setThrust(lua_State *L)
 bool calcInterceptCourse(GameObject *target, Point aimPos, F32 aimRadius, S32 aimTeam, F32 aimVel, F32 aimLife, bool ignoreFriendly, F32 &interceptAngle)
 {
    Point offset = target->getActualPos() - aimPos;    // Account for fact that robot doesn't fire from center
-   offset.normalize(aimRadius * 1.2);    // 1.2 is a fudge factor to prevent robot from not shooting because it thinks it will hit itself
+   offset.normalize(aimRadius * 1.2f);    // 1.2 is a fudge factor to prevent robot from not shooting because it thinks it will hit itself
    aimPos += offset;
 
    if(target->getObjectTypeMask() & ( ShipType | RobotType))
@@ -471,14 +469,14 @@ S32 LuaRobot::getFiringSolution(lua_State *L)
 {
    static const char *methodName = "Robot:getFiringSolution()";
    checkArgCount(L, 2, methodName);
-   U32 type = getInt(L, 1, methodName);
+   U32 type = (U32)getInt(L, 1, methodName);
    GameObject *target = getItem(L, 2, type, methodName)->getGameObject();
 
    WeaponInfo weap = gWeapons[thisRobot->getSelectedWeapon()];    // Robot's active weapon
 
    F32 interceptAngle;
 
-   if(calcInterceptCourse(target, thisRobot->getActualPos(), thisRobot->getRadius(), thisRobot->getTeam(), weap.projVelocity, weap.projLiveTime, false, interceptAngle))
+   if(calcInterceptCourse(target, thisRobot->getActualPos(), thisRobot->getRadius(), thisRobot->getTeam(), (F32)weap.projVelocity, (F32)weap.projLiveTime, false, interceptAngle))
       return returnFloat(L, interceptAngle);
 
    return returnNil(L);
@@ -491,7 +489,7 @@ S32 LuaRobot::getInterceptCourse(lua_State *L)
 {
    static const char *methodName = "Robot:getInterceptCourse()";
    checkArgCount(L, 2, methodName);
-   U32 type = getInt(L, 1, methodName);
+   U32 type = (U32)getInt(L, 1, methodName);
    GameObject *target = getItem(L, 2, type, methodName)->getGameObject();
 
    WeaponInfo weap = gWeapons[thisRobot->getSelectedWeapon()];    // Robot's active weapon
@@ -555,7 +553,7 @@ S32 LuaRobot::getZoneCenter(lua_State *L)
 {
    static const char *methodName = "Robot:getZoneCenter()";
    checkArgCount(L, 1, methodName);
-   S32 z = getInt(L, 1, methodName);
+   S32 z = (S32)getInt(L, 1, methodName);
 
 
    BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(gServerGame->getBotZoneDatabase()->getObjectByIndex(z));
@@ -572,8 +570,8 @@ S32 LuaRobot::getGatewayFromZoneToZone(lua_State *L)
 {
    static const char *methodName = "Robot:getGatewayFromZoneToZone()";
    checkArgCount(L, 2, methodName);
-   S32 from = getInt(L, 1, methodName);
-   S32 to = getInt(L, 2, methodName);
+   S32 from = (S32)getInt(L, 1, methodName);
+   S32 to = (S32)getInt(L, 2, methodName);
 
    BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(gServerGame->getBotZoneDatabase()->getObjectByIndex(from));
 
@@ -630,7 +628,7 @@ S32 LuaRobot::setWeaponIndex(lua_State *L)
 {
    static const char *methodName = "Robot:setWeaponIndex()";
    checkArgCount(L, 1, methodName);
-   U32 weap = getInt(L, 1, methodName, 1, ShipWeaponCount);    // Acceptable range = (1, ShipWeaponCount)
+   U32 weap = (U32)getInt(L, 1, methodName, 1, ShipWeaponCount);    // Acceptable range = (1, ShipWeaponCount)
    thisRobot->selectWeapon(weap - 1);     // Correct for the fact that index in C++ is 0 based
 
    return 0;
@@ -642,7 +640,7 @@ S32 LuaRobot::setWeapon(lua_State *L)
 {
    static const char *methodName = "Robot:setWeapon()";
    checkArgCount(L, 1, methodName);
-   U32 weap = getInt(L, 1, methodName, 0, WeaponCount - 1);
+   U32 weap = (U32)getInt(L, 1, methodName, 0, WeaponCount - 1);
 
    for(S32 i = 0; i < ShipWeaponCount; i++)
       if((U32)thisRobot->getWeapon(i) == weap)
@@ -661,7 +659,7 @@ S32 LuaRobot::hasWeapon(lua_State *L)
 {
    static const char *methodName = "Robot:hasWeapon()";
    checkArgCount(L, 1, methodName);
-   U32 weap = getInt(L, 1, methodName, 0, WeaponCount - 1);
+   U32 weap = (U32)getInt(L, 1, methodName, 0, WeaponCount - 1);
 
    for(S32 i = 0; i < ShipWeaponCount; i++)
       if((U32)thisRobot->getWeapon(i) == weap)
@@ -677,7 +675,7 @@ S32 LuaRobot::activateModuleIndex(lua_State *L)
    static const char *methodName = "Robot:activateModuleIndex()";
 
    checkArgCount(L, 1, methodName);
-   U32 indx = getInt(L, 1, methodName, 0, ShipModuleCount);
+   U32 indx = (U32)getInt(L, 1, methodName, 0, ShipModuleCount);
 
    thisRobot->activateModule(indx);
 
@@ -793,7 +791,7 @@ S32 LuaRobot::doFindItems(lua_State *L, Rect *scope)
 {
    // objectType is a bitmask of all the different object types we might want to find.  We need to build it up here because
    // lua can't do the bitwise or'ing itself.
-   U32 objectType = 0;
+   BITMASK objectMask = 0;
 
    S32 index = 1;
    S32 pushed = 0;      // Count of items actually pushed onto the stack
@@ -803,20 +801,32 @@ S32 LuaRobot::doFindItems(lua_State *L, Rect *scope)
    while(lua_isnumber(L, index))
    {
       GridDatabase *gridDB;
-      objectType |= (U32) lua_tointeger(L, index);
+      U8 number = (U8)lua_tointeger(L, index);
 
-      if(objectType == BotNavMeshZoneTypeNumber)
-         gridDB = ((ServerGame *)thisRobot->getGame())->getBotZoneDatabase();
+      if(number < sizeof(BITMASK) * 8)  // number of bits BITMASK have
+         objectMask |= BIT2(number);
       else
-         gridDB = thisRobot->getGame()->getGameObjDatabase();
+      {
+
+         if(number == BotNavMeshZoneTypeNumber)
+            gridDB = ((ServerGame *)thisRobot->getGame())->getBotZoneDatabase();
+         else
+            gridDB = thisRobot->getGame()->getGameObjDatabase();
 
 
-      if(scope)    // Get other objects on screen-visible area only
-         gridDB->findObjects(0, fillVector, *scope, U8(lua_tointeger(L, index)));
-      else
-         gridDB->findObjects(0, fillVector, U8(lua_tointeger(L, index)));
-
+         if(scope)    // Get other objects on screen-visible area only
+            gridDB->findObjects(0, fillVector, *scope, number);
+         else
+            gridDB->findObjects(0, fillVector, number);
+      }
       index++;
+   }
+   if(objectMask)
+   {
+      if(scope)    // Get other objects on screen-visible area only
+         thisRobot->getGame()->getGameObjDatabase()->findObjects(objectMask, fillVector, *scope);
+      else
+         thisRobot->getGame()->getGameObjDatabase()->findObjects(objectMask, fillVector);
    }
 
    clearStack(L);
@@ -1058,7 +1068,7 @@ S32 LuaRobot::subscribe(lua_State *L)
    static const char *methodName = "Robot:subscribe()";
    checkArgCount(L, 1, methodName);
 
-   S32 eventType = getInt(L, 0, methodName);
+   S32 eventType = (S32)getInt(L, 0, methodName);
    if(eventType < 0 || eventType >= EventManager::EventTypes)
       return 0;
 
@@ -1074,7 +1084,7 @@ S32 LuaRobot::unsubscribe(lua_State *L)
    static const char *methodName = "Robot:unsubscribe()";
    checkArgCount(L, 1, methodName);
 
-   S32 eventType = getInt(L, 0, methodName);
+   S32 eventType = (S32)getInt(L, 0, methodName);
    if(eventType < 0 || eventType >= EventManager::EventTypes)
       return 0;
 
@@ -1087,7 +1097,7 @@ S32 LuaRobot::engineerDeployObject(lua_State *L)
 {
    static const char *methodName = "Robot:engineerDeployObject()";
    checkArgCount(L, 1, methodName);
-   S32 type = getInt(L, 0, methodName);
+   S32 type = (S32)getInt(L, 0, methodName);
 
    if(! thisRobot->getOwner())
       return returnBool(L, false);
@@ -1110,7 +1120,7 @@ S32 LuaRobot::copyMoveFromObject(lua_State *L)
    static const char *methodName = "Robot:copyMoveFromObject()";
 
    checkArgCount(L, 2, methodName);
-   U32 type = getInt(L, 1, methodName);
+   U32 type = (U32)getInt(L, 1, methodName);
    LuaItem *luaobj = getItem(L, 2, type, methodName);
    GameObject *obj = luaobj->getGameObject();
 
@@ -1377,7 +1387,7 @@ Vector<Robot *> Robot::robots;
 Robot::Robot(StringTableEntry robotName, S32 team, Point pt, F32 mass) : Ship(robotName, false, team, pt, mass, true)
 {
    gameConnectionInitalized = false;
-   mObjectTypeMask = RobotType | MoveableType | CommandMapVisType | TurretTargetType;     // Override typemask set by ship
+   mObjectTypeMask = RobotType | MoveableType | CommandMapVisType;     // Override typemask set by ship
    mObjectTypeNumber = RobotTypeNumber;
 
    L = NULL;

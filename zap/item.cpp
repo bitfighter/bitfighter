@@ -94,7 +94,7 @@ static const Color INSTRUCTION_TEXTCOLOR(1,1,1);      // TODO: Put in editor
 
 
  // Constructor
-EditorPointObject::EditorPointObject(GameObjectType objectType) 
+EditorPointObject::EditorPointObject() 
 { 
 }     
 

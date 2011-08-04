@@ -156,23 +156,23 @@ void LoadoutHelper::render()
       if(isValidItem(i))
       {
          if(gIniSettings.inputMode == InputModeJoystick)     // Only draw joystick buttons when in joystick mode
-            JoystickRender::renderControllerButton(UserInterface::horizMargin + (showKeys ? 0 : 20), yPos, list->get(i).button, false);
+            JoystickRender::renderControllerButton(F32(UserInterface::horizMargin + (showKeys ? 0 : 20)), (F32)yPos, list->get(i).button, false);
 
          if(showKeys)
          {
             glColor3f(1, 1, 1);     // Render key in white
-            JoystickRender::renderControllerButton(UserInterface::horizMargin + 20, yPos, list->get(i).key, false);
+            JoystickRender::renderControllerButton(F32(UserInterface::horizMargin + 20), (F32)yPos, list->get(i).key, false);
          }
 
          if(selected)
-            glColor3f(1.0, 0.1, 0.1);      // Color of already selected item
+            glColor3f(1.0, 0.1f, 0.1f);      // Color of already selected item
          else
-            glColor3f(0.1, 1.0, 0.1);      // Color of not-yet selected item
+            glColor3f(0.1f, 1.0, 0.1f);      // Color of not-yet selected item
 
          S32 xPos = UserInterface::horizMargin + 50;
          xPos += UserInterface::drawStringAndGetWidth(xPos, yPos, fontSize, list->get(i).text) + 8;      // The loadout entry itself
          if(!selected)
-            glColor3f(.2, .8, .8);        // Color of help message
+            glColor3f(.2f, .8f, .8f);        // Color of help message
 
          UserInterface::drawString(xPos, yPos, fontSize, list->get(i).help);      // The loadout help string, if there is one
 

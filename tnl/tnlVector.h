@@ -327,7 +327,7 @@ template<class T> inline void Vector<T>::reserve(U32 size)
 // Reverses this Vector's elements in place.
 template<class T> inline void Vector<T>::reverse()
 {
-   for(S32 i = (innerVector.size() >> 1) - 1; i >= 0; i--)
+   for(S32 i = (S32(innerVector.size()) >> 1) - 1; i >= 0; i--)
    {
       T temp = innerVector[innerVector.size() - i - 1];
       innerVector[innerVector.size() - i - 1] = innerVector[i];

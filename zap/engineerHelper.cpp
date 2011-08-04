@@ -50,7 +50,6 @@ void EngineerHelper::onMenuShow()
 }
 
 
-extern void drawSquare(const Point &pos, S32 size);
 static Point deployPosition, deployNormal;
 
 void EngineerHelper::render()
@@ -76,12 +75,12 @@ void EngineerHelper::render()
          // Draw key controls for selecting the object to be created
 
          if(gIniSettings.inputMode == InputModeJoystick)     // Only draw joystick buttons when in joystick mode
-            JoystickRender::renderControllerButton(UserInterface::horizMargin + (showKeys ? 0 : 20), yPos, mEngineerCostructionItemInfos[i].mButton, false);
+            JoystickRender::renderControllerButton(F32(UserInterface::horizMargin + (showKeys ? 0 : 20)), (F32)yPos, mEngineerCostructionItemInfos[i].mButton, false);
 
          if(showKeys)
          {
             glColor3f(1, 1, 1);     // Render key in white
-            JoystickRender::renderControllerButton(UserInterface::horizMargin + 20, yPos, mEngineerCostructionItemInfos[i].mKey, false);
+            JoystickRender::renderControllerButton((F32)UserInterface::horizMargin + 20, (F32)yPos, mEngineerCostructionItemInfos[i].mKey, false);
          }
 
          glColor(0.1, 1.0, 0.1);     

@@ -75,7 +75,7 @@ namespace Zap
 {
 
 const S32 DOCK_WIDTH = 50;
-const F32 MIN_SCALE = .05;        // Most zoomed-in scale
+const F32 MIN_SCALE = .05f;        // Most zoomed-in scale
 const F32 MAX_SCALE = 2.5;        // Most zoomed-out scale
 const F32 STARTING_SCALE = 0.5;   
 
@@ -296,7 +296,7 @@ void renderVertex(VertexRenderStyles style, const Point &v, S32 number, F32 alph
    else
       glColor(Colors::red, alpha);
 
-   drawSquare(v, size, !hollow);
+   drawSquare(v, (F32)size, !hollow);
 
    if(number != NO_NUMBER)     // Draw vertex numbers
    {
@@ -712,7 +712,7 @@ void EditorUserInterface::validateLevel()
    GridDatabase *gridDatabase = getGame()->getEditorDatabase();
       
    fillVector.clear();
-   gridDatabase->findObjects(ShipSpawnType, fillVector);
+   gridDatabase->findObjects(0, fillVector, ShipSpawnTypeNumber);
    for(S32 i = 0; i < fillVector.size(); i++)
    {
       Spawn *spawn = dynamic_cast<Spawn *>(fillVector[i]);
@@ -748,7 +748,7 @@ void EditorUserInterface::validateLevel()
    }
 
    fillVector.clear();
-   gridDatabase->findObjects(FlagSpawnType, fillVector);
+   gridDatabase->findObjects(0, fillVector, FlagSpawnTypeNumber);
    for(S32 i = 0; i < fillVector.size(); i++)
    {
       FlagSpawn *flagSpawn = dynamic_cast<FlagSpawn *>(fillVector[i]);
@@ -1085,7 +1085,7 @@ Point EditorUserInterface::snapPointToLevelGrid(Point const &p)
       return p;
 
    // First, find a snap point based on our grid
-   F32 factor = (showMinorGridLines() ? 0.1 : 0.5) * getGame()->getGridSize();     // Tenths or halves -- major gridlines are gridsize pixels apart
+   F32 factor = (showMinorGridLines() ? 0.1f : 0.5f) * getGame()->getGridSize();     // Tenths or halves -- major gridlines are gridsize pixels apart
 
    return Point(floor(p.x / factor + 0.5) * factor, floor(p.y / factor + 0.5) * factor);
 }
@@ -1274,15 +1274,15 @@ void EditorUserInterface::renderGrid()
    if(mShowingReferenceShip)
       return;   
 
-   F32 colorFact = mSnapDisabled ? .5 : 1;
+   F32 colorFact = mSnapDisabled ? .5f : 1;
    
    // Minor grid lines
    for(S32 i = 1; i >= 0; i--)
    {
       if(i && showMinorGridLines() || !i)      // Minor then major gridlines
       {
-         F32 gridScale = mCurrentScale * getGame()->getGridSize() * (i ? 0.1 : 1);    // Major gridlines are gridSize() pixels apart   
-         F32 color = (i ? .2 : .4) * colorFact;
+         F32 gridScale = mCurrentScale * getGame()->getGridSize() * (i ? 0.1f : 1);    // Major gridlines are gridSize() pixels apart   
+         F32 color = (i ? .2f : .4f) * colorFact;
 
          F32 xStart = fmod(mCurrentOffset.x, gridScale);
          F32 yStart = fmod(mCurrentOffset.y, gridScale);
@@ -1292,13 +1292,13 @@ void EditorUserInterface::renderGrid()
             while(yStart < gScreenInfo.getGameCanvasHeight())
             {
                glVertex2f(0, yStart);
-               glVertex2f(gScreenInfo.getGameCanvasWidth(), yStart);
+               glVertex2f((F32)gScreenInfo.getGameCanvasWidth(), yStart);
                yStart += gridScale;
             }
             while(xStart < gScreenInfo.getGameCanvasWidth())
             {
                glVertex2f(xStart, 0);
-               glVertex2f(xStart, gScreenInfo.getGameCanvasHeight());
+               glVertex2f(xStart, (F32)gScreenInfo.getGameCanvasHeight());
                xStart += gridScale;
             }
          glEnd();
@@ -1306,16 +1306,16 @@ void EditorUserInterface::renderGrid()
    }
 
    // Draw axes
-   glColor3f(0.7 * colorFact, 0.7 * colorFact, 0.7 * colorFact);
+   glColor3f(0.7f * colorFact, 0.7f * colorFact, 0.7f * colorFact);
    glLineWidth(gLineWidth3);
 
    Point origin = convertLevelToCanvasCoord(Point(0,0));
 
    glBegin(GL_LINES);
       glVertex2f(0, origin.y);
-      glVertex2f(gScreenInfo.getGameCanvasWidth(), origin.y);
+      glVertex2f((F32)gScreenInfo.getGameCanvasWidth(), origin.y);
       glVertex2f(origin.x, 0);
-      glVertex2f(origin.x, gScreenInfo.getGameCanvasHeight());
+      glVertex2f(origin.x, (F32)gScreenInfo.getGameCanvasHeight());
    glEnd();
 
    glLineWidth(gDefaultLineWidth);
@@ -1359,31 +1359,31 @@ void EditorUserInterface::renderDock(F32 width)    // width is current wall widt
    else
       pos = snapPoint(convertCanvasToLevelCoord(mMousePos));
 
-   F32 xpos = gScreenInfo.getGameCanvasWidth() - horizMargin - DOCK_WIDTH / 2;
+   F32 xpos = gScreenInfo.getGameCanvasWidth() - horizMargin - DOCK_WIDTH / 2.f;
 
    char text[50];
    glColor(Colors::white);
    dSprintf(text, sizeof(text), "%2.2f|%2.2f", pos.x, pos.y);
-   drawStringc(xpos, gScreenInfo.getGameCanvasHeight() - vertMargin - 15, 8, text);
+   drawStringc(xpos, (F32)gScreenInfo.getGameCanvasHeight() - vertMargin - 15, 8, text);
 
    // And scale
    dSprintf(text, sizeof(text), "%2.2f", mCurrentScale);
-   drawStringc(xpos, gScreenInfo.getGameCanvasHeight() - vertMargin - 25, 8, text);
+   drawStringc(xpos, (F32)gScreenInfo.getGameCanvasHeight() - vertMargin - 25, 8, text);
 
    // Show number of teams
    dSprintf(text, sizeof(text), "Teams: %d",  getGame()->getTeamCount());
-   drawStringc(xpos, gScreenInfo.getGameCanvasHeight() - vertMargin - 35, 8, text);
+   drawStringc(xpos, (F32)gScreenInfo.getGameCanvasHeight() - vertMargin - 35, 8, text);
 
    glColor(mNeedToSave ? Colors::red : Colors::green);     // Color level name by whether it needs to be saved or not
    dSprintf(text, sizeof(text), "%s%s", mNeedToSave ? "*" : "", mEditFileName.substr(0, mEditFileName.find_last_of('.')).c_str());    // Chop off extension
-   drawStringc(xpos, gScreenInfo.getGameCanvasHeight() - vertMargin - 45, 8, text);
+   drawStringc(xpos, (F32)gScreenInfo.getGameCanvasHeight() - vertMargin - 45, 8, text);
 
    // And wall width as needed
    if(width != NONE)
    {
       glColor(Colors::white);
       dSprintf(text, sizeof(text), "Width: %2.0f", width);
-      drawStringc(xpos, gScreenInfo.getGameCanvasHeight() - vertMargin - 55, 8, text);
+      drawStringc(xpos, (F32)gScreenInfo.getGameCanvasHeight() - vertMargin - 55, 8, text);
    }
 }
 
@@ -1430,7 +1430,7 @@ void EditorUserInterface::renderTextEntryOverlay()
 
       for(S32 i = 1; i >= 0; i--)
       {
-         glColor(Color(.3,.6,.3), i ? .85 : 1);
+         glColor(Color(.3f,.6f,.3f), i ? .85f : 1);
 
          glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
             glVertex2i(xpos,            ypos);
@@ -1468,7 +1468,7 @@ void EditorUserInterface::renderReferenceShip()
       F32 vertDist = Game::PLAYER_VISUAL_DISTANCE_VERTICAL;
 
       glEnableBlend;     // Enable transparency
-      glColor4f(.5, .5, 1, .35);
+      glColor4f(.5, .5, 1, .35f);
       glBegin(GL_POLYGON);
          glVertex2f(-horizDist, -vertDist);
          glVertex2f(horizDist, -vertDist);
@@ -1483,7 +1483,7 @@ void EditorUserInterface::renderReferenceShip()
 
 static F32 getRenderingAlpha(bool isScriptItem)
 {
-   return isScriptItem ? .6 : 1;     // Script items will appear somewhat translucent
+   return isScriptItem ? .6f : 1;     // Script items will appear somewhat translucent
 }
 
 
@@ -1606,7 +1606,7 @@ void EditorUserInterface::render()
 			TNLAssert(obj, "LineItem NULL?");
          if(obj && (obj->isSelected() || (obj->isLitUp() && obj->isVertexLitUp(NONE))))
          {
-            width = obj->getWidth();     
+            width = (F32)obj->getWidth();
             break;
          }
       }
@@ -1655,7 +1655,7 @@ void EditorUserInterface::render()
 
          const char *helpString = mDockItems[hoverItem]->getEditorHelpString();
 
-         glColor3f(.1, 1, .1);
+         glColor3f(.1f, 1, .1f);
 
          // Center string between left side of screen and edge of dock
          S32 x = (S32)(gScreenInfo.getGameCanvasWidth() - horizMargin - DOCK_WIDTH - getStringWidth(15, helpString)) / 2;
@@ -2057,11 +2057,11 @@ void EditorUserInterface::findHitItemAndEdge()
             continue;
          
          // Only select walls in CTRL-A mode...
-         U32 type = obj->getObjectTypeMask();
+         BITMASK type = obj->getObjectTypeMask();
          if(mShowMode == ShowWallsOnly && !(type & BarrierType) && !(type & PolyWallType))        // Only select walls in CTRL-A mode
             continue;                                                              // ...so if it's not a wall, proceed to next item
 
-         S32 radius = obj->getEditorRadius(mCurrentScale);
+         F32 radius = obj->getEditorRadius(mCurrentScale);
 
          for(S32 j = obj->getVertCount() - 1; j >= 0; j--)
          {
@@ -2684,7 +2684,7 @@ void EditorUserInterface::deleteItem(S32 itemIndex)
    Game *game = getGame();
    WallSegmentManager *wallSegmentManager = game->getWallSegmentManager();
 
-   S32 mask = obj->getObjectTypeMask();
+   BITMASK mask = obj->getObjectTypeMask();
 
    if(mask & (BarrierType | PolyWallType))
    {
@@ -2712,7 +2712,7 @@ void EditorUserInterface::deleteItem(S32 itemIndex)
 }
 
 
-void EditorUserInterface::insertNewItem(GameObjectType itemType)
+void EditorUserInterface::insertNewItem(U8 itemTypeNumber)
 {
    if(mShowMode == ShowWallsOnly || mDraggingObjects)     // No inserting when items are hidden or being dragged!
       return;
@@ -2726,7 +2726,7 @@ void EditorUserInterface::insertNewItem(GameObjectType itemType)
 
    // Find a dockItem to copy
    for(S32 i = 0; i < mDockItems.size(); i++)
-      if(mDockItems[i]->getObjectTypeMask() & itemType)
+      if(mDockItems[i]->getObjectTypeNumber() == itemTypeNumber)
       {
          newObject = copyDockItem(i);
          break;
@@ -2811,7 +2811,7 @@ void EditorUserInterface::centerView()
          F32 midy = (miny + maxy) / 2;
 
          mCurrentScale = min(gScreenInfo.getGameCanvasWidth() / (maxx - minx), gScreenInfo.getGameCanvasHeight() / (maxy - miny));
-         mCurrentScale /= 1.3;      // Zoom out a bit
+         mCurrentScale /= 1.3f;      // Zoom out a bit
          mCurrentOffset.set(gScreenInfo.getGameCanvasWidth() / 2  - mCurrentScale * midx, 
                             gScreenInfo.getGameCanvasHeight() / 2 - mCurrentScale * midy);
       }
@@ -3128,7 +3128,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
             clearLevelGenItems();
       }
       else
-         rotateSelection(getKeyState(KEY_SHIFT) ? 15 : -15); // Shift-R - Rotate CW, R - Rotate CCW
+         rotateSelection(getKeyState(KEY_SHIFT) ? 15.f : -15.f); // Shift-R - Rotate CW, R - Rotate CCW
    else if((keyCode == KEY_I) && getKeyState(KEY_CTRL))  // Ctrl-I - Insert items generated with script into editor
    {
       copyScriptItemsToEditor();
@@ -3217,36 +3217,36 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       playBoop();
    }
    else if(keyCode == KEY_T)              // T - Teleporter
-      insertNewItem(TeleportType);
+      insertNewItem(TeleportTypeNumber);
    else if(keyCode == KEY_P)              // P - Speed Zone
-      insertNewItem(SpeedZoneType);
+      insertNewItem(SpeedZoneTypeNumber);
    else if(keyCode == KEY_G)              // G - Spawn
-      insertNewItem(ShipSpawnType);
+      insertNewItem(ShipSpawnTypeNumber);
    else if(keyCode == KEY_B && getKeyState(KEY_CTRL)) // Ctrl-B - Spy Bug
-      insertNewItem(SpyBugType);
+      insertNewItem(SpyBugTypeNumber);
    else if(keyCode == KEY_B)              // B - Repair
-      insertNewItem(RepairItemType);
+      insertNewItem(RepairItemTypeNumber);
    else if(keyCode == KEY_Y)              // Y - Turret
-      insertNewItem(TurretType);
+      insertNewItem(TurretTypeNumber);
    else if(keyCode == KEY_M)              // M - Mine
-      insertNewItem(MineType);
+      insertNewItem(MineTypeNumber);
    else if(keyCode == KEY_F)              // F - Force Field
-      insertNewItem(ForceFieldProjectorType);
+      insertNewItem(ForceFieldProjectorTypeNumber);
    else if(keyCode == KEY_BACKSPACE || keyCode == KEY_DELETE)
          deleteSelection(false);
    else if(keyCode == keyHELP)            // Turn on help screen
    {
-      getUIManager()->getEditorInstructionsUserInterface()->activate();
+      getGame()->getUIManager()->getEditorInstructionsUserInterface()->activate();
       playBoop();
    }
    else if(keyCode == keyOUTGAMECHAT)     // Turn on Global Chat overlay
-      getUIManager()->getChatUserInterface()->activate();
+      getGame()->getUIManager()->getChatUserInterface()->activate();
    else if(keyCode == keyDIAG)            // Turn on diagnostic overlay
-      getUIManager()->getDiagnosticUserInterface()->activate();
+      getGame()->getUIManager()->getDiagnosticUserInterface()->activate();
    else if(keyCode == KEY_ESCAPE)           // Activate the menu
    {
       playBoop();
-      getUIManager()->getEditorMenuUserInterface()->activate();
+      getGame()->getUIManager()->getEditorMenuUserInterface()->activate();
    }
    else if(keyCode == KEY_SPACE)
       mSnapDisabled = true;
@@ -3526,9 +3526,9 @@ void EditorUserInterface::idle(U32 timeDelta)
    Point mouseLevelPoint = convertCanvasToLevelCoord(mMousePos);
 
    if(mIn && !mOut)
-      mCurrentScale *= 1 + timeDelta * 0.002;
+      mCurrentScale *= 1 + timeDelta * 0.002f;
    else if(mOut && !mIn)
-      mCurrentScale *= 1 - timeDelta * 0.002;
+      mCurrentScale *= 1 - timeDelta * 0.002f;
 
    if(mCurrentScale < MIN_SCALE)
      mCurrentScale = MIN_SCALE;

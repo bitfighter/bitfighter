@@ -202,7 +202,7 @@ Vector<string> parseString(const string &line)
   while(ss >> item){
     if (item[0]=='"')
     {
-      S32 lastItemPosition = item.length() - 1;
+      S32 lastItemPosition = (S32)item.length() - 1;
       if (item[lastItemPosition]!='"') {
         // read the rest of the double-quoted item
         string restOfItem;

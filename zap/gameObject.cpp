@@ -161,7 +161,9 @@ void GameObject::setActualPos(Point p)
 
 F32 GameObject::getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 updateSkips)
 {
-   GameObject *so = (GameObject *) scopeObject;
+   GameObject *so = dynamic_cast<GameObject *>(scopeObject);
+   if(!so)
+      return 0;  // GameType is not GameObject
 
    Point center = so->getExtent().getCenter();
 
@@ -195,7 +197,7 @@ F32 GameObject::getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 up
 
    // give some extra love to things that are moving towards the scope object
    if(deltav.dot(deltap) < 0)
-      add = 0.7;
+      add = 0.7f;
 
    // and a little more love if this object has not yet been scoped.
    if(updateMask == 0xFFFFFFFF)
@@ -210,7 +212,7 @@ void GameObject::damageObject(DamageInfo *theInfo)
 
 
 // Returns number of ships hit
-S32 GameObject::radiusDamage(Point pos, S32 innerRad, S32 outerRad, U32 typemask, DamageInfo &info, F32 force)
+S32 GameObject::radiusDamage(Point pos, S32 innerRad, S32 outerRad, BITMASK typemask, DamageInfo &info, F32 force)
 {
    // Check for players within range.  If so, blast them to little tiny bits!
    // Those within innerRad get full force of the damage.  Those within outerRad get damage prop. to distance
@@ -295,7 +297,7 @@ S32 GameObject::radiusDamage(Point pos, S32 innerRad, S32 outerRad, U32 typemask
 }
 
 
-void GameObject::findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector, const Rect &ext, U8 typeNumber)
+void GameObject::findObjects(BITMASK typeMask, Vector<DatabaseObject *> &fillVector, const Rect &ext, U8 typeNumber)
 {
    GridDatabase *gridDB = getDatabase();
    if(!gridDB)
@@ -305,7 +307,7 @@ void GameObject::findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector,
 }
 
 
-GameObject *GameObject::findObjectLOS(U32 typeMask, U32 stateIndex, Point rayStart, Point rayEnd, 
+GameObject *GameObject::findObjectLOS(BITMASK typeMask, U32 stateIndex, Point rayStart, Point rayEnd, 
                                       float &collisionTime, Point &collisionNormal, U8 typeNumber)
 {
    GridDatabase *gridDB = getDatabase();
@@ -484,7 +486,7 @@ void GameObject::readCompressedVelocity(Point &vel, U32 max, BitStream *stream)
       //RDW This needs to be readSignedFloat.
       //See above.
       F32 theta = stream->readSignedFloat(10) * Float2Pi;
-      F32 magnitude = stream->readRangedU32(0, max);
+      F32 magnitude = (F32)stream->readRangedU32(0, max);
       vel.set(cos(theta) * magnitude, sin(theta) * magnitude);
    }
 }

@@ -412,28 +412,39 @@ void UserInterface::drawStringf(F32 x, F32 y, S32 size, const char *format, ...)
 }
 
 
-void UserInterface::drawStringfc(F32 x, F32 y, S32 size, const char *format, ...)
+void UserInterface::drawStringfc(F32 x, F32 y, F32 size, const char *format, ...)
 {
    makeBuffer;
-   drawStringc(x, y, size, buffer);
+   drawStringc(x, y, (F32)size, buffer);
 }
 
 
-void UserInterface::drawStringfr(F32 x, F32 y, S32 size, const char *format, ...)
+void UserInterface::drawStringfr(F32 x, F32 y, F32 size, const char *format, ...)
 {
    makeBuffer;
-   S32 pos = getStringWidth(size, buffer);
+   F32 pos = getStringWidth(size, buffer);
    drawStringc(x - pos, y, size, buffer);
 }
 
    
+S32 UserInterface::drawStringAndGetWidth(S32 x, S32 y, S32 size, const char *string)
+{
+   drawString(x, y, size, string);
+   return getStringWidth(size, string);
+}
 S32 UserInterface::drawStringAndGetWidth(F32 x, F32 y, S32 size, const char *string)
 {
-   drawString((S32) x, (S32) y, size, string);
+   drawString(x, y, size, string);
    return getStringWidth(size, string);
 }
 
 
+S32 UserInterface::drawStringAndGetWidthf(S32 x, S32 y, S32 size, const char *format, ...)
+{
+   makeBuffer;
+   drawString(x, y, size, buffer);
+   return getStringWidth(size, buffer);
+}
 S32 UserInterface::drawStringAndGetWidthf(F32 x, F32 y, S32 size, const char *format, ...)
 {
    makeBuffer;
@@ -457,7 +468,13 @@ S32 UserInterface::drawCenteredString(S32 y, S32 size, const char *string)
 
 S32 UserInterface::drawCenteredString(S32 x, S32 y, S32 size, const char *string)
 {
-   S32 xpos = x - getStringWidth(size, string) / 2 ;
+   S32 xpos = x - getStringWidth(size, string) / 2;
+   drawString(xpos, y, size, string);
+   return xpos;
+}
+F32 UserInterface::drawCenteredString(F32 x, F32 y, S32 size, const char *string)
+{
+   F32 xpos = x - getStringWidth(F32(size), string) / 2;
    drawString(xpos, y, size, string);
    return xpos;
 }
@@ -548,7 +565,7 @@ S32 UserInterface::drawCenteredStringPair(S32 xpos, S32 ypos, S32 size, const Co
    S32 xpos2 = getCenteredStringStartingPosf(size, "%s %s", leftStr, rightStr) + xpos - gScreenInfo.getGameCanvasWidth() / 2;
 
    glColor(leftColor);
-   xpos2 += UserInterface::drawStringAndGetWidthf(xpos2, ypos, size, "%s ", leftStr);
+   xpos2 += UserInterface::drawStringAndGetWidthf((F32)xpos2, (F32)ypos, size, "%s ", leftStr);
 
    glColor(rightColor);
    UserInterface::drawString(xpos2, ypos, size, rightStr);
@@ -608,28 +625,29 @@ void UserInterface::drawString4Colf(S32 y, S32 size, U32 col, const char *format
    drawString4Col(y, size, col, buffer);
 }
 
-   
-F32 UserInterface::getStringWidthF32(F32 size, const char *string)
-{
-#ifndef ZAP_DEDICATED
-   return F32( OpenglUtils::getStringLength((const unsigned char *) string) ) * size / 120.0;
-#else
-   return 1;
-#endif
 
+
+#ifndef ZAP_DEDICATED
+S32 UserInterface::getStringWidth(S32 size, const char *string)
+{
+   return OpenglUtils::getStringLength((const unsigned char *) string) * size / 120;
+}
+F32 UserInterface::getStringWidth(F32 size, const char *string)
+{
+   return F32( OpenglUtils::getStringLength((const unsigned char *) string) ) * size / 120.f;
 }
 
+#else
 
 S32 UserInterface::getStringWidth(S32 size, const char *string)
 {
-   return getStringWidthF32(size, string);
+   return 1;
 }
-
-
 F32 UserInterface::getStringWidth(F32 size, const char *string)
 {
-   return getStringWidthF32(size, string);
+   return 1;
 }
+#endif
 
 
 F32 UserInterface::getStringWidthf(F32 size, const char *format, ...)
@@ -711,10 +729,10 @@ void UserInterface::renderMessageBox(const char *title, const char *instr, const
       glColor(i ? Color(.3,0,0) : Colors::white);        // Draw the box
       
       glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
-         glVertex2f(inset, boxTop);
-         glVertex2f(canvasWidth - inset, boxTop);
-         glVertex2f(canvasWidth - inset, boxTop + boxHeight);
-         glVertex2f(inset, boxTop + boxHeight);
+         glVertex2i(inset, boxTop);
+         glVertex2i(canvasWidth - inset, boxTop);
+         glVertex2i(canvasWidth - inset, boxTop + boxHeight);
+         glVertex2i(inset, boxTop + boxHeight);
       glEnd();
    }
 

@@ -61,7 +61,7 @@ protected:
    };
 
 public:
-   EngineeredObject(S32 team = -1, Point anchorPoint = Point(), Point anchorNormal = Point(), GameObjectType objectType = UnknownType);
+   EngineeredObject(S32 team = -1, Point anchorPoint = Point(), Point anchorNormal = Point());
    virtual bool processArguments(S32 argc, const char **argv, Game *game);
 
    virtual void onAddedToGame(Game *theGame);
@@ -93,7 +93,7 @@ public:
                                                    Point &anchor, Point &normal);
 
    static DatabaseObject *findAnchorPointAndNormal(GridDatabase *db, const Point &pos, F32 snapDist, 
-                                                   bool format, S32 wallType, Point &anchor, Point &normal);
+                                                   bool format, BITMASK wallType, Point &anchor, Point &normal);
 
    void setAnchorNormal(const Point &nrml) { mAnchorNormal = nrml; }
    WallSegment *getMountSegment() { return mMountSeg; }

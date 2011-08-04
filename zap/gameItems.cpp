@@ -45,7 +45,7 @@ namespace Zap
 TNL_IMPLEMENT_NETOBJECT(RepairItem);
 
 // Constructor
-RepairItem::RepairItem(Point pos) : PickupItem(pos, REPAIR_ITEM_RADIUS, DEFAULT_RESPAWN_TIME * 1000) 
+RepairItem::RepairItem(Point pos) : PickupItem(pos, (F32)REPAIR_ITEM_RADIUS, DEFAULT_RESPAWN_TIME * 1000) 
 { 
    mObjectTypeMask |= RepairItemType;
    mObjectTypeNumber = RepairItemTypeNumber;
@@ -211,12 +211,10 @@ S32 EnergyItem::isVis(lua_State *L) { return returnBool(L, isVisible()); }      
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-AbstractSpawn::AbstractSpawn(const Point &pos, S32 time, GameObjectType objType)
+AbstractSpawn::AbstractSpawn(const Point &pos, S32 time)
 {
    setVert(pos, 0);
    setRespawnTime(time);
-   mObjectTypeMask = objType;
-   //mObjectTypeNumber = AsteroidTypeNumber
 };
 
 
@@ -263,9 +261,9 @@ string AbstractSpawn::toString(F32 gridSize) const
 ////////////////////////////////////////
 
 // Constructor
-Spawn::Spawn(const Point &pos, S32 time) : AbstractSpawn(pos, time, ShipSpawnType)
+Spawn::Spawn(const Point &pos, S32 time) : AbstractSpawn(pos, time)
 {
-   // Do nothing
+   mObjectTypeNumber = ShipSpawnTypeNumber;
 }
 
 
@@ -322,9 +320,10 @@ void Spawn::renderDock()
 ////////////////////////////////////////
 
 // Constructor
-AsteroidSpawn::AsteroidSpawn(const Point &pos, S32 time) : AbstractSpawn(pos, time, AsteroidSpawnType)
+AsteroidSpawn::AsteroidSpawn(const Point &pos, S32 time) : AbstractSpawn(pos, time)
 {
-   // Do nothing
+   mObjectTypeNumber = AsteroidSpawnTypeNumber;
+
 }
 
 
@@ -336,13 +335,13 @@ AsteroidSpawn *AsteroidSpawn::clone() const
 
 static void renderAsteroidSpawn(const Point &pos)
 {
-   F32 scale = 0.8;
+   F32 scale = 0.8f;
    static const Point p(0,0);
 
    glPushMatrix();
       glTranslatef(pos.x, pos.y, 0);
       glScalef(scale, scale, 1);
-      renderAsteroid(p, 2, .1);
+      renderAsteroid(p, 2, .1f);
 
       glColor(Colors::white);
       drawCircle(p, 13);
@@ -372,9 +371,9 @@ void AsteroidSpawn::renderDock()
 ////////////////////////////////////////
 
 // Constructor
-FlagSpawn::FlagSpawn(const Point &pos, S32 time) : AbstractSpawn(pos, time, FlagSpawnType)
+FlagSpawn::FlagSpawn(const Point &pos, S32 time) : AbstractSpawn(pos, time)
 {
-   // Do nothing
+   mObjectTypeNumber = FlagSpawnTypeNumber;
 }
 
 
@@ -390,7 +389,7 @@ void FlagSpawn::renderEditor(F32 currentScale)
 
    glPushMatrix();
       glTranslatef(pos.x + 1, pos.y, 0);
-      glScalef(0.4/currentScale, 0.4/currentScale, 1);
+      glScalef(0.4f/currentScale, 0.4f/currentScale, 1);
       Color color = getTeamColor(mTeam);  // To avoid taking address of temporary
       renderFlag(0, 0, &color);
 
@@ -417,7 +416,7 @@ static F32 asteroidVel = 250;
 static const F32 ASTEROID_MASS = 4;
 
 // Constructor
-Asteroid::Asteroid() : EditorItem(Point(0,0), true, ASTEROID_RADIUS, ASTEROID_MASS)
+Asteroid::Asteroid() : EditorItem(Point(0,0), true, (F32)ASTEROID_RADIUS, ASTEROID_MASS)
 {
    mNetFlags.set(Ghostable);
    mObjectTypeMask |= AsteroidType;
@@ -455,7 +454,7 @@ void Asteroid::renderItem(Point pos)
 
 void Asteroid::renderDock()
 {
-   renderAsteroid(getVert(0), 2, .1);
+   renderAsteroid(getVert(0), 2, .1f);
 }
 
 
@@ -643,7 +642,7 @@ S32 Asteroid::getSizeCount(lua_State *L) { return returnInt(L, getSizeCount()); 
 
 TNL_IMPLEMENT_NETOBJECT(Worm);
 
-Worm::Worm() : Item(Point(0,0), true, WORM_RADIUS, 1)
+Worm::Worm() : Item(Point(0,0), true, (F32)WORM_RADIUS, 1)
 {
    mNetFlags.set(Ghostable);
    mObjectTypeMask |= WormType;
@@ -763,10 +762,10 @@ TNL_IMPLEMENT_NETOBJECT(TestItem);
 static const F32 TEST_ITEM_MASS = 4;
 
 // Constructor
-TestItem::TestItem() : EditorItem(Point(0,0), true, TEST_ITEM_RADIUS, TEST_ITEM_MASS)
+TestItem::TestItem() : EditorItem(Point(0,0), true, (F32)TEST_ITEM_RADIUS, TEST_ITEM_MASS)
 {
    mNetFlags.set(Ghostable);
-   mObjectTypeMask |= TestItemType | TurretTargetType;
+   mObjectTypeMask |= TestItemType;
    mObjectTypeNumber = TestItemTypeNumber;
 }
 
@@ -802,7 +801,7 @@ void TestItem::damageObject(DamageInfo *theInfo)
    Point dv = theInfo->impulseVector - mMoveState[ActualState].vel;
    Point iv = mMoveState[ActualState].pos - theInfo->collisionPoint;
    iv.normalize();
-   mMoveState[ActualState].vel += iv * dv.dot(iv) * 0.3;
+   mMoveState[ActualState].vel += iv * dv.dot(iv) * 0.3f;
 }
 
 
@@ -847,10 +846,10 @@ TNL_IMPLEMENT_NETOBJECT(ResourceItem);
 static const F32 RESOURCE_ITEM_MASS = 1;
 
    // Constructor
-ResourceItem::ResourceItem() : EditorItem(Point(0,0), true, RESOURCE_ITEM_RADIUS, RESOURCE_ITEM_MASS)
+ResourceItem::ResourceItem() : EditorItem(Point(0,0), true, (F32)RESOURCE_ITEM_RADIUS, RESOURCE_ITEM_MASS)
 {
    mNetFlags.set(Ghostable);
-   mObjectTypeMask |= ResourceItemType | TurretTargetType;
+   mObjectTypeMask |= ResourceItemType;
    mObjectTypeNumber = ResourceItemTypeNumber;
 }
 
@@ -870,7 +869,7 @@ void ResourceItem::renderItem(Point pos)
 
 void ResourceItem::renderDock()
 {
-   renderResourceItem(getVert(0), .4, 0, 1);
+   renderResourceItem(getVert(0), .4f, 0, 1);
 }
 
 
@@ -906,7 +905,7 @@ void ResourceItem::damageObject(DamageInfo *theInfo)
    Point dv = theInfo->impulseVector - mMoveState[ActualState].vel;
    Point iv = mMoveState[ActualState].pos - theInfo->collisionPoint;
    iv.normalize();
-   mMoveState[ActualState].vel += iv * dv.dot(iv) * 0.3;
+   mMoveState[ActualState].vel += iv * dv.dot(iv) * 0.3f;
 }
 
 

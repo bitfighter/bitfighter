@@ -122,7 +122,7 @@ Barrier::Barrier(const Vector<Point> &points, F32 width, bool solid)
       width = -width;
 
    mWidth = width;           // must be positive to avoid problem with bufferBarrierForBotZone
-   width = width * 0.5 + 1;  // divide by 2 to avoid double size extents, add 1 to avoid rounding errors.
+   width = width * 0.5f + 1;  // divide by 2 to avoid double size extents, add 1 to avoid rounding errors.
    if(points.size() == 2)    // It's a regular segment, need to make a little larger to accomodate width
       extent.expand(Point(width, width));
    // use mWidth, not width, for anything below this.
@@ -260,9 +260,9 @@ void Barrier::constructBarrierEndPoints(const Vector<Point> *vec, F32 width, Vec
 
       cosTheta = abs(cosTheta);     // Seems to reduce "end gap" on acute junction angles
       
-      F32 extendAmt = width * 0.5 * tan( acos(cosTheta) / 2 );
-      if(extendAmt > 0.01)
-         extendAmt -= 0.01;
+      F32 extendAmt = width * 0.5f * F32(tan( acos(cosTheta) / 2 ));
+      if(extendAmt > 0.01f)
+         extendAmt -= 0.01f;
       extend.push_back(extendAmt);
    
       lastEdge = curEdge;
@@ -295,7 +295,7 @@ void Barrier::expandCenterlineToOutline(const Point &start, const Point &end, F3
 
    Point dir = end - start;
    Point crossVec(dir.y, -dir.x);
-   crossVec.normalize(width * 0.5);
+   crossVec.normalize(width * 0.5f);
 
    cornerPoints.push_back(start + crossVec);
    cornerPoints.push_back(end + crossVec);
@@ -311,7 +311,7 @@ Vector<Point> Barrier::getBufferForBotZone()
    // Use a clipper library to buffer polywalls; should be counter-clockwise by here
    if(mSolid)
    {
-      offsetPolygon(mPoints, bufferedPoints, BotNavMeshZone::BufferRadius);
+      offsetPolygon(mPoints, bufferedPoints, (F32)BotNavMeshZone::BufferRadius);
    }
 
    // If a barrier, do our own buffer
@@ -323,20 +323,20 @@ Vector<Point> Barrier::getBufferForBotZone()
       Point difference = end - start;
 
       Point crossVector(difference.y, -difference.x);  // Create a point whose vector from 0,0 is perpenticular to the original vector
-      crossVector.normalize((mWidth * 0.5) + BotNavMeshZone::BufferRadius);  // reduce point so the vector has length of barrier width + ship radius
+      crossVector.normalize((mWidth * 0.5f) + BotNavMeshZone::BufferRadius);  // reduce point so the vector has length of barrier width + ship radius
 
       Point parallelVector(difference.x, difference.y); // Create a vector parallel to original segment
-      parallelVector.normalize(BotNavMeshZone::BufferRadius);  // Reduce point so vector has length of ship radius
+      parallelVector.normalize((F32)BotNavMeshZone::BufferRadius);  // Reduce point so vector has length of ship radius
 
       // For octagonal zones
       //   create extra vectors that are offset full offset to create 'cut' corners
       //   (FloatSqrtHalf * BotNavMeshZone::BufferRadius)  creates a tangent to the radius of the buffer
       //   we then subtract a little from the tangent cut to shorten the buffer on the corners and allow zones to be created when barriers are close
       Point crossPartial = crossVector;
-      crossPartial.normalize((FloatSqrtHalf * BotNavMeshZone::BufferRadius) + (mWidth * 0.5) - (0.30 * BotNavMeshZone::BufferRadius));
+      crossPartial.normalize((FloatSqrtHalf * BotNavMeshZone::BufferRadius) + (mWidth * 0.5f) - (0.3f * BotNavMeshZone::BufferRadius));
 
       Point parallelPartial = parallelVector;
-      parallelPartial.normalize((FloatSqrtHalf * BotNavMeshZone::BufferRadius) - (0.30 * BotNavMeshZone::BufferRadius));
+      parallelPartial.normalize((FloatSqrtHalf * BotNavMeshZone::BufferRadius) - (0.3f * BotNavMeshZone::BufferRadius));
 
       // Now add/subtract perpendicular and parallel vectors to buffer the segments
       bufferedPoints.push_back((start - parallelVector)  + crossPartial);
@@ -443,7 +443,7 @@ void WallItem::onGeomChanged()
 
 void WallItem::processEndPoints()
 {
-   Barrier::constructBarrierEndPoints(getOutline(), getWidth(), extendedEndPoints);
+   Barrier::constructBarrierEndPoints(getOutline(), (F32)getWidth(), extendedEndPoints);
 }
 
 
@@ -458,7 +458,8 @@ void WallItem::scale(const Point &center, F32 scale)
    EditorObject::scale(center, scale);
 
    // Adjust the wall thickness
-   setWidth(getWidth() * scale);
+   // Scale might not be accurate due to conversion to S32
+   setWidth(S32(getWidth() * scale));
 }
 
 
@@ -719,7 +720,7 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *gameDataba
       for(S32 i = 0; i < wall->extendedEndPoints.size(); i += 2)
       {
          WallSegment *newSegment = new WallSegment(mWallSegmentDatabase, wallItem->extendedEndPoints[i], wallItem->extendedEndPoints[i+1], 
-                                                   wallItem->getWidth(), wallItem->getSerialNumber());    // Create the segment
+                                                   (F32)wallItem->getWidth(), wallItem->getSerialNumber());    // Create the segment
          mWallSegments.push_back(newSegment);          // And add it to our master segment list
       }
    }
@@ -766,7 +767,7 @@ void WallSegmentManager::invalidateIntersectingSegments(GridDatabase *gameDataba
    // These will need new walls after we've moved our segment.  We'll look for those intersecting segments in our edge database.
    for(S32 i = 0; i < mWallSegments.size(); i++)
       if(mWallSegments[i]->getOwner() == item->getSerialNumber())      // Segment belongs to our item; look it up in the database
-         gameDatabase->findObjects(WallSegmentType, fillVector, mWallSegments[i]->getExtent());
+         gameDatabase->findObjects(0, fillVector, mWallSegments[i]->getExtent(), WallSegmentTypeNumber);
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
@@ -774,11 +775,8 @@ void WallSegmentManager::invalidateIntersectingSegments(GridDatabase *gameDataba
       TNLAssert(intersectingSegment, "NULL segment!");
 
       // Reset the edges of all invalidated segments to their factory settings
-      if(intersectingSegment)  // don't crash in release mode (when assert is disabled)
-      {
-         intersectingSegment->resetEdges();   
-         intersectingSegment->invalidate();
-      }
+      intersectingSegment->resetEdges();   
+      intersectingSegment->invalidate();
    }
 
    buildWallSegmentEdgesAndPoints(gameDatabase, item);
@@ -789,7 +787,7 @@ void WallSegmentManager::invalidateIntersectingSegments(GridDatabase *gameDataba
    //// Invalidate all segments that potentially intersect the changed segment in its new location
    //for(S32 i = 0; i < mWallSegments.size(); i++)
    //   if(mWallSegments[i]->getOwner() == item->getSerialNumber())      // Segment belongs to our item, compare to all others
-   //      mWallSegmentDatabase->findObjects(WallSegmentType, fillVector, mWallSegments[i]->getExtent());
+   //      mWallSegmentDatabase->findObjects(0, fillVector, mWallSegments[i]->getExtent(), WallSegmentTypeNumber);
 
    //for(S32 i = 0; i < fillVector.size(); i++)
    //{
@@ -802,7 +800,7 @@ void WallSegmentManager::invalidateIntersectingSegments(GridDatabase *gameDataba
 
    for(S32 i = 0; i < mWallSegmentDatabase->getObjectCount(); i++)
    {
-      if(mWallSegmentDatabase->getObjectByIndex(i)->getObjectTypeMask() == WallSegmentType)
+      if(mWallSegmentDatabase->getObjectByIndex(i)->getObjectTypeNumber() == WallSegmentTypeNumber)
       {
          WallSegment *wallSegment = dynamic_cast<WallSegment *>(mWallSegmentDatabase->getObjectByIndex(i));
          TNLAssert(wallSegment, "Uh oh!");
@@ -976,7 +974,7 @@ void WallSegment::renderFill(bool beingDragged, bool showingReferenceShip)
    
    // Use true below because all segments are triangulated
    Color fillColor = useGameColor ? gIniSettings.wallFillColor : EDITOR_WALL_FILL_COLOR;
-   fillColor *= beingDragged ? 0.5 : 1;
+   fillColor *= beingDragged ? 0.5f : 1;
 
    renderWallFill(&triangulatedFillPoints, true, fillColor);   
    glEnableBlendfromLineSmooth;

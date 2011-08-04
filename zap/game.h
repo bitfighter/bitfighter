@@ -231,7 +231,7 @@ public:
 
    void addToDeleteList(GameObject *theObject, U32 delay);
 
-   void deleteObjects(U32 typeMask);
+   void deleteObjects(BITMASK typeMask);
 
    F32 getGridSize() const { return mGridSize; }
    void setGridSize(F32 gridSize);

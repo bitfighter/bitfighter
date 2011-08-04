@@ -77,7 +77,7 @@ public:
    S32 getShip(lua_State *L)       { return isDefunct() ? returnNil(L) : returnShip(L, dynamic_cast<Ship *>(mClientRef->clientConnection->getControlObject())); }
    S32 getScriptName(lua_State *L) { return returnNil(L); }
    S32 getTeamIndx(lua_State *L)   { return returnInt(L, mClientRef->getTeam() + 1); }
-   S32 getRating(lua_State *L)     { return returnInt(L, mClientRef->getRating()); }
+   S32 getRating(lua_State *L)     { return returnFloat(L, mClientRef->getRating()); }
    S32 getScore(lua_State *L)      { return returnInt(L, mClientRef->getScore()); }
    S32 isRobot(lua_State *L)       { return returnBool(L, false); }
 };

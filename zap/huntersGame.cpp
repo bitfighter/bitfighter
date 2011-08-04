@@ -110,7 +110,7 @@ bool HuntersGameType::processArguments(S32 argc, const char **argv, Game *game)
 {
    if(argc > 0)
    {
-      setGameTime(atof(argv[0]) * 60);                       // Game time, stored in minutes in level file
+      setGameTime((F32)atof(argv[0]) * 60);                       // Game time, stored in minutes in level file
       if(argc > 1)
       {
          mNexusClosedTime = S32(atof(argv[1]) * 60 * 1000);  // Time until nexus opens, specified in minutes
@@ -306,11 +306,10 @@ void releaseFlag(Game *game, Point pos, Point startVel)
 }
 
 
-void HuntersGameType::idle(GameObject::IdleCallPath path)
+void HuntersGameType::idle(GameObject::IdleCallPath path, U32 deltaT)
 {
-   Parent::idle(path);
+   Parent::idle(path, deltaT);
 
-   U32 deltaT = mCurrentMove.time;
    if(isGhost())     // i.e. on client
    {
       mNexusTimer.update(deltaT);
@@ -533,7 +532,7 @@ void HuntersGameType::spawnShip(GameConnection *theClient)
 TNL_IMPLEMENT_NETOBJECT(HuntersFlagItem);
 
 // C++ constructor
-HuntersFlagItem::HuntersFlagItem(Point pos, Point vel, bool useDropDelay) : FlagItem(pos, true, Ship::CollisionRadius, 4)  // radius was 30, which had problem with sticking to wall when drop too close to walls
+HuntersFlagItem::HuntersFlagItem(Point pos, Point vel, bool useDropDelay) : FlagItem(pos, true, (F32)Ship::CollisionRadius, 4)  // radius was 30, which had problem with sticking to wall when drop too close to walls
 {
    mFlagCount = 0;
 

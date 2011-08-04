@@ -603,14 +603,14 @@ static void renderLockIcon()
    glEnd();
 
    glBegin(GL_LINE_STRIP);
-      glVertex2f(2.6, 2);
-      glVertex2f(2.6, 1.3);
-      glVertex2f(2.4, 0.9);
-      glVertex2f(1.9, 0.6);
-      glVertex2f(1.1, 0.6);
-      glVertex2f(0.6, 0.9);
-      glVertex2f(0.4, 1.3);
-      glVertex2f(0.4, 2);
+      glVertex2f(2.6f, 2);
+      glVertex2f(2.6f, 1.3f);
+      glVertex2f(2.4f, 0.9f);
+      glVertex2f(1.9f, 0.6f);
+      glVertex2f(1.1f, 0.6f);
+      glVertex2f(0.6f, 0.9f);
+      glVertex2f(0.4f, 1.3f);
+      glVertex2f(0.4f, 2);
    glEnd();
 }
 
@@ -663,8 +663,8 @@ void QueryServersUserInterface::render()
       // Horizontal divider between game list and chat window
       glColor(Colors::white);
       glBegin(GL_LINES);
-         glVertex2f(horizMargin, dividerPos);
-         glVertex2f(canvasWidth - horizMargin, dividerPos);
+         glVertex2i(horizMargin, dividerPos);
+         glVertex2i(canvasWidth - horizMargin, dividerPos);
       glEnd();
 
 
@@ -759,12 +759,12 @@ void QueryServersUserInterface::render()
          if(s.passwordRequired || s.pingTimedOut || !s.everGotQueryResponse)
          {
             glPushMatrix();
-               glTranslatef(columns[1].xStart + 25, y + 2, 0);
+               glTranslatef(F32(columns[1].xStart + 25), F32(y + 2), 0);
                if(s.pingTimedOut || !s.everGotQueryResponse)
                   drawString(0, 0, SERVER_ENTRY_TEXTSIZE, "?");
                else
                {
-                  glScale(3.65);
+                  glScale(3.65f);
                   renderLockIcon();
                }
             glPopMatrix();
@@ -820,19 +820,19 @@ void QueryServersUserInterface::renderTopBanner()
    const S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
 
    // Top banner
-   glColor3f(0, 0.35, 0);
+   glColor3f(0, 0.35f, 0);
    glBegin(GL_POLYGON);
-      glVertex2f(0, 0);
-      glVertex2f(canvasWidth, 0);
-      glVertex2f(canvasWidth, BANNER_HEIGHT);
-      glVertex2f(0, BANNER_HEIGHT);
+      glVertex2i(0, 0);
+      glVertex2i(canvasWidth, 0);
+      glVertex2i(canvasWidth, BANNER_HEIGHT);
+      glVertex2i(0, BANNER_HEIGHT);
    glEnd();
 
    glColor(Colors::white);
    drawCenteredString(vertMargin + 7, 35, "BITFIGHTER GAME LOBBY");
 
    drawStringf(horizMargin, vertMargin, 12, "SERVERS: %d", servers.size());
-   drawStringfr(canvasWidth, vertMargin, 12, "PAGE %d/%d", mPage + 1, getLastPage() + 1);
+   drawStringfr((F32)canvasWidth, (F32)vertMargin, 12, "PAGE %d/%d", mPage + 1, getLastPage() + 1);
 }
 
 
@@ -841,23 +841,23 @@ void QueryServersUserInterface::renderColumnHeaders()
    S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
 
    // Draw vertical dividing lines
-   glColor3f(0.7, 0.7, 0.7);
+   glColor3f(0.7f, 0.7f, 0.7f);
 
    for(S32 i = 1; i < columns.size(); i++)
    {
       glBegin(GL_LINES);
-         glVertex2f(columns[i].xStart - 4, COLUMN_HEADER_TOP);
-         glVertex2f(columns[i].xStart - 4, TOP_OF_SERVER_LIST + getServersPerPage() * SERVER_ENTRY_HEIGHT + 2);
+         glVertex2i(columns[i].xStart - 4, COLUMN_HEADER_TOP);
+         glVertex2i(columns[i].xStart - 4, TOP_OF_SERVER_LIST + getServersPerPage() * SERVER_ENTRY_HEIGHT + 2);
       glEnd();
    }
 
    // Horizontal lines under column headers
    glBegin(GL_LINES);
-      glVertex2f(0, COLUMN_HEADER_TOP);
-      glVertex2f(canvasWidth, COLUMN_HEADER_TOP);
+      glVertex2i(0, COLUMN_HEADER_TOP);
+      glVertex2i(canvasWidth, COLUMN_HEADER_TOP);
 
-      glVertex2f(0, COLUMN_HEADER_TOP + COLUMN_HEADER_TEXTSIZE + 7);
-      glVertex2f(canvasWidth, COLUMN_HEADER_TOP + COLUMN_HEADER_TEXTSIZE + 7);
+      glVertex2i(0, COLUMN_HEADER_TOP + COLUMN_HEADER_TEXTSIZE + 7);
+      glVertex2i(canvasWidth, COLUMN_HEADER_TOP + COLUMN_HEADER_TEXTSIZE + 7);
    glEnd();
 
 
@@ -874,10 +874,10 @@ void QueryServersUserInterface::renderColumnHeaders()
       // Render box around (behind, really) selected column
       glColor(i ? Color(.4, .4, 0) : Colors::white);
       glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
-         glVertex2f(x1, COLUMN_HEADER_TOP);
-         glVertex2f(x2, COLUMN_HEADER_TOP);
-         glVertex2f(x2, COLUMN_HEADER_TOP + COLUMN_HEADER_HEIGHT + 1);
-         glVertex2f(x1, COLUMN_HEADER_TOP + COLUMN_HEADER_HEIGHT + 1);
+         glVertex2i(x1, COLUMN_HEADER_TOP);
+         glVertex2i(x2, COLUMN_HEADER_TOP);
+         glVertex2i(x2, COLUMN_HEADER_TOP + COLUMN_HEADER_HEIGHT + 1);
+         glVertex2i(x1, COLUMN_HEADER_TOP + COLUMN_HEADER_HEIGHT + 1);
       glEnd();
    }
 
@@ -897,10 +897,10 @@ void QueryServersUserInterface::renderColumnHeaders()
 
       glColor(Colors::white);
       glBegin(GL_LINE_LOOP);
-         glVertex2f(x1, COLUMN_HEADER_TOP);
-         glVertex2f(x2, COLUMN_HEADER_TOP);
-         glVertex2f(x2, COLUMN_HEADER_TOP + COLUMN_HEADER_HEIGHT + 1);
-         glVertex2f(x1, COLUMN_HEADER_TOP + COLUMN_HEADER_HEIGHT + 1);
+         glVertex2i(x1, COLUMN_HEADER_TOP);
+         glVertex2i(x2, COLUMN_HEADER_TOP);
+         glVertex2i(x2, COLUMN_HEADER_TOP + COLUMN_HEADER_HEIGHT + 1);
+         glVertex2i(x1, COLUMN_HEADER_TOP + COLUMN_HEADER_HEIGHT + 1);
       glEnd();
    }
 }
@@ -954,10 +954,10 @@ void QueryServersUserInterface::renderMessageBox(bool drawmsg1, bool drawmsg2)
       glColor(i ? Color(.4, 0, 0) : Colors::red);
 
       glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
-         glVertex2f(xpos1, ypos1);
-         glVertex2f(xpos1, ypos2);
-         glVertex2f(xpos2, ypos2);
-         glVertex2f(xpos2, ypos1);
+         glVertex2i(xpos1, ypos1);
+         glVertex2i(xpos1, ypos2);
+         glVertex2i(xpos2, ypos2);
+         glVertex2i(xpos2, ypos1);
       glEnd();
    }
 
@@ -1406,10 +1406,10 @@ void Button::render(F32 mouseX, F32 mouseY)
          glColor(i ? mBgColor : mFgColor);         // Fill then border
 
       glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
-         glVertex2f(mX,                           mY);
-         glVertex2f(mX + mPadding * 2 + labelLen, mY);
-         glVertex2f(mX + mPadding * 2 + labelLen, mY + mTextSize + mPadding * 2);
-         glVertex2f(mX,                           mY + mTextSize + mPadding * 2);
+         glVertex2i(mX,                           mY);
+         glVertex2i(mX + mPadding * 2 + labelLen, mY);
+         glVertex2i(mX + mPadding * 2 + labelLen, mY + mTextSize + mPadding * 2);
+         glVertex2i(mX,                           mY + mTextSize + mPadding * 2);
       glEnd();
    }
 

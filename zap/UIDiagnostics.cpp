@@ -106,12 +106,12 @@ void DiagnosticUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 
 S32 findLongestString(F32 size, const Vector<const char *> *strings)
 {
-   S32 maxLen = 0;
+   F32 maxLen = 0;
    S32 longest = 0;
 
    for(S32 i = 0; i < strings->size(); i++)
    {
-      S32 len = UserInterface::getStringWidth(size, strings->get(i));
+      F32 len = (F32)UserInterface::getStringWidth(size, strings->get(i));
       if(len > maxLen)
       {
          maxLen = len;
@@ -171,10 +171,10 @@ static void initFoldersBlock(S32 textsize)
    names.push_back("Root Data Dir:");
    vals.push_back(gCmdLineSettings.dirs.rootDataDir == "" ? "None specified" : gCmdLineSettings.dirs.rootDataDir.c_str());
 
-   longestName = findLongestString(textsize, &names);
+   longestName = findLongestString((F32)textsize, &names);
    nameWidth = UserInterface::getStringWidth(textsize, names[longestName]);
    spaceWidth = UserInterface::getStringWidth(textsize, " ");
-   longestVal = findLongestString(textsize, &vals);
+   longestVal = findLongestString((F32)textsize, &vals);
 
    totLen = nameWidth + spaceWidth + UserInterface::getStringWidth(textsize, vals[longestVal]);
 }
@@ -302,7 +302,7 @@ void DiagnosticUserInterface::render()
    drawStringf(625, 3, 25, "PAGE %d/%d", mCurPage + 1, NUM_PAGES);
  
    drawCenteredStringf(571, 20, "%s - next page  ESC exits", keyCodeToString(keyDIAG));
-   glColor3f(0.7, 0.7, 0.7);
+   glColor3f(0.7f, 0.7f, 0.7f);
    glBegin(GL_LINES);
       glVertex2f(0, 31);
       glVertex2f(800, 31);
@@ -339,8 +339,8 @@ void DiagnosticUserInterface::render()
          S32 y1 = vertMargin + 27;
          S32 y2 = vertMargin + 90;
 
-         glVertex2f(x1, y1);     glVertex2f(x2, y1);
-         glVertex2f(x2, y2);     glVertex2f(x1, y2);
+         glVertex2i(x1, y1);     glVertex2i(x2, y1);
+         glVertex2i(x2, y2);     glVertex2i(x1, y2);
       glEnd();
 
 
@@ -395,14 +395,14 @@ void DiagnosticUserInterface::render()
       for(S32 i = 0; i < Joystick::rawAxisCount; i++) // shows RAW axis inputs
       {
          glColor3f(0.5,0,0);
-         glVertex2f(i*8+rawAxisPosX, rawAxisPosY - 20);
-         glVertex2f(i*8+rawAxisPosX, rawAxisPosY + 20);
+         glVertex2i(i*8+rawAxisPosX, rawAxisPosY - 20);
+         glVertex2i(i*8+rawAxisPosX, rawAxisPosY + 20);
          glColor3f(1,1,0);
-         glVertex2f(i*8+rawAxisPosX, rawAxisPosY);
+         glVertex2i(i*8+rawAxisPosX, rawAxisPosY);
          F32 a = Joystick::rawAxis[i];
          if(a < -1) a = -1;
          if(a > 1) a = 1;
-         glVertex2f(i*8+rawAxisPosX, rawAxisPosY + a * 20);
+         glVertex2f(F32(i*8+rawAxisPosX), rawAxisPosY + a * 20);
       }
       glEnd();
 
@@ -447,25 +447,25 @@ void DiagnosticUserInterface::render()
                  getKeyState(STICK_2_LEFT), getKeyState(STICK_2_RIGHT), "R Stick", "(Fire)");
       hpos += 55;
 
-      JoystickRender::renderControllerButton(hpos, ypos, BUTTON_1, getKeyState(BUTTON_1));
+      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, BUTTON_1, getKeyState(BUTTON_1));
       hpos += 40;
-      JoystickRender::renderControllerButton(hpos, ypos, BUTTON_2, getKeyState(BUTTON_2));
+      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, BUTTON_2, getKeyState(BUTTON_2));
       hpos += 40;
-      JoystickRender::renderControllerButton(hpos, ypos, BUTTON_3, getKeyState(BUTTON_3));
+      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, BUTTON_3, getKeyState(BUTTON_3));
       hpos += 40;
-      JoystickRender::renderControllerButton(hpos, ypos, BUTTON_4, getKeyState(BUTTON_4));
+      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, BUTTON_4, getKeyState(BUTTON_4));
       hpos += 40;
-      JoystickRender::renderControllerButton(hpos, ypos, BUTTON_5, getKeyState(BUTTON_5));
+      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, BUTTON_5, getKeyState(BUTTON_5));
       hpos += 40;
-      JoystickRender::renderControllerButton(hpos, ypos, BUTTON_6, getKeyState(BUTTON_6));
+      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, BUTTON_6, getKeyState(BUTTON_6));
       hpos += 40;
-      JoystickRender::renderControllerButton(hpos, ypos, BUTTON_7, getKeyState(BUTTON_7));
+      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, BUTTON_7, getKeyState(BUTTON_7));
       hpos += 40;
-      JoystickRender::renderControllerButton(hpos, ypos, BUTTON_8, getKeyState(BUTTON_8));
+      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, BUTTON_8, getKeyState(BUTTON_8));
       hpos += 40;
-      JoystickRender::renderControllerButton(hpos, ypos, BUTTON_BACK, getKeyState(BUTTON_BACK));
+      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, BUTTON_BACK, getKeyState(BUTTON_BACK));
       hpos += 40;
-      JoystickRender::renderControllerButton(hpos, ypos, BUTTON_START, getKeyState(BUTTON_START));
+      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, BUTTON_START, getKeyState(BUTTON_START));
    }
    else if(mCurPage == 1)
    {
@@ -488,7 +488,7 @@ void DiagnosticUserInterface::render()
       drawCenteredString(ypos, textsize, "Currently reading data and settings from:");
       ypos += textsize + gap + gap;
 
-      ypos = showFoldersBlock(textsize, ypos, gap+2);
+      ypos = showFoldersBlock((F32)textsize, ypos, gap+2);
    }
    else if(mCurPage == 2)
    {

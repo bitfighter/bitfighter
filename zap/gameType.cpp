@@ -157,6 +157,7 @@ GameType::GameType(S32 winningScore) : mScoreboardUpdateTimer(1000) , mGameTimer
    mBotsAllowed = true;
 
    mLevelCredits = gClientInfo.name;
+   mGame = NULL;
 }
 
 
@@ -181,8 +182,13 @@ string GameType::toString() const
 
 void GameType::addToGame(Game *game, GridDatabase *database)
 {
-   GameObject::addToGame(game, database);
+   mGame = game;
    game->setGameType(this);
+}
+bool GameType::onGhostAdd(GhostConnection *theConnection)
+{
+   addToGame(gClientGame, gClientGame->getGameObjDatabase());
+   return true;
 }
 
 
@@ -250,7 +256,7 @@ boost::shared_ptr<MenuItem> GameType::getMenuItem(Game *game, const char *key)
    else if(!strcmp(key, "Grid Size"))
       return boost::shared_ptr<MenuItem>(new CounterMenuItem(game,
                                                              "Grid Size:",       
-                                                             game->getGridSize(),
+                                                             (S32)game->getGridSize(),
                                                              Game::MIN_GRID_SIZE,      // increment
                                                              Game::MIN_GRID_SIZE,      // min val
                                                              Game::MAX_GRID_SIZE,      // max val
@@ -299,11 +305,11 @@ bool GameType::saveMenuItem(const MenuItem *menuItem, const char *key)
    else if(!strcmp(key, "Levelgen Script"))
       setScript(parseString(menuItem->getValue()));
    else if(!strcmp(key, "Game Time"))
-      setGameTime(menuItem->getIntValue());
+		setGameTime((F32)menuItem->getIntValue());
    else if(!strcmp(key, "Win Score"))
       setWinningScore(menuItem->getIntValue());
    else if(!strcmp(key, "Grid Size"))
-      getGame()->setGridSize(menuItem->getIntValue());
+      getGame()->setGridSize((F32)menuItem->getIntValue());
    else if(!strcmp(key, "Min Players"))
        setMinRecPlayers(menuItem->getIntValue());
    else if(!strcmp(key, "Max Players"))
@@ -517,9 +523,8 @@ const char *GameType::validateGameType(const char *gtype)
 }
 
 
-void GameType::idle(GameObject::IdleCallPath path)
-{
-   U32 deltaT = mCurrentMove.time;
+void GameType::idle(GameObject::IdleCallPath path, U32 deltaT)
+{;
    mTotalGamePlay += deltaT;
 
    if(isGhost())     // i.e. client only
@@ -713,7 +718,7 @@ void GameType::renderObjectiveArrow(const Point *nearestPoint, const Color *outl
    Point p3 = rp - arrowDir * 23 * scale - crossVec * 8 * scale;
 
    Color fillColor = *outlineColor;    // Create local copy
-   fillColor *= .7;
+   fillColor *= .7f;
 
    glEnableBlend;
 
@@ -1062,7 +1067,7 @@ void GameType::onLevelLoaded()
 
    // Figure out if this level has any loadout zones
    fillVector.clear();
-   getDatabase()->findObjects(LoadoutZoneType, fillVector);
+   mGame->getGameObjDatabase()->findObjects(LoadoutZoneType, fillVector);
 
    mLevelHasLoadoutZone = (fillVector.size() > 0);
 
@@ -1291,7 +1296,7 @@ void GameType::performScopeQuery(GhostConnection *connection)
          queryRect.expand(scopeRange);
 
          fillVector.clear();
-         findObjects(AllObjectTypes, fillVector, queryRect);
+         mGame->getGameObjDatabase()->findObjects(AllObjectTypes, fillVector, queryRect);
 
          for(S32 j = 0; j < fillVector.size(); j++)
             connection->objectInScope(dynamic_cast<GameObject *>(fillVector[j]));
@@ -1344,7 +1349,7 @@ void GameType::performProxyScopeQuery(GameObject *scopeObject, GameConnection *c
          Rect queryRect(pos, pos);
          queryRect.expand( Game::getScopeRange(ship->isModuleActive(ModuleSensor)) );
 
-         findObjects(( (scopeObject == ship) ? AllObjectTypes : CommandMapVisType), fillVector, queryRect);
+         mGame->getGameObjDatabase()->findObjects(( (scopeObject == ship) ? AllObjectTypes : CommandMapVisType), fillVector, queryRect);
       }
    }
    else     // Do a simple query of the objects within scope range of the ship
@@ -1358,7 +1363,7 @@ void GameType::performProxyScopeQuery(GameObject *scopeObject, GameConnection *c
       queryRect.expand( Game::getScopeRange(co->isModuleActive(ModuleSensor)) );
 
       fillVector.clear();
-      findObjects(AllObjectTypes, fillVector, queryRect);
+      mGame->getGameObjDatabase()->findObjects(AllObjectTypes, fillVector, queryRect);
    }
 
    // Set object-in-scope for all objects found above
@@ -1408,7 +1413,7 @@ void GameType::queryItemsOfInterest()
 
       queryRect.expand(scopeRange);
       fillVector.clear();
-      findObjects(ShipType | RobotType, fillVector, queryRect);
+      mGame->getGameObjDatabase()->findObjects(ShipType | RobotType, fillVector, queryRect);
 
       for(S32 j = 0; j < fillVector.size(); j++)
       {
@@ -1507,7 +1512,7 @@ void GameType::countTeamPlayers() const
 
          GameConnection *cc = mClientList[i]->clientConnection;
 
-         const F32 BASE_RATING = .1;
+         const F32 BASE_RATING = .1f;
 
          if(cc)
             team->addRating(max(getCurrentRating(cc), BASE_RATING));
@@ -2261,7 +2266,7 @@ GAMETYPE_RPC_S2C(GameType, s2cClientJoinedTeam,
       if(gp->mSetBy == name)
       {
          gp->mSetBy = "";                                    // No longer set-by-self
-         U32 mask = gp->getObjectTypeMask();
+         BITMASK mask = gp->getObjectTypeMask();
          gp->setObjectTypeMask(mask &= ~CommandMapVisType);  // And no longer visible on commander's map
       }
    }
@@ -2868,7 +2873,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, c2sResendItemStatus, (U16 itemId), (itemId
    }
 
    fillVector.clear();
-   getDatabase()->findObjects(fillVector);
+   mGame->getGameObjDatabase()->findObjects(fillVector);
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
@@ -3020,6 +3025,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cVoiceChat, (StringTableEntry clientName
 //      cl->voiceSFX->queueBuffer(playBuffer);
    }
 }
+
 
 };
 

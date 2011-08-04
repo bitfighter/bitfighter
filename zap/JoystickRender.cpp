@@ -74,7 +74,7 @@ void JoystickRender::renderRoundButton(Point loc, const char *label, AlignType a
 
    setButtonColor(activated);
 
-   drawCircle(loc + offset, radius);
+   drawCircle(loc + offset, (F32)radius);
    UserInterface::drawString(loc.x + offset.x - UserInterface::getStringWidth(labelSize, label) / 2, loc.y + 2, labelSize, label);
 }
 
@@ -104,7 +104,7 @@ void JoystickRender::renderRectButton(Point loc, const char *label, AlignType al
 
    setButtonColor(activated);
 
-   drawRoundedRect(loc + offset, width, height, 3);
+   drawRoundedRect(loc + offset, (F32)width, (F32)height, 3);
 
    UserInterface::drawString(loc.x + offset.x - UserInterface::getStringWidth(labelSize, label) / 2, loc.y + 2, labelSize, label);
 }
@@ -135,7 +135,7 @@ void JoystickRender::renderSmallRectButton(Point loc, const char *label, AlignTy
 
    setButtonColor(activated);
 
-   drawRoundedRect(loc + offset, width, height, 3);
+   drawRoundedRect(loc + offset, (F32)width, (F32)height, 3);
 
    UserInterface::drawString(loc.x + offset.x - UserInterface::getStringWidth(labelSize, label) / 2, loc.y + 2, labelSize, label);
 }
@@ -145,7 +145,7 @@ void JoystickRender::renderSmallRectButton(Point loc, const char *label, AlignTy
 void JoystickRender::renderDPad(Point center, F32 radius, bool upActivated, bool downActivated, bool leftActivated,
                 bool rightActivated, const char *msg1, const char *msg2)
 {
-   radius = radius * 0.143;   // = 1/7  Correct for the fact that when radius = 1, graphic has 7 px radius
+   radius = radius * 0.143f;   // = 1/7  Correct for the fact that when radius = 1, graphic has 7 px radius
 
    // Up arrow
    setButtonColor(upActivated);
@@ -396,8 +396,8 @@ void JoystickRender::renderControllerButton(F32 x, F32 y, KeyCode keyCode, bool 
          { 1, 0.5, 0.5 },
          { 1, 0.5, 1 },
          { 0.5, 1, 0.5 },
-         { 0.7, 0.7, 0.7 },
-         { 0.7, 0.7, 0.7 }
+         { 0.7f, 0.7f, 0.7f },
+         { 0.7f, 0.7f, 0.7f }
       };
       Color c(color[buttonIndex][0], color[buttonIndex][1], color[buttonIndex][2]);
       Point center(x, y + 8);
@@ -465,8 +465,8 @@ void JoystickRender::renderControllerButton(F32 x, F32 y, KeyCode keyCode, bool 
             { 1, 0.5, 0.5 },
             { 1, 0.5, 1 },
             { 0.5, 1, 0.5 },
-            { 0.7, 0.7, 0.7 },
-            { 0.7, 0.7, 0.7 }
+            { 0.7f, 0.7f, 0.7f },
+            { 0.7f, 0.7f, 0.7f }
       };
       Color c(color[buttonIndex][0], color[buttonIndex][1], color[buttonIndex][2]);
       Point center(x, y + 8);
@@ -548,7 +548,7 @@ void JoystickRender::renderControllerButton(F32 x, F32 y, KeyCode keyCode, bool 
       if(buttonIndex == 4 || buttonIndex == 5)     // RB, LB
       {
          setButtonColor(activated);
-         drawRoundedRect(Point(x, y + 8), rectButtonWidth, rectButtonHeight, 3);
+         drawRoundedRect(Point(x, y + 8), (F32)rectButtonWidth, (F32)rectButtonHeight, 3);
          glColor3f(1,1,1);
          UserInterface::drawString(x - 7, y + 1, 12, buttonIndex == 5 ? "LB" : "RB");
       }
@@ -556,7 +556,7 @@ void JoystickRender::renderControllerButton(F32 x, F32 y, KeyCode keyCode, bool 
       if(buttonIndex == 6 || buttonIndex == 7)     // RT, LT
       {
          setButtonColor(activated);
-         drawRoundedRect(Point(x, y + 8), rectButtonWidth, rectButtonHeight, 3);
+         drawRoundedRect(Point(x, y + 8), (F32)rectButtonWidth, (F32)rectButtonHeight, 3);
          glColor3f(1,1,1);
          UserInterface::drawString(x - 7, y + 1, 12, buttonIndex == 7 ? "LT" : "RT");
       }

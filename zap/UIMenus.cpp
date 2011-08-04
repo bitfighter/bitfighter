@@ -180,10 +180,10 @@ static void renderMenuInstructions()
 
      S32 x = canvasWidth / 2 - UserInterface::horizMargin - totalWidth/2;
 
-     JoystickRender::renderControllerButton(x, y, BUTTON_DPAD_UP, false);
+     JoystickRender::renderControllerButton((F32)x, (F32)y, BUTTON_DPAD_UP, false);
      x += JoystickRender::getControllerButtonRenderedSize(BUTTON_DPAD_UP) + UserInterface::getStringWidth(size, " ");
 
-     JoystickRender::renderControllerButton(x, y, BUTTON_DPAD_DOWN, false);
+     JoystickRender::renderControllerButton((F32)x, (F32)y, BUTTON_DPAD_DOWN, false);
      x += JoystickRender::getControllerButtonRenderedSize(BUTTON_DPAD_DOWN) + UserInterface::getStringWidth(size, " ");
 
      glColor3f(1,1,1);
@@ -191,7 +191,7 @@ static void renderMenuInstructions()
      UserInterface::drawString(x, y, size, msg1);
      x += UserInterface::getStringWidth(size, msg1);
 
-     JoystickRender::renderControllerButton(x, y + 4, BUTTON_START, false);
+     JoystickRender::renderControllerButton((F32)x, F32(y + 4), BUTTON_START, false);
      x += JoystickRender::getControllerButtonRenderedSize(BUTTON_START);
 
      glColor3f(1,1,1);
@@ -199,7 +199,7 @@ static void renderMenuInstructions()
      UserInterface::drawString(x, y, size, msg2);
      x += UserInterface::getStringWidth(size, msg2);
 
-     JoystickRender::renderControllerButton(x + 4, y + 4, BUTTON_BACK, false);
+     JoystickRender::renderControllerButton(F32(x + 4), F32(y + 4), BUTTON_BACK, false);
      x += JoystickRender::getControllerButtonRenderedSize(BUTTON_BACK) + 4;
 
      glColor3f(1,1,1);
@@ -221,9 +221,9 @@ static void renderArrowAbove(S32 pos, S32 height)
       // First create a black poly to blot out what's behind, then the arrow itself
       glColor(i ? Colors::black : Colors::blue);
       glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
-         glVertex2f( (canvasWidth - ARROW_WIDTH) / 2, pos - ARROW_MARGIN - 7);
-         glVertex2f( (canvasWidth + ARROW_WIDTH) / 2, pos - ARROW_MARGIN - 7);
-         glVertex2f(canvasWidth / 2, pos - (height + ARROW_MARGIN ) - 7);
+         glVertex2i( (canvasWidth - ARROW_WIDTH) / 2, pos - ARROW_MARGIN - 7);
+         glVertex2i( (canvasWidth + ARROW_WIDTH) / 2, pos - ARROW_MARGIN - 7);
+         glVertex2i(canvasWidth / 2, pos - (height + ARROW_MARGIN ) - 7);
       glEnd();
    }
 }
@@ -237,9 +237,9 @@ static void renderArrowBelow(S32 pos, S32 height)
       // First create a black poly to blot out what's behind, then the arrow itself
       glColor(i ? Colors::black : Colors::blue);
       glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
-         glVertex2f( (canvasWidth - ARROW_WIDTH) / 2, pos + ARROW_MARGIN - 7);
-         glVertex2f( (canvasWidth + ARROW_WIDTH) / 2, pos + ARROW_MARGIN - 7);
-         glVertex2f(canvasWidth / 2, pos + (height + ARROW_MARGIN) - 7);
+         glVertex2i( (canvasWidth - ARROW_WIDTH) / 2, pos + ARROW_MARGIN - 7);
+         glVertex2i( (canvasWidth + ARROW_WIDTH) / 2, pos + ARROW_MARGIN - 7);
+         glVertex2i(canvasWidth / 2, pos + (height + ARROW_MARGIN) - 7);
       glEnd();
    }
 }
@@ -255,14 +255,14 @@ void MenuUserInterface::render()
    if(gClientGame->getConnectionToServer())
    {
       getGame()->getUserInterface()->render();
-      glColor4f(0, 0, 0, 0.6);
+      glColor4f(0, 0, 0, 0.6f);
 
       glEnableBlend;
          glBegin(GL_POLYGON);
-            glVertex2f(0, 0);
-            glVertex2f(canvasWidth, 0);
-            glVertex2f(canvasWidth, canvasHeight);
-            glVertex2f(0, canvasHeight);
+            glVertex2i(0, 0);
+            glVertex2i(canvasWidth, 0);
+            glVertex2i(canvasWidth, canvasHeight);
+            glVertex2i(0, canvasHeight);
          glEnd();
       glDisableBlend;
    }
@@ -296,10 +296,10 @@ void MenuUserInterface::render()
          {
             glColor(j ? Color(0,0,0.4) : Colors::blue);   // Fill, then outline
             glBegin(j ? GL_POLYGON : GL_LINES);
-               glVertex2f(0,           y - getGap() / 2 + adjfact + shrinkfact);
-               glVertex2f(canvasWidth, y - getGap() / 2 + adjfact + shrinkfact);
-               glVertex2f(canvasWidth, y + getTextSize() + getGap() / 2 + adjfact - shrinkfact);
-               glVertex2f(0,           y + getTextSize() + getGap() / 2 + adjfact - shrinkfact);
+               glVertex2i(0,           y - getGap() / 2 + adjfact + shrinkfact);
+               glVertex2i(canvasWidth, y - getGap() / 2 + adjfact + shrinkfact);
+               glVertex2i(canvasWidth, y + getTextSize() + getGap() / 2 + adjfact - shrinkfact);
+               glVertex2i(0,           y + getTextSize() + getGap() / 2 + adjfact - shrinkfact);
             glEnd();
          }
 
@@ -683,10 +683,10 @@ void MainMenuUserInterface::render()
       glEnableBlend;
          glBegin(GL_POLYGON);
             glColor4f(0, 0, 0, (F32) mFadeInTimer.getCurrent() / (F32) FadeInTime);
-            glVertex2f(0, 0);
-            glVertex2f(canvasWidth, 0);
-            glVertex2f(canvasWidth, canvasHeight);
-            glVertex2f(0, canvasHeight);
+            glVertex2i(0, 0);
+            glVertex2i(canvasWidth, 0);
+            glVertex2i(canvasWidth, canvasHeight);
+            glVertex2i(0, canvasHeight);
          glEnd();
       glDisableBlend;
    }
@@ -1248,7 +1248,7 @@ void HostMenuUserInterface::renderProgressListItems()
       glEnableBlend;
       for(S32 i = 0; i < mLevelLoadDisplayNames.size(); i++)
       {
-         glColor4f(1,1,1, (1.4 - ((F32) (mLevelLoadDisplayNames.size() - i) / 10.0)) * 
+         glColor4f(1,1,1, (1.4f - ((F32) (mLevelLoadDisplayNames.size() - i) / 10.f)) * 
                                         (levelLoadDisplayDisplay ? 1 : levelLoadDisplayFadeTimer.getFraction()) );
          drawStringf(100, gScreenInfo.getGameCanvasHeight() - vertMargin - (mLevelLoadDisplayNames.size() - i) * 20, 
                      15, "%s", mLevelLoadDisplayNames[i].c_str());

@@ -197,7 +197,7 @@ Color gHelpTextColor(Colors::green);
 
 S32 gMaxPolygonPoints = 32;                     // Max number of points we can have in Nexuses, LoadoutZones, etc.
 
-static const F32 MIN_SCALING_FACT = 0.15;       // Limits minimum window size
+static const F32 MIN_SCALING_FACT = 0.15f;       // Limits minimum window size
 
 string gServerPassword = "";
 string gAdminPassword = "";
@@ -288,7 +288,7 @@ void seedRandomNumberGenerator(string name)
    const S32 timeByteCount = 4;
    const S32 totalByteCount = 16;
 
-   S32 nameBytes = min(name.length(), totalByteCount - timeByteCount);     // # of bytes we get from the provided name
+   S32 nameBytes = min((S32)name.length(), totalByteCount - timeByteCount);     // # of bytes we get from the provided name
 
    unsigned char buf[totalByteCount];
 
@@ -880,7 +880,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
       else if(!stricmp(argv[i], "-loss"))          // additional arg required
       {
          if(hasAdditionalArg)
-            gCmdLineSettings.loss = atof(argv[i+1]);
+            gCmdLineSettings.loss = (F32)atof(argv[i+1]);
          else
          {
             logprintf(LogConsumer::LogError, "You must specify a loss rate between 0 and 1 with the -loss option");
@@ -1552,7 +1552,7 @@ void actualizeScreenMode(bool changingInterfaces)
          (gIniSettings.displayMode == DISPLAY_MODE_FULL_SCREEN_STRETCHED || gIniSettings.displayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED))
    {
       // Smaller values give bigger magnification; makes small things easier to see on full screen
-      F32 magFactor = 0.85;      
+      F32 magFactor = 0.85f;      
 
       // For screens smaller than normal, we need to readjust magFactor to make sure we get the full canvas height crammed onto
       // the screen; otherwise our dock will break.  Since this mode is only used in the editor, we don't really care about
@@ -1708,7 +1708,7 @@ void launchUpdater(string bitfighterExecutablePathAndFilename)
 
    S32 buildVersion = gCmdLineSettings.forceUpdate ? 0 : BUILD_VERSION;
 
-   S32 result = (S32) ShellExecuteA( NULL, NULL, updaterFileName.c_str(), itos(buildVersion).c_str(), updaterPath.c_str(), SW_SHOW );
+	S64 result = (S64) ShellExecuteA( NULL, NULL, updaterFileName.c_str(), itos(buildVersion).c_str(), updaterPath.c_str(), SW_SHOW );
 
    string msg = "";
 

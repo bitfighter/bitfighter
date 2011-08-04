@@ -37,7 +37,7 @@ namespace Zap
 TNL_IMPLEMENT_NETOBJECT(FlagItem);
 
 // C++ constructor
-FlagItem::FlagItem(Point pos) : EditorItem(pos, true, Ship::CollisionRadius) // radius was 20
+FlagItem::FlagItem(Point pos) : EditorItem(pos, true, (F32)Ship::CollisionRadius) // radius was 20
 {
    initialize();
 }
@@ -260,7 +260,7 @@ void FlagItem::renderDock()
 {
    glPushMatrix();
       glTranslate(getVert(0));
-      glScale(0.6);
+      glScale(0.6f);
       renderFlag(0, 0, getGame()->getTeamColor(mTeam));
    glPopMatrix();   
 }

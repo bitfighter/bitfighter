@@ -107,8 +107,8 @@ void EditorPolygon::prepareForDock(Game *game, const Point &point)
 }
 
 
-static const F32 INITIAL_HEIGHT = 0.9;
-static const F32 INITIAL_WIDTH = 0.3;
+static const F32 INITIAL_HEIGHT = 0.9f;
+static const F32 INITIAL_WIDTH = 0.3f;
 
 // Called when we create a brand new object and insert it in the editor, like when we drag a new item from the dock
 void EditorPolygon::newObjectFromDock(F32 gridSize)

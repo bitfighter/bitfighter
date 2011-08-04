@@ -93,7 +93,7 @@ void InstructionsUserInterface::render()
    drawStringf(3, 3, 25, "INSTRUCTIONS - %s", pageHeaders[mCurPage - 1]);
    drawStringf(625, 3, 25, "PAGE %d/%d", mCurPage, NUM_PAGES);
    drawCenteredString(571, 20, "LEFT - previous page  RIGHT, SPACE - next page  ESC exits");
-   glColor3f(0.7, 0.7, 0.7);
+   glColor3f(0.7f, 0.7f, 0.7f);
    glBegin(GL_LINES);
       glVertex2f(0, 31);
       glVertex2f(800, 31);
@@ -236,8 +236,8 @@ void InstructionsUserInterface::renderPage1()
    bool done = false;
 
    glBegin(GL_LINES);
-      glVertex2f(col1, starty + 26);
-      glVertex2f(750, starty + 26);
+      glVertex2i(col1, starty + 26);
+      glVertex2i(750, starty + 26);
    glEnd();
 
    static const Color txtColor = Colors::cyan;
@@ -271,10 +271,10 @@ void InstructionsUserInterface::renderPage1()
       }
       else if(!strcmp(controls[i].controlString, "-"))      // Horiz spacer
       {
-         glColor3f(0.4, 0.4, 0.4);
+         glColor3f(0.4f, 0.4f, 0.4f);
          glBegin(GL_LINES);
-            glVertex2f(actCol, y + 13);
-            glVertex2f(actCol + 335, y + 13);
+            glVertex2i(actCol, y + 13);
+            glVertex2i(actCol + 335, y + 13);
          glEnd();
       }
       else
@@ -307,7 +307,7 @@ void InstructionsUserInterface::renderPage1()
                drawStringf(col2, y + 4, 15, "[%s] [%s] [%s]", keyCodeToString(keyLEFT[InputModeKeyboard]), keyCodeToString(keyDOWN[InputModeKeyboard]), keyCodeToString(keyRIGHT[InputModeKeyboard]));
          }
          else
-            JoystickRender::renderControllerButton(contCol, y + 4, *controls[i].primaryControlIndex, false, 10);
+            JoystickRender::renderControllerButton((F32)contCol, F32(y + 4), *controls[i].primaryControlIndex, false, 10);
       }
 
       y += 26;
@@ -376,17 +376,17 @@ void InstructionsUserInterface::renderPage2()
       glColor3f(1,1,1);
       drawString(105, y, 20, moduleDescriptions[i]);
       glPushMatrix();
-      glTranslatef(60, y + 10, 0);
-      glScale(0.7);
+      glTranslatef(60, F32(y + 10), 0);
+      glScale(0.7f);
       glRotatef(-90, 0, 0, 1);
 
       static F32 thrusts[4] =  { 1, 0, 0, 0 };
-      static F32 thrustsBoost[4] =  { 1.3, 0, 0, 0 };
+      static F32 thrustsBoost[4] =  { 1.3f, 0, 0, 0 };
 
       switch(i)
       {
          case 0:     // Boost
-            renderShip(&Colors::blue, 1, thrustsBoost, 1, Ship::CollisionRadius, 0, false, false, false, false);
+            renderShip(&Colors::blue, 1, thrustsBoost, 1, (F32)Ship::CollisionRadius, 0, false, false, false, false);
             glBegin(GL_LINES);
                glColor3f(1,1,0);
                glVertex2f(-20, -17);
@@ -400,18 +400,18 @@ void InstructionsUserInterface::renderPage2()
             break;
 
          case 1:     // Shield
-            renderShip(&Colors::blue, 1, thrusts, 1, Ship::CollisionRadius, 0, false, true, false, false);
+            renderShip(&Colors::blue, 1, thrusts, 1, (F32)Ship::CollisionRadius, 0, false, true, false, false);
             break;
 
          case 2:     // Armor
-            renderShip(&Colors::blue, 1, thrusts, 1, Ship::CollisionRadius, 0, false, false, false, true);
+            renderShip(&Colors::blue, 1, thrusts, 1, (F32)Ship::CollisionRadius, 0, false, false, false, true);
             break;
 
          case 3:     // Repair
             {
                F32 health = (gClientGame->getCurrentTime() & 0x7FF) * 0.0005f;
 
-               renderShip(&Colors::blue, 1, thrusts, health, Ship::CollisionRadius, 0, false, false, false, false);
+               renderShip(&Colors::blue, 1, thrusts, health, (F32)Ship::CollisionRadius, 0, false, false, false, false);
                glLineWidth(gLineWidth3);
                glColor3f(1, 0, 0);
                drawCircle(0, 0, Ship::RepairDisplayRadius);
@@ -420,25 +420,25 @@ void InstructionsUserInterface::renderPage2()
             break;
 
          case 4:     // Sensor
-            renderShip(&Colors::blue, 1, thrusts, 1, Ship::CollisionRadius, gClientGame->getCurrentTime(), false, false, true, false);
+            renderShip(&Colors::blue, 1, thrusts, 1, (F32)Ship::CollisionRadius, gClientGame->getCurrentTime(), false, false, true, false);
             break;
 
          case 5:     // Cloak
             {
                U32 ct = gClientGame->getCurrentTime();
-               F32 frac = ct & 0x3FF;
+               F32 frac = F32(ct & 0x3FF);
                F32 alpha;
                if((ct & 0x400) != 0)
-                  alpha = frac * 0.001;
+                  alpha = frac * 0.001f;
                else
-                  alpha = 1 - (frac * 0.001);
-               renderShip(&Colors::blue, alpha, thrusts, 1, Ship::CollisionRadius, 0, false, false, false, false);
+                  alpha = 1 - (frac * 0.001f);
+               renderShip(&Colors::blue, alpha, thrusts, 1, (F32)Ship::CollisionRadius, 0, false, false, false, false);
             }
             break;
 
          case 6:     // Engineer
             {
-               renderShip(&Colors::blue, 1, thrusts, 1, Ship::CollisionRadius, 0, false, false, false, false);
+               renderShip(&Colors::blue, 1, thrusts, 1, (F32)Ship::CollisionRadius, 0, false, false, false, false);
                renderResourceItem(Point(0,0));
             }
             break;
@@ -510,7 +510,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
 
       glPushMatrix();
       glTranslate(objStart);
-      glScale(0.7);
+      glScale(0.7f);
 
 
       // TODO: Do this once, elsewhere
@@ -569,7 +569,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
             renderForceField(Point(-35, 0), Point(50, 0), Colors::red, true);
             break;
          case 18:
-            renderTeleporter(Point(0, 0), 0, true, gClientGame->getCurrentTime(), 1, Teleporter::TELEPORTER_RADIUS, 1, Vector<Point>(), false);
+            renderTeleporter(Point(0, 0), 0, true, gClientGame->getCurrentTime(), 1, (F32)Teleporter::TELEPORTER_RADIUS, 1, Vector<Point>(), false);
             break;
          case 19:
             renderFlag(0, 0, &Colors::red);
@@ -608,7 +608,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
 
          case 22:    // Asteroid... using goofball factor to keep out of sync with Nexus graphic
             renderAsteroid(Point(0,-10), 
-                     (S32)(gClientGame->getCurrentTime() / 2891) % Asteroid::getDesignCount(), .7);    
+                     (S32)(gClientGame->getCurrentTime() / 2891) % Asteroid::getDesignCount(), .7f);    
             break;
 
          case 23:    // SpeedZone
@@ -676,8 +676,8 @@ void InstructionsUserInterface::renderPageCommands(U32 page, const char *msg)
    //glColor3f(0,1,0);
    ypos += cmdSize + cmdGap;
    glBegin(GL_LINES);
-      glVertex2f(cmdCol, ypos);
-      glVertex2f(750, ypos);
+      glVertex2i(cmdCol, ypos);
+      glVertex2i(750, ypos);
    glEnd();
 
    ypos += 5;     // Small gap before cmds start
@@ -700,10 +700,10 @@ void InstructionsUserInterface::renderPageCommands(U32 page, const char *msg)
       // Check if we've just changed sections... if so, draw a horizontal line ----------
       if(chatCmds[i].helpGroup > section)      
       {
-         glColor3f(0.4, 0.4, 0.4);
+         glColor3f(0.4f, 0.4f, 0.4f);
          glBegin(GL_LINES);
-            glVertex2f(cmdCol, ypos + (cmdSize + cmdGap) / 3);
-            glVertex2f(cmdCol + 335, ypos + (cmdSize + cmdGap) / 3);
+            glVertex2i(cmdCol, ypos + (cmdSize + cmdGap) / 3);
+            glVertex2i(cmdCol + 335, ypos + (cmdSize + cmdGap) / 3);
          glEnd();
 
          section = chatCmds[i].helpGroup;
