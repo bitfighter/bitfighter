@@ -486,9 +486,6 @@ private:
 
    GameUserInterface *mGameUserInterface;
 
-
-
-
 public:
    ClientGame(const Address &bindAddress);
    ~ClientGame();
@@ -524,11 +521,14 @@ public:
    void connectionToServerRejected();
    void setMOTD(const char *motd);
 
+   // Alert users when they get a reply to their request for elevated permissions
+   void gotAdminPermissionsReply(bool granted);
+   void gotLevelChangePermissionsReply(bool granted);
 
-
+   void displayMessageBox(const StringTableEntry &title, const StringTableEntry &instr, const Vector<StringTableEntry> &message);
    void displayMessage(const Color &msgColor, const char *format, ...);
-   //void displayMessage(GameConnection::MessageColors msgColorIndex, const char *format, ...);
 
+   void onConnectionTerminated(const Address &serverAddress, NetConnection::TerminationReason reason, const char *reasonStr);
 
    const Color *getTeamColor(S32 teamIndex) const;
 

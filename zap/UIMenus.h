@@ -110,7 +110,7 @@ private:
    Timer mColorTimer;
    Timer mColorTimer2;
    enum {
-      FadeInTime = 400,       // Time that fade in lasts (ms)
+      FadeInTime = 400,       // Time that fade in lasts (ms) 
       ColorTime = 1000,
       ColorTime2 = 1700,
    };

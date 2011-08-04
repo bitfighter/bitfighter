@@ -738,9 +738,6 @@ extern Color gCmdChatColor;
 TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsAdmin, (bool granted), (granted),
    NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
-   static const char *adminPassSuccessMsg = "You've been granted permission to manage players and change levels";
-   static const char *adminPassFailureMsg = "Incorrect password: Admin access denied";
-
    if(mClientRef)
    {
       if(granted)
@@ -769,34 +766,15 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsAdmin, (bool granted), (granted),
 
    setGotPermissionsReply(true);
 
-   // If we're not waiting, don't show us a message.  Supresses superflous messages on startup.
+   // If we're not waiting, don't do anything.  Supresses superflous messages on startup.
    if(waitingForPermissionsReply())
-   {
-      if(granted)
-      {
-         // Either display the message in the menu subtitle (if the menu is active), or in the message area if not
-         if(UserInterface::current->getMenuID() == GameMenuUI)
-            mClientGame->getUIManager()->getGameMenuUserInterface()->mMenuSubTitle = adminPassSuccessMsg;
-         else
-            mClientGame->displayMessage(gCmdChatColor, adminPassSuccessMsg);
-      }
-      else
-      {
-         if(UserInterface::current->getMenuID() == GameMenuUI)
-            mClientGame->getUIManager()->getGameMenuUserInterface()->mMenuSubTitle = adminPassFailureMsg;
-         else
-            mClientGame->displayMessage(gCmdChatColor, adminPassFailureMsg);
-      }
-   }
+      mClientGame->gotAdminPermissionsReply(granted);
 }
 
 
 TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsLevelChanger, (bool granted, bool notify), (granted, notify),
    NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
-   static const char *levelPassSuccessMsg = "You've been granted permission to change levels";
-   static const char *levelPassFailureMsg = "Incorrect password: Level changing permissions denied";
-
    if(mClientRef)
    {
       if(granted)
@@ -827,23 +805,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsLevelChanger, (bool granted, bool noti
 
    // If we're not waiting, don't show us a message.  Supresses superflous messages on startup.
    if(waitingForPermissionsReply() && notify)
-   {
-      if(granted)
-      {
-         // Either display the message in the menu subtitle (if the menu is active), or in the message area if not
-         if(UserInterface::current->getMenuID() == GameMenuUI)
-            mClientGame->getUIManager()->getGameMenuUserInterface()->mMenuSubTitle = levelPassSuccessMsg;
-         else
-            mClientGame->displayMessage(gCmdChatColor, levelPassSuccessMsg);
-      }
-      else
-      {
-         if(UserInterface::current->getMenuID() == GameMenuUI)
-            mClientGame->getUIManager()->getGameMenuUserInterface()->mMenuSubTitle = levelPassFailureMsg;
-         else
-            mClientGame->displayMessage(gCmdChatColor, levelPassFailureMsg);
-      }
-   }
+      mClientGame->gotLevelChangePermissionsReply(granted);
 }
 
 
@@ -1021,15 +983,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayMessage,
 TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayMessageBox, (StringTableEntry title, StringTableEntry instr, Vector<StringTableEntry> message),
                   (title, instr, message), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
-   ErrorMessageUserInterface *ui = gClientGame->getUIManager()->getErrorMsgUserInterface();
-   ui->reset();
-   ui->setTitle(title.getString());
-   ui->setInstr(instr.getString());
-
-   for(S32 i = 0; i < message.size(); i++)
-      ui->setMessage(i+1, message[i].getString());      // UIErrorMsgInterface ==> first line = 1
-
-   ui->activate();
+   gClientGame->displayMessageBox(title, instr, message);
 }
 
 
@@ -1039,6 +993,8 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cAddLevel, (StringTableEntry name, StringTab
 {
    mLevelInfos.push_back(LevelInfo(name, type));
 }
+
+
 // Server sends the level that got removed, or removes all levels from list when index is -1
 TNL_IMPLEMENT_RPC(GameConnection, s2cRemoveLevel, (S32 index), (index),
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
@@ -1584,74 +1540,9 @@ void GameConnection::onConnectionTerminated(NetConnection::TerminationReason rea
    if(isInitiator())    // i.e. this is a client that connected to the server
    {
       TNLAssert(mClientGame, "onConnectionTerminated: mClientGame is NULL");
-      if(!mClientGame)
-         return;
 
-
-      if(UserInterface::cameFrom(EditorUI))
-         mClientGame->getUIManager()->getEditorUserInterface()->reactivateMenu(mClientGame->getUIManager()->getEditorUserInterface());
-      else
-         mClientGame->getUIManager()->getEditorUserInterface()->reactivateMenu(mClientGame->getUIManager()->getMainMenuUserInterface());
-
-      mClientGame->unsuspendGame();
-
-      // Display a context-appropriate error message
-      ErrorMessageUserInterface *ui = mClientGame->getUIManager()->getErrorMsgUserInterface();
-
-      ui->reset();
-      ui->setTitle("Connection Terminated");
-
-      switch(reason)
-      {
-         case NetConnection::ReasonTimedOut:
-            ui->setMessage(2, "Your connection timed out.  Please try again later.");
-            ui->activate();
-            break;
-
-         case NetConnection::ReasonPuzzle:
-            ui->setMessage(2, "Unable to connect to the server.  Recieved message:");
-            ui->setMessage(3, "Invalid puzzle solution");
-            ui->setMessage(5, "Please try a different game server, or try again later.");
-            ui->activate();
-            break;
-
-         case NetConnection::ReasonKickedByAdmin:
-            ui->setMessage(2, "You were kicked off the server by an admin,");
-            ui->setMessage(3, "and have been temporarily banned.");
-            ui->setMessage(5, "You can try another server, host your own,");
-            ui->setMessage(6, "or try the server that kicked you again later.");
-            mClientGame->getUIManager()->getNameEntryUserInterface()->activate();
-            ui->activate();
-
-            // Add this server to our list of servers not to display for a spell...
-            mClientGame->getUIManager()->getQueryServersUserInterface()->addHiddenServer(getNetAddress(), Platform::getRealMilliseconds() + BanDuration);
-            break;
-
-         case NetConnection::ReasonFloodControl:
-            ui->setMessage(2, "Your connection was rejected by the server");
-            ui->setMessage(3, "because you sent too many connection requests.");
-            ui->setMessage(5, "Please try a different game server, or try again later.");
-            mClientGame->getUIManager()->getNameEntryUserInterface()->activate();
-            ui->activate();
-            break;
-
-         case NetConnection::ReasonShutdown:
-            ui->setMessage(2, "Remote server shut down.");
-            ui->setMessage(4, "Please try a different server,");
-            ui->setMessage(5, "or host a game of your own!");
-            ui->activate();
-            break;
-
-         case NetConnection::ReasonSelfDisconnect:
-               // We get this when we terminate our own connection.  Since this is intentional behavior,
-               // we don't want to display any message to the user.
-            break;
-
-         default:
-            ui->setMessage(1, "Unable to connect to the server for reasons unknown.");
-            ui->setMessage(3, "Please try a different game server, or try again later.");
-            ui->activate();
-      }
+      if(mClientGame)
+         mClientGame->onConnectionTerminated(getNetAddress(), reason, reasonStr);
    }
    else     // Server
    {

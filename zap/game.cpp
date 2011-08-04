@@ -55,6 +55,7 @@
 
 #include "UIGame.h"
 #include "UIGameParameters.h"
+#include "UIEditor.h"
 
 #include "tnl.h"
 #include "tnlRandom.h"
@@ -2030,6 +2031,118 @@ void ClientGame::displayMessage(const Color &msgColor, const char *format, ...)
    va_end(args);
     
    getUserInterface()->displayMessage(msgColor, message);
+}
+
+
+extern Color gCmdChatColor;
+
+void ClientGame::gotAdminPermissionsReply(bool granted)
+{
+   static const char *adminPassSuccessMsg = "You've been granted permission to manage players and change levels";
+   static const char *adminPassFailureMsg = "Incorrect password: Admin access denied";
+
+   // Either display the message in the menu subtitle (if the menu is active), or in the message area if not
+   if(UserInterface::current->getMenuID() == GameMenuUI)
+      getUIManager()->getGameMenuUserInterface()->mMenuSubTitle = granted ? adminPassSuccessMsg : adminPassFailureMsg;
+   else
+      displayMessage(gCmdChatColor, granted ? adminPassSuccessMsg : adminPassFailureMsg);
+}
+
+
+void ClientGame::gotLevelChangePermissionsReply(bool granted)
+{
+   static const char *levelPassSuccessMsg = "You've been granted permission to change levels";
+   static const char *levelPassFailureMsg = "Incorrect password: Level changing permissions denied";
+
+   // Either display the message in the menu subtitle (if the menu is active), or in the message area if not
+   if(UserInterface::current->getMenuID() == GameMenuUI)
+      getUIManager()->getGameMenuUserInterface()->mMenuSubTitle = granted ? levelPassSuccessMsg : levelPassFailureMsg;
+   else
+      displayMessage(gCmdChatColor, granted ? levelPassSuccessMsg : levelPassFailureMsg);
+}
+
+
+void ClientGame::displayMessageBox(const StringTableEntry &title, const StringTableEntry &instr, const Vector<StringTableEntry> &message)
+{
+   ErrorMessageUserInterface *ui = getUIManager()->getErrorMsgUserInterface();
+
+   ui->reset();
+   ui->setTitle(title.getString());
+   ui->setInstr(instr.getString());
+
+   for(S32 i = 0; i < message.size(); i++)
+      ui->setMessage(i+1, message[i].getString());      // UIErrorMsgInterface ==> first line = 1
+
+   ui->activate();
+}
+
+
+void ClientGame::onConnectionTerminated(const Address &serverAddress, NetConnection::TerminationReason reason, const char *reasonStr)
+{
+   if(UserInterface::cameFrom(EditorUI))
+     getUIManager()->getEditorUserInterface()->reactivateMenu(getUIManager()->getEditorUserInterface());
+   else
+     getUIManager()->getEditorUserInterface()->reactivateMenu(getUIManager()->getMainMenuUserInterface());
+
+   unsuspendGame();
+
+   // Display a context-appropriate error message
+   ErrorMessageUserInterface *ui = getUIManager()->getErrorMsgUserInterface();
+
+   ui->reset();
+   ui->setTitle("Connection Terminated");
+
+   switch(reason)
+   {
+      case NetConnection::ReasonTimedOut:
+         ui->setMessage(2, "Your connection timed out.  Please try again later.");
+         ui->activate();
+         break;
+
+      case NetConnection::ReasonPuzzle:
+         ui->setMessage(2, "Unable to connect to the server.  Recieved message:");
+         ui->setMessage(3, "Invalid puzzle solution");
+         ui->setMessage(5, "Please try a different game server, or try again later.");
+         ui->activate();
+         break;
+
+      case NetConnection::ReasonKickedByAdmin:
+         ui->setMessage(2, "You were kicked off the server by an admin,");
+         ui->setMessage(3, "and have been temporarily banned.");
+         ui->setMessage(5, "You can try another server, host your own,");
+         ui->setMessage(6, "or try the server that kicked you again later.");
+         getUIManager()->getNameEntryUserInterface()->activate();
+         ui->activate();
+
+         // Add this server to our list of servers not to display for a spell...
+         getUIManager()->getQueryServersUserInterface()->addHiddenServer(serverAddress, Platform::getRealMilliseconds() + GameConnection::BanDuration);
+         break;
+
+      case NetConnection::ReasonFloodControl:
+         ui->setMessage(2, "Your connection was rejected by the server");
+         ui->setMessage(3, "because you sent too many connection requests.");
+         ui->setMessage(5, "Please try a different game server, or try again later.");
+         getUIManager()->getNameEntryUserInterface()->activate();
+         ui->activate();
+         break;
+
+      case NetConnection::ReasonShutdown:
+         ui->setMessage(2, "Remote server shut down.");
+         ui->setMessage(4, "Please try a different server,");
+         ui->setMessage(5, "or host a game of your own!");
+         ui->activate();
+         break;
+
+      case NetConnection::ReasonSelfDisconnect:
+            // We get this when we terminate our own connection.  Since this is intentional behavior,
+            // we don't want to display any message to the user.
+         break;
+
+      default:
+         ui->setMessage(1, "Unable to connect to the server for reasons unknown.");
+         ui->setMessage(3, "Please try a different game server, or try again later.");
+         ui->activate();
+   }
 }
 
 
