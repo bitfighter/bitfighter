@@ -342,7 +342,7 @@ void AbstractChat::renderChatters(S32 xpos, S32 ypos)
 ////////////////////////////////////////
 
 // Constructor
-ChatUserInterface::ChatUserInterface(Game *game) : Parent(game)
+ChatUserInterface::ChatUserInterface(ClientGame *game) : Parent(game)
 {
    setMenuID(GlobalChatUI);
 }
@@ -486,7 +486,7 @@ void ChatUserInterface::onEscape()
 ////////////////////////////////////////
 
 // Constructor
-SuspendedUserInterface::SuspendedUserInterface(Game *game) : Parent(game)
+SuspendedUserInterface::SuspendedUserInterface(ClientGame *game) : Parent(game)
 {
    setMenuID(SuspendedUI);
 }

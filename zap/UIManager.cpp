@@ -49,9 +49,9 @@ namespace Zap
 {
 
 // Constructor
-UIManager::UIManager(Game *game) 
+UIManager::UIManager(ClientGame *clientGame) 
 { 
-   mGame = game; 
+   mGame = clientGame; 
 
    mMainMenuUserInterface = NULL;
    mGameParamUserInterface = NULL;

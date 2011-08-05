@@ -1527,6 +1527,8 @@ extern bool gShowAimVector;
 
 void Ship::render(S32 layerIndex)
 {
+   ClientGame *clientGame = dynamic_cast<ClientGame *>(getGame());
+
    if(layerIndex == 0) return;   // Only render on layers -1 and 1
    if(hasExploded) return;       // Don't render an exploded ship!
 
@@ -1539,7 +1541,7 @@ void Ship::render(S32 layerIndex)
    // since we draw the ship pointing up the Y axis, we should rotate
    // by the ship's angle, - 90 degrees
 
-   GameConnection *conn = gClientGame->getConnectionToServer();
+   GameConnection *conn = clientGame->getConnectionToServer();
    bool localShip = ! (conn && conn->getControlObject() != this);    // i.e. a ship belonging to a remote player
    S32 localPlayerTeam = (conn && conn->getControlObject()) ? conn->getControlObject()->getTeam() : Item::NO_TEAM; // To show cloaked teammates
 
@@ -1582,7 +1584,7 @@ void Ship::render(S32 layerIndex)
       glLineWidth(gDefaultLineWidth);
    }
 
-   if(gClientGame->getUIManager()->getGameUserInterface()->isShowingDebugShipCoords() && layerIndex == 1)
+   if(clientGame->getUIManager()->getGameUserInterface()->isShowingDebugShipCoords() && layerIndex == 1)
       renderShipCoords(getActualPos(), localShip, alpha);
 
    glRotatef(radiansToDegrees(mMoveState[RenderState].angle) - 90 + rotAmount, 0, 0, 1.0);
@@ -1608,7 +1610,7 @@ void Ship::render(S32 layerIndex)
 
    // LayerIndex == 1
 
-   GameType *gameType = gClientGame->getGameType();
+   GameType *gameType = clientGame->getGameType();
    if(!gameType)
       return;     // This will likely never happen
 
@@ -1628,7 +1630,7 @@ void Ship::render(S32 layerIndex)
          alpha = 0.5;
    }
 
-   renderShip(gameType->getShipColor(this), alpha, thrusts, mHealth, mRadius, getGame()->getCurrentTime() - mSensorStartTime, 
+   renderShip(gameType->getShipColor(this), alpha, thrusts, mHealth, mRadius, clientGame->getCurrentTime() - mSensorStartTime, 
               isModuleActive(ModuleCloak), isModuleActive(ModuleShield), isModuleActive(ModuleSensor), hasModule(ModuleArmor));
 
    if(alpha != 1.0)
@@ -1666,7 +1668,6 @@ void Ship::render(S32 layerIndex)
 
    if(alpha != 1.0)
       glDisableBlend;
-
 
    // Render mounted items
    for(S32 i = 0; i < mMountedItems.size(); i++)

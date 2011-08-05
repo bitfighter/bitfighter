@@ -101,8 +101,6 @@ static Vector<DatabaseObject *> fillVector2;
 // Constructor
 Game::Game(const Address &theBindAddress) : mGameObjDatabase(new GridDatabase())     //? was without new
 {
-   mUIManager = new UIManager(this);                  // gets deleted in destructor
-
    buildModuleInfos();
    mNextMasterTryTime = 0;
    mReadyToConnectToMaster = false;
@@ -123,7 +121,6 @@ Game::Game(const Address &theBindAddress) : mGameObjDatabase(new GridDatabase())
 Game::~Game()
 {
    delete mWallSegmentManager;
-   delete mUIManager;
 }
 
 
@@ -1749,10 +1746,12 @@ S32 ServerGame::addLevelInfo(const char *filename, LevelInfo &info)
 // Constructor
 ClientGame::ClientGame(const Address &bindAddress) : Game(bindAddress)
 {
-   mGameUserInterface = new GameUserInterface(this);
    mUserInterfaceData = new UserInterfaceData();
    mInCommanderMap = false;
    mCommanderZoomDelta = 0;
+
+   mUIManager = new UIManager(this);                  // gets deleted in destructor
+
 
    // Create some random stars
    for(U32 i = 0; i < NumStars; i++)
@@ -1781,12 +1780,15 @@ ClientGame::ClientGame(const Address &bindAddress) : Game(bindAddress)
    mScreenSaverTimer.reset(59 * 1000);         // Fire screen saver supression every 59 seconds
 }
 
+
+// Destructor
 ClientGame::~ClientGame()
 {
    cleanUp();
    delete mUserInterfaceData;
-   delete mGameUserInterface;
+   delete mUIManager;   
 }
+
 
 bool ClientGame::hasValidControlObject()
 {
@@ -1895,7 +1897,7 @@ void ClientGame::idle(U32 timeDelta)
       else
          mCommanderZoomDelta -= timeDelta;
 
-      mGameUserInterface->onMouseMoved();     // Keep ship pointed towards mouse
+      getUIManager()->getGameUserInterface()->onMouseMoved();     // Keep ship pointed towards mouse
    }
    else if(mInCommanderMap && mCommanderZoomDelta != CommanderMapZoomTime)    // Zooming out to commander's map
    {
@@ -1904,12 +1906,12 @@ void ClientGame::idle(U32 timeDelta)
       if(mCommanderZoomDelta > CommanderMapZoomTime)
          mCommanderZoomDelta = CommanderMapZoomTime;
 
-      mGameUserInterface->onMouseMoved();  // Keep ship pointed towards mouse
+      getUIManager()->getGameUserInterface()->onMouseMoved();  // Keep ship pointed towards mouse
    }
    // else we're not zooming in or out, which is most of the time
 
 
-   Move *theMove = mGameUserInterface->getCurrentMove();       // Get move from keyboard input
+   Move *theMove = getUIManager()->getGameUserInterface()->getCurrentMove();       // Get move from keyboard input
 
    // Overwrite theMove if we're using joystick (also does some other essential joystick stuff)
    // We'll also run this while in the menus so if we enter keyboard mode accidentally, it won't
@@ -2382,6 +2384,11 @@ void ClientGame::displaySuccessMessage(const char *format, ...)
 }
 
 
+void ClientGame::enterMode(EntryModes mode)
+{
+   getUIManager()->getGameUserInterface()->enterMode(mode);
+}
+
 // Fire keyboard event to suppress screen saver
 void ClientGame::supressScreensaver()
 {
@@ -2636,7 +2643,7 @@ void ClientGame::renderCommander()
    const S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
    const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
 
-   Point worldExtents = (mGameUserInterface->mShowProgressBar ? getGameType()->mViewBoundsWhileLoading : mWorldExtents).getExtents();
+   Point worldExtents = (getUIManager()->getGameUserInterface()->mShowProgressBar ? getGameType()->mViewBoundsWhileLoading : mWorldExtents).getExtents();
    worldExtents.x *= canvasWidth / F32(canvasWidth - (UserInterface::horizMargin * 2));
    worldExtents.y *= canvasHeight / F32(canvasHeight - (UserInterface::vertMargin * 2));
 
@@ -2675,7 +2682,7 @@ void ClientGame::renderCommander()
    mGameObjDatabase->findObjects(CommandMapVisType, rawRenderObjects);
 
    // If we're drawing bot zones, add them to our list of render objects
-   if(gServerGame && mGameUserInterface->isShowingDebugMeshZones())
+   if(gServerGame && getUIManager()->getGameUserInterface()->isShowingDebugMeshZones())
       gServerGame->getBotZoneDatabase()->findObjects(0, rawRenderObjects, BotNavMeshZoneTypeNumber);
 
    renderObjects.clear();
@@ -2891,7 +2898,7 @@ void ClientGame::renderNormal()
    // Normally a big no-no, we'll access the server's bot zones directly if we are running locally so we can visualize them without bogging
    // the game down with the normal process of transmitting zones from server to client.  The result is that we can only see zones on our local
    // server.
-   if(gServerGame && mGameUserInterface->isShowingDebugMeshZones())
+   if(gServerGame && getUIManager()->getGameUserInterface()->isShowingDebugMeshZones())
        gServerGame->getBotZoneDatabase()->findObjects(0, rawRenderObjects, extentRect, BotNavMeshZoneTypeNumber);
 
    renderObjects.clear();
@@ -2921,7 +2928,7 @@ void ClientGame::renderNormal()
       ship = dynamic_cast<Ship *>(mConnectionToServer->getControlObject());
 
    if(ship)
-      mGameUserInterface->renderEngineeredItemDeploymentMarker(ship);
+      getUIManager()->getGameUserInterface()->renderEngineeredItemDeploymentMarker(ship);
 
    glPopMatrix();
 
@@ -2943,7 +2950,7 @@ void ClientGame::render()
    if(!renderObjectsWhileLoading && !hasValidControlObject())
       return;
 
-   if(mGameUserInterface->mShowProgressBar)
+   if(getUIManager()->getGameUserInterface()->mShowProgressBar)
       renderCommander();
    else if(mGameSuspended)
       renderCommander();

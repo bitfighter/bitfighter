@@ -73,7 +73,7 @@ extern void exitGame();
 #define MAX_MENU_SIZE S32((gScreenInfo.getGameCanvasHeight() - 150) / (getTextSize() + getGap()))   
 
 // Constructor
-MenuUserInterface::MenuUserInterface(Game *game) : UserInterface(game)
+MenuUserInterface::MenuUserInterface(ClientGame *game) : UserInterface(game)
 {
    setMenuID(GenericUI);
    mMenuTitle = "Menu:";
@@ -556,38 +556,38 @@ void MenuUserInterface::onEscape()
 // MenuUserInterface callbacks
 //////////
 
-static void joinSelectedCallback(Game *game, U32 unused)
+static void joinSelectedCallback(ClientGame *game, U32 unused)
 {
    game->getUIManager()->getQueryServersUserInterface()->activate();
 }
 
-static void hostSelectedCallback(Game *game, U32 unused)
+static void hostSelectedCallback(ClientGame *game, U32 unused)
 {
    game->getUIManager()->getHostMenuUserInterface()->activate();
 }
 
-static void helpSelectedCallback(Game *game, U32 unused)
+static void helpSelectedCallback(ClientGame *game, U32 unused)
 {
    game->getUIManager()->getInstructionsUserInterface()->activate();
 }
 
-static void optionsSelectedCallback(Game *game, U32 unused)
+static void optionsSelectedCallback(ClientGame *game, U32 unused)
 {
    game->getUIManager()->getOptionsMenuUserInterface()->activate();
 }
 
-static void editorSelectedCallback(Game *game, U32 unused)
+static void editorSelectedCallback(ClientGame *game, U32 unused)
 {
    game->getUIManager()->getEditorUserInterface()->setLevelFileName("");      // Reset this so we get the level entry screen
    game->getUIManager()->getEditorUserInterface()->activate();
 }
 
-static void creditsSelectedCallback(Game *game, U32 unused)
+static void creditsSelectedCallback(ClientGame *game, U32 unused)
 {
    game->getUIManager()->getCreditsUserInterface()->activate();
 }
 
-static void quitSelectedCallback(Game *game, U32 unused)
+static void quitSelectedCallback(ClientGame *game, U32 unused)
 {
    exitGame();
 }
@@ -595,7 +595,7 @@ static void quitSelectedCallback(Game *game, U32 unused)
 //////////
 
 // Constructor
-MainMenuUserInterface::MainMenuUserInterface(Game *game) : Parent(game)
+MainMenuUserInterface::MainMenuUserInterface(ClientGame *game) : Parent(game)
 {
    showAnimation = true;
    mFirstTime = true;
@@ -764,7 +764,7 @@ void MainMenuUserInterface::onEscape()
 ////////////////////////////////////////
 
 // Constructor
-OptionsMenuUserInterface::OptionsMenuUserInterface(Game *game) : Parent(game)
+OptionsMenuUserInterface::OptionsMenuUserInterface(ClientGame *game) : Parent(game)
 {
    setMenuID(OptionsUI);
    mMenuTitle = "OPTIONS MENU:";
@@ -793,29 +793,29 @@ static string getVolMsg(F32 volume)
 
 //////////
 // Callbacks for Options menu
-static void setSFXVolumeCallback(Game *game, U32 vol)
+static void setSFXVolumeCallback(ClientGame *game, U32 vol)
 {
    game->getIniSettings()->sfxVolLevel = F32(vol) / 10;
 }
 
-static void setMusicVolumeCallback(Game *game, U32 vol)
+static void setMusicVolumeCallback(ClientGame *game, U32 vol)
 {
    game->getIniSettings()->musicVolLevel = F32(vol) / 10;
 }
 
-static void setVoiceVolumeCallback(Game *game, U32 vol)
+static void setVoiceVolumeCallback(ClientGame *game, U32 vol)
 {
    game->getIniSettings()->voiceChatVolLevel = F32(vol) / 10;
 }
 
 
-static void setControlsCallback(Game *game, U32 val)
+static void setControlsCallback(ClientGame *game, U32 val)
 {
    game->getIniSettings()->controlsRelative = (val == 1);
 }
 
 
-static void setFullscreenCallback(Game *game, U32 mode)
+static void setFullscreenCallback(ClientGame *game, U32 mode)
 {
    game->getIniSettings()->oldDisplayMode = game->getIniSettings()->displayMode;     // Save existing setting
 
@@ -824,12 +824,12 @@ static void setFullscreenCallback(Game *game, U32 mode)
 }
 
 
-static void defineKeysCallback(Game *game, U32 unused)
+static void defineKeysCallback(ClientGame *game, U32 unused)
 {
    game->getUIManager()->getKeyDefMenuUserInterface()->activate();
 }
 
-static void setControllerCallback(Game *game, U32 jsType)
+static void setControllerCallback(ClientGame *game, U32 jsType)
 {
    game->getIniSettings()->joystickType = jsType;
 }
@@ -847,7 +847,7 @@ static void addStickOptions(Vector<string> *opts)
 
 static S32 INPUT_MODE_MENU_ITEM_INDEX = 0;
 
-static void setInputModeCallback(Game *game, U32 val)
+static void setInputModeCallback(ClientGame *game, U32 val)
 {
    S32 sticks = Joystick::DetectedJoystickNameList.size();
    Joystick::initJoystick();      // Will allow people to plug in joystick while in this menu...
@@ -876,14 +876,14 @@ static void setInputModeCallback(Game *game, U32 val)
 }
 
 
-static void setVoiceEchoCallback(Game *game, U32 val)
+static void setVoiceEchoCallback(ClientGame *game, U32 val)
 {
    game->getIniSettings()->echoVoice = (val == 1);
 }
 
 //////////
 
-MenuItem *getWindowModeMenuItem(Game *game)
+MenuItem *getWindowModeMenuItem(ClientGame *game)
 {
    Vector<string> opts;   
    opts.push_back("WINDOWED");
@@ -1010,7 +1010,7 @@ extern ClientInfo gClientInfo;
 
 
 // Constructor
-NameEntryUserInterface::NameEntryUserInterface(Game *game) : MenuUserInterface(game)
+NameEntryUserInterface::NameEntryUserInterface(ClientGame *game) : MenuUserInterface(game)
 {
    setMenuID(OptionsUI);
    mMenuTitle = "ENTER YOUR NICKNAME:";
@@ -1036,11 +1036,8 @@ void NameEntryUserInterface::onActivate()
 extern void seedRandomNumberGenerator(string name);
 
 // User is ready to move on... deal with it
-static void nameAndPasswordAcceptCallback(Game *game, U32 unused)
+static void nameAndPasswordAcceptCallback(ClientGame *clientGame, U32 unused)
 {
-   ClientGame *clientGame = dynamic_cast<ClientGame *>(game);
-   TNLAssert(clientGame, "Problem!");
-
    UIManager *uiManager = clientGame->getUIManager();
    NameEntryUserInterface *ui = uiManager->getNameEntryUserInterface();
 
@@ -1122,7 +1119,7 @@ void NameEntryUserInterface::onEscape()
 ////////////////////////////////////////
 
 // Constructor
-HostMenuUserInterface::HostMenuUserInterface(Game *game) : MenuUserInterface(game)
+HostMenuUserInterface::HostMenuUserInterface(ClientGame *game) : MenuUserInterface(game)
 {
    setMenuID(HostingUI);
    mMenuTitle ="HOST A GAME:";
@@ -1147,7 +1144,7 @@ extern string gHostName, gHostDescr;
 extern string gLevelChangePassword, gAdminPassword, gServerPassword;
 extern void initHostGame(Address bindAddress, Vector<string> &levelList, bool testMode);
 
-static void startHostingCallback(Game *game, U32 unused)
+static void startHostingCallback(ClientGame *game, U32 unused)
 {
    game->getUIManager()->getHostMenuUserInterface()->saveSettings();
 
@@ -1263,7 +1260,7 @@ void HostMenuUserInterface::renderProgressListItems()
 ////////////////////////////////////////
 
 // Constructor
-GameMenuUserInterface::GameMenuUserInterface(Game *game) : MenuUserInterface(game)
+GameMenuUserInterface::GameMenuUserInterface(ClientGame *game) : MenuUserInterface(game)
 {
    setMenuID(GameMenuUI);
    mMenuTitle = "GAME MENU:";
@@ -1297,46 +1294,47 @@ void GameMenuUserInterface::onReactivate()
 }
 
 
-static void endGameCallback(Game *game, U32 unused)
+static void endGameCallback(ClientGame *game, U32 unused)
 {
    endGame();
 }
 
 
-static void addTwoMinsCallback(Game *game, U32 unused)
+static void addTwoMinsCallback(ClientGame *game, U32 unused)
 {
    if(game->getGameType())
       game->getGameType()->addTime(2 * 60 * 1000);
-      game->getUIManager()->reactivatePrevUI();     // And back to our regularly scheduled programming!
+
+   game->getUIManager()->reactivatePrevUI();     // And back to our regularly scheduled programming!
 }
 
 
-static void chooseNewLevelCallback(Game *game, U32 unused)
+static void chooseNewLevelCallback(ClientGame *game, U32 unused)
 {
    game->getUIManager()->getLevelMenuUserInterface()->activate();
 }
 
 
-static void restartGameCallback(Game *game, U32 unused)
+static void restartGameCallback(ClientGame *game, U32 unused)
 {
    gClientGame->getConnectionToServer()->c2sRequestLevelChange(-2, false);
    game->getUIManager()->reactivatePrevUI();     // And back to our regularly scheduled programming! 
 }
 
 
-static void levelChangePWCallback(Game *game, U32 unused)
+static void levelChangePWCallback(ClientGame *game, U32 unused)
 {
    game->getUIManager()->getLevelChangePasswordEntryUserInterface()->activate();
 }
 
 
-static void adminPWCallback(Game *game, U32 unused)
+static void adminPWCallback(ClientGame *game, U32 unused)
 {
    game->getUIManager()->getAdminPasswordEntryUserInterface()->activate();
 }
 
 
-static void kickPlayerCallback(Game *game, U32 unused)
+static void kickPlayerCallback(ClientGame *game, U32 unused)
 {
    PlayerMenuUserInterface *ui = game->getUIManager()->getPlayerMenuUserInterface();
 
@@ -1376,13 +1374,13 @@ void GameMenuUserInterface::buildMenu()
 
       if(gc->isAdmin())
       {
-         GameType *theGameType = getGame()->getGameType();
+         GameType *gameType = getGame()->getGameType();
 
          // Add any game-specific menu items
-         if(theGameType)
+         if(gameType)
          {
-            mGameType = theGameType;
-            theGameType->addAdminGameMenuOptions(menuItems);
+            mGameType = gameType;
+            gameType->addAdminGameMenuOptions(menuItems);
          }
 
          menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(getGame(), 0, "KICK A PLAYER", kickPlayerCallback, "", KEY_K)));
@@ -1412,7 +1410,7 @@ void GameMenuUserInterface::onEscape()
 ////////////////////////////////////////
 
 // Constructor
-LevelMenuUserInterface::LevelMenuUserInterface(Game *game) : MenuUserInterface(game)
+LevelMenuUserInterface::LevelMenuUserInterface(ClientGame *game) : MenuUserInterface(game)
 {
    setMenuID(LevelTypeUI);
 }
@@ -1423,7 +1421,7 @@ static const char *ALL_LEVELS = "All Levels";
 static const U32 UPLOAD_LEVELS_MENUID = 1000;
 
 
-static void selectLevelTypeCallback(Game *game, U32 level)
+static void selectLevelTypeCallback(ClientGame *game, U32 level)
 {  
    LevelMenuSelectUserInterface *ui = game->getUIManager()->getLevelMenuSelectUserInterface();
 
@@ -1497,13 +1495,13 @@ void LevelMenuUserInterface::onEscape()
 ////////////////////////////////////////
 
 // Constructor
-LevelMenuSelectUserInterface::LevelMenuSelectUserInterface(Game *game) : Parent(game)
+LevelMenuSelectUserInterface::LevelMenuSelectUserInterface(ClientGame *game) : Parent(game)
 {
    setMenuID(LevelUI);
 }
 
 
-static void processLevelSelectionCallback(Game *game, U32 index)             
+static void processLevelSelectionCallback(ClientGame *game, U32 index)             
 {
    game->getUIManager()->getLevelMenuSelectUserInterface()->processSelection(index);
 }
@@ -1622,13 +1620,13 @@ void LevelMenuSelectUserInterface::onEscape()
 ////////////////////////////////////////
 
 // Constructor
-PlayerMenuUserInterface::PlayerMenuUserInterface(Game *game) : Parent(game)
+PlayerMenuUserInterface::PlayerMenuUserInterface(ClientGame *game) : Parent(game)
 {
    setMenuID(PlayerUI);
 }
 
 
-static void playerSelectedCallback(Game *game, U32 index) 
+static void playerSelectedCallback(ClientGame *game, U32 index) 
 {
    game->getUIManager()->getPlayerMenuUserInterface()->playerSelected(index);
 }
@@ -1711,13 +1709,13 @@ void PlayerMenuUserInterface::onEscape()
 ////////////////////////////////////////
 
 // Constructor
-TeamMenuUserInterface::TeamMenuUserInterface(Game *game) : Parent(game)
+TeamMenuUserInterface::TeamMenuUserInterface(ClientGame *game) : Parent(game)
 {
    setMenuID(TeamUI);
 }
 
 
-static void processTeamSelectionCallback(Game *game, U32 index)        
+static void processTeamSelectionCallback(ClientGame *game, U32 index)        
 {
    game->getUIManager()->getTeamMenuUserInterface()->processSelection(index);
 }

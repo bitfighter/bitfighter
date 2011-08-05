@@ -61,7 +61,7 @@ private:
    bool mEditing;              // true if editing selectedIndex, false if not
 
 public:
-   TeamDefUserInterface(Game *game);     // Constructor
+   TeamDefUserInterface(ClientGame *game);     // Constructor
    const char *mMenuTitle;
    const char *mMenuSubTitle;
    Color mMenuSubTitleColor;

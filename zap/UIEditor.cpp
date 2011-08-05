@@ -104,7 +104,7 @@ enum EntryMode {
 static EntryMode entryMode;
 static Vector<ZoneBorder> zoneBorders;
 
-static void saveLevelCallback(Game *game)
+static void saveLevelCallback(ClientGame *game)
 {
    UIManager *uiManager = game->getUIManager();
 
@@ -115,14 +115,14 @@ static void saveLevelCallback(Game *game)
 }
 
 
-void backToMainMenuCallback(Game *game)
+void backToMainMenuCallback(ClientGame *game)
 {
    game->getUIManager()->reactivateMenu(game->getUIManager()->getMainMenuUserInterface());    
 }
 
 
 // Constructor
-EditorUserInterface::EditorUserInterface(Game *game) : Parent(game)
+EditorUserInterface::EditorUserInterface(ClientGame *game) : Parent(game)
 {
    setMenuID(EditorUI);
 
@@ -902,7 +902,7 @@ string EditorUserInterface::getLevelFileName()
 // Valid commands: help, run, clear, quit, exit
 void processEditorConsoleCommand(void *gamePtr, OGLCONSOLE_Console console, char *cmdline)
 {
-   Game *game = (Game *)gamePtr;
+   ClientGame *game = (ClientGame *)gamePtr;
 
    Vector<string> words = parseString(cmdline);
    if(words.size() == 0)
@@ -3629,7 +3629,7 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
 
 
 // We need some local hook into the testLevelStart() below.  Ugly but apparently necessary.
-void testLevelStart_local(Game *game)
+void testLevelStart_local(ClientGame *game)
 {
    game->getUIManager()->getEditorUserInterface()->testLevelStart();
 }
@@ -3709,7 +3709,7 @@ void EditorUserInterface::testLevelStart()
 
 
 // Constructor
-EditorMenuUserInterface::EditorMenuUserInterface(Game *game) : Parent(game)
+EditorMenuUserInterface::EditorMenuUserInterface(ClientGame *game) : Parent(game)
 {
    setMenuID(EditorMenuUI);
    mMenuTitle = "EDITOR MENU";
@@ -3724,25 +3724,25 @@ void EditorMenuUserInterface::onActivate()
 
 
 extern IniSettings gIniSettings;
-extern MenuItem *getWindowModeMenuItem(Game *game);
+extern MenuItem *getWindowModeMenuItem(ClientGame *game);
 
 //////////
 // Editor menu callbacks
 //////////
 
-void reactivatePrevUICallback(Game *game, U32 unused)
+void reactivatePrevUICallback(ClientGame *game, U32 unused)
 {
    game->getUIManager()->reactivatePrevUI();
 }
 
 
-static void testLevelCallback(Game *game, U32 unused)
+static void testLevelCallback(ClientGame *game, U32 unused)
 {
    game->getUIManager()->getEditorUserInterface()->testLevel();
 }
 
 
-void returnToEditorCallback(Game *game, U32 unused)
+void returnToEditorCallback(ClientGame *game, U32 unused)
 {
    EditorUserInterface *ui = game->getUIManager()->getEditorUserInterface();
 
@@ -3752,25 +3752,25 @@ void returnToEditorCallback(Game *game, U32 unused)
 }
 
 
-static void activateHelpCallback(Game *game, U32 unused)
+static void activateHelpCallback(ClientGame *game, U32 unused)
 {
    game->getUIManager()->getEditorInstructionsUserInterface()->activate();
 }
 
 
-static void activateLevelParamsCallback(Game *game, U32 unused)
+static void activateLevelParamsCallback(ClientGame *game, U32 unused)
 {
    game->getUIManager()->getGameParamUserInterface()->activate();
 }
 
 
-static void activateTeamDefCallback(Game *game, U32 unused)
+static void activateTeamDefCallback(ClientGame *game, U32 unused)
 {
    game->getUIManager()->getTeamDefUserInterface()->activate();
 }
 
 
-void quitEditorCallback(Game *game, U32 unused)
+void quitEditorCallback(ClientGame *game, U32 unused)
 {
    EditorUserInterface *editorUI = game->getUIManager()->getEditorUserInterface();
 

@@ -44,7 +44,7 @@ private:
    WallSegmentManager mWallSegmentManager;
 
 public:
-   EditorInstructionsUserInterface(Game *game);      // Constructor
+   EditorInstructionsUserInterface(ClientGame *game);      // Constructor
    void render();
    void renderPageCommands(S32 page);
    void renderPageWalls();

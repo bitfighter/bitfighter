@@ -36,11 +36,15 @@ using namespace TNL;
 namespace Zap
 {
 
+class ClientGame;
+
 class HelperMenu   
 {
 private:
    virtual const char *getCancelMessage() { return ""; }
    virtual KeyCode getActivationKey() { return KEY_NONE; }
+
+   ClientGame *mClientGame;
 
 protected:
    static const S32 MENU_TOP = 180;     // Location of top of overlay menu
@@ -51,7 +55,11 @@ protected:
    void drawMenuBorderLine(S32 yPos, const Color &color);
    void drawMenuCancelText(S32 yPos, const Color &color, S32 fontSize);
 
+   ClientGame *getClientGame() { return mClientGame; }
+
 public:
+   HelperMenu(ClientGame *clientGame);    // Constructor
+
    virtual void render() = 0;                
    virtual void idle(U32 delta) { /* Do nothing */ }    
    virtual void onMenuShow() { /* Do nothing */  }

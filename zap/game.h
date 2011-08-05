@@ -126,8 +126,6 @@ private:
 
    WallSegmentManager *mWallSegmentManager;    
 
-   UIManager *mUIManager;
-
    // Info about modules -- access via getModuleInfo()
    Vector<ModuleInfo> mModuleInfos;
    void buildModuleInfos();
@@ -216,8 +214,6 @@ public:
    U32 getTimeUnconnectedToMaster() { return mTimeUnconnectedToMaster; }
 
    void resetLevelInfo();
-
-   UIManager *getUIManager() { return mUIManager; }
 
    virtual void processLevelLoadLine(U32 argc, U32 id, const char **argv, GridDatabase *database, bool inEditor, const string &levelFileName);  
    bool processLevelParam(S32 argc, const char **argv);
@@ -460,6 +456,16 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+// Modes the player could be in during the game   
+enum EntryModes {
+   PlayMode,               // Playing
+   ChatMode,               // Composing chat message
+   QuickChatMode,          // Showing quick-chat menu
+   LoadoutMode,            // Showing loadout menu
+   EngineerMode,           // Showing engineer overlay mode
+};
+
+
 class ClientGame : public Game
 {
    typedef Game Parent;
@@ -480,7 +486,7 @@ private:
    Timer mScreenSaverTimer;
    void supressScreensaver();
 
-   GameUserInterface *mGameUserInterface;
+   UIManager *mUIManager;
 
 public:
    ClientGame(const Address &bindAddress);
@@ -493,6 +499,9 @@ public:
 
    GameConnection *getConnectionToServer();
    void setConnectionToServer(GameConnection *connection);
+
+   UIManager *getUIManager() { return mUIManager; }
+
 
    bool getInCommanderMap() { return mInCommanderMap; }
    void setInCommanderMap(bool inCommanderMap) { mInCommanderMap = inCommanderMap; }
@@ -560,6 +569,8 @@ public:
 
    void displayErrorMessage(const char *format, ...);
    void displaySuccessMessage(const char *format, ...);
+
+   void enterMode(EntryModes mode);
 
    void suspendGame()   { mGameSuspended = true; }
    void unsuspendGame() { mGameSuspended = false; }

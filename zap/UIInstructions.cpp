@@ -47,7 +47,7 @@ namespace Zap
 {
 
 // Constructor
-InstructionsUserInterface::InstructionsUserInterface(Game *game) : Parent(game)
+InstructionsUserInterface::InstructionsUserInterface(ClientGame *game) : Parent(game)
 {
    setMenuID(InstructionsUI);
 }

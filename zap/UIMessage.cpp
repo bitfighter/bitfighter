@@ -40,7 +40,7 @@ namespace Zap
 
 extern Color gErrorMessageTextColor;
 
-MessageUserInterface::MessageUserInterface(Game *game) : Parent(game) { /* Do nothing */ }
+MessageUserInterface::MessageUserInterface(ClientGame *game) : Parent(game) { /* Do nothing */ }
 
 void MessageUserInterface::onActivate()
 {

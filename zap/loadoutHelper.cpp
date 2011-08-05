@@ -92,7 +92,7 @@ void LoadoutHelper::initialize(bool includeEngineer)
 };
 
 
-LoadoutHelper::LoadoutHelper()
+LoadoutHelper::LoadoutHelper(ClientGame *clientGame) : Parent(clientGame)
 {
    // Do nothing
 }

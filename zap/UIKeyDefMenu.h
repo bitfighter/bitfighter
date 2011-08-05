@@ -67,7 +67,7 @@ private:
    static const S32 errorMsgDisplayTime = 6000;
 
 public:
-   KeyDefMenuUserInterface(Game *game);   // Constructor
+   KeyDefMenuUserInterface(ClientGame *game);   // Constructor
    Vector<KeyDefMenuItem> menuItems;      // Array of menu items
    const char *mMenuTitle;
    const char *mMenuSubTitle;

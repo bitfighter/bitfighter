@@ -47,7 +47,7 @@ protected:
    bool resetOnActivate;
 
 public:
-   RebindKeysUserInterface(Game *game);      // Constructor
+   RebindKeysUserInterface(ClientGame *game);      // Constructor
 
    void onActivate();
    void render();

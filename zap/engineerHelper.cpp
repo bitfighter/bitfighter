@@ -39,7 +39,7 @@ namespace Zap
 {
 
 // Constructor
-EngineerHelper::EngineerHelper()
+EngineerHelper::EngineerHelper(ClientGame *clientGame) : Parent(clientGame)
 {
    mEngineerCostructionItemInfos.push_back(EngineerConstructionItemInfo(EngineeredTurret, "Turret", KEY_1, BUTTON_1));
    mEngineerCostructionItemInfos.push_back(EngineerConstructionItemInfo(EngineeredForceField, "Force Field", KEY_2, BUTTON_2));

@@ -140,7 +140,7 @@ private:
    bool mRenderUnderlyingUI;
 
 public:
-   ChatUserInterface(Game *game);      // Constructor
+   ChatUserInterface(ClientGame *game);      // Constructor
 
    // UI related
    void render();
@@ -169,7 +169,7 @@ private:
    void onOutGameChat();                  // What to do if user presses [F5]
 
 public:
-   SuspendedUserInterface(Game *game);    // Constructor
+   SuspendedUserInterface(ClientGame *game);    // Constructor
 };
 
 

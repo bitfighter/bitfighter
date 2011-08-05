@@ -93,7 +93,7 @@ static void setMenuColors(MenuItem *menuItem)
 ////////////////////////////////////////
 
 // Constructor
-GoFastEditorAttributeMenuUI::GoFastEditorAttributeMenuUI(Game *game) : Parent(game)
+GoFastEditorAttributeMenuUI::GoFastEditorAttributeMenuUI(ClientGame *game) : Parent(game)
 {
    setMenuID(GoFastAttributeEditorUI);
    menuItems.resize(2);
@@ -143,7 +143,7 @@ static void textEditedCallback(string text)
 
 
 // Constructor
-TextItemEditorAttributeMenuUI::TextItemEditorAttributeMenuUI(Game *game) : Parent(game)
+TextItemEditorAttributeMenuUI::TextItemEditorAttributeMenuUI(ClientGame *game) : Parent(game)
 {
    setMenuID(TextItemAttributeEditorUI);
 

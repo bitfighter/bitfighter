@@ -70,6 +70,7 @@ class SplashUserInterface;
 class TeamDefUserInterface;
 
 class Game;
+class ClientGame;
 
 enum UIID {
    AdminPasswordEntryUI,
@@ -114,7 +115,7 @@ class UIManager
 {
 
 private:
-   Game *mGame;
+   ClientGame *mGame;
 
    MainMenuUserInterface *mMainMenuUserInterface;
    GameParamUserInterface *mGameParamUserInterface;
@@ -149,10 +150,9 @@ private:
 
    Vector<UserInterface *> mPrevUIs;   // Previously active menus
 
-
 public:
-   UIManager(Game *game);     // Constructor
-   ~UIManager();              // Destructor
+   UIManager(ClientGame *clientGame);  // Constructor
+   ~UIManager();                       // Destructor
 
    /////
    // Interface getting methods

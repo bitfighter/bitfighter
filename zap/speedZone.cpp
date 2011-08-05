@@ -276,7 +276,7 @@ EditorAttributeMenuUI *SpeedZone::getAttributeMenu()
 {
    // Lazily initialize this -- if we're in the game, we'll never need this to be instantiated
    if(!mAttributeMenuUI)
-      mAttributeMenuUI = new GoFastEditorAttributeMenuUI(getGame());
+      mAttributeMenuUI = new GoFastEditorAttributeMenuUI(dynamic_cast<ClientGame *>(getGame()));
 
    return mAttributeMenuUI;
 }

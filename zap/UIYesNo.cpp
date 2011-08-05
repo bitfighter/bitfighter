@@ -34,18 +34,18 @@ namespace Zap
 {
 
 // Constructor
-YesNoUserInterface::YesNoUserInterface(Game *game) : ErrorMessageUserInterface(game)
+YesNoUserInterface::YesNoUserInterface(ClientGame *game) : ErrorMessageUserInterface(game)
 {
    setMenuID(YesOrNoUI);
    reset();
 }
 
-void YesNoUserInterface::registerYesFunction(void(*ptr)(Game *game))
+void YesNoUserInterface::registerYesFunction(void(*ptr)(ClientGame *game))
 {
    mYesFunction = ptr;
 }
 
-void YesNoUserInterface::registerNoFunction(void(*ptr)(Game *game))
+void YesNoUserInterface::registerNoFunction(void(*ptr)(ClientGame *game))
 {
    mNoFunction = ptr;
 }
@@ -53,9 +53,12 @@ void YesNoUserInterface::registerNoFunction(void(*ptr)(Game *game))
 void YesNoUserInterface::reset()
 {
    mTitle = "YES OR NO";    // Default title
+
    for(S32 i = 0; i < MAX_LINES; i++)
       mMessage[i] = "";
+
    mInstr = "Press [Y] or [N]";
+
    mYesFunction = NULL;
    mNoFunction = NULL;
 }

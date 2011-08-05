@@ -82,7 +82,7 @@ private:
    Vector<CreditsFX *> fxList;
 
 public:
-   CreditsUserInterface(Game *game);   // Constructor
+   CreditsUserInterface(ClientGame *game);   // Constructor
    ~CreditsUserInterface();            // Destructor
 
    void onActivate();
@@ -114,7 +114,7 @@ private:
    S32 mType;             // Type of animation (twirl, zoom out, etc.)
 
 public:
-   SplashUserInterface(Game *game);      // Constructor
+   SplashUserInterface(ClientGame *game);      // Constructor
 
    void onActivate();
    void idle(U32 timeDelta);

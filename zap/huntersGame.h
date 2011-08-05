@@ -76,7 +76,7 @@ public:
    void itemDropped(Ship *ship, Item *item);
 
    const char **getGameParameterMenuKeys();
-   boost::shared_ptr<MenuItem> getMenuItem(Game *game, const char *key);
+   boost::shared_ptr<MenuItem> getMenuItem(ClientGame *game, const char *key);
    bool saveMenuItem(const MenuItem *menuItem, const char *key);
 
    void addNexus(HuntersNexusObject *theObject);

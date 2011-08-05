@@ -77,7 +77,7 @@ TeamPreset gTeamPresets[] = {
 
 
 // Constructor
-TeamDefUserInterface::TeamDefUserInterface(Game *game) : Parent(game)
+TeamDefUserInterface::TeamDefUserInterface(ClientGame *game) : Parent(game)
 {
    setMenuID(TeamDefUI);
    mMenuTitle = "Configure Teams";

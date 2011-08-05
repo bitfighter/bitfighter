@@ -112,7 +112,7 @@ class EditorUserInterface : public UserInterface
    typedef UserInterface Parent;
 
 public:
-   EditorUserInterface(Game *game);  // Constructor
+   EditorUserInterface(ClientGame *game);  // Constructor
 
    enum SpecialAttribute   // Some items have special attributes.  These are the ones
    {                       // we can edit in the editor
@@ -378,7 +378,7 @@ protected:
    void onActivate();
 
 public:
-   EditorMenuUserInterface(Game *game);    // Constructor
+   EditorMenuUserInterface(ClientGame *game);    // Constructor
 };
 
 

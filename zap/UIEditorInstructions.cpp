@@ -51,7 +51,7 @@ static Vector<Point> sample1f, sample2f, sample3f, sample4f, sample5f;     // fi
 static Border border34;
 
 // Constructor
-EditorInstructionsUserInterface::EditorInstructionsUserInterface(Game *game) : Parent(game)
+EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *game) : Parent(game)
 {
    setMenuID(EditorInstructionsUI);
 }

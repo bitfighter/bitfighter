@@ -226,7 +226,7 @@ const char **HuntersGameType::getGameParameterMenuKeys()
 
 
 // Definitions for those items
-boost::shared_ptr<MenuItem> HuntersGameType::getMenuItem(Game *game, const char *key)
+boost::shared_ptr<MenuItem> HuntersGameType::getMenuItem(ClientGame *game, const char *key)
 {
    if(!strcmp(key, "Nexus Time to Open"))
       return boost::shared_ptr<MenuItem>(new TimeCounterMenuItem(game, "Time for Nexus to Open:", mNexusClosedTime / 1000, 99*60, "Never", "Time it takes for the Nexus to open"));

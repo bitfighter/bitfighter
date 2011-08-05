@@ -78,7 +78,11 @@ Color GameUserInterface::privateF5MessageDisplayedInGameColor(Colors::blue);
 static void makeCommandCandidateList();      // Forward delcaration
 
 // Constructor
-GameUserInterface::GameUserInterface(Game *game) : UserInterface(game)
+GameUserInterface::GameUserInterface(ClientGame *game) : Parent(game), 
+                                                         mQuickChatHelper(game), 
+                                                         mLoadoutHelper(game), 
+                                                         mEngineerHelper(game),
+                                                         mLineEditor(200)
 {
    //mOutputFile = NULL;
    bool mLeftDisabled = false; // Fix some uninitalized variables (randomly was true)
@@ -113,7 +117,6 @@ GameUserInterface::GameUserInterface(Game *game) : UserInterface(game)
       mPing[i] = 100;
    }
 
-   mLineEditor = LineEditor(200);
 
    // Initialize message buffers
    for(S32 i = 0; i < MessageDisplayCount; i++)
@@ -407,17 +410,17 @@ extern void checkMousePos(S32 maxdx, S32 maxdy);
 // Draw main game screen (client only)
 void GameUserInterface::render()
 {
-   glColor3f(0.0, 0.0, 0.0);
-   if(!getClientGame()->isConnectedToServer())
+   glColor(Colors::black);
+   if(!getGame()->isConnectedToServer())
    {
-      glColor3f(1, 1, 1);
+      glColor(Colors::white);
       drawCenteredString(260, 30, "Connecting to server...");
 
-      glColor3f(0, 1, 0);
+      glColor(Colors::green);
       if(gClientGame->getConnectionToServer())
          drawCenteredString(310, 16, gConnectStatesTable[gClientGame->getConnectionToServer()->getConnectionState()]);
 
-      glColor3f(1, 1, 1);
+      glColor(Colors::white);
       drawCenteredString(346, 20, "Press <ESC> to abort");
    }
 
@@ -457,7 +460,7 @@ void GameUserInterface::render()
       // Display running average FPS
       if(mFPSVisible)
       {
-         glColor3f(1, 1, 1);
+         glColor(Colors::white);
          drawStringf(gScreenInfo.getGameCanvasWidth() - horizMargin - 220, vertMargin, 20, "%4.1f fps | %1.0f ms", mFPSAvg, mPingAvg);
       }
 
@@ -465,7 +468,7 @@ void GameUserInterface::render()
       if(mHelper)
          mHelper->render();
 
-      GameType *theGameType = gClientGame->getGameType();
+      GameType *theGameType = getGame()->getGameType();
 
       if(theGameType)
          theGameType->renderInterfaceOverlay(mInScoreboardMode);
@@ -888,7 +891,7 @@ void GameUserInterface::onMouseMoved()
 
 
 // Enter QuickChat, Loadout, or Engineer mode
-void GameUserInterface::enterMode(GameUserInterface::Mode mode)
+void GameUserInterface::enterMode(EntryModes mode)
 {
    playBoop();
    mCurrentMode = mode;
@@ -2401,16 +2404,16 @@ void GameUserInterface::VoiceRecorder::process()
 
 void GameUserInterface::suspendGame()
 {
-   getClientGame()->getConnectionToServer()->suspendGame();     // Tell server we're suspending
-   getClientGame()->suspendGame();                              // Suspend locally
+   getGame()->getConnectionToServer()->suspendGame();     // Tell server we're suspending
+   getGame()->suspendGame();                              // Suspend locally
    getUIManager()->getSuspendedUserInterface()->activate();          // And enter chat mode
 }
 
 
 void GameUserInterface::unsuspendGame()
 {
-   getClientGame()->unsuspendGame();                            // Unsuspend locally
-   getClientGame()->getConnectionToServer()->unsuspendGame();   // Tell the server we're unsuspending
+   getGame()->unsuspendGame();                            // Unsuspend locally
+   getGame()->getConnectionToServer()->unsuspendGame();   // Tell the server we're unsuspending
 }
 
 

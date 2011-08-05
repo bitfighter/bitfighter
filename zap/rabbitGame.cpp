@@ -136,7 +136,7 @@ const char **RabbitGameType::getGameParameterMenuKeys()
 
 
 // Definitions for those items
-boost::shared_ptr<MenuItem> RabbitGameType::getMenuItem(Game *game, const char *key)
+boost::shared_ptr<MenuItem> RabbitGameType::getMenuItem(ClientGame *game, const char *key)
 {
    if(!strcmp(key, "Flag Return Time"))
       return boost::shared_ptr<MenuItem>(new CounterMenuItem(game, "Flag Return Timer:", mFlagReturnTimer / 1000, 1, 1, 99, 

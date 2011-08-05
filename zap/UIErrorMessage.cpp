@@ -35,7 +35,7 @@ namespace Zap
 {
 
 // Constructor
-ErrorMessageUserInterface::ErrorMessageUserInterface(Game *game) : UserInterface(game)
+ErrorMessageUserInterface::ErrorMessageUserInterface(ClientGame *game) : UserInterface(game)
 {
    setMenuID(ErrorMessageUI);
    reset();

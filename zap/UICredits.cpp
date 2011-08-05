@@ -71,7 +71,7 @@ const char *gGameCredits[] = {
 static bool quitting = false;
 
 // Constructor
-CreditsUserInterface::CreditsUserInterface(Game *game) : Parent(game)
+CreditsUserInterface::CreditsUserInterface(ClientGame *game) : Parent(game)
 {
    setMenuID(CreditsUI);
 }
@@ -243,7 +243,7 @@ void CreditsScroller::render()
 //////////////////////////////////
 
 // Constructor
-SplashUserInterface::SplashUserInterface(Game *game) : Parent(game)
+SplashUserInterface::SplashUserInterface(ClientGame *game) : Parent(game)
 {
    setMenuID(SplashUI);
 }

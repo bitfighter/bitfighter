@@ -49,7 +49,7 @@ namespace Zap
 {
 
 // Constructor
-GameParamUserInterface::GameParamUserInterface(Game *game) : Parent(game)
+GameParamUserInterface::GameParamUserInterface(ClientGame *game) : Parent(game)
 {
    setMenuID(GameParamsUI);
    
@@ -96,7 +96,7 @@ void GameParamUserInterface::clearCurrentGameTypeParams()
 extern const char *gGameTypeNames[];
 extern S32 gDefaultGameTypeIndex;
 
-static void changeGameTypeCallback(Game *game, U32 gtIndex)
+static void changeGameTypeCallback(ClientGame *game, U32 gtIndex)
 {
    TNL::Object *theObject = TNL::Object::create(gGameTypeNames[gtIndex]);   // Instantiate our gameType object
    GameType *gt = dynamic_cast<GameType *>(theObject);                      // and cast it to GameType

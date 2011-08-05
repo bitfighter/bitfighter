@@ -34,10 +34,17 @@
 namespace Zap
 {
 
+// Constructor
+HelperMenu::HelperMenu(ClientGame *clientGame)
+{
+   mClientGame = clientGame;
+}
+
+
 // Exit helper mode by entering play mode.  Only one mode is active at a time.
 void HelperMenu::exitHelper() 
 { 
-   gClientGame->getUIManager()->getGameUserInterface()->enterMode(GameUserInterface::PlayMode); 
+   mClientGame->enterMode(PlayMode); 
 }
 
 

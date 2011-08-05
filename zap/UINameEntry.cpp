@@ -44,7 +44,7 @@ namespace Zap
 using namespace std;
 
 // Constructor
-TextEntryUserInterface::TextEntryUserInterface(Game *game) : Parent(game)  
+TextEntryUserInterface::TextEntryUserInterface(ClientGame *game) : Parent(game)  
 {
    setMenuID(TextEntryUI);
    title = "ENTER TEXT:";
@@ -132,7 +132,7 @@ void TextEntryUserInterface::setString(string str)
 ////////////////////////////////////////
 
 // Constructor
-LevelNameEntryUserInterface::LevelNameEntryUserInterface(Game *game) : Parent(game)     
+LevelNameEntryUserInterface::LevelNameEntryUserInterface(ClientGame *game) : Parent(game)     
 {
    setMenuID(LevelNameEntryUI);
    title = "ENTER LEVEL TO EDIT:";
@@ -264,7 +264,7 @@ void PreGamePasswordEntryUserInterface::onEscape()
 ////////////////////////////////////////
 
 // Constructor
-ServerPasswordEntryUserInterface::ServerPasswordEntryUserInterface(Game *game) : Parent(game)     
+ServerPasswordEntryUserInterface::ServerPasswordEntryUserInterface(ClientGame *game) : Parent(game)     
 {
    setMenuID(PasswordEntryUI);
    title = "ENTER SERVER PASSWORD:";
@@ -300,7 +300,7 @@ void InGamePasswordEntryUserInterface::onEscape()
 ////////////////////////////////////////
 
 // Constructor
-AdminPasswordEntryUserInterface::AdminPasswordEntryUserInterface(Game *game) : Parent(game)     
+AdminPasswordEntryUserInterface::AdminPasswordEntryUserInterface(ClientGame *game) : Parent(game)     
 {
    setMenuID(AdminPasswordEntryUI);
    title = "ENTER ADMIN PASSWORD:";
@@ -319,7 +319,7 @@ void AdminPasswordEntryUserInterface::submitPassword(GameConnection *gameConnect
 ////////////////////////////////////////
 
 // Constructor
-LevelChangePasswordEntryUserInterface::LevelChangePasswordEntryUserInterface(Game *game) : Parent(game)     
+LevelChangePasswordEntryUserInterface::LevelChangePasswordEntryUserInterface(ClientGame *game) : Parent(game)     
 {
    setMenuID(LevelChangePasswordEntryUI);
    title = "ENTER LEVEL CHANGE PASSWORD:";

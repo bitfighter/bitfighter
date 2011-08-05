@@ -38,7 +38,7 @@ namespace Zap
 {
 
 // Constructor
-RebindKeysUserInterface::RebindKeysUserInterface(Game *game) : Parent(game)
+RebindKeysUserInterface::RebindKeysUserInterface(ClientGame *game) : Parent(game)
 {
    title = "ENTER TEXT:";
    buffer[0] = 0;

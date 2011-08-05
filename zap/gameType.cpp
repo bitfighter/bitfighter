@@ -213,7 +213,7 @@ const char **GameType::getGameParameterMenuKeys()
 
 
 // Definitions for those items
-boost::shared_ptr<MenuItem> GameType::getMenuItem(Game *game, const char *key)
+boost::shared_ptr<MenuItem> GameType::getMenuItem(ClientGame *game, const char *key)
 {
    if(!strcmp(key, "Level Name"))
    {
@@ -638,10 +638,9 @@ void GameType::idle(GameObject::IdleCallPath path, U32 deltaT)
 //}
 
 
-
 void GameType::renderInterfaceOverlay(bool scoreboardVisible)
 {
-   getGame()->getUIManager()->getGameUserInterface()->renderBasicInterfaceOverlay(this, scoreboardVisible);
+   dynamic_cast<ClientGame *>(getGame())->getUIManager()->getGameUserInterface()->renderBasicInterfaceOverlay(this, scoreboardVisible);
 }
 
 
@@ -1869,7 +1868,7 @@ S32 GameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S3
 
 extern ClientInfo gClientInfo;
 
-static void switchTeamsCallback(Game *game, U32 unused)
+static void switchTeamsCallback(ClientGame *game, U32 unused)
 {
    GameType *gt = game->getGameType();
    if(!gt)
@@ -1912,7 +1911,7 @@ void GameType::addClientGameMenuOptions(ClientGame *game, Vector<boost::shared_p
 }
 
 
-static void switchPlayersTeamCallback(Game *game, U32 unused)
+static void switchPlayersTeamCallback(ClientGame *game, U32 unused)
 {
    PlayerMenuUserInterface *ui = game->getUIManager()->getPlayerMenuUserInterface();
 
@@ -1924,8 +1923,10 @@ static void switchPlayersTeamCallback(Game *game, U32 unused)
 // Add any additional game-specific admin menu items, processed below
 void GameType::addAdminGameMenuOptions(Vector<boost::shared_ptr<MenuItem> > &menuOptions)
 {
-   if(isTeamGame() && mGame->getTeamCount() > 1)
-      menuOptions.push_back(boost::shared_ptr<MenuItem>(new MenuItem(mGame, 0, "CHANGE A PLAYER'S TEAM", switchPlayersTeamCallback, "", KEY_C)));
+   ClientGame *game = dynamic_cast<ClientGame *>(mGame);
+
+   if(isTeamGame() && game->getTeamCount() > 1)
+      menuOptions.push_back(boost::shared_ptr<MenuItem>(new MenuItem(game, 0, "CHANGE A PLAYER'S TEAM", switchPlayersTeamCallback, "", KEY_C)));
 }
 
 
@@ -1957,14 +1958,14 @@ GAMETYPE_RPC_S2C(GameType, s2cSetLevelInfo, (StringTableEntry levelName, StringT
       return;
 
    clientGame->mObjectsLoaded = 0;                               // Reset item counter
-   getGame()->getUIManager()->getGameUserInterface()->mShowProgressBar = true;      // Show progress bar
+   clientGame->getUIManager()->getGameUserInterface()->mShowProgressBar = true;      // Show progress bar
    //gClientGame->setInCommanderMap(true);                       // If we change here, need to tell the server we are in this mode.
    //gClientGame->resetZoomDelta();
 
-   getGame()->getUIManager()->getGameUserInterface()->resetLevelInfoDisplayTimer(); // Start displaying the level info, now that we have it
+   clientGame->getUIManager()->getGameUserInterface()->resetLevelInfoDisplayTimer(); // Start displaying the level info, now that we have it
 
    // Now we know all we need to initialize our loadout options
-   getGame()->getUIManager()->getGameUserInterface()->initializeLoadoutOptions(engineerEnabled);
+  clientGame->getUIManager()->getGameUserInterface()->initializeLoadoutOptions(engineerEnabled);
 }
 
 
@@ -2102,7 +2103,7 @@ GAMETYPE_RPC_S2C(GameType, s2cAddClient,
 
       // Now we'll check if we need an updated scoreboard... this only needed to handle use case of user
       // holding Tab while one game transitions to the next.  Without it, ratings will be reported as 0.
-      if(getGame()->getUIManager()->getGameUserInterface()->isInScoreboardMode())
+      if(clientGame->getUIManager()->getGameUserInterface()->isInScoreboardMode())
       {
          GameType *g = clientGame->getGameType();
          if(g)
@@ -2367,11 +2368,11 @@ GAMETYPE_RPC_S2C(GameType, s2cSyncMessagesComplete, (U32 sequence), (sequence))
    clientGame->computeWorldObjectExtents();          // Make sure our world extents reflect all the objects we've loaded
    Barrier::prepareRenderingGeometry(clientGame);    // Get walls ready to render
 
-   getGame()->getUIManager()->getGameUserInterface()->mShowProgressBar = false;
-   //gClientGame->setInCommanderMap(false);          // Start game in regular mode, If we change here, need to tell the server we are in this mode. Map can change while in commander map.
-   //gClientGame->clearZoomDelta();                  // No in zoom effect
+   clientGame->getUIManager()->getGameUserInterface()->mShowProgressBar = false;
+   //clientGame->setInCommanderMap(false);          // Start game in regular mode, If we change here, need to tell the server we are in this mode. Map can change while in commander map.
+   //clientGame->clearZoomDelta();                  // No in zoom effect
    
-   getGame()->getUIManager()->getGameUserInterface()->mProgressBarFadeTimer.reset(1000);
+  clientGame->getUIManager()->getGameUserInterface()->mProgressBarFadeTimer.reset(1000);
 }
 
 

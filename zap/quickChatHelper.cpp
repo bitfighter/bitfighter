@@ -43,7 +43,7 @@ namespace Zap
 
 Vector<QuickChatNode> gQuickChatTree;      // Holds our tree of QuickChat groups and messages, as defined in the INI file
 
-QuickChatHelper::QuickChatHelper()
+QuickChatHelper::QuickChatHelper(ClientGame *clientGame) : Parent(clientGame)
 {
    mCurNode = 0;
 }
@@ -161,7 +161,6 @@ bool QuickChatHelper::processKeyCode(KeyCode keyCode)
    if(Parent::processKeyCode(keyCode))
       return true;
 
-
    if(!gQuickChatTree.size())       // We'll crash if we go any further!
       return false;
 
@@ -193,11 +192,11 @@ bool QuickChatHelper::processKeyCode(KeyCode keyCode)
 
             if(gQuickChatTree[mCurNode].commandOnly)
             {
-               gClientGame->getUIManager()->getGameUserInterface()->runCommand(gQuickChatTree[mCurNode].msg.c_str());
+               getClientGame()->getUIManager()->getGameUserInterface()->runCommand(gQuickChatTree[mCurNode].msg.c_str());
             }
             else
             {
-               GameType *gt = gClientGame->getGameType();
+               GameType *gt = getClientGame()->getGameType();
                if(gt)
                {
                   StringTableEntry entry(gQuickChatTree[mCurNode].msg.c_str());

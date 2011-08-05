@@ -93,10 +93,10 @@ private:
    static void doDrawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string, bool fixed);
    static void doDrawAngleString(S32 x, S32 y, F32 size, F32 angle, const char *string, bool fixed);
 
-   Game *mGame;
+   ClientGame *mClientGame;
 
 public:
-   UserInterface(Game *game);                // Constructor
+   UserInterface(ClientGame *game);                // Constructor
    static const S32 MAX_PASSWORD_LENGTH = 32;      // Arbitrary, doesn't matter, but needs to be _something_
 
    static UserInterface *current;            // Currently active menu
@@ -105,9 +105,7 @@ public:
    UIID getMenuID() const;                   // Retrieve interface's name
    UIID getPrevMenuID() const;               // Retrieve previous interface's name
 
-   Game *getGame() { return mGame; }
-
-   ClientGame *getClientGame();
+   ClientGame *getGame() { return mClientGame; }
 
    UIManager *getUIManager() const;
 

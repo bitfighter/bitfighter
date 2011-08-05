@@ -40,7 +40,7 @@ private:
    U32 mCurPage;
 
 public:
-   InstructionsUserInterface(Game *game);      // Constructor
+   InstructionsUserInterface(ClientGame *game);      // Constructor
    void render();
    void renderPage1();
    void renderPage2();

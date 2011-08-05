@@ -71,17 +71,11 @@ struct CommandInfo {
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+enum EntryModes;
+
 class GameUserInterface : public UserInterface
 {
-public:
-   // Modes we could be in during the game   
-   enum Mode {
-      PlayMode,               // Playing
-      ChatMode,               // Composing chat message
-      QuickChatMode,          // Showing quick-chat menu
-      LoadoutMode,            // Showing loadout menu
-      EngineerMode,           // Showing engineer overlay mode
-   };
+   typedef UserInterface Parent;
 
 private:
    Move mCurrentMove;
@@ -194,10 +188,10 @@ private:
 
    // Various helper objects
    HelperMenu *mHelper;       // Current helper
+
    QuickChatHelper mQuickChatHelper;
    LoadoutHelper mLoadoutHelper;
    EngineerHelper mEngineerHelper;
-
 
    struct VoiceRecorder
    {
@@ -244,7 +238,7 @@ private:
 
    //Vector<string> mChatCmds;        // List of all commands we can type at chat prompt, for <tab> completion
 
-   Mode mCurrentMode;                // Current game mode
+   EntryModes mCurrentMode;           // Current game mode
 
    static const S32 SERVER_MSG_FONT_SIZE = 14;
    static const S32 SERVER_MSG_FONT_GAP = 4;
@@ -253,8 +247,8 @@ private:
    static const S32 CHAT_MULTILINE_INDENT = 12;
 
 public:
-   GameUserInterface(Game *game);    // Constructor
-   ~GameUserInterface();             // Destructor
+   GameUserInterface(ClientGame *game);    // Constructor
+   ~GameUserInterface();                   // Destructor
 
    bool displayInputModeChangeAlert;
 
@@ -328,7 +322,7 @@ public:
    void suspendGame();
    void unsuspendGame();
 
-   void enterMode(GameUserInterface::Mode mode);      // Enter QuickChat, Loadout, or Engineer mode
+   void enterMode(EntryModes mode);      // Enter QuickChat, Loadout, or Engineer mode
 
    void renderEngineeredItemDeploymentMarker(Ship *ship);
 

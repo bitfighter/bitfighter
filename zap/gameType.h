@@ -354,7 +354,7 @@ public:
    string toString() const;
 
    virtual const char **getGameParameterMenuKeys();
-   virtual boost::shared_ptr<MenuItem> getMenuItem(Game *game, const char *key);
+   virtual boost::shared_ptr<MenuItem> getMenuItem(ClientGame *game, const char *key);
    virtual bool saveMenuItem(const MenuItem *menuItem, const char *key);
 
    virtual bool processSpecialsParam(const char *param);

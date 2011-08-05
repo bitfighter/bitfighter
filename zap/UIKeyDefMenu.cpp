@@ -50,7 +50,7 @@ extern bool gDisableShipKeyboardInput;
 extern CmdLineSettings gCmdLineSettings;
 
 // Constructor
-KeyDefMenuUserInterface::KeyDefMenuUserInterface(Game *game) : Parent(game)
+KeyDefMenuUserInterface::KeyDefMenuUserInterface(ClientGame *game) : Parent(game)
 {
    setMenuID(KeyDefUI);
    mMenuTitle = "Define Keys";

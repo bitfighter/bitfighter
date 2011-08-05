@@ -87,7 +87,7 @@ private:
 
 
 public:
-   GameParamUserInterface(Game *game);   // Constructor
+   GameParamUserInterface(ClientGame *game);   // Constructor
 
    S32 selectedIndex;          // Highlighted menu item
    S32 changingItem;           // Index of key we're changing (in keyDef mode), -1 otherwise

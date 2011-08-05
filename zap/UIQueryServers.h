@@ -47,13 +47,13 @@ class Button
 private:
    S32 mX, mY, mTextSize, mPadding;
    const char *mLabel;
-   void (*mOnClickCallback)(Game *);
+   void (*mOnClickCallback)(ClientGame *);
    bool mouseOver(F32 mouseX, F32 mouseY);
    bool mTransparent;
    Color mBgColor, mFgColor, mHlColor;
 
 public:
-   Button(S32 x, S32 y, S32 textSize, S32 padding, const char *label, Color fgColor, Color hlColor, void(*callback)(Game *));   // Constructor
+   Button(S32 x, S32 y, S32 textSize, S32 padding, const char *label, Color fgColor, Color hlColor, void(*callback)(ClientGame *));   // Constructor
 
    void render(F32 mouseX, F32 mouseY);
    void onClick(F32 mouseX, F32 mouseY);
@@ -111,7 +111,7 @@ private:
    bool mouseInHeaderRow(const Point *pos);
 
 public:
-   QueryServersUserInterface(Game *game);      // Constructor
+   QueryServersUserInterface(ClientGame *game);      // Constructor
    bool mRecievedListOfServersFromMaster;
    Nonce mNonce;
    U32 pendingPings;

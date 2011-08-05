@@ -78,25 +78,16 @@ float gLineWidth4 = 4.0f;
 ////////////////////////////////////////
 
 // Constructor
-UserInterface::UserInterface(Game *game)
+UserInterface::UserInterface(ClientGame *clientGame)
 {
-   mGame = game;
-}
-
-
-ClientGame *UserInterface::getClientGame()
-{
-   ClientGame *clientGame = dynamic_cast<ClientGame *>(mGame);
-   TNLAssert(clientGame, "Bad cast!");
-
-   return clientGame;
+   mClientGame = clientGame;
 }
 
 
 UIManager *UserInterface::getUIManager() const 
 { 
-   TNLAssert(mGame, "mGame is NULL!");
-   return mGame->getUIManager(); 
+   TNLAssert(mClientGame, "mGame is NULL!");
+   return mClientGame->getUIManager(); 
 }
 
 

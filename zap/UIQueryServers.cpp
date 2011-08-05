@@ -70,20 +70,20 @@ static const U32 AREA_BETWEEN_BOTTOM_OF_SERVER_LIST_AND_DIVIDER = (SEL_SERVER_IN
 
 
 // Button callbacks
-static void nextButtonClickedCallback(Game *game)
+static void nextButtonClickedCallback(ClientGame *game)
 {
    game->getUIManager()->getQueryServersUserInterface()->advancePage();
 }
 
 
-static void prevButtonClickedCallback(Game *game)
+static void prevButtonClickedCallback(ClientGame *game)
 {
    game->getUIManager()->getQueryServersUserInterface()->backPage();
 }
 
 
 // Constructor
-QueryServersUserInterface::QueryServersUserInterface(Game *game) : UserInterface(game)
+QueryServersUserInterface::QueryServersUserInterface(ClientGame *game) : UserInterface(game)
 {
    setMenuID(QueryServersScreenUI);
    mLastUsedServerId = 0;
@@ -1365,7 +1365,7 @@ void QueryServersUserInterface::issueChat()
 ////////////////////////////////////////
 
 // Contstructor -- x,y are UL corner of button
-Button::Button(S32 x, S32 y, S32 textSize, S32 padding, const char *label, Color fgColor, Color hlColor, void (*onClickCallback)(Game *))
+Button::Button(S32 x, S32 y, S32 textSize, S32 padding, const char *label, Color fgColor, Color hlColor, void (*onClickCallback)(ClientGame *))
 {
    mX = x;
    mY = y;

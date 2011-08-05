@@ -72,7 +72,7 @@ private:
    S32 mSelectedItem;
 
 public:
-   EngineerHelper();                          // Constructor
+   EngineerHelper(ClientGame *clientGame);          // Constructor
 
    void onMenuShow();
    bool processKeyCode(KeyCode keyCode);   
