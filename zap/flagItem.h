@@ -51,6 +51,7 @@ protected:
 public:
    FlagItem(Point pos = Point());                                    // C++ constructor
    FlagItem(Point pos, bool collidable, float radius, float mass);   // Alternate C++ constructor
+   FlagItem(Point pos, Point vel, bool useDropDelay = false);
 
    FlagItem *clone() const;
    void copyAttrs(FlagItem *target);

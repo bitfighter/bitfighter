@@ -45,6 +45,7 @@
 #include "robot.h"
 #include "shipItems.h"           // For moduleInfos
 #include "stringUtils.h"
+#include "huntersGame.h"         // for creating new HuntersFlagItem
 
 #include "IniFile.h"             // For CIniFile def
 
@@ -286,20 +287,15 @@ void Game::processLevelLoadLine(U32 argc, U32 id, const char **argv, GridDatabas
    {
       char obj[LevelLoader::MaxArgLen + 1];
 
-      // Kind of hacky, but if we encounter a FlagItem in a Nexus game, we'll convert it to a NexusFlag item.  This seems to make more sense.
-      // This will work so long as FlagItem and HuntersFlagItem share a common attribute list.
-      if(!stricmp(argv[0], "FlagItem") && !mGameType.isNull() && mGameType->getGameType() == GameType::NexusGame)
-         strcpy(obj, "HuntersFlagItem");
-      // Also, while we're here, we'll add advanced support for the NexusFlagItem, which HuntersFlagItem will eventually be renamed to...
-      else if(!stricmp(argv[0], "NexusFlagItem"))
-         strcpy(obj, "HuntersFlagItem");
+      // Convert any HuntersFlagItem into FlagItem, only HuntersFlagItem will show up on ship
+      if(!stricmp(argv[0], "HuntersFlagItem") || !stricmp(argv[0], "NexusFlagItem"))
+         strcpy(obj, "FlagItem");
       else
-      {
          strncpy(obj, argv[0], LevelLoader::MaxArgLen);
-         obj[LevelLoader::MaxArgLen] = '\0';
-      }
 
+      obj[LevelLoader::MaxArgLen] = '\0';
       TNL::Object *theObject = TNL::Object::create(obj);          // Create an object of the type specified on the line
+
       SafePtr<GameObject> object  = dynamic_cast<GameObject *>(theObject);  // Force our new object to be a GameObject
       EditorObject *eObject = dynamic_cast<EditorObject *>(theObject);
 

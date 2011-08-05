@@ -48,6 +48,17 @@ FlagItem::FlagItem(Point pos, bool collidable, float radius, float mass) : Edito
    initialize();
 }
 
+// Alternate constructor, currently used by dropping flags in hunterGame
+FlagItem::FlagItem(Point pos, Point vel, bool useDropDelay) : EditorItem(pos, true, (F32)Ship::CollisionRadius, 4)
+{
+   initialize();
+
+   setActualVel(vel);
+   if(useDropDelay)
+      mDroppedTimer.reset(DROP_DELAY);
+}
+
+
 
 FlagItem *FlagItem::clone() const
 {
