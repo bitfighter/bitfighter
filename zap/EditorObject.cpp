@@ -164,7 +164,7 @@ static void renderVertex(VertexRenderStyles style, const Point &v, S32 number, F
 
 static const S32 DOCK_LABEL_SIZE = 9;      // Size to label items on the dock
 
-static void labelVertex(Point pos, S32 radius, const char *itemLabelTop, const char *itemLabelBottom, F32 scale)
+static void labelVertex(Point pos, F32 radius, const char *itemLabelTop, const char *itemLabelBottom, F32 scale)
 {
    F32 labelSize = DOCK_LABEL_SIZE / scale;
 

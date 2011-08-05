@@ -38,7 +38,7 @@ std::string md5wrapper::hashit(std::string text)
 	//update with our string
 	md5->MD5Update(&ctx,
 		 (unsigned char*)text.c_str(),
-		  text.length());
+		  (unsigned int)text.length());
 	
 	//create the hash
 	unsigned char buff[16] = "";	
@@ -152,7 +152,7 @@ std::string md5wrapper::getHashFromFile(std::string filename)
 	FILE *file;
   	HL_MD5_CTX context;
   
-	size_t len;    // Was int, VC++ complained, if this doesn't compile, switch it back
+	unsigned int len;
   	unsigned char buffer[1024], digest[16];
 
 	//open file
@@ -165,7 +165,7 @@ std::string md5wrapper::getHashFromFile(std::string filename)
  	md5->MD5Init (&context);
  	
 	//read the filecontent
-	while ( (len = fread (buffer, 1, 1024, file)) )
+	while ( (len = (unsigned int)fread (buffer, 1, 1024, file)) )
    {
 		md5->MD5Update (&context, buffer, len);
 	}

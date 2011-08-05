@@ -92,7 +92,7 @@ void SimpleLine::renderEditor(F32 currentScale)
    {
       // Draw heavy colored line with colored core
       glLineWidth(i ? gLineWidth4 : gDefaultLineWidth);                
-      glColor(getEditorRenderColor(), i ? .35 : 1);         // Get color from child class
+      glColor(getEditorRenderColor(), i ? .35f : 1);         // Get color from child class
 
       F32 ang = pos.angleTo(dest);
       const F32 al = 15;                // Length of arrow-head, in editor units (15 pixels)

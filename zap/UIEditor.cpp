@@ -176,9 +176,9 @@ void EditorUserInterface::populateDock()
 
    if(mShowMode == ShowAllObjects)
    {
-      S32 xPos = gScreenInfo.getGameCanvasWidth() - horizMargin - DOCK_WIDTH / 2;
-      S32 yPos = 35;
-      const S32 spacer = 35;
+      F32 xPos = (F32)gScreenInfo.getGameCanvasWidth() - horizMargin - DOCK_WIDTH / 2;
+      F32 yPos = 35;
+      const F32 spacer = 35;
 
       addDockObject(new RepairItem(), xPos, yPos);
       //addDockObject(new ItemEnergy(), xPos + 10, yPos);
