@@ -888,7 +888,6 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
    if(isInitialUpdate())      // This stuff gets sent only once per ship
    {
       stream->writeFlag(getGame()->getCurrentTime() - mRespawnTime < 300 && !hasExploded);  // If true, ship will appear to spawn on client
-      //updateMask |= ChangeTeamMask;  // make this bit true to write team.
 
       // Now write all the mounts:
       for(S32 i = 0; i < mMountedItems.size(); i++)
@@ -906,31 +905,16 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
       stream->writeFlag(false);
    }  // End initial update
 
-   if(stream->writeFlag(updateMask & AuthenticationMask))     // Player authentication status changed
+   if(stream->writeFlag(updateMask & (ChangeTeamMask | AuthenticationMask)))   // A player with admin can change robots teams.
    {
-      stream->writeStringTableEntry(mPlayerName);
-      stream->writeFlag(mIsAuthenticated);
+      writeThisTeam(stream);
+      if(stream->writeFlag(updateMask & AuthenticationMask))     // Player authentication status changed
+      {
+         stream->writeStringTableEntry(mPlayerName);
+         stream->writeFlag(mIsAuthenticated);
+      }
    }
 
-   if(stream->writeFlag(updateMask & ChangeTeamMask))   // A player with admin can change robots teams.
-   {
-      stream->write(mTeam);
-   }
-
-
-//if(isRobot())
-//{
-//Robot *robot = dynamic_cast<Robot *>(this);
-//stream->write((S32)robot->mTarget.x);
-//stream->write((S32)robot->mTarget.y);
-//
-//stream->write(robot->flightPlan.size());
-//   for(S32 i = 0; i < robot->flightPlan.size(); i++)
-//   {
-//      stream->write(robot->flightPlan[i].x);
-//      stream->write(robot->flightPlan[i].y);
-//   }
-//}
 
 
    // Respawn --> only used by robots, but will be set on ships if all mask bits
@@ -1011,41 +995,15 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
    }  // initial update
 
 
-   if(stream->readFlag())     // Player authentication status changed
+   if(stream->readFlag())     // Team or Player authentication status changed
    {
-      stream->readStringTableEntry(&mPlayerName);
-      mIsAuthenticated = stream->readFlag();
+      readThisTeam(stream);
+      if(stream->readFlag())     // Player authentication status changed
+      {
+         stream->readStringTableEntry(&mPlayerName);
+         mIsAuthenticated = stream->readFlag();
+      }
    }
-
-   if(stream->readFlag())     // Team changed
-   {
-      stream->read(&mTeam);
-   }
-
-//if(isRobot())
-//{
-//Robot *robot = dynamic_cast<Robot *>(this);
-//S32 x;
-//S32 y;
-//stream->read(&x);
-//stream->read(&y);
-//
-//robot->mTarget.x = x;
-//robot->mTarget.y = y;
-//
-//S32 ttt;
-//stream->read(&ttt);
-//robot->flightPlan.clear();
-//for(S32 i = 0; i < ttt; i++)
-//{
-//   F32 x,y;
-//   stream->read(&x);
-//   stream->read(&y);
-//   Point p(x,y);
-//   robot->flightPlan.push_back(p);
-//}
-//
-//}
 
 
    if(stream->readFlag())        // Respawn <--- will only occur on robots, will always be false with ships

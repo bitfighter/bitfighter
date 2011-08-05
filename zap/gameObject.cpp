@@ -37,6 +37,8 @@
 #include "luaObject.h"     // For LuaObject def and returnInt method
 #include "lua.h"           // For push prototype
 
+#include "tnlBitStream.h"
+
 using namespace TNL;
 
 namespace Zap
@@ -99,6 +101,16 @@ void BfObject::render(S32 layerIndex)
    if(layerIndex == 1)
       render();
 }
+
+void BfObject::readThisTeam(BitStream *stream)
+{
+   mTeam = stream->readInt(4) - 2;
+}
+void BfObject::writeThisTeam(BitStream *stream)
+{
+   stream->writeInt(mTeam + 2, 4);
+}
+
 
 ////////////////////////////////////////
 ////////////////////////////////////////

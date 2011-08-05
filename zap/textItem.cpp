@@ -252,7 +252,7 @@ U32 TextItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
    dir.write(stream);
 
    stream->writeRangedU32((U32)mSize, 0, MAX_TEXT_SIZE);
-   stream->write(mTeam);
+   writeThisTeam(stream);
 
    stream->writeString(mText.c_str(), (U8) mText.length());      // Safe to cast text.length to U8 because we've limited it's length to MAX_TEXTITEM_LEN
 
@@ -273,7 +273,7 @@ void TextItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
    setVert(dir, 1);
 
    mSize = (F32)stream->readRangedU32(0, MAX_TEXT_SIZE);
-   stream->read(&mTeam);
+   readThisTeam(stream);
 
    stream->readString(txt);
 
@@ -461,7 +461,7 @@ void LineItem::idle(GameObject::IdleCallPath path)
 U32 LineItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
    //stream->writeRangedU32(mWidth, 0, MAX_LINE_WIDTH);
-   stream->write(mTeam);
+   writeThisTeam(stream);
 
    packGeom(connection, stream);
 
@@ -472,7 +472,7 @@ U32 LineItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
 void LineItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    //mWidth = stream->readRangedU32(0, MAX_LINE_WIDTH);
-   stream->read(&mTeam);
+   readThisTeam(stream);
 
    unpackGeom(connection, stream);
    setExtent();

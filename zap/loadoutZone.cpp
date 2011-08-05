@@ -158,7 +158,7 @@ bool LoadoutZone::collide(GameObject *hitObject)
 
 U32 LoadoutZone::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
-   stream->write(mTeam);
+   writeThisTeam(stream);
    packGeom(connection, stream);
    return 0;
 }
@@ -166,7 +166,7 @@ U32 LoadoutZone::packUpdate(GhostConnection *connection, U32 updateMask, BitStre
 
 void LoadoutZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
-   stream->read(&mTeam);
+   readThisTeam(stream);
    unpackGeom(connection, stream);
    setExtent();
 }
