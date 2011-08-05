@@ -775,9 +775,8 @@ void Mine::renderItem(Point pos)
    Game *game = getGame();
    ClientGame *clientGame = dynamic_cast<ClientGame *>(game);
 
-   if(clientGame)
+   if(clientGame && clientGame->getConnectionToServer())
    {
-      TNLAssert(clientGame->getConnectionToServer(), "Invalid connection to server in Mine//projectile.cpp");
       Ship *ship = dynamic_cast<Ship *>(clientGame->getConnectionToServer()->getControlObject());
 
       if(!ship)
@@ -896,7 +895,7 @@ bool SpyBug::processArguments(S32 argc, const char **argv, Game *game)
 // ProcessArguments() used is the one in item
 string SpyBug::toString(F32 gridSize) const
 {
-   return string(Object::getClassName()) + " " + geomToString(gridSize) + " " + itos(mTeam);
+   return string(Object::getClassName()) + " " + itos(mTeam) + " " + geomToString(gridSize);
 }
 
 
@@ -981,9 +980,8 @@ void SpyBug::renderItem(Point pos)
    Game *game = getGame();
    ClientGame *clientGame = dynamic_cast<ClientGame *>(game);
 
-   if(clientGame)
+   if(clientGame && clientGame->getConnectionToServer())
    {
-      TNLAssert(clientGame->getConnectionToServer(), "Invalid connection to server in SpyBug//projectile.cpp");
       Ship *ship = dynamic_cast<Ship *>(clientGame->getConnectionToServer()->getControlObject());
 
       if(!ship)

@@ -1458,7 +1458,7 @@ void EditorUserInterface::renderReferenceShip()
 
    glPushMatrix();
       glTranslate(mMousePos);
-      glScale(mCurrentScale / getGame()->getGridSize());
+      glScale(mCurrentScale);
       glRotatef(90, 0, 0, 1);
       renderShip(&Colors::red, 1, thrusts, 1, 5, 0, false, false, false, false);
       glRotatef(-90, 0, 0, 1);
@@ -1829,7 +1829,7 @@ void EditorUserInterface::pasteSelection()
       newObject->addToDatabase(getGame()->getEditorDatabase());
 
       newObject->setSelected(true);
-      newObject->moveTo(pos + offset);
+      newObject->moveTo(pos - offset);
       newObject->onGeomChanged();
    }
 

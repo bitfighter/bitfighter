@@ -126,10 +126,11 @@ bool Teleporter::processArguments(S32 argc2, const char **argv2, Game *game)
    // See if we already have any teleports with this pos... if so, this is a "multi-dest" teleporter
    bool found = false;
 
-   foundObjects.clear();
-   game->getGameObjDatabase()->findObjects(TeleportType, foundObjects, Rect(pos, 1));
-
    if(!dynamic_cast<ClientGame *>(game))              // Editor handles multi-dest teleporters as separate single dest items
+   {
+      foundObjects.clear();
+      game->getGameObjDatabase()->findObjects(TeleportType, foundObjects, Rect(pos, 1));
+
       for(S32 i = 0; i < foundObjects.size(); i++)
       {
          Teleporter *tel = dynamic_cast<Teleporter *>(foundObjects[i]);
@@ -140,6 +141,7 @@ bool Teleporter::processArguments(S32 argc2, const char **argv2, Game *game)
             break;      // There will only be one!
          }
       }
+   }
 
    if(!found)           // New teleporter origin
    {
