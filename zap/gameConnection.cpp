@@ -311,37 +311,41 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rCommandComplete, (RangedU32<0,SENDER_STATUS
    // server might need mOutputFile, if the server were to receive files. Currently, server don't receive files in-game.
    TNLAssert(mClientGame != NULL, "trying to get mOutputFile, mClientGame is NULL");
 
-   if(mClientGame && mClientGame->getUserInterface()->mOutputFileName != "")
+   if(mClientGame)
    {
-      if(status.value == STATUS_OK && mDataBuffer)
+      string *outputFilename = mClientGame->getOutputFilename();
+
+      if(*outputFilename != "")
       {
-         FILE *OutputFile = fopen(mClientGame->getUserInterface()->mOutputFileName.c_str(), "wb");
-
-         if(!OutputFile)
+         if(status.value == STATUS_OK && mDataBuffer)
          {
-            logprintf("Problem opening file %s for writing", mClientGame->getUserInterface()->mOutputFileName.c_str());
-            mClientGame->getUserInterface()->displayErrorMessage("!!! Problem opening file %s for writing", mClientGame->getUserInterface()->mOutputFileName.c_str());
+            FILE *OutputFile = fopen(outputFilename->c_str(), "wb");
+
+            if(!OutputFile)
+            {
+               logprintf("Problem opening file %s for writing", outputFilename->c_str());
+               mClientGame->displayErrorMessage("!!! Problem opening file %s for writing", outputFilename->c_str());
+            }
+            else
+            {
+               fwrite((char *)mDataBuffer->getBuffer(), 1, mDataBuffer->getBufferSize(), OutputFile);
+               fclose(OutputFile);
+               mClientGame->displaySuccessMessage("Level download to %s", mClientGame->getUIManager()->getGameUserInterface()->remoteLevelDownloadFilename.c_str());
+            }
          }
+         else if(status.value == COMMAND_NOT_ALLOWED)
+            mClientGame->displayErrorMessage("!!! Getmap command is disabled on this server");
          else
-         {
-            fwrite((char *)mDataBuffer->getBuffer(), 1, mDataBuffer->getBufferSize(), OutputFile);
-            fclose(OutputFile);
-            mClientGame->getUserInterface()->displaySuccessMessage("Level download to %s", mClientGame->getUserInterface()->remoteLevelDownloadFilename.c_str());
-         }
-      }
-      else if(status.value == COMMAND_NOT_ALLOWED)
-         mClientGame->getUserInterface()->displayErrorMessage("!!! Getmap command is disabled on this server");
-      else
-         mClientGame->getUserInterface()->displayErrorMessage("Error downloading level");
+            mClientGame->displayErrorMessage("Error downloading level");
 
-      mClientGame->getUserInterface()->mOutputFileName = "";
+         mClientGame->setOutputFilename("");
+      }
    }
    if(mDataBuffer)
    {
       delete mDataBuffer;
       mDataBuffer = NULL;
    }
-
 }
 
 
@@ -1064,7 +1068,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestShutdown, (U16 time, StringPtr reaso
 TNL_IMPLEMENT_RPC(GameConnection, s2cInitiateShutdown, (U16 time, StringTableEntry name, StringPtr reason, bool originator),
                   (time, name, reason, originator), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
-   mClientGame->getUserInterface()->shutdownInitiated(time, name, reason, originator);
+   mClientGame->shutdownInitiated(time, name, reason, originator);
 }
 
 
@@ -1085,7 +1089,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestCancelShutdown, (), (), NetClassGrou
 
 TNL_IMPLEMENT_RPC(GameConnection, s2cCancelShutdown, (), (), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
-   mClientGame->getUserInterface()->shutdownCanceled();
+   mClientGame->cancelShutdown();
 }
 
 

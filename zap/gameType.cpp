@@ -641,7 +641,7 @@ void GameType::idle(GameObject::IdleCallPath path, U32 deltaT)
 
 void GameType::renderInterfaceOverlay(bool scoreboardVisible)
 {
-   getGame()->getUserInterface()->renderBasicInterfaceOverlay(this, scoreboardVisible);
+   getGame()->getUIManager()->getGameUserInterface()->renderBasicInterfaceOverlay(this, scoreboardVisible);
 }
 
 
@@ -1882,8 +1882,8 @@ static void switchTeamsCallback(Game *game, U32 unused)
       if(!ship)
          return;
 
-      gt->c2sChangeTeams(1 - ship->getTeam());                          // If two teams, team will either be 0 or 1, so "1 - " will toggle
-      game->getUIManager()->reactivateMenu(game->getUserInterface());   // Jump back into the game (this option takes place immediately)
+      gt->c2sChangeTeams(1 - ship->getTeam());                                            // If two teams, team will either be 0 or 1, so "1 - " will toggle
+      game->getUIManager()->reactivateMenu(game->getUIManager()->getGameUserInterface()); // Jump back into the game (this option takes place immediately)
    }
    else
    {
@@ -1957,14 +1957,14 @@ GAMETYPE_RPC_S2C(GameType, s2cSetLevelInfo, (StringTableEntry levelName, StringT
       return;
 
    clientGame->mObjectsLoaded = 0;                               // Reset item counter
-   clientGame->getUserInterface()->mShowProgressBar = true;      // Show progress bar
+   getGame()->getUIManager()->getGameUserInterface()->mShowProgressBar = true;      // Show progress bar
    //gClientGame->setInCommanderMap(true);                       // If we change here, need to tell the server we are in this mode.
    //gClientGame->resetZoomDelta();
 
-   clientGame->getUserInterface()->resetLevelInfoDisplayTimer(); // Start displaying the level info, now that we have it
+   getGame()->getUIManager()->getGameUserInterface()->resetLevelInfoDisplayTimer(); // Start displaying the level info, now that we have it
 
    // Now we know all we need to initialize our loadout options
-   clientGame->getUserInterface()->initializeLoadoutOptions(engineerEnabled);
+   getGame()->getUIManager()->getGameUserInterface()->initializeLoadoutOptions(engineerEnabled);
 }
 
 
@@ -2102,7 +2102,7 @@ GAMETYPE_RPC_S2C(GameType, s2cAddClient,
 
       // Now we'll check if we need an updated scoreboard... this only needed to handle use case of user
       // holding Tab while one game transitions to the next.  Without it, ratings will be reported as 0.
-      if(clientGame->getUserInterface()->isInScoreboardMode())
+      if(getGame()->getUIManager()->getGameUserInterface()->isInScoreboardMode())
       {
          GameType *g = clientGame->getGameType();
          if(g)
@@ -2367,11 +2367,11 @@ GAMETYPE_RPC_S2C(GameType, s2cSyncMessagesComplete, (U32 sequence), (sequence))
    clientGame->computeWorldObjectExtents();          // Make sure our world extents reflect all the objects we've loaded
    Barrier::prepareRenderingGeometry(clientGame);    // Get walls ready to render
 
-   clientGame->getUserInterface()->mShowProgressBar = false;
+   getGame()->getUIManager()->getGameUserInterface()->mShowProgressBar = false;
    //gClientGame->setInCommanderMap(false);          // Start game in regular mode, If we change here, need to tell the server we are in this mode. Map can change while in commander map.
    //gClientGame->clearZoomDelta();                  // No in zoom effect
    
-   clientGame->getUserInterface()->mProgressBarFadeTimer.reset(1000);
+   getGame()->getUIManager()->getGameUserInterface()->mProgressBarFadeTimer.reset(1000);
 }
 
 
@@ -2777,13 +2777,13 @@ GAMETYPE_RPC_S2C(GameType, s2cDisplayChatPM, (StringTableEntry fromName, StringT
 
    Color theColor = Color(1,1,0);
    if(mLocalClient->name == toName && toName == fromName)      // Message sent to self
-      clientGame->getUserInterface()->displayChatMessage(theColor, "%s: %s", toName.getString(), message.getString());
+      clientGame->getUIManager()->getGameUserInterface()->displayChatMessage(theColor, "%s: %s", toName.getString(), message.getString());
 
    else if(mLocalClient->name == toName)                       // To this player
-      clientGame->getUserInterface()->displayChatMessage(theColor, "from %s: %s", fromName.getString(), message.getString());
+      clientGame->getUIManager()->getGameUserInterface()->displayChatMessage(theColor, "from %s: %s", fromName.getString(), message.getString());
 
    else if(mLocalClient->name == fromName)                     // From this player
-      clientGame->getUserInterface()->displayChatMessage(theColor, "to %s: %s", toName.getString(), message.getString());
+      clientGame->getUIManager()->getGameUserInterface()->displayChatMessage(theColor, "to %s: %s", toName.getString(), message.getString());
 
    else                // Should never get here... shouldn't be able to see PM that is not from or not to you
       clientGame->displayMessage(theColor, "from %s to %s: %s", fromName.getString(), toName.getString(), message.getString());
@@ -2795,11 +2795,11 @@ GAMETYPE_RPC_S2C(GameType, s2cDisplayChatMessage, (bool global, StringTableEntry
    ClientGame *clientGame = dynamic_cast<ClientGame *>(getGame());
    TNLAssert(clientGame, "clientGame is NULL");
 
-   if(!clientGame || clientGame->getUserInterface()->isOnMuteList(clientName.getString()))
+   if(!clientGame || clientGame->getUIManager()->getGameUserInterface()->isOnMuteList(clientName.getString()))
       return;
 
    Color theColor = global ? gGlobalChatColor : gTeamChatColor;
-   clientGame->getUserInterface()->displayChatMessage(theColor, "%s: %s", clientName.getString(), message.getString());
+   clientGame->getUIManager()->getGameUserInterface()->displayChatMessage(theColor, "%s: %s", clientName.getString(), message.getString());
 }
 
 
@@ -2813,7 +2813,7 @@ GAMETYPE_RPC_S2C(GameType, s2cDisplayChatMessageSTE, (bool global, StringTableEn
    if(!clientGame) 
       return;
 
-   clientGame->getUserInterface()->displayChatMessage(theColor, "%s: %s", clientName.getString(), message.getString());
+   clientGame->getUIManager()->getGameUserInterface()->displayChatMessage(theColor, "%s: %s", clientName.getString(), message.getString());
 }
 
 

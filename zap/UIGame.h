@@ -295,8 +295,8 @@ public:
    void cancelChat();
    bool isOnMuteList(const string &name);
 
-   void shutdownInitiated(U16 time, StringTableEntry who, StringPtr why, bool initiator);
-   void shutdownCanceled();
+   void shutdownInitiated(U16 time, const StringTableEntry &who, const StringPtr &why, bool initiator);
+   void cancelShutdown();
 
    Vector<string> parseStringx(const char *str);    // Break a chat msg into parsable bits
 

@@ -546,7 +546,7 @@ void GameUserInterface::renderShutdownMessage()
 }
 
 
-void GameUserInterface::shutdownInitiated(U16 time, StringTableEntry who, StringPtr why, bool initiator)
+void GameUserInterface::shutdownInitiated(U16 time, const StringTableEntry &who, const StringPtr &why, bool initiator)
 {
    mShutdownMode = ShuttingDown;
    mShutdownName = who;
@@ -556,7 +556,7 @@ void GameUserInterface::shutdownInitiated(U16 time, StringTableEntry who, String
 }
 
 
-void GameUserInterface::shutdownCanceled()
+void GameUserInterface::cancelShutdown()
 {
    mShutdownMode = Canceled;
 }
@@ -1024,7 +1024,7 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    else if(keyCode == keyMISSION)
    {
       mMissionOverlayActive = true;
-      gClientGame->getUserInterface()->clearLevelInfoDisplayTimer();    // Clear level-start display if user hits F2
+      getUIManager()->getGameUserInterface()->clearLevelInfoDisplayTimer();    // Clear level-start display if user hits F2
    }
    else if(keyCode == KEY_M && getKeyState(KEY_CTRL))    // Ctrl-M, for now, to cycle through message dispaly modes
    {

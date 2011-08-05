@@ -228,7 +228,8 @@ void PasswordEntryUserInterface::render()
 
    if(gClientGame->getConnectionToServer())
    {
-      gClientGame->getUserInterface()->render();
+      getUIManager()->getGameUserInterface()->render();
+
       glColor4f(0, 0, 0, 0.5);
       glEnableBlend;
          glBegin(GL_POLYGON);
@@ -257,6 +258,7 @@ void PreGamePasswordEntryUserInterface::onEscape()
 {
    getUIManager()->getMainMenuUserInterface()->activate();
 }
+
 
 ////////////////////////////////////////
 ////////////////////////////////////////

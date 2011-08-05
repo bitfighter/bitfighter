@@ -37,7 +37,7 @@ namespace Zap
 // Exit helper mode by entering play mode.  Only one mode is active at a time.
 void HelperMenu::exitHelper() 
 { 
-   gClientGame->getUserInterface()->enterMode(GameUserInterface::PlayMode); 
+   gClientGame->getUIManager()->getGameUserInterface()->enterMode(GameUserInterface::PlayMode); 
 }
 
 

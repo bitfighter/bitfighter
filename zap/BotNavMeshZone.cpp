@@ -94,7 +94,7 @@ Point BotNavMeshZone::getCenter()
 
 void BotNavMeshZone::render(S32 layerIndex)    
 {
-   if(!gClientGame->getUserInterface()->isShowingDebugMeshZones())
+   if(!dynamic_cast<ClientGame *>(getGame())->isShowingDebugMeshZones())
       return;
 
    if(layerIndex == 0)

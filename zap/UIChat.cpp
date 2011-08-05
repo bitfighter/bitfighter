@@ -290,9 +290,9 @@ void AbstractChat::deliverPrivateMessage(const char *sender, const char *message
    UIID currId = UserInterface::current->getMenuID();
    if(currId != ChatUI && currId != QueryServersScreenUI )
    {
-      gClientGame->getUserInterface()->displayChatMessage(GameUserInterface::privateF5MessageDisplayedInGameColor,
+      gClientGame->getUIManager()->getGameUserInterface()->displayChatMessage(GameUserInterface::privateF5MessageDisplayedInGameColor,
          "Private message from %s: Press [%s] to enter chat mode", sender, keyCodeToString(keyOUTGAMECHAT));
-      gClientGame->getUserInterface()->displayChatMessage(GameUserInterface::privateF5MessageDisplayedInGameColor, "%s %s", ARROW, message);
+      gClientGame->getUIManager()->getGameUserInterface()->displayChatMessage(GameUserInterface::privateF5MessageDisplayedInGameColor, "%s %s", ARROW, message);
    }
 }
 

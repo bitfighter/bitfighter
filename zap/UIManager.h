@@ -44,6 +44,7 @@ class TeamMenuUserInterface;
 class TeamDefUserInterface;
 class QueryServersUserInterface;
 class ServerPasswordEntryUserInterface;
+class GameUserInterface;
 class PlayerMenuUserInterface;
 class NameEntryUserInterface;
 class MessageUserInterface;
@@ -121,6 +122,7 @@ private:
    TeamMenuUserInterface *mTeamMenuUserInterface;
    QueryServersUserInterface *mQueryServersUserInterface;
    ServerPasswordEntryUserInterface *mServerPasswordEntryUserInterface;
+   GameUserInterface *mGameUserInterface;
    PlayerMenuUserInterface *mPlayerMenuUserInterface;
    NameEntryUserInterface *mNameEntryUserInterface;
    MessageUserInterface *mMessageUserInterface;
@@ -162,6 +164,7 @@ public:
    TeamDefUserInterface *getTeamDefUserInterface();
    QueryServersUserInterface *getQueryServersUserInterface();
    ServerPasswordEntryUserInterface *getServerPasswordEntryUserInterface();
+   GameUserInterface *getGameUserInterface();
    PlayerMenuUserInterface *getPlayerMenuUserInterface();
    NameEntryUserInterface *getNameEntryUserInterface();
    MessageUserInterface *getMessageUserInterface();

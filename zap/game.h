@@ -195,8 +195,6 @@ public:
    Game(const Address &theBindAddress);      // Constructor
    virtual ~Game();                          // Destructor
 
-   virtual GameUserInterface *getUserInterface() = 0;
-
    Rect getWorldExtents() { return mWorldExtents; }
 
    virtual U32 getPlayerCount() = 0;         // Implemented differently on client and server
@@ -432,8 +430,6 @@ public:
    StringTableEntry getCurrentLevelName();      // Return name of level currently in play
    StringTableEntry getCurrentLevelType();      // Return type of level currently in play
 
-   virtual GameUserInterface *getUserInterface() { return NULL; }    // ServerGame has no UI
-
    bool isServer() { return true; }
    void idle(U32 timeDelta);
    void gameEnded();
@@ -532,9 +528,13 @@ public:
    // Alert users when they get a reply to their request for elevated permissions
    void gotAdminPermissionsReply(bool granted);
    void gotLevelChangePermissionsReply(bool granted);
+
    void gotPingResponse(const Address &address, const Nonce &nonce, U32 clientIdentityToken);
    void gotQueryResponse(const Address &address, const Nonce &nonce, const char *serverName, const char *serverDescr, 
                          U32 playerCount, U32 maxPlayers, U32 botCount, bool dedicated, bool test, bool passwordRequired);
+
+   void shutdownInitiated(U16 time, const StringTableEntry &name, const StringPtr &reason, bool originator);
+   void cancelShutdown();
 
    void displayMessageBox(const StringTableEntry &title, const StringTableEntry &instr, const Vector<StringTableEntry> &message);
    void displayMessage(const Color &msgColor, const char *format, ...);
@@ -549,10 +549,17 @@ public:
    U32 getPlayerAndRobotCount();    // Returns number of human and robot players
    U32 getPlayerCount();            // Returns number of human players
 
+   string *getOutputFilename();
+   void setOutputFilename(const string &filename);
+
    string getRequestedServerName();
    string getServerPassword();
    string getHashedServerPassword();
 
+   bool isShowingDebugMeshZones();
+
+   void displayErrorMessage(const char *format, ...);
+   void displaySuccessMessage(const char *format, ...);
 
    void suspendGame()   { mGameSuspended = true; }
    void unsuspendGame() { mGameSuspended = false; }
@@ -560,11 +567,6 @@ public:
    boost::shared_ptr<AbstractTeam> getNewTeam();
 
    bool processPseudoItem(S32 argc, const char **argv, const string &levelFileName);        // For loading levels in editor
-
-
-   /////
-   // Interface methods
-   GameUserInterface *getUserInterface() { return mGameUserInterface; }
 
 };
 

@@ -42,6 +42,7 @@
 #include "UIEditorInstructions.h"
 #include "UIChat.h"
 #include "UITeamDefMenu.h"
+#include "UIGame.h"
 
 
 namespace Zap
@@ -58,6 +59,7 @@ UIManager::UIManager(Game *game)
    mTeamMenuUserInterface = NULL;
    mQueryServersUserInterface = NULL;
    mServerPasswordEntryUserInterface = NULL;
+   mGameUserInterface = NULL;
    mPlayerMenuUserInterface = NULL;
    mNameEntryUserInterface = NULL;
    mMessageUserInterface = NULL;
@@ -93,6 +95,7 @@ UIManager::~UIManager()
    delete mTeamMenuUserInterface;
    delete mQueryServersUserInterface;
    delete mServerPasswordEntryUserInterface;
+   delete mGameUserInterface;
    delete mPlayerMenuUserInterface;
    delete mNameEntryUserInterface;
    delete mMessageUserInterface;
@@ -186,6 +189,16 @@ ServerPasswordEntryUserInterface *UIManager::getServerPasswordEntryUserInterface
       mServerPasswordEntryUserInterface = new ServerPasswordEntryUserInterface(mGame);
 
    return mServerPasswordEntryUserInterface;
+}
+
+
+GameUserInterface *UIManager::getGameUserInterface()
+{
+   // Lazily initialize
+   if(!mGameUserInterface)
+      mGameUserInterface = new GameUserInterface(mGame);
+
+   return mGameUserInterface;
 }
 
 

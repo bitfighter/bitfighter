@@ -254,7 +254,8 @@ void MenuUserInterface::render()
    // Draw the game screen, then dim it out so you can still see it under our overlay
    if(gClientGame->getConnectionToServer())
    {
-      getGame()->getUserInterface()->render();
+      getUIManager()->renderPrevUI();
+
       glColor4f(0, 0, 0, 0.6f);
 
       glEnableBlend;
@@ -1403,7 +1404,7 @@ void GameMenuUserInterface::onEscape()
 
    // Show alert about input mode changing, if needed
    bool inputModesChanged = lastInputMode == gIniSettings.inputMode;
-   getGame()->getUserInterface()->resetInputModeChangeAlertDisplayTimer(inputModesChanged ? 0 : 2800);
+   getUIManager()->getGameUserInterface()->resetInputModeChangeAlertDisplayTimer(inputModesChanged ? 0 : 2800);
 
 }
 
@@ -1520,8 +1521,9 @@ void LevelMenuSelectUserInterface::processSelection(U32 index)
    if((index & UPLOAD_LEVELS_BIT) && (index & (~UPLOAD_LEVELS_BIT)) < U32(mLevels.size()))
    {
       string filename = strictjoindir(gConfigDirs.levelDir, mLevels[index & (~UPLOAD_LEVELS_BIT)]);
+
       if(!gc->s2rUploadFile(filename.c_str(),1))
-         gClientGame->getUserInterface()->displayErrorMessage("Can't upload level: unable to read file");
+         gClientGame->displayErrorMessage("Can't upload level: unable to read file");
    }
    else
    {
@@ -1529,7 +1531,7 @@ void LevelMenuSelectUserInterface::processSelection(U32 index)
       gc->c2sRequestLevelChange(index, false);
    }
 
-   getUIManager()->reactivateMenu(gClientGame->getUserInterface());    // Jump back to the game menu
+   getUIManager()->reactivateMenu(getUIManager()->getGameUserInterface());    // Jump back to the game menu
 }
 
 
@@ -1658,7 +1660,7 @@ void PlayerMenuUserInterface::playerSelected(U32 index)
    }
 
    if(action != ChangeTeam)                              // Unless we need to move on to the change team screen...
-      getUIManager()->reactivateMenu(getGame()->getUserInterface());     // ...it's back to the game!
+      getUIManager()->reactivateMenu(getUIManager()->getGameUserInterface());     // ...it's back to the game!
 }
 
 
@@ -1743,7 +1745,7 @@ void TeamMenuUserInterface::processSelection(U32 index)
       }
    }
 
-   getUIManager()->reactivateMenu(getGame()->getUserInterface());    // Back to the game!
+   getUIManager()->reactivateMenu(getUIManager()->getGameUserInterface());    // Back to the game!
 }
 
 

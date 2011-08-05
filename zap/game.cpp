@@ -2058,7 +2058,7 @@ void ClientGame::displayMessage(const Color &msgColor, const char *format, ...)
    vsnprintf(message, sizeof(message), format, args); 
    va_end(args);
     
-   getUserInterface()->displayMessage(msgColor, message);
+   getUIManager()->getGameUserInterface()->displayMessage(msgColor, message);
 }
 
 
@@ -2101,6 +2101,30 @@ void ClientGame::gotQueryResponse(const Address &address, const Nonce &nonce, co
 {
    getUIManager()->getQueryServersUserInterface()->gotQueryResponse(address, nonce, serverName, serverDescr, playerCount, 
                                                                     maxPlayers, botCount, dedicated, test, passwordRequired);
+}
+
+
+void ClientGame::shutdownInitiated(U16 time, const StringTableEntry &name, const StringPtr &reason, bool originator)
+{
+   getUIManager()->getGameUserInterface()->shutdownInitiated(time, name, reason, originator);
+}
+
+
+void ClientGame::cancelShutdown() 
+{ 
+   getUIManager()->getGameUserInterface()->cancelShutdown(); 
+}
+
+
+string *ClientGame::getOutputFilename() 
+{ 
+   return &getUIManager()->getGameUserInterface()->mOutputFileName; 
+}
+
+
+void ClientGame::setOutputFilename(const string &filename) 
+{ 
+   getUIManager()->getGameUserInterface()->mOutputFileName = filename; 
 }
 
 
@@ -2321,6 +2345,40 @@ string ClientGame::getServerPassword()
 string ClientGame::getHashedServerPassword()
 {
    return getUIManager()->getServerPasswordEntryUserInterface()->getSaltedHashText();
+}
+
+
+bool ClientGame::isShowingDebugMeshZones() 
+{ 
+   return getUIManager()->getGameUserInterface()->isShowingDebugMeshZones(); 
+}
+
+
+void ClientGame::displayErrorMessage(const char *format, ...)
+{
+   static char message[256];
+
+   va_list args;
+
+   va_start(args, format);
+   vsnprintf(message, sizeof(message), format, args);
+   va_end(args);
+
+   getUIManager()->getGameUserInterface()->displayErrorMessage(message);
+}
+
+
+void ClientGame::displaySuccessMessage(const char *format, ...)
+{
+   static char message[256];
+
+   va_list args;
+
+   va_start(args, format);
+   vsnprintf(message, sizeof(message), format, args);
+   va_end(args);
+
+   getUIManager()->getGameUserInterface()->displaySuccessMessage(message);
 }
 
 

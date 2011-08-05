@@ -149,7 +149,7 @@ bool EngineerHelper::processKeyCode(KeyCode keyCode)
                gc->c2sEngineerDeployObject(mEngineerCostructionItemInfos[mSelectedItem].mObjectType);
          }
          else
-            gClientGame->getUserInterface()->displayErrorMessage(deployer.getErrorMessage().c_str());
+            gClientGame->displayErrorMessage(deployer.getErrorMessage().c_str());
             
          exitHelper();
          return true;
