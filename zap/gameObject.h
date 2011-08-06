@@ -250,7 +250,7 @@ protected:
 
 public:
    GameObject();                             // Constructor
-   ~GameObject() { removeFromGame(); }       // Destructor
+   virtual ~GameObject() { removeFromGame(); }       // Destructor
 
    virtual void addToGame(Game *game, GridDatabase *database);       // BotNavMeshZone has its own addToGame
    virtual void onAddedToGame(Game *game);

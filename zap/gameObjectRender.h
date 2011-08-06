@@ -125,7 +125,7 @@ extern void renderPolygonFill(const Vector<Point> *fillPoints, const Color *fill
 
 extern void renderGoalZone(const Color *c, const Vector<Point> *outline, const Vector<Point> *fill);     // No label version
 extern void renderGoalZone(const Color *c, const Vector<Point> *outline, const Vector<Point> *fill, Point centroid, F32 labelAngle, 
-                           bool isFlashing = false, F32 glowFraction = 0, S32 score = 0, F32 scaleFact = 1);
+                           bool isFlashing = false, F32 glowFraction = 0, S32 score = 0, F32 scaleFact = 1, F32 flashCounter = 0);
 
 extern void renderNexus(const Vector<Point> *outline, const Vector<Point> *fill, Point centroid, F32 labelAngle, 
                         bool open, F32 glowFraction, F32 scaleFact = 1);
