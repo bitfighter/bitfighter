@@ -1357,10 +1357,10 @@ void GameMenuUserInterface::buildMenu()
    if(theGameType)
    {
       mGameType = theGameType;
-      theGameType->addClientGameMenuOptions(dynamic_cast<ClientGame *>(getGame()), menuItems);
+      theGameType->addClientGameMenuOptions(getGame(), menuItems);
    }
 
-   GameConnection *gc = (dynamic_cast<ClientGame *>(getGame()))->getConnectionToServer();
+   GameConnection *gc = (getGame())->getConnectionToServer();
    if(gc)
    {
       if(gc->isLevelChanger())
@@ -1642,7 +1642,7 @@ void PlayerMenuUserInterface::playerSelected(U32 index)
          break;
       }
 
-   GameConnection *gc = dynamic_cast<ClientGame *>(getGame())->getConnectionToServer();
+   GameConnection *gc = getGame()->getConnectionToServer();
 
    if(action == ChangeTeam)
    {
@@ -1726,7 +1726,7 @@ void TeamMenuUserInterface::processSelection(U32 index)
    // Make sure user isn't just changing to the team they're already on...
 
    GameType *gt = getGame()->getGameType();
-   GameConnection *gc = dynamic_cast<ClientGame *>(getGame())->getConnectionToServer();
+   GameConnection *gc = getGame()->getConnectionToServer();
    if(!gc || !gt)
       return;
 

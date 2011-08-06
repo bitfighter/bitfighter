@@ -36,6 +36,8 @@
 #include "engineeredObjects.h"   // For EngineerModuleDeployer
 #include "Colors.h"
 
+#include "stringUtils.h"         // For strictjoindir()
+
 
 #include "UI.h"
 #include "UIEditor.h"
@@ -301,36 +303,40 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendLine, (StringPtr line), (line),
 }
 
 
+extern ConfigDirectories gConfigDirs;
+
 // << DataSendable >>
 // When sender is finished, it sends a commandComplete message
 TNL_IMPLEMENT_RPC(GameConnection, s2rCommandComplete, (RangedU32<0,SENDER_STATUS_COUNT> status), (status), 
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 0)
 {
-   if(!isInitiator()) // make it client only.
+   if(!isInitiator()) // Make it client only
       return;
-   // server might need mOutputFile, if the server were to receive files. Currently, server don't receive files in-game.
+
+   // Server might need mOutputFile, if the server were to receive files.  Currently, server doesn't receive files in-game.
    TNLAssert(mClientGame != NULL, "trying to get mOutputFile, mClientGame is NULL");
 
    if(mClientGame)
    {
-      string *outputFilename = mClientGame->getOutputFilename();
+      const char *outputFilename = strictjoindir(gConfigDirs.levelDir, mClientGame->getRemoteLevelDownloadFilename()).c_str();
 
-      if(*outputFilename != "")
+      if(strcmp(outputFilename, ""))
       {
          if(status.value == STATUS_OK && mDataBuffer)
          {
-            FILE *OutputFile = fopen(outputFilename->c_str(), "wb");
+            FILE *outputFile = fopen(outputFilename, "wb");
 
-            if(!OutputFile)
+            if(!outputFile)
             {
-               logprintf("Problem opening file %s for writing", outputFilename->c_str());
-               mClientGame->displayErrorMessage("!!! Problem opening file %s for writing", outputFilename->c_str());
+               logprintf("Problem opening file %s for writing", outputFilename);
+               mClientGame->displayErrorMessage("!!! Problem opening file %s for writing", outputFilename);
             }
             else
             {
-               fwrite((char *)mDataBuffer->getBuffer(), 1, mDataBuffer->getBufferSize(), OutputFile);
-               fclose(OutputFile);
-               mClientGame->displaySuccessMessage("Level download to %s", mClientGame->getUIManager()->getGameUserInterface()->remoteLevelDownloadFilename.c_str());
+               fwrite((char *)mDataBuffer->getBuffer(), 1, mDataBuffer->getBufferSize(), outputFile);
+               fclose(outputFile);
+
+               mClientGame->displaySuccessMessage("Level downloaded to %s", mClientGame->getRemoteLevelDownloadFilename());    
             }
          }
          else if(status.value == COMMAND_NOT_ALLOWED)
@@ -338,7 +344,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rCommandComplete, (RangedU32<0,SENDER_STATUS
          else
             mClientGame->displayErrorMessage("Error downloading level");
 
-         mClientGame->setOutputFilename("");
+         // mClientGame->setOutputFilename("");   <=== what is this for??  
       }
    }
    if(mDataBuffer)
@@ -1200,7 +1206,6 @@ LevelInfo getLevelInfo(char *level, S32 size)
    return levelInfo;
 }
 
-extern ConfigDirectories gConfigDirs;
 
 TNL_IMPLEMENT_RPC(GameConnection, s2rSendDataParts, (U8 type, ByteBufferPtr data), (type, data), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 0)
 {

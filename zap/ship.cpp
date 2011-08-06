@@ -1584,7 +1584,7 @@ void Ship::render(S32 layerIndex)
       glLineWidth(gDefaultLineWidth);
    }
 
-   if(clientGame->getUIManager()->getGameUserInterface()->isShowingDebugShipCoords() && layerIndex == 1)
+   if(clientGame->isShowingDebugShipCoords() && layerIndex == 1)
       renderShipCoords(getActualPos(), localShip, alpha);
 
    glRotatef(radiansToDegrees(mMoveState[RenderState].angle) - 90 + rotAmount, 0, 0, 1.0);

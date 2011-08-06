@@ -1750,6 +1750,8 @@ ClientGame::ClientGame(const Address &bindAddress) : Game(bindAddress)
    mInCommanderMap = false;
    mCommanderZoomDelta = 0;
 
+   mRemoteLevelDownloadFilename = "downloaded.level";
+
    mUIManager = new UIManager(this);                  // gets deleted in destructor
 
 
@@ -1778,6 +1780,9 @@ ClientGame::ClientGame(const Address &bindAddress) : Game(bindAddress)
 
 
    mScreenSaverTimer.reset(59 * 1000);         // Fire screen saver supression every 59 seconds
+
+   mDebugShowShipCoords = false;
+   mDebugShowMeshZones = false;
 }
 
 
@@ -2118,15 +2123,104 @@ void ClientGame::cancelShutdown()
 }
 
 
-string *ClientGame::getOutputFilename() 
-{ 
-   return &getUIManager()->getGameUserInterface()->mOutputFileName; 
+// Returns true if we have admin privs, displays error message and returns false if not
+bool ClientGame::hasAdmin(const char *failureMessage)
+{
+   GameConnection *gc = getConnectionToServer();
+
+   if(gc->isAdmin())
+      return true;
+   
+   displayErrorMessage(failureMessage);
+   return false;
 }
 
 
-void ClientGame::setOutputFilename(const string &filename) 
-{ 
-   getUIManager()->getGameUserInterface()->mOutputFileName = filename; 
+bool ClientGame::isOnMuteList(const string &name)
+{
+   for(S32 i = 0; i < mMuteList.size(); i++)
+      if(mMuteList[i] == name)
+         return true;
+   
+   return false;
+}
+
+
+void ClientGame::changePassword(GameConnection::ParamType type, const Vector<string> &words, bool required)
+{
+   GameConnection *gc = getConnectionToServer();
+
+   if(required)
+   {
+      if(words.size() < 2 || words[1] == "")
+      {
+         displayErrorMessage("!!! Need to supply a password");
+         return;
+      }
+
+      gc->changeParam(words[1].c_str(), type);
+   }
+   else if(words.size() < 2)
+      gc->changeParam("", type);
+
+   if(words.size() < 2)    // Empty password
+   {
+      // Clear any saved password for this server
+      if(type == GameConnection::LevelChangePassword)
+         gINI.deleteKey("SavedLevelChangePasswords", gc->getServerName());
+      else if(type == GameConnection::AdminPassword)
+         gINI.deleteKey("SavedAdminPasswords", gc->getServerName());
+   }
+   else                    // Non-empty password
+   {
+      gc->changeParam(words[1].c_str(), type);
+
+      // Save the password so the user need not enter it again the next time they're on this server
+      if(type == GameConnection::LevelChangePassword)
+         gINI.SetValue("SavedLevelChangePasswords", gc->getServerName(), words[1], true);
+      else if(type == GameConnection::AdminPassword)
+         gINI.SetValue("SavedAdminPasswords", gc->getServerName(), words[1], true);
+   }
+}
+
+
+// TODO: Probably misnamed... handles deletes too
+void ClientGame::changeServerNameDescr(GameConnection::ParamType type, const Vector<string> &words)
+{
+   // Concatenate all params into a single string
+   string allWords = concatenate(words, 1);
+
+   // Did the user provide a name/description?
+   if(type != GameConnection::DeleteLevel && allWords == "")
+   {
+      displayErrorMessage(type == GameConnection::ServerName ? "!!! Need to supply a name" : "!!! Need to supply a description");
+      return;
+   }
+
+   getConnectionToServer()->changeParam(allWords.c_str(), type);
+}
+
+
+bool ClientGame::checkName(const string &name)
+{
+   S32 potentials = 0;
+   GameType *gameType = getGameType();
+
+   for(S32 i = 0; i < gameType->getClientCount(); i++)
+   {
+      if(!gameType->getClient(i).isValid())
+         continue;
+
+      // TODO: make this work with StringTableEntry comparison rather than strcmp; might need to add new method
+      const char *n = gameType->getClient(i)->name.getString();
+
+      if(!strcmp(n, name.c_str()))           // Exact match
+         return true;
+      else if(!stricmp(n, name.c_str()))     // Case insensitive match
+         potentials++;
+   }
+
+   return(potentials == 1);      // Return true if we only found exactly one potential match, false otherwise
 }
 
 
@@ -2332,6 +2426,19 @@ void ClientGame::onConnectTerminated(const Address &serverAddress, NetConnection
 }
 
 
+void ClientGame::runCommand(const char *command)
+{
+   getUIManager()->getGameUserInterface()->runCommand(command);
+}
+
+
+void ClientGame::setVolume(VolumeType volType, const Vector<string> &words)
+{
+   getUIManager()->getGameUserInterface()->setVolume(volType, words);
+}
+
+
+
 string ClientGame::getRequestedServerName()
 {
    return getUIManager()->getQueryServersUserInterface()->getLastSelectedServerName();
@@ -2347,12 +2454,6 @@ string ClientGame::getServerPassword()
 string ClientGame::getHashedServerPassword()
 {
    return getUIManager()->getServerPasswordEntryUserInterface()->getSaltedHashText();
-}
-
-
-bool ClientGame::isShowingDebugMeshZones() 
-{ 
-   return getUIManager()->getGameUserInterface()->isShowingDebugMeshZones(); 
 }
 
 
@@ -2455,6 +2556,12 @@ U32 ClientGame::getPlayerCount()
 
    return players;
 }
+
+
+//const char *ClientGame::getRemoteLevelDownloadFilename()
+//{
+//   return getUIManager()->getGameUserInterface()->remoteLevelDownloadFilename();
+//}
 
 
 const Color *ClientGame::getTeamColor(S32 teamId) const
@@ -2682,7 +2789,7 @@ void ClientGame::renderCommander()
    mGameObjDatabase->findObjects(CommandMapVisType, rawRenderObjects);
 
    // If we're drawing bot zones, add them to our list of render objects
-   if(gServerGame && getUIManager()->getGameUserInterface()->isShowingDebugMeshZones())
+   if(gServerGame && isShowingDebugMeshZones())
       gServerGame->getBotZoneDatabase()->findObjects(0, rawRenderObjects, BotNavMeshZoneTypeNumber);
 
    renderObjects.clear();
@@ -2898,7 +3005,7 @@ void ClientGame::renderNormal()
    // Normally a big no-no, we'll access the server's bot zones directly if we are running locally so we can visualize them without bogging
    // the game down with the normal process of transmitting zones from server to client.  The result is that we can only see zones on our local
    // server.
-   if(gServerGame && getUIManager()->getGameUserInterface()->isShowingDebugMeshZones())
+   if(gServerGame && isShowingDebugMeshZones())
        gServerGame->getBotZoneDatabase()->findObjects(0, rawRenderObjects, extentRect, BotNavMeshZoneTypeNumber);
 
    renderObjects.clear();

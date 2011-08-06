@@ -466,6 +466,14 @@ enum EntryModes {
 };
 
 
+enum VolumeType {
+   SfxVolumeType,
+   MusicVolumeType,
+   VoiceVolumeType,
+   ServerAlertVolumeType,
+};
+
+
 class ClientGame : public Game
 {
    typedef Game Parent;
@@ -487,6 +495,13 @@ private:
    void supressScreensaver();
 
    UIManager *mUIManager;
+   string mRemoteLevelDownloadFilename;
+
+   bool mDebugShowShipCoords;       // Show coords on ship?
+   bool mDebugShowMeshZones;        // Show bot nav mesh zones?
+
+   Vector<string> mMuteList;        // List of players we aren't listening to anymore because they've annoyed us!
+
 
 public:
    ClientGame(const Address &bindAddress);
@@ -522,16 +537,36 @@ public:
    void idle(U32 timeDelta);
    void zoomCommanderMap();
 
+   bool isShowingDebugShipCoords() const { return mDebugShowShipCoords; }     // Show coords on ship?
+   void toggleShowingShipCoords() { mDebugShowShipCoords = !mDebugShowShipCoords; }
+
+   bool isShowingDebugMeshZones()  const { return mDebugShowMeshZones; }      // Show bot nav mesh zones?
+   void toggleShowingMeshZones() { mDebugShowMeshZones = !mDebugShowMeshZones; }
+
    void gotServerListFromMaster(const Vector<IPAddress> &serverList);
    void gotChatMessage(const char *playerNick, const char *message, bool isPrivate, bool isSystem);
    void setPlayersInGlobalChat(const Vector<StringTableEntry> &playerNicks);
    void playerJoinedGlobalChat(const StringTableEntry &playerNick);
    void playerLeftGlobalChat(const StringTableEntry &playerNick);
 
+   bool hasAdmin(const char *failureMessage);
+
+   void addToMuteList(const string &name) { mMuteList.push_back(name); }
+   bool isOnMuteList(const string &name);
+
 
    void connectionToServerRejected();
    void setMOTD(const char *motd);
    void setNeedToUpgrade(bool needToUpgrade);
+
+   string getRemoteLevelDownloadFilename() const { return mRemoteLevelDownloadFilename; }
+   void setRemoteLevelDownloadFilename(const string &filename) { mRemoteLevelDownloadFilename = filename; }
+
+   void changePassword(GameConnection::ParamType type, const Vector<string> &words, bool required);
+   void changeServerNameDescr(GameConnection::ParamType type, const Vector<string> &words);
+   bool checkName(const string &name);    // Make sure name is valid, and correct case of name if otherwise correct
+
+
 
 
    // Alert users when they get a reply to their request for elevated permissions
@@ -552,20 +587,21 @@ public:
    void onConnectionToMasterTerminated(NetConnection::TerminationReason reason, const char *reasonStr);
 
    void onConnectTerminated(const Address &serverAddress, NetConnection::TerminationReason reason);
+   void runCommand(const char *command);
+   void setVolume(VolumeType volType, const Vector<string> &words);
+
 
    const Color *getTeamColor(S32 teamIndex) const;
+
+   //const char *getRemoteLevelDownloadFilename();
 
    U32 getPlayerAndRobotCount();    // Returns number of human and robot players
    U32 getPlayerCount();            // Returns number of human players
 
-   string *getOutputFilename();
-   void setOutputFilename(const string &filename);
 
    string getRequestedServerName();
    string getServerPassword();
    string getHashedServerPassword();
-
-   bool isShowingDebugMeshZones();
 
    void displayErrorMessage(const char *format, ...);
    void displaySuccessMessage(const char *format, ...);

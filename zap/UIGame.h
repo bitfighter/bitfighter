@@ -39,6 +39,8 @@
 namespace Zap
 {
 
+extern enum VolumeType;
+
 enum ArgTypes {
    NAME,    // Player name (can be tab-completed)
    TEAM,    // Team name (can be tab-completed)
@@ -59,7 +61,7 @@ class GameUserInterface;
 
 struct CommandInfo {
    string cmdName;
-   void (*cmdCallback)(GameUserInterface *obj, const Vector<string> &args);
+   void (*cmdCallback)(ClientGame *game, const Vector<string> &args);
    ArgTypes cmdArgInfo[9];
    S32 cmdArgCount;
    HelpCategories helpCategory;
@@ -106,10 +108,6 @@ private:
 
    MessageDisplayMode mMessageDisplayMode;    // Our current message display mode
 
-   bool hasAdmin(GameConnection *gc, const char *failureMessage);
-   void changeServerNameDescr(GameConnection *gc, GameConnection::ParamType type, const Vector<string> &words);
-   void changePassword(GameConnection *gc, GameConnection::ParamType type, const Vector<string> &words, bool required);
-
    // These are our normal server messages, that "time out"
    Color mDisplayMessageColor[MessageDisplayCount];
    char mDisplayMessage[MessageDisplayCount][MAX_CHAT_MSG_LENGTH];
@@ -127,8 +125,6 @@ private:
    Timer mShutdownTimer;
 
    bool mMissionOverlayActive;      // Are game instructions (F2) visible?
-   bool mDebugShowShipCoords;       // Show coords on ship?
-   bool mDebugShowMeshZones;        // Show bot nav mesh zones?
 
    enum ChatType {            // Types of in-game chat messages:
       GlobalChat,             // Goes to everyone in game
@@ -155,7 +151,6 @@ private:
    // Some rendering routines
    void renderScoreboard(const GameType *gameType);
 
-
    StringTableEntry mShutdownName;  // Name of user who iniated the shutdown
    StringPtr mShutdownReason;       // Reason user provided for the shutdown
    bool mShutdownInitiator;         // True if local client initiated shutdown (and can therefore cancel it)
@@ -179,8 +174,6 @@ private:
 
    F32 mFPSAvg;
    F32 mPingAvg;
-
-   Vector<string> mMuteList;
 
    U32 mIdleTimeDelta[FPS_AVG_COUNT];
    U32 mPing[FPS_AVG_COUNT];
@@ -227,16 +220,6 @@ private:
    bool mModActivated[ShipModuleCount];
 
    void setBusyChatting(bool busy);       // Tell the server we are (or are not) busy chatting
-   bool checkName(const string &name);    // Make sure name is valid, and correct case of name if otherwise correct
-
-   enum VolumeType {
-      SfxVolumeType,
-      MusicVolumeType,
-      VoiceVolumeType,
-      ServerAlertVolumeType,
-   };
-
-   //Vector<string> mChatCmds;        // List of all commands we can type at chat prompt, for <tab> completion
 
    EntryModes mCurrentMode;           // Current game mode
 
@@ -254,8 +237,6 @@ public:
 
 
    bool isShowingMissionOverlay()  const { return mMissionOverlayActive; }    // Are game instructions (F2) visible?
-   bool isShowingDebugShipCoords() const { return mDebugShowShipCoords; }     // Show coords on ship?
-   bool isShowingDebugMeshZones()  const { return mDebugShowMeshZones; }      // Show bot nav mesh zones?
 
    void displayErrorMessage(const char *format, ...);
    void displaySuccessMessage(const char *format, ...);
@@ -287,7 +268,6 @@ public:
    void runCommand(const char *input);
    void issueChat();                // Send chat message (either Team or Global)
    void cancelChat();
-   bool isOnMuteList(const string &name);
 
    void shutdownInitiated(U16 time, const StringTableEntry &who, const StringPtr &why, bool initiator);
    void cancelShutdown();
@@ -304,10 +284,9 @@ public:
    void onActivate();                 // Gets run when interface is first activated
    void onReactivate();               // Gets run when interface is subsequently reactivated
 
-   string remoteLevelDownloadFilename;
+   
    //ofstream mOutputFile;            // For saving downloaded levels
    //FILE *mOutputFile;               // For saving downloaded levels
-   string mOutputFileName;
 
    void onKeyDown(KeyCode keyCode, char ascii);
    void onKeyUp(KeyCode keyCode);
@@ -337,37 +316,37 @@ public:
    // Message colors... (rest to follow someday)
    static Color privateF5MessageDisplayedInGameColor;
 
-   static void mVolHandler(GameUserInterface* gui, const Vector<string> &args);    
-   static void sVolHandler(GameUserInterface* gui, const Vector<string> &args);    
-   static void vVolHandler(GameUserInterface* gui, const Vector<string> &args);    
-   static void servVolHandler(GameUserInterface* gui, const Vector<string> &args);  
-   static void getMapHandler(GameUserInterface *gui, const Vector<string> &words);
-   static void nextLevelHandler(GameUserInterface *gui, const Vector<string> &words);
-   static void prevLevelHandler(GameUserInterface *gui, const Vector<string> &words);
-   static void restartLevelHandler(GameUserInterface *gui, const Vector<string> &words);
-   static void shutdownServerHandler(GameUserInterface *gui, const Vector<string> &words);
-   static void kickPlayerHandler(GameUserInterface *gui, const Vector<string> &words);
-   static void adminPassHandler(GameUserInterface *gui, const Vector<string> &words);
-   static void levelPassHandler(GameUserInterface *gui, const Vector<string> &words);
-   static void showCoordsHandler(GameUserInterface *gui, const Vector<string> &words);
-   static void showZonesHandler(GameUserInterface *gui, const Vector<string> &words);
-   static void showPathsHandler(GameUserInterface *gui, const Vector<string> &words);
-   static void pauseBotsHandler(GameUserInterface *gui, const Vector<string> &words);
-   static void stepBotsHandler(GameUserInterface *gui, const Vector<string> &words);
-   static void setAdminPassHandler(GameUserInterface *gui, const Vector<string> &words);
-   static void setServerPassHandler(GameUserInterface *gui, const Vector<string> &words);
-   static void setLevPassHandler(GameUserInterface *gui, const Vector<string> &words);
-   static void setServerNameHandler(GameUserInterface *gui, const Vector<string> &words);
-   static void setServerDescrHandler(GameUserInterface *gui, const Vector<string> &words);
-   static void serverCommandHandler(GameUserInterface *gui, const Vector<string> &words);
-   static void pmHandler(GameUserInterface *gui, const Vector<string> &words);
-   static void muteHandler(GameUserInterface *gui, const Vector<string> &words);
-   static void maxFpsHandler(GameUserInterface *gui, const Vector<string> &words);
-   static void lineSmoothHandler(GameUserInterface *gui, const Vector<string> &words);
-   static void lineWidthHandler(GameUserInterface *gui, const Vector<string> &words);
-   static void suspendHandler(GameUserInterface *gui, const Vector<string> &words);
-   static void deleteCurrentLevelHandler(GameUserInterface *gui, const Vector<string> &words);
-   static void addTimeHandler(GameUserInterface *gui, const Vector<string> &words);
+      static void mVolHandler(ClientGame *game, const Vector<string> &args);    
+      static void sVolHandler(ClientGame *game, const Vector<string> &args);    
+      static void vVolHandler(ClientGame *game, const Vector<string> &args);    
+      static void servVolHandler(ClientGame *game, const Vector<string> &args);  
+      static void getMapHandler(ClientGame *game, const Vector<string> &words);
+      static void nextLevelHandler(ClientGame *game, const Vector<string> &words);
+      static void prevLevelHandler(ClientGame *game, const Vector<string> &words);
+      static void restartLevelHandler(ClientGame *game, const Vector<string> &words);
+      static void shutdownServerHandler(ClientGame *game, const Vector<string> &words);
+      static void kickPlayerHandler(ClientGame *game, const Vector<string> &words);
+      static void adminPassHandler(ClientGame *game, const Vector<string> &words);
+      static void levelPassHandler(ClientGame *game, const Vector<string> &words);
+      static void showCoordsHandler(ClientGame *game, const Vector<string> &words);
+      static void showZonesHandler(ClientGame *game, const Vector<string> &words);
+      static void showPathsHandler(ClientGame *game, const Vector<string> &words);
+      static void pauseBotsHandler(ClientGame *game, const Vector<string> &words);
+      static void stepBotsHandler(ClientGame *game, const Vector<string> &words);
+      static void setAdminPassHandler(ClientGame *game, const Vector<string> &words);
+      static void setServerPassHandler(ClientGame *game, const Vector<string> &words);
+      static void setLevPassHandler(ClientGame *game, const Vector<string> &words);
+      static void setServerNameHandler(ClientGame *game, const Vector<string> &words);
+      static void setServerDescrHandler(ClientGame *game, const Vector<string> &words);
+      static void serverCommandHandler(ClientGame *game, const Vector<string> &words);
+      static void pmHandler(ClientGame *game, const Vector<string> &words);
+      static void muteHandler(ClientGame *game, const Vector<string> &words);
+      static void maxFpsHandler(ClientGame *game, const Vector<string> &words);
+      static void lineSmoothHandler(ClientGame *game, const Vector<string> &words);
+      static void lineWidthHandler(ClientGame *game, const Vector<string> &words);
+      static void suspendHandler(ClientGame *game, const Vector<string> &words);
+      static void deleteCurrentLevelHandler(ClientGame *game, const Vector<string> &words);
+      static void addTimeHandler(ClientGame *game, const Vector<string> &words);
 };
 
 

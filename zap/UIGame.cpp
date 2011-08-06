@@ -94,8 +94,6 @@ GameUserInterface::GameUserInterface(ClientGame *game) : Parent(game),
    mHelper = NULL;
    displayInputModeChangeAlert = false;
    mMissionOverlayActive = false;
-   mDebugShowShipCoords = false;
-   mDebugShowMeshZones = false;
 
    setMenuID(GameUI);
    enterMode(PlayMode);
@@ -138,8 +136,6 @@ GameUserInterface::GameUserInterface(ClientGame *game) : Parent(game),
    mDisplayMessageTimer.setPeriod(DisplayMessageTimeout);    // Set the period of our message timeout timer
    mDisplayChatMessageTimer.setPeriod(DisplayChatMessageTimeout);
    //populateChatCmdList();
-
-   remoteLevelDownloadFilename = "downloaded.level";
 
    makeCommandCandidateList();
 }
@@ -1192,17 +1188,6 @@ void GameUserInterface::processPlayModeKey(KeyCode keyCode, char ascii)
 }
 
 
-// Returns true if we have admin privs, displays error message and returns false if not
-bool GameUserInterface::hasAdmin(GameConnection *gc, const char *failureMessage)
-{
-   if(gc->isAdmin())
-      return true;
-   
-   displayErrorMessage(failureMessage);
-   return false;
-}
-
-
 // Returns a pointer of string of chars, after "count" number of args
 static const char *findPointerOfArg(const char *message, S32 count)
 {
@@ -1222,66 +1207,11 @@ static const char *findPointerOfArg(const char *message, S32 count)
 }
 
 
-
-// TODO: Probably misnamed... handles deletes too
-void GameUserInterface::changeServerNameDescr(GameConnection *gc, GameConnection::ParamType type, const Vector<string> &words)
-{
-   // Concatenate all params into a single string
-   string allWords = concatenate(words, 1);
-
-   // Did the user provide a name/description?
-   if(type != GameConnection::DeleteLevel && allWords == "")
-   {
-      displayErrorMessage(type == GameConnection::ServerName ? "!!! Need to supply a name" : "!!! Need to supply a description");
-      return;
-   }
-
-   gc->changeParam(allWords.c_str(), type);
-}
-
-extern md5wrapper md5;
-
-void GameUserInterface::changePassword(GameConnection *gc, GameConnection::ParamType type, const Vector<string> &words, bool required)
-{
-   if(required)
-   {
-      if(words.size() < 2 || words[1] == "")
-      {
-         displayErrorMessage("!!! Need to supply a password");
-         return;
-      }
-
-      gc->changeParam(words[1].c_str(), type);
-   }
-   else if(words.size() < 2)
-      gc->changeParam("", type);
-
-   if(words.size() < 2)    // Empty password
-   {
-      // Clear any saved password for this server
-      if(type == GameConnection::LevelChangePassword)
-         gINI.deleteKey("SavedLevelChangePasswords", gc->getServerName());
-      else if(type == GameConnection::AdminPassword)
-         gINI.deleteKey("SavedAdminPasswords", gc->getServerName());
-   }
-   else                    // Non-empty password
-   {
-      gc->changeParam(words[1].c_str(), type);
-
-      // Save the password so the user need not enter it again the next time they're on this server
-      if(type == GameConnection::LevelChangePassword)
-         gINI.SetValue("SavedLevelChangePasswords", gc->getServerName(), words[1], true);
-      else if(type == GameConnection::AdminPassword)
-         gINI.SetValue("SavedAdminPasswords", gc->getServerName(), words[1], true);
-   }
-}
-
-
 // static method
-void GameUserInterface::addTimeHandler(GameUserInterface *gui, const Vector<string> &words)
+void GameUserInterface::addTimeHandler(ClientGame *game, const Vector<string> &words)
 {
    if(words.size() < 2 || words[1] == "")
-      gui->displayErrorMessage("!!! Need to supply a time (in minutes)");
+      game->displayErrorMessage("!!! Need to supply a time (in minutes)");
    else
    {
       U8 mins;    // Use U8 to limit number of mins that can be added, while nominally having no limit!
@@ -1295,131 +1225,103 @@ void GameUserInterface::addTimeHandler(GameUserInterface *gui, const Vector<stri
          err = true;
 
       if(err || mins == 0)
-         gui->displayErrorMessage("!!! Invalid value... game time not changed");
+         game->displayErrorMessage("!!! Invalid value... game time not changed");
       else
       {
-         gClientGame->displayMessage(gCmdChatColor, "Extended game by %d minute%s", mins, (mins == 1) ? "" : "s");
-
-         if(gClientGame->getGameType())
-            gClientGame->getGameType()->addTime(mins * 60 * 1000);
+         if(game->getGameType())
+         {
+            game->displayMessage(gCmdChatColor, "Extended game by %d minute%s", mins, (mins == 1) ? "" : "s");
+            game->getGameType()->addTime(mins * 60 * 1000);
+         }
       }
    }
 }
 
 
-bool GameUserInterface::checkName(const string &name)
+void GameUserInterface::sVolHandler(ClientGame *game, const Vector<string> &words)
 {
-   S32 potentials = 0;
+   game->setVolume(SfxVolumeType, words);
+}
 
-   for(S32 i = 0; i < gClientGame->getGameType()->getClientCount(); i++)
-   {
-      if(!gClientGame->getGameType()->getClient(i).isValid())
-         continue;
+void GameUserInterface::mVolHandler(ClientGame *game, const Vector<string> &words)
+{
+   game->setVolume(MusicVolumeType, words);
+}
 
-      // TODO: make this work with StringTableEntry comparison rather than strcmp; might need to add new method
-      const char *n = gClientGame->getGameType()->getClient(i)->name.getString();
+void GameUserInterface::vVolHandler(ClientGame *game, const Vector<string> &words)
+{
+   game->setVolume(VoiceVolumeType, words);
+}
 
-      if(!strcmp(n, name.c_str()))           // Exact match
-         return true;
-      else if(!stricmp(n, name.c_str()))     // Case insensitive match
-         potentials++;
-   }
-
-   return(potentials == 1);      // Return true if we only found exactly one potential match, false otherwise
+void GameUserInterface::servVolHandler(ClientGame *game, const Vector<string> &words)
+{
+   game->setVolume(ServerAlertVolumeType, words);
 }
 
 
-void GameUserInterface::sVolHandler(GameUserInterface *gui, const Vector<string> &words)
+void GameUserInterface::getMapHandler(ClientGame *game, const Vector<string> &words)
 {
-   gui->setVolume(SfxVolumeType, words);
-}
+   GameConnection *connection = game->getConnectionToServer();
 
-void GameUserInterface::mVolHandler(GameUserInterface *gui, const Vector<string> &words)
-{
-   gui->setVolume(MusicVolumeType, words);
-}
-
-void GameUserInterface::vVolHandler(GameUserInterface *gui, const Vector<string> &words)
-{
-   gui->setVolume(VoiceVolumeType, words);
-}
-
-void GameUserInterface::servVolHandler(GameUserInterface *gui, const Vector<string> &words)
-{
-   gui->setVolume(ServerAlertVolumeType, words);
-}
-
-
-void GameUserInterface::getMapHandler(GameUserInterface *gui, const Vector<string> &words)
-{
-   if(gClientGame->getConnectionToServer()->isLocalConnection())
-      gui->displayErrorMessage("!!! Can't download levels from a local server");
+   if(connection->isLocalConnection())
+      game->displayErrorMessage("!!! Can't download levels from a local server");
    else
    {
+      string filename;
+
       if(words.size() > 1 && words[1] != "")
-         gui->remoteLevelDownloadFilename = words[1];
+         filename = words[1];
       else
-         gui->remoteLevelDownloadFilename = "downloaded_" + makeFilenameFromString(gClientGame->getGameType() ?
-               gClientGame->getGameType()->getLevelName()->getString() : "Level");
+         filename = "downloaded_" + makeFilenameFromString(game->getGameType() ?
+               game->getGameType()->getLevelName()->getString() : "Level");
 
       // Add an extension if needed
-      if(gui->remoteLevelDownloadFilename.find(".") == string::npos)
-         gui->remoteLevelDownloadFilename += ".level";
+      if(filename.find(".") == string::npos)
+         filename += ".level";
 
-      // Make into a fully qualified file name
-      gui->mOutputFileName = strictjoindir(gConfigDirs.levelDir, gui->remoteLevelDownloadFilename);
+      game->setRemoteLevelDownloadFilename(filename);
 
-      // Prepare for writing
-      //gui->mOutputFile = fopen(fullFile.c_str(), "w");    // TODO: Writes empty file when server does not allow getmap.  Shouldn't.
-
-      //if(!gui->mOutputFile)
-      //{
-      //   logprintf("Problem opening file %s for writing", fullFile.c_str());
-      //   gui->displayErrorMessage("!!! Problem opening file %s for writing", fullFile.c_str());
-      //}
-      //else
-         gClientGame->getConnectionToServer()->c2sRequestCurrentLevel();
+      connection->c2sRequestCurrentLevel();
    }
 }
 
 
-void GameUserInterface::nextLevelHandler(GameUserInterface *gui, const Vector<string> &words)
+void GameUserInterface::nextLevelHandler(ClientGame *game, const Vector<string> &words)
 {
-   GameConnection *gc = gClientGame->getConnectionToServer();
+   GameConnection *gc = game->getConnectionToServer();
 
    if(!gc->isLevelChanger())
-      gui->displayErrorMessage("!!! You don't have permission to change levels");
+      game->displayErrorMessage("!!! You don't have permission to change levels");
    else
       gc->c2sRequestLevelChange(ServerGame::NEXT_LEVEL, false);
 }
 
 
-void GameUserInterface::prevLevelHandler(GameUserInterface *gui, const Vector<string> &words)
+void GameUserInterface::prevLevelHandler(ClientGame *game, const Vector<string> &words)
 {
-   GameConnection *gc = gClientGame->getConnectionToServer();
+   GameConnection *gc = game->getConnectionToServer();
 
    if(!gc->isLevelChanger())
-      gui->displayErrorMessage("!!! You don't have permission to change levels");
+      game->displayErrorMessage("!!! You don't have permission to change levels");
    else
       gc->c2sRequestLevelChange(ServerGame::PREVIOUS_LEVEL, false);
 }
 
-void GameUserInterface::restartLevelHandler(GameUserInterface *gui, const Vector<string> &words)
+
+void GameUserInterface::restartLevelHandler(ClientGame *game, const Vector<string> &words)
 {
-   GameConnection *gc = gClientGame->getConnectionToServer();
+   GameConnection *gc = game->getConnectionToServer();
 
    if(!gc->isLevelChanger())
-      gui->displayErrorMessage("!!! You don't have permission to change levels");
+      game->displayErrorMessage("!!! You don't have permission to change levels");
    else
       gc->c2sRequestLevelChange(ServerGame::REPLAY_LEVEL, false);
 }
 
 
-void GameUserInterface::shutdownServerHandler(GameUserInterface *gui, const Vector<string> &words)
+void GameUserInterface::shutdownServerHandler(ClientGame *game, const Vector<string> &words)
 {
-   GameConnection *gc = gClientGame->getConnectionToServer();
-
-   if(gui->hasAdmin(gc, "!!! You don't have permission to shut the server down"))
+   if(game->hasAdmin("!!! You don't have permission to shut the server down"))
    {
       U16 time = 0;
       bool timefound = true;
@@ -1441,92 +1343,96 @@ void GameUserInterface::shutdownServerHandler(GameUserInterface *gui, const Vect
          reason = reason + words[i];
       }
 
-      gc->c2sRequestShutdown(time, reason.c_str());
+      game->getConnectionToServer()->c2sRequestShutdown(time, reason.c_str());
    }
 }
 
-void GameUserInterface::kickPlayerHandler(GameUserInterface *gui, const Vector<string> &words)
-{
-   GameConnection *gc = gClientGame->getConnectionToServer();
 
-   if(gui->hasAdmin(gc, "!!! You don't have permission to kick players"))
+void GameUserInterface::kickPlayerHandler(ClientGame *game, const Vector<string> &words)
+{
+   if(game->hasAdmin("!!! You don't have permission to kick players"))
    {
       if(words.size() < 2 || words[1] == "")
-         gui->displayErrorMessage("!!! Need to specify who to kick");
+         game->displayErrorMessage("!!! Need to specify who to kick");
       else
       {
          // Did user provide a valid, known name?
          string name = words[1];
          
-         if(!gui->checkName(name))
-            gui->displayErrorMessage("!!! Could not find player: %s", words[1].c_str());
+         if(!game->checkName(name))
+            game->displayErrorMessage("!!! Could not find player: %s", words[1].c_str());
          else
-            gc->c2sAdminPlayerAction(words[1].c_str(), PlayerMenuUserInterface::Kick, 0);     // Team doesn't matter with kick!
+            game->getConnectionToServer()->c2sAdminPlayerAction(words[1].c_str(), PlayerMenuUserInterface::Kick, 0);     // Team doesn't matter with kick!
       }
    }
 }
 
-void GameUserInterface::adminPassHandler(GameUserInterface *gui, const Vector<string> &words)
+
+void GameUserInterface::adminPassHandler(ClientGame *game, const Vector<string> &words)
 {
-   GameConnection *gc = gClientGame->getConnectionToServer();
+   GameConnection *gc = game->getConnectionToServer();
 
    if(gc->isAdmin())
-      gui->displayErrorMessage("!!! You are already an admin");
+      game->displayErrorMessage("!!! You are already an admin");
    else if(words.size() < 2 || words[1] == "")
-      gui->displayErrorMessage("!!! Need to supply a password");
+      game->displayErrorMessage("!!! Need to supply a password");
    else
       gc->submitAdminPassword(words[1].c_str());
 }
 
-void GameUserInterface::levelPassHandler(GameUserInterface *gui, const Vector<string> &words)
+
+void GameUserInterface::levelPassHandler(ClientGame *game, const Vector<string> &words)
 {
    GameConnection *gc = gClientGame->getConnectionToServer();
 
    if(gc->isLevelChanger())
-      gui->displayErrorMessage("!!! You can already change levels");
+      game->displayErrorMessage("!!! You can already change levels");
    else if(words.size() < 2 || words[1] == "")
-      gui->displayErrorMessage("!!! Need to supply a password");
+      game->displayErrorMessage("!!! Need to supply a password");
    else
       gc->submitLevelChangePassword(words[1].c_str());
 }
 
-void GameUserInterface::showCoordsHandler(GameUserInterface *gui, const Vector<string> &words)
+
+void GameUserInterface::showCoordsHandler(ClientGame *game, const Vector<string> &words)
 {
-   gui->mDebugShowShipCoords = !gui->mDebugShowShipCoords;
+   game->toggleShowingShipCoords();
 }
 
-void GameUserInterface::showZonesHandler(GameUserInterface *gui, const Vector<string> &words)
+
+void GameUserInterface::showZonesHandler(ClientGame *game, const Vector<string> &words)
 {
    if(!(gServerGame))// && gServerGame->isTestServer()))  sam: problem with not being able to test from editor due to editor crashing and loading improperly...
-      gui->displayErrorMessage("!!! Zones can only be displayed on a local host");
+      game->displayErrorMessage("!!! Zones can only be displayed on a local host");
    else
-      gui->mDebugShowMeshZones = !gui->mDebugShowMeshZones;
+      game->toggleShowingMeshZones();
 }
 
 
 extern bool showDebugBots;  // in game.cpp
 
-void GameUserInterface::showPathsHandler(GameUserInterface *gui, const Vector<string> &words)
+void GameUserInterface::showPathsHandler(ClientGame *game, const Vector<string> &words)
 {
    if(!(gServerGame && gServerGame->isTestServer())) 
-      gui->displayErrorMessage("!!! Robots can only be shown on a test server");
+      game->displayErrorMessage("!!! Robots can only be shown on a test server");
    else
       showDebugBots = !showDebugBots;
 }
 
 
-void GameUserInterface::pauseBotsHandler(GameUserInterface *gui, const Vector<string> &words)
+void GameUserInterface::pauseBotsHandler(ClientGame *game, const Vector<string> &words)
 {
    if(!(gServerGame && gServerGame->isTestServer())) 
-      gui->displayErrorMessage("!!! Robots can only be frozen on a test server");
+      game->displayErrorMessage("!!! Robots can only be frozen on a test server");
    else
       Robot::togglePauseStatus();
 }
 
-void GameUserInterface::stepBotsHandler(GameUserInterface *gui, const Vector<string> &words)
+
+void GameUserInterface::stepBotsHandler(ClientGame *game, const Vector<string> &words)
 {
    if(!(gServerGame && gServerGame->isTestServer())) 
-      gui->displayErrorMessage("!!! Robots can only be stepped on a test server");
+      game->displayErrorMessage("!!! Robots can only be stepped on a test server");
    else
    {
       S32 steps = words.size() > 1 ? atoi(words[1].c_str()) : 1;
@@ -1535,71 +1441,63 @@ void GameUserInterface::stepBotsHandler(GameUserInterface *gui, const Vector<str
 }
 
 
-void GameUserInterface::setAdminPassHandler(GameUserInterface *gui, const Vector<string> &words)
+void GameUserInterface::setAdminPassHandler(ClientGame *game, const Vector<string> &words)
 {
-   GameConnection *gc = gClientGame->getConnectionToServer();
-
-   if(gui->hasAdmin(gc, "!!! You don't have permission to set the admin password"))
-      gui->changePassword(gc, GameConnection::AdminPassword, words, true);
-}
-
-void GameUserInterface::setServerPassHandler(GameUserInterface *gui, const Vector<string> &words)
-{
-   GameConnection *gc = gClientGame->getConnectionToServer();
-
-   if(gui->hasAdmin(gc, "!!! You don't have permission to set the server password"))
-      gui->changePassword(gc, GameConnection::ServerPassword, words, false);
-}
-
-void GameUserInterface::setLevPassHandler(GameUserInterface *gui, const Vector<string> &words)
-{
-   GameConnection *gc = gClientGame->getConnectionToServer();
-
-   if(gui->hasAdmin(gc, "!!! You don't have permission to set the level change password"))
-      gui->changePassword(gc, GameConnection::LevelChangePassword, words, false);
-}
-
-void GameUserInterface::setServerNameHandler(GameUserInterface *gui, const Vector<string> &words)
-{
-   GameConnection *gc = gClientGame->getConnectionToServer();
-
-   if(gui->hasAdmin(gc, "!!! You don't have permission to set the server name"))
-      gui->changeServerNameDescr(gc, GameConnection::ServerName, words);
-}
-
-void GameUserInterface::setServerDescrHandler(GameUserInterface *gui, const Vector<string> &words)
-{
-   GameConnection *gc = gClientGame->getConnectionToServer();
-
-   if(gui->hasAdmin(gc, "!!! You don't have permission to set the server description"))
-      gui->changeServerNameDescr(gc, GameConnection::ServerDescr, words);
+   if(game->hasAdmin("!!! You don't have permission to set the admin password"))
+      game->changePassword(GameConnection::AdminPassword, words, true);
 }
 
 
-void GameUserInterface::deleteCurrentLevelHandler(GameUserInterface *gui, const Vector<string> &words)
+void GameUserInterface::setServerPassHandler(ClientGame *game, const Vector<string> &words)
 {
-   GameConnection *gc = gClientGame->getConnectionToServer();
-
-   if(gui->hasAdmin(gc, "!!! You don't have permission to delete the current level"))
-      gui->changeServerNameDescr(gc, GameConnection::DeleteLevel, words);    // handles deletes too
+   if(game->hasAdmin("!!! You don't have permission to set the server password"))
+      game->changePassword(GameConnection::ServerPassword, words, false);
 }
 
 
-void GameUserInterface::suspendHandler(GameUserInterface *gui, const Vector<string> &words)
+void GameUserInterface::setLevPassHandler(ClientGame *game, const Vector<string> &words)
 {
-   U32 players = gClientGame->getPlayerCount();
+   if(game->hasAdmin("!!! You don't have permission to set the level change password"))
+      game->changePassword(GameConnection::LevelChangePassword, words, false);
+}
+
+
+void GameUserInterface::setServerNameHandler(ClientGame *game, const Vector<string> &words)
+{
+   if(game->hasAdmin("!!! You don't have permission to set the server name"))
+      game->changeServerNameDescr(GameConnection::ServerName, words);
+}
+
+
+void GameUserInterface::setServerDescrHandler(ClientGame *game, const Vector<string> &words)
+{
+   if(game->hasAdmin("!!! You don't have permission to set the server description"))
+      game->changeServerNameDescr(GameConnection::ServerDescr, words);
+}
+
+
+void GameUserInterface::deleteCurrentLevelHandler(ClientGame *game, const Vector<string> &words)
+{
+   if(game->hasAdmin("!!! You don't have permission to delete the current level"))
+      game->changeServerNameDescr(GameConnection::DeleteLevel, words);    // handles deletes too
+}
+
+
+void GameUserInterface::suspendHandler(ClientGame *game, const Vector<string> &words)
+{
+   U32 players = game->getPlayerCount();
    if(players == (U32)Game::PLAYER_COUNT_UNAVAILABLE || players > 1)
-      gui->displayErrorMessage("!!! Can't suspend when others are playing");
+      game->displayErrorMessage("!!! Can't suspend when others are playing");
    else
-      gui->suspendGame();
+      game->suspendGame();
 }
 
 
-void GameUserInterface::lineWidthHandler(GameUserInterface *gui, const Vector<string> &words)
+void GameUserInterface::lineWidthHandler(ClientGame *game, const Vector<string> &words)
 {
    F32 linewidth;
    if(words.size() < 2 || words[1] == "")
-      gui->displayErrorMessage("!!! Need to supply line width");
+      game->displayErrorMessage("!!! Need to supply line width");
    else
    {
       linewidth = (F32)atof(words[1].c_str());
@@ -1616,14 +1514,16 @@ void GameUserInterface::lineWidthHandler(GameUserInterface *gui, const Vector<st
 }
 
 
-void GameUserInterface::lineSmoothHandler(GameUserInterface *gui, const Vector<string> &words)
+void GameUserInterface::lineSmoothHandler(ClientGame *game, const Vector<string> &words)
 {
    gIniSettings.useLineSmoothing = !gIniSettings.useLineSmoothing;
+
    if(gIniSettings.useLineSmoothing)
    {
       glEnable(GL_LINE_SMOOTH);
       glEnable(GL_BLEND);
-   }else
+   }
+   else
    {
       glDisable(GL_LINE_SMOOTH);
       glDisable(GL_BLEND);
@@ -1631,31 +1531,33 @@ void GameUserInterface::lineSmoothHandler(GameUserInterface *gui, const Vector<s
 }
 
 
-void GameUserInterface::maxFpsHandler(GameUserInterface *gui, const Vector<string> &words)
+void GameUserInterface::maxFpsHandler(ClientGame *game, const Vector<string> &words)
 {
    S32 number = words.size() > 1 ? atoi(words[1].c_str()) : 0;
+
    if(number < 1)                              // Don't allow zero or negative numbers
-      gui->displayErrorMessage("!!! Usage: /maxfps <frame rate>, default = 100");
+      game->displayErrorMessage("!!! Usage: /maxfps <frame rate>, default = 100");
    else
       gIniSettings.maxFPS = number;
 }
 
 
-void GameUserInterface::pmHandler(GameUserInterface *gui, const Vector<string> &words)
+void GameUserInterface::pmHandler(ClientGame *game, const Vector<string> &words)
 {
    if(words.size() < 3)
-      gui->displayErrorMessage("!!! Usage: /pm <player name> <message>");
+      game->displayErrorMessage("!!! Usage: /pm <player name> <message>");
    else
    {
-      if(!gui->checkName(words[1]))
-         gui->displayErrorMessage("!!! Unknown name: %s", words[1].c_str());
+      if(!game->checkName(words[1]))
+         game->displayErrorMessage("!!! Unknown name: %s", words[1].c_str());
       else
       {
          S32 argCount = 2 + countCharInString(words[1], ' ');  // Set pointer after 2 args + number of spaces in player name
-         const char *message = gui->mLineEditor.c_str();  // Get the original line
-         message = findPointerOfArg(message, argCount);     // Get the rest of the message
+         const char *message = game->getUIManager()->getGameUserInterface()->mLineEditor.c_str();      // Get the original line
+         message = findPointerOfArg(message, argCount);        // Get the rest of the message
 
-         GameType *gt = gClientGame->getGameType();
+         GameType *gt = game->getGameType();
+
          if(gt)
             gt->c2sSendChatPM(words[1], message);
       }
@@ -1663,24 +1565,24 @@ void GameUserInterface::pmHandler(GameUserInterface *gui, const Vector<string> &
 }
 
 
-void GameUserInterface::muteHandler(GameUserInterface *gui, const Vector<string> &words)
+void GameUserInterface::muteHandler(ClientGame *game, const Vector<string> &words)
 {
    if(words.size() < 2)
-      gui->displayErrorMessage("!!! Usage: /mute <player name>");
+      game->displayErrorMessage("!!! Usage: /mute <player name>");
    else
    {
-      if(!gui->checkName(words[1]))
-         gui->displayErrorMessage("!!! Unknown name: %s", words[1].c_str());
+      if(!game->checkName(words[1]))
+         game->displayErrorMessage("!!! Unknown name: %s", words[1].c_str());
       else
       {
-         gui->mMuteList.push_back(words[1]);
-         gui->displaySuccessMessage("Player %s has been muted", words[1].c_str());
+         game->addToMuteList(words[1]);
+         game->displaySuccessMessage("Player %s has been muted", words[1].c_str());
       }
    }
 }
 
 
-void GameUserInterface::serverCommandHandler(GameUserInterface *gui, const Vector<string> &words)
+void GameUserInterface::serverCommandHandler(ClientGame *game, const Vector<string> &words)
 {
    GameType *gt = gClientGame->getGameType();
    if(gt)
@@ -2164,7 +2066,7 @@ void GameUserInterface::runCommand(const char *input)
    if(words.size() == 0)            // Just in case, must have 1 or more words to check the first word as command.
       return;
 
-   GameConnection *gc = gClientGame->getConnectionToServer();
+   GameConnection *gc = getGame()->getConnectionToServer();
    if(!gc)
    {
       displayErrorMessage("!!! Not connected to server");
@@ -2174,13 +2076,15 @@ void GameUserInterface::runCommand(const char *input)
    for(U32 i = 0; i < ARRAYSIZE(chatCmds); i++)
       if(words[0] == chatCmds[i].cmdName)
       {
-         chatCmds[i].cmdCallback(this, words);
+         chatCmds[i].cmdCallback(getGame(), words);
          return;
       }
 
-   serverCommandHandler(this, words);     // Command unknown to client, will pass it on to server
+   serverCommandHandler(getGame(), words);     // Command unknown to client, will pass it on to server
 }
 
+
+extern enum VolumeType;
 
 // Set specified volume to the specefied level
 void GameUserInterface::setVolume(VolumeType volType, const Vector<string> &words)
@@ -2231,18 +2135,6 @@ void GameUserInterface::cancelChat()
 {
    mLineEditor.clear();
    enterMode(PlayMode);
-}
-
-
-bool GameUserInterface::isOnMuteList(const string &name)
-{
-   for(S32 i = 0; i < mMuteList.size(); i++)
-   {
-      if(mMuteList[i] == name)
-         return true;
-   }
-   
-   return false;
 }
 
 

@@ -191,12 +191,12 @@ bool QuickChatHelper::processKeyCode(KeyCode keyCode)
             exitHelper();
 
             if(gQuickChatTree[mCurNode].commandOnly)
-            {
-               getClientGame()->getUIManager()->getGameUserInterface()->runCommand(gQuickChatTree[mCurNode].msg.c_str());
-            }
+               getClientGame()->runCommand(gQuickChatTree[mCurNode].msg.c_str());
+
             else
             {
                GameType *gt = getClientGame()->getGameType();
+
                if(gt)
                {
                   StringTableEntry entry(gQuickChatTree[mCurNode].msg.c_str());
