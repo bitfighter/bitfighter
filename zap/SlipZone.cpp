@@ -148,7 +148,7 @@ bool SlipZone::collide(GameObject *hitObject)
 U32 SlipZone::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
    packGeom(connection, stream);
-   stream->writeFloat(slipAmount, 8);
+   stream->write(slipAmount);
    return 0;
 }
 
@@ -156,7 +156,7 @@ U32 SlipZone::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
 void SlipZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    unpackGeom(connection, stream);
-   slipAmount = stream->readFloat(8);
+   stream->read(&slipAmount);
 }
 
 

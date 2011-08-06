@@ -70,10 +70,17 @@ struct CommandInfo {
    string helpTextString;
 };
 
-////////////////////////////////////////
-////////////////////////////////////////
+// Modes the player could be in during the game   
+enum EntryModes {
+   PlayMode,               // Playing
+   ChatMode,               // Composing chat message
+   QuickChatMode,          // Showing quick-chat menu
+   LoadoutMode,            // Showing loadout menu
+   EngineerMode,           // Showing engineer overlay mode
+};
 
-enum EntryModes;
+////////////////////////////////////////
+////////////////////////////////////////
 
 class GameUserInterface : public UserInterface
 {
@@ -231,7 +238,7 @@ private:
 
 public:
    GameUserInterface(ClientGame *game);    // Constructor
-   ~GameUserInterface();                   // Destructor
+   virtual ~GameUserInterface();                   // Destructor
 
    bool displayInputModeChangeAlert;
 

@@ -735,7 +735,7 @@ U32 Mine::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
 
    if(stream->writeFlag(updateMask & InitialMask))
    {
-      stream->write(mTeam);
+      writeThisTeam(stream);
       StringTableEntryRef noOwner = "";
       stream->writeStringTableEntry(getOwner() ? getOwner()->getClientName() : noOwner);
    }
@@ -752,7 +752,7 @@ void Mine::unpackUpdate(GhostConnection *connection, BitStream *stream)
    if(stream->readFlag())     // Initial data
    {
       initial = true;
-      stream->read(&mTeam);
+      readThisTeam(stream);
       stream->readStringTableEntry(&mSetBy);
    }
    bool wasArmed = mArmed;
@@ -943,7 +943,7 @@ U32 SpyBug::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *s
    U32 ret = Parent::packUpdate(connection, updateMask, stream);
    if(stream->writeFlag(updateMask & InitialMask))
    {
-      stream->write(mTeam);
+      writeThisTeam(stream);
       //RDW I want to kill the compiler that allows binding NULL to a reference.
       //stream->writeStringTableEntry(getOwner() ? getOwner()->getClientName() : NULL);
       // Just don't kill the coder who keeps doing it! -CE
@@ -962,7 +962,7 @@ void SpyBug::unpackUpdate(GhostConnection *connection, BitStream *stream)
    if(stream->readFlag())
    {
       initial = true;
-      stream->read(&mTeam);
+      readThisTeam(stream);
       stream->readStringTableEntry(&mSetBy);
    }
    if(initial)

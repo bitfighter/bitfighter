@@ -539,7 +539,7 @@ U32 EngineeredObject::packUpdate(GhostConnection *connection, U32 updateMask, Bi
    }
 
    if(stream->writeFlag(updateMask & TeamMask))
-      stream->write(mTeam);
+      writeThisTeam(stream);
 
    if(stream->writeFlag(updateMask & HealthMask))
    {
@@ -568,7 +568,7 @@ void EngineeredObject::unpackUpdate(GhostConnection *connection, BitStream *stre
 
 
    if(stream->readFlag())
-      stream->read(&mTeam);
+      readThisTeam(stream);
 
    if(stream->readFlag())
    {
@@ -949,7 +949,7 @@ U32 ForceField::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
       stream->write(mStart.y);
       stream->write(mEnd.x);
       stream->write(mEnd.y);
-      stream->write(mTeam);
+      writeThisTeam(stream);
    }
    stream->writeFlag(mFieldUp);
    return 0;
@@ -966,7 +966,7 @@ void ForceField::unpackUpdate(GhostConnection *connection, BitStream *stream)
       stream->read(&mStart.y);
       stream->read(&mEnd.x);
       stream->read(&mEnd.y);
-      stream->read(&mTeam);
+      readThisTeam(stream);
 
       Rect extent(mStart, mEnd);
       extent.expand(Point(5,5));

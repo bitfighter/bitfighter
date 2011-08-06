@@ -251,6 +251,8 @@ struct IniSettings      // With defaults specified
 
    U32 version;
 
+   bool oldGoalFlash;
+
 
    // Set default values in config.cpp, IniSettings::init()
    void init();

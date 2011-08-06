@@ -385,7 +385,11 @@ void MasterServerConnection::onConnectionEstablished()
 // A still-being-established connection has been terminated
 void MasterServerConnection::onConnectTerminated(TerminationReason reason, const char *reasonStr)   
 {
-   gClientGame->onConnectionTerminated(getNetAddress(), reason, reasonStr);
+   //gClientGame->onConnectionTerminated(getNetAddress(), reason, reasonStr);
+	// Don't want to get Connection Terminated message interrupting the game,
+	// Also, this may be called from dedicated server's connection to master which do not have gClientGame..
+
+   // TODO: put something here or keep empty?
 }
 
 

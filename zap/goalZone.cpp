@@ -81,7 +81,7 @@ void GoalZone::render()
    if(gt->mGlowingZoneTeam >= 0 && gt->mGlowingZoneTeam != mTeam)
       glow = 0;
 
-   renderGoalZone(gt->getTeamColor(getTeam()), getOutline(), getFill(), getCentroid(), getLabelAngle(), isFlashing(), glow, mScore);
+   renderGoalZone(gt->getTeamColor(getTeam()), getOutline(), getFill(), getCentroid(), getLabelAngle(), isFlashing(), glow, mScore, 1, mFlashCount ? F32(mFlashTimer.getCurrent()) / FlashDelay : 0);
 }
 
 
@@ -194,7 +194,7 @@ U32 GoalZone::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
    }
 
    if(stream->writeFlag(updateMask & TeamMask))
-      stream->write(mTeam);
+      writeThisTeam(stream);
 
    return 0;
 }
@@ -212,7 +212,7 @@ void GoalZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
    if(stream->readFlag())
    {
-      stream->read(&mTeam);                      // Zone was captured by team mTeam
+      readThisTeam(stream);                      // Zone was captured by team mTeam
       if(!isInitialUpdate() && mTeam != -1)      // mTeam will be -1 on touchdown, and we don't want to flash then!
       {
          mFlashTimer.reset(FlashDelay);

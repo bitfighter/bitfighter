@@ -37,6 +37,8 @@
 #include "luaObject.h"     // For LuaObject def and returnInt method
 #include "lua.h"           // For push prototype
 
+#include "tnlBitStream.h"
+
 using namespace TNL;
 
 namespace Zap
@@ -100,6 +102,16 @@ void BfObject::render(S32 layerIndex)
       render();
 }
 
+void BfObject::readThisTeam(BitStream *stream)
+{
+   mTeam = stream->readInt(4) - 2;
+}
+void BfObject::writeThisTeam(BitStream *stream)
+{
+   stream->writeInt(mTeam + 2, 4);
+}
+
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 // Constructor
@@ -162,47 +174,47 @@ void GameObject::setActualPos(Point p)
 F32 GameObject::getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 updateSkips)
 {
    GameObject *so = dynamic_cast<GameObject *>(scopeObject);
-   if(!so)
-      return 0;  // GameType is not GameObject
+   F32 add = 0;
+   if(so) // GameType is not GameObject, and GameType don't have position
+   {
+      Point center = so->getExtent().getCenter();
 
-   Point center = so->getExtent().getCenter();
+      Point nearest;
+      const Rect &extent = getExtent();
 
-   Point nearest;
-   const Rect &extent = getExtent();
+      if(center.x < extent.min.x)
+         nearest.x = extent.min.x;
+      else if(center.x > extent.max.x)
+         nearest.x = extent.max.x;
+      else
+         nearest.x = center.x;
 
-   if(center.x < extent.min.x)
-      nearest.x = extent.min.x;
-   else if(center.x > extent.max.x)
-      nearest.x = extent.max.x;
-   else
-      nearest.x = center.x;
-
-   if(center.y < extent.min.y)
-      nearest.y = extent.min.y;
-   else if(center.y > extent.max.y)
-      nearest.y = extent.max.y;
-   else
+      if(center.y < extent.min.y)
+         nearest.y = extent.min.y;
+      else if(center.y > extent.max.y)
+         nearest.y = extent.max.y;
+      else
       nearest.y = center.y;
 
-   Point deltap = nearest - center;
+      Point deltap = nearest - center;
 
-   F32 distance = (nearest - center).len();
+      F32 distance = (nearest - center).len();
 
-   Point deltav = getActualVel() - so->getActualVel();
+      Point deltav = getActualVel() - so->getActualVel();
 
-   F32 add = 0;
 
-   // initial scoping factor is distance based.
-   F32 distFactor = (500 - distance) / 500;
+      // initial scoping factor is distance based.
+      add += (500 - distance) / 500;
 
-   // give some extra love to things that are moving towards the scope object
-   if(deltav.dot(deltap) < 0)
-      add = 0.7f;
+      // give some extra love to things that are moving towards the scope object
+      if(deltav.dot(deltap) < 0)
+         add += 0.7f;
+   }
 
    // and a little more love if this object has not yet been scoped.
    if(updateMask == 0xFFFFFFFF)
       add += 0.5;
-   return distFactor + add + updateSkips * 0.5f;
+   return add + updateSkips * 0.5f;
 }
 
 void GameObject::damageObject(DamageInfo *theInfo)

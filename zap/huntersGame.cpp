@@ -301,7 +301,7 @@ void releaseFlag(Game *game, Point pos, Point startVel)
    Point vel(cos(th) * f, sin(th) * f);
    vel += startVel;
 
-   HuntersFlagItem *newFlag = new HuntersFlagItem(pos, vel, true);
+   FlagItem *newFlag = new FlagItem(pos, vel, true);
    newFlag->addToGame(game, game->getGameObjDatabase());
 }
 

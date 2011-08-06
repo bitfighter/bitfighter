@@ -48,6 +48,17 @@ FlagItem::FlagItem(Point pos, bool collidable, float radius, float mass) : Edito
    initialize();
 }
 
+// Alternate constructor, currently used by dropping flags in hunterGame
+FlagItem::FlagItem(Point pos, Point vel, bool useDropDelay) : EditorItem(pos, true, (F32)Ship::CollisionRadius, 4)
+{
+   initialize();
+
+   setActualVel(vel);
+   if(useDropDelay)
+      mDroppedTimer.reset(DROP_DELAY);
+}
+
+
 
 FlagItem *FlagItem::clone() const
 {
@@ -149,17 +160,18 @@ string FlagItem::toString(F32 gridSize) const
 
 U32 FlagItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
-   if(stream->writeFlag(updateMask & InitialMask))
-      stream->writeInt(mTeam + 2, 4);
-   return Parent::packUpdate(connection, updateMask, stream);
+   U32 returnSomething = Parent::packUpdate(connection, updateMask, stream);
+   if(updateMask & InitialMask)
+      writeThisTeam(stream);
+   return returnSomething;
 }
 
 
 void FlagItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
-   if(stream->readFlag())
-      mTeam = stream->readInt(4) - 2;
    Parent::unpackUpdate(connection, stream);
+   if(mInitial)
+      readThisTeam(stream);
 }
 
 

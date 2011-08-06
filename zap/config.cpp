@@ -141,6 +141,8 @@ void IniSettings::init()
    logStats = true;            // Log statistics into ServerFilter log files
 
    version = 0;
+
+   oldGoalFlash = false;
 }
 
 
@@ -336,6 +338,7 @@ static void loadTestSettings(CIniFile *ini)
    gIniSettings.neverConnectDirect = ini->GetValueYN("Testing", "NeverConnectDirect", gIniSettings.neverConnectDirect);
    gIniSettings.wallFillColor.set(ini->GetValue("Testing", "WallFillColor", gIniSettings.wallFillColor.toRGBString()));
    gIniSettings.wallOutlineColor.set(ini->GetValue("Testing", "WallOutlineColor", gIniSettings.wallOutlineColor.toRGBString()));
+   gIniSettings.oldGoalFlash = ini->GetValueYN("Testing", "OldGoalFlash", gIniSettings.oldGoalFlash);
 }
 
 
@@ -1454,6 +1457,7 @@ static void writeTesting(CIniFile *ini)
    ini->setValueYN("Testing", "NeverConnectDirect", gIniSettings.neverConnectDirect);
    ini->SetValue  ("Testing", "WallFillColor",   gIniSettings.wallFillColor.toRGBString());
    ini->SetValue  ("Testing", "WallOutlineColor", gIniSettings.wallOutlineColor.toRGBString());
+   ini->setValueYN("Testing", "OldGoalFlash", gIniSettings.oldGoalFlash);
 }
 
 

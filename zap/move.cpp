@@ -84,7 +84,7 @@ void Move::unpack(BitStream *stream, bool unpackTime)
       y = stream->readFloat(5);
       if(stream->readFlag()) y = -y;
 
-      angle = unitToRadians(stream->readInt(12) / F32(0xFFF));
+      angle = unitToRadians(stream->readInt(12) / F32(0x1000));
       fire = stream->readFlag();
       for(U32 i = 0; i < (U32)ShipModuleCount; i++)
          module[i] = stream->readFlag();

@@ -40,6 +40,9 @@ struct lua_State;  // or #include "lua.h"
 #  pragma warning( disable : 4250)
 #endif
 
+namespace TNL{ class BitStream; }
+
+
 namespace Zap
 {
 
@@ -221,6 +224,8 @@ public:
    virtual void setExtent() { setExtent(getExtents()); }                    // Set extents of object in database
    virtual void setExtent(const Rect &extent) { DatabaseObject::setExtent(extent); }   // Passthrough
 
+   void readThisTeam(BitStream *stream);
+   void writeThisTeam(BitStream *stream);
 };
 
 
@@ -245,7 +250,7 @@ protected:
 
 public:
    GameObject();                             // Constructor
-   ~GameObject() { removeFromGame(); }       // Destructor
+   virtual ~GameObject() { removeFromGame(); }       // Destructor
 
    virtual void addToGame(Game *game, GridDatabase *database);       // BotNavMeshZone has its own addToGame
    virtual void onAddedToGame(Game *game);
