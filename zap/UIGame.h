@@ -28,6 +28,7 @@
 
 #include "UI.h"
 #include "gameConnection.h"
+#include "game.h"
 #include "quickChatHelper.h"
 #include "loadoutHelper.h"
 #include "engineerHelper.h"
@@ -70,8 +71,6 @@ struct CommandInfo {
 
 ////////////////////////////////////////
 ////////////////////////////////////////
-
-enum EntryModes;
 
 class GameUserInterface : public UserInterface
 {
@@ -248,7 +247,7 @@ private:
 
 public:
    GameUserInterface(ClientGame *game);    // Constructor
-   ~GameUserInterface();                   // Destructor
+   virtual ~GameUserInterface();                   // Destructor
 
    bool displayInputModeChangeAlert;
 
