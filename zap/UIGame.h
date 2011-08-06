@@ -28,7 +28,6 @@
 
 #include "UI.h"
 #include "gameConnection.h"
-#include "game.h"
 #include "quickChatHelper.h"
 #include "loadoutHelper.h"
 #include "engineerHelper.h"
@@ -67,6 +66,15 @@ struct CommandInfo {
    S32 helpGroup;
    string helpArgString[9];
    string helpTextString;
+};
+
+// Modes the player could be in during the game   
+enum EntryModes {
+   PlayMode,               // Playing
+   ChatMode,               // Composing chat message
+   QuickChatMode,          // Showing quick-chat menu
+   LoadoutMode,            // Showing loadout menu
+   EngineerMode,           // Showing engineer overlay mode
 };
 
 ////////////////////////////////////////

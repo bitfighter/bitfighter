@@ -2379,12 +2379,6 @@ void ClientGame::displaySuccessMessage(const char *format, ...)
    getUIManager()->getGameUserInterface()->displaySuccessMessage(message);
 }
 
-
-void ClientGame::enterMode(EntryModes mode)
-{
-   getUIManager()->getGameUserInterface()->enterMode(mode);
-}
-
 // Fire keyboard event to suppress screen saver
 void ClientGame::supressScreensaver()
 {

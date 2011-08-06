@@ -456,15 +456,6 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-// Modes the player could be in during the game   
-enum EntryModes {
-   PlayMode,               // Playing
-   ChatMode,               // Composing chat message
-   QuickChatMode,          // Showing quick-chat menu
-   LoadoutMode,            // Showing loadout menu
-   EngineerMode,           // Showing engineer overlay mode
-};
-
 
 class ClientGame : public Game
 {
@@ -569,8 +560,6 @@ public:
 
    void displayErrorMessage(const char *format, ...);
    void displaySuccessMessage(const char *format, ...);
-
-   void enterMode(EntryModes mode);
 
    void suspendGame()   { mGameSuspended = true; }
    void unsuspendGame() { mGameSuspended = false; }
