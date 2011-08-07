@@ -556,7 +556,7 @@ void Game::checkConnectionToMaster(U32 timeDelta)
          Address addr(gMasterAddress[0].c_str());
          if(addr.isValid())
          {
-            mConnectionToMaster = new MasterServerConnection(isServer());
+            mConnectionToMaster = new MasterServerConnection(this);
             mConnectionToMaster->connect(mNetInterface, addr);
          }
 

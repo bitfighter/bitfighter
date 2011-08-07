@@ -50,9 +50,10 @@ TNL_IMPLEMENT_NETCONNECTION(MasterServerConnection, NetClassGroupMaster, false);
 
 
 // Constructor
-MasterServerConnection::MasterServerConnection(bool isGameServer)   
+MasterServerConnection::MasterServerConnection(Game *game)   
 {
-   mIsGameServer = isGameServer;
+   mGame = game;
+
    mCurrentQueryId = 0;
    setIsConnectionToServer();
    setIsAdaptive();
@@ -75,7 +76,7 @@ void MasterServerConnection::startServerQuery()
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cQueryServersResponse, (U32 queryId, Vector<IPAddress> ipList))
 {
    // Only process results from current query, ignoring anything older...
-   if(queryId != mCurrentQueryId)
+   if(queryId != mCurrentQueryId || mGame->isServer())
       return;
 
    // The master server sends out an empty list to signify and "end of transmission".  We'll build up a
@@ -91,8 +92,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cQueryServersResponse, (U32
    }
    else  // Empty list recieved, transmission complete, send whole list on to the UI
    {
-      if(gClientGame)
-         gClientGame->gotServerListFromMaster(mServerList);
+      dynamic_cast<ClientGame *>(mGame)->gotServerListFromMaster(mServerList);
 
       mServerList.clear();
    }
@@ -112,7 +112,7 @@ void MasterServerConnection::requestArrangedConnection(const Address &remoteAddr
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sClientRequestedArrangedConnection, 
                               (U32 requestId, Vector<IPAddress> possibleAddresses, ByteBufferPtr connectionParameters))
 {
-   if(!mIsGameServer)   // We're not a server!
+   if(!mGame->isServer())   // We're not a server!  Reject connection!
    {
       logprintf(LogConsumer::LogConnection, "Rejecting arranged connection from %s", Address(possibleAddresses[0]).toString());
       s2mRejectArrangedConnection(requestId, connectionParameters);
@@ -126,7 +126,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sClientRequestedArrangedCon
       fullPossibleAddresses.push_back(Address(possibleAddresses[i]));
 
    // Check if the requestor is banned on this server
-   if(gServerGame->getNetInterface()->isAddressBanned(fullPossibleAddresses[0]))
+   if(mGame->getNetInterface()->isAddressBanned(fullPossibleAddresses[0]))
    {
       logprintf(LogConsumer::LogConnection, "Blocking connection from banned address %s", fullPossibleAddresses[0].toString());
       s2mRejectArrangedConnection(requestId, connectionParameters);
@@ -163,7 +163,7 @@ extern ClientInfo gClientInfo;
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cArrangedConnectionAccepted, 
                            (U32 requestId, Vector<IPAddress> possibleAddresses, ByteBufferPtr connectionData))
 {
-   if(!mIsGameServer && requestId == mCurrentQueryId && 
+   if(!mGame->isServer() && requestId == mCurrentQueryId && 
                   connectionData->getBufferSize() >= Nonce::NonceSize * 2 + SymmetricCipher::KeySize * 2)
    {
       logprintf(LogConsumer::LogConnection, "Remote host accepted arranged connection.");
@@ -182,7 +182,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cArrangedConnectionAccepted
 
       // Client is creating new connection to game server
       GameConnection *gameConnection = new GameConnection(gClientInfo);
-      gClientGame->setConnectionToServer(gameConnection);
+      dynamic_cast<ClientGame *>(mGame)->setConnectionToServer(gameConnection);
 
       gameConnection->connectArranged(getInterface(), fullPossibleAddresses, nonce, serverNonce, theSharedData, true);
    }
@@ -190,18 +190,21 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cArrangedConnectionAccepted
 
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cArrangedConnectionRejected, (U32 requestId, ByteBufferPtr rejectData))
 {
-   if(!mIsGameServer && requestId == mCurrentQueryId)
+   if(!mGame->isServer() && requestId == mCurrentQueryId)
    {
       logprintf(LogConsumer::LogConnection, "Remote host rejected arranged connection...");    // Maybe player was kicked/banned?
-      gClientGame->connectionToServerRejected();
+      dynamic_cast<ClientGame *>(mGame)->connectionToServerRejected();
    } 
 }
 
 // Display the MOTD that is set by the master server
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSetMOTD, (StringPtr masterName, StringPtr motdString))
 {
+   if(mGame->isServer())
+      return;
+
    setMasterName(masterName.getString());
-   gClientGame->setMOTD(motdString.getString()); 
+   dynamic_cast<ClientGame *>(mGame)->setMOTD(motdString.getString()); 
 }
 
 
@@ -209,6 +212,9 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSetMOTD, (StringPtr master
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSetAuthenticated, 
                                     (RangedU32<0, AuthenticationStatusCount> authStatus, StringPtr correctedName))
 {
+   if(mGame->isServer())
+      return;
+
    if((AuthenticationStatus)authStatus.value == AuthenticationStatusAuthenticatedName)
    {
       // Hmmm.... same info in two places...
@@ -216,8 +222,9 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSetAuthenticated,
       gIniSettings.name = correctedName.getString();  
 
       gClientInfo.authenticated = true;
-      if(gClientGame->getConnectionToServer())
-         gClientGame->getConnectionToServer()->c2sSetAuthenticated();
+      GameConnection *gc = dynamic_cast<ClientGame *>(mGame)->getConnectionToServer();
+      if(gc)
+         gc->c2sSetAuthenticated();
    }
    else 
       gClientInfo.authenticated = false;       
@@ -228,6 +235,9 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSetAuthenticated,
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sSetAuthenticated, (Vector<U8> id, StringTableEntry name,
          RangedU32<0,AuthenticationStatusCount> status))
 {
+   if(!mGame->isServer())
+      return;
+
    Nonce clientId(id);     // Reconstitute our id into a nonce
 
    for(GameConnection *walk = GameConnection::getClientList(); walk; walk = walk->getNextClient())
@@ -272,7 +282,10 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sSetAuthenticated, (Vector<
 // Alert user to the fact that their client is (or is not) out of date
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSendUpdgradeStatus, (bool needToUpgrade))
 {
-   gClientGame->setNeedToUpgrade(needToUpgrade);
+   if(mGame->isServer())
+      return;
+
+   dynamic_cast<ClientGame *>(mGame)->setNeedToUpgrade(needToUpgrade);
 }
 
 
@@ -280,7 +293,10 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSendUpdgradeStatus, (bool 
 // Runs on client only (but initiated by master)
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSendChat, (StringTableEntry playerNick, bool isPrivate, StringPtr message))
 {
-   gClientGame->gotChatMessage(playerNick.getString(), message.getString(), isPrivate, false);
+   if(mGame->isServer())
+      return;
+
+   dynamic_cast<ClientGame *>(mGame)->gotChatMessage(playerNick.getString(), message.getString(), isPrivate, false);
 }
 
 
@@ -288,7 +304,10 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSendChat, (StringTableEntr
 // Runs on client only (but initiated by master)
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cPlayersInGlobalChat, (Vector<StringTableEntry> playerNicks))
 {
-   gClientGame->setPlayersInGlobalChat(playerNicks);
+   if(mGame->isServer())
+      return;
+
+   dynamic_cast<ClientGame *>(mGame)->setPlayersInGlobalChat(playerNicks);
 }
 
 
@@ -296,7 +315,10 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cPlayersInGlobalChat, (Vect
 // Runs on client only (but initiated by master)
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cPlayerJoinedGlobalChat, (StringTableEntry playerNick))
 {
-   gClientGame->playerJoinedGlobalChat(playerNick);
+   if(mGame->isServer())
+      return;
+
+   dynamic_cast<ClientGame *>(mGame)->playerJoinedGlobalChat(playerNick);
 }
 
 
@@ -304,7 +326,10 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cPlayerJoinedGlobalChat, (S
 // Runs on client only (but initiated by master)
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cPlayerLeftGlobalChat, (StringTableEntry playerNick))
 {
-   gClientGame->playerLeftGlobalChat(playerNick);
+   if(mGame->isServer())
+      return;
+
+   dynamic_cast<ClientGame *>(mGame)->playerLeftGlobalChat(playerNick);
 }
 
 
@@ -337,20 +362,22 @@ void MasterServerConnection::writeConnectRequest(BitStream *bstream)
    bstream->writeString(Joystick::DetectedJoystickNameList.size() > 0 ? Joystick::DetectedJoystickNameList[0] : "");
 
 
-   if(bstream->writeFlag(mIsGameServer))     // We're a server, tell the master a little about us
+   if(bstream->writeFlag(mGame->isServer()))     // We're a server, tell the master a little about us
    {
-      bstream->write((U32) 1000);                              // CPU speed  (dummy)
-      bstream->write((U32) 0xFFFFFFFF);                        // region code (dummy) --> want to use this?
-      bstream->write((U32) gServerGame->getRobotCount());      // number of bots
-      bstream->write((U32) gServerGame->getPlayerCount());     // num players       --> will always be 0 or 1?
-      bstream->write((U32) gServerGame->getMaxPlayers());      // max players
-      bstream->write((U32) gServerGame->mInfoFlags);           // info flags (1=>test host, i.e. from editor)
+      ServerGame *serverGame = dynamic_cast<ServerGame *>(mGame);
 
-      bstream->writeString(gServerGame->getCurrentLevelName().getString());      // Level name
-      bstream->writeString(gServerGame->getCurrentLevelType().getString());      // Level type
+      bstream->write((U32) 1000);                             // CPU speed  (dummy)
+      bstream->write((U32) 0xFFFFFFFF);                       // region code (dummy) --> want to use this?
+      bstream->write((U32) serverGame->getRobotCount());      // number of bots
+      bstream->write((U32) serverGame->getPlayerCount());     // num players       --> will always be 0 or 1?
+      bstream->write((U32) serverGame->getMaxPlayers());      // max players
+      bstream->write((U32) serverGame->mInfoFlags);           // info flags (1=>test host, i.e. from editor)
 
-      bstream->writeString(gServerGame->getHostName());        // Server name
-      bstream->writeString(gServerGame->getHostDescr());       // Server description
+      bstream->writeString(serverGame->getCurrentLevelName().getString());      // Level name
+      bstream->writeString(serverGame->getCurrentLevelType().getString());      // Level type
+
+      bstream->writeString(serverGame->getHostName());        // Server name
+      bstream->writeString(serverGame->getHostDescr());       // Server description
    }
    else     // We're a client
    {
@@ -364,15 +391,16 @@ extern CmdLineSettings gCmdLineSettings;
 
 void MasterServerConnection::onConnectionEstablished()
 {
-   if(mIsGameServer)        // Might want ServerFilter ?
+   if(mGame->isServer())        // Might want ServerFilter ?
       logprintf(LogConsumer::ServerFilter, "Server established connection with Master Server");
    else
       logprintf(LogConsumer::LogConnection, "Client established connection with Master Server");
+
    if(gCmdLineSettings.masterAddress == "" && gMasterAddress.size() >= 2)
    {
       // If there is 2 or more master address, the first address is the one used to connect..
       string string1;
-      for(S32 i=0; i<gMasterAddress.size()-1; i++)
+      for(S32 i = 0; i < gMasterAddress.size() - 1; i++)
       {
          string1 = string1 + gMasterAddress[i] + ",";
       }

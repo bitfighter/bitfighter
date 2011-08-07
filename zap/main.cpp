@@ -218,7 +218,7 @@ ZapJournal gZapJournal;          // Our main journaling object
 string gPlayerPassword;
 
 struct ClientInfo;
-ClientInfo gClientInfo;          // Info about the client used for establishing connection to server
+ClientInfo gClientInfo;          // Info about the client used for establishing connection to server -- only needed on client side
 
 
 void exitGame(S32 errcode)

@@ -47,11 +47,11 @@ class MasterServerConnection : public MasterServerInterface
 private:
    U32 mCurrentQueryId;    // ID of our current query
 
-   bool mIsGameServer;
+   Game *mGame;
    string mMasterName;
 
 public:
-   MasterServerConnection(bool isGameServer = false);    // Constructor
+   MasterServerConnection(Game *game);    // Constructor
 
    void setMasterName(string name);
    string getMasterName();
