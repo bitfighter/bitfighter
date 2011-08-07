@@ -506,6 +506,9 @@ void GameObject::readCompressedVelocity(Point &vel, U32 max, BitStream *stream)
 
 bool GameObject::onGhostAdd(GhostConnection *theConnection)
 {
+   //TNLAssert(!getGame()->isServer(), "Should only be client here!");
+   // why is getGame() null here???
+
    addToGame(gClientGame, gClientGame->getGameObjDatabase());
    return true;
 }

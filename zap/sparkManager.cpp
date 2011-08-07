@@ -63,10 +63,8 @@ U32 lastOverwrittenIndex[SparkTypeCount];      // Keep track of which spark we l
 Spark gSparks[SparkTypeCount][MAX_SPARKS];     // Our sparks themselves... two types, each with room for MAX_SPARKS
 
 
-void init(ClientGame *game)
+void init()
 {
-   mGame = game;
-
    for(U32 i = 0; i < SparkTypeCount; i++)
    {
       firstFreeIndex[i] = 0;
@@ -191,7 +189,6 @@ void tick( F32 dT )
 }
 
 
-
 void render(S32 renderPass)
 {
    // The teleporter effects should render under the ships and such
@@ -203,7 +200,7 @@ void render(S32 renderPass)
          F32 alpha = 1.0;
          if(radius > 0.5)
             alpha = (1 - radius) / 0.5f;
-         renderTeleporter(walk->pos, walk->type, false, Teleporter::TeleportInExpandTime - walk->time, mGame->getCommanderZoomFraction(), radius, Teleporter::TeleportInRadius, alpha, Vector<Point>(), false);
+         renderTeleporter(walk->pos, walk->type, false, Teleporter::TeleportInExpandTime - walk->time, gClientGame->getCommanderZoomFraction(), radius, Teleporter::TeleportInRadius, alpha, Vector<Point>(), false);
       }
    }
    else if(renderPass == 1)      // Time for sparks!!

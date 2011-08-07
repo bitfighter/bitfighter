@@ -81,7 +81,7 @@ void GoalZone::render()
    if(gt->mGlowingZoneTeam >= 0 && gt->mGlowingZoneTeam != mTeam)
       glow = 0;
 
-   renderGoalZone(gt->getTeamColor(getTeam()), getOutline(), getFill(), getCentroid(), getLabelAngle(), isFlashing(), glow, mScore, 1, mFlashCount ? F32(mFlashTimer.getCurrent()) / FlashDelay : 0);
+   renderGoalZone(gt->getTeamColor(getTeam()), getOutline(), getFill(), getCentroid(), getLabelAngle(), isFlashing(), glow, mScore, mFlashCount ? F32(mFlashTimer.getCurrent()) / FlashDelay : 0);
 }
 
 

@@ -945,17 +945,43 @@ void renderGoalZone(const Color *c, const Vector<Point> *outline, const Vector<P
 
 // Goal zone flashes after capture, but glows after touchdown...
 void renderGoalZone(const Color *c, const Vector<Point> *outline, const Vector<Point> *fill, Point centroid, F32 labelAngle, 
-                    bool isFlashing, F32 glowFraction, S32 score, F32 scaleFact)
+                    bool isFlashing, F32 glowFraction, S32 score, F32 scaleFact, F32 flashCounter)
 {
-   F32 alpha = isFlashing ? 0.75f : 0.5f;
+   // So... which of these is correct??
 
-   Color fillColor    = getGoalZoneFillColor(c, isFlashing, glowFraction);
-   Color outlineColor = getGoalZoneOutlineColor(c, isFlashing);
+   //F32 alpha = isFlashing ? 0.75f : 0.5f;
 
-   renderPolygon(fill, outline, &fillColor, &outlineColor);
+   //Color fillColor    = getGoalZoneFillColor(c, isFlashing, glowFraction);
+   //Color outlineColor = getGoalZoneOutlineColor(c, isFlashing);
 
-   renderPolygonLabel(centroid, labelAngle, 25, "GOAL", scaleFact);
+   //renderPolygon(fill, outline, &fillColor, &outlineColor);
+
+   //renderPolygonLabel(centroid, labelAngle, 25, "GOAL", scaleFact);
+
+      //F32 alpha = isFlashing ? 0.75f : 0.5f;
+ 
+   Color fillColor, outlineColor;
+
+   if(gIniSettings.oldGoalFlash)
+   {
+      fillColor    = getGoalZoneFillColor(c, isFlashing, glowFraction);
+      outlineColor = getGoalZoneOutlineColor(c, isFlashing);
+   }
+   else
+   {
+      F32 glowRate = 0.5f - fabs(flashCounter - 0.5f);
+
+      Color newColor = *c;
+      if(isFlashing)
+         newColor = newColor + glowRate * (1 - glowRate);
+      else
+         newColor = newColor * (1 - glowRate);
+
+      fillColor    = getGoalZoneFillColor(&newColor, false, glowFraction);
+      outlineColor = getGoalZoneOutlineColor(&newColor, false);
+   }
 }
+
 
 
 extern Color gNexusOpenColor;

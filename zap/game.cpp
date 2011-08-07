@@ -100,7 +100,8 @@ static Vector<DatabaseObject *> fillVector2;
 //-----------------------------------------------------------------------------------
 
 // Constructor
-Game::Game(const Address &theBindAddress) : mGameObjDatabase(new GridDatabase())     //? was without new
+Game::Game(const Address &theBindAddress) : mGameObjDatabase(new GridDatabase())      //? was without new
+                                            
 {
    buildModuleInfos();
    mNextMasterTryTime = 0;
@@ -803,6 +804,7 @@ bool ServerGame::voteStart(GameConnection *client, S32 type, S32 number)
    client->s2cDisplayMessage(GameConnection::ColorAqua, SFXNone, "Vote started, waiting for others to vote.");
    return true;
 }
+
 
 void ServerGame::voteClient(GameConnection *client, bool voteYes)
 {

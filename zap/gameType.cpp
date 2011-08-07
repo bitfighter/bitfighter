@@ -188,7 +188,10 @@ void GameType::addToGame(Game *game, GridDatabase *database)
 
 
 bool GameType::onGhostAdd(GhostConnection *theConnection)
-{
+{   
+   //TNLAssert(!getGame()->isServer(), "Should only be client here!");
+   // getGame() appears to return null here sometimes... why??
+
    addToGame(gClientGame, gClientGame->getGameObjDatabase());
    return true;
 }
@@ -677,14 +680,17 @@ void GameType::renderObjectiveArrow(const GameObject *target, const Color *c, F3
 
 void GameType::renderObjectiveArrow(const Point *nearestPoint, const Color *outlineColor, F32 alphaMod) const
 {
-   GameConnection *gc = gClientGame->getConnectionToServer();
+   ClientGame *game = dynamic_cast<ClientGame *>(getGame());
+
+   GameConnection *gc = game->getConnectionToServer();
+
    GameObject *co = NULL;
    if(gc)
       co = gc->getControlObject();
    if(!co)
       return;
 
-   Point rp = gClientGame->worldToScreenPoint(nearestPoint);
+   Point rp = game->worldToScreenPoint(nearestPoint);
    Point center(400, 300);
    Point arrowDir = rp - center;
 
@@ -704,7 +710,7 @@ void GameType::renderObjectiveArrow(const Point *nearestPoint, const Color *outl
    Point crossVec(arrowDir.y, -arrowDir.x);
 
    // Fade the arrows as we transition to/from commander's map
-   F32 alpha = (1 - gClientGame->getCommanderZoomFraction()) * 0.6f * alphaMod;
+   F32 alpha = (1 - game->getCommanderZoomFraction()) * 0.6f * alphaMod;
    if(!alpha)
       return;
 
@@ -1880,7 +1886,7 @@ static void switchTeamsCallback(ClientGame *game, U32 unused)
    // If there are only two teams, just switch teams and skip the rigamarole
    if(game->getTeamCount() == 2)
    {
-      Ship *ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());  // Returns player's ship...
+      Ship *ship = dynamic_cast<Ship *>(game->getConnectionToServer()->getControlObject());  // Returns player's ship...
       if(!ship)
          return;
 

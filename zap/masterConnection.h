@@ -52,6 +52,7 @@ private:
 
 public:
    MasterServerConnection(Game *game);    // Constructor
+   MasterServerConnection() {TNLAssert(false, "LLL"); }
 
    void setMasterName(string name);
    string getMasterName();
