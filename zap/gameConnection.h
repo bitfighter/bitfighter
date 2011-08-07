@@ -117,6 +117,8 @@ private:
    Timer mAuthenticationTimer;
    S32 mAuthenticationCounter;
 
+   void displayMessage(U32 colorIndex, U32 sfxEnum, const char *message);    // Helper function
+
    StringTableEntry mServerName;
    Vector<U32> mLoadout;
    SafePtr<ClientRef> mClientRef;

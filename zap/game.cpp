@@ -1251,7 +1251,7 @@ void ServerGame::cycleLevel(S32 nextLevel)
    }
    else
       // Try and load Bot Zones for this level, set flag if failed
-      getGameType()->mBotZoneCreationFailed = !BotNavMeshZone::buildBotMeshZones(this);
+      getGameType()->mBotZoneCreationFailed = !BotNavMeshZone::buildBotMeshZones(this, gClientGame);
 
 
    // Build a list of our current connections
@@ -2129,6 +2129,25 @@ bool ClientGame::hasAdmin(const char *failureMessage)
    
    displayErrorMessage(failureMessage);
    return false;
+}
+
+
+// Returns true if we have level change privs, displays error message and returns false if not
+bool ClientGame::hasLevelChange(const char *failureMessage)
+{
+   GameConnection *gc = getConnectionToServer();
+
+   if(gc->isLevelChanger())
+      return true;
+   
+   displayErrorMessage(failureMessage);
+   return false;
+}
+
+
+void ClientGame::enterMode(UIMode mode)
+{
+   getUIManager()->getGameUserInterface()->enterMode(PlayMode); 
 }
 
 

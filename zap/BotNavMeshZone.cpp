@@ -503,7 +503,7 @@ static bool mergeBotZoneBuffers(const Vector<DatabaseObject *> &barriers,
 
 // Server only
 // Use the Triangle library to create zones.  Aggregate triangles with Recast
-bool BotNavMeshZone::buildBotMeshZones(ServerGame *game)
+bool BotNavMeshZone::buildBotMeshZones(ServerGame *game, bool triangulateZones)
 {
 
 #ifdef LOG_TIMER
@@ -595,9 +595,9 @@ bool BotNavMeshZone::buildBotMeshZones(ServerGame *game)
                   botzone = new BotNavMeshZone(game->getBotZoneDatabase()->getObjectCount());
 
                   // Triangulation only needed for display on local client... it is expensive to compute for so many zones,
-                  // and there is really no point if it will never be viewed.  Once disabled, triangluation cannot be re-enabled
+                  // and there is really no point if they will never be viewed.  Once disabled, triangluation cannot be re-enabled
                   // for this object.
-                  if(!gClientGame)     
+                  if(!triangulateZones)     
                      botzone->disableTriangluation();
 
                   polyToZoneMap[i] = botzone->getZoneId();
@@ -638,7 +638,7 @@ bool BotNavMeshZone::buildBotMeshZones(ServerGame *game)
          // Triangulation only needed for display on local client... it is expensive to compute for so many zones,
          // and there is really no point if they will never be viewed.  Once disabled, triangluation cannot be re-enabled
          // for this object.
-         if(!gClientGame)
+         if(!triangulateZones)
             botzone->disableTriangluation();
 
          botzone->addVert(Point(triangleData.pointList[triangleData.triangleList[i]*2],   triangleData.pointList[triangleData.triangleList[i]*2 + 1]));

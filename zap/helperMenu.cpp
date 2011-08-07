@@ -44,7 +44,7 @@ HelperMenu::HelperMenu(ClientGame *clientGame)
 // Exit helper mode by entering play mode.  Only one mode is active at a time.
 void HelperMenu::exitHelper() 
 { 
-   mClientGame->getUIManager()->getGameUserInterface()->enterMode(PlayMode); 
+   mClientGame->enterMode(PlayMode); 
 }
 
 

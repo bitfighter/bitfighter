@@ -887,7 +887,7 @@ void GameUserInterface::onMouseMoved()
 
 
 // Enter QuickChat, Loadout, or Engineer mode
-void GameUserInterface::enterMode(EntryModes mode)
+void GameUserInterface::enterMode(UIMode mode)
 {
    playBoop();
    mCurrentMode = mode;
@@ -1261,9 +1261,9 @@ void GameUserInterface::servVolHandler(ClientGame *game, const Vector<string> &w
 
 void GameUserInterface::getMapHandler(ClientGame *game, const Vector<string> &words)
 {
-   GameConnection *connection = game->getConnectionToServer();
+   GameConnection *gc = game->getConnectionToServer();
 
-   if(connection->isLocalConnection())
+   if(gc->isLocalConnection())
       game->displayErrorMessage("!!! Can't download levels from a local server");
    else
    {
@@ -1281,41 +1281,29 @@ void GameUserInterface::getMapHandler(ClientGame *game, const Vector<string> &wo
 
       game->setRemoteLevelDownloadFilename(filename);
 
-      connection->c2sRequestCurrentLevel();
+      gc->c2sRequestCurrentLevel();
    }
 }
 
 
 void GameUserInterface::nextLevelHandler(ClientGame *game, const Vector<string> &words)
 {
-   GameConnection *gc = game->getConnectionToServer();
-
-   if(!gc->isLevelChanger())
-      game->displayErrorMessage("!!! You don't have permission to change levels");
-   else
-      gc->c2sRequestLevelChange(ServerGame::NEXT_LEVEL, false);
+   if(game->hasLevelChange("!!! You don't have permission to change levels"))
+      game->getConnectionToServer()->c2sRequestLevelChange(ServerGame::NEXT_LEVEL, false);
 }
 
 
 void GameUserInterface::prevLevelHandler(ClientGame *game, const Vector<string> &words)
 {
-   GameConnection *gc = game->getConnectionToServer();
-
-   if(!gc->isLevelChanger())
-      game->displayErrorMessage("!!! You don't have permission to change levels");
-   else
-      gc->c2sRequestLevelChange(ServerGame::PREVIOUS_LEVEL, false);
+   if(game->hasLevelChange("!!! You don't have permission to change levels"))
+      game->getConnectionToServer()->c2sRequestLevelChange(ServerGame::PREVIOUS_LEVEL, false);
 }
 
 
 void GameUserInterface::restartLevelHandler(ClientGame *game, const Vector<string> &words)
 {
-   GameConnection *gc = game->getConnectionToServer();
-
-   if(!gc->isLevelChanger())
-      game->displayErrorMessage("!!! You don't have permission to change levels");
-   else
-      gc->c2sRequestLevelChange(ServerGame::REPLAY_LEVEL, false);
+   if(game->hasLevelChange("!!! You don't have permission to change levels"))
+      game->getConnectionToServer()->c2sRequestLevelChange(ServerGame::REPLAY_LEVEL, false);
 }
 
 

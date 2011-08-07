@@ -55,7 +55,7 @@ protected:
    void drawMenuBorderLine(S32 yPos, const Color &color);
    void drawMenuCancelText(S32 yPos, const Color &color, S32 fontSize);
 
-   ClientGame *getClientGame() { return mClientGame; }
+   ClientGame *getGame() { return mClientGame; }
 
 public:
    HelperMenu(ClientGame *clientGame);    // Constructor

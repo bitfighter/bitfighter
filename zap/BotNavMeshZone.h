@@ -116,7 +116,7 @@ public:
    static U16 findZoneContaining(const Point &p);    // Returns ID of zone containing specified point
 
    static void IDBotMeshZones(ServerGame *game);
-   static bool buildBotMeshZones(ServerGame *game);
+   static bool buildBotMeshZones(ServerGame *game, bool triangulateZones);
    static void buildBotNavMeshZoneConnections(GridDatabase *zoneDb);
    static bool buildBotNavMeshZoneConnectionsRecastStyle(GridDatabase *zoneDb, rcPolyMesh &mesh, const Vector<S32> &polyToZoneMap);
    static void linkTeleportersBotNavMeshZoneConnections(ServerGame *game);

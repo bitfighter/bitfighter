@@ -71,7 +71,7 @@ struct CommandInfo {
 };
 
 // Modes the player could be in during the game   
-enum EntryModes {
+enum UIMode {
    PlayMode,               // Playing
    ChatMode,               // Composing chat message
    QuickChatMode,          // Showing quick-chat menu
@@ -228,7 +228,7 @@ private:
 
    void setBusyChatting(bool busy);       // Tell the server we are (or are not) busy chatting
 
-   EntryModes mCurrentMode;           // Current game mode
+   UIMode mCurrentMode;                   // Current game mode
 
    static const S32 SERVER_MSG_FONT_SIZE = 14;
    static const S32 SERVER_MSG_FONT_GAP = 4;
@@ -308,7 +308,7 @@ public:
    void suspendGame();
    void unsuspendGame();
 
-   void enterMode(EntryModes mode);      // Enter QuickChat, Loadout, or Engineer mode
+   void enterMode(UIMode mode);     // Enter QuickChat, Loadout, or Engineer mode
 
    void renderEngineeredItemDeploymentMarker(Ship *ship);
 
@@ -323,37 +323,39 @@ public:
    // Message colors... (rest to follow someday)
    static Color privateF5MessageDisplayedInGameColor;
 
-      static void mVolHandler(ClientGame *game, const Vector<string> &args);    
-      static void sVolHandler(ClientGame *game, const Vector<string> &args);    
-      static void vVolHandler(ClientGame *game, const Vector<string> &args);    
-      static void servVolHandler(ClientGame *game, const Vector<string> &args);  
-      static void getMapHandler(ClientGame *game, const Vector<string> &words);
-      static void nextLevelHandler(ClientGame *game, const Vector<string> &words);
-      static void prevLevelHandler(ClientGame *game, const Vector<string> &words);
-      static void restartLevelHandler(ClientGame *game, const Vector<string> &words);
-      static void shutdownServerHandler(ClientGame *game, const Vector<string> &words);
-      static void kickPlayerHandler(ClientGame *game, const Vector<string> &words);
-      static void adminPassHandler(ClientGame *game, const Vector<string> &words);
-      static void levelPassHandler(ClientGame *game, const Vector<string> &words);
-      static void showCoordsHandler(ClientGame *game, const Vector<string> &words);
-      static void showZonesHandler(ClientGame *game, const Vector<string> &words);
-      static void showPathsHandler(ClientGame *game, const Vector<string> &words);
-      static void pauseBotsHandler(ClientGame *game, const Vector<string> &words);
-      static void stepBotsHandler(ClientGame *game, const Vector<string> &words);
-      static void setAdminPassHandler(ClientGame *game, const Vector<string> &words);
-      static void setServerPassHandler(ClientGame *game, const Vector<string> &words);
-      static void setLevPassHandler(ClientGame *game, const Vector<string> &words);
-      static void setServerNameHandler(ClientGame *game, const Vector<string> &words);
-      static void setServerDescrHandler(ClientGame *game, const Vector<string> &words);
-      static void serverCommandHandler(ClientGame *game, const Vector<string> &words);
-      static void pmHandler(ClientGame *game, const Vector<string> &words);
-      static void muteHandler(ClientGame *game, const Vector<string> &words);
-      static void maxFpsHandler(ClientGame *game, const Vector<string> &words);
-      static void lineSmoothHandler(ClientGame *game, const Vector<string> &words);
-      static void lineWidthHandler(ClientGame *game, const Vector<string> &words);
-      static void suspendHandler(ClientGame *game, const Vector<string> &words);
-      static void deleteCurrentLevelHandler(ClientGame *game, const Vector<string> &words);
-      static void addTimeHandler(ClientGame *game, const Vector<string> &words);
+
+   // TODO: Move these to ClientGame???  They could really go anywhere!
+   static void mVolHandler(ClientGame *game, const Vector<string> &args);    
+   static void sVolHandler(ClientGame *game, const Vector<string> &args);    
+   static void vVolHandler(ClientGame *game, const Vector<string> &args);    
+   static void servVolHandler(ClientGame *game, const Vector<string> &args);  
+   static void getMapHandler(ClientGame *game, const Vector<string> &words);
+   static void nextLevelHandler(ClientGame *game, const Vector<string> &words);
+   static void prevLevelHandler(ClientGame *game, const Vector<string> &words);
+   static void restartLevelHandler(ClientGame *game, const Vector<string> &words);
+   static void shutdownServerHandler(ClientGame *game, const Vector<string> &words);
+   static void kickPlayerHandler(ClientGame *game, const Vector<string> &words);
+   static void adminPassHandler(ClientGame *game, const Vector<string> &words);
+   static void levelPassHandler(ClientGame *game, const Vector<string> &words);
+   static void showCoordsHandler(ClientGame *game, const Vector<string> &words);
+   static void showZonesHandler(ClientGame *game, const Vector<string> &words);
+   static void showPathsHandler(ClientGame *game, const Vector<string> &words);
+   static void pauseBotsHandler(ClientGame *game, const Vector<string> &words);
+   static void stepBotsHandler(ClientGame *game, const Vector<string> &words);
+   static void setAdminPassHandler(ClientGame *game, const Vector<string> &words);
+   static void setServerPassHandler(ClientGame *game, const Vector<string> &words);
+   static void setLevPassHandler(ClientGame *game, const Vector<string> &words);
+   static void setServerNameHandler(ClientGame *game, const Vector<string> &words);
+   static void setServerDescrHandler(ClientGame *game, const Vector<string> &words);
+   static void serverCommandHandler(ClientGame *game, const Vector<string> &words);
+   static void pmHandler(ClientGame *game, const Vector<string> &words);
+   static void muteHandler(ClientGame *game, const Vector<string> &words);
+   static void maxFpsHandler(ClientGame *game, const Vector<string> &words);
+   static void lineSmoothHandler(ClientGame *game, const Vector<string> &words);
+   static void lineWidthHandler(ClientGame *game, const Vector<string> &words);
+   static void suspendHandler(ClientGame *game, const Vector<string> &words);
+   static void deleteCurrentLevelHandler(ClientGame *game, const Vector<string> &words);
+   static void addTimeHandler(ClientGame *game, const Vector<string> &words);
 };
 
 

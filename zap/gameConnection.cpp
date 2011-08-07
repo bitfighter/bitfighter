@@ -861,15 +861,16 @@ Color colors[] =
    Color(0.6f, 1, 0.8f),   // ColorNuclearGreen
 };
 
+
 Color gCmdChatColor = colors[GameConnection::ColorRed];
 
-static void displayMessage(U32 colorIndex, U32 sfxEnum, const char *message)
+void GameConnection::displayMessage(U32 colorIndex, U32 sfxEnum, const char *message)
 {
-
-   gClientGame->displayMessage(colors[colorIndex], "%s", message);
+   mClientGame->displayMessage(colors[colorIndex], "%s", message);
    if(sfxEnum != SFXNone)
       SoundSystem::playSoundEffect(sfxEnum);
 }
+
 
 // I believe this is not used -CE
 TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayMessageESI,
@@ -912,6 +913,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayMessageESI,
    outputBuffer[pos] = 0;
    displayMessage(color, sfx, outputBuffer);
 }
+
 
 TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayMessageE,
                   (RangedU32<0, GameConnection::ColorCount> color, RangedU32<0, NumSFXBuffers> sfx, StringTableEntry formatString,
@@ -993,7 +995,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayMessage,
 TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayMessageBox, (StringTableEntry title, StringTableEntry instr, Vector<StringTableEntry> message),
                   (title, instr, message), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
-   gClientGame->displayMessageBox(title, instr, message);
+   mClientGame->displayMessageBox(title, instr, message);
 }
 
 
@@ -1291,7 +1293,7 @@ void GameConnection::writeConnectRequest(BitStream *stream)
 
  
    string serverPW;
-   string lastServerName = gClientGame->getRequestedServerName();
+   string lastServerName = mClientGame->getRequestedServerName();
 
    // If we're local, just use the password we already know because, you know, we're the server
    if(isLocal)
@@ -1303,7 +1305,7 @@ void GameConnection::writeConnectRequest(BitStream *stream)
 
    // Otherwise, use whatever's in the interface entry box
    else 
-      serverPW = gClientGame->getHashedServerPassword();
+      serverPW = mClientGame->getHashedServerPassword();
 
    // Write some info about the client... name, id, and verification status
    stream->writeString(serverPW.c_str());

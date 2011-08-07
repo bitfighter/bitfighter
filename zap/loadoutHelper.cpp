@@ -41,9 +41,9 @@ namespace Zap
 Vector<LoadoutItem> gLoadoutModules;
 Vector<LoadoutItem> gLoadoutWeapons;
 
-LoadoutItem::LoadoutItem() {TNLAssert(false, "Do nothing, Should never be used"); }
+//LoadoutItem::LoadoutItem() { TNLAssert(false, "Do nothing, Should never be used"); }
 
-LoadoutItem::LoadoutItem(KeyCode key, KeyCode button, U32 index)      // Shortcut for modules -- use info from ModuleInfos
+LoadoutItem::LoadoutItem(ClientGame *game, KeyCode key, KeyCode button, U32 index)      // Shortcut for modules -- use info from ModuleInfos
 {
    ModuleInfo *moduleInfo = gClientGame->getModuleInfo((ShipModule) index);
 
@@ -53,9 +53,12 @@ LoadoutItem::LoadoutItem(KeyCode key, KeyCode button, U32 index)      // Shortcu
    this->text = moduleInfo->getMenuName();
    this->help = moduleInfo->getMenuHelp();
    this->requires = ModuleNone;     // Currently, no modules depend on any other
+
+   mGame = game;
 }
 
-LoadoutItem::LoadoutItem(KeyCode key, KeyCode button, U32 index, const char *text, const char *help, ShipModule requires) 
+
+LoadoutItem::LoadoutItem(ClientGame *game, KeyCode key, KeyCode button, U32 index, const char *text, const char *help, ShipModule requires) 
 {
    this->key = key;
    this->button = button;
@@ -63,6 +66,8 @@ LoadoutItem::LoadoutItem(KeyCode key, KeyCode button, U32 index, const char *tex
    this->text = text;
    this->help = help;
    this->requires = requires;
+
+   mGame = game;
 }
 
 
@@ -72,23 +77,23 @@ void LoadoutHelper::initialize(bool includeEngineer)
    gLoadoutModules.clear();
    gLoadoutWeapons.clear();
 
-   gLoadoutModules.push_back(LoadoutItem(KEY_1, BUTTON_1, ModuleBoost));
-   gLoadoutModules.push_back(LoadoutItem(KEY_2, BUTTON_2, ModuleShield));
-   gLoadoutModules.push_back(LoadoutItem(KEY_3, BUTTON_3, ModuleRepair));
-   gLoadoutModules.push_back(LoadoutItem(KEY_4, BUTTON_4, ModuleSensor));
-   gLoadoutModules.push_back(LoadoutItem(KEY_5, BUTTON_5, ModuleCloak));
-   gLoadoutModules.push_back(LoadoutItem(KEY_6, BUTTON_6, ModuleArmor));
+   gLoadoutModules.push_back(getGame(), LoadoutItem(KEY_1, BUTTON_1, ModuleBoost));
+   gLoadoutModules.push_back(getGame(), LoadoutItem(KEY_2, BUTTON_2, ModuleShield));
+   gLoadoutModules.push_back(getGame(), LoadoutItem(KEY_3, BUTTON_3, ModuleRepair));
+   gLoadoutModules.push_back(getGame(), LoadoutItem(KEY_4, BUTTON_4, ModuleSensor));
+   gLoadoutModules.push_back(getGame(), LoadoutItem(KEY_5, BUTTON_5, ModuleCloak));
+   gLoadoutModules.push_back(getGame(), LoadoutItem(KEY_6, BUTTON_6, ModuleArmor));
 
    if(includeEngineer)
-      gLoadoutModules.push_back(LoadoutItem(KEY_7, BUTTON_7, ModuleEngineer));
+      gLoadoutModules.push_back(getGame(), LoadoutItem(KEY_7, BUTTON_7, ModuleEngineer));
 
-   gLoadoutWeapons.push_back(LoadoutItem(KEY_1, BUTTON_1, WeaponPhaser,  "Phaser",          "", ModuleNone));
-   gLoadoutWeapons.push_back(LoadoutItem(KEY_2, BUTTON_2, WeaponBounce,  "Bouncer",         "", ModuleNone));
-   gLoadoutWeapons.push_back(LoadoutItem(KEY_3, BUTTON_3, WeaponTriple,  "Triple",          "", ModuleNone));
-   gLoadoutWeapons.push_back(LoadoutItem(KEY_4, BUTTON_4, WeaponBurst,   "Burster",         "", ModuleNone));
-   gLoadoutWeapons.push_back(LoadoutItem(KEY_5, BUTTON_5, WeaponMine,    "Mine Layer",      "", ModuleNone));
+   gLoadoutWeapons.push_back(getGame(), LoadoutItem(KEY_1, BUTTON_1, WeaponPhaser,  "Phaser",          "", ModuleNone));
+   gLoadoutWeapons.push_back(getGame(), LoadoutItem(KEY_2, BUTTON_2, WeaponBounce,  "Bouncer",         "", ModuleNone));
+   gLoadoutWeapons.push_back(getGame(), LoadoutItem(KEY_3, BUTTON_3, WeaponTriple,  "Triple",          "", ModuleNone));
+   gLoadoutWeapons.push_back(getGame(), LoadoutItem(KEY_4, BUTTON_4, WeaponBurst,   "Burster",         "", ModuleNone));
+   gLoadoutWeapons.push_back(getGame(), LoadoutItem(KEY_5, BUTTON_5, WeaponMine,    "Mine Layer",      "", ModuleNone));
 // { KEY_6, 5, WeaponHeatSeeker, "Heat Seeker"},      // Need to make changes below to support this
-   gLoadoutWeapons.push_back(LoadoutItem(KEY_6, BUTTON_6, WeaponSpyBug,  "Spy Bug Placer",  "", ModuleSensor));  // Only visible when Enhanced Sensor is a selected module
+   gLoadoutWeapons.push_back(getGame(), LoadoutItem(KEY_6, BUTTON_6, WeaponSpyBug,  "Spy Bug Placer",  "", ModuleSensor));  // Only visible when Enhanced Sensor is a selected module
 };
 
 

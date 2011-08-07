@@ -257,7 +257,7 @@ TNL_IMPLEMENT_NETOBJECT(HuntersNexusObject);
 
 TNL_IMPLEMENT_NETOBJECT_RPC(HuntersNexusObject, s2cFlagsReturned, (), (), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhost, 0)
 {
-   gClientGame->getGameType()->mZoneGlowTimer.reset();
+   getGame()->getGameType()->mZoneGlowTimer.reset();
 }
 
 

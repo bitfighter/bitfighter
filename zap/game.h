@@ -464,6 +464,7 @@ enum VolumeType {
    ServerAlertVolumeType,
 };
 
+extern enum UIMode;
 
 class ClientGame : public Game
 {
@@ -540,7 +541,12 @@ public:
    void playerJoinedGlobalChat(const StringTableEntry &playerNick);
    void playerLeftGlobalChat(const StringTableEntry &playerNick);
 
+   // Check for permissions
    bool hasAdmin(const char *failureMessage);
+   bool hasLevelChange(const char *failureMessage);
+
+   void enterMode(UIMode mode);
+
 
    void addToMuteList(const string &name) { mMuteList.push_back(name); }
    bool isOnMuteList(const string &name);

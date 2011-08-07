@@ -185,6 +185,8 @@ void GameType::addToGame(Game *game, GridDatabase *database)
    mGame = game;
    game->setGameType(this);
 }
+
+
 bool GameType::onGhostAdd(GhostConnection *theConnection)
 {
    addToGame(gClientGame, gClientGame->getGameObjDatabase());
@@ -649,15 +651,16 @@ void GameType::renderObjectiveArrow(const GameObject *target, const Color *c, F3
    if(!target)
       return;
 
-   GameConnection *gc = gClientGame->getConnectionToServer();
-   GameObject *co = NULL;
+   GameConnection *gc = dynamic_cast<ClientGame *>(getGame())->getConnectionToServer();
+   GameObject *ship = NULL;
+
    if(gc)
-      co = gc->getControlObject();
-   if(!co)
+      ship = gc->getControlObject();
+   if(!ship)
       return;
 
    Rect r = target->getBounds(MoveObject::RenderState);
-   Point nearestPoint = co->getRenderPos();
+   Point nearestPoint = ship->getRenderPos();
 
    if(r.max.x < nearestPoint.x)
       nearestPoint.x = r.max.x;

@@ -44,11 +44,13 @@ struct LoadoutItem
    const char *help;       // An additional bit of help text, also displayed on loadout menu
    ShipModule requires;    // Item requires this module be part of loadout (used only for spy-bugs)
 
-   LoadoutItem(); // { /* Do nothing */ };      // Should never be used
+   ClientGame *mGame;
 
-   LoadoutItem(KeyCode key, KeyCode button, U32 index);      // Shortcut for modules -- use info from ModuleInfos
+   //LoadoutItem(); // { /* Do nothing */ };      // Should never be used
 
-   LoadoutItem(KeyCode key, KeyCode button, U32 index, const char *text, const char *help, ShipModule requires);
+   LoadoutItem(ClientGame *game, KeyCode key, KeyCode button, U32 index);      // Shortcut for modules -- use info from ModuleInfos
+
+   LoadoutItem(ClientGame *game, KeyCode key, KeyCode button, U32 index, const char *text, const char *help, ShipModule requires);
 };
 
 
