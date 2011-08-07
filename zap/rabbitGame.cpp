@@ -203,13 +203,14 @@ const Color *RabbitGameType::getShipColor(Ship *s)
    if(getGame()->getTeamCount() != 1)
       return Parent::getShipColor(s);
 
-   GameConnection *gc = gClientGame->getConnectionToServer();
+   GameConnection *gc = dynamic_cast<ClientGame *>(getGame())->getConnectionToServer();
+
    if(!gc)
       return &Colors::white;     // Something's gone wrong!
 
    Ship *co = dynamic_cast<Ship *>(gc->getControlObject());
 
-   return (s == co || (!shipHasFlag(s) && !shipHasFlag(co)))  ?  &Colors::green  :  &Colors::red;
+   return (s == co || (!shipHasFlag(s) && !shipHasFlag(co))) ? &Colors::green : &Colors::red;
 }
 
 

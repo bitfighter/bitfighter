@@ -82,7 +82,9 @@ GameUserInterface::GameUserInterface(ClientGame *game) : Parent(game),
                                                          mQuickChatHelper(game), 
                                                          mLoadoutHelper(game), 
                                                          mEngineerHelper(game),
+                                                         mVoiceRecorder(game),
                                                          mLineEditor(200)
+                                                         
 {
    //mOutputFile = NULL;
    bool mLeftDisabled = false; // Fix some uninitalized variables (randomly was true)
@@ -197,7 +199,7 @@ void GameUserInterface::onActivate()
 
    mShutdownMode = None;
 
-   gClientGame->unsuspendGame();                          // Never suspended when we start
+   getGame()->unsuspendGame();                            // Never suspended when we start
 
    OGLCONSOLE_EnterKey(processGameConsoleCommand);        // Setup callback for processing console commands
 }
@@ -205,7 +207,7 @@ void GameUserInterface::onActivate()
 
 void GameUserInterface::onReactivate()
 {
-   if(gClientGame->isSuspended())
+   if(getGame()->isSuspended())
       unsuspendGame();
 
    gDisableShipKeyboardInput = false;
@@ -386,13 +388,13 @@ void GameUserInterface::idle(U32 timeDelta)
    U32 indx = mFrameIndex % FPS_AVG_COUNT;
    mIdleTimeDelta[indx] = timeDelta;
 
-   if(gClientGame->getConnectionToServer())
-      mPing[indx] = (U32)gClientGame->getConnectionToServer()->getRoundTripTime();
+   if(getGame()->getConnectionToServer())
+      mPing[indx] = (U32)getGame()->getConnectionToServer()->getRoundTripTime();
 
    mFrameIndex++;
 
    // Should we move this timer over to UIGame??
-   HostMenuUserInterface *ui = gClientGame->getUIManager()->getHostMenuUserInterface();
+   HostMenuUserInterface *ui = getUIManager()->getHostMenuUserInterface();
    if(ui->levelLoadDisplayFadeTimer.update(timeDelta))
       ui->clearLevelLoadDisplay();
 }
@@ -407,20 +409,21 @@ extern void checkMousePos(S32 maxdx, S32 maxdy);
 void GameUserInterface::render()
 {
    glColor(Colors::black);
+
    if(!getGame()->isConnectedToServer())
    {
       glColor(Colors::white);
       drawCenteredString(260, 30, "Connecting to server...");
 
       glColor(Colors::green);
-      if(gClientGame->getConnectionToServer())
-         drawCenteredString(310, 16, gConnectStatesTable[gClientGame->getConnectionToServer()->getConnectionState()]);
+      if(getGame()->getConnectionToServer())
+         drawCenteredString(310, 16, gConnectStatesTable[getGame()->getConnectionToServer()->getConnectionState()]);
 
       glColor(Colors::white);
       drawCenteredString(346, 20, "Press <ESC> to abort");
    }
 
-   gClientGame->render();
+   getGame()->render();
 
    // Provide fade in effect as level begins; doesn't work quite right because game is so busy at this point that 
    // it fades in jerkily.
@@ -439,7 +442,7 @@ void GameUserInterface::render()
    //glMatrixMode(GL_MODELVIEW);
    //glLoadIdentity();          // OpenGL command to load an identity matrix (see OpenGL docs)
 
-   if(!gClientGame->isSuspended())
+   if(!getGame()->isSuspended())
    {
       renderReticle();           // Draw crosshairs if using mouse
       renderMessageDisplay();    // Render incoming server msgs
@@ -498,7 +501,7 @@ if(mGotControlUpdate)
 
 void GameUserInterface::renderLostConnectionMessage()
 {
-   GameConnection *connection = gClientGame->getConnectionToServer();
+   GameConnection *connection = getGame()->getConnectionToServer();
    if(connection && connection->lostContact())
    {
       static const char *msg[] = { "", 
@@ -564,7 +567,7 @@ void GameUserInterface::cancelShutdown()
 // Draws level-load progress bar across the bottom of the screen
 void GameUserInterface::renderProgressBar()
 {
-   GameType *gt = gClientGame->getGameType();
+   GameType *gt = getGame()->getGameType();
    if((mShowProgressBar || mProgressBarFadeTimer.getCurrent() > 0) && gt && gt->mObjectsExpected > 0)
    {
       glEnableBlend;
@@ -581,7 +584,7 @@ void GameUserInterface::renderProgressBar()
       // a disconcerting effect, as if the level did not fully load.  Rather than waste any more time on this problem, we'll just
       // fill in the status bar while it's fading, to make it look like the level fully loaded.  Since the only thing that this
       // whole mechanism is used for is to display something to the user, this should work fine.
-      S32 barWidth = mShowProgressBar ? S32((F32) width * (F32) gClientGame->mObjectsLoaded / (F32) gt->mObjectsExpected) : width;
+      S32 barWidth = mShowProgressBar ? S32((F32) width * (F32) getGame()->mObjectsLoaded / (F32) gt->mObjectsExpected) : width;
 
       for(S32 i = 1; i >= 0; i--)
       {
@@ -701,10 +704,10 @@ void GameUserInterface::renderLoadoutIndicators()
    if(!gIniSettings.showWeaponIndicators)      // If we're not drawing them, we've got nothing to do
       return;
 
-   if(!gClientGame->getConnectionToServer())    // Can happen when first joining a game.  This was XelloBlue's crash...
+   if(!getGame()->getConnectionToServer())     // Can happen when first joining a game.  This was XelloBlue's crash...
       return;
 
-   Ship *localShip = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
+   Ship *localShip = dynamic_cast<Ship *>(getGame()->getConnectionToServer()->getControlObject());
    if(!localShip)
       return;
 
@@ -728,14 +731,14 @@ void GameUserInterface::renderLoadoutIndicators()
    // Next, loadout modules
    for(U32 i = 0; i < (U32)ShipModuleCount; i++)
    {
-      if(gClientGame->getModuleInfo(localShip->getModule(i))->getUseType() == ModuleUsePassive)
+      if(getGame()->getModuleInfo(localShip->getModule(i))->getUseType() == ModuleUsePassive)
          glColor3f(1,1,0);      // yellow = passive indicator
       else if(localShip->isModuleActive(localShip->getModule(i)))
          glColor(INDICATOR_ACTIVE_COLOR);
       else 
          glColor(INDICATOR_INACTIVE_COLOR);
 
-      S32 width = renderIndicator(xPos, gClientGame->getModuleInfo(localShip->getModule(i))->getName());
+      S32 width = renderIndicator(xPos, getGame()->getModuleInfo(localShip->getModule(i))->getName());
 
       xPos += UserInterface::vertMargin + width - 2 * gapSize;
    }
@@ -862,10 +865,10 @@ void GameUserInterface::onMouseMoved()
    mMousePoint.set(gScreenInfo.getMousePos()->x - gScreenInfo.getGameCanvasWidth()  / 2,
                    gScreenInfo.getMousePos()->y - gScreenInfo.getGameCanvasHeight() / 2);
 
-   if(gClientGame->getInCommanderMap())     // Ship not in center of the screen in cmdrs map.  Where is it?
+   if(getGame()->getInCommanderMap())     // Ship not in center of the screen in cmdrs map.  Where is it?
    {
       // If we join a server while in commander's map, we'll be here without a gameConnection and we'll get a crash without this check
-      GameConnection *gameConnection = gClientGame->getConnectionToServer();
+      GameConnection *gameConnection = getGame()->getConnectionToServer();
       if(!gameConnection)
          return;
 
@@ -875,7 +878,7 @@ void GameUserInterface::onMouseMoved()
          return;
 
       Point o = ship->getRenderPos();  // To avoid taking address of temporary
-      Point p = gClientGame->worldToScreenPoint( &o );
+      Point p = getGame()->worldToScreenPoint( &o );
 
       mCurrentMove.angle = atan2(mMousePoint.y + gScreenInfo.getGameCanvasHeight() / 2 - p.y, 
                                  mMousePoint.x + gScreenInfo.getGameCanvasWidth() / 2 - p.x);
@@ -927,14 +930,14 @@ void GameUserInterface::renderEngineeredItemDeploymentMarker(Ship *ship)
 // Runs on client
 void GameUserInterface::dropItem()
 {
-   if(!gClientGame->getConnectionToServer())
+   if(!getGame()->getConnectionToServer())
       return;
 
-   Ship *ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
+   Ship *ship = dynamic_cast<Ship *>(getGame()->getConnectionToServer()->getControlObject());
    if(!ship)
       return;
 
-   GameType *gt = gClientGame->getGameType();
+   GameType *gt = getGame()->getGameType();
    if(!gt)
       return;
 
@@ -951,26 +954,28 @@ void GameUserInterface::dropItem()
 // Send a message to the server that we are (or are not) busy chatting
 void GameUserInterface::setBusyChatting(bool busy)
 {
-   if( gClientGame && gClientGame->getConnectionToServer() )
-      gClientGame->getConnectionToServer()->c2sSetIsBusy(busy);
+   if(getGame()->getConnectionToServer())
+      getGame()->getConnectionToServer()->c2sSetIsBusy(busy);
 }
 
 
 // Select next weapon
 void GameUserInterface::advanceWeapon()
 {
-   GameType *g = gClientGame->getGameType();
-   if(g)
-      g->c2sAdvanceWeapon();
+   GameType *gameType = getGame()->getGameType();
+   if(gameType)
+      gameType->c2sAdvanceWeapon();
 }
+
 
 // Select a weapon by its index
 void GameUserInterface::selectWeapon(U32 indx)
 {
-   GameType *g = gClientGame->getGameType();
-   if(g)
-      g->c2sSelectWeapon(indx);
+   GameType *gameType = getGame()->getGameType();
+   if(gameType)
+      gameType->c2sSelectWeapon(indx);
 }
+
 
 // Temporarily disable the effects of a movement key to avoid unpleasant interactions between ship movement and loadout/quick chat entry
 void GameUserInterface::disableMovementKey(KeyCode keyCode)
@@ -1042,8 +1047,8 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       if(mCurrentMode == PlayMode)
       {
          Ship *ship = NULL;
-         if(gClientGame->getConnectionToServer())   // Prevents errors, getConnectionToServer() might be NULL, and getControlObject may crash if NULL
-            ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
+         if(getGame()->getConnectionToServer())   // Prevents errors, getConnectionToServer() might be NULL, and getControlObject may crash if NULL
+            ship = dynamic_cast<Ship *>(getGame()->getConnectionToServer()->getControlObject());
          if(ship)
          {
             if(keyCode == keyMOD1[gIniSettings.inputMode] && ship->getModule(0) == ModuleEngineer || 
@@ -1108,7 +1113,7 @@ void GameUserInterface::processPlayModeKey(KeyCode keyCode, char ascii)
       {
          if(mShutdownInitiator)
          {
-            gClientGame->getConnectionToServer()->c2sRequestCancelShutdown();
+            getGame()->getConnectionToServer()->c2sRequestCancelShutdown();
             mShutdownMode = Canceled;
          }
          else
@@ -1124,7 +1129,7 @@ void GameUserInterface::processPlayModeKey(KeyCode keyCode, char ascii)
 
       playBoop();
 
-      if(!gClientGame->isConnectedToServer())      // Perhaps we're still joining?
+      if(!getGame()->isConnectedToServer())      // Perhaps we're still joining?
       {
          endGame();
          getUIManager()->getMainMenuUserInterface()->activate();
@@ -1136,7 +1141,7 @@ void GameUserInterface::processPlayModeKey(KeyCode keyCode, char ascii)
       }
    }     
    else if(keyCode == keyCMDRMAP[inputMode])
-      gClientGame->zoomCommanderMap();
+      getGame()->zoomCommanderMap();
 
    else if(keyCode == keySCRBRD[inputMode])
    {     // (braces needed)
@@ -1371,7 +1376,7 @@ void GameUserInterface::adminPassHandler(ClientGame *game, const Vector<string> 
 
 void GameUserInterface::levelPassHandler(ClientGame *game, const Vector<string> &words)
 {
-   GameConnection *gc = gClientGame->getConnectionToServer();
+   GameConnection *gc = game->getConnectionToServer();
 
    if(gc->isLevelChanger())
       game->displayErrorMessage("!!! You can already change levels");
@@ -1572,15 +1577,16 @@ void GameUserInterface::muteHandler(ClientGame *game, const Vector<string> &word
 
 void GameUserInterface::serverCommandHandler(ClientGame *game, const Vector<string> &words)
 {
-   GameType *gt = gClientGame->getGameType();
-   if(gt)
+   GameType *gameType = game->getGameType();
+
+   if(gameType)
    {
       Vector<StringPtr> args;
 
       for(S32 i = 1; i < words.size(); i++)
          args.push_back(StringPtr(words[i]));
 
-      gt->c2sSendCommand(StringTableEntry(words[0], false), args);
+      gameType->c2sSendCommand(StringTableEntry(words[0], false), args);
    }
 }
 
@@ -1657,11 +1663,11 @@ void GameUserInterface::renderCurrentChat()
    }
 
    // Protect against crashes while game is initializing... is this really needed??
-   if(! (gClientGame && gClientGame->getConnectionToServer()))
+   if(!getGame()->getConnectionToServer())
       return;
 
    S32 promptSize = getStringWidth(CHAT_FONT_SIZE, promptStr);
-   S32 nameSize = getStringWidthf(CHAT_FONT_SIZE, "%s: ", gClientGame->getConnectionToServer()->getClientName().getString());
+   S32 nameSize = getStringWidthf(CHAT_FONT_SIZE, "%s: ", getGame()->getConnectionToServer()->getClientName().getString());
    S32 nameWidth = max(nameSize, promptSize);
    // Above block repeated below...
 
@@ -1746,11 +1752,12 @@ static void makeCommandCandidateList()
       commandCandidateList.push_back(chatCmds[i].cmdName);
 }
 
+
 static void makePlayerNameCandidateList(const Game *game)
 {
    nameCandidateList.clear();
 
-   if(gClientGame->getGameType())
+   if(game->getGameType())
       for(S32 i = 0; i < game->getGameType()->getClientCount(); i++)
          if(game->getGameType()->getClient(i).isValid())
             nameCandidateList.push_back(game->getGameType()->getClient(i)->name.getString());
@@ -1761,7 +1768,7 @@ static void makeTeamNameCandidateList(const Game *game)
 {
    nameCandidateList.clear();
 
-   if(gClientGame->getGameType())
+   if(game->getGameType())
       for(S32 i = 0; i < game->getTeamCount(); i++)
          nameCandidateList.push_back(game->getTeamName(i).getString());
 }
@@ -1852,7 +1859,7 @@ void GameUserInterface::processChatModeKey(KeyCode keyCode, char ascii)
             partial = "";                    // We'll be matching against an empty list since we've typed nothing so far
          }
 
-         Vector<string> *candidates = getCandidateList(gClientGame, words[0], arg);     // Could return NULL
+         Vector<string> *candidates = getCandidateList(getGame(), words[0], arg);     // Could return NULL
 
          // Now we have our candidates list... let's compare to what the player has already typed to generate completion string
          if(candidates && candidates->size() > 0)
@@ -1898,7 +1905,7 @@ void GameUserInterface::processChatModeKey(KeyCode keyCode, char ascii)
    else if(ascii)     // Append any other keys to the chat message
    {
       // Protect against crashes while game is initializing (because we look at the ship for the player's name)
-      if(gClientGame->getConnectionToServer())     // gClientGame cannot be NULL here
+      if(getGame()->getConnectionToServer())     // clientGame cannot be NULL here
       {
          S32 promptSize = getStringWidth(CHAT_FONT_SIZE, mCurrentChatType == TeamChat ? "(Team): " : "(Global): ");
 
@@ -1906,7 +1913,7 @@ void GameUserInterface::processChatModeKey(KeyCode keyCode, char ascii)
          //if(!ship)
          //   return;  // problem with unable to type something while trying to respawn.
 
-         S32 nameSize = getStringWidthf(CHAT_FONT_SIZE, "%s: ", gClientGame->getConnectionToServer()->getClientName().getString());
+         S32 nameSize = getStringWidthf(CHAT_FONT_SIZE, "%s: ", getGame()->getConnectionToServer()->getClientName().getString());
          S32 nameWidth = max(nameSize, promptSize);
          // Above block repeated above
 
@@ -1934,9 +1941,9 @@ void GameUserInterface::onKeyUp(KeyCode keyCode)
       if(mInScoreboardMode)     // We're turning scoreboard off
       {
          mInScoreboardMode = false;
-         GameType *g = gClientGame->getGameType();
-         if(g)
-            g->c2sRequestScoreboardUpdates(false);
+         GameType *gameType = getGame()->getGameType();
+         if(gameType)
+            gameType->c2sRequestScoreboardUpdates(false);
       }
    }
    else if(keyCode == keyTOGVOICE[inputMode])
@@ -2020,9 +2027,9 @@ void GameUserInterface::issueChat()
       // Check if chat buffer holds a message or a command
       if(mLineEditor.at(0) != '/' && mCurrentChatType != CmdChat)                   // It's a normal chat message
       {
-         GameType *gt = gClientGame->getGameType();
-         if(gt)
-            gt->c2sSendChat(mCurrentChatType == GlobalChat, mLineEditor.c_str());   // Broadcast message
+         GameType *gameType = getGame()->getGameType();
+         if(gameType)
+            gameType->c2sSendChat(mCurrentChatType == GlobalChat, mLineEditor.c_str());   // Broadcast message
       }
       else    // It's a command
          runCommand(mLineEditor.c_str());
@@ -2112,7 +2119,7 @@ void GameUserInterface::setVolume(VolumeType volType, const Vector<string> &word
       displayMessagef(gCmdChatColor, "Voice chat volume changed to %d %s", vol, vol == 0 ? "[MUTE]" : "");
       return;
    case ServerAlertVolumeType:
-      gClientGame->getConnectionToServer()->c2sSetServerAlertVolume((S8) vol);
+      getGame()->getConnectionToServer()->c2sSetServerAlertVolume((S8) vol);
       displayMessagef(gCmdChatColor, "Server alerts chat volume changed to %d %s", vol, vol == 0 ? "[MUTE]" : "");
       return;
   }
@@ -2127,13 +2134,16 @@ void GameUserInterface::cancelChat()
 
 
 // Constructor
-GameUserInterface::VoiceRecorder::VoiceRecorder()
+GameUserInterface::VoiceRecorder::VoiceRecorder(ClientGame *game)
 {
    mRecordingAudio = false;
    mMaxAudioSample = 0;
    mMaxForGain = 0;
    mVoiceEncoder = new SpeexVoiceEncoder;
+
+   mGame = game;
 }
+
 
 GameUserInterface::VoiceRecorder::~VoiceRecorder()
 {
@@ -2222,6 +2232,7 @@ void GameUserInterface::VoiceRecorder::stop()
    mWantToStopRecordingAudio = 2;
 }
 
+
 void GameUserInterface::VoiceRecorder::process()
 {
    if(mWantToStopRecordingAudio != 0)
@@ -2252,11 +2263,13 @@ void GameUserInterface::VoiceRecorder::process()
    }
    mMaxForGain = U32(mMaxForGain * 0.95f);
    S32 boostedMax = mMaxAudioSample + 2048;
+
    if(boostedMax > mMaxForGain)
       mMaxForGain = boostedMax;
+
    if(mMaxForGain > MaxDetectionThreshold)
    {
-      // apply some gain to the buffer:
+      // Apply some gain to the buffer:
       F32 gain = 0x7FFF / F32(mMaxForGain);
       for(U32 i = preSampleCount; i < sampleCount; i++)
       {
@@ -2275,9 +2288,9 @@ void GameUserInterface::VoiceRecorder::process()
 
    if(sendBuffer.isValid())
    {
-      GameType *gt = gClientGame->getGameType();
-      if(gt && sendBuffer->getBufferSize() < 1024)      // don't try to send too big.
-         gt->c2sVoiceChat(gIniSettings.echoVoice, sendBuffer);
+      GameType *gameType = mGame->getGameType();
+      if(gameType && sendBuffer->getBufferSize() < 1024)      // Don't try to send too big
+         gameType->c2sVoiceChat(gIniSettings.echoVoice, sendBuffer);
    }
 }
 

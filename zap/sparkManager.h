@@ -42,7 +42,9 @@ namespace FXManager
       SparkTypeCount
    };
 
-   void init();
+   ClientGame *mGame;
+
+   void init(ClientGame *game);
    void emitSpark(Point pos, Point vel, Color color, F32 ttl=0, SparkType=SparkTypePoint);
    void emitExplosion(Point pos, F32 size, Color *colorArray, U32 numColors);
    void emitBurst(Point pos, Point scale, Color color1, Color color2);

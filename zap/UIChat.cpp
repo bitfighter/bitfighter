@@ -379,14 +379,14 @@ void ChatUserInterface::render()
    renderHeader();
 
    // And footer
-   glColor3f(0, 1, 0);
+   glColor(Colors::green);
    S32 vertFooterPos = gScreenInfo.getGameCanvasHeight() - vertMargin - VERT_FOOTER_SIZE;
    drawCenteredString(vertFooterPos, VERT_FOOTER_SIZE - 2, "Type your message | ENTER to send | ESC exits");
 
    renderChatters(horizMargin, vertFooterPos - CHAT_NAMELIST_SIZE - CHAT_FONT_MARGIN * 2);
 
    // Render incoming chat msgs
-   glColor3f(1,1,1);
+   glColor(Colors::white);
 
    U32 y = UserInterface::vertMargin + 60;
 
@@ -403,9 +403,9 @@ void ChatUserInterface::render()
    renderMessageComposition(vertFooterPos - 45);
 
    // Give user notice that there is no connection to master, and thus chatting is ineffectual
-   if(!(gClientGame && gClientGame->getConnectionToMaster() && gClientGame->getConnectionToMaster()->getConnectionState() == NetConnection::Connected))
+   if(!(getGame()->getConnectionToMaster() && getGame()->getConnectionToMaster()->getConnectionState() == NetConnection::Connected))
    {
-      glColor3f(1, 0, 0);
+      glColor(Colors::red);
       drawCenteredString(200, 20, "Not connected to Master Server");
       drawCenteredString(230, 20, "Your chat messages cannot be relayed");
    }
@@ -417,21 +417,21 @@ void ChatUserInterface::render()
 void ChatUserInterface::renderHeader()
 {
    // Draw title, subtitle, and footer
-   glColor3f(1, 1, 1);
+   glColor(Colors::white);
    drawCenteredString(vertMargin, MENU_TITLE_SIZE, "GameLobby / Global Chat");
 
    string subtitle = "Not currently connected to any game server";
 
-   if(gClientGame && gClientGame->getConnectionToServer())
+   if(getGame()->getConnectionToServer())
    {
-      string name = gClientGame->getConnectionToServer()->getServerName();
+      string name = getGame()->getConnectionToServer()->getServerName();
       if(name == "")
          subtitle = "Connected to game server with no name";
       else
          subtitle = "Connected to game server \"" + name + "\"";
    }
 
-   glColor3f(0, 1, 0);
+   glColor(Colors::green);
    drawCenteredString(vertMargin + MENU_TITLE_SIZE + TITLE_SUBTITLE_GAP, MENU_SUBTITLE_SIZE, subtitle.c_str());
 }
 
@@ -494,29 +494,29 @@ SuspendedUserInterface::SuspendedUserInterface(ClientGame *game) : Parent(game)
 
 void SuspendedUserInterface::renderHeader()
 {
-   if(gClientGame->isSuspended())
+   if(getGame()->isSuspended())
    {
-      glColor3f(1,1,1);
+      glColor(Colors::white);
       drawCenteredString(vertMargin, MENU_TITLE_SIZE, "-- GAME SUSPENDED -- ");
    }
    else
    {
-      glColor3f(1,0,0);
+      glColor(Colors::red);
       drawCenteredString(vertMargin, MENU_TITLE_SIZE, "!! GAME RESTARTED !! ");
    }
 
    string subtitle = "Not currently connected to any game server";
 
-   if(gClientGame && gClientGame->getConnectionToServer())
+   if(getGame()->getConnectionToServer())
    {
-      string name = gClientGame->getConnectionToServer()->getServerName();
+      string name = getGame()->getConnectionToServer()->getServerName();
       if(name == "")
          subtitle = "Connected to game server with no name";
       else
          subtitle = "Connected to game server \"" + name + "\"";
    }
 
-   glColor3f(0, 1, 0);
+   glColor(Colors::green);
    drawCenteredString(vertMargin + MENU_TITLE_SIZE + TITLE_SUBTITLE_GAP, MENU_SUBTITLE_SIZE, subtitle.c_str());
 }
 

@@ -185,26 +185,26 @@ void QueryServersUserInterface::contactEveryone()
    mBroadcastPingSendTime = Platform::getRealMilliseconds();
 
    //Address broadcastAddress(IPProtocol, Address::Broadcast, 28000);
-   //gClientGame->getNetInterface()->sendPing(broadcastAddress, mNonce);
+   //getGame()->getNetInterface()->sendPing(broadcastAddress, mNonce);
 
    // Always ping these servers -- typically a local server
    for(S32 i = 0; i < alwaysPingList.size(); i++)
    {
       Address address(alwaysPingList[i].c_str());
-      gClientGame->getNetInterface()->sendPing(address, mNonce);
+      getGame()->getNetInterface()->sendPing(address, mNonce);
    } 
 
    // Try to ping the servers from our fallback list if we're having trouble connecting to the master
-   if(gClientGame->getTimeUnconnectedToMaster() > GIVE_UP_ON_MASTER_AND_GO_IT_ALONE_TIME) 
+   if(getGame()->getTimeUnconnectedToMaster() > GIVE_UP_ON_MASTER_AND_GO_IT_ALONE_TIME) 
    {
       for(S32 i = 0; i < prevServerListFromMaster.size(); i++)
-         gClientGame->getNetInterface()->sendPing(Address(prevServerListFromMaster[i].c_str()), mNonce);
+         getGame()->getNetInterface()->sendPing(Address(prevServerListFromMaster[i].c_str()), mNonce);
 
       mGivenUpOnMaster = true;
    }
 
    // If we already have a connection to the Master, start the server query... otherwise, don't
-   MasterServerConnection *conn = gClientGame->getConnectionToMaster();
+   MasterServerConnection *conn = getGame()->getConnectionToMaster();
 
    if(conn)
    {
@@ -440,7 +440,7 @@ void QueryServersUserInterface::idle(U32 timeDelta)
                s.state = ServerRef::SentPing;
                s.lastSendTime = time;
                s.sendNonce.getRandom();
-               gClientGame->getNetInterface()->sendPing(s.serverAddress, s.sendNonce);
+               getGame()->getNetInterface()->sendPing(s.serverAddress, s.sendNonce);
                pendingPings++;
                if(pendingPings >= MaxPendingPings)
                   break;
@@ -481,7 +481,7 @@ void QueryServersUserInterface::idle(U32 timeDelta)
             {
                s.state = ServerRef::SentQuery;
                s.lastSendTime = time;
-               gClientGame->getNetInterface()->sendQuery(s.serverAddress, s.sendNonce, s.identityToken);
+               getGame()->getNetInterface()->sendQuery(s.serverAddress, s.sendNonce, s.identityToken);
                pendingQueries++;
                if(pendingQueries >= MaxPendingQueries)
                   break;
@@ -514,7 +514,7 @@ void QueryServersUserInterface::idle(U32 timeDelta)
 
    // Not sure about the logic in here... maybe this is right...
    if( (mMasterRequeryTimer.update(elapsedTime) && !mWaitingForResponseFromMaster) ||
-            (!mGivenUpOnMaster && gClientGame->getTimeUnconnectedToMaster() > GIVE_UP_ON_MASTER_AND_GO_IT_ALONE_TIME) )
+            (!mGivenUpOnMaster && getGame()->getTimeUnconnectedToMaster() > GIVE_UP_ON_MASTER_AND_GO_IT_ALONE_TIME) )
        contactEveryone();
 
    // Go to previous page if a server has gone away and the last server has disappeared from the current screen
@@ -639,12 +639,12 @@ void QueryServersUserInterface::render()
    for(S32 i = 0; i < buttons.size(); i++)
       buttons[i].render(mJustMovedMouse ? mousePos->x : -1, mJustMovedMouse ? mousePos->y : -1);
 
-   bool connectedToMaster = gClientGame->getConnectionToMaster() && gClientGame->getConnectionToMaster()->isEstablished();
+   bool connectedToMaster = getGame()->getConnectionToMaster() && getGame()->getConnectionToMaster()->isEstablished();
 
    if(connectedToMaster)
    {
       glColor(gMasterServerBlue);
-      drawCenteredStringf(vertMargin - 8, 12, "Connected to %s", gClientGame->getConnectionToMaster()->getMasterName().c_str() );
+      drawCenteredStringf(vertMargin - 8, 12, "Connected to %s", getGame()->getConnectionToMaster()->getMasterName().c_str() );
    }
    else
    {

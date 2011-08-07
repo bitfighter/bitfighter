@@ -176,7 +176,8 @@ void SoccerGameType::scoreGoal(Ship *ship, StringTableEntry scorerName, S32 scor
 void SoccerGameType::renderInterfaceOverlay(bool scoreboardVisible)
 {
    Parent::renderInterfaceOverlay(scoreboardVisible);
-   Ship *ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
+   Ship *ship = dynamic_cast<Ship *>(dynamic_cast<ClientGame *>(getGame())->getConnectionToServer()->getControlObject());
+
    if(!ship)
       return;
 

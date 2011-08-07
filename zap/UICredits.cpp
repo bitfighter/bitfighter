@@ -100,7 +100,7 @@ void CreditsUserInterface::onActivate()
    // destructor is invoked
 
    // Add credits scroller first and make it active
-   CreditsScroller *scroller = new CreditsScroller;
+   CreditsScroller *scroller = new CreditsScroller(getGame());
    scroller->setActive(true);
 
    if(fxList.size() > 1)
@@ -163,14 +163,14 @@ void CreditsUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 //-----------------------------------------------------
 
 // Constructor
-CreditsFX::CreditsFX()
+CreditsFX::CreditsFX(ClientGame *game)
 {
    activated = false;
-   gClientGame->getUIManager()->getCreditsUserInterface()->addFX(this);
+   game->getUIManager()->getCreditsUserInterface()->addFX(this);
 }
 
 // Constructor
-CreditsScroller::CreditsScroller()
+CreditsScroller::CreditsScroller(ClientGame *game) : Parent(game)
 {
    glLineWidth(gDefaultLineWidth);
 

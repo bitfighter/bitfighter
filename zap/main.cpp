@@ -1824,7 +1824,7 @@ int main(int argc, char **argv)
 #ifndef ZAP_DEDICATED
    if(gClientGame)     // That is, we're starting up in interactive mode, as opposed to running a dedicated server
    {
-      FXManager::init();                                    // Get ready for sparks!!  C'mon baby!!
+      FXManager::init(gClientGame);                         // Get ready for sparks!!  C'mon baby!!
       Joystick::populateJoystickStaticData();               // Build static data needed for joysticks
       Joystick::initJoystick();                             // Initialize joystick system
       resetKeyStates();                                     // Reset keyboard state mapping to show no keys depressed

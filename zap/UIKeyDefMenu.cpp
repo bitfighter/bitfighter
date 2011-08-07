@@ -32,7 +32,6 @@
 #include "keyCode.h"
 #include "IniFile.h"
 #include "config.h"
-#include "game.h"    // For gClientGame
 #include "Colors.h"
 #include "ScreenInfo.h"
 #include "JoystickRender.h"
@@ -168,7 +167,7 @@ void KeyDefMenuUserInterface::render()
    S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
 
    // Draw the game screen, then dim it out so you can still see it under our overlay
-   if(gClientGame->getConnectionToServer())
+   if(getGame()->getConnectionToServer())
    {
       getUIManager()->getGameUserInterface()->render();
       glColor4f(0, 0, 0, 0.6f);

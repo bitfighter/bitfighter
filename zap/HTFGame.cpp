@@ -237,15 +237,16 @@ namespace Zap
    void HTFGameType::renderInterfaceOverlay(bool scoreboardVisible)
    {
       Parent::renderInterfaceOverlay(scoreboardVisible);
-      Ship *u = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
-      if(!u)
+      Ship *ship = dynamic_cast<Ship *>(dynamic_cast<ClientGame *>(getGame())->getConnectionToServer()->getControlObject());
+      if(!ship)
          return;
+
       bool uFlag = false;
-      S32 team = u->getTeam();
+      S32 team = ship->getTeam();
 
       for(S32 i = 0; i < mFlags.size(); i++)
       {
-         if(mFlags[i].isValid() && mFlags[i]->getMount() == u)
+         if(mFlags[i].isValid() && mFlags[i]->getMount() == ship)
          {
             for(S32 j = 0; j < mZones.size(); j++)
             {
@@ -275,16 +276,16 @@ namespace Zap
 
          if(!mFlags[i]->isMounted() && !uFlag)
          {
-            GoalZone *gz = mFlags[i]->getZone();
-            if(gz && gz->getTeam() != team)
-               renderObjectiveArrow(mFlags[i], getTeamColor(gz->getTeam()));
-            else if(!gz)
+            GoalZone *goalZone = mFlags[i]->getZone();
+            if(goalZone && goalZone->getTeam() != team)
+               renderObjectiveArrow(mFlags[i], getTeamColor(goalZone->getTeam()));
+            else if(!goalZone)
                renderObjectiveArrow(mFlags[i], getTeamColor(-1));
          }
          else
          {
             Ship *mount = mFlags[i]->getMount();
-            if(mount && mount != u)
+            if(mount && mount != ship)
                renderObjectiveArrow(mount, getTeamColor(mount->getTeam()));
          }
       }

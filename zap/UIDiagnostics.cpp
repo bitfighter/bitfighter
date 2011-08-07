@@ -191,7 +191,7 @@ static S32 showFoldersBlock(F32 textsize, S32 ypos, S32 gap)
       glColor3f(0,1,1);
       UserInterface::drawString(xpos, ypos, (S32)textsize, names[i]);
       xpos += nameWidth + spaceWidth;
-      glColor3f(1,1,1);
+      glColor(Colors::white);
       UserInterface::drawString(xpos, ypos, (S32)textsize, vals[i]);
 
       ypos += (S32)textsize + gap;
@@ -203,43 +203,43 @@ static S32 showFoldersBlock(F32 textsize, S32 ypos, S32 gap)
 
 static S32 showVersionBlock(S32 ypos, S32 textsize, S32 gap)
 {
-   glColor3f(1,1,1);
+   glColor(Colors::white);
 
    S32 x = UserInterface::getCenteredStringStartingPosf(textsize, "M/C Ver: %d | C/S Ver: %d | Build: %s/%d | CPU: %s | OS: %s | Cmplr: %s",
            MASTER_PROTOCOL_VERSION, CS_PROTOCOL_VERSION, ZAP_GAME_RELEASE, BUILD_VERSION, TNL_CPU_STRING, TNL_OS_STRING, TNL_COMPILER_STRING);
 
-   glColor3f(1,1,1);
+   glColor(Colors::white);
    x += UserInterface::drawStringAndGetWidthf(x, ypos, textsize, "M/C Ver: ");
-   glColor3f(1,1,0);
+   glColor(Colors::yellow);
    x += UserInterface::drawStringAndGetWidthf(x, ypos, textsize, "%d", MASTER_PROTOCOL_VERSION);
 
-   glColor3f(1,1,1);
+   glColor(Colors::white);
    x += UserInterface::drawStringAndGetWidthf(x, ypos, textsize, " | C/S Ver: ");
-   glColor3f(1,1,0);
+   glColor(Colors::yellow);
    x += UserInterface::drawStringAndGetWidthf(x, ypos, textsize, "%d", CS_PROTOCOL_VERSION);
 
-   glColor3f(1,1,1);
+   glColor(Colors::white);
    x += UserInterface::drawStringAndGetWidthf(x, ypos, textsize, " | Build: ");
-   glColor3f(1,1,0);
+   glColor(Colors::yellow);
    x += UserInterface::drawStringAndGetWidthf(x, ypos, textsize, "%d", BUILD_VERSION);
-   glColor3f(1,1,0);
+   glColor(Colors::yellow);
    x += UserInterface::drawStringAndGetWidthf(x, ypos, textsize, "/");
-   glColor3f(1,1,0);
+   glColor(Colors::yellow);
    x += UserInterface::drawStringAndGetWidthf(x, ypos, textsize, "%s", ZAP_GAME_RELEASE);
 
-   glColor3f(1,1,1);
+   glColor(Colors::white);
    x += UserInterface::drawStringAndGetWidthf(x, ypos, textsize, " | CPU: ");
-   glColor3f(1,1,0);
+   glColor(Colors::yellow);
    x += UserInterface::drawStringAndGetWidthf(x, ypos, textsize, "%s", TNL_CPU_STRING);
 
-   glColor3f(1,1,1);
+   glColor(Colors::white);
    x += UserInterface::drawStringAndGetWidthf(x, ypos, textsize, " | OS: ");
-   glColor3f(1,1,0);
+   glColor(Colors::yellow);
    x += UserInterface::drawStringAndGetWidthf(x, ypos, textsize, "%s", TNL_OS_STRING);
 
-   glColor3f(1,1,1);
+   glColor(Colors::white);
    x += UserInterface::drawStringAndGetWidthf(x, ypos, textsize, " | Cmplr: ");
-   glColor3f(1,1,0);
+   glColor(Colors::yellow);
    x += UserInterface::drawStringAndGetWidthf(x, ypos, textsize, "%s", TNL_COMPILER_STRING);
 
    return ypos + textsize + gap * 2;
@@ -248,18 +248,16 @@ static S32 showVersionBlock(S32 ypos, S32 textsize, S32 gap)
 
 static S32 showNameDescrBlock(S32 ypos, S32 textsize, S32 gap)
 {
-   glColor3f(1,1,1);
-
    S32 x = UserInterface::getCenteredStringStartingPosf(textsize, "Server Name: %s | Descr: %s", gHostName.c_str(), gHostDescr.c_str());
 
-   glColor3f(1,1,1);
+   glColor(Colors::white);
    x += UserInterface::drawStringAndGetWidthf(x, ypos, textsize, "Server Name: ");
-   glColor3f(1,1,0);
+   glColor(Colors::yellow);
    x += UserInterface::drawStringAndGetWidthf(x, ypos, textsize, "%s", gHostName.c_str());
 
-   glColor3f(1,1,1);
+   glColor(Colors::white);
    x += UserInterface::drawStringAndGetWidthf(x, ypos, textsize, " | Descr: ");
-   glColor3f(1,1,0);
+   glColor(Colors::yellow);
    x += UserInterface::drawStringAndGetWidthf(x, ypos, textsize, "%s", gHostDescr.c_str());
 
    return ypos + textsize + gap;
@@ -268,20 +266,20 @@ static S32 showNameDescrBlock(S32 ypos, S32 textsize, S32 gap)
 
 extern Color gMasterServerBlue;
 
-static S32 showMasterBlock(S32 textsize, S32 ypos, S32 gap, bool leftcol)
+static S32 showMasterBlock(ClientGame *game, S32 textsize, S32 ypos, S32 gap, bool leftcol)
 {
-   UserInterface::drawCenteredStringPair2Colf(ypos, textsize, leftcol, "Master Srvr Addr:", "%s", gMasterAddress.size()==0 ? "Empty" : gMasterAddress[0].c_str());
+   UserInterface::drawCenteredStringPair2Colf(ypos, textsize, leftcol, "Master Srvr Addr:", "%s", gMasterAddress.size() == 0 ? "Empty" : gMasterAddress[0].c_str());
 
    ypos += textsize + gap;
-   if(gClientGame && gClientGame->getConnectionToMaster() && gClientGame->getConnectionToMaster()->isEstablished())
+   if(game->getConnectionToMaster() && game->getConnectionToMaster()->isEstablished())
    {
       glColor(gMasterServerBlue);
       UserInterface::drawCenteredString2Colf(ypos, textsize, leftcol, "Connected to [%s]", 
-                                             gClientGame->getConnectionToMaster()->getMasterName().c_str() );
+                                             game->getConnectionToMaster()->getMasterName().c_str() );
    }
    else
    {
-      glColor3f(1, 0, 0);
+      glColor(Colors::red);
       UserInterface::drawCenteredString2Col(ypos, textsize, leftcol, "Not connected to Master Server" );
    }
 
@@ -348,7 +346,7 @@ void DiagnosticUserInterface::render()
 
       S32 ypos = showVersionBlock(120, 14, gap);
 
-      glColor3f(1,1,1);
+      glColor(Colors::white);
 
       textsize = 16;
 
@@ -365,7 +363,7 @@ void DiagnosticUserInterface::render()
 
       ypos += textsize + gap;
 
-      showMasterBlock(textsize, ypos, gap, false);
+      showMasterBlock(getGame(), textsize, ypos, gap, false);
 
       ypos += textsize + gap;
       drawCenteredStringPair2Colf(ypos, textsize, true, "Input Mode:", "%s", inputMode.c_str());
@@ -397,7 +395,7 @@ void DiagnosticUserInterface::render()
          glColor3f(0.5,0,0);
          glVertex2i(i*8+rawAxisPosX, rawAxisPosY - 20);
          glVertex2i(i*8+rawAxisPosX, rawAxisPosY + 20);
-         glColor3f(1,1,0);
+         glColor(Colors::yellow);
          glVertex2i(i*8+rawAxisPosX, rawAxisPosY);
          F32 a = Joystick::rawAxis[i];
          if(a < -1) a = -1;
@@ -497,7 +495,7 @@ void DiagnosticUserInterface::render()
 
       S32 ypos = vertMargin + 35;
 
-      glColor3f(1,1,1);
+      glColor(Colors::white);
       ypos += showNameDescrBlock(ypos, textsize, gap);
 
       drawCenteredStringPair2Colf(ypos, textsize, true, "Host Addr:", "%s", gBindAddress.toString());
@@ -517,9 +515,9 @@ void DiagnosticUserInterface::render()
       ypos += textsize + gap;
 
       S32 x = getCenteredString2ColStartingPosf(textsize, false, "Max Players: %d", getServerMaxPlayers());
-      glColor3f(1,1,1);
+      glColor(Colors::white);
       x += drawStringAndGetWidthf(x, ypos, textsize, "Max Players: ");
-      glColor3f(1,1,0);
+      glColor(Colors::yellow);
       x += drawStringAndGetWidthf(x, ypos, textsize, "%d", getServerMaxPlayers());
 
       ypos += textsize + gap;
@@ -531,7 +529,7 @@ void DiagnosticUserInterface::render()
       
 
       // Dump out names of loaded levels...
-      glColor3f(1,1,1);
+      glColor(Colors::white);
       string allLevels = "Levels: ";
 
       if(!gServerGame)

@@ -409,26 +409,26 @@ void InstructionsUserInterface::renderPage2()
 
          case 3:     // Repair
             {
-               F32 health = (gClientGame->getCurrentTime() & 0x7FF) * 0.0005f;
+               F32 health = (getGame()->getCurrentTime() & 0x7FF) * 0.0005f;
 
                renderShip(&Colors::blue, 1, thrusts, health, (F32)Ship::CollisionRadius, 0, false, false, false, false);
                glLineWidth(gLineWidth3);
-               glColor3f(1, 0, 0);
+               glColor(Colors::red);
                drawCircle(0, 0, Ship::RepairDisplayRadius);
                glLineWidth(gDefaultLineWidth);
             }
             break;
 
          case 4:     // Sensor
-            renderShip(&Colors::blue, 1, thrusts, 1, (F32)Ship::CollisionRadius, gClientGame->getCurrentTime(), false, false, true, false);
+            renderShip(&Colors::blue, 1, thrusts, 1, (F32)Ship::CollisionRadius, getGame()->getCurrentTime(), false, false, true, false);
             break;
 
          case 5:     // Cloak
             {
-               U32 ct = gClientGame->getCurrentTime();
-               F32 frac = F32(ct & 0x3FF);
+               U32 time = getGame()->getCurrentTime();
+               F32 frac = F32(time & 0x3FF);
                F32 alpha;
-               if((ct & 0x400) != 0)
+               if((time & 0x400) != 0)
                   alpha = frac * 0.001f;
                else
                   alpha = 1 - (frac * 0.001f);
@@ -520,13 +520,13 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
       switch(i)
       {
          case 0:
-            renderProjectile(Point(0, 0), 0, gClientGame->getCurrentTime());
+            renderProjectile(Point(0, 0), 0, getGame()->getCurrentTime());
             break;
          case 1:
-            renderProjectile(Point(0, 0), 1, gClientGame->getCurrentTime());
+            renderProjectile(Point(0, 0), 1, getGame()->getCurrentTime());
             break;
          case 2:
-            renderProjectile(Point(0, 0), 2, gClientGame->getCurrentTime());
+            renderProjectile(Point(0, 0), 2, getGame()->getCurrentTime());
             break;
          case 3:
             renderGrenade(Point(0, 0), 1);
@@ -569,7 +569,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
             renderForceField(Point(-35, 0), Point(50, 0), Colors::red, true);
             break;
          case 18:
-            renderTeleporter(Point(0, 0), 0, true, gClientGame->getCurrentTime(), 1, (F32)Teleporter::TELEPORTER_RADIUS, 1, Vector<Point>(), false);
+            renderTeleporter(Point(0, 0), 0, true, getGame()->getCurrentTime(), 1, 1, (F32)Teleporter::TELEPORTER_RADIUS, 1, Vector<Point>(), false);
             break;
          case 19:
             renderFlag(0, 0, &Colors::red);
@@ -602,17 +602,17 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
                Triangulate::Process(o, f);
 
                renderNexus(&o, &f, findCentroid(o), angleOfLongestSide(o), 
-                                       gClientGame->getCurrentTime() % 5000 > 2500, 0);
+                                       getGame()->getCurrentTime() % 5000 > 2500, 0);
             }
             break;
 
          case 22:    // Asteroid... using goofball factor to keep out of sync with Nexus graphic
             renderAsteroid(Point(0,-10), 
-                     (S32)(gClientGame->getCurrentTime() / 2891) % Asteroid::getDesignCount(), .7f);    
+                     (S32)(getGame()->getCurrentTime() / 2891) % Asteroid::getDesignCount(), .7f);    
             break;
 
          case 23:    // SpeedZone
-            renderSpeedZone(&speedZoneRenderPoints, gClientGame->getCurrentTime());
+            renderSpeedZone(&speedZoneRenderPoints, getGame()->getCurrentTime());
             break;
 
          case 24:    // TestItem

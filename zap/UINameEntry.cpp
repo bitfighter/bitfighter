@@ -226,7 +226,7 @@ void PasswordEntryUserInterface::render()
    const S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
    const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
 
-   if(gClientGame->getConnectionToServer())
+   if(getGame()->getConnectionToServer())
    {
       getUIManager()->getGameUserInterface()->render();
 
@@ -278,7 +278,7 @@ ServerPasswordEntryUserInterface::ServerPasswordEntryUserInterface(ClientGame *g
 
 void InGamePasswordEntryUserInterface::onAccept(const char *text)
 {
-   GameConnection *gc = gClientGame->getConnectionToServer();
+   GameConnection *gc = getGame()->getConnectionToServer();
    if(gc)
    {
       submitPassword(gc, text);

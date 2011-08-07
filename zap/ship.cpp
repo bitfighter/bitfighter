@@ -1061,7 +1061,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
          if(i == ModuleSensor && wasActive[i] != mModuleActive[i])
          {
             mSensorZoomTimer.reset(SensorZoomTime - mSensorZoomTimer.getCurrent(), SensorZoomTime);
-            mSensorStartTime = gClientGame->getCurrentTime();
+            mSensorStartTime = getGame()->getCurrentTime();
          }
          if(i == ModuleCloak && wasActive[i] != mModuleActive[i])
             mCloakTimer.reset(CloakFadeTime - mCloakTimer.getCurrent(), CloakFadeTime);

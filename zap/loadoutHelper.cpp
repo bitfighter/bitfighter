@@ -45,7 +45,7 @@ Vector<LoadoutItem> gLoadoutWeapons;
 
 LoadoutItem::LoadoutItem(ClientGame *game, KeyCode key, KeyCode button, U32 index)      // Shortcut for modules -- use info from ModuleInfos
 {
-   ModuleInfo *moduleInfo = gClientGame->getModuleInfo((ShipModule) index);
+   ModuleInfo *moduleInfo = game->getModuleInfo((ShipModule) index);
 
    this->key = key;
    this->button = button;
@@ -77,23 +77,23 @@ void LoadoutHelper::initialize(bool includeEngineer)
    gLoadoutModules.clear();
    gLoadoutWeapons.clear();
 
-   gLoadoutModules.push_back(getGame(), LoadoutItem(KEY_1, BUTTON_1, ModuleBoost));
-   gLoadoutModules.push_back(getGame(), LoadoutItem(KEY_2, BUTTON_2, ModuleShield));
-   gLoadoutModules.push_back(getGame(), LoadoutItem(KEY_3, BUTTON_3, ModuleRepair));
-   gLoadoutModules.push_back(getGame(), LoadoutItem(KEY_4, BUTTON_4, ModuleSensor));
-   gLoadoutModules.push_back(getGame(), LoadoutItem(KEY_5, BUTTON_5, ModuleCloak));
-   gLoadoutModules.push_back(getGame(), LoadoutItem(KEY_6, BUTTON_6, ModuleArmor));
+   gLoadoutModules.push_back(LoadoutItem(getGame(), KEY_1, BUTTON_1, ModuleBoost));
+   gLoadoutModules.push_back(LoadoutItem(getGame(), KEY_2, BUTTON_2, ModuleShield));
+   gLoadoutModules.push_back(LoadoutItem(getGame(), KEY_3, BUTTON_3, ModuleRepair));
+   gLoadoutModules.push_back(LoadoutItem(getGame(), KEY_4, BUTTON_4, ModuleSensor));
+   gLoadoutModules.push_back(LoadoutItem(getGame(), KEY_5, BUTTON_5, ModuleCloak));
+   gLoadoutModules.push_back(LoadoutItem(getGame(), KEY_6, BUTTON_6, ModuleArmor));
 
    if(includeEngineer)
-      gLoadoutModules.push_back(getGame(), LoadoutItem(KEY_7, BUTTON_7, ModuleEngineer));
+      gLoadoutModules.push_back(LoadoutItem(getGame(), KEY_7, BUTTON_7, ModuleEngineer));
 
-   gLoadoutWeapons.push_back(getGame(), LoadoutItem(KEY_1, BUTTON_1, WeaponPhaser,  "Phaser",          "", ModuleNone));
-   gLoadoutWeapons.push_back(getGame(), LoadoutItem(KEY_2, BUTTON_2, WeaponBounce,  "Bouncer",         "", ModuleNone));
-   gLoadoutWeapons.push_back(getGame(), LoadoutItem(KEY_3, BUTTON_3, WeaponTriple,  "Triple",          "", ModuleNone));
-   gLoadoutWeapons.push_back(getGame(), LoadoutItem(KEY_4, BUTTON_4, WeaponBurst,   "Burster",         "", ModuleNone));
-   gLoadoutWeapons.push_back(getGame(), LoadoutItem(KEY_5, BUTTON_5, WeaponMine,    "Mine Layer",      "", ModuleNone));
+   gLoadoutWeapons.push_back(LoadoutItem(getGame(), KEY_1, BUTTON_1, WeaponPhaser,  "Phaser",          "", ModuleNone));
+   gLoadoutWeapons.push_back(LoadoutItem(getGame(), KEY_2, BUTTON_2, WeaponBounce,  "Bouncer",         "", ModuleNone));
+   gLoadoutWeapons.push_back(LoadoutItem(getGame(), KEY_3, BUTTON_3, WeaponTriple,  "Triple",          "", ModuleNone));
+   gLoadoutWeapons.push_back(LoadoutItem(getGame(), KEY_4, BUTTON_4, WeaponBurst,   "Burster",         "", ModuleNone));
+   gLoadoutWeapons.push_back(LoadoutItem(getGame(), KEY_5, BUTTON_5, WeaponMine,    "Mine Layer",      "", ModuleNone));
 // { KEY_6, 5, WeaponHeatSeeker, "Heat Seeker"},      // Need to make changes below to support this
-   gLoadoutWeapons.push_back(getGame(), LoadoutItem(KEY_6, BUTTON_6, WeaponSpyBug,  "Spy Bug Placer",  "", ModuleSensor));  // Only visible when Enhanced Sensor is a selected module
+   gLoadoutWeapons.push_back(LoadoutItem(getGame(), KEY_6, BUTTON_6, WeaponSpyBug,  "Spy Bug Placer",  "", ModuleSensor));  // Only visible when Enhanced Sensor is a selected module
 };
 
 
@@ -266,7 +266,7 @@ bool LoadoutHelper::processKeyCode(KeyCode keyCode)
 
       exitHelper();                     // Exit loadout menu and resume play, however we leave this routine
 
-      GameConnection *gc = gClientGame->getConnectionToServer();
+      GameConnection *gc = getGame()->getConnectionToServer();
       if(!gc)
          return true;
 
@@ -301,19 +301,19 @@ bool LoadoutHelper::processKeyCode(KeyCode keyCode)
       if(theSame)      // Don't bother if ship config hasn't changed
       {
          if(gIniSettings.verboseHelpMessages)
-            gClientGame->displayMessage(Color(1.0, 0.5, 0.5), "%s", "Modifications canceled -- new ship design same as the old.");
+            getGame()->displayMessage(Color(1.0, 0.5, 0.5), "%s", "Modifications canceled -- new ship design same as the old.");
          return true;
       }
 
 
-      GameType *gt = gClientGame->getGameType();
+      GameType *gt = getGame()->getGameType();
       bool spawnWithLoadout = ! gt->levelHasLoadoutZone();  // gt->isSpawnWithLoadoutGame() not used anymore.
 
       // Check if we are in a loadout zone...  if so, it will be changed right away...
       // ...otherwise, display a notice to the player to head for a LoadoutZone
       // We've done a lot of work to get this message just right!  I hope players appreciate it!
       if(gIniSettings.verboseHelpMessages && !(ship && ship->isInZone(LoadoutZoneType)) )          
-         gClientGame->displayMessage(Color(1.0, 0.5, 0.5), 
+         getGame()->displayMessage(Color(1.0, 0.5, 0.5), 
                                            "Ship design changed -- %s%s", 
                                            spawnWithLoadout ? "changes will be activated when you respawn" : "enter Loadout Zone to activate changes", 
                                            spawnWithLoadout && gt->levelHasLoadoutZone() ? " or enter Loadout Zone." : ".");

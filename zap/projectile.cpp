@@ -133,8 +133,11 @@ void Projectile::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
       mType = (ProjectileType) stream->readEnum(ProjectileTypeCount);
 
-      TNLAssert(gClientGame->getConnectionToServer(), "Defunct connection to server in projectile.cpp!");
-      Ship *ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
+      GameConnection *gc = dynamic_cast<ClientGame *>(getGame())->getConnectionToServer();
+      TNLAssert(gc, "Defunct connection to server in projectile.cpp!");
+
+      Ship *ship = dynamic_cast<Ship *>(gc->getControlObject());
+
       if(ship && ship->hasModule(ModuleSensor))
          mObjectTypeMask |= CommandMapVisType;     // Bullets visible on commander's map if you have sensor
 
@@ -447,25 +450,27 @@ GrenadeProjectile::GrenadeProjectile(Point pos, Point vel, GameObject *shooter):
 // Runs on client and server
 void GrenadeProjectile::idle(IdleCallPath path)
 {
-
    U32 aliveTime = getGame()->getCurrentTime() - getCreationTime();  // Age of object, in ms
 
-   // Fix effect of ship getting ahead of burst on laggy client      (gClientGame is never NULL)
-   bool collisionDisabled = isGhost() && aliveTime < 250 &&
-                            gClientGame->getConnectionToServer() && gClientGame->getConnectionToServer()->getControlObject();
+   ClientGame *clientGame = dynamic_cast<ClientGame *>(getGame());
+   GameConnection *gc = clientGame->getConnectionToServer();
+
+   // Fix effect of ship getting ahead of burst on laggy client      (getGame() is never NULL)
+   bool collisionDisabled = isGhost() && aliveTime < 250 && gc && gc->getControlObject();
 
    if(collisionDisabled) 
-      gClientGame->getConnectionToServer()->getControlObject()->disableCollision();
+      gc->getControlObject()->disableCollision();
 
    Parent::idle(path);
 
    if(collisionDisabled) 
-      gClientGame->getConnectionToServer()->getControlObject()->enableCollision();
+      gc->getControlObject()->enableCollision();
 
    // Do some drag...  no, not that kind of drag!
    mMoveState[ActualState].vel -= mMoveState[ActualState].vel * (((F32)mCurrentMove.time) / 1000.f);
 
-   if(isGhost()) return;      // Here on down is server only
+   if(isGhost())       // Here on down is server only
+      return;
 
    if(!exploded)
       if(getActualVel().len() < 4.0)
@@ -499,20 +504,19 @@ void GrenadeProjectile::unpackUpdate(GhostConnection *connection, BitStream *str
 {
    Parent::unpackUpdate(connection, stream);
 
-   TNLAssert(gClientGame->getConnectionToServer(), "Invalid connection to server in GrenadeProjectile//projectile.cpp");
-   Ship *ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
+   GameConnection *gc = dynamic_cast<ClientGame *>(getGame())->getConnectionToServer();
+   TNLAssert(gc, "Invalid connection to server in GrenadeProjectile//projectile.cpp");
+
+   Ship *ship = dynamic_cast<Ship *>(gc->getControlObject());
+
    if(ship && ship->hasModule(ModuleSensor))
       mObjectTypeMask |= CommandMapVisType;     // Bursts visible on commander's map if you have sensor
 
    if(stream->readFlag())
-   {
       explode(getActualPos(), WeaponBurst);
-   }
 
    if(stream->readFlag())
-   {
       SoundSystem::playSoundEffect(SFXGrenadeProjectile, getActualPos(), getActualVel());
-   }
 }
 
 

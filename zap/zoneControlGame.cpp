@@ -196,7 +196,7 @@ void ZoneControlGameType::performProxyScopeQuery(GameObject *scopeObject, GameCo
 void ZoneControlGameType::renderInterfaceOverlay(bool scoreboardVisible)
 {
    Parent::renderInterfaceOverlay(scoreboardVisible);
-   Ship *ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
+   Ship *ship = dynamic_cast<Ship *>(dynamic_cast<ClientGame *>(getGame())->getConnectionToServer()->getControlObject());
    if(!ship)
       return;
 
@@ -261,13 +261,13 @@ void ZoneControlGameType::majorScoringEventOcurred(S32 team)
    // ...and make sure they're not flashing...
    for(S32 i = 0; i < fillVector.size(); i++)
    {
-      GoalZone *gz = dynamic_cast<GoalZone *>(fillVector[i]);
-      if(gz)
-         gz->setFlashCount(0);
+      GoalZone *goalZone = dynamic_cast<GoalZone *>(fillVector[i]);
+      if(goalZone)
+         goalZone->setFlashCount(0);
    }
 
    // ...then activate the glowing zone effect
-   gClientGame->getGameType()->mZoneGlowTimer.reset();
+   getGame()->getGameType()->mZoneGlowTimer.reset();
 }
 
 

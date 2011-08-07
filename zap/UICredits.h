@@ -40,7 +40,7 @@ protected:
 public:
    void CreditsUserInterface();     // Constructor
 
-   CreditsFX();
+   CreditsFX(ClientGame *game);
    void setActive(bool active) { activated = active; }
    bool isActive() { return activated; }
    virtual void updateFX(U32 delta) = 0;
@@ -49,7 +49,8 @@ public:
 
 class CreditsScroller : public CreditsFX
 {
-   //typedef CreditsFX Parent;
+   typedef CreditsFX Parent;
+
 public:
    enum Credits {
       MaxCreditLen = 32,
@@ -68,7 +69,7 @@ private:
    S32 mTotalSize;
 
 public:
-   CreditsScroller();      // Constructor
+   CreditsScroller(ClientGame *game);      // Constructor
    void updateFX(U32 delta);
    void render();
 };

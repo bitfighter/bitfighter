@@ -195,11 +195,15 @@ private:
 
    struct VoiceRecorder
    {
-      enum {
-         FirstVoiceAudioSampleTime = 250,
-         VoiceAudioSampleTime = 100,
-         MaxDetectionThreshold = 2048,
-      };
+      private:
+         ClientGame *mGame;
+
+      public:
+         enum {
+            FirstVoiceAudioSampleTime = 250,
+            VoiceAudioSampleTime = 100,
+            MaxDetectionThreshold = 2048,
+         };
 
       Timer mVoiceAudioTimer;
       RefPtr<SoundEffect> mVoiceSfx;
@@ -210,7 +214,7 @@ private:
       S32 mMaxForGain;
       ByteBufferPtr mUnusedAudio;
 
-      VoiceRecorder();
+      VoiceRecorder(ClientGame *game);
       ~VoiceRecorder();
 
       void idle(U32 timeDelta);

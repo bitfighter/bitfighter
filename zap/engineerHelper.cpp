@@ -117,6 +117,8 @@ bool EngineerHelper::processKeyCode(KeyCode keyCode)
    if(Parent::processKeyCode(keyCode))    // Check for cancel keys
       return true;
 
+   GameConnection *gc = getGame()->getConnectionToServer();
+
    if(mSelectedItem == -1)    // Haven't selected an item yet
    {
       for(S32 i = 0; i < mEngineerCostructionItemInfos.size(); i++)
@@ -125,7 +127,7 @@ bool EngineerHelper::processKeyCode(KeyCode keyCode)
             mSelectedItem = i;
             return true;
          }
-      Ship *ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
+      Ship *ship = dynamic_cast<Ship *>(gc->getControlObject());
       if(!ship || (keyCode == keyMOD1[gIniSettings.inputMode] && ship->getModule(0) == ModuleEngineer) ||
                   (keyCode == keyMOD2[gIniSettings.inputMode] && ship->getModule(1) == ModuleEngineer))
       {
@@ -135,21 +137,21 @@ bool EngineerHelper::processKeyCode(KeyCode keyCode)
    }
    else                       // Placing item
    {
-      Ship *ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
+      Ship *ship = dynamic_cast<Ship *>(gc->getControlObject());
       if(ship && (keyCode == keyMOD1[gIniSettings.inputMode] && ship->getModule(0) == ModuleEngineer || 
                   keyCode == keyMOD2[gIniSettings.inputMode] && ship->getModule(1) == ModuleEngineer))
       {
          // Check deployment status on client; will be checked again on server, but server will only handle likely valid placements
          EngineerModuleDeployer deployer;
          
-         if(deployer.canCreateObjectAtLocation(gClientGame->getGameObjDatabase(), ship, mEngineerCostructionItemInfos[mSelectedItem].mObjectType))     
+         if(deployer.canCreateObjectAtLocation(getGame()->getGameObjDatabase(), ship, mEngineerCostructionItemInfos[mSelectedItem].mObjectType))     
          {
-            GameConnection *gc = gClientGame->getConnectionToServer();
+            
             if(gc)
                gc->c2sEngineerDeployObject(mEngineerCostructionItemInfos[mSelectedItem].mObjectType);
          }
          else
-            gClientGame->displayErrorMessage(deployer.getErrorMessage().c_str());
+            getGame()->displayErrorMessage(deployer.getErrorMessage().c_str());
             
          exitHelper();
          return true;

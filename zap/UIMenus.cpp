@@ -252,7 +252,7 @@ void MenuUserInterface::render()
    S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
 
    // Draw the game screen, then dim it out so you can still see it under our overlay
-   if(gClientGame->getConnectionToServer())
+   if(getGame()->getConnectionToServer())
    {
       if(getUIManager()->getPrevUI() != this)  // TODO: fix problem with prevUI being the same as this causing errors
          getUIManager()->renderPrevUI();
@@ -643,8 +643,7 @@ void MainMenuUserInterface::setMOTD(const char *motd)
 {
    strncpy(mMOTD, motd, MOTD_LEN);     
 
-   if(gClientGame)
-      motdArriveTime = gClientGame->getCurrentTime();    // Used for scrolling the message
+   motdArriveTime = getGame()->getCurrentTime();    // Used for scrolling the message
 }
 
 
@@ -672,7 +671,7 @@ void MainMenuUserInterface::render()
       glColor(Colors::white);
       U32 totalWidth = width + canvasWidth;
       U32 pixelsPerSec = 100;
-      U32 delta = gClientGame->getCurrentTime() - motdArriveTime;
+      U32 delta = getGame()->getCurrentTime() - motdArriveTime;
       delta = U32(delta * pixelsPerSec * 0.001) % totalWidth;
 
       drawString(canvasWidth - delta, MOTD_POS, 20, mMOTD);
@@ -1270,7 +1269,7 @@ GameMenuUserInterface::GameMenuUserInterface(ClientGame *game) : MenuUserInterfa
 
 void GameMenuUserInterface::idle(U32 timeDelta)
 {
-   GameConnection *gc = gClientGame->getConnectionToServer();
+   GameConnection *gc = getGame()->getConnectionToServer();
 
    if(gc && gc->waitingForPermissionsReply() && gc->gotPermissionsReply())      // We're waiting for a reply, and it has arrived
    {
@@ -1318,7 +1317,7 @@ static void chooseNewLevelCallback(ClientGame *game, U32 unused)
 
 static void restartGameCallback(ClientGame *game, U32 unused)
 {
-   gClientGame->getConnectionToServer()->c2sRequestLevelChange(-2, false);
+   game->getConnectionToServer()->c2sRequestLevelChange(-2, false);
    game->getUIManager()->reactivatePrevUI();     // And back to our regularly scheduled programming! 
 }
 
@@ -1435,7 +1434,7 @@ static void selectLevelTypeCallback(ClientGame *game, U32 level)
    else
    {
       // Replace the following with a getLevelCount() function on game??
-      GameConnection *gc = gClientGame->getConnectionToServer();
+      GameConnection *gc = game->getConnectionToServer();
       if(!gc || gc->mLevelInfos.size() < (S32(level) - 1))
          return;
 
@@ -1452,7 +1451,7 @@ void LevelMenuUserInterface::onActivate()
    mMenuTitle = "CHOOSE LEVEL TYPE:";
 
    // replace with getLevelCount() method on game?
-   GameConnection *gc = gClientGame->getConnectionToServer();
+   GameConnection *gc = getGame()->getConnectionToServer();
    if(!gc || !gc->mLevelInfos.size())
       return;
 
@@ -1515,14 +1514,14 @@ extern Color gCmdChatColor;
 void LevelMenuSelectUserInterface::processSelection(U32 index)     
 {
    Parent::onActivate();
-   GameConnection *gc = gClientGame->getConnectionToServer();
+   GameConnection *gc = getGame()->getConnectionToServer();
 
    if((index & UPLOAD_LEVELS_BIT) && (index & (~UPLOAD_LEVELS_BIT)) < U32(mLevels.size()))
    {
       string filename = strictjoindir(gConfigDirs.levelDir, mLevels[index & (~UPLOAD_LEVELS_BIT)]);
 
       if(!gc->s2rUploadFile(filename.c_str(),1))
-         gClientGame->displayErrorMessage("Can't upload level: unable to read file");
+         getGame()->displayErrorMessage("Can't upload level: unable to read file");
    }
    else
    {
@@ -1540,7 +1539,7 @@ void LevelMenuSelectUserInterface::onActivate()
    mMenuTitle = "CHOOSE LEVEL: [" + category + "]";
 
    // Replace with a getLevelCount() method on Game?
-   GameConnection *gc = gClientGame->getConnectionToServer();
+   GameConnection *gc = getGame()->getConnectionToServer();
    if(!gc || !gc->mLevelInfos.size())
       return;
 
@@ -1667,18 +1666,17 @@ void PlayerMenuUserInterface::playerSelected(U32 index)
 void PlayerMenuUserInterface::render()
 {
    menuItems.clear();
-   GameType *gt = getGame()->getGameType();
-   if (!gt)
+   GameType *gameType = getGame()->getGameType();
+   if(!gameType)
       return;
 
-   GameConnection *gc = gClientGame->getConnectionToServer();
-   if (!gc)
+   if(!getGame()->getConnectionToServer())
       return;
 
    char c[] = "A";      // Dummy shortcut key
-   for(S32 i = 0; i < gt->getClientCount(); i++)
+   for(S32 i = 0; i < gameType->getClientCount(); i++)
    {
-      RefPtr<ClientRef> client = gt->getClient(i);
+      RefPtr<ClientRef> client = gameType->getClient(i);
 
       strncpy(c, client->name.getString(), 1);        // Grab first char of name for a shortcut key
 
@@ -1687,7 +1685,7 @@ void PlayerMenuUserInterface::render()
 
       PlayerMenuItem *newItem = new PlayerMenuItem(getGame(), i, client->name.getString(), playerSelectedCallback, stringToKeyCode(c), pt);
       menuItems.push_back(boost::shared_ptr<MenuItem>(newItem));
-      menuItems.last()->setUnselectedColor(gt->getTeamColor(client->getTeam()));
+      menuItems.last()->setUnselectedColor(gameType->getTeamColor(client->getTeam()));
    }
 
    menuItems.sort(menuItemValueSort);
@@ -1753,29 +1751,27 @@ void TeamMenuUserInterface::render()
 {
    menuItems.clear();
 
-   GameType *gt = getGame()->getGameType();
-   if (!gt)
+   GameType *gameType = getGame()->getGameType();
+   if(!gameType)
       return;
 
-   ClientGame *game = (ClientGame *)gt->getGame();
-
-   gt->countTeamPlayers();    // Make sure numPlayers is correctly populated
+   gameType->countTeamPlayers();    // Make sure numPlayers is correctly populated
 
    char c[] = "A";      // Dummy shortcut key, will change below
-   for(S32 i = 0; i < game->getTeamCount(); i++)
+   for(S32 i = 0; i < getGame()->getTeamCount(); i++)
    {
-      AbstractTeam *team = game->getTeam(i);
+      AbstractTeam *team = getGame()->getTeam(i);
       strncpy(c, team->getName().getString(), 1);     // Grab first char of name for a shortcut key
 
-      bool isCurrent = (i == gt->getTeam(nameToChange.c_str()));
+      bool isCurrent = (i == gameType->getTeam(nameToChange.c_str()));
       
-      menuItems.push_back(boost::shared_ptr<MenuItem>(new TeamMenuItem(game, i, team, processTeamSelectionCallback, stringToKeyCode(c), isCurrent)));
+      menuItems.push_back(boost::shared_ptr<MenuItem>(new TeamMenuItem(getGame(), i, team, processTeamSelectionCallback, stringToKeyCode(c), isCurrent)));
    }
 
    string name = "";
-   if(gClientGame->getConnectionToServer() && game->getConnectionToServer()->getControlObject())
+   if(getGame()->getConnectionToServer() && getGame()->getConnectionToServer()->getControlObject())
    {
-      Ship *ship = dynamic_cast<Ship *>(game->getConnectionToServer()->getControlObject());
+      Ship *ship = dynamic_cast<Ship *>(getGame()->getConnectionToServer()->getControlObject());
       if(ship)
          name = ship->getName().getString();
    }

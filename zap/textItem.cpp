@@ -361,11 +361,12 @@ LineItem *LineItem::clone() const
 
 void LineItem::render()
 {
+   GameConnection *gc = dynamic_cast<ClientGame *>(getGame())->getConnectionToServer();
    // Don't render opposing team's text items
-   if(!gClientGame || !gClientGame->getConnectionToServer())      // Not sure if this is really needed...
+   if(!gc)      // Not sure if this is really needed...
       return;
 
-   Ship *ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
+   Ship *ship = dynamic_cast<Ship *>(gc->getControlObject());
    if( (!ship && mTeam != -1) || (ship && ship->getTeam() != mTeam && mTeam != -1) )
       return;
 

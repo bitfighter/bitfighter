@@ -78,7 +78,7 @@ extern void renderShip(const Color *shipColor, F32 alpha, F32 thrusts[], F32 hea
 extern void renderShipCoords(const Point &coords, bool localShip, F32 alpha);
 
 extern void renderAimVector();
-extern void renderTeleporter(const Point &pos, U32 type, bool in, S32 time, F32 radiusFraction, F32 radius, F32 alpha, 
+extern void renderTeleporter(const Point &pos, U32 type, bool in, S32 time, F32 zoomFraction, F32 radiusFraction, F32 radius, F32 alpha, 
                              const Vector<Point> &dests, bool showDestOverride);
 extern void renderTurret(const Color &c, Point anchor, Point normal, bool enabled, F32 health, F32 barrelAngle);
 

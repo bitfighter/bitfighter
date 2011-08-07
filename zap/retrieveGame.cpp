@@ -218,7 +218,7 @@ namespace Zap
    // A major scoring event has ocurred -- in this case, it's all flags being collected by one team
    void RetrieveGameType::majorScoringEventOcurred(S32 team)
    {
-      gClientGame->getGameType()->mZoneGlowTimer.reset();
+      mZoneGlowTimer.reset();
       mGlowingZoneTeam = team;
    }
 
@@ -249,15 +249,15 @@ namespace Zap
    void RetrieveGameType::renderInterfaceOverlay(bool scoreboardVisible)
    {
       Parent::renderInterfaceOverlay(scoreboardVisible);
-      Ship *u = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
-      if(!u)
+      Ship *ship = dynamic_cast<Ship *>(dynamic_cast<ClientGame *>(getGame())->getConnectionToServer()->getControlObject());
+      if(!ship)
          return;
       bool uFlag = false;
-      S32 team = u->getTeam();
+      S32 team = ship->getTeam();
 
       for(S32 i = 0; i < mFlags.size(); i++)
       {
-         if(mFlags[i].isValid() && mFlags[i]->getMount() == u)
+         if(mFlags[i].isValid() && mFlags[i]->getMount() == ship)
          {
             for(S32 j = 0; j < mZones.size(); j++)
             {
@@ -296,7 +296,7 @@ namespace Zap
          else
          {
             Ship *mount = mFlags[i]->getMount();
-            if(mount && mount != u)
+            if(mount && mount != ship)
                renderObjectiveArrow(mount, getTeamColor(mount->getTeam()));
          }
       }

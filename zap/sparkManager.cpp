@@ -28,6 +28,7 @@
 #include "gameObjectRender.h"
 #include "Colors.h"
 #include "config.h"
+#include "game.h"    // For getCommanderZoomFraction()
 
 #include "SDL/SDL_opengl.h"
 #include "UI.h"
@@ -42,8 +43,6 @@ namespace Zap
 
 namespace FXManager
 {
-
-
 
 struct Spark
 {
@@ -64,8 +63,10 @@ U32 lastOverwrittenIndex[SparkTypeCount];      // Keep track of which spark we l
 Spark gSparks[SparkTypeCount][MAX_SPARKS];     // Our sparks themselves... two types, each with room for MAX_SPARKS
 
 
-void init()
+void init(ClientGame *game)
 {
+   mGame = game;
+
    for(U32 i = 0; i < SparkTypeCount; i++)
    {
       firstFreeIndex[i] = 0;
@@ -189,6 +190,8 @@ void tick( F32 dT )
    }
 }
 
+
+
 void render(S32 renderPass)
 {
    // The teleporter effects should render under the ships and such
@@ -200,7 +203,7 @@ void render(S32 renderPass)
          F32 alpha = 1.0;
          if(radius > 0.5)
             alpha = (1 - radius) / 0.5f;
-         renderTeleporter(walk->pos, walk->type, false, Teleporter::TeleportInExpandTime - walk->time, radius, Teleporter::TeleportInRadius, alpha, Vector<Point>(), false);
+         renderTeleporter(walk->pos, walk->type, false, Teleporter::TeleportInExpandTime - walk->time, mGame->getCommanderZoomFraction(), radius, Teleporter::TeleportInRadius, alpha, Vector<Point>(), false);
       }
    }
    else if(renderPass == 1)      // Time for sparks!!
