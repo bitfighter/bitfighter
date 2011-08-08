@@ -450,16 +450,22 @@ GrenadeProjectile::GrenadeProjectile(Point pos, Point vel, GameObject *shooter):
 // Runs on client and server
 void GrenadeProjectile::idle(IdleCallPath path)
 {
-   U32 aliveTime = getGame()->getCurrentTime() - getCreationTime();  // Age of object, in ms
+   bool collisionDisabled = false;
+   GameConnection *gc = NULL;
 
-   ClientGame *clientGame = dynamic_cast<ClientGame *>(getGame());
-   GameConnection *gc = clientGame->getConnectionToServer();
+   // Fix effect of ship getting ahead of burst on laggy client   
+   if(isGhost())
+   {
+      U32 aliveTime = getGame()->getCurrentTime() - getCreationTime();  // Age of object, in ms
 
-   // Fix effect of ship getting ahead of burst on laggy client      (getGame() is never NULL)
-   bool collisionDisabled = isGhost() && aliveTime < 250 && gc && gc->getControlObject();
+      ClientGame *clientGame = dynamic_cast<ClientGame *>(getGame());
+      gc = clientGame->getConnectionToServer();
 
-   if(collisionDisabled) 
-      gc->getControlObject()->disableCollision();
+      collisionDisabled = aliveTime < 250 && gc && gc->getControlObject();
+
+      if(collisionDisabled) 
+         gc->getControlObject()->disableCollision();
+   }
 
    Parent::idle(path);
 
