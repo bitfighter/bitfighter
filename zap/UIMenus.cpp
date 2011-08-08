@@ -850,7 +850,6 @@ static S32 INPUT_MODE_MENU_ITEM_INDEX = 0;
 static void setInputModeCallback(ClientGame *game, U32 val)
 {
    S32 sticks = Joystick::DetectedJoystickNameList.size();
-   Joystick::initJoystick();      // Will allow people to plug in joystick while in this menu...
 
    if(sticks != Joystick::DetectedJoystickNameList.size())
    {
@@ -872,7 +871,9 @@ static void setInputModeCallback(ClientGame *game, U32 val)
 
    game->getIniSettings()->inputMode = (val == 0) ? InputModeKeyboard : InputModeJoystick;
    if(val >= 1) 
-      Joystick::UseJoystickNumber = val;
+      Joystick::UseJoystickNumber = val - 1;
+
+   Joystick::initJoystick();      // Will allow people to plug in joystick while in this menu...
 }
 
 

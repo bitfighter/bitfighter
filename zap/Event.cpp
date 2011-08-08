@@ -196,9 +196,9 @@ void Event::onEvent(SDL_Event* event)
 //         onJoyBall(event->jball.which, event->jball.ball, event->jball.xrel, event->jball.yrel);
 //         break;
 //
-//      case SDL_JOYHATMOTION:
-//         onJoyHat(event->jhat.which, event->jhat.hat, event->jhat.value);
-//         break;
+      case SDL_JOYHATMOTION:
+         onJoyHat(event->jhat.which, event->jhat.hat, event->jhat.value);
+         break;
 
       case SDL_JOYBUTTONDOWN:
          onJoyButtonDown(event->jbutton.which, event->jbutton.button);
@@ -401,7 +401,7 @@ void Event::onJoyButtonDown(U8 which, U8 button)
 
 void Event::onJoyButtonUp(U8 which, U8 button)
 {
-   KeyCode keyCode = joyButtonToKeyCode(button);
+   KeyCode keyCode = joyButtonToKeyCode(Joystick::remapJoystickButton(button));
    setKeyState(keyCode, false);
 
    if(UserInterface::current)
@@ -410,7 +410,16 @@ void Event::onJoyButtonUp(U8 which, U8 button)
 
 void Event::onJoyHat(U8 which, U8 hat, U8 value)
 {
-
+   printf("Hat: %i\n", value);
+   // Looks like it is using bitmask for value
+   // 1 = up
+   // 2 = right
+   // 4 = down
+   // 8 = left
+   // 3 = up + right
+   // 6 = down + right
+   // 12 = down + left
+   // 9 = up + left
 }
 
 void Event::onJoyBall(U8 which, U8 ball, S16 xrel, S16 yrel)

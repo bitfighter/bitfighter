@@ -40,7 +40,6 @@ SDL_Joystick *Joystick::sdlJoystick = NULL;
 
 // public
 TNL::Vector<const char *> Joystick::DetectedJoystickNameList;
-TNL::Vector<JoystickInfo> Joystick::PredefinedJoystickList;
 
 TNL::U32 Joystick::ButtonMask = 0;
 TNL::F32 Joystick::rawAxis[Joystick::rawAxisCount];
@@ -72,6 +71,17 @@ bool Joystick::initJoystick()
 {
    DetectedJoystickNameList.clear();
 
+   // Close if already open.
+   if (sdlJoystick != NULL)
+   {
+      SDL_JoystickClose(sdlJoystick);
+      sdlJoystick = NULL;
+   }
+
+   // Will need to shutdown and init, to allow SDL_NumJoysticks to count new joysticks
+   if(SDL_WasInit(SDL_INIT_JOYSTICK))
+      SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
+
    // Initialize the SDL subsystem
    if (SDL_InitSubSystem(SDL_INIT_JOYSTICK))
    {
@@ -97,12 +107,6 @@ bool Joystick::initJoystick()
    // Enable joystick events
    SDL_JoystickEventState(SDL_ENABLE);
 
-   // Close if already open.
-   if (sdlJoystick != NULL)
-   {
-      SDL_JoystickClose(sdlJoystick);
-      sdlJoystick = NULL;
-   }
 
    // Start using joystick.
    sdlJoystick = SDL_JoystickOpen(UseJoystickNumber);
@@ -140,164 +144,231 @@ void Joystick::shutdownJoystick()
       SDL_JoystickClose(sdlJoystick);
       sdlJoystick = NULL;
    }
+
+   if(SDL_WasInit(SDL_INIT_JOYSTICK))
+      SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
 }
+
+JoystickInfo Joystick::PredefinedJoystickList[ControllerTypeCount] = 
+{
+   {
+      "Logitech Wingman Dual-Analog",
+      "LogitechWingman",
+      9,
+      {0, 1},
+      {5, 6},
+      { // LogitechWingman   9
+         ControllerButton1,
+         ControllerButton2,
+         ControllerButton3,
+         ControllerButton4,
+         ControllerButton5,
+         ControllerButton6,
+         ControllerButton7,         // L-Trigger
+         ControllerButton8,         // R-Trigger
+         ControllerButtonBack,
+         0,
+         0,
+         0,
+         0,
+         0,
+      }
+   },
+   {
+      "Logitech Dual Action",
+      "LogitechDualAction",
+      10,
+      {0, 1},
+      {2, 3},
+      { // LogitechDualAction   10
+         ControllerButton1,
+         ControllerButton2,
+         ControllerButton3,
+         ControllerButton4,
+         ControllerButton7,
+         ControllerButton8,
+         ControllerButton5,
+         ControllerButton6,
+         ControllerButtonBack,
+         ControllerButtonStart,
+         0,
+         0,
+         0,
+         0,
+      }
+   },
+   {
+      "Saitek P-880 Dual-Analog",
+      "SaitekDualAnalogP880",
+      9,
+      {0, 1},
+      {5, 2},
+      { // SaitekDualAnalogP880  9
+         ControllerButton1,
+         ControllerButton2,
+         ControllerButton3,
+         ControllerButton4,
+         ControllerButton5,
+         ControllerButton6,
+         ControllerButton7,
+         ControllerButton8,
+         0,
+         0,
+         ControllerButtonBack,         // Red button??...  no start button??
+         0,
+         0,
+         0,
+      }
+   },
+   {
+      "Saitek P-480 Dual-Analog",
+      "SaitekDualAnalogRumblePad",
+      10,
+      {0, 1},
+      {5, 2},
+      { // SaitekDualAnalogRumblePad   10       // SAITEK P-480 DUAL-ANALOG
+         ControllerButton1,
+         ControllerButton2,
+         ControllerButton3,
+         ControllerButton4,
+         ControllerButton5,
+         ControllerButton6,
+         ControllerButton7,
+         ControllerButton8,
+         ControllerButtonBack,      // Button 9
+         ControllerButtonStart,     // Button 10
+         0,
+         0,
+         0,
+         0,
+      }
+   },
+   {
+      "PS2 Dualshock USB",
+      "PS2DualShock",
+      10,
+      {0, 1},
+      {2, 5},
+      { // PS2DualShock    10
+         ControllerButton4,
+         ControllerButton2,
+         ControllerButton1,
+         ControllerButton3,
+         ControllerButton5,
+         ControllerButton6,
+         ControllerButton7,
+         ControllerButton8,
+         ControllerButtonBack,
+         0,
+         0,
+         ControllerButtonStart,
+         0,
+         0,
+      }
+   },
+   {
+      "PS2 Dualshock USB with Conversion Cable",
+      "PS2DualShockConversionCable",
+      10,
+      {0, 1},
+      {5, 2},
+      { // PS2DualShockConversionCable    10
+         ControllerButton4,
+         ControllerButton2,
+         ControllerButton1,
+         ControllerButton3,
+         ControllerButton5,
+         ControllerButton6,
+         ControllerButton7,
+         ControllerButton8,
+         ControllerButtonBack,
+         ControllerButtonStart,
+         0,
+         0,
+         0,
+         0,
+      }
+   },
+   {
+      "PS3 Sixaxis",
+      "PS3DualShock",
+      13,
+      {0, 1},
+      {2, 3},
+      { // PS3DualShock    13
+         ControllerButtonStart, // Start
+         0, // L3 - Unused
+         0, // R3 - Unused
+         ControllerButtonBack, // Select
+         ControllerButtonDPadUp, // DPAD Up
+         ControllerButtonDPadRight, // DPAD Right
+         ControllerButtonDPadDown, // DPAD Down
+         ControllerButtonDPadLeft, // DPAD Left
+         ControllerButton5, // L2
+         ControllerButton6, // R2
+         ControllerButton7, // L1
+         ControllerButton8, // R1
+         ControllerButton4, // Triangle
+         ControllerButton2, // Circle
+         // FIXME: If you can get X and Square Working. Add them as these buttons:
+         // ControllerButton1 // X
+         // ControllerButton3 // Square
+         // Above order should be correct. X is Button 14 Square is Button 15.
+      }
+   },
+   {
+      "XBox Controller USB",
+      "XBoxController",
+      10,
+      {0, 1},
+      {3, 4},
+      { // XBoxController     10
+         ControllerButton1,      // A
+         ControllerButton2,      // B
+         ControllerButton3,      // X
+         ControllerButton4,      // Y
+         ControllerButton6,      // RB
+         ControllerButton5,      // LB
+         ControllerButtonBack,   // <
+         ControllerButtonStart,  // >
+         0,
+         0,
+         ControllerButton7,
+         ControllerButton8,
+         0,
+         0,
+      }
+   },
+   {
+      "XBox Controller",
+      "XBoxControllerOnXBox",
+      10,
+      {0, 1},
+      {3, 4},
+      { // XBoxControllerOnXBox     <--- what's going on here?  On XBox??
+         ControllerButton1,
+         ControllerButton2,
+         ControllerButton3,
+         ControllerButton4,
+         ControllerButton5,
+         ControllerButton6,
+         ControllerButton7,
+         ControllerButton8,
+         ControllerButtonStart,
+         ControllerButtonBack,
+         ControllerButtonDPadUp,
+         ControllerButtonDPadDown,
+         ControllerButtonDPadLeft,
+         ControllerButtonDPadRight,
+      }
+   },
+   // When adding more to PredefinedJoystickList, be sure to add more to ControllerTypeCount
+};
+
 
 
 void Joystick::populatePredefinedJoystickList()
 {
-   // Initialize our static Vector
-//   PredefinedJoystickList((S32)ControllerTypeCount);
-
-   // What axes to use for firing?  Should we let users set this somehow?
-   //
-   // Unfortunately, Linux and Windows map joystick axes differently
-   // XXX: are they still different with SDL?
-   //                                               Wingmn  DualAct  P880  RumbPad   PS2   PS2-Conv  PS3     XBox  XBoxOnXBox
-//#ifdef TNL_OS_LINUX
-   //               ? = untested                ?     works     ?       ?       ?       ?       ?       ?       ?
-   U32 shootAxes[ControllerTypeCount][2] = { {5, 6}, {2, 3}, {5, 2}, {5, 2}, {2, 5}, {5, 2}, {2, 3}, {3, 4}, {3, 4} };
-//#else
-//   U32 shootAxes[ControllerTypeCount][2] = { {5, 6}, {2, 5}, {5, 2}, {5, 2}, {2, 5}, {5, 2}, {2, 3}, {3, 4}, {3, 4} };
-//#endif
-
-   U32 moveAxes[ControllerTypeCount][2] = { {0, 1}, {0, 1}, {0, 1}, {0, 1}, {0, 1}, {0, 1}, {0, 1}, {0, 1}, {0, 1} };
-
-   // Button counts for each controller
-   U32 buttonCount[ControllerTypeCount] = { 9, 10, 9, 10, 10, 10, 10, 10, 14};
-
-   U32 buttonRemap[ControllerTypeCount][MaxControllerButtons] =
-   {
-         { // SaitekDualAnalogP880  9
-               ControllerButton1,
-               ControllerButton2,
-               ControllerButton3,
-               ControllerButton4,
-               ControllerButton5,
-               ControllerButton6,
-               ControllerButton7,
-               ControllerButton8,
-               0,
-               0,
-               ControllerButtonBack,         // Red button??...  no start button??
-               0,
-               0,
-               0,
-         },
-         { // SaitekDualAnalogRumblePad   10       // SAITEK P-480 DUAL-ANALOG
-               ControllerButton1,
-               ControllerButton2,
-               ControllerButton3,
-               ControllerButton4,
-               ControllerButton5,
-               ControllerButton6,
-               ControllerButton7,
-               ControllerButton8,
-               ControllerButtonBack,      // Button 9
-               ControllerButtonStart,     // Button 10
-               0,
-               0,
-               0,
-               0,
-         },
-         { // PS2DualShock    10
-               ControllerButton4,
-               ControllerButton2,
-               ControllerButton1,
-               ControllerButton3,
-               ControllerButton5,
-               ControllerButton6,
-               ControllerButton7,
-               ControllerButton8,
-               ControllerButtonBack,
-               0,
-               0,
-               ControllerButtonStart,
-               0,
-               0,
-         },
-         { // PS2DualShockConversionCable    10
-               ControllerButton4,
-               ControllerButton2,
-               ControllerButton1,
-               ControllerButton3,
-               ControllerButton5,
-               ControllerButton6,
-               ControllerButton7,
-               ControllerButton8,
-               ControllerButtonBack,
-               ControllerButtonStart,
-               0,
-               0,
-               0,
-               0,
-         },
-         { // PS3DualShock    13
-               ControllerButtonStart, // Start
-               0, // L3 - Unused
-               0, // R3 - Unused
-               ControllerButtonBack, // Select
-               ControllerButtonDPadUp, // DPAD Up
-               ControllerButtonDPadRight, // DPAD Right
-               ControllerButtonDPadDown, // DPAD Down
-               ControllerButtonDPadLeft, // DPAD Left
-               ControllerButton5, // L2
-               ControllerButton6, // R2
-               ControllerButton7, // L1
-               ControllerButton8, // R1
-               ControllerButton4, // Triangle
-               ControllerButton2, // Circle
-               // FIXME: If you can get X and Square Working. Add them as these buttons:
-               // ControllerButton1 // X
-               // ControllerButton3 // Square
-               // Above order should be correct. X is Button 14 Square is Button 15.
-         },
-         { // XBoxController     10
-               ControllerButton1,      // A
-               ControllerButton2,      // B
-               ControllerButton3,      // X
-               ControllerButton4,      // Y
-               ControllerButton6,      // RB
-               ControllerButton5,      // LB
-               ControllerButtonBack,   // <
-               ControllerButtonStart,  // >
-               0,
-               0,
-               ControllerButton7,
-               ControllerButton8,
-               0,
-               0,
-         },
-         { // XBoxControllerOnXBox     <--- what's going on here?  On XBox??
-               ControllerButton1,
-               ControllerButton2,
-               ControllerButton3,
-               ControllerButton4,
-               ControllerButton5,
-               ControllerButton6,
-               ControllerButton7,
-               ControllerButton8,
-               ControllerButtonStart,
-               ControllerButtonBack,
-               ControllerButtonDPadUp,
-               ControllerButtonDPadDown,
-               ControllerButtonDPadLeft,
-               ControllerButtonDPadRight,
-         }
-   };
-
-   JoystickInfo info;
-   for (S32 i = 0; i < ControllerTypeCount; i++)
-   {
-      info.buttonCount = buttonCount[i];
-      info.moveAxesSdlIndex[0] = moveAxes[i][0];
-      info.moveAxesSdlIndex[1] = moveAxes[i][1];
-      info.shootAxesSdlIndex[0] = shootAxes[i][0];
-      info.shootAxesSdlIndex[1] = shootAxes[i][1];
-      for (S32 j = 0; j < MaxControllerButtons; j++)
-         info.buttonMappings[j] = buttonRemap[i][j];
-
-      PredefinedJoystickList.push_back(info);
-   }
 }
 
 
@@ -306,7 +377,7 @@ ControllerTypeType Joystick::autodetectJoystickType()
    if (DetectedJoystickNameList.size() == 0)  // No controllers detected
       return NoController;
 
-   S32 ret = UnknownController;
+   ControllerTypeType ret = UnknownController;
 
    string controllerName = DetectedJoystickNameList[UseJoystickNumber];
 
@@ -352,7 +423,7 @@ ControllerTypeType Joystick::autodetectJoystickType()
          ret = NoController;
    }
 
-   return (ControllerTypeType) ret;
+   return ret;
 }
 
 
@@ -360,7 +431,7 @@ ControllerTypeType Joystick::autodetectJoystickType()
 U8 Joystick::remapJoystickButton(U8 button)
 {
    // If not one of the predefined joysticks, just return the same button
-   if(gIniSettings.joystickType < ControllerTypeCount)
+   if(gIniSettings.joystickType >= ControllerTypeCount)
       return button;
 
    return PredefinedJoystickList[gIniSettings.joystickType].buttonMappings[button];
@@ -369,27 +440,13 @@ U8 Joystick::remapJoystickButton(U8 button)
 
 ControllerTypeType Joystick::stringToJoystickType(const char * strJoystick)
 {
-   if (strJoystick == "LogitechWingman")
-      return LogitechWingman;
-   else if (strJoystick == "LogitechDualAction")
-      return LogitechDualAction;
-   else if (strJoystick == "SaitekDualAnalogP880")
-      return SaitekDualAnalogP880;
-   else if (strJoystick == "SaitekDualAnalogRumblePad")
-      return SaitekDualAnalogRumblePad;
-   else if (strJoystick == "PS2DualShock")
-      return PS2DualShock;
-   else if (strJoystick == "PS2DualShockConversionCable")
-      return PS2DualShockConversionCable;
-   else if (strJoystick == "PS3DualShock")
-      return PS3DualShock;
-   else if (strJoystick == "XBoxController")
-      return XBoxController;
-   else if (strJoystick == "XBoxControllerOnXBox")
-      return XBoxControllerOnXBox;
-   else if (strJoystick == "GenericController")
+   for(S32 i=0; i < ControllerTypeCount; i++)
+      if(!stricmp(strJoystick, PredefinedJoystickList[i].nameForINI))
+         return ControllerTypeType(i);
+
+   if (!stricmp(strJoystick, "GenericController"))
       return GenericController;
-   else if (strJoystick == "UnknownController")
+   else if (!stricmp(strJoystick, "UnknownController"))
       return UnknownController;
    else
       return NoController;
@@ -398,26 +455,11 @@ ControllerTypeType Joystick::stringToJoystickType(const char * strJoystick)
 
 const char *Joystick::joystickTypeToString(S32 controllerType)
 {
+   if(controllerType < ControllerTypeCount)
+      return PredefinedJoystickList[controllerType].nameForINI;
+
    switch (controllerType)
    {
-   case LogitechWingman:
-      return "LogitechWingman";
-   case LogitechDualAction:
-      return "LogitechDualAction";
-   case SaitekDualAnalogP880:
-      return "SaitekDualAnalogP880";
-   case SaitekDualAnalogRumblePad:
-      return "SaitekDualAnalogRumblePad";
-   case PS2DualShock:
-      return "PS2DualShock";
-   case PS2DualShockConversionCable:
-      return "PS2DualShockConversionCable";
-   case PS3DualShock:
-      return "PS3DualShock";
-   case XBoxController:
-      return "XBoxController";
-   case XBoxControllerOnXBox:
-      return "XBoxControllerOnXBox";
    case GenericController:
       return "GenericController";
    case UnknownController:
@@ -430,26 +472,10 @@ const char *Joystick::joystickTypeToString(S32 controllerType)
 
 const char *Joystick::joystickTypeToPrettyString(S32 controllerType)
 {
+   if(controllerType < ControllerTypeCount)
+      return PredefinedJoystickList[controllerType].name;
    switch (controllerType)
    {
-   case LogitechWingman:
-      return "Logitech Wingman Dual-Analog";
-   case LogitechDualAction:
-      return "Logitech Dual Action";
-   case SaitekDualAnalogP880:
-      return "Saitek P-880 Dual-Analog";
-   case SaitekDualAnalogRumblePad:
-      return "Saitek P-480 Dual-Analog";
-   case PS2DualShock:
-      return "PS2 Dualshock USB";
-   case PS2DualShockConversionCable:
-      return "PS2 Dualshock USB with Conversion Cable";
-   case PS3DualShock:
-      return "PS3 Sixaxis";
-   case XBoxController:
-      return "XBox Controller USB";
-   case XBoxControllerOnXBox:
-      return "XBox Controller";
    case GenericController:
       return "Generic Controller";
    case UnknownController:

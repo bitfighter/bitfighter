@@ -121,6 +121,8 @@ struct JoystickInput {
 
 // Struct to hold joystick information once it has been detected
 struct JoystickInfo {
+   const char *name;
+   const char *nameForINI;
    TNL::U32 buttonCount;    // how many buttons
    TNL::U32 moveAxesSdlIndex[2];    // primary axes; 0 -> left/right, 1 -> up/down
    TNL::U32 shootAxesSdlIndex[2];   // secondary axes; could be anything; first -> left/right, second -> up/down
@@ -145,7 +147,7 @@ public:
    // static data
    static TNL::S16 SensitivityThreshold;
    static TNL::S32 UseJoystickNumber;
-   static TNL::Vector<JoystickInfo> PredefinedJoystickList;
+   static JoystickInfo PredefinedJoystickList[ControllerTypeCount];
    static JoystickInput JoystickInputData[MaxAxesDirections];
    static TNL::U32 AxesKeyCodeMask;
 
