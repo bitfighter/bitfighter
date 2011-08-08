@@ -945,21 +945,8 @@ void renderGoalZone(const Color *c, const Vector<Point> *outline, const Vector<P
 
 // Goal zone flashes after capture, but glows after touchdown...
 void renderGoalZone(const Color *c, const Vector<Point> *outline, const Vector<Point> *fill, Point centroid, F32 labelAngle, 
-                    bool isFlashing, F32 glowFraction, S32 score, F32 scaleFact, F32 flashCounter)
+                    bool isFlashing, F32 glowFraction, S32 score, F32 flashCounter)
 {
-   // So... which of these is correct??
-
-   //F32 alpha = isFlashing ? 0.75f : 0.5f;
-
-   //Color fillColor    = getGoalZoneFillColor(c, isFlashing, glowFraction);
-   //Color outlineColor = getGoalZoneOutlineColor(c, isFlashing);
-
-   //renderPolygon(fill, outline, &fillColor, &outlineColor);
-
-   //renderPolygonLabel(centroid, labelAngle, 25, "GOAL", scaleFact);
-
-      //F32 alpha = isFlashing ? 0.75f : 0.5f;
- 
    Color fillColor, outlineColor;
 
    if(gIniSettings.oldGoalFlash)
@@ -967,9 +954,9 @@ void renderGoalZone(const Color *c, const Vector<Point> *outline, const Vector<P
       fillColor    = getGoalZoneFillColor(c, isFlashing, glowFraction);
       outlineColor = getGoalZoneOutlineColor(c, isFlashing);
    }
-   else
+   else // Some new flashing effect (sam's idea)
    {
-      F32 glowRate = 0.5f - fabs(flashCounter - 0.5f);
+      F32 glowRate = 0.5f - fabs(flashCounter - 0.5f);  // will need flashCounter for this.
 
       Color newColor = *c;
       if(isFlashing)
@@ -980,6 +967,10 @@ void renderGoalZone(const Color *c, const Vector<Point> *outline, const Vector<P
       fillColor    = getGoalZoneFillColor(&newColor, false, glowFraction);
       outlineColor = getGoalZoneOutlineColor(&newColor, false);
    }
+
+
+   renderPolygon(fill, outline, &fillColor, &outlineColor);
+   renderPolygonLabel(centroid, labelAngle, 25, "GOAL");
 }
 
 
