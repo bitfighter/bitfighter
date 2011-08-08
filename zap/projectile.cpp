@@ -133,8 +133,8 @@ void Projectile::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
       mType = (ProjectileType) stream->readEnum(ProjectileTypeCount);
 
-      GameConnection *gc = dynamic_cast<ClientGame *>(getGame())->getConnectionToServer();
-      TNLAssert(gc, "Defunct connection to server in projectile.cpp!");
+      TNLAssert(connection, "Defunct connection to server in projectile.cpp!");
+      GameConnection *gc = (GameConnection *)connection;
 
       Ship *ship = dynamic_cast<Ship *>(gc->getControlObject());
 
@@ -504,8 +504,8 @@ void GrenadeProjectile::unpackUpdate(GhostConnection *connection, BitStream *str
 {
    Parent::unpackUpdate(connection, stream);
 
-   GameConnection *gc = dynamic_cast<ClientGame *>(getGame())->getConnectionToServer();
-   TNLAssert(gc, "Invalid connection to server in GrenadeProjectile//projectile.cpp");
+   TNLAssert(connection, "Invalid connection to server in GrenadeProjectile//projectile.cpp");
+   GameConnection *gc = (GameConnection *)connection;
 
    Ship *ship = dynamic_cast<Ship *>(gc->getControlObject());
 
