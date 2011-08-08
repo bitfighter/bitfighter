@@ -504,12 +504,17 @@ void GameObject::readCompressedVelocity(Point &vel, U32 max, BitStream *stream)
 }
 
 
-bool GameObject::onGhostAdd(GhostConnection *theConnection)
+void GameObject::onGhostAddBeforeUpdate(GhostConnection *theConnection)
 {
+   // Some unpackUpdate need getGame() available.
    GameConnection *gc = (GameConnection *)(theConnection);  // GhostConnection is always GameConnection
    TNLAssert(theConnection && gc->mClientGame, "Should only be client here!");
 
    addToGame(gc->mClientGame, gc->mClientGame->getGameObjDatabase());
+}
+bool GameObject::onGhostAdd(GhostConnection *theConnection)
+{
+   // for performance, add to GridDatabase after update, to avoid slowdown from adding to database with zero points or (0,0) then moving
    return true;
 }
 

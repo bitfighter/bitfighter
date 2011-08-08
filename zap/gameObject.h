@@ -323,6 +323,7 @@ public:
    S32 radiusDamage(Point pos, S32 innerRad, S32 outerRad, BITMASK typemask, DamageInfo &info, F32 force = 2000);
    virtual void damageObject(DamageInfo *damageInfo);
 
+   void onGhostAddBeforeUpdate(GhostConnection *theConnection);
    bool onGhostAdd(GhostConnection *theConnection);
    void disableCollision() { TNLAssert(mDisableCollisionCount < 10, "Too many disabled collisions"); mDisableCollisionCount++; }
    void enableCollision() { TNLAssert(mDisableCollisionCount != 0, "Trying to enable collision, already enabled"); mDisableCollisionCount--; }

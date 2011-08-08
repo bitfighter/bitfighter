@@ -169,8 +169,8 @@ void SpeedZone::onAddedToGame(Game *theGame)
 
    if(!isGhost())
       setScopeAlways();    // Runs on server
-   else
-      preparePoints();     // Runs on client
+   //else
+      //preparePoints();     // Runs on client,preparePoints runs in unpackUpdate
 }
 
 
@@ -430,6 +430,8 @@ void SpeedZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
       mSpeed = stream->readInt(16);
       mSnapLocation = stream->readFlag();
+
+      preparePoints();
    }
 
    else 

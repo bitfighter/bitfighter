@@ -263,6 +263,7 @@ public:
    /// initial call).  Returning true signifies no error - returning
    /// false causes the connection to abort.
    virtual bool onGhostAdd(GhostConnection *theConnection);
+   virtual void onGhostAddBeforeUpdate(GhostConnection *theConnection);
 
    /// onGhostRemove is called on the client side before the destructor
    /// when ghost has gone out of scope and is about to be deleted from the client.
