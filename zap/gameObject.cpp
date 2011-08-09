@@ -219,7 +219,6 @@ BfObject::BfObject()
 {
    mGame = NULL;
    mObjectTypeNumber = UnknownTypeNumber;
-   deleted = false;
 }
 
 
@@ -303,8 +302,8 @@ GameConnection *GameObject::getOwner()
 
 void GameObject::deleteObject(U32 deleteTimeInterval)
 {
-   deleted = true;
-   // mObjectTypeNumber = ??? ;
+   mObjectTypeNumber = DeletedTypeNumber;
+
    if(!mGame)                    // Not in a game
       delete this;
    else

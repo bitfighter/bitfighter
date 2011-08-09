@@ -475,6 +475,10 @@ void DatabaseObject::addToDatabase(GridDatabase *database)
       database->addToDatabase(this, mExtent);
 }
 
+bool DatabaseObject::isDeleted() {
+   return mObjectTypeNumber == DeletedTypeNumber;
+}
+
 
 void DatabaseObject::removeFromDatabase()
 {

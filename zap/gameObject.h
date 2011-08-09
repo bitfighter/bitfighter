@@ -93,6 +93,7 @@ const U8 ShipSpawnTypeNumber = 69;
 const U8 FlagSpawnTypeNumber = 70;
 const U8 AsteroidSpawnTypeNumber = 71;
 
+const U8 DeletedTypeNumber = 252;
 // 255
 
 // Derived Types are determined by function

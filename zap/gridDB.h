@@ -60,7 +60,6 @@ private:
 
 protected:
    U8 mObjectTypeNumber;
-   bool deleted;
 
 public:
    DatabaseObject();                            // Constructor
@@ -83,7 +82,7 @@ public:
    virtual bool isCollisionEnabled() { return true; }
 
    bool isInDatabase() { return mDatabase != NULL; }
-   bool isDeleted() { return deleted; }
+   bool isDeleted();
 
    void addToDatabase(GridDatabase *database);
    void removeFromDatabase();
