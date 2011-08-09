@@ -67,7 +67,6 @@ BotNavMeshZone::BotNavMeshZone(S32 id)
    //TNLAssert(id > -1, "id == -1!");  // Some levels already have BotNavMeshZone, trying to create bot zone in processLevelLoadLine will have ID of -1
 
    mGame = NULL;
-   //mObjectTypeMask = BotNavMeshZoneType | CommandMapVisType;
    mObjectTypeNumber = BotNavMeshZoneTypeNumber;
 
    mZoneId = id;
@@ -110,7 +109,7 @@ void BotNavMeshZone::render(S32 layerIndex)
 bool BotNavMeshZone::collide(GameObject *hitObject)
 {
    // This does not get run anymore, it is in a seperate database.
-   if(hitObject->getObjectTypeMask() & RobotType)     // Only care about robots...
+   if(hitObject->getObjectTypeNumber() == RobotShipTypeNumber)     // Only care about robots...
    {
       Robot *r = (Robot *) hitObject;
       r->setCurrentZone(mZoneId);
@@ -186,8 +185,8 @@ void BotNavMeshZone::unpackUpdate(GhostConnection *connection, BitStream *stream
 U16 BotNavMeshZone::findZoneContaining(const Point &p)
 {
    fillVector.clear();
-   gServerGame->getBotZoneDatabase()->findObjects(0, fillVector, 
-                              Rect(p - Point(0.1f,0.1f),p + Point(0.1f,0.1f)), BotNavMeshZoneTypeNumber);  // Slightly extend Rect, it can be on the edge of zone
+   gServerGame->getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, fillVector,
+                              Rect(p - Point(0.1f,0.1f),p + Point(0.1f,0.1f)));  // Slightly extend Rect, it can be on the edge of zone
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
@@ -367,7 +366,7 @@ Vector<DatabaseObject *> zones;
 void BotNavMeshZone::IDBotMeshZones(ServerGame *game)
 {
    zones.clear();
-   gServerGame->getBotZoneDatabase()->findObjects(0, zones, BotNavMeshZoneTypeNumber);
+   gServerGame->getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, zones);
    for(S32 i=0; i < zones.size(); i++)
       dynamic_cast<BotNavMeshZone *>(zones[i])->mZoneId = i;
 }
@@ -378,7 +377,7 @@ static BotNavMeshZone *findZoneContainingPoint(const Point &point)
 {
    Rect rect(point, 0.01f);
    zones.clear();
-   gServerGame->getBotZoneDatabase()->findObjects(0, zones, rect, BotNavMeshZoneTypeNumber); 
+   gServerGame->getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, zones, rect);
 
    // If there is more than one possible match, pick the first arbitrarily (could happen if dest is right on a zone border)
    for(S32 i = 0; i < zones.size(); i++)
@@ -517,13 +516,13 @@ bool BotNavMeshZone::buildBotMeshZones(ServerGame *game, bool triangulateZones)
    Vector<Vector<Point> > solution;
 
    Vector<DatabaseObject *> barrierList;
-   game->getGameObjDatabase()->findObjects(BarrierType, barrierList, bounds);
+   game->getGameObjDatabase()->findObjects(BarrierTypeNumber, barrierList, bounds);
 
    Vector<DatabaseObject *> turretList;
-   game->getGameObjDatabase()->findObjects(TurretType, turretList, bounds);
+   game->getGameObjDatabase()->findObjects(TurretTypeNumber, turretList, bounds);
 
    Vector<DatabaseObject *> forceFieldProjectorList;
-   game->getGameObjDatabase()->findObjects(ForceFieldProjectorType, forceFieldProjectorList, bounds);
+   game->getGameObjDatabase()->findObjects(ForceFieldProjectorTypeNumber, forceFieldProjectorList, bounds);
 
    // Merge bot zone buffers from barriers, turrets, and forcefield projectors
    if(!mergeBotZoneBuffers(barrierList, turretList, forceFieldProjectorList, solution))
@@ -733,7 +732,7 @@ void BotNavMeshZone::linkTeleportersBotNavMeshZoneConnections(ServerGame *game)
    // Now create paths representing the teleporters
    Vector<DatabaseObject *> teleporters, dests;
 
-   game->getGameObjDatabase()->findObjects(TeleportType, teleporters);
+   game->getGameObjDatabase()->findObjects(TeleportTypeNumber, teleporters);
 
    for(S32 i = 0; i < teleporters.size(); i++)
    {

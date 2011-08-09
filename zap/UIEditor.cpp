@@ -464,7 +464,7 @@ void EditorUserInterface::resnapAllEngineeredItems()
 {
    fillVector.clear();
 
-   getGame()->getEditorDatabase()->findObjects(EngineeredType, fillVector);
+   getGame()->getEditorDatabase()->findObjects((TestFunc)isEngineeredType, fillVector);
 
    WallSegmentManager *wallSegmentManager = getGame()->getWallSegmentManager();
 
@@ -665,7 +665,7 @@ void EditorUserInterface::runScript(const string &scriptName, const Vector<strin
    // Bulk-process new items, walls first
 
    fillVector.clear();
-   mLoadTarget->findObjects(BarrierType | PolyWallType, fillVector);
+   mLoadTarget->findObjects((TestFunc)isWallType, fillVector);
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
@@ -674,7 +674,7 @@ void EditorUserInterface::runScript(const string &scriptName, const Vector<strin
       if(obj->getVertCount() < 2)      // Invalid item; delete
          mLoadTarget->removeFromDatabase(obj, obj->getExtent());
 
-      if(obj->getObjectTypeMask() & BarrierType)
+      if(obj->getObjectTypeNumber() == BarrierTypeNumber)
          dynamic_cast<WallItem *>(obj)->processEndPoints();
       else
          dynamic_cast<PolyWall *>(obj)->processEndPoints();
@@ -712,7 +712,7 @@ void EditorUserInterface::validateLevel()
    GridDatabase *gridDatabase = getGame()->getEditorDatabase();
       
    fillVector.clear();
-   gridDatabase->findObjects(0, fillVector, ShipSpawnTypeNumber);
+   gridDatabase->findObjects(ShipSpawnTypeNumber, fillVector);
    for(S32 i = 0; i < fillVector.size(); i++)
    {
       Spawn *spawn = dynamic_cast<Spawn *>(fillVector[i]);
@@ -725,17 +725,17 @@ void EditorUserInterface::validateLevel()
    }
 
    fillVector.clear();
-   gridDatabase->findObjects(SoccerBallItemType, fillVector);
+   gridDatabase->findObjects(SoccerBallItemTypeNumber, fillVector);
    if(fillVector.size() > 0)
       foundSoccerBall = true;
 
    fillVector.clear();
-   gridDatabase->findObjects(NexusType, fillVector);
+   gridDatabase->findObjects(NexusTypeNumber, fillVector);
    if(fillVector.size() > 0)
       foundNexus = true;
 
    fillVector.clear();
-   gridDatabase->findObjects(FlagType, fillVector);
+   gridDatabase->findObjects(FlagTypeNumber, fillVector);
    for (S32 i = 0; i < fillVector.size(); i++)
    {
       foundFlags = true;
@@ -748,7 +748,7 @@ void EditorUserInterface::validateLevel()
    }
 
    fillVector.clear();
-   gridDatabase->findObjects(0, fillVector, FlagSpawnTypeNumber);
+   gridDatabase->findObjects(FlagSpawnTypeNumber, fillVector);
    for(S32 i = 0; i < fillVector.size(); i++)
    {
       FlagSpawn *flagSpawn = dynamic_cast<FlagSpawn *>(fillVector[i]);
@@ -1110,7 +1110,7 @@ Point EditorUserInterface::snapPoint(Point const &p, bool snapWhileOnDock)
             objList->get(i)->setSnapped(false);
    
       // Turrets & forcefields: Snap to a wall edge as first (and only) choice
-      if((mSnapObject->getObjectTypeMask() & EngineeredType))
+      if(isEngineeredType(mSnapObject->getObjectTypeNumber()))
       {
          EngineeredObject *engrObj = dynamic_cast<EngineeredObject *>(mSnapObject);
          return engrObj->mountToWall(snapPointToLevelGrid(p), wallSegmentManager->getWallEdgeDatabase(), 
@@ -1160,7 +1160,7 @@ Point EditorUserInterface::snapPoint(Point const &p, bool snapWhileOnDock)
 
 bool EditorUserInterface::getSnapToWallCorners()
 {
-   return !mSnapDisabled && mDraggingObjects && !(mSnapObject->getObjectTypeMask() & BarrierType);
+   return !mSnapDisabled && mDraggingObjects && !(isWallType(mSnapObject->getObjectTypeNumber()));
 }
 
 
@@ -1527,7 +1527,7 @@ void EditorUserInterface::render()
       for(S32 i = 0; i < objList->size(); i++)
       {
          EditorObject *obj = objList->get(i);
-         if(obj->getObjectTypeMask() & PolyWallType)
+         if(obj->getObjectTypeNumber() == PolyWallTypeNumber)
          {
             PolyWall *wall = dynamic_cast<PolyWall *>(obj);
             wall->renderFill();
@@ -1546,7 +1546,7 @@ void EditorUserInterface::render()
    {
       EditorObject *obj = objList->get(i);
 
-      if(obj->getObjectTypeMask() != PolyWallType)
+      if(obj->getObjectTypeNumber() == PolyWallTypeNumber)
          if(!(mDraggingObjects && obj->isSelected()))
             obj->renderInEditor(mCurrentScale, mCurrentOffset, mSnapVertexIndex, false, mShowingReferenceShip, mShowMode);
    }
@@ -1598,7 +1598,7 @@ void EditorUserInterface::render()
    else  
    {
       fillVector.clear();
-      getGame()->getEditorDatabase()->findObjects(BarrierType | LineType, fillVector);
+      getGame()->getEditorDatabase()->findObjects((TestFunc)isLineItemType, fillVector);
 
       for(S32 i = 0; i < fillVector.size(); i++)
       {
@@ -1623,7 +1623,7 @@ void EditorUserInterface::render()
       for(S32 i = 0; i < objList->size(); i++)
       {
          EditorObject *obj = objList->get(i);
-         if(obj->isSelected() && obj->getObjectTypeMask() & ~BarrierType)    // Object is selected and is not a wall
+         if(obj->isSelected() && !isWallType(obj->getObjectTypeNumber()))    // Object is selected and is not a wall
             obj->renderInEditor(mCurrentScale, mCurrentOffset, mSnapVertexIndex, false, mShowingReferenceShip, mShowMode);
       }
 
@@ -2057,8 +2057,8 @@ void EditorUserInterface::findHitItemAndEdge()
             continue;
          
          // Only select walls in CTRL-A mode...
-         BITMASK type = obj->getObjectTypeMask();
-         if(mShowMode == ShowWallsOnly && !(type & BarrierType) && !(type & PolyWallType))        // Only select walls in CTRL-A mode
+         U8 type = obj->getObjectTypeNumber();
+         if(mShowMode == ShowWallsOnly && !(isWallType(type)))        // Only select walls in CTRL-A mode
             continue;                                                              // ...so if it's not a wall, proceed to next item
 
          F32 radius = obj->getEditorRadius(mCurrentScale);
@@ -2521,7 +2521,7 @@ void EditorUserInterface::changeBarrierWidth(S32 amt)
       saveUndoState(); 
 
    fillVector.clear();
-   getGame()->getEditorDatabase()->findObjects(BarrierType | LineType, fillVector);
+   getGame()->getEditorDatabase()->findObjects((TestFunc)isLineItemType, fillVector);
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
@@ -2606,7 +2606,7 @@ void EditorUserInterface::joinBarrier()
          {
             EditorObject *obj_j = objList->get(i);
 
-            if(obj_j->getObjectTypeMask() & obj_i->getObjectTypeMask() && (obj_j->isSelected()))
+            if(obj_j->getObjectTypeNumber() && obj_i->getObjectTypeNumber() && (obj_j->isSelected()))
             {
                if(obj_i->getVert(0).distanceTo(obj_j->getVert(0)) < .01)    // First vertices are the same  1 2 3 | 1 4 5
                {
@@ -2684,9 +2684,9 @@ void EditorUserInterface::deleteItem(S32 itemIndex)
    Game *game = getGame();
    WallSegmentManager *wallSegmentManager = game->getWallSegmentManager();
 
-   BITMASK mask = obj->getObjectTypeMask();
+   U8 type = obj->getObjectTypeNumber();
 
-   if(mask & (BarrierType | PolyWallType))
+   if(isWallType(type))
    {
       // Need to recompute boundaries of any intersecting walls
       wallSegmentManager->invalidateIntersectingSegments(game->getEditorDatabase(), obj); // Mark intersecting segments invalid
@@ -2836,7 +2836,7 @@ void EditorUserInterface::doneEditingAttributes(EditorAttributeMenuUI *editor, E
    {
       EditorObject *obj = objList->get(i);
 
-      if(obj != object && obj->isSelected() && obj->getObjectTypeMask() == object->getObjectTypeMask())
+      if(obj != object && obj->isSelected() && obj->getObjectTypeNumber() == object->getObjectTypeNumber())
       {
          editor->doneEditing(obj);  // Transfer attributes from editor to object
          obj->onAttrsChanged();     // And notify the object that its attributes have changed
@@ -3324,7 +3324,7 @@ void EditorUserInterface::startAttributeEditor()
          {
             EditorObject *obj_j = objList->get(j);
 
-            if(obj_j->isSelected() && obj_j->getObjectTypeMask() != obj_i->getObjectTypeMask())
+            if(obj_j->isSelected() && obj_j->getObjectTypeNumber() != obj_i->getObjectTypeNumber())
                obj_j->unselect();
          }
 
@@ -3394,7 +3394,7 @@ void EditorUserInterface::onKeyUp(KeyCode keyCode)
             fillVector.clear();
 
             if(mShowMode == ShowWallsOnly)
-               getGame()->getEditorDatabase()->findObjects(BarrierType | PolyWallType, fillVector);
+               getGame()->getEditorDatabase()->findObjects((TestFunc)isWallType, fillVector);
             else
                getGame()->getEditorDatabase()->findObjects(fillVector);
 
@@ -3602,8 +3602,8 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
             EditorObject *p = objList->get(i);
 
             // Writing wall items on first pass, non-wall items next -- that will make sure mountable items have something to grab onto
-            if((j == 0) && (p->getObjectTypeMask() & (BarrierType | PolyWallType)) || 
-               (j == 1) && (p->getObjectTypeMask() &~ (BarrierType | PolyWallType)) )
+            if((j == 0) && (isWallType(p->getObjectTypeNumber())) ||
+               (j == 1) && (isWallType(p->getObjectTypeNumber())) )
                p->saveItem(f, getGame()->getGridSize());
          }
       fclose(f);

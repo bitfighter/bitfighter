@@ -83,7 +83,7 @@ public:
 
    bool onFire(Ship *ship);             
    // No modules while carrying the ball!
-   bool okToUseModules(Ship *ship) { return Parent::okToUseModules(ship) && ! ship->isCarryingItem(SoccerBallItemType); } 
+   bool okToUseModules(Ship *ship) { return Parent::okToUseModules(ship) && ! ship->isCarryingItem(SoccerBallItemTypeNumber); }
 
    TNL_DECLARE_RPC(s2cSoccerScoreMessage, (U32 msgIndex, StringTableEntry clientName, RangedU32<0, GameType::gMaxTeamCount> teamIndex));
    TNL_DECLARE_CLASS(SoccerGameType);

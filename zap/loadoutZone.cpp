@@ -52,7 +52,6 @@ LoadoutZone::LoadoutZone()
 {
    mTeam = 0;
    mNetFlags.set(Ghostable);
-   mObjectTypeMask = LoadoutZoneType | CommandMapVisType;
    mObjectTypeNumber = LoadoutZoneTypeNumber;
 }
 
@@ -149,7 +148,9 @@ bool LoadoutZone::getCollisionPoly(Vector<Point> &polyPoints) const
 bool LoadoutZone::collide(GameObject *hitObject)
 {
    // Anyone can use neutral loadout zones (team == -1)
-   if(!isGhost() && (hitObject->getTeam() == getTeam() || getTeam() == -1) && hitObject->getObjectTypeMask() & (ShipType | RobotType))
+   if(!isGhost() &&
+         (hitObject->getTeam() == getTeam() || getTeam() == -1) &&
+         isShipType(hitObject->getObjectTypeNumber()) )
       getGame()->getGameType()->updateShipLoadout(hitObject);      
 
    return false;

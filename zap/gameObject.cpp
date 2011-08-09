@@ -44,6 +44,171 @@ using namespace TNL;
 namespace Zap
 {
 
+// Derived Object Type conditional methods
+bool isEngineeredType(U8 x)
+{
+   return
+         x == TurretTypeNumber || x == ForceFieldProjectorTypeNumber;
+}
+
+bool isShipType(U8 x)
+{
+   return
+         x == PlayerShipTypeNumber || x == RobotShipTypeNumber;
+}
+
+bool isProjectileType(U8 x)
+{
+   return
+         x == MineTypeNumber || x == SpyBugTypeNumber || x == BulletTypeNumber;
+}
+
+bool isGrenadeType(U8 x)
+{
+   return
+         x == MineTypeNumber || x == SpyBugTypeNumber;
+}
+
+bool isWithHealthType(U8 x)
+{
+   return
+         x == PlayerShipTypeNumber || x == RobotShipTypeNumber ||
+         x == TurretTypeNumber || x == ForceFieldProjectorTypeNumber;
+}
+
+bool isForceFieldDeactivatingType(U8 x)
+{
+   return
+         x == MineTypeNumber || x == SpyBugTypeNumber ||
+         x == FlagTypeNumber || x == SoccerBallItemTypeNumber ||
+         x == ResourceItemTypeNumber || x == TestItemTypeNumber || x == AsteroidTypeNumber ||
+         x == EnergyItemTypeNumber || x == RepairItemTypeNumber ||
+         x == PlayerShipTypeNumber || x == RobotShipTypeNumber;
+}
+
+bool isDamageableType(U8 x)
+{
+   return
+         x == PlayerShipTypeNumber || x == RobotShipTypeNumber ||
+         x == BulletTypeNumber || x == MineTypeNumber || x == SpyBugTypeNumber ||
+         x == ResourceItemTypeNumber || x == TestItemTypeNumber || x == AsteroidTypeNumber ||
+         x == TurretTypeNumber || x == ForceFieldProjectorTypeNumber ||
+         x == FlagTypeNumber || x == SoccerBallItemTypeNumber;
+}
+
+bool isMotionTriggerType(U8 x)
+{
+   return
+         x == PlayerShipTypeNumber || x == RobotShipTypeNumber ||
+         x == ResourceItemTypeNumber || x == TestItemTypeNumber || x == AsteroidTypeNumber ||
+         x == MineTypeNumber;
+}
+
+bool isTurretTargetType(U8 x)
+{
+   return
+         x == PlayerShipTypeNumber || x == RobotShipTypeNumber || x == ResourceItemTypeNumber ||
+         x == TestItemTypeNumber || x == SoccerBallItemTypeNumber;
+}
+
+bool isCollideableType(U8 x)
+{
+   return
+         x == BarrierTypeNumber || x == PolyWallTypeNumber ||
+         x == TurretTypeNumber || x == ForceFieldTypeNumber ||
+         x == ForceFieldProjectorTypeNumber;
+}
+
+bool isForceFieldCollideableType(U8 x)
+{
+   return
+         x == BarrierTypeNumber || x == PolyWallTypeNumber ||
+         x == TurretTypeNumber || x == ForceFieldProjectorTypeNumber;
+}
+
+bool isWallType(U8 x)
+{
+   return
+         x == BarrierTypeNumber || x == PolyWallTypeNumber;
+}
+
+bool isLineItemType(U8 x)
+{
+   return
+         x == BarrierTypeNumber || x == LineTypeNumber;
+}
+
+bool isMoveableType(U8 x)
+{
+   return
+         x == PlayerShipTypeNumber || x == RobotShipTypeNumber ||
+         x == SpyBugTypeNumber || x == MineTypeNumber || x == BulletTypeNumber ||
+         x == FlagTypeNumber || x == SoccerBallItemTypeNumber ||
+         x == AsteroidTypeNumber || x == TestItemTypeNumber || x == ResourceItemTypeNumber;
+}
+
+bool isWeaponCollideableType(U8 x)
+{
+   return
+         x == PlayerShipTypeNumber || x == RobotShipTypeNumber ||
+         x == SpyBugTypeNumber || x == MineTypeNumber || x == BulletTypeNumber ||
+         x == FlagTypeNumber || x == SoccerBallItemTypeNumber ||
+         x == AsteroidTypeNumber || x == TestItemTypeNumber || x == ResourceItemTypeNumber ||
+         x == TurretTypeNumber || x == ForceFieldProjectorTypeNumber ||
+         x == BarrierTypeNumber || x == PolyWallTypeNumber || x == ForceFieldTypeNumber;
+}
+
+bool isAsteroidCollideableType(U8 x)
+{
+   return
+         x == PlayerShipTypeNumber || x == RobotShipTypeNumber ||
+         x == TestItemTypeNumber || x == ResourceItemTypeNumber ||
+         x == TurretTypeNumber || x == ForceFieldProjectorTypeNumber ||
+         x == BarrierTypeNumber || x == PolyWallTypeNumber || x == ForceFieldTypeNumber;
+}
+
+bool isFlagCollideableType(U8 x)
+{
+   return
+         x == BarrierTypeNumber || x == PolyWallTypeNumber ||
+         x == ForceFieldTypeNumber;
+}
+
+bool isVisibleOnCmdrsMapType(U8 x)
+{
+   return
+         x == PlayerShipTypeNumber || x == RobotShipTypeNumber ||
+         x == BarrierTypeNumber || x == PolyWallTypeNumber ||
+         x == TurretTypeNumber || x == ForceFieldTypeNumber || x == ForceFieldProjectorTypeNumber ||
+         x == FlagTypeNumber || x == SoccerBallItemTypeNumber ||
+         x == GoalZoneTypeNumber || x == NexusTypeNumber || x == LoadoutZoneTypeNumber || x == SlipZoneTypeNumber ||
+         x == SpeedZoneTypeNumber || x == TeleportTypeNumber ||
+         x == LineTypeNumber || x == TextItemTypeNumber ||
+         x == AsteroidTypeNumber || x == TestItemTypeNumber || x == ResourceItemTypeNumber ||
+         x == EnergyItemTypeNumber || x == RepairItemTypeNumber;
+}
+
+bool isVisibleOnCmdrsMapWithSensorType(U8 x)
+{
+   return
+         x == PlayerShipTypeNumber || x == RobotShipTypeNumber ||
+         x == BarrierTypeNumber || x == PolyWallTypeNumber ||
+         x == TurretTypeNumber || x == ForceFieldTypeNumber || x == ForceFieldProjectorTypeNumber ||
+         x == FlagTypeNumber || x == SoccerBallItemTypeNumber ||
+         x == GoalZoneTypeNumber || x == NexusTypeNumber || x == LoadoutZoneTypeNumber || x == SlipZoneTypeNumber ||
+         x == SpeedZoneTypeNumber || x == TeleportTypeNumber ||
+         x == LineTypeNumber || x == TextItemTypeNumber ||
+         x == AsteroidTypeNumber || x == TestItemTypeNumber || x == ResourceItemTypeNumber ||
+         x == EnergyItemTypeNumber || x == RepairItemTypeNumber ||
+         x == BulletTypeNumber || x == MineTypeNumber;  // Weapons visible on commander's map for sensor
+}
+
+
+bool isAnyObjectType(U8 x)
+{
+   return true;
+}
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -53,8 +218,8 @@ namespace Zap
 BfObject::BfObject()
 {
    mGame = NULL;
-   mObjectTypeMask = UnknownType;
    mObjectTypeNumber = UnknownTypeNumber;
+   deleted = false;
 }
 
 
@@ -138,7 +303,7 @@ GameConnection *GameObject::getOwner()
 
 void GameObject::deleteObject(U32 deleteTimeInterval)
 {
-   mObjectTypeMask = DeletedType;
+   deleted = true;
    // mObjectTypeNumber = ??? ;
    if(!mGame)                    // Not in a game
       delete this;
@@ -224,7 +389,7 @@ void GameObject::damageObject(DamageInfo *theInfo)
 
 
 // Returns number of ships hit
-S32 GameObject::radiusDamage(Point pos, S32 innerRad, S32 outerRad, BITMASK typemask, DamageInfo &info, F32 force)
+S32 GameObject::radiusDamage(Point pos, S32 innerRad, S32 outerRad, TestFunc objectTypeTest, DamageInfo &info, F32 force)
 {
    // Check for players within range.  If so, blast them to little tiny bits!
    // Those within innerRad get full force of the damage.  Those within outerRad get damage prop. to distance
@@ -232,7 +397,7 @@ S32 GameObject::radiusDamage(Point pos, S32 innerRad, S32 outerRad, BITMASK type
    queryRect.expand(Point(outerRad, outerRad));
 
    fillVector.clear();
-   findObjects(typemask, fillVector, queryRect);
+   findObjects(objectTypeTest, fillVector, queryRect);
 
    // Ghosts can't do damage
    if(isGhost())
@@ -267,7 +432,7 @@ S32 GameObject::radiusDamage(Point pos, S32 innerRad, S32 outerRad, BITMASK type
       F32 t;
       Point n;
 
-      if(findObjectLOS(BarrierType, MoveObject::ActualState, pos, objPos, t, n))
+      if(findObjectLOS(BarrierTypeNumber, MoveObject::ActualState, pos, objPos, t, n))
          continue;
 
       // Figure the impulse and damage
@@ -299,7 +464,7 @@ S32 GameObject::radiusDamage(Point pos, S32 innerRad, S32 outerRad, BITMASK type
          localInfo.damageAmount *= localInfo.damageSelfMultiplier;
 
 
-      if(foundObject->getObjectTypeMask() & (ShipType | RobotType))
+      if(isShipType(foundObject->getObjectTypeNumber()))
          shipsHit++;
 
       foundObject->damageObject(&localInfo); 
@@ -309,26 +474,51 @@ S32 GameObject::radiusDamage(Point pos, S32 innerRad, S32 outerRad, BITMASK type
 }
 
 
-void GameObject::findObjects(BITMASK typeMask, Vector<DatabaseObject *> &fillVector, const Rect &ext, U8 typeNumber)
+void GameObject::findObjects(TestFunc objectTypeTest, Vector<DatabaseObject *> &fillVector, const Rect &ext)
 {
    GridDatabase *gridDB = getDatabase();
    if(!gridDB)
       return;
 
-   gridDB->findObjects(typeMask, fillVector, ext, typeNumber);
+   gridDB->findObjects(objectTypeTest, fillVector, ext);
 }
 
 
-GameObject *GameObject::findObjectLOS(BITMASK typeMask, U32 stateIndex, Point rayStart, Point rayEnd, 
-                                      float &collisionTime, Point &collisionNormal, U8 typeNumber)
+void GameObject::findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector, const Rect &ext)
+{
+   GridDatabase *gridDB = getDatabase();
+   if(!gridDB)
+      return;
+
+   gridDB->findObjects(typeNumber, fillVector, ext);
+}
+
+
+GameObject *GameObject::findObjectLOS(U8 typeNumber, U32 stateIndex, Point rayStart, Point rayEnd,
+                                      float &collisionTime, Point &collisionNormal)
 {
    GridDatabase *gridDB = getDatabase();
 
    if(!gridDB)
       return NULL;
 
-   return dynamic_cast<GameObject *>(gridDB->
-                        findObjectLOS(typeMask, stateIndex, rayStart, rayEnd, collisionTime, collisionNormal, typeNumber));
+   return dynamic_cast<GameObject *>(
+         gridDB->findObjectLOS(typeNumber, stateIndex, rayStart, rayEnd, collisionTime, collisionNormal)
+         );
+}
+
+
+GameObject *GameObject::findObjectLOS(TestFunc objectTypeTest, U32 stateIndex, Point rayStart, Point rayEnd,
+                                      float &collisionTime, Point &collisionNormal)
+{
+   GridDatabase *gridDB = getDatabase();
+
+   if(!gridDB)
+      return NULL;
+
+   return dynamic_cast<GameObject *>(
+         gridDB->findObjectLOS(objectTypeTest, stateIndex, rayStart, rayEnd, collisionTime, collisionNormal)
+         );
 }
 
 

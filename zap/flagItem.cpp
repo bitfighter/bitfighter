@@ -73,7 +73,6 @@ void FlagItem::initialize()
    mIsAtHome = true;    // All flags start off at home!
 
    mNetFlags.set(Ghostable);
-   mObjectTypeMask |= FlagType | CommandMapVisType;
    mObjectTypeNumber = FlagTypeNumber;
    setZone(NULL);
 }
@@ -292,7 +291,7 @@ bool FlagItem::collide(GameObject *hitObject)
       return false;
 
    // Flag always collides with walls and forcefields
-   if(hitObject->getObjectTypeMask() & (BarrierType | ForceFieldType))
+   if(isFlagCollideableType(hitObject->getObjectTypeNumber()))
       return true;
 
    // No other collision detection happens on the client -- From here on out, it's server only!
@@ -300,7 +299,7 @@ bool FlagItem::collide(GameObject *hitObject)
       return false;
 
    // The only things we'll collide with (aside from walls and forcefields above) is ships and robots
-   if(!(hitObject->getObjectTypeMask() & (ShipType | RobotType)))
+   if( !(isShipType(hitObject->getObjectTypeNumber())) )
       return false;
 
    // Ignore collisions that occur to recently dropped flags.  Make sure flag is ready to be picked up! 

@@ -196,11 +196,11 @@ void SoccerGameType::renderInterfaceOverlay(bool scoreboardVisible)
 void SoccerGameType::shipTouchZone(Ship *ship, GoalZone *zone)
 {
    // See if this ship is carrying a ball
-   if(!ship->isCarryingItem(SoccerBallItemType))
+   if(!ship->isCarryingItem(SoccerBallItemTypeNumber))
       return;
 
    // The ship has a ball
-   SoccerBallItem *ball = dynamic_cast<SoccerBallItem *>(ship->unmountItem(SoccerBallItemType));
+   SoccerBallItem *ball = dynamic_cast<SoccerBallItem *>(ship->unmountItem(SoccerBallItemTypeNumber));
    ball->collide(zone);
 }
 
@@ -213,11 +213,11 @@ bool SoccerGameType::onFire(Ship *ship)
 
 
    // If we have the ball, drop it
-   if(ship->isCarryingItem(SoccerBallItemType))
+   if(ship->isCarryingItem(SoccerBallItemTypeNumber))
    {
       for(S32 i = 0; i < ship->mMountedItems.size(); i++)
       {
-         if(ship->mMountedItems[i]->getObjectTypeMask() & SoccerBallItemType)
+         if(ship->mMountedItems[i]->getObjectTypeNumber() == SoccerBallItemTypeNumber)
          {
             SoccerBallItem *ball = dynamic_cast<SoccerBallItem *>(ship->mMountedItems[i].getPointer());
             TNLAssert(ball != NULL, "SoccerGameType::onFire NULL ball");
@@ -329,7 +329,6 @@ TNL_IMPLEMENT_NETOBJECT(SoccerBallItem);
 // Constructor
 SoccerBallItem::SoccerBallItem(Point pos) : EditorItem(pos, true, (F32)SoccerBallItem::SOCCER_BALL_RADIUS, 4)
 {
-   mObjectTypeMask |= CommandMapVisType | SoccerBallItemType;
    mObjectTypeNumber = SoccerBallItemTypeNumber;
    mNetFlags.set(Ghostable);
    initialPos = pos;
@@ -523,14 +522,14 @@ void SoccerBallItem::damageObject(DamageInfo *theInfo)
 
    if(theInfo->damagingObject)
    {
-      if(theInfo->damagingObject->getObjectTypeMask() & (ShipType | RobotType))
+      if(isShipType(theInfo->damagingObject->getObjectTypeNumber()))
       {
          mLastPlayerTouch = dynamic_cast<Ship *>(theInfo->damagingObject);
          mLastPlayerTouchTeam = mLastPlayerTouch->getTeam();
          mLastPlayerTouchName = mLastPlayerTouch->getName();
       }
 
-      else if(theInfo->damagingObject->getObjectTypeMask() & (BulletType | MineType | SpyBugType))
+      else if(isProjectileType(theInfo->damagingObject->getObjectTypeNumber()))
       {
          Projectile *p = dynamic_cast<Projectile *>(theInfo->damagingObject);
          Ship *ship = dynamic_cast<Ship *>(p->mShooter.getPointer());
@@ -568,7 +567,7 @@ bool SoccerBallItem::collide(GameObject *hitObject)
    if(mSendHomeTimer.getCurrent())     // If we've already scored, and we're waiting for the ball to reset, there's nothing to do
       return true;
 
-   if(hitObject->getObjectTypeMask() & (ShipType | RobotType))
+   if(isShipType(hitObject->getObjectTypeNumber()))
    {
       if(mMount == hitObject)    // Sometimes we get collisions between ship and an already mounted soccer ball.
          return false;  //false = don't hit self
@@ -603,7 +602,7 @@ bool SoccerBallItem::collide(GameObject *hitObject)
          return !mAllowPickup;       // Let server handle the collision when pickup is enabled
       }
    }
-   else if(hitObject->getObjectTypeMask() & GoalZoneType)      // SCORE!!!!
+   else if(hitObject->getObjectTypeNumber() == GoalZoneTypeNumber)      // SCORE!!!!
    {
       GoalZone *goal = dynamic_cast<GoalZone *>(hitObject);
 

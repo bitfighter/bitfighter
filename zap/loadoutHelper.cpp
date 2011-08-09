@@ -312,7 +312,7 @@ bool LoadoutHelper::processKeyCode(KeyCode keyCode)
       // Check if we are in a loadout zone...  if so, it will be changed right away...
       // ...otherwise, display a notice to the player to head for a LoadoutZone
       // We've done a lot of work to get this message just right!  I hope players appreciate it!
-      if(gIniSettings.verboseHelpMessages && !(ship && ship->isInZone(LoadoutZoneType)) )          
+      if(gIniSettings.verboseHelpMessages && !(ship && ship->isInZone(LoadoutZoneTypeNumber)) )
          getGame()->displayMessage(Color(1.0, 0.5, 0.5), 
                                            "Ship design changed -- %s%s", 
                                            spawnWithLoadout ? "changes will be activated when you respawn" : "enter Loadout Zone to activate changes", 

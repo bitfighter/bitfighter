@@ -93,7 +93,7 @@ public:
                                                    Point &anchor, Point &normal);
 
    static DatabaseObject *findAnchorPointAndNormal(GridDatabase *db, const Point &pos, F32 snapDist, 
-                                                   bool format, BITMASK wallType, Point &anchor, Point &normal);
+                                                   bool format, U8 wallType, Point &anchor, Point &normal);
 
    void setAnchorNormal(const Point &nrml) { mAnchorNormal = nrml; }
    WallSegment *getMountSegment() { return mMountSeg; }

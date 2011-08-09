@@ -58,7 +58,7 @@ bool EngineerModuleDeployer::findDeployPoint(Ship *ship, Point &deployPosition, 
 
    F32 collisionTime;
 
-   GameObject *hitObject = ship->findObjectLOS(BarrierType, MoveObject::ActualState, startPoint, endPoint, 
+   GameObject *hitObject = ship->findObjectLOS(BarrierTypeNumber, MoveObject::ActualState, startPoint, endPoint,
                                                collisionTime, deployNormal);
 
    if(!hitObject)    // No appropriate walls found, can't deploy, sorry!
@@ -79,7 +79,7 @@ bool EngineerModuleDeployer::findDeployPoint(Ship *ship, Point &deployPosition, 
 // Check for sufficient energy and resources; return empty string if everything is ok
 string EngineerModuleDeployer::checkResourcesAndEnergy(Ship *ship)
 {
-   if(!ship->isCarryingItem(ResourceItemType)) 
+   if(!ship->isCarryingItem(ResourceItemTypeNumber))
       return "!!! Need resource item to use Engineer module";
 
    if(ship->getEnergy() < ship->getGame()->getModuleInfo(ModuleEngineer)->getPerUseCost())
@@ -153,7 +153,7 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(GridDatabase *database, S
    ForceField::getGeom(forceFieldStart, forceFieldEnd, candidateForceFieldGeom);
 
    fillVector.clear();
-   database->findObjects(ForceFieldProjectorType, fillVector, queryRect);
+   database->findObjects(ForceFieldProjectorTypeNumber, fillVector, queryRect);
 
    Vector<Point> ffpGeom;     // Geom of any projectors we find
 
@@ -179,7 +179,7 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(GridDatabase *database, S
       // one could intersect the end of the other.
       fillVector.clear();
       queryRect.expand(Point(ForceField::MAX_FORCEFIELD_LENGTH, ForceField::MAX_FORCEFIELD_LENGTH));
-      database->findObjects(ForceFieldProjectorType, fillVector, queryRect);
+      database->findObjects(ForceFieldProjectorTypeNumber, fillVector, queryRect);
 
       // Reusable containers for holding geom of any forcefields we might need to check for intersection with our candidate
       Point start, end;
@@ -253,7 +253,7 @@ bool EngineerModuleDeployer::deployEngineeredItem(GameConnection *connection, U3
    deployedObject->addToGame(gServerGame, gServerGame->getGameObjDatabase());
    deployedObject->onEnabled();
 
-   Item *resource = ship->unmountItem(ResourceItemType);
+   Item *resource = ship->unmountItem(ResourceItemTypeNumber);
 
    deployedObject->setResource(resource);
 
@@ -337,12 +337,12 @@ string EngineeredObject::toString(F32 gridSize) const
 DatabaseObject *EngineeredObject::findAnchorPointAndNormal(GridDatabase *wallEdgeDatabase, const Point &pos, F32 snapDist, 
                                                            bool format, Point &anchor, Point &normal)
 {
-   return findAnchorPointAndNormal(wallEdgeDatabase, pos, snapDist, format, BarrierType, anchor, normal);
+   return findAnchorPointAndNormal(wallEdgeDatabase, pos, snapDist, format, BarrierTypeNumber, anchor, normal);
 }
 
 
 DatabaseObject *EngineeredObject::findAnchorPointAndNormal(GridDatabase *wallEdgeDatabase, const Point &pos, F32 snapDist, 
-                                                           bool format, BITMASK wallType, Point &anchor, Point &normal)
+                                                           bool format, U8 wallType, Point &anchor, Point &normal)
 {
    F32 minDist = F32_MAX;
    DatabaseObject *closestWall = NULL;
@@ -514,7 +514,7 @@ bool EngineeredObject::checkDeploymentPosition(const Vector<Point> &thisBounds, 
 {
    Vector<DatabaseObject *> foundObjects;
    Rect queryRect(thisBounds);
-   gb->findObjects(BarrierType | EngineeredType, foundObjects, queryRect);
+   gb->findObjects((TestFunc) isForceFieldCollideableType, foundObjects, queryRect);
 
    for(S32 i = 0; i < foundObjects.size(); i++)
    {
@@ -618,12 +618,12 @@ Point EngineeredObject::mountToWall(const Point &pos, GridDatabase *wallEdgeData
    // it indirectly by snapping again, this time to a segment in our WallSegment database.  By using the snap point we found initially, that will
    // ensure the segment we find is associated with the edge found in the first pass.
    mountEdge = findAnchorPointAndNormal(wallEdgeDatabase, pos, 
-                               (F32)EngineeredObject::MAX_SNAP_DISTANCE, false, BarrierType, anchor, nrml);
+                               (F32)EngineeredObject::MAX_SNAP_DISTANCE, false, BarrierTypeNumber, anchor, nrml);
 
    if(mountEdge)
    {
       mountSeg = findAnchorPointAndNormal(wallSegmentDatabase, anchor,     // <== passing in anchor here (found above), not pos
-                        (F32)EngineeredObject::MAX_SNAP_DISTANCE, false, BarrierType, anchor, nrml);
+                        (F32)EngineeredObject::MAX_SNAP_DISTANCE, false, BarrierTypeNumber, anchor, nrml);
    }
 
    if(mountSeg)   // Found a segment we can mount to
@@ -666,7 +666,6 @@ TNL_IMPLEMENT_NETOBJECT(ForceFieldProjector);
 ForceFieldProjector::ForceFieldProjector(S32 team, Point anchorPoint, Point anchorNormal) : EngineeredObject(team, anchorPoint, anchorNormal)
 {
    mNetFlags.set(Ghostable);
-   mObjectTypeMask = ForceFieldProjectorType | CommandMapVisType;
    mObjectTypeNumber = ForceFieldProjectorTypeNumber;
 }
 
@@ -881,7 +880,6 @@ ForceField::ForceField(S32 team, Point start, Point end)
    setExtent(extent);
 
    mFieldUp = true;
-   mObjectTypeMask = ForceFieldType | CommandMapVisType;
    mObjectTypeNumber = ForceFieldTypeNumber;
    mNetFlags.set(Ghostable);
 }
@@ -891,7 +889,7 @@ bool ForceField::collide(GameObject *hitObject)
    if(!mFieldUp)
       return false;
 
-   if( ! (hitObject->getObjectTypeMask() & (ShipType | RobotType)))
+   if( ! (isShipType(hitObject->getObjectTypeNumber()) ) )
       return true;
 
    if(hitObject->getTeam() == mTeam)
@@ -930,7 +928,7 @@ void ForceField::idle(GameObject::IdleCallPath path)
       // do an LOS test to see if anything is in the field:
       F32 t;
       Point n;
-      if(!findObjectLOS(ShipType | RobotType | ItemType, MoveObject::ActualState, mStart, mEnd, t, n))
+      if(!findObjectLOS((TestFunc)isForceFieldDeactivatingType, MoveObject::ActualState, mStart, mEnd, t, n))
       {
          mFieldUp = true;
          setMaskBits(StatusMask);
@@ -1011,7 +1009,7 @@ bool ForceField::findForceFieldEnd(GridDatabase *db, const Point &start, const P
 
    end.set(start.x + normal.x * MAX_FORCEFIELD_LENGTH, start.y + normal.y * MAX_FORCEFIELD_LENGTH);
 
-   *collObj = db->findObjectLOS(BarrierType, MoveObject::ActualState, start, end, time, n); 
+   *collObj = db->findObjectLOS(BarrierTypeNumber, MoveObject::ActualState, start, end, time, n);
 
    if(*collObj)
    {
@@ -1045,7 +1043,6 @@ TNL_IMPLEMENT_NETOBJECT(Turret);
 // Constructor
 Turret::Turret(S32 team, Point anchorPoint, Point anchorNormal) : EngineeredObject(team, anchorPoint, anchorNormal)
 {
-   mObjectTypeMask = TurretType | CommandMapVisType;
    mObjectTypeNumber = TurretTypeNumber;
 
    mWeaponFireType = WeaponTurret;
@@ -1213,7 +1210,7 @@ void Turret::idle(IdleCallPath path)
    queryRect.unionPoint(aimPos - cross * TurretPerceptionDistance);
    queryRect.unionPoint(aimPos + mAnchorNormal * TurretPerceptionDistance);
    fillVector.clear();
-   findObjects(TurretTargetType, fillVector, queryRect);    // Get all potential targets
+   findObjects((TestFunc)isTurretTargetType, fillVector, queryRect);    // Get all potential targets
 
    GameObject *bestTarget = NULL;
    F32 bestRange = F32_MAX;
@@ -1223,7 +1220,7 @@ void Turret::idle(IdleCallPath path)
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
-      if(fillVector[i]->getObjectTypeMask() & ( ShipType | RobotType))
+      if(isShipType(fillVector[i]->getObjectTypeNumber()))
       {
          Ship *potential = dynamic_cast<Ship *>(fillVector[i]);
 
@@ -1266,14 +1263,14 @@ void Turret::idle(IdleCallPath path)
 
       // See if we can see it...
       Point n;
-      if(findObjectLOS(BarrierType, MoveObject::ActualState, aimPos, potential->getActualPos(), t, n))
+      if(findObjectLOS(BarrierTypeNumber, MoveObject::ActualState, aimPos, potential->getActualPos(), t, n))
          continue;
 
       // See if we're gonna clobber our own stuff...
       disableCollision();
       Point delta2 = delta;
       delta2.normalize(gWeapons[mWeaponFireType].projLiveTime * (F32)gWeapons[mWeaponFireType].projVelocity / 1000.f);
-      GameObject *hitObject = findObjectLOS(ShipType | RobotType | BarrierType | EngineeredType, 0, aimPos, aimPos + delta2, t, n);
+      GameObject *hitObject = findObjectLOS((TestFunc) isWithHealthType, 0, aimPos, aimPos + delta2, t, n);
       enableCollision();
 
       if(hitObject && hitObject->getTeam() == mTeam)

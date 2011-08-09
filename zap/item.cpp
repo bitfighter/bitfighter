@@ -43,7 +43,6 @@ Item::Item(Point p, bool collideable, float radius, float mass) : MoveObject(p, 
 {
    mIsMounted = false;
    mIsCollideable = collideable;
-   mObjectTypeMask = MoveableType | CommandMapVisType;
    mInitial = false;
 
    //if(getGame()->isServer())
@@ -564,7 +563,7 @@ void PickupItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 // Runs on both client and server, but does nothing on client
 bool PickupItem::collide(GameObject *otherObject)
 {
-   if(mIsVisible && !isGhost() && otherObject->getObjectTypeMask() & (ShipType | RobotType))
+   if(mIsVisible && !isGhost() && isShipType(otherObject->getObjectTypeNumber()))
    {
       if(pickup(dynamic_cast<Ship *>(otherObject)))
       {

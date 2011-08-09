@@ -158,26 +158,6 @@ void GridDatabase::removeFromDatabase(DatabaseObject *theObject, const Rect &ext
 }
 
 
-void GridDatabase::findObjects(BITMASK typeMask, Vector<DatabaseObject *> &fillVector, const Rect *extents, S32 minx, S32 miny, S32 maxx, S32 maxy, U8 typeNumber)
-{
-   mQueryId++;    // Used to prevent the same item from being found in multiple buckets
-
-   for(S32 x = minx; maxx - x >= 0; x++)
-      for(S32 y = miny; maxy - y >= 0; y++)
-         for(BucketEntry *walk = mBuckets[x & BucketMask][y & BucketMask]; walk; walk = walk->nextInBucket)
-         {
-            DatabaseObject *theObject = walk->theObject;
-
-            if(theObject->mLastQueryId != mQueryId &&                                                             // Object hasn't been queried; and
-               ((theObject->getObjectTypeMask() & typeMask) || theObject->getObjectTypeNumber() == typeNumber) && // is of the right type; and
-               (!extents || theObject->mExtent.intersects(*extents)) )                                             // overlaps our extents (if passed)
-            {
-               walk->theObject->mLastQueryId = mQueryId;    // Flag the object so we know we've already visited it
-               fillVector.push_back(walk->theObject);       // And save it as a found item
-            }
-         }
-}
-
 
 void GridDatabase::findObjects(Vector<DatabaseObject *> &fillVector)
 {
@@ -187,23 +167,38 @@ void GridDatabase::findObjects(Vector<DatabaseObject *> &fillVector)
 }
 
 
-//const Vector<DatabaseObject *> *GridDatabase::getObjectList()
-//{
-//   return &mAllObjects;
-//}
+void GridDatabase::findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector, const Rect *extents, S32 minx, S32 miny, S32 maxx, S32 maxy)
+{
+   mQueryId++;    // Used to prevent the same item from being found in multiple buckets
+
+   for(S32 x = minx; maxx - x >= 0; x++)
+      for(S32 y = miny; maxy - y >= 0; y++)
+         for(BucketEntry *walk = mBuckets[x & BucketMask][y & BucketMask]; walk; walk = walk->nextInBucket)
+         {
+            DatabaseObject *theObject = walk->theObject;
+
+            if(theObject->mLastQueryId != mQueryId &&                      // Object hasn't been queried; and
+               (theObject->getObjectTypeNumber() == typeNumber) &&         // is of the right type; and
+               (!extents || theObject->mExtent.intersects(*extents)) )     // overlaps our extents (if passed)
+            {
+               walk->theObject->mLastQueryId = mQueryId;    // Flag the object so we know we've already visited it
+               fillVector.push_back(walk->theObject);       // And save it as a found item
+            }
+         }
+}
 
 
-// Find all objects in database of type typeMask
-void GridDatabase::findObjects(BITMASK typeMask, Vector<DatabaseObject *> &fillVector, U8 typeNumber)
+// Find all objects in database of type typeNumber
+void GridDatabase::findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector)
 {
    for(S32 i = 0; i < mAllObjects.size(); i++)
-      if((mAllObjects[i]->getObjectTypeMask() & typeMask) || (mAllObjects[i]->getObjectTypeNumber() == typeNumber))
+      if(mAllObjects[i]->getObjectTypeNumber() == typeNumber)
          fillVector.push_back(mAllObjects[i]);
 }
 
 
-// Find all objects in &extents that are of type typeMask
-void GridDatabase::findObjects(BITMASK typeMask, Vector<DatabaseObject *> &fillVector, const Rect &extents, U8 typeNumber)
+// Find all objects in &extents that are of type typeNumber
+void GridDatabase::findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector, const Rect &extents)
 {
    S32 minx, miny, maxx, maxy;
 
@@ -217,7 +212,56 @@ void GridDatabase::findObjects(BITMASK typeMask, Vector<DatabaseObject *> &fillV
    if(maxy - miny >= BucketRowCount)
       maxy = miny + BucketRowCount - 1;
 
-   findObjects(typeMask, fillVector, &extents, minx, miny, maxx, maxy, typeNumber);
+   findObjects(typeNumber, fillVector, &extents, minx, miny, maxx, maxy);
+}
+
+
+void GridDatabase::findObjects(TestFunc testFunc, Vector<DatabaseObject *> &fillVector, const Rect *extents, S32 minx, S32 miny, S32 maxx, S32 maxy)
+{
+   mQueryId++;    // Used to prevent the same item from being found in multiple buckets
+
+   for(S32 x = minx; maxx - x >= 0; x++)
+      for(S32 y = miny; maxy - y >= 0; y++)
+         for(BucketEntry *walk = mBuckets[x & BucketMask][y & BucketMask]; walk; walk = walk->nextInBucket)
+         {
+            DatabaseObject *theObject = walk->theObject;
+
+            if(theObject->mLastQueryId != mQueryId &&                      // Object hasn't been queried; and
+               (testFunc(theObject->getObjectTypeNumber())) &&         // is of the right type; and
+               (!extents || theObject->mExtent.intersects(*extents)) )     // overlaps our extents (if passed)
+            {
+               walk->theObject->mLastQueryId = mQueryId;    // Flag the object so we know we've already visited it
+               fillVector.push_back(walk->theObject);       // And save it as a found item
+            }
+         }
+}
+
+
+// Find all objects in database using derived type test function
+void GridDatabase::findObjects(TestFunc testFunc, Vector<DatabaseObject *> &fillVector)
+{
+   for(S32 i = 0; i < mAllObjects.size(); i++)
+      if(testFunc(mAllObjects[i]->getObjectTypeNumber()))
+         fillVector.push_back(mAllObjects[i]);
+}
+
+
+// Find all objects in &extents derived type test function
+void GridDatabase::findObjects(TestFunc testFunc, Vector<DatabaseObject *> &fillVector, const Rect &extents)
+{
+   S32 minx, miny, maxx, maxy;
+
+   minx = S32(extents.min.x * widthDiv);
+   miny = S32(extents.min.y * widthDiv);
+   maxx = S32(extents.max.x * widthDiv);
+   maxy = S32(extents.max.y * widthDiv);
+
+   if(maxx - minx >= BucketRowCount)
+      maxx = minx + BucketRowCount - 1;
+   if(maxy - miny >= BucketRowCount)
+      maxy = miny + BucketRowCount - 1;
+
+   findObjects(testFunc, fillVector, &extents, minx, miny, maxx, maxy);
 }
 
 
@@ -235,7 +279,6 @@ DatabaseObject::DatabaseObject()
 DatabaseObject::DatabaseObject(const DatabaseObject &t) 
 {  
    initialize();
-   mObjectTypeMask = t.mObjectTypeMask; 
    mObjectTypeNumber = t.mObjectTypeNumber; 
 }
 
@@ -253,25 +296,24 @@ void DatabaseObject::initialize()
 // Find objects along a ray, returning first discovered object, along with time of
 // that collision and a Point representing the normal angle at intersection point
 //             (at least I think that's what's going on here - CE)
-DatabaseObject *GridDatabase::findObjectLOS(BITMASK typeMask, U32 stateIndex, 
+DatabaseObject *GridDatabase::findObjectLOS(U8 typeNumber, U32 stateIndex,
                                             const Point &rayStart, const Point &rayEnd, 
-                                            float &collisionTime, Point &surfaceNormal, U8 typeNumber)
+                                            float &collisionTime, Point &surfaceNormal)
 {
-   return findObjectLOS(typeMask, stateIndex, true, rayStart, rayEnd, collisionTime, surfaceNormal, typeNumber);
+   return findObjectLOS(typeNumber, stateIndex, true, rayStart, rayEnd, collisionTime, surfaceNormal);
 }
 
-
 // Format is a passthrough to polygonLineIntersect().  Will be true for most items, false for walls in editor.
-DatabaseObject *GridDatabase::findObjectLOS(BITMASK typeMask, U32 stateIndex, bool format,
-                                            const Point &rayStart, const Point &rayEnd, 
-                                            float &collisionTime, Point &surfaceNormal, U8 typeNumber)
+DatabaseObject *GridDatabase::findObjectLOS(U8 typeNumber, U32 stateIndex, bool format,
+                                            const Point &rayStart, const Point &rayEnd,
+                                            float &collisionTime, Point &surfaceNormal)
 {
    Rect queryRect(rayStart, rayEnd);
 
    static Vector<DatabaseObject *> fillVector;  // Use local here, Most of code expects a global FillVector left unchanged
    fillVector.clear();
 
-   findObjects(typeMask, fillVector, queryRect, typeNumber);
+   findObjects(typeNumber, fillVector, queryRect);
 
    Point collisionPoint;
 
@@ -326,12 +368,84 @@ DatabaseObject *GridDatabase::findObjectLOS(BITMASK typeMask, U32 stateIndex, bo
 }
 
 
+DatabaseObject *GridDatabase::findObjectLOS(TestFunc testFunc, U32 stateIndex, bool format,
+                                            const Point &rayStart, const Point &rayEnd, 
+                                            float &collisionTime, Point &surfaceNormal)
+{
+   Rect queryRect(rayStart, rayEnd);
+
+   static Vector<DatabaseObject *> fillVector;  // Use local here, Most of code expects a global FillVector left unchanged
+   fillVector.clear();
+
+   findObjects(testFunc, fillVector, queryRect);
+
+   Point collisionPoint;
+
+   collisionTime = 100;
+   DatabaseObject *retObject = NULL;
+
+   for(S32 i = 0; i < fillVector.size(); i++)
+   {
+      if(!fillVector[i]->isCollisionEnabled())     // Skip collision-disabled objects
+         continue;
+
+      static Vector<Point> poly;
+      poly.clear();
+      Point center;
+      F32 radius;
+      float ct;
+
+      if(fillVector[i]->getCollisionPoly(poly))
+      {
+         if(poly.size() == 0)    // This can happen in the editor when a wall segment is completely hidden by another
+            continue;
+
+         Point normal;
+         if(polygonIntersectsSegmentDetailed(&poly[0], poly.size(), format, rayStart, rayEnd, ct, normal))
+         {
+            if(ct < collisionTime)
+            {
+               collisionTime = ct;
+               retObject = fillVector[i];
+               surfaceNormal = normal;
+            }
+         }
+      }
+      else if(fillVector[i]->getCollisionCircle(stateIndex, center, radius))
+      {
+         if(circleIntersectsSegment(center, radius, rayStart, rayEnd, ct))
+         {
+            if(ct < collisionTime)
+            {
+               collisionTime = ct;
+               surfaceNormal = (rayStart + (rayEnd - rayStart) * ct) - center;
+               retObject = fillVector[i];
+            }
+         }
+      }
+   }
+
+   if(retObject)
+      surfaceNormal.normalize();
+
+   return retObject;
+}
+
+
+DatabaseObject *GridDatabase::findObjectLOS(TestFunc testFunc, U32 stateIndex,
+                                            const Point &rayStart, const Point &rayEnd,
+                                            float &collisionTime, Point &surfaceNormal)
+{
+   return findObjectLOS(testFunc, stateIndex, true, rayStart, rayEnd, collisionTime, surfaceNormal);
+}
+
+
 bool GridDatabase::pointCanSeePoint(const Point &point1, const Point &point2)
 {
    F32 time;
    Point coll;
 
-   return( findObjectLOS(BarrierType, MoveObject::ActualState, true, point1, point2, time, coll) == NULL );
+   return( findObjectLOS(BarrierTypeNumber, MoveObject::ActualState, true, point1, point2, time, coll) == NULL );
 }
 
 
@@ -450,9 +564,9 @@ void DatabaseObject::setExtent(const Rect &extents)
 // We'll also put walls on the bottom, as this seems to work best in practice
 bool QSORT_CALLBACK geometricSort(EditorObject * &a, EditorObject * &b)
 {
-   if(a->getObjectTypeMask() & BarrierType)
+   if(a->getObjectTypeNumber() == BarrierTypeNumber)
       return true;
-   if(b->getObjectTypeMask() & BarrierType)
+   if(b->getObjectTypeNumber() == BarrierTypeNumber)
       return false;
 
    return( a->getGeomType() > b->getGeomType() );

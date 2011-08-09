@@ -111,6 +111,22 @@ class UIManager;
 struct IniSettings;
 extern IniSettings gIniSettings;
 
+// Modes the player could be in during the game
+enum UIMode {
+   PlayMode,               // Playing
+   ChatMode,               // Composing chat message
+   QuickChatMode,          // Showing quick-chat menu
+   LoadoutMode,            // Showing loadout menu
+   EngineerMode,           // Showing engineer overlay mode
+};
+
+enum VolumeType {
+   SfxVolumeType,
+   MusicVolumeType,
+   VoiceVolumeType,
+   ServerAlertVolumeType,
+};
+
 /// Base class for server and client Game subclasses.  The Game
 /// base class manages all the objects in the game simulation on
 /// either the server or the client, and is responsible for
@@ -225,7 +241,7 @@ public:
 
    void addToDeleteList(GameObject *theObject, U32 delay);
 
-   void deleteObjects(BITMASK typeMask);
+   void deleteObjects(U8 typeNumber);
 
    F32 getGridSize() const { return mGridSize; }
    void setGridSize(F32 gridSize);
@@ -367,7 +383,7 @@ private:
 public:
    U32 mInfoFlags;           // Not used for much at the moment, but who knows? --> propagates to master
    ServerGame(const Address &theBindAddress, U32 maxPlayers, const char *hostName, bool testMode);    // Constructor
-   ~ServerGame();   // Destructor
+   virtual ~ServerGame();   // Destructor
 
    U32 mVoteTimer;
    S32 mVoteType;
@@ -456,16 +472,6 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-
-enum VolumeType {
-   SfxVolumeType,
-   MusicVolumeType,
-   VoiceVolumeType,
-   ServerAlertVolumeType,
-};
-
-extern enum UIMode;
-
 class ClientGame : public Game
 {
    typedef Game Parent;
@@ -497,7 +503,7 @@ private:
 
 public:
    ClientGame(const Address &bindAddress);
-   ~ClientGame();
+   virtual ~ClientGame();
 
    UserInterfaceData *mUserInterfaceData;
 

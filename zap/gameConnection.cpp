@@ -336,7 +336,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rCommandComplete, (RangedU32<0,SENDER_STATUS
                fwrite((char *)mDataBuffer->getBuffer(), 1, mDataBuffer->getBufferSize(), outputFile);
                fclose(outputFile);
 
-               mClientGame->displaySuccessMessage("Level downloaded to %s", mClientGame->getRemoteLevelDownloadFilename());    
+               mClientGame->displaySuccessMessage("Level downloaded to %s", mClientGame->getRemoteLevelDownloadFilename().c_str());
             }
          }
          else if(status.value == COMMAND_NOT_ALLOWED)

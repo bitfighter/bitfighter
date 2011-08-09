@@ -62,7 +62,6 @@ TNL_IMPLEMENT_NETOBJECT(Projectile);
 // Constructor
 Projectile::Projectile(WeaponType type, Point p, Point v, GameObject *shooter)
 {
-   mObjectTypeMask = BulletType;
    mObjectTypeNumber = BulletTypeNumber;
 
    mNetFlags.set(Ghostable);
@@ -137,9 +136,6 @@ void Projectile::unpackUpdate(GhostConnection *connection, BitStream *stream)
       GameConnection *gc = (GameConnection *)connection;
 
       Ship *ship = dynamic_cast<Ship *>(gc->getControlObject());
-
-      if(ship && ship->hasModule(ModuleSensor))
-         mObjectTypeMask |= CommandMapVisType;     // Bullets visible on commander's map if you have sensor
 
       if(stream->readFlag())
          mShooter = dynamic_cast<Ship *>(connection->resolveGhost(stream->readInt(GhostConnection::GhostIdBitSize)));
@@ -230,9 +226,9 @@ void Projectile::idle(GameObject::IdleCallPath path)
       Point surfNormal;
 
       // Do the search
-      for(;;)
+      for(;;)  // TODO:  replace with less evil loop?
       {
-         hitObject = findObjectLOS(MoveableType | BarrierType | EngineeredType | ForceFieldType,
+         hitObject = findObjectLOS((TestFunc)isWeaponCollideableType,
                                    MoveObject::RenderState, pos, endPos, collisionTime, surfNormal);
 
          if((!hitObject || hitObject->collide(this)))
@@ -255,11 +251,10 @@ void Projectile::idle(GameObject::IdleCallPath path)
       if(hitObject)  // Hit something...  should we bounce?
       {
          bool bounce = false;
-         BITMASK typeMask = hitObject->getObjectTypeMask();
 
-         if(mType == ProjectileBounce && (typeMask & BarrierType))
+         if(mType == ProjectileBounce && isWallType(hitObject->getObjectTypeNumber()))
             bounce = true;
-         else if(typeMask & (ShipType | RobotType))
+         else if(isShipType(hitObject->getObjectTypeNumber()))
          {
             Ship *s = dynamic_cast<Ship *>(hitObject);
             if(s->isModuleActive(ModuleShield))
@@ -419,7 +414,6 @@ TNL_IMPLEMENT_NETOBJECT(GrenadeProjectile);
 
 GrenadeProjectile::GrenadeProjectile(Point pos, Point vel, GameObject *shooter): Item(pos, true, mRadius, mMass)
 {
-   mObjectTypeMask = MoveableType | BulletType;
    mObjectTypeNumber = BulletTypeNumber;
 
    mNetFlags.set(Ghostable);
@@ -515,9 +509,6 @@ void GrenadeProjectile::unpackUpdate(GhostConnection *connection, BitStream *str
 
    Ship *ship = dynamic_cast<Ship *>(gc->getControlObject());
 
-   if(ship && ship->hasModule(ModuleSensor))
-      mObjectTypeMask |= CommandMapVisType;     // Bursts visible on commander's map if you have sensor
-
    if(stream->readFlag())
       explode(getActualPos(), WeaponBurst);
 
@@ -575,7 +566,7 @@ void GrenadeProjectile::explode(Point pos, WeaponType weaponType)
       info.damageType           = DamageTypeArea;
       info.damageSelfMultiplier = gWeapons[weaponType].damageSelfMultiplier;
 
-      S32 hits = radiusDamage(pos, InnerBlastRadius, OuterBlastRadius, DamagableTypes, info);
+      S32 hits = radiusDamage(pos, InnerBlastRadius, OuterBlastRadius, (TestFunc)isDamageableType, info);
 
       if(getOwner())
          for(S32 i = 0; i < hits; i++)
@@ -630,7 +621,6 @@ TNL_IMPLEMENT_NETOBJECT(Mine);
 // Constructor (planter defaults to null)
 Mine::Mine(Point pos, Ship *planter) : GrenadeProjectile(pos, Point())
 {
-   mObjectTypeMask = MoveableType | MineType;
    mObjectTypeNumber = MineTypeNumber;
    mWeaponType = WeaponMine;
 
@@ -679,7 +669,7 @@ void Mine::idle(IdleCallPath path)
    queryRect.expand(Point(SensorRadius, SensorRadius));
 
    fillVector.clear();
-   findObjects(MotionTriggerTypes | MineType, fillVector, queryRect);
+   findObjects((TestFunc)isMotionTriggerType, fillVector, queryRect);
 
    // Found something!
    bool foundItem = false;
@@ -693,7 +683,7 @@ void Mine::idle(IdleCallPath path)
       {
          if((ipos - pos).len() < (radius + SensorRadius))
          {
-            bool isMine = foundObject->getObjectTypeMask() & MineType;
+            bool isMine = foundObject->getObjectTypeNumber() == MineTypeNumber;
             if(!isMine)
             {
                foundItem = true;
@@ -725,7 +715,7 @@ void Mine::idle(IdleCallPath path)
 
 bool Mine::collide(GameObject *otherObj)
 {
-   if(otherObj->getObjectTypeMask() & (BulletType | SpyBugType | MineType))
+   if(isProjectileType(otherObj->getObjectTypeNumber()))
       explode(getActualPos(), WeaponMine);
    return false;
 }
@@ -851,9 +841,7 @@ TNL_IMPLEMENT_NETOBJECT(SpyBug);
 // Constructor
 SpyBug::SpyBug(Point pos, Ship *planter) : GrenadeProjectile(pos, Point())
 {
-   mObjectTypeMask = MoveableType | SpyBugType;
    mObjectTypeNumber = SpyBugTypeNumber;
-   //mObjectTypeMask &= ~CommandMapVisType;    // These items aren't shown on commander's map (well, sometimes they are, but through a special method)
 
    mWeaponType = WeaponSpyBug;
    mNetFlags.set(Ghostable);
@@ -935,7 +923,7 @@ void SpyBug::idle(IdleCallPath path)
 
 bool SpyBug::collide(GameObject *otherObj)
 {
-   if(otherObj->getObjectTypeMask() & (BulletType | SpyBugType | MineType))
+   if(isProjectileType(otherObj->getObjectTypeNumber()))
       explode(getActualPos(), WeaponSpyBug);
    return false;
 }

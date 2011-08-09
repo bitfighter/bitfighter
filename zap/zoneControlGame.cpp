@@ -68,7 +68,7 @@ void ZoneControlGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
    mFlagTeam = theShip->getTeam();
    s2cSetFlagTeam(mFlagTeam);
 
-   GoalZone *theZone = dynamic_cast<GoalZone *>(theShip->isInZone(GoalZoneType));
+   GoalZone *theZone = dynamic_cast<GoalZone *>(theShip->isInZone(GoalZoneTypeNumber));
    if(theZone)
       shipTouchZone(theShip, theZone);
 }
@@ -256,7 +256,7 @@ void ZoneControlGameType::majorScoringEventOcurred(S32 team)
 {
    // Find all zones...
    fillVector.clear();
-   getGame()->getGameObjDatabase()->findObjects(GoalZoneType, fillVector);
+   getGame()->getGameObjDatabase()->findObjects(GoalZoneTypeNumber, fillVector);
 
    // ...and make sure they're not flashing...
    for(S32 i = 0; i < fillVector.size(); i++)

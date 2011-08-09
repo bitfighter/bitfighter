@@ -189,7 +189,7 @@ void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vecto
       // Collision!  Advance to the point of collision
       mMoveState[stateIndex].pos += mMoveState[stateIndex].vel * collisionTime;
 
-      if(objectHit->getObjectTypeMask() & MoveableType)     // Collided with movable object
+      if(isMoveableType(objectHit->getObjectTypeNumber()))     // Collided with movable object
       {
          MoveObject *moveObjectThatWasHit = (MoveObject *) objectHit;    
          Point velDelta = moveObjectThatWasHit->mMoveState[stateIndex].vel - mMoveState[stateIndex].vel;
@@ -234,12 +234,12 @@ void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vecto
             }
          }
       }
-      else if(objectHit->getObjectTypeMask() & (BarrierType | EngineeredType | ForceFieldType))
+      else if(isCollideableType(objectHit->getObjectTypeNumber()))
       {
          computeCollisionResponseBarrier(stateIndex, collisionPoint);
          //moveTime = 0;
       }
-      else if(objectHit->getObjectTypeMask() & SpeedZoneType)
+      else if(objectHit->getObjectTypeNumber() == SpeedZoneTypeNumber)
       {
          SpeedZone *speedZone = dynamic_cast<SpeedZone *>(objectHit);
          if(speedZone)
@@ -277,7 +277,10 @@ GameObject *MoveObject::findFirstCollision(U32 stateIndex, F32 &collisionTime, P
    fillVector.clear();
 
    // Free CPU for asteroids
-   findObjects(dynamic_cast<Asteroid *>(this) ? (BarrierType | TurretType | ForceFieldProjectorType | ForceFieldType | ShipType | RobotType | TestItemType | ResourceItemType) : AllObjectTypes, fillVector, queryRect);
+   if (dynamic_cast<Asteroid *>(this))
+      findObjects((TestFunc)isAsteroidCollideableType, fillVector, queryRect);
+   else
+      findObjects((TestFunc)isAnyObjectType, fillVector, queryRect);
 
    F32 collisionFraction;
 
@@ -318,7 +321,7 @@ GameObject *MoveObject::findFirstCollision(U32 stateIndex, F32 &collisionTime, P
             }
          }
       }
-      else if(foundObject->getObjectTypeMask() & MoveableType)
+      else if(isMoveableType(foundObject->getObjectTypeNumber()))
       {
          MoveObject *otherShip = (MoveObject *) foundObject;
 
@@ -467,14 +470,11 @@ void MoveObject::computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *
       if(v1i > 0.25)    // Make sound if the objects are moving fast enough
          SoundSystem::playSoundEffect(SFXBounceObject, moveObjectThatWasHit->mMoveState[stateIndex].pos, Point());
 
-      if(moveObjectThatWasHit->getObjectTypeMask() & ItemType)
-      {
-         Item *item = dynamic_cast<Item *>(moveObjectThatWasHit);
-         GameType *gameType = gClientGame->getGameType();
+      Item *item = dynamic_cast<Item *>(moveObjectThatWasHit);
+      GameType *gameType = gClientGame->getGameType();
 
-         if(item && gameType)
-            gameType->c2sResendItemStatus(item->getItemId());
-      }
+      if(item && gameType)
+         gameType->c2sResendItemStatus(item->getItemId());
    }
 }
 

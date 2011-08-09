@@ -606,10 +606,10 @@ void Game::processDeleteList(U32 timeDelta)
 
 
 // Delete all objects of specified type  --> currently only used to remove all walls from the game
-void Game::deleteObjects(BITMASK typeMask)
+void Game::deleteObjects(U8 typeNumber)
 {
    fillVector.clear();
-   mGameObjDatabase->findObjects(typeMask, fillVector);
+   mGameObjDatabase->findObjects(typeNumber, fillVector);
    for(S32 i = 0; i < fillVector.size(); i++)
    {
       GameObject *obj = dynamic_cast<GameObject *>(fillVector[i]);
@@ -641,7 +641,7 @@ void Game::computeWorldObjectExtents()
 
    // Look for first non-UnknownType object
    for(S32 i = 0; i < fillVector.size() && first == -1; i++)
-      if(fillVector[i]->getObjectTypeMask() != UnknownType)
+      if(fillVector[i]->getObjectTypeNumber() != UnknownTypeNumber)
       {
          theRect = fillVector[i]->getExtent();
          first = i;
@@ -666,7 +666,7 @@ Rect Game::computeBarrierExtents()
    Rect theRect;
 
    fillVector.clear();
-   mGameObjDatabase->findObjects(BarrierType, fillVector);
+   mGameObjDatabase->findObjects(BarrierTypeNumber, fillVector);
 
    for(S32 i = 0; i < fillVector.size(); i++)
       theRect.unionRect(fillVector[i]->getExtent());
@@ -1672,7 +1672,7 @@ void ServerGame::idle(U32 timeDelta)
    // Visit each game object, handling moves and running its idle method
    for(S32 i = 0; i < fillVector2.size(); i++)
    {
-      if(fillVector2[i]->getObjectTypeMask() & DeletedType)
+      if(fillVector2[i]->isDeleted())
          continue;
 
       GameObject *obj = dynamic_cast<GameObject *>(fillVector2[i]);
@@ -1954,7 +1954,7 @@ void ClientGame::idle(U32 timeDelta)
 
       for(S32 i = 0; i < fillVector2.size(); i++)
       {
-         if(fillVector2[i]->getObjectTypeMask() & DeletedType)
+         if(fillVector2[i]->isDeleted())
             continue;
 
          GameObject *obj = dynamic_cast<GameObject *>(fillVector2[i]);
@@ -2322,6 +2322,7 @@ void ClientGame::onConnectionTerminated(const Address &serverAddress, NetConnect
          ui->setMessage(1, "Unable to connect to the server for reasons unknown.");
          ui->setMessage(3, "Please try a different game server, or try again later.");
          ui->activate();
+         break;
    }
 }
 
@@ -2797,11 +2798,14 @@ void ClientGame::renderCommander()
    // Render the objects.  Start by putting all command-map-visible objects into renderObjects.  Note that this no longer captures
    // walls -- those will be rendered separately.
    rawRenderObjects.clear();
-   mGameObjDatabase->findObjects(CommandMapVisType, rawRenderObjects);
+   if(u->isModuleActive(ModuleSensor))
+      mGameObjDatabase->findObjects((TestFunc)isVisibleOnCmdrsMapWithSensorType, rawRenderObjects);
+   else
+      mGameObjDatabase->findObjects((TestFunc)isVisibleOnCmdrsMapType, rawRenderObjects);
 
    // If we're drawing bot zones, add them to our list of render objects
    if(gServerGame && isShowingDebugMeshZones())
-      gServerGame->getBotZoneDatabase()->findObjects(0, rawRenderObjects, BotNavMeshZoneTypeNumber);
+      gServerGame->getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, rawRenderObjects);
 
    renderObjects.clear();
    for(S32 i = 0; i < rawRenderObjects.size(); i++)
@@ -2825,7 +2829,8 @@ void ClientGame::renderCommander()
          for(S32 i = 0; i < renderObjects.size(); i++)
          {
             // Render ship visibility range, and that of our teammates
-            if(renderObjects[i]->getObjectTypeMask() & (ShipType | RobotType))
+            if(renderObjects[i]->getObjectTypeNumber() == PlayerShipTypeNumber ||
+                  renderObjects[i]->getObjectTypeNumber() == RobotShipTypeNumber)
             {
                Ship *ship = dynamic_cast<Ship *>(renderObjects[i]);
 
@@ -2849,7 +2854,7 @@ void ClientGame::renderCommander()
          }
 
          fillVector.clear();
-         mGameObjDatabase->findObjects(SpyBugType, fillVector);
+         mGameObjDatabase->findObjects(SpyBugTypeNumber, fillVector);
 
          // Render spy bug visibility range second, so ranges appear above ship scanner range
          for(S32 i = 0; i < fillVector.size(); i++)
@@ -2945,7 +2950,10 @@ void ClientGame::renderOverlayMap()
    mapBounds.expand(Point(mapWidth * 2, mapHeight * 2));      //TODO: Fix
 
    rawRenderObjects.clear();
-   mGameObjDatabase->findObjects(CommandMapVisType, rawRenderObjects, mapBounds);
+   if(u->isModuleActive(ModuleSensor))
+      mGameObjDatabase->findObjects((TestFunc)isVisibleOnCmdrsMapWithSensorType, rawRenderObjects);
+   else
+      mGameObjDatabase->findObjects((TestFunc)isVisibleOnCmdrsMapType, rawRenderObjects);
 
    renderObjects.clear();
    for(S32 i = 0; i < rawRenderObjects.size(); i++)
@@ -3011,13 +3019,13 @@ void ClientGame::renderNormal()
    Rect extentRect(position - screenSize, position + screenSize);
 
    rawRenderObjects.clear();
-   mGameObjDatabase->findObjects(AllObjectTypes, rawRenderObjects, extentRect);    // Use extent rects to quickly find objects in visual range
+   mGameObjDatabase->findObjects((TestFunc)isAnyObjectType, rawRenderObjects, extentRect);    // Use extent rects to quickly find objects in visual range
 
    // Normally a big no-no, we'll access the server's bot zones directly if we are running locally so we can visualize them without bogging
    // the game down with the normal process of transmitting zones from server to client.  The result is that we can only see zones on our local
    // server.
    if(gServerGame && isShowingDebugMeshZones())
-       gServerGame->getBotZoneDatabase()->findObjects(0, rawRenderObjects, extentRect, BotNavMeshZoneTypeNumber);
+       gServerGame->getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, rawRenderObjects, extentRect);
 
    renderObjects.clear();
    for(S32 i = 0; i < rawRenderObjects.size(); i++)
