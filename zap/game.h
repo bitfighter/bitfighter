@@ -242,6 +242,7 @@ public:
    void addToDeleteList(GameObject *theObject, U32 delay);
 
    void deleteObjects(U8 typeNumber);
+   void deleteObjects(TestFunc testFunc);
 
    F32 getGridSize() const { return mGridSize; }
    void setGridSize(F32 gridSize);

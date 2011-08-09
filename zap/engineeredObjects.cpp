@@ -58,7 +58,7 @@ bool EngineerModuleDeployer::findDeployPoint(Ship *ship, Point &deployPosition, 
 
    F32 collisionTime;
 
-   GameObject *hitObject = ship->findObjectLOS(BarrierTypeNumber, MoveObject::ActualState, startPoint, endPoint,
+   GameObject *hitObject = ship->findObjectLOS((TestFunc)isWallType, MoveObject::ActualState, startPoint, endPoint,
                                                collisionTime, deployNormal);
 
    if(!hitObject)    // No appropriate walls found, can't deploy, sorry!
@@ -337,12 +337,12 @@ string EngineeredObject::toString(F32 gridSize) const
 DatabaseObject *EngineeredObject::findAnchorPointAndNormal(GridDatabase *wallEdgeDatabase, const Point &pos, F32 snapDist, 
                                                            bool format, Point &anchor, Point &normal)
 {
-   return findAnchorPointAndNormal(wallEdgeDatabase, pos, snapDist, format, BarrierTypeNumber, anchor, normal);
+   return findAnchorPointAndNormal(wallEdgeDatabase, pos, snapDist, format, (TestFunc)isWallType, anchor, normal);
 }
 
 
 DatabaseObject *EngineeredObject::findAnchorPointAndNormal(GridDatabase *wallEdgeDatabase, const Point &pos, F32 snapDist, 
-                                                           bool format, U8 wallType, Point &anchor, Point &normal)
+                                                           bool format, TestFunc testFunc, Point &anchor, Point &normal)
 {
    F32 minDist = F32_MAX;
    DatabaseObject *closestWall = NULL;
@@ -358,7 +358,7 @@ DatabaseObject *EngineeredObject::findAnchorPointAndNormal(GridDatabase *wallEdg
       Point mountPos = pos - dir * 0.001f;                           // Offsetting slightly prevents spazzy behavior in editor
       
       // Look for walls
-      DatabaseObject *wall = wallEdgeDatabase->findObjectLOS(wallType, MoveObject::ActualState, format, mountPos, mountPos + dir, t, n);
+      DatabaseObject *wall = wallEdgeDatabase->findObjectLOS(testFunc, MoveObject::ActualState, format, mountPos, mountPos + dir, t, n);
 
       if(wall != NULL)     // Found one!
       {
@@ -618,12 +618,12 @@ Point EngineeredObject::mountToWall(const Point &pos, GridDatabase *wallEdgeData
    // it indirectly by snapping again, this time to a segment in our WallSegment database.  By using the snap point we found initially, that will
    // ensure the segment we find is associated with the edge found in the first pass.
    mountEdge = findAnchorPointAndNormal(wallEdgeDatabase, pos, 
-                               (F32)EngineeredObject::MAX_SNAP_DISTANCE, false, BarrierTypeNumber, anchor, nrml);
+                               (F32)EngineeredObject::MAX_SNAP_DISTANCE, false, (TestFunc)isWallType, anchor, nrml);
 
    if(mountEdge)
    {
       mountSeg = findAnchorPointAndNormal(wallSegmentDatabase, anchor,     // <== passing in anchor here (found above), not pos
-                        (F32)EngineeredObject::MAX_SNAP_DISTANCE, false, BarrierTypeNumber, anchor, nrml);
+                        (F32)EngineeredObject::MAX_SNAP_DISTANCE, false, (TestFunc)isWallType, anchor, nrml);
    }
 
    if(mountSeg)   // Found a segment we can mount to
@@ -1009,7 +1009,7 @@ bool ForceField::findForceFieldEnd(GridDatabase *db, const Point &start, const P
 
    end.set(start.x + normal.x * MAX_FORCEFIELD_LENGTH, start.y + normal.y * MAX_FORCEFIELD_LENGTH);
 
-   *collObj = db->findObjectLOS(BarrierTypeNumber, MoveObject::ActualState, start, end, time, n);
+   *collObj = db->findObjectLOS((TestFunc)isWallType, MoveObject::ActualState, start, end, time, n);
 
    if(*collObj)
    {
@@ -1263,7 +1263,7 @@ void Turret::idle(IdleCallPath path)
 
       // See if we can see it...
       Point n;
-      if(findObjectLOS(BarrierTypeNumber, MoveObject::ActualState, aimPos, potential->getActualPos(), t, n))
+      if(findObjectLOS((TestFunc)isWallType, MoveObject::ActualState, aimPos, potential->getActualPos(), t, n))
          continue;
 
       // See if we're gonna clobber our own stuff...

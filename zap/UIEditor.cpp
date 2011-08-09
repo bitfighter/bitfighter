@@ -674,10 +674,10 @@ void EditorUserInterface::runScript(const string &scriptName, const Vector<strin
       if(obj->getVertCount() < 2)      // Invalid item; delete
          mLoadTarget->removeFromDatabase(obj, obj->getExtent());
 
-      if(obj->getObjectTypeNumber() == BarrierTypeNumber)
-         dynamic_cast<WallItem *>(obj)->processEndPoints();
-      else
+      if(obj->getObjectTypeNumber() == PolyWallTypeNumber)
          dynamic_cast<PolyWall *>(obj)->processEndPoints();
+      else
+         dynamic_cast<WallItem *>(obj)->processEndPoints();
    }
 
    // When I came through here in early june, there was nothing else here... shouldn't there be some handling of non-wall objects?  -CE

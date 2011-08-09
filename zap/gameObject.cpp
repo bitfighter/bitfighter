@@ -129,7 +129,8 @@ bool isForceFieldCollideableType(U8 x)
 bool isWallType(U8 x)
 {
    return
-         x == BarrierTypeNumber || x == PolyWallTypeNumber;
+         x == BarrierTypeNumber || x == PolyWallTypeNumber ||
+         x == WallItemTypeNumber || x == WallEdgeTypeNumber || x == WallSegmentTypeNumber;
 }
 
 bool isLineItemType(U8 x)
@@ -431,7 +432,7 @@ S32 GameObject::radiusDamage(Point pos, S32 innerRad, S32 outerRad, TestFunc obj
       F32 t;
       Point n;
 
-      if(findObjectLOS(BarrierTypeNumber, MoveObject::ActualState, pos, objPos, t, n))
+      if(findObjectLOS((TestFunc)isWallType, MoveObject::ActualState, pos, objPos, t, n))
          continue;
 
       // Figure the impulse and damage

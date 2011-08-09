@@ -46,7 +46,7 @@ TNL_IMPLEMENT_NETOBJECT(Barrier);
 
 Vector<Point> Barrier::mRenderLineSegments;
 
-bool loadBarrierPoints(const BarrierRec *barrier, Vector<Point> &points)
+bool loadBarrierPoints(const WallRec *barrier, Vector<Point> &points)
 {
    // Convert the list of floats into a list of points
    for(S32 i = 1; i < barrier->verts.size(); i += 2)
@@ -61,7 +61,7 @@ bool loadBarrierPoints(const BarrierRec *barrier, Vector<Point> &points)
 ////////////////////////////////////////
 
 // Runs on server or on client, never in editor
-void BarrierRec::constructBarriers(Game *theGame)
+void WallRec::constructWalls(Game *theGame)
 {
    Vector<Point> vec;
 
@@ -367,13 +367,16 @@ void Barrier::clipRenderLinesToPoly(const Vector<DatabaseObject *> &barrierList,
 
 
 // Merges wall outlines together, client only
+// This is used for barriers and polywalls
 void Barrier::prepareRenderingGeometry(Game *game)
 {
    mRenderLineSegments.clear();
 
    Vector<DatabaseObject *> barrierList;
 
-   game->getGameObjDatabase()->findObjects(BarrierTypeNumber, barrierList);
+   game->getGameObjDatabase()->findObjects((TestFunc)isWallType, barrierList);
+
+   printf("BarrierCount: %i\n", barrierList.size());
 
    clipRenderLinesToPoly(barrierList, mRenderLineSegments);
 }

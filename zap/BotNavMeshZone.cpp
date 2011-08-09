@@ -516,7 +516,7 @@ bool BotNavMeshZone::buildBotMeshZones(ServerGame *game, bool triangulateZones)
    Vector<Vector<Point> > solution;
 
    Vector<DatabaseObject *> barrierList;
-   game->getGameObjDatabase()->findObjects(BarrierTypeNumber, barrierList, bounds);
+   game->getGameObjDatabase()->findObjects((TestFunc)isWallType, barrierList, bounds);
 
    Vector<DatabaseObject *> turretList;
    game->getGameObjDatabase()->findObjects(TurretTypeNumber, turretList, bounds);

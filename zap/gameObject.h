@@ -55,7 +55,7 @@ class Game;
 
 const U8 UnknownTypeNumber = 0;
 const U8 PlayerShipTypeNumber = 1;
-const U8 BarrierTypeNumber = 2;
+const U8 BarrierTypeNumber = 2;  // Barrier is different than PolyWall!!
 // 3
 const U8 LineTypeNumber = 4;
 const U8 ResourceItemTypeNumber = 5;

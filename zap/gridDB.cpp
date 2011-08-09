@@ -445,7 +445,7 @@ bool GridDatabase::pointCanSeePoint(const Point &point1, const Point &point2)
    F32 time;
    Point coll;
 
-   return( findObjectLOS(BarrierTypeNumber, MoveObject::ActualState, true, point1, point2, time, coll) == NULL );
+   return( findObjectLOS((TestFunc)isWallType, MoveObject::ActualState, true, point1, point2, time, coll) == NULL );
 }
 
 
@@ -568,9 +568,9 @@ void DatabaseObject::setExtent(const Rect &extents)
 // We'll also put walls on the bottom, as this seems to work best in practice
 bool QSORT_CALLBACK geometricSort(EditorObject * &a, EditorObject * &b)
 {
-   if(a->getObjectTypeNumber() == BarrierTypeNumber)
+   if(isWallType(a->getObjectTypeNumber()))
       return true;
-   if(b->getObjectTypeNumber() == BarrierTypeNumber)
+   if(isWallType(b->getObjectTypeNumber()))
       return false;
 
    return( a->getGeomType() > b->getGeomType() );

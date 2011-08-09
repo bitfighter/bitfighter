@@ -1061,10 +1061,10 @@ void GameType::addSpyBug(SpyBug *spybug)
 
 
 // Only runs on server
-void GameType::addBarrier(BarrierRec barrier, Game *game)
+void GameType::addWall(WallRec wall, Game *game)
 {
-   mBarriers.push_back(barrier); 
-   barrier.constructBarriers(game);
+   mWalls.push_back(wall);
+   wall.constructWalls(game);
 }
 
 
@@ -2351,10 +2351,10 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
 
    // Sending an empty list clears the barriers
    Vector<F32> v;
-   s2cAddBarriers(v, 0, false);
+   s2cAddWalls(v, 0, false);
 
-   for(S32 i = 0; i < mBarriers.size(); i++)
-      s2cAddBarriers(mBarriers[i].verts, mBarriers[i].width, mBarriers[i].solid);
+   for(S32 i = 0; i < mWalls.size(); i++)
+      s2cAddWalls(mWalls[i].verts, mWalls[i].width, mWalls[i].solid);
 
    s2cSetTimeRemaining(mGameTimer.getCurrent());      // Tell client how much time left in current game
    s2cSetGameOver(mGameOver);
@@ -2399,18 +2399,18 @@ GAMETYPE_RPC_C2S(GameType, c2sSyncMessagesComplete, (U32 sequence), (sequence))
 
 
 // Gets called multiple times as barriers are added
-GAMETYPE_RPC_S2C(GameType, s2cAddBarriers, (Vector<F32> verts, F32 width, bool solid), (verts, width, solid))
+GAMETYPE_RPC_S2C(GameType, s2cAddWalls, (Vector<F32> verts, F32 width, bool solid), (verts, width, solid))
 {
    if(!verts.size())
-      getGame()->deleteObjects(BarrierTypeNumber);
+      getGame()->deleteObjects((TestFunc)isWallType);
    else
    {
-      BarrierRec barrier;
-      barrier.verts = verts;
-      barrier.width = width;
-      barrier.solid = solid;
+      WallRec wall;
+      wall.verts = verts;
+      wall.width = width;
+      wall.solid = solid;
 
-      barrier.constructBarriers(getGame());
+      wall.constructWalls(getGame());
    }
 }
 

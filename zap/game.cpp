@@ -618,6 +618,18 @@ void Game::deleteObjects(U8 typeNumber)
 }
 
 
+void Game::deleteObjects(TestFunc testFunc)
+{
+   fillVector.clear();
+   mGameObjDatabase->findObjects(testFunc, fillVector);
+   for(S32 i = 0; i < fillVector.size(); i++)
+   {
+      GameObject *obj = dynamic_cast<GameObject *>(fillVector[i]);
+      obj->deleteObject(0);
+   }
+}
+
+
 void Game::computeWorldObjectExtents()
 {
    fillVector.clear();
@@ -666,7 +678,7 @@ Rect Game::computeBarrierExtents()
    Rect theRect;
 
    fillVector.clear();
-   mGameObjDatabase->findObjects(BarrierTypeNumber, fillVector);
+   mGameObjDatabase->findObjects((TestFunc)isWallType, fillVector);
 
    for(S32 i = 0; i < fillVector.size(); i++)
       theRect.unionRect(fillVector[i]->getExtent());
@@ -1081,7 +1093,7 @@ bool ServerGame::processPseudoItem(S32 argc, const char **argv, const string &le
    {
       if(argc >= 2)
       {
-         BarrierRec barrier;
+         WallRec barrier;
          barrier.width = F32(atof(argv[1]));
 
          if(barrier.width < Barrier::MIN_BARRIER_WIDTH)
@@ -1096,7 +1108,7 @@ bool ServerGame::processPseudoItem(S32 argc, const char **argv, const string &le
          if(barrier.verts.size() > 3)
          {
             barrier.solid = false;
-            getGameType()->addBarrier(barrier, this);
+            getGameType()->addWall(barrier, this);
          }
       }
    }
@@ -1113,7 +1125,7 @@ bool ServerGame::processPseudoItem(S32 argc, const char **argv, const string &le
 
       if(argc >= 2)
       { 
-         BarrierRec barrier;
+         WallRec barrier;
          
          if(width)      // BarrierMakerS still width, though we ignore it
             barrier.width = F32(atof(argv[1]));
@@ -1126,7 +1138,7 @@ bool ServerGame::processPseudoItem(S32 argc, const char **argv, const string &le
          if(barrier.verts.size() > 3)
          {
             barrier.solid = true;
-            getGameType()->addBarrier(barrier, this);
+            getGameType()->addWall(barrier, this);
          }
       }
    }

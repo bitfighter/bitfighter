@@ -40,9 +40,6 @@ using namespace TNL;
 namespace Zap
 {
 
-// use of BITMASK is to allow to easily change it between U32 or U64, depending on the number of bits we use
-typedef U64 BITMASK;
-
 typedef bool (*TestFunc)(U8);
 
 // Interface for dealing with objects that can be in our spatial database.  Can be either GameObjects or
