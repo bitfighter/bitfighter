@@ -3602,8 +3602,8 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
             EditorObject *p = objList->get(i);
 
             // Writing wall items on first pass, non-wall items next -- that will make sure mountable items have something to grab onto
-            if((j == 0) && (isWallType(p->getObjectTypeNumber())) ||
-               (j == 1) && (isWallType(p->getObjectTypeNumber())) )
+            if((j == 0) && isWallType(p->getObjectTypeNumber()) ||
+               (j == 1) && ! isWallType(p->getObjectTypeNumber()) )
                p->saveItem(f, getGame()->getGridSize());
          }
       fclose(f);

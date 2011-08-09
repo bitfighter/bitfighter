@@ -136,7 +136,7 @@ bool isWallType(U8 x)
 bool isLineItemType(U8 x)
 {
    return
-         x == BarrierTypeNumber || x == LineTypeNumber;
+         x == BarrierTypeNumber || x == WallItemTypeNumber || x == LineTypeNumber;
 }
 
 bool isMoveableType(U8 x)
