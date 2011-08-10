@@ -66,8 +66,8 @@ public:
       HitMask      = BIT(1),
    };
 
-   SpeedZone();   // Constructor
-   ~SpeedZone();  // Destructor
+   SpeedZone();           // Constructor
+   virtual ~SpeedZone();  // Destructor
 
    SpeedZone *clone() const;
    //void copyAttrs(SpeedZone *target);

@@ -60,7 +60,7 @@ private:
 
 public:
    ClientRef();               // Constructor
-   ~ClientRef();              // Destructor
+   virtual ~ClientRef();              // Destructor
 
    StringTableEntry name;     // Name of client - guaranteed to be unique of current clients
 

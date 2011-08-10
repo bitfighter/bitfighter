@@ -1048,8 +1048,8 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
             ship = dynamic_cast<Ship *>(getGame()->getConnectionToServer()->getControlObject());
          if(ship)
          {
-            if(keyCode == keyMOD1[gIniSettings.inputMode] && ship->getModule(0) == ModuleEngineer || 
-               keyCode == keyMOD2[gIniSettings.inputMode] && ship->getModule(1) == ModuleEngineer)
+            if( (keyCode == keyMOD1[gIniSettings.inputMode] && ship->getModule(0) == ModuleEngineer) ||
+               (keyCode == keyMOD2[gIniSettings.inputMode] && ship->getModule(1) == ModuleEngineer) )
             {
                string msg = EngineerModuleDeployer::checkResourcesAndEnergy(ship);      // Returns "" if ok, error message otherwise
 

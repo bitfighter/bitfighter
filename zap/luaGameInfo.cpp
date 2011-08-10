@@ -101,12 +101,12 @@ S32 LuaGameInfo::isTeamGame(lua_State *L)           { return returnBool(L, gServ
 S32 LuaGameInfo::isNexusOpen(lua_State *L)
 {
    HuntersGameType *theGameType = dynamic_cast<HuntersGameType *>(gServerGame->getGameType());
-	return theGameType ? returnBool(L, theGameType->mNexusIsOpen) : returnNil(L);;
+   return theGameType ? returnBool(L, theGameType->mNexusIsOpen) : returnNil(L);
 }
 S32 LuaGameInfo::getNexusTimeLeft(lua_State *L)
 {
    HuntersGameType *theGameType = dynamic_cast<HuntersGameType *>(gServerGame->getGameType());
-	return theGameType ? returnInt(L, theGameType->getNexusTimeLeft()) : returnNil(L);;
+   return theGameType ? returnInt(L, theGameType->getNexusTimeLeft()) : returnNil(L);
 }
 
 

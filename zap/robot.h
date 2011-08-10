@@ -221,7 +221,7 @@ public:
 
   // Initialize the pointer
    LuaRobot(lua_State *L);     // Lua constructor
-  ~LuaRobot();                 // Destructor
+   virtual ~LuaRobot();                 // Destructor
 
    static const char className[];
    static Lunar<LuaRobot>::RegType methods[];

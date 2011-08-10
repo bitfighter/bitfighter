@@ -60,6 +60,7 @@ protected:
 public:
 
    Geometry() { mTriangluationDisabled = false; }     // Constructor
+   virtual ~Geometry() {}
 
    virtual GeomType getGeomType()                  {TNLAssert(false, "Not implemented"); return geomNone;}
    virtual Point getVert(S32 index) const          {TNLAssert(false, "Not implemented"); return Point();}

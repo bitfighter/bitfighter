@@ -114,8 +114,6 @@ static F32 getRenderingAlpha(bool isScriptItem)
 
 
 // TODO: merge with UIEditor versions
-static const Color grayedOutColorBright = Colors::gray50;
-static const Color grayedOutColorDim = Color(.25, .25, .25);
 static const S32 NO_NUMBER = -1;
 
 // Draw a vertex of a selected editor item
@@ -236,11 +234,6 @@ void EditorObject::highlightDockItem()
 }
 
 
-
-extern void renderPolygon(const Vector<Point> &fillPoints, const Vector<Point> &outlinePoints, const Color &fillColor, const Color &outlineColor, F32 alpha = 1);
-
-static const S32 asteroidDesign = 2;      // Design we'll use for all asteroids in editor
-
 // Items are rendered in index order, so those with a higher index get drawn later, and hence, on top
 void EditorObject::renderInEditor(F32 currentScale, const Point &currentOffset, S32 snapIndex, bool isScriptItem, bool showingReferenceShip, ShowMode showMode)
 {
@@ -254,7 +247,7 @@ void EditorObject::renderInEditor(F32 currentScale, const Point &currentOffset, 
 
    Color drawColor;
    if(hideit)
-      glColor(grayedOutColorBright, alpha);
+      glColor(Colors::gray50, alpha);
    else 
       glColor(getDrawColor(), alpha);
 

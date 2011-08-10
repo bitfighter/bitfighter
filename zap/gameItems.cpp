@@ -262,6 +262,10 @@ Spawn::Spawn(const Point &pos, S32 time) : AbstractSpawn(pos, time)
    mObjectTypeNumber = ShipSpawnTypeNumber;
 }
 
+Spawn::~Spawn()
+{
+}
+
 
 Spawn *Spawn::clone() const
 {
@@ -322,6 +326,10 @@ AsteroidSpawn::AsteroidSpawn(const Point &pos, S32 time) : AbstractSpawn(pos, ti
 
 }
 
+AsteroidSpawn::~AsteroidSpawn()
+{
+}
+
 
 AsteroidSpawn *AsteroidSpawn::clone() const
 {
@@ -370,6 +378,10 @@ void AsteroidSpawn::renderDock()
 FlagSpawn::FlagSpawn(const Point &pos, S32 time) : AbstractSpawn(pos, time)
 {
    mObjectTypeNumber = FlagSpawnTypeNumber;
+}
+
+FlagSpawn::~FlagSpawn()
+{
 }
 
 

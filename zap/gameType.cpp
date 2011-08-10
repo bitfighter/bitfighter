@@ -888,6 +888,7 @@ class InsertStatsToDatabaseThread : public TNL::Thread
 public:
    VersionedGameStats mStats;
    InsertStatsToDatabaseThread(const VersionedGameStats &stats) {mStats = stats;}
+   virtual ~InsertStatsToDatabaseThread() {}
 
    U32 run()
    {
@@ -2469,7 +2470,7 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
       {
          S32 time = S32(60 * 1000 * atof(args[0].getString()));
 
-         if(time < 0 || time == 0 && (stricmp(args[0].getString(), "0") && stricmp(args[0].getString(), "unlim")))  // 0 --> unlimited
+         if((time < 0 || time == 0) && (stricmp(args[0].getString(), "0") && stricmp(args[0].getString(), "unlim")))  // 0 --> unlimited
             clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Invalid time... game time not changed");
          else
          {

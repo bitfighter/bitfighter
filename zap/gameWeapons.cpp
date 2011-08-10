@@ -74,6 +74,7 @@ void createWeaponProjectiles(WeaponType weapon, Point &dir, Point &shooterPos, P
             (new Projectile(weapon, firePos, projVel + velPerp, shooter))->addToGame(game, game->getGameObjDatabase());
             (new Projectile(weapon, firePos, projVel - velPerp, shooter))->addToGame(game, game->getGameObjDatabase());
          }
+         break;
       case WeaponPhaser:
       case WeaponBounce:
       case WeaponTurret:

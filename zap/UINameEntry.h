@@ -138,6 +138,7 @@ private:
    Address connectAddress;
 public:
    PreGamePasswordEntryUserInterface(ClientGame *game) : Parent(game) { /* Do nothing */ }    // Constructor
+   virtual ~PreGamePasswordEntryUserInterface() {}
    void onAccept(const char *text);
    void onEscape();
    void setConnectServer(const Address &addr) { connectAddress = addr; }
@@ -180,6 +181,8 @@ class AdminPasswordEntryUserInterface : public InGamePasswordEntryUserInterface
 
 public:
    AdminPasswordEntryUserInterface(ClientGame *game);           // Constructor
+   virtual ~AdminPasswordEntryUserInterface();
+
    void submitPassword(GameConnection *gameConnection, const char *text);
 };
 
@@ -193,6 +196,8 @@ class LevelChangePasswordEntryUserInterface : public InGamePasswordEntryUserInte
 
 public:
    LevelChangePasswordEntryUserInterface(ClientGame *game);     // Constructor
+   virtual ~LevelChangePasswordEntryUserInterface();
+
    void submitPassword(GameConnection *gameConnection, const char *text);
 };
 

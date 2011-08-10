@@ -388,36 +388,28 @@ void RabbitGameType::onFlaggerDead(Ship *killerShip)
 // What does a particular scoring event score?
 S32 RabbitGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data)
 {
-   // In general, there are no team scores in Rabbit games... Teams is now allowed.
-   //if(scoreGroup == TeamScore)
-   //{
-   //   return naScore;
-   //}
-   //else  // scoreGroup == IndividualScore
+   switch(scoreEvent)
    {
-      switch(scoreEvent)
-      {
-         case KillEnemy:
-            return 0;
-         case KilledByAsteroid:  // Fall through OK
-         case KilledByTurret:    // Fall through OK
-         case KillSelf:
-            return -5;
-         case KillTeammate:
-            return 0;
-         case KillEnemyTurret:
-            return 0;
-         case KillOwnTurret:
-            return 0;
-         case RabbitKilled:
-            return 5;
-         case RabbitKills:
-            return 5;
-         case RabbitHoldsFlag:      // Points per second
-            return 1;
-         default:
-            return naScore;
-      }
+   case KillEnemy:
+      return 0;
+   case KilledByAsteroid:  // Fall through OK
+   case KilledByTurret:    // Fall through OK
+   case KillSelf:
+      return -5;
+   case KillTeammate:
+      return 0;
+   case KillEnemyTurret:
+      return 0;
+   case KillOwnTurret:
+      return 0;
+   case RabbitKilled:
+      return 5;
+   case RabbitKills:
+      return 5;
+   case RabbitHoldsFlag:      // Points per second
+   return 1;
+   default:
+      return naScore;
    }
 }
 

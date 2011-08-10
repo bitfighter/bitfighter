@@ -428,11 +428,6 @@ void EditorInstructionsUserInterface::renderPageWalls()
 }
 
 
-extern const Color BORDER_FILL_COLOR;
-extern const F32 BORDER_FILL_ALPHA;
-extern const F32 BORDER_WIDTH;
-
-
 void EditorInstructionsUserInterface::nextPage()
 {
    mCurPage++;

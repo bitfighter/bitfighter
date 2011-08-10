@@ -135,6 +135,7 @@ PictureLoader *LoadPicture(const char* path){
     break;case 2:vx=-((x+3) >> 2) & 3;
     break;case 1:vx=-((x+7) >> 3) & 3;
     break;default:vx=-(x*3) & 3;bpp=24; //pretend unsupported formats is 24 bpp
+    break;
    }
    if(bpp<=8){
       a=1 << bpp;
@@ -158,6 +159,7 @@ PictureLoader *LoadPicture(const char* path){
             if(!c){e=8-bpp;c=255;d=readbyte(r);}
             j=p[(d & c) >> e];
             e-=bpp;c=c >> bpp;
+         break;
          }
          //If j And $FF000000 Xor $FF000000 Then K5=K5 Or $40000000
          //B4=j And $F0F0F0F0:If (B4 Shr 4 Or B4) Xor j Then K5=K5 And $DFFFFFFF

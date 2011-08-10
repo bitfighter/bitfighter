@@ -128,6 +128,7 @@ void RebindKeysUserInterface::onKeyDown(KeyCode keyCode, char ascii)
                cursorPos++;
             }
          }
+         break;
    }
 }
 

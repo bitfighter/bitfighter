@@ -138,7 +138,7 @@ void InstructionsUserInterface::render()
          break;
       case 12:
          renderConsoleCommands("Open the console by pressing [Shift]-[/] in game", consoleCommands1);   // Scripting console
-
+         break;
 
       // When adding page, be sure to increase NUM_PAGES, and add item to pageHeaders array
    }
@@ -218,7 +218,6 @@ static ControlString controlsGamepad[] = {
       };
 
 
-extern CmdLineSettings gCmdLineSettings;
 
 // This has become rather ugly and inelegant.  Sorry!
 void InstructionsUserInterface::renderPage1()

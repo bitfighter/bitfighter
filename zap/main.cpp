@@ -643,7 +643,6 @@ void endGame()
 
 
 extern void saveWindowMode(CIniFile *ini);
-extern void saveWindowPosition(S32 x, S32 y);
 
 // Run when we're quitting the game, returning to the OS
 void onExit()
@@ -1443,7 +1442,7 @@ void processCmdLineParams(Vector<TNL::StringPtr> &theArgv)
 
          bool started = false;
 
-         while(!started || dataConn && dataConn->isEstablished())
+         while(!started || dataConn && dataConn->isEstablished())  // XXX: Is the operator precedence here correct?
          {
             if(dataConn && dataConn->isEstablished())
             {

@@ -207,7 +207,7 @@ extern md5wrapper md5;
 // Client sends this message to set up the coming transfer.  Server checks for the password, and then, if the client is requesting
 // a file, initiates the transfer.  If client is sending a file, it gets things ready then sends s2cOkToSend to indicate it's ready.
 TNL_IMPLEMENT_RPC(DataConnection, c2sSendOrRequestFile, 
-                  (StringPtr password, RangedU32<0,U32(FILE_TYPES)> filetype, bool isRequest, StringPtr filename), 
+                  (StringPtr password, RangedU32<0,(U32)FILE_TYPES> filetype, bool isRequest, StringPtr filename),
                   (password, filetype, isRequest, filename), 
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
@@ -343,8 +343,6 @@ void DataConnection::onConnectionEstablished()
    }
 }
 
-
-extern void exitGame(S32);
 
 // Make sure things are cleaned up -- will run on both client and server
 void DataConnection::onConnectionTerminated(NetConnection::TerminationReason reason, const char *reasonMsg)

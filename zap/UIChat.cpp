@@ -47,8 +47,6 @@ Vector<StringTableEntry> AbstractChat::mPlayersInGlobalChat;
 const char *ARROW = ">";
 const S32 AFTER_ARROW_SPACE = 5;
 
-extern string gPlayerName;
-
 // Initialize some static vars
 U32 AbstractChat::mColorPtr = 0;
 U32 AbstractChat::mMessageCount = 0;
@@ -64,6 +62,9 @@ AbstractChat::AbstractChat()
    mLineEditor = LineEditor(200);
 }
 
+AbstractChat::~AbstractChat()
+{
+}
 
 Color AbstractChat::getColor(string name)
 {

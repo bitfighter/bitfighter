@@ -79,7 +79,7 @@ struct LevelLoadException : public std::exception
    std::string msg;
 
    LevelLoadException (std::string str) : msg(str) { /* do nothing */ }    // Constructor
-   ~LevelLoadException () throw() { /* do nothing */ }                // Destructor, required by gcc to avoid "looser throw" error
+   virtual ~LevelLoadException () throw() { /* do nothing */ }                // Destructor, required by gcc to avoid "looser throw" error
    const char* what() const throw() { return msg.c_str(); }
 };
 

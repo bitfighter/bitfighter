@@ -83,6 +83,9 @@ UserInterface::UserInterface(ClientGame *clientGame)
    mClientGame = clientGame;
 }
 
+UserInterface::~UserInterface()
+{
+}
 
 UIManager *UserInterface::getUIManager() const 
 { 
@@ -197,8 +200,6 @@ KeyCode UserInterface::convertJoystickToKeyboard(KeyCode keyCode)
 }
 
 
-extern CmdLineSettings gCmdLineSettings;
-extern ServerGame *gServerGame;
 extern ClientGame *gClientGame1;
 extern ClientGame *gClientGame2;
 

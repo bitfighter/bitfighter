@@ -80,7 +80,8 @@ protected:
    ClientGame *getGame() { return mGame; }
 
 public:
-   MenuItem(); // Default constructor
+   MenuItem();          // Default constructor
+   virtual ~MenuItem(); // Default destructor
 
    // Constructor
    MenuItem(ClientGame *game, S32 index, const string &prompt, void (*callback)(ClientGame *, U32), const string &help, 

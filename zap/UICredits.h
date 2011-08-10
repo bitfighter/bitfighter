@@ -70,6 +70,7 @@ private:
 
 public:
    CreditsScroller(ClientGame *game);      // Constructor
+   virtual ~CreditsScroller();             // Destructor
    void updateFX(U32 delta);
    void render();
 };
@@ -84,7 +85,7 @@ private:
 
 public:
    CreditsUserInterface(ClientGame *game);   // Constructor
-   ~CreditsUserInterface();            // Destructor
+   virtual ~CreditsUserInterface();          // Destructor
 
    void onActivate();
    void onReactivate();

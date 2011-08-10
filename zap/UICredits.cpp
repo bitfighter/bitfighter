@@ -201,6 +201,10 @@ CreditsScroller::CreditsScroller(ClientGame *game) : Parent(game)
 }
 
 
+CreditsScroller::~CreditsScroller()       // Destructor
+{
+}
+
 void CreditsScroller::updateFX(U32 delta)
 {
    // Scroll the credits text from bottom to top

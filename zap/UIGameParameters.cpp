@@ -94,7 +94,6 @@ void GameParamUserInterface::clearCurrentGameTypeParams()
 
 
 extern const char *gGameTypeNames[];
-extern S32 gDefaultGameTypeIndex;
 
 static void changeGameTypeCallback(ClientGame *game, U32 gtIndex)
 {

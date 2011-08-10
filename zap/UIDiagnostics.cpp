@@ -46,11 +46,9 @@ namespace Zap
 
 extern string gHostName, gHostDescr;
 extern CmdLineSettings gCmdLineSettings;
-extern F32 gSimulatedPacketLoss;
 extern string gServerPassword;
 extern string gAdminPassword;
 extern string gLevelChangePassword;
-extern U32 gSimulatedLag;
 extern U32 getServerMaxPlayers();
 extern Address gBindAddress;
 
@@ -287,9 +285,6 @@ static S32 showMasterBlock(ClientGame *game, S32 textsize, S32 ypos, S32 gap, bo
 }
 
 
-extern ClientGame *gClientGame;
-extern string gLevelDir;
-extern string gPlayerPassword;
 extern ClientInfo gClientInfo;
 
 void DiagnosticUserInterface::render()

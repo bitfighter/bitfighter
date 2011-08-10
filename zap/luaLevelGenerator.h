@@ -53,7 +53,7 @@ public:
                      LevelLoader *caller, OGLCONSOLE_Console console);   // C++ constructor
 
    LuaLevelGenerator(lua_State *L);      // Lua constructor
-   ~LuaLevelGenerator();                 // Destructor
+   virtual ~LuaLevelGenerator();         // Destructor
 
    void runScript(lua_State *L, const string &scriptName, const Vector<string> *scriptArgs, F32 gridSize);
    void logError(const char *format, ...);

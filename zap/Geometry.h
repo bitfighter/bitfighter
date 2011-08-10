@@ -110,7 +110,7 @@ private:
 
 public:
    SimpleLineGeometry() { mFromSelected = false; mToSelected = false; }    // Constructor
-   ~SimpleLineGeometry() { 
+   virtual ~SimpleLineGeometry() {
       //TNLAssert(false, "deleting!");
    }
    GeomType getGeomType() { return geomSimpleLine; }

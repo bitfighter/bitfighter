@@ -93,7 +93,8 @@ protected:
    bool composingMessage() { return mLineEditor.length() > 0; }
 
 public:
-   AbstractChat();      // Constructor
+   AbstractChat();                        // Constructor
+   virtual ~AbstractChat();               // Destructor
    void newMessage(string from, string message, bool isPrivate, bool isSystem);   // Handle incoming msg
 
    void clearChat();                      // Clear message being composed

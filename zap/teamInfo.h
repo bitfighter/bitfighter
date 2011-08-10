@@ -90,7 +90,8 @@ private:
 public:
    S32 mId;                             // Helps keep track of teams after they've been sorted
 
-   Team() { mPlayerCount = 0; mBotCount = 0; mScore = 0; mRating = 0; }  // Quickie constructor
+   Team();              // Constructor
+   virtual ~Team();     // Destructor
 
    void setName(const char *name) { mName.set(name); }
    void setName(StringTableEntry name) { mName = name; }
@@ -137,6 +138,7 @@ private:
 
 public:
    TeamEditor() { mNameEditor = LineEditor(MAX_TEAM_NAME_LENGTH); }              // Quickie constructor
+   virtual ~TeamEditor() {}
 
    LineEditor *getLineEditor() { return &mNameEditor; }
    void setName(const char *name) { mNameEditor.setString(name); }

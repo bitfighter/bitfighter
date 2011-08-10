@@ -97,6 +97,7 @@ private:
 
 public:
    UserInterface(ClientGame *game);                // Constructor
+   virtual ~UserInterface();                       // Destructor
    static const S32 MAX_PASSWORD_LENGTH = 32;      // Arbitrary, doesn't matter, but needs to be _something_
 
    static UserInterface *current;            // Currently active menu

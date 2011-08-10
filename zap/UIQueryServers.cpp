@@ -577,8 +577,6 @@ S32 QueryServersUserInterface::getSelectedIndex()
 }
 
 
-extern void drawString(S32 x, S32 y, U32 size, const char *string);
-
 static void renderDedicatedIcon()
 {
    // Add a "D"

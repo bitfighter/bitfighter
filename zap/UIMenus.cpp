@@ -1510,7 +1510,6 @@ static void processLevelSelectionCallback(ClientGame *game, U32 index)
 
 const U32 UPLOAD_LEVELS_BIT = 0x80000000;
 extern ConfigDirectories gConfigDirs;
-extern Color gCmdChatColor;
 
 void LevelMenuSelectUserInterface::processSelection(U32 index)     
 {

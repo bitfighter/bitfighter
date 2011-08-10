@@ -57,8 +57,8 @@ public:
 
    //S32 mTeam;            // Team text is visible to (-1 for visible to all)
    
-   TextItem();    // Constructor
-   ~TextItem();   // Destructor
+   TextItem();            // Constructor
+   virtual ~TextItem();   // Destructor
 
    TextItem *clone() const;
    //void copyAttrs(TextItem *target);

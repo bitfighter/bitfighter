@@ -48,7 +48,6 @@ QuickChatHelper::QuickChatHelper(ClientGame *clientGame) : Parent(clientGame)
    mCurNode = 0;
 }
 
-extern CmdLineSettings gCmdLineSettings;
 extern Color gGlobalChatColor;
 extern Color gTeamChatColor;
 extern Color gErrorMessageTextColor;

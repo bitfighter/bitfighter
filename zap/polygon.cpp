@@ -38,8 +38,6 @@ namespace Zap
 static const Color INSTRUCTION_TEXTCOLOR(1,1,1);
 static const S32 INSTRUCTION_TEXTSIZE = 9;      
 static const S32 INSTRUCTION_TEXTGAP = 3;
-static const Color ACTIVE_SPECIAL_ATTRIBUTE_COLOR = Color(.6, .6, .6);    
-static const Color INACTIVE_SPECIAL_ATTRIBUTE_COLOR = Color(.6, .6, .6);      // already in editor, called inactiveSpecialAttributeColor
 
 // Offset: negative below the item, positive above
 void EditorPolygon::renderItemText(const char *text, S32 offset, F32 currentScale, const Point &currentOffset)

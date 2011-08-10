@@ -45,6 +45,10 @@ EngineerHelper::EngineerHelper(ClientGame *clientGame) : Parent(clientGame)
    mEngineerCostructionItemInfos.push_back(EngineerConstructionItemInfo(EngineeredForceField, "Force Field", KEY_2, BUTTON_2));
 }
 
+EngineerHelper::~EngineerHelper()
+{
+}
+
 void EngineerHelper::onMenuShow()
 {
    mSelectedItem = -1;
@@ -138,8 +142,8 @@ bool EngineerHelper::processKeyCode(KeyCode keyCode)
    else                       // Placing item
    {
       Ship *ship = dynamic_cast<Ship *>(gc->getControlObject());
-      if(ship && (keyCode == keyMOD1[gIniSettings.inputMode] && ship->getModule(0) == ModuleEngineer || 
-                  keyCode == keyMOD2[gIniSettings.inputMode] && ship->getModule(1) == ModuleEngineer))
+      if(ship && ((keyCode == keyMOD1[gIniSettings.inputMode] && ship->getModule(0) == ModuleEngineer) ||
+                  (keyCode == keyMOD2[gIniSettings.inputMode] && ship->getModule(1) == ModuleEngineer)))
       {
          // Check deployment status on client; will be checked again on server, but server will only handle likely valid placements
          EngineerModuleDeployer deployer;

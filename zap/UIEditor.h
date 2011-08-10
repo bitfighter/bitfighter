@@ -242,7 +242,7 @@ protected:
    void onDeactivate();
 
 public:
-   ~EditorUserInterface();       // Destructor
+   virtual ~EditorUserInterface();       // Destructor
 
    void clearDatabase(GridDatabase *database);
 

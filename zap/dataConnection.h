@@ -123,7 +123,7 @@ public:
 
    TNL_DECLARE_RPC(s2cOkToSend, ());
 
-   TNL_DECLARE_RPC(c2sSendOrRequestFile, (StringPtr password, RangedU32<0,U32(FILE_TYPES)> filetype, bool isRequest, StringPtr name));
+   TNL_DECLARE_RPC(c2sSendOrRequestFile, (StringPtr password, RangedU32<0,(U32)FILE_TYPES> filetype, bool isRequest, StringPtr name));
    TNL_DECLARE_NETCONNECTION(DataConnection);
 };
 

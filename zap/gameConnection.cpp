@@ -1281,9 +1281,6 @@ bool GameConnection::s2rUploadFile(const char *filename, U8 type)
 }
 
 
-
-extern Nonce gClientId;
-
 // Send password, client's name, and version info to game server
 void GameConnection::writeConnectRequest(BitStream *stream)
 {

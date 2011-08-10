@@ -73,6 +73,7 @@ private:
 
 public:
    EngineerHelper(ClientGame *clientGame);          // Constructor
+   virtual ~EngineerHelper();
 
    void onMenuShow();
    bool processKeyCode(KeyCode keyCode);   

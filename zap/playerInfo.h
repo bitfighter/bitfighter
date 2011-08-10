@@ -72,6 +72,7 @@ private:
 
 public:
    PlayerInfo(ClientRef *clientRef = NULL) { mClientRef = clientRef; }     // C++ Constructor
+   virtual ~PlayerInfo() {}
 
    S32 getName(lua_State *L)       { return returnString(L, mClientRef->name.getString()); }
    S32 getShip(lua_State *L)       { return isDefunct() ? returnNil(L) : returnShip(L, dynamic_cast<Ship *>(mClientRef->clientConnection->getControlObject())); }
@@ -94,6 +95,7 @@ private:
 
 public:
    RobotPlayerInfo(Robot *robot = NULL) { mRobot = robot; }     // C++ Constructor
+   virtual ~RobotPlayerInfo() {}
 
    S32 getName(lua_State *L)       { return returnString(L, mRobot->getName().getString()); }
    S32 getShip(lua_State *L)       { return isDefunct() ? returnNil(L) : returnShip(L, mRobot); }

@@ -46,7 +46,6 @@
 namespace Zap
 {
 extern bool gDisableShipKeyboardInput;
-extern CmdLineSettings gCmdLineSettings;
 
 // Constructor
 KeyDefMenuUserInterface::KeyDefMenuUserInterface(ClientGame *game) : Parent(game)

@@ -77,12 +77,7 @@ namespace Zap
 const S32 DOCK_WIDTH = 50;
 const F32 MIN_SCALE = .05f;        // Most zoomed-in scale
 const F32 MAX_SCALE = 2.5;        // Most zoomed-out scale
-const F32 STARTING_SCALE = 0.5;   
-
-extern Color gNexusOpenColor;
-extern Color EDITOR_WALL_FILL_COLOR;
-
-static const Color inactiveSpecialAttributeColor = Color(.6, .6, .6);
+const F32 STARTING_SCALE = 0.5;
 
 
 static const S32 TEAM_NEUTRAL = Item::TEAM_NEUTRAL;
@@ -151,9 +146,6 @@ const Vector<EditorObject *> *EditorUserInterface::getObjectList()
    return getGame()->getEditorDatabase()->getObjectList();
 }
 
-
-static const S32 DOCK_POLY_HEIGHT = 20;
-static const S32 DOCK_POLY_WIDTH = DOCK_WIDTH - 10;
 
 void EditorUserInterface::addToDock(EditorObject* object)
 {
@@ -339,10 +331,6 @@ void EditorUserInterface::renderPolyline(const Vector<Point> *verts)
 }
 
 
-extern Color gNeutralTeamColor;
-extern Color gHostileTeamColor;
-
-
 ////////////////////////////////////
 ////////////////////////////////////
 
@@ -524,8 +512,6 @@ void EditorUserInterface::makeSureThereIsAtLeastOneTeam()
 }
 
 
-extern const char *gGameTypeNames[];
-extern S32 gDefaultGameTypeIndex;
 extern S32 gMaxPolygonPoints;
 extern ConfigDirectories gConfigDirs;
 
@@ -1257,8 +1243,6 @@ S32 EditorUserInterface::checkCornersForSnap(const Point &clickPoint, const Vect
 
 extern Color gErrorMessageTextColor;
 
-static const Color grayedOutColorBright = Colors::gray50;
-static const Color grayedOutColorDim = Color(.25, .25, .25);
 static bool fillRendered = false;
 
 
@@ -1279,7 +1263,7 @@ void EditorUserInterface::renderGrid()
    // Minor grid lines
    for(S32 i = 1; i >= 0; i--)
    {
-      if(i && showMinorGridLines() || !i)      // Minor then major gridlines
+      if((i && showMinorGridLines()) || !i)      // Minor then major gridlines
       {
          F32 gridScale = mCurrentScale * getGame()->getGridSize() * (i ? 0.1f : 1);    // Major gridlines are gridSize() pixels apart   
          F32 color = (i ? .2f : .4f) * colorFact;
@@ -2845,14 +2829,6 @@ void EditorUserInterface::doneEditingAttributes(EditorAttributeMenuUI *editor, E
 }
 
 
-extern string itos(S32);
-extern string itos(U32);
-extern string itos(U64);
-
-extern string ftos(F32, S32);
-
-extern string stripZeros(string str);
-
 // Handle key presses
 void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 {
@@ -3307,8 +3283,6 @@ void EditorUserInterface::textEntryKeyHandler(KeyCode keyCode, char ascii)
 }
 
 
-static const S32 MAX_REPOP_DELAY = 600;      // That's 10 whole minutes!
-
 void EditorUserInterface::startAttributeEditor()
 {
    const Vector<EditorObject *> *objList = getObjectList();
@@ -3352,13 +3326,13 @@ void EditorUserInterface::onKeyUp(KeyCode keyCode)
    {
       case KEY_UP:
          mIn = false;
-         // fall-through OK
+         // fall-through OK  ...why?
       case KEY_W:
          mUp = false;
          break;
       case KEY_DOWN:
          mOut = false;
-         // fall-through OK
+         // fall-through OK  ...why?
       case KEY_S:
          mDown = false;
          break;
@@ -3602,8 +3576,8 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
             EditorObject *p = objList->get(i);
 
             // Writing wall items on first pass, non-wall items next -- that will make sure mountable items have something to grab onto
-            if((j == 0) && isWallType(p->getObjectTypeNumber()) ||
-               (j == 1) && ! isWallType(p->getObjectTypeNumber()) )
+            if((j == 0 && isWallType(p->getObjectTypeNumber())) ||
+               (j == 1 && ! isWallType(p->getObjectTypeNumber())) )
                p->saveItem(f, getGame()->getGridSize());
          }
       fclose(f);
@@ -3636,7 +3610,6 @@ void testLevelStart_local(ClientGame *game)
 
 
 extern void initHostGame(Address bindAddress, Vector<string> &levelList, bool testMode);
-extern CmdLineSettings gCmdLineSettings;
 
 void EditorUserInterface::testLevel()
 {

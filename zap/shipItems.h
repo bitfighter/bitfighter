@@ -141,6 +141,7 @@ public:
 
          default:
             TNLAssert(false, "Something's gone wrong again!");
+            break;
       }
    };
 

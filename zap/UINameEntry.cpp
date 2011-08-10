@@ -118,6 +118,7 @@ void TextEntryUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          break;
       default:
          lineEditor.addChar(ascii);
+         break;
    }
 }
 
@@ -308,6 +309,9 @@ AdminPasswordEntryUserInterface::AdminPasswordEntryUserInterface(ClientGame *gam
    instr2 = "Enter the admin password to perform admin tasks and change levels on this server";
 }
 
+AdminPasswordEntryUserInterface::~AdminPasswordEntryUserInterface()
+{
+}
 
 void AdminPasswordEntryUserInterface::submitPassword(GameConnection *gameConnection, const char *text)
 {
@@ -325,6 +329,10 @@ LevelChangePasswordEntryUserInterface::LevelChangePasswordEntryUserInterface(Cli
    title = "ENTER LEVEL CHANGE PASSWORD:";
    instr1 = "";
    instr2 = "Enter the level change password to change levels on this server";
+}
+
+LevelChangePasswordEntryUserInterface::~LevelChangePasswordEntryUserInterface()
+{
 }
 
 

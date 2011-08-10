@@ -89,6 +89,20 @@ void AbstractTeam::alterBlue(F32 amt)
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+// Constructor
+Team::Team()
+{
+   mPlayerCount = 0;
+   mBotCount = 0;
+   mScore = 0;
+   mRating = 0;
+}
+
+// Destructor
+Team::~Team()
+{
+}
+
 void Team::clearStats()
 {
    mPlayerCount = 0;

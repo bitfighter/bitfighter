@@ -253,6 +253,7 @@ public:
    static const S32 DEFAULT_RESPAWN_TIME = 30;    // in seconds
 
    Spawn(const Point &pos = Point(), S32 time = DEFAULT_RESPAWN_TIME);  // C++ constructor (no lua constructor)
+   virtual ~Spawn();
    Spawn *clone() const;
 
    const char *getEditorHelpString() { return "Location where ships start.  At least one per team is required. [G]"; }
@@ -281,6 +282,7 @@ public:
    static const S32 DEFAULT_RESPAWN_TIME = 30;    // in seconds
 
    AsteroidSpawn(const Point &pos = Point(), S32 time = DEFAULT_RESPAWN_TIME);  // C++ constructor (no lua constructor)
+   virtual ~AsteroidSpawn();
    AsteroidSpawn *clone() const;
 
    const char *getEditorHelpString() { return "Periodically spawns a new asteroid."; }
@@ -306,6 +308,7 @@ public:
    static const S32 DEFAULT_RESPAWN_TIME = 30;    // in seconds
 
    FlagSpawn(const Point &pos = Point(), S32 time = DEFAULT_RESPAWN_TIME);  // C++ constructor (no lua constructor)
+   virtual ~FlagSpawn();
    FlagSpawn *clone() const;
 
    bool updateTimer(S32 deltaT) { return mTimer.update(deltaT); }

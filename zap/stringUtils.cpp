@@ -43,8 +43,6 @@
 #     include <dirent.h>        // Need standard copy for *NIXes
 #  endif
 
-using namespace std;
-using namespace TNL;
 
 namespace Zap
 {
