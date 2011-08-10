@@ -496,6 +496,8 @@ void GhostConnection::readPacket(BitStream *bstream)
             obj->mNetIndex = index;
             mLocalGhosts[index] = obj;
 
+            obj->onGhostAddBeforeUpdate(this);
+
             NetObject::mIsInitialUpdate = true;
             mLocalGhosts[index]->unpackUpdate(this, bstream);
             NetObject::mIsInitialUpdate = false;

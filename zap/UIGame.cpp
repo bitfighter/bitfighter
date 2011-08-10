@@ -62,7 +62,6 @@
 
 namespace Zap
 {
-extern ConfigDirectories gConfigDirs;          //in main.cpp for Getmap
 
 //GameUserInterface mGameUserInterface;
 
@@ -602,8 +601,6 @@ void GameUserInterface::renderProgressBar()
    }
 }
 
-
-extern CmdLineSettings gCmdLineSettings;
 
 // Draw the reticle (i.e. the mouse cursor) if we are using keyboard/mouse
 void GameUserInterface::renderReticle()
@@ -2078,8 +2075,6 @@ void GameUserInterface::runCommand(const char *input)
    serverCommandHandler(getGame(), words);     // Command unknown to client, will pass it on to server
 }
 
-
-extern enum VolumeType;
 
 // Set specified volume to the specefied level
 void GameUserInterface::setVolume(VolumeType volType, const Vector<string> &words)

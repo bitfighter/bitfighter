@@ -182,8 +182,8 @@ void HuntersGameType::itemDropped(Ship *ship, Item *item)
       return;
 
    U32 flagCount = flag->getFlagCount();
-   TNLAssert(flagCount > 0, "Looks like that check _is_ needed after all... remove assert and comment below!");
-   if(flagCount == 0)      // <=== probably unneeded
+
+   if(flagCount == 0)  // This is needed if you drop your flags, then pick up a different item type (like resource item), and drop it
       return;
 
    Vector<StringTableEntry> e;
@@ -343,7 +343,7 @@ void HuntersGameType::idle(GameObject::IdleCallPath path, U32 deltaT)
          if(!client_ship)
             continue;
 
-         HuntersNexusObject *nexus = dynamic_cast<HuntersNexusObject *>(client_ship->isInZone(NexusType));
+         HuntersNexusObject *nexus = dynamic_cast<HuntersNexusObject *>(client_ship->isInZone(NexusTypeNumber));
          if(nexus)
             shipTouchNexus(client_ship, nexus);
       }
@@ -649,7 +649,6 @@ void HuntersFlagItem::unpackUpdate(GhostConnection *connection, BitStream *strea
 // Constructor
 HuntersNexusObject::HuntersNexusObject()
 {
-   mObjectTypeMask |= NexusType | CommandMapVisType;
    mObjectTypeNumber = NexusTypeNumber;
    mNetFlags.set(Ghostable);
 }
@@ -660,8 +659,6 @@ HuntersNexusObject *HuntersNexusObject::clone() const
    return new HuntersNexusObject(*this);
 }
 
-
-extern S32 gMaxPolygonPoints;
 
 // The nexus object itself
 // If there are 2 or 4 params, this is an Zap! rectangular format object
@@ -777,7 +774,7 @@ bool HuntersNexusObject::collide(GameObject *hitObject)
 
    // From here on out, runs on server only
 
-   if( ! (hitObject->getObjectTypeMask() & (ShipType | RobotType)))
+   if( ! (isShipType(hitObject->getObjectTypeNumber())) )
       return false;
 
    Ship *theShip = dynamic_cast<Ship *>(hitObject);

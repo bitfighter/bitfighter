@@ -46,7 +46,7 @@ TNL_IMPLEMENT_NETOBJECT(Barrier);
 
 Vector<Point> Barrier::mRenderLineSegments;
 
-bool loadBarrierPoints(const BarrierRec *barrier, Vector<Point> &points)
+bool loadBarrierPoints(const WallRec *barrier, Vector<Point> &points)
 {
    // Convert the list of floats into a list of points
    for(S32 i = 1; i < barrier->verts.size(); i += 2)
@@ -61,7 +61,7 @@ bool loadBarrierPoints(const BarrierRec *barrier, Vector<Point> &points)
 ////////////////////////////////////////
 
 // Runs on server or on client, never in editor
-void BarrierRec::constructBarriers(Game *theGame)
+void WallRec::constructWalls(Game *theGame)
 {
    Vector<Point> vec;
 
@@ -105,7 +105,6 @@ void BarrierRec::constructBarriers(Game *theGame)
 // Constructor --> gets called from constructBarriers above
 Barrier::Barrier(const Vector<Point> &points, F32 width, bool solid)
 {
-   mObjectTypeMask = BarrierType | CommandMapVisType;
    mObjectTypeNumber = BarrierTypeNumber;
    mPoints = points;
 
@@ -368,13 +367,16 @@ void Barrier::clipRenderLinesToPoly(const Vector<DatabaseObject *> &barrierList,
 
 
 // Merges wall outlines together, client only
+// This is used for barriers and polywalls
 void Barrier::prepareRenderingGeometry(Game *game)
 {
    mRenderLineSegments.clear();
 
    Vector<DatabaseObject *> barrierList;
 
-   game->getGameObjDatabase()->findObjects(BarrierType, barrierList); 
+   game->getGameObjDatabase()->findObjects((TestFunc)isWallType, barrierList);
+
+   printf("BarrierCount: %i\n", barrierList.size());
 
    clipRenderLinesToPoly(barrierList, mRenderLineSegments);
 }
@@ -401,7 +403,6 @@ void Barrier::renderEdges(S32 layerIndex)
 // Constructor
 WallItem::WallItem()
 {
-   mObjectTypeMask = BarrierType;
    mObjectTypeNumber = WallItemTypeNumber;
    setWidth(Barrier::DEFAULT_BARRIER_WIDTH);
 }
@@ -431,7 +432,7 @@ void WallItem::onGeomChanged()
    aoi.expand(Point(ForceField::MAX_FORCEFIELD_LENGTH, ForceField::MAX_FORCEFIELD_LENGTH));  
 
    fillVector.clear();
-   getGame()->getEditorDatabase()->findObjects(ForceFieldProjectorType, fillVector, aoi);     
+   getGame()->getEditorDatabase()->findObjects(ForceFieldProjectorTypeNumber, fillVector, aoi);
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
@@ -482,7 +483,6 @@ const char PolyWall::className[] = "PolyWall";      // Class name as it appears 
 
 PolyWall::PolyWall()
 {
-   mObjectTypeMask = PolyWallType;
    mObjectTypeNumber = PolyWallTypeNumber;
 }
 
@@ -572,7 +572,7 @@ void PolyWall::onGeomChanged()
    aoi.expand(Point(ForceField::MAX_FORCEFIELD_LENGTH, ForceField::MAX_FORCEFIELD_LENGTH));  
 
    fillVector.clear();
-   getGame()->getEditorDatabase()->findObjects(ForceFieldProjectorType, fillVector, aoi);     
+   getGame()->getEditorDatabase()->findObjects(ForceFieldProjectorTypeNumber, fillVector, aoi);
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
@@ -597,7 +597,6 @@ WallEdge::WallEdge(const Point &start, const Point &end, GridDatabase *database)
    setExtent(Rect(start, end)); 
 
    // Set some things required by DatabaseObject
-   mObjectTypeMask = BarrierType;
    mObjectTypeNumber = WallEdgeTypeNumber;
 }
 
@@ -657,10 +656,10 @@ void WallSegmentManager::buildAllWallSegmentEdgesAndPoints(GridDatabase *gameDat
 
    fillVector.clear();
 
-   gameDatabase->findObjects(WallType, fillVector);
+   gameDatabase->findObjects((TestFunc)isWallType, fillVector);
 
    Vector<DatabaseObject *> engrObjects;
-   gameDatabase->findObjects(EngineeredType, engrObjects);   // All engineered objects
+   gameDatabase->findObjects((TestFunc)isEngineeredType, engrObjects);   // All engineered objects
 
    // Iterate over all our wall objects
    for(S32 i = 0; i < fillVector.size(); i++)
@@ -671,7 +670,7 @@ void WallSegmentManager::buildAllWallSegmentEdgesAndPoints(GridDatabase *gameDat
 void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *gameDatabase, DatabaseObject *dbObject)
 {
    fillVector.clear();
-   gameDatabase->findObjects(EngineeredType, fillVector);    // All engineered objects
+   gameDatabase->findObjects((TestFunc)isEngineeredType, fillVector);    // All engineered objects
 
    buildWallSegmentEdgesAndPoints(gameDatabase, dbObject, fillVector);
 }
@@ -706,7 +705,7 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *gameDataba
 
    Rect allSegExtent;
 
-   if(wall->getObjectTypeMask() & PolyWallType)
+   if(wall->getObjectTypeNumber() == PolyWallTypeNumber)
    {
       WallSegment *newSegment = new WallSegment(mWallSegmentDatabase, *wall->getOutline(), wall->getSerialNumber());
       mWallSegments.push_back(newSegment);
@@ -767,7 +766,7 @@ void WallSegmentManager::invalidateIntersectingSegments(GridDatabase *gameDataba
    // These will need new walls after we've moved our segment.  We'll look for those intersecting segments in our edge database.
    for(S32 i = 0; i < mWallSegments.size(); i++)
       if(mWallSegments[i]->getOwner() == item->getSerialNumber())      // Segment belongs to our item; look it up in the database
-         gameDatabase->findObjects(0, fillVector, mWallSegments[i]->getExtent(), WallSegmentTypeNumber);
+         gameDatabase->findObjects(WallSegmentTypeNumber, fillVector, mWallSegments[i]->getExtent());
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
@@ -844,7 +843,7 @@ void WallSegmentManager::deleteSegments(S32 owner)
 void WallSegmentManager::renderWalls(bool draggingObjects, bool showingReferenceShip, bool showSnapVertices, F32 alpha)
 {
    fillVector.clear();
-   mWallSegmentDatabase->findObjects(WallType, fillVector);
+   mWallSegmentDatabase->findObjects((TestFunc)isWallType, fillVector);
 
    for(S32 i = 0; i < mWallSegments.size(); i++)
    {  
@@ -930,7 +929,6 @@ void WallSegment::init(S32 owner)
 
    /////
    // Set some things required by DatabaseObject
-   mObjectTypeMask = BarrierType;
    mObjectTypeNumber = WallSegmentTypeNumber;
 }
 

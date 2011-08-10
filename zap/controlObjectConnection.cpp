@@ -169,7 +169,7 @@ void ControlObjectConnection::readPacket(BitStream *bstream)
          // Process the move, including crediting time to the client and all that joy.
          // The time crediting prevents clients from hacking speed cheats
          // that feed more moves to the server than are allowed.
-         if(mMoveTimeCredit >= theMove.time && controlObject.isValid() && !(controlObject->getObjectTypeMask() & DeletedType))
+         if(mMoveTimeCredit >= theMove.time && controlObject.isValid() && !(controlObject->isDeleted()))
          {
             mMoveTimeCredit -= theMove.time;
             controlObject->setCurrentMove(theMove);

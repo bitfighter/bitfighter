@@ -35,11 +35,10 @@
 #include "voiceCodec.h"
 #include "Point.h"
 #include "Color.h"
+#include "game.h"
 
 namespace Zap
 {
-
-extern enum VolumeType;
 
 enum ArgTypes {
    NAME,    // Player name (can be tab-completed)
@@ -68,15 +67,6 @@ struct CommandInfo {
    S32 helpGroup;
    string helpArgString[9];
    string helpTextString;
-};
-
-// Modes the player could be in during the game   
-enum UIMode {
-   PlayMode,               // Playing
-   ChatMode,               // Composing chat message
-   QuickChatMode,          // Showing quick-chat menu
-   LoadoutMode,            // Showing loadout menu
-   EngineerMode,           // Showing engineer overlay mode
 };
 
 ////////////////////////////////////////

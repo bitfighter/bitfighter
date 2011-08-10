@@ -46,7 +46,6 @@ EditorAttributeMenuUI *TextItem::mAttributeMenuUI = NULL;
 TextItem::TextItem()
 {
    mNetFlags.set(Ghostable);
-   mObjectTypeMask = TextItemType | CommandMapVisType;     
    mObjectTypeNumber = TextItemTypeNumber;
 
    // Some default values
@@ -341,7 +340,6 @@ const S32 LineItem::MAX_LINE_WIDTH;
 LineItem::LineItem()
 { 
    mNetFlags.set(Ghostable);
-   mObjectTypeMask |= LineType | CommandMapVisType;
    mObjectTypeNumber = LineTypeNumber;
 }
 

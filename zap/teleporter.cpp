@@ -50,7 +50,6 @@ static Vector<DatabaseObject *> foundObjects;
 // that we get the multiple destination aspect of teleporters right
 Teleporter::Teleporter()
 {
-   mObjectTypeMask = TeleportType | CommandMapVisType;
    mObjectTypeNumber = TeleportTypeNumber;
    mNetFlags.set(Ghostable);
 
@@ -129,7 +128,7 @@ bool Teleporter::processArguments(S32 argc2, const char **argv2, Game *game)
    if(!dynamic_cast<ClientGame *>(game))              // Editor handles multi-dest teleporters as separate single dest items
    {
       foundObjects.clear();
-      game->getGameObjDatabase()->findObjects(TeleportType, foundObjects, Rect(pos, 1));
+      game->getGameObjDatabase()->findObjects(TeleportTypeNumber, foundObjects, Rect(pos, 1));
 
       for(S32 i = 0; i < foundObjects.size(); i++)
       {
@@ -243,7 +242,7 @@ void Teleporter::idle(GameObject::IdleCallPath path)
    Rect queryRect(getVert(0), (F32)TELEPORTER_RADIUS);
 
    foundObjects.clear();
-   findObjects(ShipType | RobotType, foundObjects, queryRect);
+   findObjects((TestFunc)isShipType, foundObjects, queryRect);
 
    // First see if we're triggered...
    bool isTriggered = false;

@@ -102,14 +102,14 @@ class AsteroidSpawn;
 class Team;
 class SpyBug;
 
-struct BarrierRec
+struct WallRec
 {
    Vector<F32> verts;
    F32 width;
    bool solid;
 
 public:
-   void constructBarriers(Game *theGame);
+   void constructWalls(Game *theGame);
 };
 
 
@@ -127,7 +127,7 @@ private:
 
    Vector<RefPtr<ClientRef> > mClientList;
 
-   Vector<BarrierRec> mBarriers;
+   Vector<WallRec> mWalls;
 
    void sendChatDisplayEvent(ClientRef *clientRef, bool global, const char *message, NetEvent *theEvent);      // In-game chat message
 
@@ -238,7 +238,7 @@ public:
    void catalogSpybugs();     // Rebuild a list of spybugs in the game
    void addSpyBug(SpyBug *spybug);
 
-   void addBarrier(BarrierRec barrier, Game *game);
+   void addWall(WallRec barrier, Game *game);
 
    virtual bool isFlagGame() { return false; }              // Does game use flags?
    virtual bool isTeamFlagGame() { return true; }           // Does flag-team orientation matter?  Only false in HunterGame.
@@ -273,7 +273,7 @@ public:
    };
 
 
-   const Vector<BarrierRec> *getBarrierList() { return &mBarriers; }
+   const Vector<WallRec> *getBarrierList() { return &mWalls; }
 
    S32 getClientCount() const { return mClientList.size(); }
    RefPtr<ClientRef> getClient(S32 index) const { return mClientList[index]; }
@@ -449,7 +449,7 @@ public:
    virtual void onGhostAvailable(GhostConnection *theConnection);
    TNL_DECLARE_RPC(s2cSetLevelInfo, (StringTableEntry levelName, StringTableEntry levelDesc, S32 teamScoreLimit, StringTableEntry levelCreds, 
                                      S32 objectCount, F32 lx, F32 ly, F32 ux, F32 uy, bool levelHasLoadoutZone, bool engineerEnabled));
-   TNL_DECLARE_RPC(s2cAddBarriers, (Vector<F32> barrier, F32 width, bool solid));
+   TNL_DECLARE_RPC(s2cAddWalls, (Vector<F32> barrier, F32 width, bool solid));
    TNL_DECLARE_RPC(s2cAddTeam, (StringTableEntry teamName, F32 r, F32 g, F32 b, U32 score, bool firstTeam));
    TNL_DECLARE_RPC(s2cAddClient, (StringTableEntry clientName, bool isMyClient, bool isAdmin, bool isRobot, bool playAlert));
    TNL_DECLARE_RPC(s2cClientJoinedTeam, (StringTableEntry clientName, RangedU32<0, MAX_TEAMS> teamIndex));

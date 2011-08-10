@@ -57,7 +57,6 @@ GoalZone::GoalZone()
 {
    mTeam = -1;
    mNetFlags.set(Ghostable);
-   mObjectTypeMask = CommandMapVisType | GoalZoneType;
    mObjectTypeNumber = GoalZoneTypeNumber;
    mFlashCount = 0;
    mHasFlag = false;
@@ -104,8 +103,6 @@ S32 GoalZone::getRenderSortValue()
    return -1;     // Renders beneath everything else
 }
 
-
-extern S32 gMaxPolygonPoints;
 
 bool GoalZone::processArguments(S32 argc2, const char **argv2, Game *game)
 {
@@ -175,7 +172,7 @@ bool GoalZone::getCollisionPoly(Vector<Point> &polyPoints) const
 
 bool GoalZone::collide(GameObject *hitObject)
 {
-   if( !isGhost() && (hitObject->getObjectTypeMask() & (ShipType | RobotType)) )
+   if( !isGhost() && (isShipType(hitObject->getObjectTypeNumber())) )
    {
       Ship *s = dynamic_cast<Ship *>(hitObject); 
       getGame()->getGameType()->shipTouchZone(s, this);

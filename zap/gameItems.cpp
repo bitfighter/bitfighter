@@ -47,7 +47,6 @@ TNL_IMPLEMENT_NETOBJECT(RepairItem);
 // Constructor
 RepairItem::RepairItem(Point pos) : PickupItem(pos, (F32)REPAIR_ITEM_RADIUS, DEFAULT_RESPAWN_TIME * 1000) 
 { 
-   mObjectTypeMask |= RepairItemType;
    mObjectTypeNumber = RepairItemTypeNumber;
 }
 
@@ -107,7 +106,6 @@ const char RepairItem::className[] = "RepairItem";      // Class name as it appe
 // Lua constructor
 RepairItem::RepairItem(lua_State *L)
 {
-   mObjectTypeMask |= RepairItemType;
    mObjectTypeNumber = RepairItemTypeNumber;
 }
 
@@ -138,7 +136,6 @@ TNL_IMPLEMENT_NETOBJECT(EnergyItem);
 // Constructor
 EnergyItem::EnergyItem(Point p) : PickupItem(p, 20, DEFAULT_RESPAWN_TIME * 1000) 
 { 
-   mObjectTypeMask |= EnergyItemType;
    mObjectTypeNumber = EnergyItemTypeNumber;
 };   
 
@@ -185,7 +182,6 @@ const char EnergyItem::className[] = "EnergyItem";      // Class name as it appe
 // Lua constructor
 EnergyItem::EnergyItem(lua_State *L)
 {
-   mObjectTypeMask |= EnergyItemType;
    mObjectTypeNumber = EnergyItemTypeNumber;
 }
 
@@ -419,7 +415,6 @@ static const F32 ASTEROID_MASS = 4;
 Asteroid::Asteroid() : EditorItem(Point(0,0), true, (F32)ASTEROID_RADIUS, ASTEROID_MASS)
 {
    mNetFlags.set(Ghostable);
-   mObjectTypeMask |= AsteroidType;
    mObjectTypeNumber = AsteroidTypeNumber;
    mSizeIndex = 0;     // Higher = smaller
    hasExploded = false;
@@ -645,7 +640,6 @@ TNL_IMPLEMENT_NETOBJECT(Worm);
 Worm::Worm() : Item(Point(0,0), true, (F32)WORM_RADIUS, 1)
 {
    mNetFlags.set(Ghostable);
-   mObjectTypeMask |= WormType;
    mObjectTypeNumber = WormTypeNumber;
    hasExploded = false;
 
@@ -765,7 +759,6 @@ static const F32 TEST_ITEM_MASS = 4;
 TestItem::TestItem() : EditorItem(Point(0,0), true, (F32)TEST_ITEM_RADIUS, TEST_ITEM_MASS)
 {
    mNetFlags.set(Ghostable);
-   mObjectTypeMask |= TestItemType;
    mObjectTypeNumber = TestItemTypeNumber;
 }
 
@@ -849,7 +842,6 @@ static const F32 RESOURCE_ITEM_MASS = 1;
 ResourceItem::ResourceItem() : EditorItem(Point(0,0), true, (F32)RESOURCE_ITEM_RADIUS, RESOURCE_ITEM_MASS)
 {
    mNetFlags.set(Ghostable);
-   mObjectTypeMask |= ResourceItemType;
    mObjectTypeNumber = ResourceItemTypeNumber;
 }
 
@@ -878,7 +870,7 @@ bool ResourceItem::collide(GameObject *hitObject)
    if(mIsMounted)
       return false;
 
-   if( ! (hitObject->getObjectTypeMask() & (ShipType | RobotType)))
+   if( ! (isShipType(hitObject->getObjectTypeNumber())) )
       return true;
 
    // Ignore collisions that occur to recently dropped items.  Make sure item is ready to be picked up! 
@@ -889,7 +881,7 @@ bool ResourceItem::collide(GameObject *hitObject)
    if(!ship || ship->hasExploded)
       return false;
 
-   if(ship->hasModule(ModuleEngineer) && !ship->isCarryingItem(ResourceItemType))
+   if(ship->hasModule(ModuleEngineer) && !ship->isCarryingItem(ResourceItemTypeNumber))
    {
       if(!isGhost())
          mountToShip(ship);

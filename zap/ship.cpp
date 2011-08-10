@@ -77,8 +77,7 @@ TNL_IMPLEMENT_NETOBJECT(Ship);
 // Also, the following is also run by robot's constructor
 Ship::Ship(StringTableEntry playerName, bool isAuthenticated, S32 team, Point p, F32 m, bool isRobot) : MoveObject(p, (F32)CollisionRadius), mSpawnPoint(p)
 {
-   mObjectTypeMask = ShipType | MoveableType | CommandMapVisType;
-   mObjectTypeNumber = ShipTypeNumber;
+   mObjectTypeNumber = PlayerShipTypeNumber;
    mFireTimer = 0;
 
    mNetFlags.set(Ghostable);
@@ -247,7 +246,7 @@ void Ship::processMove(U32 stateIndex)
 
 
 // Find objects of specified type that may be under the ship, and put them in fillVector
-void Ship::findObjectsUnderShip(BITMASK type)
+void Ship::findObjectsUnderShip(U8 type)
 {
    Rect rect(getActualPos(), getActualPos());
    rect.expand(Point(CollisionRadius, CollisionRadius));
@@ -258,7 +257,7 @@ void Ship::findObjectsUnderShip(BITMASK type)
 
 
 // Returns the zone in question if this ship is in a zone of type zoneType
-GameObject *Ship::isInZone(BITMASK zoneType)
+GameObject *Ship::isInZone(U8 zoneType)
 {
    findObjectsUnderShip(zoneType);
 
@@ -299,13 +298,13 @@ GameObject *Ship::isInZone(BITMASK zoneType)
 
 F32 Ship::getSlipzoneSpeedMoficationFactor()
 {
-   SlipZone *slipzone = dynamic_cast<SlipZone *>(isInZone(SlipZoneType));
+   SlipZone *slipzone = dynamic_cast<SlipZone *>(isInZone(SlipZoneTypeNumber));
    return slipzone ? slipzone->slipAmount : 1.0f;
 }
 
 
 // Returns the object in question if this ship is on an object of type objectType
-DatabaseObject *Ship::isOnObject(BITMASK objectType)
+DatabaseObject *Ship::isOnObject(U8 objectType)
 {
    findObjectsUnderShip(objectType);
 
@@ -350,8 +349,6 @@ void Ship::selectWeapon()
    selectWeapon(mActiveWeaponIndx + 1);
 }
 
-
-extern CmdLineSettings gCmdLineSettings;
 
 void Ship::selectWeapon(U32 weaponIdx)
 {
@@ -466,7 +463,7 @@ void Ship::idle(GameObject::IdleCallPath path)
       // When not moving, Detect if on a GoFast - seems better to always detect...
       //if(mMoveState[ActualState].vel == Point(0,0))
       {
-         SpeedZone *speedZone = dynamic_cast<SpeedZone *>(isOnObject(SpeedZoneType));
+         SpeedZone *speedZone = dynamic_cast<SpeedZone *>(isOnObject(SpeedZoneTypeNumber));
          if(speedZone && speedZone->collide(this))
             speedZone->collided(this, ActualState);
       }
@@ -570,7 +567,7 @@ bool Ship::findRepairTargets()
    Rect r(pos - extend, pos + extend);
    
    foundObjects.clear();
-   findObjects(ShipType | RobotType | EngineeredType, foundObjects, r);
+   findObjects((TestFunc)isWithHealthType, foundObjects, r);
 
    mRepairTargets.clear();
    for(S32 i = 0; i < foundObjects.size(); i++)
@@ -920,7 +917,7 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
    // Respawn --> only used by robots, but will be set on ships if all mask bits
    // are set (as happens when a ship comes into scope).  Therefore, we'll force
    // this to be robot only.
-   if(stream->writeFlag(updateMask & RespawnMask && isRobot()))
+   if(stream->writeFlag((updateMask & RespawnMask) && isRobot()))
       stream->writeFlag(getGame()->getCurrentTime() - mRespawnTime < 300 && !hasExploded);  // If true, ship will appear to spawn on client
 
    if(stream->writeFlag(updateMask & HealthMask))     // Health
@@ -938,10 +935,10 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
    stream->writeFlag(hasExploded);
    stream->writeFlag(getControllingClient()->isBusy());
 
-   stream->writeFlag(updateMask & WarpPositionMask && updateMask != 0xFFFFFFFF);   
+   stream->writeFlag((updateMask & WarpPositionMask) && updateMask != 0xFFFFFFFF);
 
    // Don't show warp effect when all mask flags are set, as happens when ship comes into scope
-   stream->writeFlag(updateMask & TeleportMask && !(updateMask & InitialMask));      
+   stream->writeFlag((updateMask & TeleportMask) && !(updateMask & InitialMask));
 
    bool shouldWritePosition = (updateMask & InitialMask) || gameConnection->getControlObject() != this;
    if(!shouldWritePosition)
@@ -1146,7 +1143,7 @@ bool Ship::isVisible()
 S32 Ship::carryingFlag()
 {
    for(S32 i = 0; i < mMountedItems.size(); i++)
-      if(mMountedItems[i].isValid() && (mMountedItems[i]->getObjectTypeMask() & FlagType))
+      if(mMountedItems[i].isValid() && (mMountedItems[i]->getObjectTypeNumber() == FlagTypeNumber))
          return i;
    return GameType::NO_FLAG;
 }
@@ -1156,7 +1153,7 @@ S32 Ship::getFlagCount()
 {
    S32 count = 0;
    for(S32 i = 0; i < mMountedItems.size(); i++)
-      if(mMountedItems[i].isValid() && (mMountedItems[i]->getObjectTypeMask() & FlagType))
+      if(mMountedItems[i].isValid() && (mMountedItems[i]->getObjectTypeNumber() == FlagTypeNumber))
       {
          HuntersFlagItem *flag = dynamic_cast<HuntersFlagItem *>(mMountedItems[i].getPointer());
          if(flag != NULL)   // Nexus flag have multiple flags as one item.
@@ -1168,21 +1165,21 @@ S32 Ship::getFlagCount()
 }
 
 
-bool Ship::isCarryingItem(BITMASK objectType)
+bool Ship::isCarryingItem(U8 objectType)
 {
    for(S32 i = mMountedItems.size() - 1; i >= 0; i--)
-      if(mMountedItems[i].isValid() && mMountedItems[i]->getObjectTypeMask() & objectType)
+      if(mMountedItems[i].isValid() && mMountedItems[i]->getObjectTypeNumber() == objectType)
          return true;
    return false;
 }
 
 
-Item *Ship::unmountItem(BITMASK objectType)
+Item *Ship::unmountItem(U8 objectType)
 {
    //logprintf("%s ship->unmountItem", isGhost()? "Client:" : "Server:");
    for(S32 i = mMountedItems.size() - 1; i >= 0; i--)
    {
-      if(mMountedItems[i]->getObjectTypeMask() & objectType)
+      if(mMountedItems[i]->getObjectTypeNumber() == objectType)
       {
          Item *item = mMountedItems[i];
          item->dismount();
@@ -1246,7 +1243,7 @@ void Ship::setLoadout(const Vector<U32> &loadout, bool silent)
    if(!hasModule(ModuleEngineer))        // We don't, so drop any resources we may be carrying
    {
       for(S32 i = mMountedItems.size() - 1; i >= 0; i--)
-         if(mMountedItems[i]->getObjectTypeMask() & ResourceItemType)
+         if(mMountedItems[i]->getObjectTypeNumber() == ResourceItemTypeNumber)
             mMountedItems[i]->dismount();
    }
 
@@ -1743,36 +1740,51 @@ S32 LuaShip::getActiveWeapon(lua_State *L) { return thisShip ?  returnInt(L, get
 S32 LuaShip::getEnergy(lua_State *L) { return thisShip ? returnFloat(L, thisShip->getEnergyFraction()) : returnNil(L); }        // Return ship's energy as a fraction between 0 and 1
 S32 LuaShip::getHealth(lua_State *L) { return thisShip ? returnFloat(L, thisShip->getHealth()) : returnNil(L); }                // Return ship's health as a fraction between 0 and 1
 
-
 S32 LuaShip::getMountedItems(lua_State *L)
 {
-   // objectType is a bitmask of all the different object types we might want to find.  We need to build it up here because
-   // lua can't do the bitwise or'ing itself.
-   U32 objectType = 0;
+   bool hasArgs = lua_isnumber(L, 1);
+   Vector<GameObject *> tempVector;
 
-   S32 index = 1;
-   S32 pushed = 0;      // Count of items actually pushed onto the stack
-
-   while(lua_isnumber(L, index))
+   // Loop through all the mounted items
+   for(S32 i = 0; i < thisShip->mMountedItems.size(); i++)
    {
-      objectType |= (U32) lua_tointeger(L, index);
-      index++;
+      // Add every item to the list if no arguments were specified
+      if (!hasArgs)
+         tempVector.push_back(dynamic_cast<GameObject *>(thisShip->mMountedItems[i].getPointer()));
+
+      // Else, compare against argument type and add to the list if matched
+      else
+      {
+         S32 index = 1;
+         while(lua_isnumber(L, index))
+         {
+            U8 objectType = (U8) lua_tointeger(L, index);
+
+            if(thisShip->mMountedItems[i]->getObjectTypeNumber() == objectType)
+            {
+               tempVector.push_back(dynamic_cast<GameObject *>(thisShip->mMountedItems[i].getPointer()));
+               break;
+            }
+
+            index++;
+         }
+      }
    }
-   if(objectType == 0) objectType = 0xFFFFFFFF;  // find everything if type is none.
 
    clearStack(L);
 
    if(!thisShip) return 0;  // if NULL, what to do here?
+
    lua_createtable(L, thisShip->mMountedItems.size(), 0);    // Create a table, with enough slots pre-allocated for our data
 
-   for(S32 i = 0; i < thisShip->mMountedItems.size(); i++)
+   // Now push all found items back to LUA
+   S32 pushed = 0;      // Count of items actually pushed onto the stack
+
+   for(S32 i = 0; i < tempVector.size(); i++)
    {
-      if(thisShip->mMountedItems[i]->getObjectTypeMask() & objectType)
-      {
-         dynamic_cast<GameObject *>(thisShip->mMountedItems[i].getPointer())->push(L);
-         pushed++;      // Increment pushed before using it because Lua uses 1-based arrays
-         lua_rawseti(L, 1, pushed);
-      }
+      tempVector[i]->push(L);
+      pushed++;      // Increment pushed before using it because Lua uses 1-based arrays
+      lua_rawseti(L, 1, pushed);
    }
 
    return 1;

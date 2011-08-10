@@ -67,7 +67,7 @@ public:
 
    static Lunar<LuaShip>::RegType methods[];
 
-   virtual S32 getClassID(lua_State *L) { return returnInt(L, ShipTypeNumber); }    // Robot will override this
+   virtual S32 getClassID(lua_State *L) { return returnInt(L, PlayerShipTypeNumber); }    // Robot will override this
 
    S32 isAlive(lua_State *L);
    S32 getAngle(lua_State *L);
@@ -114,7 +114,7 @@ private:
    U32 mRespawnTime;
 
    // Find objects of specified type that may be under the ship, and put them in fillVector
-   void findObjectsUnderShip(BITMASK type); 
+   void findObjectsUnderShip(U8 typeNumber);
 
 protected:
    StringTableEntry mPlayerName;
@@ -245,8 +245,8 @@ public:
    S32 carryingFlag();     // Returns index of first flag, or NO_FLAG if ship has no flags
    S32 getFlagCount();     // Returns the number of flags ship is carrying
 
-   bool isCarryingItem(BITMASK objectType);
-   Item *unmountItem(BITMASK objectType);
+   bool isCarryingItem(U8 objectType);
+   Item *unmountItem(U8 objectType);
 
    F32 getSensorZoomFraction() { return 1 - mSensorZoomTimer.getFraction(); }
    Point getAimVector();
@@ -296,9 +296,9 @@ public:
    bool isRobot() { return mIsRobot; }
    void push(lua_State *L);                           // Push a LuaShip proxy object onto the stack
 
-   GameObject *isInZone(BITMASK zoneType);     // Return whether the ship is currently in a zone of the specified type, and which one
+   GameObject *isInZone(U8 zoneType);     // Return whether the ship is currently in a zone of the specified type, and which one
    //GameObject *isInZone(GameObject *zone);
-   DatabaseObject *isOnObject(BITMASK objectType); // Returns the object in question if this ship is on an object of type objectType
+   DatabaseObject *isOnObject(U8 objectType); // Returns the object in question if this ship is on an object of type objectType
 
    bool isOnObject(GameObject *object);               // Return whether or not ship is sitting on a particular item
 

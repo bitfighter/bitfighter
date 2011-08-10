@@ -211,7 +211,7 @@ private:
 public:
    WallSegment(GridDatabase *gridDatabase, const Point &start, const Point &end, F32 width, S32 owner = -1);    // Normal wall segment
    WallSegment(GridDatabase *gridDatabase, const Vector<Point> &points, S32 owner = -1);                        // PolyWall 
-   ~WallSegment();
+   virtual ~WallSegment();
 
    // TODO: Make these private
    Vector<Point> edges;    
@@ -252,7 +252,7 @@ private:
 
 public:
    WallEdge(const Point &start, const Point &end, GridDatabase *database);
-   ~WallEdge();
+   virtual ~WallEdge();
 
    Point *getStart() { return &mStart; }
    Point *getEnd() { return &mEnd; }

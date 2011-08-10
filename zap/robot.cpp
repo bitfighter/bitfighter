@@ -126,7 +126,7 @@ LuaRobot::LuaRobot(lua_State *L) : LuaShip((Robot *)lua_touserdata(L, 1))
 #define setEnumName(number, name) { lua_pushinteger(L, number); lua_setglobal(L, name); }
 
    setEnumName(BarrierTypeNumber, "BarrierType");
-   setEnumName(ShipTypeNumber, "ShipType");
+   setEnumName(PlayerShipTypeNumber, "ShipType");
    setEnumName(LineTypeNumber, "LineType");
    setEnumName(ResourceItemTypeNumber, "ResourceItem");
    setEnumName(TextItemTypeNumber, "TextItemType");
@@ -137,7 +137,7 @@ LuaRobot::LuaRobot(lua_State *L) : LuaShip((Robot *)lua_touserdata(L, 1))
    setEnumName(MineTypeNumber, "MineType");
    setEnumName(NexusTypeNumber, "NexusType");
    setEnumName(BotNavMeshZoneTypeNumber, "BotNavMeshZoneType");
-   setEnumName(RobotTypeNumber, "RobotType");
+   setEnumName(RobotShipTypeNumber, "RobotType");
    setEnumName(TeleportTypeNumber, "TeleportType");
    setEnumName(GoalZoneTypeNumber, "GoalZoneType");
    setEnumName(AsteroidTypeNumber, "AsteroidType");
@@ -319,7 +319,7 @@ Lunar<LuaRobot>::RegType LuaRobot::methods[] = {
 
 S32 LuaRobot::getClassID(lua_State *L)
 {
-   return returnInt(L, RobotTypeNumber);
+   return returnInt(L, RobotShipTypeNumber);
 }
 
 
@@ -408,7 +408,7 @@ bool calcInterceptCourse(GameObject *target, Point aimPos, F32 aimRadius, S32 ai
    offset.normalize(aimRadius * 1.2f);    // 1.2 is a fudge factor to prevent robot from not shooting because it thinks it will hit itself
    aimPos += offset;
 
-   if(target->getObjectTypeMask() & ( ShipType | RobotType))
+   if(isShipType(target->getObjectTypeNumber()))
    {
       Ship *potential = (Ship*)target;
 
@@ -436,20 +436,19 @@ bool calcInterceptCourse(GameObject *target, Point aimPos, F32 aimRadius, S32 ai
 
    // Make sure we can see it...
    Point n;
-   U32 objectType = 0;
-   objectType |= BarrierType;
+   TestFunc testFunc = isWallType;
 
-   if(!(target->getObjectTypeMask() & ( ShipType | RobotType)))  // If the target isn't a ship, take forcefields into account
-      objectType |= ForceFieldType;
+   if( !(isShipType(target->getObjectTypeNumber())) )  // If the target isn't a ship, take forcefields into account
+      testFunc = isFlagCollideableType;
 
-   if(target->findObjectLOS(objectType, MoveObject::ActualState, aimPos, target->getActualPos(), t, n))
+   if(target->findObjectLOS(testFunc, MoveObject::ActualState, aimPos, target->getActualPos(), t, n))
       return false;
 
    // See if we're gonna clobber our own stuff...
    target->disableCollision();
    Point delta2 = delta;
    delta2.normalize(aimLife * aimVel / 1000);
-   GameObject *hitObject = target->findObjectLOS(ShipType | RobotType | BarrierType | EngineeredType, 0, aimPos, aimPos + delta2, t, n);
+   GameObject *hitObject = target->findObjectLOS((TestFunc)isWithHealthType, 0, aimPos, aimPos + delta2, t, n);
    target->enableCollision();
 
    if(ignoreFriendly && hitObject && hitObject->getTeam() == aimTeam)
@@ -789,10 +788,6 @@ S32 LuaRobot::findGlobalItems(lua_State *L)
 
 S32 LuaRobot::doFindItems(lua_State *L, Rect *scope)
 {
-   // objectType is a bitmask of all the different object types we might want to find.  We need to build it up here because
-   // lua can't do the bitwise or'ing itself.
-   BITMASK objectMask = 0;
-
    S32 index = 1;
    S32 pushed = 0;      // Count of items actually pushed onto the stack
 
@@ -803,30 +798,18 @@ S32 LuaRobot::doFindItems(lua_State *L, Rect *scope)
       GridDatabase *gridDB;
       U8 number = (U8)lua_tointeger(L, index);
 
-      if(number < sizeof(BITMASK) * 8)  // number of bits BITMASK have
-         objectMask |= BIT2(number);
+
+      if(number == BotNavMeshZoneTypeNumber)
+         gridDB = ((ServerGame *)thisRobot->getGame())->getBotZoneDatabase();
       else
-      {
+         gridDB = thisRobot->getGame()->getGameObjDatabase();
 
-         if(number == BotNavMeshZoneTypeNumber)
-            gridDB = ((ServerGame *)thisRobot->getGame())->getBotZoneDatabase();
-         else
-            gridDB = thisRobot->getGame()->getGameObjDatabase();
-
-
-         if(scope)    // Get other objects on screen-visible area only
-            gridDB->findObjects(0, fillVector, *scope, number);
-         else
-            gridDB->findObjects(0, fillVector, number);
-      }
-      index++;
-   }
-   if(objectMask)
-   {
       if(scope)    // Get other objects on screen-visible area only
-         thisRobot->getGame()->getGameObjDatabase()->findObjects(objectMask, fillVector, *scope);
+         gridDB->findObjects(number, fillVector, *scope);
       else
-         thisRobot->getGame()->getGameObjDatabase()->findObjects(objectMask, fillVector);
+         gridDB->findObjects(number, fillVector);
+
+      index++;
    }
 
    clearStack(L);
@@ -835,7 +818,7 @@ S32 LuaRobot::doFindItems(lua_State *L, Rect *scope)
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
-      if(fillVector[i]->getObjectTypeMask() & (ShipType | RobotType))      // Skip cloaked ships & robots!
+      if(isShipType(fillVector[i]->getObjectTypeNumber()))      // Skip cloaked ships & robots!
       {
          Ship *ship = dynamic_cast<Ship *>(fillVector[i]);
          if(ship)
@@ -971,7 +954,7 @@ S32 LuaRobot::getWaypoint(lua_State *L)  // Takes a luavec or an x,y
 
    // TODO: Cache this block -- data will not change throughout game... 
    Vector<DatabaseObject *> objects;
-   gServerGame->getBotZoneDatabase()->findObjects(0, objects, BotNavMeshZoneTypeNumber);
+   gServerGame->getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, objects);
 
    Vector<BotNavMeshZone *> zones;
    zones.resize(objects.size());
@@ -1013,7 +996,7 @@ U16 LuaRobot::findClosestZone(const Point &point)
    Vector<DatabaseObject*> objects;
    Rect rect = Rect(point.x + searchRadius, point.y + searchRadius, point.x - searchRadius, point.y - searchRadius);
 
-   gServerGame->getBotZoneDatabase()->findObjects(0, objects, rect, BotNavMeshZoneTypeNumber);
+   gServerGame->getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, objects, rect);
 
    for(S32 i = 0; i < objects.size(); i++)
    {
@@ -1035,8 +1018,8 @@ U16 LuaRobot::findClosestZone(const Point &point)
       F32 collisionTimeIgnore;
       Point surfaceNormalIgnore;
 
-      DatabaseObject* object = gServerGame->getBotZoneDatabase()->findObjectLOS(0,
-            MoveObject::ActualState, point, extentsCenter, collisionTimeIgnore, surfaceNormalIgnore, BotNavMeshZoneTypeNumber);
+      DatabaseObject* object = gServerGame->getBotZoneDatabase()->findObjectLOS(BotNavMeshZoneTypeNumber,
+            MoveObject::ActualState, point, extentsCenter, collisionTimeIgnore, surfaceNormalIgnore);
 
       BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(object);
 
@@ -1387,8 +1370,7 @@ Vector<Robot *> Robot::robots;
 Robot::Robot(StringTableEntry robotName, S32 team, Point pt, F32 mass) : Ship(robotName, false, team, pt, mass, true)
 {
    gameConnectionInitalized = false;
-   mObjectTypeMask = RobotType | MoveableType | CommandMapVisType;     // Override typemask set by ship
-   mObjectTypeNumber = RobotTypeNumber;
+   mObjectTypeNumber = RobotShipTypeNumber;
 
    L = NULL;
    mCurrentZone = U16_MAX;
@@ -1816,7 +1798,7 @@ bool Robot::findNearestShip(Point &loc)
    Point extend(2000, 2000);
    Rect r(pos - extend, pos + extend);
 
-   findObjects(ShipType, foundObjects, r);
+   findObjects((TestFunc)isShipType, foundObjects, r);
 
    if(!foundObjects.size())
       return false;
@@ -1863,7 +1845,7 @@ bool Robot::canSeePoint(Point point)
    Vector<Point> otherPoints;
    Rect queryRect(thisPoints);
    fillVector.clear();
-   findObjects(CollideableType, fillVector, queryRect);
+   findObjects((TestFunc)isCollideableType, fillVector, queryRect);
 
    for(S32 i=0; i < fillVector.size(); i++)
    {

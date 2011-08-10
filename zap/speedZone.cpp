@@ -53,7 +53,6 @@ EditorAttributeMenuUI *SpeedZone::mAttributeMenuUI = NULL;
 SpeedZone::SpeedZone()
 {
    mNetFlags.set(Ghostable);
-   mObjectTypeMask = SpeedZoneType | CommandMapVisType;
    mObjectTypeNumber = SpeedZoneTypeNumber;
 
    mSpeed = defaultSpeed;
@@ -169,8 +168,8 @@ void SpeedZone::onAddedToGame(Game *theGame)
 
    if(!isGhost())
       setScopeAlways();    // Runs on server
-   else
-      preparePoints();     // Runs on client
+   //else
+      //preparePoints();     // Runs on client,preparePoints runs in unpackUpdate
 }
 
 
@@ -205,7 +204,7 @@ bool SpeedZone::processArguments(S32 argc2, const char **argv2, Game *game)
 
       if((firstChar >= 'a' && firstChar <= 'z') || (firstChar >= 'A' && firstChar <= 'Z'))
       {
-         if(firstChar = 'R') // 015a
+         if(firstChar == 'R') // 015a
             mRotateSpeed = (F32)atof(&argv2[i][1]);   // using second char to handle number, "R3.4" or "R-1.7"
          else if(!strnicmp(argv2[i], "Rotate=", 7))  // 016, same as 'R', better name
             mRotateSpeed = (F32)atof(&argv2[i][7]);   // "Rotate=3.4" or "Rotate=-1.7"
@@ -290,7 +289,7 @@ bool SpeedZone::collide(GameObject *hitObject)
    if(ignoreThisCollision)
       return false;
    // This is run on both server and client side to reduce teleport lag effect.
-   if(hitObject->getObjectTypeMask() & (ShipType | RobotType))     // Only ships & robots collide
+   if(isShipType(hitObject->getObjectTypeNumber()))     // Only ships & robots collide
    {
       MoveObject *s = dynamic_cast<MoveObject *>(hitObject);
       if(!s)
@@ -430,6 +429,8 @@ void SpeedZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
       mSpeed = stream->readInt(16);
       mSnapLocation = stream->readFlag();
+
+      preparePoints();
    }
 
    else 

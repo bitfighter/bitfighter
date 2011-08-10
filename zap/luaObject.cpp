@@ -369,8 +369,8 @@ LuaItem *LuaItem::getItem(lua_State *L, S32 index, U32 type, const char *functio
 {
    switch(type)
    {
-      case RobotTypeNumber:  // pass through
-      case ShipTypeNumber:
+      case RobotShipTypeNumber:  // pass through
+      case PlayerShipTypeNumber:
         return  Lunar<LuaShip>::check(L, index);
 
       case BulletTypeNumber:  // pass through

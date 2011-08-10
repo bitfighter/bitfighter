@@ -1046,7 +1046,7 @@ void GameType::catalogSpybugs()
    mSpyBugs.clear();
 
    // Find all spybugs in the game, load them into mSpyBugs
-   getGame()->getGameObjDatabase()->findObjects(SpyBugType, spyBugs);
+   getGame()->getGameObjDatabase()->findObjects(SpyBugTypeNumber, spyBugs);
 
    mSpyBugs.resize(spyBugs.size());
    for(S32 i = 0; i < spyBugs.size(); i++)
@@ -1061,10 +1061,10 @@ void GameType::addSpyBug(SpyBug *spybug)
 
 
 // Only runs on server
-void GameType::addBarrier(BarrierRec barrier, Game *game)
+void GameType::addWall(WallRec wall, Game *game)
 {
-   mBarriers.push_back(barrier); 
-   barrier.constructBarriers(game);
+   mWalls.push_back(wall);
+   wall.constructWalls(game);
 }
 
 
@@ -1075,7 +1075,7 @@ void GameType::onLevelLoaded()
 
    // Figure out if this level has any loadout zones
    fillVector.clear();
-   mGame->getGameObjDatabase()->findObjects(LoadoutZoneType, fillVector);
+   mGame->getGameObjDatabase()->findObjects(LoadoutZoneTypeNumber, fillVector);
 
    mLevelHasLoadoutZone = (fillVector.size() > 0);
 
@@ -1240,7 +1240,7 @@ void GameType::clientRequestLoadout(GameConnection *client, const Vector<U32> &l
 
    if(ship)
    {
-      GameObject *object = ship->isInZone(LoadoutZoneType);
+      GameObject *object = ship->isInZone(LoadoutZoneTypeNumber);
       if(object)
          if(object->getTeam() == ship->getTeam() || object->getTeam() == -1)
             setClientShipLoadout(client->getClientRef(), loadout, false);
@@ -1304,7 +1304,7 @@ void GameType::performScopeQuery(GhostConnection *connection)
          queryRect.expand(scopeRange);
 
          fillVector.clear();
-         mGame->getGameObjDatabase()->findObjects(AllObjectTypes, fillVector, queryRect);
+         mGame->getGameObjDatabase()->findObjects((TestFunc)isAnyObjectType, fillVector, queryRect);
 
          for(S32 j = 0; j < fillVector.size(); j++)
             connection->objectInScope(dynamic_cast<GameObject *>(fillVector[j]));
@@ -1357,7 +1357,13 @@ void GameType::performProxyScopeQuery(GameObject *scopeObject, GameConnection *c
          Rect queryRect(pos, pos);
          queryRect.expand( Game::getScopeRange(ship->isModuleActive(ModuleSensor)) );
 
-         mGame->getGameObjDatabase()->findObjects(( (scopeObject == ship) ? AllObjectTypes : CommandMapVisType), fillVector, queryRect);
+         if (scopeObject == ship)
+            mGame->getGameObjDatabase()->findObjects((TestFunc)isAnyObjectType, fillVector, queryRect);
+         else
+            if (ship && ship->hasModule(ModuleSensor))
+               mGame->getGameObjDatabase()->findObjects((TestFunc)isVisibleOnCmdrsMapWithSensorType, fillVector, queryRect);
+            else
+               mGame->getGameObjDatabase()->findObjects((TestFunc)isVisibleOnCmdrsMapType, fillVector, queryRect);
       }
    }
    else     // Do a simple query of the objects within scope range of the ship
@@ -1371,7 +1377,7 @@ void GameType::performProxyScopeQuery(GameObject *scopeObject, GameConnection *c
       queryRect.expand( Game::getScopeRange(co->isModuleActive(ModuleSensor)) );
 
       fillVector.clear();
-      mGame->getGameObjDatabase()->findObjects(AllObjectTypes, fillVector, queryRect);
+      mGame->getGameObjDatabase()->findObjects((TestFunc)isAnyObjectType, fillVector, queryRect);
    }
 
    // Set object-in-scope for all objects found above
@@ -1421,7 +1427,7 @@ void GameType::queryItemsOfInterest()
 
       queryRect.expand(scopeRange);
       fillVector.clear();
-      mGame->getGameObjDatabase()->findObjects(ShipType | RobotType, fillVector, queryRect);
+      mGame->getGameObjDatabase()->findObjects((TestFunc)isShipType, fillVector, queryRect);
 
       for(S32 j = 0; j < fillVector.size(); j++)
       {
@@ -1462,9 +1468,6 @@ bool GameType::makeSureTeamCountIsNotZero()
    return false;
 }
 
-
-extern Color gNeutralTeamColor;
-extern Color gHostileTeamColor;
 
 // This method can be overridden by other game types that handle colors differently
 const Color *GameType::getTeamColor(S32 teamIndex) const
@@ -2057,7 +2060,7 @@ void GameType::changeClientTeam(GameConnection *source, S32 team)
       Rect worldBounds = getGame()->getWorldExtents();
 
       fillVector.clear();
-      getGame()->getGameObjDatabase()->findObjects(SpyBugType | MineType, fillVector);
+      getGame()->getGameObjDatabase()->findObjects((TestFunc)isGrenadeType, fillVector);
 
       for(S32 i = 0; i < fillVector.size(); i++)
       {
@@ -2268,7 +2271,7 @@ GAMETYPE_RPC_S2C(GameType, s2cClientJoinedTeam,
    // but this RPC only runs when a player joins the game or changes teams, so this will never hurt, and we can
    // save the overhead of sending a separate message which, while theoretically cleaner, will never be needed practically.
    fillVector.clear();
-   clientGame->getGameObjDatabase()->findObjects(SpyBugType | MineType, fillVector);
+   clientGame->getGameObjDatabase()->findObjects((TestFunc)isGrenadeType, fillVector);
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
@@ -2276,8 +2279,6 @@ GAMETYPE_RPC_S2C(GameType, s2cClientJoinedTeam,
       if(gp->mSetBy == name)
       {
          gp->mSetBy = "";                                    // No longer set-by-self
-         BITMASK mask = gp->getObjectTypeMask();
-         gp->setObjectTypeMask(mask &= ~CommandMapVisType);  // And no longer visible on commander's map
       }
    }
 }
@@ -2350,10 +2351,10 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
 
    // Sending an empty list clears the barriers
    Vector<F32> v;
-   s2cAddBarriers(v, 0, false);
+   s2cAddWalls(v, 0, false);
 
-   for(S32 i = 0; i < mBarriers.size(); i++)
-      s2cAddBarriers(mBarriers[i].verts, mBarriers[i].width, mBarriers[i].solid);
+   for(S32 i = 0; i < mWalls.size(); i++)
+      s2cAddWalls(mWalls[i].verts, mWalls[i].width, mWalls[i].solid);
 
    s2cSetTimeRemaining(mGameTimer.getCurrent());      // Tell client how much time left in current game
    s2cSetGameOver(mGameOver);
@@ -2398,18 +2399,18 @@ GAMETYPE_RPC_C2S(GameType, c2sSyncMessagesComplete, (U32 sequence), (sequence))
 
 
 // Gets called multiple times as barriers are added
-GAMETYPE_RPC_S2C(GameType, s2cAddBarriers, (Vector<F32> verts, F32 width, bool solid), (verts, width, solid))
+GAMETYPE_RPC_S2C(GameType, s2cAddWalls, (Vector<F32> verts, F32 width, bool solid), (verts, width, solid))
 {
    if(!verts.size())
-      getGame()->deleteObjects(BarrierType);
+      getGame()->deleteObjects((TestFunc)isWallType);
    else
    {
-      BarrierRec barrier;
-      barrier.verts = verts;
-      barrier.width = width;
-      barrier.solid = solid;
+      WallRec wall;
+      wall.verts = verts;
+      wall.width = width;
+      wall.solid = solid;
 
-      barrier.constructBarriers(getGame());
+      wall.constructWalls(getGame());
    }
 }
 

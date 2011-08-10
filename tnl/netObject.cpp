@@ -151,6 +151,9 @@ bool NetObject::onGhostAdd(GhostConnection *theConnection)
 {
    return true;
 }
+void NetObject::onGhostAddBeforeUpdate(GhostConnection *theConnection)
+{
+}
 
 
 void NetObject::onGhostRemove()

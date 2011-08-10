@@ -172,7 +172,7 @@ Point getPointFromTable(lua_State *L, int tableIndex, int key)
 S32 LuaLevelGenerator::addWall(lua_State *L)
 {
    static const char *methodName = "LevelGeneratorEditor:addWall()";
-   BarrierRec barrier;
+   WallRec barrier;
 
    string line = "BarrierMaker";
 

@@ -37,13 +37,10 @@
 namespace Zap
 {
 
-extern S32 gMaxPolygonPoints;
-
 SlipZone::SlipZone()     // Constructor
 {
    mTeam = 0;
    mNetFlags.set(Ghostable);
-   mObjectTypeMask = SlipZoneType | CommandMapVisType;
    mObjectTypeNumber = SlipZoneTypeNumber;
    slipAmount = 0.1f;
 }
@@ -137,7 +134,7 @@ bool SlipZone::getCollisionPoly(Vector<Point> &polyPoints) const
 
 bool SlipZone::collide(GameObject *hitObject) 
 {
-   if(!isGhost() && hitObject->getObjectTypeMask() & (ShipType))
+   if(!isGhost() && isShipType(hitObject->getObjectTypeNumber()))
    {
       //logprintf("IN A SLIP ZONE!!");
    }
