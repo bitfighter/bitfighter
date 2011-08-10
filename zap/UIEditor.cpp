@@ -1546,7 +1546,7 @@ void EditorUserInterface::render()
    {
       EditorObject *obj = objList->get(i);
 
-      if(obj->getObjectTypeNumber() == PolyWallTypeNumber)
+      if(obj->getObjectTypeNumber() != PolyWallTypeNumber)
          if(!(mDraggingObjects && obj->isSelected()))
             obj->renderInEditor(mCurrentScale, mCurrentOffset, mSnapVertexIndex, false, mShowingReferenceShip, mShowMode);
    }
