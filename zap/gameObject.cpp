@@ -145,6 +145,7 @@ bool isMoveableType(U8 x)
          x == PlayerShipTypeNumber || x == RobotShipTypeNumber ||
          x == SpyBugTypeNumber || x == MineTypeNumber || x == BulletTypeNumber ||
          x == FlagTypeNumber || x == SoccerBallItemTypeNumber ||
+         x == RepairItemTypeNumber || x == EnergyItemTypeNumber ||  // Why are these considered moveable type?
          x == AsteroidTypeNumber || x == TestItemTypeNumber || x == ResourceItemTypeNumber;
 }
 

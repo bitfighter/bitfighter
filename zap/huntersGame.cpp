@@ -182,8 +182,8 @@ void HuntersGameType::itemDropped(Ship *ship, Item *item)
       return;
 
    U32 flagCount = flag->getFlagCount();
-   TNLAssert(flagCount > 0, "Looks like that check _is_ needed after all... remove assert and comment below!");
-   if(flagCount == 0)      // <=== probably unneeded
+
+   if(flagCount == 0)  // This is needed if you drop your flags, then pick up a different item type (like resource item), and drop it
       return;
 
    Vector<StringTableEntry> e;
