@@ -694,7 +694,7 @@ Point Game::computePlayerVisArea(Ship *ship) const
    Point regVis(PLAYER_VISUAL_DISTANCE_HORIZONTAL, PLAYER_VISUAL_DISTANCE_VERTICAL);
    Point sensVis(PLAYER_SENSOR_VISUAL_DISTANCE_HORIZONTAL, PLAYER_SENSOR_VISUAL_DISTANCE_VERTICAL);
 
-   if(ship->isModuleActive(ModuleSensor))
+   if(ship->hasModule(ModuleSensor))
       return regVis + (sensVis - regVis) * fraction;
    else
       return sensVis + (regVis - sensVis) * fraction;

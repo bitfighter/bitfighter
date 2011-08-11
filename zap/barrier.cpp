@@ -376,8 +376,6 @@ void Barrier::prepareRenderingGeometry(Game *game)
 
    game->getGameObjDatabase()->findObjects((TestFunc)isWallType, barrierList);
 
-   printf("BarrierCount: %i\n", barrierList.size());
-
    clipRenderLinesToPoly(barrierList, mRenderLineSegments);
 }
 

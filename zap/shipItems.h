@@ -57,7 +57,8 @@ enum EngineerBuildObjects
 enum ModuleUseType
 {
    ModuleUseActive,     // Only functional when active
-   ModuleUsePassive     // Always functional
+   ModuleUsePassive,    // Always functional
+   ModuleUseHybrid      // Always functional, with an active component
 };
 
 class ModuleInfo
@@ -100,7 +101,7 @@ public:
             mMenuHelp = "(makes Spy Bug Placer available)";
             mEnergyDrain = 8000;
             mUseCost = 0;
-            mUseType = ModuleUseActive;
+            mUseType = ModuleUseHybrid;
             break;
 
          case ModuleRepair:

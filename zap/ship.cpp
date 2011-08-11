@@ -712,10 +712,7 @@ void Ship::processEnergy()
       if(mModuleActive[i] != modActive[i])
       {
          if(i == ModuleSensor)
-         {
-            mSensorZoomTimer.reset(SensorZoomTime - mSensorZoomTimer.getCurrent(), SensorZoomTime);
             mSensorStartTime = getGame()->getCurrentTime();
-         }
          else if(i == ModuleCloak)
             mCloakTimer.reset(CloakFadeTime - mCloakTimer.getCurrent(), CloakFadeTime);
 
@@ -1016,8 +1013,25 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
    if(stream->readFlag())        // New module configuration
    {
+      bool hadSensorThen = false;
+      bool hasSensorNow = false;
       for(S32 i = 0; i < ShipModuleCount; i++)
+      {
+         // Check old loadout for sensor
+         if(mModule[i] == ModuleSensor)
+            hadSensorThen = true;
+
+         // Set to new loadout
          mModule[i] = (ShipModule) stream->readEnum(ModuleCount);
+
+         // Check new loadout for sensor
+         if(mModule[i] == ModuleSensor)
+            hasSensorNow = true;
+      }
+
+      // Set sensor zoom timer if sensor carrying status has switched
+      if (hadSensorThen != hasSensorNow)
+         mSensorZoomTimer.reset(SensorZoomTime - mSensorZoomTimer.getCurrent(), SensorZoomTime);
 
       for(S32 i = 0; i < ShipWeaponCount; i++)
          mWeapon[i] = (WeaponType) stream->readEnum(WeaponCount);
@@ -1056,10 +1070,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
          wasActive[i] = mModuleActive[i];
          mModuleActive[i] = stream->readFlag();
          if(i == ModuleSensor && wasActive[i] != mModuleActive[i])
-         {
-            mSensorZoomTimer.reset(SensorZoomTime - mSensorZoomTimer.getCurrent(), SensorZoomTime);
             mSensorStartTime = getGame()->getCurrentTime();
-         }
          if(i == ModuleCloak && wasActive[i] != mModuleActive[i])
             mCloakTimer.reset(CloakFadeTime - mCloakTimer.getCurrent(), CloakFadeTime);
       }
@@ -1285,8 +1296,6 @@ void Ship::kill()
       if(getOwner())
          getLoadout(getOwner()->mOldLoadout);
    }
-   //else
-   //   S32 x = 0;     // TODO: Delete this
 
    deleteObject(KillDeleteDelay);
    hasExploded = true;

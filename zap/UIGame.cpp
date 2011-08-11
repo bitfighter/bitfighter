@@ -728,8 +728,9 @@ void GameUserInterface::renderLoadoutIndicators()
    // Next, loadout modules
    for(U32 i = 0; i < (U32)ShipModuleCount; i++)
    {
-      if(getGame()->getModuleInfo(localShip->getModule(i))->getUseType() == ModuleUsePassive)
-         glColor3f(1,1,0);      // yellow = passive indicator
+      if( getGame()->getModuleInfo(localShip->getModule(i))->getUseType() == ModuleUsePassive ||
+            getGame()->getModuleInfo(localShip->getModule(i))->getUseType() == ModuleUseHybrid )
+         glColor(Colors::yellow);      // yellow = passive indicator
       else if(localShip->isModuleActive(localShip->getModule(i)))
          glColor(INDICATOR_ACTIVE_COLOR);
       else 
