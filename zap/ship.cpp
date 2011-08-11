@@ -712,7 +712,11 @@ void Ship::processEnergy()
       if(mModuleActive[i] != modActive[i])
       {
          if(i == ModuleSensor)
+         {
             mSensorStartTime = getGame()->getCurrentTime();
+            if(mModuleActive[i])
+               mEnergy -= EnergyMax * 1/20; // inital energy use, prevents tapping to see cloaked
+         }
          else if(i == ModuleCloak)
             mCloakTimer.reset(CloakFadeTime - mCloakTimer.getCurrent(), CloakFadeTime);
 

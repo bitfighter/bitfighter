@@ -1356,7 +1356,7 @@ void GameType::performProxyScopeQuery(GameObject *scopeObject, GameConnection *c
 
          Point pos = ship->getActualPos();
          Rect queryRect(pos, pos);
-         queryRect.expand( Game::getScopeRange(ship->isModuleActive(ModuleSensor)) );
+         queryRect.expand( Game::getScopeRange(ship->hasModule(ModuleSensor)) );
 
          if (scopeObject == ship)
             mGame->getGameObjDatabase()->findObjects((TestFunc)isAnyObjectType, fillVector, queryRect);
@@ -1375,7 +1375,7 @@ void GameType::performProxyScopeQuery(GameObject *scopeObject, GameConnection *c
       TNLAssert(co, "Null control object!");
 
       Rect queryRect(pos, pos);
-      queryRect.expand( Game::getScopeRange(co->isModuleActive(ModuleSensor)) );
+      queryRect.expand( Game::getScopeRange(co->hasModule(ModuleSensor)) );
 
       fillVector.clear();
       mGame->getGameObjDatabase()->findObjects((TestFunc)isAnyObjectType, fillVector, queryRect);
@@ -1437,7 +1437,7 @@ void GameType::queryItemsOfInterest()
          delta.x = fabs(delta.x);
          delta.y = fabs(delta.y);
 
-         if( (theShip->isModuleActive(ModuleSensor) && delta.x < Game::PLAYER_SENSOR_VISUAL_DISTANCE_HORIZONTAL && delta.y < Game::PLAYER_SENSOR_VISUAL_DISTANCE_VERTICAL) ||
+         if( (theShip->hasModule(ModuleSensor) && delta.x < Game::PLAYER_SENSOR_VISUAL_DISTANCE_HORIZONTAL && delta.y < Game::PLAYER_SENSOR_VISUAL_DISTANCE_VERTICAL) ||
                (delta.x < Game::PLAYER_VISUAL_DISTANCE_HORIZONTAL && delta.y < Game::PLAYER_VISUAL_DISTANCE_VERTICAL) )
             ioi.teamVisMask |= (1 << theShip->getTeam());      // Mark object as visible to theShip's team
       }
