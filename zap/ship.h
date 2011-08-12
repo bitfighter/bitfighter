@@ -132,7 +132,7 @@ protected:
 public:
    static const S32 CollisionRadius = 24;
    static const S32 RepairRadius = 65;
-   static const U32 SPAWNSHIELDTIME = 1000;
+   static const U32 SpawnShieldTime = 1000;
 
    enum {
       MaxVelocity = 450,        // points per second

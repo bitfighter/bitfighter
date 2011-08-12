@@ -130,7 +130,7 @@ void Ship::initialize(Point &pos)
 
    mHealth = 1.0;       // Start at full health
    hasExploded = false; // Haven't exploded yet!
-   mSpawnShield = SPAWNSHIELDTIME;
+   mSpawnShield = SpawnShieldTime;
 
    for(S32 i = 0; i < TrailCount; i++)          // Clear any vehicle trails
       mTrail[i].reset();
@@ -936,9 +936,7 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
          stream->writeEnum(mWeapon[i], WeaponCount);
    }
 
-   if(stream->writeFlag(hasExploded))
-      ;  // do nothing
-   else
+   if(!stream->writeFlag(hasExploded))
       if(stream->writeFlag(updateMask & RespawnMask))
       {
          stream->writeFlag(getGame()->getCurrentTime() - mRespawnTime < 300 && !hasExploded);  // If true, ship will appear to spawn on client
@@ -1534,7 +1532,12 @@ void Ship::render(S32 layerIndex)
    bool localShip = ! (conn && conn->getControlObject() != this);    // i.e. a ship belonging to a remote player
    S32 localPlayerTeam = (conn && conn->getControlObject()) ? conn->getControlObject()->getTeam() : Item::NO_TEAM; // To show cloaked teammates
 
-   F32 alpha = isModuleActive(ModuleCloak) ? mCloakTimer.getFraction() : 1 - mCloakTimer.getFraction();
+   F32 alpha = 1.0f;
+   if (mSpawnShield != 0)  // Fade the ship a little if it is invulnerable
+      alpha = 0.5f;
+
+   // now adjust if using cloak module
+   alpha = isModuleActive(ModuleCloak) ? mCloakTimer.getFraction() * alpha : alpha - (mCloakTimer.getFraction() * alpha);
 
    glPushMatrix();
    glTranslatef(mMoveState[RenderState].pos.x, mMoveState[RenderState].pos.y, 0);
@@ -1620,10 +1623,9 @@ void Ship::render(S32 layerIndex)
    }
 
 
-   //if(mRespawnShield != 0)  // TODO: draw spawn shield here
-
    renderShip(gameType->getShipColor(this), alpha, thrusts, mHealth, mRadius, clientGame->getCurrentTime() - mSensorStartTime, 
               isModuleActive(ModuleCloak), isModuleActive(ModuleShield), isModuleActive(ModuleSensor), hasModule(ModuleArmor));
+
 
    if(alpha != 1.0)
       glEnableBlend;
