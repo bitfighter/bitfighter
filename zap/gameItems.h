@@ -206,6 +206,66 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+
+class Circle : public EditorItem
+{
+
+typedef Item Parent;
+
+private:
+   bool hasExploded;
+
+public:
+   Circle();     // Constructor  
+   Circle *clone() const;
+
+   static const S32 CIRCLE_RADIUS = 10;
+
+   void renderItem(Point pos);
+   bool getCollisionPoly(Vector<Point> &polyPoints) const;
+   bool getCollisionCircle(U32 state, Point &center, F32 &radius) const;
+   bool collide(GameObject *otherObject);
+   void setPosAng(Point pos, F32 ang);
+
+   void idle(GameObject::IdleCallPath path);
+
+   void damageObject(DamageInfo *theInfo);
+   U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
+   void unpackUpdate(GhostConnection *connection, BitStream *stream);
+   void emitAsteroidExplosion(Point pos);
+
+   static U32 getDesignCount() { return AsteroidDesigns; }
+
+   TNL_DECLARE_CLASS(Circle);
+
+   ///// Editor methods
+   const char *getEditorHelpString() { return "Shootable circle object.  Scary."; }
+   const char *getPrettyNamePlural() { return "Circles"; }
+   const char *getOnDockName() { return "Circ."; }
+   const char *getOnScreenName() { return "Circle"; }
+
+   F32 getEditorRadius(F32 currentScale);
+   void renderDock();
+
+   ///// Lua interface
+
+   public:
+   Circle(lua_State *L);    // Lua constructor
+
+   static const char className[];
+
+   static Lunar<Circle>::RegType methods[];
+
+   S32 getClassID(lua_State *L) { return returnInt(L, CircleTypeNumber); }
+
+   S32 getSize(lua_State *L);        // Index of current asteroid size (0 = initial size, 1 = next smaller, 2 = ...) (returns int)
+   void push(lua_State *L) {  Lunar<Circle>::push(L, this); }
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 // Parent class for spawns that generate items
 class AbstractSpawn : public EditorPointObject
 {

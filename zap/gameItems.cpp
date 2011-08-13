@@ -410,13 +410,13 @@ CircleSpawn *CircleSpawn::clone() const
 
 void CircleSpawn::spawn(Game *game, const Point &pos)
 {
-   Asteroid *asteroid = dynamic_cast<Asteroid *>(TNL::Object::create("Asteroid"));   // Create a new asteroid
+   Circle *circle = dynamic_cast<Circle *>(TNL::Object::create("Circle"));   // Create a new asteroid
 
    F32 ang = TNL::Random::readF() * Float2Pi;
 
-   asteroid->setPosAng(pos, ang);
+   circle->setPosAng(pos, ang);
 
-   asteroid->addToGame(game, game->getGameObjDatabase());              // And add it to the list of game objects
+   circle->addToGame(game, game->getGameObjDatabase());              // And add it to the list of game objects
 }
 
 
@@ -583,7 +583,8 @@ bool Asteroid::getCollisionPoly(Vector<Point> &polyPoints) const
 
 void Asteroid::damageObject(DamageInfo *theInfo)
 {
-   if(hasExploded) return; //Avoid index out of range error.
+   if(hasExploded)   // Avoid index out of range error
+      return; 
 
    // Compute impulse direction
    mSizeIndex++;
@@ -728,6 +729,201 @@ Lunar<Asteroid>::RegType Asteroid::methods[] =
 
 S32 Asteroid::getSize(lua_State *L) { return returnInt(L, getSizeIndex()); }         // Index of current asteroid size (0 = initial size, 1 = next smaller, 2 = ...) (returns int)
 S32 Asteroid::getSizeCount(lua_State *L) { return returnInt(L, getSizeCount()); }    // Number of indexes of size we can have (returns int)
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+TNL_IMPLEMENT_NETOBJECT(Circle);
+class LuaCircle;
+
+static F32 CIRCLE_VEL = 250;
+
+static const F32 CIRCLE_MASS = 4;
+
+// Constructor
+Circle::Circle() : EditorItem(Point(0,0), true, (F32)CIRCLE_RADIUS, CIRCLE_MASS)
+{
+   mNetFlags.set(Ghostable);
+   mObjectTypeNumber = CircleTypeNumber;
+   hasExploded = false;
+
+   // Give the asteroids some intial motion in a random direction
+   F32 ang = TNL::Random::readF() * Float2Pi;
+   F32 vel = CIRCLE_VEL;
+
+   for(U32 i = 0; i < MoveStateCount; i++)
+   {
+      mMoveState[i].vel.x = vel * cos(ang);
+      mMoveState[i].vel.y = vel * sin(ang);
+   }
+
+   mKillString = "crashed into an circle";
+}
+
+
+Circle *Circle::clone() const
+{
+   return new Circle(*this);
+}
+
+
+void Circle::idle(GameObject::IdleCallPath path)
+{
+   if(path == GameObject::ServerIdleMainLoop)
+   {
+      // Find nearest ship
+      fillVector.clear();
+      findObjects((TestFunc)isShipType, fillVector, Rect(getActualPos(), 1000));
+
+      F32 dist = F32_MAX;
+      Ship *closest = NULL;
+
+      for(S32 i = 0; i < fillVector.size(); i++)
+      {
+         Ship *ship = dynamic_cast<Ship *>(fillVector[i]);
+         F32 d = getActualPos().distSquared(ship->getActualPos());
+         if(d < dist)
+         {
+            closest = ship;
+            dist = d;
+         }
+      }
+
+      if(!closest)
+         return;
+
+      F32 ang = getActualPos().angleTo(closest->getActualPos());
+
+      Point v = getActualVel();
+      v += closest->getActualPos() - getActualPos();
+
+      v.normalize(CIRCLE_VEL);
+
+      setActualVel(v);
+   }
+
+   Parent::idle(path);
+}
+
+
+void Circle::renderItem(Point pos)
+{
+   if(!hasExploded)
+   {
+      glColor(Colors::red);
+      drawCircle(pos, CIRCLE_RADIUS);
+   }
+}
+
+
+void Circle::renderDock()
+{
+   drawCircle(getVert(0), 2);
+}
+
+
+F32 Circle::getEditorRadius(F32 currentScale)
+{
+   return CIRCLE_RADIUS * currentScale;
+}
+
+
+bool Circle::getCollisionCircle(U32 state, Point &center, F32 &radius) const
+{
+   return Parent::getCollisionCircle(state, center, radius);
+}
+
+
+bool Circle::getCollisionPoly(Vector<Point> &polyPoints) const
+{
+   return false;
+}
+
+
+
+void Circle::damageObject(DamageInfo *theInfo)
+{
+   // Compute impulse direction
+   Point dv = theInfo->impulseVector - mMoveState[ActualState].vel;
+   Point iv = mMoveState[ActualState].pos - theInfo->collisionPoint;
+   iv.normalize();
+   mMoveState[ActualState].vel += iv * dv.dot(iv) * 0.3f;
+}
+
+
+void Circle::setPosAng(Point pos, F32 ang)
+{
+   for(U32 i = 0; i < MoveStateCount; i++)
+   {
+      mMoveState[i].pos = pos;
+      mMoveState[i].angle = ang;
+      mMoveState[i].vel.x = asteroidVel * cos(ang);
+      mMoveState[i].vel.y = asteroidVel * sin(ang);
+   }
+}
+
+
+U32 Circle::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
+{
+   U32 retMask = Parent::packUpdate(connection, updateMask, stream);
+
+   stream->writeFlag(hasExploded);
+
+   return retMask;
+}
+
+
+void Circle::unpackUpdate(GhostConnection *connection, BitStream *stream)
+{
+   Parent::unpackUpdate(connection, stream);
+
+   bool explode = (stream->readFlag());     // Exploding!  Take cover!!
+
+   if(explode && !hasExploded)
+   {
+      hasExploded = true;
+      disableCollision();
+      emitAsteroidExplosion(mMoveState[RenderState].pos);
+   }
+}
+
+
+bool Circle::collide(GameObject *otherObject)
+{
+   return Parent::collide(otherObject);  //?
+}
+
+
+void Circle::emitAsteroidExplosion(Point pos)
+{
+   SoundSystem::playSoundEffect(SFXAsteroidExplode, pos, Point());
+   // FXManager::emitBurst(pos, Point(.1, .1), Colors::white, Colors::white, 10);
+}
+
+
+const char Circle::className[] = "Circle";      // Class name as it appears to Lua scripts
+
+// Lua constructor
+Circle::Circle(lua_State *L)
+{
+   // Do we want to construct these from Lua?  If so, do that here!
+}
+
+
+// Define the methods we will expose to Lua
+Lunar<Circle>::RegType Circle::methods[] =
+{
+   // Standard gameItem methods
+   method(Circle, getClassID),
+   method(Circle, getLoc),
+   method(Circle, getRad),
+   method(Circle, getVel),
+   method(Circle, getTeamIndx),
+
+   {0,0}    // End method list
+};
+
 
 ////////////////////////////////////////
 ////////////////////////////////////////

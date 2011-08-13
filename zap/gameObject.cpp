@@ -93,7 +93,7 @@ bool isDamageableType(U8 x)
          x == BulletTypeNumber || x == MineTypeNumber || x == SpyBugTypeNumber ||
          x == ResourceItemTypeNumber || x == TestItemTypeNumber || x == AsteroidTypeNumber ||
          x == TurretTypeNumber || x == ForceFieldProjectorTypeNumber ||
-         x == FlagTypeNumber || x == SoccerBallItemTypeNumber;
+         x == FlagTypeNumber || x == SoccerBallItemTypeNumber || x == CircleTypeNumber;
 }
 
 bool isMotionTriggerType(U8 x)
@@ -146,7 +146,7 @@ bool isMoveableType(U8 x)
          x == SpyBugTypeNumber || x == MineTypeNumber || x == BulletTypeNumber ||
          x == FlagTypeNumber || x == SoccerBallItemTypeNumber ||
          x == RepairItemTypeNumber || x == EnergyItemTypeNumber ||  // Why are these considered moveable type?
-         x == AsteroidTypeNumber || x == TestItemTypeNumber || x == ResourceItemTypeNumber;
+         x == AsteroidTypeNumber || x == TestItemTypeNumber || x == ResourceItemTypeNumber || x == CircleTypeNumber;
 }
 
 bool isWeaponCollideableType(U8 x)
@@ -157,7 +157,7 @@ bool isWeaponCollideableType(U8 x)
          x == FlagTypeNumber || x == SoccerBallItemTypeNumber ||
          x == AsteroidTypeNumber || x == TestItemTypeNumber || x == ResourceItemTypeNumber ||
          x == TurretTypeNumber || x == ForceFieldProjectorTypeNumber ||
-         x == BarrierTypeNumber || x == PolyWallTypeNumber || x == ForceFieldTypeNumber;
+         x == BarrierTypeNumber || x == PolyWallTypeNumber || x == ForceFieldTypeNumber || x == CircleTypeNumber;
 }
 
 bool isAsteroidCollideableType(U8 x)

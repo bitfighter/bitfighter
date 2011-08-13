@@ -82,6 +82,7 @@ const U8 WormTypeNumber = 25;
 const U8 TurretTypeNumber = 26;
 const U8 ForceFieldProjectorTypeNumber = 27;
 const U8 PolyWallTypeNumber = 28;
+const U8 CircleTypeNumber = 29;
 
 const U8 BotNavMeshZoneTypeNumber = 64;  // separate database
 
