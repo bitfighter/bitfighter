@@ -192,6 +192,7 @@ void FlagItem::mountToShip(Ship *theShip)
 }
 
 
+// Only called from from sendHome()
 const Vector<FlagSpawn> *FlagItem::getSpawnPoints()
 {
    Game *game = getGame();

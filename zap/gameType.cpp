@@ -529,7 +529,7 @@ const char *GameType::validateGameType(const char *gtype)
 
 
 void GameType::idle(GameObject::IdleCallPath path, U32 deltaT)
-{;
+{
    mTotalGamePlay += deltaT;
 
    if(isGhost())     // i.e. client only
@@ -583,22 +583,13 @@ void GameType::idle(GameObject::IdleCallPath path, U32 deltaT)
          }
    }
 
-   // Need more asteroids?
-   for(S32 i = 0; i < mAsteroidSpawnPoints.size(); i++)
-   {
-      if(mAsteroidSpawnPoints[i].updateTimer(deltaT))
+   // Spawn things
+   for(S32 i = 0; i < mItemSpawnPoints.size(); i++)
+      if(mItemSpawnPoints[i]->updateTimer(deltaT))
       {
-         Asteroid *asteroid = dynamic_cast<Asteroid *>(TNL::Object::create("Asteroid"));   // Create a new asteroid
-
-         F32 ang = TNL::Random::readF() * Float2Pi;
-
-         asteroid->setPosAng(mAsteroidSpawnPoints[i].getPos(), ang);
-
-         asteroid->addToGame(gServerGame, gServerGame->getGameObjDatabase());              // And add it to the list of game objects
-
-         mAsteroidSpawnPoints[i].resetTimer();                                             // Reset the spawn timer
+         mItemSpawnPoints[i]->spawn(getGame(), mItemSpawnPoints[i]->getPos());   // Spawn item
+         mItemSpawnPoints[i]->resetTimer();                                      // Reset the spawn timer
       }
-   }
 
    //if(mTestTimer.update(deltaT))
    //{

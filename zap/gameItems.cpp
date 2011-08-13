@@ -217,7 +217,8 @@ AbstractSpawn::AbstractSpawn(const Point &pos, S32 time)
 void AbstractSpawn::setRespawnTime(S32 time)       // in seconds
 {
    mSpawnTime = time;
-   mTimer.setPeriod(time);
+   mTimer.setPeriod(time * 1000);
+   mTimer.reset();
 }
 
 
@@ -229,7 +230,7 @@ F32 AbstractSpawn::getEditorRadius(F32 currentScale)
 
 bool AbstractSpawn::processArguments(S32 argc, const char **argv, Game *game)
 {
-   if(argc >= 3)
+   if(argc >= 5)
       return false;
 
    Point pos;
@@ -248,7 +249,7 @@ bool AbstractSpawn::processArguments(S32 argc, const char **argv, Game *game)
 
 string AbstractSpawn::toString(F32 gridSize) const
 {
-   // AsteroidSpawn|FlagSpawn <x> <y> <time>
+   // <<spawn class name>> <x> <y> <time>
    return string(getClassName()) + " " + geomToString(gridSize) + " " + itos(mSpawnTime);
 }
 
@@ -315,17 +316,37 @@ void Spawn::renderDock()
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+ItemSpawn::ItemSpawn(const Point &pos, S32 time) : Parent(pos, time)
+{
+   // Do nothing
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 // Constructor
-AsteroidSpawn::AsteroidSpawn(const Point &pos, S32 time) : AbstractSpawn(pos, time)
+AsteroidSpawn::AsteroidSpawn(const Point &pos, S32 time) : Parent(pos, time)
 {
    mObjectTypeNumber = AsteroidSpawnTypeNumber;
-
 }
 
 
 AsteroidSpawn *AsteroidSpawn::clone() const
 {
    return new AsteroidSpawn(*this);
+}
+
+
+void AsteroidSpawn::spawn(Game *game, const Point &pos)
+{
+   Asteroid *asteroid = dynamic_cast<Asteroid *>(TNL::Object::create("Asteroid"));   // Create a new asteroid
+
+   F32 ang = TNL::Random::readF() * Float2Pi;
+
+   asteroid->setPosAng(pos, ang);
+
+   asteroid->addToGame(game, game->getGameObjDatabase());              // And add it to the list of game objects
 }
 
 
@@ -361,6 +382,70 @@ void AsteroidSpawn::renderDock()
 {
    renderAsteroidSpawn(getVert(0));
 }
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Constructor
+CircleSpawn::CircleSpawn(const Point &pos, S32 time) : Parent(pos, time)
+{
+   mObjectTypeNumber = CircleSpawnTypeNumber;
+}
+
+
+CircleSpawn *CircleSpawn::clone() const
+{
+   return new CircleSpawn(*this);
+}
+
+
+void CircleSpawn::spawn(Game *game, const Point &pos)
+{
+   Asteroid *asteroid = dynamic_cast<Asteroid *>(TNL::Object::create("Asteroid"));   // Create a new asteroid
+
+   F32 ang = TNL::Random::readF() * Float2Pi;
+
+   asteroid->setPosAng(pos, ang);
+
+   asteroid->addToGame(game, game->getGameObjDatabase());              // And add it to the list of game objects
+}
+
+
+
+static void renderCircleSpawn(const Point &pos)
+{
+   F32 scale = 0.8f;
+   static const Point p(0,0);
+
+   glPushMatrix();
+      glTranslatef(pos.x, pos.y, 0);
+      glScalef(scale, scale, 1);
+      drawCircle(p, 8);
+
+      glColor(Colors::white);
+      drawCircle(p, 13);
+   glPopMatrix();  
+}
+
+
+void CircleSpawn::renderEditor(F32 currentScale)
+{
+   Point pos = getVert(0);
+
+   glPushMatrix();
+      glTranslate(pos);
+      glScale(1/currentScale);    // Make item draw at constant size, regardless of zoom
+      renderCircleSpawn(Point(0,0));
+   glPopMatrix();   
+}
+
+
+void CircleSpawn::renderDock()
+{
+   renderCircleSpawn(getVert(0));
+}
+
 
 
 ////////////////////////////////////////

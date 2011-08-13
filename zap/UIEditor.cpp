@@ -220,6 +220,10 @@ void EditorUserInterface::populateDock()
       addDockObject(new AsteroidSpawn(), xPos + 10, yPos);
       yPos += spacer;
 
+      addDockObject(new CircleSpawn(), xPos, yPos);
+      yPos += spacer;
+
+
       // These two will share a line
       addDockObject(new TestItem(), xPos - 10, yPos);
       addDockObject(new ResourceItem(), xPos + 10, yPos);

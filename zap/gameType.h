@@ -154,10 +154,10 @@ private:
    S32 mMinRecPlayers;         // Recommended min players for this level
    S32 mMaxRecPlayers;         // Recommended max players for this level
 
-   Vector<FlagSpawn> mFlagSpawnPoints;           // List of non-team specific spawn points for flags
-   Vector<AsteroidSpawn> mAsteroidSpawnPoints;   // List of spawn points for asteroids
+   Vector<FlagSpawn> mFlagSpawnPoints;                        // List of non-team specific spawn points for flags
+   Vector<boost::shared_ptr<ItemSpawn> > mItemSpawnPoints;    // List of spawn points for asteroids, circles, etc.
 
-   Timer mGameTimer;                // Track when current game will end
+   Timer mGameTimer;                      // Track when current game will end
    Timer mScoreboardUpdateTimer;    
    Timer mGameTimeUpdateTimer;
 
@@ -288,7 +288,8 @@ public:
    const FlagSpawn *getFlagSpawn(S32 index) const { return &mFlagSpawnPoints[index]; }
    const Vector<FlagSpawn> *getFlagSpawns() const { return &mFlagSpawnPoints; }
    void addFlagSpawn(FlagSpawn flagSpawn) { mFlagSpawnPoints.push_back(flagSpawn); }
-   void addAsteroidSpawn(AsteroidSpawn asteroidSpawn) { mAsteroidSpawnPoints.push_back(asteroidSpawn); }
+   void addItemSpawn(ItemSpawn *spawn) { mItemSpawnPoints.push_back(boost::shared_ptr<ItemSpawn>(spawn)); logprintf("spawn time: %d", mItemSpawnPoints.last()->getPeriod()); }
+
 
    Rect mViewBoundsWhileLoading;    // Show these view bounds while loading the map
    S32 mObjectsExpected;      // Count of objects we expect to get with this level (for display purposes only)

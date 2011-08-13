@@ -1084,10 +1084,17 @@ bool ServerGame::processPseudoItem(S32 argc, const char **argv, const string &le
    }
    else if(!stricmp(argv[0], "AsteroidSpawn"))      // AsteroidSpawn <x> <y> [timer]      // TODO: Move this to AsteroidSpawn class?
    {
-      AsteroidSpawn spawn = AsteroidSpawn();
+      AsteroidSpawn *spawn = new AsteroidSpawn();
 
-      if(spawn.processArguments(argc, argv, this))
-         getGameType()->addAsteroidSpawn(spawn);
+      if(spawn->processArguments(argc, argv, this))
+         getGameType()->addItemSpawn(spawn);
+   }
+   else if(!stricmp(argv[0], "CircleSpawn"))      // CircleSpawn <x> <y> [timer]      // TODO: Move this to CircleSpawn class?
+   {
+      CircleSpawn *spawn = new CircleSpawn();
+
+      if(spawn->processArguments(argc, argv, this))
+         getGameType()->addItemSpawn(spawn);
    }
    else if(!stricmp(argv[0], "BarrierMaker"))
    {
@@ -3111,7 +3118,7 @@ void ClientGame::render()
 
 bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &levelFileName)
 {
-   if(!stricmp(argv[0], "Spawn") || !stricmp(argv[0], "FlagSpawn") || !stricmp(argv[0], "AsteroidSpawn"))
+   if(!stricmp(argv[0], "Spawn") || !stricmp(argv[0], "FlagSpawn") || !stricmp(argv[0], "AsteroidSpawn") || !stricmp(argv[0], "CircleSpawn"))
    {
       EditorObject *newObject;
 
@@ -3119,8 +3126,10 @@ bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &le
          newObject = new Spawn();
       else if(!stricmp(argv[0], "FlagSpawn"))
          newObject = new FlagSpawn();
-      else /* if(!stricmp(argv[0], "AsteroidSpawn")) */
+      else if(!stricmp(argv[0], "AsteroidSpawn")) 
          newObject = new AsteroidSpawn();
+      else if(!stricmp(argv[0], "CircleSpawn")) 
+         newObject = new CircleSpawn();
 
 
       bool validArgs = newObject->processArguments(argc - 1, argv + 1, this);

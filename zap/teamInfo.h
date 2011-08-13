@@ -84,7 +84,7 @@ private:
    S32 mScore;
    F32 mRating; 
 
-   Vector<Point> mSpawnPoints;
+   Vector<Point> mItemSpawnPoints;
    Vector<FlagSpawn> mFlagSpawns;       // List of places for team flags to spawn
 
 public:
@@ -95,9 +95,9 @@ public:
    void setName(const char *name) { mName.set(name); }
    void setName(StringTableEntry name) { mName = name; }
 
-   S32 getSpawnPointCount() const { return mSpawnPoints.size(); }
-   Point getSpawnPoint(S32 index) const { return mSpawnPoints[index]; }
-   void addSpawnPoint(Point point) { mSpawnPoints.push_back(point); }
+   S32 getSpawnPointCount() const { return mItemSpawnPoints.size(); }
+   Point getSpawnPoint(S32 index) const { return mItemSpawnPoints[index]; }
+   void addSpawnPoint(Point point) { mItemSpawnPoints.push_back(point); }
 
    void addFlagSpawn(FlagSpawn flagSpawn) { mFlagSpawns.push_back(flagSpawn); }
    const Vector<FlagSpawn> *getFlagSpawns() const { return &mFlagSpawns; }

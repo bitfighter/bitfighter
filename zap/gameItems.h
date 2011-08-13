@@ -240,7 +240,8 @@ public:
    F32 getEditorRadius(F32 currentScale);
 
    bool updateTimer(U32 deltaT) { return mTimer.update(deltaT); }
-   void resetTimer() { mTimer.clear(); }
+   void resetTimer() { mTimer.reset(); }
+   U32 getPeriod() { return mTimer.getPeriod(); }     // temp debugging
 
    virtual void renderEditor(F32 currentScale) = 0;
    virtual void renderDock() = 0;
@@ -275,8 +276,22 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class AsteroidSpawn : public AbstractSpawn    
+class ItemSpawn : public AbstractSpawn
 {
+   typedef AbstractSpawn Parent;
+
+   public:
+      ItemSpawn(const Point &pos, S32 time);
+      virtual void spawn(Game *game, const Point &pos) = 0;
+};
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+class AsteroidSpawn : public ItemSpawn    
+{
+   typedef ItemSpawn Parent;
+
 public:
    static const S32 DEFAULT_RESPAWN_TIME = 30;    // in seconds
 
@@ -292,10 +307,38 @@ public:
 
    S32 getDefaultRespawnTime() { return DEFAULT_RESPAWN_TIME; }
 
+   void spawn(Game *game, const Point &pos);
    void renderEditor(F32 currentScale);
    void renderDock();
 };
 
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+class CircleSpawn : public ItemSpawn    
+{
+   typedef ItemSpawn Parent;
+
+public:
+   static const S32 DEFAULT_RESPAWN_TIME = 1;    // in seconds
+
+   CircleSpawn(const Point &pos = Point(), S32 time = DEFAULT_RESPAWN_TIME);  // C++ constructor (no lua constructor)
+   CircleSpawn *clone() const;
+
+   const char *getEditorHelpString() { return "Periodically spawns a new circle."; }
+   const char *getPrettyNamePlural() { return "Circle spawn points"; }
+   const char *getOnDockName() { return "CSP"; }
+   const char *getOnScreenName() { return "CircleSpawn"; }
+
+   const char *getClassName() const { return "CircleSpawn"; }
+
+   S32 getDefaultRespawnTime() { return DEFAULT_RESPAWN_TIME; }
+
+   void spawn(Game *game, const Point &pos);
+   void renderEditor(F32 currentScale);
+   void renderDock();
+};
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -320,6 +363,7 @@ public:
 
    S32 getDefaultRespawnTime() { return DEFAULT_RESPAWN_TIME; }
 
+   void spawn(Game *game, const Point &pos);
    void renderEditor(F32 currentScale);
    void renderDock();
 };
