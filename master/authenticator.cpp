@@ -101,7 +101,7 @@ bool Authenticator::authenticate(string &username, string password, int &errorCo
 		Query qry = connection->query("");
 
       // Provide some protection against injection attacks
-      string safeUsername = replaceString(replaceString(username, "\\", "\\\\"), "'", "''");      
+      string safeUsername = replaceString(replaceString(trim(username), "\\", "\\\\"), "'", "''");
 
 		string qryText = "SELECT username, user_password FROM " + prefix + "users WHERE UPPER(username) = UPPER('" + safeUsername + "')";
 		StoreQueryResult results = qry.store(qryText.c_str(),qryText.length());
