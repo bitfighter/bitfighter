@@ -125,6 +125,47 @@ void drawArc(const Point &pos, F32 radius, F32 startAngle, F32 endAngle)
 }
 
 
+void drawDashedArc(const Point &center, F32 radius, S32 dashCount, F32 spaceAngle)
+{
+   F32 interimAngle = 6.283f/dashCount;  // tau is so much easier
+
+   for (S32 i = 0; i < dashCount; i++ )
+      drawArc(center, radius, interimAngle * i, (interimAngle * (i + 1)) - spaceAngle);
+}
+
+
+void drawAngledRay(const Point &center, F32 innerRadius, F32 outerRadius, F32 angle)
+{
+   glBegin(GL_LINE_STRIP);
+
+   glVertex2f(center.x + cos(angle) * innerRadius, center.y + sin(angle) * innerRadius);
+   glVertex2f(center.x + cos(angle) * outerRadius, center.y + sin(angle) * outerRadius);
+
+   glEnd();
+}
+
+
+void drawAngledRayCircle(const Point &center, F32 innerRadius, F32 outerRadius, S32 rayCount, F32 startAngle)
+{
+   F32 interimAngle = 6.283f/rayCount;
+
+   for (S32 i = 0; i < rayCount; i++ )
+      drawAngledRay(center, innerRadius, outerRadius, interimAngle * i + startAngle);
+}
+
+
+void drawDashedHollowArc(const Point &center, F32 innerRadius, F32 outerRadius, S32 dashCount, F32 spaceAngle)
+{
+   // Draw the dashed arcs
+   drawDashedArc(center, innerRadius, dashCount, spaceAngle);
+   drawDashedArc(center, outerRadius, dashCount, spaceAngle);
+
+   // Now connect them
+   drawAngledRayCircle(center, innerRadius,  outerRadius, dashCount, 0);
+   drawAngledRayCircle(center, innerRadius,  outerRadius, dashCount, 0 - spaceAngle);
+}
+
+
 // Draw rounded rectangle centered on pos
 void drawRoundedRect(const Point &pos, F32 width, F32 height, F32 rad)
 {

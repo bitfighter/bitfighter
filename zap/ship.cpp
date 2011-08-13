@@ -1532,12 +1532,9 @@ void Ship::render(S32 layerIndex)
    bool localShip = ! (conn && conn->getControlObject() != this);    // i.e. a ship belonging to a remote player
    S32 localPlayerTeam = (conn && conn->getControlObject()) ? conn->getControlObject()->getTeam() : Item::NO_TEAM; // To show cloaked teammates
 
-   F32 alpha = 1.0f;
-   if (mSpawnShield != 0)  // Fade the ship a little if it is invulnerable
-      alpha = 0.5f;
 
    // now adjust if using cloak module
-   alpha = isModuleActive(ModuleCloak) ? mCloakTimer.getFraction() * alpha : alpha - (mCloakTimer.getFraction() * alpha);
+   F32 alpha = isModuleActive(ModuleCloak) ? mCloakTimer.getFraction() : 1 - mCloakTimer.getFraction();
 
    glPushMatrix();
    glTranslatef(mMoveState[RenderState].pos.x, mMoveState[RenderState].pos.y, 0);
@@ -1633,13 +1630,18 @@ void Ship::render(S32 layerIndex)
    if(localShip && gShowAimVector && gIniSettings.enableExperimentalAimMode)     // Only show for local ship
       renderAimVector();
 
-   glPopMatrix();  
+   glPopMatrix();
 
+   if (mSpawnShield != 0)  // Add invulnerability effect
+   {
+      glColor(Colors::green, 0.5f);
+      drawDashedHollowArc(mMoveState[RenderState].pos, CollisionRadius + 5, CollisionRadius + 10, 8, 6.283f/24);
+   }
 
    if(isModuleActive(ModuleRepair) && alpha != 0)     // Don't bother when completely transparent
    {
       glLineWidth(gLineWidth3);
-      glColor4f(1,0,0,alpha);
+      glColor(Colors::red, alpha);
       // render repair rays to all the repairing objects
       Point pos = mMoveState[RenderState].pos;
 
