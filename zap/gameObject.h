@@ -85,13 +85,14 @@ const U8 PolyWallTypeNumber = 28;
 
 const U8 BotNavMeshZoneTypeNumber = 64;  // separate database
 
-// These are probably used only in editor..
+// These are probably used only in editor...
 const U8 WallItemTypeNumber = 66;
 const U8 WallEdgeTypeNumber = 67;
 const U8 WallSegmentTypeNumber = 68;
 const U8 ShipSpawnTypeNumber = 69;
 const U8 FlagSpawnTypeNumber = 70;
 const U8 AsteroidSpawnTypeNumber = 71;
+const U8 CircleSpawnTypeNumber = 72;
 
 const U8 DeletedTypeNumber = 252;
 // 255
