@@ -410,15 +410,16 @@ CircleSpawn *CircleSpawn::clone() const
 
 void CircleSpawn::spawn(Game *game, const Point &pos)
 {
-   Circle *circle = dynamic_cast<Circle *>(TNL::Object::create("Circle"));   // Create a new asteroid
+   for(S32 i = 0; i < 10; i++)
+   {
+      Circle *circle = dynamic_cast<Circle *>(TNL::Object::create("Circle"));   // Create a new Circle
+      F32 ang = TNL::Random::readF() * Float2Pi;
 
-   F32 ang = TNL::Random::readF() * Float2Pi;
+      circle->setPosAng(pos, ang);
 
-   circle->setPosAng(pos, ang);
-
-   circle->addToGame(game, game->getGameObjDatabase());              // And add it to the list of game objects
+      circle->addToGame(game, game->getGameObjDatabase());              // And add it to the list of game objects
+   }
 }
-
 
 
 static void renderCircleSpawn(const Point &pos)
@@ -453,7 +454,6 @@ void CircleSpawn::renderDock()
 {
    renderCircleSpawn(getVert(0));
 }
-
 
 
 ////////////////////////////////////////
@@ -670,7 +670,7 @@ void Asteroid::unpackUpdate(GhostConnection *connection, BitStream *stream)
    {
       hasExploded = true;
       disableCollision();
-      emitAsteroidExplosion(mMoveState[RenderState].pos);
+      onItemExploded(mMoveState[RenderState].pos);
    }
 }
 
@@ -693,7 +693,8 @@ bool Asteroid::collide(GameObject *otherObject)
 }
 
 
-void Asteroid::emitAsteroidExplosion(Point pos)
+// Client only
+void Asteroid::onItemExploded(Point pos)
 {
    SoundSystem::playSoundEffect(SFXAsteroidExplode, pos, Point());
    // FXManager::emitBurst(pos, Point(.1, .1), Colors::white, Colors::white, 10);
@@ -841,14 +842,13 @@ bool Circle::getCollisionPoly(Vector<Point> &polyPoints) const
 }
 
 
-
 void Circle::damageObject(DamageInfo *theInfo)
 {
    // Compute impulse direction
-   Point dv = theInfo->impulseVector - mMoveState[ActualState].vel;
-   Point iv = mMoveState[ActualState].pos - theInfo->collisionPoint;
-   iv.normalize();
-   mMoveState[ActualState].vel += iv * dv.dot(iv) * 0.3f;
+   hasExploded = true;
+   deleteObject(500);
+   setMaskBits(ExplodedMask);    // Fix asteroids delay destroy after hit again...
+   return;
 }
 
 
@@ -884,21 +884,21 @@ void Circle::unpackUpdate(GhostConnection *connection, BitStream *stream)
    {
       hasExploded = true;
       disableCollision();
-      emitAsteroidExplosion(mMoveState[RenderState].pos);
+      onItemExploded(mMoveState[RenderState].pos);
    }
 }
 
 
 bool Circle::collide(GameObject *otherObject)
 {
-   return Parent::collide(otherObject);  //?
+   return true;
 }
 
 
-void Circle::emitAsteroidExplosion(Point pos)
+// Client only
+void Circle::onItemExploded(Point pos)
 {
    SoundSystem::playSoundEffect(SFXAsteroidExplode, pos, Point());
-   // FXManager::emitBurst(pos, Point(.1, .1), Colors::white, Colors::white, 10);
 }
 
 
@@ -1036,7 +1036,7 @@ void Worm::unpackUpdate(GhostConnection *connection, BitStream *stream)
    {
       hasExploded = true;
       disableCollision();
-      //emitAsteroidExplosion(mMoveState[RenderState].pos);
+      onItemExploded(mMoveState[RenderState].pos);
    }
 }
 

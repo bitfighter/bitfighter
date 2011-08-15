@@ -167,7 +167,7 @@ public:
    void damageObject(DamageInfo *theInfo);
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
-   void emitAsteroidExplosion(Point pos);
+   void onItemExploded(Point pos);
 
    static U32 getDesignCount() { return AsteroidDesigns; }
 
@@ -232,7 +232,9 @@ public:
    void damageObject(DamageInfo *theInfo);
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
-   void emitAsteroidExplosion(Point pos);
+   void onItemExploded(Point pos);
+
+   void playCollisionSound(U32 stateIndex, MoveObject *moveObjectThatWasHit, F32 velocity) { /* Do nothing */ }
 
    static U32 getDesignCount() { return AsteroidDesigns; }
 
@@ -383,7 +385,7 @@ class CircleSpawn : public ItemSpawn
    typedef ItemSpawn Parent;
 
 public:
-   static const S32 DEFAULT_RESPAWN_TIME = 1;    // in seconds
+   static const S32 DEFAULT_RESPAWN_TIME = 20;    // in seconds
 
    CircleSpawn(const Point &pos = Point(), S32 time = DEFAULT_RESPAWN_TIME);  // C++ constructor (no lua constructor)
    CircleSpawn *clone() const;

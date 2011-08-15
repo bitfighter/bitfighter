@@ -86,6 +86,8 @@ public:
    Point getActualVel() { return mMoveState[ActualState].vel; }
    void setActualVel(Point vel) { mMoveState[ActualState].vel = vel; }
 
+   virtual void playCollisionSound(U32 stateIndex, MoveObject *moveObjectThatWasHit, F32 velocity);
+
    void move(F32 time, U32 stateIndex, bool displacing = false, Vector<SafePtr<MoveObject> > = Vector<SafePtr<MoveObject> >());
    bool collide(GameObject *otherObject);
 

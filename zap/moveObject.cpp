@@ -467,8 +467,7 @@ void MoveObject::computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *
    }
    else     // Client only
    {
-      if(v1i > 0.25)    // Make sound if the objects are moving fast enough
-         SoundSystem::playSoundEffect(SFXBounceObject, moveObjectThatWasHit->mMoveState[stateIndex].pos, Point());
+      playCollisionSound(stateIndex, moveObjectThatWasHit, v1i);
 
       Item *item = dynamic_cast<Item *>(moveObjectThatWasHit);
       GameType *gameType = gClientGame->getGameType();
@@ -476,6 +475,13 @@ void MoveObject::computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *
       if(item && gameType)
          gameType->c2sResendItemStatus(item->getItemId());
    }
+}
+
+
+void MoveObject::playCollisionSound(U32 stateIndex, MoveObject *moveObjectThatWasHit, F32 velocity)
+{
+   if(velocity > 0.25)    // Make sound if the objects are moving fast enough
+      SoundSystem::playSoundEffect(SFXBounceObject, moveObjectThatWasHit->mMoveState[stateIndex].pos, Point());
 }
 
 
