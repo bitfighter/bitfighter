@@ -771,11 +771,11 @@ Circle *Circle::clone() const
 
 void Circle::idle(GameObject::IdleCallPath path)
 {
-   if(path == GameObject::ServerIdleMainLoop)
+   //if(path == GameObject::ServerIdleMainLoop)
    {
       // Find nearest ship
       fillVector.clear();
-      findObjects((TestFunc)isShipType, fillVector, Rect(getActualPos(), 1000));
+      findObjects((TestFunc)isShipType, fillVector, Rect(getActualPos(), 1200));
 
       F32 dist = F32_MAX;
       Ship *closest = NULL;
@@ -1036,7 +1036,7 @@ void Worm::unpackUpdate(GhostConnection *connection, BitStream *stream)
    {
       hasExploded = true;
       disableCollision();
-      onItemExploded(mMoveState[RenderState].pos);
+      //onItemExploded(mMoveState[RenderState].pos);
    }
 }
 
