@@ -764,7 +764,14 @@ void Ship::damageObject(DamageInfo *theInfo)
 
       // Having armor halves the damage
       if(hasModule(ModuleArmor))
-         damageAmount /= 2;
+      {
+         // Except for bouncers - they do a little more damage
+         Projectile* projectile = dynamic_cast<Projectile*>(theInfo->damagingObject);
+         if (projectile && projectile->mWeaponType == WeaponBounce)
+            damageAmount /= 1.3333f;  // Bouncers do 3/4 damage
+         else
+            damageAmount /= 2;        // Everything else does 1/2
+      }
    }
 
    GameConnection *damagerOwner = theInfo->damagingObject->getOwner();
