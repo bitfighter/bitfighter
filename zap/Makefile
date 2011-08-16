@@ -171,6 +171,12 @@ dedicated: SFX_LFLAGS=
 dedicated: EXEFILE=bitfighterd
 dedicated: bitfighter
 
+dedicated_debug: OPTIMIZE=
+dedicated_debug: CFLAGS=-DZAP_DEDICATED 
+dedicated_debug: GFX_LFLAGS=
+dedicated_debug: SFX_LFLAGS=
+dedicated_debug: EXEFILE=bitfighterd
+dedicated_debug: bitfighter
 
 bitfighter: $(OBJECTS_ZAP) 
 	$(CC) -o ../exe/$(EXEFILE) $(OBJECTS_ZAP) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a ../lua/lua-vec/src/liblua.a ../alure/libalure.a $(SFX_LFLAGS) $(GFX_LFLAGS) $(THREADLIB) $(LFLAGS)

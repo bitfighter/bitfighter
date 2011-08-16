@@ -61,6 +61,13 @@ dedicated:
 	@$(MAKE) -C alure
 	@$(MAKE) -C zap	dedicated
 
+dedicated_debug:
+	@$(MAKE) -C tnl 
+	@$(MAKE) -C libtomcrypt
+	#@$(MAKE) -C master
+	@$(MAKE) -C lua/lua-vec/src 
+	@$(MAKE) -C zap	dedicated_debug
+
 bitfighter:
 	@$(MAKE) -C zap
 
