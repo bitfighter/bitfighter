@@ -703,7 +703,7 @@ void Ship::processEnergy()
       {
          // Faster energy recharge if not moving
          if(mCurrentMove.x == 0 && mCurrentMove.y == 0)
-            mEnergy += S32(EnergyRechargeRateIdle * scaleFactor);
+            mEnergy += S32(EnergyRechargeRateWhenIdle * scaleFactor);
 
          // Else normal rate
          else
