@@ -139,15 +139,6 @@ bool isLineItemType(U8 x)
          x == BarrierTypeNumber || x == WallItemTypeNumber || x == LineTypeNumber;
 }
 
-bool isMoveableType(U8 x)
-{
-   return
-         x == PlayerShipTypeNumber || x == RobotShipTypeNumber ||
-         x == SpyBugTypeNumber || x == MineTypeNumber || x == BulletTypeNumber ||
-         x == FlagTypeNumber || x == SoccerBallItemTypeNumber ||
-         x == RepairItemTypeNumber || x == EnergyItemTypeNumber ||  // Why are these considered moveable type?
-         x == AsteroidTypeNumber || x == TestItemTypeNumber || x == ResourceItemTypeNumber || x == CircleTypeNumber;
-}
 
 bool isWeaponCollideableType(U8 x)
 {

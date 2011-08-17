@@ -112,7 +112,6 @@ bool isCollideableType(U8 x);
 bool isForceFieldCollideableType(U8 x);
 bool isWallType(U8 x);
 bool isLineItemType(U8 x);
-bool isMoveableType(U8 x);
 bool isWeaponCollideableType(U8 x);
 bool isAsteroidCollideableType(U8 x);
 bool isFlagCollideableType(U8 x);
@@ -222,6 +221,8 @@ public:
    virtual void onAddedToGame(Game *game);
 
    void markAsGhost() { mNetFlags = NetObject::IsGhost; }
+
+   virtual bool isMoveObject() { return false; }
 
    U32 getCreationTime() { return mCreationTime; }
    void setCreationTime(U32 creationTime) { mCreationTime = creationTime; }

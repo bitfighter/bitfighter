@@ -75,6 +75,8 @@ public:
    void updateInterpolation();
    void updateExtent();
 
+   bool isMoveObject() { return true; }
+
    F32 getRadius() { return mRadius; }
    F32 getMass() { return mMass; }
    void setRadius(F32 radius) {   mRadius = radius;   }

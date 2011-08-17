@@ -189,9 +189,10 @@ void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vecto
       // Collision!  Advance to the point of collision
       mMoveState[stateIndex].pos += mMoveState[stateIndex].vel * collisionTime;
 
-      if(isMoveableType(objectHit->getObjectTypeNumber()))     // Collided with movable object
+      if(objectHit->isMoveObject())     // Collided with a MoveObject
       {
-         MoveObject *moveObjectThatWasHit = (MoveObject *) objectHit;    
+         MoveObject *moveObjectThatWasHit = (MoveObject *) objectHit;  
+
          Point velDelta = moveObjectThatWasHit->mMoveState[stateIndex].vel - mMoveState[stateIndex].vel;
          Point posDelta = moveObjectThatWasHit->mMoveState[stateIndex].pos - mMoveState[stateIndex].pos;
 
@@ -321,7 +322,7 @@ GameObject *MoveObject::findFirstCollision(U32 stateIndex, F32 &collisionTime, P
             }
          }
       }
-      else if(isMoveableType(foundObject->getObjectTypeNumber()))
+      else if(foundObject->isMoveObject())
       {
          MoveObject *otherShip = (MoveObject *) foundObject;
 
