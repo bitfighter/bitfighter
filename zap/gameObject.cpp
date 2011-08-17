@@ -96,6 +96,7 @@ bool isDamageableType(U8 x)
          x == FlagTypeNumber || x == SoccerBallItemTypeNumber || x == CircleTypeNumber;
 }
 
+
 bool isMotionTriggerType(U8 x)
 {
    return
@@ -104,12 +105,14 @@ bool isMotionTriggerType(U8 x)
          x == MineTypeNumber;
 }
 
+
 bool isTurretTargetType(U8 x)
 {
    return
          x == PlayerShipTypeNumber || x == RobotShipTypeNumber || x == ResourceItemTypeNumber ||
          x == TestItemTypeNumber || x == SoccerBallItemTypeNumber;
 }
+
 
 bool isCollideableType(U8 x)
 {
@@ -119,6 +122,7 @@ bool isCollideableType(U8 x)
          x == ForceFieldProjectorTypeNumber;
 }
 
+
 bool isForceFieldCollideableType(U8 x)
 {
    return
@@ -126,12 +130,14 @@ bool isForceFieldCollideableType(U8 x)
          x == TurretTypeNumber || x == ForceFieldProjectorTypeNumber;
 }
 
+
 bool isWallType(U8 x)
 {
    return
          x == BarrierTypeNumber || x == PolyWallTypeNumber ||
          x == WallItemTypeNumber || x == WallEdgeTypeNumber || x == WallSegmentTypeNumber;
 }
+
 
 bool isLineItemType(U8 x)
 {
