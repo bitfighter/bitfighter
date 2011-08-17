@@ -356,7 +356,7 @@ void Ship::selectWeapon(U32 weaponIdx)
    mActiveWeaponIndx = weaponIdx % ShipWeaponCount;      // Advance index to next weapon
 
    // Display a message confirming new weapon choice if we're not showing the indicators
-   if (!gIniSettings.showWeaponIndicators)
+   if(!gIniSettings.showWeaponIndicators)
    {
       GameConnection *cc = getControllingClient();
       if(cc)
@@ -702,7 +702,7 @@ void Ship::processEnergy()
       if(!anyActive)
       {
          // Faster energy recharge if not moving
-         if (mCurrentMove.x == 0 && mCurrentMove.y == 0)
+         if(mCurrentMove.x == 0 && mCurrentMove.y == 0)
             mEnergy += S32(EnergyRechargeRateIdle * scaleFactor);
 
          // Else normal rate
@@ -775,7 +775,7 @@ void Ship::damageObject(DamageInfo *theInfo)
       {
          // Except for bouncers - they do a little more damage
          Projectile* projectile = dynamic_cast<Projectile*>(theInfo->damagingObject);
-         if (projectile && projectile->mWeaponType == WeaponBounce)
+         if(projectile && projectile->mWeaponType == WeaponBounce)
             damageAmount /= 1.3333f;  // Bouncers do 3/4 damage
          else
             damageAmount /= 2;        // Everything else does 1/2
@@ -1050,7 +1050,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
       }
 
       // Set sensor zoom timer if sensor carrying status has switched
-      if (hadSensorThen != hasSensorNow && !isInitialUpdate())  // ! isInitialUpdate(), don't do zoom out effect of ship spawn
+      if(hadSensorThen != hasSensorNow && !isInitialUpdate())  // ! isInitialUpdate(), don't do zoom out effect of ship spawn
          mSensorZoomTimer.reset(SensorZoomTime - mSensorZoomTimer.getCurrent(), SensorZoomTime);
 
       for(S32 i = 0; i < ShipWeaponCount; i++)
@@ -1647,7 +1647,7 @@ void Ship::render(S32 layerIndex)
 
    glPopMatrix();
 
-   if (mSpawnShield != 0)  // Add invulnerability effect
+   if(mSpawnShield != 0)  // Add invulnerability effect
    {
       glColor(Colors::green, 0.5f);
       drawDashedHollowArc(mMoveState[RenderState].pos, CollisionRadius + 5, CollisionRadius + 10, 8, 6.283f/24);
@@ -1805,7 +1805,7 @@ S32 LuaShip::getMountedItems(lua_State *L)
    for(S32 i = 0; i < thisShip->mMountedItems.size(); i++)
    {
       // Add every item to the list if no arguments were specified
-      if (!hasArgs)
+      if(!hasArgs)
          tempVector.push_back(dynamic_cast<GameObject *>(thisShip->mMountedItems[i].getPointer()));
 
       // Else, compare against argument type and add to the list if matched
