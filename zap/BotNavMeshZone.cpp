@@ -131,6 +131,9 @@ GridDatabase *BotNavMeshZone::getGameObjDatabase()
 // Create objects from parameters stored in level file
 bool BotNavMeshZone::processArguments(S32 argc, const char **argv, Game *game)
 {
+   if(!dynamic_cast<ServerGame *>(game) != 0)
+      return false;  // can only load in server game (not editor) due to getBotZoneDatabase() being in ServerGame
+                     // see BotNavMeshZone::getGameObjDatabase()
    if(argc < 6)
       return false;
 
@@ -140,7 +143,7 @@ bool BotNavMeshZone::processArguments(S32 argc, const char **argv, Game *game)
 }
 
 
-void BotNavMeshZone::addToGame(Game *game)
+void BotNavMeshZone::addToGame(Game *game, GridDatabase *database)
 {
    // Ordinarily, we'd call GameObject::addToGame() here, but the BotNavMeshZones don't need to be added to the game
    // the way an ordinary game object would be.  So we won't.
@@ -593,7 +596,7 @@ bool BotNavMeshZone::buildBotMeshZones(ServerGame *game, bool triangulateZones)
                   // Triangulation only needed for display on local client... it is expensive to compute for so many zones,
                   // and there is really no point if they will never be viewed.  Once disabled, triangluation cannot be re-enabled
                   // for this object.
-                  if(!triangulateZones)     
+                  if(!triangulateZones)
                      botzone->disableTriangluation();
 
                   polyToZoneMap[i] = botzone->getZoneId();

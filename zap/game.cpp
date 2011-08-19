@@ -470,7 +470,8 @@ void Game::onReadScriptParam(S32 argc, const char **argv)
 {
    Vector<string> args;
 
-   for(S32 i = 0; i < argc; i++)
+   // argv[0] is always "Script"
+   for(S32 i = 1; i < argc; i++)
       args.push_back(argv[i]);
 
    getGameType()->setScript(args);
@@ -1391,7 +1392,7 @@ bool ServerGame::loadLevel(const string &levelFileName)
 
       if(name == "")
       {
-         logprintf(LogConsumer::LogWarning, "Warning: Could not find script \"%s\" in level\"%s\"", 
+         logprintf(LogConsumer::LogWarning, "Warning: Could not find script \"%s\" in level \"%s\"", 
                                     scriptName.c_str(), levelFileName.c_str());
          return false;
       }
