@@ -431,6 +431,9 @@ public:
    void spawn(Game *game, const Point &pos);
    void renderEditor(F32 currentScale);
    void renderDock();
+
+   bool processArguments(S32 argc, const char **argv, Game *game);
+   string toString(F32 gridSize) const;
 };
 
 

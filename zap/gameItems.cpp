@@ -230,16 +230,16 @@ F32 AbstractSpawn::getEditorRadius(F32 currentScale)
 
 bool AbstractSpawn::processArguments(S32 argc, const char **argv, Game *game)
 {
-   if(argc >= 5)
+   if(argc < 2)
       return false;
 
    Point pos;
-   pos.read(argv + 1);
+   pos.read(argv);
    pos *= game->getGridSize();
 
    setVert(pos, 0);
 
-   S32 time = (argc > 3) ? atoi(argv[3]) : getDefaultRespawnTime();
+   S32 time = (argc > 2) ? atoi(argv[2]) : getDefaultRespawnTime();
 
    setRespawnTime(time);
 
@@ -249,7 +249,7 @@ bool AbstractSpawn::processArguments(S32 argc, const char **argv, Game *game)
 
 string AbstractSpawn::toString(F32 gridSize) const
 {
-   // <<spawn class name>> <x> <y> <time>
+   // <<spawn class name>> <x> <y> <spawn timer>
    return string(getClassName()) + " " + geomToString(gridSize) + " " + itos(mSpawnTime);
 }
 
@@ -276,7 +276,7 @@ Spawn *Spawn::clone() const
 
 bool Spawn::processArguments(S32 argc, const char **argv, Game *game)
 {
-   if(argc >= 4)
+   if(argc < 3)
       return false;
 
    S32 teamIndex = atoi(argv[0]);
@@ -496,7 +496,25 @@ void FlagSpawn::renderDock()
 {
    renderEditor(1);
 }
- 
+
+bool FlagSpawn::processArguments(S32 argc, const char **argv, Game *game)
+{
+   if(argc < 1)
+      return false;
+
+   mTeam = atoi(argv[0]);                                            // Read team
+   return AbstractSpawn::processArguments(argc - 1, argv + 1, game); // then read the rest of args
+}
+
+
+string FlagSpawn::toString(F32 gridSize) const
+{
+   // FlagSpawn <team> <x> <y> <spawn timer for nexus> -- squeezing in team number from AbstractSpawn::toString
+   string str1 = AbstractSpawn::toString(gridSize);
+   size_t firstarg = str1.find(' ');
+   return str1.substr(0, firstarg) + " " + itos(mTeam) + str1.substr(firstarg);
+}
+
 
 ////////////////////////////////////////
 ////////////////////////////////////////
