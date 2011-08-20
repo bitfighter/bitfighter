@@ -130,7 +130,6 @@ void Ship::initialize(Point &pos)
 
    mHealth = 1.0;       // Start at full health
    hasExploded = false; // Haven't exploded yet!
-   mSpawnShield = SpawnShieldTime;
 
    for(S32 i = 0; i < TrailCount; i++)          // Clear any vehicle trails
       mTrail[i].reset();
@@ -385,20 +384,21 @@ void Ship::processWeaponFire()
    //  in a while loop, to catch up the firing rate for low Frame Per Second
    while(mCurrentMove.fire && mFireTimer <= 0 && getGame()->getGameType() && getGame()->getGameType()->onFire(this) && mEnergy >= gWeapons[curWeapon].minEnergy)
    {
+      mEnergy -= gWeapons[curWeapon].drainEnergy;
+      mFireTimer += S32(gWeapons[curWeapon].fireDelay);
+      mWeaponFireDecloakTimer.reset(WeaponFireDecloakTime);
+
+      if(getControllingClient().isValid())
+         getControllingClient()->mStatistics.countShot(curWeapon);
+
+      if(!isGhost())    // i.e. server only
       {
-         mEnergy -= gWeapons[curWeapon].drainEnergy;
-         mFireTimer += S32(gWeapons[curWeapon].fireDelay);
-         mWeaponFireDecloakTimer.reset(WeaponFireDecloakTime);
-
-         if(getControllingClient().isValid())
-            getControllingClient()->mStatistics.countShot(curWeapon);
-
-         if(!isGhost())    // i.e. server only
-         {
-            Point dir = getAimVector();
-            createWeaponProjectiles(curWeapon, dir, mMoveState[ActualState].pos, mMoveState[ActualState].vel, CollisionRadius - 2, this);
-         }
+         Point dir = getAimVector();
+         createWeaponProjectiles(curWeapon, dir, mMoveState[ActualState].pos, mMoveState[ActualState].vel, CollisionRadius - 2, this);
       }
+
+      // If we've fired, Spawn Shield turns off
+      mSpawnShield.reset(0);
    }
 }
 
@@ -457,11 +457,6 @@ void Ship::idle(GameObject::IdleCallPath path)
                getControllingClient()->lostContact())
          return;  // If we're out-of-touch, don't move the ship... moving won't actually hurt, but this seems somehow better
 
-
-      if(mSpawnShield <= mCurrentMove.time) // update spawn timer
-         mSpawnShield = 0;
-      else
-         mSpawnShield -= mCurrentMove.time;
 
       // Apply impulse vector and reset it
       mMoveState[ActualState].vel += mImpulseVector;
@@ -532,6 +527,13 @@ void Ship::idle(GameObject::IdleCallPath path)
    mLastMove = mCurrentMove;
    mSensorZoomTimer.update(mCurrentMove.time);
    mCloakTimer.update(mCurrentMove.time);
+
+   // Update spawn shield unless we move the ship - then it turns off
+   if (mCurrentMove.x == 0 && mCurrentMove.y == 0)
+      mSpawnShield.update(mCurrentMove.time);
+   else
+      mSpawnShield.reset(0);
+
 
    if(path == GameObject::ServerIdleControlFromClient ||
       path == GameObject::ClientIdleControlMain ||
@@ -770,9 +772,9 @@ void Ship::damageObject(DamageInfo *theInfo)
          return;
       }
 
-      if(mSpawnShield != 0)
+      // No damage done if spawn shield is active
+      if(mSpawnShield.getCurrent() != 0)
          return;
-
 
       // Having armor halves the damage
       if(hasModule(ModuleArmor))
@@ -959,8 +961,9 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
       if(stream->writeFlag(updateMask & RespawnMask))
       {
          stream->writeFlag(getGame()->getCurrentTime() - mRespawnTime < 300 && !hasExploded);  // If true, ship will appear to spawn on client
-         if(stream->writeFlag(mSpawnShield >= 20))
-            stream->writeInt((mSpawnShield + 20) / 40, 8);  // in case a ship goes in scope with mSpawnShield half way done..
+
+         // Start spawn shield timer
+         mSpawnShield.reset(SpawnShieldTime);
       }
 
    stream->writeFlag(getControllingClient()->isBusy());
@@ -1081,10 +1084,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
          hasExploded = false;
          playSpawnEffect = stream->readFlag();    // prevent spawn effect every time the robot goes into scope.
          shipwarped = true;
-         if(stream->readFlag())
-            mSpawnShield = stream->readInt(8) * 40;  // in case a ship goes in scope with mSpawnShield half way done..
-         else
-            mSpawnShield = 0;
+         mSpawnShield.reset(SpawnShieldTime);
       }
    }
 
@@ -1651,7 +1651,7 @@ void Ship::render(S32 layerIndex)
 
    glPopMatrix();
 
-   if(mSpawnShield != 0)  // Add invulnerability effect
+   if(mSpawnShield.getCurrent() != 0)  // Add invulnerability effect
    {
       glColor(Colors::green, 0.5f);
       drawDashedHollowArc(mMoveState[RenderState].pos, CollisionRadius + 5, CollisionRadius + 10, 8, 6.283f/24);
