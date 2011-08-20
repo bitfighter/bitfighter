@@ -1574,6 +1574,13 @@ void renderSoccerBall(const Point &pos, F32 size)
 }
 
 
+void renderReactor(const Point &pos, F32 size)
+{
+   glColor(Colors::red);
+   drawSquare(pos, size);
+}
+
+
 void renderSoccerBall(const Point &pos)
 {
    renderSoccerBall(pos, (F32)SoccerBallItem::SOCCER_BALL_RADIUS);

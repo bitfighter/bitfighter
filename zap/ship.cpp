@@ -325,14 +325,18 @@ bool Ship::isOnObject(GameObject *object)
 {
    Point center;
    float radius;
-   Vector<Point> polyPoints;
+   static Vector<Point> polyPoints;
+   polyPoints.clear();
+   Rect rect;
 
    // Ships don't have collisionPolys, so this first check is utterly unneeded unless we change that
-   if(getCollisionPoly(polyPoints))
+   /*if(getCollisionPoly(polyPoints))
       return object->collisionPolyPointIntersect(polyPoints);
-   else if(getCollisionCircle(MoveObject::ActualState, center, radius))
+   else */
+   if(getCollisionCircle(MoveObject::ActualState, center, radius))
       return object->collisionPolyPointIntersect(center, radius);
-
+   // else if(getCollisionRect(MoveObject::ActualState, rect)) 
+      // Do some check here...  not needed as getCollisionCircle() always returns true
    else
       return false;
 }

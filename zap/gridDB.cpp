@@ -320,6 +320,9 @@ DatabaseObject *GridDatabase::findObjectLOS(U8 typeNumber, U32 stateIndex, bool 
    collisionTime = 100;
    DatabaseObject *retObject = NULL;
 
+   Point center;
+   Rect rect;
+
    for(S32 i = 0; i < fillVector.size(); i++)
    {
       if(!fillVector[i]->isCollisionEnabled())     // Skip collision-disabled objects
@@ -327,9 +330,8 @@ DatabaseObject *GridDatabase::findObjectLOS(U8 typeNumber, U32 stateIndex, bool 
 
       static Vector<Point> poly;
       poly.clear();
-      Point center;
-      F32 radius;
-      float ct;
+
+      F32 radius, ct;
 
       if(fillVector[i]->getCollisionPoly(poly))
       {
@@ -349,14 +351,20 @@ DatabaseObject *GridDatabase::findObjectLOS(U8 typeNumber, U32 stateIndex, bool 
       }
       else if(fillVector[i]->getCollisionCircle(stateIndex, center, radius))
       {
-         if(circleIntersectsSegment(center, radius, rayStart, rayEnd, ct))
+         if(circleIntersectsSegment(center, radius, rayStart, rayEnd, ct) && ct < collisionTime)
          {
-            if(ct < collisionTime)
-            {
-               collisionTime = ct;
-               surfaceNormal = (rayStart + (rayEnd - rayStart) * ct) - center;
-               retObject = fillVector[i];
-            }
+            collisionTime = ct;
+            surfaceNormal = (rayStart + (rayEnd - rayStart) * ct) - center;
+            retObject = fillVector[i];
+         }
+      }
+      else if(fillVector[i]->getCollisionRect(stateIndex, rect))
+      {
+         if(rect.intersects(rayStart, rayEnd, ct) && ct < collisionTime)
+         {
+            collisionTime = ct;
+            surfaceNormal = Point(0,0);      // THIS IS WRONG!!
+            retObject = fillVector[i];
          }
       }
    }
@@ -384,6 +392,9 @@ DatabaseObject *GridDatabase::findObjectLOS(TestFunc testFunc, U32 stateIndex, b
    collisionTime = 100;
    DatabaseObject *retObject = NULL;
 
+   Point center;
+   Rect rect;
+
    for(S32 i = 0; i < fillVector.size(); i++)
    {
       if(!fillVector[i]->isCollisionEnabled())     // Skip collision-disabled objects
@@ -391,7 +402,7 @@ DatabaseObject *GridDatabase::findObjectLOS(TestFunc testFunc, U32 stateIndex, b
 
       static Vector<Point> poly;
       poly.clear();
-      Point center;
+
       F32 radius;
       float ct;
 
@@ -423,7 +434,17 @@ DatabaseObject *GridDatabase::findObjectLOS(TestFunc testFunc, U32 stateIndex, b
             }
          }
       }
+      else if(fillVector[i]->getCollisionRect(stateIndex, rect))
+      {
+         if(rect.intersects(rayStart, rayEnd, ct) && ct < collisionTime)
+         {
+            collisionTime = ct;
+            surfaceNormal = Point(0,0);      // THIS IS WRONG!!
+            retObject = fillVector[i];
+         }
+      }
    }
+
 
    if(retObject)
       surfaceNormal.normalize();

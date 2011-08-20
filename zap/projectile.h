@@ -130,9 +130,10 @@ public:
    void damageObject(DamageInfo *info);
    void explode(GameObject *hitObject, Point p);
 
-   virtual Point getRenderVel() { return velocity; }
-   virtual Point getActualVel() { return velocity; }
-   virtual Point getActualPos() { return pos; }
+   virtual Point getRenderVel() const { return velocity; }
+   virtual Point getActualVel() const { return velocity; }
+   virtual Point getRenderPos() const { return pos; }    // Unused??
+   virtual Point getActualPos() const { return pos; }
 
    void render() { renderItem(getActualPos()); }     // TODO: Get rid of this! (currently won't render without it)
    void renderItem(Point p);

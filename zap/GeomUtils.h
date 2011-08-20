@@ -99,7 +99,7 @@ TNL::F32 angleOfLongestSide(const TNL::Vector<Point> &polyPoints);
 
 // These functions returns true if it found an appropriate point, false if not
 bool findNormalPoint(const Point &p, const Point &s1, const Point &s2, Point &closest);
-bool segmentsIntersect(const Point &p1, const Point &p2, const Point &p3, const Point &p4);
+bool segmentsIntersect(const Point &p1, const Point &p2, const Point &p3, const Point &p4, TNL::F32 &collisionTime);
 bool findIntersection(const Point &p1, const Point &p2, const Point &p3, const Point &p4, Point &intersection);
 
 void removeCollinearPoints(TNL::Vector<Point> &points, bool isPolygon);

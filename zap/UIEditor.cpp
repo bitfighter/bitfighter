@@ -212,7 +212,8 @@ void EditorUserInterface::populateDock()
       addDockObject(new AsteroidSpawn(), xPos + 10, yPos);
       yPos += spacer;
 
-      addDockObject(new CircleSpawn(), xPos, yPos);
+      addDockObject(new CircleSpawn(), xPos - 10, yPos);
+      addDockObject(new Reactor(), xPos + 10, yPos);
       yPos += spacer;
 
 

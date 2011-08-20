@@ -83,6 +83,7 @@ const U8 TurretTypeNumber = 26;
 const U8 ForceFieldProjectorTypeNumber = 27;
 const U8 PolyWallTypeNumber = 28;
 const U8 CircleTypeNumber = 29;
+const U8 ReactorTypeNumber = 30;
 
 const U8 BotNavMeshZoneTypeNumber = 64;  // separate database
 
@@ -174,9 +175,11 @@ public:
    virtual void removeFromGame();
    void clearGame() { mGame = NULL; }
 
-   // DatabaseObject methods
-   virtual bool getCollisionPoly(Vector<Point> &polyPoints) const;
-   virtual bool getCollisionCircle(U32 stateIndex, Point &point, float &radius) const;
+   // DatabaseObject methods -- provide default implementations
+   virtual bool getCollisionPoly(Vector<Point> &polyPoints) const                     { return false; }
+   virtual bool getCollisionCircle(U32 stateIndex, Point &point, float &radius) const { return false; }
+   virtual bool getCollisionRect(U32 stateIndex, Rect &rect) const                    { return false; }
+
 
    virtual bool processArguments(S32 argc, const char**argv, Game *game) { return true; }
 
@@ -280,10 +283,10 @@ public:
    void writeCompressedVelocity(Point &vel, U32 max, BitStream *stream);
    void readCompressedVelocity(Point &vel, U32 max, BitStream *stream);
 
-   virtual Point getActualPos();
-   virtual Point getRenderPos();
-   virtual Point getRenderVel() { return Point(); }
-   virtual Point getActualVel() { return Point(); }
+   virtual Point getActualPos() const;
+   virtual Point getRenderPos() const;
+   virtual Point getRenderVel() const { return Point(); }
+   virtual Point getActualVel() const { return Point(); }
 
    virtual void setActualPos(Point p);
 

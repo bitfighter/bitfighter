@@ -226,7 +226,7 @@ void Projectile::idle(GameObject::IdleCallPath path)
       Point surfNormal;
 
       // Do the search
-      for(;;)  // TODO:  replace with less evil loop?
+      while(true)  
       {
          hitObject = findObjectLOS((TestFunc)isWeaponCollideableType,
                                    MoveObject::RenderState, pos, endPos, collisionTime, surfNormal);

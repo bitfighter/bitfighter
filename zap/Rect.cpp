@@ -171,13 +171,57 @@ bool Rect::intersectsOrBorders(const Rect &r)
 // Does rect intersect line defined by p1 and p2?
 bool Rect::intersects(const Point &p1, const Point &p2) const
 {
-   return ( segmentsIntersect(p1, p2, Point(min.x, min.y), Point(min.x, max.y)) ||
-         segmentsIntersect(p1, p2, Point(min.x, max.y), Point(max.x, max.y)) ||
-         segmentsIntersect(p1, p2, Point(max.x, max.y), Point(max.x, min.y)) ||
-         segmentsIntersect(p1, p2, Point(max.x, min.y), Point(min.x, min.y)) ||
-         contains(p1) || contains(p2)
-   );
+   F32 ct;
+
+   return intersects(p1, p2, ct);
 }
+
+
+// As above, but returns info about where along segment p1-p2 collision occurs.  Returns 0 if segment is entirely contained in rect.
+bool Rect::intersects(const Point &p1, const Point &p2, member_type &collisionTime) const
+{
+   collisionTime = 0;      
+   return ( 
+            segmentsIntersect(p1, p2, Point(min.x, min.y), Point(min.x, max.y), collisionTime) ||
+            segmentsIntersect(p1, p2, Point(min.x, max.y), Point(max.x, max.y), collisionTime) ||
+            segmentsIntersect(p1, p2, Point(max.x, max.y), Point(max.x, min.y), collisionTime) ||
+            segmentsIntersect(p1, p2, Point(max.x, min.y), Point(min.x, min.y), collisionTime) ||
+            contains(p1) || contains(p2)
+   );
+
+}
+
+
+// Adapted from hightest-rated solution on http://stackoverflow.com/questions/401847/circle-rectangle-collision-detection-intersection
+bool Rect::intersects(const Point &center, F32 radius) const
+{
+    F32 rectHalfWidth = (max.x - min.x) / 2;
+    F32 rectHalfHeight = (max.y - min.y) / 2;
+
+    // Calculate the absolute values of the x and y difference between the center of the circle and the center of the rectangle. 
+    // This collapses the four quadrants down into one, so that the calculations do not have to be done four times. 
+    F32 rectCenter_x = (min.x + max.x) / 2;
+    F32 rectCenter_y = (min.y + max.y) / 2;
+
+    F32 circleDistance_x = abs(center.x - rectCenter_x);   
+    F32 circleDistance_y = abs(center.y - rectCenter_y);  
+
+    // Eliminate the easy cases where the circle is far enough away from the rectangle (in either direction) that no intersection is possible
+    if(circleDistance_x > (rectHalfWidth + radius)) { return false; }
+    if(circleDistance_y > (rectHalfHeight + radius)) { return false; }
+
+    // Eliminate the easy cases where the circle is close enough to the rectangle (in either direction) that an intersection is guaranteed
+    if(circleDistance_x <= rectHalfWidth) { return true; } 
+    if(circleDistance_y <= rectHalfHeight) { return true; }
+
+    // Calculate the difficult case where the circle may intersect the corner of the rectangle. To solve, compute the distance from the 
+    // center of the circle and the corner, and then verify that the distance is not more than the radius of the circle.
+    F32 cornerDistance_sq = (circleDistance_x - rectHalfWidth)  * (circleDistance_x - rectHalfWidth) +
+                            (circleDistance_y - rectHalfHeight) * (circleDistance_y - rectHalfHeight);
+
+    return cornerDistance_sq <= (radius * radius);
+}
+
 
 #define INTIFY(a) (a) < 0 ? floor(a) : ceil(a) 
 

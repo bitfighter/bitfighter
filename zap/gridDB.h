@@ -70,12 +70,13 @@ public:
    GridDatabase *getDatabase() { return mDatabase; }     // Returns the database in which this object is stored, NULL if not in any database
    void setDatabase(GridDatabase *database) { mDatabase = database; }
 
-   Rect getExtent() { return mExtent; }
+   Rect getExtent() const { return mExtent; }
    void setExtent(const Rect &extentRect);
 
    virtual bool getCollisionPoly(Vector<Point> &polyPoints) const = 0;
    virtual bool getCollisionCircle(U32 stateIndex, Point &point, float &radius) const = 0;
-   
+   virtual bool getCollisionRect(U32 stateIndex, Rect &rect) const = 0;
+
    virtual bool isCollisionEnabled() { return true; }
 
    bool isInDatabase() { return mDatabase != NULL; }

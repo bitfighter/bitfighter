@@ -125,6 +125,65 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+class Reactor : public EditorItem
+{
+
+typedef EditorItem Parent;
+
+private:
+   bool hasExploded;
+   U32 mHitPoints;
+
+public:
+   Reactor();     // Constructor  
+   Reactor *clone() const;
+
+   static const S32 REACTOR_RADIUS = 10;
+
+   void renderItem(Point pos);
+   bool getCollisionPoly(Vector<Point> &polyPoints) const;
+   bool getCollisionCircle(U32 state, Point &center, F32 &radius) const;
+   bool getCollisionRect(U32 state, Rect &rect) const;
+   bool collide(GameObject *otherObject);
+
+   F32 getReactorRadius() const;
+
+   void damageObject(DamageInfo *theInfo);
+   U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
+   void unpackUpdate(GhostConnection *connection, BitStream *stream);
+   void onItemExploded(Point pos);
+
+   void setRadius(F32 radius);
+
+   TNL_DECLARE_CLASS(Reactor);
+
+   ///// Editor methods
+   const char *getEditorHelpString() { return "Reactor.  Destroy to score."; }
+   const char *getPrettyNamePlural() { return "Reactors"; }
+   const char *getOnDockName() { return "Rctr"; }
+   const char *getOnScreenName() { return "Reactor"; }
+
+   F32 getEditorRadius(F32 currentScale);
+   void renderDock();
+
+   ///// Lua interface
+public:
+   Reactor(lua_State *L);    // Constructor
+
+   static const char className[];
+
+   static Lunar<Reactor>::RegType methods[];
+
+   S32 getClassID(lua_State *L) { return returnInt(L, ReactorTypeNumber); }
+
+   S32 getHitPoints(lua_State *L);   // Index of current asteroid size (0 = initial size, 1 = next smaller, 2 = ...) (returns int)
+   void push(lua_State *L) {  Lunar<Reactor>::push(L, this); }
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 static const S32 AsteroidDesigns = 4;
 static const S32 AsteroidPoints = 12;
 
@@ -223,7 +282,6 @@ public:
 
    void renderItem(Point pos);
    bool getCollisionPoly(Vector<Point> &polyPoints) const;
-   bool getCollisionCircle(U32 state, Point &center, F32 &radius) const;
    bool collide(GameObject *otherObject);
    void setPosAng(Point pos, F32 ang);
 
@@ -260,7 +318,6 @@ public:
 
    S32 getClassID(lua_State *L) { return returnInt(L, CircleTypeNumber); }
 
-   S32 getSize(lua_State *L);        // Index of current asteroid size (0 = initial size, 1 = next smaller, 2 = ...) (returns int)
    void push(lua_State *L) {  Lunar<Circle>::push(L, this); }
 };
 

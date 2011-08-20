@@ -74,6 +74,10 @@ public:
 
    // Does rect intersect line defined by p1 and p2?
    bool intersects(const Point &p1, const Point &p2) const;
+   bool intersects(const Point &p1, const Point &p2, member_type &collisionTime) const;     // Sets collisionTime to where intersection occurs
+
+   // Check for intersection with circle
+   bool intersects(const Point &center, TNL::F32 radius) const;    
 
    void expand(const Point &delta);
    void expandToInt(const Point &delta);

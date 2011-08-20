@@ -135,6 +135,7 @@ F32 MoveObject::computeMinSeperationTime(U32 stateIndex, MoveObject *contactShip
    Point contactShipPos;
 
    getCollisionCircle(stateIndex, myPos, myRadius);   // getCollisionCircle sets myPos and myRadius
+
    contactShip->getCollisionCircle(stateIndex, contactShipPos, contactShipRadius);
 
    // Find out if either of the colliding objects uses collisionPolys or not

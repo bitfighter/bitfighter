@@ -79,13 +79,14 @@ public:
 
    F32 getRadius() { return mRadius; }
    F32 getMass() { return mMass; }
-   void setRadius(F32 radius) {   mRadius = radius;   }
-   void setMass(F32 mass) {   mMass = mass;   }
+   virtual void setRadius(F32 radius) { mRadius = radius; }
+   void setMass(F32 mass) { mMass = mass; }
 
-   Point getRenderPos() { return mMoveState[RenderState].pos; }
-   Point getActualPos() { return mMoveState[ActualState].pos; }
-   Point getRenderVel() { return mMoveState[RenderState].vel; }
-   Point getActualVel() { return mMoveState[ActualState].vel; }
+   Point getRenderPos() const { return mMoveState[RenderState].pos; }
+   Point getActualPos() const { return mMoveState[ActualState].pos; }
+   Point getRenderVel() const { return mMoveState[RenderState].vel; }
+   Point getActualVel() const { return mMoveState[ActualState].vel; }
+
    void setActualVel(Point vel) { mMoveState[ActualState].vel = vel; }
 
    virtual void playCollisionSound(U32 stateIndex, MoveObject *moveObjectThatWasHit, F32 velocity);
@@ -104,7 +105,6 @@ public:
       radius = mRadius;
       return true;
    }
-
 };
 
 

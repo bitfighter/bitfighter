@@ -235,6 +235,7 @@ public:
    // by getCollisionPoly() elsewhere in the game.  Therefore, it needs to be handled differently.
    bool getCollisionPoly(Vector<Point> &polyPoints) const { polyPoints = edges; return true; }  
    bool getCollisionCircle(U32 stateIndex, Point &point, float &radius) const { return false; }
+   bool getCollisionRect(U32 stateIndex, Rect &rect) const { return false; }
 };
 
 
@@ -262,6 +263,7 @@ public:
    // by getCollisionPoly() elsewhere in the game.  Therefore, it needs to be handled differently.
    bool getCollisionPoly(Vector<Point> &polyPoints) const { polyPoints.resize(2); polyPoints[0] = mStart; polyPoints[1] = mEnd; return true; }  
    bool getCollisionCircle(U32 stateIndex, Point &point, float &radius) const { return false; }
+   bool getCollisionRect(U32 stateIndex, Rect &rect) const { return false; }
 };
 
 

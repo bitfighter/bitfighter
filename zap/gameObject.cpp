@@ -93,7 +93,7 @@ bool isDamageableType(U8 x)
          x == BulletTypeNumber || x == MineTypeNumber || x == SpyBugTypeNumber ||
          x == ResourceItemTypeNumber || x == TestItemTypeNumber || x == AsteroidTypeNumber ||
          x == TurretTypeNumber || x == ForceFieldProjectorTypeNumber ||
-         x == FlagTypeNumber || x == SoccerBallItemTypeNumber || x == CircleTypeNumber;
+         x == FlagTypeNumber || x == SoccerBallItemTypeNumber || x == CircleTypeNumber || x == ReactorTypeNumber;
 }
 
 
@@ -154,7 +154,7 @@ bool isWeaponCollideableType(U8 x)
          x == FlagTypeNumber || x == SoccerBallItemTypeNumber ||
          x == AsteroidTypeNumber || x == TestItemTypeNumber || x == ResourceItemTypeNumber ||
          x == TurretTypeNumber || x == ForceFieldProjectorTypeNumber ||
-         x == BarrierTypeNumber || x == PolyWallTypeNumber || x == ForceFieldTypeNumber || x == CircleTypeNumber;
+         x == BarrierTypeNumber || x == PolyWallTypeNumber || x == ForceFieldTypeNumber || x == CircleTypeNumber || x == ReactorTypeNumber;
 }
 
 bool isAsteroidCollideableType(U8 x)
@@ -163,7 +163,7 @@ bool isAsteroidCollideableType(U8 x)
          x == PlayerShipTypeNumber || x == RobotShipTypeNumber ||
          x == TestItemTypeNumber || x == ResourceItemTypeNumber ||
          x == TurretTypeNumber || x == ForceFieldProjectorTypeNumber ||
-         x == BarrierTypeNumber || x == PolyWallTypeNumber || x == ForceFieldTypeNumber;
+         x == BarrierTypeNumber || x == PolyWallTypeNumber || x == ForceFieldTypeNumber || x == ReactorTypeNumber;
 }
 
 bool isFlagCollideableType(U8 x)
@@ -184,7 +184,7 @@ bool isVisibleOnCmdrsMapType(U8 x)
          x == SpeedZoneTypeNumber || x == TeleportTypeNumber ||
          x == LineTypeNumber || x == TextItemTypeNumber ||
          x == AsteroidTypeNumber || x == TestItemTypeNumber || x == ResourceItemTypeNumber ||
-         x == EnergyItemTypeNumber || x == RepairItemTypeNumber;
+         x == EnergyItemTypeNumber || x == RepairItemTypeNumber || x == ReactorTypeNumber;
 }
 
 bool isVisibleOnCmdrsMapWithSensorType(U8 x)
@@ -199,6 +199,7 @@ bool isVisibleOnCmdrsMapWithSensorType(U8 x)
          x == LineTypeNumber || x == TextItemTypeNumber ||
          x == AsteroidTypeNumber || x == TestItemTypeNumber || x == ResourceItemTypeNumber ||
          x == EnergyItemTypeNumber || x == RepairItemTypeNumber ||
+         x == ReactorTypeNumber ||
          x == BulletTypeNumber || x == MineTypeNumber;  // Weapons visible on commander's map for sensor
 }
 
@@ -235,18 +236,6 @@ void BfObject::removeFromGame()
 {
    removeFromDatabase();
    mGame = NULL;
-}
-
-
-bool BfObject::getCollisionPoly(Vector<Point> &polyPoints) const
-{
-   return false;
-}
-
-
-bool BfObject::getCollisionCircle(U32 stateIndex, Point &point, float &radius) const
-{
-   return false;
 }
 
 
@@ -307,13 +296,13 @@ void GameObject::deleteObject(U32 deleteTimeInterval)
 }
 
 
-Point GameObject::getRenderPos()
+Point GameObject::getRenderPos() const
 {
    return getExtent().getCenter();
 }
 
 
-Point GameObject::getActualPos()
+Point GameObject::getActualPos() const
 {
    return getExtent().getCenter();
 }
@@ -553,6 +542,10 @@ Rect GameObject::getBounds(U32 stateIndex) const
       ret.max = p + Point(radius, radius);
       ret.min = p - Point(radius, radius);
    }
+   else if(getCollisionRect(stateIndex, ret))
+   {
+      /* Nothing to do -- ret is populated by getCollisionRect() */
+   }
 
    return ret;
 }
@@ -563,14 +556,21 @@ bool GameObject::collisionPolyPointIntersect(Point point)
 {
    Point center;
    F32 radius;
+   Rect rect;
+
    Vector<Point> polyPoints;
 
    polyPoints.clear();
 
    if(getCollisionPoly(polyPoints))
       return PolygonContains2(polyPoints.address(), polyPoints.size(), point);
+
    else if(getCollisionCircle(MoveObject::ActualState, center, radius))
       return(center.distanceTo(point) <= radius);
+
+   else if(getCollisionRect(MoveObject::ActualState, rect))
+      return rect.contains(point);
+
    else
       return false;
 }
@@ -580,6 +580,7 @@ bool GameObject::collisionPolyPointIntersect(Point point)
 bool GameObject::collisionPolyPointIntersect(Vector<Point> points)
 {
    Point center;
+   Rect rect;
    F32 radius;
    Vector<Point> polyPoints;
 
@@ -590,9 +591,12 @@ bool GameObject::collisionPolyPointIntersect(Vector<Point> points)
 
    else if(getCollisionCircle(MoveObject::ActualState, center, radius))
    {
-      Point pt;
-      return polygonCircleIntersect(&points[0], points.size(), center, radius * radius, pt);
+      Point unusedPt;
+      return polygonCircleIntersect(&points[0], points.size(), center, radius * radius, unusedPt);
    }
+   else if(getCollisionRect(MoveObject::ActualState, rect))
+      return rect.intersects(points);
+
    else
       return false;
 }
@@ -601,10 +605,10 @@ bool GameObject::collisionPolyPointIntersect(Vector<Point> points)
 // Find if the specified polygon intersects theObject's collisionPoly or collisonCircle
 bool GameObject::collisionPolyPointIntersect(Point center, F32 radius)
 {
-   Point c;
+   Point c, pt;
    float r;
-   Point pt;
-   Vector<Point> polyPoints;
+   Rect rect;
+   static Vector<Point> polyPoints;
 
    polyPoints.clear();
 
@@ -613,6 +617,9 @@ bool GameObject::collisionPolyPointIntersect(Point center, F32 radius)
 
    else if(getCollisionCircle(MoveObject::ActualState, c, r))
       return ( center.distSquared(c) < (radius + r) * (radius + r) );
+
+   else if(getCollisionRect(MoveObject::ActualState, rect))
+      return rect.intersects(center, radius);
 
    else
       return false;

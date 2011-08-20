@@ -271,14 +271,17 @@ bool polygonCircleIntersect(const Point *inVertices, int inNumVertices, const Po
 bool polygonIntersectsSegment(const Vector<Point> &points, const Point &start, const Point &end)
 {
    const Point *pointPrev = &points[points.size() - 1];
+   F32 ct;
+
    for(S32 i = 0; i < points.size(); i++)
    {
-      if(segmentsIntersect(start, end, *pointPrev, points[i]))
+      if(segmentsIntersect(start, end, *pointPrev, points[i], ct))
          return true;
+      // else
       pointPrev = &points[i];
    }
 
-   //  Line inside polygon?  If so, then the start will be within.
+   //  Entire line inside polygon?  If so, then the start will be within.
    return PolygonContains2(points.address(), points.size(), start);
 }
 
@@ -286,7 +289,9 @@ bool polygonIntersectsSegment(const Vector<Point> &points, const Point &start, c
 // Returns true if polygons represented by p1 & p2 intersect or one contains the other
 bool polygonsIntersect(const Vector<Point> &p1, const Vector<Point> &p2)
 {
+   F32 ct;
    const Point *rp1 = &p1[p1.size() - 1];
+
    for(S32 i = 0; i < p1.size(); i++)
    {
       const Point *rp2 = &p1[i];
@@ -296,7 +301,7 @@ bool polygonsIntersect(const Vector<Point> &p1, const Vector<Point> &p2)
       for(S32 j = 0; j < p2.size(); j++)
       {
          const Point *cp2 = &p2[j];
-         if(segmentsIntersect(*rp1, *rp2, *cp1, *cp2))
+         if(segmentsIntersect(*rp1, *rp2, *cp1, *cp2, ct))
             return true;
          cp1 = cp2;
       }
@@ -1311,23 +1316,23 @@ bool findNormalPoint(const Point &p, const Point &s1, const Point &s2, Point &cl
 
 
 // Based on http://www.gamedev.net/community/forums/topic.asp?topic_id=440350
-bool segmentsIntersect(const Point &p1, const Point &p2, const Point &p3, const Point &p4)
+bool segmentsIntersect(const Point &p1, const Point &p2, const Point &p3, const Point &p4, F32 &collisionTime)
 {
     F32 denom = ((p4.y - p3.y) * (p2.x - p1.x)) - ((p4.x - p3.x) * (p2.y - p1.y));
-    F32 numerator = ((p4.x - p3.x) * (p1.y - p3.y)) - ((p4.y - p3.y) * (p1.x - p3.x));
 
+    F32 numerator1 = ((p4.x - p3.x) * (p1.y - p3.y)) - ((p4.y - p3.y) * (p1.x - p3.x));
     F32 numerator2 = ((p2.x - p1.x) * (p1.y - p3.y)) - ((p2.y - p1.y) * (p1.x - p3.x));
 
     if ( denom == 0.0 )
-       //if ( numerator == 0.0 && numerator2 == 0.0 )
+       //if ( numerator1 == 0.0 && numerator2 == 0.0 )
        //   return false;  //COINCIDENT;
     return false;  // PARALLEL;
 
-    F32 ua = numerator / denom;
-    F32 ub = numerator2/ denom;
+    collisionTime = numerator1 / denom;
+    F32 ub = numerator2 / denom;
 
-    return (ua >= 0.0 && ua <= 1.0 && ub >= 0.0 && ub <= 1.0);
-    // Point intersection(p1.x + ua * (p2.x - p1.x), p1.y + ua * (p2.y - p1.y));
+    return (collisionTime >= 0.0 && collisionTime <= 1.0 && ub >= 0.0 && ub <= 1.0);
+    // Point intersection(p1.x + collisionTime * (p2.x - p1.x), p1.y + collisionTime * (p2.y - p1.y));
 }
 
 
