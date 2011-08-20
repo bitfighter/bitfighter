@@ -3129,7 +3129,7 @@ bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &le
          newObject = new FlagSpawn();
       else if(!stricmp(argv[0], "AsteroidSpawn")) 
          newObject = new AsteroidSpawn();
-      else if(!stricmp(argv[0], "CircleSpawn")) 
+      else //if(!stricmp(argv[0], "CircleSpawn"))  // using only "else" to prevent warning about possible uninitalized newObject
          newObject = new CircleSpawn();
 
 

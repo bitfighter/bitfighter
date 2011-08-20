@@ -96,6 +96,8 @@ Ship::Ship(StringTableEntry playerName, bool isAuthenticated, S32 team, Point p,
 
    if(!isRobot)         // Robots will run this during their own initialization; no need to run it twice!
       initialize(p);
+   else
+      hasExploded = false;  // client need this false for unpackUpdate
 
    isBusy = false;      // On client, will be updated in initial packet set from server.  Not used on server.
 
@@ -513,6 +515,18 @@ void Ship::idle(GameObject::IdleCallPath path)
          mInterpolating = (getActualVel().lenSquared() < MoveObject::InterpMaxVelocity*MoveObject::InterpMaxVelocity);
          updateInterpolation();
       }
+
+      if(path != GameObject::ClientIdleControlReplay)
+      {
+         mSensorZoomTimer.update(mCurrentMove.time);
+         mCloakTimer.update(mCurrentMove.time);
+
+         // Update spawn shield unless we move the ship - then it turns off
+         if (mCurrentMove.x == 0 && mCurrentMove.y == 0)
+            mSpawnShield.update(mCurrentMove.time);
+         else
+            mSpawnShield.reset(0);
+      }
    }
 
    // Update the object in the game's extents database
@@ -525,14 +539,7 @@ void Ship::idle(GameObject::IdleCallPath path)
       setMaskBits(MoveMask);
 
    mLastMove = mCurrentMove;
-   mSensorZoomTimer.update(mCurrentMove.time);
-   mCloakTimer.update(mCurrentMove.time);
 
-   // Update spawn shield unless we move the ship - then it turns off
-   if (mCurrentMove.x == 0 && mCurrentMove.y == 0)
-      mSpawnShield.update(mCurrentMove.time);
-   else
-      mSpawnShield.reset(0);
 
 
    if(path == GameObject::ServerIdleControlFromClient ||

@@ -131,7 +131,7 @@ GridDatabase *BotNavMeshZone::getGameObjDatabase()
 // Create objects from parameters stored in level file
 bool BotNavMeshZone::processArguments(S32 argc, const char **argv, Game *game)
 {
-   if(!dynamic_cast<ServerGame *>(game) != 0)
+   if(!dynamic_cast<ServerGame *>(game))
       return false;  // can only load in server game (not editor) due to getBotZoneDatabase() being in ServerGame
                      // see BotNavMeshZone::getGameObjDatabase()
    if(argc < 6)
