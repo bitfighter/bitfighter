@@ -93,7 +93,7 @@ public:
    bool processArguments(S32 argc, const char **argv, Game *game);
 
    GridDatabase *getGameObjDatabase();
-   void addToGame(Game *theGame);
+   void addToGame(Game *theGame, GridDatabase *database = NULL);
    void onAddedToGame(Game *theGame);
    Point getCenter();      // Return center of zone
 
