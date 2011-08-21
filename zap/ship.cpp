@@ -403,8 +403,11 @@ void Ship::processWeaponFire()
       }
 
       // If we've fired, Spawn Shield turns off
-      mSpawnShield.clear();
-      setMaskBits(SpawnShieldMask);
+      if(mSpawnShield.getCurrent() != 0)
+      {
+         setMaskBits(SpawnShieldMask);
+         mSpawnShield.clear();
+      }
    }
 }
 
@@ -961,9 +964,6 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
 
 
 
-   if(stream->writeFlag(updateMask & HealthMask))     // Health
-      stream->writeFloat(mHealth, 6);
-
    if(stream->writeFlag(updateMask & LoadoutMask))    // Module configuration
    {
       for(S32 i = 0; i < ShipModuleCount; i++)
@@ -974,11 +974,16 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
    }
 
    if(!stream->writeFlag(hasExploded))
+   {
       if(stream->writeFlag(updateMask & (RespawnMask | SpawnShieldMask)))
       {
          stream->writeFlag((updateMask & RespawnMask) != 0 && getGame()->getCurrentTime() - mRespawnTime < 300);  // If true, ship will appear to spawn on client
          stream->writeFlag(mSpawnShield.getCurrent() != 0);
       }
+
+      if(stream->writeFlag(updateMask & HealthMask))     // Health
+         stream->writeFloat(mHealth, 6);
+   }
 
    stream->writeFlag(getControllingClient()->isBusy());
 
@@ -1049,9 +1054,6 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
 
 
-   if(stream->readFlag())        // Health
-      mHealth = stream->readFloat(6);
-
    if(stream->readFlag())        // New module configuration
    {
       bool hadSensorThen = false;
@@ -1078,8 +1080,9 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
          mWeapon[i] = (WeaponType) stream->readEnum(WeaponCount);
    }
 
-   if(stream->readFlag())
+   if(stream->readFlag())  // hasExploded
    {
+      mHealth = 0;
       if(!hasExploded)
       {
          hasExploded = true;
@@ -1100,6 +1103,8 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
          shipwarped = true;
          mSpawnShield.reset(stream->readFlag() ? 1 : 0);
       }
+      if(stream->readFlag())        // Health
+         mHealth = stream->readFloat(6);
    }
 
    isBusy = stream->readFlag();

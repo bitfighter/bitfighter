@@ -90,8 +90,10 @@ Point BotNavMeshZone::getCenter()
 
 void BotNavMeshZone::render(S32 layerIndex)    
 {
-   if(!dynamic_cast<ClientGame *>(getGame())->isShowingDebugMeshZones())
-      return;
+   //if(!dynamic_cast<ClientGame *>(getGame())->isShowingDebugMeshZones())
+   //   return;
+   // isShowingDebugMeshZones doesn't work, and not needed. getGame() is ServerGame, because gClientGame is rendering server's BotZones
+   // Client does not have any BotZones
 
    if(layerIndex == 0)
       renderNavMeshZone(getOutline(), getFill(), getCentroid(), mZoneId, true);

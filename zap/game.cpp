@@ -1844,7 +1844,11 @@ static void joystickUpdateMove(Move *theMove)
    // One of each of left/right axis and up/down axis should be 0 by this point
    // but let's guarantee it..   why?
    theMove->x = Joystick::JoystickInputData[MoveAxesRight].value - Joystick::JoystickInputData[MoveAxesLeft].value;
+   theMove->x = MAX(theMove->x, -1);
+   theMove->x = MIN(theMove->x, 1);
    theMove->y = Joystick::JoystickInputData[MoveAxesDown].value - Joystick::JoystickInputData[MoveAxesUp].value;
+   theMove->y = MAX(theMove->y, -1);
+   theMove->y = MIN(theMove->y, 1);
 
    //logprintf(
    //      "Joystick axis values. Move: Left: %f, Right: %f, Up: %f, Down: %f\nShoot: Left: %f, Right: %f, Up: %f, Down: %f ",

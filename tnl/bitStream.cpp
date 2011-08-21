@@ -302,7 +302,8 @@ void BitStream::writeInt64(U64 val, U8 bitCount)
 
 void BitStream::writeFloat(F32 f, U8 bitCount)
 {
-   writeInt(U32(f * ((1 << bitCount) - 1)), bitCount);
+   TNLAssert(f >= 0 && f <= 1, "writeFloat Must be between 0.0 and 1.0");
+   writeInt(U32(f * ((1 << bitCount) - 1) + 0.5f), bitCount);  // note that float to int will remove the decimal numbers.
 }
 
 F32 BitStream::readFloat(U8 bitCount)
