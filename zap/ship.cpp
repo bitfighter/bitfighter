@@ -149,6 +149,9 @@ void Ship::initialize(Point &pos)
 
    mActiveWeaponIndx = 0;
    mCooldown = false;
+
+   // Start spawn shield timer
+   mSpawnShield.reset(SpawnShieldTime);
 }
 
 
@@ -400,7 +403,7 @@ void Ship::processWeaponFire()
       }
 
       // If we've fired, Spawn Shield turns off
-      mSpawnShield.reset(0);
+      mSpawnShield.clear();
    }
 }
 
@@ -525,7 +528,7 @@ void Ship::idle(GameObject::IdleCallPath path)
          if (mCurrentMove.x == 0 && mCurrentMove.y == 0)
             mSpawnShield.update(mCurrentMove.time);
          else
-            mSpawnShield.reset(0);
+            mSpawnShield.clear();
       }
    }
 
@@ -968,9 +971,6 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
       if(stream->writeFlag(updateMask & RespawnMask))
       {
          stream->writeFlag(getGame()->getCurrentTime() - mRespawnTime < 300 && !hasExploded);  // If true, ship will appear to spawn on client
-
-         // Start spawn shield timer
-         mSpawnShield.reset(SpawnShieldTime);
       }
 
    stream->writeFlag(getControllingClient()->isBusy());
@@ -1091,7 +1091,6 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
          hasExploded = false;
          playSpawnEffect = stream->readFlag();    // prevent spawn effect every time the robot goes into scope.
          shipwarped = true;
-         mSpawnShield.reset(SpawnShieldTime);
       }
    }
 
