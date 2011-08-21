@@ -404,6 +404,7 @@ void Ship::processWeaponFire()
 
       // If we've fired, Spawn Shield turns off
       mSpawnShield.clear();
+      setMaskBits(SpawnShieldMask);
    }
 }
 
@@ -524,11 +525,16 @@ void Ship::idle(GameObject::IdleCallPath path)
          mSensorZoomTimer.update(mCurrentMove.time);
          mCloakTimer.update(mCurrentMove.time);
 
-         // Update spawn shield unless we move the ship - then it turns off
-         if (mCurrentMove.x == 0 && mCurrentMove.y == 0)
-            mSpawnShield.update(mCurrentMove.time);
-         else
-            mSpawnShield.clear();
+         // Update spawn shield unless we move the ship - then it turns off .. server only
+         if(path == ServerIdleControlFromClient && mSpawnShield.getCurrent())
+         {
+            if (mCurrentMove.x == 0 && mCurrentMove.y == 0)
+               mSpawnShield.update(mCurrentMove.time);
+            else
+               mSpawnShield.clear();
+            if(mSpawnShield.getCurrent() == 0)
+               setMaskBits(SpawnShieldMask);
+         }
       }
    }
 
@@ -968,9 +974,10 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
    }
 
    if(!stream->writeFlag(hasExploded))
-      if(stream->writeFlag(updateMask & RespawnMask))
+      if(stream->writeFlag(updateMask & (RespawnMask | SpawnShieldMask)))
       {
-         stream->writeFlag(getGame()->getCurrentTime() - mRespawnTime < 300 && !hasExploded);  // If true, ship will appear to spawn on client
+         stream->writeFlag((updateMask & RespawnMask) != 0 && getGame()->getCurrentTime() - mRespawnTime < 300);  // If true, ship will appear to spawn on client
+         stream->writeFlag(mSpawnShield.getCurrent() != 0);
       }
 
    stream->writeFlag(getControllingClient()->isBusy());
@@ -1091,6 +1098,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
          hasExploded = false;
          playSpawnEffect = stream->readFlag();    // prevent spawn effect every time the robot goes into scope.
          shipwarped = true;
+         mSpawnShield.reset(stream->readFlag() ? 1 : 0);
       }
    }
 

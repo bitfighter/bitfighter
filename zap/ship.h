@@ -172,6 +172,7 @@ public:
       TeleportMask = BIT(9),        // Ship has just teleported
       AuthenticationMask = BIT(10), // Player authentication status changed
       ChangeTeamMask = BIT(11),     // Used for when robots change teams
+      SpawnShieldMask = BIT(12),     // Used for when robots change teams
    };
 
    S32 mFireTimer;
