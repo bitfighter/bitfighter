@@ -29,7 +29,7 @@
 #include "UIManager.h"
 #include "keyCode.h"
 #include "SharedConstants.h"
-#include "timer.h"
+#include "Timer.h"
 #include "Point.h"
 #include "lineEditor.h"
 #include "config.h"           // For DisplayMode enum

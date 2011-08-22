@@ -130,6 +130,7 @@ OBJECTS_ZAP=\
    teamInfo.o\
    teleporter.o\
    textItem.o\
+   Timer.o\
    voiceCodec.o\
    zoneControlGame.o\
    md5wrapper.o\

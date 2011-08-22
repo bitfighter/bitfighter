@@ -34,7 +34,7 @@
 #include "SoundSystem.h"           // for NumSFXBuffers
 
 #include "tnlNetConnection.h"
-#include "timer.h"
+#include "Timer.h"
 #include <time.h>
 
 

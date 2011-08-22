@@ -27,7 +27,7 @@
 #define _UIEDITORINSTRUCTIONS_H_
 
 #include "UIAbstractInstructions.h"
-#include "timer.h"
+#include "Timer.h"
 
 namespace Zap
 {

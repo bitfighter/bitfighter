@@ -32,7 +32,7 @@
 #include "gameLoader.h"
 #include "gameObject.h"          // For EditorObject definition
 #include "gridDB.h"              // For DatabaseObject definition
-#include "timer.h"
+#include "Timer.h"
 #include "Point.h"
 #include "BotNavMeshZone.h"      // For Border def
 #include "tnlNetStringTable.h"

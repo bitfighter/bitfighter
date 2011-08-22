@@ -27,7 +27,7 @@
 #define _UINAMEENTRY_H_
 
 #include "UI.h"
-#include "timer.h"
+#include "Timer.h"
 #include "config.h"
 #include "md5wrapper.h"    // For hashing
 

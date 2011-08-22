@@ -206,6 +206,7 @@
     <ClCompile Include="..\zap\teamInfo.cpp" />
     <ClCompile Include="..\zap\teleporter.cpp" />
     <ClCompile Include="..\zap\textItem.cpp" />
+    <ClInclude Include="..\zap\Timer.cpp" />
     <ClCompile Include="..\zap\UI.cpp" />
     <ClCompile Include="..\zap\UIChat.cpp" />
     <ClCompile Include="..\zap\UICredits.cpp" />
@@ -321,7 +322,7 @@
     <ClInclude Include="..\zap\teamInfo.h" />
     <ClInclude Include="..\zap\teleporter.h" />
     <ClInclude Include="..\zap\textItem.h" />
-    <ClInclude Include="..\zap\timer.h" />
+    <ClInclude Include="..\zap\Timer.h" />
     <ClInclude Include="..\zap\UI.h" />
     <ClInclude Include="..\zap\UIChat.h" />
     <ClInclude Include="..\zap\UICredits.h" />

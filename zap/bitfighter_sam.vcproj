@@ -1095,7 +1095,11 @@
 			>
 		</File>
 		<File
-			RelativePath=".\timer.h"
+			RelativePath=".\Timer.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\Timer.h"
 			>
 		</File>
 		<File

@@ -32,7 +32,7 @@
 #include "ship.h"
 
 #include "sparkManager.h"
-#include "timer.h"
+#include "Timer.h"
 #include "shipItems.h"
 #include "gameWeapons.h"
 

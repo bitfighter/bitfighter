@@ -30,7 +30,7 @@
 
 #include "UI.h"
 #include "input.h"
-#include "timer.h"
+#include "Timer.h"
 #include <string>
 
 namespace Zap

@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------------
 //
 // Bitfighter - A multiplayer vector graphics space game
-// Based on Zap demo released for Torque Network Library by GarageGames.com
+// Based on Zap demo relased for Torque Network Library by GarageGames.com
 //
 // Derivative work copyright (C) 2008-2009 Chris Eykamp
 // Original work copyright (C) 2004 GarageGames.com, Inc.
@@ -23,60 +23,49 @@
 //
 //------------------------------------------------------------------------------------
 
-#ifndef _UITEAMDEFMENU_H_
-#define _UITEAMDEFMENU_H_
+#ifndef _TIMER_H_
+#define _TIMER_H_
 
 #include "../tnl/tnlTypes.h"
 
-#include "UI.h"
-#include "input.h"
-#include "Timer.h"
-
-#include <string>
+using namespace TNL;
 
 namespace Zap
 {
 
-using namespace std;
-
-struct TeamPreset
+class Timer
 {
-   const char *name;    // Team's name, as seen in save file
-   F32 r;
-   F32 g;
-   F32 b;
-};
-
-class TeamDefUserInterface : public UserInterface
-{
-   typedef UserInterface Parent;
-
 private:
-   Timer errorMsgTimer;
-   string errorMsg;
-   
-   S32 selectedIndex;          // Highlighted menu item
-   S32 changingItem;           // Index of key we're changing (in keyDef mode), -1 otherwise
-
-   bool mEditing;              // true if editing selectedIndex, false if not
+   U32 mPeriod;
+   U32 mCurrentCounter;
 
 public:
-   TeamDefUserInterface(ClientGame *game);     // Constructor
-   const char *mMenuTitle;
-   const char *mMenuSubTitle;
-   Color mMenuSubTitleColor;
-   const char *mMenuFooter;
+   Timer(U32 period = 0);  // Constructor
+   virtual ~Timer();       // Destructor
 
-   void render();              // Draw the menu
-   void idle(U32 timeDelta);
-   void onKeyDown(KeyCode keyCode, char ascii);
-   void onMouseMoved(S32 x, S32 y);
+   // Update timer in idle loop -- returns true if timer has just expired, false if there's still time left
+   bool update(U32 timeDelta);
 
-   void onActivate();
-   void onEscape();
+   // Return amount of time left on timer
+   U32 getCurrent() const;
+
+   // Return fraction of original time left on timer
+   F32 getFraction() const;
+
+   void setPeriod(U32 period);
+   U32 getPeriod() const;
+
+   void reset(); // Start timer over, using last time set
+
+   // Extend will add or remove time from the timer in a way that preserves overall timer duration
+   void extend(S32 time);
+
+   // Start timer over, setting timer to the time specified
+   void reset(U32 newCounter, U32 newPeriod = 0);
+
+   // Remove all time from timer
+   void clear();
 };
 
-};
-
+} /* namespace Zap */
 #endif
-

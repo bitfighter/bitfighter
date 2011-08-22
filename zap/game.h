@@ -31,7 +31,7 @@
 
 #include "gameConnection.h"
 #include "gridDB.h"
-#include "timer.h"
+#include "Timer.h"
 #include "gameLoader.h"
 #include "Rect.h"
 #include "Color.h"

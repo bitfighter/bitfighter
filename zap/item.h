@@ -31,7 +31,7 @@
 #include "luaObject.h"        // Parent class
 
 #include"goalZone.h"          // For GoalZone def
-#include "timer.h"
+#include "Timer.h"
 
 namespace Zap
 {

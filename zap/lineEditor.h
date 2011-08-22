@@ -28,7 +28,7 @@
 
 #include "tnlTypes.h"
 #include "tnlVector.h"
-#include "timer.h"
+#include "Timer.h"
 #include "keyCode.h"
 #include <string>
 

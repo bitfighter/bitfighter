@@ -27,7 +27,7 @@
 #define _UIREBINDKEYS_H_
 
 #include "UI.h"
-#include "timer.h"
+#include "Timer.h"
 
 namespace Zap
 {

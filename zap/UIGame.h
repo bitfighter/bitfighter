@@ -31,7 +31,7 @@
 #include "quickChatHelper.h"
 #include "loadoutHelper.h"
 #include "engineerHelper.h"
-#include "timer.h"
+#include "Timer.h"
 #include "voiceCodec.h"
 #include "Point.h"
 #include "Color.h"

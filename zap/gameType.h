@@ -26,7 +26,7 @@
 #ifndef _GAMETYPE_H_
 #define _GAMETYPE_H_
 
-#include "timer.h"
+#include "Timer.h"
 #include "flagItem.h"
 #include "teamInfo.h"
 #include "gameItems.h"     // For AsteroidSpawn and FlagSpawn
