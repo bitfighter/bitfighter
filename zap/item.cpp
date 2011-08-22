@@ -30,6 +30,7 @@
 #include "flagItem.h"
 #include "UI.h"
 #include "game.h"
+#include "gameConnection.h"
 
 #include "SDL/SDL_opengl.h"
 

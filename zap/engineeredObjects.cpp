@@ -35,6 +35,7 @@
 #include "Colors.h"
 #include "game.h"
 #include "stringUtils.h"
+#include "gameConnection.h"
 
 #include <math.h>
 

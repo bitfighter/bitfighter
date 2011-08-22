@@ -526,11 +526,11 @@ template <class T> class RefPtr : public RefObjectRef
 public:
    RefPtr() : RefObjectRef() {}
    RefPtr(T *ptr) : RefObjectRef(ptr) {}
-   RefPtr(const RefPtr<T>& ref) : RefObjectRef((T *) ref.mObject) {}
+   RefPtr(const RefPtr<T>& ref) : RefObjectRef((Object *) ref.mObject) {}
 
    RefPtr<T>& operator=(const RefPtr<T>& ref)
    {
-      set((T *) ref.mObject);
+      set((Object *) ref.mObject);
       return *this;
    }
    RefPtr<T>& operator=(T *ptr)
@@ -625,11 +625,11 @@ template <class T> class SafePtr : public SafeObjectRef
 public:
    SafePtr() : SafeObjectRef() {}
    SafePtr(T *ptr) : SafeObjectRef(ptr) {}
-   SafePtr(const SafePtr<T>& ref) : SafeObjectRef((T *) ref.mObject) {}
+   SafePtr(const SafePtr<T>& ref) : SafeObjectRef((Object *) ref.mObject) {}
 
    SafePtr<T>& operator=(const SafePtr<T>& ref)
    {
-      set((T *) ref.mObject);
+      set((Object *) ref.mObject);
       return *this;
    }
    SafePtr<T>& operator=(T *ptr)
@@ -642,7 +642,7 @@ public:
    T* operator->() const { return static_cast<T*>(mObject); }
    T& operator*() const  { return *static_cast<T*>(mObject); }
    operator T*() const   { return static_cast<T*>(mObject); }
-   operator T*() { return reinterpret_cast<T*>(mObject); }
+   operator T*() { return static_cast<T*>(mObject); }
    T* getPointer() { return static_cast<T*>(mObject); }
 };
 

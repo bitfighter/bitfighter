@@ -27,7 +27,6 @@
 #define _UIGAME_H_
 
 #include "UI.h"
-#include "gameConnection.h"
 #include "quickChatHelper.h"
 #include "loadoutHelper.h"
 #include "engineerHelper.h"

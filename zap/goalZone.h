@@ -28,6 +28,7 @@
 
 #include "gameObject.h"
 #include "polygon.h"
+#include "Timer.h"
 
 namespace Zap
 {

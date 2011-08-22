@@ -30,6 +30,7 @@
 #include "gameObject.h"
 #include "item.h"
 #include "gameWeapons.h"
+#include "SoundSystem.h" // for enum SFXProfiles
 
 namespace Zap
 {

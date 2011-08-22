@@ -24,6 +24,7 @@
 //------------------------------------------------------------------------------------
 
 #include "playerInfo.h"
+#include "gameConnection.h"
 
 namespace Zap
 {
@@ -43,6 +44,12 @@ Lunar<LuaPlayerInfo>::RegType LuaPlayerInfo::methods[] =
 
    {0,0}    // End method list
 };
+
+S32 PlayerInfo::getShip(lua_State *L)
+{
+	return isDefunct() ? returnNil(L) : returnShip(L, dynamic_cast<Ship *>(mClientRef->clientConnection->getControlObject()));
+}
+
 
 
 };

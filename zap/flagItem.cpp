@@ -28,6 +28,7 @@
 #include "gameType.h"
 #include "game.h"
 #include "stringUtils.h"
+#include "gameConnection.h"
 
 #include "SDL/SDL_opengl.h"
 
