@@ -35,8 +35,6 @@
 #include "freeglut_stroke.h"
 #include "freeglut_stroke_roman.h"
 
-using namespace TNL;
-
 namespace Zap {
 
 void OpenglUtils::drawCharacter(S32 character)

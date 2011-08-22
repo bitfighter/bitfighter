@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------------
 //
-// Bitfighter - A multiplayer TNL::Vector graphics space game
+// Bitfighter - A multiplayer Vector graphics space game
 // Based on Zap demo released for Torque Network Library by GarageGames.com
 //
 // Derivative work copyright (C) 2008-2009 Chris Eykamp
@@ -43,7 +43,7 @@
 // this file has been modified by Mark Frohnmayer:
 // removed swept ellipsoid routine
 // removed swept sphere
-// removed references to TNL::Vector2 and replaced with Point
+// removed references to Vector2 and replaced with Point
 // added in prototypes for circle collisions
 
 #ifndef _GEOM_UTILS_
@@ -65,6 +65,10 @@ namespace clipper {
 };
 struct rcPolyMesh;
 
+
+using namespace TNL;
+using namespace clipper;
+
 namespace Zap {
 
 class Point;
@@ -73,74 +77,74 @@ class Rect;
 // Test between a polygon and a swept sphere with radius inRadius moving from inBegin to inBegin + inDelta
 // If there is an intersection the intersection position is returned in outPoint and the center of the
 // sphere is at inBegin + outFraction * inDelta when it collides
-//bool PolygonSweptSphereIntersect(const Plane &inPlane, const TNL::Vector2 *inVertices, int inNumVertices, const TNL::Vector3 &inBegin, const TNL::Vector3 &inDelta, float inRadius, TNL::Vector3 &outPoint, float &outFraction);
+//bool PolygonSweptSphereIntersect(const Plane &inPlane, const Vector2 *inVertices, int inNumVertices, const Vector3 &inBegin, const Vector3 &inDelta, float inRadius, Vector3 &outPoint, float &outFraction);
 
 // Test intersection with a swept ellipsoid with principal axis inAxis1, inAxis2, inAxis3 moving from inBegin to inBegin + inDelta
 // If there is an intersection the intersection position is returned in outPoint and the center of the
 // sphere is at inBegin + outFraction * inDelta when it collides
-//bool PolygonSweptEllipsoidIntersect(const Plane &inPlane, const TNL::Vector2 *inVertices, int inNumVertices, const TNL::Vector3 &inBegin, const TNL::Vector3 &inDelta, const TNL::Vector3 &inAxis1, const TNL::Vector3 &inAxis2, const TNL::Vector3 &inAxis3, TNL::Vector3 &outPoint, float &outFraction);
+//bool PolygonSweptEllipsoidIntersect(const Plane &inPlane, const Vector2 *inVertices, int inNumVertices, const Vector3 &inBegin, const Vector3 &inDelta, const Vector3 &inAxis1, const Vector3 &inAxis2, const Vector3 &inAxis3, Vector3 &outPoint, float &outFraction);
 
-bool PolygonSweptCircleIntersect(const Point *inVertices, int inNumVertices, const Point &inBegin, const Point &inDelta, TNL::F32 inRadius, Point &outPoint, TNL::F32 &outFraction);
+bool PolygonSweptCircleIntersect(const Point *inVertices, int inNumVertices, const Point &inBegin, const Point &inDelta, F32 inRadius, Point &outPoint, F32 &outFraction);
 bool PolygonContains2(const Point *inVertices, int inNumVertices, const Point &inPoint);
-bool segmentsColinear(const Point &p1, const Point &p2, const Point &p3, const Point &p4, TNL::F32 scaleFact);
+bool segmentsColinear(const Point &p1, const Point &p2, const Point &p3, const Point &p4, F32 scaleFact);
 bool segsOverlap(const Point &p1, const Point &p2, const Point &p3, const Point &p4, Point &overlapStart, Point &overlapEnd);
-bool zonesTouch(const TNL::Vector<Point> *zone1, const TNL::Vector<Point> *zone2, TNL::F32 scaleFact, Point &overlapStart, Point &overlapEnd);
-bool pointOnSegment(const Point &c, const Point &a, const Point &b, TNL::F32 closeEnough);
-bool polygonCircleIntersect(const Point *inVertices, int inNumVertices, const Point &inCenter, TNL::F32 inRadiusSq, Point &outPoint, Point *ignoreVelocityEpsilon = NULL);
+bool zonesTouch(const Vector<Point> *zone1, const Vector<Point> *zone2, F32 scaleFact, Point &overlapStart, Point &overlapEnd);
+bool pointOnSegment(const Point &c, const Point &a, const Point &b, F32 closeEnough);
+bool polygonCircleIntersect(const Point *inVertices, int inNumVertices, const Point &inCenter, F32 inRadiusSq, Point &outPoint, Point *ignoreVelocityEpsilon = NULL);
 
-bool polygonsIntersect(const TNL::Vector<Point> &p1, const TNL::Vector<Point> &p2);
-bool polygonIntersectsSegment(const TNL::Vector<Point> &points, const Point &start, const Point &end);  // This is four times faster than the Detailed one.
-bool polygonIntersectsSegmentDetailed(Point *poly, TNL::U32 vertexCount, bool format, const Point &start, const Point &end, float &collisionTime, Point &normal);
+bool polygonsIntersect(const Vector<Point> &p1, const Vector<Point> &p2);
+bool polygonIntersectsSegment(const Vector<Point> &points, const Point &start, const Point &end);  // This is four times faster than the Detailed one.
+bool polygonIntersectsSegmentDetailed(Point *poly, U32 vertexCount, bool format, const Point &start, const Point &end, float &collisionTime, Point &normal);
 bool circleIntersectsSegment(Point center, float radius, Point start, Point end, float &collisionTime);
 
-Point findCentroid(const TNL::Vector<Point> &polyPoints);
-TNL::F32 area(const TNL::Vector<Point> &polyPoints);
-TNL::F32 angleOfLongestSide(const TNL::Vector<Point> &polyPoints);
+Point findCentroid(const Vector<Point> &polyPoints);
+F32 area(const Vector<Point> &polyPoints);
+F32 angleOfLongestSide(const Vector<Point> &polyPoints);
 
 // These functions returns true if it found an appropriate point, false if not
 bool findNormalPoint(const Point &p, const Point &s1, const Point &s2, Point &closest);
-bool segmentsIntersect(const Point &p1, const Point &p2, const Point &p3, const Point &p4, TNL::F32 &collisionTime);
+bool segmentsIntersect(const Point &p1, const Point &p2, const Point &p3, const Point &p4, F32 &collisionTime);
 bool findIntersection(const Point &p1, const Point &p2, const Point &p3, const Point &p4, Point &intersection);
 
-void removeCollinearPoints(TNL::Vector<Point> &points, bool isPolygon);
+void removeCollinearPoints(Vector<Point> &points, bool isPolygon);
 
 // TODO: Should we create a MathUtils class for this and other useful purely mathematic functions?
-bool FindLowestRootInInterval(TNL::F32 inA, TNL::F32 inB, TNL::F32 inC, TNL::F32 inUpperBound, TNL::F32 &outX);
+bool FindLowestRootInInterval(F32 inA, F32 inB, F32 inC, F32 inUpperBound, F32 &outX);
 
-// Returns index of points TNL::Vector closest to point
-TNL::S32 findClosestPoint(const Point &point, const TNL::Vector<Point> &points);
+// Returns index of points Vector closest to point
+S32 findClosestPoint(const Point &point, const Vector<Point> &points);
 
 // Offset a complex polygon by a given amount
-void offsetPolygon(const TNL::Vector<Point>& inputPoly, TNL::Vector<Point>& outputPoly, const TNL::F32 offset);
+void offsetPolygon(const Vector<Point>& inputPoly, Vector<Point>& outputPoly, const F32 offset);
 
 // Use Clipper to merge inputPolygons, placing the result in solution
-bool mergePolys(const TNL::Vector<TNL::Vector<Point> > &inputPolygons, TNL::Vector<TNL::Vector<Point> > &outputPolygons);
+bool mergePolys(const Vector<Vector<Point> > &inputPolygons, Vector<Vector<Point> > &outputPolygons);
 
 // Convert a Polygons to a list of points in a-b b-c c-d d-a format
-void unpackPolygons(const TNL::Vector<TNL::Vector<Point> > &solution, TNL::Vector<Point> &lineSegmentPoints);
+void unpackPolygons(const Vector<Vector<Point> > &solution, Vector<Point> &lineSegmentPoints);
 
 // test if a complex polygon has clockwise point winding order
-bool isWoundClockwise(const TNL::Vector<Point>& inputPoly);
+bool isWoundClockwise(const Vector<Point>& inputPoly);
 
-bool isConvex(const TNL::Vector<Point> *verts);
+bool isConvex(const Vector<Point> *verts);
 
 // scale Geometric points for clipper
-clipper::Polygons upscaleClipperPoints(const TNL::Vector<TNL::Vector<Point> >& inputPolygons);
-TNL::Vector<TNL::Vector<Point> > downscaleClipperPoints(const clipper::Polygons& inputPolygons);
+Polygons upscaleClipperPoints(const Vector<Vector<Point> >& inputPolygons);
+Vector<Vector<Point> > downscaleClipperPoints(const Polygons& inputPolygons);
 
 /*****************************************************************/
 /** Static class to triangulate any contour/polygon efficiently **/
-/** You should replace TNL::Vector2d with whatever your own TNL::Vector   **/
+/** You should replace Vector2d with whatever your own Vector   **/
 /** class might be.  Does not support polygons with holes.      **/
-/** Uses STL TNL::Vectors to represent a dynamic array of vertices.  **/
+/** Uses STL Vectors to represent a dynamic array of vertices.  **/
 /** This code snippet was submitted to FlipCode.com by          **/
 /** John W. Ratcliff (jratcliff@verant.com) on July 22, 2000    **/
 /** I did not write the original code/algorithm for this        **/
 /** this triangulator, in fact, I can't even remember where I   **/
 /** found it in the first place.  However, I did rework it into **/
 /** the following black-box static class so you can make easy   **/
-/** use of it in your own code.  Simply replace TNL::Vector2d with   **/
-/** whatever your own TNL::Vector implementation might be.           **/
+/** use of it in your own code.  Simply replace Vector2d with   **/
+/** whatever your own Vector implementation might be.           **/
 /*****************************************************************/
 
 
@@ -157,20 +161,20 @@ public:
          if(pointList) free(pointList);
          if(triangleList) free(triangleList);
       }
-      TNL::F32* pointList;
-      TNL::S32 pointCount;
-      TNL::S32* triangleList;
-      TNL::S32 triangleCount;
+      F32* pointList;
+      S32 pointCount;
+      S32* triangleList;
+      S32 triangleCount;
    };
 
-   // Triangulate a contour/polygon, places results in  TNL::Vector as series of triangles
-   static bool Process(const TNL::Vector<Point> &contour, TNL::Vector<Point> &result);
+   // Triangulate a contour/polygon, places results in  Vector as series of triangles
+   static bool Process(const Vector<Point> &contour, Vector<Point> &result);
 
    // Triangulate a bounded area with complex polygon holes
-   static bool processComplex(TriangleData& outputData, const Rect& bounds, const TNL::Vector<TNL::Vector<Point> >& polygonList, TNL::Vector<TNL::F32>& holeMarkerList);
+   static bool processComplex(TriangleData& outputData, const Rect& bounds, const Vector<Vector<Point> >& polygonList, Vector<F32>& holeMarkerList);
 
    // Merge triangles into convex polygons
-   static bool mergeTriangles(TriangleData& triangleData, rcPolyMesh& mesh, TNL::S32 maxVertices = 6);
+   static bool mergeTriangles(TriangleData& triangleData, rcPolyMesh& mesh, S32 maxVertices = 6);
 
    // Decide if point Px/Py is inside triangle defined by
    // (Ax,Ay) (Bx,By) (Cx,Cy)
@@ -180,7 +184,7 @@ public:
          float Px, float Py);
 
 private:
-   static bool Snip(const TNL::Vector<Point> &contour, int u, int v, int w, int n, int *V);
+   static bool Snip(const Vector<Point> &contour, int u, int v, int w, int n, int *V);
 
 };
 

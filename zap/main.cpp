@@ -668,7 +668,7 @@ void onExit()
    saveSettingsToINI(&gINI);    // Writes settings to the INI, then saves it to disk
 
    NetClassRep::logBitUsage();
-   TNL::logprintf("Bye!");
+   logprintf("Bye!");
 
    SDL_QuitSubSystem(SDL_INIT_VIDEO);
 
@@ -1392,7 +1392,7 @@ bool writeToConsole()
 extern FileType getResourceType(const char *);
 
 // This method may remove args from theArgv
-void processCmdLineParams(Vector<TNL::StringPtr> &theArgv)
+void processCmdLineParams(Vector<StringPtr> &theArgv)
 {
    // Process some command line args that need to be handled early, like journaling options
    for(S32 i = 0; i < theArgv.size(); i++)

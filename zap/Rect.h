@@ -33,6 +33,9 @@ namespace TNL {
    template<class T> class Vector;
 };
 
+
+using namespace TNL;
+
 namespace Zap
 {
 
@@ -45,16 +48,16 @@ public:
 
    Rect();                                     // Constuctor
    Rect(const Point &p1, const Point &p2);    // Constuctor
-   Rect(TNL::F32 x1, TNL::F32 y1, TNL::F32 x2, TNL::F32 y2);       // Constuctor
+   Rect(F32 x1, F32 y1, F32 x2, F32 y2);       // Constuctor
    Rect(const Point &p, member_type size);    // Constuctor, takes point and "radius"
 
-   Rect(const TNL::Vector<Point> &p);         // Construct as a bounding box around multiple points
+   Rect(const Vector<Point> &p);         // Construct as a bounding box around multiple points
 
    Point getCenter() const;
 
    void set(const Point &p1, const Point &p2);
 
-   void set(const TNL::Vector<Point> &p);     // Set to bounding box around multiple points
+   void set(const Vector<Point> &p);     // Set to bounding box around multiple points
 
    void set(const Rect &r);
 
@@ -77,15 +80,15 @@ public:
    bool intersects(const Point &p1, const Point &p2, member_type &collisionTime) const;     // Sets collisionTime to where intersection occurs
 
    // Check for intersection with circle
-   bool intersects(const Point &center, TNL::F32 radius) const;    
+   bool intersects(const Point &center, F32 radius) const;
 
    void expand(const Point &delta);
    void expandToInt(const Point &delta);
 
    void offset(const Point &offset);
 
-   TNL::F32 getWidth() const;
-   TNL::F32 getHeight() const;
+   F32 getWidth() const;
+   F32 getHeight() const;
 
    Point getExtents() const;
 

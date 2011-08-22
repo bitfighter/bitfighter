@@ -9,8 +9,6 @@
 
 #if !defined (ZAP_DEDICATED) && !defined (TNL_OS_XBOX)
 
-using namespace TNL;
-
 namespace Zap {
 
 extern SFXProfile *gSFXProfiles;

@@ -29,8 +29,6 @@
 
 #include <math.h>
 
-using namespace TNL;
-
 namespace Zap
 {
 
@@ -56,7 +54,7 @@ Rect::Rect(const Point &p, member_type size)
 }
 
 // Construct as a bounding box around multiple points
-Rect::Rect(const TNL::Vector<Point> &p)
+Rect::Rect(const Vector<Point> &p)
 {
    set(p);
 }
@@ -96,7 +94,7 @@ void Rect::set(const Point &p1, const Point &p2)
 }
 
 // Set to bounding box around multiple points
-void Rect::set(const TNL::Vector<Point> &p)
+void Rect::set(const Vector<Point> &p)
 {
    if(p.size() == 0)
    {

@@ -12,12 +12,15 @@
 #include "tnlTypes.h"
 #include "SDL/SDL_opengl.h"
 
+
+using namespace TNL;
+
 namespace Zap {
 
 class OpenglUtils {
 public:
-   static void drawCharacter(TNL::S32 character);
-   static TNL::S32 getStringLength(const unsigned char* string);
+   static void drawCharacter(S32 character);
+   static S32 getStringLength(const unsigned char* string);
 };
 
 }

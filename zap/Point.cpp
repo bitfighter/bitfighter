@@ -27,12 +27,11 @@
 
 #include "tnlPlatform.h"
 #include "tnlBitStream.h"
+#include "stringUtils.h"
 
 #include <math.h>
 #include <cstdlib>
 
-
-using namespace TNL;
 
 namespace Zap
 {
@@ -169,23 +168,21 @@ void Point::read(const char **argv)
 }
 
 
-void Point::read(TNL::BitStream *stream)
+void Point::read(BitStream *stream)
 {
    stream->read(&x);
    stream->read(&y);
 }
 
 
-void Point::write(TNL::BitStream *stream)
+void Point::write(BitStream *stream)
 {
    stream->write(x);
    stream->write(y);
 }
 
 
-extern std::string ftos(F32);     // In stringUtils.cpp
-
-std::string Point::toString()
+string Point::toString()
 {
    return ftos(x) + " " + ftos(y);
 }

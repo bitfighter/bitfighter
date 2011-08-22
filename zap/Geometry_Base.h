@@ -45,8 +45,8 @@ namespace Zap
 enum GeomType {           
    geomPoint,           
    geomSimpleLine,      
-   geomLine,            // TODO: change to geomPolyline
-   geomPoly,            // TODO: Change to geomPolygon
+   geomPolyLine,
+   geomPolygon,
    geomNone,            
 };
 

@@ -20,6 +20,8 @@ namespace TNL {
    class Object;
 };
 
+using namespace TNL;
+
 namespace Zap {
 
 class SoundEffect : public TNL::Object
@@ -27,25 +29,25 @@ class SoundEffect : public TNL::Object
 public:
    static Point mListenerPosition;
    static Point mListenerVelocity;
-   static TNL::F32 mMaxDistance;
-   static TNL::S32 mCaptureGain;
+   static F32 mMaxDistance;
+   static S32 mCaptureGain;
 
-   TNL::U32 mSFXIndex;
+   U32 mSFXIndex;
    Point mPosition;
    Point mVelocity;
-   TNL::ByteBufferPtr mInitialBuffer;
+   ByteBufferPtr mInitialBuffer;
    SFXProfile *mProfile;
-   TNL::F32 mGain;
-   TNL::S32 mSourceIndex;
-   TNL::F32 mPriority;
+   F32 mGain;
+   S32 mSourceIndex;
+   F32 mPriority;
 
-   SoundEffect(TNL::U32 profileIndex, TNL::ByteBufferPtr ib, TNL::F32 gain, Point position, Point velocity);
+   SoundEffect(U32 profileIndex, ByteBufferPtr ib, F32 gain, Point position, Point velocity);
    virtual ~SoundEffect();
 
    bool isPlaying() { return mSourceIndex != -1; }
 };
 
-typedef TNL::RefPtr<SoundEffect> SFXHandle;
+typedef RefPtr<SoundEffect> SFXHandle;
 
 }
 

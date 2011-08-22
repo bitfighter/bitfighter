@@ -344,7 +344,7 @@ void MenuUserInterface::onMouseMoved()
       return;
 
    itemSelectedWithMouse = true;
-   SDL_ShowCursor(SDL_ENABLE);  // TODO:  was GLUT_CURSOR_RIGHT_ARROW           // Show cursor when user moves mouse
+   SDL_ShowCursor(SDL_ENABLE);  // Show cursor when user moves mouse
 
    selectedIndex = U32( floor(( gScreenInfo.getMousePos()->y - getYStart() + 10 ) / (getTextSize() + getGap())) ) + currOffset;
 

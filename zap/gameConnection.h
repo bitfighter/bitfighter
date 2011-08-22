@@ -38,12 +38,11 @@
 #include <time.h>
 
 
+using namespace TNL;
+using namespace std;
 
 namespace Zap
 {
-
-using TNL::StringPtr;
-using std::string;
 
 static const char USED_EXTERNAL *gConnectStatesTable[] = {
       "Not connected...",
@@ -92,8 +91,8 @@ private:
    bool mAcheivedConnection;
 
    // For saving passwords
-   std::string mLastEnteredLevelChangePassword;
-   std::string mLastEnteredAdminPassword;       
+   string mLastEnteredLevelChangePassword;
+   string mLastEnteredAdminPassword;
 
    // The server maintains a linked list of clients...
    GameConnection *mNext;
@@ -187,8 +186,8 @@ public:
 
    bool lostContact() { return getTimeSinceLastPacketReceived() > 2000 && mLastPacketRecvTime != 0; }     // No contact in 2000ms?  That's bad!
 
-   std::string getServerName() { return mServerName.getString(); }
-   static std::string makeUnique(std::string name);    // Make sure a given name is unique across all clients & bots
+   string getServerName() { return mServerName.getString(); }
+   static string makeUnique(string name);    // Make sure a given name is unique across all clients & bots
 
    void setClientRef(ClientRef *theRef);
    ClientRef *getClientRef();
@@ -196,7 +195,7 @@ public:
    StringTableEntryRef getClientName() { return mClientName; }
 
    void submitAdminPassword(const char *password);
-   void submitLevelChangePassword(std::string password);
+   void submitLevelChangePassword(string password);
 
    void suspendGame();
    void unsuspendGame();
@@ -279,7 +278,7 @@ public:
    TNL_DECLARE_RPC(c2sRequestCurrentLevel, ());
 
    U8 mSendableFlags;
-   TNL::ByteBuffer *mDataBuffer;
+   ByteBuffer *mDataBuffer;
    TNL_DECLARE_RPC(s2rSendableFlags, (U8 flags));
    TNL_DECLARE_RPC(s2rSendDataParts, (U8 type, ByteBufferPtr data));
    bool s2rUploadFile(const char *filename, U8 type);

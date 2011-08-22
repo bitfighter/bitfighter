@@ -53,8 +53,8 @@ public:
    void parseLevelLine(const char *line, GridDatabase *database, bool inEditor, const string &levelFileName);
 
    // Implementers of this class need to provide the following implementations:
-   virtual void processLevelLoadLine(TNL::U32 argc, TNL::U32 id, const char **argv, GridDatabase *database, bool inEditor, const string &levelFileName) = 0;
-   virtual void setGameTime(TNL::F32 time) = 0;
+   virtual void processLevelLoadLine(U32 argc, U32 id, const char **argv, GridDatabase *database, bool inEditor, const string &levelFileName) = 0;
+   virtual void setGameTime(F32 time) = 0;
 };
 
 
@@ -65,8 +65,8 @@ public:
 class LevelListLoader
 {
 public:
-   static TNL::Vector<std::string> buildLevelList();
-   static void removeSkippedLevels(TNL::Vector<std::string> &levelList);
+   static Vector<string> buildLevelList();
+   static void removeSkippedLevels(Vector<string> &levelList);
 };
 
 
@@ -76,9 +76,9 @@ public:
 // Thrown when the loader encounters a line that seems broken for some reason
 struct LevelLoadException : public std::exception
 {
-   std::string msg;
+   string msg;
 
-   LevelLoadException (std::string str) : msg(str) { /* do nothing */ }    // Constructor
+   LevelLoadException (string str) : msg(str) { /* do nothing */ }    // Constructor
    virtual ~LevelLoadException () throw() { /* do nothing */ }                // Destructor, required by gcc to avoid "looser throw" error
    const char* what() const throw() { return msg.c_str(); }
 };

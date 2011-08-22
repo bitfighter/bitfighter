@@ -34,6 +34,9 @@ namespace TNL {
    typedef float F32;
 };
 
+using namespace TNL;
+using namespace std;
+
 namespace Zap
 {
 
@@ -47,12 +50,12 @@ public:
    Color(const Color *c);
 
    template<class T, class U, class V>
-      Color(T in_r, U in_g, V in_b) { r = static_cast<TNL::F32>(in_r); g = static_cast<TNL::F32>(in_g); b = static_cast<TNL::F32>(in_b);}
+      Color(T in_r, U in_g, V in_b) { r = static_cast<F32>(in_r); g = static_cast<F32>(in_g); b = static_cast<F32>(in_b);}
 
    Color(float grayScale = 1);
    Color(double grayScale);
 
-   Color(TNL::U32 rgbInt);
+   Color(U32 rgbInt);
 
    void read(const char **argv);
 
@@ -60,15 +63,15 @@ public:
 
    // templates must stay in headers
    template<class T, class U, class V>
-      void set(T in_r, U in_g, V in_b) { r = static_cast<TNL::F32>(in_r); g = static_cast<TNL::F32>(in_g); b = static_cast<TNL::F32>(in_b); }
+      void set(T in_r, U in_g, V in_b) { r = static_cast<F32>(in_r); g = static_cast<F32>(in_g); b = static_cast<F32>(in_b); }
 
    void set(const Color &c);
-   void set(const std::string &s);
+   void set(const string &s);
 
-   std::string toRGBString() const;
-   std::string toHexString() const;
+   string toRGBString() const;
+   string toHexString() const;
 
-   TNL::U32 toU32() const;
+   U32 toU32() const;
 
    // inlines must stay in headers
    inline Color operator+(const Color &c) const { return Color (r + c.r, g + c.g, b + c.b); }

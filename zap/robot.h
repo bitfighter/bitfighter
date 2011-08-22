@@ -191,7 +191,7 @@ public:
 
 private:
    int attribute;
-   std::string message;
+   string message;
    bool loadLuaHelperFunctions(lua_State *L, const char *caller);
 
    TNL_DECLARE_CLASS(Robot);

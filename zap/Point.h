@@ -35,14 +35,17 @@ namespace TNL {
 };
 
 
+using namespace TNL;
+using namespace std;
+
 namespace Zap
 {
 
 class Point
 {
 public:
-   TNL::F32 x;
-   TNL::F32 y;
+   F32 x;
+   F32 y;
 
    // Constructors...
    Point();
@@ -51,39 +54,39 @@ public:
    // Thanks, Ben & Mike!
    // Templates required to be in headers
    template<class T, class U>
-   Point(T in_x, U in_y) { x = static_cast<TNL::F32>(in_x); y = static_cast<TNL::F32>(in_y); }
+   Point(T in_x, U in_y) { x = static_cast<F32>(in_x); y = static_cast<F32>(in_y); }
 
    template<class T, class U>
-   void set(T ix, U iy) { x = (TNL::F32)ix; y = (TNL::F32)iy; }
+   void set(T ix, U iy) { x = (F32)ix; y = (F32)iy; }
 
    void set(const Point &pt);
    void set(const Point *pt);
 
-   TNL::F32 len() const;		// Distance from (0,0)
-   TNL::F32 lenSquared() const;
+   F32 len() const;		// Distance from (0,0)
+   F32 lenSquared() const;
    void normalize();
    void normalize(float newLen);
-   TNL::F32 ATAN2() const;
-   TNL::F32 distanceTo(const Point &pt) const;
-   TNL::F32 distSquared(const Point &pt) const;
+   F32 ATAN2() const;
+   F32 distanceTo(const Point &pt) const;
+   F32 distSquared(const Point &pt) const;
 
-   TNL::F32 angleTo(const Point &p) const;
+   F32 angleTo(const Point &p) const;
 
-   Point rotate(TNL::F32 ang);
+   Point rotate(F32 ang);
 
-   void setAngle(const TNL::F32 ang);
-   void setPolar(const TNL::F32 l, const TNL::F32 ang);
+   void setAngle(const F32 ang);
+   void setPolar(const F32 l, const F32 ang);
 
-   TNL::F32 determinant(const Point &p);
+   F32 determinant(const Point &p);
 
    void scaleFloorDiv(float scaleFactor, float divFactor);
 
-   TNL::F32 dot(const Point &p) const;
+   F32 dot(const Point &p) const;
    void read(const char **argv);
-   void read(TNL::BitStream *stream);
-   void write(TNL::BitStream *stream);
+   void read(BitStream *stream);
+   void write(BitStream *stream);
 
-   std::string toString();
+   string toString();
    
    // inlines  need to be in header, too
    inline Point operator+(const Point &pt) const
@@ -115,24 +118,24 @@ public:
       return *this;
    }
 
-   inline Point operator*(const TNL::F32 f)
+   inline Point operator*(const F32 f)
    {
       return Point (x * f, y * f);
    }
 
-   inline Point operator/(const TNL::F32 f)
+   inline Point operator/(const F32 f)
    {
       return Point (x / f, y / f);
    }
 
-   inline Point& operator*=(const TNL::F32 f)
+   inline Point& operator*=(const F32 f)
    {
       x *= f;
       y *= f;
       return *this;
    }
 
-   inline Point& operator/=(const TNL::F32 f)
+   inline Point& operator/=(const F32 f)
    {
       x /= f;
       y /= f;

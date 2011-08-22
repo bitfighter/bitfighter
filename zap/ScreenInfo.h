@@ -30,6 +30,8 @@
 #include "Point.h"
 #include "config.h"
 
+using namespace TNL;
+
 namespace Zap {
 
 
@@ -39,57 +41,57 @@ namespace Zap {
 class ScreenInfo
 {
 private:
-   static const TNL::S32 GAME_WIDTH = 800;
-   static const TNL::S32 GAME_HEIGHT = 600;
+   static const S32 GAME_WIDTH = 800;
+   static const S32 GAME_HEIGHT = 600;
 
-   TNL::F32 MIN_SCALING_FACTOR;       // Limits minimum window size
+   F32 MIN_SCALING_FACTOR;       // Limits minimum window size
 
    Point mWindowMousePos, mCanvasMousePos;
 
-   TNL::S32 mPhysicalScreenWidth, mPhysicalScreenHeight;
-   TNL::S32 mGameCanvasWidth, mGameCanvasHeight;     // Size of screen; in game, will always be 800x600, but may be different in editor fullscreen
-   TNL::S32 mWindowWidth, mWindowHeight;             // Window dimensions in physical pixels
-   TNL::F32 mScalingRatioX, mScalingRatioY;          // Ratio of physical pixels to virtual pixels
+   S32 mPhysicalScreenWidth, mPhysicalScreenHeight;
+   S32 mGameCanvasWidth, mGameCanvasHeight;     // Size of screen; in game, will always be 800x600, but may be different in editor fullscreen
+   S32 mWindowWidth, mWindowHeight;             // Window dimensions in physical pixels
+   F32 mScalingRatioX, mScalingRatioY;          // Ratio of physical pixels to virtual pixels
    bool mIsLandscape;                           // Is our screen landscape or portrait?
    bool mHardwareSurface;                       // Is our screen going to use a hardware surface?
 
 public:
    ScreenInfo();      // Constructor
 
-   TNL::F32 getMinScalingFactor();
+   F32 getMinScalingFactor();
 
    // Can't initialize until SDL has been set up
-   void init(TNL::S32 physicalScreenWidth, TNL::S32 physicalScreenHeight);
+   void init(S32 physicalScreenWidth, S32 physicalScreenHeight);
 
-   void setWindowSize(TNL::S32 width, TNL::S32 height);
-   TNL::S32 getWindowWidth();
-   TNL::S32 getWindowHeight();
+   void setWindowSize(S32 width, S32 height);
+   S32 getWindowWidth();
+   S32 getWindowHeight();
 
    // The following methods return values in PHYSICAL pixels -- how large is the entire physical monitor?
-   TNL::S32 getPhysicalScreenWidth();
-   TNL::S32 getPhysicalScreenHeight();
+   S32 getPhysicalScreenWidth();
+   S32 getPhysicalScreenHeight();
 
    // Game canvas size in physical pixels, assuming full screen unstretched mode
-   TNL::S32 getDrawAreaWidth();
-   TNL::S32 getDrawAreaHeight();
+   S32 getDrawAreaWidth();
+   S32 getDrawAreaHeight();
 
    // Dimensions of black bars in physical pixels in full-screen unstretched mode.  Does not reflect current window mode
-   TNL::S32 getHorizPhysicalMargin();
-   TNL::S32 getVertPhysicalMargin();
+   S32 getHorizPhysicalMargin();
+   S32 getVertPhysicalMargin();
 
    // Dimensions of black bars in physical pixes, based on current window mode
-   TNL::S32 getHorizPhysicalMargin(DisplayMode mode);
-   TNL::S32 getVertPhysicalMargin(DisplayMode mode);
+   S32 getHorizPhysicalMargin(DisplayMode mode);
+   S32 getVertPhysicalMargin(DisplayMode mode);
 
    // The following methods return values in VIRTUAL pixels, not accurate in editor
-   void setGameCanvasSize(TNL::S32 width, TNL::S32 height);
+   void setGameCanvasSize(S32 width, S32 height);
    void resetGameCanvasSize();
-   TNL::S32 getGameCanvasWidth();
-   TNL::S32 getGameCanvasHeight();
+   S32 getGameCanvasWidth();
+   S32 getGameCanvasHeight();
 
    // Dimensions of black bars in game-sized pixels
-   TNL::S32 getHorizDrawMargin();
-   TNL::S32 getVertDrawMargin();
+   S32 getHorizDrawMargin();
+   S32 getVertDrawMargin();
 
    bool isLandscape();     // Whether physical screen is landscape, or at least more landscape than our game window
    bool isHardwareSurface();  // Whether we can use the opengl hardware surface
@@ -99,7 +101,7 @@ public:
    Point convertWindowToCanvasCoord(const Point &p, DisplayMode mode);
    Point convertWindowToCanvasCoord(S32 x, S32 y, DisplayMode mode);
 
-   void setMousePos(TNL::S32 x, TNL::S32 y, DisplayMode mode);
+   void setMousePos(S32 x, S32 y, DisplayMode mode);
 
    const Point *getMousePos();
    const Point *getWindowMousePos();

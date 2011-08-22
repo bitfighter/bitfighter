@@ -20,8 +20,6 @@
 
 #include <cmath>
 
-using namespace TNL;
-
 namespace Zap
 {
 

@@ -301,7 +301,7 @@ void EditorObject::initializeEditor()
 
 void EditorObject::onGeomChanging()
 {
-   if(getGeomType() == geomPoly)
+   if(getGeomType() == geomPolygon)
       onGeomChanged();               // Allows poly fill to get reshaped as vertices move
    onPointsChanged();
 }
@@ -388,7 +388,7 @@ void EditorObject::newObjectFromDock(F32 gridSize)
 //void EditorObject::initializePolyGeom()
 //{
 //   // TODO: Use the same code already in polygon
-//   if(getGeomType() == geomPoly)
+//   if(getGeomType() == geomPolygon)
 //   {
 //      Triangulate::Process(getVerts(), *getPolyFillPoints());   // Populates fillPoints from polygon outline
 //      //TNLAssert(fillPoints.size() > 0, "Bogus polygon geometry detected!");

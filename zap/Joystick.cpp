@@ -30,8 +30,6 @@
 
 #include "SDL/SDL.h"
 
-using namespace TNL;
-
 namespace Zap {
 
 // Linker needs these declared like this, why?
@@ -39,13 +37,13 @@ namespace Zap {
 SDL_Joystick *Joystick::sdlJoystick = NULL;
 
 // public
-TNL::Vector<const char *> Joystick::DetectedJoystickNameList;
+Vector<const char *> Joystick::DetectedJoystickNameList;
 
-TNL::U32 Joystick::ButtonMask = 0;
-TNL::F32 Joystick::rawAxis[Joystick::rawAxisCount];
-TNL::S16 Joystick::SensitivityThreshold = 3200;  // out of 32767
-TNL::S32 Joystick::UseJoystickNumber = 0;
-TNL::U32 Joystick::AxesKeyCodeMask = 0;
+U32 Joystick::ButtonMask = 0;
+F32 Joystick::rawAxis[Joystick::rawAxisCount];
+S16 Joystick::SensitivityThreshold = 3200;  // out of 32767
+S32 Joystick::UseJoystickNumber = 0;
+U32 Joystick::AxesKeyCodeMask = 0;
 
 
 // Needs to be Aligned with JoystickAxesDirections

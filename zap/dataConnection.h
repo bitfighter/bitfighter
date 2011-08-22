@@ -63,7 +63,7 @@ class DataSender
 private:
    bool mDone;
    S32 mLineCtr;
-   Vector<std::string> mLines;              // Store strings because storing char * will cause problems when source string is gone
+   Vector<string> mLines;              // Store strings because storing char * will cause problems when source string is gone
    SafePtr<Object> mConnection;     // need to use SafePtr, as it is possible that a player disconnect making it no longer valid
    FileType mFileType;
 

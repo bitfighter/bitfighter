@@ -32,6 +32,8 @@
 
 #include "SDL/SDL_joystick.h"
 
+using namespace TNL;
+
 namespace Zap {
 
 
@@ -113,20 +115,20 @@ enum AlignType {
 };
 
 struct JoystickInput {
-   TNL::U32 axesDirection;
-   TNL::U32 axesMask;
+   U32 axesDirection;
+   U32 axesMask;
    KeyCode keyCode;
-   TNL::F32 value;
+   F32 value;
 };
 
 // Struct to hold joystick information once it has been detected
 struct JoystickInfo {
    const char *name;
    const char *nameForINI;
-   TNL::U32 buttonCount;    // how many buttons
-   TNL::U32 moveAxesSdlIndex[2];    // primary axes; 0 -> left/right, 1 -> up/down
-   TNL::U32 shootAxesSdlIndex[2];   // secondary axes; could be anything; first -> left/right, second -> up/down
-   TNL::U32 buttonMappings[MaxControllerButtons];
+   U32 buttonCount;    // how many buttons
+   U32 moveAxesSdlIndex[2];    // primary axes; 0 -> left/right, 1 -> up/down
+   U32 shootAxesSdlIndex[2];   // secondary axes; could be anything; first -> left/right, second -> up/down
+   U32 buttonMappings[MaxControllerButtons];
 };
 
 class Joystick {
@@ -139,17 +141,17 @@ public:
    Joystick();
    virtual ~Joystick();
 
-   static TNL::U32 ButtonMask;
-   static const TNL::S32 rawAxisCount = 32;
-   static TNL::F32 rawAxis[rawAxisCount];
-   static TNL::Vector<const char *> DetectedJoystickNameList;   // All detected joystick names
+   static U32 ButtonMask;
+   static const S32 rawAxisCount = 32;
+   static F32 rawAxis[rawAxisCount];
+   static Vector<const char *> DetectedJoystickNameList;   // All detected joystick names
 
    // static data
-   static TNL::S16 SensitivityThreshold;
-   static TNL::S32 UseJoystickNumber;
+   static S16 SensitivityThreshold;
+   static S32 UseJoystickNumber;
    static JoystickInfo PredefinedJoystickList[ControllerTypeCount];
    static JoystickInput JoystickInputData[MaxAxesDirections];
-   static TNL::U32 AxesKeyCodeMask;
+   static U32 AxesKeyCodeMask;
 
    static bool initJoystick();
    static void shutdownJoystick();
@@ -160,10 +162,10 @@ public:
    static ControllerTypeType autodetectJoystickType();
 
    static ControllerTypeType stringToJoystickType(const char * strJoystick);
-   static const char *joystickTypeToString(TNL::S32 controllerType);
-   static const char *joystickTypeToPrettyString(TNL::S32 controllerType);
+   static const char *joystickTypeToString(S32 controllerType);
+   static const char *joystickTypeToPrettyString(S32 controllerType);
 
-   static TNL::U8 remapJoystickButton(TNL::U8 button);
+   static U8 remapJoystickButton(U8 button);
 };
 
 

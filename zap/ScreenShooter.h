@@ -30,17 +30,19 @@
 
 #include "png.h"
 
+using namespace TNL;
+
 namespace Zap
 {
 
 class ScreenShooter
 {
 private:
-   static const TNL::S32 BitDepth = 8;
-   static const TNL::S32 BytesPerPixel = 3;  // 3 bytes = 24 bits
+   static const S32 BitDepth = 8;
+   static const S32 BytesPerPixel = 3;  // 3 bytes = 24 bits
 
    static bool writePNG(const char *file_name, png_bytep *rows,
-         TNL::S32 width, TNL::S32 height, TNL::S32 colorType, TNL::S32 bitDepth);
+         S32 width, S32 height, S32 colorType, S32 bitDepth);
 
 public:
    ScreenShooter();

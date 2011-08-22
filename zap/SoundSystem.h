@@ -19,12 +19,14 @@ namespace TNL {
    typedef RefPtr<ByteBuffer> ByteBufferPtr;
 };
 
+using namespace TNL;
+
 namespace Zap {
 
 // forward declarations
 class Point;
 class SoundEffect;
-typedef TNL::RefPtr<SoundEffect> SFXHandle;
+typedef RefPtr<SoundEffect> SFXHandle;
 
 // Must keep this aligned with sfxProfilesModern[] and sfxProfilesClassic[]
 enum SFXProfiles
@@ -107,10 +109,10 @@ enum MusicState {
 class SoundSystem
 {
 private:
-   static const TNL::S32 NumMusicStreamBuffers = 3;
-   static const TNL::S32 MusicChunkSize = 250000;
-   static const TNL::S32 NumVoiceChatBuffers = 32;
-   static const TNL::S32 NumSamples = 16;
+   static const S32 NumMusicStreamBuffers = 3;
+   static const S32 MusicChunkSize = 250000;
+   static const S32 NumVoiceChatBuffers = 32;
+   static const S32 NumSamples = 16;
 
    // Sound Effect functions
    static void playOnSource(SFXHandle& effect);
@@ -130,25 +132,25 @@ public:
 
    // Sound Effect functions
    static void processSoundEffects();
-   static SFXHandle playSoundEffect(TNL::U32 profileIndex, TNL::F32 gain = 1.0f);
-   static SFXHandle playSoundEffect(TNL::U32 profileIndex, Point position, Point velocity, TNL::F32 gain = 1.0f);
+   static SFXHandle playSoundEffect(U32 profileIndex, F32 gain = 1.0f);
+   static SFXHandle playSoundEffect(U32 profileIndex, Point position, Point velocity, F32 gain = 1.0f);
    static void playSoundEffect(SFXHandle& effect);
-   static SFXHandle playRecordedBuffer(TNL::ByteBufferPtr p, TNL::F32 gain);
+   static SFXHandle playRecordedBuffer(ByteBufferPtr p, F32 gain);
    static void stopSoundEffect(SFXHandle& effect);
-   static void unqueueBuffers(TNL::S32 sourceIndex);
+   static void unqueueBuffers(S32 sourceIndex);
    static void setMovementParams(SFXHandle& effect, Point position, Point velocity);
    static void updateMovementParams(SFXHandle& effect);
 
    // Voice Chat functions
    static void processVoiceChat();
-   static void queueVoiceChatBuffer(SFXHandle& effect, TNL::ByteBufferPtr p);
+   static void queueVoiceChatBuffer(SFXHandle& effect, ByteBufferPtr p);
    static bool startRecording();
-   static void captureSamples(TNL::ByteBufferPtr sampleBuffer);
+   static void captureSamples(ByteBufferPtr sampleBuffer);
    static void stopRecording();
 
    // Music functions
    static void processMusic();
-   static void playMusic(TNL::S32 listIndex);
+   static void playMusic(S32 listIndex);
    static void playMusicList();
    static void stopMusic();
 

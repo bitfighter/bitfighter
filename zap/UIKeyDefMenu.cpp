@@ -374,7 +374,7 @@ void KeyDefMenuUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 // Handle mouse input, figure out which menu item we're over, and highlight it
 void KeyDefMenuUserInterface::onMouseMoved(S32 x, S32 y)
 {
-   SDL_ShowCursor(SDL_ENABLE);  // TODO:  was GLUT_CURSOR_RIGHT_ARROW  // Show cursor when user moves mouse
+   SDL_ShowCursor(SDL_ENABLE);  // Show cursor when user moves mouse
 
    const Point *mousePos = gScreenInfo.getMousePos();
 

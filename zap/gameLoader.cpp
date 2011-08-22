@@ -214,7 +214,7 @@ stateLineParseDone:
       }
       catch(LevelLoadException &e)
       {
-         TNL::logprintf("Level Error: Can't parse %s: %s", line, e.what());
+         logprintf("Level Error: Can't parse %s: %s", line, e.what());
       }
    }
    argc = 0;
@@ -353,7 +353,7 @@ Vector<string> LevelListLoader::buildLevelList()
 extern string lcase(string strToConvert);
 
 // Remove any levels listed in gLevelSkipList from gLevelList.  Not foolproof!
-void LevelListLoader::removeSkippedLevels(Vector<std::string> &levelList)
+void LevelListLoader::removeSkippedLevels(Vector<string> &levelList)
 {
    for(S32 i = 0; i < levelList.size(); i++)
    {

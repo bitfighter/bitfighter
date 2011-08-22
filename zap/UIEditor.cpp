@@ -492,7 +492,7 @@ void EditorUserInterface::setLevelFileName(string name)
    if(name == "")
       mEditFileName = "";
    else
-      if(name.find('.') == std::string::npos)      // Append extension, if one is needed
+      if(name.find('.') == string::npos)      // Append extension, if one is needed
          mEditFileName = name + ".level";
       // else... what?
 }
@@ -1555,7 +1555,7 @@ void EditorUserInterface::render()
    fillRendered = false;
    F32 width = NONE;
 
-   if(mCreatingPoly || mCreatingPolyline)    // Draw geomLine features under construction
+   if(mCreatingPoly || mCreatingPolyline)    // Draw geomPolyLine features under construction
    {
       mNewItem->addVert(snapPoint(convertCanvasToLevelCoord(mMousePos)));
       glLineWidth(gLineWidth3);
@@ -2075,7 +2075,7 @@ void EditorUserInterface::findHitItemAndEdge()
          // Make a copy of the items vertices that we can add to in the case of a loop
          Vector<Point> verts = *obj->getOutline();    
 
-         if(obj->getGeomType() == geomPoly)   // Add first point to the end to create last side on poly
+         if(obj->getGeomType() == geomPolygon)   // Add first point to the end to create last side on poly
             verts.push_back(verts.first());
 
          Point p1 = convertLevelToCanvasCoord(obj->getVert(0));
@@ -2111,7 +2111,7 @@ void EditorUserInterface::findHitItemAndEdge()
    {
       EditorObject *obj = objList->get(i);
 
-      if(obj->getGeomType() == geomPoly)
+      if(obj->getGeomType() == geomPolygon)
       {
          Vector<Point> verts;
          for(S32 j = 0; j < obj->getVertCount(); j++)
@@ -2142,7 +2142,7 @@ S32 EditorUserInterface::findHitItemOnDock(Point canvasPos)
 
    // Now check for polygon interior hits
    for(S32 i = 0; i < mDockItems.size(); i++)
-      if(mDockItems[i]->getGeomType() == geomPoly)
+      if(mDockItems[i]->getGeomType() == geomPolygon)
       {
          Vector<Point> verts;
          for(S32 j = 0; j < mDockItems[i]->getVertCount(); j++)
@@ -2333,7 +2333,7 @@ void EditorUserInterface::startDraggingDockItem()
    Point pos = snapPoint(convertCanvasToLevelCoord(mMousePos), true) - item->getInitialPlacementOffset(getGame()->getGridSize());
    item->moveTo(pos);
       
-   //item->setWidth((mDockItems[mDraggingDockItem]->getGeomType() == geomPoly) ? .7 : 1);      // TODO: Still need this?
+   //item->setWidth((mDockItems[mDraggingDockItem]->getGeomType() == geomPolygon) ? .7 : 1);      // TODO: Still need this?
    item->addToEditor(getGame());          
 
    clearSelection();            // No items are selected...
@@ -2480,8 +2480,8 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
 
          // Deleted last vertex, or item can't lose a vertex... it must go!
          if(obj->getVertCount() == 0 || (obj->getGeomType() == geomSimpleLine && obj->getVertCount() < 2)
-                                     || (obj->getGeomType() == geomLine       && obj->getVertCount() < 2)
-                                     || (obj->getGeomType() == geomPoly       && obj->getVertCount() < 2))
+                                     || (obj->getGeomType() == geomPolyLine       && obj->getVertCount() < 2)
+                                     || (obj->getGeomType() == geomPolygon       && obj->getVertCount() < 2))
          {
             deleteItem(i);
             deleted = true;
@@ -2534,7 +2534,7 @@ void EditorUserInterface::splitBarrier()
    {
       EditorObject *obj = objList->get(i);
 
-      if(obj->getGeomType() == geomLine)
+      if(obj->getGeomType() == geomPolyLine)
           for(S32 j = 1; j < obj->getVertCount() - 1; j++)     // Can't split on end vertices!
             if(obj->vertSelected(j))
             {
@@ -2589,7 +2589,7 @@ void EditorUserInterface::joinBarrier()
    {
       EditorObject *obj_i = objList->get(i);
 
-      if(obj_i->getGeomType() == geomLine && (obj_i->isSelected()))
+      if(obj_i->getGeomType() == geomPolyLine && (obj_i->isSelected()))
       {
          for(S32 j = i + 1; j < objList->size(); j++)
          {
@@ -2911,7 +2911,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       clearSelection();    // Unselect anything currently selected
 
       // Can only add new vertices by clicking on item's edge, not it's interior (for polygons, that is)
-      if(mEdgeHit != NONE && mItemHit && (mItemHit->getGeomType() == geomLine || mItemHit->getGeomType() >= geomPoly))
+      if(mEdgeHit != NONE && mItemHit && (mItemHit->getGeomType() == geomPolyLine || mItemHit->getGeomType() >= geomPolygon))
       {
          if(mItemHit->getVertCount() >= gMaxPolygonPoints)     // Polygon full -- can't add more
             return;

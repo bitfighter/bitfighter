@@ -40,7 +40,6 @@
 #include "input.h"
 #include <string>
 
-// TODO: get rid of these and add std:: and TNL:: to the various types
 using namespace std;
 using namespace TNL;
 

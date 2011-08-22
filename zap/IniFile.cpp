@@ -74,7 +74,7 @@ void CIniFile::ReadFile()
    fstream f;
    string line;
 
-   Vector<TNL::StringPtr> iniLines;
+   Vector<StringPtr> iniLines;
    if(gZapJournal.getCurrentMode() != TNL::Journal::Playback)
    {
       string x = path;
@@ -111,7 +111,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, setINILength, (S32 lineCount), (lin
 }
 
 
-TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, processINILine, (TNL::StringPtr iniLine), (iniLine))
+TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, processINILine, (StringPtr iniLine), (iniLine))
 {
    gINI.processLine(iniLine.getString());
 }
@@ -310,7 +310,7 @@ bool CIniFile::SetValue(const string &keyname, const string &valuename, const st
 }
 
 
-bool CIniFile::SetAllValues(const string &section, const string &prefix, const TNL::Vector<string> &values)
+bool CIniFile::SetAllValues(const string &section, const string &prefix, const Vector<string> &values)
 {
    char key[256];
    bool stat = true;
@@ -375,12 +375,12 @@ string CIniFile::GetValue(const string &keyname, const string &valuename, const 
 }
 
 
-void CIniFile::GetAllValues(const string &section, TNL::Vector<string> &valueList)
+void CIniFile::GetAllValues(const string &section, Vector<string> &valueList)
 {
    S32 numVals = gINI.NumValues(section);
    if(numVals > 0)
    {
-      TNL::Vector<string> keys(numVals);
+      Vector<string> keys(numVals);
 
       for(S32 i = 0; i < numVals; i++)
          keys.push_back(gINI.ValueName(section, i));

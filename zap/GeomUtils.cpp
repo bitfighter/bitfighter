@@ -1027,7 +1027,7 @@ void triangulate2(char *a, triangulateio *b, triangulateio *c, triangulateio *d)
    __try{
       triangulate(a,b,c,d);
    }__except(1){
-      TNL::logprintf("Exception tessellating with Triangle method");
+      logprintf("Exception tessellating with Triangle method");
    }
 }
 

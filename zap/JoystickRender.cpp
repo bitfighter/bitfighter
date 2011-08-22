@@ -30,8 +30,6 @@
 
 #include "SDL/SDL_opengl.h"
 
-using namespace TNL;
-
 namespace Zap
 {
 

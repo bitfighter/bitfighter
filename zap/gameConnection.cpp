@@ -1398,7 +1398,7 @@ void GameConnection::requestAuthenticationVerificationFromMaster()
 
 // Make sure name is unique.  If it's not, make it so.  The problem is that then the client doesn't know their official name.
 // This makes the assumption that we'll find a unique name before numstr runs out of space (allowing us to try 999,999,999 or so combinations)
-std::string GameConnection::makeUnique(string name)
+string GameConnection::makeUnique(string name)
 {
    U32 index = 0;
    string proposedName = name;

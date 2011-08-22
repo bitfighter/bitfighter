@@ -125,7 +125,7 @@ public:
    string GetValue(const string &section, const string &key, const string &defValue = "") const;
 
    // Load up valueList with all values from the section
-   void GetAllValues(const string &section, TNL::Vector<string> &valueList);
+   void GetAllValues(const string &section, Vector<string> &valueList);
 
    S32    GetValueI(const string &section, const string &key, S32 const defValue = 0) const;
    bool   GetValueB(const string &section, const string &key, bool const defValue = false) const {
@@ -148,7 +148,7 @@ public:
    // the key if it doesn't exist. Returns true if data entered, false otherwise.
    // Overloaded to accept string, int, and double.
    bool SetValue(const string &section, const string &key, const string &value, bool const create = true);
-   bool SetAllValues(const string &section, const string &prefix, const TNL::Vector<string> &values);
+   bool SetAllValues(const string &section, const string &prefix, const Vector<string> &values);
    bool SetValueI(const string &section, const string &key, int const value, bool const create = true);
    bool SetValueB(const string &section, const string &key, bool const value, bool const create = true) {
       return SetValueI(section, key, int(value), create);

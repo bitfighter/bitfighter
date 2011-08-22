@@ -169,7 +169,7 @@ public:
    PolylineGeometry() { mAnyVertsSelected = false; }              // Constructor
    ~PolylineGeometry() { /*TNLAssert(false, "deleting!");*/ }     // Destructor
 
-   GeomType getGeomType() { return geomLine; }
+   GeomType getGeomType() { return geomPolyLine; }
 
    Point getVert(S32 index) const;
    virtual void setVert(const Point &pos, S32 index);
@@ -220,7 +220,7 @@ private:
 public:
    PolygonGeometry() : PolylineGeometry() { mLabelAngle = 0; }      // Constructor
 
-   GeomType getGeomType() { return geomPoly; }
+   GeomType getGeomType() { return geomPolygon; }
 
    Vector<Point> *getFill() { TNLAssert(!mTriangluationDisabled, "Triangluation disabled!"); return &mPolyFill; }
    F32 getLabelAngle()      { TNLAssert(!mTriangluationDisabled, "Triangluation disabled!"); return mLabelAngle; }

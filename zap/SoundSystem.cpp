@@ -22,8 +22,6 @@
 
 #include "tnlNetBase.h"
 
-using namespace TNL;
-
 namespace Zap {
 
 //
