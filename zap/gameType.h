@@ -45,7 +45,7 @@ namespace Zap
 // Some forward declarations
 class GoalZone;
 class MenuItem;
-class Item;
+class MoveItem;
 class SoundEffect;
 class VoiceDecoder;
 
@@ -161,7 +161,7 @@ private:
    Timer mScoreboardUpdateTimer;    
    Timer mGameTimeUpdateTimer;
 
-   Vector<SafePtr<Item> > mCacheResendItem;  // speed up c2sResendItemStatus
+   Vector<SafePtr<MoveItem> > mCacheResendItem;  // speed up c2sResendItemStatus
 
 public:
    enum GameTypes
@@ -296,13 +296,13 @@ public:
 
    struct ItemOfInterest
    {
-      SafePtr<Item> theItem;
+      SafePtr<MoveItem> theItem;
       U32 teamVisMask;        // Bitmask, where 1 = object is visible to team in that position, 0 if not
    };
 
    Vector<ItemOfInterest> mItemsOfInterest;
 
-   void addItemOfInterest(Item *theItem);
+   void addItemOfInterest(MoveItem *theItem);
 
    S32 getDigitsNeededToDisplayScore() const { return mDigitsNeededToDisplayScore; }
 
@@ -437,8 +437,8 @@ public:
 
    // gameType flag methods for CTF, Rabbit, Football
    virtual void addFlag(FlagItem *flag) {  mFlags.push_back(flag);  }
-   virtual void itemDropped(Ship *ship, Item *item) {  /* do nothing */  }
-   virtual void shipTouchFlag(Ship *ship, FlagItem *flag) {  /* do nothing */  }
+   virtual void itemDropped(Ship *ship, MoveItem *item) {  /* Do nothing */  }
+   virtual void shipTouchFlag(Ship *ship, FlagItem *flag) {  /* Do nothing */  }
 
    virtual void addZone(GoalZone *zone) {  /* Do nothing */  }
    virtual void shipTouchZone(Ship *ship, GoalZone *zone) {  /* Do nothing */  }

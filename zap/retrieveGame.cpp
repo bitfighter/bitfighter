@@ -118,7 +118,7 @@ namespace Zap
    }
 
 
-   void RetrieveGameType::itemDropped(Ship *ship, Item *item)
+   void RetrieveGameType::itemDropped(Ship *ship, MoveItem *item)
    {
       FlagItem *flag = dynamic_cast<FlagItem *>(item);
 
@@ -153,8 +153,8 @@ namespace Zap
          return;
 
       // Ok, the ship has a flag and it's on the ship and we're in an empty zone
-      Item *theItem = s->mMountedItems[flagIndex];
-      FlagItem *mountedFlag = dynamic_cast<FlagItem *>(theItem);
+      MoveItem *item = s->mMountedItems[flagIndex];
+      FlagItem *mountedFlag = dynamic_cast<FlagItem *>(item);
       if(mountedFlag)
       {
          static StringTableEntry capString("%e0 retrieved a flag!");

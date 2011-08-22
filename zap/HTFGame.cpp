@@ -117,7 +117,7 @@ namespace Zap
    }
 
 
-   void HTFGameType::itemDropped(Ship *ship, Item *item)
+   void HTFGameType::itemDropped(Ship *ship, MoveItem *item)
    {
       FlagItem *flag = dynamic_cast<FlagItem *>(item);
 
@@ -156,8 +156,8 @@ namespace Zap
          return;
 
       // Ok, the ship has a flag and it's on the ship...
-      Item *theItem = s->mMountedItems[flagIndex];
-      FlagItem *mountedFlag = dynamic_cast<FlagItem *>(theItem);
+      MoveItem *item = s->mMountedItems[flagIndex];
+      FlagItem *mountedFlag = dynamic_cast<FlagItem *>(item);
       if(mountedFlag)
       {
          static StringTableEntry capString("%e0 retrieved %e1 flag.  Team %e2 holds %e1 flag!");

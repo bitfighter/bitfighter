@@ -211,7 +211,7 @@ public:
    F32 mass;            // Mass of ship, not used
    bool hasExploded;
 
-   Vector<SafePtr<Item> > mMountedItems;
+   Vector<SafePtr<MoveItem> > mMountedItems;
    Vector<SafePtr<GameObject> > mRepairTargets;
 
    virtual void render(S32 layerIndex);
@@ -250,7 +250,7 @@ public:
    S32 getFlagCount();     // Returns the number of flags ship is carrying
 
    bool isCarryingItem(U8 objectType);
-   Item *unmountItem(U8 objectType);
+   MoveItem *unmountItem(U8 objectType);
 
    F32 getSensorZoomFraction() { return 1 - mSensorZoomTimer.getFraction(); }
    Point getAimVector();

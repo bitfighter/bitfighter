@@ -147,13 +147,13 @@ void SoccerGameType::updateSoccerScore(Ship *ship, S32 scoringTeam, ScoringEvent
 
 void SoccerGameType::scoreGoal(Ship *ship, StringTableEntry scorerName, S32 scoringTeam, S32 goalTeamIndex, S32 score)
 {
-   if(scoringTeam == Item::NO_TEAM)
+   if(scoringTeam == MoveItem::NO_TEAM)
    {
       s2cSoccerScoreMessage(SoccerMsgScoreGoal, scorerName, (U32) (goalTeamIndex - gFirstTeamNumber));
       return;
    }
 
-   if(isTeamGame() && (scoringTeam == Item::TEAM_NEUTRAL || scoringTeam == goalTeamIndex))    // Own-goal
+   if(isTeamGame() && (scoringTeam == MoveItem::TEAM_NEUTRAL || scoringTeam == goalTeamIndex))    // Own-goal
    {
       updateSoccerScore(ship, scoringTeam, ScoreGoalOwnTeam, score);
 
@@ -162,7 +162,7 @@ void SoccerGameType::scoreGoal(Ship *ship, StringTableEntry scorerName, S32 scor
    }
    else     // Goal on someone else's goal
    {
-      if(goalTeamIndex == Item::TEAM_HOSTILE)
+      if(goalTeamIndex == MoveItem::TEAM_HOSTILE)
          updateSoccerScore(ship, scoringTeam, ScoreGoalHostileTeam, score);
       else
          updateSoccerScore(ship, scoringTeam, ScoreGoalEnemyTeam, score);
@@ -249,7 +249,7 @@ bool SoccerGameType::onFire(Ship *ship)
 
 
 // Runs on server only, and only when player deliberately drops ball
-void SoccerGameType::itemDropped(Ship *ship, Item *item)
+void SoccerGameType::itemDropped(Ship *ship, MoveItem *item)
 {
    //logprintf("%s SoccerGameType->itemDropped", isGhost()? "Client:" : "Server:");
    TNLAssert(!isGhost(), "Should run on server only!");
@@ -334,7 +334,7 @@ SoccerBallItem::SoccerBallItem(Point pos) : EditorItem(pos, true, (F32)SoccerBal
    initialPos = pos;
    mLastPlayerTouch = NULL;
    mLastPlayerMounted = NULL;
-   mLastPlayerTouchTeam = Item::NO_TEAM;
+   mLastPlayerTouchTeam = MoveItem::NO_TEAM;
    mLastPlayerTouchName = StringTableEntry(NULL);
    mDragFactor = 1.0;     // 1.0 for no drag
    mAllowPickup = false;

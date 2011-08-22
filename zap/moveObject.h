@@ -37,7 +37,7 @@ class MoveObject : public GameObject
    typedef GameObject Parent;
 
 private:
-   S32 mHitLimit;
+   S32 mHitLimit;    // Internal counter for processing collisions
 
 protected:
    F32 mRadius;

@@ -2621,9 +2621,9 @@ const Color *Game::getBasicTeamColor(const Game *game, S32 teamId)
 {
    //TNLAssert(teamId < game->getTeamCount() || teamId < Item::TEAM_HOSTILE, "Invalid team id!");
 
-   if(teamId == Item::TEAM_NEUTRAL)
+   if(teamId == MoveItem::TEAM_NEUTRAL)
       return &gNeutralTeamColor;
-   else if(teamId == Item::TEAM_HOSTILE)
+   else if(teamId == MoveItem::TEAM_HOSTILE)
       return &gHostileTeamColor;
    else if((U32)teamId < (U32)game->getTeamCount())
       return game->getTeam(teamId)->getColor();

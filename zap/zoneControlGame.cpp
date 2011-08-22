@@ -74,7 +74,7 @@ void ZoneControlGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
 }
 
 
-void ZoneControlGameType::itemDropped(Ship *ship, Item *item)
+void ZoneControlGameType::itemDropped(Ship *ship, MoveItem *item)
 {
    FlagItem *flag = dynamic_cast<FlagItem *>(item);
 
@@ -157,7 +157,7 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
    // Return the flag to spawn point
    for(S32 i = 0; i < s->mMountedItems.size(); i++)
    {
-      Item *theItem = s->mMountedItems[i];
+      MoveItem *theItem = s->mMountedItems[i];
       FlagItem *mountedFlag = dynamic_cast<FlagItem *>(theItem);
       if(mountedFlag)
       {

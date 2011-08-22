@@ -149,8 +149,10 @@ bool HuntersGameType::isCarryingItems(Ship *ship)
    if(ship->mMountedItems.size() == 0)    // Should never happen
       return false;
 
-   Item *item = ship->mMountedItems[0];   // Currently, ship always has a NexusFlagItem... this is it
-   if(! item) return false;               // Null when a player drop flag and get destroyed at the same time.
+   MoveItem *item = ship->mMountedItems[0];   // Currently, ship always has a NexusFlagItem... this is it
+   if(!item)                                  // Null when a player drop flag and get destroyed at the same time
+      return false;  
+
    return ( ((HuntersFlagItem *) item)->getFlagCount() > 0 );    
 }
 
@@ -159,15 +161,13 @@ bool HuntersGameType::isCarryingItems(Ship *ship)
 // Returns NULL if it can't find one.
 static HuntersFlagItem *findFirstNexusFlag(Ship *ship)
 {
-   HuntersFlagItem *theFlag = NULL;
-
    for(S32 i = ship->mMountedItems.size() - 1; i >= 0; i--)
    {
-      Item *theItem = ship->mMountedItems[i];
-      theFlag = dynamic_cast<HuntersFlagItem *>(theItem);
+      MoveItem *item = ship->mMountedItems[i];
+      HuntersFlagItem *flag = dynamic_cast<HuntersFlagItem *>(item);
 
-      if(theFlag)
-         return theFlag;
+      if(flag)
+         return flag;
    }
 
    return NULL;
@@ -175,7 +175,7 @@ static HuntersFlagItem *findFirstNexusFlag(Ship *ship)
 
 
 // The flag will come from ship->mount.  *item is used as it is posssible to carry and drop multiple items
-void HuntersGameType::itemDropped(Ship *ship, Item *item)
+void HuntersGameType::itemDropped(Ship *ship, MoveItem *item)
 {
    //HuntersFlagItem *flag = findFirstNexusFlag(ship);  //  This line causes multiple "Drop Flag" messages when ship carry multiple items.
    HuntersFlagItem *flag = dynamic_cast<HuntersFlagItem *>(item);
@@ -479,13 +479,14 @@ void HuntersGameType::controlObjectForClientKilled(GameConnection *theClient, Ga
    // Check for yard sale  (is this when the flags a player is carrying go drifting about??)
    for(S32 i = theShip->mMountedItems.size() - 1; i >= 0; i--)
    {
-      Item *theItem = theShip->mMountedItems[i];
-      HuntersFlagItem *theFlag = dynamic_cast<HuntersFlagItem *>(theItem);
-      if(theFlag)
+      MoveItem *item = theShip->mMountedItems[i];
+      HuntersFlagItem *flag = dynamic_cast<HuntersFlagItem *>(item);
+
+      if(flag)
       {
-         if(theFlag->getFlagCount() >= YardSaleCount)
+         if(flag->getFlagCount() >= YardSaleCount)
          {
-            Point pos = theFlag->getActualPos();
+            Point pos = flag->getActualPos();
             s2cAddYardSaleWaypoint(pos.x, pos.y);
             s2cHuntersMessage(HuntersMsgYardSale, theShip->getName().getString(), 0, 0);
          }

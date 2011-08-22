@@ -95,7 +95,7 @@ public:
 ////////////////////////////////////////
 
 
-class Item;
+class MoveItem;
 class LuaRobot;
 
 /**

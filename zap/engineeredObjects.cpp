@@ -252,7 +252,7 @@ bool EngineerModuleDeployer::deployEngineeredItem(GameConnection *connection, U3
    deployedObject->addToGame(gServerGame, gServerGame->getGameObjDatabase());
    deployedObject->onEnabled();
 
-   Item *resource = ship->unmountItem(ResourceItemTypeNumber);
+   MoveItem *resource = ship->unmountItem(ResourceItemTypeNumber);
 
    deployedObject->setResource(resource);
 
@@ -375,7 +375,7 @@ DatabaseObject *EngineeredObject::findAnchorPointAndNormal(GridDatabase *wallEdg
 }
 
 
-void EngineeredObject::setResource(Item *resource)
+void EngineeredObject::setResource(MoveItem *resource)
 {
    TNLAssert(resource->isMounted() == false, "Doh!");
    mResource = resource;
@@ -1230,7 +1230,7 @@ void Turret::idle(IdleCallPath path)
       }
 
       // Don't target mounted items (like resourceItems and flagItems)
-      Item *item = dynamic_cast<Item *>(fillVector[i]);
+      MoveItem *item = dynamic_cast<MoveItem *>(fillVector[i]);
       if(item && item->isMounted())
          continue;
 

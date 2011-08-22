@@ -50,7 +50,7 @@ TextItem::TextItem()
 
    // Some default values
    mSize = 20;
-   mTeam = Item::TEAM_NEUTRAL;
+   mTeam = MoveItem::TEAM_NEUTRAL;
 }
 
 

@@ -206,7 +206,7 @@
     <ClCompile Include="..\zap\teamInfo.cpp" />
     <ClCompile Include="..\zap\teleporter.cpp" />
     <ClCompile Include="..\zap\textItem.cpp" />
-    <ClInclude Include="..\zap\Timer.cpp" />
+    <ClCompile Include="..\zap\Timer.cpp" />
     <ClCompile Include="..\zap\UI.cpp" />
     <ClCompile Include="..\zap\UIChat.cpp" />
     <ClCompile Include="..\zap\UICredits.cpp" />

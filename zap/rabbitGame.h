@@ -72,7 +72,7 @@ public:
    void idle(GameObject::IdleCallPath path, U32 deltaT);
 
    void addFlag(FlagItem *flag);
-   void itemDropped(Ship *ship, Item *item);
+   void itemDropped(Ship *ship, MoveItem *item);
    void shipTouchFlag(Ship *ship, FlagItem *flag);
 
    bool isFlagGame() { return true; }

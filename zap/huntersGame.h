@@ -73,7 +73,7 @@ public:
    void shipTouchFlag(Ship *ship, FlagItem *flag);
 
    bool isCarryingItems(Ship *ship);
-   void itemDropped(Ship *ship, Item *item);
+   void itemDropped(Ship *ship, MoveItem *item);
 
    const char **getGameParameterMenuKeys();
    boost::shared_ptr<MenuItem> getMenuItem(ClientGame *game, const char *key);

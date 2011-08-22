@@ -1385,14 +1385,15 @@ void GameType::performProxyScopeQuery(GameObject *scopeObject, GameConnection *c
 
 
 // Server only
-void GameType::addItemOfInterest(Item *theItem)
+void GameType::addItemOfInterest(MoveItem *item)
 {
 #ifdef TNL_DEBUG
    for(S32 i = 0; i < mItemsOfInterest.size(); i++)
-      TNLAssert(mItemsOfInterest[i].theItem.getPointer() != theItem, "Item already exists in ItemOfInterest!");
+      TNLAssert(mItemsOfInterest[i].theItem.getPointer() != item, "Item already exists in ItemOfInterest!");
 #endif
+
    ItemOfInterest i;
-   i.theItem = theItem;
+   i.theItem = item;
    i.teamVisMask = 0;
    mItemsOfInterest.push_back(i);
 }
@@ -1475,7 +1476,7 @@ S32 GameType::getTeam(const char *playerName)
       if(!strcmp(mClientList[i]->name.getString(), playerName))
          return(mClientList[i]->getTeam());
 
-   return(Item::TEAM_NEUTRAL);    // If we can't find the team, let's call it neutral
+   return(MoveItem::TEAM_NEUTRAL);    // If we can't find the team, let's call it neutral
 }
 
 
@@ -2867,7 +2868,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, c2sResendItemStatus, (U16 itemId), (itemId
 
    for(S32 i=0; i < 1024; i += 256)
    {
-      Item *item = mCacheResendItem[S32(itemId & 255) | i];
+      MoveItem *item = mCacheResendItem[S32(itemId & 255) | i];
       if(item && item->getItemId() == itemId)
       {
          item->setPositionMask();
@@ -2880,7 +2881,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, c2sResendItemStatus, (U16 itemId), (itemId
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
-      Item *item = dynamic_cast<Item *>(fillVector[i]);
+      MoveItem *item = dynamic_cast<MoveItem *>(fillVector[i]);
       if(item && item->getItemId() == itemId)
       {
          item->setPositionMask();

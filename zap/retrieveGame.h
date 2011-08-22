@@ -50,7 +50,7 @@ public:
    void shipTouchFlag(Ship *theShip, FlagItem *theFlag);
 
 
-   void itemDropped(Ship *ship, Item *item);
+   void itemDropped(Ship *ship, MoveItem *item);
 
 
    // The ship has entered a drop zone, either friend or foe

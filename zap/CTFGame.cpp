@@ -134,7 +134,7 @@ void CTFGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
 
 class FlagItem;
 
-void CTFGameType::itemDropped(Ship *ship, Item *item)
+void CTFGameType::itemDropped(Ship *ship, MoveItem *item)
 {
    FlagItem *flag = dynamic_cast<FlagItem *>(item);
 

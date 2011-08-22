@@ -57,7 +57,7 @@ public:
    void setSoccerPickupAllowed(bool allowed) { mSoccerPickupAllowed = allowed; }
 
    void addZone(GoalZone *theZone);
-   void itemDropped(Ship *ship, Item *item);
+   void itemDropped(Ship *ship, MoveItem *item);
    void setBall(SoccerBallItem *theBall);
    void renderInterfaceOverlay(bool scoreboardVisible);
 
@@ -95,8 +95,9 @@ public:
 
 class SoccerBallItem : public EditorItem
 {
+   typedef MoveItem Parent;      // TODO: Should be EditorItem???
+
 private:
-   typedef Item Parent;
    Point initialPos;
    Timer mSendHomeTimer;
    SafePtr<Ship> mLastPlayerTouch;

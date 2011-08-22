@@ -39,7 +39,7 @@ namespace Zap
 static U32 sItemId = 1;
 
 // Constructor
-Item::Item(Point p, bool collideable, float radius, float mass) : MoveObject(p, radius, mass)
+MoveItem::MoveItem(Point p, bool collideable, float radius, float mass) : MoveObject(p, radius, mass)
 {
    mIsMounted = false;
    mIsCollideable = collideable;
@@ -57,7 +57,7 @@ Item::Item(Point p, bool collideable, float radius, float mass) : MoveObject(p, 
 
 
 // Server only
-bool Item::processArguments(S32 argc, const char **argv, Game *game)
+bool MoveItem::processArguments(S32 argc, const char **argv, Game *game)
 {
    if(argc < 2)
       return false;
@@ -77,7 +77,7 @@ bool Item::processArguments(S32 argc, const char **argv, Game *game)
 
 
 // Server only
-string Item::toString(F32 gridSize) const
+string MoveItem::toString(F32 gridSize) const
 {
    return string(getClassName()) + " " + geomToString(gridSize);
 }
@@ -135,7 +135,7 @@ string EditorItem::toString(F32 gridSize) const
 
 
 // Client only, in-game
-void Item::render()
+void MoveItem::render()
 {
    // If the item is mounted, renderItem will be called from the ship it is mounted to
    if(mIsMounted)
@@ -161,7 +161,7 @@ F32 EditorItem::getEditorRadius(F32 currentScale)
 // unpackUpdate() in the case of all clients
 //
 // theShip could be NULL here, and this could still be legit (e.g. flag is in scope, and ship is out of scope)
-void Item::mountToShip(Ship *theShip)     
+void MoveItem::mountToShip(Ship *theShip)     
 {
    TNLAssert(isGhost() || isInDatabase(), "Error, mount item not in database.");
 
@@ -180,14 +180,14 @@ void Item::mountToShip(Ship *theShip)
 }
 
 
-void Item::onMountDestroyed()
+void MoveItem::onMountDestroyed()
 {
    dismount();
 }
 
 
 // Runs on client & server, via different code paths
-void Item::onItemDropped()
+void MoveItem::onItemDropped()
 {
    if(!getGame())    // Can happen on game startup
       return;
@@ -207,7 +207,7 @@ void Item::onItemDropped()
 
 
 // Client & server, called via different paths
-void Item::dismount()
+void MoveItem::dismount()
 {
    if(mMount.isValid())      // Mount could be null if mount is out of scope, but is dropping an always-in-scope item
    {
@@ -228,7 +228,7 @@ void Item::dismount()
 }
 
 
-void Item::setActualPos(const Point &p)
+void MoveItem::setActualPos(const Point &p)
 {
    mMoveState[ActualState].pos = p;
    mMoveState[ActualState].vel.set(0,0);
@@ -236,20 +236,20 @@ void Item::setActualPos(const Point &p)
 }
 
 
-void Item::setActualVel(const Point &vel)
+void MoveItem::setActualVel(const Point &vel)
 {
    mMoveState[ActualState].vel = vel;
    setMaskBits(WarpPositionMask | PositionMask);
 }
 
 
-Ship *Item::getMount()
+Ship *MoveItem::getMount()
 {
    return mMount;
 }
 
 
-void Item::setZone(GoalZone *theZone)
+void MoveItem::setZone(GoalZone *theZone)
 {
    // If the item on which we're setting the zone is a flag (which, at this point, it always will be),
    // we want to make sure to update the zone itself.  This is mostly a convenience for robots searching
@@ -270,7 +270,7 @@ void Item::setZone(GoalZone *theZone)
 }
 
 
-void Item::idle(GameObject::IdleCallPath path)
+void MoveItem::idle(GameObject::IdleCallPath path)
 {
    if(!isInDatabase())
       return;
@@ -331,7 +331,7 @@ void Item::idle(GameObject::IdleCallPath path)
 
 static const S32 VEL_POINT_SEND_BITS = 511;     // 511 = 2^9 - 1, the biggest int we can pack into 9 bits.
 
-U32 Item::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
+U32 MoveItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
    U32 retMask = 0;
    if(stream->writeFlag(updateMask & InitialMask))
@@ -371,7 +371,7 @@ U32 Item::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
 }
 
 
-void Item::unpackUpdate(GhostConnection *connection, BitStream *stream)
+void MoveItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    bool interpolate = false;
    bool positionChanged = false;
@@ -432,20 +432,20 @@ void Item::unpackUpdate(GhostConnection *connection, BitStream *stream)
 }
 
 
-bool Item::collide(GameObject *otherObject)
+bool MoveItem::collide(GameObject *otherObject)
 {
    return mIsCollideable && !mIsMounted;
 }
 
 
-S32 Item::getCaptureZone(lua_State *L) { if(mZone.isValid()) {mZone->push(L); return 1;} else return returnNil(L); }
-S32 Item::getShip(lua_State *L) { if(mMount.isValid()) {mMount->push(L); return 1;} else return returnNil(L); }
+S32 MoveItem::getCaptureZone(lua_State *L) { if(mZone.isValid()) {mZone->push(L); return 1;} else return returnNil(L); }
+S32 MoveItem::getShip(lua_State *L) { if(mMount.isValid()) {mMount->push(L); return 1;} else return returnNil(L); }
 
 
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-EditorItem::EditorItem(Point p, bool collideable, F32 radius, F32 repopDelay) : Item(p, collideable, radius, repopDelay)
+EditorItem::EditorItem(Point pos, bool collideable, F32 radius, F32 repopDelay) : MoveItem(pos, collideable, radius, repopDelay)
 {
    // Do nothing
 }

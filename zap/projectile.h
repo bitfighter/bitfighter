@@ -154,17 +154,17 @@ public:
 
 
 // GrenadeProjectiles are the base clase used for both mines and spybugs
-class GrenadeProjectile : public Item, public LuaProjectile
+class GrenadeProjectile : public MoveItem, public LuaProjectile
 {
 private:
-   typedef Item Parent;
+   typedef MoveItem Parent;
 
 public:
    GrenadeProjectile(Point pos = Point(), Point vel = Point(), GameObject *shooter = NULL);
 
    enum Constants
    {
-      ExplodeMask = Item::FirstFreeMask,
+      ExplodeMask = MoveItem::FirstFreeMask,
       FirstFreeMask = ExplodeMask << 1,
    };
 

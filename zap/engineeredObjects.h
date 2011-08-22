@@ -40,7 +40,7 @@ private:
 
 protected:
    F32 mHealth;
-   SafePtr<Item> mResource;
+   SafePtr<MoveItem> mResource;
    Point mAnchorNormal;
    bool mIsDestroyed;
    S32 mOriginalTeam;
@@ -68,7 +68,7 @@ public:
 
    static const S32 MAX_SNAP_DISTANCE = 100;    // Max distance to look for a mount point
 
-   void setResource(Item *resource);
+   void setResource(MoveItem *resource);
    static bool checkDeploymentPosition(const Vector<Point> &thisBounds, GridDatabase *gb);
    void computeExtent();
    virtual void onDestroyed() { /* do nothing */ }  

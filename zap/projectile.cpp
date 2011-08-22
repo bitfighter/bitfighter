@@ -412,7 +412,7 @@ GameObject *Projectile::getGameObject() { return this; }                        
 //-----------------------------------------------------------------------------
 TNL_IMPLEMENT_NETOBJECT(GrenadeProjectile);
 
-GrenadeProjectile::GrenadeProjectile(Point pos, Point vel, GameObject *shooter): Item(pos, true, mRadius, mMass)
+GrenadeProjectile::GrenadeProjectile(Point pos, Point vel, GameObject *shooter): MoveItem(pos, true, mRadius, mMass)
 {
    mObjectTypeNumber = BulletTypeNumber;
 
@@ -658,7 +658,7 @@ string Mine::toString(F32 gridSize) const
 void Mine::idle(IdleCallPath path)
 {
    // Skip the grenade timing goofiness...
-   Item::idle(path);
+   MoveItem::idle(path);
 
    if(exploded || path != GameObject::ServerIdleMainLoop)
       return;
@@ -914,7 +914,7 @@ void SpyBug::onAddedToGame(Game *theGame)
 void SpyBug::idle(IdleCallPath path)
 {
    // Skip the grenade timing goofiness...
-   Item::idle(path);
+   MoveItem::idle(path);
 
    if(exploded || path != GameObject::ServerIdleMainLoop)
       return;

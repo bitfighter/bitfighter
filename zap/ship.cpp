@@ -1035,8 +1035,8 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
       while(stream->readFlag())
       {
          S32 index = stream->readInt(GhostConnection::GhostIdBitSize);
-         Item *theItem = (Item *) connection->resolveGhost(index);
-         theItem->mountToShip(this);
+         MoveItem *item = (MoveItem *) connection->resolveGhost(index);
+         item->mountToShip(this);
       }
 
    }  // initial update
@@ -1246,20 +1246,19 @@ bool Ship::isCarryingItem(U8 objectType)
 }
 
 
-Item *Ship::unmountItem(U8 objectType)
+MoveItem *Ship::unmountItem(U8 objectType)
 {
-   //logprintf("%s ship->unmountItem", isGhost()? "Client:" : "Server:");
    for(S32 i = mMountedItems.size() - 1; i >= 0; i--)
-   {
       if(mMountedItems[i]->getObjectTypeNumber() == objectType)
       {
-         Item *item = mMountedItems[i];
+         MoveItem *item = mMountedItems[i];
          item->dismount();
          return item;
       }
-   }
+
    return NULL;
 }
+
 
 void Ship::getLoadout(Vector<U32> &loadout)
 {
@@ -1270,6 +1269,7 @@ void Ship::getLoadout(Vector<U32> &loadout)
    for(S32 i = 0; i < ShipWeaponCount; i++)
       loadout.push_back(mWeapon[i]);
 }
+
 
 void Ship::setLoadout(const Vector<U32> &loadout, bool silent)
 {
@@ -1568,7 +1568,7 @@ void Ship::render(S32 layerIndex)
 
    GameConnection *conn = clientGame->getConnectionToServer();
    bool localShip = ! (conn && conn->getControlObject() != this);    // i.e. a ship belonging to a remote player
-   S32 localPlayerTeam = (conn && conn->getControlObject()) ? conn->getControlObject()->getTeam() : Item::NO_TEAM; // To show cloaked teammates
+   S32 localPlayerTeam = (conn && conn->getControlObject()) ? conn->getControlObject()->getTeam() : MoveItem::NO_TEAM; // To show cloaked teammates
 
 
    // now adjust if using cloak module

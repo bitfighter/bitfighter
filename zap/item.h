@@ -42,7 +42,7 @@ class GameType;
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class Item : public MoveObject, public LuaItem
+class MoveItem : public MoveObject, public LuaItem
 {
    typedef MoveObject Parent;
 
@@ -75,7 +75,7 @@ protected:
    static const U32 DROP_DELAY = 500;     // Time until we can pick the item up after it's dropped (in ms)
 
 public:
-   Item(Point p = Point(0,0), bool collideable = false, float radius = 1, float mass = 1);   // Constructor
+   MoveItem(Point p = Point(0,0), bool collideable = false, float radius = 1, float mass = 1);   // Constructor
 
    void idle(GameObject::IdleCallPath path);
 
@@ -149,9 +149,9 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class EditorItem : public Item, public EditorPointObject
+class EditorItem : public MoveItem, public EditorPointObject
 {
-   typedef Item Parent;   
+   typedef MoveItem Parent;   
    typedef EditorObject EditorParent;
 
 public:
@@ -170,8 +170,9 @@ public:
 
 class PickupItem : public EditorItem
 {
+   typedef MoveItem Parent;
+
 private:
-   typedef Item Parent;
    bool mIsVisible;
    bool mIsMomentarilyVisible;      // Used if item briefly flashes on and off, like if a ship is sitting on a repair item when it reappears
    Timer mRepopTimer;

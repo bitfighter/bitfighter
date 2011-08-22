@@ -204,7 +204,7 @@ static const S8 AsteroidCoords[AsteroidDesigns][AsteroidPoints][2] =   // <== Wo
 class Asteroid : public EditorItem
 {
 
-typedef Item Parent;
+typedef MoveItem Parent;      // TODO: Should be EditorItem???
 
 private:
    S32 mSizeIndex;
@@ -269,7 +269,7 @@ public:
 class Circle : public EditorItem
 {
 
-typedef Item Parent;
+typedef MoveItem Parent;
 
 private:
    bool hasExploded;
@@ -497,9 +497,9 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class Worm : public Item      // But not an editor object!!  -- should be a Projectile?
+class Worm : public MoveItem      // But not an editor object!!  -- should be a Projectile?
 {
-typedef Item Parent;
+typedef MoveItem Parent;
 
 public:
    static const S32 WORM_RADIUS = 5;
@@ -534,7 +534,7 @@ public:
 
 class TestItem : public EditorItem
 {
-   typedef Item Parent;
+   typedef MoveItem Parent;
 
 public:
    TestItem();     // Constructor
@@ -575,7 +575,7 @@ public:
 
 class ResourceItem : public EditorItem
 {
-   typedef Item Parent;
+   typedef MoveItem Parent;         // TODO: Should be EditorItem???
 
 public:
    ResourceItem();      // Constructor

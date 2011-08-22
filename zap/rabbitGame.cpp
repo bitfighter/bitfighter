@@ -334,7 +334,7 @@ bool RabbitGameType::teamHasFlag(S32 teamId) const
 }
 
 
-void RabbitGameType::itemDropped(Ship *ship, Item *item)
+void RabbitGameType::itemDropped(Ship *ship, MoveItem *item)
 {
    FlagItem *flag = dynamic_cast<FlagItem *>(item);
 
