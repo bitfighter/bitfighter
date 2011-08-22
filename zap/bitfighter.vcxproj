@@ -145,6 +145,7 @@
     <ClCompile Include="..\zap\engineeredObjects.cpp" />
     <ClCompile Include="..\zap\flagItem.cpp" />
     <ClCompile Include="..\zap\game.cpp" />
+    <ClCompile Include="..\zap\ClientGame.cpp" />
     <ClCompile Include="..\zap\gameConnection.cpp" />
     <ClCompile Include="..\zap\gameItems.cpp" />
     <ClCompile Include="..\zap\gameLoader.cpp" />
@@ -255,6 +256,7 @@
     <ClInclude Include="..\zap\flagItem.h" />
     <ClInclude Include="..\zap\ftol.h" />
     <ClInclude Include="..\zap\game.h" />
+    <ClInclude Include="..\zap\ClientGame.h" />
     <ClInclude Include="..\zap\gameConnection.h" />
     <ClInclude Include="..\zap\gameItems.h" />
     <ClInclude Include="..\zap\gameLoader.h" />
@@ -269,8 +271,8 @@
     <ClInclude Include="..\zap\IniFile.h" />
     <ClInclude Include="..\zap\input.h" />
     <ClInclude Include="..\zap\item.h" />
-    <ClCompile Include="Joystick.h" />
-    <ClCompile Include="JoystickRender.h" />
+    <ClInclude Include="Joystick.h" />
+    <ClInclude Include="JoystickRender.h" />
     <ClInclude Include="..\zap\keyCode.h" />
     <ClInclude Include="..\zap\lineEditor.h" />
     <ClInclude Include="EditorObject.h" />

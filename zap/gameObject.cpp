@@ -30,6 +30,10 @@
 #include "GeomUtils.h"
 #include "game.h"
 
+#ifndef ZAP_DEDICATED
+#include "ClientGame.h"
+#endif
+
 #include "projectile.h"
 
 #include <math.h>
@@ -701,13 +705,16 @@ void GameObject::onGhostAddBeforeUpdate(GhostConnection *theConnection)
    // Some unpackUpdate need getGame() available.
    GameConnection *gc = (GameConnection *)(theConnection);  // GhostConnection is always GameConnection
    TNLAssert(theConnection && gc->mClientGame, "Should only be client here!");
+#ifndef ZAP_DEDICATED
    mGame = gc->mClientGame;
+#endif
 }
 
 bool GameObject::onGhostAdd(GhostConnection *theConnection)
 {
    GameConnection *gc = (GameConnection *)(theConnection);  // GhostConnection is always GameConnection
    TNLAssert(theConnection && gc->mClientGame, "Should only be client here!");
+#ifndef ZAP_DEDICATED
 
 #ifdef TNL_ENABLE_ASSERTS
    mGame = NULL;  // prevent false asserts
@@ -715,6 +722,7 @@ bool GameObject::onGhostAdd(GhostConnection *theConnection)
 
    // for performance, add to GridDatabase after update, to avoid slowdown from adding to database with zero points or (0,0) then moving
    addToGame(gc->mClientGame, gc->mClientGame->getGameObjDatabase());
+#endif
    return true;
 }
 

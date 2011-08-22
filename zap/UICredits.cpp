@@ -26,6 +26,7 @@
 #include "UICredits.h"
 #include "UIMenus.h"
 #include "gameObjectRender.h"    // For renderBitfighterLogo
+#include "ClientGame.h"
 
 #include "../tnl/tnlRandom.h"
 #include "ScreenInfo.h"

@@ -35,6 +35,7 @@
 #include "Colors.h"
 #include "ScreenInfo.h"
 #include "JoystickRender.h"
+#include "ClientGame.h"
 
 #include "SDL/SDL.h"
 #include "SDL/SDL_opengl.h"

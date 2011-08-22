@@ -29,6 +29,11 @@
 #include "gameObjectRender.h"    // For renderPointVector()
 #include "game.h"
 
+#ifndef ZAP_DEDICATED
+#include "ClientGame.h"
+#endif
+
+
 #include "SDL/SDL_opengl.h"
 
 #include <math.h>
@@ -92,6 +97,7 @@ void TextItem::newObjectFromDock(F32 gridSize)
 // In game rendering
 void TextItem::render()
 {
+#ifndef ZAP_DEDICATED
    ClientGame *game = dynamic_cast<ClientGame *>(getGame());
    
    // Don't render opposing team's text items
@@ -103,6 +109,7 @@ void TextItem::render()
       return;
 
    renderTextItem(getVert(0), getVert(1), mSize, mText, game->getTeamColor(mTeam));
+#endif
 }
 
 
@@ -359,6 +366,7 @@ LineItem *LineItem::clone() const
 
 void LineItem::render()
 {
+#ifndef ZAP_DEDICATED
    GameConnection *gc = dynamic_cast<ClientGame *>(getGame())->getConnectionToServer();
    // Don't render opposing team's text items
    if(!gc)      // Not sure if this is really needed...
@@ -370,6 +378,7 @@ void LineItem::render()
 
    glColor(getGame()->getTeamColor(mTeam));
    renderPointVector(getOutline(), GL_LINE_STRIP);
+#endif
 }
 
 

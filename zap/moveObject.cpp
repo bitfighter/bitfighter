@@ -33,6 +33,10 @@
 #include "speedZone.h"
 #include "game.h"
 
+#ifndef ZAP_DEDICATED
+#include "ClientGame.h"
+#endif
+
 #include <math.h>
 
 namespace Zap
@@ -63,8 +67,10 @@ void MoveObject::onAddedToGame(Game *game)
 {
    Parent::onAddedToGame(game);
 
+#ifndef ZAP_DEDICATED
    if(isGhost())     // Client only
       this->setControllingClient(dynamic_cast<ClientGame *>(game)->getConnectionToServer());
+#endif
 }
 
 static const float MoveObjectCollisionElasticity = 1.7f;
@@ -467,6 +473,7 @@ void MoveObject::computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *
          ship->damageObject(&theInfo);
       }
    }
+#ifndef ZAP_DEDICATED
    else     // Client only
    {
       playCollisionSound(stateIndex, moveObjectThatWasHit, v1i);
@@ -477,6 +484,7 @@ void MoveObject::computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *
       if(item && gameType)
          gameType->c2sResendItemStatus(item->getItemId());
    }
+#endif
 }
 
 

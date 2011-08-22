@@ -30,6 +30,10 @@
 #include "gameObjectRender.h"
 #include "game.h"
 
+#ifndef ZAP_DEDICATED
+#include "ClientGame.h"
+#endif
+
 namespace Zap
 {
 
@@ -248,6 +252,8 @@ namespace Zap
    // Runs on client
    void RetrieveGameType::renderInterfaceOverlay(bool scoreboardVisible)
    {
+#ifndef ZAP_DEDICATED
+
       Parent::renderInterfaceOverlay(scoreboardVisible);
       Ship *ship = dynamic_cast<Ship *>(dynamic_cast<ClientGame *>(getGame())->getConnectionToServer()->getControlObject());
       if(!ship)
@@ -300,6 +306,7 @@ namespace Zap
                renderObjectiveArrow(mount, getTeamColor(mount->getTeam()));
          }
       }
+#endif
    }
 
 

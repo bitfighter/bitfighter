@@ -37,6 +37,10 @@
 #include "game.h"
 #include "UIMenuItems.h"
 
+#ifndef ZAP_DEDICATED
+#include "ClientGame.h"
+#endif
+
 #include "SDL/SDL_opengl.h"
 
 #include <math.h>
@@ -66,6 +70,8 @@ TNL_IMPLEMENT_NETOBJECT_RPC(HuntersGameType, s2cHuntersMessage,
    (U32 msgIndex, StringTableEntry clientName, U32 flagCount, U32 score), (msgIndex, clientName, flagCount, score),
    NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhost, 0)
 {
+#ifndef ZAP_DEDICATED
+
    ClientGame *clientGame = dynamic_cast<ClientGame *>(getGame());
    TNLAssert(clientGame, "clientGame is NULL");
    if(!clientGame) return;
@@ -94,6 +100,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(HuntersGameType, s2cHuntersMessage,
       clientGame->displayMessage(Color(0.6f, 1.0f, 0.8f), "The game ended in a tie.");
       SoundSystem::playSoundEffect(SFXFlagDrop);
    }
+#endif
 }
 
 

@@ -32,6 +32,10 @@
 #include "gameObjectRender.h"
 #include "game.h"
 
+#ifndef ZAP_DEDICATED
+#include "ClientGame.h"
+#endif
+
 #include "SDL/SDL_opengl.h"
 #include "UI.h"
 
@@ -447,8 +451,8 @@ void GrenadeProjectile::idle(IdleCallPath path)
    bool collisionDisabled = false;
    GameConnection *gc = NULL;
 
-   // Fix effect of ship getting ahead of burst on laggy client   
-   if(isGhost())
+#ifndef ZAP_DEDICATED
+   if(isGhost())   // Fix effect of ship getting ahead of burst on laggy client  
    {
       U32 aliveTime = getGame()->getCurrentTime() - getCreationTime();  // Age of object, in ms
 
@@ -460,6 +464,7 @@ void GrenadeProjectile::idle(IdleCallPath path)
       if(collisionDisabled) 
          gc->getControlObject()->disableCollision();
    }
+#endif
 
    Parent::idle(path);
 
@@ -767,6 +772,7 @@ void Mine::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
 void Mine::renderItem(Point pos)
 {
+#ifndef ZAP_DEDICATED
    if(exploded)
       return;
 
@@ -797,7 +803,8 @@ void Mine::renderItem(Point pos)
       visible = true;
    }
 
-      renderMine(pos, armed, visible);
+   renderMine(pos, armed, visible);
+#endif
 }
 
 
@@ -970,6 +977,7 @@ void SpyBug::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
 void SpyBug::renderItem(Point pos)
 {
+#ifndef ZAP_DEDICATED
    if(exploded)
       return;
 
@@ -996,6 +1004,7 @@ void SpyBug::renderItem(Point pos)
       visible = true;
 
    renderSpyBug(pos, visible);
+#endif
 }
 
 

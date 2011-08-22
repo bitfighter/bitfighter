@@ -31,8 +31,9 @@
 #include "UIMenus.h"
 #include "config.h"
 #include "Colors.h"
-#include "game.h"
+#include "ClientGame.h"
 #include "JoystickRender.h"
+#include "ClientGame.h"
 
 #include "SDL/SDL_opengl.h"
 

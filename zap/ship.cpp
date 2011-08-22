@@ -48,7 +48,10 @@
 #include "stringUtils.h"      // For itos
 #include "game.h"
 
+#ifndef ZAP_DEDICATED
+#include "ClientGame.h"
 #include "SDL/SDL_opengl.h"
+#endif
 
 #include <stdio.h>
 #include <math.h>
@@ -1321,8 +1324,11 @@ void Ship::setLoadout(const Vector<U32> &loadout, bool silent)
 
    // And notifiy user
    GameConnection *cc = getControllingClient();
-   if(!cc)
+
+#ifndef ZAP_DEDICATED
+   if(!cc && gClientGame)
       cc = gClientGame->getConnectionToServer();      // Second try
+#endif
 
    if(cc)
    {
@@ -1552,6 +1558,7 @@ extern bool gShowAimVector;
 
 void Ship::render(S32 layerIndex)
 {
+#ifndef ZAP_DEDICATED
    ClientGame *clientGame = dynamic_cast<ClientGame *>(getGame());
 
    if(layerIndex == 0) return;   // Only render on layers -1 and 1
@@ -1707,6 +1714,7 @@ void Ship::render(S32 layerIndex)
    for(S32 i = 0; i < mMountedItems.size(); i++)
       if(mMountedItems[i].isValid())
          mMountedItems[i]->renderItem(mMoveState[RenderState].pos);
+#endif
 }
 
 

@@ -35,6 +35,7 @@
 #include "version.h"
 #include "Joystick.h"
 #include "config.h"
+#include "ClientGame.h"
 
 #include "SharedConstants.h"    // For AuthenticationStatus enum
 

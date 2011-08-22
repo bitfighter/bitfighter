@@ -15,6 +15,7 @@
 #include "ScreenShooter.h"
 #include "ScreenInfo.h"
 #include "Joystick.h"
+#include "ClientGame.h"
 
 #include "SDL/SDL_opengl.h"
 

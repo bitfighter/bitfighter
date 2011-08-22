@@ -35,7 +35,7 @@
 #include "UIKeyDefMenu.h"
 #include "UIErrorMessage.h"
 #include "gameObjectRender.h"    // For renderBitfighterLogo, glColor
-#include "game.h"
+#include "ClientGame.h"
 #include "gameType.h"
 #include "input.h"
 //#include "keyCode.h"

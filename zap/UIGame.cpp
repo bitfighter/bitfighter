@@ -48,7 +48,7 @@
 #include "oglconsole.h"          // Our console object
 #include "config.h"              // for Getmap level dir
 #include "ScreenInfo.h"
-#include "game.h"
+#include "ClientGame.h"
 
 #include "../tnl/tnlEndian.h"
 

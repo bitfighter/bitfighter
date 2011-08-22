@@ -33,6 +33,7 @@
 #include "UIDiagnostics.h"
 #include "Colors.h"
 #include "ScreenInfo.h"
+#include "ClientGame.h"
 
 #include "SDL/SDL_opengl.h"
 

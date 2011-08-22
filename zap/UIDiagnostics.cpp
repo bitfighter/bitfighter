@@ -34,6 +34,8 @@
 #include "ScreenInfo.h"
 #include "Joystick.h"
 #include "JoystickRender.h"
+#include "ClientGame.h"
+
 
 #include "tnl.h"
 

@@ -29,7 +29,6 @@
 #include "tnlNetObject.h"
 #include "tnlTypes.h"
 
-#include "gameConnection.h"
 #include "gridDB.h"
 #include "Timer.h"
 #include "gameLoader.h"
@@ -42,10 +41,6 @@
 
 
 #include "boost/smart_ptr/shared_ptr.hpp"
-
-#ifdef TNL_OS_WIN32
-#include <windows.h>   // For screensaver... windows only feature, I'm afraid!
-#endif
 
 #include <string>
 
@@ -90,6 +85,10 @@ using namespace std;
 
 namespace Zap
 {
+
+const U32 MAX_GAME_NAME_LEN = 32;     // Any longer, and it won't fit on-screen
+const U32 MAX_GAME_DESCR_LEN = 60;    // Any longer, and it won't fit on-screen; also limits max length of credits string
+
 
 // Some forward declarations
 class MasterServerConnection;
@@ -473,6 +472,7 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+/* TODO: delete commented below, only here to prevent any possible merge conflict (Moved to ClientGame.h)
 class ClientGame : public Game
 {
    typedef Game Parent;
@@ -618,13 +618,13 @@ public:
    bool processPseudoItem(S32 argc, const char **argv, const string &levelFileName);        // For loading levels in editor
 
 };
+*/
 
 ////////////////////////////////////////
 ////////////////////////////////////////
 
 
 extern ServerGame *gServerGame;
-extern ClientGame *gClientGame;
 
 extern Vector<string> gMasterAddress;
 

@@ -34,6 +34,10 @@ using namespace TNL;
 #include "Colors.h"
 #include "game.h"
 
+#ifndef ZAP_DEDICATED
+#include "ClientGame.h"
+#endif
+
 #include "SDL/SDL_opengl.h"
 #include "UI.h"
 
@@ -125,7 +129,9 @@ bool Teleporter::processArguments(S32 argc2, const char **argv2, Game *game)
    // See if we already have any teleports with this pos... if so, this is a "multi-dest" teleporter
    bool found = false;
 
+#ifndef ZAP_DEDICATED
    if(!dynamic_cast<ClientGame *>(game))              // Editor handles multi-dest teleporters as separate single dest items
+#endif
    {
       foundObjects.clear();
       game->getGameObjDatabase()->findObjects(TeleportTypeNumber, foundObjects, Rect(pos, 1));
@@ -288,6 +294,7 @@ inline Point polarToRect(Point p)
 
 void Teleporter::render()
 {
+#ifndef ZAP_DEDICATED
    F32 r;
    if(timeout > TeleporterExpandTime - TeleporterDelay + mTeleporterDelay)
       r = (timeout - TeleporterExpandTime + TeleporterDelay - mTeleporterDelay) / F32(TeleporterDelay - TeleporterExpandTime);
@@ -301,6 +308,7 @@ void Teleporter::render()
       F32 zoomFraction = dynamic_cast<ClientGame *>(getGame())->getCommanderZoomFraction();
       renderTeleporter(getVert(0), 0, true, mTime, zoomFraction, r, (F32)TELEPORTER_RADIUS, 1.0, mDests, false);
    }
+#endif
 }
 
 

@@ -32,6 +32,11 @@
 #include "goalZone.h"
 #include "game.h"
 
+#ifndef ZAP_DEDICATED
+#include "ClientGame.h"
+#endif
+
+
 namespace Zap
 {
 
@@ -47,6 +52,8 @@ TNL_IMPLEMENT_NETOBJECT_RPC(SoccerGameType, s2cSoccerScoreMessage,
    (U32 msgIndex, StringTableEntry clientName, RangedU32<0, GameType::gMaxTeamCount> teamIndex), (msgIndex, clientName, teamIndex),
    NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhost, 0)
 {
+#ifndef ZAP_DEDICATED
+
    S32 teamIndexAdjusted = (S32) teamIndex + GameType::gFirstTeamNumber;      // Before calling this RPC, we subtracted gFirstTeamNumber, so we need to add it back here...
    string msg;
    SoundSystem::playSoundEffect(SFXFlagCapture);
@@ -98,6 +105,8 @@ TNL_IMPLEMENT_NETOBJECT_RPC(SoccerGameType, s2cSoccerScoreMessage,
 
    // Print the message
    clientGame->displayMessage(Color(0.6f, 1.0f, 0.8f), msg.c_str());
+
+#endif
 }
 
 
@@ -175,6 +184,8 @@ void SoccerGameType::scoreGoal(Ship *ship, StringTableEntry scorerName, S32 scor
 // Runs on client
 void SoccerGameType::renderInterfaceOverlay(bool scoreboardVisible)
 {
+#ifndef ZAP_DEDICATED
+
    Parent::renderInterfaceOverlay(scoreboardVisible);
    Ship *ship = dynamic_cast<Ship *>(dynamic_cast<ClientGame *>(getGame())->getConnectionToServer()->getControlObject());
 
@@ -190,6 +201,7 @@ void SoccerGameType::renderInterfaceOverlay(bool scoreboardVisible)
    }
    if(mBall.isValid())
       renderObjectiveArrow(mBall, getTeamColor(-1));
+#endif
 }
 
 

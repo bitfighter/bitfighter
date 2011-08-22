@@ -28,7 +28,7 @@
 #include "UIMenus.h"
 #include "gameType.h"
 #include "Colors.h"
-#include "game.h"
+#include "ClientGame.h"
 #include "JoystickRender.h"
 #include "config.h"
 

@@ -28,7 +28,7 @@
 #include "gameObjectRender.h"
 #include "Colors.h"
 #include "config.h"
-#include "game.h"    // For getCommanderZoomFraction()
+#include "ClientGame.h"    // For getCommanderZoomFraction()
 
 #include "SDL/SDL_opengl.h"
 #include "UI.h"

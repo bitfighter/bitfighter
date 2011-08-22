@@ -34,6 +34,7 @@
 #include "IniFile.h"
 #include "config.h"
 #include "gameType.h"
+#include "ClientGame.h"
 
 #include "SDL/SDL.h"
 #include "SDL/SDL_opengl.h"

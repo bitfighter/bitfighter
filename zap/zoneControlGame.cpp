@@ -30,6 +30,11 @@
 #include "gameObjectRender.h"
 #include "game.h"
 
+#ifndef ZAP_DEDICATED
+#include "ClientGame.h"
+#endif
+
+
 namespace Zap
 {
 
@@ -195,6 +200,8 @@ void ZoneControlGameType::performProxyScopeQuery(GameObject *scopeObject, GameCo
 // Do some extra rendering required by this game, runs on client
 void ZoneControlGameType::renderInterfaceOverlay(bool scoreboardVisible)
 {
+#ifndef ZAP_DEDICATED
+
    Parent::renderInterfaceOverlay(scoreboardVisible);
    Ship *ship = dynamic_cast<Ship *>(dynamic_cast<ClientGame *>(getGame())->getConnectionToServer()->getControlObject());
    if(!ship)
@@ -233,8 +240,8 @@ void ZoneControlGameType::renderInterfaceOverlay(bool scoreboardVisible)
          }
       }
    }
+#endif
 }
-
 
 bool ZoneControlGameType::teamHasFlag(S32 teamId)
 {

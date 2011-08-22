@@ -32,7 +32,7 @@ using namespace TNL;
 #include "UIMenus.h"
 #include "input.h"      // For MaxJoystickButtons const
 #include "config.h"
-#include "game.h"
+#include "ClientGame.h"
 #include "oglconsole.h"    // For console rendering
 //#include "UIEditor.h"      // <--- we need to get rid of this one!
 //#include "UICredits.h"     // <--- don't want this one either

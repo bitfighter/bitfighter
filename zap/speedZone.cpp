@@ -34,6 +34,11 @@
 #include "UI.h"
 #include "SoundSystem.h"
 
+#ifndef ZAP_DEDICATED
+#include "ClientGame.h"
+#endif
+
+
 namespace Zap
 {
 
@@ -273,10 +278,12 @@ const char *SpeedZone::getInstructionMsg()
 
 EditorAttributeMenuUI *SpeedZone::getAttributeMenu()
 {
+#ifndef ZAP_DEDICATED
    // Lazily initialize this -- if we're in the game, we'll never need this to be instantiated
    if(!mAttributeMenuUI)
       mAttributeMenuUI = new GoFastEditorAttributeMenuUI(dynamic_cast<ClientGame *>(getGame()));
 
+#endif
    return mAttributeMenuUI;
 }
 
@@ -295,6 +302,7 @@ bool SpeedZone::collide(GameObject *hitObject)
       if(!s)
          return false;
 
+#ifndef ZAP_DEDICATED
       if(isGhost()) // on client, don't process speedZone on all moveObjects except the controlling one.
       {
          ClientGame *client = dynamic_cast<ClientGame *>(getGame());
@@ -305,6 +313,7 @@ bool SpeedZone::collide(GameObject *hitObject)
                return false;
          }
       }
+#endif
       return true;
    }
    return false;

@@ -27,6 +27,10 @@
 #include "game.h"
 #include "version.h"
 
+#ifndef ZAP_DEDICATED
+#include "ClientGame.h"
+#endif
+
 namespace Zap
 {
 
@@ -119,7 +123,9 @@ void GameNetInterface::handleInfoPacket(const Address &remoteAddress, U8 packetT
             pingResponse.sendto(mSocket, remoteAddress);
          }
          break;
-      case PingResponse:
+
+#ifndef ZAP_DEDICATED
+      case PingResponse: // Client only
          if(!mGame->isServer())
          {
             Nonce theNonce;
@@ -130,6 +136,8 @@ void GameNetInterface::handleInfoPacket(const Address &remoteAddress, U8 packetT
             dynamic_cast<ClientGame *>(mGame)->gotPingResponse(remoteAddress, theNonce, clientIdentityToken);
          }
          break;
+#endif
+
       case Query:
          if(mGame->isServer())
          {
@@ -157,7 +165,9 @@ void GameNetInterface::handleInfoPacket(const Address &remoteAddress, U8 packetT
             }
          }
          break;
-      case QueryResponse:
+
+#ifndef ZAP_DEDICATED
+      case QueryResponse: // Client only
          if(!mGame->isServer())
          {
             Nonce theNonce;
@@ -181,6 +191,8 @@ void GameNetInterface::handleInfoPacket(const Address &remoteAddress, U8 packetT
             dynamic_cast<ClientGame *>(mGame)->gotQueryResponse(remoteAddress, theNonce, name.getString(), descr.getString(), playerCount, maxPlayers, botCount, dedicated, test, passwordRequired);
          }
          break;
+#endif
+
    }
 }
 

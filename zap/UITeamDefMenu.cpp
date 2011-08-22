@@ -34,6 +34,7 @@
 #include "config.h"
 #include "gameType.h"      // For MAX_TEAMS
 #include "ScreenInfo.h"
+#include "ClientGame.h"
 
 #include "SDL/SDL.h"
 #include "SDL/SDL_opengl.h"

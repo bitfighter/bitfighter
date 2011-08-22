@@ -28,7 +28,7 @@
 #include "UIGame.h"
 #include "UIChat.h"
 #include "UIDiagnostics.h"
-#include "game.h"
+#include "ClientGame.h"
 #include "gameObjectRender.h"
 #include "ship.h"
 #include "teleporter.h"

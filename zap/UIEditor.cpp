@@ -36,7 +36,7 @@
 #include "UIErrorMessage.h"
 #include "UIYesNo.h"
 #include "gameObjectRender.h"
-#include "game.h"                // Can delete?
+#include "ClientGame.h"                // Can delete?
 #include "gameType.h"
 #include "soccerGame.h"          // For Soccer ball radius
 #include "engineeredObjects.h"   // For Turret properties

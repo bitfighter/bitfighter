@@ -28,7 +28,7 @@
 #include "UIGame.h"
 #include "UIChat.h"
 #include "UIEditor.h"
-#include "game.h"
+#include "ClientGame.h"
 #include "gameConnection.h"
 #include "config.h"
 #include "md5wrapper.h"

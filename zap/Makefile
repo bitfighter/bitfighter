@@ -70,6 +70,7 @@ OBJECTS_ZAP=\
    UIQueryServers.o\
    UIGameParameters.o\
    barrier.o\
+   ClientGame.o\
    Color.o\
    config.o\
    controlObjectConnection.o\

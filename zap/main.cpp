@@ -118,7 +118,7 @@ using namespace TNL;
 #include "UIErrorMessage.h"
 #include "UIDiagnostics.h"
 #include "UICredits.h"
-#include "game.h"
+#include "ClientGame.h"
 #include "gameNetInterface.h"
 #include "masterConnection.h"
 #include "SoundSystem.h"

@@ -28,7 +28,7 @@
 #include "tnlRandom.h"
 #include "masterConnection.h"
 #include "gameNetInterface.h"
-#include "game.h"
+#include "ClientGame.h"
 #include "gameType.h"
 #include "Colors.h"
 #include "config.h"     // TODO: remove requirement -- currently for gIni stuff in screen pos calc

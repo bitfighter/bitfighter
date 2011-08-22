@@ -24,7 +24,7 @@
 //------------------------------------------------------------------------------------
 
 #include "gameConnection.h"
-#include "game.h"
+#include "ClientGame.h"
 #include "gameType.h"
 #include "soccerGame.h"          // For checking if pick up soccer is allowed
 #include "gameNetInterface.h"

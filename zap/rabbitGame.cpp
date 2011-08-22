@@ -32,6 +32,10 @@
 #include "game.h"
 #include "UIMenuItems.h"
 
+#ifndef ZAP_DEDICATED
+#include "ClientGame.h"
+#endif
+
 #include <stdio.h>
 
 namespace Zap
@@ -40,6 +44,7 @@ namespace Zap
 TNL_IMPLEMENT_NETOBJECT_RPC(RabbitGameType, s2cRabbitMessage, (U32 msgIndex, StringTableEntry clientName), (msgIndex, clientName),
    NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhost, 0)
 {
+#ifndef ZAP_DEDICATED
    ClientGame *clientGame = dynamic_cast<ClientGame *>(getGame());
    TNLAssert(clientGame, "clientGame is NULL");
    if(!clientGame) return;
@@ -85,6 +90,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(RabbitGameType, s2cRabbitMessage, (U32 msgIndex, Str
                   "No top rabbit - Carrot wins by default!");
       break;
    }
+#endif
 }
 
 //-----------------------------------------------------
@@ -198,8 +204,13 @@ bool RabbitGameType::objectCanDamageObject(GameObject *damager, GameObject *vict
 
 
 // Works for ships and robots!  --> or does it?  Was a template, but it wasn't working for regular ships, haven't tested with robots
+// Client only
 const Color *RabbitGameType::getShipColor(Ship *s)
 {
+#ifdef ZAP_DEDICATED
+   return &Colors::white;
+#else
+
    if(getGame()->getTeamCount() != 1)
       return Parent::getShipColor(s);
 
@@ -211,6 +222,7 @@ const Color *RabbitGameType::getShipColor(Ship *s)
    Ship *co = dynamic_cast<Ship *>(gc->getControlObject());
 
    return (s == co || (!shipHasFlag(s) && !shipHasFlag(co))) ? &Colors::green : &Colors::red;
+#endif
 }
 
 

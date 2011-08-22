@@ -28,7 +28,7 @@
 #include "UIGame.h"
 #include "Color.h"                  // For Color def
 #include "Colors.h"
-#include "game.h"
+#include "ClientGame.h"
 #include "JoystickRender.h"
 #include "config.h"
 #include "gameObjectRender.h"       // For drawSquare

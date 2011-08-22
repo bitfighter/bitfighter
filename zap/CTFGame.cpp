@@ -29,6 +29,10 @@
 #include "flagItem.h"
 #include "game.h"
 
+#ifndef ZAP_DEDICATED
+#include "ClientGame.h"
+#endif
+
 #include <stdio.h>
 
 namespace Zap
@@ -177,6 +181,7 @@ void CTFGameType::performProxyScopeQuery(GameObject *scopeObject, GameConnection
 
 void CTFGameType::renderInterfaceOverlay(bool scoreboardVisible)
 {
+#ifndef ZAP_DEDICATED
    Parent::renderInterfaceOverlay(scoreboardVisible);
 
    // Rendering objective arrows makes no sense if there is no ship at the moment...
@@ -198,6 +203,7 @@ void CTFGameType::renderInterfaceOverlay(bool scoreboardVisible)
       else
          renderObjectiveArrow(mFlags[i], getTeamColor(mFlags[i]->getTeam()));
    }
+#endif
 }
 
 

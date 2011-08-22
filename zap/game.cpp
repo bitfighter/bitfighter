@@ -49,17 +49,8 @@
 
 #include "IniFile.h"             // For CIniFile def
 
-#include "UIQueryServers.h"
-#include "UIErrorMessage.h"
 
 #include "BotNavMeshZone.h"      // For zone clearing code
-#include "ScreenInfo.h"
-#include "Joystick.h"
-
-#include "UIGame.h"
-#include "UIGameParameters.h"
-#include "UIEditor.h"
-#include "UINameEntry.h"
 
 #include "tnl.h"
 #include "tnlRandom.h"
@@ -67,8 +58,6 @@
 #include "tnlNetInterface.h"
 
 #include "md5wrapper.h"
-
-#include "SDL/SDL_opengl.h"
 
 #include <boost/shared_ptr.hpp>
 #include <sys/stat.h>
@@ -78,23 +67,23 @@
 #include "soccerGame.h"
 
 
+#ifdef PRINT_SOMETHING
+#include "ClientGame.h"  // only used to print some variables in ClientGame...
+#endif
+
+
 using namespace TNL;
 
 namespace Zap
 {
-bool showDebugBots = false;
-
 
 // Global Game objects
 ServerGame *gServerGame = NULL;
 
-ClientGame *gClientGame = NULL;
-ClientGame *gClientGame1 = NULL;
-ClientGame *gClientGame2 = NULL;
-
-extern ScreenInfo gScreenInfo;
-
 static Vector<DatabaseObject *> fillVector2;
+
+class ClientGame;
+extern ClientGame *gClientGame; // only used to see if we have a ClientGame, for buildBotMeshZones
 
 //-----------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------
@@ -1364,7 +1353,9 @@ bool ServerGame::loadLevel(const string &levelFileName)
       return false;
    }
 
+#ifdef PRINT_SOMETHING
    logprintf("1 server: %d, client %d", gServerGame->getGameObjDatabase()->getObjectCount(),gClientGame->getGameObjDatabase()->getObjectCount());
+#endif
    if(loadLevelFromFile(filename.c_str(), false, getGameObjDatabase()))
       mLevelFileHash = md5.getHashFromFile(filename);    // TODO: Combine this with the reading of the file we're doing anyway in initLevelFromFile()
    else
@@ -1372,7 +1363,9 @@ bool ServerGame::loadLevel(const string &levelFileName)
       logprintf("Unable to process level file \"%s\".  Skipping...", levelFileName.c_str());
       return false;
    }
+#ifdef PRINT_SOMETHING
    logprintf("2 server: %d, client %d", gServerGame->getGameObjDatabase()->getObjectCount(),gClientGame->getGameObjDatabase()->getObjectCount());
+#endif
 
    // We should have a gameType by the time we get here... but in case we don't, we'll add a default one now
    if(!getGameType())
@@ -1760,7 +1753,7 @@ S32 ServerGame::addLevelInfo(const char *filename, LevelInfo &info)
 //-----------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------
 
-
+/*  TODO: delete commented below, only here to prevent any possible merge conflict (Moved to ClientGame.cpp
 // Constructor
 ClientGame::ClientGame(const Address &bindAddress) : Game(bindAddress)
 {
@@ -3215,7 +3208,7 @@ bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &le
 
    return true;
 }
-
+*/
 
 };
 

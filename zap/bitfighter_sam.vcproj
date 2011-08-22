@@ -791,6 +791,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\ClientGame.cpp"
+			>
+		</File>
+		<File
 			RelativePath="..\clipper\clipper.cpp"
 			>
 		</File>

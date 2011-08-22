@@ -40,7 +40,8 @@
 #include "gameStats.h"      // For VersionedGameStats def
 #include "version.h"
 #include "Colors.h"
-#include "game.h"
+#include "ClientGame.h"
+
 
 #include "../master/database.h"
 
