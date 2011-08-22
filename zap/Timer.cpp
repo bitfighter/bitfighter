@@ -36,9 +36,12 @@ Timer::Timer(U32 period)
    mCurrentCounter = mPeriod = period;
 }
 
+
 Timer::~Timer()
 {
+   // Do nothing
 }
+
 
 bool Timer::update(U32 timeDelta)
 {
@@ -53,6 +56,7 @@ bool Timer::update(U32 timeDelta)
    mCurrentCounter -= timeDelta;
    return false;
 }
+
 
 U32 Timer::getCurrent() const
 {
@@ -117,5 +121,6 @@ void Timer::clear()
 {
    mCurrentCounter = 0;
 }
+
 
 } /* namespace Zap */

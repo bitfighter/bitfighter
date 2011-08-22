@@ -96,6 +96,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(HuntersGameType, s2cHuntersMessage,
    }
 }
 
+
 // Constructor
 HuntersGameType::HuntersGameType() : GameType(100)
 {
