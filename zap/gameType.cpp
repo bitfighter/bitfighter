@@ -24,8 +24,8 @@
 //------------------------------------------------------------------------------------
 
 #include "gameType.h"
-#include "UIGame.h"
-#include "UIMenus.h"
+#include "UIGame.h"        // TODO: Get this out of here
+#include "UIMenus.h"       // TODO: Get this out of here
 #include "gameNetInterface.h"
 #include "flagItem.h"
 #include "gameItems.h"     // For asteroid def.

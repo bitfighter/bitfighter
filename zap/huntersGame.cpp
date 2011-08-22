@@ -25,17 +25,20 @@
 
 #include "huntersGame.h"
 #include "flagItem.h"
-#include "UIGame.h"
 #include "SoundSystem.h"
 #include "gameNetInterface.h"
 #include "ship.h"
-#include "gameObjectRender.h"
-#include "GeomUtils.h"      // For centroid calculation for labeling
-#include "stringUtils.h"         // For itos
-#include "Colors.h"
-#include "ScreenInfo.h"
+#include "GeomUtils.h"        // For centroid calculation for labeling
+#include "stringUtils.h"      // For itos
 #include "game.h"
 #include "UIMenuItems.h"
+
+// Things I think should not be on server side
+#include "Colors.h"
+#include "ScreenInfo.h"
+#include "gameObjectRender.h"
+#include "UIGame.h"
+
 
 #ifndef ZAP_DEDICATED
 #include "ClientGame.h"
