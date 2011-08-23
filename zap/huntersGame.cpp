@@ -37,7 +37,6 @@
 #include "Colors.h"
 #include "ScreenInfo.h"
 #include "gameObjectRender.h"
-#include "UIGame.h"
 
 
 #ifndef ZAP_DEDICATED

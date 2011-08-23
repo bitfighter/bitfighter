@@ -26,6 +26,10 @@
 #ifndef _CLIENTGAME_H_
 #define _CLIENTGAME_H_
 
+#ifdef ZAP_DEDICATED
+#error "ClientGame.h shouldn't be included in dedicated build"
+#endif
+
 #include "game.h"
 
 #include "gameConnection.h"

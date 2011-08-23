@@ -260,9 +260,13 @@ class EditorObject : virtual public BfObject   // Interface class  -- All editor
 {
    // dedicated server won't need much of this
 public:
-   virtual EditorObject *clone()  const = 0;
+   virtual EditorObject *clone()  const { TNLAssert(false, "Clone method not implemented!"); };
    EditorObject *newCopy() {return clone();};        // Copies object        // TODO: Will become call to clone, delete method
 };
+
+class EditorPointObject : public EditorObject, public PointGeometry {};
+class EditorItem : public EditorPointObject {};
+
 
 #endif
 };

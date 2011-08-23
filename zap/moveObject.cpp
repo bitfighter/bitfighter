@@ -58,13 +58,17 @@ string Item::toString(F32 gridSize) const
 }
 
 
+#ifndef ZAP_DEDICATED
 extern void glColor(const Color &c, float alpha = 1.0);
+#endif
 
 // Provide generic item rendering; will be overridden
 void Item::renderItem(const Point &pos)
 {
+#ifndef ZAP_DEDICATED
    glColor(Colors::cyan);
    drawSquare(pos, 10, true);
+#endif
 }
 
 

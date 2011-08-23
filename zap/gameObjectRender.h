@@ -229,6 +229,7 @@ extern void renderStaticBitfighterLogo();
 #define renderPolygonFill
 #define renderPolygonOutline
 #define drawCircle
+#define drawSquare
 
 
 #endif
