@@ -440,4 +440,53 @@ bool EditorObject::canBeHostile()
    return true;
 }
 
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// TODO: merge with simpleLine values, put in editor
+static const S32 INSTRUCTION_TEXTSIZE = 9;      
+static const S32 INSTRUCTION_TEXTGAP = 3;
+//static const Color INSTRUCTION_TEXTCOLOR(1,1,1);      // TODO: Put in editor
+
+// Offset: negative below the item, positive above
+void EditorPointObject::renderItemText(const char *text, S32 offset, F32 currentScale, const Point &currentOffset)
+{
+   glColor(INSTRUCTION_TEXTCOLOR);
+   S32 off = (INSTRUCTION_TEXTSIZE + INSTRUCTION_TEXTGAP) * offset - 10 - ((offset > 0) ? 5 : 0);
+
+   Point pos = getVert(0) * currentScale + currentOffset;
+
+   UserInterface::drawCenteredString(pos.x, pos.y - off, INSTRUCTION_TEXTSIZE, text);
+}
+
+
+void EditorPointObject::prepareForDock(Game *game, const Point &point)
+{
+   setVert(point, 0);
+   Parent::prepareForDock(game, point);
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+//string EditorItem::toString(F32 gridSize) const
+//{
+//   return string(getClassName()) + " " + geomToString(gridSize);
+//}
+//
+//
+//void EditorItem::renderEditor(F32 currentScale)
+//{
+//   renderItem(getVert(0));                    
+//}
+//
+//
+//F32 EditorItem::getEditorRadius(F32 currentScale)
+//{
+//   return (getRadius() + 2) * currentScale;
+//}
+
+
 };

@@ -261,8 +261,7 @@ bool EngineerModuleDeployer::deployEngineeredItem(GameConnection *connection, U3
 
 
 // Constructor
-EngineeredObject::EngineeredObject(S32 team, Point anchorPoint, Point anchorNormal) : 
-      EditorPointObject(), mAnchorNormal(anchorNormal)
+EngineeredObject::EngineeredObject(S32 team, Point anchorPoint, Point anchorNormal) : mAnchorNormal(anchorNormal)
 {
    setVert(anchorPoint, 0);
    mHealth = 1.0f;
@@ -662,11 +661,13 @@ static bool renderFull(F32 currentScale, bool snapped)
 TNL_IMPLEMENT_NETOBJECT(ForceFieldProjector);
 
 // Constructor
-ForceFieldProjector::ForceFieldProjector(S32 team, Point anchorPoint, Point anchorNormal) : EngineeredObject(team, anchorPoint, anchorNormal)
+ForceFieldProjector::ForceFieldProjector(S32 team, Point anchorPoint, Point anchorNormal) : Parent(team, anchorPoint, anchorNormal)
 {
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = ForceFieldProjectorTypeNumber;
+   mRadius = 7;
 }
+
 
 void ForceFieldProjector::onDisabled()
 {

@@ -33,10 +33,10 @@
 namespace Zap
 {
 
-class EngineeredObject : public GameObject, public EditorPointObject, public LuaItem
+class EngineeredObject : public Item    // TODO: Rename to EngineeredItem
 {
 private:
-   typedef GameObject Parent;
+   typedef Item Parent;
 
 protected:
    F32 mHealth;
@@ -54,10 +54,10 @@ protected:
 
    enum MaskBits
    {
-      InitialMask = BIT(0),
-      HealthMask = BIT(1),
-      TeamMask = BIT(2),
-      NextFreeMask = BIT(3),
+      InitialMask = Parent::FirstFreeMask << 0,
+      HealthMask = Parent::FirstFreeMask << 1,
+      TeamMask = Parent::FirstFreeMask << 2,
+      FirstFreeMask = Parent::FirstFreeMask << 3,
    };
 
 public:
@@ -132,20 +132,21 @@ public:
 
 class ForceField : public GameObject
 {
+   typedef GameObject Parent;
+
 private:
    Point mStart, mEnd;
    Timer mDownTimer;
    bool mFieldUp;
 
-public:
-   enum Constants
-   {
-      InitialMask = BIT(0),
-      StatusMask = BIT(1),
-
-      FieldDownTime = 250,
+protected:
+   enum MaskBits {
+      StatusMask   = Parent::FirstFreeMask << 0,
+      FirstFreeMask = Parent::FirstFreeMask << 1
    };
 
+public:
+   static const S32 FieldDownTime = 250;
    static const S32 MAX_FORCEFIELD_LENGTH = 2500;
 
 
@@ -240,19 +241,19 @@ public:
    void push(lua_State *L) {  Lunar<ForceFieldProjector>::push(L, this); }
 
    // LuaItem methods
-   enum {
-      radius = 7,
-   };
-
-   S32 getRad(lua_State *L) { return returnInt(L, radius); }
-   S32 getLoc(lua_State *L) { return LuaObject::returnPoint(L, getVert(0) + mAnchorNormal * radius ); }
+   //S32 getRad(lua_State *L) { return returnInt(L, radius); }
+   S32 getLoc(lua_State *L) { return LuaObject::returnPoint(L, getVert(0) + mAnchorNormal * getRadius() ); }
 };
 
 
+////////////////////////////////////////
+////////////////////////////////////////
+
 class Turret : public EngineeredObject
 {
-private:
    typedef EngineeredObject Parent;
+
+private:
    Timer mFireTimer;
    F32 mCurrentAngle;
 
@@ -274,7 +275,7 @@ public:
       TurretTurnRate = 4,                 // How fast can turrets turn to aim?
       // Turret projectile characteristics (including bullet range) set in gameWeapons.cpp
 
-      AimMask = EngineeredObject::NextFreeMask,
+      AimMask = Parent::FirstFreeMask,
    };
 
 

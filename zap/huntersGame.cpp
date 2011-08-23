@@ -317,6 +317,7 @@ void releaseFlag(Game *game, Point pos, Point startVel)
 }
 
 
+// Runs on client and server
 void HuntersGameType::idle(GameObject::IdleCallPath path, U32 deltaT)
 {
    Parent::idle(path, deltaT);
@@ -437,6 +438,8 @@ S32 HuntersGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEv
 }
 
 
+//////////  Client only code:
+
 extern Color gNexusOpenColor;
 extern Color gNexusClosedColor;
 
@@ -467,7 +470,6 @@ void HuntersGameType::renderInterfaceOverlay(bool scoreboardVisible)
       UserInterface::drawStringf(x, y, size, "%s%02d:%02d", NEXUS_STR, minsRemaining, secsRemaining);
    }
 
-
    for(S32 i = 0; i < mYardSaleWaypoints.size(); i++)
       renderObjectiveArrow(&mYardSaleWaypoints[i].pos, &Colors::white);
 
@@ -476,6 +478,10 @@ void HuntersGameType::renderInterfaceOverlay(bool scoreboardVisible)
 }
 
 #undef NEXUS_STR
+
+
+//////////  END Client only code
+
 
 
 void HuntersGameType::controlObjectForClientKilled(GameConnection *theClient, GameObject *clientObject, GameObject *killerObject)
@@ -554,20 +560,7 @@ HuntersFlagItem::HuntersFlagItem(Point pos, Point vel, bool useDropDelay) : Flag
 }
 
 
-//const char HuntersFlagItem::className[] = "HuntersFlagItem";      // Class name as it appears to Lua scripts
-
-//// Define the methods we will expose to Lua
-//Lunar<HuntersFlagItem>::RegType HuntersFlagItem::methods[] =
-//{
-//   // Standard gameItem methods
-//   method(HuntersFlagItem, getClassID),
-//   method(HuntersFlagItem, getLoc),
-//   method(HuntersFlagItem, getRad),
-//   method(HuntersFlagItem, getVel),
-//
-//   {0,0}    // End method list
-//};
-
+//////////  Client only code:
 
 void HuntersFlagItem::renderItem(Point pos)
 {
@@ -591,6 +584,9 @@ void HuntersFlagItem::renderItem(Point pos)
       UserInterface::drawStringf(pos.x + 10, pos.y - 46, 12, "%d", mFlagCount);
    }
 }
+
+//////////  END Client only code
+
 
 
 // Private helper function

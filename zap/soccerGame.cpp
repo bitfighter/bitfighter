@@ -40,6 +40,10 @@
 namespace Zap
 {
 
+const S32 NO_TEAM = -3;    // TODO -- Use one defined in main.cpp
+
+
+
 SoccerGameType::SoccerGameType()
 {
    mSoccerPickupAllowed = false;   // make sure it is always false
@@ -156,13 +160,13 @@ void SoccerGameType::updateSoccerScore(Ship *ship, S32 scoringTeam, ScoringEvent
 
 void SoccerGameType::scoreGoal(Ship *ship, StringTableEntry scorerName, S32 scoringTeam, S32 goalTeamIndex, S32 score)
 {
-   if(scoringTeam == MoveItem::NO_TEAM)
+   if(scoringTeam == NO_TEAM)
    {
       s2cSoccerScoreMessage(SoccerMsgScoreGoal, scorerName, (U32) (goalTeamIndex - gFirstTeamNumber));
       return;
    }
 
-   if(isTeamGame() && (scoringTeam == MoveItem::TEAM_NEUTRAL || scoringTeam == goalTeamIndex))    // Own-goal
+   if(isTeamGame() && (scoringTeam == TEAM_NEUTRAL || scoringTeam == goalTeamIndex))    // Own-goal
    {
       updateSoccerScore(ship, scoringTeam, ScoreGoalOwnTeam, score);
 
@@ -171,7 +175,7 @@ void SoccerGameType::scoreGoal(Ship *ship, StringTableEntry scorerName, S32 scor
    }
    else     // Goal on someone else's goal
    {
-      if(goalTeamIndex == MoveItem::TEAM_HOSTILE)
+      if(goalTeamIndex == TEAM_HOSTILE)
          updateSoccerScore(ship, scoringTeam, ScoreGoalHostileTeam, score);
       else
          updateSoccerScore(ship, scoringTeam, ScoreGoalEnemyTeam, score);
@@ -339,14 +343,14 @@ S32 SoccerGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEve
 TNL_IMPLEMENT_NETOBJECT(SoccerBallItem);
 
 // Constructor
-SoccerBallItem::SoccerBallItem(Point pos) : EditorItem(pos, true, (F32)SoccerBallItem::SOCCER_BALL_RADIUS, 4)
+SoccerBallItem::SoccerBallItem(Point pos) : Parent(pos, true, (F32)SoccerBallItem::SOCCER_BALL_RADIUS, 4)
 {
    mObjectTypeNumber = SoccerBallItemTypeNumber;
    mNetFlags.set(Ghostable);
    initialPos = pos;
    mLastPlayerTouch = NULL;
    mLastPlayerMounted = NULL;
-   mLastPlayerTouchTeam = MoveItem::NO_TEAM;
+   mLastPlayerTouchTeam = NO_TEAM;
    mLastPlayerTouchName = StringTableEntry(NULL);
    mDragFactor = 1.0;     // 1.0 for no drag
    mAllowPickup = false;

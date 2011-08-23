@@ -32,6 +32,7 @@
 #include "Point.h"
 #include "tnlVector.h"
 #include "Color.h"
+#include "Geometry.h"
 
 
 using namespace std;
@@ -81,10 +82,9 @@ protected:
    Color getDrawColor();
 
 public:
-   EditorObject();      // Constructor
-   virtual ~EditorObject();                                    // Virtual destructor
-   //virtual void copyAttrs(EditorObject *target);
-   virtual EditorObject *clone()  const = 0;
+   EditorObject();                  // Constructor
+   virtual ~EditorObject();         // Virtual destructor
+   virtual EditorObject *clone() const { TNLAssert(false, "Clone method not implemented!"); }
 
    EditorObject *newCopy();         // Copies object        // TODO: Will become call to clone, delete method
 
@@ -199,10 +199,10 @@ public:
    virtual bool canBeNeutral();
    virtual bool hasTeam();
 
-   virtual const char *getEditorHelpString() = 0;     
-   virtual const char *getPrettyNamePlural() = 0;
-   virtual const char *getOnDockName() = 0;
-   virtual const char *getOnScreenName() = 0;   
+   virtual const char *getEditorHelpString() { TNLAssert(false, "getEditorHelpString method not implemented!"); }     
+   virtual const char *getPrettyNamePlural() { TNLAssert(false, "getPrettyNamePlural method not implemented!"); }
+   virtual const char *getOnDockName()       { TNLAssert(false, "getOnDockName method not implemented!"); }
+   virtual const char *getOnScreenName()     { TNLAssert(false, "getOnScreenName method not implemented!"); }   
 
    virtual const char *getInstructionMsg() { return ""; }      // Message printed below item when it is selected
 
@@ -216,6 +216,41 @@ public:
 
 };
 
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Class with editor methods related to point things
+
+class EditorPointObject : public EditorObject, public PointGeometry
+{
+   typedef EditorObject Parent;
+
+public:
+   //EditorPointObject();       // Constructor
+
+   virtual void renderItemText(const char *text, S32 offset, F32 currentScale, const Point &currentOffset);
+   void prepareForDock(Game *game, const Point &point);
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+class EditorItem : public EditorPointObject
+{
+   //typedef MoveItem Parent;   
+   //typedef EditorObject EditorParent;
+   typedef EditorPointObject Parent;
+
+public:
+   //EditorItem(Point p = Point(0,0), bool collideable = false, float radius = 1, float mass = 1);   // Constructor
+
+   virtual void renderEditor(F32 currentScale) = 0;
+   virtual F32 getEditorRadius(F32 currentScale) = 0;
+   virtual string toString(F32 gridSize) const = 0;
+
+};
 
 
 };

@@ -42,135 +42,9 @@ class GameType;
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class MoveItem : public MoveObject, public LuaItem
+class PickupItem : public Item
 {
-   typedef MoveObject Parent;
-
-private:
-   F32 updateTimer;
-   Point prevMoveVelocity;
-
-protected:
-   enum MaskBits {
-      InitialMask = BIT(0),
-      PositionMask = BIT(1),     // <-- Indicates position has changed and needs to be updated
-      WarpPositionMask = BIT(2),
-      MountMask = BIT(3),
-      ZoneMask = BIT(4),
-      ItemChangedMask = BIT(5),
-      ExplodedMask = BIT(6),
-      FirstFreeMask = BIT(7),
-   };
-
-   SafePtr<Ship> mMount;
-   SafePtr<GoalZone> mZone;
-
-   bool mIsMounted;
-   bool mIsCollideable;
-   bool mInitial;       // True on initial unpack, false thereafter
-
-   U16 mItemId;         // Item ID, shared between client and server
-
-   Timer mDroppedTimer;                   // Make flags have a tiny bit of delay before they can be picked up again
-   static const U32 DROP_DELAY = 500;     // Time until we can pick the item up after it's dropped (in ms)
-
-public:
-   MoveItem(Point p = Point(0,0), bool collideable = false, float radius = 1, float mass = 1);   // Constructor
-
-   void idle(GameObject::IdleCallPath path);
-
-   bool processArguments(S32 argc, const char **argv, Game *game);
-   string toString(F32 gridSize) const;
-
-   virtual U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
-   virtual void unpackUpdate(GhostConnection *connection, BitStream *stream);
-
-   void setActualPos(const Point &p);
-   void setActualVel(const Point &vel);
-
-   U16 getItemId() { return mItemId; }
-
-   virtual void mountToShip(Ship *theShip);
-   void setMountedMask() { setMaskBits(MountMask); }
-   void setPositionMask() { setMaskBits(PositionMask); }
-
-   bool isMounted() { return mIsMounted; }
-   virtual bool isItemThatMakesYouVisibleWhileCloaked() { return true; }      // HuntersFlagItem overrides to false
-
-   void setZone(GoalZone *theZone);
-   GoalZone *getZone() { return mZone; }
-   bool isInZone() { return mZone == NULL; }
-   void setCollideable(bool isCollideable) { mIsCollideable = isCollideable; }
-
-   Ship *getMount();
-   void dismount();
-   void render();
-
-   virtual void renderItem(Point pos) = 0;      // Does actual rendering, allowing render() to be generic for all Items
-
-   virtual void onMountDestroyed();
-   virtual void onItemDropped();
-
-   bool collide(GameObject *otherObject);
-
-   static const S32 TEAM_NEUTRAL = -1;
-   static const S32 TEAM_HOSTILE = -2;
-   static const S32 NO_TEAM = -3;      // Not exposed to lua, not used in level files, only used internally
-
-   // LuaItem interface
-   S32 getLoc(lua_State *L) { return LuaObject::returnPoint(L, getActualPos()); }
-   S32 getRad(lua_State *L) { return LuaObject::returnFloat(L, getRadius()); }
-   S32 getVel(lua_State *L) { return LuaObject::returnPoint(L, getActualVel()); }
-   virtual S32 getTeamIndx(lua_State *L) { return TEAM_NEUTRAL + 1; }              // Can be overridden for team items
-   S32 isInCaptureZone(lua_State *L) { return returnBool(L, mZone.isValid()); }    // Is flag in a team's capture zone?
-   S32 isOnShip(lua_State *L) { return returnBool(L, mIsMounted); }                // Is flag being carried by a ship?
-   S32 getCaptureZone(lua_State *L);
-   S32 getShip(lua_State *L);
-   GameObject *getGameObject() { return this; }
-};
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-// Class with editor methods related to point things
-
-class EditorPointObject : public EditorObject, public PointGeometry
-{
-   typedef EditorObject Parent;
-
-public:
-   EditorPointObject();       // Constructor
-
-   virtual void renderItemText(const char *text, S32 offset, F32 currentScale, const Point &currentOffset);
-   void prepareForDock(Game *game, const Point &point);
-};
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-class EditorItem : public MoveItem, public EditorPointObject
-{
-   typedef MoveItem Parent;   
-   typedef EditorObject EditorParent;
-
-public:
-   EditorItem(Point p = Point(0,0), bool collideable = false, float radius = 1, float mass = 1);   // Constructor
-
-   // Some properties about the item that will be needed in the editor
-   string toString(F32 gridSize) const;
-
-   virtual void renderEditor(F32 currentScale);
-   virtual F32 getEditorRadius(F32 currentScale);
-};
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-class PickupItem : public EditorItem
-{
-   typedef MoveItem Parent;
+   typedef Item Parent;
 
 private:
    bool mIsVisible;
@@ -178,11 +52,10 @@ private:
    Timer mRepopTimer;
    S32 mRepopDelay;
 
-
 protected:
    enum MaskBits {
-      PickupMask = Parent::FirstFreeMask << 0,
-      FirstFreeMask = Parent::FirstFreeMask << 1,
+      PickupMask    = Parent::FirstFreeMask << 0,
+      FirstFreeMask = Parent::FirstFreeMask << 1
    };
 
 public:

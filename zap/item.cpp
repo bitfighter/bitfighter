@@ -86,53 +86,6 @@ string MoveItem::toString(F32 gridSize) const
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-// TODO: merge with simpleLine values, put in editor
-static const S32 INSTRUCTION_TEXTSIZE = 9;      
-static const S32 INSTRUCTION_TEXTGAP = 3;
-static const Color INSTRUCTION_TEXTCOLOR(1,1,1);      // TODO: Put in editor
-
-
- // Constructor
-EditorPointObject::EditorPointObject() 
-{ 
-}     
-
-
-// Copy constructor -- make sure each copy gets its own geometry object
-//EditorPointObject::EditorPointObject(const EditorPointObject &epo)
-//{
-//   mGeometry = boost::shared_ptr<Geometry>(new PointGeometry(*((PointGeometry *)epo.mGeometry.get())));  
-//}
-
-
-
-// Offset: negative below the item, positive above
-void EditorPointObject::renderItemText(const char *text, S32 offset, F32 currentScale, const Point &currentOffset)
-{
-   glColor(INSTRUCTION_TEXTCOLOR);
-   S32 off = (INSTRUCTION_TEXTSIZE + INSTRUCTION_TEXTGAP) * offset - 10 - ((offset > 0) ? 5 : 0);
-
-   Point pos = getVert(0) * currentScale + currentOffset;
-
-   UserInterface::drawCenteredString(pos.x, pos.y - off, INSTRUCTION_TEXTSIZE, text);
-}
-
-
-void EditorPointObject::prepareForDock(Game *game, const Point &point)
-{
-   setVert(point, 0);
-   Parent::prepareForDock(game, point);
-}
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-string EditorItem::toString(F32 gridSize) const
-{
-   return string(getClassName()) + " " + geomToString(gridSize);
-}
-
 
 // Client only, in-game
 void MoveItem::render()
@@ -144,17 +97,6 @@ void MoveItem::render()
    renderItem(mMoveState[RenderState].pos);
 }
 
-
-void EditorItem::renderEditor(F32 currentScale)
-{
-   renderItem(getVert(0));                    
-}
-
-
-F32 EditorItem::getEditorRadius(F32 currentScale)
-{
-   return (getRadius() + 2) * currentScale;
-}
 
 
 // Runs on both client and server, comes from collision() on the server and the colliding client, and from
@@ -438,23 +380,43 @@ bool MoveItem::collide(GameObject *otherObject)
 }
 
 
-S32 MoveItem::getCaptureZone(lua_State *L) { if(mZone.isValid()) {mZone->push(L); return 1;} else return returnNil(L); }
-S32 MoveItem::getShip(lua_State *L) { if(mMount.isValid()) {mMount->push(L); return 1;} else return returnNil(L); }
+S32 MoveItem::getCaptureZone(lua_State *L) 
+{ 
+   if(mZone.isValid()) 
+   {
+      mZone->push(L); 
+      return 1;
+   } 
+   else 
+      return returnNil(L); 
+}
 
 
-////////////////////////////////////////
-////////////////////////////////////////
-
-EditorItem::EditorItem(Point pos, bool collideable, F32 radius, F32 repopDelay) : MoveItem(pos, collideable, radius, repopDelay)
-{
-   // Do nothing
+S32 MoveItem::getShip(lua_State *L) 
+{ 
+   if(mMount.isValid()) 
+   {
+      mMount->push(L); 
+      return 1;
+   } 
+   else 
+      return returnNil(L); 
 }
 
 
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-PickupItem::PickupItem(Point p, float radius, S32 repopDelay) : EditorItem(p, false, radius, 1)
+//EditorItem::EditorItem(Point pos, bool collideable, F32 radius, F32 repopDelay) : MoveItem(pos, collideable, radius, repopDelay)
+//{
+//   // Do nothing
+//}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+PickupItem::PickupItem(Point p, float radius, S32 repopDelay) : Parent(p, radius, 1)
 {
    mRepopDelay = repopDelay;
    mIsVisible = true;
@@ -503,7 +465,7 @@ void PickupItem::idle(GameObject::IdleCallPath path)
       }
    }
 
-   updateExtent();
+   //updateExtent();    ==> Taking this out... why do we need it for a non-moving object?  CE 8/23/11
 }
 
 

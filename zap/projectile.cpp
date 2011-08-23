@@ -99,7 +99,7 @@ U32 Projectile::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
    if(stream->writeFlag(updateMask & PositionMask))
    {
       ((GameConnection *) connection)->writeCompressedPoint(pos, stream);
-      writeCompressedVelocity(velocity, CompressedVelocityMax, stream);
+      writeCompressedVelocity(velocity, COMPRESSED_VELOCITY_MAX, stream);
    }
 
    if(stream->writeFlag(updateMask & InitialMask))
@@ -128,7 +128,7 @@ void Projectile::unpackUpdate(GhostConnection *connection, BitStream *stream)
    if(stream->readFlag())  // Read position, for correcting bouncers, needs to be before inital for SoundSystem::playSoundEffect
    {
       ((GameConnection *) connection)->readCompressedPoint(pos, stream);
-      readCompressedVelocity(velocity, CompressedVelocityMax, stream);
+      readCompressedVelocity(velocity, COMPRESSED_VELOCITY_MAX, stream);
    }
 
    if(stream->readFlag())         // Initial chunk of data, sent once for this object

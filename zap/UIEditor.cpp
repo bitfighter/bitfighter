@@ -79,10 +79,6 @@ const F32 MIN_SCALE = .05f;        // Most zoomed-in scale
 const F32 MAX_SCALE = 2.5;        // Most zoomed-out scale
 const F32 STARTING_SCALE = 0.5;
 
-
-static const S32 TEAM_NEUTRAL = MoveItem::TEAM_NEUTRAL;
-static const S32 TEAM_HOSTILE = MoveItem::TEAM_HOSTILE;
-
 //static Vector<boost::shared_ptr<EditorObject> > *mLoadTarget;
 static EditorObjectDatabase *mLoadTarget;
 

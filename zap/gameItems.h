@@ -125,10 +125,10 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class Reactor : public EditorItem
+class Reactor : public Item
 {
 
-typedef EditorItem Parent;
+typedef Item Parent;
 
 private:
    bool hasExploded;
@@ -201,7 +201,7 @@ static const S8 AsteroidCoords[AsteroidDesigns][AsteroidPoints][2] =   // <== Wo
 };
 
 
-class Asteroid : public EditorItem
+class Asteroid : public MoveItem
 {
 
 typedef MoveItem Parent;      // TODO: Should be EditorItem???
@@ -266,7 +266,7 @@ public:
 ////////////////////////////////////////
 
 
-class Circle : public EditorItem
+class Circle : public MoveItem
 {
 
 typedef MoveItem Parent;
@@ -532,7 +532,7 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class TestItem : public EditorItem
+class TestItem : public MoveItem
 {
    typedef MoveItem Parent;
 
@@ -573,7 +573,7 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class ResourceItem : public EditorItem
+class ResourceItem : public MoveItem
 {
    typedef MoveItem Parent;         // TODO: Should be EditorItem???
 

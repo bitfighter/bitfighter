@@ -55,8 +55,8 @@ private:
 public:
 
    LuaShip(Ship *ship);                        // C++ constructor
-   LuaShip() { /* do nothing */ };             // C++ default constructor ==> not used.  Constructor with Ship (above) used instead
-   LuaShip(lua_State *L) { /* do nothing */ }; // Lua constructor ==> not used.  Class only instantiated from C++.
+   LuaShip() { /* Do nothing */ };             // C++ default constructor ==> not used.  Constructor with Ship (above) used instead
+   LuaShip(lua_State *L) { /* Do nothing */ }; // Lua constructor ==> not used.  Class only instantiated from C++.
 
    virtual ~LuaShip(){ logprintf(LogConsumer::LogLuaObjectLifecycle, "Killing luaShip %d", mId); };     // Destructor
 

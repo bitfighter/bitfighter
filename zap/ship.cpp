@@ -1555,6 +1555,7 @@ void Ship::emitMovementSparks()
 
 
 extern bool gShowAimVector;
+const S32 NO_TEAM = -3;    // TODO -- Use one defined in main.cpp
 
 void Ship::render(S32 layerIndex)
 {
@@ -1575,7 +1576,7 @@ void Ship::render(S32 layerIndex)
 
    GameConnection *conn = clientGame->getConnectionToServer();
    bool localShip = ! (conn && conn->getControlObject() != this);    // i.e. a ship belonging to a remote player
-   S32 localPlayerTeam = (conn && conn->getControlObject()) ? conn->getControlObject()->getTeam() : MoveItem::NO_TEAM; // To show cloaked teammates
+   S32 localPlayerTeam = (conn && conn->getControlObject()) ? conn->getControlObject()->getTeam() : NO_TEAM; // To show cloaked teammates
 
 
    // now adjust if using cloak module

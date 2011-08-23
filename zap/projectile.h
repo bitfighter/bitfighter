@@ -99,13 +99,19 @@ extern ProjectileInfo gProjInfo[ProjectileTypeCount];
 
 class Projectile : public GameObject, public LuaProjectile
 {
-public:
-   enum {
-      CompressedVelocityMax = 2047,
-      InitialMask = BIT(0),
-      ExplodedMask = BIT(1),
-      PositionMask = BIT(2),
+   typedef GameObject Parent;
+
+private:
+   static const S32 COMPRESSED_VELOCITY_MAX = 2047;
+
+protected:
+   enum MaskBits {
+      ExplodedMask  = Parent::FirstFreeMask << 0,
+      PositionMask  = Parent::FirstFreeMask << 1,
+      FirstFreeMask = Parent::FirstFreeMask << 2
    };
+
+public:
 
    Point pos;
    Point velocity;
@@ -207,7 +213,7 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class Mine : public GrenadeProjectile, public EditorPointObject
+class Mine : public GrenadeProjectile/*, public EditorPointObject*/
 {
    typedef GrenadeProjectile Parent;
 
@@ -275,7 +281,7 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class SpyBug : public GrenadeProjectile, public EditorPointObject
+class SpyBug : public GrenadeProjectile/*, public EditorPointObject*/
 {
    typedef GrenadeProjectile Parent;
 

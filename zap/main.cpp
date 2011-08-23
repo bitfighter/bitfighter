@@ -195,6 +195,11 @@ Color gHostileTeamColor(0.5, 0.5, 0.5);         // Objects that are "hostile-to-
 Color gMasterServerBlue(0.8, 0.8, 1);           // Messages about successful master server statii
 Color gHelpTextColor(Colors::green);
 
+static const S32 TEAM_NEUTRAL = -1;
+static const S32 TEAM_HOSTILE = -2;
+static const S32 NO_TEAM = -3;      // Not exposed to lua, not used in level files, only used internally
+
+
 S32 gMaxPolygonPoints = 32;                     // Max number of points we can have in Nexuses, LoadoutZones, etc.
 
 static const F32 MIN_SCALING_FACT = 0.15f;       // Limits minimum window size

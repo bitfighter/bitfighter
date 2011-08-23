@@ -37,19 +37,19 @@ namespace Zap
 TNL_IMPLEMENT_NETOBJECT(FlagItem);
 
 // C++ constructor
-FlagItem::FlagItem(Point pos) : EditorItem(pos, true, (F32)Ship::CollisionRadius) // radius was 20
+FlagItem::FlagItem(Point pos) : Parent(pos, true, (F32)Ship::CollisionRadius) // radius was 20
 {
    initialize();
 }
 
 // Alternate constructor, currently used by HuntersFlag
-FlagItem::FlagItem(Point pos, bool collidable, float radius, float mass) : EditorItem(pos, collidable, radius, mass)
+FlagItem::FlagItem(Point pos, bool collidable, float radius, float mass) : Parent(pos, collidable, radius, mass)
 {
    initialize();
 }
 
 // Alternate constructor, currently used by dropping flags in hunterGame
-FlagItem::FlagItem(Point pos, Point vel, bool useDropDelay) : EditorItem(pos, true, (F32)Ship::CollisionRadius, 4)
+FlagItem::FlagItem(Point pos, Point vel, bool useDropDelay) : Parent(pos, true, (F32)Ship::CollisionRadius, 4)
 {
    initialize();
 

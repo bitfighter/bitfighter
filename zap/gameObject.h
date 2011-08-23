@@ -237,6 +237,11 @@ public:
    F32 getRating() { return 0; }    // TODO: Fix this
    S32 getScore() { return 0; }     // TODO: Fix this
 
+   enum MaskBits {
+      InitialMask = BIT(0),
+      FirstFreeMask = BIT(1)
+   };
+
    void findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector, const Rect &extents);
    void findObjects(TestFunc, Vector<DatabaseObject *> &fillVector, const Rect &extents);
 
@@ -307,7 +312,7 @@ public:
 
    void setScopeAlways();
 
-   S32 getTeamIndx(lua_State *L);            // Return item team to Lua
+   S32 getTeamIndx(lua_State *L);      // Return item team to Lua
    virtual void push(lua_State *L);    // Lua-aware classes will implement this
 };
 

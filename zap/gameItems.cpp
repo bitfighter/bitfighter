@@ -527,7 +527,7 @@ static F32 asteroidVel = 250;
 static const F32 ASTEROID_MASS = 4;
 
 // Constructor
-Asteroid::Asteroid() : EditorItem(Point(0,0), true, (F32)ASTEROID_RADIUS, ASTEROID_MASS)
+Asteroid::Asteroid() : Parent(Point(0,0), true, (F32)ASTEROID_RADIUS, ASTEROID_MASS)
 {
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = AsteroidTypeNumber;
@@ -759,7 +759,7 @@ class LuaReactor;
 static const F32 REACTOR_MASS = F32_MAX;
 
 // Constructor
-Reactor::Reactor() : EditorItem(Point(0,0), true, (F32)REACTOR_RADIUS, REACTOR_MASS)
+Reactor::Reactor() : Parent(Point(0,0), (F32)REACTOR_RADIUS, REACTOR_MASS)
 {
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = ReactorTypeNumber;
@@ -768,13 +768,7 @@ Reactor::Reactor() : EditorItem(Point(0,0), true, (F32)REACTOR_RADIUS, REACTOR_M
 
    F32 vel = 0;
 
-   for(U32 i = 0; i < MoveStateCount; i++)
-   {
-      mMoveState[i].vel.x = 0;
-      mMoveState[i].vel.y = 0;
-   }
-
-   mKillString = "crashed into an reactor";
+   mKillString = "crashed into an reactor";     // TODO: Really needed?
 }
 
 
@@ -862,15 +856,15 @@ U32 Reactor::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *
 
 void Reactor::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
-   Parent::unpackUpdate(connection, stream);
+   //Parent::unpackUpdate(connection, stream);
 
    if(stream->readFlag())
    {
       mHitPoints = stream->readInt(8);
       setRadius(getReactorRadius());
 
-      if(!mInitial)
-         SoundSystem::playSoundEffect(SFXAsteroidExplode, mMoveState[RenderState].pos, Point());
+      //if(!mInitial)
+      //   SoundSystem::playSoundEffect(SFXAsteroidExplode, mMoveState[RenderState].pos, Point());
    }
 
    bool explode = (stream->readFlag());     // Exploding!  Take cover!!
@@ -879,7 +873,7 @@ void Reactor::unpackUpdate(GhostConnection *connection, BitStream *stream)
    {
       hasExploded = true;
       disableCollision();
-      onItemExploded(mMoveState[RenderState].pos);
+      onItemExploded(getActualPos());
    }
 }
 
@@ -944,7 +938,7 @@ static F32 CIRCLE_VEL = 250;
 static const F32 CIRCLE_MASS = 4;
 
 // Constructor
-Circle::Circle() : EditorItem(Point(0,0), true, (F32)CIRCLE_RADIUS, CIRCLE_MASS)
+Circle::Circle() : Parent(Point(0,0), true, (F32)CIRCLE_RADIUS, CIRCLE_MASS)
 {
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = CircleTypeNumber;
@@ -1244,7 +1238,7 @@ TNL_IMPLEMENT_NETOBJECT(TestItem);
 static const F32 TEST_ITEM_MASS = 4;
 
 // Constructor
-TestItem::TestItem() : EditorItem(Point(0,0), true, (F32)TEST_ITEM_RADIUS, TEST_ITEM_MASS)
+TestItem::TestItem() : Parent(Point(0,0), true, (F32)TEST_ITEM_RADIUS, TEST_ITEM_MASS)
 {
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = TestItemTypeNumber;
@@ -1327,7 +1321,7 @@ TNL_IMPLEMENT_NETOBJECT(ResourceItem);
 static const F32 RESOURCE_ITEM_MASS = 1;
 
    // Constructor
-ResourceItem::ResourceItem() : EditorItem(Point(0,0), true, (F32)RESOURCE_ITEM_RADIUS, RESOURCE_ITEM_MASS)
+ResourceItem::ResourceItem() : Parent(Point(0,0), true, (F32)RESOURCE_ITEM_RADIUS, RESOURCE_ITEM_MASS)
 {
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = ResourceItemTypeNumber;
