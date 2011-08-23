@@ -40,13 +40,15 @@ using namespace TNL;
 
 namespace Zap
 {
-#ifndef ZAP_DEDICATED
 
-static const S32 NONE = -1;
-
+// These need to be available for client and dedicated server
 static const S32 TEAM_NEUTRAL = -1;
 static const S32 TEAM_HOSTILE = -2;
 static const S32 NO_TEAM = -3;      // Not exposed to lua, not used in level files, only used internally
+
+#ifndef ZAP_DEDICATED
+
+static const S32 NONE = -1;
 
 
 ////////////////////////////////////////
