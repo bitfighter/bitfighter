@@ -1575,7 +1575,6 @@ void Ship::emitMovementSparks()
 
 
 extern bool gShowAimVector;
-const S32 NO_TEAM = -3;    // TODO -- Use one defined in main.cpp
 
 void Ship::render(S32 layerIndex)
 {

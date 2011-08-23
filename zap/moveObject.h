@@ -39,10 +39,6 @@ namespace Zap
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-extern const S32 TEAM_NEUTRAL, TEAM_HOSTILE;
-
-
-
 // Parent class of EngineeredObject, PickupItem
 class Item : public GameObject, public EditorItem, public LuaItem
 {

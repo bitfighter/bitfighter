@@ -41,10 +41,6 @@
 namespace Zap
 {
 
-const S32 NO_TEAM = -3;    // TODO -- Use one defined in main.cpp
-
-
-
 SoccerGameType::SoccerGameType()
 {
    mSoccerPickupAllowed = false;   // make sure it is always false
