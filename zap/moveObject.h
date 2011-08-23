@@ -30,6 +30,7 @@
 #include "gameObject.h" 
 #include "luaObject.h"     // For LuaItem class
 #include "EditorObject.h"  // For EditorItem class
+#include "Timer.h"
 
 
 namespace Zap
