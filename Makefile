@@ -58,7 +58,6 @@ dedicated:
 	@$(MAKE) -C libtomcrypt
 	#@$(MAKE) -C master
 	@$(MAKE) -C lua/lua-vec/src 
-	@$(MAKE) -C alure
 	@$(MAKE) -C zap	dedicated
 
 dedicated_debug:
