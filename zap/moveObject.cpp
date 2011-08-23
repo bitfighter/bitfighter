@@ -42,7 +42,48 @@
 namespace Zap
 {
 
-MoveObject::MoveObject(Point pos, float radius, float mass)    // Constructor
+
+// Constructor
+Item::Item(const Point &pos, F32 radius, F32 mass)
+{
+   setActualPos(pos);
+   mRadius = radius;
+   mMass = mass;
+}
+
+
+string Item::toString(F32 gridSize) const
+{
+   return string(getClassName()) + " " + geomToString(gridSize);
+}
+
+
+extern void glColor(const Color &c, float alpha = 1.0);
+
+// Provide generic item rendering; will be overridden
+void Item::renderItem(const Point &pos)
+{
+   glColor(Colors::cyan);
+   drawSquare(pos, 10, true);
+}
+
+
+void Item::renderEditor(F32 currentScale)
+{
+   renderItem(getVert(0));                    
+}
+
+
+F32 Item::getEditorRadius(F32 currentScale)
+{
+   return (getRadius() + 2) * currentScale;
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+MoveObject::MoveObject(const Point &pos, F32 radius, F32 mass) : Parent(pos, radius, mass)    // Constructor
 {
    for(U32 i = 0; i < MoveStateCount; i++)
    {
@@ -50,8 +91,6 @@ MoveObject::MoveObject(Point pos, float radius, float mass)    // Constructor
       mMoveState[i].angle = 0;
    }
 
-   mMass = mass;
-   mRadius = radius;
    mInterpolating = false;
    mHitLimit = 16;
 }

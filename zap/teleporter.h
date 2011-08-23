@@ -106,7 +106,7 @@ public:
    S32 getLoc(lua_State *L) { return returnPoint(L, getVert(0)); }                    // Center of item (returns point)
    S32 getRad(lua_State *L) { return returnInt(L, TeleporterTriggerRadius); }         // Radius of item (returns number)
    S32 getVel(lua_State *L) { return returnPoint(L, Point(0,0)); }                    // Speed of item (returns point)
-   S32 getTeamIndx(lua_State *L) { return returnInt(L, MoveItem::TEAM_NEUTRAL + 1); } // All teleporters are neutral
+   S32 getTeamIndx(lua_State *L) { return returnInt(L, TEAM_NEUTRAL + 1); }           // All teleporters are neutral
    GameObject *getGameObject() { return this; }                                       // Return the underlying GameObject
 
 

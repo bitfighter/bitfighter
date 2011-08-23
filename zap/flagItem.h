@@ -34,10 +34,10 @@ namespace Zap
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class FlagItem : public EditorItem
+class FlagItem : public MoveItem
 {
 protected:
-   typedef EditorItem Parent;         // <=== needs to be protected as this is accessed by child in form of Parent::Parent
+   typedef MoveItem Parent;          // <=== needs to be protected as this is accessed by child in form of Parent::Parent
 
 private:
    Point mInitialPos;                 // Where flag was "born"

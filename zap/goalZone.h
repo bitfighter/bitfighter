@@ -35,18 +35,21 @@ namespace Zap
 
 class GoalZone : public EditorPolygon
 {
-private:
    typedef GameObject Parent;
 
-   enum {
-      FlashDelay = 500,
-      FlashCount = 5,
+private:
+   static const S32 FlashDelay = 500;
+   static const S32 FlashCount = 5;
 
-      InitialMask = BIT(0),
-      TeamMask = BIT(1),
-   };
    S32 mFlashCount;
    Timer mFlashTimer;
+
+protected:
+   enum MaskBits {
+      TeamMask      = Parent::FirstFreeMask << 0,
+      FirstFreeMask = Parent::FirstFreeMask << 1
+   };
+
 
 public:
    GoalZone();        // Constructor

@@ -56,7 +56,6 @@ class Ship;
 
 class LuaObject
 {
-
 protected:
    static int luaPanicked(lua_State *L);
    static void clearStack(lua_State *L);
@@ -71,8 +70,6 @@ protected:
    static Point getVec(lua_State *L, S32 index, const char *methodName);
 
    static void setfield (lua_State *L, const char *key, F32 value);
-
-
 
 public:
    // All of these return<T> functions work in the same way.  Include at the and of a child class method.

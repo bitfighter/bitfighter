@@ -34,8 +34,6 @@
 namespace Zap
 {
 
-//extern void glColor(const Color &c, float alpha = 1.0);
-
 MenuItem::MenuItem() { TNLAssert(false, "Do not use this constructor!"); }    // Default constructor
 MenuItem::~MenuItem() {}
 

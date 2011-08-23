@@ -93,7 +93,7 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class SoccerBallItem : public EditorItem
+class SoccerBallItem : public MoveItem
 {
    typedef MoveItem Parent;      // TODO: Should be EditorItem???
 

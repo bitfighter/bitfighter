@@ -28,13 +28,17 @@
 #include "SoundSystem.h"
 #include "gameNetInterface.h"
 #include "ship.h"
-#include "gameObjectRender.h"
-#include "GeomUtils.h"      // For centroid calculation for labeling
-#include "stringUtils.h"         // For itos
-#include "Colors.h"
-#include "ScreenInfo.h"
+#include "GeomUtils.h"        // For centroid calculation for labeling
+#include "stringUtils.h"      // For itos
 #include "game.h"
 #include "gameConnection.h"
+
+// Things I think should not be on server side
+#include "Colors.h"
+#include "ScreenInfo.h"
+#include "gameObjectRender.h"
+#include "UIGame.h"
+
 
 #ifndef ZAP_DEDICATED
 #include "ClientGame.h"
@@ -317,6 +321,7 @@ void releaseFlag(Game *game, Point pos, Point startVel)
 }
 
 
+// Runs on client and server
 void HuntersGameType::idle(GameObject::IdleCallPath path, U32 deltaT)
 {
    Parent::idle(path, deltaT);
@@ -437,6 +442,8 @@ S32 HuntersGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEv
 }
 
 
+//////////  Client only code:
+
 extern Color gNexusOpenColor;
 extern Color gNexusClosedColor;
 
@@ -468,7 +475,6 @@ void HuntersGameType::renderInterfaceOverlay(bool scoreboardVisible)
       UserInterface::drawStringf(x, y, size, "%s%02d:%02d", NEXUS_STR, minsRemaining, secsRemaining);
    }
 
-
    for(S32 i = 0; i < mYardSaleWaypoints.size(); i++)
       renderObjectiveArrow(&mYardSaleWaypoints[i].pos, &Colors::white);
 
@@ -478,6 +484,10 @@ void HuntersGameType::renderInterfaceOverlay(bool scoreboardVisible)
 #endif
 
 #undef NEXUS_STR
+
+
+//////////  END Client only code
+
 
 
 void HuntersGameType::controlObjectForClientKilled(GameConnection *theClient, GameObject *clientObject, GameObject *killerObject)
@@ -556,20 +566,7 @@ HuntersFlagItem::HuntersFlagItem(Point pos, Point vel, bool useDropDelay) : Flag
 }
 
 
-//const char HuntersFlagItem::className[] = "HuntersFlagItem";      // Class name as it appears to Lua scripts
-
-//// Define the methods we will expose to Lua
-//Lunar<HuntersFlagItem>::RegType HuntersFlagItem::methods[] =
-//{
-//   // Standard gameItem methods
-//   method(HuntersFlagItem, getClassID),
-//   method(HuntersFlagItem, getLoc),
-//   method(HuntersFlagItem, getRad),
-//   method(HuntersFlagItem, getVel),
-//
-//   {0,0}    // End method list
-//};
-
+//////////  Client only code:
 
 void HuntersFlagItem::renderItem(Point pos)
 {
@@ -595,6 +592,9 @@ void HuntersFlagItem::renderItem(Point pos)
    }
 #endif
 }
+
+//////////  END Client only code
+
 
 
 // Private helper function

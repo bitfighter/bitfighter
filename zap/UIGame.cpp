@@ -466,10 +466,10 @@ void GameUserInterface::render()
       if(mHelper)
          mHelper->render();
 
-      GameType *theGameType = getGame()->getGameType();
+      GameType *gameType = getGame()->getGameType();
 
-      if(theGameType)
-         theGameType->renderInterfaceOverlay(mInScoreboardMode);
+      if(gameType)
+         gameType->renderInterfaceOverlay(mInScoreboardMode);
 
       renderLostConnectionMessage();      // Renders message overlay if we're losing our connection to the server
    }
