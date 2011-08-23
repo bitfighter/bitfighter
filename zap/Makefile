@@ -39,15 +39,94 @@ CFLAGS=
 DFLAGS=
 WFLAGS=
 
-OBJECTS_ZAP=\
+
+OBJECTS_SHARED=\
+   barrier.o\
+   BotNavMeshZone.o\
+   Color.o\
+   config.o\
+   controlObjectConnection.o\
    CTFGame.o\
-   HTFGame.o\
-   IniFile.o\
-   loadoutZone.o\
-   EditorObject.o\
-   GeomUtils.o\
+   dataConnection.o\
+   engineeredObjects.o\
+   flagItem.o\
+   game.o\
+   gameConnection.o\
+   gameItems.o\
+   gameLoader.o\
+   gameNetInterface.o\
+   gameObject.o\
+   gameStats.o\
+   gameType.o\
+   gameWeapons.o\
    Geometry.o\
+   GeomUtils.o\
+   goalZone.o\
+   gridDB.o\
+   HTFGame.o\
+   huntersGame.o\
+   IniFile.o\
+   item.o\
+   keyCode.o\
+   lineEditor.o\
+   loadoutZone.o\
+   luaGameInfo.o\
+   luaLevelGenerator.o\
+   luaObject.o\
+   luaUtil.o\
+   main.o\
+   masterConnection.o\
+   md5.o\
+   md5wrapper.o\
+   move.o\
+   moveObject.o\
+   playerInfo.o\
+   Point.o\
+   polygon.o\
+   projectile.o\
+   rabbitGame.o\
+   Rect.o\
+   retrieveGame.o\
+   robot.o\
+   ScreenInfo.o\
+   ship.o\
    SimpleLine.o\
+   SlipZone.o\
+   soccerGame.o\
+   SoundEffect.o\
+   SoundSystem.o\
+   speedZone.o\
+   statistics.o\
+   stringUtils.o\
+   teamInfo.o\
+   teleporter.o\
+   textItem.o\
+   Timer.o\
+   zoneControlGame.o\
+   ../clipper/clipper.o\
+   ../master/masterInterface.o\
+   ../master/database.o\
+   ../recast/RecastAlloc.o\
+   ../recast/RecastMesh.o\
+   ../sqlite/sqlite3.o\
+   ../Triangle/triangle.o
+
+
+OBJECTS_CLIENT=\
+   ClientGame.o\
+   EditorObject.o\
+   engineerHelper.o\
+   Event.o\
+   gameObjectRender.o\
+   helperMenu.o\
+   Joystick.o\
+   JoystickRender.o\
+   loadoutHelper.o\
+   oglconsole.o\
+   OpenglUtils.o\
+   quickChatHelper.o\
+   ScreenShooter.o\
+   sparkManager.o\
    UI.o\
    UIAbstractInstructions.o\
    UIChat.o\
@@ -69,83 +148,12 @@ OBJECTS_ZAP=\
    UINameEntry.o\
    UIQueryServers.o\
    UIGameParameters.o\
-   barrier.o\
-   ClientGame.o\
-   Color.o\
-   config.o\
-   controlObjectConnection.o\
-   dataConnection.o\
-   engineeredObjects.o\
-   engineerHelper.o\
-   Event.o\
-   flagItem.o\
-   keyCode.o\
-   game.o\
-   gameConnection.o\
-   gameItems.o\
-   gameLoader.o\
-   gameNetInterface.o\
-   gameObject.o\
-   gameObjectRender.o\
-   gameStats.o\
-   gameType.o\
-   gameWeapons.o\
-   goalZone.o\
-   gridDB.o\
-   helperMenu.o\
-   huntersGame.o\
-   item.o\
-   Joystick.o\
-   JoystickRender.o\
-   lineEditor.o\
-   loadoutHelper.o\
-   luaGameInfo.o\
-   luaLevelGenerator.o\
-   luaObject.o\
-   luaUtil.o\
-   main.o\
-   masterConnection.o\
-   move.o\
-   moveObject.o\
-   oglconsole.o\
-   playerInfo.o\
-   Point.o\
-   polygon.o\
-   projectile.o\
-   quickChatHelper.o\
-   rabbitGame.o\
-   Rect.o\
-   retrieveGame.o\
-   robot.o\
-   ScreenInfo.o\
-   ScreenShooter.o\
-   SoundSystem.o\
-   SoundEffect.o\
-   ship.o\
-   SlipZone.o\
-   soccerGame.o\
-   sparkManager.o\
-   speedZone.o\
-   statistics.o\
-   stringUtils.o\
-   teamInfo.o\
-   teleporter.o\
-   textItem.o\
-   Timer.o\
    voiceCodec.o\
-   zoneControlGame.o\
-   md5wrapper.o\
-   md5.o\
-   ../master/masterInterface.o\
-   ../master/database.o\
-   ../sqlite/sqlite3.o\
-   ../Triangle/triangle.o\
-   ../recast/RecastAlloc.o\
-   ../recast/RecastMesh.o\
-   ../clipper/clipper.o\
-   BotNavMeshZone.o\
-   OpenglUtils.o
-# These last classes MUST be in this order for the linker to work
+   $(OBJECTS_SHARED)
+
+
+OBJECTS_DEDICATED=\
+   $(OBJECTS_SHARED)
 
 
 .c.o:
@@ -168,25 +176,24 @@ release: bitfighter
 
 dedicated: DEBUG=
 dedicated: CFLAGS=-DZAP_DEDICATED 
-dedicated: GFX_LFLAGS=
-dedicated: SFX_LFLAGS=
 dedicated: EXEFILE=bitfighterd
-dedicated: bitfighter
+dedicated: dedicated_server
 
 dedicated_debug: OPTIMIZE=
 dedicated_debug: CFLAGS=-DZAP_DEDICATED 
-dedicated_debug: GFX_LFLAGS=
-dedicated_debug: SFX_LFLAGS=
 dedicated_debug: EXEFILE=bitfighterd
-dedicated_debug: bitfighter
+dedicated_debug: dedicated_server
 
-bitfighter: $(OBJECTS_ZAP) 
-	$(CC) -o ../exe/$(EXEFILE) $(OBJECTS_ZAP) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a ../lua/lua-vec/src/liblua.a ../alure/libalure.a $(SFX_LFLAGS) $(GFX_LFLAGS) $(THREADLIB) $(LFLAGS)
 
+bitfighter: $(OBJECTS_CLIENT) 
+	$(CC) -o ../exe/$(EXEFILE) $(OBJECTS_CLIENT) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a ../lua/lua-vec/src/liblua.a ../alure/libalure.a $(SFX_LFLAGS) $(GFX_LFLAGS) $(THREADLIB) $(LFLAGS)
+
+dedicated_server: $(OBJECTS_DEDICATED) 
+	$(CC) -o ../exe/$(EXEFILE) $(OBJECTS_DEDICATED) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a ../lua/lua-vec/src/liblua.a $(THREADLIB) $(LFLAGS)
 
 clean: 
-	rm -f $(OBJECTS_ZAP) ../exe/bitfighter ../exe/bitfightered
+	rm -f $(OBJECTS_CLIENT) $(OBJECTS_CLIENT) $(OBJECTS_DEDICATED) $(OBJECTS_SHARED) ../exe/bitfighter ../exe/bitfightered
 
 cleano:
-	rm -f $(OBJECTS_ZAP)
+	rm -f $(OBJECTS_CLIENT) $(OBJECTS_DEDICATED) $(OBJECTS_SHARED)
 
