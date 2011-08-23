@@ -25,17 +25,21 @@
 
 #include "masterConnection.h"
 //#include "UIQueryServers.h"
-#include "UIMenus.h"
-#include "UINameEntry.h"
-#include "UIChat.h"
-#include "UIErrorMessage.h"
 #include "gameConnection.h"
 #include "gameNetInterface.h"
 #include "gameObject.h"
 #include "version.h"
-#include "Joystick.h"
 #include "config.h"
+#include "game.h"
+
+#ifndef ZAP_DEDICATED
+#include "Joystick.h"
+#include "UIMenus.h"
+#include "UINameEntry.h"
+#include "UIChat.h"
+#include "UIErrorMessage.h"
 #include "ClientGame.h"
+#endif
 
 #include "SharedConstants.h"    // For AuthenticationStatus enum
 
@@ -74,6 +78,7 @@ void MasterServerConnection::startServerQuery()
 
 }
 
+#ifndef ZAP_DEDICATED
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cQueryServersResponse, (U32 queryId, Vector<IPAddress> ipList))
 {
    // Only process results from current query, ignoring anything older...
@@ -98,6 +103,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cQueryServersResponse, (U32
       mServerList.clear();
    }
 }
+#endif
 
 
 void MasterServerConnection::requestArrangedConnection(const Address &remoteAddress)
@@ -159,6 +165,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sClientRequestedArrangedCon
 }
 
 
+#ifndef ZAP_DEDICATED
 extern ClientInfo gClientInfo;
 
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cArrangedConnectionAccepted, 
@@ -195,7 +202,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cArrangedConnectionRejected
    {
       logprintf(LogConsumer::LogConnection, "Remote host rejected arranged connection...");    // Maybe player was kicked/banned?
       dynamic_cast<ClientGame *>(mGame)->connectionToServerRejected();
-   } 
+   }
 }
 
 // Display the MOTD that is set by the master server
@@ -205,7 +212,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSetMOTD, (StringPtr master
       return;
 
    setMasterName(masterName.getString());
-   dynamic_cast<ClientGame *>(mGame)->setMOTD(motdString.getString()); 
+   dynamic_cast<ClientGame *>(mGame)->setMOTD(motdString.getString());
 }
 
 
@@ -228,8 +235,9 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSetAuthenticated,
          gc->c2sSetAuthenticated();
    }
    else 
-      gClientInfo.authenticated = false;       
+      gClientInfo.authenticated = false;
 }
+#endif
 
 
 // Now we know that player with specified id has an approved name
@@ -280,6 +288,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sSetAuthenticated, (Vector<
 }
 
 
+#ifndef ZAP_DEDICATED
 // Alert user to the fact that their client is (or is not) out of date
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSendUpdgradeStatus, (bool needToUpgrade))
 {
@@ -332,6 +341,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cPlayerLeftGlobalChat, (Str
 
    dynamic_cast<ClientGame *>(mGame)->playerLeftGlobalChat(playerNick);
 }
+#endif
 
 
 // Set master server name
@@ -359,8 +369,12 @@ void MasterServerConnection::writeConnectRequest(BitStream *bstream)
    bstream->write(CS_PROTOCOL_VERSION);      // Version of the Client-Server protocol we use (can only play with others using same version)
    bstream->write(BUILD_VERSION);            // Current build of this game
 
+#ifdef ZAP_DEDICATED
+	bstream->writeString("");  // empty controller string for dedicated.
+#else
    // First controller's autodetect string (for research purposes!)
    bstream->writeString(Joystick::DetectedJoystickNameList.size() > 0 ? Joystick::DetectedJoystickNameList[0] : "");
+#endif
 
 
    if(bstream->writeFlag(mGame->isServer()))     // We're a server, tell the master a little about us
@@ -382,9 +396,11 @@ void MasterServerConnection::writeConnectRequest(BitStream *bstream)
    }
    else     // We're a client
    {
+#ifndef ZAP_DEDICATED
       bstream->writeString(gClientInfo.name.c_str());   // User's nickname
       bstream->writeString(gPlayerPassword.c_str());    // and whatever password they supplied
-      gClientInfo.id.write(bstream);  
+      gClientInfo.id.write(bstream);
+#endif
    }
 }
 

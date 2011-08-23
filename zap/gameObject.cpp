@@ -29,6 +29,7 @@
 #include "ship.h"
 #include "GeomUtils.h"
 #include "game.h"
+#include "gameConnection.h"
 
 #ifndef ZAP_DEDICATED
 #include "ClientGame.h"
@@ -706,19 +707,19 @@ void GameObject::readCompressedVelocity(Point &vel, U32 max, BitStream *stream)
 
 void GameObject::onGhostAddBeforeUpdate(GhostConnection *theConnection)
 {
+#ifndef ZAP_DEDICATED
    // Some unpackUpdate need getGame() available.
    GameConnection *gc = (GameConnection *)(theConnection);  // GhostConnection is always GameConnection
    TNLAssert(theConnection && gc->mClientGame, "Should only be client here!");
-#ifndef ZAP_DEDICATED
    mGame = gc->mClientGame;
 #endif
 }
 
 bool GameObject::onGhostAdd(GhostConnection *theConnection)
 {
+#ifndef ZAP_DEDICATED
    GameConnection *gc = (GameConnection *)(theConnection);  // GhostConnection is always GameConnection
    TNLAssert(theConnection && gc->mClientGame, "Should only be client here!");
-#ifndef ZAP_DEDICATED
 
 #ifdef TNL_ENABLE_ASSERTS
    mGame = NULL;  // prevent false asserts

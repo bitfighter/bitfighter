@@ -39,7 +39,6 @@
 #include "SoundSystem.h"
 #include "SharedConstants.h"     // For ServerInfoFlags enum
 #include "ship.h"
-#include "sparkManager.h"
 #include "GeomUtils.h"
 #include "luaLevelGenerator.h"
 #include "robot.h"
@@ -82,8 +81,10 @@ ServerGame *gServerGame = NULL;
 
 static Vector<DatabaseObject *> fillVector2;
 
+#ifndef ZAP_DEDICATED
 class ClientGame;
 extern ClientGame *gClientGame; // only used to see if we have a ClientGame, for buildBotMeshZones
+#endif
 
 //-----------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------
@@ -1262,7 +1263,11 @@ void ServerGame::cycleLevel(S32 nextLevel)
    }
    else
       // Try and load Bot Zones for this level, set flag if failed
+#ifdef ZAP_DEDICATED
+      getGameType()->mBotZoneCreationFailed = !BotNavMeshZone::buildBotMeshZones(this, false);
+#else
       getGameType()->mBotZoneCreationFailed = !BotNavMeshZone::buildBotMeshZones(this, gClientGame);
+#endif
 
 
    // Build a list of our current connections
@@ -1749,6 +1754,23 @@ S32 ServerGame::addLevelInfo(const char *filename, LevelInfo &info)
    return mLevelInfos.size() - 1;
 }
 
+extern Color gNeutralTeamColor;
+extern Color gHostileTeamColor;
+
+// Generic color function, works in most cases (static method)
+const Color *Game::getBasicTeamColor(const Game *game, S32 teamId)
+{
+   //TNLAssert(teamId < game->getTeamCount() || teamId < Item::TEAM_HOSTILE, "Invalid team id!");
+
+   if(teamId == MoveItem::TEAM_NEUTRAL)
+      return &gNeutralTeamColor;
+   else if(teamId == MoveItem::TEAM_HOSTILE)
+      return &gHostileTeamColor;
+   else if((U32)teamId < (U32)game->getTeamCount())
+      return game->getTeam(teamId)->getColor();
+   else
+      return &Colors::magenta;  // a level can make team number out of range, throw in some rarely used color to let user know an object is out of range team number
+}
 
 //-----------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------
@@ -2605,24 +2627,6 @@ const Color *ClientGame::getTeamColor(S32 teamId) const
    return gameType->getTeamColor(teamId);    // return Game::getBasicTeamColor(mGame, teamIndex); by default, overridden by certain gametypes...
 }
 
-
-extern Color gNeutralTeamColor;
-extern Color gHostileTeamColor;
-
-// Generic color function, works in most cases (static method)
-const Color *Game::getBasicTeamColor(const Game *game, S32 teamId)
-{
-   //TNLAssert(teamId < game->getTeamCount() || teamId < Item::TEAM_HOSTILE, "Invalid team id!");
-
-   if(teamId == MoveItem::TEAM_NEUTRAL)
-      return &gNeutralTeamColor;
-   else if(teamId == MoveItem::TEAM_HOSTILE)
-      return &gHostileTeamColor;
-   else if((U32)teamId < (U32)game->getTeamCount())
-      return game->getTeam(teamId)->getColor();
-   else
-      return &Colors::magenta;  // a level can make team number out of range, throw in some rarely used color to let user know an object is out of range team number
-}
 
 
 void ClientGame::drawStars(F32 alphaFrac, Point cameraPos, Point visibleExtent)

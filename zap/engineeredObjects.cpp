@@ -475,6 +475,7 @@ void EngineeredObject::computeExtent()
 
 void EngineeredObject::explode()
 {
+#ifndef ZAP_DEDICATED
    const S32 EXPLOSION_COLOR_COUNT = 12;
 
    static Color ExplosionColors[EXPLOSION_COLOR_COUNT] = {
@@ -504,6 +505,7 @@ void EngineeredObject::explode()
    FXManager::emitBurst(getActualPos(), Point(b,d) * 0.6f, Color(1,1,0), Color(0,1,1));
 
    disableCollision();
+#endif
 }
 
 
@@ -783,6 +785,7 @@ void ForceFieldProjector::renderDock()
 
 void ForceFieldProjector::renderEditor(F32 currentScale)
 {
+#ifndef ZAP_DEDICATED
    F32 scaleFact = 1;
    const Color *color = getGame()->getTeamColor(mTeam);
 
@@ -794,6 +797,7 @@ void ForceFieldProjector::renderEditor(F32 currentScale)
    }
    else
       renderDock();
+#endif
 }
 
 

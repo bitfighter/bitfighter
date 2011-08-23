@@ -24,17 +24,19 @@
 //------------------------------------------------------------------------------------
 
 #include "textItem.h"
-#include "UIEditorMenus.h"       // For TextItemEditorAttributeMenuUI def
 #include "gameNetInterface.h"
 #include "gameObjectRender.h"    // For renderPointVector()
 #include "game.h"
+#include "item.h"
+#include "stringUtils.h"
 
 #ifndef ZAP_DEDICATED
 #include "ClientGame.h"
+#include "UIEditorMenus.h"       // For TextItemEditorAttributeMenuUI def
+#include "SDL/SDL_opengl.h"
 #endif
 
 
-#include "SDL/SDL_opengl.h"
 
 #include <math.h>
 
@@ -44,8 +46,9 @@ namespace Zap
 TNL_IMPLEMENT_NETOBJECT(TextItem);
 
 
+#ifndef ZAP_DEDICATED
 EditorAttributeMenuUI *TextItem::mAttributeMenuUI = NULL;
-
+#endif
 
 // Constructor
 TextItem::TextItem()
@@ -174,6 +177,7 @@ string TextItem::toString(F32 gridSize) const
 // Editor
 void TextItem::recalcTextSize()
 {
+#ifndef ZAP_DEDICATED
    const F32 dummyTextSize = 120;
 
    F32 lineLen = getVert(0).distanceTo(getVert(1));      // In in-game units
@@ -182,6 +186,7 @@ void TextItem::recalcTextSize()
 
    // Compute text size subject to min and max defined in TextItem
    mSize = max(min(size, (F32)MAX_TEXT_SIZE), (F32)MIN_TEXT_SIZE);
+#endif
 }
 
 
@@ -197,6 +202,10 @@ void TextItem::onAddedToGame(Game *theGame)
 // Bounding box for quick collision-possibility elimination, and display scoping purposes
 void TextItem::computeExtent()
 {
+#ifdef ZAP_DEDICATED
+   // don't care much about it in server, as server won't render, and does not do colliding to textTiem
+	setExtent(Rect(getVert(0), getVert(1)));
+#else
    F32 len = UserInterface::getStringWidth(mSize, mText.c_str());
    //F32 buf = mSize / 2;     // Provides some room to accomodate descenders on letters like j and g.
 
@@ -230,6 +239,7 @@ void TextItem::computeExtent()
    Rect extent(Point(minx, miny), Point(maxx, maxy));
 
    setExtent(extent);
+#endif
 }
 
 
@@ -312,9 +322,10 @@ void TextItem::onGeomChanged()
 }
 
 
+#ifndef ZAP_DEDICATED
 // Static method: Provide hook into the object currently being edited with the attrubute editor for callback purposes
 EditorObject *TextItem::getAttributeEditorObject()     
-{ 
+{
    return mAttributeMenuUI->getObject(); 
 }
 
@@ -330,6 +341,7 @@ EditorAttributeMenuUI *TextItem::getAttributeMenu(ClientGame *game)
 
    return mAttributeMenuUI;
 }
+#endif
 
 
 ////////////////////////////////////////
@@ -384,6 +396,7 @@ void LineItem::render()
 
 void LineItem::renderEditor(F32 currentScale)
 {
+#ifndef ZAP_DEDICATED
    if(!mSelected)
       glColor(getEditorRenderColor());
    else
@@ -392,6 +405,7 @@ void LineItem::renderEditor(F32 currentScale)
    renderPointVector(getOutline(), GL_LINE_STRIP);
 
    renderLinePolyVertices(currentScale);
+#endif
 }
 
 

@@ -30,8 +30,10 @@
 
 #include <math.h>
 
+#ifndef ZAP_DEDICATED
 #include "SDL/SDL_opengl.h"
 #include "UI.h"
+#endif
 
 namespace Zap
 {
@@ -58,17 +60,21 @@ SimpleLine::SimpleLine()
 
 void SimpleLine::renderDock()
 {
+#ifndef ZAP_DEDICATED
    glColor(getEditorRenderColor());       // Blue for TextItem, red for GoFast, etc.
    drawFilledSquare(getVert(0), 5);       // Draw origin of item to give user something to grab on the dock
+#endif
 }
 
 
 // Called when we create a brand new object and insert it in the editor, like when we drag a new item from the dock
 void SimpleLine::newObjectFromDock(F32 gridSize) 
 {
+#ifndef ZAP_DEDICATED
    EditorParent::newObjectFromDock(gridSize);
    setVert(Point(0,0), 0);
    setVert(Point(1,0) * gridSize, 1);
+#endif
 }
 
 
@@ -83,6 +89,7 @@ static const Color *SELECT_COLOR = &Colors::yellow;
 // Subclasses will fill in the rest
 void SimpleLine::renderEditor(F32 currentScale)
 {
+#ifndef ZAP_DEDICATED
    Point pos = getVert(0);
    Point dest = getVert(1);
 
@@ -112,22 +119,27 @@ void SimpleLine::renderEditor(F32 currentScale)
    }
 
    renderEditorItem();
+#endif
 }
 
 
 // Offset: negative below the item, positive above
 void SimpleLine::renderItemText(const char *text, S32 offset, F32 currentScale, const Point &currentOffset)
 {
+#ifndef ZAP_DEDICATED
    glColor(INSTRUCTION_TEXTCOLOR);
    S32 off = (INSTRUCTION_TEXTSIZE + INSTRUCTION_TEXTGAP) * offset - 10 - ((offset > 0) ? 5 : 0);
    UserInterface::drawStringf_2pt(getVert(0), getVert(1) , F32(INSTRUCTION_TEXTSIZE) / currentScale, F32(off) / currentScale, text);
+#endif
 }
 
 
 void SimpleLine::prepareForDock(Game *game, const Point &point)
 {
+#ifndef ZAP_DEDICATED
    setVert(point, 0);
    EditorParent::prepareForDock(game, point);
+#endif
 }
 
 

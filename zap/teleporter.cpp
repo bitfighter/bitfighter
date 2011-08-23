@@ -27,19 +27,19 @@
 
 using namespace TNL;
 #include "ship.h"
-#include "sparkManager.h"
 #include "gameLoader.h"
 #include "SoundSystem.h"
 #include "gameObjectRender.h"
 #include "Colors.h"
 #include "game.h"
+#include "stringUtils.h"
 
 #ifndef ZAP_DEDICATED
 #include "ClientGame.h"
-#endif
-
+#include "sparkManager.h"
 #include "SDL/SDL_opengl.h"
 #include "UI.h"
+#endif
 
 #include <math.h>
 
@@ -218,10 +218,12 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
       S32 dest;
       stream->read(&dest);
 
+#ifndef ZAP_DEDICATED
       FXManager::emitTeleportInEffect(mDests[dest], 0);
       SoundSystem::playSoundEffect(SFXTeleportIn, mDests[dest], Point());
 
       SoundSystem::playSoundEffect(SFXTeleportOut, getVert(0), Point());
+#endif
       timeout = mTeleporterDelay;
    }
 }
@@ -314,11 +316,13 @@ void Teleporter::render()
 
 void Teleporter::renderEditorItem()
 {
+#ifndef ZAP_DEDICATED
    glColor(Colors::green);
 
    glLineWidth(gLineWidth3);
    drawPolygon(getVert(0), 12, (F32)TELEPORTER_RADIUS, 0);
    glLineWidth(gDefaultLineWidth);
+#endif
 }
 
 

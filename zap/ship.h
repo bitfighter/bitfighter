@@ -30,11 +30,14 @@
 #include "gameObject.h"
 #include "moveObject.h"
 #include "luaObject.h"
-#include "sparkManager.h"
 #include "SoundEffect.h"
 #include "Timer.h"
 #include "shipItems.h"
 #include "gameWeapons.h"
+
+#ifndef ZAP_DEDICATED
+#include "sparkManager.h"
+#endif
 
 namespace Zap
 {
@@ -204,9 +207,11 @@ public:
    Timer mCloakTimer;
    Timer mSpawnShield;
 
+#ifndef ZAP_DEDICATED
    U32 mSparkElapsed;
    S32 mLastTrailPoint[TrailCount];  // TrailCount = 2
    FXTrail mTrail[TrailCount];
+#endif
 
    F32 mass;            // Mass of ship, not used
    bool hasExploded;

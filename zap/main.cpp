@@ -110,6 +110,7 @@ XXX need to document timers, new luavec stuff XXX
 
 using namespace TNL;
 
+#ifndef ZAP_DEDICATED
 #include "UI.h"
 #include "UIGame.h"
 #include "UINameEntry.h"
@@ -119,31 +120,34 @@ using namespace TNL;
 #include "UIDiagnostics.h"
 #include "UICredits.h"
 #include "ClientGame.h"
+#include "sparkManager.h"
+#include "Joystick.h"
+#include "Event.h"
+#include "SDL/SDL.h"
+#include "SDL/SDL_opengl.h"
+#endif
+
+#include "game.h"
 #include "gameNetInterface.h"
 #include "masterConnection.h"
 #include "SoundSystem.h"
-#include "sparkManager.h"
 #include "input.h"
 #include "keyCode.h"
 #include "config.h"
 #include "md5wrapper.h"
 #include "version.h"
 #include "Colors.h"
-#include "Event.h"
 #include "ScreenInfo.h"
-#include "Joystick.h"
 #include "stringUtils.h"
-
-#include "SDL/SDL.h"
-#include "SDL/SDL_opengl.h"
 
 // For writeToConsole() functionality
 #ifdef WIN32
+#include <windows.h>
 #include <io.h>
 #include <fcntl.h>
 #include <shellapi.h>
 #define USE_BFUP
-#endif 
+#endif
 
 #ifdef TNL_OS_MAC_OSX
 #include "Directory.h"
@@ -249,6 +253,7 @@ void abortHosting_noLevels()
       //printf("No levels were loaded from folder %s.  Cannot host a game.", gLevelDir.c_str());      ==> Does nothing
       exitGame(1);
    }
+#ifndef ZAP_DEDICATED
    else
    {
       ErrorMessageUserInterface *ui = gClientGame->getUIManager()->getErrorMsgUserInterface();
@@ -271,7 +276,7 @@ void abortHosting_noLevels()
    ui->levelLoadDisplayDisplay = false;
    ui->levelLoadDisplayFadeTimer.clear();
 
-   return;
+#endif
 }
 
 
@@ -344,8 +349,10 @@ void initHostGame(Address bindAddress, Vector<string> &levelList, bool testMode)
       gServerGame->buildLevelList(levelList);     // Take levels in gLevelList and create a set of empty levelInfo records
       gServerGame->resetLevelLoadIndex();
 
+#ifndef ZAP_DEDICATED
       if(gClientGame)
          gClientGame->getUIManager()->getHostMenuUserInterface()->levelLoadDisplayDisplay = true;
+#endif
    }
    else
    {
@@ -382,16 +389,21 @@ void hostGame()
       return;
    }
 
-   HostMenuUserInterface *ui = gClientGame->getUIManager()->getHostMenuUserInterface();
-
-   ui->levelLoadDisplayDisplay = false;
-   ui->levelLoadDisplayFadeTimer.reset();
-
+#ifndef ZAP_DEDICATED
    if(!gDedicatedServer)                  // If this isn't a dedicated server...
+   {
+      HostMenuUserInterface *ui = gClientGame->getUIManager()->getHostMenuUserInterface();
+
+      ui->levelLoadDisplayDisplay = false;
+      ui->levelLoadDisplayFadeTimer.reset();
+
       joinGame(Address(), false, true);   // ...then we'll play, too!
+   }
+#endif
 }
 
 
+#ifndef ZAP_DEDICATED
 // do the logic to draw the screen
 void display()
 {
@@ -414,15 +426,19 @@ void display()
    // screen that are being updated at the same time.
    SDL_GL_SwapBuffers();  // Use this if we convert to SDL
 }
+#endif
 
 
 void gameIdle(U32 integerTime)
 {
+#ifndef ZAP_DEDICATED
    if(UserInterface::current)
       UserInterface::current->idle(integerTime);
+#endif
 
    if(!(gServerGame && gServerGame->hostingModePhase == ServerGame::LoadingLevels))    // Don't idle games during level load
    {
+#ifndef ZAP_DEDICATED
       if(gClientGame2)
       {
          gIniSettings.inputMode = InputModeJoystick;
@@ -441,6 +457,7 @@ void gameIdle(U32 integerTime)
          gClientGame = gClientGame1;
          gClientGame->idle(integerTime);
       }
+#endif
       if(gServerGame)
          gServerGame->idle(integerTime);
    }
@@ -493,11 +510,11 @@ void idle()
    static S32 integerTime = 0;   // static, as we need to keep holding the value that was set
    static U32 prevTimer = 0;
 
-	U32 currentTimer = Platform::getRealMilliseconds();
-	integerTime += currentTimer - prevTimer;
-	prevTimer = currentTimer;
+   U32 currentTimer = Platform::getRealMilliseconds();
+   integerTime += currentTimer - prevTimer;
+   prevTimer = currentTimer;
 
-	if(integerTime < -500 || integerTime > 5000)
+   if(integerTime < -500 || integerTime > 5000)
       integerTime = 10;
 
    U32 sleepTime = 1;
@@ -506,7 +523,9 @@ void idle()
          (!gDedicatedServer && integerTime >= S32(1000 / gIniSettings.maxFPS)) )
    {
       gameIdle(U32(integerTime));
+#ifndef ZAP_DEDICATED
       display();    // Draw the screen
+#endif
       integerTime = 0;
       if(!gDedicatedServer)
          sleepTime = 0;      // Live player at the console, but if we're running > 100 fps, we can afford a nap
@@ -520,6 +539,7 @@ void idle()
    // Note that moving to SDL will require our journaling system to be re-engineered.
    // Note too that SDL will require linking in SDL.lib and SDLMain.lib, and including the SDL.dll in the EXE folder.
 
+#ifndef ZAP_DEDICATED
    // SDL requires an active polling loop.  We could use something like the following:
    SDL_Event event;
 
@@ -531,6 +551,7 @@ void idle()
       Event::onEvent(&event);
    }
    // END SDL event polling
+#endif
 
 
    // Sleep a bit so we don't saturate the system. For a non-dedicated server,
@@ -566,7 +587,7 @@ FileLogConsumer gServerLog;       // We'll apply a filter later on, in main()
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-
+#ifndef ZAP_DEDICATED
 // Player has selected a game from the QueryServersUserInterface, and is ready to join
 void joinGame(Address remoteAddress, bool isFromMaster, bool local)
 {
@@ -618,12 +639,13 @@ void joinGame(Address remoteAddress, bool isFromMaster, bool local)
    //}
 
 }
-
+#endif
 
 
 // Disconnect from servers and exit game in an orderly fashion.  But stay connected to the master until we exit the program altogether
 void endGame()
 {
+#ifndef ZAP_DEDICATED
    // Cancel any in-progress attempts to connect
    if(gClientGame && gClientGame->getConnectionToMaster())
       gClientGame->getConnectionToMaster()->cancelArrangedConnectionAttempt();
@@ -632,10 +654,11 @@ void endGame()
    if(gClientGame && gClientGame->getConnectionToServer())
       gClientGame->getConnectionToServer()->disconnect(NetConnection::ReasonSelfDisconnect, "");
 
+   gClientGame->getUIManager()->getHostMenuUserInterface()->levelLoadDisplayDisplay = false;
+#endif
+
    delete gServerGame;
    gServerGame = NULL;
-
-   gClientGame->getUIManager()->getHostMenuUserInterface()->levelLoadDisplayDisplay = false;
 
    if(gDedicatedServer)
       exitGame();
@@ -649,28 +672,33 @@ void onExit()
 {
    endGame();
 
+#ifndef ZAP_DEDICATED
    if(gClientGame)
       delete gClientGame;     // Has effect of disconnecting from master
+#endif
    if(gServerGame)
       delete gServerGame;     // Has effect of disconnecting from master
 
-   OGLCONSOLE_Quit();
    SoundSystem::shutdown();
+
+#ifndef ZAP_DEDICATED
+   OGLCONSOLE_Quit();
    Joystick::shutdownJoystick();
 
    // Save settings to capture window position
    saveWindowMode(&gINI);
-
    // TODO: reimplement window position saving with SDL
    //   if(gIniSettings.displayMode == DISPLAY_MODE_WINDOWED)
    //      saveWindowPosition(glutGet(GLUT_WINDOW_X), glutGet(GLUT_WINDOW_Y));
+
+   SDL_QuitSubSystem(SDL_INIT_VIDEO);
+#endif
 
    saveSettingsToINI(&gINI);    // Writes settings to the INI, then saves it to disk
 
    NetClassRep::logBitUsage();
    logprintf("Bye!");
 
-   SDL_QuitSubSystem(SDL_INIT_VIDEO);
 
    exitGame();
 }
@@ -1073,9 +1101,11 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
       }
       else if(!stricmp(argv[i], "-usestick")) // additional arg required
       {
+#ifndef ZAP_DEDICATED
          if(hasAdditionalArg)
             Joystick::UseJoystickNumber = atoi(argv[i+1]) - 1;  // zero-indexed     //  TODO: should be part of gCmdLineSettings
          else
+#endif
          {
             logprintf(LogConsumer::LogError, "You must specify the joystick you want to use with the -usestick option");
             exitGame(1);
@@ -1090,6 +1120,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
 }
 
 
+#ifndef ZAP_DEDICATED
 void InitSdlVideo()
 {
    // Information about the current video settings.
@@ -1169,6 +1200,7 @@ void InitSdlVideo()
    else
       gScreenInfo.setHardwareSurface(true);
 }
+#endif
 
 // Now integrate INI settings with those from the command line and process them
 void processStartupParams()
@@ -1302,6 +1334,7 @@ void processStartupParams()
 
    // Note that we can be in both clientMode and serverMode (such as when we're hosting a game interactively)
 
+#ifndef ZAP_DEDICATED
    if(gCmdLineSettings.clientMode)                // Create ClientGame object
    {
       gClientGame1 = new ClientGame(Address());   //   Let the system figure out IP address and assign a port
@@ -1309,8 +1342,9 @@ void processStartupParams()
 
        // Put any saved filename into the editor file entry thingy
       gClientGame->getUIManager()->getLevelNameEntryUserInterface()->setString(gIniSettings.lastEditorName);
+
+      //gClientGame2 = new ClientGame(Address());   //  !!! 2-player split-screen game in same game.
    }
-   //gClientGame2 = new ClientGame(Address());   //  !!! 2-player split-screen game in same game.
 
 
    // Not immediately starting a connection...  start out with name entry or main menu
@@ -1349,6 +1383,7 @@ void processStartupParams()
          gClientInfo.id.getRandom();                           // Generate a player ID
       }
    }
+#endif
 }
 
 
@@ -1520,6 +1555,7 @@ void setupLogging()
    gStdoutLog.logprintf("Welcome to Bitfighter!");
 }
 
+#ifndef ZAP_DEDICATED
 // Actually put us in windowed or full screen mode.  Pass true the first time this is used, false subsequently.
 // This has the unfortunate side-effect of triggering a mouse move event.  
 void actualizeScreenMode(bool changingInterfaces)
@@ -1669,6 +1705,7 @@ void setJoystick(ControllerTypeType jsType)
    else
       gIniSettings.inputMode = InputModeJoystick;
 }
+#endif
 
 
 // Function to handle one-time update tasks
@@ -1707,7 +1744,7 @@ void launchUpdater(string bitfighterExecutablePathAndFilename)
 
    S32 buildVersion = gCmdLineSettings.forceUpdate ? 0 : BUILD_VERSION;
 
-	S64 result = (S64) ShellExecuteA( NULL, NULL, updaterFileName.c_str(), itos(buildVersion).c_str(), updaterPath.c_str(), SW_SHOW );
+   S64 result = (S64) ShellExecuteA( NULL, NULL, updaterFileName.c_str(), itos(buildVersion).c_str(), updaterPath.c_str(), SW_SHOW );
 
    string msg = "";
 

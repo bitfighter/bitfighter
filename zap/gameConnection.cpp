@@ -24,7 +24,7 @@
 //------------------------------------------------------------------------------------
 
 #include "gameConnection.h"
-#include "ClientGame.h"
+#include "game.h"
 #include "gameType.h"
 #include "soccerGame.h"          // For checking if pick up soccer is allowed
 #include "gameNetInterface.h"
@@ -39,6 +39,8 @@
 #include "stringUtils.h"         // For strictjoindir()
 
 
+#ifndef ZAP_DEDICATED
+#include "ClientGame.h"
 #include "UI.h"
 #include "UIEditor.h"
 #include "UIGame.h"
@@ -46,6 +48,10 @@
 #include "UINameEntry.h"
 #include "UIErrorMessage.h"
 #include "UIQueryServers.h"
+#endif
+
+#include "UIMenus.h"  // for enum in PlayerMenuUserInterface
+
 #include "md5wrapper.h"
   
 
@@ -316,6 +322,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rCommandComplete, (RangedU32<0,SENDER_STATUS
    // Server might need mOutputFile, if the server were to receive files.  Currently, server doesn't receive files in-game.
    TNLAssert(mClientGame != NULL, "trying to get mOutputFile, mClientGame is NULL");
 
+#ifndef ZAP_DEDICATED
    if(mClientGame)
    {
       const char *outputFilename = strictjoindir(gConfigDirs.levelDir, mClientGame->getRemoteLevelDownloadFilename()).c_str();
@@ -347,6 +354,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rCommandComplete, (RangedU32<0,SENDER_STATUS
          // mClientGame->setOutputFilename("");   <=== what is this for??  
       }
    }
+#endif
    if(mDataBuffer)
    {
       delete mDataBuffer;
@@ -406,8 +414,10 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSuspendGame, (bool suspend), (suspend), Net
 // We'll also play the playerJoined sfx to alert local client that the game is on again.
 TNL_IMPLEMENT_RPC(GameConnection, s2cUnsuspend, (), (), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
+#ifndef ZAP_DEDICATED
    mClientGame->unsuspendGame();       
    SoundSystem::playSoundEffect(SFXPlayerJoined, 1);
+#endif
 }
 
 
@@ -748,6 +758,7 @@ extern Color gCmdChatColor;
 TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsAdmin, (bool granted), (granted),
    NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
+#ifndef ZAP_DEDICATED
    if(mClientRef)
    {
       if(granted)
@@ -779,12 +790,14 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsAdmin, (bool granted), (granted),
    // If we're not waiting, don't do anything.  Supresses superflous messages on startup.
    if(waitingForPermissionsReply())
       mClientGame->gotAdminPermissionsReply(granted);
+#endif
 }
 
 
 TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsLevelChanger, (bool granted, bool notify), (granted, notify),
    NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
+#ifndef ZAP_DEDICATED
    if(mClientRef)
    {
       if(granted)
@@ -816,6 +829,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsLevelChanger, (bool granted, bool noti
    // If we're not waiting, don't show us a message.  Supresses superflous messages on startup.
    if(waitingForPermissionsReply() && notify)
       mClientGame->gotLevelChangePermissionsReply(granted);
+#endif
 }
 
 
@@ -866,9 +880,11 @@ Color gCmdChatColor = colors[GameConnection::ColorRed];
 
 void GameConnection::displayMessage(U32 colorIndex, U32 sfxEnum, const char *message)
 {
+#ifndef ZAP_DEDICATED
    mClientGame->displayMessage(colors[colorIndex], "%s", message);
    if(sfxEnum != SFXNone)
       SoundSystem::playSoundEffect(sfxEnum);
+#endif
 }
 
 
@@ -929,8 +945,10 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cTouchdownScored,
                   (sfx, team, formatString, e),
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
+#ifndef ZAP_DEDICATED
    displayMessageE(GameConnection::ColorNuclearGreen, sfx, formatString, e);
    mClientGame->getGameType()->majorScoringEventOcurred(team);
+#endif
 }
 
 
@@ -995,7 +1013,9 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayMessage,
 TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayMessageBox, (StringTableEntry title, StringTableEntry instr, Vector<StringTableEntry> message),
                   (title, instr, message), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
+#ifndef ZAP_DEDICATED
    mClientGame->displayMessageBox(title, instr, message);
+#endif
 }
 
 
@@ -1076,7 +1096,9 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestShutdown, (U16 time, StringPtr reaso
 TNL_IMPLEMENT_RPC(GameConnection, s2cInitiateShutdown, (U16 time, StringTableEntry name, StringPtr reason, bool originator),
                   (time, name, reason, originator), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
+#ifndef ZAP_DEDICATED
    mClientGame->shutdownInitiated(time, name, reason, originator);
+#endif
 }
 
 
@@ -1097,7 +1119,9 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestCancelShutdown, (), (), NetClassGrou
 
 TNL_IMPLEMENT_RPC(GameConnection, s2cCancelShutdown, (), (), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
+#ifndef ZAP_DEDICATED
    mClientGame->cancelShutdown();
+#endif
 }
 
 
@@ -1284,6 +1308,7 @@ bool GameConnection::s2rUploadFile(const char *filename, U8 type)
 // Send password, client's name, and version info to game server
 void GameConnection::writeConnectRequest(BitStream *stream)
 {
+#ifndef ZAP_DEDICATED
    Parent::writeConnectRequest(stream);
 
    bool isLocal = gServerGame;      // Only way to have gServerGame defined is if we're also hosting... ergo, we must be local
@@ -1309,6 +1334,7 @@ void GameConnection::writeConnectRequest(BitStream *stream)
    stream->writeString(mClientName.getString());
    mClientId.write(stream);
    stream->writeFlag(mIsVerified);    // Tell server whether we (the client) claim to be authenticated
+#endif
 }
 
 
@@ -1452,7 +1478,6 @@ string GameConnection::makeUnique(string name)
 }
 
 
-extern Vector<string> prevServerListFromMaster;    // in UIQueryServers.cpp
 void GameConnection::onConnectionEstablished()
 {
    U32 minPacketSendPeriod = 40; //50;   <== original zap setting
@@ -1474,6 +1499,7 @@ void GameConnection::onConnectionEstablished()
 
    if(isInitiator())    // Runs on client
    {
+#ifndef ZAP_DEDICATED
       mClientGame->setInCommanderMap(false);       // Start game in regular mode.
       mClientGame->clearZoomDelta();               // No in zoom effect
       setGhostFrom(false);
@@ -1497,16 +1523,17 @@ void GameConnection::onConnectionEstablished()
          string addr = getNetAddressString();
          bool found = false;
 
-         for(S32 i = 0; i < prevServerListFromMaster.size(); i++)
-            if(prevServerListFromMaster[i].compare(addr) == 0) 
+         for(S32 i = 0; i < gIniSettings.prevServerListFromMaster.size(); i++)
+            if(gIniSettings.prevServerListFromMaster[i].compare(addr) == 0) 
             {
                found = true;
                break;
             }
 
          if(!found) 
-            prevServerListFromMaster.push_back(addr);
+            gIniSettings.prevServerListFromMaster.push_back(addr);
       }
+#endif
    }
    else                 // Runs on server
    {
@@ -1552,8 +1579,10 @@ void GameConnection::onConnectionTerminated(NetConnection::TerminationReason rea
    {
       TNLAssert(mClientGame, "onConnectionTerminated: mClientGame is NULL");
 
+#ifndef ZAP_DEDICATED
       if(mClientGame)
          mClientGame->onConnectionTerminated(getNetAddress(), reason, reasonStr);
+#endif
    }
    else     // Server
    {
@@ -1580,7 +1609,9 @@ void GameConnection::onConnectTerminated(TerminationReason reason, const char *n
       if(!mClientGame)
          return;
 
+#ifndef ZAP_DEDICATED
       mClientGame->onConnectTerminated(getNetAddress(), reason);
+#endif
 
    }
 }

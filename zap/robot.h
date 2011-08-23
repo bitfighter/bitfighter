@@ -31,7 +31,6 @@
 #include "moveObject.h"
 #include "ship.h"
 
-#include "sparkManager.h"
 #include "Timer.h"
 #include "shipItems.h"
 #include "gameWeapons.h"

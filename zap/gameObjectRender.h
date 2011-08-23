@@ -26,6 +26,8 @@
 #ifndef _GAMEOBJECTRENDER_H_
 #define _GAMEOBJECTRENDER_H_
 
+#ifndef ZAP_DEDICATED
+
 #include "tnl.h"
 
 #include "Geometry.h"
@@ -193,6 +195,41 @@ extern void renderStaticBitfighterLogo();
 
 };
 
+#else
+
+// for ZAP_DEDICATED, we will just define blank functions, and don't compile gameObjectRender.cpp
+
+#define renderSoccerBall
+#define renderNexus
+#define renderTextItem
+#define renderSpeedZone
+#define renderSlipZone
+#define renderProjectile
+#define renderGrenade
+#define renderMine
+#define renderSpyBug
+#define renderLoadoutZone
+#define renderGoalZone
+#define renderForceFieldProjector
+#define renderForceField
+#define renderTurret
+#define renderSquareItem
+#define renderNavMeshZone
+#define renderNavMeshBorders
+#define renderRepairItem
+#define renderEnergyItem
+#define renderAsteroid
+#define renderReactor
+#define renderWorm
+#define renderTestItem
+#define renderResourceItem
+#define renderFlag
+#define renderWallFill
+#define renderWallEdges
+#define renderPolygonFill
+#define renderPolygonOutline
+#define drawCircle
+
+
 #endif
-
-
+#endif

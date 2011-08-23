@@ -30,12 +30,14 @@
 #include "gameNetInterface.h"
 #include "gameObjectRender.h"
 #include "ship.h"
-#include "UIEditorMenus.h"    // For GoFastEditorAttributeMenuUI def
-#include "UI.h"
 #include "SoundSystem.h"
+#include "stringUtils.h"
+#include "gameConnection.h"
 
 #ifndef ZAP_DEDICATED
 #include "ClientGame.h"
+#include "UIEditorMenus.h"    // For GoFastEditorAttributeMenuUI def
+#include "UI.h"
 #endif
 
 

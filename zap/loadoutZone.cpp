@@ -25,6 +25,7 @@
 
 #include "loadoutZone.h"
 #include "game.h"
+#include "stringUtils.h"
 
 namespace Zap
 {

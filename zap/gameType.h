@@ -355,9 +355,11 @@ public:
    bool processArguments(S32 argc, const char **argv, Game *game);
    string toString() const;
 
+#ifndef ZAP_DEDICATED
    virtual const char **getGameParameterMenuKeys();
    virtual boost::shared_ptr<MenuItem> getMenuItem(ClientGame *game, const char *key);
    virtual bool saveMenuItem(const MenuItem *menuItem, const char *key);
+#endif
 
    virtual bool processSpecialsParam(const char *param);
    virtual string getSpecialsLine();
@@ -416,9 +418,11 @@ public:
 
    virtual void changeClientTeam(GameConnection *theClient, S32 team);     // Change player to team indicated, -1 = cycle teams
 
+#ifndef ZAP_DEDICATED
    virtual void renderInterfaceOverlay(bool scoreboardVisible);
    void renderObjectiveArrow(const GameObject *target, const Color *c, F32 alphaMod = 1.0f) const;
    void renderObjectiveArrow(const Point *p, const Color *c, F32 alphaMod = 1.0f) const;
+#endif
 
    void addTime(U32 time);          // Extend the game by time (in ms)
 
@@ -494,11 +498,13 @@ public:
    // These are used when the client sees something happen and wants a confirmation from the server
    TNL_DECLARE_RPC(c2sResendItemStatus, (U16 itemId));
 
+#ifndef ZAP_DEDICATED
    // Handle additional game-specific menu options for the client and the admin
    virtual void addClientGameMenuOptions(ClientGame *game, Vector<boost::shared_ptr<MenuItem> > &menuOptions);
    //virtual void processClientGameMenuOption(U32 index);                        // Param used only to hold team, at the moment
 
    virtual void addAdminGameMenuOptions(Vector<boost::shared_ptr<MenuItem> > &menuOptions);
+#endif
 
    TNL_DECLARE_RPC(c2sAddTime, (U32 time));                                    // Admin is adding time to the game
    TNL_DECLARE_RPC(c2sChangeTeams, (S32 team));                                // Player wants to change teams

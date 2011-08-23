@@ -39,6 +39,7 @@ using namespace TNL;
 
 namespace Zap
 {
+#ifndef ZAP_DEDICATED
 
 static const S32 NONE = -1;
 
@@ -217,6 +218,16 @@ public:
 };
 
 
+#else
 
+class EditorObject : virtual public BfObject   // Interface class  -- All editor objects need to implement this
+{
+   // dedicated server won't need much of this
+public:
+   virtual EditorObject *clone()  const = 0;
+   EditorObject *newCopy() {return clone();};        // Copies object        // TODO: Will become call to clone, delete method
+};
+
+#endif
 };
 #endif

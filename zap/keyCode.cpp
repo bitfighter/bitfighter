@@ -32,7 +32,9 @@
 
 #include <ctype.h>
 
+#ifndef ZAP_DEDICATED
 #include "SDL/SDL.h"
+#endif
 
 using namespace TNL;
 
@@ -125,6 +127,7 @@ char keyToAscii(int unicode, KeyCode keyCode)
 }
 
 
+#ifndef ZAP_DEDICATED
 // Translate SDL standard keys to our KeyCodes
 KeyCode sdlKeyToKeyCode(int key)
 {
@@ -1071,7 +1074,7 @@ S32 keyCodeToSDLKey(KeyCode keyCode)
          return SDLK_UNKNOWN;
    }
 }
-
+#endif
 
 KeyCode joyButtonToKeyCode(int buttonIndex)
 {

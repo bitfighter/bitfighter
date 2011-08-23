@@ -25,15 +25,17 @@
 
 #include "rabbitGame.h"
 #include "ship.h"
-#include "UIGame.h"
 #include "SoundSystem.h"
 #include "flagItem.h"
 #include "Colors.h"
 #include "game.h"
-#include "UIMenuItems.h"
+#include "gameConnection.h"
+#include "stringUtils.h"
 
 #ifndef ZAP_DEDICATED
 #include "ClientGame.h"
+#include "UIGame.h"
+#include "UIMenuItems.h"
 #endif
 
 #include <stdio.h>
@@ -119,6 +121,7 @@ string RabbitGameType::toString()
 }
 
 
+#ifndef ZAP_DEDICATED
 // Any unique items defined here must be handled in both getMenuItem() and saveMenuItem() below!
 const char **RabbitGameType::getGameParameterMenuKeys()
 {
@@ -164,6 +167,7 @@ bool RabbitGameType::saveMenuItem(const MenuItem *menuItem, const char *key)
 
    return true;
 }
+#endif
 
 
 void RabbitGameType::setFlagScore(S32 pointsPerMinute)     

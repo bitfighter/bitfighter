@@ -26,11 +26,12 @@
 #ifndef JOYSTICK_H_
 #define JOYSTICK_H_
 
+#ifndef ZAP_DEDICATED
 #include "tnlTypes.h"
 #include "tnlVector.h"
 #include "keyCodeEnum.h"
-
 #include "SDL/SDL_joystick.h"
+#endif
 
 using namespace TNL;
 
@@ -54,6 +55,7 @@ enum ControllerTypeType
    NoController               // Pretty sure there is no controller
 };
 
+#ifndef ZAP_DEDICATED
 enum ControllerButton {
    ControllerButton1,
    ControllerButton2,
@@ -168,6 +170,6 @@ public:
    static U8 remapJoystickButton(U8 button);
 };
 
-
+#endif // ZAP_DEDICATED
 } /* namespace Zap */
 #endif /* JOYSTICK_H_ */

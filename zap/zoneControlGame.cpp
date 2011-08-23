@@ -29,6 +29,7 @@
 #include "flagItem.h"
 #include "gameObjectRender.h"
 #include "game.h"
+#include "gameConnection.h"
 
 #ifndef ZAP_DEDICATED
 #include "ClientGame.h"

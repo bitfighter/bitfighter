@@ -31,9 +31,12 @@
 #include "gameType.h"               // For BarrierRec struct
 #include "game.h"
 #include "config.h"
-#include "UI.h"  // for glColor(Color)
+#include "stringUtils.h"
 
+#ifndef ZAP_DEDICATED 
+#include "UI.h"  // for glColor(Color)
 #include "SDL/SDL_opengl.h"
+#endif
 
 #include <cmath>                    // C++ version of this headers includes float overloads
 
@@ -442,7 +445,9 @@ void WallItem::onGeomChanged()
 
 void WallItem::processEndPoints()
 {
+#ifndef ZAP_DEDICATED
    Barrier::constructBarrierEndPoints(getOutline(), (F32)getWidth(), extendedEndPoints);
+#endif
 }
 
 
@@ -493,6 +498,7 @@ PolyWall *PolyWall::clone() const
 
 void PolyWall::processEndPoints()
 {
+#ifndef ZAP_DEDICATED
    extendedEndPoints.clear();
    for(S32 i = 1; i < getVertCount(); i++)
    {
@@ -503,6 +509,7 @@ void PolyWall::processEndPoints()
    // Close the loop
    extendedEndPoints.push_back(getVert(getVertCount()));
    extendedEndPoints.push_back(getVert(0));
+#endif
 }
 
 
@@ -510,8 +517,10 @@ static const Color HIGHLIGHT_COLOR = Colors::white;
 
 void PolyWall::render()
 {
+#ifndef ZAP_DEDICATED
    glColor(HIGHLIGHT_COLOR);
    renderPolygonOutline(getOutline());
+#endif
 }
 
 
@@ -523,9 +532,11 @@ void PolyWall::renderFill()
 
 void PolyWall::renderEditor(F32 currentScale)
 {
+#ifndef ZAP_DEDICATED
    glColor(HIGHLIGHT_COLOR);
    renderPolygonOutline(getOutline());
    EditorPolygon::renderEditor(currentScale);
+#endif
 }
 
 
@@ -676,6 +687,7 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *gameDataba
 
 void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *gameDatabase, DatabaseObject *wallDbObject, const Vector<DatabaseObject *> &engrObjects)
 {
+#ifndef ZAP_DEDICATED
    // Find any engineered objects that terminate on this wall, and mark them for resnapping later
 
    Vector<EngineeredObject *> eosOnDeletedSegs;    // A list of engr objects terminating on the wall segment that we'll be deleting
@@ -738,6 +750,7 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *gameDataba
    // Alert all forcefields terminating on any of the wall segments we deleted and potentially recreated
    for(S32 j = 0; j < eosOnDeletedSegs.size(); j++)  
       eosOnDeletedSegs[j]->mountToWall(eosOnDeletedSegs[j]->getVert(0), mWallEdgeDatabase, mWallSegmentDatabase);
+#endif
 }
 
 
@@ -758,6 +771,7 @@ void WallSegmentManager::clipAllWallEdges(const Vector<WallSegment *> &wallSegme
 // Takes a wall, finds all intersecting segments, and marks them invalid
 void WallSegmentManager::invalidateIntersectingSegments(GridDatabase *gameDatabase, EditorObject *item)
 {
+#ifndef ZAP_DEDICATED
    fillVector.clear();
 
    // Before we update our edges, we need to mark all intersecting segments using the invalid flag.
@@ -804,6 +818,7 @@ void WallSegmentManager::invalidateIntersectingSegments(GridDatabase *gameDataba
          wallSegment->invalidate();
       }
    }
+#endif
 }
 
 
@@ -840,6 +855,7 @@ void WallSegmentManager::deleteSegments(S32 owner)
 
 void WallSegmentManager::renderWalls(bool draggingObjects, bool showingReferenceShip, bool showSnapVertices, F32 alpha)
 {
+#ifndef ZAP_DEDICATED
    fillVector.clear();
    mWallSegmentDatabase->findObjects((TestFunc)isWallType, fillVector);
 
@@ -880,6 +896,7 @@ void WallSegmentManager::renderWalls(bool draggingObjects, bool showingReference
    //if(showSnapVertices)
    //   for(S32 i = 0; i < mWallEdgePoints.size(); i++)
    //      EditorUserInterface::renderSnapTarget(mWallEdgePoints[i]);
+#endif
 }
 
 
@@ -963,6 +980,7 @@ void WallSegment::resetEdges()
 
 void WallSegment::renderFill(bool beingDragged, bool showingReferenceShip)
 {
+#ifndef ZAP_DEDICATED
    // We'll use the editor color most of the time; only in preview mode in the editor do we use the game color
    bool useGameColor = UserInterface::current && UserInterface::current->getMenuID() == EditorUI && showingReferenceShip;
 
@@ -974,6 +992,7 @@ void WallSegment::renderFill(bool beingDragged, bool showingReferenceShip)
 
    renderWallFill(&triangulatedFillPoints, true, fillColor);   
    glEnableBlendfromLineSmooth;
+#endif
 }
 
 };

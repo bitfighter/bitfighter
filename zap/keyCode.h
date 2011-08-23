@@ -47,9 +47,11 @@ void resetKeyStates();                          // Initialize key states
 void dumpKeyStates();                           // Log key states for testing
 void checkModifierKeyState();                   // Handle Ctrl, Shift, Alt
 
+#ifndef ZAP_DEDICATED
 KeyCode sdlKeyToKeyCode(int key);       // Convert SDL keys to KeyCode
 
 int keyCodeToSDLKey(KeyCode keyCode);           // Take a KeyCode and return the SDL equivalent
+#endif
 
 char keyToAscii(int unicode, KeyCode keyCode);  // Return a printable ascii char, if possible
 bool isControllerButton(KeyCode keyCode);       // Does keyCode represent a controller button?

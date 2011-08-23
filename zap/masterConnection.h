@@ -69,11 +69,14 @@ public:
       s2mUpdateServerStatus(levelName, levelType, botCount, playerCount, maxPlayers, infoFlags);
    }
 
+#ifndef ZAP_DEDICATED
    TNL_DECLARE_RPC_OVERRIDE(m2cQueryServersResponse, (U32 queryId, Vector<IPAddress> ipList));
+#endif
 
    TNL_DECLARE_RPC_OVERRIDE(m2sClientRequestedArrangedConnection, (U32 requestId, Vector<IPAddress> possibleAddresses,
       ByteBufferPtr connectionParameters));
 
+#ifndef ZAP_DEDICATED
    TNL_DECLARE_RPC_OVERRIDE(m2cArrangedConnectionAccepted, 
                (U32 requestId, Vector<IPAddress> possibleAddresses, ByteBufferPtr connectionData));
    TNL_DECLARE_RPC_OVERRIDE(m2cArrangedConnectionRejected, (U32 requestId, ByteBufferPtr rejectData));
@@ -89,6 +92,7 @@ public:
    TNL_DECLARE_RPC_OVERRIDE(m2cPlayerJoinedGlobalChat, (StringTableEntry playerNick));
    TNL_DECLARE_RPC_OVERRIDE(m2cPlayerLeftGlobalChat, (StringTableEntry playerNick));
    TNL_DECLARE_RPC_OVERRIDE(m2cPlayersInGlobalChat, (Vector<StringTableEntry> playerNicks));
+#endif
 
    void requestAuthentication(StringTableEntry mClientName, Nonce mClientId);
 

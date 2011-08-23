@@ -24,8 +24,7 @@
 //------------------------------------------------------------------------------------
 
 #include "gameType.h"
-#include "UIGame.h"
-#include "UIMenus.h"
+#include "game.h"
 #include "gameNetInterface.h"
 #include "flagItem.h"
 #include "gameItems.h"     // For asteroid def.
@@ -40,7 +39,13 @@
 #include "gameStats.h"      // For VersionedGameStats def
 #include "version.h"
 #include "Colors.h"
+
+#ifndef ZAP_DEDICATED
 #include "ClientGame.h"
+#include "UIGame.h"
+#include "UIMenus.h"
+#include "SDL/SDL_opengl.h"
+#endif
 
 
 #include "../master/database.h"
@@ -48,7 +53,6 @@
 #include "statistics.h"
 #include "masterConnection.h"     // For s2mSendPlayerStatistics, s2mSendGameStatistics
 
-#include "SDL/SDL_opengl.h"
 
 #include "tnlThread.h"
 #include <math.h>
@@ -189,15 +193,19 @@ void GameType::addToGame(Game *game, GridDatabase *database)
 
 
 bool GameType::onGhostAdd(GhostConnection *theConnection)
-{   
+{
+
    //TNLAssert(!getGame()->isServer(), "Should only be client here!");
    // getGame() appears to return null here sometimes... why??
 
+#ifndef ZAP_DEDICATED
    addToGame(gClientGame, gClientGame->getGameObjDatabase());
+#endif
    return true;
 }
 
 
+#ifndef ZAP_DEDICATED
 // Menu items we want to show
 const char **GameType::getGameParameterMenuKeys()
 {
@@ -327,7 +335,7 @@ bool GameType::saveMenuItem(const MenuItem *menuItem, const char *key)
 
    return true;
 }
-
+#endif
 
 bool GameType::processSpecialsParam(const char *param)
 {
@@ -635,6 +643,7 @@ void GameType::idle(GameObject::IdleCallPath path, U32 deltaT)
 //}
 
 
+#ifndef ZAP_DEDICATED
 void GameType::renderInterfaceOverlay(bool scoreboardVisible)
 {
    dynamic_cast<ClientGame *>(getGame())->getUIManager()->getGameUserInterface()->renderBasicInterfaceOverlay(this, scoreboardVisible);
@@ -742,6 +751,7 @@ void GameType::renderObjectiveArrow(const Point *nearestPoint, const Color *outl
    // Add an icon to the objective arrow...  kind of lame.
    //renderSmallFlag(cen, c, alpha);
 }
+#endif
 
 
 // Server only
@@ -1872,6 +1882,7 @@ S32 GameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S3
 }
 
 
+#ifndef ZAP_DEDICATED
 extern ClientInfo gClientInfo;
 
 static void switchTeamsCallback(ClientGame *game, U32 unused)
@@ -1934,6 +1945,7 @@ void GameType::addAdminGameMenuOptions(Vector<boost::shared_ptr<MenuItem> > &men
    if(isTeamGame() && game->getTeamCount() > 1)
       menuOptions.push_back(boost::shared_ptr<MenuItem>(new MenuItem(game, 0, "CHANGE A PLAYER'S TEAM", switchPlayersTeamCallback, "", KEY_C)));
 }
+#endif
 
 
 // Broadcast info about the current level... code gets run on client, obviously
@@ -1945,6 +1957,7 @@ GAMETYPE_RPC_S2C(GameType, s2cSetLevelInfo, (StringTableEntry levelName, StringT
                                                 levelCreds, objectCount, lx, ly, ux, uy, 
                                                 levelHasLoadoutZone, engineerEnabled))
 {
+#ifndef ZAP_DEDICATED
    mLevelName = levelName;
    mLevelDescription = levelDesc;
    mLevelCredits = levelCreds;
@@ -1971,7 +1984,8 @@ GAMETYPE_RPC_S2C(GameType, s2cSetLevelInfo, (StringTableEntry levelName, StringT
    clientGame->getUIManager()->getGameUserInterface()->resetLevelInfoDisplayTimer(); // Start displaying the level info, now that we have it
 
    // Now we know all we need to initialize our loadout options
-  clientGame->getUIManager()->getGameUserInterface()->initializeLoadoutOptions(engineerEnabled);
+   clientGame->getUIManager()->getGameUserInterface()->initializeLoadoutOptions(engineerEnabled);
+#endif
 }
 
 
@@ -2087,6 +2101,7 @@ GAMETYPE_RPC_S2C(GameType, s2cAddClient,
                 (StringTableEntry name, bool isMyClient, bool admin, bool isRobot, bool playAlert), 
                 (name, isMyClient, admin, isRobot, playAlert))
 {
+#ifndef ZAP_DEDICATED
    ClientRef *cref = allocClientRef();
    cref->name = name;
    cref->setTeam(0);
@@ -2123,6 +2138,7 @@ GAMETYPE_RPC_S2C(GameType, s2cAddClient,
       if(playAlert)
          SoundSystem::playSoundEffect(SFXPlayerJoined, 1);
    }
+#endif
 }
 
 
@@ -2155,6 +2171,7 @@ void GameType::serverRemoveClient(GameConnection *theClient)
 // Server notifies clients that a player has changed name
 GAMETYPE_RPC_S2C(GameType, s2cRenameClient, (StringTableEntry oldName, StringTableEntry newName), (oldName, newName))
 {
+#ifndef ZAP_DEDICATED
    for(S32 i = 0; i < mClientList.size(); i++)
    {
       if(mClientList[i]->name == oldName)
@@ -2169,11 +2186,13 @@ GAMETYPE_RPC_S2C(GameType, s2cRenameClient, (StringTableEntry oldName, StringTab
       return;
 
    clientGame->displayMessage(Color(0.6f, 0.6f, 0.8f), "%s changed to %s", oldName.getString(), newName.getString());
+#endif
 }
 
 // Server notifies clients that a player has left the game
 GAMETYPE_RPC_S2C(GameType, s2cRemoveClient, (StringTableEntry name), (name))
 {
+#ifndef ZAP_DEDICATED
    for(S32 i = 0; i < mClientList.size(); i++)
    {
       if(mClientList[i]->name == name)
@@ -2190,6 +2209,7 @@ GAMETYPE_RPC_S2C(GameType, s2cRemoveClient, (StringTableEntry name), (name))
 
    clientGame->displayMessage(Color(0.6f, 0.6f, 0.8f), "%s left the game.", name.getString());
    SoundSystem::playSoundEffect(SFXPlayerLeft, 1);
+#endif
 }
 
 
@@ -2230,6 +2250,7 @@ GAMETYPE_RPC_S2C(GameType, s2cSetTimeRemaining, (U32 timeLeft), (timeLeft))
 // Server has sent us (the client) a message telling us the winning score has changed, and who changed it
 GAMETYPE_RPC_S2C(GameType, s2cChangeScoreToWin, (U32 winningScore, StringTableEntry changer), (winningScore, changer))
 {
+#ifndef ZAP_DEDICATED
    mWinningScore = winningScore;
 
    ClientGame *clientGame = dynamic_cast<ClientGame *>(getGame());
@@ -2238,6 +2259,7 @@ GAMETYPE_RPC_S2C(GameType, s2cChangeScoreToWin, (U32 winningScore, StringTableEn
 
    clientGame->displayMessage(Color(0.6f, 1, 0.8f) /*Nuclear green */, 
                "%s changed the winning score to %d.", changer.getString(), mWinningScore);
+#endif
 }
 
 
@@ -2246,6 +2268,7 @@ GAMETYPE_RPC_S2C(GameType, s2cClientJoinedTeam,
                 (StringTableEntry name, RangedU32<0, GameType::MAX_TEAMS> teamIndex), 
                 (name, teamIndex))
 {
+#ifndef ZAP_DEDICATED
    ClientRef *cl = findClientRef(name);      // Will be us, if we changed teams
    cl->setTeam((S32) teamIndex);
 
@@ -2275,12 +2298,14 @@ GAMETYPE_RPC_S2C(GameType, s2cClientJoinedTeam,
          gp->mSetBy = "";                                    // No longer set-by-self
       }
    }
+#endif
 }
 
 
 // Announce a new player has become an admin
 GAMETYPE_RPC_S2C(GameType, s2cClientBecameAdmin, (StringTableEntry name), (name))
 {
+#ifndef ZAP_DEDICATED
    ClientRef *cl = findClientRef(name);
    cl->isAdmin = true;
 
@@ -2290,12 +2315,14 @@ GAMETYPE_RPC_S2C(GameType, s2cClientBecameAdmin, (StringTableEntry name), (name)
 
    if(clientGame->getGameType()->mClientList.size() && name != clientGame->getGameType()->mLocalClient->name)    // Don't show message to self
       clientGame->displayMessage(Color(0,1,1), "%s has been granted administrator access.", name.getString());
+#endif
 }
 
 
 // Announce a new player has permission to change levels
 GAMETYPE_RPC_S2C(GameType, s2cClientBecameLevelChanger, (StringTableEntry name), (name))
 {
+#ifndef ZAP_DEDICATED
    ClientRef *cl = findClientRef(name);
    cl->isLevelChanger = true;
 
@@ -2305,6 +2332,7 @@ GAMETYPE_RPC_S2C(GameType, s2cClientBecameLevelChanger, (StringTableEntry name),
 
    if(clientGame->getGameType()->mClientList.size() && name != clientGame->getGameType()->mLocalClient->name)    // Don't show message to self
       clientGame->displayMessage(Color(0,1,1), "%s can now change levels.", name.getString());
+#endif
 }
 
 // Runs after the server knows that the client is available and addressable via the getGhostIndex()
@@ -2360,6 +2388,7 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
 
 GAMETYPE_RPC_S2C(GameType, s2cSyncMessagesComplete, (U32 sequence), (sequence))
 {
+#ifndef ZAP_DEDICATED
    // Now we know the game is ready to begin...
    mBetweenLevels = false;
    c2sSyncMessagesComplete(sequence);
@@ -2377,6 +2406,7 @@ GAMETYPE_RPC_S2C(GameType, s2cSyncMessagesComplete, (U32 sequence), (sequence))
    //clientGame->clearZoomDelta();                  // No in zoom effect
    
   clientGame->getUIManager()->getGameUserInterface()->mProgressBarFadeTimer.reset(1000);
+#endif
 }
 
 
@@ -2776,6 +2806,7 @@ extern Color gTeamChatColor;
 // Server sends message to the client for display using StringPtr
 GAMETYPE_RPC_S2C(GameType, s2cDisplayChatPM, (StringTableEntry fromName, StringTableEntry toName, StringPtr message), (fromName, toName, message))
 {
+#ifndef ZAP_DEDICATED
    ClientGame *clientGame = dynamic_cast<ClientGame *>(getGame());
    TNLAssert(clientGame, "clientGame is NULL");
    if(!clientGame) return;
@@ -2792,11 +2823,13 @@ GAMETYPE_RPC_S2C(GameType, s2cDisplayChatPM, (StringTableEntry fromName, StringT
 
    else                // Should never get here... shouldn't be able to see PM that is not from or not to you
       clientGame->displayMessage(theColor, "from %s to %s: %s", fromName.getString(), toName.getString(), message.getString());
+#endif
 }
 
 
 GAMETYPE_RPC_S2C(GameType, s2cDisplayChatMessage, (bool global, StringTableEntry clientName, StringPtr message), (global, clientName, message))
 {
+#ifndef ZAP_DEDICATED
    ClientGame *clientGame = dynamic_cast<ClientGame *>(getGame());
    TNLAssert(clientGame, "clientGame is NULL");
 
@@ -2805,12 +2838,14 @@ GAMETYPE_RPC_S2C(GameType, s2cDisplayChatMessage, (bool global, StringTableEntry
 
    Color theColor = global ? gGlobalChatColor : gTeamChatColor;
    clientGame->getUIManager()->getGameUserInterface()->displayChatMessage(theColor, "%s: %s", clientName.getString(), message.getString());
+#endif
 }
 
 
 // Server sends message to the client for display using StringTableEntry
 GAMETYPE_RPC_S2C(GameType, s2cDisplayChatMessageSTE, (bool global, StringTableEntry clientName, StringTableEntry message), (global, clientName, message))
 {
+#ifndef ZAP_DEDICATED
    Color theColor = global ? gGlobalChatColor : gTeamChatColor;
    ClientGame *clientGame = dynamic_cast<ClientGame *>(getGame());
 
@@ -2819,6 +2854,7 @@ GAMETYPE_RPC_S2C(GameType, s2cDisplayChatMessageSTE, (bool global, StringTableEn
       return;
 
    clientGame->getUIManager()->getGameUserInterface()->displayChatMessage(theColor, "%s: %s", clientName.getString(), message.getString());
+#endif
 }
 
 
@@ -2973,6 +3009,7 @@ GAMETYPE_RPC_S2C(GameType, s2cScoreboardUpdate,
 
 GAMETYPE_RPC_S2C(GameType, s2cKillMessage, (StringTableEntry victim, StringTableEntry killer, StringTableEntry killerDescr), (victim, killer, killerDescr))
 {
+#ifndef ZAP_DEDICATED
    ClientGame *clientGame = dynamic_cast<ClientGame *>(getGame());
    TNLAssert(clientGame, "clientGame is NULL");
    if(!clientGame) return;
@@ -2996,6 +3033,7 @@ GAMETYPE_RPC_S2C(GameType, s2cKillMessage, (StringTableEntry victim, StringTable
       clientGame->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s %s", victim.getString(), killerDescr.getString());
    else         // Killer unknown
       clientGame->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s got zapped", victim.getString());
+#endif
 }
 
 
@@ -3022,6 +3060,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, c2sVoiceChat, (bool echo, ByteBufferPtr vo
 TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cVoiceChat, (StringTableEntry clientName, ByteBufferPtr voiceBuffer), (clientName, voiceBuffer),
    NetClassGroupGameMask, RPCUnguaranteed, RPCToGhost, 0)
 {
+#ifndef ZAP_DEDICATED
    ClientRef *cl = findClientRef(clientName);
    if(cl)
    {
@@ -3029,6 +3068,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cVoiceChat, (StringTableEntry clientName
       SoundSystem::queueVoiceChatBuffer(cl->voiceSFX, playBuffer);
 //      cl->voiceSFX->queueBuffer(playBuffer);
    }
+#endif
 }
 
 

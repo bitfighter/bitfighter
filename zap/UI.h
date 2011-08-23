@@ -26,6 +26,10 @@
 #ifndef _UI_H_
 #define _UI_H_
 
+#ifdef ZAP_DEDICATED
+#error "UI.h shouldn't be included in dedicated build"
+#endif
+
 #include "UIManager.h"
 #include "keyCode.h"
 #include "SharedConstants.h"

@@ -50,7 +50,9 @@ private:
    const char *getVertLabel(S32 index) { return index == 0 ? "Start" : "Direction"; }
    const char *getInstructionMsg() { return "[Enter] to edit text"; }
 
+#ifndef ZAP_DEDICATED
    static EditorAttributeMenuUI *mAttributeMenuUI;      // Menu for text editing; since it's static, don't bother with smart pointer
+#endif
 
 public:
    static const S32 MAX_TEXT_SIZE = 255;
@@ -74,7 +76,9 @@ public:
    void onAddedToGame(Game *theGame);  
    void computeExtent();                                            // Bounding box for quick collision-possibility elimination
 
+#ifndef ZAP_DEDICATED
    EditorAttributeMenuUI *getAttributeMenu(ClientGame *game);
+#endif
 
    bool getCollisionPoly(Vector<Point> &polyPoints) const;          // More precise boundary for precise collision detection
    bool collide(GameObject *hitObject);
@@ -93,8 +97,10 @@ public:
    string getText() { return mText; }
    void setText(string text) { mText = text; }
 
+#ifndef ZAP_DEDICATED
    // Provide a static hook into the object currently being edited with the attrubute editor for callback purposes
    static EditorObject *getAttributeEditorObject();
+#endif
 
    void onAttrsChanging();
    void onAttrsChanged();

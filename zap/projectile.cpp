@@ -26,18 +26,20 @@
 #include "gameWeapons.h"
 #include "projectile.h"
 #include "ship.h"
-#include "sparkManager.h"
 #include "SoundSystem.h"
 #include "gameObject.h"
 #include "gameObjectRender.h"
 #include "game.h"
+#include "gameConnection.h"
+#include "stringUtils.h"
 
 #ifndef ZAP_DEDICATED
 #include "ClientGame.h"
-#endif
-
+#include "sparkManager.h"
 #include "SDL/SDL_opengl.h"
 #include "UI.h"
+#endif
+
 
 namespace Zap
 {
@@ -374,6 +376,7 @@ void Projectile::damageObject(DamageInfo *info)
 
 void Projectile::explode(GameObject *hitObject, Point pos)
 {
+#ifndef ZAP_DEDICATED
    // Do some particle spew...
    if(isGhost())
    {
@@ -391,6 +394,7 @@ void Projectile::explode(GameObject *hitObject, Point pos)
 
       SoundSystem::playSoundEffect(sound, pos, velocity);       // Play the sound
    }
+#endif
 }
 
 
@@ -546,6 +550,7 @@ void GrenadeProjectile::explode(Point pos, WeaponType weaponType)
 {
    if(exploded) return;
 
+#ifndef ZAP_DEDICATED
    if(isGhost())
    {
       // Make us go boom!
@@ -556,6 +561,7 @@ void GrenadeProjectile::explode(Point pos, WeaponType weaponType)
 
       SoundSystem::playSoundEffect(SFXMineExplode, getActualPos(), Point());
    }
+#endif
 
    disableCollision();
 
@@ -606,6 +612,7 @@ void GrenadeProjectile::renderItem(Point pos)
 
 static void drawLetter(char letter, const Point &pos, const Color &color, F32 alpha)
 {
+#ifndef ZAP_DEDICATED
    // Mark the item with a letter, unless we're showing the reference ship
    F32 vertOffset = 8;
    if (letter >= 'a' && letter <= 'z')    // Better position lowercase letters
@@ -615,6 +622,7 @@ static void drawLetter(char letter, const Point &pos, const Color &color, F32 al
    F32 xpos = pos.x - UserInterface::getStringWidthf(15, "%c", letter) / 2;
 
    UserInterface::drawStringf(xpos, pos.y - vertOffset, 15, "%c", letter);
+#endif
 }
 
 
@@ -816,9 +824,11 @@ void Mine::renderEditor(F32 currentScale)
 
 void Mine::renderDock()
 {
+#ifndef ZAP_DEDICATED
    glColor3f(.7f, .7f, .7f);
    drawCircle(getVert(0), 9);
    drawLetter('M', getVert(0), Color(.7), 1);
+#endif
 }
 
 
@@ -1016,9 +1026,11 @@ void SpyBug::renderEditor(F32 currentScale)
 
 void SpyBug::renderDock()
 {
+#ifndef ZAP_DEDICATED
    glColor3f(.7f, .7f, .7f);
    drawCircle(getVert(0), 9);
    drawLetter('S', getVert(0), Color(.7f), 1);
+#endif
 }
 
 

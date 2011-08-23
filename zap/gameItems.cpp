@@ -34,8 +34,10 @@
 #include "stringUtils.h"
 #include "game.h"
 
+#ifndef ZAP_DEDICATED
 #include "SDL/SDL_opengl.h"
 #include "UI.h"
+#endif
 
 #include <math.h>
 
@@ -301,13 +303,15 @@ string Spawn::toString(F32 gridSize) const
 
 void Spawn::renderEditor(F32 currentScale)
 {
+#ifndef ZAP_DEDICATED
    Point pos = getVert(0);
 
    glPushMatrix();
       glTranslatef(pos.x, pos.y, 0);
       glScalef(1/currentScale, 1/currentScale, 1);    // Make item draw at constant size, regardless of zoom
       renderSquareItem(Point(0,0), getGame()->getTeamColor(mTeam), 1, &Colors::white, 'S');
-   glPopMatrix();   
+   glPopMatrix();
+#endif
 }
 
 
@@ -360,6 +364,7 @@ void AsteroidSpawn::spawn(Game *game, const Point &pos)
 
 static void renderAsteroidSpawn(const Point &pos)
 {
+#ifndef ZAP_DEDICATED
    F32 scale = 0.8f;
    static const Point p(0,0);
 
@@ -371,11 +376,13 @@ static void renderAsteroidSpawn(const Point &pos)
       glColor(Colors::white);
       drawCircle(p, 13);
    glPopMatrix();  
+#endif
 }
 
 
 void AsteroidSpawn::renderEditor(F32 currentScale)
 {
+#ifndef ZAP_DEDICATED
    Point pos = getVert(0);
 
    glPushMatrix();
@@ -383,6 +390,7 @@ void AsteroidSpawn::renderEditor(F32 currentScale)
       glScale(1/currentScale);    // Make item draw at constant size, regardless of zoom
       renderAsteroidSpawn(Point(0,0));
    glPopMatrix();   
+#endif
 }
 
 
@@ -424,6 +432,7 @@ void CircleSpawn::spawn(Game *game, const Point &pos)
 
 static void renderCircleSpawn(const Point &pos)
 {
+#ifndef ZAP_DEDICATED
    F32 scale = 0.8f;
    static const Point p(0,0);
 
@@ -435,11 +444,13 @@ static void renderCircleSpawn(const Point &pos)
       glColor(Colors::white);
       drawCircle(p, 13);
    glPopMatrix();  
+#endif
 }
 
 
 void CircleSpawn::renderEditor(F32 currentScale)
 {
+#ifndef ZAP_DEDICATED
    Point pos = getVert(0);
 
    glPushMatrix();
@@ -447,6 +458,7 @@ void CircleSpawn::renderEditor(F32 currentScale)
       glScale(1/currentScale);    // Make item draw at constant size, regardless of zoom
       renderCircleSpawn(Point(0,0));
    glPopMatrix();   
+#endif
 }
 
 
@@ -478,6 +490,7 @@ FlagSpawn *FlagSpawn::clone() const
 
 void FlagSpawn::renderEditor(F32 currentScale)
 {
+#ifndef ZAP_DEDICATED
    Point pos = getVert(0);
 
    glPushMatrix();
@@ -489,6 +502,7 @@ void FlagSpawn::renderEditor(F32 currentScale)
       glColor(Colors::white);
       drawCircle(-4, 0, 26);
    glPopMatrix();
+#endif
 }
 
 
@@ -1011,11 +1025,13 @@ void Circle::idle(GameObject::IdleCallPath path)
 
 void Circle::renderItem(Point pos)
 {
+#ifndef ZAP_DEDICATED
    if(!hasExploded)
    {
       glColor(Colors::red);
       drawCircle(pos, CIRCLE_RADIUS);
    }
+#endif
 }
 
 

@@ -30,7 +30,9 @@
 #include "stringUtils.h"
 #include "gameConnection.h"
 
+#ifndef ZAP_DEDICATED
 #include "SDL/SDL_opengl.h"
+#endif
 
 namespace Zap
 {
@@ -271,11 +273,13 @@ void FlagItem::renderItem(Point pos)
 
 void FlagItem::renderDock()
 {
+#ifndef ZAP_DEDICATED
    glPushMatrix();
       glTranslate(getVert(0));
       glScale(0.6f);
       renderFlag(0, 0, getGame()->getTeamColor(mTeam));
    glPopMatrix();   
+#endif
 }
 
 

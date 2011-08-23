@@ -27,7 +27,6 @@
 #include "gameType.h"
 #include "gameItems.h"
 #include "GeomUtils.h"
-#include "sparkManager.h"
 #include "ship.h"
 #include "SoundSystem.h"
 #include "speedZone.h"
@@ -35,6 +34,7 @@
 
 #ifndef ZAP_DEDICATED
 #include "ClientGame.h"
+#include "sparkManager.h"
 #endif
 
 #include <math.h>
@@ -394,6 +394,7 @@ void MoveObject::computeCollisionResponseBarrier(U32 stateIndex, Point &collisio
 
    mMoveState[stateIndex].vel -= normal * MoveObjectCollisionElasticity * normal.dot(mMoveState[stateIndex].vel);
 
+#ifndef ZAP_DEDICATED
    // Emit some bump particles on client
    if(isGhost())     // i.e. on client side
    {
@@ -418,6 +419,7 @@ void MoveObject::computeCollisionResponseBarrier(U32 stateIndex, Point &collisio
          }
       }
    }
+#endif
 }
 
 

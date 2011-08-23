@@ -175,9 +175,6 @@ void QueryServersUserInterface::onActivate()
 }
 
 
-Vector<string> prevServerListFromMaster;
-Vector<string> alwaysPingList;
-
 // Checks for connection to master, and sets up timer to keep running this until it finds one.  Once a connection is located,
 // it fires off a series of requests to the master asking for servers and chat names.
 void QueryServersUserInterface::contactEveryone()
@@ -188,17 +185,17 @@ void QueryServersUserInterface::contactEveryone()
    //getGame()->getNetInterface()->sendPing(broadcastAddress, mNonce);
 
    // Always ping these servers -- typically a local server
-   for(S32 i = 0; i < alwaysPingList.size(); i++)
+   for(S32 i = 0; i < gIniSettings.alwaysPingList.size(); i++)
    {
-      Address address(alwaysPingList[i].c_str());
+      Address address(gIniSettings.alwaysPingList[i].c_str());
       getGame()->getNetInterface()->sendPing(address, mNonce);
    } 
 
    // Try to ping the servers from our fallback list if we're having trouble connecting to the master
    if(getGame()->getTimeUnconnectedToMaster() > GIVE_UP_ON_MASTER_AND_GO_IT_ALONE_TIME) 
    {
-      for(S32 i = 0; i < prevServerListFromMaster.size(); i++)
-         getGame()->getNetInterface()->sendPing(Address(prevServerListFromMaster[i].c_str()), mNonce);
+      for(S32 i = 0; i < gIniSettings.prevServerListFromMaster.size(); i++)
+         getGame()->getNetInterface()->sendPing(Address(gIniSettings.prevServerListFromMaster[i].c_str()), mNonce);
 
       mGivenUpOnMaster = true;
    }
@@ -250,7 +247,7 @@ void QueryServersUserInterface::addPingServers(const Vector<IPAddress> &ipList)
 
    // Save servers from the master
    if(ipList.size() != 0) 
-      prevServerListFromMaster.clear();    // Don't clear if we have nothing to add... 
+      gIniSettings.prevServerListFromMaster.clear();    // Don't clear if we have nothing to add... 
 
    // Now add any new servers
    for(S32 i = 0; i < ipList.size(); i++)
@@ -268,7 +265,7 @@ void QueryServersUserInterface::addPingServers(const Vector<IPAddress> &ipList)
       if(isHidden)
          break;
 
-      prevServerListFromMaster.push_back( Address(ipList[i]).toString() );
+      gIniSettings.prevServerListFromMaster.push_back( Address(ipList[i]).toString() );
 
       bool found = false;
       // Is this server already in our list?
@@ -647,7 +644,7 @@ void QueryServersUserInterface::render()
    else
    {
       glColor(Colors::red);
-      if(mGivenUpOnMaster && prevServerListFromMaster.size() != 0) //can't use empty server list.
+      if(mGivenUpOnMaster && gIniSettings.prevServerListFromMaster.size() != 0) //can't use empty server list.
          drawCenteredString(vertMargin - 8, 12, "Couldn't connect to Master Server - Using server list from last successful connect.");
       else
          drawCenteredString(vertMargin - 8, 12, "Couldn't connect to Master Server - Firewall issues? Do you have the latest version?");

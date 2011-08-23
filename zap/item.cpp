@@ -28,11 +28,14 @@
 #include "goalZone.h"
 #include "gameType.h"
 #include "flagItem.h"
-#include "UI.h"
 #include "game.h"
 #include "gameConnection.h"
+#include "stringUtils.h"
 
+#ifndef ZAP_DEDICATED
+#include "UI.h"
 #include "SDL/SDL_opengl.h"
+#endif
 
 namespace Zap
 {
@@ -110,19 +113,23 @@ EditorPointObject::EditorPointObject()
 // Offset: negative below the item, positive above
 void EditorPointObject::renderItemText(const char *text, S32 offset, F32 currentScale, const Point &currentOffset)
 {
+#ifndef ZAP_DEDICATED
    glColor(INSTRUCTION_TEXTCOLOR);
    S32 off = (INSTRUCTION_TEXTSIZE + INSTRUCTION_TEXTGAP) * offset - 10 - ((offset > 0) ? 5 : 0);
 
    Point pos = getVert(0) * currentScale + currentOffset;
 
    UserInterface::drawCenteredString(pos.x, pos.y - off, INSTRUCTION_TEXTSIZE, text);
+#endif
 }
 
 
 void EditorPointObject::prepareForDock(Game *game, const Point &point)
 {
+#ifndef ZAP_DEDICATED
    setVert(point, 0);
    Parent::prepareForDock(game, point);
+#endif
 }
 
 

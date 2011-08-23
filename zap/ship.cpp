@@ -26,13 +26,9 @@
 #include "ship.h"
 #include "item.h"
 
-#include "sparkManager.h"
 #include "projectile.h"
 #include "gameLoader.h"
 #include "SoundSystem.h"
-#include "UI.h"
-#include "UIMenus.h"
-#include "UIGame.h"
 #include "gameType.h"
 #include "huntersGame.h"
 #include "gameConnection.h"
@@ -48,9 +44,17 @@
 #include "stringUtils.h"      // For itos
 #include "game.h"
 
+#ifdef TNL_OS_WIN32
+#include <windows.h>   // For ARRAYSIZE
+#endif
+
 #ifndef ZAP_DEDICATED
 #include "ClientGame.h"
 #include "SDL/SDL_opengl.h"
+#include "sparkManager.h"
+#include "UI.h"
+#include "UIMenus.h"
+#include "UIGame.h"
 #endif
 
 #include <stdio.h>
@@ -85,8 +89,10 @@ Ship::Ship(StringTableEntry playerName, bool isAuthenticated, S32 team, Point p,
 
    mNetFlags.set(Ghostable);
 
+#ifndef ZAP_DEDICATED
    for(U32 i = 0; i < TrailCount; i++)
       mLastTrailPoint[i] = -1;   // Or something... doesn't really matter what
+#endif
 
    mTeam = team;
    mass = m;            // Ship's mass, not used
@@ -104,7 +110,9 @@ Ship::Ship(StringTableEntry playerName, bool isAuthenticated, S32 team, Point p,
 
    isBusy = false;      // On client, will be updated in initial packet set from server.  Not used on server.
 
+#ifndef ZAP_DEDICATED
    mSparkElapsed = 0;
+#endif
 
    // Create our proxy object for Lua access
    luaProxy = LuaShip(this);
@@ -136,8 +144,10 @@ void Ship::initialize(Point &pos)
    mHealth = 1.0;       // Start at full health
    hasExploded = false; // Haven't exploded yet!
 
+#ifndef ZAP_DEDICATED
    for(S32 i = 0; i < TrailCount; i++)          // Clear any vehicle trails
       mTrail[i].reset();
+#endif
 
    mEnergy = (S32) ((F32) EnergyMax * .80);     // Start off with 80% energy
    for(S32 i = 0; i < ModuleCount; i++)         // and all modules disabled
@@ -427,10 +437,12 @@ void Ship::controlMoveReplayComplete()
    // max interpolation threshold, just warp to the new position
    if(deltaLen <= 0.5 || deltaLen > MaxControlObjectInterpDistance)
    {
+#ifndef ZAP_DEDICATED
       // If it's a large delta, get rid of the movement trails
       if(deltaLen > MaxControlObjectInterpDistance)
          for(S32 i=0; i<TrailCount; i++)
             mTrail[i].reset();
+#endif
 
       mMoveState[RenderState].pos = mMoveState[ActualState].pos;
       mMoveState[RenderState].vel = mMoveState[ActualState].vel;
@@ -575,6 +587,7 @@ void Ship::idle(GameObject::IdleCallPath path)
    if(path == GameObject::ServerIdleControlFromClient && isModuleActive(ModuleRepair))
       repairTargets();
 
+#ifndef ZAP_DEDICATED
    if(path == GameObject::ClientIdleControlMain ||
       path == GameObject::ClientIdleMainRemote)
    {
@@ -585,6 +598,7 @@ void Ship::idle(GameObject::IdleCallPath path)
          mTrail[i].tick(mCurrentMove.time);
       updateModuleSounds();
    }
+#endif
 }
 
 static Vector<DatabaseObject *> foundObjects;
@@ -1024,6 +1038,7 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
 // Any changes here need to be reflected in Ship::packUpdate
 void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
+#ifndef ZAP_DEDICATED
    bool positionChanged = false;    // True when position changes a little
    bool shipwarped = false;         // True when position changes a lot
 
@@ -1178,6 +1193,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
       SoundSystem::playSoundEffect(SFXTeleportIn, mMoveState[ActualState].pos, Point());
    }
 
+#endif
 }  // unpackUpdate
 
 
@@ -1394,6 +1410,7 @@ Color ShipExplosionColors[NumShipExplosionColors] = {
 
 void Ship::emitShipExplosion(Point pos)
 {
+#ifndef ZAP_DEDICATED
    SoundSystem::playSoundEffect(SFXShipExplode, pos, Point());
 
    F32 a = TNL::Random::readF() * 0.4f + 0.5f;
@@ -1405,10 +1422,12 @@ void Ship::emitShipExplosion(Point pos)
    FXManager::emitExplosion(mMoveState[ActualState].pos, 0.9f, ShipExplosionColors, NumShipExplosionColors);
    FXManager::emitBurst(pos, Point(a,c), Color(1,1,0.25), Colors::red);
    FXManager::emitBurst(pos, Point(b,d), Colors::yellow, Color(0,0.75,0));
+#endif
 }
 
 void Ship::emitMovementSparks()
 {
+#ifndef ZAP_DEDICATED
    //U32 deltaT = mCurrentMove.time;
 
    // Do nothing if we're under 0.1 vel
@@ -1551,6 +1570,7 @@ void Ship::emitMovementSparks()
           }
       }
    }
+#endif
 }
 
 

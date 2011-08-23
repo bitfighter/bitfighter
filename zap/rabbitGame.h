@@ -65,9 +65,11 @@ public:
    bool processArguments(S32 argc, const char **argv, Game *game);
    string toString();
 
+#ifndef ZAP_DEDICATED
    const char **getGameParameterMenuKeys();
    boost::shared_ptr<MenuItem> getMenuItem(ClientGame *game, const char *key);
    bool saveMenuItem(const MenuItem *menuItem, const char *key);
+#endif
 
    void idle(GameObject::IdleCallPath path, U32 deltaT);
 

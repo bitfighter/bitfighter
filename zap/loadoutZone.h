@@ -29,7 +29,6 @@
 #include "gameObject.h"
 #include "gameType.h"
 #include "gameNetInterface.h"
-#include "UI.h"
 #include "gameObjectRender.h"
 #include "polygon.h"
 

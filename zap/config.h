@@ -252,6 +252,8 @@ struct IniSettings      // With defaults specified
 
    bool oldGoalFlash;
 
+   Vector<string> prevServerListFromMaster;
+   Vector<string> alwaysPingList;
 
    // Set default values in config.cpp, IniSettings::init()
    void init();

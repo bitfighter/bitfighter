@@ -27,12 +27,8 @@
 #include "item.h"
 
 #include "gameType.h"
-#include "sparkManager.h"
 #include "projectile.h"
 #include "gameLoader.h"
-#include "UI.h"
-#include "UIMenus.h"
-#include "UIGame.h"
 #include "gameConnection.h"
 #include "shipItems.h"
 #include "playerInfo.h"          // For RobotPlayerInfo constructor
@@ -57,7 +53,13 @@
 #include "game.h"
 #include "stringUtils.h"
 
+#ifndef ZAP_DEDICATED
+#include "sparkManager.h"
+#include "UI.h"
+#include "UIMenus.h"
+#include "UIGame.h"
 #include "SDL/SDL_opengl.h"
+#endif
 
 #include <math.h>
 
@@ -1861,6 +1863,7 @@ bool Robot::canSeePoint(Point point)
 
 void Robot::render(S32 layerIndex)
 {
+#ifndef ZAP_DEDICATED
    if(isGhost())                                      // Client rendering client's objects
       Parent::render(layerIndex);
 
@@ -1874,6 +1877,7 @@ void Robot::render(S32 layerIndex)
          
       glEnd();
    }
+#endif
 }
 
 

@@ -28,8 +28,10 @@
 #include "gameObjectRender.h"
 #include "Colors.h"
 
+#ifndef ZAP_DEDICATED
 #include "SDL/SDL_opengl.h"
 #include "UI.h"
+#endif
 
 namespace Zap
 {
@@ -42,19 +44,23 @@ static const S32 INSTRUCTION_TEXTGAP = 3;
 // Offset: negative below the item, positive above
 void EditorPolygon::renderItemText(const char *text, S32 offset, F32 currentScale, const Point &currentOffset)
 {
+#ifndef ZAP_DEDICATED
    glColor(INSTRUCTION_TEXTCOLOR);
    S32 off = (INSTRUCTION_TEXTSIZE + INSTRUCTION_TEXTGAP) * offset - 10 - ((offset > 0) ? 5 : 0);
    Point pos = getVert(0) * currentScale + currentOffset;
    UserInterface::drawCenteredString(pos.x, pos.y - off, INSTRUCTION_TEXTSIZE, text);
+#endif
 }
 
 
 void EditorPolygon::renderEditor(F32 currentScale)
 {
+#ifndef ZAP_DEDICATED
    if(mSelected || mLitUp)
       renderPolyHighlight();
 
    renderLinePolyVertices(currentScale);
+#endif
 }
 
 
@@ -77,21 +83,26 @@ const Color *SELECT_COLOR = &Colors::yellow;
 
 void EditorPolygon::renderPolyHighlight()
 {
+#ifndef ZAP_DEDICATED
    glLineWidth(gLineWidth3);
    glColor(mSelected ? *SELECT_COLOR : *HIGHLIGHT_COLOR);
    renderPolygonOutline(getOutline());
    glLineWidth(gDefaultLineWidth);
+#endif
 }
 
 
 void EditorPolygon::labelDockItem()
 {
+#ifndef ZAP_DEDICATED
    renderDockItemLabel(getCentroid(), getOnDockName(), -2);
+#endif
 }
 
 
 void EditorPolygon::prepareForDock(Game *game, const Point &point)
 {
+#ifndef ZAP_DEDICATED
    F32 h = 16;    // Entire height
    F32 w = 20;    // Half the width
 
@@ -102,6 +113,7 @@ void EditorPolygon::prepareForDock(Game *game, const Point &point)
    addVert(point + Point(-w, h)); 
 
    EditorObject::prepareForDock(game, point);
+#endif
 }
 
 
@@ -111,6 +123,7 @@ static const F32 INITIAL_WIDTH = 0.3f;
 // Called when we create a brand new object and insert it in the editor, like when we drag a new item from the dock
 void EditorPolygon::newObjectFromDock(F32 gridSize)
 {
+#ifndef ZAP_DEDICATED
    EditorParent::newObjectFromDock(gridSize);
 
    F32 w = INITIAL_HEIGHT * gridSize / 2;
@@ -120,6 +133,7 @@ void EditorPolygon::newObjectFromDock(F32 gridSize)
    setVert(Point(-w,  h), 1);
    setVert(Point( w,  h), 2);
    setVert(Point( w, -h), 3);
+#endif
 }
 
 

@@ -127,6 +127,10 @@ public:
    S32 getAngle(lua_State *L) {return returnFloat(L, mAnchorNormal.ATAN2());};
 
    GameObject *getGameObject() { return this; }
+
+#ifdef ZAP_DEDICATED
+   Point forceFieldEnd;  // would normally be in EditorObject
+#endif
 };
 
 

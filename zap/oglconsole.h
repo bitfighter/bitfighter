@@ -3,6 +3,19 @@
 #ifndef _OGLCONSOLE_H
 #define _OGLCONSOLE_H
 
+#ifdef ZAP_DEDICATED
+
+struct OGLCONSOLE_Console
+{
+	// nothing for dedicated
+};
+
+// define some empty function that will do nothing
+#define OGLCONSOLE_Output
+#define OGLCONSOLE_Print
+
+#else
+
 /* Opaque to you you lowly user */
 typedef struct _OGLCONSOLE_Console *OGLCONSOLE_Console;
 
@@ -63,6 +76,7 @@ int OGLCONSOLE_GetVisibility();
 
 #ifdef __cplusplus
 }
+#endif
 #endif
 
 #endif

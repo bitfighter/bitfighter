@@ -26,11 +26,15 @@
 #include "input.h"
 #include "IniFile.h"
 #include "config.h"
-#include "quickChatHelper.h"
 #include "gameLoader.h"    // For LevelListLoader::levelList
 #include "version.h"
-#include "Joystick.h"
 #include "stringUtils.h"
+#include "Joystick.h"
+#include "keyCode.h"
+
+#ifndef ZAP_DEDICATED
+#include "quickChatHelper.h"
+#endif
 
 #ifdef _MSC_VER
 #pragma warning (disable: 4996)     // Disable POSIX deprecation, certain security warnings that seem to be specific to VC++
@@ -151,19 +155,16 @@ extern string lcase(string strToConvert);
 // Sorts alphanumerically
 extern S32 QSORT_CALLBACK alphaSort(string *a, string *b);
 
-extern Vector<string> prevServerListFromMaster;
-extern Vector<string> alwaysPingList;
-
 static void loadForeignServerInfo(CIniFile *ini)
 {
    // AlwaysPingList will default to broadcast, can modify the list in the INI
    // http://learn-networking.com/network-design/how-a-broadcast-address-works
-   parseString(ini->GetValue("Connections", "AlwaysPingList", "IP:Broadcast:28000").c_str(), alwaysPingList, ',');
+   parseString(ini->GetValue("Connections", "AlwaysPingList", "IP:Broadcast:28000").c_str(), gIniSettings.alwaysPingList, ',');
 
    // These are the servers we found last time we were able to contact the master.
    // In case the master server fails, we can use this list to try to find some game servers. 
    //parseString(ini->GetValue("ForeignServers", "ForeignServerList").c_str(), prevServerListFromMaster, ',');
-   ini->GetAllValues("RecentForeignServers", prevServerListFromMaster);
+   ini->GetAllValues("RecentForeignServers", gIniSettings.prevServerListFromMaster);
 }
 
 static void writeConnectionsInfo(CIniFile *ini)
@@ -177,7 +178,7 @@ static void writeConnectionsInfo(CIniFile *ini)
    }
 
    // Creates comma delimited list
-   ini->SetValue("Connections", "AlwaysPingList", listToString(alwaysPingList, ','));
+   ini->SetValue("Connections", "AlwaysPingList", listToString(gIniSettings.alwaysPingList, ','));
 }
 
 
@@ -192,7 +193,7 @@ static void writeForeignServerInfo(CIniFile *ini)
       ini->sectionComment("RecentForeignServers", "----------------");
    }
 
-   ini->SetAllValues("RecentForeignServers", "Server", prevServerListFromMaster);
+   ini->SetAllValues("RecentForeignServers", "Server", gIniSettings.prevServerListFromMaster);
 }
 
 
@@ -273,7 +274,9 @@ static void loadGeneralSettings(CIniFile *ini)
    gIniSettings.verboseHelpMessages  = ini->GetValueYN(section, "VerboseHelpMessages", gIniSettings.verboseHelpMessages);
    gIniSettings.showKeyboardKeys     = ini->GetValueYN(section, "ShowKeyboardKeysInStickMode", gIniSettings.showKeyboardKeys);
 
+#ifndef ZAP_DEDICATED
    gIniSettings.joystickType = Joystick::stringToJoystickType(ini->GetValue(section, "JoystickType", Joystick::joystickTypeToString(gIniSettings.joystickType)).c_str());
+#endif
 
    gIniSettings.winXPos = max(ini->GetValueI(section, "WindowXPos", gIniSettings.winXPos), 0);    // Restore window location
    gIniSettings.winYPos = max(ini->GetValueI(section, "WindowYPos", gIniSettings.winYPos), 0);
@@ -297,10 +300,12 @@ static void loadGeneralSettings(CIniFile *ini)
       gIniSettings.maxFPS = fps;   // Otherwise, leave it at the default value
    // else warn?
 
+#ifndef ZAP_DEDICATED
    gDefaultLineWidth = (F32) ini->GetValueF(section, "LineWidth", 2);
    gLineWidth1 = gDefaultLineWidth * 0.5f;
    gLineWidth3 = gDefaultLineWidth * 1.5f;
    gLineWidth4 = gDefaultLineWidth * 2;
+#endif
 }
 
 
@@ -583,6 +588,7 @@ static void writeKeyBindings(CIniFile *ini)
 */
 static void loadQuickChatMessages(CIniFile *ini)
 {
+#ifndef ZAP_DEDICATED
    // Add initial node
    QuickChatNode emptynode;
    emptynode.depth = 0;    // This is a beginning or ending node
@@ -679,6 +685,7 @@ static void loadQuickChatMessages(CIniFile *ini)
 
    // Add final node.  Last verse, same as the first.
    gQuickChatTree.push_back(emptynode);
+#endif
 }
 
 
@@ -1300,7 +1307,9 @@ static void writeSettings(CIniFile *ini)
    ini->setValueYN(section, "VerboseHelpMessages", gIniSettings.verboseHelpMessages);
    ini->setValueYN(section, "ShowKeyboardKeysInStickMode", gIniSettings.showKeyboardKeys);
 
+#ifndef ZAP_DEDICATED
    ini->SetValue  (section, "JoystickType", Joystick::joystickTypeToString(gIniSettings.joystickType));
+#endif
    ini->SetValue  (section, "MasterServerAddressList", gIniSettings.masterAddress);
    ini->SetValue  (section, "DefaultName", gIniSettings.defaultName);
    ini->SetValue  (section, "LastName", gIniSettings.lastName);
@@ -1312,9 +1321,11 @@ static void writeSettings(CIniFile *ini)
 
    ini->SetValueI (section, "Version", BUILD_VERSION);
 
+#ifndef ZAP_DEDICATED
    // Don't save new value if out of range, so it will go back to the old value. Just in case a user screw up with /linewidth command using value too big or too small
    if(gDefaultLineWidth >= 0.5 && gDefaultLineWidth <= 8)
       ini->SetValueF (section, "LineWidth", gDefaultLineWidth);
+#endif
 }
 
 
@@ -1811,9 +1822,11 @@ string ConfigDirectories::findBotFile(const string &filename)           // stati
 // Returns display-friendly mode designator like "Keyboard" or "Joystick 1"
 string IniSettings::getInputMode()
 {
+#ifndef ZAP_DEDICATED
    if(gIniSettings.inputMode == InputModeJoystick)
       return "Joystick " + itos(Joystick::UseJoystickNumber);
    else
+#endif
       return "Keyboard";
 }
 

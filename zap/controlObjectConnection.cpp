@@ -25,7 +25,6 @@
 
 #include "gameObject.h"
 #include "controlObjectConnection.h"
-#include "UIGame.h"
 #include "game.h"
 
 #include <math.h>

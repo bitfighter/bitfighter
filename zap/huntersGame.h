@@ -75,15 +75,20 @@ public:
    bool isCarryingItems(Ship *ship);
    void itemDropped(Ship *ship, MoveItem *item);
 
+#ifndef ZAP_DEDICATED
    const char **getGameParameterMenuKeys();
    boost::shared_ptr<MenuItem> getMenuItem(ClientGame *game, const char *key);
    bool saveMenuItem(const MenuItem *menuItem, const char *key);
+#endif
 
    void addNexus(HuntersNexusObject *theObject);
    void shipTouchNexus(Ship *ship, HuntersNexusObject *nexus);
    void onGhostAvailable(GhostConnection *connection);
    void idle(GameObject::IdleCallPath path, U32 deltaT);
+
+#ifndef ZAP_DEDICATED
    void renderInterfaceOverlay(bool scoreboardVisible);
+#endif
 
    void controlObjectForClientKilled(GameConnection *theClient, GameObject *clientObject, GameObject *killerObject);
    void spawnShip(GameConnection *theClient);
