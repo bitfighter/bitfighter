@@ -75,7 +75,7 @@ public:
    virtual ~PlayerInfo() {}
 
    S32 getName(lua_State *L)       { return returnString(L, mClientRef->name.getString()); }
-   S32 getShip(lua_State *L)       { return isDefunct() ? returnNil(L) : returnShip(L, dynamic_cast<Ship *>(mClientRef->clientConnection->getControlObject())); }
+   S32 getShip(lua_State *L)       ;
    S32 getScriptName(lua_State *L) { return returnNil(L); }
    S32 getTeamIndx(lua_State *L)   { return returnInt(L, mClientRef->getTeam() + 1); }
    S32 getRating(lua_State *L)     { return returnFloat(L, mClientRef->getRating()); }

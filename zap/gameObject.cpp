@@ -277,6 +277,10 @@ GameObject::GameObject() : BfObject()
    mCreationTime = 0;
 }
 
+void GameObject::setControllingClient(GameConnection *c)         // This only gets run on the server
+{
+	mControllingClient = c;
+}
 
 void GameObject::setOwner(GameConnection *connection)
 {

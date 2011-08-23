@@ -29,6 +29,7 @@
 #include "UI.h"
 #include "input.h"         // For InputMode def
 #include "UIMenuItems.h"
+#include "tnlNetConnection.h" // for TerminationReason
 
 
 namespace Zap

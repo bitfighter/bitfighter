@@ -35,6 +35,7 @@ using namespace std;
 namespace Zap
 {
 
+class ClientGame;
 static const S32 MAX_TEXTITEM_LEN = 255;
 
 class TextItem : public SimpleLine

@@ -26,9 +26,9 @@
 #ifndef _GAMEOBJECT_H_
 #define _GAMEOBJECT_H_
 
-#include "gameConnection.h"
 #include "gridDB.h"        // For DatabaseObject
 #include "tnlNetObject.h"
+#include "move.h"
 
 #include "Geometry_Base.h"      // For GeomType enum
 
@@ -250,11 +250,11 @@ public:
 
    bool isControlled() { return mControllingClient.isValid(); }
 
-   void setOwner(GameConnection *c);
 
    SafePtr<GameConnection> getControllingClient() { return mControllingClient; }
-   void setControllingClient(GameConnection *c) { mControllingClient = c; }         // This only gets run on the server
+   void setControllingClient(GameConnection *c);         // This only gets run on the server
 
+   void setOwner(GameConnection *c);
    GameConnection *getOwner();
 
    F32 getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 updateSkips);

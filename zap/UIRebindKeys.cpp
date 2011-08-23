@@ -28,7 +28,6 @@
 #include "UIGame.h"
 #include "UIChat.h"
 #include "game.h"
-#include "gameConnection.h"
 #include "UIRebindKeys.h"
 #include "ScreenInfo.h"
 

@@ -48,6 +48,7 @@ class MenuItem;
 class MoveItem;
 class SoundEffect;
 class VoiceDecoder;
+class ClientGame;
 
 class ClientRef : public NetObject
 {
