@@ -352,7 +352,7 @@ public:
 
    ClientRef *findClientRef(const StringTableEntry &name);
 
-   bool processArguments(S32 argc, const char **argv, Game *game);
+   virtual bool processArguments(S32 argc, const char **argv, Game *game);
    string toString() const;
 
 #ifndef ZAP_DEDICATED

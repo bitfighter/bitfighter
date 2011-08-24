@@ -546,7 +546,11 @@ U32 EngineeredObject::packUpdate(GhostConnection *connection, U32 updateMask, Bi
 
    if(stream->writeFlag(updateMask & HealthMask))
    {
-      stream->writeFloat(mHealth, 6);
+      if(stream->writeFlag(isEnabled()))
+         stream->writeFloat((mHealth - disabledLevel) / (1 - disabledLevel), 5);
+      else
+         stream->writeFloat(mHealth / disabledLevel, 5);
+
       stream->writeFlag(mIsDestroyed);
    }
    return 0;
@@ -575,7 +579,12 @@ void EngineeredObject::unpackUpdate(GhostConnection *connection, BitStream *stre
 
    if(stream->readFlag())
    {
-      mHealth = stream->readFloat(6);
+      if(stream->readFlag())
+         mHealth = stream->readFloat(5) * (1 - disabledLevel) + disabledLevel; // enabled
+      else
+         mHealth = stream->readFloat(5) * (disabledLevel * 0.99); // disabled, make sure (mHealth < disabledLevel)
+
+
       bool wasDestroyed = mIsDestroyed;
       mIsDestroyed = stream->readFlag();
 
