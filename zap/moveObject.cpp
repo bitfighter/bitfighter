@@ -35,6 +35,7 @@
 #ifndef ZAP_DEDICATED
 #include "ClientGame.h"
 #include "sparkManager.h"
+#include "UI.h" // for extern void glColor
 #endif
 
 #include <math.h>
@@ -57,10 +58,6 @@ string Item::toString(F32 gridSize) const
    return string(getClassName()) + " " + geomToString(gridSize);
 }
 
-
-#ifndef ZAP_DEDICATED
-extern void glColor(const Color &c, float alpha = 1.0);
-#endif
 
 // Provide generic item rendering; will be overridden
 void Item::renderItem(const Point &pos)

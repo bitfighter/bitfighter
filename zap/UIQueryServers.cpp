@@ -1193,6 +1193,12 @@ void QueryServersUserInterface::sortSelected()
 // Handle mouse input, figure out which menu item we're over, and highlight it
 void QueryServersUserInterface::onMouseMoved(S32 x, S32 y)
 {
+   if(getKeyState(MOUSE_LEFT))
+   {
+      onMouseDragged(x, y);
+      return;
+   }
+
    const Point *mousePos = gScreenInfo.getMousePos();
 
    SDL_ShowCursor(SDL_ENABLE);  // TODO:  was GLUT_CURSOR_RIGHT_ARROW
