@@ -230,12 +230,13 @@ const Color *RabbitGameType::getShipColor(Ship *s)
 }
 
 
-Color RabbitGameType::getTeamColor(S32 team)
+const Color *RabbitGameType::getTeamColor(S32 team) const
 {
    if(team != -1 || getGame()->getTeamCount() != 1)
       return Parent::getTeamColor(team);
 
-   return Color(1, 0.5, 0);      // orange neutral team, so the neutral flag is orange.
+   static const Color OrangeColor(1, 0.5, 0); // due to returning pointer, need to be static.
+   return &OrangeColor;      // orange neutral team, so the neutral flag is orange.
 }
 
 

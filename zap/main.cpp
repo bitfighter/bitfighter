@@ -525,7 +525,8 @@ void idle()
    {
       gameIdle(U32(integerTime));
 #ifndef ZAP_DEDICATED
-      display();    // Draw the screen
+      if(!gDedicatedServer)
+         display();    // Draw the screen, if not dedicated
 #endif
       integerTime = 0;
       if(!gDedicatedServer)

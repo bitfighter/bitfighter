@@ -84,9 +84,9 @@ public:
    void controlObjectForClientKilled(GameConnection *theClient, GameObject *clientObject, GameObject *killerObject);
    bool shipHasFlag(Ship *ship);
    bool teamHasFlag(S32 team) const;
-   const Color *getShipColor(Ship *s);
 
-   Color getTeamColor(S32 team);
+   const Color *getShipColor(Ship *s);
+   const Color *getTeamColor(S32 team) const;
 
    void onFlagHeld(Ship *ship);
    void onFlaggerDead(Ship *killerShip);
