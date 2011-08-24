@@ -39,6 +39,9 @@ namespace Zap
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+
+// A note on terminology here: an "object" is any game object, whereas an "item" is a point object that the player will interact with
+
 // Parent class of EngineeredObject, PickupItem
 class Item : public GameObject, public EditorItem, public LuaItem
 {
@@ -54,8 +57,12 @@ protected:
       FirstFreeMask   = Parent::FirstFreeMask << 2
    };
 
+
 public:
    Item(const Point &pos = Point(0,0), F32 radius = 1, F32 mass = 1);      // Constructor
+
+   bool processArguments(S32 argc, const char **argv, Game *game);
+
 
    F32 getRadius() { return mRadius; }
    virtual void setRadius(F32 radius) { mRadius = radius; }

@@ -52,6 +52,22 @@ Item::Item(const Point &pos, F32 radius, F32 mass)
    mMass = mass;
 }
 
+// Server only
+bool Item::processArguments(S32 argc, const char **argv, Game *game)
+{
+   if(argc < 2)
+      return false;
+
+   Point pos;
+   pos.read(argv);
+   pos *= game->getGridSize();
+   setVert(pos, 0);
+
+   setExtent(Rect(pos, mRadius + 10));
+
+   return true;
+}
+
 
 string Item::toString(F32 gridSize) const
 {

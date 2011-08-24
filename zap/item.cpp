@@ -65,14 +65,11 @@ bool MoveItem::processArguments(S32 argc, const char **argv, Game *game)
 {
    if(argc < 2)
       return false;
-
-   Point pos;
-   pos.read(argv);
-   pos *= game->getGridSize();
-   setVert(pos, 0);
+   else if(!Parent::processArguments(argc, argv, game))
+      return false;
 
    for(U32 i = 0; i < MoveStateCount; i++)
-      mMoveState[i].pos = pos;
+      mMoveState[i].pos = getVert(0);
 
    updateExtent();
 
