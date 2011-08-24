@@ -402,6 +402,8 @@ void EngineeredObject::damageObject(DamageInfo *di)
 
    if(mHealth < 0)
       mHealth = 0;
+   else if(mHealth > 1)
+      mHealth = 1;
 
    mHealTimer.reset();     // Restart healing timer...
 
