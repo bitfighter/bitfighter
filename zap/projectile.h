@@ -143,7 +143,7 @@ public:
    virtual Point getActualPos() const { return pos; }
 
    void render() { renderItem(getActualPos()); }     // TODO: Get rid of this! (currently won't render without it)
-   void renderItem(Point p);
+   void renderItem(const Point &pos);
 
    TNL_DECLARE_CLASS(Projectile);
 
@@ -183,7 +183,7 @@ public:
    bool collide(GameObject *otherObj) { return true; }   // Things (like bullets) can collide with grenades
 
    WeaponType mWeaponType;
-   void renderItem(Point p);
+   void renderItem(const Point &pos);
    void idle(IdleCallPath path);
    void damageObject(DamageInfo *damageInfo);
    void explode(Point p, WeaponType weaponType);
@@ -237,7 +237,7 @@ public:
    void idle(IdleCallPath path);
 
    void damageObject(DamageInfo *damageInfo);
-   void renderItem(Point p);
+   void renderItem(const Point &pos);
 
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
@@ -300,7 +300,7 @@ public:
    void idle(IdleCallPath path);
 
    void damageObject(DamageInfo *damageInfo);
-   void renderItem(Point p);
+   void renderItem(const Point &pos);
 
    bool isVisibleToPlayer(S32 playerTeam, StringTableEntry playerName, bool isTeamGame);
 

@@ -260,7 +260,7 @@ void FlagItem::sendHome()
 }
 
 
-void FlagItem::renderItem(Point pos)
+void FlagItem::renderItem(const Point &pos)
 {
    Point offset;
 

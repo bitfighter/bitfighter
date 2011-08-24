@@ -567,7 +567,7 @@ HuntersFlagItem::HuntersFlagItem(Point pos, Point vel, bool useDropDelay) : Flag
 
 //////////  Client only code:
 
-void HuntersFlagItem::renderItem(Point pos)
+void HuntersFlagItem::renderItem(const Point &pos)
 {
 #ifndef ZAP_DEDICATED
    // Don't render flags on cloaked ships

@@ -82,7 +82,7 @@ void RepairItem::onClientPickup()
 }
 
 
-void RepairItem::renderItem(Point pos)
+void RepairItem::renderItem(const Point &pos)
 {
    if(!isVisible())
       return;
@@ -170,7 +170,7 @@ void EnergyItem::onClientPickup()
 }
 
 
-void EnergyItem::renderItem(Point pos)
+void EnergyItem::renderItem(const Point &pos)
 {
    if(!isVisible())
       return;
@@ -569,7 +569,7 @@ Asteroid *Asteroid::clone() const
 }
 
 
-void Asteroid::renderItem(Point pos)
+void Asteroid::renderItem(const Point &pos)
 {
    if(!hasExploded)
       renderAsteroid(pos, mDesign, asteroidRenderSize[mSizeIndex]);
@@ -792,7 +792,7 @@ Reactor *Reactor::clone() const
 }
 
 
-void Reactor::renderItem(Point pos)
+void Reactor::renderItem(const Point &pos)
 {
    if(!hasExploded)
       renderReactor(pos, getReactorRadius());
@@ -1017,7 +1017,7 @@ void Circle::idle(GameObject::IdleCallPath path)
 }
 
 
-void Circle::renderItem(Point pos)
+void Circle::renderItem(const Point &pos)
 {
 #ifndef ZAP_DEDICATED
    if(!hasExploded)
@@ -1157,7 +1157,7 @@ Worm::Worm() : MoveItem(Point(0,0), true, (F32)WORM_RADIUS, 1)
    mKillString = "killed by a worm";
 }
 
-void Worm::renderItem(Point pos)
+void Worm::renderItem(const Point &pos)
 {
    if(!hasExploded)
       renderWorm(pos);
@@ -1267,7 +1267,7 @@ TestItem *TestItem::clone() const
 }
 
 
-void TestItem::renderItem(Point pos)
+void TestItem::renderItem(const Point &pos)
 {
    renderTestItem(pos);
 }
@@ -1351,7 +1351,7 @@ ResourceItem *ResourceItem::clone() const
 
 
 
-void ResourceItem::renderItem(Point pos)
+void ResourceItem::renderItem(const Point &pos)
 {
    renderResourceItem(pos);
 }

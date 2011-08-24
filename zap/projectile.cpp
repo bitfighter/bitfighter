@@ -398,7 +398,7 @@ void Projectile::explode(GameObject *hitObject, Point pos)
 }
 
 
-void Projectile::renderItem(Point pos)
+void Projectile::renderItem(const Point &pos)
 {
    if(collided || !alive)
       return;
@@ -587,7 +587,7 @@ void GrenadeProjectile::explode(Point pos, WeaponType weaponType)
 }
 
 
-void GrenadeProjectile::renderItem(Point pos)
+void GrenadeProjectile::renderItem(const Point &pos)
 {
    if(exploded)
       return;
@@ -778,7 +778,7 @@ void Mine::unpackUpdate(GhostConnection *connection, BitStream *stream)
 }
 
 
-void Mine::renderItem(Point pos)
+void Mine::renderItem(const Point &pos)
 {
 #ifndef ZAP_DEDICATED
    if(exploded)
@@ -985,7 +985,7 @@ void SpyBug::unpackUpdate(GhostConnection *connection, BitStream *stream)
 }
 
 
-void SpyBug::renderItem(Point pos)
+void SpyBug::renderItem(const Point &pos)
 {
 #ifndef ZAP_DEDICATED
    if(exploded)

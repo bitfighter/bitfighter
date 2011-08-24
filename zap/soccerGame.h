@@ -114,7 +114,7 @@ public:
 
    static const S32 SOCCER_BALL_RADIUS = 30;
 
-   void renderItem(Point pos);
+   void renderItem(const Point &pos);
    void sendHome();
    void damageObject(DamageInfo *theInfo);
    void idle(GameObject::IdleCallPath path);

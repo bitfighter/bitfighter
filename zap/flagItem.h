@@ -62,7 +62,7 @@ public:
    virtual string toString(F32 gridSize) const;
 
    virtual void onAddedToGame(Game *theGame);
-   virtual void renderItem(Point pos);
+   virtual void renderItem(const Point &pos);
 
    void mountToShip(Ship *theShip);
 

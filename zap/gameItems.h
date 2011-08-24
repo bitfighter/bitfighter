@@ -51,7 +51,7 @@ public:
 
    bool pickup(Ship *theShip);
    void onClientPickup();
-   void renderItem(Point pos);
+   void renderItem(const Point &pos);
 
    TNL_DECLARE_CLASS(RepairItem);
 
@@ -96,7 +96,7 @@ public:
 
    bool pickup(Ship *theShip);
    void onClientPickup();
-   void renderItem(Point pos);
+   void renderItem(const Point &pos);
 
    TNL_DECLARE_CLASS(EnergyItem);
 
@@ -140,7 +140,7 @@ public:
 
    static const S32 REACTOR_RADIUS = 10;
 
-   void renderItem(Point pos);
+   void renderItem(const Point &pos);
    bool getCollisionPoly(Vector<Point> &polyPoints) const;
    bool getCollisionCircle(U32 state, Point &center, F32 &radius) const;
    bool getCollisionRect(U32 state, Rect &rect) const;
@@ -217,7 +217,7 @@ public:
 
    static const S32 ASTEROID_RADIUS = 89;
 
-   void renderItem(Point pos);
+   void renderItem(const Point &pos);
    bool getCollisionPoly(Vector<Point> &polyPoints) const;
    bool getCollisionCircle(U32 state, Point &center, F32 &radius) const;
    bool collide(GameObject *otherObject);
@@ -280,7 +280,7 @@ public:
 
    static const S32 CIRCLE_RADIUS = 10;
 
-   void renderItem(Point pos);
+   void renderItem(const Point &pos);
    bool getCollisionPoly(Vector<Point> &polyPoints) const;
    bool collide(GameObject *otherObject);
    void setPosAng(Point pos, F32 ang);
@@ -512,7 +512,7 @@ private:
 public:
    Worm();     // Constructor  
 
-   void renderItem(Point pos);
+   void renderItem(const Point &pos);
    bool getCollisionPoly(Vector<Point> &polyPoints) const;
    bool getCollisionCircle(U32 state, Point &center, F32 &radius) const;
    bool collide(GameObject *otherObject);
@@ -542,7 +542,7 @@ public:
 
    static const S32 TEST_ITEM_RADIUS = 60;
 
-   void renderItem(Point pos);
+   void renderItem(const Point &pos);
    void damageObject(DamageInfo *theInfo);
    bool getCollisionPoly(Vector<Point> &polyPoints) const;
 
@@ -583,7 +583,7 @@ public:
 
    static const S32 RESOURCE_ITEM_RADIUS = 20;
 
-   void renderItem(Point pos);
+   void renderItem(const Point &pos);
    bool collide(GameObject *hitObject);
    void damageObject(DamageInfo *theInfo);
    void onItemDropped();

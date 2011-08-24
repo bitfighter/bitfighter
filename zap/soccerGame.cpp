@@ -468,7 +468,7 @@ void SoccerBallItem::onItemDropped()
 }
 
 
-void SoccerBallItem::renderItem(Point pos)
+void SoccerBallItem::renderItem(const Point &pos)
 {
    renderSoccerBall(pos);
 }

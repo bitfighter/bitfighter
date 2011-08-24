@@ -142,7 +142,7 @@ protected:
 public:
    HuntersFlagItem(Point pos = Point(), Point vel = Point(0,0), bool useDropDelay = false);     // Constructor
 
-   void renderItem(Point pos);
+   void renderItem(const Point &pos);
 
    void onMountDestroyed();
    void onItemDropped();
