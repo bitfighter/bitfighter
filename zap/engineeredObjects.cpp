@@ -582,7 +582,7 @@ void EngineeredObject::unpackUpdate(GhostConnection *connection, BitStream *stre
       if(stream->readFlag())
          mHealth = stream->readFloat(5) * (1 - disabledLevel) + disabledLevel; // enabled
       else
-         mHealth = stream->readFloat(5) * (disabledLevel * 0.99); // disabled, make sure (mHealth < disabledLevel)
+         mHealth = stream->readFloat(5) * (disabledLevel * 0.99f); // disabled, make sure (mHealth < disabledLevel)
 
 
       bool wasDestroyed = mIsDestroyed;

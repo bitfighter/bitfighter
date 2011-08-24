@@ -91,7 +91,7 @@ protected:
 public:
    EditorObject();                  // Constructor
    virtual ~EditorObject();         // Virtual destructor
-   virtual EditorObject *clone() const { TNLAssert(false, "Clone method not implemented!"); }
+   virtual EditorObject *clone() const { TNLAssert(false, "Clone method not implemented!"); return NULL; }
 
    EditorObject *newCopy();         // Copies object        // TODO: Will become call to clone, delete method
 
@@ -206,10 +206,10 @@ public:
    virtual bool canBeNeutral();
    virtual bool hasTeam();
 
-   virtual const char *getEditorHelpString() { TNLAssert(false, "getEditorHelpString method not implemented!"); }     
-   virtual const char *getPrettyNamePlural() { TNLAssert(false, "getPrettyNamePlural method not implemented!"); }
-   virtual const char *getOnDockName()       { TNLAssert(false, "getOnDockName method not implemented!"); }
-   virtual const char *getOnScreenName()     { TNLAssert(false, "getOnScreenName method not implemented!"); }   
+   virtual const char *getEditorHelpString() { TNLAssert(false, "getEditorHelpString method not implemented!"); return NULL; }     
+   virtual const char *getPrettyNamePlural() { TNLAssert(false, "getPrettyNamePlural method not implemented!"); return NULL; }
+   virtual const char *getOnDockName()       { TNLAssert(false, "getOnDockName method not implemented!"); return NULL; }
+   virtual const char *getOnScreenName()     { TNLAssert(false, "getOnScreenName method not implemented!"); return NULL; }   
 
    virtual const char *getInstructionMsg() { return ""; }      // Message printed below item when it is selected
 
