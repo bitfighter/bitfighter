@@ -236,7 +236,7 @@ void AbstractChat::renderMessages(U32 ypos, U32 lineCountToDisplay)  // ypos is 
             if(renderLoop)
             {
                xpos = UserInterface::horizMargin / 2;
-               xpos += UserInterface::drawStringAndGetWidthf((F32)xpos, F32(ypos + (CHAT_FONT_SIZE - CHAT_TIME_FONT_SIZE)) / 2.f + 2,  // + 2 just looks better!
+               xpos += UserInterface::drawStringAndGetWidthf((F32)xpos, F32(ypos + (CHAT_FONT_SIZE - CHAT_TIME_FONT_SIZE) / 2.f + 2),  // + 2 just looks better!
                      CHAT_TIME_FONT_SIZE, "[%s] ", msg.time.c_str());
 
                if(!msg.isSystem)
