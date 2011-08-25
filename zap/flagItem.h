@@ -71,6 +71,8 @@ public:
    virtual void onMountDestroyed();
    virtual bool collide(GameObject *hitObject);
 
+   TestFunc collideTypes() { return (TestFunc)isFlagOrShipCollideableType; }
+
    bool isAtHome() { return mIsAtHome; }
 
    Timer mTimer;                       // Used for games like HTF where time a flag is held is important

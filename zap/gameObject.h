@@ -116,6 +116,7 @@ bool isLineItemType(U8 x);
 bool isWeaponCollideableType(U8 x);
 bool isAsteroidCollideableType(U8 x);
 bool isFlagCollideableType(U8 x);
+bool isFlagOrShipCollideableType(U8 x);
 bool isVisibleOnCmdrsMapType(U8 x);
 bool isVisibleOnCmdrsMapWithSensorType(U8 x);
 

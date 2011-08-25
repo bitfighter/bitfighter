@@ -787,7 +787,7 @@
 			</File>
 		</Filter>
 		<File
-			RelativePath=".\bitfighter.rc"
+			RelativePath=".\ZAP.rc"
 			>
 		</File>
 		<File

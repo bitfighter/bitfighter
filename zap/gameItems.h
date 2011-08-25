@@ -223,6 +223,9 @@ public:
    bool collide(GameObject *otherObject);
    void setPosAng(Point pos, F32 ang);
 
+   // Asteroid does not collide to another asteroid
+   TestFunc collideTypes() { return (TestFunc)isAsteroidCollideableType; }
+
    void damageObject(DamageInfo *theInfo);
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);

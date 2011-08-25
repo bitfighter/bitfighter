@@ -324,11 +324,8 @@ GameObject *MoveObject::findFirstCollision(U32 stateIndex, F32 &collisionTime, P
 
    fillVector.clear();
 
-   // Free CPU for asteroids
-   if (dynamic_cast<Asteroid *>(this))
-      findObjects((TestFunc)isAsteroidCollideableType, fillVector, queryRect);
-   else
-      findObjects((TestFunc)isAnyObjectType, fillVector, queryRect);
+   // collideTypes speeds up for Asteroid, and moving FlagItem in nexus.
+   findObjects(collideTypes(), fillVector, queryRect);
 
    F32 collisionFraction;
 
