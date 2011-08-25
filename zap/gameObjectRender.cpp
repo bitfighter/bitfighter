@@ -1619,7 +1619,7 @@ void renderForceFieldProjector(Point pos, Point normal, const Color *c, bool ena
 
    Color color(c);      // Create locally modifiable copy
 
-   color *= (1 - ForceFieldBrightnessProjector) + ForceFieldBrightnessProjector;
+   color = color * (1 - ForceFieldBrightnessProjector) + ForceFieldBrightnessProjector;
 
    glColor(enabled ? color : (color * 0.6f));
 

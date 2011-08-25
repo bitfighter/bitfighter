@@ -894,7 +894,7 @@ void Reactor::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
 F32 Reactor::getReactorRadius() const
 {
-   return 5 + 2 * mHitPoints;
+   return F32(5 + 2 * mHitPoints);
 }
 
 
@@ -1023,7 +1023,7 @@ void Circle::renderItem(const Point &pos)
    if(!hasExploded)
    {
       glColor(Colors::red);
-      drawCircle(pos, CIRCLE_RADIUS);
+      drawCircle(pos, (F32)CIRCLE_RADIUS);
    }
 #endif
 }

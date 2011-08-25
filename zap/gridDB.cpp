@@ -39,8 +39,6 @@ U32 GridDatabase::mQueryId = 0;
 ClassChunker<GridDatabase::BucketEntry> *GridDatabase::mChunker = NULL;
 U32 GridDatabase::mCountGridDatabase = 0;
 
-const F32 GridDatabase::widthDiv = 1.f / BucketWidth;
-
 // Constructor
 GridDatabase::GridDatabase()
 {
@@ -75,10 +73,10 @@ void GridDatabase::addToDatabase(DatabaseObject *theObject, const Rect &extents)
 {
    S32 minx, miny, maxx, maxy;  
 
-   minx = S32(extents.min.x * widthDiv);
-   miny = S32(extents.min.y * widthDiv);
-   maxx = S32(extents.max.x * widthDiv);
-   maxy = S32(extents.max.y * widthDiv);
+   minx = S32(extents.min.x) >> BucketWidthBitShift;
+   miny = S32(extents.min.y) >> BucketWidthBitShift;
+   maxx = S32(extents.max.x) >> BucketWidthBitShift;
+   maxy = S32(extents.max.y) >> BucketWidthBitShift;
 
    if(maxx - minx >= BucketRowCount)
       maxx = minx + BucketRowCount - 1;
@@ -119,10 +117,10 @@ void GridDatabase::removeFromDatabase(DatabaseObject *theObject, const Rect &ext
 {
    S32 minx, miny, maxx, maxy;
 
-   minx = S32(extents.min.x * widthDiv);
-   miny = S32(extents.min.y * widthDiv);
-   maxx = S32(extents.max.x * widthDiv);
-   maxy = S32(extents.max.y * widthDiv);
+   minx = S32(extents.min.x) >> BucketWidthBitShift;
+   miny = S32(extents.min.y) >> BucketWidthBitShift;
+   maxx = S32(extents.max.x) >> BucketWidthBitShift;
+   maxy = S32(extents.max.y) >> BucketWidthBitShift;
 
    if(maxx - minx >= BucketRowCount)
       maxx = minx + BucketRowCount - 1;
@@ -202,10 +200,10 @@ void GridDatabase::findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVect
 {
    S32 minx, miny, maxx, maxy;
 
-   minx = S32(extents.min.x * widthDiv);
-   miny = S32(extents.min.y * widthDiv);
-   maxx = S32(extents.max.x * widthDiv);
-   maxy = S32(extents.max.y * widthDiv);
+   minx = S32(extents.min.x) >> BucketWidthBitShift;
+   miny = S32(extents.min.y) >> BucketWidthBitShift;
+   maxx = S32(extents.max.x) >> BucketWidthBitShift;
+   maxy = S32(extents.max.y) >> BucketWidthBitShift;
 
    if(maxx - minx >= BucketRowCount)
       maxx = minx + BucketRowCount - 1;
@@ -251,10 +249,10 @@ void GridDatabase::findObjects(TestFunc testFunc, Vector<DatabaseObject *> &fill
 {
    S32 minx, miny, maxx, maxy;
 
-   minx = S32(extents.min.x * widthDiv);
-   miny = S32(extents.min.y * widthDiv);
-   maxx = S32(extents.max.x * widthDiv);
-   maxy = S32(extents.max.y * widthDiv);
+   minx = S32(extents.min.x) >> BucketWidthBitShift;
+   miny = S32(extents.min.y) >> BucketWidthBitShift;
+   maxx = S32(extents.max.x) >> BucketWidthBitShift;
+   maxy = S32(extents.max.y) >> BucketWidthBitShift;
 
    if(maxx - minx >= BucketRowCount)
       maxx = minx + BucketRowCount - 1;
@@ -527,19 +525,21 @@ void DatabaseObject::setExtent(const Rect &extents)
       S32 minxold, minyold, maxxold, maxyold;
       S32 minx, miny, maxx, maxy;
 
-      minxold = S32(mExtent.min.x * gridDB->widthDiv);
-      minyold = S32(mExtent.min.y * gridDB->widthDiv);
-      maxxold = S32(mExtent.max.x * gridDB->widthDiv);
-      maxyold = S32(mExtent.max.y * gridDB->widthDiv);
-      minx = S32(extents.min.x * gridDB->widthDiv);
-      miny = S32(extents.min.y * gridDB->widthDiv);
-      maxx = S32(extents.max.x * gridDB->widthDiv);
-      maxy = S32(extents.max.y * gridDB->widthDiv);
+      minxold = S32(mExtent.min.x) >> GridDatabase::BucketWidthBitShift;
+      minyold = S32(mExtent.min.y) >> GridDatabase::BucketWidthBitShift;
+      maxxold = S32(mExtent.max.x) >> GridDatabase::BucketWidthBitShift;
+      maxyold = S32(mExtent.max.y) >> GridDatabase::BucketWidthBitShift;
+      minx = S32(extents.min.x) >> GridDatabase::BucketWidthBitShift;
+      miny = S32(extents.min.y) >> GridDatabase::BucketWidthBitShift;
+      maxx = S32(extents.max.x) >> GridDatabase::BucketWidthBitShift;
+      maxy = S32(extents.max.y) >> GridDatabase::BucketWidthBitShift;
 
       // To save CPU, check if there is anything different
       if(minxold - minx | minyold - miny | maxxold - maxx | maxyold - maxy)
       {
          // it is different, remove and add to database, but don't touch gridDB->mAllObjects
+
+         //printf("new  %i %i %i %i old %i %i %i %i\n", minx, miny, maxx, maxy, minxold, minyold, maxxold, maxyold);
 
          if(maxx - minx >= gridDB->BucketRowCount)
             maxx = minx + gridDB->BucketRowCount - 1;

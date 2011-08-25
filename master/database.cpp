@@ -185,7 +185,7 @@ static string insertStatsTeam(Query *query, sqlite3 *sqliteDb, const TeamStats *
 {
    string sql = "INSERT INTO stats_team(stats_game_id, team_name, team_score, result, color_hex) "
                 "VALUES(" + gameId + ", '" + sanitize(teamStats->name) + "', " + itos(teamStats->score) + " ,'" + 
-                            teamStats->gameResult + "' ,'" + teamStats->hexColor + "');";
+                ctos(teamStats->gameResult) + "' ,'" + teamStats->hexColor + "');";
 
    string teamId = runQuery(query, sqliteDb, sql);
 

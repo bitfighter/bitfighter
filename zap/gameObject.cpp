@@ -178,6 +178,13 @@ bool isFlagCollideableType(U8 x)
          x == ForceFieldTypeNumber;
 }
 
+bool isFlagOrShipCollideableType(U8 x)
+{
+   return
+         x == BarrierTypeNumber || x == PolyWallTypeNumber || ForceFieldTypeNumber ||
+         x == PlayerShipTypeNumber || x == RobotShipTypeNumber;
+}
+
 bool isVisibleOnCmdrsMapType(U8 x)
 {
    return

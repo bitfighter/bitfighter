@@ -148,6 +148,9 @@ public:
    void move(F32 time, U32 stateIndex, bool displacing = false, Vector<SafePtr<MoveObject> > = Vector<SafePtr<MoveObject> >());
    bool collide(GameObject *otherObject);
 
+   // CollideTypes is used to improve speed on findFirstCollision
+   virtual TestFunc collideTypes() { return (TestFunc)isAnyObjectType; }
+
    GameObject *findFirstCollision(U32 stateIndex, F32 &collisionTime, Point &collisionPoint);
    void computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *objHit);
    void computeCollisionResponseBarrier(U32 stateIndex, Point &collisionPoint);

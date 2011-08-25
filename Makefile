@@ -61,7 +61,7 @@ dedicated:
 	@$(MAKE) -C zap	dedicated
 
 dedicated_debug:
-	@$(MAKE) -C tnl 
+	@$(MAKE) -C tnl debug 
 	@$(MAKE) -C libtomcrypt
 	#@$(MAKE) -C master
 	@$(MAKE) -C lua/lua-vec/src 
