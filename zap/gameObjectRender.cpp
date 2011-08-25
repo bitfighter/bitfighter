@@ -1422,7 +1422,7 @@ void renderEnergySymbol(const Color *overrideColor, F32 alpha)
 
    // Orangey circle
    glLineWidth(gLineWidth3);
-   glColor(overrideColor == 0 ? Colors::orange : *overrideColor, alpha);
+   glColor(overrideColor == 0 ? Colors::orange67 : *overrideColor, alpha);
    glLineWidth(gDefaultLineWidth);
 }
 
