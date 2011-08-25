@@ -411,7 +411,6 @@ S32 countCharInString(const string &source, char search)
 }
 
 
-
 string makeFilenameFromString(const char *levelname)
 {
    static char filename[MAX_FILE_NAME_LEN + 1];    // Leave room for terminating null
@@ -431,6 +430,21 @@ string makeFilenameFromString(const char *levelname)
 
    filename[i] = 0;    // Null terminate
    return filename;
+}
+
+
+string ctos(char c)
+{
+   // Return empty string if char is null
+   if (!c)
+      return "";
+
+   stringstream ss;
+   string s;
+   ss << c;
+   ss >> s;
+
+   return s;
 }
 
 };
