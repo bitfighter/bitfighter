@@ -656,7 +656,8 @@ void endGame()
    if(gClientGame && gClientGame->getConnectionToServer())
       gClientGame->getConnectionToServer()->disconnect(NetConnection::ReasonSelfDisconnect, "");
 
-   gClientGame->getUIManager()->getHostMenuUserInterface()->levelLoadDisplayDisplay = false;
+   if(gClientGame)
+      gClientGame->getUIManager()->getHostMenuUserInterface()->levelLoadDisplayDisplay = false;
 #endif
 
    delete gServerGame;
