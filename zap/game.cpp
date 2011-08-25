@@ -302,7 +302,8 @@ void Game::processLevelLoadLine(U32 argc, U32 id, const char **argv, GridDatabas
 
          bool validArgs = object->processArguments(argc - 1, argv + 1, this);
 
-         // Mark the item as being a ghost (client copy of a server obect) that the object will not trigger server-side tests
+         // Mark the item as being a ghost (client copy of a server object) so that the object will not trigger server-side tests
+         // The only time this code is run on the client is when loading into the editor.
          if(inEditor)
             object->markAsGhost();
 

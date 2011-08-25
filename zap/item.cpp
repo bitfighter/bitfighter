@@ -40,8 +40,6 @@
 namespace Zap
 {
 
-static U32 sItemId = 1;
-
 // Constructor
 MoveItem::MoveItem(Point p, bool collideable, float radius, float mass) : MoveObject(p, radius, mass)
 {
@@ -49,13 +47,6 @@ MoveItem::MoveItem(Point p, bool collideable, float radius, float mass) : MoveOb
    mIsCollideable = collideable;
    mInitial = false;
 
-   //if(getGame()->isServer())
-   //{
-      mItemId = sItemId;
-      sItemId++;
-   //}
-   //else  // is client
-   //   mItemId = 0;
    updateTimer = 0;
 }
 
@@ -84,14 +75,6 @@ string MoveItem::toString(F32 gridSize) const
 }
 
 
-////////////////////////////////////////
-////////////////////////////////////////
-
-#ifndef ZAP_DEDICATED
-#endif
-#ifndef ZAP_DEDICATED
-#endif
-
 // Client only, in-game
 void MoveItem::render()
 {
@@ -101,7 +84,6 @@ void MoveItem::render()
 
    renderItem(mMoveState[RenderState].pos);
 }
-
 
 
 // Runs on both client and server, comes from collision() on the server and the colliding client, and from
@@ -502,13 +484,13 @@ bool PickupItem::processArguments(S32 argc, const char **argv, Game *game)
 
 string PickupItem::toString(F32 gridSize) const
 {
-   return string(getClassName()) + " " + geomToString(gridSize) + " " + (mRepopDelay != -1 ? itos(mRepopDelay / 1000) : "");
+   return Parent::toString(gridSize) + " " + (mRepopDelay != -1 ? itos(mRepopDelay / 1000) : "");
 }
 
 
 U32 PickupItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
-   U32 retMask = Parent::packUpdate(connection, updateMask, stream);
+   U32 retMask = Parent::packUpdate(connection, updateMask, stream);       // Writes id and pos
    stream->writeFlag(updateMask & InitialMask);
    stream->writeFlag(mIsVisible || mIsMomentarilyVisible);
 
@@ -524,7 +506,7 @@ U32 PickupItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
 
 void PickupItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
-   Parent::unpackUpdate(connection, stream);
+   Parent::unpackUpdate(connection, stream);    // Get id and pos
    bool isInitial = stream->readFlag();
    bool visible = stream->readFlag();
 
@@ -532,6 +514,7 @@ void PickupItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
       onClientPickup();
    mIsVisible = visible;
 }
+
 
 // Runs on both client and server, but does nothing on client
 bool PickupItem::collide(GameObject *otherObject)

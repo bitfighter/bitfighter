@@ -61,8 +61,10 @@ protected:
 public:
    Item(const Point &pos = Point(0,0), F32 radius = 1, F32 mass = 1);      // Constructor
 
-   bool processArguments(S32 argc, const char **argv, Game *game);
+   virtual bool processArguments(S32 argc, const char **argv, Game *game);
 
+   virtual U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
+   virtual void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
    F32 getRadius() { return mRadius; }
    virtual void setRadius(F32 radius) { mRadius = radius; }

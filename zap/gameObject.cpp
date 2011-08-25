@@ -325,7 +325,7 @@ void GameObject::setScopeAlways()
 
 void GameObject::setActualPos(Point p)
 {
-   // Do nothing
+    setExtent(Rect(p, 10));
 }
 
 

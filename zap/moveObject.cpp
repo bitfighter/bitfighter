@@ -44,15 +44,21 @@ namespace Zap
 {
 
 
+static U32 sItemId = 1;
+
 // Constructor
 Item::Item(const Point &pos, F32 radius, F32 mass)
 {
    setActualPos(pos);
    mRadius = radius;
    mMass = mass;
+
+   mItemId = sItemId;
+   sItemId++;
 }
 
-// Server only
+
+// Server only  --> Assumes first two params are x and y location; subclasses may read additional params
 bool Item::processArguments(S32 argc, const char **argv, Game *game)
 {
    if(argc < 2)
@@ -61,9 +67,8 @@ bool Item::processArguments(S32 argc, const char **argv, Game *game)
    Point pos;
    pos.read(argv);
    pos *= game->getGridSize();
-   setVert(pos, 0);
 
-   setExtent(Rect(pos, mRadius + 10));
+   setActualPos(pos);
 
    return true;
 }
@@ -72,6 +77,37 @@ bool Item::processArguments(S32 argc, const char **argv, Game *game)
 string Item::toString(F32 gridSize) const
 {
    return string(getClassName()) + " " + geomToString(gridSize);
+}
+
+
+U32 Item::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
+{
+   U32 retMask = Parent::packUpdate(connection, updateMask, stream);
+
+   if(stream->writeFlag(updateMask & InitialMask))
+   {
+      // Send id in inital packet
+      stream->writeRangedU32(mItemId, 0, U16_MAX);
+      ((GameConnection *) connection)->writeCompressedPoint(getActualPos(), stream);
+   }
+
+   return retMask;
+}
+
+
+void Item::unpackUpdate(GhostConnection *connection, BitStream *stream)
+{
+   Parent::unpackUpdate(connection, stream);
+
+   if(stream->readFlag())     // InitialMask
+   {
+      mItemId = stream->readRangedU32(0, U16_MAX);
+
+      Point pos;
+      ((GameConnection *) connection)->readCompressedPoint(pos, stream);
+
+      setActualPos(pos);      // Also sets object extent
+   }
 }
 
 
