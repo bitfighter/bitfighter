@@ -89,7 +89,9 @@ U32 Item::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
    {
       // Send id in inital packet
       stream->writeRangedU32(mItemId, 0, U16_MAX);
-      ((GameConnection *) connection)->writeCompressedPoint(getActualPos(), stream);
+
+      Point pos = getActualPos();
+      ((GameConnection *) connection)->writeCompressedPoint(pos, stream);
    }
 
    return retMask;
