@@ -266,6 +266,8 @@ class EditorObject : virtual public BfObject   // Interface class  -- All editor
 {
    // dedicated server won't need much of this
 public:
+   S32 mItemId;  // not used, but as of now, needed for Item::Item constructor
+
    virtual EditorObject *clone()  const { TNLAssert(false, "Clone method not implemented!"); };
    EditorObject *newCopy() {return clone();};        // Copies object        // TODO: Will become call to clone, delete method
 };

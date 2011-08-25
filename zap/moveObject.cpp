@@ -31,6 +31,7 @@
 #include "SoundSystem.h"
 #include "speedZone.h"
 #include "game.h"
+#include "gameConnection.h"
 
 #ifndef ZAP_DEDICATED
 #include "ClientGame.h"
