@@ -439,12 +439,7 @@ string ctos(char c)
    if (!c)
       return "";
 
-   stringstream ss;
-   string s;
-   ss << c;
-   ss >> s;
-
-   return s;
+   return string(1, c);
 }
 
 };
