@@ -372,7 +372,7 @@ void GhostConnection::writePacket(BitStream *bstream, PacketNotify *pnotify)
 
       // check for packet overrun, and rewind this update if there
       // was one:
-      if(bstream->getBitPosition() >= MaxPreferredPacketDataSize*8 - MinimumPaddingBits)
+      if(!bstream->isValid() || bstream->getBitPosition() >= MaxPreferredPacketDataSize*8 - MinimumPaddingBits)
       {
          TNLAssert(have_something_to_send || bstream->getBitPosition() < MaxPacketDataSize*8 - MinimumPaddingBits, "Packet too big to send");
          if(have_something_to_send)
