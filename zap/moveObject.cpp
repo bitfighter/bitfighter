@@ -31,7 +31,6 @@
 #include "SoundSystem.h"
 #include "speedZone.h"
 #include "game.h"
-#include "gameConnection.h"
 
 #ifndef ZAP_DEDICATED
 #include "ClientGame.h"
@@ -69,7 +68,9 @@ bool Item::processArguments(S32 argc, const char **argv, Game *game)
    pos.read(argv);
    pos *= game->getGridSize();
 
-   setActualPos(pos);
+   // TODO: We need to reconcile these two ways of storing an item's location
+   setActualPos(pos);      // Needed by game
+   setVert(pos, 0);        // Needed by editor
 
    return true;
 }
@@ -89,9 +90,7 @@ U32 Item::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
    {
       // Send id in inital packet
       stream->writeRangedU32(mItemId, 0, U16_MAX);
-
-      Point pos = getActualPos();
-      ((GameConnection *) connection)->writeCompressedPoint(pos, stream);
+      ((GameConnection *) connection)->writeCompressedPoint(getActualPos(), stream);
    }
 
    return retMask;
@@ -379,8 +378,11 @@ GameObject *MoveObject::findFirstCollision(U32 stateIndex, F32 &collisionTime, P
 
    fillVector.clear();
 
-   // collideTypes speeds up for Asteroid, and moving FlagItem in nexus.
-   findObjects(collideTypes(), fillVector, queryRect);
+   // Free CPU for asteroids
+   if (dynamic_cast<Asteroid *>(this))
+      findObjects((TestFunc)isAsteroidCollideableType, fillVector, queryRect);
+   else
+      findObjects((TestFunc)isAnyObjectType, fillVector, queryRect);
 
    F32 collisionFraction;
 

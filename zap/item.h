@@ -48,9 +48,9 @@ class PickupItem : public Item
 
 private:
    bool mIsVisible;
-   bool mIsMomentarilyVisible;      // Used if item briefly flashes on and off, like if a ship is sitting on a repair item when it reappears
+   bool mIsMomentarilyVisible; // Used if item briefly flashes on and off, like if a ship is sitting on a repair item when it reappears
    Timer mRepopTimer;
-   S32 mRepopDelay;
+   S32 mRepopDelay;            // Period of mRepopTimer
 
 protected:
    enum MaskBits {
