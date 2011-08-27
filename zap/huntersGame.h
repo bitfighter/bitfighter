@@ -166,7 +166,6 @@ public:
 
 class HuntersNexusObject : public EditorPolygon
 {
-private:
    typedef GameObject Parent;
 
 public:
