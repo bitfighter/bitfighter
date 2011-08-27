@@ -31,7 +31,7 @@
 #include "gameObjectRender.h"
 #include "teleporter.h"
 #include "barrier.h"             // For Barrier methods in generating zones
-#include "engineeredObjects.h"   // For Turret and ForceFieldProjector methods in generating zones
+#include "EngineeredItem.h"   // For Turret and ForceFieldProjector methods in generating zones
 #include "../recast/Recast.h"    // For zone generation
 #include "../recast/RecastAlloc.h"
 #include "game.h"

@@ -26,57 +26,65 @@
 #ifndef _ITEM_H_
 #define _ITEM_H_
 
-#include "moveObject.h"       // Parent class
+#include "gameObject.h"       // Parent class
 #include "EditorObject.h"     // Parent class
 #include "luaObject.h"        // Parent class
 
-#include"goalZone.h"          // For GoalZone def
 #include "Timer.h"
 
 namespace Zap
 {
 
-class Ship;
-class GameType;
+// A note on terminology here: an "object" is any game object, whereas an "item" is a point object that the player will interact with
+// Item is now parent class of MoveItem, EngineeredItem, PickupItem
 
-////////////////////////////////////////
-////////////////////////////////////////
-
-class PickupItem : public Item
+class Item : public GameObject, public EditorItem, public LuaItem
 {
-   typedef Item Parent;
-
-private:
-   bool mIsVisible;
-   bool mIsMomentarilyVisible; // Used if item briefly flashes on and off, like if a ship is sitting on a repair item when it reappears
-   Timer mRepopTimer;
-   S32 mRepopDelay;            // Period of mRepopTimer
+   typedef GameObject Parent;
 
 protected:
+   F32 mRadius;
+   F32 mMass;
+
    enum MaskBits {
-      PickupMask    = Parent::FirstFreeMask << 0,
-      FirstFreeMask = Parent::FirstFreeMask << 1
+      ItemChangedMask = Parent::FirstFreeMask << 0,
+      ExplodedMask    = Parent::FirstFreeMask << 1,
+      FirstFreeMask   = Parent::FirstFreeMask << 2
    };
 
 public:
-   PickupItem(Point p = Point(), float radius = 1, S32 repopDelay = 20000);      // Constructor
+   Item(const Point &pos = Point(0,0), F32 radius = 1, F32 mass = 1);      // Constructor
 
-   bool processArguments(S32 argc, const char **argv, Game *game);
-   string toString(F32 gridSize) const;
+   virtual bool processArguments(S32 argc, const char **argv, Game *game);
 
-   void idle(GameObject::IdleCallPath path);
-   bool isVisible() { return mIsVisible; }
+   virtual U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
+   virtual void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
-   U32 getRepopDelay() { return mRepopDelay; }
+   F32 getRadius() { return mRadius; }
+   virtual void setRadius(F32 radius) { mRadius = radius; }
 
+   F32 getMass() { return mMass; }
+   void setMass(F32 mass) { mMass = mass; }
 
-   U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
-   void unpackUpdate(GhostConnection *connection, BitStream *stream);
+   virtual void renderItem(const Point &pos);      // Generic renderer -- will be overridden
 
-   bool collide(GameObject *otherObject);
-   virtual bool pickup(Ship *theShip) = 0;
-   virtual void onClientPickup() = 0;
+   // EditorItem interface
+   virtual void renderEditor(F32 currentScale);
+   virtual F32 getEditorRadius(F32 currentScale);
+   virtual string toString(F32 gridSize) const;
+
+   // LuaItem interface
+   virtual S32 getLoc(lua_State *L) { return LuaObject::returnPoint(L, getActualPos()); }
+   virtual S32 getRad(lua_State *L) { return LuaObject::returnFloat(L, getRadius()); }
+   virtual S32 getVel(lua_State *L) { return LuaObject::returnPoint(L, Point(0,0)); }
+   virtual S32 getTeamIndx(lua_State *L) { return TEAM_NEUTRAL + 1; }              // Can be overridden for team items
+   virtual S32 isInCaptureZone(lua_State *L) { return returnBool(L, false); }      // Non-moving item is never in capture zone, even if it is!
+   virtual S32 isOnShip(lua_State *L) { return returnBool(L, false); }             // Is item being carried by a ship? NO!
+   virtual S32 getCaptureZone(lua_State *L) { return returnNil(L); }
+   virtual S32 getShip(lua_State *L) { return returnNil(L); }
+   virtual GameObject *getGameObject() { return this; }          // Return the underlying GameObject
 };
+
 
 };
 

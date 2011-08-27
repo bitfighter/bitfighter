@@ -35,7 +35,7 @@
 #include "robot.h"               // For robot stuff
 #include "gameType.h"
 #include "IniFile.h"             // For access to gINI functions
-#include "engineeredObjects.h"   // For EngineerModuleDeployer
+#include "EngineeredItem.h"   // For EngineerModuleDeployer
 #include "ship.h"
 #include "shipItems.h"           // For EngineerBuildObjects
 #include "gameObjectRender.h"

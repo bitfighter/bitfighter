@@ -33,7 +33,7 @@
 #include "playerInfo.h"
 #include "shipItems.h"           // For EngineerBuildObjects enum
 #include "masterConnection.h"    // For MasterServerConnection def
-#include "engineeredObjects.h"   // For EngineerModuleDeployer
+#include "EngineeredItem.h"   // For EngineerModuleDeployer
 #include "Colors.h"
 
 #include "stringUtils.h"         // For strictjoindir()
@@ -427,7 +427,7 @@ void GameConnection::changeParam(const char *param, ParamType type)
 }
 
 
-TNL_IMPLEMENT_RPC(GameConnection, c2sEngineerDeployObject, (RangedU32<0,EngineeredObjectCount> type), (type), 
+TNL_IMPLEMENT_RPC(GameConnection, c2sEngineerDeployObject, (RangedU32<0,EngineeredItemCount> type), (type), 
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
    sEngineerDeployObject(type);

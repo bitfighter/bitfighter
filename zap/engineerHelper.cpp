@@ -24,7 +24,7 @@
 //------------------------------------------------------------------------------------
 
 #include "engineerHelper.h"
-#include "engineeredObjects.h"      // For EngineerModuleDeployer
+#include "EngineeredItem.h"      // For EngineerModuleDeployer
 #include "UIGame.h"
 #include "Color.h"                  // For Color def
 #include "Colors.h"

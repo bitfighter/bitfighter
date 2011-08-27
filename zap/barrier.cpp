@@ -27,7 +27,7 @@
 #include "BotNavMeshZone.h"
 #include "gameObjectRender.h"
 #include "GeomUtils.h"              // For polygon triangulation
-#include "engineeredObjects.h"      // For forcefieldprojector def
+#include "EngineeredItem.h"      // For forcefieldprojector def
 #include "gameType.h"               // For BarrierRec struct
 #include "game.h"
 #include "config.h"
@@ -690,7 +690,7 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *gameDataba
 #ifndef ZAP_DEDICATED
    // Find any engineered objects that terminate on this wall, and mark them for resnapping later
 
-   Vector<EngineeredObject *> eosOnDeletedSegs;    // A list of engr objects terminating on the wall segment that we'll be deleting
+   Vector<EngineeredItem *> eosOnDeletedSegs;    // A list of engr objects terminating on the wall segment that we'll be deleting
 
    EditorObject *wall = dynamic_cast<EditorObject *>(wallDbObject);   // Wall we're deleting and rebuilding
 
@@ -703,7 +703,7 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *gameDataba
       if(mWallSegments[i]->getOwner() == wall->getSerialNumber())      // Segment belongs to item
          for(S32 j = 0; j < engrObjects.size(); j++)
          {
-            EngineeredObject *engrObj = dynamic_cast<EngineeredObject *>(engrObjects[j]);
+            EngineeredItem *engrObj = dynamic_cast<EngineeredItem *>(engrObjects[j]);
 
             // Does FF start or end on this segment?
             if(engrObj->getMountSegment() == mWallSegments[i] || engrObj->getEndSegment() == mWallSegments[i])

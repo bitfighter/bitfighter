@@ -32,7 +32,7 @@
 #include "gameObjectRender.h"
 #include "ship.h"
 #include "teleporter.h"
-#include "engineeredObjects.h"
+#include "EngineeredItem.h"
 #include "input.h"
 #include "speedZone.h"           // For SpeedZone::height
 #include "GeomUtils.h"      // For polygon triangulation

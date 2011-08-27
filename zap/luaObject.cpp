@@ -36,7 +36,7 @@
 #include "projectile.h"    // For getItem()
 #include "teleporter.h"
 #include "speedZone.h"
-#include "engineeredObjects.h"    // For getItem()
+#include "EngineeredItem.h"    // For getItem()
 #include "playerInfo.h"           // For playerInfo def
 #include "config.h"
 

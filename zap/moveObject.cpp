@@ -25,7 +25,8 @@
 
 #include "moveObject.h"
 #include "gameType.h"
-#include "gameItems.h"
+//#include "gameItems.h"
+#include "goalZone.h"
 #include "GeomUtils.h"
 #include "ship.h"
 #include "SoundSystem.h"
@@ -42,101 +43,6 @@
 
 namespace Zap
 {
-
-
-static U32 sItemId = 1;
-
-// Constructor
-Item::Item(const Point &pos, F32 radius, F32 mass)
-{
-   setActualPos(pos);
-   mRadius = radius;
-   mMass = mass;
-
-   mItemId = sItemId;
-   sItemId++;
-}
-
-
-// Server only  --> Assumes first two params are x and y location; subclasses may read additional params
-bool Item::processArguments(S32 argc, const char **argv, Game *game)
-{
-   if(argc < 2)
-      return false;
-
-   Point pos;
-   pos.read(argv);
-   pos *= game->getGridSize();
-
-   // TODO: We need to reconcile these two ways of storing an item's location
-   setActualPos(pos);      // Needed by game
-   setVert(pos, 0);        // Needed by editor
-
-   return true;
-}
-
-
-string Item::toString(F32 gridSize) const
-{
-   return string(getClassName()) + " " + geomToString(gridSize);
-}
-
-
-U32 Item::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
-{
-   U32 retMask = Parent::packUpdate(connection, updateMask, stream);
-
-   if(stream->writeFlag(updateMask & InitialMask))
-   {
-      // Send id in inital packet
-      stream->writeRangedU32(mItemId, 0, U16_MAX);
-      ((GameConnection *) connection)->writeCompressedPoint(getActualPos(), stream);
-   }
-
-   return retMask;
-}
-
-
-void Item::unpackUpdate(GhostConnection *connection, BitStream *stream)
-{
-   Parent::unpackUpdate(connection, stream);
-
-   if(stream->readFlag())     // InitialMask
-   {
-      mItemId = stream->readRangedU32(0, U16_MAX);
-
-      Point pos;
-      ((GameConnection *) connection)->readCompressedPoint(pos, stream);
-
-      setActualPos(pos);      // Also sets object extent
-   }
-}
-
-
-// Provide generic item rendering; will be overridden
-void Item::renderItem(const Point &pos)
-{
-#ifndef ZAP_DEDICATED
-   glColor(Colors::cyan);
-   drawSquare(pos, 10, true);
-#endif
-}
-
-
-void Item::renderEditor(F32 currentScale)
-{
-   renderItem(getVert(0));                    
-}
-
-
-F32 Item::getEditorRadius(F32 currentScale)
-{
-   return (getRadius() + 2) * currentScale;
-}
-
-
-////////////////////////////////////////
-////////////////////////////////////////
 
 MoveObject::MoveObject(const Point &pos, F32 radius, F32 mass) : Parent(pos, radius, mass)    // Constructor
 {
@@ -657,6 +563,508 @@ void MoveObject::updateInterpolation()
       }
    }
 }
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Constructor
+MoveItem::MoveItem(Point p, bool collideable, float radius, float mass) : MoveObject(p, radius, mass)
+{
+   mIsMounted = false;
+   mIsCollideable = collideable;
+   mInitial = false;
+
+   updateTimer = 0;
+}
+
+
+// Server only
+bool MoveItem::processArguments(S32 argc, const char **argv, Game *game)
+{
+   if(argc < 2)
+      return false;
+   else if(!Parent::processArguments(argc, argv, game))
+      return false;
+
+   for(U32 i = 0; i < MoveStateCount; i++)
+      mMoveState[i].pos = getVert(0);
+
+   updateExtent();
+
+   return true;
+}
+
+
+// Server only
+string MoveItem::toString(F32 gridSize) const
+{
+   return string(getClassName()) + " " + geomToString(gridSize);
+}
+
+
+// Client only, in-game
+void MoveItem::render()
+{
+   // If the item is mounted, renderItem will be called from the ship it is mounted to
+   if(mIsMounted)
+      return;
+
+   renderItem(mMoveState[RenderState].pos);
+}
+
+
+// Runs on both client and server, comes from collision() on the server and the colliding client, and from
+// unpackUpdate() in the case of all clients
+//
+// theShip could be NULL here, and this could still be legit (e.g. flag is in scope, and ship is out of scope)
+void MoveItem::mountToShip(Ship *theShip)     
+{
+   TNLAssert(isGhost() || isInDatabase(), "Error, mount item not in database.");
+
+   if(mMount.isValid() && mMount == theShip)    // Already mounted on ship!  Nothing to do!
+      return;
+
+   if(mMount.isValid())                         // Mounted on something else; dismount!
+      dismount();
+
+   mMount = theShip;
+   if(theShip)
+      theShip->mMountedItems.push_back(this);
+
+   mIsMounted = true;
+   setMaskBits(MountMask);
+}
+
+
+void MoveItem::onMountDestroyed()
+{
+   dismount();
+}
+
+
+// Runs on client & server, via different code paths
+void MoveItem::onItemDropped()
+{
+   if(!getGame())    // Can happen on game startup
+      return;
+
+   GameType *gt = getGame()->getGameType();
+   if(!gt || !mMount.isValid())
+      return;
+
+   if(!isGhost())    // Server only; on client calls onItemDropped from dismount
+   {
+      gt->itemDropped(mMount, this);
+      dismount();
+   }
+
+   mDroppedTimer.reset(DROP_DELAY);
+}
+
+
+// Client & server, called via different paths
+void MoveItem::dismount()
+{
+   if(mMount.isValid())      // Mount could be null if mount is out of scope, but is dropping an always-in-scope item
+   {
+      for(S32 i = 0; i < mMount->mMountedItems.size(); i++)
+         if(mMount->mMountedItems[i].getPointer() == this)
+         {
+            mMount->mMountedItems.erase(i);     // Remove mounted item from our mount's list of mounted things
+            break;
+         }
+   }
+
+   if(isGhost())     // Client only; on server, we came from onItemDropped()
+      onItemDropped();
+
+   mMount = NULL;
+   mIsMounted = false;
+   setMaskBits(MountMask | PositionMask);    // Sending position fixes the super annoying "flag that can't be picked up" bug
+}
+
+
+void MoveItem::setActualPos(const Point &p)
+{
+   mMoveState[ActualState].pos = p;
+   mMoveState[ActualState].vel.set(0,0);
+   setMaskBits(WarpPositionMask | PositionMask);
+}
+
+
+void MoveItem::setActualVel(const Point &vel)
+{
+   mMoveState[ActualState].vel = vel;
+   setMaskBits(WarpPositionMask | PositionMask);
+}
+
+
+Ship *MoveItem::getMount()
+{
+   return mMount;
+}
+
+
+void MoveItem::setZone(GoalZone *theZone)
+{
+   // If the item on which we're setting the zone is a flag (which, at this point, it always will be),
+   // we want to make sure to update the zone itself.  This is mostly a convenience for robots searching
+   // for objects that meet certain criteria, such as for zones that contain a flag.
+   FlagItem *flag = dynamic_cast<FlagItem *>(this);
+
+   if(flag)
+   {
+      GoalZone *z = ((theZone == NULL) ? flag->getZone() : theZone);
+
+      if(z)
+         z->mHasFlag = ((theZone == NULL) ? false : true );
+   }
+
+   // Now we can get around to setting the zone, like we came here to do
+   mZone = theZone;
+   setMaskBits(ZoneMask);
+}
+
+
+GoalZone *MoveItem::getZone()
+{
+	return mZone;
+}
+
+
+void MoveItem::idle(GameObject::IdleCallPath path)
+{
+   if(!isInDatabase())
+      return;
+
+   Parent::idle(path);
+
+   if(mIsMounted)    // Item is mounted on something else
+   {
+      if(mMount.isNull() || mMount->hasExploded)
+      {
+         if(!isGhost())    // Server only
+            dismount();
+      }
+      else
+      {
+         mMoveState[RenderState].pos = mMount->getRenderPos();
+         mMoveState[ActualState].pos = mMount->getActualPos();
+      }
+   }
+   else              // Not mounted
+   {
+      float time = mCurrentMove.time * 0.001f;
+      move(time, ActualState, false);
+      if(path == GameObject::ServerIdleMainLoop)
+      {
+         // Only update if it's actually moving...
+         if(mMoveState[ActualState].vel.lenSquared() != 0)
+         {
+            // Update less often on slow moving item, more often on fast moving item, and update when we change velocity.
+            // Update at most every 5 seconds.
+            updateTimer -= (mMoveState[ActualState].vel.len() + 20) * time;
+            if(updateTimer < 0 || mMoveState[ActualState].vel.distSquared(prevMoveVelocity) > 100)
+            {
+               setMaskBits(PositionMask);
+               updateTimer = 100;
+               prevMoveVelocity = mMoveState[ActualState].vel;
+            }
+         }
+         else if(prevMoveVelocity.lenSquared() != 0)
+         {
+            setMaskBits(PositionMask);  // update to client that this item is no longer moving.
+            prevMoveVelocity.set(0,0);
+         }
+
+         mMoveState[RenderState] = mMoveState[ActualState];
+
+      }
+      else
+         updateInterpolation();
+   }
+   updateExtent();
+
+   // Server only...
+   U32 deltaT = mCurrentMove.time;
+   mDroppedTimer.update(deltaT);
+}
+
+
+static const S32 VEL_POINT_SEND_BITS = 511;     // 511 = 2^9 - 1, the biggest int we can pack into 9 bits.
+
+U32 MoveItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
+{
+   U32 retMask = 0;
+   if(stream->writeFlag(updateMask & InitialMask))
+   {
+      // Send id in inital packet
+      stream->writeRangedU32(mItemId, 0, U16_MAX);
+   }
+   if(stream->writeFlag(updateMask & PositionMask))
+   {
+      ((GameConnection *) connection)->writeCompressedPoint(mMoveState[ActualState].pos, stream);
+      writeCompressedVelocity(mMoveState[ActualState].vel, VEL_POINT_SEND_BITS, stream);      
+      stream->writeFlag(updateMask & WarpPositionMask);
+   }
+   if(stream->writeFlag(updateMask & MountMask) && stream->writeFlag(mIsMounted))      // mIsMounted gets written iff MountMask is set  
+   {
+      S32 index = connection->getGhostIndex(mMount);     // Index of ship with item mounted
+
+      if(stream->writeFlag(index != -1))                 // True if some ship has item, false if nothing is mounted
+         stream->writeInt(index, GhostConnection::GhostIdBitSize);
+      else
+         retMask |= MountMask;
+   }
+   if(stream->writeFlag(updateMask & ZoneMask))
+   {
+      if(mZone.isValid())
+      {
+         S32 index = connection->getGhostIndex(mZone);
+         if(stream->writeFlag(index != -1))
+            stream->writeInt(index, GhostConnection::GhostIdBitSize);
+         else
+            retMask |= ZoneMask;
+      }
+      else
+         stream->writeFlag(false);
+   }
+   return retMask;
+}
+
+
+void MoveItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
+{
+   bool interpolate = false;
+   bool positionChanged = false;
+
+   mInitial = stream->readFlag();
+
+   if(mInitial)     // InitialMask
+   {
+      mItemId = stream->readRangedU32(0, U16_MAX);
+   }
+
+   if(stream->readFlag())     // PositionMask
+   {
+      ((GameConnection *) connection)->readCompressedPoint(mMoveState[ActualState].pos, stream);
+      readCompressedVelocity(mMoveState[ActualState].vel, VEL_POINT_SEND_BITS, stream);   
+      positionChanged = true;
+      interpolate = !stream->readFlag();
+   }
+
+   if(stream->readFlag())     // MountMask
+   {
+      bool isMounted = stream->readFlag();
+      if(isMounted)
+      {
+         Ship *theShip = NULL;
+         
+         if(stream->readFlag())
+            theShip = dynamic_cast<Ship *>(connection->resolveGhost(stream->readInt(GhostConnection::GhostIdBitSize)));
+
+         mountToShip(theShip);
+      }
+      else
+         dismount();
+   }
+
+   if(stream->readFlag())     // ZoneMask
+   {
+      bool hasZone = stream->readFlag();
+      if(hasZone)
+         mZone = (GoalZone *) connection->resolveGhost(stream->readInt(GhostConnection::GhostIdBitSize));
+      else
+         mZone = NULL;
+   }
+
+   if(positionChanged)
+   {
+      if(interpolate)
+      {
+         mInterpolating = true;
+         move(connection->getOneWayTime() * 0.001f, ActualState, false);
+      }
+      else
+      {
+         mInterpolating = false;
+         mMoveState[RenderState] = mMoveState[ActualState];
+      }
+   }
+}
+
+
+bool MoveItem::collide(GameObject *otherObject)
+{
+   return mIsCollideable && !mIsMounted;
+}
+
+
+S32 MoveItem::getCaptureZone(lua_State *L) 
+{ 
+   if(mZone.isValid()) 
+   {
+      mZone->push(L); 
+      return 1;
+   } 
+   else 
+      return returnNil(L); 
+}
+
+
+S32 MoveItem::getShip(lua_State *L) 
+{ 
+   if(mMount.isValid()) 
+   {
+      mMount->push(L); 
+      return 1;
+   } 
+   else 
+      return returnNil(L); 
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Constructor
+AsteroidSpawn::AsteroidSpawn(const Point &pos, S32 time) : Parent(pos, time)
+{
+   mObjectTypeNumber = AsteroidSpawnTypeNumber;
+}
+
+
+AsteroidSpawn::~AsteroidSpawn()
+{
+   // Do nothing
+}
+
+
+AsteroidSpawn *AsteroidSpawn::clone() const
+{
+   return new AsteroidSpawn(*this);
+}
+
+
+void AsteroidSpawn::spawn(Game *game, const Point &pos)
+{
+   Asteroid *asteroid = dynamic_cast<Asteroid *>(TNL::Object::create("Asteroid"));   // Create a new asteroid
+
+   F32 ang = TNL::Random::readF() * Float2Pi;
+
+   asteroid->setPosAng(pos, ang);
+
+   asteroid->addToGame(game, game->getGameObjDatabase());              // And add it to the list of game objects
+}
+
+
+static void renderAsteroidSpawn(const Point &pos)
+{
+#ifndef ZAP_DEDICATED
+   F32 scale = 0.8f;
+   static const Point p(0,0);
+
+   glPushMatrix();
+      glTranslatef(pos.x, pos.y, 0);
+      glScalef(scale, scale, 1);
+      renderAsteroid(p, 2, .1f);
+
+      glColor(Colors::white);
+      drawCircle(p, 13);
+   glPopMatrix();  
+#endif
+}
+
+
+void AsteroidSpawn::renderEditor(F32 currentScale)
+{
+#ifndef ZAP_DEDICATED
+   Point pos = getVert(0);
+
+   glPushMatrix();
+      glTranslate(pos);
+      glScale(1/currentScale);    // Make item draw at constant size, regardless of zoom
+      renderAsteroidSpawn(Point(0,0));
+   glPopMatrix();   
+#endif
+}
+
+
+void AsteroidSpawn::renderDock()
+{
+   renderAsteroidSpawn(getVert(0));
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Constructor
+CircleSpawn::CircleSpawn(const Point &pos, S32 time) : Parent(pos, time)
+{
+   mObjectTypeNumber = CircleSpawnTypeNumber;
+}
+
+
+CircleSpawn *CircleSpawn::clone() const
+{
+   return new CircleSpawn(*this);
+}
+
+
+void CircleSpawn::spawn(Game *game, const Point &pos)
+{
+   for(S32 i = 0; i < 10; i++)
+   {
+      Circle *circle = dynamic_cast<Circle *>(TNL::Object::create("Circle"));   // Create a new Circle
+      F32 ang = TNL::Random::readF() * Float2Pi;
+
+      circle->setPosAng(pos, ang);
+
+      circle->addToGame(game, game->getGameObjDatabase());              // And add it to the list of game objects
+   }
+}
+
+
+static void renderCircleSpawn(const Point &pos)
+{
+#ifndef ZAP_DEDICATED
+   F32 scale = 0.8f;
+   static const Point p(0,0);
+
+   glPushMatrix();
+      glTranslatef(pos.x, pos.y, 0);
+      glScalef(scale, scale, 1);
+      drawCircle(p, 8);
+
+      glColor(Colors::white);
+      drawCircle(p, 13);
+   glPopMatrix();  
+#endif
+}
+
+
+void CircleSpawn::renderEditor(F32 currentScale)
+{
+#ifndef ZAP_DEDICATED
+   Point pos = getVert(0);
+
+   glPushMatrix();
+      glTranslate(pos);
+      glScale(1/currentScale);    // Make item draw at constant size, regardless of zoom
+      renderCircleSpawn(Point(0,0));
+   glPopMatrix();   
+#endif
+}
+
+
+void CircleSpawn::renderDock()
+{
+   renderCircleSpawn(getVert(0));
+}
+
+
 
 };
 

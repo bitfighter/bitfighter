@@ -23,17 +23,18 @@
 //
 //------------------------------------------------------------------------------------
 
-#ifndef _ENGINEEREDOBJECTS_H_
-#define _ENGINEEREDOBJECTS_H_
+#ifndef _ENGINEEREDITEM_H_
+#define _ENGINEEREDITEM_H_
 
 #include "gameObject.h"
 #include "item.h"
+#include "moveObject.h"    // For MoveItem
 #include "barrier.h"
 
 namespace Zap
 {
 
-class EngineeredObject : public Item    // TODO: Rename to EngineeredItem
+class EngineeredItem : public Item 
 {
 private:
    typedef Item Parent;
@@ -61,7 +62,7 @@ protected:
    };
 
 public:
-   EngineeredObject(S32 team = -1, Point anchorPoint = Point(), Point anchorNormal = Point());
+   EngineeredItem(S32 team = -1, Point anchorPoint = Point(), Point anchorNormal = Point());
    virtual bool processArguments(S32 argc, const char **argv, Game *game);
 
    virtual void onAddedToGame(Game *theGame);
@@ -71,10 +72,12 @@ public:
    void setResource(MoveItem *resource);
    static bool checkDeploymentPosition(const Vector<Point> &thisBounds, GridDatabase *gb);
    void computeExtent();
-   virtual void onDestroyed() { /* do nothing */ }  
-   virtual void onDisabled() { /* do nothing */ } 
-   virtual void onEnabled() { /* do nothing */ }  
-   virtual bool isTurret() { return false; }
+
+   virtual void onDestroyed() { /* Do nothing */ }  
+   virtual void onDisabled()  { /* Do nothing */ } 
+   virtual void onEnabled()   { /* Do nothing */ }  
+   virtual bool isTurret()    { return false; }
+
    bool isEnabled();    // True if still active, false otherwise
 
    void explode();
@@ -180,10 +183,10 @@ public:
 };
 
 
-class ForceFieldProjector : public EngineeredObject
+class ForceFieldProjector : public EngineeredItem
 {
 private:
-   typedef EngineeredObject Parent;
+   typedef EngineeredItem Parent;
    SafePtr<ForceField> mField;
    WallSegment *mForceFieldEndSegment;
 
@@ -253,9 +256,9 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class Turret : public EngineeredObject
+class Turret : public EngineeredItem
 {
-   typedef EngineeredObject Parent;
+   typedef EngineeredItem Parent;
 
 private:
    Timer mFireTimer;

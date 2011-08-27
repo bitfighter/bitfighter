@@ -23,7 +23,7 @@
 //
 //------------------------------------------------------------------------------------
 
-#include "engineeredObjects.h"
+#include "EngineeredItem.h"
 #include "ship.h"
 #include "projectile.h"
 #include "gameType.h"
@@ -121,7 +121,7 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(GridDatabase *database, S
          return false;
    }
 
-   if(!EngineeredObject::checkDeploymentPosition(bounds, database))
+   if(!EngineeredItem::checkDeploymentPosition(bounds, database))
    {
       mErrorMessage = "!!! Cannot deploy item at this location";
       return false;
@@ -224,7 +224,7 @@ bool EngineerModuleDeployer::deployEngineeredItem(GameConnection *connection, U3
    if(!ship)
       return false;
 
-   EngineeredObject *deployedObject = NULL;
+   EngineeredItem *deployedObject = NULL;
 
    switch(objectType)
    {
@@ -262,7 +262,7 @@ bool EngineerModuleDeployer::deployEngineeredItem(GameConnection *connection, U3
 
 
 // Constructor
-EngineeredObject::EngineeredObject(S32 team, Point anchorPoint, Point anchorNormal) : mAnchorNormal(anchorNormal)
+EngineeredItem::EngineeredItem(S32 team, Point anchorPoint, Point anchorNormal) : mAnchorNormal(anchorNormal)
 {
    setVert(anchorPoint, 0);
    mHealth = 1.0f;
@@ -275,7 +275,7 @@ EngineeredObject::EngineeredObject(S32 team, Point anchorPoint, Point anchorNorm
 }
 
 
-bool EngineeredObject::processArguments(S32 argc, const char **argv, Game *game)
+bool EngineeredItem::processArguments(S32 argc, const char **argv, Game *game)
 {
    if(argc < 3)
       return false;
@@ -315,7 +315,7 @@ bool EngineeredObject::processArguments(S32 argc, const char **argv, Game *game)
 }
 
 
-void EngineeredObject::onAddedToGame(Game *game)
+void EngineeredItem::onAddedToGame(Game *game)
 {
    Parent::onAddedToGame(game);
 
@@ -324,7 +324,7 @@ void EngineeredObject::onAddedToGame(Game *game)
 }
 
 
-string EngineeredObject::toString(F32 gridSize) const
+string EngineeredItem::toString(F32 gridSize) const
 {
    return string(Object::getClassName()) + " " + itos(mTeam) + " " + geomToString(gridSize) + " " + itos(mHealRate);
 }
@@ -333,14 +333,14 @@ string EngineeredObject::toString(F32 gridSize) const
 // This is used for both positioning items in-game and for snapping them to walls in the editor --> static method
 // Polulates anchor and normal
 
-DatabaseObject *EngineeredObject::findAnchorPointAndNormal(GridDatabase *wallEdgeDatabase, const Point &pos, F32 snapDist, 
+DatabaseObject *EngineeredItem::findAnchorPointAndNormal(GridDatabase *wallEdgeDatabase, const Point &pos, F32 snapDist, 
                                                            bool format, Point &anchor, Point &normal)
 {
    return findAnchorPointAndNormal(wallEdgeDatabase, pos, snapDist, format, (TestFunc)isWallType, anchor, normal);
 }
 
 
-DatabaseObject *EngineeredObject::findAnchorPointAndNormal(GridDatabase *wallEdgeDatabase, const Point &pos, F32 snapDist, 
+DatabaseObject *EngineeredItem::findAnchorPointAndNormal(GridDatabase *wallEdgeDatabase, const Point &pos, F32 snapDist, 
                                                            bool format, TestFunc testFunc, Point &anchor, Point &normal)
 {
    F32 minDist = F32_MAX;
@@ -375,7 +375,7 @@ DatabaseObject *EngineeredObject::findAnchorPointAndNormal(GridDatabase *wallEdg
 }
 
 
-void EngineeredObject::setResource(MoveItem *resource)
+void EngineeredItem::setResource(MoveItem *resource)
 {
    TNLAssert(resource->isMounted() == false, "Doh!");
    mResource = resource;
@@ -385,13 +385,13 @@ void EngineeredObject::setResource(MoveItem *resource)
 
 static const F32 disabledLevel = 0.25;
 
-bool EngineeredObject::isEnabled()
+bool EngineeredItem::isEnabled()
 {
    return mHealth >= disabledLevel;
 }
 
 
-void EngineeredObject::damageObject(DamageInfo *di)
+void EngineeredItem::damageObject(DamageInfo *di)
 {
    F32 prevHealth = mHealth;
 
@@ -465,7 +465,7 @@ void EngineeredObject::damageObject(DamageInfo *di)
 }
 
 
-void EngineeredObject::computeExtent()
+void EngineeredItem::computeExtent()
 {
    Vector<Point> v;
    getCollisionPoly(v);
@@ -474,7 +474,7 @@ void EngineeredObject::computeExtent()
 }
 
 
-void EngineeredObject::explode()
+void EngineeredItem::explode()
 {
 #ifndef ZAP_DEDICATED
    const S32 EXPLOSION_COLOR_COUNT = 12;
@@ -513,7 +513,7 @@ void EngineeredObject::explode()
 // Make sure position looks good when player deploys item with Engineer module -- make sure we're not deploying on top of
 // a wall or another engineered item
 // static method
-bool EngineeredObject::checkDeploymentPosition(const Vector<Point> &thisBounds, GridDatabase *gb)
+bool EngineeredItem::checkDeploymentPosition(const Vector<Point> &thisBounds, GridDatabase *gb)
 {
    Vector<DatabaseObject *> foundObjects;
    Rect queryRect(thisBounds);
@@ -531,7 +531,7 @@ bool EngineeredObject::checkDeploymentPosition(const Vector<Point> &thisBounds, 
 }
 
 
-U32 EngineeredObject::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
+U32 EngineeredItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
    if(stream->writeFlag(updateMask & InitialMask))
    {
@@ -557,7 +557,7 @@ U32 EngineeredObject::packUpdate(GhostConnection *connection, U32 updateMask, Bi
 }
 
 
-void EngineeredObject::unpackUpdate(GhostConnection *connection, BitStream *stream)
+void EngineeredItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    bool initial = false;
 
@@ -594,7 +594,7 @@ void EngineeredObject::unpackUpdate(GhostConnection *connection, BitStream *stre
 }
 
 
-void EngineeredObject::healObject(S32 time)
+void EngineeredItem::healObject(S32 time)
 {
    if(mHealRate == 0 || mTeam == -1)      // Neutral items don't heal!
       return;
@@ -618,7 +618,7 @@ void EngineeredObject::healObject(S32 time)
 
 
 // Find mount point or turret or forcefield closest to pos
-Point EngineeredObject::mountToWall(const Point &pos, GridDatabase *wallEdgeDatabase, GridDatabase *wallSegmentDatabase)
+Point EngineeredItem::mountToWall(const Point &pos, GridDatabase *wallEdgeDatabase, GridDatabase *wallSegmentDatabase)
 {  
    Point anchor, nrml;
 
@@ -630,12 +630,12 @@ Point EngineeredObject::mountToWall(const Point &pos, GridDatabase *wallEdgeData
    // it indirectly by snapping again, this time to a segment in our WallSegment database.  By using the snap point we found initially, that will
    // ensure the segment we find is associated with the edge found in the first pass.
    mountEdge = findAnchorPointAndNormal(wallEdgeDatabase, pos, 
-                               (F32)EngineeredObject::MAX_SNAP_DISTANCE, false, (TestFunc)isWallType, anchor, nrml);
+                               (F32)EngineeredItem::MAX_SNAP_DISTANCE, false, (TestFunc)isWallType, anchor, nrml);
 
    if(mountEdge)
    {
       mountSeg = findAnchorPointAndNormal(wallSegmentDatabase, anchor,     // <== passing in anchor here (found above), not pos
-                        (F32)EngineeredObject::MAX_SNAP_DISTANCE, false, (TestFunc)isWallType, anchor, nrml);
+                        (F32)EngineeredItem::MAX_SNAP_DISTANCE, false, (TestFunc)isWallType, anchor, nrml);
    }
 
    if(mountSeg)   // Found a segment we can mount to
@@ -872,7 +872,7 @@ Lunar<ForceFieldProjector>::RegType ForceFieldProjector::methods[] =
    method(ForceFieldProjector, getVel),
    method(ForceFieldProjector, getTeamIndx),
 
-   // EngineeredObject methods
+   // EngineeredItem methods
    method(ForceFieldProjector, getHealth),
    method(ForceFieldProjector, isActive),
    method(ForceFieldProjector, getAngle),
@@ -1057,7 +1057,7 @@ void ForceField::render()
 TNL_IMPLEMENT_NETOBJECT(Turret);
 
 // Constructor
-Turret::Turret(S32 team, Point anchorPoint, Point anchorNormal) : EngineeredObject(team, anchorPoint, anchorNormal)
+Turret::Turret(S32 team, Point anchorPoint, Point anchorNormal) : EngineeredItem(team, anchorPoint, anchorNormal)
 {
    mObjectTypeNumber = TurretTypeNumber;
 
@@ -1119,7 +1119,7 @@ bool Turret::processArguments(S32 argc2, const char **argv2, Game *game)
       
    }
 
-   bool returnBool = EngineeredObject::processArguments(argc1, argv1, game);
+   bool returnBool = EngineeredItem::processArguments(argc1, argv1, game);
    mCurrentAngle = mAnchorNormal.ATAN2();
    return returnBool;
 }
@@ -1127,7 +1127,7 @@ bool Turret::processArguments(S32 argc2, const char **argv2, Game *game)
 
 string Turret::toString(F32 gridSize) const
 {
-   string out = EngineeredObject::toString(gridSize);
+   string out = EngineeredItem::toString(gridSize);
    if(mWeaponFireType != WeaponTurret)
       out = out + " W=" + gWeapons[mWeaponFireType].name.getString();
    return out;
@@ -1377,7 +1377,7 @@ Lunar<Turret>::RegType Turret::methods[] =
    method(Turret, getVel),
    method(Turret, getTeamIndx),
 
-   // EngineeredObject methods
+   // EngineeredItem methods
    method(Turret, getHealth),
    method(Turret, isActive),
    method(Turret, getAngle),

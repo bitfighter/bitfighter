@@ -27,73 +27,14 @@
 #define _MOVEOBJECT_H_
 
 //#include "item.h"
-#include "gameObject.h" 
-#include "luaObject.h"     // For LuaItem class
-#include "EditorObject.h"  // For EditorItem class
-#include "Timer.h"
+//#include "gameObject.h" 
+//#include "luaObject.h"     // For LuaItem class
+//#include "EditorObject.h"  // For EditorItem class
+#include "Item.h"          // Parent class
 
 
 namespace Zap
 {
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-
-// A note on terminology here: an "object" is any game object, whereas an "item" is a point object that the player will interact with
-
-// Parent class of EngineeredObject, PickupItem
-class Item : public GameObject, public EditorItem, public LuaItem
-{
-   typedef GameObject Parent;
-
-protected:
-   F32 mRadius;
-   F32 mMass;
-
-   enum MaskBits {
-      ItemChangedMask = Parent::FirstFreeMask << 0,
-      ExplodedMask    = Parent::FirstFreeMask << 1,
-      FirstFreeMask   = Parent::FirstFreeMask << 2
-   };
-
-
-public:
-   Item(const Point &pos = Point(0,0), F32 radius = 1, F32 mass = 1);      // Constructor
-
-   virtual bool processArguments(S32 argc, const char **argv, Game *game);
-
-   virtual U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
-   virtual void unpackUpdate(GhostConnection *connection, BitStream *stream);
-
-   F32 getRadius() { return mRadius; }
-   virtual void setRadius(F32 radius) { mRadius = radius; }
-
-   F32 getMass() { return mMass; }
-   void setMass(F32 mass) { mMass = mass; }
-
-   virtual void renderItem(const Point &pos);      // Generic renderer -- will be overridden
-
-   // EditorItem interface
-   virtual void renderEditor(F32 currentScale);
-   virtual F32 getEditorRadius(F32 currentScale);
-   virtual string toString(F32 gridSize) const;
-
-   // LuaItem interface
-   virtual S32 getLoc(lua_State *L) { return LuaObject::returnPoint(L, getActualPos()); }
-   virtual S32 getRad(lua_State *L) { return LuaObject::returnFloat(L, getRadius()); }
-   virtual S32 getVel(lua_State *L) { return LuaObject::returnPoint(L, Point(0,0)); }
-   virtual S32 getTeamIndx(lua_State *L) { return TEAM_NEUTRAL + 1; }              // Can be overridden for team items
-   virtual S32 isInCaptureZone(lua_State *L) { return returnBool(L, false); }      // Non-moving item is never in capture zone, even if it is!
-   virtual S32 isOnShip(lua_State *L) { return returnBool(L, false); }             // Is item being carried by a ship? NO!
-   virtual S32 getCaptureZone(lua_State *L) { return returnNil(L); }
-   virtual S32 getShip(lua_State *L) { return returnNil(L); }
-   virtual GameObject *getGameObject() { return this; }          // Return the underlying GameObject
-};
-
-
-////////////////////////////////////////
-////////////////////////////////////////
 
 class MoveObject : public Item
 {
@@ -247,6 +188,150 @@ public:
    virtual S32 getCaptureZone(lua_State *L);
    virtual S32 getShip(lua_State *L);
 
+};
+
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+static const S32 AsteroidDesigns = 4;
+static const S32 AsteroidPoints = 12;
+
+static const F32 asteroidRenderSize[] = { .8f, .4f, .2f, -1 };      // Must end in -1
+static const S32 asteroidRenderSizes = sizeof(asteroidRenderSize) / sizeof(F32) - 1;
+
+static const S32 mSizeIndexLength = sizeof(asteroidRenderSize) / sizeof(F32) - 1;
+
+static const S8 AsteroidCoords[AsteroidDesigns][AsteroidPoints][2] =   // <== Wow!  A 3D array!
+{
+  { { 80, -43}, { 47, -84 }, { 5, -58 }, { -41, -81 }, { -79, -21 }, { -79, -0 }, { -79, 10 }, { -79, 47 }, { -49, 78 }, { 43, 78 }, { 80, 40 }, { 46, -0 } },
+  { { -41, -83 }, { 18, -83 }, { 81, -42 }, { 83, -42 }, { 7, -2 }, { 81, 38 }, { 41, 79 }, { 10, 56 }, { -48, 79 }, { -80, 15 }, { -80, -43 }, { -17, -43 } },
+  { { -2, -56 }, { 40, -79 }, { 81, -39 }, { 34, -19 }, { 82, 22 }, { 32, 83 }, { -21, 59 }, { -40, 82 }, { -80, 42 }, { -57, 2 }, { -79, -38 }, { -31, -79 } },
+  { { 42, -82 }, { 82, -25 }, { 82, 5 }, { 21, 80 }, { -19, 80 }, { -8, 5 }, { -48, 79 }, { -79, 16 }, { -39, -4 }, { -79, -21 }, { -19, -82 }, { -4, -82 } },
+};
+
+
+class Asteroid : public MoveItem
+{
+
+typedef MoveItem Parent;      // TODO: Should be EditorItem???
+
+private:
+   S32 mSizeIndex;
+   bool hasExploded;
+   S32 mDesign;
+
+public:
+   Asteroid();     // Constructor  
+   Asteroid *clone() const;
+
+   static const S32 ASTEROID_RADIUS = 89;
+
+   void renderItem(const Point &pos);
+   bool getCollisionPoly(Vector<Point> &polyPoints) const;
+   bool getCollisionCircle(U32 state, Point &center, F32 &radius) const;
+   bool collide(GameObject *otherObject);
+   void setPosAng(Point pos, F32 ang);
+
+   // Asteroid does not collide to another asteroid
+   TestFunc collideTypes() { return (TestFunc)isAsteroidCollideableType; }
+
+   void damageObject(DamageInfo *theInfo);
+   U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
+   void unpackUpdate(GhostConnection *connection, BitStream *stream);
+   void onItemExploded(Point pos);
+
+   static U32 getDesignCount() { return AsteroidDesigns; }
+
+   S32 getSizeIndex() { return mSizeIndex; }
+   S32 getSizeCount() { return asteroidRenderSizes; }
+
+   TNL_DECLARE_CLASS(Asteroid);
+
+   ///// Editor methods
+   const char *getEditorHelpString() { return "Shootable asteroid object.  Just like the arcade game."; }
+   const char *getPrettyNamePlural() { return "Asteroids"; }
+   const char *getOnDockName() { return "Ast."; }
+   const char *getOnScreenName() { return "Asteroid"; }
+
+      //virtual S32 getDockRadius() { return 11; }
+   F32 getEditorRadius(F32 currentScale);
+   void renderDock();
+
+   ///// Lua interface
+
+   public:
+   Asteroid(lua_State *L);    // Constructor
+
+   static const char className[];
+
+   static Lunar<Asteroid>::RegType methods[];
+
+   S32 getClassID(lua_State *L) { return returnInt(L, AsteroidTypeNumber); }
+
+   S32 getSize(lua_State *L);        // Index of current asteroid size (0 = initial size, 1 = next smaller, 2 = ...) (returns int)
+   S32 getSizeCount(lua_State *L);   // Number of indexes of size we can have (returns int)
+   void push(lua_State *L) {  Lunar<Asteroid>::push(L, this); }
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+class Circle : public MoveItem
+{
+
+typedef MoveItem Parent;
+
+private:
+   bool hasExploded;
+
+public:
+   Circle();     // Constructor  
+   Circle *clone() const;
+
+   static const S32 CIRCLE_RADIUS = 10;
+
+   void renderItem(const Point &pos);
+   bool getCollisionPoly(Vector<Point> &polyPoints) const;
+   bool collide(GameObject *otherObject);
+   void setPosAng(Point pos, F32 ang);
+
+   void idle(GameObject::IdleCallPath path);
+
+   void damageObject(DamageInfo *theInfo);
+   U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
+   void unpackUpdate(GhostConnection *connection, BitStream *stream);
+   void onItemExploded(Point pos);
+
+   void playCollisionSound(U32 stateIndex, MoveObject *moveObjectThatWasHit, F32 velocity) { /* Do nothing */ }
+
+   static U32 getDesignCount() { return AsteroidDesigns; }
+
+   TNL_DECLARE_CLASS(Circle);
+
+   ///// Editor methods
+   const char *getEditorHelpString() { return "Shootable circle object.  Scary."; }
+   const char *getPrettyNamePlural() { return "Circles"; }
+   const char *getOnDockName() { return "Circ."; }
+   const char *getOnScreenName() { return "Circle"; }
+
+   F32 getEditorRadius(F32 currentScale);
+   void renderDock();
+
+   ///// Lua interface
+
+   public:
+   Circle(lua_State *L);    // Lua constructor
+
+   static const char className[];
+
+   static Lunar<Circle>::RegType methods[];
+
+   S32 getClassID(lua_State *L) { return returnInt(L, CircleTypeNumber); }
+
+   void push(lua_State *L) {  Lunar<Circle>::push(L, this); }
 };
 
 

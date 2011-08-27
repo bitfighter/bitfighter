@@ -25,7 +25,7 @@
 
 #include "barrier.h"
 #include "config.h"
-#include "engineeredObjects.h"    // For EngineerModuleDeployer
+#include "EngineeredItem.h"    // For EngineerModuleDeployer
 #include "ClientGame.h"
 #include "gameLoader.h"
 #include "gameNetInterface.h"

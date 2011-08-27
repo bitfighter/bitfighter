@@ -24,7 +24,7 @@
 //------------------------------------------------------------------------------------
 
 #include "EditorObject.h"
-#include "engineeredObjects.h"   // For Turret properties
+#include "EngineeredItem.h"   // For Turret properties
 #include "soccerGame.h"          // For soccer ball radius
 
 #include "textItem.h"            // For copy constructor

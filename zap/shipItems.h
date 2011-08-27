@@ -50,7 +50,7 @@ enum EngineerBuildObjects
 {
    EngineeredTurret,
    EngineeredForceField,
-   EngineeredObjectCount
+   EngineeredItemCount
 };
 
 

@@ -224,7 +224,7 @@ public:
    TNL_DECLARE_RPC(c2sSuspendGame, (bool suspend));
    TNL_DECLARE_RPC(s2cUnsuspend, ());
 
-   TNL_DECLARE_RPC(c2sEngineerDeployObject, (RangedU32<0,EngineeredObjectCount> type));      // Player using engineer module
+   TNL_DECLARE_RPC(c2sEngineerDeployObject, (RangedU32<0,EngineeredItemCount> type));      // Player using engineer module
    bool sEngineerDeployObject(U32 type);      // Player using engineer module, robots use this, bypassing the net interface. True if successful.
 
    // Chage passwords on the server

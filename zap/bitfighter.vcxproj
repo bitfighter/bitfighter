@@ -142,7 +142,7 @@
     <ClCompile Include="..\zap\config.cpp" />
     <ClCompile Include="..\zap\controlObjectConnection.cpp" />
     <ClCompile Include="..\zap\CTFGame.cpp" />
-    <ClCompile Include="..\zap\engineeredObjects.cpp" />
+    <ClCompile Include="EngineeredItem.cpp" />
     <ClCompile Include="..\zap\flagItem.cpp" />
     <ClCompile Include="..\zap\game.cpp" />
     <ClCompile Include="..\zap\ClientGame.cpp" />
@@ -189,6 +189,7 @@
     <ClCompile Include="..\zap\Rect.cpp" />
     <ClCompile Include="..\zap\Color.cpp" />
     <ClCompile Include="OpenglUtils.cpp" />
+    <ClCompile Include="PickupItem.cpp" />
     <ClCompile Include="quickChatHelper.cpp" />
     <ClCompile Include="..\zap\rabbitGame.cpp" />
     <ClCompile Include="..\zap\retrieveGame.cpp" />
@@ -252,7 +253,7 @@
     <ClInclude Include="..\zap\CTFGame.h" />
     <ClInclude Include="..\zap\Directory.h" />
     <ClInclude Include="..\zap\dirent.h" />
-    <ClInclude Include="..\zap\engineeredObjects.h" />
+    <ClInclude Include="EngineeredItem.h" />
     <ClInclude Include="..\zap\flagItem.h" />
     <ClInclude Include="..\zap\ftol.h" />
     <ClInclude Include="..\zap\game.h" />
@@ -303,6 +304,7 @@
     <ClInclude Include="..\zap\polygon.h" />
     <ClInclude Include="..\zap\projectile.h" />
     <ClInclude Include="OpenglUtils.h" />
+    <ClInclude Include="PickupItem.h" />
     <ClInclude Include="pointainer.h" />
     <ClInclude Include="quickChatHelper.h" />
     <ClInclude Include="..\zap\rabbitGame.h" />

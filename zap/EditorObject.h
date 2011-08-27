@@ -118,7 +118,7 @@ public:
 
    void unselect();
 
-   void setSnapped(bool snapped) { /* Do nothing */ }          // Overridden in EngineeredObject
+   void setSnapped(bool snapped) { /* Do nothing */ }          // Overridden in EngineeredItem
 
    virtual void newObjectFromDock(F32 gridSize);   // Called when item dragged from dock to editor -- overridden by several objects
 

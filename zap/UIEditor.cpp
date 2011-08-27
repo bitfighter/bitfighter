@@ -39,7 +39,7 @@
 #include "ClientGame.h"                // Can delete?
 #include "gameType.h"
 #include "soccerGame.h"          // For Soccer ball radius
-#include "engineeredObjects.h"   // For Turret properties
+#include "EngineeredItem.h"      // For Turret properties
 #include "barrier.h"             // For DEFAULT_BARRIER_WIDTH
 #include "gameItems.h"           // For Asteroid defs
 #include "teleporter.h"          // For Teleporter def
@@ -47,6 +47,7 @@
 #include "loadoutZone.h"         // For LoadoutZone def
 #include "huntersGame.h"         // For HuntersNexusObject def
 #include "config.h"
+#include "goalZone.h"
 
 #include "gameLoader.h"          // For LevelLoadException def
 
@@ -459,7 +460,7 @@ void EditorUserInterface::resnapAllEngineeredItems()
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
-      EngineeredObject *engrObj = dynamic_cast<EngineeredObject *>(fillVector[i]);
+      EngineeredItem *engrObj = dynamic_cast<EngineeredItem *>(fillVector[i]);
       engrObj->mountToWall(engrObj->getVert(0), wallSegmentManager->getWallEdgeDatabase(), wallSegmentManager->getWallSegmentDatabase());
    }
 }
@@ -1099,7 +1100,7 @@ Point EditorUserInterface::snapPoint(Point const &p, bool snapWhileOnDock)
       // Turrets & forcefields: Snap to a wall edge as first (and only) choice
       if(isEngineeredType(mSnapObject->getObjectTypeNumber()))
       {
-         EngineeredObject *engrObj = dynamic_cast<EngineeredObject *>(mSnapObject);
+         EngineeredItem *engrObj = dynamic_cast<EngineeredItem *>(mSnapObject);
          return engrObj->mountToWall(snapPointToLevelGrid(p), wallSegmentManager->getWallEdgeDatabase(), 
                                                               wallSegmentManager->getWallSegmentDatabase());
       }
