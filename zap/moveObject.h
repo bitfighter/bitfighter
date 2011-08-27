@@ -335,6 +335,122 @@ public:
 };
 
 
+////////////////////////////////////////
+////////////////////////////////////////
+
+class Worm : public MoveItem      // But not an editor object!!  -- should be a Projectile?
+{
+typedef MoveItem Parent;
+
+public:
+   static const S32 WORM_RADIUS = 5;
+
+private:
+   bool hasExploded;
+   F32 mNextAng;
+   Timer mDirTimer;
+
+public:
+   Worm();     // Constructor  
+
+   void renderItem(const Point &pos);
+   bool getCollisionPoly(Vector<Point> &polyPoints) const;
+   bool getCollisionCircle(U32 state, Point &center, F32 &radius) const;
+   bool collide(GameObject *otherObject);
+   void setPosAng(Point pos, F32 ang);
+   void setNextAng(F32 nextAng) { mNextAng = nextAng; }
+
+   void damageObject(DamageInfo *theInfo);
+   void idle(GameObject::IdleCallPath path);
+   U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
+   void unpackUpdate(GhostConnection *connection, BitStream *stream);
+
+   TNL_DECLARE_CLASS(Worm);
+
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+class TestItem : public MoveItem
+{
+   typedef MoveItem Parent;
+
+public:
+   TestItem();     // Constructor
+   TestItem *clone() const;
+
+   static const S32 TEST_ITEM_RADIUS = 60;
+
+   void renderItem(const Point &pos);
+   void damageObject(DamageInfo *theInfo);
+   bool getCollisionPoly(Vector<Point> &polyPoints) const;
+
+   TNL_DECLARE_CLASS(TestItem);
+
+   ///// Editor methods
+   const char *getEditorHelpString() { return "Bouncy object that floats around and gets in the way."; }
+   const char *getPrettyNamePlural() { return "TestItems"; }
+   const char *getOnDockName() { return "Test"; }
+   const char *getOnScreenName() { return "TestItem"; }
+
+   F32 getEditorRadius(F32 currentScale);
+   void renderDock();
+
+   ///// Lua Interface
+
+   TestItem(lua_State *L);             //  Lua constructor
+
+   static const char className[];
+
+   static Lunar<TestItem>::RegType methods[];
+
+   S32 getClassID(lua_State *L) { return returnInt(L, TestItemTypeNumber); }
+   void push(lua_State *L) {  Lunar<TestItem>::push(L, this); }
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+class ResourceItem : public MoveItem
+{
+   typedef MoveItem Parent;         // TODO: Should be EditorItem???
+
+public:
+   ResourceItem();      // Constructor
+   ResourceItem *clone() const;
+
+   static const S32 RESOURCE_ITEM_RADIUS = 20;
+
+   void renderItem(const Point &pos);
+   bool collide(GameObject *hitObject);
+   void damageObject(DamageInfo *theInfo);
+   void onItemDropped();
+
+   TNL_DECLARE_CLASS(ResourceItem);
+
+   ///// Editor methods
+   const char *getEditorHelpString() { return "Small bouncy object; capture one to activate Engineer module"; }
+   const char *getPrettyNamePlural() { return "ResourceItems"; }
+   const char *getOnDockName() { return "Res."; }
+   const char *getOnScreenName() { return "ResourceItem"; }
+
+   void renderDock();
+
+   ///// Lua Interface
+
+   ResourceItem(lua_State *L);             //  Lua constructor
+
+   static const char className[];
+
+   static Lunar<ResourceItem>::RegType methods[];
+
+   S32 getClassID(lua_State *L) { return returnInt(L, ResourceItemTypeNumber); }
+   void push(lua_State *L) {  Lunar<ResourceItem>::push(L, this); }
+
+};
 
 
 

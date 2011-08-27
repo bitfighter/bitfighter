@@ -31,8 +31,10 @@
 #include "Spawn.h"
 #include "game.h"
 
-#include "stringUtils.h"         // for itos()
-#include "gameObjectRender.h"    // For renderSquareItem, renderFlag, drawCircle
+#include "stringUtils.h"         // For itos()
+#include "gameObjectRender.h"    // For renderSquareItem(), renderFlag(), drawCircle()
+#include "moveObject.h"          // For Circle, Asteroid class defs
+
 
 namespace Zap
 {
@@ -159,6 +161,145 @@ ItemSpawn::ItemSpawn(const Point &pos, S32 time) : Parent(pos, time)
 }
 
 
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Constructor
+AsteroidSpawn::AsteroidSpawn(const Point &pos, S32 time) : Parent(pos, time)
+{
+   mObjectTypeNumber = AsteroidSpawnTypeNumber;
+}
+
+
+AsteroidSpawn::~AsteroidSpawn()
+{
+   // Do nothing
+}
+
+
+AsteroidSpawn *AsteroidSpawn::clone() const
+{
+   return new AsteroidSpawn(*this);
+}
+
+
+void AsteroidSpawn::spawn(Game *game, const Point &pos)
+{
+   Asteroid *asteroid = dynamic_cast<Asteroid *>(TNL::Object::create("Asteroid"));   // Create a new asteroid
+
+   F32 ang = TNL::Random::readF() * Float2Pi;
+
+   asteroid->setPosAng(pos, ang);
+
+   asteroid->addToGame(game, game->getGameObjDatabase());              // And add it to the list of game objects
+}
+
+
+static void renderAsteroidSpawn(const Point &pos)
+{
+#ifndef ZAP_DEDICATED
+   F32 scale = 0.8f;
+   static const Point p(0,0);
+
+   glPushMatrix();
+      glTranslatef(pos.x, pos.y, 0);
+      glScalef(scale, scale, 1);
+      renderAsteroid(p, 2, .1f);
+
+      glColor(Colors::white);
+      drawCircle(p, 13);
+   glPopMatrix();  
+#endif
+}
+
+
+void AsteroidSpawn::renderEditor(F32 currentScale)
+{
+#ifndef ZAP_DEDICATED
+   Point pos = getVert(0);
+
+   glPushMatrix();
+      glTranslate(pos);
+      glScale(1/currentScale);    // Make item draw at constant size, regardless of zoom
+      renderAsteroidSpawn(Point(0,0));
+   glPopMatrix();   
+#endif
+}
+
+
+void AsteroidSpawn::renderDock()
+{
+   renderAsteroidSpawn(getVert(0));
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Constructor
+CircleSpawn::CircleSpawn(const Point &pos, S32 time) : Parent(pos, time)
+{
+   mObjectTypeNumber = CircleSpawnTypeNumber;
+}
+
+
+CircleSpawn *CircleSpawn::clone() const
+{
+   return new CircleSpawn(*this);
+}
+
+
+void CircleSpawn::spawn(Game *game, const Point &pos)
+{
+   for(S32 i = 0; i < 10; i++)
+   {
+      Circle *circle = dynamic_cast<Circle *>(TNL::Object::create("Circle"));   // Create a new Circle
+      F32 ang = TNL::Random::readF() * Float2Pi;
+
+      circle->setPosAng(pos, ang);
+
+      circle->addToGame(game, game->getGameObjDatabase());              // And add it to the list of game objects
+   }
+}
+
+
+static void renderCircleSpawn(const Point &pos)
+{
+#ifndef ZAP_DEDICATED
+   F32 scale = 0.8f;
+   static const Point p(0,0);
+
+   glPushMatrix();
+      glTranslatef(pos.x, pos.y, 0);
+      glScalef(scale, scale, 1);
+      drawCircle(p, 8);
+
+      glColor(Colors::white);
+      drawCircle(p, 13);
+   glPopMatrix();  
+#endif
+}
+
+
+void CircleSpawn::renderEditor(F32 currentScale)
+{
+#ifndef ZAP_DEDICATED
+   Point pos = getVert(0);
+
+   glPushMatrix();
+      glTranslate(pos);
+      glScale(1/currentScale);    // Make item draw at constant size, regardless of zoom
+      renderCircleSpawn(Point(0,0));
+   glPopMatrix();   
+#endif
+}
+
+
+void CircleSpawn::renderDock()
+{
+   renderCircleSpawn(getVert(0));
+}
+
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -221,7 +362,6 @@ string FlagSpawn::toString(F32 gridSize) const
    size_t firstarg = str1.find(' ');
    return str1.substr(0, firstarg) + " " + itos(mTeam) + str1.substr(firstarg);
 }
-
 
 
 };    // namespace

@@ -132,6 +132,182 @@ F32 Item::getEditorRadius(F32 currentScale)
 }
 
 
+////////////////////////////////////////
+////////////////////////////////////////
+
+TNL_IMPLEMENT_NETOBJECT(Reactor);
+class LuaReactor;
+
+static const F32 REACTOR_MASS = F32_MAX;
+
+// Constructor
+Reactor::Reactor() : Parent(Point(0,0), (F32)REACTOR_RADIUS, REACTOR_MASS)
+{
+   mNetFlags.set(Ghostable);
+   mObjectTypeNumber = ReactorTypeNumber;
+   mHitPoints = 10;     // Hits to kill
+   hasExploded = false;
+
+   F32 vel = 0;
+
+   mKillString = "crashed into an reactor";     // TODO: Really needed?
+}
+
+
+Reactor *Reactor::clone() const
+{
+   return new Reactor(*this);
+}
+
+
+void Reactor::renderItem(const Point &pos)
+{
+   if(!hasExploded)
+      renderReactor(pos, getReactorRadius());
+}
+
+
+void Reactor::renderDock()
+{
+   renderReactor(getVert(0), 5);
+}
+
+
+F32 Reactor::getEditorRadius(F32 currentScale)
+{
+   return 75 * currentScale;
+}
+
+
+bool Reactor::getCollisionCircle(U32 state, Point &center, F32 &radius) const
+{
+   return false;
+}
+
+
+bool Reactor::getCollisionPoly(Vector<Point> &polyPoints) const
+{
+   return false;
+}
+
+
+bool Reactor::getCollisionRect(U32 state, Rect &rect) const
+{
+   rect = Rect(getActualPos(), F32(getReactorRadius()));
+   return true;
+}
+
+
+void Reactor::damageObject(DamageInfo *theInfo)
+{
+   if(hasExploded)  
+      return; 
+   
+   mHitPoints--;
+   if(mHitPoints == 0)    // Kill small items
+   {
+      hasExploded = true;
+      deleteObject(500);
+      setMaskBits(ExplodedMask);    // Fix asteroids delay destroy after hit again...
+      return;
+   }
+
+   setMaskBits(ItemChangedMask);    // So our clients will get new size
+   setRadius(getReactorRadius());
+}
+
+
+void Reactor::setRadius(F32 radius) 
+{ 
+   Parent::setRadius(radius * getGame()->getGridSize()); 
+}
+
+
+U32 Reactor::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
+{
+   U32 retMask = Parent::packUpdate(connection, updateMask, stream);
+
+   if(stream->writeFlag(updateMask & ItemChangedMask))
+      stream->writeInt(mHitPoints, 8);
+
+   stream->writeFlag(hasExploded);
+
+   return retMask;
+}
+
+
+void Reactor::unpackUpdate(GhostConnection *connection, BitStream *stream)
+{
+   //Parent::unpackUpdate(connection, stream);
+
+   if(stream->readFlag())
+   {
+      mHitPoints = stream->readInt(8);
+      setRadius(getReactorRadius());
+
+      //if(!mInitial)
+      //   SoundSystem::playSoundEffect(SFXAsteroidExplode, mMoveState[RenderState].pos, Point());
+   }
+
+   bool explode = (stream->readFlag());     // Exploding!  Take cover!!
+
+   if(explode && !hasExploded)
+   {
+      hasExploded = true;
+      disableCollision();
+      onItemExploded(getActualPos());
+   }
+}
+
+
+F32 Reactor::getReactorRadius() const
+{
+   return 5 + 2 * mHitPoints;
+}
+
+
+bool Reactor::collide(GameObject *otherObject)
+{
+   return true;
+}
+
+
+// Client only
+void Reactor::onItemExploded(Point pos)
+{
+   SoundSystem::playSoundEffect(SFXAsteroidExplode, pos, Point());
+   // FXManager::emitBurst(pos, Point(.1, .1), Colors::white, Colors::white, 10);
+}
+
+
+const char Reactor::className[] = "Reactor";      // Class name as it appears to Lua scripts
+
+// Lua constructor
+Reactor::Reactor(lua_State *L)
+{
+   // Do we want to construct these from Lua?  If so, do that here!
+}
+
+
+// Define the methods we will expose to Lua
+Lunar<Reactor>::RegType Reactor::methods[] =
+{
+   // Standard gameItem methods
+   method(Reactor, getClassID),
+   method(Reactor, getLoc),
+   method(Reactor, getRad),
+   method(Reactor, getVel),
+   method(Reactor, getTeamIndx),
+
+   // Class specific methods
+   method(Reactor, getHitPoints),
+
+   {0,0}    // End method list
+};
+
+
+S32 Reactor::getHitPoints(lua_State *L) { return returnInt(L, mHitPoints); }      
+
 
 
 };

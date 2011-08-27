@@ -155,4 +155,171 @@ bool PickupItem::collide(GameObject *otherObject)
    return false;
 }
 
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+TNL_IMPLEMENT_NETOBJECT(RepairItem);
+
+// Constructor
+RepairItem::RepairItem(Point pos) : PickupItem(pos, (F32)REPAIR_ITEM_RADIUS, DEFAULT_RESPAWN_TIME * 1000) 
+{ 
+   mObjectTypeNumber = RepairItemTypeNumber;
+}
+
+
+RepairItem *RepairItem::clone() const
+{
+   return new RepairItem(*this);
+}
+
+
+// Runs on server, returns true if we're doing the pickup, false otherwise
+bool RepairItem::pickup(Ship *theShip)
+{
+   if(theShip->getHealth() >= 1)
+      return false;
+
+   DamageInfo di;
+   di.damageAmount = -0.5f;      // Negative damage = repair!
+   di.damageType = DamageTypePoint;
+   di.damagingObject = this;
+
+   theShip->damageObject(&di);
+   return true;
+}
+
+
+// Runs on client when item's unpack method signifies the item has been picked up
+void RepairItem::onClientPickup()
+{
+   SoundSystem::playSoundEffect(SFXShipHeal, getRenderPos(), getRenderVel());
+}
+
+
+void RepairItem::renderItem(const Point &pos)
+{
+   if(!isVisible())
+      return;
+
+   renderRepairItem(pos);
+}
+
+
+void RepairItem::renderDock()
+{
+   renderRepairItem(getVert(0), true, 0, 1);
+}
+
+
+F32 RepairItem::getEditorRadius(F32 currentScale)
+{
+   return 22 * currentScale;
+}
+
+
+const char RepairItem::className[] = "RepairItem";      // Class name as it appears to Lua scripts
+
+// Lua constructor
+RepairItem::RepairItem(lua_State *L)
+{
+   mObjectTypeNumber = RepairItemTypeNumber;
+}
+
+
+// Define the methods we will expose to Lua
+Lunar<RepairItem>::RegType RepairItem::methods[] =
+{
+   // Standard gameItem methods
+   method(RepairItem, getClassID),
+   method(RepairItem, getLoc),
+   method(RepairItem, getRad),
+   method(RepairItem, getVel),
+   method(RepairItem, getTeamIndx),
+
+   // Class specific methods
+   method(RepairItem, isVis),
+   {0,0}    // End method list
+};
+
+S32 RepairItem::isVis(lua_State *L) { return returnBool(L, isVisible()); }        // Is RepairItem visible? (returns boolean)
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+TNL_IMPLEMENT_NETOBJECT(EnergyItem);
+
+// Constructor
+EnergyItem::EnergyItem(Point p) : PickupItem(p, 20, DEFAULT_RESPAWN_TIME * 1000) 
+{ 
+   mObjectTypeNumber = EnergyItemTypeNumber;
+};   
+
+
+EnergyItem *EnergyItem::clone() const
+{
+   return new EnergyItem(*this);
+}
+
+
+// Runs on server, returns true if we're doing the pickup, false otherwise
+bool EnergyItem::pickup(Ship *theShip)
+{
+   S32 energy = theShip->getEnergy();
+   S32 maxEnergy = theShip->getMaxEnergy();
+
+   if(energy >= maxEnergy)      // Don't need no stinkin' energy!!
+      return false;
+
+   theShip->changeEnergy(maxEnergy / 2);     // Bump up energy by 50%, changeEnergy() sets energy delta
+
+   return true;
+}
+
+
+// Runs on client when item's unpack method signifies the item has been picked up
+void EnergyItem::onClientPickup()
+{
+   SoundSystem::playSoundEffect(SFXShipHeal, getRenderPos(), getRenderVel());
+}
+
+
+void EnergyItem::renderItem(const Point &pos)
+{
+   if(!isVisible())
+      return;
+
+   renderEnergyItem(pos);
+}
+
+
+const char EnergyItem::className[] = "EnergyItem";      // Class name as it appears to Lua scripts
+
+// Lua constructor
+EnergyItem::EnergyItem(lua_State *L)
+{
+   mObjectTypeNumber = EnergyItemTypeNumber;
+}
+
+
+// Define the methods we will expose to Lua
+Lunar<EnergyItem>::RegType EnergyItem::methods[] =
+{
+   // Standard gameItem methods
+   method(EnergyItem, getClassID),
+   method(EnergyItem, getLoc),
+   method(EnergyItem, getRad),
+   method(EnergyItem, getVel),
+   method(EnergyItem, getTeamIndx),
+
+   // Class specific methods
+   method(EnergyItem, isVis),
+   {0,0}    // End method list
+};
+
+S32 EnergyItem::isVis(lua_State *L) { return returnBool(L, isVisible()); }        // Is EnergyItem visible? (returns boolean)
+
+
+
 };
