@@ -32,6 +32,7 @@
 #include "gameItems.h"     // For AsteroidSpawn and FlagSpawn
 #include "gameStats.h"     // For VersionedGameStats
 #include "statistics.h"
+#include "Spawn.h"
 
 #include <string>
 #include <boost/shared_ptr.hpp>

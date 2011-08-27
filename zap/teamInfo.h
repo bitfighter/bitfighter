@@ -26,10 +26,11 @@
 #ifndef _TEAM_INFO_H_
 #define _TEAM_INFO_H_
 
-#include "luaGameInfo.h"
-#include "gameItems.h"        // For FlagSpawn def
+#include "luaGameInfo.h"      // For LuaObject def
+#include "Spawn.h"            // For FlagSpawn def
 #include "lineEditor.h"
 #include "tnl.h"
+
 
 namespace Zap
 {

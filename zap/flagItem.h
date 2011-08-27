@@ -34,9 +34,11 @@ namespace Zap
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+
+class FlagSpawn;
+
 class FlagItem : public MoveItem
 {
-protected:
    typedef MoveItem Parent;          // <=== needs to be protected as this is accessed by child in form of Parent::Parent
 
 private:
