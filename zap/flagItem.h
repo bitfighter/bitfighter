@@ -39,16 +39,13 @@ class FlagSpawn;
 
 class FlagItem : public MoveItem
 {
-   typedef MoveItem Parent;          // <=== needs to be protected as this is accessed by child in form of Parent::Parent
+   typedef MoveItem Parent;  
 
 private:
    Point mInitialPos;                 // Where flag was "born"
    bool mIsAtHome;
 
    const Vector<FlagSpawn> *getSpawnPoints();
-
-protected:
-   U32 mFlagCount;                    // How many flags does this represet?
 
 public:
    FlagItem(Point pos = Point());                                    // C++ constructor

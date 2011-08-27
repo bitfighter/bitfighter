@@ -72,7 +72,6 @@ FlagItem *FlagItem::clone() const
 void FlagItem::initialize()
 {
    mTeam = -1;
-   mFlagCount = 1;
    mIsAtHome = true;    // All flags start off at home!
 
    mNetFlags.set(Ghostable);

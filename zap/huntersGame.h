@@ -128,8 +128,10 @@ public:
 
 class HuntersFlagItem : public FlagItem
 {
-private:
    typedef FlagItem Parent;
+
+private:
+   U32 mFlagCount;                    // How many flags does this represet?  When flag is mounted, could represent several
 
    void dropFlags(U32 flags);
 
