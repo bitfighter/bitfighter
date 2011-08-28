@@ -35,13 +35,14 @@
 #include "UIGameParameters.h"
 #include "UIErrorMessage.h"
 #include "UIYesNo.h"
+
 #include "gameObjectRender.h"
 #include "ClientGame.h"                // Can delete?
 #include "gameType.h"
 #include "soccerGame.h"          // For Soccer ball radius
 #include "EngineeredItem.h"      // For Turret properties
+#include "PickupItem.h"
 #include "barrier.h"             // For DEFAULT_BARRIER_WIDTH
-#include "gameItems.h"           // For Asteroid defs
 #include "teleporter.h"          // For Teleporter def
 #include "speedZone.h"           // For Speedzone def
 #include "loadoutZone.h"         // For LoadoutZone def

@@ -24,8 +24,8 @@
 //------------------------------------------------------------------------------------
 
 #include "moveObject.h"
+
 #include "gameType.h"
-//#include "gameItems.h"
 #include "goalZone.h"
 #include "GeomUtils.h"
 #include "ship.h"
@@ -706,33 +706,6 @@ Ship *MoveItem::getMount()
 }
 
 
-void MoveItem::setZone(GoalZone *theZone)
-{
-   // If the item on which we're setting the zone is a flag (which, at this point, it always will be),
-   // we want to make sure to update the zone itself.  This is mostly a convenience for robots searching
-   // for objects that meet certain criteria, such as for zones that contain a flag.
-   FlagItem *flag = dynamic_cast<FlagItem *>(this);
-
-   if(flag)
-   {
-      GoalZone *z = ((theZone == NULL) ? flag->getZone() : theZone);
-
-      if(z)
-         z->mHasFlag = ((theZone == NULL) ? false : true );
-   }
-
-   // Now we can get around to setting the zone, like we came here to do
-   mZone = theZone;
-   setMaskBits(ZoneMask);
-}
-
-
-GoalZone *MoveItem::getZone()
-{
-	return mZone;
-}
-
-
 void MoveItem::idle(GameObject::IdleCallPath path)
 {
    if(!isInDatabase())
@@ -817,19 +790,6 @@ U32 MoveItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
       else
          retMask |= MountMask;
    }
-   if(stream->writeFlag(updateMask & ZoneMask))
-   {
-      if(mZone.isValid())
-      {
-         S32 index = connection->getGhostIndex(mZone);
-         if(stream->writeFlag(index != -1))
-            stream->writeInt(index, GhostConnection::GhostIdBitSize);
-         else
-            retMask |= ZoneMask;
-      }
-      else
-         stream->writeFlag(false);
-   }
    return retMask;
 }
 
@@ -870,15 +830,6 @@ void MoveItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
          dismount();
    }
 
-   if(stream->readFlag())     // ZoneMask
-   {
-      bool hasZone = stream->readFlag();
-      if(hasZone)
-         mZone = (GoalZone *) connection->resolveGhost(stream->readInt(GhostConnection::GhostIdBitSize));
-      else
-         mZone = NULL;
-   }
-
    if(positionChanged)
    {
       if(interpolate)
@@ -898,18 +849,6 @@ void MoveItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 bool MoveItem::collide(GameObject *otherObject)
 {
    return mIsCollideable && !mIsMounted;
-}
-
-
-S32 MoveItem::getCaptureZone(lua_State *L) 
-{ 
-   if(mZone.isValid()) 
-   {
-      mZone->push(L); 
-      return 1;
-   } 
-   else 
-      return returnNil(L); 
 }
 
 
@@ -1650,7 +1589,6 @@ Lunar<ResourceItem>::RegType ResourceItem::methods[] =
 
    // item methods
    method(ResourceItem, isInCaptureZone),
-   method(ResourceItem, getCaptureZone),
    method(ResourceItem, isOnShip),
    method(ResourceItem, getShip),
 

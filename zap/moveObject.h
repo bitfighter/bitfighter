@@ -26,10 +26,6 @@
 #ifndef _MOVEOBJECT_H_
 #define _MOVEOBJECT_H_
 
-//#include "item.h"
-//#include "gameObject.h" 
-//#include "luaObject.h"     // For LuaItem class
-//#include "EditorObject.h"  // For EditorItem class
 #include "Item.h"          // Parent class
 
 
@@ -109,8 +105,6 @@ public:
 };
 
 
-class GoalZone;
-
 class MoveItem : public MoveObject
 {
    typedef MoveObject Parent;
@@ -124,13 +118,11 @@ protected:
       PositionMask     = Parent::FirstFreeMask << 0,     // <-- Indicates position has changed and needs to be updated
       WarpPositionMask = Parent::FirstFreeMask << 1,
       MountMask        = Parent::FirstFreeMask << 2,
-      ZoneMask         = Parent::FirstFreeMask << 3,
-      ItemChangedMask  = Parent::FirstFreeMask << 4,
-      FirstFreeMask    = Parent::FirstFreeMask << 5
+      ItemChangedMask  = Parent::FirstFreeMask << 3,
+      FirstFreeMask    = Parent::FirstFreeMask << 4
    };
 
    SafePtr<Ship> mMount;
-   SafePtr<GoalZone> mZone;
 
    bool mIsMounted;
    bool mIsCollideable;
@@ -164,9 +156,6 @@ public:
    bool isMounted() { return mIsMounted; }
    virtual bool isItemThatMakesYouVisibleWhileCloaked() { return true; }      // HuntersFlagItem overrides to false
 
-   void setZone(GoalZone *theZone);
-   GoalZone *getZone();
-   bool isInZone() { return mZone.isValid(); }
    void setCollideable(bool isCollideable) { mIsCollideable = isCollideable; }
 
    Ship *getMount();
@@ -183,13 +172,9 @@ public:
    GameObject *getGameObject() { return this; }
 
    // LuaItem interface
-   virtual S32 isInCaptureZone(lua_State *L) { return returnBool(L, mZone.isValid()); }    // Is flag in a team's capture zone?
    virtual S32 isOnShip(lua_State *L) { return returnBool(L, mIsMounted); }                // Is flag being carried by a ship?
-   virtual S32 getCaptureZone(lua_State *L);
    virtual S32 getShip(lua_State *L);
-
 };
-
 
 
 ////////////////////////////////////////
@@ -416,7 +401,7 @@ public:
 
 class ResourceItem : public MoveItem
 {
-   typedef MoveItem Parent;         // TODO: Should be EditorItem???
+   typedef MoveItem Parent; 
 
 public:
    ResourceItem();      // Constructor
@@ -449,7 +434,6 @@ public:
 
    S32 getClassID(lua_State *L) { return returnInt(L, ResourceItemTypeNumber); }
    void push(lua_State *L) {  Lunar<ResourceItem>::push(L, this); }
-
 };
 
 

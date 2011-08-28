@@ -24,11 +24,13 @@
 //------------------------------------------------------------------------------------
 
 #include "flagItem.h"
-#include "gameItems.h"     // For FlagSpawn def
+//#include "Spawn.h"      // For FlagSpawn def
+#include "goalZone.h"
 #include "gameType.h"
 #include "game.h"
 #include "stringUtils.h"
 #include "gameConnection.h"
+#include "gameObjectRender.h"
 
 #ifndef ZAP_DEDICATED
 #include "SDL/SDL_opengl.h"
@@ -112,6 +114,45 @@ void FlagItem::onAddedToGame(Game *theGame)
 }
 
 
+void FlagItem::setZone(GoalZone *goalZone)
+{
+   // If the item on which we're setting the zone is a flag (which, at this point, it always will be),
+   // we want to make sure to update the zone itself.  This is mostly a convenience for robots searching
+   // for objects that meet certain criteria, such as for zones that contain a flag.
+   FlagItem *flag = dynamic_cast<FlagItem *>(this);
+
+   if(flag)
+   {
+      GoalZone *z = ((goalZone == NULL) ? flag->getZone() : goalZone);
+
+      if(z)
+         z->mHasFlag = ((goalZone == NULL) ? false : true );
+   }
+
+   // Now we can get around to setting the zone, which is what we came here to do
+   mZone = goalZone;
+   setMaskBits(ZoneMask);
+}
+
+
+GoalZone *FlagItem::getZone()
+{
+	return mZone;
+}
+
+
+S32 FlagItem::getCaptureZone(lua_State *L) 
+{ 
+   if(mZone.isValid()) 
+   {
+      mZone->push(L); 
+      return 1;
+   } 
+   else 
+      return returnNil(L); 
+}
+
+
 static bool isTeamFlagSpawn(Game *game, S32 team)
 {
    return game->getGameType()->isTeamFlagGame() && team >= 0 && team < game->getTeamCount();
@@ -161,16 +202,42 @@ string FlagItem::toString(F32 gridSize) const
 
 U32 FlagItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
-   U32 returnSomething = Parent::packUpdate(connection, updateMask, stream);
+   U32 retMask = Parent::packUpdate(connection, updateMask, stream);
+
+   if(stream->writeFlag(updateMask & ZoneMask))
+   {
+      if(mZone.isValid())
+      {
+         S32 index = connection->getGhostIndex(mZone);
+         if(stream->writeFlag(index != -1))
+            stream->writeInt(index, GhostConnection::GhostIdBitSize);
+         else
+            retMask |= ZoneMask;
+      }
+      else
+         stream->writeFlag(false);
+   }
+
    if(updateMask & InitialMask)
       writeThisTeam(stream);
-   return returnSomething;
+
+   return retMask;
 }
 
 
 void FlagItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    Parent::unpackUpdate(connection, stream);
+
+   if(stream->readFlag())     // ZoneMask
+   {
+      bool hasZone = stream->readFlag();
+      if(hasZone)
+         mZone = (GoalZone *) connection->resolveGhost(stream->readInt(GhostConnection::GhostIdBitSize));
+      else
+         mZone = NULL;
+   }
+
    if(mInitial)
       readThisTeam(stream);
 }

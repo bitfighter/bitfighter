@@ -32,7 +32,6 @@
 #include "gameConnection.h"
 #include "shipItems.h"
 #include "playerInfo.h"          // For RobotPlayerInfo constructor
-#include "gameItems.h"
 #include "gameWeapons.h"
 #include "gameObjectRender.h"
 #include "flagItem.h"
@@ -40,8 +39,10 @@
 #include "loadoutZone.h"
 #include "soccerGame.h"          // For lua object defs
 #include "huntersGame.h"         // For lua object defs
-#include "EngineeredItem.h"   // For lua object defs
-#include "teleporter.h"          // ""
+#include "EngineeredItem.h"      // For lua object defs
+#include "PickupItem.h"          // For lua object defs
+#include "teleporter.h"          // For lua object defs
+
 #include "../lua/luaprofiler-2.0.2/src/luaprofiler.h"      // For... the profiler!
 #include "config.h"
 #include "BotNavMeshZone.h"      // For BotNavMeshZone class definition

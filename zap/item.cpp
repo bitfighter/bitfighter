@@ -30,6 +30,8 @@
 #include "flagItem.h"
 #include "game.h"
 #include "gameConnection.h"
+
+#include "gameObjectRender.h"
 #include "stringUtils.h"
 
 #ifndef ZAP_DEDICATED
