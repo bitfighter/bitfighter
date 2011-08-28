@@ -77,9 +77,9 @@ using namespace boost;
 namespace Zap
 {
 
-const S32 DOCK_WIDTH = 50;
-const F32 MIN_SCALE = .05f;        // Most zoomed-in scale
-const F32 MAX_SCALE = 2.5;        // Most zoomed-out scale
+const S32 DOCK_WIDTH = 50;          // Width of dock, in pixels
+const F32 MIN_SCALE = .05f;         // Most zoomed-in scale
+const F32 MAX_SCALE = 2.5;          // Most zoomed-out scale
 const F32 STARTING_SCALE = 0.5;
 
 //static Vector<boost::shared_ptr<EditorObject> > *mLoadTarget;
