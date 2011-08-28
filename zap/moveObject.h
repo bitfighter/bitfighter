@@ -26,7 +26,7 @@
 #ifndef _MOVEOBJECT_H_
 #define _MOVEOBJECT_H_
 
-#include "Item.h"          // Parent class
+#include "item.h"          // Parent class
 
 
 namespace Zap

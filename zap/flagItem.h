@@ -40,8 +40,6 @@ class GoalZone;
 
 class FlagItem : public MoveItem
 {
-   typedef MoveItem Parent;  
-
 private:
    Point mInitialPos;                 // Where flag was "born"
    bool mIsAtHome;
@@ -51,6 +49,8 @@ private:
    const Vector<FlagSpawn> *getSpawnPoints();
 
 protected:
+   typedef MoveItem Parent;
+
    enum MaskBits {
       ZoneMask         = Parent::FirstFreeMask << 0,
       FirstFreeMask    = Parent::FirstFreeMask << 1
