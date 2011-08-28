@@ -423,8 +423,8 @@ Lunar<SoccerBallItem>::RegType SoccerBallItem::methods[] =
    method(SoccerBallItem, getTeamIndx),
  
    // item methods
-   method(SoccerBallItem, isInCaptureZone),
-   method(SoccerBallItem, getCaptureZone),
+   //method(SoccerBallItem, isInCaptureZone),
+   //method(SoccerBallItem, getCaptureZone),
    method(SoccerBallItem, isOnShip),
    method(SoccerBallItem, getShip),
 

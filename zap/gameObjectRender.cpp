@@ -31,7 +31,6 @@
 #include "projectile.h"
 #include "speedZone.h"
 #include "soccerGame.h"
-#include "item.h"
 #include "EngineeredItem.h"      // For TURRET_OFFSET
 #include "BotNavMeshZone.h"         // For Border def
 #include "version.h"

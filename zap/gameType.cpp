@@ -27,7 +27,6 @@
 #include "game.h"
 #include "gameNetInterface.h"
 #include "flagItem.h"
-#include "item.h"     // For asteroid def.
 #include "EngineeredItem.h"
 #include "gameObjectRender.h"
 #include "SoundEffect.h"

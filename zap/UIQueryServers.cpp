@@ -24,19 +24,22 @@
 //------------------------------------------------------------------------------------
 
 #include "UIQueryServers.h"
+
+#include "UIChat.h"
+#include "UIDiagnostics.h"
 #include "UIMenus.h"
-#include "tnlRandom.h"
+
 #include "masterConnection.h"
 #include "gameNetInterface.h"
 #include "ClientGame.h"
 #include "gameType.h"
 #include "Colors.h"
 #include "config.h"     // TODO: remove requirement -- currently for gIni stuff in screen pos calc
-#include "UIChat.h"
-#include "UIDiagnostics.h"
 #include "keyCode.h"
 #include "ScreenInfo.h"
 #include "gameObjectRender.h"
+
+#include "tnlRandom.h"
 
 #include "SDL/SDL.h"
 #include "SDL/SDL_opengl.h"
@@ -612,6 +615,7 @@ static void renderLockIcon()
 
 
 extern Color gMasterServerBlue;
+extern void glScale(F32 scaleFactor);
 
 void QueryServersUserInterface::render()
 {

@@ -36,9 +36,10 @@
 #include "UIErrorMessage.h"
 #include "UIYesNo.h"
 #include "gameObjectRender.h"
-#include "ClientGame.h"                // Can delete?
+#include "ClientGame.h"  
 #include "gameType.h"
 #include "soccerGame.h"          // For Soccer ball radius
+#include "huntersGame.h"         // For HuntersNexusObject def
 #include "EngineeredItem.h"      // For Turret properties
 #include "PickupItem.h"          // For RepairItem
 #include "barrier.h"             // For DEFAULT_BARRIER_WIDTH

@@ -26,7 +26,7 @@
 #ifndef _FLAGITEM_H_
 #define _FLAGITEM_H_
 
-#include "item.h"     // For FlagSpawn def
+//#include "Spawn.h"      // For FlagSpawn def
 #include "ship.h"
 
 namespace Zap
@@ -36,17 +36,25 @@ namespace Zap
 
 
 class FlagSpawn;
+class GoalZone;
 
 class FlagItem : public MoveItem
 {
-protected:
    typedef MoveItem Parent;  
 
 private:
    Point mInitialPos;                 // Where flag was "born"
    bool mIsAtHome;
 
+   SafePtr<GoalZone> mZone;            // GoalZone currently holding the flag, NULL if not in a zone
+
    const Vector<FlagSpawn> *getSpawnPoints();
+
+protected:
+   enum MaskBits {
+      ZoneMask         = Parent::FirstFreeMask << 0,
+      FirstFreeMask    = Parent::FirstFreeMask << 1
+   };
 
 public:
    FlagItem(Point pos = Point());                                    // C++ constructor
@@ -81,6 +89,11 @@ public:
    virtual void unpackUpdate(GhostConnection *connection, BitStream *stream);
    virtual void idle(GameObject::IdleCallPath path);
 
+   // For tracking GoalZones where the flag might be at the moment
+   void setZone(GoalZone *goalZone);
+   GoalZone *getZone();
+   bool isInZone() { return mZone.isValid(); }
+
 
    TNL_DECLARE_CLASS(FlagItem);
 
@@ -110,6 +123,8 @@ public:
    S32 getTeamIndx(lua_State *L) { return returnInt(L, mTeam + 1); }          // Index of owning team
    S32 isInInitLoc(lua_State *L) { return returnBool(L, isAtHome()); }        // Is flag in it's initial location?
 
+   S32 isInCaptureZone(lua_State *L) { return returnBool(L, mZone.isValid()); }    // Is flag in a team's capture zone?
+   S32 getCaptureZone(lua_State *L);
    void push(lua_State *L) { Lunar<FlagItem>::push(L, this); }
 
 };

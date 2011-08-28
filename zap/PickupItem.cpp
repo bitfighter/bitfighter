@@ -28,6 +28,7 @@
 #include "game.h"
 #include "gameConnection.h"
 
+#include "gameObjectRender.h"
 #include "stringUtils.h"      // for itos
 #include "gameObjectRender.h"
 
