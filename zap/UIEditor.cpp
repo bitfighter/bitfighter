@@ -37,18 +37,21 @@
 #include "UIYesNo.h"
 
 #include "gameObjectRender.h"
-#include "ClientGame.h"                // Can delete?
+#include "ClientGame.h"  
 #include "gameType.h"
+
 #include "soccerGame.h"          // For Soccer ball radius
+#include "huntersGame.h"         // For HuntersNexusObject def
+
 #include "EngineeredItem.h"      // For Turret properties
 #include "PickupItem.h"
 #include "barrier.h"             // For DEFAULT_BARRIER_WIDTH
 #include "teleporter.h"          // For Teleporter def
 #include "speedZone.h"           // For Speedzone def
 #include "loadoutZone.h"         // For LoadoutZone def
-#include "huntersGame.h"         // For HuntersNexusObject def
-#include "config.h"
 #include "goalZone.h"
+
+#include "config.h"
 
 #include "gameLoader.h"          // For LevelLoadException def
 
