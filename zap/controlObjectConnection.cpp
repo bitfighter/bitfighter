@@ -214,7 +214,7 @@ void ControlObjectConnection::readPacket(BitStream *bstream)
    }
 }
 
-void ControlObjectConnection::writeCompressedPoint(Point &p, BitStream *stream)
+void ControlObjectConnection::writeCompressedPoint(const Point &p, BitStream *stream)
 {
    if(!mCompressPointsRelative)
    {

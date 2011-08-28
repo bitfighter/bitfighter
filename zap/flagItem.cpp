@@ -24,11 +24,12 @@
 //------------------------------------------------------------------------------------
 
 #include "flagItem.h"
-#include "gameItems.h"     // For FlagSpawn def
+#include "item.h"     // For FlagSpawn def
 #include "gameType.h"
 #include "game.h"
 #include "stringUtils.h"
 #include "gameConnection.h"
+#include "gameObjectRender.h"
 
 #ifndef ZAP_DEDICATED
 #include "SDL/SDL_opengl.h"

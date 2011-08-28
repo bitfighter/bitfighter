@@ -29,7 +29,7 @@
 #include "Timer.h"
 #include "flagItem.h"
 #include "teamInfo.h"
-#include "gameItems.h"     // For AsteroidSpawn and FlagSpawn
+#include "item.h"          // For AsteroidSpawn and FlagSpawn
 #include "gameStats.h"     // For VersionedGameStats
 #include "statistics.h"
 #include "Spawn.h"

@@ -30,7 +30,7 @@
 //#include "gameObject.h" 
 //#include "luaObject.h"     // For LuaItem class
 //#include "EditorObject.h"  // For EditorItem class
-#include "Item.h"          // Parent class
+#include "item.h"          // Parent class
 
 
 namespace Zap

@@ -26,7 +26,7 @@
 #ifndef _FLAGITEM_H_
 #define _FLAGITEM_H_
 
-#include "gameItems.h"     // For FlagSpawn def
+#include "item.h"     // For FlagSpawn def
 #include "ship.h"
 
 namespace Zap
@@ -39,6 +39,7 @@ class FlagSpawn;
 
 class FlagItem : public MoveItem
 {
+protected:
    typedef MoveItem Parent;  
 
 private:

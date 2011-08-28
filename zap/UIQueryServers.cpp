@@ -36,6 +36,7 @@
 #include "UIDiagnostics.h"
 #include "keyCode.h"
 #include "ScreenInfo.h"
+#include "gameObjectRender.h"
 
 #include "SDL/SDL.h"
 #include "SDL/SDL_opengl.h"

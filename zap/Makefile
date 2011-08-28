@@ -48,11 +48,10 @@ OBJECTS_SHARED=\
    controlObjectConnection.o\
    CTFGame.o\
    dataConnection.o\
-   engineeredObjects.o\
+   EngineeredItem.o\
    flagItem.o\
    game.o\
    gameConnection.o\
-   gameItems.o\
    gameLoader.o\
    gameNetInterface.o\
    gameObject.o\
@@ -80,6 +79,7 @@ OBJECTS_SHARED=\
    md5wrapper.o\
    move.o\
    moveObject.o\
+   PickupItem.o\
    playerInfo.o\
    Point.o\
    polygon.o\
@@ -95,6 +95,7 @@ OBJECTS_SHARED=\
    soccerGame.o\
    SoundEffect.o\
    SoundSystem.o\
+   Spawn.o\
    speedZone.o\
    statistics.o\
    stringUtils.o\

@@ -25,13 +25,14 @@
 
 #include "moveObject.h"
 #include "gameType.h"
-//#include "gameItems.h"
+//#include "item.h"
 #include "goalZone.h"
 #include "GeomUtils.h"
 #include "ship.h"
 #include "SoundSystem.h"
 #include "speedZone.h"
 #include "game.h"
+#include "gameConnection.h"
 
 #ifndef ZAP_DEDICATED
 #include "ClientGame.h"

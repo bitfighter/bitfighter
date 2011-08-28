@@ -90,7 +90,7 @@ public:
 
    bool isDataToTransmit() { return true; }
 
-   void writeCompressedPoint(Point &p, BitStream *stream);
+   void writeCompressedPoint(const Point &p, BitStream *stream);
    void readCompressedPoint(Point &p, BitStream *stream);
 };
 
