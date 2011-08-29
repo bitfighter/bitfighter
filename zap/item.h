@@ -47,9 +47,10 @@ protected:
    F32 mMass;
 
    enum MaskBits {
-      ItemChangedMask = Parent::FirstFreeMask << 0,
-      ExplodedMask    = Parent::FirstFreeMask << 1,
-      FirstFreeMask   = Parent::FirstFreeMask << 2
+      InitialMask = Parent::FirstFreeMask << 0,
+      ItemChangedMask = Parent::FirstFreeMask << 1,
+      ExplodedMask    = Parent::FirstFreeMask << 2,
+      FirstFreeMask   = Parent::FirstFreeMask << 3
    };
 
 public:

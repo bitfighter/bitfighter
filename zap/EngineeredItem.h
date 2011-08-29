@@ -148,8 +148,9 @@ private:
 
 protected:
    enum MaskBits {
-      StatusMask   = Parent::FirstFreeMask << 0,
-      FirstFreeMask = Parent::FirstFreeMask << 1
+      InitialMask   = Parent::FirstFreeMask << 0,
+      StatusMask    = Parent::FirstFreeMask << 1,
+      FirstFreeMask = Parent::FirstFreeMask << 2
    };
 
 public:

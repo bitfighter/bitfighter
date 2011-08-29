@@ -107,9 +107,10 @@ private:
 
 protected:
    enum MaskBits {
-      ExplodedMask  = Parent::FirstFreeMask << 0,
-      PositionMask  = Parent::FirstFreeMask << 1,
-      FirstFreeMask = Parent::FirstFreeMask << 2
+      InitialMask   = Parent::FirstFreeMask << 0,
+      ExplodedMask  = Parent::FirstFreeMask << 1,
+      PositionMask  = Parent::FirstFreeMask << 2,
+      FirstFreeMask = Parent::FirstFreeMask << 3
    };
 
 public:

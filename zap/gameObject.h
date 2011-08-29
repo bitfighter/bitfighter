@@ -239,8 +239,8 @@ public:
    S32 getScore() { return 0; }     // TODO: Fix this
 
    enum MaskBits {
-      InitialMask = BIT(0),
-      FirstFreeMask = BIT(1)
+      //InitialMask = BIT(0),
+      FirstFreeMask = BIT(0)
    };
 
    void findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector, const Rect &extents);
