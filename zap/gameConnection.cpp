@@ -73,8 +73,10 @@ GameConnection::GameConnection()
    mVote = 0;
    mVoteTime = 0;
    mChatMute = false;
+#ifndef ZAP_DEDICATED
    mClientGame = NULL;
-   initialize();
+#endif
+	initialize();
 }
 
 
@@ -319,10 +321,10 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rCommandComplete, (RangedU32<0,SENDER_STATUS
    if(!isInitiator()) // Make it client only
       return;
 
+#ifndef ZAP_DEDICATED
    // Server might need mOutputFile, if the server were to receive files.  Currently, server doesn't receive files in-game.
    TNLAssert(mClientGame != NULL, "trying to get mOutputFile, mClientGame is NULL");
 
-#ifndef ZAP_DEDICATED
    if(mClientGame)
    {
       const char *outputFilename = strictjoindir(gConfigDirs.levelDir, mClientGame->getRemoteLevelDownloadFilename()).c_str();
@@ -1015,6 +1017,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayErrorMessage,
                   (formatString),
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
+#ifndef ZAP_DEDICATED
    static const S32 STRLEN = 256;
    char outputBuffer[STRLEN];
 
@@ -1022,6 +1025,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayErrorMessage,
    outputBuffer[STRLEN - 1] = '\0';    // Make sure we're null-terminated
 
    mClientGame->displayMessage(Colors::red, "%s", outputBuffer);
+#endif
 }
 
 
@@ -1592,9 +1596,9 @@ void GameConnection::onConnectionTerminated(NetConnection::TerminationReason rea
 {
    if(isInitiator())    // i.e. this is a client that connected to the server
    {
+#ifndef ZAP_DEDICATED
       TNLAssert(mClientGame, "onConnectionTerminated: mClientGame is NULL");
 
-#ifndef ZAP_DEDICATED
       if(mClientGame)
          mClientGame->onConnectionTerminated(getNetAddress(), reason, reasonStr);
 #endif
@@ -1620,11 +1624,11 @@ void GameConnection::onConnectTerminated(TerminationReason reason, const char *n
 {
    if(isInitiator())
    {
+#ifndef ZAP_DEDICATED
       TNLAssert(mClientGame, "onConnectTerminated: mClientGame is NULL");
       if(!mClientGame)
          return;
 
-#ifndef ZAP_DEDICATED
       mClientGame->onConnectTerminated(getNetAddress(), reason);
 #endif
 

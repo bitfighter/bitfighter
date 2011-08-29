@@ -430,23 +430,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\engineeredObjects.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\engineeredObjects.h"
-				>
-			</File>
-			<File
 				RelativePath=".\flagItem.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\flagItem.h"
-				>
-			</File>
-			<File
-				RelativePath=".\gameItems.cpp"
 				>
 			</File>
 			<File
@@ -643,10 +631,6 @@
 			</File>
 		</Filter>
 		<File
-			RelativePath=".\ZAP.rc"
-			>
-		</File>
-		<File
 			RelativePath="..\clipper\clipper.cpp"
 			>
 		</File>
@@ -684,6 +668,10 @@
 		</File>
 		<File
 			RelativePath=".\dataConnection.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\EngineeredItem.cpp"
 			>
 		</File>
 		<File
@@ -815,6 +803,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\PickupItem.cpp"
+			>
+		</File>
+		<File
 			RelativePath=".\playerInfo.cpp"
 			>
 		</File>
@@ -871,6 +863,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\Spawn.cpp"
+			>
+		</File>
+		<File
 			RelativePath="..\sqlite\sqlite3.c"
 			>
 		</File>
@@ -900,6 +896,10 @@
 		</File>
 		<File
 			RelativePath="..\Triangle\triangle.c"
+			>
+		</File>
+		<File
+			RelativePath=".\ZAP.rc"
 			>
 		</File>
 		<File

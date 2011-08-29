@@ -562,23 +562,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\engineeredObjects.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\engineeredObjects.h"
-				>
-			</File>
-			<File
 				RelativePath=".\flagItem.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\flagItem.h"
-				>
-			</File>
-			<File
-				RelativePath=".\gameItems.cpp"
 				>
 			</File>
 			<File
@@ -787,10 +775,6 @@
 			</File>
 		</Filter>
 		<File
-			RelativePath=".\ZAP.rc"
-			>
-		</File>
-		<File
 			RelativePath=".\ClientGame.cpp"
 			>
 		</File>
@@ -836,6 +820,10 @@
 		</File>
 		<File
 			RelativePath=".\EditorObject.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\EngineeredItem.cpp"
 			>
 		</File>
 		<File
@@ -1003,6 +991,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\PickupItem.cpp"
+			>
+		</File>
+		<File
 			RelativePath=".\playerInfo.cpp"
 			>
 		</File>
@@ -1132,6 +1124,10 @@
 		</File>
 		<File
 			RelativePath=".\UIRebindKeys.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\ZAP.rc"
 			>
 		</File>
 		<File
