@@ -665,7 +665,7 @@ void GameUserInterface::renderReticle()
 
    if(mWrongModeMsgDisplay.getCurrent())
    {
-      glColor3f(1,.5,.5);
+      glColor(Colors::paleRed);
       drawCenteredString(225, 20, "You are in joystick mode.");
       drawCenteredString(250, 20, "You can change to Keyboard input with the Options menu.");
    }
@@ -941,7 +941,7 @@ void GameUserInterface::dropItem()
 
    if(!gt->isCarryingItems(ship))
    {
-      displayMessage(Color(1.0, 0.5, 0.5), "You don't have any items to drop!");
+      displayMessage(Colors::paleRed, "You don't have any items to drop!");
       return;
    }
 
@@ -2350,7 +2350,7 @@ void GameUserInterface::renderScoreboard(const GameType *gameType)
          alpha = mInputModeChangeAlertDisplayTimer.getCurrent() * 0.001f;
 
       glEnableBlend;
-      glColor4f(1, 0.5 , 0.5, alpha);
+      glColor(Colors::paleRed, alpha);
       UserInterface::drawCenteredStringf(UserInterface::vertMargin + 130, 20, "Input mode changed to %s", 
                                          gIniSettings.inputMode == InputModeJoystick ? "Joystick" : "Keyboard");
       glDisableBlend;
@@ -2514,7 +2514,7 @@ void GameUserInterface::renderBasicInterfaceOverlay(const GameType *gameType, bo
          alpha = mInputModeChangeAlertDisplayTimer.getCurrent() * 0.001f;
 
       glEnableBlend;
-      glColor4f(1, 0.5 , 0.5, alpha);
+      glColor(Colors::paleRed, alpha);
       UserInterface::drawCenteredStringf(UserInterface::vertMargin + 130, 20, "Input mode changed to %s", 
                                          gIniSettings.inputMode == InputModeJoystick ? "Joystick" : "Keyboard");
       glDisableBlend;
