@@ -2481,24 +2481,24 @@ void GameUserInterface::renderBasicInterfaceOverlay(const GameType *gameType, bo
          alpha = mLevelInfoDisplayTimer.getCurrent() * 0.001f;
 
       glEnableBlend;
-         glColor4f(1, 1, 1, alpha);
+         glColor(Colors::white, alpha);
          UserInterface::drawCenteredStringf(canvasHeight / 2 - 180, 30, "Level: %s", gameType->getLevelName()->getString());
          UserInterface::drawCenteredStringf(canvasHeight / 2 - 140, 30, "Game Type: %s", gameType->getGameTypeString());
-         glColor4f(0, 1, 1, alpha);
+         glColor(Colors::cyan, alpha);
          UserInterface::drawCenteredString(canvasHeight / 2 - 100, 20, gameType->getInstructionString());
-         glColor4f(1, 0, 1, alpha);
+         glColor(Colors::magenta, alpha);
          UserInterface::drawCenteredString(canvasHeight / 2 - 75, 20, gameType->getLevelDescription()->getString());
 
-         glColor4f(0, 1, 0, alpha);
+         glColor(Colors::red, alpha);
          UserInterface::drawCenteredStringf(canvasHeight - 100, 20, "Press [%s] to see this information again", keyCodeToString(keyMISSION));
 
          if(gameType->getLevelCredits()->isNotNull())    // Only render credits string if it's is not empty
          {
-            glColor4f(1, 0, 0, alpha);
+            glColor(Colors::red, alpha);
             UserInterface::drawCenteredStringf(canvasHeight / 2 + 50, 20, "%s", gameType->getLevelCredits()->getString());
          }
 
-         glColor4f(1, 1, 0, alpha);
+         glColor(Colors::yellow, alpha);
          UserInterface::drawCenteredStringf(canvasHeight / 2 - 50, 20, "Score to Win: %d", gameType->getWinningScore());
 
       glDisableBlend;
