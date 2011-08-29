@@ -1208,7 +1208,7 @@ LevelInfo getLevelInfo(char *level, S32 size)
 {
    S32 cur = 0;
    S32 startingCur = 0;
-   //const char *gametypeName;
+
    LevelInfo levelInfo;
    levelInfo.levelName = "";
    levelInfo.levelType = "Bitmatch";
@@ -1228,7 +1228,7 @@ LevelInfo getLevelInfo(char *level, S32 size)
             if(list.size() >= 1 && list[0].find("GameType") != string::npos)
             {
                TNL::Object *theObject = TNL::Object::create(list[0].c_str());  // Instantiate a gameType object
-               GameType *gt = dynamic_cast<GameType*>(theObject);  // and cast it
+               GameType *gt = dynamic_cast<GameType*>(theObject);              // and cast it
                if(gt)
                {
                   levelInfo.levelType = gt->getGameTypeString();
@@ -1278,18 +1278,19 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendDataParts, (U8 type, ByteBufferPtr data
       LevelInfo levelInfo = getLevelInfo((char *)mDataBuffer->getBuffer(), mDataBuffer->getBufferSize());
 
       //BitStream s(mDataBuffer.getBuffer(), mDataBuffer.getBufferSize());
-      char filename1[128];
-      string titleName = makeFilenameFromString(levelInfo.levelName.getString());
-      dSprintf(filename1, sizeof(filename1), "upload_%s.level", titleName.c_str());
-      string filename2 = strictjoindir(gConfigDirs.levelDir, filename1);
+      char filename[128];
 
-      FILE *f = fopen(filename2.c_str(), "wb");
+      string titleName = makeFilenameFromString(levelInfo.levelName.getString());
+      dSprintf(filename, sizeof(filename), "upload_%s.level", titleName.c_str());
+      string fullFilename = strictjoindir(gConfigDirs.levelDir, filename);
+
+      FILE *f = fopen(fullFilename.c_str(), "wb");
       if(f)
       {
          fwrite(mDataBuffer->getBuffer(), 1, mDataBuffer->getBufferSize(), f);
          fclose(f);
-         logprintf(LogConsumer::ServerFilter, "%s %s Uploaded %s", getNetAddressString(), mClientName.getString(), filename1);
-         S32 id = gServerGame->addLevelInfo(filename1, levelInfo);
+         logprintf(LogConsumer::ServerFilter, "%s %s Uploaded %s", getNetAddressString(), mClientName.getString(), filename);
+         S32 id = gServerGame->addLevelInfo(filename, levelInfo);
          c2sRequestLevelChange2(id, false);
       }
       else
@@ -1303,21 +1304,26 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendDataParts, (U8 type, ByteBufferPtr data
    }
 }
 
+
 bool GameConnection::s2rUploadFile(const char *filename, U8 type)
 {
    BitStream s;
    const U32 partsSize = 512;   // max 1023, limited by ByteBufferSizeBitSize=10
+
    FILE *f = fopen(filename, "rb");
+
    if(f)
    {
       U32 size = partsSize;
       while(size == partsSize)
       {
-         ByteBuffer *bytebuffer = new ByteBuffer();
-         bytebuffer->resize(512);
+         ByteBuffer *bytebuffer = new ByteBuffer(512);
+         //bytebuffer->resize(512);
          size = (U32)fread(bytebuffer->getBuffer(), 1, bytebuffer->getBufferSize(), f);
+
          if(size != partsSize)
             bytebuffer->resize(size);
+
          s2rSendDataParts(size == partsSize ? 0 : type, ByteBufferPtr(bytebuffer));
       }
       fclose(f);
@@ -1335,7 +1341,6 @@ void GameConnection::writeConnectRequest(BitStream *stream)
 
    bool isLocal = gServerGame;      // Only way to have gServerGame defined is if we're also hosting... ergo, we must be local
 
- 
    string serverPW;
    string lastServerName = mClientGame->getRequestedServerName();
 
@@ -1354,7 +1359,9 @@ void GameConnection::writeConnectRequest(BitStream *stream)
    // Write some info about the client... name, id, and verification status
    stream->writeString(serverPW.c_str());
    stream->writeString(mClientName.getString());
+
    mClientId.write(stream);
+
    stream->writeFlag(mIsVerified);    // Tell server whether we (the client) claim to be authenticated
 #endif
 }
