@@ -619,7 +619,7 @@ bool SoccerBallItem::collide(GameObject *hitObject)
       if(goal && !isGhost())
       {
          SoccerGameType *g = dynamic_cast<SoccerGameType *>(getGame()->getGameType());
-         if(g) g->scoreGoal(mLastPlayerTouch, mLastPlayerTouchName, mLastPlayerTouchTeam, goal->getTeam(), goal->mScore);
+         if(g) g->scoreGoal(mLastPlayerTouch, mLastPlayerTouchName, mLastPlayerTouchTeam, goal->getTeam(), goal->getScore());
 
          static const S32 POST_SCORE_HIATUS = 1500;
          mSendHomeTimer.reset(POST_SCORE_HIATUS);

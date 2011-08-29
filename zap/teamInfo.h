@@ -46,6 +46,8 @@ public:
    static const S32 MAX_TEAM_NAME_LENGTH = 32;
 
    void setColor(F32 r, F32 g, F32 b) { mColor.set(r,g,b); } 
+   void setColor(const Color &color) { mColor.set(color); }
+
    const Color *getColor() const { return &mColor; }
 
    virtual void setName(const char *name) = 0;

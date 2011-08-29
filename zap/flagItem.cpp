@@ -123,10 +123,10 @@ void FlagItem::setZone(GoalZone *goalZone)
 
    if(flag)
    {
-      GoalZone *z = ((goalZone == NULL) ? flag->getZone() : goalZone);
+      GoalZone *zone = ((goalZone == NULL) ? flag->getZone() : goalZone);
 
-      if(z)
-         z->mHasFlag = ((goalZone == NULL) ? false : true );
+      if(zone)
+         zone->setHasFlag(goalZone != NULL);
    }
 
    // Now we can get around to setting the zone, which is what we came here to do

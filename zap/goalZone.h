@@ -76,6 +76,10 @@ public:
    
    bool isFlashing() { return mFlashCount & 1; }
    void setFlashCount(S32 i) { mFlashCount = i; }
+
+   S32 getScore() { return mScore; }
+   //bool hasFlag() { return mHasFlag; }
+   void setHasFlag(bool hasFlag) { mHasFlag = hasFlag; }
    
    TNL_DECLARE_CLASS(GoalZone);
 
