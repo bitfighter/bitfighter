@@ -71,7 +71,6 @@ public:
    /////
    // Former LuaPolygon methods
    // This class serves only to provide an implementation of the abstract methods in LuaItem that are common to the polygon classes
-public:
    S32 getLoc(lua_State *L) { return LuaObject::returnPoint(L, getCentroid()); }     // Center of item (returns point)
    S32 getRad(lua_State *L) { return LuaObject::returnInt(L, 0); }                   // Radius of item (returns number)
    S32 getVel(lua_State *L) { return LuaObject::returnPoint(L, Point(0,0)); }        // Velocity of item (returns point)

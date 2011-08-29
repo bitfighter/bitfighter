@@ -41,6 +41,9 @@ private:
    static const S32 FlashDelay = 500;
    static const S32 FlashCount = 5;
 
+   bool mHasFlag;     // Is there a flag parked in this zone?
+   S32 mScore;        // How much is this zone worth?
+
    S32 mFlashCount;
    Timer mFlashTimer;
 
@@ -51,30 +54,29 @@ protected:
       FirstFreeMask = Parent::FirstFreeMask << 2
    };
 
-
 public:
    GoalZone();        // Constructor
    GoalZone *clone() const;
 
+   bool processArguments(S32 argc, const char **argv, Game *game);
+   
+   U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
+   void unpackUpdate(GhostConnection *connection, BitStream *stream);
+
+   void idle(GameObject::IdleCallPath path);
    void render();
 
-   bool mHasFlag;     // Is there a flag parked in this zone?
-   S32 mScore;        // How much is this zone worth?
-
-   bool isFlashing() { return mFlashCount & 1; }
    bool didRecentlyChangeTeam() { return mFlashCount != 0; }
    S32 getRenderSortValue();
-   bool processArguments(S32 argc, const char **argv, Game *game);
 
    void setTeam(S32 team);
    void onAddedToGame(Game *theGame);
    bool getCollisionPoly(Vector<Point> &polyPoints) const;
    bool collide(GameObject *hitObject);
-   U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
-   void unpackUpdate(GhostConnection *connection, BitStream *stream);
-   void idle(GameObject::IdleCallPath path);
+   
+   bool isFlashing() { return mFlashCount & 1; }
    void setFlashCount(S32 i) { mFlashCount = i; }
-
+   
    TNL_DECLARE_CLASS(GoalZone);
 
    /////
@@ -107,6 +109,3 @@ public:
 };
 
 #endif
-
-
-
