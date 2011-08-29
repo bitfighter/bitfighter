@@ -124,7 +124,10 @@ private:
 
 
 public:
+#ifndef ZAP_DEDICATED
    ClientGame *mClientGame;
+#endif
+
    Vector<U32> mOldLoadout;   // Server: to respawn with old loadout  Client: to check if using same loadout configuration
    U16 switchedTeamCount;
 
