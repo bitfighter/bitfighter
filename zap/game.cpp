@@ -783,7 +783,7 @@ bool ServerGame::voteStart(GameConnection *client, S32 type, S32 number)
 
    if(mVoteTimer != 0)
    {
-      client->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "Can't start vote when there is pending vote.");
+      client->s2cDisplayErrorMessage("Can't start a new vote when there is one pending.");
       return true;
    }
 
@@ -813,9 +813,9 @@ bool ServerGame::voteStart(GameConnection *client, S32 type, S32 number)
 void ServerGame::voteClient(GameConnection *client, bool voteYes)
 {
    if(mVoteTimer == 0)
-      client->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Nothing to vote");
+      client->s2cDisplayErrorMessage("!!! Nothing to vote");
    else if(client->mVote == (voteYes ? 1 : 2))
-      client->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Already voted");
+      client->s2cDisplayErrorMessage("!!! Already voted");
    else if(client->mVote == 0)
    {
       if(voteYes)

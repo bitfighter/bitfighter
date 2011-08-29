@@ -2485,15 +2485,15 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
    if(!stricmp(cmd, "settime"))
    {
       if(!clientRef->clientConnection->isLevelChanger())
-         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Need level change permission");
+         clientRef->clientConnection->s2cDisplayErrorMessage("!!! Need level change permission");
       else if(args.size() < 1)
-         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Enter time in minutes");
+         clientRef->clientConnection->s2cDisplayErrorMessage("!!! Enter time in minutes");
       else
       {
          S32 time = S32(60 * 1000 * atof(args[0].getString()));
 
          if((time < 0 || time == 0) && (stricmp(args[0].getString(), "0") && stricmp(args[0].getString(), "unlim")))  // 0 --> unlimited
-            clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Invalid time... game time not changed");
+            clientRef->clientConnection->s2cDisplayErrorMessage("!!! Invalid time... game time not changed");
          else
          {
             // use voting when no level change password and more then 1 players
@@ -2519,14 +2519,14 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
    else if(!stricmp(cmd, "setscore"))
    {
      if(!clientRef->clientConnection->isLevelChanger())                         // Level changers and above
-         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Need level change permission");
+         clientRef->clientConnection->s2cDisplayErrorMessage("!!! Need level change permission");
      else if(args.size() < 1)
-         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Enter score limit");
+         clientRef->clientConnection->s2cDisplayErrorMessage("!!! Enter score limit");
      else
      {
          S32 score = atoi(args[0].getString());
          if(score <= 0)    // 0 can come about if user enters invalid input
-            clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Invalid score... winning score not changed");
+            clientRef->clientConnection->s2cDisplayErrorMessage("!!! Invalid score... winning score not changed");
          else
          {
             // use voting when no level change password and more then 1 players
@@ -2544,7 +2544,7 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
    {
       mShowAllBots = !mShowAllBots;  // Show all robots affects all players
       if(Robot::robots.size() == 0)
-         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! There are no robots to show");
+         clientRef->clientConnection->s2cDisplayErrorMessage("!!! There are no robots to show");
       else
       {
          StringTableEntry msg = mShowAllBots ? StringTableEntry("Show all robots option enabled by %e0") : StringTableEntry("Show all robots option disabled by %e0");
@@ -2557,22 +2557,22 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
    else if(!stricmp(cmd, "addbot"))
    {
       if(mBotZoneCreationFailed)
-         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Zone creation failure.  Bots disabled");
+         clientRef->clientConnection->s2cDisplayErrorMessage("!!! Zone creation failure.  Bots disabled");
 
       else if(!areBotsAllowed() && !clientRef->clientConnection->isAdmin())  // not admin, no robotScript
-         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! This level does not allow robots");
+         clientRef->clientConnection->s2cDisplayErrorMessage("!!! This level does not allow robots");
 
       else if(!clientRef->clientConnection->isAdmin() && gIniSettings.defaultRobotScript == "" && args.size() < 2)  // not admin, no robotScript
-         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! This server doesn't have default robots configured");
+         clientRef->clientConnection->s2cDisplayErrorMessage("!!! This server doesn't have default robots configured");
       
       else if(!clientRef->clientConnection->isLevelChanger())
-         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Need level change permissions to add a bot");
+         clientRef->clientConnection->s2cDisplayErrorMessage("!!! Need level change permissions to add a bot");
 
       else if((Robot::robots.size() >= gIniSettings.maxBots && !clientRef->clientConnection->isAdmin()) || Robot::robots.size() >= 256)
-         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Can't add more bots -- this server is full");
+         clientRef->clientConnection->s2cDisplayErrorMessage("!!! Can't add more bots -- this server is full");
 
       else if(args.size() >= 2 && !safeFilename(args[1].getString()))
-         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Invalid filename");
+         clientRef->clientConnection->s2cDisplayErrorMessage("!!! Invalid filename");
 
       else
       {
@@ -2609,7 +2609,7 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
          count = atoi(args[0].getString());
 
       if(count <= 0)
-         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Need to enter number of bots to add");
+         clientRef->clientConnection->s2cDisplayErrorMessage("!!! Need to enter number of bots to add");
       else
       {
          S32 prevRobotSize = -1;
@@ -2624,9 +2624,9 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
    else if(!stricmp(cmd, "maxbots"))
    {
       if(!clientRef->clientConnection->isAdmin())
-         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Need admin permission");
+         clientRef->clientConnection->s2cDisplayErrorMessage("!!! Need admin permission");
       else if(args.size() < 1)
-         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "Use /maxbots <number>");
+         clientRef->clientConnection->s2cDisplayErrorMessage("Invalid command.  Try /maxbots <number>");
       else
       {
          gIniSettings.maxBots = atoi(args[0].getString());
@@ -2635,10 +2635,10 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
    else if(!stricmp(cmd, "kickbot") || !stricmp(cmd, "kickbots"))
    {
       if(!clientRef->clientConnection->isLevelChanger())
-         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Need level change permissions to kick a bot");
+         clientRef->clientConnection->s2cDisplayErrorMessage("!!! Need level change permissions to kick a bot");
 
       else if(Robot::robots.size() == 0)
-         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! No robots");
+         clientRef->clientConnection->s2cDisplayErrorMessage("!!! No robots");
       else
       {
          for(S32 i = Robot::robots.size() - 1; i >= 0; i--)
@@ -2657,16 +2657,16 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
    }
    else if(!stricmp(cmd, "rename") && args.size() >= 1)  // allow admins to rename anyone (in case of bad name)
       if(!clientRef->clientConnection->isAdmin())
-         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Need admin permission");
+         clientRef->clientConnection->s2cDisplayErrorMessage("!!! Need admin permission");
       else if(args.size() < 2)
-         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "Use /rename <From_name> <To_name>");
+         clientRef->clientConnection->s2cDisplayErrorMessage("Invalid command.  Try /rename <from name> <to name>");
       else
       {
          GameConnection *gc = findClient(this, args[0].getString());
          if(!gc)
-            clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Player name not found");
+            clientRef->clientConnection->s2cDisplayErrorMessage("!!! Player name not found");
          else if(gc->isAuthenticated())
-            clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Can't rename authenticated players");
+            clientRef->clientConnection->s2cDisplayErrorMessage("!!! Can't rename authenticated players");
          else
          {
             StringTableEntry oldName = gc->getClientName();
@@ -2689,14 +2689,14 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
    else if(!stricmp(cmd, "gmute"))
    {
       if(!clientRef->clientConnection->isAdmin())
-         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Need admin permission");
+         clientRef->clientConnection->s2cDisplayErrorMessage("!!! Need admin permission");
       else if(args.size() < 1)
-         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Enter player name");
+         clientRef->clientConnection->s2cDisplayErrorMessage("!!! Enter player name");
       else
       {
          GameConnection *gc = findClient(this, args[0].getString());
          if(!gc)
-            clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Player name not found");
+            clientRef->clientConnection->s2cDisplayErrorMessage("!!! Player name not found");
          else
          {
             gc->mChatMute = !gc->mChatMute;
@@ -2707,7 +2707,7 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
    else
    {
       // Command not found, tell the client
-      clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Invalid Command");
+      clientRef->clientConnection->s2cDisplayErrorMessage("!!! Invalid Command");
    }
 }
 
@@ -2743,7 +2743,7 @@ GAMETYPE_RPC_C2S(GameType, c2sSendChatPM, (StringTableEntry toName, StringPtr me
    }
 
    if(!found)
-      sourceClientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Player name not found");
+      sourceClientRef->clientConnection->s2cDisplayErrorMessage("!!! Player name not found");
 }
 
 

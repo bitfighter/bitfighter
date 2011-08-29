@@ -243,7 +243,7 @@ bool EngineerModuleDeployer::deployEngineeredItem(GameConnection *connection, U3
 
    if(!deployedObject)              // Something went wrong
    {
-      connection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "Error deploying object.");
+      connection->s2cDisplayErrorMessage("Error deploying object.");
       delete deployedObject;
       return false;
    }

@@ -260,6 +260,8 @@ public:
    TNL_DECLARE_RPC(s2cTouchdownScored, (U32 sfx, S32 team, StringTableEntry formatString, Vector<StringTableEntry> e));
 
    TNL_DECLARE_RPC(s2cDisplayMessage, (RangedU32<0, ColorCount> color, RangedU32<0, NumSFXBuffers> sfx, StringTableEntry formatString));
+   TNL_DECLARE_RPC(s2cDisplayErrorMessage, (StringTableEntry formatString));    
+
    TNL_DECLARE_RPC(s2cDisplayMessageBox, (StringTableEntry title, StringTableEntry instr, Vector<StringTableEntry> message));
    TNL_DECLARE_RPC(s2cAddLevel, (StringTableEntry name, StringTableEntry type));
    TNL_DECLARE_RPC(s2cRemoveLevel, (S32 index));

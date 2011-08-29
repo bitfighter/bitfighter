@@ -447,7 +447,7 @@ bool GameConnection::sEngineerDeployObject(U32 type)
    EngineerModuleDeployer deployer;
 
    if(!deployer.canCreateObjectAtLocation(gServerGame->getGameObjDatabase(), ship, type))     
-      s2cDisplayMessage(GameConnection::ColorRed, SFXNone, deployer.getErrorMessage().c_str());
+      s2cDisplayErrorMessage(deployer.getErrorMessage().c_str());
 
    else if(deployer.deployEngineeredItem(this, type))
    {
@@ -866,12 +866,12 @@ void GameConnection::sRequestLoadout(Vector<U32> &loadout)
 
 Color colors[] =
 {
-   Colors::white,           // ColorWhite
-   Colors::red,           // ColorRed    ==> also used for chat commands
-   Colors::green,           // ColorGreen
+   Colors::white,          // ColorWhite
+   Colors::red,            // ColorRed    ==> also used for chat commands
+   Colors::green,          // ColorGreen
    Colors::blue,           // ColorBlue
    Colors::cyan,           // ColorAqua
-   Colors::yellow,           // ColorYellow
+   Colors::yellow,         // ColorYellow
    Color(0.6f, 1, 0.8f),   // ColorNuclearGreen
 };
 
@@ -1007,6 +1007,21 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayMessage,
    outputBuffer[STRLEN - 1] = '\0';    // Make sure we're null-terminated
 
    displayMessage(color, sfx, outputBuffer);
+}
+
+
+TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayErrorMessage,
+                  (StringTableEntry formatString),
+                  (formatString),
+                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
+{
+   static const S32 STRLEN = 256;
+   char outputBuffer[STRLEN];
+
+   strncpy(outputBuffer, formatString.getString(), STRLEN - 1);
+   outputBuffer[STRLEN - 1] = '\0';    // Make sure we're null-terminated
+
+   mClientGame->displayMessage(Colors::red, "%s", outputBuffer);
 }
 
 
@@ -1271,7 +1286,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendDataParts, (U8 type, ByteBufferPtr data
          c2sRequestLevelChange2(id, false);
       }
       else
-         s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Upload Failed, server can't write file");
+         s2cDisplayErrorMessage("!!! Upload Failed, server can't write file");
    }
 
    if(type != 0)
