@@ -1152,50 +1152,57 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetServerAlertVolume, (S8 vol), (vol), NetC
    //setServerAlertVolume(vol);
 }
 
-//  Tell all clients name is changed, and update server side name
-// Game Server only
-void updateClientChangedName(GameConnection *gc, StringTableEntry newName){
-   GameType *gt = gServerGame->getGameType();
-   ClientRef *cr = gc->getClientRef();
-   logprintf(LogConsumer::LogConnection, "Name changed from %s to %s",gc->getClientName().getString(),newName.getString());
-   if(gt)
-   {
-      gt->s2cRenameClient(gc->getClientName(), newName);
-   }
-   gc->setClientName(newName);
-   cr->name = newName;
-   Ship *ship = dynamic_cast<Ship *>(gc->getControlObject());
+
+// Tell all clients name has changed, and update server side name
+// Server only
+void updateClientChangedName(GameConnection *gameConnection, StringTableEntry newName)
+{
+   GameType *gameType = gServerGame->getGameType();
+   ClientRef *clientRef = gameConnection->getClientRef();
+
+   logprintf(LogConsumer::LogConnection, "Name changed from %s to %s", gameConnection->getClientName().getString(), newName.getString());
+
+   if(gameType)
+      gameType->s2cRenameClient(gameConnection->getClientName(), newName);
+
+   gameConnection->setClientName(newName);
+   clientRef->name = newName;
+
+   Ship *ship = dynamic_cast<Ship *>(gameConnection->getControlObject());
+
    if(ship)
    {
       ship->setName(newName);
-      ship->setMaskBits(Ship::AuthenticationMask);  //ship names will update with this bit
+      ship->setMaskBits(Ship::AuthenticationMask);    // Will trigger sending new ship name on next update
    }
 }
 
-// Client connect to master after joining game server, get authentication fail,
-// then client have changed name to non-reserved, or entered password.
+
+// Client connects to master after joining a game, authentication fails,
+// then client has changed name to non-reserved, or entered password.
 TNL_IMPLEMENT_RPC(GameConnection, c2sRenameClient, (StringTableEntry newName), (newName), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
    StringTableEntry oldName = getClientName();
-   setClientName(StringTableEntry(""));       //avoid unique self
-   StringTableEntry uniqueName = GameConnection::makeUnique(newName.getString()).c_str();  //new name
-   setClientName(oldName);                   //restore name to properly get it updated to clients.
-   setClientNameNonUnique(newName);          //for correct authentication
-   setAuthenticated(false);         //don't underline anymore because of rename
-   mIsVerified = false;             //Reset all verified to false.
-   mClientNeedsToBeVerified = false;
+   setClientName(StringTableEntry(""));     
+   StringTableEntry uniqueName = GameConnection::makeUnique(newName.getString()).c_str();  // Make sure new name is unique
+   setClientName(oldName);                // Restore name to properly get it updated to clients
+   setClientNameNonUnique(newName);       // For correct authentication
+   
+   mIsVerified = false;                   // Renamed names are never verified
+   setAuthenticated(false);               // This prevents the name from being underlined
+   mClientNeedsToBeVerified = false;      // Prevent attempts to authenticate the new name
    mClientClaimsToBeVerified = false;
 
-   if(oldName != uniqueName)  //different?
-   {
+   if(oldName != uniqueName)              // Did the name actually change?
       updateClientChangedName(this,uniqueName);
-   }
 }
+
 
 TNL_IMPLEMENT_RPC(GameConnection, s2rSendableFlags, (U8 flags), (flags), NetClassGroupGameMask, RPCGuaranteed, RPCDirAny, 0)
 {
    mSendableFlags = flags;
 }
+
 
 LevelInfo getLevelInfo(char *level, S32 size)
 {

@@ -2655,7 +2655,7 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
             mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXNone, msg, e);
       }
    }
-   else if(!stricmp(cmd, "rename") && args.size() >= 1)  // allow admins to rename anyone (in case of bad name)
+   else if(!stricmp(cmd, "rename") && args.size() >= 1)  // Allow admins to rename other players (in case of bad name)
       if(!clientRef->clientConnection->isAdmin())
          clientRef->clientConnection->s2cDisplayErrorMessage("!!! Need admin permission");
       else if(args.size() < 2)

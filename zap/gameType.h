@@ -29,7 +29,6 @@
 #include "Timer.h"
 #include "flagItem.h"
 #include "teamInfo.h"
-//#include "Spawn.h"     // For AsteroidSpawn and FlagSpawn
 #include "gameStats.h"     // For VersionedGameStats
 #include "statistics.h"
 #include "Spawn.h"
@@ -550,5 +549,3 @@ public:
 };
 
 #endif
-
-
