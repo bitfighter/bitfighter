@@ -579,13 +579,13 @@ void HuntersFlagItem::renderItem(const Point &pos)
    if(mIsMounted && mFlagCount > 0)
    {
       if(mFlagCount >= 40)
-         glColor3f(1, 0.5, 0.5);
+         glColor(Colors::paleRed);
       else if(mFlagCount >= 20)
-         glColor3f(1, 1, 0);
+         glColor(Colors::yellow);
       else if(mFlagCount >= 10)
-         glColor3f(0, 1, 0);
+         glColor(Colors::green);
       else
-         glColor3f(1, 1, 1);
+         glColor(Colors::white);
 
       UserInterface::drawStringf(pos.x + 10, pos.y - 46, 12, "%d", mFlagCount);
    }

@@ -193,9 +193,9 @@ OGLCONSOLE_Console gConsole;     // For the moment, we'll just have one console 
 // Some colors -- other candidates include global and local chat colors, which are defined elsewhere.  Include here?
 Color gNexusOpenColor(0, 0.7, 0);
 Color gNexusClosedColor(0.85, 0.3, 0);
-Color gErrorMessageTextColor(1, 0.5, 0.5);
-Color gNeutralTeamColor(0.8, 0.8, 0.8);         // Objects that are neutral (on team -1)
-Color gHostileTeamColor(0.5, 0.5, 0.5);         // Objects that are "hostile-to-all" (on team -2)
+Color gErrorMessageTextColor(Colors::paleRed);
+Color gNeutralTeamColor(Colors::gray80);        // Objects that are neutral (on team -1)
+Color gHostileTeamColor(Colors::gray50);        // Objects that are "hostile-to-all" (on team -2)
 Color gMasterServerBlue(0.8, 0.8, 1);           // Messages about successful master server statii
 Color gHelpTextColor(Colors::green);
 

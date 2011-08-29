@@ -24,11 +24,10 @@
 //------------------------------------------------------------------------------------
 
 #include "flagItem.h"
-//#include "Spawn.h"      // For FlagSpawn def
 #include "goalZone.h"
 #include "gameType.h"
 #include "game.h"
-#include "stringUtils.h"
+#include "stringUtils.h"      // For itos
 #include "gameConnection.h"
 #include "gameObjectRender.h"
 
@@ -47,11 +46,13 @@ FlagItem::FlagItem(Point pos) : Parent(pos, true, (F32)Ship::CollisionRadius) //
    initialize();
 }
 
+
 // Alternate constructor, currently used by HuntersFlag
 FlagItem::FlagItem(Point pos, bool collidable, float radius, float mass) : Parent(pos, collidable, radius, mass)
 {
    initialize();
 }
+
 
 // Alternate constructor, currently used by dropping flags in hunterGame
 FlagItem::FlagItem(Point pos, Point vel, bool useDropDelay) : Parent(pos, true, (F32)Ship::CollisionRadius, 4)

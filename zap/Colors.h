@@ -23,8 +23,10 @@ namespace Colors {
    const Color black(0,0,0);
    const Color white(1,1,1);
    const Color gray50(0.50);
+   const Color gray80(0.80);
    const Color orange50(1, .50f, 0);      // Rabbit orange
    const Color orange67(1, .67f ,0);      // A more reddish orange
+   const Color paleRed(1, .50f, .50f);    // A washed out red
 };
 
 }
