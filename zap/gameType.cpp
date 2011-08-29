@@ -1462,7 +1462,7 @@ bool GameType::makeSureTeamCountIsNotZero()
    {
       boost::shared_ptr<Team> team = boost::shared_ptr<Team>(new Team);
       team->setName("Missing Team");
-      team->setColor(0,0,1);
+      team->setColor(Colors::blue);
       mGame->addTeam(team);
 
       return true;
@@ -2313,7 +2313,7 @@ GAMETYPE_RPC_S2C(GameType, s2cClientBecameAdmin, (StringTableEntry name), (name)
    if(!clientGame) return;
 
    if(clientGame->getGameType()->mClientList.size() && name != clientGame->getGameType()->mLocalClient->name)    // Don't show message to self
-      clientGame->displayMessage(Color(0,1,1), "%s has been granted administrator access.", name.getString());
+      clientGame->displayMessage(Colors::cyan, "%s has been granted administrator access.", name.getString());
 #endif
 }
 
@@ -2330,7 +2330,7 @@ GAMETYPE_RPC_S2C(GameType, s2cClientBecameLevelChanger, (StringTableEntry name),
    if(!clientGame) return;
 
    if(clientGame->getGameType()->mClientList.size() && name != clientGame->getGameType()->mLocalClient->name)    // Don't show message to self
-      clientGame->displayMessage(Color(0,1,1), "%s can now change levels.", name.getString());
+      clientGame->displayMessage(Colors::cyan, "%s can now change levels.", name.getString());
 #endif
 }
 
@@ -2810,7 +2810,7 @@ GAMETYPE_RPC_S2C(GameType, s2cDisplayChatPM, (StringTableEntry fromName, StringT
    TNLAssert(clientGame, "clientGame is NULL");
    if(!clientGame) return;
 
-   Color theColor = Color(1,1,0);
+   Color theColor = Colors::yellow;
    if(mLocalClient->name == toName && toName == fromName)      // Message sent to self
       clientGame->getUIManager()->getGameUserInterface()->displayChatMessage(theColor, "%s: %s", toName.getString(), message.getString());
 

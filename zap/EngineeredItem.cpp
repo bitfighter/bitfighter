@@ -486,7 +486,7 @@ void EngineeredItem::explode()
       Colors::yellow,
       Colors::red,
       Color(0.8, 1.0, 0),
-      Color(1, 0.5, 0),
+      Colors::orange50,
       Colors::white,
       Colors::red,
       Color(0.9, 0.5, 0),
@@ -502,8 +502,8 @@ void EngineeredItem::explode()
    F32 d = TNL::Random::readF() * 0.2f + 0.9f;
 
    FXManager::emitExplosion(getActualPos(), 0.65f, ExplosionColors, EXPLOSION_COLOR_COUNT);
-   FXManager::emitBurst(getActualPos(), Point(a,c) * 0.6f, Color(1,1,0.25), Color(1,0,0));
-   FXManager::emitBurst(getActualPos(), Point(b,d) * 0.6f, Color(1,1,0), Color(0,1,1));
+   FXManager::emitBurst(getActualPos(), Point(a,c) * 0.6f, Color(1,1,0.25), Colors::red);
+   FXManager::emitBurst(getActualPos(), Point(b,d) * 0.6f, Colors::yellow, Colors::yellow);
 
    disableCollision();
 #endif

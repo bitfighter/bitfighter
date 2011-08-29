@@ -645,7 +645,7 @@ U32 HuntersFlagItem::packUpdate(GhostConnection *connection, U32 updateMask, Bit
    if(stream->writeFlag(updateMask & FlagCountMask))
       stream->write(mFlagCount);
 
-   return Parent::Parent::packUpdate(connection, updateMask, stream);
+   return Parent::packUpdate(connection, updateMask, stream);
 }
 
 void HuntersFlagItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
@@ -653,7 +653,7 @@ void HuntersFlagItem::unpackUpdate(GhostConnection *connection, BitStream *strea
    if(stream->readFlag())
       stream->read(&mFlagCount);
 
-   Parent::Parent::unpackUpdate(connection, stream);
+   Parent::unpackUpdate(connection, stream);
 }
 
 
