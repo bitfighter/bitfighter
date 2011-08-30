@@ -58,45 +58,44 @@ protected:
    bool mTriangluationDisabled;     // Allow optimization of adding points for polygons that will never be displayed
 
 public:
-
    Geometry() { mTriangluationDisabled = false; }     // Constructor
    virtual ~Geometry() {}
 
-   virtual GeomType getGeomType()                  {TNLAssert(false, "Not implemented"); return geomNone;}
-   virtual Point getVert(S32 index) const          {TNLAssert(false, "Not implemented"); return Point();}
-   virtual void setVert(const Point &pos, S32 index) {TNLAssert(false, "Not implemented");}
-   virtual S32 getVertCount()                      {TNLAssert(false, "Not implemented"); return 0;}
-   virtual void clearVerts()                       {TNLAssert(false, "Not implemented");}
-   virtual bool addVert(const Point &point)        {TNLAssert(false, "Not implemented"); return false;}
-   virtual bool addVertFront(Point vert)           {TNLAssert(false, "Not implemented"); return false;}
-   virtual bool deleteVert(S32 vertIndex)          {TNLAssert(false, "Not implemented"); return false;}
-   virtual bool insertVert(Point vertex, S32 vertIndex) {TNLAssert(false, "Not implemented"); return false;}
+   virtual GeomType getGeomType()                       { TNLAssert(false, "Not implemented"); return geomNone; }
+   virtual Point getVert(S32 index) const               { TNLAssert(false, "Not implemented"); return Point(); }
+   virtual void setVert(const Point &pos, S32 index)    { TNLAssert(false, "Not implemented"); }
+   virtual S32 getVertCount()                           { TNLAssert(false, "Not implemented"); return 0; }
+   virtual void clearVerts()                            { TNLAssert(false, "Not implemented"); }
+   virtual bool addVert(const Point &point)             { TNLAssert(false, "Not implemented"); return false; }
+   virtual bool addVertFront(Point vert)                { TNLAssert(false, "Not implemented"); return false; }
+   virtual bool deleteVert(S32 vertIndex)               { TNLAssert(false, "Not implemented"); return false; }
+   virtual bool insertVert(Point vertex, S32 vertIndex) { TNLAssert(false, "Not implemented"); return false; }
 
-   virtual bool anyVertsSelected()                 {TNLAssert(false, "Not implemented"); return false;}
+   virtual bool anyVertsSelected()                      { TNLAssert(false, "Not implemented"); return false; }
 
-   virtual void selectVert(S32 vertIndex)          {TNLAssert(false, "Not implemented");}
-   virtual void aselectVert(S32 vertIndex)         {TNLAssert(false, "Not implemented");}    // Select an additional vertex (remember command line ArcInfo?)
-   virtual void unselectVert(S32 vertIndex)        {TNLAssert(false, "Not implemented");}
-   virtual void unselectVerts()                    {TNLAssert(false, "Not implemented");}
-   virtual bool vertSelected(S32 vertIndex)        {TNLAssert(false, "Not implemented"); return false;}
+   virtual void selectVert(S32 vertIndex)               { TNLAssert(false, "Not implemented"); }
+   virtual void aselectVert(S32 vertIndex)              { TNLAssert(false, "Not implemented"); }    // Select an additional vertex (remember command line ArcInfo?)
+   virtual void unselectVert(S32 vertIndex)             { TNLAssert(false, "Not implemented"); }
+   virtual void unselectVerts()                         { TNLAssert(false, "Not implemented"); }
+   virtual bool vertSelected(S32 vertIndex)             { TNLAssert(false, "Not implemented"); return false; }
 
-   virtual Vector<Point> *getOutline() const       {TNLAssert(false, "Not implemented"); return NULL;}
-   virtual Vector<Point> *getFill() const          {TNLAssert(false, "Not implemented"); return NULL;}
-   virtual Point getCentroid()                     {TNLAssert(false, "Not implemented"); return Point();}
-   virtual F32 getLabelAngle()                     {TNLAssert(false, "Not implemented"); return 0;}
+   virtual Vector<Point> *getOutline() const            { TNLAssert(false, "Not implemented"); return NULL; }
+   virtual Vector<Point> *getFill() const               { TNLAssert(false, "Not implemented"); return NULL; }
+   virtual Point getCentroid()                          { TNLAssert(false, "Not implemented"); return Point(); }
+   virtual F32 getLabelAngle()                          { TNLAssert(false, "Not implemented"); return 0; }
                                                             //
-   virtual void packGeom(GhostConnection *connection, BitStream *stream) {TNLAssert(false, "Not implemented");}
-   virtual void unpackGeom(GhostConnection *connection, BitStream *stream) {TNLAssert(false, "Not implemented");}
+   virtual void packGeom(GhostConnection *connection, BitStream *stream)   { TNLAssert(false, "Not implemented"); }
+   virtual void unpackGeom(GhostConnection *connection, BitStream *stream) { TNLAssert(false, "Not implemented"); }
 
-   virtual string geomToString(F32 gridSize) const                                    {TNLAssert(false, "Not implemented"); return string();}
-   virtual void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize) {TNLAssert(false, "Not implemented");}
+   virtual string geomToString(F32 gridSize) const                                  { TNLAssert(false, "Not implemented"); return string(); }
+   virtual void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize) { TNLAssert(false, "Not implemented"); }
 
    //virtual boost::shared_ptr<Geometry> copyGeometry() const = 0;
    void newGeomCopy();
 
-   virtual Rect getExtents()                       {TNLAssert(false, "Not implemented"); return Rect();}
+   virtual Rect getExtents()                       { TNLAssert(false, "Not implemented"); return Rect(); }
 
-   virtual void onPointsChanged()                  {TNLAssert(false, "Not implemented");}
+   virtual void onPointsChanged()                  { TNLAssert(false, "Not implemented"); }
 
    void disableTriangluation() { mTriangluationDisabled = true; }
 
@@ -105,11 +104,11 @@ public:
    void flipHorizontal(F32 centerX = 0);
    void flipVertical(F32 centerY = 0);
    void scale(const Point &center, F32 scale);
-
-
-   virtual void onGeomChanged() { /* do nothing */ };      // Item changed geometry (or moved), do any internal updating that might be required
-
+   
+   virtual void onGeomChanged() { /* Do nothing */ };   // Item changed geometry (or moved), do any internal updating that might be required
 };
+
+
 };
 
 #endif

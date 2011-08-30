@@ -93,7 +93,7 @@ public:
    virtual ~EditorObject();         // Virtual destructor
    virtual EditorObject *clone() const { TNLAssert(false, "Clone method not implemented!"); return NULL; }
 
-   EditorObject *newCopy();         // Copies object        // TODO: Will become call to clone, delete method
+   EditorObject *newCopy();         // Copies object, wraps clone()
 
    virtual void prepareForDock(Game *game, const Point &point);
    void addToEditor(Game *game);
@@ -269,7 +269,7 @@ public:
    S32 mItemId;  // not used, but as of now, needed for Item::Item constructor
 
    virtual EditorObject *clone()  const { TNLAssert(false, "Clone method not implemented!"); return NULL; };
-   EditorObject *newCopy() {return clone();};        // Copies object        // TODO: Will become call to clone, delete method
+   EditorObject *newCopy() { return clone(); }        // Copies object  
 };
 
 class EditorPointObject : public EditorObject, public PointGeometry {};
