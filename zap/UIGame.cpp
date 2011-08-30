@@ -2310,6 +2310,8 @@ void GameUserInterface::renderScoreboard(const GameType *gameType)
 {
    S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
 
+   /* // already in renderBasicInterfaceOverlay...
+      // May remove this to avoid F2 being brighter when pressing TAB to show score board with /linesmooth on
    if(mLevelInfoDisplayTimer.getCurrent() || mMissionOverlayActive)
    {
       F32 alpha = 1;
@@ -2341,6 +2343,7 @@ void GameUserInterface::renderScoreboard(const GameType *gameType)
 
       mInputModeChangeAlertDisplayTimer.reset(0);     // Supress mode change alert if this message is displayed...
    }
+   */
 
    if(mInputModeChangeAlertDisplayTimer.getCurrent() != 0)
    {
