@@ -2557,7 +2557,7 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
    else if(!stricmp(cmd, "addbot"))
    {
       if(mBotZoneCreationFailed)
-         clientRef->clientConnection->s2cDisplayErrorMessage("!!! Zone creation failure.  Bots disabled");
+         clientRef->clientConnection->s2cDisplayErrorMessage("!!! Zone creation failed for this level -- bots disabled");
 
       else if(!areBotsAllowed() && !clientRef->clientConnection->isAdmin())  // not admin, no robotScript
          clientRef->clientConnection->s2cDisplayErrorMessage("!!! This level does not allow robots");
@@ -2656,6 +2656,7 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
       }
    }
    else if(!stricmp(cmd, "rename") && args.size() >= 1)  // Allow admins to rename other players (in case of bad name)
+   {
       if(!clientRef->clientConnection->isAdmin())
          clientRef->clientConnection->s2cDisplayErrorMessage("!!! Need admin permission");
       else if(args.size() < 2)
@@ -2678,6 +2679,7 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
             clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, StringTableEntry("Player is renamed"));
          }
       }
+   }
    else if(!stricmp(cmd, "yes"))
    {
       gServerGame->voteClient(clientRef->clientConnection, true);
@@ -2710,6 +2712,7 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
       clientRef->clientConnection->s2cDisplayErrorMessage("!!! Invalid Command");
    }
 }
+
 
 GAMETYPE_RPC_C2S(GameType, c2sSendCommand, (StringTableEntry cmd, Vector<StringPtr> args), (cmd, args))
 {
