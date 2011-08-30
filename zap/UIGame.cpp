@@ -2310,6 +2310,8 @@ void GameUserInterface::renderScoreboard(const GameType *gameType)
 {
    S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
 
+   /* // already in renderBasicInterfaceOverlay...
+      // May remove this to avoid F2 being brighter when pressing TAB to show score board with /linesmooth on
    if(mLevelInfoDisplayTimer.getCurrent() || mMissionOverlayActive)
    {
       F32 alpha = 1;
@@ -2341,6 +2343,7 @@ void GameUserInterface::renderScoreboard(const GameType *gameType)
 
       mInputModeChangeAlertDisplayTimer.reset(0);     // Supress mode change alert if this message is displayed...
    }
+   */
 
    if(mInputModeChangeAlertDisplayTimer.getCurrent() != 0)
    {
@@ -2489,7 +2492,7 @@ void GameUserInterface::renderBasicInterfaceOverlay(const GameType *gameType, bo
          glColor(Colors::magenta, alpha);
          UserInterface::drawCenteredString(canvasHeight / 2 - 75, 20, gameType->getLevelDescription()->getString());
 
-         glColor(Colors::red, alpha);
+         glColor(Colors::green, alpha);
          UserInterface::drawCenteredStringf(canvasHeight - 100, 20, "Press [%s] to see this information again", keyCodeToString(keyMISSION));
 
          if(gameType->getLevelCredits()->isNotNull())    // Only render credits string if it's is not empty

@@ -153,6 +153,8 @@ public:
    static void playMusic(S32 listIndex);
    static void playMusicList();
    static void stopMusic();
+   static void pauseMusic();
+   static void resumeMusic();
 
 };
 

@@ -470,19 +470,39 @@ void SoundSystem::processAudio()
 
 void SoundSystem::processMusic()
 {
-   if (!gMusicValid)
+   // If music system failed to initialize, just return
+   if(!gMusicValid)
       return;
 
    // Adjust music volume only if changed
-   if (S32(gIniSettings.musicVolLevel * 10) != S32(musicVolume * 10)) {
+   if(S32(gIniSettings.musicVolLevel * 10) != S32(musicVolume * 10)) {
       musicVolume = gIniSettings.musicVolLevel;
       alSourcef(musicSource, AL_GAIN, musicVolume);
    }
 
-   // Once currentlyPlayingIndex is greater than list size, we are done with the list
-   // We probably don't want this behaviour in the end
-   if(musicState == MusicStopped && currentlyPlayingIndex < musicList.size())
-      playMusicList();
+   // Now check the music state and act accordingly
+   switch(musicState)
+   {
+      case MusicPlaying:
+         // If volume is set to zero, pause the music
+         if(S32(gIniSettings.musicVolLevel * 10) == 0)
+            pauseMusic();
+         break;
+
+      case MusicStopped:
+         // Don't play the next track unless the music is stopped
+         playMusicList();
+         break;
+
+      case MusicPaused:
+         // If the music is paused and the volume is not zero, resume the music
+         if(S32(gIniSettings.musicVolLevel * 10) != 0)
+            resumeMusic();
+         break;
+
+      default:
+         break;
+   }
 }
 
 
@@ -494,6 +514,7 @@ void SoundSystem::processVoiceChat()
 
 void SoundSystem::processSoundEffects()
 {
+   // If SFX system failed to initialize, just return
    if(!gSFXValid)
       return;
 
@@ -691,13 +712,16 @@ void SoundSystem::queueVoiceChatBuffer(SFXHandle& effect, ByteBufferPtr p)
 }
 
 
-
+// This method is called after a music track finishes playing
 void SoundSystem::music_end_callback(void* userdata, ALuint source)
 {
    logprintf("finished playing: %s", musicList[currentlyPlayingIndex].c_str());
 
+   // Set the state to stopped
    musicState = MusicStopped;
-   currentlyPlayingIndex++;
+
+   // Go to the next track, loop if at the end
+   currentlyPlayingIndex = (currentlyPlayingIndex + 1) % musicList.size();
 }
 
 void SoundSystem::playMusicList()
@@ -713,22 +737,34 @@ void SoundSystem::playMusic(S32 listIndex)
    musicStream = alureCreateStreamFromFile(musicFile.c_str(), MusicChunkSize, 0, NULL);
 
    if(!musicStream)
-   {
       logprintf(LogConsumer::LogError, "Failed to create music stream for: %s", musicList[listIndex].c_str());
-   }
 
    if(!alurePlaySourceStream(musicSource, musicStream, NumMusicStreamBuffers, 0, music_end_callback, NULL))
-   {
       logprintf(LogConsumer::LogError, "Failed to play music file: %s", musicList[listIndex].c_str());
-   }
 }
+
 
 void SoundSystem::stopMusic()
 {
    alureStopSource(musicSource, AL_FALSE);
+   musicState = MusicStopped;
 }
 
+
+void SoundSystem::pauseMusic()
+{
+   alurePauseSource(musicSource);
+   musicState = MusicPaused;
 }
+
+
+void SoundSystem::resumeMusic()
+{
+   alureResumeSource(musicSource);
+   musicState = MusicPlaying;
+}
+
+};
 
 #elif defined (ZAP_DEDICATED)
 
