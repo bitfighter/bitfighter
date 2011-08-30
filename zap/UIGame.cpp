@@ -2489,7 +2489,7 @@ void GameUserInterface::renderBasicInterfaceOverlay(const GameType *gameType, bo
          glColor(Colors::magenta, alpha);
          UserInterface::drawCenteredString(canvasHeight / 2 - 75, 20, gameType->getLevelDescription()->getString());
 
-         glColor(Colors::red, alpha);
+         glColor(Colors::green, alpha);
          UserInterface::drawCenteredStringf(canvasHeight - 100, 20, "Press [%s] to see this information again", keyCodeToString(keyMISSION));
 
          if(gameType->getLevelCredits()->isNotNull())    // Only render credits string if it's is not empty
