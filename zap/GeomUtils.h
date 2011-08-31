@@ -155,12 +155,9 @@ public:
    class TriangleData
    {
    public:
-      TriangleData() {}
-      ~TriangleData()
-      {
-         if(pointList) free(pointList);
-         if(triangleList) free(triangleList);
-      }
+      TriangleData();
+      ~TriangleData();
+
       F32* pointList;
       S32 pointCount;
       S32* triangleList;
