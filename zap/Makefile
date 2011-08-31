@@ -39,9 +39,6 @@ CFLAGS=
 DFLAGS=
 WFLAGS=
 
-# Special case for Triangle library because it can't handle optimizations without crashing on some levels 
-# with some verions of gcc
-CC_TRIANGLE=gcc $(DEBUG) $(INCLUDES) -DTNL_ENABLE_LOGGING -W
 
 OBJECTS_SHARED=\
    barrier.o\
@@ -112,7 +109,8 @@ OBJECTS_SHARED=\
    ../master/database.o\
    ../recast/RecastAlloc.o\
    ../recast/RecastMesh.o\
-   ../sqlite/sqlite3.o
+   ../sqlite/sqlite3.o\
+   ../Triangle/triangle.o
 
 
 OBJECTS_CLIENT=\
@@ -159,9 +157,6 @@ OBJECTS_DEDICATED=\
    $(OBJECTS_SHARED)
 
 
-OBJECT_TRIANGLE=../Triangle/triangle.o
-
-
 .c.o:
 	$(CC) $(DFLAGS) $(WFLAGS) -c $(CFLAGS) -o $@ $<
 
@@ -174,35 +169,32 @@ OBJECT_TRIANGLE=../Triangle/triangle.o
 
 default: release
 
-triangle:
-	$(CC_TRIANGLE) $(DFLAGS) $(WFLAGS) -c $(CFLAGS) -o $(OBJECT_TRIANGLE) ../Triangle/triangle.c
-
 debug: OPTIMIZE=
-debug: triangle bitfighter
+debug: bitfighter
 
 release: DEBUG=
-release: triangle bitfighter
+release: bitfighter
 
 dedicated: DEBUG=
 dedicated: CFLAGS=-DZAP_DEDICATED 
 dedicated: EXEFILE=bitfighterd
-dedicated: triangle dedicated_server
+dedicated: dedicated_server
 
 dedicated_debug: OPTIMIZE=
 dedicated_debug: CFLAGS=-DZAP_DEDICATED 
 dedicated_debug: EXEFILE=bitfighterd
-dedicated_debug: triangle dedicated_server
+dedicated_debug: dedicated_server
 
 
 bitfighter: $(OBJECTS_CLIENT) 
-	$(CC) -o ../exe/$(EXEFILE) $(OBJECTS_CLIENT) $(OBJECT_TRIANGLE) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a ../lua/lua-vec/src/liblua.a ../alure/libalure.a $(SFX_LFLAGS) $(GFX_LFLAGS) $(THREADLIB) $(LFLAGS)
+	$(CC) -o ../exe/$(EXEFILE) $(OBJECTS_CLIENT) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a ../lua/lua-vec/src/liblua.a ../alure/libalure.a $(SFX_LFLAGS) $(GFX_LFLAGS) $(THREADLIB) $(LFLAGS)
 
 dedicated_server: $(OBJECTS_DEDICATED) 
-	$(CC) -o ../exe/$(EXEFILE) $(OBJECTS_DEDICATED) $(OBJECT_TRIANGLE) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a ../lua/lua-vec/src/liblua.a $(THREADLIB) $(LFLAGS)
+	$(CC) -o ../exe/$(EXEFILE) $(OBJECTS_DEDICATED) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a ../lua/lua-vec/src/liblua.a $(THREADLIB) $(LFLAGS)
 
 clean: 
-	rm -f $(OBJECTS_CLIENT) $(OBJECTS_CLIENT) $(OBJECTS_DEDICATED) $(OBJECTS_SHARED) $(OBJECT_TRIANGLE) ../exe/bitfighter ../exe/bitfightered
+	rm -f $(OBJECTS_CLIENT) $(OBJECTS_CLIENT) $(OBJECTS_DEDICATED) $(OBJECTS_SHARED) ../exe/bitfighter ../exe/bitfightered
 
 cleano:
-	rm -f $(OBJECTS_CLIENT) $(OBJECTS_DEDICATED) $(OBJECTS_SHARED) $(OBJECT_TRIANGLE)
+	rm -f $(OBJECTS_CLIENT) $(OBJECTS_DEDICATED) $(OBJECTS_SHARED)
 
