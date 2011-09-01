@@ -1266,7 +1266,10 @@ static const char *sanitizeForJson(const char *value)
 
 
    TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mJoinGlobalChat, ())
-   { 
+   {
+      if(isInGlobalChat)  // Already in Global Chat
+         return;
+
       isInGlobalChat = true;
       
       Vector<StringTableEntry> names;
@@ -1285,6 +1288,9 @@ static const char *sanitizeForJson(const char *value)
 
    TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mLeaveGlobalChat, ())
    {
+      if(!isInGlobalChat)  // was not in Global Chat
+         return;
+
       isInGlobalChat = false;
 
       for(MasterServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)

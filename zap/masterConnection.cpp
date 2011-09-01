@@ -370,7 +370,7 @@ void MasterServerConnection::writeConnectRequest(BitStream *bstream)
    bstream->write(BUILD_VERSION);            // Current build of this game
 
 #ifdef ZAP_DEDICATED
-	bstream->writeString("");  // empty controller string for dedicated.
+   bstream->writeString("");  // empty controller string for dedicated.
 #else
    // First controller's autodetect string (for research purposes!)
    bstream->writeString(Joystick::DetectedJoystickNameList.size() > 0 ? Joystick::DetectedJoystickNameList[0] : "");
@@ -409,9 +409,17 @@ extern CmdLineSettings gCmdLineSettings;
 void MasterServerConnection::onConnectionEstablished()
 {
    if(mGame->isServer())        // Might want ServerFilter ?
-      logprintf(LogConsumer::ServerFilter, "Server established connection with Master Server");
+      logprintf(LogConsumer::MsgType(LogConsumer::LogConnection | LogConsumer::ServerFilter), "Server established connection with Master Server");
    else
+   {
       logprintf(LogConsumer::LogConnection, "Client established connection with Master Server");
+
+      TNLAssert(dynamic_cast<ClientGame *>(mGame), "mGame is not ClientGame");
+
+      // Clear old Player list that might be there from client's lost connection to master while in game lobby
+      Vector<StringTableEntry> emptyPlayerList;
+      ((ClientGame *)mGame)->setPlayersInGlobalChat(emptyPlayerList);
+   }
 
    if(gCmdLineSettings.masterAddress == "" && gMasterAddress.size() >= 2)
    {
@@ -430,11 +438,17 @@ void MasterServerConnection::onConnectionEstablished()
 // A still-being-established connection has been terminated
 void MasterServerConnection::onConnectTerminated(TerminationReason reason, const char *reasonStr)   
 {
-   //gClientGame->onConnectionTerminated(getNetAddress(), reason, reasonStr);
-	// Don't want to get Connection Terminated message interrupting the game,
-	// Also, this may be called from dedicated server's connection to master which do not have gClientGame..
+#ifndef ZAP_DEDICATED
+   if(!mGame->isServer())
+   {
+      TNLAssert(dynamic_cast<ClientGame *>(mGame), "mGame is not ClientGame");
 
-   // TODO: put something here or keep empty?
+      //((ClientGame *)mGame)->onConnectionTerminated(getNetAddress(), reason, reasonStr);
+      // Don't want to get Connection Terminated message interrupting the game when Client lost connection to master
+
+      // TODO: put something here?
+   }
+#endif
 }
 
 
