@@ -44,6 +44,7 @@ F32 Joystick::rawAxis[Joystick::rawAxisCount];
 S16 Joystick::SensitivityThreshold = 3200;  // out of 32767
 S32 Joystick::UseJoystickNumber = 0;
 U32 Joystick::AxesKeyCodeMask = 0;
+U32 Joystick::HatKeyCodeMask = 0;
 
 
 // Needs to be Aligned with JoystickAxesDirections
