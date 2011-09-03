@@ -200,7 +200,7 @@ JoystickInfo Joystick::PredefinedJoystickList[ControllerTypeCount] =
       "SaitekDualAnalogP880",
       9,
       {0, 1},
-      {5, 2},
+      {3, 2},
       { // SaitekDualAnalogP880  9
          ControllerButton1,
          ControllerButton2,
