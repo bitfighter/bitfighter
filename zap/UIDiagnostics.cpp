@@ -417,7 +417,7 @@ void DiagnosticUserInterface::render()
       hpos += drawStringAndGetWidthf( hpos, ypos, textsize - 2, "Raw Controller Input [%d]: ", Joystick::UseJoystickNumber);
 
       for(U32 i = 0; i < MaxControllerButtons; i++)
-         if(Joystick::ButtonMask & (1 << i))
+         if(Joystick::ButtonMask & BIT(i))
             hpos += drawStringAndGetWidthf( hpos, ypos, textsize - 2, "(%d)", i ) + 5;
 
       ypos += textsize + gap + 10;

@@ -1076,6 +1076,7 @@ S32 keyCodeToSDLKey(KeyCode keyCode)
 }
 #endif
 
+
 KeyCode joyButtonToKeyCode(int buttonIndex)
 {
    switch(buttonIndex)
@@ -1100,14 +1101,24 @@ KeyCode joyButtonToKeyCode(int buttonIndex)
          return BUTTON_START;
       case 9:
          return BUTTON_BACK;
-      case 10:
+      default:
+         return BUTTON_UNKNOWN;
+   }
+}
+
+
+KeyCode joyHatToKeyCode(int hatDirectionMask)
+{
+   switch(hatDirectionMask)
+   {
+      case 1:
          return BUTTON_DPAD_UP;
-      case 11:
-         return BUTTON_DPAD_DOWN;
-      case 12:
-         return BUTTON_DPAD_LEFT;
-      case 13:
+      case 2:
          return BUTTON_DPAD_RIGHT;
+      case 4:
+         return BUTTON_DPAD_DOWN;
+      case 8:
+         return BUTTON_DPAD_LEFT;
       default:
          return BUTTON_UNKNOWN;
    }
