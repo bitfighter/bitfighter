@@ -717,8 +717,8 @@ void GameObject::onGhostAddBeforeUpdate(GhostConnection *theConnection)
 #ifndef ZAP_DEDICATED
    // Some unpackUpdate need getGame() available.
    GameConnection *gc = (GameConnection *)(theConnection);  // GhostConnection is always GameConnection
-   TNLAssert(theConnection && gc->mClientGame, "Should only be client here!");
-   mGame = gc->mClientGame;
+   TNLAssert(theConnection && gc->getClientGame(), "Should only be client here!");
+   mGame = gc->getClientGame();
 #endif
 }
 
@@ -726,14 +726,14 @@ bool GameObject::onGhostAdd(GhostConnection *theConnection)
 {
 #ifndef ZAP_DEDICATED
    GameConnection *gc = (GameConnection *)(theConnection);  // GhostConnection is always GameConnection
-   TNLAssert(theConnection && gc->mClientGame, "Should only be client here!");
+   TNLAssert(theConnection && gc->getClientGame(), "Should only be client here!");
 
 #ifdef TNL_ENABLE_ASSERTS
    mGame = NULL;  // prevent false asserts
 #endif
 
    // for performance, add to GridDatabase after update, to avoid slowdown from adding to database with zero points or (0,0) then moving
-   addToGame(gc->mClientGame, gc->mClientGame->getGameObjDatabase());
+   addToGame(gc->getClientGame(), gc->getClientGame()->getGameObjDatabase());
 #endif
    return true;
 }

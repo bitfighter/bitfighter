@@ -344,7 +344,6 @@ void initHostGame(Address bindAddress, Vector<string> &levelList, bool testMode)
 
    gServerGame->setReadyToConnectToMaster(true);
    seedRandomNumberGenerator(gHostName);
-   gClientInfo.id.getRandom();                    // Generate a player ID
 
    // Don't need to build our level list when in test mode because we're only running that one level stored in editor.tmp
    if(!testMode)

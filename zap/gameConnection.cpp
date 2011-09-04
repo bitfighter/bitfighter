@@ -299,7 +299,8 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendLine, (StringPtr line), (line),
    // else... what?
    if(mDataBuffer)
    {
-      if(mDataBuffer->getBufferSize() < maxDataBufferSize)  // limit memory, to avoid eating too much memory.
+      // Limit memory consumption:
+      if(mDataBuffer->getBufferSize() < maxDataBufferSize)                                   
          mDataBuffer->appendBuffer((U8 *)line.getString(), (U32)strlen(line.getString()));
    }
    else
@@ -323,7 +324,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rCommandComplete, (RangedU32<0,SENDER_STATUS
 
 #ifndef ZAP_DEDICATED
    // Server might need mOutputFile, if the server were to receive files.  Currently, server doesn't receive files in-game.
-   TNLAssert(mClientGame != NULL, "trying to get mOutputFile, mClientGame is NULL");
+   TNLAssert(mClientGame != NULL, "We need a clientGame to proceed...");
 
    if(mClientGame)
    {

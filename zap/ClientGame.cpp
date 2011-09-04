@@ -169,8 +169,9 @@ void ClientGame::setConnectionToServer(GameConnection *theConnection)
 {
    TNLAssert(theConnection, "Passing null connection.  Bah!");
    TNLAssert(mConnectionToServer.isNull(), "Error, a connection already exists here.");
+
    mConnectionToServer = theConnection;
-   theConnection->mClientGame = this;
+   theConnection->setClientGame(this);
 }
 
 

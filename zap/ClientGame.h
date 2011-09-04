@@ -89,7 +89,6 @@ public:
 
    UIManager *getUIManager() { return mUIManager; }
 
-
    bool getInCommanderMap() { return mInCommanderMap; }
    void setInCommanderMap(bool inCommanderMap) { mInCommanderMap = inCommanderMap; }
 
@@ -142,8 +141,6 @@ public:
    void changePassword(GameConnection::ParamType type, const Vector<string> &words, bool required);
    void changeServerParam(GameConnection::ParamType type, const Vector<string> &words);
    bool checkName(const string &name);    // Make sure name is valid, and correct case of name if otherwise correct
-
-
 
 
    // Alert users when they get a reply to their request for elevated permissions

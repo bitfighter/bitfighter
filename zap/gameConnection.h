@@ -68,8 +68,13 @@ struct ClientInfo
    bool authenticated;
    F32 simulatedPacketLoss;
    U32 simulatedLag;
-};
 
+
+   ClientInfo()   // Quickie constructor
+   { 
+      id.getRandom();    // Generate a player ID
+   }
+};
 
 
 ////////////////////////////////////////
@@ -97,7 +102,12 @@ private:
    // The server maintains a linked list of clients...
    GameConnection *mNext;
    GameConnection *mPrev;
+
    static GameConnection gClientList;
+
+#ifndef ZAP_DEDICATED
+   ClientGame *mClientGame;
+#endif
 
    bool mInCommanderMap;
    bool mIsRobot;
@@ -124,10 +134,6 @@ private:
 
 
 public:
-#ifndef ZAP_DEDICATED
-   ClientGame *mClientGame;
-#endif
-
    Vector<U32> mOldLoadout;   // Server: to respawn with old loadout  Client: to check if using same loadout configuration
    U16 switchedTeamCount;
 
@@ -180,6 +186,9 @@ public:
    TNL_DECLARE_RPC(s2rSendLine, (StringPtr line));
    TNL_DECLARE_RPC(s2rCommandComplete, (RangedU32<0,SENDER_STATUS_COUNT> status));
 
+
+   ClientGame *getClientGame() { return mClientGame; }
+   void setClientGame(ClientGame *game) { mClientGame = game; }
 
    S32 mScore;                // Total points scored my this connection
    S32 mTotalScore;           // Total points scored by anyone while this connection is alive
