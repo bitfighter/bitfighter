@@ -1434,10 +1434,7 @@ void ClientGame::renderNormal()
 
    // Render current ship's energy
    if(ship)
-   {
       renderEnergyGuage(ship->mEnergy, Ship::EnergyMax, Ship::EnergyCooldownThreshold);
-   }
-
 
    //renderOverlayMap();     // Draw a floating overlay map
 }
@@ -1463,13 +1460,6 @@ void ClientGame::render()
 
 ////////////////////////////////////////
 ////////////////////////////////////////
-
-//const Color *EditorGame::getTeamColor(S32 teamIndex) const
-//{
-//   return Game::getBasicTeamColor(this, teamIndex); 
-//}
-
-
 
 bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &levelFileName)
 {
@@ -1520,7 +1510,6 @@ bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &le
          {
             wallObject->addToGame(this, this->getEditorDatabase());
             wallObject->processEndPoints();
-            //wallObject->onGeomChanged(); 
          }
          else
             delete wallObject;
