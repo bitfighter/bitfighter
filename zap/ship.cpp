@@ -1342,8 +1342,16 @@ void Ship::setLoadout(const Vector<U32> &loadout, bool silent)
    GameConnection *cc = getControllingClient();
 
 #ifndef ZAP_DEDICATED
-   if(!cc && gClientGame)
-      cc = gClientGame->getConnectionToServer();      // Second try
+   if(!cc)
+   {
+      ClientGame *clientGame = dynamic_cast<ClientGame *>(getGame());
+
+      if(clientGame)
+      {
+         TNLAssert(false, "Please document code path/circumstances this is triggered!");
+         cc = clientGame->getConnectionToServer();      // Second try  ==> under what circumstances can this happen?
+      }
+   }
 #endif
 
    if(cc)

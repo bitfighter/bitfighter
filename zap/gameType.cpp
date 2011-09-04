@@ -1225,7 +1225,6 @@ void GameType::setClientShipLoadout(ClientRef *cl, const Vector<U32> &loadout, b
 #endif
    }
 
-
    Ship *theShip = dynamic_cast<Ship *>(cl->clientConnection->getControlObject());
    if(theShip)
       theShip->setLoadout(loadout, silent);
