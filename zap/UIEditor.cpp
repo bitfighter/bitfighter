@@ -3654,6 +3654,8 @@ void EditorUserInterface::testLevel()
 }
 
 
+extern U16 DEFAULT_GAME_PORT;
+
 void EditorUserInterface::testLevelStart()
 {
    string tmpFileName = mEditFileName;
@@ -3673,7 +3675,7 @@ void EditorUserInterface::testLevelStart()
 
       Vector<string> levelList;
       levelList.push_back("editor.tmp");
-      initHostGame(Address(IPProtocol, Address::Any, 28000), levelList, true);
+      initHostGame(Address(IPProtocol, Address::Any, DEFAULT_GAME_PORT), levelList, true);
    }
 
    mNeedToSave = nts;                  // Restore saved parameters

@@ -1143,13 +1143,14 @@ extern string gHostName, gHostDescr;
 extern string gLevelChangePassword, gAdminPassword, gServerPassword;
 extern void initHostGame(Address bindAddress, Vector<string> &levelList, bool testMode);
 extern ConfigDirectories gConfigDirs;
+extern U16 DEFAULT_GAME_PORT;
 
 static void startHostingCallback(ClientGame *game, U32 unused)
 {
    game->getUIManager()->getHostMenuUserInterface()->saveSettings();
 
    Vector<string> levelList = LevelListLoader::buildLevelList(gConfigDirs.levelDir);
-   initHostGame(Address(IPProtocol, Address::Any, 28000), levelList, false);
+   initHostGame(Address(IPProtocol, Address::Any, DEFAULT_GAME_PORT), levelList, false);
 }
 
 void HostMenuUserInterface::setupMenus()
@@ -1175,7 +1176,7 @@ void HostMenuUserInterface::setupMenus()
    menuItems.push_back(boost::shared_ptr<MenuItem>(new YesNoMenuItem(getGame(), "ALLOW MAP DOWNLOADS:", gIniSettings.allowGetMap, NULL, "", KEY_M)));
 
    //menuItems.push_back(boost::shared_ptr<MenuItem>(new CounterMenuItem("MAXIMUM PLAYERS:",   gIniSettings.maxplayers, 1, 2, MAX_PLAYERS, "", "", "", KEY_P)));
-   //menuItems.push_back(boost::shared_ptr<MenuItem>(new EditableMenuItem("PORT:",                  "28000",              "Use default of 28000", 
+   //menuItems.push_back(boost::shared_ptr<MenuItem>(new EditableMenuItem("PORT:",             itos(DEFAULT_GAME_PORT),  "Use default of " + itos(DEFAULT_GAME_PORT), 
    //                                         "", 10, KEY_P)));
 }
 

@@ -154,7 +154,7 @@ void QueryServersUserInterface::onActivate()
       s.serverName = name;
       s.id = i;
       s.pingTime = Random::readF() * 512;
-      s.serverAddress.port = 28000;
+      s.serverAddress.port = DEFAULT_GAME_PORT;
       s.serverAddress.netNum[0] = Random::readI();
       s.maxPlayers = Random::readF() * 16 + 8;
       s.playerCount = Random::readF() * s.maxPlayers;
@@ -185,7 +185,7 @@ void QueryServersUserInterface::contactEveryone()
 {
    mBroadcastPingSendTime = Platform::getRealMilliseconds();
 
-   //Address broadcastAddress(IPProtocol, Address::Broadcast, 28000);
+   //Address broadcastAddress(IPProtocol, Address::Broadcast, DEFAULT_GAME_PORT);
    //getGame()->getNetInterface()->sendPing(broadcastAddress, mNonce);
 
    // Always ping these servers -- typically a local server
@@ -1335,6 +1335,8 @@ void QueryServersUserInterface::sort()
 }
 
 
+extern U16 DEFAULT_GAME_PORT;
+
 // Look for /commands in chat message before handing off to parent
 void QueryServersUserInterface::issueChat()
 {
@@ -1343,7 +1345,7 @@ void QueryServersUserInterface::issueChat()
       const char *str1 = mLineEditor.c_str();
       S32 a = 0;
 
-      while(a < 9)      // compare character by character, now case insensitive
+      while(a < 9)      // Compare character by character, now case insensitive
       {       
          if(str1[a] != "/connect "[a] && str1[a] != "/CONNECT "[a] ) 
             a = S32_MAX;
@@ -1356,7 +1358,8 @@ void QueryServersUserInterface::issueChat()
          if(address.isValid())
          {
             if(address.port == 0)
-               address.port = 28000;   //default port number, if user did not enter port number
+               address.port = DEFAULT_GAME_PORT;   // Use default port number if the user did not supply one
+
             joinGame(address, false, false);
          }
          else

@@ -221,8 +221,10 @@ string gLevelChangePassword = "";
 
 DataConnection *dataConn = NULL;
 
+U16 DEFAULT_GAME_PORT = 28000;
+
 Vector<string> gMasterAddress;
-Address gBindAddress(IPProtocol, Address::Any, 28000);      // Good for now, may be overwritten by INI or cmd line setting
+Address gBindAddress(IPProtocol, Address::Any, DEFAULT_GAME_PORT);      // Good for now, may be overwritten by INI or cmd line setting
 // Above is equivalent to ("IP:Any:28000")
 
 Vector<StringTableEntry> gLevelSkipList;  // Levels we'll never load, to create a semi-delete function for remote server mgt
@@ -911,7 +913,8 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
             gCmdLineSettings.hostaddr = argv[i+1];
          else
          {
-            logprintf(LogConsumer::LogError, "You must specify a host address for the host to listen on (e.g. IP:Any:28000 or IP:192.169.1.100:5500)");
+            string msg = "You must specify a host address for the host to listen on (e.g. IP:Any:" + itos(DEFAULT_GAME_PORT) + " or IP:192.169.1.100:5500)";
+            logprintf(LogConsumer::LogError, msg.c_str());
             exitGame(1);
          }
       }
