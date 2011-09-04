@@ -1150,11 +1150,11 @@ void ClientGame::renderCommander()
    glPushMatrix();
 
    GameObject *controlObject = mConnectionToServer->getControlObject();
-   Ship *u = dynamic_cast<Ship *>(controlObject);      // This is the local player's ship
+   Ship *ship = dynamic_cast<Ship *>(controlObject);      // This is the local player's ship
    
-   Point position = u ? u->getRenderPos() : Point(0,0);
+   Point position = ship ? ship->getRenderPos() : Point(0,0);
 
-   Point visSize = u ? computePlayerVisArea(u) * 2 : worldExtents;
+   Point visSize = ship ? computePlayerVisArea(ship) * 2 : worldExtents;
    Point modVisSize = (worldExtents - visSize) * zoomFrac + visSize;
 
    // Put (0,0) at the center of the screen
@@ -1172,7 +1172,7 @@ void ClientGame::renderCommander()
    // Render the objects.  Start by putting all command-map-visible objects into renderObjects.  Note that this no longer captures
    // walls -- those will be rendered separately.
    rawRenderObjects.clear();
-   if(u->isModuleActive(ModuleSensor))
+   if(ship->isModuleActive(ModuleSensor))
       mGameObjDatabase->findObjects((TestFunc)isVisibleOnCmdrsMapWithSensorType, rawRenderObjects);
    else
       mGameObjDatabase->findObjects((TestFunc)isVisibleOnCmdrsMapType, rawRenderObjects);
@@ -1189,7 +1189,7 @@ void ClientGame::renderCommander()
       for(S32 i = 0; i < Robot::robots.size(); i++)
          renderObjects.push_back(Robot::robots[i]);
 
-   if(u)
+   if(ship)
    {
       // Get info about the current player
       GameType *gt = getGameType();
@@ -1197,7 +1197,7 @@ void ClientGame::renderCommander()
 
       if(gt)
       {
-         playerTeam = u->getTeam();
+         playerTeam = ship->getTeam();
          Color teamColor = *gt->getTeamColor(playerTeam);
 
          for(S32 i = 0; i < renderObjects.size(); i++)
@@ -1206,14 +1206,14 @@ void ClientGame::renderCommander()
             if(renderObjects[i]->getObjectTypeNumber() == PlayerShipTypeNumber ||
                   renderObjects[i]->getObjectTypeNumber() == RobotShipTypeNumber)
             {
-               Ship *ship = dynamic_cast<Ship *>(renderObjects[i]);
+               Ship *otherShip = dynamic_cast<Ship *>(renderObjects[i]);
 
                // Get team of this object
-               S32 ourTeam = ship->getTeam();
-               if((ourTeam == playerTeam && getGameType()->isTeamGame()) || ship == u)  // On our team (in team game) || the ship is us
+               S32 otherShipTeam = otherShip->getTeam();
+               if((otherShipTeam == playerTeam && getGameType()->isTeamGame()) || otherShip == ship)  // On our team (in team game) || the ship is us
                {
-                  Point p = ship->getRenderPos();
-                  Point visExt = computePlayerVisArea(ship);
+                  Point p = otherShip->getRenderPos();
+                  Point visExt = computePlayerVisArea(otherShip);
 
                   glColor(teamColor * zoomFrac * 0.35f);
 
@@ -1250,7 +1250,7 @@ void ClientGame::renderCommander()
                glEnd();
 
                glColor(teamColor * 0.8f);     // Draw a marker in the middle
-               drawCircle(u->getRenderPos(), 2);
+               drawCircle(ship->getRenderPos(), 2);
             }
          }
       }
@@ -1293,9 +1293,9 @@ void ClientGame::renderOverlayMap()
    const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
 
    GameObject *controlObject = mConnectionToServer->getControlObject();
-   Ship *u = dynamic_cast<Ship *>(controlObject);
+   Ship *ship = dynamic_cast<Ship *>(controlObject);
 
-   Point position = u->getRenderPos();
+   Point position = ship->getRenderPos();
 
    S32 mapWidth = canvasWidth / 4;
    S32 mapHeight = canvasHeight / 4;
@@ -1324,7 +1324,7 @@ void ClientGame::renderOverlayMap()
    mapBounds.expand(Point(mapWidth * 2, mapHeight * 2));      //TODO: Fix
 
    rawRenderObjects.clear();
-   if(u->isModuleActive(ModuleSensor))
+   if(ship->isModuleActive(ModuleSensor))
       mGameObjDatabase->findObjects((TestFunc)isVisibleOnCmdrsMapWithSensorType, rawRenderObjects);
    else
       mGameObjDatabase->findObjects((TestFunc)isVisibleOnCmdrsMapType, rawRenderObjects);
@@ -1368,19 +1368,18 @@ void ClientGame::renderNormal()
    if(!hasValidControlObject())
       return;
 
-   GameObject *controlObject = mConnectionToServer->getControlObject();
-   Ship *u = dynamic_cast<Ship *>(controlObject);      // This is the local player's ship
-   if(!u)
+   Ship *ship = dynamic_cast<Ship *>(mConnectionToServer->getControlObject());  // This is the local player's ship
+   if(!ship)
       return;
 
-   position.set(u->getRenderPos());
+   position.set(ship->getRenderPos());
 
    glPushMatrix();
 
    // Put (0,0) at the center of the screen
    glTranslatef(gScreenInfo.getGameCanvasWidth() / 2.f, gScreenInfo.getGameCanvasHeight() / 2.f, 0);       
 
-   Point visExt = computePlayerVisArea(dynamic_cast<Ship *>(u));
+   Point visExt = computePlayerVisArea(ship);
    glScalef((gScreenInfo.getGameCanvasWidth()  / 2) / visExt.x, 
             (gScreenInfo.getGameCanvasHeight() / 2) / visExt.y, 1);
 
@@ -1423,12 +1422,7 @@ void ClientGame::renderNormal()
 
    FXTrail::renderTrails();
 
-   Ship *ship = NULL;
-   if(mConnectionToServer.isValid())
-      ship = dynamic_cast<Ship *>(mConnectionToServer->getControlObject());
-
-   if(ship)
-      getUIManager()->getGameUserInterface()->renderEngineeredItemDeploymentMarker(ship);
+   getUIManager()->getGameUserInterface()->renderEngineeredItemDeploymentMarker(ship);
 
    glPopMatrix();
 
