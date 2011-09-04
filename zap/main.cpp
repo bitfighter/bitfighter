@@ -56,6 +56,7 @@ XXX need to document timers, new luavec stuff XXX
     level into editor and save; parameter will be properly rewritten.
 <li>Reduced CPU usage for overlapping asteroids
 <li>LUA added copyMoveFromObject, LUA getCurrLoaduot and getReqLoadout can now be used for ships
+<li>Added /leveldir command to change folder where levels are read.  Change affects current session only, and will not be saved in the INI.</li>
 </ul>
 */
 
