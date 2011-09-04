@@ -1654,7 +1654,7 @@ void Ship::render(S32 layerIndex)
       // Draw the outline of the ship in solid black -- this will block out any stars and give
       // a tantalizing hint of motion when the ship is cloaked.  Could also try some sort of star-twinkling or
       // scrambling thing here as well...
-      glColor3f(0,0,0);
+      glColor(Colors::black);
       glDisableBlendfromLineSmooth;
       glBegin(GL_POLYGON);
          glVertex2f(-20, -15);
@@ -1670,6 +1670,7 @@ void Ship::render(S32 layerIndex)
    // LayerIndex == 1
 
    GameType *gameType = clientGame->getGameType();
+
    if(!gameType)
       return;     // This will likely never happen
 
