@@ -95,18 +95,18 @@ protected:
 public:
    AbstractChat();                        // Constructor
    virtual ~AbstractChat();               // Destructor
-   void newMessage(const string &from, const string &message, bool isPrivate, bool isSystem, bool fromSelf);   // Handle incoming msg
+   void newMessage(ClientGame *game, const string &from, const string &message, bool isPrivate, bool isSystem, bool fromSelf);   // Handle incoming msg
 
    void clearChat();                          // Clear message being composed
    virtual void issueChat(ClientGame *game);  // Send chat message
 
-   void leaveGlobalChat();                    // Send msg to master telling them we're leaving chat
+   void leaveGlobalChat(ClientGame *game);    // Send msg to master telling them we're leaving chat
 
    void renderMessages(U32 yPos, U32 lineCountToDisplay);
    void renderMessageComposition(S32 ypos);   // Render outgoing chat message composition line
 
    void renderChatters(S32 xpos, S32 ypos);   // Render list of other people in chat room
-   void deliverPrivateMessage(const char *sender, const char *message);
+   void deliverPrivateMessage(ClientGame *game, const char *sender, const char *message);
 
    // Handle players joining and leaving the chat session
    void setPlayersInGlobalChat(const Vector<StringTableEntry> &playerNicks);

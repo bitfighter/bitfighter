@@ -65,6 +65,7 @@ AbstractChat::AbstractChat()
 
 AbstractChat::~AbstractChat()
 {
+   // Do nothing
 }
 
 Color AbstractChat::getColor(string name)
@@ -77,7 +78,7 @@ Color AbstractChat::getColor(string name)
 
 
 // We received a new incoming chat message...  Add it to the list
-void AbstractChat::newMessage(const string &from, const string &message, bool isPrivate, bool isSystem, bool fromSelf)
+void AbstractChat::newMessage(ClientGame *game, const string &from, const string &message, bool isPrivate, bool isSystem, bool fromSelf)
 {
    // Choose a color
    Color color;
@@ -96,7 +97,7 @@ void AbstractChat::newMessage(const string &from, const string &message, bool is
    mMessageCount++;
 
    if(fromSelf && isPrivate)     // I don't think this can ever happen!  ==> Should be !fromSelf ?
-      deliverPrivateMessage(from.c_str(), message.c_str());
+      deliverPrivateMessage(game, from.c_str(), message.c_str());
 }
 
 
@@ -114,20 +115,21 @@ void AbstractChat::playerJoinedGlobalChat(ClientGame *game, const StringTableEnt
    mPlayersInGlobalChat.push_back(playerNick);
 
    // Make the following be from us, so it will be colored white
-   newMessage(game->getClientInfo()->name, "----- Player " + string(playerNick.getString()) + " joined the conversation -----", false, true, true);
+   string msg = "----- Player " + string(playerNick.getString()) + " joined the conversation -----";
+   newMessage(game, game->getClientInfo()->name, msg, false, true, true);
    SoundSystem::playSoundEffect(SFXPlayerJoined, gIniSettings.sfxVolLevel);   // Make sound?
 }
 
 
 void AbstractChat::playerLeftGlobalChat(ClientGame *game, const StringTableEntry &playerNick)
 {
-   ChatUserInterface *ui = gClientGame->getUIManager()->getChatUserInterface();
+   ChatUserInterface *ui = game->getUIManager()->getChatUserInterface();
 
    for(S32 i = 0; i < ui->mPlayersInGlobalChat.size(); i++)
       if(ui->mPlayersInGlobalChat[i] == playerNick)
       {
          ui->mPlayersInGlobalChat.erase_fast(i);
-         newMessage(game->getClientInfo()->name, "----- Player " + string(playerNick.getString()) + " left the conversation -----", false, true, true);
+         newMessage(game, game->getClientInfo()->name, "----- Player " + string(playerNick.getString()) + " left the conversation -----", false, true, true);
          SoundSystem::playSoundEffect(SFXPlayerLeft, gIniSettings.sfxVolLevel);   // Make sound?
          break;
       }
@@ -168,12 +170,14 @@ Color AbstractChat::getNextColor()
 
 
 // Announce we're ducking out for a spell...
-void AbstractChat::leaveGlobalChat()
+void AbstractChat::leaveGlobalChat(ClientGame *game)
 {
-   MasterServerConnection *conn = gClientGame->getConnectionToMaster();
+   MasterServerConnection *conn = game->getConnectionToMaster();
+
    if(conn)
       conn->c2mLeaveGlobalChat();
 }
+
 
 void AbstractChat::renderMessages(U32 ypos, U32 lineCountToDisplay)  // ypos is starting location of first message
 {
@@ -280,15 +284,15 @@ void AbstractChat::renderMessageComposition(S32 ypos)
 }
 
 
-void AbstractChat::deliverPrivateMessage(const char *sender, const char *message)
+void AbstractChat::deliverPrivateMessage(ClientGame *game, const char *sender, const char *message)
 {
    // If player not in UIChat or UIQueryServers, then display message in-game if possible.  2 line message.
    UIID currId = UserInterface::current->getMenuID();
    if(currId != ChatUI && currId != QueryServersScreenUI )
    {
-      gClientGame->getUIManager()->getGameUserInterface()->displayChatMessage(GameUserInterface::privateF5MessageDisplayedInGameColor,
+      game->getUIManager()->getGameUserInterface()->displayChatMessage(GameUserInterface::privateF5MessageDisplayedInGameColor,
          "Private message from %s: Press [%s] to enter chat mode", sender, keyCodeToString(keyOUTGAMECHAT));
-      gClientGame->getUIManager()->getGameUserInterface()->displayChatMessage(GameUserInterface::privateF5MessageDisplayedInGameColor, "%s %s", ARROW, message);
+      game->getUIManager()->getGameUserInterface()->displayChatMessage(GameUserInterface::privateF5MessageDisplayedInGameColor, "%s %s", ARROW, message);
    }
 }
 
@@ -304,7 +308,7 @@ void AbstractChat::issueChat(ClientGame *game)
          conn->c2mSendChat(mLineEditor.c_str());
 
       // And display it locally
-      newMessage(game->getClientInfo()->name, mLineEditor.getString(), false, false, true);
+      newMessage(game, game->getClientInfo()->name, mLineEditor.getString(), false, false, true);
    }
    clearChat();     // Clear message
 
@@ -472,7 +476,7 @@ void ChatUserInterface::onOutGameChat()
 
 void ChatUserInterface::onEscape()
 {
-   leaveGlobalChat();
+   leaveGlobalChat(getGame());
    getUIManager()->reactivatePrevUI();
    playBoop();
 }
