@@ -269,9 +269,9 @@ void SoundSystem::init()
 
    // Set up music list for streaming later
    if (!getFilesFromFolder(gConfigDirs.musicDir, musicList))
-   {
       logprintf(LogConsumer::LogWarning, "Could not read music files from folder \"%s\".  Game will proceed without music", gConfigDirs.musicDir.c_str());
-   }
+   else if (musicList.size() == 0)
+      logprintf(LogConsumer::LogWarning, "No music files found in folder \"%s\".  Game will proceed without music", gConfigDirs.musicDir.c_str());
    else
    {
       // Create dedicated music source
@@ -301,8 +301,8 @@ void SoundSystem::shutdown()
 
    // Stop and clean up music
    if(gMusicValid) {
-   stopMusic();
-   alureDestroyStream(musicStream, 0, NULL);
+      stopMusic();
+      alureDestroyStream(musicStream, 0, NULL);
       alDeleteSources(1, &musicSource);
    }
 

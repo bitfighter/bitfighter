@@ -1036,7 +1036,7 @@ void triangulate2(char *a, triangulateio *b, triangulateio *c, triangulateio *d)
 #endif
 
 
-F32 *pointsToCheck;
+REAL *pointsToCheck;
 S32 QSORT_CALLBACK IDtoPointSort(S32 *a_ptr, S32 *b_ptr)
 {
    S32 a = (*a_ptr)*2;
@@ -1058,9 +1058,13 @@ S32 QSORT_CALLBACK IDtoPointSort(S32 *a_ptr, S32 *b_ptr)
 
 // Triangulate a bounded area with complex polygon holes
 bool Triangulate::processComplex(TriangleData& outputData, const Rect& bounds,
-                                 const Vector<Vector<Point> >& polygonList, Vector<F32>& holeMarkerList)
+                                 const Vector<Vector<Point> >& polygonList, Vector<F32>& holeMarkerList2)
 {
-   Vector<F32> coords;
+   Vector<REAL> coords;
+   Vector<REAL> holeMarkerList;
+   holeMarkerList.resize(holeMarkerList2.size());
+   for(S32 i=0; i < holeMarkerList.size(); i++)
+      holeMarkerList[i] = holeMarkerList2[i]; // convert F32 to REAL(double)
 
    F32 minx = bounds.min.x;  F32 miny = bounds.min.y;
    F32 maxx = bounds.max.x;  F32 maxy = bounds.max.y;
@@ -1173,8 +1177,14 @@ bool Triangulate::processComplex(TriangleData& outputData, const Rect& bounds,
    // Adding the 'X' option gives a speed boost but seems to crash on several levels running on windows
    triangulate2((char*)"zpQ", &in, &out, NULL);  // Replace Q with V to debug
 
+   if(outputData.pointList)
+      delete[] outputData.pointList;
+
    // add triangle output to custom object for return storage
-   outputData.pointList = out.pointlist;
+   outputData.pointList = new F32[out.numberofpoints * 2];
+   for(S32 i=0; i < out.numberofpoints * 2; i++)
+      outputData.pointList[i] = (F32) out.pointlist[i]; // REAL (double) to F32
+
    outputData.pointCount = out.numberofpoints;
    outputData.triangleList = out.trianglelist;
    outputData.triangleCount = out.numberoftriangles;
@@ -1183,6 +1193,7 @@ bool Triangulate::processComplex(TriangleData& outputData, const Rect& bounds,
    //
    // pointlist and trianglelist will not be freed as they are now wrapped in TriangleData
    // to be used later
+   trifree(out.pointlist);  // with a conversion to F32, this REAL (double) size data can be freed
    trifree(out.pointattributelist);
    trifree(out.pointmarkerlist);
    trifree(out.triangleattributelist);
@@ -1192,6 +1203,7 @@ bool Triangulate::processComplex(TriangleData& outputData, const Rect& bounds,
    trifree(out.edgemarkerlist);
    trifree(out.normlist);
    trifree(out.neighborlist);
+
 
    // If no output points, no triangle points, or too many points, we can't use the data so return false
    if(outputData.pointCount == 0 || outputData.triangleCount == 0)
@@ -1360,6 +1372,22 @@ bool findIntersection(const Point &p1, const Point &p2, const Point &p3, const P
        return false;
 }
 
+Triangulate::TriangleData::TriangleData()
+{
+   pointList = NULL;
+   pointCount = 0;
+   triangleList = NULL;
+   triangleCount = 0;
+}
+
+Triangulate::TriangleData::~TriangleData()
+{
+   //if(pointList) free(pointList);
+   if(pointList)
+      delete[] pointList;
+   if(triangleList)
+      free(triangleList);
+}
 
 
 };

@@ -21,6 +21,9 @@ private:
    static void setMousePos(S32 x, S32 y);
    static void updateJoyAxesDirections(U32 axisMask, S16 value);
 
+   static void keyCodeUp(KeyCode keyCode);
+   static void keyCodeDown(KeyCode keyCode, char ascii);
+
 public:
    Event();
    virtual ~Event();
@@ -40,7 +43,7 @@ public:
    static void onJoyAxis(U8 which, U8 axis, S16 value);
    static void onJoyButtonDown(U8 which, U8 button);
    static void onJoyButtonUp(U8 which, U8 button);
-   static void onJoyHat(U8 which, U8 hat, U8 value);
+   static void onJoyHat(U8 which, U8 hat, U8 directionMask);
    static void onJoyBall(U8 which, U8 ball, S16 xrel, S16 yrel);
    static void onMinimize();
    static void onRestore();

@@ -110,6 +110,14 @@ enum JoystickAxesDirections {
    MaxAxesDirections
 };
 
+enum JoystickHatDirections {
+   HatUp,
+   HatRight,
+   HatDown,
+   HatLeft,
+   MaxHatDirections
+};
+
 enum AlignType {
    ALIGN_LEFT,
    ALIGN_CENTER,
@@ -154,6 +162,7 @@ public:
    static JoystickInfo PredefinedJoystickList[ControllerTypeCount];
    static JoystickInput JoystickInputData[MaxAxesDirections];
    static U32 AxesKeyCodeMask;
+   static U32 HatKeyCodeMask;
 
    static bool initJoystick();
    static void shutdownJoystick();

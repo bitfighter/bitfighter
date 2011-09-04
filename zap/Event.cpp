@@ -112,27 +112,36 @@ void Event::updateJoyAxesDirections(U32 axisMask, S16 value)
       // If the current axes direction is set in the keyCodeDownDeltaMask, set the key down
       if (Joystick::JoystickInputData[i].axesMask & keyCodeDownDeltaMask)
       {
-         setKeyState(Joystick::JoystickInputData[i].keyCode, true);
-
-         if(UserInterface::current)
-            UserInterface::current->onKeyDown(Joystick::JoystickInputData[i].keyCode, 0);
-
+         keyCodeDown(Joystick::JoystickInputData[i].keyCode, 0);
          continue;
       }
 
       // If the current axes direction is set in the keyCodeUpDeltaMask, set the key up
       if (Joystick::JoystickInputData[i].axesMask & keyCodeUpDeltaMask)
-      {
-         setKeyState(Joystick::JoystickInputData[i].keyCode, false);
-
-         if(UserInterface::current)
-            UserInterface::current->onKeyUp(Joystick::JoystickInputData[i].keyCode);
-      }
+         keyCodeUp(Joystick::JoystickInputData[i].keyCode);
    }
 
 
    // Finally alter the global axes KeyCode mask to reflect the current keyState
-      Joystick::AxesKeyCodeMask = currentKeyCodeMask;
+   Joystick::AxesKeyCodeMask = currentKeyCodeMask;
+}
+
+
+void Event::keyCodeUp(KeyCode keyCode)
+{
+   setKeyState(keyCode, false);
+
+   if(UserInterface::current)
+      UserInterface::current->onKeyUp(keyCode);
+}
+
+
+void Event::keyCodeDown(KeyCode keyCode, char ascii)
+{
+   setKeyState(keyCode, true);
+
+   if(UserInterface::current)
+      UserInterface::current->onKeyDown(keyCode, ascii);
 }
 
 
@@ -191,10 +200,10 @@ void Event::onEvent(SDL_Event* event)
          break;
 
          // TODO:  Do we need joyball and joyhat?
-//      case SDL_JOYBALLMOTION:
-//         onJoyBall(event->jball.which, event->jball.ball, event->jball.xrel, event->jball.yrel);
-//         break;
-//
+      case SDL_JOYBALLMOTION:
+         onJoyBall(event->jball.which, event->jball.ball, event->jball.xrel, event->jball.yrel);
+         break;
+
       case SDL_JOYHATMOTION:
          onJoyHat(event->jhat.which, event->jhat.hat, event->jhat.value);
          break;
@@ -284,21 +293,14 @@ void Event::onKeyDown(SDLKey key, SDLMod mod, U16 unicode)
    else
    {
       KeyCode keyCode = sdlKeyToKeyCode(key);
-      setKeyState(keyCode, true);
-
-      if(UserInterface::current)
-         UserInterface::current->onKeyDown(keyCode, keyToAscii(unicode, keyCode));
+      keyCodeDown(keyCode, keyToAscii(unicode, keyCode));
    }
 }
 
 
 void Event::onKeyUp(SDLKey key, SDLMod mod, U16 unicode)
 {
-   KeyCode keyCode = sdlKeyToKeyCode(key);
-   setKeyState(keyCode, false);
-
-   if(UserInterface::current)
-      UserInterface::current->onKeyUp(keyCode);
+   keyCodeUp(sdlKeyToKeyCode(key));
 }
 
 void Event::onMouseFocus()
@@ -329,29 +331,21 @@ void Event::onMouseButtonDown(S32 x, S32 y, KeyCode keyCode)
 {
    setMousePos(x, y);
 
-   if(!UserInterface::current)
-      return;    // Bail if no current UI
-
-   setKeyState(keyCode, true);
-
-   UserInterface::current->onKeyDown(keyCode, 0);
+   keyCodeDown(keyCode, 0);
 }
 
 void Event::onMouseButtonUp(S32 x, S32 y, KeyCode keyCode)
 {
    setMousePos(x, y);
 
-   if(!UserInterface::current)
-      return;    // Bail if no current UI
-
-   setKeyState(keyCode, false);
-
-   UserInterface::current->onKeyUp(keyCode);
+   keyCodeUp(keyCode);
 }
 
 
 void Event::onJoyAxis(U8 whichJoystick, U8 axis, S16 value)
 {
+//   logprintf("SDL Axis number: %u, value: %d", axis, value);
+
    if(axis < Joystick::rawAxisCount)
       Joystick::rawAxis[axis] = (F32)value / (F32)S16_MAX;
 
@@ -391,39 +385,46 @@ extern KeyCode joyButtonToKeyCode(int buttonIndex);
 
 void Event::onJoyButtonDown(U8 which, U8 button)
 {
-   KeyCode keyCode = joyButtonToKeyCode(Joystick::remapJoystickButton(button));
-   setKeyState(keyCode, true);
-
-   if(UserInterface::current)
-      UserInterface::current->onKeyDown(keyCode, 0);
+   keyCodeDown(joyButtonToKeyCode(Joystick::remapJoystickButton(button)), 0);
 }
 
 void Event::onJoyButtonUp(U8 which, U8 button)
 {
-   KeyCode keyCode = joyButtonToKeyCode(Joystick::remapJoystickButton(button));
-   setKeyState(keyCode, false);
-
-   if(UserInterface::current)
-      UserInterface::current->onKeyUp(keyCode);
+   keyCodeUp(joyButtonToKeyCode(Joystick::remapJoystickButton(button)));
 }
 
-void Event::onJoyHat(U8 which, U8 hat, U8 value)
+
+extern KeyCode joyHatToKeyCode(int hatDirectionMask);
+
+// See SDL_Joystick.h for the SDL_HAT_* mask definitions
+void Event::onJoyHat(U8 which, U8 hat, U8 directionMask)
 {
-   printf("Hat: %i\n", value);
-   // Looks like it is using bitmask for value
-   // 1 = up
-   // 2 = right
-   // 4 = down
-   // 8 = left
-   // 3 = up + right
-   // 6 = down + right
-   // 12 = down + left
-   // 9 = up + left
+//   logprintf("SDL Hat number: %u, value: %u", hat, directionMask);
+
+   KeyCode keyCode;
+   U32 keyCodeDownDeltaMask = directionMask & ~Joystick::HatKeyCodeMask;
+   U32 keyCodeUpDeltaMask = ~directionMask & Joystick::HatKeyCodeMask;
+
+   for (S32 i = 0; i < MaxHatDirections; i++)
+   {
+      keyCode = joyHatToKeyCode(BIT(i));  // BIT(i) corresponds to a defined SDL_HAT_*  value
+
+      // If the current hat direction is set in the keyCodeDownDeltaMask, set the key down
+      if (keyCodeDownDeltaMask & BIT(i))
+         keyCodeDown(keyCode, 0);
+
+      // If the current hat direction is set in the keyCodeUpDeltaMask, set the key up
+      if (keyCodeUpDeltaMask & BIT(i))
+         keyCodeUp(keyCode);
+   }
+
+   // Finally alter the global hat KeyCode mask to reflect the current keyState
+   Joystick::HatKeyCodeMask = directionMask;
 }
 
 void Event::onJoyBall(U8 which, U8 ball, S16 xrel, S16 yrel)
 {
-
+//   logprintf("SDL Ball number: %u, relative x: %d, relative y: %d", ball, xrel, yrel);
 }
 
 void Event::onMinimize()

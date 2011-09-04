@@ -208,13 +208,13 @@
 /*   recommend double precision unless you want to generate a mesh for which */
 /*   you do not have enough memory.                                          */
 
- #define SINGLE 
+//#define SINGLE 
 
-#ifdef SINGLE
-#define REAL float
-#else /* not SINGLE */
-#define REAL double
-#endif /* not SINGLE */
+//#ifdef SINGLE  // defined in triangle.h
+//#define REAL float
+//#else /* not SINGLE */
+//#define REAL double
+//#endif /* not SINGLE */
 
 /* If yours is not a Unix system, define the NO_TIMER compiler switch to     */
 /*   remove the Unix-specific timing code.                                   */

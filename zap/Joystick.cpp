@@ -44,6 +44,7 @@ F32 Joystick::rawAxis[Joystick::rawAxisCount];
 S16 Joystick::SensitivityThreshold = 3200;  // out of 32767
 S32 Joystick::UseJoystickNumber = 0;
 U32 Joystick::AxesKeyCodeMask = 0;
+U32 Joystick::HatKeyCodeMask = 0;
 
 
 // Needs to be Aligned with JoystickAxesDirections
@@ -200,7 +201,7 @@ JoystickInfo Joystick::PredefinedJoystickList[ControllerTypeCount] =
       "SaitekDualAnalogP880",
       9,
       {0, 1},
-      {5, 2},
+      {3, 2},
       { // SaitekDualAnalogP880  9
          ControllerButton1,
          ControllerButton2,
