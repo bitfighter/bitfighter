@@ -85,12 +85,11 @@ MenuUserInterface::MenuUserInterface(ClientGame *game) : UserInterface(game)
    mRenderInstructions = true;
 }
 
-extern bool gDisableShipKeyboardInput;
 
 // Gets run when menu is activated.  This is also called by almost all other menus/subclasses.
 void MenuUserInterface::onActivate()
 {
-   gDisableShipKeyboardInput = true;       // Keep keystrokes from getting to game
+   mDisableShipKeyboardInput = true;       // Keep keystrokes from getting to game
    selectedIndex = 0;
    currOffset = 0;
 }
@@ -98,7 +97,7 @@ void MenuUserInterface::onActivate()
 
 void MenuUserInterface::onReactivate()
 {
-   gDisableShipKeyboardInput = true;       // Keep keystrokes from getting to game
+   mDisableShipKeyboardInput = true;       // Keep keystrokes from getting to game
 }
 
 

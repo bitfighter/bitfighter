@@ -457,8 +457,6 @@ void ChatUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 }
 
 
-extern bool gDisableShipKeyboardInput;
-
 // Run when UIChat is called in normal UI mode
 void ChatUserInterface::onActivate()
 {
@@ -468,7 +466,7 @@ void ChatUserInterface::onActivate()
 
    mPlayersInGlobalChat.clear();
    mRenderUnderlyingUI = true;
-   gDisableShipKeyboardInput = true;       // Keep keystrokes from getting to game
+   mDisableShipKeyboardInput = true;       // Keep keystrokes from getting to game
 }
 
 

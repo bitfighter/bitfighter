@@ -46,7 +46,6 @@
 
 namespace Zap
 {
-extern bool gDisableShipKeyboardInput;
 
 // Constructor
 KeyDefMenuUserInterface::KeyDefMenuUserInterface(ClientGame *game) : Parent(game)
@@ -66,7 +65,7 @@ static S32 firstItemInCol2 = 0;     // Set later
 
 void KeyDefMenuUserInterface::onActivate()
 {
-   gDisableShipKeyboardInput = true;      // Keep keystrokes from getting to game
+   mDisableShipKeyboardInput = true;      // Keep keystrokes from getting to game
    selectedIndex = 0;                     // First item selected when we begin
    changingItem = -1;                     // Not changing anything at the moment...
 

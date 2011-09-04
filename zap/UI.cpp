@@ -81,11 +81,15 @@ float gLineWidth4 = 4.0f;
 UserInterface::UserInterface(ClientGame *clientGame)
 {
    mClientGame = clientGame;
+   mDisableShipKeyboardInput = false;
 }
+
 
 UserInterface::~UserInterface()
 {
+   // Do nothing
 }
+
 
 UIManager *UserInterface::getUIManager() const 
 { 

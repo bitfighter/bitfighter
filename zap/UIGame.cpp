@@ -145,9 +145,9 @@ GameUserInterface::GameUserInterface(ClientGame *game) : Parent(game),
 // Destructor
 GameUserInterface::~GameUserInterface()
 {
-   //if(mOutputFile)
-   //   fclose(mOutputFile);
+   // Do nothing
 }
+
 
 void processGameConsoleCommand(void *gamePtr, OGLCONSOLE_Console console, char *cmd)
 {
@@ -174,11 +174,9 @@ void processGameConsoleCommand(void *gamePtr, OGLCONSOLE_Console console, char *
 }
 
 
-extern bool gDisableShipKeyboardInput;
-
 void GameUserInterface::onActivate()
 {
-   gDisableShipKeyboardInput = false;  // Make sure our ship controls are active
+   mDisableShipKeyboardInput = false;  // Make sure our ship controls are active
    mMissionOverlayActive = false;      // Turn off the mission overlay (if it was on)
    SDL_ShowCursor(SDL_DISABLE);        // Turn off cursor
    onMouseMoved();                     // Make sure ship pointed is towards mouse
@@ -209,7 +207,7 @@ void GameUserInterface::onReactivate()
    if(getGame()->isSuspended())
       unsuspendGame();
 
-   gDisableShipKeyboardInput = false;
+   mDisableShipKeyboardInput = false;
    SDL_ShowCursor(SDL_DISABLE);    // Turn off cursor
    enterMode(PlayMode);
 
@@ -1970,7 +1968,7 @@ void GameUserInterface::onKeyUp(KeyCode keyCode)
 // Runs only on client
 Move *GameUserInterface::getCurrentMove()
 {
-   if((mCurrentMode != ChatMode) && !gDisableShipKeyboardInput && !OGLCONSOLE_GetVisibility())
+   if((mCurrentMode != ChatMode) && !mDisableShipKeyboardInput && !OGLCONSOLE_GetVisibility())
    {
       InputMode inputMode = gIniSettings.inputMode;
       mCurrentMove.x = F32((!mRightDisabled && getKeyState(keyRIGHT[inputMode]) ? 1 : 0) - (!mLeftDisabled && getKeyState(keyLEFT[inputMode]) ? 1 : 0));
