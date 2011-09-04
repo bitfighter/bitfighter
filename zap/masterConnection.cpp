@@ -223,20 +223,22 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSetAuthenticated,
    if(mGame->isServer())
       return;
 
+   ClientGame *clientGame = (ClientGame *)mGame;
+
    if((AuthenticationStatus)authStatus.value == AuthenticationStatusAuthenticatedName)
    {
       // Hmmm.... same info in two places...
-      gClientGame->getClientInfo()->name = correctedName.getString();
+      clientGame->getClientInfo()->name = correctedName.getString();
       gIniSettings.name = correctedName.getString();  
 
-      gClientGame->getClientInfo()->authenticated = true;
+      clientGame->getClientInfo()->authenticated = true;
 
       GameConnection *gc = dynamic_cast<ClientGame *>(mGame)->getConnectionToServer();
       if(gc)
          gc->c2sSetAuthenticated();
    }
    else 
-      gClientGame->getClientInfo()->authenticated = false;
+      clientGame->getClientInfo()->authenticated = false;
 }
 #endif
 
@@ -380,7 +382,7 @@ void MasterServerConnection::writeConnectRequest(BitStream *bstream)
 
    if(bstream->writeFlag(mGame->isServer()))     // We're a server, tell the master a little about us
    {
-      ServerGame *serverGame = dynamic_cast<ServerGame *>(mGame);
+      ServerGame *serverGame = (ServerGame *)mGame;
 
       bstream->write((U32) 1000);                             // CPU speed  (dummy)
       bstream->write((U32) 0xFFFFFFFF);                       // region code (dummy) --> want to use this?
@@ -398,10 +400,12 @@ void MasterServerConnection::writeConnectRequest(BitStream *bstream)
    else     // We're a client
    {
 #ifndef ZAP_DEDICATED
-      bstream->writeString(gClientGame->getClientInfo()->name.c_str());   // User's nickname
-      bstream->writeString(gPlayerPassword.c_str());                      // and whatever password they supplied
+      ClientGame *clientGame = (ClientGame *)mGame;
 
-      gClientGame->getClientInfo()->id.write(bstream);
+      bstream->writeString(clientGame->getClientInfo()->name.c_str());   // User's nickname
+      bstream->writeString(gPlayerPassword.c_str());                     // and whatever password they supplied
+
+      clientGame->getClientInfo()->id.write(bstream);
 #endif
    }
 }
