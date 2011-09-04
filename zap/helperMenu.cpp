@@ -60,7 +60,7 @@ bool HelperMenu::processKeyCode(KeyCode keyCode)
    {
       exitHelper();      // Return to play mode, ship design unchanged
       if(gIniSettings.verboseHelpMessages)
-         gClientGame->displayMessage(Color(1.0, 0.5, 0.5), getCancelMessage());
+         mClientGame->displayMessage(Color(1.0, 0.5, 0.5), getCancelMessage());
 
       return true;
    }
