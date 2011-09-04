@@ -213,7 +213,7 @@ Color gHelpTextColor(Colors::green);
 
 S32 gMaxPolygonPoints = 32;                     // Max number of points we can have in Nexuses, LoadoutZones, etc.
 
-static const F32 MIN_SCALING_FACT = 0.15f;       // Limits minimum window size
+static const F32 MIN_SCALING_FACT = 0.15f;      // Limits minimum window size
 
 string gServerPassword = "";
 string gAdminPassword = "";
@@ -390,7 +390,7 @@ void hostGame()
 
    for(S32 i = 0; i < gServerGame->getLevelNameCount(); i++)
       logprintf(LogConsumer::ServerFilter, "\t%s [%s]", gServerGame->getLevelNameFromIndex(i).getString(), 
-            gServerGame->getLevelFileNameFromIndex(i).c_str());
+                gServerGame->getLevelFileNameFromIndex(i).c_str());
 
    if(gServerGame->getLevelNameCount())                  // Levels loaded --> start game!
       gServerGame->cycleLevel(ServerGame::FIRST_LEVEL);  // Start with the first level
@@ -1842,6 +1842,7 @@ int main(int argc, char **argv)
       argVector.push_back(argv[i]);
 
    readFolderLocationParams(argVector);      // Reads folder location params, and removes them from argVector
+
    gConfigDirs.resolveDirs();                // Resolve all folders except for levels folder, resolved later
 
    // Before we go any further, we should get our log files in order.  Now we know where they'll be, as the 

@@ -163,11 +163,11 @@ void LevelNameEntryUserInterface::onActivate()
 
    // Remove the extension from the level file
    for(S32 i = 0; i < mLevels.size(); i++)
-       mLevels[i] = mLevels[i].substr(0, mLevels[i].find_last_of('.'));
+       mLevels[i] = stripExtension(mLevels[i]);
 
-   // See if our current level name is on the list -- if so, set mLevelIndex to that level
+   // See if our current level is on the list -- if so, set mLevelIndex to that level
    for(S32 i = 0; i < mLevels.size(); i++)
-      if(!stricmp(mLevels[i].c_str(), lineEditor.c_str()))
+      if(mLevels[i] == lineEditor.getString())
       {
          mLevelIndex = i;
          break;

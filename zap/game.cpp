@@ -174,9 +174,9 @@ StringTableEntry Game::getTeamName(S32 teamIndex) const
 {
    if(teamIndex >= 0 && teamIndex < getTeamCount())
       return getTeam(teamIndex)->getName();
-   else if(teamIndex == -2)
+   else if(teamIndex == TEAM_HOSTILE)
       return StringTableEntry("Hostile");
-   else if(teamIndex == -1)
+   else if(teamIndex == TEAM_NEUTRAL)
       return StringTableEntry("Neutral");
    else
       return StringTableEntry("UNKNOWN");

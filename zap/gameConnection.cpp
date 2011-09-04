@@ -587,8 +587,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
          return;
       }
 
-      Vector<string> newLevels;
-      newLevels = LevelListLoader::buildLevelList(candidate, true);
+      Vector<string> newLevels = LevelListLoader::buildLevelList(candidate, true);
 
       if(newLevels.size() == 0)
       {

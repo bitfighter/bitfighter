@@ -1553,8 +1553,9 @@ void LevelMenuSelectUserInterface::onActivate()
 
    if(!strcmp(category.c_str(), UPLOAD_LEVELS))
    {
-      mLevels = LevelListLoader::buildLevelList(gConfigDirs.levelDir);
-      for(S32 i=0; i < mLevels.size(); i++)
+      mLevels = LevelListLoader::buildLevelList(gConfigDirs.levelDir);     // Get all the playable levels in levelDir
+
+      for(S32 i = 0; i < mLevels.size(); i++)
       {
          c[0] = mLevels[i].c_str()[0];
          menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(getGame(), i | UPLOAD_LEVELS_BIT, mLevels[i].c_str(), 

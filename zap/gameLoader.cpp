@@ -324,13 +324,12 @@ Vector<string> LevelListLoader::buildLevelList(const string &levelFolder, bool i
 {
    Vector<string> levelList;
 
-   // If user specified a list of levels on the command line, use those
+   // If user specified a list of levels on the command line, use those, unless ignoreCmdLine was set to true
    if(!ignoreCmdLine && gCmdLineSettings.specifiedLevels.size() > 0)
       levelList = gCmdLineSettings.specifiedLevels;
    else
    {
-      // Otherwise we need to build our level list by looking at the filesystem  
-      // (n.b. gLevelDir defaults to the "levels" folder under the Bitfighter data install dir)
+      // Build our level list by looking at the filesystem  
       Vector<string> levelfiles;
 
       if(!getFilesFromFolder(levelFolder, levelfiles, "level"))    // True if error reading level...  print message... or just PANIC!!
@@ -341,11 +340,12 @@ Vector<string> LevelListLoader::buildLevelList(const string &levelFolder, bool i
 
       levelfiles.sort(alphaSort);   // Just to be sure...
 
-      for (S32 i = 0; i < levelfiles.size(); i++)
+      for(S32 i = 0; i < levelfiles.size(); i++)
          levelList.push_back(levelfiles[i]);
    }
 
    removeSkippedLevels(levelList);
+
    return levelList;
 }
 
