@@ -1344,11 +1344,11 @@ static const char *sanitizeForJson(const char *value)
       {
          if(isPrivate)
          {
-            if (!stricmp(walk->mPlayerOrServerName.getString(), privateTo))     // Only send to player(s) with the specified nick
+            if(!stricmp(walk->mPlayerOrServerName.getString(), privateTo))     // Only send to player(s) with the specified nick
                walk->m2cSendChat(mPlayerOrServerName, isPrivate, strippedMessage);
          }
          else                    // Send to everyone...
-            if (walk != this)    // ...except self!
+            if(walk != this)    // ...except self!
                walk->m2cSendChat(mPlayerOrServerName, isPrivate, message);
       }
 
