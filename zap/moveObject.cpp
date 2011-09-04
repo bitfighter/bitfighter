@@ -481,7 +481,7 @@ void MoveObject::computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *
       playCollisionSound(stateIndex, moveObjectThatWasHit, v1i);
 
       MoveItem *item = dynamic_cast<MoveItem *>(moveObjectThatWasHit);
-      GameType *gameType = gClientGame->getGameType();
+      GameType *gameType = getGame()->getGameType();
 
       if(item && gameType)
          gameType->c2sResendItemStatus(item->getItemId());

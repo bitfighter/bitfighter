@@ -1623,13 +1623,10 @@ void Ship::render(S32 layerIndex)
       glEnableBlend;
       F32 textAlpha = 0.5f * alpha;
       S32 textSize = 14;
-#ifdef TNL_OS_XBOX
-      textAlpha *= 1 - gClientGame->getCommanderZoomFraction();
-      textSize = 23;
-#else
+
       glLineWidth(gLineWidth1);
-#endif
-      glColor4f(1,1,1,textAlpha);
+
+      glColor(Colors::white, textAlpha);
       UserInterface::drawStringc(0, 30, (F32)textSize, str.c_str());
 
       // Underline name if player is authenticated
