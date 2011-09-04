@@ -95,6 +95,7 @@ public:
    virtual ~ClientGame();
 
    void joinGame(Address remoteAddress, bool isFromMaster, bool local);
+   void endGame();
 
    UserInterfaceData *mUserInterfaceData;
 

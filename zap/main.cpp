@@ -601,16 +601,8 @@ FileLogConsumer gServerLog;       // We'll apply a filter later on, in main()
 void endGame()
 {
 #ifndef ZAP_DEDICATED
-   // Cancel any in-progress attempts to connect
-   if(gClientGame && gClientGame->getConnectionToMaster())
-      gClientGame->getConnectionToMaster()->cancelArrangedConnectionAttempt();
-
-   // Disconnect from game server
-   if(gClientGame && gClientGame->getConnectionToServer())
-      gClientGame->getConnectionToServer()->disconnect(NetConnection::ReasonSelfDisconnect, "");
-
    if(gClientGame)
-      gClientGame->getUIManager()->getHostMenuUserInterface()->levelLoadDisplayDisplay = false;
+      gClientGame->endGame();
 #endif
 
    delete gServerGame;
@@ -1161,6 +1153,7 @@ void InitSdlVideo()
 }
 #endif
 
+
 // Now integrate INI settings with those from the command line and process them
 void processStartupParams()
 {
@@ -1191,15 +1184,6 @@ void processStartupParams()
    gMainLog.setMsgType(LogConsumer::LuaLevelGenerator, gIniSettings.luaLevelGenerator); 
    gMainLog.setMsgType(LogConsumer::LuaBotMessage, gIniSettings.luaBotMessage); 
    gMainLog.setMsgType(LogConsumer::ServerFilter, gIniSettings.serverFilter); 
-
-
-   // These options can come either from cmd line or INI file
-   //if(gCmdLineSettings.name != "")
-   //   gNameEntryUserInterface.setString(gCmdLineSettings.name);
-   //else if(gIniSettings.name != "")
-   //   gNameEntryUserInterface.setString(gIniSettings.name);
-   //else
-   //   gNameEntryUserInterface.setString(gIniSettings.lastName);
 
 
    if(gCmdLineSettings.password != "")
@@ -1343,7 +1327,7 @@ bool writeToConsole()
 
    try
    {
-      int m_nCRTOut= _open_osfhandle((intptr_t) GetStdHandle(STD_OUTPUT_HANDLE), _O_TEXT);
+      int m_nCRTOut = _open_osfhandle((intptr_t) GetStdHandle(STD_OUTPUT_HANDLE), _O_TEXT);
       if(m_nCRTOut == -1)
          return false;
 
@@ -1609,9 +1593,9 @@ void actualizeScreenMode(bool changingInterfaces)
    if (displayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED)
    {
       glScissor(gScreenInfo.getHorizPhysicalMargin(),    // x
-            gScreenInfo.getVertPhysicalMargin(),     // y
-            gScreenInfo.getDrawAreaWidth(),          // width
-            gScreenInfo.getDrawAreaHeight());        // height
+                gScreenInfo.getVertPhysicalMargin(),     // y
+                gScreenInfo.getDrawAreaWidth(),          // width
+                gScreenInfo.getDrawAreaHeight());        // height
 
       glEnable(GL_SCISSOR_TEST);    // Turn on clipping to keep the margins clear
    }

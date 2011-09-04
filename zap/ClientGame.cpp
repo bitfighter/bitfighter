@@ -227,6 +227,20 @@ void ClientGame::joinGame(Address remoteAddress, bool isFromMaster, bool local)
 }
 
 
+// Called when connection to game server is terminated for one reason or another
+void ClientGame::endGame()
+{
+    // Cancel any in-progress attempts to connect
+   if(getConnectionToMaster())
+      getConnectionToMaster()->cancelArrangedConnectionAttempt();
+
+   // Disconnect from game server
+   if(getConnectionToServer())
+      getConnectionToServer()->disconnect(NetConnection::ReasonSelfDisconnect, "");
+
+   getUIManager()->getHostMenuUserInterface()->levelLoadDisplayDisplay = false;
+}
+
 bool ClientGame::hasValidControlObject()
 {
    return mConnectionToServer.isValid() && mConnectionToServer->getControlObject();
