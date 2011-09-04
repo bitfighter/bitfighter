@@ -94,6 +94,8 @@ public:
    ClientGame(const Address &bindAddress);
    virtual ~ClientGame();
 
+   void joinGame(Address remoteAddress, bool isFromMaster, bool local);
+
    UserInterfaceData *mUserInterfaceData;
 
    bool hasValidControlObject();

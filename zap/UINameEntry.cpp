@@ -253,7 +253,7 @@ void PasswordEntryUserInterface::render()
 
 void PreGamePasswordEntryUserInterface::onAccept(const char *text)
 {
-   joinGame(connectAddress, false, false);      // Not from master, not local
+   getGame()->joinGame(connectAddress, false, false);      // Not from master, not local
 }
 
 

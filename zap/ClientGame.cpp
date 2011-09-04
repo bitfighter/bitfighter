@@ -173,6 +173,60 @@ ClientGame::~ClientGame()
 }
 
 
+// Player has selected a game from the QueryServersUserInterface, and is ready to join
+void ClientGame::joinGame(Address remoteAddress, bool isFromMaster, bool local)
+{
+   MasterServerConnection *connToMaster = getConnectionToMaster();
+   if(isFromMaster && connToMaster && connToMaster->getConnectionState() == NetConnection::Connected)     // Request arranged connection
+   {
+      connToMaster->requestArrangedConnection(remoteAddress);
+      getUIManager()->getGameUserInterface()->activate();
+   }
+   else                                                         // Try a direct connection
+   {
+      GameConnection *gameConnection = new GameConnection(getClientInfo());
+
+      setConnectionToServer(gameConnection);
+
+      if(local)   // We're a local client, running in the same process as the server... connect to that server
+      {
+         // Stuff on client side, so interface will offer the correct options.
+         // Note that if we're local, the passed address is probably a dummy; check caller if important.
+         gameConnection->connectLocal(getNetInterface(), gServerGame->getNetInterface());
+         gameConnection->setIsAdmin(true);              // Local connection is always admin
+         gameConnection->setIsLevelChanger(true);       // Local connection can always change levels
+
+         GameConnection *gc = dynamic_cast<GameConnection *>(gameConnection->getRemoteConnectionObject());
+
+         // Stuff on server side
+         if(gc)                              
+         {
+            gc->setIsAdmin(true);            // Set isAdmin on server
+            gc->setIsLevelChanger(true);     // Set isLevelChanger on server
+            gc->sendLevelList();
+
+            gc->s2cSetIsAdmin(true);                        // Set isAdmin on the client
+            gc->s2cSetIsLevelChanger(true, false);          // Set isLevelChanger on the client
+            gc->setServerName(gServerGame->getHostName());  // Server name is whatever we've set locally
+
+            gc->setAuthenticated(getClientInfo()->authenticated); // Tell local host if we're authenticated... no need to verify
+         }
+      }
+      else        // Connect to a remote server, but not via the master server
+         gameConnection->connect(getNetInterface(), remoteAddress);  
+
+      getUIManager()->getGameUserInterface()->activate();
+   }
+
+   //if(gClientGame2 && gClientGame != gClientGame2)  // make both client connect for now, until menus works in both clients.
+   //{
+   //   gClientGame = gClientGame2;
+   //   joinGame(remoteAddress, isFromMaster, local);
+   //   gClientGame = gClientGame1;
+   //}
+}
+
+
 bool ClientGame::hasValidControlObject()
 {
    return mConnectionToServer.isValid() && mConnectionToServer->getControlObject();

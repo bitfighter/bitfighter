@@ -406,7 +406,7 @@ void hostGame()
       ui->levelLoadDisplayDisplay = false;
       ui->levelLoadDisplayFadeTimer.reset();
 
-      joinGame(Address(), false, true);   // ...then we'll play, too!
+      gClientGame->joinGame(Address(), false, true);   // ...then we'll play, too!
    }
 #endif
 }
@@ -596,62 +596,6 @@ FileLogConsumer gServerLog;       // We'll apply a filter later on, in main()
 
 ////////////////////////////////////////
 ////////////////////////////////////////
-
-#ifndef ZAP_DEDICATED
-// Player has selected a game from the QueryServersUserInterface, and is ready to join
-void joinGame(Address remoteAddress, bool isFromMaster, bool local)
-{
-   MasterServerConnection *connToMaster = gClientGame->getConnectionToMaster();
-   if(isFromMaster && connToMaster && connToMaster->getConnectionState() == NetConnection::Connected)     // Request arranged connection
-   {
-      connToMaster->requestArrangedConnection(remoteAddress);
-      gClientGame->getUIManager()->getGameUserInterface()->activate();
-   }
-   else                                                         // Try a direct connection
-   {
-      GameConnection *gameConnection = new GameConnection(gClientGame->getClientInfo());
-
-      gClientGame->setConnectionToServer(gameConnection);
-
-      if(local)   // We're a local client, running in the same process as the server... connect to that server
-      {
-         // Stuff on client side, so interface will offer the correct options.
-         // Note that if we're local, the passed address is probably a dummy; check caller if important.
-         gameConnection->connectLocal(gClientGame->getNetInterface(), gServerGame->getNetInterface());
-         gameConnection->setIsAdmin(true);              // Local connection is always admin
-         gameConnection->setIsLevelChanger(true);       // Local connection can always change levels
-
-         GameConnection *gc = dynamic_cast<GameConnection *>(gameConnection->getRemoteConnectionObject());
-
-         // Stuff on server side
-         if(gc)                              
-         {
-            gc->setIsAdmin(true);            // Set isAdmin on server
-            gc->setIsLevelChanger(true);     // Set isLevelChanger on server
-            gc->sendLevelList();
-
-            gc->s2cSetIsAdmin(true);                        // Set isAdmin on the client
-            gc->s2cSetIsLevelChanger(true, false);          // Set isLevelChanger on the client
-            gc->setServerName(gServerGame->getHostName());  // Server name is whatever we've set locally
-
-            gc->setAuthenticated(gClientGame->getClientInfo()->authenticated); // Tell local host if we're authenticated... no need to verify
-         }
-      }
-      else        // Connect to a remote server, but not via the master server
-         gameConnection->connect(gClientGame->getNetInterface(), remoteAddress);  
-
-      gClientGame->getUIManager()->getGameUserInterface()->activate();
-   }
-   //if(gClientGame2 && gClientGame != gClientGame2)  // make both client connect for now, until menus works in both clients.
-   //{
-   //   gClientGame = gClientGame2;
-   //   joinGame(remoteAddress, isFromMaster, local);
-   //   gClientGame = gClientGame1;
-   //}
-
-}
-#endif
-
 
 // Disconnect from servers and exit game in an orderly fashion.  But stay connected to the master until we exit the program altogether
 void endGame()

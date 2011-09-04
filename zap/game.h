@@ -468,7 +468,7 @@ extern ServerGame *gServerGame;
 
 extern Vector<string> gMasterAddress;
 
-extern void joinGame(Address remoteAddress, bool isFromMaster, bool local);
+//extern void joinGame(ClientGame *game, Address remoteAddress, bool isFromMaster, bool local);
 extern void endGame();
 
 };
