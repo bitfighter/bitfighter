@@ -392,7 +392,7 @@ void ClientGame::gotServerListFromMaster(const Vector<IPAddress> &serverList)
 
 void ClientGame::gotChatMessage(const char *playerNick, const char *message, bool isPrivate, bool isSystem)
 {
-   getUIManager()->getChatUserInterface()->newMessage(playerNick, message, isPrivate, isSystem);
+   getUIManager()->getChatUserInterface()->newMessage(playerNick, message, isPrivate, isSystem, false);
 }
 
 

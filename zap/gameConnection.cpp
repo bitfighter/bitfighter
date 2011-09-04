@@ -259,7 +259,7 @@ ClientRef *GameConnection::getClientRef()
 // 4. server send CommandComplete
 TNL_IMPLEMENT_RPC(GameConnection, c2sRequestCurrentLevel, (), (), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
-   if(! gIniSettings.allowGetMap)
+   if(!gIniSettings.allowGetMap)
    {
       s2rCommandComplete(COMMAND_NOT_ALLOWED);  
       return;
@@ -449,7 +449,7 @@ bool GameConnection::sEngineerDeployObject(U32 type)
 
    EngineerModuleDeployer deployer;
 
-   if(!deployer.canCreateObjectAtLocation(gServerGame->getGameObjDatabase(), ship, type))     
+   if(!deployer.canCreateObjectAtLocation(ship->getGame()->getGameObjDatabase(), ship, type))     
       s2cDisplayErrorMessage(deployer.getErrorMessage().c_str());
 
    else if(deployer.deployEngineeredItem(this, type))

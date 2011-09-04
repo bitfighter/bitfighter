@@ -1363,7 +1363,7 @@ void QueryServersUserInterface::issueChat()
             joinGame(address, false, false);
          }
          else
-            newMessage("", "INVALID ADDRESS", false, true);
+            newMessage("", "INVALID ADDRESS", false, true, true);
          return;
       }
    }

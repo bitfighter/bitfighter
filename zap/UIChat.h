@@ -95,7 +95,7 @@ protected:
 public:
    AbstractChat();                        // Constructor
    virtual ~AbstractChat();               // Destructor
-   void newMessage(string from, string message, bool isPrivate, bool isSystem);   // Handle incoming msg
+   void newMessage(const string &from, const string &message, bool isPrivate, bool isSystem, bool fromSelf);   // Handle incoming msg
 
    void clearChat();                          // Clear message being composed
    virtual void issueChat(ClientGame *game);  // Send chat message

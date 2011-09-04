@@ -77,19 +77,17 @@ Color AbstractChat::getColor(string name)
 
 
 // We received a new incoming chat message...  Add it to the list
-void AbstractChat::newMessage(string from, string message, bool isPrivate, bool isSystem)
+void AbstractChat::newMessage(const string &from, const string &message, bool isPrivate, bool isSystem, bool fromSelf)
 {
-   bool isFromUs = (from == gClientGame->getClientInfo()->name);  // Is this message from us?
-
    // Choose a color
    Color color;
 
-   if(isFromUs)
-      color = Colors::white;                               // If so, use white
-   else                                                   // Otherwise...
+   if(fromSelf)
+      color = Colors::white;                  
+   else                                       
    {
-      if(mFromColors.count(from) == 0)                   // ...see if we have a color for this nick.  If we don't, count will be 0
-         mFromColors[from] = getNextColor();              // If not, get a new one
+      if(mFromColors.count(from) == 0)        // See if we have a color for this nick
+         mFromColors[from] = getNextColor();  // If not, get one
 
       color = mFromColors[from];
    }
@@ -97,7 +95,7 @@ void AbstractChat::newMessage(string from, string message, bool isPrivate, bool 
    mMessages[mMessageCount % MESSAGES_TO_RETAIN] = ChatMessage(from, message, color, isPrivate, isSystem);
    mMessageCount++;
 
-   if(isFromUs && isPrivate)
+   if(fromSelf && isPrivate)     // I don't think this can ever happen!  ==> Should be !fromSelf ?
       deliverPrivateMessage(from.c_str(), message.c_str());
 }
 
@@ -116,7 +114,7 @@ void AbstractChat::playerJoinedGlobalChat(ClientGame *game, const StringTableEnt
    mPlayersInGlobalChat.push_back(playerNick);
 
    // Make the following be from us, so it will be colored white
-   newMessage(game->getClientInfo()->name, "----- Player " + string(playerNick.getString()) + " joined the conversation -----", false, true);
+   newMessage(game->getClientInfo()->name, "----- Player " + string(playerNick.getString()) + " joined the conversation -----", false, true, true);
    SoundSystem::playSoundEffect(SFXPlayerJoined, gIniSettings.sfxVolLevel);   // Make sound?
 }
 
@@ -129,7 +127,7 @@ void AbstractChat::playerLeftGlobalChat(ClientGame *game, const StringTableEntry
       if(ui->mPlayersInGlobalChat[i] == playerNick)
       {
          ui->mPlayersInGlobalChat.erase_fast(i);
-         newMessage(game->getClientInfo()->name, "----- Player " + string(playerNick.getString()) + " left the conversation -----", false, true);
+         newMessage(game->getClientInfo()->name, "----- Player " + string(playerNick.getString()) + " left the conversation -----", false, true, true);
          SoundSystem::playSoundEffect(SFXPlayerLeft, gIniSettings.sfxVolLevel);   // Make sound?
          break;
       }
@@ -306,7 +304,7 @@ void AbstractChat::issueChat(ClientGame *game)
          conn->c2mSendChat(mLineEditor.c_str());
 
       // And display it locally
-      newMessage(game->getClientInfo()->name, mLineEditor.getString(), false, false);
+      newMessage(game->getClientInfo()->name, mLineEditor.getString(), false, false, true);
    }
    clearChat();     // Clear message
 
