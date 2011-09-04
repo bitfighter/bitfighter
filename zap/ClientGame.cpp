@@ -86,6 +86,7 @@ bool showDebugBots = false;
 
 
 // Global Game objects
+// TODO: Replace this rigamarole with something like: Vector<ClientGame *> gClientGames;
 ClientGame *gClientGame = NULL;
 ClientGame *gClientGame1 = NULL;
 ClientGame *gClientGame2 = NULL;
@@ -128,7 +129,7 @@ ClientGame::ClientGame(const Address &bindAddress) : Game(bindAddress)
 
    mRemoteLevelDownloadFilename = "downloaded.level";
 
-   mUIManager = new UIManager(this);                  // gets deleted in destructor
+   mUIManager = new UIManager(this);        // Gets deleted in destructor
 
 
    // Create some random stars
@@ -176,15 +177,18 @@ bool ClientGame::hasValidControlObject()
    return mConnectionToServer.isValid() && mConnectionToServer->getControlObject();
 }
 
+
 bool ClientGame::isConnectedToServer()
 {
    return mConnectionToServer.isValid() && mConnectionToServer->getConnectionState() == NetConnection::Connected;
 }
 
+
 GameConnection *ClientGame::getConnectionToServer()
 {
    return mConnectionToServer;
 }
+
 
 void ClientGame::setConnectionToServer(GameConnection *theConnection)
 {

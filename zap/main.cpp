@@ -1266,7 +1266,6 @@ void processStartupParams()
       gPlayerPassword = gIniSettings.lastPassword;
 
 
-   
    if(gCmdLineSettings.serverPassword != "")
       gServerPassword = gCmdLineSettings.serverPassword;
    else if(gIniSettings.serverPassword != "")
