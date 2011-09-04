@@ -320,12 +320,12 @@ extern CmdLineSettings gCmdLineSettings;
 extern Vector<StringTableEntry> gLevelSkipList;
 
 // Create a list of levels for hosting a game, but does not read the files or do any validation of them
-Vector<string> LevelListLoader::buildLevelList()
+Vector<string> LevelListLoader::buildLevelList(const string &levelFolder, bool ignoreCmdLine)
 {
    Vector<string> levelList;
 
    // If user specified a list of levels on the command line, use those
-   if(gCmdLineSettings.specifiedLevels.size() > 0)
+   if(!ignoreCmdLine && gCmdLineSettings.specifiedLevels.size() > 0)
       levelList = gCmdLineSettings.specifiedLevels;
    else
    {
@@ -333,9 +333,9 @@ Vector<string> LevelListLoader::buildLevelList()
       // (n.b. gLevelDir defaults to the "levels" folder under the Bitfighter data install dir)
       Vector<string> levelfiles;
 
-      if(!getFilesFromFolder(gConfigDirs.levelDir, levelfiles, "level"))    // True if error reading level...  print message... or just PANIC!!
+      if(!getFilesFromFolder(levelFolder, levelfiles, "level"))    // True if error reading level...  print message... or just PANIC!!
       {
-         logprintf(LogConsumer::LogError, "Could not read any levels from the levels folder \"%s\".", gConfigDirs.levelDir.c_str());
+         logprintf(LogConsumer::LogError, "Could not read any levels from the levels folder \"%s\".", levelFolder.c_str());
          return levelList;    // empty
       }
 

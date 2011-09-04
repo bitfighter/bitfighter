@@ -29,7 +29,7 @@
 #include "gameConnection.h"
 
 #include "gameObjectRender.h"
-#include "stringUtils.h"      // for itos
+#include "stringUtils.h"      // for itos()
 #include "gameObjectRender.h"
 
 namespace Zap

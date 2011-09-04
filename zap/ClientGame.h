@@ -140,7 +140,7 @@ public:
    void setRemoteLevelDownloadFilename(const string &filename) { mRemoteLevelDownloadFilename = filename; }
 
    void changePassword(GameConnection::ParamType type, const Vector<string> &words, bool required);
-   void changeServerNameDescr(GameConnection::ParamType type, const Vector<string> &words);
+   void changeServerParam(GameConnection::ParamType type, const Vector<string> &words);
    bool checkName(const string &name);    // Make sure name is valid, and correct case of name if otherwise correct
 
 

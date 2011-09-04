@@ -1573,12 +1573,13 @@ void writeSkipList(CIniFile *ini)
    ini->SetAllValues("LevelSkipList", "SkipLevel", skipList);
 }
 
+
 //////////////////////////////////
 //////////////////////////////////
 
 extern CmdLineSettings gCmdLineSettings;
 
-string resolutionHelper(const string &cmdLineDir, const string &rootDataDir, const string &subdir)
+static string resolutionHelper(const string &cmdLineDir, const string &rootDataDir, const string &subdir)
 {
    if(cmdLineDir != "")             // Direct specification of ini path takes precedence...
       return cmdLineDir;
@@ -1610,18 +1611,6 @@ void ConfigDirectories::resolveDirs()
    gConfigDirs.musicDir      = resolutionHelper(gCmdLineSettings.dirs.musicDir,      "", "music");
 
    gSqlite = gConfigDirs.logDir + "stats";
-}
-
-
-static bool assignIfExists(const string &path)
-{
-   if(fileExists(path))
-   {
-      gConfigDirs.levelDir = path;
-      return true;
-   }
-
-   return false;
 }
 
 
@@ -1658,47 +1647,69 @@ static bool assignIfExists(const string &path)
 //
 // If none of the above work, no hosting/editing for you!
 //
-// NOTE: See above for full explanation of what this function is doing
-static void doResolveLevelDir(const string &rootDataDir, const string &levelDir, const string &iniLevelDir)
+// NOTE: See above for full explanation of what these functions are doing
+string ConfigDirectories::resolveLevelDir(const string &rootDataDir, const string &levelDir)     // static
 {
    if(levelDir != "")
-      if(assignIfExists(levelDir))
-         return;
+      if(fileExists(levelDir))     // Check for a valid absolute path in levelDir
+         return levelDir;
 
    if(rootDataDir != "")
    {
       if(levelDir != "")
       {
-         if(assignIfExists(strictjoindir(rootDataDir, "levels", levelDir)))
-            return;
-         else if(assignIfExists(strictjoindir(rootDataDir, levelDir)))
-            return;
-      }
+         string candidate = strictjoindir(rootDataDir, "levels", levelDir);
+         if(fileExists(candidate))
+            return candidate;
 
-      if(assignIfExists(strictjoindir(rootDataDir, "levels")))
-         return;
+         candidate = strictjoindir(rootDataDir, levelDir);
+         if(fileExists(candidate))
+            return candidate;
+      }
+   }
+
+   return "";
+}
+
+
+string ConfigDirectories::resolveLevelDir(const string &rootDataDir, const string &levelDir, const string &iniLevelDir)     // static
+{
+   string resolved = resolveLevelDir(rootDataDir, levelDir);
+   if(resolved != "")
+      return resolved;
+
+   if(rootDataDir != "")
+   {
+      string candidate = strictjoindir(rootDataDir, "levels");
+      if(fileExists(candidate))   // Try rootDataDir/levels
+         return candidate;
    }
 
    // rootDataDir is blank, or nothing using it worked
    if(iniLevelDir != "")
    {
+      string candidate;
+
       if(levelDir != "")
       {
-         if(assignIfExists(strictjoindir(iniLevelDir, levelDir)))
-            return;
+         candidate = strictjoindir(iniLevelDir, levelDir);
+         if(fileExists(candidate))
+            return candidate;
       }
-
-      if(assignIfExists(iniLevelDir))
-         return;
+      
+      if(fileExists(iniLevelDir))
+         return iniLevelDir;
    }
 
-   if(assignIfExists("levels"))
-      return;
+   if(fileExists("levels"))
+      return "levels";
 
-   gConfigDirs.levelDir = "";    // Surrender
+   return "";     // Surrender
 }
 
+
 #ifdef false
+// WARNING: May not still work...
 static void testLevelDirResolution()
 {
    // These need to exist!
@@ -1717,25 +1728,25 @@ static void testLevelDirResolution()
    */
    
    // rootDataDir, levelDir, iniLevelDir
-   doResolveLevelDir("c:/temp", "leveldir", "c:/ini/level/dir/");       // rootDataDir/levelDir
+   resolveLevelDir("c:/temp", "leveldir", "c:/ini/level/dir/");       // rootDataDir/levelDir
    TNLAssertV(gConfigDirs.levelDir == "c:/temp/leveldir", ("Bad leveldir: %s", gConfigDirs.levelDir.c_str()));
 
-   doResolveLevelDir("c:/temp/leveldir2", "leveldir", "c:/ini/level/dir/");       // rootDataDir/levels/levelDir
+   resolveLevelDir("c:/temp/leveldir2", "leveldir", "c:/ini/level/dir/");       // rootDataDir/levels/levelDir
    TNLAssertV(gConfigDirs.levelDir == "c:/temp/leveldir2/levels/leveldir", ("Bad leveldir: %s", gConfigDirs.levelDir.c_str()));
 
-   doResolveLevelDir("c:/temp/leveldir2", "c:/temp/leveldir", "c:/ini/level/dir/");       // levelDir
+   resolveLevelDir("c:/temp/leveldir2", "c:/temp/leveldir", "c:/ini/level/dir/");       // levelDir
    TNLAssertV(gConfigDirs.levelDir == "c:/temp/leveldir", ("Bad leveldir: %s", gConfigDirs.levelDir.c_str()));
 
-   doResolveLevelDir("c:/temp/leveldir2", "nosuchfolder", "c:/ini/level/dir/");       // rootDataDir/levels
+   resolveLevelDir("c:/temp/leveldir2", "nosuchfolder", "c:/ini/level/dir/");       // rootDataDir/levels
    TNLAssertV(gConfigDirs.levelDir == "c:/temp/leveldir2/levels", ("Bad leveldir: %s", gConfigDirs.levelDir.c_str()));
 
-   doResolveLevelDir("c:/temp/nosuchfolder", "leveldir", "c:/temp/");       // iniLevelDir/levelDir
+   resolveLevelDir("c:/temp/nosuchfolder", "leveldir", "c:/temp/");       // iniLevelDir/levelDir
    TNLAssertV(gConfigDirs.levelDir == "c:/temp/leveldir", ("Bad leveldir: %s", gConfigDirs.levelDir.c_str()));
 
-   doResolveLevelDir("c:/temp/nosuchfolder", "nosuchfolder", "c:/temp");       // iniLevelDir
+   resolveLevelDir("c:/temp/nosuchfolder", "nosuchfolder", "c:/temp");       // iniLevelDir
    TNLAssertV(gConfigDirs.levelDir == "c:/temp", ("Bad leveldir: %s", gConfigDirs.levelDir.c_str()));
 
-   doResolveLevelDir("c:/temp/nosuchfolder", "nosuchfolder", "c:/does/not/exist");       // total failure
+   resolveLevelDir("c:/temp/nosuchfolder", "nosuchfolder", "c:/does/not/exist");       // total failure
    TNLAssertV(gConfigDirs.levelDir == "", ("Bad leveldir: %s", gConfigDirs.levelDir.c_str()));
 
    printf("passed leveldir resolution tests!\n");
@@ -1743,10 +1754,10 @@ static void testLevelDirResolution()
 #endif
 
 
-void ConfigDirectories::resolveLevelDir()
+void ConfigDirectories::resolveLevelDir()    // static
 {
    //testLevelDirResolution();
-   doResolveLevelDir(gCmdLineSettings.dirs.rootDataDir, gCmdLineSettings.dirs.levelDir, gIniSettings.levelDir);
+   gConfigDirs.levelDir = resolveLevelDir(gCmdLineSettings.dirs.rootDataDir, gCmdLineSettings.dirs.levelDir, gIniSettings.levelDir);
 }
 
 

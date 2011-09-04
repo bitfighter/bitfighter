@@ -1144,12 +1144,13 @@ void HostMenuUserInterface::onActivate()
 extern string gHostName, gHostDescr;
 extern string gLevelChangePassword, gAdminPassword, gServerPassword;
 extern void initHostGame(Address bindAddress, Vector<string> &levelList, bool testMode);
+extern ConfigDirectories gConfigDirs;
 
 static void startHostingCallback(ClientGame *game, U32 unused)
 {
    game->getUIManager()->getHostMenuUserInterface()->saveSettings();
 
-   Vector<string> levelList = LevelListLoader::buildLevelList();
+   Vector<string> levelList = LevelListLoader::buildLevelList(gConfigDirs.levelDir);
    initHostGame(Address(IPProtocol, Address::Any, 28000), levelList, false);
 }
 
@@ -1552,7 +1553,7 @@ void LevelMenuSelectUserInterface::onActivate()
 
    if(!strcmp(category.c_str(), UPLOAD_LEVELS))
    {
-      mLevels = LevelListLoader::buildLevelList();
+      mLevels = LevelListLoader::buildLevelList(gConfigDirs.levelDir);
       for(S32 i=0; i < mLevels.size(); i++)
       {
          c[0] = mLevels[i].c_str()[0];

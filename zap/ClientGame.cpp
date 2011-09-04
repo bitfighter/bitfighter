@@ -562,8 +562,7 @@ void ClientGame::changePassword(GameConnection::ParamType type, const Vector<str
 }
 
 
-// TODO: Probably misnamed... handles deletes too
-void ClientGame::changeServerNameDescr(GameConnection::ParamType type, const Vector<string> &words)
+void ClientGame::changeServerParam(GameConnection::ParamType type, const Vector<string> &words)
 {
    // Concatenate all params into a single string
    string allWords = concatenate(words, 1);
@@ -571,7 +570,12 @@ void ClientGame::changeServerNameDescr(GameConnection::ParamType type, const Vec
    // Did the user provide a name/description?
    if(type != GameConnection::DeleteLevel && allWords == "")
    {
-      displayErrorMessage(type == GameConnection::ServerName ? "!!! Need to supply a name" : "!!! Need to supply a description");
+      if(type == GameConnection::LevelDir)
+         displayErrorMessage("!!! Need to supply a folder name");
+      else if(type == GameConnection::ServerName)
+         displayErrorMessage("!!! Need to supply a name");
+      else
+         displayErrorMessage("!!! Need to supply a description");
       return;
    }
 

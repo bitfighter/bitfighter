@@ -316,7 +316,7 @@ bool makeSureFolderExists(const string &dir)
 }
 
 // Read files from folder
-bool getFilesFromFolder(const string& dir, Vector<string>& files, const string& extension)
+bool getFilesFromFolder(const string &dir, Vector<string> &files, const string &extension)
 {
    DIR *dp;
    struct dirent *dirp;

@@ -320,20 +320,20 @@ public:
    LevelInfo() { /* Do nothing */ }    // Default constructor
 
    // Used on client side where we don't care about min/max players
-   LevelInfo(StringTableEntry name, StringTableEntry type)     
+   LevelInfo(const StringTableEntry &name, const StringTableEntry &type)
    {
       levelName = name;  
       levelType = type; 
    }
 
    // Used on server side, augmented with setInfo method below
-   LevelInfo(string levelFile)
+   LevelInfo(const string &levelFile)
    {
       levelFileName = levelFile.c_str();
    }
 
    // Used on server side
-   void setInfo(StringTableEntry name, StringTableEntry type, S32 minPlayers, S32 maxPlayers)
+   void setInfo(const StringTableEntry &name, const StringTableEntry &type, S32 minPlayers, S32 maxPlayers)
    {
       levelName = name;  levelType = type;  minRecPlayers = minPlayers;  maxRecPlayers = maxPlayers; 
    }
@@ -352,7 +352,7 @@ class ServerGame : public Game
 private:
    enum {
       LevelSwitchTime = 5000,
-      UpdateServerStatusTime = 20000,      // How often we update our status on the master server (ms)
+      UpdateServerStatusTime = 20000,    // How often we update our status on the master server (ms)
       CheckServerStatusTime = 5000,      // If it did not send updates, recheck after ms
    };
 
@@ -423,7 +423,7 @@ public:
 
    void setShuttingDown(bool shuttingDown, U16 time, ClientRef *who, StringPtr reason);  
 
-   void buildLevelList(Vector<string> &levelList);
+   void buildLevelList(const Vector<string> &levelList);
    void resetLevelLoadIndex();
    void loadNextLevel();
    string getLastLevelLoadName();             // For updating the UI

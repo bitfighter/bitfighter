@@ -72,13 +72,14 @@ struct ConfigDirectories {
    string luaDir;
    string rootDataDir;
 
-   static void resolveDirs();
-   static void resolveLevelDir();
+   static void resolveDirs();                                                                                    // calls resolveLevelDir()
+   static void resolveLevelDir();                                                                                // calls resolveLevelDir(x,y,z)
+   static string resolveLevelDir(const string &rootDataDir, const string &levelDir, const string &iniLevelDir);  // calls resolveLevelDir(x,y)
+   static string resolveLevelDir(const string &rootDataDir, const string &levelDir);
 
    static string findLevelFile(const string &filename);
    static string findLevelGenScript(const string &fileName);
    static string findBotFile(const string &filename);
-
 };
 
 

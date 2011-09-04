@@ -526,12 +526,12 @@ extern Vector<StringTableEntry> gLevelSkipList;
 TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, GameConnection::ParamTypeCount> type), (param, type),
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
-   if(!isAdmin())    // Do nothing --> non-admins have no pull here
-      return;
+   if(!isAdmin())    // Do nothing --> non-admins have no pull here.  Note that this should never happen; client should filter out
+      return;        // non-admins before we get here, but we'll check anyway in case the client has been hacked.
 
-   // Check for forbidden blank parameters
-   if( (type == (U32)AdminPassword || type == (U32)ServerName || type == (U32)ServerDescr) &&
-                          !strcmp(param.getString(), ""))    // Some params can't be blank
+   // Check for forbidden blank parameters -- the following commands require a value to be passed in param
+   if( (type == (U32)AdminPassword || type == (U32)ServerName || type == (U32)ServerDescr || type == (U32)LevelDir) &&
+                          !strcmp(param.getString(), ""))
       return;
 
    // Add a message to the server log
@@ -540,9 +540,9 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
                                                 gServerGame->getCurrentLevelFileName().getString());
    else
    {
-      const char *types[] = { "level change password", "admin password", "server password", "server name", "server description" };
-      logprintf(LogConsumer::ServerFilter, "User [%s] %s %s", mClientRef->name.getString(), 
-                                                strcmp(param.getString(), "") ? "set" : "cleared", types[type]);
+      const char *types[] = { "level change password", "admin password", "server password", "server name", "server description", "leveldir param" };
+      logprintf(LogConsumer::ServerFilter, "User [%s] %s to [%s]", mClientRef->name.getString(), 
+                                                strcmp(param.getString(), "") ? "changed" : "cleared", types[type]);
    }
 
    // Update our in-memory copies of the param
@@ -562,6 +562,29 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
       gServerGame->setHostDescr(param.getString());    // Do we also need to set gHost
       gHostDescr = param.getString();                  // Needed on local host?
    }
+   else if(type == (U32)LevelDir)
+   {
+      string candidate = ConfigDirectories::resolveLevelDir(gConfigDirs.rootDataDir, param.getString());
+
+      // Make sure the specified dir exists; hopefully it contains levels
+      if(candidate != "" && fileExists(candidate))
+      {
+         Vector<string> newLevels;
+         newLevels = LevelListLoader::buildLevelList(candidate, true);
+
+         if(newLevels.size() > 0)
+         {
+            gConfigDirs.levelDir = candidate;
+            gServerGame->buildLevelList(newLevels);
+            s2cDisplayMessage(ColorAqua, SFXNone, "Level folder changed");
+         }
+         else
+            s2cDisplayErrorMessage("!!! Specified folder contains no levels");
+      }
+      else
+         s2cDisplayErrorMessage("!!! Could not find specified folder");
+   }  // end change leveldir
+
    else if(type == (U32)DeleteLevel)
    {
       // Avoid duplicates on skip list
@@ -582,7 +605,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
       }
    }
 
-   if(type != (U32)DeleteLevel)
+   if(type != (U32)DeleteLevel && type != (U32)LevelDir)
    {
       const char *keys[] = { "LevelChangePassword", "AdminPassword", "ServerPassword", "ServerName", "ServerDescription" };
 
@@ -592,14 +615,14 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
    }
 
    // Some messages we might show the user... should these just be inserted directly below?
-   static StringTableEntry levelPassChanged("Level change password changed");
-   static StringTableEntry levelPassCleared("Level change password cleared -- anyone can change levels");
-   static StringTableEntry adminPassChanged("Admin password changed");
-   static StringTableEntry serverPassChanged("Server password changed -- only players with the password can connect");
-   static StringTableEntry serverPassCleared("Server password cleared -- anyone can connect");
-   static StringTableEntry serverNameChanged("Server name changed");
-   static StringTableEntry serverDescrChanged("Server description changed");
-   static StringTableEntry serverLevelDeleted("Level added to skip list; level will stay in rotation until server restarted");
+   static StringTableEntry levelPassChanged   = "Level change password changed";
+   static StringTableEntry levelPassCleared   = "Level change password cleared -- anyone can change levels";
+   static StringTableEntry adminPassChanged   = "Admin password changed";
+   static StringTableEntry serverPassChanged  = "Server password changed -- only players with the password can connect";
+   static StringTableEntry serverPassCleared  = "Server password cleared -- anyone can connect";
+   static StringTableEntry serverNameChanged  = "Server name changed";
+   static StringTableEntry serverDescrChanged = "Server description changed";
+   static StringTableEntry serverLevelDeleted = "Level added to skip list; level will stay in rotation until server restarted";
 
    // Pick out just the right message
    StringTableEntry msg;
@@ -616,7 +639,9 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
                walk->setIsLevelChanger(true);
                walk->s2cSetIsLevelChanger(true, false);     // Silently
             }
-     }else{ //if setting a password, remove everyone permission (except admin)
+      }
+      else  // If setting a password, remove everyone's permissions (except admins)
+      { 
          for(GameConnection *walk = getClientList(); walk; walk = walk->getNextClient())
             if(walk->isLevelChanger() && (! walk->isAdmin()))
             {
@@ -1002,13 +1027,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayMessage,
                   (color, sfx, formatString),
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
-   static const S32 STRLEN = 256;
-   char outputBuffer[STRLEN];
-
-   strncpy(outputBuffer, formatString.getString(), STRLEN - 1);
-   outputBuffer[STRLEN - 1] = '\0';    // Make sure we're null-terminated
-
-   displayMessage(color, sfx, outputBuffer);
+   displayMessage(color, sfx, formatString.getString());
 }
 
 
@@ -1018,13 +1037,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayErrorMessage,
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
 #ifndef ZAP_DEDICATED
-   static const S32 STRLEN = 256;
-   char outputBuffer[STRLEN];
-
-   strncpy(outputBuffer, formatString.getString(), STRLEN - 1);
-   outputBuffer[STRLEN - 1] = '\0';    // Make sure we're null-terminated
-
-   mClientGame->displayMessage(Colors::red, "%s", outputBuffer);
+   mClientGame->displayErrorMessage(formatString.getString());
 #endif
 }
 
@@ -1071,8 +1084,8 @@ void GameConnection::c2sRequestLevelChange2(S32 newLevelIndex, bool isRelative)
    if(!mIsLevelChanger)
       return;
 
-   // use voting when no level change password and more then 1 players
-   if(!mIsAdmin && gLevelChangePassword.length() == 0 && gServerGame->getPlayerCount() > 1&&  gServerGame->voteStart(this, 0, newLevelIndex))
+   // Use voting when there is no level change password and there is more then 1 player
+   if(!mIsAdmin && gLevelChangePassword.length() == 0 && gServerGame->getPlayerCount() > 1 && gServerGame->voteStart(this, 0, newLevelIndex))
       return;
 
    bool restart = false;
@@ -1298,7 +1311,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendDataParts, (U8 type, ByteBufferPtr data
          c2sRequestLevelChange2(id, false);
       }
       else
-         s2cDisplayErrorMessage("!!! Upload Failed, server can't write file");
+         s2cDisplayErrorMessage("!!! Upload failed -- server can't write file");
    }
 
    if(type != 0)

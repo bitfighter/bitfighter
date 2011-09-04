@@ -1456,21 +1456,28 @@ void GameUserInterface::setLevPassHandler(ClientGame *game, const Vector<string>
 void GameUserInterface::setServerNameHandler(ClientGame *game, const Vector<string> &words)
 {
    if(game->hasAdmin("!!! You don't have permission to set the server name"))
-      game->changeServerNameDescr(GameConnection::ServerName, words);
+      game->changeServerParam(GameConnection::ServerName, words);
 }
 
 
 void GameUserInterface::setServerDescrHandler(ClientGame *game, const Vector<string> &words)
 {
    if(game->hasAdmin("!!! You don't have permission to set the server description"))
-      game->changeServerNameDescr(GameConnection::ServerDescr, words);
+      game->changeServerParam(GameConnection::ServerDescr, words);
+}
+
+
+void GameUserInterface::setLevelDirHandler(ClientGame *game, const Vector<string> &words)
+{
+   if(game->hasAdmin("!!! You don't have permission to set the leveldir param"))
+      game->changeServerParam(GameConnection::LevelDir, words);
 }
 
 
 void GameUserInterface::deleteCurrentLevelHandler(ClientGame *game, const Vector<string> &words)
 {
    if(game->hasAdmin("!!! You don't have permission to delete the current level"))
-      game->changeServerNameDescr(GameConnection::DeleteLevel, words);    // handles deletes too
+      game->changeServerParam(GameConnection::DeleteLevel, words);    // handles deletes too
 }
 
 
@@ -1617,6 +1624,7 @@ CommandInfo chatCmds[] = {
    { "setlevpass",         GameUserInterface::setLevPassHandler,         { STR },     1,  ADMIN_COMMANDS, 0, {"[passwd]"},           "Set server password  (use blank to clear)" },
    { "setadminpass",       GameUserInterface::setAdminPassHandler,       { STR },     1,  ADMIN_COMMANDS, 0, {"[passwd]"},           "Set level change password (use blank to clear)" },
    { "setserverpass",      GameUserInterface::setServerPassHandler,      { STR },     1,  ADMIN_COMMANDS, 0, {"<passwd>"},           "Set admin password" },
+   { "leveldir",           GameUserInterface::setLevelDirHandler,        { STR },     1,  ADMIN_COMMANDS, 0, {"<new level folder>"}, "Set leveldir param on the server (changes levels available)" },
    { "setservername",      GameUserInterface::setServerNameHandler,      { STR },     1,  ADMIN_COMMANDS, 0, {"<name>"},             "Set server name" },
    { "setserverdescr",     GameUserInterface::setServerDescrHandler,     { STR },     1,  ADMIN_COMMANDS, 0, {"<descr>"},            "Set server description" },
    { "deletecurrentlevel", GameUserInterface::deleteCurrentLevelHandler, { },         0,  ADMIN_COMMANDS, 0, {""},                   "Remove current level from server" },

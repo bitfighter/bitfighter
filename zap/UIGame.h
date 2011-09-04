@@ -340,6 +340,7 @@ public:
    static void setLevPassHandler(ClientGame *game, const Vector<string> &words);
    static void setServerNameHandler(ClientGame *game, const Vector<string> &words);
    static void setServerDescrHandler(ClientGame *game, const Vector<string> &words);
+   static void setLevelDirHandler(ClientGame *game, const Vector<string> &words);
    static void serverCommandHandler(ClientGame *game, const Vector<string> &words);
    static void pmHandler(ClientGame *game, const Vector<string> &words);
    static void muteHandler(ClientGame *game, const Vector<string> &words);

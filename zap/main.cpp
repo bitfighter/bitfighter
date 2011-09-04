@@ -736,6 +736,8 @@ void readFolderLocationParams(Vector<StringPtr> &argv)
          }
 
          gCmdLineSettings.dirs.rootDataDir = argv[i+1].getString();
+         gConfigDirs.rootDataDir = gCmdLineSettings.dirs.rootDataDir;      // Also sock it away here
+
          argv.erase(i);
          argv.erase(i);
          i--;
@@ -1851,7 +1853,7 @@ int main(int argc, char **argv)
 
    if(gCmdLineSettings.serverMode)           // Only set when 1) compiled as a dedicated server; or 2) -dedicated param is specified
    {
-      Vector<string> levels = LevelListLoader::buildLevelList();
+      Vector<string> levels = LevelListLoader::buildLevelList(gConfigDirs.levelDir);
       initHostGame(gBindAddress, levels, false);     // Start hosting
    }
 

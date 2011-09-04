@@ -1418,12 +1418,14 @@ void GameType::queryItemsOfInterest()
       ItemOfInterest &ioi = mItemsOfInterest[i];
       if(ioi.theItem.isNull())
       {
-         // Currently can happen when dropping HuntersFlagItem in ZoneControlGameType.
+         // This can happen when dropping HuntersFlagItem in ZoneControlGameType
          TNLAssert(false,"item in ItemOfInterest is NULL. This can happen when an item got deleted.");
-         mItemsOfInterest.erase(i);    // non-debug mode will skip TNLAssert, do this to fix this error.
+         mItemsOfInterest.erase(i);    // When not in debug mode, the TNLAssert is not fired.  Delete the problem object and carry on.
          break;
       }
+
       ioi.teamVisMask = 0;                         // Reset mask, object becomes invisible to all teams
+      
       Point pos = ioi.theItem->getActualPos();
       Point scopeRange(Game::PLAYER_SENSOR_VISUAL_DISTANCE_HORIZONTAL, Game::PLAYER_SENSOR_VISUAL_DISTANCE_VERTICAL);
       Rect queryRect(pos, pos);

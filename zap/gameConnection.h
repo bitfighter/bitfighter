@@ -155,12 +155,18 @@ public:
    enum ParamType             // Be careful changing the order of this list... c2sSetParam() expects this for message creation
    {
       LevelChangePassword = 0,
-      AdminPassword = 1,
-      ServerPassword = 2,
-      ServerName = 3,
-      ServerDescr = 4,
-      DeleteLevel = 5,
-      ParamTypeCount       // Must be last
+      AdminPassword,
+      ServerPassword,
+      ServerName,
+      ServerDescr,
+
+      // Items not listed in c2sSetParam()::*keys[] should be added here
+      LevelDir, 
+
+      // Items not listed in c2sSetParam()::*types[] should be added here
+      DeleteLevel,            
+
+      ParamTypeCount          // Must be last
    };
 
    static const S32 BanDuration = 30000;     // Players are banned for 30secs after being kicked
