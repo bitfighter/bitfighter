@@ -87,7 +87,7 @@ static void prevButtonClickedCallback(ClientGame *game)
 
 
 // Constructor
-QueryServersUserInterface::QueryServersUserInterface(ClientGame *game) : UserInterface(game)
+QueryServersUserInterface::QueryServersUserInterface(ClientGame *game) : UserInterface(game), ChatParent(game)
 {
    setMenuID(QueryServersScreenUI);
    mLastUsedServerId = 0;
@@ -1022,7 +1022,7 @@ void QueryServersUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 
             if(servers.size() > currentIndex)      // Index is valid
             {
-               leaveGlobalChat(getGame());
+               leaveGlobalChat();
 
                // Join the selected game...   (what if we select a local server from the list...  wouldn't 2nd param be true?)
                // Second param, false when we can ping that server, allows faster connect. If we can ping, we can connect without master help.
@@ -1038,7 +1038,7 @@ void QueryServersUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    else if(keyCode == KEY_ESCAPE)  // Return to main menu
    {
       playBoop();
-      leaveGlobalChat(getGame());
+      leaveGlobalChat();
       getUIManager()->getMainMenuUserInterface()->activate();
    }
    else if(keyCode == keyDIAG)            // Turn on diagnostic overlay
@@ -1363,11 +1363,11 @@ void QueryServersUserInterface::issueChat()
             joinGame(address, false, false);
          }
          else
-            newMessage(getGame(), "", "INVALID ADDRESS", false, true, true);
+            newMessage("", "INVALID ADDRESS", false, true, true);
          return;
       }
    }
-   ChatParent::issueChat(getGame());
+   ChatParent::issueChat();
 }
 
 

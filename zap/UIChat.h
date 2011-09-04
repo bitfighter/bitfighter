@@ -41,7 +41,7 @@ namespace Zap
 class ChatMessage
 {
 public:
-   ChatMessage() { /* do nothing */ }                             // Quickie constructor
+   ChatMessage() { /* Do nothing */ }                             // Quickie constructor
 
    ChatMessage(string frm, string msg, Color col, bool isPriv, bool isSys)    // "Real" constructor
    {
@@ -80,6 +80,8 @@ private:
 
    Color getColor(string name);
 
+   ClientGame *mGame;
+
 protected:
    // Message data
    static ChatMessage mMessages[MESSAGES_TO_RETAIN];
@@ -93,25 +95,25 @@ protected:
    bool composingMessage() { return mLineEditor.length() > 0; }
 
 public:
-   AbstractChat();                        // Constructor
+   AbstractChat(ClientGame *game);        // Constructor
    virtual ~AbstractChat();               // Destructor
-   void newMessage(ClientGame *game, const string &from, const string &message, bool isPrivate, bool isSystem, bool fromSelf);   // Handle incoming msg
+   void newMessage(const string &from, const string &message, bool isPrivate, bool isSystem, bool fromSelf);   // Handle incoming msg
 
-   void clearChat();                          // Clear message being composed
-   virtual void issueChat(ClientGame *game);  // Send chat message
+   void clearChat();                      // Clear message being composed
+   virtual void issueChat();              // Send chat message
 
-   void leaveGlobalChat(ClientGame *game);    // Send msg to master telling them we're leaving chat
+   void leaveGlobalChat();                // Send msg to master telling them we're leaving chat
 
    void renderMessages(U32 yPos, U32 lineCountToDisplay);
    void renderMessageComposition(S32 ypos);   // Render outgoing chat message composition line
 
    void renderChatters(S32 xpos, S32 ypos);   // Render list of other people in chat room
-   void deliverPrivateMessage(ClientGame *game, const char *sender, const char *message);
+   void deliverPrivateMessage(const char *sender, const char *message);
 
    // Handle players joining and leaving the chat session
    void setPlayersInGlobalChat(const Vector<StringTableEntry> &playerNicks);
-   void playerJoinedGlobalChat(ClientGame *game, const StringTableEntry &playerNick);
-   void playerLeftGlobalChat(ClientGame *game, const StringTableEntry &playerNick);
+   void playerJoinedGlobalChat(const StringTableEntry &playerNick);
+   void playerLeftGlobalChat(const StringTableEntry &playerNick);
 
 
    // Sizes and other things to help with positioning
@@ -131,6 +133,7 @@ public:
 class ChatUserInterface : public UserInterface, public AbstractChat
 {
    typedef UserInterface Parent;
+   typedef AbstractChat ChatParent;
 
 private:
    Color mMenuSubTitleColor;

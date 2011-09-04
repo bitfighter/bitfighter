@@ -392,7 +392,7 @@ void ClientGame::gotServerListFromMaster(const Vector<IPAddress> &serverList)
 
 void ClientGame::gotChatMessage(const char *playerNick, const char *message, bool isPrivate, bool isSystem)
 {
-   getUIManager()->getChatUserInterface()->newMessage(this, playerNick, message, isPrivate, isSystem, false);
+   getUIManager()->getChatUserInterface()->newMessage(playerNick, message, isPrivate, isSystem, false);
 }
 
 
@@ -404,13 +404,13 @@ void ClientGame::setPlayersInGlobalChat(const Vector<StringTableEntry> &playerNi
 
 void ClientGame::playerJoinedGlobalChat(const StringTableEntry &playerNick)
 {
-   getUIManager()->getChatUserInterface()->playerJoinedGlobalChat(this, playerNick);
+   getUIManager()->getChatUserInterface()->playerJoinedGlobalChat(playerNick);
 }
 
 
 void ClientGame::playerLeftGlobalChat(const StringTableEntry &playerNick)
 {
-   getUIManager()->getChatUserInterface()->playerLeftGlobalChat(this, playerNick);
+   getUIManager()->getChatUserInterface()->playerLeftGlobalChat(playerNick);
 }
 
 

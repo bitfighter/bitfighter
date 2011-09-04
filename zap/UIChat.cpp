@@ -58,8 +58,9 @@ ChatMessage AbstractChat::mMessages[MESSAGES_TO_RETAIN];
 std::map<string, Color> AbstractChat::mFromColors;       // Map nicknames to colors
 
 
-AbstractChat::AbstractChat()
+AbstractChat::AbstractChat(ClientGame *game)
 {
+   mGame = game;
    mLineEditor = LineEditor(200);
 }
 
@@ -78,7 +79,7 @@ Color AbstractChat::getColor(string name)
 
 
 // We received a new incoming chat message...  Add it to the list
-void AbstractChat::newMessage(ClientGame *game, const string &from, const string &message, bool isPrivate, bool isSystem, bool fromSelf)
+void AbstractChat::newMessage(const string &from, const string &message, bool isPrivate, bool isSystem, bool fromSelf)
 {
    // Choose a color
    Color color;
@@ -97,7 +98,7 @@ void AbstractChat::newMessage(ClientGame *game, const string &from, const string
    mMessageCount++;
 
    if(fromSelf && isPrivate)     // I don't think this can ever happen!  ==> Should be !fromSelf ?
-      deliverPrivateMessage(game, from.c_str(), message.c_str());
+      deliverPrivateMessage(from.c_str(), message.c_str());
 }
 
 
@@ -110,27 +111,30 @@ void AbstractChat::setPlayersInGlobalChat(const Vector<StringTableEntry> &player
 }
 
 
-void AbstractChat::playerJoinedGlobalChat(ClientGame *game, const StringTableEntry &playerNick)
+void AbstractChat::playerJoinedGlobalChat(const StringTableEntry &playerNick)
 {
    mPlayersInGlobalChat.push_back(playerNick);
 
    // Make the following be from us, so it will be colored white
    string msg = "----- Player " + string(playerNick.getString()) + " joined the conversation -----";
-   newMessage(game, game->getClientInfo()->name, msg, false, true, true);
+   newMessage(mGame->getClientInfo()->name, msg, false, true, true);
    SoundSystem::playSoundEffect(SFXPlayerJoined, gIniSettings.sfxVolLevel);   // Make sound?
 }
 
 
-void AbstractChat::playerLeftGlobalChat(ClientGame *game, const StringTableEntry &playerNick)
+void AbstractChat::playerLeftGlobalChat(const StringTableEntry &playerNick)
 {
-   ChatUserInterface *ui = game->getUIManager()->getChatUserInterface();
+   ChatUserInterface *ui = mGame->getUIManager()->getChatUserInterface();
 
    for(S32 i = 0; i < ui->mPlayersInGlobalChat.size(); i++)
       if(ui->mPlayersInGlobalChat[i] == playerNick)
       {
          ui->mPlayersInGlobalChat.erase_fast(i);
-         newMessage(game, game->getClientInfo()->name, "----- Player " + string(playerNick.getString()) + " left the conversation -----", false, true, true);
-         SoundSystem::playSoundEffect(SFXPlayerLeft, gIniSettings.sfxVolLevel);   // Make sound?
+
+         string msg = "----- Player " + string(playerNick.getString()) + " left the conversation -----";
+         newMessage(mGame->getClientInfo()->name, msg, false, true, true);
+         
+         SoundSystem::playSoundEffect(SFXPlayerLeft, gIniSettings.sfxVolLevel);   // Me make sound!
          break;
       }
 }
@@ -170,9 +174,9 @@ Color AbstractChat::getNextColor()
 
 
 // Announce we're ducking out for a spell...
-void AbstractChat::leaveGlobalChat(ClientGame *game)
+void AbstractChat::leaveGlobalChat()
 {
-   MasterServerConnection *conn = game->getConnectionToMaster();
+   MasterServerConnection *conn = mGame->getConnectionToMaster();
 
    if(conn)
       conn->c2mLeaveGlobalChat();
@@ -284,31 +288,31 @@ void AbstractChat::renderMessageComposition(S32 ypos)
 }
 
 
-void AbstractChat::deliverPrivateMessage(ClientGame *game, const char *sender, const char *message)
+void AbstractChat::deliverPrivateMessage(const char *sender, const char *message)
 {
    // If player not in UIChat or UIQueryServers, then display message in-game if possible.  2 line message.
    UIID currId = UserInterface::current->getMenuID();
    if(currId != ChatUI && currId != QueryServersScreenUI )
    {
-      game->getUIManager()->getGameUserInterface()->displayChatMessage(GameUserInterface::privateF5MessageDisplayedInGameColor,
+      mGame->getUIManager()->getGameUserInterface()->displayChatMessage(GameUserInterface::privateF5MessageDisplayedInGameColor,
          "Private message from %s: Press [%s] to enter chat mode", sender, keyCodeToString(keyOUTGAMECHAT));
-      game->getUIManager()->getGameUserInterface()->displayChatMessage(GameUserInterface::privateF5MessageDisplayedInGameColor, "%s %s", ARROW, message);
+      mGame->getUIManager()->getGameUserInterface()->displayChatMessage(GameUserInterface::privateF5MessageDisplayedInGameColor, "%s %s", ARROW, message);
    }
 }
 
 
 // Send chat message
-void AbstractChat::issueChat(ClientGame *game)
+void AbstractChat::issueChat()
 {
    if(mLineEditor.length() > 0)
    {
       // Send message
-      MasterServerConnection *conn = game->getConnectionToMaster();
+      MasterServerConnection *conn = mGame->getConnectionToMaster();
       if(conn)
          conn->c2mSendChat(mLineEditor.c_str());
 
       // And display it locally
-      newMessage(game, game->getClientInfo()->name, mLineEditor.getString(), false, false, true);
+      newMessage(mGame->getClientInfo()->name, mLineEditor.getString(), false, false, true);
    }
    clearChat();     // Clear message
 
@@ -342,7 +346,7 @@ void AbstractChat::renderChatters(S32 xpos, S32 ypos)
 ////////////////////////////////////////
 
 // Constructor
-ChatUserInterface::ChatUserInterface(ClientGame *game) : Parent(game)
+ChatUserInterface::ChatUserInterface(ClientGame *game) : Parent(game), ChatParent(game)
 {
    setMenuID(GlobalChatUI);
 }
@@ -445,7 +449,7 @@ void ChatUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    else if(keyCode == KEY_ESCAPE)
       onEscape();
    else if (keyCode == KEY_ENTER)                // Submits message
-      issueChat(getGame());
+      issueChat();
    else if (keyCode == KEY_DELETE || keyCode == KEY_BACKSPACE)       // Do backspacey things
       mLineEditor.handleBackspace(keyCode);
    else if(ascii)                               // Other keys - add key to message
@@ -476,7 +480,7 @@ void ChatUserInterface::onOutGameChat()
 
 void ChatUserInterface::onEscape()
 {
-   leaveGlobalChat(getGame());
+   leaveGlobalChat();
    getUIManager()->reactivatePrevUI();
    playBoop();
 }
