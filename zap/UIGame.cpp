@@ -480,7 +480,7 @@ void GameUserInterface::render()
 
 #if 0
 // Some code for outputting the position of the ship for finding good spawns
-GameConnection *con = gClientGame->getConnectionToServer();
+GameConnection *con = getGame()->getConnectionToServer();
 
 if(con)
 {
@@ -1914,10 +1914,6 @@ void GameUserInterface::processChatModeKey(KeyCode keyCode, char ascii)
       if(getGame()->getConnectionToServer())     // clientGame cannot be NULL here
       {
          S32 promptSize = getStringWidth(CHAT_FONT_SIZE, mCurrentChatType == TeamChat ? "(Team): " : "(Global): ");
-
-         //Ship *ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
-         //if(!ship)
-         //   return;  // problem with unable to type something while trying to respawn.
 
          S32 nameSize = getStringWidthf(CHAT_FONT_SIZE, "%s: ", getGame()->getConnectionToServer()->getClientName().getString());
          S32 nameWidth = max(nameSize, promptSize);

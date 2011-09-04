@@ -119,8 +119,8 @@ QueryServersUserInterface::QueryServersUserInterface(ClientGame *game) : UserInt
    S32 textsize = 12;
    S32 ypos = BANNER_HEIGHT - 30;
 
-   Button prevButton = Button(horizMargin, ypos, textsize, 4, "PREV", Colors::white, Colors::yellow, prevButtonClickedCallback);
-   Button nextButton = Button(gScreenInfo.getGameCanvasWidth() - horizMargin - 50, ypos, 
+   Button prevButton = Button(getGame(), horizMargin, ypos, textsize, 4, "PREV", Colors::white, Colors::yellow, prevButtonClickedCallback);
+   Button nextButton = Button(getGame(), gScreenInfo.getGameCanvasWidth() - horizMargin - 50, ypos, 
                               textsize, 4, "NEXT", Colors::white, Colors::yellow, nextButtonClickedCallback);
    
    buttons.push_back(prevButton);
@@ -1375,8 +1375,9 @@ void QueryServersUserInterface::issueChat()
 ////////////////////////////////////////
 
 // Contstructor -- x,y are UL corner of button
-Button::Button(S32 x, S32 y, S32 textSize, S32 padding, const char *label, Color fgColor, Color hlColor, void (*onClickCallback)(ClientGame *))
+Button::Button(ClientGame *game, S32 x, S32 y, S32 textSize, S32 padding, const char *label, Color fgColor, Color hlColor, void (*onClickCallback)(ClientGame *))
 {
+   mGame = game;
    mX = x;
    mY = y;
    mTextSize = textSize;
@@ -1399,7 +1400,7 @@ bool Button::mouseOver(F32 mouseX, F32 mouseY)
 void Button::onClick(F32 mouseX, F32 mouseY)
 {
    if(mOnClickCallback && mouseOver(mouseX, mouseY))
-      mOnClickCallback(gClientGame);
+      mOnClickCallback(mGame);
 }
 
 
