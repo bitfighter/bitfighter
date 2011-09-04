@@ -83,7 +83,7 @@
   <ItemGroup>
     <ClCompile Include="config.cpp" />
     <ClCompile Include="database.cpp" />
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="master.cpp" />
     <ClCompile Include="masterInterface.cpp" />
   </ItemGroup>
   <ItemGroup>
