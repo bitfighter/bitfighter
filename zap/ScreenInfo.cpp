@@ -69,7 +69,7 @@ void ScreenInfo::init(S32 physicalScreenWidth, S32 physicalScreenHeight)
    mHardwareSurface = false;
 }
 
-F32 ScreenInfo::getMinScalingFactor() {return MIN_SCALING_FACTOR; }
+F32 ScreenInfo::getMinScalingFactor() { return MIN_SCALING_FACTOR; }
 
 void ScreenInfo::setWindowSize(S32 width, S32 height) { mWindowWidth = width; mWindowHeight = height; }
 S32 ScreenInfo::getWindowWidth() { return mWindowWidth; }

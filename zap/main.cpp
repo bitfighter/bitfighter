@@ -213,7 +213,7 @@ Color gHelpTextColor(Colors::green);
 
 S32 gMaxPolygonPoints = 32;                     // Max number of points we can have in Nexuses, LoadoutZones, etc.
 
-static const F32 MIN_SCALING_FACT = 0.15f;      // Limits minimum window size
+//static const F32 MIN_SCALING_FACT = 0.15f;      // Limits minimum window size
 
 string gServerPassword = "";
 string gAdminPassword = "";
@@ -1317,7 +1317,7 @@ void processStartupParams()
    if(gCmdLineSettings.ypos != -9999)
       gIniSettings.winYPos = gCmdLineSettings.ypos;
    if(gCmdLineSettings.winWidth > 0)
-      gIniSettings.winSizeFact = max((F32) gCmdLineSettings.winWidth / (F32) gScreenInfo.getGameCanvasWidth(), MIN_SCALING_FACT);
+      gIniSettings.winSizeFact = max((F32) gCmdLineSettings.winWidth / (F32) gScreenInfo.getGameCanvasWidth(), gScreenInfo.getMinScalingFactor());
 
    string strings;
    if(gCmdLineSettings.masterAddress != "")
