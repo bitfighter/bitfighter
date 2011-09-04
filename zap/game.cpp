@@ -538,7 +538,7 @@ void Game::checkConnectionToMaster(U32 timeDelta)
       {
          if(mHaveTriedToConnectToMaster)
          {
-            gMasterAddress.push_back(string(gMasterAddress[0]));  // Try all the address in the list, one at a time..
+            gMasterAddress.push_back(string(gMasterAddress[0]));  // Try all the address in the list, one at a time...
             gMasterAddress.erase(0);
          }
          mHaveTriedToConnectToMaster = true;

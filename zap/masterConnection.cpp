@@ -422,21 +422,22 @@ void MasterServerConnection::onConnectionEstablished()
 
       TNLAssert(dynamic_cast<ClientGame *>(mGame), "mGame is not ClientGame");
 
-      // Clear old Player list that might be there from client's lost connection to master while in game lobby
+      // Clear old player list that might be there from client's lost connection to master while in game lobby
       Vector<StringTableEntry> emptyPlayerList;
       ((ClientGame *)mGame)->setPlayersInGlobalChat(emptyPlayerList);
    }
 
    if(gCmdLineSettings.masterAddress == "" && gMasterAddress.size() >= 2)
    {
-      // If there is 2 or more master address, the first address is the one used to connect..
-      string string1;
+      // If there are 2 or more master addresses, the first is the one used to connect
+      string addressList;
+      
       for(S32 i = 0; i < gMasterAddress.size() - 1; i++)
-      {
-         string1 = string1 + gMasterAddress[i] + ",";
-      }
-      string1 += gMasterAddress[gMasterAddress.size()-1];
-      gIniSettings.masterAddress = string1;
+         addressList += gMasterAddress[i] + ",";
+
+      addressList += gMasterAddress[gMasterAddress.size() - 1];
+
+      gIniSettings.masterAddress = addressList;
    }
 }
 
