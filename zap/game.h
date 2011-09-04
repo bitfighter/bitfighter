@@ -370,7 +370,7 @@ private:
 
 public:
    U32 mInfoFlags;           // Not used for much at the moment, but who knows? --> propagates to master
-   ServerGame(const Address &theBindAddress, U32 maxPlayers, const char *hostName, bool testMode);    // Constructor
+   ServerGame(const Address &theBindAddress, const string &hostName, const string &hostDescr, U32 maxPlayers, bool testMode);    // Constructor
    virtual ~ServerGame();   // Destructor
 
    U32 mVoteTimer;

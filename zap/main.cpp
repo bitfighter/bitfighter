@@ -337,7 +337,7 @@ U32 getServerMaxPlayers()
 // Host a game (and maybe even play a bit, too!)
 void initHostGame(Address bindAddress, Vector<string> &levelList, bool testMode)
 {
-   gServerGame = new ServerGame(bindAddress, getServerMaxPlayers(), gHostName.c_str(), testMode);
+   gServerGame = new ServerGame(bindAddress, gHostName, gHostDescr, getServerMaxPlayers(), testMode);
 
    gServerGame->setReadyToConnectToMaster(true);
    seedRandomNumberGenerator(gHostName);

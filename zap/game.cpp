@@ -738,18 +738,20 @@ extern string gHostName;
 extern string gHostDescr;
 
 // Constructor
-ServerGame::ServerGame(const Address &theBindAddress, U32 maxPlayers, const char *hostName, bool testMode) : Game(theBindAddress)
+ServerGame::ServerGame(const Address &theBindAddress, const string &hostName, const string &hostDescr, U32 maxPlayers, bool testMode) : 
+      Game(theBindAddress)
 {
+   mHostName = hostName;
+   mHostDescr = hostDescr;
+   mMaxPlayers = maxPlayers;
+
    mVoteTimer = 0;
    mNextLevel = NEXT_LEVEL;
    mPlayerCount = 0;
-   mMaxPlayers = maxPlayers;
-   mHostName = gHostName;
-   mHostDescr = gHostDescr;
+
    mShuttingDown = false;
 
    Robot::setPaused(false);
-
 
    hostingModePhase = ServerGame::NotHosting;
 
