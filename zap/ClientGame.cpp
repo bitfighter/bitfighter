@@ -91,12 +91,33 @@ ClientGame *gClientGame1 = NULL;
 ClientGame *gClientGame2 = NULL;
 
 extern ScreenInfo gScreenInfo;
+extern CmdLineSettings gCmdLineSettings;
 
 static Vector<DatabaseObject *> fillVector2;
 
-//-----------------------------------------------------------------------------------
-//-----------------------------------------------------------------------------------
+////////////////////////////////////////
+////////////////////////////////////////
 
+// Constructor
+ClientInfo::ClientInfo()   
+{ 
+   id.getRandom();    // Generate a player ID
+   simulatedPacketLoss = gCmdLineSettings.loss;
+   simulatedLag = gCmdLineSettings.lag;
+
+   if(gCmdLineSettings.name != "")
+      name = gCmdLineSettings.name;
+   else if(gIniSettings.name != "")
+      name = gIniSettings.name;
+   else
+      name = gIniSettings.lastName;
+
+   authenticated = false;
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 // Constructor
 ClientGame::ClientGame(const Address &bindAddress) : Game(bindAddress)
@@ -378,13 +399,13 @@ void ClientGame::setPlayersInGlobalChat(const Vector<StringTableEntry> &playerNi
 
 void ClientGame::playerJoinedGlobalChat(const StringTableEntry &playerNick)
 {
-   getUIManager()->getChatUserInterface()->playerJoinedGlobalChat(playerNick);
+   getUIManager()->getChatUserInterface()->playerJoinedGlobalChat(this, playerNick);
 }
 
 
 void ClientGame::playerLeftGlobalChat(const StringTableEntry &playerNick)
 {
-   getUIManager()->getChatUserInterface()->playerLeftGlobalChat(playerNick);
+   getUIManager()->getChatUserInterface()->playerLeftGlobalChat(this, playerNick);
 }
 
 
@@ -693,8 +714,6 @@ void ClientGame::onConnectionTerminated(const Address &serverAddress, NetConnect
 }
 
 
-extern ClientInfo gClientInfo;
-
 void ClientGame::onConnectionToMasterTerminated(NetConnection::TerminationReason reason, const char *reasonStr)
 {
    ErrorMessageUserInterface *ui = getUIManager()->getErrorMsgUserInterface();
@@ -712,7 +731,7 @@ void ClientGame::onConnectionToMasterTerminated(NetConnection::TerminationReason
          if(getConnectionToServer())
             setReadyToConnectToMaster(false);  // New ID might cause Authentication (underline name) problems if connected to game server...
          else
-            gClientInfo.id.getRandom();        // Get another ID, if not connected to game server
+            getClientInfo()->id.getRandom();        // Get another ID, if not connected to game server
          break;
 
       case NetConnection::ReasonBadLogin:

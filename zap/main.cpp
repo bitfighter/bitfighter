@@ -233,10 +233,6 @@ ZapJournal gZapJournal;          // Our main journaling object
 
 string gPlayerPassword;
 
-struct ClientInfo;
-ClientInfo gClientInfo;          // Info about the client used for establishing connection to server -- only needed on client side
-
-
 void exitGame(S32 errcode)
 {
 #ifdef TNL_OS_XBOX
@@ -611,7 +607,7 @@ void joinGame(Address remoteAddress, bool isFromMaster, bool local)
    }
    else                                                         // Try a direct connection
    {
-      GameConnection *gameConnection = new GameConnection(gClientInfo);
+      GameConnection *gameConnection = new GameConnection(gClientGame->getClientInfo());
 
       gClientGame->setConnectionToServer(gameConnection);
 
@@ -632,11 +628,11 @@ void joinGame(Address remoteAddress, bool isFromMaster, bool local)
             gc->setIsLevelChanger(true);     // Set isLevelChanger on server
             gc->sendLevelList();
 
-            gc->s2cSetIsAdmin(true);                // Set isAdmin on the client
-            gc->s2cSetIsLevelChanger(true, false);  // Set isLevelChanger on the client
-            gc->setServerName(gServerGame->getHostName());     // Server name is whatever we've set locally
+            gc->s2cSetIsAdmin(true);                        // Set isAdmin on the client
+            gc->s2cSetIsLevelChanger(true, false);          // Set isLevelChanger on the client
+            gc->setServerName(gServerGame->getHostName());  // Server name is whatever we've set locally
 
-            gc->setAuthenticated(gClientInfo.authenticated);   // Tell the local host whether we're authenticated... no need to verify
+            gc->setAuthenticated(gClientGame->getClientInfo()->authenticated); // Tell local host if we're authenticated... no need to verify
          }
       }
       else        // Connect to a remote server, but not via the master server
@@ -1228,9 +1224,6 @@ void processStartupParams()
    if(!gCmdLineSettings.dedicated.empty())
       gBindAddress.set(gCmdLineSettings.dedicated);
 
-   gClientInfo.simulatedPacketLoss = gCmdLineSettings.loss;
-   gClientInfo.simulatedLag = gCmdLineSettings.lag;
-
    // Enable some logging...
    gMainLog.setMsgType(LogConsumer::LogConnectionProtocol, gIniSettings.logConnectionProtocol);
    gMainLog.setMsgType(LogConsumer::LogNetConnection, gIniSettings.logNetConnection);
@@ -1261,15 +1254,6 @@ void processStartupParams()
    //else
    //   gNameEntryUserInterface.setString(gIniSettings.lastName);
 
-
-   if(gCmdLineSettings.name != "")
-      gClientInfo.name = gCmdLineSettings.name;
-   else if(gIniSettings.name != "")
-      gClientInfo.name = gIniSettings.name;
-   else
-      gClientInfo.name = gIniSettings.lastName;
-
-   gClientInfo.authenticated = false;
 
    if(gCmdLineSettings.password != "")
       gPlayerPassword = gCmdLineSettings.password;
@@ -1379,7 +1363,6 @@ void processStartupParams()
          }
          gClientGame->getUIManager()->getNameEntryUserInterface()->activate();
          seedRandomNumberGenerator(gIniSettings.lastName);
-         gClientInfo.id.getRandom();                           // Generate a player ID
       }
       else
       {
@@ -1396,7 +1379,6 @@ void processStartupParams()
 
          gClientGame->setReadyToConnectToMaster(true);         // Set elsewhere if in dedicated server mode
          seedRandomNumberGenerator(gIniSettings.name);
-         gClientInfo.id.getRandom();                           // Generate a player ID
       }
    }
 #endif

@@ -1007,8 +1007,6 @@ void OptionsMenuUserInterface::onEscape()
 ////////////////////////////////////////
 
 extern string gPlayerPassword;
-extern ClientInfo gClientInfo;
-
 
 // Constructor
 NameEntryUserInterface::NameEntryUserInterface(ClientGame *game) : MenuUserInterface(game)
@@ -1049,16 +1047,16 @@ static void nameAndPasswordAcceptCallback(ClientGame *clientGame, U32 unused)
 
    clientGame->resetMasterConnectTimer();
 
-   clientGame->getIniSettings()->lastName     = gClientInfo.name = ui->menuItems[1]->getValueForWritingToLevelFile();
-   clientGame->getIniSettings()->lastPassword = gPlayerPassword  = ui->menuItems[2]->getValueForWritingToLevelFile();
+   clientGame->getIniSettings()->lastName     = clientGame->getClientInfo()->name = ui->menuItems[1]->getValueForWritingToLevelFile();
+   clientGame->getIniSettings()->lastPassword = gPlayerPassword                   = ui->menuItems[2]->getValueForWritingToLevelFile();
 
    saveSettingsToINI(&gINI);             // Get that baby into the INI file
 
    clientGame->setReadyToConnectToMaster(true);
-   seedRandomNumberGenerator(gClientInfo.name);
-   //gClientInfo.id.getRandom();          // Generate a player ID - messes up with the rename and Authentication
+   seedRandomNumberGenerator(clientGame->getClientInfo()->name);
+
    if(clientGame->getConnectionToServer())                 // Rename while in game server, if connected
-      clientGame->getConnectionToServer()->c2sRenameClient(gClientInfo.name);
+      clientGame->getConnectionToServer()->c2sRenameClient(clientGame->getClientInfo()->name);
 }
 
 
@@ -1067,7 +1065,7 @@ void NameEntryUserInterface::setupMenu()
    menuItems.clear();
 
    menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(getGame(), 0, "OK", nameAndPasswordAcceptCallback, "")));
-   menuItems.push_back(boost::shared_ptr<MenuItem>(new EditableMenuItem(getGame(), "NICKNAME:", gClientInfo.name, "ChumpChange", "", MAX_PLAYER_NAME_LENGTH)));
+   menuItems.push_back(boost::shared_ptr<MenuItem>(new EditableMenuItem(getGame(), "NICKNAME:", getGame()->getClientInfo()->name, "ChumpChange", "", MAX_PLAYER_NAME_LENGTH)));
    menuItems.push_back(boost::shared_ptr<MenuItem>(new EditableMenuItem(getGame(), "PASSWORD:", gPlayerPassword, "", "", MAX_PLAYER_PASSWORD_LENGTH)));
    
    menuItems[1]->setFilter(LineEditor::noQuoteFilter);      // quotes are incompatible with PHPBB3 logins

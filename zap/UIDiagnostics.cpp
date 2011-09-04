@@ -287,8 +287,6 @@ static S32 showMasterBlock(ClientGame *game, S32 textsize, S32 ypos, S32 gap, bo
 }
 
 
-extern ClientInfo gClientInfo;
-
 void DiagnosticUserInterface::render()
 {
    // Draw title, subtitle, and footer
@@ -354,9 +352,8 @@ void DiagnosticUserInterface::render()
       // This following line is a bit of a beast, but it will return a valid result at any stage of being in or out of a game.
       // If the server modifies a user name to make it unique, this will display the modified version.
       drawCenteredStringPair2Colf(ypos, textsize, true, "Nickname:", "%s (%s)", 
-                  /*gClientGame && gClientGame->getGameType() && gClientGame->getGameType()->mClientList.size() ?
-                        gClientGame->getGameType()->mLocalClient->name.getString() : */gClientInfo.name.c_str(), 
-                        gClientInfo.authenticated ? "Verified" : "Not verified");
+                                  getGame()->getClientInfo()->name.c_str(), 
+                                  getGame()->getClientInfo()->authenticated ? "Verified" : "Not verified");
 
       ypos += textsize + gap;
 
@@ -520,7 +517,7 @@ void DiagnosticUserInterface::render()
       ypos += textsize + gap;
 
       drawCenteredStringPair2Colf(ypos, textsize, false, "Sim. Lag/Pkt. Loss:", "%dms /%2.0f%%", 
-                                  gClientInfo.simulatedLag, gClientInfo.simulatedPacketLoss * 100);
+                                  getGame()->getClientInfo()->simulatedLag, getGame()->getClientInfo()->simulatedPacketLoss * 100);
       ypos += textsize + gap;
       ypos += textsize + gap;
       

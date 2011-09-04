@@ -76,12 +76,10 @@ Color AbstractChat::getColor(string name)
 }
 
 
-extern ClientInfo gClientInfo;
-
 // We received a new incoming chat message...  Add it to the list
 void AbstractChat::newMessage(string from, string message, bool isPrivate, bool isSystem)
 {
-   bool isFromUs = (from == gClientInfo.name);  // Is this message from us?
+   bool isFromUs = (from == gClientGame->getClientInfo()->name);  // Is this message from us?
 
    // Choose a color
    Color color;
@@ -104,8 +102,6 @@ void AbstractChat::newMessage(string from, string message, bool isPrivate, bool 
 }
 
 
-extern ClientInfo gClientInfo;
-
 void AbstractChat::setPlayersInGlobalChat(const Vector<StringTableEntry> &playerNicks)
 {
    mPlayersInGlobalChat.clear();
@@ -115,17 +111,17 @@ void AbstractChat::setPlayersInGlobalChat(const Vector<StringTableEntry> &player
 }
 
 
-void AbstractChat::playerJoinedGlobalChat(const StringTableEntry &playerNick)
+void AbstractChat::playerJoinedGlobalChat(ClientGame *game, const StringTableEntry &playerNick)
 {
    mPlayersInGlobalChat.push_back(playerNick);
 
    // Make the following be from us, so it will be colored white
-   newMessage(gClientInfo.name, "----- Player " + string(playerNick.getString()) + " joined the conversation -----", false, true);
+   newMessage(game->getClientInfo()->name, "----- Player " + string(playerNick.getString()) + " joined the conversation -----", false, true);
    SoundSystem::playSoundEffect(SFXPlayerJoined, gIniSettings.sfxVolLevel);   // Make sound?
 }
 
 
-void AbstractChat::playerLeftGlobalChat(const StringTableEntry &playerNick)
+void AbstractChat::playerLeftGlobalChat(ClientGame *game, const StringTableEntry &playerNick)
 {
    ChatUserInterface *ui = gClientGame->getUIManager()->getChatUserInterface();
 
@@ -133,7 +129,7 @@ void AbstractChat::playerLeftGlobalChat(const StringTableEntry &playerNick)
       if(ui->mPlayersInGlobalChat[i] == playerNick)
       {
          ui->mPlayersInGlobalChat.erase_fast(i);
-         newMessage(gClientInfo.name, "----- Player " + string(playerNick.getString()) + " left the conversation -----", false, true);
+         newMessage(game->getClientInfo()->name, "----- Player " + string(playerNick.getString()) + " left the conversation -----", false, true);
          SoundSystem::playSoundEffect(SFXPlayerLeft, gIniSettings.sfxVolLevel);   // Make sound?
          break;
       }
@@ -300,17 +296,17 @@ void AbstractChat::deliverPrivateMessage(const char *sender, const char *message
 
 
 // Send chat message
-void AbstractChat::issueChat()
+void AbstractChat::issueChat(ClientGame *game)
 {
    if(mLineEditor.length() > 0)
    {
       // Send message
-      MasterServerConnection *conn = gClientGame->getConnectionToMaster();
+      MasterServerConnection *conn = game->getConnectionToMaster();
       if(conn)
          conn->c2mSendChat(mLineEditor.c_str());
 
       // And display it locally
-      newMessage(gClientInfo.name, mLineEditor.getString(), false, false);
+      newMessage(game->getClientInfo()->name, mLineEditor.getString(), false, false);
    }
    clearChat();     // Clear message
 
@@ -447,7 +443,7 @@ void ChatUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    else if(keyCode == KEY_ESCAPE)
       onEscape();
    else if (keyCode == KEY_ENTER)                // Submits message
-      issueChat();
+      issueChat(getGame());
    else if (keyCode == KEY_DELETE || keyCode == KEY_BACKSPACE)       // Do backspacey things
       mLineEditor.handleBackspace(keyCode);
    else if(ascii)                               // Other keys - add key to message

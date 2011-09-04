@@ -1360,12 +1360,13 @@ void QueryServersUserInterface::issueChat()
             joinGame(address, false, false);
          }
          else
-            newMessage("","INVALID ADDRESS",false,true);
+            newMessage("", "INVALID ADDRESS", false, true);
          return;
       }
    }
-   ChatParent::issueChat();
+   ChatParent::issueChat(getGame());
 }
+
 
 ////////////////////////////////////////
 ////////////////////////////////////////

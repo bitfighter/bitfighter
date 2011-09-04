@@ -97,10 +97,10 @@ public:
    virtual ~AbstractChat();               // Destructor
    void newMessage(string from, string message, bool isPrivate, bool isSystem);   // Handle incoming msg
 
-   void clearChat();                      // Clear message being composed
-   virtual void issueChat();              // Send chat message
+   void clearChat();                          // Clear message being composed
+   virtual void issueChat(ClientGame *game);  // Send chat message
 
-   void leaveGlobalChat();                // Send msg to master telling them we're leaving chat
+   void leaveGlobalChat();                    // Send msg to master telling them we're leaving chat
 
    void renderMessages(U32 yPos, U32 lineCountToDisplay);
    void renderMessageComposition(S32 ypos);   // Render outgoing chat message composition line
@@ -110,8 +110,8 @@ public:
 
    // Handle players joining and leaving the chat session
    void setPlayersInGlobalChat(const Vector<StringTableEntry> &playerNicks);
-   void playerJoinedGlobalChat(const StringTableEntry &playerNick);
-   void playerLeftGlobalChat(const StringTableEntry &playerNick);
+   void playerJoinedGlobalChat(ClientGame *game, const StringTableEntry &playerNick);
+   void playerLeftGlobalChat(ClientGame *game, const StringTableEntry &playerNick);
 
 
    // Sizes and other things to help with positioning

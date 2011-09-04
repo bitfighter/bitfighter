@@ -45,6 +45,20 @@ namespace Zap
 {
 
 
+struct ClientInfo
+{
+   string name;
+   Nonce id;
+   bool authenticated;
+   F32 simulatedPacketLoss;
+   U32 simulatedLag;
+
+   ClientInfo();   // Constructor
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 class ClientGame : public Game
 {
@@ -74,6 +88,7 @@ private:
 
    Vector<string> mMuteList;        // List of players we aren't listening to anymore because they've annoyed us!
 
+   ClientInfo mClientInfo;
 
 public:
    ClientGame(const Address &bindAddress);
@@ -107,6 +122,8 @@ public:
    bool isServer() { return false; }
    void idle(U32 timeDelta);
    void zoomCommanderMap();
+
+   ClientInfo *getClientInfo() { return &mClientInfo; }
 
    bool isShowingDebugShipCoords() const { return mDebugShowShipCoords; }     // Show coords on ship?
    void toggleShowingShipCoords() { mDebugShowShipCoords = !mDebugShowShipCoords; }

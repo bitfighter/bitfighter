@@ -132,9 +132,6 @@ ClientRef::~ClientRef()
 
 TNL_IMPLEMENT_NETOBJECT(GameType);
 
-struct ClientInfo;
-extern ClientInfo gClientInfo;
-
 // Constructor
 GameType::GameType(S32 winningScore) : mScoreboardUpdateTimer(1000) , mGameTimer(DefaultGameTime) , mGameTimeUpdateTimer(30000)
 {
@@ -160,10 +157,9 @@ GameType::GameType(S32 winningScore) : mScoreboardUpdateTimer(1000) , mGameTimer
    mEngineerEnabled = false;
    mBotsAllowed = true;
 
-   mLevelCredits = gClientInfo.name;
+   mLevelCredits = gClientGame ? gClientGame->getClientInfo()->name : "";     // I *think* this is only here to provide a default for the editor
    mGame = NULL;
 }
-
 
 
 bool GameType::processArguments(S32 argc, const char **argv, Game *game)
@@ -1884,7 +1880,6 @@ S32 GameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S3
 
 
 #ifndef ZAP_DEDICATED
-extern ClientInfo gClientInfo;
 
 static void switchTeamsCallback(ClientGame *game, U32 unused)
 {
@@ -1906,7 +1901,7 @@ static void switchTeamsCallback(ClientGame *game, U32 unused)
    {
       TeamMenuUserInterface *ui = game->getUIManager()->getTeamMenuUserInterface();
       ui->activate();     // Show menu to let player select a new team
-      ui->nameToChange = gClientInfo.name;
+      ui->nameToChange = game->getClientInfo()->name;
    }
  }
 

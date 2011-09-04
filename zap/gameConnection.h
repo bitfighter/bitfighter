@@ -58,24 +58,6 @@ static const char USED_EXTERNAL *gConnectStatesTable[] = {
       ""
 };
 
-////////////////////////////////////////
-////////////////////////////////////////
-
-struct ClientInfo
-{
-   string name;
-   Nonce id;
-   bool authenticated;
-   F32 simulatedPacketLoss;
-   U32 simulatedLag;
-
-
-   ClientInfo()   // Quickie constructor
-   { 
-      id.getRandom();    // Generate a player ID
-   }
-};
-
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -83,7 +65,7 @@ struct ClientInfo
 class ClientRef;
 class ClientGame;
 struct LevelInfo;
-
+struct ClientInfo;
 
 class GameConnection: public ControlObjectConnection, public DataSendable
 {
@@ -178,7 +160,7 @@ public:
    static const S32 BanDuration = 30000;     // Players are banned for 30secs after being kicked
 
    GameConnection();                                  // Constructor
-   GameConnection(const ClientInfo &clientInfo);      // Constructor
+   GameConnection(const ClientInfo *clientInfo);      // Constructor
    ~GameConnection();                                 // Destructor
 
 

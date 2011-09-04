@@ -131,7 +131,6 @@ TNL_IMPLEMENT_RPC(MasterServerInterface, c2mJoinGlobalChat, (), (),
 TNL_IMPLEMENT_RPC(MasterServerInterface, c2mLeaveGlobalChat, (), (),
                   NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 2) {}
 
-
 TNL_IMPLEMENT_RPC(MasterServerInterface, m2cPlayerJoinedGlobalChat, (StringTableEntry playerNick), (playerNick),
                   NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirServerToClient, 2) {}
 

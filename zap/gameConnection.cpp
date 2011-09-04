@@ -80,19 +80,19 @@ GameConnection::GameConnection()
 }
 
 
-GameConnection::GameConnection(const ClientInfo &clientInfo)
+GameConnection::GameConnection(const ClientInfo *clientInfo)
 {
    initialize();
 
-   if(clientInfo.name == "")
+   if(clientInfo->name == "")
       mClientName = "Chump";
    else
-      mClientName = clientInfo.name.c_str();
+      mClientName = clientInfo->name.c_str();
 
-   mClientId = clientInfo.id;
+   mClientId = clientInfo->id;
 
-   setAuthenticated(clientInfo.authenticated);
-   setSimulatedNetParams(clientInfo.simulatedPacketLoss, clientInfo.simulatedLag);
+   setAuthenticated(clientInfo->authenticated);
+   setSimulatedNetParams(clientInfo->simulatedPacketLoss, clientInfo->simulatedLag);
 }
 
 

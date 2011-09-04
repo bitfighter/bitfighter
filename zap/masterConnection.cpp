@@ -166,7 +166,6 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sClientRequestedArrangedCon
 
 
 #ifndef ZAP_DEDICATED
-extern ClientInfo gClientInfo;
 
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cArrangedConnectionAccepted, 
                            (U32 requestId, Vector<IPAddress> possibleAddresses, ByteBufferPtr connectionData))
@@ -189,8 +188,9 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cArrangedConnectionAccepted
       Nonce serverNonce(connectionData->getBuffer() + Nonce::NonceSize);
 
       // Client is creating new connection to game server
-      GameConnection *gameConnection = new GameConnection(gClientInfo);
-      dynamic_cast<ClientGame *>(mGame)->setConnectionToServer(gameConnection);
+      ClientGame *clientGame = dynamic_cast<ClientGame *>(mGame);
+      GameConnection *gameConnection = new GameConnection(clientGame->getClientInfo());
+      clientGame->setConnectionToServer(gameConnection);
 
       gameConnection->connectArranged(getInterface(), fullPossibleAddresses, nonce, serverNonce, theSharedData, true);
    }
@@ -226,16 +226,17 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSetAuthenticated,
    if((AuthenticationStatus)authStatus.value == AuthenticationStatusAuthenticatedName)
    {
       // Hmmm.... same info in two places...
-      gClientInfo.name = correctedName.getString();
+      gClientGame->getClientInfo()->name = correctedName.getString();
       gIniSettings.name = correctedName.getString();  
 
-      gClientInfo.authenticated = true;
+      gClientGame->getClientInfo()->authenticated = true;
+
       GameConnection *gc = dynamic_cast<ClientGame *>(mGame)->getConnectionToServer();
       if(gc)
          gc->c2sSetAuthenticated();
    }
    else 
-      gClientInfo.authenticated = false;
+      gClientGame->getClientInfo()->authenticated = false;
 }
 #endif
 
@@ -328,7 +329,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cPlayerJoinedGlobalChat, (S
    if(mGame->isServer())
       return;
 
-   dynamic_cast<ClientGame *>(mGame)->playerJoinedGlobalChat(playerNick);
+   ((ClientGame *)mGame)->playerJoinedGlobalChat(playerNick);
 }
 
 
@@ -397,9 +398,10 @@ void MasterServerConnection::writeConnectRequest(BitStream *bstream)
    else     // We're a client
    {
 #ifndef ZAP_DEDICATED
-      bstream->writeString(gClientInfo.name.c_str());   // User's nickname
-      bstream->writeString(gPlayerPassword.c_str());    // and whatever password they supplied
-      gClientInfo.id.write(bstream);
+      bstream->writeString(gClientGame->getClientInfo()->name.c_str());   // User's nickname
+      bstream->writeString(gPlayerPassword.c_str());                      // and whatever password they supplied
+
+      gClientGame->getClientInfo()->id.write(bstream);
 #endif
    }
 }
