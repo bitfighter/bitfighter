@@ -397,7 +397,7 @@ void hostGame()
    }
 
 #ifndef ZAP_DEDICATED
-   if(!gDedicatedServer)                  // If this isn't a dedicated server...
+   if(gClientGame)      // Should be true if this isn't a dedicated server...
    {
       HostMenuUserInterface *ui = gClientGame->getUIManager()->getHostMenuUserInterface();
 
