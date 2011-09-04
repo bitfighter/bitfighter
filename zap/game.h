@@ -316,27 +316,15 @@ public:
    S32 minRecPlayers;               // Min recommended number of players for this level
    S32 maxRecPlayers;               // Max recommended number of players for this level
 
-   
-   LevelInfo() { /* Do nothing */ }    // Default constructor
+   LevelInfo();      // Default constructor used on server side
 
-   // Used on client side where we don't care about min/max players
-   LevelInfo(const StringTableEntry &name, const StringTableEntry &type)
-   {
-      levelName = name;  
-      levelType = type; 
-   }
+   // Constructor, used on client side where we don't care about min/max players
+   LevelInfo(const StringTableEntry &name, const StringTableEntry &type);
 
-   // Used on server side, augmented with setInfo method below
-   LevelInfo(const string &levelFile)
-   {
-      levelFileName = levelFile.c_str();
-   }
+   // Constructor, used on server side, augmented with setInfo method below
+   LevelInfo(const string &levelFile);
 
-   // Used on server side
-   void setInfo(const StringTableEntry &name, const StringTableEntry &type, S32 minPlayers, S32 maxPlayers)
-   {
-      levelName = name;  levelType = type;  minRecPlayers = minPlayers;  maxRecPlayers = maxPlayers; 
-   }
+   void initialize();      // Called by constructors
 };
 
 
@@ -425,7 +413,8 @@ public:
 
    void buildLevelList(const Vector<string> &levelList);
    void resetLevelLoadIndex();
-   void loadNextLevel();
+   void loadNextLevelInfo();
+   bool getLevelInfo(const string &fullFilename, LevelInfo &levelInfo);   // Populates levelInfo with data from fullFilename
    string getLastLevelLoadName();             // For updating the UI
 
    bool loadLevel(const string &fileName);    // Load a level
@@ -450,6 +439,10 @@ public:
    S32 getRobotCount();
    S32 getCurrentLevelIndex() { return mCurrentLevelIndex; }
    S32 getLevelCount() { return mLevelInfos.size(); }
+   LevelInfo getLevelInfo(S32 index) { return mLevelInfos[index]; }
+   void clearLevelInfos() { mLevelInfos.clear(); }
+   void addLevelInfo(const LevelInfo &levelInfo) { mLevelInfos.push_back(levelInfo); }
+
    bool isTestServer() { return mTestMode; }
 
    DataSender dataSender;
@@ -461,7 +454,7 @@ public:
    void suspenderLeftGame() { mSuspendor = NULL; }
    GameConnection *getSuspendor() { return mSuspendor; }
 
-   S32 addLevelInfo(const char *filename, LevelInfo &info);
+   S32 addUploadedLevelInfo(const char *filename, LevelInfo &info);
 
    HostingModePhases hostingModePhase;
 

@@ -221,6 +221,8 @@ public:
    bool isLevelChanger() { return mIsLevelChanger; }
    void setIsLevelChanger(bool levelChanger) { mIsLevelChanger = levelChanger; }
 
+   void sendLevelList();
+
    // Tell UI we're waiting for password confirmation from server
    void setWaitingForPermissionsReply(bool waiting) { mWaitingForPermissionsReply = waiting; }
    bool waitingForPermissionsReply() { return mWaitingForPermissionsReply; }
@@ -272,8 +274,10 @@ public:
    TNL_DECLARE_RPC(s2cDisplayErrorMessage, (StringTableEntry formatString));    
 
    TNL_DECLARE_RPC(s2cDisplayMessageBox, (StringTableEntry title, StringTableEntry instr, Vector<StringTableEntry> message));
+
    TNL_DECLARE_RPC(s2cAddLevel, (StringTableEntry name, StringTableEntry type));
    TNL_DECLARE_RPC(s2cRemoveLevel, (S32 index));
+
    TNL_DECLARE_RPC(c2sRequestLevelChange, (S32 newLevelIndex, bool isRelative));
    void c2sRequestLevelChange2(S32 newLevelIndex, bool isRelative);
    TNL_DECLARE_RPC(c2sRequestShutdown, (U16 time, StringPtr reason));

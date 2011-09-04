@@ -482,7 +482,7 @@ void idle()
    if(gServerGame)
    {
       if(gServerGame->hostingModePhase == ServerGame::LoadingLevels)
-         gServerGame->loadNextLevel();
+         gServerGame->loadNextLevelInfo();
       else if(gServerGame->hostingModePhase == ServerGame::DoneLoadingLevels)
          hostGame();
    }
@@ -631,6 +631,7 @@ void joinGame(Address remoteAddress, bool isFromMaster, bool local)
          {
             gc->setIsAdmin(true);            // Set isAdmin on server
             gc->setIsLevelChanger(true);     // Set isLevelChanger on server
+            gc->sendLevelList();
 
             gc->s2cSetIsAdmin(true);                // Set isAdmin on the client
             gc->s2cSetIsLevelChanger(true, false);  // Set isLevelChanger on the client

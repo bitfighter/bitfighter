@@ -91,7 +91,6 @@ extern ClientGame *gClientGame; // only used to see if we have a ClientGame, for
 
 // Constructor
 Game::Game(const Address &theBindAddress) : mGameObjDatabase(new GridDatabase())      //? was without new
-                                            
 {
    buildModuleInfos();
    mNextMasterTryTime = 0;
@@ -696,6 +695,45 @@ Point Game::computePlayerVisArea(Ship *ship) const
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+// Constructor
+LevelInfo::LevelInfo()      
+{
+   initialize();
+}
+
+
+// Constructor, only used on client
+LevelInfo::LevelInfo(const StringTableEntry &name, const StringTableEntry &type)
+{
+   initialize();
+
+   levelName = name;  
+   levelType = type; 
+}
+
+
+// Constructor
+LevelInfo::LevelInfo(const string &levelFile)
+{
+   initialize();
+
+   levelFileName = levelFile.c_str();
+}
+
+
+void LevelInfo::initialize()
+{
+   levelName = "";
+   levelType = "Bitmatch";
+   levelFileName = "";
+   minRecPlayers = 0;
+   maxRecPlayers = 0;
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 extern string gHostName;
 extern string gHostDescr;
 
@@ -902,69 +940,111 @@ void ServerGame::setShuttingDown(bool shuttingDown, U16 time, ClientRef *who, St
 }
 
 
-void ServerGame::loadNextLevel()
+// Parse through the chunk of data passed in and find parameters to populate levelInfo with
+// Warning: Mungs chunk!
+LevelInfo getLevelInfoFromFileChunk(char *chunk, S32 size, LevelInfo &levelInfo)
 {
+   S32 cur = 0;
+   S32 startingCur = 0;
 
-   string path = ConfigDirectories::findLevelFile(string(mLevelInfos[mLevelLoadIndex].levelFileName.getString()));
-   FILE *f = fopen(path.c_str(), "rb");
-   if(f)
+   bool foundGameType = false;
+   bool foundLevelName = false;
+   bool foundMinPlayers = false;
+   bool foundMaxPlayers = false;
+
+   while(cur < size && !(foundGameType && foundLevelName && foundMinPlayers && foundMaxPlayers))
    {
-      char data[1024*4];  // 4 kb should be big enough to fit all parameters at the beginning of level, don't need to read everything.
-      S32 size = (S32)fread(data, 1, sizeof(data), f);
-      fclose(f);
-      LevelInfo info = getLevelInfo(data, size);
-      if(info.levelName == "")
-         info.levelName = mLevelInfos[mLevelLoadIndex].levelFileName;
-      mLevelInfos[mLevelLoadIndex].setInfo(info.levelName, info.levelType, info.maxRecPlayers, info.maxRecPlayers);
+      if(chunk[cur] < 32)
+      {
+         if(cur - startingCur > 5)
+         {
+            char c = chunk[cur];
+            chunk[cur] = 0;
+            Vector<string> list = parseString(string(&chunk[startingCur]));
+            chunk[cur] = c;
+
+            if(list.size() >= 1 && list[0].find("GameType") != string::npos)
+            {
+               TNL::Object *theObject = TNL::Object::create(list[0].c_str());  // Instantiate a gameType object
+               GameType *gt = dynamic_cast<GameType*>(theObject);              // and cast it
+               if(gt)
+               {
+                  levelInfo.levelType = gt->getGameTypeString();
+                  delete gt;
+                  foundGameType = true;
+               }
+            }
+            else if(list.size() >= 2 && list[0] == "LevelName")
+            {
+               string levelName = list[1];
+
+               for(S32 i = 2; i < list.size(); i++)
+                  levelName += " " + list[i];
+
+               levelInfo.levelName = levelName;
+
+               foundLevelName = true;
+            }
+            else if(list.size() >= 2 && list[0] == "MinPlayers")
+            {
+               levelInfo.minRecPlayers = atoi(list[1].c_str());
+               foundMinPlayers = true;
+            }
+            else if(list.size() >= 2 && list[0] == "MaxPlayers")
+            {
+               levelInfo.maxRecPlayers = atoi(list[1].c_str());
+               foundMaxPlayers = true;
+            }
+         }
+         startingCur = cur + 1;
+      }
+      cur++;
+   }
+   return levelInfo;
+}
+
+
+void ServerGame::loadNextLevelInfo()
+{
+   string levelFile = ConfigDirectories::findLevelFile(string(mLevelInfos[mLevelLoadIndex].levelFileName.getString()));
+
+   if(getLevelInfo(levelFile, mLevelInfos[mLevelLoadIndex]))    // Populate mLevelInfos[i] with data from levelFile
       mLevelLoadIndex++;
-   }
    else
-   {
-      logprintf(LogConsumer::LogWarning, "Could not load level %s.  Skipping...", mLevelInfos[mLevelLoadIndex].levelFileName.getString());
       mLevelInfos.erase(mLevelLoadIndex);
-   }
-
-
-/*
-   // Here we cycle through all the levels, reading them in, and grabbing their names for the level list
-   // Seems kind of wasteful...  could we quit after we found the name? (probably not easily, and we get the benefit of learning early on which levels are b0rked)
-   // How about storing them in memory for rapid recall? People sometimes load hundreds of levels, so it's probably not feasible.
-   if(mLevelLoadIndex < mLevelInfos.size())
-   {
-      string levelName = mLevelInfos[mLevelLoadIndex].levelFileName.getString();
-
-      if(loadLevel(levelName))    // loadLevel returns true if the load was successful
-      {
-         string lname = trim(getGameType()->mLevelName.getString());
-         StringTableEntry name;
-         if(lname == "")
-            name = mLevelInfos[mLevelLoadIndex].levelFileName;      // Use filename if level name is blank
-         else
-            name = lname.c_str();
-
-         StringTableEntry type(getGameType()->getGameTypeString());
-
-         // Save some key level parameters
-         mLevelInfos[mLevelLoadIndex].setInfo(name, type, getGameType()->minRecPlayers, getGameType()->maxRecPlayers);
-
-         // We got what we need, so get rid of this level.  Delete any objects that may exist
-         while(mGameObjects.size())    // Don't just to a .clear() because we want to make sure destructors run and memory gets cleared.
-            delete mGameObjects[0];    // But would they anyway?  Apparently not...  using .clear() causes all kinds of hell.
-
-         mScopeAlwaysList.clear();
-
-         logprintf(LogConsumer::LogLevelLoaded, "Loaded level %s of type %s [%s]", name.getString(), type.getString(), levelName.c_str());
-         mLevelLoadIndex++;
-      }
-      else     // Level could not be loaded -- it's either missing or invalid.  Remove it from our level list.
-      {
-         logprintf(LogConsumer::LogWarning, "Could not load level %s.  Skipping...", levelName.c_str());
-         mLevelInfos.erase(mLevelLoadIndex);
-      }
-   }*/
 
    if(mLevelLoadIndex == mLevelInfos.size())
       ServerGame::hostingModePhase = DoneLoadingLevels;
+}
+
+
+// Populates levelInfo with data from fullFilename
+bool ServerGame::getLevelInfo(const string &fullFilename, LevelInfo &levelInfo)
+{
+   TNLAssert(levelInfo.levelFileName != "", "Invalid assumption");
+
+   FILE *f = fopen(fullFilename.c_str(), "rb");
+
+   if(f)
+   {
+      char data[1024 * 4];  // 4 kb should be enough to fit all parameters at the beginning of level; we don't need to read everything
+      S32 size = (S32)fread(data, 1, sizeof(data), f);
+      fclose(f);
+
+      getLevelInfoFromFileChunk(data, size, levelInfo);
+
+      // Provide a default levelname
+      if(levelInfo.levelName == "")
+         levelInfo.levelName = levelInfo.levelFileName;     // was mLevelInfos[mLevelLoadIndex].levelFileName
+
+      return true;
+   }
+   else
+   {
+      // was mLevelInfos[mLevelLoadIndex].levelFileName.getString()
+      logprintf(LogConsumer::LogWarning, "Could not load level %s [%s].  Skipping...", levelInfo.levelFileName.getString(), fullFilename);
+      return false;
+   }
 }
 
 
@@ -1432,9 +1512,9 @@ extern bool gDedicatedServer;
 
 void ServerGame::addClient(GameConnection *theConnection)
 {
-   // Send our list of levels and their types to the connecting client
-   for(S32 i = 0; i < mLevelInfos.size(); i++)
-      theConnection->s2cAddLevel(mLevelInfos[i].levelName, mLevelInfos[i].levelType);
+   // If client has level change or admin permissions, send a list of levels and their types to the connecting client
+   if(theConnection->isLevelChanger() || theConnection->isAdmin())
+      theConnection->sendLevelList();
 
    // If we're shutting down, display a notice to the user
    if(mShuttingDown)
@@ -1734,26 +1814,29 @@ void ServerGame::gameEnded()
 
 //extern ConfigDirectories gConfigDirs;
 
-S32 ServerGame::addLevelInfo(const char *filename, LevelInfo &info)
+S32 ServerGame::addUploadedLevelInfo(const char *filename, LevelInfo &info)
 {
-   if(info.levelName == StringTableEntry(""))
+   if(info.levelName == "")            // Make sure we have something in the name field
       info.levelName = filename;
 
-   info.levelFileName = filename; //strictjoindir(gConfigDirs.levelDir, filename).c_str();
+   info.levelFileName = filename; 
 
+   // Check if we already have this one
    for(S32 i = 0; i < mLevelInfos.size(); i++)
-   {
       if(mLevelInfos[i].levelFileName == info.levelFileName)
          return i;
-   }
 
+   // We don't... so add it!
    mLevelInfos.push_back(info);
+
+   // Let levelChangers know about the new level
    for(GameConnection *walk = GameConnection::getClientList(); walk; walk = walk->getNextClient())
-   {
-      walk->s2cAddLevel(info.levelName, info.levelType);
-   }
+      if(walk->isLevelChanger())
+         walk->s2cAddLevel(info.levelName, info.levelType);
+
    return mLevelInfos.size() - 1;
 }
+
 
 extern Color gNeutralTeamColor;
 extern Color gHostileTeamColor;
