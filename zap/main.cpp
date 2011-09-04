@@ -358,7 +358,7 @@ void initHostGame(Address bindAddress, Vector<string> &levelList, bool testMode)
    // Parse all levels, make sure they are in some sense valid, and record some critical parameters
    if(levelList.size())
    {
-      gServerGame->buildLevelList(levelList);     // Take levels in gLevelList and create a set of empty levelInfo records
+      gServerGame->buildBasicLevelInfoList(levelList);     // Take levels in gLevelList and create a set of empty levelInfo records
       gServerGame->resetLevelLoadIndex();
 
 #ifndef ZAP_DEDICATED

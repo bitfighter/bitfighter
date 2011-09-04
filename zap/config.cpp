@@ -1796,12 +1796,12 @@ static string checkName(const string &filename, const char *folders[], const cha
 }
 
 
-string ConfigDirectories::findLevelFile(const string &filename)         // static
+string ConfigDirectories::findLevelFile(const string &leveldir, const string &filename)         // static
 {
 #ifdef TNL_OS_XBOX         // This logic completely untested for OS_XBOX... basically disables -leveldir param
    const char *folders[] = { "d:\\media\\levels\\", "" };
 #else
-   const char *folders[] = { gConfigDirs.levelDir.c_str(), "" };
+   const char *folders[] = { leveldir.c_str(), "" };
 #endif
    const char *extensions[] = { ".level", "" };
 

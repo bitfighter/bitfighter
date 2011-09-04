@@ -885,8 +885,9 @@ S32 ServerGame::getRobotCount()
 }
 
 
+// Creates a set of LevelInfos that are empty except for the filename.  They will be fleshed out later.
 // This gets called when you first load the host menu
-void ServerGame::buildLevelList(const Vector<string> &levelList)
+void ServerGame::buildBasicLevelInfoList(const Vector<string> &levelList)
 {
    mLevelInfos.clear();
 
@@ -1004,9 +1005,11 @@ LevelInfo getLevelInfoFromFileChunk(char *chunk, S32 size, LevelInfo &levelInfo)
 }
 
 
+extern ConfigDirectories gConfigDirs;
+
 void ServerGame::loadNextLevelInfo()
 {
-   string levelFile = ConfigDirectories::findLevelFile(string(mLevelInfos[mLevelLoadIndex].levelFileName.getString()));
+   string levelFile = ConfigDirectories::findLevelFile(gConfigDirs.levelDir, mLevelInfos[mLevelLoadIndex].levelFileName.getString());
 
    if(getLevelInfo(levelFile, mLevelInfos[mLevelLoadIndex]))    // Populate mLevelInfos[i] with data from levelFile
       mLevelLoadIndex++;
@@ -1430,7 +1433,7 @@ bool ServerGame::loadLevel(const string &levelFileName)
 
    mObjectsLoaded = 0;
 
-   string filename = ConfigDirectories::findLevelFile(levelFileName);
+   string filename = ConfigDirectories::findLevelFile(gConfigDirs.levelDir, levelFileName);
 
    cleanUp();
    if(filename == "")

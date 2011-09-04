@@ -411,7 +411,7 @@ public:
 
    void setShuttingDown(bool shuttingDown, U16 time, ClientRef *who, StringPtr reason);  
 
-   void buildLevelList(const Vector<string> &levelList);
+   void buildBasicLevelInfoList(const Vector<string> &levelList);
    void resetLevelLoadIndex();
    void loadNextLevelInfo();
    bool getLevelInfo(const string &fullFilename, LevelInfo &levelInfo);   // Populates levelInfo with data from fullFilename

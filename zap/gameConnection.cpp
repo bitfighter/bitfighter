@@ -574,52 +574,63 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
    {
       string candidate = ConfigDirectories::resolveLevelDir(gConfigDirs.rootDataDir, param.getString());
 
-      // Make sure the specified dir exists; hopefully it contains levels
-      if(candidate != "" && fileExists(candidate))
+      if(gConfigDirs.levelDir == candidate)
       {
-         Vector<string> newLevels;
-         newLevels = LevelListLoader::buildLevelList(candidate, true);
-
-         if(newLevels.size() > 0)
-         {
-            gConfigDirs.levelDir = candidate;
-            gServerGame->buildLevelList(newLevels);
-
-            bool anyLoaded = false;
-
-            for(S32 i = 0; i < newLevels.size(); i++)
-            {
-               string levelFile = ConfigDirectories::findLevelFile(newLevels[i]);
-
-               LevelInfo levelInfo(newLevels[i]);
-               if(gServerGame->getLevelInfo(levelFile, levelInfo))
-               {
-                  if(!anyLoaded)
-                     gServerGame->clearLevelInfos();
-
-                  anyLoaded = true;
-
-                  gServerGame->addLevelInfo(levelInfo);
-               }
-            }
-
-            if(anyLoaded)
-            {
-               // Send the new list of levels to all levelchangers
-               for(GameConnection *walk = getClientList(); walk; walk = walk->getNextClient())
-                  if(walk->isLevelChanger())
-                     sendLevelList();
-
-               s2cDisplayMessage(ColorAqua, SFXNone, "Level folder changed");
-            }
-            else
-               s2cDisplayErrorMessage("!!! Specified folder contains no valid levels.  See server log for details.");
-         }
-         else
-            s2cDisplayErrorMessage("!!! Specified folder contains no levels");
+         s2cDisplayErrorMessage("!!! Specified folder is already the current level folder");
+         return;
       }
-      else
+
+      // Make sure the specified dir exists; hopefully it contains levels
+      if(candidate == "" || !fileExists(candidate))
+      {
          s2cDisplayErrorMessage("!!! Could not find specified folder");
+         return;
+      }
+
+      Vector<string> newLevels;
+      newLevels = LevelListLoader::buildLevelList(candidate, true);
+
+      if(newLevels.size() == 0)
+      {
+         s2cDisplayErrorMessage("!!! Specified folder contains no levels");
+         return;
+      }
+
+      gServerGame->buildBasicLevelInfoList(newLevels);      // Populates mLevelInfos on gServerGame with nearly empty LevelInfos 
+
+      bool anyLoaded = false;
+
+      for(S32 i = 0; i < newLevels.size(); i++)
+      {
+         string levelFile = ConfigDirectories::findLevelFile(candidate, newLevels[i]);
+
+         LevelInfo levelInfo(newLevels[i]);
+         if(gServerGame->getLevelInfo(levelFile, levelInfo))
+         {
+            if(!anyLoaded)    // i.e. we just found the first valid level; safe to clear out old list
+               gServerGame->clearLevelInfos();
+
+            anyLoaded = true;
+
+            gServerGame->addLevelInfo(levelInfo);
+         }
+      }
+
+      if(!anyLoaded)
+      {
+         s2cDisplayErrorMessage("!!! Specified folder contains no valid levels.  See server log for details.");
+         return;
+      }
+
+      gConfigDirs.levelDir = candidate;
+
+      // Send the new list of levels to all levelchangers
+      for(GameConnection *walk = getClientList(); walk; walk = walk->getNextClient())
+         if(walk->isLevelChanger())
+            sendLevelList();
+
+      s2cDisplayMessage(ColorAqua, SFXNone, "Level folder changed");
+
    }  // end change leveldir
 
    else if(type == (U32)DeleteLevel)

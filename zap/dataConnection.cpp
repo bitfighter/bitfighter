@@ -50,7 +50,7 @@ static string getFullFilename(string filename, FileType fileType)
       name = ConfigDirectories::findBotFile(filename);
 
    else if(fileType == LEVEL_TYPE)
-      name = ConfigDirectories::findLevelFile(filename);
+      name = ConfigDirectories::findLevelFile(gConfigDirs.levelDir, filename);
 
    else if(fileType == LEVELGEN_TYPE)
       name = ConfigDirectories::findLevelGenScript(filename);
