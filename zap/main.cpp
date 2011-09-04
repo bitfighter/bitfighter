@@ -351,7 +351,6 @@ void initHostGame(Address bindAddress, Vector<string> &levelList, bool testMode)
       logprintf(LogConsumer::ServerFilter, "Loaded %d levels:", levelList.size());
    }
 
-   // Parse all levels, make sure they are in some sense valid, and record some critical parameters
    if(levelList.size())
    {
       gServerGame->buildBasicLevelInfoList(levelList);     // Take levels in gLevelList and create a set of empty levelInfo records
@@ -362,7 +361,7 @@ void initHostGame(Address bindAddress, Vector<string> &levelList, bool testMode)
          gClientGame->getUIManager()->getHostMenuUserInterface()->levelLoadDisplayDisplay = true;
 #endif
    }
-   else
+   else  // No levels!
    {
       abortHosting_noLevels();
       return;
