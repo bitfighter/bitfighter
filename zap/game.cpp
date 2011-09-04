@@ -1343,7 +1343,7 @@ void ServerGame::cycleLevel(S32 nextLevel)
    {
       getGameType()->mBotZoneCreationFailed = false;
       BotNavMeshZone::IDBotMeshZones(this);
-      BotNavMeshZone::buildBotNavMeshZoneConnections(getBotZoneDatabase());
+      BotNavMeshZone::buildBotNavMeshZoneConnections(this);
    }
    else
       // Try and load Bot Zones for this level, set flag if failed

@@ -184,10 +184,10 @@ void BotNavMeshZone::unpackUpdate(GhostConnection *connection, BitStream *stream
 
 
 // Returns ID of zone containing specified point
-U16 BotNavMeshZone::findZoneContaining(const Point &p)
+U16 BotNavMeshZone::findZoneContaining(ServerGame *game, const Point &p)
 {
    fillVector.clear();
-   gServerGame->getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, fillVector,
+   game->getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, fillVector,
                               Rect(p - Point(0.1f,0.1f),p + Point(0.1f,0.1f)));  // Slightly extend Rect, it can be on the edge of zone
 
    for(S32 i = 0; i < fillVector.size(); i++)
@@ -225,8 +225,10 @@ struct rcEdge
 };
 
 // Build connections between zones using the adjacency data created in recast
-bool BotNavMeshZone::buildBotNavMeshZoneConnectionsRecastStyle(GridDatabase *zoneDb, rcPolyMesh &mesh, const Vector<S32> &polyToZoneMap)    
+bool BotNavMeshZone::buildBotNavMeshZoneConnectionsRecastStyle(ServerGame *game, rcPolyMesh &mesh, const Vector<S32> &polyToZoneMap)    
 {
+   GridDatabase *zoneDb = game->getBotZoneDatabase();
+
    if(zoneDb->getObjectCount() == 0)      // Nothing to do!
       return true;
 
@@ -368,18 +370,18 @@ Vector<DatabaseObject *> zones;
 void BotNavMeshZone::IDBotMeshZones(ServerGame *game)
 {
    zones.clear();
-   gServerGame->getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, zones);
-   for(S32 i=0; i < zones.size(); i++)
+   game->getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, zones);
+   for(S32 i = 0; i < zones.size(); i++)
       dynamic_cast<BotNavMeshZone *>(zones[i])->mZoneId = i;
 }
 
 
 // Returns index of zone containing specified point
-static BotNavMeshZone *findZoneContainingPoint(const Point &point)
+static BotNavMeshZone *findZoneContainingPoint(ServerGame *game, const Point &point)
 {
    Rect rect(point, 0.01f);
    zones.clear();
-   gServerGame->getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, zones, rect);
+   game->getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, zones, rect);
 
    // If there is more than one possible match, pick the first arbitrarily (could happen if dest is right on a zone border)
    for(S32 i = 0; i < zones.size(); i++)
@@ -618,7 +620,7 @@ bool BotNavMeshZone::buildBotMeshZones(ServerGame *game, bool triangulateZones)
          logprintf("Recast built %d zones!", game->getBotZoneDatabase()->getObjectCount());
 #endif               
 
-         buildBotNavMeshZoneConnectionsRecastStyle(game->getBotZoneDatabase(), mesh, polyToZoneMap);
+         buildBotNavMeshZoneConnectionsRecastStyle(game, mesh, polyToZoneMap);
          linkTeleportersBotNavMeshZoneConnections(game);
       }
    }
@@ -649,7 +651,7 @@ bool BotNavMeshZone::buildBotMeshZones(ServerGame *game, bool triangulateZones)
          botzone->addToGame(game);
        }
 
-      BotNavMeshZone::buildBotNavMeshZoneConnections(game->getBotZoneDatabase());
+      BotNavMeshZone::buildBotNavMeshZoneConnections(game);
    }
 
 #ifdef LOG_TIMER
@@ -664,8 +666,9 @@ bool BotNavMeshZone::buildBotMeshZones(ServerGame *game, bool triangulateZones)
 
 // Only runs on server
 // TODO can be combined with buildBotNavMeshZoneConnectionsRecastStyle() ?
-void BotNavMeshZone::buildBotNavMeshZoneConnections(GridDatabase *zoneDb)    
+void BotNavMeshZone::buildBotNavMeshZoneConnections(ServerGame *game)    
 {
+   GridDatabase *zoneDb = game->getBotZoneDatabase();
    if(zoneDb->getObjectCount() == 0)      // Nothing to do!
       return;
 
@@ -724,8 +727,9 @@ void BotNavMeshZone::buildBotNavMeshZoneConnections(GridDatabase *zoneDb)
          }
       }
    }
-   linkTeleportersBotNavMeshZoneConnections(gServerGame);
+   linkTeleportersBotNavMeshZoneConnections(game);
 }
+
 
 // Only runs on server
 void BotNavMeshZone::linkTeleportersBotNavMeshZoneConnections(ServerGame *game)
@@ -743,12 +747,12 @@ void BotNavMeshZone::linkTeleportersBotNavMeshZoneConnections(ServerGame *game)
       if(!teleporter)
          continue;
 
-      BotNavMeshZone *origZone = findZoneContainingPoint(teleporter->getActualPos());
+      BotNavMeshZone *origZone = findZoneContainingPoint(game, teleporter->getActualPos());
 
       if(origZone != NULL)
       for(S32 j = 0; j < teleporter->mDests.size(); j++)     // Review each teleporter destination
       {
-         BotNavMeshZone *destZone = findZoneContainingPoint(teleporter->mDests[j]);
+         BotNavMeshZone *destZone = findZoneContainingPoint(game, teleporter->mDests[j]);
 
          if(destZone != NULL && origZone != destZone)      // Ignore teleporters that begin and end in the same zone
          {

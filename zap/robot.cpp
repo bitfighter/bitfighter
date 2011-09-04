@@ -591,7 +591,7 @@ S32 LuaRobot::getGatewayFromZoneToZone(lua_State *L)
 // Get the zone this robot is currently in.  If not in a zone, return nil
 S32 LuaRobot::getCurrentZone(lua_State *L)
 {
-   S32 zone = thisRobot->getCurrentZone();
+   S32 zone = thisRobot->getCurrentZone(gServerGame);
    return (zone == U16_MAX) ? returnNil(L) : returnInt(L, zone);
 }
 
@@ -863,7 +863,7 @@ S32 LuaRobot::getWaypoint(lua_State *L)  // Takes a luavec or an x,y
 
    // TODO: cache destination point; if it hasn't moved, then skip ahead.
 
-   U16 targetZone = BotNavMeshZone::findZoneContaining(target);       // Where we're going  ===> returns zone id
+   U16 targetZone = BotNavMeshZone::findZoneContaining(gServerGame, target);       // Where we're going  ===> returns zone id
 
    if(targetZone == U16_MAX)       // Our target is off the map.  See if it's visible from any of our zones, and, if so, go there
    {
@@ -920,7 +920,7 @@ S32 LuaRobot::getWaypoint(lua_State *L)  // Takes a luavec or an x,y
    // We need to calculate a new flightplan
    thisRobot->flightPlan.clear();
 
-   U16 currentZone = thisRobot->getCurrentZone();     // Where we are
+   U16 currentZone = thisRobot->getCurrentZone(gServerGame);     // Where we are
 
    if(currentZone == U16_MAX)      // We don't really know where we are... bad news!  Let's find closest visible zone and go that way.
       currentZone = findClosestZone(thisRobot->getActualPos());
@@ -1769,10 +1769,10 @@ void Robot::logError(const char *format, ...)
 }
 
 // Returns zone ID of current zone
-S32 Robot::getCurrentZone()
+S32 Robot::getCurrentZone(ServerGame *game)
 {
    // We're in uncharted territory -- try to get the current zone
-   mCurrentZone = BotNavMeshZone::findZoneContaining(getActualPos());
+   mCurrentZone = BotNavMeshZone::findZoneContaining(game, getActualPos());
 
    return mCurrentZone;
 }

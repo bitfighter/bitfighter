@@ -96,6 +96,7 @@ public:
 
 class MoveItem;
 class LuaRobot;
+class ServerGame;
 
 /**
  * This is the wrapper around the C++ object found in object.cc
@@ -152,7 +153,7 @@ public:
    bool processArguments(S32 argc, const char **argv, Game *game);
    void onAddedToGame(Game *);
 
-   S32 getCurrentZone();
+   S32 getCurrentZone(ServerGame *game);
    void setCurrentZone(S32 zone);
    bool canSeePoint(Point point);         // Is point within robot's LOS?
 

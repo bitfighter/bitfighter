@@ -113,12 +113,12 @@ public:
    Vector<Border> mNeighborRenderPoints;     // Only populated on client
    S32 getNeighborIndex(S32 zone);           // Returns index of neighboring zone, or -1 if zone is not a neighbor
 
-   static U16 findZoneContaining(const Point &p);    // Returns ID of zone containing specified point
+   static U16 findZoneContaining(ServerGame *game, const Point &p);    // Returns ID of zone containing specified point
 
    static void IDBotMeshZones(ServerGame *game);
    static bool buildBotMeshZones(ServerGame *game, bool triangulateZones);
-   static void buildBotNavMeshZoneConnections(GridDatabase *zoneDb);
-   static bool buildBotNavMeshZoneConnectionsRecastStyle(GridDatabase *zoneDb, rcPolyMesh &mesh, const Vector<S32> &polyToZoneMap);
+   static void buildBotNavMeshZoneConnections(ServerGame *game);
+   static bool buildBotNavMeshZoneConnectionsRecastStyle(ServerGame *game, rcPolyMesh &mesh, const Vector<S32> &polyToZoneMap);
    static void linkTeleportersBotNavMeshZoneConnections(ServerGame *game);
 
    TNL_DECLARE_CLASS(BotNavMeshZone);
