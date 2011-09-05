@@ -209,23 +209,23 @@ bool RabbitGameType::objectCanDamageObject(GameObject *damager, GameObject *vict
 
 // Works for ships and robots!  --> or does it?  Was a template, but it wasn't working for regular ships, haven't tested with robots
 // Client only
-const Color *RabbitGameType::getShipColor(Ship *s)
+const Color *RabbitGameType::getShipColor(Ship *ship)
 {
 #ifdef ZAP_DEDICATED
    return &Colors::white;
 #else
 
    if(getGame()->getTeamCount() != 1)
-      return Parent::getShipColor(s);
+      return Parent::getShipColor(ship);
 
    GameConnection *gc = dynamic_cast<ClientGame *>(getGame())->getConnectionToServer();
 
    if(!gc)
       return &Colors::white;     // Something's gone wrong!
 
-   Ship *co = dynamic_cast<Ship *>(gc->getControlObject());
+   Ship *localShip = dynamic_cast<Ship *>(gc->getControlObject());
 
-   return (s == co || (!shipHasFlag(s) && !shipHasFlag(co))) ? &Colors::green : &Colors::red;
+   return (ship == localShip || (!shipHasFlag(ship) && !shipHasFlag(localShip))) ? &Colors::green : &Colors::red;
 #endif
 }
 
