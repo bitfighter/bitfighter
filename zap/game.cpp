@@ -738,7 +738,7 @@ extern string gHostName;
 extern string gHostDescr;
 
 // Constructor
-ServerGame::ServerGame(const Address &theBindAddress, const string &hostName, const string &hostDescr, U32 maxPlayers, bool testMode) : 
+ServerGame::ServerGame(const Address &theBindAddress, const string &hostName, const string &hostDescr, U32 maxPlayers, bool testMode, bool dedicated) : 
       Game(theBindAddress)
 {
    mHostName = hostName;
@@ -767,6 +767,12 @@ ServerGame::ServerGame(const Address &theBindAddress, const string &hostName, co
    mMasterUpdateTimer.reset(UpdateServerStatusTime);
 
    mSuspendor = NULL;
+
+#ifdef ZAP_DEDICATED
+   TNLAssert(dedicated, "Dedicated should be true here!");
+#endif
+
+   mDedicated = dedicated;   
 }
 
 
@@ -1513,8 +1519,6 @@ bool ServerGame::loadLevel(const string &levelFileName)
 }
 
 
-extern bool gDedicatedServer;
-
 void ServerGame::addClient(GameConnection *theConnection)
 {
    // If client has level change or admin permissions, send a list of levels and their types to the connecting client
@@ -1531,7 +1535,7 @@ void ServerGame::addClient(GameConnection *theConnection)
 
    mPlayerCount++;
 
-   if(gDedicatedServer)
+   if(mDedicated)
       SoundSystem::playSoundEffect(SFXPlayerJoined, 1);
 }
 
@@ -1542,7 +1546,7 @@ void ServerGame::removeClient(GameConnection *theConnection)
       mGameType->serverRemoveClient(theConnection);
    mPlayerCount--;
 
-   if(gDedicatedServer)
+   if(mDedicated)
       SoundSystem::playSoundEffect(SFXPlayerLeft, 1);
 }
 
@@ -1808,7 +1812,7 @@ void ServerGame::idle(U32 timeDelta)
    }
 
    // Lastly, play any sounds server might have made...
-   SoundSystem::processAudio();
+   SoundSystem::processAudio(gIniSettings.alertsVolLevel);
 }
 
 

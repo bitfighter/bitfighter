@@ -174,15 +174,6 @@ string gHostName;                // Server name used when hosting a game (defaul
 string gHostDescr;               // Brief description of host
 const char *gWindowTitle = "Bitfighter";
 
-// The following things can be set via command line parameters
-
-
-#ifdef ZAP_DEDICATED
-bool gDedicatedServer = true;    // This will allow us to omit the -dedicated parameter when compiled in dedicated mode
-#else
-bool gDedicatedServer = false;   // Usually, we just want to play.  If true, we'll be in server-only, no-player mode
-#endif
-
 // Handle any md5 requests
 md5wrapper md5;
 
@@ -255,38 +246,42 @@ void exitGame()
 // If we can't load any levels, here's the plan...
 void abortHosting_noLevels()
 {
-   if(gDedicatedServer)
+   TNLAssert(gServerGame, "gServerGame should always exist here!");
+
+   if(gServerGame->isDedicated())
    {
       logprintf(LogConsumer::LogError,     "No levels found in folder %s.  Cannot host a game.", gConfigDirs.levelDir.c_str());
       logprintf(LogConsumer::ServerFilter, "No levels found in folder %s.  Cannot host a game.", gConfigDirs.levelDir.c_str());
-
-      exitGame(1);
-   }
-#ifndef ZAP_DEDICATED
-   else
-   {
-      ErrorMessageUserInterface *ui = gClientGame->getUIManager()->getErrorMsgUserInterface();
-
-      ui->reset();
-      ui->setTitle("HOUSTON, WE HAVE A PROBLEM");
-      ui->setMessage(1, "No levels were loaded.  Cannot host a game.");
-      ui->setMessage(3, "Check the LevelDir parameter in your INI file,");
-      ui->setMessage(4, "or your command-line parameters to make sure");
-      ui->setMessage(5, "you have correctly specified a folder containing");
-      ui->setMessage(6, "valid level files.");
-      ui->setMessage(8, "Trying to load levels from folder:");
-      ui->setMessage(9, gConfigDirs.levelDir == "" ? "<<Unresolvable>>" : gConfigDirs.levelDir.c_str());
-      ui->activate();
    }
 
    delete gServerGame;
    gServerGame = NULL;
 
-   HostMenuUserInterface *ui = gClientGame->getUIManager()->getHostMenuUserInterface();
-   ui->levelLoadDisplayDisplay = false;
-   ui->levelLoadDisplayFadeTimer.clear();
+#ifndef ZAP_DEDICATED
+   if(gClientGame)
+   {
+      ErrorMessageUserInterface *errUI = gClientGame->getUIManager()->getErrorMsgUserInterface();
 
+      errUI->reset();
+      errUI->setTitle("HOUSTON, WE HAVE A PROBLEM");
+      errUI->setMessage(1, "No levels were loaded.  Cannot host a game.");
+      errUI->setMessage(3, "Check the LevelDir parameter in your INI file,");
+      errUI->setMessage(4, "or your command-line parameters to make sure");
+      errUI->setMessage(5, "you have correctly specified a folder containing");
+      errUI->setMessage(6, "valid level files.");
+      errUI->setMessage(8, "Trying to load levels from folder:");
+      errUI->setMessage(9, gConfigDirs.levelDir == "" ? "<<Unresolvable>>" : gConfigDirs.levelDir.c_str());
+      errUI->activate();
+
+      HostMenuUserInterface *menuUI = gClientGame->getUIManager()->getHostMenuUserInterface();
+      menuUI->levelLoadDisplayDisplay = false;
+      menuUI->levelLoadDisplayFadeTimer.clear();
+   }
+   else
 #endif
+   {
+      exitGame(1);
+   }
 }
 
 
@@ -336,9 +331,9 @@ U32 getServerMaxPlayers()
 }
 
 // Host a game (and maybe even play a bit, too!)
-void initHostGame(Address bindAddress, Vector<string> &levelList, bool testMode)
+void initHostGame(Address bindAddress, Vector<string> &levelList, bool testMode, bool dedicatedServer)
 {
-   gServerGame = new ServerGame(bindAddress, gHostName, gHostDescr, getServerMaxPlayers(), testMode);
+   gServerGame = new ServerGame(bindAddress, gHostName, gHostDescr, getServerMaxPlayers(), testMode, dedicatedServer);
 
    gServerGame->setReadyToConnectToMaster(true);
    seedRandomNumberGenerator(gHostName);
@@ -412,7 +407,7 @@ void hostGame()
 
 
 #ifndef ZAP_DEDICATED
-// do the logic to draw the screen
+// Draw the screen
 void display()
 {
    glFlush();
@@ -527,17 +522,21 @@ void idle()
 
    U32 sleepTime = 1;
 
-   if( (gDedicatedServer  && integerTime >= S32(1000 / gIniSettings.maxDedicatedFPS)) || 
-         (!gDedicatedServer && integerTime >= S32(1000 / gIniSettings.maxFPS)) )
+   bool dedicated = gServerGame && gServerGame->isDedicated();
+
+   if( ( dedicated && integerTime >= S32(1000 / gIniSettings.maxDedicatedFPS)) || 
+       (!dedicated && integerTime >= S32(1000 / gIniSettings.maxFPS)) )
    {
       gameIdle(U32(integerTime));
+
 #ifndef ZAP_DEDICATED
-      if(!gDedicatedServer)
-         display();    // Draw the screen, if not dedicated
+      if(!dedicated)
+         display();          // Draw the screen if not dedicated
 #endif
       integerTime = 0;
-      if(!gDedicatedServer)
-         sleepTime = 0;      // Live player at the console, but if we're running > 100 fps, we can afford a nap
+
+      if(!dedicated)
+         sleepTime = 0;      
    }
 
 
@@ -568,7 +567,7 @@ void idle()
 
    // If there are no players, set sleepTime to 40 to further reduce impact on the server.
    // We'll only go into this longer sleep on dedicated servers when there are no players.
-   if(gDedicatedServer && gServerGame->isSuspended())
+   if(dedicated && gServerGame->isSuspended())
       sleepTime = 40;     // The higher this number, the less accurate the ping is on server lobby when empty, but the less power consumed.
 
    Platform::sleep(sleepTime);
@@ -596,7 +595,8 @@ FileLogConsumer gServerLog;       // We'll apply a filter later on, in main()
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-// Disconnect from servers and exit game in an orderly fashion.  But stay connected to the master until we exit the program altogether
+// Disconnect from servers and exit current game in an orderly fashion.  Does not exit Bitfighter, unless we're a dedicated server.
+// Stay connected to the master until we exit the program altogether.
 void endGame()
 {
 #ifndef ZAP_DEDICATED
@@ -604,10 +604,12 @@ void endGame()
       gClientGame->endGame();
 #endif
 
+   bool dedicated = gServerGame && gServerGame->isDedicated();
+
    delete gServerGame;
    gServerGame = NULL;
 
-   if(gDedicatedServer)
+   if(dedicated)
       exitGame();
 }
 
@@ -656,7 +658,7 @@ void setParamsForDedicatedMode()
 {
    gCmdLineSettings.clientMode = false;
    gCmdLineSettings.serverMode = true;
-   gDedicatedServer = true;
+   gCmdLineSettings.dedicatedMode = true;
 }
 
 
@@ -1277,7 +1279,7 @@ void processStartupParams()
 
 
    // Not immediately starting a connection...  start out with name entry or main menu
-   if(!gDedicatedServer)
+   if(!gCmdLineSettings.dedicatedMode)     
    {
       if(gIniSettings.name == "")
       {
@@ -1777,7 +1779,7 @@ int main(int argc, char **argv)
    if(gCmdLineSettings.serverMode)           // Only set when 1) compiled as a dedicated server; or 2) -dedicated param is specified
    {
       Vector<string> levels = LevelListLoader::buildLevelList(gConfigDirs.levelDir);
-      initHostGame(gBindAddress, levels, false);     // Start hosting
+      initHostGame(gBindAddress, levels, false, gCmdLineSettings.serverMode);     // Start hosting
    }
 
    SoundSystem::init();  // Even dedicated server needs sound these days

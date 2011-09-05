@@ -241,6 +241,7 @@ void ClientGame::endGame()
    getUIManager()->getHostMenuUserInterface()->levelLoadDisplayDisplay = false;
 }
 
+
 bool ClientGame::hasValidControlObject()
 {
    return mConnectionToServer.isValid() && mConnectionToServer->getControlObject();
@@ -339,7 +340,7 @@ void ClientGame::idle(U32 timeDelta)
    if(isSuspended())
    {
       mNetInterface->processConnections();
-      SoundSystem::processAudio();                        // Process sound effects (SFX)
+      SoundSystem::processAudio(gIniSettings.sfxVolLevel);     // Process sound effects (SFX)
       return;
    }
 
@@ -438,13 +439,13 @@ void ClientGame::idle(U32 timeDelta)
          SoundSystem::setListenerParams(controlObject->getRenderPos(), controlObject->getRenderVel());
    }
 
-   processDeleteList(timeDelta);                // Delete any objects marked for deletion
-   FXManager::tick((F32)timeDelta * 0.001f);    // Processes sparks and teleporter effects
-   SoundSystem::processAudio();                        // Process sound effects (SFX)
+   processDeleteList(timeDelta);                         // Delete any objects marked for deletion
+   FXManager::tick((F32)timeDelta * 0.001f);             // Processes sparks and teleporter effects
+   SoundSystem::processAudio(gIniSettings.sfxVolLevel);  // Process sound effects (SFX)
 
-   mNetInterface->processConnections();         // Here we can pass on our updated ship info to the server
+   mNetInterface->processConnections();                  // Pass updated ship info to the server
 
-   if(mScreenSaverTimer.update(timeDelta))
+   if(mScreenSaverTimer.update(timeDelta))               // Attempt, vainly, I'm afraid, to suppress screensavers
    {
       supressScreensaver();
       mScreenSaverTimer.reset();

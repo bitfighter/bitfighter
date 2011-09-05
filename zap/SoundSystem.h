@@ -115,8 +115,8 @@ private:
    static const S32 NumSamples = 16;
 
    // Sound Effect functions
-   static void playOnSource(SFXHandle& effect);
-   static void updateGain(SFXHandle& effect);
+   static void updateGain(SFXHandle& effect, F32 volLevel);
+   static void playOnSource(SFXHandle& effect, F32 volLevel);
 
    static void music_end_callback(void* userdata, ALuint source);
 
@@ -128,10 +128,10 @@ public:
    static void init();
    static void shutdown();
    static void setListenerParams(Point pos, Point velocity);
-   static void processAudio();
+   static void processAudio(F32 volLevel);
 
    // Sound Effect functions
-   static void processSoundEffects();
+   static void processSoundEffects(F32 volLevel);
    static SFXHandle playSoundEffect(U32 profileIndex, F32 gain = 1.0f);
    static SFXHandle playSoundEffect(U32 profileIndex, Point position, Point velocity, F32 gain = 1.0f);
    static void playSoundEffect(SFXHandle& effect);

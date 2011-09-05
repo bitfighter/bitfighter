@@ -89,6 +89,7 @@ struct CmdLineSettings
 
    bool clientMode;        // Start with client active
    bool serverMode;        // Start in server mode
+   bool dedicatedMode;     // Will server be dedicated?
 
    string server;
    string masterAddress;   // Use this master server
@@ -127,6 +128,7 @@ struct CmdLineSettings
    {
       clientMode = true;
       serverMode = false;
+      dedicatedMode = false;
 
       loss = 0;
       lag = 0;

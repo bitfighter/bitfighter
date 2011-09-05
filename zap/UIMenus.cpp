@@ -1140,7 +1140,7 @@ void HostMenuUserInterface::onActivate()
 
 extern string gHostName, gHostDescr;
 extern string gLevelChangePassword, gAdminPassword, gServerPassword;
-extern void initHostGame(Address bindAddress, Vector<string> &levelList, bool testMode);
+extern void initHostGame(Address bindAddress, Vector<string> &levelList, bool testMode, bool dedicatedServer);
 extern ConfigDirectories gConfigDirs;
 extern U16 DEFAULT_GAME_PORT;
 
@@ -1149,7 +1149,7 @@ static void startHostingCallback(ClientGame *game, U32 unused)
    game->getUIManager()->getHostMenuUserInterface()->saveSettings();
 
    Vector<string> levelList = LevelListLoader::buildLevelList(gConfigDirs.levelDir);
-   initHostGame(Address(IPProtocol, Address::Any, DEFAULT_GAME_PORT), levelList, false);
+   initHostGame(Address(IPProtocol, Address::Any, DEFAULT_GAME_PORT), levelList, false, false);
 }
 
 void HostMenuUserInterface::setupMenus()

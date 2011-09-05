@@ -35,7 +35,6 @@ namespace Zap
 {
 
 extern string gServerPassword;
-extern bool gDedicatedServer;
 
 // Constructor
 GameNetInterface::GameNetInterface(const Address &bindAddress, Game *theGame) : NetInterface(bindAddress)
@@ -157,7 +156,7 @@ void GameNetInterface::handleInfoPacket(const Address &remoteAddress, U8 packetT
                queryResponse.write(gServerGame->getPlayerCount());
                queryResponse.write(gServerGame->getMaxPlayers());
                queryResponse.write(gServerGame->getRobotCount());
-               queryResponse.writeFlag(gDedicatedServer);
+               queryResponse.writeFlag(gServerGame->isDedicated());
                queryResponse.writeFlag(gServerGame->isTestServer());
                queryResponse.writeFlag(gServerPassword != "");
 

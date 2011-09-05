@@ -203,7 +203,7 @@ void TextItem::onAddedToGame(Game *theGame)
 void TextItem::computeExtent()
 {
 #ifdef ZAP_DEDICATED
-   // don't care much about it in server, as server won't render, and does not do colliding to textTiem
+   // Don't care much about it on the server, as server won't render, and nothing collides with TextItems
 	setExtent(Rect(getVert(0), getVert(1)));
 #else
    F32 len = UserInterface::getStringWidth(mSize, mText.c_str());

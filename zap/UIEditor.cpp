@@ -3613,7 +3613,7 @@ void testLevelStart_local(ClientGame *game)
 }
 
 
-extern void initHostGame(Address bindAddress, Vector<string> &levelList, bool testMode);
+extern void initHostGame(Address bindAddress, Vector<string> &levelList, bool testMode, bool dedicatedServer);
 
 void EditorUserInterface::testLevel()
 {
@@ -3675,7 +3675,7 @@ void EditorUserInterface::testLevelStart()
 
       Vector<string> levelList;
       levelList.push_back("editor.tmp");
-      initHostGame(Address(IPProtocol, Address::Any, DEFAULT_GAME_PORT), levelList, true);
+      initHostGame(Address(IPProtocol, Address::Any, DEFAULT_GAME_PORT), levelList, true, false);
    }
 
    mNeedToSave = nts;                  // Restore saved parameters

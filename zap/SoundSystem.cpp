@@ -198,15 +198,20 @@ static Vector<string> musicList;
 static S32 currentlyPlayingIndex;
 
 extern ConfigDirectories gConfigDirs;
-extern bool gDedicatedServer;
 
+// Constructor
 SoundSystem::SoundSystem()
 {
+   // Do nothing
 }
 
+
+// Destructor
 SoundSystem::~SoundSystem()
 {
+   // Do nothing
 }
+
 
 // Initialize the sound sub-system.
 // Use ALURE to ease the use of OpenAL.
@@ -458,9 +463,9 @@ void SoundSystem::updateMovementParams(SFXHandle& effect)
 }
 
 
-void SoundSystem::processAudio()
+void SoundSystem::processAudio(F32 volLevel)
 {
-   processSoundEffects();
+   processSoundEffects(volLevel);
    processMusic();
    processVoiceChat();
 
@@ -512,7 +517,7 @@ void SoundSystem::processVoiceChat()
 }
 
 
-void SoundSystem::processSoundEffects()
+void SoundSystem::processSoundEffects(F32 volLevel)
 {
    // If SFX system failed to initialize, just return
    if(!gSFXValid)
@@ -610,14 +615,14 @@ void SoundSystem::processSoundEffects()
             firstFree++;
          s->mSourceIndex = firstFree;
          sourceActive[firstFree] = true;
-         playOnSource(s);
+         playOnSource(s, volLevel);
       }
       else
-         updateGain(s);     // For other sources, check the distance and adjust the gain
+         updateGain(s, volLevel);     // For other sources, check the distance and adjust the gain
    }
 }
 
-void SoundSystem::playOnSource(SFXHandle& effect)
+void SoundSystem::playOnSource(SFXHandle& effect, F32 volLevel)
 {
    ALuint source = gFreeSources[effect->mSourceIndex];
    alSourceStop(source);
@@ -646,14 +651,14 @@ void SoundSystem::playOnSource(SFXHandle& effect)
    alSourcef(source, AL_ROLLOFF_FACTOR, 1);
 
    updateMovementParams(effect);
-   updateGain(effect);
+   updateGain(effect, volLevel);
 
    alSourcePlay(source);
 }
 
 
 // Recalculate distance, and reset gain as necessary
-void SoundSystem::updateGain(SFXHandle& effect)
+void SoundSystem::updateGain(SFXHandle& effect, F32 volLevel)
 {
    ALuint source = gFreeSources[effect.getPointer()->mSourceIndex];
 
@@ -664,7 +669,6 @@ void SoundSystem::updateGain(SFXHandle& effect)
       return;
    }
 
-   F32 volLevel = gDedicatedServer ? gIniSettings.alertsVolLevel : gIniSettings.sfxVolLevel;
    alSourcef(source, AL_GAIN, effect.getPointer()->mGain * effect.getPointer()->mProfile->gainScale * volLevel);
 }
 
@@ -775,20 +779,24 @@ namespace Zap
 {
 
 
-void SoundSystem::updateGain(SFXHandle& effect)
+void SoundSystem::updateGain(SFXHandle& effect, F32 volLevel)
 {
+   // Do nothing
 }
 
 void SoundSystem::updateMovementParams(SFXHandle& effect)
 {
+   // Do nothing
 }
 
-void SoundSystem::playOnSource(SFXHandle& effect)
+void SoundSystem::playOnSource(SFXHandle& effect, F32 volLevel)
 {
+   // Do nothing
 }
 
 void SoundSystem::setMovementParams(SFXHandle& effect, Point position, Point velocity)
 {
+   // Do nothing
 }
 
 SFXHandle SoundSystem::playSoundEffect(U32 profileIndex, F32 gain)
@@ -808,14 +816,17 @@ SFXHandle SoundSystem::playRecordedBuffer(ByteBufferPtr p, F32 gain)
 
 void SoundSystem::playSoundEffect(SFXHandle& effect)
 {
+   // Do nothing
 }
 
 void SoundSystem::stopSoundEffect(SFXHandle& effect)
 {
+   // Do nothing
 }
 
 void SoundSystem::queueVoiceChatBuffer(SFXHandle& effect, ByteBufferPtr p)
 {
+   // Do nothing
 }
 
 void SoundSystem::init()
@@ -823,21 +834,25 @@ void SoundSystem::init()
    logprintf(LogConsumer::LogError, "No OpenAL support on this platform.");
 }
 
-void SoundSystem::processAudio()
+void SoundSystem::processAudio(F32 volLevel)
 {
+   // Do nothing
 }
 
 void SoundSystem::setListenerParams(Point pos, Point velocity)
 {
+   // Do nothing
 }
 
 void SoundSystem::shutdown()
 {
-};
+   // Do nothing
+}
+
 
 };
 
-#endif
+#endif      // #ifdef defined ZAP_DEDICATED
 
 
 #if defined(ZAP_DEDICATED)

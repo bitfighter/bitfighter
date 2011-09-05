@@ -361,6 +361,8 @@ private:
    Timer mShutdownTimer;
    GameConnection *mShutdownOriginator;   // Who started the shutdown?
 
+   bool mDedicated;
+
    S32 mLevelLoadIndex;                   // For keeping track of where we are in the level loading process.  NOT CURRENT LEVEL IN PLAY!
 
    GameConnection *mSuspendor;            // Player requesting suspension if game suspended by request
@@ -370,7 +372,7 @@ private:
 
 public:
    U32 mInfoFlags;           // Not used for much at the moment, but who knows? --> propagates to master
-   ServerGame(const Address &theBindAddress, const string &hostName, const string &hostDescr, U32 maxPlayers, bool testMode);    // Constructor
+   ServerGame(const Address &theBindAddress, const string &hostName, const string &hostDescr, U32 maxPlayers, bool testMode, bool dedicated);    // Constructor
    virtual ~ServerGame();   // Destructor
 
    U32 mVoteTimer;
@@ -397,6 +399,9 @@ public:
 
    U32 getPlayerCount() { return mPlayerCount; }
    U32 getMaxPlayers() { return mMaxPlayers; }
+
+   bool isDedicated() { return mDedicated; }
+   void setDedicated(bool dedicated) { mDedicated = dedicated; }
 
    void setHostName(const char *name) { mHostName = name; }
    const char *getHostName() { return mHostName.c_str(); }
