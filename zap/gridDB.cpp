@@ -78,9 +78,9 @@ void GridDatabase::addToDatabase(DatabaseObject *theObject, const Rect &extents)
    maxx = S32(extents.max.x) >> BucketWidthBitShift;
    maxy = S32(extents.max.y) >> BucketWidthBitShift;
 
-   if(maxx - minx >= BucketRowCount)
+   if(U32(maxx - minx) >= BucketRowCount)
       maxx = minx + BucketRowCount - 1;
-   if(maxy - miny >= BucketRowCount)
+   if(U32(maxy - miny) >= BucketRowCount)
       maxy = miny + BucketRowCount - 1;
 
    for(S32 x = minx; maxx - x >= 0; x++)
@@ -122,9 +122,9 @@ void GridDatabase::removeFromDatabase(DatabaseObject *theObject, const Rect &ext
    maxx = S32(extents.max.x) >> BucketWidthBitShift;
    maxy = S32(extents.max.y) >> BucketWidthBitShift;
 
-   if(maxx - minx >= BucketRowCount)
+   if(U32(maxx - minx) >= BucketRowCount)
       maxx = minx + BucketRowCount - 1;
-   if(maxy - miny >= BucketRowCount)
+   if(U32(maxy - miny) >= BucketRowCount)
       maxy = miny + BucketRowCount - 1;
 
 
@@ -205,9 +205,9 @@ void GridDatabase::findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVect
    maxx = S32(extents.max.x) >> BucketWidthBitShift;
    maxy = S32(extents.max.y) >> BucketWidthBitShift;
 
-   if(maxx - minx >= BucketRowCount)
+   if(U32(maxx - minx) >= BucketRowCount)
       maxx = minx + BucketRowCount - 1;
-   if(maxy - miny >= BucketRowCount)
+   if(U32(maxy - miny) >= BucketRowCount)
       maxy = miny + BucketRowCount - 1;
 
    findObjects(typeNumber, fillVector, &extents, minx, miny, maxx, maxy);
@@ -254,9 +254,9 @@ void GridDatabase::findObjects(TestFunc testFunc, Vector<DatabaseObject *> &fill
    maxx = S32(extents.max.x) >> BucketWidthBitShift;
    maxy = S32(extents.max.y) >> BucketWidthBitShift;
 
-   if(maxx - minx >= BucketRowCount)
+   if(U32(maxx - minx) >= BucketRowCount)
       maxx = minx + BucketRowCount - 1;
-   if(maxy - miny >= BucketRowCount)
+   if(U32(maxy - miny) >= BucketRowCount)
       maxy = miny + BucketRowCount - 1;
 
    findObjects(testFunc, fillVector, &extents, minx, miny, maxx, maxy);
@@ -541,13 +541,13 @@ void DatabaseObject::setExtent(const Rect &extents)
 
          //printf("new  %i %i %i %i old %i %i %i %i\n", minx, miny, maxx, maxy, minxold, minyold, maxxold, maxyold);
 
-         if(maxx - minx >= gridDB->BucketRowCount)
+         if(U32(maxx - minx) >= gridDB->BucketRowCount)
             maxx = minx + gridDB->BucketRowCount - 1;
-         if(maxy - miny >= gridDB->BucketRowCount)
+         if(U32(maxy - miny) >= gridDB->BucketRowCount)
             maxy = miny + gridDB->BucketRowCount - 1;
-         if(maxxold >= minxold + gridDB->BucketRowCount)
+         if(U32(maxxold >= minxold) + gridDB->BucketRowCount)
             maxxold = minxold + gridDB->BucketRowCount - 1;
-         if(maxyold >= minyold + gridDB->BucketRowCount)
+         if(U32(maxyold >= minyold) + gridDB->BucketRowCount)
             maxyold = minyold + gridDB->BucketRowCount - 1;
 
 

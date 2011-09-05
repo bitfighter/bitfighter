@@ -178,6 +178,16 @@
 		73851F7113ABF55000D88D2A /* Event.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73851F6913ABF55000D88D2A /* Event.cpp */; };
 		73851F7213ABF55000D88D2A /* OpenglUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73851F6D13ABF55000D88D2A /* OpenglUtils.cpp */; };
 		7385200E13ABFDDB00D88D2A /* SDLMain.m in Sources */ = {isa = PBXBuildFile; fileRef = 7385200D13ABFDDB00D88D2A /* SDLMain.m */; };
+		7385CBAA14147824008470C8 /* ClientGame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7385CB9F14147824008470C8 /* ClientGame.cpp */; };
+		7385CBAB14147824008470C8 /* EngineeredItem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7385CBA114147824008470C8 /* EngineeredItem.cpp */; };
+		7385CBAC14147824008470C8 /* PickupItem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7385CBA414147824008470C8 /* PickupItem.cpp */; };
+		7385CBAD14147824008470C8 /* Spawn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7385CBA614147824008470C8 /* Spawn.cpp */; };
+		7385CBAE14147824008470C8 /* Timer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7385CBA814147824008470C8 /* Timer.cpp */; };
+		7385CBAF14147824008470C8 /* ClientGame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7385CB9F14147824008470C8 /* ClientGame.cpp */; };
+		7385CBB014147824008470C8 /* EngineeredItem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7385CBA114147824008470C8 /* EngineeredItem.cpp */; };
+		7385CBB114147824008470C8 /* PickupItem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7385CBA414147824008470C8 /* PickupItem.cpp */; };
+		7385CBB214147824008470C8 /* Spawn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7385CBA614147824008470C8 /* Spawn.cpp */; };
+		7385CBB314147824008470C8 /* Timer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7385CBA814147824008470C8 /* Timer.cpp */; };
 		7388F04E139D5A0E003C6BB0 /* Ogg.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7388F036139D59E4003C6BB0 /* Ogg.framework */; };
 		7388F061139D5A32003C6BB0 /* Ogg.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7388F036139D59E4003C6BB0 /* Ogg.framework */; };
 		7388F06C139D5B46003C6BB0 /* music in Resources */ = {isa = PBXBuildFile; fileRef = 7388F069139D5B46003C6BB0 /* music */; };
@@ -411,12 +421,10 @@
 		73D2F35912E2D7E800EA5EBE /* CTFGame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F28D12E2D7E700EA5EBE /* CTFGame.cpp */; };
 		73D2F35A12E2D7E800EA5EBE /* dataConnection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F28F12E2D7E700EA5EBE /* dataConnection.cpp */; };
 		73D2F35B12E2D7E800EA5EBE /* Directory.mm in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F29212E2D7E700EA5EBE /* Directory.mm */; };
-		73D2F35C12E2D7E800EA5EBE /* engineeredObjects.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F29412E2D7E700EA5EBE /* engineeredObjects.cpp */; };
 		73D2F35D12E2D7E800EA5EBE /* engineerHelper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F29612E2D7E700EA5EBE /* engineerHelper.cpp */; };
 		73D2F35E12E2D7E800EA5EBE /* flagItem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F29812E2D7E700EA5EBE /* flagItem.cpp */; };
 		73D2F36012E2D7E800EA5EBE /* game.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F29C12E2D7E700EA5EBE /* game.cpp */; };
 		73D2F36112E2D7E800EA5EBE /* gameConnection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F29E12E2D7E700EA5EBE /* gameConnection.cpp */; };
-		73D2F36312E2D7E800EA5EBE /* gameItems.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2A112E2D7E700EA5EBE /* gameItems.cpp */; };
 		73D2F36412E2D7E800EA5EBE /* gameLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2A312E2D7E700EA5EBE /* gameLoader.cpp */; };
 		73D2F36512E2D7E800EA5EBE /* gameNetInterface.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2A512E2D7E700EA5EBE /* gameNetInterface.cpp */; };
 		73D2F36612E2D7E800EA5EBE /* gameObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2A712E2D7E700EA5EBE /* gameObject.cpp */; };
@@ -494,12 +502,10 @@
 		73D2F3CC12E2D7E800EA5EBE /* CTFGame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F28D12E2D7E700EA5EBE /* CTFGame.cpp */; };
 		73D2F3CD12E2D7E800EA5EBE /* dataConnection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F28F12E2D7E700EA5EBE /* dataConnection.cpp */; };
 		73D2F3CE12E2D7E800EA5EBE /* Directory.mm in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F29212E2D7E700EA5EBE /* Directory.mm */; };
-		73D2F3CF12E2D7E800EA5EBE /* engineeredObjects.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F29412E2D7E700EA5EBE /* engineeredObjects.cpp */; };
 		73D2F3D012E2D7E800EA5EBE /* engineerHelper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F29612E2D7E700EA5EBE /* engineerHelper.cpp */; };
 		73D2F3D112E2D7E800EA5EBE /* flagItem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F29812E2D7E700EA5EBE /* flagItem.cpp */; };
 		73D2F3D312E2D7E800EA5EBE /* game.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F29C12E2D7E700EA5EBE /* game.cpp */; };
 		73D2F3D412E2D7E800EA5EBE /* gameConnection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F29E12E2D7E700EA5EBE /* gameConnection.cpp */; };
-		73D2F3D612E2D7E800EA5EBE /* gameItems.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2A112E2D7E700EA5EBE /* gameItems.cpp */; };
 		73D2F3D712E2D7E800EA5EBE /* gameLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2A312E2D7E700EA5EBE /* gameLoader.cpp */; };
 		73D2F3D812E2D7E800EA5EBE /* gameNetInterface.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2A512E2D7E700EA5EBE /* gameNetInterface.cpp */; };
 		73D2F3D912E2D7E800EA5EBE /* gameObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2A712E2D7E700EA5EBE /* gameObject.cpp */; };
@@ -829,7 +835,7 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 73A2B1E913DE57BD0002EF92 /* libpng */;
+			remoteGlobalIDString = 73A2B1E913DE57BD0002EF92;
 			remoteInfo = libpng;
 		};
 		73B0FC151370ABA90019AE4E /* PBXContainerItemProxy */ = {
@@ -1037,6 +1043,17 @@
 		73851F6F13ABF55000D88D2A /* zoneControlGame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = zoneControlGame.h; path = ../../../zap/zoneControlGame.h; sourceTree = SOURCE_ROOT; };
 		7385200C13ABFDDB00D88D2A /* SDLMain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDLMain.h; path = ../../../zap/SDLMain.h; sourceTree = SOURCE_ROOT; };
 		7385200D13ABFDDB00D88D2A /* SDLMain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SDLMain.m; path = ../../../zap/SDLMain.m; sourceTree = SOURCE_ROOT; };
+		7385CB9F14147824008470C8 /* ClientGame.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ClientGame.cpp; path = ../../../zap/ClientGame.cpp; sourceTree = SOURCE_ROOT; };
+		7385CBA014147824008470C8 /* ClientGame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ClientGame.h; path = ../../../zap/ClientGame.h; sourceTree = SOURCE_ROOT; };
+		7385CBA114147824008470C8 /* EngineeredItem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = EngineeredItem.cpp; path = ../../../zap/EngineeredItem.cpp; sourceTree = SOURCE_ROOT; };
+		7385CBA214147824008470C8 /* EngineeredItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = EngineeredItem.h; path = ../../../zap/EngineeredItem.h; sourceTree = SOURCE_ROOT; };
+		7385CBA314147824008470C8 /* Geometry_Base.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Geometry_Base.h; path = ../../../zap/Geometry_Base.h; sourceTree = SOURCE_ROOT; };
+		7385CBA414147824008470C8 /* PickupItem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PickupItem.cpp; path = ../../../zap/PickupItem.cpp; sourceTree = SOURCE_ROOT; };
+		7385CBA514147824008470C8 /* PickupItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PickupItem.h; path = ../../../zap/PickupItem.h; sourceTree = SOURCE_ROOT; };
+		7385CBA614147824008470C8 /* Spawn.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Spawn.cpp; path = ../../../zap/Spawn.cpp; sourceTree = SOURCE_ROOT; };
+		7385CBA714147824008470C8 /* Spawn.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Spawn.h; path = ../../../zap/Spawn.h; sourceTree = SOURCE_ROOT; };
+		7385CBA814147824008470C8 /* Timer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Timer.cpp; path = ../../../zap/Timer.cpp; sourceTree = SOURCE_ROOT; };
+		7385CBA914147824008470C8 /* Timer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Timer.h; path = ../../../zap/Timer.h; sourceTree = SOURCE_ROOT; };
 		7386B9F7136FE3000094A660 /* ALURE.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ALURE.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		7388F020139D5992003C6BB0 /* Ogg-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Ogg-Info.plist"; sourceTree = "<group>"; };
 		7388F036139D59E4003C6BB0 /* Ogg.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Ogg.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1312,8 +1329,6 @@
 		73D2F29112E2D7E700EA5EBE /* Directory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Directory.h; path = ../../../zap/Directory.h; sourceTree = SOURCE_ROOT; };
 		73D2F29212E2D7E700EA5EBE /* Directory.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = Directory.mm; path = ../../../zap/Directory.mm; sourceTree = SOURCE_ROOT; };
 		73D2F29312E2D7E700EA5EBE /* dirent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dirent.h; path = ../../../zap/dirent.h; sourceTree = SOURCE_ROOT; };
-		73D2F29412E2D7E700EA5EBE /* engineeredObjects.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = engineeredObjects.cpp; path = ../../../zap/engineeredObjects.cpp; sourceTree = SOURCE_ROOT; };
-		73D2F29512E2D7E700EA5EBE /* engineeredObjects.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = engineeredObjects.h; path = ../../../zap/engineeredObjects.h; sourceTree = SOURCE_ROOT; };
 		73D2F29612E2D7E700EA5EBE /* engineerHelper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = engineerHelper.cpp; path = ../../../zap/engineerHelper.cpp; sourceTree = SOURCE_ROOT; };
 		73D2F29712E2D7E700EA5EBE /* engineerHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = engineerHelper.h; path = ../../../zap/engineerHelper.h; sourceTree = SOURCE_ROOT; };
 		73D2F29812E2D7E700EA5EBE /* flagItem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = flagItem.cpp; path = ../../../zap/flagItem.cpp; sourceTree = SOURCE_ROOT; };
@@ -1323,8 +1338,6 @@
 		73D2F29D12E2D7E700EA5EBE /* game.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = game.h; path = ../../../zap/game.h; sourceTree = SOURCE_ROOT; };
 		73D2F29E12E2D7E700EA5EBE /* gameConnection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = gameConnection.cpp; path = ../../../zap/gameConnection.cpp; sourceTree = SOURCE_ROOT; };
 		73D2F29F12E2D7E700EA5EBE /* gameConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = gameConnection.h; path = ../../../zap/gameConnection.h; sourceTree = SOURCE_ROOT; };
-		73D2F2A112E2D7E700EA5EBE /* gameItems.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = gameItems.cpp; path = ../../../zap/gameItems.cpp; sourceTree = SOURCE_ROOT; };
-		73D2F2A212E2D7E700EA5EBE /* gameItems.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = gameItems.h; path = ../../../zap/gameItems.h; sourceTree = SOURCE_ROOT; };
 		73D2F2A312E2D7E700EA5EBE /* gameLoader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = gameLoader.cpp; path = ../../../zap/gameLoader.cpp; sourceTree = SOURCE_ROOT; };
 		73D2F2A412E2D7E700EA5EBE /* gameLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = gameLoader.h; path = ../../../zap/gameLoader.h; sourceTree = SOURCE_ROOT; };
 		73D2F2A512E2D7E700EA5EBE /* gameNetInterface.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = gameNetInterface.cpp; path = ../../../zap/gameNetInterface.cpp; sourceTree = SOURCE_ROOT; };
@@ -2491,6 +2504,17 @@
 		73D2F27E12E2D6D800EA5EBE /* zap */ = {
 			isa = PBXGroup;
 			children = (
+				7385CB9F14147824008470C8 /* ClientGame.cpp */,
+				7385CBA014147824008470C8 /* ClientGame.h */,
+				7385CBA114147824008470C8 /* EngineeredItem.cpp */,
+				7385CBA214147824008470C8 /* EngineeredItem.h */,
+				7385CBA314147824008470C8 /* Geometry_Base.h */,
+				7385CBA414147824008470C8 /* PickupItem.cpp */,
+				7385CBA514147824008470C8 /* PickupItem.h */,
+				7385CBA614147824008470C8 /* Spawn.cpp */,
+				7385CBA714147824008470C8 /* Spawn.h */,
+				7385CBA814147824008470C8 /* Timer.cpp */,
+				7385CBA914147824008470C8 /* Timer.h */,
 				73A2B2A113DE59740002EF92 /* HTFGame.h */,
 				73A2B2A213DE59740002EF92 /* retrieveGame.h */,
 				73A2B2A313DE59740002EF92 /* ScreenShooter.cpp */,
@@ -2557,8 +2581,6 @@
 				73D2F29112E2D7E700EA5EBE /* Directory.h */,
 				73D2F29212E2D7E700EA5EBE /* Directory.mm */,
 				73D2F29312E2D7E700EA5EBE /* dirent.h */,
-				73D2F29412E2D7E700EA5EBE /* engineeredObjects.cpp */,
-				73D2F29512E2D7E700EA5EBE /* engineeredObjects.h */,
 				73D2F29612E2D7E700EA5EBE /* engineerHelper.cpp */,
 				73D2F29712E2D7E700EA5EBE /* engineerHelper.h */,
 				73D2F29812E2D7E700EA5EBE /* flagItem.cpp */,
@@ -2568,8 +2590,6 @@
 				73D2F29D12E2D7E700EA5EBE /* game.h */,
 				73D2F29E12E2D7E700EA5EBE /* gameConnection.cpp */,
 				73D2F29F12E2D7E700EA5EBE /* gameConnection.h */,
-				73D2F2A112E2D7E700EA5EBE /* gameItems.cpp */,
-				73D2F2A212E2D7E700EA5EBE /* gameItems.h */,
 				73D2F2A312E2D7E700EA5EBE /* gameLoader.cpp */,
 				73D2F2A412E2D7E700EA5EBE /* gameLoader.h */,
 				73D2F2A512E2D7E700EA5EBE /* gameNetInterface.cpp */,
@@ -3599,12 +3619,10 @@
 				73D2F35912E2D7E800EA5EBE /* CTFGame.cpp in Sources */,
 				73D2F35A12E2D7E800EA5EBE /* dataConnection.cpp in Sources */,
 				73D2F35B12E2D7E800EA5EBE /* Directory.mm in Sources */,
-				73D2F35C12E2D7E800EA5EBE /* engineeredObjects.cpp in Sources */,
 				73D2F35D12E2D7E800EA5EBE /* engineerHelper.cpp in Sources */,
 				73D2F35E12E2D7E800EA5EBE /* flagItem.cpp in Sources */,
 				73D2F36012E2D7E800EA5EBE /* game.cpp in Sources */,
 				73D2F36112E2D7E800EA5EBE /* gameConnection.cpp in Sources */,
-				73D2F36312E2D7E800EA5EBE /* gameItems.cpp in Sources */,
 				73D2F36412E2D7E800EA5EBE /* gameLoader.cpp in Sources */,
 				73D2F36512E2D7E800EA5EBE /* gameNetInterface.cpp in Sources */,
 				73D2F36612E2D7E800EA5EBE /* gameObject.cpp in Sources */,
@@ -3687,6 +3705,11 @@
 				7375E26813690B6300F71273 /* pictureloader.cpp in Sources */,
 				7377F2D91381C7AD00DB1417 /* SoundEffect.cpp in Sources */,
 				7377F2DA1381C7AD00DB1417 /* SoundSystem.cpp in Sources */,
+				7385CBAF14147824008470C8 /* ClientGame.cpp in Sources */,
+				7385CBB014147824008470C8 /* EngineeredItem.cpp in Sources */,
+				7385CBB114147824008470C8 /* PickupItem.cpp in Sources */,
+				7385CBB214147824008470C8 /* Spawn.cpp in Sources */,
+				7385CBB314147824008470C8 /* Timer.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3949,12 +3972,10 @@
 				73D2F3CC12E2D7E800EA5EBE /* CTFGame.cpp in Sources */,
 				73D2F3CD12E2D7E800EA5EBE /* dataConnection.cpp in Sources */,
 				73D2F3CE12E2D7E800EA5EBE /* Directory.mm in Sources */,
-				73D2F3CF12E2D7E800EA5EBE /* engineeredObjects.cpp in Sources */,
 				73D2F3D012E2D7E800EA5EBE /* engineerHelper.cpp in Sources */,
 				73D2F3D112E2D7E800EA5EBE /* flagItem.cpp in Sources */,
 				73D2F3D312E2D7E800EA5EBE /* game.cpp in Sources */,
 				73D2F3D412E2D7E800EA5EBE /* gameConnection.cpp in Sources */,
-				73D2F3D612E2D7E800EA5EBE /* gameItems.cpp in Sources */,
 				73D2F3D712E2D7E800EA5EBE /* gameLoader.cpp in Sources */,
 				73D2F3D812E2D7E800EA5EBE /* gameNetInterface.cpp in Sources */,
 				73D2F3D912E2D7E800EA5EBE /* gameObject.cpp in Sources */,
@@ -4050,6 +4071,11 @@
 				D37210EB13D4E4C1008E86F6 /* ScreenInfo.cpp in Sources */,
 				73A2B2A713DE59740002EF92 /* ScreenShooter.cpp in Sources */,
 				73A2B2A813DE59740002EF92 /* UIManager.cpp in Sources */,
+				7385CBAA14147824008470C8 /* ClientGame.cpp in Sources */,
+				7385CBAB14147824008470C8 /* EngineeredItem.cpp in Sources */,
+				7385CBAC14147824008470C8 /* PickupItem.cpp in Sources */,
+				7385CBAD14147824008470C8 /* Spawn.cpp in Sources */,
+				7385CBAE14147824008470C8 /* Timer.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

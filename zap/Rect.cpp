@@ -201,8 +201,8 @@ bool Rect::intersects(const Point &center, F32 radius) const
     F32 rectCenter_x = (min.x + max.x) / 2;
     F32 rectCenter_y = (min.y + max.y) / 2;
 
-    F32 circleDistance_x = abs(center.x - rectCenter_x);   
-    F32 circleDistance_y = abs(center.y - rectCenter_y);  
+    F32 circleDistance_x = fabs(center.x - rectCenter_x);   
+    F32 circleDistance_y = fabs(center.y - rectCenter_y);  
 
     // Eliminate the easy cases where the circle is far enough away from the rectangle (in either direction) that no intersection is possible
     if(circleDistance_x > (rectHalfWidth + radius)) { return false; }
