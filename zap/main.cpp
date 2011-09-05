@@ -1248,13 +1248,13 @@ void processStartupParams()
       gIniSettings.winSizeFact = max((F32) gCmdLineSettings.winWidth / (F32) gScreenInfo.getGameCanvasWidth(), gScreenInfo.getMinScalingFactor());
 
    string strings;
+
    if(gCmdLineSettings.masterAddress != "")
       strings = gCmdLineSettings.masterAddress;
    else
       strings = gIniSettings.masterAddress;    // This will always have a value
-   Vector<string> stringList;
-   parseString(strings.c_str(), gMasterAddress, ',');
 
+   parseString(strings.c_str(), gMasterAddress, ',');
 
    if(gCmdLineSettings.name != "")                       // We'll clobber the INI file setting.  Since this
       gIniSettings.name = gCmdLineSettings.name;         // setting is never saved, we won't mess up our INI
