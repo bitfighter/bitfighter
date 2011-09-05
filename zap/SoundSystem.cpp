@@ -664,7 +664,8 @@ void SoundSystem::updateGain(SFXHandle& effect)
       return;
    }
 
-   alSourcef(source, AL_GAIN, effect.getPointer()->mGain * effect.getPointer()->mProfile->gainScale * (gDedicatedServer ? gIniSettings.alertsVolLevel : gIniSettings.sfxVolLevel));
+   F32 vol = gDedicatedServer ? gIniSettings.alertsVolLevel : gIniSettings.sfxVolLevel;
+   alSourcef(source, AL_GAIN, effect.getPointer()->mGain * effect.getPointer()->mProfile->gainScale * vol);
 }
 
 

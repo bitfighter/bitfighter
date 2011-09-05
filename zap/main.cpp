@@ -257,9 +257,9 @@ void abortHosting_noLevels()
 {
    if(gDedicatedServer)
    {
-      logprintf(LogConsumer::LogError, "No levels found in folder %s.  Cannot host a game.", gConfigDirs.levelDir.c_str());
+      logprintf(LogConsumer::LogError,     "No levels found in folder %s.  Cannot host a game.", gConfigDirs.levelDir.c_str());
       logprintf(LogConsumer::ServerFilter, "No levels found in folder %s.  Cannot host a game.", gConfigDirs.levelDir.c_str());
-      //printf("No levels were loaded from folder %s.  Cannot host a game.", gLevelDir.c_str());      ==> Does nothing
+
       exitGame(1);
    }
 #ifndef ZAP_DEDICATED
@@ -278,6 +278,7 @@ void abortHosting_noLevels()
       ui->setMessage(9, gConfigDirs.levelDir == "" ? "<<Unresolvable>>" : gConfigDirs.levelDir.c_str());
       ui->activate();
    }
+
    delete gServerGame;
    gServerGame = NULL;
 
