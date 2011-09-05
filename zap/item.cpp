@@ -241,7 +241,7 @@ U32 Reactor::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *
 
 void Reactor::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
-   //Parent::unpackUpdate(connection, stream);
+   Parent::unpackUpdate(connection, stream);
 
    if(stream->readFlag())
    {

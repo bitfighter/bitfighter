@@ -420,11 +420,13 @@ void MasterServerConnection::onConnectionEstablished()
    {
       logprintf(LogConsumer::LogConnection, "Client established connection with Master Server");
 
+#ifndef ZAP_DEDICATED
       TNLAssert(dynamic_cast<ClientGame *>(mGame), "mGame is not ClientGame");
 
       // Clear old player list that might be there from client's lost connection to master while in game lobby
       Vector<StringTableEntry> emptyPlayerList;
       ((ClientGame *)mGame)->setPlayersInGlobalChat(emptyPlayerList);
+#endif
    }
 
    if(gCmdLineSettings.masterAddress == "" && gMasterAddress.size() >= 2)

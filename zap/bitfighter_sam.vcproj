@@ -1071,6 +1071,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\Spawn.cpp"
+			>
+		</File>
+		<File
 			RelativePath="..\sqlite\sqlite3.c"
 			>
 		</File>
