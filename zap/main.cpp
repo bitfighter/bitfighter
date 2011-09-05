@@ -1150,7 +1150,10 @@ void InitSdlVideo()
       }
    }
    else
+   {
+      logprintf("Using hardware OpenGL window");
       gScreenInfo.setHardwareSurface(true);
+   }
 }
 #endif
 

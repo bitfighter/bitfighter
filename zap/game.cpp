@@ -1053,7 +1053,7 @@ bool ServerGame::getLevelInfo(const string &fullFilename, LevelInfo &levelInfo)
    else
    {
       // was mLevelInfos[mLevelLoadIndex].levelFileName.getString()
-      logprintf(LogConsumer::LogWarning, "Could not load level %s [%s].  Skipping...", levelInfo.levelFileName.getString(), fullFilename);
+      logprintf(LogConsumer::LogWarning, "Could not load level %s [%s].  Skipping...", levelInfo.levelFileName.getString(), fullFilename.c_str());
       return false;
    }
 }
