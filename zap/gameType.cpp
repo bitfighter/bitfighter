@@ -157,7 +157,10 @@ GameType::GameType(S32 winningScore) : mScoreboardUpdateTimer(1000) , mGameTimer
    mEngineerEnabled = false;
    mBotsAllowed = true;
 
+#ifndef ZAP_DEDICATED
    mLevelCredits = gClientGame ? gClientGame->getClientInfo()->name : "";     // I *think* this is only here to provide a default for the editor
+#endif
+
    mGame = NULL;
 }
 

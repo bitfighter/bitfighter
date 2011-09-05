@@ -160,7 +160,9 @@ public:
    static const S32 BanDuration = 30000;     // Players are banned for 30secs after being kicked
 
    GameConnection();                                  // Constructor
-   GameConnection(const ClientInfo *clientInfo);      // Constructor
+#ifndef ZAP_DEDICATED
+   GameConnection(const ClientInfo *clientInfo);      // Constructor for ClientGame
+#endif
    ~GameConnection();                                 // Destructor
 
 
@@ -169,8 +171,10 @@ public:
    TNL_DECLARE_RPC(s2rCommandComplete, (RangedU32<0,SENDER_STATUS_COUNT> status));
 
 
+#ifndef ZAP_DEDICATED
    ClientGame *getClientGame() { return mClientGame; }
    void setClientGame(ClientGame *game) { mClientGame = game; }
+#endif
 
    S32 mScore;                // Total points scored my this connection
    S32 mTotalScore;           // Total points scored by anyone while this connection is alive

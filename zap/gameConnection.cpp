@@ -80,6 +80,7 @@ GameConnection::GameConnection()
 }
 
 
+#ifndef ZAP_DEDICATED
 GameConnection::GameConnection(const ClientInfo *clientInfo)
 {
    initialize();
@@ -94,6 +95,7 @@ GameConnection::GameConnection(const ClientInfo *clientInfo)
    setAuthenticated(clientInfo->authenticated);
    setSimulatedNetParams(clientInfo->simulatedPacketLoss, clientInfo->simulatedLag);
 }
+#endif
 
 
 void GameConnection::initialize()
