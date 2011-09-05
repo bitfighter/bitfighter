@@ -818,7 +818,266 @@ void readFolderLocationParams(Vector<StringPtr> &argv)
    }
 }
 
+enum ParamRequirements {
+   NO_PARAMETERS,
+   ONE_OPTIONAL,
+   ONE_REQUIRED,
+   TWO_REQUIRED,
+   ALL_REMAINING
+};
 
+struct ParamInfo {
+   string paramName;
+   ParamRequirements argsRequired;
+   void (*paramCallback)(const Vector<string> &args);
+   const char *helpString;
+};
+
+static void paramMaster(const Vector<string> &words)
+{
+   gCmdLineSettings.masterAddress = words[0];
+}
+
+static void paramHostAddr(const Vector<string> &words)
+{
+   gCmdLineSettings.hostaddr = words[0];
+}
+
+static void paramLoss(const Vector<string> &words)
+{
+   gCmdLineSettings.loss = stoi(words[0]);
+}
+
+static void paramLag(const Vector<string> &words)
+{
+   gCmdLineSettings.lag = stoi(words[0]);
+}
+
+static void paramForceUpdate(const Vector<string> &words)
+{
+   gCmdLineSettings.forceUpdate = true;
+}
+
+static void paramDedicated(const Vector<string> &words)
+{
+   setParamsForDedicatedMode();
+
+   if(words.size() == 1)
+      gCmdLineSettings.dedicated = words[0];
+}
+
+static void paramName(const Vector<string> &words)
+{
+   gCmdLineSettings.name = words[0];
+}
+
+static void paramPassword(const Vector<string> &words)
+{
+   gCmdLineSettings.password = words[0];
+}
+
+static void paramServerPassword(const Vector<string> &words)
+{
+   gCmdLineSettings.serverPassword = words[0];
+}
+
+static void paramAdminPassword(const Vector<string> &words)
+{
+   gCmdLineSettings.adminPassword = words[0];
+}
+
+static void paramLevelChangePassword(const Vector<string> &words)
+{
+   gCmdLineSettings.levelChangePassword = words[0];
+}
+
+static void paramLevels(const Vector<string> &words)
+{
+   // We'll overwrite our main level list directly, so if we're writing the INI for the first time,
+   // we'll use the cmd line args to generate the INI Level keys, rather than the built-in defaults.
+   for(S32 i = 0; i < words.size(); i++)
+      gCmdLineSettings.specifiedLevels.push_back(words[i]);
+}
+
+static void paramHostName(const Vector<string> &words)
+{
+   gCmdLineSettings.hostname = words[0];
+}
+
+static void paramHostDescr(const Vector<string> &words)
+{
+   gCmdLineSettings.hostdescr = words[0];
+}
+
+static void paramMaxPlayers(const Vector<string> &words)
+{
+   gCmdLineSettings.maxPlayers = stoi(words[0]);
+}
+
+static void paramWindow(const Vector<string> &words)
+{
+   gCmdLineSettings.displayMode = DISPLAY_MODE_WINDOWED;
+}
+
+static void paramFullscreen(const Vector<string> &words)
+{
+   gCmdLineSettings.displayMode = DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED;
+}
+
+static void paramFullscreenStretch(const Vector<string> &words)
+{
+   gCmdLineSettings.displayMode = DISPLAY_MODE_FULL_SCREEN_STRETCHED;
+}
+
+static void paramWinPos(const Vector<string> &words)
+{
+   gCmdLineSettings.xpos = stoi(words[0]);
+   gCmdLineSettings.ypos = stoi(words[1]);
+}
+
+static void paramWinWidth(const Vector<string> &words)
+{
+   gCmdLineSettings.winWidth = stoi(words[0]);
+}
+
+static void paramHelp(const Vector<string> &words)
+{
+   // TODO: Dump these parameters and a helpful message
+   logprintf("See http://bitfighter.org/wiki/index.php?title=Command_line_parameters for information");
+   exitGame(0);
+}
+
+static void paramUseStick(const Vector<string> &words)
+{
+#ifndef ZAP_DEDICATED
+   Joystick::UseJoystickNumber = stoi(words[0]) - 1;  // zero-indexed     //  TODO: should be part of gCmdLineSettings
+#endif
+}
+
+ParamInfo paramDefs[] = {   
+// Parameter             Args required  Callback function                              Error message
+{ "master",              ONE_REQUIRED,  paramMaster,              "You must specify a master server address with -master option" },
+{ "hostaddr",            ONE_REQUIRED,  paramHostAddr,            "You must specify a host address for the host to listen on (e.g. IP:Any:28000 or IP:192.169.1.100:5500)" },
+{ "loss",                ONE_REQUIRED,  paramLoss,                "You must specify a loss rate between 0 and 1 with the -loss option" },
+{ "lag",                 ONE_REQUIRED,  paramLag,                 "You must specify a lag (in ms) with the -lag option" },
+{ "forceupdate",         NO_PARAMETERS, paramForceUpdate,         "" },
+{ "dedicated",           ONE_OPTIONAL,  paramDedicated,           "" },
+{ "name",                ONE_REQUIRED,  paramName,                "You must enter a nickname with the -name option" },
+{ "password",            ONE_REQUIRED,  paramPassword,            "You must enter a password with the -password option" },
+{ "serverpassword",      ONE_REQUIRED,  paramServerPassword,      "You must enter a password with the -serverpassword option" },
+{ "adminpassword",       ONE_REQUIRED,  paramAdminPassword,       "You must specify an admin password with the -adminpassword option" },
+{ "levelchangepassword", ONE_REQUIRED,  paramLevelChangePassword, "You must specify an level-change password with the -levelchangepassword option" },
+{ "levels",              ALL_REMAINING, paramLevels,              "You must specify one or more levels to load with the -levels option" },
+{ "hostname",            ONE_REQUIRED,  paramHostName,            "You must specify a server name with the -hostname option" },
+{ "hostdescr",           ONE_REQUIRED,  paramHostDescr,           "You must specify a description (use quotes) with the -hostdescr option" },
+{ "maxplayers",          ONE_REQUIRED,  paramMaxPlayers,          "You must specify the max number of players on your server with the -maxplayers option" },
+{ "window",              NO_PARAMETERS, paramWindow,              "You must specify the x and y position of the window with the -winpos option" },
+{ "fullscreen",          NO_PARAMETERS, paramFullscreen,          "" },
+{ "fullscreen-stretch",  NO_PARAMETERS, paramFullscreenStretch,   "" },
+{ "winpos",              TWO_REQUIRED,  paramWinPos,              "You must specify the width of the game window with the -winwidth option"         },
+{ "winwidth",            ONE_REQUIRED,  paramWinWidth,            "See http://bitfighter.org/wiki/index.php?title=Command_line_parameters for information" },
+{ "help",                NO_PARAMETERS, paramHelp,                "" },
+{ "usestick",            ONE_REQUIRED,  paramUseStick,            "You must specify the joystick you want to use with the -usestick option" },
+
+};
+
+
+
+
+
+void parameterError(S32 i)
+{
+   logprintf(LogConsumer::LogError, paramDefs[i].helpString);
+   exitGame(1);
+}
+
+
+TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPtr> argv), (argv))
+{
+   S32 argc = argv.size();
+   S32 argPtr = 0;
+
+   // Assume "args" starting with "-" are actually subsequent params
+
+   while(argPtr < argc)
+   {
+      bool hasAdditionalArg = (argPtr != argc - 1 && argv[argPtr + 1].getString()[0] != '-');     
+      bool has2AdditionalArgs = hasAdditionalArg && (argPtr != argc - 2);
+
+      bool found = false;
+
+      Vector<string> params;
+
+      for(S32 i = 0; i < ARRAYSIZE(paramDefs); i++)
+      {
+         argPtr++;      // Advance argPtr to location of first parameter argument
+
+         if(!stricmp(argv[argPtr], paramDefs[i].paramName.c_str()))
+         {
+            params.clear();
+
+            if(paramDefs[i].argsRequired == NO_PARAMETERS)
+            {
+               // Do nothing
+            }
+            else if(paramDefs[i].argsRequired == ONE_OPTIONAL)
+            {
+               if(hasAdditionalArg)
+               {
+                  params.push_back(argv[argPtr].getString());
+                  argPtr += 1;
+               }
+            }
+            else if(paramDefs[i].argsRequired == ONE_REQUIRED)
+            {
+               if(!hasAdditionalArg)
+                  parameterError(i);
+
+               params.push_back(argv[argPtr].getString());
+               argPtr += 1;
+            }
+            else if(paramDefs[i].argsRequired == TWO_REQUIRED)
+            {
+               if(!has2AdditionalArgs)
+                  parameterError(i);
+
+               params.push_back(argv[argPtr].getString());
+               params.push_back(argv[argPtr + 1].getString());
+               argPtr += 2;
+            }
+            else if(paramDefs[i].argsRequired == ALL_REMAINING)
+            {
+               if(!hasAdditionalArg)
+                  parameterError(i);
+
+               for(S32 j = argPtr; j < argc; j++)
+                  params.push_back(argv[j].getString());
+
+               argPtr = argc;
+            }
+
+            paramDefs[i].paramCallback(params);    // Call the parameter processing function
+
+            found = true;
+            break;
+         }
+      }
+
+      if(!found)
+      {
+         logprintf("Invalid parameter found: %s", argv[argPtr]);
+         argPtr++;
+      }
+   }
+
+#ifdef ZAP_DEDICATED
+   // Override some settings if we're compiling ZAP_DEDICATED
+   setParamsForDedicatedMode();
+#endif
+
+}
+
+/*
 // Read the command line params... if we're replaying a journal, we'll process those params as if they were actually there, while
 // ignoring those params that were provided.
 TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPtr> argv), (argv))
@@ -1071,6 +1330,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
 #endif
 }
 
+*/
 
 #ifndef ZAP_DEDICATED
 void InitSdlVideo()

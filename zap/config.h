@@ -96,7 +96,7 @@ struct CmdLineSettings
    F32 loss;               // Simulate packet loss (0-1)
    U32 lag;                // Simulate server lag (in ms)
    bool forceUpdate;       // For testing updater
-   string dedicated;
+   string dedicated;       // Holds bind address specified on cmd line following -dedicated parameter
    string name;
    string password;
 
