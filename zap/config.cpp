@@ -2052,7 +2052,7 @@ struct ParamInfo {
    void (*paramCallback)(const Vector<string> &args);
    S32 docLevel;     
    string paramString;
-   const char *helpString;
+   string helpString;
    const char *errorMsg;
 };
 
@@ -2139,11 +2139,24 @@ static string makeParamStr(const ParamInfo paramInfo)
 }
 
 
+static string makePad(U32 len)
+{
+   string padding = "";
+
+   for(U32 i = 0; i < len; i++)
+      padding += " ";
+
+   return padding;
+}
+
+
+static const S32 MAX_HELP_LINE_LEN = 100;
+
 static void paramHelp(const Vector<string> &words)
 {
    for(S32 i = 0; i < ARRAYSIZE(helpTitles); i++)
    {
-      // Make an initial sweep through to check on the sizes of things
+      // Make an initial sweep through to check on the sizes of things, to ensure we get the indention right
       U32 maxSize = 0;
 
       for(S32 j = 0; j < ARRAYSIZE(paramDefs); j++)
@@ -2170,11 +2183,18 @@ static void paramHelp(const Vector<string> &words)
             string paramStr = makeParamStr(paramDefs[j]);
             U32 paddingLen = maxSize - paramStr.length();
 
-            string padding;
-            for(U32 k = 0; k < paddingLen; k++)
-               padding += " ";
+            U32 wrapWidth = MAX_HELP_LINE_LEN - maxSize;
 
-            printf("\t-%s%s -- %s\n", paramStr.c_str(), padding.c_str(), paramDefs[j].helpString);
+            for(U32 k = 0; k < paramDefs[j].helpString.length(); k += wrapWidth)
+            {
+               string chunk = paramDefs[j].helpString.substr(k, wrapWidth);
+
+               if(k == 0)
+                  printf("\t-%s%s -- %s\n", paramStr.c_str(), makePad(paddingLen).c_str(),  chunk.c_str());
+               else
+                  printf("\t%s %s\n",                         makePad(maxSize + 4).c_str(), chunk.c_str());
+            }
+
             first = false;
          }
       }
@@ -2182,13 +2202,13 @@ static void paramHelp(const Vector<string> &words)
 
    // Add some final notes...
    printf("\n\nNotes:\n\
-   <param> denotes a required parameter\n\
-   [param] denotes an optional parameter\n\
-   address is an address in the form ip address:port. (e.g. 192.168.1.55:25955)\n\
-   string means a parameter consisting of some combination of letters and numbers (e.g. Grambol_22).\n\
-      In many cases, spaces can be included by enclosing entire string in double quotes (\"Solid Gold Levels\").\n\
-   integer means an integer number must be specified (e.g. 4)\n\
-   float means a floating point number must be specified (e.g. 3.5)\n");
+   \t<param> denotes a required parameter\n\
+   \t[param] denotes an optional parameter\n\
+   \taddress is an address in the form ip address:port. (e.g. 192.168.1.55:25955)\n\
+   \tstring means a parameter consisting of some combination of letters and numbers (e.g. Grambol_22).\n\
+   \t   In many cases, spaces can be included by enclosing entire string in double quotes (\"Solid Gold Levels\").\n\
+   \tinteger means an integer number must be specified (e.g. 4)\n\
+   \tfloat means a floating point number must be specified (e.g. 3.5)\n");
 
    exitGame(0);
 }
