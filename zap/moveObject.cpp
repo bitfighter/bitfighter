@@ -1180,7 +1180,7 @@ void Circle::renderItem(const Point &pos)
    if(!hasExploded)
    {
       glColor(Colors::red);
-      drawCircle(pos, CIRCLE_RADIUS);
+      drawCircle(pos, (F32)CIRCLE_RADIUS);
    }
 #endif
 }
