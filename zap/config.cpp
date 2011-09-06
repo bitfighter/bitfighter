@@ -42,6 +42,10 @@
 #pragma warning (disable: 4996)     // Disable POSIX deprecation, certain security warnings that seem to be specific to VC++
 #endif
 
+#ifdef TNL_OS_WIN32
+#include <windows.h>   // For ARRAYSIZE when using ZAP_DEDICATED
+#endif
+
 #ifndef min
 #define min(a,b) ((a) <= (b) ? (a) : (b))
 #define max(a,b) ((a) >= (b) ? (a) : (b))
@@ -1904,7 +1908,7 @@ static void paramHostAddr(const Vector<string> &words)
 
 static void paramLoss(const Vector<string> &words)
 {
-   gCmdLineSettings.loss = stoi(words[0]);
+   gCmdLineSettings.loss = stof(words[0]);
 }
 
 static void paramLag(const Vector<string> &words)
