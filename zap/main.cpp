@@ -997,22 +997,22 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
    S32 argc = argv.size();
    S32 argPtr = 0;
 
-   // Assume "args" starting with "-" are actually subsequent params
+   Vector<string> params;
 
    while(argPtr < argc)
    {
+      // Assume "args" starting with "-" are actually subsequent params
       bool hasAdditionalArg = (argPtr != argc - 1 && argv[argPtr + 1].getString()[0] != '-');     
       bool has2AdditionalArgs = hasAdditionalArg && (argPtr != argc - 2);
 
       bool found = false;
 
-      Vector<string> params;
+      string arg = argv[argPtr].getString();
+      argPtr++;      // Advance argPtr to location of first parameter argument
 
       for(S32 i = 0; i < ARRAYSIZE(paramDefs); i++)
       {
-         argPtr++;      // Advance argPtr to location of first parameter argument
-
-         if(!stricmp(argv[argPtr], paramDefs[i].paramName.c_str()))
+         if(arg == "-" + paramDefs[i].paramName)
          {
             params.clear();
 
@@ -1064,10 +1064,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
       }
 
       if(!found)
-      {
-         logprintf("Invalid parameter found: %s", argv[argPtr]);
-         argPtr++;
-      }
+         logprintf("Invalid parameter found: %s", arg.c_str());
    }
 
 #ifdef ZAP_DEDICATED
