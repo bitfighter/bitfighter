@@ -2051,7 +2051,7 @@ struct ParamInfo {
    ParamRequirements argsRequired;
    void (*paramCallback)(const Vector<string> &args);
    S32 docLevel;     
-   const char *paramString;
+   string paramString;
    const char *helpString;
    const char *errorMsg;
 };
@@ -2067,47 +2067,61 @@ const char *helpTitles[] = {
 };
 
 
+// The order of these is unimportant -- it only determines the order in which the items are printed out with the -help option.  
+// Items are sorted by tier, but order is otherwise preserved.
+// Only items related to determining the locations of resources should be included in pass 0; most items should be set to pass 1.
+
 ParamInfo paramDefs[] = {   
-// Parameter           Pass, Args required  Callback function         Help string            Error message (not needed for NO_PARAMETERS)
-{ "rootdatadir",         0,  ONE_REQUIRED,  paramRootDataDir,         3, "<path>", "is equivalent to setting the -inidir, -logdir, -robotdir, -screenshotdir, and -leveldir parameters. The application will automatially append \"/robots\", \"/screenshots\", and \"/levels\" to path as appropriate.", "You must specify the root data folder with the -rootdatadir option" },
-{ "leveldir",            0,  ONE_REQUIRED,  paramLevelDir,            2, "<folder or subfolder>", "Loads all levels in specified system folder, or a subfolder under the levels folder. Levels will be loaded in alphabetical order by level-file name. Admins can create custom level lists by copying selected levels into folders or subfolders, and rename the files to get them to load in the proper order.", "You must specify a levels subfolder with the -leveldir option" },
-{ "inidir",              0,  ONE_REQUIRED,  paramIniDir,              3, "<path>", "Folder where INI file is stored", "You must specify a the folder where your INI file is stored with the -inidir option" },
-{ "logdir",              0,  ONE_REQUIRED,  paramLogDir,              3, "<path>", "Folder where logfiles will be written", "You must specify your log folder with the -logdir option" },
-{ "scriptsdir",          0,  ONE_REQUIRED,  paramScriptsDir,          3, "<path>", "Folder where Lua helper scripts are stored", "You must specify the folder where your Lua scripts are stored with the -scriptsdir option" },
-{ "cachedir",            0,  ONE_REQUIRED,  paramCacheDir,            3, "<path>", "Folder where cache files are stored", "You must specify the folder where cache files are to be stored with the -cachedir option" },
-{ "robotdir",            0,  ONE_REQUIRED,  paramRobotDir,            3, "<path>", "Folder where robot scripts are stored", "You must specify the robots folder with the -robotdir option" },
-{ "screenshotdir",       0,  ONE_REQUIRED,  paramScreenshotDir,       3, "<path>", "Folder where screenshots are stored", "You must specify your screenshots folder with the -screenshotdir option" },
-{ "sfxdir",              0,  ONE_REQUIRED,  paramSfxDir,              3, "<path>", "Folder where sounds are stored", "You must specify your sounds folder with the -sfxdir option" },
-{ "musicdir",            0,  ONE_REQUIRED,  paramMusicDir,            3, "<path>", "Folder where game music stored", "You must specify your sounds folder with the -musicdir option" }, 
+// Parameter           Pass, Args required  Callback function        Tier  Args                                                Help string            Error message (not needed for NO_PARAMETERS)
 
-{ "getres",              1,  FOUR_REQUIRED, paramGetRes,              5, "<server address> <admin password> <resource name> <LEVEL|LEVELGEN|BOT>", "Send a resource to a remote server. Address must be specified in the form IP:nnn.nnn.nnn.nnn:port. The server must be running, have an admin password set, and have resource management enabled ([Host] section in the bitfighter.ini file).", "Usage: bitfighter getres <server address> <password> <file> <resource type>" },
-{ "sendres",             1,  FOUR_REQUIRED, paramSendRes,             5, "<server address> <admin password> <resource name> <LEVEL|LEVELGEN|BOT>", "Retrieves a resource from a remote server, using the same arguments as -sendres.", "Usage: bitfighter sendres <server address> <password> <file> <resource type>" },
-{ "rules",               1,  NO_PARAMETERS, paramRules,               6, "", "Prints out a list of \"rules of the game\" and other possibly useful data", "" },
-{ "help",                1,  NO_PARAMETERS, paramHelp,                6, "", "Display this message", "" },  
-
-{ "master",              1,  ONE_REQUIRED,  paramMaster,              0, "<address>", "Use master server (game finder) at specified address", "You must specify a master server address with -master option" },
-{ "hostaddr",            1,  ONE_REQUIRED,  paramHostAddr,            0, "<address>", "Specifies host address for the server to listen to when hosting", "You must specify a host address for the host to listen on (e.g. IP:Any:28000 or IP:192.169.1.100:5500)" },
-{ "loss",                1,  ONE_REQUIRED,  paramLoss,                4, "<float>", "Simulate the specified amount of packet loss, from 0 (no loss) to 1 (all packets lost)", "You must specify a loss rate between 0 and 1 with the -loss option" },
-{ "lag",                 1,  ONE_REQUIRED,  paramLag,                 4, "<int>", "Simulate the specified amount of server lag (in milliseconds)", "You must specify a lag (in ms) with the -lag option" },
-{ "forceupdate",         1,  NO_PARAMETERS, paramForceUpdate,         4, "", "Tricks game into thinking it needs to update", "" },
-{ "dedicated",           1,  ONE_OPTIONAL,  paramDedicated,           1, "[address]", "Run as a dedicated game server (i.e. no game window, console mode)", "" },
-{ "name",                1,  ONE_REQUIRED,  paramName,                0, "<string>", "Specify your username", "You must enter a nickname with the -name option" },
-{ "password",            1,  ONE_REQUIRED,  paramPassword,            0, "<string>", "Specify your password", "You must enter a password with the -password option" },
-{ "serverpassword",      1,  ONE_REQUIRED,  paramServerPassword,      1, "<string>", "Specify a server password (players will need to know this to connect to your server)", "You must enter a password with the -serverpassword option" },
-{ "adminpassword",       1,  ONE_REQUIRED,  paramAdminPassword,       1, "<string>", "Specify an admin password (allowing those with the password to kick players and change their teams) when you host a game or run a dedicated server ", "You must specify an admin password with the -adminpassword option" },
-{ "levelchangepassword", 1,  ONE_REQUIRED,  paramLevelChangePassword, 1, "<string>", "Specifies the password required for players to be able to change levels on your server when you host a game or run a dedicated server", "You must specify an level-change password with the -levelchangepassword option" },
-{ "levels",              1,  ALL_REMAINING, paramLevels,              2, "<level 1> [level 2]...", "Specify the levels to play. Note that all remaining items on the command line will be interpreted as levels, so this must be the last parameter.", "You must specify one or more levels to load with the -levels option" },
-{ "hostname",            1,  ONE_REQUIRED,  paramHostName,            1, "<string>", "Sets the name that will appear in the server browser when searching for servers", "You must specify a server name with the -hostname option" },
-{ "hostdescr",           1,  ONE_REQUIRED,  paramHostDescr,           1, "<string>", "Sets a brief description of the server, which will be visible when players browse for game servers. Use double quotes (\") for descriptions containing spaces.", "You must specify a description (use quotes) with the -hostdescr option" },
-{ "maxplayers",          1,  ONE_REQUIRED,  paramMaxPlayers,          1, "<int>", "Max players allowed in a game (default is 128)", "You must specify the max number of players on your server with the -maxplayers option" }, 
-
-{ "window",              1,  NO_PARAMETERS, paramWindow,              0, "", "Start in windowed mode", "" },
-{ "fullscreen",          1,  NO_PARAMETERS, paramFullscreen,          0, "", "Start in fullscreen mode (no stretching)", "" },
+// Player-oriented options
+{ "name",                1,  ONE_REQUIRED,  paramName,                0, "<string>", "Specify your username",                                                                   "You must enter a nickname with the -name option" },
+{ "password",            1,  ONE_REQUIRED,  paramPassword,            0, "<string>", "Specify your password",                                                                   "You must enter a password with the -password option" },
+{ "window",              1,  NO_PARAMETERS, paramWindow,              0, "", "Start in windowed mode",                                       "" },
+{ "fullscreen",          1,  NO_PARAMETERS, paramFullscreen,          0, "", "Start in fullscreen mode (no stretching)",                     "" },
 { "fullscreen-stretch",  1,  NO_PARAMETERS, paramFullscreenStretch,   0, "", "Start in fullscreen mode (gaphics stretched to fill monitor)", "" },
-
 { "winpos",              1,  TWO_REQUIRED,  paramWinPos,              0, "<int> <int>", "Specify x,y location of game window (note that this is the position of the UL corner of the game canvas, and does not account for the window frame)", "You must specify the x and y position of the window with the -winpos option" },
-{ "winwidth",            1,  ONE_REQUIRED,  paramWinWidth,            0, "<int>", "Specify width of game window. Height will be set automatically. Note that the specified width is the width of the game canvas itself, and does not take account of window borders. Therefore, the entire window width will exceed the size specified slightly.", "You must specify the width of the game window with the -winwidth option" },
-{ "usestick",            1,  ONE_REQUIRED,  paramUseStick,            0, "<int>", "Specify which joystick or other input device to use. Default is 1.", "You must specify the joystick you want to use with the -usestick option" },
+{ "winwidth",            1,  ONE_REQUIRED,  paramWinWidth,            0, "<int>",       "Specify width of game window. Height will be set automatically. Note that the specified width is the width of the game canvas itself, and does not take account of window borders. Therefore, the entire window width will exceed the size specified slightly.", "You must specify the width of the game window with the -winwidth option" },
+{ "usestick",            1,  ONE_REQUIRED,  paramUseStick,            0, "<int>",       "Specify which joystick or other input device to use. Default is 1.", "You must specify the joystick you want to use with the -usestick option" },
+{ "master",              1,  ONE_REQUIRED,  paramMaster,              0, "<address>", "Use master server (game finder) at specified address",                                   "You must specify a master server address with -master option" },
+
+// Options for hosting
+{ "dedicated",           1,  ONE_OPTIONAL,  paramDedicated,           1, "[address]", "Run as a dedicated game server (i.e. no game window, console mode)",                     "" },
+{ "serverpassword",      1,  ONE_REQUIRED,  paramServerPassword,      1, "<string>", "Specify a server password (players will need to know this to connect to your server)",    "You must enter a password with the -serverpassword option" },
+{ "adminpassword",       1,  ONE_REQUIRED,  paramAdminPassword,       1, "<string>", "Specify an admin password (allowing those with the password to kick players and change their teams) when you host a game or run a dedicated server ", "You must specify an admin password with the -adminpassword option" },
+{ "levelchangepassword", 1,  ONE_REQUIRED,  paramLevelChangePassword, 1, "<string>", "Specify the password required for players to be able to change levels on your server when you host a game or run a dedicated server", "You must specify an level-change password with the -levelchangepassword option" },
+{ "hostname",            1,  ONE_REQUIRED,  paramHostName,            1, "<string>", "Set the name that will appear in the server browser when searching for servers", "You must specify a server name with the -hostname option" },
+{ "hostdescr",           1,  ONE_REQUIRED,  paramHostDescr,           1, "<string>", "Set a brief description of the server, which will be visible when players browse for game servers. Use double quotes (\") for descriptions containing spaces.", "You must specify a description (use quotes) with the -hostdescr option" },
+{ "maxplayers",          1,  ONE_REQUIRED,  paramMaxPlayers,          1, "<int>",    "Max players allowed in a game (default is 128)", "You must specify the max number of players on your server with the -maxplayers option" }, 
+{ "hostaddr",            1,  ONE_REQUIRED,  paramHostAddr,            1, "<address>", "Specify host address for the server to listen to when hosting",                        "You must specify a host address for the host to listen on (e.g. IP:Any:28000 or IP:192.169.1.100:5500)" },
+
+// Specifying levels
+{ "levels",              1,  ALL_REMAINING, paramLevels,              2, "<level 1> [level 2]...", "Specify the levels to play. Note that all remaining items on the command line will be interpreted as levels, so this must be the last parameter.  See also the -leveldir parameter in the next section.", "You must specify one or more levels to load with the -levels option" },
+
+// Specifying folders
+{ "rootdatadir",         0,  ONE_REQUIRED,  paramRootDataDir,         3, "<path>",                "Equivalent to setting the -inidir, -logdir, -robotdir, -screenshotdir, and -leveldir parameters. The application will automatially append \"/robots\", \"/screenshots\", and \"/levels\" to path as appropriate.", "You must specify the root data folder with the -rootdatadir option" },
+{ "leveldir",            0,  ONE_REQUIRED,  paramLevelDir,            2, "<folder or subfolder>", "Load all levels in specified system folder, or a subfolder under the levels folder. Levels will be loaded in alphabetical order by level-file name. Admins can create custom level lists by copying selected levels into folders or subfolders, and rename the files to get them to load in the proper order.", "You must specify a levels subfolder with the -leveldir option" },
+{ "inidir",              0,  ONE_REQUIRED,  paramIniDir,              3, "<path>",                "Folder where INI file is stored",            "You must specify a the folder where your INI file is stored with the -inidir option" },
+{ "logdir",              0,  ONE_REQUIRED,  paramLogDir,              3, "<path>",                "Folder where logfiles will be written",      "You must specify your log folder with the -logdir option" },
+{ "scriptsdir",          0,  ONE_REQUIRED,  paramScriptsDir,          3, "<path>",                "Folder where Lua helper scripts are stored", "You must specify the folder where your Lua scripts are stored with the -scriptsdir option" },
+{ "cachedir",            0,  ONE_REQUIRED,  paramCacheDir,            3, "<path>",                "Folder where cache files are stored",        "You must specify the folder where cache files are to be stored with the -cachedir option" },
+{ "robotdir",            0,  ONE_REQUIRED,  paramRobotDir,            3, "<path>",                "Folder where robot scripts are stored",      "You must specify the robots folder with the -robotdir option" },
+{ "screenshotdir",       0,  ONE_REQUIRED,  paramScreenshotDir,       3, "<path>",                "Folder where screenshots are stored",        "You must specify your screenshots folder with the -screenshotdir option" },
+{ "sfxdir",              0,  ONE_REQUIRED,  paramSfxDir,              3, "<path>",                "Folder where sounds are stored",             "You must specify your sounds folder with the -sfxdir option" },
+{ "musicdir",            0,  ONE_REQUIRED,  paramMusicDir,            3, "<path>",                "Folder where game music stored",             "You must specify your sounds folder with the -musicdir option" }, 
+
+// Developer-oriented options
+{ "loss",                1,  ONE_REQUIRED,  paramLoss,                4, "<float>",   "Simulate the specified amount of packet loss, from 0 (no loss) to 1 (all packets lost)", "You must specify a loss rate between 0 and 1 with the -loss option" },
+{ "lag",                 1,  ONE_REQUIRED,  paramLag,                 4, "<int>",     "Simulate the specified amount of server lag (in milliseconds)",                          "You must specify a lag (in ms) with the -lag option" },
+{ "forceupdate",         1,  NO_PARAMETERS, paramForceUpdate,         4, "",          "Trick game into thinking it needs to update",                                           "" },
+
+// Advanced server management options
+{ "getres",              1,  FOUR_REQUIRED, paramGetRes,              5, "<server address> <admin password> <resource name> <LEVEL|LEVELGEN|BOT>", "Send a resource to a remote server. Address must be specified in the form IP:nnn.nnn.nnn.nnn:port. The server must be running, have an admin password set, and have resource management enabled ([Host] section in the bitfighter.ini file).", "Usage: bitfighter getres <server address> <password> <file> <resource type>" },
+{ "sendres",             1,  FOUR_REQUIRED, paramSendRes,             5, "<server address> <admin password> <resource name> <LEVEL|LEVELGEN|BOT>", "Retrieve a resource from a remote server, with same requirements as -sendres.",                                                                                                                                                                "Usage: bitfighter sendres <server address> <password> <file> <resource type>" },
+
+// Other commands
+{ "rules",               1,  NO_PARAMETERS, paramRules,               6, "",  "Print a list of \"rules of the game\" and other possibly useful data", "" },
+{ "help",                1,  NO_PARAMETERS, paramHelp,                6, "",  "Display this message", "" },  
 
 };
 
@@ -2119,33 +2133,54 @@ void parameterError(S32 i)
 }
 
 
+static string makeParamStr(const ParamInfo paramInfo)
+{
+   return paramInfo.paramName + (paramInfo.paramString == "" ? "" : " ") + paramInfo.paramString;
+}
+
+
 static void paramHelp(const Vector<string> &words)
 {
-   bool found;
-   S32 docLevel = 0;
-
-   do
+   for(S32 i = 0; i < ARRAYSIZE(helpTitles); i++)
    {
-      found = false;
+      // Make an initial sweep through to check on the sizes of things
+      U32 maxSize = 0;
 
-      for(S32 i = 0; i < ARRAYSIZE(paramDefs); i++)
+      for(S32 j = 0; j < ARRAYSIZE(paramDefs); j++)
       {
-         if(paramDefs[i].docLevel == docLevel)
+         if(paramDefs[j].docLevel == i)
          {
-            if(!found)
-            {
-               printf("%s\n", helpTitles[docLevel]);
-            }
+            U32 len = makeParamStr(paramDefs[j]).length();
 
-            found = true;
-            printf("\t-%s%s%s -- %s\n", paramDefs[i].paramName.c_str(), paramDefs[i].paramString[0] ? " " : "", paramDefs[i].paramString, paramDefs[i].helpString);
+            if(len > maxSize)
+               maxSize = len;
          }
       }
 
-      docLevel++;
 
-   } while(found);
+      bool first = true;
 
+      for(S32 j = 0; j < ARRAYSIZE(paramDefs); j++)
+      {
+         if(paramDefs[j].docLevel == i)
+         {
+            if(first)     // First item in this docLevel... print the section header
+               printf("\n\n%s\n", helpTitles[i]);
+
+            string paramStr = makeParamStr(paramDefs[j]);
+            U32 paddingLen = maxSize - paramStr.length();
+
+            string padding;
+            for(U32 k = 0; k < paddingLen; k++)
+               padding += " ";
+
+            printf("\t-%s%s -- %s\n", paramStr.c_str(), padding.c_str(), paramDefs[j].helpString);
+            first = false;
+         }
+      }
+   }
+
+   // Add some final notes...
    printf("\n\nNotes:\n\
    <param> denotes a required parameter\n\
    [param] denotes an optional parameter\n\
