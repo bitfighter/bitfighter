@@ -86,6 +86,7 @@ struct ConfigDirectories {
 struct CmdLineSettings
 {
    CmdLineSettings() { init(); }    // Quickie constructor
+   void readParams(const Vector<string> &argv);
 
    bool clientMode;        // Start with client active
    bool serverMode;        // Start in server mode

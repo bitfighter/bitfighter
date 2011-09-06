@@ -36,6 +36,8 @@
 #include "quickChatHelper.h"
 #endif
 
+#include "dataConnection.h"   // For defs of stuff used by transferResource() function below
+
 #ifdef _MSC_VER
 #pragma warning (disable: 4996)     // Disable POSIX deprecation, certain security warnings that seem to be specific to VC++
 #endif
@@ -1436,15 +1438,6 @@ static void writeLevels(CIniFile *ini)
       ini->sectionComment("Levels", " ... etc ...");
       ini->sectionComment("Levels", "This list can be overidden on the command line with the -leveldir, -rootdatadir, or -levels parameters.");
       ini->sectionComment("Levels", "----------------");
-
-      /*
-      char levelName[256];
-      for(S32 i = 0; i < gLevelList.size(); i++)
-      {
-         dSprintf(levelName, 255, "Level%d", i);
-         ini->SetValue("Levels", string(levelName), gLevelList[i].getString(), true);
-      }
-      */
    }
 }
 
@@ -1841,6 +1834,379 @@ string IniSettings::getInputMode()
       return "Keyboard";
 }
 
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Cmd Line processing callbacks
+
+
+static void paramRootDataDir(const Vector<string> &words)
+{
+   gCmdLineSettings.dirs.rootDataDir = words[0];
+   gConfigDirs.rootDataDir = words[0];             // Also sock it away here
+}
+
+static void paramLevelDir(const Vector<string> &words)
+{
+   gCmdLineSettings.dirs.levelDir = words[0];
+}
+
+static void paramIniDir(const Vector<string> &words)
+{
+   gCmdLineSettings.dirs.iniDir= words[0];
+}
+
+static void paramLogDir(const Vector<string> &words)
+{
+   gCmdLineSettings.dirs.logDir = words[0];
+}
+
+static void paramScriptsDir(const Vector<string> &words)
+{
+   gCmdLineSettings.dirs.luaDir = words[0];
+}
+
+static void paramCacheDir(const Vector<string> &words)
+{
+   gCmdLineSettings.dirs.cacheDir = words[0];
+}
+
+static void paramRobotDir(const Vector<string> &words)
+{
+   gCmdLineSettings.dirs.robotDir = words[0];
+}
+
+static void paramScreenshotDir(const Vector<string> &words)
+{
+   gCmdLineSettings.dirs.screenshotDir = words[0];
+}
+
+static void paramSfxDir(const Vector<string> &words)
+{
+   gCmdLineSettings.dirs.sfxDir = words[0];
+}
+
+static void paramMusicDir(const Vector<string> &words)
+{
+   gCmdLineSettings.dirs.musicDir = words[0];
+}
+
+static void paramMaster(const Vector<string> &words)
+{
+   gCmdLineSettings.masterAddress = words[0];
+}
+
+static void paramHostAddr(const Vector<string> &words)
+{
+   gCmdLineSettings.hostaddr = words[0];
+}
+
+static void paramLoss(const Vector<string> &words)
+{
+   gCmdLineSettings.loss = stoi(words[0]);
+}
+
+static void paramLag(const Vector<string> &words)
+{
+   gCmdLineSettings.lag = stoi(words[0]);
+}
+
+static void paramForceUpdate(const Vector<string> &words)
+{
+   gCmdLineSettings.forceUpdate = true;
+}
+
+
+extern void setParamsForDedicatedMode();
+
+static void paramDedicated(const Vector<string> &words)
+{
+   setParamsForDedicatedMode();
+
+   if(words.size() == 1)
+      gCmdLineSettings.dedicated = words[0];
+}
+
+static void paramName(const Vector<string> &words)
+{
+   gCmdLineSettings.name = words[0];
+}
+
+static void paramPassword(const Vector<string> &words)
+{
+   gCmdLineSettings.password = words[0];
+}
+
+static void paramServerPassword(const Vector<string> &words)
+{
+   gCmdLineSettings.serverPassword = words[0];
+}
+
+static void paramAdminPassword(const Vector<string> &words)
+{
+   gCmdLineSettings.adminPassword = words[0];
+}
+
+static void paramLevelChangePassword(const Vector<string> &words)
+{
+   gCmdLineSettings.levelChangePassword = words[0];
+}
+
+static void paramLevels(const Vector<string> &words)
+{
+   gCmdLineSettings.specifiedLevels = words;
+}
+
+static void paramHostName(const Vector<string> &words)
+{
+   gCmdLineSettings.hostname = words[0];
+}
+
+static void paramHostDescr(const Vector<string> &words)
+{
+   gCmdLineSettings.hostdescr = words[0];
+}
+
+static void paramMaxPlayers(const Vector<string> &words)
+{
+   gCmdLineSettings.maxPlayers = stoi(words[0]);
+}
+
+static void paramWindow(const Vector<string> &words)
+{
+   gCmdLineSettings.displayMode = DISPLAY_MODE_WINDOWED;
+}
+
+static void paramFullscreen(const Vector<string> &words)
+{
+   gCmdLineSettings.displayMode = DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED;
+}
+
+static void paramFullscreenStretch(const Vector<string> &words)
+{
+   gCmdLineSettings.displayMode = DISPLAY_MODE_FULL_SCREEN_STRETCHED;
+}
+
+static void paramWinPos(const Vector<string> &words)
+{
+   gCmdLineSettings.xpos = stoi(words[0]);
+   gCmdLineSettings.ypos = stoi(words[1]);
+}
+
+static void paramWinWidth(const Vector<string> &words)
+{
+   gCmdLineSettings.winWidth = stoi(words[0]);
+}
+
+
+extern void exitGame(S32 errcode);
+extern void transferResource(const string &addr, const string &pw, const string &fileName, const string &resourceType, bool sending);
+
+static void paramGetRes(const Vector<string> &words)
+{
+   transferResource(words[0], words[1], words[2], words[3], false);
+}
+
+static void paramSendRes(const Vector<string> &words)
+{
+   transferResource(words[0], words[1], words[2], words[3], true);
+}
+
+
+extern bool writeToConsole();
+extern void printRules();
+
+static void paramRules(const Vector<string> &words)
+{
+   writeToConsole();
+   printRules();
+   exitGame(0);
+}
+
+static void paramHelp(const Vector<string> &words)
+{
+   // TODO: Dump these parameters and a helpful message
+   logprintf("See http://bitfighter.org/wiki/index.php?title=Command_line_parameters for information");
+   exitGame(0);
+}
+
+static void paramUseStick(const Vector<string> &words)
+{
+#ifndef ZAP_DEDICATED
+   Joystick::UseJoystickNumber = stoi(words[0]) - 1;  // zero-indexed     //  TODO: should be part of gCmdLineSettings
+#endif
+}
+
+
+enum ParamRequirements {
+   NO_PARAMETERS,      
+   ONE_OPTIONAL,
+   ONE_REQUIRED,
+   TWO_REQUIRED,
+   FOUR_REQUIRED,
+   ALL_REMAINING
+};
+
+
+struct ParamInfo {
+   string paramName;
+   ParamRequirements argsRequired;
+   void (*paramCallback)(const Vector<string> &args);
+   const char *helpString;
+};
+
+
+ParamInfo paramDefs[] = {   
+// Parameter             Args required  Callback function                     Error message (not needed for NO_PARAMETERS)
+{ "rootdatadir",         ONE_REQUIRED,  paramRootDataDir,         "You must specify the root data folder with the -rootdatadir option" },
+{ "leveldir",            ONE_REQUIRED,  paramLevelDir,            "You must specify a levels subfolder with the -leveldir option" },
+{ "inidir",              ONE_REQUIRED,  paramIniDir,              "You must specify a the folder where your INI file is stored with the -inidir option" },
+{ "logdir",              ONE_REQUIRED,  paramLogDir,              "You must specify your log folder with the -logdir option" },
+{ "scriptsdir",          ONE_REQUIRED,  paramScriptsDir,          "You must specify the folder where your Lua scripts are stored with the -scriptsdir option" },
+{ "cachedir",            ONE_REQUIRED,  paramCacheDir,            "You must specify the folder where cache files are to be stored with the -cachedir option" },
+{ "robotdir",            ONE_REQUIRED,  paramRobotDir,            "You must specify the robots folder with the -robotdir option" },
+{ "screenshotdir",       ONE_REQUIRED,  paramScreenshotDir,       "You must specify your screenshots folder with the -screenshotdir option" },
+{ "sfxdir",              ONE_REQUIRED,  paramSfxDir,              "You must specify your sounds folder with the -sfxdir option" },
+{ "musicdir",            ONE_REQUIRED,  paramMusicDir,            "You must specify your sounds folder with the -musicdir option" },
+
+{ "getres",              FOUR_REQUIRED, paramGetRes,              "Usage: bitfighter getres <server address> <password> <file> <resource type>" },
+{ "sendres",             FOUR_REQUIRED, paramSendRes,             "Usage: bitfighter sendres <server address> <password> <file> <resource type>" },
+{ "rules",               NO_PARAMETERS, paramRules,               "" },
+{ "help",                NO_PARAMETERS, paramHelp,                "" },
+
+{ "master",              ONE_REQUIRED,  paramMaster,              "You must specify a master server address with -master option" },
+{ "hostaddr",            ONE_REQUIRED,  paramHostAddr,            "You must specify a host address for the host to listen on (e.g. IP:Any:28000 or IP:192.169.1.100:5500)" },
+{ "loss",                ONE_REQUIRED,  paramLoss,                "You must specify a loss rate between 0 and 1 with the -loss option" },
+{ "lag",                 ONE_REQUIRED,  paramLag,                 "You must specify a lag (in ms) with the -lag option" },
+{ "forceupdate",         NO_PARAMETERS, paramForceUpdate,         "" },
+{ "dedicated",           ONE_OPTIONAL,  paramDedicated,           "" },
+{ "name",                ONE_REQUIRED,  paramName,                "You must enter a nickname with the -name option" },
+{ "password",            ONE_REQUIRED,  paramPassword,            "You must enter a password with the -password option" },
+{ "serverpassword",      ONE_REQUIRED,  paramServerPassword,      "You must enter a password with the -serverpassword option" },
+{ "adminpassword",       ONE_REQUIRED,  paramAdminPassword,       "You must specify an admin password with the -adminpassword option" },
+{ "levelchangepassword", ONE_REQUIRED,  paramLevelChangePassword, "You must specify an level-change password with the -levelchangepassword option" },
+{ "levels",              ALL_REMAINING, paramLevels,              "You must specify one or more levels to load with the -levels option" },
+{ "hostname",            ONE_REQUIRED,  paramHostName,            "You must specify a server name with the -hostname option" },
+{ "hostdescr",           ONE_REQUIRED,  paramHostDescr,           "You must specify a description (use quotes) with the -hostdescr option" },
+{ "maxplayers",          ONE_REQUIRED,  paramMaxPlayers,          "You must specify the max number of players on your server with the -maxplayers option" },
+
+{ "window",              NO_PARAMETERS, paramWindow,              "You must specify the x and y position of the window with the -winpos option" },
+{ "fullscreen",          NO_PARAMETERS, paramFullscreen,          "" },
+{ "fullscreen-stretch",  NO_PARAMETERS, paramFullscreenStretch,   "" },
+
+{ "winpos",              TWO_REQUIRED,  paramWinPos,              "You must specify the width of the game window with the -winwidth option"         },
+{ "winwidth",            ONE_REQUIRED,  paramWinWidth,            "See http://bitfighter.org/wiki/index.php?title=Command_line_parameters for information" },
+{ "usestick",            ONE_REQUIRED,  paramUseStick,            "You must specify the joystick you want to use with the -usestick option" },
+
+};
+
+
+void parameterError(S32 i)
+{
+   logprintf(LogConsumer::LogError, paramDefs[i].helpString);
+   exitGame(1);
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+void CmdLineSettings::readParams(const Vector<string> &argv)
+{
+   S32 argc = argv.size();
+   S32 argPtr = 0;
+
+   Vector<string> params;
+
+   while(argPtr < argc)
+   {
+      // Assume "args" starting with "-" are actually subsequent params
+      bool hasAdditionalArg =                         (argPtr != argc - 1 && argv[argPtr + 1][0] != '-');     
+      bool has2AdditionalArgs = hasAdditionalArg   && (argPtr != argc - 2 && argv[argPtr + 2][0] != '-');
+      bool has3AdditionalArgs = has2AdditionalArgs && (argPtr != argc - 3 && argv[argPtr + 3][0] != '-');
+      bool has4AdditionalArgs = has3AdditionalArgs && (argPtr != argc - 4 && argv[argPtr + 4][0] != '-');
+
+      bool found = false;
+
+      string arg = argv[argPtr];
+      argPtr++;      // Advance argPtr to location of first parameter argument
+
+      for(S32 i = 0; i < ARRAYSIZE(paramDefs); i++)
+      {
+         if(arg == "-" + paramDefs[i].paramName)
+         {
+            params.clear();
+
+            if(paramDefs[i].argsRequired == NO_PARAMETERS)
+            {
+               // Do nothing
+            }
+            else if(paramDefs[i].argsRequired == ONE_OPTIONAL)
+            {
+               if(hasAdditionalArg)
+               {
+                  params.push_back(argv[argPtr]);
+                  argPtr += 1;
+               }
+            }
+            else if(paramDefs[i].argsRequired == ONE_REQUIRED)
+            {
+               if(!hasAdditionalArg)
+                  parameterError(i);
+
+               params.push_back(argv[argPtr]);
+               argPtr += 1;
+            }
+            else if(paramDefs[i].argsRequired == TWO_REQUIRED)
+            {
+               if(!has2AdditionalArgs)
+                  parameterError(i);
+
+               params.push_back(argv[argPtr]);
+               params.push_back(argv[argPtr + 1]);
+               argPtr += 2;
+            }
+            else if(paramDefs[i].argsRequired == FOUR_REQUIRED)
+            {
+               if(!has4AdditionalArgs)
+                  parameterError(i);
+
+               params.push_back(argv[argPtr]);
+               params.push_back(argv[argPtr + 1]);
+               params.push_back(argv[argPtr + 2]);
+               params.push_back(argv[argPtr + 3]);
+               argPtr += 4;
+            }
+
+            else if(paramDefs[i].argsRequired == ALL_REMAINING)
+            {
+               if(!hasAdditionalArg)
+                  parameterError(i);
+
+               for(S32 j = argPtr; j < argc; j++)
+                  params.push_back(argv[j]);
+
+               argPtr = argc;
+            }
+
+            paramDefs[i].paramCallback(params);    // Call the parameter processing function
+
+            found = true;
+            break;
+         }
+      }
+
+      if(!found)
+         logprintf("Invalid cmd line parameter found: %s", arg.c_str());
+   }
+
+#ifdef ZAP_DEDICATED
+   // Override some settings if we're compiling ZAP_DEDICATED
+   setParamsForDedicatedMode();
+#endif
+
+}
 
 };
 

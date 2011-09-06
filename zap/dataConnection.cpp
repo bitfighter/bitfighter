@@ -8,6 +8,7 @@
 #include "tnlLog.h"
 #include "tnlVector.h"
 #include "tnlNetBase.h"
+#include "tnlNetInterface.h"
 
 #include "tnlHuffmanStringProcessor.h"    // For HuffmanStringProcessor::MAX_SENDABLE_LINE_LENGTH
 
@@ -71,6 +72,66 @@ static string getOutputFolder(FileType filetype)
    else if(filetype == LEVELGEN_TYPE) 
       return gConfigDirs.levelDir;
    else return "";
+}
+
+
+extern md5wrapper md5;
+extern bool writeToConsole();
+extern void exitGame(S32 errcode);
+extern DataConnection *dataConn;
+
+void transferResource(const string &addr, const string &pw, const string &fileName, const string &resourceType, bool sending)
+{
+   writeToConsole();
+
+   Address address(addr.c_str());
+
+   if(!address.isValid())
+   {
+      printf("Invalid address: Use format IP:nnn.nnn.nnn.nnn:port\n");
+      exitGame(1);
+   }
+
+   string password = md5.getSaltedHashFromString(pw);
+
+   FileType fileType = getResourceType(resourceType.c_str());
+   if(fileType == INVALID_RESOURCE_TYPE)
+   {
+      printf("Invalid resource type: Please sepecify BOT, LEVEL, or LEVELGEN\n");
+      exitGame(1);
+   }
+
+   dataConn = new DataConnection(sending ? SEND_FILE : REQUEST_FILE, password, fileName, fileType);
+
+   NetInterface *netInterface = new NetInterface(Address());
+   dataConn->connect(netInterface, address);
+
+   bool started = false;
+
+   while(!started || dataConn && dataConn->isEstablished())  // FIXME: Is the operator precedence here correct?
+   {
+      if(dataConn && dataConn->isEstablished())
+      {
+         if(!dataConn->mDataSender.isDone())
+            dataConn->mDataSender.sendNextLine();
+
+         started = true;
+      }
+
+      netInterface->checkIncomingPackets();
+      netInterface->processConnections();
+      Platform::sleep(1);              // Don't eat CPU power
+      if((!started) && (!dataConn))
+      {
+         printf("Failed to connect");
+         started = true;      // Get out of this loop
+      }
+   }
+
+   delete netInterface;
+   delete dataConn;
+
+   exitGame(0);
 }
 
 

@@ -52,7 +52,7 @@ public:
    TNL_DECLARE_JOURNAL_ENTRYPOINT(specialkeyup, (S32 key));
    TNL_DECLARE_JOURNAL_ENTRYPOINT(idle, (U32 timeDelta));
    TNL_DECLARE_JOURNAL_ENTRYPOINT(display, ());
-   TNL_DECLARE_JOURNAL_ENTRYPOINT(readCmdLineParams, (Vector<TNL::StringPtr> theArgv));
+   //TNL_DECLARE_JOURNAL_ENTRYPOINT(readCmdLineParams, (Vector<string> theArgv));
    TNL_DECLARE_JOURNAL_ENTRYPOINT(setINILength, (S32 lineCount));
    TNL_DECLARE_JOURNAL_ENTRYPOINT(processINILine, (TNL::StringPtr iniLine));
 

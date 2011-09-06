@@ -451,6 +451,13 @@ void GameType::printRules()
 }
 
 
+// For external access -- delete me if you can!
+void printRules()
+{
+   GameType::printRules();
+}
+
+
 // These are really only used for displaying scoring with the -rules option
 string GameType::getScoringEventDescr(ScoringEvent event)
 {

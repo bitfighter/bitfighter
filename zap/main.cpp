@@ -64,9 +64,11 @@ XXX need to document timers, new luavec stuff XXX
 <li>Teleporter, added Delay option in levels for teleporters      <<=== what is this??
 </ul>
 
+<h2>Other changes</h2>
 <li>Deprecated SoccerPickup parameter -- now stored as an option on the Specials line.  Will be completely removed in 017.  Easiest fix is to load
-    level into editor and save; parameter will be properly rewritten.
+    an affected level into the editor and save; parameter will be properly rewritten
 <li>Reduced CPU usage for overlapping asteroids
+<li>Removed -jsave and -jplay cmd line options.  It's been ages since they worked, and it's unlikely they ever will
 </ul>
 */
 
@@ -106,10 +108,10 @@ XXX need to document timers, new luavec stuff XXX
 #include "tnl.h"
 #include "tnlRandom.h"
 #include "tnlGhostConnection.h"
-#include "tnlNetInterface.h"
+//#include "tnlNetInterface.h"
 #include "tnlJournal.h"
 
-#include "dataConnection.h"
+//#include "dataConnection.h"
 
 #include "oglconsole.h"
 
@@ -151,12 +153,13 @@ using namespace TNL;
 #include "ScreenInfo.h"
 #include "stringUtils.h"
 
-// For writeToConsole() functionality
 #ifdef WIN32
+// For writeToConsole()
 #include <windows.h>
 #include <io.h>
 #include <fcntl.h>
 #include <shellapi.h>
+
 #define USE_BFUP
 #endif
 
@@ -313,6 +316,45 @@ void seedRandomNumberGenerator(string name)
       buf[i + timeByteCount] = name.at(i);
 
    Random::addEntropy(buf, totalByteCount);     // May be some uninitialized bytes at the end of the buffer, but that's ok
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+// Call this function when running game in console mode; causes output to be dumped to console, if it was run from one
+// Loosely based on http://www.codeproject.com/KB/dialog/ConsoleAdapter.aspx
+bool writeToConsole()
+{
+
+#if defined(WIN32) && (_WIN32_WINNT >= 0x0500)
+   // _WIN32_WINNT is needed in case of compiling for old windows 98 (this code won't work for windows 98)
+   if(!AttachConsole(-1))
+      return false;
+
+   try
+   {
+      int m_nCRTOut = _open_osfhandle((intptr_t) GetStdHandle(STD_OUTPUT_HANDLE), _O_TEXT);
+      if(m_nCRTOut == -1)
+         return false;
+
+      FILE *m_fpCRTOut = _fdopen( m_nCRTOut, "w" );
+
+      if( !m_fpCRTOut )
+         return false;
+
+      *stdout = *m_fpCRTOut;
+
+      //// If clear is not done, any cout statement before AllocConsole will 
+      //// cause, the cout after AllocConsole to fail, so this is very important
+      // But here, we're not using AllocConsole...
+      //std::cout.clear();
+   }
+   catch ( ... )
+   {
+      return false;
+   } 
+#endif    
+   return true;
 }
 
 
@@ -662,673 +704,6 @@ void setParamsForDedicatedMode()
 }
 
 
-// Processed params will be removed from argv
-void readFolderLocationParams(Vector<StringPtr> &argv)
-{
-   // Process command line args  --> see http://bitfighter.org/wiki/index.php?title=Command_line_parameters
-   for(S32 i = 0; i < argv.size(); i++)
-   {
-      S32 argc = argv.size();
-
-      // Assume "args" starting with "-" are actually follow-on params
-      bool hasAdditionalArg = (i != argc - 1 && argv[i + 1].getString()[0] != '-');     
-
-      if(!stricmp(argv[i].getString(), "-rootdatadir"))      // additional arg required
-      {
-         if(!hasAdditionalArg)
-         {
-            logprintf(LogConsumer::LogError, "You must specify the root data folder with the -rootdatadir option");
-            exitGame(1);
-         }
-
-         gCmdLineSettings.dirs.rootDataDir = argv[i+1].getString();
-         gConfigDirs.rootDataDir = gCmdLineSettings.dirs.rootDataDir;      // Also sock it away here
-
-         argv.erase(i);
-         argv.erase(i);
-         i--;
-      }
-
-
-      else if(!stricmp(argv[i].getString(), "-leveldir"))      // additional arg required
-      {
-         if(!hasAdditionalArg)
-         {
-            logprintf(LogConsumer::LogError, "You must specify a levels subfolder with the -leveldir option");
-            exitGame(1);
-         }
-
-         gCmdLineSettings.dirs.levelDir = argv[i+1].getString();
-         argv.erase(i);
-         argv.erase(i);
-         i--;
-      }
-
-      else if(!stricmp(argv[i].getString(), "-inidir"))      // additional arg required
-      {
-         if(!hasAdditionalArg)
-         {
-            logprintf(LogConsumer::LogError, "You must specify a the folder where your INI file is stored with the -inidir option");
-            exitGame(1);
-         }
-
-         gCmdLineSettings.dirs.iniDir = argv[i+1].getString();
-         argv.erase(i);
-         argv.erase(i);
-         i--;
-      }
-
-      else if(!stricmp(argv[i].getString(), "-logdir"))      // additional arg required
-      {
-         if(!hasAdditionalArg)
-         {
-            logprintf(LogConsumer::LogError, "You must specify your log folder with the -logdir option");
-            exitGame(1);
-         }
-
-         gCmdLineSettings.dirs.logDir = argv[i+1].getString();
-         argv.erase(i);
-         argv.erase(i);
-         i--;
-      }
-
-      else if(!stricmp(argv[i].getString(), "-scriptsdir"))      // additional arg required
-      {
-         if(!hasAdditionalArg)
-         {
-            logprintf(LogConsumer::LogError, "You must specify the folder where your Lua scripts are stored with the -scriptsdir option");
-            exitGame(1);
-         }
-
-         gCmdLineSettings.dirs.luaDir = argv[i+1].getString();
-         argv.erase(i);
-         argv.erase(i);
-         i--;
-      }
-
-      else if(!stricmp(argv[i].getString(), "-cachedir"))      // additional arg required
-      {
-         if(!hasAdditionalArg)
-         {
-            logprintf(LogConsumer::LogError, "You must specify the folder where cache files are to be stored with the -cachedir option");
-            exitGame(1);
-         }
-
-         gCmdLineSettings.dirs.cacheDir = argv[i+1].getString();
-         argv.erase(i);
-         argv.erase(i);
-         i--;
-      }
-
-      else if(!stricmp(argv[i].getString(), "-robotdir"))      // additional arg required
-      {
-         if(!hasAdditionalArg)
-         {
-            logprintf(LogConsumer::LogError, "You must specify the robots folder with the -robotdir option");
-            exitGame(1);
-         }
-
-         gCmdLineSettings.dirs.robotDir = argv[i+1].getString();
-         argv.erase(i);
-         argv.erase(i);
-         i--;
-      }
-
-      else if(!stricmp(argv[i].getString(), "-screenshotdir"))      // additional arg required
-      {
-         if(!hasAdditionalArg)
-         {
-            logprintf(LogConsumer::LogError, "You must specify your screenshots folder with the -screenshotdir option");
-            exitGame(1);
-         }
-
-         gCmdLineSettings.dirs.screenshotDir = argv[i+1].getString();
-         argv.erase(i);
-         argv.erase(i);
-         i--;
-      }
-
-      else if(!stricmp(argv[i].getString(), "-sfxdir"))      // additional arg required
-      {
-         if(!hasAdditionalArg)
-         {
-            logprintf(LogConsumer::LogError, "You must specify your sounds folder with the -sfxdir option");
-            exitGame(1);
-         }
-
-         gCmdLineSettings.dirs.sfxDir = argv[i+1].getString();
-         argv.erase(i);
-         argv.erase(i);
-         i--;
-      }
-
-      else if(!stricmp(argv[i].getString(), "-musicdir"))      // additional arg required
-      {
-         if(!hasAdditionalArg)
-         {
-            logprintf(LogConsumer::LogError, "You must specify your sounds folder with the -musicdir option");
-            exitGame(1);
-         }
-
-         gCmdLineSettings.dirs.musicDir = argv[i+1].getString();
-         argv.erase(i);
-         argv.erase(i);
-         i--;
-      }
-   }
-}
-
-enum ParamRequirements {
-   NO_PARAMETERS,
-   ONE_OPTIONAL,
-   ONE_REQUIRED,
-   TWO_REQUIRED,
-   ALL_REMAINING
-};
-
-struct ParamInfo {
-   string paramName;
-   ParamRequirements argsRequired;
-   void (*paramCallback)(const Vector<string> &args);
-   const char *helpString;
-};
-
-static void paramMaster(const Vector<string> &words)
-{
-   gCmdLineSettings.masterAddress = words[0];
-}
-
-static void paramHostAddr(const Vector<string> &words)
-{
-   gCmdLineSettings.hostaddr = words[0];
-}
-
-static void paramLoss(const Vector<string> &words)
-{
-   gCmdLineSettings.loss = stoi(words[0]);
-}
-
-static void paramLag(const Vector<string> &words)
-{
-   gCmdLineSettings.lag = stoi(words[0]);
-}
-
-static void paramForceUpdate(const Vector<string> &words)
-{
-   gCmdLineSettings.forceUpdate = true;
-}
-
-static void paramDedicated(const Vector<string> &words)
-{
-   setParamsForDedicatedMode();
-
-   if(words.size() == 1)
-      gCmdLineSettings.dedicated = words[0];
-}
-
-static void paramName(const Vector<string> &words)
-{
-   gCmdLineSettings.name = words[0];
-}
-
-static void paramPassword(const Vector<string> &words)
-{
-   gCmdLineSettings.password = words[0];
-}
-
-static void paramServerPassword(const Vector<string> &words)
-{
-   gCmdLineSettings.serverPassword = words[0];
-}
-
-static void paramAdminPassword(const Vector<string> &words)
-{
-   gCmdLineSettings.adminPassword = words[0];
-}
-
-static void paramLevelChangePassword(const Vector<string> &words)
-{
-   gCmdLineSettings.levelChangePassword = words[0];
-}
-
-static void paramLevels(const Vector<string> &words)
-{
-   // We'll overwrite our main level list directly, so if we're writing the INI for the first time,
-   // we'll use the cmd line args to generate the INI Level keys, rather than the built-in defaults.
-   for(S32 i = 0; i < words.size(); i++)
-      gCmdLineSettings.specifiedLevels.push_back(words[i]);
-}
-
-static void paramHostName(const Vector<string> &words)
-{
-   gCmdLineSettings.hostname = words[0];
-}
-
-static void paramHostDescr(const Vector<string> &words)
-{
-   gCmdLineSettings.hostdescr = words[0];
-}
-
-static void paramMaxPlayers(const Vector<string> &words)
-{
-   gCmdLineSettings.maxPlayers = stoi(words[0]);
-}
-
-static void paramWindow(const Vector<string> &words)
-{
-   gCmdLineSettings.displayMode = DISPLAY_MODE_WINDOWED;
-}
-
-static void paramFullscreen(const Vector<string> &words)
-{
-   gCmdLineSettings.displayMode = DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED;
-}
-
-static void paramFullscreenStretch(const Vector<string> &words)
-{
-   gCmdLineSettings.displayMode = DISPLAY_MODE_FULL_SCREEN_STRETCHED;
-}
-
-static void paramWinPos(const Vector<string> &words)
-{
-   gCmdLineSettings.xpos = stoi(words[0]);
-   gCmdLineSettings.ypos = stoi(words[1]);
-}
-
-static void paramWinWidth(const Vector<string> &words)
-{
-   gCmdLineSettings.winWidth = stoi(words[0]);
-}
-
-static void paramHelp(const Vector<string> &words)
-{
-   // TODO: Dump these parameters and a helpful message
-   logprintf("See http://bitfighter.org/wiki/index.php?title=Command_line_parameters for information");
-   exitGame(0);
-}
-
-static void paramUseStick(const Vector<string> &words)
-{
-#ifndef ZAP_DEDICATED
-   Joystick::UseJoystickNumber = stoi(words[0]) - 1;  // zero-indexed     //  TODO: should be part of gCmdLineSettings
-#endif
-}
-
-ParamInfo paramDefs[] = {   
-// Parameter             Args required  Callback function                              Error message
-{ "master",              ONE_REQUIRED,  paramMaster,              "You must specify a master server address with -master option" },
-{ "hostaddr",            ONE_REQUIRED,  paramHostAddr,            "You must specify a host address for the host to listen on (e.g. IP:Any:28000 or IP:192.169.1.100:5500)" },
-{ "loss",                ONE_REQUIRED,  paramLoss,                "You must specify a loss rate between 0 and 1 with the -loss option" },
-{ "lag",                 ONE_REQUIRED,  paramLag,                 "You must specify a lag (in ms) with the -lag option" },
-{ "forceupdate",         NO_PARAMETERS, paramForceUpdate,         "" },
-{ "dedicated",           ONE_OPTIONAL,  paramDedicated,           "" },
-{ "name",                ONE_REQUIRED,  paramName,                "You must enter a nickname with the -name option" },
-{ "password",            ONE_REQUIRED,  paramPassword,            "You must enter a password with the -password option" },
-{ "serverpassword",      ONE_REQUIRED,  paramServerPassword,      "You must enter a password with the -serverpassword option" },
-{ "adminpassword",       ONE_REQUIRED,  paramAdminPassword,       "You must specify an admin password with the -adminpassword option" },
-{ "levelchangepassword", ONE_REQUIRED,  paramLevelChangePassword, "You must specify an level-change password with the -levelchangepassword option" },
-{ "levels",              ALL_REMAINING, paramLevels,              "You must specify one or more levels to load with the -levels option" },
-{ "hostname",            ONE_REQUIRED,  paramHostName,            "You must specify a server name with the -hostname option" },
-{ "hostdescr",           ONE_REQUIRED,  paramHostDescr,           "You must specify a description (use quotes) with the -hostdescr option" },
-{ "maxplayers",          ONE_REQUIRED,  paramMaxPlayers,          "You must specify the max number of players on your server with the -maxplayers option" },
-{ "window",              NO_PARAMETERS, paramWindow,              "You must specify the x and y position of the window with the -winpos option" },
-{ "fullscreen",          NO_PARAMETERS, paramFullscreen,          "" },
-{ "fullscreen-stretch",  NO_PARAMETERS, paramFullscreenStretch,   "" },
-{ "winpos",              TWO_REQUIRED,  paramWinPos,              "You must specify the width of the game window with the -winwidth option"         },
-{ "winwidth",            ONE_REQUIRED,  paramWinWidth,            "See http://bitfighter.org/wiki/index.php?title=Command_line_parameters for information" },
-{ "help",                NO_PARAMETERS, paramHelp,                "" },
-{ "usestick",            ONE_REQUIRED,  paramUseStick,            "You must specify the joystick you want to use with the -usestick option" },
-
-};
-
-
-
-
-
-void parameterError(S32 i)
-{
-   logprintf(LogConsumer::LogError, paramDefs[i].helpString);
-   exitGame(1);
-}
-
-
-TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPtr> argv), (argv))
-{
-   S32 argc = argv.size();
-   S32 argPtr = 0;
-
-   Vector<string> params;
-
-   while(argPtr < argc)
-   {
-      // Assume "args" starting with "-" are actually subsequent params
-      bool hasAdditionalArg = (argPtr != argc - 1 && argv[argPtr + 1].getString()[0] != '-');     
-      bool has2AdditionalArgs = hasAdditionalArg && (argPtr != argc - 2);
-
-      bool found = false;
-
-      string arg = argv[argPtr].getString();
-      argPtr++;      // Advance argPtr to location of first parameter argument
-
-      for(S32 i = 0; i < ARRAYSIZE(paramDefs); i++)
-      {
-         if(arg == "-" + paramDefs[i].paramName)
-         {
-            params.clear();
-
-            if(paramDefs[i].argsRequired == NO_PARAMETERS)
-            {
-               // Do nothing
-            }
-            else if(paramDefs[i].argsRequired == ONE_OPTIONAL)
-            {
-               if(hasAdditionalArg)
-               {
-                  params.push_back(argv[argPtr].getString());
-                  argPtr += 1;
-               }
-            }
-            else if(paramDefs[i].argsRequired == ONE_REQUIRED)
-            {
-               if(!hasAdditionalArg)
-                  parameterError(i);
-
-               params.push_back(argv[argPtr].getString());
-               argPtr += 1;
-            }
-            else if(paramDefs[i].argsRequired == TWO_REQUIRED)
-            {
-               if(!has2AdditionalArgs)
-                  parameterError(i);
-
-               params.push_back(argv[argPtr].getString());
-               params.push_back(argv[argPtr + 1].getString());
-               argPtr += 2;
-            }
-            else if(paramDefs[i].argsRequired == ALL_REMAINING)
-            {
-               if(!hasAdditionalArg)
-                  parameterError(i);
-
-               for(S32 j = argPtr; j < argc; j++)
-                  params.push_back(argv[j].getString());
-
-               argPtr = argc;
-            }
-
-            paramDefs[i].paramCallback(params);    // Call the parameter processing function
-
-            found = true;
-            break;
-         }
-      }
-
-      if(!found)
-         logprintf("Invalid parameter found: %s", arg.c_str());
-   }
-
-#ifdef ZAP_DEDICATED
-   // Override some settings if we're compiling ZAP_DEDICATED
-   setParamsForDedicatedMode();
-#endif
-
-}
-
-/*
-// Read the command line params... if we're replaying a journal, we'll process those params as if they were actually there, while
-// ignoring those params that were provided.
-TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPtr> argv), (argv))
-{
-   S32 argc = argv.size();
-
-   // Process command line args  --> see http://bitfighter.org/wiki/index.php?title=Command_line_parameters
-   for(S32 i = 0; i < argc; i+=2)
-   {
-      // Assume "args" starting with "-" are actually follow-on params
-      bool hasAdditionalArg = (i != argc - 1 && argv[i + 1].getString()[0] != '-');     
-      bool has2AdditionalArgs = hasAdditionalArg && (i != argc - 2);
-
-      // Specify a master server
-      if(!stricmp(argv[i], "-master"))        // additional arg required
-      {
-         if(hasAdditionalArg)
-            gCmdLineSettings.masterAddress = argv[i+1];
-         else
-         {
-            logprintf(LogConsumer::LogError, "You must specify a master server address with -master option");
-            exitGame(1);
-         }
-      }
-      // Address to use when we're hosting
-      else if(!stricmp(argv[i], "-hostaddr"))       // additional arg required
-      {
-         if(hasAdditionalArg)
-            gCmdLineSettings.hostaddr = argv[i+1];
-         else
-         {
-            string msg = "You must specify a host address for the host to listen on (e.g. IP:Any:" + itos(DEFAULT_GAME_PORT) + " or IP:192.169.1.100:5500)";
-            logprintf(LogConsumer::LogError, msg.c_str());
-            exitGame(1);
-         }
-      }
-      // Simulate packet loss 0 (none) - 1 (total)  [I think]
-      else if(!stricmp(argv[i], "-loss"))          // additional arg required
-      {
-         if(hasAdditionalArg)
-            gCmdLineSettings.loss = (F32)atof(argv[i+1]);
-         else
-         {
-            logprintf(LogConsumer::LogError, "You must specify a loss rate between 0 and 1 with the -loss option");
-            exitGame(1);
-         }
-      }
-      // Simulate network lag
-      else if(!stricmp(argv[i], "-lag"))           // additional arg required
-      {
-         if(hasAdditionalArg)
-            gCmdLineSettings.lag = atoi(argv[i+1]);
-         else
-         {
-            logprintf(LogConsumer::LogError, "You must specify a lag (in ms) with the -lag option");
-            exitGame(1);
-         }
-      }
-
-      else if(!stricmp(argv[i], "-forceUpdate"))
-      {
-         gCmdLineSettings.forceUpdate = true;
-         i--;
-      }
-
-      // Run as a dedicated server
-      else if(!stricmp(argv[i], "-dedicated"))     // additional arg optional
-      {
-         setParamsForDedicatedMode();
-
-         if(hasAdditionalArg)
-            gCmdLineSettings.dedicated = argv[i+1];
-         else
-            i--;     // Correct for the fact that we don't really have two args here...
-      }
-      // Specify user name
-      else if(!stricmp(argv[i], "-name"))          // additional arg required
-      {
-         if(hasAdditionalArg)
-            gCmdLineSettings.name = argv[i+1];
-         else
-         {
-            logprintf(LogConsumer::LogError, "You must enter a nickname with the -name option");
-            exitGame(1);
-         }
-      }
-      // Specify user password
-      else if(!stricmp(argv[i], "-password"))          // additional arg required
-      {
-         if(hasAdditionalArg)
-            gCmdLineSettings.password = argv[i+1];
-         else
-         {
-            logprintf(LogConsumer::LogError, "You must enter a password with the -password option");
-            exitGame(1);
-         }
-      }
-
-      // Specify password for accessing locked servers
-      else if(!stricmp(argv[i], "-serverpassword"))      // additional arg required
-      {
-         if(hasAdditionalArg)
-            gCmdLineSettings.serverPassword = argv[i+1];
-         else
-         {
-            logprintf(LogConsumer::LogError, "You must enter a password with the -serverpassword option");
-            exitGame(1);
-         }
-      }
-      // Specify admin password for server
-      else if(!stricmp(argv[i], "-adminpassword")) // additional arg required
-      {
-         if(hasAdditionalArg)
-            gCmdLineSettings.adminPassword = argv[i+1];
-         else
-         {
-            logprintf(LogConsumer::LogError, "You must specify an admin password with the -adminpassword option");
-            exitGame(1);
-         }
-      }
-      // Specify level change password for server
-      else if(!stricmp(argv[i], "-levelchangepassword")) // additional arg required
-      {
-         if(hasAdditionalArg)
-            gCmdLineSettings.levelChangePassword = argv[i+1];
-         else
-         {
-            logprintf(LogConsumer::LogError, "You must specify an level-change password with the -levelchangepassword option");
-            exitGame(1);
-         }
-      }
-
-      // Specify list of levels...  all remaining params will be taken as level names
-      else if(!stricmp(argv[i], "-levels"))     // additional arg(s) required
-      {
-         if(!hasAdditionalArg)
-         {
-            logprintf(LogConsumer::LogError, "You must specify one or more levels to load with the -levels option");
-            exitGame(1);
-         }
-
-         // We'll overwrite our main level list directly, so if we're writing the INI for the first time,
-         // we'll use the cmd line args to generate the INI Level keys, rather than the built-in defaults.
-         for(S32 j = i+1; j < argc; j++)
-            gCmdLineSettings.specifiedLevels.push_back(argv[j].getString());
-
-         return;     // This param must be last, so no more args to process.  We can return.
-
-      }
-      // Specify name of the server as others will see it from the Join menu
-      else if(!stricmp(argv[i], "-hostname"))   // additional arg required
-      {
-         if(hasAdditionalArg)
-            gCmdLineSettings.hostname = argv[i+1];
-         else
-         {
-            logprintf(LogConsumer::LogError, "You must specify a server name with the -hostname option");
-            exitGame(1);
-         }
-      }
-      else if(!stricmp(argv[i], "-hostdescr"))   // additional arg required
-      {
-         if(hasAdditionalArg)
-            gCmdLineSettings.hostdescr = argv[i+1];
-         else
-         {
-            logprintf(LogConsumer::LogError, "You must specify a description (use quotes) with the -hostdescr option");
-            exitGame(1);
-         }
-      }
-      // Change max players on server
-      else if(!stricmp(argv[i], "-maxplayers")) // additional arg required
-      {
-         if(hasAdditionalArg)
-            gCmdLineSettings.maxPlayers = atoi(argv[i+1]);
-         else
-         {
-            logprintf(LogConsumer::LogError, "You must specify the max number of players on your server with the -maxplayers option");
-            exitGame(1);
-         }
-      }
-      // Start in window mode
-      else if(!stricmp(argv[i], "-window"))     // no additional args
-      {
-         i--;  // compentsate for +=2 in for loop with single param
-         gCmdLineSettings.displayMode = DISPLAY_MODE_WINDOWED;
-      }
-      // Start in fullscreen mode
-      else if(!stricmp(argv[i], "-fullscreen")) // no additional args
-      {
-         i--;
-         gCmdLineSettings.displayMode = DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED;
-      }
-      // Start in fullscreen-stretch mode
-      else if(!stricmp(argv[i], "-fullscreen-stretch")) // no additional args
-      {
-         i--;
-         gCmdLineSettings.displayMode = DISPLAY_MODE_FULL_SCREEN_STRETCHED;
-      }
-
-      // Specify position of window
-      else if(!stricmp(argv[i], "-winpos"))     // 2 additional args required
-      {
-         if(has2AdditionalArgs)
-         {
-            gCmdLineSettings.xpos = atoi(argv[i+1]);
-            gCmdLineSettings.ypos = atoi(argv[i+2]);
-            i++;  // compentsate for +=2 in for loop with single param (because we're grabbing two)
-         }
-         else
-         {
-            logprintf(LogConsumer::LogError, "You must specify the x and y position of the window with the -winpos option");
-            exitGame(1);
-         }
-      }
-      // Specify width of the game window
-      else if(!stricmp(argv[i], "-winwidth")) // additional arg required
-      {
-         if(hasAdditionalArg)
-            gCmdLineSettings.winWidth = atoi(argv[i+1]);
-         else
-         {
-            logprintf(LogConsumer::LogError, "You must specify the width of the game window with the -winwidth option");
-            exitGame(1);
-         }
-      }
-      else if(!stricmp(argv[i], "-help"))       // no additional args
-      {
-         i--;
-         logprintf("See http://bitfighter.org/wiki/index.php?title=Command_line_parameters for information");
-         exitGame(0);
-      }
-      else if(!stricmp(argv[i], "-usestick")) // additional arg required
-      {
-#ifndef ZAP_DEDICATED
-         if(hasAdditionalArg)
-            Joystick::UseJoystickNumber = atoi(argv[i+1]) - 1;  // zero-indexed     //  TODO: should be part of gCmdLineSettings
-         else
-#endif
-         {
-            logprintf(LogConsumer::LogError, "You must specify the joystick you want to use with the -usestick option");
-            exitGame(1);
-         }
-      }
-   }
-
-   // Override some settings if we're compiling ZAP_DEDICATED
-#ifdef ZAP_DEDICATED
-   setParamsForDedicatedMode();
-#endif
-}
-
-*/
-
 #ifndef ZAP_DEDICATED
 void InitSdlVideo()
 {
@@ -1573,158 +948,6 @@ void processStartupParams()
       }
    }
 #endif
-}
-
-
-// Call this function when running game in console mode; causes output to be dumped to console, if it was run from one
-// Loosely based on http://www.codeproject.com/KB/dialog/ConsoleAdapter.aspx
-bool writeToConsole()
-{
-
-#if defined(WIN32) && (_WIN32_WINNT >= 0x0500)
-   // _WIN32_WINNT is needed in case of compiling for old windows 98 (this code won't work for windows 98)
-   if(!AttachConsole(-1))
-      return false;
-
-   try
-   {
-      int m_nCRTOut = _open_osfhandle((intptr_t) GetStdHandle(STD_OUTPUT_HANDLE), _O_TEXT);
-      if(m_nCRTOut == -1)
-         return false;
-
-      FILE *m_fpCRTOut = _fdopen( m_nCRTOut, "w" );
-
-      if( !m_fpCRTOut )
-         return false;
-
-      *stdout = *m_fpCRTOut;
-
-      //// If clear is not done, any cout statement before AllocConsole will 
-      //// cause, the cout after AllocConsole to fail, so this is very important
-      // But here, we're not using AllocConsole...
-      //std::cout.clear();
-   }
-   catch ( ... )
-   {
-      return false;
-   } 
-#endif    
-   return true;
-}
-
-
-extern FileType getResourceType(const char *);
-
-// This method may remove args from theArgv
-void processCmdLineParams(Vector<StringPtr> &theArgv)
-{
-   // Process some command line args that need to be handled early, like journaling options
-   for(S32 i = 0; i < theArgv.size(); i++)
-   {
-      bool hasAdditionalArg = (i != theArgv.size() - 1 && theArgv[i + 1].getString()[0] != '-');     
-
-      if(!stricmp(theArgv[i].getString(), "-rules"))            // Print current rules and exit; nothing more to do
-      {
-         writeToConsole();
-         GameType::printRules();
-         exitGame(0);
-      }
-
-      // -sendres/getres <server> <password> <file> <resource type>
-      if(!stricmp(theArgv[i].getString(), "-sendres") || !stricmp(theArgv[i].getString(), "-getres"))  
-      {
-         writeToConsole();
-         if(theArgv.size() <= i + 4)     // Too few arguments
-         {
-            printf("Usage: bitfighter %s <server address> <password> <file> <resource type>\n", theArgv[i].getString());
-            exitGame(1);
-         }
-
-         bool sending = (!stricmp(theArgv[i].getString(), "-sendres"));
-
-         Address address(theArgv[i+1].getString());
-         if(!address.isValid())
-         {
-            printf("Invalid address: Use format IP:nnn.nnn.nnn.nnn:port\n");
-            exitGame(1);
-         }
-
-         string password = md5.getSaltedHashFromString(theArgv[i+2].getString());
-         const char *fileName = theArgv[i+3].getString();
-
-         FileType fileType = getResourceType(theArgv[i+4].getString());
-         if(fileType == INVALID_RESOURCE_TYPE)
-         {
-            printf("Invalid resource type: Please sepecify BOT, LEVEL, or LEVELGEN\n");
-            exitGame(1);
-         }
-
-         dataConn = new DataConnection(sending ? SEND_FILE : REQUEST_FILE, password, fileName, fileType);
-
-         NetInterface *netInterface = new NetInterface(Address());
-         dataConn->connect(netInterface, address);
-
-         bool started = false;
-
-         while(!started || dataConn && dataConn->isEstablished())  // FIXME: Is the operator precedence here correct?
-         {
-            if(dataConn && dataConn->isEstablished())
-            {
-               if(!dataConn->mDataSender.isDone())
-                  dataConn->mDataSender.sendNextLine();
-
-               started = true;
-            }
-
-            netInterface->checkIncomingPackets();
-            netInterface->processConnections();
-            Platform::sleep(1);              // Don't eat CPU power
-            if((!started) && (!dataConn))
-            {
-               printf("Failed to connect");
-               started = true;      // Get out of this loop
-            }
-         }
-
-         delete netInterface;
-         delete dataConn;
-
-         exitGame(0);
-      }
-
-      else if(!stricmp(theArgv[i].getString(), "-jsave"))      // Write game to journal
-      {
-         if(hasAdditionalArg)
-            gZapJournal.record(theArgv[i+1].getString());
-         else
-         {
-            logprintf(LogConsumer::LogError, "You must specify a file with the jsave option");
-            exitGame(1);
-         }
-
-         theArgv.erase(i);
-         theArgv.erase(i);
-         i--;
-      }
-
-      else if(!stricmp(theArgv[i].getString(), "-jplay"))      // Replay game from journal
-      {
-         if(hasAdditionalArg)
-            gZapJournal.load(theArgv[i+1].getString());
-         else
-         {
-            logprintf(LogConsumer::LogError, "You must specify a file with the jload option");
-            exitGame(1);
-         }
-
-         theArgv.erase(i);
-         theArgv.erase(i);
-         i--;
-      }
-
-   }  // End of first pass of processing command line args
-
-   gZapJournal.readCmdLineParams(theArgv);   // Process normal command line params, read INI, and start up
 }
 
 
@@ -1996,6 +1219,7 @@ using namespace Zap;
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+
 #ifdef TNL_OS_XBOX
 int zapmain(int argc, char **argv)
 #else
@@ -2009,19 +1233,17 @@ int main(int argc, char **argv)
 #endif
 
    // Put all cmd args into a Vector for easier processing
-   Vector<StringPtr> argVector;
+   Vector<string> argVector(argc - 1);
+
    for(S32 i = 1; i < argc; i++)
       argVector.push_back(argv[i]);
 
-   readFolderLocationParams(argVector);      // Reads folder location params, and removes them from argVector
-
-   gConfigDirs.resolveDirs();                // Resolve all folders except for levels folder, resolved later
+   gCmdLineSettings.readParams(argVector);    // Read cmd line params and store values for later use
+   gConfigDirs.resolveDirs();                 // Resolve all folders except for levels folder, resolved later
 
    // Before we go any further, we should get our log files in order.  Now we know where they'll be, as the 
    // only way to specify a non-standard location is via the command line, which we've now read.
    setupLogging();
-
-   processCmdLineParams(argVector);          // Reads remaining params in two passes -- pre-journaling, and post-journaling
 
    // Load the INI file
    gINI.SetPath(joindir(gConfigDirs.iniDir, "bitfighter.ini"));
