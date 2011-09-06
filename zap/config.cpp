@@ -2027,7 +2027,7 @@ static void paramRules(const Vector<string> &words)
 static void paramHelp(const Vector<string> &words)
 {
    // TODO: Dump these parameters and a helpful message
-   logprintf("See http://bitfighter.org/wiki/index.php?title=Command_line_parameters for information");
+   printf("See http://bitfighter.org/wiki/index.php?title=Command_line_parameters for information");
    exitGame(0);
 }
 
@@ -2051,6 +2051,7 @@ enum ParamRequirements {
 
 struct ParamInfo {
    string paramName;
+   S32 pass;
    ParamRequirements argsRequired;
    void (*paramCallback)(const Vector<string> &args);
    const char *helpString;
@@ -2059,52 +2060,52 @@ struct ParamInfo {
 
 ParamInfo paramDefs[] = {   
 // Parameter             Args required  Callback function                     Error message (not needed for NO_PARAMETERS)
-{ "rootdatadir",         ONE_REQUIRED,  paramRootDataDir,         "You must specify the root data folder with the -rootdatadir option" },
-{ "leveldir",            ONE_REQUIRED,  paramLevelDir,            "You must specify a levels subfolder with the -leveldir option" },
-{ "inidir",              ONE_REQUIRED,  paramIniDir,              "You must specify a the folder where your INI file is stored with the -inidir option" },
-{ "logdir",              ONE_REQUIRED,  paramLogDir,              "You must specify your log folder with the -logdir option" },
-{ "scriptsdir",          ONE_REQUIRED,  paramScriptsDir,          "You must specify the folder where your Lua scripts are stored with the -scriptsdir option" },
-{ "cachedir",            ONE_REQUIRED,  paramCacheDir,            "You must specify the folder where cache files are to be stored with the -cachedir option" },
-{ "robotdir",            ONE_REQUIRED,  paramRobotDir,            "You must specify the robots folder with the -robotdir option" },
-{ "screenshotdir",       ONE_REQUIRED,  paramScreenshotDir,       "You must specify your screenshots folder with the -screenshotdir option" },
-{ "sfxdir",              ONE_REQUIRED,  paramSfxDir,              "You must specify your sounds folder with the -sfxdir option" },
-{ "musicdir",            ONE_REQUIRED,  paramMusicDir,            "You must specify your sounds folder with the -musicdir option" },
+{ "rootdatadir",         0, ONE_REQUIRED,  paramRootDataDir,         "You must specify the root data folder with the -rootdatadir option" },
+{ "leveldir",            0, ONE_REQUIRED,  paramLevelDir,            "You must specify a levels subfolder with the -leveldir option" },
+{ "inidir",              0, ONE_REQUIRED,  paramIniDir,              "You must specify a the folder where your INI file is stored with the -inidir option" },
+{ "logdir",              0, ONE_REQUIRED,  paramLogDir,              "You must specify your log folder with the -logdir option" },
+{ "scriptsdir",          0, ONE_REQUIRED,  paramScriptsDir,          "You must specify the folder where your Lua scripts are stored with the -scriptsdir option" },
+{ "cachedir",            0, ONE_REQUIRED,  paramCacheDir,            "You must specify the folder where cache files are to be stored with the -cachedir option" },
+{ "robotdir",            0, ONE_REQUIRED,  paramRobotDir,            "You must specify the robots folder with the -robotdir option" },
+{ "screenshotdir",       0, ONE_REQUIRED,  paramScreenshotDir,       "You must specify your screenshots folder with the -screenshotdir option" },
+{ "sfxdir",              0, ONE_REQUIRED,  paramSfxDir,              "You must specify your sounds folder with the -sfxdir option" },
+{ "musicdir",            0, ONE_REQUIRED,  paramMusicDir,            "You must specify your sounds folder with the -musicdir option" },
 
-{ "getres",              FOUR_REQUIRED, paramGetRes,              "Usage: bitfighter getres <server address> <password> <file> <resource type>" },
-{ "sendres",             FOUR_REQUIRED, paramSendRes,             "Usage: bitfighter sendres <server address> <password> <file> <resource type>" },
-{ "rules",               NO_PARAMETERS, paramRules,               "" },
-{ "help",                NO_PARAMETERS, paramHelp,                "" },
+{ "getres",              1, FOUR_REQUIRED, paramGetRes,              "Usage: bitfighter getres <server address> <password> <file> <resource type>" },
+{ "sendres",             1, FOUR_REQUIRED, paramSendRes,             "Usage: bitfighter sendres <server address> <password> <file> <resource type>" },
+{ "rules",               1, NO_PARAMETERS, paramRules,               "" },
+{ "help",                1, NO_PARAMETERS, paramHelp,                "" },
 
-{ "master",              ONE_REQUIRED,  paramMaster,              "You must specify a master server address with -master option" },
-{ "hostaddr",            ONE_REQUIRED,  paramHostAddr,            "You must specify a host address for the host to listen on (e.g. IP:Any:28000 or IP:192.169.1.100:5500)" },
-{ "loss",                ONE_REQUIRED,  paramLoss,                "You must specify a loss rate between 0 and 1 with the -loss option" },
-{ "lag",                 ONE_REQUIRED,  paramLag,                 "You must specify a lag (in ms) with the -lag option" },
-{ "forceupdate",         NO_PARAMETERS, paramForceUpdate,         "" },
-{ "dedicated",           ONE_OPTIONAL,  paramDedicated,           "" },
-{ "name",                ONE_REQUIRED,  paramName,                "You must enter a nickname with the -name option" },
-{ "password",            ONE_REQUIRED,  paramPassword,            "You must enter a password with the -password option" },
-{ "serverpassword",      ONE_REQUIRED,  paramServerPassword,      "You must enter a password with the -serverpassword option" },
-{ "adminpassword",       ONE_REQUIRED,  paramAdminPassword,       "You must specify an admin password with the -adminpassword option" },
-{ "levelchangepassword", ONE_REQUIRED,  paramLevelChangePassword, "You must specify an level-change password with the -levelchangepassword option" },
-{ "levels",              ALL_REMAINING, paramLevels,              "You must specify one or more levels to load with the -levels option" },
-{ "hostname",            ONE_REQUIRED,  paramHostName,            "You must specify a server name with the -hostname option" },
-{ "hostdescr",           ONE_REQUIRED,  paramHostDescr,           "You must specify a description (use quotes) with the -hostdescr option" },
-{ "maxplayers",          ONE_REQUIRED,  paramMaxPlayers,          "You must specify the max number of players on your server with the -maxplayers option" },
+{ "master",              1, ONE_REQUIRED,  paramMaster,              "You must specify a master server address with -master option" },
+{ "hostaddr",            1, ONE_REQUIRED,  paramHostAddr,            "You must specify a host address for the host to listen on (e.g. IP:Any:28000 or IP:192.169.1.100:5500)" },
+{ "loss",                1, ONE_REQUIRED,  paramLoss,                "You must specify a loss rate between 0 and 1 with the -loss option" },
+{ "lag",                 1, ONE_REQUIRED,  paramLag,                 "You must specify a lag (in ms) with the -lag option" },
+{ "forceupdate",         1, NO_PARAMETERS, paramForceUpdate,         "" },
+{ "dedicated",           1, ONE_OPTIONAL,  paramDedicated,           "" },
+{ "name",                1, ONE_REQUIRED,  paramName,                "You must enter a nickname with the -name option" },
+{ "password",            1, ONE_REQUIRED,  paramPassword,            "You must enter a password with the -password option" },
+{ "serverpassword",      1, ONE_REQUIRED,  paramServerPassword,      "You must enter a password with the -serverpassword option" },
+{ "adminpassword",       1, ONE_REQUIRED,  paramAdminPassword,       "You must specify an admin password with the -adminpassword option" },
+{ "levelchangepassword", 1, ONE_REQUIRED,  paramLevelChangePassword, "You must specify an level-change password with the -levelchangepassword option" },
+{ "levels",              1, ALL_REMAINING, paramLevels,              "You must specify one or more levels to load with the -levels option" },
+{ "hostname",            1, ONE_REQUIRED,  paramHostName,            "You must specify a server name with the -hostname option" },
+{ "hostdescr",           1, ONE_REQUIRED,  paramHostDescr,           "You must specify a description (use quotes) with the -hostdescr option" },
+{ "maxplayers",          1, ONE_REQUIRED,  paramMaxPlayers,          "You must specify the max number of players on your server with the -maxplayers option" },
 
-{ "window",              NO_PARAMETERS, paramWindow,              "You must specify the x and y position of the window with the -winpos option" },
-{ "fullscreen",          NO_PARAMETERS, paramFullscreen,          "" },
-{ "fullscreen-stretch",  NO_PARAMETERS, paramFullscreenStretch,   "" },
+{ "window",              1, NO_PARAMETERS, paramWindow,              "" },
+{ "fullscreen",          1, NO_PARAMETERS, paramFullscreen,          "" },
+{ "fullscreen-stretch",  1, NO_PARAMETERS, paramFullscreenStretch,   "" },
 
-{ "winpos",              TWO_REQUIRED,  paramWinPos,              "You must specify the width of the game window with the -winwidth option"         },
-{ "winwidth",            ONE_REQUIRED,  paramWinWidth,            "See http://bitfighter.org/wiki/index.php?title=Command_line_parameters for information" },
-{ "usestick",            ONE_REQUIRED,  paramUseStick,            "You must specify the joystick you want to use with the -usestick option" },
+{ "winpos",              1, TWO_REQUIRED,  paramWinPos,              "You must specify the x and y position of the window with the -winpos option" },
+{ "winwidth",            1, ONE_REQUIRED,  paramWinWidth,            "You must specify the width of the game window with the -winwidth option" },
+{ "usestick",            1, ONE_REQUIRED,  paramUseStick,            "You must specify the joystick you want to use with the -usestick option" },
 
 };
 
 
 void parameterError(S32 i)
 {
-   logprintf(LogConsumer::LogError, paramDefs[i].helpString);
+   printf("%s\n", paramDefs[i].helpString);
    exitGame(1);
 }
 
@@ -2112,7 +2113,7 @@ void parameterError(S32 i)
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-void CmdLineSettings::readParams(const Vector<string> &argv)
+void CmdLineSettings::readParams(const Vector<string> &argv, S32 pass)
 {
    S32 argc = argv.size();
    S32 argPtr = 0;
@@ -2136,6 +2137,8 @@ void CmdLineSettings::readParams(const Vector<string> &argv)
       {
          if(arg == "-" + paramDefs[i].paramName)
          {
+            found = true;
+
             params.clear();
 
             if(paramDefs[i].argsRequired == NO_PARAMETERS)
@@ -2178,7 +2181,6 @@ void CmdLineSettings::readParams(const Vector<string> &argv)
                params.push_back(argv[argPtr + 3]);
                argPtr += 4;
             }
-
             else if(paramDefs[i].argsRequired == ALL_REMAINING)
             {
                if(!hasAdditionalArg)
@@ -2190,15 +2192,18 @@ void CmdLineSettings::readParams(const Vector<string> &argv)
                argPtr = argc;
             }
 
-            paramDefs[i].paramCallback(params);    // Call the parameter processing function
+            if(paramDefs[i].pass == pass)
+               paramDefs[i].paramCallback(params);    // Call the parameter processing function, if we're in the right pass
 
-            found = true;
             break;
          }
       }
 
       if(!found)
-         logprintf("Invalid cmd line parameter found: %s", arg.c_str());
+      {
+         printf("Invalid cmd line parameter found: %s\n", arg.c_str());
+         exit(1);
+      }
    }
 
 #ifdef ZAP_DEDICATED

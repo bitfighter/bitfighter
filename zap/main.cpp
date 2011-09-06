@@ -1238,12 +1238,14 @@ int main(int argc, char **argv)
    for(S32 i = 1; i < argc; i++)
       argVector.push_back(argv[i]);
 
-   gCmdLineSettings.readParams(argVector);    // Read cmd line params and store values for later use
-   gConfigDirs.resolveDirs();                 // Resolve all folders except for levels folder, resolved later
+   gCmdLineSettings.readParams(argVector, 0);    // Read first tranche of cmd line params, needed to resolve folder locations
+   gConfigDirs.resolveDirs();                    // Resolve all folders except for levels folder, resolved later
 
    // Before we go any further, we should get our log files in order.  Now we know where they'll be, as the 
    // only way to specify a non-standard location is via the command line, which we've now read.
    setupLogging();
+
+   gCmdLineSettings.readParams(argVector, 1);    // Read remaining cmd line params 
 
    // Load the INI file
    gINI.SetPath(joindir(gConfigDirs.iniDir, "bitfighter.ini"));
