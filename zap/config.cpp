@@ -1740,7 +1740,7 @@ static void testLevelDirResolution()
    TNLAssertV(gConfigDirs.levelDir == "c:/temp", ("Bad leveldir: %s", gConfigDirs.levelDir.c_str()));
 
    resolveLevelDir("c:/temp/nosuchfolder", "nosuchfolder", "c:/does/not/exist");       // total failure
-   TNLAssertV(gConfigDirs.levelDir == "", ("Bad leveldir: %s", gConfigDirs.levelDir.c_str()));
+   TNLAssertV(gConfigDirs.levelDir == 0, "", ("Bad leveldir: %s", gConfigDirs.levelDir.c_str()));
 
    printf("passed leveldir resolution tests!\n");
 }
@@ -2024,12 +2024,8 @@ static void paramRules(const Vector<string> &words)
    exitGame(0);
 }
 
-static void paramHelp(const Vector<string> &words)
-{
-   // TODO: Dump these parameters and a helpful message
-   printf("See http://bitfighter.org/wiki/index.php?title=Command_line_parameters for information");
-   exitGame(0);
-}
+void paramHelp(const Vector<string> &words);    // Forwrad declare this one here; it is defined down below
+
 
 static void paramUseStick(const Vector<string> &words)
 {
@@ -2054,59 +2050,103 @@ struct ParamInfo {
    S32 pass;
    ParamRequirements argsRequired;
    void (*paramCallback)(const Vector<string> &args);
+   S32 docLevel;     
+   const char *paramString;
    const char *helpString;
+   const char *errorMsg;
+};
+
+const char *helpTitles[] = {
+   "Player-oriented options",
+   "Options for hosting",
+   "Specifying levels",
+   "Specifying folders",
+   "Developer-oriented options",
+   "Advanced server management options",
+   "Other commands",
 };
 
 
 ParamInfo paramDefs[] = {   
-// Parameter             Args required  Callback function                     Error message (not needed for NO_PARAMETERS)
-{ "rootdatadir",         0, ONE_REQUIRED,  paramRootDataDir,         "You must specify the root data folder with the -rootdatadir option" },
-{ "leveldir",            0, ONE_REQUIRED,  paramLevelDir,            "You must specify a levels subfolder with the -leveldir option" },
-{ "inidir",              0, ONE_REQUIRED,  paramIniDir,              "You must specify a the folder where your INI file is stored with the -inidir option" },
-{ "logdir",              0, ONE_REQUIRED,  paramLogDir,              "You must specify your log folder with the -logdir option" },
-{ "scriptsdir",          0, ONE_REQUIRED,  paramScriptsDir,          "You must specify the folder where your Lua scripts are stored with the -scriptsdir option" },
-{ "cachedir",            0, ONE_REQUIRED,  paramCacheDir,            "You must specify the folder where cache files are to be stored with the -cachedir option" },
-{ "robotdir",            0, ONE_REQUIRED,  paramRobotDir,            "You must specify the robots folder with the -robotdir option" },
-{ "screenshotdir",       0, ONE_REQUIRED,  paramScreenshotDir,       "You must specify your screenshots folder with the -screenshotdir option" },
-{ "sfxdir",              0, ONE_REQUIRED,  paramSfxDir,              "You must specify your sounds folder with the -sfxdir option" },
-{ "musicdir",            0, ONE_REQUIRED,  paramMusicDir,            "You must specify your sounds folder with the -musicdir option" },
+// Parameter           Pass, Args required  Callback function         Help string            Error message (not needed for NO_PARAMETERS)
+{ "rootdatadir",         0,  ONE_REQUIRED,  paramRootDataDir,         3, "", "", "You must specify the root data folder with the -rootdatadir option" },
+{ "leveldir",            0,  ONE_REQUIRED,  paramLevelDir,            2, "", "", "You must specify a levels subfolder with the -leveldir option" },
+{ "inidir",              0,  ONE_REQUIRED,  paramIniDir,              3, "", "", "You must specify a the folder where your INI file is stored with the -inidir option" },
+{ "logdir",              0,  ONE_REQUIRED,  paramLogDir,              3, "", "", "You must specify your log folder with the -logdir option" },
+{ "scriptsdir",          0,  ONE_REQUIRED,  paramScriptsDir,          3, "", "", "You must specify the folder where your Lua scripts are stored with the -scriptsdir option" },
+{ "cachedir",            0,  ONE_REQUIRED,  paramCacheDir,            3, "", "", "You must specify the folder where cache files are to be stored with the -cachedir option" },
+{ "robotdir",            0,  ONE_REQUIRED,  paramRobotDir,            3, "", "", "You must specify the robots folder with the -robotdir option" },
+{ "screenshotdir",       0,  ONE_REQUIRED,  paramScreenshotDir,       3, "", "", "You must specify your screenshots folder with the -screenshotdir option" },
+{ "sfxdir",              0,  ONE_REQUIRED,  paramSfxDir,              3, "", "", "You must specify your sounds folder with the -sfxdir option" },
+{ "musicdir",            0,  ONE_REQUIRED,  paramMusicDir,            3, "", "", "You must specify your sounds folder with the -musicdir option" }, 
 
-{ "getres",              1, FOUR_REQUIRED, paramGetRes,              "Usage: bitfighter getres <server address> <password> <file> <resource type>" },
-{ "sendres",             1, FOUR_REQUIRED, paramSendRes,             "Usage: bitfighter sendres <server address> <password> <file> <resource type>" },
-{ "rules",               1, NO_PARAMETERS, paramRules,               "" },
-{ "help",                1, NO_PARAMETERS, paramHelp,                "" },
+{ "getres",              1,  FOUR_REQUIRED, paramGetRes,              5, "", "", "Usage: bitfighter getres <server address> <password> <file> <resource type>" },
+{ "sendres",             1,  FOUR_REQUIRED, paramSendRes,             5, "", "", "Usage: bitfighter sendres <server address> <password> <file> <resource type>" },
+{ "rules",               1,  NO_PARAMETERS, paramRules,               6, "", "Display \"rules of the game\", such as points awareded for various achievements", "" },
+{ "help",                1,  NO_PARAMETERS, paramHelp,                6, "", "Display this message", "" },  
 
-{ "master",              1, ONE_REQUIRED,  paramMaster,              "You must specify a master server address with -master option" },
-{ "hostaddr",            1, ONE_REQUIRED,  paramHostAddr,            "You must specify a host address for the host to listen on (e.g. IP:Any:28000 or IP:192.169.1.100:5500)" },
-{ "loss",                1, ONE_REQUIRED,  paramLoss,                "You must specify a loss rate between 0 and 1 with the -loss option" },
-{ "lag",                 1, ONE_REQUIRED,  paramLag,                 "You must specify a lag (in ms) with the -lag option" },
-{ "forceupdate",         1, NO_PARAMETERS, paramForceUpdate,         "" },
-{ "dedicated",           1, ONE_OPTIONAL,  paramDedicated,           "" },
-{ "name",                1, ONE_REQUIRED,  paramName,                "You must enter a nickname with the -name option" },
-{ "password",            1, ONE_REQUIRED,  paramPassword,            "You must enter a password with the -password option" },
-{ "serverpassword",      1, ONE_REQUIRED,  paramServerPassword,      "You must enter a password with the -serverpassword option" },
-{ "adminpassword",       1, ONE_REQUIRED,  paramAdminPassword,       "You must specify an admin password with the -adminpassword option" },
-{ "levelchangepassword", 1, ONE_REQUIRED,  paramLevelChangePassword, "You must specify an level-change password with the -levelchangepassword option" },
-{ "levels",              1, ALL_REMAINING, paramLevels,              "You must specify one or more levels to load with the -levels option" },
-{ "hostname",            1, ONE_REQUIRED,  paramHostName,            "You must specify a server name with the -hostname option" },
-{ "hostdescr",           1, ONE_REQUIRED,  paramHostDescr,           "You must specify a description (use quotes) with the -hostdescr option" },
-{ "maxplayers",          1, ONE_REQUIRED,  paramMaxPlayers,          "You must specify the max number of players on your server with the -maxplayers option" },
+{ "master",              1,  ONE_REQUIRED,  paramMaster,              0, "<address>", "Use master server (game finder) at specified address", "You must specify a master server address with -master option" },
+{ "hostaddr",            1,  ONE_REQUIRED,  paramHostAddr,            0, "", "", "You must specify a host address for the host to listen on (e.g. IP:Any:28000 or IP:192.169.1.100:5500)" },
+{ "loss",                1,  ONE_REQUIRED,  paramLoss,                4, "", "", "You must specify a loss rate between 0 and 1 with the -loss option" },
+{ "lag",                 1,  ONE_REQUIRED,  paramLag,                 4, "", "", "You must specify a lag (in ms) with the -lag option" },
+{ "forceupdate",         1,  NO_PARAMETERS, paramForceUpdate,         4, "", "", "" },
+{ "dedicated",           1,  ONE_OPTIONAL,  paramDedicated,           1, "", "", "" },
+{ "name",                1,  ONE_REQUIRED,  paramName,                0, "<string>", "Specify your username", "You must enter a nickname with the -name option" },
+{ "password",            1,  ONE_REQUIRED,  paramPassword,            0, "", "", "You must enter a password with the -password option" },
+{ "serverpassword",      1,  ONE_REQUIRED,  paramServerPassword,      1, "", "", "You must enter a password with the -serverpassword option" },
+{ "adminpassword",       1,  ONE_REQUIRED,  paramAdminPassword,       1, "", "", "You must specify an admin password with the -adminpassword option" },
+{ "levelchangepassword", 1,  ONE_REQUIRED,  paramLevelChangePassword, 1, "", "", "You must specify an level-change password with the -levelchangepassword option" },
+{ "levels",              1,  ALL_REMAINING, paramLevels,              2, "", "", "You must specify one or more levels to load with the -levels option" },
+{ "hostname",            1,  ONE_REQUIRED,  paramHostName,            1, "", "", "You must specify a server name with the -hostname option" },
+{ "hostdescr",           1,  ONE_REQUIRED,  paramHostDescr,           1, "", "", "You must specify a description (use quotes) with the -hostdescr option" },
+{ "maxplayers",          1,  ONE_REQUIRED,  paramMaxPlayers,          1, "", "", "You must specify the max number of players on your server with the -maxplayers option" }, 
 
-{ "window",              1, NO_PARAMETERS, paramWindow,              "" },
-{ "fullscreen",          1, NO_PARAMETERS, paramFullscreen,          "" },
-{ "fullscreen-stretch",  1, NO_PARAMETERS, paramFullscreenStretch,   "" },
+{ "window",              1,  NO_PARAMETERS, paramWindow,              0, "", "", "" },
+{ "fullscreen",          1,  NO_PARAMETERS, paramFullscreen,          0, "", "", "" },
+{ "fullscreen-stretch",  1,  NO_PARAMETERS, paramFullscreenStretch,   0, "", "", "" },
 
-{ "winpos",              1, TWO_REQUIRED,  paramWinPos,              "You must specify the x and y position of the window with the -winpos option" },
-{ "winwidth",            1, ONE_REQUIRED,  paramWinWidth,            "You must specify the width of the game window with the -winwidth option" },
-{ "usestick",            1, ONE_REQUIRED,  paramUseStick,            "You must specify the joystick you want to use with the -usestick option" },
+{ "winpos",              1,  TWO_REQUIRED,  paramWinPos,              0, "", "", "You must specify the x and y position of the window with the -winpos option" },
+{ "winwidth",            1,  ONE_REQUIRED,  paramWinWidth,            0, "", "", "You must specify the width of the game window with the -winwidth option" },
+{ "usestick",            1,  ONE_REQUIRED,  paramUseStick,            0, "", "", "You must specify the joystick you want to use with the -usestick option" },
 
 };
 
 
 void parameterError(S32 i)
 {
-   printf("%s\n", paramDefs[i].helpString);
+   printf("%s\n", paramDefs[i].errorMsg);
    exitGame(1);
+}
+
+
+static void paramHelp(const Vector<string> &words)
+{
+   bool found;
+   S32 docLevel = 0;
+
+   do
+   {
+      found = false;
+
+      for(S32 i = 0; i < ARRAYSIZE(paramDefs); i++)
+      {
+         if(paramDefs[i].docLevel == docLevel)
+         {
+            if(!found)
+            {
+               printf("%s\n", helpTitles[docLevel]);
+            }
+
+            found = true;
+            printf("\t-%s%s%s -- %s\n", paramDefs[i].paramName.c_str(), paramDefs[i].paramString[0] ? " " : "", paramDefs[i].paramString, paramDefs[i].helpString);
+         }
+      }
+
+      docLevel++;
+
+   } while(found);
+
+   exitGame(0);
 }
 
 
