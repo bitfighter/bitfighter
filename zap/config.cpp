@@ -2156,6 +2156,37 @@ static string makePad(U32 len)
 
 static const S32 MAX_HELP_LINE_LEN = 110;
 
+static U32 chunkStart;
+static string chunkText;
+
+// Return a chunk of text starting at start, with a max of len chars
+static string getChunk(U32 len)
+{
+   if(chunkStart >= chunkText.length())
+      return "";
+
+   // Advance chunkStart to position of first non-space; avoids leading spaces
+   chunkStart += chunkText.substr(chunkStart, len + 1).find_first_not_of(' ');
+               
+   // Create a chunk of text, with the max length we have room for
+   string chunk = chunkText.substr(chunkStart, len + 1);
+               
+   if(chunk.length() >= len)                                // If chunk would fill a full line...
+      chunk = chunk.substr(0, chunk.find_last_of(' '));     // ...lop chunk off at last space
+
+   chunkStart += chunk.length();
+
+   return chunk;
+}
+
+
+static void resetChunker(const string &text)
+{
+   chunkText = trim(text);
+   chunkStart = 0;
+}
+
+
 static void paramHelp(const Vector<string> &words)
 {
    for(S32 i = 0; i < ARRAYSIZE(helpTitles); i++)
@@ -2172,43 +2203,45 @@ static void paramHelp(const Vector<string> &words)
                maxSize = len;
          }
 
-      bool first = true;
+      bool firstSection = true;
 
       for(S32 j = 0; j < ARRAYSIZE(paramDefs); j++)
       {
          if(paramDefs[j].docLevel == i)
          {
-            if(first)     // First item in this docLevel... print the section header
+            if(firstSection)     // First item in this docLevel... print the section header
                printf("\n\n%s\n", helpTitles[i]);
 
             string paramStr = makeParamStr(paramDefs[j]);
             U32 paddingLen = maxSize - paramStr.length();
 
             U32 wrapWidth = MAX_HELP_LINE_LEN - maxSize;
+
             U32 currPos = 0;
 
-            U32 length = trim_right(paramDefs[j].helpString).length();     // Make sure errant trailing spaces don't screw us up
+            string helpString = trim(paramDefs[j].helpString);
+            U32 length = helpString.length();                     // Make sure errant trailing spaces don't screw us up
 
-            for(U32 currPos = 0; currPos < length; /* do nothing */ )
+            resetChunker(helpString);
+
+            bool first = true;
+
+            while(true)
             {
-               // Advance currPos to position of first non-space; avoids leading spaces
-               currPos += paramDefs[j].helpString.substr(currPos, wrapWidth + 1).find_first_not_of(' ');
-               
-               // Create a chunk of text, with the max length we have room for
-               string chunk = paramDefs[j].helpString.substr(currPos, wrapWidth + 1);
-               
-               if(chunk.length() >= wrapWidth)                          // If chunk would fill a full line...
-                  chunk = chunk.substr(0, chunk.find_last_of(' '));     // ...lop chunk off at last space
+               string chunk = getChunk(wrapWidth);
 
-               if(currPos == 0)
+               if(!chunk.length())
+                  break;
+
+               if(first)
                   printf("\t-%s%s -- %s\n", paramStr.c_str(), makePad(paddingLen).c_str(),  chunk.c_str());
                else
                   printf("\t%s %s\n",                         makePad(maxSize + 4).c_str(), chunk.c_str());
 
-               currPos += chunk.length();
+               first = false;
             }
 
-            first = false;
+            firstSection = false;
          }
       }
    }
