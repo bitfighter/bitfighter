@@ -87,6 +87,7 @@ public:
    bool pickup(Ship *theShip);
    void onClientPickup();
    void renderItem(const Point &pos);
+   void render(S32 layerIndex);
 
    TNL_DECLARE_CLASS(RepairItem);
 
@@ -112,6 +113,7 @@ public:
 
    S32 isVis(lua_State *L); // Is RepairItem visible? (returns boolean)
    void push(lua_State *L) {  Lunar<RepairItem>::push(L, this); }
+
 };
 
 
@@ -132,6 +134,7 @@ public:
    bool pickup(Ship *theShip);
    void onClientPickup();
    void renderItem(const Point &pos);
+   void render(S32 layerIndex);
 
    TNL_DECLARE_CLASS(EnergyItem);
 

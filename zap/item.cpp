@@ -265,7 +265,7 @@ void Reactor::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
 F32 Reactor::getReactorRadius() const
 {
-   return 5 + 2 * mHitPoints;
+   return F32(5 + 2 * mHitPoints);
 }
 
 

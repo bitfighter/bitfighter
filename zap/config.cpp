@@ -42,6 +42,10 @@
 #pragma warning (disable: 4996)     // Disable POSIX deprecation, certain security warnings that seem to be specific to VC++
 #endif
 
+#ifdef TNL_OS_WIN32
+#include <windows.h>   // For ARRAYSIZE when using ZAP_DEDICATED
+#endif
+
 #ifndef min
 #define min(a,b) ((a) <= (b) ? (a) : (b))
 #define max(a,b) ((a) >= (b) ? (a) : (b))
@@ -1904,7 +1908,7 @@ static void paramHostAddr(const Vector<string> &words)
 
 static void paramLoss(const Vector<string> &words)
 {
-   gCmdLineSettings.loss = stoi(words[0]);
+   gCmdLineSettings.loss = stof(words[0]);
 }
 
 static void paramLag(const Vector<string> &words)
@@ -2024,7 +2028,7 @@ static void paramRules(const Vector<string> &words)
    exitGame(0);
 }
 
-void paramHelp(const Vector<string> &words);    // Forwrad declare this one here; it is defined down below
+static void paramHelp(const Vector<string> &words);    // Forward declare this one here; it is defined down below
 
 
 static void paramUseStick(const Vector<string> &words)
@@ -2237,7 +2241,7 @@ void CmdLineSettings::readParams(const Vector<string> &argv, S32 pass)
       string arg = argv[argPtr];
       argPtr++;      // Advance argPtr to location of first parameter argument
 
-      for(S32 i = 0; i < ARRAYSIZE(paramDefs); i++)
+      for(U32 i = 0; i < ARRAYSIZE(paramDefs); i++)
       {
          if(arg == "-" + paramDefs[i].paramName)
          {
