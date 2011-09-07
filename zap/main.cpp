@@ -874,14 +874,8 @@ void processStartupParams()
        // Put any saved filename into the editor file entry thingy
       gClientGame->getUIManager()->getLevelNameEntryUserInterface()->setString(gIniSettings.lastEditorName);
 
-
       //gClientGame2 = new ClientGame(Address());   //  !!! 2-player split-screen game in same game.
-   }
 
-
-   // Not immediately starting a connection...  start out with name entry or main menu
-   if(!gCmdLineSettings.dedicatedMode)     
-   {
       if(gIniSettings.name == "")
       {
          if(gClientGame2)
