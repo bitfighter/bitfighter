@@ -2207,41 +2207,68 @@ static void paramHelp(const Vector<string> &words)
 
       for(S32 j = 0; j < ARRAYSIZE(paramDefs); j++)
       {
-         if(paramDefs[j].docLevel == i)
+         if(paramDefs[j].docLevel != i)
+            continue;
+
+         if(firstSection)     // First item in this docLevel... print the section header
          {
-            if(firstSection)     // First item in this docLevel... print the section header
-               printf("\n\n%s\n", helpTitles[i]);
+            printf("\n");
+            string title = helpTitles[i];
 
-            string paramStr = makeParamStr(paramDefs[j]);
-            U32 paddingLen = maxSize - paramStr.length();
-
-            U32 wrapWidth = MAX_HELP_LINE_LEN - maxSize;
-
-            U32 currPos = 0;
-
-            string helpString = trim(paramDefs[j].helpString);
-            U32 length = helpString.length();                     // Make sure errant trailing spaces don't screw us up
-
-            resetChunker(helpString);
-
-            bool first = true;
-
-            while(true)
+            while(title.length())
             {
-               string chunk = getChunk(wrapWidth);
+               printf("\n");
 
-               if(!chunk.length())
-                  break;
+               U32 firstCR = title.find_first_of('\n');     // Grab a line of the title
+               resetChunker(title.substr(0, firstCR));
 
-               if(first)
-                  printf("\t-%s%s -- %s\n", paramStr.c_str(), makePad(paddingLen).c_str(),  chunk.c_str());
+               if(firstCR != string::npos)
+                  title = title.substr(firstCR + 1);
                else
-                  printf("\t%s %s\n",                         makePad(maxSize + 4).c_str(), chunk.c_str());
+                  title = "";
 
+               while(true)
+               {
+                  string chunk = getChunk(MAX_HELP_LINE_LEN);
+
+                  if(!chunk.length())
+                     break;
+
+                  printf("%s\n", chunk.c_str());
+               }
+
+               firstSection = false;
+            }
+         }
+
+         string paramStr = makeParamStr(paramDefs[j]);
+         U32 paddingLen = maxSize - paramStr.length();
+
+         U32 wrapWidth = MAX_HELP_LINE_LEN - maxSize;
+
+         U32 currPos = 0;
+
+         string helpString = trim(paramDefs[j].helpString);
+         U32 length = helpString.length();                     // Make sure errant trailing spaces don't screw us up
+
+         resetChunker(helpString);
+
+         bool first = true;
+
+         while(true)
+         {
+            string chunk = getChunk(wrapWidth);
+
+            if(!chunk.length())
+               break;
+
+            if(first)
+            {
+               printf("\t-%s%s -- %s\n", paramStr.c_str(), makePad(paddingLen).c_str(),  chunk.c_str());
                first = false;
             }
-
-            firstSection = false;
+            else
+               printf("\t%s %s\n",                         makePad(maxSize + 4).c_str(), chunk.c_str());
          }
       }
    }
