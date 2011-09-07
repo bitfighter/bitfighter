@@ -1921,12 +1921,9 @@ static void paramForceUpdate(const Vector<string> &words)
    gCmdLineSettings.forceUpdate = true;
 }
 
-
-extern void setParamsForDedicatedMode();
-
 static void paramDedicated(const Vector<string> &words)
 {
-   setParamsForDedicatedMode();
+   gCmdLineSettings.dedicatedMode = true;
 
    if(words.size() == 1)
       gCmdLineSettings.dedicated = words[0];
@@ -2385,7 +2382,7 @@ void CmdLineSettings::readParams(const Vector<string> &argv, S32 pass)
 
 #ifdef ZAP_DEDICATED
    // Override some settings if we're compiling ZAP_DEDICATED
-   setParamsForDedicatedMode();
+   gCmdLineSettings.dedicatedMode = true;
 #endif
 
 }

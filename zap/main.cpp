@@ -679,13 +679,6 @@ void onExit()
 }
 
 
-// If we're running in dedicated mode, these things need to be set as such.
-void setParamsForDedicatedMode()
-{
-   gCmdLineSettings.dedicatedMode = true;
-}
-
-
 #ifndef ZAP_DEDICATED
 void InitSdlVideo()
 {
