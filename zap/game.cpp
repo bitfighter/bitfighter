@@ -81,6 +81,11 @@ ServerGame *gServerGame = NULL;
 
 static Vector<DatabaseObject *> fillVector2;
 
+// Declare some statics 
+Vector<string> Game::mMasterAddressList;
+
+
+
 #ifndef ZAP_DEDICATED
 class ClientGame;
 extern ClientGame *gClientGame; // only used to see if we have a ClientGame, for buildBotMeshZones
@@ -529,28 +534,29 @@ void Game::checkConnectionToMaster(U32 timeDelta)
 
    if(!mConnectionToMaster.isValid())      // It's valid if it isn't null, so could be disconnected and would still be valid
    {
-      if(gMasterAddress.size() == 0)
+      if(mMasterAddressList.size() == 0)
          return;
 
       if(mNextMasterTryTime < timeDelta && mReadyToConnectToMaster)
       {
          if(mHaveTriedToConnectToMaster)
          {
-            gMasterAddress.push_back(string(gMasterAddress[0]));  // Try all the addresses in the list, one at a time...
-            gMasterAddress.erase(0);
+            mMasterAddressList.push_back(mMasterAddressList[0]);  // Rotate the list so as to try each one until we find one that works...
+            mMasterAddressList.erase(0);
          }
+
          mHaveTriedToConnectToMaster = true;
          logprintf(LogConsumer::LogConnection, "%s connecting to master [%s]", isServer() ? "Server" : "Client", 
-                    gMasterAddress[0].c_str());
+                    mMasterAddressList[0].c_str());
 
-         Address addr(gMasterAddress[0].c_str());
+         Address addr(mMasterAddressList[0].c_str());
          if(addr.isValid())
          {
             mConnectionToMaster = new MasterServerConnection(this);
             mConnectionToMaster->connect(mNetInterface, addr);
          }
 
-         mNextMasterTryTime = GameConnection::MASTER_SERVER_FAILURE_RETRY;     // 10 secs, just in case this attempt fails
+         mNextMasterTryTime = GameConnection::MASTER_SERVER_FAILURE_RETRY_TIME;     // 10 secs, just in case this attempt fails
       }
       else if(!mReadyToConnectToMaster)
          mNextMasterTryTime = 0;
@@ -616,6 +622,12 @@ void Game::deleteObjects(TestFunc testFunc)
       GameObject *obj = dynamic_cast<GameObject *>(fillVector[i]);
       obj->deleteObject(0);
    }
+}
+
+// Static method
+void Game::setMasterAddress(const string &firstChoice, const string &secondChoice)
+{
+   parseString((firstChoice != "" ? firstChoice : secondChoice).c_str(), mMasterAddressList, ',');
 }
 
 

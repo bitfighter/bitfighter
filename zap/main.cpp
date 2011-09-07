@@ -202,7 +202,6 @@ DataConnection *dataConn = NULL;
 
 U16 DEFAULT_GAME_PORT = 28000;
 
-Vector<string> gMasterAddress;
 Address gBindAddress(IPProtocol, Address::Any, DEFAULT_GAME_PORT);      // Good for now, may be overwritten by INI or cmd line setting
 // Above is equivalent to ("IP:Any:28000")
 
@@ -847,14 +846,8 @@ void processStartupParams()
    if(gCmdLineSettings.winWidth > 0)
       gIniSettings.winSizeFact = max((F32) gCmdLineSettings.winWidth / (F32) gScreenInfo.getGameCanvasWidth(), gScreenInfo.getMinScalingFactor());
 
-   string strings;
-
-   if(gCmdLineSettings.masterAddress != "")
-      strings = gCmdLineSettings.masterAddress;
-   else
-      strings = gIniSettings.masterAddress;    // This will always have a value
-
-   parseString(strings.c_str(), gMasterAddress, ',');
+   Game::setMasterAddress(gCmdLineSettings.masterAddress, gIniSettings.masterAddress);    // The INI one will always have a value
+   
 
    if(gCmdLineSettings.name != "")                       // We'll clobber the INI file setting.  Since this
       gIniSettings.name = gCmdLineSettings.name;         // setting is never saved, we won't mess up our INI

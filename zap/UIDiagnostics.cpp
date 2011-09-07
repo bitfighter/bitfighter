@@ -268,7 +268,8 @@ extern Color gMasterServerBlue;
 
 static S32 showMasterBlock(ClientGame *game, S32 textsize, S32 ypos, S32 gap, bool leftcol)
 {
-   UserInterface::drawCenteredStringPair2Colf(ypos, textsize, leftcol, "Master Srvr Addr:", "%s", gMasterAddress.size() == 0 ? "Empty" : gMasterAddress[0].c_str());
+   UserInterface::drawCenteredStringPair2Colf(ypos, textsize, leftcol, "Master Srvr Addr:", "%s", 
+                                              game->getMasterAddressList().size() > 0 ? game->getMasterAddressList()[0].c_str() : "None");
 
    ypos += textsize + gap;
    if(game->getConnectionToMaster() && game->getConnectionToMaster()->isEstablished())

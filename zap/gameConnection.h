@@ -126,7 +126,7 @@ public:
    void linkToClientList();
    Vector<LevelInfo> mLevelInfos;
 
-   static const S32 MASTER_SERVER_FAILURE_RETRY = 10000;   // 10 secs
+   static const S32 MASTER_SERVER_FAILURE_RETRY_TIME = 10000;   // 10 secs
 
    enum MessageColors
    {
@@ -301,7 +301,7 @@ public:
    Nonce *getClientId() { return &mClientId; }
 
    void setAuthenticated(bool isVerified);    // Runs on server only, after receiving a message from the master, or on local connection
-   void resetAuthenticationTimer() { mAuthenticationTimer.reset(MASTER_SERVER_FAILURE_RETRY + 1000); mAuthenticationCounter++;}
+   void resetAuthenticationTimer() { mAuthenticationTimer.reset(MASTER_SERVER_FAILURE_RETRY_TIME + 1000); mAuthenticationCounter++;}
    S32 getAuthenticationCounter() { return mAuthenticationCounter; }
    bool isAuthenticated() { return mIsVerified; }
    void requestAuthenticationVerificationFromMaster();

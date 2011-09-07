@@ -159,7 +159,7 @@ private:
    
 protected:
 
-boost::shared_ptr<EditorObjectDatabase> mEditorDatabase;    // TODO: Move to clientGame
+   boost::shared_ptr<EditorObjectDatabase> mEditorDatabase;    // TODO: Move to clientGame
 
    virtual void cleanUp();
    U32 mNextMasterTryTime;
@@ -188,7 +188,9 @@ boost::shared_ptr<EditorObjectDatabase> mEditorDatabase;    // TODO: Move to cli
    SafePtr<MasterServerConnection> mConnectionToMaster;
    SafePtr<GameType> mGameType;
 
-   bool mGameSuspended;       // True if we're in "suspended animation" mode
+   static Vector<string> mMasterAddressList; // We only have one master address list, shared for all games
+
+   bool mGameSuspended;                      // True if we're in "suspended animation" mode
 
 public:
    static const S32 DefaultGridSize = 255;   // Size of "pages", represented by floats for intrapage locations (i.e. pixels per integer)
@@ -196,7 +198,7 @@ public:
    static const S32 MAX_GRID_SIZE = 1000;    // A bit ridiculous too...  250-300 seems about right for normal use.  But we'll let folks experiment.
 
    static const S32 PLAYER_VISUAL_DISTANCE_HORIZONTAL = 600;    // How far player can see normally horizontally...
-   static const S32 PLAYER_VISUAL_DISTANCE_VERTICAL = 450;     // ...and vertically
+   static const S32 PLAYER_VISUAL_DISTANCE_VERTICAL = 450;      // ...and vertically
 
    static const S32 PLAYER_SCOPE_MARGIN = 150;
 
@@ -242,6 +244,9 @@ public:
 
    void deleteObjects(U8 typeNumber);
    void deleteObjects(TestFunc testFunc);
+
+   static void setMasterAddress(const string &firstChoice, const string &secondChoice);
+   Vector<string> getMasterAddressList() { return mMasterAddressList; }
 
    F32 getGridSize() const { return mGridSize; }
    void setGridSize(F32 gridSize);
@@ -470,8 +475,6 @@ public:
 ////////////////////////////////////////
 
 extern ServerGame *gServerGame;
-
-extern Vector<string> gMasterAddress;
 
 extern void endGame();
 

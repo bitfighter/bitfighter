@@ -427,18 +427,9 @@ void MasterServerConnection::onConnectionEstablished()
 #endif
    }
 
-   if(gCmdLineSettings.masterAddress == "" && gMasterAddress.size() >= 2)
-   {
-      // If there are 2 or more master addresses, the first is the one used to connect
-      string addressList;
-      
-      for(S32 i = 0; i < gMasterAddress.size() - 1; i++)
-         addressList += gMasterAddress[i] + ",";
-
-      addressList += gMasterAddress[gMasterAddress.size() - 1];
-
-      gIniSettings.masterAddress = addressList;
-   }
+   // If we didn't get the master from the cmd line, and we have multiple addresses, write them to the INI file in their new order
+   if(gCmdLineSettings.masterAddress == "" && mGame->getMasterAddressList().size() >= 2)
+      gIniSettings.masterAddress = listToString(mGame->getMasterAddressList(), ',');
 }
 
 
