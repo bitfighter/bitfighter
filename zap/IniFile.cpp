@@ -94,14 +94,11 @@ void CIniFile::ReadFile()
       }
    }
 
-   gZapJournal.setINILength(iniLines.size());         // This will get our INI vector length into the journal
-   gZapJournal.processNextJournalEntry();             // And this will retrieve the value during playback
-
+   gZapJournal.setINILength(iniLines.size());      // This will get our INI vector length into the journal
+   gZapJournal.processNextJournalEntry();          // And this will retrieve the value during playback
+   
    for(S32 i = 0; i < gINI.lineCount; i++)
-      if(gZapJournal.getCurrentMode() != TNL::Journal::Playback)
-         gZapJournal.processINILine(iniLines[i]);     // Process our INI lines, will provide sensible defaults for any missing or malformed entries
-      else
-         gZapJournal.processNextJournalEntry();       // If we are playing back from a journal, this should cause the journaled INI settings to be processed
+      gZapJournal.processINILine(iniLines[i]);     // Process our INI lines, will provide sensible defaults for any missing or malformed entries
 
 }
 
@@ -167,11 +164,6 @@ void CIniFile::processLine(string line)
 
 bool CIniFile::WriteFile()
 {
-   // We don't want to write anything during journal playback, so if that's what's happening, we'll bail now
-   if(gZapJournal.getCurrentMode() == TNL::Journal::Playback)
-      return true;
-
-
    S32 commentID, sectionId, valueID;
 
    // Normally you would use ofstream, but the SGI CC compiler has a few bugs with ofstream. So ... fstream used

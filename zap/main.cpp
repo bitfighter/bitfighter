@@ -600,8 +600,6 @@ void idle()
 
    Platform::sleep(sleepTime);
 
-   gZapJournal.processNextJournalEntry();    // Does nothing unless we're playing back a journal...
-
 }  // end idle()
 
 
@@ -1236,9 +1234,6 @@ int main(int argc, char **argv)
    // Load the INI file
    gINI.SetPath(joindir(gConfigDirs.iniDir, "bitfighter.ini"));
    gIniSettings.init();                      // Init struct that holds INI settings
-
-
-   gZapJournal.processNextJournalEntry();    // If we're replaying a journal, this will cause the cmd line params to be read from the saved journal
 
    loadSettingsFromINI(&gINI);               // Read INI
 
