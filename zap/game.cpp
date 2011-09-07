@@ -529,8 +529,6 @@ void Game::checkConnectionToMaster(U32 timeDelta)
 
    if(!mConnectionToMaster.isValid())      // It's valid if it isn't null, so could be disconnected and would still be valid
    {
-      //if(gMasterAddress == Address())     // Check for a valid address
-      //   return;
       if(gMasterAddress.size() == 0)
          return;
 
@@ -538,7 +536,7 @@ void Game::checkConnectionToMaster(U32 timeDelta)
       {
          if(mHaveTriedToConnectToMaster)
          {
-            gMasterAddress.push_back(string(gMasterAddress[0]));  // Try all the address in the list, one at a time...
+            gMasterAddress.push_back(string(gMasterAddress[0]));  // Try all the addresses in the list, one at a time...
             gMasterAddress.erase(0);
          }
          mHaveTriedToConnectToMaster = true;
