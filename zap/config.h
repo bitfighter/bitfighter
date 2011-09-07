@@ -89,7 +89,6 @@ struct CmdLineSettings
    void readParams(const Vector<string> &argv, S32 pass);
 
    bool clientMode;        // Start with client active
-   bool serverMode;        // Start in server mode
    bool dedicatedMode;     // Will server be dedicated?
 
    string server;
@@ -128,7 +127,6 @@ struct CmdLineSettings
    void init()
    {
       clientMode = true;
-      serverMode = false;
       dedicatedMode = false;
 
       loss = 0;

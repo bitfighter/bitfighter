@@ -683,7 +683,6 @@ void onExit()
 void setParamsForDedicatedMode()
 {
    gCmdLineSettings.clientMode = false;
-   gCmdLineSettings.serverMode = true;
    gCmdLineSettings.dedicatedMode = true;
 }
 
@@ -881,8 +880,6 @@ void processStartupParams()
    if(gCmdLineSettings.password != "")                   // We'll clobber the INI file setting.  Since this
       gIniSettings.password = gCmdLineSettings.password; // setting is never saved, we won't mess up our INI
 
-
-   // Note that we can be in both clientMode and serverMode (such as when we're hosting a game interactively)
 
 #ifndef ZAP_DEDICATED
    if(gCmdLineSettings.clientMode)                // Create ClientGame object
@@ -1240,10 +1237,10 @@ int main(int argc, char **argv)
    processStartupParams();                   // And merge command line params and INI settings
    Ship::computeMaxFireDelay();              // Look over weapon info and get some ranges, which we'll need before we start sending data
 
-   if(gCmdLineSettings.serverMode)           // Only set when 1) compiled as a dedicated server; or 2) -dedicated param is specified
+   if(gCmdLineSettings.dedicatedMode)
    {
       Vector<string> levels = LevelListLoader::buildLevelList(gConfigDirs.levelDir);
-      initHostGame(gBindAddress, levels, false, gCmdLineSettings.serverMode);     // Start hosting
+      initHostGame(gBindAddress, levels, false, true);     // Start hosting
    }
 
    SoundSystem::init();  // Even dedicated server needs sound these days
