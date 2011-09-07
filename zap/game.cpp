@@ -1812,7 +1812,8 @@ void ServerGame::idle(U32 timeDelta)
    }
 
    // Lastly, play any sounds server might have made...
-   SoundSystem::processAudio(gIniSettings.alertsVolLevel);
+   if(isDedicated())   // non-dedicated will process sound in client side.
+      SoundSystem::processAudio(gIniSettings.alertsVolLevel);
 }
 
 
