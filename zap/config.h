@@ -88,7 +88,6 @@ struct CmdLineSettings
    CmdLineSettings() { init(); }    // Quickie constructor
    void readParams(const Vector<string> &argv, S32 pass);
 
-   bool clientMode;        // Start with client active
    bool dedicatedMode;     // Will server be dedicated?
 
    string server;
@@ -126,7 +125,6 @@ struct CmdLineSettings
 
    void init()
    {
-      clientMode = true;
       dedicatedMode = false;
 
       loss = 0;

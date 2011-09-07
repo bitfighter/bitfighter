@@ -682,7 +682,6 @@ void onExit()
 // If we're running in dedicated mode, these things need to be set as such.
 void setParamsForDedicatedMode()
 {
-   gCmdLineSettings.clientMode = false;
    gCmdLineSettings.dedicatedMode = true;
 }
 
@@ -882,7 +881,7 @@ void processStartupParams()
 
 
 #ifndef ZAP_DEDICATED
-   if(gCmdLineSettings.clientMode)                // Create ClientGame object
+   if(!gCmdLineSettings.dedicatedMode)            // Create ClientGame object
    {
       gClientGame1 = new ClientGame(Address());   //   Let the system figure out IP address and assign a port
       gClientGame = gClientGame1;
