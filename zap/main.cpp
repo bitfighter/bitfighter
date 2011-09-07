@@ -109,32 +109,21 @@ XXX need to document timers, new luavec stuff XXX
 #include "tnl.h"
 #include "tnlRandom.h"
 #include "tnlGhostConnection.h"
-//#include "tnlNetInterface.h"
 #include "tnlJournal.h"
-
-//#include "dataConnection.h"
 
 #include "oglconsole.h"
 
 #include "zapjournal.h"
 
 #include <stdarg.h>
-#include <math.h>
-//#include <stdio.h>      // For logging to console
 
 using namespace TNL;
 
 #ifndef ZAP_DEDICATED
-#include "UI.h"
-#include "UIGame.h"
 #include "UINameEntry.h"
-#include "UIMenus.h"
 #include "UIEditor.h"
 #include "UIErrorMessage.h"
-#include "UIDiagnostics.h"
-#include "UICredits.h"
 #include "ClientGame.h"
-#include "sparkManager.h"
 #include "Joystick.h"
 #include "Event.h"
 #include "SDL/SDL.h"
@@ -144,15 +133,11 @@ using namespace TNL;
 #include "game.h"
 #include "gameNetInterface.h"
 #include "masterConnection.h"
-#include "SoundSystem.h"
-#include "input.h"
-#include "keyCode.h"
 #include "config.h"
 #include "md5wrapper.h"
-#include "version.h"
+#include "version.h"       // For BUILD_VERSION def
 #include "Colors.h"
 #include "ScreenInfo.h"
-#include "stringUtils.h"
 
 #ifdef WIN32
 // For writeToConsole()
