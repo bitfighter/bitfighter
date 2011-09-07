@@ -2092,7 +2092,7 @@ ParamInfo paramDefs[] = {
 // Options for hosting
 { "dedicated",           1,  ONE_OPTIONAL,  paramDedicated,           1, "[address]", "Run as a dedicated game server (i.e. no game window, console mode)",                     "" },
 { "serverpassword",      1,  ONE_REQUIRED,  paramServerPassword,      1, "<string>", "Specify a server password (players will need to know this to connect to your server)",    "You must enter a password with the -serverpassword option" },
-{ "adminpassword",       1,  ONE_REQUIRED,  paramAdminPassword,       1, "<string>", "Specify an admin password (allowing those with the password to kick players and change their teams) when you host a game or run a dedicated server ", "You must specify an admin password with the -adminpassword option" },
+{ "adminpassword",       1,  ONE_REQUIRED,  paramAdminPassword,       1, "<string>", "Specify an admin password (allowing those with the password to kick players and change their teams) when you host a game or run a dedicated server", "You must specify an admin password with the -adminpassword option" },
 { "levelchangepassword", 1,  ONE_REQUIRED,  paramLevelChangePassword, 1, "<string>", "Specify the password required for players to be able to change levels on your server when you host a game or run a dedicated server", "You must specify an level-change password with the -levelchangepassword option" },
 { "hostname",            1,  ONE_REQUIRED,  paramHostName,            1, "<string>", "Set the name that will appear in the server browser when searching for servers", "You must specify a server name with the -hostname option" },
 { "hostdescr",           1,  ONE_REQUIRED,  paramHostDescr,           1, "<string>", "Set a brief description of the server, which will be visible when players browse for game servers. Use double quotes (\") for descriptions containing spaces.", "You must specify a description (use quotes) with the -hostdescr option" },
@@ -2100,7 +2100,7 @@ ParamInfo paramDefs[] = {
 { "hostaddr",            1,  ONE_REQUIRED,  paramHostAddr,            1, "<address>", "Specify host address for the server to listen to when hosting",                        "You must specify a host address for the host to listen on (e.g. IP:Any:28000 or IP:192.169.1.100:5500)" },
 
 // Specifying levels
-{ "levels",              1,  ALL_REMAINING, paramLevels,              2, "<level 1> [level 2]...", "Specify the levels to play. Note that all remaining items on the command line will be interpreted as levels, so this must be the last parameter.  See also the -leveldir parameter in the next section.", "You must specify one or more levels to load with the -levels option" },
+{ "levels",              1,  ALL_REMAINING, paramLevels,              2, "<level 1> [level 2]...", "Specify the levels to play. Note that all remaining items on the command line will be interpreted as levels, so this must be the last parameter.", "You must specify one or more levels to load with the -levels option" },
 
 // Specifying folders
 { "rootdatadir",         0,  ONE_REQUIRED,  paramRootDataDir,         3, "<path>",                "Equivalent to setting the -inidir, -logdir, -robotdir, -screenshotdir, and -leveldir parameters. The application will automatially append \"/robots\", \"/screenshots\", and \"/levels\" to path as appropriate.", "You must specify the root data folder with the -rootdatadir option" },
@@ -2154,7 +2154,7 @@ static string makePad(U32 len)
 }
 
 
-static const S32 MAX_HELP_LINE_LEN = 100;
+static const S32 MAX_HELP_LINE_LEN = 110;
 
 static void paramHelp(const Vector<string> &words)
 {
@@ -2164,7 +2164,6 @@ static void paramHelp(const Vector<string> &words)
       U32 maxSize = 0;
 
       for(S32 j = 0; j < ARRAYSIZE(paramDefs); j++)
-      {
          if(paramDefs[j].docLevel == i)
          {
             U32 len = makeParamStr(paramDefs[j]).length();
@@ -2172,8 +2171,6 @@ static void paramHelp(const Vector<string> &words)
             if(len > maxSize)
                maxSize = len;
          }
-      }
-
 
       bool first = true;
 
@@ -2188,15 +2185,27 @@ static void paramHelp(const Vector<string> &words)
             U32 paddingLen = maxSize - paramStr.length();
 
             U32 wrapWidth = MAX_HELP_LINE_LEN - maxSize;
+            U32 currPos = 0;
 
-            for(U32 k = 0; k < paramDefs[j].helpString.length(); k += wrapWidth)
+            U32 length = trim_right(paramDefs[j].helpString).length();     // Make sure errant trailing spaces don't screw us up
+
+            for(U32 currPos = 0; currPos < length; /* do nothing */ )
             {
-               string chunk = paramDefs[j].helpString.substr(k, wrapWidth);
+               // Advance currPos to position of first non-space; avoids leading spaces
+               currPos += paramDefs[j].helpString.substr(currPos, wrapWidth + 1).find_first_not_of(' ');
+               
+               // Create a chunk of text, with the max length we have room for
+               string chunk = paramDefs[j].helpString.substr(currPos, wrapWidth + 1);
+               
+               if(chunk.length() >= wrapWidth)                          // If chunk would fill a full line...
+                  chunk = chunk.substr(0, chunk.find_last_of(' '));     // ...lop chunk off at last space
 
-               if(k == 0)
+               if(currPos == 0)
                   printf("\t-%s%s -- %s\n", paramStr.c_str(), makePad(paddingLen).c_str(),  chunk.c_str());
                else
                   printf("\t%s %s\n",                         makePad(maxSize + 4).c_str(), chunk.c_str());
+
+               currPos += chunk.length();
             }
 
             first = false;
