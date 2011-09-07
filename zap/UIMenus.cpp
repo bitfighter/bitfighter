@@ -1005,8 +1005,6 @@ void OptionsMenuUserInterface::onEscape()
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-extern string gPlayerPassword;
-
 // Constructor
 NameEntryUserInterface::NameEntryUserInterface(ClientGame *game) : MenuUserInterface(game)
 {
@@ -1046,8 +1044,10 @@ static void nameAndPasswordAcceptCallback(ClientGame *clientGame, U32 unused)
 
    clientGame->resetMasterConnectTimer();
 
-   clientGame->getIniSettings()->lastName     = clientGame->getClientInfo()->name = ui->menuItems[1]->getValueForWritingToLevelFile();
-   clientGame->getIniSettings()->lastPassword = gPlayerPassword                   = ui->menuItems[2]->getValueForWritingToLevelFile();
+   clientGame->getIniSettings()->lastName = clientGame->getClientInfo()->name = ui->menuItems[1]->getValueForWritingToLevelFile();
+
+   clientGame->getIniSettings()->lastPassword = ui->menuItems[2]->getValueForWritingToLevelFile();
+   clientGame->setLoginPassword(ui->menuItems[2]->getValueForWritingToLevelFile());
 
    saveSettingsToINI(&gINI);             // Get that baby into the INI file
 
@@ -1065,7 +1065,7 @@ void NameEntryUserInterface::setupMenu()
 
    menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(getGame(), 0, "OK", nameAndPasswordAcceptCallback, "")));
    menuItems.push_back(boost::shared_ptr<MenuItem>(new EditableMenuItem(getGame(), "NICKNAME:", getGame()->getClientInfo()->name, "ChumpChange", "", MAX_PLAYER_NAME_LENGTH)));
-   menuItems.push_back(boost::shared_ptr<MenuItem>(new EditableMenuItem(getGame(), "PASSWORD:", gPlayerPassword, "", "", MAX_PLAYER_PASSWORD_LENGTH)));
+   menuItems.push_back(boost::shared_ptr<MenuItem>(new EditableMenuItem(getGame(), "PASSWORD:", getGame()->getLoginPassword(), "", "", MAX_PLAYER_PASSWORD_LENGTH)));
    
    menuItems[1]->setFilter(LineEditor::noQuoteFilter);      // quotes are incompatible with PHPBB3 logins
    menuItems[2]->setSecret(true);

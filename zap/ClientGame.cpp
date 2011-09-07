@@ -270,6 +270,17 @@ void ClientGame::setConnectionToServer(GameConnection *theConnection)
 }
 
 
+void ClientGame::setLoginPassword(const string &firstChoice, const string &secondChoice, const string &thirdChoice)
+{
+   if(firstChoice != "")
+      mLoginPassword = firstChoice;
+   else if(secondChoice != "")
+      mLoginPassword = secondChoice;
+   else
+      mLoginPassword = thirdChoice;
+}
+
+
 extern bool gShowAimVector;
 
 static void joystickUpdateMove(Move *theMove)

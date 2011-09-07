@@ -49,8 +49,6 @@
 namespace Zap
 {
 
-extern string gPlayerPassword;
-
 TNL_IMPLEMENT_NETCONNECTION(MasterServerConnection, NetClassGroupMaster, false);
 
 
@@ -403,7 +401,7 @@ void MasterServerConnection::writeConnectRequest(BitStream *bstream)
       ClientGame *clientGame = (ClientGame *)mGame;
 
       bstream->writeString(clientGame->getClientInfo()->name.c_str());   // User's nickname
-      bstream->writeString(gPlayerPassword.c_str());                     // and whatever password they supplied
+      bstream->writeString(clientGame->getLoginPassword().c_str());      // and whatever password they supplied
 
       clientGame->getClientInfo()->id.write(bstream);
 #endif

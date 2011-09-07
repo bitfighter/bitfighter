@@ -212,7 +212,6 @@ ScreenInfo gScreenInfo;
 
 ZapJournal gZapJournal;          // Our main journaling object
 
-string gPlayerPassword;
 
 void exitGame(S32 errcode)
 {
@@ -796,15 +795,6 @@ void processStartupParams()
    gMainLog.setMsgType(LogConsumer::LuaBotMessage, gIniSettings.luaBotMessage); 
    gMainLog.setMsgType(LogConsumer::ServerFilter, gIniSettings.serverFilter); 
 
-
-   if(gCmdLineSettings.password != "")
-      gPlayerPassword = gCmdLineSettings.password;
-   else if(gIniSettings.password != "")
-      gPlayerPassword = gIniSettings.password;
-   else
-      gPlayerPassword = gIniSettings.lastPassword;
-
-
    if(gCmdLineSettings.serverPassword != "")
       gServerPassword = gCmdLineSettings.serverPassword;
    else if(gIniSettings.serverPassword != "")
@@ -879,8 +869,11 @@ void processStartupParams()
       gClientGame1 = new ClientGame(Address());   //   Let the system figure out IP address and assign a port
       gClientGame = gClientGame1;
 
+      gClientGame->setLoginPassword(gCmdLineSettings.password, gIniSettings.password, gIniSettings.lastPassword);
+
        // Put any saved filename into the editor file entry thingy
       gClientGame->getUIManager()->getLevelNameEntryUserInterface()->setString(gIniSettings.lastEditorName);
+
 
       //gClientGame2 = new ClientGame(Address());   //  !!! 2-player split-screen game in same game.
    }

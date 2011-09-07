@@ -48,6 +48,7 @@ namespace Zap
 struct ClientInfo
 {
    string name;
+
    Nonce id;
    bool authenticated;
    F32 simulatedPacketLoss;
@@ -90,6 +91,8 @@ private:
 
    ClientInfo mClientInfo;
 
+   string mLoginPassword;
+
 public:
    ClientGame(const Address &bindAddress);
    virtual ~ClientGame();
@@ -104,6 +107,10 @@ public:
 
    GameConnection *getConnectionToServer();
    void setConnectionToServer(GameConnection *connection);
+
+   string getLoginPassword() const { return mLoginPassword; }
+   void setLoginPassword(const string &loginPassword) { mLoginPassword = loginPassword; }
+   void setLoginPassword(const string &firstChoice, const string &secondChoice, const string &thirdChoice);
 
    UIManager *getUIManager() { return mUIManager; }
 
