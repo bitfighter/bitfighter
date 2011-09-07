@@ -1240,7 +1240,6 @@ int main(int argc, char **argv)
    processStartupParams();                   // And merge command line params and INI settings
    Ship::computeMaxFireDelay();              // Look over weapon info and get some ranges, which we'll need before we start sending data
 
-
    if(gCmdLineSettings.serverMode)           // Only set when 1) compiled as a dedicated server; or 2) -dedicated param is specified
    {
       Vector<string> levels = LevelListLoader::buildLevelList(gConfigDirs.levelDir);
