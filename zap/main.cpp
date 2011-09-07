@@ -49,8 +49,9 @@ XXX need to document timers, new luavec stuff XXX
 /* Fixes after 015a
 <h2>New features</h2>
 <ul>
-<li>Added /leveldir command to change folder where levels are read.  Change affects current session only, and will not be saved in the INI.
+<li>Added /leveldir admin command to change folder where levels are read.  Change affects current session only, and will not be saved in the INI.
 <li>Can now specify whether soccer game permits picking up the ball or not
+<li>-help cmd line option now displays meaningful help
 </ul>
 
 <h2>Bot scripting</h2>
