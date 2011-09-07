@@ -2028,7 +2028,7 @@ static void paramRules(const Vector<string> &words)
    exitGame(0);
 }
 
-void paramHelp(const Vector<string> &words);    // Forwrad declare this one here; it is defined down below
+static void paramHelp(const Vector<string> &words);    // Forward declare this one here; it is defined down below
 
 
 static void paramUseStick(const Vector<string> &words)
@@ -2132,7 +2132,7 @@ static void paramHelp(const Vector<string> &words)
    {
       found = false;
 
-      for(S32 i = 0; i < ARRAYSIZE(paramDefs); i++)
+      for(S32 i = 0; i < S32(ARRAYSIZE(paramDefs)); i++)
       {
          if(paramDefs[i].docLevel == docLevel)
          {
@@ -2186,7 +2186,7 @@ void CmdLineSettings::readParams(const Vector<string> &argv, S32 pass)
       string arg = argv[argPtr];
       argPtr++;      // Advance argPtr to location of first parameter argument
 
-      for(S32 i = 0; i < ARRAYSIZE(paramDefs); i++)
+      for(S32 i = 0; i < S32(ARRAYSIZE(paramDefs)); i++)
       {
          if(arg == "-" + paramDefs[i].paramName)
          {

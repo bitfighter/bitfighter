@@ -121,6 +121,19 @@ string ftos(F32 f)
    return stripZeros(outString);
 }
 
+// These next two functions are defined in c++0x/c++11 and can be removed if we migrate to
+// the new standard
+S32 stoi(const string &s)
+{
+   return atoi(s.c_str());
+}
+
+
+F64 stof(const string &s)
+{
+   return atof(s.c_str());
+}
+
 
 // From http://stackoverflow.com/questions/1087088/single-quote-issues-with-c-find-and-replace-function
 string replaceString( const string &strString, const string &strOld, const string &strNew )

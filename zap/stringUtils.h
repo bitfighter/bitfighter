@@ -65,10 +65,8 @@ string itos(S64 i);
 string ftos(float f, int digits);
 string ftos(float f);
 
-#if !_HAS_CPP0X
-inline int stoi(const string &s) {return atoi(s.c_str());}
-inline double stof(const string &s) {return atof(s.c_str());}
-#endif
+S32 stoi(const string &s);
+F64 stof(const string &s);
 
 string replaceString(const string &strString, const string &strOld, const string &strNew);
 string stripExtension(string filename);
