@@ -68,6 +68,7 @@ public:
    void setMass(F32 mass) { mMass = mass; }
 
    virtual void renderItem(const Point &pos);      // Generic renderer -- will be overridden
+   virtual void render();
 
    // EditorItem interface
    virtual void renderEditor(F32 currentScale);

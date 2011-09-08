@@ -87,7 +87,6 @@ public:
    bool pickup(Ship *theShip);
    void onClientPickup();
    void renderItem(const Point &pos);
-   void render(S32 layerIndex);
 
    TNL_DECLARE_CLASS(RepairItem);
 
@@ -134,7 +133,6 @@ public:
    bool pickup(Ship *theShip);
    void onClientPickup();
    void renderItem(const Point &pos);
-   void render(S32 layerIndex);
 
    TNL_DECLARE_CLASS(EnergyItem);
 

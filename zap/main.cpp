@@ -138,6 +138,9 @@ using namespace TNL;
 #include "version.h"       // For BUILD_VERSION def
 #include "Colors.h"
 #include "ScreenInfo.h"
+#include "stringUtils.h"
+
+#include <math.h>
 
 #ifdef WIN32
 // For writeToConsole()

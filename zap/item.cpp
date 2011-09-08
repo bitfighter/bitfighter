@@ -122,6 +122,10 @@ void Item::renderItem(const Point &pos)
 #endif
 }
 
+void Item::render()
+{
+   renderItem(getActualPos());
+}
 
 void Item::renderEditor(F32 currentScale)
 {
