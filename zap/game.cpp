@@ -782,7 +782,9 @@ ServerGame::ServerGame(const Address &theBindAddress, const string &hostName, co
    TNLAssert(dedicated, "Dedicated should be true here!");
 #endif
 
-   mDedicated = dedicated;   
+   mDedicated = dedicated;
+
+   mGameSuspended = true; // server starts at zero players
 }
 
 
