@@ -195,10 +195,6 @@ S32 gMaxPolygonPoints = 32;                     // Max number of points we can h
 
 //static const F32 MIN_SCALING_FACT = 0.15f;      // Limits minimum window size
 
-string gServerPassword = "";
-string gAdminPassword = "";
-string gLevelChangePassword = "";
-
 DataConnection *dataConn = NULL;
 
 U16 DEFAULT_GAME_PORT = 28000;
@@ -796,23 +792,10 @@ void processStartupParams(boost::shared_ptr<GameSettings> settings)
    gMainLog.setMsgType(LogConsumer::LuaBotMessage, gIniSettings.luaBotMessage); 
    gMainLog.setMsgType(LogConsumer::ServerFilter, gIniSettings.serverFilter); 
 
-   if(gCmdLineSettings.serverPassword != "")
-      gServerPassword = gCmdLineSettings.serverPassword;
-   else if(gIniSettings.serverPassword != "")
-      gServerPassword = gIniSettings.serverPassword;
-   // else rely on gServerPassword default of ""
 
-   if(gCmdLineSettings.adminPassword != "")
-      gAdminPassword = gCmdLineSettings.adminPassword;
-   else if(gIniSettings.adminPassword != "")
-      gAdminPassword = gIniSettings.adminPassword;
-   // else rely on gAdminPassword default of ""   i.e. no one can do admin tasks on the server
-
-   if(gCmdLineSettings.levelChangePassword != "")
-      gLevelChangePassword = gCmdLineSettings.levelChangePassword;
-   else if(gIniSettings.levelChangePassword != "")
-      gLevelChangePassword = gIniSettings.levelChangePassword;
-   // else rely on gLevelChangePassword default of ""   i.e. no one can change levels on the server
+   settings->initServerPassword(gCmdLineSettings.serverPassword, gIniSettings.serverPassword);
+   settings->initServerPassword(gCmdLineSettings.adminPassword, gIniSettings.adminPassword);
+   settings->initServerPassword(gCmdLineSettings.levelChangePassword, gIniSettings.levelChangePassword);
 
    gConfigDirs.resolveLevelDir(); 
 

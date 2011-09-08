@@ -1994,8 +1994,6 @@ GAMETYPE_RPC_S2C(GameType, s2cSetLevelInfo, (StringTableEntry levelName, StringT
 }
 
 
-extern string gLevelChangePassword;
-
 GAMETYPE_RPC_C2S(GameType, c2sAddTime, (U32 time), (time))
 {
    GameConnection *source = dynamic_cast<GameConnection *>(NetObject::getRPCSourceConnection());
@@ -2004,7 +2002,8 @@ GAMETYPE_RPC_C2S(GameType, c2sAddTime, (U32 time), (time))
       return;
 
    // Use voting when no level change password and more then 1 players
-   if(!source->isAdmin() && gLevelChangePassword.length() == 0 && gServerGame->getPlayerCount() > 1 && gServerGame->voteStart(source, 1, time))
+   if(!source->isAdmin() && gServerGame->getSettings()->getLevelChangePassword() == "" && 
+            gServerGame->getPlayerCount() > 1 && gServerGame->voteStart(source, 1, time))
       return;
 
    mGameTimer.extend(time);                         // Increase "official time"
@@ -2026,7 +2025,8 @@ GAMETYPE_RPC_C2S(GameType, c2sChangeTeams, (S32 team), (team))
       return;                                                                 // return without processing the change team request
 
    // Vote to change team might have different problems then the old way...
-   if((!source->isLevelChanger() || gLevelChangePassword.length() == 0) && gServerGame->getPlayerCount() > 1)
+   if( (!source->isLevelChanger() || gServerGame->getSettings()->getLevelChangePassword() == "") && 
+        gServerGame->getPlayerCount() > 1 )
    {
       if(gServerGame->voteStart(source, 4, team))
          return;
@@ -2502,8 +2502,10 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
             clientRef->clientConnection->s2cDisplayErrorMessage("!!! Invalid time... game time not changed");
          else
          {
-            // use voting when no level change password and more then 1 players
-            if(!clientRef->clientConnection->isAdmin() && gLevelChangePassword.length() == 0 && gServerGame->getPlayerCount() > 1)
+            // Use voting when there is no level change password, and there is more then 1 player
+            if(!clientRef->clientConnection->isAdmin() && 
+               gServerGame->getSettings()->getLevelChangePassword() == "" && 
+               gServerGame->getPlayerCount() > 1)
             {
                if(gServerGame->voteStart(clientRef->clientConnection, 2, time))
                   return;
@@ -2531,12 +2533,15 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
      else
      {
          S32 score = atoi(args[0].getString());
-         if(score <= 0)    // 0 can come about if user enters invalid input
+
+         if(score <= 0)    // i.e. score is invalid
             clientRef->clientConnection->s2cDisplayErrorMessage("!!! Invalid score... winning score not changed");
          else
          {
-            // use voting when no level change password and more then 1 players
-            if(!clientRef->clientConnection->isAdmin() && gLevelChangePassword.length() == 0 && gServerGame->getPlayerCount() > 1)
+            // Use voting when there is no level change password, and there is more then 1 player
+            if(!clientRef->clientConnection->isAdmin() && 
+               gServerGame->getSettings()->getLevelChangePassword() == "" && 
+               gServerGame->getPlayerCount() > 1)
             {
                if(gServerGame->voteStart(clientRef->clientConnection, 3, score))
                   return;

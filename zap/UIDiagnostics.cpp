@@ -47,9 +47,6 @@ namespace Zap
 {
 
 extern CmdLineSettings gCmdLineSettings;
-extern string gServerPassword;
-extern string gAdminPassword;
-extern string gLevelChangePassword;
 extern U32 getServerMaxPlayers();
 extern Address gBindAddress;
 
@@ -496,17 +493,17 @@ void DiagnosticUserInterface::render()
       ypos += showNameDescrBlock(settings->getHostName(), settings->getHostDescr(), ypos, textsize, gap);
 
       drawCenteredStringPair2Colf(ypos, textsize, true, "Host Addr:", "%s", gBindAddress.toString());
-      drawCenteredStringPair2Colf(ypos, 14, false, "Lvl Change PW:", "%s", gLevelChangePassword == "" ?
-                                                                    "None - anyone can change" : gLevelChangePassword.c_str());
+      drawCenteredStringPair2Colf(ypos, 14, false, "Lvl Change PW:", "%s", settings->getLevelChangePassword() == "" ?
+                                                                    "None - anyone can change" : settings->getLevelChangePassword().c_str());
       ypos += textsize + gap;
 
       
-      drawCenteredStringPair2Colf(ypos, 14, false, "Admin PW:", "%s", gAdminPassword == "" ? 
-                                                                     "None - no one can get admin" : gAdminPassword.c_str());
+      drawCenteredStringPair2Colf(ypos, 14, false, "Admin PW:", "%s", settings->getAdminPassword() == "" ? 
+                                                                     "None - no one can get admin" : settings->getAdminPassword().c_str());
       ypos += textsize + gap;
 
-      drawCenteredStringPair2Colf(ypos, textsize, false, "Server PW:", "%s", gServerPassword == "" ? 
-                                                                             "None needed to play" : gServerPassword.c_str());
+      drawCenteredStringPair2Colf(ypos, textsize, false, "Server PW:", "%s", settings->getServerPassword() == "" ? 
+                                                                             "None needed to play" : settings->getServerPassword().c_str());
 
       ypos += textsize + gap;
       ypos += textsize + gap;

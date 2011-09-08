@@ -60,10 +60,6 @@ namespace Zap
 // Global list of clients (if we're a server, created but never accessed if we're a client)
 GameConnection GameConnection::gClientList;
 
-extern string gServerPassword;
-extern string gAdminPassword;
-extern string gLevelChangePassword;
-
 
 TNL_IMPLEMENT_NETCONNECTION(GameConnection, NetClassGroupGame, true);
 
@@ -485,8 +481,10 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetAuthenticated, (), (),
 TNL_IMPLEMENT_RPC(GameConnection, c2sAdminPassword, (StringPtr pass), (pass), 
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
-   // If gAdminPassword is blank, no one can get admin permissions except the local host, if there is one...
-   if(gAdminPassword != "" && !strcmp(md5.getSaltedHashFromString(gAdminPassword).c_str(), pass))
+   string adminPW = gServerGame->getSettings()->getAdminPassword();
+
+   // If admin password is blank, no one can get admin permissions except the local host, if there is one...
+   if(adminPW != "" && !strcmp(md5.getSaltedHashFromString(adminPW).c_str(), pass))
    {
       setIsAdmin(true);             // Enter admin PW and...
 
@@ -514,8 +512,10 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sAdminPassword, (StringPtr pass), (pass),
 // pass is our hashed password
 TNL_IMPLEMENT_RPC(GameConnection, c2sLevelChangePassword, (StringPtr pass), (pass), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
+   string levChangePW = gServerGame->getSettings()->getLevelChangePassword();
+
    // If password is blank, permissions always granted
-   if(gLevelChangePassword == "" || !strcmp(md5.getSaltedHashFromString(gLevelChangePassword).c_str(), pass))
+   if(levChangePW == "" || !strcmp(md5.getSaltedHashFromString(levChangePW).c_str(), pass))
    {
       setIsLevelChanger(true);
 
@@ -554,17 +554,22 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
                                                 strcmp(param.getString(), "") ? "changed" : "cleared", types[type]);
    }
 
-   // Update our in-memory copies of the param
+   // Update our in-memory copies of the param, but do not save the new values to the INI
    if(type == (U32)LevelChangePassword)
-      gLevelChangePassword = param.getString();
+      gServerGame->getSettings()->setLevelChangePassword(param.getString(), false);
+   
    else if(type == (U32)AdminPassword)
-      gAdminPassword = param.getString();
+      gServerGame->getSettings()->setAdminPassword(param.getString(), false);
+   
    else if(type == (U32)ServerPassword)
-      gServerPassword = param.getString();
+      gServerGame->getSettings()->setServerPassword(param.getString(), false);
+   
    else if(type == (U32)ServerName)
-      gServerGame->getSettings()->setHostName(param.getString());
+      gServerGame->getSettings()->setHostName(param.getString(), false);
+   
    else if(type == (U32)ServerDescr)
-      gServerGame->getSettings()->setHostDescr(param.getString());                  // Needed on local host?
+      gServerGame->getSettings()->setHostDescr(param.getString(), false);
+
    else if(type == (U32)LevelDir)
    {
       string candidate = ConfigDirectories::resolveLevelDir(gConfigDirs.rootDataDir, param.getString());
@@ -1138,8 +1143,6 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cRemoveLevel, (S32 index), (index),
 }
 
 
-extern string gLevelChangePassword;
-
 TNL_IMPLEMENT_RPC(GameConnection, c2sRequestLevelChange, (S32 newLevelIndex, bool isRelative), (newLevelIndex, isRelative), 
                               NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
@@ -1153,7 +1156,7 @@ void GameConnection::c2sRequestLevelChange2(S32 newLevelIndex, bool isRelative)
       return;
 
    // Use voting when there is no level change password and there is more then 1 player
-   if(!mIsAdmin && gLevelChangePassword.length() == 0 && gServerGame->getPlayerCount() > 1 && gServerGame->voteStart(this, 0, newLevelIndex))
+   if(!mIsAdmin && gServerGame->getSettings()->getLevelChangePassword().length() == 0 && gServerGame->getPlayerCount() > 1 && gServerGame->voteStart(this, 0, newLevelIndex))
       return;
 
    bool restart = false;
@@ -1383,7 +1386,7 @@ void GameConnection::writeConnectRequest(BitStream *stream)
 
    // If we're local, just use the password we already know because, you know, we're the server
    if(isLocal)
-      serverPW = md5.getSaltedHashFromString(gServerPassword);
+      serverPW = md5.getSaltedHashFromString(mClientGame->getSettings()->getServerPassword());
 
    // If we have a saved password for this server, use that
    else if(gINI.GetValue("SavedServerPasswords", lastServerName) != "")
@@ -1427,7 +1430,9 @@ bool GameConnection::readConnectRequest(BitStream *stream, NetConnection::Termin
    char buf[256];
 
    stream->readString(buf);
-   if(gServerPassword != "" && stricmp(buf, md5.getSaltedHashFromString(gServerPassword).c_str()))
+   string serverPassword = gServerGame->getSettings()->getServerPassword();
+
+   if(serverPassword != "" && stricmp(buf, md5.getSaltedHashFromString(serverPassword).c_str()))
    {
       reason = ReasonNeedServerPassword;
       return false;
@@ -1618,23 +1623,22 @@ void GameConnection::onConnectionEstablished()
       mAcheivedConnection = true;
       
       // Notify the bots that a new player has joined
-      if(mClientRef)  // could be NULL when getGameType() is NULL
+      if(mClientRef)       // could be NULL when getGameType() is NULL
          Robot::getEventManager().fireEvent(NULL, EventManager::PlayerJoinedEvent, mClientRef->getPlayerInfo());
 
-      if(gLevelChangePassword == "")                // Grant level change permissions if level change PW is blank
+      if(gServerGame->getSettings()->getLevelChangePassword() == "")   // Grant level change permissions if level change PW is blank
       {
          setIsLevelChanger(true);
-         s2cSetIsLevelChanger(true, false);         // Tell client, but don't display notification
+         s2cSetIsLevelChanger(true, false);    // Tell client, but don't display notification
          sendLevelList();
       }
 
-      //s2mRequestNameVerification(this->mClientName, this->mClientNonce);
-
       logprintf(LogConsumer::LogConnection, "%s - client \"%s\" connected.", getNetAddressString(), mClientName.getString());
-      logprintf(LogConsumer::ServerFilter, "%s [%s] joined [%s]", mClientName.getString(), 
+      logprintf(LogConsumer::ServerFilter,  "%s [%s] joined [%s]", mClientName.getString(), 
                 isLocalConnection() ? "Local Connection" : getNetAddressString(), getTimeStamp().c_str());
 
       GameType *gt = gServerGame->getGameType();
+
       if(gIniSettings.allowMapUpload)
          s2rSendableFlags(1);
    }

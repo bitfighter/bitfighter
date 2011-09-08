@@ -1138,7 +1138,6 @@ void HostMenuUserInterface::onActivate()
 }
 
 
-extern string gLevelChangePassword, gAdminPassword, gServerPassword;
 extern void initHostGame(Address bindAddress, boost::shared_ptr<GameSettings> settings, Vector<string> &levelList, bool testMode, bool dedicatedServer);
 extern ConfigDirectories gConfigDirs;
 extern U16 DEFAULT_GAME_PORT;
@@ -1165,14 +1164,14 @@ void HostMenuUserInterface::setupMenus()
    menuItems.push_back(boost::shared_ptr<MenuItem>(new EditableMenuItem(getGame(), "DESCRIPTION:", settings->getHostDescr(), "<Empty>",                    
                                                                         "", QueryServersUserInterface::MaxServerDescrLen, KEY_D)));
 
-   menuItems.push_back(boost::shared_ptr<MenuItem>(new EditableMenuItem(getGame(), "LEVEL CHANGE PASSWORD:", gLevelChangePassword, "<Anyone can change levels>", 
-                                                                        "", MAX_PASSWORD_LENGTH, KEY_L)));
+   menuItems.push_back(boost::shared_ptr<MenuItem>(new EditableMenuItem(getGame(), "LEVEL CHANGE PASSWORD:", settings->getLevelChangePassword(), 
+                                                                        "<Anyone can change levels>", "", MAX_PASSWORD_LENGTH, KEY_L)));
 
-   menuItems.push_back(boost::shared_ptr<MenuItem>(new EditableMenuItem(getGame(), "ADMIN PASSWORD:",        gAdminPassword,       "<No remote admin access>",   
-                                                                        "", MAX_PASSWORD_LENGTH, KEY_A)));
+   menuItems.push_back(boost::shared_ptr<MenuItem>(new EditableMenuItem(getGame(), "ADMIN PASSWORD:", settings->getAdminPassword(),       
+                                                                        "<No remote admin access>", "", MAX_PASSWORD_LENGTH, KEY_A)));
 
-   menuItems.push_back(boost::shared_ptr<MenuItem>(new EditableMenuItem(getGame(), "CONNECTION PASSWORD:",   gServerPassword,      "<Anyone can connect>",       
-                                                   "", MAX_PASSWORD_LENGTH, KEY_C)));
+   menuItems.push_back(boost::shared_ptr<MenuItem>(new EditableMenuItem(getGame(), "CONNECTION PASSWORD:", settings->getServerPassword(),      
+                                                                        "<Anyone can connect>", "", MAX_PASSWORD_LENGTH, KEY_C)));
 
    menuItems.push_back(boost::shared_ptr<MenuItem>(new YesNoMenuItem(getGame(), "ALLOW MAP DOWNLOADS:", gIniSettings.allowGetMap, NULL, "", KEY_M)));
 
@@ -1191,17 +1190,18 @@ void HostMenuUserInterface::onEscape()
 }
 
 
-// Save parameters in INI file
+// Save parameters and get them into the INI file
 void HostMenuUserInterface::saveSettings()
 {
    GameSettings *settings = getGame()->getSettings().get();
 
-   settings->setHostName (menuItems[OPT_NAME]->getValue());
-   settings->setHostDescr(menuItems[OPT_DESCR]->getValue());
+   settings->setHostName (menuItems[OPT_NAME]->getValue(), true);
+   settings->setHostDescr(menuItems[OPT_DESCR]->getValue(), true);
 
-   gLevelChangePassword = gIniSettings.levelChangePassword = menuItems[OPT_LVL_PASS]->getValue();
-   gAdminPassword       = gIniSettings.adminPassword       = menuItems[OPT_ADMIN_PASS]->getValue();    
-   gServerPassword      = gIniSettings.serverPassword      = menuItems[OPT_PASS]->getValue();
+   settings->setAdminPassword(menuItems[OPT_ADMIN_PASS]->getValue(), true);
+   settings->setLevelChangePassword(menuItems[OPT_LVL_PASS]->getValue(), true);
+   settings->setServerPassword(menuItems[OPT_PASS]->getValue(), true);
+
    gIniSettings.allowGetMap                                = menuItems[OPT_GETMAP]->getValue() == "yes";
    //gIniSettings.maxplayers                                 = menuItems[OPT_MAX_PLAYERS]->getIntValue();
 

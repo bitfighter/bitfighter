@@ -35,17 +35,37 @@ namespace Zap
 class GameSettings
 {
 private:
+   // Some items will be passthroughs to the underlying INI objects; however, if a value can differ from the INI setting 
+   // (such as when it can be overridden from the cmd line, or set remotely), then we'll need to store the working value locally.
+
    string mHostName;                // Server name used when hosting a game (default set in config.h, set in INI or on cmd line)
    string mHostDescr;               // Brief description of host
 
+   // Various passwords
+   string mServerPassword;
+   string mAdminPassword;
+   string mLevelChangePassword;
+
 public:
    string getHostName() { return mHostName; }
-   void setHostName(const string &hostName);
+   void setHostName(const string &hostName, bool updateINI);
    void initHostName(const string &cmdLineVal, const string &iniVal);
 
    string getHostDescr() { return mHostDescr; }
-   void setHostDescr(const string &hostDescr);
+   void setHostDescr(const string &hostDescr, bool updateINI);
    void initHostDescr(const string &cmdLineVal, const string &iniVal);
+
+   string getServerPassword() { return mServerPassword; }
+   void setServerPassword(const string &ServerPassword, bool updateINI);
+   void initServerPassword(const string &cmdLineVal, const string &iniVal);
+
+   string getAdminPassword() { return mAdminPassword; }
+   void setAdminPassword(const string &AdminPassword, bool updateINI);
+   void initAdminPassword(const string &cmdLineVal, const string &iniVal);
+
+   string getLevelChangePassword() { return mLevelChangePassword; }
+   void setLevelChangePassword(const string &LevelChangePassword, bool updateINI);
+   void initLevelChangePassword(const string &cmdLineVal, const string &iniVal);
 };
 
 

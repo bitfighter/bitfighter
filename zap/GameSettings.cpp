@@ -35,17 +35,25 @@ struct IniSettings;
 extern IniSettings gIniSettings;    // For now...
 
 
-// Helper for init functions below
+// Helpers for init functions below
 static const string *choose(const string &firstChoice, const string &secondChoice)
 {
    return firstChoice != "" ? &firstChoice : &secondChoice;
 }
 
 
-void GameSettings::setHostName(const string &hostName) 
+static const string *choose(const string &firstChoice, const string &secondChoice, const string &thirdChoice)
+{
+   return choose(firstChoice, *choose(secondChoice, thirdChoice));
+}
+
+
+void GameSettings::setHostName(const string &hostName, bool updateINI) 
 { 
    mHostName = hostName; 
-   gIniSettings.hostname = hostName; 
+
+   if(updateINI)
+      gIniSettings.hostname = hostName; 
 }
 
 
@@ -55,16 +63,63 @@ void GameSettings::initHostName(const string &cmdLineVal, const string &iniVal)
 }
 
 
-void GameSettings::setHostDescr(const string &hostDescr) 
+void GameSettings::setHostDescr(const string &hostDescr, bool updateINI) 
 { 
-   mHostDescr = hostDescr; 
-   gIniSettings.hostdescr = hostDescr; 
+   mHostDescr = hostDescr;
+   
+   if(updateINI)
+      gIniSettings.hostdescr = hostDescr; 
 }
 
 
 void GameSettings::initHostDescr(const string &cmdLineVal, const string &iniVal)
 {
    mHostDescr = *choose(cmdLineVal, iniVal);
+}
+
+
+void GameSettings::setServerPassword(const string &serverPassword, bool updateINI) 
+{ 
+   mServerPassword = serverPassword; 
+
+   if(updateINI)
+      gIniSettings.serverPassword = serverPassword; 
+}
+
+
+void GameSettings::initServerPassword(const string &cmdLineVal, const string &iniVal)
+{
+   mServerPassword = *choose(cmdLineVal, iniVal, "");
+}
+
+
+void GameSettings::setAdminPassword(const string &adminPassword, bool updateINI) 
+{ 
+   mAdminPassword = adminPassword; 
+
+   if(updateINI)
+      gIniSettings.adminPassword = adminPassword; 
+}
+
+
+void GameSettings::initAdminPassword(const string &cmdLineVal, const string &iniVal)
+{
+   mAdminPassword = *choose(cmdLineVal, iniVal, "");
+}
+
+
+void GameSettings::setLevelChangePassword(const string &levelChangePassword, bool updateINI) 
+{ 
+   mLevelChangePassword = levelChangePassword; 
+
+   if(updateINI)
+      gIniSettings.levelChangePassword = levelChangePassword; 
+}
+
+
+void GameSettings::initLevelChangePassword(const string &cmdLineVal, const string &iniVal)
+{
+   mLevelChangePassword = *choose(cmdLineVal, iniVal, "");
 }
 
 

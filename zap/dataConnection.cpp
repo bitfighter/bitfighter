@@ -262,7 +262,6 @@ string DataConnection::getErrorMessage(SenderStatus stat, const string &filename
 TNL_IMPLEMENT_NETCONNECTION(DataConnection, NetClassGroupGame, true);
 
 
-extern string gAdminPassword;
 extern md5wrapper md5;
 
 // Client sends this message to set up the coming transfer.  Server checks for the password, and then, if the client is requesting
@@ -280,7 +279,9 @@ TNL_IMPLEMENT_RPC(DataConnection, c2sSendOrRequestFile,
       return;
    }
    // Check password
-   if(gAdminPassword == "" || strcmp(md5.getSaltedHashFromString(gAdminPassword).c_str(), password))
+   string adminPW = gServerGame->getSettings()->getAdminPassword();
+
+   if(adminPW == "" || strcmp(md5.getSaltedHashFromString(adminPW).c_str(), password))
    {
       logprintf("Incorrect password!");
       disconnect(ReasonBadLogin, "Incorrect pasword");

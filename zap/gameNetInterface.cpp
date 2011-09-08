@@ -34,13 +34,12 @@
 namespace Zap
 {
 
-extern string gServerPassword;
-
 // Constructor
 GameNetInterface::GameNetInterface(const Address &bindAddress, Game *theGame) : NetInterface(bindAddress)
 {
    mGame = theGame;
 };
+
 
 // Add an address to the ban list
 void GameNetInterface::banHost(const Address &bannedAddress, U32 bannedMilliseconds)
@@ -50,6 +49,7 @@ void GameNetInterface::banHost(const Address &bannedAddress, U32 bannedMilliseco
    h.banDuration = bannedMilliseconds;
    mBanList.push_back(h);
 }
+
 
 // Check if address is on the ban list
 bool GameNetInterface::isAddressBanned(const Address &theAddress)
@@ -61,6 +61,7 @@ bool GameNetInterface::isAddressBanned(const Address &theAddress)
    return false;
 }
 
+
 void GameNetInterface::processPacket(const Address &sourceAddress, BitStream *pStream)
 {
    // can cause problems when one of multiple player using same IP address is kicked, causing all player in same IP address to disconnect. Moved to GameConnection::readConnectRequest (sam)
@@ -70,6 +71,7 @@ void GameNetInterface::processPacket(const Address &sourceAddress, BitStream *pS
 
    Parent::processPacket(sourceAddress, pStream);
 }
+
 
 void GameNetInterface::checkBanlistTimeouts(U32 timeElapsed)
 {
@@ -97,6 +99,7 @@ U32 computeSimpleToken(const Address &theAddress, const Nonce &theNonce)
       | ((theNonce.data[4] ^ theNonce.data[6]) << 24)
       ^ 0x638542e6;
 }
+
 
 void GameNetInterface::handleInfoPacket(const Address &remoteAddress, U8 packetType, BitStream *stream)
 {
@@ -144,6 +147,7 @@ void GameNetInterface::handleInfoPacket(const Address &remoteAddress, U8 packetT
             U32 clientIdentityToken;
             theNonce.read(stream);
             stream->read(&clientIdentityToken);
+
             if(clientIdentityToken == computeSimpleToken(remoteAddress, theNonce))
             {
                PacketStream queryResponse;
@@ -158,7 +162,7 @@ void GameNetInterface::handleInfoPacket(const Address &remoteAddress, U8 packetT
                queryResponse.write(gServerGame->getRobotCount());
                queryResponse.writeFlag(gServerGame->isDedicated());
                queryResponse.writeFlag(gServerGame->isTestServer());
-               queryResponse.writeFlag(gServerPassword != "");
+               queryResponse.writeFlag(gServerGame->getSettings()->getServerPassword() != "");
 
                queryResponse.sendto(mSocket, remoteAddress);
             }
