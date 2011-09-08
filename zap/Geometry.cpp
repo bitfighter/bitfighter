@@ -92,9 +92,9 @@ void Geometry::scale(const Point &center, F32 scale)
 void PointGeometry::setVert(const Point &pos, S32 index)
 {
    mPos = pos;
-   GameObject *obj = dynamic_cast<GameObject *>(this);
-   if(obj)
-      obj->setActualPos(pos);
+   //GameObject *obj = dynamic_cast<GameObject *>(this);
+   //if(obj)
+   //   obj->setActualPos(pos);
 }
 
 void PointGeometry::packGeom(GhostConnection *connection, BitStream *stream)

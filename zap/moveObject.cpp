@@ -329,53 +329,53 @@ GameObject *MoveObject::findFirstCollision(U32 stateIndex, F32 &collisionTime, P
             }
          }
       }
-      else if(foundObject->isMoveObject())
+      else
       {
-         MoveObject *otherShip = (MoveObject *) foundObject;
-
          F32 myRadius;
          F32 otherRadius;
          Point myPos;
          Point shipPos;
 
          getCollisionCircle(stateIndex, myPos, myRadius);
-         otherShip->getCollisionCircle(stateIndex, shipPos, otherRadius);
-
-         Point v = mMoveState[stateIndex].vel;
-         Point p = myPos - shipPos;
-
-         if(v.dot(p) < 0)
+         if(foundObject->getCollisionCircle(stateIndex, shipPos, otherRadius))
          {
-            F32 R = myRadius + otherRadius;
-            if(p.len() <= R)
-            {
-               bool collide1 = collide(otherShip);
-               bool collide2 = otherShip->collide(this);
 
-               if(!(collide1 && collide2))
-                  continue;
+            Point v = mMoveState[stateIndex].vel;
+            Point p = myPos - shipPos;
 
-               collisionTime = 0;
-               collisionObject = foundObject;
-               delta.set(0,0);
-            }
-            else
+            if(v.dot(p) < 0)
             {
-               F32 a = v.dot(v);
-               F32 b = 2 * p.dot(v);
-               F32 c = p.dot(p) - R * R;
-               F32 t;
-               if(FindLowestRootInInterval(a, b, c, collisionTime, t))
+               F32 R = myRadius + otherRadius;
+               if(p.len() <= R)
                {
-                  bool collide1 = collide(otherShip);
-                  bool collide2 = otherShip->collide(this);
+                  bool collide1 = collide(foundObject);
+                  bool collide2 = foundObject->collide(this);
 
                   if(!(collide1 && collide2))
                      continue;
 
-                  collisionTime = t;
+                  collisionTime = 0;
                   collisionObject = foundObject;
-                  delta = mMoveState[stateIndex].vel * collisionTime;
+                  delta.set(0,0);
+               }
+               else
+               {
+                  F32 a = v.dot(v);
+                  F32 b = 2 * p.dot(v);
+                  F32 c = p.dot(p) - R * R;
+                  F32 t;
+                  if(FindLowestRootInInterval(a, b, c, collisionTime, t))
+                  {
+                     bool collide1 = collide(foundObject);
+                     bool collide2 = foundObject->collide(this);
+
+                     if(!(collide1 && collide2))
+                        continue;
+
+                     collisionTime = t;
+                     collisionObject = foundObject;
+                     delta = mMoveState[stateIndex].vel * collisionTime;
+                  }
                }
             }
          }
