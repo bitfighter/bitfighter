@@ -33,11 +33,12 @@
 #include "Timer.h"
 #include "gameLoader.h"
 #include "Rect.h"
-#include "Color.h"
 #include "Colors.h"
-#include "shipItems.h"     // For moduleInfos
+#include "shipItems.h"           // For moduleInfos
 
 #include "dataConnection.h"      // For DataSender
+
+#include "GameSettings.h"
 
 
 #include "boost/smart_ptr/shared_ptr.hpp"
@@ -192,6 +193,8 @@ protected:
 
    bool mGameSuspended;                      // True if we're in "suspended animation" mode
 
+   boost::shared_ptr<GameSettings> mSettings;
+
 public:
    static const S32 DefaultGridSize = 255;   // Size of "pages", represented by floats for intrapage locations (i.e. pixels per integer)
    static const S32 MIN_GRID_SIZE = 5;       // Ridiculous, it's true, but we step by our minimum value, so we can't make this too high
@@ -297,6 +300,7 @@ public:
    void processDeleteList(U32 timeDelta);
 
    IniSettings *getIniSettings() { return &gIniSettings; }
+   boost::shared_ptr<GameSettings> getSettings() { return mSettings; }
 
    bool isSuspended() { return mGameSuspended; }
 
@@ -377,7 +381,7 @@ private:
 
 public:
    U32 mInfoFlags;           // Not used for much at the moment, but who knows? --> propagates to master
-   ServerGame(const Address &theBindAddress, const string &hostName, const string &hostDescr, U32 maxPlayers, bool testMode, bool dedicated);    // Constructor
+   ServerGame(const Address &theBindAddress, boost::shared_ptr<GameSettings> settings, const string &hostName, const string &hostDescr, U32 maxPlayers, bool testMode, bool dedicated);    // Constructor
    virtual ~ServerGame();   // Destructor
 
    U32 mVoteTimer;

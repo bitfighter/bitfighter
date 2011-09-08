@@ -748,9 +748,10 @@ extern string gHostName;
 extern string gHostDescr;
 
 // Constructor
-ServerGame::ServerGame(const Address &theBindAddress, const string &hostName, const string &hostDescr, U32 maxPlayers, bool testMode, bool dedicated) : 
+ServerGame::ServerGame(const Address &theBindAddress, boost::shared_ptr<GameSettings> settings, const string &hostName, const string &hostDescr, U32 maxPlayers, bool testMode, bool dedicated) : 
       Game(theBindAddress)
 {
+   mSettings = settings;
    mHostName = hostName;
    mHostDescr = hostDescr;
    mMaxPlayers = maxPlayers;

@@ -357,9 +357,9 @@ U32 getServerMaxPlayers()
 }
 
 // Host a game (and maybe even play a bit, too!)
-void initHostGame(Address bindAddress, Vector<string> &levelList, bool testMode, bool dedicatedServer)
+void initHostGame(Address bindAddress, boost::shared_ptr<GameSettings> settings, Vector<string> &levelList, bool testMode, bool dedicatedServer)
 {
-   gServerGame = new ServerGame(bindAddress, gHostName, gHostDescr, getServerMaxPlayers(), testMode, dedicatedServer);
+   gServerGame = new ServerGame(bindAddress, settings, gHostName, gHostDescr, getServerMaxPlayers(), testMode, dedicatedServer);
 
    gServerGame->setReadyToConnectToMaster(true);
    seedRandomNumberGenerator(gHostName);
@@ -1185,6 +1185,9 @@ int main(int argc, char **argv)
    moveToAppPath();
 #endif
 
+   // Use shared_ptr so we don't have to worry about cleanup
+   boost::shared_ptr<GameSettings> settings = boost::shared_ptr<GameSettings>(new GameSettings());
+
    // Put all cmd args into a Vector for easier processing
    Vector<string> argVector(argc - 1);
 
@@ -1212,7 +1215,7 @@ int main(int argc, char **argv)
    if(gCmdLineSettings.dedicatedMode)
    {
       Vector<string> levels = LevelListLoader::buildLevelList(gConfigDirs.levelDir);
-      initHostGame(gBindAddress, levels, false, true);     // Start hosting
+      initHostGame(gBindAddress, settings, levels, false, true);     // Start hosting
    }
 
    SoundSystem::init();  // Even dedicated server needs sound these days
