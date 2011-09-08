@@ -2186,12 +2186,12 @@ static void resetChunker(const string &text)
 
 static void paramHelp(const Vector<string> &words)
 {
-   for(S32 i = 0; i < ARRAYSIZE(helpTitles); i++)
+   for(S32 i = 0; i < S32(ARRAYSIZE(helpTitles)); i++)
    {
       // Make an initial sweep through to check on the sizes of things, to ensure we get the indention right
       U32 maxSize = 0;
 
-      for(S32 j = 0; j < ARRAYSIZE(paramDefs); j++)
+      for(S32 j = 0; j < S32(ARRAYSIZE(paramDefs)); j++)
          if(paramDefs[j].docLevel == i)
          {
             U32 len = makeParamStr(paramDefs[j]).length();
@@ -2202,7 +2202,7 @@ static void paramHelp(const Vector<string> &words)
 
       bool firstSection = true;
 
-      for(S32 j = 0; j < ARRAYSIZE(paramDefs); j++)
+      for(S32 j = 0; j < S32(ARRAYSIZE(paramDefs)); j++)
       {
          if(paramDefs[j].docLevel != i)
             continue;
@@ -2216,7 +2216,9 @@ static void paramHelp(const Vector<string> &words)
             {
                printf("\n");
 
-               U32 firstCR = title.find_first_of('\n');     // Grab a line of the title
+               // Have to use string::size_type here because U32 and string::npos don't
+               // compare well on x86_64 machines
+               string::size_type firstCR = title.find_first_of('\n');     // Grab a line of the title
                resetChunker(title.substr(0, firstCR));
 
                if(firstCR != string::npos)

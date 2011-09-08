@@ -779,7 +779,9 @@ ServerGame::ServerGame(const Address &theBindAddress, const boost::shared_ptr<Ga
    TNLAssert(dedicated, "Dedicated should be true here!");
 #endif
 
-   mDedicated = dedicated;   
+   mDedicated = dedicated;
+
+   mGameSuspended = true; // server starts at zero players
 }
 
 

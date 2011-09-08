@@ -30,7 +30,6 @@
 
 #include "gameObjectRender.h"
 #include "stringUtils.h"      // for itos()
-#include "gameObjectRender.h"
 
 namespace Zap
 {
@@ -207,12 +206,6 @@ void RepairItem::renderItem(const Point &pos)
    renderRepairItem(pos);
 }
 
-void RepairItem::render(S32 layerIndex)
-{
-   if(layerIndex == 1)
-      renderItem(getActualPos());
-}
-
 
 void RepairItem::renderDock()
 {
@@ -299,12 +292,6 @@ void EnergyItem::renderItem(const Point &pos)
       return;
 
    renderEnergyItem(pos);
-}
-
-void EnergyItem::render(S32 layerIndex)
-{
-   if(layerIndex == 1)
-      renderItem(getActualPos());
 }
 
 

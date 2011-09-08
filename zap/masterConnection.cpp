@@ -31,6 +31,7 @@
 #include "version.h"
 #include "config.h"
 #include "game.h"
+#include "stringUtils.h"
 
 #ifndef ZAP_DEDICATED
 #include "Joystick.h"

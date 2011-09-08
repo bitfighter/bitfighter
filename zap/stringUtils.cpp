@@ -266,7 +266,7 @@ void parseString(const char *inputString, Vector<string> &words, char seperator)
 }
 
 
-string listToString(Vector<string> &words, char seperator)
+string listToString(const Vector<string> &words, char seperator)
 {
    string str = "";
 

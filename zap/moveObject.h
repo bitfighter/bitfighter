@@ -78,7 +78,8 @@ public:
    Point getRenderVel() const { return mMoveState[RenderState].vel; }
    Point getActualVel() const { return mMoveState[ActualState].vel; }
 
-   void setActualVel(Point vel) { mMoveState[ActualState].vel = vel; }
+   virtual void setActualPos(Point pos);
+   virtual void setActualVel(Point vel);
 
    virtual void playCollisionSound(U32 stateIndex, MoveObject *moveObjectThatWasHit, F32 velocity);
 
@@ -93,15 +94,13 @@ public:
    void computeCollisionResponseBarrier(U32 stateIndex, Point &collisionPoint);
    F32 computeMinSeperationTime(U32 stateIndex, MoveObject *contactObject, Point intendedPos);
 
-   virtual bool getCollisionCircle(U32 stateIndex, Point &point, F32 &radius) const
-   {
-      point = mMoveState[stateIndex].pos;
-      radius = mRadius;
-      return true;
-   }
+   virtual bool getCollisionCircle(U32 stateIndex, Point &point, F32 &radius) const;
+
+   virtual void onGeomChanged();
 
    // LuaItem interface
    virtual S32 getVel(lua_State *L) { return LuaObject::returnPoint(L, getActualVel()); }
+
 };
 
 
@@ -144,8 +143,8 @@ public:
    virtual U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    virtual void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
-   void setActualPos(const Point &p);
-   void setActualVel(const Point &vel);
+   void setActualPos(Point p);
+   void setActualVel(Point vel);
 
    U16 getItemId() { return mItemId; }
 
