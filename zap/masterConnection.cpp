@@ -392,8 +392,8 @@ void MasterServerConnection::writeConnectRequest(BitStream *bstream)
       bstream->writeString(serverGame->getCurrentLevelName().getString());      // Level name
       bstream->writeString(serverGame->getCurrentLevelType().getString());      // Level type
 
-      bstream->writeString(serverGame->getHostName());        // Server name
-      bstream->writeString(serverGame->getHostDescr());       // Server description
+      bstream->writeString(serverGame->getSettings()->getHostName().c_str());        // Server name
+      bstream->writeString(serverGame->getSettings()->getHostDescr().c_str());       // Server description
    }
    else     // We're a client
    {

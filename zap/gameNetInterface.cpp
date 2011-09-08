@@ -150,8 +150,8 @@ void GameNetInterface::handleInfoPacket(const Address &remoteAddress, U8 packetT
                queryResponse.write(U8(QueryResponse));
 
                theNonce.write(&queryResponse);
-               queryResponse.writeStringTableEntry(gServerGame->getHostName());
-               queryResponse.writeStringTableEntry(gServerGame->getHostDescr());
+               queryResponse.writeStringTableEntry(gServerGame->getSettings()->getHostName());
+               queryResponse.writeStringTableEntry(gServerGame->getSettings()->getHostDescr());
 
                queryResponse.write(gServerGame->getPlayerCount());
                queryResponse.write(gServerGame->getMaxPlayers());

@@ -121,7 +121,7 @@ ClientInfo::ClientInfo()
 ////////////////////////////////////////
 
 // Constructor
-ClientGame::ClientGame(const Address &bindAddress) : Game(bindAddress)
+ClientGame::ClientGame(const Address &bindAddress, boost::shared_ptr<GameSettings> settings) : Game(bindAddress, settings)
 {
    mUserInterfaceData = new UserInterfaceData();
    mInCommanderMap = false;
@@ -205,9 +205,9 @@ void ClientGame::joinGame(Address remoteAddress, bool isFromMaster, bool local)
             gc->setIsLevelChanger(true);     // Set isLevelChanger on server
             gc->sendLevelList();
 
-            gc->s2cSetIsAdmin(true);                        // Set isAdmin on the client
-            gc->s2cSetIsLevelChanger(true, false);          // Set isLevelChanger on the client
-            gc->setServerName(gServerGame->getHostName());  // Server name is whatever we've set locally
+            gc->s2cSetIsAdmin(true);                                       // Set isAdmin on the client
+            gc->s2cSetIsLevelChanger(true, false);                         // Set isLevelChanger on the client
+            gc->setServerName(gServerGame->getSettings()->getHostName());  // Server name is whatever we've set locally
 
             gc->setAuthenticated(getClientInfo()->authenticated); // Tell local host if we're authenticated... no need to verify
          }

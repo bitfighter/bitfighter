@@ -159,8 +159,6 @@ namespace Zap
 extern ClientGame *gClientGame1;
 extern ClientGame *gClientGame2;
 
-string gHostName;                // Server name used when hosting a game (default set in config.h, set in INI or on cmd line)
-string gHostDescr;               // Brief description of host
 const char *gWindowTitle = "Bitfighter";
 
 // Handle any md5 requests
@@ -359,16 +357,17 @@ U32 getServerMaxPlayers()
 // Host a game (and maybe even play a bit, too!)
 void initHostGame(Address bindAddress, boost::shared_ptr<GameSettings> settings, Vector<string> &levelList, bool testMode, bool dedicatedServer)
 {
-   gServerGame = new ServerGame(bindAddress, settings, gHostName, gHostDescr, getServerMaxPlayers(), testMode, dedicatedServer);
+   gServerGame = new ServerGame(bindAddress, settings, getServerMaxPlayers(), testMode, dedicatedServer);
 
    gServerGame->setReadyToConnectToMaster(true);
-   seedRandomNumberGenerator(gHostName);
+   seedRandomNumberGenerator(settings->getHostName());
 
    // Don't need to build our level list when in test mode because we're only running that one level stored in editor.tmp
    if(!testMode)
    {
       logprintf(LogConsumer::ServerFilter, "----------\nBitfighter server started [%s]", getTimeStamp().c_str());
-      logprintf(LogConsumer::ServerFilter, "hostname=[%s], hostdescr=[%s]", gServerGame->getHostName(), gServerGame->getHostDescr());
+      logprintf(LogConsumer::ServerFilter, "hostname=[%s], hostdescr=[%s]", gServerGame->getSettings()->getHostName().c_str(), 
+                                                                            gServerGame->getSettings()->getHostDescr().c_str());
 
       logprintf(LogConsumer::ServerFilter, "Loaded %d levels:", levelList.size());
    }
@@ -764,7 +763,7 @@ void InitSdlVideo()
 
 
 // Now integrate INI settings with those from the command line and process them
-void processStartupParams()
+void processStartupParams(boost::shared_ptr<GameSettings> settings)
 {
    // These options can only be set on cmd line
    if(!gCmdLineSettings.server.empty())
@@ -819,15 +818,8 @@ void processStartupParams()
       gIniSettings.levelDir = gConfigDirs.levelDir;     // write a good default to the INI
 
 
-   if(gCmdLineSettings.hostname != "")
-      gHostName = gCmdLineSettings.hostname;
-   else
-      gHostName = gIniSettings.hostname;
-
-   if(gCmdLineSettings.hostdescr != "")
-      gHostDescr = gCmdLineSettings.hostdescr;
-   else
-      gHostDescr = gIniSettings.hostdescr;
+   settings->initHostName(gCmdLineSettings.hostname, gIniSettings.hostname);
+   settings->initHostDescr(gCmdLineSettings.hostdescr, gIniSettings.hostdescr);
 
    if(gCmdLineSettings.hostaddr != "")
       gBindAddress.set(gCmdLineSettings.hostaddr);
@@ -849,17 +841,17 @@ void processStartupParams()
    Game::setMasterAddress(gCmdLineSettings.masterAddress, gIniSettings.masterAddress);    // The INI one will always have a value
    
 
-   if(gCmdLineSettings.name != "")                       // We'll clobber the INI file setting.  Since this
-      gIniSettings.name = gCmdLineSettings.name;         // setting is never saved, we won't mess up our INI
+   if(gCmdLineSettings.name != "")                          // We'll clobber the INI file setting.  Since this
+      gIniSettings.name = gCmdLineSettings.name;            // setting is never saved, we won't mess up our INI
 
-   if(gCmdLineSettings.password != "")                   // We'll clobber the INI file setting.  Since this
-      gIniSettings.password = gCmdLineSettings.password; // setting is never saved, we won't mess up our INI
+   if(gCmdLineSettings.password != "")                      // We'll clobber the INI file setting.  Since this
+      gIniSettings.password = gCmdLineSettings.password;    // setting is never saved, we won't mess up our INI
 
 
 #ifndef ZAP_DEDICATED
-   if(!gCmdLineSettings.dedicatedMode)            // Create ClientGame object
+   if(!gCmdLineSettings.dedicatedMode)                      // Create ClientGame object
    {
-      gClientGame1 = new ClientGame(Address());   //   Let the system figure out IP address and assign a port
+      gClientGame1 = new ClientGame(Address(), settings);   //   Let the system figure out IP address and assign a port
       gClientGame = gClientGame1;
 
       gClientGame->setLoginPassword(gCmdLineSettings.password, gIniSettings.password, gIniSettings.lastPassword);
@@ -1205,12 +1197,12 @@ int main(int argc, char **argv)
 
    // Load the INI file
    gINI.SetPath(joindir(gConfigDirs.iniDir, "bitfighter.ini"));
-   gIniSettings.init();                      // Init struct that holds INI settings
+   gIniSettings.init();                // Init struct that holds INI settings
 
-   loadSettingsFromINI(&gINI);               // Read INI
+   loadSettingsFromINI(&gINI);         // Read INI
 
-   processStartupParams();                   // And merge command line params and INI settings
-   Ship::computeMaxFireDelay();              // Look over weapon info and get some ranges, which we'll need before we start sending data
+   processStartupParams(settings);     // And merge command line params and INI settings
+   Ship::computeMaxFireDelay();        // Look over weapon info and get some ranges, which we'll need before we start sending data
 
    if(gCmdLineSettings.dedicatedMode)
    {

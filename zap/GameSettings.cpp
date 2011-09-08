@@ -24,11 +24,48 @@
 //------------------------------------------------------------------------------------
 
 #include "GameSettings.h"
+#include "config.h"     // For IniSettings def
 
-//using namespace TNL;
+using namespace std;
 
 namespace Zap
 {
+
+struct IniSettings;
+extern IniSettings gIniSettings;    // For now...
+
+
+// Helper for init functions below
+static const string *choose(const string &firstChoice, const string &secondChoice)
+{
+   return firstChoice != "" ? &firstChoice : &secondChoice;
+}
+
+
+void GameSettings::setHostName(const string &hostName) 
+{ 
+   mHostName = hostName; 
+   gIniSettings.hostname = hostName; 
+}
+
+
+void GameSettings::initHostName(const string &cmdLineVal, const string &iniVal)
+{
+   mHostName = *choose(cmdLineVal, iniVal);
+}
+
+
+void GameSettings::setHostDescr(const string &hostDescr) 
+{ 
+   mHostDescr = hostDescr; 
+   gIniSettings.hostdescr = hostDescr; 
+}
+
+
+void GameSettings::initHostDescr(const string &cmdLineVal, const string &iniVal)
+{
+   mHostDescr = *choose(cmdLineVal, iniVal);
+}
 
 
 };

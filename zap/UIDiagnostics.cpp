@@ -46,7 +46,6 @@
 namespace Zap
 {
 
-extern string gHostName, gHostDescr;
 extern CmdLineSettings gCmdLineSettings;
 extern string gServerPassword;
 extern string gAdminPassword;
@@ -246,19 +245,19 @@ static S32 showVersionBlock(S32 ypos, S32 textsize, S32 gap)
 }
 
 
-static S32 showNameDescrBlock(S32 ypos, S32 textsize, S32 gap)
+static S32 showNameDescrBlock(const string &hostName, const string &hostDescr, S32 ypos, S32 textsize, S32 gap)
 {
-   S32 x = UserInterface::getCenteredStringStartingPosf(textsize, "Server Name: %s | Descr: %s", gHostName.c_str(), gHostDescr.c_str());
+   S32 x = UserInterface::getCenteredStringStartingPosf(textsize, "Server Name: %s | Descr: %s", hostName.c_str(), hostDescr.c_str());
 
    glColor(Colors::white);
    x += UserInterface::drawStringAndGetWidthf(x, ypos, textsize, "Server Name: ");
    glColor(Colors::yellow);
-   x += UserInterface::drawStringAndGetWidthf(x, ypos, textsize, "%s", gHostName.c_str());
+   x += UserInterface::drawStringAndGetWidthf(x, ypos, textsize, "%s", hostName.c_str());
 
    glColor(Colors::white);
    x += UserInterface::drawStringAndGetWidthf(x, ypos, textsize, " | Descr: ");
    glColor(Colors::yellow);
-   x += UserInterface::drawStringAndGetWidthf(x, ypos, textsize, "%s", gHostDescr.c_str());
+   x += UserInterface::drawStringAndGetWidthf(x, ypos, textsize, "%s", hostDescr.c_str());
 
    return ypos + textsize + gap;
 }
@@ -491,7 +490,10 @@ void DiagnosticUserInterface::render()
       S32 ypos = vertMargin + 35;
 
       glColor(Colors::white);
-      ypos += showNameDescrBlock(ypos, textsize, gap);
+
+      GameSettings *settings = getGame()->getSettings().get();
+
+      ypos += showNameDescrBlock(settings->getHostName(), settings->getHostDescr(), ypos, textsize, gap);
 
       drawCenteredStringPair2Colf(ypos, textsize, true, "Host Addr:", "%s", gBindAddress.toString());
       drawCenteredStringPair2Colf(ypos, 14, false, "Lvl Change PW:", "%s", gLevelChangePassword == "" ?

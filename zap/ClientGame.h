@@ -94,7 +94,7 @@ private:
    string mLoginPassword;
 
 public:
-   ClientGame(const Address &bindAddress);
+   ClientGame(const Address &bindAddress, boost::shared_ptr<GameSettings> settings);
    virtual ~ClientGame();
 
    void joinGame(Address remoteAddress, bool isFromMaster, bool local);

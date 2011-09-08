@@ -780,7 +780,7 @@ VersionedGameStats GameType::getGameStats()
    VersionedGameStats stats;
    GameStats *gameStats = &stats.gameStats;
 
-   gameStats->serverName = gServerGame->getHostName(); // not sent, used for logging stats
+   gameStats->serverName = gServerGame->getSettings()->getHostName(); // not sent, used for logging stats
 
    gameStats->isOfficial = false;
    gameStats->isTesting = gServerGame->isTestServer();

@@ -210,8 +210,8 @@ public:
 
    static const S32 PLAYER_COUNT_UNAVAILABLE = -1;
 
-   Game(const Address &theBindAddress);      // Constructor
-   virtual ~Game();                          // Destructor
+   Game(const Address &theBindAddress, const boost::shared_ptr<GameSettings> &settings);  // Constructor
+   virtual ~Game();                                                                       // Destructor
 
    Rect getWorldExtents() { return mWorldExtents; }
 
@@ -355,8 +355,6 @@ private:
 
    U32 mMaxPlayers;
    bool mTestMode;           // True if being tested from editor
-   string mHostName;
-   string mHostDescr;
 
    GridDatabase mDatabaseForBotZones;     // Database especially for BotZones to avoid gumming up the regular database with too many objects
 
@@ -381,7 +379,7 @@ private:
 
 public:
    U32 mInfoFlags;           // Not used for much at the moment, but who knows? --> propagates to master
-   ServerGame(const Address &theBindAddress, boost::shared_ptr<GameSettings> settings, const string &hostName, const string &hostDescr, U32 maxPlayers, bool testMode, bool dedicated);    // Constructor
+   ServerGame(const Address &theBindAddress, const boost::shared_ptr<GameSettings> &settings, U32 maxPlayers, bool testMode, bool dedicated);    // Constructor
    virtual ~ServerGame();   // Destructor
 
    U32 mVoteTimer;
@@ -412,13 +410,7 @@ public:
    bool isDedicated() { return mDedicated; }
    void setDedicated(bool dedicated) { mDedicated = dedicated; }
 
-   void setHostName(const char *name) { mHostName = name; }
-   const char *getHostName() { return mHostName.c_str(); }
-
-   void setHostDescr(const char *descr) { mHostDescr = descr; }
-   const char *getHostDescr() { return mHostDescr.c_str(); }
-
-   bool isFull() { return mPlayerCount == mMaxPlayers; }    // Room for more players?
+   bool isFull() { return mPlayerCount == mMaxPlayers; }                // More room at the inn?
 
    void addClient(GameConnection *theConnection);
    void removeClient(GameConnection *theConnection);
@@ -428,7 +420,7 @@ public:
    void buildBasicLevelInfoList(const Vector<string> &levelList);
    void resetLevelLoadIndex();
    void loadNextLevelInfo();
-   bool getLevelInfo(const string &fullFilename, LevelInfo &levelInfo);   // Populates levelInfo with data from fullFilename
+   bool getLevelInfo(const string &fullFilename, LevelInfo &levelInfo); // Populates levelInfo with data from fullFilename
    string getLastLevelLoadName();             // For updating the UI
 
    bool loadLevel(const string &fileName);    // Load a level

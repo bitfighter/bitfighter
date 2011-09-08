@@ -528,8 +528,6 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sLevelChangePassword, (StringPtr pass), (pas
 }
 
 
-extern string gHostName;
-extern string gHostDescr;
 extern ServerGame *gServerGame;
 extern Vector<StringTableEntry> gLevelSkipList;
 
@@ -564,15 +562,9 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
    else if(type == (U32)ServerPassword)
       gServerPassword = param.getString();
    else if(type == (U32)ServerName)
-   {
-      gServerGame->setHostName(param.getString());
-      gHostName = param.getString();      // Needed on local host?
-   }
+      gServerGame->getSettings()->setHostName(param.getString());
    else if(type == (U32)ServerDescr)
-   {
-      gServerGame->setHostDescr(param.getString());    // Do we also need to set gHost
-      gHostDescr = param.getString();                  // Needed on local host?
-   }
+      gServerGame->getSettings()->setHostDescr(param.getString());                  // Needed on local host?
    else if(type == (U32)LevelDir)
    {
       string candidate = ConfigDirectories::resolveLevelDir(gConfigDirs.rootDataDir, param.getString());
@@ -710,7 +702,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
       msg = serverNameChanged;
       // If we've changed the server name, notify all the clients
       for(GameConnection *walk = getClientList(); walk; walk = walk->getNextClient())
-         walk->s2cSetServerName(gServerGame->getHostName());
+         walk->s2cSetServerName(gServerGame->getSettings()->getHostName());
    }
    else if(type == (U32)ServerDescr)
       msg = serverDescrChanged;
@@ -1619,7 +1611,8 @@ void GameConnection::onConnectionEstablished()
       activateGhosting();
       setFixedRateParameters(minPacketSendPeriod, minPacketRecvPeriod, maxSendBandwidth, maxRecvBandwidth);        
 
-      s2cSetServerName(gServerGame->getHostName());   // Ideally, this would be part of the connection handshake, but this should work
+      // Ideally, the server name would be part of the connection handshake, but this will work as well
+      s2cSetServerName(gServerGame->getSettings()->getHostName());   
 
       time(&joinTime);
       mAcheivedConnection = true;

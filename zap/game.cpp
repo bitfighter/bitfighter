@@ -95,8 +95,10 @@ extern ClientGame *gClientGame; // only used to see if we have a ClientGame, for
 //-----------------------------------------------------------------------------------
 
 // Constructor
-Game::Game(const Address &theBindAddress) : mGameObjDatabase(new GridDatabase())      //? was without new
+Game::Game(const Address &theBindAddress, const boost::shared_ptr<GameSettings> &settings) : mGameObjDatabase(new GridDatabase())      //? was without new
 {
+   mSettings = settings;
+
    buildModuleInfos();
    mNextMasterTryTime = 0;
    mReadyToConnectToMaster = false;
@@ -744,16 +746,10 @@ void LevelInfo::initialize()
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-extern string gHostName;
-extern string gHostDescr;
-
 // Constructor
-ServerGame::ServerGame(const Address &theBindAddress, boost::shared_ptr<GameSettings> settings, const string &hostName, const string &hostDescr, U32 maxPlayers, bool testMode, bool dedicated) : 
-      Game(theBindAddress)
+ServerGame::ServerGame(const Address &theBindAddress, const boost::shared_ptr<GameSettings> &settings, U32 maxPlayers, bool testMode, bool dedicated) : 
+      Game(theBindAddress, settings)
 {
-   mSettings = settings;
-   mHostName = hostName;
-   mHostDescr = hostDescr;
    mMaxPlayers = maxPlayers;
 
    mVoteTimer = 0;

@@ -26,14 +26,29 @@
 #ifndef _GAME_SETTINGS_H_
 #define _GAME_SETTINGS_H_
 
+#include <string>
 using namespace std;
 
 namespace Zap
 {
-   class GameSettings
-   {
-      int aSetting;
-   };
+
+class GameSettings
+{
+private:
+   string mHostName;                // Server name used when hosting a game (default set in config.h, set in INI or on cmd line)
+   string mHostDescr;               // Brief description of host
+
+public:
+   string getHostName() { return mHostName; }
+   void setHostName(const string &hostName);
+   void initHostName(const string &cmdLineVal, const string &iniVal);
+
+   string getHostDescr() { return mHostDescr; }
+   void setHostDescr(const string &hostDescr);
+   void initHostDescr(const string &cmdLineVal, const string &iniVal);
+};
+
+
 };
 
 

@@ -1138,7 +1138,6 @@ void HostMenuUserInterface::onActivate()
 }
 
 
-extern string gHostName, gHostDescr;
 extern string gLevelChangePassword, gAdminPassword, gServerPassword;
 extern void initHostGame(Address bindAddress, boost::shared_ptr<GameSettings> settings, Vector<string> &levelList, bool testMode, bool dedicatedServer);
 extern ConfigDirectories gConfigDirs;
@@ -1157,11 +1156,13 @@ void HostMenuUserInterface::setupMenus()
 {
    menuItems.clear();
 
+   GameSettings *settings = getGame()->getSettings().get();
+
    menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(getGame(), 0, "START HOSTING", startHostingCallback, "", KEY_H)));
 
-   menuItems.push_back(boost::shared_ptr<MenuItem>(new EditableMenuItem(getGame(), "SERVER NAME:", gHostName, "<Bitfighter Host>", "", QueryServersUserInterface::MaxServerNameLen,  KEY_N)));
+   menuItems.push_back(boost::shared_ptr<MenuItem>(new EditableMenuItem(getGame(), "SERVER NAME:", settings->getHostName(), "<Bitfighter Host>", "", QueryServersUserInterface::MaxServerNameLen,  KEY_N)));
 
-   menuItems.push_back(boost::shared_ptr<MenuItem>(new EditableMenuItem(getGame(), "DESCRIPTION:", gHostDescr, "<Empty>",                    
+   menuItems.push_back(boost::shared_ptr<MenuItem>(new EditableMenuItem(getGame(), "DESCRIPTION:", settings->getHostDescr(), "<Empty>",                    
                                                                         "", QueryServersUserInterface::MaxServerDescrLen, KEY_D)));
 
    menuItems.push_back(boost::shared_ptr<MenuItem>(new EditableMenuItem(getGame(), "LEVEL CHANGE PASSWORD:", gLevelChangePassword, "<Anyone can change levels>", 
@@ -1193,8 +1194,11 @@ void HostMenuUserInterface::onEscape()
 // Save parameters in INI file
 void HostMenuUserInterface::saveSettings()
 {
-   gHostName            = gIniSettings.hostname            = menuItems[OPT_NAME]->getValue();
-   gHostDescr           = gIniSettings.hostdescr           = menuItems[OPT_DESCR]->getValue();
+   GameSettings *settings = getGame()->getSettings().get();
+
+   settings->setHostName (menuItems[OPT_NAME]->getValue());
+   settings->setHostDescr(menuItems[OPT_DESCR]->getValue());
+
    gLevelChangePassword = gIniSettings.levelChangePassword = menuItems[OPT_LVL_PASS]->getValue();
    gAdminPassword       = gIniSettings.adminPassword       = menuItems[OPT_ADMIN_PASS]->getValue();    
    gServerPassword      = gIniSettings.serverPassword      = menuItems[OPT_PASS]->getValue();
