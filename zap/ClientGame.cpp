@@ -169,7 +169,7 @@ ClientGame::~ClientGame()
    cleanUp();
    delete mUserInterfaceData;
    delete mUIManager;   
-   delete mConnectionToServer;
+   delete mConnectionToServer.getPointer();
 }
 
 

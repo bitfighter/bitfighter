@@ -55,6 +55,7 @@ OBJECTS_SHARED=\
    gameLoader.o\
    gameNetInterface.o\
    gameObject.o\
+   GameSettings.o\
    gameStats.o\
    gameType.o\
    gameWeapons.o\

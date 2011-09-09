@@ -869,6 +869,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\GameSettings.cpp"
+			>
+		</File>
+		<File
 			RelativePath=".\gameStats.cpp"
 			>
 		</File>
