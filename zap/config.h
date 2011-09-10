@@ -36,6 +36,7 @@
 #include "tnlNetStringTable.h"
 #include "tnlVector.h"
 #include "Color.h"      // For Color def
+#include "GameSettings.h"
 
 #include "input.h"
 #include <string>
@@ -262,10 +263,10 @@ struct IniSettings      // With defaults specified
 extern IniSettings gIniSettings;
 class CIniFile;
 
-void saveSettingsToINI(CIniFile *ini);
-void loadSettingsFromINI(CIniFile *ini);
+void saveSettingsToINI(CIniFile *ini, GameSettings *settings);
+void loadSettingsFromINI(CIniFile *ini, GameSettings *settings);
 
-void writeSkipList(CIniFile *ini);
+void writeSkipList(CIniFile *ini, const Vector<string> *levelSkipList);
 
 };
 

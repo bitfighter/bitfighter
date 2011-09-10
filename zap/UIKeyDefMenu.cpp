@@ -333,9 +333,9 @@ void KeyDefMenuUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    else if(keyCode == KEY_ESCAPE || keyCode == BUTTON_BACK)       // Quit
    {
       playBoop();
-      saveSettingsToINI(&gINI);
+      saveSettingsToINI(&gINI, getGame()->getSettings());
 
-      getUIManager()->reactivatePrevUI();      //gOptionsMenuUserInterface
+      getUIManager()->reactivatePrevUI();      // to gOptionsMenuUserInterface
    }
    else if(keyCode == KEY_UP || keyCode == BUTTON_DPAD_UP)        // Prev item
    {
@@ -367,7 +367,6 @@ void KeyDefMenuUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       playBoop();
       getUIManager()->getDiagnosticUserInterface()->activate();
    }
-
 }
 
 

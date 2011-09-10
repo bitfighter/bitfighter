@@ -95,7 +95,7 @@ extern ClientGame *gClientGame; // only used to see if we have a ClientGame, for
 //-----------------------------------------------------------------------------------
 
 // Constructor
-Game::Game(const Address &theBindAddress, const boost::shared_ptr<GameSettings> &settings) : mGameObjDatabase(new GridDatabase())      //? was without new
+Game::Game(const Address &theBindAddress, GameSettings *settings) : mGameObjDatabase(new GridDatabase())      //? was without new
 {
    mSettings = settings;
 
@@ -747,7 +747,7 @@ void LevelInfo::initialize()
 ////////////////////////////////////////
 
 // Constructor
-ServerGame::ServerGame(const Address &theBindAddress, const boost::shared_ptr<GameSettings> &settings, U32 maxPlayers, bool testMode, bool dedicated) : 
+ServerGame::ServerGame(const Address &theBindAddress, GameSettings *settings, U32 maxPlayers, bool testMode, bool dedicated) : 
       Game(theBindAddress, settings)
 {
    mMaxPlayers = maxPlayers;
@@ -806,8 +806,9 @@ void Game::cleanUp()
    for(S32 i = 0; i < fillVector.size(); i++)
    {
       mGameObjDatabase->removeFromDatabase(fillVector[i], fillVector[i]->getExtent());
-      delete dynamic_cast<Object *>(fillVector[i]); // dynamic_cast might be needed to avoid errors.
+      delete dynamic_cast<Object *>(fillVector[i]); // dynamic_cast might be needed to avoid errors
    }
+
    mTeams.resize(0);
 }
 
@@ -819,8 +820,10 @@ void ServerGame::cleanUp()
 
    for(S32 i = 0; i < fillVector.size(); i++)
       delete dynamic_cast<Object *>(fillVector[i]);
-   Game::cleanUp();
+
+   Parent::cleanUp();
 }
+
 
 // Return true when handled
 bool ServerGame::voteStart(GameConnection *client, S32 type, S32 number)
@@ -855,10 +858,10 @@ bool ServerGame::voteStart(GameConnection *client, S32 type, S32 number)
    mVoteType = type;
    mVoteNumber = number;
    mVoteClientName = client->getClientName();
+
    for(GameConnection *walk = GameConnection::getClientList(); walk; walk = walk->getNextClient())
-   {
       walk->mVote = 0;
-   }
+
    client->mVote = 1;
    client->s2cDisplayMessage(GameConnection::ColorAqua, SFXNone, "Vote started, waiting for others to vote.");
    return true;
@@ -868,7 +871,7 @@ bool ServerGame::voteStart(GameConnection *client, S32 type, S32 number)
 void ServerGame::voteClient(GameConnection *client, bool voteYes)
 {
    if(mVoteTimer == 0)
-      client->s2cDisplayErrorMessage("!!! Nothing to vote");
+      client->s2cDisplayErrorMessage("!!! Nothing to vote on");
    else if(client->mVote == (voteYes ? 1 : 2))
       client->s2cDisplayErrorMessage("!!! Already voted");
    else if(client->mVote == 0)
@@ -1560,15 +1563,16 @@ void ServerGame::removeClient(GameConnection *theConnection)
 }
 
 
+extern void shutdownBitfighter();      // defined in main.cpp
+
 // Top-level idle loop for server, runs only on the server by definition
 void ServerGame::idle(U32 timeDelta)
 {
    if( mShuttingDown && (mShutdownTimer.update(timeDelta) || GameConnection::onlyClientIs(mShutdownOriginator)) )
    {
-      endGame();
+      shutdownBitfighter();
       return;
    }
-
 
    if(mVoteTimer != 0)
    {

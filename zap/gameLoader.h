@@ -65,8 +65,8 @@ public:
 class LevelListLoader
 {
 public:
-   static Vector<string> buildLevelList(const string &leveldir, bool ignoreCmdLine = false);
-   static void removeSkippedLevels(Vector<string> &levelList);
+   static Vector<string> buildLevelList(const string &leveldir, const Vector<string> *skipList, bool ignoreCmdLine = false);
+   static void removeSkippedLevels(Vector<string> &levelList, const Vector<string> *skipList);
 };
 
 

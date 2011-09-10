@@ -32,6 +32,8 @@
 #include "Joystick.h"
 #include "keyCode.h"
 
+#include "GameSettings.h"
+
 #ifndef ZAP_DEDICATED
 #include "quickChatHelper.h"
 #endif
@@ -227,18 +229,11 @@ static void writeForeignServerInfo(CIniFile *ini)
 }
 
 
-extern Vector<StringTableEntry> gLevelSkipList;
-
 // Read level deleteList, if there are any.  This could probably be made more efficient by not reading the
 // valnames in first, but what the heck...
-static void loadLevelSkipList(CIniFile *ini)
+void loadLevelSkipList(CIniFile *ini, GameSettings *settings)
 {
-   Vector<string> skipList;
-
-   ini->GetAllValues("LevelSkipList", skipList);
-
-   for(S32 i = 0; i < skipList.size(); i++)
-      gLevelSkipList.push_back(StringTableEntry(skipList[i].c_str()));
+   ini->GetAllValues("LevelSkipList", *settings->getLevelSkipList());
 }
 
 
@@ -1134,7 +1129,7 @@ static void writeDefaultQuickChatMessages(CIniFile *ini)
 
 // Option default values are stored here, in the 3rd prarm of the GetValue call
 // This is only called once, during initial initialization
-void loadSettingsFromINI(CIniFile *ini)
+void loadSettingsFromINI(CIniFile *ini, GameSettings *settings)
 {
    ini->ReadFile();        // Read the INI file  (journaling of read lines happens within)
 
@@ -1148,15 +1143,15 @@ void loadSettingsFromINI(CIniFile *ini)
    loadTestSettings(ini);
 
    loadKeyBindings(ini);
-   loadForeignServerInfo(ini);    // Info about other servers
-   loadLevels(ini);               // Read levels, if there are any
-   loadLevelSkipList(ini);        // Read level skipList, if there are any
+   loadForeignServerInfo(ini);         // Info about other servers
+   loadLevels(ini);                    // Read levels, if there are any
+   loadLevelSkipList(ini, settings);   // Read level skipList, if there are any
 
    loadQuickChatMessages(ini);
 
 //   readJoystick();
 
-   saveSettingsToINI(ini);        // Save to fill in any missing settings
+   saveSettingsToINI(ini, settings);    // Save to fill in any missing settings
 }
 
 
@@ -1505,7 +1500,7 @@ static void writeINIHeader(CIniFile *ini)
 
 
 // Save more commonly altered settings first to make them easier to find
-void saveSettingsToINI(CIniFile *ini)
+void saveSettingsToINI(CIniFile *ini, GameSettings *settings)
 {
    writeINIHeader(ini);
 
@@ -1517,7 +1512,7 @@ void saveSettingsToINI(CIniFile *ini)
    writeSettings(ini);
    writeDiagnostics(ini);
    writeLevels(ini);
-   writeSkipList(ini);
+   writeSkipList(ini, settings->getLevelSkipList());
    writeUpdater(ini);
    writeTesting(ini);
    writePasswordSection(ini);
@@ -1534,7 +1529,8 @@ void saveSettingsToINI(CIniFile *ini)
 }
 
 
-void writeSkipList(CIniFile *ini)
+// Can't be static -- called externally!
+void writeSkipList(CIniFile *ini, const Vector<string> *levelSkipList)
 {
    // If there is no LevelSkipList key, we'll add it here.  Otherwise, we'll do nothing so as not to clobber an existing value
    // We'll write our current skip list (which may have been specified via remote server management tools)
@@ -1546,28 +1542,28 @@ void writeSkipList(CIniFile *ini)
 
    ini->sectionComment("LevelSkipList", "----------------");
    ini->sectionComment("LevelSkipList", " Levels listed here will be skipped and will NOT be loaded, even when they are specified in");
-   ini->sectionComment("LevelSkipList", " another section or on the command line.  You can edit this section, but it is really intended");
-   ini->sectionComment("LevelSkipList", " for remote server management.  You will experience slightly better load times if you clean");
-   ini->sectionComment("LevelSkipList", " this section out from time to time.  The names of the keys are not important, and may be changed.");
+   ini->sectionComment("LevelSkipList", " on the command line.  You can edit this section, but it is really intended for remote");
+   ini->sectionComment("LevelSkipList", " server management.  You will experience slightly better load times if you clean this section");
+   ini->sectionComment("LevelSkipList", " out from time to time.  The names of the keys are not important, and may be changed.");
    ini->sectionComment("LevelSkipList", " Example:");
    ini->sectionComment("LevelSkipList", " SkipLevel1=skip_me.level");
    ini->sectionComment("LevelSkipList", " SkipLevel2=dont_load_me_either.level");
    ini->sectionComment("LevelSkipList", " ... etc ...");
    ini->sectionComment("LevelSkipList", "----------------");
 
-   Vector<string> skipList;
+   Vector<string> normalizedSkipList;
 
-   for(S32 i = 0; i < gLevelSkipList.size(); i++)
+   for(S32 i = 0; i < levelSkipList->size(); i++)
    {
       // "Normalize" the name a little before writing it
-      string filename = lcase(gLevelSkipList[i].getString());
+      string filename = lcase(levelSkipList->get(i));
       if(filename.find(".level") == string::npos)
          filename += ".level";
 
-      skipList.push_back(filename);
+      normalizedSkipList.push_back(filename);
    }
 
-   ini->SetAllValues("LevelSkipList", "SkipLevel", skipList);
+   ini->SetAllValues("LevelSkipList", "SkipLevel", normalizedSkipList);
 }
 
 
@@ -2001,7 +1997,7 @@ static void paramWinWidth(const Vector<string> &words)
 }
 
 
-extern void exitGame(S32 errcode);
+extern void exitToOs(S32 errcode);
 extern void transferResource(const string &addr, const string &pw, const string &fileName, const string &resourceType, bool sending);
 
 static void paramGetRes(const Vector<string> &words)
@@ -2022,7 +2018,7 @@ static void paramRules(const Vector<string> &words)
 {
    writeToConsole();
    printRules();
-   exitGame(0);
+   exitToOs(0);
 }
 
 static void paramHelp(const Vector<string> &words);    // Forward declare this one here; it is defined down below
@@ -2130,7 +2126,7 @@ ParamInfo paramDefs[] = {
 void parameterError(S32 i)
 {
    printf("%s\n", paramDefs[i].errorMsg);
-   exitGame(1);
+   exitToOs(1);
 }
 
 
@@ -2282,7 +2278,7 @@ static void paramHelp(const Vector<string> &words)
    \tinteger means an integer number must be specified (e.g. 4)\n\
    \tfloat means a floating point number must be specified (e.g. 3.5)\n");
 
-   exitGame(0);
+   exitToOs(0);
 }
 
 

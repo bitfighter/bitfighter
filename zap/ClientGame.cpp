@@ -121,7 +121,7 @@ ClientInfo::ClientInfo()
 ////////////////////////////////////////
 
 // Constructor
-ClientGame::ClientGame(const Address &bindAddress, boost::shared_ptr<GameSettings> settings) : Game(bindAddress, settings)
+ClientGame::ClientGame(const Address &bindAddress, GameSettings *settings) : Game(bindAddress, settings)
 {
    mUserInterfaceData = new UserInterfaceData();
    mInCommanderMap = false;
@@ -166,7 +166,9 @@ ClientGame::ClientGame(const Address &bindAddress, boost::shared_ptr<GameSetting
 // Destructor
 ClientGame::~ClientGame()
 {
+   closeConnectionToGameServer();      // I just added this for good measure... not really sure it's needed
    cleanUp();
+
    delete mUserInterfaceData;
    delete mUIManager;   
    delete mConnectionToServer;
@@ -228,7 +230,7 @@ void ClientGame::joinGame(Address remoteAddress, bool isFromMaster, bool local)
 
 
 // Called when connection to game server is terminated for one reason or another
-void ClientGame::endGame()
+void ClientGame::closeConnectionToGameServer()
 {
     // Cancel any in-progress attempts to connect
    if(getConnectionToMaster())
@@ -505,7 +507,7 @@ void ClientGame::connectionToServerRejected()
    ui->setMessage(3, "Unable to join game.  Please try again.");
    ui->activate();
 
-   endGame();
+   closeConnectionToGameServer();
 }
 
 

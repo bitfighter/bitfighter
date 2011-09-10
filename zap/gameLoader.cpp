@@ -317,10 +317,9 @@ S32 QSORT_CALLBACK alphaSort(string *a, string *b)
 
 extern ConfigDirectories gConfigDirs;
 extern CmdLineSettings gCmdLineSettings;
-extern Vector<StringTableEntry> gLevelSkipList;
 
 // Create a list of levels for hosting a game, but does not read the files or do any validation of them
-Vector<string> LevelListLoader::buildLevelList(const string &levelFolder, bool ignoreCmdLine)
+Vector<string> LevelListLoader::buildLevelList(const string &levelFolder, const Vector<string> *skipList, bool ignoreCmdLine)
 {
    Vector<string> levelList;
 
@@ -344,7 +343,7 @@ Vector<string> LevelListLoader::buildLevelList(const string &levelFolder, bool i
          levelList.push_back(levelfiles[i]);
    }
 
-   removeSkippedLevels(levelList);
+   removeSkippedLevels(levelList, skipList);
 
    return levelList;
 }
@@ -352,8 +351,8 @@ Vector<string> LevelListLoader::buildLevelList(const string &levelFolder, bool i
 
 extern string lcase(string strToConvert);
 
-// Remove any levels listed in gLevelSkipList from gLevelList.  Not foolproof!
-void LevelListLoader::removeSkippedLevels(Vector<string> &levelList)
+// Remove any levels listed in the skip list from levelList.  Modifies levelList.  Not foolproof!
+void LevelListLoader::removeSkippedLevels(Vector<string> &levelList, const Vector<string> *skipList)
 {
    for(S32 i = 0; i < levelList.size(); i++)
    {
@@ -362,8 +361,8 @@ void LevelListLoader::removeSkippedLevels(Vector<string> &levelList)
       if(filename_i.find(".level") == string::npos)
          filename_i += ".level";
 
-      for(S32 j = 0; j < gLevelSkipList.size(); j++)
-         if(!strcmp(filename_i.c_str(), gLevelSkipList[j].getString()))
+      for(S32 j = 0; j < skipList->size(); j++)
+         if(filename_i == skipList->get(j))
          {
             logprintf(LogConsumer::ServerFilter, "Loader skipping level %s listed in LevelSkipList (see INI file)", levelList[i].c_str());
             levelList.erase(i);

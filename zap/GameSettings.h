@@ -26,8 +26,11 @@
 #ifndef _GAME_SETTINGS_H_
 #define _GAME_SETTINGS_H_
 
+#include"tnlVector.h"
 #include <string>
+
 using namespace std;
+using namespace TNL;
 
 namespace Zap
 {
@@ -35,8 +38,8 @@ namespace Zap
 class GameSettings
 {
 private:
-   // Some items will be passthroughs to the underlying INI objects; however, if a value can differ from the INI setting 
-   // (such as when it can be overridden from the cmd line, or set remotely), then we'll need to store the working value locally.
+   // Some items will be passthroughs to the underlying INI object; however, if a value can differ from the INI setting 
+   // (such as when it can be overridden from the cmd line, or is set remotely), then we'll need to store the working value locally.
 
    string mHostName;                // Server name used when hosting a game (default set in config.h, set in INI or on cmd line)
    string mHostDescr;               // Brief description of host
@@ -45,6 +48,9 @@ private:
    string mServerPassword;
    string mAdminPassword;
    string mLevelChangePassword;
+
+   Vector<string> mLevelSkipList;   // Levels we'll never load, to create a pseudo delete function for remote server mgt
+
 
 public:
    string getHostName() { return mHostName; }
@@ -66,6 +72,8 @@ public:
    string getLevelChangePassword() { return mLevelChangePassword; }
    void setLevelChangePassword(const string &LevelChangePassword, bool updateINI);
    void initLevelChangePassword(const string &cmdLineVal, const string &iniVal);
+
+   Vector<string> *getLevelSkipList() { return &mLevelSkipList; }
 };
 
 

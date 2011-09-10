@@ -131,27 +131,30 @@ GameConnection::~GameConnection()
    mNext->mPrev = mPrev;
 
    // Log the disconnect...
-   if(! mIsRobot)  //Logging Robot disconnect appears useless. "IP:any:0 - client quickbot disconnected."
+   if(!mIsRobot)        // Avoid cluttering log with useless messages like "IP:any:0 - client quickbot disconnected."
       logprintf(LogConsumer::LogConnection, "%s - client \"%s\" disconnected.", getNetAddressString(), mClientName.getString());
 
-   if(isConnectionToClient() && gServerGame->getSuspendor() == this)     // isConnectionToClient only true if we're the server
-      gServerGame->suspenderLeftGame();
-
-   if(isConnectionToClient() && mAcheivedConnection)    // isConnectionToClient only true if we're the server
+   if(isConnectionToClient())    // Only true if we're the server
    {
-     // Compute time we were connected
-     time_t quitTime;
-     time(&quitTime);
+      if(gServerGame->getSuspendor() == this)     
+         gServerGame->suspenderLeftGame();
 
-     double elapsed = difftime (quitTime, joinTime);
+      if(mAcheivedConnection)         
+      {
+        // Compute time we were connected
+        time_t quitTime;
+        time(&quitTime);
 
-     logprintf(LogConsumer::ServerFilter, "%s [%s] quit [%s] (%.2lf secs)", mClientName.getString(), 
-                                               isLocalConnection() ? "Local Connection" : getNetAddressString(), 
-                                               getTimeStamp().c_str(), elapsed);
+        double elapsed = difftime (quitTime, joinTime);
+
+        logprintf(LogConsumer::ServerFilter, "%s [%s] quit [%s] (%.2lf secs)", mClientName.getString(), 
+                                                  isLocalConnection() ? "Local Connection" : getNetAddressString(), 
+                                                  getTimeStamp().c_str(), elapsed);
+      }
    }
+
    if(mDataBuffer)
       delete mDataBuffer;
-
 }
 
 
@@ -529,7 +532,6 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sLevelChangePassword, (StringPtr pass), (pas
 
 
 extern ServerGame *gServerGame;
-extern Vector<StringTableEntry> gLevelSkipList;
 
 // Allow admins to change the passwords on their systems
 TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, GameConnection::ParamTypeCount> type), (param, type),
@@ -587,7 +589,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
          return;
       }
 
-      Vector<string> newLevels = LevelListLoader::buildLevelList(candidate, true);
+      Vector<string> newLevels = LevelListLoader::buildLevelList(candidate, gServerGame->getSettings()->getLevelSkipList(), true);
 
       if(newLevels.size() == 0)
       {
@@ -636,8 +638,10 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
    {
       // Avoid duplicates on skip list
       bool found = false;
-      for(S32 i = 0; i < gLevelSkipList.size(); i++)
-         if(gLevelSkipList[i] == gServerGame->getCurrentLevelFileName())
+      Vector<string> *skipList = gServerGame->getSettings()->getLevelSkipList();
+
+      for(S32 i = 0; i < skipList->size(); i++)
+         if(skipList->get(i) == gServerGame->getCurrentLevelFileName().getString())    // Already on our list!
          {
             found = true;
             break;
@@ -646,9 +650,9 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
       if(!found)
       {
          // Add level to our skip list.  Deleting it from the active list of levels is more of a challenge...
-         gLevelSkipList.push_back(gServerGame->getCurrentLevelFileName());
-         writeSkipList(&gINI);     // Write skipped levels to INI
-         gINI.WriteFile();         // Save new INI settings to disk
+         skipList->push_back(gServerGame->getCurrentLevelFileName().getString());
+         writeSkipList(&gINI, skipList);           // Write skipped levels to INI
+         gINI.WriteFile();                         // Save new INI settings to disk
       }
    }
 

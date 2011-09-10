@@ -193,7 +193,7 @@ protected:
 
    bool mGameSuspended;                      // True if we're in "suspended animation" mode
 
-   boost::shared_ptr<GameSettings> mSettings;
+   GameSettings *mSettings;
 
 public:
    static const S32 DefaultGridSize = 255;   // Size of "pages", represented by floats for intrapage locations (i.e. pixels per integer)
@@ -210,8 +210,8 @@ public:
 
    static const S32 PLAYER_COUNT_UNAVAILABLE = -1;
 
-   Game(const Address &theBindAddress, const boost::shared_ptr<GameSettings> &settings);  // Constructor
-   virtual ~Game();                                                                       // Destructor
+   Game(const Address &theBindAddress, GameSettings *settings);  // Constructor
+   virtual ~Game();                                              // Destructor
 
    Rect getWorldExtents() { return mWorldExtents; }
 
@@ -300,7 +300,7 @@ public:
    void processDeleteList(U32 timeDelta);
 
    IniSettings *getIniSettings() { return &gIniSettings; }
-   boost::shared_ptr<GameSettings> getSettings() { return mSettings; }
+   GameSettings *getSettings() { return mSettings; }
 
    bool isSuspended() { return mGameSuspended; }
 
@@ -379,7 +379,7 @@ private:
 
 public:
    U32 mInfoFlags;           // Not used for much at the moment, but who knows? --> propagates to master
-   ServerGame(const Address &theBindAddress, const boost::shared_ptr<GameSettings> &settings, U32 maxPlayers, bool testMode, bool dedicated);    // Constructor
+   ServerGame(const Address &theBindAddress, GameSettings *settings, U32 maxPlayers, bool testMode, bool dedicated);    // Constructor
    virtual ~ServerGame();   // Destructor
 
    U32 mVoteTimer;
@@ -471,8 +471,6 @@ public:
 ////////////////////////////////////////
 
 extern ServerGame *gServerGame;
-
-extern void endGame();
 
 };
 

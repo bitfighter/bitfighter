@@ -172,7 +172,7 @@ string stripExtension(string filename)
 
 
 // Convert string to lower case
-string lcase(string strToConvert)
+string lcase(string strToConvert)      // Note that strToConvert is a copy of whatever was passed
 {
    for(U32 i = 0; i < strToConvert.length(); i++)
       strToConvert[i] = tolower(strToConvert[i]);

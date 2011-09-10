@@ -1127,8 +1127,8 @@ void GameUserInterface::processPlayModeKey(KeyCode keyCode, char ascii)
 
       if(!getGame()->isConnectedToServer())      // Perhaps we're still joining?
       {
-         endGame();
-         getUIManager()->getMainMenuUserInterface()->activate();
+         getGame()->closeConnectionToGameServer();
+         getUIManager()->getMainMenuUserInterface()->activate();     // Back to main menu
       }
       else
       {

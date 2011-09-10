@@ -77,7 +77,7 @@ static string getOutputFolder(FileType filetype)
 
 extern md5wrapper md5;
 extern bool writeToConsole();
-extern void exitGame(S32 errcode);
+extern void exitToOs(S32 errcode);
 extern DataConnection *dataConn;
 
 void transferResource(const string &addr, const string &pw, const string &fileName, const string &resourceType, bool sending)
@@ -89,7 +89,7 @@ void transferResource(const string &addr, const string &pw, const string &fileNa
    if(!address.isValid())
    {
       printf("Invalid address: Use format IP:nnn.nnn.nnn.nnn:port\n");
-      exitGame(1);
+      exitToOs(1);
    }
 
    string password = md5.getSaltedHashFromString(pw);
@@ -98,7 +98,7 @@ void transferResource(const string &addr, const string &pw, const string &fileNa
    if(fileType == INVALID_RESOURCE_TYPE)
    {
       printf("Invalid resource type: Please sepecify BOT, LEVEL, or LEVELGEN\n");
-      exitGame(1);
+      exitToOs(1);
    }
 
    dataConn = new DataConnection(sending ? SEND_FILE : REQUEST_FILE, password, fileName, fileType);
@@ -131,7 +131,7 @@ void transferResource(const string &addr, const string &pw, const string &fileNa
    delete netInterface;
    delete dataConn;
 
-   exitGame(0);
+   exitToOs(0);
 }
 
 

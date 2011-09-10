@@ -38,7 +38,6 @@
 #include "ClientGame.h"
 #include "gameType.h"
 #include "input.h"
-//#include "keyCode.h"
 #include "IniFile.h"
 #include "config.h"
 #include "Colors.h"
@@ -64,7 +63,7 @@ S32 QSORT_CALLBACK menuItemValueSort(boost::shared_ptr<MenuItem> *a, boost::shar
 
 
 extern void actualizeScreenMode(bool);
-extern void exitGame();
+extern void shutdownBitfighter();
 
 ////////////////////////////////////
 ////////////////////////////////////
@@ -390,7 +389,6 @@ void MenuUserInterface::processMouse()
 }
 
 
-// All key handling now under one roof!
 void MenuUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 {
    if(keyCode == KEY_UNKNOWN)
@@ -404,11 +402,18 @@ void MenuUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    if(gServerGame && (gServerGame->hostingModePhase == ServerGame::LoadingLevels || 
                       gServerGame->hostingModePhase == ServerGame::DoneLoadingLevels))
    {
-      if(keyCode == KEY_ESCAPE)     // can only get here when hosting
+      if(keyCode == KEY_ESCAPE)     // Can only get here when hosting
       {
          gServerGame->hostingModePhase = ServerGame::NotHosting;
          getUIManager()->getHostMenuUserInterface()->clearLevelLoadDisplay();
-         endGame();
+         getGame()->closeConnectionToGameServer();
+
+         if(gServerGame)
+         {
+            delete gServerGame;
+            gServerGame = NULL;
+         }
+
       }
       return;
    }
@@ -589,7 +594,7 @@ static void creditsSelectedCallback(ClientGame *game, U32 unused)
 
 static void quitSelectedCallback(ClientGame *game, U32 unused)
 {
-   exitGame();
+   shutdownBitfighter();
 }
 
 //////////
@@ -755,7 +760,7 @@ void MainMenuUserInterface::processSelection(U32 index)
 
 void MainMenuUserInterface::onEscape()
 {
-   exitGame();    // Quit!
+   shutdownBitfighter();    // Quit!
 }
 
 
@@ -997,7 +1002,7 @@ void OptionsMenuUserInterface::toggleDisplayMode()
 // Save options to INI file, and return to our regularly scheduled program
 void OptionsMenuUserInterface::onEscape()
 {
-   saveSettingsToINI(&gINI);
+   saveSettingsToINI(&gINI, getGame()->getSettings());
    getUIManager()->reactivatePrevUI();      //mGameUserInterface
 }
 
@@ -1049,7 +1054,7 @@ static void nameAndPasswordAcceptCallback(ClientGame *clientGame, U32 unused)
    clientGame->getIniSettings()->lastPassword = ui->menuItems[2]->getValueForWritingToLevelFile();
    clientGame->setLoginPassword(ui->menuItems[2]->getValueForWritingToLevelFile());
 
-   saveSettingsToINI(&gINI);             // Get that baby into the INI file
+   saveSettingsToINI(&gINI, clientGame->getSettings());   // Get that baby into the INI file
 
    clientGame->setReadyToConnectToMaster(true);
    seedRandomNumberGenerator(clientGame->getClientInfo()->name);
@@ -1109,7 +1114,7 @@ void NameEntryUserInterface::renderExtras()
 // Save options to INI file, and return to our regularly scheduled program
 void NameEntryUserInterface::onEscape()
 {
-   exitGame();
+   shutdownBitfighter();
 }
 
 
@@ -1138,7 +1143,7 @@ void HostMenuUserInterface::onActivate()
 }
 
 
-extern void initHostGame(Address bindAddress, boost::shared_ptr<GameSettings> settings, Vector<string> &levelList, bool testMode, bool dedicatedServer);
+extern void initHostGame(Address bindAddress, GameSettings *settings, Vector<string> &levelList, bool testMode, bool dedicatedServer);
 extern ConfigDirectories gConfigDirs;
 extern U16 DEFAULT_GAME_PORT;
 
@@ -1146,7 +1151,7 @@ static void startHostingCallback(ClientGame *game, U32 unused)
 {
    game->getUIManager()->getHostMenuUserInterface()->saveSettings();
 
-   Vector<string> levelList = LevelListLoader::buildLevelList(gConfigDirs.levelDir);
+   Vector<string> levelList = LevelListLoader::buildLevelList(gConfigDirs.levelDir, game->getSettings()->getLevelSkipList());
    initHostGame(Address(IPProtocol, Address::Any, DEFAULT_GAME_PORT), game->getSettings(), levelList, false, false);
 }
 
@@ -1155,7 +1160,7 @@ void HostMenuUserInterface::setupMenus()
 {
    menuItems.clear();
 
-   GameSettings *settings = getGame()->getSettings().get();
+   GameSettings *settings = getGame()->getSettings();
 
    menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(getGame(), 0, "START HOSTING", startHostingCallback, "", KEY_H)));
 
@@ -1193,7 +1198,7 @@ void HostMenuUserInterface::onEscape()
 // Save parameters and get them into the INI file
 void HostMenuUserInterface::saveSettings()
 {
-   GameSettings *settings = getGame()->getSettings().get();
+   GameSettings *settings = getGame()->getSettings();
 
    settings->setHostName (menuItems[OPT_NAME]->getValue(), true);
    settings->setHostDescr(menuItems[OPT_DESCR]->getValue(), true);
@@ -1205,7 +1210,7 @@ void HostMenuUserInterface::saveSettings()
    gIniSettings.allowGetMap                                = menuItems[OPT_GETMAP]->getValue() == "yes";
    //gIniSettings.maxplayers                                 = menuItems[OPT_MAX_PLAYERS]->getIntValue();
 
-   saveSettingsToINI(&gINI);
+   saveSettingsToINI(&gINI, getGame()->getSettings());
 }
 
 
@@ -1301,7 +1306,13 @@ void GameMenuUserInterface::onReactivate()
 
 static void endGameCallback(ClientGame *game, U32 unused)
 {
-   endGame();
+   game->closeConnectionToGameServer();
+
+   if(gServerGame)
+   {
+      delete gServerGame;
+      gServerGame = NULL;
+   }
 }
 
 
@@ -1556,7 +1567,8 @@ void LevelMenuSelectUserInterface::onActivate()
 
    if(!strcmp(category.c_str(), UPLOAD_LEVELS))
    {
-      mLevels = LevelListLoader::buildLevelList(gConfigDirs.levelDir);     // Get all the playable levels in levelDir
+      // Get all the playable levels in levelDir
+      mLevels = LevelListLoader::buildLevelList(gConfigDirs.levelDir, getGame()->getSettings()->getLevelSkipList());     
 
       for(S32 i = 0; i < mLevels.size(); i++)
       {

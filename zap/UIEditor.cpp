@@ -3613,7 +3613,7 @@ void testLevelStart_local(ClientGame *game)
 }
 
 
-extern void initHostGame(Address bindAddress, boost::shared_ptr<GameSettings> settings, Vector<string> &levelList, bool testMode, bool dedicatedServer);
+extern void initHostGame(Address bindAddress, GameSettings *settings, Vector<string> &levelList, bool testMode, bool dedicatedServer);
 
 void EditorUserInterface::testLevel()
 {

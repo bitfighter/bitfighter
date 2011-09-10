@@ -162,8 +162,6 @@ namespace Zap
 extern ClientGame *gClientGame1;
 extern ClientGame *gClientGame2;
 
-const char *gWindowTitle = "Bitfighter";
-
 // Handle any md5 requests
 md5wrapper md5;
 
@@ -172,10 +170,9 @@ bool gShowAimVector = false;     // Do we render an aim vector?  This should pro
 
 CIniFile gINI("dummy");          // This is our INI file.  Filename set down in main(), but compiler seems to want an arg here.
 
+// These will be moved to the GameSettings object
 CmdLineSettings gCmdLineSettings;
-
 ConfigDirectories gConfigDirs;
-
 IniSettings gIniSettings;
 
 OGLCONSOLE_Console gConsole;     // For the moment, we'll just have one console for levelgens and bots.  This may change later.
@@ -191,9 +188,7 @@ Color gMasterServerBlue(0.8, 0.8, 1);           // Messages about successful mas
 Color gHelpTextColor(Colors::green);
 
 
-S32 gMaxPolygonPoints = 32;                     // Max number of points we can have in Nexuses, LoadoutZones, etc.
-
-//static const F32 MIN_SCALING_FACT = 0.15f;      // Limits minimum window size
+S32 gMaxPolygonPoints = 32;                     // Max number of points we can have in Walls, Nexuses, LoadoutZones, etc.
 
 DataConnection *dataConn = NULL;
 
@@ -202,14 +197,12 @@ U16 DEFAULT_GAME_PORT = 28000;
 Address gBindAddress(IPProtocol, Address::Any, DEFAULT_GAME_PORT);      // Good for now, may be overwritten by INI or cmd line setting
 // Above is equivalent to ("IP:Any:28000")
 
-Vector<StringTableEntry> gLevelSkipList;  // Levels we'll never load, to create a semi-delete function for remote server mgt
-
 ScreenInfo gScreenInfo;
 
 ZapJournal gZapJournal;          // Our main journaling object
 
 
-void exitGame(S32 errcode)
+void exitToOs(S32 errcode)
 {
 #ifdef TNL_OS_XBOX
    extern void xboxexit();
@@ -221,11 +214,13 @@ void exitGame(S32 errcode)
 
 
 // Exit the game, back to the OS
-void exitGame()
+void exitToOs()
 {
-   exitGame(0);
+   exitToOs(0);
 }
 
+
+void shutdownBitfighter();    // Forward declaration
 
 // If we can't load any levels, here's the plan...
 void abortHosting_noLevels()
@@ -264,7 +259,7 @@ void abortHosting_noLevels()
    else
 #endif
    {
-      exitGame(1);
+      shutdownBitfighter();      // Quit in an orderly fashion
    }
 }
 
@@ -354,8 +349,10 @@ U32 getServerMaxPlayers()
 }
 
 // Host a game (and maybe even play a bit, too!)
-void initHostGame(Address bindAddress, boost::shared_ptr<GameSettings> settings, Vector<string> &levelList, bool testMode, bool dedicatedServer)
+void initHostGame(Address bindAddress, GameSettings *settings, Vector<string> &levelList, bool testMode, bool dedicatedServer)
 {
+   TNLAssert(!gServerGame, "already exists!");
+
    gServerGame = new ServerGame(bindAddress, settings, getServerMaxPlayers(), testMode, dedicatedServer);
 
    gServerGame->setReadyToConnectToMaster(true);
@@ -443,7 +440,7 @@ void display()
    if(gClientGame && gClientGame->getConnectionToMaster() &&
          gClientGame->getConnectionToMaster()->getConnectionState() != NetConnection::Connected)
    {
-      glColor3f(1, 1, 1);
+      glColor(Colors::white);
       UserInterface::drawStringf(10, 550, 15, "Master Server - %s", gConnectStatesTable[gClientGame->getConnectionToMaster()->getConnectionState()]);
    }
 
@@ -577,8 +574,8 @@ void idle()
 
    while(SDL_PollEvent(&event))
    {
-      if (event.type == SDL_QUIT) // Handle quit here
-         exitGame();
+      if(event.type == SDL_QUIT) // Handle quit here
+         exitToOs();
 
       Event::onEvent(&event);
    }
@@ -617,38 +614,43 @@ FileLogConsumer gServerLog;       // We'll apply a filter later on, in main()
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-// Disconnect from servers and exit current game in an orderly fashion.  Does not exit Bitfighter, unless we're a dedicated server.
-// Stay connected to the master until we exit the program altogether.
-void endGame()
-{
-#ifndef ZAP_DEDICATED
-   if(gClientGame)
-      gClientGame->endGame();
-#endif
-
-   bool dedicated = gServerGame && gServerGame->isDedicated();
-
-   delete gServerGame;
-   gServerGame = NULL;
-
-   if(dedicated)
-      exitGame();
-}
-
 
 extern void saveWindowMode(CIniFile *ini);
 
-// Run when we're quitting the game, returning to the OS
-void onExit()
+// Run when we're quitting the game, returning to the OS.  Saves settings and does some final cleanup to keep things orderly.
+// There are currently only 6 ways to get here (i.e. 6 legitimate ways to exit Bitfighter): 
+// 1) Hit escape during initial name entry screen
+// 2) Hit escape from the main menu
+// 3) Choose Quit from main menu
+// 4) Host a game with no levels as a dedicated server
+// 5) Admin issues a shutdown command to a remote dedicated server
+// 6) Click the X on the window to close the game window   <=== NOTE: This scenario fails for me when running a dedicated server on windows.
+void shutdownBitfighter()
 {
-   endGame();
+   GameSettings *settings;
 
+   // Avoid this function being called twice when we exit via methods 1-4 above
+   if(!gClientGame && !gServerGame)
+      exitToOs();
+
+// Grab a pointer to settings wherever we can.  Note that gClientGame and gServerGame refer to the same copy.
 #ifndef ZAP_DEDICATED
    if(gClientGame)
-      delete gClientGame;     // Has effect of disconnecting from master
+   {
+      settings = gClientGame->getSettings();
+      delete gClientGame;     // Destructor terminates connection to master
+      gClientGame = NULL;
+   }
 #endif
+
    if(gServerGame)
-      delete gServerGame;     // Has effect of disconnecting from master
+   {
+      settings = gServerGame->getSettings();
+      delete gServerGame;     // Destructor terminates connection to master
+      gServerGame = NULL;
+   }
+
+   TNLAssert(settings, "Should always have a value here!");
 
    SoundSystem::shutdown();
 
@@ -665,44 +667,45 @@ void onExit()
    SDL_QuitSubSystem(SDL_INIT_VIDEO);
 #endif
 
-   saveSettingsToINI(&gINI);    // Writes settings to the INI, then saves it to disk
+   saveSettingsToINI(&gINI, settings);    // Writes settings to the INI, then saves it to disk
+
+   delete settings;
 
    NetClassRep::logBitUsage();
    logprintf("Bye!");
 
-
-   exitGame();
+   exitToOs();    // Do not pass Go
 }
 
 
 #ifndef ZAP_DEDICATED
 void InitSdlVideo()
 {
-   // Information about the current video settings.
+   // Information about the current video settings
    const SDL_VideoInfo* info = NULL;
 
-   // Flags we will pass into SDL_SetVideoMode.
+   // Flags we will pass into SDL_SetVideoMode
    S32 flags = 0;
 
    // Init!
    SDL_Init(0);
 
-   // First, initialize SDL's video subsystem.
+   // First, initialize SDL's video subsystem
    if (SDL_InitSubSystem(SDL_INIT_VIDEO) < 0)
    {
-      // Failed, exit.
+      // Failed, exit
       logprintf(LogConsumer::LogFatalError, "SDL Video initialization failed: %s", SDL_GetError());
-      exitGame();
+      exitToOs();
    }
 
-   // Let's get some video information.
+   // Let's get some video information
    info = SDL_GetVideoInfo();
 
    if(!info)
    {
-      // This should probably never happen.
+      // This should probably never happen
       logprintf(LogConsumer::LogFatalError, "SDL Video query failed: %s", SDL_GetError());
-      exitGame();
+      exitToOs();
    }
 
    // Find the desktop width/height and initialize the ScreenInfo object with it
@@ -729,7 +732,9 @@ void InitSdlVideo()
    SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 16 );
    SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
 
-   SDL_WM_SetCaption(gWindowTitle, gWindowTitle);  // Icon name is same as window title -- set here so window will be created with proper name
+   static const char *WINDOW_TITLE = "Bitfighter";
+   SDL_WM_SetCaption(WINDOW_TITLE, WINDOW_TITLE);  // Icon name is same as window title -- set here so window will be created with proper name
+
    SDL_Surface* icon = SDL_LoadBMP("zap_win_icon.bmp");     // <=== TODO: put a real bmp here...
    SDL_WM_SetIcon(icon, NULL);
 
@@ -749,7 +754,7 @@ void InitSdlVideo()
       if (SDL_SetVideoMode(0, 0, 0, flags) == NULL)
       {
          logprintf(LogConsumer::LogFatalError, "Unable to create OpenGL window: %s", SDL_GetError());
-         exitGame();
+         exitToOs();
       }
    }
    else
@@ -762,7 +767,7 @@ void InitSdlVideo()
 
 
 // Now integrate INI settings with those from the command line and process them
-void processStartupParams(boost::shared_ptr<GameSettings> settings)
+void processStartupParams(GameSettings *settings)
 {
    // These options can only be set on cmd line
    if(!gCmdLineSettings.server.empty())
@@ -794,8 +799,8 @@ void processStartupParams(boost::shared_ptr<GameSettings> settings)
 
 
    settings->initServerPassword(gCmdLineSettings.serverPassword, gIniSettings.serverPassword);
-   settings->initServerPassword(gCmdLineSettings.adminPassword, gIniSettings.adminPassword);
-   settings->initServerPassword(gCmdLineSettings.levelChangePassword, gIniSettings.levelChangePassword);
+   settings->initAdminPassword(gCmdLineSettings.adminPassword, gIniSettings.adminPassword);
+   settings->initLevelChangePassword(gCmdLineSettings.levelChangePassword, gIniSettings.levelChangePassword);
 
    gConfigDirs.resolveLevelDir(); 
 
@@ -1163,8 +1168,7 @@ int main(int argc, char **argv)
    moveToAppPath();
 #endif
 
-   // Use shared_ptr so we don't have to worry about cleanup
-   boost::shared_ptr<GameSettings> settings = boost::shared_ptr<GameSettings>(new GameSettings());
+   GameSettings *settings = new GameSettings();    // Will be deleted in shutdownBitfighter()
 
    // Put all cmd args into a Vector for easier processing
    Vector<string> argVector(argc - 1);
@@ -1185,14 +1189,14 @@ int main(int argc, char **argv)
    gINI.SetPath(joindir(gConfigDirs.iniDir, "bitfighter.ini"));
    gIniSettings.init();                // Init struct that holds INI settings
 
-   loadSettingsFromINI(&gINI);         // Read INI
+   loadSettingsFromINI(&gINI, settings);  // Read INI
 
    processStartupParams(settings);     // And merge command line params and INI settings
    Ship::computeMaxFireDelay();        // Look over weapon info and get some ranges, which we'll need before we start sending data
 
    if(gCmdLineSettings.dedicatedMode)
    {
-      Vector<string> levels = LevelListLoader::buildLevelList(gConfigDirs.levelDir);
+      Vector<string> levels = LevelListLoader::buildLevelList(gConfigDirs.levelDir, settings->getLevelSkipList());
       initHostGame(gBindAddress, settings, levels, false, true);     // Start hosting
    }
 
@@ -1204,38 +1208,35 @@ int main(int argc, char **argv)
 #ifndef ZAP_DEDICATED
    if(gClientGame)     // That is, we're starting up in interactive mode, as opposed to running a dedicated server
    {
-      FXManager::init();                                    // Get ready for sparks!!  C'mon baby!!
-      Joystick::populateJoystickStaticData();               // Build static data needed for joysticks
-      Joystick::initJoystick();                             // Initialize joystick system
-      resetKeyStates();                                     // Reset keyboard state mapping to show no keys depressed
+      FXManager::init();                           // Get ready for sparks!!  C'mon baby!!
+      Joystick::populateJoystickStaticData();      // Build static data needed for joysticks
+      Joystick::initJoystick();                    // Initialize joystick system
+      resetKeyStates();                            // Reset keyboard state mapping to show no keys depressed
       ControllerTypeType controllerType = Joystick::autodetectJoystickType();
-      setJoystick(controllerType);               // Will override INI settings, so process INI first
+      setJoystick(controllerType);                 // Will override INI settings, so process INI first
 
-      // On OS X, make sure we're in the right directory
+      
 #ifdef TNL_OS_MAC_OSX
-      moveToAppPath();
+      moveToAppPath();        // On OS X, make sure we're in the right directory
 #endif
 
       InitSdlVideo();         // Get our main SDL rendering window all set up
       SDL_EnableUNICODE(1);   // Activate unicode ==> http://sdl.beuc.net/sdl.wiki/SDL_EnableUNICODE
-      SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
+      SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);      // SDL_DEFAULT_REPEAT_DELAY defined as 500
 
-      // Put 0,0 at the center of the screen
-      //glTranslatef(gScreenInfo.getGameCanvasWidth() / 2, gScreenInfo.getGameCanvasHeight() / 2, 0);     
+      atexit(shutdownBitfighter);      // If user clicks the X on their game window, this runs shutdownBitfighter()
+      actualizeScreenMode(false);      // Create a display window
 
-      atexit(onExit);
-      actualizeScreenMode(false);            // Create a display window
-
-      gConsole = OGLCONSOLE_Create();        // Create our console *after* the screen mode has been actualized
+      gConsole = OGLCONSOLE_Create();  // Create our console *after* the screen mode has been actualized
 
 #ifdef USE_BFUP
       if(gIniSettings.useUpdater)
-         launchUpdater(argv[0]);             // Spawn external updater tool to check for new version of Bitfighter -- Windows only
+         launchUpdater(argv[0]);       // Spawn external updater tool to check for new version of Bitfighter -- Windows only
 #endif
 
    }
 #endif
-   dedicatedServerLoop();  //    loop forever, running the idle command endlessly
+   dedicatedServerLoop();              // Loop forever, running the idle command endlessly
 
    return 0;
 }

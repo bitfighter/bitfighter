@@ -488,7 +488,7 @@ void DiagnosticUserInterface::render()
 
       glColor(Colors::white);
 
-      GameSettings *settings = getGame()->getSettings().get();
+      GameSettings *settings = getGame()->getSettings();
 
       ypos += showNameDescrBlock(settings->getHostName(), settings->getHostDescr(), ypos, textsize, gap);
 

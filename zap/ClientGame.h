@@ -94,11 +94,11 @@ private:
    string mLoginPassword;
 
 public:
-   ClientGame(const Address &bindAddress, boost::shared_ptr<GameSettings> settings);
+   ClientGame(const Address &bindAddress, GameSettings *settings);
    virtual ~ClientGame();
 
    void joinGame(Address remoteAddress, bool isFromMaster, bool local);
-   void endGame();
+   void closeConnectionToGameServer();
 
    UserInterfaceData *mUserInterfaceData;
 
