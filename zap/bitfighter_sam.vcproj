@@ -777,6 +777,14 @@
 			</File>
 		</Filter>
 		<File
+			RelativePath=".\BanList.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\BanList.h"
+			>
+		</File>
+		<File
 			RelativePath=".\ClientGame.cpp"
 			>
 		</File>
