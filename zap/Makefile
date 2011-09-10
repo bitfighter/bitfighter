@@ -41,6 +41,7 @@ WFLAGS=
 
 
 OBJECTS_SHARED=\
+   BanList.o\
    barrier.o\
    BotNavMeshZone.o\
    Color.o\

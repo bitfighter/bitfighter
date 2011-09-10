@@ -139,6 +139,7 @@ using namespace TNL;
 #include "Colors.h"
 #include "ScreenInfo.h"
 #include "stringUtils.h"
+#include "BanList.h"
 
 #include <math.h>
 
@@ -207,6 +208,8 @@ Vector<StringTableEntry> gLevelSkipList;  // Levels we'll never load, to create 
 ScreenInfo gScreenInfo;
 
 ZapJournal gZapJournal;          // Our main journaling object
+
+BanList gBanList;         // Our ban list
 
 
 void exitGame(S32 errcode)
@@ -666,6 +669,7 @@ void onExit()
 #endif
 
    saveSettingsToINI(&gINI);    // Writes settings to the INI, then saves it to disk
+//   gBanList.writeToFile();      // Writes ban list back to file XXX enable this when admin functionality is built in
 
    NetClassRep::logBitUsage();
    logprintf("Bye!");
@@ -1186,6 +1190,7 @@ int main(int argc, char **argv)
    gIniSettings.init();                // Init struct that holds INI settings
 
    loadSettingsFromINI(&gINI);         // Read INI
+   gBanList.readFromFile();            // Read ban list file
 
    processStartupParams(settings);     // And merge command line params and INI settings
    Ship::computeMaxFireDelay();        // Look over weapon info and get some ranges, which we'll need before we start sending data

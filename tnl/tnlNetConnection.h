@@ -217,7 +217,7 @@ public:
    struct PacketNotify;
 
    NetConnection();
-   ~NetConnection();
+   virtual ~NetConnection();
 
    enum TerminationReason {
       // Reasons the server might terminate an existing connection
@@ -242,7 +242,7 @@ public:
       ReasonNeedServerPassword,     // Server requires a password -- either provided none, or an incorrect one
 
       ReasonConnectionsForbidden,   // Used when rejecting data connections when data connection capability is disabled
-
+      ReasonBanned,                 // You made the admin mad...
       TerminationReasons,           // Must be last of enumerated reasons!
       ReasonNone
    };

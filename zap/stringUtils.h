@@ -109,6 +109,8 @@ string makeFilenameFromString(const char *levelname);
 
 string ctos(char c);
 
+bool isValidIpAddress(const string &ipAddress);
+
 };
 
 #endif

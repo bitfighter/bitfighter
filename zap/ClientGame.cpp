@@ -770,6 +770,14 @@ void ClientGame::onConnectionTerminated(const Address &serverAddress, NetConnect
          getUIManager()->getQueryServersUserInterface()->addHiddenServer(serverAddress, Platform::getRealMilliseconds() + GameConnection::BanDuration);
          break;
 
+      case NetConnection::ReasonBanned:
+         ui->setMessage(2, "You are banned from playing on this server");
+         ui->setMessage(4, "Contact the server administrator if you think");
+         ui->setMessage(4, "this was in error.");
+         ui->activate();
+
+        break;
+
       case NetConnection::ReasonFloodControl:
          ui->setMessage(2, "Your connection was rejected by the server");
          ui->setMessage(3, "because you sent too many connection requests.");
@@ -891,6 +899,20 @@ void ClientGame::onConnectTerminated(const Address &serverAddress, NetConnection
       ui->setMessage(3, "and have been temporarily banned.");
       ui->setMessage(5, "You can try another server, host your own,");
       ui->setMessage(6, "or try the server that kicked you again later.");
+
+      getUIManager()->getMainMenuUserInterface()->activate();
+      ui->activate();
+   }
+   else if(reason == NetConnection::ReasonBanned)
+   {
+      ErrorMessageUserInterface *ui = getUIManager()->getErrorMsgUserInterface();
+
+      ui->reset();
+      ui->setTitle("Connection Terminated");
+
+      ui->setMessage(2, "You are banned from playing on this server");
+      ui->setMessage(4, "Contact the server administrator if you think");
+      ui->setMessage(5, "this was in error.");
 
       getUIManager()->getMainMenuUserInterface()->activate();
       ui->activate();
@@ -1058,9 +1080,6 @@ const Color *ClientGame::getTeamColor(S32 teamId) const
    return gameType->getTeamColor(teamId);    // return Game::getBasicTeamColor(mGame, teamIndex); by default, overridden by certain gametypes...
 }
 
-
-extern Color gNeutralTeamColor;
-extern Color gHostileTeamColor;
 
 void ClientGame::drawStars(F32 alphaFrac, Point cameraPos, Point visibleExtent)
 {
