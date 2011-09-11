@@ -56,12 +56,15 @@ ProjectileInfo gProjInfo[ProjectileTypeCount] = {
 
 
 // Here we actually intantiate the various projectiles when fired
-void createWeaponProjectiles(WeaponType weapon, Point &dir, Point &shooterPos, Point &shooterVel, F32 shooterRadius, GameObject *shooter)
+void createWeaponProjectiles(WeaponType weapon, Point &dir, Point &shooterPos, Point &shooterVel, S32 time, F32 shooterRadius, GameObject *shooter)
 {
    //GameObject *proj = NULL;
    WeaponInfo *wi = gWeapons + weapon;
    Point projVel = dir * F32(wi->projVelocity) + dir * shooterVel.dot(dir);
    Point firePos = shooterPos + dir * shooterRadius;
+
+   // Advance pos by the distance the projectile would have traveled in time... fixes skipped shot effect on stuttering CPU
+   firePos += projVel * F32(time) / 1000.0;
 
    Game *game = shooter->getGame();
 

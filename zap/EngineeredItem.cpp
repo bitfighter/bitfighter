@@ -1318,6 +1318,7 @@ void Turret::idle(IdleCallPath path)
       angleDelta += Float2Pi;
 
    F32 maxTurn = TurretTurnRate * mCurrentMove.time * 0.001f;
+
    if(angleDelta != 0)
       setMaskBits(AimMask);
 
@@ -1338,7 +1339,7 @@ void Turret::idle(IdleCallPath path)
          string killer = string("got blasted by ") + getGame()->getTeamName(mTeam).getString() + " turret";
          mKillString = killer.c_str();
 
-         createWeaponProjectiles(WeaponType(mWeaponFireType), bestDelta, aimPos, velocity, mWeaponFireType == WeaponBurst ? 45.f : 35.f, this);
+         createWeaponProjectiles(WeaponType(mWeaponFireType), bestDelta, aimPos, velocity, 0, mWeaponFireType == WeaponBurst ? 45.f : 35.f, this);
          mFireTimer.reset(gWeapons[mWeaponFireType].fireDelay);
       }
    }

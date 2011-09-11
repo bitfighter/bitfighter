@@ -395,31 +395,44 @@ void Ship::processWeaponFire()
 {
    if(mFireTimer > 0)
       mFireTimer -= S32(mCurrentMove.time);
+
+   if(!mCurrentMove.fire && mFireTimer < 0)
+      mFireTimer = 0;
+
    mWeaponFireDecloakTimer.update(mCurrentMove.time);
 
    WeaponType curWeapon = mWeapon[mActiveWeaponIndx];
 
-   //  in a while loop, to catch up the firing rate for low Frame Per Second
-   while(mCurrentMove.fire && mFireTimer <= 0 && getGame()->getGameType() && getGame()->getGameType()->onFire(this) && mEnergy >= gWeapons[curWeapon].minEnergy)
+   GameType *gameType = getGame()->getGameType();
+
+   if(mCurrentMove.fire && gameType)
    {
-      mEnergy -= gWeapons[curWeapon].drainEnergy;
-      mFireTimer += S32(gWeapons[curWeapon].fireDelay);
-      mWeaponFireDecloakTimer.reset(WeaponFireDecloakTime);
-
-      if(getControllingClient().isValid())
-         getControllingClient()->mStatistics.countShot(curWeapon);
-
-      if(!isGhost())    // i.e. server only
+      // In a while loop, to catch up the firing rate for low Frame Per Second
+      while(mFireTimer <= 0 && gameType->onFire(this) && mEnergy >= gWeapons[curWeapon].minEnergy)
       {
-         Point dir = getAimVector();
-         createWeaponProjectiles(curWeapon, dir, mMoveState[ActualState].pos, mMoveState[ActualState].vel, CollisionRadius - 2, this);
-      }
+         mEnergy -= gWeapons[curWeapon].drainEnergy;              // Drain energy
+         mWeaponFireDecloakTimer.reset(WeaponFireDecloakTime);    // Uncloak ship
 
-      // If we've fired, Spawn Shield turns off
-      if(mSpawnShield.getCurrent() != 0)
-      {
-         setMaskBits(SpawnShieldMask);
-         mSpawnShield.clear();
+         if(getControllingClient().isValid())
+            getControllingClient()->mStatistics.countShot(curWeapon);
+
+         if(!isGhost())    // i.e. server only
+         {
+            Point dir = getAimVector();
+
+            // TODO: To fix skip fire effect on jittery server, need to replace the 0 with... something...
+            createWeaponProjectiles(curWeapon, dir, mMoveState[ActualState].pos, mMoveState[ActualState].vel, 0, CollisionRadius - 2, this);
+         }
+
+         mFireTimer += S32(gWeapons[curWeapon].fireDelay);
+
+
+         // If we've fired, Spawn Shield turns off
+         if(mSpawnShield.getCurrent() != 0)
+         {
+            setMaskBits(SpawnShieldMask);
+            mSpawnShield.clear();
+         }
       }
    }
 }
