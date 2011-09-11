@@ -172,7 +172,6 @@ CIniFile gINI("dummy");          // This is our INI file.  Filename set down in 
 
 // These will be moved to the GameSettings object
 CmdLineSettings gCmdLineSettings;
-ConfigDirectories gConfigDirs;
 IniSettings gIniSettings;
 
 OGLCONSOLE_Console gConsole;     // For the moment, we'll just have one console for levelgens and bots.  This may change later.
@@ -229,8 +228,11 @@ void abortHosting_noLevels()
 
    if(gServerGame->isDedicated())
    {
-      logprintf(LogConsumer::LogError,     "No levels found in folder %s.  Cannot host a game.", gConfigDirs.levelDir.c_str());
-      logprintf(LogConsumer::ServerFilter, "No levels found in folder %s.  Cannot host a game.", gConfigDirs.levelDir.c_str());
+      ConfigDirectories *folderManager = gServerGame->getSettings()->getConfigDirs();
+      const char *levelDir = folderManager->levelDir.c_str();
+
+      logprintf(LogConsumer::LogError,     "No levels found in folder %s.  Cannot host a game.", levelDir);
+      logprintf(LogConsumer::ServerFilter, "No levels found in folder %s.  Cannot host a game.", levelDir);
    }
 
    delete gServerGame;
@@ -240,6 +242,8 @@ void abortHosting_noLevels()
    if(gClientGame)
    {
       ErrorMessageUserInterface *errUI = gClientGame->getUIManager()->getErrorMsgUserInterface();
+      ConfigDirectories *folderManager = gServerGame->getSettings()->getConfigDirs();
+      string levelDir = folderManager->levelDir;
 
       errUI->reset();
       errUI->setTitle("HOUSTON, WE HAVE A PROBLEM");
@@ -249,7 +253,7 @@ void abortHosting_noLevels()
       errUI->setMessage(5, "you have correctly specified a folder containing");
       errUI->setMessage(6, "valid level files.");
       errUI->setMessage(8, "Trying to load levels from folder:");
-      errUI->setMessage(9, gConfigDirs.levelDir == "" ? "<<Unresolvable>>" : gConfigDirs.levelDir.c_str());
+      errUI->setMessage(9, levelDir == "" ? "<<Unresolvable>>" : levelDir.c_str());
       errUI->activate();
 
       HostMenuUserInterface *menuUI = gClientGame->getUIManager()->getHostMenuUserInterface();
@@ -392,9 +396,11 @@ void initHostGame(Address bindAddress, GameSettings *settings, Vector<string> &l
 // All levels loaded, we're ready to go
 void hostGame()
 {
-   if(gConfigDirs.levelDir == "")      // Never did resolve a leveldir... no hosting for you!
+   ConfigDirectories *folderManager = gServerGame->getSettings()->getConfigDirs();
+
+   if(folderManager->levelDir == "")     // Never did resolve a leveldir... no hosting for you!
    {
-      abortHosting_noLevels();         // Not sure this would ever get called...
+      abortHosting_noLevels();           // Not sure this would ever get called...
       return;
    }
 
@@ -802,12 +808,12 @@ void processStartupParams(GameSettings *settings)
    settings->initAdminPassword(gCmdLineSettings.adminPassword, gIniSettings.adminPassword);
    settings->initLevelChangePassword(gCmdLineSettings.levelChangePassword, gIniSettings.levelChangePassword);
 
-   gConfigDirs.resolveLevelDir(); 
+   ConfigDirectories *folderManager = settings->getConfigDirs();
 
+   folderManager->resolveLevelDir(); 
 
-   if(gIniSettings.levelDir == "")                      // If there is nothing in the INI,
-      gIniSettings.levelDir = gConfigDirs.levelDir;     // write a good default to the INI
-
+   if(gIniSettings.levelDir == "")                       // If there is nothing in the INI,
+      gIniSettings.levelDir = folderManager->levelDir;   // write a good default to the INI
 
    settings->initHostName(gCmdLineSettings.hostname, gIniSettings.hostname);
    settings->initHostDescr(gCmdLineSettings.hostdescr, gIniSettings.hostdescr);
@@ -887,21 +893,22 @@ void processStartupParams(GameSettings *settings)
 }
 
 
-void setupLogging()
+void setupLogging(const string &logDir)
 {
    // Specify which events each logfile will listen for
    S32 events = LogConsumer::AllErrorTypes | LogConsumer::LogConnection | LogConsumer::LuaLevelGenerator | LogConsumer::LuaBotMessage;
 
-   gMainLog.init(joindir(gConfigDirs.logDir, "bitfighter.log"), "w");
+   gMainLog.init(joindir(logDir, "bitfighter.log"), "w");
    //gMainLog.setMsgTypes(events);  ==> set from INI settings     
    gMainLog.logprintf("------ Bitfighter Log File ------");
 
    gStdoutLog.setMsgTypes(events);   // writes to stdout
 
-   gServerLog.init(joindir(gConfigDirs.logDir, "bitfighter_server.log"), "a");
+   gServerLog.init(joindir(logDir, "bitfighter_server.log"), "a");
    gServerLog.setMsgTypes(LogConsumer::AllErrorTypes | LogConsumer::ServerFilter | LogConsumer::StatisticsFilter); 
    gStdoutLog.logprintf("Welcome to Bitfighter!");
 }
+
 
 #ifndef ZAP_DEDICATED
 // Actually put us in windowed or full screen mode.  Pass true the first time this is used, false subsequently.
@@ -1168,7 +1175,7 @@ int main(int argc, char **argv)
    moveToAppPath();
 #endif
 
-   GameSettings *settings = new GameSettings();    // Will be deleted in shutdownBitfighter()
+   GameSettings *settings = new GameSettings(); // Will be deleted in shutdownBitfighter()
 
    // Put all cmd args into a Vector for easier processing
    Vector<string> argVector(argc - 1);
@@ -1176,37 +1183,39 @@ int main(int argc, char **argv)
    for(S32 i = 1; i < argc; i++)
       argVector.push_back(argv[i]);
 
-   gCmdLineSettings.readParams(argVector, 0);    // Read first tranche of cmd line params, needed to resolve folder locations
-   gConfigDirs.resolveDirs();                    // Resolve all folders except for levels folder, resolved later
+   ConfigDirectories *folderManager = settings->getConfigDirs();
+
+   gCmdLineSettings.readParams(settings, argVector, 0);   // Read first tranche of cmd line params, needed to resolve folder locations
+   folderManager->resolveDirs(settings);                  // Resolve all folders except for levels folder, which is resolved later
 
    // Before we go any further, we should get our log files in order.  Now we know where they'll be, as the 
    // only way to specify a non-standard location is via the command line, which we've now read.
-   setupLogging();
+   setupLogging(folderManager->logDir);
 
-   gCmdLineSettings.readParams(argVector, 1);    // Read remaining cmd line params 
+   gCmdLineSettings.readParams(settings, argVector, 1);   // Read remaining cmd line params 
 
    // Load the INI file
-   gINI.SetPath(joindir(gConfigDirs.iniDir, "bitfighter.ini"));
-   gIniSettings.init();                // Init struct that holds INI settings
+   gINI.SetPath(joindir(folderManager->iniDir, "bitfighter.ini"));
+   gIniSettings.init();                   // Init struct that holds INI settings
 
    loadSettingsFromINI(&gINI, settings);  // Read INI
 
-   processStartupParams(settings);     // And merge command line params and INI settings
-   Ship::computeMaxFireDelay();        // Look over weapon info and get some ranges, which we'll need before we start sending data
+   processStartupParams(settings);        // And merge command line params and INI settings
+   Ship::computeMaxFireDelay();           // Look over weapon info and get some ranges, which we'll need before we start sending data
 
    if(gCmdLineSettings.dedicatedMode)
    {
-      Vector<string> levels = LevelListLoader::buildLevelList(gConfigDirs.levelDir, settings->getLevelSkipList());
-      initHostGame(gBindAddress, settings, levels, false, true);     // Start hosting
+      Vector<string> levels = LevelListLoader::buildLevelList(folderManager->levelDir, settings->getLevelSkipList());
+      initHostGame(gBindAddress, settings, levels, false, true);       // Start hosting
    }
 
-   SoundSystem::init();  // Even dedicated server needs sound these days
-
+   SoundSystem::init(folderManager->sfxDir, folderManager->musicDir);  // Even dedicated server needs sound these days
+   
    checkIfThisIsAnUpdate();
 
 
 #ifndef ZAP_DEDICATED
-   if(gClientGame)     // That is, we're starting up in interactive mode, as opposed to running a dedicated server
+   if(gClientGame)     // Only exists when we're starting up in interactive mode, as opposed to running a dedicated server
    {
       FXManager::init();                           // Get ready for sparks!!  C'mon baby!!
       Joystick::populateJoystickStaticData();      // Build static data needed for joysticks

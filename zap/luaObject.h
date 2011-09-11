@@ -93,7 +93,7 @@ public:
 
    static void setLuaArgs(lua_State *L, const string &scriptName, const Vector<string> *args);     // Used by bots and levelgens
 
-   static void setModulePath(lua_State *L);
+   static void setModulePath(lua_State *L, const string &scriptDir);
    static void openLibs(lua_State *L);
 
 };

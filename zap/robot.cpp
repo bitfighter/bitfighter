@@ -1370,10 +1370,12 @@ TNL_IMPLEMENT_NETOBJECT(Robot);
 Vector<Robot *> Robot::robots;
 
 // Constructor, runs on client and server
-Robot::Robot(StringTableEntry robotName, S32 team, Point pt, F32 mass) : Ship(robotName, false, team, pt, mass, true)
+Robot::Robot(const StringTableEntry &robotName, const string &scriptDir, S32 team, Point pt, F32 mass) : Ship(robotName, false, team, pt, mass, true)
 {
    gameConnectionInitalized = false;
    mObjectTypeNumber = RobotShipTypeNumber;
+
+   mScriptDir = scriptDir;
 
    L = NULL;
    mCurrentZone = U16_MAX;
@@ -1488,8 +1490,6 @@ void Robot::startBots()
 }
 
 
-extern ConfigDirectories gConfigDirs;
-
 bool Robot::startLua()
 {
    if(!isRunningScript) 
@@ -1544,7 +1544,7 @@ bool Robot::startLua()
 #endif
 
    LuaUtil::openLibs(L);
-   LuaUtil::setModulePath(L);
+   LuaUtil::setModulePath(L, mScriptDir);
 
    // Push a pointer to this Robot to the Lua stack,
    // then set the global name of this pointer.  This is the name that we'll use to refer
@@ -1559,7 +1559,7 @@ bool Robot::startLua()
    if(!loadLuaHelperFunctions(L, "robot"))
       return false;
 
-   string robotfname = joindir(gConfigDirs.luaDir, "robot_helper_functions.lua");
+   string robotfname = joindir(mScriptDir, "robot_helper_functions.lua");
 
    if(luaL_loadfile(L, robotfname.c_str()))
    {
@@ -1621,7 +1621,7 @@ bool Robot::loadLuaHelperFunctions(lua_State *L, const char *caller)
 
    // Load our standard robot library  TODO: Read the file into memory, store that as a static string in the bot code, and then pass that to Lua rather than rereading this
    // every time a bot is created.
-   string fname = joindir(gConfigDirs.luaDir, "lua_helper_functions.lua");
+   string fname = joindir(mScriptDir, "lua_helper_functions.lua");
 
    if(luaL_loadfile(L, fname.c_str()))
    {
@@ -1728,7 +1728,12 @@ bool Robot::processArguments(S32 argc, const char **argv, Game *game)
    {
       wasRunningScript = true;
       string fullFilename = mFilename;  // for printing filename when not found
-      mFilename = gConfigDirs.findBotFile(mFilename);
+
+      ConfigDirectories *folderManager = game->getSettings()->getConfigDirs();
+
+      mFilename = folderManager->findBotFile(mFilename);
+      mScriptDir = folderManager->luaDir;                   // Probably superfluous, but seems good practice
+
 
       if(mFilename == "")
       {
@@ -1968,7 +1973,9 @@ void Robot::idle(GameObject::IdleCallPath path)
 void Robot::spawn()
 {
    // Cannot be in onAddedToGame, as it will error, trying to add robots while level map is not ready
-   GameConnection *gc = new GameConnection();   // Need GameConnection and ClientRef to keep track of score...  TODO: Make this work differently
+
+   // Need GameConnection and ClientRef to keep track of score...  TODO: Make this work differently
+   GameConnection *gc = new GameConnection(getGame()->getSettings());   
 
    if(getName() == "")                          // Make sure bots have a name
       setName(GameConnection::makeUnique("Robot").c_str());

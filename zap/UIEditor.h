@@ -354,7 +354,7 @@ public:
 
    void deleteItem(S32 itemIndex);
 
-   void runScript(const string &scriptName, const Vector<string> &args);        
+   void runScript(const ConfigDirectories *folderManager, const string &scriptName, const Vector<string> &args);        
    void runLevelGenScript();              // Run associated levelgen script
    void copyScriptItemsToEditor();        // Insert these items into the editor as first class items that can be manipulated or saved
    void clearLevelGenItems();             // Clear any previously created levelgen items

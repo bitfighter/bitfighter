@@ -10,6 +10,7 @@
 
 #include "tnlTypes.h"
 #include "tnlVector.h"
+#include <string>
 
 // forward declarations
 typedef unsigned int ALuint;
@@ -20,6 +21,7 @@ namespace TNL {
 };
 
 using namespace TNL;
+using namespace std;
 
 namespace Zap {
 
@@ -120,12 +122,14 @@ private:
 
    static void music_end_callback(void* userdata, ALuint source);
 
+   static string mMusicDir;
+
 public:
    SoundSystem();
    virtual ~SoundSystem();
 
    // General functions
-   static void init();
+   static void init(const string &sfxDir, const string &musicDir);
    static void shutdown();
    static void setListenerParams(Point pos, Point velocity);
    static void processAudio(F32 volLevel);
@@ -155,7 +159,6 @@ public:
    static void stopMusic();
    static void pauseMusic();
    static void resumeMusic();
-
 };
 
 }

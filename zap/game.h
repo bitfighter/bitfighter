@@ -423,9 +423,9 @@ public:
    bool getLevelInfo(const string &fullFilename, LevelInfo &levelInfo); // Populates levelInfo with data from fullFilename
    string getLastLevelLoadName();             // For updating the UI
 
-   bool loadLevel(const string &fileName);    // Load a level
+   bool loadLevel(const string &fileName);        // Load a level
 
-   bool processPseudoItem(S32 argc, const char **argv, const string &levelFileName);      // Things like spawns that aren't really items
+   bool processPseudoItem(S32 argc, const char **argv, const string &levelFileName);   // Things like spawns that aren't really items
 
    void cycleLevel(S32 newLevelIndex = NEXT_LEVEL);
 

@@ -43,19 +43,22 @@ class LuaLevelGenerator: public LuaObject
 {
 private:
    string mFilename;
+   const Vector<string> *mScriptArgs;
+   string mScriptDir;
+   GridDatabase *mGridDatabase;
+
    OGLCONSOLE_Console mConsole;
    bool loadLuaHelperFunctions(lua_State *L, const char *caller);
    bool loadLevelGenHelperFunctions(lua_State *L);
 
 public:
-
-   LuaLevelGenerator(const string &scriptName, const Vector<string> *scriptArgs, F32 gridsize, GridDatabase *gridDatabase, 
+   LuaLevelGenerator(const string &scriptName, const string &scriptDir, const Vector<string> *scriptArgs, F32 gridsize, GridDatabase *gridDatabase, 
                      LevelLoader *caller, OGLCONSOLE_Console console);   // C++ constructor
 
    LuaLevelGenerator(lua_State *L);      // Lua constructor
    virtual ~LuaLevelGenerator();         // Destructor
 
-   void runScript(lua_State *L, const string &scriptName, const Vector<string> *scriptArgs, F32 gridSize);
+   void runScript(lua_State *L, F32 gridSize);
    void logError(const char *format, ...);
 
 

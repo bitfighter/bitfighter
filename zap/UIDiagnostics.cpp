@@ -127,39 +127,37 @@ static S32 spaceWidth;
 static S32 longestVal;
 static S32 totLen;
 
-extern ConfigDirectories gConfigDirs;
-
-static void initFoldersBlock(S32 textsize)
+static void initFoldersBlock(ConfigDirectories *folderManager, S32 textsize)
 {
    names.push_back("Level Dir:");
-   vals.push_back(gConfigDirs.levelDir == "" ? "<<Unresolvable>>" : gConfigDirs.levelDir.c_str());
+   vals.push_back(folderManager->levelDir == "" ? "<<Unresolvable>>" : folderManager->levelDir.c_str());
 
    names.push_back("");
    vals.push_back("");
       
    names.push_back("Cache Dir:");
-   vals.push_back(gConfigDirs.cacheDir.c_str());
+   vals.push_back(folderManager->cacheDir.c_str());
 
    names.push_back("INI Dir:");
-   vals.push_back(gConfigDirs.iniDir.c_str());
+   vals.push_back(folderManager->iniDir.c_str());
       
    names.push_back("Log Dir:");
-   vals.push_back(gConfigDirs.logDir.c_str());
+   vals.push_back(folderManager->logDir.c_str());
       
    names.push_back("Lua Dir:");
-   vals.push_back(gConfigDirs.luaDir.c_str());
+   vals.push_back(folderManager->luaDir.c_str());
       
    names.push_back("Robot Dir:");
-   vals.push_back(gConfigDirs.robotDir.c_str());
+   vals.push_back(folderManager->robotDir.c_str());
       
    names.push_back("Screenshot Dir:");
-   vals.push_back(gConfigDirs.screenshotDir.c_str());
+   vals.push_back(folderManager->screenshotDir.c_str());
       
    names.push_back("SFX Dir:");
-   vals.push_back(gConfigDirs.sfxDir.c_str());
+   vals.push_back(folderManager->sfxDir.c_str());
 
    names.push_back("Music Dir:");
-   vals.push_back(gConfigDirs.musicDir.c_str());
+   vals.push_back(folderManager->musicDir.c_str());
 
    names.push_back("");
    vals.push_back("");
@@ -176,10 +174,10 @@ static void initFoldersBlock(S32 textsize)
 }
 
 
-static S32 showFoldersBlock(F32 textsize, S32 ypos, S32 gap)
+static S32 showFoldersBlock(ConfigDirectories *folderManager, F32 textsize, S32 ypos, S32 gap)
 {
    if(names.size() == 0)      // Lazy init
-      initFoldersBlock((S32)textsize);
+      initFoldersBlock(folderManager, (S32)textsize);
 
    for(S32 i = 0; i < names.size(); i++)
    {
@@ -477,7 +475,7 @@ void DiagnosticUserInterface::render()
       drawCenteredString(ypos, textsize, "Currently reading data and settings from:");
       ypos += textsize + gap + gap;
 
-      ypos = showFoldersBlock((F32)textsize, ypos, gap+2);
+      ypos = showFoldersBlock(getGame()->getSettings()->getConfigDirs(), (F32)textsize, ypos, gap+2);
    }
    else if(mCurPage == 2)
    {

@@ -66,13 +66,14 @@ class ClientRef;
 class ClientGame;
 struct LevelInfo;
 struct ClientInfo;
+class GameSettings;
 
 class GameConnection: public ControlObjectConnection, public DataSendable
 {
 private:
    typedef ControlObjectConnection Parent;
 
-   void initialize();
+   void initialize(GameSettings *settings);
 
    time_t joinTime;
    bool mAcheivedConnection;
@@ -86,6 +87,7 @@ private:
    GameConnection *mPrev;
 
    static GameConnection gClientList;
+   GameSettings *mSettings;
 
 #ifndef ZAP_DEDICATED
    ClientGame *mClientGame;
@@ -159,9 +161,9 @@ public:
 
    static const S32 BanDuration = 30000;     // Players are banned for 30secs after being kicked
 
-   GameConnection();                                  // Constructor
+   GameConnection(GameSettings *settings = NULL);                           // Constructor
 #ifndef ZAP_DEDICATED
-   GameConnection(const ClientInfo *clientInfo);      // Constructor for ClientGame
+   GameConnection(GameSettings *settings, const ClientInfo *clientInfo);    // Constructor for ClientGame
 #endif
    ~GameConnection();                                 // Destructor
 

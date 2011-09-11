@@ -112,6 +112,7 @@ class Robot : public Ship
 
 private:
    string mFilename;            // Name of file script was loaded from
+   string mScriptDir;
 
    U16 mCurrentZone;            // Zone robot is currently in
 
@@ -131,7 +132,7 @@ private:
    static S32 mStepCount;           // If running for a certain number of steps, this will be > 0, while mIsPaused will be true
 
 public:
-   Robot(StringTableEntry robotName="", S32 team = -1, Point p = Point(0,0), F32 m = 1.0);      // Constructor
+   Robot(const StringTableEntry &robotName = "", const string &scriptDir = "", S32 team = -1, Point p = Point(0,0), F32 m = 1.0);      // Constructor
    ~Robot();                                                                                    // Destructor
 
    lua_State *L;                    // Main Lua state variable

@@ -309,24 +309,26 @@ bool fileExists(const string &path)
 }
 
 
-bool makeSureFolderExists(const string &dir)
+// Checks if specified folder exists; creates it if not
+bool makeSureFolderExists(const string &folder)
 {
-   if(!fileExists(dir))
+   if(!fileExists(folder))
    {
 #ifdef TNL_OS_WIN32
-      mkdir(dir.c_str());
+      mkdir(folder.c_str());
 #else
-      mkdir(dir.c_str(), 0755);
+      mkdir(folder.c_str(), 0755);
 #endif
-      if(!fileExists(dir))
+      if(!fileExists(folder))
       {
-         logprintf(LogConsumer::LogError, "Could not create folder %s", dir.c_str());
+         logprintf(LogConsumer::LogError, "Could not create folder %s", folder.c_str());
          return false;
       }
    }
 
    return true;
 }
+
 
 // Read files from folder
 bool getFilesFromFolder(const string &dir, Vector<string> &files, const string &extension)

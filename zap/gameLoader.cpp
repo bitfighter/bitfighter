@@ -227,14 +227,14 @@ stateLineParseDone:
 
 
 // Reads files by chunks, converts to lines
-bool LevelLoader::loadLevelFromFile(const char *filename, bool inEditor, GridDatabase *database)
+bool LevelLoader::loadLevelFromFile(const string &filename, bool inEditor, GridDatabase *database)
 {
    char levelChunk[MAX_LEVEL_LINE_LENGTH];     // Data buffer for reading in chunks of our level file
-   FILE *file = fopen(filename, "r");
+   FILE *file = fopen(filename.c_str(), "r");
 
 #ifdef SAM_ONLY
    // In case the level crash the game trying to load, want to know which file is the problem. 
-   logprintf("Loading %s", filename);
+   logprintf("Loading %s", filename.c_str());
 #endif
 
    if(!file)               // Can't open file
@@ -315,7 +315,6 @@ S32 QSORT_CALLBACK alphaSort(string *a, string *b)
 }
 
 
-extern ConfigDirectories gConfigDirs;
 extern CmdLineSettings gCmdLineSettings;
 
 // Create a list of levels for hosting a game, but does not read the files or do any validation of them

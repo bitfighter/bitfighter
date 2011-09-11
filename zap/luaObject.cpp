@@ -61,14 +61,12 @@ void LuaObject::setLuaArgs(lua_State *L, const string &scriptname, const Vector<
 }
 
 
-extern ConfigDirectories gConfigDirs;
-
- void LuaObject::setModulePath(lua_State *L)      // static
+ void LuaObject::setModulePath(lua_State *L, const string &scriptDir)      // static
  {
    lua_pushstring(L, "package");
    lua_gettable(L, LUA_GLOBALSINDEX);
    lua_pushstring(L, "path");
-   lua_pushstring(L, string(gConfigDirs.luaDir + "/?.lua").c_str());
+   lua_pushstring(L, (scriptDir + "/?.lua").c_str());
    lua_settable(L, -3);
  }
 

@@ -61,33 +61,10 @@ enum DisplayMode {
 };
 
 
-struct ConfigDirectories {
-   string levelDir;
-   string robotDir;
-   string sfxDir;
-   string musicDir;
-   string cacheDir;
-   string iniDir;
-   string logDir;
-   string screenshotDir;
-   string luaDir;
-   string rootDataDir;
-
-   static void resolveDirs();                                                                                    // calls resolveLevelDir()
-   static void resolveLevelDir();                                                                                // calls resolveLevelDir(x,y,z)
-   static string resolveLevelDir(const string &rootDataDir, const string &levelDir, const string &iniLevelDir);  // calls resolveLevelDir(x,y)
-   static string resolveLevelDir(const string &rootDataDir, const string &levelDir);
-
-   static string findLevelFile(const string &levelDir, const string &filename);
-   static string findLevelGenScript(const string &fileName);
-   static string findBotFile(const string &filename);
-};
-
-
 struct CmdLineSettings
 {
    CmdLineSettings() { init(); }    // Quickie constructor
-   void readParams(const Vector<string> &argv, S32 pass);
+   void readParams(GameSettings *settings, const Vector<string> &argv, S32 pass);
 
    bool dedicatedMode;     // Will server be dedicated?
 

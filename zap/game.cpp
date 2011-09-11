@@ -1025,11 +1025,11 @@ LevelInfo getLevelInfoFromFileChunk(char *chunk, S32 size, LevelInfo &levelInfo)
 }
 
 
-extern ConfigDirectories gConfigDirs;
-
 void ServerGame::loadNextLevelInfo()
 {
-   string levelFile = ConfigDirectories::findLevelFile(gConfigDirs.levelDir, mLevelInfos[mLevelLoadIndex].levelFileName.getString());
+   ConfigDirectories *folderManager = getSettings()->getConfigDirs();
+
+   string levelFile = folderManager->findLevelFile(mLevelInfos[mLevelLoadIndex].levelFileName.getString());
 
    if(getLevelInfo(levelFile, mLevelInfos[mLevelLoadIndex]))    // Populate mLevelInfos[i] with data from levelFile
       mLevelLoadIndex++;
@@ -1037,7 +1037,7 @@ void ServerGame::loadNextLevelInfo()
       mLevelInfos.erase(mLevelLoadIndex);
 
    if(mLevelLoadIndex == mLevelInfos.size())
-      ServerGame::hostingModePhase = DoneLoadingLevels;
+      hostingModePhase = DoneLoadingLevels;
 }
 
 
@@ -1449,11 +1449,13 @@ extern md5wrapper md5;
 
 bool ServerGame::loadLevel(const string &levelFileName)
 {
+   ConfigDirectories *folderManager = getSettings()->getConfigDirs();
+
    resetLevelInfo();
 
    mObjectsLoaded = 0;
 
-   string filename = ConfigDirectories::findLevelFile(gConfigDirs.levelDir, levelFileName);
+   string filename = folderManager->findLevelFile(levelFileName);
 
    cleanUp();
    if(filename == "")
@@ -1465,7 +1467,7 @@ bool ServerGame::loadLevel(const string &levelFileName)
 #ifdef PRINT_SOMETHING
    logprintf("1 server: %d, client %d", gServerGame->getGameObjDatabase()->getObjectCount(),gClientGame->getGameObjDatabase()->getObjectCount());
 #endif
-   if(loadLevelFromFile(filename.c_str(), false, getGameObjDatabase()))
+   if(loadLevelFromFile(filename, false, getGameObjDatabase()))
       mLevelFileHash = md5.getHashFromFile(filename);    // TODO: Combine this with the reading of the file we're doing anyway in initLevelFromFile()
    else
    {
@@ -1490,7 +1492,7 @@ bool ServerGame::loadLevel(const string &levelFileName)
 
    if(scriptName != "")
    {
-      string name = ConfigDirectories::findLevelGenScript(scriptName);  // Find full name of levelgen script
+      string name = folderManager->findLevelGenScript(scriptName);  // Find full name of levelgen script
 
       if(name == "")
       {
@@ -1501,13 +1503,15 @@ bool ServerGame::loadLevel(const string &levelFileName)
 
       // The script file will be the first argument, subsequent args will be passed on to the script.
       // Now we've crammed all our action into the constructor... is this ok design?
-      LuaLevelGenerator levelgen = LuaLevelGenerator(name, getGameType()->getScriptArgs(), getGridSize(), getGameObjDatabase(), this, gConsole);
+      string *dir = &folderManager->levelDir;
+      const Vector<string> *args = getGameType()->getScriptArgs();
+      LuaLevelGenerator levelgen = LuaLevelGenerator(name, *dir, args, getGridSize(), getGameObjDatabase(), this, gConsole);
    }
 
    // Script specified in INI globalLevelLoadScript
    if(gIniSettings.globalLevelScript != "")
    {
-      string name = ConfigDirectories::findLevelGenScript(gIniSettings.globalLevelScript);  // Find full name of levelgen script
+      string name = folderManager->findLevelGenScript(gIniSettings.globalLevelScript);  // Find full name of levelgen script
 
       if(name == "")
       {
@@ -1518,7 +1522,9 @@ bool ServerGame::loadLevel(const string &levelFileName)
 
       // The script file will be the first argument, subsequent args will be passed on to the script.
       // Now we've crammed all our action into the constructor... is this ok design?
-      LuaLevelGenerator levelgen = LuaLevelGenerator(name, getGameType()->getScriptArgs(), getGridSize(), getGameObjDatabase(), this, gConsole);
+      string *dir = &folderManager->levelDir;
+      const Vector<string> *args = getGameType()->getScriptArgs();
+      LuaLevelGenerator levelgen = LuaLevelGenerator(name, *dir, args, getGridSize(), getGameObjDatabase(), this, gConsole);
    }
 
    //  Check after script, script might add Teams
@@ -1835,7 +1841,6 @@ void ServerGame::gameEnded()
    mLevelSwitchTimer.reset(LevelSwitchTime);
 }
 
-//extern ConfigDirectories gConfigDirs;
 
 S32 ServerGame::addUploadedLevelInfo(const char *filename, LevelInfo &info)
 {

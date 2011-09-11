@@ -24,8 +24,6 @@ namespace Zap {
 
 class ServerGame;
 extern ServerGame *gServerGame;
-extern ConfigDirectories gConfigDirs;
-
 
 
 FileType getResourceType(const char *fileType)
@@ -43,18 +41,18 @@ FileType getResourceType(const char *fileType)
 }
    
 
-static string getFullFilename(string filename, FileType fileType)
+static string getFullFilename(const ConfigDirectories *configDirs, string filename, FileType fileType)
 {
    // Don't return "" if empty directory, allow client load the file if on the same directory as EXE.
    string name;
    if(fileType == BOT_TYPE)
-      name = ConfigDirectories::findBotFile(filename);
+      name = configDirs->findBotFile(filename);
 
    else if(fileType == LEVEL_TYPE)
-      name = ConfigDirectories::findLevelFile(gConfigDirs.levelDir, filename);
+      name = configDirs->findLevelFile(filename);
 
    else if(fileType == LEVELGEN_TYPE)
-      name = ConfigDirectories::findLevelGenScript(filename);
+      name = configDirs->findLevelGenScript(filename);
 
    else
       name = "";
@@ -63,14 +61,14 @@ static string getFullFilename(string filename, FileType fileType)
 }
 
 
-static string getOutputFolder(FileType filetype)
+static string getOutputFolder(ConfigDirectories *folderManager, FileType filetype)
 {
    if(filetype == BOT_TYPE) 
-      return gConfigDirs.robotDir;
+      return folderManager->robotDir;
    else if(filetype == LEVEL_TYPE) 
-      return gConfigDirs.levelDir;
+      return folderManager->levelDir;
    else if(filetype == LEVELGEN_TYPE) 
-      return gConfigDirs.levelDir;
+      return folderManager->levelDir;
    else return "";
 }
 
@@ -80,7 +78,7 @@ extern bool writeToConsole();
 extern void exitToOs(S32 errcode);
 extern DataConnection *dataConn;
 
-void transferResource(const string &addr, const string &pw, const string &fileName, const string &resourceType, bool sending)
+void transferResource(GameSettings *settings, const string &addr, const string &pw, const string &fileName, const string &resourceType, bool sending)
 {
    writeToConsole();
 
@@ -101,7 +99,7 @@ void transferResource(const string &addr, const string &pw, const string &fileNa
       exitToOs(1);
    }
 
-   dataConn = new DataConnection(sending ? SEND_FILE : REQUEST_FILE, password, fileName, fileType);
+   dataConn = new DataConnection(settings, sending ? SEND_FILE : REQUEST_FILE, password, fileName, fileType);
 
    NetInterface *netInterface = new NetInterface(Address());
    dataConn->connect(netInterface, address);
@@ -141,13 +139,12 @@ void transferResource(const string &addr, const string &pw, const string &fileNa
 // For readability
 #define MAX_CHUNK_LEN HuffmanStringProcessor::MAX_SENDABLE_LINE_LENGTH
 
-SenderStatus DataSender::initialize(DataSendable *connection, string filename, FileType fileType)
+SenderStatus DataSender::initialize(DataSendable *connection, ConfigDirectories *folderManager, string filename, FileType fileType)
 {
-   string fullname = getFullFilename(filename, fileType);
+   string fullname = getFullFilename(folderManager, filename, fileType);
+
    if(fullname == "")
-   {
       return COULD_NOT_FIND_FILE;
-   }
 
    //ifstream file;
    //file.open(fullname.c_str());
@@ -156,9 +153,6 @@ SenderStatus DataSender::initialize(DataSendable *connection, string filename, F
    //if(!file.is_open())
    if(!file)
       return COULD_NOT_OPEN_FILE;
-
-
-
 
    // Allocate a buffer
    //char *buffer = new char[MAX_CHUNK_LEN + 1];      // 255 for data, + 1 for terminator
@@ -292,7 +286,7 @@ TNL_IMPLEMENT_RPC(DataConnection, c2sSendOrRequestFile,
    if(isRequest)     // Client wants to get a file from us... they should have a file open and waiting for this data
    {
       // Initialize on the server to start sending requested file -- will return OK if everything is set up right
-      SenderStatus stat = gServerGame->dataSender.initialize(this, filename.getString(), (FileType)(U32)filetype);
+      SenderStatus stat = gServerGame->dataSender.initialize(this, gServerGame->getSettings()->getConfigDirs(), filename.getString(), (FileType)(U32)filetype);
 
       if(stat != STATUS_OK)
       {
@@ -305,7 +299,9 @@ TNL_IMPLEMENT_RPC(DataConnection, c2sSendOrRequestFile,
    }
    else              // Client wants to send us a file -- get ready for incoming data!
    {
-      string folder = getOutputFolder((FileType)(U32)filetype);
+      ConfigDirectories *folderManager = gServerGame->getSettings()->getConfigDirs();
+
+      string folder = getOutputFolder(folderManager, (FileType)(U32)filetype);
 
       if(folder == "")     // filetype was bogus, will probably never happen
       {
@@ -335,7 +331,7 @@ TNL_IMPLEMENT_RPC(DataConnection, s2cOkToSend, (), (),
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 0)
 {
    // Initialize on the client to start sending file we want to send
-   SenderStatus stat = mDataSender.initialize(this, mFilename.c_str(), mFileType);
+   SenderStatus stat = mDataSender.initialize(this, mSettings->getConfigDirs(), mFilename.c_str(), mFileType);
    if(stat != STATUS_OK)
    {
       string msg = getErrorMessage(stat, mFilename);
@@ -384,7 +380,8 @@ void DataConnection::onConnectionEstablished()
 
       else if(mAction == REQUEST_FILE)
       {
-         string folder = getOutputFolder(mFileType);
+         ConfigDirectories *folderManager = gServerGame->getSettings()->getConfigDirs();
+         string folder = getOutputFolder(folderManager, mFileType);
 
          if(folder == "")     // filetype was bogus; should never happen
             logprintf("Error resolving folder!");      // But... we can save files without needing folder, so log and cary on

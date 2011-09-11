@@ -41,27 +41,29 @@ namespace Zap
 
 ScreenShooter::ScreenShooter()
 {
+   // Do nothing
 }
+
 
 ScreenShooter::~ScreenShooter()
 {
+   // Do nothing
 }
 
-extern ConfigDirectories gConfigDirs;
 
 // Thanks to the good developers of naev for excellent code to base this off of.
 // Much was copied directly.
-void ScreenShooter::saveScreenshot()
+void ScreenShooter::saveScreenshot(const string &folder)
 {
    // Let's find a filename to use
-   makeSureFolderExists(gConfigDirs.screenshotDir);
+   makeSureFolderExists(folder);
 
    string fullFilename;
    S32 ctr = 0;
 
    while(true)    // Settle in for the long haul, boys.  This seems crazy...
    {
-      fullFilename = joindir(gConfigDirs.screenshotDir.c_str(), "screenshot_" + itos(ctr++) + ".png");
+      fullFilename = joindir(folder, "screenshot_" + itos(ctr++) + ".png");
 
       if(!fileExists(fullFilename))
          break;

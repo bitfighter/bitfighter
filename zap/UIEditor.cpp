@@ -517,31 +517,33 @@ void EditorUserInterface::makeSureThereIsAtLeastOneTeam()
 
 
 extern S32 gMaxPolygonPoints;
-extern ConfigDirectories gConfigDirs;
 
 // Loads a level
 void EditorUserInterface::loadLevel()
 {
+   ClientGame *game = getGame();
+
    // Initialize
-   clearDatabase(getGame()->getEditorDatabase());
-   getGame()->clearTeams();
+   clearDatabase(game->getEditorDatabase());
+   game->clearTeams();
    mSnapObject = NULL;
    mSnapVertexIndex = NONE;
    mAddingVertex = false;
    clearLevelGenItems();
-   mLoadTarget = getGame()->getEditorDatabase();
+   mLoadTarget = game->getEditorDatabase();
    mGameTypeArgs.clear();
 
-   getGame()->resetLevelInfo();
+   game->resetLevelInfo();
 
    GameType *gameType = new GameType;
-   gameType->addToGame(getGame(), getGame()->getEditorDatabase());
+   gameType->addToGame(game, game->getEditorDatabase());
 
-   char fileBuffer[1024];
-   dSprintf(fileBuffer, sizeof(fileBuffer), "%s/%s", gConfigDirs.levelDir.c_str(), mEditFileName.c_str());
+   ConfigDirectories *folderManager = game->getSettings()->getConfigDirs();
+   string fileName = joindir(folderManager->levelDir, mEditFileName).c_str();
+
 
    // Process level file --> returns true if file found and loaded, false if not (assume it's a new level)
-   if(getGame()->loadLevelFromFile(fileBuffer, true, getGame()->getEditorDatabase()))   
+   if(game->loadLevelFromFile(fileName, true, game->getEditorDatabase()))   
    {
       // Loaded a level!
       makeSureThereIsAtLeastOneTeam(); // Make sure we at least have one team
@@ -567,7 +569,7 @@ void EditorUserInterface::loadLevel()
    //for(S32 i = 0; i < objList->size(); i++)
    //   objList->get(i)->processEndPoints();
 
-   getGame()->getWallSegmentManager()->recomputeAllWallGeometry(getGame()->getEditorDatabase());
+   game->getWallSegmentManager()->recomputeAllWallGeometry(game->getEditorDatabase());
    
    // Snap all engineered items to the closest wall, if one is found
    resnapAllEngineeredItems();
@@ -627,7 +629,8 @@ void EditorUserInterface::runLevelGenScript()
    // Set the load target to the levelgen db, as that's where we want our items stored
    mLoadTarget = &mLevelGenDatabase;
 
-   runScript(scriptName, scriptArgs);
+   ConfigDirectories *folderManager = getGame()->getSettings()->getConfigDirs();
+   runScript(folderManager, scriptName, scriptArgs);
 
    // Reset the target
    mLoadTarget = getGame()->getEditorDatabase();
@@ -635,9 +638,9 @@ void EditorUserInterface::runLevelGenScript()
 
 
 // Runs an arbitrary lua script.  Command is first item in cmdAndArgs, subsequent items are the args, if any
-void EditorUserInterface::runScript(const string &scriptName, const Vector<string> &args)
+void EditorUserInterface::runScript(const ConfigDirectories *folderManager, const string &scriptName, const Vector<string> &args)
 {
-   string name = ConfigDirectories::findLevelGenScript(scriptName);  // Find full name of levelgen script
+   string name = folderManager->findLevelGenScript(scriptName);  // Find full name of levelgen script
 
    if(name == "")
    {
@@ -920,7 +923,7 @@ void processEditorConsoleCommand(void *gamePtr, OGLCONSOLE_Console console, char
          words.erase(0);
 
          ui->onBeforeRunScriptFromConsole();
-         ui->runScript(name, words);
+         ui->runScript(game->getSettings()->getConfigDirs(), name, words);
          ui->onAfterRunScriptFromConsole();
       }
    }   
@@ -958,7 +961,9 @@ extern void actualizeScreenMode(bool);
 
 void EditorUserInterface::onActivate()
 {
-   if(gConfigDirs.levelDir == "")      // Never did resolve a leveldir... no editing for you!
+   ConfigDirectories *folderManager = getGame()->getSettings()->getConfigDirs();
+
+   if(folderManager->levelDir == "")      // Never did resolve a leveldir... no editing for you!
    {
       getUIManager()->reactivatePrevUI();     // Must come before the error msg, so it will become the previous UI when that one exits
 
@@ -3561,9 +3566,11 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
          return false;
       }
 
-      char fileNameBuffer[256];
-      dSprintf(fileNameBuffer, sizeof(fileNameBuffer), "%s/%s", gConfigDirs.levelDir.c_str(), saveName.c_str());
-      FILE *f = fopen(fileNameBuffer, "w");
+      ConfigDirectories *folderManager = getGame()->getSettings()->getConfigDirs();
+
+      const char *fileName = joindir(folderManager->levelDir, saveName).c_str();
+
+      FILE *f = fopen(fileName, "w");
       if(!f)
          throw(SaveException("Could not open file for writing"));
 

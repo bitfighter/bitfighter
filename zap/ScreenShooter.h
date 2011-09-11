@@ -30,7 +30,10 @@
 
 #include "png.h"
 
+#include <string>
+
 using namespace TNL;
+using namespace std;
 
 namespace Zap
 {
@@ -42,13 +45,13 @@ private:
    static const S32 BytesPerPixel = 3;  // 3 bytes = 24 bits
 
    static bool writePNG(const char *file_name, png_bytep *rows,
-         S32 width, S32 height, S32 colorType, S32 bitDepth);
+                        S32 width, S32 height, S32 colorType, S32 bitDepth);
 
 public:
    ScreenShooter();
    virtual ~ScreenShooter();
 
-   static void saveScreenshot();
+   static void saveScreenshot(const string &folder);
 };
 
 } /* namespace Zap */

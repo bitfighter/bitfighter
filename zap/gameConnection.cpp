@@ -64,7 +64,7 @@ GameConnection GameConnection::gClientList;
 TNL_IMPLEMENT_NETCONNECTION(GameConnection, NetClassGroupGame, true);
 
 // Constructor
-GameConnection::GameConnection()
+GameConnection::GameConnection(GameSettings *settings)
 {
    mVote = 0;
    mVoteTime = 0;
@@ -72,14 +72,14 @@ GameConnection::GameConnection()
 #ifndef ZAP_DEDICATED
    mClientGame = NULL;
 #endif
-	initialize();
+	initialize(settings);
 }
 
 
 #ifndef ZAP_DEDICATED
-GameConnection::GameConnection(const ClientInfo *clientInfo)
+GameConnection::GameConnection(GameSettings *settings, const ClientInfo *clientInfo)
 {
-   initialize();
+   initialize(settings);
 
    if(clientInfo->name == "")
       mClientName = "Chump";
@@ -94,8 +94,10 @@ GameConnection::GameConnection(const ClientInfo *clientInfo)
 #endif
 
 
-void GameConnection::initialize()
+void GameConnection::initialize(GameSettings *settings)
 {
+   mSettings = settings;
+
    mNext = mPrev = this;
    setTranslatesStrings();
    mInCommanderMap = false;
@@ -269,7 +271,8 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestCurrentLevel, (), (), NetClassGroupG
    const char *filename = gServerGame->getCurrentLevelFileName().getString();
    
    // Initialize on the server to start sending requested file -- will return OK if everything is set up right
-   SenderStatus stat = gServerGame->dataSender.initialize(this, filename, LEVEL_TYPE);
+   ConfigDirectories *folderManager = gServerGame->getSettings()->getConfigDirs();
+   SenderStatus stat = gServerGame->dataSender.initialize(this, folderManager, filename, LEVEL_TYPE);
 
    if(stat != STATUS_OK)
    {
@@ -313,8 +316,6 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendLine, (StringPtr line), (line),
 }
 
 
-extern ConfigDirectories gConfigDirs;
-
 // << DataSendable >>
 // When sender is finished, it sends a commandComplete message
 TNL_IMPLEMENT_RPC(GameConnection, s2rCommandComplete, (RangedU32<0,SENDER_STATUS_COUNT> status), (status), 
@@ -329,7 +330,8 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rCommandComplete, (RangedU32<0,SENDER_STATUS
 
    if(mClientGame)
    {
-      const char *outputFilename = strictjoindir(gConfigDirs.levelDir, mClientGame->getRemoteLevelDownloadFilename()).c_str();
+      string levelDir = mSettings->getConfigDirs()->levelDir;
+      const char *outputFilename = strictjoindir(levelDir, mClientGame->getRemoteLevelDownloadFilename()).c_str();
 
       if(strcmp(outputFilename, ""))
       {
@@ -557,26 +559,29 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
    }
 
    // Update our in-memory copies of the param, but do not save the new values to the INI
+   GameSettings *settings = gServerGame->getSettings();
+
    if(type == (U32)LevelChangePassword)
-      gServerGame->getSettings()->setLevelChangePassword(param.getString(), false);
+      settings->setLevelChangePassword(param.getString(), false);
    
    else if(type == (U32)AdminPassword)
-      gServerGame->getSettings()->setAdminPassword(param.getString(), false);
+      settings->setAdminPassword(param.getString(), false);
    
    else if(type == (U32)ServerPassword)
-      gServerGame->getSettings()->setServerPassword(param.getString(), false);
+      settings->setServerPassword(param.getString(), false);
    
    else if(type == (U32)ServerName)
-      gServerGame->getSettings()->setHostName(param.getString(), false);
+      settings->setHostName(param.getString(), false);
    
    else if(type == (U32)ServerDescr)
-      gServerGame->getSettings()->setHostDescr(param.getString(), false);
+      settings->setHostDescr(param.getString(), false);
 
    else if(type == (U32)LevelDir)
    {
-      string candidate = ConfigDirectories::resolveLevelDir(gConfigDirs.rootDataDir, param.getString());
+      ConfigDirectories *folderManager = settings->getConfigDirs();
+      string candidate = folderManager->resolveLevelDir(param.getString());
 
-      if(gConfigDirs.levelDir == candidate)
+      if(folderManager->levelDir == candidate)
       {
          s2cDisplayErrorMessage("!!! Specified folder is already the current level folder");
          return;
@@ -589,7 +594,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
          return;
       }
 
-      Vector<string> newLevels = LevelListLoader::buildLevelList(candidate, gServerGame->getSettings()->getLevelSkipList(), true);
+      Vector<string> newLevels = LevelListLoader::buildLevelList(candidate, settings->getLevelSkipList(), true);
 
       if(newLevels.size() == 0)
       {
@@ -603,7 +608,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
 
       for(S32 i = 0; i < newLevels.size(); i++)
       {
-         string levelFile = ConfigDirectories::findLevelFile(candidate, newLevels[i]);
+         string levelFile = folderManager->findLevelFile(candidate, newLevels[i]);
 
          LevelInfo levelInfo(newLevels[i]);
          if(gServerGame->getLevelInfo(levelFile, levelInfo))
@@ -623,7 +628,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
          return;
       }
 
-      gConfigDirs.levelDir = candidate;
+      folderManager->levelDir = candidate;
 
       // Send the new list of levels to all levelchangers
       for(GameConnection *walk = getClientList(); walk; walk = walk->getNextClient())
@@ -638,7 +643,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
    {
       // Avoid duplicates on skip list
       bool found = false;
-      Vector<string> *skipList = gServerGame->getSettings()->getLevelSkipList();
+      Vector<string> *skipList = settings->getLevelSkipList();
 
       for(S32 i = 0; i < skipList->size(); i++)
          if(skipList->get(i) == gServerGame->getCurrentLevelFileName().getString())    // Already on our list!
@@ -711,7 +716,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
       msg = serverNameChanged;
       // If we've changed the server name, notify all the clients
       for(GameConnection *walk = getClientList(); walk; walk = walk->getNextClient())
-         walk->s2cSetServerName(gServerGame->getSettings()->getHostName());
+         walk->s2cSetServerName(settings->getHostName());
    }
    else if(type == (U32)ServerDescr)
       msg = serverDescrChanged;
@@ -1160,7 +1165,8 @@ void GameConnection::c2sRequestLevelChange2(S32 newLevelIndex, bool isRelative)
       return;
 
    // Use voting when there is no level change password and there is more then 1 player
-   if(!mIsAdmin && gServerGame->getSettings()->getLevelChangePassword().length() == 0 && gServerGame->getPlayerCount() > 1 && gServerGame->voteStart(this, 0, newLevelIndex))
+   if(!mIsAdmin && gServerGame->getSettings()->getLevelChangePassword().length() == 0 && 
+         gServerGame->getPlayerCount() > 1 && gServerGame->voteStart(this, 0, newLevelIndex))
       return;
 
    bool restart = false;
@@ -1300,12 +1306,14 @@ extern LevelInfo getLevelInfoFromFileChunk(char *chunk, S32 size, LevelInfo &lev
 
 TNL_IMPLEMENT_RPC(GameConnection, s2rSendDataParts, (U8 type, ByteBufferPtr data), (type, data), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 0)
 {
-   if(!gIniSettings.allowMapUpload && !isAdmin())  // don't need it when not enabled, saves some memory. May remove this, it is checked again leter.
+   ConfigDirectories *folderManager = mSettings->getConfigDirs();
+
+   if(!gIniSettings.allowMapUpload && !isAdmin())  // Don't need it when not enabled, saves some memory. May remove this, it is checked again leter.
       return;
 
    if(mDataBuffer)
    {
-      if(mDataBuffer->getBufferSize() < maxDataBufferSize)  // limit memory, to avoid eating too much memory.
+      if(mDataBuffer->getBufferSize() < maxDataBufferSize)  // Limit memory consumption
          mDataBuffer->appendBuffer(*data.getPointer());
    }
    else
@@ -1314,9 +1322,9 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendDataParts, (U8 type, ByteBufferPtr data
       mDataBuffer->takeOwnership();
    }
 
-   if(type == 1 &&
-      (gIniSettings.allowMapUpload || (gIniSettings.allowAdminMapUpload && isAdmin())) &&
-      !isInitiator() && mDataBuffer->getBufferSize() != 0)
+   if(type == 1 &&      // TODO: 1 Should be an enum, means we're transmitting a level file.  Probably already have an enum that would work.
+         (gIniSettings.allowMapUpload || (gIniSettings.allowAdminMapUpload && isAdmin())) &&
+         !isInitiator() && mDataBuffer->getBufferSize() != 0)
    {
       LevelInfo levelInfo("Transmitted Level");
       getLevelInfoFromFileChunk((char *)mDataBuffer->getBuffer(), mDataBuffer->getBufferSize(), levelInfo);
@@ -1326,7 +1334,8 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendDataParts, (U8 type, ByteBufferPtr data
 
       string titleName = makeFilenameFromString(levelInfo.levelName.getString());
       dSprintf(filename, sizeof(filename), "upload_%s.level", titleName.c_str());
-      string fullFilename = strictjoindir(gConfigDirs.levelDir, filename);
+
+      string fullFilename = strictjoindir(folderManager->levelDir, filename);
 
       FILE *f = fopen(fullFilename.c_str(), "wb");
       if(f)
@@ -1352,7 +1361,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendDataParts, (U8 type, ByteBufferPtr data
 bool GameConnection::s2rUploadFile(const char *filename, U8 type)
 {
    BitStream s;
-   const U32 partsSize = 512;   // max 1023, limited by ByteBufferSizeBitSize=10
+   const U32 partsSize = 512;   // max 1023, limited by ByteBufferSizeBitSize value of 10
 
    FILE *f = fopen(filename, "rb");
 
@@ -1362,7 +1371,7 @@ bool GameConnection::s2rUploadFile(const char *filename, U8 type)
       while(size == partsSize)
       {
          ByteBuffer *bytebuffer = new ByteBuffer(512);
-         //bytebuffer->resize(512);
+
          size = (U32)fread(bytebuffer->getBuffer(), 1, bytebuffer->getBufferSize(), f);
 
          if(size != partsSize)
@@ -1373,6 +1382,7 @@ bool GameConnection::s2rUploadFile(const char *filename, U8 type)
       fclose(f);
       return true;
    }
+
    return false;
 }
 

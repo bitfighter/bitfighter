@@ -287,7 +287,7 @@ void Event::onKeyDown(SDLKey key, SDLMod mod, U16 unicode)
 
    // CTRL + Q --> screenshot!
    else if(key == SDLK_q && (mod & KMOD_CTRL))
-      ScreenShooter::saveScreenshot();
+      ScreenShooter::saveScreenshot(gClientGame->getSettings()->getConfigDirs()->screenshotDir);
 
    // The rest
    else

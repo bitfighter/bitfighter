@@ -1144,15 +1144,17 @@ void HostMenuUserInterface::onActivate()
 
 
 extern void initHostGame(Address bindAddress, GameSettings *settings, Vector<string> &levelList, bool testMode, bool dedicatedServer);
-extern ConfigDirectories gConfigDirs;
 extern U16 DEFAULT_GAME_PORT;
 
 static void startHostingCallback(ClientGame *game, U32 unused)
 {
    game->getUIManager()->getHostMenuUserInterface()->saveSettings();
 
-   Vector<string> levelList = LevelListLoader::buildLevelList(gConfigDirs.levelDir, game->getSettings()->getLevelSkipList());
-   initHostGame(Address(IPProtocol, Address::Any, DEFAULT_GAME_PORT), game->getSettings(), levelList, false, false);
+   GameSettings *settings = game->getSettings();
+   ConfigDirectories *folderManager = settings->getConfigDirs();
+
+   Vector<string> levelList = LevelListLoader::buildLevelList(folderManager->levelDir, settings->getLevelSkipList());
+   initHostGame(Address(IPProtocol, Address::Any, DEFAULT_GAME_PORT), settings, levelList, false, false);
 }
 
 
@@ -1524,7 +1526,6 @@ static void processLevelSelectionCallback(ClientGame *game, U32 index)
 
 
 const U32 UPLOAD_LEVELS_BIT = 0x80000000;
-extern ConfigDirectories gConfigDirs;
 
 void LevelMenuSelectUserInterface::processSelection(U32 index)     
 {
@@ -1533,16 +1534,14 @@ void LevelMenuSelectUserInterface::processSelection(U32 index)
 
    if((index & UPLOAD_LEVELS_BIT) && (index & (~UPLOAD_LEVELS_BIT)) < U32(mLevels.size()))
    {
-      string filename = strictjoindir(gConfigDirs.levelDir, mLevels[index & (~UPLOAD_LEVELS_BIT)]);
+      ConfigDirectories *folderManager = getGame()->getSettings()->getConfigDirs();
+      string filename = strictjoindir(folderManager->levelDir, mLevels[index & (~UPLOAD_LEVELS_BIT)]);
 
-      if(!gc->s2rUploadFile(filename.c_str(),1))
-         getGame()->displayErrorMessage("Can't upload level: unable to read file");
+      if(!gc->s2rUploadFile(filename.c_str(), 1))     // TODO: 1 Should be an enum
+         getGame()->displayErrorMessage("!!! Can't upload level: unable to read file");
    }
    else
-   {
-      // The selection index is the level to load
-      gc->c2sRequestLevelChange(index, false);
-   }
+      gc->c2sRequestLevelChange(index, false);        // The selection index is the level to load
 
    getUIManager()->reactivateMenu(getUIManager()->getGameUserInterface());    // Jump back to the game menu
 }
@@ -1554,7 +1553,9 @@ void LevelMenuSelectUserInterface::onActivate()
    mMenuTitle = "CHOOSE LEVEL: [" + category + "]";
 
    // Replace with a getLevelCount() method on Game?
-   GameConnection *gc = getGame()->getConnectionToServer();
+   ClientGame *game = getGame();
+   GameConnection *gc = game->getConnectionToServer();
+
    if(!gc || !gc->mLevelInfos.size())
       return;
 
@@ -1568,12 +1569,13 @@ void LevelMenuSelectUserInterface::onActivate()
    if(!strcmp(category.c_str(), UPLOAD_LEVELS))
    {
       // Get all the playable levels in levelDir
-      mLevels = LevelListLoader::buildLevelList(gConfigDirs.levelDir, getGame()->getSettings()->getLevelSkipList());     
+      ConfigDirectories *folderManager = game->getSettings()->getConfigDirs();
+      mLevels = LevelListLoader::buildLevelList(folderManager->levelDir, game->getSettings()->getLevelSkipList());     
 
       for(S32 i = 0; i < mLevels.size(); i++)
       {
          c[0] = mLevels[i].c_str()[0];
-         menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(getGame(), i | UPLOAD_LEVELS_BIT, mLevels[i].c_str(), 
+         menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(game, i | UPLOAD_LEVELS_BIT, mLevels[i].c_str(), 
                                                                       processLevelSelectionCallback, "", stringToKeyCode(c))));
       }
    }
@@ -1586,7 +1588,7 @@ void LevelMenuSelectUserInterface::onActivate()
          !strcmp(category.c_str(), ALL_LEVELS) )
       {
          c[0] = gc->mLevelInfos[i].levelName.getString()[0];
-         menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(getGame(), i, gc->mLevelInfos[i].levelName.getString(), 
+         menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(game, i, gc->mLevelInfos[i].levelName.getString(), 
                                                                       processLevelSelectionCallback, "", stringToKeyCode(c))));
       }
    }

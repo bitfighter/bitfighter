@@ -63,7 +63,6 @@ namespace Zap
 
 {
 
-//extern ConfigDirectories gConfigDirs; // Fail to compile master.  Link errors, missing gConfigDirs.
 string gSqlite = "stats";
 
 // Sorts player stats by score, high to low

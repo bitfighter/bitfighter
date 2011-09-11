@@ -1583,27 +1583,27 @@ static string resolutionHelper(const string &cmdLineDir, const string &rootDataD
 }
 
 
-extern ConfigDirectories gConfigDirs;
 extern string gSqlite;
 
 // Doesn't handle leveldir -- that one is handled separately, later, because it requires input from the INI file
-void ConfigDirectories::resolveDirs()
+void ConfigDirectories::resolveDirs(GameSettings *settings)
 {
+   ConfigDirectories *configDirs = settings->getConfigDirs();
    string rootDataDir = gCmdLineSettings.dirs.rootDataDir;
 
    // rootDataDir used to specify the following folders
-   gConfigDirs.robotDir      = resolutionHelper(gCmdLineSettings.dirs.robotDir,      rootDataDir, "robots");
-   gConfigDirs.iniDir        = resolutionHelper(gCmdLineSettings.dirs.iniDir,        rootDataDir, "");
-   gConfigDirs.logDir        = resolutionHelper(gCmdLineSettings.dirs.logDir,        rootDataDir, "");
-   gConfigDirs.screenshotDir = resolutionHelper(gCmdLineSettings.dirs.screenshotDir, rootDataDir, "screenshots");
+   configDirs->robotDir      = resolutionHelper(gCmdLineSettings.dirs.robotDir,      rootDataDir, "robots");
+   configDirs->iniDir        = resolutionHelper(gCmdLineSettings.dirs.iniDir,        rootDataDir, "");
+   configDirs->logDir        = resolutionHelper(gCmdLineSettings.dirs.logDir,        rootDataDir, "");
+   configDirs->screenshotDir = resolutionHelper(gCmdLineSettings.dirs.screenshotDir, rootDataDir, "screenshots");
 
    // rootDataDir not used for these folders
-   gConfigDirs.cacheDir      = resolutionHelper(gCmdLineSettings.dirs.cacheDir,      "", "cache");
-   gConfigDirs.luaDir        = resolutionHelper(gCmdLineSettings.dirs.luaDir,        "", "scripts");
-   gConfigDirs.sfxDir        = resolutionHelper(gCmdLineSettings.dirs.sfxDir,        "", "sfx");
-   gConfigDirs.musicDir      = resolutionHelper(gCmdLineSettings.dirs.musicDir,      "", "music");
+   configDirs->cacheDir      = resolutionHelper(gCmdLineSettings.dirs.cacheDir,      "", "cache");
+   configDirs->luaDir        = resolutionHelper(gCmdLineSettings.dirs.luaDir,        "", "scripts");
+   configDirs->sfxDir        = resolutionHelper(gCmdLineSettings.dirs.sfxDir,        "", "sfx");
+   configDirs->musicDir      = resolutionHelper(gCmdLineSettings.dirs.musicDir,      "", "music");
 
-   gSqlite = gConfigDirs.logDir + "stats";
+   gSqlite = configDirs->logDir + "stats";
 }
 
 
@@ -1641,7 +1641,7 @@ void ConfigDirectories::resolveDirs()
 // If none of the above work, no hosting/editing for you!
 //
 // NOTE: See above for full explanation of what these functions are doing
-string ConfigDirectories::resolveLevelDir(const string &rootDataDir, const string &levelDir)     // static
+string ConfigDirectories::resolveLevelDir(const string &levelDir)    
 {
    if(levelDir != "")
       if(fileExists(levelDir))     // Check for a valid absolute path in levelDir
@@ -1665,9 +1665,9 @@ string ConfigDirectories::resolveLevelDir(const string &rootDataDir, const strin
 }
 
 
-string ConfigDirectories::resolveLevelDir(const string &rootDataDir, const string &levelDir, const string &iniLevelDir)     // static
+string ConfigDirectories::resolveLevelDir(const string &levelDir, const string &iniLevelDir)     // static
 {
-   string resolved = resolveLevelDir(rootDataDir, levelDir);
+   string resolved = resolveLevelDir(levelDir);
    if(resolved != "")
       return resolved;
 
@@ -1703,7 +1703,7 @@ string ConfigDirectories::resolveLevelDir(const string &rootDataDir, const strin
 
 #ifdef false
 // WARNING: May not still work...
-static void testLevelDirResolution()
+static void testLevelDirResolution(ConfigDirectories *configDirs)
 {
    // These need to exist!
    // c:\temp\leveldir
@@ -1722,35 +1722,35 @@ static void testLevelDirResolution()
    
    // rootDataDir, levelDir, iniLevelDir
    resolveLevelDir("c:/temp", "leveldir", "c:/ini/level/dir/");       // rootDataDir/levelDir
-   TNLAssertV(gConfigDirs.levelDir == "c:/temp/leveldir", ("Bad leveldir: %s", gConfigDirs.levelDir.c_str()));
+   TNLAssertV(configDirs->levelDir == "c:/temp/leveldir", ("Bad leveldir: %s", configDirs->levelDir.c_str()));
 
    resolveLevelDir("c:/temp/leveldir2", "leveldir", "c:/ini/level/dir/");       // rootDataDir/levels/levelDir
-   TNLAssertV(gConfigDirs.levelDir == "c:/temp/leveldir2/levels/leveldir", ("Bad leveldir: %s", gConfigDirs.levelDir.c_str()));
+   TNLAssertV(configDirs->levelDir == "c:/temp/leveldir2/levels/leveldir", ("Bad leveldir: %s", configDirs->levelDir.c_str()));
 
    resolveLevelDir("c:/temp/leveldir2", "c:/temp/leveldir", "c:/ini/level/dir/");       // levelDir
-   TNLAssertV(gConfigDirs.levelDir == "c:/temp/leveldir", ("Bad leveldir: %s", gConfigDirs.levelDir.c_str()));
+   TNLAssertV(configDirs->levelDir == "c:/temp/leveldir", ("Bad leveldir: %s", configDirs->levelDir.c_str()));
 
    resolveLevelDir("c:/temp/leveldir2", "nosuchfolder", "c:/ini/level/dir/");       // rootDataDir/levels
-   TNLAssertV(gConfigDirs.levelDir == "c:/temp/leveldir2/levels", ("Bad leveldir: %s", gConfigDirs.levelDir.c_str()));
+   TNLAssertV(configDirs->levelDir == "c:/temp/leveldir2/levels", ("Bad leveldir: %s", configDirs->levelDir.c_str()));
 
    resolveLevelDir("c:/temp/nosuchfolder", "leveldir", "c:/temp/");       // iniLevelDir/levelDir
-   TNLAssertV(gConfigDirs.levelDir == "c:/temp/leveldir", ("Bad leveldir: %s", gConfigDirs.levelDir.c_str()));
+   TNLAssertV(configDirs->levelDir == "c:/temp/leveldir", ("Bad leveldir: %s", configDirs->levelDir.c_str()));
 
    resolveLevelDir("c:/temp/nosuchfolder", "nosuchfolder", "c:/temp");       // iniLevelDir
-   TNLAssertV(gConfigDirs.levelDir == "c:/temp", ("Bad leveldir: %s", gConfigDirs.levelDir.c_str()));
+   TNLAssertV(configDirs->levelDir == "c:/temp", ("Bad leveldir: %s", configDirs->levelDir.c_str()));
 
    resolveLevelDir("c:/temp/nosuchfolder", "nosuchfolder", "c:/does/not/exist");       // total failure
-   TNLAssertV(gConfigDirs.levelDir == 0, "", ("Bad leveldir: %s", gConfigDirs.levelDir.c_str()));
+   TNLAssertV(configDirs->levelDir == 0, "", ("Bad leveldir: %s", configDirs->levelDir.c_str()));
 
    printf("passed leveldir resolution tests!\n");
 }
 #endif
 
 
-void ConfigDirectories::resolveLevelDir()    // static
+void ConfigDirectories::resolveLevelDir()  
 {
    //testLevelDirResolution();
-   gConfigDirs.levelDir = resolveLevelDir(gCmdLineSettings.dirs.rootDataDir, gCmdLineSettings.dirs.levelDir, gIniSettings.levelDir);
+   levelDir = resolveLevelDir(gCmdLineSettings.dirs.levelDir, gIniSettings.levelDir);
 }
 
 
@@ -1789,7 +1789,13 @@ static string checkName(const string &filename, const char *folders[], const cha
 }
 
 
-string ConfigDirectories::findLevelFile(const string &leveldir, const string &filename)         // static
+string ConfigDirectories::findLevelFile(const string &filename) const
+{
+   return findLevelFile(levelDir, filename);
+}
+
+
+string ConfigDirectories::findLevelFile(const string &leveldir, const string &filename) const
 {
 #ifdef TNL_OS_XBOX         // This logic completely untested for OS_XBOX... basically disables -leveldir param
    const char *folders[] = { "d:\\media\\levels\\", "" };
@@ -1802,18 +1808,18 @@ string ConfigDirectories::findLevelFile(const string &leveldir, const string &fi
 }
 
 
-string ConfigDirectories::findLevelGenScript(const string &filename)    // static
+string ConfigDirectories::findLevelGenScript(const string &filename) const
 {
-   const char *folders[] = { gConfigDirs.levelDir.c_str(), gConfigDirs.luaDir.c_str(), "" };
+   const char *folders[] = { levelDir.c_str(), luaDir.c_str(), "" };
    const char *extensions[] = { ".levelgen", ".lua", "" };
 
    return checkName(filename, folders, extensions);
 }
 
 
-string ConfigDirectories::findBotFile(const string &filename)           // static
+string ConfigDirectories::findBotFile(const string &filename) const          
 {
-   const char *folders[] = { gConfigDirs.robotDir.c_str(), "" };
+   const char *folders[] = { robotDir.c_str(), "" };
    const char *extensions[] = { ".bot", ".lua", "" };
 
    return checkName(filename, folders, extensions);
@@ -1841,83 +1847,85 @@ string IniSettings::getInputMode()
 // Cmd Line processing callbacks
 
 
-static void paramRootDataDir(const Vector<string> &words)
+static void paramRootDataDir(GameSettings *settings, const Vector<string> &words)
 {
    gCmdLineSettings.dirs.rootDataDir = words[0];
-   gConfigDirs.rootDataDir = words[0];             // Also sock it away here
+
+   ConfigDirectories *folderManager = settings->getConfigDirs();
+   folderManager->rootDataDir = words[0];             // Also sock it away here
 }
 
-static void paramLevelDir(const Vector<string> &words)
+static void paramLevelDir(GameSettings *settings, const Vector<string> &words)
 {
    gCmdLineSettings.dirs.levelDir = words[0];
 }
 
-static void paramIniDir(const Vector<string> &words)
+static void paramIniDir(GameSettings *settings, const Vector<string> &words)
 {
    gCmdLineSettings.dirs.iniDir= words[0];
 }
 
-static void paramLogDir(const Vector<string> &words)
+static void paramLogDir(GameSettings *settings, const Vector<string> &words)
 {
    gCmdLineSettings.dirs.logDir = words[0];
 }
 
-static void paramScriptsDir(const Vector<string> &words)
+static void paramScriptsDir(GameSettings *settings, const Vector<string> &words)
 {
    gCmdLineSettings.dirs.luaDir = words[0];
 }
 
-static void paramCacheDir(const Vector<string> &words)
+static void paramCacheDir(GameSettings *settings, const Vector<string> &words)
 {
    gCmdLineSettings.dirs.cacheDir = words[0];
 }
 
-static void paramRobotDir(const Vector<string> &words)
+static void paramRobotDir(GameSettings *settings, const Vector<string> &words)
 {
    gCmdLineSettings.dirs.robotDir = words[0];
 }
 
-static void paramScreenshotDir(const Vector<string> &words)
+static void paramScreenshotDir(GameSettings *settings, const Vector<string> &words)
 {
    gCmdLineSettings.dirs.screenshotDir = words[0];
 }
 
-static void paramSfxDir(const Vector<string> &words)
+static void paramSfxDir(GameSettings *settings, const Vector<string> &words)
 {
    gCmdLineSettings.dirs.sfxDir = words[0];
 }
 
-static void paramMusicDir(const Vector<string> &words)
+static void paramMusicDir(GameSettings *settings, const Vector<string> &words)
 {
    gCmdLineSettings.dirs.musicDir = words[0];
 }
 
-static void paramMaster(const Vector<string> &words)
+static void paramMaster(GameSettings *settings, const Vector<string> &words)
 {
    gCmdLineSettings.masterAddress = words[0];
 }
 
-static void paramHostAddr(const Vector<string> &words)
+static void paramHostAddr(GameSettings *settings, const Vector<string> &words)
 {
    gCmdLineSettings.hostaddr = words[0];
 }
 
-static void paramLoss(const Vector<string> &words)
+static void paramLoss(GameSettings *settings, const Vector<string> &words)
 {
    gCmdLineSettings.loss = stof(words[0]);
 }
 
-static void paramLag(const Vector<string> &words)
+static void paramLag(GameSettings *settings, const Vector<string> &words)
 {
    gCmdLineSettings.lag = stoi(words[0]);
 }
 
-static void paramForceUpdate(const Vector<string> &words)
+static void paramForceUpdate(GameSettings *settings, const Vector<string> &words)
 {
    gCmdLineSettings.forceUpdate = true;
 }
 
-static void paramDedicated(const Vector<string> &words)
+static void paramDedicated(GameSettings *settings, const Vector<string> &words)
 {
    gCmdLineSettings.dedicatedMode = true;
 
@@ -1925,106 +1933,106 @@ static void paramDedicated(const Vector<string> &words)
       gCmdLineSettings.dedicated = words[0];
 }
 
-static void paramName(const Vector<string> &words)
+static void paramName(GameSettings *settings, const Vector<string> &words)
 {
    gCmdLineSettings.name = words[0];
 }
 
-static void paramPassword(const Vector<string> &words)
+static void paramPassword(GameSettings *settings, const Vector<string> &words)
 {
    gCmdLineSettings.password = words[0];
 }
 
-static void paramServerPassword(const Vector<string> &words)
+static void paramServerPassword(GameSettings *settings, const Vector<string> &words)
 {
    gCmdLineSettings.serverPassword = words[0];
 }
 
-static void paramAdminPassword(const Vector<string> &words)
+static void paramAdminPassword(GameSettings *settings, const Vector<string> &words)
 {
    gCmdLineSettings.adminPassword = words[0];
 }
 
-static void paramLevelChangePassword(const Vector<string> &words)
+static void paramLevelChangePassword(GameSettings *settings, const Vector<string> &words)
 {
    gCmdLineSettings.levelChangePassword = words[0];
 }
 
-static void paramLevels(const Vector<string> &words)
+static void paramLevels(GameSettings *settings, const Vector<string> &words)
 {
    gCmdLineSettings.specifiedLevels = words;
 }
 
-static void paramHostName(const Vector<string> &words)
+static void paramHostName(GameSettings *settings, const Vector<string> &words)
 {
    gCmdLineSettings.hostname = words[0];
 }
 
-static void paramHostDescr(const Vector<string> &words)
+static void paramHostDescr(GameSettings *settings, const Vector<string> &words)
 {
    gCmdLineSettings.hostdescr = words[0];
 }
 
-static void paramMaxPlayers(const Vector<string> &words)
+static void paramMaxPlayers(GameSettings *settings, const Vector<string> &words)
 {
    gCmdLineSettings.maxPlayers = stoi(words[0]);
 }
 
-static void paramWindow(const Vector<string> &words)
+static void paramWindow(GameSettings *settings, const Vector<string> &words)
 {
    gCmdLineSettings.displayMode = DISPLAY_MODE_WINDOWED;
 }
 
-static void paramFullscreen(const Vector<string> &words)
+static void paramFullscreen(GameSettings *settings, const Vector<string> &words)
 {
    gCmdLineSettings.displayMode = DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED;
 }
 
-static void paramFullscreenStretch(const Vector<string> &words)
+static void paramFullscreenStretch(GameSettings *settings, const Vector<string> &words)
 {
    gCmdLineSettings.displayMode = DISPLAY_MODE_FULL_SCREEN_STRETCHED;
 }
 
-static void paramWinPos(const Vector<string> &words)
+static void paramWinPos(GameSettings *settings, const Vector<string> &words)
 {
    gCmdLineSettings.xpos = stoi(words[0]);
    gCmdLineSettings.ypos = stoi(words[1]);
 }
 
-static void paramWinWidth(const Vector<string> &words)
+static void paramWinWidth(GameSettings *settings, const Vector<string> &words)
 {
    gCmdLineSettings.winWidth = stoi(words[0]);
 }
 
 
 extern void exitToOs(S32 errcode);
-extern void transferResource(const string &addr, const string &pw, const string &fileName, const string &resourceType, bool sending);
+extern void transferResource(GameSettings *settings, const string &addr, const string &pw, const string &fileName, const string &resourceType, bool sending);
 
-static void paramGetRes(const Vector<string> &words)
+static void paramGetRes(GameSettings *settings, const Vector<string> &words)
 {
-   transferResource(words[0], words[1], words[2], words[3], false);
+   transferResource(settings, words[0], words[1], words[2], words[3], false);
 }
 
-static void paramSendRes(const Vector<string> &words)
+static void paramSendRes(GameSettings *settings, const Vector<string> &words)
 {
-   transferResource(words[0], words[1], words[2], words[3], true);
+   transferResource(settings, words[0], words[1], words[2], words[3], true);
 }
 
 
 extern bool writeToConsole();
 extern void printRules();
 
-static void paramRules(const Vector<string> &words)
+static void paramRules(GameSettings *settings, const Vector<string> &words)
 {
    writeToConsole();
    printRules();
    exitToOs(0);
 }
 
-static void paramHelp(const Vector<string> &words);    // Forward declare this one here; it is defined down below
+static void paramHelp(GameSettings *settings, const Vector<string> &words);    // Forward declare this one here; it is defined down below
 
 
-static void paramUseStick(const Vector<string> &words)
+static void paramUseStick(GameSettings *settings, const Vector<string> &words)
 {
 #ifndef ZAP_DEDICATED
    Joystick::UseJoystickNumber = stoi(words[0]) - 1;  // zero-indexed     //  TODO: should be part of gCmdLineSettings
@@ -2046,7 +2054,7 @@ struct ParamInfo {
    string paramName;
    S32 pass;
    ParamRequirements argsRequired;
-   void (*paramCallback)(const Vector<string> &args);
+   void (*paramCallback)(GameSettings *settings, const Vector<string> &args);
    S32 docLevel;     
    string paramString;
    string helpString;
@@ -2180,7 +2188,7 @@ static void resetChunker(const string &text)
 }
 
 
-static void paramHelp(const Vector<string> &words)
+static void paramHelp(GameSettings *settings, const Vector<string> &words)
 {
    for(S32 i = 0; i < S32(ARRAYSIZE(helpTitles)); i++)
    {
@@ -2285,7 +2293,7 @@ static void paramHelp(const Vector<string> &words)
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-void CmdLineSettings::readParams(const Vector<string> &argv, S32 pass)
+void CmdLineSettings::readParams(GameSettings *settings, const Vector<string> &argv, S32 pass)
 {
    S32 argc = argv.size();
    S32 argPtr = 0;
@@ -2365,7 +2373,7 @@ void CmdLineSettings::readParams(const Vector<string> &argv, S32 pass)
             }
 
             if(paramDefs[i].pass == pass)
-               paramDefs[i].paramCallback(params);    // Call the parameter processing function, if we're in the right pass
+               paramDefs[i].paramCallback(settings, params);    // Call the parameter processing function, if we're in the right pass
 
             break;
          }

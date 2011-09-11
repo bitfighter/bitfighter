@@ -193,11 +193,10 @@ static alureStream* musicStream;
 static ALuint musicSource;  // dedicated source for Music
 static MusicState musicState;
 static ALfloat musicVolume = 0;
+string SoundSystem::mMusicDir;
 
 static Vector<string> musicList;
 static S32 currentlyPlayingIndex;
-
-extern ConfigDirectories gConfigDirs;
 
 // Constructor
 SoundSystem::SoundSystem()
@@ -213,9 +212,9 @@ SoundSystem::~SoundSystem()
 }
 
 
-// Initialize the sound sub-system.
-// Use ALURE to ease the use of OpenAL.
-void SoundSystem::init()
+// Initialize the sound sub-system
+// Use ALURE to ease the use of OpenAL
+void SoundSystem::init(const string &sfxDir, const string &musicDir)
 {
    // Initialize the sound device
    if(!alureInitDevice(NULL, NULL))
@@ -223,6 +222,8 @@ void SoundSystem::init()
       logprintf(LogConsumer::LogError, "Failed to open OpenAL device: %s\n", alureGetErrorString());
       return;
    }
+
+   mMusicDir = musicDir;
 
    // Create source pool for all game sounds
    gFreeSources.resize(NumSamples);
@@ -245,6 +246,7 @@ void SoundSystem::init()
    // which is the "physically correct" model, however we'll use the simple
    // linear model
    alDistanceModel(AL_LINEAR_DISTANCE_CLAMPED);
+
    if(alGetError() != AL_NO_ERROR)
       logprintf(LogConsumer::LogWarning, "Failed to set proper sound gain distance model!  Sounds will be off..\n");
 
@@ -262,7 +264,7 @@ void SoundSystem::init()
          break;
 
       // Grab sound file location
-      string fileBuffer = joindir(gConfigDirs.sfxDir, gSFXProfiles[i].fileName);
+      string fileBuffer = joindir(sfxDir, gSFXProfiles[i].fileName);
 
       // Stick sound into a buffer
       if(alureBufferDataFromFile(fileBuffer.c_str(), gSfxBuffers[i]) == AL_FALSE)
@@ -273,11 +275,11 @@ void SoundSystem::init()
    }
 
    // Set up music list for streaming later
-   if(!getFilesFromFolder(gConfigDirs.musicDir, musicList))
-      logprintf(LogConsumer::LogWarning, "Could not read music files from folder \"%s\".  Game will proceed without music", gConfigDirs.musicDir.c_str());
+   if(!getFilesFromFolder("LLL", musicList))
+      logprintf(LogConsumer::LogWarning, "Could not read music files from folder \"%s\".  Game will proceed without music", musicDir.c_str());
    else if(musicList.size() == 0)
-      logprintf(LogConsumer::LogWarning, "No music files found in folder \"%s\".  Game will proceed without music", gConfigDirs.musicDir.c_str());
-   else
+      logprintf(LogConsumer::LogWarning, "No music files found in folder \"%s\".  Game will proceed without music", musicDir.c_str());
+   else     // Got some music!
    {
       // Create dedicated music source
       alGenSources(1, &musicSource);
@@ -299,13 +301,15 @@ void SoundSystem::init()
    gSFXValid = true;
 }
 
+
 void SoundSystem::shutdown()
 {
    if(!gSFXValid)
       return;
 
    // Stop and clean up music
-   if(gMusicValid) {
+   if(gMusicValid) 
+   {
       stopMusic();
       alureDestroyStream(musicStream, 0, NULL);
       alDeleteSources(1, &musicSource);
@@ -322,11 +326,13 @@ void SoundSystem::shutdown()
    // Clean up sources
    for (S32 i = 0; i < NumSamples; i++)
       alDeleteSources(1, &(gFreeSources[i]));
+
    gFreeSources.clear();
 
    // Shutdown device cv9
    alureShutdownDevice();
 }
+
 
 void SoundSystem::setListenerParams(Point pos, Point velocity)
 {
@@ -338,6 +344,7 @@ void SoundSystem::setListenerParams(Point pos, Point velocity)
    alListener3f(AL_POSITION, pos.x, pos.y, -mMaxDistance/2);
 }
 
+
 SFXHandle SoundSystem::playRecordedBuffer(ByteBufferPtr p, F32 gain)
 {
    SFXHandle ret = new SoundEffect(0, p, gain, Point(), Point());
@@ -345,12 +352,14 @@ SFXHandle SoundSystem::playRecordedBuffer(ByteBufferPtr p, F32 gain)
    return ret;
 }
 
+
 SFXHandle SoundSystem::playSoundEffect(U32 profileIndex, F32 gain)
 {
    SFXHandle ret = new SoundEffect(profileIndex, NULL, gain, Point(), Point());
    playSoundEffect(ret);
    return ret;
 }
+
 
 SFXHandle SoundSystem::playSoundEffect(U32 profileIndex, Point position, Point velocity, F32 gain)
 {
@@ -373,6 +382,7 @@ void SoundSystem::playSoundEffect(SFXHandle& effect)
       for(S32 i = 0; i < gPlayList.size(); i++)
          if(effect == gPlayList[i].getPointer())
             return;
+
       if(gPlayList.size() < 100)  // limit sounds, as search takes too long when list is big
          gPlayList.push_back(effect);
    }
@@ -415,6 +425,7 @@ void SoundSystem::unqueueBuffers(S32 sourceIndex)
       {
          ALuint buffer;
          alSourceUnqueueBuffers(gFreeSources[sourceIndex], 1, &buffer);
+
          if(alGetError() != AL_NO_ERROR)
             return;
 
@@ -434,6 +445,7 @@ void SoundSystem::unqueueBuffers(S32 sourceIndex)
    }
 }
 
+
 void SoundSystem::setMovementParams(SFXHandle& effect, Point position, Point velocity)
 {
    if(!gSFXValid)
@@ -441,9 +453,11 @@ void SoundSystem::setMovementParams(SFXHandle& effect, Point position, Point vel
 
    effect->mPosition = position;
    effect->mVelocity = velocity;
+
    if(effect->mSourceIndex != -1)
       updateMovementParams(effect);
 }
+
 
 void SoundSystem::updateMovementParams(SFXHandle& effect)
 {
@@ -738,7 +752,7 @@ void SoundSystem::playMusic(S32 listIndex)
 {
    musicState = MusicPlaying;
 
-   string musicFile = joindir(gConfigDirs.musicDir, musicList[listIndex]);
+   string musicFile = joindir(mMusicDir, musicList[listIndex]);
    musicStream = alureCreateStreamFromFile(musicFile.c_str(), MusicChunkSize, 0, NULL);
 
    if(!musicStream)

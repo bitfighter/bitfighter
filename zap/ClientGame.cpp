@@ -186,7 +186,7 @@ void ClientGame::joinGame(Address remoteAddress, bool isFromMaster, bool local)
    }
    else                                                         // Try a direct connection
    {
-      GameConnection *gameConnection = new GameConnection(getClientInfo());
+      GameConnection *gameConnection = new GameConnection(getSettings(), getClientInfo());
 
       setConnectionToServer(gameConnection);
 

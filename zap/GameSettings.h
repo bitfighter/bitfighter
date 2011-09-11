@@ -35,6 +35,35 @@ using namespace TNL;
 namespace Zap
 {
 
+class GameSettings;
+
+struct ConfigDirectories 
+{
+   string levelDir;
+   string robotDir;
+   string sfxDir;
+   string musicDir;
+   string cacheDir;
+   string iniDir;
+   string logDir;
+   string screenshotDir;
+   string luaDir;
+   string rootDataDir;
+
+   void resolveDirs(GameSettings *settings);                                   // calls resolveLevelDir()
+   void resolveLevelDir();                                                     // calls resolveLevelDir(x,y,z)
+   string resolveLevelDir(const string &levelDir, const string &iniLevelDir);  // calls resolveLevelDir(x,y)
+   string resolveLevelDir(const string &levelDir);
+
+   string findLevelFile(const string &filename) const;
+   string findLevelFile(const string &levelDir, const string &filename) const;
+   string findLevelGenScript(const string &fileName) const;
+   string findBotFile(const string &filename) const;
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
 class GameSettings
 {
 private:
@@ -50,7 +79,7 @@ private:
    string mLevelChangePassword;
 
    Vector<string> mLevelSkipList;   // Levels we'll never load, to create a pseudo delete function for remote server mgt
-
+   ConfigDirectories mFolderManager;
 
 public:
    string getHostName() { return mHostName; }
@@ -74,6 +103,7 @@ public:
    void initLevelChangePassword(const string &cmdLineVal, const string &iniVal);
 
    Vector<string> *getLevelSkipList() { return &mLevelSkipList; }
+   ConfigDirectories *getConfigDirs() { return &mFolderManager; }
 };
 
 

@@ -33,7 +33,6 @@ namespace Zap
 {
 
 static F32 sGridSize;
-static GridDatabase *sGridDatabase;
 static LevelLoader *mCaller;
 
 
@@ -41,7 +40,7 @@ string levelGenFile;     // Exists here so exception handler will know what file
 
 
 // C++ Constructor
-LuaLevelGenerator::LuaLevelGenerator(const string &scriptName, const Vector<string> *scriptArgs, F32 gridSize, GridDatabase *gridDatabase, 
+LuaLevelGenerator::LuaLevelGenerator(const string &scriptName, const string &scriptDir, const Vector<string> *scriptArgs, F32 gridSize, GridDatabase *gridDatabase, 
                                      LevelLoader *caller, OGLCONSOLE_Console console)
 {
    if(!fileExists(scriptName))      // Files should be checked before we get here, so this should never happen
@@ -51,9 +50,12 @@ LuaLevelGenerator::LuaLevelGenerator(const string &scriptName, const Vector<stri
    }
 
    mFilename = scriptName;
+   mScriptArgs = scriptArgs;
+   mScriptDir = scriptDir;
+
    levelGenFile = mFilename;
    mConsole = console;
-   sGridDatabase = gridDatabase;
+   mGridDatabase = gridDatabase;
 
    lua_State *L = lua_open();    // Create a new Lua interpreter
 
@@ -64,7 +66,7 @@ LuaLevelGenerator::LuaLevelGenerator(const string &scriptName, const Vector<stri
    }
    sGridSize = gridSize;
    mCaller = caller;
-   runScript(L, scriptName, scriptArgs, gridSize);
+   runScript(L, gridSize);
    cleanupAndTerminate(L);
 }
 
@@ -197,7 +199,7 @@ S32 LuaLevelGenerator::addWall(lua_State *L)
       logError(e.what());
    }
 
-   mCaller->parseLevelLine(line.c_str(), sGridDatabase, false, "Levelgen script: " + mFilename);
+   mCaller->parseLevelLine(line.c_str(), mGridDatabase, false, "Levelgen script: " + mFilename);
 
    return 0;
 }
@@ -221,7 +223,7 @@ S32 LuaLevelGenerator::addItem(lua_State *L)
    for(S32 i = 0; i < argc; i++)      // argc was already bounds checked above
       argv[i] = getString(L, i + 1, methodName);
 
-   processLevelLoadLine(argc, 0, argv, sGridDatabase, false, "Levelgen script: " + mFilename);      // For now, all ids are 0!
+   processLevelLoadLine(argc, 0, argv, mGridDatabase, false, "Levelgen script: " + mFilename);      // For now, all ids are 0!
 
    //clearStack();
 
@@ -244,7 +246,7 @@ S32 LuaLevelGenerator::addLevelLine(lua_State *L)
    checkArgCount(L, 1, methodName);
    const char *line = getString(L, 1, methodName);
 
-   mCaller->parseLevelLine(line, sGridDatabase, false, "Levelgen script: " + mFilename);
+   mCaller->parseLevelLine(line, mGridDatabase, false, "Levelgen script: " + mFilename);
 
    //clearStack();
 
@@ -273,19 +275,11 @@ S32 LuaLevelGenerator::pointCanSeePoint(lua_State *L)
    static const char *methodName = "LevelGenerator:pointCanSeePoint()";
 
    checkArgCount(L, 2, methodName);
-   Point p1 = getPoint(L, 1, methodName);
-   Point p2 = getPoint(L, 2, methodName);
 
-   // There's editor coordinates, and game coordinates.  Game coordinates are just editor coordinates * gridSize.  Scripts run
-   // in editor coordinates, so if the database is storing objects in game coords, we need to adjust our points.
-   //if(sGridDatabase->isUsingGameCoords())// with refactor, may not matter -- everything is "game coords" now...
-   //{
-      
-      p1 *= sGridSize; 
-      p2 *= sGridSize;
-   //}
+   Point p1 = getPoint(L, 1, methodName) *= sGridSize;
+   Point p2 = getPoint(L, 2, methodName) *= sGridSize;
 
-   return returnBool(L, sGridDatabase->pointCanSeePoint(p1, p2));
+   return returnBool(L, mGridDatabase->pointCanSeePoint(p1, p2));
 
    //clearStack();
 }
@@ -314,15 +308,13 @@ S32 LuaLevelGenerator::getPlayerCount(lua_State *L)
 }
 
 
-extern ConfigDirectories gConfigDirs;
-
 // TODO: This is almost identical to the same-named function in robot.cpp, but each call their own logError function.  How can we combine?
 bool LuaLevelGenerator::loadLuaHelperFunctions(lua_State *L, const char *caller)
 {
    // Load our standard robot library  
    // TODO: Read the file into memory, store that as a static string in the bot code, and then pass that to Lua rather than rereading this
    // every time a bot is created.
-   string fname = joindir(gConfigDirs.luaDir, "lua_helper_functions.lua");
+   string fname = joindir(mScriptDir, "lua_helper_functions.lua");
 
    if(luaL_loadfile(L, fname.c_str()))
    {
@@ -343,7 +335,7 @@ bool LuaLevelGenerator::loadLuaHelperFunctions(lua_State *L, const char *caller)
 
 bool LuaLevelGenerator::loadLevelGenHelperFunctions(lua_State *L)
 {
-   string fname = joindir(gConfigDirs.luaDir, "levelgen_helper_functions.lua");
+   string fname = joindir(mScriptDir, "levelgen_helper_functions.lua");
 
    if(luaL_loadfile(L, fname.c_str()))
    {
@@ -362,7 +354,7 @@ bool LuaLevelGenerator::loadLevelGenHelperFunctions(lua_State *L)
 }
 
 
-void LuaLevelGenerator::runScript(lua_State *L, const string &scriptName, const Vector<string> *scriptArgs, F32 gridSize)
+void LuaLevelGenerator::runScript(lua_State *L, F32 gridSize)
 {
    // Register this class Luna
    Lunar<LuaLevelGenerator>::Register(L);
@@ -372,7 +364,7 @@ void LuaLevelGenerator::runScript(lua_State *L, const string &scriptName, const 
    lua_atpanic(L, luaPanicked);    // Register our panic function
 
    LuaUtil::openLibs(L);
-   LuaUtil::setModulePath(L);
+   LuaUtil::setModulePath(L, mScriptDir);
 
    lua_pushnumber(L, gridSize);
    lua_setglobal(L, "_GRID_SIZE");
@@ -380,11 +372,14 @@ void LuaLevelGenerator::runScript(lua_State *L, const string &scriptName, const 
    lua_pushlightuserdata(L, (void *)this);
    lua_setglobal(L, "LevelGen");
 
-   setLuaArgs(L, scriptName, scriptArgs);    // Put our args in to the Lua table "args"
+   setLuaArgs(L, mFilename, mScriptArgs);    // Put our args in to the Lua table "args"
                                              // MUST BE SET BEFORE LOADING LUA HELPER FNS (WHICH F$%^S WITH GLOBALS IN LUA)
 
-   if(!loadLuaHelperFunctions(L, "levelgen script")) return;
-   if(!loadLevelGenHelperFunctions(L)) return;
+   if(!loadLuaHelperFunctions(L, "levelgen script")) 
+      return;
+
+   if(!loadLevelGenHelperFunctions(L)) 
+      return;
 
 
    if(luaL_loadfile(L, mFilename.c_str()))

@@ -152,14 +152,14 @@ void LevelNameEntryUserInterface::onEscape()
 }
 
 
-extern ConfigDirectories gConfigDirs;
-
 void LevelNameEntryUserInterface::onActivate()
 {
    Parent::onActivate();
    mLevelIndex = 0;
 
-   mLevels = LevelListLoader::buildLevelList(gConfigDirs.levelDir, getGame()->getSettings()->getLevelSkipList());
+   GameSettings *settings = getGame()->getSettings();
+   ConfigDirectories *folderManager = settings->getConfigDirs();
+   mLevels = LevelListLoader::buildLevelList(folderManager->levelDir, settings->getLevelSkipList());
 
    // Remove the extension from the level file
    for(S32 i = 0; i < mLevels.size(); i++)

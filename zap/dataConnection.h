@@ -18,6 +18,8 @@ using namespace std;
 namespace Zap {
 
 class DataConnection;
+class GameSettings;
+struct ConfigDirectories;
 
 enum ActionType {
    SEND_FILE,
@@ -63,13 +65,13 @@ class DataSender
 private:
    bool mDone;
    S32 mLineCtr;
-   Vector<string> mLines;              // Store strings because storing char * will cause problems when source string is gone
+   Vector<string> mLines;           // Store strings because storing char * will cause problems when source string is gone
    SafePtr<Object> mConnection;     // need to use SafePtr, as it is possible that a player disconnect making it no longer valid
    FileType mFileType;
 
 public:
    DataSender() { mDone = true; }        // Constructor 
-   SenderStatus initialize(DataSendable *connection, string filename, FileType fileType);   
+   SenderStatus initialize(DataSendable *connection, ConfigDirectories *folderManager, string filename, FileType fileType);   
 
    bool isDone() { return mDone; }
    void sendNextLine();
@@ -94,20 +96,26 @@ private:
 
    bool connectionsAllowed();
 
+   GameSettings *mSettings;
+
 public:
    // Quickie Constructor
-   DataConnection(ActionType action = NO_ACTION, string password = "", string filename = "", FileType fileType = LEVELGEN_TYPE) 
+   DataConnection(GameSettings *settings = NULL, ActionType action = NO_ACTION, string password = "", string filename = "", FileType fileType = LEVELGEN_TYPE) 
    { 
+      mSettings = settings;
       mAction = action; 
       mFilename = filename; 
       mFileType = fileType;
       mPassword = password;
+
       mOutputFile = NULL;
    }     
 
-   DataConnection(const Nonce &clientId)
+   DataConnection(GameSettings *settings, const Nonce &clientId)
    {
+      mSettings = settings;
       mClientId = clientId;
+
       mAction = REQUEST_CURRENT_LEVEL;
    }
 
