@@ -159,7 +159,6 @@ private:
    void onReadLevelCreditsParam(S32 argc, const char **argv);
    
 protected:
-
    boost::shared_ptr<EditorObjectDatabase> mEditorDatabase;    // TODO: Move to clientGame
 
    virtual void cleanUp();
@@ -374,14 +373,19 @@ private:
 
    GameConnection *mSuspendor;            // Player requesting suspension if game suspended by request
 
+   // For simulating CPU stutter
+   Timer mStutterTimer;                   
+   Timer mStutterSleepTimer;
+   U32 mAccumulatedSleepTime;
+
    U32 mPlayerCount;
    void cleanUp();
 
 public:
-   U32 mInfoFlags;           // Not used for much at the moment, but who knows? --> propagates to master
    ServerGame(const Address &theBindAddress, GameSettings *settings, U32 maxPlayers, bool testMode, bool dedicated);    // Constructor
    virtual ~ServerGame();   // Destructor
 
+   U32 mInfoFlags;           // Not used for much at the moment, but who knows? --> propagates to master
    U32 mVoteTimer;
    S32 mVoteType;
    S32 mVoteYes;

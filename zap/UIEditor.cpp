@@ -3568,9 +3568,9 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
 
       ConfigDirectories *folderManager = getGame()->getSettings()->getConfigDirs();
 
-      const char *fileName = joindir(folderManager->levelDir, saveName).c_str();
+      string fileName = joindir(folderManager->levelDir, saveName).c_str();
 
-      FILE *f = fopen(fileName, "w");
+      FILE *f = fopen(fileName.c_str(), "w");
       if(!f)
          throw(SaveException("Could not open file for writing"));
 

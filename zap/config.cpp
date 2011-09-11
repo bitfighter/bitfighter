@@ -1920,6 +1920,11 @@ static void paramLag(GameSettings *settings, const Vector<string> &words)
    gCmdLineSettings.lag = stoi(words[0]);
 }
 
+static void paramStutter(GameSettings *settings, const Vector<string> &words)
+{
+   gCmdLineSettings.stutter = min(U32(stoi(words[0])), 1000);     // Limit to 0 - 1000
+}
+
 static void paramForceUpdate(GameSettings *settings, const Vector<string> &words)
 {
    gCmdLineSettings.forceUpdate = true;
@@ -2118,7 +2123,8 @@ ParamInfo paramDefs[] = {
 // Developer-oriented options
 { "loss",                1,  ONE_REQUIRED,  paramLoss,                4, "<float>",   "Simulate the specified amount of packet loss, from 0 (no loss) to 1 (all packets lost)", "You must specify a loss rate between 0 and 1 with the -loss option" },
 { "lag",                 1,  ONE_REQUIRED,  paramLag,                 4, "<int>",     "Simulate the specified amount of server lag (in milliseconds)",                          "You must specify a lag (in ms) with the -lag option" },
-{ "forceupdate",         1,  NO_PARAMETERS, paramForceUpdate,         4, "",          "Trick game into thinking it needs to update",                                           "" },
+{ "stutter",             1,  ONE_REQUIRED,  paramStutter,             4, "<int>",     "Simulate VPS CPU stutter (in milliseconds/second)",                                      "You must specify a value (in ms) with the -stutter option.  Values clamped to 0-1000" },
+{ "forceupdate",         1,  NO_PARAMETERS, paramForceUpdate,         4, "",          "Trick game into thinking it needs to update",                                            "" },
 
 // Advanced server management options
 { "getres",              1,  FOUR_REQUIRED, paramGetRes,              5, "<server address> <admin password> <resource name> <LEVEL|LEVELGEN|BOT>", "Send a resource to a remote server. Address must be specified in the form IP:nnn.nnn.nnn.nnn:port. The server must be running, have an admin password set, and have resource management enabled ([Host] section in the bitfighter.ini file).", "Usage: bitfighter getres <server address> <password> <file> <resource type>" },

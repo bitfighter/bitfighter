@@ -746,6 +746,8 @@ void LevelInfo::initialize()
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+extern CmdLineSettings gCmdLineSettings;
+
 // Constructor
 ServerGame::ServerGame(const Address &theBindAddress, GameSettings *settings, U32 maxPlayers, bool testMode, bool dedicated) : 
       Game(theBindAddress, settings)
@@ -782,6 +784,10 @@ ServerGame::ServerGame(const Address &theBindAddress, GameSettings *settings, U3
    mDedicated = dedicated;
 
    mGameSuspended = true; // server starts at zero players
+
+   mStutterTimer.reset(1001 - gCmdLineSettings.stutter);    // Use 1001 to ensure timer is never set to 0
+   mStutterSleepTimer.reset(gCmdLineSettings.stutter);
+   mAccumulatedSleepTime = 0;
 }
 
 
@@ -1574,10 +1580,34 @@ extern void shutdownBitfighter();      // defined in main.cpp
 // Top-level idle loop for server, runs only on the server by definition
 void ServerGame::idle(U32 timeDelta)
 {
-   if( mShuttingDown && (mShutdownTimer.update(timeDelta) || GameConnection::onlyClientIs(mShutdownOriginator)) )
+   if(mShuttingDown && (mShutdownTimer.update(timeDelta) || GameConnection::onlyClientIs(mShutdownOriginator)))
    {
       shutdownBitfighter();
       return;
+   }
+
+   // Simulate CPU stutter without impacting gClientGame
+   if(gCmdLineSettings.stutter > 0)
+   {
+      if(mStutterTimer.getCurrent() > 0)      
+      {
+         if(mStutterTimer.update(timeDelta))
+            mStutterSleepTimer.reset();               // Go to sleep
+      }
+      else     // We're sleeping
+      {
+         if(mStutterSleepTimer.update(timeDelta))     // Wake up!
+         {
+            mStutterTimer.reset();
+            timeDelta += mAccumulatedSleepTime;       // Give serverGame credit for time we slept
+            mAccumulatedSleepTime = 0;
+         }
+         else
+         {
+            mAccumulatedSleepTime += timeDelta;
+            return;
+         }
+      }
    }
 
    if(mVoteTimer != 0)
@@ -1726,6 +1756,7 @@ void ServerGame::idle(U32 timeDelta)
 
    if(timeDelta > 2000)   // prevents timeDelta from going too high, usually when after the server was frozen.
       timeDelta = 100;
+
    mCurrentTime += timeDelta;
    mNetInterface->checkIncomingPackets();
    checkConnectionToMaster(timeDelta);    // Connect to master server if not connected
@@ -1829,6 +1860,7 @@ void ServerGame::idle(U32 timeDelta)
       cycleLevel(mNextLevel);
       mNextLevel = NEXT_LEVEL;
    }
+
 
    // Lastly, play any sounds server might have made...
    if(isDedicated())   // non-dedicated will process sound in client side.

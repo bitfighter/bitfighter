@@ -70,8 +70,11 @@ struct CmdLineSettings
 
    string server;
    string masterAddress;   // Use this master server
+
    F32 loss;               // Simulate packet loss (0-1)
    U32 lag;                // Simulate server lag (in ms)
+   U32 stutter;            // Simulate VPS CPU stutter (0-1000)
+
    bool forceUpdate;       // For testing updater
    string dedicated;       // Holds bind address specified on cmd line following -dedicated parameter
    string name;
@@ -107,6 +110,7 @@ struct CmdLineSettings
 
       loss = 0;
       lag = 0;
+      stutter = 0;
       forceUpdate = false;
       maxPlayers = -1;
       displayMode = DISPLAY_MODE_UNKNOWN;

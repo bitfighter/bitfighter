@@ -93,7 +93,7 @@ void Timer::reset()
 void Timer::extend(S32 time)
 {
    U32 U32time = U32(abs(time));
-   if (time > 0)
+   if(time > 0)
    {
       mPeriod += U32time;
       mCurrentCounter += U32time;
@@ -109,7 +109,7 @@ void Timer::extend(S32 time)
 
 void Timer::reset(U32 newCounter, U32 newPeriod)
 {
-   if (newPeriod == 0)
+   if(newPeriod == 0)
       newPeriod = newCounter;
 
    mCurrentCounter = newCounter;
