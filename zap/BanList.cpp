@@ -139,7 +139,7 @@ bool BanList::processBanListLine(const string &line)
    string durationMinutesString = words[3];
 
    // Validate IP address string
-   if (!isValidIpAddress(ipAddress) && ipAddress.compare(banListWildcardCharater) != 0)
+   if (!(Address(ipAddress.c_str()).isValid()) && ipAddress.compare(banListWildcardCharater) != 0)
       return false;
 
    // nickname could be anything...
