@@ -64,7 +64,7 @@ private:
    string ptimeToIsoString(ptime time);
 
 public:
-   BanList();
+   BanList(const string &iniDir);
    virtual ~BanList();
 
    bool addToBanList(BanItem banItem);
@@ -74,8 +74,6 @@ public:
    bool writeToFile();
    void readFromFile();
 };
-
-extern BanList gBanList;
 
 } /* namespace Zap */
 #endif /* BANLIST_H_ */

@@ -26,6 +26,7 @@
 #ifndef _GAME_SETTINGS_H_
 #define _GAME_SETTINGS_H_
 
+#include "BanList.h"
 #include"tnlVector.h"
 #include <string>
 
@@ -64,24 +65,31 @@ struct ConfigDirectories
 
 ////////////////////////////////////////
 ////////////////////////////////////////
+
 class GameSettings
 {
 private:
    // Some items will be passthroughs to the underlying INI object; however, if a value can differ from the INI setting 
    // (such as when it can be overridden from the cmd line, or is set remotely), then we'll need to store the working value locally.
 
-   string mHostName;                // Server name used when hosting a game (default set in config.h, set in INI or on cmd line)
-   string mHostDescr;               // Brief description of host
+   string mHostName;                   // Server name used when hosting a game (default set in config.h, set in INI or on cmd line)
+   string mHostDescr;                  // Brief description of host
 
    // Various passwords
    string mServerPassword;
    string mAdminPassword;
    string mLevelChangePassword;
 
-   Vector<string> mLevelSkipList;   // Levels we'll never load, to create a pseudo delete function for remote server mgt
+   Vector<string> mLevelSkipList;      // Levels we'll never load, to create a pseudo delete function for remote server mgt
    ConfigDirectories mFolderManager;
 
+   BanList *mBanList;                  // Our ban list
+
 public:
+   ~GameSettings();   // Destructor
+
+   void setNewBanList(const string &iniDir) { mBanList = new BanList(iniDir); }
+
    string getHostName() { return mHostName; }
    void setHostName(const string &hostName, bool updateINI);
    void initHostName(const string &cmdLineVal, const string &iniVal);
@@ -104,6 +112,7 @@ public:
 
    Vector<string> *getLevelSkipList() { return &mLevelSkipList; }
    ConfigDirectories *getConfigDirs() { return &mFolderManager; }
+   BanList *getBanList() { return mBanList; }
 };
 
 

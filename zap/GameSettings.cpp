@@ -34,6 +34,11 @@ namespace Zap
 struct IniSettings;
 extern IniSettings gIniSettings;    // For now...
 
+// Destructor
+GameSettings::~GameSettings()
+{
+   delete mBanList;
+}
 
 // Helpers for init functions below
 static const string *choose(const string &firstChoice, const string &secondChoice)

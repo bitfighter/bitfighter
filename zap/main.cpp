@@ -139,7 +139,7 @@ using namespace TNL;
 #include "Colors.h"
 #include "ScreenInfo.h"
 #include "stringUtils.h"
-#include "BanList.h"
+#include "BanList.h"    
 
 #include <math.h>
 
@@ -200,8 +200,6 @@ Address gBindAddress(IPProtocol, Address::Any, DEFAULT_GAME_PORT);      // Good 
 ScreenInfo gScreenInfo;
 
 ZapJournal gZapJournal;          // Our main journaling object
-
-BanList gBanList;         // Our ban list
 
 void exitToOs(S32 errcode)
 {
@@ -624,6 +622,7 @@ FileLogConsumer gServerLog;       // We'll apply a filter later on, in main()
 
 
 extern void saveWindowMode(CIniFile *ini);
+class BanList;
 
 // Run when we're quitting the game, returning to the OS.  Saves settings and does some final cleanup to keep things orderly.
 // There are currently only 6 ways to get here (i.e. 6 legitimate ways to exit Bitfighter): 
@@ -676,7 +675,10 @@ void shutdownBitfighter()
 #endif
 
    saveSettingsToINI(&gINI, settings);    // Writes settings to the INI, then saves it to disk
-   gBanList.writeToFile();      // Writes ban list back to file XXX enable this when admin functionality is built in
+
+   // TODO: Put this in settings->save()
+   BanList *bl = settings->getBanList();
+   bl->writeToFile();      // Writes ban list back to file XXX enable this when admin functionality is built in
 
    delete settings;
 
@@ -1194,6 +1196,8 @@ int main(int argc, char **argv)
    // Before we go any further, we should get our log files in order.  Now we know where they'll be, as the 
    // only way to specify a non-standard location is via the command line, which we've now read.
    setupLogging(folderManager->logDir);
+
+   settings->setNewBanList(folderManager->iniDir);        // TODO: Integrate this into the reading and configuring of folders... but will do for now
 
    gCmdLineSettings.readParams(settings, argVector, 1);   // Read remaining cmd line params 
 

@@ -35,21 +35,25 @@
 namespace Zap
 {
 
-
-extern ConfigDirectories gConfigDirs;
-BanList::BanList()
+// Constructor
+BanList::BanList(const string &iniDir)
 {
    banListTokenDelimiter = "|";
    banListWildcardCharater = "*";
    banListFileName = "ban_list.txt";
+
    // Ban list file should be in iniDir
-   banListFilePath = joindir(gConfigDirs.iniDir, banListFileName);
-   serverBanList = Vector<BanItem>();
+   banListFilePath = joindir(iniDir, banListFileName);
+   //serverBanList = Vector<BanItem>();      ==> not needed... happens automatically!  raptor: Delete this when you've read it!
 }
 
+
+// Destructor
 BanList::~BanList()
 {
+   // Do nothing
 }
+
 
 bool BanList::addToBanList(BanItem banItem)
 {
@@ -83,6 +87,7 @@ bool BanList::writeToFile()
 
    // Write BanItems to file
    string line;
+
    for(S32 i = 0; i < serverBanList.size(); i++) {
       line = banItemToString(serverBanList[i]);
 

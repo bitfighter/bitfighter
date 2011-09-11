@@ -64,7 +64,7 @@ GameConnection GameConnection::gClientList;
 TNL_IMPLEMENT_NETCONNECTION(GameConnection, NetClassGroupGame, true);
 
 // Constructor
-GameConnection::GameConnection(GameSettings *settings)
+GameConnection::GameConnection()
 {
    mVote = 0;
    mVoteTime = 0;
@@ -72,14 +72,15 @@ GameConnection::GameConnection(GameSettings *settings)
 #ifndef ZAP_DEDICATED
    mClientGame = NULL;
 #endif
-	initialize(settings);
+
+	initialize();
 }
 
 
 #ifndef ZAP_DEDICATED
-GameConnection::GameConnection(GameSettings *settings, const ClientInfo *clientInfo)
+GameConnection::GameConnection(const ClientInfo *clientInfo)
 {
-   initialize(settings);
+   initialize();
 
    if(clientInfo->name == "")
       mClientName = "Chump";
@@ -94,10 +95,8 @@ GameConnection::GameConnection(GameSettings *settings, const ClientInfo *clientI
 #endif
 
 
-void GameConnection::initialize(GameSettings *settings)
+void GameConnection::initialize()
 {
-   mSettings = settings;
-
    mNext = mPrev = this;
    setTranslatesStrings();
    mInCommanderMap = false;
@@ -330,7 +329,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rCommandComplete, (RangedU32<0,SENDER_STATUS
 
    if(mClientGame)
    {
-      string levelDir = mSettings->getConfigDirs()->levelDir;
+      string levelDir = mClientGame->getSettings()->getConfigDirs()->levelDir;
       const char *outputFilename = strictjoindir(levelDir, mClientGame->getRemoteLevelDownloadFilename()).c_str();
 
       if(strcmp(outputFilename, ""))
@@ -1306,7 +1305,7 @@ extern LevelInfo getLevelInfoFromFileChunk(char *chunk, S32 size, LevelInfo &lev
 
 TNL_IMPLEMENT_RPC(GameConnection, s2rSendDataParts, (U8 type, ByteBufferPtr data), (type, data), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 0)
 {
-   ConfigDirectories *folderManager = mSettings->getConfigDirs();
+   ConfigDirectories *folderManager = mClientGame->getSettings()->getConfigDirs();
 
    if(!gIniSettings.allowMapUpload && !isAdmin())  // Don't need it when not enabled, saves some memory. May remove this, it is checked again leter.
       return;
@@ -1479,7 +1478,7 @@ bool GameConnection::readConnectRequest(BitStream *stream, NetConnection::Termin
    name[len] = 0;    // Terminate string properly
 
    // Now that we have the name, check if it is banned
-   if(gBanList.isBanned(getNetAddress().toString(), string(name)))
+   if(gServerGame->getSettings()->getBanList()->isBanned(getNetAddress().toString(), string(name)))
    {
       reason = ReasonBanned;
       return false;
