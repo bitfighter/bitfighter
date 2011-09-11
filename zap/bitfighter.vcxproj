@@ -142,6 +142,7 @@
     <ClCompile Include="..\zap\config.cpp" />
     <ClCompile Include="..\zap\controlObjectConnection.cpp" />
     <ClCompile Include="..\zap\CTFGame.cpp" />
+    <ClCompile Include="BanList.cpp" />
     <ClCompile Include="EngineeredItem.cpp" />
     <ClCompile Include="..\zap\flagItem.cpp" />
     <ClCompile Include="..\zap\game.cpp" />
