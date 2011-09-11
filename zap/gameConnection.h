@@ -73,7 +73,7 @@ class GameConnection: public ControlObjectConnection, public DataSendable
 private:
    typedef ControlObjectConnection Parent;
 
-   void initialize(GameSettings *settings);
+   void initialize();
 
    time_t joinTime;
    bool mAcheivedConnection;
@@ -87,7 +87,6 @@ private:
    GameConnection *mPrev;
 
    static GameConnection gClientList;
-   GameSettings *mSettings;
 
 #ifndef ZAP_DEDICATED
    ClientGame *mClientGame;
@@ -115,7 +114,6 @@ private:
    StringTableEntry mServerName;
    Vector<U32> mLoadout;
    SafePtr<ClientRef> mClientRef;
-
 
 public:
    Vector<U32> mOldLoadout;   // Server: to respawn with old loadout  Client: to check if using same loadout configuration
@@ -159,13 +157,13 @@ public:
       ParamTypeCount          // Must be last
    };
 
-   static const S32 BanDuration = 30000;     // Players are banned for 30secs after being kicked
+   static const S32 BanDuration = 30000;           // Players are banned for 30secs after being kicked
 
-   GameConnection(GameSettings *settings = NULL);                           // Constructor
+   GameConnection();                               // Constructor
 #ifndef ZAP_DEDICATED
-   GameConnection(GameSettings *settings, const ClientInfo *clientInfo);    // Constructor for ClientGame
+   GameConnection(const ClientInfo *clientInfo);   // Constructor for ClientGame
 #endif
-   ~GameConnection();                                 // Destructor
+   ~GameConnection();                              // Destructor
 
 
    // These from the DataSendable interface class

@@ -1975,7 +1975,7 @@ void Robot::spawn()
    // Cannot be in onAddedToGame, as it will error, trying to add robots while level map is not ready
 
    // Need GameConnection and ClientRef to keep track of score...  TODO: Make this work differently
-   GameConnection *gc = new GameConnection(getGame()->getSettings());   
+   GameConnection *gc = new GameConnection();   
 
    if(getName() == "")                          // Make sure bots have a name
       setName(GameConnection::makeUnique("Robot").c_str());

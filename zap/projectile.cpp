@@ -169,6 +169,7 @@ void Projectile::unpackUpdate(GhostConnection *connection, BitStream *stream)
    }
 }
 
+
 void Projectile::handleCollision(GameObject *hitObject, Point collisionPoint)
 {
    collided = true;
@@ -366,6 +367,7 @@ void Projectile::idle(GameObject::IdleCallPath path)
          mTimeRemaining -= deltaT;     // Decrement time left to live
    }
 }
+
 
 // Gets run when projectile suffers damage, like from a burst going off
 void Projectile::damageObject(DamageInfo *info)
