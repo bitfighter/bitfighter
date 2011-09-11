@@ -51,7 +51,7 @@ void GameNetInterface::banHost(const Address &bannedAddress, U32 bannedMilliseco
 }
 
 
-// Check if address is on the ban list
+// Check if address is on the temporary ban list
 bool GameNetInterface::isAddressBanned(const Address &theAddress)
 {
    for(S32 i = 0; i < mBanList.size(); i++)

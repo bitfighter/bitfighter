@@ -139,6 +139,7 @@ using namespace TNL;
 #include "Colors.h"
 #include "ScreenInfo.h"
 #include "stringUtils.h"
+#include "BanList.h"
 
 #include <math.h>
 
@@ -200,6 +201,7 @@ ScreenInfo gScreenInfo;
 
 ZapJournal gZapJournal;          // Our main journaling object
 
+BanList gBanList;         // Our ban list
 
 void exitToOs(S32 errcode)
 {
@@ -674,6 +676,7 @@ void shutdownBitfighter()
 #endif
 
    saveSettingsToINI(&gINI, settings);    // Writes settings to the INI, then saves it to disk
+//   gBanList.writeToFile();      // Writes ban list back to file XXX enable this when admin functionality is built in
 
    delete settings;
 

@@ -1912,7 +1912,7 @@ static void paramHostAddr(GameSettings *settings, const Vector<string> &words)
 
 static void paramLoss(GameSettings *settings, const Vector<string> &words)
 {
-   gCmdLineSettings.loss = stof(words[0]);
+   gCmdLineSettings.loss = (F32)stof(words[0]);
 }
 
 static void paramLag(GameSettings *settings, const Vector<string> &words)
@@ -2157,7 +2157,7 @@ static string makePad(U32 len)
 
 static const S32 MAX_HELP_LINE_LEN = 110;
 
-static U32 chunkStart;
+static size_t chunkStart;  // string::length returns size_t type which might be U64 for 64 bit systems.
 static string chunkText;
 
 // Return a chunk of text starting at start, with a max of len chars
@@ -2198,7 +2198,7 @@ static void paramHelp(GameSettings *settings, const Vector<string> &words)
       for(S32 j = 0; j < S32(ARRAYSIZE(paramDefs)); j++)
          if(paramDefs[j].docLevel == i)
          {
-            U32 len = makeParamStr(paramDefs[j]).length();
+            U32 len = (U32) makeParamStr(paramDefs[j]).length();
 
             if(len > maxSize)
                maxSize = len;
@@ -2252,7 +2252,7 @@ static void paramHelp(GameSettings *settings, const Vector<string> &words)
          U32 currPos = 0;
 
          string helpString = trim(paramDefs[j].helpString);
-         U32 length = helpString.length();                     // Make sure errant trailing spaces don't screw us up
+         //U32 length = (U32) helpString.length();  //(not used)                    // Make sure errant trailing spaces don't screw us up
 
          resetChunker(helpString);
 

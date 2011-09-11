@@ -41,6 +41,7 @@ WFLAGS=
 
 
 OBJECTS_SHARED=\
+   BanList.o\
    barrier.o\
    BotNavMeshZone.o\
    Color.o\
@@ -55,6 +56,7 @@ OBJECTS_SHARED=\
    gameLoader.o\
    gameNetInterface.o\
    gameObject.o\
+   GameSettings.o\
    gameStats.o\
    gameType.o\
    gameWeapons.o\

@@ -631,6 +631,14 @@
 			</File>
 		</Filter>
 		<File
+			RelativePath=".\BanList.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\BanList.h"
+			>
+		</File>
+		<File
 			RelativePath="..\clipper\clipper.cpp"
 			>
 		</File>
@@ -704,6 +712,10 @@
 		</File>
 		<File
 			RelativePath=".\gameNetInterface.h"
+			>
+		</File>
+		<File
+			RelativePath=".\GameSettings.cpp"
 			>
 		</File>
 		<File
