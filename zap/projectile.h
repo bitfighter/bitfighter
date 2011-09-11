@@ -113,10 +113,10 @@ protected:
       FirstFreeMask = Parent::FirstFreeMask << 3
    };
 
-public:
+   Point mPos;
+   Point mVelocity;
 
-   Point pos;
-   Point velocity;
+public:
    U32 mTimeRemaining;
    ProjectileType mType;
    WeaponType mWeaponType;
@@ -138,10 +138,10 @@ public:
    void damageObject(DamageInfo *info);
    void explode(GameObject *hitObject, Point p);
 
-   virtual Point getRenderVel() const { return velocity; }
-   virtual Point getActualVel() const { return velocity; }
-   virtual Point getRenderPos() const { return pos; }    // Unused??
-   virtual Point getActualPos() const { return pos; }
+   virtual Point getRenderVel() const { return mVelocity; }
+   virtual Point getActualVel() const { return mVelocity; }
+   virtual Point getRenderPos() const { return mPos; }    // Unused??
+   virtual Point getActualPos() const { return mPos; }
 
    void render() { renderItem(getActualPos()); }     // TODO: Get rid of this! (currently won't render without it)
    void renderItem(const Point &pos);
