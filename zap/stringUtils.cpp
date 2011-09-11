@@ -33,7 +33,7 @@
 #include <string>          // For... everything.  This is stringUtils, after all!
 #include <sstream>         // For parseString
 #include <sys/stat.h>      // For testing existence of folders
-#include <arpa/inet.h>     // For testing valid IP address
+//#include <arpa/inet.h>     // For testing valid IP address  -- blocks compile on VC++ 10
 
 #ifdef TNL_OS_WIN32
 #include <direct.h>        // For mkdir
@@ -462,11 +462,13 @@ string ctos(char c)
 
 bool isValidIpAddress(const string &ipAddress)
 {
-    struct sockaddr_in sa;
-    int result = inet_pton(AF_INET, ipAddress.c_str(), &(sa.sin_addr));
+    //struct sockaddr_in sa;
+    //int result = inet_pton(AF_INET, ipAddress.c_str(), &(sa.sin_addr));
 
-    // If result is 1 then it converted and therefore is a valid IP address
-    return result == 1;
+    //// If result is 1 then it converted and therefore is a valid IP address
+    //return result == 1;
+
+   return true;
 }
 
 };

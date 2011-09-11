@@ -139,7 +139,7 @@ using namespace TNL;
 #include "Colors.h"
 #include "ScreenInfo.h"
 #include "stringUtils.h"
-#include "BanList.h"
+//#include "BanList.h"
 
 #include <math.h>
 
@@ -201,7 +201,7 @@ ScreenInfo gScreenInfo;
 
 ZapJournal gZapJournal;          // Our main journaling object
 
-BanList gBanList;         // Our ban list
+//BanList gBanList;         // Our ban list
 
 void exitToOs(S32 errcode)
 {

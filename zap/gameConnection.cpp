@@ -36,7 +36,7 @@
 #include "EngineeredItem.h"   // For EngineerModuleDeployer
 #include "Colors.h"
 #include "stringUtils.h"         // For strictjoindir()
-#include "BanList.h"
+//#include "BanList.h"
 
 
 #ifndef ZAP_DEDICATED
@@ -1479,11 +1479,11 @@ bool GameConnection::readConnectRequest(BitStream *stream, NetConnection::Termin
    name[len] = 0;    // Terminate string properly
 
    // Now that we have the name, check if it is banned
-   if(gBanList.isBanned(getNetAddress().toString(), string(name)))
-   {
-      reason = ReasonBanned;
-      return false;
-   }
+   //if(gBanList.isBanned(getNetAddress().toString(), string(name)))
+   //{
+   //   reason = ReasonBanned;
+   //   return false;
+   //}
 
    mClientName = makeUnique(name).c_str();  // Unique name
    mClientNameNonUnique = name;             // For authentication non-unique name
