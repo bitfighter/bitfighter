@@ -843,7 +843,7 @@ void SoundSystem::queueVoiceChatBuffer(SFXHandle& effect, ByteBufferPtr p)
    // Do nothing
 }
 
-void SoundSystem::init()
+void SoundSystem::init(const string &sfxDir, const string &musicDir)
 {
    logprintf(LogConsumer::LogError, "No OpenAL support on this platform.");
 }

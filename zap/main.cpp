@@ -637,8 +637,11 @@ void shutdownBitfighter()
    GameSettings *settings;
 
    // Avoid this function being called twice when we exit via methods 1-4 above
-   if(!gClientGame && !gServerGame)
-      exitToOs();
+#ifndef ZAP_DEDICATED
+   if(!gClientGame)
+#endif
+      if(!gServerGame)
+         exitToOs();
 
 // Grab a pointer to settings wherever we can.  Note that gClientGame and gServerGame refer to the same copy.
 #ifndef ZAP_DEDICATED
