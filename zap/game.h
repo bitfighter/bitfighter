@@ -352,7 +352,6 @@ private:
       CheckServerStatusTime = 5000,      // If it did not send updates, recheck after ms
    };
 
-   U32 mMaxPlayers;
    bool mTestMode;           // True if being tested from editor
 
    GridDatabase mDatabaseForBotZones;     // Database especially for BotZones to avoid gumming up the regular database with too many objects
@@ -382,7 +381,7 @@ private:
    void cleanUp();
 
 public:
-   ServerGame(const Address &address, GameSettings *settings, U32 maxPlayers, bool testMode, bool dedicated);    // Constructor
+   ServerGame(const Address &address, GameSettings *settings, bool testMode, bool dedicated);    // Constructor
    virtual ~ServerGame();   // Destructor
 
    U32 mInfoFlags;           // Not used for much at the moment, but who knows? --> propagates to master
@@ -409,12 +408,12 @@ public:
    GridDatabase *getBotZoneDatabase() { return &mDatabaseForBotZones; }
 
    U32 getPlayerCount() { return mPlayerCount; }
-   U32 getMaxPlayers() { return mMaxPlayers; }
+   U32 getMaxPlayers() { return mSettings->getServerMaxPlayers(); }
 
    bool isDedicated() { return mDedicated; }
    void setDedicated(bool dedicated) { mDedicated = dedicated; }
 
-   bool isFull() { return mPlayerCount == mMaxPlayers; }                // More room at the inn?
+   bool isFull() { return mPlayerCount == mSettings->getServerMaxPlayers(); }          // More room at the inn?
 
    void addClient(GameConnection *theConnection);
    void removeClient(GameConnection *theConnection);

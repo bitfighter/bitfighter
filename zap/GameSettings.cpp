@@ -24,6 +24,7 @@
 //------------------------------------------------------------------------------------
 
 #include "GameSettings.h"
+#include "SharedConstants.h"  // For MAX_PLAYERS
 #include "config.h"           // For IniSettings, CmdLineSettings defs
 #include "stringUtils.h"      // For itos
 
@@ -154,6 +155,22 @@ string GameSettings::getHostAddress()
       return gCmdLineSettings.server;
 
    return "IP:Any:" + itos(DEFAULT_GAME_PORT);
+}
+
+
+U32 GameSettings::getServerMaxPlayers()
+{
+   U32 maxplayers;
+
+   if(gCmdLineSettings.maxPlayers > 0)
+      maxplayers = gCmdLineSettings.maxPlayers;
+   else
+      maxplayers = gIniSettings.maxPlayers;
+
+   if(maxplayers > MAX_PLAYERS)
+      maxplayers = MAX_PLAYERS;
+
+   return maxplayers;
 }
 
 

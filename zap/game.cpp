@@ -749,11 +749,9 @@ void LevelInfo::initialize()
 extern CmdLineSettings gCmdLineSettings;
 
 // Constructor
-ServerGame::ServerGame(const Address &address, GameSettings *settings, U32 maxPlayers, bool testMode, bool dedicated) : 
+ServerGame::ServerGame(const Address &address, GameSettings *settings, bool testMode, bool dedicated) : 
       Game(address, settings)
 {
-   mMaxPlayers = maxPlayers;
-
    mVoteTimer = 0;
    mNextLevel = NEXT_LEVEL;
    mPlayerCount = 0;
@@ -1782,7 +1780,7 @@ void ServerGame::idle(U32 timeDelta)
             prevCurrentLevelType = getCurrentLevelType();
             prevRobotCount = getRobotCount();
             prevPlayerCount = mPlayerCount;
-            masterConn->updateServerStatus(getCurrentLevelName(), getCurrentLevelType(), getRobotCount(), mPlayerCount, mMaxPlayers, mInfoFlags);
+            masterConn->updateServerStatus(getCurrentLevelName(), getCurrentLevelType(), getRobotCount(), mPlayerCount, mSettings->getServerMaxPlayers(), mInfoFlags);
             mMasterUpdateTimer.reset(UpdateServerStatusTime);
          }
          else

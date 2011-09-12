@@ -333,21 +333,6 @@ bool writeToConsole()
 }
 
 
-U32 getServerMaxPlayers()
-{
-   U32 maxplayers;
-   if(gCmdLineSettings.maxPlayers > 0)
-      maxplayers = gCmdLineSettings.maxPlayers;
-   else
-      maxplayers = gIniSettings.maxPlayers;
-
-   if(maxplayers > MAX_PLAYERS)
-      maxplayers = MAX_PLAYERS;
-
-   return maxplayers;
-}
-
-
 // Host a game (and maybe even play a bit, too!)
 void initHostGame(GameSettings *settings, Vector<string> &levelList, bool testMode, bool dedicatedServer)
 {
@@ -356,7 +341,7 @@ void initHostGame(GameSettings *settings, Vector<string> &levelList, bool testMo
    Address address(IPProtocol, Address::Any, DEFAULT_GAME_PORT);     // Equivalent to ("IP:Any:28000")
    address.set(settings->getHostAddress());                          // May overwrite parts of address, depending on what getHostAddress contains
 
-   gServerGame = new ServerGame(address, settings, getServerMaxPlayers(), testMode, dedicatedServer);
+   gServerGame = new ServerGame(address, settings, testMode, dedicatedServer);
 
    gServerGame->setReadyToConnectToMaster(true);
    seedRandomNumberGenerator(settings->getHostName());

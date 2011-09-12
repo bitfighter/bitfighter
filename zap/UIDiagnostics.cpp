@@ -47,7 +47,6 @@ namespace Zap
 {
 
 extern CmdLineSettings gCmdLineSettings;
-extern U32 getServerMaxPlayers();
 
 static const char *pageHeaders[] = {
    "PLAYING",
@@ -505,11 +504,12 @@ void DiagnosticUserInterface::render()
       ypos += textsize + gap;
       ypos += textsize + gap;
 
-      S32 x = getCenteredString2ColStartingPosf(textsize, false, "Max Players: %d", getServerMaxPlayers());
+      S32 x = getCenteredString2ColStartingPosf(textsize, false, "Max Players: %d", settings->getServerMaxPlayers());
+
       glColor(Colors::white);
       x += drawStringAndGetWidthf(x, ypos, textsize, "Max Players: ");
       glColor(Colors::yellow);
-      x += drawStringAndGetWidthf(x, ypos, textsize, "%d", getServerMaxPlayers());
+      x += drawStringAndGetWidthf(x, ypos, textsize, "%d", settings->getServerMaxPlayers());
 
       ypos += textsize + gap;
 
