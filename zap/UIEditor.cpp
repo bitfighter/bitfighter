@@ -3661,8 +3661,6 @@ void EditorUserInterface::testLevel()
 }
 
 
-extern U16 DEFAULT_GAME_PORT;
-
 void EditorUserInterface::testLevelStart()
 {
    string tmpFileName = mEditFileName;
