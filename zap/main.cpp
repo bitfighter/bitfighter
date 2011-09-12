@@ -622,7 +622,6 @@ FileLogConsumer gServerLog;       // We'll apply a filter later on, in main()
 
 
 extern void saveWindowMode(CIniFile *ini);
-class BanList;
 
 // Run when we're quitting the game, returning to the OS.  Saves settings and does some final cleanup to keep things orderly.
 // There are currently only 6 ways to get here (i.e. 6 legitimate ways to exit Bitfighter): 
