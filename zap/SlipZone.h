@@ -32,8 +32,6 @@
 namespace Zap
 {
 
-extern S32 gMaxPolygonPoints;
-
 class SlipZone : public EditorPolygon
 {
    typedef GameObject Parent;

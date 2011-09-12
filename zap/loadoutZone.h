@@ -35,8 +35,6 @@
 namespace Zap
 {
 
-extern S32 gMaxPolygonPoints;
-
 class LoadoutZone : public EditorPolygon
 {
 private:
