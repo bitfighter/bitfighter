@@ -275,7 +275,7 @@ void SoundSystem::init(const string &sfxDir, const string &musicDir)
    }
 
    // Set up music list for streaming later
-   if(!getFilesFromFolder("LLL", musicList))
+   if(!getFilesFromFolder(mMusicDir, musicList))
       logprintf(LogConsumer::LogWarning, "Could not read music files from folder \"%s\".  Game will proceed without music", musicDir.c_str());
    else if(musicList.size() == 0)
       logprintf(LogConsumer::LogWarning, "No music files found in folder \"%s\".  Game will proceed without music", musicDir.c_str());
