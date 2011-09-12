@@ -194,6 +194,7 @@ struct IniSettings      // With defaults specified
    bool neverConnectDirect;
    Color wallFillColor;
    Color wallOutlineColor;
+   U16 clientPortNumber;
 
    // Logging options   --   true will enable logging these events, false will disable
    bool logConnectionProtocol;

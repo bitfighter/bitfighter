@@ -109,6 +109,7 @@ void IniSettings::init()
 
    wallFillColor.set(0,0,.15);
    wallOutlineColor.set(0,0,1);
+   clientPortNumber = 0;
 
    allowMapUpload = false;
    allowAdminMapUpload = true;
@@ -346,6 +347,7 @@ static void loadTestSettings(CIniFile *ini)
    gIniSettings.wallFillColor.set(ini->GetValue("Testing", "WallFillColor", gIniSettings.wallFillColor.toRGBString()));
    gIniSettings.wallOutlineColor.set(ini->GetValue("Testing", "WallOutlineColor", gIniSettings.wallOutlineColor.toRGBString()));
    gIniSettings.oldGoalFlash = ini->GetValueYN("Testing", "OldGoalFlash", gIniSettings.oldGoalFlash);
+   gIniSettings.clientPortNumber = (U16) ini->GetValueI("Testing", "ClientPortNumber", gIniSettings.clientPortNumber);
 }
 
 
@@ -1496,6 +1498,7 @@ static void writeTesting(CIniFile *ini)
       ini->sectionComment("Testing", " NeverConnectDirect - Never connect to pingable internet server directly; forces arranged connections via master");
       ini->sectionComment("Testing", " WallOutlineColor - Color used locally for rendering wall outlines (r,g,b), (values between 0 and 1)");
       ini->sectionComment("Testing", " WallFillColor - Color used locally for rendering wall fill (r,g,b), (values between 0 and 1)");
+      ini->sectionComment("Testing", " ClientPortNumber - Only helps when punching through firewall when using router's port forwarded for client port number");
       ini->sectionComment("Testing", "----------------");
    }
 
@@ -1504,6 +1507,7 @@ static void writeTesting(CIniFile *ini)
    ini->SetValue  ("Testing", "WallFillColor",   gIniSettings.wallFillColor.toRGBString());
    ini->SetValue  ("Testing", "WallOutlineColor", gIniSettings.wallOutlineColor.toRGBString());
    ini->setValueYN("Testing", "OldGoalFlash", gIniSettings.oldGoalFlash);
+   ini->SetValueI ("Testing", "ClientPortNumber", gIniSettings.clientPortNumber);
 }
 
 

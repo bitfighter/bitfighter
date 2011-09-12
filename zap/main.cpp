@@ -856,7 +856,7 @@ void processStartupParams(GameSettings *settings)
 #ifndef ZAP_DEDICATED
    if(!gCmdLineSettings.dedicatedMode)                      // Create ClientGame object
    {
-      gClientGame1 = new ClientGame(Address(), settings);   //   Let the system figure out IP address and assign a port
+      gClientGame1 = new ClientGame(Address(IPProtocol, Address::Any, gIniSettings.clientPortNumber), settings);   //   Let the system figure out IP address and assign a port
       gClientGame = gClientGame1;
 
       gClientGame->setLoginPassword(gCmdLineSettings.password, gIniSettings.password, gIniSettings.lastPassword);
