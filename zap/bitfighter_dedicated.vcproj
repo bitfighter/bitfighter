@@ -18,8 +18,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="c:\temp\Zapd_Debug1"
-			IntermediateDirectory="c:\temp\Zapd_Debug1"
+			OutputDirectory="..\temp\Zapd_Debug"
+			IntermediateDirectory="..\temp\Zapd_Debug"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
@@ -106,8 +106,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="c:\temp\Zapd_Release1"
-			IntermediateDirectory="c:\temp\Zapd_Release1"
+			OutputDirectory="..\temp\Zapd_Release"
+			IntermediateDirectory="..\temp\Zapd_Release"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="2"
@@ -195,8 +195,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug_mysql|Win32"
-			OutputDirectory="c:\temp\Zapd_Debug_mysql"
-			IntermediateDirectory="c:\temp\Zapd_Debug_mysql"
+			OutputDirectory="..\temp\Zapd_Debug_mysql"
+			IntermediateDirectory="..\temp\Zapd_Debug_mysql"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
@@ -283,8 +283,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release_mysql|Win32"
-			OutputDirectory="c:\temp\Zapd_Release_mysql"
-			IntermediateDirectory="c:\temp\Zapd_Release_mysql"
+			OutputDirectory="..\temp\Zapd_Release_mysql"
+			IntermediateDirectory="..\temp\Zapd_Release_mysql"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="2"

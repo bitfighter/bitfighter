@@ -17,8 +17,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="c:\temp\tnl_Debug"
-			IntermediateDirectory="c:\temp\tnl_Debug"
+			OutputDirectory="..\temp\tnl_Debug"
+			IntermediateDirectory="..\temp\tnl_Debug"
 			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
@@ -89,8 +89,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="c:\temp\tnl_release"
-			IntermediateDirectory="c:\temp\tnl_release"
+			OutputDirectory="..\temp\tnl_release"
+			IntermediateDirectory="..\temp\tnl_release"
 			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"

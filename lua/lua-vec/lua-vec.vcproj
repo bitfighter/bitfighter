@@ -17,8 +17,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="c:\temp\lua-vec_Debug"
-			IntermediateDirectory="c:\temp\lua-vec_Debug"
+			OutputDirectory="..\..\temp\lua-vec_Debug"
+			IntermediateDirectory="..\..\temp\lua-vec_Debug"
 			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
@@ -89,8 +89,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="c:\temp\lua-vec_Release"
-			IntermediateDirectory="c:\temp\lua-vec_Release"
+			OutputDirectory="..\..\temp\lua-vec_Release"
+			IntermediateDirectory="..\..\temp\lua-vec_Release"
 			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
