@@ -749,8 +749,8 @@ void LevelInfo::initialize()
 extern CmdLineSettings gCmdLineSettings;
 
 // Constructor
-ServerGame::ServerGame(const Address &theBindAddress, GameSettings *settings, U32 maxPlayers, bool testMode, bool dedicated) : 
-      Game(theBindAddress, settings)
+ServerGame::ServerGame(const Address &address, GameSettings *settings, U32 maxPlayers, bool testMode, bool dedicated) : 
+      Game(address, settings)
 {
    mMaxPlayers = maxPlayers;
 

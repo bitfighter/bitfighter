@@ -382,7 +382,7 @@ private:
    void cleanUp();
 
 public:
-   ServerGame(const Address &theBindAddress, GameSettings *settings, U32 maxPlayers, bool testMode, bool dedicated);    // Constructor
+   ServerGame(const Address &address, GameSettings *settings, U32 maxPlayers, bool testMode, bool dedicated);    // Constructor
    virtual ~ServerGame();   // Destructor
 
    U32 mInfoFlags;           // Not used for much at the moment, but who knows? --> propagates to master
