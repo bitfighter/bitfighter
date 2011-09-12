@@ -408,12 +408,12 @@ public:
    GridDatabase *getBotZoneDatabase() { return &mDatabaseForBotZones; }
 
    U32 getPlayerCount() { return mPlayerCount; }
-   U32 getMaxPlayers() { return mSettings->getServerMaxPlayers(); }
+   U32 getMaxPlayers() { return mSettings->getMaxPlayers(); }
 
    bool isDedicated() { return mDedicated; }
    void setDedicated(bool dedicated) { mDedicated = dedicated; }
 
-   bool isFull() { return mPlayerCount == mSettings->getServerMaxPlayers(); }          // More room at the inn?
+   bool isFull() { return mPlayerCount == mSettings->getMaxPlayers(); }          // More room at the inn?
 
    void addClient(GameConnection *theConnection);
    void removeClient(GameConnection *theConnection);

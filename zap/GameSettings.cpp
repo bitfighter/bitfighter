@@ -158,7 +158,7 @@ string GameSettings::getHostAddress()
 }
 
 
-U32 GameSettings::getServerMaxPlayers()
+U32 GameSettings::getMaxPlayers()
 {
    U32 maxplayers;
 

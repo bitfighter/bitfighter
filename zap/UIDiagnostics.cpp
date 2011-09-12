@@ -504,12 +504,12 @@ void DiagnosticUserInterface::render()
       ypos += textsize + gap;
       ypos += textsize + gap;
 
-      S32 x = getCenteredString2ColStartingPosf(textsize, false, "Max Players: %d", settings->getServerMaxPlayers());
+      S32 x = getCenteredString2ColStartingPosf(textsize, false, "Max Players: %d", settings->getMaxPlayers());
 
       glColor(Colors::white);
       x += drawStringAndGetWidthf(x, ypos, textsize, "Max Players: ");
       glColor(Colors::yellow);
-      x += drawStringAndGetWidthf(x, ypos, textsize, "%d", settings->getServerMaxPlayers());
+      x += drawStringAndGetWidthf(x, ypos, textsize, "%d", settings->getMaxPlayers());
 
       ypos += textsize + gap;
 

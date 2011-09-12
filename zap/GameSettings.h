@@ -115,7 +115,7 @@ public:
    BanList *getBanList() { return mBanList; }
 
    string getHostAddress();
-   U32 getServerMaxPlayers();
+   U32 getMaxPlayers();
 };
 
 
