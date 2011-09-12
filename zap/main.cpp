@@ -259,9 +259,7 @@ void abortHosting_noLevels()
    }
    else
 #endif
-   {
       shutdownBitfighter();      // Quit in an orderly fashion
-   }
 }
 
 
