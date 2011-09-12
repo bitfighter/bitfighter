@@ -113,6 +113,8 @@ public:
    Vector<string> *getLevelSkipList() { return &mLevelSkipList; }
    ConfigDirectories *getConfigDirs() { return &mFolderManager; }
    BanList *getBanList() { return mBanList; }
+
+   string getHostAddress();
 };
 
 

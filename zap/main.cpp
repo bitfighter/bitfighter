@@ -194,9 +194,6 @@ DataConnection *dataConn = NULL;
 
 U16 DEFAULT_GAME_PORT = 28000;
 
-Address gBindAddress(IPProtocol, Address::Any, DEFAULT_GAME_PORT);      // Good for now, may be overwritten by INI or cmd line setting
-// Above is equivalent to ("IP:Any:28000")
-
 ScreenInfo gScreenInfo;
 
 ZapJournal gZapJournal;          // Our main journaling object
@@ -353,11 +350,14 @@ U32 getServerMaxPlayers()
 }
 
 // Host a game (and maybe even play a bit, too!)
-void initHostGame(Address bindAddress, GameSettings *settings, Vector<string> &levelList, bool testMode, bool dedicatedServer)
+void initHostGame(GameSettings *settings, Vector<string> &levelList, bool testMode, bool dedicatedServer)
 {
    TNLAssert(!gServerGame, "already exists!");
 
-   gServerGame = new ServerGame(bindAddress, settings, getServerMaxPlayers(), testMode, dedicatedServer);
+   Address address(IPProtocol, Address::Any, DEFAULT_GAME_PORT);     // Equivalent to ("IP:Any:28000")
+   address.set(settings->getHostAddress());                          // May overwrite parts of address, depending on what getHostAddress contains
+
+   gServerGame = new ServerGame(address, settings, getServerMaxPlayers(), testMode, dedicatedServer);
 
    gServerGame->setReadyToConnectToMaster(true);
    seedRandomNumberGenerator(settings->getHostName());
@@ -780,13 +780,6 @@ void InitSdlVideo()
 // Now integrate INI settings with those from the command line and process them
 void processStartupParams(GameSettings *settings)
 {
-   // These options can only be set on cmd line
-   if(!gCmdLineSettings.server.empty())
-      gBindAddress.set(gCmdLineSettings.server);
-
-   if(!gCmdLineSettings.dedicated.empty())
-      gBindAddress.set(gCmdLineSettings.dedicated);
-
    // Enable some logging...
    gMainLog.setMsgType(LogConsumer::LogConnectionProtocol, gIniSettings.logConnectionProtocol);
    gMainLog.setMsgType(LogConsumer::LogNetConnection, gIniSettings.logNetConnection);
@@ -822,12 +815,6 @@ void processStartupParams(GameSettings *settings)
 
    settings->initHostName(gCmdLineSettings.hostname, gIniSettings.hostname);
    settings->initHostDescr(gCmdLineSettings.hostdescr, gIniSettings.hostdescr);
-
-   if(gCmdLineSettings.hostaddr != "")
-      gBindAddress.set(gCmdLineSettings.hostaddr);
-   else if(gIniSettings.hostaddr != "")
-      gBindAddress.set(gIniSettings.hostaddr);
-   // else stick with default defined earlier
 
 
    if(gCmdLineSettings.displayMode != DISPLAY_MODE_UNKNOWN)
@@ -1213,7 +1200,7 @@ int main(int argc, char **argv)
    if(gCmdLineSettings.dedicatedMode)
    {
       Vector<string> levels = LevelListLoader::buildLevelList(folderManager->levelDir, settings->getLevelSkipList());
-      initHostGame(gBindAddress, settings, levels, false, true);       // Start hosting
+      initHostGame(settings, levels, false, true);       // Start hosting
    }
 
    SoundSystem::init(folderManager->sfxDir, folderManager->musicDir);  // Even dedicated server needs sound these days

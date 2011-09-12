@@ -24,21 +24,24 @@
 //------------------------------------------------------------------------------------
 
 #include "GameSettings.h"
-#include "config.h"     // For IniSettings def
+#include "config.h"           // For IniSettings, CmdLineSettings defs
+#include "stringUtils.h"      // For itos
 
 using namespace std;
 
 namespace Zap
 {
 
-struct IniSettings;
 extern IniSettings gIniSettings;    // For now...
+extern CmdLineSettings gCmdLineSettings;
+
 
 // Destructor
 GameSettings::~GameSettings()
 {
    delete mBanList;
 }
+
 
 // Helpers for init functions below
 static const string *choose(const string &firstChoice, const string &secondChoice)
@@ -126,6 +129,33 @@ void GameSettings::initLevelChangePassword(const string &cmdLineVal, const strin
 {
    mLevelChangePassword = *choose(cmdLineVal, iniVal, "");
 }
+
+
+extern U16 DEFAULT_GAME_PORT;
+
+// Will be cleaned up when gCmdLineSettings/gINI are integrated
+// NOTE: I believe that this accurately replicates how things were set before, but I'm not sure this makes sense.  There seem to be many
+// ways to set the address.  Do we need all of them?  Is the order of precedence logical?  I think we can get rid of everything except the two
+// hostaddr options.
+string GameSettings::getHostAddress()
+{
+   if(gCmdLineSettings.hostaddr != "")
+      return gCmdLineSettings.hostaddr;
+
+   if(gIniSettings.hostaddr != "")
+      return gIniSettings.hostaddr;
+
+   // Should we get rid of this option?
+   if(gCmdLineSettings.dedicated != "")     // Should only be true if dedicated server
+      return gCmdLineSettings.dedicated;
+
+   // Should we get rid of this option?
+   if(gCmdLineSettings.server != "")
+      return gCmdLineSettings.server;
+
+   return "IP:Any:" + itos(DEFAULT_GAME_PORT);
+}
+
 
 
 };

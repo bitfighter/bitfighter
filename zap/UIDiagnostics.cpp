@@ -48,7 +48,6 @@ namespace Zap
 
 extern CmdLineSettings gCmdLineSettings;
 extern U32 getServerMaxPlayers();
-extern Address gBindAddress;
 
 static const char *pageHeaders[] = {
    "PLAYING",
@@ -490,7 +489,7 @@ void DiagnosticUserInterface::render()
 
       ypos += showNameDescrBlock(settings->getHostName(), settings->getHostDescr(), ypos, textsize, gap);
 
-      drawCenteredStringPair2Colf(ypos, textsize, true, "Host Addr:", "%s", gBindAddress.toString());
+      drawCenteredStringPair2Colf(ypos, textsize, true, "Host Addr:", "%s", settings->getHostAddress().c_str());
       drawCenteredStringPair2Colf(ypos, 14, false, "Lvl Change PW:", "%s", settings->getLevelChangePassword() == "" ?
                                                                     "None - anyone can change" : settings->getLevelChangePassword().c_str());
       ypos += textsize + gap;

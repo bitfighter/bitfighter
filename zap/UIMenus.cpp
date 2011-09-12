@@ -1143,7 +1143,7 @@ void HostMenuUserInterface::onActivate()
 }
 
 
-extern void initHostGame(Address bindAddress, GameSettings *settings, Vector<string> &levelList, bool testMode, bool dedicatedServer);
+extern void initHostGame(GameSettings *settings, Vector<string> &levelList, bool testMode, bool dedicatedServer);
 extern U16 DEFAULT_GAME_PORT;
 
 static void startHostingCallback(ClientGame *game, U32 unused)
@@ -1154,7 +1154,7 @@ static void startHostingCallback(ClientGame *game, U32 unused)
    ConfigDirectories *folderManager = settings->getConfigDirs();
 
    Vector<string> levelList = LevelListLoader::buildLevelList(folderManager->levelDir, settings->getLevelSkipList());
-   initHostGame(Address(IPProtocol, Address::Any, DEFAULT_GAME_PORT), settings, levelList, false, false);
+   initHostGame(settings, levelList, false, false);
 }
 
 
