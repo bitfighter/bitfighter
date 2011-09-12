@@ -460,6 +460,7 @@ void gameIdle(U32 integerTime)
    }
 }
 
+
 // This is the master idle loop that gets registered with GLUT and is called on every game tick.
 // This in turn calls the idle functions for all other objects in the game.
 void idle()
@@ -533,13 +534,6 @@ void idle()
          sleepTime = 0;      
    }
 
-
-   // So, what's with all the SDL code in here?  I looked at converting from GLUT to SDL, in order to get
-   // a richer set of keyboard events.  Looks possible, but SDL appears to be missing some very handy
-   // windowing code (e.g. the ability to resize or move a window) that GLUT has.  So until we find a
-   // platform independent window library, we'll stick with GLUT, or maybe go to FreeGlut.
-   // Note that moving to SDL will require our journaling system to be re-engineered.
-   // Note too that SDL will require linking in SDL.lib and SDLMain.lib, and including the SDL.dll in the EXE folder.
 
 #ifndef ZAP_DEDICATED
    // SDL requires an active polling loop.  We could use something like the following:
