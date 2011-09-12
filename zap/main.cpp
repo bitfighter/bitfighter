@@ -335,17 +335,18 @@ bool writeToConsole()
 
 U32 getServerMaxPlayers()
 {
-   U32 maxplay;
-   if (gCmdLineSettings.maxPlayers > 0)
-      maxplay = gCmdLineSettings.maxPlayers;
+   U32 maxplayers;
+   if(gCmdLineSettings.maxPlayers > 0)
+      maxplayers = gCmdLineSettings.maxPlayers;
    else
-      maxplay = gIniSettings.maxPlayers;
+      maxplayers = gIniSettings.maxPlayers;
 
-   if(maxplay > MAX_PLAYERS)
-      maxplay = MAX_PLAYERS;
+   if(maxplayers > MAX_PLAYERS)
+      maxplayers = MAX_PLAYERS;
 
-   return maxplay;
+   return maxplayers;
 }
+
 
 // Host a game (and maybe even play a bit, too!)
 void initHostGame(GameSettings *settings, Vector<string> &levelList, bool testMode, bool dedicatedServer)
