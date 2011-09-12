@@ -26,8 +26,7 @@
 #ifndef _GAME_SETTINGS_H_
 #define _GAME_SETTINGS_H_
 
-#include "BanList.h"
-#include"tnlVector.h"
+#include "tnlVector.h"
 #include <string>
 
 using namespace std;
@@ -37,6 +36,7 @@ namespace Zap
 {
 
 class GameSettings;
+class BanList;
 
 struct ConfigDirectories 
 {
@@ -86,9 +86,8 @@ private:
    BanList *mBanList;                  // Our ban list
 
 public:
+   GameSettings();    // Constructor
    ~GameSettings();   // Destructor
-
-   void setNewBanList(const string &iniDir) { mBanList = new BanList(iniDir); }
 
    string getHostName() { return mHostName; }
    void setHostName(const string &hostName, bool updateINI);

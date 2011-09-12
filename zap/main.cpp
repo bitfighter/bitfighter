@@ -680,8 +680,8 @@ void shutdownBitfighter()
    saveSettingsToINI(&gINI, settings);    // Writes settings to the INI, then saves it to disk
 
    // TODO: Put this in settings->save()
-   BanList *bl = settings->getBanList();
-   bl->writeToFile();      // Writes ban list back to file XXX enable this when admin functionality is built in
+//   BanList *bl = settings->getBanList();
+//   bl->writeToFile();      // Writes ban list back to file XXX enable this when admin functionality is built in
 
    delete settings;
 
@@ -1199,8 +1199,6 @@ int main(int argc, char **argv)
    // Before we go any further, we should get our log files in order.  Now we know where they'll be, as the 
    // only way to specify a non-standard location is via the command line, which we've now read.
    setupLogging(folderManager->logDir);
-
-   settings->setNewBanList(folderManager->iniDir);        // TODO: Integrate this into the reading and configuring of folders... but will do for now
 
    gCmdLineSettings.readParams(settings, argVector, 1);   // Read remaining cmd line params 
 

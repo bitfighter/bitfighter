@@ -29,8 +29,12 @@
 
 #include "tnlLog.h"
 
+#include <boost/date_time/posix_time/posix_time.hpp>
+
 #include <fstream>
 #include <iostream>
+
+using namespace boost::posix_time;
 
 namespace Zap
 {
@@ -40,11 +44,6 @@ BanList::BanList(const string &iniDir)
 {
    banListTokenDelimiter = "|";
    banListWildcardCharater = "*";
-   banListFileName = "ban_list.txt";
-
-   // Ban list file should be in iniDir
-   banListFilePath = joindir(iniDir, banListFileName);
-   //serverBanList = Vector<BanItem>();      ==> not needed... happens automatically!  raptor: Delete this when you've read it!
 }
 
 
@@ -55,70 +54,17 @@ BanList::~BanList()
 }
 
 
-bool BanList::addToBanList(BanItem banItem)
+bool BanList::addToBanList(BanItem *banItem)
 {
    // TODO call this from an admin command?
    return false;
 }
 
 
-bool BanList::removeFromBanList(BanItem banItem)
+bool BanList::removeFromBanList(BanItem *banItem)
 {
    // TODO call this from an admin command?
    return false;
-}
-
-// Make ban list always have windows line endings, like INI.  Why??  For consistency, I think..
-#if defined(WIN32)
-#define EOL endl
-#else
-#define EOL '\r' << endl
-#endif
-
-bool BanList::writeToFile()
-{
-   ofstream file(banListFilePath.c_str());
-
-   if(file.fail())
-   {
-      file.close();
-      return false;
-   }
-
-   // Write BanItems to file
-   string line;
-
-   for(S32 i = 0; i < serverBanList.size(); i++) {
-      line = banItemToString(serverBanList[i]);
-
-      file << line << EOL;
-   }
-
-   file.close();
-
-   return true;
-}
-
-void BanList::readFromFile()
-{
-   ifstream file(banListFilePath.c_str());
-
-   Vector<string> banListFileLines;
-
-   // If file didn't fail to load, load each line into a Vector
-   if(!file.fail())
-   {
-      string line;
-      while(getline(file, line))
-         banListFileLines.push_back(line);
-   }
-
-   file.close();
-
-   // Process each line of the ban list file
-   for(S32 i = 0; i < banListFileLines.size(); i++)
-      if(!processBanListLine(banListFileLines[i]))
-         logprintf("Ban list item on line %d is malformed: %s", i+1, banListFileLines[i].c_str());
 }
 
 
@@ -140,8 +86,8 @@ bool BanList::processBanListLine(const string &line)
    // IP, nickname, startTime, duration <- in this order
    string ipAddress = words[0];
    string nickname = words[1];
-   string dateTimeString = words[2];
-   string durationMinutesString = words[3];
+   string startDateTime = words[2];
+   string durationMinutes = words[3];
 
    // Validate IP address string
    if (!(Address(ipAddress.c_str()).isValid()) && ipAddress.compare(banListWildcardCharater) != 0)
@@ -150,30 +96,29 @@ bool BanList::processBanListLine(const string &line)
    // nickname could be anything...
 
    // Validate date
-   ptime startTime;
+   ptime tempDateTime;
    // If exception is thrown, then date didn't parse correctly
    try
    {
-      startTime = from_iso_string(dateTimeString);
+      tempDateTime = from_iso_string(startDateTime);
    }
    catch (...)
    {
       return false;
    }
    // If date time ends up equaling empty ptime, then it didn't parse right either
-   if (startTime == ptime())
+   if (tempDateTime == ptime())
       return false;
 
    // Validate duration
-   S32 durationMinutes = stoi(durationMinutesString);
-   if(durationMinutes <= 0)
+   if(stoi(durationMinutes) <= 0)
       return false;
 
    // Now finally add to banList
    BanItem banItem;
    banItem.ipAddress = ipAddress;
    banItem.nickname = nickname;
-   banItem.startTime = startTime;
+   banItem.startDateTime = startDateTime;
    banItem.durationMinutes = durationMinutes;
 
    serverBanList.push_back(banItem);
@@ -183,26 +128,14 @@ bool BanList::processBanListLine(const string &line)
 }
 
 
-string BanList::banItemToString(BanItem banItem)
+string BanList::banItemToString(BanItem *banItem)
 {
    // IP, nickname, startTime, duration <- in this order
    return
-         banItem.ipAddress + banListTokenDelimiter +
-         banItem.nickname + banListTokenDelimiter +
-         ptimeToIsoString(banItem.startTime) + banListTokenDelimiter +
-         itos(banItem.durationMinutes);
-}
-
-
-// Custom toString method so we don't have to compile extra boost sources
-// This is super slow because of using streams...  not sure how to fix
-string BanList::ptimeToIsoString(ptime time)
-{
-   ostringstream formatter;
-   formatter.imbue(locale(cout.getloc(), new boost::posix_time::time_facet("%Y%m%dT%H%M%S")));
-   formatter << time;
-
-   return formatter.str();
+         banItem->ipAddress + banListTokenDelimiter +
+         banItem->nickname + banListTokenDelimiter +
+         banItem->startDateTime + banListTokenDelimiter +
+         banItem->durationMinutes;
 }
 
 
@@ -227,7 +160,7 @@ bool BanList::isBanned(Address address, string nickname)
          continue;
 
       // Check time
-      if (serverBanList[i].startTime + minutes(serverBanList[i].durationMinutes) < currentTime)
+      if (from_iso_string(serverBanList[i].startDateTime) + minutes(stoi(serverBanList[i].durationMinutes)) < currentTime)
          continue;
 
       // If we get here, that means nickname and IP address matched and we are still in the
@@ -236,6 +169,33 @@ bool BanList::isBanned(Address address, string nickname)
    }
 
    return false;
+}
+
+string BanList::getDelimiter()
+{
+   return banListTokenDelimiter;
+}
+
+
+Vector<string> BanList::banListToString()
+{
+   Vector<string> banList;
+   for(S32 i = 0; i < serverBanList.size(); i++)
+   {
+      banList.push_back(banItemToString(&serverBanList[i]));
+   }
+
+   return banList;
+}
+
+
+void BanList::loadBanList(const Vector<string> &banItemList)
+{
+   for(S32 i = 0; i < banItemList.size(); i++)
+      if(!processBanListLine(banItemList[i]))
+         logprintf("Ban list item on line %d is malformed: %s", i+1, banItemList[i].c_str());
+      else
+         logprintf("Loading ban: %s", banItemList[i].c_str());
 }
 
 

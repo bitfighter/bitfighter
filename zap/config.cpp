@@ -31,6 +31,7 @@
 #include "stringUtils.h"
 #include "Joystick.h"
 #include "keyCode.h"
+#include "BanList.h"
 
 #include "GameSettings.h"
 
@@ -1127,6 +1128,47 @@ static void writeDefaultQuickChatMessages(CIniFile *ini)
 //}
 
 
+static void loadServerBanList(CIniFile *ini, BanList *banList)
+{
+   Vector<string> banItemList;
+   ini->GetAllValues("ServerBanList", banItemList);
+   banList->loadBanList(banItemList);
+}
+
+
+static void writeServerBanList(CIniFile *ini, BanList *banList)
+{
+   // Refresh the server ban list
+   ini->deleteSection("ServerBanList");
+   ini->addSection("ServerBanList");
+
+   string delim = banList->getDelimiter();
+   if(ini->numSectionComments("ServerBanList") == 0)
+   {
+      ini->sectionComment("ServerBanList", "----------------");
+      ini->sectionComment("ServerBanList", " This section contains a list of bans that this dedicated server has enacted");
+      ini->sectionComment("ServerBanList", " ");
+      ini->sectionComment("ServerBanList", " Bans are in the following format:");
+      ini->sectionComment("ServerBanList", "   IP Address " + delim + " nickname " + delim + " Start time (ISO time format) " + delim + " Duration in minutes ");
+      ini->sectionComment("ServerBanList", " ");
+      ini->sectionComment("ServerBanList", " Example:");
+      ini->sectionComment("ServerBanList", "   123.123.123.123" + delim + "watusimoto" + delim + "20110131T123000" + delim + "30");
+      ini->sectionComment("ServerBanList", " ");
+      ini->sectionComment("ServerBanList", " Note: ISO time format is in the following format: YYYYMMDDTHH24MISS");
+      ini->sectionComment("ServerBanList", "   YYYY = four digit year, '2011'");
+      ini->sectionComment("ServerBanList", "     MM = month (01 - 12), '01'");
+      ini->sectionComment("ServerBanList", "     DD = day of the month, '31'");
+      ini->sectionComment("ServerBanList", "      T = Just a one character divider between date and time, 'T'");
+      ini->sectionComment("ServerBanList", "   HH24 = hour of the day (0-23), '12'");
+      ini->sectionComment("ServerBanList", "     MI = minute of the hour, '30'");
+      ini->sectionComment("ServerBanList", "     SS = seconds of the minute, '00' (we don't really care about these... yet)");
+      ini->sectionComment("ServerBanList", "----------------");
+   }
+
+   ini->SetAllValues("ServerBanList", "BanItem", banList->banListToString());
+}
+
+
 // Option default values are stored here, in the 3rd prarm of the GetValue call
 // This is only called once, during initial initialization
 void loadSettingsFromINI(CIniFile *ini, GameSettings *settings)
@@ -1150,6 +1192,7 @@ void loadSettingsFromINI(CIniFile *ini, GameSettings *settings)
    loadQuickChatMessages(ini);
 
 //   readJoystick();
+   loadServerBanList(ini, settings->getBanList());
 
    saveSettingsToINI(ini, settings);    // Save to fill in any missing settings
 }
@@ -1524,6 +1567,7 @@ void saveSettingsToINI(CIniFile *ini, GameSettings *settings)
       // or joystick that maps differenly in LINUX
       // This adds 200+ lines.
    //writeJoystick();
+   writeServerBanList(ini, settings->getBanList());
 
    ini->WriteFile();
 }

@@ -25,6 +25,7 @@
 
 #include "GameSettings.h"
 #include "config.h"     // For IniSettings def
+#include "BanList.h"
 
 using namespace std;
 
@@ -33,6 +34,12 @@ namespace Zap
 
 struct IniSettings;
 extern IniSettings gIniSettings;    // For now...
+
+// Constructor
+GameSettings::GameSettings()
+{
+   mBanList = new BanList(mFolderManager.iniDir);
+}
 
 // Destructor
 GameSettings::~GameSettings()
