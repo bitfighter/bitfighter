@@ -26,6 +26,7 @@
 #include "GameSettings.h"
 #include "SharedConstants.h"  // For MAX_PLAYERS
 #include "config.h"           // For IniSettings, CmdLineSettings defs
+#include "BanList.h"
 #include "stringUtils.h"      // For itos
 
 using namespace std;
@@ -36,6 +37,11 @@ namespace Zap
 extern IniSettings gIniSettings;    // For now...
 extern CmdLineSettings gCmdLineSettings;
 
+// Constructor
+GameSettings::GameSettings()
+{
+   mBanList = new BanList(mFolderManager.iniDir);
+}
 
 // Destructor
 GameSettings::~GameSettings()

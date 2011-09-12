@@ -1305,8 +1305,6 @@ extern LevelInfo getLevelInfoFromFileChunk(char *chunk, S32 size, LevelInfo &lev
 
 TNL_IMPLEMENT_RPC(GameConnection, s2rSendDataParts, (U8 type, ByteBufferPtr data), (type, data), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 0)
 {
-   ConfigDirectories *folderManager = mClientGame->getSettings()->getConfigDirs();
-
    if(!gIniSettings.allowMapUpload && !isAdmin())  // Don't need it when not enabled, saves some memory. May remove this, it is checked again leter.
       return;
 
@@ -1325,6 +1323,9 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendDataParts, (U8 type, ByteBufferPtr data
          (gIniSettings.allowMapUpload || (gIniSettings.allowAdminMapUpload && isAdmin())) &&
          !isInitiator() && mDataBuffer->getBufferSize() != 0)
    {
+      // only server runs this part of code
+      ConfigDirectories *folderManager = gServerGame->getSettings()->getConfigDirs();
+
       LevelInfo levelInfo("Transmitted Level");
       getLevelInfoFromFileChunk((char *)mDataBuffer->getBuffer(), mDataBuffer->getBufferSize(), levelInfo);
 

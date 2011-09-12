@@ -264,7 +264,7 @@ bool LevelLoader::loadLevelFromFile(const string &filename, bool inEditor, GridD
 
          if(cur == 0)
          {
-            logprintf(LogConsumer::LogWarning, "Load level ==> Some lines too long in file %s (max len = %d)", filename, sizeof(levelChunk) - 2);  // -2 : need room for NULL and \n character
+            logprintf(LogConsumer::LogWarning, "Load level ==> Some lines too long in file %s (max len = %d)", filename.c_str(), sizeof(levelChunk) - 2);  // -2 : need room for NULL and \n character
 				cur = lastByteRead - 1; // Did not find \n, go back to end of chunk. Without this line, it will freeze in endless loop.
          }
                      // small cur number (cur > 0) is OK, as cur will then have to be a big number on next pass.

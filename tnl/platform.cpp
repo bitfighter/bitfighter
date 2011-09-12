@@ -167,7 +167,7 @@ F64 Platform::getHighPrecisionMilliseconds(S64 timerDelta)
 
 void Platform::sleep(U32 msCount)
 {
-	// no need to sleep on the xbox...
+   // no need to sleep on the xbox...
 }
 
 #elif defined (TNL_OS_WIN32)
@@ -217,13 +217,17 @@ class WinTimer
 {
    private:
       F64 mPeriod;
+      F64 mPeriod2;
       bool mUsingPerfCounter;
+      static const U8 Period2ShiftAccuracy = 12;  // F64 loses accuracy for big numbers
+
    public:
       WinTimer()
       {
          S64 frequency;
          mUsingPerfCounter = QueryPerformanceFrequency((LARGE_INTEGER *) &frequency);
-         mPeriod = 1000.0f / F64(frequency);
+         mPeriod = 1000.0 / F64(frequency);
+         mPeriod2 = 1000000.0 * F64(1 << Period2ShiftAccuracy) / F64(frequency);
       }
       S64 getCurrentTime()
       {
@@ -238,6 +242,15 @@ class WinTimer
             return GetTickCount();
          }
       }
+
+      U32 getRealMicroseconds()
+      {
+         if(mUsingPerfCounter)
+            return U32( F64(U64(getCurrentTime()) >> Period2ShiftAccuracy) * mPeriod2 );
+         else
+            return Platform::getRealMilliseconds() * 1000;
+      }
+
       F64 convertToMS(S64 delta)
       {
          if(mUsingPerfCounter)
@@ -282,6 +295,12 @@ F64 Platform::getHighPrecisionMilliseconds(S64 timerDelta)
 
    return timerValue;
 }
+
+U32 Platform::getRealMicroseconds()
+{
+   return gTimer.getRealMicroseconds();
+}
+
 
 void Platform::sleep(U32 msCount)
 {

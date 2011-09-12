@@ -31,22 +31,18 @@
 
 #include <string>
 
-#include <boost/date_time/posix_time/posix_time.hpp>
-
 using namespace TNL;
 using namespace std;
-using namespace boost::posix_time;
 
 namespace Zap
 {
-
 
 struct BanItem
 {
    string ipAddress;
    string nickname;
-   ptime startTime;
-   S32 durationMinutes;
+   string startDateTime;
+   string durationMinutes;
 };
 
 
@@ -54,25 +50,23 @@ class BanList
 {
 private:
    Vector<BanItem> serverBanList;
-   string banListFileName;
-   string banListFilePath;
    string banListTokenDelimiter;
    string banListWildcardCharater;
 
    bool processBanListLine(const string &line);
-   string banItemToString(BanItem banItem);
-   string ptimeToIsoString(ptime time);
+   string banItemToString(BanItem *banItem);
 
 public:
    BanList(const string &iniDir);
    virtual ~BanList();
 
-   bool addToBanList(BanItem banItem);
-   bool removeFromBanList(BanItem banItem);
+   bool addToBanList(BanItem *banItem);
+   bool removeFromBanList(BanItem *banItem);
    bool isBanned(Address ipAddress, string nickname);
 
-   bool writeToFile();
-   void readFromFile();
+   string getDelimiter();
+   Vector<string> banListToString();
+   void loadBanList(const Vector<string> &banItemList);
 };
 
 } /* namespace Zap */
