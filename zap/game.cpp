@@ -1842,6 +1842,7 @@ void ServerGame::idle(U32 timeDelta)
       obj->setCurrentMove(thisMove);
       obj->idle(GameObject::ServerIdleMainLoop);
    }
+
    if(mGameType)
    {
       mGameType->idle(GameObject::ServerIdleMainLoop, timeDelta);
@@ -1863,6 +1864,26 @@ void ServerGame::idle(U32 timeDelta)
    // Lastly, play any sounds server might have made...
    if(isDedicated())   // non-dedicated will process sound in client side.
       SoundSystem::processAudio(gIniSettings.alertsVolLevel);
+}
+
+
+bool ServerGame::startHosting()
+{
+   if(mSettings->getConfigDirs()->levelDir == "")     // Never did resolve a leveldir... no hosting for you!
+      return false;
+
+   hostingModePhase = Hosting;
+
+   for(S32 i = 0; i < getLevelNameCount(); i++)
+      logprintf(LogConsumer::ServerFilter, "\t%s [%s]", getLevelNameFromIndex(i).getString(), 
+                getLevelFileNameFromIndex(i).c_str());
+
+   if(!getLevelNameCount())      // No levels loaded... we'll crash if we try to start a game       
+      return false;      
+
+   cycleLevel(FIRST_LEVEL);      // Start with the first level
+
+   return true;
 }
 
 

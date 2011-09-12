@@ -380,24 +380,7 @@ void initHostGame(GameSettings *settings, Vector<string> &levelList, bool testMo
 // All levels loaded, we're ready to go
 void hostGame()
 {
-   ConfigDirectories *folderManager = gServerGame->getSettings()->getConfigDirs();
-
-   if(folderManager->levelDir == "")     // Never did resolve a leveldir... no hosting for you!
-   {
-      abortHosting_noLevels();           // Not sure this would ever get called...
-      return;
-   }
-
-   gServerGame->hostingModePhase = ServerGame::Hosting;
-
-   for(S32 i = 0; i < gServerGame->getLevelNameCount(); i++)
-      logprintf(LogConsumer::ServerFilter, "\t%s [%s]", gServerGame->getLevelNameFromIndex(i).getString(), 
-                gServerGame->getLevelFileNameFromIndex(i).c_str());
-
-   if(gServerGame->getLevelNameCount())                  // Levels loaded --> start game!
-      gServerGame->cycleLevel(ServerGame::FIRST_LEVEL);  // Start with the first level
-
-   else        // No levels loaded... we'll crash if we try to start a game
+   if(!gServerGame->startHosting())
    {
       abortHosting_noLevels();
       return;

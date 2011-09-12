@@ -400,6 +400,8 @@ public:
 
    enum HostingModePhases { NotHosting, LoadingLevels, DoneLoadingLevels, Hosting };      
 
+   bool startHosting();
+
    static const S32 NEXT_LEVEL = -1;
    static const S32 REPLAY_LEVEL = -2;
    static const S32 PREVIOUS_LEVEL = -3;
