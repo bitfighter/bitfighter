@@ -34,8 +34,10 @@ using namespace std;
 namespace Zap
 {
 
-extern IniSettings gIniSettings;    // For now...
+// For now...  soon all these things will be contained herein
+extern IniSettings gIniSettings;   
 extern CmdLineSettings gCmdLineSettings;
+extern CIniFile gINI;
 
 // Constructor
 GameSettings::GameSettings()
@@ -177,6 +179,19 @@ U32 GameSettings::getMaxPlayers()
       maxplayers = MAX_PLAYERS;
 
    return maxplayers;
+}
+
+
+extern void saveWindowMode(CIniFile *ini);
+
+// Write all our settings to bitfighter.ini
+void GameSettings::save()
+{
+   //   BanList *bl = settings->getBanList();
+   //   bl->writeToFile();      // Writes ban list back to file XXX enable this when admin functionality is built in
+
+   saveWindowMode(&gINI);              
+   saveSettingsToINI(&gINI, this);     // Writes settings to the INI, then saves it to disk
 }
 
 

@@ -582,8 +582,6 @@ FileLogConsumer gServerLog;       // We'll apply a filter later on, in main()
 ////////////////////////////////////////
 
 
-extern void saveWindowMode(CIniFile *ini);
-
 // Run when we're quitting the game, returning to the OS.  Saves settings and does some final cleanup to keep things orderly.
 // There are currently only 6 ways to get here (i.e. 6 legitimate ways to exit Bitfighter): 
 // 1) Hit escape during initial name entry screen
@@ -603,7 +601,7 @@ void shutdownBitfighter()
       if(!gServerGame)
          exitToOs();
 
-// Grab a pointer to settings wherever we can.  Note that gClientGame and gServerGame refer to the same copy.
+// Grab a pointer to settings wherever we can.  Note that gClientGame and gServerGame refer to the same object.
 #ifndef ZAP_DEDICATED
    if(gClientGame)
    {
@@ -628,8 +626,6 @@ void shutdownBitfighter()
    OGLCONSOLE_Quit();
    Joystick::shutdownJoystick();
 
-   // Save settings to capture window position
-   saveWindowMode(&gINI);
    // TODO: reimplement window position saving with SDL
    //   if(gIniSettings.displayMode == DISPLAY_MODE_WINDOWED)
    //      saveWindowPosition(glutGet(GLUT_WINDOW_X), glutGet(GLUT_WINDOW_Y));
@@ -637,11 +633,7 @@ void shutdownBitfighter()
    SDL_QuitSubSystem(SDL_INIT_VIDEO);
 #endif
 
-   saveSettingsToINI(&gINI, settings);    // Writes settings to the INI, then saves it to disk
-
-   // TODO: Put this in settings->save()
-//   BanList *bl = settings->getBanList();
-//   bl->writeToFile();      // Writes ban list back to file XXX enable this when admin functionality is built in
+   settings->save();        // Writes all our settings to bitfighter.ini
 
    delete settings;
 
@@ -740,10 +732,8 @@ void InitSdlVideo()
 #endif
 
 
-// Now integrate INI settings with those from the command line and process them
-void processStartupParams(GameSettings *settings)
+void setupLogging()
 {
-   // Enable some logging...
    gMainLog.setMsgType(LogConsumer::LogConnectionProtocol, gIniSettings.logConnectionProtocol);
    gMainLog.setMsgType(LogConsumer::LogNetConnection, gIniSettings.logNetConnection);
    gMainLog.setMsgType(LogConsumer::LogEventConnection, gIniSettings.logEventConnection);
@@ -763,8 +753,12 @@ void processStartupParams(GameSettings *settings)
    gMainLog.setMsgType(LogConsumer::LuaLevelGenerator, gIniSettings.luaLevelGenerator); 
    gMainLog.setMsgType(LogConsumer::LuaBotMessage, gIniSettings.luaBotMessage); 
    gMainLog.setMsgType(LogConsumer::ServerFilter, gIniSettings.serverFilter); 
+}
 
 
+// Now integrate INI settings with those from the command line and process them
+void processStartupParams(GameSettings *settings)
+{
    settings->initServerPassword(gCmdLineSettings.serverPassword, gIniSettings.serverPassword);
    settings->initAdminPassword(gCmdLineSettings.adminPassword, gIniSettings.adminPassword);
    settings->initLevelChangePassword(gCmdLineSettings.levelChangePassword, gIniSettings.levelChangePassword);
@@ -790,6 +784,7 @@ void processStartupParams(GameSettings *settings)
    if(gCmdLineSettings.winWidth > 0)
       gIniSettings.winSizeFact = max((F32) gCmdLineSettings.winWidth / (F32) gScreenInfo.getGameCanvasWidth(), gScreenInfo.getMinScalingFactor());
 
+   // TODO: Mov to settings
    Game::setMasterAddress(gCmdLineSettings.masterAddress, gIniSettings.masterAddress);    // The INI one will always have a value
    
 
@@ -798,8 +793,11 @@ void processStartupParams(GameSettings *settings)
 
    if(gCmdLineSettings.password != "")                      // We'll clobber the INI file setting.  Since this
       gIniSettings.password = gCmdLineSettings.password;    // setting is never saved, we won't mess up our INI
+}
 
 
+void createClientGame(GameSettings *settings)
+{
 #ifndef ZAP_DEDICATED
    if(!gCmdLineSettings.dedicatedMode)                      // Create ClientGame object
    {
@@ -1155,7 +1153,10 @@ int main(int argc, char **argv)
 
    loadSettingsFromINI(&gINI, settings);  // Read INI
 
+   setupLogging();
    processStartupParams(settings);        // And merge command line params and INI settings
+   createClientGame(settings);
+
    Ship::computeMaxFireDelay();           // Look over weapon info and get some ranges, which we'll need before we start sending data
 
    if(gCmdLineSettings.dedicatedMode)

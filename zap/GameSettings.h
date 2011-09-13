@@ -115,6 +115,8 @@ public:
 
    string getHostAddress();
    U32 getMaxPlayers();
+
+   void save();
 };
 
 
