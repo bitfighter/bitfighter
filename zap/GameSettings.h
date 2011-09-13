@@ -26,6 +26,7 @@
 #ifndef _GAME_SETTINGS_H_
 #define _GAME_SETTINGS_H_
 
+#include "config.h"
 #include "tnlVector.h"
 #include <string>
 
@@ -37,31 +38,6 @@ namespace Zap
 
 class GameSettings;
 class BanList;
-
-struct ConfigDirectories 
-{
-   string levelDir;
-   string robotDir;
-   string sfxDir;
-   string musicDir;
-   string cacheDir;
-   string iniDir;
-   string logDir;
-   string screenshotDir;
-   string luaDir;
-   string rootDataDir;
-
-   void resolveDirs(GameSettings *settings);                                   // calls resolveLevelDir()
-   void resolveLevelDir();                                                     // calls resolveLevelDir(x,y,z)
-   string resolveLevelDir(const string &levelDir, const string &iniLevelDir);  // calls resolveLevelDir(x,y)
-   string resolveLevelDir(const string &levelDir);
-
-   string findLevelFile(const string &filename) const;
-   string findLevelFile(const string &levelDir, const string &filename) const;
-   string findLevelGenScript(const string &fileName) const;
-   string findBotFile(const string &filename) const;
-};
-
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -84,6 +60,8 @@ private:
    ConfigDirectories mFolderManager;
 
    BanList *mBanList;                  // Our ban list
+
+   CmdLineSettings mCmdLineSettings;
 
 public:
    GameSettings();    // Constructor
@@ -117,6 +95,9 @@ public:
    U32 getMaxPlayers();
 
    void save();
+
+   CmdLineSettings *getCmdLineSettings() { return &mCmdLineSettings; }
+
 };
 
 

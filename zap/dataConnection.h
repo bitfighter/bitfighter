@@ -19,7 +19,6 @@ namespace Zap {
 
 class DataConnection;
 class GameSettings;
-struct ConfigDirectories;
 
 enum ActionType {
    SEND_FILE,
@@ -43,7 +42,8 @@ enum SenderStatus {
    FILE_TOO_LONG,
    COMMAND_NOT_ALLOWED,
    SENDER_STATUS_COUNT
-   };
+};
+
 
 ////////////////////////////////////
 ////////////////////////////////////
@@ -59,6 +59,9 @@ public:
 
 ////////////////////////////////////
 ////////////////////////////////////
+
+class GameSettings;
+struct ConfigDirectories;
 
 class DataSender 
 {

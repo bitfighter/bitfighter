@@ -27,6 +27,7 @@
 #include "config.h"
 #include "EngineeredItem.h"    // For EngineerModuleDeployer
 #include "ClientGame.h"
+#include "GameSettings.h"
 #include "gameLoader.h"
 #include "gameNetInterface.h"
 #include "gameObject.h"
@@ -92,7 +93,6 @@ ClientGame *gClientGame1 = NULL;
 ClientGame *gClientGame2 = NULL;
 
 extern ScreenInfo gScreenInfo;
-extern CmdLineSettings gCmdLineSettings;
 
 static Vector<DatabaseObject *> fillVector2;
 
@@ -100,14 +100,14 @@ static Vector<DatabaseObject *> fillVector2;
 ////////////////////////////////////////
 
 // Constructor
-ClientInfo::ClientInfo()   
+ClientInfo::ClientInfo(GameSettings *settings)   
 { 
    id.getRandom();    // Generate a player ID
-   simulatedPacketLoss = gCmdLineSettings.loss;
-   simulatedLag = gCmdLineSettings.lag;
+   simulatedPacketLoss = settings->getCmdLineSettings()->loss;
+   simulatedLag = settings->getCmdLineSettings()->lag;
 
-   if(gCmdLineSettings.name != "")
-      name = gCmdLineSettings.name;
+   if(settings->getCmdLineSettings()->name != "")
+      name = settings->getCmdLineSettings()->name;
    else if(gIniSettings.name != "")
       name = gIniSettings.name;
    else
@@ -129,13 +129,14 @@ ClientGame::ClientGame(const Address &bindAddress, GameSettings *settings) : Gam
 
    mRemoteLevelDownloadFilename = "downloaded.level";
 
-   mUIManager = new UIManager(this);        // Gets deleted in destructor
+   mUIManager = new UIManager(this);         // Gets deleted in destructor
 
+   mClientInfo = new ClientInfo(settings);   // Gets deleted in destructor
 
    // Create some random stars
    for(U32 i = 0; i < NumStars; i++)
    {
-      mStars[i].x = TNL::Random::readF();      // Between 0 and 1
+      mStars[i].x = TNL::Random::readF();    // Between 0 and 1
       mStars[i].y = TNL::Random::readF();
    }
 
@@ -171,6 +172,7 @@ ClientGame::~ClientGame()
 
    delete mUserInterfaceData;
    delete mUIManager;   
+   delete mClientInfo;
    delete mConnectionToServer.getPointer();
 }
 

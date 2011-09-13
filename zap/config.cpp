@@ -1618,8 +1618,6 @@ void writeSkipList(CIniFile *ini, const Vector<string> *levelSkipList)
 //////////////////////////////////
 //////////////////////////////////
 
-extern CmdLineSettings gCmdLineSettings;
-
 static string resolutionHelper(const string &cmdLineDir, const string &rootDataDir, const string &subdir)
 {
    if(cmdLineDir != "")             // Direct specification of ini path takes precedence...
@@ -1632,24 +1630,27 @@ static string resolutionHelper(const string &cmdLineDir, const string &rootDataD
 
 
 extern string gSqlite;
+struct CmdLineSettings;
 
 // Doesn't handle leveldir -- that one is handled separately, later, because it requires input from the INI file
 void ConfigDirectories::resolveDirs(GameSettings *settings)
 {
    ConfigDirectories *configDirs = settings->getConfigDirs();
-   string rootDataDir = gCmdLineSettings.dirs.rootDataDir;
+   ConfigDirectories *cmdLineDirs = &settings->getCmdLineSettings()->dirs;
+
+   string rootDataDir = cmdLineDirs->rootDataDir;
 
    // rootDataDir used to specify the following folders
-   configDirs->robotDir      = resolutionHelper(gCmdLineSettings.dirs.robotDir,      rootDataDir, "robots");
-   configDirs->iniDir        = resolutionHelper(gCmdLineSettings.dirs.iniDir,        rootDataDir, "");
-   configDirs->logDir        = resolutionHelper(gCmdLineSettings.dirs.logDir,        rootDataDir, "");
-   configDirs->screenshotDir = resolutionHelper(gCmdLineSettings.dirs.screenshotDir, rootDataDir, "screenshots");
+   configDirs->robotDir      = resolutionHelper(cmdLineDirs->robotDir,      rootDataDir, "robots");
+   configDirs->iniDir        = resolutionHelper(cmdLineDirs->iniDir,        rootDataDir, "");
+   configDirs->logDir        = resolutionHelper(cmdLineDirs->logDir,        rootDataDir, "");
+   configDirs->screenshotDir = resolutionHelper(cmdLineDirs->screenshotDir, rootDataDir, "screenshots");
 
    // rootDataDir not used for these folders
-   configDirs->cacheDir      = resolutionHelper(gCmdLineSettings.dirs.cacheDir,      "", "cache");
-   configDirs->luaDir        = resolutionHelper(gCmdLineSettings.dirs.luaDir,        "", "scripts");
-   configDirs->sfxDir        = resolutionHelper(gCmdLineSettings.dirs.sfxDir,        "", "sfx");
-   configDirs->musicDir      = resolutionHelper(gCmdLineSettings.dirs.musicDir,      "", "music");
+   configDirs->cacheDir      = resolutionHelper(cmdLineDirs->cacheDir,      "", "cache");
+   configDirs->luaDir        = resolutionHelper(cmdLineDirs->luaDir,        "", "scripts");
+   configDirs->sfxDir        = resolutionHelper(cmdLineDirs->sfxDir,        "", "sfx");
+   configDirs->musicDir      = resolutionHelper(cmdLineDirs->musicDir,      "", "music");
 
    gSqlite = configDirs->logDir + "stats";
 }
@@ -1795,10 +1796,10 @@ static void testLevelDirResolution(ConfigDirectories *configDirs)
 #endif
 
 
-void ConfigDirectories::resolveLevelDir()  
+void ConfigDirectories::resolveLevelDir(CmdLineSettings *cmdLineSettings)  
 {
    //testLevelDirResolution();
-   levelDir = resolveLevelDir(gCmdLineSettings.dirs.levelDir, gIniSettings.levelDir);
+   levelDir = resolveLevelDir(cmdLineSettings->dirs.levelDir, gIniSettings.levelDir);
 }
 
 
@@ -1897,7 +1898,7 @@ string IniSettings::getInputMode()
 
 static void paramRootDataDir(GameSettings *settings, const Vector<string> &words)
 {
-   gCmdLineSettings.dirs.rootDataDir = words[0];
+   settings->getCmdLineSettings()->dirs.rootDataDir = words[0];
 
    ConfigDirectories *folderManager = settings->getConfigDirs();
    folderManager->rootDataDir = words[0];             // Also sock it away here
@@ -1905,156 +1906,156 @@ static void paramRootDataDir(GameSettings *settings, const Vector<string> &words
 
 static void paramLevelDir(GameSettings *settings, const Vector<string> &words)
 {
-   gCmdLineSettings.dirs.levelDir = words[0];
+   settings->getCmdLineSettings()->dirs.levelDir = words[0];
 }
 
 static void paramIniDir(GameSettings *settings, const Vector<string> &words)
 {
-   gCmdLineSettings.dirs.iniDir= words[0];
+   settings->getCmdLineSettings()->dirs.iniDir= words[0];
 }
 
 static void paramLogDir(GameSettings *settings, const Vector<string> &words)
 {
-   gCmdLineSettings.dirs.logDir = words[0];
+   settings->getCmdLineSettings()->dirs.logDir = words[0];
 }
 
 static void paramScriptsDir(GameSettings *settings, const Vector<string> &words)
 {
-   gCmdLineSettings.dirs.luaDir = words[0];
+   settings->getCmdLineSettings()->dirs.luaDir = words[0];
 }
 
 static void paramCacheDir(GameSettings *settings, const Vector<string> &words)
 {
-   gCmdLineSettings.dirs.cacheDir = words[0];
+   settings->getCmdLineSettings()->dirs.cacheDir = words[0];
 }
 
 static void paramRobotDir(GameSettings *settings, const Vector<string> &words)
 {
-   gCmdLineSettings.dirs.robotDir = words[0];
+   settings->getCmdLineSettings()->dirs.robotDir = words[0];
 }
 
 static void paramScreenshotDir(GameSettings *settings, const Vector<string> &words)
 {
-   gCmdLineSettings.dirs.screenshotDir = words[0];
+   settings->getCmdLineSettings()->dirs.screenshotDir = words[0];
 }
 
 static void paramSfxDir(GameSettings *settings, const Vector<string> &words)
 {
-   gCmdLineSettings.dirs.sfxDir = words[0];
+   settings->getCmdLineSettings()->dirs.sfxDir = words[0];
 }
 
 static void paramMusicDir(GameSettings *settings, const Vector<string> &words)
 {
-   gCmdLineSettings.dirs.musicDir = words[0];
+   settings->getCmdLineSettings()->dirs.musicDir = words[0];
 }
 
 static void paramMaster(GameSettings *settings, const Vector<string> &words)
 {
-   gCmdLineSettings.masterAddress = words[0];
+   settings->getCmdLineSettings()->masterAddress = words[0];
 }
 
 static void paramHostAddr(GameSettings *settings, const Vector<string> &words)
 {
-   gCmdLineSettings.hostaddr = words[0];
+   settings->getCmdLineSettings()->hostaddr = words[0];
 }
 
 static void paramLoss(GameSettings *settings, const Vector<string> &words)
 {
-   gCmdLineSettings.loss = (F32)stof(words[0]);
+   settings->getCmdLineSettings()->loss = (F32)stof(words[0]);
 }
 
 static void paramLag(GameSettings *settings, const Vector<string> &words)
 {
-   gCmdLineSettings.lag = stoi(words[0]);
+   settings->getCmdLineSettings()->lag = stoi(words[0]);
 }
 
 static void paramStutter(GameSettings *settings, const Vector<string> &words)
 {
-   gCmdLineSettings.stutter = min(U32(stoi(words[0])), 1000);     // Limit to 0 - 1000
+   settings->getCmdLineSettings()->stutter = min(U32(stoi(words[0])), 1000);     // Limit to 0 - 1000
 }
 
 static void paramForceUpdate(GameSettings *settings, const Vector<string> &words)
 {
-   gCmdLineSettings.forceUpdate = true;
+   settings->getCmdLineSettings()->forceUpdate = true;
 }
 
 static void paramDedicated(GameSettings *settings, const Vector<string> &words)
 {
-   gCmdLineSettings.dedicatedMode = true;
+   settings->getCmdLineSettings()->dedicatedMode = true;
 
    if(words.size() == 1)
-      gCmdLineSettings.dedicated = words[0];
+      settings->getCmdLineSettings()->dedicated = words[0];
 }
 
 static void paramName(GameSettings *settings, const Vector<string> &words)
 {
-   gCmdLineSettings.name = words[0];
+   settings->getCmdLineSettings()->name = words[0];
 }
 
 static void paramPassword(GameSettings *settings, const Vector<string> &words)
 {
-   gCmdLineSettings.password = words[0];
+   settings->getCmdLineSettings()->password = words[0];
 }
 
 static void paramServerPassword(GameSettings *settings, const Vector<string> &words)
 {
-   gCmdLineSettings.serverPassword = words[0];
+   settings->getCmdLineSettings()->serverPassword = words[0];
 }
 
 static void paramAdminPassword(GameSettings *settings, const Vector<string> &words)
 {
-   gCmdLineSettings.adminPassword = words[0];
+   settings->getCmdLineSettings()->adminPassword = words[0];
 }
 
 static void paramLevelChangePassword(GameSettings *settings, const Vector<string> &words)
 {
-   gCmdLineSettings.levelChangePassword = words[0];
+   settings->getCmdLineSettings()->levelChangePassword = words[0];
 }
 
 static void paramLevels(GameSettings *settings, const Vector<string> &words)
 {
-   gCmdLineSettings.specifiedLevels = words;
+   settings->getCmdLineSettings()->specifiedLevels = words;
 }
 
 static void paramHostName(GameSettings *settings, const Vector<string> &words)
 {
-   gCmdLineSettings.hostname = words[0];
+   settings->getCmdLineSettings()->hostname = words[0];
 }
 
 static void paramHostDescr(GameSettings *settings, const Vector<string> &words)
 {
-   gCmdLineSettings.hostdescr = words[0];
+   settings->getCmdLineSettings()->hostdescr = words[0];
 }
 
 static void paramMaxPlayers(GameSettings *settings, const Vector<string> &words)
 {
-   gCmdLineSettings.maxPlayers = stoi(words[0]);
+   settings->getCmdLineSettings()->maxPlayers = stoi(words[0]);
 }
 
 static void paramWindow(GameSettings *settings, const Vector<string> &words)
 {
-   gCmdLineSettings.displayMode = DISPLAY_MODE_WINDOWED;
+   settings->getCmdLineSettings()->displayMode = DISPLAY_MODE_WINDOWED;
 }
 
 static void paramFullscreen(GameSettings *settings, const Vector<string> &words)
 {
-   gCmdLineSettings.displayMode = DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED;
+   settings->getCmdLineSettings()->displayMode = DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED;
 }
 
 static void paramFullscreenStretch(GameSettings *settings, const Vector<string> &words)
 {
-   gCmdLineSettings.displayMode = DISPLAY_MODE_FULL_SCREEN_STRETCHED;
+   settings->getCmdLineSettings()->displayMode = DISPLAY_MODE_FULL_SCREEN_STRETCHED;
 }
 
 static void paramWinPos(GameSettings *settings, const Vector<string> &words)
 {
-   gCmdLineSettings.xpos = stoi(words[0]);
-   gCmdLineSettings.ypos = stoi(words[1]);
+   settings->getCmdLineSettings()->xpos = stoi(words[0]);
+   settings->getCmdLineSettings()->ypos = stoi(words[1]);
 }
 
 static void paramWinWidth(GameSettings *settings, const Vector<string> &words)
 {
-   gCmdLineSettings.winWidth = stoi(words[0]);
+   settings->getCmdLineSettings()->winWidth = stoi(words[0]);
 }
 
 
@@ -2088,7 +2089,7 @@ static void paramHelp(GameSettings *settings, const Vector<string> &words);    /
 static void paramUseStick(GameSettings *settings, const Vector<string> &words)
 {
 #ifndef ZAP_DEDICATED
-   Joystick::UseJoystickNumber = stoi(words[0]) - 1;  // zero-indexed     //  TODO: should be part of gCmdLineSettings
+   Joystick::UseJoystickNumber = stoi(words[0]) - 1;  // zero-indexed     //  TODO: should be part of settings
 #endif
 }
 
@@ -2442,7 +2443,7 @@ void CmdLineSettings::readParams(GameSettings *settings, const Vector<string> &a
 
 #ifdef ZAP_DEDICATED
    // Override some settings if we're compiling ZAP_DEDICATED
-   gCmdLineSettings.dedicatedMode = true;
+   settings->getCmdLineSettings()->dedicatedMode = true;
 #endif
 
 }

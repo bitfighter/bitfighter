@@ -409,7 +409,6 @@ void MasterServerConnection::writeConnectRequest(BitStream *bstream)
    }
 }
 
-extern CmdLineSettings gCmdLineSettings;
 
 void MasterServerConnection::onConnectionEstablished()
 {
@@ -429,7 +428,7 @@ void MasterServerConnection::onConnectionEstablished()
    }
 
    // If we didn't get the master from the cmd line, and we have multiple addresses, write them to the INI file in their new order
-   if(gCmdLineSettings.masterAddress == "" && mGame->getMasterAddressList().size() >= 2)
+   if(mGame->getSettings()->getCmdLineSettings()->masterAddress == "" && mGame->getMasterAddressList().size() >= 2)
       gIniSettings.masterAddress = listToString(mGame->getMasterAddressList(), ',');
 }
 

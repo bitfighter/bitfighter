@@ -746,8 +746,6 @@ void LevelInfo::initialize()
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-extern CmdLineSettings gCmdLineSettings;
-
 // Constructor
 ServerGame::ServerGame(const Address &address, GameSettings *settings, bool testMode, bool dedicated) : 
       Game(address, settings)
@@ -783,8 +781,10 @@ ServerGame::ServerGame(const Address &address, GameSettings *settings, bool test
 
    mGameSuspended = true; // server starts at zero players
 
-   mStutterTimer.reset(1001 - gCmdLineSettings.stutter);    // Use 1001 to ensure timer is never set to 0
-   mStutterSleepTimer.reset(gCmdLineSettings.stutter);
+   U32 stutter = settings->getCmdLineSettings()->stutter;
+
+   mStutterTimer.reset(1001 - stutter);    // Use 1001 to ensure timer is never set to 0
+   mStutterSleepTimer.reset(stutter);
    mAccumulatedSleepTime = 0;
 }
 
@@ -1585,7 +1585,7 @@ void ServerGame::idle(U32 timeDelta)
    }
 
    // Simulate CPU stutter without impacting gClientGame
-   if(gCmdLineSettings.stutter > 0)
+   if(mSettings->getCmdLineSettings()->stutter > 0)
    {
       if(mStutterTimer.getCurrent() > 0)      
       {

@@ -36,7 +36,6 @@ namespace Zap
 
 // For now...  soon all these things will be contained herein
 extern IniSettings gIniSettings;   
-extern CmdLineSettings gCmdLineSettings;
 extern CIniFile gINI;
 
 // Constructor
@@ -142,25 +141,25 @@ void GameSettings::initLevelChangePassword(const string &cmdLineVal, const strin
 
 extern U16 DEFAULT_GAME_PORT;
 
-// Will be cleaned up when gCmdLineSettings/gINI are integrated
+// Will be cleaned up when gINI is integrated
 // NOTE: I believe that this accurately replicates how things were set before, but I'm not sure this makes sense.  There seem to be many
 // ways to set the address.  Do we need all of them?  Is the order of precedence logical?  I think we can get rid of everything except the two
 // hostaddr options.
 string GameSettings::getHostAddress()
 {
-   if(gCmdLineSettings.hostaddr != "")
-      return gCmdLineSettings.hostaddr;
+   if(mCmdLineSettings.hostaddr != "")
+      return mCmdLineSettings.hostaddr;
 
    if(gIniSettings.hostaddr != "")
       return gIniSettings.hostaddr;
 
    // Should we get rid of this option?
-   if(gCmdLineSettings.dedicated != "")     // Should only be true if dedicated server
-      return gCmdLineSettings.dedicated;
+   if(mCmdLineSettings.dedicated != "")     // Should only be true if dedicated server
+      return mCmdLineSettings.dedicated;
 
    // Should we get rid of this option?
-   if(gCmdLineSettings.server != "")
-      return gCmdLineSettings.server;
+   if(mCmdLineSettings.server != "")
+      return mCmdLineSettings.server;
 
    return "IP:Any:" + itos(DEFAULT_GAME_PORT);
 }
@@ -170,8 +169,8 @@ U32 GameSettings::getMaxPlayers()
 {
    U32 maxplayers;
 
-   if(gCmdLineSettings.maxPlayers > 0)
-      maxplayers = gCmdLineSettings.maxPlayers;
+   if(mCmdLineSettings.maxPlayers > 0)
+      maxplayers = mCmdLineSettings.maxPlayers;
    else
       maxplayers = gIniSettings.maxPlayers;
 

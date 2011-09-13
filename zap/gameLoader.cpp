@@ -315,16 +315,15 @@ S32 QSORT_CALLBACK alphaSort(string *a, string *b)
 }
 
 
-extern CmdLineSettings gCmdLineSettings;
-
 // Create a list of levels for hosting a game, but does not read the files or do any validation of them
-Vector<string> LevelListLoader::buildLevelList(const string &levelFolder, const Vector<string> *skipList, bool ignoreCmdLine)
+Vector<string> LevelListLoader::buildLevelList(const string &levelFolder, const Vector<string> &levelsSpecifiedOnCmdLine, 
+                                               const Vector<string> *skipList, bool ignoreCmdLine)
 {
    Vector<string> levelList;
 
    // If user specified a list of levels on the command line, use those, unless ignoreCmdLine was set to true
-   if(!ignoreCmdLine && gCmdLineSettings.specifiedLevels.size() > 0)
-      levelList = gCmdLineSettings.specifiedLevels;
+   if(!ignoreCmdLine && levelsSpecifiedOnCmdLine.size() > 0)
+      levelList = levelsSpecifiedOnCmdLine;
    else
    {
       // Build our level list by looking at the filesystem  

@@ -46,8 +46,6 @@
 namespace Zap
 {
 
-extern CmdLineSettings gCmdLineSettings;
-
 static const char *pageHeaders[] = {
    "PLAYING",
    "FOLDERS",
@@ -125,7 +123,7 @@ static S32 spaceWidth;
 static S32 longestVal;
 static S32 totLen;
 
-static void initFoldersBlock(ConfigDirectories *folderManager, S32 textsize)
+static void initFoldersBlock(ConfigDirectories *folderManager, const string &rootDataDir, S32 textsize)
 {
    names.push_back("Level Dir:");
    vals.push_back(folderManager->levelDir == "" ? "<<Unresolvable>>" : folderManager->levelDir.c_str());
@@ -161,7 +159,7 @@ static void initFoldersBlock(ConfigDirectories *folderManager, S32 textsize)
    vals.push_back("");
 
    names.push_back("Root Data Dir:");
-   vals.push_back(gCmdLineSettings.dirs.rootDataDir == "" ? "None specified" : gCmdLineSettings.dirs.rootDataDir.c_str());
+   vals.push_back(rootDataDir == "" ? "None specified" : rootDataDir.c_str());
 
    longestName = findLongestString((F32)textsize, &names);
    nameWidth = UserInterface::getStringWidth(textsize, names[longestName]);
@@ -172,10 +170,10 @@ static void initFoldersBlock(ConfigDirectories *folderManager, S32 textsize)
 }
 
 
-static S32 showFoldersBlock(ConfigDirectories *folderManager, F32 textsize, S32 ypos, S32 gap)
+static S32 showFoldersBlock(ConfigDirectories *folderManager, const string &rootDataDir, F32 textsize, S32 ypos, S32 gap)
 {
    if(names.size() == 0)      // Lazy init
-      initFoldersBlock(folderManager, (S32)textsize);
+      initFoldersBlock(folderManager, rootDataDir, (S32)textsize);
 
    for(S32 i = 0; i < names.size(); i++)
    {
@@ -473,7 +471,8 @@ void DiagnosticUserInterface::render()
       drawCenteredString(ypos, textsize, "Currently reading data and settings from:");
       ypos += textsize + gap + gap;
 
-      ypos = showFoldersBlock(getGame()->getSettings()->getConfigDirs(), (F32)textsize, ypos, gap+2);
+      GameSettings *settings = getGame()->getSettings();
+      ypos = showFoldersBlock(settings->getConfigDirs(), settings->getCmdLineSettings()->dirs.rootDataDir, (F32)textsize, ypos, gap+2);
    }
    else if(mCurPage == 2)
    {

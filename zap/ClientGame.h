@@ -54,7 +54,7 @@ struct ClientInfo
    F32 simulatedPacketLoss;
    U32 simulatedLag;
 
-   ClientInfo();   // Constructor
+   ClientInfo(GameSettings *settings);   // Constructor
 };
 
 
@@ -89,7 +89,7 @@ private:
 
    Vector<string> mMuteList;        // List of players we aren't listening to anymore because they've annoyed us!
 
-   ClientInfo mClientInfo;
+   ClientInfo *mClientInfo;
 
    string mLoginPassword;
 
@@ -133,7 +133,7 @@ public:
    void idle(U32 timeDelta);
    void zoomCommanderMap();
 
-   ClientInfo *getClientInfo() { return &mClientInfo; }
+   ClientInfo *getClientInfo() { return mClientInfo; }
 
    bool isShowingDebugShipCoords() const { return mDebugShowShipCoords; }     // Show coords on ship?
    void toggleShowingShipCoords() { mDebugShowShipCoords = !mDebugShowShipCoords; }

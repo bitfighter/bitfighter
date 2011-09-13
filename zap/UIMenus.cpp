@@ -1153,7 +1153,8 @@ static void startHostingCallback(ClientGame *game, U32 unused)
    GameSettings *settings = game->getSettings();
    ConfigDirectories *folderManager = settings->getConfigDirs();
 
-   Vector<string> levelList = LevelListLoader::buildLevelList(folderManager->levelDir, settings->getLevelSkipList());
+   Vector<string> levelList = LevelListLoader::buildLevelList(folderManager->levelDir, settings->getCmdLineSettings()->specifiedLevels, 
+                                                              settings->getLevelSkipList());
    initHostGame(settings, levelList, false, false);
 }
 
@@ -1569,8 +1570,11 @@ void LevelMenuSelectUserInterface::onActivate()
    if(!strcmp(category.c_str(), UPLOAD_LEVELS))
    {
       // Get all the playable levels in levelDir
-      ConfigDirectories *folderManager = game->getSettings()->getConfigDirs();
-      mLevels = LevelListLoader::buildLevelList(folderManager->levelDir, game->getSettings()->getLevelSkipList());     
+      GameSettings *settings = getGame()->getSettings();
+
+      ConfigDirectories *folderManager = settings->getConfigDirs();
+      mLevels = LevelListLoader::buildLevelList(folderManager->levelDir, settings->getCmdLineSettings()->specifiedLevels,
+                                                settings->getLevelSkipList());     
 
       for(S32 i = 0; i < mLevels.size(); i++)
       {

@@ -36,7 +36,6 @@
 #include "tnlNetStringTable.h"
 #include "tnlVector.h"
 #include "Color.h"      // For Color def
-#include "GameSettings.h"
 
 #include "input.h"
 #include <string>
@@ -60,6 +59,42 @@ enum DisplayMode {
    DISPLAY_MODE_UNKNOWN
 };
 
+
+////////////////////////////////////
+////////////////////////////////////
+
+class GameSettings;
+struct CmdLineSettings;
+
+struct ConfigDirectories 
+{
+   string levelDir;
+   string robotDir;
+   string sfxDir;
+   string musicDir;
+   string cacheDir;
+   string iniDir;
+   string logDir;
+   string screenshotDir;
+   string luaDir;
+   string rootDataDir;
+
+   void resolveDirs(GameSettings *settings);                                   // calls resolveLevelDir()
+   void resolveLevelDir(CmdLineSettings *cmdLineSettings);                     // calls resolveLevelDir(x,y,z)
+   string resolveLevelDir(const string &levelDir, const string &iniLevelDir);  // calls resolveLevelDir(x,y)
+   string resolveLevelDir(const string &levelDir);
+
+   string findLevelFile(const string &filename) const;
+   string findLevelFile(const string &levelDir, const string &filename) const;
+   string findLevelGenScript(const string &fileName) const;
+   string findBotFile(const string &filename) const;
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+class GameSettings;
 
 struct CmdLineSettings
 {

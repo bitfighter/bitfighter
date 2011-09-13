@@ -172,7 +172,6 @@ bool gShowAimVector = false;     // Do we render an aim vector?  This should pro
 CIniFile gINI("dummy");          // This is our INI file.  Filename set down in main(), but compiler seems to want an arg here.
 
 // These will be moved to the GameSettings object
-CmdLineSettings gCmdLineSettings;
 IniSettings gIniSettings;
 
 OGLCONSOLE_Console gConsole;     // For the moment, we'll just have one console for levelgens and bots.  This may change later.
@@ -759,52 +758,52 @@ void setupLogging()
 // Now integrate INI settings with those from the command line and process them
 void processStartupParams(GameSettings *settings)
 {
-   settings->initServerPassword(gCmdLineSettings.serverPassword, gIniSettings.serverPassword);
-   settings->initAdminPassword(gCmdLineSettings.adminPassword, gIniSettings.adminPassword);
-   settings->initLevelChangePassword(gCmdLineSettings.levelChangePassword, gIniSettings.levelChangePassword);
+   settings->initServerPassword     (settings->getCmdLineSettings()->serverPassword,      gIniSettings.serverPassword);
+   settings->initAdminPassword      (settings->getCmdLineSettings()->adminPassword,       gIniSettings.adminPassword);
+   settings->initLevelChangePassword(settings->getCmdLineSettings()->levelChangePassword, gIniSettings.levelChangePassword);
 
    ConfigDirectories *folderManager = settings->getConfigDirs();
 
-   folderManager->resolveLevelDir(); 
+   folderManager->resolveLevelDir(settings->getCmdLineSettings()); 
 
    if(gIniSettings.levelDir == "")                       // If there is nothing in the INI,
       gIniSettings.levelDir = folderManager->levelDir;   // write a good default to the INI
 
-   settings->initHostName(gCmdLineSettings.hostname, gIniSettings.hostname);
-   settings->initHostDescr(gCmdLineSettings.hostdescr, gIniSettings.hostdescr);
+   settings->initHostName(settings->getCmdLineSettings()->hostname, gIniSettings.hostname);
+   settings->initHostDescr(settings->getCmdLineSettings()->hostdescr, gIniSettings.hostdescr);
 
 
-   if(gCmdLineSettings.displayMode != DISPLAY_MODE_UNKNOWN)
-      gIniSettings.displayMode = gCmdLineSettings.displayMode;    // Simply clobber the gINISettings copy
+   if(settings->getCmdLineSettings()->displayMode != DISPLAY_MODE_UNKNOWN)
+      gIniSettings.displayMode = settings->getCmdLineSettings()->displayMode;    // Simply clobber the gINISettings copy
 
-   if(gCmdLineSettings.xpos != -9999)
-      gIniSettings.winXPos = gCmdLineSettings.xpos;
-   if(gCmdLineSettings.ypos != -9999)
-      gIniSettings.winYPos = gCmdLineSettings.ypos;
-   if(gCmdLineSettings.winWidth > 0)
-      gIniSettings.winSizeFact = max((F32) gCmdLineSettings.winWidth / (F32) gScreenInfo.getGameCanvasWidth(), gScreenInfo.getMinScalingFactor());
+   if(settings->getCmdLineSettings()->xpos != -9999)
+      gIniSettings.winXPos = settings->getCmdLineSettings()->xpos;
+   if(settings->getCmdLineSettings()->ypos != -9999)
+      gIniSettings.winYPos = settings->getCmdLineSettings()->ypos;
+   if(settings->getCmdLineSettings()->winWidth > 0)
+      gIniSettings.winSizeFact = max((F32) settings->getCmdLineSettings()->winWidth / (F32) gScreenInfo.getGameCanvasWidth(), gScreenInfo.getMinScalingFactor());
 
    // TODO: Mov to settings
-   Game::setMasterAddress(gCmdLineSettings.masterAddress, gIniSettings.masterAddress);    // The INI one will always have a value
+   Game::setMasterAddress(settings->getCmdLineSettings()->masterAddress, gIniSettings.masterAddress);    // The INI one will always have a value
    
 
-   if(gCmdLineSettings.name != "")                          // We'll clobber the INI file setting.  Since this
-      gIniSettings.name = gCmdLineSettings.name;            // setting is never saved, we won't mess up our INI
+   if(settings->getCmdLineSettings()->name != "")                          // We'll clobber the INI file setting.  Since this
+      gIniSettings.name = settings->getCmdLineSettings()->name;            // setting is never saved, we won't mess up our INI
 
-   if(gCmdLineSettings.password != "")                      // We'll clobber the INI file setting.  Since this
-      gIniSettings.password = gCmdLineSettings.password;    // setting is never saved, we won't mess up our INI
+   if(settings->getCmdLineSettings()->password != "")                      // We'll clobber the INI file setting.  Since this
+      gIniSettings.password = settings->getCmdLineSettings()->password;    // setting is never saved, we won't mess up our INI
 }
 
 
 void createClientGame(GameSettings *settings)
 {
 #ifndef ZAP_DEDICATED
-   if(!gCmdLineSettings.dedicatedMode)                      // Create ClientGame object
+   if(!settings->getCmdLineSettings()->dedicatedMode)                      // Create ClientGame object
    {
       gClientGame1 = new ClientGame(Address(IPProtocol, Address::Any, gIniSettings.clientPortNumber), settings);   //   Let the system figure out IP address and assign a port
       gClientGame = gClientGame1;
 
-      gClientGame->setLoginPassword(gCmdLineSettings.password, gIniSettings.password, gIniSettings.lastPassword);
+      gClientGame->setLoginPassword(settings->getCmdLineSettings()->password, gIniSettings.password, gIniSettings.lastPassword);
 
        // Put any saved filename into the editor file entry thingy
       gClientGame->getUIManager()->getLevelNameEntryUserInterface()->setString(gIniSettings.lastEditorName);
@@ -1042,15 +1041,14 @@ void checkIfThisIsAnUpdate()
 #ifdef USE_BFUP
 #include <direct.h>
 #include <stdlib.h>
-#include "stringUtils.h"      // For itos
 
 // This block is Windows only, so it can do all sorts of icky stuff...
-void launchUpdater(string bitfighterExecutablePathAndFilename)
+void launchUpdater(string bitfighterExecutablePathAndFilename, bool forceUpdate)
 {
    string updaterPath = ExtractDirectory(bitfighterExecutablePathAndFilename) + "\\updater";
    string updaterFileName = updaterPath + "\\bfup.exe";
 
-   S32 buildVersion = gCmdLineSettings.forceUpdate ? 0 : BUILD_VERSION;
+   S32 buildVersion = forceUpdate ? 0 : BUILD_VERSION;
 
    S64 result = (S64) ShellExecuteA( NULL, NULL, updaterFileName.c_str(), itos(buildVersion).c_str(), updaterPath.c_str(), SW_SHOW );
 
@@ -1138,14 +1136,14 @@ int main(int argc, char **argv)
 
    ConfigDirectories *folderManager = settings->getConfigDirs();
 
-   gCmdLineSettings.readParams(settings, argVector, 0);   // Read first tranche of cmd line params, needed to resolve folder locations
+   settings->getCmdLineSettings()->readParams(settings, argVector, 0);   // Read first tranche of cmd line params, needed to resolve folder locations
    folderManager->resolveDirs(settings);                  // Resolve all folders except for levels folder, which is resolved later
 
    // Before we go any further, we should get our log files in order.  Now we know where they'll be, as the 
    // only way to specify a non-standard location is via the command line, which we've now read.
    setupLogging(folderManager->logDir);
 
-   gCmdLineSettings.readParams(settings, argVector, 1);   // Read remaining cmd line params 
+   settings->getCmdLineSettings()->readParams(settings, argVector, 1);   // Read remaining cmd line params 
 
    // Load the INI file
    gINI.SetPath(joindir(folderManager->iniDir, "bitfighter.ini"));
@@ -1159,10 +1157,11 @@ int main(int argc, char **argv)
 
    Ship::computeMaxFireDelay();           // Look over weapon info and get some ranges, which we'll need before we start sending data
 
-   if(gCmdLineSettings.dedicatedMode)
+   if(settings->getCmdLineSettings()->dedicatedMode)
    {
-      Vector<string> levels = LevelListLoader::buildLevelList(folderManager->levelDir, settings->getLevelSkipList());
-      initHostGame(settings, levels, false, true);       // Start hosting
+      Vector<string> levels = LevelListLoader::buildLevelList(folderManager->levelDir, settings->getCmdLineSettings()->specifiedLevels,
+                                                              settings->getLevelSkipList());
+      initHostGame(settings, levels, false, true);       // Start hostingm
    }
 
    SoundSystem::init(folderManager->sfxDir, folderManager->musicDir);  // Even dedicated server needs sound these days
@@ -1196,7 +1195,7 @@ int main(int argc, char **argv)
 
 #ifdef USE_BFUP
       if(gIniSettings.useUpdater)
-         launchUpdater(argv[0]);       // Spawn external updater tool to check for new version of Bitfighter -- Windows only
+         launchUpdater(argv[0], settings->getCmdLineSettings()->forceUpdate);  // Spawn external updater tool to check for new version of Bitfighter -- Windows only
 #endif
 
    }
