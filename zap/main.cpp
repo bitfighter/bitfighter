@@ -1149,7 +1149,7 @@ int main(int argc, char **argv)
    gINI.SetPath(joindir(folderManager->iniDir, "bitfighter.ini"));
    gIniSettings.init();                   // Init struct that holds INI settings
 
-   loadSettingsFromINI(&gINI, settings);  // Read INI
+   loadSettingsFromINI(&gINI, gIniSettings, settings);  // Read INI
 
    setupLogging();
    processStartupParams(settings);        // And merge command line params and INI settings

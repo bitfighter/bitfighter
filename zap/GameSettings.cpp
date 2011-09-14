@@ -181,7 +181,7 @@ U32 GameSettings::getMaxPlayers()
 }
 
 
-extern void saveWindowMode(CIniFile *ini);
+extern void saveWindowMode(CIniFile *ini, IniSettings iniSettings);
 
 // Write all our settings to bitfighter.ini
 void GameSettings::save()
@@ -189,8 +189,8 @@ void GameSettings::save()
    //   BanList *bl = settings->getBanList();
    //   bl->writeToFile();      // Writes ban list back to file XXX enable this when admin functionality is built in
 
-   saveWindowMode(&gINI);              
-   saveSettingsToINI(&gINI, this);     // Writes settings to the INI, then saves it to disk
+   saveWindowMode(&gINI, gIniSettings);              
+   saveSettingsToINI(&gINI, gIniSettings, this);     // Writes settings to the INI, then saves it to disk
 }
 
 
