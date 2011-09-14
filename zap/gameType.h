@@ -65,19 +65,19 @@ public:
 
    StringTableEntry name;     // Name of client - guaranteed to be unique of current clients
 
-   S32 getTeam() { return mTeamId; }
-   void setTeam(S32 teamId) { mTeamId = teamId; }
+   S32 getTeam();
+   void setTeam(S32 teamId);
 
-   S32 getScore() { return mScore; }
-   void setScore(S32 score) { mScore = score; }
-   void addScore(S32 score) { mScore += score; }
+   S32 getScore();
+   void setScore(S32 score);
+   void addScore(S32 score);
 
-   F32 getRating() { return mRating; }
-   void setRating(F32 rating) { mRating = rating; }
+   F32 getRating();
+   void setRating(F32 rating);
 
    Statistics mStatistics;        // Player statistics tracker
 
-   LuaPlayerInfo *getPlayerInfo() { return mPlayerInfo; }
+   LuaPlayerInfo *getPlayerInfo();
 
    bool isAdmin;
    bool isRobot;
@@ -179,7 +179,8 @@ public:
    };
 
    // Potentially scoring events
-   enum ScoringEvent {
+   enum ScoringEvent
+   {
       KillEnemy,              // all games
       KillSelf,               // all games
       KillTeammate,           // all games
@@ -212,46 +213,46 @@ public:
    static const U32 gMaxTeamCount = MAX_TEAMS - gFirstTeamNumber;    // Number of possible teams, including Neutral and Hostile to All
    static const char *validateGameType(const char *gtype);           // Returns a valid gameType, defaulting to gDefaultGameTypeIndex if needed
 
-   Game *getGame() const { return mGame; }
+   Game *getGame() const;
    bool onGhostAdd(GhostConnection *theConnection);
 
-   virtual GameTypes getGameType() { return BitmatchGame; }
-   virtual const char *getGameTypeString() const { return "Bitmatch"; }                            // Will be overridden by other games
-   virtual const char *getShortName() const { return "BM"; }                                       //          -- ditto --
-   virtual const char *getInstructionString() const { return "Blast as many ships as you can!"; }  //          -- ditto --
-   virtual bool isTeamGame() const;                                                                // Team game if we have teams.  Otherwise it's every man for himself.
-   virtual bool canBeTeamGame() { return true; }
-   virtual bool canBeIndividualGame() { return true; }
-   virtual bool teamHasFlag(S32 teamId) const { return false; }
-   S32 getWinningScore() const { return mWinningScore; }
-   void setWinningScore(S32 score) { mWinningScore = score; }
+   virtual GameTypes getGameType();
+   virtual const char *getGameTypeString() const;       // Will be overridden by other games
+   virtual const char *getShortName() const;            //          -- ditto --
+   virtual const char *getInstructionString() const;    //          -- ditto --
+   virtual bool isTeamGame() const;                     // Team game if we have teams.  Otherwise it's every man for himself.
+   virtual bool canBeTeamGame();
+   virtual bool canBeIndividualGame();
+   virtual bool teamHasFlag(S32 teamId) const;
+   S32 getWinningScore() const;
+   void setWinningScore(S32 score);
 
-   void setGameTime(F32 timeInSeconds) { mGameTimer.reset(U32(timeInSeconds) * 1000); }
+   void setGameTime(F32 timeInSeconds);
 
-   U32 getTotalGameTime() const { return (mGameTimer.getPeriod() / 1000); }      // In seconds
-   S32 getRemainingGameTime() const { return (mGameTimer.getCurrent() / 1000); } // In seconds
-   S32 getRemainingGameTimeInMs() const { return (mGameTimer.getCurrent()); }    // In ms
-   void extendGameTime(S32 timeInMs) { mGameTimer.extend(timeInMs); }
+   U32 getTotalGameTime() const;            // In seconds
+   S32 getRemainingGameTime() const;        // In seconds
+   S32 getRemainingGameTimeInMs() const;    // In ms
+   void extendGameTime(S32 timeInMs);
 
-   S32 getLeadingScore() const { return mLeadingTeamScore; }
-   S32 getLeadingTeam() const { return mLeadingTeam; }
+   S32 getLeadingScore() const;
+   S32 getLeadingTeam() const;
 
    void catalogSpybugs();     // Rebuild a list of spybugs in the game
    void addSpyBug(SpyBug *spybug);
 
    void addWall(WallRec barrier, Game *game);
 
-   virtual bool isFlagGame() { return false; }              // Does game use flags?
-   virtual bool isTeamFlagGame() { return true; }           // Does flag-team orientation matter?  Only false in HunterGame.
-   virtual S32 getFlagCount() { return mFlags.size(); }     // Return the number of game-significant flags
+   virtual bool isFlagGame();      // Does game use flags?
+   virtual bool isTeamFlagGame();  // Does flag-team orientation matter?  Only false in HunterGame.
+   virtual S32 getFlagCount();     // Return the number of game-significant flags
 
-   virtual bool isCarryingItems(Ship *ship) { return ship->mMountedItems.size() > 0; }     // Nexus game will override this
+   virtual bool isCarryingItems(Ship *ship);     // Nexus game will override this
 
    // Some games may place restrictions on when players can fire or use modules
-   virtual bool onFire(Ship *ship) { return true; }
-   virtual bool okToUseModules(Ship *ship) { return true; }
+   virtual bool onFire(Ship *ship);
+   virtual bool okToUseModules(Ship *ship);
 
-   virtual bool isSpawnWithLoadoutGame() { return false; }  // We do not spawn with our loadout, but instead need to pass through a loadout zone
+   virtual bool isSpawnWithLoadoutGame();  // We do not spawn with our loadout, but instead need to pass through a loadout zone
 
    F32 getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 updateSkips);
 
@@ -259,11 +260,11 @@ public:
 
    static void printRules();             // Dump game-rule info
 
-   bool levelHasLoadoutZone() { return mLevelHasLoadoutZone; }        // Does the level have a loadout zone?
+   bool levelHasLoadoutZone();           // Does the level have a loadout zone?
 
    // Game-specific location for the bottom of the scoreboard on the lower-right corner
    // (because games like hunters have more stuff down there we need to look out for)
-   virtual U32 getLowerRightCornerScoreboardOffsetFromBottom() const { return 60; } 
+   virtual U32 getLowerRightCornerScoreboardOffsetFromBottom() const;
 
    enum
    {
@@ -274,22 +275,22 @@ public:
    };
 
 
-   const Vector<WallRec> *getBarrierList() { return &mWalls; }
+   const Vector<WallRec> *getBarrierList();
 
-   S32 getClientCount() const { return mClientList.size(); }
-   RefPtr<ClientRef> getClient(S32 index) const { return mClientList[index]; }
+   S32 getClientCount() const;
+   RefPtr<ClientRef> getClient(S32 index) const;
 
 
 
    ClientRef *mLocalClient;
 
-   virtual ClientRef *allocClientRef() { return new ClientRef; }
+   virtual ClientRef *allocClientRef();
 
-   S32 getFlagSpawnCount() const { return mFlagSpawnPoints.size(); }
-   const FlagSpawn *getFlagSpawn(S32 index) const { return &mFlagSpawnPoints[index]; }
-   const Vector<FlagSpawn> *getFlagSpawns() const { return &mFlagSpawnPoints; }
-   void addFlagSpawn(FlagSpawn flagSpawn) { mFlagSpawnPoints.push_back(flagSpawn); }
-   void addItemSpawn(ItemSpawn *spawn) { mItemSpawnPoints.push_back(boost::shared_ptr<ItemSpawn>(spawn)); logprintf("spawn time: %d", mItemSpawnPoints.last()->getPeriod()); }
+   S32 getFlagSpawnCount() const;
+   const FlagSpawn *getFlagSpawn(S32 index) const;
+   const Vector<FlagSpawn> *getFlagSpawns() const;
+   void addFlagSpawn(FlagSpawn flagSpawn);
+   void addItemSpawn(ItemSpawn *spawn);
 
 
    Rect mViewBoundsWhileLoading;    // Show these view bounds while loading the map
@@ -305,15 +306,16 @@ public:
 
    void addItemOfInterest(MoveItem *theItem);
 
-   S32 getDigitsNeededToDisplayScore() const { return mDigitsNeededToDisplayScore; }
+   S32 getDigitsNeededToDisplayScore() const;
 
-   bool isGameOver() const { return mGameOver; }
+   bool isGameOver() const;
 
    bool mHaveSoccer;                // Does level have soccer balls? used to determine weather or not to send s2cSoccerCollide
 
    bool mBotZoneCreationFailed;
 
-   enum {
+   enum
+   {
       MaxPing = 999,
       DefaultGameTime = 10 * 60 * 1000,
       DefaultWinningScore = 8,
@@ -331,7 +333,8 @@ public:
       S32 maxval;    // Max value for this param
    };
 
-   enum ScoringGroup {
+   enum ScoringGroup
+   {
       IndividualScore,
       TeamScore,
    };
@@ -365,32 +368,32 @@ public:
    virtual string getSpecialsLine();
 
 
-   const StringTableEntry *getLevelName() const { return &mLevelName; }
-   void setLevelName(const StringTableEntry &levelName) { mLevelName = levelName; }
+   const StringTableEntry *getLevelName() const;
+   void setLevelName(const StringTableEntry &levelName);
 
-   const StringTableEntry *getLevelDescription() const { return &mLevelDescription; }
-   void setLevelDescription(const StringTableEntry &levelDescription) { mLevelDescription = levelDescription; }
+   const StringTableEntry *getLevelDescription() const;
+   void setLevelDescription(const StringTableEntry &levelDescription);
 
-   const StringTableEntry *getLevelCredits() const { return &mLevelCredits; }
-   void setLevelCredits(const StringTableEntry &levelCredits) { mLevelCredits = levelCredits; }
+   const StringTableEntry *getLevelCredits() const;
+   void setLevelCredits(const StringTableEntry &levelCredits);
 
-   S32 getMinRecPlayers() { return mMinRecPlayers; }
-   void setMinRecPlayers(S32 minPlayers) { mMinRecPlayers = minPlayers; }
+   S32 getMinRecPlayers();
+   void setMinRecPlayers(S32 minPlayers);
 
-   S32 getMaxRecPlayers() { return mMaxRecPlayers; }
-   void setMaxRecPlayers(S32 maxPlayers) { mMaxRecPlayers = maxPlayers; }
+   S32 getMaxRecPlayers();
+   void setMaxRecPlayers(S32 maxPlayers);
 
-   bool isEngineerEnabled() { return mEngineerEnabled; }
-   void setEngineerEnabled(bool enabled) { mEngineerEnabled = enabled; }
+   bool isEngineerEnabled();
+   void setEngineerEnabled(bool enabled);
 
-   bool areBotsAllowed() { return mBotsAllowed; }
-   void setBotsAllowed(bool allowed) { mBotsAllowed = allowed; }
+   bool areBotsAllowed();
+   void setBotsAllowed(bool allowed);
    
    string getScriptLine() const;
    void setScript(const Vector<string> &args);
 
-   string getScriptName() const { return mScriptName; }
-   const Vector<string> *getScriptArgs() { return &mScriptArgs; }
+   string getScriptName() const;
+   const Vector<string> *getScriptArgs();
 
    void onAddedToGame(Game *theGame);
 
@@ -438,15 +441,15 @@ public:
 
    S32 getTeam(const char *playerName);               // Given a player, return their team
 
-   virtual bool isDatabasable() { return false; }     // Makes no sense to insert a GameType in our spatial database!
+   virtual bool isDatabasable();                      // Makes no sense to insert a GameType in our spatial database!
 
    // gameType flag methods for CTF, Rabbit, Football
-   virtual void addFlag(FlagItem *flag) {  mFlags.push_back(flag);  }
-   virtual void itemDropped(Ship *ship, MoveItem *item) {  /* Do nothing */  }
-   virtual void shipTouchFlag(Ship *ship, FlagItem *flag) {  /* Do nothing */  }
+   virtual void addFlag(FlagItem *flag);
+   virtual void itemDropped(Ship *ship, MoveItem *item);
+   virtual void shipTouchFlag(Ship *ship, FlagItem *flag);
 
-   virtual void addZone(GoalZone *zone) {  /* Do nothing */  }
-   virtual void shipTouchZone(Ship *ship, GoalZone *zone) {  /* Do nothing */  }
+   virtual void addZone(GoalZone *zone);
+   virtual void shipTouchZone(Ship *ship, GoalZone *zone);
 
    void queryItemsOfInterest();
    void performScopeQuery(GhostConnection *connection);
@@ -527,13 +530,15 @@ public:
 
    TNL_DECLARE_CLASS(GameType);
 
-   enum {
+   enum
+   {
       mZoneGlowTime = 800,    // Time for visual effect, used by Nexus & GoalZone
    };
+
    Timer mZoneGlowTimer;
    S32 mGlowingZoneTeam;      // Which team's zones are glowing, -1 for all
 
-   virtual void majorScoringEventOcurred(S32 team) { /* empty */ }    // Gets called when touchdown is scored...  currently only used by zone control & retrieve
+   virtual void majorScoringEventOcurred(S32 team);    // Gets called when touchdown is scored...  currently only used by zone control & retrieve
 
    void processServerCommand(ClientRef *clientRef, const char *cmd, Vector<StringPtr> args);
 

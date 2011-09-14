@@ -43,7 +43,6 @@
 #include "tnlLog.h"
 
 #include "SDL/SDL_opengl.h"
-#include "boost/shared_ptr.hpp"
 
 #include <string>
 
