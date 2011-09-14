@@ -731,27 +731,27 @@ void InitSdlVideo()
 #endif
 
 
-void setupLogging()
+void setupLogging(IniSettings *iniSettings)
 {
-   gMainLog.setMsgType(LogConsumer::LogConnectionProtocol, gIniSettings.logConnectionProtocol);
-   gMainLog.setMsgType(LogConsumer::LogNetConnection, gIniSettings.logNetConnection);
-   gMainLog.setMsgType(LogConsumer::LogEventConnection, gIniSettings.logEventConnection);
-   gMainLog.setMsgType(LogConsumer::LogGhostConnection, gIniSettings.logGhostConnection);
+   gMainLog.setMsgType(LogConsumer::LogConnectionProtocol, iniSettings->logConnectionProtocol);
+   gMainLog.setMsgType(LogConsumer::LogNetConnection, iniSettings->logNetConnection);
+   gMainLog.setMsgType(LogConsumer::LogEventConnection, iniSettings->logEventConnection);
+   gMainLog.setMsgType(LogConsumer::LogGhostConnection, iniSettings->logGhostConnection);
 
-   gMainLog.setMsgType(LogConsumer::LogNetInterface, gIniSettings.logNetInterface);
-   gMainLog.setMsgType(LogConsumer::LogPlatform, gIniSettings.logPlatform);
-   gMainLog.setMsgType(LogConsumer::LogNetBase, gIniSettings.logNetBase);
-   gMainLog.setMsgType(LogConsumer::LogUDP, gIniSettings.logUDP);
+   gMainLog.setMsgType(LogConsumer::LogNetInterface, iniSettings->logNetInterface);
+   gMainLog.setMsgType(LogConsumer::LogPlatform, iniSettings->logPlatform);
+   gMainLog.setMsgType(LogConsumer::LogNetBase, iniSettings->logNetBase);
+   gMainLog.setMsgType(LogConsumer::LogUDP, iniSettings->logUDP);
 
-   gMainLog.setMsgType(LogConsumer::LogFatalError, gIniSettings.logFatalError); 
-   gMainLog.setMsgType(LogConsumer::LogError, gIniSettings.logError); 
-   gMainLog.setMsgType(LogConsumer::LogWarning, gIniSettings.logWarning); 
-   gMainLog.setMsgType(LogConsumer::LogConnection, gIniSettings.logConnection); 
-   gMainLog.setMsgType(LogConsumer::LogLevelLoaded, gIniSettings.logLevelLoaded); 
-   gMainLog.setMsgType(LogConsumer::LogLuaObjectLifecycle, gIniSettings.logLuaObjectLifecycle); 
-   gMainLog.setMsgType(LogConsumer::LuaLevelGenerator, gIniSettings.luaLevelGenerator); 
-   gMainLog.setMsgType(LogConsumer::LuaBotMessage, gIniSettings.luaBotMessage); 
-   gMainLog.setMsgType(LogConsumer::ServerFilter, gIniSettings.serverFilter); 
+   gMainLog.setMsgType(LogConsumer::LogFatalError, iniSettings->logFatalError); 
+   gMainLog.setMsgType(LogConsumer::LogError, iniSettings->logError); 
+   gMainLog.setMsgType(LogConsumer::LogWarning, iniSettings->logWarning); 
+   gMainLog.setMsgType(LogConsumer::LogConnection, iniSettings->logConnection); 
+   gMainLog.setMsgType(LogConsumer::LogLevelLoaded, iniSettings->logLevelLoaded); 
+   gMainLog.setMsgType(LogConsumer::LogLuaObjectLifecycle, iniSettings->logLuaObjectLifecycle); 
+   gMainLog.setMsgType(LogConsumer::LuaLevelGenerator, iniSettings->luaLevelGenerator); 
+   gMainLog.setMsgType(LogConsumer::LuaBotMessage, iniSettings->luaBotMessage); 
+   gMainLog.setMsgType(LogConsumer::ServerFilter, iniSettings->serverFilter); 
 }
 
 
@@ -1149,9 +1149,9 @@ int main(int argc, char **argv)
    gINI.SetPath(joindir(folderManager->iniDir, "bitfighter.ini"));
    gIniSettings.init();                   // Init struct that holds INI settings
 
-   loadSettingsFromINI(&gINI, gIniSettings, settings);  // Read INI
+   loadSettingsFromINI(&gINI, &gIniSettings, settings);  // Read INI
 
-   setupLogging();
+   setupLogging(&gIniSettings);
    processStartupParams(settings);        // And merge command line params and INI settings
    createClientGame(settings);
 

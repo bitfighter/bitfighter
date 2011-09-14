@@ -165,19 +165,19 @@ extern string lcase(string strToConvert);
 // Sorts alphanumerically
 extern S32 QSORT_CALLBACK alphaSort(string *a, string *b);
 
-static void loadForeignServerInfo(CIniFile *ini, IniSettings iniSettings)
+static void loadForeignServerInfo(CIniFile *ini, IniSettings *iniSettings)
 {
    // AlwaysPingList will default to broadcast, can modify the list in the INI
    // http://learn-networking.com/network-design/how-a-broadcast-address-works
-   parseString(ini->GetValue("Connections", "AlwaysPingList", "IP:Broadcast:28000").c_str(), iniSettings.alwaysPingList, ',');
+   parseString(ini->GetValue("Connections", "AlwaysPingList", "IP:Broadcast:28000").c_str(), iniSettings->alwaysPingList, ',');
 
    // These are the servers we found last time we were able to contact the master.
    // In case the master server fails, we can use this list to try to find some game servers. 
    //parseString(ini->GetValue("ForeignServers", "ForeignServerList").c_str(), prevServerListFromMaster, ',');
-   ini->GetAllValues("RecentForeignServers", iniSettings.prevServerListFromMaster);
+   ini->GetAllValues("RecentForeignServers", iniSettings->prevServerListFromMaster);
 }
 
-static void writeConnectionsInfo(CIniFile *ini, IniSettings iniSettings)
+static void writeConnectionsInfo(CIniFile *ini, IniSettings *iniSettings)
 {
    if(ini->numSectionComments("Connections") == 0)
    {
@@ -188,11 +188,11 @@ static void writeConnectionsInfo(CIniFile *ini, IniSettings iniSettings)
    }
 
    // Creates comma delimited list
-   ini->SetValue("Connections", "AlwaysPingList", listToString(iniSettings.alwaysPingList, ','));
+   ini->SetValue("Connections", "AlwaysPingList", listToString(iniSettings->alwaysPingList, ','));
 }
 
 
-static void writeForeignServerInfo(CIniFile *ini, IniSettings iniSettings)
+static void writeForeignServerInfo(CIniFile *ini, IniSettings *iniSettings)
 {
    if(ini->numSectionComments("RecentForeignServers") == 0)
    {
@@ -203,12 +203,12 @@ static void writeForeignServerInfo(CIniFile *ini, IniSettings iniSettings)
       ini->sectionComment("RecentForeignServers", "----------------");
    }
 
-   ini->SetAllValues("RecentForeignServers", "Server", iniSettings.prevServerListFromMaster);
+   ini->SetAllValues("RecentForeignServers", "Server", iniSettings->prevServerListFromMaster);
 }
 
 
 // Read levels, if there are any...
- void loadLevels(CIniFile *ini, IniSettings iniSettings)
+ void loadLevels(CIniFile *ini, IniSettings *iniSettings)
 {
    if(ini->findSection("Levels") != ini->noID)
    {
@@ -225,7 +225,7 @@ static void writeForeignServerInfo(CIniFile *ini, IniSettings iniSettings)
       {
          level = ini->GetValue("Levels", levelValNames[i], "");
          if (level != "")
-            iniSettings.levelList.push_back(StringTableEntry(level.c_str()));
+            iniSettings->levelList.push_back(StringTableEntry(level.c_str()));
       }
    }
 }
@@ -263,44 +263,44 @@ static string displayModeToString(DisplayMode mode)
 }
 
 
-static void loadGeneralSettings(CIniFile *ini, IniSettings iniSettings)
+static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
 {
    string section = "Settings";
 
-   iniSettings.displayMode = stringToDisplayMode( ini->GetValue(section, "WindowMode", displayModeToString(iniSettings.displayMode)));
-   iniSettings.oldDisplayMode = iniSettings.displayMode;
+   iniSettings->displayMode = stringToDisplayMode( ini->GetValue(section, "WindowMode", displayModeToString(iniSettings->displayMode)));
+   iniSettings->oldDisplayMode = iniSettings->displayMode;
 
-   iniSettings.controlsRelative = (lcase(ini->GetValue(section, "ControlMode", (iniSettings.controlsRelative ? "Relative" : "Absolute"))) == "relative");
+   iniSettings->controlsRelative = (lcase(ini->GetValue(section, "ControlMode", (iniSettings->controlsRelative ? "Relative" : "Absolute"))) == "relative");
 
-   iniSettings.echoVoice            = ini->GetValueYN(section, "VoiceEcho", iniSettings.echoVoice);
-   iniSettings.showWeaponIndicators = ini->GetValueYN(section, "LoadoutIndicators", iniSettings.showWeaponIndicators);
-   iniSettings.verboseHelpMessages  = ini->GetValueYN(section, "VerboseHelpMessages", iniSettings.verboseHelpMessages);
-   iniSettings.showKeyboardKeys     = ini->GetValueYN(section, "ShowKeyboardKeysInStickMode", iniSettings.showKeyboardKeys);
+   iniSettings->echoVoice            = ini->GetValueYN(section, "VoiceEcho", iniSettings->echoVoice);
+   iniSettings->showWeaponIndicators = ini->GetValueYN(section, "LoadoutIndicators", iniSettings->showWeaponIndicators);
+   iniSettings->verboseHelpMessages  = ini->GetValueYN(section, "VerboseHelpMessages", iniSettings->verboseHelpMessages);
+   iniSettings->showKeyboardKeys     = ini->GetValueYN(section, "ShowKeyboardKeysInStickMode", iniSettings->showKeyboardKeys);
 
 #ifndef ZAP_DEDICATED
-   iniSettings.joystickType = Joystick::stringToJoystickType(ini->GetValue(section, "JoystickType", Joystick::joystickTypeToString(iniSettings.joystickType)).c_str());
+   iniSettings->joystickType = Joystick::stringToJoystickType(ini->GetValue(section, "JoystickType", Joystick::joystickTypeToString(iniSettings->joystickType)).c_str());
 #endif
 
-   iniSettings.winXPos = max(ini->GetValueI(section, "WindowXPos", iniSettings.winXPos), 0);    // Restore window location
-   iniSettings.winYPos = max(ini->GetValueI(section, "WindowYPos", iniSettings.winYPos), 0);
+   iniSettings->winXPos = max(ini->GetValueI(section, "WindowXPos", iniSettings->winXPos), 0);    // Restore window location
+   iniSettings->winYPos = max(ini->GetValueI(section, "WindowYPos", iniSettings->winYPos), 0);
 
-   iniSettings.winSizeFact = (F32) ini->GetValueF(section, "WindowScalingFactor", iniSettings.winSizeFact);
-   iniSettings.masterAddress = ini->GetValue(section, "MasterServerAddressList", iniSettings.masterAddress);
+   iniSettings->winSizeFact = (F32) ini->GetValueF(section, "WindowScalingFactor", iniSettings->winSizeFact);
+   iniSettings->masterAddress = ini->GetValue(section, "MasterServerAddressList", iniSettings->masterAddress);
    
-   iniSettings.name           = ini->GetValue(section, "Nickname", iniSettings.name);
-   iniSettings.password       = ini->GetValue(section, "Password", iniSettings.password);
+   iniSettings->name           = ini->GetValue(section, "Nickname", iniSettings->name);
+   iniSettings->password       = ini->GetValue(section, "Password", iniSettings->password);
 
-   iniSettings.defaultName    = ini->GetValue(section, "DefaultName", iniSettings.defaultName);
-   iniSettings.lastName       = ini->GetValue(section, "LastName", iniSettings.lastName);
-   iniSettings.lastPassword   = ini->GetValue(section, "LastPassword", iniSettings.lastPassword);
-   iniSettings.lastEditorName = ini->GetValue(section, "LastEditorName", iniSettings.lastEditorName);
+   iniSettings->defaultName    = ini->GetValue(section, "DefaultName", iniSettings->defaultName);
+   iniSettings->lastName       = ini->GetValue(section, "LastName", iniSettings->lastName);
+   iniSettings->lastPassword   = ini->GetValue(section, "LastPassword", iniSettings->lastPassword);
+   iniSettings->lastEditorName = ini->GetValue(section, "LastEditorName", iniSettings->lastEditorName);
 
-   iniSettings.version = ini->GetValueI(section, "Version", iniSettings.version);
+   iniSettings->version = ini->GetValueI(section, "Version", iniSettings->version);
 
-   iniSettings.enableExperimentalAimMode = ini->GetValueYN(section, "EnableExperimentalAimMode", iniSettings.enableExperimentalAimMode);
-   S32 fps = ini->GetValueI(section, "MaxFPS", iniSettings.maxFPS);
+   iniSettings->enableExperimentalAimMode = ini->GetValueYN(section, "EnableExperimentalAimMode", iniSettings->enableExperimentalAimMode);
+   S32 fps = ini->GetValueI(section, "MaxFPS", iniSettings->maxFPS);
    if(fps >= 1) 
-      iniSettings.maxFPS = fps;   // Otherwise, leave it at the default value
+      iniSettings->maxFPS = fps;   // Otherwise, leave it at the default value
    // else warn?
 
 #ifndef ZAP_DEDICATED
@@ -312,49 +312,49 @@ static void loadGeneralSettings(CIniFile *ini, IniSettings iniSettings)
 }
 
 
-static void loadDiagnostics(CIniFile *ini, IniSettings iniSettings)
+static void loadDiagnostics(CIniFile *ini, IniSettings *iniSettings)
 {
    string section = "Diagnostics";
 
-   iniSettings.diagnosticKeyDumpMode = ini->GetValueYN(section, "DumpKeys",              iniSettings.diagnosticKeyDumpMode);
+   iniSettings->diagnosticKeyDumpMode = ini->GetValueYN(section, "DumpKeys",              iniSettings->diagnosticKeyDumpMode);
 
-   iniSettings.logConnectionProtocol = ini->GetValueYN(section, "LogConnectionProtocol", iniSettings.logConnectionProtocol);
-   iniSettings.logNetConnection      = ini->GetValueYN(section, "LogNetConnection",      iniSettings.logNetConnection);
-   iniSettings.logEventConnection    = ini->GetValueYN(section, "LogEventConnection",    iniSettings.logEventConnection);
-   iniSettings.logGhostConnection    = ini->GetValueYN(section, "LogGhostConnection",    iniSettings.logGhostConnection);
-   iniSettings.logNetInterface       = ini->GetValueYN(section, "LogNetInterface",       iniSettings.logNetInterface);
-   iniSettings.logPlatform           = ini->GetValueYN(section, "LogPlatform",           iniSettings.logPlatform);
-   iniSettings.logNetBase            = ini->GetValueYN(section, "LogNetBase",            iniSettings.logNetBase);
-   iniSettings.logUDP                = ini->GetValueYN(section, "LogUDP",                iniSettings.logUDP);
+   iniSettings->logConnectionProtocol = ini->GetValueYN(section, "LogConnectionProtocol", iniSettings->logConnectionProtocol);
+   iniSettings->logNetConnection      = ini->GetValueYN(section, "LogNetConnection",      iniSettings->logNetConnection);
+   iniSettings->logEventConnection    = ini->GetValueYN(section, "LogEventConnection",    iniSettings->logEventConnection);
+   iniSettings->logGhostConnection    = ini->GetValueYN(section, "LogGhostConnection",    iniSettings->logGhostConnection);
+   iniSettings->logNetInterface       = ini->GetValueYN(section, "LogNetInterface",       iniSettings->logNetInterface);
+   iniSettings->logPlatform           = ini->GetValueYN(section, "LogPlatform",           iniSettings->logPlatform);
+   iniSettings->logNetBase            = ini->GetValueYN(section, "LogNetBase",            iniSettings->logNetBase);
+   iniSettings->logUDP                = ini->GetValueYN(section, "LogUDP",                iniSettings->logUDP);
 
-   iniSettings.logFatalError         = ini->GetValueYN(section, "LogFatalError",         iniSettings.logFatalError);
-   iniSettings.logError              = ini->GetValueYN(section, "LogError",              iniSettings.logError);
-   iniSettings.logWarning            = ini->GetValueYN(section, "LogWarning",            iniSettings.logWarning);
-   iniSettings.logConnection         = ini->GetValueYN(section, "LogConnection",         iniSettings.logConnection);
+   iniSettings->logFatalError         = ini->GetValueYN(section, "LogFatalError",         iniSettings->logFatalError);
+   iniSettings->logError              = ini->GetValueYN(section, "LogError",              iniSettings->logError);
+   iniSettings->logWarning            = ini->GetValueYN(section, "LogWarning",            iniSettings->logWarning);
+   iniSettings->logConnection         = ini->GetValueYN(section, "LogConnection",         iniSettings->logConnection);
 
-   iniSettings.logLevelLoaded        = ini->GetValueYN(section, "LogLevelLoaded",        iniSettings.logLevelLoaded);
-   iniSettings.logLuaObjectLifecycle = ini->GetValueYN(section, "LogLuaObjectLifecycle", iniSettings.logLuaObjectLifecycle);
-   iniSettings.luaLevelGenerator     = ini->GetValueYN(section, "LuaLevelGenerator",     iniSettings.luaLevelGenerator);
-   iniSettings.luaBotMessage         = ini->GetValueYN(section, "LuaBotMessage",         iniSettings.luaBotMessage);
-   iniSettings.serverFilter          = ini->GetValueYN(section, "ServerFilter",          iniSettings.serverFilter);
+   iniSettings->logLevelLoaded        = ini->GetValueYN(section, "LogLevelLoaded",        iniSettings->logLevelLoaded);
+   iniSettings->logLuaObjectLifecycle = ini->GetValueYN(section, "LogLuaObjectLifecycle", iniSettings->logLuaObjectLifecycle);
+   iniSettings->luaLevelGenerator     = ini->GetValueYN(section, "LuaLevelGenerator",     iniSettings->luaLevelGenerator);
+   iniSettings->luaBotMessage         = ini->GetValueYN(section, "LuaBotMessage",         iniSettings->luaBotMessage);
+   iniSettings->serverFilter          = ini->GetValueYN(section, "ServerFilter",          iniSettings->serverFilter);
 }
 
 
-static void loadTestSettings(CIniFile *ini, IniSettings iniSettings)
+static void loadTestSettings(CIniFile *ini, IniSettings *iniSettings)
 {
-   iniSettings.burstGraphicsMode = max(ini->GetValueI("Testing", "BurstGraphics", iniSettings.burstGraphicsMode), 0);
-   iniSettings.neverConnectDirect = ini->GetValueYN("Testing", "NeverConnectDirect", iniSettings.neverConnectDirect);
-   iniSettings.wallFillColor.set(ini->GetValue("Testing", "WallFillColor", iniSettings.wallFillColor.toRGBString()));
-   iniSettings.wallOutlineColor.set(ini->GetValue("Testing", "WallOutlineColor", iniSettings.wallOutlineColor.toRGBString()));
-   iniSettings.oldGoalFlash = ini->GetValueYN("Testing", "OldGoalFlash", iniSettings.oldGoalFlash);
-   iniSettings.clientPortNumber = (U16) ini->GetValueI("Testing", "ClientPortNumber", iniSettings.clientPortNumber);
+   iniSettings->burstGraphicsMode = max(ini->GetValueI("Testing", "BurstGraphics", iniSettings->burstGraphicsMode), 0);
+   iniSettings->neverConnectDirect = ini->GetValueYN("Testing", "NeverConnectDirect", iniSettings->neverConnectDirect);
+   iniSettings->wallFillColor.set(ini->GetValue("Testing", "WallFillColor", iniSettings->wallFillColor.toRGBString()));
+   iniSettings->wallOutlineColor.set(ini->GetValue("Testing", "WallOutlineColor", iniSettings->wallOutlineColor.toRGBString()));
+   iniSettings->oldGoalFlash = ini->GetValueYN("Testing", "OldGoalFlash", iniSettings->oldGoalFlash);
+   iniSettings->clientPortNumber = (U16) ini->GetValueI("Testing", "ClientPortNumber", iniSettings->clientPortNumber);
 }
 
 
-static void loadEffectsSettings(CIniFile *ini, IniSettings iniSettings)
+static void loadEffectsSettings(CIniFile *ini, IniSettings *iniSettings)
 {
-   iniSettings.starsInDistance  = (lcase(ini->GetValue("Effects", "StarsInDistance", (iniSettings.starsInDistance ? "Yes" : "No"))) == "yes");
-   iniSettings.useLineSmoothing = (lcase(ini->GetValue("Effects", "LineSmoothing", "No")) == "yes");
+   iniSettings->starsInDistance  = (lcase(ini->GetValue("Effects", "StarsInDistance", (iniSettings->starsInDistance ? "Yes" : "No"))) == "yes");
+   iniSettings->useLineSmoothing = (lcase(ini->GetValue("Effects", "LineSmoothing", "No")) == "yes");
 }
 
 
@@ -371,83 +371,83 @@ static F32 checkVol(F32 vol)
 }
 
 
-static void loadSoundSettings(CIniFile *ini, IniSettings iniSettings)
+static void loadSoundSettings(CIniFile *ini, IniSettings *iniSettings)
 {
-   iniSettings.sfxVolLevel       = (F32) ini->GetValueI("Sounds", "EffectsVolume",   (S32) (iniSettings.sfxVolLevel       * 10)) / 10.0f;
-   iniSettings.musicVolLevel     = (F32) ini->GetValueI("Sounds", "MusicVolume",     (S32) (iniSettings.musicVolLevel     * 10)) / 10.0f;
-   iniSettings.voiceChatVolLevel = (F32) ini->GetValueI("Sounds", "VoiceChatVolume", (S32) (iniSettings.voiceChatVolLevel * 10)) / 10.0f;
+   iniSettings->sfxVolLevel       = (F32) ini->GetValueI("Sounds", "EffectsVolume",   (S32) (iniSettings->sfxVolLevel       * 10)) / 10.0f;
+   iniSettings->musicVolLevel     = (F32) ini->GetValueI("Sounds", "MusicVolume",     (S32) (iniSettings->musicVolLevel     * 10)) / 10.0f;
+   iniSettings->voiceChatVolLevel = (F32) ini->GetValueI("Sounds", "VoiceChatVolume", (S32) (iniSettings->voiceChatVolLevel * 10)) / 10.0f;
 
    string sfxSet = ini->GetValue("Sounds", "SFXSet", "Modern");
-   iniSettings.sfxSet = stringToSFXSet(sfxSet);
+   iniSettings->sfxSet = stringToSFXSet(sfxSet);
 
    // Bounds checking
-   iniSettings.sfxVolLevel       = checkVol(iniSettings.sfxVolLevel);
-   iniSettings.musicVolLevel     = checkVol(iniSettings.musicVolLevel);
-   iniSettings.voiceChatVolLevel = checkVol(iniSettings.voiceChatVolLevel);
+   iniSettings->sfxVolLevel       = checkVol(iniSettings->sfxVolLevel);
+   iniSettings->musicVolLevel     = checkVol(iniSettings->musicVolLevel);
+   iniSettings->voiceChatVolLevel = checkVol(iniSettings->voiceChatVolLevel);
 }
 
-static void loadHostConfiguration(CIniFile *ini, IniSettings iniSettings)
+static void loadHostConfiguration(CIniFile *ini, IniSettings *iniSettings)
 {
-   iniSettings.hostname  = ini->GetValue("Host", "ServerName", iniSettings.hostname);
-   iniSettings.hostaddr  = ini->GetValue("Host", "ServerAddress", iniSettings.hostaddr);
-   iniSettings.hostdescr = ini->GetValue("Host", "ServerDescription", iniSettings.hostdescr);
+   iniSettings->hostname  = ini->GetValue("Host", "ServerName", iniSettings->hostname);
+   iniSettings->hostaddr  = ini->GetValue("Host", "ServerAddress", iniSettings->hostaddr);
+   iniSettings->hostdescr = ini->GetValue("Host", "ServerDescription", iniSettings->hostdescr);
 
-   iniSettings.serverPassword      = ini->GetValue("Host", "ServerPassword", iniSettings.serverPassword);
-   iniSettings.adminPassword       = ini->GetValue("Host", "AdminPassword", iniSettings.adminPassword);
-   iniSettings.levelChangePassword = ini->GetValue("Host", "LevelChangePassword", iniSettings.levelChangePassword);
-   iniSettings.levelDir            = ini->GetValue("Host", "LevelDir", iniSettings.levelDir);
-   iniSettings.maxPlayers          = ini->GetValueI("Host", "MaxPlayers", iniSettings.maxPlayers);
-   iniSettings.maxBots             = ini->GetValueI("Host", "MaxBots", iniSettings.maxBots);
+   iniSettings->serverPassword      = ini->GetValue("Host", "ServerPassword", iniSettings->serverPassword);
+   iniSettings->adminPassword       = ini->GetValue("Host", "AdminPassword", iniSettings->adminPassword);
+   iniSettings->levelChangePassword = ini->GetValue("Host", "LevelChangePassword", iniSettings->levelChangePassword);
+   iniSettings->levelDir            = ini->GetValue("Host", "LevelDir", iniSettings->levelDir);
+   iniSettings->maxPlayers          = ini->GetValueI("Host", "MaxPlayers", iniSettings->maxPlayers);
+   iniSettings->maxBots             = ini->GetValueI("Host", "MaxBots", iniSettings->maxBots);
 
-   iniSettings.alertsVolLevel = (float) ini->GetValueI("Host", "AlertsVolume", (S32) (iniSettings.alertsVolLevel * 10)) / 10.0f;
-   iniSettings.allowGetMap          = ini->GetValueYN("Host", "AllowGetMap", iniSettings.allowGetMap);
-   iniSettings.allowDataConnections = ini->GetValueYN("Host", "AllowDataConnections", iniSettings.allowDataConnections);
+   iniSettings->alertsVolLevel = (float) ini->GetValueI("Host", "AlertsVolume", (S32) (iniSettings->alertsVolLevel * 10)) / 10.0f;
+   iniSettings->allowGetMap          = ini->GetValueYN("Host", "AllowGetMap", iniSettings->allowGetMap);
+   iniSettings->allowDataConnections = ini->GetValueYN("Host", "AllowDataConnections", iniSettings->allowDataConnections);
 
-   S32 fps = ini->GetValueI("Host", "MaxFPS", iniSettings.maxDedicatedFPS);
+   S32 fps = ini->GetValueI("Host", "MaxFPS", iniSettings->maxDedicatedFPS);
    if(fps >= 1) 
-      iniSettings.maxDedicatedFPS = fps; 
+      iniSettings->maxDedicatedFPS = fps; 
    // TODO: else warn?
 
-   iniSettings.logStats = ini->GetValueYN("Host", "LogStats", iniSettings.logStats);
+   iniSettings->logStats = ini->GetValueYN("Host", "LogStats", iniSettings->logStats);
 
-   //iniSettings.SendStatsToMaster = (lcase(ini->GetValue("Host", "SendStatsToMaster", "yes")) != "no");
+   //iniSettings->SendStatsToMaster = (lcase(ini->GetValue("Host", "SendStatsToMaster", "yes")) != "no");
 
-   iniSettings.alertsVolLevel = checkVol(iniSettings.alertsVolLevel);
+   iniSettings->alertsVolLevel = checkVol(iniSettings->alertsVolLevel);
 
-   iniSettings.allowMapUpload         = (U32) ini->GetValueYN("Host", "AllowMapUpload", S32(iniSettings.allowMapUpload) );
-   iniSettings.allowAdminMapUpload    = (U32) ini->GetValueYN("Host", "AllowAdminMapUpload", S32(iniSettings.allowAdminMapUpload) );
+   iniSettings->allowMapUpload         = (U32) ini->GetValueYN("Host", "AllowMapUpload", S32(iniSettings->allowMapUpload) );
+   iniSettings->allowAdminMapUpload    = (U32) ini->GetValueYN("Host", "AllowAdminMapUpload", S32(iniSettings->allowAdminMapUpload) );
 
-   iniSettings.voteEnable             = (U32) ini->GetValueYN("Host", "VoteEnable", S32(iniSettings.voteEnable) );
-   iniSettings.voteLength             = (U32) ini->GetValueI("Host", "VoteLength", S32(iniSettings.voteLength) );
-   iniSettings.voteLengthToChangeTeam = (U32) ini->GetValueI("Host", "VoteLengthToChangeTeam", S32(iniSettings.voteLengthToChangeTeam) );
-   iniSettings.voteRetryLength        = (U32) ini->GetValueI("Host", "VoteRetryLength", S32(iniSettings.voteRetryLength) );
-   iniSettings.voteYesStrength        = ini->GetValueI("Host", "VoteYesStrength", iniSettings.voteYesStrength );
-   iniSettings.voteNoStrength         = ini->GetValueI("Host", "VoteNoStrength", iniSettings.voteNoStrength );
-   iniSettings.voteNothingStrength    = ini->GetValueI("Host", "VoteNothingStrength", iniSettings.voteNothingStrength );
+   iniSettings->voteEnable             = (U32) ini->GetValueYN("Host", "VoteEnable", S32(iniSettings->voteEnable) );
+   iniSettings->voteLength             = (U32) ini->GetValueI("Host", "VoteLength", S32(iniSettings->voteLength) );
+   iniSettings->voteLengthToChangeTeam = (U32) ini->GetValueI("Host", "VoteLengthToChangeTeam", S32(iniSettings->voteLengthToChangeTeam) );
+   iniSettings->voteRetryLength        = (U32) ini->GetValueI("Host", "VoteRetryLength", S32(iniSettings->voteRetryLength) );
+   iniSettings->voteYesStrength        = ini->GetValueI("Host", "VoteYesStrength", iniSettings->voteYesStrength );
+   iniSettings->voteNoStrength         = ini->GetValueI("Host", "VoteNoStrength", iniSettings->voteNoStrength );
+   iniSettings->voteNothingStrength    = ini->GetValueI("Host", "VoteNothingStrength", iniSettings->voteNothingStrength );
 
 #ifdef BF_WRITE_TO_MYSQL
    Vector<string> args;
    parseString(ini->GetValue("Host", "MySqlStatsDatabaseCredentials").c_str(), args, ',');
-   if(args.size() >= 1) iniSettings.mySqlStatsDatabaseServer = args[0];
-   if(args.size() >= 2) iniSettings.mySqlStatsDatabaseName = args[1];
-   if(args.size() >= 3) iniSettings.mySqlStatsDatabaseUser = args[2];
-   if(args.size() >= 4) iniSettings.mySqlStatsDatabasePassword = args[3];
-   if(iniSettings.mySqlStatsDatabaseServer == "server" && iniSettings.mySqlStatsDatabaseName == "dbname")
+   if(args.size() >= 1) iniSettings->mySqlStatsDatabaseServer = args[0];
+   if(args.size() >= 2) iniSettings->mySqlStatsDatabaseName = args[1];
+   if(args.size() >= 3) iniSettings->mySqlStatsDatabaseUser = args[2];
+   if(args.size() >= 4) iniSettings->mySqlStatsDatabasePassword = args[3];
+   if(iniSettings->mySqlStatsDatabaseServer == "server" && iniSettings->mySqlStatsDatabaseName == "dbname")
    {
-      iniSettings.mySqlStatsDatabaseServer = "";  // blank this, so it won't try to connect to "server"
+      iniSettings->mySqlStatsDatabaseServer = "";  // blank this, so it won't try to connect to "server"
    }
 #endif
 
-   iniSettings.defaultRobotScript = ini->GetValue("Host", "DefaultRobotScript", iniSettings.defaultRobotScript);
-   iniSettings.globalLevelScript  = ini->GetValue("Host", "GlobalLevelScript", iniSettings.globalLevelScript);
+   iniSettings->defaultRobotScript = ini->GetValue("Host", "DefaultRobotScript", iniSettings->defaultRobotScript);
+   iniSettings->globalLevelScript  = ini->GetValue("Host", "GlobalLevelScript", iniSettings->globalLevelScript);
 }
 
 
-void loadUpdaterSettings(CIniFile *ini, IniSettings iniSettings)
+void loadUpdaterSettings(CIniFile *ini, IniSettings *iniSettings)
 {
-   iniSettings.useUpdater = lcase(ini->GetValue("Updater", "UseUpdater", "Yes")) != "no";
-   //if(! iniSettings.useUpdater) logprintf("useUpdater is OFF");
-   //if(iniSettings.useUpdater) logprintf("useUpdater is ON");
+   iniSettings->useUpdater = lcase(ini->GetValue("Updater", "UseUpdater", "Yes")) != "no";
+   //if(! iniSettings->useUpdater) logprintf("useUpdater is OFF");
+   //if(iniSettings->useUpdater) logprintf("useUpdater is ON");
 }
 
 
@@ -693,7 +693,7 @@ static void loadQuickChatMessages(CIniFile *ini)
 }
 
 
-static void writeDefaultQuickChatMessages(CIniFile *ini, IniSettings iniSettings)
+static void writeDefaultQuickChatMessages(CIniFile *ini, IniSettings *iniSettings)
 {
    // Are there any QuickChatMessageGroups?  If not, we'll write the defaults.
    S32 keys = ini->GetNumKeys();
@@ -1173,7 +1173,7 @@ static void writeServerBanList(CIniFile *ini, BanList *banList)
 
 // Option default values are stored here, in the 3rd prarm of the GetValue call
 // This is only called once, during initial initialization
-void loadSettingsFromINI(CIniFile *ini, IniSettings iniSettings, GameSettings *settings)
+void loadSettingsFromINI(CIniFile *ini, IniSettings *iniSettings, GameSettings *settings)
 {
    ini->ReadFile();        // Read the INI file  (journaling of read lines happens within)
 
@@ -1196,11 +1196,11 @@ void loadSettingsFromINI(CIniFile *ini, IniSettings iniSettings, GameSettings *s
 //   readJoystick();
    loadServerBanList(ini, settings->getBanList());
 
-   saveSettingsToINI(ini, gIniSettings, settings);    // Save to fill in any missing settings
+   saveSettingsToINI(ini, iniSettings, settings);    // Save to fill in any missing settings
 }
 
 
-static void writeDiagnostics(CIniFile *ini, IniSettings iniSettings)
+static void writeDiagnostics(CIniFile *ini, IniSettings *iniSettings)
 {
    const char *section = "Diagnostics";
    ini->addSection(section);
@@ -1233,29 +1233,29 @@ static void writeDiagnostics(CIniFile *ini, IniSettings iniSettings)
       ini->sectionComment(section, "----------------");
    }
 
-   ini->setValueYN(section, "DumpKeys", iniSettings.diagnosticKeyDumpMode);
-   ini->setValueYN(section, "LogConnectionProtocol", iniSettings.logConnectionProtocol);
-   ini->setValueYN(section, "LogNetConnection",      iniSettings.logNetConnection);
-   ini->setValueYN(section, "LogEventConnection",    iniSettings.logEventConnection);
-   ini->setValueYN(section, "LogGhostConnection",    iniSettings.logGhostConnection);
-   ini->setValueYN(section, "LogNetInterface",       iniSettings.logNetInterface);
-   ini->setValueYN(section, "LogPlatform",           iniSettings.logPlatform);
-   ini->setValueYN(section, "LogNetBase",            iniSettings.logNetBase);
-   ini->setValueYN(section, "LogUDP",                iniSettings.logUDP);
+   ini->setValueYN(section, "DumpKeys", iniSettings->diagnosticKeyDumpMode);
+   ini->setValueYN(section, "LogConnectionProtocol", iniSettings->logConnectionProtocol);
+   ini->setValueYN(section, "LogNetConnection",      iniSettings->logNetConnection);
+   ini->setValueYN(section, "LogEventConnection",    iniSettings->logEventConnection);
+   ini->setValueYN(section, "LogGhostConnection",    iniSettings->logGhostConnection);
+   ini->setValueYN(section, "LogNetInterface",       iniSettings->logNetInterface);
+   ini->setValueYN(section, "LogPlatform",           iniSettings->logPlatform);
+   ini->setValueYN(section, "LogNetBase",            iniSettings->logNetBase);
+   ini->setValueYN(section, "LogUDP",                iniSettings->logUDP);
 
-   ini->setValueYN(section, "LogFatalError",         iniSettings.logFatalError);
-   ini->setValueYN(section, "LogError",              iniSettings.logError);
-   ini->setValueYN(section, "LogWarning",            iniSettings.logWarning);
-   ini->setValueYN(section, "LogConnection",         iniSettings.logConnection);
-   ini->setValueYN(section, "LogLevelLoaded",        iniSettings.logLevelLoaded);
-   ini->setValueYN(section, "LogLuaObjectLifecycle", iniSettings.logLuaObjectLifecycle);
-   ini->setValueYN(section, "LuaLevelGenerator",     iniSettings.luaLevelGenerator);
-   ini->setValueYN(section, "LuaBotMessage",         iniSettings.luaBotMessage);
-   ini->setValueYN(section, "ServerFilter",          iniSettings.serverFilter);
+   ini->setValueYN(section, "LogFatalError",         iniSettings->logFatalError);
+   ini->setValueYN(section, "LogError",              iniSettings->logError);
+   ini->setValueYN(section, "LogWarning",            iniSettings->logWarning);
+   ini->setValueYN(section, "LogConnection",         iniSettings->logConnection);
+   ini->setValueYN(section, "LogLevelLoaded",        iniSettings->logLevelLoaded);
+   ini->setValueYN(section, "LogLuaObjectLifecycle", iniSettings->logLuaObjectLifecycle);
+   ini->setValueYN(section, "LuaLevelGenerator",     iniSettings->luaLevelGenerator);
+   ini->setValueYN(section, "LuaBotMessage",         iniSettings->luaBotMessage);
+   ini->setValueYN(section, "ServerFilter",          iniSettings->serverFilter);
 }
 
 
-static void writeEffects(CIniFile *ini, IniSettings iniSettings)
+static void writeEffects(CIniFile *ini, IniSettings *iniSettings)
 {
    const char *section = "Effects";
    ini->addSection(section);
@@ -1269,11 +1269,11 @@ static void writeEffects(CIniFile *ini, IniSettings iniSettings)
       ini->sectionComment(section, "----------------");
    }
 
-   ini->setValueYN(section, "StarsInDistance", iniSettings.starsInDistance);
-   ini->setValueYN(section, "LineSmoothing",   iniSettings.useLineSmoothing);
+   ini->setValueYN(section, "StarsInDistance", iniSettings->starsInDistance);
+   ini->setValueYN(section, "LineSmoothing",   iniSettings->useLineSmoothing);
 }
 
-static void writeSounds(CIniFile *ini, IniSettings iniSettings)
+static void writeSounds(CIniFile *ini, IniSettings *iniSettings)
 {
    ini->addSection("Sounds");
 
@@ -1288,17 +1288,17 @@ static void writeSounds(CIniFile *ini, IniSettings iniSettings)
       ini->sectionComment("Sounds", "----------------");
    }
 
-   ini->SetValueI("Sounds", "EffectsVolume", (S32) (iniSettings.sfxVolLevel * 10));
-   ini->SetValueI("Sounds", "MusicVolume",   (S32) (iniSettings.musicVolLevel * 10));
-   ini->SetValueI("Sounds", "VoiceChatVolume",   (S32) (iniSettings.voiceChatVolLevel * 10));
+   ini->SetValueI("Sounds", "EffectsVolume", (S32) (iniSettings->sfxVolLevel * 10));
+   ini->SetValueI("Sounds", "MusicVolume",   (S32) (iniSettings->musicVolLevel * 10));
+   ini->SetValueI("Sounds", "VoiceChatVolume",   (S32) (iniSettings->voiceChatVolLevel * 10));
 
-   ini->SetValue("Sounds", "SFXSet", iniSettings.sfxSet == sfxClassicSet ? "Classic" : "Modern");
+   ini->SetValue("Sounds", "SFXSet", iniSettings->sfxSet == sfxClassicSet ? "Classic" : "Modern");
 }
 
 
-void saveWindowMode(CIniFile *ini, IniSettings iniSettings)
+void saveWindowMode(CIniFile *ini, IniSettings *iniSettings)
 {
-   ini->SetValue("Settings",  "WindowMode", displayModeToString(iniSettings.displayMode));
+   ini->SetValue("Settings",  "WindowMode", displayModeToString(iniSettings->displayMode));
 }
 
 
@@ -1309,7 +1309,7 @@ void saveWindowPosition(CIniFile *ini, S32 x, S32 y)
 }
 
 
-static void writeSettings(CIniFile *ini, IniSettings iniSettings)
+static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
 {
    const char *section = "Settings";
    ini->addSection(section);
@@ -1341,29 +1341,29 @@ static void writeSettings(CIniFile *ini, IniSettings iniSettings)
       ini->sectionComment(section, "----------------");
    }
    saveWindowMode(ini, iniSettings);
-   saveWindowPosition(ini, iniSettings.winXPos, iniSettings.winYPos);
+   saveWindowPosition(ini, iniSettings->winXPos, iniSettings->winYPos);
 
-   ini->SetValueF (section, "WindowScalingFactor", iniSettings.winSizeFact);
-   ini->setValueYN(section, "VoiceEcho", iniSettings.echoVoice );
-   ini->SetValue  (section, "ControlMode", (iniSettings.controlsRelative ? "Relative" : "Absolute"));
+   ini->SetValueF (section, "WindowScalingFactor", iniSettings->winSizeFact);
+   ini->setValueYN(section, "VoiceEcho", iniSettings->echoVoice );
+   ini->SetValue  (section, "ControlMode", (iniSettings->controlsRelative ? "Relative" : "Absolute"));
 
    // inputMode is not saved, but rather determined at runtime by whether a joystick is attached
 
-   ini->setValueYN(section, "LoadoutIndicators", iniSettings.showWeaponIndicators);
-   ini->setValueYN(section, "VerboseHelpMessages", iniSettings.verboseHelpMessages);
-   ini->setValueYN(section, "ShowKeyboardKeysInStickMode", iniSettings.showKeyboardKeys);
+   ini->setValueYN(section, "LoadoutIndicators", iniSettings->showWeaponIndicators);
+   ini->setValueYN(section, "VerboseHelpMessages", iniSettings->verboseHelpMessages);
+   ini->setValueYN(section, "ShowKeyboardKeysInStickMode", iniSettings->showKeyboardKeys);
 
 #ifndef ZAP_DEDICATED
-   ini->SetValue  (section, "JoystickType", Joystick::joystickTypeToString(iniSettings.joystickType));
+   ini->SetValue  (section, "JoystickType", Joystick::joystickTypeToString(iniSettings->joystickType));
 #endif
-   ini->SetValue  (section, "MasterServerAddressList", iniSettings.masterAddress);
-   ini->SetValue  (section, "DefaultName", iniSettings.defaultName);
-   ini->SetValue  (section, "LastName", iniSettings.lastName);
-   ini->SetValue  (section, "LastPassword", iniSettings.lastPassword);
-   ini->SetValue  (section, "LastEditorName", iniSettings.lastEditorName);
+   ini->SetValue  (section, "MasterServerAddressList", iniSettings->masterAddress);
+   ini->SetValue  (section, "DefaultName", iniSettings->defaultName);
+   ini->SetValue  (section, "LastName", iniSettings->lastName);
+   ini->SetValue  (section, "LastPassword", iniSettings->lastPassword);
+   ini->SetValue  (section, "LastEditorName", iniSettings->lastEditorName);
 
-   ini->setValueYN(section, "EnableExperimentalAimMode", iniSettings.enableExperimentalAimMode);
-   ini->SetValueI (section, "MaxFPS", iniSettings.maxFPS);  
+   ini->setValueYN(section, "EnableExperimentalAimMode", iniSettings->enableExperimentalAimMode);
+   ini->SetValueI (section, "MaxFPS", iniSettings->maxFPS);  
 
    ini->SetValueI (section, "Version", BUILD_VERSION);
 
@@ -1375,7 +1375,7 @@ static void writeSettings(CIniFile *ini, IniSettings iniSettings)
 }
 
 
-static void writeUpdater(CIniFile *ini, IniSettings iniSettings)
+static void writeUpdater(CIniFile *ini, IniSettings *iniSettings)
 {
    ini->addSection("Updater");
 
@@ -1387,14 +1387,14 @@ static void writeUpdater(CIniFile *ini, IniSettings iniSettings)
       ini->sectionComment("Updater", "----------------");
 
    }
-   ini->setValueYN("Updater", "UseUpdater", iniSettings.useUpdater, true);
+   ini->setValueYN("Updater", "UseUpdater", iniSettings->useUpdater, true);
 }
 
 // TEST!!
 // Does this macro def make it easier to read the code?
 #define addComment(comment) ini->sectionComment(section, comment);
 
-static void writeHost(CIniFile *ini, IniSettings iniSettings)
+static void writeHost(CIniFile *ini, IniSettings *iniSettings)
 {
    const char *section = "Host";
    ini->addSection(section);
@@ -1427,37 +1427,37 @@ static void writeHost(CIniFile *ini, IniSettings iniSettings)
       addComment("----------------");
    }
 
-   ini->SetValue  (section, "ServerName", iniSettings.hostname);
-   ini->SetValue  (section, "ServerAddress", iniSettings.hostaddr);
-   ini->SetValue  (section, "ServerDescription", iniSettings.hostdescr);
-   ini->SetValue  (section, "ServerPassword", iniSettings.serverPassword);
-   ini->SetValue  (section, "AdminPassword", iniSettings.adminPassword);
-   ini->SetValue  (section, "LevelChangePassword", iniSettings.levelChangePassword);
-   ini->SetValue  (section, "LevelDir", iniSettings.levelDir);
-   ini->SetValueI (section, "MaxPlayers", iniSettings.maxPlayers);
-   ini->SetValueI (section, "MaxBots", iniSettings.maxBots);
-   ini->SetValueI (section, "AlertsVolume", (S32) (iniSettings.alertsVolLevel * 10));
-   ini->setValueYN(section, "AllowGetMap", iniSettings.allowGetMap);
-   ini->setValueYN(section, "AllowDataConnections", iniSettings.allowDataConnections);
-   ini->SetValueI (section, "MaxFPS", iniSettings.maxDedicatedFPS);
-   ini->setValueYN(section, "LogStats", iniSettings.logStats);
+   ini->SetValue  (section, "ServerName", iniSettings->hostname);
+   ini->SetValue  (section, "ServerAddress", iniSettings->hostaddr);
+   ini->SetValue  (section, "ServerDescription", iniSettings->hostdescr);
+   ini->SetValue  (section, "ServerPassword", iniSettings->serverPassword);
+   ini->SetValue  (section, "AdminPassword", iniSettings->adminPassword);
+   ini->SetValue  (section, "LevelChangePassword", iniSettings->levelChangePassword);
+   ini->SetValue  (section, "LevelDir", iniSettings->levelDir);
+   ini->SetValueI (section, "MaxPlayers", iniSettings->maxPlayers);
+   ini->SetValueI (section, "MaxBots", iniSettings->maxBots);
+   ini->SetValueI (section, "AlertsVolume", (S32) (iniSettings->alertsVolLevel * 10));
+   ini->setValueYN(section, "AllowGetMap", iniSettings->allowGetMap);
+   ini->setValueYN(section, "AllowDataConnections", iniSettings->allowDataConnections);
+   ini->SetValueI (section, "MaxFPS", iniSettings->maxDedicatedFPS);
+   ini->setValueYN(section, "LogStats", iniSettings->logStats);
 
-   ini->setValueYN(section, "AllowMapUpload", S32(iniSettings.allowMapUpload) );
-   ini->setValueYN(section, "AllowAdminMapUpload", S32(iniSettings.allowAdminMapUpload) );
+   ini->setValueYN(section, "AllowMapUpload", S32(iniSettings->allowMapUpload) );
+   ini->setValueYN(section, "AllowAdminMapUpload", S32(iniSettings->allowAdminMapUpload) );
 
 
-   ini->setValueYN(section, "VoteEnable", S32(iniSettings.voteEnable) );
-   ini->SetValueI(section, "VoteLength", S32(iniSettings.voteLength) );
-   ini->SetValueI(section, "VoteLengthToChangeTeam", S32(iniSettings.voteLengthToChangeTeam) );
-   ini->SetValueI(section, "VoteRetryLength", S32(iniSettings.voteRetryLength) );
-   ini->SetValueI(section, "VoteYesStrength", iniSettings.voteYesStrength );
-   ini->SetValueI(section, "VoteNoStrength", iniSettings.voteNoStrength );
-   ini->SetValueI(section, "VoteNothingStrength", iniSettings.voteNothingStrength );
+   ini->setValueYN(section, "VoteEnable", S32(iniSettings->voteEnable) );
+   ini->SetValueI(section, "VoteLength", S32(iniSettings->voteLength) );
+   ini->SetValueI(section, "VoteLengthToChangeTeam", S32(iniSettings->voteLengthToChangeTeam) );
+   ini->SetValueI(section, "VoteRetryLength", S32(iniSettings->voteRetryLength) );
+   ini->SetValueI(section, "VoteYesStrength", iniSettings->voteYesStrength );
+   ini->SetValueI(section, "VoteNoStrength", iniSettings->voteNoStrength );
+   ini->SetValueI(section, "VoteNothingStrength", iniSettings->voteNothingStrength );
 
-   ini->SetValue  (section, "DefaultRobotScript", iniSettings.defaultRobotScript);
-   ini->SetValue  (section, "GlobalLevelScript", iniSettings.globalLevelScript );
+   ini->SetValue  (section, "DefaultRobotScript", iniSettings->defaultRobotScript);
+   ini->SetValue  (section, "GlobalLevelScript", iniSettings->globalLevelScript );
 #ifdef BF_WRITE_TO_MYSQL
-   if(iniSettings.mySqlStatsDatabaseServer == "" && iniSettings.mySqlStatsDatabaseName == "" && iniSettings.mySqlStatsDatabaseUser == "" && iniSettings.mySqlStatsDatabasePassword == "")
+   if(iniSettings->mySqlStatsDatabaseServer == "" && iniSettings->mySqlStatsDatabaseName == "" && iniSettings->mySqlStatsDatabaseUser == "" && iniSettings->mySqlStatsDatabasePassword == "")
       ini->SetValue  (section, "MySqlStatsDatabaseCredentials", "server, dbname, login, password");
 #endif
 }
@@ -1486,7 +1486,7 @@ static void writeLevels(CIniFile *ini)
 }
 
 
-static void writeTesting(CIniFile *ini, IniSettings iniSettings)
+static void writeTesting(CIniFile *ini, IniSettings *iniSettings)
 {
    ini->addSection("Testing");
    if (ini->numSectionComments("Testing") == 0)
@@ -1502,12 +1502,12 @@ static void writeTesting(CIniFile *ini, IniSettings iniSettings)
       ini->sectionComment("Testing", "----------------");
    }
 
-   ini->SetValueI ("Testing", "BurstGraphics",  (S32) (iniSettings.burstGraphicsMode), true);
-   ini->setValueYN("Testing", "NeverConnectDirect", iniSettings.neverConnectDirect);
-   ini->SetValue  ("Testing", "WallFillColor",   iniSettings.wallFillColor.toRGBString());
-   ini->SetValue  ("Testing", "WallOutlineColor", iniSettings.wallOutlineColor.toRGBString());
-   ini->setValueYN("Testing", "OldGoalFlash", iniSettings.oldGoalFlash);
-   ini->SetValueI ("Testing", "ClientPortNumber", iniSettings.clientPortNumber);
+   ini->SetValueI ("Testing", "BurstGraphics",  (S32) (iniSettings->burstGraphicsMode), true);
+   ini->setValueYN("Testing", "NeverConnectDirect", iniSettings->neverConnectDirect);
+   ini->SetValue  ("Testing", "WallFillColor",   iniSettings->wallFillColor.toRGBString());
+   ini->SetValue  ("Testing", "WallOutlineColor", iniSettings->wallOutlineColor.toRGBString());
+   ini->setValueYN("Testing", "OldGoalFlash", iniSettings->oldGoalFlash);
+   ini->SetValueI ("Testing", "ClientPortNumber", iniSettings->clientPortNumber);
 }
 
 
@@ -1547,7 +1547,7 @@ static void writeINIHeader(CIniFile *ini)
 
 
 // Save more commonly altered settings first to make them easier to find
-void saveSettingsToINI(CIniFile *ini, IniSettings iniSettings, GameSettings *settings)
+void saveSettingsToINI(CIniFile *ini, IniSettings *iniSettings, GameSettings *settings)
 {
    writeINIHeader(ini);
 

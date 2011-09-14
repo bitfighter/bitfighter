@@ -215,7 +215,7 @@ void LevelNameEntryUserInterface::onAccept(const char *name)
    
    // Get that baby into the INI file
    getGame()->getIniSettings()->lastEditorName = name;
-   saveSettingsToINI(&gINI, gIniSettings, getGame()->getSettings());             
+   saveSettingsToINI(&gINI, &gIniSettings, getGame()->getSettings());             
    // Should be...
    //getGame()->getIniSettings()->saveSettingsToDisk();
 }

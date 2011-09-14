@@ -280,8 +280,8 @@ struct IniSettings      // With defaults specified
 extern IniSettings gIniSettings;
 class CIniFile;
 
-void saveSettingsToINI(CIniFile *ini, IniSettings iniSettings, GameSettings *settings);
-void loadSettingsFromINI(CIniFile *ini, IniSettings iniSettings, GameSettings *settings);
+void saveSettingsToINI(CIniFile *ini, IniSettings *iniSettings, GameSettings *settings);
+void loadSettingsFromINI(CIniFile *ini, IniSettings *iniSettings, GameSettings *settings);
 
 void writeSkipList(CIniFile *ini, const Vector<string> *levelSkipList);
 

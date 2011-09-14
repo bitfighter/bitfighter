@@ -333,7 +333,7 @@ void KeyDefMenuUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    else if(keyCode == KEY_ESCAPE || keyCode == BUTTON_BACK)       // Quit
    {
       playBoop();
-      saveSettingsToINI(&gINI, gIniSettings, getGame()->getSettings());
+      saveSettingsToINI(&gINI, &gIniSettings, getGame()->getSettings());
 
       getUIManager()->reactivatePrevUI();      // to gOptionsMenuUserInterface
    }
