@@ -84,7 +84,7 @@ void EngineerHelper::render()
 
          if(showKeys)
          {
-            glColor3f(1, 1, 1);     // Render key in white
+            glColor(Colors::white);     // Render key in white
             JoystickRender::renderControllerButton((F32)UserInterface::horizMargin + 20, (F32)yPos, mEngineerCostructionItemInfos[i].mKey, false);
          }
 
@@ -106,7 +106,7 @@ void EngineerHelper::render()
    else     // Have selected a module, need to indicate where to deploy
    {
       S32 xPos = UserInterface::horizMargin;
-      glColor3f(0, 1, 0);
+      glColor(Colors::green);
       UserInterface::drawStringf(xPos, yPos, fontSize, "Placing %s.", mEngineerCostructionItemInfos[mSelectedItem].mName);
       yPos += fontSize + 7;
       UserInterface::drawString(xPos, yPos, fontSize, "Aim at a spot on the wall, and activate the module again.");
