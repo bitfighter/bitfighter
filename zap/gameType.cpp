@@ -125,6 +125,54 @@ ClientRef::~ClientRef()
 }
 
 
+S32 ClientRef::getTeam()
+{
+   return mTeamId;
+}
+
+
+void ClientRef::setTeam(S32 teamId)
+{
+   mTeamId = teamId;
+}
+
+
+S32 ClientRef::getScore()
+{
+   return mScore;
+}
+
+
+void ClientRef::setScore(S32 score)
+{
+   mScore = score;
+}
+
+
+void ClientRef::addScore(S32 score)
+{
+   mScore += score;
+}
+
+
+F32 ClientRef::getRating()
+{
+   return mRating;
+}
+
+
+void ClientRef::setRating(F32 rating)
+{
+   mRating = rating;
+}
+
+
+LuaPlayerInfo *ClientRef::getPlayerInfo()
+{
+   return mPlayerInfo;
+}
+
+
 ////////////////////////////////////////      __              ___           
 ////////////////////////////////////////     /__  _. ._ _   _  |    ._   _  
 ////////////////////////////////////////     \_| (_| | | | (/_ | \/ |_) (/_ 
@@ -1043,7 +1091,10 @@ F32 GameType::getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 upda
    return F32_MAX;      // High priority!!
 }
 
-bool GameType::isTeamGame() const { return mGame->getTeamCount() > 1; }   // Team game if we have teams.  Otherwise it's every man for himself.
+
+bool GameType::isTeamGame() const {
+   return mGame->getTeamCount() > 1;
+}
 
 
 // Find all spubugs in the game, and store them for future reference
@@ -3085,6 +3136,365 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cVoiceChat, (StringTableEntry clientName
 }
 
 
-};
+Game *GameType::getGame() const
+{
+   return mGame;
+}
 
+
+GameType::GameTypes GameType::getGameType()
+{
+   return BitmatchGame;
+}
+
+
+const char *GameType::getGameTypeString() const
+{
+   return "Bitmatch";
+}
+
+
+const char *GameType::getShortName() const
+{
+   return "BM";
+}
+
+
+const char *GameType::getInstructionString() const
+{
+   return "Blast as many ships as you can!";
+}
+
+
+bool GameType::canBeTeamGame()
+{
+   return true;
+}
+
+
+bool GameType::canBeIndividualGame()
+{
+   return true;
+}
+
+
+bool GameType::teamHasFlag(S32 teamId) const
+{
+   return false;
+}
+
+
+S32 GameType::getWinningScore() const
+{
+   return mWinningScore;
+}
+
+
+void GameType::setWinningScore(S32 score)
+{
+   mWinningScore = score;
+}
+
+
+void GameType::setGameTime(F32 timeInSeconds)
+{
+   mGameTimer.reset(U32(timeInSeconds) * 1000);
+}
+
+
+U32 GameType::getTotalGameTime() const
+{
+   return (mGameTimer.getPeriod() / 1000);
+}
+
+
+S32 GameType::getRemainingGameTime() const
+{
+   return (mGameTimer.getCurrent() / 1000);
+}
+
+
+S32 GameType::getRemainingGameTimeInMs() const
+{
+   return (mGameTimer.getCurrent());
+}
+
+
+void GameType::extendGameTime(S32 timeInMs)
+{
+   mGameTimer.extend(timeInMs);
+}
+
+
+S32 GameType::getLeadingScore() const
+{
+   return mLeadingTeamScore;
+}
+
+
+S32 GameType::getLeadingTeam() const
+{
+   return mLeadingTeam;
+}
+
+
+bool GameType::isFlagGame()
+{
+   return false;
+}
+
+
+bool GameType::isTeamFlagGame()
+{
+   return true;
+}
+
+
+S32 GameType::getFlagCount()
+{
+   return mFlags.size();
+}
+
+
+bool GameType::isCarryingItems(Ship *ship)
+{
+   return ship->mMountedItems.size() > 0;
+}
+
+
+bool GameType::onFire(Ship *ship)
+{
+   return true;
+}
+
+
+bool GameType::okToUseModules(Ship *ship)
+{
+   return true;
+}
+
+
+bool GameType::isSpawnWithLoadoutGame()
+{
+   return false;
+}
+
+
+bool GameType::levelHasLoadoutZone()
+{
+   return mLevelHasLoadoutZone;
+}
+
+
+U32 GameType::getLowerRightCornerScoreboardOffsetFromBottom() const
+{
+   return 60;
+}
+
+
+const Vector<WallRec> *GameType::getBarrierList()
+{
+   return &mWalls;
+}
+
+
+S32 GameType::getClientCount() const
+{
+   return mClientList.size();
+}
+
+
+RefPtr<ClientRef> GameType::getClient(S32 index) const
+{
+   return mClientList[index];
+}
+
+
+ClientRef *GameType::allocClientRef()
+{
+   return new ClientRef;
+}
+
+
+S32 GameType::getFlagSpawnCount() const
+{
+   return mFlagSpawnPoints.size();
+}
+
+
+const FlagSpawn *GameType::getFlagSpawn(S32 index) const
+{
+   return &mFlagSpawnPoints[index];
+}
+
+
+const Vector<FlagSpawn> *GameType::getFlagSpawns() const
+{
+   return &mFlagSpawnPoints;
+}
+
+
+void GameType::addFlagSpawn(FlagSpawn flagSpawn)
+{
+   mFlagSpawnPoints.push_back(flagSpawn);
+}
+
+
+void GameType::addItemSpawn(ItemSpawn *spawn)
+{
+   mItemSpawnPoints.push_back(boost::shared_ptr<ItemSpawn>(spawn));
+   logprintf("spawn time: %d", mItemSpawnPoints.last()->getPeriod());
+}
+
+
+S32 GameType::getDigitsNeededToDisplayScore() const
+{
+   return mDigitsNeededToDisplayScore;
+}
+
+
+bool GameType::isGameOver() const
+{
+   return mGameOver;
+}
+
+const StringTableEntry *GameType::getLevelName() const
+{
+   return &mLevelName;
+}
+
+
+void GameType::setLevelName(const StringTableEntry &levelName)
+{
+   mLevelName = levelName;
+}
+
+
+const StringTableEntry *GameType::getLevelDescription() const
+{
+   return &mLevelDescription;
+}
+
+
+void GameType::setLevelDescription(const StringTableEntry &levelDescription)
+{
+   mLevelDescription = levelDescription;
+}
+
+
+const StringTableEntry *GameType::getLevelCredits() const
+{
+   return &mLevelCredits;
+}
+
+
+void GameType::setLevelCredits(const StringTableEntry &levelCredits)
+{
+   mLevelCredits = levelCredits;
+}
+
+
+S32 GameType::getMinRecPlayers()
+{
+   return mMinRecPlayers;
+}
+
+
+void GameType::setMinRecPlayers(S32 minPlayers)
+{
+   mMinRecPlayers = minPlayers;
+}
+
+
+S32 GameType::getMaxRecPlayers()
+{
+   return mMaxRecPlayers;
+}
+
+
+void GameType::setMaxRecPlayers(S32 maxPlayers)
+{
+   mMaxRecPlayers = maxPlayers;
+}
+
+
+bool GameType::isEngineerEnabled()
+{
+   return mEngineerEnabled;
+}
+
+
+void GameType::setEngineerEnabled(bool enabled)
+{
+   mEngineerEnabled = enabled;
+}
+
+
+bool GameType::areBotsAllowed()
+{
+   return mBotsAllowed;
+}
+
+
+void GameType::setBotsAllowed(bool allowed)
+{
+   mBotsAllowed = allowed;
+}
+
+
+string GameType::getScriptName() const
+{
+   return mScriptName;
+}
+
+
+const Vector<string> *GameType::getScriptArgs()
+{
+   return &mScriptArgs;
+}
+
+
+bool GameType::isDatabasable()
+{
+   return false;
+}
+
+
+void GameType::addFlag(FlagItem *flag)
+{
+   mFlags.push_back(flag);
+}
+
+
+void GameType::itemDropped(Ship *ship, MoveItem *item)
+{
+   /* Do nothing */
+}
+
+
+void GameType::shipTouchFlag(Ship *ship, FlagItem *flag)
+{
+   /* Do nothing */
+}
+
+
+void GameType::addZone(GoalZone *zone)
+{
+   /* Do nothing */
+}
+
+
+void GameType::shipTouchZone(Ship *ship, GoalZone *zone)
+{
+   /* Do nothing */
+}
+
+
+void GameType::majorScoringEventOcurred(S32 team)
+{
+   /* empty */
+}
+
+
+};
 

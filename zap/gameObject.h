@@ -32,8 +32,6 @@
 
 #include "Geometry_Base.h"      // For GeomType enum
 
-#include "boost/smart_ptr/shared_ptr.hpp"
-
 struct lua_State;  // or #include "lua.h"
 
 #ifdef TNL_OS_WIN32 
