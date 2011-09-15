@@ -1145,6 +1145,7 @@ static void writeServerBanList(CIniFile *ini, BanList *banList)
    ini->addSection("ServerBanList");
 
    string delim = banList->getDelimiter();
+   string wildcard = banList->getWildcard();
    if(ini->numSectionComments("ServerBanList") == 0)
    {
       ini->sectionComment("ServerBanList", "----------------");
@@ -1153,8 +1154,12 @@ static void writeServerBanList(CIniFile *ini, BanList *banList)
       ini->sectionComment("ServerBanList", " Bans are in the following format:");
       ini->sectionComment("ServerBanList", "   IP Address " + delim + " nickname " + delim + " Start time (ISO time format) " + delim + " Duration in minutes ");
       ini->sectionComment("ServerBanList", " ");
-      ini->sectionComment("ServerBanList", " Example:");
-      ini->sectionComment("ServerBanList", "   123.123.123.123" + delim + "watusimoto" + delim + "20110131T123000" + delim + "30");
+      ini->sectionComment("ServerBanList", " Examples:");
+      ini->sectionComment("ServerBanList", "   BanItem0=123.123.123.123" + delim + "watusimoto" + delim + "20110131T123000" + delim + "30");
+      ini->sectionComment("ServerBanList", "   BanItem1=" + wildcard + delim + "watusimoto" + delim + "20110131T123000" + delim + "120");
+      ini->sectionComment("ServerBanList", "   BanItem2=123.123.123.123" + delim + wildcard + delim + "20110131T123000" + delim + "30");
+      ini->sectionComment("ServerBanList", " ");
+      ini->sectionComment("ServerBanList", " Note: Wildcards (" + wildcard +") may be used for IP address and nickname" );
       ini->sectionComment("ServerBanList", " ");
       ini->sectionComment("ServerBanList", " Note: ISO time format is in the following format: YYYYMMDDTHH24MISS");
       ini->sectionComment("ServerBanList", "   YYYY = four digit year, '2011'");

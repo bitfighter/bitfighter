@@ -171,9 +171,16 @@ bool BanList::isBanned(Address address, string nickname)
    return false;
 }
 
+
 string BanList::getDelimiter()
 {
    return banListTokenDelimiter;
+}
+
+
+string BanList::getWildcard()
+{
+   return banListWildcardCharater;
 }
 
 

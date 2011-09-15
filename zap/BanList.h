@@ -65,6 +65,8 @@ public:
    bool isBanned(Address ipAddress, string nickname);
 
    string getDelimiter();
+   string getWildcard();
+
    Vector<string> banListToString();
    void loadBanList(const Vector<string> &banItemList);
 };
