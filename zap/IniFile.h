@@ -39,17 +39,17 @@ class CIniFile
 private:
    bool   caseInsensitive;
    string path;
-   struct key {
-      Vector<string> names;
+   struct section {
+      Vector<string> keys;
       Vector<string> values;
       Vector<string> comments;
    };
-   Vector<key>    keys;     // <== should be sections
-   Vector<string> names;    // <== should be keys
-   Vector<string> comments;
+   Vector<section> sections;         // This is our main Vector that holds all of our INI data
+   Vector<string>  sectionNames;     // Holds just the section names
+   Vector<string>  headerComments;   // Holds the header comments that aren't part of any section
    string CheckCase( string s) const;
 
-   string keyname;    // <== should be section
+   string section;
 
 public:
    enum errors{ noID = -1};
@@ -92,7 +92,7 @@ public:
    S32 FindValue( S32 const sectionID, const string key) const;
 
    // Returns number of keys currently in the ini.
-   S32 NumKeys() const                        {return names.size();}
+   S32 NumKeys() const                        {return sectionNames.size();}
    S32 GetNumKeys() const                {return NumKeys();}
 
    // Add a key name.
@@ -172,7 +172,7 @@ public:
    // Header comments are those comments before the first key.
    //
    // Get number of header comments.
-   size_t NumHeaderComments()   {return comments.size();}
+   size_t NumHeaderComments()   {return headerComments.size();}
    // Add a header comment.
    void     headerComment( const string comment);
    // Return a header comment.
@@ -180,7 +180,7 @@ public:
    // Delete a header comment.
    bool     deleteHeaderComment( S32 commentID);
    // Delete all header comments.
-   void     deleteHeaderComments()               { comments.clear(); }
+   void     deleteHeaderComments()               { headerComments.clear(); }
 
    // Key comment functions.
    // Key comments are those comments within a key. Any comments

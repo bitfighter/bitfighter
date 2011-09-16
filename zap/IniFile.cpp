@@ -134,8 +134,8 @@ void CIniFile::processLine(string line)
          switch (line[pLeft]) {
          case '[':      // Section
             if((pRight = line.find_last_of("]")) != string::npos && pRight > pLeft) {
-               keyname = line.substr(pLeft + 1, pRight - pLeft - 1);
-               addSection(keyname);
+               section = line.substr(pLeft + 1, pRight - pLeft - 1);
+               addSection(section);
             }
             break;
 
@@ -147,15 +147,15 @@ void CIniFile::processLine(string line)
             k = trim(k, " ");
             v = trim(v, " ");
 
-            SetValue(keyname, k, v);
+            SetValue(section, k, v);
             break;
 
          case ';':      // Comments
          case '#':
-            if(!names.size())
+            if(!sectionNames.size())
                headerComment(line.substr(pLeft + 1));
             else
-               sectionComment(keyname, line.substr(pLeft + 1));
+               sectionComment(section, line.substr(pLeft + 1));
             break;
          }
       }
@@ -164,7 +164,7 @@ void CIniFile::processLine(string line)
 
 bool CIniFile::WriteFile()
 {
-   S32 commentID, sectionId, valueID;
+   S32 commentID, sectionId, keyID;
 
    // Normally you would use ofstream, but the SGI CC compiler has a few bugs with ofstream. So ... fstream used
    fstream f;
@@ -177,20 +177,20 @@ bool CIniFile::WriteFile()
       return false;
 
    // Write header comments.
-   for(commentID = 0; commentID < comments.size(); ++commentID)
-      f << ";" << comments[commentID] << iniEOL;
-   if(comments.size())
+   for(commentID = 0; commentID < headerComments.size(); ++commentID)
+      f << ";" << headerComments[commentID] << iniEOL;
+   if(headerComments.size())
       f << iniEOL;
 
    // Write keys and values.
-   for(sectionId = 0; sectionId < keys.size(); ++sectionId) {
-      f << '[' << names[sectionId] << ']' << iniEOL;
+   for(sectionId = 0; sectionId < sections.size(); ++sectionId) {
+      f << '[' << sectionNames[sectionId] << ']' << iniEOL;
       // Comments.
-      for(commentID = 0; commentID < keys[sectionId].comments.size(); ++commentID)
-         f << ";" << keys[sectionId].comments[commentID] << iniEOL;
+      for(commentID = 0; commentID < sections[sectionId].comments.size(); ++commentID)
+         f << ";" << sections[sectionId].comments[commentID] << iniEOL;
       // Values.
-      for(valueID = 0; valueID < keys[sectionId].names.size(); ++valueID)
-         f << keys[sectionId].names[valueID] << '=' << keys[sectionId].values[valueID] << iniEOL;
+      for(keyID = 0; keyID < sections[sectionId].keys.size(); ++keyID)
+         f << sections[sectionId].keys[keyID] << '=' << sections[sectionId].values[keyID] << iniEOL;
       f << iniEOL;
    }
    f.close();
@@ -200,20 +200,20 @@ bool CIniFile::WriteFile()
 
 S32 CIniFile::findSection(const string keyname) const
 {
-   for(S32 sectionId = 0; sectionId < names.size(); ++sectionId)
-      if(CheckCase(names[sectionId]) == CheckCase(keyname))
+   for(S32 sectionId = 0; sectionId < sectionNames.size(); ++sectionId)
+      if(CheckCase(sectionNames[sectionId]) == CheckCase(keyname))
          return sectionId;
    return noID;
 }
 
 S32 CIniFile::FindValue(S32 const sectionId, const string valuename) const
 {
-   if(!keys.size() || sectionId >= keys.size())
+   if(!sections.size() || sectionId >= sections.size())
       return noID;
 
-   for(S32 valueID = 0; valueID < keys[sectionId].names.size(); ++valueID)
-      if(CheckCase(keys[sectionId].names[valueID]) == CheckCase(valuename))
-         return valueID;
+   for(S32 keyID = 0; keyID < sections[sectionId].keys.size(); ++keyID)
+      if(CheckCase(sections[sectionId].keys[keyID]) == CheckCase(valuename))
+         return keyID;
    return noID;
 }
 
@@ -221,23 +221,23 @@ S32 CIniFile::addSection(const string keyname)
 {
    if(findSection(keyname) != noID)            // Don't create duplicate keys!
       return noID;
-   names.push_back(keyname);
-   keys.resize(keys.size() + 1);
-   return names.size() - 1;
+   sectionNames.push_back(keyname);
+   sections.resize(sections.size() + 1);
+   return sectionNames.size() - 1;
 }
 
 string CIniFile::sectionName(S32 const sectionId) const
 {
-   if(sectionId < names.size())
-      return names[sectionId];
+   if(sectionId < sectionNames.size())
+      return sectionNames[sectionId];
    else
       return "";
 }
 
 S32 CIniFile::NumValues(S32 const sectionId)
 {
-   if(sectionId < keys.size())
-      return keys[sectionId].names.size();
+   if(sectionId < sections.size())
+      return sections[sectionId].keys.size();
    return 0;
 }
 
@@ -246,13 +246,13 @@ S32 CIniFile::NumValues(const string &keyname)
    S32 sectionId = findSection(keyname);
    if(sectionId == noID)
       return 0;
-   return keys[sectionId].names.size();
+   return sections[sectionId].keys.size();
 }
 
 string CIniFile::ValueName(S32 const sectionId, S32 const valueID) const
 {
-   if(sectionId < keys.size() && valueID < keys[sectionId].names.size())
-      return keys[sectionId].names[valueID];
+   if(sectionId < sections.size() && valueID < sections[sectionId].keys.size())
+      return sections[sectionId].keys[valueID];
    return "";
 }
 
@@ -266,8 +266,8 @@ string CIniFile::ValueName(const string keyname, S32 const valueID) const
 
 bool CIniFile::SetValue(S32 const sectionId, S32 const valueID, const string value)
 {
-   if(sectionId < keys.size() && valueID < keys[sectionId].names.size())
-      keys[sectionId].values[valueID] = value;
+   if(sectionId < sections.size() && valueID < sections[sectionId].keys.size())
+      sections[sectionId].values[valueID] = value;
 
    return false;
 }
@@ -293,10 +293,10 @@ bool CIniFile::SetValue(const string &keyname, const string &valuename, const st
    if(valueID == noID) {
       if(!create)
          return false;
-      keys[sectionId].names.push_back(valuename);
-      keys[sectionId].values.push_back(value);
+      sections[sectionId].keys.push_back(valuename);
+      sections[sectionId].values.push_back(value);
    } else
-      keys[sectionId].values[valueID] = value;
+      sections[sectionId].values[valueID] = value;
 
    return true;
 }
@@ -345,10 +345,10 @@ bool CIniFile::SetValueV(const string &section, const string &key, char *format,
    return SetValue(section, key, value);
 }
 
-string CIniFile::GetValue(S32 const sectionId, S32 const valueID, const string defValue) const
+string CIniFile::GetValue(S32 const sectionId, S32 const keyID, const string defValue) const
 {
-   if(sectionId < keys.size() && valueID < keys[sectionId].names.size())
-      return keys[sectionId].values[valueID];
+   if(sectionId < sections.size() && keyID < sections[sectionId].keys.size())
+      return sections[sectionId].values[keyID];
    return defValue;
 }
 
@@ -363,7 +363,7 @@ string CIniFile::GetValue(const string &keyname, const string &valuename, const 
    if(valueID == noID)
       return defValue;
 
-   return keys[sectionId].values[valueID];
+   return sections[sectionId].values[valueID];
 }
 
 
@@ -372,10 +372,10 @@ void CIniFile::GetAllValues(const string &section, Vector<string> &valueList)
    S32 numVals = gINI.NumValues(section);
    if(numVals > 0)
    {
-      Vector<string> keys(numVals);
+      Vector<string> keyList(numVals);
 
       for(S32 i = 0; i < numVals; i++)
-         keys.push_back(gINI.ValueName(section, i));
+         keyList.push_back(gINI.ValueName(section, i));
 
       string val;
 
@@ -383,7 +383,7 @@ void CIniFile::GetAllValues(const string &section, Vector<string> &valueList)
 
       for(S32 i = 0; i < numVals; i++)
       {
-         val = gINI.GetValue(section, keys[i], "");
+         val = gINI.GetValue(section, keyList[i], "");
          if(val != "")
             valueList.push_back(val);
       }
@@ -475,8 +475,8 @@ bool CIniFile::deleteKey(const string &section, const string &key)
       return false;
 
    // This looks strange, but is neccessary.
-   keys[sectionId].names.erase(valueID);
-   keys[sectionId].values.erase(valueID);
+   sections[sectionId].keys.erase(valueID);
+   sections[sectionId].values.erase(valueID);
 
    return true;
 }
@@ -488,15 +488,8 @@ bool CIniFile::deleteSection(const string &section)
    if(sectionId == noID)
       return false;
 
-   // Now hopefully this destroys the vector lists within keys.
-   // Looking at <vector> source, this should be the case using the destructor.
-   // If not, I may have to do it explicitly. Memory leak check should tell.
-   // memleak_test.cpp shows that the following not required.
-   //keys[sectionId].names.clear();
-   //keys[sectionId].values.clear();
-
-   names.erase(sectionId);
-   keys.erase(sectionId);
+   sectionNames.erase(sectionId);
+   sections.erase(sectionId);
 
    return true;
 }
@@ -504,35 +497,29 @@ bool CIniFile::deleteSection(const string &section)
 
 void CIniFile::Erase()
 {
-   // This loop not needed. The vector<> destructor seems to do
-   // all the work itself. memleak_test.cpp shows this.
-   //for(S32 i = 0; i < keys.size(); ++i) {
-   //  keys[i].names.clear();
-   //  keys[i].values.clear();
-   //}
-   names.clear();
-   keys.clear();
-   comments.clear();
+   sectionNames.clear();
+   sections.clear();
+   headerComments.clear();
 }
 
 void CIniFile::headerComment(const string comment)
 {
-   comments.push_back(comment);
+   headerComments.push_back(comment);
 }
 
 
 string CIniFile::headerComment(S32 const commentID) const
 {
-   if(commentID < comments.size())
-      return comments[commentID];
+   if(commentID < headerComments.size())
+      return headerComments[commentID];
    return "";
 }
 
 
 bool CIniFile::deleteHeaderComment(S32 commentID)
 {
-   if(commentID < comments.size()) {
-      comments.erase(commentID);
+   if(commentID < headerComments.size()) {
+      headerComments.erase(commentID);
       return true;
    }
    return false;
@@ -541,8 +528,8 @@ bool CIniFile::deleteHeaderComment(S32 commentID)
 
 S32 CIniFile::numSectionComments(S32 const sectionId) const
 {
-   if(sectionId < keys.size())
-      return keys[sectionId].comments.size();
+   if(sectionId < sections.size())
+      return sections[sectionId].comments.size();
    return 0;
 }
 
@@ -552,15 +539,15 @@ S32 CIniFile::numSectionComments(const string keyname) const
    S32 sectionId = findSection(keyname);
    if(sectionId == noID)
       return 0;
-   return keys[sectionId].comments.size();
+   return sections[sectionId].comments.size();
 }
 
 
 bool CIniFile::sectionComment(S32 sectionId, const string &comment)
 {
-   if(sectionId < keys.size())
+   if(sectionId < sections.size())
    {
-      keys[sectionId].comments.push_back(comment);
+      sections[sectionId].comments.push_back(comment);
       return true;
    }
 
@@ -597,8 +584,8 @@ bool CIniFile::sectionComment(const string section, const string comment, bool c
 
 string CIniFile::sectionComment(S32 const sectionId, S32 const commentID) const
 {
-   if(sectionId < keys.size() && commentID < keys[sectionId].comments.size())
-      return keys[sectionId].comments[commentID];
+   if(sectionId < sections.size() && commentID < sections[sectionId].comments.size())
+      return sections[sectionId].comments[commentID];
    return "";
 }
 
@@ -613,8 +600,8 @@ string CIniFile::sectionComment(const string keyname, S32 const commentID) const
 
 bool CIniFile::deleteSectionComment(S32 const sectionId, S32 const commentID)
 {
-   if(sectionId < keys.size() && commentID < keys[sectionId].comments.size()) {
-      keys[sectionId].comments.erase(commentID);
+   if(sectionId < sections.size() && commentID < sections[sectionId].comments.size()) {
+      sections[sectionId].comments.erase(commentID);
       return true;
    }
    return false;
@@ -632,8 +619,8 @@ bool CIniFile::deleteSectionComment(const string keyname, S32 const commentID)
 
 bool CIniFile::deleteSectionComments(S32 const sectionId)
 {
-   if(sectionId < keys.size()) {
-      keys[sectionId].comments.clear();
+   if(sectionId < sections.size()) {
+      sections[sectionId].comments.clear();
       return true;
    }
    return false;
@@ -652,7 +639,7 @@ bool CIniFile::deleteSectionComments(const string keyname)
 bool CIniFile::deleteAllSectionComments()
 {
    bool result = true;
-   for(S32 i = 0; i < keys.size() && result; i++)
+   for(S32 i = 0; i < sections.size() && result; i++)
       result &= deleteSectionComments(i);
 
    return result;
