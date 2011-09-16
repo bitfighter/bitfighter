@@ -39,11 +39,14 @@ class CIniFile
 private:
    bool   caseInsensitive;
    string path;
-   struct section {
+
+   struct section
+   {
       Vector<string> keys;
       Vector<string> values;
       Vector<string> comments;
    };
+
    Vector<section> sections;         // This is our main Vector that holds all of our INI data
    Vector<string>  sectionNames;     // Holds just the section names
    Vector<string>  headerComments;   // Holds the header comments that aren't part of any section
@@ -52,26 +55,28 @@ private:
    string section;
 
 public:
-   enum errors{ noID = -1};
+   enum errors
+   {
+      noID = -1
+   };
+
    S32 lineCount;
 
    CIniFile( const string iniPath = "");     // Constructor
-   ~CIniFile()  {
-      //WriteFile();  --> Crashes with VC++ 2008
-   }
+   ~CIniFile();                              // Destructor
 
    void processLine(string line);     // Process a line of an input file (CE)
 
 
    // Sets whether or not keynames and valuenames should be case sensitive.
    // The default is case insensitive.
-   void CaseSensitive()                           {caseInsensitive = false;}
-   void CaseInsensitive()                         {caseInsensitive = true;}
+   void CaseSensitive();
+   void CaseInsensitive();
 
    // Sets path of ini file to read and write from.
-   void Path(const string newPath)                {path = newPath;}
-   string Path() const                            {return path;}
-   void SetPath(const string newPath)             {Path( newPath);}
+   void Path(const string newPath);
+   string Path() const;
+   void SetPath(const string newPath);
 
    // Reads ini file specified using path.
    // Returns true if successful, false otherwise.
@@ -82,8 +87,8 @@ public:
 
    // Deletes all stored ini data.
    void Erase();
-   void Clear()                                   {Erase();}
-   void Reset()                                   {Erase();}
+   void Clear();
+   void Reset();
 
    // Returns index of specified key, or noID if not found.
    S32 findSection( const string section) const;
@@ -92,31 +97,27 @@ public:
    S32 FindValue( S32 const sectionID, const string key) const;
 
    // Returns number of keys currently in the ini.
-   S32 NumKeys() const                        {return sectionNames.size();}
-   S32 GetNumKeys() const                {return NumKeys();}
+   S32 NumKeys() const;
+   S32 GetNumKeys() const;
 
    // Add a key name.
    S32 addSection( const string section);
 
    // Returns key names by index.
    string sectionName( S32 const sectionId) const;
-   string getSectionName( S32 const sectionId) const {return sectionName(sectionId);}
+   string getSectionName( S32 const sectionId) const;
 
    // Returns number of values stored for specified key.
    S32 NumValues( S32 const sectionId);
-   S32 GetNumValues( S32 const sectionId)   {return NumValues( sectionId);}
+   S32 GetNumValues( S32 const sectionId);
    S32 NumValues( const string &keyname);
-   S32 GetNumValues( const string keyname)   {return NumValues( keyname);}
+   S32 GetNumValues( const string keyname);
 
    // Returns value name by index for a given keyname or sectionId.
    string ValueName( S32 const sectionID, S32 const keyID) const;
-   string GetValueName( S32 const sectionID, S32 const keyID) const {
-      return ValueName( sectionID, keyID);
-   }
+   string GetValueName( S32 const sectionID, S32 const keyID) const;
    string ValueName( const string section, S32 const keyID) const;
-   string GetValueName( const string section, S32 const keyID) const {
-      return ValueName( section, keyID);
-   }
+   string GetValueName( const string section, S32 const keyID) const;
 
    // Gets value of [keyname] valuename =.
    // Overloaded to return string, int, and double.
@@ -128,9 +129,7 @@ public:
    void GetAllValues(const string &section, Vector<string> &valueList);
 
    S32    GetValueI(const string &section, const string &key, S32 const defValue = 0) const;
-   bool   GetValueB(const string &section, const string &key, bool const defValue = false) const {
-      return (GetValueI( section, key, int( defValue)) != 0);
-   }
+   bool   GetValueB(const string &section, const string &key, bool const defValue = false) const;
    F64   GetValueF(const string &section, const string& key, F64 const defValue = 0.0) const;
    bool     GetValueYN(const string &section, const string &key, bool defValue) const;
 
@@ -150,12 +149,8 @@ public:
    bool SetValue(const string &section, const string &key, const string &value, bool const create = true);
    bool SetAllValues(const string &section, const string &prefix, const Vector<string> &values);
    bool SetValueI(const string &section, const string &key, int const value, bool const create = true);
-   bool SetValueB(const string &section, const string &key, bool const value, bool const create = true) {
-      return SetValueI(section, key, int(value), create);
-   }
-   bool setValueYN(const string section, const string key, bool const value, bool const create = true) {
-      return SetValue(section, key, value ? "Yes" : "No", create);
-   }
+   bool SetValueB(const string &section, const string &key, bool const value, bool const create = true);
+   bool setValueYN(const string section, const string key, bool const value, bool const create = true);
    bool SetValueF(const string &section, const string &key, F64 const value, bool const create = true);
    bool SetValueV(const string &section, const string &key, char *format, ...);
    bool SetValue(S32 const sectionId, S32 const valueID, const string value);
@@ -172,7 +167,7 @@ public:
    // Header comments are those comments before the first key.
    //
    // Get number of header comments.
-   size_t NumHeaderComments()   {return headerComments.size();}
+   size_t NumHeaderComments();
    // Add a header comment.
    void     headerComment( const string comment);
    // Return a header comment.
@@ -180,7 +175,7 @@ public:
    // Delete a header comment.
    bool     deleteHeaderComment( S32 commentID);
    // Delete all header comments.
-   void     deleteHeaderComments()               { headerComments.clear(); }
+   void     deleteHeaderComments();
 
    // Key comment functions.
    // Key comments are those comments within a key. Any comments

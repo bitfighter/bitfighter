@@ -65,6 +65,13 @@ CIniFile::CIniFile(const string iniPath)
 }
 
 
+// Destructor
+CIniFile::~CIniFile()
+{
+   //WriteFile();  --> Crashes with VC++ 2008
+}
+
+
 extern Zap::ZapJournal gZapJournal;
 
 void CIniFile::ReadFile()
@@ -652,6 +659,122 @@ string CIniFile::CheckCase(string s) const
       for(string::size_type i = 0; i < s.length(); i++)
          s[i] = tolower(s[i]);
    return s;
+}
+
+
+void CIniFile::CaseSensitive()
+{
+   caseInsensitive = false;
+}
+
+
+void CIniFile::CaseInsensitive()
+{
+   caseInsensitive = true;
+}
+
+
+// Sets path of ini file to read and write from.
+void CIniFile::Path(const string newPath)
+{
+   path = newPath;
+}
+
+
+string CIniFile::Path() const
+{
+   return path;
+}
+
+
+void CIniFile::SetPath(const string newPath)
+{
+   Path( newPath);
+}
+
+
+void CIniFile::Clear()
+{
+   Erase();
+}
+
+
+void CIniFile::Reset()
+{
+   Erase();
+}
+
+
+S32 CIniFile::NumKeys() const
+{
+   return sectionNames.size();
+}
+
+
+S32 CIniFile::GetNumKeys() const
+{
+   return NumKeys();
+}
+
+
+string CIniFile::getSectionName( S32 const sectionId) const
+{
+   return sectionName(sectionId);
+}
+
+
+S32 CIniFile::GetNumValues( S32 const sectionId)
+{
+   return NumValues( sectionId);
+}
+
+
+S32 CIniFile::GetNumValues( const string keyname)
+{
+   return NumValues( keyname);
+}
+
+
+string CIniFile::GetValueName( S32 const sectionID, S32 const keyID) const
+{
+   return ValueName( sectionID, keyID);
+}
+
+
+
+string CIniFile::GetValueName( const string section, S32 const keyID) const
+{
+   return ValueName( section, keyID);
+}
+
+
+bool CIniFile::GetValueB(const string &section, const string &key, bool const defValue) const
+{
+   return (GetValueI( section, key, int( defValue)) != 0);
+}
+
+
+bool CIniFile::SetValueB(const string &section, const string &key, bool const value, bool const create)
+{
+   return SetValueI(section, key, int(value), create);
+}
+
+
+bool CIniFile::setValueYN(const string section, const string key, bool const value, bool const create)
+{
+   return SetValue(section, key, value ? "Yes" : "No", create);
+}
+
+
+size_t CIniFile::NumHeaderComments()
+{
+   return headerComments.size();
+}
+
+
+void CIniFile::deleteHeaderComments()
+{
+   headerComments.clear();
 }
 
 
