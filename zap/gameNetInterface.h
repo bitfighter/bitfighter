@@ -40,11 +40,6 @@ class GameNetInterface : public NetInterface
    typedef NetInterface Parent;
    Game *mGame;
 
-   struct BannedHost {
-      Address theAddress;
-      U32 banDuration;
-   };
-   Vector<BannedHost> mBanList;
 public:
    enum PacketType
    {
@@ -58,9 +53,6 @@ public:
    void sendPing(const Address &theAddress, const Nonce &clientNonce);
    void sendQuery(const Address &theAddress, const Nonce &clientNonce, U32 identityToken);
    void processPacket(const Address &sourceAddress, BitStream *pStream);
-   void banHost(const Address &bannedAddress, U32 bannedMilliseconds);
-   void checkBanlistTimeouts(U32 timeElapsed);
-   bool isAddressBanned(const Address &theAddress);
 };
 
 };

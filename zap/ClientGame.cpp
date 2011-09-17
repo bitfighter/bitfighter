@@ -49,6 +49,7 @@
 #include "huntersGame.h"         // for creating new HuntersFlagItem
 
 #include "IniFile.h"             // For CIniFile def
+#include "BanList.h"             // For banList kick duration
 
 #include "UIQueryServers.h"
 #include "UIErrorMessage.h"
@@ -763,15 +764,15 @@ void ClientGame::onConnectionTerminated(const Address &serverAddress, NetConnect
          break;
 
       case NetConnection::ReasonKickedByAdmin:
-         ui->setMessage(2, "You were kicked off the server by an admin,");
-         ui->setMessage(3, "and have been temporarily banned.");
-         ui->setMessage(5, "You can try another server, host your own,");
-         ui->setMessage(6, "or try the server that kicked you again later.");
+         ui->setMessage(2, "You were kicked off the server by an admin.");
+         ui->setMessage(4, "You can try another server, host your own,");
+         ui->setMessage(5, "or try the server that kicked you again later.");
          getUIManager()->getNameEntryUserInterface()->activate();
          ui->activate();
 
          // Add this server to our list of servers not to display for a spell...
-         getUIManager()->getQueryServersUserInterface()->addHiddenServer(serverAddress, Platform::getRealMilliseconds() + GameConnection::BanDuration);
+         getUIManager()->getQueryServersUserInterface()->addHiddenServer(serverAddress, Platform::getRealMilliseconds() +
+               mSettings->getBanList()->getKickDuration());
          break;
 
       case NetConnection::ReasonBanned:
@@ -899,10 +900,9 @@ void ClientGame::onConnectTerminated(const Address &serverAddress, NetConnection
       ui->reset();
       ui->setTitle("Connection Terminated");
 
-      ui->setMessage(2, "You were kicked off the server by an admin,");
-      ui->setMessage(3, "and have been temporarily banned.");
-      ui->setMessage(5, "You can try another server, host your own,");
-      ui->setMessage(6, "or try the server that kicked you again later.");
+      ui->setMessage(2, "You were kicked off the server by an admin.");
+      ui->setMessage(4, "You can try another server, host your own,");
+      ui->setMessage(5, "or try the server that kicked you again later.");
 
       getUIManager()->getMainMenuUserInterface()->activate();
       ui->activate();

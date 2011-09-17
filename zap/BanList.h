@@ -37,21 +37,30 @@ using namespace std;
 namespace Zap
 {
 
-struct BanItem
-{
-   string ipAddress;
-   string nickname;
-   string startDateTime;
-   string durationMinutes;
-};
-
 
 class BanList
 {
 private:
+   struct BanItem
+   {
+      string ipAddress;
+      string nickname;
+      string startDateTime;
+      string durationMinutes;
+   };
+
+   struct KickedHost {
+      Address theAddress;
+      U32 kickTimeRemaining;
+   };
+
    Vector<BanItem> serverBanList;
+   Vector<KickedHost> serverKickList;
+
    string banListTokenDelimiter;
    string banListWildcardCharater;
+
+   S32 kickDurationMilliseconds;
 
    bool processBanListLine(const string &line);
    string banItemToString(BanItem *banItem);
@@ -62,13 +71,18 @@ public:
 
    bool addToBanList(BanItem *banItem);
    bool removeFromBanList(BanItem *banItem);
-   bool isBanned(Address ipAddress, string nickname);
+   bool isBanned(const Address &ipAddress, const string &nickname);
 
    string getDelimiter();
    string getWildcard();
+   S32 getKickDuration();
 
    Vector<string> banListToString();
    void loadBanList(const Vector<string> &banItemList);
+
+   void kickHost(const Address &bannedAddress);       // Add an address to kick list
+   bool isAddressKicked(const Address &theAddress);   // Check if address is on the kick list
+   void updateKickList(U32 timeElapsed);              // Check if kick time has expired and update the kick list
 };
 
 } /* namespace Zap */

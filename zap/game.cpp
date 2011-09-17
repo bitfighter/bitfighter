@@ -47,7 +47,7 @@
 #include "huntersGame.h"         // for creating new HuntersFlagItem
 
 #include "IniFile.h"             // For CIniFile def
-
+#include "BanList.h"             // For banList kick duration
 
 #include "BotNavMeshZone.h"      // For zone clearing code
 
@@ -1760,7 +1760,7 @@ void ServerGame::idle(U32 timeDelta)
    checkConnectionToMaster(timeDelta);    // Connect to master server if not connected
 
    
-   mNetInterface->checkBanlistTimeouts(timeDelta);    // Unban players who's bans have expired
+   mSettings->getBanList()->updateKickList(timeDelta);    // Unban players who's bans have expired
 
    // Periodically update our status on the master, so they know what we're doing...
    if(mMasterUpdateTimer.update(timeDelta))

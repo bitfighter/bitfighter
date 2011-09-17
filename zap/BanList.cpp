@@ -44,6 +44,8 @@ BanList::BanList(const string &iniDir)
 {
    banListTokenDelimiter = "|";
    banListWildcardCharater = "*";
+
+   kickDurationMilliseconds = 30000;     // 30 seconds is a good breather
 }
 
 
@@ -139,7 +141,7 @@ string BanList::banItemToString(BanItem *banItem)
 }
 
 
-bool BanList::isBanned(Address address, string nickname)
+bool BanList::isBanned(const Address &address, const string &nickname)
 {
    // Build proper IP Address string
    char addressBuffer[16];
@@ -184,6 +186,12 @@ string BanList::getWildcard()
 }
 
 
+S32 BanList::getKickDuration()
+{
+   return kickDurationMilliseconds;
+}
+
+
 Vector<string> BanList::banListToString()
 {
    Vector<string> banList;
@@ -203,6 +211,40 @@ void BanList::loadBanList(const Vector<string> &banItemList)
          logprintf("Ban list item on line %d is malformed: %s", i+1, banItemList[i].c_str());
       else
          logprintf("Loading ban: %s", banItemList[i].c_str());
+}
+
+
+void BanList::kickHost(const Address &bannedAddress)
+{
+   KickedHost h;
+   h.theAddress = bannedAddress;
+   h.kickTimeRemaining = kickDurationMilliseconds;
+   serverKickList.push_back(h);
+}
+
+
+bool BanList::isAddressKicked(const Address &theAddress)
+{
+   for(S32 i = 0; i < serverKickList.size(); i++)
+      if(theAddress.isEqualAddress(serverKickList[i].theAddress))
+         return true;
+
+   return false;
+}
+
+
+void BanList::updateKickList(U32 timeElapsed)
+{
+   for(S32 i = 0; i < serverKickList.size(); )
+   {
+      if(serverKickList[i].kickTimeRemaining < timeElapsed)
+         serverKickList.erase_fast(i);
+      else
+      {
+         serverKickList[i].kickTimeRemaining -= timeElapsed;
+         i++;
+      }
+   }
 }
 
 
