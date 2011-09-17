@@ -256,19 +256,6 @@ void QueryServersUserInterface::addPingServers(const Vector<IPAddress> &ipList)
    // Now add any new servers
    for(S32 i = 0; i < ipList.size(); i++)
    {
-      bool isHidden = false;
-
-      // Make sure this isn't a server we're banned from... if so, don't show the connection
-      for(S32 j = 0; j < hidden.size(); j++)
-      {
-         if(hidden[j].serverAddress == Address(ipList[i]))
-            isHidden = true;
-         break;
-      }
-
-      if(isHidden)
-         break;
-
       gIniSettings.prevServerListFromMaster.push_back( Address(ipList[i]).toString() );
 
       bool found = false;
@@ -508,11 +495,6 @@ void QueryServersUserInterface::idle(U32 timeDelta)
       }
    }
 
-   // Clear out our hidden server list
-   for(S32 i = hidden.size()-1; i >= 0; i--)
-      if(time > hidden[i].timeUntilShow)
-         hidden.erase_fast(i);
-
    // Not sure about the logic in here... maybe this is right...
    if( (mMasterRequeryTimer.update(elapsedTime) && !mWaitingForResponseFromMaster) ||
             (!mGivenUpOnMaster && getGame()->getTimeUnconnectedToMaster() > GIVE_UP_ON_MASTER_AND_GO_IT_ALONE_TIME) )
@@ -523,14 +505,6 @@ void QueryServersUserInterface::idle(U32 timeDelta)
        mPage--;
 
 }  // end idle
-
-
-// Add a server to our list of servers not to show the client... usually happens when user has been kicked
-// They'll see the server again at time
-void QueryServersUserInterface::addHiddenServer(Address addr, U32 time)
-{
-   hidden.push_back(HiddenServer(addr, time));
-}
 
 
 bool QueryServersUserInterface::mouseInHeaderRow(const Point *pos)

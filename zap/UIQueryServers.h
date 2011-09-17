@@ -187,20 +187,11 @@ public:
       ColumnInfo(const char *nm = NULL, U32 xs = 0) { name = nm; xStart = xs; }     // Constructor
    };
 
-   struct HiddenServer
-   {
-      U32 timeUntilShow;
-      Address serverAddress;
-      HiddenServer(Address addr, U32 time) { serverAddress = addr; timeUntilShow = time; }
-
-   };
-
    Vector<ServerRef> servers;
    ServerRef mLastSelectedServer;
    string getLastSelectedServerName() { return mLastSelectedServer.serverName; }
 
    Vector<ColumnInfo> columns;
-   Vector<HiddenServer> hidden;
    S32 getSelectedIndex();
 
    // Functions for handling user input
@@ -219,8 +210,6 @@ public:
    void render();                // Draw the screen
 
    void addPingServers(const Vector<IPAddress> &ipList);    // Add many addresses
-   void addHiddenServer(Address addr, U32 time);            // Add server to list of servers we don't show the user
-
 
    void sort();               // Sort servers for pretty viewing
 

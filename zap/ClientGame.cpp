@@ -49,7 +49,6 @@
 #include "huntersGame.h"         // for creating new HuntersFlagItem
 
 #include "IniFile.h"             // For CIniFile def
-#include "BanList.h"             // For banList kick duration
 
 #include "UIQueryServers.h"
 #include "UIErrorMessage.h"
@@ -770,9 +769,6 @@ void ClientGame::onConnectionTerminated(const Address &serverAddress, NetConnect
          getUIManager()->getNameEntryUserInterface()->activate();
          ui->activate();
 
-         // Add this server to our list of servers not to display for a spell...
-         getUIManager()->getQueryServersUserInterface()->addHiddenServer(serverAddress, Platform::getRealMilliseconds() +
-               mSettings->getBanList()->getKickDuration());
          break;
 
       case NetConnection::ReasonBanned:
