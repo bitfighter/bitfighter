@@ -38,6 +38,7 @@
 #include "gameStats.h"      // For VersionedGameStats def
 #include "version.h"
 #include "Colors.h"
+#include "BanList.h"
 
 #ifndef ZAP_DEDICATED
 #include "ClientGame.h"
@@ -2765,6 +2766,75 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
          {
             gc->mChatMute = !gc->mChatMute;
             clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, gc->mChatMute ? "Player is muted" : "Player is not muted");
+         }
+      }
+   }
+   else if(!stricmp(cmd, "ban"))
+   {
+      if(!clientRef->clientConnection->isAdmin())
+         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Need admin permission");
+      else if(args.size() < 1)
+         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! /ban <player name> [duration in minutes]");
+      else
+      {
+         string nickname = args[0].getString();
+         GameConnection *gc = findClient(this, nickname.c_str());
+
+         if(!gc)
+            clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Player name not found");
+         else if(gc->isAdmin())
+            clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Cannot ban admin");
+         else if(!gc->isEstablished())
+            clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Cannot ban robots");
+         else
+         {
+            Address ipAddress = gc->getNetAddressString();
+            S32 banDuration = ((ServerGame *)getGame())->getSettings()->getBanList()->getDefaultBanDuration();
+            if(args.size() >= 2)
+               banDuration = atoi(args[1].getString());
+
+            logprintf("Duration: %d", banDuration);
+
+            ((ServerGame *)getGame())->getSettings()->getBanList()->addToBanList(ipAddress, banDuration);
+            logprintf(LogConsumer::ServerFilter, "%s - banned for %d minutes", ipAddress.toString(), banDuration);
+            gc->disconnect(NetConnection::ReasonBanned, "");
+            clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "Player IP banned");
+         }
+      }
+   }
+   else if(!stricmp(cmd, "banip"))
+   {
+      if(!clientRef->clientConnection->isAdmin())
+         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Need admin permission");
+      else if(args.size() < 1)
+         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! /banip <ip> [duration in minutes]");
+      else
+      {
+         Address ipAddress(args[0].getString());
+         S32 banDuration = ((ServerGame *)getGame())->getSettings()->getBanList()->getDefaultBanDuration();
+         if(args.size() >= 2)
+            banDuration = atoi(args[1].getString());
+
+         // banip should always add to the ban list, even if the IP isn't connected
+         ((ServerGame *)getGame())->getSettings()->getBanList()->addToBanList(ipAddress, banDuration);
+         logprintf(LogConsumer::ServerFilter, "%s - banned for %d minutes", ipAddress.toString(), banDuration);
+
+         GameConnection *gc = NULL;
+         for(S32 i = 0; i < mClientList.size(); i++)
+         {
+            if(mClientList[i]->clientConnection->getNetAddress().isEqualAddress(ipAddress))
+            {
+               gc = mClientList[i]->clientConnection;
+               break;
+            }
+         }
+
+         if(!gc)
+            clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "IP banned but not connected");
+         else
+         {
+            gc->disconnect(NetConnection::ReasonBanned, "");
+            clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "IP banned and kicked");
          }
       }
    }

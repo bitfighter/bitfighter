@@ -37,20 +37,19 @@ using namespace std;
 namespace Zap
 {
 
-
 class BanList
 {
 private:
    struct BanItem
    {
-      string ipAddress;
+      string address;
       string nickname;
       string startDateTime;
       string durationMinutes;
    };
 
    struct KickedHost {
-      Address theAddress;
+      Address address;
       U32 kickTimeRemaining;
    };
 
@@ -60,6 +59,7 @@ private:
    string banListTokenDelimiter;
    string banListWildcardCharater;
 
+   S32 defaultBanDurationMinutes;
    S32 kickDurationMilliseconds;
 
    bool processBanListLine(const string &line);
@@ -69,19 +69,21 @@ public:
    BanList(const string &iniDir);
    virtual ~BanList();
 
-   bool addToBanList(BanItem *banItem);
-   bool removeFromBanList(BanItem *banItem);
-   bool isBanned(const Address &ipAddress, const string &nickname);
+   void addToBanList(const Address &address, S32 durationMinutes);
+   void removeFromBanList(const Address &address);
+
+   bool isBanned(const Address &address, const string &nickname);
 
    string getDelimiter();
    string getWildcard();
    S32 getKickDuration();
+   S32 getDefaultBanDuration();
 
    Vector<string> banListToString();
    void loadBanList(const Vector<string> &banItemList);
 
-   void kickHost(const Address &bannedAddress);       // Add an address to kick list
-   bool isAddressKicked(const Address &theAddress);   // Check if address is on the kick list
+   void kickHost(const Address &address);       // Add an address to kick list
+   bool isAddressKicked(const Address &address);   // Check if address is on the kick list
    void updateKickList(U32 timeElapsed);              // Check if kick time has expired and update the kick list
 };
 
