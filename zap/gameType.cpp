@@ -2537,7 +2537,7 @@ bool safeFilename(const char *str)
 // Runs the server side commands, which the client may or may not know about
 
 // This is server side commands, For client side commands, use UIGame.cpp, GameUserInterface::processCommand.
-// When adding new commands, please update GameUserInterface::populateChatCmdList() and also the help screen (UIInstructions.cpp)
+// When adding new commands, please update the giant CommandInfo chatCmds[] array in UIGame.cpp)
 void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vector<StringPtr> args)
 {
    if(!stricmp(cmd, "settime"))
