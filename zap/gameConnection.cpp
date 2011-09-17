@@ -73,7 +73,7 @@ GameConnection::GameConnection()
    mClientGame = NULL;
 #endif
 
-	initialize();
+   initialize();
 }
 
 
@@ -570,11 +570,17 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
       settings->setServerPassword(param.getString(), false);
    
    else if(type == (U32)ServerName)
+   {
       settings->setHostName(param.getString(), false);
-   
+      if(gServerGame->getConnectionToMaster())
+         gServerGame->getConnectionToMaster()->s2mChangeName(StringTableEntry(param.getString()));
+   }
    else if(type == (U32)ServerDescr)
+   {
       settings->setHostDescr(param.getString(), false);
-
+      if(gServerGame->getConnectionToMaster())
+         gServerGame->getConnectionToMaster()->s2mServerDescription(StringTableEntry(param.getString()));
+   }
    else if(type == (U32)LevelDir)
    {
       ConfigDirectories *folderManager = settings->getConfigDirs();

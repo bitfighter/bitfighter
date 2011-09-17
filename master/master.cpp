@@ -1359,6 +1359,18 @@ static const char *sanitizeForJson(const char *value)
          logprintf(LogConsumer::LogChat, "Relayed chat msg from %s: %s", mPlayerOrServerName.getString(), message.getString());
    }
 
+   TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mChangeName, (StringTableEntry name))
+   {
+      if(mIsGameServer)  // server only, don't want clients to rename yet (client names need to authenticate)
+      {
+         mPlayerOrServerName = name;
+         gNeedToWriteStatus = true;  // update server name in ".json"
+      }
+   }
+   TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mServerDescription, (StringTableEntry descr))
+   {
+      mServerDescr = descr;
+   }
 
 TNL_IMPLEMENT_NETCONNECTION(MasterServerConnection, NetClassGroupMaster, true);
 
