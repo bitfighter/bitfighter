@@ -62,6 +62,7 @@ private:
    BanList *mBanList;                  // Our ban list
 
    CmdLineSettings mCmdLineSettings;
+   IniSettings mIniSettings;
 
 public:
    GameSettings();    // Constructor
@@ -97,7 +98,7 @@ public:
    void save();
 
    CmdLineSettings *getCmdLineSettings() { return &mCmdLineSettings; }
-
+   IniSettings *getIniSettings() { return &mIniSettings; }
 };
 
 

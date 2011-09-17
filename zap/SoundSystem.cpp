@@ -214,7 +214,7 @@ SoundSystem::~SoundSystem()
 
 // Initialize the sound sub-system
 // Use ALURE to ease the use of OpenAL
-void SoundSystem::init(const string &sfxDir, const string &musicDir)
+void SoundSystem::init(sfxSets sfxSet, const string &sfxDir, const string &musicDir, float musicVolLevel)
 {
    // Initialize the sound device
    if(!alureInitDevice(NULL, NULL))
@@ -251,7 +251,7 @@ void SoundSystem::init(const string &sfxDir, const string &musicDir)
       logprintf(LogConsumer::LogWarning, "Failed to set proper sound gain distance model!  Sounds will be off..\n");
 
    // Choose the sound set
-   if(gIniSettings.sfxSet == sfxClassicSet)
+   if(sfxSet == sfxClassicSet)
       gSFXProfiles = sfxProfilesClassic;
    else
       gSFXProfiles = sfxProfilesModern;
@@ -290,7 +290,7 @@ void SoundSystem::init(const string &sfxDir, const string &musicDir)
       musicState = MusicStopped;
 
       // Initialize to the proper volume level
-      musicVolume = gIniSettings.musicVolLevel;
+      musicVolume = musicVolLevel;
       alSourcef(musicSource, AL_GAIN, musicVolume);
    }
 
@@ -477,25 +477,25 @@ void SoundSystem::updateMovementParams(SFXHandle& effect)
 }
 
 
-void SoundSystem::processAudio(F32 volLevel)
+void SoundSystem::processAudio(F32 sfxVol, F32 musicVol, F32 voiceVol)
 {
-   processSoundEffects(volLevel);
-   processMusic();
+   processSoundEffects(sfxVol, voiceVol);
+   processMusic(musicVol);
    processVoiceChat();
 
    alureUpdate();
 }
 
 
-void SoundSystem::processMusic()
+void SoundSystem::processMusic(F32 newMusicVolLevel)
 {
    // If music system failed to initialize, just return
    if(!gMusicValid)
       return;
 
    // Adjust music volume only if changed
-   if(S32(gIniSettings.musicVolLevel * 10) != S32(musicVolume * 10)) {
-      musicVolume = gIniSettings.musicVolLevel;
+   if(S32(newMusicVolLevel * 10) != S32(musicVolume * 10)) {
+      musicVolume = newMusicVolLevel;
       alSourcef(musicSource, AL_GAIN, musicVolume);
    }
 
@@ -504,7 +504,7 @@ void SoundSystem::processMusic()
    {
       case MusicPlaying:
          // If volume is set to zero, pause the music
-         if(S32(gIniSettings.musicVolLevel * 10) == 0)
+         if(S32(newMusicVolLevel) == 0)
             pauseMusic();
          break;
 
@@ -515,7 +515,7 @@ void SoundSystem::processMusic()
 
       case MusicPaused:
          // If the music is paused and the volume is not zero, resume the music
-         if(S32(gIniSettings.musicVolLevel * 10) != 0)
+         if(S32(newMusicVolLevel) != 0)
             resumeMusic();
          break;
 
@@ -531,7 +531,7 @@ void SoundSystem::processVoiceChat()
 }
 
 
-void SoundSystem::processSoundEffects(F32 volLevel)
+void SoundSystem::processSoundEffects(F32 sfxVol, F32 voiceVol)
 {
    // If SFX system failed to initialize, just return
    if(!gSFXValid)
@@ -629,14 +629,15 @@ void SoundSystem::processSoundEffects(F32 volLevel)
             firstFree++;
          s->mSourceIndex = firstFree;
          sourceActive[firstFree] = true;
-         playOnSource(s, volLevel);
+         playOnSource(s, sfxVol, voiceVol);
       }
       else
-         updateGain(s, volLevel);     // For other sources, check the distance and adjust the gain
+         updateGain(s, sfxVol, voiceVol);     // For other sources, check the distance and adjust the gain
    }
 }
 
-void SoundSystem::playOnSource(SFXHandle& effect, F32 volLevel)
+
+void SoundSystem::playOnSource(SFXHandle& effect, F32 sfxVol, F32 voiceVol)
 {
    ALuint source = gFreeSources[effect->mSourceIndex];
    alSourceStop(source);
@@ -665,25 +666,22 @@ void SoundSystem::playOnSource(SFXHandle& effect, F32 volLevel)
    alSourcef(source, AL_ROLLOFF_FACTOR, 1);
 
    updateMovementParams(effect);
-   updateGain(effect, volLevel);
+   updateGain(effect, sfxVol, voiceVol);
 
    alSourcePlay(source);
 }
 
 
 // Recalculate distance, and reset gain as necessary
-void SoundSystem::updateGain(SFXHandle& effect, F32 volLevel)
+void SoundSystem::updateGain(SFXHandle& effect, F32 sfxVol, F32 voiceVol)
 {
    ALuint source = gFreeSources[effect.getPointer()->mSourceIndex];
 
-   // First check if it's a voice chat... voice volume is handled separately.
+   // First check if it's a voice chat... voice volume is handled separately
    if(effect.getPointer()->mSFXIndex == SFXVoice)
-   {
-      alSourcef(source, AL_GAIN, gIniSettings.voiceChatVolLevel);
-      return;
-   }
-
-   alSourcef(source, AL_GAIN, effect.getPointer()->mGain * effect.getPointer()->mProfile->gainScale * volLevel);
+      alSourcef(source, AL_GAIN, voiceVol);
+   else
+      alSourcef(source, AL_GAIN, effect.getPointer()->mGain * effect.getPointer()->mProfile->gainScale * sfxVol);
 }
 
 
@@ -843,12 +841,12 @@ void SoundSystem::queueVoiceChatBuffer(SFXHandle& effect, ByteBufferPtr p)
    // Do nothing
 }
 
-void SoundSystem::init(const string &sfxDir, const string &musicDir)
+void SoundSystem::init(sfxSets sfxSet, const string &sfxDir, const string &musicDir, ALFloat musicVol)
 {
    logprintf(LogConsumer::LogError, "No OpenAL support on this platform.");
 }
 
-void SoundSystem::processAudio(F32 volLevel)
+void SoundSystem::processAudio(F32 sfxVol, F32 musicVol, F32 voiceVol)
 {
    // Do nothing
 }

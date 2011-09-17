@@ -188,7 +188,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cArrangedConnectionAccepted
 
       // Client is creating new connection to game server
       ClientGame *clientGame = dynamic_cast<ClientGame *>(mGame);
-      GameConnection *gameConnection = new GameConnection(clientGame->getClientInfo());
+      GameConnection *gameConnection = new GameConnection(clientGame->getSettings(), clientGame->getClientInfo());
       clientGame->setConnectionToServer(gameConnection);
 
       gameConnection->connectArranged(getInterface(), fullPossibleAddresses, nonce, serverNonce, theSharedData, true);
@@ -228,7 +228,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSetAuthenticated,
    {
       // Hmmm.... same info in two places...
       clientGame->getClientInfo()->name = correctedName.getString();
-      gIniSettings.name = correctedName.getString();  
+      clientGame->getSettings()->getIniSettings()->name = correctedName.getString();  
 
       clientGame->getClientInfo()->authenticated = true;
 
@@ -429,7 +429,7 @@ void MasterServerConnection::onConnectionEstablished()
 
    // If we didn't get the master from the cmd line, and we have multiple addresses, write them to the INI file in their new order
    if(mGame->getSettings()->getCmdLineSettings()->masterAddress == "" && mGame->getMasterAddressList().size() >= 2)
-      gIniSettings.masterAddress = listToString(mGame->getMasterAddressList(), ',');
+      mGame->getSettings()->getIniSettings()->masterAddress = listToString(mGame->getMasterAddressList(), ',');
 }
 
 

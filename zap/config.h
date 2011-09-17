@@ -80,7 +80,7 @@ struct ConfigDirectories
    string rootDataDir;
 
    void resolveDirs(GameSettings *settings);                                   // calls resolveLevelDir()
-   void resolveLevelDir(CmdLineSettings *cmdLineSettings);                     // calls resolveLevelDir(x,y,z)
+   void resolveLevelDir(GameSettings *settings);                               // calls resolveLevelDir(x,y,z)
    string resolveLevelDir(const string &levelDir, const string &iniLevelDir);  // calls resolveLevelDir(x,y)
    string resolveLevelDir(const string &levelDir);
 
@@ -115,10 +115,10 @@ struct CmdLineSettings
    string name;
    string password;
 
-   string defaultName;     // Name used if user hits <enter> on name entry screen
-   string lastName;        // Name the user previously entered
-   string lastPassword;    // Last password user entered on startup screen
-   string lastEditorName;  // Name of most recently edited level
+   //string defaultName;     // Name used if user hits <enter> on name entry screen
+   //string lastName;        // Name the user previously entered
+   //string lastPassword;    // Last password user entered on startup screen
+   //string lastEditorName;  // Name of most recently edited level
 
    string hostname;
    string hostaddr;        // Address to listen on when we're host (e.g. IP:localhost:1234 or IP:Any:6666 or whatever)
@@ -158,6 +158,8 @@ struct CmdLineSettings
 
 struct IniSettings      // With defaults specified
 {
+   IniSettings();       // Constructor
+
    bool controlsRelative;
    DisplayMode displayMode;
    DisplayMode oldDisplayMode;
@@ -272,16 +274,12 @@ struct IniSettings      // With defaults specified
 
    Vector<string> prevServerListFromMaster;
    Vector<string> alwaysPingList;
-
-   // Set default values in config.cpp, IniSettings::init()
-   void init();
 };
 
-extern IniSettings gIniSettings;
 class CIniFile;
 
-void saveSettingsToINI(CIniFile *ini, IniSettings *iniSettings, GameSettings *settings);
-void loadSettingsFromINI(CIniFile *ini, IniSettings *iniSettings, GameSettings *settings);
+void saveSettingsToINI(CIniFile *ini, GameSettings *settings);
+void loadSettingsFromINI(CIniFile *ini, GameSettings *settings);
 
 void writeSkipList(CIniFile *ini, const Vector<string> *levelSkipList);
 

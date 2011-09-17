@@ -223,7 +223,7 @@ void UserInterface::renderCurrent()    // static
    
    if(gClientGame2)
    {
-      gIniSettings.inputMode = InputModeJoystick;
+      gClientGame2->getSettings()->getIniSettings()->inputMode = InputModeJoystick;
       gClientGame = gClientGame2;
       gClientGame1->mUserInterfaceData->get();
       gClientGame2->mUserInterfaceData->set();
@@ -241,7 +241,7 @@ void UserInterface::renderCurrent()    // static
       gClientGame2->mUserInterfaceData->get();
       gClientGame1->mUserInterfaceData->set();
       glViewport(0, 0, gScreenInfo.getWindowWidth()/2, gScreenInfo.getWindowHeight());
-      gIniSettings.inputMode = InputModeKeyboard;
+      gClientGame->getSettings()->getIniSettings()->inputMode = InputModeKeyboard;
    }
 
    glMatrixMode(GL_MODELVIEW);
@@ -254,24 +254,25 @@ void UserInterface::renderCurrent()    // static
    // By putting this here, it will always get rendered, regardless of which UI (if any) is active (kind of ugly)
    // This block will dump any keys and raw stick button inputs depressed to the screen when in diagnostic mode
    // This should make it easier to see what happens when users press joystick buttons
-   if(gIniSettings.diagnosticKeyDumpMode)
+   if(gClientGame->getSettings()->getIniSettings()->diagnosticKeyDumpMode)
    {
-     glColor3f(1, 1, 1);
      S32 vpos = gScreenInfo.getGameCanvasHeight() / 2;
      S32 hpos = horizMargin;
 
-      glColor3f(1, 1, 1);
+     glColor(Colors::white);
+
       // Key states
      for (U32 i = 0; i < MAX_KEYS; i++)
         if(getKeyState((KeyCode) i))
         {
-        drawString( hpos, vpos, 18, keyCodeToString((KeyCode) i) );
-        hpos += getStringWidth(18, keyCodeToString( (KeyCode) i) ) + 5;
+           drawString( hpos, vpos, 18, keyCodeToString((KeyCode) i) );
+           hpos += getStringWidth(18, keyCodeToString( (KeyCode) i) ) + 5;
         }
 
-      glColor3f(1, 0, 1);
       vpos += 23;
       hpos = horizMargin;
+      glColor(Colors::magenta);
+
       for(U32 i = 0; i < MaxControllerButtons; i++)
          if(Joystick::ButtonMask & (1 << i))
          {
@@ -281,6 +282,7 @@ void UserInterface::renderCurrent()    // static
    }
    // End diagnostic key dump mode
 }
+
 
 extern const F32 radiansToDegreesConversion;
 
@@ -716,11 +718,18 @@ void UserInterface::renderMessageBox(const char *title, const char *instr, const
    if(canvasWidth - 2 * inset < maxLen)
       inset = (canvasWidth - maxLen) / 2;
 
-   glDisableBlendfromLineSmooth;
+   bool enableLineSmoothing = false;
+   
+   if(glIsEnabled(GL_BLEND)) 
+   {
+      glDisable(GL_BLEND);
+      enableLineSmoothing = true;
+   }
+
    for(S32 i = 1; i >= 0; i--)
    {
-      if(i == 0) 
-         glEnableBlendfromLineSmooth;
+      if(i == 0 && enableLineSmoothing) 
+         glEnable(GL_BLEND);
 
       glColor(i ? Color(.3,0,0) : Colors::white);        // Draw the box
       
@@ -733,7 +742,7 @@ void UserInterface::renderMessageBox(const char *title, const char *instr, const
    }
 
    // Draw title, message, and footer
-   glColor3f(1,1,1);
+   glColor(Colors::white);
    drawCenteredString(boxTop + vertMargin, titleSize, title);
 
    for(S32 i = 0; i < msgLines; i++)
@@ -859,7 +868,6 @@ void UserInterfaceData::get()
    vertMargin = UserInterface::vertMargin;
    horizMargin = UserInterface::horizMargin;
    chatMargin = UserInterface::messageMargin;
-   S32 inputmode = S32(gIniSettings.inputMode);
 }
 
 
@@ -870,8 +878,6 @@ void UserInterfaceData::set()
    UserInterface::vertMargin = vertMargin;
    UserInterface::horizMargin = horizMargin;
    UserInterface::messageMargin = chatMargin;
-
-   S32 inputmode = S32(gIniSettings.inputMode);
 }
 
 

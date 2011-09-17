@@ -8,12 +8,14 @@
 #ifndef SOUNDSYSTEM_H_
 #define SOUNDSYSTEM_H_
 
+#include "config.h"     // For sfxSets
 #include "tnlTypes.h"
 #include "tnlVector.h"
 #include <string>
 
 // forward declarations
 typedef unsigned int ALuint;
+
 namespace TNL {
    template <class T> class RefPtr;
    class ByteBuffer;
@@ -108,6 +110,7 @@ enum MusicState {
    MusicPaused
 };
 
+
 class SoundSystem
 {
 private:
@@ -117,8 +120,8 @@ private:
    static const S32 NumSamples = 16;
 
    // Sound Effect functions
-   static void updateGain(SFXHandle& effect, F32 volLevel);
-   static void playOnSource(SFXHandle& effect, F32 volLevel);
+   static void updateGain(SFXHandle& effect, F32 sfxVolLevel, F32 voiceVolLevel);
+   static void playOnSource(SFXHandle& effect, F32 sfxVol, F32 voiceVol);
 
    static void music_end_callback(void* userdata, ALuint source);
 
@@ -129,13 +132,13 @@ public:
    virtual ~SoundSystem();
 
    // General functions
-   static void init(const string &sfxDir, const string &musicDir);
+   static void init(sfxSets sfxSet, const string &sfxDir, const string &musicDir, float musicVol);
    static void shutdown();
    static void setListenerParams(Point pos, Point velocity);
-   static void processAudio(F32 volLevel);
+   static void processAudio(F32 sfxVol, F32 musicVol, F32 voiceVol);
 
    // Sound Effect functions
-   static void processSoundEffects(F32 volLevel);
+   static void processSoundEffects(F32 sfxVol, F32 voiceVol);
    static SFXHandle playSoundEffect(U32 profileIndex, F32 gain = 1.0f);
    static SFXHandle playSoundEffect(U32 profileIndex, Point position, Point velocity, F32 gain = 1.0f);
    static void playSoundEffect(SFXHandle& effect);
@@ -153,7 +156,7 @@ public:
    static void stopRecording();
 
    // Music functions
-   static void processMusic();
+   static void processMusic(F32 newMusicVolLevel);
    static void playMusic(S32 listIndex);
    static void playMusicList();
    static void stopMusic();

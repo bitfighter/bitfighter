@@ -171,9 +171,6 @@ bool gShowAimVector = false;     // Do we render an aim vector?  This should pro
 
 CIniFile gINI("dummy");          // This is our INI file.  Filename set down in main(), but compiler seems to want an arg here.
 
-// These will be moved to the GameSettings object
-IniSettings gIniSettings;
-
 OGLCONSOLE_Console gConsole;     // For the moment, we'll just have one console for levelgens and bots.  This may change later.
 
 
@@ -185,7 +182,7 @@ Color gNeutralTeamColor(Colors::gray80);        // Objects that are neutral (on 
 Color gHostileTeamColor(Colors::gray50);        // Objects that are "hostile-to-all" (on team -2)
 Color gMasterServerBlue(0.8, 0.8, 1);           // Messages about successful master server statii
 Color gHelpTextColor(Colors::green);
-
+Color EDITOR_WALL_FILL_COLOR(.5, .5, 1); 
 
 S32 gMaxPolygonPoints = 32;                     // Max number of points we can have in Walls, Nexuses, LoadoutZones, etc.
 
@@ -437,14 +434,16 @@ void gameIdle(U32 integerTime)
 #ifndef ZAP_DEDICATED
       if(gClientGame2)
       {
-         gIniSettings.inputMode = InputModeJoystick;
+         gClientGame2->getSettings()->getIniSettings()->inputMode = InputModeJoystick;
+
          gClientGame1->mUserInterfaceData->get();
          gClientGame2->mUserInterfaceData->set();
 
          gClientGame = gClientGame2;
          gClientGame->idle(integerTime);
 
-         gIniSettings.inputMode = InputModeKeyboard;
+         gClientGame->getSettings()->getIniSettings()->inputMode = InputModeKeyboard;
+
          gClientGame2->mUserInterfaceData->get();
          gClientGame1->mUserInterfaceData->set();
       }
@@ -464,13 +463,19 @@ void gameIdle(U32 integerTime)
 // This in turn calls the idle functions for all other objects in the game.
 void idle()
 {
+   GameSettings *settings;
+
    if(gServerGame)
    {
+      settings = gServerGame->getSettings();
+
       if(gServerGame->hostingModePhase == ServerGame::LoadingLevels)
          gServerGame->loadNextLevelInfo();
       else if(gServerGame->hostingModePhase == ServerGame::DoneLoadingLevels)
          hostGame();
    }
+   else
+      settings = gClientGame->getSettings();
 
 /*
    static S64 lastTimer = Platform::getHighPrecisionTimerValue(); // accurate, but possible wrong speed when overclocking or underclocking CPU
@@ -518,8 +523,9 @@ void idle()
 
    bool dedicated = gServerGame && gServerGame->isDedicated();
 
-   if( ( dedicated && integerTime >= S32(1000 / gIniSettings.maxDedicatedFPS)) || 
-       (!dedicated && integerTime >= S32(1000 / gIniSettings.maxFPS)) )
+
+   if( ( dedicated && integerTime >= S32(1000 / settings->getIniSettings()->maxDedicatedFPS)) || 
+       (!dedicated && integerTime >= S32(1000 / settings->getIniSettings()->maxFPS)) )
    {
       gameIdle(U32(integerTime));
 
@@ -540,10 +546,12 @@ void idle()
 
    while(SDL_PollEvent(&event))
    {
+      TNLAssert(gClientGame, "Why are we here if there is no client game??");
+
       if(event.type == SDL_QUIT) // Handle quit here
          exitToOs();
 
-      Event::onEvent(&event);
+      Event::onEvent(gClientGame, &event);
    }
    // END SDL event polling
 #endif
@@ -626,7 +634,7 @@ void shutdownBitfighter()
    Joystick::shutdownJoystick();
 
    // TODO: reimplement window position saving with SDL
-   //   if(gIniSettings.displayMode == DISPLAY_MODE_WINDOWED)
+   //   if(settings->getIniSettings()->displayMode == DISPLAY_MODE_WINDOWED)
    //      saveWindowPosition(glutGet(GLUT_WINDOW_X), glutGet(GLUT_WINDOW_Y));
 
    SDL_QuitSubSystem(SDL_INIT_VIDEO);
@@ -758,40 +766,40 @@ void setupLogging(IniSettings *iniSettings)
 // Now integrate INI settings with those from the command line and process them
 void processStartupParams(GameSettings *settings)
 {
-   settings->initServerPassword     (settings->getCmdLineSettings()->serverPassword,      gIniSettings.serverPassword);
-   settings->initAdminPassword      (settings->getCmdLineSettings()->adminPassword,       gIniSettings.adminPassword);
-   settings->initLevelChangePassword(settings->getCmdLineSettings()->levelChangePassword, gIniSettings.levelChangePassword);
+   settings->initServerPassword     (settings->getCmdLineSettings()->serverPassword,      settings->getIniSettings()->serverPassword);
+   settings->initAdminPassword      (settings->getCmdLineSettings()->adminPassword,       settings->getIniSettings()->adminPassword);
+   settings->initLevelChangePassword(settings->getCmdLineSettings()->levelChangePassword, settings->getIniSettings()->levelChangePassword);
 
    ConfigDirectories *folderManager = settings->getConfigDirs();
 
-   folderManager->resolveLevelDir(settings->getCmdLineSettings()); 
+   folderManager->resolveLevelDir(settings); 
 
-   if(gIniSettings.levelDir == "")                       // If there is nothing in the INI,
-      gIniSettings.levelDir = folderManager->levelDir;   // write a good default to the INI
+   if(settings->getIniSettings()->levelDir == "")                       // If there is nothing in the INI,
+      settings->getIniSettings()->levelDir = folderManager->levelDir;   // write a good default to the INI
 
-   settings->initHostName(settings->getCmdLineSettings()->hostname, gIniSettings.hostname);
-   settings->initHostDescr(settings->getCmdLineSettings()->hostdescr, gIniSettings.hostdescr);
+   settings->initHostName (settings->getCmdLineSettings()->hostname,  settings->getIniSettings()->hostname);
+   settings->initHostDescr(settings->getCmdLineSettings()->hostdescr, settings->getIniSettings()->hostdescr);
 
 
    if(settings->getCmdLineSettings()->displayMode != DISPLAY_MODE_UNKNOWN)
-      gIniSettings.displayMode = settings->getCmdLineSettings()->displayMode;    // Simply clobber the gINISettings copy
+      settings->getIniSettings()->displayMode = settings->getCmdLineSettings()->displayMode;    // Simply clobber the INISettings copy
 
    if(settings->getCmdLineSettings()->xpos != -9999)
-      gIniSettings.winXPos = settings->getCmdLineSettings()->xpos;
+      settings->getIniSettings()->winXPos = settings->getCmdLineSettings()->xpos;
    if(settings->getCmdLineSettings()->ypos != -9999)
-      gIniSettings.winYPos = settings->getCmdLineSettings()->ypos;
+      settings->getIniSettings()->winYPos = settings->getCmdLineSettings()->ypos;
    if(settings->getCmdLineSettings()->winWidth > 0)
-      gIniSettings.winSizeFact = max((F32) settings->getCmdLineSettings()->winWidth / (F32) gScreenInfo.getGameCanvasWidth(), gScreenInfo.getMinScalingFactor());
+      settings->getIniSettings()->winSizeFact = max((F32) settings->getCmdLineSettings()->winWidth / (F32) gScreenInfo.getGameCanvasWidth(), gScreenInfo.getMinScalingFactor());
 
    // TODO: Mov to settings
-   Game::setMasterAddress(settings->getCmdLineSettings()->masterAddress, gIniSettings.masterAddress);    // The INI one will always have a value
+   Game::setMasterAddress(settings->getCmdLineSettings()->masterAddress, settings->getIniSettings()->masterAddress);    // The INI one will always have a value
    
 
    if(settings->getCmdLineSettings()->name != "")                          // We'll clobber the INI file setting.  Since this
-      gIniSettings.name = settings->getCmdLineSettings()->name;            // setting is never saved, we won't mess up our INI
+      settings->getIniSettings()->name = settings->getCmdLineSettings()->name;            // setting is never saved, we won't mess up our INI
 
    if(settings->getCmdLineSettings()->password != "")                      // We'll clobber the INI file setting.  Since this
-      gIniSettings.password = settings->getCmdLineSettings()->password;    // setting is never saved, we won't mess up our INI
+      settings->getIniSettings()->password = settings->getCmdLineSettings()->password;    // setting is never saved, we won't mess up our INI
 }
 
 
@@ -800,17 +808,17 @@ void createClientGame(GameSettings *settings)
 #ifndef ZAP_DEDICATED
    if(!settings->getCmdLineSettings()->dedicatedMode)                      // Create ClientGame object
    {
-      gClientGame1 = new ClientGame(Address(IPProtocol, Address::Any, gIniSettings.clientPortNumber), settings);   //   Let the system figure out IP address and assign a port
+      gClientGame1 = new ClientGame(Address(IPProtocol, Address::Any, settings->getIniSettings()->clientPortNumber), settings);   //   Let the system figure out IP address and assign a port
       gClientGame = gClientGame1;
 
-      gClientGame->setLoginPassword(settings->getCmdLineSettings()->password, gIniSettings.password, gIniSettings.lastPassword);
+      gClientGame->setLoginPassword(settings->getCmdLineSettings()->password, settings->getIniSettings()->password, settings->getIniSettings()->lastPassword);
 
        // Put any saved filename into the editor file entry thingy
-      gClientGame->getUIManager()->getLevelNameEntryUserInterface()->setString(gIniSettings.lastEditorName);
+      gClientGame->getUIManager()->getLevelNameEntryUserInterface()->setString(settings->getIniSettings()->lastEditorName);
 
       //gClientGame2 = new ClientGame(Address());   //  !!! 2-player split-screen game in same game.
 
-      if(gIniSettings.name == "")
+      if(settings->getIniSettings()->name == "")
       {
          if(gClientGame2)
          {
@@ -822,7 +830,7 @@ void createClientGame(GameSettings *settings)
             gClientGame = gClientGame1;
          }
          gClientGame->getUIManager()->getNameEntryUserInterface()->activate();
-         seedRandomNumberGenerator(gIniSettings.lastName);
+         seedRandomNumberGenerator(settings->getIniSettings()->lastName);
       }
       else
       {
@@ -838,7 +846,7 @@ void createClientGame(GameSettings *settings)
          gClientGame->getUIManager()->getMainMenuUserInterface()->activate();
 
          gClientGame->setReadyToConnectToMaster(true);         // Set elsewhere if in dedicated server mode
-         seedRandomNumberGenerator(gIniSettings.name);
+         seedRandomNumberGenerator(settings->getIniSettings()->name);
       }
    }
 #endif
@@ -871,13 +879,13 @@ void actualizeScreenMode(bool changingInterfaces)
    // TODO: reimplement window positioning - difficult with SDL since it doesn't have much access to the
    // window manager; however, it may be possible to do position upon start-up, but not save when exiting
 
-   //   if(gIniSettings.oldDisplayMode == DISPLAY_MODE_WINDOWED && !first)
+   //   if(settings->getIniSettings()->oldDisplayMode == DISPLAY_MODE_WINDOWED && !first)
    //   {
-   //      gIniSettings.winXPos = glutGet(GLUT_WINDOW_X);
-   //      gIniSettings.winYPos = glutGet(GLUT_WINDOW_Y);
+   //      settings->getIniSettings()->winXPos = glutGet(GLUT_WINDOW_X);
+   //      settings->getIniSettings()->winYPos = glutGet(GLUT_WINDOW_Y);
    //
-   //      gINI.SetValueI("Settings", "WindowXPos", gIniSettings.winXPos, true);
-   //      gINI.SetValueI("Settings", "WindowYPos", gIniSettings.winYPos, true);
+   //      gINI.SetValueI("Settings", "WindowXPos", settings->getIniSettings()->winXPos, true);
+   //      gINI.SetValueI("Settings", "WindowYPos", settings->getIniSettings()->winYPos, true);
    //   }
 
    if(changingInterfaces)
@@ -885,13 +893,16 @@ void actualizeScreenMode(bool changingInterfaces)
    else
       UserInterface::current->onPreDisplayModeChange();
 
-   DisplayMode displayMode = gIniSettings.displayMode;
+   GameSettings *settings = gClientGame->getSettings();
+
+   DisplayMode displayMode = settings->getIniSettings()->displayMode;
 
    gScreenInfo.resetGameCanvasSize();     // Set GameCanvasSize vars back to their default values
 
    // When we're in the editor, let's take advantage of the entire screen unstretched
    if(UserInterface::current->getMenuID() == EditorUI && 
-         (gIniSettings.displayMode == DISPLAY_MODE_FULL_SCREEN_STRETCHED || gIniSettings.displayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED))
+         (settings->getIniSettings()->displayMode == DISPLAY_MODE_FULL_SCREEN_STRETCHED || 
+          settings->getIniSettings()->displayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED))
    {
       // Smaller values give bigger magnification; makes small things easier to see on full screen
       F32 magFactor = 0.85f;      
@@ -937,8 +948,8 @@ void actualizeScreenMode(bool changingInterfaces)
       break;
 
    default:  //  DISPLAY_MODE_WINDOWED
-      sdlWindowWidth = (S32) floor((F32)gScreenInfo.getGameCanvasWidth()  * gIniSettings.winSizeFact + 0.5f);
-      sdlWindowHeight = (S32) floor((F32)gScreenInfo.getGameCanvasHeight() * gIniSettings.winSizeFact + 0.5f);
+      sdlWindowWidth = (S32) floor((F32)gScreenInfo.getGameCanvasWidth()  * settings->getIniSettings()->winSizeFact + 0.5f);
+      sdlWindowHeight = (S32) floor((F32)gScreenInfo.getGameCanvasHeight() * settings->getIniSettings()->winSizeFact + 0.5f);
       sdlVideoFlags |= SDL_RESIZABLE;
 
       orthoRight = gScreenInfo.getGameCanvasWidth();
@@ -985,7 +996,7 @@ void actualizeScreenMode(bool changingInterfaces)
    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
    glLineWidth(gDefaultLineWidth);
 
-   if(gIniSettings.useLineSmoothing)
+   if(settings->getIniSettings()->useLineSmoothing)
    {
       glEnable(GL_LINE_SMOOTH);
       //glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
@@ -997,30 +1008,31 @@ void actualizeScreenMode(bool changingInterfaces)
 }
 
 
-void setJoystick(ControllerTypeType jsType)
+void setJoystick(GameSettings *settings, ControllerTypeType jsType)
 {
    // Set joystick type if we found anything other than None or Unknown
    // Otherwise, it makes more sense to remember what the user had last specified
 
    if (jsType != NoController && jsType != UnknownController && jsType != GenericController)
-      gIniSettings.joystickType = jsType;
+      settings->getIniSettings()->joystickType = jsType;
    // else do nothing and leave the value we read from the INI file alone
 
    // Set primary input to joystick if any controllers were found, even a generic one
    if(jsType == NoController || jsType == UnknownController)
-      gIniSettings.inputMode = InputModeKeyboard;
+      settings->getIniSettings()->inputMode = InputModeKeyboard;
    else
-      gIniSettings.inputMode = InputModeJoystick;
+      settings->getIniSettings()->inputMode = InputModeJoystick;
 }
+
 #endif
 
 
 // Function to handle one-time update tasks
 // Use this when upgrading, and changing something like the name of an INI parameter.  The old version is stored in
-// gIniSettings.version, and the new version is in BUILD_VERSION.
-void checkIfThisIsAnUpdate()
+// IniSettings.version, and the new version is in BUILD_VERSION.
+void checkIfThisIsAnUpdate(GameSettings *settings)
 {
-   if(gIniSettings.version == BUILD_VERSION)
+   if(settings->getIniSettings()->version == BUILD_VERSION)
       return;
 
    // Wipe out all comments; they will be replaced with any updates
@@ -1029,12 +1041,12 @@ void checkIfThisIsAnUpdate()
 
    // version specific changes
    // 015a
-   if(gIniSettings.version < 1836)
-      gIniSettings.useLineSmoothing = true;
+   if(settings->getIniSettings()->version < 1836)
+      settings->getIniSettings()->useLineSmoothing = true;
 
    // after 015a
-   if(gIniSettings.version < 1840 && gIniSettings.maxBots == 127)
-      gIniSettings.maxBots = 10;
+   if(settings->getIniSettings()->version < 1840 && settings->getIniSettings()->maxBots == 127)
+      settings->getIniSettings()->maxBots = 10;
 }
 
 
@@ -1147,11 +1159,11 @@ int main(int argc, char **argv)
 
    // Load the INI file
    gINI.SetPath(joindir(folderManager->iniDir, "bitfighter.ini"));
-   gIniSettings.init();                   // Init struct that holds INI settings
 
-   loadSettingsFromINI(&gINI, &gIniSettings, settings);  // Read INI
+   loadSettingsFromINI(&gINI, settings);  // Read INI
 
-   setupLogging(&gIniSettings);
+   setupLogging(settings->getIniSettings());
+
    processStartupParams(settings);        // And merge command line params and INI settings
    createClientGame(settings);
 
@@ -1164,9 +1176,10 @@ int main(int argc, char **argv)
       initHostGame(settings, levels, false, true);       // Start hostingm
    }
 
-   SoundSystem::init(folderManager->sfxDir, folderManager->musicDir);  // Even dedicated server needs sound these days
+   SoundSystem::init(settings->getIniSettings()->sfxSet, folderManager->sfxDir, 
+                     folderManager->musicDir, settings->getIniSettings()->musicVolLevel);  // Even dedicated server needs sound these days
    
-   checkIfThisIsAnUpdate();
+   checkIfThisIsAnUpdate(settings);
 
 
 #ifndef ZAP_DEDICATED
@@ -1177,7 +1190,7 @@ int main(int argc, char **argv)
       Joystick::initJoystick();                    // Initialize joystick system
       resetKeyStates();                            // Reset keyboard state mapping to show no keys depressed
       ControllerTypeType controllerType = Joystick::autodetectJoystickType();
-      setJoystick(controllerType);                 // Will override INI settings, so process INI first
+      setJoystick(settings, controllerType);       // Will override INI settings, so process INI first
 
       
 #ifdef TNL_OS_MAC_OSX
@@ -1194,7 +1207,7 @@ int main(int argc, char **argv)
       gConsole = OGLCONSOLE_Create();  // Create our console *after* the screen mode has been actualized
 
 #ifdef USE_BFUP
-      if(gIniSettings.useUpdater)
+      if(settings->getIniSettings()->useUpdater)
          launchUpdater(argv[0], settings->getCmdLineSettings()->forceUpdate);  // Spawn external updater tool to check for new version of Bitfighter -- Windows only
 #endif
 

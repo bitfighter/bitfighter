@@ -427,13 +427,13 @@ ControllerTypeType Joystick::autodetectJoystickType()
 
 
 
-U8 Joystick::remapJoystickButton(U8 button)
+U8 Joystick::remapJoystickButton(U32 joystickType, U8 button)
 {
    // If not one of the predefined joysticks, just return the same button
-   if(gIniSettings.joystickType >= ControllerTypeCount)
+   if(joystickType >= ControllerTypeCount)
       return button;
 
-   return PredefinedJoystickList[gIniSettings.joystickType].buttonMappings[button];
+   return PredefinedJoystickList[joystickType].buttonMappings[button];
 }
 
 

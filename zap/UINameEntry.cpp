@@ -214,8 +214,8 @@ void LevelNameEntryUserInterface::onAccept(const char *name)
    ui->activate(false);
    
    // Get that baby into the INI file
-   getGame()->getIniSettings()->lastEditorName = name;
-   saveSettingsToINI(&gINI, &gIniSettings, getGame()->getSettings());             
+   getGame()->getSettings()->getIniSettings()->lastEditorName = name;
+   saveSettingsToINI(&gINI, getGame()->getSettings());             
    // Should be...
    //getGame()->getIniSettings()->saveSettingsToDisk();
 }
@@ -233,15 +233,25 @@ void PasswordEntryUserInterface::render()
    {
       getUIManager()->getGameUserInterface()->render();
 
-      glColor4f(0, 0, 0, 0.5);
-      glEnableBlend;
-         glBegin(GL_POLYGON);
-            glVertex2i(0,           0);
-            glVertex2i(canvasWidth, 0);
-            glVertex2i(canvasWidth, canvasHeight);
-            glVertex2i(0,           canvasHeight);
-         glEnd();
-      glDisableBlend;
+      glColor(Colors::black, 0.5);
+
+      bool disableBlending = false;
+
+      if(!glIsEnabled(GL_BLEND))
+      {
+         glEnable(GL_BLEND);
+         disableBlending = true; 
+      }
+
+      glBegin(GL_POLYGON);
+         glVertex2i(0,           0);
+         glVertex2i(canvasWidth, 0);
+         glVertex2i(canvasWidth, canvasHeight);
+         glVertex2i(0,           canvasHeight);
+      glEnd();
+
+      if(disableBlending)
+         glDisable(GL_BLEND);
    }
 
    Parent::render();

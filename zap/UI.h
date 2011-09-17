@@ -58,14 +58,6 @@ extern float gDefaultLineWidth;
 extern float gLineWidth3;
 extern float gLineWidth4;
 
-
-
-#define glEnableBlend { if(!gIniSettings.useLineSmoothing) glEnable(GL_BLEND); }
-#define glDisableBlend { if(!gIniSettings.useLineSmoothing) glDisable(GL_BLEND); }
-#define glEnableBlendfromLineSmooth { if(gIniSettings.useLineSmoothing) glEnable(GL_BLEND); }
-#define glDisableBlendfromLineSmooth { if(gIniSettings.useLineSmoothing) glDisable(GL_BLEND); }
-
-
 extern void glColor(const Color &c, float alpha = 1.0);
 extern void glColor(const Color *c, float alpha = 1.0);
 

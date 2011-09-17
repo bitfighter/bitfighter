@@ -62,6 +62,8 @@ void QuickChatHelper::render()
    S32 yPos = MENU_TOP;
    const S32 fontSize = 15;
 
+   GameSettings *settings = getGame()->getSettings();
+
    if(!gQuickChatTree.size())
    {
       glColor(gErrorMessageTextColor);
@@ -70,7 +72,8 @@ void QuickChatHelper::render()
    }
 
    Vector<QuickChatNode> renderNodes;
-   InputMode inputMode = gIniSettings.inputMode;
+   InputMode inputMode = settings->getIniSettings()->inputMode;
+   bool showKeyboardKeys = settings->getIniSettings()->showKeyboardKeys;
 
    S32 walk = mCurNode;
    U32 matchLevel = gQuickChatTree[walk].depth + 1;
@@ -83,7 +86,8 @@ void QuickChatHelper::render()
    // Then draw bottom up...
    while(walk != mCurNode)
    {     // When we're using a controller, don't present options with no defined controller key
-      if(gQuickChatTree[walk].depth == matchLevel && ( (inputMode == InputModeKeyboard) || gIniSettings.showKeyboardKeys || (gQuickChatTree[walk].buttonCode != KEY_UNKNOWN) ))
+      if(gQuickChatTree[walk].depth == matchLevel && ( (inputMode == InputModeKeyboard) || showKeyboardKeys || 
+                                                       (gQuickChatTree[walk].buttonCode != KEY_UNKNOWN) ))
          renderNodes.push_back(gQuickChatTree[walk]);
       walk--;
    }
@@ -99,13 +103,13 @@ void QuickChatHelper::render()
 
    if(!renderNodes.size())    // Nothing to render, let's go home
    {
-      glColor3f(1,0,0); 
+      glColor(Colors::red); 
       UserInterface::drawString(UserInterface::horizMargin, yPos, fontSize, "No messages here (misconfiguration?)");
       yPos += fontSize + 7;
    }
    else
    {
-      bool showKeys = gIniSettings.showKeyboardKeys || (inputMode == InputModeKeyboard);
+      bool showKeys = showKeyboardKeys || (inputMode == InputModeKeyboard);
 
       S32 xPosBase = UserInterface::horizMargin + (showKeys ? 0 : indent);
       S32 messageIndent = (matchLevel == 1) ? indent : 0;    // No indenting on submenus
@@ -116,13 +120,13 @@ void QuickChatHelper::render()
 
          // Draw key controls for selecting quick chat items
          if(inputMode == InputModeJoystick && renderNodes[i].buttonCode != KEY_UNKNOWN)     // Only draw joystick buttons when in joystick mode
-				JoystickRender::renderControllerButton((F32)xPos, (F32)yPos, renderNodes[i].buttonCode, false, 0);
+            JoystickRender::renderControllerButton((F32)xPos, (F32)yPos, settings->getIniSettings()->joystickType, renderNodes[i].buttonCode, false, 0);
 
          Color color = renderNodes[i].teamOnly ? gTeamChatColor : gGlobalChatColor;
          if(showKeys)
          {
             glColor(color);
-            JoystickRender::renderControllerButton(F32(xPos + indent), (F32)yPos, renderNodes[i].keyCode, false, 0);
+            JoystickRender::renderControllerButton(F32(xPos + indent), (F32)yPos, settings->getIniSettings()->joystickType, renderNodes[i].keyCode, false, 0);
          }
  
          glColor(color);

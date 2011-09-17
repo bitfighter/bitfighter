@@ -49,6 +49,7 @@
 #include "config.h"              // for Getmap level dir
 #include "ScreenInfo.h"
 #include "ClientGame.h"
+#include "Colors.h"
 
 #include "../tnl/tnlEndian.h"
 
@@ -422,23 +423,6 @@ void GameUserInterface::render()
 
    getGame()->render();
 
-   // Provide fade in effect as level begins; doesn't work quite right because game is so busy at this point that 
-   // it fades in jerkily.
-
-   //glColor4f(0, 0, 0, mProgressBarFadeTimer.getFraction());  
-   //glEnableBlend;
-   //glBegin(GL_POLYGON);
-   //   glVertex2f(0, 0);
-   //   glVertex2f(canvasWidth, 0);
-   //   glVertex2f(canvasWidth, canvasHeight);
-   //   glVertex2f(0, canvasHeight);
-   //glEnd();
-   //glDisableBlend;
-
-   // TODO: Can delete these two lines???
-   //glMatrixMode(GL_MODELVIEW);
-   //glLoadIdentity();          // OpenGL command to load an identity matrix (see OpenGL docs)
-
    if(!getGame()->isSuspended())
    {
       renderReticle();           // Draw crosshairs if using mouse
@@ -567,9 +551,15 @@ void GameUserInterface::renderProgressBar()
    GameType *gt = getGame()->getGameType();
    if((mShowProgressBar || mProgressBarFadeTimer.getCurrent() > 0) && gt && gt->mObjectsExpected > 0)
    {
-      glEnableBlend;
+      bool disableBlending = false;
 
-      glColor4f(0, 1, 0, mShowProgressBar ? 1 : mProgressBarFadeTimer.getFraction());
+      if(!glIsEnabled(GL_BLEND))
+      {
+         glEnable(GL_BLEND);
+         disableBlending = true; 
+      }
+
+      glColor(Colors::green, mShowProgressBar ? 1 : mProgressBarFadeTimer.getFraction());
 
       // Outline
       const S32 left = 200;
@@ -595,7 +585,8 @@ void GameUserInterface::renderProgressBar()
          glEnd();
       }
 
-      glDisableBlend;
+      if(disableBlending)
+         glDisable(GL_BLEND);
    }
 }
 
@@ -603,11 +594,11 @@ void GameUserInterface::renderProgressBar()
 // Draw the reticle (i.e. the mouse cursor) if we are using keyboard/mouse
 void GameUserInterface::renderReticle()
 {
-   if(gIniSettings.inputMode == InputModeKeyboard)
+   if(getGame()->getSettings()->getIniSettings()->inputMode == InputModeKeyboard)
    {
 #if 0 // TNL_OS_WIN32
       Point realMousePoint = mMousePoint;
-      if(!gIniSettings.controlsRelative)
+      if(!getGame()->getSettings()->getIniSettings()->controlsRelative)
       {
          F32 len = mMousePoint.len();
          checkMousePos(gScreenInfo.getWindowWidth()  * 100 / canvasWidth,
@@ -619,46 +610,54 @@ void GameUserInterface::renderReticle()
 #endif
       Point offsetMouse = mMousePoint + Point(gScreenInfo.getGameCanvasWidth() / 2, gScreenInfo.getGameCanvasHeight() / 2);
 
-      glEnableBlend;
-      glColor4f(0,1,0, 0.7f);
+      bool disableBlending = false;
+
+      if(!glIsEnabled(GL_BLEND))
+      {
+         glEnable(GL_BLEND);
+         disableBlending = true; 
+      }
+
+      glColor(Colors::green, 0.7f);
       glBegin(GL_LINES);
+         glVertex2f(offsetMouse.x - 15, offsetMouse.y);
+         glVertex2f(offsetMouse.x + 15, offsetMouse.y);
+         glVertex2f(offsetMouse.x, offsetMouse.y - 15);
+         glVertex2f(offsetMouse.x, offsetMouse.y + 15);
 
-      glVertex2f(offsetMouse.x - 15, offsetMouse.y);
-      glVertex2f(offsetMouse.x + 15, offsetMouse.y);
-      glVertex2f(offsetMouse.x, offsetMouse.y - 15);
-      glVertex2f(offsetMouse.x, offsetMouse.y + 15);
-
-      if(offsetMouse.x > 30)
-      {
-         glColor4f(0,1,0, 0);
-         glVertex2f(0, offsetMouse.y);
-         glColor4f(0,1,0, 0.7f);
-         glVertex2f(offsetMouse.x - 30, offsetMouse.y);
-      }
-      if(offsetMouse.x < gScreenInfo.getGameCanvasWidth() - 30)
-      {
-         glColor4f(0,1,0, 0.7f);
-         glVertex2f(offsetMouse.x + 30, offsetMouse.y);
-         glColor4f(0,1,0, 0);
-         glVertex2f((F32)gScreenInfo.getGameCanvasWidth(), offsetMouse.y);
-      }
-      if(offsetMouse.y > 30)
-      {
-         glColor4f(0,1,0, 0);
-         glVertex2f(offsetMouse.x, 0);
-         glColor4f(0,1,0, 0.7f);
-         glVertex2f(offsetMouse.x, offsetMouse.y - 30);
-      }
-      if(offsetMouse.y < gScreenInfo.getGameCanvasHeight() - 30)
-      {
-         glColor4f(0,1,0, 0.7f);
-         glVertex2f(offsetMouse.x, offsetMouse.y + 30);
-         glColor4f(0,1,0, 0);
-         glVertex2f(offsetMouse.x, (F32)gScreenInfo.getGameCanvasHeight());
-      }
+         if(offsetMouse.x > 30)
+         {
+            glColor(Colors::green, 0);
+            glVertex2f(0, offsetMouse.y);
+            glColor(Colors::green, 0.7f);
+            glVertex2f(offsetMouse.x - 30, offsetMouse.y);
+         }
+         if(offsetMouse.x < gScreenInfo.getGameCanvasWidth() - 30)
+         {
+            glColor(Colors::green, 0.7f);
+            glVertex2f(offsetMouse.x + 30, offsetMouse.y);
+            glColor(Colors::green, 0);
+            glVertex2f((F32)gScreenInfo.getGameCanvasWidth(), offsetMouse.y);
+         }
+         if(offsetMouse.y > 30)
+         {
+            glColor(Colors::green, 0);
+            glVertex2f(offsetMouse.x, 0);
+            glColor(Colors::green, 0.7f);
+            glVertex2f(offsetMouse.x, offsetMouse.y - 30);
+         }
+         if(offsetMouse.y < gScreenInfo.getGameCanvasHeight() - 30)
+         {
+            glColor(Colors::green, 0.7f);
+            glVertex2f(offsetMouse.x, offsetMouse.y + 30);
+            glColor(Colors::green, 0);
+            glVertex2f(offsetMouse.x, (F32)gScreenInfo.getGameCanvasHeight());
+         }
 
       glEnd();
-      glDisableBlend;
+
+      if(disableBlending)
+         glDisable(GL_BLEND);
    }
 
    if(mWrongModeMsgDisplay.getCurrent())
@@ -696,7 +695,7 @@ S32 renderIndicator(S32 xPos, const char *name)
 // Draw weapon indicators at top of the screen, runs on client
 void GameUserInterface::renderLoadoutIndicators()
 {
-   if(!gIniSettings.showWeaponIndicators)      // If we're not drawing them, we've got nothing to do
+   if(!getGame()->getSettings()->getIniSettings()->showWeaponIndicators)      // If we're not drawing them, we've got nothing to do
       return;
 
    if(!getGame()->getConnectionToServer())     // Can happen when first joining a game.  This was XelloBlue's crash...
@@ -706,8 +705,8 @@ void GameUserInterface::renderLoadoutIndicators()
    if(!localShip)
       return;
 
-   const Color INDICATOR_INACTIVE_COLOR(0,.8,0);    // green
-   const Color INDICATOR_ACTIVE_COLOR(.8,0,0);      // red
+   const Color INDICATOR_INACTIVE_COLOR(0, .8, 0);    // green
+   const Color INDICATOR_ACTIVE_COLOR  (.8, 0, 0);    // red
 
    U32 xPos = UserInterface::horizMargin;
 
@@ -746,7 +745,7 @@ void GameUserInterface::renderMessageDisplay()
 {
    glColor3f(1,1,1);
 
-   S32 y = gIniSettings.showWeaponIndicators ? UserInterface::messageMargin : UserInterface::vertMargin;
+   S32 y = getGame()->getSettings()->getIniSettings()->showWeaponIndicators ? UserInterface::messageMargin : UserInterface::vertMargin;
    S32 msgCount;
 
    msgCount = MessageDisplayCount;  // Short form
@@ -787,8 +786,14 @@ void GameUserInterface::renderChatMessageDisplay()
 
    S32 y_end = y - msgCount * (CHAT_FONT_SIZE + CHAT_FONT_GAP);
 
-   if(mHelper)
-      glEnableBlend;
+
+   bool disableBlending = false;
+
+   if(mHelper && !glIsEnabled(GL_BLEND))
+   {
+      glEnable(GL_BLEND);
+      disableBlending = true; 
+   }
 
    if(mMessageDisplayMode == ShortTimeout)
       for(S32 i = 0; i < msgCount; i++)
@@ -833,8 +838,8 @@ void GameUserInterface::renderChatMessageDisplay()
          }
       }
 
-   if(mHelper)
-      glDisableBlend;
+      if(disableBlending)
+         glDisable(GL_BLEND);
 }
 
 
@@ -976,7 +981,7 @@ void GameUserInterface::selectWeapon(U32 indx)
 // Temporarily disable the effects of a movement key to avoid unpleasant interactions between ship movement and loadout/quick chat entry
 void GameUserInterface::disableMovementKey(KeyCode keyCode)
 {
-   InputMode inputMode = gIniSettings.inputMode;
+   InputMode inputMode = getGame()->getSettings()->getIniSettings()->inputMode;
 
    if(keyCode == keyUP[inputMode])
       mUpDisabled = true;
@@ -1047,8 +1052,10 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
             ship = dynamic_cast<Ship *>(getGame()->getConnectionToServer()->getControlObject());
          if(ship)
          {
-            if( (keyCode == keyMOD1[gIniSettings.inputMode] && ship->getModule(0) == ModuleEngineer) ||
-               (keyCode == keyMOD2[gIniSettings.inputMode] && ship->getModule(1) == ModuleEngineer) )
+            InputMode inputMode = getGame()->getSettings()->getIniSettings()->inputMode;
+
+            if( (keyCode == keyMOD1[inputMode] && ship->getModule(0) == ModuleEngineer) ||
+                (keyCode == keyMOD2[inputMode] && ship->getModule(1) == ModuleEngineer) )
             {
                string msg = EngineerModuleDeployer::checkResourcesAndEnergy(ship);      // Returns "" if ok, error message otherwise
 
@@ -1072,7 +1079,7 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 
 void GameUserInterface::processPlayModeKey(KeyCode keyCode, char ascii)
 {
-   InputMode inputMode = gIniSettings.inputMode;
+   InputMode inputMode = getGame()->getSettings()->getIniSettings()->inputMode;
    // The following keys are allowed in both play mode and in
    // loadout or engineering menu modes if not used in the loadout
    // menu above
@@ -1512,9 +1519,9 @@ void GameUserInterface::lineWidthHandler(ClientGame *game, const Vector<string> 
 
 void GameUserInterface::lineSmoothHandler(ClientGame *game, const Vector<string> &words)
 {
-   gIniSettings.useLineSmoothing = !gIniSettings.useLineSmoothing;
+   game->getSettings()->getIniSettings()->useLineSmoothing = !game->getSettings()->getIniSettings()->useLineSmoothing;
 
-   if(gIniSettings.useLineSmoothing)
+   if(game->getSettings()->getIniSettings()->useLineSmoothing)
    {
       glEnable(GL_LINE_SMOOTH);
       glEnable(GL_BLEND);
@@ -1534,7 +1541,7 @@ void GameUserInterface::maxFpsHandler(ClientGame *game, const Vector<string> &wo
    if(number < 1)                              // Don't allow zero or negative numbers
       game->displayErrorMessage("!!! Usage: /maxfps <frame rate>, default = 100");
    else
-      gIniSettings.maxFPS = number;
+      game->getSettings()->getIniSettings()->maxFPS = number;
 }
 
 
@@ -1680,7 +1687,13 @@ void GameUserInterface::renderCurrentChat()
    S32 boxWidth = gScreenInfo.getGameCanvasWidth() - 2 * horizMargin - (nameWidth - promptSize) - 230;
 
    // Render text entry box like thingy
-   glEnableBlend;
+   bool disableBlending = false;
+
+   if(!glIsEnabled(GL_BLEND))
+   {
+      glEnable(GL_BLEND);
+      disableBlending = true; 
+   }
 
    for(S32 i = 1; i >= 0; i--)
    {
@@ -1693,7 +1706,9 @@ void GameUserInterface::renderCurrentChat()
          glVertex2i(horizMargin, ypos + CHAT_FONT_SIZE + 7);
       glEnd();
    }
-   glDisableBlend;
+   
+   if(disableBlending)
+      glDisable(GL_BLEND);
 
    glColor(baseColor);
 
@@ -1924,7 +1939,7 @@ void GameUserInterface::processChatModeKey(KeyCode keyCode, char ascii)
 
 void GameUserInterface::onKeyUp(KeyCode keyCode)
 {
-   S32 inputMode = gIniSettings.inputMode;
+   S32 inputMode = getGame()->getSettings()->getIniSettings()->inputMode;
 
    // These keys works in any mode!  And why not??
 
@@ -1970,7 +1985,8 @@ Move *GameUserInterface::getCurrentMove()
 {
    if((mCurrentMode != ChatMode) && !mDisableShipKeyboardInput && !OGLCONSOLE_GetVisibility())
    {
-      InputMode inputMode = gIniSettings.inputMode;
+      InputMode inputMode = getGame()->getSettings()->getIniSettings()->inputMode;
+
       mCurrentMove.x = F32((!mRightDisabled && getKeyState(keyRIGHT[inputMode]) ? 1 : 0) - (!mLeftDisabled && getKeyState(keyLEFT[inputMode]) ? 1 : 0));
       mCurrentMove.y = F32((!mDownDisabled && getKeyState(keyDOWN[inputMode]) ? 1 : 0) - (!mUpDisabled && getKeyState(keyUP[inputMode]) ? 1 : 0));
 
@@ -1990,15 +2006,14 @@ Move *GameUserInterface::getCurrentMove()
          mCurrentMove.module[i] = false;
    }
 
-   if(!gIniSettings.controlsRelative)
+   if(!getGame()->getSettings()->getIniSettings()->controlsRelative)
       return &mCurrentMove;
 
    else     // Using relative controls -- all turning is done relative to the direction of the ship.
    {
       mTransformedMove = mCurrentMove;
 
-      Point moveDir(mCurrentMove.x,
-                    mCurrentMove.y);
+      Point moveDir(mCurrentMove.x, mCurrentMove.y);
 
       Point angleDir(cos(mCurrentMove.angle), sin(mCurrentMove.angle));
 
@@ -2105,17 +2120,20 @@ void GameUserInterface::setVolume(VolumeType volType, const Vector<string> &word
   switch(volType)
   {
    case SfxVolumeType:
-      gIniSettings.sfxVolLevel = (F32) vol / 10.f;
+      getGame()->getSettings()->getIniSettings()->sfxVolLevel = (F32) vol / 10.f;
       displayMessagef(gCmdChatColor, "SFX volume changed to %d %s", vol, vol == 0 ? "[MUTE]" : "");
       return;
+
    case MusicVolumeType:
-      gIniSettings.musicVolLevel = (F32) vol / 10.f;
+      getGame()->getSettings()->getIniSettings()->musicVolLevel = (F32) vol / 10.f;
       displayMessagef(gCmdChatColor, "Music volume changed to %d %s", vol, vol == 0 ? "[MUTE]" : "");
       return;
+
    case VoiceVolumeType:
-      gIniSettings.voiceChatVolLevel = (F32) vol / 10.f;
+      getGame()->getSettings()->getIniSettings()->voiceChatVolLevel = (F32) vol / 10.f;
       displayMessagef(gCmdChatColor, "Voice chat volume changed to %d %s", vol, vol == 0 ? "[MUTE]" : "");
       return;
+
    case ServerAlertVolumeType:
       getGame()->getConnectionToServer()->c2sSetServerAlertVolume((S8) vol);
       displayMessagef(gCmdChatColor, "Server alerts chat volume changed to %d %s", vol, vol == 0 ? "[MUTE]" : "");
@@ -2287,8 +2305,9 @@ void GameUserInterface::VoiceRecorder::process()
    if(sendBuffer.isValid())
    {
       GameType *gameType = mGame->getGameType();
+
       if(gameType && sendBuffer->getBufferSize() < 1024)      // Don't try to send too big
-         gameType->c2sVoiceChat(gIniSettings.echoVoice, sendBuffer);
+         gameType->c2sVoiceChat(mGame->getSettings()->getIniSettings()->echoVoice, sendBuffer);
    }
 }
 
@@ -2312,41 +2331,6 @@ void GameUserInterface::renderScoreboard(const GameType *gameType)
 {
    S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
 
-   /* // already in renderBasicInterfaceOverlay...
-      // May remove this to avoid F2 being brighter when pressing TAB to show score board with /linesmooth on
-   if(mLevelInfoDisplayTimer.getCurrent() || mMissionOverlayActive)
-   {
-      F32 alpha = 1;
-      if(mLevelInfoDisplayTimer.getCurrent() < 1000 && !mMissionOverlayActive)
-         alpha = mLevelInfoDisplayTimer.getCurrent() * 0.001f;
-
-      glEnableBlend;
-         glColor(Colors::white, alpha);
-         UserInterface::drawCenteredStringf(canvasHeight / 2 - 180, 30, "Level: %s", gameType->getLevelName()->getString());
-         UserInterface::drawCenteredStringf(canvasHeight / 2 - 140, 30, "Game Type: %s", gameType->getGameTypeString());
-         glColor(Colors::cyan, alpha);
-         UserInterface::drawCenteredString(canvasHeight / 2 - 100, 20, gameType->getInstructionString());
-         glColor(Colors::magenta, alpha);
-         UserInterface::drawCenteredString(canvasHeight / 2 - 75, 20, gameType->getLevelDescription()->getString());
-
-         glColor(Colors::green, alpha);
-         UserInterface::drawCenteredStringf(canvasHeight - 100, 20, "Press [%s] to see this information again", keyCodeToString(keyMISSION));
-
-         if(gameType->getLevelCredits()->isNull())    // Display credits if it's not empty
-         {
-            glColor(Colors::red, alpha);
-            UserInterface::drawCenteredStringf(canvasHeight / 2 + 50, 20, "%s", gameType->getLevelCredits()->getString());
-         }
-
-         glColor4f(1, 1, 0, alpha);
-         UserInterface::drawCenteredStringf(canvasHeight / 2 - 50, 20, "Score to Win: %d", gameType->getWinningScore());
-
-      glDisableBlend;
-
-      mInputModeChangeAlertDisplayTimer.reset(0);     // Supress mode change alert if this message is displayed...
-   }
-   */
-
    if(mInputModeChangeAlertDisplayTimer.getCurrent() != 0)
    {
       // Display alert about input mode changing
@@ -2354,11 +2338,19 @@ void GameUserInterface::renderScoreboard(const GameType *gameType)
       if(mInputModeChangeAlertDisplayTimer.getCurrent() < 1000)
          alpha = mInputModeChangeAlertDisplayTimer.getCurrent() * 0.001f;
 
-      glEnableBlend;
+      bool disableBlending = false;
+
+      if(!glIsEnabled(GL_BLEND))
+      {
+         glEnable(GL_BLEND);
+         disableBlending = true; 
+      }
+
       glColor(Colors::paleRed, alpha);
       UserInterface::drawCenteredStringf(UserInterface::vertMargin + 130, 20, "Input mode changed to %s", 
-                                         gIniSettings.inputMode == InputModeJoystick ? "Joystick" : "Keyboard");
-      glDisableBlend;
+                                         getGame()->getSettings()->getIniSettings()->inputMode == InputModeJoystick ? "Joystick" : "Keyboard");
+      if(disableBlending)
+         glDisable(GL_BLEND);
    }
 
    U32 totalWidth = gScreenInfo.getGameCanvasWidth() - UserInterface::horizMargin * 2;
@@ -2405,7 +2397,14 @@ void GameUserInterface::renderScoreboard(const GameType *gameType)
       S32 xr = xl + teamWidth - 2;
 
       const Color *teamColor = gameType->getGame()->getTeamColor(i);
-      glEnableBlend;
+
+      bool disableBlending = false;
+
+      if(!glIsEnabled(GL_BLEND))
+      {
+         glEnable(GL_BLEND);
+         disableBlending = true; 
+      }
 
       glColor(teamColor, 0.6f);
       glBegin(GL_POLYGON);
@@ -2415,7 +2414,8 @@ void GameUserInterface::renderScoreboard(const GameType *gameType)
          glVertex2i(xl, yb);
       glEnd();
 
-      glDisableBlend;
+      if(disableBlending)
+         glDisable(GL_BLEND);
 
       glColor(Colors::white);
       if(gameType->isTeamGame())     // Render team scores
@@ -2485,28 +2485,36 @@ void GameUserInterface::renderBasicInterfaceOverlay(const GameType *gameType, bo
       if(mLevelInfoDisplayTimer.getCurrent() < 1000 && !mMissionOverlayActive)
          alpha = mLevelInfoDisplayTimer.getCurrent() * 0.001f;
 
-      glEnableBlend;
-         glColor(Colors::white, alpha);
-         UserInterface::drawCenteredStringf(canvasHeight / 2 - 180, 30, "Level: %s", gameType->getLevelName()->getString());
-         UserInterface::drawCenteredStringf(canvasHeight / 2 - 140, 30, "Game Type: %s", gameType->getGameTypeString());
-         glColor(Colors::cyan, alpha);
-         UserInterface::drawCenteredString(canvasHeight / 2 - 100, 20, gameType->getInstructionString());
-         glColor(Colors::magenta, alpha);
-         UserInterface::drawCenteredString(canvasHeight / 2 - 75, 20, gameType->getLevelDescription()->getString());
+      bool disableBlending = false;
 
-         glColor(Colors::green, alpha);
-         UserInterface::drawCenteredStringf(canvasHeight - 100, 20, "Press [%s] to see this information again", keyCodeToString(keyMISSION));
+      if(!glIsEnabled(GL_BLEND))
+      {
+         glEnable(GL_BLEND);
+         disableBlending = true; 
+      }
 
-         if(gameType->getLevelCredits()->isNotNull())    // Only render credits string if it's is not empty
-         {
-            glColor(Colors::red, alpha);
-            UserInterface::drawCenteredStringf(canvasHeight / 2 + 50, 20, "%s", gameType->getLevelCredits()->getString());
-         }
+      glColor(Colors::white, alpha);
+      UserInterface::drawCenteredStringf(canvasHeight / 2 - 180, 30, "Level: %s", gameType->getLevelName()->getString());
+      UserInterface::drawCenteredStringf(canvasHeight / 2 - 140, 30, "Game Type: %s", gameType->getGameTypeString());
+      glColor(Colors::cyan, alpha);
+      UserInterface::drawCenteredString(canvasHeight / 2 - 100, 20, gameType->getInstructionString());
+      glColor(Colors::magenta, alpha);
+      UserInterface::drawCenteredString(canvasHeight / 2 - 75, 20, gameType->getLevelDescription()->getString());
 
-         glColor(Colors::yellow, alpha);
-         UserInterface::drawCenteredStringf(canvasHeight / 2 - 50, 20, "Score to Win: %d", gameType->getWinningScore());
+      glColor(Colors::green, alpha);
+      UserInterface::drawCenteredStringf(canvasHeight - 100, 20, "Press [%s] to see this information again", keyCodeToString(keyMISSION));
 
-      glDisableBlend;
+      if(gameType->getLevelCredits()->isNotNull())    // Only render credits string if it's is not empty
+      {
+         glColor(Colors::red, alpha);
+         UserInterface::drawCenteredStringf(canvasHeight / 2 + 50, 20, "%s", gameType->getLevelCredits()->getString());
+      }
+
+      glColor(Colors::yellow, alpha);
+      UserInterface::drawCenteredStringf(canvasHeight / 2 - 50, 20, "Score to Win: %d", gameType->getWinningScore());
+
+      if(disableBlending)
+         glDisable(GL_BLEND);
 
       mInputModeChangeAlertDisplayTimer.reset(0);     // Supress mode change alert if this message is displayed...
    }
@@ -2518,11 +2526,19 @@ void GameUserInterface::renderBasicInterfaceOverlay(const GameType *gameType, bo
       if(mInputModeChangeAlertDisplayTimer.getCurrent() < 1000)
          alpha = mInputModeChangeAlertDisplayTimer.getCurrent() * 0.001f;
 
-      glEnableBlend;
+      bool disableBlending = false;
+
+      if(!glIsEnabled(GL_BLEND))
+      {
+         glEnable(GL_BLEND);
+         disableBlending = true; 
+      }
+
       glColor(Colors::paleRed, alpha);
       UserInterface::drawCenteredStringf(UserInterface::vertMargin + 130, 20, "Input mode changed to %s", 
-                                         gIniSettings.inputMode == InputModeJoystick ? "Joystick" : "Keyboard");
-      glDisableBlend;
+                                         getGame()->getSettings()->getIniSettings()->inputMode == InputModeJoystick ? "Joystick" : "Keyboard");
+      if(disableBlending)
+         glDisable(GL_BLEND);
    }
 
    Game *game = gameType->getGame();

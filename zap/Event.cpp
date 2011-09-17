@@ -26,16 +26,19 @@ namespace Zap
 
 Event::Event()
 {
+   // Do nothing -- never called?
 }
+
 
 Event::~Event()
 {
+   // Do nothing
 }
 
-void Event::setMousePos(S32 x, S32 y)
-{
-   DisplayMode reportedDisplayMode = gIniSettings.displayMode;
 
+void Event::setMousePos(S32 x, S32 y, DisplayMode reportedDisplayMode)
+{
+   // Handle special case of editor... would be better handled elsewhere?
    if(UserInterface::current->getMenuID() == EditorUI && reportedDisplayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED)
       reportedDisplayMode = DISPLAY_MODE_FULL_SCREEN_STRETCHED;
 
@@ -145,12 +148,12 @@ void Event::keyCodeDown(KeyCode keyCode, char ascii)
 }
 
 
-void Event::onEvent(SDL_Event* event)
+void Event::onEvent(ClientGame *game, SDL_Event* event)
 {
    switch (event->type)
    {
       case SDL_KEYDOWN:
-         onKeyDown(event->key.keysym.sym, event->key.keysym.mod, event->key.keysym.unicode);
+         onKeyDown(game, event->key.keysym.sym, event->key.keysym.mod, event->key.keysym.unicode);
          break;
 
       case SDL_KEYUP:
@@ -158,22 +161,22 @@ void Event::onEvent(SDL_Event* event)
          break;
 
       case SDL_MOUSEMOTION:
-            onMouseMoved(event->motion.x, event->motion.y);
+            onMouseMoved(event->motion.x, event->motion.y, game->getSettings()->getIniSettings()->displayMode);
          break;
 
       case SDL_MOUSEBUTTONDOWN:
          switch (event->button.button)
          {
             case SDL_BUTTON_LEFT:
-               onMouseButtonDown(event->button.x, event->button.y, MOUSE_LEFT);
+               onMouseButtonDown(event->button.x, event->button.y, MOUSE_LEFT, game->getSettings()->getIniSettings()->displayMode);
                break;
 
             case SDL_BUTTON_RIGHT:
-               onMouseButtonDown(event->button.x, event->button.y, MOUSE_RIGHT);
+               onMouseButtonDown(event->button.x, event->button.y, MOUSE_RIGHT, game->getSettings()->getIniSettings()->displayMode);
                break;
 
             case SDL_BUTTON_MIDDLE:
-               onMouseButtonDown(event->button.x, event->button.y, MOUSE_MIDDLE);
+               onMouseButtonDown(event->button.x, event->button.y, MOUSE_MIDDLE, game->getSettings()->getIniSettings()->displayMode);
                break;
          }
          break;
@@ -182,21 +185,21 @@ void Event::onEvent(SDL_Event* event)
          switch (event->button.button)
          {
             case SDL_BUTTON_LEFT:
-               onMouseButtonUp(event->button.x, event->button.y, MOUSE_LEFT);
+               onMouseButtonUp(event->button.x, event->button.y, MOUSE_LEFT, game->getSettings()->getIniSettings()->displayMode);
                break;
 
             case SDL_BUTTON_RIGHT:
-               onMouseButtonUp(event->button.x, event->button.y, MOUSE_RIGHT);
+               onMouseButtonUp(event->button.x, event->button.y, MOUSE_RIGHT, game->getSettings()->getIniSettings()->displayMode);
                break;
 
             case SDL_BUTTON_MIDDLE:
-               onMouseButtonUp(event->button.x, event->button.y, MOUSE_MIDDLE);
+               onMouseButtonUp(event->button.x, event->button.y, MOUSE_MIDDLE, game->getSettings()->getIniSettings()->displayMode);
                break;
          }
          break;
 
       case SDL_JOYAXISMOTION:
-         onJoyAxis(event->jaxis.which, event->jaxis.axis, event->jaxis.value);
+         onJoyAxis(game->getSettings()->getIniSettings()->joystickType, event->jaxis.which, event->jaxis.axis, event->jaxis.value);
          break;
 
          // TODO:  Do we need joyball and joyhat?
@@ -209,11 +212,11 @@ void Event::onEvent(SDL_Event* event)
          break;
 
       case SDL_JOYBUTTONDOWN:
-         onJoyButtonDown(event->jbutton.which, event->jbutton.button);
+         onJoyButtonDown(event->jbutton.which, event->jbutton.button, game->getSettings()->getIniSettings()->joystickType);
          break;
 
       case SDL_JOYBUTTONUP:
-         onJoyButtonUp(event->jbutton.which, event->jbutton.button);
+         onJoyButtonUp(event->jbutton.which, event->jbutton.button, game->getSettings()->getIniSettings()->joystickType);
          break;
 
       case SDL_SYSWMEVENT:
@@ -221,7 +224,7 @@ void Event::onEvent(SDL_Event* event)
          break;
 
       case SDL_VIDEORESIZE:
-         onResize(event->resize.w, event->resize.h);
+         onResize(event->resize.w, event->resize.h, game->getSettings()->getIniSettings()->winSizeFact);
          break;
 
       case SDL_VIDEOEXPOSE:
@@ -265,7 +268,7 @@ void Event::onEvent(SDL_Event* event)
 
 void Event::onInputFocus()
 {
-
+   // Do nothing
 }
 
 
@@ -275,19 +278,17 @@ void Event::onInputBlur()     // <=== what does this do??
 }
 
 
-void Event::onKeyDown(SDLKey key, SDLMod mod, U16 unicode)
+void Event::onKeyDown(ClientGame *game, SDLKey key, SDLMod mod, U16 unicode)
 {
-//   logprintf("Key: %d; Mod: %d", key, mod);
-
    // Global modifiers
 
    // ALT + ENTER --> toggles window mode/full screen
    if(key == SDLK_RETURN && (mod & KMOD_ALT))
-      gClientGame->getUIManager()->getOptionsMenuUserInterface()->toggleDisplayMode();
+      game->getUIManager()->getOptionsMenuUserInterface()->toggleDisplayMode();
 
    // CTRL + Q --> screenshot!
    else if(key == SDLK_q && (mod & KMOD_CTRL))
-      ScreenShooter::saveScreenshot(gClientGame->getSettings()->getConfigDirs()->screenshotDir);
+      ScreenShooter::saveScreenshot(game->getSettings()->getConfigDirs()->screenshotDir);
 
    // The rest
    else
@@ -303,19 +304,22 @@ void Event::onKeyUp(SDLKey key, SDLMod mod, U16 unicode)
    keyCodeUp(sdlKeyToKeyCode(key));
 }
 
+
 void Event::onMouseFocus()
 {
-
+   // Do nothing
 }
+
 
 void Event::onMouseBlur()
 {
-
+   // Do nothing
 }
 
-void Event::onMouseMoved(S32 x, S32 y)
+
+void Event::onMouseMoved(S32 x, S32 y, DisplayMode mode)
 {
-   setMousePos(x, y);
+   setMousePos(x, y, mode);
 
    if(UserInterface::current)
       UserInterface::current->onMouseMoved(x, y);
@@ -324,25 +328,27 @@ void Event::onMouseMoved(S32 x, S32 y)
 
 void Event::onMouseWheel(bool Up, bool Down)
 {
-
+   // Do nothing
 }
 
-void Event::onMouseButtonDown(S32 x, S32 y, KeyCode keyCode)
+
+void Event::onMouseButtonDown(S32 x, S32 y, KeyCode keyCode, DisplayMode mode)
 {
-   setMousePos(x, y);
+   setMousePos(x, y, mode);
 
    keyCodeDown(keyCode, 0);
 }
 
-void Event::onMouseButtonUp(S32 x, S32 y, KeyCode keyCode)
+
+void Event::onMouseButtonUp(S32 x, S32 y, KeyCode keyCode, DisplayMode mode)
 {
-   setMousePos(x, y);
+   setMousePos(x, y, mode);
 
    keyCodeUp(keyCode);
 }
 
 
-void Event::onJoyAxis(U8 whichJoystick, U8 axis, S16 value)
+void Event::onJoyAxis(U32 joystickType, U8 whichJoystick, U8 axis, S16 value)
 {
 //   logprintf("SDL Axis number: %u, value: %d", axis, value);
 
@@ -350,22 +356,22 @@ void Event::onJoyAxis(U8 whichJoystick, U8 axis, S16 value)
       Joystick::rawAxis[axis] = (F32)value / (F32)S16_MAX;
 
    // If we are using a predefined controller, get the appropriate axis
-   if (gIniSettings.joystickType < ControllerTypeCount)
+   if(joystickType < ControllerTypeCount)
    {
       // Left/Right movement axis
-      if(axis == Joystick::PredefinedJoystickList[gIniSettings.joystickType].moveAxesSdlIndex[0])
+      if(axis == Joystick::PredefinedJoystickList[joystickType].moveAxesSdlIndex[0])
          updateJoyAxesDirections(MoveAxisLeftRightMask,  value);
 
       // Up/down movement axis
-      if(axis == Joystick::PredefinedJoystickList[gIniSettings.joystickType].moveAxesSdlIndex[1])
+      if(axis == Joystick::PredefinedJoystickList[joystickType].moveAxesSdlIndex[1])
          updateJoyAxesDirections(MoveAxisUpDownMask,  value);
 
       // Left/Right shooting axis
-      if(axis == Joystick::PredefinedJoystickList[gIniSettings.joystickType].shootAxesSdlIndex[0])
+      if(axis == Joystick::PredefinedJoystickList[joystickType].shootAxesSdlIndex[0])
          updateJoyAxesDirections(ShootAxisLeftRightMask, value);
 
       // Up/down shooting axis
-      if(axis == Joystick::PredefinedJoystickList[gIniSettings.joystickType].shootAxesSdlIndex[1])
+      if(axis == Joystick::PredefinedJoystickList[joystickType].shootAxesSdlIndex[1])
          updateJoyAxesDirections(ShootAxisUpDownMask, value);
    }
    // Else just use the first 4 axis for fun
@@ -383,14 +389,16 @@ void Event::onJoyAxis(U8 whichJoystick, U8 axis, S16 value)
 
 extern KeyCode joyButtonToKeyCode(int buttonIndex);
 
-void Event::onJoyButtonDown(U8 which, U8 button)
+
+void Event::onJoyButtonDown(U8 which, U8 button, U32 joystickType)
 {
-   keyCodeDown(joyButtonToKeyCode(Joystick::remapJoystickButton(button)), 0);
+   keyCodeDown(joyButtonToKeyCode(Joystick::remapJoystickButton(joystickType, button)), 0);
 }
 
-void Event::onJoyButtonUp(U8 which, U8 button)
+
+void Event::onJoyButtonUp(U8 which, U8 button, U32 joystickType)
 {
-   keyCodeUp(joyButtonToKeyCode(Joystick::remapJoystickButton(button)));
+   keyCodeUp(joyButtonToKeyCode(Joystick::remapJoystickButton(joystickType, button)));
 }
 
 
@@ -427,30 +435,33 @@ void Event::onJoyBall(U8 which, U8 ball, S16 xrel, S16 yrel)
 //   logprintf("SDL Ball number: %u, relative x: %d, relative y: %d", ball, xrel, yrel);
 }
 
+
 void Event::onMinimize()
 {
-
+   // Do nothing
 }
+
 
 void Event::onRestore()
 {
-
+   // Do nothing
 }
 
+
 // We don't need to worry about this event in fullscreen modes because it is never fired with SDL
-void Event::onResize(S32 width, S32 height)
+void Event::onResize(S32 width, S32 height, F32 winSizeFact)
 {
    S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
    S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
 
    // Constrain window to correct proportions...
    if((width - canvasWidth) > (height - canvasHeight))      // Wider than taller  (is this right? mixing virtual and physical pixels)
-      gIniSettings.winSizeFact = max((F32) height / (F32)canvasHeight, gScreenInfo.getMinScalingFactor());
+      winSizeFact = max((F32) height / (F32)canvasHeight, gScreenInfo.getMinScalingFactor());
    else
-      gIniSettings.winSizeFact = max((F32) width / (F32)canvasWidth, gScreenInfo.getMinScalingFactor());
+      winSizeFact = max((F32) width / (F32)canvasWidth, gScreenInfo.getMinScalingFactor());
 
-   S32 newWidth  = (S32)floor(canvasWidth  * gIniSettings.winSizeFact + 0.5f);   // virtual * (physical/virtual) = physical, fix rounding problem
-   S32 newHeight = (S32)floor(canvasHeight * gIniSettings.winSizeFact + 0.5f);
+   S32 newWidth  = (S32)floor(canvasWidth  * winSizeFact + 0.5f);   // virtual * (physical/virtual) = physical, fix rounding problem
+   S32 newHeight = (S32)floor(canvasHeight * winSizeFact + 0.5f);
 
    S32 flags = 0;
    flags = gScreenInfo.isHardwareSurface() ? SDL_OPENGL | SDL_HWSURFACE | SDL_RESIZABLE : SDL_OPENGL | SDL_RESIZABLE;
@@ -460,12 +471,13 @@ void Event::onResize(S32 width, S32 height)
    glViewport(0, 0, gScreenInfo.getWindowWidth(), gScreenInfo.getWindowHeight());
    OGLCONSOLE_Reshape();
 
-   gINI.SetValueF("Settings", "WindowScalingFactor", gIniSettings.winSizeFact, true);
+   gINI.SetValueF("Settings", "WindowScalingFactor", winSizeFact, true);
 }
+
 
 void Event::onExpose()
 {
-
+   // Do nothing
 }
 
 void Event::onUser(U8 type, S32 code, void* data1, void* data2)

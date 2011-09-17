@@ -298,25 +298,25 @@ void DiagnosticUserInterface::render()
 
    if(mCurPage == 0)
    {
-      string inputMode = gIniSettings.getInputMode();
+      string inputMode = getGame()->getSettings()->getIniSettings()->getInputMode();
 
-      glColor3f(1,0,0);
+      glColor(Colors::red);
       drawCenteredString(vertMargin + 37, 18, "Is something wrong?");
 
       S32 x;
       x = getCenteredStringStartingPosf(textsize, "Can't control your ship? Check your input mode "
                                                   "(Options>Primary Input) [currently %s]", inputMode.c_str());
-      glColor3f(0,1,0);
+      glColor(Colors::green);
       x += drawStringAndGetWidth(x, vertMargin + 63, textsize, "Can't control your ship? Check your input mode (Options>Primary Input) [currently ");
 
-      glColor3f(1,0,0);
+      glColor(Colors::red);
       x += drawStringAndGetWidthf(x, vertMargin + 63, textsize, "%s", inputMode.c_str());
 
-      glColor3f(0,1,0);
+      glColor(Colors::green);
       drawString(x, vertMargin + 63, textsize, "]");
 
       // Box around something wrong? block
-      glColor3f(0,1,1);
+      glColor(Colors::cyan);
       glBegin(GL_LINE_LOOP);
          S32 x1 = horizMargin;
          S32 x2 = gScreenInfo.getGameCanvasWidth() - horizMargin;
@@ -430,25 +430,27 @@ void DiagnosticUserInterface::render()
                  getKeyState(STICK_2_LEFT), getKeyState(STICK_2_RIGHT), "R Stick", "(Fire)");
       hpos += 55;
 
-      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, BUTTON_1, getKeyState(BUTTON_1));
+      U32 joystickType = getGame()->getSettings()->getIniSettings()->joystickType;
+
+      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickType, BUTTON_1, getKeyState(BUTTON_1));
       hpos += 40;
-      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, BUTTON_2, getKeyState(BUTTON_2));
+      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickType, BUTTON_2, getKeyState(BUTTON_2));
       hpos += 40;
-      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, BUTTON_3, getKeyState(BUTTON_3));
+      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickType, BUTTON_3, getKeyState(BUTTON_3));
       hpos += 40;
-      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, BUTTON_4, getKeyState(BUTTON_4));
+      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickType, BUTTON_4, getKeyState(BUTTON_4));
       hpos += 40;
-      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, BUTTON_5, getKeyState(BUTTON_5));
+      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickType, BUTTON_5, getKeyState(BUTTON_5));
       hpos += 40;
-      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, BUTTON_6, getKeyState(BUTTON_6));
+      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickType, BUTTON_6, getKeyState(BUTTON_6));
       hpos += 40;
-      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, BUTTON_7, getKeyState(BUTTON_7));
+      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickType, BUTTON_7, getKeyState(BUTTON_7));
       hpos += 40;
-      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, BUTTON_8, getKeyState(BUTTON_8));
+      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickType, BUTTON_8, getKeyState(BUTTON_8));
       hpos += 40;
-      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, BUTTON_BACK, getKeyState(BUTTON_BACK));
+      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickType, BUTTON_BACK, getKeyState(BUTTON_BACK));
       hpos += 40;
-      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, BUTTON_START, getKeyState(BUTTON_START));
+      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickType, BUTTON_START, getKeyState(BUTTON_START));
    }
    else if(mCurPage == 1)
    {

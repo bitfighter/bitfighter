@@ -243,7 +243,7 @@ void InstructionsUserInterface::renderPage1()
    static const Color keyColor = Colors::white;      // white
    static const Color secColor = Colors::yellow;
 
-   ControlString *controls = (gIniSettings.inputMode == InputModeKeyboard) ? controlsKeyboard : controlsGamepad;
+   ControlString *controls = (getGame()->getSettings()->getIniSettings()->inputMode == InputModeKeyboard) ? controlsKeyboard : controlsGamepad;
 
    glColor(secColor);
    drawString(col1, starty, 20, "Action");
@@ -306,7 +306,8 @@ void InstructionsUserInterface::renderPage1()
                drawStringf(col2, y + 4, 15, "[%s] [%s] [%s]", keyCodeToString(keyLEFT[InputModeKeyboard]), keyCodeToString(keyDOWN[InputModeKeyboard]), keyCodeToString(keyRIGHT[InputModeKeyboard]));
          }
          else
-            JoystickRender::renderControllerButton((F32)contCol, F32(y + 4), *controls[i].primaryControlIndex, false, 10);
+            JoystickRender::renderControllerButton((F32)contCol, F32(y + 4), getGame()->getSettings()->getIniSettings()->joystickType, 
+                                                   *controls[i].primaryControlIndex, false, 10);
       }
 
       y += 26;
@@ -528,7 +529,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
             renderProjectile(Point(0, 0), 2, getGame()->getCurrentTime());
             break;
          case 3:
-            renderGrenade(Point(0, 0), 1);
+            renderGrenade(Point(0, 0), 1, getGame()->getSettings()->getIniSettings()->burstGraphicsMode);
             break;
          case 4:
             renderMine(Point(0, 0), true, true);
@@ -649,7 +650,7 @@ void InstructionsUserInterface::renderPageCommands(U32 page, const char *msg)
 
    glColor3f(0,1,0);
    drawStringf(cmdCol, ypos, instrSize, "Enter a cmd by pressing [%s], or by typing one at the chat prompt", 
-               keyCodeToString(keyCMDCHAT[gIniSettings.inputMode]));
+                                        keyCodeToString(keyCMDCHAT[getGame()->getSettings()->getIniSettings()->inputMode]));
    ypos += 28;
    drawString(cmdCol, ypos, instrSize, "Use [TAB] to expand a partially typed command");
    ypos += 28;

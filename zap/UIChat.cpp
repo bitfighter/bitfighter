@@ -118,7 +118,7 @@ void AbstractChat::playerJoinedGlobalChat(const StringTableEntry &playerNick)
    // Make the following be from us, so it will be colored white
    string msg = "----- Player " + string(playerNick.getString()) + " joined the conversation -----";
    newMessage(mGame->getClientInfo()->name, msg, false, true, true);
-   SoundSystem::playSoundEffect(SFXPlayerJoined, gIniSettings.sfxVolLevel);   // Make sound?
+   SoundSystem::playSoundEffect(SFXPlayerJoined, mGame->getSettings()->getIniSettings()->sfxVolLevel);   // Make sound?
 }
 
 
@@ -134,7 +134,7 @@ void AbstractChat::playerLeftGlobalChat(const StringTableEntry &playerNick)
          string msg = "----- Player " + string(playerNick.getString()) + " left the conversation -----";
          newMessage(mGame->getClientInfo()->name, msg, false, true, true);
          
-         SoundSystem::playSoundEffect(SFXPlayerLeft, gIniSettings.sfxVolLevel);   // Me make sound!
+         SoundSystem::playSoundEffect(SFXPlayerLeft, mGame->getSettings()->getIniSettings()->sfxVolLevel);   // Me make sound!
          break;
       }
 }
@@ -368,15 +368,26 @@ void ChatUserInterface::render()
    if(mRenderUnderlyingUI && getUIManager()->hasPrevUI())           // If there is an underlying menu...
    {
       getUIManager()->renderPrevUI();  // ...render it...
-      glColor4f(0, 0, 0, 0.75);        // ... and dim it out a bit, nay, a lot
-      glEnableBlend;
+      glColor(Colors::black, 0.75);        // ... and dim it out a bit, nay, a lot
+      
+      bool disableBlending = false;
+
+      if(!glIsEnabled(GL_BLEND))
+      {
+         glEnable(GL_BLEND);
+         disableBlending = true; 
+      }
+
+
       glBegin(GL_POLYGON);
          glVertex2i(0, 0);
          glVertex2i(gScreenInfo.getGameCanvasWidth(), 0);
          glVertex2i(gScreenInfo.getGameCanvasWidth(), gScreenInfo.getGameCanvasHeight());
          glVertex2i(0, gScreenInfo.getGameCanvasHeight());
       glEnd();
-      glDisableBlend;
+
+      if(disableBlending)
+         glDisable(GL_BLEND);
    }
 
    // Render header

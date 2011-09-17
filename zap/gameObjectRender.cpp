@@ -272,8 +272,14 @@ void drawCentroidMark(const Point &pos, F32 radius)
 void renderShip(const Color *shipColor, F32 alpha, F32 thrusts[], F32 health, F32 radius, U32 sensorTime,
                 bool cloakActive, bool shieldActive, bool sensorActive, bool hasArmor)
 {
-   if(alpha != 1.0)
-      glEnableBlend;
+   bool disableBlending = false;
+
+   if(alpha != 1.0 && !glIsEnabled(GL_BLEND))
+   {
+      glEnable(GL_BLEND);
+      disableBlending = true;
+   }
+      
 
    // First render the thrusters
    if(thrusts[0] > 0) // forward thrust
@@ -430,8 +436,8 @@ void renderShip(const Color *shipColor, F32 alpha, F32 thrusts[], F32 health, F3
       drawCircle(0, 0, radius * Ship::CollisionRadius + 4);
    }
    
-   if(alpha != 1.0)
-      glDisableBlend;
+   if(disableBlending)
+      glDisable(GL_BLEND);
 }
 
 
@@ -440,13 +446,22 @@ void renderShipCoords(const Point &coords, bool localShip, F32 alpha)
    string str = string("@") + itos((S32) coords.x) + "," + itos((S32) coords.y);
    const U32 textSize = 18;
 
-   glEnableBlend;
-      
-      glLineWidth(gLineWidth1);
-      glColor4f(1, 1, 1, 0.5f * alpha);
+   bool disableBlending = false;
 
-      UserInterface::drawStringc(0, 30 + (localShip ? 0 : F32(textSize) + 3), (F32)textSize, str.c_str() );
-   glDisableBlend;
+   if(!glIsEnabled(GL_BLEND))
+   {
+      glEnable(GL_BLEND);
+      disableBlending = true;
+   }
+      
+   glLineWidth(gLineWidth1);
+   glColor(Colors::white, 0.5f * alpha);
+
+   UserInterface::drawStringc(0, 30 + (localShip ? 0 : F32(textSize) + 3), (F32)textSize, str.c_str() );
+
+   if(disableBlending)
+      glDisable(GL_BLEND);
+
    glLineWidth(gDefaultLineWidth);
 }
 
@@ -454,19 +469,28 @@ void renderShipCoords(const Point &coords, bool localShip, F32 alpha)
 // This is a line extending from the ship to give joystick players some idea of where they're aiming
 void renderAimVector()
 {
-   glEnableBlend;
-      glBegin(GL_LINES);
-         glColor4f(0,1,0, 0);
-         glVertex2f(0, 50);       // Gradient from here...
+   bool disableBlending = false;
 
-         glColor4f(0,1,0, 0.5);        // Reticle color
-         glVertex2f(0, 150);      // ...to here
+   if(!glIsEnabled(GL_BLEND))
+   {
+      glEnable(GL_BLEND);
+      disableBlending = true; 
+   }
 
-         glColor4f(0,1,0, 0.5);
-         glVertex2f(0, 150);      // Solid from here on out
-         glVertex2f(0, 1000);     // 1000 is pretty aribitrary!
-      glEnd();
-   glDisableBlend;
+   glBegin(GL_LINES);
+      glColor(Colors::green, 0);
+      glVertex(0, 50);       // Gradient from here...
+
+      glColor(Colors::green, 0.5);        // Reticle color
+      glVertex(0, 150);      // ...to here
+
+      glColor(Colors::green, 0.5);
+      glVertex(0, 150);      // Solid from here on out
+      glVertex(0, 1000);     // 1000 is pretty aribitrary!
+   glEnd();
+
+   if(disableBlending)
+      glDisable(GL_BLEND);
 }
 
 #ifndef ABS
@@ -529,7 +553,14 @@ void renderTeleporter(const Point &pos, U32 type, bool in, S32 time, F32 zoomFra
 
    glPushMatrix();
 
-   glEnableBlend;
+   bool disableBlending = false;
+
+   if(!glIsEnabled(GL_BLEND))
+   {
+      glEnable(GL_BLEND);
+      disableBlending = true; 
+   }
+
 
    if(zoomFraction > 0 || showDestOverride)
    {
@@ -640,7 +671,10 @@ void renderTeleporter(const Point &pos, U32 type, bool in, S32 time, F32 zoomFra
          }
       glEnd();
    }
-   glDisableBlend;
+
+   if(disableBlending)
+      glDisable(GL_BLEND);
+
    glPopMatrix();
 }
 
@@ -773,7 +807,16 @@ void renderFlag(F32 x, F32 y, const Color *flagColor)
 void renderSmallFlag(const Point &pos, const Color &c, F32 parentAlpha)
 {
    F32 alpha = 0.75f * parentAlpha;
-   glEnableBlend;
+   
+   bool disableBlending = false;
+
+   if(!glIsEnabled(GL_BLEND))
+   {
+      glEnable(GL_BLEND);
+      disableBlending = true; 
+   }
+
+
    glPushMatrix();
       glTranslate(pos);
       glScale(0.2f);
@@ -796,7 +839,9 @@ void renderSmallFlag(const Point &pos, const Color &c, F32 parentAlpha)
          glVertex2f(-15, 15);
       glEnd();
    glPopMatrix();
-   glDisableBlend;
+
+   if(disableBlending)
+      glDisable(GL_BLEND);
 }
 
 
@@ -839,27 +884,39 @@ void renderPolygonOutline(const Vector<Point> *outline)
 
 void renderPolygonOutline(const Vector<Point> *outlinePoints, const Color *outlineColor, F32 alpha)
 {
-   if(alpha != 1)
-      glEnableBlend;
+   bool disableBlending = false;
+
+   if(alpha != 1 && !glIsEnabled(GL_BLEND))
+   {
+      glEnable(GL_BLEND);
+      disableBlending = true; 
+   }
+
 
    glColor(outlineColor, alpha);
    renderPolygonOutline(outlinePoints);
 
-   if(alpha != 1)
-      glDisableBlend;
+   if(disableBlending)
+      glDisable(GL_BLEND);
 }
 
 
 void renderPolygonFill(const Vector<Point> *fillPoints, const Color *fillColor, F32 alpha)      
 {
-   if(alpha != 1)
-      glEnableBlend;
+   bool disableBlending = false;
+
+   if(alpha != 1 && !glIsEnabled(GL_BLEND))
+   {
+      glEnable(GL_BLEND);
+      disableBlending = true; 
+   }
+
 
    glColor(fillColor, alpha);
    renderTriangulatedPolygonFill(fillPoints);
 
-   if(alpha != 1)
-      glDisableBlend;
+   if(disableBlending)
+      glDisable(GL_BLEND);
 }
 
 
@@ -910,8 +967,13 @@ void renderNavMeshZone(const Vector<Point> *outline, const Vector<Point> *fill, 
 
 void renderNavMeshBorder(const Border &border, F32 scaleFact, const Color &color, F32 fillAlpha, F32 width)
 {
-   if(fillAlpha != 1)
-      glDisableBlend;
+   bool disableBlending = false;
+
+   if(fillAlpha != 1 && !glIsEnabled(GL_BLEND))
+   {
+      glEnable(GL_BLEND);
+      disableBlending = true; 
+   }
 
    for(S32 j = 1; j >= 0; j--)
    {
@@ -919,8 +981,8 @@ void renderNavMeshBorder(const Border &border, F32 scaleFact, const Color &color
       renderTwoPointPolygon(border.borderStart, border.borderEnd, width * scaleFact, j ? GL_POLYGON : GL_LINE_LOOP);
    }
 
-   if(fillAlpha != 1)
-      glDisableBlend;
+   if(disableBlending)
+      glDisable(GL_BLEND);
 }
 
 
@@ -985,11 +1047,11 @@ void renderGoalZone(const Color *c, const Vector<Point> *outline, const Vector<P
 
 // Goal zone flashes after capture, but glows after touchdown...
 void renderGoalZone(const Color *c, const Vector<Point> *outline, const Vector<Point> *fill, Point centroid, F32 labelAngle, 
-                    bool isFlashing, F32 glowFraction, S32 score, F32 flashCounter)
+                    bool isFlashing, F32 glowFraction, S32 score, F32 flashCounter, bool useOldStyle)
 {
    Color fillColor, outlineColor;
 
-   if(gIniSettings.oldGoalFlash)
+   if(useOldStyle)
    {
       fillColor    = getGoalZoneFillColor(c, isFlashing, glowFraction);
       outlineColor = getGoalZoneOutlineColor(c, isFlashing);
@@ -1012,7 +1074,6 @@ void renderGoalZone(const Color *c, const Vector<Point> *outline, const Vector<P
    renderPolygon(fill, outline, &fillColor, &outlineColor);
    renderPolygonLabel(centroid, labelAngle, 25, "GOAL");
 }
-
 
 
 extern Color gNexusOpenColor;
@@ -1166,7 +1227,14 @@ void renderMine(const Point &pos, bool armed, bool visible)
    else
       glLineWidth(gLineWidth1);
 
-   glEnableBlend;
+   bool disableBlending = false;
+
+   if(!glIsEnabled(GL_BLEND))
+   {
+      glEnable(GL_BLEND);
+      disableBlending = true; 
+   }
+
    glColor4f(mod, mod, mod, vis);
    drawCircle(pos, 10);
 
@@ -1176,7 +1244,9 @@ void renderMine(const Point &pos, bool armed, bool visible)
       drawCircle(pos, 6);
    }
    glLineWidth(gDefaultLineWidth);
-   glDisableBlend;
+
+   if(disableBlending)
+      glDisable(GL_BLEND);
 }
 
 #ifndef min
@@ -1193,7 +1263,7 @@ void renderMine(const Point &pos, bool armed, bool visible)
 // 3 = color change only
 // 4 = normal rendering, filled circle
 // 5 = normal rendering
-void renderGrenade(const Point &pos, F32 lifeLeft)
+void renderGrenade(const Point &pos, F32 lifeLeft, S32 style)
 {
    glColor(Colors::white);
    drawCircle(pos, 10);
@@ -1219,13 +1289,13 @@ void renderGrenade(const Point &pos, F32 lifeLeft)
    else if(lifeLeft > .05)
       innerVis = false;
 
-   if(gIniSettings.burstGraphicsMode == 1 || gIniSettings.burstGraphicsMode == 3)
+   if(style == 1 || style == 3)
       glColor3f(1, min(1.25f - lifeLeft, 1), 0);
    else
       glColor(Colors::red);
 
    // if(innerVis)
-   if((innerVis && (gIniSettings.burstGraphicsMode == 1 || gIniSettings.burstGraphicsMode == 2)) || gIniSettings.burstGraphicsMode == 3 || gIniSettings.burstGraphicsMode == 4 )
+   if((innerVis && (style == 1 || style == 2)) || style == 3 || style == 4 )
       drawFilledCircle(pos, 6);
    else
       drawCircle(pos, 6);
@@ -1242,7 +1312,14 @@ void renderGrenade(const Point &pos, F32 lifeLeft)
    F32 alpha = 1 - (vel / 500) * (vel / 500);      // TODO: Make 500 come from constant in gameWeapons.cpp
 
    // Color inner circle with a color that gets darker as grenade slows
-   glEnableBlend;
+   bool disableBlending = false;
+
+   if(!glIsEnabled(GL_BLEND))
+   {
+      glEnable(GL_BLEND);
+      disableBlending = true; 
+   }
+
    glColor4f(1,.5,0,alpha);
    drawFilledCircle(pos, r3);
    glDisable(GL_BLEND);
@@ -1292,6 +1369,7 @@ void renderGrenade(const Point &pos, F32 lifeLeft)
       glLineWidth(gDefaultLineWidth);
       */
 }
+
 
 void renderSpyBug(const Point &pos, bool visible)
 {
@@ -1466,16 +1544,16 @@ void renderWallFill(const Vector<Point> *points, bool polyWall, const Color &fil
 
 
 // Used in both editor and game
-void renderWallEdges(const Vector<Point> *edges, F32 alpha)
+void renderWallEdges(const Vector<Point> *edges, const Color &outlineColor, F32 alpha)
 {
-   glColor(gIniSettings.wallOutlineColor, alpha);
+   glColor(outlineColor, alpha);
    renderPointVector(edges, GL_LINES);
 }
 
 
 void renderSpeedZone(const Vector<Point> *points, U32 time)
 {
-   glColor3f(1, 0, 0);     // Red
+   glColor(Colors::red);
 
    for(S32 j = 0; j < 2; j++)
    {
@@ -1514,8 +1592,8 @@ void renderWorm(const Point &pos)
    glColor(Color(1, .1, .1));
       glBegin(GL_LINE_LOOP);
          glVertex2f(0,    -size);
-         glVertex2f(size, 0    );
-         glVertex2f(0,    size );
+         glVertex2f(size,  0    );
+         glVertex2f(0,     size );
          glVertex2f(-size, 0   );
       glEnd();
    glPopMatrix();
@@ -1527,7 +1605,7 @@ void renderAsteroid(const Point &pos, S32 design, F32 scaleFact, const Color *co
    glPushMatrix();
    glTranslate(pos);
 
-   glColor(color ? *color : Color(.7, .7, .7), alpha);
+   glColor(color ? *color : Color(.7), alpha);
       // Design 1
       glBegin(GL_LINE_LOOP);
          for(S32 i = 0; i < AsteroidPoints; i++)

@@ -156,17 +156,22 @@ void LoadoutHelper::render()
       }
 
       // Draw key controls for selecting loadout items
-      bool showKeys = gIniSettings.showKeyboardKeys || gIniSettings.inputMode == InputModeKeyboard;
+      GameSettings *settings = getGame()->getSettings();
+      InputMode inputMode = settings->getIniSettings()->inputMode;
+
+      bool showKeys = settings->getIniSettings()->showKeyboardKeys || inputMode == InputModeKeyboard;
 
       if(isValidItem(i))
       {
-         if(gIniSettings.inputMode == InputModeJoystick)     // Only draw joystick buttons when in joystick mode
-            JoystickRender::renderControllerButton(F32(UserInterface::horizMargin + (showKeys ? 0 : 20)), (F32)yPos, list->get(i).button, false);
+         U32 joystickType = settings->getIniSettings()->joystickType;
 
+         if(inputMode == InputModeJoystick)     // Only draw joystick buttons when in joystick mode
+            JoystickRender::renderControllerButton(F32(UserInterface::horizMargin + (showKeys ? 0 : 20)), (F32)yPos, 
+                                                   joystickType, list->get(i).button, false);
          if(showKeys)
          {
-            glColor3f(1, 1, 1);     // Render key in white
-            JoystickRender::renderControllerButton(F32(UserInterface::horizMargin + 20), (F32)yPos, list->get(i).key, false);
+            glColor(Colors::white);     
+            JoystickRender::renderControllerButton(F32(UserInterface::horizMargin + 20), (F32)yPos, joystickType, list->get(i).key, false);
          }
 
          if(selected)
@@ -298,9 +303,11 @@ bool LoadoutHelper::processKeyCode(KeyCode keyCode)
       for(S32 i = ShipModuleCount; i < ShipWeaponCount + ShipModuleCount; i++)
          theSame = theSame && (gLoadoutWeapons[mWeapon[i - ShipModuleCount]].index == (U32)ship->getWeapon(i - ShipModuleCount));
 
+      bool verboseHelpMessages = getGame()->getSettings()->getIniSettings()->verboseHelpMessages;
+
       if(theSame)      // Don't bother if ship config hasn't changed
       {
-         if(gIniSettings.verboseHelpMessages)
+         if(verboseHelpMessages)
             getGame()->displayMessage(Color(1.0, 0.5, 0.5), "%s", "Modifications canceled -- new ship design same as the old.");
          return true;
       }
@@ -312,7 +319,7 @@ bool LoadoutHelper::processKeyCode(KeyCode keyCode)
       // Check if we are in a loadout zone...  if so, it will be changed right away...
       // ...otherwise, display a notice to the player to head for a LoadoutZone
       // We've done a lot of work to get this message just right!  I hope players appreciate it!
-      if(gIniSettings.verboseHelpMessages && !(ship && ship->isInZone(LoadoutZoneTypeNumber)) )
+      if(verboseHelpMessages && !(ship && ship->isInZone(LoadoutZoneTypeNumber)))
          getGame()->displayMessage(Color(1.0, 0.5, 0.5), 
                                            "Ship design changed -- %s%s", 
                                            spawnWithLoadout ? "changes will be activated when you respawn" : "enter Loadout Zone to activate changes", 
@@ -322,7 +329,11 @@ bool LoadoutHelper::processKeyCode(KeyCode keyCode)
    return true;
 }
 
-KeyCode LoadoutHelper::getActivationKey() { return keyLOADOUT[gIniSettings.inputMode]; }
+
+KeyCode LoadoutHelper::getActivationKey() 
+{ 
+   return keyLOADOUT[getGame()->getSettings()->getIniSettings()->inputMode]; 
+}
 
 };
 

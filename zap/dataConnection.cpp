@@ -265,15 +265,17 @@ TNL_IMPLEMENT_RPC(DataConnection, c2sSendOrRequestFile,
                   (password, filetype, isRequest, filename), 
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
+   GameSettings *settings = gServerGame->getSettings();
+
    // Check if data connections are allowed
-   if(!gIniSettings.allowDataConnections)
+   if(!settings->getIniSettings()->allowDataConnections)
    {
       logprintf("This server does not allow remote access to resources.  It can be enabled in the server's INI file.");
       disconnect(ReasonConnectionsForbidden, "");
       return;
    }
    // Check password
-   string adminPW = gServerGame->getSettings()->getAdminPassword();
+   string adminPW = settings->getAdminPassword();
 
    if(adminPW == "" || strcmp(md5.getSaltedHashFromString(adminPW).c_str(), password))
    {
@@ -286,7 +288,7 @@ TNL_IMPLEMENT_RPC(DataConnection, c2sSendOrRequestFile,
    if(isRequest)     // Client wants to get a file from us... they should have a file open and waiting for this data
    {
       // Initialize on the server to start sending requested file -- will return OK if everything is set up right
-      SenderStatus stat = gServerGame->dataSender.initialize(this, gServerGame->getSettings()->getConfigDirs(), filename.getString(), (FileType)(U32)filetype);
+      SenderStatus stat = gServerGame->dataSender.initialize(this, settings->getConfigDirs(), filename.getString(), (FileType)(U32)filetype);
 
       if(stat != STATUS_OK)
       {
@@ -299,7 +301,7 @@ TNL_IMPLEMENT_RPC(DataConnection, c2sSendOrRequestFile,
    }
    else              // Client wants to send us a file -- get ready for incoming data!
    {
-      ConfigDirectories *folderManager = gServerGame->getSettings()->getConfigDirs();
+      ConfigDirectories *folderManager = settings->getConfigDirs();
 
       string folder = getOutputFolder(folderManager, (FileType)(U32)filetype);
 
@@ -314,6 +316,7 @@ TNL_IMPLEMENT_RPC(DataConnection, c2sSendOrRequestFile,
          fclose((FILE*)mOutputFile);
 
       mOutputFile = fopen(strictjoindir(folder, filename.getString()).c_str(), "w");
+
       if(!mOutputFile)
       {
          logprintf("Problem opening file %s for writing", strictjoindir(folder, filename.getString()).c_str());

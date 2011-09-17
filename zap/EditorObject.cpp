@@ -251,7 +251,13 @@ void EditorObject::renderInEditor(F32 currentScale, const Point &currentOffset, 
    else 
       glColor(getDrawColor(), alpha);
 
-   glEnableBlend;        // Enable transparency
+   bool disableBlending = false;
+
+   if(!glIsEnabled(GL_BLEND))
+   {
+      glEnable(GL_BLEND);        // Enable transparency
+      disableBlending = true;
+   }
 
    // Override drawColor for this special case
    if(anyVertsSelected())
@@ -289,7 +295,8 @@ void EditorObject::renderInEditor(F32 currentScale, const Point &currentOffset, 
 
    }
 
-   glDisableBlend;
+   if(disableBlending)
+      glDisable(GL_BLEND);
 }
 
 

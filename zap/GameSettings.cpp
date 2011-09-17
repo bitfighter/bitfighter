@@ -35,7 +35,6 @@ namespace Zap
 {
 
 // For now...  soon all these things will be contained herein
-extern IniSettings gIniSettings;   
 extern CIniFile gINI;
 
 // Constructor
@@ -69,7 +68,7 @@ void GameSettings::setHostName(const string &hostName, bool updateINI)
    mHostName = hostName; 
 
    if(updateINI)
-      gIniSettings.hostname = hostName; 
+      mIniSettings.hostname = hostName; 
 }
 
 
@@ -84,7 +83,7 @@ void GameSettings::setHostDescr(const string &hostDescr, bool updateINI)
    mHostDescr = hostDescr;
    
    if(updateINI)
-      gIniSettings.hostdescr = hostDescr; 
+      mIniSettings.hostdescr = hostDescr; 
 }
 
 
@@ -99,7 +98,7 @@ void GameSettings::setServerPassword(const string &serverPassword, bool updateIN
    mServerPassword = serverPassword; 
 
    if(updateINI)
-      gIniSettings.serverPassword = serverPassword; 
+      mIniSettings.serverPassword = serverPassword; 
 }
 
 
@@ -114,7 +113,7 @@ void GameSettings::setAdminPassword(const string &adminPassword, bool updateINI)
    mAdminPassword = adminPassword; 
 
    if(updateINI)
-      gIniSettings.adminPassword = adminPassword; 
+      mIniSettings.adminPassword = adminPassword; 
 }
 
 
@@ -129,7 +128,7 @@ void GameSettings::setLevelChangePassword(const string &levelChangePassword, boo
    mLevelChangePassword = levelChangePassword; 
 
    if(updateINI)
-      gIniSettings.levelChangePassword = levelChangePassword; 
+      mIniSettings.levelChangePassword = levelChangePassword; 
 }
 
 
@@ -150,8 +149,8 @@ string GameSettings::getHostAddress()
    if(mCmdLineSettings.hostaddr != "")
       return mCmdLineSettings.hostaddr;
 
-   if(gIniSettings.hostaddr != "")
-      return gIniSettings.hostaddr;
+   if(mIniSettings.hostaddr != "")
+      return mIniSettings.hostaddr;
 
    // Should we get rid of this option?
    if(mCmdLineSettings.dedicated != "")     // Should only be true if dedicated server
@@ -172,7 +171,7 @@ U32 GameSettings::getMaxPlayers()
    if(mCmdLineSettings.maxPlayers > 0)
       maxplayers = mCmdLineSettings.maxPlayers;
    else
-      maxplayers = gIniSettings.maxPlayers;
+      maxplayers = mIniSettings.maxPlayers;
 
    if(maxplayers > MAX_PLAYERS)
       maxplayers = MAX_PLAYERS;
@@ -189,8 +188,8 @@ void GameSettings::save()
    //   BanList *bl = settings->getBanList();
    //   bl->writeToFile();      // Writes ban list back to file XXX enable this when admin functionality is built in
 
-   saveWindowMode(&gINI, &gIniSettings);              
-   saveSettingsToINI(&gINI, &gIniSettings, this);     // Writes settings to the INI, then saves it to disk
+   saveWindowMode(&gINI, &mIniSettings);              
+   saveSettingsToINI(&gINI, this);        // Writes settings to gINI, then writes it to disk
 }
 
 

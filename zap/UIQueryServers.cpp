@@ -189,17 +189,21 @@ void QueryServersUserInterface::contactEveryone()
    //getGame()->getNetInterface()->sendPing(broadcastAddress, mNonce);
 
    // Always ping these servers -- typically a local server
-   for(S32 i = 0; i < gIniSettings.alwaysPingList.size(); i++)
+   Vector<string> *pingList = &getGame()->getSettings()->getIniSettings()->alwaysPingList;
+
+   for(S32 i = 0; i < pingList->size(); i++)
    {
-      Address address(gIniSettings.alwaysPingList[i].c_str());
+      Address address(pingList->get(i).c_str());
       getGame()->getNetInterface()->sendPing(address, mNonce);
    } 
 
    // Try to ping the servers from our fallback list if we're having trouble connecting to the master
    if(getGame()->getTimeUnconnectedToMaster() > GIVE_UP_ON_MASTER_AND_GO_IT_ALONE_TIME) 
    {
-      for(S32 i = 0; i < gIniSettings.prevServerListFromMaster.size(); i++)
-         getGame()->getNetInterface()->sendPing(Address(gIniSettings.prevServerListFromMaster[i].c_str()), mNonce);
+      Vector<string> *serverList = &getGame()->getSettings()->getIniSettings()->prevServerListFromMaster;
+
+      for(S32 i = 0; i < serverList->size(); i++)
+         getGame()->getNetInterface()->sendPing(Address(serverList->get(i).c_str()), mNonce);
 
       mGivenUpOnMaster = true;
    }
@@ -249,9 +253,11 @@ void QueryServersUserInterface::addPingServers(const Vector<IPAddress> &ipList)
          servers.erase_fast(i);    // ...bye-bye!
    }
 
+   Vector<string> *serverList = &getGame()->getSettings()->getIniSettings()->prevServerListFromMaster;
+
    // Save servers from the master
    if(ipList.size() != 0) 
-      gIniSettings.prevServerListFromMaster.clear();    // Don't clear if we have nothing to add... 
+      serverList->clear();    // Don't clear if we have nothing to add... 
 
    // Now add any new servers
    for(S32 i = 0; i < ipList.size(); i++)
@@ -269,7 +275,7 @@ void QueryServersUserInterface::addPingServers(const Vector<IPAddress> &ipList)
       if(isHidden)
          break;
 
-      gIniSettings.prevServerListFromMaster.push_back( Address(ipList[i]).toString() );
+      serverList->push_back(Address(ipList[i]).toString());
 
       bool found = false;
       // Is this server already in our list?
@@ -649,7 +655,7 @@ void QueryServersUserInterface::render()
    else
    {
       glColor(Colors::red);
-      if(mGivenUpOnMaster && gIniSettings.prevServerListFromMaster.size() != 0) //can't use empty server list.
+      if(mGivenUpOnMaster && getGame()->getSettings()->getIniSettings()->prevServerListFromMaster.size() != 0)
          drawCenteredString(vertMargin - 8, 12, "Couldn't connect to Master Server - Using server list from last successful connect.");
       else
          drawCenteredString(vertMargin - 8, 12, "Couldn't connect to Master Server - Firewall issues? Do you have the latest version?");
@@ -1026,7 +1032,8 @@ void QueryServersUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 
                // Join the selected game...   (what if we select a local server from the list...  wouldn't 2nd param be true?)
                // Second param, false when we can ping that server, allows faster connect. If we can ping, we can connect without master help.
-               getGame()->joinGame(servers[currentIndex].serverAddress, servers[currentIndex].isFromMaster && (gIniSettings.neverConnectDirect || !servers[currentIndex].everGotQueryResponse), false);
+               getGame()->joinGame(servers[currentIndex].serverAddress, servers[currentIndex].isFromMaster && 
+                    (getGame()->getSettings()->getIniSettings()->neverConnectDirect || !servers[currentIndex].everGotQueryResponse), false);
                mLastSelectedServer = servers[currentIndex];    // Save this because we'll need the server name when connecting.  Kind of a hack.
 
                // ...and clear out the server list so we don't do any more pinging

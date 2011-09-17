@@ -80,13 +80,16 @@ void GoalZone::render()
    if(gt->mGlowingZoneTeam >= 0 && gt->mGlowingZoneTeam != mTeam)
       glow = 0;
 
-   renderGoalZone(gt->getTeamColor(getTeam()), getOutline(), getFill(), getCentroid(), getLabelAngle(), isFlashing(), glow, mScore, mFlashCount ? F32(mFlashTimer.getCurrent()) / FlashDelay : 0);
+   bool useOldStyle = getGame()->getSettings()->getIniSettings()->oldGoalFlash;
+   renderGoalZone(gt->getTeamColor(getTeam()), getOutline(), getFill(), getCentroid(), getLabelAngle(), isFlashing(), glow, mScore, mFlashCount ? F32(mFlashTimer.getCurrent()) / FlashDelay : 0, useOldStyle);
 }
 
 
 void GoalZone::renderEditor(F32 currentScale)
 {
-   renderGoalZone(getGame()->getTeamColor(getTeam()), getOutline(), getFill(), getCentroid(), getLabelAngle(), false);
+   bool useOldStyle = getGame()->getSettings()->getIniSettings()->oldGoalFlash;
+
+   renderGoalZone(getGame()->getTeamColor(getTeam()), getOutline(), getFill(), getCentroid(), getLabelAngle(), false, 0, 0, 0, useOldStyle);
    EditorPolygon::renderEditor(currentScale);
 }
 

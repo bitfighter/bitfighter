@@ -69,8 +69,8 @@ public:
    void onAddedToGame(Game *theGame);
 
    /// Renders barrier fill
-   void render(S32 layer);                // Renders barrier fill barrier-by-barrier
-   static void renderEdges(S32 layer);    // Renders all edges in one pass
+   void render(S32 layerIndex);                                           // Renders barrier fill barrier-by-barrier
+   static void renderEdges(S32 layerIndex, const Color &outlineColor);    // Renders all edges in one pass
 
    /// Returns a sorting key for the object.  Barriers should be drawn first so as to appear behind other objects.
    S32 getRenderSortValue() { return 0; }
@@ -225,7 +225,7 @@ public:
    void resetEdges();         // Compute basic edges from corner points
    void computeBoundingBox(); // Computes bounding box based on the corners, updates database
    
-   void renderFill(bool renderLight, bool showingReferenceShip);
+   void renderFill(const Color &fillColor, bool renderLight);
 
    ////////////////////
    //  DatabaseObject methods
@@ -271,6 +271,7 @@ public:
 ////////////////////////////////////////
 
 class EditorObject;
+class GameSettings;
 
 class WallSegmentManager
 {
@@ -310,7 +311,7 @@ public:
  
    ////////////////
    // Render functions
-   void renderWalls(bool isBeingDragged, bool showingReferenceShip, bool showSnapVertices, F32 alpha);
+   void renderWalls(GameSettings *settings, bool isBeingDragged, bool showingReferenceShip, bool showSnapVertices, F32 alpha);
 };
 
 

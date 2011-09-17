@@ -28,12 +28,11 @@
 #include "gameType.h"
 #include "soccerGame.h"          // For checking if pick up soccer is allowed
 #include "gameNetInterface.h"
-#include "config.h"              // For gIniSettings support
 #include "IniFile.h"             // For CIniFile def
 #include "playerInfo.h"
 #include "shipItems.h"           // For EngineerBuildObjects enum
 #include "masterConnection.h"    // For MasterServerConnection def
-#include "EngineeredItem.h"   // For EngineerModuleDeployer
+#include "EngineeredItem.h"      // For EngineerModuleDeployer
 #include "Colors.h"
 #include "stringUtils.h"         // For strictjoindir()
 #include "BanList.h"
@@ -58,14 +57,18 @@
 namespace Zap
 {
 // Global list of clients (if we're a server, created but never accessed if we're a client)
+   //TODO --> Convert to Vector<GameConnection> to avoid initial use of no arg constructor on client side
 GameConnection GameConnection::gClientList;
 
 
 TNL_IMPLEMENT_NETCONNECTION(GameConnection, NetClassGroupGame, true);
 
-// Constructor
+// Constructor  -- I believe this is only used by server, except when initializing gClientList...
 GameConnection::GameConnection()
 {
+   if(gServerGame)
+      mSettings = gServerGame->getSettings();      // TOTAL HACK!!
+
    mVote = 0;
    mVoteTime = 0;
    mChatMute = false;
@@ -78,8 +81,10 @@ GameConnection::GameConnection()
 
 
 #ifndef ZAP_DEDICATED
-GameConnection::GameConnection(const ClientInfo *clientInfo)
+// Constructor
+GameConnection::GameConnection(GameSettings *settings, const ClientInfo *clientInfo)
 {
+   mSettings = settings;
    initialize();
 
    if(clientInfo->name == "")
@@ -261,7 +266,7 @@ ClientRef *GameConnection::getClientRef()
 // 4. server send CommandComplete
 TNL_IMPLEMENT_RPC(GameConnection, c2sRequestCurrentLevel, (), (), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
-   if(!gIniSettings.allowGetMap)
+   if(!mSettings->getIniSettings()->allowGetMap)
    {
       s2rCommandComplete(COMMAND_NOT_ALLOWED);  
       return;
@@ -270,7 +275,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestCurrentLevel, (), (), NetClassGroupG
    const char *filename = gServerGame->getCurrentLevelFileName().getString();
    
    // Initialize on the server to start sending requested file -- will return OK if everything is set up right
-   ConfigDirectories *folderManager = gServerGame->getSettings()->getConfigDirs();
+   ConfigDirectories *folderManager = mSettings->getConfigDirs();
    SenderStatus stat = gServerGame->dataSender.initialize(this, folderManager, filename, LEVEL_TYPE);
 
    if(stat != STATUS_OK)
@@ -329,7 +334,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rCommandComplete, (RangedU32<0,SENDER_STATUS
 
    if(mClientGame)
    {
-      string levelDir = mClientGame->getSettings()->getConfigDirs()->levelDir;
+      string levelDir = mSettings->getConfigDirs()->levelDir;
       const char *outputFilename = strictjoindir(levelDir, mClientGame->getRemoteLevelDownloadFilename()).c_str();
 
       if(strcmp(outputFilename, ""))
@@ -485,7 +490,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetAuthenticated, (), (),
 TNL_IMPLEMENT_RPC(GameConnection, c2sAdminPassword, (StringPtr pass), (pass), 
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
-   string adminPW = gServerGame->getSettings()->getAdminPassword();
+   string adminPW = mSettings->getAdminPassword();
 
    // If admin password is blank, no one can get admin permissions except the local host, if there is one...
    if(adminPW != "" && !strcmp(md5.getSaltedHashFromString(adminPW).c_str(), pass))
@@ -500,7 +505,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sAdminPassword, (StringPtr pass), (pass),
       
       s2cSetIsAdmin(true);                                                 // Tell client they have been granted access
 
-      if(gIniSettings.allowAdminMapUpload)
+      if(mSettings->getIniSettings()->allowAdminMapUpload)
          s2rSendableFlags(1); // enable level uploads
 
       GameType *gt = gServerGame->getGameType();
@@ -516,7 +521,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sAdminPassword, (StringPtr pass), (pass),
 // pass is our hashed password
 TNL_IMPLEMENT_RPC(GameConnection, c2sLevelChangePassword, (StringPtr pass), (pass), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
-   string levChangePW = gServerGame->getSettings()->getLevelChangePassword();
+   string levChangePW = mSettings->getLevelChangePassword();
 
    // If password is blank, permissions always granted
    if(levChangePW == "" || !strcmp(md5.getSaltedHashFromString(levChangePW).c_str(), pass))
@@ -558,26 +563,24 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
    }
 
    // Update our in-memory copies of the param, but do not save the new values to the INI
-   GameSettings *settings = gServerGame->getSettings();
-
    if(type == (U32)LevelChangePassword)
-      settings->setLevelChangePassword(param.getString(), false);
+      mSettings->setLevelChangePassword(param.getString(), false);
    
    else if(type == (U32)AdminPassword)
-      settings->setAdminPassword(param.getString(), false);
+      mSettings->setAdminPassword(param.getString(), false);
    
    else if(type == (U32)ServerPassword)
-      settings->setServerPassword(param.getString(), false);
+      mSettings->setServerPassword(param.getString(), false);
    
    else if(type == (U32)ServerName)
-      settings->setHostName(param.getString(), false);
+      mSettings->setHostName(param.getString(), false);
    
    else if(type == (U32)ServerDescr)
-      settings->setHostDescr(param.getString(), false);
+      mSettings->setHostDescr(param.getString(), false);
 
    else if(type == (U32)LevelDir)
    {
-      ConfigDirectories *folderManager = settings->getConfigDirs();
+      ConfigDirectories *folderManager = mSettings->getConfigDirs();
       string candidate = folderManager->resolveLevelDir(param.getString());
 
       if(folderManager->levelDir == candidate)
@@ -593,8 +596,8 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
          return;
       }
 
-      Vector<string> newLevels = LevelListLoader::buildLevelList(candidate, settings->getCmdLineSettings()->specifiedLevels, 
-                                                                 settings->getLevelSkipList(), true);
+      Vector<string> newLevels = LevelListLoader::buildLevelList(candidate, mSettings->getCmdLineSettings()->specifiedLevels, 
+                                                                 mSettings->getLevelSkipList(), true);
 
       if(newLevels.size() == 0)
       {
@@ -643,7 +646,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
    {
       // Avoid duplicates on skip list
       bool found = false;
-      Vector<string> *skipList = settings->getLevelSkipList();
+      Vector<string> *skipList = mSettings->getLevelSkipList();
 
       for(S32 i = 0; i < skipList->size(); i++)
          if(skipList->get(i) == gServerGame->getCurrentLevelFileName().getString())    // Already on our list!
@@ -716,7 +719,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
       msg = serverNameChanged;
       // If we've changed the server name, notify all the clients
       for(GameConnection *walk = getClientList(); walk; walk = walk->getNextClient())
-         walk->s2cSetServerName(settings->getHostName());
+         walk->s2cSetServerName(mSettings->getHostName());
    }
    else if(type == (U32)ServerDescr)
       msg = serverDescrChanged;
@@ -1165,7 +1168,7 @@ void GameConnection::c2sRequestLevelChange2(S32 newLevelIndex, bool isRelative)
       return;
 
    // Use voting when there is no level change password and there is more then 1 player
-   if(!mIsAdmin && gServerGame->getSettings()->getLevelChangePassword().length() == 0 && 
+   if(!mIsAdmin && mSettings->getLevelChangePassword().length() == 0 && 
          gServerGame->getPlayerCount() > 1 && gServerGame->voteStart(this, 0, newLevelIndex))
       return;
 
@@ -1306,7 +1309,7 @@ extern LevelInfo getLevelInfoFromFileChunk(char *chunk, S32 size, LevelInfo &lev
 
 TNL_IMPLEMENT_RPC(GameConnection, s2rSendDataParts, (U8 type, ByteBufferPtr data), (type, data), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 0)
 {
-   if(!gIniSettings.allowMapUpload && !isAdmin())  // Don't need it when not enabled, saves some memory. May remove this, it is checked again leter.
+   if(!mSettings->getIniSettings()->allowMapUpload && !isAdmin())  // Don't need it when not enabled, saves some memory. May remove this, it is checked again leter.
       return;
 
    if(mDataBuffer)
@@ -1321,11 +1324,11 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendDataParts, (U8 type, ByteBufferPtr data
    }
 
    if(type == 1 &&      // TODO: 1 Should be an enum, means we're transmitting a level file.  Probably already have an enum that would work.
-         (gIniSettings.allowMapUpload || (gIniSettings.allowAdminMapUpload && isAdmin())) &&
+         (mSettings->getIniSettings()->allowMapUpload || (mSettings->getIniSettings()->allowAdminMapUpload && isAdmin())) &&
          !isInitiator() && mDataBuffer->getBufferSize() != 0)
    {
       // only server runs this part of code
-      ConfigDirectories *folderManager = gServerGame->getSettings()->getConfigDirs();
+      ConfigDirectories *folderManager = mSettings->getConfigDirs();
 
       LevelInfo levelInfo("Transmitted Level");
       getLevelInfoFromFileChunk((char *)mDataBuffer->getBuffer(), mDataBuffer->getBufferSize(), levelInfo);
@@ -1401,7 +1404,7 @@ void GameConnection::writeConnectRequest(BitStream *stream)
 
    // If we're local, just use the password we already know because, you know, we're the server
    if(isLocal)
-      serverPW = md5.getSaltedHashFromString(mClientGame->getSettings()->getServerPassword());
+      serverPW = md5.getSaltedHashFromString(mSettings->getServerPassword());
 
    // If we have a saved password for this server, use that
    else if(gINI.GetValue("SavedServerPasswords", lastServerName) != "")
@@ -1425,6 +1428,7 @@ void GameConnection::writeConnectRequest(BitStream *stream)
 // On the server side of things, read the connection request, and return if everything looks legit.  If not, provide an error string
 // to help diagnose the problem, or prompt further data from client (such as a password).
 // Note that we'll always go through this, even if the client is running on in the same process as the server.
+// Note also that mSettings will be NULL here.
 bool GameConnection::readConnectRequest(BitStream *stream, NetConnection::TerminationReason &reason)
 {
    if(!Parent::readConnectRequest(stream, reason))
@@ -1617,15 +1621,15 @@ void GameConnection::onConnectionEstablished()
          string addr = getNetAddressString();
          bool found = false;
 
-         for(S32 i = 0; i < gIniSettings.prevServerListFromMaster.size(); i++)
-            if(gIniSettings.prevServerListFromMaster[i].compare(addr) == 0) 
+         for(S32 i = 0; i < mSettings->getIniSettings()->prevServerListFromMaster.size(); i++)
+            if(mSettings->getIniSettings()->prevServerListFromMaster[i].compare(addr) == 0) 
             {
                found = true;
                break;
             }
 
          if(!found) 
-            gIniSettings.prevServerListFromMaster.push_back(addr);
+            mSettings->getIniSettings()->prevServerListFromMaster.push_back(addr);
       }
 #endif
    }
@@ -1639,7 +1643,7 @@ void GameConnection::onConnectionEstablished()
       setFixedRateParameters(minPacketSendPeriod, minPacketRecvPeriod, maxSendBandwidth, maxRecvBandwidth);        
 
       // Ideally, the server name would be part of the connection handshake, but this will work as well
-      s2cSetServerName(gServerGame->getSettings()->getHostName());   
+      s2cSetServerName(gServerGame->getSettings()->getHostName());   // Note: mSettings is NULL here
 
       time(&joinTime);
       mAcheivedConnection = true;
@@ -1651,7 +1655,7 @@ void GameConnection::onConnectionEstablished()
       if(gServerGame->getSettings()->getLevelChangePassword() == "")   // Grant level change permissions if level change PW is blank
       {
          setIsLevelChanger(true);
-         s2cSetIsLevelChanger(true, false);    // Tell client, but don't display notification
+         s2cSetIsLevelChanger(true, false);          // Tell client, but don't display notification
          sendLevelList();
       }
 
@@ -1661,7 +1665,7 @@ void GameConnection::onConnectionEstablished()
 
       GameType *gt = gServerGame->getGameType();
 
-      if(gIniSettings.allowMapUpload)
+      if(gServerGame->getSettings()->getIniSettings()->allowMapUpload)
          s2rSendableFlags(1);
    }
 }

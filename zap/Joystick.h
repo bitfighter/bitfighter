@@ -176,7 +176,7 @@ public:
    static const char *joystickTypeToString(S32 controllerType);
    static const char *joystickTypeToPrettyString(S32 controllerType);
 
-   static U8 remapJoystickButton(U8 button);
+   static U8 remapJoystickButton(U32 joystickType, U8 button);
 };
 
 #endif // ZAP_DEDICATED

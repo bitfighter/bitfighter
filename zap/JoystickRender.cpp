@@ -214,18 +214,15 @@ void JoystickRender::renderDPad(Point center, F32 radius, bool upActivated, bool
 extern S32 keyCodeToButtonIndex(KeyCode keyCode);
 
 // Only partially implemented at the moment...
-S32 JoystickRender::getControllerButtonRenderedSize(KeyCode keyCode)
+S32 JoystickRender::getControllerButtonRenderedSize(S32 joystickType, KeyCode keyCode)
 {
-   S32 joy = gIniSettings.joystickType;
-   //InputMode inputMode = gIniSettings.inputMode;
-
    if(!isControllerButton(keyCode))    // Render keyboard keys
       return UserInterface::getStringWidthf(15, "[%s]", keyCodeToString(keyCode));
 
    // Render controller button
    U32 buttonIndex = keyCodeToButtonIndex(keyCode);
 
-   if(joy == LogitechWingman)
+   if(joystickType == LogitechWingman)
    {
       if (buttonIndex < 6)
          return roundButtonRadius;
@@ -234,7 +231,7 @@ S32 JoystickRender::getControllerButtonRenderedSize(KeyCode keyCode)
       else return rectButtonWidth;
    }
 
-   else if(joy == LogitechDualAction)
+   else if(joystickType == LogitechDualAction)
    {
       if(buttonIndex < 4)   // 4 round buttons on top
          return roundButtonRadius;
@@ -244,7 +241,7 @@ S32 JoystickRender::getControllerButtonRenderedSize(KeyCode keyCode)
          return smallRectButtonWidth;
    }
 
-   else if(joy == SaitekDualAnalogP880)    // 8 round buttons, no start, one large red button
+   else if(joystickType == SaitekDualAnalogP880)    // 8 round buttons, no start, one large red button
    {
       if(buttonIndex < 6)            // 6 round buttons on top
          return roundButtonRadius;
@@ -256,7 +253,7 @@ S32 JoystickRender::getControllerButtonRenderedSize(KeyCode keyCode)
         return -1;
    }
 
-   else if(joy == SaitekDualAnalogRumblePad)    // First 4 buttons are circles, next 4 are rectangles
+   else if(joystickType == SaitekDualAnalogRumblePad)    // First 4 buttons are circles, next 4 are rectangles
    {
       if(buttonIndex < 4)           // 4 round buttons on top
          return roundButtonRadius;
@@ -267,7 +264,7 @@ S32 JoystickRender::getControllerButtonRenderedSize(KeyCode keyCode)
    }
 
    // http://ecx.images-amazon.com/images/I/412Q3RFHZVL._SS500_.jpg
-   else if(joy == PS2DualShock || joy == PS2DualShockConversionCable)
+   else if(joystickType == PS2DualShock || joystickType == PS2DualShockConversionCable)
    {
       if(buttonIndex < 4)
          return 18;
@@ -275,14 +272,14 @@ S32 JoystickRender::getControllerButtonRenderedSize(KeyCode keyCode)
          return rectButtonWidth;
    }
   // http://ps3media.ign.com/ps3/image/article/705/705934/e3-2006-in-depth-with-the-ps3-controller-20060515010609802.jpg
-   else if(joy == PS3DualShock)
+   else if(joystickType == PS3DualShock)
    {
       if(buttonIndex < 4)
          return 18;
       else
          return rectButtonWidth;
    }
-   else if(joy == XBoxController || joy == XBoxControllerOnXBox)
+   else if(joystickType == XBoxController || joystickType == XBoxControllerOnXBox)
    {
       if(buttonIndex < 4)
          return 18;
@@ -299,11 +296,8 @@ S32 JoystickRender::getControllerButtonRenderedSize(KeyCode keyCode)
 
 
 // Renders something resembling a controller button or keyboard key
-void JoystickRender::renderControllerButton(F32 x, F32 y, KeyCode keyCode, bool activated, S32 offset)
+void JoystickRender::renderControllerButton(F32 x, F32 y, U32 joystickType, KeyCode keyCode, bool activated, S32 offset)
 {
-   S32 joy = gIniSettings.joystickType;
-   //InputMode inputMode = gIniSettings.inputMode;
-
    if(!isControllerButton(keyCode))    // Render keyboard keys
    {
       UserInterface::drawStringf(x, y, 15, "[%s]", keyCodeToString(keyCode));
@@ -318,7 +312,7 @@ void JoystickRender::renderControllerButton(F32 x, F32 y, KeyCode keyCode, bool 
    // http://www.amazon.com/Logitech-963196-0403-WingMan-GamePad/dp/B00004RCG1/ref=pd_bbs_sr_5
    // 6 round buttons on top (ABCXYZ) plus start/select button, plus two triggers
 
-   if(joy == LogitechWingman)
+   if(joystickType == LogitechWingman)
    {
       string labels[10] = { "A", "B", "C", "X", "Y", "Z", "", "", "T1", "T2" };
       if (buttonIndex < 6)
@@ -331,7 +325,7 @@ void JoystickRender::renderControllerButton(F32 x, F32 y, KeyCode keyCode, bool 
 
    // http://www.amazon.com/Logitech-Dual-Action-Game-Pad/dp/B0000ALFCI/ref=pd_bbs_sr_1?ie=UTF8&s=electronics&qid=1200603250&sr=8-1
    // 4 round buttons on top (1-4), 4 shoulder buttons (5-8), 2 small square buttons on top (9, 10?)
-   else if(joy == LogitechDualAction)
+   else if(joystickType == LogitechDualAction)
    {
       string labels[10] = { "1", "2", "3", "4", "7", "8", "5", "6", "9", "10" };
       if(buttonIndex < 4)        // 4 round buttons on top
@@ -340,11 +334,10 @@ void JoystickRender::renderControllerButton(F32 x, F32 y, KeyCode keyCode, bool 
          renderRectButton(Point(x, y), labels[buttonIndex].c_str(), ALIGN_CENTER, activated);
       else                       // 2 buttons on top
          renderSmallRectButton(Point(x, y), labels[buttonIndex].c_str(), ALIGN_CENTER, activated);
-
    }
 
    // http://www.madtech.pl/pliki/saitek/p880/1.jpg
-   else if(joy == SaitekDualAnalogP880)    // 8 round buttons, one red one, no start button
+   else if(joystickType == SaitekDualAnalogP880)    // 8 round buttons, one red one, no start button
    {
       string labels[] = { "1", "2", "3", "4", "5", "6", "7", "8" };
       setButtonColor(activated);
@@ -369,7 +362,7 @@ void JoystickRender::renderControllerButton(F32 x, F32 y, KeyCode keyCode, bool 
          return;                 // No back button
    }
 
-   else if(joy == SaitekDualAnalogRumblePad)    // First 4 buttons are circles, next 4 are rectangles   (SAITEK P-480 DUAL-ANALOG)
+   else if(joystickType == SaitekDualAnalogRumblePad)    // First 4 buttons are circles, next 4 are rectangles   (SAITEK P-480 DUAL-ANALOG)
    {
       string labels[10] = { "1", "2", "3", "4", "5", "6", "7", "8", "10", "9" };    // Yes, I mean 10, 9!
       setButtonColor(activated);
@@ -384,9 +377,9 @@ void JoystickRender::renderControllerButton(F32 x, F32 y, KeyCode keyCode, bool 
    }
 
    // http://ecx.images-amazon.com/images/I/412Q3RFHZVL._SS500_.jpg
-   else if(joy == PS2DualShock || joy == PS2DualShockConversionCable)
+   else if(joystickType == PS2DualShock || joystickType == PS2DualShockConversionCable)
    {
-      if(buttonIndex >= Joystick::PredefinedJoystickList[joy].buttonCount)
+      if(buttonIndex >= Joystick::PredefinedJoystickList[joystickType].buttonCount)
          return;
 
       static F32 color[6][3] = {
@@ -397,21 +390,24 @@ void JoystickRender::renderControllerButton(F32 x, F32 y, KeyCode keyCode, bool 
          { 0.7f, 0.7f, 0.7f },
          { 0.7f, 0.7f, 0.7f }
       };
+
       Color c(color[buttonIndex][0], color[buttonIndex][1], color[buttonIndex][2]);
       Point center(x, y + 8);
+
       if(buttonIndex < 4)
       {
          setButtonColor(activated);
          drawCircle(center, 9);
          glColor(c);
+
          switch(buttonIndex)
          {
          case 0:     // X
             glBegin(GL_LINES);
-            glVertex(center + Point(-5, -5));
-            glVertex(center + Point(5, 5));
-            glVertex(center + Point(-5, 5));
-            glVertex(center + Point(5, -5));
+               glVertex(center + Point(-5, -5));
+               glVertex(center + Point(5, 5));
+               glVertex(center + Point(-5, 5));
+               glVertex(center + Point(5, -5));
             glEnd();
             break;
          case 1:     // Circle
@@ -419,17 +415,17 @@ void JoystickRender::renderControllerButton(F32 x, F32 y, KeyCode keyCode, bool 
             break;
          case 2:     // Square
             glBegin(GL_LINE_LOOP);
-            glVertex(center + Point(-5, -5));
-            glVertex(center + Point(-5, 5));
-            glVertex(center + Point(5, 5));
-            glVertex(center + Point(5, -5));
+               glVertex(center + Point(-5, -5));
+               glVertex(center + Point(-5, 5));
+               glVertex(center + Point(5, 5));
+               glVertex(center + Point(5, -5));
             glEnd();
             break;
          case 3:     // Triangle
             glBegin(GL_LINE_LOOP);
-            glVertex(center + Point(0, -7));
-            glVertex(center + Point(6, 5));
-            glVertex(center + Point(-6, 5));
+               glVertex(center + Point(0, -7));
+               glVertex(center + Point(6, 5));
+               glVertex(center + Point(-6, 5));
             glEnd();
             break;
          }
@@ -453,9 +449,9 @@ void JoystickRender::renderControllerButton(F32 x, F32 y, KeyCode keyCode, bool 
    }
    // http://ps3media.ign.com/ps3/image/article/705/705934/e3-2006-in-depth-with-the-ps3-controller-20060515010609802.jpg
    // Based on PS2DualShock
-   else if(joy == PS3DualShock)
+   else if(joystickType == PS3DualShock)
    {
-      if(buttonIndex >= Joystick::PredefinedJoystickList[joy].buttonCount)
+      if(buttonIndex >= Joystick::PredefinedJoystickList[joystickType].buttonCount)
          return;
 
       static F32 color[6][3] = {
@@ -477,10 +473,10 @@ void JoystickRender::renderControllerButton(F32 x, F32 y, KeyCode keyCode, bool 
          {
          case 0:     // X
             glBegin(GL_LINES);
-            glVertex(center + Point(-5, -5));
-            glVertex(center + Point(5, 5));
-            glVertex(center + Point(-5, 5));
-            glVertex(center + Point(5, -5));
+               glVertex(center + Point(-5, -5));
+               glVertex(center + Point(5, 5));
+               glVertex(center + Point(-5, 5));
+               glVertex(center + Point(5, -5));
             glEnd();
             break;
          case 1:     // Circle
@@ -488,17 +484,17 @@ void JoystickRender::renderControllerButton(F32 x, F32 y, KeyCode keyCode, bool 
             break;
          case 2:     // Square
             glBegin(GL_LINE_LOOP);
-            glVertex(center + Point(-5, -5));
-            glVertex(center + Point(-5, 5));
-            glVertex(center + Point(5, 5));
-            glVertex(center + Point(5, -5));
+               glVertex(center + Point(-5, -5));
+               glVertex(center + Point(-5, 5));
+               glVertex(center + Point(5, 5));
+               glVertex(center + Point(5, -5));
             glEnd();
             break;
          case 3:     // Triangle
             glBegin(GL_LINE_LOOP);
-            glVertex(center + Point(0, -7));
-            glVertex(center + Point(6, 5));
-            glVertex(center + Point(-6, 5));
+               glVertex(center + Point(0, -7));
+               glVertex(center + Point(6, 5));
+               glVertex(center + Point(-6, 5));
             glEnd();
             break;
          }
@@ -512,17 +508,17 @@ void JoystickRender::renderControllerButton(F32 x, F32 y, KeyCode keyCode, bool 
          {  // Triangle button
             setButtonColor(activated);
             glBegin(GL_LINE_LOOP);
-            glVertex(center + Point(-15, -9));
-            glVertex(center + Point(-15, 10));
-            glVertex(center + Point(12, 0));
+               glVertex(center + Point(-15, -9));
+               glVertex(center + Point(-15, 10));
+               glVertex(center + Point(12, 0));
             glEnd();
             UserInterface::drawString(x - 13, y + 3, 8, labels[buttonIndex - 4].c_str());
          }
       }
    }
-   else if(joy == XBoxController || joy == XBoxControllerOnXBox)
+   else if(joystickType == XBoxController || joystickType == XBoxControllerOnXBox)
    {
-      if(buttonIndex >= Joystick::PredefinedJoystickList[joy].buttonCount)
+      if(buttonIndex >= Joystick::PredefinedJoystickList[joystickType].buttonCount)
          return;
 
       static F32 color[4][3] = { { 0, 1, 0 },

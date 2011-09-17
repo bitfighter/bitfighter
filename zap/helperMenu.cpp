@@ -56,11 +56,11 @@ bool HelperMenu::processKeyCode(KeyCode keyCode)
    // from the loadout menu.
    if(keyCode == KEY_ESCAPE || keyCode == KEY_BACKSPACE ||
       keyCode == KEY_LEFT   || keyCode == BUTTON_DPAD_LEFT ||
-      keyCode == BUTTON_BACK || (gIniSettings.inputMode == InputModeKeyboard && keyCode == getActivationKey()) )
+      keyCode == BUTTON_BACK || (getGame()->getSettings()->getIniSettings()->inputMode == InputModeKeyboard && keyCode == getActivationKey()) )
    {
       exitHelper();      // Return to play mode, ship design unchanged
-      if(gIniSettings.verboseHelpMessages)
-         mClientGame->displayMessage(Color(1.0, 0.5, 0.5), getCancelMessage());
+      if(getGame()->getSettings()->getIniSettings()->verboseHelpMessages)
+         mClientGame->displayMessage(Colors::paleRed, getCancelMessage());
 
       return true;
    }
@@ -71,32 +71,43 @@ bool HelperMenu::processKeyCode(KeyCode keyCode)
 
 void HelperMenu::drawMenuBorderLine(S32 yPos, const Color &color)
 {
-   glEnableBlend;
+   bool disableBlending = false;
+
+   if(!glIsEnabled(GL_BLEND))
+   {
+      glEnable(GL_BLEND);
+      disableBlending = true; 
+   }
+
    glBegin(GL_LINES);
       glColor(color);
       glVertex2i(UserInterface::horizMargin, yPos + 20);
-      glColor(color,0);    // Fade to transparent...
+      glColor(color, 0);    // Fade to transparent...
       glVertex2i(400, yPos + 20);
    glEnd();
-   glDisableBlend;
+
+   if(disableBlending)
+      glDisable(GL_BLEND);
 }
+
 
 void HelperMenu::drawMenuCancelText(S32 yPos, const Color &color, S32 fontSize)
 {
-
-   S32 butSize = JoystickRender::getControllerButtonRenderedSize(BUTTON_BACK);
+   S32 butSize = JoystickRender::getControllerButtonRenderedSize(getGame()->getSettings()->getIniSettings()->joystickType, BUTTON_BACK);
    const S32 fontSizeSm = fontSize - 4;
 
    glColor(color);
 
+   GameSettings *settings = getGame()->getSettings();
+
    // RenderedSize will be -1 if the button is not defined
-   if(gIniSettings.inputMode == InputModeKeyboard || butSize == -1)
+   if(settings->getIniSettings()->inputMode == InputModeKeyboard || butSize == -1)
       UserInterface::drawStringf( UserInterface::horizMargin, yPos, fontSizeSm, "Press [%s] to cancel", keyCodeToString(KEY_ESCAPE) );
    else
    {
       S32 xPos = UserInterface::horizMargin;
       xPos += UserInterface::drawStringAndGetWidth(xPos, yPos, fontSizeSm, "Press ");
-      JoystickRender::renderControllerButton((F32)xPos, (F32)yPos, BUTTON_BACK, false, butSize / 2);
+      JoystickRender::renderControllerButton((F32)xPos, (F32)yPos, settings->getIniSettings()->joystickType, BUTTON_BACK, false, butSize / 2);
       xPos += butSize;
       glColor(color);
       UserInterface::drawString( xPos, yPos, fontSizeSm, " to cancel");

@@ -132,7 +132,7 @@ extern void renderPolygonFill(const Vector<Point> *fillPoints, const Color *fill
 
 extern void renderGoalZone(const Color *c, const Vector<Point> *outline, const Vector<Point> *fill);     // No label version
 extern void renderGoalZone(const Color *c, const Vector<Point> *outline, const Vector<Point> *fill, Point centroid, F32 labelAngle, 
-                           bool isFlashing = false, F32 glowFraction = 0, S32 score = 0, F32 flashCounter = 0);
+                           bool isFlashing, F32 glowFraction, S32 score, F32 flashCounter, bool useOldStyle);
 
 extern void renderNexus(const Vector<Point> *outline, const Vector<Point> *fill, Point centroid, F32 labelAngle, 
                         bool open, F32 glowFraction, F32 scaleFact = 1);
@@ -147,7 +147,7 @@ extern void renderPolygonLabel(const Point &centroid, F32 angle, F32 size, const
 extern void renderProjectile(const Point &pos, U32 type, U32 time);
 
 extern void renderMine(const Point &pos, bool armed, bool visible);
-extern void renderGrenade(const Point &pos, F32 vel);
+extern void renderGrenade(const Point &pos, F32 vel, S32 style);
 extern void renderSpyBug(const Point &pos, bool visible);
 
 extern void renderRepairItem(const Point &pos);
@@ -162,7 +162,7 @@ extern void renderEnergySymbol(const Color *overrideColor, F32 alpha);      // R
 extern void renderEnergySymbol(const Point &pos, F32 scaleFactor);   // Another signature
 
 // Wall rendering
-void renderWallEdges(const Vector<Point> *edges, F32 alpha = 1.0);
+void renderWallEdges(const Vector<Point> *edges, const Color &outlineColor, F32 alpha = 1.0);
 
 //extern void renderSpeedZone(Point pos, Point normal, U32 time);
 void renderSpeedZone(const Vector<Point> *pts, U32 time);

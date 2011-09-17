@@ -832,14 +832,14 @@ void ServerGame::cleanUp()
 // Return true when handled
 bool ServerGame::voteStart(GameConnection *client, S32 type, S32 number)
 {
-   if(!gIniSettings.voteEnable)
+   if(!mSettings->getIniSettings()->voteEnable)
       return false;
 
    U32 VoteTimer;
    if(type == 4) // change team
-      VoteTimer = gIniSettings.voteLengthToChangeTeam * 1000;
+      VoteTimer = mSettings->getIniSettings()->voteLengthToChangeTeam * 1000;
    else
-      VoteTimer = gIniSettings.voteLength * 1000;
+      VoteTimer = mSettings->getIniSettings()->voteLength * 1000;
    if(VoteTimer == 0)
       return false;
 
@@ -1100,7 +1100,7 @@ S32 ServerGame::getAbsoluteLevelIndex(S32 indx)
 // Get the level name, as defined in the level file
 StringTableEntry ServerGame::getLevelNameFromIndex(S32 indx)
 {
-   return StringTableEntry( mLevelInfos[getAbsoluteLevelIndex(indx)].levelName.getString() );
+   return mLevelInfos[getAbsoluteLevelIndex(indx)].levelName;
 }
 
 
@@ -1513,9 +1513,9 @@ bool ServerGame::loadLevel(const string &levelFileName)
    }
 
    // Script specified in INI globalLevelLoadScript
-   if(gIniSettings.globalLevelScript != "")
+   if(mSettings->getIniSettings()->globalLevelScript != "")
    {
-      string name = folderManager->findLevelGenScript(gIniSettings.globalLevelScript);  // Find full name of levelgen script
+      string name = folderManager->findLevelGenScript(mSettings->getIniSettings()->globalLevelScript);  // Find full name of levelgen script
 
       if(name == "")
       {
@@ -1677,7 +1677,9 @@ void ServerGame::idle(U32 timeDelta)
             else if(!walk->isRobot())
                voteNothing++;
          }
-         bool votePass = voteYes * gIniSettings.voteYesStrength + voteNo * gIniSettings.voteNoStrength + voteNothing * gIniSettings.voteNothingStrength > 0;
+         bool votePass = voteYes     * mSettings->getIniSettings()->voteYesStrength + 
+                         voteNo      * mSettings->getIniSettings()->voteNoStrength  + 
+                         voteNothing * mSettings->getIniSettings()->voteNothingStrength > 0;
          if(votePass)
          {
             GameType *gt = getGameType();
@@ -1739,7 +1741,7 @@ void ServerGame::idle(U32 timeDelta)
          {
             walk->s2cDisplayMessageESI(GameConnection::ColorAqua, SFXNone, "Vote %e0 - %i0 yes, %i1 no, %i2 not voted", e, s, i);
             if(!votePass && walk->getClientName() == mVoteClientName)
-               walk->mVoteTime = gIniSettings.voteRetryLength * 1000;
+               walk->mVoteTime = mSettings->getIniSettings()->voteRetryLength * 1000;
          }
       }
    }
@@ -1863,7 +1865,7 @@ void ServerGame::idle(U32 timeDelta)
 
    // Lastly, play any sounds server might have made...
    if(isDedicated())   // non-dedicated will process sound in client side.
-      SoundSystem::processAudio(gIniSettings.alertsVolLevel);
+      SoundSystem::processAudio(mSettings->getIniSettings()->alertsVolLevel, 0, 0);    // No music or voice on server!
 }
 
 

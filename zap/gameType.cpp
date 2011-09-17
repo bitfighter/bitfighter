@@ -782,7 +782,14 @@ void GameType::renderObjectiveArrow(const Point *nearestPoint, const Color *outl
    Color fillColor = *outlineColor;    // Create local copy
    fillColor *= .7f;
 
-   glEnableBlend;
+   bool disableBlending = false;
+
+   if(!glIsEnabled(GL_BLEND))
+   {
+      glEnable(GL_BLEND);
+      disableBlending = true; 
+   }
+
 
    for(S32 i = 1; i <= 0; i--)
    {
@@ -794,7 +801,8 @@ void GameType::renderObjectiveArrow(const Point *nearestPoint, const Color *outl
       glEnd();
    }
 
-   glDisableBlend;
+   if(disableBlending)
+      glDisable(GL_BLEND);
 
    Point cen = rp - arrowDir * 12;
 
@@ -940,18 +948,23 @@ void GameType::getSortedPlayerScores(S32 teamIndex, Vector<RefPtr<ClientRef> > &
 
 class InsertStatsToDatabaseThread : public TNL::Thread
 {
-public:
+private:
+   GameSettings *mSettings;
    VersionedGameStats mStats;
-   InsertStatsToDatabaseThread(const VersionedGameStats &stats) {mStats = stats;}
-   virtual ~InsertStatsToDatabaseThread() {}
+
+public:
+   InsertStatsToDatabaseThread(GameSettings *settings, const VersionedGameStats &stats) { mSettings = settings; mStats = stats; }
+   virtual ~InsertStatsToDatabaseThread() { }
 
    U32 run()
    {
 #ifdef BF_WRITE_TO_MYSQL
-      if(gIniSettings.mySqlStatsDatabaseServer != "")
+      if(mSettings->getIniSettings()->mySqlStatsDatabaseServer != "")
       {
-         DatabaseWriter databaseWriter(gIniSettings.mySqlStatsDatabaseServer.c_str(), gIniSettings.mySqlStatsDatabaseName.c_str(),
-                                       gIniSettings.mySqlStatsDatabaseUser.c_str(),   gIniSettings.mySqlStatsDatabasePassword.c_str() );
+         DatabaseWriter databaseWriter(mSettings->getIniSettings()->mySqlStatsDatabaseServer.c_str(), 
+                                       mSettings->getIniSettings()->mySqlStatsDatabaseName.c_str(),
+                                       mSettings->getIniSettings()->mySqlStatsDatabaseUser.c_str(),   
+                                       mSettings->getIniSettings()->mySqlStatsDatabasePassword.c_str() );
          databaseWriter.insertStats(mStats.gameStats);
       }
       else
@@ -966,6 +979,7 @@ public:
 
 
 // Transmit statistics to the master server, LogStats to game server
+// Only runs on server
 void GameType::saveGameStats()
 {
    MasterServerConnection *masterConn = gServerGame->getConnectionToMaster();
@@ -981,21 +995,20 @@ void GameType::saveGameStats()
       U32 size = s.getBitPosition();
       s.setBitPosition(0);
       Types::read(s, &stats2);
+
       TNLAssert(s.isValid(), "Stats not valid, problem with gameStats.cpp read/write");
       TNLAssert(size == s.getBitPosition(), "Stats not equal size, problem with gameStats.cpp read/write");
    }
 #endif
  
    if(masterConn)
-   {
       masterConn->s2mSendStatistics(stats);
-   }
 
-   if(gIniSettings.logStats)
+   if(gServerGame->getSettings()->getIniSettings()->logStats)
    {
       processStatsResults(&stats.gameStats);
 
-      InsertStatsToDatabaseThread *statsthread = new InsertStatsToDatabaseThread(stats);
+      InsertStatsToDatabaseThread *statsthread = new InsertStatsToDatabaseThread(gServerGame->getSettings(), stats);
       statsthread->start();
    }
 }
@@ -2533,12 +2546,15 @@ bool safeFilename(const char *str)
    return true;
 }
 
+
 // Runs the server side commands, which the client may or may not know about
 
 // This is server side commands, For client side commands, use UIGame.cpp, GameUserInterface::processCommand.
 // When adding new commands, please update GameUserInterface::populateChatCmdList() and also the help screen (UIInstructions.cpp)
 void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vector<StringPtr> args)
 {
+   GameSettings *settings = gServerGame->getSettings();
+
    if(!stricmp(cmd, "settime"))
    {
       if(!clientRef->clientConnection->isLevelChanger())
@@ -2554,13 +2570,12 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
          else
          {
             // Use voting when there is no level change password, and there is more then 1 player
-            if(!clientRef->clientConnection->isAdmin() && 
-               gServerGame->getSettings()->getLevelChangePassword() == "" && 
-               gServerGame->getPlayerCount() > 1)
+            if(!clientRef->clientConnection->isAdmin() && settings->getLevelChangePassword() == "" && gServerGame->getPlayerCount() > 1)
             {
                if(gServerGame->voteStart(clientRef->clientConnection, 2, time))
                   return;
             }
+
             // We want to preserve the actual, overall time of the game in mGameTimer's period
             mGameTimer.extend(time - mGameTimer.getCurrent());
 
@@ -2590,9 +2605,7 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
          else
          {
             // Use voting when there is no level change password, and there is more then 1 player
-            if(!clientRef->clientConnection->isAdmin() && 
-               gServerGame->getSettings()->getLevelChangePassword() == "" && 
-               gServerGame->getPlayerCount() > 1)
+            if(!clientRef->clientConnection->isAdmin() && settings->getLevelChangePassword() == "" && gServerGame->getPlayerCount() > 1)
             {
                if(gServerGame->voteStart(clientRef->clientConnection, 3, score))
                   return;
@@ -2624,13 +2637,13 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
       else if(!areBotsAllowed() && !clientRef->clientConnection->isAdmin())  // not admin, no robotScript
          clientRef->clientConnection->s2cDisplayErrorMessage("!!! This level does not allow robots");
 
-      else if(!clientRef->clientConnection->isAdmin() && gIniSettings.defaultRobotScript == "" && args.size() < 2)  // not admin, no robotScript
+      else if(!clientRef->clientConnection->isAdmin() && settings->getIniSettings()->defaultRobotScript == "" && args.size() < 2)  // not admin, no robotScript
          clientRef->clientConnection->s2cDisplayErrorMessage("!!! This server doesn't have default robots configured");
       
       else if(!clientRef->clientConnection->isLevelChanger())
          clientRef->clientConnection->s2cDisplayErrorMessage("!!! Need level change permissions to add a bot");
 
-      else if((Robot::robots.size() >= gIniSettings.maxBots && !clientRef->clientConnection->isAdmin()) || Robot::robots.size() >= 256)
+      else if((Robot::robots.size() >= settings->getIniSettings()->maxBots && !clientRef->clientConnection->isAdmin()) || Robot::robots.size() >= 256)
          clientRef->clientConnection->s2cDisplayErrorMessage("!!! Can't add more bots -- this server is full");
 
       else if(args.size() >= 2 && !safeFilename(args[1].getString()))
@@ -2688,11 +2701,9 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
       if(!clientRef->clientConnection->isAdmin())
          clientRef->clientConnection->s2cDisplayErrorMessage("!!! Need admin permission");
       else if(args.size() < 1)
-         clientRef->clientConnection->s2cDisplayErrorMessage("Invalid command.  Try /maxbots <number>");
+         clientRef->clientConnection->s2cDisplayErrorMessage("!!! Missing argument -- try /maxbots <number>");
       else
-      {
-         gIniSettings.maxBots = atoi(args[0].getString());
-      }
+         gServerGame->getSettings()->getIniSettings()->maxBots = atoi(args[0].getString());
    }
    else if(!stricmp(cmd, "kickbot") || !stricmp(cmd, "kickbots"))
    {
@@ -2700,7 +2711,7 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
          clientRef->clientConnection->s2cDisplayErrorMessage("!!! Need level change permissions to kick a bot");
 
       else if(Robot::robots.size() == 0)
-         clientRef->clientConnection->s2cDisplayErrorMessage("!!! No robots");
+         clientRef->clientConnection->s2cDisplayErrorMessage("!!! There are no robots to kick");
       else
       {
          for(S32 i = Robot::robots.size() - 1; i >= 0; i--)

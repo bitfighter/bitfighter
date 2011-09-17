@@ -1417,7 +1417,14 @@ void EditorUserInterface::renderTextEntryOverlay()
           mEntryBox.getMaxLen() * getStringWidth(fontsize, "-") + 25;
 
       // Render entry box    
-      glEnableBlend;
+      bool disableBlending = false;
+
+      if(!glIsEnabled(GL_BLEND))
+      {
+         glEnable(GL_BLEND);
+         disableBlending = true; 
+      }
+
       S32 xpos = (gScreenInfo.getGameCanvasWidth()  - boxwidth) / 2;
       S32 ypos = (gScreenInfo.getGameCanvasHeight() - boxheight) / 2;
 
@@ -1432,7 +1439,9 @@ void EditorUserInterface::renderTextEntryOverlay()
             glVertex2i(xpos,            ypos + boxheight);
          glEnd();
       }
-      glDisableBlend;
+
+      if(disableBlending)
+         glDisable(GL_BLEND);
 
       xpos += inset;
       ypos += inset;
@@ -1460,7 +1469,14 @@ void EditorUserInterface::renderReferenceShip()
       F32 horizDist = Game::PLAYER_VISUAL_DISTANCE_HORIZONTAL;
       F32 vertDist = Game::PLAYER_VISUAL_DISTANCE_VERTICAL;
 
-      glEnableBlend;     // Enable transparency
+      bool disableBlending = false;
+
+      if(!glIsEnabled(GL_BLEND))
+      {
+         glEnable(GL_BLEND);
+         disableBlending = true; 
+      }
+
       glColor4f(.5, .5, 1, .35f);
       glBegin(GL_POLYGON);
          glVertex2f(-horizDist, -vertDist);
@@ -1468,7 +1484,9 @@ void EditorUserInterface::renderReferenceShip()
          glVertex2f(horizDist, vertDist);
          glVertex2f(-horizDist, vertDist);
       glEnd();
-      glDisableBlend;
+      
+      if(disableBlending)
+         glDisable(GL_BLEND);
 
    glPopMatrix();
 }
@@ -1527,7 +1545,7 @@ void EditorUserInterface::render()
          }
       }
    
-      getGame()->getWallSegmentManager()->renderWalls(
+      getGame()->getWallSegmentManager()->renderWalls(getGame()->getSettings(),
                      mDraggingObjects, mShowingReferenceShip, getSnapToWallCorners(), getRenderingAlpha(false/*isScriptItem*/));
    glPopMatrix();
 
@@ -1670,10 +1688,19 @@ void EditorUserInterface::render()
       if(mSaveMsgTimer.getCurrent() < 1000)
          alpha = (F32) mSaveMsgTimer.getCurrent() / 1000;
 
-      glEnableBlend;
-         glColor(mSaveMsgColor, alpha);
-         drawCenteredString(gScreenInfo.getGameCanvasHeight() - vertMargin - 65, 25, mSaveMsg.c_str());
-      glDisableBlend;
+      bool disableBlending = false;
+
+      if(!glIsEnabled(GL_BLEND))
+      {
+         glEnable(GL_BLEND);
+         disableBlending = true; 
+      }
+
+      glColor(mSaveMsgColor, alpha);
+      drawCenteredString(gScreenInfo.getGameCanvasHeight() - vertMargin - 65, 25, mSaveMsg.c_str());
+
+      if(disableBlending)
+         glDisable(GL_BLEND);
    }
 
    if(mWarnMsgTimer.getCurrent())
@@ -1682,11 +1709,20 @@ void EditorUserInterface::render()
       if (mWarnMsgTimer.getCurrent() < 1000)
          alpha = (F32) mWarnMsgTimer.getCurrent() / 1000;
 
-      glEnableBlend;
-         glColor(mWarnMsgColor, alpha);
-         drawCenteredString(gScreenInfo.getGameCanvasHeight() / 4, 25, mWarnMsg1.c_str());
-         drawCenteredString(gScreenInfo.getGameCanvasHeight() / 4 + 30, 25, mWarnMsg2.c_str());
-      glDisableBlend;
+      bool disableBlending = false;
+
+      if(!glIsEnabled(GL_BLEND))
+      {
+         glEnable(GL_BLEND);
+         disableBlending = true; 
+      }
+
+      glColor(mWarnMsgColor, alpha);
+      drawCenteredString(gScreenInfo.getGameCanvasHeight() / 4, 25, mWarnMsg1.c_str());
+      drawCenteredString(gScreenInfo.getGameCanvasHeight() / 4 + 30, 25, mWarnMsg2.c_str());
+
+      if(disableBlending)
+         glDisable(GL_BLEND);
    }
 
 
@@ -3707,7 +3743,6 @@ void EditorMenuUserInterface::onActivate()
 }
 
 
-extern IniSettings gIniSettings;
 extern MenuItem *getWindowModeMenuItem(ClientGame *game);
 
 //////////

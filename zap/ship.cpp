@@ -382,7 +382,7 @@ void Ship::selectWeapon(U32 weaponIdx)
    mActiveWeaponIndx = weaponIdx % ShipWeaponCount;      // Advance index to next weapon
 
    // Display a message confirming new weapon choice if we're not showing the indicators
-   if(!gIniSettings.showWeaponIndicators)
+   if(!mGame->getSettings()->getIniSettings()->showWeaponIndicators)
    {
       GameConnection *cc = getControllingClient();
       if(cc)
@@ -1638,7 +1638,14 @@ void Ship::render(S32 layerIndex)
       if(isBusy)
          str = "<<" + str + ">>";
 
-      glEnableBlend;
+      bool disableBlending = false;
+
+      if(!glIsEnabled(GL_BLEND))
+      {
+         glEnable(GL_BLEND);
+         disableBlending = true; 
+      }
+
       F32 textAlpha = 0.5f * alpha;
       S32 textSize = 14;
 
@@ -1657,7 +1664,9 @@ void Ship::render(S32 layerIndex)
          glEnd();
       }
 
-      glDisableBlend;
+      if(disableBlending)
+         glDisable(GL_BLEND);
+
       glLineWidth(gDefaultLineWidth);
    }
 
@@ -1673,13 +1682,24 @@ void Ship::render(S32 layerIndex)
       // a tantalizing hint of motion when the ship is cloaked.  Could also try some sort of star-twinkling or
       // scrambling thing here as well...
       glColor(Colors::black);
-      glDisableBlendfromLineSmooth;
+      
+      bool enableLineSmoothing = false;
+   
+      if(glIsEnabled(GL_BLEND)) 
+      {
+         glDisable(GL_BLEND);
+         enableLineSmoothing = true;
+      }
+
       glBegin(GL_POLYGON);
          glVertex2f(-20, -15);
          glVertex2f(0, 25);
          glVertex2f(20, -15);
       glEnd();
-      glEnableBlendfromLineSmooth;
+
+      if(enableLineSmoothing) 
+         glEnable(GL_BLEND);
+
 
       glPopMatrix();
       return;
@@ -1712,11 +1732,15 @@ void Ship::render(S32 layerIndex)
    renderShip(gameType->getShipColor(this), alpha, thrusts, mHealth, mRadius, clientGame->getCurrentTime() - mSensorStartTime, 
               isModuleActive(ModuleCloak), isModuleActive(ModuleShield), isModuleActive(ModuleSensor), hasModule(ModuleArmor));
 
+   bool disableBlending = false;
 
-   if(alpha != 1.0)
-      glEnableBlend;
+   if(alpha != 1 && !glIsEnabled(GL_BLEND))
+   {
+      glEnable(GL_BLEND);
+      disableBlending = true; 
+   }
 
-   if(localShip && gShowAimVector && gIniSettings.enableExperimentalAimMode)     // Only show for local ship
+   if(localShip && gShowAimVector && mGame->getSettings()->getIniSettings()->enableExperimentalAimMode)   // Only show for local ship
       renderAimVector();
 
    glPopMatrix();
@@ -1751,8 +1775,8 @@ void Ship::render(S32 layerIndex)
       glLineWidth(gDefaultLineWidth);
    }
 
-   if(alpha != 1.0)
-      glDisableBlend;
+   if(disableBlending)
+      glDisable(GL_BLEND);
 
    // Render mounted items
    for(S32 i = 0; i < mMountedItems.size(); i++)

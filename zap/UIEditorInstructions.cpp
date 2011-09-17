@@ -24,7 +24,7 @@
 //------------------------------------------------------------------------------------
 
 
-#include "game.h"
+#include "ClientGame.h"    // For usage with getGame()
 #include "input.h"
 #include "config.h"
 #include "barrier.h"            
@@ -327,6 +327,7 @@ static const char *wallInstructions[] =
 
 extern void renderVertex(VertexRenderStyles style, const Point &v, S32 number);
 extern Color gNeutralTeamColor;
+extern Color EDITOR_WALL_FILL_COLOR;
 
 void EditorInstructionsUserInterface::renderPageWalls()
 {
@@ -378,9 +379,9 @@ void EditorInstructionsUserInterface::renderPageWalls()
       mWallSegmentManager.clipAllWallEdges(wallSegments, edges);      // Remove interior wall outline fragments
 
       for(S32 i = 0; i < wallSegments.size(); i++)
-         wallSegments[i]->renderFill(false, false);
+         wallSegments[i]->renderFill(EDITOR_WALL_FILL_COLOR, false);
 
-      renderWallEdges(&edges);
+      renderWallEdges(&edges, getGame()->getSettings()->getIniSettings()->wallOutlineColor);
 
       for(S32 i = 0; i < wallSegments.size(); i++)
          delete wallSegments[i];

@@ -109,7 +109,6 @@ class TeamEditor;
 class UIManager;
 
 struct IniSettings;
-extern IniSettings gIniSettings;
 
 // Modes the player could be in during the game
 enum UIMode {
@@ -298,7 +297,6 @@ public:
    void setGameType(GameType *theGameType);
    void processDeleteList(U32 timeDelta);
 
-   IniSettings *getIniSettings() { return &gIniSettings; }
    GameSettings *getSettings() { return mSettings; }
 
    bool isSuspended() { return mGameSuspended; }

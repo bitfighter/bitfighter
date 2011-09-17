@@ -76,14 +76,16 @@ void KeyDefMenuUserInterface::onActivate()
    errorMsgTimer.reset(errorMsgDisplayTime);
    errorMsg = "";
 
-   if(getGame()->getIniSettings()->inputMode == InputModeJoystick)
+   InputMode inputMode = getGame()->getSettings()->getIniSettings()->inputMode;
+
+   if(inputMode == InputModeJoystick)
       mMenuSubTitle = "Input Mode: Joystick";
    else
       mMenuSubTitle = "Input Mode: Keyboard";
 
    mMenuSubTitleColor = Colors::white;   // white
 
-   if(getGame()->getIniSettings()->inputMode == InputModeJoystick)
+   if(inputMode == InputModeJoystick)
    {
       itemsPerCol = 7;           // Approx. half of the items we have
 
@@ -169,24 +171,34 @@ void KeyDefMenuUserInterface::render()
    if(getGame()->getConnectionToServer())
    {
       getUIManager()->getGameUserInterface()->render();
-      glColor4f(0, 0, 0, 0.6f);
-      glEnableBlend;
+      glColor(Colors::black, 0.6f);
+      bool disableBlending = false;
+
+      if(!glIsEnabled(GL_BLEND))
+      {
+         glEnable(GL_BLEND);
+         disableBlending = true; 
+      }
+
       glBegin(GL_POLYGON);
          glVertex2i(0, 0);
          glVertex2i(canvasWidth, 0);
          glVertex2i(canvasWidth, gScreenInfo.getGameCanvasHeight());
          glVertex2i(0, canvasHeight);
       glEnd();
-      glDisableBlend;
+
+      if(disableBlending)
+         glDisable(GL_BLEND);
    }
 
-   glColor3f(1, 1, 1);
+   glColor(Colors::white);
    drawCenteredString(vertMargin, 30, mMenuTitle);
    drawCenteredString(vertMargin + 35, 18, mMenuSubTitle);
-   glColor3f(0, 1, 0);
-   drawCenteredString(vertMargin + 63, 14, "You can define different keys for keyboard or joystick mode.  Switch in Options menu.");
-   glColor3f(1, 1, 1);
 
+   glColor(Colors::green);
+   drawCenteredString(vertMargin + 63, 14, "You can define different keys for keyboard or joystick mode.  Switch in Options menu.");
+
+   glColor(Colors::white);
    drawCenteredString(gScreenInfo.getGameCanvasHeight() - vertMargin - 20, 18, mMenuFooter);
 
    if(selectedIndex >= menuItems.size())
@@ -208,7 +220,7 @@ void KeyDefMenuUserInterface::render()
             glVertex2i((menuItems[i].mColumn == 1 ? horizMargin : canvasWidth / 2), y + height + 1);
          glEnd();
 
-         glColor3f(0, 0, 1);       // Outline
+         glColor(Colors::blue);       // Outline
          glBegin(GL_LINE_LOOP);
             glVertex2i((menuItems[i].mColumn == 1 ? horizMargin : canvasWidth / 2), y);
             glVertex2i((menuItems[i].mColumn == 1 ? canvasWidth / 2 - horizMargin : canvasWidth - horizMargin), y);
@@ -218,7 +230,7 @@ void KeyDefMenuUserInterface::render()
       }
 
       // Draw item text
-      glColor3f(0, 1, 1);
+      glColor(Colors::cyan);
       drawString((menuItems[i].mColumn == 1 ? 2 * horizMargin : canvasWidth / 2 + horizMargin), y + offset, 15, menuItems[i].mText);
 
       if(changingItem == i)
@@ -229,19 +241,17 @@ void KeyDefMenuUserInterface::render()
       else
       {
          bool dupe = isDuplicate(i, menuItems); 
-         if(dupe)
-            glColor3f(1,0,0);
-         else
-            glColor3f(1, 1, 1);
+         glColor(dupe ? Colors::red : Colors::white);
 
-         JoystickRender::renderControllerButton((canvasWidth * (menuItems[i].mColumn == 1 ? 0.25f : 0.75f)) + horizMargin, F32(y + offset), *menuItems[i].primaryControl, dupe, 10);
+         JoystickRender::renderControllerButton((canvasWidth * (menuItems[i].mColumn == 1 ? 0.25f : 0.75f)) + horizMargin, F32(y + offset), 
+                                                getGame()->getSettings()->getIniSettings()->joystickType, *menuItems[i].primaryControl, dupe, 10);
       }
    }
    
 
    // Draw some suggestions
    glColor3f(1, 1, 0);
-   if(getGame()->getIniSettings()->inputMode == InputModeJoystick)
+   if(getGame()->getSettings()->getIniSettings()->inputMode == InputModeJoystick)
       drawCenteredString(canvasHeight - vertMargin - 90, 15, "HINT: You will be using the left joystick to steer, the right to fire");
    else 
       drawCenteredString(canvasHeight - vertMargin - 90, 15, "HINT: You will be using the mouse to aim, so make good use of your mouse buttons");
@@ -257,10 +267,19 @@ void KeyDefMenuUserInterface::render()
       if (errorMsgTimer.getCurrent() < 1000)
          alpha = (F32) errorMsgTimer.getCurrent() / 1000;
 
-      glEnableBlend;
-      glColor4f(1, 0, 0, alpha);
+      bool disableBlending = false;
+
+      if(!glIsEnabled(GL_BLEND))
+      {
+         glEnable(GL_BLEND);
+         disableBlending = true; 
+      }
+
+      glColor(Colors::red, alpha);
       drawCenteredString(canvasHeight - vertMargin - 65, 15, errorMsg.c_str());
-      glDisableBlend;
+
+      if(disableBlending)
+         glDisable(GL_BLEND);
    }
 }
 
@@ -333,7 +352,7 @@ void KeyDefMenuUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    else if(keyCode == KEY_ESCAPE || keyCode == BUTTON_BACK)       // Quit
    {
       playBoop();
-      saveSettingsToINI(&gINI, &gIniSettings, getGame()->getSettings());
+      saveSettingsToINI(&gINI, getGame()->getSettings());
 
       getUIManager()->reactivatePrevUI();      // to gOptionsMenuUserInterface
    }

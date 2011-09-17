@@ -205,10 +205,16 @@ void render(S32 renderPass)
    }
    else if(renderPass == 1)      // Time for sparks!!
    {
-      for (S32 i = SparkTypeCount - 1; i >= 0; i --)     // Loop through our different spark types
+      bool useLineSmoothing = gClientGame->getSettings()->getIniSettings()->useLineSmoothing;
+
+      for(S32 i = SparkTypeCount - 1; i >= 0; i --)     // Loop through our different spark types
       {
-         glPointSize( gDefaultLineWidth );
-         glEnableBlend;
+         glPointSize(gDefaultLineWidth);
+
+         bool blending = glIsEnabled(GL_BLEND);
+         
+         if(!blending) 
+            glEnable(GL_BLEND); 
 
          glEnableClientState(GL_COLOR_ARRAY);
          glEnableClientState(GL_VERTEX_ARRAY);
@@ -224,7 +230,8 @@ void render(S32 renderPass)
          glDisableClientState(GL_COLOR_ARRAY);
          glDisableClientState(GL_VERTEX_ARRAY);
 
-         glDisableBlend;
+         if(!blending) 
+            glDisable(GL_BLEND); 
       }
    }
 }
@@ -325,6 +332,7 @@ void FXTrail::update(Point pos, bool boosted, bool invisible)
    }
 }
 
+
 void FXTrail::tick(U32 dT)
 {
    if(mNodes.size() == 0)
@@ -334,6 +342,7 @@ void FXTrail::tick(U32 dT)
    if(mNodes.last().ttl <= 0)
       mNodes.pop_back();      // Delete last item
 }
+
 
 void FXTrail::render()
 {
@@ -356,10 +365,12 @@ void FXTrail::render()
    glEnd();
 }
 
+
 void FXTrail::reset()
 {
    mNodes.clear();
 }
+
 
 Point FXTrail::getLastPos()
 {
@@ -371,6 +382,7 @@ Point FXTrail::getLastPos()
       return Point(0,0);
 }
 
+
 FXTrail * FXTrail::mHead = NULL;
 
 void FXTrail::registerTrail()
@@ -379,6 +391,7 @@ void FXTrail::registerTrail()
   mHead = this;
   mNext = n;
 }
+
 
 void FXTrail::unregisterTrail()
 {
@@ -402,9 +415,13 @@ void FXTrail::unregisterTrail()
    }
 }
 
+
 void FXTrail::renderTrails()
 {
-   glEnableBlend;
+   bool blending = glIsEnabled(GL_BLEND);
+
+   if(!blending) 
+      glEnable(GL_BLEND); 
 
    FXTrail *w = mHead;
    while(w)
@@ -413,7 +430,8 @@ void FXTrail::renderTrails()
       w = w->mNext;
    }
 
-   glDisableBlend;
+   if(!blending) 
+      glDisable(GL_BLEND); 
 }
 
 };

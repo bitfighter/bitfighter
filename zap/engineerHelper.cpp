@@ -73,19 +73,23 @@ void EngineerHelper::render()
       UserInterface::drawString(UserInterface::horizMargin, yPos, fontSize, "What do you want to Engineer?");
       yPos += fontSize + 10;
 
-      bool showKeys = gIniSettings.showKeyboardKeys || gIniSettings.inputMode == InputModeKeyboard;
+      GameSettings *settings = getGame()->getSettings();
+      bool showKeys = settings->getIniSettings()->showKeyboardKeys || settings->getIniSettings()->inputMode == InputModeKeyboard;
 
       for(S32 i = 0; i < mEngineerCostructionItemInfos.size(); i++)
       {
          // Draw key controls for selecting the object to be created
+         U32 joystickType = getGame()->getSettings()->getIniSettings()->joystickType;
 
-         if(gIniSettings.inputMode == InputModeJoystick)     // Only draw joystick buttons when in joystick mode
-            JoystickRender::renderControllerButton(F32(UserInterface::horizMargin + (showKeys ? 0 : 20)), (F32)yPos, mEngineerCostructionItemInfos[i].mButton, false);
+         if(getGame()->getSettings()->getIniSettings()->inputMode == InputModeJoystick)     // Only draw joystick buttons when in joystick mode
+            JoystickRender::renderControllerButton(F32(UserInterface::horizMargin + (showKeys ? 0 : 20)), (F32)yPos, 
+                                                   joystickType, mEngineerCostructionItemInfos[i].mButton, false);
 
          if(showKeys)
          {
             glColor(Colors::white);     // Render key in white
-            JoystickRender::renderControllerButton((F32)UserInterface::horizMargin + 20, (F32)yPos, mEngineerCostructionItemInfos[i].mKey, false);
+            JoystickRender::renderControllerButton((F32)UserInterface::horizMargin + 20, (F32)yPos, 
+                                                   joystickType, mEngineerCostructionItemInfos[i].mKey, false);
          }
 
          glColor(0.1, 1.0, 0.1);     
@@ -122,6 +126,7 @@ bool EngineerHelper::processKeyCode(KeyCode keyCode)
       return true;
 
    GameConnection *gc = getGame()->getConnectionToServer();
+   InputMode inputMode = getGame()->getSettings()->getIniSettings()->inputMode;
 
    if(mSelectedItem == -1)    // Haven't selected an item yet
    {
@@ -132,8 +137,8 @@ bool EngineerHelper::processKeyCode(KeyCode keyCode)
             return true;
          }
       Ship *ship = dynamic_cast<Ship *>(gc->getControlObject());
-      if(!ship || (keyCode == keyMOD1[gIniSettings.inputMode] && ship->getModule(0) == ModuleEngineer) ||
-                  (keyCode == keyMOD2[gIniSettings.inputMode] && ship->getModule(1) == ModuleEngineer))
+      if(!ship || (keyCode == keyMOD1[inputMode] && ship->getModule(0) == ModuleEngineer) ||
+                  (keyCode == keyMOD2[inputMode] && ship->getModule(1) == ModuleEngineer))
       {
          exitHelper();
          return true;
@@ -142,8 +147,8 @@ bool EngineerHelper::processKeyCode(KeyCode keyCode)
    else                       // Placing item
    {
       Ship *ship = dynamic_cast<Ship *>(gc->getControlObject());
-      if(ship && ((keyCode == keyMOD1[gIniSettings.inputMode] && ship->getModule(0) == ModuleEngineer) ||
-                  (keyCode == keyMOD2[gIniSettings.inputMode] && ship->getModule(1) == ModuleEngineer)))
+      if(ship && ((keyCode == keyMOD1[inputMode] && ship->getModule(0) == ModuleEngineer) ||
+                  (keyCode == keyMOD2[inputMode] && ship->getModule(1) == ModuleEngineer)))
       {
          // Check deployment status on client; will be checked again on server, but server will only handle likely valid placements
          EngineerModuleDeployer deployer;

@@ -32,6 +32,7 @@
 #include "Joystick.h"
 #include "keyCode.h"
 #include "BanList.h"
+#include "Colors.h"
 
 #include "GameSettings.h"
 
@@ -58,8 +59,8 @@
 namespace Zap
 {
 
-// Set default values here
-void IniSettings::init()
+// Constructor: Set default values here
+IniSettings::IniSettings()
 {
    controlsRelative = false;          // Relative controls is lame!
    displayMode = DISPLAY_MODE_FULL_SCREEN_STRETCHED;
@@ -108,13 +109,13 @@ void IniSettings::init()
    globalLevelScript = "";
 
    wallFillColor.set(0,0,.15);
-   wallOutlineColor.set(0,0,1);
+   wallOutlineColor.set(Colors::blue);
    clientPortNumber = 0;
 
    allowMapUpload = false;
    allowAdminMapUpload = true;
 
-   voteEnable = false; // disable by default.
+   voteEnable = false;     // Voting disabled by default
    voteLength = 12;
    voteLengthToChangeTeam = 10;
    voteRetryLength = 30;
@@ -1173,8 +1174,10 @@ static void writeServerBanList(CIniFile *ini, BanList *banList)
 
 // Option default values are stored here, in the 3rd prarm of the GetValue call
 // This is only called once, during initial initialization
-void loadSettingsFromINI(CIniFile *ini, IniSettings *iniSettings, GameSettings *settings)
+void loadSettingsFromINI(CIniFile *ini, GameSettings *settings)
 {
+   IniSettings *iniSettings = settings->getIniSettings();
+
    ini->ReadFile();        // Read the INI file  (journaling of read lines happens within)
 
    loadSoundSettings(ini, iniSettings);
@@ -1196,7 +1199,7 @@ void loadSettingsFromINI(CIniFile *ini, IniSettings *iniSettings, GameSettings *
 //   readJoystick();
    loadServerBanList(ini, settings->getBanList());
 
-   saveSettingsToINI(ini, iniSettings, settings);    // Save to fill in any missing settings
+   saveSettingsToINI(ini, settings);    // Save to fill in any missing settings
 }
 
 
@@ -1547,9 +1550,11 @@ static void writeINIHeader(CIniFile *ini)
 
 
 // Save more commonly altered settings first to make them easier to find
-void saveSettingsToINI(CIniFile *ini, IniSettings *iniSettings, GameSettings *settings)
+void saveSettingsToINI(CIniFile *ini, GameSettings *settings)
 {
    writeINIHeader(ini);
+
+   IniSettings *iniSettings = settings->getIniSettings();
 
    writeHost(ini, iniSettings);
    writeForeignServerInfo(ini, iniSettings);
@@ -1567,9 +1572,9 @@ void saveSettingsToINI(CIniFile *ini, IniSettings *iniSettings, GameSettings *se
    
    writeDefaultQuickChatMessages(ini, iniSettings);    // Does nothing if there are already chat messages in the INI
 
-      // only needed for users using custom joystick 
-      // or joystick that maps differenly in LINUX
-      // This adds 200+ lines.
+   // only needed for users using custom joystick 
+   // or joystick that maps differenly in LINUX
+   // This adds 200+ lines.
    //writeJoystick();
    writeServerBanList(ini, settings->getBanList());
 
@@ -1796,10 +1801,10 @@ static void testLevelDirResolution(ConfigDirectories *configDirs)
 #endif
 
 
-void ConfigDirectories::resolveLevelDir(CmdLineSettings *cmdLineSettings)  
+void ConfigDirectories::resolveLevelDir(GameSettings *settings)  
 {
    //testLevelDirResolution();
-   levelDir = resolveLevelDir(cmdLineSettings->dirs.levelDir, gIniSettings.levelDir);
+   levelDir = resolveLevelDir(settings->getCmdLineSettings()->dirs.levelDir, settings->getIniSettings()->levelDir);
 }
 
 

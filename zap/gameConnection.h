@@ -27,6 +27,7 @@
 #define _GAMECONNECTION_H_
 
 
+#include "game.h"                    // For LevelInfo??
 #include "controlObjectConnection.h"
 #include "shipItems.h"           // For EngineerBuildObjects enum
 #include "dataConnection.h"      // For DataSendable interface
@@ -89,7 +90,7 @@ private:
    static GameConnection gClientList;
 
 #ifndef ZAP_DEDICATED
-   ClientGame *mClientGame;
+   ClientGame *mClientGame;      // Sometimes this is NULL
 #endif
 
    bool mInCommanderMap;
@@ -114,6 +115,8 @@ private:
    StringTableEntry mServerName;
    Vector<U32> mLoadout;
    SafePtr<ClientRef> mClientRef;
+
+   GameSettings *mSettings;
 
 public:
    Vector<U32> mOldLoadout;   // Server: to respawn with old loadout  Client: to check if using same loadout configuration
@@ -159,9 +162,9 @@ public:
 
    static const S32 BanDuration = 30000;           // Players are banned for 30secs after being kicked
 
-   GameConnection();                               // Constructor
+   GameConnection();         // Constructor
 #ifndef ZAP_DEDICATED
-   GameConnection(const ClientInfo *clientInfo);   // Constructor for ClientGame
+   GameConnection(GameSettings *setting, const ClientInfo *clientInfo);   // Constructor for ClientGame
 #endif
    ~GameConnection();                              // Destructor
 

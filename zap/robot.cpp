@@ -48,7 +48,6 @@
 #include "BotNavMeshZone.h"      // For BotNavMeshZone class definition
 #include "luaGameInfo.h"
 #include "luaUtil.h"
-#include "config.h"              // for gIniSettings.defaultRobotScript
 #include "GeomUtils.h"
 #include "oglconsole.h"
 #include "game.h"
@@ -1710,9 +1709,6 @@ void Robot::kill()
 
 bool Robot::processArguments(S32 argc, const char **argv, Game *game)
 {
-   //if(argc < 2)               // Two required: team and bot file
-   //   return false;
-
    if(argc >= 1)
       mTeam = atoi(argv[0]);
    else
@@ -1722,7 +1718,7 @@ bool Robot::processArguments(S32 argc, const char **argv, Game *game)
    if(argc >= 2)
       mFilename = argv[1];
    else
-      mFilename = gIniSettings.defaultRobotScript;
+      mFilename = mGame->getSettings()->getIniSettings()->defaultRobotScript;
 
    if(mFilename != "")
    {

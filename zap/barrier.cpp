@@ -383,18 +383,19 @@ void Barrier::prepareRenderingGeometry(Game *game)
 }
 
 
-// Render wall fill only for this wall; all edges rendered in a single pass
+// Render wall fill only for this wall; all edges rendered in a single pass later
 void Barrier::render(S32 layerIndex)
 {
    if(layerIndex == 0)           // First pass: draw the fill
-      renderWallFill(&mRenderFillGeometry, mSolid, gIniSettings.wallFillColor);
+      renderWallFill(&mRenderFillGeometry, mSolid, getGame()->getSettings()->getIniSettings()->wallFillColor);
 }
 
+
 // static 
-void Barrier::renderEdges(S32 layerIndex)
+void Barrier::renderEdges(S32 layerIndex, const Color &outlineColor)
 {
    if(layerIndex == 1)
-      renderWallEdges(&mRenderLineSegments);
+      renderWallEdges(&mRenderLineSegments, outlineColor);
 }
 
 
@@ -477,7 +478,7 @@ void WallItem::setWidth(S32 width)
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-const Color EDITOR_WALL_FILL_COLOR(.5, .5, 1); 
+extern Color EDITOR_WALL_FILL_COLOR;
 
 TNL_IMPLEMENT_NETOBJECT(PolyWall);
 
@@ -853,7 +854,8 @@ void WallSegmentManager::deleteSegments(S32 owner)
 }
 
 
-void WallSegmentManager::renderWalls(bool draggingObjects, bool showingReferenceShip, bool showSnapVertices, F32 alpha)
+// Only called from the editor
+void WallSegmentManager::renderWalls(GameSettings *settings, bool draggingObjects, bool showingReferenceShip, bool showSnapVertices, F32 alpha)
 {
 #ifndef ZAP_DEDICATED
    fillVector.clear();
@@ -876,10 +878,15 @@ void WallSegmentManager::renderWalls(bool draggingObjects, bool showingReference
          }
       }*/
 
-      mWallSegments[i]->renderFill(isBeingDragged, showingReferenceShip);
+      // We'll use the editor color most of the time; only in preview mode in the editor do we use the game color
+      bool useGameColor = UserInterface::current && UserInterface::current->getMenuID() == EditorUI && showingReferenceShip;
+      TNLAssert(UserInterface::current->getMenuID() == EditorUI, "How did we get here, then???");
+
+      Color fillColor = useGameColor ? settings->getIniSettings()->wallFillColor : EDITOR_WALL_FILL_COLOR;
+      mWallSegments[i]->renderFill(fillColor, isBeingDragged);
    }
 
-   renderWallEdges(&mWallEdgePoints);      // Render wall outlines
+   renderWallEdges(&mWallEdgePoints, settings->getIniSettings()->wallOutlineColor);      // Render wall outlines
 
    if(showSnapVertices)
    {
@@ -978,20 +985,26 @@ void WallSegment::resetEdges()
 }
 
 
-void WallSegment::renderFill(bool beingDragged, bool showingReferenceShip)
+void WallSegment::renderFill(const Color &fillColor, bool beingDragged)
 {
 #ifndef ZAP_DEDICATED
-   // We'll use the editor color most of the time; only in preview mode in the editor do we use the game color
-   bool useGameColor = UserInterface::current && UserInterface::current->getMenuID() == EditorUI && showingReferenceShip;
 
-   glDisableBlendfromLineSmooth;
+   Color color = fillColor;
+
+   bool enableLineSmoothing = false;
    
-   // Use true below because all segments are triangulated
-   Color fillColor = useGameColor ? gIniSettings.wallFillColor : EDITOR_WALL_FILL_COLOR;
-   fillColor *= beingDragged ? 0.5f : 1;
+   if(glIsEnabled(GL_BLEND)) 
+   {
+      glDisable(GL_BLEND);
+      enableLineSmoothing = true;
+   }
+   
+   color *= beingDragged ? 0.5f : 1;
 
-   renderWallFill(&triangulatedFillPoints, true, fillColor);   
-   glEnableBlendfromLineSmooth;
+   renderWallFill(&triangulatedFillPoints, true, color);       // Use true because all segment fills are triangulated
+
+   if(enableLineSmoothing) 
+      glEnable(GL_BLEND);
 #endif
 }
 

@@ -214,10 +214,19 @@ void TeamDefUserInterface::render()
       if (errorMsgTimer.getCurrent() < 1000)
          alpha = (F32) errorMsgTimer.getCurrent() / 1000;
 
-      glEnableBlend;
-      glColor4f(1, 0, 0, alpha);
+      bool disableBlending = false;
+
+      if(!glIsEnabled(GL_BLEND))
+      {
+         glEnable(GL_BLEND);
+         disableBlending = true; 
+      }
+
+      glColor(Colors::red, alpha);
       drawCenteredString(canvasHeight - vertMargin - 141, fontsize, errorMsg.c_str());
-      glDisableBlend;
+
+      if(disableBlending)
+         glDisable(GL_BLEND);
    }
 }
 

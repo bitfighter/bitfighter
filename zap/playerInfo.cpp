@@ -51,5 +51,4 @@ S32 PlayerInfo::getShip(lua_State *L)
 }
 
 
-
 };

@@ -108,10 +108,10 @@ ClientInfo::ClientInfo(GameSettings *settings)
 
    if(settings->getCmdLineSettings()->name != "")
       name = settings->getCmdLineSettings()->name;
-   else if(gIniSettings.name != "")
-      name = gIniSettings.name;
+   else if(settings->getIniSettings()->name != "")
+      name = settings->getIniSettings()->name;
    else
-      name = gIniSettings.lastName;
+      name = settings->getIniSettings()->lastName;       // Should always have something valid
 
    authenticated = false;
 }
@@ -188,7 +188,7 @@ void ClientGame::joinGame(Address remoteAddress, bool isFromMaster, bool local)
    }
    else                                                         // Try a direct connection
    {
-      GameConnection *gameConnection = new GameConnection(getClientInfo());
+      GameConnection *gameConnection = new GameConnection(mSettings, getClientInfo());
 
       setConnectionToServer(gameConnection);
 
@@ -287,7 +287,7 @@ void ClientGame::setLoginPassword(const string &firstChoice, const string &secon
 
 extern bool gShowAimVector;
 
-static void joystickUpdateMove(Move *theMove)
+static void joystickUpdateMove(GameSettings *settings, Move *theMove)
 {
    // One of each of left/right axis and up/down axis should be 0 by this point
    // but let's guarantee it..   why?
@@ -322,9 +322,9 @@ static void joystickUpdateMove(Move *theMove)
 
    F32 maxplen = max(fabs(p.x), fabs(p.y));
 
-   F32 fact = gIniSettings.enableExperimentalAimMode ? maxplen : plen;
+   F32 fact = settings->getIniSettings()->enableExperimentalAimMode ? maxplen : plen;
 
-   if(fact > (gIniSettings.enableExperimentalAimMode ? 0.95 : 0.50))    // It requires a large movement to actually fire...
+   if(fact > (settings->getIniSettings()->enableExperimentalAimMode ? 0.95 : 0.50))    // It requires a large movement to actually fire...
    {
       theMove->angle = atan2(p.y, p.x);
       theMove->fire = true;
@@ -355,7 +355,8 @@ void ClientGame::idle(U32 timeDelta)
    if(isSuspended())
    {
       mNetInterface->processConnections();
-      SoundSystem::processAudio(gIniSettings.sfxVolLevel);     // Process sound effects (SFX)
+      SoundSystem::processAudio(mSettings->getIniSettings()->sfxVolLevel, mSettings->getIniSettings()->musicVolLevel,
+                                mSettings->getIniSettings()->voiceChatVolLevel);     // Process sound effects (SFX)
       return;
    }
 
@@ -391,8 +392,8 @@ void ClientGame::idle(U32 timeDelta)
    // Overwrite theMove if we're using joystick (also does some other essential joystick stuff)
    // We'll also run this while in the menus so if we enter keyboard mode accidentally, it won't
    // kill the joystick.  The design of combining joystick input and move updating really sucks.
-   if(getIniSettings()->inputMode == InputModeJoystick || UserInterface::current == getUIManager()->getOptionsMenuUserInterface())
-      joystickUpdateMove(theMove);
+   if(mSettings->getIniSettings()->inputMode == InputModeJoystick || UserInterface::current == getUIManager()->getOptionsMenuUserInterface())
+      joystickUpdateMove(mSettings, theMove);
 
 
    theMove->time = timeDelta + prevTimeDelta;
@@ -456,7 +457,8 @@ void ClientGame::idle(U32 timeDelta)
 
    processDeleteList(timeDelta);                         // Delete any objects marked for deletion
    FXManager::tick((F32)timeDelta * 0.001f);             // Processes sparks and teleporter effects
-   SoundSystem::processAudio(gIniSettings.sfxVolLevel);  // Process sound effects (SFX)
+   SoundSystem::processAudio(mSettings->getIniSettings()->sfxVolLevel, mSettings->getIniSettings()->musicVolLevel,
+                             mSettings->getIniSettings()->voiceChatVolLevel);  // Process sound effects (SFX)
 
    mNetInterface->processConnections();                  // Pass updated ship info to the server
 
@@ -1117,13 +1119,29 @@ void ClientGame::drawStars(F32 alphaFrac, Point cameraPos, Point visibleExtent)
    glEnableClientState(GL_VERTEX_ARRAY);
    glVertexPointer(2, GL_FLOAT, sizeof(Point), &mStars[0]);    // Each star is a pair of floats between 0 and 1
 
-   S32 fx1 = gIniSettings.starsInDistance ? -1 - ((S32) (cameraPos.x / starDist)) : 0;
-   S32 fx2 = gIniSettings.starsInDistance ?  1 - ((S32) (cameraPos.x / starDist)) : 0;
-   S32 fy1 = gIniSettings.starsInDistance ? -1 - ((S32) (cameraPos.y / starDist)) : 0;
-   S32 fy2 = gIniSettings.starsInDistance ?  1 - ((S32) (cameraPos.y / starDist)) : 0;
+   bool starsInDistance = mSettings->getIniSettings()->starsInDistance;
 
-   glDisableBlendfromLineSmooth;
+   S32 fx1 = 0, fx2 = 0, fy1 = 0, fy2 = 0;
 
+   if(starsInDistance)
+   {
+      S32 xDist = (S32) (cameraPos.x / starDist);
+      S32 yDist = (S32) (cameraPos.y / starDist);
+
+      fx1 = -1 - xDist;
+      fx2 =  1 - xDist;
+      fy1 = -1 - yDist;
+      fy2 =  1 - yDist;
+   }
+
+
+   bool enableLineSmoothing = false;
+   
+   if(glIsEnabled(GL_BLEND)) 
+   {
+      glDisable(GL_BLEND);
+      enableLineSmoothing = true;
+   }
 
    for(F32 xPage = upperLeft.x + fx1; xPage < lowerRight.x + fx2; xPage++)
       for(F32 yPage = upperLeft.y + fy1; yPage < lowerRight.y + fy2; yPage++)
@@ -1131,7 +1149,7 @@ void ClientGame::drawStars(F32 alphaFrac, Point cameraPos, Point visibleExtent)
          glPushMatrix();
          glScale(starChunkSize);   // Creates points with coords btwn 0 and starChunkSize
 
-         if(gIniSettings.starsInDistance)
+         if(starsInDistance)
             glTranslatef(xPage + (cameraPos.x / starDist), yPage + (cameraPos.y / starDist), 0);
          else
             glTranslatef(xPage, yPage, 0);
@@ -1145,7 +1163,8 @@ void ClientGame::drawStars(F32 alphaFrac, Point cameraPos, Point visibleExtent)
          glPopMatrix();
       }
 
-   glEnableBlendfromLineSmooth;
+   if(enableLineSmoothing) 
+      glEnable(GL_BLEND);
 
    glDisableClientState(GL_VERTEX_ARRAY);
 }
@@ -1367,7 +1386,7 @@ void ClientGame::renderCommander()
       renderObjects[i]->render(0);
 
    // Second pass
-   Barrier::renderEdges(1);    // Render wall edges
+   Barrier::renderEdges(1, mSettings->getIniSettings()->wallOutlineColor);    // Render wall edges
 
    for(S32 i = 0; i < renderObjects.size(); i++)
       // Keep our spy bugs from showing up on enemy commander maps, even if they're known
@@ -1517,9 +1536,11 @@ void ClientGame::renderNormal()
    // Render in three passes, to ensure some objects are drawn above others
    for(S32 j = -1; j < 2; j++)
    {
-      Barrier::renderEdges(j);    // Render wall edges
+      Barrier::renderEdges(j, mSettings->getIniSettings()->wallOutlineColor);    // Render wall edges
+
       for(S32 i = 0; i < renderObjects.size(); i++)
          renderObjects[i]->render(j);
+
       FXManager::render(j);
    }
 
