@@ -659,6 +659,9 @@ bool Address::set(std::string addressString)
 
 bool Address::set(const char *addressString)
 {
+   if(addressString[0] == 0) // zero string length should be invalid
+      return false;
+
    init();
    if(strnicmp(addressString, "ipx:", 4))
    {
@@ -716,6 +719,8 @@ bool Address::set(const char *addressString)
       SocketToTNLAddress((SOCKADDR *) &ipAddr, this);
       if(isTCP)
          transport = TCPProtocol;
+      if((netNum[0] | netNum[1] | netNum[2] | netNum[3]) == 0)  // IP address of 0.0.0.0 is probably not valid
+         return false;
       return true;
    }
    else     // addressString started with "ipx:"

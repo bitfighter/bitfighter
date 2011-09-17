@@ -433,10 +433,7 @@ void MasterServerConnection::onConnectTerminated(TerminationReason reason, const
    {
       TNLAssert(dynamic_cast<ClientGame *>(mGame), "mGame is not ClientGame");
 
-      //((ClientGame *)mGame)->onConnectionTerminated(getNetAddress(), reason, reasonStr);
-      // Don't want to get Connection Terminated message interrupting the game when Client lost connection to master
-
-      // TODO: put something here?
+      ((ClientGame *)mGame)->onConnectionToMasterTerminated(reason, reasonStr);
    }
 #endif
 }

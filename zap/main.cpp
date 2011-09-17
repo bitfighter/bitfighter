@@ -336,6 +336,8 @@ bool writeToConsole()
 void initHostGame(GameSettings *settings, Vector<string> &levelList, bool testMode, bool dedicatedServer)
 {
    TNLAssert(!gServerGame, "already exists!");
+   if(gServerGame)
+      delete gServerGame;
 
    Address address(IPProtocol, Address::Any, DEFAULT_GAME_PORT);     // Equivalent to ("IP:Any:28000")
    address.set(settings->getHostAddress());                          // May overwrite parts of address, depending on what getHostAddress contains

@@ -822,11 +822,7 @@ void ClientGame::onConnectionToMasterTerminated(NetConnection::TerminationReason
          ui->setMessage(6, "speaking, you should never see this message again!");
          ui->activate();
 
-         if(getConnectionToServer())
-            setReadyToConnectToMaster(false);  // New ID might cause Authentication (underline name) problems if connected to game server...
-         else
-            getClientInfo()->id.getRandom();        // Get another ID, if not connected to game server
-         break;
+         getClientInfo()->id.getRandom();        // Get a different ID and retry to successfully connect to master
 
       case NetConnection::ReasonBadLogin:
          ui->setMessage(2, "Unable to log you in with the username/password you");

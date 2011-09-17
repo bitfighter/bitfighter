@@ -541,9 +541,10 @@ void Game::checkConnectionToMaster(U32 timeDelta)
 
       if(mNextMasterTryTime < timeDelta && mReadyToConnectToMaster)
       {
-         if(mHaveTriedToConnectToMaster)
-         {
-            mMasterAddressList.push_back(mMasterAddressList[0]);  // Rotate the list so as to try each one until we find one that works...
+         if(mHaveTriedToConnectToMaster && mMasterAddressList.size() >= 2)
+         {  // Rotate the list so as to try each one until we find one that works...
+            mMasterAddressList.resize(mMasterAddressList.size()+1);
+            mMasterAddressList[mMasterAddressList.size() - 1] = mMasterAddressList[0];
             mMasterAddressList.erase(0);
          }
 
