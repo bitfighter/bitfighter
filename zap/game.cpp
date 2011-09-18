@@ -864,8 +864,8 @@ bool ServerGame::voteStart(GameConnection *client, S32 type, S32 number)
    mVoteNumber = number;
    mVoteClientName = client->getClientName();
 
-   for(GameConnection *walk = GameConnection::getClientList(); walk; walk = walk->getNextClient())
-      walk->mVote = 0;
+   for(S32 i = 0; i < getClientCount(); i++)
+      getClient(i)->mVote = 0;
 
    client->mVote = 1;
    client->s2cDisplayMessage(GameConnection::ColorAqua, SFXNone, "Vote started, waiting for others to vote.");
@@ -1283,11 +1283,13 @@ void ServerGame::cycleLevel(S32 nextLevel)
    mLevelSwitchTimer.clear();
    mScopeAlwaysList.clear();
 
-   for(GameConnection *walk = GameConnection::getClientList(); walk; walk = walk->getNextClient())
+   for(S32 i = 0; i < getClientCount(); i++)
    {
-      walk->resetGhosting();
-      walk->mOldLoadout.clear();
-      walk->switchedTeamCount = 0;
+      GameConnection *client = getClient(i);
+
+      client->resetGhosting();
+      client->mOldLoadout.clear();
+      client->switchedTeamCount = 0;
    }
 
    if(nextLevel >= FIRST_LEVEL)          // Go to specified level
@@ -1366,26 +1368,26 @@ void ServerGame::cycleLevel(S32 nextLevel)
 
    if(mDatabaseForBotZones.getObjectCount() != 0)     // There are some zones loaded in the level...
    {
-      getGameType()->mBotZoneCreationFailed = false;
+      mGameType->mBotZoneCreationFailed = false;
       BotNavMeshZone::IDBotMeshZones(this);
       BotNavMeshZone::buildBotNavMeshZoneConnections(this);
    }
    else
+   {
       // Try and load Bot Zones for this level, set flag if failed
 #ifdef ZAP_DEDICATED
-      getGameType()->mBotZoneCreationFailed = !BotNavMeshZone::buildBotMeshZones(this, false);
+      mGameType->mBotZoneCreationFailed = !BotNavMeshZone::buildBotMeshZones(this, false);
 #else
-      getGameType()->mBotZoneCreationFailed = !BotNavMeshZone::buildBotMeshZones(this, gClientGame);
+      mGameType->mBotZoneCreationFailed = !BotNavMeshZone::buildBotMeshZones(this, gClientGame);
 #endif
+   }
 
 
    // Build a list of our current connections
    Vector<GameConnection *> connectionList;
-   GameType *gt = getGameType();
-   for(GameConnection *walk = GameConnection::getClientList(); walk; walk = walk->getNextClient())
-   {
-      connectionList.push_back(walk);
-   }
+
+   for(S32 i = 0; i < getClientCount(); i++)
+      connectionList.push_back(getClient(i));
 
    // Now add the connections to the game type, from highest rating to lowest --> will create ratings-based teams
    connectionList.sort(RatingSort);
@@ -1649,15 +1651,20 @@ void ServerGame::idle(U32 timeDelta)
                s.push_back(mVoteString);
                break;
             }
+            
             bool WaitingToVote = false;
-            for(GameConnection *walk = GameConnection::getClientList(); walk; walk = walk->getNextClient())
+
+            for(S32 i = 0; i < getClientCount(); i++)
             {
-               if(walk->mVote == 0 && !walk->isRobot())
+               GameConnection *client = getClient(i);
+
+               if(client->mVote == 0 && !client->isRobot())
                {
                   WaitingToVote = true;
-                  walk->s2cDisplayMessageESI(GameConnection::ColorAqua, SFXNone, msg, e, s, i);
+                  client->s2cDisplayMessageESI(GameConnection::ColorAqua, SFXNone, msg, e, s, i);
                }
             }
+
             if(!WaitingToVote)
                mVoteTimer = timeDelta + 1;  // no more waiting when everyone have voted.
          }
@@ -1669,68 +1676,72 @@ void ServerGame::idle(U32 timeDelta)
          S32 voteNo = 0;
          S32 voteNothing = 0;
          mVoteTimer = 0;
-         for(GameConnection *walk = GameConnection::getClientList(); walk; walk = walk->getNextClient())
+
+         for(S32 i = 0; i < getClientCount(); i++)
          {
-            if(walk->mVote == 1)
+            GameConnection *client = getClient(i);
+
+            if(client->mVote == 1)
                voteYes++;
-            else if(walk->mVote == 2)
+            else if(client->mVote == 2)
                voteNo++;
-            else if(!walk->isRobot())
+            else if(!client->isRobot())
                voteNothing++;
          }
+
          bool votePass = voteYes     * mSettings->getIniSettings()->voteYesStrength + 
                          voteNo      * mSettings->getIniSettings()->voteNoStrength  + 
                          voteNothing * mSettings->getIniSettings()->voteNothingStrength > 0;
          if(votePass)
          {
-            GameType *gt = getGameType();
             mVoteTimer = 0;
             switch(mVoteType)
             {
             case 0:
                mNextLevel = mVoteNumber;
-               if(gt)
-                  gt->gameOverManGameOver();
+               if(mGameType)
+                  mGameType->gameOverManGameOver();
                break;
             case 1:
-               if(gt)
+               if(mGameType)
                {
-                  gt->extendGameTime(mVoteNumber);                           // Increase "official time"
-                  gt->s2cSetTimeRemaining(gt->getRemainingGameTimeInMs());   // Broadcast time to clients
+                  mGameType->extendGameTime(mVoteNumber);                                  // Increase "official time"
+                  mGameType->s2cSetTimeRemaining(mGameType->getRemainingGameTimeInMs());   // Broadcast time to clients
                }
-               break;
+               break;   
             case 2:
-               if(gt)
+               if(mGameType)
                {
-                  gt->extendGameTime(S32(mVoteNumber - gt->getRemainingGameTimeInMs()));
-                  gt->s2cSetTimeRemaining(gt->getRemainingGameTimeInMs());    // Broadcast time to clients
+                  mGameType->extendGameTime(S32(mVoteNumber - mGameType->getRemainingGameTimeInMs()));
+                  mGameType->s2cSetTimeRemaining(mGameType->getRemainingGameTimeInMs());    // Broadcast time to clients
                }
                break;
             case 3:
-               if(gt)
+               if(mGameType)
                {
-                  gt->setWinningScore(mVoteNumber);
-                  gt->s2cChangeScoreToWin(mVoteNumber, mVoteClientName);    // Broadcast score to clients
+                  mGameType->setWinningScore(mVoteNumber);
+                  mGameType->s2cChangeScoreToWin(mVoteNumber, mVoteClientName);    // Broadcast score to clients
                }
                break;
             case 4:
-               if(gt)
+               if(mGameType)
                {
-                  for(GameConnection *walk = GameConnection::getClientList(); walk; walk = walk->getNextClient())
-                     if(walk->getClientName() == mVoteClientName)
-                        gt->changeClientTeam(walk, mVoteNumber);
+                  for(S32 i = 0; i < getClientCount(); i++)
+                     if(getClient(i)->getClientName() == mVoteClientName)
+                        mGameType->changeClientTeam(getClient(i), mVoteNumber);
                }
                break;
             case 5:
-               if(gt)
+               if(mGameType)
                {
-                  for(GameConnection *walk = GameConnection::getClientList(); walk; walk = walk->getNextClient())
-                     if(walk->getClientName() == mVoteClientName)
-                        gt->changeClientTeam(walk, mVoteNumber);
+                  for(S32 i = 0; i < getClientCount(); i++)
+                     if(getClient(i)->getClientName() == mVoteClientName)
+                        mGameType->changeClientTeam(getClient(i), mVoteNumber);
                }
                break;
             }
          }
+
          Vector<StringTableEntry> e;
          Vector<StringPtr> s;
          Vector<S32> i;
@@ -1738,11 +1749,13 @@ void ServerGame::idle(U32 timeDelta)
          i.push_back(voteNo);
          i.push_back(voteNothing);
          e.push_back(votePass ? "Pass" : "Fail");
-         for(GameConnection *walk = GameConnection::getClientList(); walk; walk = walk->getNextClient())
+
+         for(S32 i = 0; i < getClientCount(); i++)
          {
-            walk->s2cDisplayMessageESI(GameConnection::ColorAqua, SFXNone, "Vote %e0 - %i0 yes, %i1 no, %i2 not voted", e, s, i);
-            if(!votePass && walk->getClientName() == mVoteClientName)
-               walk->mVoteTime = mSettings->getIniSettings()->voteRetryLength * 1000;
+            getClient(i)->s2cDisplayMessageESI(GameConnection::ColorAqua, SFXNone, "Vote %e0 - %i0 yes, %i1 no, %i2 not voted", e, s, i);
+
+            if(!votePass && getClient(i)->getClientName() == mVoteClientName)
+               getClient(i)->mVoteTime = mSettings->getIniSettings()->voteRetryLength * 1000;
          }
       }
    }
@@ -1806,16 +1819,19 @@ void ServerGame::idle(U32 timeDelta)
    if(mGameSuspended)     // If game is suspended, we need do nothing more
       return;
 
-   for(GameConnection *walk = GameConnection::getClientList(); walk ; walk = walk->getNextClient())
+   for(S32 i = 0; i < getClientCount(); i++)
    {
-      if(! walk->isRobot())
+      GameConnection *client = getClient(i);
+
+      if(!client->isRobot())
       {
-         walk->addToTimeCredit(timeDelta);
-         walk->updateAuthenticationTimer(timeDelta);
-         if(walk->mVoteTime <= timeDelta)
-            walk->mVoteTime = 0;
+         client->addToTimeCredit(timeDelta);
+         client->updateAuthenticationTimer(timeDelta);
+
+         if(client->mVoteTime <= timeDelta)
+            client->mVoteTime = 0;
          else
-            walk->mVoteTime -= timeDelta;
+            client->mVoteTime -= timeDelta;
       }
    }
 
@@ -1912,9 +1928,14 @@ S32 ServerGame::addUploadedLevelInfo(const char *filename, LevelInfo &info)
    mLevelInfos.push_back(info);
 
    // Let levelChangers know about the new level
-   for(GameConnection *walk = GameConnection::getClientList(); walk; walk = walk->getNextClient())
-      if(walk->isLevelChanger())
-         walk->s2cAddLevel(info.levelName, info.levelType);
+
+   for(S32 i = 0; i < getClientCount(); i++)
+   {
+      GameConnection *client = getClient(i);
+
+      if(client->isLevelChanger())
+         client->s2cAddLevel(info.levelName, info.levelType);
+   }
 
    return mLevelInfos.size() - 1;
 }

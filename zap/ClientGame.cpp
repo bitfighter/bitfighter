@@ -696,6 +696,7 @@ void ClientGame::changeServerParam(GameConnection::ParamType type, const Vector<
 }
 
 
+// Returns true if it finds a case-sensitive match, or only 1 case-insensitive matches, false otherwise
 bool ClientGame::checkName(const string &name)
 {
    S32 potentials = 0;
@@ -706,12 +707,11 @@ bool ClientGame::checkName(const string &name)
       if(!gameType->getClient(i).isValid())
          continue;
 
-      // TODO: make this work with StringTableEntry comparison rather than strcmp; might need to add new method
-      const char *n = gameType->getClient(i)->name.getString();
+      StringTableEntry n = gameType->getClient(i)->name;
 
-      if(!strcmp(n, name.c_str()))           // Exact match
+      if(n == name)           // Exact match
          return true;
-      else if(!stricmp(n, name.c_str()))     // Case insensitive match
+      else if(!stricmp(n.getString(), name.c_str()))     // Case insensitive match
          potentials++;
    }
 

@@ -87,8 +87,6 @@ private:
    GameConnection *mNext;
    GameConnection *mPrev;
 
-   static GameConnection gClientList;
-
 #ifndef ZAP_DEDICATED
    ClientGame *mClientGame;      // Sometimes this is NULL
 #endif
@@ -126,7 +124,6 @@ public:
    U32 mVoteTime;
    bool mChatMute;
 
-   void linkToClientList();
    Vector<LevelInfo> mLevelInfos;
 
    static const S32 MASTER_SERVER_FAILURE_RETRY_TIME = 10000;   // 10 secs
@@ -296,8 +293,6 @@ public:
    TNL_DECLARE_RPC(s2rSendDataParts, (U8 type, ByteBufferPtr data));
    bool s2rUploadFile(const char *filename, U8 type);
 
-   static GameConnection *getClientList();
-   static S32 getClientCount();
    static bool onlyClientIs(GameConnection *client);
    //static GameConnection *findClient(const Nonce &clientId);   // Loop through the client list, return first match
 
@@ -309,8 +304,6 @@ public:
    bool isAuthenticated() { return mIsVerified; }
    void requestAuthenticationVerificationFromMaster();
    void updateAuthenticationTimer(U32 timeDelta);
-
-   GameConnection *getNextClient();
 
    void displayMessageE(U32 color, U32 sfx, StringTableEntry formatString, Vector<StringTableEntry> e);
 

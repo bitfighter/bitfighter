@@ -241,44 +241,52 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sSetAuthenticated, (Vector<
    if(!mGame->isServer())
       return;
 
+   ServerGame *serverGame = (ServerGame *)mGame;
+
    Nonce clientId(id);     // Reconstitute our id into a nonce
 
-   for(GameConnection *walk = GameConnection::getClientList(); walk; walk = walk->getNextClient())
-      if(walk->getClientId()->isValid() && *walk->getClientId() == clientId)  // Robots don't have valid clientID
+   for(S32 i = 0; i < serverGame->getClientCount(); i++)
+   {
+      GameConnection *client = serverGame->getClient(i);
+
+      if(client ->getClientId()->isValid() && *client ->getClientId() == clientId)  // Robots don't have valid clientID
       {
          if(status == AuthenticationStatusAuthenticatedName)
          {
-            walk->setAuthenticated(true);
-            //auto-rename other non-Authenticated clients to avoid stealing the authenticated name.
-            for(GameConnection *walk2 = GameConnection::getClientList(); walk2; walk2 = walk2->getNextClient())
+            client ->setAuthenticated(true);
+
+            // Auto-rename other non-authenticated clients to avoid stealing the authenticated name
+            for(S32 j = 0; j < serverGame->getClientCount(); j++)
             {
-               if(walk2->getClientName() == name && !walk2->isAuthenticated() )
+               if(serverGame->getClient(j)->getClientName() == name && !serverGame->getClient(j)->isAuthenticated())
                {
-                  //walk2->setClientName(GameConnection::makeUnique(walk2->getClientName().getString()).c_str());
-                  updateClientChangedName(walk2, GameConnection::makeUnique(walk2->getClientName().getString()).c_str());
+                  updateClientChangedName(serverGame->getClient(j), 
+                                          GameConnection::makeUnique(serverGame->getClient(j)->getClientName().getString()).c_str());
                           //makeUnique will think the name is in use by self, and rename it.
 
                }
             }
-            StringTableEntry oldName = walk->getClientName();
-            walk->setClientName(StringTableEntry(""));       //avoid unique self
+
+            StringTableEntry oldName = client->getClientName();
+            client->setClientName(StringTableEntry(""));       //avoid unique self
             StringTableEntry uniqueName = GameConnection::makeUnique(name.getString()).c_str();  //new name
-            walk->setClientName(oldName);                   //restore name to properly get it updated to clients.
-            if(walk->getClientName() != uniqueName)
-               updateClientChangedName(walk, uniqueName);
+            client->setClientName(oldName);                   //restore name to properly get it updated to clients.
+            if(client->getClientName() != uniqueName)
+               updateClientChangedName(client, uniqueName);
          }
          else if(status == AuthenticationStatusUnauthenticatedName)
          {  // braces needed
-            if(walk->getAuthenticationCounter() > 1)     // Client gets two bites at the apple, to cover rare race condition
-               walk->setAuthenticated(false);
+            if(client->getAuthenticationCounter() > 1)     // Client gets two bites at the apple, to cover rare race condition
+               client->setAuthenticated(false);
             else
-               walk->resetAuthenticationTimer();
+               client->resetAuthenticationTimer();
          }
          else if(status == AuthenticationStatusTryAgainLater)
-            walk->resetAuthenticationTimer();
+            client->resetAuthenticationTimer();
 
          break;
       }
+   }
 }
 
 

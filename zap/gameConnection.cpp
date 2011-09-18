@@ -56,18 +56,15 @@
 
 namespace Zap
 {
-// Global list of clients (if we're a server, created but never accessed if we're a client)
-   //TODO --> Convert to Vector<GameConnection> to avoid initial use of no arg constructor on client side
-GameConnection GameConnection::gClientList;
-
 
 TNL_IMPLEMENT_NETCONNECTION(GameConnection, NetClassGroupGame, true);
 
-// Constructor  -- I believe this is only used by server, except when initializing gClientList...
+// Constructor  -- I believe this is only used by server
 GameConnection::GameConnection()
 {
-   if(gServerGame)
-      mSettings = gServerGame->getSettings();      // TOTAL HACK!!
+   TNLAssert(gServerGame, "Client uses this?!?");
+
+   mSettings = gServerGame->getSettings();      // TOTAL HACK!!
 
    mVote = 0;
    mVoteTime = 0;
@@ -164,33 +161,6 @@ GameConnection::~GameConnection()
 }
 
 
-/// Adds this connection to the doubly linked list of clients.
-void GameConnection::linkToClientList()
-{
-   mNext = gClientList.mNext;
-   mPrev = gClientList.mNext->mPrev;
-   mNext->mPrev = this;
-   mPrev->mNext = this;
-}
-
-
-GameConnection *GameConnection::getClientList()       // static
-{
-   return gClientList.getNextClient();
-}
-
-
-S32 GameConnection::getClientCount()
-{
-   S32 count = 0;
-
-   for(GameConnection *walk = GameConnection::getClientList(); walk; walk = walk->getNextClient())
-      count++;
-
-   return count;
-}
-
-
 // Definitive, final declaration of whether this player is (or is not) verified on this server
 // Runs on both client (tracking other players) and server (tracking all players)
 void GameConnection::setAuthenticated(bool isAuthenticated)
@@ -211,31 +181,11 @@ void GameConnection::setAuthenticated(bool isAuthenticated)
 
 bool GameConnection::onlyClientIs(GameConnection *client)
 {
-   for(GameConnection *walk = GameConnection::getClientList(); walk; walk = walk->getNextClient())
-      if(walk != client)
+   for(S32 i = 0; i < gServerGame->getClientCount(); i++)
+      if(gServerGame->getClient(i) != client)
          return false;
 
    return true;
-}
-
-
-// Loop through the client list, return first (and hopefully only!) match
-// runs on server
-//GameConnection *GameConnection::findClient(const Nonce &clientId)
-//{
-//   for(GameConnection *walk = GameConnection::getClientList(); walk; walk = walk->getNextClient())
-//      if(*walk->getClientId() == clientId)
-//         return walk;
-//
-//   return NULL;
-//}
-
-
-GameConnection *GameConnection::getNextClient()
-{
-   if(mNext == &gClientList)
-      return NULL;
-   return mNext;
 }
 
 
@@ -467,8 +417,9 @@ bool GameConnection::sEngineerDeployObject(U32 type)
       e.push_back(getClientName());
       e.push_back(type == EngineeredTurret ? "turret" : "force field");
    
-      for(GameConnection *walk = getClientList(); walk; walk = walk->getNextClient())
-         walk->s2cDisplayMessageE(ColorAqua, SFXNone, msg, e);
+      for(S32 i = 0; i < gServerGame->getClientCount(); i++)
+         gServerGame->getClient(i)->s2cDisplayMessageE(ColorAqua, SFXNone, msg, e);
+
       return true;
    }
    // else... fail silently?
@@ -642,8 +593,8 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
       folderManager->levelDir = candidate;
 
       // Send the new list of levels to all levelchangers
-      for(GameConnection *walk = getClientList(); walk; walk = walk->getNextClient())
-         if(walk->isLevelChanger())
+      for(S32 i = 0; i < gServerGame->getClientCount(); i++)
+         if(gServerGame->getClient(i)->isLevelChanger())
             sendLevelList();
 
       s2cDisplayMessage(ColorAqua, SFXNone, "Level folder changed");
@@ -700,22 +651,30 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
       // If we're clearning the level change password, quietly grant access to anyone who doesn't already have it
       if(!strcmp(param.getString(), ""))
       {
-         for(GameConnection *walk = getClientList(); walk; walk = walk->getNextClient())
-            if(!walk->isLevelChanger())
+         for(S32 i = 0; i < gServerGame->getClientCount(); i++)
+         {
+            GameConnection *client = gServerGame->getClient(i);
+
+            if(!client->isLevelChanger())
             {
-               walk->setIsLevelChanger(true);
-               walk->sendLevelList();
-               walk->s2cSetIsLevelChanger(true, false);     // Silently
+               client->setIsLevelChanger(true);
+               client->sendLevelList();
+               client->s2cSetIsLevelChanger(true, false);     // Silently
             }
+         }
       }
       else  // If setting a password, remove everyone's permissions (except admins)
       { 
-         for(GameConnection *walk = getClientList(); walk; walk = walk->getNextClient())
-            if(walk->isLevelChanger() && (! walk->isAdmin()))
+         for(S32 i = 0; i < gServerGame->getClientCount(); i++)
+         {
+            GameConnection *client = gServerGame->getClient(i);
+
+            if(client->isLevelChanger() && (!client->isAdmin()))
             {
-               walk->setIsLevelChanger(false);
-               walk->s2cSetIsLevelChanger(false, false);
+               client->setIsLevelChanger(false);
+               client->s2cSetIsLevelChanger(false, false);
             }
+         }
       }
    }
    else if(type == (U32)AdminPassword)
@@ -725,9 +684,10 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
    else if(type == (U32)ServerName)
    {
       msg = serverNameChanged;
+
       // If we've changed the server name, notify all the clients
-      for(GameConnection *walk = getClientList(); walk; walk = walk->getNextClient())
-         walk->s2cSetServerName(mSettings->getHostName());
+      for(S32 i = 0; i < gServerGame->getClientCount(); i++)
+         gServerGame->getClient(i)->s2cSetServerName(mSettings->getHostName());
    }
    else if(type == (U32)ServerDescr)
       msg = serverDescrChanged;
@@ -735,8 +695,6 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
       msg = serverLevelDeleted;
 
    s2cDisplayMessage(ColorRed, SFXNone, msg);      // Notify user their bidding has been done
-
-
 }
 
 
@@ -750,10 +708,13 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sAdminPlayerAction,
 
    // else...
 
-   GameConnection *theClient;
-   for(theClient = getClientList(); theClient; theClient = theClient->getNextClient())
-      if(theClient->getClientName() == playerName)
+   GameConnection *theClient = NULL;
+   for(S32 i = 0; i < gServerGame->getClientCount(); i++)
+      if(gServerGame->getClient(i)->getClientName() == playerName)
+      {
+         theClient = gServerGame->getClient(i);
          break;
+      }
 
    if(!theClient)    // Hmmm... couldn't find him.  Maybe the dude disconnected?
       return;
@@ -803,9 +764,10 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sAdminPlayerAction,
    default:
       return;
    }
+
    // Broadcast the message
-   for(GameConnection *walk = getClientList(); walk; walk = walk->getNextClient())
-      walk->s2cDisplayMessageE(ColorAqua, SFXIncomingMessage, msg, e);
+   for(S32 i = 0; i < gServerGame->getClientCount(); i++)
+      gServerGame->getClient(i)->s2cDisplayMessageE(ColorAqua, SFXIncomingMessage, msg, e);
 }
 
 
@@ -1196,8 +1158,8 @@ void GameConnection::c2sRequestLevelChange2(S32 newLevelIndex, bool isRelative)
 
    gServerGame->cycleLevel(newLevelIndex);
 
-   for(GameConnection *walk = getClientList(); walk; walk = walk->getNextClient())
-      walk->s2cDisplayMessageE(ColorYellow, SFXNone, msg, e);
+   for(S32 i = 0; i < gServerGame->getClientCount(); i++)
+      gServerGame->getClient(i)->s2cDisplayMessageE(ColorYellow, SFXNone, msg, e);
 }
 
 
@@ -1212,8 +1174,8 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestShutdown, (U16 time, StringPtr reaso
 
    gServerGame->setShuttingDown(true, time, mClientRef, reason.getString());
 
-   for(GameConnection *walk = getClientList(); walk; walk = walk->getNextClient())
-      walk->s2cInitiateShutdown(time, mClientRef->name, reason, walk == this);
+   for(S32 i = 0; i < gServerGame->getClientCount(); i++)
+      gServerGame->getClient(i)->s2cInitiateShutdown(time, mClientRef->name, reason, gServerGame->getClient(i) == this);
 }
 
 
@@ -1233,9 +1195,9 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestCancelShutdown, (), (), NetClassGrou
 
    logprintf(LogConsumer::ServerFilter, "User %s canceled shutdown", mClientRef->name.getString());
 
-   for(GameConnection *walk = getClientList(); walk; walk = walk->getNextClient())
-      if(walk != this)     // Don't send message to cancellor!
-         walk->s2cCancelShutdown();
+   for(S32 i = 0; i < gServerGame->getClientCount(); i++)
+      if(gServerGame->getClient(i) != this)     // Don't send message to cancellor!
+         gServerGame->getClient(i)->s2cCancelShutdown();
 
    gServerGame->setShuttingDown(false, 0, NULL, "");
 }
@@ -1542,10 +1504,11 @@ string GameConnection::makeUnique(string name)
    while(!unique)
    {
       unique = true;
-      for(GameConnection *walk = getClientList(); walk; walk = walk->getNextClient())
+
+      for(S32 i = 0; i < gServerGame->getClientCount(); i++)
       {
          // TODO:  How to combine these blocks?
-         if(proposedName == walk->mClientName.getString())          // Collision detected!
+         if(proposedName == gServerGame->getClient(i)->getClientName().getString())          // Collision detected!
          {
             unique = false;
 
@@ -1589,7 +1552,7 @@ string GameConnection::makeUnique(string name)
 // Runs on client and server?
 void GameConnection::onConnectionEstablished()
 {
-   U32 minPacketSendPeriod = 40; //50;   <== original zap setting
+   U32 minPacketSendPeriod = 40; //50;   <== original zap settings
    U32 minPacketRecvPeriod = 40; //50;
    U32 maxSendBandwidth = 65535; //2000;
    U32 maxRecvBandwidth = 65535; //2000;
@@ -1646,7 +1609,6 @@ void GameConnection::onConnectionEstablished()
    }
    else                 // Runs on server
    {
-      linkToClientList();              // Add to list of clients
       gServerGame->addClient(this);
       setGhostFrom(true);
       setGhostTo(false);

@@ -378,6 +378,8 @@ private:
    U32 mPlayerCount;
    void cleanUp();
 
+   Vector<GameConnection *> mClientList;
+
 public:
    ServerGame(const Address &address, GameSettings *settings, bool testMode, bool dedicated);    // Constructor
    virtual ~ServerGame();   // Destructor
@@ -415,8 +417,12 @@ public:
 
    bool isFull() { return mPlayerCount == mSettings->getMaxPlayers(); }          // More room at the inn?
 
-   void addClient(GameConnection *theConnection);
-   void removeClient(GameConnection *theConnection);
+   void addClient(GameConnection *client);
+   void removeClient(GameConnection *client);
+
+   GameConnection *getClient(S32 index) { return mClientList[index]; }
+   void addClientToList(GameConnection *client) { mClientList.push_back(client); }
+   S32 getClientCount() { return mClientList.size(); }
 
    void setShuttingDown(bool shuttingDown, U16 time, ClientRef *who, StringPtr reason);  
 
