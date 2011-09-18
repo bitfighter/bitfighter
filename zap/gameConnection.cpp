@@ -573,10 +573,18 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
       mSettings->setServerPassword(param.getString(), false);
    
    else if(type == (U32)ServerName)
+   {
       mSettings->setHostName(param.getString(), false);
-   
+      if(gServerGame->getConnectionToMaster())
+         gServerGame->getConnectionToMaster()->s2mChangeName(StringTableEntry(param.getString()));   
+   }
    else if(type == (U32)ServerDescr)
+   {
       mSettings->setHostDescr(param.getString(), false);
+
+      if(gServerGame->getConnectionToMaster())
+         gServerGame->getConnectionToMaster()->s2mServerDescription(StringTableEntry(param.getString()));
+   }
 
    else if(type == (U32)LevelDir)
    {
@@ -780,8 +788,8 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sAdminPlayerAction,
          {
             ConnectionParameters &p = theClient->getConnectionParameters();
             if(p.mIsArranged)
-               gServerGame->getNetInterface()->banHost(p.mPossibleAddresses[0], BanDuration);      // Banned for 30 seconds
-            gServerGame->getNetInterface()->banHost(theClient->getNetAddress(), BanDuration);      // Banned for 30 seconds
+               gServerGame->getSettings()->getBanList()->kickHost(p.mPossibleAddresses[0]);      // Banned for 30 seconds
+            gServerGame->getSettings()->getBanList()->kickHost(theClient->getNetAddress());      // Banned for 30 seconds
             theClient->disconnect(ReasonKickedByAdmin, "");
          }
 
@@ -1434,18 +1442,6 @@ bool GameConnection::readConnectRequest(BitStream *stream, NetConnection::Termin
    if(!Parent::readConnectRequest(stream, reason))
       return false;
 
-   if(gServerGame->isFull())
-   {
-      reason = ReasonServerFull;
-      return false;
-   }
-
-   if(gServerGame->getNetInterface()->isAddressBanned(getNetAddress()))
-   {
-      reason = ReasonKickedByAdmin;
-      return false;
-   }
-
    char buf[256];
 
    stream->readString(buf);
@@ -1483,13 +1479,28 @@ bool GameConnection::readConnectRequest(BitStream *stream, NetConnection::Termin
 
    name[len] = 0;    // Terminate string properly
 
-   // Now that we have the name, check if it is banned
+   // Now that we have the name, check if the client is banned
    if(gServerGame->getSettings()->getBanList()->isBanned(getNetAddress().toString(), string(name)))
    {
       reason = ReasonBanned;
       return false;
    }
 
+   // Was the client kicked temporarily?
+   if(gServerGame->getSettings()->getBanList()->isAddressKicked(getNetAddress()))
+   {
+      reason = ReasonKickedByAdmin;
+      return false;
+   }
+
+   // Is the server Full?
+   if(gServerGame->isFull())
+   {
+      reason = ReasonServerFull;
+      return false;
+   }
+
+   // Change name to be unique - i.e. if we have multiples of 'ChumpChange'
    mClientName = makeUnique(name).c_str();  // Unique name
    mClientNameNonUnique = name;             // For authentication non-unique name
 

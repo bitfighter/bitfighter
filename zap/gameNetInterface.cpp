@@ -41,50 +41,9 @@ GameNetInterface::GameNetInterface(const Address &bindAddress, Game *theGame) : 
 };
 
 
-// Add an address to the ban list
-void GameNetInterface::banHost(const Address &bannedAddress, U32 bannedMilliseconds)
-{
-   BannedHost h;
-   h.theAddress = bannedAddress;
-   h.banDuration = bannedMilliseconds;
-   mBanList.push_back(h);
-}
-
-
-// Check if address is on the temporary ban list
-bool GameNetInterface::isAddressBanned(const Address &theAddress)
-{
-   for(S32 i = 0; i < mBanList.size(); i++)
-      if(theAddress.isEqualAddress(mBanList[i].theAddress))
-         return true;
-
-   return false;
-}
-
-
 void GameNetInterface::processPacket(const Address &sourceAddress, BitStream *pStream)
 {
-   // can cause problems when one of multiple player using same IP address is kicked, causing all player in same IP address to disconnect. Moved to GameConnection::readConnectRequest (sam)
-   //for(S32 i = 0; i < mBanList.size(); i++)
-      //if(sourceAddress.isEqualAddress(mBanList[i].theAddress))
-         //return;        // Ignore packets from banned hosts
-
    Parent::processPacket(sourceAddress, pStream);
-}
-
-
-void GameNetInterface::checkBanlistTimeouts(U32 timeElapsed)
-{
-   for(S32 i = 0; i < mBanList.size(); )
-   {
-      if(mBanList[i].banDuration < timeElapsed)
-         mBanList.erase_fast(i);
-      else
-      {
-         mBanList[i].banDuration -= timeElapsed;
-         i++;
-      }
-   }
 }
 
 

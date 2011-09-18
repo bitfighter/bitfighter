@@ -131,14 +131,6 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sClientRequestedArrangedCon
    for(S32 i = 0; i < possibleAddresses.size(); i++)
       fullPossibleAddresses.push_back(Address(possibleAddresses[i]));
 
-   // Check if the requestor is banned on this server
-   if(mGame->getNetInterface()->isAddressBanned(fullPossibleAddresses[0]))
-   {
-      logprintf(LogConsumer::LogConnection, "Blocking connection from banned address %s", fullPossibleAddresses[0].toString());
-      s2mRejectArrangedConnection(requestId, connectionParameters);
-      return;
-   }
-
    // Ok, let's do the arranged connection!
    U8 data[Nonce::NonceSize * 2 + SymmetricCipher::KeySize * 2];
 
@@ -441,10 +433,7 @@ void MasterServerConnection::onConnectTerminated(TerminationReason reason, const
    {
       TNLAssert(dynamic_cast<ClientGame *>(mGame), "mGame is not ClientGame");
 
-      //((ClientGame *)mGame)->onConnectionTerminated(getNetAddress(), reason, reasonStr);
-      // Don't want to get Connection Terminated message interrupting the game when Client lost connection to master
-
-      // TODO: put something here?
+      ((ClientGame *)mGame)->onConnectionToMasterTerminated(reason, reasonStr);
    }
 #endif
 }

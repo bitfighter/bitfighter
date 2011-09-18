@@ -160,7 +160,7 @@ public:
       ParamTypeCount          // Must be last
    };
 
-   static const S32 BanDuration = 30000;           // Players are banned for 30secs after being kicked
+  // static const S32 BanDuration = 30000;           // Players are banned for 30secs after being kicked
 
    GameConnection();         // Constructor
 #ifndef ZAP_DEDICATED

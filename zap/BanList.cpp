@@ -44,6 +44,9 @@ BanList::BanList(const string &iniDir)
 {
    banListTokenDelimiter = "|";
    banListWildcardCharater = "*";
+
+   defaultBanDurationMinutes = 60;
+   kickDurationMilliseconds = 30000;     // 30 seconds is a good breather
 }
 
 
@@ -54,17 +57,45 @@ BanList::~BanList()
 }
 
 
-bool BanList::addToBanList(BanItem *banItem)
+string addressToString(const Address &address)
 {
-   // TODO call this from an admin command?
-   return false;
+   // Build proper IP Address string
+   char addressBuffer[16];
+   dSprintf(addressBuffer, 16, "%d.%d.%d.%d", U8(address.netNum[0] >> 24 ),
+         U8 (address.netNum[0] >> 16 ), U8 (address.netNum[0] >> 8), U8(address.netNum[0]));
+
+   return string(addressBuffer);
 }
 
 
-bool BanList::removeFromBanList(BanItem *banItem)
+// Custom toString method so we don't have to compile extra boost sources
+// This is super slow because of using streams...  not sure how to fix
+string ptimeToIsoString(const ptime &ptime)
+{
+   ostringstream formatter;
+   formatter.imbue(locale(cout.getloc(), new boost::posix_time::time_facet("%Y%m%dT%H%M%S")));
+   formatter << ptime;
+
+   return formatter.str();
+}
+
+
+void BanList::addToBanList(const Address &address, S32 durationMinutes)
+{
+   BanItem banItem;
+   banItem.durationMinutes = itos(durationMinutes);
+   banItem.address = addressToString(address);
+   banItem.nickname = "*";
+   banItem.startDateTime = ptimeToIsoString(second_clock::local_time());
+
+   serverBanList.push_back(banItem);
+}
+
+
+void BanList::removeFromBanList(const Address &address)
 {
    // TODO call this from an admin command?
-   return false;
+   return;
 }
 
 
@@ -84,13 +115,13 @@ bool BanList::processBanListLine(const string &line)
          return false;
 
    // IP, nickname, startTime, duration <- in this order
-   string ipAddress = words[0];
+   string address = words[0];
    string nickname = words[1];
    string startDateTime = words[2];
    string durationMinutes = words[3];
 
    // Validate IP address string
-   if (!(Address(ipAddress.c_str()).isValid()) && ipAddress.compare(banListWildcardCharater) != 0)
+   if (!(Address(address.c_str()).isValid()) && address.compare(banListWildcardCharater) != 0)
       return false;
 
    // nickname could be anything...
@@ -116,7 +147,7 @@ bool BanList::processBanListLine(const string &line)
 
    // Now finally add to banList
    BanItem banItem;
-   banItem.ipAddress = ipAddress;
+   banItem.address = address;
    banItem.nickname = nickname;
    banItem.startDateTime = startDateTime;
    banItem.durationMinutes = durationMinutes;
@@ -132,27 +163,22 @@ string BanList::banItemToString(BanItem *banItem)
 {
    // IP, nickname, startTime, duration <- in this order
    return
-         banItem->ipAddress + banListTokenDelimiter +
+         banItem->address + banListTokenDelimiter +
          banItem->nickname + banListTokenDelimiter +
          banItem->startDateTime + banListTokenDelimiter +
          banItem->durationMinutes;
 }
 
 
-bool BanList::isBanned(Address address, string nickname)
+bool BanList::isBanned(const Address &address, const string &nickname)
 {
-   // Build proper IP Address string
-   char addressBuffer[16];
-   dSprintf(addressBuffer, 16, "%d.%d.%d.%d", U8(address.netNum[0] >> 24 ),
-         U8 (address.netNum[0] >> 16 ), U8 (address.netNum[0] >> 8), U8(address.netNum[0]));
-
-   string ipAddress(addressBuffer);
+   string addressString = addressToString(address);
    ptime currentTime = second_clock::local_time();
 
    for (S32 i = 0; i < serverBanList.size(); i++)
    {
       // Check IP
-      if (ipAddress.compare(serverBanList[i].ipAddress) != 0 && serverBanList[i].ipAddress.compare("*") != 0)
+      if (addressString.compare(serverBanList[i].address) != 0 && serverBanList[i].address.compare("*") != 0)
          continue;
 
       // Check nickname
@@ -171,9 +197,28 @@ bool BanList::isBanned(Address address, string nickname)
    return false;
 }
 
+
 string BanList::getDelimiter()
 {
    return banListTokenDelimiter;
+}
+
+
+string BanList::getWildcard()
+{
+   return banListWildcardCharater;
+}
+
+
+S32 BanList::getKickDuration()
+{
+   return kickDurationMilliseconds;
+}
+
+
+S32 BanList::getDefaultBanDuration()
+{
+   return defaultBanDurationMinutes;
 }
 
 
@@ -181,9 +226,7 @@ Vector<string> BanList::banListToString()
 {
    Vector<string> banList;
    for(S32 i = 0; i < serverBanList.size(); i++)
-   {
       banList.push_back(banItemToString(&serverBanList[i]));
-   }
 
    return banList;
 }
@@ -196,6 +239,40 @@ void BanList::loadBanList(const Vector<string> &banItemList)
          logprintf("Ban list item on line %d is malformed: %s", i+1, banItemList[i].c_str());
       else
          logprintf("Loading ban: %s", banItemList[i].c_str());
+}
+
+
+void BanList::kickHost(const Address &address)
+{
+   KickedHost h;
+   h.address = address;
+   h.kickTimeRemaining = kickDurationMilliseconds;
+   serverKickList.push_back(h);
+}
+
+
+bool BanList::isAddressKicked(const Address &address)
+{
+   for(S32 i = 0; i < serverKickList.size(); i++)
+      if(address.isEqualAddress(serverKickList[i].address))
+         return true;
+
+   return false;
+}
+
+
+void BanList::updateKickList(U32 timeElapsed)
+{
+   for(S32 i = 0; i < serverKickList.size(); )
+   {
+      if(serverKickList[i].kickTimeRemaining < timeElapsed)
+         serverKickList.erase_fast(i);
+      else
+      {
+         serverKickList[i].kickTimeRemaining -= timeElapsed;
+         i++;
+      }
+   }
 }
 
 

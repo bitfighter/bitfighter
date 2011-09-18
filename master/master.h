@@ -92,7 +92,6 @@ protected:
    ///
    /// @{
 
-   U32              mRegionCode;        ///< The region code in which this server operates.
    StringTableEntry mVersionString;     ///< The unique version string for this server or client
                                         ///< Only used in version 0 protocol.  In subsequent versions, the Version vars
                                         ///< below will hold actual version numbers, and this var will hold a "+".
@@ -102,12 +101,14 @@ protected:
                                         ///     using this same version)
    U32              mClientBuild;       ///< Build number of the client (different builds may use same protocols)
 
-   // The following are mostly dummy values at the moment... we may use them later.
-   U32              mCPUSpeed;          ///< The CPU speed of this server.
    U32              mInfoFlags;         ///< Info flags describing this server.
    U32              mPlayerCount;       ///< Current number of players on this server.
    U32              mMaxPlayers;        ///< Maximum number of players on this server.
    U32              mNumBots;           ///< Current number of bots on this server.
+
+   // The following are mostly dummy values at the moment... we may use them later.
+   U32              mRegionCode;        ///< The region code in which this server operates.
+   U32              mCPUSpeed;          ///< The CPU speed of this server.
 
    StringTableEntry mLevelName;
    StringTableEntry mLevelType;
@@ -276,8 +277,12 @@ public:
    TNL_DECLARE_RPC_OVERRIDE(c2mJoinGlobalChat, ());
    TNL_DECLARE_RPC_OVERRIDE(c2mLeaveGlobalChat, ());
 
-   // Got out-of-game chat message from client, need to relay it to others
    TNL_DECLARE_RPC_OVERRIDE(c2mSendChat, (StringPtr message));
+
+   // Got out-of-game chat message from client, need to relay it to others
+   TNL_DECLARE_RPC_OVERRIDE(s2mChangeName, (StringTableEntry name));
+   TNL_DECLARE_RPC_OVERRIDE(s2mServerDescription, (StringTableEntry descr));
+
    TNL_DECLARE_NETCONNECTION(MasterServerConnection);
 
 };

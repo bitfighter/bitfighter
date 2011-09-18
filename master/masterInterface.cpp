@@ -202,3 +202,9 @@ TNL_IMPLEMENT_RPC(MasterServerInterface, m2sSetAuthenticated, (Vector<U8> id, St
                               RangedU32<0,AuthenticationStatusCount> status ), (id, name, status ),
                   NetClassGroupMasterMask, RPCGuaranteed, RPCDirServerToClient, 5) {}
 
+
+TNL_IMPLEMENT_RPC(MasterServerInterface, s2mChangeName, (StringTableEntry name), (name),
+                  NetClassGroupMasterMask, RPCGuaranteedOrderedBigData, RPCDirClientToServer, 7) {}
+
+TNL_IMPLEMENT_RPC(MasterServerInterface, s2mServerDescription, (StringTableEntry descr), (descr),
+                  NetClassGroupMasterMask, RPCGuaranteedOrderedBigData, RPCDirClientToServer, 7) {}

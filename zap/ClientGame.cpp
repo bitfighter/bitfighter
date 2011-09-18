@@ -765,15 +765,12 @@ void ClientGame::onConnectionTerminated(const Address &serverAddress, NetConnect
          break;
 
       case NetConnection::ReasonKickedByAdmin:
-         ui->setMessage(2, "You were kicked off the server by an admin,");
-         ui->setMessage(3, "and have been temporarily banned.");
-         ui->setMessage(5, "You can try another server, host your own,");
-         ui->setMessage(6, "or try the server that kicked you again later.");
+         ui->setMessage(2, "You were kicked off the server by an admin.");
+         ui->setMessage(4, "You can try another server, host your own,");
+         ui->setMessage(5, "or try the server that kicked you again later.");
          getUIManager()->getNameEntryUserInterface()->activate();
          ui->activate();
 
-         // Add this server to our list of servers not to display for a spell...
-         getUIManager()->getQueryServersUserInterface()->addHiddenServer(serverAddress, Platform::getRealMilliseconds() + GameConnection::BanDuration);
          break;
 
       case NetConnection::ReasonBanned:
@@ -827,11 +824,7 @@ void ClientGame::onConnectionToMasterTerminated(NetConnection::TerminationReason
          ui->setMessage(6, "speaking, you should never see this message again!");
          ui->activate();
 
-         if(getConnectionToServer())
-            setReadyToConnectToMaster(false);  // New ID might cause Authentication (underline name) problems if connected to game server...
-         else
-            getClientInfo()->id.getRandom();        // Get another ID, if not connected to game server
-         break;
+         getClientInfo()->id.getRandom();        // Get a different ID and retry to successfully connect to master
 
       case NetConnection::ReasonBadLogin:
          ui->setMessage(2, "Unable to log you in with the username/password you");
@@ -901,10 +894,9 @@ void ClientGame::onConnectTerminated(const Address &serverAddress, NetConnection
       ui->reset();
       ui->setTitle("Connection Terminated");
 
-      ui->setMessage(2, "You were kicked off the server by an admin,");
-      ui->setMessage(3, "and have been temporarily banned.");
-      ui->setMessage(5, "You can try another server, host your own,");
-      ui->setMessage(6, "or try the server that kicked you again later.");
+      ui->setMessage(2, "You were kicked off the server by an admin.");
+      ui->setMessage(4, "You can try another server, host your own,");
+      ui->setMessage(5, "or try the server that kicked you again later.");
 
       getUIManager()->getMainMenuUserInterface()->activate();
       ui->activate();
