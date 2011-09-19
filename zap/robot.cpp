@@ -1977,7 +1977,8 @@ void Robot::spawn()
       setName(GameConnection::makeUnique("Robot").c_str());
 
    gc->setClientName(getName());
-   ((ServerGame *)getGame())->addClientToList(gc);
+   ((ServerGame *)getGame())->addClientToList(gc);    // Really need this?
+
    gc->setControlObject(this);
    gc->setIsRobot(true);
    

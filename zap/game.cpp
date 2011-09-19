@@ -1402,6 +1402,7 @@ void ServerGame::cycleLevel(S32 nextLevel)
    }
 }
 
+
 // Enter suspended animation mode
 void ServerGame::suspendGame()
 {
@@ -1544,35 +1545,51 @@ bool ServerGame::loadLevel(const string &levelFileName)
 }
 
 
-void ServerGame::addClient(GameConnection *theConnection)
+void ServerGame::addClient(GameConnection *client)
 {
    // If client has level change or admin permissions, send a list of levels and their types to the connecting client
-   if(theConnection->isLevelChanger() || theConnection->isAdmin())
-      theConnection->sendLevelList();
+   if(client->isLevelChanger() || client->isAdmin())
+      client->sendLevelList();
 
    // If we're shutting down, display a notice to the user
    if(mShuttingDown)
-      theConnection->s2cInitiateShutdown(mShutdownTimer.getCurrent() / 1000, mShutdownOriginator->getClientName(), 
+      client->s2cInitiateShutdown(mShutdownTimer.getCurrent() / 1000, mShutdownOriginator->getClientName(), 
                                          "Sorry -- server shutting down", false);
 
    if(mGameType.isValid())
-      mGameType->serverAddClient(theConnection);
+      mGameType->serverAddClient(client);
 
    mPlayerCount++;
 
    if(mDedicated)
       SoundSystem::playSoundEffect(SFXPlayerJoined, 1);
+
+    addClientToList(client);
 }
 
 
-void ServerGame::removeClient(GameConnection *theConnection)
+void ServerGame::removeClient(GameConnection *client)
 {
    if(mGameType.isValid())
-      mGameType->serverRemoveClient(theConnection);
+      mGameType->serverRemoveClient(client);
+
    mPlayerCount--;
 
    if(mDedicated)
       SoundSystem::playSoundEffect(SFXPlayerLeft, 1);
+
+   removeClientFromList(client);
+}
+
+
+void ServerGame::removeClientFromList(GameConnection *client)
+{
+   for(S32 i = 0; i < mClientList.size(); i++)
+      if(mClientList[i] == client)
+      {
+         mClientList.erase_fast(i);
+         return;
+      }
 }
 
 
@@ -1788,10 +1805,9 @@ void ServerGame::idle(U32 timeDelta)
       static U32 prevPlayerCount;
       if(masterConn && masterConn->isEstablished())
       {
-         // Only update if something is different.
+         // Only update if something is different
          if(prevCurrentLevelName != getCurrentLevelName() || prevCurrentLevelType != getCurrentLevelType() || prevRobotCount != getRobotCount() || prevPlayerCount != mPlayerCount)
          {
-            //logprintf("UPDATE");
             prevCurrentLevelName = getCurrentLevelName();
             prevCurrentLevelType = getCurrentLevelType();
             prevRobotCount = getRobotCount();

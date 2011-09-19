@@ -120,6 +120,7 @@ public:
 
    void clearStats();
 
+   // Players & bots on each team:
    // Note that these values need to be precalulated before they are ready for use; they are not dynamically updated!
    S32 getPlayerCount() { return mPlayerCount; }                  // Get number of human players on team
    S32 getBotCount() { return mBotCount; }                        // Get number of bots on team

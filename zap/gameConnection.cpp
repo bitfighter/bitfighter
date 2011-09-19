@@ -704,7 +704,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sAdminPlayerAction,
    NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
    if(!isAdmin())
-      return;              // do nothing --> non-admins have no pull here
+      return;              // Do nothing --> non-admins have no pull here
 
    // else...
 
@@ -1572,7 +1572,7 @@ void GameConnection::onConnectionEstablished()
    if(isInitiator())    // Runs on client
    {
 #ifndef ZAP_DEDICATED
-      mClientGame->setInCommanderMap(false);       // Start game in regular mode.
+      mClientGame->setInCommanderMap(false);       // Start game in regular mode
       mClientGame->clearZoomDelta();               // No in zoom effect
       setGhostFrom(false);
       setGhostTo(true);
