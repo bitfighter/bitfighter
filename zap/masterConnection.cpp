@@ -245,32 +245,33 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sSetAuthenticated, (Vector<
 
    Nonce clientId(id);     // Reconstitute our id into a nonce
 
-   for(S32 i = 0; i < serverGame->getClientCount(); i++)
+   for(S32 i = 0; i < serverGame->getGameType()->getClientCount(); i++)
    {
-      GameConnection *client = serverGame->getClient(i);
+      GameConnection *client = serverGame->getGameType()->getClient(i)->getConnection();
 
-      if(client ->getClientId()->isValid() && *client ->getClientId() == clientId)  // Robots don't have valid clientID
+      if(client->getClientId()->isValid() && *client ->getClientId() == clientId)  // Robots don't have valid clientID
       {
          if(status == AuthenticationStatusAuthenticatedName)
          {
-            client ->setAuthenticated(true);
+            client->setAuthenticated(true);
 
             // Auto-rename other non-authenticated clients to avoid stealing the authenticated name
-            for(S32 j = 0; j < serverGame->getClientCount(); j++)
+            for(S32 j = 0; j < serverGame->getGameType()->getClientCount(); j++)
             {
-               if(serverGame->getClient(j)->getClientName() == name && !serverGame->getClient(j)->isAuthenticated())
-               {
-                  updateClientChangedName(serverGame->getClient(j), 
-                                          GameConnection::makeUnique(serverGame->getClient(j)->getClientName().getString()).c_str());
-                          //makeUnique will think the name is in use by self, and rename it.
+               GameConnection *conn2 = serverGame->getGameType()->getClient(j)->getConnection();
 
+               if(conn2->getClientName() == name && !conn2->isAuthenticated())
+               {
+                  //makeUnique will think the name is in use by self, and rename it.
+                  updateClientChangedName(conn2, GameConnection::makeUnique(conn2->getClientName().getString()).c_str());
                }
             }
 
             StringTableEntry oldName = client->getClientName();
             client->setClientName(StringTableEntry(""));       //avoid unique self
-            StringTableEntry uniqueName = GameConnection::makeUnique(name.getString()).c_str();  //new name
+            StringTableEntry uniqueName = GameConnection::makeUnique(name.getString()).c_str();  // The new name
             client->setClientName(oldName);                   //restore name to properly get it updated to clients.
+
             if(client->getClientName() != uniqueName)
                updateClientChangedName(client, uniqueName);
          }

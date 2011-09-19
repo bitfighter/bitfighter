@@ -293,9 +293,6 @@ public:
    TNL_DECLARE_RPC(s2rSendDataParts, (U8 type, ByteBufferPtr data));
    bool s2rUploadFile(const char *filename, U8 type);
 
-   static bool onlyClientIs(GameConnection *client);
-   //static GameConnection *findClient(const Nonce &clientId);   // Loop through the client list, return first match
-
    Nonce *getClientId() { return &mClientId; }
 
    void setAuthenticated(bool isVerified);    // Runs on server only, after receiving a message from the master, or on local connection

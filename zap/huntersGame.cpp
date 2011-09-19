@@ -210,8 +210,7 @@ void HuntersGameType::itemDropped(Ship *ship, MoveItem *item)
 
    StringTableEntry *ste = (flagCount > 1) ? &dropManyString : &dropOneString;
 
-   for(S32 i = 0; i < getClientCount(); i++)
-      getClient(i)->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagDrop, *ste, e);
+   broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagDrop, *ste, e);
 }
 
 
@@ -347,13 +346,12 @@ void HuntersGameType::idle(GameObject::IdleCallPath path, U32 deltaT)
       static StringTableEntry msg("The Nexus is now OPEN!");
 
       // Broadcast a message
-      for(S32 i = 0; i < getClientCount(); i++)
-        getClient(i)->clientConnection->s2cDisplayMessage(GameConnection::ColorNuclearGreen, SFXFlagSnatch, msg);
+      broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagSnatch, msg);
 
       // Check if anyone is already in the Nexus, examining each client's ship in turn...
       for(S32 i = 0; i < getClientCount(); i++)
       {
-         Ship *client_ship = dynamic_cast<Ship *>(getClient(i)->clientConnection->getControlObject());
+         Ship *client_ship = dynamic_cast<Ship *>(getClient(i)->getConnection()->getControlObject());
 
          if(!client_ship)
             continue;
@@ -370,8 +368,7 @@ void HuntersGameType::idle(GameObject::IdleCallPath path, U32 deltaT)
       s2cSetNexusTimer(mNexusTimer.getCurrent(), mNexusIsOpen);
 
       static StringTableEntry msg("The Nexus is now CLOSED.");
-      for(S32 i = 0; i < getClientCount(); i++)
-         getClient(i)->clientConnection->s2cDisplayMessage(GameConnection::ColorNuclearGreen, SFXFlagDrop, msg);
+      broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagDrop, msg);
    }
 
    // Advance all flagSpawn timers and see if it's time for a new flag

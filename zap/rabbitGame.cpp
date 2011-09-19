@@ -285,8 +285,7 @@ void RabbitGameType::idle(GameObject::IdleCallPath path, U32 deltaT)
 
                static StringTableEntry returnString("The carrot has been returned!");
 
-               for(S32 i = 0; i < getClientCount(); i++)
-                  getClient(i)->clientConnection->s2cDisplayMessageE( GameConnection::ColorNuclearGreen, SFXFlagReturn, returnString, Vector<StringTableEntry>() );
+               broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagReturn, returnString, Vector<StringTableEntry>());
             }
          }
       }

@@ -1977,7 +1977,7 @@ void Robot::spawn()
       setName(GameConnection::makeUnique("Robot").c_str());
 
    gc->setClientName(getName());
-   ((ServerGame *)getGame())->addClientToList(gc);    // Really need this?  And why are bots never removed from client list?
+   //((ServerGame *)getGame())->getGameType()->addClientToList(gc);    // Really need this?  And why are bots never removed from client list?
 
    gc->setControlObject(this);
    gc->setIsRobot(true);

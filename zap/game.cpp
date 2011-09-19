@@ -864,8 +864,8 @@ bool ServerGame::voteStart(GameConnection *client, S32 type, S32 number)
    mVoteNumber = number;
    mVoteClientName = client->getClientName();
 
-   for(S32 i = 0; i < getClientCount(); i++)
-      getClient(i)->mVote = 0;
+   for(S32 i = 0; i < mGameType->getClientCount(); i++)
+      mGameType->getClient(i)->getConnection()->mVote = 0;
 
    client->mVote = 1;
    client->s2cDisplayMessage(GameConnection::ColorAqua, SFXNone, "Vote started, waiting for others to vote.");
@@ -880,19 +880,10 @@ void ServerGame::voteClient(GameConnection *client, bool voteYes)
    else if(client->mVote == (voteYes ? 1 : 2))
       client->s2cDisplayErrorMessage("!!! Already voted");
    else if(client->mVote == 0)
-   {
-      if(voteYes)
-         client->s2cDisplayMessage(GameConnection::ColorGreen, SFXNone, "Voted Yes");
-      else
-         client->s2cDisplayMessage(GameConnection::ColorGreen, SFXNone, "Voted No");
-   }
+      client->s2cDisplayMessage(GameConnection::ColorGreen, SFXNone, voteYes ? "Voted Yes" : "Voted No");
    else
-   {
-      if(voteYes)
-         client->s2cDisplayMessage(GameConnection::ColorGreen, SFXNone, "Changed vote to Yes");
-      else
-         client->s2cDisplayMessage(GameConnection::ColorGreen, SFXNone, "Changed vote to No");
-   }
+      client->s2cDisplayMessage(GameConnection::ColorGreen, SFXNone, voteYes ? "Changed vote to Yes" : "Changed vote to No");
+
    client->mVote = voteYes ? 1 : 2;
 }
 
@@ -939,16 +930,33 @@ string ServerGame::getLastLevelLoadName()
 }
 
 
+// Return true if the only client connected is the one we passed
+bool ServerGame::onlyClientIs(GameConnection *client)
+{
+   GameType *gameType = gServerGame->getGameType();
+
+   if(!gameType)
+      return false;
+
+   for(S32 i = 0; i < gameType->getClientCount(); i++)
+      if(gameType->getClient(i)->getConnection() != client)
+         return false;
+
+   return true;
+}
+
+
+
 // Control whether we're in shut down mode or not
 void ServerGame::setShuttingDown(bool shuttingDown, U16 time, ClientRef *who, StringPtr reason)
 {
    mShuttingDown = shuttingDown;
    if(shuttingDown)
    {
-      mShutdownOriginator = who->clientConnection;
+      mShutdownOriginator = who->getConnection();
 
       // If there's no other clients, then just shutdown now
-      if(GameConnection::onlyClientIs(mShutdownOriginator))
+      if(onlyClientIs(mShutdownOriginator))
       {
          logprintf(LogConsumer::ServerFilter, "Server shutdown requested by %s.  No other players, so shutting down now.", 
                                                    mShutdownOriginator->getClientName().getString());
@@ -1283,14 +1291,15 @@ void ServerGame::cycleLevel(S32 nextLevel)
    mLevelSwitchTimer.clear();
    mScopeAlwaysList.clear();
 
-   for(S32 i = 0; i < getClientCount(); i++)
-   {
-      GameConnection *client = getClient(i);
-
-      client->resetGhosting();
-      client->mOldLoadout.clear();
-      client->switchedTeamCount = 0;
-   }
+   if(mGameType)
+      for(S32 i = 0; i < mGameType->getClientCount(); i++)
+      {
+         GameConnection *conn = mGameType->getClient(i)->getConnection();
+         
+         conn->resetGhosting();
+         conn->mOldLoadout.clear();
+         conn->switchedTeamCount = 0;
+      }
 
    if(nextLevel >= FIRST_LEVEL)          // Go to specified level
       mCurrentLevelIndex = (nextLevel < mLevelInfos.size()) ? nextLevel : FIRST_LEVEL;
@@ -1386,8 +1395,8 @@ void ServerGame::cycleLevel(S32 nextLevel)
    // Build a list of our current connections
    Vector<GameConnection *> connectionList;
 
-   for(S32 i = 0; i < getClientCount(); i++)
-      connectionList.push_back(getClient(i));
+   for(S32 i = 0; i < mGameType->getClientCount(); i++)
+      connectionList.push_back(mGameType->getClient(i)->getConnection());
 
    // Now add the connections to the game type, from highest rating to lowest --> will create ratings-based teams
    connectionList.sort(RatingSort);
@@ -1563,8 +1572,6 @@ void ServerGame::addClient(GameConnection *client)
 
    if(mDedicated)
       SoundSystem::playSoundEffect(SFXPlayerJoined, 1);
-
-    addClientToList(client);
 }
 
 
@@ -1577,19 +1584,6 @@ void ServerGame::removeClient(GameConnection *client)
 
    if(mDedicated)
       SoundSystem::playSoundEffect(SFXPlayerLeft, 1);
-
-   removeClientFromList(client);
-}
-
-
-void ServerGame::removeClientFromList(GameConnection *client)
-{
-   for(S32 i = 0; i < mClientList.size(); i++)
-      if(mClientList[i] == client)
-      {
-         mClientList.erase_fast(i);
-         return;
-      }
 }
 
 
@@ -1598,7 +1592,7 @@ extern void shutdownBitfighter();      // defined in main.cpp
 // Top-level idle loop for server, runs only on the server by definition
 void ServerGame::idle(U32 timeDelta)
 {
-   if(mShuttingDown && (mShutdownTimer.update(timeDelta) || GameConnection::onlyClientIs(mShutdownOriginator)))
+   if(mShuttingDown && (mShutdownTimer.update(timeDelta) || onlyClientIs(mShutdownOriginator)))
    {
       shutdownBitfighter();
       return;
@@ -1671,14 +1665,14 @@ void ServerGame::idle(U32 timeDelta)
             
             bool WaitingToVote = false;
 
-            for(S32 i = 0; i < getClientCount(); i++)
+            for(S32 i = 0; i < mGameType->getClientCount(); i++)
             {
-               GameConnection *client = getClient(i);
+               GameConnection *conn = mGameType->getClient(i)->getConnection();
 
-               if(client->mVote == 0 && !client->isRobot())
+               if(conn->mVote == 0 && !conn->isRobot())
                {
                   WaitingToVote = true;
-                  client->s2cDisplayMessageESI(GameConnection::ColorAqua, SFXNone, msg, e, s, i);
+                  conn->s2cDisplayMessageESI(GameConnection::ColorAqua, SFXNone, msg, e, s, i);
                }
             }
 
@@ -1694,15 +1688,15 @@ void ServerGame::idle(U32 timeDelta)
          S32 voteNothing = 0;
          mVoteTimer = 0;
 
-         for(S32 i = 0; i < getClientCount(); i++)
+         for(S32 i = 0; i < mGameType->getClientCount(); i++)
          {
-            GameConnection *client = getClient(i);
+            GameConnection *conn = mGameType->getClient(i)->getConnection();
 
-            if(client->mVote == 1)
+            if(conn->mVote == 1)
                voteYes++;
-            else if(client->mVote == 2)
+            else if(conn->mVote == 2)
                voteNo++;
-            else if(!client->isRobot())
+            else if(!conn->isRobot())
                voteNothing++;
          }
 
@@ -1743,17 +1737,25 @@ void ServerGame::idle(U32 timeDelta)
             case 4:
                if(mGameType)
                {
-                  for(S32 i = 0; i < getClientCount(); i++)
-                     if(getClient(i)->getClientName() == mVoteClientName)
-                        mGameType->changeClientTeam(getClient(i), mVoteNumber);
+                  for(S32 i = 0; i < mGameType->getClientCount(); i++)
+                  {
+                     GameConnection *conn = mGameType->getClient(i)->getConnection();
+
+                     if(conn->getClientName() == mVoteClientName)
+                        mGameType->changeClientTeam(conn, mVoteNumber);
+                  }
                }
                break;
             case 5:
                if(mGameType)
                {
-                  for(S32 i = 0; i < getClientCount(); i++)
-                     if(getClient(i)->getClientName() == mVoteClientName)
-                        mGameType->changeClientTeam(getClient(i), mVoteNumber);
+                  for(S32 i = 0; i < mGameType->getClientCount(); i++)
+                  {
+                     GameConnection *conn = mGameType->getClient(i)->getConnection();
+
+                     if(conn->getClientName() == mVoteClientName)
+                        mGameType->changeClientTeam(conn, mVoteNumber);
+                  }
                }
                break;
             }
@@ -1767,12 +1769,14 @@ void ServerGame::idle(U32 timeDelta)
          i.push_back(voteNothing);
          e.push_back(votePass ? "Pass" : "Fail");
 
-         for(S32 i = 0; i < getClientCount(); i++)
+         for(S32 i = 0; i < mGameType->getClientCount(); i++)
          {
-            getClient(i)->s2cDisplayMessageESI(GameConnection::ColorAqua, SFXNone, "Vote %e0 - %i0 yes, %i1 no, %i2 not voted", e, s, i);
+            GameConnection *conn = mGameType->getClient(i)->getConnection();
 
-            if(!votePass && getClient(i)->getClientName() == mVoteClientName)
-               getClient(i)->mVoteTime = mSettings->getIniSettings()->voteRetryLength * 1000;
+            conn->s2cDisplayMessageESI(GameConnection::ColorAqua, SFXNone, "Vote %e0 - %i0 yes, %i1 no, %i2 not voted", e, s, i);
+
+            if(!votePass && conn->getClientName() == mVoteClientName)
+               conn->mVoteTime = mSettings->getIniSettings()->voteRetryLength * 1000;
          }
       }
    }
@@ -1835,19 +1839,19 @@ void ServerGame::idle(U32 timeDelta)
    if(mGameSuspended)     // If game is suspended, we need do nothing more
       return;
 
-   for(S32 i = 0; i < getClientCount(); i++)
+   for(S32 i = 0; i < mGameType->getClientCount(); i++)
    {
-      GameConnection *client = getClient(i);
+      GameConnection *conn = mGameType->getClient(i)->getConnection();
 
-      if(!client->isRobot())
+      if(!conn->isRobot())
       {
-         client->addToTimeCredit(timeDelta);
-         client->updateAuthenticationTimer(timeDelta);
+         conn->addToTimeCredit(timeDelta);
+         conn->updateAuthenticationTimer(timeDelta);
 
-         if(client->mVoteTime <= timeDelta)
-            client->mVoteTime = 0;
+         if(conn->mVoteTime <= timeDelta)
+            conn->mVoteTime = 0;
          else
-            client->mVoteTime -= timeDelta;
+            conn->mVoteTime -= timeDelta;
       }
    }
 
@@ -1945,12 +1949,12 @@ S32 ServerGame::addUploadedLevelInfo(const char *filename, LevelInfo &info)
 
    // Let levelChangers know about the new level
 
-   for(S32 i = 0; i < getClientCount(); i++)
+   for(S32 i = 0; i < mGameType->getClientCount(); i++)
    {
-      GameConnection *client = getClient(i);
+      GameConnection *conn = mGameType->getClient(i)->getConnection();
 
-      if(client->isLevelChanger())
-         client->s2cAddLevel(info.levelName, info.levelType);
+      if(conn->isLevelChanger())
+         conn->s2cAddLevel(info.levelName, info.levelType);
    }
 
    return mLevelInfos.size() - 1;

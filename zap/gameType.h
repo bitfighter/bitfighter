@@ -29,9 +29,11 @@
 #include "Timer.h"
 #include "flagItem.h"
 #include "teamInfo.h"
-#include "gameStats.h"     // For VersionedGameStats
+#include "gameStats.h"           // For VersionedGameStats
 #include "statistics.h"
 #include "Spawn.h"
+
+#include "gameConnection.h"      // For MessageColors enum
 
 #include <string>
 #include <boost/shared_ptr.hpp>
@@ -59,9 +61,11 @@ private:
    F32 mRating;                     // Skill rating from -1 to 1
    LuaPlayerInfo *mPlayerInfo;      // Lua access to this class
 
+   SafePtr<GameConnection> mClientConnection;
+
 public:
    ClientRef();               // Constructor
-   virtual ~ClientRef();              // Destructor
+   virtual ~ClientRef();      // Destructor
 
    StringTableEntry name;     // Name of client - guaranteed to be unique of current clients
 
@@ -87,7 +91,9 @@ public:
    bool wantsScoreboardUpdates;  // Indicates whether the client has requested scoreboard streaming (e.g. pressing Tab key)
    bool readyForRegularGhosts;
 
-   SafePtr<GameConnection> clientConnection;
+   GameConnection *getConnection() { return mClientConnection; }
+   void setConnection(GameConnection *connection)  { mClientConnection = connection; }
+
    RefPtr<SoundEffect> voiceSFX;
    RefPtr<VoiceDecoder> decoder;
 
@@ -307,6 +313,11 @@ public:
    void addItemOfInterest(MoveItem *theItem);
 
    S32 getDigitsNeededToDisplayScore() const;
+
+   void broadcastMessage(GameConnection::MessageColors color, SFXProfiles sfx, const StringTableEntry &formatString);
+
+   void broadcastMessage(GameConnection::MessageColors color, SFXProfiles sfx, 
+                         const StringTableEntry &formatString, const Vector<StringTableEntry> &e);
 
    bool isGameOver() const;
 
@@ -540,7 +551,7 @@ public:
 
    virtual void majorScoringEventOcurred(S32 team);    // Gets called when touchdown is scored...  currently only used by zone control & retrieve
 
-   void processServerCommand(ClientRef *clientRef, const char *cmd, Vector<StringPtr> args);
+   void processServerCommand(GameConnection *conn, const char *cmd, Vector<StringPtr> args);
 
    map <pair<U16,U16>, Vector<Point> > cachedBotFlightPlans;  // cache of zone-to-zone flight plans, shared for all bots
 };

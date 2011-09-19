@@ -272,8 +272,7 @@ void SoccerGameType::itemDropped(Ship *ship, MoveItem *item)
    Vector<StringTableEntry> e;
    e.push_back(ship->getName());
 
-   for(S32 i = 0; i < getClientCount(); i++)
-      getClient(i)->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagDrop, dropString, e);
+   broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagDrop, dropString, e);
 }
 
 

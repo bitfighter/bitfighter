@@ -114,8 +114,7 @@ namespace Zap
       e.push_back(theShip->getName());
       e.push_back(getGame()->getTeamName(team));
 
-      for(S32 i = 0; i < getClientCount(); i++)
-        getClient(i)->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagSnatch, r, e);
+      broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagSnatch, r, e);
 
       theFlag->mountToShip(theShip);
       updateScore(theShip, RemoveFlagFromEnemyZone);
@@ -133,8 +132,7 @@ namespace Zap
          Vector<StringTableEntry> e;
          e.push_back(ship->getName());
 
-         for(S32 i = 0; i < getClientCount(); i++)
-           getClient(i)->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagDrop, dropString, e);
+         broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagDrop, dropString, e);
       }
    }
 
@@ -167,9 +165,7 @@ namespace Zap
 
          Vector<StringTableEntry> e;
          e.push_back(s->getName());
-         for(S32 i = 0; i < getClientCount(); i++)
-           getClient(i)->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen,
-               SFXFlagCapture, (mFlags.size() == 1) ? oneFlagCapString : capString, e);
+         broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagCapture, (mFlags.size() == 1) ? oneFlagCapString : capString, e);
 
          // Drop the flag into the zone
          mountedFlag->dismount();
@@ -203,7 +199,7 @@ namespace Zap
             e[0] = getGame()->getTeamName(s->getTeam());
 
             for(S32 i = 0; i < getClientCount(); i++)
-              getClient(i)->clientConnection->s2cTouchdownScored(SFXFlagCapture, s->getTeam(), capAllString, e);
+              getClient(i)->getConnection()->s2cTouchdownScored(SFXFlagCapture, s->getTeam(), capAllString, e);
          }
 
          // Return all the flags to their starting locations if need be

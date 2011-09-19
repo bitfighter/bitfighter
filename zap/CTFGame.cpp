@@ -74,9 +74,8 @@ void CTFGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
          Vector<StringTableEntry> e;
          e.push_back(theShip->getName());
          e.push_back(getGame()->getTeamName(theFlag->getTeam()));
-
-         for(S32 i = 0; i < getClientCount(); i++)
-            getClient(i)->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagReturn, returnString, e);
+         
+         broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagReturn, returnString, e);
 
          theFlag->sendHome();
 
@@ -98,8 +97,8 @@ void CTFGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
                e.push_back(theShip->getName());
                e.push_back(getGame()->getTeamName(mountedFlag->getTeam()));
 
-               for(S32 i = 0; i < getClientCount(); i++)
-                  getClient(i)->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagCapture, capString, e);
+               broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagCapture, capString, e);
+
 
                mountedFlag->dismount();
                mountedFlag->sendHome();
@@ -125,8 +124,7 @@ void CTFGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
          e.push_back(theShip->getName());
          e.push_back(getGame()->getTeamName(theFlag->getTeam()));
 
-         for(S32 i = 0; i < getClientCount(); i++)
-            getClient(i)->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagSnatch, takeString, e);
+         broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagSnatch, takeString, e);
 
          theFlag->mountToShip(theShip);
 
@@ -151,8 +149,7 @@ void CTFGameType::itemDropped(Ship *ship, MoveItem *item)
       e.push_back(ship->getName());
       e.push_back(getGame()->getTeamName(flag->getTeam()));
 
-      for(S32 i = 0; i < getClientCount(); i++)
-         getClient(i)->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagDrop, dropString, e);
+      broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagDrop, dropString, e);
    }
 }
 

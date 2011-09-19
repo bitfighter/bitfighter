@@ -375,10 +375,10 @@ private:
    Timer mStutterSleepTimer;
    U32 mAccumulatedSleepTime;
 
+   bool onlyClientIs(GameConnection *client);
+
    U32 mPlayerCount;
    void cleanUp();
-
-   Vector<GameConnection *> mClientList;
 
 public:
    ServerGame(const Address &address, GameSettings *settings, bool testMode, bool dedicated);    // Constructor
@@ -419,11 +419,6 @@ public:
 
    void addClient(GameConnection *client);
    void removeClient(GameConnection *client);
-
-   GameConnection *getClient(S32 index) { return mClientList[index]; }
-   void addClientToList(GameConnection *client) { mClientList.push_back(client); }
-   void removeClientFromList(GameConnection *client);
-   S32 getClientCount() { return mClientList.size(); }
 
    void setShuttingDown(bool shuttingDown, U16 time, ClientRef *who, StringPtr reason);  
 

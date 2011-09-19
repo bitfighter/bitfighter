@@ -59,7 +59,7 @@ void PickupItem::idle(GameObject::IdleCallPath path)
          {
             for(S32 i = 0; i < gt->getClientCount(); i++)
             {
-               SafePtr<GameConnection> connection = gt->getClient(i)->clientConnection;
+               SafePtr<GameConnection> connection = gt->getClient(i)->getConnection();
 
                TNLAssert(connection, "Defunct client connection in item.cpp!");
 

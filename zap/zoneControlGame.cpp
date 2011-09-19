@@ -64,8 +64,9 @@ void ZoneControlGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
    Vector<StringTableEntry> e;
    e.push_back(theShip->getName());
    e.push_back(getGame()->getTeamName(theShip->getTeam()));
-   for(S32 i = 0; i < getClientCount(); i++)
-     getClient(i)->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagSnatch, takeString, e);
+
+   broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagSnatch, takeString, e);
+
    theFlag->mountToShip(theShip);
 
    if(theShip->getOwner())
@@ -92,8 +93,7 @@ void ZoneControlGameType::itemDropped(Ship *ship, MoveItem *item)
       Vector<StringTableEntry> e;
       e.push_back(ship->getName());
 
-      for(S32 i = 0; i < getClientCount(); i++)
-        getClient(i)->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagDrop, dropString, e);
+      broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagDrop, dropString, e);
    }
 }
 
@@ -119,8 +119,7 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
          e.push_back(s->getName());
          e.push_back(getGame()->getTeamName(oldTeam));
 
-         for(S32 i = 0; i < getClientCount(); i++)
-           getClient(i)->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagSnatch, takeString, e);
+         broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagSnatch, takeString, e);
       }
       updateScore(z->getTeam(), UncaptureZone);      // Inherently team-only event, no?
    }
@@ -131,8 +130,7 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
       Vector<StringTableEntry> e;
       e.push_back(s->getName());
 
-      for(S32 i = 0; i < getClientCount(); i++)
-        getClient(i)->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagSnatch, takeString, e);
+      broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagSnatch, takeString, e);
    }
 
    updateScore(s, CaptureZone);
@@ -153,8 +151,9 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
    static StringTableEntry tdString("Team %e0 scored a touchdown!");
    Vector<StringTableEntry> e;
    e.push_back(getGame()->getTeamName(s->getTeam()));
+
    for(S32 i = 0; i < getClientCount(); i++)
-     getClient(i)->clientConnection->s2cTouchdownScored(SFXFlagSnatch, s->getTeam(), tdString, e);
+     getClient(i)->getConnection()->s2cTouchdownScored(SFXFlagSnatch, s->getTeam(), tdString, e);
 
    // Reset zones to neutral
    for(S32 i = 0; i < mZones.size(); i++)
