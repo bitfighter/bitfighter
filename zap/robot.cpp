@@ -1970,14 +1970,14 @@ void Robot::spawn()
 {
    // Cannot be in onAddedToGame, as it will error, trying to add robots while level map is not ready
 
-   // Need GameConnection and ClientRef to keep track of score...  TODO: Make this work differently
+   // Need GameConnection and ClientRef to keep track of score...  TODO: Make this work differently.  This is bogus.
    GameConnection *gc = new GameConnection();   
 
    if(getName() == "")                          // Make sure bots have a name
       setName(GameConnection::makeUnique("Robot").c_str());
 
    gc->setClientName(getName());
-   ((ServerGame *)getGame())->addClientToList(gc);    // Really need this?
+   ((ServerGame *)getGame())->addClientToList(gc);    // Really need this?  And why are bots never removed from client list?
 
    gc->setControlObject(this);
    gc->setIsRobot(true);
