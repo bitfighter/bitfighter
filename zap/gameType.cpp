@@ -2607,7 +2607,7 @@ void GameType::processServerCommand(GameConnection *conn, const char *cmd, Vecto
          }
       }
    }
-   else if(!stricmp(cmd, "setscore"))
+   else if(!stricmp(cmd, "setwinscore"))
    {
      if(!conn->isLevelChanger())                         // Level changers and above
          conn->s2cDisplayErrorMessage("!!! Need level change permission");
@@ -2630,6 +2630,26 @@ void GameType::processServerCommand(GameConnection *conn, const char *cmd, Vecto
             mWinningScore = score;
             s2cChangeScoreToWin(mWinningScore, conn->getClientName());
          }
+     }
+   }
+   else if(!stricmp(cmd, "resetscore"))
+   {
+     if(!conn->isLevelChanger())                         // Level changers and above
+         conn->s2cDisplayErrorMessage("!!! Need level change permission");
+     else
+     {
+        // Reset all player scores
+        for(S32 i = 0; i < mClientList.size(); i++)
+           mClientList[i]->setScore(0);
+
+        // Reset team scores
+        for (S32 i = 0; i < mGame->getTeamCount(); i++)
+        {
+           // Set the score on the server
+           ((Team*)mGame->getTeam(i))->setScore(0);
+           // Broadcast to the clients
+           s2cSetTeamScore(i, ((Team *)(mGame->getTeam(i)))->getScore());
+        }
      }
    }
    else if(!stricmp(cmd, "showbots") || !stricmp(cmd, "showbot"))    // Maybe there is only one bot to show :-)
