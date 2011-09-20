@@ -39,6 +39,7 @@
 #include "version.h"
 #include "Colors.h"
 #include "BanList.h"
+#include "IniFile.h"        // For CIniFile
 
 #ifndef ZAP_DEDICATED
 #include "ClientGame.h"
@@ -2562,6 +2563,7 @@ bool safeFilename(const char *str)
    return true;
 }
 
+extern void writeServerBanList(CIniFile *ini, BanList *banList);
 
 // Runs the server side commands, which the client may or may not know about
 
@@ -2817,15 +2819,25 @@ void GameType::processServerCommand(GameConnection *conn, const char *cmd, Vecto
          else
          {
             Address ipAddress = gc->getNetAddressString();
-            S32 banDuration = ((ServerGame *)getGame())->getSettings()->getBanList()->getDefaultBanDuration();
+            S32 banDuration = settings->getBanList()->getDefaultBanDuration();
             if(args.size() >= 2)
                banDuration = atoi(args[1].getString());
 
             logprintf("Duration: %d", banDuration);
 
-            ((ServerGame *)getGame())->getSettings()->getBanList()->addToBanList(ipAddress, banDuration);
+            // Add the ban
+            settings->getBanList()->addToBanList(ipAddress, banDuration);
             logprintf(LogConsumer::ServerFilter, "%s - banned for %d minutes", ipAddress.toString(), banDuration);
+
+            // Save BanList in memory
+            writeServerBanList(&gINI, settings->getBanList());
+
+            // Save new INI settings to disk
+            gINI.WriteFile();
+
+            // Disconnect player
             gc->disconnect(NetConnection::ReasonBanned, "");
+
             conn->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "Player IP banned");
          }
       }
@@ -2839,14 +2851,21 @@ void GameType::processServerCommand(GameConnection *conn, const char *cmd, Vecto
       else
       {
          Address ipAddress(args[0].getString());
-         S32 banDuration = ((ServerGame *)getGame())->getSettings()->getBanList()->getDefaultBanDuration();
+         S32 banDuration = settings->getBanList()->getDefaultBanDuration();
          if(args.size() >= 2)
             banDuration = atoi(args[1].getString());
 
          // banip should always add to the ban list, even if the IP isn't connected
-         ((ServerGame *)getGame())->getSettings()->getBanList()->addToBanList(ipAddress, banDuration);
+         settings->getBanList()->addToBanList(ipAddress, banDuration);
          logprintf(LogConsumer::ServerFilter, "%s - banned for %d minutes", ipAddress.toString(), banDuration);
 
+         // Save BanList in memory
+         writeServerBanList(&gINI, settings->getBanList());
+
+         // Save new INI settings to disk
+         gINI.WriteFile();
+
+         // Now check to see if the client is connected and disconnect if so
          GameConnection *gc = NULL;
          for(S32 i = 0; i < mClientList.size(); i++)
          {
