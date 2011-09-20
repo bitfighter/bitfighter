@@ -36,6 +36,7 @@
 #include "tnlNetStringTable.h"
 #include "tnlVector.h"
 #include "Color.h"      // For Color def
+#include "ConfigEnum.h" // For sfxSets, DisplayMode
 
 #include "input.h"
 #include <string>
@@ -46,18 +47,6 @@ using namespace TNL;
 
 namespace Zap
 {
-
-enum sfxSets {
-   sfxClassicSet,
-   sfxModernSet
-};
-
-enum DisplayMode {
-   DISPLAY_MODE_WINDOWED,
-   DISPLAY_MODE_FULL_SCREEN_STRETCHED,
-   DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED,
-   DISPLAY_MODE_UNKNOWN
-};
 
 
 ////////////////////////////////////

@@ -813,6 +813,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\ConfigEnum.h"
+			>
+		</File>
+		<File
 			RelativePath=".\controlObjectConnection.cpp"
 			>
 		</File>

@@ -23,23 +23,25 @@
 //
 //------------------------------------------------------------------------------------
 
-#ifndef SFXPROFILE_H_
-#define SFXPROFILE_H_
+#ifndef CONFIGENUM_H_
+#define CONFIGENUM_H_
 
-#include "tnlTypes.h"
 
-namespace Zap {
-
-struct SFXProfile
+namespace Zap
 {
-   const char *fileName;
-   bool        isRelative;
-   TNL::F32    gainScale;
-   bool        isLooping;
-   TNL::F32    fullGainDistance;
-   TNL::F32    zeroGainDistance;
+
+enum sfxSets {
+   sfxClassicSet,
+   sfxModernSet
 };
 
-}
+enum DisplayMode {
+   DISPLAY_MODE_WINDOWED,
+   DISPLAY_MODE_FULL_SCREEN_STRETCHED,
+   DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED,
+   DISPLAY_MODE_UNKNOWN
+};
 
-#endif /* SFXPROFILE_H_ */
+};
+
+#endif /* CONFIGENUM_H_ */

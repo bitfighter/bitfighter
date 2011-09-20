@@ -9,14 +9,13 @@
 
 #include "tnlTypes.h"
 #include "keyCode.h"
+#include "ConfigEnum.h"
 
 #include "SDL/SDL.h"
 
 using namespace TNL;
 
 namespace Zap {
-
-enum DisplayMode;    // Wait, does this cause Linux problems?
 
 class ClientGame;
 

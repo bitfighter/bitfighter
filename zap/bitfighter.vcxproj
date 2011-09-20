@@ -252,6 +252,7 @@
     <ClInclude Include="..\zap\barrier.h" />
     <ClInclude Include="..\zap\BotNavMeshZone.h" />
     <ClInclude Include="..\zap\config.h" />
+    <ClInclude Include="..\zap\ConfigEnum.h" />
     <ClInclude Include="..\zap\controlObjectConnection.h" />
     <ClInclude Include="..\zap\CTFGame.h" />
     <ClInclude Include="..\zap\Directory.h" />
