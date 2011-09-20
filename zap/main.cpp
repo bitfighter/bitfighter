@@ -818,6 +818,9 @@ void createClientGame(GameSettings *settings)
        // Put any saved filename into the editor file entry thingy
       gClientGame->getUIManager()->getLevelNameEntryUserInterface()->setString(settings->getIniSettings()->lastEditorName);
 
+      seedRandomNumberGenerator(settings->getIniSettings()->lastName);
+      gClientGame->getClientInfo()->id.getRandom();
+
       //gClientGame2 = new ClientGame(Address());   //  !!! 2-player split-screen game in same game.
 
       if(settings->getIniSettings()->name == "")
@@ -1127,6 +1130,7 @@ using namespace Zap;
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+#undef main
 
 #ifdef TNL_OS_XBOX
 int zapmain(int argc, char **argv)
