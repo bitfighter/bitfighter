@@ -308,67 +308,9 @@ bool LevelLoader::loadLevelFromFile(const string &filename, bool inEditor, GridD
 
 using namespace std;
 
-// Sorts alphanumerically
-S32 QSORT_CALLBACK alphaSort(string *a, string *b)
-{
-   return stricmp((a)->c_str(), (b)->c_str());        // Is there something analagous to stricmp for strings (as opposed to c_strs)?
-}
-
-
-// Create a list of levels for hosting a game, but does not read the files or do any validation of them
-Vector<string> LevelListLoader::buildLevelList(const string &levelFolder, const Vector<string> &levelsSpecifiedOnCmdLine, 
-                                               const Vector<string> *skipList, bool ignoreCmdLine)
-{
-   Vector<string> levelList;
-
-   // If user specified a list of levels on the command line, use those, unless ignoreCmdLine was set to true
-   if(!ignoreCmdLine && levelsSpecifiedOnCmdLine.size() > 0)
-      levelList = levelsSpecifiedOnCmdLine;
-   else
-   {
-      // Build our level list by looking at the filesystem  
-      Vector<string> levelfiles;
-
-      if(!getFilesFromFolder(levelFolder, levelfiles, "level"))    // True if error reading level...  print message... or just PANIC!!
-      {
-         logprintf(LogConsumer::LogError, "Could not read any levels from the levels folder \"%s\".", levelFolder.c_str());
-         return levelList;    // empty
-      }
-
-      levelfiles.sort(alphaSort);   // Just to be sure...
-
-      for(S32 i = 0; i < levelfiles.size(); i++)
-         levelList.push_back(levelfiles[i]);
-   }
-
-   removeSkippedLevels(levelList, skipList);
-
-   return levelList;
-}
-
-
 extern string lcase(string strToConvert);
 
-// Remove any levels listed in the skip list from levelList.  Modifies levelList.  Not foolproof!
-void LevelListLoader::removeSkippedLevels(Vector<string> &levelList, const Vector<string> *skipList)
-{
-   for(S32 i = 0; i < levelList.size(); i++)
-   {
-      // Make sure we have the right extension
-      string filename_i = lcase(levelList[i]);
-      if(filename_i.find(".level") == string::npos)
-         filename_i += ".level";
 
-      for(S32 j = 0; j < skipList->size(); j++)
-         if(filename_i == skipList->get(j))
-         {
-            logprintf(LogConsumer::ServerFilter, "Loader skipping level %s listed in LevelSkipList (see INI file)", levelList[i].c_str());
-            levelList.erase(i);
-            i--;
-            break;
-         }
-   }
-}
 
 
 };

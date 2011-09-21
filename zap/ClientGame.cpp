@@ -103,15 +103,9 @@ static Vector<DatabaseObject *> fillVector2;
 ClientInfo::ClientInfo(GameSettings *settings)   
 { 
    id.getRandom();    // Generate a player ID
-   simulatedPacketLoss = settings->getCmdLineSettings()->loss;
-   simulatedLag = settings->getCmdLineSettings()->lag;
-
-   if(settings->getCmdLineSettings()->name != "")
-      name = settings->getCmdLineSettings()->name;
-   else if(settings->getIniSettings()->name != "")
-      name = settings->getIniSettings()->name;
-   else
-      name = settings->getIniSettings()->lastName;       // Should always have something valid
+   simulatedPacketLoss = settings->getSimulatedLoss();
+   simulatedLag = settings->getSimulatedLag();
+   name = settings->getPlayerName();
 
    authenticated = false;
 }
@@ -274,14 +268,19 @@ void ClientGame::setConnectionToServer(GameConnection *theConnection)
 }
 
 
-void ClientGame::setLoginPassword(const string &firstChoice, const string &secondChoice, const string &thirdChoice)
+// When server corrects capitalization of name or similar
+void ClientGame::correctPlayerName(const string &name)
 {
-   if(firstChoice != "")
-      mLoginPassword = firstChoice;
-   else if(secondChoice != "")
-      mLoginPassword = secondChoice;
-   else
-      mLoginPassword = thirdChoice;
+   getClientInfo()->name = name;
+   getSettings()->setPlayerName(name, false);                  // Save to INI
+}
+
+
+// When user enters new name and password on NameEntryUI
+void ClientGame::updatePlayerNameAndPassword(const string &name, const string &password)
+{
+   getClientInfo()->name = name;
+   getSettings()->setPlayerNameAndPassword(name, password);    // Save to INI
 }
 
 
@@ -322,9 +321,9 @@ static void joystickUpdateMove(GameSettings *settings, Move *theMove)
 
    F32 maxplen = max(fabs(p.x), fabs(p.y));
 
-   F32 fact = settings->getIniSettings()->enableExperimentalAimMode ? maxplen : plen;
+   F32 fact = settings->getEnableExperimentalAimMode() ? maxplen : plen;
 
-   if(fact > (settings->getIniSettings()->enableExperimentalAimMode ? 0.95 : 0.50))    // It requires a large movement to actually fire...
+   if(fact > (settings->getEnableExperimentalAimMode() ? 0.95 : 0.50))    // It requires a large movement to actually fire...
    {
       theMove->angle = atan2(p.y, p.x);
       theMove->fire = true;
@@ -658,9 +657,10 @@ void ClientGame::changePassword(GameConnection::ParamType type, const Vector<str
    {
       // Clear any saved password for this server
       if(type == GameConnection::LevelChangePassword)
-         gINI.deleteKey("SavedLevelChangePasswords", gc->getServerName());
+         mSettings->forgetLevelChangePassword(gc->getServerName());
+
       else if(type == GameConnection::AdminPassword)
-         gINI.deleteKey("SavedAdminPasswords", gc->getServerName());
+         mSettings->forgetAdminPassword(gc->getServerName());
    }
    else                    // Non-empty password
    {
@@ -668,9 +668,10 @@ void ClientGame::changePassword(GameConnection::ParamType type, const Vector<str
 
       // Save the password so the user need not enter it again the next time they're on this server
       if(type == GameConnection::LevelChangePassword)
-         gINI.SetValue("SavedLevelChangePasswords", gc->getServerName(), words[1], true);
+         mSettings->saveLevelChangePassword(gc->getServerName(), words[1]);
+         
       else if(type == GameConnection::AdminPassword)
-         gINI.SetValue("SavedAdminPasswords", gc->getServerName(), words[1], true);
+         mSettings->saveAdminPassword(gc->getServerName(), words[1]);
    }
 }
 
@@ -1111,7 +1112,7 @@ void ClientGame::drawStars(F32 alphaFrac, Point cameraPos, Point visibleExtent)
    glEnableClientState(GL_VERTEX_ARRAY);
    glVertexPointer(2, GL_FLOAT, sizeof(Point), &mStars[0]);    // Each star is a pair of floats between 0 and 1
 
-   bool starsInDistance = mSettings->getIniSettings()->starsInDistance;
+   bool starsInDistance = mSettings->getStarsInDistance();
 
    S32 fx1 = 0, fx2 = 0, fy1 = 0, fy2 = 0;
 
@@ -1378,7 +1379,7 @@ void ClientGame::renderCommander()
       renderObjects[i]->render(0);
 
    // Second pass
-   Barrier::renderEdges(1, mSettings->getIniSettings()->wallOutlineColor);    // Render wall edges
+   Barrier::renderEdges(1, mSettings->getWallOutlineColor());    // Render wall edges
 
    for(S32 i = 0; i < renderObjects.size(); i++)
       // Keep our spy bugs from showing up on enemy commander maps, even if they're known
@@ -1528,7 +1529,7 @@ void ClientGame::renderNormal()
    // Render in three passes, to ensure some objects are drawn above others
    for(S32 j = -1; j < 2; j++)
    {
-      Barrier::renderEdges(j, mSettings->getIniSettings()->wallOutlineColor);    // Render wall edges
+      Barrier::renderEdges(j, mSettings->getWallOutlineColor());    // Render wall edges
 
       for(S32 i = 0; i < renderObjects.size(); i++)
          renderObjects[i]->render(j);

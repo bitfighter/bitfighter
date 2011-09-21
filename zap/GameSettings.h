@@ -33,6 +33,60 @@
 using namespace std;
 using namespace TNL;
 
+namespace CmdLineParams
+{
+
+enum ParamId {
+   LOGIN_NAME,
+   LOGIN_PASSWORD,
+   WINDOW_MODE,
+   FULLSCREEN_MODE,
+   FULLSCREEN_STRETCH,
+   WINDOW_POS,
+   WINDOW_WIDTH,
+   USE_STICK,
+   MASTER_ADDRESS,
+
+   DEDICATED,
+   SERVER_PASSWORD,
+   ADMIN_PASSWORD,
+   LEVEL_CHANGE_PASSWORD,
+   HOST_NAME,
+   HOST_DESCRIPTION,
+   MAX_PLAYERS_PARAM,
+   HOST_ADDRESS,
+
+   LEVEL_LIST,
+
+   ROOT_DATA_DIR,
+   LEVEL_DIR,
+   INI_DIR,
+   LOG_DIR,
+   SCRIPTS_DIR,
+   CACHE_DIR,
+   ROBOT_DIR,
+   SCREENSHOT_DIR,
+   SFX_DIR,
+   MUSIC_DIR,
+
+   SIMULATED_LOSS,
+   SIMULATED_LAG,
+   SIMULATED_STUTTER,
+   FORCE_UPDATE,
+
+   SEND_RESOURCE,
+   GET_RESOURCE,
+   SHOW_RULES,
+   HELP,
+
+   PARAM_COUNT
+};
+
+};
+
+
+using namespace CmdLineParams;
+
 namespace Zap
 {
 
@@ -41,6 +95,21 @@ class BanList;
 
 ////////////////////////////////////////
 ////////////////////////////////////////
+
+
+enum SettingSource {
+   INI,
+   CMD_LINE,
+   DEFAULT
+};
+
+
+#ifndef min
+#define min(a,b) ((a) <= (b) ? (a) : (b))
+#define max(a,b) ((a) >= (b) ? (a) : (b))
+#endif
+
+
 
 class GameSettings
 {
@@ -51,45 +120,77 @@ private:
    string mHostName;                   // Server name used when hosting a game (default set in config.h, set in INI or on cmd line)
    string mHostDescr;                  // Brief description of host
 
+   string mPlayerName, mPlayerPassword;
+   bool mPlayerNameSpecifiedOnCmdLine;
+
    // Various passwords
    string mServerPassword;
    string mAdminPassword;
    string mLevelChangePassword;
 
    Vector<string> mLevelSkipList;      // Levels we'll never load, to create a pseudo delete function for remote server mgt
-   ConfigDirectories mFolderManager;
+   FolderManager mFolderManager;
 
    BanList *mBanList;                  // Our ban list
 
-   CmdLineSettings mCmdLineSettings;
+   //CmdLineSettings mCmdLineSettings;
    IniSettings mIniSettings;
+
+   // Store params read from the cmd line
+   Vector<string> mCmdLineParams[CmdLineParams::PARAM_COUNT];
+
+   Vector<string> mMasterServerList;
+   bool mMasterServerSpecifiedOnCmdLine;
+
+   // Helper functions:
+   // This first lot return the first value following the cmd line parameter cast to various types
+   string getString(ParamId paramId);
+   U32 getU32(ParamId paramId);
+   F32 getF32(ParamId paramId);
+
+   bool getSpecified(ParamId paramId);                // Returns true if parameter was present, false if not
+
+   DisplayMode resolveCmdLineSpecifiedDisplayMode();  // Tries to figure out what display mode was specified on the cmd line, if any
 
 public:
    GameSettings();    // Constructor
    ~GameSettings();   // Destructor
 
+   void readCmdLineParams(const Vector<string> &argv);
+   void resolveDirs();
+
    string getHostName() { return mHostName; }
    void setHostName(const string &hostName, bool updateINI);
-   void initHostName(const string &cmdLineVal, const string &iniVal);
 
    string getHostDescr() { return mHostDescr; }
    void setHostDescr(const string &hostDescr, bool updateINI);
-   void initHostDescr(const string &cmdLineVal, const string &iniVal);
 
    string getServerPassword() { return mServerPassword; }
    void setServerPassword(const string &ServerPassword, bool updateINI);
-   void initServerPassword(const string &cmdLineVal, const string &iniVal);
 
    string getAdminPassword() { return mAdminPassword; }
    void setAdminPassword(const string &AdminPassword, bool updateINI);
-   void initAdminPassword(const string &cmdLineVal, const string &iniVal);
 
    string getLevelChangePassword() { return mLevelChangePassword; }
    void setLevelChangePassword(const string &LevelChangePassword, bool updateINI);
-   void initLevelChangePassword(const string &cmdLineVal, const string &iniVal);
 
    Vector<string> *getLevelSkipList() { return &mLevelSkipList; }
-   ConfigDirectories *getConfigDirs() { return &mFolderManager; }
+   Vector<string> *getSpecifiedLevels() { return &mCmdLineParams[CmdLineParams::LEVEL_LIST]; }
+
+   // Variations on generating a list of levels
+   Vector<string> getLevelList();                            // Generic, grab a list of levels based on current settings
+   Vector<string> getLevelList(const string &levelFolder);   // Grab a list of levels from the specified level folder; ignore anything in the INI
+private:
+   Vector<string> getLevelList(const string &levelDir, bool ignoreCmdLine);    // Workhorse for above methods
+
+public:
+
+   Vector<string> *getMasterServerList() { return &mMasterServerList; }
+   void saveMasterAddressListInIniUnlessItCameFromCmdLine();
+   
+   FolderManager *getFolderManager() { return &mFolderManager; }
+   FolderManager getCmdLineFolderManager();    // Return a FolderManager struct populated with settings specified on cmd line
+
    BanList *getBanList() { return mBanList; }
 
    string getHostAddress();
@@ -97,8 +198,45 @@ public:
 
    void save();
 
-   CmdLineSettings *getCmdLineSettings() { return &mCmdLineSettings; }
    IniSettings *getIniSettings() { return &mIniSettings; }
+
+   void runCmdLineDirectives();
+
+
+   const Color *getWallFillColor() { return &mIniSettings.wallFillColor; }
+   const Color *getWallOutlineColor() { return &mIniSettings.wallOutlineColor; }
+
+   bool getStarsInDistance() { return mIniSettings.starsInDistance; }
+   bool getEnableExperimentalAimMode() { return mIniSettings.enableExperimentalAimMode; }
+
+
+   // Accessor methods
+   U32 getSimulatedStutter() { return getU32(SIMULATED_STUTTER); }
+   F32 getSimulatedLoss()    { return getF32(SIMULATED_LOSS); }
+   U32 getSimulatedLag()     { return min(getU32(SIMULATED_LAG), 1000); }
+
+   bool getForceUpdate()  { return getSpecified(FORCE_UPDATE); }
+
+   string getPlayerName() { return mPlayerName; }
+
+   void setPlayerName(const string &name, bool nameSuppliedByUser);
+   void setPlayerNameAndPassword(const string &name, const string &password);
+
+   string getPlayerPassword() { return mPlayerPassword; }
+
+   bool isDedicatedServer() { return getSpecified(DEDICATED); }
+
+   string getLevelDir(SettingSource source);
+
+
+   // Other methods
+   void saveLevelChangePassword(const string &serverName, const string &password);
+   void saveAdminPassword(const string &serverName, const string &password);
+
+   void forgetLevelChangePassword(const string &serverName);
+   void forgetAdminPassword(const string &serverName);
+
+   void onFinishedLoading();     // Should be run after INI and cmd line params have been read
 };
 
 

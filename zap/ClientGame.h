@@ -110,7 +110,9 @@ public:
 
    string getLoginPassword() const { return mLoginPassword; }
    void setLoginPassword(const string &loginPassword) { mLoginPassword = loginPassword; }
-   void setLoginPassword(const string &firstChoice, const string &secondChoice, const string &thirdChoice);
+
+   void correctPlayerName(const string &name);                                      // When server corrects capitalization of name or similar
+   void updatePlayerNameAndPassword(const string &name, const string &password);    // When user enters new name and password on NameEntryUI
 
    UIManager *getUIManager() { return mUIManager; }
 

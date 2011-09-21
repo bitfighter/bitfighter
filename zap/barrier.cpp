@@ -387,7 +387,7 @@ void Barrier::prepareRenderingGeometry(Game *game)
 void Barrier::render(S32 layerIndex)
 {
    if(layerIndex == 0)           // First pass: draw the fill
-      renderWallFill(&mRenderFillGeometry, mSolid, getGame()->getSettings()->getIniSettings()->wallFillColor);
+      renderWallFill(&mRenderFillGeometry, mSolid, getGame()->getSettings()->getWallFillColor());
 }
 
 
@@ -882,11 +882,11 @@ void WallSegmentManager::renderWalls(GameSettings *settings, bool draggingObject
       bool useGameColor = UserInterface::current && UserInterface::current->getMenuID() == EditorUI && showingReferenceShip;
       TNLAssert(UserInterface::current->getMenuID() == EditorUI, "How did we get here, then???");
 
-      Color fillColor = useGameColor ? settings->getIniSettings()->wallFillColor : EDITOR_WALL_FILL_COLOR;
+      Color fillColor = useGameColor ? settings->getWallFillColor() : EDITOR_WALL_FILL_COLOR;
       mWallSegments[i]->renderFill(fillColor, isBeingDragged);
    }
 
-   renderWallEdges(&mWallEdgePoints, settings->getIniSettings()->wallOutlineColor);      // Render wall outlines
+   renderWallEdges(&mWallEdgePoints, settings->getWallOutlineColor());      // Render wall outlines
 
    if(showSnapVertices)
    {

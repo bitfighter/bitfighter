@@ -538,7 +538,7 @@ void EditorUserInterface::loadLevel()
    GameType *gameType = new GameType;
    gameType->addToGame(game, game->getEditorDatabase());
 
-   ConfigDirectories *folderManager = game->getSettings()->getConfigDirs();
+   FolderManager *folderManager = game->getSettings()->getFolderManager();
    string fileName = joindir(folderManager->levelDir, mEditFileName).c_str();
 
 
@@ -629,7 +629,7 @@ void EditorUserInterface::runLevelGenScript()
    // Set the load target to the levelgen db, as that's where we want our items stored
    mLoadTarget = &mLevelGenDatabase;
 
-   ConfigDirectories *folderManager = getGame()->getSettings()->getConfigDirs();
+   FolderManager *folderManager = getGame()->getSettings()->getFolderManager();
    runScript(folderManager, scriptName, scriptArgs);
 
    // Reset the target
@@ -638,7 +638,7 @@ void EditorUserInterface::runLevelGenScript()
 
 
 // Runs an arbitrary lua script.  Command is first item in cmdAndArgs, subsequent items are the args, if any
-void EditorUserInterface::runScript(const ConfigDirectories *folderManager, const string &scriptName, const Vector<string> &args)
+void EditorUserInterface::runScript(const FolderManager *folderManager, const string &scriptName, const Vector<string> &args)
 {
    string name = folderManager->findLevelGenScript(scriptName);  // Find full name of levelgen script
 
@@ -923,7 +923,7 @@ void processEditorConsoleCommand(void *gamePtr, OGLCONSOLE_Console console, char
          words.erase(0);
 
          ui->onBeforeRunScriptFromConsole();
-         ui->runScript(game->getSettings()->getConfigDirs(), name, words);
+         ui->runScript(game->getSettings()->getFolderManager(), name, words);
          ui->onAfterRunScriptFromConsole();
       }
    }   
@@ -961,7 +961,7 @@ extern void actualizeScreenMode(bool);
 
 void EditorUserInterface::onActivate()
 {
-   ConfigDirectories *folderManager = getGame()->getSettings()->getConfigDirs();
+   FolderManager *folderManager = getGame()->getSettings()->getFolderManager();
 
    if(folderManager->levelDir == "")      // Never did resolve a leveldir... no editing for you!
    {
@@ -3602,7 +3602,7 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
          return false;
       }
 
-      ConfigDirectories *folderManager = getGame()->getSettings()->getConfigDirs();
+      FolderManager *folderManager = getGame()->getSettings()->getFolderManager();
 
       string fileName = joindir(folderManager->levelDir, saveName).c_str();
 

@@ -25,7 +25,7 @@
 
 #include "luaLevelGenerator.h"
 #include "gameType.h"
-#include "config.h"     // For definition of ConfigDirectories struct
+#include "config.h"     // For definition of FolderManager struct
 #include "game.h"
 #include "stringUtils.h"
 

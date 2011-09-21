@@ -34,12 +34,15 @@
 #include "BanList.h"
 #include "Colors.h"
 
+#include "stringUtils.h"    // For itos
+
 #include "GameSettings.h"
 
 #ifndef ZAP_DEDICATED
 #include "quickChatHelper.h"
 #endif
 
+#include "stringUtils.h"
 #include "dataConnection.h"   // For defs of stuff used by transferResource() function below
 
 #ifdef _MSC_VER
@@ -170,11 +173,11 @@ static void loadForeignServerInfo(CIniFile *ini, IniSettings *iniSettings)
 {
    // AlwaysPingList will default to broadcast, can modify the list in the INI
    // http://learn-networking.com/network-design/how-a-broadcast-address-works
-   parseString(ini->GetValue("Connections", "AlwaysPingList", "IP:Broadcast:28000").c_str(), iniSettings->alwaysPingList, ',');
+   parseString(ini->GetValue("Connections", "AlwaysPingList", "IP:Broadcast:28000"), iniSettings->alwaysPingList, ',');
 
    // These are the servers we found last time we were able to contact the master.
    // In case the master server fails, we can use this list to try to find some game servers. 
-   //parseString(ini->GetValue("ForeignServers", "ForeignServerList").c_str(), prevServerListFromMaster, ',');
+   //parseString(ini->GetValue("ForeignServers", "ForeignServerList"), prevServerListFromMaster, ',');
    ini->GetAllValues("RecentForeignServers", iniSettings->prevServerListFromMaster);
 }
 
@@ -428,7 +431,7 @@ static void loadHostConfiguration(CIniFile *ini, IniSettings *iniSettings)
 
 #ifdef BF_WRITE_TO_MYSQL
    Vector<string> args;
-   parseString(ini->GetValue("Host", "MySqlStatsDatabaseCredentials").c_str(), args, ',');
+   parseString(ini->GetValue("Host", "MySqlStatsDatabaseCredentials"), args, ',');
    if(args.size() >= 1) iniSettings->mySqlStatsDatabaseServer = args[0];
    if(args.size() >= 2) iniSettings->mySqlStatsDatabaseName = args[1];
    if(args.size() >= 3) iniSettings->mySqlStatsDatabaseUser = args[2];
@@ -1065,7 +1068,7 @@ static void writeDefaultQuickChatMessages(CIniFile *ini, IniSettings *iniSetting
 //   for(U32 i=0; i<MaxJoystickAxes*2; i++)
 //   {
 //      Vector<string> buttonList;
-//      parseString(ini->GetValue("Joystick", "Axes" + itos(i), i<8 ? itos(i+16) : "").c_str(), buttonList, ',');
+//      parseString(ini->GetValue("Joystick", "Axes" + itos(i), i<8 ? itos(i+16) : ""), buttonList, ',');
 //      gJoystickMapping.axes[i] = 0;
 //      for(S32 j=0; j<buttonList.size(); j++)
 //      {
@@ -1075,7 +1078,7 @@ static void writeDefaultQuickChatMessages(CIniFile *ini, IniSettings *iniSetting
 //   for(U32 i=0; i<32; i++)
 //   {
 //      Vector<string> buttonList;
-//      parseString(ini->GetValue("Joystick", "Button" + itos(i), i<10 ? itos(i) : "").c_str(), buttonList, ',');
+//      parseString(ini->GetValue("Joystick", "Button" + itos(i), i<10 ? itos(i) : ""), buttonList, ',');
 //      gJoystickMapping.button[i] = 0;
 //      for(S32 j=0; j<buttonList.size(); j++)
 //      {
@@ -1085,7 +1088,7 @@ static void writeDefaultQuickChatMessages(CIniFile *ini, IniSettings *iniSetting
 //   for(U32 i=0; i<4; i++)
 //   {
 //      Vector<string> buttonList;
-//      parseString(ini->GetValue("Joystick", "Pov" + itos(i), itos(i+10)).c_str(), buttonList, ',');
+//      parseString(ini->GetValue("Joystick", "Pov" + itos(i), itos(i+10)), buttonList, ',');
 //      gJoystickMapping.pov[i] = 0;
 //      for(S32 j=0; j<buttonList.size(); j++)
 //      {
@@ -1205,6 +1208,8 @@ void loadSettingsFromINI(CIniFile *ini, GameSettings *settings)
    loadServerBanList(ini, settings->getBanList());
 
    saveSettingsToINI(ini, settings);    // Save to fill in any missing settings
+
+   settings->onFinishedLoading();
 }
 
 
@@ -1494,8 +1499,10 @@ static void writeLevels(CIniFile *ini)
 }
 
 
-static void writeTesting(CIniFile *ini, IniSettings *iniSettings)
+static void writeTesting(CIniFile *ini, GameSettings *settings)
 {
+   IniSettings *iniSettings = settings->getIniSettings();
+
    ini->addSection("Testing");
    if (ini->numSectionComments("Testing") == 0)
    {
@@ -1512,7 +1519,7 @@ static void writeTesting(CIniFile *ini, IniSettings *iniSettings)
 
    ini->SetValueI ("Testing", "BurstGraphics",  (S32) (iniSettings->burstGraphicsMode), true);
    ini->setValueYN("Testing", "NeverConnectDirect", iniSettings->neverConnectDirect);
-   ini->SetValue  ("Testing", "WallFillColor",   iniSettings->wallFillColor.toRGBString());
+   ini->SetValue  ("Testing", "WallFillColor",   settings->getWallOutlineColor()->toRGBString());
    ini->SetValue  ("Testing", "WallOutlineColor", iniSettings->wallOutlineColor.toRGBString());
    ini->setValueYN("Testing", "OldGoalFlash", iniSettings->oldGoalFlash);
    ini->SetValueI ("Testing", "ClientPortNumber", iniSettings->clientPortNumber);
@@ -1571,7 +1578,7 @@ void saveSettingsToINI(CIniFile *ini, GameSettings *settings)
    writeLevels(ini);
    writeSkipList(ini, settings->getLevelSkipList());
    writeUpdater(ini, iniSettings);
-   writeTesting(ini, iniSettings);
+   writeTesting(ini, settings);
    writePasswordSection(ini);
    writeKeyBindings(ini);
    
@@ -1628,6 +1635,24 @@ void writeSkipList(CIniFile *ini, const Vector<string> *levelSkipList)
 //////////////////////////////////
 //////////////////////////////////
 
+// Constructor
+FolderManager::FolderManager(const string &levelDir, const string &robotDir,     const string &sfxDir, const string &musicDir, 
+                             const string &cacheDir, const string &iniDir,       const string &logDir, const string &screenshotDir, 
+                             const string &luaDir,   const string &rootDataDir)
+{
+   this->levelDir      = levelDir;
+   this->robotDir      = robotDir;
+   this->sfxDir        = sfxDir;
+   this->musicDir      = musicDir;
+   this->cacheDir      = cacheDir;
+   this->iniDir        = iniDir;
+   this->logDir        = logDir;
+   this->screenshotDir = screenshotDir;
+   this->luaDir        = luaDir;
+   this->rootDataDir   = rootDataDir;
+}
+
+
 static string resolutionHelper(const string &cmdLineDir, const string &rootDataDir, const string &subdir)
 {
    if(cmdLineDir != "")             // Direct specification of ini path takes precedence...
@@ -1643,26 +1668,26 @@ extern string gSqlite;
 struct CmdLineSettings;
 
 // Doesn't handle leveldir -- that one is handled separately, later, because it requires input from the INI file
-void ConfigDirectories::resolveDirs(GameSettings *settings)
+void FolderManager::resolveDirs(GameSettings *settings)
 {
-   ConfigDirectories *configDirs = settings->getConfigDirs();
-   ConfigDirectories *cmdLineDirs = &settings->getCmdLineSettings()->dirs;
+   FolderManager folderManager  = *settings->getFolderManager();
+   FolderManager cmdLineDirs = settings->getCmdLineFolderManager();     // Versions specified on the cmd line
 
-   string rootDataDir = cmdLineDirs->rootDataDir;
+   string rootDataDir = cmdLineDirs.rootDataDir;
 
    // rootDataDir used to specify the following folders
-   configDirs->robotDir      = resolutionHelper(cmdLineDirs->robotDir,      rootDataDir, "robots");
-   configDirs->iniDir        = resolutionHelper(cmdLineDirs->iniDir,        rootDataDir, "");
-   configDirs->logDir        = resolutionHelper(cmdLineDirs->logDir,        rootDataDir, "");
-   configDirs->screenshotDir = resolutionHelper(cmdLineDirs->screenshotDir, rootDataDir, "screenshots");
+   folderManager.robotDir      = resolutionHelper(cmdLineDirs.robotDir,      rootDataDir, "robots");
+   folderManager.iniDir        = resolutionHelper(cmdLineDirs.iniDir,        rootDataDir, "");
+   folderManager.logDir        = resolutionHelper(cmdLineDirs.logDir,        rootDataDir, "");
+   folderManager.screenshotDir = resolutionHelper(cmdLineDirs.screenshotDir, rootDataDir, "screenshots");
 
    // rootDataDir not used for these folders
-   configDirs->cacheDir      = resolutionHelper(cmdLineDirs->cacheDir,      "", "cache");
-   configDirs->luaDir        = resolutionHelper(cmdLineDirs->luaDir,        "", "scripts");
-   configDirs->sfxDir        = resolutionHelper(cmdLineDirs->sfxDir,        "", "sfx");
-   configDirs->musicDir      = resolutionHelper(cmdLineDirs->musicDir,      "", "music");
+   folderManager.cacheDir      = resolutionHelper(cmdLineDirs.cacheDir,      "", "cache");
+   folderManager.luaDir        = resolutionHelper(cmdLineDirs.luaDir,        "", "scripts");
+   folderManager.sfxDir        = resolutionHelper(cmdLineDirs.sfxDir,        "", "sfx");
+   folderManager.musicDir      = resolutionHelper(cmdLineDirs.musicDir,      "", "music");
 
-   gSqlite = configDirs->logDir + "stats";
+   gSqlite = folderManager.logDir + "stats";
 }
 
 
@@ -1700,7 +1725,7 @@ void ConfigDirectories::resolveDirs(GameSettings *settings)
 // If none of the above work, no hosting/editing for you!
 //
 // NOTE: See above for full explanation of what these functions are doing
-string ConfigDirectories::resolveLevelDir(const string &levelDir)    
+string FolderManager::resolveLevelDir(const string &levelDir)    
 {
    if(levelDir != "")
       if(fileExists(levelDir))     // Check for a valid absolute path in levelDir
@@ -1724,45 +1749,9 @@ string ConfigDirectories::resolveLevelDir(const string &levelDir)
 }
 
 
-string ConfigDirectories::resolveLevelDir(const string &levelDir, const string &iniLevelDir)     // static
-{
-   string resolved = resolveLevelDir(levelDir);
-   if(resolved != "")
-      return resolved;
-
-   if(rootDataDir != "")
-   {
-      string candidate = strictjoindir(rootDataDir, "levels");
-      if(fileExists(candidate))   // Try rootDataDir/levels
-         return candidate;
-   }
-
-   // rootDataDir is blank, or nothing using it worked
-   if(iniLevelDir != "")
-   {
-      string candidate;
-
-      if(levelDir != "")
-      {
-         candidate = strictjoindir(iniLevelDir, levelDir);
-         if(fileExists(candidate))
-            return candidate;
-      }
-      
-      if(fileExists(iniLevelDir))
-         return iniLevelDir;
-   }
-
-   if(fileExists("levels"))
-      return "levels";
-
-   return "";     // Surrender
-}
-
-
 #ifdef false
 // WARNING: May not still work...
-static void testLevelDirResolution(ConfigDirectories *configDirs)
+static void testLevelDirResolution(FolderManager *configDirs)
 {
    // These need to exist!
    // c:\temp\leveldir
@@ -1806,12 +1795,61 @@ static void testLevelDirResolution(ConfigDirectories *configDirs)
 #endif
 
 
-void ConfigDirectories::resolveLevelDir(GameSettings *settings)  
+// Figuring out where the levels are stored is so complex, it needs its own function!
+void FolderManager::resolveLevelDir(GameSettings *settings)  
 {
-   //testLevelDirResolution();
-   levelDir = resolveLevelDir(settings->getCmdLineSettings()->dirs.levelDir, settings->getIniSettings()->levelDir);
+   string iniLevelDir =     settings->getLevelDir(INI);
+   string cmdLineLevelDir = settings->getLevelDir(CMD_LINE);
+
+   string resolved = resolveLevelDir(levelDir);
+
+   if(resolved != "")
+   {
+      levelDir = resolved;
+      return;
+   }
+
+   if(rootDataDir != "")
+   {
+      string candidate = strictjoindir(rootDataDir, "levels");    // Try rootDataDir/levels
+      if(fileExists(candidate))   
+      {
+         levelDir = candidate;
+         return;
+      }
+   }
+
+   // rootDataDir is blank, or nothing using it worked
+   if(iniLevelDir != "")
+   {
+      string candidate;
+
+      if(cmdLineLevelDir != "")
+      {
+         candidate = strictjoindir(iniLevelDir, cmdLineLevelDir);    // Check if cmdLineLevelDir is a subfolder of iniLevelDir
+         if(fileExists(candidate))
+         {
+            levelDir = candidate;
+            return;
+         }
+      }
+      
+      if(fileExists(iniLevelDir))
+      {
+         levelDir = iniLevelDir;
+         return;
+      }
+   }
+
+   if(fileExists("levels"))
+      levelDir = "levels";
+   else
+      levelDir = "";    // Surrender
 }
 
+
+extern string strictjoindir(const string &part1, const string &part2);
+extern bool fileExists(const string &filename);
 
 static string checkName(const string &filename, const char *folders[], const char *extensions[])
 {
@@ -1848,13 +1886,13 @@ static string checkName(const string &filename, const char *folders[], const cha
 }
 
 
-string ConfigDirectories::findLevelFile(const string &filename) const
+string FolderManager::findLevelFile(const string &filename) const
 {
    return findLevelFile(levelDir, filename);
 }
 
 
-string ConfigDirectories::findLevelFile(const string &leveldir, const string &filename) const
+string FolderManager::findLevelFile(const string &leveldir, const string &filename) const
 {
 #ifdef TNL_OS_XBOX         // This logic completely untested for OS_XBOX... basically disables -leveldir param
    const char *folders[] = { "d:\\media\\levels\\", "" };
@@ -1867,7 +1905,7 @@ string ConfigDirectories::findLevelFile(const string &leveldir, const string &fi
 }
 
 
-string ConfigDirectories::findLevelGenScript(const string &filename) const
+string FolderManager::findLevelGenScript(const string &filename) const
 {
    const char *folders[] = { levelDir.c_str(), luaDir.c_str(), "" };
    const char *extensions[] = { ".levelgen", ".lua", "" };
@@ -1876,7 +1914,7 @@ string ConfigDirectories::findLevelGenScript(const string &filename) const
 }
 
 
-string ConfigDirectories::findBotFile(const string &filename) const          
+string FolderManager::findBotFile(const string &filename) const          
 {
    const char *folders[] = { robotDir.c_str(), "" };
    const char *extensions[] = { ".bot", ".lua", "" };
@@ -1908,168 +1946,13 @@ string IniSettings::getInputMode()
 
 static void paramRootDataDir(GameSettings *settings, const Vector<string> &words)
 {
-   settings->getCmdLineSettings()->dirs.rootDataDir = words[0];
+   //settings->getCmdLineSettings()->dirs.rootDataDir = words[0];
 
-   ConfigDirectories *folderManager = settings->getConfigDirs();
+   FolderManager *folderManager = settings->getFolderManager();
    folderManager->rootDataDir = words[0];             // Also sock it away here
 }
 
-static void paramLevelDir(GameSettings *settings, const Vector<string> &words)
-{
-   settings->getCmdLineSettings()->dirs.levelDir = words[0];
-}
 
-static void paramIniDir(GameSettings *settings, const Vector<string> &words)
-{
-   settings->getCmdLineSettings()->dirs.iniDir= words[0];
-}
-
-static void paramLogDir(GameSettings *settings, const Vector<string> &words)
-{
-   settings->getCmdLineSettings()->dirs.logDir = words[0];
-}
-
-static void paramScriptsDir(GameSettings *settings, const Vector<string> &words)
-{
-   settings->getCmdLineSettings()->dirs.luaDir = words[0];
-}
-
-static void paramCacheDir(GameSettings *settings, const Vector<string> &words)
-{
-   settings->getCmdLineSettings()->dirs.cacheDir = words[0];
-}
-
-static void paramRobotDir(GameSettings *settings, const Vector<string> &words)
-{
-   settings->getCmdLineSettings()->dirs.robotDir = words[0];
-}
-
-static void paramScreenshotDir(GameSettings *settings, const Vector<string> &words)
-{
-   settings->getCmdLineSettings()->dirs.screenshotDir = words[0];
-}
-
-static void paramSfxDir(GameSettings *settings, const Vector<string> &words)
-{
-   settings->getCmdLineSettings()->dirs.sfxDir = words[0];
-}
-
-static void paramMusicDir(GameSettings *settings, const Vector<string> &words)
-{
-   settings->getCmdLineSettings()->dirs.musicDir = words[0];
-}
-
-static void paramMaster(GameSettings *settings, const Vector<string> &words)
-{
-   settings->getCmdLineSettings()->masterAddress = words[0];
-}
-
-static void paramHostAddr(GameSettings *settings, const Vector<string> &words)
-{
-   settings->getCmdLineSettings()->hostaddr = words[0];
-}
-
-static void paramLoss(GameSettings *settings, const Vector<string> &words)
-{
-   settings->getCmdLineSettings()->loss = (F32)stof(words[0]);
-}
-
-static void paramLag(GameSettings *settings, const Vector<string> &words)
-{
-   settings->getCmdLineSettings()->lag = stoi(words[0]);
-}
-
-static void paramStutter(GameSettings *settings, const Vector<string> &words)
-{
-   settings->getCmdLineSettings()->stutter = min(U32(stoi(words[0])), 1000);     // Limit to 0 - 1000
-}
-
-static void paramForceUpdate(GameSettings *settings, const Vector<string> &words)
-{
-   settings->getCmdLineSettings()->forceUpdate = true;
-}
-
-static void paramDedicated(GameSettings *settings, const Vector<string> &words)
-{
-   settings->getCmdLineSettings()->dedicatedMode = true;
-
-   if(words.size() == 1)
-      settings->getCmdLineSettings()->dedicated = words[0];
-}
-
-static void paramName(GameSettings *settings, const Vector<string> &words)
-{
-   settings->getCmdLineSettings()->name = words[0];
-}
-
-static void paramPassword(GameSettings *settings, const Vector<string> &words)
-{
-   settings->getCmdLineSettings()->password = words[0];
-}
-
-static void paramServerPassword(GameSettings *settings, const Vector<string> &words)
-{
-   settings->getCmdLineSettings()->serverPassword = words[0];
-}
-
-static void paramAdminPassword(GameSettings *settings, const Vector<string> &words)
-{
-   settings->getCmdLineSettings()->adminPassword = words[0];
-}
-
-static void paramLevelChangePassword(GameSettings *settings, const Vector<string> &words)
-{
-   settings->getCmdLineSettings()->levelChangePassword = words[0];
-}
-
-static void paramLevels(GameSettings *settings, const Vector<string> &words)
-{
-   settings->getCmdLineSettings()->specifiedLevels = words;
-}
-
-static void paramHostName(GameSettings *settings, const Vector<string> &words)
-{
-   settings->getCmdLineSettings()->hostname = words[0];
-}
-
-static void paramHostDescr(GameSettings *settings, const Vector<string> &words)
-{
-   settings->getCmdLineSettings()->hostdescr = words[0];
-}
-
-static void paramMaxPlayers(GameSettings *settings, const Vector<string> &words)
-{
-   settings->getCmdLineSettings()->maxPlayers = stoi(words[0]);
-}
-
-static void paramWindow(GameSettings *settings, const Vector<string> &words)
-{
-   settings->getCmdLineSettings()->displayMode = DISPLAY_MODE_WINDOWED;
-}
-
-static void paramFullscreen(GameSettings *settings, const Vector<string> &words)
-{
-   settings->getCmdLineSettings()->displayMode = DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED;
-}
-
-static void paramFullscreenStretch(GameSettings *settings, const Vector<string> &words)
-{
-   settings->getCmdLineSettings()->displayMode = DISPLAY_MODE_FULL_SCREEN_STRETCHED;
-}
-
-static void paramWinPos(GameSettings *settings, const Vector<string> &words)
-{
-   settings->getCmdLineSettings()->xpos = stoi(words[0]);
-   settings->getCmdLineSettings()->ypos = stoi(words[1]);
-}
-
-static void paramWinWidth(GameSettings *settings, const Vector<string> &words)
-{
-   settings->getCmdLineSettings()->winWidth = stoi(words[0]);
-}
-
-
-extern void exitToOs(S32 errcode);
 extern void transferResource(GameSettings *settings, const string &addr, const string &pw, const string &fileName, const string &resourceType, bool sending);
 
 static void paramGetRes(GameSettings *settings, const Vector<string> &words)
@@ -2083,15 +1966,7 @@ static void paramSendRes(GameSettings *settings, const Vector<string> &words)
 }
 
 
-extern bool writeToConsole();
-extern void printRules();
 
-static void paramRules(GameSettings *settings, const Vector<string> &words)
-{
-   writeToConsole();
-   printRules();
-   exitToOs(0);
-}
 
 static void paramHelp(GameSettings *settings, const Vector<string> &words);    // Forward declare this one here; it is defined down below
 
@@ -2103,360 +1978,6 @@ static void paramUseStick(GameSettings *settings, const Vector<string> &words)
 #endif
 }
 
-
-enum ParamRequirements {
-   NO_PARAMETERS,      
-   ONE_OPTIONAL,
-   ONE_REQUIRED,
-   TWO_REQUIRED,
-   FOUR_REQUIRED,
-   ALL_REMAINING
-};
-
-
-struct ParamInfo {
-   string paramName;
-   S32 pass;
-   ParamRequirements argsRequired;
-   void (*paramCallback)(GameSettings *settings, const Vector<string> &args);
-   S32 docLevel;     
-   string paramString;
-   string helpString;
-   const char *errorMsg;
-};
-
-const char *helpTitles[] = {
-   "Player-oriented options",
-   "Options for hosting",
-   "Specifying levels",
-   "Specifying folders\nAll of the following options can be specified with either a relative or absolute path. They are primarily intended to make installation on certain Linux platforms more flexible; they are not meant for daily use by average users.\nIn most cases, -rootdatadir is the only parameter in this section you will need.",
-   "Developer-oriented options",
-   "Advanced server management options",
-   "Other commands",
-};
-
-
-// The order of these is unimportant -- it only determines the order in which the items are printed out with the -help option.  
-// Items are sorted by tier, but order is otherwise preserved.
-// Only items related to determining the locations of resources should be included in pass 0; most items should be set to pass 1.
-
-ParamInfo paramDefs[] = {   
-// Parameter           Pass, Args required  Callback function        Tier  Args                                                Help string            Error message (not needed for NO_PARAMETERS)
-
-// Player-oriented options
-{ "name",                1,  ONE_REQUIRED,  paramName,                0, "<string>", "Specify your username",                                                                   "You must enter a nickname with the -name option" },
-{ "password",            1,  ONE_REQUIRED,  paramPassword,            0, "<string>", "Specify your password",                                                                   "You must enter a password with the -password option" },
-{ "window",              1,  NO_PARAMETERS, paramWindow,              0, "", "Start in windowed mode",                                       "" },
-{ "fullscreen",          1,  NO_PARAMETERS, paramFullscreen,          0, "", "Start in fullscreen mode (no stretching)",                     "" },
-{ "fullscreen-stretch",  1,  NO_PARAMETERS, paramFullscreenStretch,   0, "", "Start in fullscreen mode (gaphics stretched to fill monitor)", "" },
-{ "winpos",              1,  TWO_REQUIRED,  paramWinPos,              0, "<int> <int>", "Specify x,y location of game window (note that this is the position of the UL corner of the game canvas, and does not account for the window frame)", "You must specify the x and y position of the window with the -winpos option" },
-{ "winwidth",            1,  ONE_REQUIRED,  paramWinWidth,            0, "<int>",       "Specify width of game window. Height will be set automatically. Note that the specified width is the width of the game canvas itself, and does not take account of window borders. Therefore, the entire window width will exceed the size specified slightly.", "You must specify the width of the game window with the -winwidth option" },
-{ "usestick",            1,  ONE_REQUIRED,  paramUseStick,            0, "<int>",       "Specify which joystick or other input device to use. Default is 1.", "You must specify the joystick you want to use with the -usestick option" },
-{ "master",              1,  ONE_REQUIRED,  paramMaster,              0, "<address>", "Use master server (game finder) at specified address",                                   "You must specify a master server address with -master option" },
-
-// Options for hosting
-{ "dedicated",           1,  ONE_OPTIONAL,  paramDedicated,           1, "[address]", "Run as a dedicated game server (i.e. no game window, console mode)",                     "" },
-{ "serverpassword",      1,  ONE_REQUIRED,  paramServerPassword,      1, "<string>", "Specify a server password (players will need to know this to connect to your server)",    "You must enter a password with the -serverpassword option" },
-{ "adminpassword",       1,  ONE_REQUIRED,  paramAdminPassword,       1, "<string>", "Specify an admin password (allowing those with the password to kick players and change their teams) when you host a game or run a dedicated server", "You must specify an admin password with the -adminpassword option" },
-{ "levelchangepassword", 1,  ONE_REQUIRED,  paramLevelChangePassword, 1, "<string>", "Specify the password required for players to be able to change levels on your server when you host a game or run a dedicated server", "You must specify an level-change password with the -levelchangepassword option" },
-{ "hostname",            1,  ONE_REQUIRED,  paramHostName,            1, "<string>", "Set the name that will appear in the server browser when searching for servers", "You must specify a server name with the -hostname option" },
-{ "hostdescr",           1,  ONE_REQUIRED,  paramHostDescr,           1, "<string>", "Set a brief description of the server, which will be visible when players browse for game servers. Use double quotes (\") for descriptions containing spaces.", "You must specify a description (use quotes) with the -hostdescr option" },
-{ "maxplayers",          1,  ONE_REQUIRED,  paramMaxPlayers,          1, "<int>",    "Max players allowed in a game (default is 128)", "You must specify the max number of players on your server with the -maxplayers option" }, 
-{ "hostaddr",            1,  ONE_REQUIRED,  paramHostAddr,            1, "<address>", "Specify host address for the server to listen to when hosting",                        "You must specify a host address for the host to listen on (e.g. IP:Any:28000 or IP:192.169.1.100:5500)" },
-
-// Specifying levels
-{ "levels",              1,  ALL_REMAINING, paramLevels,              2, "<level 1> [level 2]...", "Specify the levels to play. Note that all remaining items on the command line will be interpreted as levels, so this must be the last parameter.", "You must specify one or more levels to load with the -levels option" },
-
-// Specifying folders
-{ "rootdatadir",         0,  ONE_REQUIRED,  paramRootDataDir,         3, "<path>",                "Equivalent to setting the -inidir, -logdir, -robotdir, -screenshotdir, and -leveldir parameters. The application will automatially append \"/robots\", \"/screenshots\", and \"/levels\" to path as appropriate.", "You must specify the root data folder with the -rootdatadir option" },
-{ "leveldir",            0,  ONE_REQUIRED,  paramLevelDir,            2, "<folder or subfolder>", "Load all levels in specified system folder, or a subfolder under the levels folder. Levels will be loaded in alphabetical order by level-file name. Admins can create custom level lists by copying selected levels into folders or subfolders, and rename the files to get them to load in the proper order.", "You must specify a levels subfolder with the -leveldir option" },
-{ "inidir",              0,  ONE_REQUIRED,  paramIniDir,              3, "<path>",                "Folder where INI file is stored",            "You must specify a the folder where your INI file is stored with the -inidir option" },
-{ "logdir",              0,  ONE_REQUIRED,  paramLogDir,              3, "<path>",                "Folder where logfiles will be written",      "You must specify your log folder with the -logdir option" },
-{ "scriptsdir",          0,  ONE_REQUIRED,  paramScriptsDir,          3, "<path>",                "Folder where Lua helper scripts are stored", "You must specify the folder where your Lua scripts are stored with the -scriptsdir option" },
-{ "cachedir",            0,  ONE_REQUIRED,  paramCacheDir,            3, "<path>",                "Folder where cache files are stored",        "You must specify the folder where cache files are to be stored with the -cachedir option" },
-{ "robotdir",            0,  ONE_REQUIRED,  paramRobotDir,            3, "<path>",                "Folder where robot scripts are stored",      "You must specify the robots folder with the -robotdir option" },
-{ "screenshotdir",       0,  ONE_REQUIRED,  paramScreenshotDir,       3, "<path>",                "Folder where screenshots are stored",        "You must specify your screenshots folder with the -screenshotdir option" },
-{ "sfxdir",              0,  ONE_REQUIRED,  paramSfxDir,              3, "<path>",                "Folder where sounds are stored",             "You must specify your sounds folder with the -sfxdir option" },
-{ "musicdir",            0,  ONE_REQUIRED,  paramMusicDir,            3, "<path>",                "Folder where game music stored",             "You must specify your sounds folder with the -musicdir option" }, 
-
-// Developer-oriented options
-{ "loss",                1,  ONE_REQUIRED,  paramLoss,                4, "<float>",   "Simulate the specified amount of packet loss, from 0 (no loss) to 1 (all packets lost)", "You must specify a loss rate between 0 and 1 with the -loss option" },
-{ "lag",                 1,  ONE_REQUIRED,  paramLag,                 4, "<int>",     "Simulate the specified amount of server lag (in milliseconds)",                          "You must specify a lag (in ms) with the -lag option" },
-{ "stutter",             1,  ONE_REQUIRED,  paramStutter,             4, "<int>",     "Simulate VPS CPU stutter (in milliseconds/second)",                                      "You must specify a value (in ms) with the -stutter option.  Values clamped to 0-1000" },
-{ "forceupdate",         1,  NO_PARAMETERS, paramForceUpdate,         4, "",          "Trick game into thinking it needs to update",                                            "" },
-
-// Advanced server management options
-{ "getres",              1,  FOUR_REQUIRED, paramGetRes,              5, "<server address> <admin password> <resource name> <LEVEL|LEVELGEN|BOT>", "Send a resource to a remote server. Address must be specified in the form IP:nnn.nnn.nnn.nnn:port. The server must be running, have an admin password set, and have resource management enabled ([Host] section in the bitfighter.ini file).", "Usage: bitfighter getres <server address> <password> <file> <resource type>" },
-{ "sendres",             1,  FOUR_REQUIRED, paramSendRes,             5, "<server address> <admin password> <resource name> <LEVEL|LEVELGEN|BOT>", "Retrieve a resource from a remote server, with same requirements as -sendres.",                                                                                                                                                                "Usage: bitfighter sendres <server address> <password> <file> <resource type>" },
-
-// Other commands
-{ "rules",               1,  NO_PARAMETERS, paramRules,               6, "",  "Print a list of \"rules of the game\" and other possibly useful data", "" },
-{ "help",                1,  NO_PARAMETERS, paramHelp,                6, "",  "Display this message", "" },  
-
-};
-
-
-void parameterError(S32 i)
-{
-   printf("%s\n", paramDefs[i].errorMsg);
-   exitToOs(1);
-}
-
-
-static string makeParamStr(const ParamInfo paramInfo)
-{
-   return paramInfo.paramName + (paramInfo.paramString == "" ? "" : " ") + paramInfo.paramString;
-}
-
-
-static string makePad(U32 len)
-{
-   string padding = "";
-
-   for(U32 i = 0; i < len; i++)
-      padding += " ";
-
-   return padding;
-}
-
-
-static const S32 MAX_HELP_LINE_LEN = 110;
-
-static size_t chunkStart;  // string::length returns size_t type which might be U64 for 64 bit systems.
-static string chunkText;
-
-// Return a chunk of text starting at start, with a max of len chars
-static string getChunk(U32 len)
-{
-   if(chunkStart >= chunkText.length())
-      return "";
-
-   // Advance chunkStart to position of first non-space; avoids leading spaces
-   chunkStart += chunkText.substr(chunkStart, len + 1).find_first_not_of(' ');
-               
-   // Create a chunk of text, with the max length we have room for
-   string chunk = chunkText.substr(chunkStart, len + 1);
-               
-   if(chunk.length() >= len)                                // If chunk would fill a full line...
-      chunk = chunk.substr(0, chunk.find_last_of(' '));     // ...lop chunk off at last space
-
-   chunkStart += chunk.length();
-
-   return chunk;
-}
-
-
-static void resetChunker(const string &text)
-{
-   chunkText = trim(text);
-   chunkStart = 0;
-}
-
-
-static void paramHelp(GameSettings *settings, const Vector<string> &words)
-{
-   for(S32 i = 0; i < S32(ARRAYSIZE(helpTitles)); i++)
-   {
-      // Make an initial sweep through to check on the sizes of things, to ensure we get the indention right
-      U32 maxSize = 0;
-
-      for(S32 j = 0; j < S32(ARRAYSIZE(paramDefs)); j++)
-         if(paramDefs[j].docLevel == i)
-         {
-            U32 len = (U32) makeParamStr(paramDefs[j]).length();
-
-            if(len > maxSize)
-               maxSize = len;
-         }
-
-      bool firstSection = true;
-
-      for(S32 j = 0; j < S32(ARRAYSIZE(paramDefs)); j++)
-      {
-         if(paramDefs[j].docLevel != i)
-            continue;
-
-         if(firstSection)     // First item in this docLevel... print the section header
-         {
-            printf("\n");
-            string title = helpTitles[i];
-
-            while(title.length())
-            {
-               printf("\n");
-
-               // Have to use string::size_type here because U32 and string::npos don't
-               // compare well on x86_64 machines
-               string::size_type firstCR = title.find_first_of('\n');     // Grab a line of the title
-               resetChunker(title.substr(0, firstCR));
-
-               if(firstCR != string::npos)
-                  title = title.substr(firstCR + 1);
-               else
-                  title = "";
-
-               while(true)
-               {
-                  string chunk = getChunk(MAX_HELP_LINE_LEN);
-
-                  if(!chunk.length())
-                     break;
-
-                  printf("%s\n", chunk.c_str());
-               }
-
-               firstSection = false;
-            }
-         }
-
-         string paramStr = makeParamStr(paramDefs[j]);
-         U32 paddingLen = maxSize - paramStr.length();
-
-         U32 wrapWidth = MAX_HELP_LINE_LEN - maxSize;
-
-         U32 currPos = 0;
-
-         string helpString = trim(paramDefs[j].helpString);
-         //U32 length = (U32) helpString.length();  //(not used)                    // Make sure errant trailing spaces don't screw us up
-
-         resetChunker(helpString);
-
-         bool first = true;
-
-         while(true)
-         {
-            string chunk = getChunk(wrapWidth);
-
-            if(!chunk.length())
-               break;
-
-            if(first)
-            {
-               printf("\t-%s%s -- %s\n", paramStr.c_str(), makePad(paddingLen).c_str(),  chunk.c_str());
-               first = false;
-            }
-            else
-               printf("\t%s %s\n",                         makePad(maxSize + 4).c_str(), chunk.c_str());
-         }
-      }
-   }
-
-   // Add some final notes...
-   printf("\n\nNotes:\n\
-   \t<param> denotes a required parameter\n\
-   \t[param] denotes an optional parameter\n\
-   \taddress is an address in the form ip address:port. (e.g. 192.168.1.55:25955)\n\
-   \tstring means a parameter consisting of some combination of letters and numbers (e.g. Grambol_22).\n\
-   \t   In many cases, spaces can be included by enclosing entire string in double quotes (\"Solid Gold Levels\").\n\
-   \tinteger means an integer number must be specified (e.g. 4)\n\
-   \tfloat means a floating point number must be specified (e.g. 3.5)\n");
-
-   exitToOs(0);
-}
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-void CmdLineSettings::readParams(GameSettings *settings, const Vector<string> &argv, S32 pass)
-{
-   S32 argc = argv.size();
-   S32 argPtr = 0;
-
-   Vector<string> params;
-
-   while(argPtr < argc)
-   {
-      // Assume "args" starting with "-" are actually subsequent params
-      bool hasAdditionalArg =                         (argPtr != argc - 1 && argv[argPtr + 1][0] != '-');     
-      bool has2AdditionalArgs = hasAdditionalArg   && (argPtr != argc - 2 && argv[argPtr + 2][0] != '-');
-      bool has3AdditionalArgs = has2AdditionalArgs && (argPtr != argc - 3 && argv[argPtr + 3][0] != '-');
-      bool has4AdditionalArgs = has3AdditionalArgs && (argPtr != argc - 4 && argv[argPtr + 4][0] != '-');
-
-      bool found = false;
-
-      string arg = argv[argPtr];
-      argPtr++;      // Advance argPtr to location of first parameter argument
-
-      for(U32 i = 0; i < ARRAYSIZE(paramDefs); i++)
-      {
-         if(arg == "-" + paramDefs[i].paramName)
-         {
-            found = true;
-
-            params.clear();
-
-            if(paramDefs[i].argsRequired == NO_PARAMETERS)
-            {
-               // Do nothing
-            }
-            else if(paramDefs[i].argsRequired == ONE_OPTIONAL)
-            {
-               if(hasAdditionalArg)
-               {
-                  params.push_back(argv[argPtr]);
-                  argPtr += 1;
-               }
-            }
-            else if(paramDefs[i].argsRequired == ONE_REQUIRED)
-            {
-               if(!hasAdditionalArg)
-                  parameterError(i);
-
-               params.push_back(argv[argPtr]);
-               argPtr += 1;
-            }
-            else if(paramDefs[i].argsRequired == TWO_REQUIRED)
-            {
-               if(!has2AdditionalArgs)
-                  parameterError(i);
-
-               params.push_back(argv[argPtr]);
-               params.push_back(argv[argPtr + 1]);
-               argPtr += 2;
-            }
-            else if(paramDefs[i].argsRequired == FOUR_REQUIRED)
-            {
-               if(!has4AdditionalArgs)
-                  parameterError(i);
-
-               params.push_back(argv[argPtr]);
-               params.push_back(argv[argPtr + 1]);
-               params.push_back(argv[argPtr + 2]);
-               params.push_back(argv[argPtr + 3]);
-               argPtr += 4;
-            }
-            else if(paramDefs[i].argsRequired == ALL_REMAINING)
-            {
-               if(!hasAdditionalArg)
-                  parameterError(i);
-
-               for(S32 j = argPtr; j < argc; j++)
-                  params.push_back(argv[j]);
-
-               argPtr = argc;
-            }
-
-            if(paramDefs[i].pass == pass)
-               paramDefs[i].paramCallback(settings, params);    // Call the parameter processing function, if we're in the right pass
-
-            break;
-         }
-      }
-
-      if(!found)
-      {
-         printf("Invalid cmd line parameter found: %s\n", arg.c_str());
-         exit(1);
-      }
-   }
-
-#ifdef ZAP_DEDICATED
-   // Override some settings if we're compiling ZAP_DEDICATED
-   settings->getCmdLineSettings()->dedicatedMode = true;
-#endif
-
-}
 
 };
 

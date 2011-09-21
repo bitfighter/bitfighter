@@ -81,10 +81,6 @@ ServerGame *gServerGame = NULL;
 
 static Vector<DatabaseObject *> fillVector2;
 
-// Declare some statics 
-Vector<string> Game::mMasterAddressList;
-
-
 
 #ifndef ZAP_DEDICATED
 class ClientGame;
@@ -536,27 +532,30 @@ void Game::checkConnectionToMaster(U32 timeDelta)
 
    if(!mConnectionToMaster.isValid())      // It's valid if it isn't null, so could be disconnected and would still be valid
    {
-      if(mMasterAddressList.size() == 0)
+      Vector<string> *masterServerList = mSettings->getMasterServerList();
+
+      if(masterServerList->size() == 0)
          return;
 
       if(mNextMasterTryTime < timeDelta && mReadyToConnectToMaster)
       {
-         if(mHaveTriedToConnectToMaster && mMasterAddressList.size() >= 2)
-         {  // Rotate the list so as to try each one until we find one that works...
-            mMasterAddressList.resize(mMasterAddressList.size()+1);
-            mMasterAddressList[mMasterAddressList.size() - 1] = mMasterAddressList[0];
-            mMasterAddressList.erase(0);
+         if(mHaveTriedToConnectToMaster && masterServerList->size() >= 2)
+         {  
+            // Rotate the list so as to try each one until we find one that works...
+            masterServerList->push_back(masterServerList->get(0));
+            masterServerList->erase(0);
          }
 
-         mHaveTriedToConnectToMaster = true;
-         logprintf(LogConsumer::LogConnection, "%s connecting to master [%s]", isServer() ? "Server" : "Client", 
-                    mMasterAddressList[0].c_str());
+         const char *addr = masterServerList->get(0).c_str();
 
-         Address addr(mMasterAddressList[0].c_str());
-         if(addr.isValid())
+         mHaveTriedToConnectToMaster = true;
+         logprintf(LogConsumer::LogConnection, "%s connecting to master [%s]", isServer() ? "Server" : "Client", addr);
+
+         Address address(addr);
+         if(address.isValid())
          {
             mConnectionToMaster = new MasterServerConnection(this);
-            mConnectionToMaster->connect(mNetInterface, addr);
+            mConnectionToMaster->connect(mNetInterface, address);
          }
 
          mNextMasterTryTime = GameConnection::MASTER_SERVER_FAILURE_RETRY_TIME;     // 10 secs, just in case this attempt fails
@@ -626,13 +625,6 @@ void Game::deleteObjects(TestFunc testFunc)
       obj->deleteObject(0);
    }
 }
-
-// Static method
-void Game::setMasterAddress(const string &firstChoice, const string &secondChoice)
-{
-   parseString((firstChoice != "" ? firstChoice : secondChoice).c_str(), mMasterAddressList, ',');
-}
-
 
 void Game::computeWorldObjectExtents()
 {
@@ -782,7 +774,7 @@ ServerGame::ServerGame(const Address &address, GameSettings *settings, bool test
 
    mGameSuspended = true; // server starts at zero players
 
-   U32 stutter = settings->getCmdLineSettings()->stutter;
+   U32 stutter = mSettings->getSimulatedStutter();
 
    mStutterTimer.reset(1001 - stutter);    // Use 1001 to ensure timer is never set to 0
    mStutterSleepTimer.reset(stutter);
@@ -994,7 +986,7 @@ LevelInfo getLevelInfoFromFileChunk(char *chunk, S32 size, LevelInfo &levelInfo)
          {
             char c = chunk[cur];
             chunk[cur] = 0;
-            Vector<string> list = parseString(string(&chunk[startingCur]));
+            Vector<string> list = parseString(&chunk[startingCur]);
             chunk[cur] = c;
 
             if(list.size() >= 1 && list[0].find("GameType") != string::npos)
@@ -1040,7 +1032,7 @@ LevelInfo getLevelInfoFromFileChunk(char *chunk, S32 size, LevelInfo &levelInfo)
 
 void ServerGame::loadNextLevelInfo()
 {
-   ConfigDirectories *folderManager = getSettings()->getConfigDirs();
+   FolderManager *folderManager = getSettings()->getFolderManager();
 
    string levelFile = folderManager->findLevelFile(mLevelInfos[mLevelLoadIndex].levelFileName.getString());
 
@@ -1284,6 +1276,7 @@ static S32 QSORT_CALLBACK RatingSort(GameConnection **a, GameConnection **b)
    return diff > 0 ? 1 : -1;
 }
 
+
 // Pass -1 to go to next level, otherwise pass an absolute level number
 void ServerGame::cycleLevel(S32 nextLevel)
 {
@@ -1466,7 +1459,7 @@ extern md5wrapper md5;
 
 bool ServerGame::loadLevel(const string &levelFileName)
 {
-   ConfigDirectories *folderManager = getSettings()->getConfigDirs();
+   FolderManager *folderManager = getSettings()->getFolderManager();
 
    resetLevelInfo();
 
@@ -1599,7 +1592,7 @@ void ServerGame::idle(U32 timeDelta)
    }
 
    // Simulate CPU stutter without impacting gClientGame
-   if(mSettings->getCmdLineSettings()->stutter > 0)
+   if(mSettings->getSimulatedStutter() > 0)
    {
       if(mStutterTimer.getCurrent() > 0)      
       {
@@ -1908,7 +1901,7 @@ void ServerGame::idle(U32 timeDelta)
 
 bool ServerGame::startHosting()
 {
-   if(mSettings->getConfigDirs()->levelDir == "")     // Never did resolve a leveldir... no hosting for you!
+   if(mSettings->getFolderManager()->levelDir == "")     // Never did resolve a leveldir... no hosting for you!
       return false;
 
    hostingModePhase = Hosting;

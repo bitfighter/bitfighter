@@ -61,19 +61,6 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-// Provide a class to help organize loading of levels from disk
-class LevelListLoader
-{
-public:
-   static Vector<string> buildLevelList(const string &leveldir, const Vector<string> &levelsSpecifiedOnCmdLine,
-                                        const Vector<string> *skipList, bool ignoreCmdLine = false);
-   static void removeSkippedLevels(Vector<string> &levelList, const Vector<string> *skipList);
-};
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
 // Thrown when the loader encounters a line that seems broken for some reason
 struct LevelLoadException : public std::exception
 {

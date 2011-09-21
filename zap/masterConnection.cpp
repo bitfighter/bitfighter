@@ -218,10 +218,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSetAuthenticated,
 
    if((AuthenticationStatus)authStatus.value == AuthenticationStatusAuthenticatedName)
    {
-      // Hmmm.... same info in two places...
-      clientGame->getClientInfo()->name = correctedName.getString();
-      clientGame->getSettings()->getIniSettings()->name = correctedName.getString();  
-
+      clientGame->correctPlayerName(correctedName.getString());
       clientGame->getClientInfo()->authenticated = true;
 
       GameConnection *gc = dynamic_cast<ClientGame *>(mGame)->getConnectionToServer();
@@ -428,9 +425,7 @@ void MasterServerConnection::onConnectionEstablished()
 #endif
    }
 
-   // If we didn't get the master from the cmd line, and we have multiple addresses, write them to the INI file in their new order
-   if(mGame->getSettings()->getCmdLineSettings()->masterAddress == "" && mGame->getMasterAddressList().size() >= 2)
-      mGame->getSettings()->getIniSettings()->masterAddress = listToString(mGame->getMasterAddressList(), ',');
+   mGame->getSettings()->saveMasterAddressListInIniUnlessItCameFromCmdLine();
 }
 
 

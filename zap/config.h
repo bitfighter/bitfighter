@@ -66,8 +66,15 @@ enum DisplayMode {
 class GameSettings;
 struct CmdLineSettings;
 
-struct ConfigDirectories 
+struct FolderManager 
 {
+   // Constructors
+   FolderManager() { /* Do nothing */ };
+
+   FolderManager(const string &levelDir, const string &robotDir,     const string &sfxDir, const string &musicDir, 
+                 const string &cacheDir, const string &iniDir,       const string &logDir, const string &screenshotDir, 
+                 const string &luaDir,   const string &rootDataDir);      
+
    string levelDir;
    string robotDir;
    string sfxDir;
@@ -79,9 +86,8 @@ struct ConfigDirectories
    string luaDir;
    string rootDataDir;
 
-   void resolveDirs(GameSettings *settings);                                   // calls resolveLevelDir()
-   void resolveLevelDir(GameSettings *settings);                               // calls resolveLevelDir(x,y,z)
-   string resolveLevelDir(const string &levelDir, const string &iniLevelDir);  // calls resolveLevelDir(x,y)
+   void resolveDirs(GameSettings *settings);                                  
+   void resolveLevelDir(GameSettings *settings);                                 
    string resolveLevelDir(const string &levelDir);
 
    string findLevelFile(const string &filename) const;
@@ -99,7 +105,7 @@ class GameSettings;
 struct CmdLineSettings
 {
    CmdLineSettings() { init(); }    // Quickie constructor
-   void readParams(GameSettings *settings, const Vector<string> &argv, S32 pass);
+   
 
    bool dedicatedMode;     // Will server be dedicated?
 
@@ -115,11 +121,6 @@ struct CmdLineSettings
    string name;
    string password;
 
-   //string defaultName;     // Name used if user hits <enter> on name entry screen
-   //string lastName;        // Name the user previously entered
-   //string lastPassword;    // Last password user entered on startup screen
-   //string lastEditorName;  // Name of most recently edited level
-
    string hostname;
    string hostaddr;        // Address to listen on when we're host (e.g. IP:localhost:1234 or IP:Any:6666 or whatever)
    string hostdescr;       // One-line description of server
@@ -127,7 +128,7 @@ struct CmdLineSettings
    string adminPassword;   // Password required to perform certain admin functions
    string levelChangePassword;   // Password required to change levels and such
 
-   ConfigDirectories dirs;
+   FolderManager dirs;
 
    S32 maxPlayers;
 
@@ -191,8 +192,8 @@ struct IniSettings      // With defaults specified
 
    InputMode inputMode;             // Joystick or Keyboard
    string masterAddress;            // Default address of our master server
-   string name;                     // Player name (none by default)
-   string password;                 // Player pasword (none by default)
+   string name;                     // Player name (none by default)    ==> will only be present if the user added it manually
+   string password;                 // Player pasword (none by default) ==> will only be present if the user added it manually
    string defaultName;              // Name used if user hits <enter> on name entry screen
    string lastName;                 // Name user entered last time the game was run -- will be used as default on name entry screen
    string lastPassword;

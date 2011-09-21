@@ -70,6 +70,8 @@ XXX need to document timers, new luavec stuff XXX
     an affected level into the editor and save; parameter will be properly rewritten
 <li>Reduced CPU usage for overlapping asteroids
 <li>Removed -jsave and -jplay cmd line options.  It's been ages since they worked, and it's unlikely they ever will
+<li>Removed optional hostAddr cmd line parameter for -dedicated <hostAddr>.  Specify host address (only rarely needed) with the existing -hostAddr option
+<li>Removed -server cmd line parameter; not sure it really ever worked at all
 </ul>
 */
 
@@ -221,7 +223,7 @@ void abortHosting_noLevels()
 
    if(gServerGame->isDedicated())
    {
-      ConfigDirectories *folderManager = gServerGame->getSettings()->getConfigDirs();
+      FolderManager *folderManager = gServerGame->getSettings()->getFolderManager();
       const char *levelDir = folderManager->levelDir.c_str();
 
       logprintf(LogConsumer::LogError,     "No levels found in folder %s.  Cannot host a game.", levelDir);
@@ -235,7 +237,7 @@ void abortHosting_noLevels()
    if(gClientGame)
    {
       ErrorMessageUserInterface *errUI = gClientGame->getUIManager()->getErrorMsgUserInterface();
-      ConfigDirectories *folderManager = gServerGame->getSettings()->getConfigDirs();
+      FolderManager *folderManager = gServerGame->getSettings()->getFolderManager();
       string levelDir = folderManager->levelDir;
 
       errUI->reset();
@@ -765,62 +767,22 @@ void setupLogging(IniSettings *iniSettings)
 }
 
 
-// Now integrate INI settings with those from the command line and process them
-void processStartupParams(GameSettings *settings)
-{
-   settings->initServerPassword     (settings->getCmdLineSettings()->serverPassword,      settings->getIniSettings()->serverPassword);
-   settings->initAdminPassword      (settings->getCmdLineSettings()->adminPassword,       settings->getIniSettings()->adminPassword);
-   settings->initLevelChangePassword(settings->getCmdLineSettings()->levelChangePassword, settings->getIniSettings()->levelChangePassword);
-
-   ConfigDirectories *folderManager = settings->getConfigDirs();
-
-   folderManager->resolveLevelDir(settings); 
-
-   if(settings->getIniSettings()->levelDir == "")                       // If there is nothing in the INI,
-      settings->getIniSettings()->levelDir = folderManager->levelDir;   // write a good default to the INI
-
-   settings->initHostName (settings->getCmdLineSettings()->hostname,  settings->getIniSettings()->hostname);
-   settings->initHostDescr(settings->getCmdLineSettings()->hostdescr, settings->getIniSettings()->hostdescr);
-
-
-   if(settings->getCmdLineSettings()->displayMode != DISPLAY_MODE_UNKNOWN)
-      settings->getIniSettings()->displayMode = settings->getCmdLineSettings()->displayMode;    // Simply clobber the INISettings copy
-
-   if(settings->getCmdLineSettings()->xpos != -9999)
-      settings->getIniSettings()->winXPos = settings->getCmdLineSettings()->xpos;
-   if(settings->getCmdLineSettings()->ypos != -9999)
-      settings->getIniSettings()->winYPos = settings->getCmdLineSettings()->ypos;
-   if(settings->getCmdLineSettings()->winWidth > 0)
-      settings->getIniSettings()->winSizeFact = max((F32) settings->getCmdLineSettings()->winWidth / (F32) gScreenInfo.getGameCanvasWidth(), gScreenInfo.getMinScalingFactor());
-
-   // TODO: Mov to settings
-   Game::setMasterAddress(settings->getCmdLineSettings()->masterAddress, settings->getIniSettings()->masterAddress);    // The INI one will always have a value
-   
-
-   if(settings->getCmdLineSettings()->name != "")                          // We'll clobber the INI file setting.  Since this
-      settings->getIniSettings()->name = settings->getCmdLineSettings()->name;            // setting is never saved, we won't mess up our INI
-
-   if(settings->getCmdLineSettings()->password != "")                      // We'll clobber the INI file setting.  Since this
-      settings->getIniSettings()->password = settings->getCmdLineSettings()->password;    // setting is never saved, we won't mess up our INI
-}
-
-
 void createClientGame(GameSettings *settings)
 {
 #ifndef ZAP_DEDICATED
-   if(!settings->getCmdLineSettings()->dedicatedMode)                      // Create ClientGame object
+   if(!settings->isDedicatedServer())                      // Create ClientGame object
    {
       gClientGame1 = new ClientGame(Address(IPProtocol, Address::Any, settings->getIniSettings()->clientPortNumber), settings);   //   Let the system figure out IP address and assign a port
       gClientGame = gClientGame1;
 
-      gClientGame->setLoginPassword(settings->getCmdLineSettings()->password, settings->getIniSettings()->password, settings->getIniSettings()->lastPassword);
+      gClientGame->setLoginPassword(settings->getPlayerPassword());
 
        // Put any saved filename into the editor file entry thingy
       gClientGame->getUIManager()->getLevelNameEntryUserInterface()->setString(settings->getIniSettings()->lastEditorName);
 
       //gClientGame2 = new ClientGame(Address());   //  !!! 2-player split-screen game in same game.
 
-      if(settings->getIniSettings()->name == "")
+      if(settings->getPlayerName() == "")
       {
          if(gClientGame2)
          {
@@ -848,7 +810,7 @@ void createClientGame(GameSettings *settings)
          gClientGame->getUIManager()->getMainMenuUserInterface()->activate();
 
          gClientGame->setReadyToConnectToMaster(true);         // Set elsewhere if in dedicated server mode
-         seedRandomNumberGenerator(settings->getIniSettings()->name);
+         seedRandomNumberGenerator(settings->getPlayerName());
       }
    }
 #endif
@@ -1148,45 +1110,38 @@ int main(int argc, char **argv)
    for(S32 i = 1; i < argc; i++)
       argVector.push_back(argv[i]);
 
-   ConfigDirectories *folderManager = settings->getConfigDirs();
+   settings->readCmdLineParams(argVector);      // Read cmd line params, needed to resolve folder locations
+   settings->resolveDirs();                     // Figures out where all our folders are
 
-   settings->getCmdLineSettings()->readParams(settings, argVector, 0);   // Read first tranche of cmd line params, needed to resolve folder locations
-   folderManager->resolveDirs(settings);                  // Resolve all folders except for levels folder, which is resolved later
+   FolderManager *folderManager = settings->getFolderManager();
 
-   // Before we go any further, we should get our log files in order.  Now we know where they'll be, as the 
+   // Before we go any further, we should get our log files in order.  We know where they'll be, as the 
    // only way to specify a non-standard location is via the command line, which we've now read.
    setupLogging(folderManager->logDir);
-
-   settings->getCmdLineSettings()->readParams(settings, argVector, 1);   // Read remaining cmd line params 
 
    // Load the INI file
    gINI.SetPath(joindir(folderManager->iniDir, "bitfighter.ini"));
 
-   loadSettingsFromINI(&gINI, settings);  // Read INI
+   loadSettingsFromINI(&gINI, settings);        // Read INI
+   setupLogging(settings->getIniSettings());    // Turns various logging options on and off
 
-   setupLogging(settings->getIniSettings());
+   Ship::computeMaxFireDelay();                 // Look over weapon info and get some ranges, which we'll need before we start sending data
 
-   processStartupParams(settings);        // And merge command line params and INI settings
-   createClientGame(settings);
-
-   Ship::computeMaxFireDelay();           // Look over weapon info and get some ranges, which we'll need before we start sending data
-
-   if(settings->getCmdLineSettings()->dedicatedMode)
-   {
-      Vector<string> levels = LevelListLoader::buildLevelList(folderManager->levelDir, settings->getCmdLineSettings()->specifiedLevels,
-                                                              settings->getLevelSkipList());
-      initHostGame(settings, levels, false, true);       // Start hostingm
-   }
+   settings->runCmdLineDirectives();            // If we specified a directive on the cmd line, like -help, attend to that now
 
    SoundSystem::init(settings->getIniSettings()->sfxSet, folderManager->sfxDir, 
                      folderManager->musicDir, settings->getIniSettings()->musicVolLevel);  // Even dedicated server needs sound these days
    
-   checkIfThisIsAnUpdate(settings);
+   checkIfThisIsAnUpdate(settings);             // Make any adjustments needed when we run for the first time after an upgrade
 
 
-#ifndef ZAP_DEDICATED
-   if(gClientGame)     // Only exists when we're starting up in interactive mode, as opposed to running a dedicated server
+   if(settings->isDedicatedServer())
+      initHostGame(settings, settings->getLevelList(), false, true);     // Figure out what levels we'll be playing with, and start hosting  
+   else
    {
+#ifndef ZAP_DEDICATED
+      createClientGame(settings);                  // Instantiate gClientGame
+
       FXManager::init();                           // Get ready for sparks!!  C'mon baby!!
       Joystick::populateJoystickStaticData();      // Build static data needed for joysticks
       Joystick::initJoystick();                    // Initialize joystick system
@@ -1210,11 +1165,11 @@ int main(int argc, char **argv)
 
 #ifdef USE_BFUP
       if(settings->getIniSettings()->useUpdater)
-         launchUpdater(argv[0], settings->getCmdLineSettings()->forceUpdate);  // Spawn external updater tool to check for new version of Bitfighter -- Windows only
-#endif
-
+         launchUpdater(argv[0], settings->getForceUpdate());  // Spawn external updater tool to check for new version of Bitfighter -- Windows only
+#endif   // USE_BFUP
    }
-#endif
+#endif   // !ZAP_DEDICATED
+
    dedicatedServerLoop();              // Loop forever, running the idle command endlessly
 
    return 0;

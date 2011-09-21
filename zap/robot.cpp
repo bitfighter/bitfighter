@@ -1725,7 +1725,7 @@ bool Robot::processArguments(S32 argc, const char **argv, Game *game)
       wasRunningScript = true;
       string fullFilename = mFilename;  // for printing filename when not found
 
-      ConfigDirectories *folderManager = game->getSettings()->getConfigDirs();
+      FolderManager *folderManager = game->getSettings()->getFolderManager();
 
       mFilename = folderManager->findBotFile(mFilename);
       mScriptDir = folderManager->luaDir;                   // Probably superfluous, but seems good practice

@@ -1078,13 +1078,9 @@ static void nameAndPasswordAcceptCallback(ClientGame *clientGame, U32 unused)
       uiManager->getMainMenuUserInterface()->activate();
 
    clientGame->resetMasterConnectTimer();
-
-   clientGame->getSettings()->getIniSettings()->lastName = clientGame->getClientInfo()->name = ui->menuItems[1]->getValueForWritingToLevelFile();
-
-   clientGame->getSettings()->getIniSettings()->lastPassword = ui->menuItems[2]->getValueForWritingToLevelFile();
-   clientGame->setLoginPassword(ui->menuItems[2]->getValueForWritingToLevelFile());
-
-   saveSettingsToINI(&gINI, clientGame->getSettings());   // Get that baby into the INI file
+   
+   clientGame->updatePlayerNameAndPassword(ui->menuItems[1]->getValueForWritingToLevelFile(), 
+                                           ui->menuItems[2]->getValueForWritingToLevelFile());
 
    clientGame->setReadyToConnectToMaster(true);
    seedRandomNumberGenerator(clientGame->getClientInfo()->name);
@@ -1181,11 +1177,8 @@ static void startHostingCallback(ClientGame *game, U32 unused)
    game->getUIManager()->getHostMenuUserInterface()->saveSettings();
 
    GameSettings *settings = game->getSettings();
-   ConfigDirectories *folderManager = settings->getConfigDirs();
 
-   Vector<string> levelList = LevelListLoader::buildLevelList(folderManager->levelDir, settings->getCmdLineSettings()->specifiedLevels, 
-                                                              settings->getLevelSkipList());
-   initHostGame(settings, levelList, false, false);
+   initHostGame(settings, settings->getLevelList(), false, false);
 }
 
 
@@ -1573,7 +1566,7 @@ void LevelMenuSelectUserInterface::processSelection(U32 index)
 
    if((index & UPLOAD_LEVELS_BIT) && (index & (~UPLOAD_LEVELS_BIT)) < U32(mLevels.size()))
    {
-      ConfigDirectories *folderManager = getGame()->getSettings()->getConfigDirs();
+      FolderManager *folderManager = getGame()->getSettings()->getFolderManager();
       string filename = strictjoindir(folderManager->levelDir, mLevels[index & (~UPLOAD_LEVELS_BIT)]);
 
       if(!gc->s2rUploadFile(filename.c_str(), 1))     // TODO: 1 Should be an enum
@@ -1603,16 +1596,12 @@ void LevelMenuSelectUserInterface::onActivate()
    mLevels.clear();
 
    char c[2];
-   c[1] = 0; // null terminate
+   c[1] = 0;   // null termination
 
    if(!strcmp(category.c_str(), UPLOAD_LEVELS))
    {
       // Get all the playable levels in levelDir
-      GameSettings *settings = getGame()->getSettings();
-
-      ConfigDirectories *folderManager = settings->getConfigDirs();
-      mLevels = LevelListLoader::buildLevelList(folderManager->levelDir, settings->getCmdLineSettings()->specifiedLevels,
-                                                settings->getLevelSkipList());     
+      mLevels = getGame()->getSettings()->getLevelList();     
 
       for(S32 i = 0; i < mLevels.size(); i++)
       {

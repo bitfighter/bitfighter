@@ -88,10 +88,10 @@ void Color::set(const Color &c) { r = c.r; g = c.g; b = c.b; }
 void Color::set(const string &s)
 {
    Vector<string> list;
-   parseString(s.c_str(), list, ' ');
+   parseString(s, list, ' ');
 
    if(list.size() < 3)
-      parseString(s.c_str(), list, ',');
+      parseString(s, list, ',');
 
    if(list.size() >= 3)
    {

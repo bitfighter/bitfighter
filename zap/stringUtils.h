@@ -76,6 +76,7 @@ string listToString(const Vector<string> &words, char seperator);
 // TODO: Merge these methods
 Vector<string> parseString(const string &line);
 void parseString(const char *inputString, Vector<string> &words, char seperator);
+void parseString(const string &inputString, Vector<string> &words, char seperator);
 
 string concatenate(const Vector<string> &words, S32 startingWith = 0);
 

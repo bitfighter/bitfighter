@@ -1740,7 +1740,7 @@ void Ship::render(S32 layerIndex)
       disableBlending = true; 
    }
 
-   if(localShip && gShowAimVector && mGame->getSettings()->getIniSettings()->enableExperimentalAimMode)   // Only show for local ship
+   if(localShip && gShowAimVector && mGame->getSettings()->getEnableExperimentalAimMode())   // Only show for local ship
       renderAimVector();
 
    glPopMatrix();

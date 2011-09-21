@@ -439,7 +439,8 @@ void GameType::setScript(const Vector<string> &args)
 
 void GameType::printRules()
 {
-   NetClassRep::initialize();
+   NetClassRep::initialize();    // We need this to instantiate objects to interrogate them below
+
    printf("\n\n");
    printf("Bitfighter rules\n");
    printf("================\n\n");

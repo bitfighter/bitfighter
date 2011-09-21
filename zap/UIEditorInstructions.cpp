@@ -381,7 +381,7 @@ void EditorInstructionsUserInterface::renderPageWalls()
       for(S32 i = 0; i < wallSegments.size(); i++)
          wallSegments[i]->renderFill(EDITOR_WALL_FILL_COLOR, false);
 
-      renderWallEdges(&edges, getGame()->getSettings()->getIniSettings()->wallOutlineColor);
+      renderWallEdges(&edges, getGame()->getSettings()->getWallOutlineColor());
 
       for(S32 i = 0; i < wallSegments.size(); i++)
          delete wallSegments[i];

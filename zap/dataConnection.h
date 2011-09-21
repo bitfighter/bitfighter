@@ -61,7 +61,7 @@ public:
 ////////////////////////////////////
 
 class GameSettings;
-struct ConfigDirectories;
+struct FolderManager;
 
 class DataSender 
 {
@@ -74,7 +74,7 @@ private:
 
 public:
    DataSender() { mDone = true; }        // Constructor 
-   SenderStatus initialize(DataSendable *connection, ConfigDirectories *folderManager, string filename, FileType fileType);   
+   SenderStatus initialize(DataSendable *connection, FolderManager *folderManager, string filename, FileType fileType);   
 
    bool isDone() { return mDone; }
    void sendNextLine();

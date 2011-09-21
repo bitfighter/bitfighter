@@ -233,6 +233,12 @@ Vector<string> parseString(const string &line)
 }
 
 
+void parseString(const string &inputString, Vector<string> &words, char seperator)
+{
+   parseString(inputString.c_str(), words, seperator);
+}
+
+
 // Splits inputString into a series of words using the specified separator
 void parseString(const char *inputString, Vector<string> &words, char seperator)
 {
@@ -262,6 +268,7 @@ void parseString(const char *inputString, Vector<string> &words, char seperator)
       isn++;
    }
     word[wn] = 0;
+
     if(wn > 0) 
        words.push_back(word);
 }

@@ -187,8 +187,6 @@ protected:
    SafePtr<MasterServerConnection> mConnectionToMaster;
    SafePtr<GameType> mGameType;
 
-   static Vector<string> mMasterAddressList; // We only have one master address list, shared for all games
-
    bool mGameSuspended;                      // True if we're in "suspended animation" mode
 
    GameSettings *mSettings;
@@ -245,9 +243,6 @@ public:
 
    void deleteObjects(U8 typeNumber);
    void deleteObjects(TestFunc testFunc);
-
-   static void setMasterAddress(const string &firstChoice, const string &secondChoice);
-   Vector<string> getMasterAddressList() { return mMasterAddressList; }
 
    F32 getGridSize() const { return mGridSize; }
    void setGridSize(F32 gridSize);

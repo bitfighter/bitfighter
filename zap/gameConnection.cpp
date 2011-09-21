@@ -215,7 +215,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestCurrentLevel, (), (), NetClassGroupG
    const char *filename = gServerGame->getCurrentLevelFileName().getString();
    
    // Initialize on the server to start sending requested file -- will return OK if everything is set up right
-   ConfigDirectories *folderManager = mSettings->getConfigDirs();
+   FolderManager *folderManager = mSettings->getFolderManager();
    SenderStatus stat = gServerGame->dataSender.initialize(this, folderManager, filename, LEVEL_TYPE);
 
    if(stat != STATUS_OK)
@@ -274,7 +274,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rCommandComplete, (RangedU32<0,SENDER_STATUS
 
    if(mClientGame)
    {
-      string levelDir = mSettings->getConfigDirs()->levelDir;
+      string levelDir = mSettings->getFolderManager()->levelDir;
       const char *outputFilename = strictjoindir(levelDir, mClientGame->getRemoteLevelDownloadFilename()).c_str();
 
       if(strcmp(outputFilename, ""))
@@ -332,10 +332,10 @@ void GameConnection::submitLevelChangePassword(string password)    // password h
    string encrypted = md5.getSaltedHashFromString(password);
    c2sLevelChangePassword(encrypted.c_str());
 
-   mLastEnteredLevelChangePassword = password;
+   mLastEnteredLevelChangePassword = password;     // Remember the password
 
-   setGotPermissionsReply(false);
-   setWaitingForPermissionsReply(true);      // Means we'll show a reply from the server
+   setGotPermissionsReply(false);                  // No reply yet
+   setWaitingForPermissionsReply(true);            // True means that we'll show a reply from the server
 }
 
 
@@ -533,7 +533,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
 
    else if(type == (U32)LevelDir)
    {
-      ConfigDirectories *folderManager = mSettings->getConfigDirs();
+      FolderManager *folderManager = mSettings->getFolderManager();
       string candidate = folderManager->resolveLevelDir(param.getString());
 
       if(folderManager->levelDir == candidate)
@@ -549,8 +549,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
          return;
       }
 
-      Vector<string> newLevels = LevelListLoader::buildLevelList(candidate, mSettings->getCmdLineSettings()->specifiedLevels, 
-                                                                 mSettings->getLevelSkipList(), true);
+      Vector<string> newLevels = mSettings->getLevelList(candidate);
 
       if(newLevels.size() == 0)
       {
@@ -1301,8 +1300,8 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendDataParts, (U8 type, ByteBufferPtr data
          (mSettings->getIniSettings()->allowMapUpload || (mSettings->getIniSettings()->allowAdminMapUpload && isAdmin())) &&
          !isInitiator() && mDataBuffer->getBufferSize() != 0)
    {
-      // only server runs this part of code
-      ConfigDirectories *folderManager = mSettings->getConfigDirs();
+      // Only server runs this part of code
+      FolderManager *folderManager = mSettings->getFolderManager();
 
       LevelInfo levelInfo("Transmitted Level");
       getLevelInfoFromFileChunk((char *)mDataBuffer->getBuffer(), mDataBuffer->getBufferSize(), levelInfo);
