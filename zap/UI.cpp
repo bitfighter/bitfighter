@@ -476,6 +476,12 @@ F32 UserInterface::drawCenteredString(F32 x, F32 y, S32 size, const char *string
    drawString(xpos, y, size, string);
    return xpos;
 }
+F32 UserInterface::drawCenteredString(F32 x, F32 y, F32 size, const char *string)
+{
+   F32 xpos = x - getStringWidth(size, string) / 2;
+   drawString(xpos, y, size, string);
+   return xpos;
+}
 
 
 S32 UserInterface::drawCenteredStringf(S32 y, S32 size, const char *format, ...)

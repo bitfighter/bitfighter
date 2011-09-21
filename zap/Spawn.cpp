@@ -25,7 +25,9 @@
 
 #ifndef ZAP_DEDICATED
 #  include "SDL/SDL_opengl.h"
-#  include "UI.h"
+#  include "UIMenuItems.h"
+#  include "UIEditorMenus.h"
+#  include "ClientGame.h"
 #endif
 
 #include "Spawn.h"
@@ -44,8 +46,29 @@ AbstractSpawn::AbstractSpawn(const Point &pos, S32 time)
 {
    setVert(pos, 0);
    setRespawnTime(time);
+#ifndef ZAP_DEDICATED
+   mAttributeMenu = NULL;
+#endif
 };
 
+// Use of mAttributeMenu seems to be very messy, make it more cleaner?
+// using "static" have problems when selecting multiple items at the same time.
+
+AbstractSpawn::AbstractSpawn(const AbstractSpawn &copy)
+{
+   mSpawnTime = copy.mSpawnTime;
+#ifndef ZAP_DEDICATED
+   mAttributeMenu = NULL;
+#endif
+}
+
+AbstractSpawn::~AbstractSpawn()
+{
+#ifndef ZAP_DEDICATED
+   if(mAttributeMenu)
+      delete mAttributeMenu;
+#endif
+}
 
 void AbstractSpawn::setRespawnTime(S32 time)       // in seconds
 {
@@ -86,12 +109,32 @@ string AbstractSpawn::toString(F32 gridSize) const
    return string(getClassName()) + " " + geomToString(gridSize) + " " + itos(mSpawnTime);
 }
 
+#ifndef ZAP_DEDICATED
+
+EditorAttributeMenuUI *AbstractSpawn::getAttributeMenu()
+{
+   if(getDefaultRespawnTime() == -1)  // No editing RespawnTimer for Ship Spawn
+      return NULL;
+
+   if(!mAttributeMenu)
+      mAttributeMenu = new EditorAttributeMenuUI(dynamic_cast<ClientGame *>(getGame()));
+
+   mAttributeMenu->menuItems.resize(1);
+   mAttributeMenu->menuItems[0] = boost::shared_ptr<MenuItem>(new CounterMenuItem(dynamic_cast<ClientGame *>(getGame()), "Spawn timer", mSpawnTime, 1, 1, 1000, "", "", ""));
+   return mAttributeMenu;
+}
+
+void AbstractSpawn::doneEditing(EditorAttributeMenuUI *attributeMenu)
+{
+   mSpawnTime = attributeMenu->menuItems[0]->getIntValue();
+}
+#endif
 
 ////////////////////////////////////////
 ////////////////////////////////////////
 
 // Constructor
-Spawn::Spawn(const Point &pos, S32 time) : AbstractSpawn(pos, time)
+Spawn::Spawn(const Point &pos) : AbstractSpawn(pos)
 {
    mObjectTypeNumber = ShipSpawnTypeNumber;
 }

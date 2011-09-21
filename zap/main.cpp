@@ -476,8 +476,10 @@ void idle()
       else if(gServerGame->hostingModePhase == ServerGame::DoneLoadingLevels)
          hostGame();
    }
+#ifndef ZAP_DEDICATED
    else
       settings = gClientGame->getSettings();
+#endif
 
 /*
    static S64 lastTimer = Platform::getHighPrecisionTimerValue(); // accurate, but possible wrong speed when overclocking or underclocking CPU

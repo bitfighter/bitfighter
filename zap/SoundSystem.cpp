@@ -791,7 +791,7 @@ namespace Zap
 {
 
 
-void SoundSystem::updateGain(SFXHandle& effect, F32 volLevel)
+void SoundSystem::updateGain(SFXHandle& effect, F32 volLevel, F32 voiceVolLevel)
 {
    // Do nothing
 }
@@ -801,7 +801,7 @@ void SoundSystem::updateMovementParams(SFXHandle& effect)
    // Do nothing
 }
 
-void SoundSystem::playOnSource(SFXHandle& effect, F32 volLevel)
+void SoundSystem::playOnSource(SFXHandle& effect, F32 sfxVol, F32 voiceVol)
 {
    // Do nothing
 }
@@ -841,7 +841,7 @@ void SoundSystem::queueVoiceChatBuffer(SFXHandle& effect, ByteBufferPtr p)
    // Do nothing
 }
 
-void SoundSystem::init(sfxSets sfxSet, const string &sfxDir, const string &musicDir, ALFloat musicVol)
+void SoundSystem::init(sfxSets sfxSet, const string &sfxDir, const string &musicDir, float musicVol)
 {
    logprintf(LogConsumer::LogError, "No OpenAL support on this platform.");
 }

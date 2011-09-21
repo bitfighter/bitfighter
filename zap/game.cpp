@@ -1277,7 +1277,7 @@ F32 getCurrentRating(GameConnection *conn)
 
 
 // Highest ratings first
-static S32 QSORT_CALLBACK RatingSort(GameConnection **a, GameConnection **b)
+static S32 QSORT_CALLBACK RatingSort(SafePtr<GameConnection> *a, SafePtr<GameConnection> *b)
 {
    F32 diff = getCurrentRating(*b) - getCurrentRating(*a);
    if(diff == 0) return 0;
@@ -1287,6 +1287,8 @@ static S32 QSORT_CALLBACK RatingSort(GameConnection **a, GameConnection **b)
 // Pass -1 to go to next level, otherwise pass an absolute level number
 void ServerGame::cycleLevel(S32 nextLevel)
 {
+   Vector<SafePtr<GameConnection> > connectionList;
+
    cleanUp();
    mLevelSwitchTimer.clear();
    mScopeAlwaysList.clear();
@@ -1299,6 +1301,8 @@ void ServerGame::cycleLevel(S32 nextLevel)
          conn->resetGhosting();
          conn->mOldLoadout.clear();
          conn->switchedTeamCount = 0;
+         // Build a list of our current connections first, while still having the old GameType
+         connectionList.push_back(conn);
       }
 
    if(nextLevel >= FIRST_LEVEL)          // Go to specified level
@@ -1391,12 +1395,6 @@ void ServerGame::cycleLevel(S32 nextLevel)
 #endif
    }
 
-
-   // Build a list of our current connections
-   Vector<GameConnection *> connectionList;
-
-   for(S32 i = 0; i < mGameType->getClientCount(); i++)
-      connectionList.push_back(mGameType->getClient(i)->getConnection());
 
    // Now add the connections to the game type, from highest rating to lowest --> will create ratings-based teams
    connectionList.sort(RatingSort);

@@ -172,7 +172,7 @@ public:
 
    /////
    // Geometry operations  -- can we provide standard implementations of these?
-	//void rotateAboutPoint(const Point &origin, F32 angle) { Geometry::rotateAboutPoint(origin, angle); onGeomChanged(); }
+   //void rotateAboutPoint(const Point &origin, F32 angle) { Geometry::rotateAboutPoint(origin, angle); onGeomChanged(); }
    //void flipHorizontal(F32 minX, F32 maxX) { Geometry::flipHorizontal(minX, maxX); onGeomChanged(); };
    //void flipVertical(F32 minY, F32 maxY) { Geometry::flipVertical(minY, maxY); onGeomChanged(); };
    //virtual void scale(const Point &center, F32 scale) { Geometry::scale(center, scale); onGeomChanged(); }
@@ -214,6 +214,7 @@ public:
    virtual const char *getInstructionMsg() { return ""; }      // Message printed below item when it is selected
 
    virtual EditorAttributeMenuUI *getAttributeMenu() { return NULL; }    // Override if child class has an attribute menu
+   virtual void doneEditing(EditorAttributeMenuUI *attributeMenu) {}
 
 
    //////////////

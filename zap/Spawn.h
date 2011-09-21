@@ -53,7 +53,8 @@ protected:
 
 public:
    AbstractSpawn(const Point &pos = Point(), S32 time = 0); // Constructor
-
+   AbstractSpawn(const AbstractSpawn &copy);    // Copy constructor
+   ~AbstractSpawn();
    
    virtual bool processArguments(S32 argc, const char **argv, Game *game);
 
@@ -79,15 +80,19 @@ public:
 
    virtual void renderEditor(F32 currentScale) = 0;
    virtual void renderDock() = 0;
+
+#ifndef ZAP_DEDICATED
+   EditorAttributeMenuUI *mAttributeMenu; 
+   EditorAttributeMenuUI *getAttributeMenu();
+   void doneEditing(EditorAttributeMenuUI *attributeMenu);
+#endif
 };
 
 
 class Spawn : public AbstractSpawn
 {
 public:
-   static const S32 DEFAULT_RESPAWN_TIME = 30;    // in seconds
-
-   Spawn(const Point &pos = Point(), S32 time = DEFAULT_RESPAWN_TIME);  // C++ constructor (no lua constructor)
+   Spawn(const Point &pos = Point());  // C++ constructor (no lua constructor)
    virtual ~Spawn();
    Spawn *clone() const;
 
@@ -101,7 +106,7 @@ public:
    bool processArguments(S32 argc, const char **argv, Game *game);
    string toString(F32 gridSize) const;
 
-   S32 getDefaultRespawnTime() { return 0; }    // Somewhat meaningless in this context
+   S32 getDefaultRespawnTime() { return -1; }    // Somewhat meaningless in this context
 
    void renderEditor(F32 currentScale);
    void renderDock();
