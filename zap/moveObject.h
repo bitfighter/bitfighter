@@ -78,8 +78,8 @@ public:
    Point getRenderVel() const { return mMoveState[RenderState].vel; }
    Point getActualVel() const { return mMoveState[ActualState].vel; }
 
-   virtual void setActualPos(Point pos);
-   virtual void setActualVel(Point vel);
+   virtual void setActualPos(const Point &pos);
+   virtual void setActualVel(const Point &vel);
 
    virtual void playCollisionSound(U32 stateIndex, MoveObject *moveObjectThatWasHit, F32 velocity);
 
@@ -143,8 +143,8 @@ public:
    virtual U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    virtual void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
-   void setActualPos(Point p);
-   void setActualVel(Point vel);
+   void setActualPos(const Point &p);
+   void setActualVel(const Point &vel);
 
    U16 getItemId() { return mItemId; }
 
