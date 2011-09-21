@@ -253,8 +253,8 @@ void MenuUserInterface::render()
    // Draw the game screen, then dim it out so you can still see it under our overlay
    if(getGame()->getConnectionToServer())
    {
-      if(getUIManager()->getPrevUI() != this)  // TODO: fix problem with prevUI being the same as this causing errors
-         getUIManager()->renderPrevUI();
+      if(getUIManager()->getGameUserInterface())
+         getUIManager()->getGameUserInterface()->render();
 
       glColor(Colors::black, 0.6f);
 

@@ -97,33 +97,6 @@ LuaRobot::LuaRobot(lua_State *L) : LuaShip((Robot *)lua_touserdata(L, 1))
    // The following sets scads of global vars in the Lua instance that mimic the use of the enums we use everywhere
 
    // Game Objects
-/*
-   setEnum(ShipType);
-   setEnum(BarrierType);
-   setEnum(MoveableType);
-
-   setEnum(BulletType);
-   setEnum(MineType);
-   setEnum(SpyBugType);
-
-   setEnum(ResourceItemType);
-   setEnum(ForceFieldType);
-   setEnum(LoadoutZoneType);
-   setEnum(TestItemType);
-   setEnum(FlagType);
-   setEnum(TurretTargetType);
-   setEnum(SlipZoneType);
-   setEnum(NexusType);
-   //setEnum(BotNavMeshZoneType);
-   setEnum(RobotType);
-   setEnum(TeleportType);
-   setEnum(GoalZoneType);
-   setEnum(AsteroidType);
-   setEnum(RepairItemType);
-   setEnum(EnergyItemType);
-   setEnum(SoccerBallItemType);
-   setEnum(TurretType);
-   setEnum(ForceFieldProjectorType);*/
 
 #define setEnumName(number, name) { lua_pushinteger(L, number); lua_setglobal(L, name); }
 
@@ -145,7 +118,7 @@ LuaRobot::LuaRobot(lua_State *L) : LuaShip((Robot *)lua_touserdata(L, 1))
    setEnumName(AsteroidTypeNumber, "AsteroidType");
    setEnumName(RepairItemTypeNumber, "RepairItemType");
    setEnumName(EnergyItemTypeNumber, "EnergyItemType");
-   setEnumName(SoccerBallItemTypeNumber, "SoccerBallItem");
+   setEnumName(SoccerBallItemTypeNumber, "SoccerBallItemType");
    setEnumName(WormTypeNumber, "WormType");
    setEnumName(TurretTypeNumber, "TurretType");
    setEnumName(ForceFieldTypeNumber, "ForceFieldType");

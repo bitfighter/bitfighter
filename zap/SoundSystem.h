@@ -8,7 +8,7 @@
 #ifndef SOUNDSYSTEM_H_
 #define SOUNDSYSTEM_H_
 
-#include "config.h"     // For sfxSets
+#include "ConfigEnum.h"     // For sfxSets
 #include "tnlTypes.h"
 #include "tnlVector.h"
 #include <string>

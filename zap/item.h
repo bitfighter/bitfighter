@@ -57,7 +57,7 @@ public:
    Item(const Point &pos = Point(0,0), F32 radius = 1, F32 mass = 1);      // Constructor
 
    virtual Point getActualPos() const;
-   virtual void setActualPos(Point p);
+   virtual void setActualPos(const Point &p);
 
    virtual bool getCollisionCircle(U32 stateIndex, Point &point, F32 &radius) const;
 

@@ -84,13 +84,13 @@ void MoveObject::updateExtent()
    setExtent(r);
 }
 
-void MoveObject::setActualPos(Point pos)
+void MoveObject::setActualPos(const Point &pos)
 {
    mMoveState[ActualState].pos = pos;
-   mMoveState[ActualState].vel.set(0,0);
+//   mMoveState[ActualState].vel.set(0,0);  // Why is this there?  It breaks asteroid initial movement
 }
 
-void MoveObject::setActualVel(Point vel)
+void MoveObject::setActualVel(const Point &vel)
 {
    mMoveState[ActualState].vel = vel;
 }
@@ -296,11 +296,7 @@ GameObject *MoveObject::findFirstCollision(U32 stateIndex, F32 &collisionTime, P
 
    fillVector.clear();
 
-   // Free CPU for asteroids
-   if (dynamic_cast<Asteroid *>(this))
-      findObjects((TestFunc)isAsteroidCollideableType, fillVector, queryRect);
-   else
-      findObjects((TestFunc)isAnyObjectType, fillVector, queryRect);
+   findObjects(collideTypes(), fillVector, queryRect);   // Free CPU for finding only the ones we care about
 
    F32 collisionFraction;
 
@@ -713,15 +709,15 @@ void MoveItem::dismount()
 }
 
  // if wanting to use setActualPos(const Point &p), will have to change all class that have setActualPos, to allow virtual inheritance to work right.
-void MoveItem::setActualPos(Point p)
+void MoveItem::setActualPos(const Point &p)
 {
    mMoveState[ActualState].pos = p;
-   mMoveState[ActualState].vel.set(0,0);
+//   mMoveState[ActualState].vel.set(0,0);  // Why is this there?  It breaks asteroid initial movement
    setMaskBits(WarpPositionMask | PositionMask);
 }
 
 
-void MoveItem::setActualVel(Point vel)
+void MoveItem::setActualVel(const Point &vel)
 {
    mMoveState[ActualState].vel = vel;
    setMaskBits(PositionMask);

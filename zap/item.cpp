@@ -63,7 +63,7 @@ Point Item::getActualPos() const
    return getVert(0);
 }
 
-void Item::setActualPos(Point p)
+void Item::setActualPos(const Point &p)
 {
    setVert(p, 0);
    setExtent(Rect(p, mRadius));

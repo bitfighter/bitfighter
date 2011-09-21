@@ -28,7 +28,7 @@
 
 #include "tnlTypes.h"
 #include "Point.h"
-#include "config.h"
+#include "ConfigEnum.h"
 
 using namespace TNL;
 

@@ -212,11 +212,10 @@ void CreditsScroller::updateFX(U32 delta)
    for(S32 i = 0; i < credits.size(); i++)
    {
       credits[i].currPos.x -= (delta / 8.f);
-      S32 pos = S32( credits[i].currPos.x );
 
       // Reached the top, reset
-      if(pos < -CreditSpace )
-         pos += mTotalSize - 350;
+      if(credits[i].currPos.x < -CreditSpace )
+         credits[i].currPos.x += mTotalSize - 350;
 
    }
 }

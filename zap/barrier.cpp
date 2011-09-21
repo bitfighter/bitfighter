@@ -880,7 +880,7 @@ void WallSegmentManager::renderWalls(GameSettings *settings, bool draggingObject
 
       // We'll use the editor color most of the time; only in preview mode in the editor do we use the game color
       bool useGameColor = UserInterface::current && UserInterface::current->getMenuID() == EditorUI && showingReferenceShip;
-      TNLAssert(UserInterface::current->getMenuID() == EditorUI, "How did we get here, then???");
+      //TNLAssert(UserInterface::current->getMenuID() == EditorUI, "How did we get here, then???"); // (came from editing attributes of SpeedZone)
 
       Color fillColor = useGameColor ? settings->getWallFillColor() : EDITOR_WALL_FILL_COLOR;
       mWallSegments[i]->renderFill(fillColor, isBeingDragged);

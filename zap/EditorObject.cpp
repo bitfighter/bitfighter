@@ -462,9 +462,9 @@ void EditorPointObject::renderItemText(const char *text, S32 offset, F32 current
    glColor(INSTRUCTION_TEXTCOLOR);
    S32 off = (INSTRUCTION_TEXTSIZE + INSTRUCTION_TEXTGAP) * offset - 10 - ((offset > 0) ? 5 : 0);
 
-   Point pos = getVert(0) * currentScale + currentOffset;
+   Point pos = getVert(0) + currentOffset;
 
-   UserInterface::drawCenteredString(pos.x, pos.y - off, INSTRUCTION_TEXTSIZE, text);
+   UserInterface::drawCenteredString(pos.x, pos.y - off, F32(INSTRUCTION_TEXTSIZE) / currentScale, text);
 }
 
 

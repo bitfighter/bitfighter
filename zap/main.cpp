@@ -478,8 +478,10 @@ void idle()
       else if(gServerGame->hostingModePhase == ServerGame::DoneLoadingLevels)
          hostGame();
    }
+#ifndef ZAP_DEDICATED
    else
       settings = gClientGame->getSettings();
+#endif
 
 /*
    static S64 lastTimer = Platform::getHighPrecisionTimerValue(); // accurate, but possible wrong speed when overclocking or underclocking CPU
@@ -779,6 +781,9 @@ void createClientGame(GameSettings *settings)
 
        // Put any saved filename into the editor file entry thingy
       gClientGame->getUIManager()->getLevelNameEntryUserInterface()->setString(settings->getIniSettings()->lastEditorName);
+
+      seedRandomNumberGenerator(settings->getIniSettings()->lastName);
+      gClientGame->getClientInfo()->id.getRandom();
 
       //gClientGame2 = new ClientGame(Address());   //  !!! 2-player split-screen game in same game.
 
@@ -1089,6 +1094,7 @@ using namespace Zap;
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+#undef main
 
 #ifdef TNL_OS_XBOX
 int zapmain(int argc, char **argv)

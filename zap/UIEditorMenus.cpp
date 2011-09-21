@@ -67,7 +67,9 @@ void EditorAttributeMenuUI::render()
 
 
 void EditorAttributeMenuUI::doneEditing(EditorObject *object) 
-{ 
+{
+   mObject->doneEditing(this);
+
    // Only run on object that is the subject of this editor.  See TextItemEditorAttributeMenuUI::doneEditing() for explanation
    // of why this may be run on objects that are not actually the ones being edited (hence the need for passing an object in).
    if(object == mObject)   

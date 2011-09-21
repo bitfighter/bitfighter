@@ -826,6 +826,7 @@ void ClientGame::onConnectionToMasterTerminated(NetConnection::TerminationReason
          ui->activate();
 
          getClientInfo()->id.getRandom();        // Get a different ID and retry to successfully connect to master
+         break;
 
       case NetConnection::ReasonBadLogin:
          ui->setMessage(2, "Unable to log you in with the username/password you");
