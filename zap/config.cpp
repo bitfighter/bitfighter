@@ -1519,8 +1519,11 @@ static void writeTesting(CIniFile *ini, GameSettings *settings)
 
    ini->SetValueI ("Testing", "BurstGraphics",  (S32) (iniSettings->burstGraphicsMode), true);
    ini->setValueYN("Testing", "NeverConnectDirect", iniSettings->neverConnectDirect);
+
+   // Maybe we should not write these if they are the default values?
    ini->SetValue  ("Testing", "WallFillColor",   settings->getWallFillColor()->toRGBString());
    ini->SetValue  ("Testing", "WallOutlineColor", iniSettings->wallOutlineColor.toRGBString());
+
    ini->setValueYN("Testing", "OldGoalFlash", iniSettings->oldGoalFlash);
    ini->SetValueI ("Testing", "ClientPortNumber", iniSettings->clientPortNumber);
 }
