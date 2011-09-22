@@ -538,8 +538,6 @@ void GameSettings::readCmdLineParams(const Vector<string> &argv)
    S32 argc = argv.size();
    S32 argPtr = 0;
 
-   Vector<string> params;
-
    while(argPtr < argc)
    {
       bool found = false;
@@ -552,13 +550,9 @@ void GameSettings::readCmdLineParams(const Vector<string> &argv)
       {
          if(arg == "-" + paramDefs[i].paramName)
          {
+            argPtr = getParams(paramDefs[i].argsRequired, i, argPtr, argc, argv, paramDefs[i].errorMsg, mCmdLineParams[paramDefs[i].paramId]);
+
             found = true;
-
-            params.clear();
-            argPtr = getParams(paramDefs[i].argsRequired, i, argPtr, argc, argv, paramDefs[i].errorMsg, params);
-
-            mCmdLineParams[paramDefs[i].paramId] = argv;
-
             break;
          }
       }
@@ -570,13 +564,9 @@ void GameSettings::readCmdLineParams(const Vector<string> &argv)
          {
             if(arg == "-" + directiveDefs[i].paramName)
             {
+               argPtr = getParams(directiveDefs[i].argsRequired, i, argPtr, argc, argv, directiveDefs[i].errorMsg, mCmdLineParams[directiveDefs[i].paramId]);
+
                found = true;
-
-               params.clear();
-               argPtr = getParams(directiveDefs[i].argsRequired, i, argPtr, argc, argv, directiveDefs[i].errorMsg, params);
-
-               mCmdLineParams[directiveDefs[i].paramId] = argv;
-
                break;
             }
          }

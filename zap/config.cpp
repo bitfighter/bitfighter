@@ -1519,7 +1519,7 @@ static void writeTesting(CIniFile *ini, GameSettings *settings)
 
    ini->SetValueI ("Testing", "BurstGraphics",  (S32) (iniSettings->burstGraphicsMode), true);
    ini->setValueYN("Testing", "NeverConnectDirect", iniSettings->neverConnectDirect);
-   ini->SetValue  ("Testing", "WallFillColor",   settings->getWallOutlineColor()->toRGBString());
+   ini->SetValue  ("Testing", "WallFillColor",   settings->getWallFillColor()->toRGBString());
    ini->SetValue  ("Testing", "WallOutlineColor", iniSettings->wallOutlineColor.toRGBString());
    ini->setValueYN("Testing", "OldGoalFlash", iniSettings->oldGoalFlash);
    ini->SetValueI ("Testing", "ClientPortNumber", iniSettings->clientPortNumber);
@@ -1670,24 +1670,27 @@ struct CmdLineSettings;
 // Doesn't handle leveldir -- that one is handled separately, later, because it requires input from the INI file
 void FolderManager::resolveDirs(GameSettings *settings)
 {
-   FolderManager folderManager  = *settings->getFolderManager();
+   FolderManager *folderManager = settings->getFolderManager();
    FolderManager cmdLineDirs = settings->getCmdLineFolderManager();     // Versions specified on the cmd line
 
    string rootDataDir = cmdLineDirs.rootDataDir;
 
+   folderManager->rootDataDir = rootDataDir;
+
    // rootDataDir used to specify the following folders
-   folderManager.robotDir      = resolutionHelper(cmdLineDirs.robotDir,      rootDataDir, "robots");
-   folderManager.iniDir        = resolutionHelper(cmdLineDirs.iniDir,        rootDataDir, "");
-   folderManager.logDir        = resolutionHelper(cmdLineDirs.logDir,        rootDataDir, "");
-   folderManager.screenshotDir = resolutionHelper(cmdLineDirs.screenshotDir, rootDataDir, "screenshots");
+   folderManager->robotDir      = resolutionHelper(cmdLineDirs.robotDir,      rootDataDir, "robots");
+   folderManager->iniDir        = resolutionHelper(cmdLineDirs.iniDir,        rootDataDir, "");
+   folderManager->logDir        = resolutionHelper(cmdLineDirs.logDir,        rootDataDir, "");
+   folderManager->screenshotDir = resolutionHelper(cmdLineDirs.screenshotDir, rootDataDir, "screenshots");
 
    // rootDataDir not used for these folders
-   folderManager.cacheDir      = resolutionHelper(cmdLineDirs.cacheDir,      "", "cache");
-   folderManager.luaDir        = resolutionHelper(cmdLineDirs.luaDir,        "", "scripts");
-   folderManager.sfxDir        = resolutionHelper(cmdLineDirs.sfxDir,        "", "sfx");
-   folderManager.musicDir      = resolutionHelper(cmdLineDirs.musicDir,      "", "music");
 
-   gSqlite = folderManager.logDir + "stats";
+   folderManager->cacheDir      = resolutionHelper(cmdLineDirs.cacheDir,      "", "cache");
+   folderManager->luaDir        = resolutionHelper(cmdLineDirs.luaDir,        "", "scripts");
+   folderManager->sfxDir        = resolutionHelper(cmdLineDirs.sfxDir,        "", "sfx");
+   folderManager->musicDir      = resolutionHelper(cmdLineDirs.musicDir,      "", "music");
+
+   gSqlite = folderManager->logDir + "stats";
 }
 
 
