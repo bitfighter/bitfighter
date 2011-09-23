@@ -132,8 +132,6 @@ private:
    bool mShowAllBots;
    U32 mTotalGamePlay;
 
-   Vector<RefPtr<ClientRef> > mClientList;
-
    Vector<WallRec> mWalls;
 
    void sendChatDisplayEvent(ClientRef *clientRef, bool global, const char *message, NetEvent *theEvent);      // In-game chat message
@@ -283,14 +281,8 @@ public:
 
    const Vector<WallRec> *getBarrierList();
 
-   S32 getClientCount() const;
-   RefPtr<ClientRef> getClient(S32 index) const;
-
-
 
    ClientRef *mLocalClient;
-
-   virtual ClientRef *allocClientRef();
 
    S32 getFlagSpawnCount() const;
    const FlagSpawn *getFlagSpawn(S32 index) const;
@@ -362,10 +354,6 @@ public:
 
    virtual void addToGame(Game *game, GridDatabase *database);
 
-   void countTeamPlayers() const;
-
-   ClientRef *findClientRef(const StringTableEntry &name);
-
    virtual bool processArguments(S32 argc, const char **argv, Game *game);
    string toString() const;
 
@@ -420,7 +408,7 @@ public:
    void checkForWinningScore(S32 score);     // Check if player or team has reachede the winning score
    virtual void onGameOver();
 
-   virtual void serverAddClient(GameConnection *theClient);
+   virtual ClientRef *serverAddClient(GameConnection *theClient);
    virtual void serverRemoveClient(GameConnection *theClient);
 
    virtual bool objectCanDamageObject(GameObject *damager, GameObject *victim);
@@ -450,7 +438,7 @@ public:
    virtual const Color *getTeamColor(S32 team) const; // Get the color of a team, based on index
    const Color *getTeamColor(GameObject *theObject);  // Get the color of a team, based on object
 
-   S32 getTeam(const char *playerName);               // Given a player, return their team
+   //S32 getTeam(const StringTableEntry &playerName);   // Given a player's name, return their team
 
    virtual bool isDatabasable();                      // Makes no sense to insert a GameType in our spatial database!
 

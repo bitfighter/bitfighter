@@ -36,7 +36,7 @@
 #include "dataConnection.h"      // For DataSender
 
 #ifdef TNL_OS_WIN32
-#include <windows.h>   // For screensaver... windows only feature, I'm afraid!
+#include <windows.h>             // For screensaver... windows only feature, I'm afraid!
 #endif
 
 using namespace std;

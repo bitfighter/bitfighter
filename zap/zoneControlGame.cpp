@@ -152,8 +152,8 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
    Vector<StringTableEntry> e;
    e.push_back(getGame()->getTeamName(s->getTeam()));
 
-   for(S32 i = 0; i < getClientCount(); i++)
-     getClient(i)->getConnection()->s2cTouchdownScored(SFXFlagSnatch, s->getTeam(), tdString, e);
+   for(S32 i = 0; i < getGame()->getClientCount(); i++)
+     getGame()->getClient(i)->getConnection()->s2cTouchdownScored(SFXFlagSnatch, s->getTeam(), tdString, e);
 
    // Reset zones to neutral
    for(S32 i = 0; i < mZones.size(); i++)
@@ -164,12 +164,14 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
    {
       MoveItem *theItem = s->mMountedItems[i];
       FlagItem *mountedFlag = dynamic_cast<FlagItem *>(theItem);
+
       if(mountedFlag)
       {
          mountedFlag->dismount();
          mountedFlag->sendHome();
       }
    }
+
    mFlagTeam = -1;
    s2cSetFlagTeam(-1);
 }

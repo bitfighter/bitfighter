@@ -54,30 +54,21 @@ void PickupItem::idle(GameObject::IdleCallPath path)
          mIsVisible = true;
 
          // Check if there is a ship sitting on this item... it so, ship gets the repair!
-         GameType *gt = getGame()->getGameType();
-         if(gt)
+         for(S32 i = 0; i < getGame()->getClientCount(); i++)
          {
-            for(S32 i = 0; i < gt->getClientCount(); i++)
+            SafePtr<GameConnection> connection = getGame()->getClient(i)->getConnection();
+
+            TNLAssert(connection, "Defunct client connection in item.cpp!");
+
+            if(!connection)    // <-- not sure this ever happens
+               continue;
+
+            Ship *ship = dynamic_cast<Ship *>(connection->getControlObject());
+
+            if(ship && ship->isOnObject(this))
             {
-               SafePtr<GameConnection> connection = gt->getClient(i)->getConnection();
-
-               TNLAssert(connection, "Defunct client connection in item.cpp!");
-
-               if(!connection)    // <-- not sure this ever happens
-                  continue;
-
-               Ship *client_ship = dynamic_cast<Ship *>(connection->getControlObject());
-
-               if(!client_ship)
-                  continue;
-               if(client_ship->isOnObject(this)) {
-                  S32 i = 1;
-               }
-               if(client_ship->isOnObject(this))
-               {
-                  collide(client_ship);
-                  mIsMomentarilyVisible = true;
-               }
+               collide(ship);
+               mIsMomentarilyVisible = true;
             }
          }
       }

@@ -124,12 +124,10 @@ S32 LuaGameInfo::getEventScore(lua_State *L)
 // Return a table listing all players on this team
 S32 LuaGameInfo::getPlayers(lua_State *L) 
 {
-   if(gServerGame->getGameType() == NULL)
-      return returnNil(L);
+   S32 clientCount = gServerGame->getClientCount();
 
-   S32 clientCount = gServerGame->getGameType()->getClientCount();
-
-   TNLAssertV( (U32)clientCount == gServerGame->getPlayerCount(), ("Mismatched player counts (%s v %s)!", clientCount, gServerGame->getPlayerCount()) );
+   TNLAssertV( (U32)clientCount == gServerGame->getPlayerCount(), 
+               ("Mismatched player counts (%s v %s)!", clientCount, gServerGame->getPlayerCount()) );
 
    S32 pushed = 0;     // Count of pushed objects
 
@@ -137,7 +135,7 @@ S32 LuaGameInfo::getPlayers(lua_State *L)
 
    for(S32 i = 0; i < clientCount; i++)
    {
-      ClientRef *clientRef = gServerGame->getGameType()->getClient(i);
+      ClientRef *clientRef = gServerGame->getClient(i);
 
       if(clientRef->getPlayerInfo()->isDefunct())     // Skip defunct players
          continue;

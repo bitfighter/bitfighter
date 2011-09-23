@@ -26,9 +26,6 @@
 #ifndef _GAME_H_
 #define _GAME_H_
 
-#include "tnlNetObject.h"
-#include "tnlTypes.h"
-
 #include "gridDB.h"
 #include "Timer.h"
 #include "gameLoader.h"
@@ -40,6 +37,8 @@
 
 #include "GameSettings.h"
 
+#include "tnlNetObject.h"
+#include "tnlTypes.h"
 
 #include "boost/smart_ptr/shared_ptr.hpp"
 
@@ -131,11 +130,15 @@ enum VolumeType {
 /// either the server or the client, and is responsible for
 /// managing the passage of time as well as rendering.
 
+class ClientRef;
+
 class Game : public LevelLoader
 {
 private:
-   F32 mGridSize;     
-
+   F32 mGridSize;  
+public:     // TODO: private
+   Vector<RefPtr<ClientRef> > mClientList;      // List of players on the server; used by both client and server
+private:
    U32 mTimeUnconnectedToMaster;      // Time that we've been unconnected to the master
    bool mHaveTriedToConnectToMaster;
 
@@ -191,6 +194,8 @@ protected:
 
    GameSettings *mSettings;
 
+   S32 findClientIndex(const StringTableEntry &name);
+
 public:
    static const S32 DefaultGridSize = 255;   // Size of "pages", represented by floats for intrapage locations (i.e. pixels per integer)
    static const S32 MIN_GRID_SIZE = 5;       // Ridiculous, it's true, but we step by our minimum value, so we can't make this too high
@@ -204,16 +209,26 @@ public:
    static const S32 PLAYER_SENSOR_VISUAL_DISTANCE_HORIZONTAL = 1060;   // How far player can see with sensor activated horizontally...
    static const S32 PLAYER_SENSOR_VISUAL_DISTANCE_VERTICAL = 795;      // ...and vertically
 
-   static const S32 PLAYER_COUNT_UNAVAILABLE = -1;
 
-   Game(const Address &theBindAddress, GameSettings *settings);  // Constructor
-   virtual ~Game();                                              // Destructor
+   Game(const Address &theBindAddress, GameSettings *settings);         // Constructor
+   virtual ~Game();                                                     // Destructor
+
+
+   S32 getClientCount() const { return mClientList.size(); }
+   ClientRef *getClient(S32 index);
+   void addClientRefToList(ClientRef *cref);                            // Used by robots and client
+   void deleteClientRefFromList(ClientRef *cref);                       // Used by robots
+   void deleteClientRefFromList(const StringTableEntry &name);          // Used by client
+
+   ClientRef *findClientRef(const StringTableEntry &name);              // Find client by name
+
+   F32 getCurrentRating(GameConnection *conn);
 
    Rect getWorldExtents() { return mWorldExtents; }
 
-   virtual U32 getPlayerCount() = 0;         // Implemented differently on client and server
+   virtual U32 getPlayerCount() = 0;                  // Implemented differently on client and server
 
-   virtual bool isTestServer() { return false; }     // Overridden in ServerGame
+   virtual bool isTestServer() { return false; }      // Overridden in ServerGame
 
    virtual const Color *getTeamColor(S32 teamId) const { return &Colors::white; }  // ClientGame will override
    static const Color *getBasicTeamColor(const Game *game, S32 teamId);            // Color function used in most cases, overridden by some games
@@ -247,10 +262,6 @@ public:
    F32 getGridSize() const { return mGridSize; }
    void setGridSize(F32 gridSize);
 
-   static Point getScopeRange(bool sensorIsActive) { return sensorIsActive ? Point(PLAYER_SENSOR_VISUAL_DISTANCE_HORIZONTAL + PLAYER_SCOPE_MARGIN,
-                                                                                   PLAYER_SENSOR_VISUAL_DISTANCE_VERTICAL  + PLAYER_SCOPE_MARGIN)
-                                                                           : Point(PLAYER_VISUAL_DISTANCE_HORIZONTAL + PLAYER_SCOPE_MARGIN,
-                                                                                   PLAYER_VISUAL_DISTANCE_VERTICAL  + PLAYER_SCOPE_MARGIN); }
    U32 getCurrentTime() { return mCurrentTime; }
    virtual bool isServer() = 0;              // Will be overridden by either clientGame (return false) or serverGame (return true)
    virtual void idle(U32 timeDelta) = 0;
@@ -281,6 +292,11 @@ public:
    // Team functions
    S32 getTeamCount() const;
    AbstractTeam *getTeam(S32 teamIndex) const;
+
+   S32 getTeamIndex(const StringTableEntry &playerName);
+
+   void countTeamPlayers();      // Makes sure that the mTeams[] structure has the proper player counts
+
    void addTeam(boost::shared_ptr<AbstractTeam> team);
    void addTeam(boost::shared_ptr<AbstractTeam> team, S32 index);
    void replaceTeam(boost::shared_ptr<AbstractTeam> team, S32 index);
@@ -301,7 +317,13 @@ public:
    void setReadyToConnectToMaster(bool ready) { mReadyToConnectToMaster = ready; }
 
    // Objects in a given level, used for status bar.  On server it's objects loaded from file, on client, it's objects dl'ed from server.
-   S32 mObjectsLoaded;        
+   S32 mObjectsLoaded;  
+
+   Point getScopeRange(bool sensorIsActive) { return sensorIsActive ? Point(PLAYER_SENSOR_VISUAL_DISTANCE_HORIZONTAL + PLAYER_SCOPE_MARGIN,
+                                                                                   PLAYER_SENSOR_VISUAL_DISTANCE_VERTICAL  + PLAYER_SCOPE_MARGIN)
+                                                                           : Point(PLAYER_VISUAL_DISTANCE_HORIZONTAL + PLAYER_SCOPE_MARGIN,
+                                                                                   PLAYER_VISUAL_DISTANCE_VERTICAL  + PLAYER_SCOPE_MARGIN); }
+
 };
 
 
@@ -331,8 +353,6 @@ public:
 
 ////////////////////////////////////////
 ////////////////////////////////////////
-
-class ClientRef;
 
 class ServerGame : public Game
 {
@@ -414,6 +434,7 @@ public:
 
    void addClient(GameConnection *client);
    void removeClient(GameConnection *client);
+   
 
    void setShuttingDown(bool shuttingDown, U16 time, ClientRef *who, StringPtr reason);  
 

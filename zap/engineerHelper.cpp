@@ -45,9 +45,13 @@ EngineerHelper::EngineerHelper(ClientGame *clientGame) : Parent(clientGame)
    mEngineerCostructionItemInfos.push_back(EngineerConstructionItemInfo(EngineeredForceField, "Force Field", KEY_2, BUTTON_2));
 }
 
+
+// Destructor
 EngineerHelper::~EngineerHelper()
 {
+   // Do nothing
 }
+
 
 void EngineerHelper::onMenuShow()
 {
@@ -105,6 +109,7 @@ void EngineerHelper::render()
 
       drawMenuBorderLine(yPos - fontSize - 2, engineerMenuHeaderColor);
       yPos += 8;
+
       drawMenuCancelText(yPos, engineerMenuHeaderColor, fontSize);
    }
    else     // Have selected a module, need to indicate where to deploy

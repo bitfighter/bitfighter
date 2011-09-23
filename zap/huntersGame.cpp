@@ -349,14 +349,15 @@ void HuntersGameType::idle(GameObject::IdleCallPath path, U32 deltaT)
       broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagSnatch, msg);
 
       // Check if anyone is already in the Nexus, examining each client's ship in turn...
-      for(S32 i = 0; i < getClientCount(); i++)
+      for(S32 i = 0; i < getGame()->getClientCount(); i++)
       {
-         Ship *client_ship = dynamic_cast<Ship *>(getClient(i)->getConnection()->getControlObject());
+         Ship *client_ship = dynamic_cast<Ship *>(getGame()->getClient(i)->getConnection()->getControlObject());
 
          if(!client_ship)
             continue;
 
          HuntersNexusObject *nexus = dynamic_cast<HuntersNexusObject *>(client_ship->isInZone(NexusTypeNumber));
+
          if(nexus)
             shipTouchNexus(client_ship, nexus);
       }

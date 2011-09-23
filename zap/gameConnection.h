@@ -27,12 +27,10 @@
 #define _GAMECONNECTION_H_
 
 
-#include "game.h"                    // For LevelInfo??
 #include "controlObjectConnection.h"
-#include "shipItems.h"           // For EngineerBuildObjects enum
-#include "dataConnection.h"      // For DataSendable interface
+#include "dataConnection.h"            // For DataSendable interface
 #include "statistics.h"
-#include "SoundSystem.h"           // for NumSFXBuffers
+#include "SoundSystem.h"               // for NumSFXBuffers
 
 #include "tnlNetConnection.h"
 #include "Timer.h"

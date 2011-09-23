@@ -238,13 +238,11 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sSetAuthenticated, (Vector<
    if(!mGame->isServer())
       return;
 
-   ServerGame *serverGame = (ServerGame *)mGame;
-
    Nonce clientId(id);     // Reconstitute our id into a nonce
 
-   for(S32 i = 0; i < serverGame->getGameType()->getClientCount(); i++)
+   for(S32 i = 0; i < mGame->getClientCount(); i++)
    {
-      GameConnection *client = serverGame->getGameType()->getClient(i)->getConnection();
+      GameConnection *client = mGame->getClient(i)->getConnection();
 
       if(client->getClientId()->isValid() && *client ->getClientId() == clientId)  // Robots don't have valid clientID
       {
@@ -253,9 +251,9 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sSetAuthenticated, (Vector<
             client->setAuthenticated(true);
 
             // Auto-rename other non-authenticated clients to avoid stealing the authenticated name
-            for(S32 j = 0; j < serverGame->getGameType()->getClientCount(); j++)
+            for(S32 j = 0; j < mGame->getClientCount(); j++)
             {
-               GameConnection *conn2 = serverGame->getGameType()->getClient(j)->getConnection();
+               GameConnection *conn2 = mGame->getClient(j)->getConnection();
 
                if(conn2->getClientName() == name && !conn2->isAuthenticated())
                {

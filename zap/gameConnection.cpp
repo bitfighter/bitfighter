@@ -25,28 +25,20 @@
 
 #include "gameConnection.h"
 #include "game.h"
-#include "gameType.h"
 #include "soccerGame.h"          // For checking if pick up soccer is allowed
-#include "gameNetInterface.h"
 #include "IniFile.h"             // For CIniFile def
 #include "playerInfo.h"
 #include "shipItems.h"           // For EngineerBuildObjects enum
 #include "masterConnection.h"    // For MasterServerConnection def
 #include "EngineeredItem.h"      // For EngineerModuleDeployer
+#include "BanList.h"
+
 #include "Colors.h"
 #include "stringUtils.h"         // For strictjoindir()
-#include "BanList.h"
 
 
 #ifndef ZAP_DEDICATED
 #include "ClientGame.h"
-#include "UI.h"
-#include "UIEditor.h"
-#include "UIGame.h"
-#include "UIMenus.h"
-#include "UINameEntry.h"
-#include "UIErrorMessage.h"
-#include "UIQueryServers.h"
 #endif
 
 #include "UIMenus.h"  // for enum in PlayerMenuUserInterface
@@ -489,8 +481,6 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
    if(!isAdmin())    // Do nothing --> non-admins have no pull here.  Note that this should never happen; client should filter out
       return;        // non-admins before we get here, but we'll check anyway in case the client has been hacked.
 
-   GameType *gt = gServerGame->getGameType();
-
    // Check for forbidden blank parameters -- the following commands require a value to be passed in param
    if( (type == (U32)AdminPassword || type == (U32)ServerName || type == (U32)ServerDescr || type == (U32)LevelDir) &&
                           !strcmp(param.getString(), ""))
@@ -586,9 +576,9 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
       folderManager->levelDir = candidate;
 
       // Send the new list of levels to all levelchangers
-      for(S32 i = 0; i < gt->getClientCount(); i++)
+      for(S32 i = 0; i < gServerGame->getClientCount(); i++)
       {
-         GameConnection *clientConnection = gt->getClient(i)->getConnection();
+         GameConnection *clientConnection = gServerGame->getClient(i)->getConnection();
 
          if(clientConnection->isLevelChanger())
             clientConnection->sendLevelList();
@@ -648,9 +638,9 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
       // If we're clearning the level change password, quietly grant access to anyone who doesn't already have it
       if(!strcmp(param.getString(), ""))
       {
-         for(S32 i = 0; i < gt->getClientCount(); i++)
+         for(S32 i = 0; i < gServerGame->getClientCount(); i++)
          {
-            GameConnection *client = gt->getClient(i)->getConnection();
+            GameConnection *client = gServerGame->getClient(i)->getConnection();
 
             if(!client->isLevelChanger())
             {
@@ -662,9 +652,9 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
       }
       else  // If setting a password, remove everyone's permissions (except admins)
       { 
-         for(S32 i = 0; i < gt->getClientCount(); i++)
+         for(S32 i = 0; i < gServerGame->getClientCount(); i++)
          {
-            GameConnection *client = gt->getClient(i)->getConnection();
+            GameConnection *client = gServerGame->getClient(i)->getConnection();
 
             if(client->isLevelChanger() && (!client->isAdmin()))
             {
@@ -683,8 +673,8 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
       msg = serverNameChanged;
 
       // If we've changed the server name, notify all the clients
-      for(S32 i = 0; i < gt->getClientCount(); i++)
-         gt->getClient(i)->getConnection()->s2cSetServerName(mSettings->getHostName());
+      for(S32 i = 0; i < gServerGame->getClientCount(); i++)
+         gServerGame->getClient(i)->getConnection()->s2cSetServerName(mSettings->getHostName());
    }
    else if(type == (U32)ServerDescr)
       msg = serverDescrChanged;
@@ -708,7 +698,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sAdminPlayerAction,
    GameType *gt = gServerGame->getGameType();
 
    // Find connection for player with name playerName
-   GameConnection *theClient = gt->findClientRef(playerName)->getConnection();
+   GameConnection *theClient = gt->getGame()->findClientRef(playerName)->getConnection();
 
    if(!theClient)    // Hmmm... couldn't find him.  Maybe the dude disconnected?
       return;
@@ -1161,16 +1151,14 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestShutdown, (U16 time, StringPtr reaso
    if(!mIsAdmin)
       return;
 
-   GameType *gt = gServerGame->getGameType();
-
    logprintf(LogConsumer::ServerFilter, "User [%s] requested shutdown in %d seconds [%s]", 
          mClientRef->name.getString(), time, reason.getString());
 
    gServerGame->setShuttingDown(true, time, mClientRef, reason.getString());
 
-   for(S32 i = 0; i < gt->getClientCount(); i++)
+   for(S32 i = 0; i < gServerGame->getClientCount(); i++)
    {
-      GameConnection *conn = gt->getClient(i)->getConnection();
+      GameConnection *conn = gServerGame->getClient(i)->getConnection();
       conn->s2cInitiateShutdown(time, mClientRef->name, reason, conn == this);
    }
 }
@@ -1192,11 +1180,9 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestCancelShutdown, (), (), NetClassGrou
 
    logprintf(LogConsumer::ServerFilter, "User %s canceled shutdown", mClientRef->name.getString());
 
-   GameType *gt = gServerGame->getGameType();
-
-   for(S32 i = 0; i < gt->getClientCount(); i++)
+   for(S32 i = 0; i < gServerGame->getClientCount(); i++)
    {
-      GameConnection *conn = gt->getClient(i)->getConnection();
+      GameConnection *conn = gServerGame->getClient(i)->getConnection();
 
       if(conn != this)     // Don't send message to cancellor!
          conn->s2cCancelShutdown();
@@ -1504,16 +1490,14 @@ string GameConnection::makeUnique(string name)
 
    bool unique = false;
 
-   GameType *gt = gServerGame->getGameType();
-
    while(!unique)
    {
       unique = true;
 
-      for(S32 i = 0; i < gt->getClientCount(); i++)
+      for(S32 i = 0; i < gServerGame->getClientCount(); i++)
       {
          // TODO:  How to combine these blocks?
-         if(proposedName == gt->getClient(i)->getConnection()->getClientName().getString())          // Collision detected!
+         if(proposedName == gServerGame->getClient(i)->getConnection()->getClientName().getString())          // Collision detected!
          {
             unique = false;
 

@@ -23,21 +23,19 @@
 //
 //------------------------------------------------------------------------------------
 
+#include "ClientGame.h"
 #include "barrier.h"
 #include "config.h"
-#include "EngineeredItem.h"    // For EngineerModuleDeployer
-#include "ClientGame.h"
+#include "EngineeredItem.h"      // For EngineerModuleDeployer
 #include "GameSettings.h"
 #include "gameLoader.h"
 #include "gameNetInterface.h"
 #include "gameObject.h"
 #include "gameObjectRender.h"
-#include "gameType.h"
 #include "masterConnection.h"
 #include "move.h"
 #include "moveObject.h"
 #include "projectile.h"          // For SpyBug class
-#include "SoundSystem.h"
 #include "SharedConstants.h"     // For ServerInfoFlags enum
 #include "ship.h"
 #include "sparkManager.h"
@@ -45,22 +43,22 @@
 #include "luaLevelGenerator.h"
 #include "robot.h"
 #include "shipItems.h"           // For moduleInfos
-#include "stringUtils.h"
 #include "huntersGame.h"         // for creating new HuntersFlagItem
+
+#include "stringUtils.h"
 
 #include "IniFile.h"             // For CIniFile def
 
-#include "UIQueryServers.h"
-#include "UIErrorMessage.h"
 
 #include "BotNavMeshZone.h"      // For zone clearing code
 #include "ScreenInfo.h"
 #include "Joystick.h"
 
 #include "UIGame.h"
-#include "UIGameParameters.h"
 #include "UIEditor.h"
 #include "UINameEntry.h"
+#include "UIQueryServers.h"
+#include "UIErrorMessage.h"
 
 #include "tnl.h"
 #include "tnlRandom.h"
@@ -701,17 +699,17 @@ void ClientGame::changeServerParam(GameConnection::ParamType type, const Vector<
 bool ClientGame::checkName(const string &name)
 {
    S32 potentials = 0;
-   GameType *gameType = getGameType();
 
-   for(S32 i = 0; i < gameType->getClientCount(); i++)
+   for(S32 i = 0; i < getClientCount(); i++)
    {
-      if(!gameType->getClient(i).isValid())
+      if(!getClient(i))
          continue;
 
-      StringTableEntry n = gameType->getClient(i)->name;
+      StringTableEntry n = getClient(i)->name;
 
       if(n == name)           // Exact match
          return true;
+
       else if(!stricmp(n.getString(), name.c_str()))     // Case insensitive match
          potentials++;
    }
@@ -1043,19 +1041,16 @@ void ClientGame::zoomCommanderMap()
 // Unused
 U32 ClientGame::getPlayerAndRobotCount() 
 { 
-   return mGameType ? mGameType->getClientCount() : (U32)PLAYER_COUNT_UNAVAILABLE; 
+   return getClientCount(); 
 }
 
 
 U32 ClientGame::getPlayerCount()
 {
-   if(!mGameType)
-      return (U32)PLAYER_COUNT_UNAVAILABLE;
-
    U32 players = 0;
 
-   for(S32 i = 0; i < mGameType->getClientCount(); i++)
-      if(!mGameType->getClient(i)->isRobot)
+   for(S32 i = 0; i < getClientCount(); i++)
+      if(!getClient(i)->isRobot)
          players++;
 
    return players;

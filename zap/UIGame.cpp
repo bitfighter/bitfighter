@@ -1488,8 +1488,7 @@ void GameUserInterface::deleteCurrentLevelHandler(ClientGame *game, const Vector
 
 void GameUserInterface::suspendHandler(ClientGame *game, const Vector<string> &words)
 {
-   U32 players = game->getPlayerCount();
-   if(players == (U32)Game::PLAYER_COUNT_UNAVAILABLE || players > 1)
+   if(game->getPlayerCount() > 1)
       game->displayErrorMessage("!!! Can't suspend when others are playing");
    else
       game->suspendGame();
@@ -1773,14 +1772,17 @@ static void makeCommandCandidateList()
 }
 
 
-static void makePlayerNameCandidateList(const Game *game)
+static void makePlayerNameCandidateList(Game *game)
 {
    nameCandidateList.clear();
 
-   if(game->getGameType())
-      for(S32 i = 0; i < game->getGameType()->getClientCount(); i++)
-         if(game->getGameType()->getClient(i).isValid())
-            nameCandidateList.push_back(game->getGameType()->getClient(i)->name.getString());
+   for(S32 i = 0; i < game->getClientCount(); i++)
+   {
+      ClientRef *client = game->getClient(i);
+
+      if(client)
+         nameCandidateList.push_back(client->name.getString());
+   }
 }
 
 
@@ -2328,8 +2330,13 @@ void GameUserInterface::unsuspendGame()
 }
 
 
-void GameUserInterface::renderScoreboard(const GameType *gameType)
+void GameUserInterface::renderScoreboard()
 {
+   // This is probably not needed... if gameType were NULL, we'd have crashed and burned long ago
+   GameType *gameType = getGame()->getGameType();
+   if(!gameType)
+      return;
+
    S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
 
    if(mInputModeChangeAlertDisplayTimer.getCurrent() != 0)
@@ -2356,33 +2363,35 @@ void GameUserInterface::renderScoreboard(const GameType *gameType)
 
    U32 totalWidth = gScreenInfo.getGameCanvasWidth() - UserInterface::horizMargin * 2;
 
-   Game *game = gameType->getGame();
-   S32 teams = gameType->isTeamGame() ? game->getTeamCount() : 1;
+   bool isTeamGame = gameType->isTeamGame();
+
+   S32 teams = isTeamGame ? getGame()->getTeamCount() : 1;
 
    U32 columnCount = min(teams, 2);
 
    U32 teamWidth = totalWidth / columnCount;
    S32 maxTeamPlayers = 0;
-   gameType->countTeamPlayers();
+   getGame()->countTeamPlayers();
+
+   S32 teamCount = getGame()->getTeamCount();
 
    // Check to make sure at least one team has at least one player...
-   for(S32 i = 0; i < game->getTeamCount(); i++)
+   for(S32 i = 0; i < teamCount; i++)
    {
-      Team *team = (Team *)game->getTeam(i);
-      if(gameType->isTeamGame())
-      {     // (braces required)
-         if(team->getPlayerBotCount() > maxTeamPlayers)
-            maxTeamPlayers = team->getPlayerBotCount();
-      }
-      else
+      Team *team = (Team *)getGame()->getTeam(i);
+
+      if(!isTeamGame)
          maxTeamPlayers += team->getPlayerBotCount();
+
+      else if(team->getPlayerBotCount() > maxTeamPlayers)
+            maxTeamPlayers = team->getPlayerBotCount();
    }
    // ...if not, then go home!
    if(!maxTeamPlayers)
       return;
 
-   U32 teamAreaHeight = gameType->isTeamGame() ? 40 : 0;
-   U32 numTeamRows = (game->getTeamCount() + 1) >> 1;
+   U32 teamAreaHeight = isTeamGame ? 40 : 0;
+   U32 numTeamRows = (teamCount + 1) >> 1;
 
    U32 totalHeight = (gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin * 2) / numTeamRows - (numTeamRows - 1) * 2;
    U32 maxHeight = MIN(30, (totalHeight - teamAreaHeight) / maxTeamPlayers);
@@ -2397,7 +2406,7 @@ void GameUserInterface::renderScoreboard(const GameType *gameType)
       S32 xl = 10 + (i & 1) * teamWidth;
       S32 xr = xl + teamWidth - 2;
 
-      const Color *teamColor = gameType->getGame()->getTeamColor(i);
+      const Color *teamColor = getGame()->getTeamColor(i);
 
       bool disableBlending = false;
 
@@ -2419,7 +2428,7 @@ void GameUserInterface::renderScoreboard(const GameType *gameType)
          glDisable(GL_BLEND);
 
       glColor(Colors::white);
-      if(gameType->isTeamGame())     // Render team scores
+      if(isTeamGame)     // Render team scores
       {
          renderFlag(F32(xl + 20), F32(yt + 18), teamColor);
          renderFlag(F32(xr - 20), F32(yt + 18), teamColor);
@@ -2430,8 +2439,8 @@ void GameUserInterface::renderScoreboard(const GameType *gameType)
             glVertex2i(xr, yt + S32(teamAreaHeight));
          glEnd();
 
-         UserInterface::drawString(xl + 40, yt + 2, 30, gameType->getGame()->getTeamName(i).getString());
-         UserInterface::drawStringf(xr - 140, yt + 2, 30, "%d", ((Team *)(game->getTeam(i)))->getScore());
+         UserInterface::drawString(xl + 40, yt + 2, 30, getGame()->getTeamName(i).getString());
+         UserInterface::drawStringf(xr - 140, yt + 2, 30, "%d", ((Team *)(getGame()->getTeam(i)))->getScore());
       }
 
       // Now for player scores.  First build a list, then sort it, then display it.
@@ -2455,7 +2464,7 @@ void GameUserInterface::renderScoreboard(const GameType *gameType)
 
          static char buff[255] = "";
 
-         if(gameType->isTeamGame())
+         if(isTeamGame)
             dSprintf(buff, sizeof(buff), "%2.2f", (F32)playerScores[j]->getRating());
          else
             dSprintf(buff, sizeof(buff), "%d", playerScores[j]->getScore());
@@ -2497,8 +2506,10 @@ void GameUserInterface::renderBasicInterfaceOverlay(const GameType *gameType, bo
       glColor(Colors::white, alpha);
       UserInterface::drawCenteredStringf(canvasHeight / 2 - 180, 30, "Level: %s", gameType->getLevelName()->getString());
       UserInterface::drawCenteredStringf(canvasHeight / 2 - 140, 30, "Game Type: %s", gameType->getGameTypeString());
+
       glColor(Colors::cyan, alpha);
       UserInterface::drawCenteredString(canvasHeight / 2 - 100, 20, gameType->getInstructionString());
+
       glColor(Colors::magenta, alpha);
       UserInterface::drawCenteredString(canvasHeight / 2 - 75, 20, gameType->getLevelDescription()->getString());
 
@@ -2546,7 +2557,7 @@ void GameUserInterface::renderBasicInterfaceOverlay(const GameType *gameType, bo
    S32 teamCount = game->getTeamCount();
 
    if((gameType->isGameOver() || scoreboardVisible) && teamCount > 0)      // Render scoreboard
-      renderScoreboard(gameType);
+      renderScoreboard();
 
    else if(teamCount > 1 && gameType->isTeamGame())  // Render team scores in lower-right corner when scoreboard is off
    {
@@ -2575,12 +2586,14 @@ void GameUserInterface::renderBasicInterfaceOverlay(const GameType *gameType, bo
          S32 ypos = gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin - lroff - (teams.size() - i - 1) * 38;
 
          Team *team = (Team *)game->getTeam(i);
-         glColor3f(1,0,1);
+
+         glColor(Colors::magenta);
          if( gameType->teamHasFlag(team->getId()) )
             UserInterface::drawString(xpos - 50, ypos + 3, 18, "*");
 
          renderFlag(F32(xpos - 20), F32(ypos + 18), team->getColor());
-         glColor3f(1,1,1);
+
+         glColor(Colors::white);
          UserInterface::drawStringf(xpos, ypos, textsize, "%d", team->getScore());
       }
    }
@@ -2633,28 +2646,31 @@ void GameUserInterface::renderBasicInterfaceOverlay(const GameType *gameType, bo
    //   }
    //}
 
-   renderTimeLeft(gameType);
-   renderTalkingClients(gameType);
-   renderDebugStatus(gameType);
+   renderTimeLeft();
+   renderTalkingClients();
+   renderDebugStatus();
 }
 
 
 
-void GameUserInterface::renderTimeLeft(const GameType *gameType)
+void GameUserInterface::renderTimeLeft()
 {
    const S32 size = 20;       // Size of time
    const S32 gtsize = 12;     // Size of game type/score indicator
    
+   GameType *gameType = getGame()->getGameType();
+
    S32 len = UserInterface::getStringWidthf(gtsize, "[%s/%d]", gameType->getShortName(), gameType->getWinningScore());
 
-   glColor3f(0,1,1);
+   glColor(Colors::cyan);
    UserInterface::drawStringf(gScreenInfo.getGameCanvasWidth() - UserInterface::horizMargin - 65 - len - 5,
                               gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin - 20 + ((size - gtsize) / 2) + 2, 
                               gtsize, "[%s/%d]", gameType->getShortName(), gameType->getWinningScore());
 
    S32 x = gScreenInfo.getGameCanvasWidth() - UserInterface::horizMargin - 65;
    S32 y = gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin - 20;
-   glColor3f(1,1,1);
+
+   glColor(Colors::white);
 
    if(gameType->getTotalGameTime() == 0)
       UserInterface::drawString(x, y, size, "Unlim.");
@@ -2669,27 +2685,31 @@ void GameUserInterface::renderTimeLeft(const GameType *gameType)
 }
 
 
-void GameUserInterface::renderTalkingClients(const GameType *gameType)
+void GameUserInterface::renderTalkingClients()
 {
    S32 y = 150;
-   for(S32 i = 0; i < gameType->getClientCount(); i++)
+
+   for(S32 i = 0; i < getGame()->getClientCount(); i++)
    {
-      if(gameType->getClient(i)->voiceSFX->isPlaying())
+      ClientRef *client = getGame()->getClient(i);
+      if(client->voiceSFX->isPlaying())
       {
-         glColor( gameType->getGame()->getTeamColor(gameType->getClient(i)->getTeam()) );
-         UserInterface::drawString(10, y, 20, gameType->getClient(i)->name.getString());
-         y += 25;
+         const S32 TEXT_HEIGHT = 20;
+
+         glColor( getGame()->getTeamColor(client->getTeam()) );
+         UserInterface::drawString(10, y, TEXT_HEIGHT, client->name.getString());
+         y += TEXT_HEIGHT + 5;
       }
    }
 }
 
 
-void GameUserInterface::renderDebugStatus(const GameType *gameType)
+void GameUserInterface::renderDebugStatus()
 {
    // When bots are frozen, render large pause icon in lower left
    if(Robot::isPaused())
    {
-      glColor3f(1,1,1);
+      glColor(Colors::white);
 
       const S32 PAUSE_HEIGHT = 40;
       const S32 PAUSE_WIDTH = 15;

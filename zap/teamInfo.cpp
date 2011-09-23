@@ -98,10 +98,13 @@ Team::Team()
    mRating = 0;
 }
 
+
 // Destructor
 Team::~Team()
 {
+   // Do nothing
 }
+
 
 void Team::clearStats()
 {
@@ -175,7 +178,7 @@ S32 LuaTeamInfo::getScore(lua_State *L) { return returnInt(L, mTeam->getScore())
 
 S32 LuaTeamInfo::getPlayerCount(lua_State *L)         // number getPlayerCount() ==> return player count
 {
-   gServerGame->getGameType()->countTeamPlayers();    // Make sure player counts are up-to-date
+   gServerGame->countTeamPlayers();    // Make sure player counts are up-to-date
    return returnInt(L, mTeam->getPlayerBotCount());
 }
 
@@ -183,15 +186,15 @@ S32 LuaTeamInfo::getPlayerCount(lua_State *L)         // number getPlayerCount()
 // Return a table listing all players on this team
 S32 LuaTeamInfo::getPlayers(lua_State *L)
 {
-   TNLAssert(gServerGame->getPlayerCount() == (U32)gServerGame->getGameType()->getClientCount(), "Mismatched player counts!");
+   TNLAssert(gServerGame->getPlayerCount() == (U32)gServerGame->getClientCount(), "Mismatched player counts!");
 
    S32 pushed = 0;
 
    lua_newtable(L);    // Create a table, with no slots pre-allocated for our data
 
-   for(S32 i = 0; i < gServerGame->getGameType()->getClientCount(); i++)
+   for(S32 i = 0; i < gServerGame->getClientCount(); i++)
    {
-      ClientRef *clientRef = gServerGame->getGameType()->getClient(i);
+      ClientRef *clientRef = gServerGame->getClient(i);
 
       if(clientRef->getTeam() == mTeamIndex)
       {

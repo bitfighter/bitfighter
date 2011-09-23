@@ -1375,14 +1375,18 @@ Robot::~Robot()
    if(gameConnectionInitalized)
    {
       GameConnection *gc = getOwner();
+
       if(getGame()->getGameType())
-      {
          getGame()->getGameType()->serverRemoveClient(gc);
-      }
+
+      ClientRef *cref = gc->getClientRef();
+
+      gServerGame->deleteClientRefFromList(cref);     // HACK  (deletes cref)
+
       setOwner(NULL);
-      delete gc->getClientRef();
       delete gc;
    }
+
    // Close down our Lua interpreter
    LuaObject::cleanupAndTerminate(L);
 
@@ -1685,7 +1689,7 @@ bool Robot::processArguments(S32 argc, const char **argv, Game *game)
    if(argc >= 1)
       mTeam = atoi(argv[0]);
    else
-      mTeam = -10;   // The Gametype serverAddClient will take care of out of bound checking
+      mTeam = -10;   // The Gametype serverAddClient will take care of bounds checking
    
 
    if(argc >= 2)
@@ -1957,7 +1961,9 @@ void Robot::spawn()
    
    setOwner(gc);
 
-   getGame()->getGameType()->serverAddClient(gc);  // ClientRef is created in serverAddClient
+   ClientRef *cref = getGame()->getGameType()->serverAddClient(gc);  // ClientRef is created in serverAddClient
+   gServerGame->addClientRefToList(cref);
+   
    gameConnectionInitalized = true;
 }
 

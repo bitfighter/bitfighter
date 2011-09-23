@@ -145,7 +145,7 @@ private:
    ShutdownMode mShutdownMode;
 
    // Some rendering routines
-   void renderScoreboard(const GameType *gameType);
+   void renderScoreboard();
 
    StringTableEntry mShutdownName;  // Name of user who iniated the shutdown
    StringPtr mShutdownReason;       // Reason user provided for the shutdown
@@ -163,9 +163,9 @@ private:
    Timer mInputModeChangeAlertDisplayTimer;  // Remind user that they just changed input modes
    Timer mLevelInfoDisplayTimer;
 
-   void renderTimeLeft(const GameType *gameType);
-   void renderTalkingClients(const GameType *gameType);     // Render things related to voicechat
-   void renderDebugStatus(const GameType *gameType);        // Render things related to debugging
+   void renderTimeLeft();
+   void renderTalkingClients();     // Render things related to voice chat
+   void renderDebugStatus();        // Render things related to debugging
 
 
    F32 mFPSAvg;

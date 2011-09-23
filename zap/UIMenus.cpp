@@ -1716,17 +1716,14 @@ void PlayerMenuUserInterface::playerSelected(U32 index)
 void PlayerMenuUserInterface::render()
 {
    menuItems.clear();
-   GameType *gameType = getGame()->getGameType();
-   if(!gameType)
-      return;
 
    if(!getGame()->getConnectionToServer())
       return;
 
    char c[] = "A";      // Dummy shortcut key
-   for(S32 i = 0; i < gameType->getClientCount(); i++)
+   for(S32 i = 0; i < getGame()->getClientCount(); i++)
    {
-      RefPtr<ClientRef> client = gameType->getClient(i);
+      ClientRef *client = getGame()->getClient(i);
 
       strncpy(c, client->name.getString(), 1);        // Grab first char of name for a shortcut key
 
@@ -1734,8 +1731,9 @@ void PlayerMenuUserInterface::render()
       PlayerType pt = client->isRobot ? PlayerTypeRobot : (client->isAdmin ? PlayerTypeAdmin : PlayerTypePlayer);    
 
       PlayerMenuItem *newItem = new PlayerMenuItem(getGame(), i, client->name.getString(), playerSelectedCallback, stringToKeyCode(c), pt);
+
       menuItems.push_back(boost::shared_ptr<MenuItem>(newItem));
-      menuItems.last()->setUnselectedColor(gameType->getTeamColor(client->getTeam()));
+      menuItems.last()->setUnselectedColor(getGame()->getTeamColor(client->getTeam()));
    }
 
    menuItems.sort(menuItemValueSort);
@@ -1772,14 +1770,14 @@ static void processTeamSelectionCallback(ClientGame *game, U32 index)
 
 void TeamMenuUserInterface::processSelection(U32 index)        
 {
-   // Make sure user isn't just changing to the team they're already on...
-
    GameType *gt = getGame()->getGameType();
    GameConnection *gc = getGame()->getConnectionToServer();
+
    if(!gc || !gt)
       return;
 
-   if(index != (U32)gt->getTeam(nameToChange.c_str()))
+   // Make sure user isn't just changing to the team they're already on...
+   if(index != (U32)getGame()->getTeamIndex(nameToChange.c_str()))
    {
       if(getPrevMenuID() == PlayerUI)     // Initiated by an admin (PlayerUI is the kick/change team player-pick admin menu)
       {
@@ -1787,9 +1785,7 @@ void TeamMenuUserInterface::processSelection(U32 index)
          gc->c2sAdminPlayerAction(e, PlayerMenuUserInterface::ChangeTeam, index);   // Index will be the team index
       }
       else                                // Came from player changing own team
-      {
          gt->c2sChangeTeams(index);
-      }
    }
 
    getUIManager()->reactivateMenu(getUIManager()->getGameUserInterface());    // Back to the game!
@@ -1801,11 +1797,7 @@ void TeamMenuUserInterface::render()
 {
    menuItems.clear();
 
-   GameType *gameType = getGame()->getGameType();
-   if(!gameType)
-      return;
-
-   gameType->countTeamPlayers();    // Make sure numPlayers is correctly populated
+   getGame()->countTeamPlayers();    // Make sure numPlayers is correctly populated
 
    char c[] = "A";      // Dummy shortcut key, will change below
    for(S32 i = 0; i < getGame()->getTeamCount(); i++)
@@ -1813,7 +1805,7 @@ void TeamMenuUserInterface::render()
       AbstractTeam *team = getGame()->getTeam(i);
       strncpy(c, team->getName().getString(), 1);     // Grab first char of name for a shortcut key
 
-      bool isCurrent = (i == gameType->getTeam(nameToChange.c_str()));
+      bool isCurrent = (i == getGame()->getTeamIndex(nameToChange.c_str()));
       
       menuItems.push_back(boost::shared_ptr<MenuItem>(new TeamMenuItem(getGame(), i, team, processTeamSelectionCallback, stringToKeyCode(c), isCurrent)));
    }
