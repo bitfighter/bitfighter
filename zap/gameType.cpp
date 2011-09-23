@@ -1086,7 +1086,7 @@ void GameType::onGameOver()
          if(!tied)
          {
             e.push_back(emptyString);
-            e.push_back(winningClient->getName());
+            e.push_back(winningClient->getConnection()->getClientName());
          }
       }
    }
@@ -1204,7 +1204,7 @@ void GameType::spawnShip(GameConnection *theClient)
    else
    {
       // Player's name, team, and spawn location
-      Ship *newShip = new Ship(cl->getName(), theClient->isAuthenticated(), teamIndex, spawnPoint);
+      Ship *newShip = new Ship(cl->getConnection()->getClientName(), theClient->isAuthenticated(), teamIndex, spawnPoint);
       theClient->setControlObject(newShip);
       newShip->setOwner(theClient);
       newShip->addToGame(mGame, mGame->getGameObjDatabase());

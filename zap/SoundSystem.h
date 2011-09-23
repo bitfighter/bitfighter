@@ -141,16 +141,16 @@ public:
    static void processSoundEffects(F32 sfxVol, F32 voiceVol);
    static SFXHandle playSoundEffect(U32 profileIndex, F32 gain = 1.0f);
    static SFXHandle playSoundEffect(U32 profileIndex, Point position, Point velocity, F32 gain = 1.0f);
-   static void playSoundEffect(SFXHandle& effect);
+   static void playSoundEffect(const SFXHandle &effect);
    static SFXHandle playRecordedBuffer(ByteBufferPtr p, F32 gain);
-   static void stopSoundEffect(SFXHandle& effect);
+   static void stopSoundEffect(SFXHandle &effect);
    static void unqueueBuffers(S32 sourceIndex);
    static void setMovementParams(SFXHandle& effect, Point position, Point velocity);
    static void updateMovementParams(SFXHandle& effect);
 
    // Voice Chat functions
    static void processVoiceChat();
-   static void queueVoiceChatBuffer(SFXHandle& effect, ByteBufferPtr p);
+   static void queueVoiceChatBuffer(const SFXHandle &effect, ByteBufferPtr p);
    static bool startRecording();
    static void captureSamples(ByteBufferPtr sampleBuffer);
    static void stopRecording();

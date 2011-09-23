@@ -148,7 +148,6 @@ ClientGame::ClientGame(const Address &bindAddress, GameSettings *settings) : Gam
    //   }
    //}
 
-
    mScreenSaverTimer.reset(59 * 1000);         // Fire screen saver supression every 59 seconds
 
    mDebugShowShipCoords = false;

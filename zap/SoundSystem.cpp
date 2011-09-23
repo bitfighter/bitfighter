@@ -369,7 +369,7 @@ SFXHandle SoundSystem::playSoundEffect(U32 profileIndex, Point position, Point v
 }
 
 
-void SoundSystem::playSoundEffect(SFXHandle& effect)
+void SoundSystem::playSoundEffect(const SFXHandle &effect)
 {
    if(!gSFXValid)
       return;
@@ -686,7 +686,7 @@ void SoundSystem::updateGain(SFXHandle& effect, F32 sfxVol, F32 voiceVol)
 
 
 // This only called when playing an incoming voice chat message
-void SoundSystem::queueVoiceChatBuffer(SFXHandle& effect, ByteBufferPtr p)
+void SoundSystem::queueVoiceChatBuffer(const SFXHandle &effect, ByteBufferPtr p)
 {
    if(!gSFXValid)
       return;

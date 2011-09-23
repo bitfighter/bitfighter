@@ -55,17 +55,16 @@ class ClientGame;
 class ClientRef : public NetObject
 {
 private:
-   Game *mGame;
    S32 mTeamId;
-   S32 mScore;                      // Individual score for current game
-   F32 mRating;                     // Skill rating from -1 to 1
-   LuaPlayerInfo *mPlayerInfo;      // Lua access to this class
+   S32 mScore;                         // Individual score for current game
+   F32 mRating;                        // Skill rating from -1 to 1
+   LuaPlayerInfo *mPlayerInfo;         // Lua access to this class
 
    SafePtr<GameConnection> mClientConnection;
 
 public:
-   ClientRef(GameConnection *conn);               // Constructor
-   virtual ~ClientRef();      // Destructor
+   ClientRef(GameConnection *conn);    // Constructor
+   virtual ~ClientRef();               // Destructor
 
    void reset();              // Clears/initializes most settings
 
@@ -79,8 +78,6 @@ public:
    F32 getRating();
    void setRating(F32 rating);
 
-   Statistics mStatistics;        // Player statistics tracker
-
    LuaPlayerInfo *getPlayerInfo();
 
    Timer respawnTimer;
@@ -89,18 +86,11 @@ public:
    bool readyForRegularGhosts;
 
    GameConnection *getConnection() { return mClientConnection; }
-   //void setConnection(GameConnection *connection)  { mClientConnection = connection; }
 
    RefPtr<SoundEffect> voiceSFX;
    RefPtr<VoiceDecoder> decoder;
 
    U32 ping;
-
-   bool isRobot() { return mClientConnection->isRobot(); }
-   bool isAdmin() { return mClientConnection->isAdmin(); }
-   bool isLevelChanger() { return mClientConnection->isLevelChanger(); }
-   StringTableEntry getName() { return mClientConnection->getClientName(); }
-
 };
 
 

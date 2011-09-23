@@ -2700,6 +2700,7 @@ void GameUserInterface::renderTalkingClients()
    for(S32 i = 0; i < getGame()->getClientCount(); i++)
    {
       ClientRef *client = getGame()->getClient(i);
+
       if(client->voiceSFX->isPlaying())
       {
          const S32 TEXT_HEIGHT = 20;
