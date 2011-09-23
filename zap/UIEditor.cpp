@@ -3656,7 +3656,7 @@ void testLevelStart_local(ClientGame *game)
 }
 
 
-extern void initHostGame(GameSettings *settings, Vector<string> &levelList, bool testMode, bool dedicatedServer);
+extern void initHostGame(GameSettings *settings, const Vector<string> &levelList, bool testMode, bool dedicatedServer);
 
 void EditorUserInterface::testLevel()
 {

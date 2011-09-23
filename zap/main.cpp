@@ -332,7 +332,7 @@ bool writeToConsole()
 
 
 // Host a game (and maybe even play a bit, too!)
-void initHostGame(GameSettings *settings, Vector<string> &levelList, bool testMode, bool dedicatedServer)
+void initHostGame(GameSettings *settings, const Vector<string> &levelList, bool testMode, bool dedicatedServer)
 {
    TNLAssert(!gServerGame, "already exists!");
    if(gServerGame)
@@ -1173,8 +1173,9 @@ int main(int argc, char **argv)
       if(settings->getIniSettings()->useUpdater)
          launchUpdater(argv[0], settings->getForceUpdate());  // Spawn external updater tool to check for new version of Bitfighter -- Windows only
 #endif   // USE_BFUP
-   }
+
 #endif   // !ZAP_DEDICATED
+   }
 
    dedicatedServerLoop();              // Loop forever, running the idle command endlessly
 

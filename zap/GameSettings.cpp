@@ -39,6 +39,9 @@
 
 #include "IniFile.h"
 
+#include <stdio.h>
+#include <algorithm>
+
 using namespace std;
 using namespace CmdLineParams;
 
@@ -130,22 +133,15 @@ struct DirectiveInfo {
 };
 
 
-// Forward declare our directives... they're defined at the end of this file
-void getRes(GameSettings *settings, const Vector<string> &words);
-void sendRes(GameSettings *settings, const Vector<string> &words);
-void showRules(GameSettings *settings, const Vector<string> &words);
-void showHelp(GameSettings *settings, const Vector<string> &words);
-
-
 DirectiveInfo directiveDefs[] = {   
 
 // Advanced server management options
-{ "getres",                FOUR_REQUIRED,  SEND_RESOURCE, 5, getRes,    "<server address> <admin password> <resource name> <LEVEL|LEVELGEN|BOT>", "Send a resource to a remote server. Address must be specified in the form IP:nnn.nnn.nnn.nnn:port. The server must be running, have an admin password set, and have resource management enabled ([Host] section in the bitfighter.ini file).", "Usage: bitfighter getres <server address> <admin password> <resource name> <LEVEL|LEVELGEN|BOT>" },
-{ "sendres",               FOUR_REQUIRED,  GET_RESOURCE,  5, sendRes,   "<server address> <admin password> <resource name> <LEVEL|LEVELGEN|BOT>", "Retrieve a resource from a remote server, with same requirements as -sendres.",                                                                                                                                                                "Usage: bitfighter sendres <server address> <admin password> <resource name> <LEVEL|LEVELGEN|BOT>" },
+{ "getres",                FOUR_REQUIRED,  SEND_RESOURCE, 5, GameSettings::getRes,    "<server address> <admin password> <resource name> <LEVEL|LEVELGEN|BOT>", "Send a resource to a remote server. Address must be specified in the form IP:nnn.nnn.nnn.nnn:port. The server must be running, have an admin password set, and have resource management enabled ([Host] section in the bitfighter.ini file).", "Usage: bitfighter getres <server address> <admin password> <resource name> <LEVEL|LEVELGEN|BOT>" },
+{ "sendres",               FOUR_REQUIRED,  GET_RESOURCE,  5, GameSettings::sendRes,   "<server address> <admin password> <resource name> <LEVEL|LEVELGEN|BOT>", "Retrieve a resource from a remote server, with same requirements as -sendres.",                                                                                                                                                                "Usage: bitfighter sendres <server address> <admin password> <resource name> <LEVEL|LEVELGEN|BOT>" },
 
 // Other commands
-{ "rules",                 NO_PARAMETERS,  SHOW_RULES,    6, showRules, "",  "Print a list of \"rules of the game\" and other possibly useful data", "" },
-{ "help",                  NO_PARAMETERS,  HELP,          6, showHelp,  "",  "Display this message", "" },  
+{ "rules",                 NO_PARAMETERS,  SHOW_RULES,    6, GameSettings::showRules, "",  "Print a list of \"rules of the game\" and other possibly useful data", "" },
+{ "help",                  NO_PARAMETERS,  HELP,          6, GameSettings::showHelp,  "",  "Display this message", "" },
 
 };
 
@@ -591,7 +587,7 @@ void GameSettings::readCmdLineParams(const Vector<string> &argv)
 // If any directives were specified on the cmd line, run them
 void GameSettings::runCmdLineDirectives()
 {
-   for(S32 i = 0; i < ARRAYSIZE(directiveDefs); i++)
+   for(S32 i = 0; i < S32(ARRAYSIZE(directiveDefs)); i++)
    {
       if(mCmdLineParams[directiveDefs[i].paramId].size() > 0)
       {
@@ -702,13 +698,13 @@ DisplayMode GameSettings::resolveCmdLineSpecifiedDisplayMode()
 
 extern void transferResource(GameSettings *settings, const string &addr, const string &pw, const string &fileName, const string &resourceType, bool sending);
 
-static void getRes(GameSettings *settings, const Vector<string> &words)
+void GameSettings::getRes(GameSettings *settings, const Vector<string> &words)
 {
    transferResource(settings, words[0], words[1], words[2], words[3], false);
 }
 
 
-static void sendRes(GameSettings *settings, const Vector<string> &words)
+void GameSettings::sendRes(GameSettings *settings, const Vector<string> &words)
 {
    transferResource(settings, words[0], words[1], words[2], words[3], true);
 }
@@ -721,7 +717,7 @@ static void sendRes(GameSettings *settings, const Vector<string> &words)
 extern bool writeToConsole();
 extern void printRules();
 
-static void showRules(GameSettings *settings, const Vector<string> &words)
+void GameSettings::showRules(GameSettings *settings, const Vector<string> &words)
 {
    writeToConsole();
    printRules();
@@ -850,7 +846,7 @@ static void printHelpEntry(const string &paramName, const string &paramString, c
 }
 
 
-static void showHelp(GameSettings *settings, const Vector<string> &words)
+void GameSettings::showHelp(GameSettings *settings, const Vector<string> &words)
 {
    for(S32 i = 0; i < S32(ARRAYSIZE(helpTitles)); i++)
    {
@@ -914,6 +910,11 @@ static void showHelp(GameSettings *settings, const Vector<string> &words)
    exitToOs(0);
 }
 
+
+U32 GameSettings::getSimulatedLag()
+{
+   return min(getU32(SIMULATED_LAG), (U32)1000);
+}
 
 
 };
