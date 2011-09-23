@@ -104,12 +104,6 @@ enum SettingSource {
 };
 
 
-#ifndef min
-#define min(a,b) ((a) <= (b) ? (a) : (b))
-#define max(a,b) ((a) >= (b) ? (a) : (b))
-#endif
-
-
 
 class GameSettings
 {
@@ -151,6 +145,7 @@ private:
    bool getSpecified(ParamId paramId);                // Returns true if parameter was present, false if not
 
    DisplayMode resolveCmdLineSpecifiedDisplayMode();  // Tries to figure out what display mode was specified on the cmd line, if any
+
 
 public:
    GameSettings();    // Constructor
@@ -214,7 +209,7 @@ public:
    // Accessor methods
    U32 getSimulatedStutter() { return getU32(SIMULATED_STUTTER); }
    F32 getSimulatedLoss()    { return getF32(SIMULATED_LOSS); }
-   U32 getSimulatedLag()     { return min(getU32(SIMULATED_LAG), 1000); }
+   U32 getSimulatedLag();
 
    bool getForceUpdate()  { return getSpecified(FORCE_UPDATE); }
 
@@ -238,6 +233,11 @@ public:
    void forgetAdminPassword(const string &serverName);
 
    void onFinishedLoading();     // Should be run after INI and cmd line params have been read
+
+   static void getRes(GameSettings *settings, const Vector<string> &words);
+   static void sendRes(GameSettings *settings, const Vector<string> &words);
+   static void showRules(GameSettings *settings, const Vector<string> &words);
+   static void showHelp(GameSettings *settings, const Vector<string> &words);
 };
 
 

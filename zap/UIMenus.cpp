@@ -1169,7 +1169,7 @@ void HostMenuUserInterface::onActivate()
 }
 
 
-extern void initHostGame(GameSettings *settings, Vector<string> &levelList, bool testMode, bool dedicatedServer);
+extern void initHostGame(GameSettings *settings, const Vector<string> &levelList, bool testMode, bool dedicatedServer);
 extern U16 DEFAULT_GAME_PORT;
 
 static void startHostingCallback(ClientGame *game, U32 unused)
