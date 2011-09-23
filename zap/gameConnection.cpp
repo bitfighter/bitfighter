@@ -428,28 +428,29 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sAdminPassword, (StringPtr pass), (pass),
    string adminPW = mSettings->getAdminPassword();
 
    // If admin password is blank, no one can get admin permissions except the local host, if there is one...
-   if(adminPW != "" && !strcmp(md5.getSaltedHashFromString(adminPW).c_str(), pass))
+   if(adminPW == "" || strcmp(md5.getSaltedHashFromString(adminPW).c_str(), pass))
    {
-      setIsAdmin(true);             // Enter admin PW and...
-
-      if(!isLevelChanger())
-      {
-         setIsLevelChanger(true);   // ...get these permissions too!
-         sendLevelList();
-      }
-      
-      s2cSetIsAdmin(true);                                                 // Tell client they have been granted access
-
-      if(mSettings->getIniSettings()->allowAdminMapUpload)
-         s2rSendableFlags(1); // enable level uploads
-
-      GameType *gameType = gServerGame->getGameType();
-
-      if(gameType)
-         gameType->s2cClientBecameAdmin(mClientRef->name);  // Announce change to world
-   }
-   else
       s2cSetIsAdmin(false);                                                // Tell client they have NOT been granted access
+      return;
+   }
+
+   setIsAdmin(true);             // Enter admin PW and...
+
+   if(!isLevelChanger())
+   {
+      setIsLevelChanger(true);   // ...get these permissions too!
+      sendLevelList();
+   }
+      
+   s2cSetIsAdmin(true);          // Tell client they have been granted access
+
+   if(mSettings->getIniSettings()->allowAdminMapUpload)
+      s2rSendableFlags(1);       // Enable level uploads
+
+   GameType *gameType = gServerGame->getGameType();
+
+   if(gameType)
+      gameType->s2cClientBecameAdmin(getClientName());  // Announce change to world
 }
 
 
@@ -459,16 +460,19 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sLevelChangePassword, (StringPtr pass), (pas
    string levChangePW = mSettings->getLevelChangePassword();
 
    // If password is blank, permissions always granted
-   if(levChangePW == "" || !strcmp(md5.getSaltedHashFromString(levChangePW).c_str(), pass))
+   if(levChangePW != "" && strcmp(md5.getSaltedHashFromString(levChangePW).c_str(), pass))
    {
-      setIsLevelChanger(true);
-
-      s2cSetIsLevelChanger(true, true);                                           // Tell client they have been granted access
-      sendLevelList();                                                            // Send client the level list
-      gServerGame->getGameType()->s2cClientBecameLevelChanger(mClientRef->name);  // Announce change to world
+      s2cSetIsLevelChanger(false, true);  // Tell client they have NOT been granted access
+      return;
    }
-   else
-      s2cSetIsLevelChanger(false, true);                                          // Tell client they have NOT been granted access
+
+   setIsLevelChanger(true);
+
+   s2cSetIsLevelChanger(true, true);      // Tell client they have been granted access
+   sendLevelList();                       // Send client the level list
+
+   // Announce change to world
+   gServerGame->getGameType()->s2cClientBecameLevelChanger(getClientName());  
 }
 
 
@@ -488,13 +492,13 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
 
    // Add a message to the server log
    if(type == (U32)DeleteLevel)
-      logprintf(LogConsumer::ServerFilter, "User [%s] added level [%s] to server skip list", mClientRef->name.getString(), 
+      logprintf(LogConsumer::ServerFilter, "User [%s] added level [%s] to server skip list", getClientName().getString(), 
                                                 gServerGame->getCurrentLevelFileName().getString());
    else
    {
       const char *types[] = { "level change password", "admin password", "server password", "server name", "server description", "leveldir param" };
-      logprintf(LogConsumer::ServerFilter, "User [%s] %s to [%s]", mClientRef->name.getString(), 
-                                                strcmp(param.getString(), "") ? "changed" : "cleared", types[type]);
+      logprintf(LogConsumer::ServerFilter, "User [%s] %s to [%s]", getClientName().getString(), 
+                                                                   strcmp(param.getString(), "") ? "changed" : "cleared", types[type]);
    }
 
    // Update our in-memory copies of the param, but do not save the new values to the INI
@@ -799,13 +803,10 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsAdmin, (bool granted), (granted),
    NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
 #ifndef ZAP_DEDICATED
-   if(mClientRef)
-   {
-      if(granted)
-         logprintf(LogConsumer::ServerFilter, "User [%s] granted admin permissions", mClientRef->name.getString());
-      else
-         logprintf(LogConsumer::ServerFilter, "User [%s] denied admin permissions", mClientRef->name.getString());
-   }
+   if(granted)
+      logprintf(LogConsumer::ServerFilter, "User [%s] granted admin permissions", getClientName().getString());
+   else
+      logprintf(LogConsumer::ServerFilter, "User [%s] denied admin permissions", getClientName().getString());
 
    setIsAdmin(granted);
 
@@ -846,9 +847,9 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsLevelChanger, (bool granted, bool noti
    if(mClientRef)
    {
       if(granted)
-         logprintf(LogConsumer::ServerFilter, "User [%s] granted level change permissions", mClientRef->name.getString());
+         logprintf(LogConsumer::ServerFilter, "User [%s] granted level change permissions", getClientName().getString());
       else
-         logprintf(LogConsumer::ServerFilter, "User [%s] denied level change permissions", mClientRef->name.getString());
+         logprintf(LogConsumer::ServerFilter, "User [%s] denied level change permissions", getClientName().getString());
    }
 
    // If we entered a password, and it worked, let's save it for next time
@@ -1152,14 +1153,15 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestShutdown, (U16 time, StringPtr reaso
       return;
 
    logprintf(LogConsumer::ServerFilter, "User [%s] requested shutdown in %d seconds [%s]", 
-         mClientRef->name.getString(), time, reason.getString());
+         getClientName().getString(), time, reason.getString());
 
    gServerGame->setShuttingDown(true, time, mClientRef, reason.getString());
 
+   // Broadcast the message
    for(S32 i = 0; i < gServerGame->getClientCount(); i++)
    {
       GameConnection *conn = gServerGame->getClient(i)->getConnection();
-      conn->s2cInitiateShutdown(time, mClientRef->name, reason, conn == this);
+      conn->s2cInitiateShutdown(time, getClientName(), reason, conn == this);
    }
 }
 
@@ -1178,8 +1180,9 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestCancelShutdown, (), (), NetClassGrou
    if(!mIsAdmin)
       return;
 
-   logprintf(LogConsumer::ServerFilter, "User %s canceled shutdown", mClientRef->name.getString());
+   logprintf(LogConsumer::ServerFilter, "User %s canceled shutdown", getClientName().getString());
 
+   // Broadcast the message
    for(S32 i = 0; i < gServerGame->getClientCount(); i++)
    {
       GameConnection *conn = gServerGame->getClient(i)->getConnection();
@@ -1226,7 +1229,6 @@ void updateClientChangedName(GameConnection *gameConnection, StringTableEntry ne
       gameType->s2cRenameClient(gameConnection->getClientName(), newName);
 
    gameConnection->setClientName(newName);
-   clientRef->name = newName;
 
    Ship *ship = dynamic_cast<Ship *>(gameConnection->getControlObject());
 

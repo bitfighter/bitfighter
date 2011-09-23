@@ -705,7 +705,7 @@ bool ClientGame::checkName(const string &name)
       if(!getClient(i))
          continue;
 
-      StringTableEntry n = getClient(i)->name;
+      StringTableEntry n = getClient(i)->getConnection()->getClientName();
 
       if(n == name)           // Exact match
          return true;
@@ -1050,7 +1050,7 @@ U32 ClientGame::getPlayerCount()
    U32 players = 0;
 
    for(S32 i = 0; i < getClientCount(); i++)
-      if(!getClient(i)->isRobot)
+      if(!getClient(i)->getConnection()->isRobot())
          players++;
 
    return players;
@@ -1346,7 +1346,7 @@ void ClientGame::renderCommander()
          {
             SpyBug *sb = dynamic_cast<SpyBug *>(fillVector[i]);
 
-            if(sb->isVisibleToPlayer(playerTeam, getGameType()->mLocalClient ? getGameType()->mLocalClient->name : 
+            if(sb->isVisibleToPlayer(playerTeam, getGameType()->mLocalClient ? getGameType()->mLocalClient->getConnection()->getClientName() : 
                                                                                  StringTableEntry(""), getGameType()->isTeamGame()))
             {
                const Point &p = sb->getRenderPos();

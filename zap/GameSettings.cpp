@@ -669,6 +669,13 @@ void GameSettings::onFinishedLoading()
 }
 
 
+// We need to show the name entry screen unless user has specified a nickname via the cmd line or the INI file
+bool GameSettings::shouldShowNameEntryScreenOnStartup()
+{
+   return getString(LOGIN_NAME) == "" && mIniSettings.name == "";
+}
+
+
 void GameSettings::saveMasterAddressListInIniUnlessItCameFromCmdLine()
 {
    // If we got the master from the cmd line, or we only have one address, we have nothing to do

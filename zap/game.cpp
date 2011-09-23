@@ -269,6 +269,7 @@ void Game::countTeamPlayers()
    for(S32 i = 0; i < getClientCount(); i++)
    {
       ClientRef *client = getClient(i);
+      GameConnection *conn = client->getConnection();
 
       S32 teamIndex = client->getTeam();
 
@@ -277,15 +278,13 @@ void Game::countTeamPlayers()
          // Robot could be neutral or hostile, skip out of range team numbers
          Team *team = (Team *)getTeam(teamIndex);
 
-         if(client->isRobot)
+         if(conn->isRobot())
             team->incrementBotCount();
          else
             team->incrementPlayerCount();
 
 
          const F32 BASE_RATING = .1f;
-
-         GameConnection *conn = client->getConnection();
 
          if(conn)
             team->addRating(max(getCurrentRating(conn), BASE_RATING));
@@ -708,7 +707,7 @@ void Game::deleteObjects(TestFunc testFunc)
 S32 Game::findClientIndex(const StringTableEntry &name)
 {
    for(S32 i = 0; i < getClientCount(); i++)
-      if(getClient(i)->name == name)
+      if(getClient(i)->getConnection()->getClientName() == name)
          return i;
 
    return -1;     // Not found
@@ -843,7 +842,6 @@ ServerGame::ServerGame(const Address &address, GameSettings *settings, bool test
 {
    mVoteTimer = 0;
    mNextLevel = NEXT_LEVEL;
-   mPlayerCount = 0;
 
    mShuttingDown = false;
 
@@ -989,6 +987,7 @@ S32 ServerGame::getRobotCount()
 {
    return Robot::getRobotCount();
 }
+
 
 
 // Creates a set of LevelInfos that are empty except for the filename.  They will be fleshed out later.
@@ -1404,81 +1403,26 @@ void ServerGame::cycleLevel(S32 nextLevel)
       }
    }
 
-   // Record the number of players...
-   S32 players = mClientList.size();
+   setCurrentLevelIndex(nextLevel, getPlayerCount());
+   
+   string levelFile = getLevelFileNameFromIndex(mCurrentLevelIndex);
 
-   // ...and clear the list
-   mClientList.clear();    // Should be deleteAndClear()?
-
-
-   if(nextLevel >= FIRST_LEVEL)          // Go to specified level
-      mCurrentLevelIndex = (nextLevel < mLevelInfos.size()) ? nextLevel : FIRST_LEVEL;
-
-   else if(nextLevel == NEXT_LEVEL)      // Next level
-   {
-      // If game is supended, then we are waiting for another player to join.  That means that (probably)
-      // there are either 0 or 1 players, so the next game will need to be good for 1 or 2 players.
-      if(mGameSuspended)
-         players++;
-
-      bool first = true;
-      bool found = false;
-
-      U32 currLevel = mCurrentLevelIndex;
-
-      // Cycle through the levels looking for one that matches our player counts
-      while(first || mCurrentLevelIndex != currLevel)
-      {
-         mCurrentLevelIndex = (mCurrentLevelIndex + 1) % mLevelInfos.size();
-
-         S32 minPlayers = mLevelInfos[mCurrentLevelIndex].minRecPlayers;
-         S32 maxPlayers = mLevelInfos[mCurrentLevelIndex].maxRecPlayers;
-
-         if(maxPlayers <= 0)        // i.e. limit doesn't apply or is invalid (note if limit doesn't apply on the minPlayers, 
-            maxPlayers = S32_MAX;   // then it works out because the smallest number of players is 1).
-
-         if(players >= minPlayers && players <= maxPlayers)
-         {
-            found = true;
-            break;
-         }
-
-         // else do nothing to play the next level, which we found above
-         first = false;
-      }
-
-      // We didn't find a suitable level... just proceed to the next one
-      if(!found)
-      {
-         mCurrentLevelIndex++;
-         if(S32(mCurrentLevelIndex) >= mLevelInfos.size())
-            mCurrentLevelIndex = FIRST_LEVEL;
-      }
-   } 
-   else if(nextLevel == PREVIOUS_LEVEL)
-      mCurrentLevelIndex = mCurrentLevelIndex > 0 ? mCurrentLevelIndex - 1 : mLevelInfos.size() - 1;
-
-   //else if(nextLevel == REPLAY_LEVEL)    // Replay level, do nothing
-   //   mCurrentLevelIndex += 0;
-
-
-   logprintf(LogConsumer::ServerFilter, "Loading %s [%s]... \\", gServerGame->getLevelNameFromIndex(mCurrentLevelIndex).getString(), 
-                                             gServerGame->getLevelFileNameFromIndex(mCurrentLevelIndex).c_str());
+   logprintf(LogConsumer::ServerFilter, "Loading %s [%s]... \\", getLevelNameFromIndex(mCurrentLevelIndex).getString(), levelFile.c_str());
 
    // Load the level for real this time (we loaded it once before, when we started the server, but only to grab a few params)
-   loadLevel(getLevelFileNameFromIndex(mCurrentLevelIndex));
+   loadLevel(levelFile);
 
    // Make sure we have a gameType... if we don't we'll add a default one here
    if(!getGameType())   // loadLevel can fail (missing file) and not create GameType
    {
-      logprintf(LogConsumer::LogWarning, "Warning: Missing game type parameter in level \"%s\"", 
-                                         gServerGame->getLevelFileNameFromIndex(mCurrentLevelIndex).c_str());
+      logprintf(LogConsumer::LogWarning, "Warning: Missing game type parameter in level \"%s\"", levelFile.c_str());
+
       GameType *gameType = new GameType;
       gameType->addToGame(this, getGameObjDatabase());
    }
 
    if(getGameType()->makeSureTeamCountIsNotZero())
-      logprintf(LogConsumer::LogWarning, "Warning: Missing team in level \"%s\"", getLevelFileNameFromIndex(mCurrentLevelIndex).c_str());
+      logprintf(LogConsumer::LogWarning, "Warning: Missing team in level \"%s\"", levelFile.c_str());
 
    logprintf(LogConsumer::ServerFilter, "Done. [%s]", getTimeStamp().c_str());
 
@@ -1500,19 +1444,83 @@ void ServerGame::cycleLevel(S32 nextLevel)
 #endif
    }
 
+   // Clear team info for all clients
+   resetAllClientTeams();
 
-   // Now add the connections to the game type, from highest rating to lowest --> will create ratings-based teams
+   // Now add players to the gameType, from highest rating to lowest --> will create ratings-based teams
    connectionList.sort(RatingSort);
 
-   for(S32 i = 0; i < connectionList.size(); i++)
+   if(mGameType.isValid())
    {
-      GameConnection *gc = connectionList[i];
-
-      if(mGameType.isValid())
-         addClientRefToList(mGameType->serverAddClient(gc));
-
-      gc->activateGhosting();
+      for(S32 i = 0; i < getClientCount(); i++)
+      {
+         mGameType->serverAddClient(getClient(i));
+         getClient(i)->getConnection()->activateGhosting();
+      }
    }
+}
+
+
+// Resets all player team assignments
+void ServerGame::resetAllClientTeams()
+{
+   for(S32 i = 0; i < getClientCount(); i++)
+      getClient(i)->setTeam(NO_TEAM);
+}
+
+
+// Set mCurrentLevelIndex to refer to the next level we'll play
+void ServerGame::setCurrentLevelIndex(S32 nextLevel, S32 playerCount)
+{
+   if(nextLevel >= FIRST_LEVEL)          // Go to specified level
+      mCurrentLevelIndex = (nextLevel < mLevelInfos.size()) ? nextLevel : FIRST_LEVEL;
+
+   else if(nextLevel == NEXT_LEVEL)      // Next level
+   {
+      // If game is supended, then we are waiting for another player to join.  That means that (probably)
+      // there are either 0 or 1 players, so the next game will need to be good for 1 or 2 players.
+      if(mGameSuspended)
+         playerCount++;
+
+      bool first = true;
+      bool found = false;
+
+      U32 currLevel = mCurrentLevelIndex;
+
+      // Cycle through the levels looking for one that matches our player counts
+      while(first || mCurrentLevelIndex != currLevel)
+      {
+         mCurrentLevelIndex = (mCurrentLevelIndex + 1) % mLevelInfos.size();
+
+         S32 minPlayers = mLevelInfos[mCurrentLevelIndex].minRecPlayers;
+         S32 maxPlayers = mLevelInfos[mCurrentLevelIndex].maxRecPlayers;
+
+         if(maxPlayers <= 0)        // i.e. limit doesn't apply or is invalid (note if limit doesn't apply on the minPlayers, 
+            maxPlayers = S32_MAX;   // then it works out because the smallest number of players is 1).
+
+         if(playerCount >= minPlayers && playerCount <= maxPlayers)
+         {
+            found = true;
+            break;
+         }
+
+         // else do nothing to play the next level, which we found above
+         first = false;
+      }
+
+      // We didn't find a suitable level... just proceed to the next one in the list
+      if(!found)
+      {
+         mCurrentLevelIndex++;
+         if(S32(mCurrentLevelIndex) >= mLevelInfos.size())
+            mCurrentLevelIndex = FIRST_LEVEL;
+      }
+   } 
+   else if(nextLevel == PREVIOUS_LEVEL)
+      mCurrentLevelIndex = mCurrentLevelIndex > 0 ? mCurrentLevelIndex - 1 : mLevelInfos.size() - 1;
+
+   //else if(nextLevel == REPLAY_LEVEL)    // Replay level, do nothing
+   //   mCurrentLevelIndex += 0;
 }
 
 
@@ -1670,9 +1678,11 @@ void ServerGame::addClient(GameConnection *client)
                                          "Sorry -- server shutting down", false);
 
    if(mGameType.isValid())
-      addClientRefToList(mGameType->serverAddClient(client));
-
-   mPlayerCount++;
+   {
+      ClientRef *cref = new ClientRef(client);
+      mGameType->serverAddClient(cref);
+      addClientRefToList(cref);
+   }
 
    if(mDedicated)
       SoundSystem::playSoundEffect(SFXPlayerJoined, 1);
@@ -1685,8 +1695,6 @@ void ServerGame::removeClient(GameConnection *client)
       mGameType->serverRemoveClient(client);
 
    deleteClientRefFromList(client->getClientRef());
-
-   mPlayerCount--;
 
    if(mDedicated)
       SoundSystem::playSoundEffect(SFXPlayerLeft, 1);
@@ -1890,12 +1898,12 @@ void ServerGame::idle(U32 timeDelta)
    // If there are no players on the server, we can enter "suspended animation" mode, but not during the first half-second of hosting.
    // This will prevent locally hosted game from immediately suspending for a frame, giving the local client a chance to 
    // connect.  A little hacky, but works!
-   if(mPlayerCount == 0 && !mGameSuspended && mCurrentTime != 0)
+   if(getPlayerCount() == 0 && !mGameSuspended && mCurrentTime != 0)
       suspendGame();
-   else if( mGameSuspended && ((mPlayerCount > 0 && !mSuspendor) || mPlayerCount > 1) )
+   else if(mGameSuspended && ( (getPlayerCount() > 0 && !mSuspendor) || getPlayerCount() > 1 ))
       unsuspendGame(false);
 
-   if(timeDelta > 2000)   // prevents timeDelta from going too high, usually when after the server was frozen.
+   if(timeDelta > 2000)   // Prevents timeDelta from going too high, usually when after the server was frozen.
       timeDelta = 100;
 
    mCurrentTime += timeDelta;
@@ -1916,13 +1924,14 @@ void ServerGame::idle(U32 timeDelta)
       if(masterConn && masterConn->isEstablished())
       {
          // Only update if something is different
-         if(prevCurrentLevelName != getCurrentLevelName() || prevCurrentLevelType != getCurrentLevelType() || prevRobotCount != getRobotCount() || prevPlayerCount != mPlayerCount)
+         if(prevCurrentLevelName != getCurrentLevelName() || prevCurrentLevelType != getCurrentLevelType() || prevRobotCount != getRobotCount() || prevPlayerCount != getPlayerCount())
          {
             prevCurrentLevelName = getCurrentLevelName();
             prevCurrentLevelType = getCurrentLevelType();
             prevRobotCount = getRobotCount();
-            prevPlayerCount = mPlayerCount;
-            masterConn->updateServerStatus(getCurrentLevelName(), getCurrentLevelType(), getRobotCount(), mPlayerCount, mSettings->getMaxPlayers(), mInfoFlags);
+            prevPlayerCount = getPlayerCount();
+
+            masterConn->updateServerStatus(getCurrentLevelName(), getCurrentLevelType(), getRobotCount(), getPlayerCount(), mSettings->getMaxPlayers(), mInfoFlags);
             mMasterUpdateTimer.reset(UpdateServerStatusTime);
          }
          else

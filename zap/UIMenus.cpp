@@ -1717,7 +1717,8 @@ void PlayerMenuUserInterface::render()
 {
    menuItems.clear();
 
-   if(!getGame()->getConnectionToServer())
+   GameConnection *conn = getGame()->getConnectionToServer();
+   if(!conn)
       return;
 
    char c[] = "A";      // Dummy shortcut key
@@ -1725,12 +1726,12 @@ void PlayerMenuUserInterface::render()
    {
       ClientRef *client = getGame()->getClient(i);
 
-      strncpy(c, client->name.getString(), 1);        // Grab first char of name for a shortcut key
+      strncpy(c, conn->getClientName().getString(), 1);        // Grab first char of name for a shortcut key
 
       // Will be used to show admin/player/robot prefix on menu
-      PlayerType pt = client->isRobot ? PlayerTypeRobot : (client->isAdmin ? PlayerTypeAdmin : PlayerTypePlayer);    
+      PlayerType pt = conn->isRobot() ? PlayerTypeRobot : (conn->isAdmin() ? PlayerTypeAdmin : PlayerTypePlayer);    
 
-      PlayerMenuItem *newItem = new PlayerMenuItem(getGame(), i, client->name.getString(), playerSelectedCallback, stringToKeyCode(c), pt);
+      PlayerMenuItem *newItem = new PlayerMenuItem(getGame(), i, conn->getClientName().getString(), playerSelectedCallback, stringToKeyCode(c), pt);
 
       menuItems.push_back(boost::shared_ptr<MenuItem>(newItem));
       menuItems.last()->setUnselectedColor(getGame()->getTeamColor(client->getTeam()));

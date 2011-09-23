@@ -787,7 +787,7 @@ void createClientGame(GameSettings *settings)
 
       //gClientGame2 = new ClientGame(Address());   //  !!! 2-player split-screen game in same game.
 
-      if(settings->getPlayerName() == "")
+      if(settings->shouldShowNameEntryScreenOnStartup())
       {
          if(gClientGame2)
          {

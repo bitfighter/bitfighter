@@ -1763,7 +1763,6 @@ void GameUserInterface::renderCurrentChat()
 
 
 static Vector<string> commandCandidateList;
-static Vector<string> nameCandidateList;         // Reuse this for player and team names
 
 static void makeCommandCandidateList()
 {
@@ -1772,7 +1771,8 @@ static void makeCommandCandidateList()
 }
 
 
-static void makePlayerNameCandidateList(Game *game)
+// Make a list of all players in the game
+static void makePlayerNameCandidateList(Game *game, Vector<string> &nameCandidateList)
 {
    nameCandidateList.clear();
 
@@ -1781,12 +1781,12 @@ static void makePlayerNameCandidateList(Game *game)
       ClientRef *client = game->getClient(i);
 
       if(client)
-         nameCandidateList.push_back(client->name.getString());
+         nameCandidateList.push_back(client->getConnection()->getClientName().getString());
    }
 }
 
 
-static void makeTeamNameCandidateList(const Game *game)
+static void makeTeamNameCandidateList(const Game *game, Vector<string> &nameCandidateList)
 {
    nameCandidateList.clear();
 
@@ -1796,7 +1796,7 @@ static void makeTeamNameCandidateList(const Game *game)
 }
 
 
-static Vector<string> *getCandidateList(Game *game, const string &cmdName, S32 arg)
+static Vector<string> *getCandidateList(Game *game, const string &partialCmd, S32 arg)
 {
    if(arg == 0)         // Command completion
       return &commandCandidateList;
@@ -1807,7 +1807,7 @@ static Vector<string> *getCandidateList(Game *game, const string &cmdName, S32 a
       S32 cmd = -1;
 
       for(S32 i = 0; i < chatCmdSize; i++)
-         if(!stricmp(chatCmds[i].cmdName.c_str(), cmdName.c_str()))
+         if(!stricmp(chatCmds[i].cmdName.c_str(), partialCmd.c_str()))
          {
             cmd = i;
             break;
@@ -1817,15 +1817,17 @@ static Vector<string> *getCandidateList(Game *game, const string &cmdName, S32 a
       {
          ArgTypes argType = chatCmds[cmd].cmdArgInfo[arg - 1];  // What type of arg are we expecting?
 
+         static Vector<string> nameCandidateList;     // Reusable container
+
          if(argType == NAME)           // Player names
          {  
-            makePlayerNameCandidateList(game);
+            makePlayerNameCandidateList(game, nameCandidateList);
             return &nameCandidateList;
          }
 
          else if(argType == TEAM)      // Team names
          {
-            makeTeamNameCandidateList(game);
+            makeTeamNameCandidateList(game, nameCandidateList);
             return &nameCandidateList;
          }
       }
@@ -1833,6 +1835,10 @@ static Vector<string> *getCandidateList(Game *game, const string &cmdName, S32 a
    
    return NULL;                        // No completion options
 }
+
+
+// Sorts alphanumerically
+extern S32 QSORT_CALLBACK alphaSort(string *a, string *b);
 
 
 void GameUserInterface::processChatModeKey(KeyCode keyCode, char ascii)
@@ -1880,8 +1886,10 @@ void GameUserInterface::processChatModeKey(KeyCode keyCode, char ascii)
             arg = words.size();              // Trailing space --> current arg is the next word we've not yet started typing
             partial = "";                    // We'll be matching against an empty list since we've typed nothing so far
          }
+         
+         Vector<string> *candidates = getCandidateList(getGame(), partial, arg);     // Could return NULL
 
-         Vector<string> *candidates = getCandidateList(getGame(), words[0], arg);     // Could return NULL
+         candidates->sort(alphaSort);
 
          // Now we have our candidates list... let's compare to what the player has already typed to generate completion string
          if(candidates && candidates->size() > 0)
@@ -2457,10 +2465,10 @@ void GameUserInterface::renderScoreboard()
          S32 x = xl + 40;
 
          // Add the mark of the bot
-         if(playerScores[j]->isRobot)
+         if(playerScores[j]->getConnection()->isRobot())
             UserInterface::drawString(x - botsize, curRowY + fontSize / 4 + 2, fontSize / 2, bot); 
 
-         UserInterface::drawString(x, curRowY, fontSize, playerScores[j]->name.getString());
+         UserInterface::drawString(x, curRowY, fontSize, playerScores[j]->getConnection()->getClientName().getString());
 
          static char buff[255] = "";
 
@@ -2697,7 +2705,7 @@ void GameUserInterface::renderTalkingClients()
          const S32 TEXT_HEIGHT = 20;
 
          glColor( getGame()->getTeamColor(client->getTeam()) );
-         UserInterface::drawString(10, y, TEXT_HEIGHT, client->name.getString());
+         UserInterface::drawString(10, y, TEXT_HEIGHT, client->getConnection()->getClientName().getString());
          y += TEXT_HEIGHT + 5;
       }
    }

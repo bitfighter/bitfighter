@@ -74,7 +74,7 @@ public:
    PlayerInfo(ClientRef *clientRef = NULL) { mClientRef = clientRef; }     // C++ Constructor
    virtual ~PlayerInfo() {}
 
-   S32 getName(lua_State *L)       { return returnString(L, mClientRef->name.getString()); }
+   S32 getName(lua_State *L)       { return returnString(L, mClientRef->getName().getString()); }
    S32 getShip(lua_State *L)       ;
    S32 getScriptName(lua_State *L) { return returnNil(L); }
    S32 getTeamIndx(lua_State *L)   { return returnInt(L, mClientRef->getTeam() + 1); }

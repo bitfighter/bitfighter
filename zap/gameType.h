@@ -64,10 +64,10 @@ private:
    SafePtr<GameConnection> mClientConnection;
 
 public:
-   ClientRef();               // Constructor
+   ClientRef(GameConnection *conn);               // Constructor
    virtual ~ClientRef();      // Destructor
 
-   StringTableEntry name;     // Name of client - guaranteed to be unique of current clients
+   void reset();              // Clears/initializes most settings
 
    S32 getTeam();
    void setTeam(S32 teamId);
@@ -83,21 +83,24 @@ public:
 
    LuaPlayerInfo *getPlayerInfo();
 
-   bool isAdmin;
-   bool isRobot;
-   bool isLevelChanger;
    Timer respawnTimer;
 
    bool wantsScoreboardUpdates;  // Indicates whether the client has requested scoreboard streaming (e.g. pressing Tab key)
    bool readyForRegularGhosts;
 
    GameConnection *getConnection() { return mClientConnection; }
-   void setConnection(GameConnection *connection)  { mClientConnection = connection; }
+   //void setConnection(GameConnection *connection)  { mClientConnection = connection; }
 
    RefPtr<SoundEffect> voiceSFX;
    RefPtr<VoiceDecoder> decoder;
 
    U32 ping;
+
+   bool isRobot() { return mClientConnection->isRobot(); }
+   bool isAdmin() { return mClientConnection->isAdmin(); }
+   bool isLevelChanger() { return mClientConnection->isLevelChanger(); }
+   StringTableEntry getName() { return mClientConnection->getClientName(); }
+
 };
 
 
@@ -408,7 +411,7 @@ public:
    void checkForWinningScore(S32 score);     // Check if player or team has reachede the winning score
    virtual void onGameOver();
 
-   virtual ClientRef *serverAddClient(GameConnection *theClient);
+   virtual void serverAddClient(ClientRef *cref);
    virtual void serverRemoveClient(GameConnection *theClient);
 
    virtual bool objectCanDamageObject(GameObject *damager, GameObject *victim);

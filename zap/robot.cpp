@@ -1689,7 +1689,7 @@ bool Robot::processArguments(S32 argc, const char **argv, Game *game)
    if(argc >= 1)
       mTeam = atoi(argv[0]);
    else
-      mTeam = -10;   // The Gametype serverAddClient will take care of bounds checking
+      mTeam = NO_TEAM;   // The Gametype serverAddClient will take care of bounds checking
    
 
    if(argc >= 2)
@@ -1961,8 +1961,9 @@ void Robot::spawn()
    
    setOwner(gc);
 
-   ClientRef *cref = getGame()->getGameType()->serverAddClient(gc);  // ClientRef is created in serverAddClient
-   gServerGame->addClientRefToList(cref);
+   ClientRef *cref = new ClientRef(gc);
+   getGame()->getGameType()->serverAddClient(cref);    
+   getGame()->addClientRefToList(cref);
    
    gameConnectionInitalized = true;
 }

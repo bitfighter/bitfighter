@@ -136,10 +136,9 @@ class Game : public LevelLoader
 {
 private:
    F32 mGridSize;  
-public:     // TODO: private
    Vector<RefPtr<ClientRef> > mClientList;      // List of players on the server; used by both client and server
-private:
-   U32 mTimeUnconnectedToMaster;      // Time that we've been unconnected to the master
+
+   U32 mTimeUnconnectedToMaster;                // Time that we've been disconnected to the master
    bool mHaveTriedToConnectToMaster;
 
    WallSegmentManager *mWallSegmentManager;    
@@ -218,7 +217,9 @@ public:
    ClientRef *getClient(S32 index);
    void addClientRefToList(ClientRef *cref);                            // Used by robots and client
    void deleteClientRefFromList(ClientRef *cref);                       // Used by robots
-   void deleteClientRefFromList(const StringTableEntry &name);          // Used by client
+   void deleteClientRefFromList(const StringTableEntry &name);          // Used by player
+
+   void clearClientList()  { mClientList.clear(); }                     
 
    ClientRef *findClientRef(const StringTableEntry &name);              // Find client by name
 
@@ -390,9 +391,11 @@ private:
    Timer mStutterSleepTimer;
    U32 mAccumulatedSleepTime;
 
+   void setCurrentLevelIndex(S32 nextLevel, S32 playerCount);    // Helper for cycleLevel()
+   void resetAllClientTeams();                                   // Resets all player team assignments
+
    bool onlyClientIs(GameConnection *client);
 
-   U32 mPlayerCount;
    void cleanUp();
 
 public:
@@ -424,13 +427,13 @@ public:
 
    GridDatabase *getBotZoneDatabase() { return &mDatabaseForBotZones; }
 
-   U32 getPlayerCount() { return mPlayerCount; }
+   U32 getPlayerCount() { return getClientCount() - getRobotCount(); }
    U32 getMaxPlayers() { return mSettings->getMaxPlayers(); }
 
    bool isDedicated() { return mDedicated; }
    void setDedicated(bool dedicated) { mDedicated = dedicated; }
 
-   bool isFull() { return mPlayerCount == mSettings->getMaxPlayers(); }          // More room at the inn?
+   bool isFull() { return getPlayerCount() == mSettings->getMaxPlayers(); }          // More room at the inn?
 
    void addClient(GameConnection *client);
    void removeClient(GameConnection *client);

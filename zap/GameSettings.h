@@ -202,6 +202,7 @@ public:
 
    void runCmdLineDirectives();
 
+   bool shouldShowNameEntryScreenOnStartup();
 
    const Color *getWallFillColor() { return &mIniSettings.wallFillColor; }
    const Color *getWallOutlineColor() { return &mIniSettings.wallOutlineColor; }

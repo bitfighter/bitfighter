@@ -805,7 +805,7 @@ void Mine::renderItem(const Point &pos)
       // Can see mine if laid by teammate in team game || sensor is active ||
       // you laid it yourself
       visible = ( (ship->getTeam() == getTeam()) && gameType->isTeamGame() ) || ship->isModuleActive(ModuleSensor) ||
-                  (gameType->mLocalClient && gameType->mLocalClient->name == mSetBy);
+                (gameType->mLocalClient && gameType->mLocalClient->getConnection()->getClientName() == mSetBy);
    }
    else     // Must be in editor?
    {
@@ -1000,7 +1000,8 @@ void SpyBug::renderItem(const Point &pos)
 
    if(clientGame && clientGame->getConnectionToServer())
    {
-      Ship *ship = dynamic_cast<Ship *>(clientGame->getConnectionToServer()->getControlObject());
+      GameConnection *conn = clientGame->getConnectionToServer();
+      Ship *ship = dynamic_cast<Ship *>(conn->getControlObject());
 
       if(!ship)
          return;
@@ -1009,8 +1010,8 @@ void SpyBug::renderItem(const Point &pos)
 
       // Can see bug if laid by teammate in team game || sensor is active ||
       //       you laid it yourself                   || spyBug is neutral
-      visible = ( ((ship->getTeam() == getTeam()) && gameType->isTeamGame())         || ship->isModuleActive(ModuleSensor) ||
-                  (gameType->mLocalClient && gameType->mLocalClient->name == mSetBy) || getTeam() == TEAM_NEUTRAL);
+      visible = ( ((ship->getTeam() == getTeam()) && gameType->isTeamGame())   || ship->isModuleActive(ModuleSensor) ||
+                  (gameType->mLocalClient && conn->getClientName() == mSetBy) || getTeam() == TEAM_NEUTRAL);
    }
    else     // Must be in editor?
       visible = true;
@@ -1029,7 +1030,7 @@ void SpyBug::renderEditor(F32 currentScale)
 void SpyBug::renderDock()
 {
 #ifndef ZAP_DEDICATED
-   glColor3f(.7f, .7f, .7f);
+   glColor(.7f);
    drawCircle(getVert(0), 9);
    drawLetter('S', getVert(0), Color(.7f), 1);
 #endif
