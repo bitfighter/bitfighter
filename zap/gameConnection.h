@@ -66,6 +66,9 @@ class ClientGame;
 struct LevelInfo;
 struct ClientInfo;
 class GameSettings;
+class SoundEffect;
+class VoiceDecoder;
+
 
 class GameConnection: public ControlObjectConnection, public DataSendable
 {
@@ -89,6 +92,11 @@ private:
    ClientGame *mClientGame;      // Sometimes this is NULL
 #endif
 
+   // For voice chat
+   SoundEffect *mVoiceSFX;
+   VoiceDecoder *mDecoder;
+
+
    bool mInCommanderMap;
    bool mIsRobot;
    bool mIsAdmin;
@@ -96,6 +104,8 @@ private:
    bool mWaitingForPermissionsReply;
    bool mGotPermissionsReply;
    bool mIsBusy;              // True when the player is off chatting or futzing with options or whatever, false when they are "active"
+
+   U32 mPing;
 
    StringTableEntry mClientName;
    StringTableEntry mClientNameNonUnique;    // For authentication, not unique name.
@@ -155,12 +165,10 @@ public:
       ParamTypeCount          // Must be last
    };
 
-  // static const S32 BanDuration = 30000;           // Players are banned for 30secs after being kicked
-
-   GameConnection();         // Constructor
 #ifndef ZAP_DEDICATED
    GameConnection(GameSettings *setting, const ClientInfo *clientInfo);   // Constructor for ClientGame
 #endif
+   GameConnection();                               // Constructor (server only)
    ~GameConnection();                              // Destructor
 
 
@@ -193,6 +201,13 @@ public:
 
    void setClientRef(ClientRef *theRef);
    ClientRef *getClientRef();
+
+   U32 getPing() { return mPing; }
+   void setPing(U32 ping) { mPing = ping; }
+
+   // Voice chat stuff -- these will be invalid on the server side
+   SoundEffect *getVoiceSFX() { return mVoiceSFX; }
+   VoiceDecoder *getVoiceDecoder() { return mDecoder; }
 
    StringTableEntryRef getClientName() { return mClientName; }
 

@@ -102,7 +102,6 @@ ClientRef::ClientRef(GameConnection *conn)
 {
    mClientConnection = conn;
 
-   ping = 0;
    reset();
 
    mPlayerInfo = new PlayerInfo(this);    // Deleted in destructor
@@ -614,15 +613,14 @@ void GameType::idle(GameObject::IdleCallPath path, U32 deltaT)
       mScoreboardUpdateTimer.reset();
       for(S32 i = 0; i < mGame->getClientCount(); i++)
       {
-         ClientRef *client = mGame->getClient(i);
-         GameConnection *conn = client->getConnection();
+         GameConnection *conn = mGame->getClient(i)->getConnection();
 
          if(conn && conn->isEstablished())  // robots don't have connection
          {
-            client->ping = (U32) conn->getRoundTripTime();
+            conn->setPing((U32) conn->getRoundTripTime());
 
-            if(client->ping > MaxPing || conn->lostContact())
-               client->ping = MaxPing;
+            if(conn->getPing() > MaxPing || conn->lostContact())
+               conn->setPing(MaxPing);
          }
       }
 
@@ -2171,9 +2169,6 @@ GAMETYPE_RPC_S2C(GameType, s2cAddClient,
 
    cref->setTeam(0);
 
-   cref->decoder = new SpeexVoiceDecoder();
-   cref->voiceSFX = new SoundEffect(SFXVoice, NULL, 1, Point(), Point());
-
    mGame->addClientRefToList(cref);      
 
    if(isMyClient)
@@ -3157,15 +3152,15 @@ void GameType::updateClientScoreboard(ClientRef *cl)
    for(S32 i = 0; i < mGame->getClientCount(); i++)
    {
       ClientRef *client = mGame->getClient(i);
+      GameConnection *conn = client->getConnection();
 
-      if(client->ping < MaxPing)
-         mPingTimes.push_back(client->ping);
+      if(conn->getPing() < MaxPing)
+         mPingTimes.push_back(conn->getPing());
       else
          mPingTimes.push_back(MaxPing);
 
       mScores.push_back(client->getScore());
 
-      GameConnection *conn = client->getConnection();
 
       // Players rating = cumulative score / total score played while this player was playing, ranks from 0 to 1
       mRatings.push_back(min(U32(mGame->getCurrentRating(conn) * 100.0) + 100, maxRating));
@@ -3196,7 +3191,7 @@ GAMETYPE_RPC_S2C(GameType, s2cScoreboardUpdate,
 
       ClientRef *client = mGame->getClient(i);
 
-      client->ping = pingTimes[i];
+      client->getConnection()->setPing(pingTimes[i]);
       client->setScore(scores[i]);
       client->setRating(((F32)ratings[i] - 100.f) / 100.f);
    }
@@ -3260,12 +3255,12 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cVoiceChat, (StringTableEntry clientName
    NetClassGroupGameMask, RPCUnguaranteed, RPCToGhost, 0)
 {
 #ifndef ZAP_DEDICATED
-   ClientRef *cl = mGame->findClientRef(clientName);
+   GameConnection *conn = mGame->findClientRef(clientName)->getConnection();
 
-   if(cl)
+   if(conn)
    {
-      ByteBufferPtr playBuffer = cl->decoder->decompressBuffer(*(voiceBuffer.getPointer()));
-      SoundSystem::queueVoiceChatBuffer(cl->voiceSFX, playBuffer);
+      ByteBufferPtr playBuffer = conn->getVoiceDecoder()->decompressBuffer(*(voiceBuffer.getPointer()));
+      SoundSystem::queueVoiceChatBuffer(conn->getVoiceSFX(), playBuffer);
 //      cl->voiceSFX->queueBuffer(playBuffer);
    }
 #endif

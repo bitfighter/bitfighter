@@ -33,6 +33,8 @@
 #include "EngineeredItem.h"      // For EngineerModuleDeployer
 #include "BanList.h"
 
+#include "voiceCodec.h"
+
 #include "Colors.h"
 #include "stringUtils.h"         // For strictjoindir()
 
@@ -85,6 +87,9 @@ GameConnection::GameConnection(GameSettings *settings, const ClientInfo *clientI
 
    setAuthenticated(clientInfo->authenticated);
    setSimulatedNetParams(clientInfo->simulatedPacketLoss, clientInfo->simulatedLag);
+
+   mDecoder = new SpeexVoiceDecoder();
+   mVoiceSFX = new SoundEffect(SFXVoice, NULL, 1, Point(), Point());
 }
 #endif
 
@@ -108,6 +113,7 @@ void GameConnection::initialize()
    mAcheivedConnection = false;
    mLastEnteredLevelChangePassword = "";
    mLastEnteredAdminPassword = "";
+   mPing = 0;
 
    mClientClaimsToBeVerified = false;     // Does client report that they are verified
    mClientNeedsToBeVerified = false;      // If so, do we still need to verify that claim?
@@ -150,6 +156,10 @@ GameConnection::~GameConnection()
 
    if(mDataBuffer)
       delete mDataBuffer;
+
+   delete mVoiceSFX;
+   delete mDecoder;
+
 }
 
 

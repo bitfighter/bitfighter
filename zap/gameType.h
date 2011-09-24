@@ -48,8 +48,6 @@ namespace Zap
 class GoalZone;
 class MenuItem;
 class MoveItem;
-class SoundEffect;
-class VoiceDecoder;
 class ClientGame;
 
 class ClientRef : public NetObject
@@ -86,11 +84,6 @@ public:
    bool readyForRegularGhosts;
 
    GameConnection *getConnection() { return mClientConnection; }
-
-   RefPtr<SoundEffect> voiceSFX;
-   RefPtr<VoiceDecoder> decoder;
-
-   U32 ping;
 };
 
 

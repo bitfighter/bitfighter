@@ -2478,7 +2478,7 @@ void GameUserInterface::renderScoreboard()
             dSprintf(buff, sizeof(buff), "%d", playerScores[j]->getScore());
 
          UserInterface::drawString(xr - (120 + S32(UserInterface::getStringWidth(F32(fontSize), buff))), curRowY, fontSize, buff);
-         UserInterface::drawStringf(xr - 70, curRowY, fontSize, "%d", playerScores[j]->ping);
+         UserInterface::drawStringf(xr - 70, curRowY, fontSize, "%d", playerScores[j]->getConnection()->getPing());
          curRowY += maxHeight;
       }
    }
@@ -2701,7 +2701,7 @@ void GameUserInterface::renderTalkingClients()
    {
       ClientRef *client = getGame()->getClient(i);
 
-      if(client->voiceSFX->isPlaying())
+      if(client->getConnection()->getVoiceSFX()->isPlaying())
       {
          const S32 TEXT_HEIGHT = 20;
 
