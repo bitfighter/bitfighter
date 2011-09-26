@@ -280,14 +280,16 @@ void Event::onInputBlur()     // <=== what does this do??
 
 void Event::onKeyDown(ClientGame *game, SDLKey key, SDLMod mod, U16 unicode)
 {
-   // Global modifiers
+   // Use getKeyState() instead of checking the mod flag to prevent hyper annoying case of user pressing and holding Alt, selecting another
+   // window, releasing Alt, returning to Bitfighter window, and pressing enter, and having this block think we pressed alt-enter.  
+   // GetKeyState() looks at the actual current state of the key, which is what we want.
 
    // ALT + ENTER --> toggles window mode/full screen
-   if(key == SDLK_RETURN && (mod & KMOD_ALT))
+   if(key == SDLK_RETURN && getKeyState(KEY_ALT))         
       game->getUIManager()->getOptionsMenuUserInterface()->toggleDisplayMode();
 
    // CTRL + Q --> screenshot!
-   else if(key == SDLK_q && (mod & KMOD_CTRL))
+   else if(key == SDLK_q && getKeyState(KEY_CTRL))
       ScreenShooter::saveScreenshot(game->getSettings()->getFolderManager()->screenshotDir);
 
    // The rest
