@@ -217,7 +217,8 @@ private:
    void dropItem();                       // User presses drop item key
 
    bool mFiring;                          // Are we firing?
-   bool mModActivated[ShipModuleCount];
+   bool mModPrimaryActivated[ShipModuleCount];
+   bool mModSecondaryActivated[ShipModuleCount];
 
    void setBusyChatting(bool busy);       // Tell the server we are (or are not) busy chatting
 
@@ -228,6 +229,10 @@ private:
    static const S32 CHAT_FONT_SIZE = 12;
    static const S32 CHAT_FONT_GAP = 3;
    static const S32 CHAT_MULTILINE_INDENT = 12;
+
+   Timer mModuleOneDoubleClickTimer;              // Timer for detecting if a module key is double-clicked
+   Timer mModuleTwoDoubleClickTimer;              // Timer for detecting if a module key is double-clicked
+   static const S32 DoubleClickTimeout = 300;  // Timeout in milliseconds
 
 public:
    GameUserInterface(ClientGame *game);    // Constructor

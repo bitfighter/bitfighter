@@ -1283,7 +1283,7 @@ void ClientGame::renderCommander()
    // Render the objects.  Start by putting all command-map-visible objects into renderObjects.  Note that this no longer captures
    // walls -- those will be rendered separately.
    rawRenderObjects.clear();
-   if(ship->isModuleActive(ModuleSensor))
+   if(ship->isModulePrimaryActive(ModuleSensor))
       mGameObjDatabase->findObjects((TestFunc)isVisibleOnCmdrsMapWithSensorType, rawRenderObjects);
    else
       mGameObjDatabase->findObjects((TestFunc)isVisibleOnCmdrsMapType, rawRenderObjects);
@@ -1435,7 +1435,7 @@ void ClientGame::renderOverlayMap()
    mapBounds.expand(Point(mapWidth * 2, mapHeight * 2));      //TODO: Fix
 
    rawRenderObjects.clear();
-   if(ship->isModuleActive(ModuleSensor))
+   if(ship->isModulePrimaryActive(ModuleSensor))
       mGameObjDatabase->findObjects((TestFunc)isVisibleOnCmdrsMapWithSensorType, rawRenderObjects);
    else
       mGameObjDatabase->findObjects((TestFunc)isVisibleOnCmdrsMapType, rawRenderObjects);

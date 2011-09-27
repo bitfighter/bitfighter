@@ -34,7 +34,10 @@ Move::Move()
 {
    fire = false; time = 32;
    for(U32 i = 0; i < (U32)ShipModuleCount; i++)
-      module[i] = false;
+   {
+      modulePrimary[i] = false;
+      moduleSecondary[i] = false;
+   }
 }
 
 bool Move::isEqualMove(Move *prev)
@@ -42,7 +45,10 @@ bool Move::isEqualMove(Move *prev)
    bool modsUnchanged = true;
 
    for(U32 i = 0; i < (U32)ShipModuleCount; i++)
-      modsUnchanged = modsUnchanged && (prev->module[i] == module[i]);
+   {
+      modsUnchanged = modsUnchanged && (prev->modulePrimary[i] == modulePrimary[i]);
+      modsUnchanged = modsUnchanged && (prev->moduleSecondary[i] == moduleSecondary[i]);
+   }
 
    return   prev->x == x &&
             prev->y == y &&
@@ -69,7 +75,10 @@ void Move::pack(BitStream *stream, Move *prev, bool packTime)
       stream->writeFlag(fire);
 
       for(U32 i = 0; i < (U32)ShipModuleCount; i++)
-         stream->writeFlag(module[i]);
+      {
+         stream->writeFlag(modulePrimary[i]);
+         stream->writeFlag(moduleSecondary[i]);
+      }
    }
    if(packTime)
       stream->writeRangedU32(time, 0, MaxMoveTime);
@@ -87,7 +96,10 @@ void Move::unpack(BitStream *stream, bool unpackTime)
       angle = unitToRadians(stream->readInt(12) / F32(0x1000));
       fire = stream->readFlag();
       for(U32 i = 0; i < (U32)ShipModuleCount; i++)
-         module[i] = stream->readFlag();
+      {
+         modulePrimary[i] = stream->readFlag();
+         moduleSecondary[i] = stream->readFlag();
+      }
    }
 
    if(unpackTime)

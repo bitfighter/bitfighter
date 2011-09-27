@@ -54,23 +54,24 @@ enum EngineerBuildObjects
 };
 
 
-enum ModuleUseType
+enum ModulePrimaryUseType
 {
-   ModuleUseActive,     // Only functional when active
-   ModuleUsePassive,    // Always functional
-   ModuleUseHybrid      // Always functional, with an active component
+   ModulePrimaryUseActive,     // Only functional when active
+   ModulePrimaryUsePassive,    // Always functional
+   ModulePrimaryUseHybrid      // Always functional, with an active component
 };
 
 class ModuleInfo
 {
 private:
    ShipModule mModuleType;
-   S32 mEnergyDrain;       // Continuous energy drain while in use
-   S32 mUseCost;           // Per use energy drain
+   S32 mPrimaryEnergyDrain;       // Continuous energy drain while primary component is in use
+   S32 mPrimaryUseCost;           // Per use energy drain of primary component (if it has one)
+   S32 mSecondaryUseCost;         // Per use energy drain of secondary component
    const char *mName;
    const char *mMenuName;
    const char *mMenuHelp;
-   ModuleUseType mUseType; // How module is activated
+   ModulePrimaryUseType mPrimaryUseType; // How the primary component of the module is activated
 
 public:
    ModuleInfo(ShipModule moduleType)       // Constructor
@@ -81,63 +82,70 @@ public:
             mName = "Shield";
             mMenuName = "Shield Generator";
             mMenuHelp = "";
-            mEnergyDrain = 27000;
-            mUseCost = 0;
-            mUseType = ModuleUseActive;
+            mPrimaryEnergyDrain = 27000;
+            mPrimaryUseCost = 0;
+            mPrimaryUseType = ModulePrimaryUseActive;
+            mSecondaryUseCost = 0;
             break;
 
          case ModuleBoost:
             mName = "Turbo";
             mMenuName = "Turbo Boost";
             mMenuHelp = "";
-            mEnergyDrain = 15000;
-            mUseCost = 0;
-            mUseType = ModuleUseActive;
+            mPrimaryEnergyDrain = 15000;
+            mPrimaryUseCost = 0;
+            mPrimaryUseType = ModulePrimaryUseActive;
+            mSecondaryUseCost = 0;
             break;
 
          case ModuleSensor:
             mName = "Sensor";
             mMenuName = "Enhanced Sensor";
             mMenuHelp = "(makes Spy Bug Placer available)";
-            mEnergyDrain = 8000;
-            mUseCost = 0;
-            mUseType = ModuleUseHybrid;
+            mPrimaryEnergyDrain = 8000;
+            mPrimaryUseCost = 0;
+            mPrimaryUseType = ModulePrimaryUseHybrid;
+            mSecondaryUseCost = 35000;
             break;
 
          case ModuleRepair:
             mName = "Repair";
             mMenuName = "Repair Module";
             mMenuHelp = "";
-            mEnergyDrain = 15000;
-            mUseCost = 0;
-            mUseType = ModuleUseActive;
+            mPrimaryEnergyDrain = 15000;
+            mPrimaryUseCost = 0;
+            mPrimaryUseType = ModulePrimaryUseActive;
+            mSecondaryUseCost = 0;
             break;
 
          case ModuleEngineer:
             mName = "Engineer";
             mMenuName = "Engineer";
             mMenuHelp = "";
-            mEnergyDrain = 0;
-            mUseCost = 75000;
-            mUseType = ModuleUseActive;
+            mPrimaryEnergyDrain = 0;
+            mPrimaryUseCost = 75000;
+            mPrimaryUseType = ModulePrimaryUseActive;
+            mSecondaryUseCost = 0;
             break;
 
          case ModuleCloak:
             mName = "Cloak";
             mMenuName = "Cloak Field Modulator";
             mMenuHelp = "";
-            mEnergyDrain = 8000;
-            mUseCost = 0;
-            mUseType = ModuleUseActive;
+            mPrimaryEnergyDrain = 8000;
+            mPrimaryUseCost = 0;
+            mPrimaryUseType = ModulePrimaryUseActive;
+            mSecondaryUseCost = 0;
             break;
 
          case ModuleArmor:
             mName = "Armor";
             mMenuName = "Armor";
             mMenuHelp = "";
-            mEnergyDrain = 0;
-            mUseCost = 0;
-            mUseType = ModuleUsePassive;
+            mPrimaryEnergyDrain = 0;
+            mPrimaryUseCost = 0;
+            mPrimaryUseType = ModulePrimaryUsePassive;
+            mSecondaryUseCost = 0;
             break;
 
          default:
@@ -147,10 +155,11 @@ public:
    };
 
    ShipModule getModuleType() { return mModuleType; }
-   S32 getEnergyDrain() { return mEnergyDrain; }
-   S32 getPerUseCost() { return mUseCost; }
+   S32 getPrimaryEnergyDrain() { return mPrimaryEnergyDrain; }
+   S32 getPrimaryPerUseCost() { return mPrimaryUseCost; }
+   S32 getSecondaryPerUseCost() { return mSecondaryUseCost; }
    const char *getName() { return mName; }
-   ModuleUseType getUseType() { return mUseType; }
+   ModulePrimaryUseType getPrimaryUseType() { return mPrimaryUseType; }
    const char *getMenuName() { return mMenuName; }
    const char *getMenuHelp() { return mMenuHelp; }
 };

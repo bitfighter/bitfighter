@@ -57,7 +57,8 @@ class Move : public Point
 public:
    F32 angle;
    bool fire;
-   bool module[ShipModuleCount];    // Is given module active?
+   bool modulePrimary[ShipModuleCount];    // Is given module primary component active?
+   bool moduleSecondary[ShipModuleCount];  // Is given module secondary component active?
    U32 time;
 
    enum {

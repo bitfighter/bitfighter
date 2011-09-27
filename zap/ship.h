@@ -123,7 +123,8 @@ protected:
    StringTableEntry mPlayerName;
    bool mIsAuthenticated;
 
-   bool mModuleActive[ModuleCount];       // Is that module active at this moment?
+   bool mModulePrimaryActive[ModuleCount];       // Is the primary component of the module active at this moment?
+   bool mModuleSecondaryActive[ModuleCount];     // Is the secondary component of the module active?
 
    ShipModule mModule[ShipModuleCount];   // Modules ship is carrying
    WeaponType mWeapon[ShipWeaponCount];
@@ -155,6 +156,7 @@ public:
       EnergyCooldownThreshold = 15000,
       WeaponFireDecloakTime = 350,
       SensorZoomTime = 300,
+      SensorInitialEnergyUsage = 5000,
       CloakFadeTime = 300,
       CloakCheckRadius = 200,
       RepairHundredthsPerSecond = 16,
@@ -169,13 +171,14 @@ public:
       WarpPositionMask = BIT(3),    // When ship makes a big jump in position
       ExplosionMask = BIT(4),
       HealthMask = BIT(5),
-      ModulesMask = BIT(6),          // Which modules are active
-      LoadoutMask = BIT(7),
-      RespawnMask = BIT(8),         // For when robots respawn
-      TeleportMask = BIT(9),        // Ship has just teleported
-      AuthenticationMask = BIT(10), // Player authentication status changed
-      ChangeTeamMask = BIT(11),     // Used for when robots change teams
-      SpawnShieldMask = BIT(12),     // Used for when robots change teams
+      ModulePrimaryMask = BIT(6),   // Is module primary component active
+      ModuleSecondaryMask = BIT(7), // Is module secondary component active
+      LoadoutMask = BIT(8),
+      RespawnMask = BIT(9),         // For when robots respawn
+      TeleportMask = BIT(10),        // Ship has just teleported
+      AuthenticationMask = BIT(11), // Player authentication status changed
+      ChangeTeamMask = BIT(12),     // Used for when robots change teams
+      SpawnShieldMask = BIT(13),    // Used for when robots change teams
    };
 
    S32 mFireTimer;
@@ -235,7 +238,8 @@ public:
 
    void onGhostRemove();
 
-   bool isModuleActive(ShipModule mod) { return mModuleActive[mod]; }
+   bool isModulePrimaryActive(ShipModule mod);
+   bool isModuleSecondaryActive(ShipModule mod);
 
    void engineerBuildObject();
 
@@ -283,7 +287,8 @@ public:
    void emitShipExplosion(Point pos);
    //void setActualPos(Point p);
    void setActualPos(Point p, bool warp);
-   void activateModule(U32 indx) { mCurrentMove.module[indx] = true; }     // Activate the specified module for the current move
+   void activateModulePrimary(U32 indx);    // Activate the specified module primary component for the current move
+   void activateModuleSecondary(U32 indx);  // Activate the specified module secondary component for the current move
 
 
    virtual void kill(DamageInfo *theInfo);

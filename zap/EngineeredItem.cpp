@@ -82,7 +82,7 @@ string EngineerModuleDeployer::checkResourcesAndEnergy(Ship *ship)
    if(!ship->isCarryingItem(ResourceItemTypeNumber))
       return "!!! Need resource item to use Engineer module";
 
-   if(ship->getEnergy() < ship->getGame()->getModuleInfo(ModuleEngineer)->getPerUseCost())
+   if(ship->getEnergy() < ship->getGame()->getModuleInfo(ModuleEngineer)->getPrimaryPerUseCost())
       return "!!! Not enough energy to engineer an object";
 
    return "";
