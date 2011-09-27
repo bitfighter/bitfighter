@@ -130,8 +130,10 @@ Ship::~Ship()
 // and also after a bot respawns and needs to reset itself
 void Ship::initialize(Point &pos)
 {
+   // Does this ever evaluate to true?
    if(getGame())
       mRespawnTime = getGame()->getCurrentTime();
+
    for(U32 i = 0; i < MoveStateCount; i++)
    {
       mMoveState[i].pos = pos;
@@ -164,7 +166,7 @@ void Ship::initialize(Point &pos)
       mWeapon[i] = (WeaponType) DefaultLoadout[i + ShipModuleCount];
 
    mActiveWeaponIndx = 0;
-   mCooldown = false;
+   mCooldownNeeded = false;
 
    // Start spawn shield timer
    mSpawnShield.reset(SpawnShieldTime);
@@ -461,7 +463,6 @@ void Ship::processWeaponFire()
 
          mFireTimer += S32(gWeapons[curWeapon].fireDelay);
 
-
          // If we've fired, Spawn Shield turns off
          if(mSpawnShield.getCurrent() != 0)
          {
@@ -621,9 +622,10 @@ void Ship::idle(GameObject::IdleCallPath path)
       path == GameObject::ClientIdleControlMain ||
       path == GameObject::ClientIdleControlReplay)
    {
-      // Process weapons and energy on controlled object objects
+      // Process weapons and modules on controlled object objects
+      // This handles all the energy reductions as well
       processWeaponFire();
-      processEnergy();     // and modules
+      processModules();
    }
      
    if(path == GameObject::ClientIdleMainRemote)
@@ -699,25 +701,38 @@ void Ship::repairTargets()
 }
 
 
-void Ship::processEnergy()
+void Ship::processModules()
 {
-   // Save the module primary/secondary component states and immediately set them back to off
-   bool modPrimaryActive[ModuleCount];
-   bool modSecondaryActive[ModuleCount];
+   // Update some timers
+   // TODO: Move this into the constructor once ModuleInfo is refactored
+   if(mModuleSecondaryCooldownTimer[0].getPeriod() == 0)
+   {
+      for(S32 i = 0; i < ModuleCount; i++)
+         mModuleSecondaryCooldownTimer[i].setPeriod(getGame()->getModuleInfo((ShipModule) i)->getSecondaryCooldown());
+   }
+
+   for(S32 i = 0; i < ModuleCount; i++)
+      mModuleSecondaryCooldownTimer[i].update(mCurrentMove.time);
+
+   // Save the previous module primary/secondary component states; reset them - to be set later
+   bool wasModulePrimaryActive[ModuleCount];
+   bool wasModuleSecondaryActive[ModuleCount];
    for(S32 i = 0; i < ModuleCount; i++)
    {
-      modPrimaryActive[i] = mModulePrimaryActive[i];
+      wasModulePrimaryActive[i] = mModulePrimaryActive[i];
+      wasModuleSecondaryActive[i] = mModuleSecondaryActive[i];
       mModulePrimaryActive[i] = false;
-      modSecondaryActive[i] = mModuleSecondaryActive[i];
       mModuleSecondaryActive[i] = false;
    }
 
-   if(mEnergy > EnergyCooldownThreshold)     // Only turn off cooldown if energy has risen above threshold, not if it falls below
-      mCooldown = false;
+   // Only turn off cooldown if energy has risen above threshold, not if it falls below
+   if(mEnergy > EnergyCooldownThreshold)
+      mCooldownNeeded = false;
 
    // Make sure we're allowed to use modules
    bool allowed = getGame()->getGameType() && getGame()->getGameType()->okToUseModules(this);
 
+   // Go through our loaded modules and see if they are currently turned on
    // Are these checked on the server side?
    for(S32 i = 0; i < ShipModuleCount; i++)   
    {
@@ -725,8 +740,9 @@ void Ship::processEnergy()
       if(getGame()->getModuleInfo(mModule[i])->getPrimaryUseType() == ModulePrimaryUsePassive)
          mModulePrimaryActive[mModule[i]] = true;         // needs to be true to allow stats counting
 
-      // No active module components if we're too hot or game has disallowed them
-      if (!mCooldown && allowed)
+      // Set loaded module states to 'on' if detected as so,
+      // unless modules are disallowed or we need to cooldown
+      if (!mCooldownNeeded && allowed)
       {
          if(mCurrentMove.modulePrimary[i])
             mModulePrimaryActive[mModule[i]] = true;
@@ -774,6 +790,8 @@ void Ship::processEnergy()
       //}
    }
 
+   // This will make the module primary active component use the proper
+   // amount of enery per second since the game idle methods are run on milliseconds
    F32 scaleFactor = mCurrentMove.time * 0.001f;
 
    // Update things based on available energy...
@@ -789,11 +807,19 @@ void Ship::processEnergy()
          if(gc)
             gc->mStatistics.addModuleUsed(ShipModule(i), mCurrentMove.time);
       }
+
+      // Fire the module secondary component if it is active and the cooldown timer has run out
+      if(mModuleSecondaryActive[i] && mModuleSecondaryCooldownTimer[i].getCurrent() == 0)
+      {
+         S32 EnergyUsed = S32(getGame()->getModuleInfo((ShipModule) i)->getSecondaryPerUseCost());
+         mEnergy -= EnergyUsed;
+      }
    }
 
    if(!anyActive && mEnergy <= EnergyCooldownThreshold)
-      mCooldown = true;
+      mCooldownNeeded = true;
 
+   // What to do if our most current energy reduction put us below zero
    if(mEnergy < EnergyMax)
    {
       // If we're not doing anything, recharge.
@@ -816,16 +842,17 @@ void Ship::processEnergy()
             mModulePrimaryActive[i] = false;
             mModuleSecondaryActive[i] = false;
          }
-         mCooldown = true;
+         mCooldownNeeded = true;
       }
    }
 
    if(mEnergy >= EnergyMax)
       mEnergy = EnergyMax;
 
+   // Do logic triggered when module primary component state changes
    for(S32 i = 0; i < ModuleCount;i++)
    {
-      if(mModulePrimaryActive[i] != modPrimaryActive[i])
+      if(mModulePrimaryActive[i] != wasModulePrimaryActive[i])
       {
          if(i == ModuleSensor)
          {
@@ -840,9 +867,18 @@ void Ship::processEnergy()
       }
    }
 
+   // Do logic triggered when module secondary component state changes
    for(S32 i = 0; i < ModuleCount;i++)
-      if(mModuleSecondaryActive[i] != modSecondaryActive[i])
+   {
+      if(mModuleSecondaryActive[i] != wasModuleSecondaryActive[i])
+      {
+         // If current state is active, reset the cooldown timer
+         if(mModuleSecondaryActive[i])
+            mModuleSecondaryCooldownTimer[i].reset();
+
          setMaskBits(ModuleSecondaryMask);
+      }
+   }
 }
 
 
@@ -985,7 +1021,7 @@ void Ship::writeControlState(BitStream *stream)
    stream->write(mMoveState[ActualState].vel.x);
    stream->write(mMoveState[ActualState].vel.y);
    stream->writeRangedU32(mEnergy, 0, EnergyMax);
-   stream->writeFlag(mCooldown);
+   stream->writeFlag(mCooldownNeeded);
    if(mFireTimer < 0)   // mFireTimer could be negative.
       stream->writeRangedU32(MaxFireDelay + (mFireTimer < -S32(negativeFireDelay) ? negativeFireDelay : U32(-mFireTimer)),0, MaxFireDelay + negativeFireDelay);
    else
@@ -1000,7 +1036,7 @@ void Ship::readControlState(BitStream *stream)
    stream->read(&mMoveState[ActualState].vel.x);
    stream->read(&mMoveState[ActualState].vel.y);
    mEnergy = stream->readRangedU32(0, EnergyMax);
-   mCooldown = stream->readFlag();
+   mCooldownNeeded = stream->readFlag();
    mFireTimer = S32(stream->readRangedU32(0, MaxFireDelay + negativeFireDelay));
    if(mFireTimer > S32(MaxFireDelay))
       mFireTimer =  S32(MaxFireDelay) - mFireTimer;

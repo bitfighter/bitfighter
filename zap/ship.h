@@ -185,7 +185,7 @@ public:
    Timer mWarpInTimer;
    F32 mHealth;
    S32 mEnergy;
-   bool mCooldown;
+   bool mCooldownNeeded;
    U32 mSensorStartTime;
    Point mImpulseVector;
    F32 getSlipzoneSpeedMoficationFactor();
@@ -209,6 +209,7 @@ public:
    Timer mWeaponFireDecloakTimer;
    Timer mCloakTimer;
    Timer mSpawnShield;
+   Timer mModuleSecondaryCooldownTimer[ModuleCount];
 
 #ifndef ZAP_DEDICATED
    U32 mSparkElapsed;
@@ -275,7 +276,7 @@ public:
    U32 getSelectedWeaponIndex() { return mActiveWeaponIndx; }              // Return index of currently selected weapon (0, 1, 2)
 
    void processWeaponFire();
-   void processEnergy();
+   void processModules();
    void updateModuleSounds();
    void emitMovementSparks();
    bool findRepairTargets();

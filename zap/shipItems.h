@@ -68,6 +68,7 @@ private:
    S32 mPrimaryEnergyDrain;       // Continuous energy drain while primary component is in use
    S32 mPrimaryUseCost;           // Per use energy drain of primary component (if it has one)
    S32 mSecondaryUseCost;         // Per use energy drain of secondary component
+   S32 mSecondaryCooldown;        // Cooldown between allowed secondary component uses, in milliseconds
    const char *mName;
    const char *mMenuName;
    const char *mMenuHelp;
@@ -86,6 +87,7 @@ public:
             mPrimaryUseCost = 0;
             mPrimaryUseType = ModulePrimaryUseActive;
             mSecondaryUseCost = 0;
+            mSecondaryCooldown = 1000;
             break;
 
          case ModuleBoost:
@@ -96,6 +98,7 @@ public:
             mPrimaryUseCost = 0;
             mPrimaryUseType = ModulePrimaryUseActive;
             mSecondaryUseCost = 0;
+            mSecondaryCooldown = 1000;
             break;
 
          case ModuleSensor:
@@ -106,6 +109,7 @@ public:
             mPrimaryUseCost = 0;
             mPrimaryUseType = ModulePrimaryUseHybrid;
             mSecondaryUseCost = 35000;
+            mSecondaryCooldown = 800;
             break;
 
          case ModuleRepair:
@@ -116,6 +120,7 @@ public:
             mPrimaryUseCost = 0;
             mPrimaryUseType = ModulePrimaryUseActive;
             mSecondaryUseCost = 0;
+            mSecondaryCooldown = 1000;
             break;
 
          case ModuleEngineer:
@@ -126,6 +131,7 @@ public:
             mPrimaryUseCost = 75000;
             mPrimaryUseType = ModulePrimaryUseActive;
             mSecondaryUseCost = 0;
+            mSecondaryCooldown = 1000;
             break;
 
          case ModuleCloak:
@@ -136,6 +142,7 @@ public:
             mPrimaryUseCost = 0;
             mPrimaryUseType = ModulePrimaryUseActive;
             mSecondaryUseCost = 0;
+            mSecondaryCooldown = 1000;
             break;
 
          case ModuleArmor:
@@ -146,6 +153,7 @@ public:
             mPrimaryUseCost = 0;
             mPrimaryUseType = ModulePrimaryUsePassive;
             mSecondaryUseCost = 0;
+            mSecondaryCooldown = 1000;
             break;
 
          default:
@@ -158,6 +166,7 @@ public:
    S32 getPrimaryEnergyDrain() { return mPrimaryEnergyDrain; }
    S32 getPrimaryPerUseCost() { return mPrimaryUseCost; }
    S32 getSecondaryPerUseCost() { return mSecondaryUseCost; }
+   S32 getSecondaryCooldown() { return mSecondaryCooldown; }
    const char *getName() { return mName; }
    ModulePrimaryUseType getPrimaryUseType() { return mPrimaryUseType; }
    const char *getMenuName() { return mMenuName; }
