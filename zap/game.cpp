@@ -95,7 +95,6 @@ Game::Game(const Address &theBindAddress, GameSettings *settings) : mGameObjData
 {
    mSettings = settings;
 
-   buildModuleInfos();
    mNextMasterTryTime = 0;
    mReadyToConnectToMaster = false;
 
@@ -115,17 +114,6 @@ Game::Game(const Address &theBindAddress, GameSettings *settings) : mGameObjData
 Game::~Game()
 {
    delete mWallSegmentManager;
-}
-
-
-// Info about modules -- access via getModuleInfo()  -- static
-void Game::buildModuleInfos()    
-{
-   if(mModuleInfos.size() > 0)         // Already built?
-      return;
-
-   for(S32 i = 0; i < ModuleCount; i++)
-      mModuleInfos.push_back(ModuleInfo((ShipModule) i));
 }
 
 

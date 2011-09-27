@@ -597,7 +597,7 @@ void GameType::idle(GameObject::IdleCallPath path, U32 deltaT)
 {
    mTotalGamePlay += deltaT;
 
-   if(isGhost())     // i.e. client only
+   if(path != GameObject::ServerIdleMainLoop)     // i.e. client only
    {
       mGameTimer.update(deltaT);
       mZoneGlowTimer.update(deltaT);

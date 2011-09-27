@@ -45,7 +45,7 @@ Vector<LoadoutItem> gLoadoutWeapons;
 
 LoadoutItem::LoadoutItem(ClientGame *game, KeyCode key, KeyCode button, U32 index)      // Shortcut for modules -- use info from ModuleInfos
 {
-   ModuleInfo *moduleInfo = game->getModuleInfo((ShipModule) index);
+   const ModuleInfo *moduleInfo = game->getModuleInfo((ShipModule) index);
 
    this->key = key;
    this->button = button;

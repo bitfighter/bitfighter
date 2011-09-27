@@ -61,118 +61,28 @@ enum ModulePrimaryUseType
    ModulePrimaryUseHybrid      // Always functional, with an active component
 };
 
-class ModuleInfo
+struct ModuleInfo
 {
-private:
-   ShipModule mModuleType;
-   S32 mPrimaryEnergyDrain;       // Continuous energy drain while primary component is in use
-   S32 mPrimaryUseCost;           // Per use energy drain of primary component (if it has one)
-   S32 mSecondaryUseCost;         // Per use energy drain of secondary component
-   S32 mSecondaryCooldown;        // Cooldown between allowed secondary component uses, in milliseconds
    const char *mName;
+   TNL::S32 mPrimaryEnergyDrain;       // Continuous energy drain while primary component is in use
+   TNL::S32 mPrimaryUseCost;           // Per use energy drain of primary component (if it has one)
+   ModulePrimaryUseType mPrimaryUseType; // How the primary component of the module is activated
+   TNL::S32 mSecondaryUseCost;         // Per use energy drain of secondary component
+   TNL::S32 mSecondaryCooldown;        // Cooldown between allowed secondary component uses, in milliseconds
    const char *mMenuName;
    const char *mMenuHelp;
-   ModulePrimaryUseType mPrimaryUseType; // How the primary component of the module is activated
 
-public:
-   ModuleInfo(ShipModule moduleType)       // Constructor
-   {
-      switch(moduleType)
-      {
-         case ModuleShield:
-            mName = "Shield";
-            mMenuName = "Shield Generator";
-            mMenuHelp = "";
-            mPrimaryEnergyDrain = 27000;
-            mPrimaryUseCost = 0;
-            mPrimaryUseType = ModulePrimaryUseActive;
-            mSecondaryUseCost = 0;
-            mSecondaryCooldown = 1000;
-            break;
-
-         case ModuleBoost:
-            mName = "Turbo";
-            mMenuName = "Turbo Boost";
-            mMenuHelp = "";
-            mPrimaryEnergyDrain = 15000;
-            mPrimaryUseCost = 0;
-            mPrimaryUseType = ModulePrimaryUseActive;
-            mSecondaryUseCost = 0;
-            mSecondaryCooldown = 1000;
-            break;
-
-         case ModuleSensor:
-            mName = "Sensor";
-            mMenuName = "Enhanced Sensor";
-            mMenuHelp = "(makes Spy Bug Placer available)";
-            mPrimaryEnergyDrain = 8000;
-            mPrimaryUseCost = 0;
-            mPrimaryUseType = ModulePrimaryUseHybrid;
-            mSecondaryUseCost = 35000;
-            mSecondaryCooldown = 800;
-            break;
-
-         case ModuleRepair:
-            mName = "Repair";
-            mMenuName = "Repair Module";
-            mMenuHelp = "";
-            mPrimaryEnergyDrain = 15000;
-            mPrimaryUseCost = 0;
-            mPrimaryUseType = ModulePrimaryUseActive;
-            mSecondaryUseCost = 0;
-            mSecondaryCooldown = 1000;
-            break;
-
-         case ModuleEngineer:
-            mName = "Engineer";
-            mMenuName = "Engineer";
-            mMenuHelp = "";
-            mPrimaryEnergyDrain = 0;
-            mPrimaryUseCost = 75000;
-            mPrimaryUseType = ModulePrimaryUseActive;
-            mSecondaryUseCost = 0;
-            mSecondaryCooldown = 1000;
-            break;
-
-         case ModuleCloak:
-            mName = "Cloak";
-            mMenuName = "Cloak Field Modulator";
-            mMenuHelp = "";
-            mPrimaryEnergyDrain = 8000;
-            mPrimaryUseCost = 0;
-            mPrimaryUseType = ModulePrimaryUseActive;
-            mSecondaryUseCost = 0;
-            mSecondaryCooldown = 1000;
-            break;
-
-         case ModuleArmor:
-            mName = "Armor";
-            mMenuName = "Armor";
-            mMenuHelp = "";
-            mPrimaryEnergyDrain = 0;
-            mPrimaryUseCost = 0;
-            mPrimaryUseType = ModulePrimaryUsePassive;
-            mSecondaryUseCost = 0;
-            mSecondaryCooldown = 1000;
-            break;
-
-         default:
-            TNLAssert(false, "Something's gone wrong again!");
-            break;
-      }
-   };
-
-   ShipModule getModuleType() { return mModuleType; }
-   S32 getPrimaryEnergyDrain() { return mPrimaryEnergyDrain; }
-   S32 getPrimaryPerUseCost() { return mPrimaryUseCost; }
-   S32 getSecondaryPerUseCost() { return mSecondaryUseCost; }
-   S32 getSecondaryCooldown() { return mSecondaryCooldown; }
-   const char *getName() { return mName; }
-   ModulePrimaryUseType getPrimaryUseType() { return mPrimaryUseType; }
-   const char *getMenuName() { return mMenuName; }
-   const char *getMenuHelp() { return mMenuHelp; }
+   TNL::S32 getPrimaryEnergyDrain() const { return mPrimaryEnergyDrain; }
+   TNL::S32 getPrimaryPerUseCost() const { return mPrimaryUseCost; }
+   TNL::S32 getSecondaryPerUseCost() const { return mSecondaryUseCost; }
+   TNL::S32 getSecondaryCooldown() const { return mSecondaryCooldown; }
+   const char *getName() const { return mName; }
+   ModulePrimaryUseType getPrimaryUseType() const { return mPrimaryUseType; }
+   const char *getMenuName() const { return mMenuName; }
+   const char *getMenuHelp() const { return mMenuHelp; }
 };
 
+extern const ModuleInfo gModuleInfo[ModuleCount];
 
 };
 #endif

@@ -92,6 +92,7 @@ OBJECTS_SHARED=\
    robot.o\
    ScreenInfo.o\
    ship.o\
+   shipItems.o\
    SimpleLine.o\
    SlipZone.o\
    soccerGame.o\
