@@ -197,6 +197,36 @@ void Ship::onGhostRemove()
 }
 
 
+F32 Ship::getHealth()
+{
+   return mHealth;
+}
+
+
+S32 Ship::getEnergy()
+{
+   return mEnergy;
+}
+
+
+F32 Ship::getEnergyFraction()
+{
+   return (F32)mEnergy / (F32)EnergyMax;
+}
+
+
+S32 Ship::getMaxEnergy()
+{
+   return EnergyMax;
+}
+
+
+void Ship::changeEnergy(S32 deltaEnergy)
+{
+   mEnergy = max(0, min(static_cast<int>(EnergyMax), mEnergy + deltaEnergy));
+}
+
+
 bool Ship::isModulePrimaryActive(ShipModule mod)
 {
    return mModulePrimaryActive[mod];
@@ -401,6 +431,12 @@ bool Ship::isOnObject(GameObject *object)
 }
 
 
+F32 Ship::getSensorZoomFraction()
+{
+   return 1 - mSensorZoomTimer.getFraction();
+}
+
+
  // Returns vector for aiming a weapon based on direction ship is facing
 Point Ship::getAimVector()
 {
@@ -411,6 +447,27 @@ Point Ship::getAimVector()
 void Ship::selectWeapon()
 {
    selectWeapon(mActiveWeaponIndx + 1);
+}
+
+
+StringTableEntry Ship::getName()
+{
+   return mPlayerName;
+}
+
+
+void Ship::setName(StringTableEntry name)
+{
+   mPlayerName = name;
+}
+
+
+void Ship::setIsAuthenticated(bool isAuthenticated, StringTableEntry name)
+{
+   mIsAuthenticated = isAuthenticated;
+   mPlayerName = name;
+
+   setMaskBits(AuthenticationMask);
 }
 
 
@@ -430,6 +487,18 @@ void Ship::selectWeapon(U32 weaponIdx)
          cc->s2cDisplayMessageE(GameConnection::ColorAqua, SFXUIBoop, msg, e);
       }
    }
+}
+
+
+WeaponType Ship::getWeapon(U32 indx)
+{
+   return mWeapon[indx];
+}
+
+
+ShipModule Ship::getModule(U32 indx)
+{
+   return mModule[indx];
 }
 
 
@@ -1332,6 +1401,21 @@ static F32 getAngleDiff(F32 a, F32 b)
 }
 
 
+bool Ship::hasModule(ShipModule mod)
+{
+   for(S32 i = 0; i < ShipModuleCount; i++)
+      if(mModule[i] == mod)
+         return true;
+   return false;
+}
+
+
+bool Ship::isDestroyed()
+{
+   return hasExploded;
+}
+
+
 bool Ship::isItemMounted() 
 { 
    return mMountedItems.size() != 0; 
@@ -1397,6 +1481,18 @@ MoveItem *Ship::unmountItem(U8 objectType)
       }
 
    return NULL;
+}
+
+
+WeaponType Ship::getSelectedWeapon()
+{
+   return mWeapon[mActiveWeaponIndx];
+}
+
+
+U32 Ship::getSelectedWeaponIndex()
+{
+   return mActiveWeaponIndx;
 }
 
 
@@ -1927,6 +2023,11 @@ void Ship::calcThrustComponents(F32 *thrusts)
 }
 
 
+bool Ship::isRobot()
+{
+   return mIsRobot;
+}
+
 
 S32 LuaShip::id = 99;
 
@@ -1968,6 +2069,28 @@ LuaShip::LuaShip(Ship *ship): thisShip(ship)
 }
 
 
+// C++ default constructor ==> not used.  Constructor with Ship (above) used instead
+LuaShip::LuaShip()
+{
+   /* Do nothing */
+};
+
+
+// Lua constructor ==> not used.  Class only instantiated from C++.
+LuaShip::LuaShip(lua_State *L)
+{
+   /* Do nothing */
+};
+
+
+// Destructor
+LuaShip::~LuaShip()
+{
+   logprintf(LogConsumer::LogLuaObjectLifecycle, "Killing luaShip %d", mId);
+};
+
+
+S32 LuaShip::getClassID(lua_State *L) { return returnInt(L, PlayerShipTypeNumber); }
 S32 LuaShip::isAlive(lua_State *L) { return returnBool(L, thisShip.isValid()); }
 
 // Note: All of these methods will return nil if the ship in question has been deleted.
@@ -2092,6 +2215,24 @@ GameObject *LuaShip::getGameObject()
    }
    else
       return getObj();
+}
+
+
+const char *LuaShip::getClassName() const
+{
+   return "LuaShip";
+}
+
+
+void LuaShip::push(lua_State *L)
+{
+   Lunar<LuaShip>::push(L, this, false);
+}
+
+
+Ship *LuaShip::getObj()
+{
+   return thisShip;
 }
 
 
