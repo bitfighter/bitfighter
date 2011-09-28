@@ -177,10 +177,10 @@ void ClientGame::joinGame(Address remoteAddress, bool isFromMaster, bool local)
          mClientInfo->setIsAdmin(true);              // Local connection is always admin
          mClientInfo->setIsLevelChanger(true);       // Local connection can always change levels
 
-         GameConnection *gc = dynamic_cast<GameConnection *>(gameConnection->getRemoteConnectionObject());
-
-         TNLAssert(gc == gameConnection, "ok..., probably need to change clientInfo below to gc->getClientInfo()");
-         TNLAssert(gc->getClientInfo() == mClientInfo.get(), "ok..., probably need to change clientInfo below to gc->getClientInfo()");
+         // Note that gc and gameConnection aren't the same, nor are gc->getClientInfo() and mClientInfo the same.
+         // I _think_ gc is the server view of the local connection, where as gameConnection is the client's view.
+         // Likewise with the clientInfos.  A little confusing, as they really represent the same thing in a way.  But different.
+         GameConnection *gc = dynamic_cast<GameConnection *>(gameConnection->getRemoteConnectionObject()); 
 
          // Stuff on server side
          if(gc)                              
