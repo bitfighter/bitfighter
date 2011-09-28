@@ -35,11 +35,6 @@
 -------------------------------------------------------------------------------
 
 --
--- Create a reference to our levelgen
---
-levelgen = LuaLevelGenerator(LevelGen)
-
---
 -- Convenience function... let user use logprint directly, without referencing luaUtil
 --
 function logprint(msg)

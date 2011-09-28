@@ -1698,7 +1698,7 @@ bool Robot::processArguments(S32 argc, const char **argv, Game *game)
    if(argc >= 2)
       mFilename = argv[1];
    else
-      mFilename = mGame->getSettings()->getIniSettings()->defaultRobotScript;
+      mFilename = game->getSettings()->getIniSettings()->defaultRobotScript;
 
    if(mFilename != "")
    {
