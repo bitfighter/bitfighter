@@ -45,9 +45,10 @@ Lunar<LuaPlayerInfo>::RegType LuaPlayerInfo::methods[] =
    {0,0}    // End method list
 };
 
+
 S32 PlayerInfo::getShip(lua_State *L)
 {
-	return isDefunct() ? returnNil(L) : returnShip(L, dynamic_cast<Ship *>(mClientRef->getConnection()->getControlObject()));
+	return isDefunct() ? returnNil(L) : returnShip(L, dynamic_cast<Ship *>(mClientInfo->getConnection()->getControlObject()));
 }
 
 

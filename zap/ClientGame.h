@@ -45,22 +45,6 @@ namespace Zap
 {
 
 
-struct ClientInfo
-{
-   string name;
-
-   Nonce id;
-   bool authenticated;
-   F32 simulatedPacketLoss;
-   U32 simulatedLag;
-
-   ClientInfo(GameSettings *settings);   // Constructor
-};
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
 class ClientGame : public Game
 {
    typedef Game Parent;
@@ -89,9 +73,10 @@ private:
 
    Vector<string> mMuteList;        // List of players we aren't listening to anymore because they've annoyed us!
 
-   ClientInfo *mClientInfo;
-
    string mLoginPassword;
+   boost::shared_ptr<ClientInfo> mClientInfo;         // ClientInfo object for local client
+
+   S32 findClientIndex(const StringTableEntry &name);
 
 public:
    ClientGame(const Address &bindAddress, GameSettings *settings);
@@ -107,6 +92,8 @@ public:
 
    GameConnection *getConnectionToServer();
    void setConnectionToServer(GameConnection *connection);
+
+   ClientInfo *getClientInfo() { return mClientInfo.get(); }
 
    string getLoginPassword() const { return mLoginPassword; }
    void setLoginPassword(const string &loginPassword) { mLoginPassword = loginPassword; }
@@ -134,8 +121,6 @@ public:
    bool isServer() { return false; }
    void idle(U32 timeDelta);
    void zoomCommanderMap();
-
-   ClientInfo *getClientInfo() { return mClientInfo; }
 
    bool isShowingDebugShipCoords() const { return mDebugShowShipCoords; }     // Show coords on ship?
    void toggleShowingShipCoords() { mDebugShowShipCoords = !mDebugShowShipCoords; }
@@ -171,6 +156,8 @@ public:
    void changeServerParam(GameConnection::ParamType type, const Vector<string> &words);
    bool checkName(const string &name);    // Make sure name is valid, and correct case of name if otherwise correct
 
+
+   
 
    // Alert users when they get a reply to their request for elevated permissions
    void gotAdminPermissionsReply(bool granted);

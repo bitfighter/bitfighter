@@ -1366,14 +1366,14 @@ void GameUserInterface::kickPlayerHandler(ClientGame *game, const Vector<string>
 
 void GameUserInterface::adminPassHandler(ClientGame *game, const Vector<string> &words)
 {
-   GameConnection *gc = game->getConnectionToServer();
+   GameConnection *conn = game->getConnectionToServer();
 
-   if(gc->isAdmin())
+   if(conn->getClientInfo()->isAdmin())
       game->displayErrorMessage("!!! You are already an admin");
    else if(words.size() < 2 || words[1] == "")
       game->displayErrorMessage("!!! Need to supply a password");
    else
-      gc->submitAdminPassword(words[1].c_str());
+      conn->submitAdminPassword(words[1].c_str());
 }
 
 
@@ -1645,6 +1645,7 @@ CommandInfo chatCmds[] = {
    { "maxfps",     GameUserInterface::maxFpsHandler,        { INT }, 1, DEBUG_COMMANDS, 1, {"<number>"}, "Set maximum speed of game in frames per second" },
 };
 
+
 S32 chatCmdSize = ARRAYSIZE(chatCmds);    // So instructions will now how big chatCmds is
 
 // Render chat msg that user is composing
@@ -1678,7 +1679,7 @@ void GameUserInterface::renderCurrentChat()
       return;
 
    S32 promptSize = getStringWidth(CHAT_FONT_SIZE, promptStr);
-   S32 nameSize = getStringWidthf(CHAT_FONT_SIZE, "%s: ", getGame()->getConnectionToServer()->getClientName().getString());
+   S32 nameSize = getStringWidthf(CHAT_FONT_SIZE, "%s: ", getGame()->getConnectionToServer()->getClientInfo()->getName().getString());
    S32 nameWidth = max(nameSize, promptSize);
    // Above block repeated below...
 
@@ -1772,21 +1773,16 @@ static void makeCommandCandidateList()
 
 
 // Make a list of all players in the game
-static void makePlayerNameCandidateList(Game *game, Vector<string> &nameCandidateList)
+static void makePlayerNameList(Game *game, Vector<string> &nameCandidateList)
 {
    nameCandidateList.clear();
 
    for(S32 i = 0; i < game->getClientCount(); i++)
-   {
-      ClientRef *client = game->getClient(i);
-
-      if(client)
-         nameCandidateList.push_back(client->getConnection()->getClientName().getString());
-   }
+      nameCandidateList.push_back(((Game *)game)->getClientInfo(i)->getName().getString());
 }
 
 
-static void makeTeamNameCandidateList(const Game *game, Vector<string> &nameCandidateList)
+static void makeTeamNameList(const Game *game, Vector<string> &nameCandidateList)
 {
    nameCandidateList.clear();
 
@@ -1821,15 +1817,17 @@ static Vector<string> *getCandidateList(Game *game, const string &partialCmd, S3
 
          if(argType == NAME)           // Player names
          {  
-            makePlayerNameCandidateList(game, nameCandidateList);
+            makePlayerNameList(game, nameCandidateList);    // Creates a list of all player names
             return &nameCandidateList;
          }
 
          else if(argType == TEAM)      // Team names
          {
-            makeTeamNameCandidateList(game, nameCandidateList);
+            makeTeamNameList(game, nameCandidateList);
             return &nameCandidateList;
          }
+         else
+            TNLAssert(false, "Invalid argType!");
       }
    }
    
@@ -1939,7 +1937,7 @@ void GameUserInterface::processChatModeKey(KeyCode keyCode, char ascii)
       {
          S32 promptSize = getStringWidth(CHAT_FONT_SIZE, mCurrentChatType == TeamChat ? "(Team): " : "(Global): ");
 
-         S32 nameSize = getStringWidthf(CHAT_FONT_SIZE, "%s: ", getGame()->getConnectionToServer()->getClientName().getString());
+         S32 nameSize = getStringWidthf(CHAT_FONT_SIZE, "%s: ", getGame()->getConnectionToServer()->getClientInfo()->getName().getString());
          S32 nameWidth = max(nameSize, promptSize);
          // Above block repeated above
 
@@ -2452,7 +2450,7 @@ void GameUserInterface::renderScoreboard()
       }
 
       // Now for player scores.  First build a list, then sort it, then display it.
-      Vector<RefPtr<ClientRef> > playerScores;
+      Vector<ClientInfo *> playerScores;
       gameType->getSortedPlayerScores(i, playerScores);     // Fills playerScores
 
       S32 curRowY = yt + teamAreaHeight + 1;
@@ -2465,10 +2463,10 @@ void GameUserInterface::renderScoreboard()
          S32 x = xl + 40;
 
          // Add the mark of the bot
-         if(playerScores[j]->getConnection()->isRobot())
+         if(playerScores[j]->isRobot())
             UserInterface::drawString(x - botsize, curRowY + fontSize / 4 + 2, fontSize / 2, bot); 
 
-         UserInterface::drawString(x, curRowY, fontSize, playerScores[j]->getConnection()->getClientName().getString());
+         UserInterface::drawString(x, curRowY, fontSize, playerScores[j]->getName().getString());
 
          static char buff[255] = "";
 
@@ -2478,7 +2476,7 @@ void GameUserInterface::renderScoreboard()
             dSprintf(buff, sizeof(buff), "%d", playerScores[j]->getScore());
 
          UserInterface::drawString(xr - (120 + S32(UserInterface::getStringWidth(F32(fontSize), buff))), curRowY, fontSize, buff);
-         UserInterface::drawStringf(xr - 70, curRowY, fontSize, "%d", playerScores[j]->getConnection()->getPing());
+         UserInterface::drawStringf(xr - 70, curRowY, fontSize, "%d", playerScores[j]->getPing());
          curRowY += maxHeight;
       }
    }
@@ -2614,10 +2612,10 @@ void GameUserInterface::renderBasicInterfaceOverlay(const GameType *gameType, bo
    //   Vector<RefPtr<ClientRef> > leaderboardList;
 
    //   // Add you to the leaderboard
-   //   if(mLocalClient)
+   //   if(getGame()->getConnectionToServer())
    //   {
-   //      leaderboardList.push_back(mLocalClient);
-   //      logprintf("Score = %d", mLocalClient->getScore());
+   //      leaderboardList.push_back(getGame()->getConnectionToServer());
+   //      logprintf("Score = %d", getGame()->getConnectionToServer()->getScore());
    //   }
 
    //   // Get leading player
@@ -2699,14 +2697,14 @@ void GameUserInterface::renderTalkingClients()
 
    for(S32 i = 0; i < getGame()->getClientCount(); i++)
    {
-      ClientRef *client = getGame()->getClient(i);
+      ClientInfo *client = ((Game *)getGame())->getClientInfo(i);
 
       if(client->getConnection()->getVoiceSFX()->isPlaying())
       {
          const S32 TEXT_HEIGHT = 20;
 
-         glColor( getGame()->getTeamColor(client->getTeam()) );
-         UserInterface::drawString(10, y, TEXT_HEIGHT, client->getConnection()->getClientName().getString());
+         glColor( getGame()->getTeamColor(client->getTeamIndex()) );
+         UserInterface::drawString(10, y, TEXT_HEIGHT, client->getName().getString());
          y += TEXT_HEIGHT + 5;
       }
    }

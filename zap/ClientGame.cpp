@@ -94,20 +94,6 @@ extern ScreenInfo gScreenInfo;
 
 static Vector<DatabaseObject *> fillVector2;
 
-////////////////////////////////////////
-////////////////////////////////////////
-
-// Constructor
-ClientInfo::ClientInfo(GameSettings *settings)   
-{ 
-   id.getRandom();    // Generate a player ID
-   simulatedPacketLoss = settings->getSimulatedLoss();
-   simulatedLag = settings->getSimulatedLag();
-   name = settings->getPlayerName();
-
-   authenticated = false;
-}
-
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -123,7 +109,7 @@ ClientGame::ClientGame(const Address &bindAddress, GameSettings *settings) : Gam
 
    mUIManager = new UIManager(this);         // Gets deleted in destructor
 
-   mClientInfo = new ClientInfo(settings);   // Gets deleted in destructor
+   mClientInfo = boost::shared_ptr<ClientInfo>(new ClientClientInfo("", false, false));   // just a guess...
 
    // Create some random stars
    for(U32 i = 0; i < NumStars; i++)
@@ -163,7 +149,6 @@ ClientGame::~ClientGame()
 
    delete mUserInterfaceData;
    delete mUIManager;   
-   delete mClientInfo;
    delete mConnectionToServer.getPointer();
 }
 
@@ -172,6 +157,7 @@ ClientGame::~ClientGame()
 void ClientGame::joinGame(Address remoteAddress, bool isFromMaster, bool local)
 {
    MasterServerConnection *connToMaster = getConnectionToMaster();
+   
    if(isFromMaster && connToMaster && connToMaster->getConnectionState() == NetConnection::Connected)     // Request arranged connection
    {
       connToMaster->requestArrangedConnection(remoteAddress);
@@ -179,7 +165,8 @@ void ClientGame::joinGame(Address remoteAddress, bool isFromMaster, bool local)
    }
    else                                                         // Try a direct connection
    {
-      GameConnection *gameConnection = new GameConnection(mSettings, getClientInfo());
+      ClientInfo *clientInfo = getClientInfo();
+      GameConnection *gameConnection = new GameConnection(mSettings, clientInfo);
 
       setConnectionToServer(gameConnection);
 
@@ -188,23 +175,25 @@ void ClientGame::joinGame(Address remoteAddress, bool isFromMaster, bool local)
          // Stuff on client side, so interface will offer the correct options.
          // Note that if we're local, the passed address is probably a dummy; check caller if important.
          gameConnection->connectLocal(getNetInterface(), gServerGame->getNetInterface());
-         gameConnection->setIsAdmin(true);              // Local connection is always admin
+         clientInfo->setAdmin(true);                    // Local connection is always admin
          gameConnection->setIsLevelChanger(true);       // Local connection can always change levels
 
          GameConnection *gc = dynamic_cast<GameConnection *>(gameConnection->getRemoteConnectionObject());
 
+         TNLAssert(gc == gameConnection, "ok..., probably need to change clientInfo below to gc->getClientInfo()");
+
          // Stuff on server side
          if(gc)                              
          {
-            gc->setIsAdmin(true);            // Set isAdmin on server
-            gc->setIsLevelChanger(true);     // Set isLevelChanger on server
+            gc->getClientInfo()->setAdmin(true);      // Set isAdmin on server
+            gc->setIsLevelChanger(true);              // Set isLevelChanger on server
             gc->sendLevelList();
 
             gc->s2cSetIsAdmin(true);                                       // Set isAdmin on the client
             gc->s2cSetIsLevelChanger(true, false);                         // Set isLevelChanger on the client
             gc->setServerName(gServerGame->getSettings()->getHostName());  // Server name is whatever we've set locally
 
-            gc->setAuthenticated(getClientInfo()->authenticated); // Tell local host if we're authenticated... no need to verify
+            gc->getClientInfo()->setAuthenticated(getClientInfo()->isAuthenticated());      // Tell local host if we're authenticated... no need to verify
          }
       }
       else        // Connect to a remote server, but not via the master server
@@ -222,7 +211,7 @@ void ClientGame::joinGame(Address remoteAddress, bool isFromMaster, bool local)
 }
 
 
-// Called when connection to game server is terminated for one reason or another
+// Called when the local connection to game server is terminated for one reason or another
 void ClientGame::closeConnectionToGameServer()
 {
     // Cancel any in-progress attempts to connect
@@ -234,6 +223,8 @@ void ClientGame::closeConnectionToGameServer()
       getConnectionToServer()->disconnect(NetConnection::ReasonSelfDisconnect, "");
 
    getUIManager()->getHostMenuUserInterface()->levelLoadDisplayDisplay = false;
+
+   clearClientList();     
 }
 
 
@@ -262,13 +253,14 @@ void ClientGame::setConnectionToServer(GameConnection *theConnection)
 
    mConnectionToServer = theConnection;
    theConnection->setClientGame(this);
+
 }
 
 
 // When server corrects capitalization of name or similar
 void ClientGame::correctPlayerName(const string &name)
 {
-   getClientInfo()->name = name;
+   getClientInfo()->setName(name);
    getSettings()->setPlayerName(name, false);                  // Save to INI
 }
 
@@ -276,7 +268,7 @@ void ClientGame::correctPlayerName(const string &name)
 // When user enters new name and password on NameEntryUI
 void ClientGame::updatePlayerNameAndPassword(const string &name, const string &password)
 {
-   getClientInfo()->name = name;
+   getClientInfo()->setName(name);
    getSettings()->setPlayerNameAndPassword(name, password);    // Save to INI
 }
 
@@ -594,9 +586,7 @@ void ClientGame::cancelShutdown()
 // Returns true if we have admin privs, displays error message and returns false if not
 bool ClientGame::hasAdmin(const char *failureMessage)
 {
-   GameConnection *gc = getConnectionToServer();
-
-   if(gc->isAdmin())
+   if(getClientInfo()->isAdmin())
       return true;
    
    displayErrorMessage(failureMessage);
@@ -637,22 +627,23 @@ void ClientGame::changePassword(GameConnection::ParamType type, const Vector<str
 {
    GameConnection *gc = getConnectionToServer();
 
-   if(required)
-   {
-      if(words.size() < 2 || words[1] == "")
-      {
-         displayErrorMessage("!!! Need to supply a password");
-         return;
-      }
+   bool blankPassword = words.size() < 2 || words[1] == "";
 
-      gc->changeParam(words[1].c_str(), type);
+   // First, send a message to the server to tell it we want to change a password
+   if(required && blankPassword)
+   {
+      displayErrorMessage("!!! Need to supply a password");
+      return;
    }
-   else if(words.size() < 2)
-      gc->changeParam("", type);
 
-   if(words.size() < 2)    // Empty password
+   gc->changeParam(blankPassword ? "" : words[1].c_str(), type);
+
+
+   // Now make any changes we need locally -- writing (or erasing) the pw in the INI, etc.
+
+   if(blankPassword)       // Empty password
    {
-      // Clear any saved password for this server
+      // Clear any saved passwords for this server
       if(type == GameConnection::LevelChangePassword)
          mSettings->forgetLevelChangePassword(gc->getServerName());
 
@@ -661,8 +652,6 @@ void ClientGame::changePassword(GameConnection::ParamType type, const Vector<str
    }
    else                    // Non-empty password
    {
-      gc->changeParam(words[1].c_str(), type);
-
       // Save the password so the user need not enter it again the next time they're on this server
       if(type == GameConnection::LevelChangePassword)
          mSettings->saveLevelChangePassword(gc->getServerName(), words[1]);
@@ -701,10 +690,7 @@ bool ClientGame::checkName(const string &name)
 
    for(S32 i = 0; i < getClientCount(); i++)
    {
-      if(!getClient(i))
-         continue;
-
-      StringTableEntry n = getClient(i)->getConnection()->getClientName();
+      StringTableEntry n = Parent::getClientInfo(i)->getName();
 
       if(n == name)           // Exact match
          return true;
@@ -822,7 +808,7 @@ void ClientGame::onConnectionToMasterTerminated(NetConnection::TerminationReason
          ui->setMessage(6, "speaking, you should never see this message again!");
          ui->activate();
 
-         getClientInfo()->id.getRandom();        // Get a different ID and retry to successfully connect to master
+         getClientInfo()->getId()->getRandom();        // Get a different ID and retry to successfully connect to master
          break;
 
       case NetConnection::ReasonBadLogin:
@@ -1049,7 +1035,7 @@ U32 ClientGame::getPlayerCount()
    U32 players = 0;
 
    for(S32 i = 0; i < getClientCount(); i++)
-      if(!getClient(i)->getConnection()->isRobot())
+      if(!Parent::getClientInfo(i)->isRobot())
          players++;
 
    return players;
@@ -1345,8 +1331,8 @@ void ClientGame::renderCommander()
          {
             SpyBug *sb = dynamic_cast<SpyBug *>(fillVector[i]);
 
-            if(sb->isVisibleToPlayer(playerTeam, getGameType()->mLocalClient ? getGameType()->mLocalClient->getConnection()->getClientName() : 
-                                                                                 StringTableEntry(""), getGameType()->isTeamGame()))
+            if(sb->isVisibleToPlayer(playerTeam, getConnectionToServer() ? getClientInfo()->getName() : StringTableEntry(""), 
+                                     getGameType()->isTeamGame()))
             {
                const Point &p = sb->getRenderPos();
                Point visExt(gSpyBugRange, gSpyBugRange);

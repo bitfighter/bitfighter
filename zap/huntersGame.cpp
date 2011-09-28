@@ -351,7 +351,7 @@ void HuntersGameType::idle(GameObject::IdleCallPath path, U32 deltaT)
       // Check if anyone is already in the Nexus, examining each client's ship in turn...
       for(S32 i = 0; i < getGame()->getClientCount(); i++)
       {
-         Ship *client_ship = dynamic_cast<Ship *>(getGame()->getClient(i)->getConnection()->getControlObject());
+         Ship *client_ship = dynamic_cast<Ship *>(getGame()->getClientInfo(i)->getConnection()->getControlObject());
 
          if(!client_ship)
             continue;
@@ -487,7 +487,7 @@ void HuntersGameType::renderInterfaceOverlay(bool scoreboardVisible)
 
 
 
-void HuntersGameType::controlObjectForClientKilled(GameConnection *theClient, GameObject *clientObject, GameObject *killerObject)
+void HuntersGameType::controlObjectForClientKilled(ClientInfo *theClient, GameObject *clientObject, GameObject *killerObject)
 {
    Parent::controlObjectForClientKilled(theClient, clientObject, killerObject);
 
@@ -537,13 +537,15 @@ void HuntersGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
 
 
 // Special spawn function for Hunters games (runs only on server)
-void HuntersGameType::spawnShip(GameConnection *theClient)
+void HuntersGameType::spawnShip(ClientInfo *clientInfo)
 {
-   Parent::spawnShip(theClient);
+   Parent::spawnShip(clientInfo);
 
-   HuntersFlagItem *newFlag = new HuntersFlagItem(theClient->getControlObject()->getActualPos());
+   GameConnection *conn = clientInfo->getConnection();
+
+   HuntersFlagItem *newFlag = new HuntersFlagItem(conn->getControlObject()->getActualPos());
    newFlag->addToGame(getGame(), getGame()->getGameObjDatabase());
-   newFlag->mountToShip(dynamic_cast<Ship *>(theClient->getControlObject()));    // mountToShip() can handle NULL
+   newFlag->mountToShip(dynamic_cast<Ship *>(conn->getControlObject()));    // mountToShip() can handle NULL
    newFlag->changeFlagCount(0);
 }
 

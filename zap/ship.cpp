@@ -1390,7 +1390,7 @@ void Ship::kill(DamageInfo *theInfo)
    {
       GameType *gt = getGame()->getGameType();
       if(gt)
-         gt->controlObjectForClientKilled(controllingClient, this, theInfo->damagingObject);
+         gt->controlObjectForClientKilled(controllingClient->getClientInfo(), this, theInfo->damagingObject);
    }
 
    kill();

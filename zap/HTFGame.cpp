@@ -217,9 +217,12 @@ namespace Zap
    }
 
    // Same code as in retrieveGame, CTF
-   void HTFGameType::performProxyScopeQuery(GameObject *scopeObject, GameConnection *connection)
+   void HTFGameType::performProxyScopeQuery(GameObject *scopeObject, ClientInfo *clientInfo)
    {
-      Parent::performProxyScopeQuery(scopeObject, connection);
+      Parent::performProxyScopeQuery(scopeObject, clientInfo);
+
+      GameConnection *connection = clientInfo->getConnection();
+
       S32 uTeam = scopeObject->getTeam();
 
       for(S32 i = 0; i < mFlags.size(); i++)

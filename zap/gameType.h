@@ -50,43 +50,6 @@ class MenuItem;
 class MoveItem;
 class ClientGame;
 
-class ClientRef : public NetObject
-{
-private:
-   S32 mTeamId;
-   S32 mScore;                         // Individual score for current game
-   F32 mRating;                        // Skill rating from -1 to 1
-   LuaPlayerInfo *mPlayerInfo;         // Lua access to this class
-
-   SafePtr<GameConnection> mClientConnection;
-
-public:
-   ClientRef(GameConnection *conn);    // Constructor
-   virtual ~ClientRef();               // Destructor
-
-   void reset();              // Clears/initializes most settings
-
-   S32 getTeam();
-   void setTeam(S32 teamId);
-
-   S32 getScore();
-   void setScore(S32 score);
-   void addScore(S32 score);
-
-   F32 getRating();
-   void setRating(F32 rating);
-
-   LuaPlayerInfo *getPlayerInfo();
-
-   Timer respawnTimer;
-
-   bool wantsScoreboardUpdates;  // Indicates whether the client has requested scoreboard streaming (e.g. pressing Tab key)
-   bool readyForRegularGhosts;
-
-   GameConnection *getConnection() { return mClientConnection; }
-};
-
-
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -120,7 +83,7 @@ private:
 
    Vector<WallRec> mWalls;
 
-   void sendChatDisplayEvent(ClientRef *clientRef, bool global, const char *message, NetEvent *theEvent);      // In-game chat message
+   void sendChatDisplayEvent(ClientInfo *sender, bool global, const char *message, NetEvent *theEvent);      // In-game chat message
 
    S32 mWinningScore;               // Game over when team (or player in individual games) gets this score
    S32 mLeadingTeam;                // Team with highest score
@@ -267,9 +230,6 @@ public:
 
    const Vector<WallRec> *getBarrierList();
 
-
-   ClientRef *mLocalClient;
-
    S32 getFlagSpawnCount() const;
    const FlagSpawn *getFlagSpawn(S32 index) const;
    const Vector<FlagSpawn> *getFlagSpawns() const;
@@ -388,23 +348,23 @@ public:
 
    void gameOverManGameOver();
    VersionedGameStats getGameStats();
-   void getSortedPlayerScores(S32 teamIndex, Vector<RefPtr<ClientRef> > &playerScores) const;
+   void getSortedPlayerScores(S32 teamIndex, Vector<ClientInfo *> &playerScores) const;
    void saveGameStats();                     // Transmit statistics to the master server
 
    void checkForWinningScore(S32 score);     // Check if player or team has reachede the winning score
    virtual void onGameOver();
 
-   virtual void serverAddClient(ClientRef *cref);
-   virtual void serverRemoveClient(GameConnection *theClient);
+   void serverAddClient(ClientInfo *clientInfo);
+   void serverRemoveClient(ClientInfo *clientInfo);    // Remove a client from the game
 
    virtual bool objectCanDamageObject(GameObject *damager, GameObject *victim);
-   virtual void controlObjectForClientKilled(GameConnection *theClient, GameObject *clientObject, GameObject *killerObject);
+   virtual void controlObjectForClientKilled(ClientInfo *theClient, GameObject *clientObject, GameObject *killerObject);
 
-   virtual void spawnShip(GameConnection *theClient);
+   virtual void spawnShip(ClientInfo *clientInfo);
    virtual void spawnRobot(Robot *robot);
    //Vector<Robot *> mRobotList;        // List of all robots in the game
 
-   virtual void changeClientTeam(GameConnection *theClient, S32 team);     // Change player to team indicated, -1 = cycle teams
+   virtual void changeClientTeam(ClientInfo *client, S32 team);     // Change player to team indicated, -1 = cycle teams
 
 #ifndef ZAP_DEDICATED
    virtual void renderInterfaceOverlay(bool scoreboardVisible);
@@ -414,9 +374,9 @@ public:
 
    void addTime(U32 time);          // Extend the game by time (in ms)
 
-   virtual void clientRequestLoadout(GameConnection *client, const Vector<U32> &loadout);
+   virtual void clientRequestLoadout(GameConnection *conn, const Vector<U32> &loadout);
    virtual void updateShipLoadout(GameObject *shipObject); // called from LoadoutZone when a Ship touches the zone
-   void setClientShipLoadout(ClientRef *cl, const Vector<U32> &loadout, bool silent = false);
+   void setClientShipLoadout(GameConnection *conn, const Vector<U32> &loadout, bool silent = false);
 
    bool checkTeamRange(S32 team);                     // Team in range? Used for processing arguments.
    bool makeSureTeamCountIsNotZero();                 // Zero teams can cause crashiness
@@ -438,7 +398,7 @@ public:
 
    void queryItemsOfInterest();
    void performScopeQuery(GhostConnection *connection);
-   virtual void performProxyScopeQuery(GameObject *scopeObject, GameConnection *connection);
+   virtual void performProxyScopeQuery(GameObject *scopeObject, ClientInfo *clientInfo);
 
    virtual void onGhostAvailable(GhostConnection *theConnection);
    TNL_DECLARE_RPC(s2cSetLevelInfo, (StringTableEntry levelName, StringTableEntry levelDesc, S32 teamScoreLimit, StringTableEntry levelCreds, 
@@ -465,8 +425,8 @@ public:
 
    // Not all of these actually used?
    void updateScore(Ship *ship, ScoringEvent event, S32 data = 0);               // used
-   void updateScore(ClientRef *client, S32 team, ScoringEvent event, S32 data = 0);
-   void updateScore(ClientRef *client, ScoringEvent event, S32 data = 0);        // used
+   void updateScore(ClientInfo *player, S32 team, ScoringEvent event, S32 data = 0);
+   void updateScore(ClientInfo *player, ScoringEvent event, S32 data = 0);        // used
    void updateScore(S32 team, ScoringEvent event, S32 data = 0);
 
    void updateLeadingTeamAndScore();   // Sets mLeadingTeamScore and mLeadingTeam
@@ -477,7 +437,8 @@ public:
 
    TNL_DECLARE_RPC(c2sRequestScoreboardUpdates, (bool updates));
    TNL_DECLARE_RPC(s2cScoreboardUpdate, (Vector<RangedU32<0, MaxPing> > pingTimes, Vector<SignedInt<24> > scores, Vector<RangedU32<0,200> > ratings));
-   virtual void updateClientScoreboard(ClientRef *theClient);
+
+   void updateClientScoreboard(ClientInfo *clientInfo);
 
    TNL_DECLARE_RPC(c2sAdvanceWeapon, ());
    TNL_DECLARE_RPC(c2sSelectWeapon, (RangedU32<0, ShipWeaponCount> index));
@@ -525,7 +486,7 @@ public:
 
    virtual void majorScoringEventOcurred(S32 team);    // Gets called when touchdown is scored...  currently only used by zone control & retrieve
 
-   void processServerCommand(GameConnection *conn, const char *cmd, Vector<StringPtr> args);
+   void processServerCommand(ClientInfo *clientInfo, const char *cmd, Vector<StringPtr> args);
 
    map <pair<U16,U16>, Vector<Point> > cachedBotFlightPlans;  // cache of zone-to-zone flight plans, shared for all bots
 };

@@ -68,18 +68,18 @@ class PlayerInfo : public LuaPlayerInfo
 {
 private:
   typedef LuaPlayerInfo Parent;
-  ClientRef *mClientRef;
+  ClientInfo *mClientInfo;
 
 public:
-   PlayerInfo(ClientRef *clientRef = NULL) { mClientRef = clientRef; }     // C++ Constructor
+   PlayerInfo(ClientInfo *clientInfo) { mClientInfo = clientInfo; }     // C++ Constructor
    virtual ~PlayerInfo() {}
 
-   S32 getName(lua_State *L)       { return returnString(L, mClientRef->getConnection()->getClientName().getString()); }
+   S32 getName(lua_State *L)       { return returnString(L, mClientInfo->getName().getString()); }
    S32 getShip(lua_State *L)       ;
    S32 getScriptName(lua_State *L) { return returnNil(L); }
-   S32 getTeamIndx(lua_State *L)   { return returnInt(L, mClientRef->getTeam() + 1); }
-   S32 getRating(lua_State *L)     { return returnFloat(L, mClientRef->getRating()); }
-   S32 getScore(lua_State *L)      { return returnInt(L, mClientRef->getScore()); }
+   S32 getTeamIndx(lua_State *L)   { return returnInt(L, mClientInfo->getTeamIndex() + 1); }     // Lua indexes are 1-based
+   S32 getRating(lua_State *L)     { return returnFloat(L, mClientInfo->getRating()); }
+   S32 getScore(lua_State *L)      { return returnInt(L, mClientInfo->getScore()); }
    S32 isRobot(lua_State *L)       { return returnBool(L, false); }
 };
 

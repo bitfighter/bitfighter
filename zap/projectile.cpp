@@ -751,10 +751,11 @@ U32 Mine::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
    if(stream->writeFlag(updateMask & InitialMask))
    {
       writeThisTeam(stream);
-      StringTableEntryRef noOwner = "";
-      stream->writeStringTableEntry(getOwner() ? getOwner()->getClientName() : noOwner);
+      stream->writeStringTableEntry(getOwner() ? getOwner()->getClientInfo()->getName() : "");
    }
+
    stream->writeFlag(mArmed);
+
    return ret;
 }
 
@@ -802,10 +803,12 @@ void Mine::renderItem(const Point &pos)
 
       GameType *gameType = clientGame->getGameType();
 
+      GameConnection *localClient = clientGame->getConnectionToServer();
+
       // Can see mine if laid by teammate in team game || sensor is active ||
       // you laid it yourself
       visible = ( (ship->getTeam() == getTeam()) && gameType->isTeamGame() ) || ship->isModuleActive(ModuleSensor) ||
-                (gameType->mLocalClient && gameType->mLocalClient->getConnection()->getClientName() == mSetBy);
+                  (localClient && localClient->getClientInfo()->getName() == mSetBy);
    }
    else     // Must be in editor?
    {
@@ -966,7 +969,7 @@ U32 SpyBug::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *s
       // Just don't kill the coder who keeps doing it! -CE
       // And remember, pack and unpack must match, so if'ing this out won't work unless we do the same on unpack.
       StringTableEntryRef noOwner = StringTableEntryRef("");
-      stream->writeStringTableEntry(getOwner() ? getOwner()->getClientName() : noOwner);
+      stream->writeStringTableEntry(getOwner() ? getOwner()->getClientInfo()->getName() : noOwner);
    }
    return ret;
 }
@@ -1000,7 +1003,7 @@ void SpyBug::renderItem(const Point &pos)
 
    if(clientGame && clientGame->getConnectionToServer())
    {
-      GameConnection *conn = clientGame->getConnectionToServer();
+      GameConnection *conn = clientGame->getConnectionToServer();   
       Ship *ship = dynamic_cast<Ship *>(conn->getControlObject());
 
       if(!ship)
@@ -1011,7 +1014,7 @@ void SpyBug::renderItem(const Point &pos)
       // Can see bug if laid by teammate in team game || sensor is active ||
       //       you laid it yourself                   || spyBug is neutral
       visible = ( ((ship->getTeam() == getTeam()) && gameType->isTeamGame())   || ship->isModuleActive(ModuleSensor) ||
-                  (gameType->mLocalClient && conn->getClientName() == mSetBy) || getTeam() == TEAM_NEUTRAL);
+                  (conn && conn->getClientInfo()->getName() == mSetBy) || getTeam() == TEAM_NEUTRAL);
    }
    else     // Must be in editor?
       visible = true;

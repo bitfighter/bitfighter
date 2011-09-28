@@ -56,11 +56,10 @@ void PickupItem::idle(GameObject::IdleCallPath path)
          // Check if there is a ship sitting on this item... it so, ship gets the repair!
          for(S32 i = 0; i < getGame()->getClientCount(); i++)
          {
-            SafePtr<GameConnection> connection = getGame()->getClient(i)->getConnection();
+            GameConnection *connection = getGame()->getClientInfo(i)->getConnection();
 
             TNLAssert(connection, "Defunct client connection in item.cpp!");
-
-            if(!connection)    // <-- not sure this ever happens
+            if(!connection)    
                continue;
 
             Ship *ship = dynamic_cast<Ship *>(connection->getControlObject());

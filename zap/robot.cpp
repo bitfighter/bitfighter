@@ -202,6 +202,7 @@ LuaRobot::LuaRobot(lua_State *L) : LuaShip((Robot *)lua_touserdata(L, 1))
    lua_pushinteger(L, -1); lua_setglobal(L, "HostileTeamIndx");
 }
 
+
 // Destructor
 LuaRobot::~LuaRobot()
 {
@@ -1357,6 +1358,8 @@ Robot::Robot(const StringTableEntry &robotName, const string &scriptDir, S32 tea
    // respawnTimer.reset(100, RobotRespawnDelay);
 
 
+   mClientInfo = boost::shared_ptr<ClientInfo>(new ClientClientInfo("Rudy the Robot", true, false));
+
    mPlayerInfo = new RobotPlayerInfo(this);
    mScore = 0;
    mTotalScore = 0;
@@ -1377,14 +1380,9 @@ Robot::~Robot()
       GameConnection *gc = getOwner();
 
       if(getGame()->getGameType())
-         getGame()->getGameType()->serverRemoveClient(gc);
-
-      ClientRef *cref = gc->getClientRef();
-
-      gServerGame->deleteClientRefFromList(cref);     // HACK  (deletes cref)
+         getGame()->getGameType()->serverRemoveClient(mClientInfo.get());
 
       setOwner(NULL);
-      delete gc;
    }
 
    // Close down our Lua interpreter
@@ -1408,8 +1406,8 @@ Robot::~Robot()
 
    mPlayerInfo->setDefunct();
    eventManager.fireEvent(L, EventManager::PlayerLeftEvent, getPlayerInfo());
-   delete mPlayerInfo;
 
+   delete mPlayerInfo;
 
    logprintf(LogConsumer::LogLuaObjectLifecycle, "Robot terminated [%s] (%d)", mFilename.c_str(), robots.size());
 }
@@ -1439,13 +1437,13 @@ bool Robot::initialize(Point &pos)
       if(! runMain()) return false;      //try to run, can fail on script error.
       eventManager.update();       // Ensure registrations made during bot initialization are ready to go
 
-   }catch(LuaException &e)
+   }
+   catch(LuaException &e)
    {
       logError("Robot error during spawn: %s.  Shutting robot down.", e.what());
-      //delete this;         //can't delete here, that can cause memory errors
       isRunningScript = false;
-      //return false;          //return false have an effect of disconnecting the robot.
    }
+
    return true;
 } 
 
@@ -1689,7 +1687,7 @@ bool Robot::processArguments(S32 argc, const char **argv, Game *game)
    if(argc >= 1)
       mTeam = atoi(argv[0]);
    else
-      mTeam = NO_TEAM;   // The Gametype serverAddClient will take care of bounds checking
+      mTeam = NO_TEAM;   
    
 
    if(argc >= 2)
@@ -1945,25 +1943,22 @@ void Robot::idle(GameObject::IdleCallPath path)
 
 void Robot::spawn()
 {
-   // Cannot be in onAddedToGame, as it will error, trying to add robots while level map is not ready
+   // Cannot be in onAddedToGame, as it will error while trying to add robots while level map is not ready
 
-   // Need GameConnection and ClientRef to keep track of score...  TODO: Make this work differently.  This is bogus.
    GameConnection *gc = new GameConnection();   
 
    if(getName() == "")                          // Make sure bots have a name
       setName(GameConnection::makeUnique("Robot").c_str());
 
-   gc->setClientName(getName());
-   //((ServerGame *)getGame())->getGameType()->addClientToList(gc);    // Really need this?  And why are bots never removed from client list?
-
    gc->setControlObject(this);
-   gc->setIsRobot(true);
    
    setOwner(gc);
 
-   ClientRef *cref = new ClientRef(gc);
-   getGame()->getGameType()->serverAddClient(cref);    
-   getGame()->addClientRefToList(cref);
+   mClientInfo->setName(getName());
+   mClientInfo->setConnection(gc);
+
+   getGame()->getGameType()->serverAddClient(mClientInfo.get());    
+   getGame()->addClientInfoToList(mClientInfo);
    
    gameConnectionInitalized = true;
 }

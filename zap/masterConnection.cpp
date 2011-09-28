@@ -219,14 +219,14 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSetAuthenticated,
    if((AuthenticationStatus)authStatus.value == AuthenticationStatusAuthenticatedName)
    {
       clientGame->correctPlayerName(correctedName.getString());
-      clientGame->getClientInfo()->authenticated = true;
+      clientGame->getClientInfo()->setAuthenticated(true);
 
       GameConnection *gc = dynamic_cast<ClientGame *>(mGame)->getConnectionToServer();
       if(gc)
          gc->c2sSetAuthenticated();
    }
    else 
-      clientGame->getClientInfo()->authenticated = false;
+      clientGame->getClientInfo()->setAuthenticated(false);
 }
 #endif
 
@@ -242,43 +242,43 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sSetAuthenticated, (Vector<
 
    for(S32 i = 0; i < mGame->getClientCount(); i++)
    {
-      GameConnection *client = mGame->getClient(i)->getConnection();
+      ClientInfo *clientInfo = mGame->getClientInfo(i);
 
-      if(client->getClientId()->isValid() && *client ->getClientId() == clientId)  // Robots don't have valid clientID
+      if(clientInfo->getId()->isValid() && *clientInfo->getId() == clientId)    // Robots don't have valid clientId, so this will never match a bot
       {
          if(status == AuthenticationStatusAuthenticatedName)
          {
-            client->setAuthenticated(true);
+            clientInfo->setAuthenticated(true);
 
             // Auto-rename other non-authenticated clients to avoid stealing the authenticated name
             for(S32 j = 0; j < mGame->getClientCount(); j++)
             {
-               GameConnection *conn2 = mGame->getClient(j)->getConnection();
+               ClientInfo *conn2 = mGame->getClientInfo(j);
 
-               if(conn2->getClientName() == name && !conn2->isAuthenticated())
+               if(conn2->getName() == name && !conn2->isAuthenticated())
                {
                   //makeUnique will think the name is in use by self, and rename it.
-                  updateClientChangedName(conn2, GameConnection::makeUnique(conn2->getClientName().getString()).c_str());
+                  updateClientChangedName(conn2, GameConnection::makeUnique(conn2->getName().getString()).c_str());
                }
             }
 
-            StringTableEntry oldName = client->getClientName();
-            client->setClientName(StringTableEntry(""));       //avoid unique self
+            StringTableEntry oldName = clientInfo->getName();
+            clientInfo->setName("");                               // avoid unique self
             StringTableEntry uniqueName = GameConnection::makeUnique(name.getString()).c_str();  // The new name
-            client->setClientName(oldName);                   //restore name to properly get it updated to clients.
+            clientInfo->setName(oldName);                          // restore name to properly get it updated to clients.
 
-            if(client->getClientName() != uniqueName)
-               updateClientChangedName(client, uniqueName);
+            if(clientInfo->getName() != uniqueName)
+               updateClientChangedName(clientInfo, uniqueName);
          }
          else if(status == AuthenticationStatusUnauthenticatedName)
-         {  // braces needed
-            if(client->getAuthenticationCounter() > 1)     // Client gets two bites at the apple, to cover rare race condition
-               client->setAuthenticated(false);
+         {  
+            if(clientInfo->getConnection()->getAuthenticationCounter() > 1)  // Client gets two bites at the apple, to cover rare race condition
+               clientInfo->setAuthenticated(false);
             else
-               client->resetAuthenticationTimer();
+               clientInfo->getConnection()->resetAuthenticationTimer();
          }
          else if(status == AuthenticationStatusTryAgainLater)
-            client->resetAuthenticationTimer();
+            clientInfo->getConnection()->resetAuthenticationTimer();
 
          break;
       }
@@ -386,21 +386,22 @@ void MasterServerConnection::writeConnectRequest(BitStream *bstream)
       bstream->write((U32) serverGame->getMaxPlayers());      // max players
       bstream->write((U32) serverGame->mInfoFlags);           // info flags (1=>test host, i.e. from editor)
 
-      bstream->writeString(serverGame->getCurrentLevelName().getString());      // Level name
-      bstream->writeString(serverGame->getCurrentLevelType().getString());      // Level type
+      bstream->writeString(serverGame->getCurrentLevelName().getString());          // Level name
+      bstream->writeString(serverGame->getCurrentLevelType().getString());          // Level type
 
-      bstream->writeString(serverGame->getSettings()->getHostName().c_str());        // Server name
-      bstream->writeString(serverGame->getSettings()->getHostDescr().c_str());       // Server description
+      bstream->writeString(serverGame->getSettings()->getHostName().c_str());       // Server name
+      bstream->writeString(serverGame->getSettings()->getHostDescr().c_str());      // Server description
    }
    else     // We're a client
    {
 #ifndef ZAP_DEDICATED
       ClientGame *clientGame = (ClientGame *)mGame;
+      ClientInfo *clientInfo = clientGame->getConnectionToServer()->getClientInfo();
 
-      bstream->writeString(clientGame->getClientInfo()->name.c_str());   // User's nickname
-      bstream->writeString(clientGame->getLoginPassword().c_str());      // and whatever password they supplied
+      bstream->writeString(clientInfo->getName().getString());          // User's nickname
+      bstream->writeString(clientGame->getLoginPassword().c_str());     // and whatever password they supplied
 
-      clientGame->getClientInfo()->id.write(bstream);
+      clientInfo->getId()->write(bstream);
 #endif
    }
 }

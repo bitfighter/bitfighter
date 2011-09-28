@@ -90,8 +90,8 @@ public:
    void renderInterfaceOverlay(bool scoreboardVisible);
 #endif
 
-   void controlObjectForClientKilled(GameConnection *theClient, GameObject *clientObject, GameObject *killerObject);
-   void spawnShip(GameConnection *theClient);
+   void controlObjectForClientKilled(ClientInfo *theClient, GameObject *clientObject, GameObject *killerObject);
+   void spawnShip(ClientInfo *clientInfo);
    GameTypes getGameType() { return NexusGame; }
    const char *getGameTypeString() const { return "Nexus"; }     // Official game name
    const char *getShortName() const { return "N"; }

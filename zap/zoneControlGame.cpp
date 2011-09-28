@@ -153,7 +153,7 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
    e.push_back(getGame()->getTeamName(s->getTeam()));
 
    for(S32 i = 0; i < getGame()->getClientCount(); i++)
-     getGame()->getClient(i)->getConnection()->s2cTouchdownScored(SFXFlagSnatch, s->getTeam(), tdString, e);
+      getGame()->getClientInfo(i)->getConnection()->s2cTouchdownScored(SFXFlagSnatch, s->getTeam(), tdString, e);
 
    // Reset zones to neutral
    for(S32 i = 0; i < mZones.size(); i++)
@@ -178,9 +178,12 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
 
 
 // Could probably be consolodated with HTF & others
-void ZoneControlGameType::performProxyScopeQuery(GameObject *scopeObject, GameConnection *connection)
+void ZoneControlGameType::performProxyScopeQuery(GameObject *scopeObject, ClientInfo *clientInfo)
 {
-   Parent::performProxyScopeQuery(scopeObject, connection);
+   Parent::performProxyScopeQuery(scopeObject, clientInfo);
+
+   GameConnection *connection = clientInfo->getConnection();
+
    S32 uTeam = scopeObject->getTeam();
    if(mFlag.isValid())
    {

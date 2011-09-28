@@ -65,7 +65,7 @@ public:
    void idle(GameObject::IdleCallPath path, U32 deltaT);
 
    // Same code as in retrieveGame, CTF
-   void performProxyScopeQuery(GameObject *scopeObject, GameConnection *connection);
+   void performProxyScopeQuery(GameObject *scopeObject, ClientInfo *clientInfo);
 
    void renderInterfaceOverlay(bool scoreboardVisible);
 

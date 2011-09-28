@@ -33,19 +33,17 @@
 #include "EngineeredItem.h"      // For EngineerModuleDeployer
 #include "BanList.h"
 
-#include "voiceCodec.h"
-
-#include "Colors.h"
-#include "stringUtils.h"         // For strictjoindir()
-
-
 #ifndef ZAP_DEDICATED
 #include "ClientGame.h"
 #endif
 
-#include "UIMenus.h"  // for enum in PlayerMenuUserInterface
+#include "UIMenus.h"             // For enum in PlayerMenuUserInterface
 
 #include "md5wrapper.h"
+#include "voiceCodec.h"
+
+#include "Colors.h"
+#include "stringUtils.h"         // For strictjoindir()
   
 
 namespace Zap
@@ -53,7 +51,7 @@ namespace Zap
 
 TNL_IMPLEMENT_NETCONNECTION(GameConnection, NetClassGroupGame, true);
 
-// Constructor  -- I believe this is only used by server
+// Constructor -- used on Server by TNL, not called directly
 GameConnection::GameConnection()
 {
    TNLAssert(gServerGame, "Client uses this?!?");
@@ -68,72 +66,76 @@ GameConnection::GameConnection()
 #endif
 
 	initialize();
+   mPlayerInfo = new PlayerInfo(mClientInfo.get());   // Deleted in destructor
+
+   // Not needed on server
+   mDecoder = NULL;
+   mVoiceSFX = NULL;
 }
 
 
 #ifndef ZAP_DEDICATED
-// Constructor
-GameConnection::GameConnection(GameSettings *settings, const ClientInfo *clientInfo)
+// Constructor on client side
+GameConnection::GameConnection(GameSettings *settings, ClientInfo *clientInfo)
 {
-   mSettings = settings;
    initialize();
 
-   if(clientInfo->name == "")
-      mClientName = "Chump";
-   else
-      mClientName = clientInfo->name.c_str();
+   mSettings = settings;
 
-   mClientId = clientInfo->id;
+   // Make sure we have a valid name
+   if(clientInfo->getName() == "")
+      clientInfo->setName("Chump");
 
-   setAuthenticated(clientInfo->authenticated);
-   setSimulatedNetParams(clientInfo->simulatedPacketLoss, clientInfo->simulatedLag);
+   mClientInfo = boost::shared_ptr<ClientInfo>(clientInfo);
+
+   setSimulatedNetParams(settings->getSimulatedLoss(), settings->getSimulatedLag());
 
    mDecoder = new SpeexVoiceDecoder();
    mVoiceSFX = new SoundEffect(SFXVoice, NULL, 1, Point(), Point());
+
+   // These are not used on client
+   mPlayerInfo = NULL;     
 }
 #endif
 
 
 void GameConnection::initialize()
 {
-   mNext = mPrev = this;
    setTranslatesStrings();
    mInCommanderMap = false;
-   mIsRobot = false;
-   mIsAdmin = false;
    mIsLevelChanger = false;
    mIsBusy = false;
    mGotPermissionsReply = false;
    mWaitingForPermissionsReply = false;
    mSwitchTimer.reset(0);
-   mScore = 0;        // Total points scored my this connection (this game)
-   mTotalScore = 0;   // Total points scored by anyone while this connection is alive (this game)
-   mGamesPlayed = 0;  // Overall
-   mRating = 0;       // Overall
+
+   mGamesPlayed = 0;                      // Overall
+   mCumulativeScore = 0;                  // Total points scored my this connection
+   mTotalCumulativeScore = 0;             // Total points scored by anyone while this connection is alive
+
    mAcheivedConnection = false;
    mLastEnteredLevelChangePassword = "";
    mLastEnteredAdminPassword = "";
-   mPing = 0;
 
+   // Things related to verification
    mClientClaimsToBeVerified = false;     // Does client report that they are verified
    mClientNeedsToBeVerified = false;      // If so, do we still need to verify that claim?
-   mAuthenticationCounter = 0;            // Counts number of retries
    mIsVerified = false;                   // Final conclusion... client is or is not verified
+   mAuthenticationCounter = 0;            // Counts number of retries
+
    switchedTeamCount = 0;
    mSendableFlags = 0;
    mDataBuffer = NULL;
+
+   reset();
 }
 
 // Destructor
 GameConnection::~GameConnection()
 {
-   // Unlink ourselves if we're in the client list
-   mPrev->mNext = mNext;
-   mNext->mPrev = mPrev;
-
    // Log the disconnect...
-   if(!mIsRobot)        // Avoid cluttering log with useless messages like "IP:any:0 - client quickbot disconnected."
-      logprintf(LogConsumer::LogConnection, "%s - client \"%s\" disconnected.", getNetAddressString(), mClientName.getString());
+   if(!mClientInfo->isRobot())        // Avoid cluttering log with useless messages like "IP:any:0 - client quickbot disconnected."
+      logprintf(LogConsumer::LogConnection, "%s - client \"%s\" disconnected.", getNetAddressString(), mClientInfo->getName().getString());
 
    if(isConnectionToClient())    // Only true if we're the server
    {
@@ -148,52 +150,49 @@ GameConnection::~GameConnection()
 
         double elapsed = difftime (quitTime, joinTime);
 
-        logprintf(LogConsumer::ServerFilter, "%s [%s] quit [%s] (%.2lf secs)", mClientName.getString(), 
+        logprintf(LogConsumer::ServerFilter, "%s [%s] quit [%s] (%.2lf secs)", mClientInfo->getName().getString(), 
                                                   isLocalConnection() ? "Local Connection" : getNetAddressString(), 
                                                   getTimeStamp().c_str(), elapsed);
       }
    }
 
-   if(mDataBuffer)
-      delete mDataBuffer;
+   delete mDataBuffer;
 
    delete mVoiceSFX;
    delete mDecoder;
 
+   delete mPlayerInfo;
+   //delete mClientInfo;      
+}
+
+
+// Clears/initializes some things between levels
+void GameConnection::reset()
+{  
+   //mScore = 0;
+   //mRating = 0;
+
+   mReadyForRegularGhosts = false;
+   mWantsScoreboardUpdates = false;
 }
 
 
 // Definitive, final declaration of whether this player is (or is not) verified on this server
 // Runs on both client (tracking other players) and server (tracking all players)
-void GameConnection::setAuthenticated(bool isAuthenticated)
-{ 
-   mIsVerified = isAuthenticated; 
-   mClientNeedsToBeVerified = false; 
+//void GameConnection::setAuthenticated(bool isAuthenticated)
+//{ 
+//   mIsVerified = isAuthenticated; 
+//   mClientNeedsToBeVerified = false; 
+//
+//   if(isConnectionToClient())    // Only run this bit if we are a server
+//   {
+//      // If we are verified, we need to alert any connected clients, so they can render ships properly.  This is done via the ship object.
+//      Ship *ship = dynamic_cast<Ship *>(getControlObject());
+//      if(ship)
+//         ship->setIsAuthenticated(isAuthenticated, mClientInfo->getName());
+//   }
+//}
 
-   if(isConnectionToClient())    // Only run this bit if we are a server
-   {
-      // If we are verified, we need to alert any connected clients, so they can render ships properly
-
-      Ship *ship = dynamic_cast<Ship *>(getControlObject());
-      if(ship)
-         ship->setIsAuthenticated(isAuthenticated, mClientName);
-   }
-}
-
-
-//  Runs on server, theRef should never be null; therefore mClientRef should never be null.
-void GameConnection::setClientRef(ClientRef *theRef)
-{
-   TNLAssert(theRef, "NULL ClientRef!");
-   mClientRef = theRef;
-}
-
-
-// See comment above about why mClientRef should never be NULL.  Actually, it can be null while server is quitting the game.
-ClientRef *GameConnection::getClientRef()
-{
-   return mClientRef;
-}
 
 
 // Old server side /getmap command, now unused, may be removed
@@ -258,7 +257,6 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendLine, (StringPtr line), (line),
       mDataBuffer = new ByteBuffer((U8 *)line.getString(), (U32)strlen(line.getString()));
       mDataBuffer->takeOwnership();
    }
-
 }
 
 
@@ -407,8 +405,9 @@ bool GameConnection::sEngineerDeployObject(U32 type)
    {
       // Announce the build
       StringTableEntry msg( "%e0 has engineered a %e1." );
+
       Vector<StringTableEntry> e;
-      e.push_back(getClientName());
+      e.push_back(mClientInfo->getName());
       e.push_back(type == EngineeredTurret ? "turret" : "force field");
    
 
@@ -416,11 +415,13 @@ bool GameConnection::sEngineerDeployObject(U32 type)
 
       return true;
    }
+
    // else... fail silently?
    return false;
 }
 
 
+// Client tells the server that they claim to be authenticated.  Of course, we need to verify this ourselves.
 TNL_IMPLEMENT_RPC(GameConnection, c2sSetAuthenticated, (), (), 
                   NetClassGroupGameMask, RPCGuaranteed, RPCDirClientToServer, 0)
 {
@@ -440,11 +441,11 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sAdminPassword, (StringPtr pass), (pass),
    // If admin password is blank, no one can get admin permissions except the local host, if there is one...
    if(adminPW == "" || strcmp(md5.getSaltedHashFromString(adminPW).c_str(), pass))
    {
-      s2cSetIsAdmin(false);                                                // Tell client they have NOT been granted access
+      s2cSetIsAdmin(false);      // Tell client they have NOT been granted access
       return;
    }
 
-   setIsAdmin(true);             // Enter admin PW and...
+   mClientInfo->setAdmin(true);   // Enter admin PW and...
 
    if(!isLevelChanger())
    {
@@ -460,7 +461,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sAdminPassword, (StringPtr pass), (pass),
    GameType *gameType = gServerGame->getGameType();
 
    if(gameType)
-      gameType->s2cClientBecameAdmin(getClientName());  // Announce change to world
+      gameType->s2cClientBecameAdmin(mClientInfo->getName());  // Announce change to world
 }
 
 
@@ -482,7 +483,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sLevelChangePassword, (StringPtr pass), (pas
    sendLevelList();                       // Send client the level list
 
    // Announce change to world
-   gServerGame->getGameType()->s2cClientBecameLevelChanger(getClientName());  
+   gServerGame->getGameType()->s2cClientBecameLevelChanger(mClientInfo->getName());  
 }
 
 
@@ -492,8 +493,8 @@ extern ServerGame *gServerGame;
 TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, GameConnection::ParamTypeCount> type), (param, type),
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
-   if(!isAdmin())    // Do nothing --> non-admins have no pull here.  Note that this should never happen; client should filter out
-      return;        // non-admins before we get here, but we'll check anyway in case the client has been hacked.
+   if(!mClientInfo->isAdmin())   // Do nothing --> non-admins have no pull here.  Note that this should never happen; client should filter out
+      return;                    // non-admins before we get here, but we'll check anyway in case the client has been hacked.
 
    // Check for forbidden blank parameters -- the following commands require a value to be passed in param
    if( (type == (U32)AdminPassword || type == (U32)ServerName || type == (U32)ServerDescr || type == (U32)LevelDir) &&
@@ -502,12 +503,12 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
 
    // Add a message to the server log
    if(type == (U32)DeleteLevel)
-      logprintf(LogConsumer::ServerFilter, "User [%s] added level [%s] to server skip list", getClientName().getString(), 
+      logprintf(LogConsumer::ServerFilter, "User [%s] added level [%s] to server skip list", mClientInfo->getName().getString(), 
                                                 gServerGame->getCurrentLevelFileName().getString());
    else
    {
       const char *types[] = { "level change password", "admin password", "server password", "server name", "server description", "leveldir param" };
-      logprintf(LogConsumer::ServerFilter, "User [%s] %s to [%s]", getClientName().getString(), 
+      logprintf(LogConsumer::ServerFilter, "User [%s] %s to [%s]", mClientInfo->getName().getString(), 
                                                                    strcmp(param.getString(), "") ? "changed" : "cleared", types[type]);
    }
 
@@ -592,7 +593,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
       // Send the new list of levels to all levelchangers
       for(S32 i = 0; i < gServerGame->getClientCount(); i++)
       {
-         GameConnection *clientConnection = gServerGame->getClient(i)->getConnection();
+         GameConnection *clientConnection = gServerGame->getClientInfo(i)->getConnection();
 
          if(clientConnection->isLevelChanger())
             clientConnection->sendLevelList();
@@ -654,7 +655,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
       {
          for(S32 i = 0; i < gServerGame->getClientCount(); i++)
          {
-            GameConnection *client = gServerGame->getClient(i)->getConnection();
+            GameConnection *client = gServerGame->getClientInfo(i)->getConnection();
 
             if(!client->isLevelChanger())
             {
@@ -668,9 +669,9 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
       { 
          for(S32 i = 0; i < gServerGame->getClientCount(); i++)
          {
-            GameConnection *client = gServerGame->getClient(i)->getConnection();
+            GameConnection *client = gServerGame->getClientInfo(i)->getConnection();
 
-            if(client->isLevelChanger() && (!client->isAdmin()))
+            if(client->isLevelChanger() && (!mClientInfo->isAdmin()))
             {
                client->setIsLevelChanger(false);
                client->s2cSetIsLevelChanger(false, false);
@@ -688,7 +689,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
 
       // If we've changed the server name, notify all the clients
       for(S32 i = 0; i < gServerGame->getClientCount(); i++)
-         gServerGame->getClient(i)->getConnection()->s2cSetServerName(mSettings->getHostName());
+         gServerGame->getClientInfo(i)->getConnection()->s2cSetServerName(mSettings->getHostName());
    }
    else if(type == (U32)ServerDescr)
       msg = serverDescrChanged;
@@ -701,10 +702,10 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
 
 // Kick player or change his team
 TNL_IMPLEMENT_RPC(GameConnection, c2sAdminPlayerAction,
-   (StringTableEntry playerName, U32 actionIndex, S32 team), (playerName, actionIndex, team),
-   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
+                     (StringTableEntry playerName, U32 actionIndex, S32 team), (playerName, actionIndex, team),
+                     NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
-   if(!isAdmin())
+   if(!mClientInfo->isAdmin())
       return;              // Do nothing --> non-admins have no pull here
 
    // else...
@@ -712,9 +713,10 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sAdminPlayerAction,
    GameType *gt = gServerGame->getGameType();
 
    // Find connection for player with name playerName
-   GameConnection *theClient = gt->getGame()->findClientRef(playerName)->getConnection();
+   ClientInfo *clientInfo = gt->getGame()->findClientInfo(playerName);
+   GameConnection *theClient = clientInfo->getConnection();
 
-   if(!theClient)    // Hmmm... couldn't find him.  Maybe the dude disconnected?
+   if(!clientInfo)    // Hmmm... couldn't find the dude.  Maybe he disconnected?
       return;
 
    static StringTableEntry kickMessage("%e0 was kicked from the game by %e1.");
@@ -722,20 +724,19 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sAdminPlayerAction,
 
    StringTableEntry msg;
    Vector<StringTableEntry> e;
-   e.push_back(theClient->getClientName());     // --> Name of player being administered
-   e.push_back(getClientName());                // --> Name of player doing the adminstering
+   e.push_back(clientInfo->getName());       // --> Name of player being administered
+   e.push_back(getClientInfo()->getName());  // --> Name of player doing the adminstering
 
    switch(actionIndex)
    {
-   case PlayerMenuUserInterface::ChangeTeam:
-      msg = changeTeamMessage;
-         gt->changeClientTeam(theClient, team);
-      break;
+      case PlayerMenuUserInterface::ChangeTeam:
+         msg = changeTeamMessage;
+         gt->changeClientTeam(clientInfo, team);
+         break;
 
-   case PlayerMenuUserInterface::Kick:
-      {
+      case PlayerMenuUserInterface::Kick:
          msg = kickMessage;
-         if(theClient->isAdmin())
+         if(mClientInfo->isAdmin())
          {
             static StringTableEntry nokick("Can't kick an administrator!");
             s2cDisplayMessage(ColorAqua, SFXNone, nokick);
@@ -754,14 +755,13 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sAdminPlayerAction,
          }
 
          for(S32 i = 0; i < Robot::robots.size(); i++)
-            if(Robot::robots[i]->getName() == theClient->getClientName())
+            if(Robot::robots[i]->getName() == clientInfo->getName())
                delete Robot::robots[i];
 
          break;
-      }
 
-   default:
-      return;
+      default:
+         return;
    }
 
    gt->broadcastMessage(ColorAqua, SFXIncomingMessage, msg, e);
@@ -771,7 +771,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sAdminPlayerAction,
 //// Announce a new player has become an admin
 //TNL_IMPLEMENT_RPC(GameConnection, s2cClientBecameAdmin, (StringTableEntry name), (name), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 1)
 //{
-//   ClientRef *cl = findClientRef(name);
+//   ClientRef *cl = findClientConnection(name);
 //   cl->clientConnection->isAdmin = true;
 //   getUserInterface().displayMessage(Color(0,1,1), "%s has been granted administrator access.", name.getString());
 //}
@@ -795,7 +795,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetServerName, (StringTableEntry name), (na
    }
 
    // If we know the admin password, apply for permissions if we don't already have them
-   if(!mIsAdmin)
+   if(!mClientGame->getClientInfo()->isAdmin())
    {
       string adminPassword = gINI.GetValue("SavedAdminPasswords", getServerName());
       if(adminPassword != "")
@@ -813,12 +813,15 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsAdmin, (bool granted), (granted),
    NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
 #ifndef ZAP_DEDICATED
-   if(granted)
-      logprintf(LogConsumer::ServerFilter, "User [%s] granted admin permissions", getClientName().getString());
-   else
-      logprintf(LogConsumer::ServerFilter, "User [%s] denied admin permissions", getClientName().getString());
 
-   setIsAdmin(granted);
+   ClientInfo *clientInfo = mClientGame->getClientInfo();
+
+   if(granted)
+      logprintf(LogConsumer::ServerFilter, "User [%s] granted admin permissions", clientInfo->getName().getString());
+   else
+      logprintf(LogConsumer::ServerFilter, "User [%s] denied admin permissions", clientInfo->getName().getString());
+
+   clientInfo->setAdmin(granted);
 
    // Admin permissions automatically give level change permission
    if(granted)                      // Don't rescind level change permissions for entering a bad admin PW
@@ -854,13 +857,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsLevelChanger, (bool granted, bool noti
    NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
 #ifndef ZAP_DEDICATED
-   if(mClientRef)
-   {
-      if(granted)
-         logprintf(LogConsumer::ServerFilter, "User [%s] granted level change permissions", getClientName().getString());
-      else
-         logprintf(LogConsumer::ServerFilter, "User [%s] denied level change permissions", getClientName().getString());
-   }
+   logprintf(LogConsumer::ServerFilter, "User [%s] %s level change permissions", granted ? "granted" : "denied", mClientInfo->getName().getString());
 
    // If we entered a password, and it worked, let's save it for next time
    if(granted && mLastEnteredLevelChangePassword != "")
@@ -1132,8 +1129,8 @@ void GameConnection::c2sRequestLevelChange2(S32 newLevelIndex, bool isRelative)
       return;
 
    // Use voting when there is no level change password and there is more then 1 player
-   if(!mIsAdmin && mSettings->getLevelChangePassword().length() == 0 && 
-         gServerGame->getPlayerCount() > 1 && gServerGame->voteStart(this, 0, newLevelIndex))
+   if(!mClientInfo->isAdmin() && mSettings->getLevelChangePassword().length() == 0 && 
+         gServerGame->getPlayerCount() > 1 && gServerGame->voteStart(mClientInfo.get(), 0, newLevelIndex))
       return;
 
    bool restart = false;
@@ -1145,7 +1142,7 @@ void GameConnection::c2sRequestLevelChange2(S32 newLevelIndex, bool isRelative)
 
    StringTableEntry msg( restart ? "%e0 restarted the current level." : "%e0 changed the level to %e1." );
    Vector<StringTableEntry> e;
-   e.push_back(getClientName());
+   e.push_back(mClientInfo->getName());
    
    if(!restart)
       e.push_back(gServerGame->getLevelNameFromIndex(newLevelIndex));
@@ -1159,19 +1156,19 @@ void GameConnection::c2sRequestLevelChange2(S32 newLevelIndex, bool isRelative)
 TNL_IMPLEMENT_RPC(GameConnection, c2sRequestShutdown, (U16 time, StringPtr reason), (time, reason), 
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
-   if(!mIsAdmin)
+   if(!mClientInfo->isAdmin())
       return;
 
    logprintf(LogConsumer::ServerFilter, "User [%s] requested shutdown in %d seconds [%s]", 
-         getClientName().getString(), time, reason.getString());
+         mClientInfo->getName().getString(), time, reason.getString());
 
-   gServerGame->setShuttingDown(true, time, mClientRef, reason.getString());
+   gServerGame->setShuttingDown(true, time, this, reason.getString());
 
    // Broadcast the message
    for(S32 i = 0; i < gServerGame->getClientCount(); i++)
    {
-      GameConnection *conn = gServerGame->getClient(i)->getConnection();
-      conn->s2cInitiateShutdown(time, getClientName(), reason, conn == this);
+      GameConnection *conn = gServerGame->getClientInfo(i)->getConnection();
+      conn->s2cInitiateShutdown(time, mClientInfo->getName(), reason, conn == this);
    }
 }
 
@@ -1187,15 +1184,15 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cInitiateShutdown, (U16 time, StringTableEnt
 
 TNL_IMPLEMENT_RPC(GameConnection, c2sRequestCancelShutdown, (), (), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
-   if(!mIsAdmin)
+   if(!mClientInfo->isAdmin())
       return;
 
-   logprintf(LogConsumer::ServerFilter, "User %s canceled shutdown", getClientName().getString());
+   logprintf(LogConsumer::ServerFilter, "User %s canceled shutdown", mClientInfo->getName().getString());
 
    // Broadcast the message
    for(S32 i = 0; i < gServerGame->getClientCount(); i++)
    {
-      GameConnection *conn = gServerGame->getClient(i)->getConnection();
+      GameConnection *conn = gServerGame->getClientInfo(i)->getConnection();
 
       if(conn != this)     // Don't send message to cancellor!
          conn->s2cCancelShutdown();
@@ -1228,19 +1225,18 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetServerAlertVolume, (S8 vol), (vol), NetC
 
 // Tell all clients name has changed, and update server side name
 // Server only
-void updateClientChangedName(GameConnection *gameConnection, StringTableEntry newName)
+void updateClientChangedName(ClientInfo *clientInfo, StringTableEntry newName)
 {
    GameType *gameType = gServerGame->getGameType();
-   ClientRef *clientRef = gameConnection->getClientRef();
 
-   logprintf(LogConsumer::LogConnection, "Name changed from %s to %s", gameConnection->getClientName().getString(), newName.getString());
+   logprintf(LogConsumer::LogConnection, "Name changed from %s to %s", clientInfo->getName().getString(), newName.getString());
 
    if(gameType)
-      gameType->s2cRenameClient(gameConnection->getClientName(), newName);
+      gameType->s2cRenameClient(clientInfo->getName(), newName);
 
-   gameConnection->setClientName(newName);
+   clientInfo->setName(newName);
 
-   Ship *ship = dynamic_cast<Ship *>(gameConnection->getControlObject());
+   Ship *ship = dynamic_cast<Ship *>(clientInfo->getConnection()->getControlObject());
 
    if(ship)
    {
@@ -1254,19 +1250,20 @@ void updateClientChangedName(GameConnection *gameConnection, StringTableEntry ne
 // then client has changed name to non-reserved, or entered password.
 TNL_IMPLEMENT_RPC(GameConnection, c2sRenameClient, (StringTableEntry newName), (newName), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
-   StringTableEntry oldName = getClientName();
-   setClientName(StringTableEntry(""));     
-   StringTableEntry uniqueName = GameConnection::makeUnique(newName.getString()).c_str();  // Make sure new name is unique
-   setClientName(oldName);                // Restore name to properly get it updated to clients
+   StringTableEntry oldName = mClientInfo->getName();
+   mClientInfo->setName("");     
+
+   StringTableEntry uniqueName = GameConnection::makeUnique(newName.getString()).c_str();    // Make sure new name is unique
+   mClientInfo->setName(oldName);         // Restore name to properly get it updated to clients
    setClientNameNonUnique(newName);       // For correct authentication
    
    mIsVerified = false;                   // Renamed names are never verified
-   setAuthenticated(false);               // This prevents the name from being underlined
+   mClientInfo->setAuthenticated(false);  // Prevents name from being underlined
    mClientNeedsToBeVerified = false;      // Prevent attempts to authenticate the new name
    mClientClaimsToBeVerified = false;
 
    if(oldName != uniqueName)              // Did the name actually change?
-      updateClientChangedName(this,uniqueName);
+      updateClientChangedName(mClientInfo.get(), uniqueName);
 }
 
 
@@ -1280,7 +1277,7 @@ extern LevelInfo getLevelInfoFromFileChunk(char *chunk, S32 size, LevelInfo &lev
 
 TNL_IMPLEMENT_RPC(GameConnection, s2rSendDataParts, (U8 type, ByteBufferPtr data), (type, data), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 0)
 {
-   if(!mSettings->getIniSettings()->allowMapUpload && !isAdmin())  // Don't need it when not enabled, saves some memory. May remove this, it is checked again leter.
+   if(!mSettings->getIniSettings()->allowMapUpload && !mClientInfo->isAdmin())  // Don't need it when not enabled, saves some memory. May remove this, it is checked again leter.
       return;
 
    if(mDataBuffer)
@@ -1295,7 +1292,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendDataParts, (U8 type, ByteBufferPtr data
    }
 
    if(type == 1 &&      // TODO: 1 Should be an enum, means we're transmitting a level file.  Probably already have an enum that would work.
-         (mSettings->getIniSettings()->allowMapUpload || (mSettings->getIniSettings()->allowAdminMapUpload && isAdmin())) &&
+         (mSettings->getIniSettings()->allowMapUpload || (mSettings->getIniSettings()->allowAdminMapUpload && mClientInfo->isAdmin())) &&
          !isInitiator() && mDataBuffer->getBufferSize() != 0)
    {
       // Only server runs this part of code
@@ -1317,7 +1314,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendDataParts, (U8 type, ByteBufferPtr data
       {
          fwrite(mDataBuffer->getBuffer(), 1, mDataBuffer->getBufferSize(), f);
          fclose(f);
-         logprintf(LogConsumer::ServerFilter, "%s %s Uploaded %s", getNetAddressString(), mClientName.getString(), filename);
+         logprintf(LogConsumer::ServerFilter, "%s %s Uploaded %s", getNetAddressString(), mClientInfo->getName().getString(), filename);
          S32 id = gServerGame->addUploadedLevelInfo(filename, levelInfo);
          c2sRequestLevelChange2(id, false);
       }
@@ -1387,9 +1384,9 @@ void GameConnection::writeConnectRequest(BitStream *stream)
 
    // Write some info about the client... name, id, and verification status
    stream->writeString(serverPW.c_str());
-   stream->writeString(mClientName.getString());
+   stream->writeString(mClientInfo->getName().getString());
 
-   mClientId.write(stream);
+    mClientInfo->getId()->write(stream);
 
    stream->writeFlag(mIsVerified);    // Tell server whether we (the client) claim to be authenticated
 #endif
@@ -1464,10 +1461,10 @@ bool GameConnection::readConnectRequest(BitStream *stream, NetConnection::Termin
    }
 
    // Change name to be unique - i.e. if we have multiples of 'ChumpChange'
-   mClientName = makeUnique(name).c_str();  // Unique name
-   mClientNameNonUnique = name;             // For authentication non-unique name
+   mClientInfo->setName(makeUnique(name));   // Unique name
+   mClientNameNonUnique = name;              // For authentication non-unique name
 
-   mClientId.read(stream);
+   mClientInfo->getId()->read(stream);
    mIsVerified = false;
    mClientNeedsToBeVerified = mClientClaimsToBeVerified = stream->readFlag();
 
@@ -1488,8 +1485,9 @@ void GameConnection::requestAuthenticationVerificationFromMaster()
 {
    MasterServerConnection *masterConn = gServerGame->getConnectionToMaster();
 
+   // Ask master if client name/id match and the client is authenticated
    if(masterConn && masterConn->isEstablished() && mClientClaimsToBeVerified)
-      masterConn->requestAuthentication(mClientNameNonUnique, mClientId);              // Ask master if client name/id match and are authenticated
+      masterConn->requestAuthentication(mClientNameNonUnique, *mClientInfo->getId());   
 }
 
 
@@ -1509,7 +1507,7 @@ string GameConnection::makeUnique(string name)
       for(S32 i = 0; i < gServerGame->getClientCount(); i++)
       {
          // TODO:  How to combine these blocks?
-         if(proposedName == gServerGame->getClient(i)->getConnection()->getClientName().getString())          // Collision detected!
+         if(proposedName == gServerGame->getClientInfo(i)->getName().getString())     // Collision detected!
          {
             unique = false;
 
@@ -1518,7 +1516,7 @@ string GameConnection::makeUnique(string name)
 
             // Max length name can be such that when number is appended, it's still less than MAX_PLAYER_NAME_LENGTH
             S32 maxNamePos = MAX_PLAYER_NAME_LENGTH - (S32)strlen(numstr); 
-            name = name.substr(0, maxNamePos);                         // Make sure name won't grow too long
+            name = name.substr(0, maxNamePos);     // Make sure name won't grow too long
             proposedName = name + numstr;
 
             index++;
@@ -1610,7 +1608,7 @@ void GameConnection::onConnectionEstablished()
    }
    else                 // Runs on server
    {
-      gServerGame->addClient(this);
+      gServerGame->addClient(mClientInfo);
       setGhostFrom(true);
       setGhostTo(false);
       activateGhosting();
@@ -1623,8 +1621,7 @@ void GameConnection::onConnectionEstablished()
       mAcheivedConnection = true;
       
       // Notify the bots that a new player has joined
-      if(mClientRef)       // could be NULL when getGameType() is NULL
-         Robot::getEventManager().fireEvent(NULL, EventManager::PlayerJoinedEvent, mClientRef->getPlayerInfo());
+      Robot::getEventManager().fireEvent(NULL, EventManager::PlayerJoinedEvent, getPlayerInfo());
 
       if(gServerGame->getSettings()->getLevelChangePassword() == "")   // Grant level change permissions if level change PW is blank
       {
@@ -1633,9 +1630,11 @@ void GameConnection::onConnectionEstablished()
          sendLevelList();
       }
 
-      logprintf(LogConsumer::LogConnection, "%s - client \"%s\" connected.", getNetAddressString(), mClientName.getString());
-      logprintf(LogConsumer::ServerFilter,  "%s [%s] joined [%s]", mClientName.getString(), 
-                isLocalConnection() ? "Local Connection" : getNetAddressString(), getTimeStamp().c_str());
+      const char *name =  mClientInfo->getName().getString();
+
+      logprintf(LogConsumer::LogConnection, "%s - client \"%s\" connected.", getNetAddressString(), name);
+      logprintf(LogConsumer::ServerFilter,  "%s [%s] joined [%s]", name, 
+                                             isLocalConnection() ? "Local Connection" : getNetAddressString(), getTimeStamp().c_str());
 
       GameType *gt = gServerGame->getGameType();
 
@@ -1659,15 +1658,10 @@ void GameConnection::onConnectionTerminated(NetConnection::TerminationReason rea
    }
    else     // Server
    {
-      // ClientRef might be NULL if the server is quitting the game, in which case we 
-      // don't need to fire these events anyway
-      if(getClientRef() != NULL)
-      {
-         getClientRef()->getPlayerInfo()->setDefunct();
-         Robot::getEventManager().fireEvent(NULL, EventManager::PlayerLeftEvent, getClientRef()->getPlayerInfo());
-      }
+      getPlayerInfo()->setDefunct();
+      Robot::getEventManager().fireEvent(NULL, EventManager::PlayerLeftEvent, getPlayerInfo());
 
-      gServerGame->removeClient(this);
+      gServerGame->removeClient(mClientInfo.get());
    }
 }
 
@@ -1688,6 +1682,32 @@ void GameConnection::onConnectTerminated(TerminationReason reason, const char *n
 
    }
 }
+
+
+// Return a measure of a player's strength.  Right now this is rather bogus -- any improvements welcomed!!!
+// Should return a number between -1 and 1
+// Better: https://secure.wikimedia.org/wikipedia/en/wiki/Elo_rating_system
+F32 GameConnection::getCumulativeRating()
+{
+   // Initial case: no one has scored
+   if(mTotalCumulativeScore == 0)      
+      return .5;
+
+   // Standard case: 
+   else   
+      return F32(mCumulativeScore) / F32(mTotalCumulativeScore);
+}
+
+
+void GameConnection::endOfGameScoringHandler()
+{
+   mGamesPlayed++;
+   //mScore = 0; 
+   //mRating = 0; 
+   //mTotalScore = 0;
+   mStatistics.resetStatistics();
+}
+
 
 };
 

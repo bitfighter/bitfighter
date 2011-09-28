@@ -35,6 +35,7 @@
 #include "tnlNetConnection.h"
 #include "Timer.h"
 #include <time.h>
+#include "boost\smart_ptr\shared_ptr.hpp"
 
 
 using namespace TNL;
@@ -61,13 +62,13 @@ static const char USED_EXTERNAL *gConnectStatesTable[] = {
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class ClientRef;
 class ClientGame;
 struct LevelInfo;
-struct ClientInfo;
 class GameSettings;
 class SoundEffect;
 class VoiceDecoder;
+class LuaPlayerInfo;
+class ClientInfo;
 
 
 class GameConnection: public ControlObjectConnection, public DataSendable
@@ -84,35 +85,34 @@ private:
    string mLastEnteredLevelChangePassword;
    string mLastEnteredAdminPassword;
 
-   // The server maintains a linked list of clients...
-   GameConnection *mNext;
-   GameConnection *mPrev;
+   // These are only used on the server -- will be NULL on client
+   boost::shared_ptr<ClientInfo> mClientInfo;         
+   LuaPlayerInfo *mPlayerInfo;      // Lua access to this class
+
 
 #ifndef ZAP_DEDICATED
-   ClientGame *mClientGame;      // Sometimes this is NULL
+   ClientGame *mClientGame;         // Sometimes this is NULL
 #endif
 
    // For voice chat
    SoundEffect *mVoiceSFX;
    VoiceDecoder *mDecoder;
 
-
    bool mInCommanderMap;
-   bool mIsRobot;
-   bool mIsAdmin;
    bool mIsLevelChanger;
    bool mWaitingForPermissionsReply;
    bool mGotPermissionsReply;
    bool mIsBusy;              // True when the player is off chatting or futzing with options or whatever, false when they are "active"
 
-   U32 mPing;
+   bool mWantsScoreboardUpdates;          // Indicates if client has requested scoreboard streaming (e.g. pressing Tab key)
+   bool mReadyForRegularGhosts;
 
-   StringTableEntry mClientName;
-   StringTableEntry mClientNameNonUnique;    // For authentication, not unique name.
-   Nonce mClientId;
+   //StringTableEntry mClientName;
+   StringTableEntry mClientNameNonUnique; // For authentication, not unique name
+   //Nonce mClientId;
    bool mClientClaimsToBeVerified;
    bool mClientNeedsToBeVerified;
-   bool mIsVerified;          // True if the connection has a verified account confirmed by the master
+   bool mIsVerified;                      // True if the connection has a verified account confirmed by the master
    Timer mAuthenticationTimer;
    S32 mAuthenticationCounter;
 
@@ -120,9 +120,18 @@ private:
 
    StringTableEntry mServerName;
    Vector<U32> mLoadout;
-   SafePtr<ClientRef> mClientRef;
 
    GameSettings *mSettings;
+
+   // Score for current game
+   //S32 mScore;                   // Score this game
+   //F32 mRating;                  // Rating for this game
+   //S32 mTotalScore;              // Total number of points scored by anyone this game
+
+   // Long term score tracking
+   S32 mCumulativeScore;         // Total points scored my this connection over it's entire lifetime
+   S32 mTotalCumulativeScore;    // Total points scored by anyone while this connection is alive
+   U32 mGamesPlayed;             // Number of games played, obviously
 
 public:
    Vector<U32> mOldLoadout;   // Server: to respawn with old loadout  Client: to check if using same loadout configuration
@@ -162,14 +171,15 @@ public:
       // Items not listed in c2sSetParam()::*types[] should be added here
       DeleteLevel,            
 
-      ParamTypeCount          // Must be last
+      ParamTypeCount       // Must be last
    };
 
+
 #ifndef ZAP_DEDICATED
-   GameConnection(GameSettings *setting, const ClientInfo *clientInfo);   // Constructor for ClientGame
+   GameConnection(GameSettings *settings, ClientInfo *clientInfo);   // Constructor for ClientGame
 #endif
-   GameConnection();                               // Constructor (server only)
-   ~GameConnection();                              // Destructor
+   GameConnection();                                                 // Constructor for ServerGame
+   ~GameConnection();                                                // Destructor
 
 
    // These from the DataSendable interface class
@@ -182,34 +192,31 @@ public:
    void setClientGame(ClientGame *game) { mClientGame = game; }
 #endif
 
-   S32 mScore;                // Total points scored my this connection
-   S32 mTotalScore;           // Total points scored by anyone while this connection is alive
-   U32 mGamesPlayed;          // Number of games played, obviously
-   F32 mRating;               // Game-normalized rating
-   Statistics mStatistics;    // Player statistics tracker
+   Statistics mStatistics;       // Player statistics tracker
 
-   Timer mSwitchTimer;        // Timer controlling when player can switch teams after an initial switch
+   Timer mSwitchTimer;           // Timer controlling when player can switch teams after an initial switch
 
-   void setClientName(StringTableEntry name) { mClientName = name; }
    void setClientNameNonUnique(StringTableEntry name) { mClientNameNonUnique = name; }
    void setServerName(StringTableEntry name) { mServerName = name; }
+
+   ClientInfo *getClientInfo() { return mClientInfo.get(); }
+   void setClientInfo(boost::shared_ptr<ClientInfo> clientInfo) { mClientInfo = clientInfo; }
+
+
+   LuaPlayerInfo *getPlayerInfo() { return mPlayerInfo; }
 
    bool lostContact() { return getTimeSinceLastPacketReceived() > 2000 && mLastPacketRecvTime != 0; }     // No contact in 2000ms?  That's bad!
 
    string getServerName() { return mServerName.getString(); }
    static string makeUnique(string name);    // Make sure a given name is unique across all clients & bots
 
-   void setClientRef(ClientRef *theRef);
-   ClientRef *getClientRef();
-
-   U32 getPing() { return mPing; }
-   void setPing(U32 ping) { mPing = ping; }
-
    // Voice chat stuff -- these will be invalid on the server side
    SoundEffect *getVoiceSFX() { return mVoiceSFX; }
    VoiceDecoder *getVoiceDecoder() { return mDecoder; }
 
-   StringTableEntryRef getClientName() { return mClientName; }
+   //StringTableEntryRef getClientName() { return mClientName; }
+
+   void reset();        // Clears/initializes some things between levels
 
    void submitAdminPassword(const char *password);
    void submitLevelChangePassword(string password);
@@ -217,11 +224,11 @@ public:
    void suspendGame();
    void unsuspendGame();
 
-   bool isRobot() { return mIsRobot; }
-   void setIsRobot(bool robot) { mIsRobot = robot; }
+   //bool isRobot() { return mIsRobot; }
+   //void setIsRobot(bool robot) { mIsRobot = robot; }
 
-   bool isAdmin() { return mIsAdmin; }
-   void setIsAdmin(bool admin) { mIsAdmin = admin; }
+   //bool isAdmin() { return mIsAdmin; }
+   //void setIsAdmin(bool admin) { mIsAdmin = admin; }
 
    bool isBusy() { if(!this) return false; else return mIsBusy; }
    void setIsBusy(bool busy) { mIsBusy = busy; }
@@ -230,6 +237,31 @@ public:
    void setIsLevelChanger(bool levelChanger) { mIsLevelChanger = levelChanger; }
 
    void sendLevelList();
+
+   bool isReadyForRegularGhosts() { return mReadyForRegularGhosts; }
+   void setReadyForRegularGhosts(bool ready) { mReadyForRegularGhosts = ready; }
+
+   bool wantsScoreboardUpdates() { return mWantsScoreboardUpdates; }
+   void setWantsScoreboardUpdates(bool wantsUpdates) { mWantsScoreboardUpdates = wantsUpdates; }
+
+   //S32 getScore() { return mScore; }
+   //void setScore(S32 score) { mScore = score; }    // Called from ServerClientInfo
+
+   //void addScore(S32 score) { mScore += score; }
+   //void addToTotalScore(S32 score) { mTotalScore += score; mTotalCumulativeScore += score; }
+
+   void addToTotalCumulativeScore(S32 score) { mTotalCumulativeScore += score; }
+
+   F32 getCumulativeRating();
+   //F32 getRating();
+
+   //void setRating(F32 rating) { mRating = rating; }
+
+   void endOfGameScoringHandler();
+
+   Timer respawnTimer;
+
+
 
    // Tell UI we're waiting for password confirmation from server
    void setWaitingForPermissionsReply(bool waiting) { mWaitingForPermissionsReply = waiting; }
@@ -302,16 +334,15 @@ public:
 
    U8 mSendableFlags;
    ByteBuffer *mDataBuffer;
+
    TNL_DECLARE_RPC(s2rSendableFlags, (U8 flags));
    TNL_DECLARE_RPC(s2rSendDataParts, (U8 type, ByteBufferPtr data));
    bool s2rUploadFile(const char *filename, U8 type);
 
-   Nonce *getClientId() { return &mClientId; }
-
-   void setAuthenticated(bool isVerified);    // Runs on server only, after receiving a message from the master, or on local connection
+   //void setAuthenticated(bool isVerified);    // Client & Server... Runs on server after getting message from master, or on local connection
    void resetAuthenticationTimer() { mAuthenticationTimer.reset(MASTER_SERVER_FAILURE_RETRY_TIME + 1000); mAuthenticationCounter++;}
    S32 getAuthenticationCounter() { return mAuthenticationCounter; }
-   bool isAuthenticated() { return mIsVerified; }
+   //bool isAuthenticated() { return mIsVerified; }
    void requestAuthenticationVerificationFromMaster();
    void updateAuthenticationTimer(U32 timeDelta);
 
@@ -331,7 +362,7 @@ public:
 };
 
 LevelInfo getLevelInfo(char *level, S32 size);
-void updateClientChangedName(GameConnection *,StringTableEntry);  //in masterConnection.cpp
+void updateClientChangedName(ClientInfo *clientInfo, StringTableEntry);  
 
 
 };

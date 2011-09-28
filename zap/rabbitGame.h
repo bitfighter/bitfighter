@@ -81,7 +81,7 @@ public:
    S32 getFlagCount() { return mFlags.size(); }
 
    bool objectCanDamageObject(GameObject *damager, GameObject *victim);
-   void controlObjectForClientKilled(GameConnection *theClient, GameObject *clientObject, GameObject *killerObject);
+   void controlObjectForClientKilled(ClientInfo *theClient, GameObject *clientObject, GameObject *killerObject);
    bool shipHasFlag(Ship *ship);
    bool teamHasFlag(S32 team) const;
 

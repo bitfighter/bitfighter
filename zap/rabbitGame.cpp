@@ -292,7 +292,7 @@ void RabbitGameType::idle(GameObject::IdleCallPath path, U32 deltaT)
    }
 }
 
-void RabbitGameType::controlObjectForClientKilled(GameConnection *theClient, GameObject *clientObject, GameObject *killerObject)
+void RabbitGameType::controlObjectForClientKilled(ClientInfo *theClient, GameObject *clientObject, GameObject *killerObject)
 {
    Parent::controlObjectForClientKilled(theClient, clientObject, killerObject);
 

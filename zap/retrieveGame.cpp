@@ -199,7 +199,7 @@ namespace Zap
             e[0] = getGame()->getTeamName(s->getTeam());
 
             for(S32 i = 0; i < getGame()->getClientCount(); i++)
-              getGame()->getClient(i)->getConnection()->s2cTouchdownScored(SFXFlagCapture, s->getTeam(), capAllString, e);
+              getGame()->getClientInfo(i)->getConnection()->s2cTouchdownScored(SFXFlagCapture, s->getTeam(), capAllString, e);
          }
 
          // Return all the flags to their starting locations if need be
@@ -224,9 +224,12 @@ namespace Zap
    }
 
    // Same code as in HTF, CTF
-   void RetrieveGameType::performProxyScopeQuery(GameObject *scopeObject, GameConnection *connection)
+   void RetrieveGameType::performProxyScopeQuery(GameObject *scopeObject, ClientInfo *clientInfo)
    {
-      Parent::performProxyScopeQuery(scopeObject, connection);
+      Parent::performProxyScopeQuery(scopeObject, clientInfo);
+
+      GameConnection *connection = clientInfo->getConnection();
+
       S32 uTeam = scopeObject->getTeam();
 
       for(S32 i = 0; i < mFlags.size(); i++)

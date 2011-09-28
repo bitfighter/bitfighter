@@ -1045,7 +1045,8 @@ static const char *sanitizeForJson(const char *value)
          {
             AuthenticationStatus status;
 
-            if(!stricmp(name.getString(), walk->mPlayerOrServerName.getString()) && walk->isAuthenticated())      // Need case insensitive comparison here
+            // Need case insensitive comparison here
+            if(!stricmp(name.getString(), walk->mPlayerOrServerName.getString()) && walk->isAuthenticated())      
                status = AuthenticationStatusAuthenticatedName;
 
             // If server just restarted, clients will need to reauthenticate, and that may take some time.

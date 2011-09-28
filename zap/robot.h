@@ -30,6 +30,7 @@
 #include "gameObject.h"
 #include "moveObject.h"
 #include "ship.h"
+#include "game.h"          // For ClientInfo def
 
 #include "Timer.h"
 #include "shipItems.h"
@@ -97,6 +98,7 @@ public:
 class MoveItem;
 class LuaRobot;
 class ServerGame;
+class ClientInfo;
 
 /**
  * This is the wrapper around the C++ object found in object.cc
@@ -121,6 +123,7 @@ private:
 
    static const S32 RobotRespawnDelay = 1500;
 
+   boost::shared_ptr<ClientInfo> mClientInfo;         // Reusable ClientInfo for robot, will have NULL connection, used when spawning
    LuaPlayerInfo *mPlayerInfo;      // Player info object describing the robot
 
    Vector<string> mArgs;            // List of arguments passed to the robot.  Script name itself is the first one.

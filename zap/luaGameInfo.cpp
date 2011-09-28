@@ -135,12 +135,12 @@ S32 LuaGameInfo::getPlayers(lua_State *L)
 
    for(S32 i = 0; i < clientCount; i++)
    {
-      ClientRef *clientRef = gServerGame->getClient(i);
+      GameConnection *conn = gServerGame->getClientInfo(i)->getConnection();
 
-      if(clientRef->getPlayerInfo()->isDefunct())     // Skip defunct players
+      if(conn->getPlayerInfo()->isDefunct())     // Skip defunct players
          continue;
       
-      clientRef->getPlayerInfo()->push(L);
+      conn->getPlayerInfo()->push(L);
       pushed++;      // Increment pushed before using it because Lua uses 1-based arrays
       lua_rawseti(L, 1, pushed);
    }

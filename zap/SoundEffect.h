@@ -44,6 +44,7 @@ public:
    SoundEffect(U32 profileIndex, ByteBufferPtr ib, F32 gain, Point position, Point velocity);
    virtual ~SoundEffect();
 
+
    bool isPlaying() { return mSourceIndex != -1; }
 };
 

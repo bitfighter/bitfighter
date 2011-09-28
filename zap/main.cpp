@@ -783,7 +783,7 @@ void createClientGame(GameSettings *settings)
       gClientGame->getUIManager()->getLevelNameEntryUserInterface()->setString(settings->getIniSettings()->lastEditorName);
 
       seedRandomNumberGenerator(settings->getIniSettings()->lastName);
-      gClientGame->getClientInfo()->id.getRandom();
+      gClientGame->getClientInfo()->getId()->getRandom();
 
       //gClientGame2 = new ClientGame(Address());   //  !!! 2-player split-screen game in same game.
 

@@ -155,9 +155,11 @@ void CTFGameType::itemDropped(Ship *ship, MoveItem *item)
 
 
 // Identical to HTF, Retrieve
-void CTFGameType::performProxyScopeQuery(GameObject *scopeObject, GameConnection *connection)
+void CTFGameType::performProxyScopeQuery(GameObject *scopeObject, ClientInfo *clientInfo)
 {
-   Parent::performProxyScopeQuery(scopeObject, connection);
+   GameConnection *connection = clientInfo->getConnection();
+
+   Parent::performProxyScopeQuery(scopeObject, clientInfo);
    S32 uTeam = scopeObject->getTeam();
 
    for(S32 i = 0; i < mFlags.size(); i++)

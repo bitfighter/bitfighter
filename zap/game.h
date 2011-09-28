@@ -90,6 +90,123 @@ const U32 MAX_GAME_NAME_LEN = 32;     // Any longer, and it won't fit on-screen
 const U32 MAX_GAME_DESCR_LEN = 60;    // Any longer, and it won't fit on-screen; also limits max length of credits string
 
 
+////////////////////////////////////////
+////////////////////////////////////////
+
+class GameConnection;
+extern S32 NO_TEAM;
+
+// This object only concerns itself with things that one client tracks about another.  We use it for other purposes, of course, 
+// as a convenient strucure for holding certain settings about the local client, or about remote clients when we are running on the server.
+// But the general scope of what we track should be limited; other items should be stored directly on the GameConnection object itself.
+class ClientInfo
+{
+protected:
+   StringTableEntry mName;
+   S32 mScore;
+   S32 mTotalScore;
+   Nonce mId;
+   S32 mTeamIndex;
+   S32 mPing;
+   bool mIsAdmin;
+   bool mIsRobot;
+   bool mIsAuthenticated;
+
+   virtual void initialize() { mScore = 0; mTotalScore = 0; mTeamIndex = (NO_TEAM + 0); mPing = 0; mIsAdmin = false; mIsRobot = false; mIsAuthenticated = false; }
+
+public:
+   virtual GameConnection *getConnection() = 0;
+   virtual void setConnection(GameConnection *conn) = 0;
+
+   const StringTableEntry getName() { return mName; }
+   void setName(const StringTableEntry &name) { mName = name; }
+
+   S32 getScore() { return mScore; }
+   void setScore(S32 score) { mScore = score; }
+   void addScore(S32 score) { mScore += score; }
+
+   virtual void addToTotalScore(S32 score) = 0;
+
+   virtual void setRating(F32 rating) = 0;
+   virtual F32 getRating() = 0;
+
+   S32 getPing() { return mPing; }
+   void setPing(S32 ping) { mPing = ping; }
+
+   S32 getTeamIndex() { return mTeamIndex; }
+   void setTeamIndex(S32 teamIndex) { mTeamIndex = teamIndex; }
+
+   bool isAuthenticated() { return mIsAuthenticated; }
+   virtual void setAuthenticated(bool isAuthenticated);
+
+   bool isAdmin() { return mIsAdmin; }
+   void setAdmin(bool isAdmin) { mIsAdmin = isAdmin; }
+
+   bool isRobot() { return mIsRobot; }
+
+
+   Nonce *getId() { return &mId; }
+
+};
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+class GameConnection;
+
+class ServerClientInfo : public ClientInfo
+{
+   typedef ClientInfo Parent;
+
+private:
+   GameConnection *mClientConnection;
+   
+public:
+   ServerClientInfo(GameConnection *clientConnection);
+   //ServerClientInfo(GameConnection *clientConnection, const StringTableEntry &name, bool isRobot);
+
+   GameConnection *getConnection() { return mClientConnection; }
+   void setConnection(GameConnection *conn) { mClientConnection = conn; }
+
+   void setAuthenticated(bool isAuthenticated);
+
+   void setRating(F32 rating) { TNLAssert(false, "ratings can't be set for this class!"); }
+   F32 getRating();
+
+   void addToTotalScore(S32 score);
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+// Basically the same as a ServerClientInfo, but without the GameConnection pointer.  These are used on the client side to track information
+// about other players, and since players have not connections to other players, the connection pointer becomes superfluous.  The main
+// reason for seperating them out is to help make their usage clearer.
+class ClientClientInfo : public ClientInfo
+{
+   typedef ClientInfo Parent;
+
+private:
+   F32 mRating;      // Ratings are provided by the server and stored here
+
+public:
+   ClientClientInfo(const StringTableEntry &name, bool isRobot, bool isAdmin);      // Constructor
+
+   GameConnection *getConnection() { TNLAssert(false, "Can't get a GameConnection from a ClientClientInfo!"); }
+   void setConnection(GameConnection *conn) { TNLAssert(false, "Can't set a GameConnection on a ClientClientInfo!"); }
+
+   F32 getRating() { return mRating; }
+   void setRating(F32 rating) { mRating = rating; }
+
+   void addToTotalScore(S32 score) { TNLAssert(false, "We don't track total score in these parts..."); }
+
+   void initialize() { Parent::initialize(); mRating = 0; }
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 // Some forward declarations
 class MasterServerConnection;
 class GameNetInterface;
@@ -136,9 +253,8 @@ class Game : public LevelLoader
 {
 private:
    F32 mGridSize;  
-   Vector<RefPtr<ClientRef> > mClientList;      // List of players on the server; used by both client and server
 
-   U32 mTimeUnconnectedToMaster;                // Time that we've been disconnected to the master
+   U32 mTimeUnconnectedToMaster;                         // Time that we've been disconnected to the master
    bool mHaveTriedToConnectToMaster;
 
    WallSegmentManager *mWallSegmentManager;    
@@ -195,6 +311,12 @@ protected:
 
    S32 findClientIndex(const StringTableEntry &name);
 
+   // On the Cliet, this list will track info about every player in the game.  Note that the local client will also be represented here,
+   // but the info in these records will only be managed by the server.  E.g. if the local client's name changes, the client's record
+   // should not be updated directly, but rather by notifying the server, and having the server notify us.
+   Vector<boost::shared_ptr<ClientInfo> > mClientInfos;
+
+
 public:
    static const S32 DefaultGridSize = 255;   // Size of "pages", represented by floats for intrapage locations (i.e. pixels per integer)
    static const S32 MIN_GRID_SIZE = 5;       // Ridiculous, it's true, but we step by our minimum value, so we can't make this too high
@@ -213,18 +335,18 @@ public:
    virtual ~Game();                                                     // Destructor
 
 
-   S32 getClientCount() const { return mClientList.size(); }
-   ClientRef *getClient(S32 index);
-   void addClientRefToList(ClientRef *cref);                            // Used by robots and client
-   void deleteClientRefFromList(ClientRef *cref);                       // Used by robots
-   void deleteClientRefFromList(const StringTableEntry &name);          // Used by player
+   S32 getClientCount() const { return mClientInfos.size(); }
+   ClientInfo *getClientInfo(S32 index);
 
-   void clearClientList()  { mClientList.clear(); }                     
 
-   ClientRef *findClientRef(const StringTableEntry &name);              // Find client by name
+   ClientInfo *getClientConnection(S32 index);
+   void addClientInfoToList(const boost::shared_ptr<ClientInfo> &conn);               
+   void removeClientInfoFromList(const StringTableEntry &name);
+   void removeClientInfoFromList(ClientInfo *clientInfo);
+   void clearClientList();
 
-   F32 getCurrentRating(GameConnection *conn);
-
+   ClientInfo *findClientInfo(const StringTableEntry &name);      // Find client by name
+   
    Rect getWorldExtents() { return mWorldExtents; }
 
    virtual U32 getPlayerCount() = 0;                  // Implemented differently on client and server
@@ -324,7 +446,6 @@ public:
                                                                                    PLAYER_SENSOR_VISUAL_DISTANCE_VERTICAL  + PLAYER_SCOPE_MARGIN)
                                                                            : Point(PLAYER_VISUAL_DISTANCE_HORIZONTAL + PLAYER_SCOPE_MARGIN,
                                                                                    PLAYER_VISUAL_DISTANCE_VERTICAL  + PLAYER_SCOPE_MARGIN); }
-
 };
 
 
@@ -391,8 +512,8 @@ private:
    Timer mStutterSleepTimer;
    U32 mAccumulatedSleepTime;
 
-   void setCurrentLevelIndex(S32 nextLevel, S32 playerCount);    // Helper for cycleLevel()
-   void resetAllClientTeams();                                   // Resets all player team assignments
+   void setCurrentLevelIndex(S32 nextLevel, S32 playerCount);  // Helper for cycleLevel()
+   void resetAllClientTeams();                                 // Resets all player team assignments
 
    bool onlyClientIs(GameConnection *client);
 
@@ -413,8 +534,8 @@ public:
 
    //SafePtr<GameConnection> mVoteClientConnection;
    StringTableEntry mVoteClientName;
-   bool voteStart(GameConnection *client, S32 type, S32 number = 0);
-   void voteClient(GameConnection *client, bool voteYes);
+   bool voteStart(ClientInfo *clientInfo, S32 type, S32 number = 0);
+   void voteClient(ClientInfo *clientInfo, bool voteYes);
 
    enum HostingModePhases { NotHosting, LoadingLevels, DoneLoadingLevels, Hosting };      
 
@@ -435,11 +556,11 @@ public:
 
    bool isFull() { return getPlayerCount() == mSettings->getMaxPlayers(); }          // More room at the inn?
 
-   void addClient(GameConnection *client);
-   void removeClient(GameConnection *client);
+   void addClient(boost::shared_ptr<ClientInfo> clientInfo);
+   void removeClient(ClientInfo *clientInfo);
    
 
-   void setShuttingDown(bool shuttingDown, U16 time, ClientRef *who, StringPtr reason);  
+   void setShuttingDown(bool shuttingDown, U16 time, GameConnection *who, StringPtr reason);  
 
    void buildBasicLevelInfoList(const Vector<string> &levelList);
    void resetLevelLoadIndex();

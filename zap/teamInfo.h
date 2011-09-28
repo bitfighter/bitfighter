@@ -116,7 +116,7 @@ public:
    void addScore(S32 score) { mScore += score; }
 
    F32 getRating() { return mRating; }
-   void addRating(F32 rating) { mRating += rating; }
+   void addRating(F32 rating) { mRating += rating; }     // For summing ratings of all players on a team 
 
    void clearStats();
 

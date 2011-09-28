@@ -301,6 +301,7 @@ GameConnection *GameObject::getOwner()
    return mOwner;
 }
 
+
 void GameObject::deleteObject(U32 deleteTimeInterval)
 {
    mObjectTypeNumber = DeletedTypeNumber;

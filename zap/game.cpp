@@ -76,16 +76,95 @@ using namespace TNL;
 namespace Zap
 {
 
-// Global Game objects
-ServerGame *gServerGame = NULL;
+void ClientInfo::setAuthenticated(bool isAuthenticated)
+{
+   mIsAuthenticated = isAuthenticated; 
+}
 
-static Vector<DatabaseObject *> fillVector2;
 
+void ServerClientInfo::setAuthenticated(bool isAuthenticated)
+{
+   Parent::setAuthenticated(isAuthenticated);
+
+   if(getConnection() && getConnection()->isConnectionToClient())    // Only run this bit if we are a server
+   {
+      // If we are verified, we need to alert any connected clients, so they can render ships properly.  This is done via the ship object.
+      Ship *ship = dynamic_cast<Ship *>(getConnection()->getControlObject());
+      if(ship)
+         ship->setIsAuthenticated(isAuthenticated, mName);
+   }
+}
+
+
+// Constructor
+ServerClientInfo::ServerClientInfo(GameConnection *gameConnection)
+{
+   TNLAssert(gameConnection, "Must have a gameConnection to create a ServerClientInfo!");
+   initialize();
+
+   mClientConnection = gameConnection;
+      //gameConnection->setClientInfo(this);    // Reciprocate
+}
+
+
+// Construtor used by bots
+//ServerClientInfo::ServerClientInfo(GameConnection *clientConnection, const StringTableEntry &name, bool isRobot)
+//{
+//   initialize();
+//
+//   mClientConnection = clientConnection;
+//   mName = name;
+//   mIsRobot = isRobot;
+//}
+
+F32 ServerClientInfo::getRating()
+{
+   // Initial case: no one has scored
+   if(mTotalScore == 0)      
+      return .5;
+
+   // Standard case: 
+   else   
+      return F32(mScore) / F32(mTotalScore);
+}
+
+
+void ServerClientInfo::addToTotalScore(S32 score) 
+{ 
+   mTotalScore += score; 
+   mClientConnection->addToTotalCumulativeScore(score); 
+}
+
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Constructor used by bots
+ClientClientInfo::ClientClientInfo(const StringTableEntry &name, bool isRobot, bool isAdmin)
+{
+   initialize();
+
+   mName = name;
+   mIsRobot = isRobot;
+   mIsAdmin = isAdmin;
+   mTeamIndex = NO_TEAM;
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 #ifndef ZAP_DEDICATED
 class ClientGame;
 extern ClientGame *gClientGame; // only used to see if we have a ClientGame, for buildBotMeshZones
 #endif
+
+// Global Game objects
+ServerGame *gServerGame = NULL;
+
+static Vector<DatabaseObject *> fillVector2;
+
 
 //-----------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------
@@ -141,36 +220,64 @@ void Game::setScopeAlwaysObject(GameObject *theObject)
 }
 
 
-ClientRef *Game::getClient(S32 index) 
+ClientInfo *Game::getClientInfo(S32 index) 
 { 
-   return mClientList[index].getPointer(); 
+   return mClientInfos[index].get(); 
 }
 
 
-void Game::addClientRefToList(ClientRef *cref) 
+void Game::addClientInfoToList(const boost::shared_ptr<ClientInfo> &clientInfo) 
 { 
-   mClientList.push_back(cref); 
+   mClientInfos.push_back(clientInfo); 
 }     
 
 
-void Game::deleteClientRefFromList(ClientRef *cref)
+// Helper function for other find functions
+S32 Game::findClientIndex(const StringTableEntry &name)
 {
-   for(S32 i = 0; i < getClientCount(); i++)
-      if(getClient(i) == cref)
+   for(S32 i = 0; i < mClientInfos.size(); i++)
+      if(mClientInfos[i]->getName() == name) 
+         return i;
+
+   return -1;     // Not found
+}
+
+
+void Game::removeClientInfoFromList(const StringTableEntry &name)
+{
+   S32 index = findClientIndex(name);
+
+   if(index >= 0)
+      mClientInfos.erase(index);
+}
+
+
+void Game::removeClientInfoFromList(ClientInfo *clientInfo)
+{
+   for(S32 i = 0; i < mClientInfos.size(); i++)
+      if(mClientInfos[i].get() == clientInfo)
       {
-         mClientList.erase(i);
+         mClientInfos.erase_fast(i);
          return;
       }
 }
 
 
-void Game::deleteClientRefFromList(const StringTableEntry &name)
+void Game::clearClientList() 
+{ 
+   mClientInfos.clear(); 
+}
+
+
+// Find clientInfo given a player name
+ClientInfo *Game::findClientInfo(const StringTableEntry &name)
 {
    S32 index = findClientIndex(name);
 
-   if(index >= 0)
-       mClientList.erase(index);
+   return index >= 0 ? mClientInfos[index].get() : NULL;
 }
+
+
 
 
 GameNetInterface *Game::getNetInterface()
@@ -221,9 +328,9 @@ StringTableEntry Game::getTeamName(S32 teamIndex) const
 // Given a player's name, return his team
 S32 Game::getTeamIndex(const StringTableEntry &playerName)
 {
-   ClientRef *client = findClientRef(playerName);     // Returns NULL if player can't be found
+   ClientInfo *clientInfo = findClientInfo(playerName);              // Returns NULL if player can't be found
    
-   return client ? client->getTeam() : TEAM_NEUTRAL;  // If we can't find the team, let's call it neutral
+   return clientInfo ? clientInfo->getTeamIndex() : TEAM_NEUTRAL;    // If we can't find the team, let's call it neutral
 }
 
 
@@ -268,17 +375,16 @@ void Game::countTeamPlayers()
 
    for(S32 i = 0; i < getClientCount(); i++)
    {
-      ClientRef *client = getClient(i);
-      GameConnection *conn = client->getConnection();
+      ClientInfo *clientInfo =  getClientInfo(i);
 
-      S32 teamIndex = client->getTeam();
+      S32 teamIndex = clientInfo->getTeamIndex();
 
       if(teamIndex >= 0 && teamIndex < getTeamCount())
       { 
          // Robot could be neutral or hostile, skip out of range team numbers
          Team *team = (Team *)getTeam(teamIndex);
 
-         if(conn->isRobot())
+         if(clientInfo->isRobot())
             team->incrementBotCount();
          else
             team->incrementPlayerCount();
@@ -286,8 +392,10 @@ void Game::countTeamPlayers()
 
          const F32 BASE_RATING = .1f;
 
+         GameConnection *conn = clientInfo->getConnection();
+
          if(conn)
-            team->addRating(max(getCurrentRating(conn), BASE_RATING));
+            team->addRating(max(conn->getCumulativeRating(), BASE_RATING));    
       }
    }
 }
@@ -676,8 +784,6 @@ void Game::processDeleteList(U32 timeDelta)
 }
 
 
-
-
 // Delete all objects of specified type  --> currently only used to remove all walls from the game
 void Game::deleteObjects(U8 typeNumber)
 {
@@ -700,26 +806,6 @@ void Game::deleteObjects(TestFunc testFunc)
       GameObject *obj = dynamic_cast<GameObject *>(fillVector[i]);
       obj->deleteObject(0);
    }
-}
-
-
-// Helper function for other find functions
-S32 Game::findClientIndex(const StringTableEntry &name)
-{
-   for(S32 i = 0; i < getClientCount(); i++)
-      if(getClient(i)->getConnection()->getClientName() == name)
-         return i;
-
-   return -1;     // Not found
-}
-
-
-// Find client object given a player name
-ClientRef *Game::findClientRef(const StringTableEntry &name)
-{
-   S32 index = findClientIndex(name);
-
-   return index >= 0 ? getClient(index) : NULL;
 }
 
 
@@ -919,8 +1005,10 @@ void ServerGame::cleanUp()
 
 
 // Return true when handled
-bool ServerGame::voteStart(GameConnection *client, S32 type, S32 number)
+bool ServerGame::voteStart(ClientInfo *clientInfo, S32 type, S32 number)
 {
+   GameConnection *conn = clientInfo->getConnection();
+
    if(!mSettings->getIniSettings()->voteEnable)
       return false;
 
@@ -934,46 +1022,52 @@ bool ServerGame::voteStart(GameConnection *client, S32 type, S32 number)
 
    if(mVoteTimer != 0)
    {
-      client->s2cDisplayErrorMessage("Can't start a new vote when there is one pending.");
+      conn->s2cDisplayErrorMessage("Can't start a new vote when there is one pending.");
       return true;
    }
 
-   if(client->mVoteTime != 0)
+   if(conn->mVoteTime != 0)
    {
       Vector<StringTableEntry> e;
       Vector<StringPtr> s;
       Vector<S32> i;
-      i.push_back(client->mVoteTime / 1000);
-      client->s2cDisplayMessageESI(GameConnection::ColorRed, SFXNone, "Can't start vote, try again %i0 seconds later.", e, s, i);
+
+      i.push_back(conn->mVoteTime / 1000);
+      conn->s2cDisplayMessageESI(GameConnection::ColorRed, SFXNone, "Can't start vote, try again %i0 seconds later.", e, s, i);
+
       return true;
    }
+
    mVoteTimer = VoteTimer;
    mVoteType = type;
    mVoteNumber = number;
-   mVoteClientName = client->getClientName();
+   mVoteClientName = clientInfo->getName();
 
    for(S32 i = 0; i < getClientCount(); i++)
-      getClient(i)->getConnection()->mVote = 0;
+      getClientInfo(i)->getConnection()->mVote = 0;
 
-   client->mVote = 1;
-   client->s2cDisplayMessage(GameConnection::ColorAqua, SFXNone, "Vote started, waiting for others to vote.");
+   conn->mVote = 1;
+   conn->s2cDisplayMessage(GameConnection::ColorAqua, SFXNone, "Vote started, waiting for others to vote.");
    return true;
 }
 
 
-void ServerGame::voteClient(GameConnection *client, bool voteYes)
+void ServerGame::voteClient(ClientInfo *clientInfo, bool voteYes)
 {
-   if(mVoteTimer == 0)
-      client->s2cDisplayErrorMessage("!!! Nothing to vote on");
-   else if(client->mVote == (voteYes ? 1 : 2))
-      client->s2cDisplayErrorMessage("!!! Already voted");
-   else if(client->mVote == 0)
-      client->s2cDisplayMessage(GameConnection::ColorGreen, SFXNone, voteYes ? "Voted Yes" : "Voted No");
-   else
-      client->s2cDisplayMessage(GameConnection::ColorGreen, SFXNone, voteYes ? "Changed vote to Yes" : "Changed vote to No");
+   GameConnection *conn = clientInfo->getConnection();
 
-   client->mVote = voteYes ? 1 : 2;
+   if(mVoteTimer == 0)
+      conn->s2cDisplayErrorMessage("!!! Nothing to vote on");
+   else if(conn->mVote == (voteYes ? 1 : 2))
+      conn->s2cDisplayErrorMessage("!!! Already voted");
+   else if(conn->mVote == 0)
+      conn->s2cDisplayMessage(GameConnection::ColorGreen, SFXNone, voteYes ? "Voted Yes" : "Voted No");
+   else
+      conn->s2cDisplayMessage(GameConnection::ColorGreen, SFXNone, voteYes ? "Changed vote to Yes" : "Changed vote to No");
+
+   conn->mVote = voteYes ? 1 : 2;
 }
+
 
 S32 ServerGame::getLevelNameCount()
 {
@@ -1028,7 +1122,7 @@ bool ServerGame::onlyClientIs(GameConnection *client)
       return false;
 
    for(S32 i = 0; i < getClientCount(); i++)
-      if(getClient(i)->getConnection() != client)
+      if(mClientInfos[i]->getConnection() != client)
          return false;
 
    return true;
@@ -1037,24 +1131,23 @@ bool ServerGame::onlyClientIs(GameConnection *client)
 
 
 // Control whether we're in shut down mode or not
-void ServerGame::setShuttingDown(bool shuttingDown, U16 time, ClientRef *who, StringPtr reason)
+void ServerGame::setShuttingDown(bool shuttingDown, U16 time, GameConnection *who, StringPtr reason)
 {
    mShuttingDown = shuttingDown;
    if(shuttingDown)
    {
-      mShutdownOriginator = who->getConnection();
+      mShutdownOriginator = who;
+      const char *name = mShutdownOriginator->getClientInfo()->getName().getString();
 
       // If there's no other clients, then just shutdown now
       if(onlyClientIs(mShutdownOriginator))
       {
-         logprintf(LogConsumer::ServerFilter, "Server shutdown requested by %s.  No other players, so shutting down now.", 
-                                                   mShutdownOriginator->getClientName().getString());
+         logprintf(LogConsumer::ServerFilter, "Server shutdown requested by %s.  No other players, so shutting down now.", name);
          mShutdownTimer.reset(1);
       }
       else
       {
-         logprintf(LogConsumer::ServerFilter, "Server shutdown in %d seconds, requested by %s, for reason [%s].", 
-            time, mShutdownOriginator->getClientName().getString(), reason.getString());
+         logprintf(LogConsumer::ServerFilter, "Server shutdown in %d seconds, requested by %s, for reason [%s].", time, name, reason.getString());
          mShutdownTimer.reset(time * 1000);
       }
    }
@@ -1353,23 +1446,10 @@ bool ServerGame::processPseudoItem(S32 argc, const char **argv, const string &le
 }
 
 
-// Return a measure of a player's strength.  Right now this is rather bogus -- any improvements welcomed!!!
-// Should return a number between -1 and 1
-F32 Game::getCurrentRating(GameConnection *conn)
-{
-   if(conn->mTotalScore == 0 && conn->mGamesPlayed == 0)
-      return .5;
-   else if(conn->mTotalScore == 0)
-      return (conn->mGamesPlayed * conn->mRating) / conn->mGamesPlayed;
-   else
-      return ((conn->mGamesPlayed * conn->mRating) + ((F32) conn->mScore / (F32) conn->mTotalScore)) / (conn->mGamesPlayed + 1);
-}
-
-
 // Highest ratings first -- runs on server only
-static S32 QSORT_CALLBACK RatingSort(SafePtr<GameConnection> *a, SafePtr<GameConnection> *b)
+static S32 QSORT_CALLBACK RatingSort(boost::shared_ptr<ClientInfo> *a, boost::shared_ptr<ClientInfo> *b)
 {
-   F32 diff = gServerGame->getCurrentRating(*b) - gServerGame->getCurrentRating(*a);
+   F32 diff = (*a)->getConnection()->getCumulativeRating() - (*b)->getConnection()->getCumulativeRating();
 
    if(diff == 0) 
       return 0;
@@ -1381,8 +1461,6 @@ static S32 QSORT_CALLBACK RatingSort(SafePtr<GameConnection> *a, SafePtr<GameCon
 // Pass -1 to go to next level, otherwise pass an absolute level number
 void ServerGame::cycleLevel(S32 nextLevel)
 {
-   Vector<SafePtr<GameConnection> > connectionList;
-
    cleanUp();
    mLevelSwitchTimer.clear();
    mScopeAlwaysList.clear();
@@ -1392,14 +1470,11 @@ void ServerGame::cycleLevel(S32 nextLevel)
    {
       for(S32 i = 0; i < getClientCount(); i++)
       {
-         GameConnection *conn = getClient(i)->getConnection();
+         GameConnection *conn = getClientInfo(i)->getConnection();
 
          conn->resetGhosting();
          conn->mOldLoadout.clear();
          conn->switchedTeamCount = 0;
-
-         // Build a list of our current connections first
-         connectionList.push_back(conn);
       }
    }
 
@@ -1447,17 +1522,15 @@ void ServerGame::cycleLevel(S32 nextLevel)
    // Clear team info for all clients
    resetAllClientTeams();
 
-   // Now add players to the gameType, from highest rating to lowest --> will create ratings-based teams
-   connectionList.sort(RatingSort);
+   // Now add players to the gameType, from highest rating to lowest --> will attempt to create ratings-based teams
+   mClientInfos.sort(RatingSort);
 
    if(mGameType.isValid())
-   {
       for(S32 i = 0; i < getClientCount(); i++)
       {
-         mGameType->serverAddClient(getClient(i));
-         getClient(i)->getConnection()->activateGhosting();
+         mGameType->serverAddClient(getClientInfo(i));
+         getClientInfo(i)->getConnection()->activateGhosting();
       }
-   }
 }
 
 
@@ -1465,7 +1538,7 @@ void ServerGame::cycleLevel(S32 nextLevel)
 void ServerGame::resetAllClientTeams()
 {
    for(S32 i = 0; i < getClientCount(); i++)
-      getClient(i)->setTeam(NO_TEAM);
+      getClientInfo(i)->setTeamIndex(NO_TEAM);
 }
 
 
@@ -1666,22 +1739,23 @@ bool ServerGame::loadLevel(const string &levelFileName)
 }
 
 
-void ServerGame::addClient(GameConnection *client)
+void ServerGame::addClient(boost::shared_ptr<ClientInfo> clientInfo)
 {
+   GameConnection *conn = clientInfo->getConnection();
+
    // If client has level change or admin permissions, send a list of levels and their types to the connecting client
-   if(client->isLevelChanger() || client->isAdmin())
-      client->sendLevelList();
+   if(conn->isLevelChanger() || clientInfo->isAdmin())
+      conn->sendLevelList();
 
    // If we're shutting down, display a notice to the user
    if(mShuttingDown)
-      client->s2cInitiateShutdown(mShutdownTimer.getCurrent() / 1000, mShutdownOriginator->getClientName(), 
+      conn->s2cInitiateShutdown(mShutdownTimer.getCurrent() / 1000, mShutdownOriginator->getClientInfo()->getName(), 
                                          "Sorry -- server shutting down", false);
 
    if(mGameType.isValid())
    {
-      ClientRef *cref = new ClientRef(client);
-      mGameType->serverAddClient(cref);
-      addClientRefToList(cref);
+      mGameType->serverAddClient(clientInfo.get());
+      addClientInfoToList(clientInfo);
    }
 
    if(mDedicated)
@@ -1689,12 +1763,10 @@ void ServerGame::addClient(GameConnection *client)
 }
 
 
-void ServerGame::removeClient(GameConnection *client)
+void ServerGame::removeClient(ClientInfo *clientInfo)
 {
    if(mGameType.isValid())
-      mGameType->serverRemoveClient(client);
-
-   deleteClientRefFromList(client->getClientRef());
+      mGameType->serverRemoveClient(clientInfo);
 
    if(mDedicated)
       SoundSystem::playSoundEffect(SFXPlayerLeft, 1);
@@ -1781,9 +1853,10 @@ void ServerGame::idle(U32 timeDelta)
 
             for(S32 i = 0; i < getClientCount(); i++)
             {
-               GameConnection *conn = getClient(i)->getConnection();
+               ClientInfo *clientInfo = getClientInfo(i);
+               GameConnection *conn = clientInfo->getConnection();
 
-               if(conn->mVote == 0 && !conn->isRobot())
+               if(conn->mVote == 0 && !clientInfo->isRobot())
                {
                   WaitingToVote = true;
                   conn->s2cDisplayMessageESI(GameConnection::ColorAqua, SFXNone, msg, e, s, i);
@@ -1804,13 +1877,14 @@ void ServerGame::idle(U32 timeDelta)
 
          for(S32 i = 0; i < getClientCount(); i++)
          {
-            GameConnection *conn = getClient(i)->getConnection();
+            ClientInfo *clientInfo = getClientInfo(i);
+            GameConnection *conn = clientInfo->getConnection();
 
             if(conn->mVote == 1)
                voteYes++;
             else if(conn->mVote == 2)
                voteNo++;
-            else if(!conn->isRobot())
+            else if(!clientInfo->isRobot())
                voteNothing++;
          }
 
@@ -1853,10 +1927,10 @@ void ServerGame::idle(U32 timeDelta)
                {
                   for(S32 i = 0; i < getClientCount(); i++)
                   {
-                     GameConnection *conn = getClient(i)->getConnection();
+                     ClientInfo *clientInfo = getClientInfo(i);
 
-                     if(conn->getClientName() == mVoteClientName)
-                        mGameType->changeClientTeam(conn, mVoteNumber);
+                     if(clientInfo->getName() == mVoteClientName)
+                        mGameType->changeClientTeam(clientInfo, mVoteNumber);
                   }
                }
                break;
@@ -1865,10 +1939,10 @@ void ServerGame::idle(U32 timeDelta)
                {
                   for(S32 i = 0; i < getClientCount(); i++)
                   {
-                     GameConnection *conn = getClient(i)->getConnection();
+                     ClientInfo *clientInfo = getClientInfo(i);
 
-                     if(conn->getClientName() == mVoteClientName)
-                        mGameType->changeClientTeam(conn, mVoteNumber);
+                     if(clientInfo->getName() == mVoteClientName)
+                        mGameType->changeClientTeam(clientInfo, mVoteNumber);
                   }
                }
                break;
@@ -1885,11 +1959,12 @@ void ServerGame::idle(U32 timeDelta)
 
          for(S32 i = 0; i < getClientCount(); i++)
          {
-            GameConnection *conn = getClient(i)->getConnection();
+            ClientInfo *clientInfo = getClientInfo(i);
+            GameConnection *conn = clientInfo->getConnection();
 
-            conn->s2cDisplayMessageESI(GameConnection::ColorAqua, SFXNone, "Vote %e0 - %i0 yes, %i1 no, %i2 not voted", e, s, i);
+            conn->s2cDisplayMessageESI(GameConnection::ColorAqua, SFXNone, "Vote %e0 - %i0 yes, %i1 no, %i2 did not vote", e, s, i);
 
-            if(!votePass && conn->getClientName() == mVoteClientName)
+            if(!votePass && clientInfo->getName() == mVoteClientName)
                conn->mVoteTime = mSettings->getIniSettings()->voteRetryLength * 1000;
          }
       }
@@ -1956,9 +2031,10 @@ void ServerGame::idle(U32 timeDelta)
 
    for(S32 i = 0; i < getClientCount(); i++)
    {
-      GameConnection *conn = getClient(i)->getConnection();
+      ClientInfo *clientInfo = getClientInfo(i);
+      GameConnection *conn = clientInfo->getConnection();
 
-      if(!conn->isRobot())
+      if(!clientInfo->isRobot())
       {
          conn->addToTimeCredit(timeDelta);
          conn->updateAuthenticationTimer(timeDelta);
@@ -2066,7 +2142,7 @@ S32 ServerGame::addUploadedLevelInfo(const char *filename, LevelInfo &info)
 
    for(S32 i = 0; i < getClientCount(); i++)
    {
-      GameConnection *conn = getClient(i)->getConnection();
+      GameConnection *conn = getClientInfo(i)->getConnection();
 
       if(conn->isLevelChanger())
          conn->s2cAddLevel(info.levelName, info.levelType);

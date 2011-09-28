@@ -342,11 +342,14 @@ void DiagnosticUserInterface::render()
 
       drawCenteredString2Colf(ypos, textsize, false, "%s", needToUpgrade ? "<<Update available>>" : "<<Current version>>");
       ypos += textsize + gap;
+
+      ClientInfo *clientInfo = getGame()->getClientInfo();
+
       // This following line is a bit of a beast, but it will return a valid result at any stage of being in or out of a game.
       // If the server modifies a user name to make it unique, this will display the modified version.
       drawCenteredStringPair2Colf(ypos, textsize, true, "Nickname:", "%s (%s)", 
-                                  getGame()->getClientInfo()->name.c_str(), 
-                                  getGame()->getClientInfo()->authenticated ? "Verified" : "Not verified");
+                                  clientInfo->getName().getString(), 
+                                  clientInfo->isAuthenticated() ? "Verified" : "Not verified");
 
       ypos += textsize + gap;
 
@@ -517,7 +520,7 @@ void DiagnosticUserInterface::render()
       ypos += textsize + gap;
 
       drawCenteredStringPair2Colf(ypos, textsize, false, "Sim. Lag/Pkt. Loss:", "%dms /%2.0f%%", 
-                                  getGame()->getClientInfo()->simulatedLag, getGame()->getClientInfo()->simulatedPacketLoss * 100);
+                                  getGame()->getSettings()->getSimulatedLag(), getGame()->getSettings()->getSimulatedLoss() * 100);
       ypos += textsize + gap;
       ypos += textsize + gap;
       

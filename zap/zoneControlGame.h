@@ -80,7 +80,7 @@ public:
    void renderInterfaceOverlay(bool scoreboardVisible);
    bool teamHasFlag(S32 teamId);
 
-   void performProxyScopeQuery(GameObject *scopeObject, GameConnection *connection);
+   void performProxyScopeQuery(GameObject *scopeObject, ClientInfo *clientInfo);
    void majorScoringEventOcurred(S32 team);    // Gets run when a touchdown is scored
 
    S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data);

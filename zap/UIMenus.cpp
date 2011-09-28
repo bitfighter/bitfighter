@@ -1083,10 +1083,10 @@ static void nameAndPasswordAcceptCallback(ClientGame *clientGame, U32 unused)
                                            ui->menuItems[2]->getValueForWritingToLevelFile());
 
    clientGame->setReadyToConnectToMaster(true);
-   seedRandomNumberGenerator(clientGame->getClientInfo()->name);
+   seedRandomNumberGenerator(clientGame->getClientInfo()->getName().getString());
 
    if(clientGame->getConnectionToServer())                 // Rename while in game server, if connected
-      clientGame->getConnectionToServer()->c2sRenameClient(clientGame->getClientInfo()->name);
+      clientGame->getConnectionToServer()->c2sRenameClient(clientGame->getClientInfo()->getName());
 }
 
 
@@ -1095,8 +1095,10 @@ void NameEntryUserInterface::setupMenu()
    menuItems.clear();
 
    menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(getGame(), 0, "OK", nameAndPasswordAcceptCallback, "")));
-   menuItems.push_back(boost::shared_ptr<MenuItem>(new EditableMenuItem(getGame(), "NICKNAME:", getGame()->getClientInfo()->name, "ChumpChange", "", MAX_PLAYER_NAME_LENGTH)));
-   menuItems.push_back(boost::shared_ptr<MenuItem>(new EditableMenuItem(getGame(), "PASSWORD:", getGame()->getLoginPassword(), "", "", MAX_PLAYER_PASSWORD_LENGTH)));
+   menuItems.push_back(boost::shared_ptr<MenuItem>(new EditableMenuItem(getGame(), "NICKNAME:", getGame()->getClientInfo()->getName().getString(), 
+                                                                        "ChumpChange", "", MAX_PLAYER_NAME_LENGTH)));
+   menuItems.push_back(boost::shared_ptr<MenuItem>(new EditableMenuItem(getGame(), "PASSWORD:", getGame()->getLoginPassword(), 
+                                                                        "", "", MAX_PLAYER_PASSWORD_LENGTH)));
    
    menuItems[1]->setFilter(LineEditor::noQuoteFilter);      // quotes are incompatible with PHPBB3 logins
    menuItems[2]->setSecret(true);
@@ -1402,16 +1404,18 @@ void GameMenuUserInterface::buildMenu()
 
    menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(getGame(), 0, "OPTIONS",      optionsSelectedCallback, "", KEY_O)));
    menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(getGame(), 0, "INSTRUCTIONS", helpSelectedCallback,    "", KEY_I, keyHELP)));
-   GameType *theGameType = getGame()->getGameType();
+
+   GameType *gameType = getGame()->getGameType();
 
    // Add any game-specific menu items
-   if(theGameType)
+   if(gameType)
    {
-      mGameType = theGameType;
-      theGameType->addClientGameMenuOptions(getGame(), menuItems);
+      mGameType = gameType;
+      gameType->addClientGameMenuOptions(getGame(), menuItems);
    }
 
    GameConnection *gc = (getGame())->getConnectionToServer();
+
    if(gc)
    {
       if(gc->isLevelChanger())
@@ -1420,13 +1424,11 @@ void GameMenuUserInterface::buildMenu()
          menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(getGame(), 0, "ADD TIME (2 MINS)",    addTwoMinsCallback,     "", KEY_T, KEY_2)));
          menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(getGame(), 0, "RESTART LEVEL",        restartGameCallback,    "", KEY_R)));
       }
-      else
+      else        // Not level changer
          menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(getGame(), 0, "ENTER LEVEL CHANGE PASSWORD", levelChangePWCallback, "", KEY_L, KEY_P)));
 
-      if(gc->isAdmin())
+      if(gc->getClientInfo()->isAdmin())
       {
-         GameType *gameType = getGame()->getGameType();
-
          // Add any game-specific menu items
          if(gameType)
          {
@@ -1436,7 +1438,7 @@ void GameMenuUserInterface::buildMenu()
 
          menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(getGame(), 0, "KICK A PLAYER", kickPlayerCallback, "", KEY_K)));
       }
-      else
+      else     // Not admin
          menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(getGame(), 0, "ENTER ADMIN PASSWORD", adminPWCallback, "", KEY_A, KEY_E)));
    }
 
@@ -1724,17 +1726,17 @@ void PlayerMenuUserInterface::render()
    char c[] = "A";      // Dummy shortcut key
    for(S32 i = 0; i < getGame()->getClientCount(); i++)
    {
-      ClientRef *client = getGame()->getClient(i);
+      ClientInfo *clientInfo = ((Game *)getGame())->getClientInfo(i);      // Lame!
 
-      strncpy(c, conn->getClientName().getString(), 1);        // Grab first char of name for a shortcut key
+      strncpy(c, clientInfo->getName().getString(), 1);        // Grab first char of name for a shortcut key
 
       // Will be used to show admin/player/robot prefix on menu
-      PlayerType pt = conn->isRobot() ? PlayerTypeRobot : (conn->isAdmin() ? PlayerTypeAdmin : PlayerTypePlayer);    
+      PlayerType pt = clientInfo->isRobot() ? PlayerTypeRobot : (clientInfo->isAdmin() ? PlayerTypeAdmin : PlayerTypePlayer);    
 
-      PlayerMenuItem *newItem = new PlayerMenuItem(getGame(), i, conn->getClientName().getString(), playerSelectedCallback, stringToKeyCode(c), pt);
+      PlayerMenuItem *newItem = new PlayerMenuItem(getGame(), i, clientInfo->getName().getString(), playerSelectedCallback, stringToKeyCode(c), pt);
 
       menuItems.push_back(boost::shared_ptr<MenuItem>(newItem));
-      menuItems.last()->setUnselectedColor(getGame()->getTeamColor(client->getTeam()));
+      menuItems.last()->setUnselectedColor(getGame()->getTeamColor(clientInfo->getTeamIndex()));
    }
 
    menuItems.sort(menuItemValueSort);
