@@ -813,7 +813,14 @@ void Ship::processModules()
          // If we have enough energy, fire the module
          if(mEnergy >= energyCost)
          {
-            // TODO: fire the module...
+            // Do the module secondary component action
+            if (i == ModuleSensor)
+            {
+               Point direction = getAimVector();
+               createWeaponProjectiles(WeaponSpyBug, direction, mMoveState[ActualState].pos, mMoveState[ActualState].vel, 0, CollisionRadius - 2, this);
+            }
+
+            // Reduce energy
             mEnergy -= energyCost;
          }
       }
