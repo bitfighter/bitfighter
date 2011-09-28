@@ -737,18 +737,16 @@ void GameUserInterface::renderLoadoutIndicators()
    // Next, loadout modules
    for(U32 i = 0; i < (U32)ShipModuleCount; i++)
    {
-      if( getGame()->getModuleInfo(localShip->getModule(i))->getPrimaryUseType() == ModulePrimaryUsePassive ||
-            getGame()->getModuleInfo(localShip->getModule(i))->getPrimaryUseType() == ModulePrimaryUseHybrid )
+      if( gModuleInfo[localShip->getModule(i)].getPrimaryUseType() != ModulePrimaryUseActive )
          glColor(Colors::yellow);      // yellow = passive indicator
       else if(localShip->isModulePrimaryActive(localShip->getModule(i)))
-      {
          glColor(INDICATOR_ACTIVE_COLOR);
-
-         if(localShip->isModuleSecondaryActive(localShip->getModule(i)))
-            glColor(Colors::orange50);
-      }
       else 
          glColor(INDICATOR_INACTIVE_COLOR);
+
+      // Always change to orange if module secondary is fired
+      if(localShip->isModuleSecondaryActive(localShip->getModule(i)))
+         glColor(Colors::orange67);
 
       S32 width = renderIndicator(xPos, getGame()->getModuleInfo(localShip->getModule(i))->getName());
 

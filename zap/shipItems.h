@@ -26,7 +26,9 @@
 #ifndef _SHIPITEMS_H_
 #define _SHIPITEMS_H_
 
-#include "../tnl/tnlAssert.h"
+#include "../tnl/tnlTypes.h"
+
+using namespace TNL;
 
 namespace Zap
 {
@@ -64,22 +66,22 @@ enum ModulePrimaryUseType
 struct ModuleInfo
 {
    const char *mName;
-   TNL::S32 mPrimaryEnergyDrain;       // Continuous energy drain while primary component is in use
-   TNL::S32 mPrimaryUseCost;           // Per use energy drain of primary component (if it has one)
+   S32 mPrimaryEnergyDrain;       // Continuous energy drain while primary component is in use
+   S32 mPrimaryUseCost;           // Per use energy drain of primary component (if it has one)
    ModulePrimaryUseType mPrimaryUseType; // How the primary component of the module is activated
-   TNL::S32 mSecondaryUseCost;         // Per use energy drain of secondary component
-   TNL::S32 mSecondaryCooldown;        // Cooldown between allowed secondary component uses, in milliseconds
+   S32 mSecondaryUseCost;         // Per use energy drain of secondary component
+   S32 mSecondaryCooldown;        // Cooldown between allowed secondary component uses, in milliseconds
    const char *mMenuName;
    const char *mMenuHelp;
 
-   TNL::S32 getPrimaryEnergyDrain() const { return mPrimaryEnergyDrain; }
-   TNL::S32 getPrimaryPerUseCost() const { return mPrimaryUseCost; }
-   TNL::S32 getSecondaryPerUseCost() const { return mSecondaryUseCost; }
-   TNL::S32 getSecondaryCooldown() const { return mSecondaryCooldown; }
-   const char *getName() const { return mName; }
-   ModulePrimaryUseType getPrimaryUseType() const { return mPrimaryUseType; }
-   const char *getMenuName() const { return mMenuName; }
-   const char *getMenuHelp() const { return mMenuHelp; }
+   S32 getPrimaryEnergyDrain() const;
+   S32 getPrimaryPerUseCost() const;
+   S32 getSecondaryPerUseCost() const;
+   S32 getSecondaryCooldown() const;
+   const char *getName() const;
+   ModulePrimaryUseType getPrimaryUseType() const;
+   const char *getMenuName() const;
+   const char *getMenuHelp() const;
 };
 
 extern const ModuleInfo gModuleInfo[ModuleCount];

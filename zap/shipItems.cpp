@@ -24,6 +24,8 @@
 //------------------------------------------------------------------------------------
 #include "shipItems.h"
 
+using namespace TNL;
+
 namespace Zap
 {
 
@@ -38,5 +40,54 @@ const ModuleInfo gModuleInfo[ModuleCount] =
 	{"Cloak",     8000,     0, ModulePrimaryUseActive,      0,  1000, "Cloak Field Modulator", ""  },
 	{"Armor",        0,     0, ModulePrimaryUsePassive,     0,  1000, "ModuleArmor",           ""  }
 };
+
+
+S32 ModuleInfo::getPrimaryEnergyDrain() const
+{
+   return mPrimaryEnergyDrain;
+}
+
+
+S32 ModuleInfo::getPrimaryPerUseCost() const
+{
+   return mPrimaryUseCost;
+}
+
+
+S32 ModuleInfo::getSecondaryPerUseCost() const
+{
+   return mSecondaryUseCost;
+}
+
+
+S32 ModuleInfo::getSecondaryCooldown() const
+{
+   return mSecondaryCooldown;
+}
+
+
+const char *ModuleInfo::getName() const
+{
+   return mName;
+}
+
+
+ModulePrimaryUseType ModuleInfo::getPrimaryUseType() const
+{
+   return mPrimaryUseType;
+}
+
+
+const char *ModuleInfo::getMenuName() const
+{
+   return mMenuName;
+}
+
+
+const char *ModuleInfo::getMenuHelp() const
+{
+   return mMenuHelp;
+}
+
 
 }

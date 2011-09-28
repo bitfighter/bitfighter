@@ -43,6 +43,7 @@
 #include "robot.h"            // For EventManager def
 #include "stringUtils.h"      // For itos
 #include "game.h"
+#include "shipItems.h"
 
 #ifdef TNL_OS_WIN32
 #include <windows.h>   // For ARRAYSIZE
@@ -86,6 +87,10 @@ Ship::Ship(StringTableEntry playerName, bool isAuthenticated, S32 team, Point p,
 {
    mObjectTypeNumber = PlayerShipTypeNumber;
    mFireTimer = 0;
+
+   // Set up module secondary component cooldown
+   for(S32 i = 0; i < ModuleCount; i++)
+      mModuleSecondaryCooldownTimer[i].setPeriod(gModuleInfo[i].getSecondaryCooldown());
 
    mNetFlags.set(Ghostable);
 
@@ -704,13 +709,6 @@ void Ship::repairTargets()
 void Ship::processModules()
 {
    // Update some timers
-   // TODO: Move this into the constructor once ModuleInfo is refactored
-   if(mModuleSecondaryCooldownTimer[0].getPeriod() == 0)
-   {
-      for(S32 i = 0; i < ModuleCount; i++)
-         mModuleSecondaryCooldownTimer[i].setPeriod(getGame()->getModuleInfo((ShipModule) i)->getSecondaryCooldown());
-   }
-
    for(S32 i = 0; i < ModuleCount; i++)
       mModuleSecondaryCooldownTimer[i].update(mCurrentMove.time);
 
@@ -811,8 +809,13 @@ void Ship::processModules()
       // Fire the module secondary component if it is active and the cooldown timer has run out
       if(mModuleSecondaryActive[i] && mModuleSecondaryCooldownTimer[i].getCurrent() == 0)
       {
-         S32 EnergyUsed = S32(getGame()->getModuleInfo((ShipModule) i)->getSecondaryPerUseCost());
-         mEnergy -= EnergyUsed;
+         S32 energyCost = gModuleInfo[i].getSecondaryPerUseCost();
+         // If we have enough energy, fire the module
+         if(mEnergy >= energyCost)
+         {
+            // TODO: fire the module...
+            mEnergy -= energyCost;
+         }
       }
    }
 
