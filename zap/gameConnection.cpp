@@ -40,7 +40,6 @@
 #include "UIMenus.h"             // For enum in PlayerMenuUserInterface
 
 #include "md5wrapper.h"
-#include "voiceCodec.h"
 
 #include "Colors.h"
 #include "stringUtils.h"         // For strictjoindir()
@@ -51,12 +50,14 @@ namespace Zap
 
 TNL_IMPLEMENT_NETCONNECTION(GameConnection, NetClassGroupGame, true);
 
-// Constructor -- used on Server by TNL, not called directly
+// Constructor -- used on Server by TNL, not called directly, used when a new client connects to the server
 GameConnection::GameConnection()
 {
    TNLAssert(gServerGame, "Client uses this?!?");
 
-   mSettings = gServerGame->getSettings();      // TOTAL HACK!!
+   mSettings = gServerGame->getSettings();      // HACK!!  Should not refer to gServerGame!!
+
+   mClientInfo = boost::shared_ptr<ClientInfo>(new LocalClientInfo(this, false));
 
    mVote = 0;
    mVoteTime = 0;
@@ -67,10 +68,6 @@ GameConnection::GameConnection()
 
 	initialize();
    mPlayerInfo = new PlayerInfo(mClientInfo.get());   // Deleted in destructor
-
-   // Not needed on server
-   mDecoder = NULL;
-   mVoiceSFX = NULL;
 }
 
 
@@ -90,9 +87,6 @@ GameConnection::GameConnection(GameSettings *settings, ClientInfo *clientInfo)
 
    setSimulatedNetParams(settings->getSimulatedLoss(), settings->getSimulatedLag());
 
-   mDecoder = new SpeexVoiceDecoder();
-   mVoiceSFX = new SoundEffect(SFXVoice, NULL, 1, Point(), Point());
-
    // These are not used on client
    mPlayerInfo = NULL;     
 }
@@ -103,7 +97,6 @@ void GameConnection::initialize()
 {
    setTranslatesStrings();
    mInCommanderMap = false;
-   mIsLevelChanger = false;
    mIsBusy = false;
    mGotPermissionsReply = false;
    mWaitingForPermissionsReply = false;
@@ -157,12 +150,7 @@ GameConnection::~GameConnection()
    }
 
    delete mDataBuffer;
-
-   delete mVoiceSFX;
-   delete mDecoder;
-
    delete mPlayerInfo;
-   //delete mClientInfo;      
 }
 
 
@@ -445,18 +433,18 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sAdminPassword, (StringPtr pass), (pass),
       return;
    }
 
-   mClientInfo->setAdmin(true);   // Enter admin PW and...
+   mClientInfo->setIsAdmin(true);               // Enter admin PW and...
 
-   if(!isLevelChanger())
+   if(!mClientInfo->isLevelChanger())
    {
-      setIsLevelChanger(true);   // ...get these permissions too!
+      mClientInfo->setIsLevelChanger(true);     // ...get these permissions too!
       sendLevelList();
    }
       
-   s2cSetIsAdmin(true);          // Tell client they have been granted access
+   s2cSetIsAdmin(true);                         // Tell client they have been granted access
 
    if(mSettings->getIniSettings()->allowAdminMapUpload)
-      s2rSendableFlags(1);       // Enable level uploads
+      s2rSendableFlags(1);                      // Enable level uploads
 
    GameType *gameType = gServerGame->getGameType();
 
@@ -477,7 +465,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sLevelChangePassword, (StringPtr pass), (pas
       return;
    }
 
-   setIsLevelChanger(true);
+   mClientInfo->setIsLevelChanger(true);
 
    s2cSetIsLevelChanger(true, true);      // Tell client they have been granted access
    sendLevelList();                       // Send client the level list
@@ -593,10 +581,11 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
       // Send the new list of levels to all levelchangers
       for(S32 i = 0; i < gServerGame->getClientCount(); i++)
       {
-         GameConnection *clientConnection = gServerGame->getClientInfo(i)->getConnection();
+         ClientInfo *clientInfo = gServerGame->getClientInfo(i);
+         GameConnection *conn = clientInfo->getConnection();
 
-         if(clientConnection->isLevelChanger())
-            clientConnection->sendLevelList();
+         if(clientInfo->isLevelChanger())
+            conn->sendLevelList();
       }
 
       s2cDisplayMessage(ColorAqua, SFXNone, "Level folder changed");
@@ -650,18 +639,20 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
    if(type == (U32)LevelChangePassword)
    {
       msg = strcmp(param.getString(), "") ? levelPassChanged : levelPassCleared;
+
       // If we're clearning the level change password, quietly grant access to anyone who doesn't already have it
       if(!strcmp(param.getString(), ""))
       {
          for(S32 i = 0; i < gServerGame->getClientCount(); i++)
          {
-            GameConnection *client = gServerGame->getClientInfo(i)->getConnection();
+            ClientInfo *clientInfo = gServerGame->getClientInfo(i);
+            GameConnection *conn = clientInfo->getConnection();
 
-            if(!client->isLevelChanger())
+            if(!clientInfo->isLevelChanger())
             {
-               client->setIsLevelChanger(true);
-               client->sendLevelList();
-               client->s2cSetIsLevelChanger(true, false);     // Silently
+               clientInfo->setIsLevelChanger(true);
+               conn->sendLevelList();
+               conn->s2cSetIsLevelChanger(true, false);     // Silently
             }
          }
       }
@@ -669,12 +660,13 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
       { 
          for(S32 i = 0; i < gServerGame->getClientCount(); i++)
          {
-            GameConnection *client = gServerGame->getClientInfo(i)->getConnection();
+            ClientInfo *clientInfo = gServerGame->getClientInfo(i);
+            GameConnection *conn = clientInfo->getConnection();
 
-            if(client->isLevelChanger() && (!mClientInfo->isAdmin()))
+            if(clientInfo->isLevelChanger() && (!clientInfo->isAdmin()))
             {
-               client->setIsLevelChanger(false);
-               client->s2cSetIsLevelChanger(false, false);
+               clientInfo->setIsLevelChanger(false);
+               conn->s2cSetIsLevelChanger(false, false);
             }
          }
       }
@@ -784,7 +776,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetServerName, (StringTableEntry name), (na
    setServerName(name);
 
    // If we know the level change password, apply for permissions if we don't already have them
-   if(!mIsLevelChanger)
+   if(!mClientInfo->isLevelChanger())
    {
       string levelChangePassword = gINI.GetValue("SavedLevelChangePasswords", getServerName());
       if(levelChangePassword != "")
@@ -795,7 +787,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetServerName, (StringTableEntry name), (na
    }
 
    // If we know the admin password, apply for permissions if we don't already have them
-   if(!mClientGame->getClientInfo()->isAdmin())
+   if(!mClientInfo->isAdmin())
    {
       string adminPassword = gINI.GetValue("SavedAdminPasswords", getServerName());
       if(adminPassword != "")
@@ -821,15 +813,15 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsAdmin, (bool granted), (granted),
    else
       logprintf(LogConsumer::ServerFilter, "User [%s] denied admin permissions", clientInfo->getName().getString());
 
-   clientInfo->setAdmin(granted);
+   clientInfo->setIsAdmin(granted);
 
    // Admin permissions automatically give level change permission
    if(granted)                      // Don't rescind level change permissions for entering a bad admin PW
    {
-      if(!isLevelChanger())
+      if(!clientInfo->isLevelChanger())
          sendLevelList();
 
-      setIsLevelChanger(true);
+      clientInfo->setIsLevelChanger(true);
    }
 
 
@@ -870,12 +862,13 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsLevelChanger, (bool granted, bool noti
    if(!granted)
       gINI.deleteKey("SavedLevelChangePasswords", getServerName());
 
+   ClientInfo *clientInfo = mClientGame->getClientInfo();
 
    // Check for permissions being rescinded by server, will happen if admin changes level change pw
-   if(isLevelChanger() && !granted)
+   if(clientInfo->isLevelChanger() && !granted)
       mClientGame->displayMessage(gCmdChatColor, "An admin has changed the level change password; you must enter the new password to change levels.");
 
-   setIsLevelChanger(granted);
+   clientInfo->setIsLevelChanger(granted);
 
    setGotPermissionsReply(true);
 
@@ -1125,10 +1118,10 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestLevelChange, (S32 newLevelIndex, boo
 
 void GameConnection::c2sRequestLevelChange2(S32 newLevelIndex, bool isRelative)
 {
-   if(!mIsLevelChanger)
+   if(!mClientInfo->isLevelChanger())
       return;
 
-   // Use voting when there is no level change password and there is more then 1 player
+   // Use voting when there is no level change password and there is more then 1 player (unless changer is an admin)
    if(!mClientInfo->isAdmin() && mSettings->getLevelChangePassword().length() == 0 && 
          gServerGame->getPlayerCount() > 1 && gServerGame->voteStart(mClientInfo.get(), 0, newLevelIndex))
       return;
@@ -1625,7 +1618,7 @@ void GameConnection::onConnectionEstablished()
 
       if(gServerGame->getSettings()->getLevelChangePassword() == "")   // Grant level change permissions if level change PW is blank
       {
-         setIsLevelChanger(true);
+         mClientInfo->setIsLevelChanger(true);
          s2cSetIsLevelChanger(true, false);          // Tell client, but don't display notification
          sendLevelList();
       }

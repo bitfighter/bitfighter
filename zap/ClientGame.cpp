@@ -109,7 +109,7 @@ ClientGame::ClientGame(const Address &bindAddress, GameSettings *settings) : Gam
 
    mUIManager = new UIManager(this);         // Gets deleted in destructor
 
-   mClientInfo = boost::shared_ptr<ClientInfo>(new ClientClientInfo("", false, false));   // just a guess...
+   mClientInfo = boost::shared_ptr<ClientInfo>(new LocalClientInfo(NULL, false));   
 
    // Create some random stars
    for(U32 i = 0; i < NumStars; i++)
@@ -175,8 +175,8 @@ void ClientGame::joinGame(Address remoteAddress, bool isFromMaster, bool local)
          // Stuff on client side, so interface will offer the correct options.
          // Note that if we're local, the passed address is probably a dummy; check caller if important.
          gameConnection->connectLocal(getNetInterface(), gServerGame->getNetInterface());
-         clientInfo->setAdmin(true);                    // Local connection is always admin
-         gameConnection->setIsLevelChanger(true);       // Local connection can always change levels
+         clientInfo->setIsAdmin(true);              // Local connection is always admin
+         clientInfo->setIsLevelChanger(true);       // Local connection can always change levels
 
          GameConnection *gc = dynamic_cast<GameConnection *>(gameConnection->getRemoteConnectionObject());
 
@@ -185,8 +185,8 @@ void ClientGame::joinGame(Address remoteAddress, bool isFromMaster, bool local)
          // Stuff on server side
          if(gc)                              
          {
-            gc->getClientInfo()->setAdmin(true);      // Set isAdmin on server
-            gc->setIsLevelChanger(true);              // Set isLevelChanger on server
+            gc->getClientInfo()->setIsAdmin(true);                         // Set isAdmin on server
+            gc->getClientInfo()->setIsLevelChanger(true);                  // Set isLevelChanger on server
             gc->sendLevelList();
 
             gc->s2cSetIsAdmin(true);                                       // Set isAdmin on the client
@@ -586,7 +586,7 @@ void ClientGame::cancelShutdown()
 // Returns true if we have admin privs, displays error message and returns false if not
 bool ClientGame::hasAdmin(const char *failureMessage)
 {
-   if(getClientInfo()->isAdmin())
+   if(mClientInfo->isAdmin())
       return true;
    
    displayErrorMessage(failureMessage);
@@ -597,9 +597,7 @@ bool ClientGame::hasAdmin(const char *failureMessage)
 // Returns true if we have level change privs, displays error message and returns false if not
 bool ClientGame::hasLevelChange(const char *failureMessage)
 {
-   GameConnection *gc = getConnectionToServer();
-
-   if(gc->isLevelChanger())
+   if(mClientInfo->isLevelChanger())
       return true;
    
    displayErrorMessage(failureMessage);

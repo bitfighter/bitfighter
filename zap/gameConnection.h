@@ -65,8 +65,6 @@ static const char USED_EXTERNAL *gConnectStatesTable[] = {
 class ClientGame;
 struct LevelInfo;
 class GameSettings;
-class SoundEffect;
-class VoiceDecoder;
 class LuaPlayerInfo;
 class ClientInfo;
 
@@ -94,12 +92,7 @@ private:
    ClientGame *mClientGame;         // Sometimes this is NULL
 #endif
 
-   // For voice chat
-   SoundEffect *mVoiceSFX;
-   VoiceDecoder *mDecoder;
-
    bool mInCommanderMap;
-   bool mIsLevelChanger;
    bool mWaitingForPermissionsReply;
    bool mGotPermissionsReply;
    bool mIsBusy;              // True when the player is off chatting or futzing with options or whatever, false when they are "active"
@@ -210,9 +203,6 @@ public:
    string getServerName() { return mServerName.getString(); }
    static string makeUnique(string name);    // Make sure a given name is unique across all clients & bots
 
-   // Voice chat stuff -- these will be invalid on the server side
-   SoundEffect *getVoiceSFX() { return mVoiceSFX; }
-   VoiceDecoder *getVoiceDecoder() { return mDecoder; }
 
    //StringTableEntryRef getClientName() { return mClientName; }
 
@@ -232,9 +222,6 @@ public:
 
    bool isBusy() { if(!this) return false; else return mIsBusy; }
    void setIsBusy(bool busy) { mIsBusy = busy; }
-
-   bool isLevelChanger() { return mIsLevelChanger; }
-   void setIsLevelChanger(bool levelChanger) { mIsLevelChanger = levelChanger; }
 
    void sendLevelList();
 

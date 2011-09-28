@@ -1357,8 +1357,8 @@ Robot::Robot(const StringTableEntry &robotName, const string &scriptDir, S32 tea
    // Need to provide some time on here to get timer to trigger robot to spawn.  It's timer driven.
    // respawnTimer.reset(100, RobotRespawnDelay);
 
-
-   mClientInfo = boost::shared_ptr<ClientInfo>(new ClientClientInfo("Rudy the Robot", true, false));
+   TNLAssert(getOwner(), "Need a game connection here!");
+   mClientInfo = boost::shared_ptr<ClientInfo>(new LocalClientInfo(getOwner(), true));
 
    mPlayerInfo = new RobotPlayerInfo(this);
    mScore = 0;

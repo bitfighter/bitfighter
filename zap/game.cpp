@@ -51,6 +51,8 @@
 
 #include "BotNavMeshZone.h"      // For zone clearing code
 
+#include "voiceCodec.h"
+
 #include "tnl.h"
 #include "tnlRandom.h"
 #include "tnlGhostConnection.h"
@@ -82,11 +84,24 @@ void ClientInfo::setAuthenticated(bool isAuthenticated)
 }
 
 
-void ServerClientInfo::setAuthenticated(bool isAuthenticated)
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Constructor
+LocalClientInfo::LocalClientInfo(GameConnection *gameConnection, bool isRobot)
+{
+   initialize();
+
+   mClientConnection = gameConnection;
+   mIsRobot = isRobot;
+}
+
+
+void LocalClientInfo::setAuthenticated(bool isAuthenticated)
 {
    Parent::setAuthenticated(isAuthenticated);
 
-   if(getConnection() && getConnection()->isConnectionToClient())    // Only run this bit if we are a server
+   if(mClientConnection && mClientConnection->isConnectionToClient())    // Only run this bit if we are a server
    {
       // If we are verified, we need to alert any connected clients, so they can render ships properly.  This is done via the ship object.
       Ship *ship = dynamic_cast<Ship *>(getConnection()->getControlObject());
@@ -96,28 +111,7 @@ void ServerClientInfo::setAuthenticated(bool isAuthenticated)
 }
 
 
-// Constructor
-ServerClientInfo::ServerClientInfo(GameConnection *gameConnection)
-{
-   TNLAssert(gameConnection, "Must have a gameConnection to create a ServerClientInfo!");
-   initialize();
-
-   mClientConnection = gameConnection;
-      //gameConnection->setClientInfo(this);    // Reciprocate
-}
-
-
-// Construtor used by bots
-//ServerClientInfo::ServerClientInfo(GameConnection *clientConnection, const StringTableEntry &name, bool isRobot)
-//{
-//   initialize();
-//
-//   mClientConnection = clientConnection;
-//   mName = name;
-//   mIsRobot = isRobot;
-//}
-
-F32 ServerClientInfo::getRating()
+F32 LocalClientInfo::getRating()
 {
    // Initial case: no one has scored
    if(mTotalScore == 0)      
@@ -129,19 +123,18 @@ F32 ServerClientInfo::getRating()
 }
 
 
-void ServerClientInfo::addToTotalScore(S32 score) 
+void LocalClientInfo::addToTotalScore(S32 score) 
 { 
    mTotalScore += score; 
    mClientConnection->addToTotalCumulativeScore(score); 
 }
 
 
-
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-// Constructor used by bots
-ClientClientInfo::ClientClientInfo(const StringTableEntry &name, bool isRobot, bool isAdmin)
+// Constructor
+RemoteClientInfo::RemoteClientInfo(const StringTableEntry &name, bool isRobot, bool isAdmin)
 {
    initialize();
 
@@ -149,6 +142,17 @@ ClientClientInfo::ClientClientInfo(const StringTableEntry &name, bool isRobot, b
    mIsRobot = isRobot;
    mIsAdmin = isAdmin;
    mTeamIndex = NO_TEAM;
+
+   // Initialize speech stuff, will be deleted in destructor
+   mDecoder = new SpeexVoiceDecoder();
+   mVoiceSFX = new SoundEffect(SFXVoice, NULL, 1, Point(), Point());
+}
+
+
+RemoteClientInfo::~RemoteClientInfo()
+{
+   delete mDecoder;
+   delete mVoiceSFX;
 }
 
 
@@ -389,13 +393,16 @@ void Game::countTeamPlayers()
          else
             team->incrementPlayerCount();
 
+         // The following bit won't work on the client... 
+         if(isServer())
+         {
+            const F32 BASE_RATING = .1f;
 
-         const F32 BASE_RATING = .1f;
+            GameConnection *conn = clientInfo->getConnection();
 
-         GameConnection *conn = clientInfo->getConnection();
-
-         if(conn)
-            team->addRating(max(conn->getCumulativeRating(), BASE_RATING));    
+            if(conn)
+               team->addRating(max(conn->getCumulativeRating(), BASE_RATING));    
+         }
       }
    }
 }
@@ -1744,7 +1751,7 @@ void ServerGame::addClient(boost::shared_ptr<ClientInfo> clientInfo)
    GameConnection *conn = clientInfo->getConnection();
 
    // If client has level change or admin permissions, send a list of levels and their types to the connecting client
-   if(conn->isLevelChanger() || clientInfo->isAdmin())
+   if(clientInfo->isLevelChanger() || clientInfo->isAdmin())
       conn->sendLevelList();
 
    // If we're shutting down, display a notice to the user
@@ -2123,29 +2130,29 @@ void ServerGame::gameEnded()
 }
 
 
-S32 ServerGame::addUploadedLevelInfo(const char *filename, LevelInfo &info)
+S32 ServerGame::addUploadedLevelInfo(const char *filename, LevelInfo &levelInfo)
 {
-   if(info.levelName == "")            // Make sure we have something in the name field
-      info.levelName = filename;
+   if(levelInfo.levelName == "")            // Make sure we have something in the name field
+      levelInfo.levelName = filename;
 
-   info.levelFileName = filename; 
+   levelInfo.levelFileName = filename; 
 
    // Check if we already have this one
    for(S32 i = 0; i < mLevelInfos.size(); i++)
-      if(mLevelInfos[i].levelFileName == info.levelFileName)
+      if(mLevelInfos[i].levelFileName == levelInfo.levelFileName)
          return i;
 
    // We don't... so add it!
-   mLevelInfos.push_back(info);
+   mLevelInfos.push_back(levelInfo);
 
    // Let levelChangers know about the new level
 
    for(S32 i = 0; i < getClientCount(); i++)
    {
-      GameConnection *conn = getClientInfo(i)->getConnection();
+      ClientInfo *clientInfo = getClientInfo(i);
 
-      if(conn->isLevelChanger())
-         conn->s2cAddLevel(info.levelName, info.levelType);
+      if(clientInfo->isLevelChanger())
+         clientInfo->getConnection()->s2cAddLevel(levelInfo.levelName, levelInfo.levelType);
    }
 
    return mLevelInfos.size() - 1;

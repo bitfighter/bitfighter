@@ -822,7 +822,7 @@ VersionedGameStats GameType::getGameStats()
 
          playerStats->switchedTeamCount = conn->switchedTeamCount;
          playerStats->isAdmin           = clientInfo->isAdmin();
-         playerStats->isLevelChanger    = conn->isLevelChanger();
+         playerStats->isLevelChanger    = clientInfo->isLevelChanger();
          playerStats->isAuthenticated   = clientInfo->isAuthenticated();
          playerStats->isHosting         = conn->isLocalConnection();
 
@@ -1946,7 +1946,7 @@ GAMETYPE_RPC_C2S(GameType, c2sAddTime, (U32 time), (time))
    GameConnection *source = dynamic_cast<GameConnection *>(NetObject::getRPCSourceConnection());
    ClientInfo *clientInfo = source->getClientInfo();
 
-   if(!source->isLevelChanger())                         // Level changers and above
+   if(!clientInfo->isLevelChanger())                // Level changers and above
       return;
 
    // Use voting when no level change password and more then 1 players
@@ -1974,7 +1974,7 @@ GAMETYPE_RPC_C2S(GameType, c2sChangeTeams, (S32 team), (team))
       return;                                                     // return without processing the change team request
 
    // Vote to change team might have different problems than the old way...
-   if( (!source->isLevelChanger() || gServerGame->getSettings()->getLevelChangePassword() == "") && 
+   if( (!clientInfo->isLevelChanger() || gServerGame->getSettings()->getLevelChangePassword() == "") && 
         gServerGame->getPlayerCount() > 1 )
    {
       if(gServerGame->voteStart(clientInfo, 4, team))
@@ -2067,7 +2067,7 @@ GAMETYPE_RPC_S2C(GameType, s2cAddClient,
       
    GameConnection *localConn = clientGame->getConnectionToServer();     // This is the current, local game connection
 
-   boost::shared_ptr<ClientInfo> clientInfo = boost::shared_ptr<ClientInfo>(new ClientClientInfo(name, isRobot, isAdmin));  
+   boost::shared_ptr<ClientInfo> clientInfo = boost::shared_ptr<ClientInfo>(new RemoteClientInfo(name, isRobot, isAdmin));  
    mGame->addClientInfoToList(clientInfo);                              // Add ourselves to our list of other clients
 
    if(isLocalClient)
@@ -2253,12 +2253,16 @@ GAMETYPE_RPC_S2C(GameType, s2cClientJoinedTeam,
 GAMETYPE_RPC_S2C(GameType, s2cClientBecameAdmin, (StringTableEntry name), (name))
 {
 #ifndef ZAP_DEDICATED
-   ClientInfo *clientInfo = mGame->findClientInfo(name);      // Will be us, if we changed teams
+   // Get a RemoteClientInfo representing the client that just became an admin
+   ClientInfo *clientInfo = mGame->findClientInfo(name);      
    if(!clientInfo)
       return;
 
-   clientInfo->setAdmin(true);
+   // Record that fact in our local copy of info about them
+   clientInfo->setIsAdmin(true);
 
+   // Now display a message to the local client, unless they were the ones who were granted the privs, in which case they already
+   // saw a different message.
    ClientGame *clientGame = dynamic_cast<ClientGame *>(mGame);
    TNLAssert(clientGame, "clientGame is NULL");
    if(!clientGame) 
@@ -2274,13 +2278,19 @@ GAMETYPE_RPC_S2C(GameType, s2cClientBecameAdmin, (StringTableEntry name), (name)
 GAMETYPE_RPC_S2C(GameType, s2cClientBecameLevelChanger, (StringTableEntry name), (name))
 {
 #ifndef ZAP_DEDICATED
-   ClientInfo *clientInfo = mGame->findClientInfo(name);      // Will be us, if we changed teams
+   // Get a RemoteClientInfo representing the client that just became a level changer
+   ClientInfo *clientInfo = mGame->findClientInfo(name);      
    if(!clientInfo)
       return;
 
-   clientInfo->getConnection()->setIsLevelChanger(true);
+   // Record that fact in our local copy of info about them
+   clientInfo->setIsLevelChanger(true);
 
+
+   // Now display a message to the local client, unless they were the ones who were granted the privs, in which case they already
+   // saw a different message.
    ClientGame *clientGame = dynamic_cast<ClientGame *>(mGame);
+
    TNLAssert(clientGame, "clientGame is NULL");
    if(!clientGame) 
       return;
@@ -2431,7 +2441,7 @@ void GameType::processServerCommand(ClientInfo *clientInfo, const char *cmd, Vec
 
    if(!stricmp(cmd, "settime"))
    {
-      if(!conn->isLevelChanger())
+      if(!clientInfo->isLevelChanger())
          conn->s2cDisplayErrorMessage("!!! Need level change permission");
       else if(args.size() < 1)
          conn->s2cDisplayErrorMessage("!!! Enter time in minutes");
@@ -2465,7 +2475,7 @@ void GameType::processServerCommand(ClientInfo *clientInfo, const char *cmd, Vec
    }
    else if(!stricmp(cmd, "setwinscore"))
    {
-     if(!conn->isLevelChanger())                         // Level changers and above
+     if(!clientInfo->isLevelChanger())                       // Level changers and above
          conn->s2cDisplayErrorMessage("!!! Need level change permission");
      else if(args.size() < 1)
          conn->s2cDisplayErrorMessage("!!! Enter score limit");
@@ -2490,7 +2500,7 @@ void GameType::processServerCommand(ClientInfo *clientInfo, const char *cmd, Vec
    }
    else if(!stricmp(cmd, "resetscore"))
    {
-     if(!conn->isLevelChanger())                         // Level changers and above
+     if(!clientInfo->isLevelChanger())                       // Level changers and above
          conn->s2cDisplayErrorMessage("!!! Need level change permission");
      else
      {
@@ -2535,7 +2545,7 @@ void GameType::processServerCommand(ClientInfo *clientInfo, const char *cmd, Vec
       else if(!clientInfo->isAdmin() && settings->getIniSettings()->defaultRobotScript == "" && args.size() < 2)  // not admin, no robotScript
          conn->s2cDisplayErrorMessage("!!! This server doesn't have default robots configured");
       
-      else if(!conn->isLevelChanger())
+      else if(!clientInfo->isLevelChanger())
          conn->s2cDisplayErrorMessage("!!! Need level change permissions to add a bot");
 
       else if((Robot::robots.size() >= settings->getIniSettings()->maxBots && !clientInfo->isAdmin()) || Robot::robots.size() >= 256)
@@ -2603,7 +2613,7 @@ void GameType::processServerCommand(ClientInfo *clientInfo, const char *cmd, Vec
    }
    else if(!stricmp(cmd, "kickbot") || !stricmp(cmd, "kickbots"))
    {
-      if(!conn->isLevelChanger())
+      if(!clientInfo->isLevelChanger())
          conn->s2cDisplayErrorMessage("!!! Need level change permissions to kick a bot");
 
       else if(Robot::robots.size() == 0)
@@ -3137,14 +3147,9 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cVoiceChat, (StringTableEntry clientName
    if(!clientInfo)
       return;
 
-   GameConnection *conn = clientInfo->getConnection();
+   ByteBufferPtr playBuffer = clientInfo->getVoiceDecoder()->decompressBuffer(*(voiceBuffer.getPointer()));
+   SoundSystem::queueVoiceChatBuffer(clientInfo->getVoiceSFX(), playBuffer);
 
-   if(conn)
-   {
-      ByteBufferPtr playBuffer = conn->getVoiceDecoder()->decompressBuffer(*(voiceBuffer.getPointer()));
-      SoundSystem::queueVoiceChatBuffer(conn->getVoiceSFX(), playBuffer);
-//      cl->voiceSFX->queueBuffer(playBuffer);
-   }
 #endif
 }
 

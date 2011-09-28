@@ -1418,7 +1418,7 @@ void GameMenuUserInterface::buildMenu()
 
    if(gc)
    {
-      if(gc->isLevelChanger())
+      if(gc->getClientInfo()->isLevelChanger())
       {
          menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(getGame(), 0, "PLAY DIFFERENT LEVEL", chooseNewLevelCallback, "", KEY_L, KEY_P)));
          menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(getGame(), 0, "ADD TIME (2 MINS)",    addTwoMinsCallback,     "", KEY_T, KEY_2)));

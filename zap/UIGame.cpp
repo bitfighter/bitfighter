@@ -1381,7 +1381,7 @@ void GameUserInterface::levelPassHandler(ClientGame *game, const Vector<string> 
 {
    GameConnection *gc = game->getConnectionToServer();
 
-   if(gc->isLevelChanger())
+   if(gc->getClientInfo()->isLevelChanger())
       game->displayErrorMessage("!!! You can already change levels");
    else if(words.size() < 2 || words[1] == "")
       game->displayErrorMessage("!!! Need to supply a password");
@@ -1763,12 +1763,16 @@ void GameUserInterface::renderCurrentChat()
 }
 
 
+extern S32 QSORT_CALLBACK alphaSort(string *a, string *b);     // Sort alphanumerically
+
 static Vector<string> commandCandidateList;
 
 static void makeCommandCandidateList()
 {
    for(S32 i = 0; i < chatCmdSize; i++)
       commandCandidateList.push_back(chatCmds[i].cmdName);
+
+   commandCandidateList.sort(alphaSort);
 }
 
 
@@ -1792,7 +1796,7 @@ static void makeTeamNameList(const Game *game, Vector<string> &nameCandidateList
 }
 
 
-static Vector<string> *getCandidateList(Game *game, const string &partialCmd, S32 arg)
+static Vector<string> *getCandidateList(Game *game, const char *first, S32 arg)
 {
    if(arg == 0)         // Command completion
       return &commandCandidateList;
@@ -1803,7 +1807,7 @@ static Vector<string> *getCandidateList(Game *game, const string &partialCmd, S3
       S32 cmd = -1;
 
       for(S32 i = 0; i < chatCmdSize; i++)
-         if(!stricmp(chatCmds[i].cmdName.c_str(), partialCmd.c_str()))
+         if(!stricmp(chatCmds[i].cmdName.c_str(), first))
          {
             cmd = i;
             break;
@@ -1833,10 +1837,6 @@ static Vector<string> *getCandidateList(Game *game, const string &partialCmd, S3
    
    return NULL;                        // No completion options
 }
-
-
-// Sorts alphanumerically
-extern S32 QSORT_CALLBACK alphaSort(string *a, string *b);
 
 
 void GameUserInterface::processChatModeKey(KeyCode keyCode, char ascii)
@@ -1872,22 +1872,29 @@ void GameUserInterface::processChatModeKey(KeyCode keyCode, char ascii)
                
          S32 arg;                      // Which word we're looking at
          const char *partial;          // The partially typed word we're trying to match against
+         const char *first;            // First arg we entered (will match partial if we're still entering the first one)
          
          // Check for trailing space --> http://www.suodenjoki.dk/us/archive/2010/basic-string-back.htm
          if(words.size() > 0 && *mLineEditor.getString().rbegin() != ' ')   
          {
             arg = words.size() - 1;          // No trailing space --> current arg is the last word we've been typing
             partial = words[arg].c_str();    // We'll be matching against what we've typed so far
+            first = words[0].c_str();      
+         }
+         else if(words.size() > 0)           // We've entered a word, pressed space indicating word is complete, 
+         {                                   // but have not started typing the next word.  We'll let user cycle through every
+            arg = words.size();              // possible value for next argument.
+            partial = "";
+            first = words[0].c_str(); 
          }
          else     // If the editor is empty, or if final character is a space, then we need to set these params differently
          {
             arg = words.size();              // Trailing space --> current arg is the next word we've not yet started typing
-            partial = "";                    // We'll be matching against an empty list since we've typed nothing so far
+            partial = "";
+            first = "";                      // We'll be matching against an empty list since we've typed nothing so far
          }
          
-         Vector<string> *candidates = getCandidateList(getGame(), partial, arg);     // Could return NULL
-
-         candidates->sort(alphaSort);
+         Vector<string> *candidates = getCandidateList(getGame(), first, arg);     // Could return NULL
 
          // Now we have our candidates list... let's compare to what the player has already typed to generate completion string
          if(candidates && candidates->size() > 0)
@@ -2699,7 +2706,7 @@ void GameUserInterface::renderTalkingClients()
    {
       ClientInfo *client = ((Game *)getGame())->getClientInfo(i);
 
-      if(client->getConnection()->getVoiceSFX()->isPlaying())
+      if(client->getVoiceSFX()->isPlaying())
       {
          const S32 TEXT_HEIGHT = 20;
 

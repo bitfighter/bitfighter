@@ -94,6 +94,9 @@ const U32 MAX_GAME_DESCR_LEN = 60;    // Any longer, and it won't fit on-screen;
 ////////////////////////////////////////
 
 class GameConnection;
+class SoundEffect;
+class VoiceDecoder;
+
 extern S32 NO_TEAM;
 
 // This object only concerns itself with things that one client tracks about another.  We use it for other purposes, of course, 
@@ -108,11 +111,13 @@ protected:
    Nonce mId;
    S32 mTeamIndex;
    S32 mPing;
+   bool mIsLevelChanger;
    bool mIsAdmin;
    bool mIsRobot;
    bool mIsAuthenticated;
 
-   virtual void initialize() { mScore = 0; mTotalScore = 0; mTeamIndex = (NO_TEAM + 0); mPing = 0; mIsAdmin = false; mIsRobot = false; mIsAuthenticated = false; }
+   virtual void initialize() { mScore = 0; mTotalScore = 0; mTeamIndex = (NO_TEAM + 0); mPing = 0; mIsAdmin = false; mIsLevelChanger = false; 
+                               mIsRobot = false; mIsAuthenticated = false; }
 
 public:
    virtual GameConnection *getConnection() = 0;
@@ -139,14 +144,19 @@ public:
    bool isAuthenticated() { return mIsAuthenticated; }
    virtual void setAuthenticated(bool isAuthenticated);
 
+   bool isLevelChanger() { return mIsLevelChanger; }
+   void setIsLevelChanger(bool isLevelChanger) { mIsLevelChanger = isLevelChanger; }
+
    bool isAdmin() { return mIsAdmin; }
-   void setAdmin(bool isAdmin) { mIsAdmin = isAdmin; }
+   void setIsAdmin(bool isAdmin) { mIsAdmin = isAdmin; }
 
    bool isRobot() { return mIsRobot; }
 
 
    Nonce *getId() { return &mId; }
 
+   virtual SoundEffect *getVoiceSFX() = 0;
+   virtual VoiceDecoder *getVoiceDecoder() = 0;
 };
 
 ////////////////////////////////////////
@@ -154,7 +164,7 @@ public:
 
 class GameConnection;
 
-class ServerClientInfo : public ClientInfo
+class LocalClientInfo : public ClientInfo
 {
    typedef ClientInfo Parent;
 
@@ -162,38 +172,45 @@ private:
    GameConnection *mClientConnection;
    
 public:
-   ServerClientInfo(GameConnection *clientConnection);
-   //ServerClientInfo(GameConnection *clientConnection, const StringTableEntry &name, bool isRobot);
+   LocalClientInfo(GameConnection *clientConnection, bool isRobot);
 
+   // WARNING!! mClientConnection can be NULL!!!
    GameConnection *getConnection() { return mClientConnection; }
    void setConnection(GameConnection *conn) { mClientConnection = conn; }
 
    void setAuthenticated(bool isAuthenticated);
 
-   void setRating(F32 rating) { TNLAssert(false, "ratings can't be set for this class!"); }
+   void setRating(F32 rating) { TNLAssert(false, "Ratings can't be set for this class!"); }
    F32 getRating();
 
    void addToTotalScore(S32 score);
+
+   SoundEffect *getVoiceSFX()      { TNLAssert(false, "Can't access VoiceSFX from this class!");      return NULL; }
+   VoiceDecoder *getVoiceDecoder() { TNLAssert(false, "Can't access VoiceDecoder from this class!"); return NULL; }
 };
 
 
 ////////////////////////////////////////
 ////////////////////////////////////////
-// Basically the same as a ServerClientInfo, but without the GameConnection pointer.  These are used on the client side to track information
-// about other players, and since players have not connections to other players, the connection pointer becomes superfluous.  The main
-// reason for seperating them out is to help make their usage clearer.
-class ClientClientInfo : public ClientInfo
+// RemoteClientInfo is used on the client side to track information about other players; these other players do not have a connection
+// to us -- all the information we know about them is located on this RemoteClientInfo object.
+class RemoteClientInfo : public ClientInfo
 {
    typedef ClientInfo Parent;
 
 private:
    F32 mRating;      // Ratings are provided by the server and stored here
 
-public:
-   ClientClientInfo(const StringTableEntry &name, bool isRobot, bool isAdmin);      // Constructor
+   // For voice chat
+   SoundEffect *mVoiceSFX;
+   VoiceDecoder *mDecoder;
 
-   GameConnection *getConnection() { TNLAssert(false, "Can't get a GameConnection from a ClientClientInfo!"); }
-   void setConnection(GameConnection *conn) { TNLAssert(false, "Can't set a GameConnection on a ClientClientInfo!"); }
+public:
+   RemoteClientInfo(const StringTableEntry &name, bool isRobot, bool isAdmin);      // Constructor
+   RemoteClientInfo::~RemoteClientInfo();                                           // Destructor
+
+   GameConnection *getConnection() { TNLAssert(false, "Can't get a GameConnection from a RemoteClientInfo!"); }
+   void setConnection(GameConnection *conn) { TNLAssert(false, "Can't set a GameConnection on a RemoteClientInfo!"); }
 
    F32 getRating() { return mRating; }
    void setRating(F32 rating) { mRating = rating; }
@@ -201,6 +218,11 @@ public:
    void addToTotalScore(S32 score) { TNLAssert(false, "We don't track total score in these parts..."); }
 
    void initialize() { Parent::initialize(); mRating = 0; }
+
+   // Voice chat stuff -- these will be invalid on the server side
+   SoundEffect *getVoiceSFX() { return mVoiceSFX; }
+   VoiceDecoder *getVoiceDecoder() { return mDecoder; }
+
 };
 
 
@@ -338,8 +360,6 @@ public:
    S32 getClientCount() const { return mClientInfos.size(); }
    ClientInfo *getClientInfo(S32 index);
 
-
-   ClientInfo *getClientConnection(S32 index);
    void addClientInfoToList(const boost::shared_ptr<ClientInfo> &conn);               
    void removeClientInfoFromList(const StringTableEntry &name);
    void removeClientInfoFromList(ClientInfo *clientInfo);
