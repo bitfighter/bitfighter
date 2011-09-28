@@ -53,7 +53,7 @@ TNL_IMPLEMENT_NETCONNECTION(GameConnection, NetClassGroupGame, true);
 // Constructor -- used on Server by TNL, not called directly, used when a new client connects to the server
 GameConnection::GameConnection()
 {
-   TNLAssert(gServerGame, "Client uses this?!?");
+   TNLAssert(gServerGame, "Client should not be using this constructor!");
 
    mSettings = gServerGame->getSettings();      // HACK!!  Should not refer to gServerGame!!
 
@@ -73,19 +73,19 @@ GameConnection::GameConnection()
 
 #ifndef ZAP_DEDICATED
 // Constructor on client side
-GameConnection::GameConnection(GameSettings *settings, ClientInfo *clientInfo)
+GameConnection::GameConnection(ClientGame *clientGame)
 {
    initialize();
 
-   mSettings = settings;
+   mSettings = clientGame->getSettings();
+   mClientInfo = clientGame->getClientInfo_shared_ptr();
 
-   // Make sure we have a valid name
-   if(clientInfo->getName() == "")
-      clientInfo->setName("Chump");
+   TNLAssert(mClientInfo->getName() != "", "Client has invalid name!");
+   if(mClientInfo->getName() == "")
+      mClientInfo->setName("Chump");
 
-   mClientInfo = boost::shared_ptr<ClientInfo>(clientInfo);
 
-   setSimulatedNetParams(settings->getSimulatedLoss(), settings->getSimulatedLag());
+   setSimulatedNetParams(mSettings->getSimulatedLoss(), mSettings->getSimulatedLag());
 
    // These are not used on client
    mPlayerInfo = NULL;     

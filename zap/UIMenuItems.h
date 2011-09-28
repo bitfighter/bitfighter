@@ -316,7 +316,7 @@ public:
    LineEditor getLineEditor() { return mLineEditor; }
    void setLineEditor(LineEditor editor) { mLineEditor = editor; }
 
-   virtual string getValueForWritingToLevelFile() { return mLineEditor.getString(); }
+   virtual string getValueForWritingToLevelFile() { return mLineEditor.getString() != "" ? mLineEditor.getString() : mEmptyVal; }
    virtual string getValueForDisplayingInMenu() { return mLineEditor.getString(); }
 
    virtual string getValue() const { return mLineEditor.getString(); } 

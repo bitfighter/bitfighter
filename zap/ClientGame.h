@@ -94,6 +94,7 @@ public:
    void setConnectionToServer(GameConnection *connection);
 
    ClientInfo *getClientInfo() { return mClientInfo.get(); }
+   boost::shared_ptr<ClientInfo> getClientInfo_shared_ptr() { return mClientInfo; } // Ugly on purpose... should rarely be used!
 
    string getLoginPassword() const { return mLoginPassword; }
    void setLoginPassword(const string &loginPassword) { mLoginPassword = loginPassword; }

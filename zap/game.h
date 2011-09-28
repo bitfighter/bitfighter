@@ -175,7 +175,7 @@ public:
    LocalClientInfo(GameConnection *clientConnection, bool isRobot);
 
    // WARNING!! mClientConnection can be NULL!!!
-   GameConnection *getConnection() { return mClientConnection; }
+   GameConnection *getConnection() { TNLAssert(mClientConnection, "Null connection"); return mClientConnection; }
    void setConnection(GameConnection *conn) { mClientConnection = conn; }
 
    void setAuthenticated(bool isAuthenticated);

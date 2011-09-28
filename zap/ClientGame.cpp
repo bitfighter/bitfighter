@@ -165,8 +165,7 @@ void ClientGame::joinGame(Address remoteAddress, bool isFromMaster, bool local)
    }
    else                                                         // Try a direct connection
    {
-      ClientInfo *clientInfo = getClientInfo();
-      GameConnection *gameConnection = new GameConnection(mSettings, clientInfo);
+      GameConnection *gameConnection = new GameConnection(this);
 
       setConnectionToServer(gameConnection);
 
@@ -175,12 +174,13 @@ void ClientGame::joinGame(Address remoteAddress, bool isFromMaster, bool local)
          // Stuff on client side, so interface will offer the correct options.
          // Note that if we're local, the passed address is probably a dummy; check caller if important.
          gameConnection->connectLocal(getNetInterface(), gServerGame->getNetInterface());
-         clientInfo->setIsAdmin(true);              // Local connection is always admin
-         clientInfo->setIsLevelChanger(true);       // Local connection can always change levels
+         mClientInfo->setIsAdmin(true);              // Local connection is always admin
+         mClientInfo->setIsLevelChanger(true);       // Local connection can always change levels
 
          GameConnection *gc = dynamic_cast<GameConnection *>(gameConnection->getRemoteConnectionObject());
 
          TNLAssert(gc == gameConnection, "ok..., probably need to change clientInfo below to gc->getClientInfo()");
+         TNLAssert(gc->getClientInfo() == mClientInfo.get(), "ok..., probably need to change clientInfo below to gc->getClientInfo()");
 
          // Stuff on server side
          if(gc)                              

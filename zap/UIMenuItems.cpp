@@ -360,7 +360,7 @@ void EditableMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
 {
    Color textColor;     
    if(mLineEditor.getString() == "" && mEmptyVal != "")
-      textColor.set(.4, .4, .4);
+      textColor.set(.4);
    else if(isSelected)
       textColor.set(Colors::red);
    else

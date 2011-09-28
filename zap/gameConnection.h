@@ -67,6 +67,7 @@ struct LevelInfo;
 class GameSettings;
 class LuaPlayerInfo;
 class ClientInfo;
+class LocalClientInfo;
 
 
 class GameConnection: public ControlObjectConnection, public DataSendable
@@ -169,10 +170,10 @@ public:
 
 
 #ifndef ZAP_DEDICATED
-   GameConnection(GameSettings *settings, ClientInfo *clientInfo);   // Constructor for ClientGame
+   GameConnection(ClientGame *game);      // Constructor for ClientGame
 #endif
-   GameConnection();                                                 // Constructor for ServerGame
-   ~GameConnection();                                                // Destructor
+   GameConnection();                      // Constructor for ServerGame
+   ~GameConnection();                     // Destructor
 
 
    // These from the DataSendable interface class
