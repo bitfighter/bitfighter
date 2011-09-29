@@ -158,7 +158,8 @@ public:
    static Vector<const char *> DetectedJoystickNameList;   // All detected joystick names
 
    // static data
-   static S16 SensitivityThreshold;
+   static S16 LowerSensitivityThreshold;
+   static S16 UpperSensitivityThreshold;
    static S32 UseJoystickNumber;
    static JoystickInfo PredefinedJoystickList[ControllerTypeCount];
    static JoystickInput JoystickInputData[MaxAxesDirections];

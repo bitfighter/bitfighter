@@ -79,12 +79,15 @@ void Event::updateJoyAxesDirections(U32 axisMask, S16 value)
    // Update our global joystick input data, use a sensitivity threshold to take care of calibration issues
    // Also, normalize the input value to a floating point scale of 0 to 1
    F32 normalValue;
-   if (value < -Joystick::SensitivityThreshold)
-      normalValue = (F32)(-value - Joystick::SensitivityThreshold)/(F32)(S16_MAX - Joystick::SensitivityThreshold);
-   else if (value > Joystick::SensitivityThreshold)
-      normalValue = (F32)(value - Joystick::SensitivityThreshold)/(F32)(S16_MAX - Joystick::SensitivityThreshold);
-   else
+   S32 absValue = abs(value);
+   if(absValue < Joystick::LowerSensitivityThreshold)
       normalValue = 0.0f;
+   else if(absValue > Joystick::UpperSensitivityThreshold)
+      normalValue = 1.0f;
+   else
+      normalValue = (F32)(absValue - Joystick::LowerSensitivityThreshold) / (F32)(Joystick::UpperSensitivityThreshold - Joystick::LowerSensitivityThreshold);
+
+//   logprintf("value: %d;\tnormalValue: %f", value, normalValue);
 
    Joystick::JoystickInputData[axesDirectionIndex].value = normalValue;
 

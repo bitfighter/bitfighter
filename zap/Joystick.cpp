@@ -41,7 +41,8 @@ Vector<const char *> Joystick::DetectedJoystickNameList;
 
 U32 Joystick::ButtonMask = 0;
 F32 Joystick::rawAxis[Joystick::rawAxisCount];
-S16 Joystick::SensitivityThreshold = 3200;  // out of 32767
+S16 Joystick::LowerSensitivityThreshold = 4900;   // out of 32767, ~15%, any less than this is ends up as zero
+S16 Joystick::UpperSensitivityThreshold = 26200;  // out of 32767, ~80%, any more than this is full amount
 S32 Joystick::UseJoystickNumber = 0;
 U32 Joystick::AxesKeyCodeMask = 0;
 U32 Joystick::HatKeyCodeMask = 0;
