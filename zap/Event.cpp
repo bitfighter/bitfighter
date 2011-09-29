@@ -392,13 +392,17 @@ extern KeyCode joyButtonToKeyCode(int buttonIndex);
 
 void Event::onJoyButtonDown(U8 which, U8 button, U32 joystickType)
 {
+//   logprintf("SDL button down number: %u", button);
    keyCodeDown(joyButtonToKeyCode(Joystick::remapJoystickButton(joystickType, button)), 0);
+   Joystick::ButtonMask |= BIT(button);
 }
 
 
 void Event::onJoyButtonUp(U8 which, U8 button, U32 joystickType)
 {
+//   logprintf("SDL button up number: %u", button);
    keyCodeUp(joyButtonToKeyCode(Joystick::remapJoystickButton(joystickType, button)));
+   Joystick::ButtonMask ^= BIT(button);
 }
 
 

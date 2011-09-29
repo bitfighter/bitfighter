@@ -279,7 +279,7 @@ S32 JoystickRender::getControllerButtonRenderedSize(S32 joystickType, KeyCode ke
       else
          return rectButtonWidth;
    }
-   else if(joystickType == XBoxController || joystickType == XBoxControllerOnXBox)
+   else if(joystickType == XBoxController || joystickType == XBoxControllerOnXBox || joystickType == XBox360pad)
    {
       if(buttonIndex < 4)
          return 18;
@@ -516,7 +516,7 @@ void JoystickRender::renderControllerButton(F32 x, F32 y, U32 joystickType, KeyC
          }
       }
    }
-   else if(joystickType == XBoxController || joystickType == XBoxControllerOnXBox)
+   else if(joystickType == XBoxController || joystickType == XBoxControllerOnXBox || joystickType == XBox360pad)
    {
       if(buttonIndex >= Joystick::PredefinedJoystickList[joystickType].buttonCount)
          return;

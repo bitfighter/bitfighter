@@ -49,6 +49,7 @@ enum ControllerTypeType
    PS3DualShock,
    XBoxController,
    XBoxControllerOnXBox,
+   XBox360pad,
    ControllerTypeCount,       // Number of predefined controllers
    GenericController,         // Something confirmed as a controller, but of unknown type --> treat as controller
    UnknownController,         // Something not confirmed as controller, or of unknown type --> treat as no controller
@@ -151,7 +152,7 @@ public:
    Joystick();
    virtual ~Joystick();
 
-   static U32 ButtonMask;
+   static U32 ButtonMask;    // Holds what buttons are current pressed down - can support up to 32
    static const S32 rawAxisCount = 32;
    static F32 rawAxis[rawAxisCount];
    static Vector<const char *> DetectedJoystickNameList;   // All detected joystick names
