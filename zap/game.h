@@ -172,10 +172,12 @@ private:
    GameConnection *mClientConnection;
    
 public:
-   LocalClientInfo(GameConnection *clientConnection, bool isRobot);
+   LocalClientInfo(GameConnection *clientConnection, bool isRobot);     // Constructor
+   ~LocalClientInfo();                                                  // Destructor
 
-   // WARNING!! mClientConnection can be NULL!!!
-   GameConnection *getConnection() { TNLAssert(mClientConnection, "Null connection"); return mClientConnection; }
+
+   // WARNING!! mClientConnection can be NULL on client!!! (though should never be NULL on server)
+   GameConnection *getConnection() { return mClientConnection; }
    void setConnection(GameConnection *conn) { mClientConnection = conn; }
 
    void setAuthenticated(bool isAuthenticated);

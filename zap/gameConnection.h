@@ -128,7 +128,7 @@ private:
    U32 mGamesPlayed;             // Number of games played, obviously
 
 public:
-   Vector<U32> mOldLoadout;   // Server: to respawn with old loadout  Client: to check if using same loadout configuration
+   Vector<U32> mOldLoadout;      // Server: to respawn with old loadout  Client: to check if using same loadout configuration
    U16 switchedTeamCount;
 
    U8 mVote;  // 0 = not voted,  1 = vote yes,  2 = vote no
@@ -204,9 +204,6 @@ public:
    string getServerName() { return mServerName.getString(); }
    static string makeUnique(string name);    // Make sure a given name is unique across all clients & bots
 
-
-   //StringTableEntryRef getClientName() { return mClientName; }
-
    void reset();        // Clears/initializes some things between levels
 
    void submitAdminPassword(const char *password);
@@ -214,12 +211,6 @@ public:
 
    void suspendGame();
    void unsuspendGame();
-
-   //bool isRobot() { return mIsRobot; }
-   //void setIsRobot(bool robot) { mIsRobot = robot; }
-
-   //bool isAdmin() { return mIsAdmin; }
-   //void setIsAdmin(bool admin) { mIsAdmin = admin; }
 
    bool isBusy() { if(!this) return false; else return mIsBusy; }
    void setIsBusy(bool busy) { mIsBusy = busy; }
@@ -286,11 +277,12 @@ public:
    TNL_DECLARE_RPC(c2sAdminPlayerAction, (StringTableEntry playerName, U32 actionIndex, S32 team));
 
    bool isInCommanderMap() { return mInCommanderMap; }
+
    TNL_DECLARE_RPC(c2sRequestCommanderMap, ());
    TNL_DECLARE_RPC(c2sReleaseCommanderMap, ());
 
    TNL_DECLARE_RPC(c2sRequestLoadout, (Vector<U32> loadout));     // Client has changed his loadout configuration
-   void sRequestLoadout(Vector<U32> &loadout);                     // Robot has changed his loadout configuration
+   void sRequestLoadout(Vector<U32> &loadout);                    // Robot has changed his loadout configuration
 
    TNL_DECLARE_RPC(s2cDisplayMessageESI, (RangedU32<0, ColorCount> color, RangedU32<0, NumSFXBuffers> sfx,
                    StringTableEntry formatString, Vector<StringTableEntry> e, Vector<StringPtr> s, Vector<S32> i));

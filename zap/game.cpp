@@ -97,6 +97,13 @@ LocalClientInfo::LocalClientInfo(GameConnection *gameConnection, bool isRobot)
 }
 
 
+// Destructor
+LocalClientInfo::~LocalClientInfo()
+{
+   // Do nothing
+}
+
+
 void LocalClientInfo::setAuthenticated(bool isAuthenticated)
 {
    Parent::setAuthenticated(isAuthenticated);

@@ -373,7 +373,7 @@ void InstructionsUserInterface::renderPage2()
    y += 30;
    for(S32 i = 0; i < 7; i++)
    {
-      glColor3f(1,1,1);
+      glColor(Colors::white);
       drawString(105, y, 20, moduleDescriptions[i]);
       glPushMatrix();
       glTranslatef(60, F32(y + 10), 0);
@@ -390,11 +390,11 @@ void InstructionsUserInterface::renderPage2()
             glBegin(GL_LINES);
                glColor3f(1,1,0);
                glVertex2f(-20, -17);
-               glColor3f(0, 0,0);
+               glColor(Colors::black);
                glVertex2f(-20, -50);
-               glColor3f(1,1,0);
+               glColor(Colors::yellow);
                glVertex2f(20, -17);
-               glColor3f(0, 0,0);
+               glColor(Colors::black);
                glVertex2f(20, -50);
             glEnd();
             break;
