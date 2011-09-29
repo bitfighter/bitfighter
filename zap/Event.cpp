@@ -402,7 +402,7 @@ void Event::onJoyButtonUp(U8 which, U8 button, U32 joystickType)
 {
 //   logprintf("SDL button up number: %u", button);
    keyCodeUp(joyButtonToKeyCode(Joystick::remapJoystickButton(joystickType, button)));
-   Joystick::ButtonMask ^= BIT(button);
+   Joystick::ButtonMask = Joystick::ButtonMask & ~BIT(button);
 }
 
 
