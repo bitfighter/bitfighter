@@ -283,9 +283,6 @@ private:
 
    WallSegmentManager *mWallSegmentManager;    
 
-   // Info about modules -- access via getModuleInfo()
-   static Vector<ModuleInfo> mModuleInfos;
-
    Vector<boost::shared_ptr<AbstractTeam> > mTeams;       // List of teams
 
    // Functions for handling individual level parameters read in processLevelParam; some may be game-specific
@@ -377,8 +374,7 @@ public:
    virtual const Color *getTeamColor(S32 teamId) const { return &Colors::white; }  // ClientGame will override
    static const Color *getBasicTeamColor(const Game *game, S32 teamId);            // Color function used in most cases, overridden by some games
 
-   static void buildModuleInfos();                    // Populate mModuleInfos 
-   static ModuleInfo *getModuleInfo(ShipModule module) { return &mModuleInfos[(U32)module]; }
+   static const ModuleInfo *getModuleInfo(ShipModule module) { TNLAssert(U32(module) < U32(ModuleCount), "out of range module"); return &gModuleInfo[(U32)module]; }
    
    WallSegmentManager *getWallSegmentManager() const { return mWallSegmentManager; }      // TODO: Move back to ClientGame()
 

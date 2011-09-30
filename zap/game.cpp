@@ -78,8 +78,6 @@ using namespace TNL;
 namespace Zap
 {
 
-// Statics
-Vector<ModuleInfo> Game::mModuleInfos;
 
 void ClientInfo::setAuthenticated(bool isAuthenticated)
 {
@@ -207,17 +205,6 @@ Game::Game(const Address &theBindAddress, GameSettings *settings) : mGameObjData
 Game::~Game()
 {
    delete mWallSegmentManager;
-}
-
-
-// Info about modules -- access via getModuleInfo()  -- static
-void Game::buildModuleInfos()    
-{
-   if(mModuleInfos.size() > 0)         // Already built?
-      return;
-
-   for(S32 i = 0; i < ModuleCount; i++)
-      mModuleInfos.push_back(ModuleInfo((ShipModule) i));
 }
 
 

@@ -1129,8 +1129,6 @@ int main(int argc, char **argv)
    // only way to specify a non-standard location is via the command line, which we've now read.
    setupLogging(folderManager->logDir);
 
-   Game::buildModuleInfos();                    // Needs to happen before INI is loaded -- needed for parsing loadout presets in the INI
-
    // Load the INI file
    gINI.SetPath(joindir(folderManager->iniDir, "bitfighter.ini"));
 

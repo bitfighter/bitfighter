@@ -2092,9 +2092,17 @@ void GameUserInterface::onKeyUp(KeyCode keyCode)
    if(keyCode == keyMISSION)
       mMissionOverlayActive = false;
    else if (keyCode == keyMOD1[inputMode])
-      mModActivated[0] = false;
+   {
+      mModPrimaryActivated[0] = false;
+      mModSecondaryActivated[0] = false;
+      mModuleOneDoubleClickTimer.reset();
+   }
    else if (keyCode == keyMOD2[inputMode])
-      mModActivated[1] = false;
+   {
+      mModPrimaryActivated[1] = false;
+      mModSecondaryActivated[1] = false;
+      mModuleTwoDoubleClickTimer.reset();
+   }
    else if (keyCode == keyFIRE[inputMode])
       mFiring = false;
    else if(keyCode == keySCRBRD[inputMode])
@@ -2140,7 +2148,10 @@ Move *GameUserInterface::getCurrentMove()
       mCurrentMove.fire = mFiring;
 
       for(U32 i = 0; i < (U32)ShipModuleCount; i++)
-         mCurrentMove.module[i] = mModActivated[i];
+      {
+         mCurrentMove.modulePrimary[i] = mModPrimaryActivated[i];
+         mCurrentMove.moduleSecondary[i] = mModSecondaryActivated[i];
+      }
    }
    else
    {
@@ -2150,7 +2161,10 @@ Move *GameUserInterface::getCurrentMove()
       mCurrentMove.fire = mFiring;     // should be false?
 
       for(U32 i = 0; i < (U32)ShipModuleCount; i++)
-         mCurrentMove.module[i] = false;
+      {
+         mCurrentMove.modulePrimary[i] = false;
+         mCurrentMove.moduleSecondary[i] = false;
+      }
    }
 
    if(!getGame()->getSettings()->getIniSettings()->controlsRelative)
