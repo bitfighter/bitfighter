@@ -652,7 +652,7 @@ S32 LuaRobot::activateModuleIndex(lua_State *L)
    checkArgCount(L, 1, methodName);
    U32 indx = (U32)getInt(L, 1, methodName, 0, ShipModuleCount);
 
-   thisRobot->activateModule(indx);
+   thisRobot->activateModulePrimary(indx);
 
    return 0;
 }
@@ -670,7 +670,7 @@ S32 LuaRobot::activateModule(lua_State *L)
    for(S32 i = 0; i < ShipModuleCount; i++)
       if(thisRobot->getModule(i) == mod)
       {
-         thisRobot->activateModule(i);
+         thisRobot->activateModulePrimary(i);
          break;
       }
 
@@ -1365,7 +1365,10 @@ Robot::Robot(const StringTableEntry &robotName, const string &scriptDir, S32 tea
    mTotalScore = 0;
 
    for(S32 i = 0; i < ModuleCount; i++)         // Here so valgrind won't complain if robot updates before initialize is run
-      mModuleActive[i] = false;
+   {
+      mModulePrimaryActive[i] = false;
+      mModuleSecondaryActive[i] = false;
+   }
 
    isRunningScript = false;
    wasRunningScript = false;
@@ -1430,7 +1433,7 @@ bool Robot::initialize(Point &pos)
       enableCollision();
 
       // WarpPositionMask triggers the spinny spawning visual effect
-      setMaskBits(RespawnMask | HealthMask | LoadoutMask | PositionMask | MoveMask | ModulesMask | WarpPositionMask);      // Send lots to the client
+      setMaskBits(RespawnMask | HealthMask | LoadoutMask | PositionMask | MoveMask | ModulePrimaryMask | ModuleSecondaryMask | WarpPositionMask);      // Send lots to the client
 
       TNLAssert(!isGhost(), "Didn't expect ghost here...");
 
@@ -1693,7 +1696,7 @@ bool Robot::processArguments(S32 argc, const char **argv, Game *game)
    if(argc >= 2)
       mFilename = argv[1];
    else
-      mFilename = mGame->getSettings()->getIniSettings()->defaultRobotScript;
+      mFilename = game->getSettings()->getIniSettings()->defaultRobotScript;
 
    if(mFilename != "")
    {
@@ -1887,7 +1890,10 @@ void Robot::idle(GameObject::IdleCallPath path)
       {
 
          for(S32 i = 0; i < ShipModuleCount; i++)
-            mCurrentMove.module[i] = false;
+         {
+            mCurrentMove.modulePrimary[i] = false;
+            mCurrentMove.moduleSecondary[i] = false;
+         }
 
          if(!mIsPaused || mStepCount > 0)
          {

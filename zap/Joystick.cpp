@@ -41,7 +41,8 @@ Vector<const char *> Joystick::DetectedJoystickNameList;
 
 U32 Joystick::ButtonMask = 0;
 F32 Joystick::rawAxis[Joystick::rawAxisCount];
-S16 Joystick::SensitivityThreshold = 3200;  // out of 32767
+S16 Joystick::LowerSensitivityThreshold = 4900;   // out of 32767, ~15%, any less than this is ends up as zero
+S16 Joystick::UpperSensitivityThreshold = 26200;  // out of 32767, ~80%, any more than this is full amount
 S32 Joystick::UseJoystickNumber = 0;
 U32 Joystick::AxesKeyCodeMask = 0;
 U32 Joystick::HatKeyCodeMask = 0;
@@ -115,11 +116,6 @@ bool Joystick::initJoystick()
       return false;
    }
    logprintf("Using joystick %d - %s", UseJoystickNumber, SDL_JoystickName(UseJoystickNumber));
-
-   // Determine the button mask for the UI stuff
-   ButtonMask = 0;
-   for(U32 b = 0; b < (U32)SDL_JoystickNumButtons(sdlJoystick) && b < 32; b++)  // We can detect up to 32 buttons with our mask
-      ButtonMask |= 1 << b;
 
    return true;
 }
@@ -355,6 +351,29 @@ JoystickInfo Joystick::PredefinedJoystickList[ControllerTypeCount] =
          ControllerButton8,
          ControllerButtonStart,
          ControllerButtonBack,
+         ControllerButtonDPadUp,
+         ControllerButtonDPadDown,
+         ControllerButtonDPadLeft,
+         ControllerButtonDPadRight,
+      }
+   },
+   {
+      "Microsoft X-Box 360 pad",
+      "XBox360pad",
+      14,
+      {0, 1},
+      {3, 4},
+      {
+         ControllerButton1,
+         ControllerButton2,
+         ControllerButton3,
+         ControllerButton4,
+         ControllerButton6,
+         ControllerButton5,
+         ControllerButtonBack,
+         ControllerButtonStart,
+         ControllerButton7,
+         ControllerButton8,
          ControllerButtonDPadUp,
          ControllerButtonDPadDown,
          ControllerButtonDPadLeft,

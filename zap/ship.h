@@ -47,6 +47,7 @@ static const S32 ShipModuleCount = 2;                // Modules a ship can carry
 static const S32 ShipWeaponCount = 3;                // Weapons a ship can carry
 static const U32 DefaultLoadout[] = { ModuleBoost, ModuleShield, WeaponPhaser, WeaponMine, WeaponBurst };
 
+
 //////////////////////////////////////////////
 
 class LuaShip : public LuaItem
@@ -57,11 +58,11 @@ private:
 
 public:
 
-   LuaShip(Ship *ship);                        // C++ constructor
-   LuaShip() { /* Do nothing */ };             // C++ default constructor ==> not used.  Constructor with Ship (above) used instead
-   LuaShip(lua_State *L) { /* Do nothing */ }; // Lua constructor ==> not used.  Class only instantiated from C++.
+   LuaShip(Ship *ship);   // C++ constructor
+   LuaShip();             // C++ default constructor ==> not used.  Constructor with Ship (above) used instead
+   LuaShip(lua_State *L); // Lua constructor ==> not used.  Class only instantiated from C++.
 
-   virtual ~LuaShip(){ logprintf(LogConsumer::LogLuaObjectLifecycle, "Killing luaShip %d", mId); };     // Destructor
+   virtual ~LuaShip();    // Destructor
 
    static S32 id;
    S32 mId;
@@ -70,7 +71,7 @@ public:
 
    static Lunar<LuaShip>::RegType methods[];
 
-   virtual S32 getClassID(lua_State *L) { return returnInt(L, PlayerShipTypeNumber); }    // Robot will override this
+   virtual S32 getClassID(lua_State *L);    // Robot will override this
 
    S32 isAlive(lua_State *L);
    S32 getAngle(lua_State *L);
@@ -92,13 +93,13 @@ public:
    S32 getReqLoadout(lua_State *L);
 
    GameObject *getGameObject();
-   const char *getClassName() const { return "LuaShip"; }
+   const char *getClassName() const;
 
-   void push(lua_State *L) {  Lunar<LuaShip>::push(L, this, false); }      // Push item onto stack
+   void push(lua_State *L);      // Push item onto stack
 
    S32 getActiveWeapon(lua_State *L);                // Get WeaponIndex for current weapon
 
-   virtual Ship *getObj() { return thisShip; }       // Access to underlying object, robot will override
+   virtual Ship *getObj();       // Access to underlying object, robot will override
 };
 
 ////////////////////////////////////////
@@ -123,7 +124,8 @@ protected:
    StringTableEntry mPlayerName;
    bool mIsAuthenticated;
 
-   bool mModuleActive[ModuleCount];       // Is that module active at this moment?
+   bool mModulePrimaryActive[ModuleCount];       // Is the primary component of the module active at this moment?
+   bool mModuleSecondaryActive[ModuleCount];     // Is the secondary component of the module active?
 
    ShipModule mModule[ShipModuleCount];   // Modules ship is carrying
    WeaponType mWeapon[ShipWeaponCount];
@@ -155,6 +157,7 @@ public:
       EnergyCooldownThreshold = 15000,
       WeaponFireDecloakTime = 350,
       SensorZoomTime = 300,
+      SensorInitialEnergyUsage = 5000,
       CloakFadeTime = 300,
       CloakCheckRadius = 200,
       RepairHundredthsPerSecond = 16,
@@ -169,28 +172,28 @@ public:
       WarpPositionMask = BIT(3),    // When ship makes a big jump in position
       ExplosionMask = BIT(4),
       HealthMask = BIT(5),
-      ModulesMask = BIT(6),          // Which modules are active
-      LoadoutMask = BIT(7),
-      RespawnMask = BIT(8),         // For when robots respawn
-      TeleportMask = BIT(9),        // Ship has just teleported
-      AuthenticationMask = BIT(10), // Player authentication status changed
-      ChangeTeamMask = BIT(11),     // Used for when robots change teams
-      SpawnShieldMask = BIT(12),     // Used for when robots change teams
+      ModulePrimaryMask = BIT(6),   // Is module primary component active
+      ModuleSecondaryMask = BIT(7), // Is module secondary component active
+      LoadoutMask = BIT(8),
+      RespawnMask = BIT(9),         // For when robots respawn
+      TeleportMask = BIT(10),        // Ship has just teleported
+      AuthenticationMask = BIT(11), // Player authentication status changed
+      ChangeTeamMask = BIT(12),     // Used for when robots change teams
+      SpawnShieldMask = BIT(13),    // Used for when robots change teams
    };
 
    S32 mFireTimer;
    Timer mWarpInTimer;
    F32 mHealth;
    S32 mEnergy;
-   bool mCooldown;
+   bool mCooldownNeeded;
    U32 mSensorStartTime;
    Point mImpulseVector;
    F32 getSlipzoneSpeedMoficationFactor();
 
-   StringTableEntry getName() { return mPlayerName; }
-   void setName(StringTableEntry name) { mPlayerName = name; }
-   void setIsAuthenticated(bool isAuthenticated, StringTableEntry name) { mIsAuthenticated = isAuthenticated; mPlayerName = name;
-                           setMaskBits(AuthenticationMask); }
+   StringTableEntry getName();
+   void setName(StringTableEntry name);
+   void setIsAuthenticated(bool isAuthenticated, StringTableEntry name);
 
    SFXHandle mModuleSound[ModuleCount];
 
@@ -198,14 +201,15 @@ public:
 
    void selectWeapon();                   // Select next weapon
    void selectWeapon(U32 weaponIndex);    // Select weapon by index
-   WeaponType getWeapon(U32 indx) { return mWeapon[indx]; }    // Returns weapon in slot indx
-   ShipModule getModule(U32 indx) { return mModule[indx]; }    // Returns module in slot indx
+   WeaponType getWeapon(U32 indx);        // Returns weapon in slot indx
+   ShipModule getModule(U32 indx);        // Returns module in slot indx
 
 
    Timer mSensorZoomTimer;
    Timer mWeaponFireDecloakTimer;
    Timer mCloakTimer;
    Timer mSpawnShield;
+   Timer mModuleSecondaryCooldownTimer[ModuleCount];
 
 #ifndef ZAP_DEDICATED
    U32 mSparkElapsed;
@@ -227,27 +231,22 @@ public:
    
    ~Ship();           // Destructor
 
-   F32 getHealth() { return mHealth; }
-   S32 getEnergy() { return mEnergy; }
-   F32 getEnergyFraction() { return (F32)mEnergy / (F32)EnergyMax; }     // Only used by bots
-   S32 getMaxEnergy() { return EnergyMax; }
-   void changeEnergy(S32 deltaEnergy) { mEnergy = max(0, min(static_cast<int>(EnergyMax), mEnergy + deltaEnergy)); }
+   F32 getHealth();
+   S32 getEnergy();
+   F32 getEnergyFraction();     // Only used by bots
+   S32 getMaxEnergy();
+   void changeEnergy(S32 deltaEnergy);
 
    void onGhostRemove();
 
-   bool isModuleActive(ShipModule mod) { return mModuleActive[mod]; }
+   bool isModulePrimaryActive(ShipModule mod);
+   bool isModuleSecondaryActive(ShipModule mod);
 
    void engineerBuildObject();
 
-   bool hasModule(ShipModule mod)
-   {
-      for(S32 i = 0; i < ShipModuleCount; i++)
-         if(mModule[i] == mod)
-            return true;
-      return false;
-    }
+   bool hasModule(ShipModule mod);
 
-   bool isDestroyed() { return hasExploded; }
+   bool isDestroyed();
    bool isItemMounted();    // <== unused
    bool isVisible();
 
@@ -257,7 +256,7 @@ public:
    bool isCarryingItem(U8 objectType);
    MoveItem *unmountItem(U8 objectType);
 
-   F32 getSensorZoomFraction() { return 1 - mSensorZoomTimer.getFraction(); }
+   F32 getSensorZoomFraction();
    Point getAimVector();
 
    void getLoadout(Vector<U32> &loadout);
@@ -272,11 +271,11 @@ public:
 
    virtual void processMove(U32 stateIndex);
 
-   WeaponType getSelectedWeapon() { return mWeapon[mActiveWeaponIndx]; }   // Return currently selected weapon
-   U32 getSelectedWeaponIndex() { return mActiveWeaponIndx; }              // Return index of currently selected weapon (0, 1, 2)
+   WeaponType getSelectedWeapon();   // Return currently selected weapon
+   U32 getSelectedWeaponIndex();     // Return index of currently selected weapon (0, 1, 2)
 
    void processWeaponFire();
-   void processEnergy();
+   void processModules();
    void updateModuleSounds();
    void emitMovementSparks();
    bool findRepairTargets();
@@ -288,7 +287,8 @@ public:
    void emitShipExplosion(Point pos);
    //void setActualPos(Point p);
    void setActualPos(Point p, bool warp);
-   void activateModule(U32 indx) { mCurrentMove.module[indx] = true; }     // Activate the specified module for the current move
+   void activateModulePrimary(U32 indx);    // Activate the specified module primary component for the current move
+   void activateModuleSecondary(U32 indx);  // Activate the specified module secondary component for the current move
 
 
    virtual void kill(DamageInfo *theInfo);
@@ -307,7 +307,7 @@ public:
    virtual bool processArguments(S32 argc, const char **argv, Game *game);
 
    LuaShip luaProxy;                                  // Our Lua proxy object
-   bool isRobot() { return mIsRobot; }
+   bool isRobot();
    void push(lua_State *L);                           // Push a LuaShip proxy object onto the stack
 
    GameObject *isInZone(U8 zoneType);     // Return whether the ship is currently in a zone of the specified type, and which one

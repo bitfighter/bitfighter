@@ -571,7 +571,7 @@ void HuntersFlagItem::renderItem(const Point &pos)
 {
 #ifndef ZAP_DEDICATED
    // Don't render flags on cloaked ships
-   if(mMount.isValid() && mMount->isModuleActive(ModuleCloak))
+   if(mMount.isValid() && mMount->isModulePrimaryActive(ModuleCloak))
       return;
 
    Parent::renderItem(pos);

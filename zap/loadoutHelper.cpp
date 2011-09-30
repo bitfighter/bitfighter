@@ -45,7 +45,7 @@ Vector<LoadoutItem> gLoadoutWeapons;
 
 LoadoutItem::LoadoutItem(ClientGame *game, KeyCode key, KeyCode button, U32 index)      // Shortcut for modules -- use info from ModuleInfos
 {
-   ModuleInfo *moduleInfo = game->getModuleInfo((ShipModule) index);
+   const ModuleInfo *moduleInfo = game->getModuleInfo((ShipModule) index);
 
    this->key = key;
    this->button = button;
@@ -93,7 +93,6 @@ void LoadoutHelper::initialize(bool includeEngineer)
    gLoadoutWeapons.push_back(LoadoutItem(getGame(), KEY_4, BUTTON_4, WeaponBurst,   "Burster",         "", ModuleNone));
    gLoadoutWeapons.push_back(LoadoutItem(getGame(), KEY_5, BUTTON_5, WeaponMine,    "Mine Layer",      "", ModuleNone));
 // { KEY_6, 5, WeaponHeatSeeker, "Heat Seeker"},      // Need to make changes below to support this
-   gLoadoutWeapons.push_back(LoadoutItem(getGame(), KEY_6, BUTTON_6, WeaponSpyBug,  "Spy Bug Placer",  "", ModuleSensor));  // Only visible when Enhanced Sensor is a selected module
 };
 
 

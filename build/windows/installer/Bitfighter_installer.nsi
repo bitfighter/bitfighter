@@ -200,8 +200,14 @@ Section "Install"
   
   CreateShortCut "$INSTDIR\Play Bitfighter.lnk" "$INSTDIR\Bitfighter.exe" "-rootdatadir $\"$DOCUMENTS\Bitfighter$\""
 
-  File "..\..\..\lib\OpenAL32.dll"     
-  File "..\..\..\lib\glut32.dll"
+  File "..\..\..\lib\OpenAL32.dll"
+  File "..\..\..\lib\ALURE32.dll"
+  File "..\..\..\lib\libogg.dll"
+  File "..\..\..\lib\libspeex.dll"
+  File "..\..\..\lib\libvorbis.dll"
+  File "..\..\..\lib\libvorbisfile.dll"
+  File "..\..\..\lib\SDL.dll"
+  File "..\..\..\lib\zlib1.dll"
 
   File "..\..\..\doc\readme.txt"
   File "..\..\..\End-User License.txt"
@@ -219,6 +225,9 @@ Section "Install"
 
   SetOutPath "$INSTDIR\sfx"
   File /r "..\..\..\resource\sfx\*.wav"
+
+  SetOutPath "$INSTDIR\music"
+  File /r "..\..\..\resource\music\*.ogg"
 
   SetOutPath "$DOCUMENTS\Bitfighter\levels"
   File /r "..\..\..\resource\levels\*.level"  

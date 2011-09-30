@@ -133,10 +133,15 @@ GameUserInterface::GameUserInterface(ClientGame *game) : Parent(game),
 
    mFiring = false;
    for (U32 i = 0; i < (U32)ShipModuleCount; i++)
-      mModActivated[i] = false;
+   {
+      mModPrimaryActivated[i] = false;
+      mModSecondaryActivated[i] = false;
+   }
 
    mDisplayMessageTimer.setPeriod(DisplayMessageTimeout);    // Set the period of our message timeout timer
    mDisplayChatMessageTimer.setPeriod(DisplayChatMessageTimeout);
+   mModuleOneDoubleClickTimer.setPeriod(DoubleClickTimeout);
+   mModuleTwoDoubleClickTimer.setPeriod(DoubleClickTimeout);
    //populateChatCmdList();
 
    makeCommandCandidateList();
@@ -193,7 +198,10 @@ void GameUserInterface::onActivate()
    enterMode(PlayMode);                         // Make sure we're not in chat or loadout-select mode
 
    for(S32 i = 0; i < ShipModuleCount; i++)
-      mModActivated[i] = false;
+   {
+      mModPrimaryActivated[i] = false;
+      mModSecondaryActivated[i] = false;
+   }
 
    mShutdownMode = None;
 
@@ -213,7 +221,10 @@ void GameUserInterface::onReactivate()
    enterMode(PlayMode);
 
    for(S32 i = 0; i < ShipModuleCount; i++)
-      mModActivated[i] = false;
+   {
+      mModPrimaryActivated[i] = false;
+      mModSecondaryActivated[i] = false;
+   }
 
    onMouseMoved();   // Call onMouseMoved to get ship pointed at current cursor location
 }
@@ -326,7 +337,8 @@ void GameUserInterface::idle(U32 timeDelta)
    mWrongModeMsgDisplay.update(timeDelta);
    mProgressBarFadeTimer.update(timeDelta);
    mLevelInfoDisplayTimer.update(timeDelta);
-
+   mModuleOneDoubleClickTimer.update(timeDelta);
+   mModuleTwoDoubleClickTimer.update(timeDelta);
 
    // Server messages
    if(mDisplayMessageTimer.update(timeDelta))
@@ -726,15 +738,17 @@ void GameUserInterface::renderLoadoutIndicators()
    // Next, loadout modules
    for(U32 i = 0; i < (U32)ShipModuleCount; i++)
    {
-      if( getGame()->getModuleInfo(localShip->getModule(i))->getUseType() == ModuleUsePassive ||
-          getGame()->getModuleInfo(localShip->getModule(i))->getUseType() == ModuleUseHybrid )
-         glColor(INDICATOR_PASSIVE_COLOR);      
-
-      else if(localShip->isModuleActive(localShip->getModule(i)))
+      if(gModuleInfo[localShip->getModule(i)].getPrimaryUseType() != ModulePrimaryUseActive)
+         glColor(INDICATOR_PASSIVE_COLOR);
+      else if(localShip->isModulePrimaryActive(localShip->getModule(i)))
          glColor(INDICATOR_ACTIVE_COLOR);
-
       else 
          glColor(INDICATOR_INACTIVE_COLOR);
+
+      // Always change to orange if module secondary is fired
+      if(gModuleInfo[localShip->getModule(i)].hasSecondary() &&
+            localShip->isModuleSecondaryActive(localShip->getModule(i)))
+         glColor(Colors::orange67);
 
       S32 width = renderIndicator(xPos, getGame()->getModuleInfo(localShip->getModule(i))->getName());
 
@@ -1168,9 +1182,25 @@ void GameUserInterface::processPlayModeKey(KeyCode keyCode, char ascii)
       loadLoadoutPreset(getGame(), 2);
 
    else if(keyCode == keyMOD1[inputMode])
-      mModActivated[0] = true;
+   {
+      mModPrimaryActivated[0] = true;
+      // If double-click timer hasn't run out, activate the secondary active component
+      if (mModuleOneDoubleClickTimer.getCurrent() != 0)
+      {
+         mModSecondaryActivated[0] = true;
+         mModuleOneDoubleClickTimer.clear();
+      }
+   }
    else if(keyCode == keyMOD2[inputMode])
-      mModActivated[1] = true;
+   {
+      mModPrimaryActivated[1] = true;
+      // If double-click timer hasn't run out, activate the secondary active component
+      if (mModuleTwoDoubleClickTimer.getCurrent() != 0)
+      {
+         mModSecondaryActivated[1] = true;
+         mModuleTwoDoubleClickTimer.clear();
+      }
+   }
    else if(keyCode == keyFIRE[inputMode])
       mFiring = true;
    else if(keyCode == keySELWEAP1[inputMode])

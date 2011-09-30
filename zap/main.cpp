@@ -1100,8 +1100,6 @@ using namespace Zap;
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-#undef main
-
 #ifdef TNL_OS_XBOX
 int zapmain(int argc, char **argv)
 #else

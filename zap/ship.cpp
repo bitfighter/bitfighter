@@ -43,6 +43,7 @@
 #include "robot.h"            // For EventManager def
 #include "stringUtils.h"      // For itos
 #include "game.h"
+#include "shipItems.h"
 
 #ifdef TNL_OS_WIN32
 #include <windows.h>   // For ARRAYSIZE
@@ -87,6 +88,10 @@ Ship::Ship(StringTableEntry playerName, bool isAuthenticated, S32 team, Point p,
    mObjectTypeNumber = PlayerShipTypeNumber;
    mFireTimer = 0;
 
+   // Set up module secondary component cooldown
+   for(S32 i = 0; i < ModuleCount; i++)
+      mModuleSecondaryCooldownTimer[i].setPeriod(gModuleInfo[i].getSecondaryCooldown());
+
    mNetFlags.set(Ghostable);
 
 #ifndef ZAP_DEDICATED
@@ -130,8 +135,10 @@ Ship::~Ship()
 // and also after a bot respawns and needs to reset itself
 void Ship::initialize(Point &pos)
 {
+   // Does this ever evaluate to true?
    if(getGame())
       mRespawnTime = getGame()->getCurrentTime();
+
    for(U32 i = 0; i < MoveStateCount; i++)
    {
       mMoveState[i].pos = pos;
@@ -151,7 +158,10 @@ void Ship::initialize(Point &pos)
 
    mEnergy = (S32) ((F32) EnergyMax * .80);     // Start off with 80% energy
    for(S32 i = 0; i < ModuleCount; i++)         // and all modules disabled
-      mModuleActive[i] = false;
+   {
+      mModulePrimaryActive[i] = false;
+      mModuleSecondaryActive[i] = false;
+   }
 
    // Set initial module and weapon selections
    for(S32 i = 0; i < ShipModuleCount; i++)
@@ -161,7 +171,7 @@ void Ship::initialize(Point &pos)
       mWeapon[i] = (WeaponType) DefaultLoadout[i + ShipModuleCount];
 
    mActiveWeaponIndx = 0;
-   mCooldown = false;
+   mCooldownNeeded = false;
 
    // Start spawn shield timer
    mSpawnShield.reset(SpawnShieldTime);
@@ -179,14 +189,59 @@ void Ship::onGhostRemove()
 {
    Parent::onGhostRemove();
    for(S32 i = 0; i < ModuleCount; i++)
-      mModuleActive[i] = false;
+   {
+      mModulePrimaryActive[i] = false;
+      mModuleSecondaryActive[i] = false;
+   }
    updateModuleSounds();
+}
+
+
+F32 Ship::getHealth()
+{
+   return mHealth;
+}
+
+
+S32 Ship::getEnergy()
+{
+   return mEnergy;
+}
+
+
+F32 Ship::getEnergyFraction()
+{
+   return (F32)mEnergy / (F32)EnergyMax;
+}
+
+
+S32 Ship::getMaxEnergy()
+{
+   return EnergyMax;
+}
+
+
+void Ship::changeEnergy(S32 deltaEnergy)
+{
+   mEnergy = max(0, min(static_cast<int>(EnergyMax), mEnergy + deltaEnergy));
+}
+
+
+bool Ship::isModulePrimaryActive(ShipModule mod)
+{
+   return mModulePrimaryActive[mod];
+}
+
+
+bool Ship::isModuleSecondaryActive(ShipModule mod)
+{
+   return mModuleSecondaryActive[mod];
 }
 
 
 void Ship::engineerBuildObject() 
 { 
-   mEnergy -= getGame()->getModuleInfo(ModuleEngineer)->getPerUseCost(); 
+   mEnergy -= getGame()->getModuleInfo(ModuleEngineer)->getPrimaryPerUseCost(); 
 }
 
 
@@ -210,6 +265,18 @@ bool Ship::processArguments(S32 argc, const char **argv, Game *game)
 }
 
 
+void Ship::activateModulePrimary(U32 index)
+{
+   mCurrentMove.modulePrimary[index] = true;
+}
+
+
+void Ship::activateModuleSecondary(U32 index)
+{
+   mCurrentMove.modulePrimary[index] = true;
+}
+
+
 void Ship::setActualPos(Point p, bool warp)
 {
    mMoveState[ActualState].pos = p;
@@ -229,7 +296,7 @@ void Ship::processMove(U32 stateIndex)
 
    mMoveState[LastProcessState] = mMoveState[stateIndex];
 
-   F32 maxVel = (isModuleActive(ModuleBoost) ? BoostMaxVelocity : MaxVelocity) * 
+   F32 maxVel = (isModulePrimaryActive(ModuleBoost) ? BoostMaxVelocity : MaxVelocity) * 
                 (hasModule(ModuleArmor) ? ARMOR_SPEED_PENALTY_FACT : 1);
 
    F32 time = mCurrentMove.time * 0.001f;
@@ -251,7 +318,7 @@ void Ship::processMove(U32 stateIndex)
 
 
    // Apply turbo-boost if active, reduce accel and max vel when armor is present
-   F32 maxAccel = (isModuleActive(ModuleBoost) ? BoostAcceleration : Acceleration) * time * 
+   F32 maxAccel = (isModulePrimaryActive(ModuleBoost) ? BoostAcceleration : Acceleration) * time * 
                   (hasModule(ModuleArmor) ? ARMOR_ACCEL_PENALTY_FACT : 1);
    maxAccel *= getSlipzoneSpeedMoficationFactor();
 
@@ -364,6 +431,12 @@ bool Ship::isOnObject(GameObject *object)
 }
 
 
+F32 Ship::getSensorZoomFraction()
+{
+   return 1 - mSensorZoomTimer.getFraction();
+}
+
+
  // Returns vector for aiming a weapon based on direction ship is facing
 Point Ship::getAimVector()
 {
@@ -374,6 +447,27 @@ Point Ship::getAimVector()
 void Ship::selectWeapon()
 {
    selectWeapon(mActiveWeaponIndx + 1);
+}
+
+
+StringTableEntry Ship::getName()
+{
+   return mPlayerName;
+}
+
+
+void Ship::setName(StringTableEntry name)
+{
+   mPlayerName = name;
+}
+
+
+void Ship::setIsAuthenticated(bool isAuthenticated, StringTableEntry name)
+{
+   mIsAuthenticated = isAuthenticated;
+   mPlayerName = name;
+
+   setMaskBits(AuthenticationMask);
 }
 
 
@@ -393,6 +487,18 @@ void Ship::selectWeapon(U32 weaponIdx)
          cc->s2cDisplayMessageE(GameConnection::ColorAqua, SFXUIBoop, msg, e);
       }
    }
+}
+
+
+WeaponType Ship::getWeapon(U32 indx)
+{
+   return mWeapon[indx];
+}
+
+
+ShipModule Ship::getModule(U32 indx)
+{
+   return mModule[indx];
 }
 
 
@@ -430,7 +536,6 @@ void Ship::processWeaponFire()
          }
 
          mFireTimer += S32(gWeapons[curWeapon].fireDelay);
-
 
          // If we've fired, Spawn Shield turns off
          if(mSpawnShield.getCurrent() != 0)
@@ -591,18 +696,19 @@ void Ship::idle(GameObject::IdleCallPath path)
       path == GameObject::ClientIdleControlMain ||
       path == GameObject::ClientIdleControlReplay)
    {
-      // Process weapons and energy on controlled object objects
+      // Process weapons and modules on controlled object objects
+      // This handles all the energy reductions as well
       processWeaponFire();
-      processEnergy();     // and modules
+      processModules();
    }
      
    if(path == GameObject::ClientIdleMainRemote)
    {
       // For ghosts, find some repair targets for rendering the repair effect
-      if(isModuleActive(ModuleRepair))
+      if(isModulePrimaryActive(ModuleRepair))
          findRepairTargets();
    }
-   if(path == GameObject::ServerIdleControlFromClient && isModuleActive(ModuleRepair))
+   if(path == GameObject::ServerIdleControlFromClient && isModulePrimaryActive(ModuleRepair))
       repairTargets();
 
 #ifndef ZAP_DEDICATED
@@ -669,47 +775,62 @@ void Ship::repairTargets()
 }
 
 
-void Ship::processEnergy()
+void Ship::processModules()
 {
-   bool modActive[ModuleCount];
+   // Update some timers
+   for(S32 i = 0; i < ModuleCount; i++)
+      mModuleSecondaryCooldownTimer[i].update(mCurrentMove.time);
+
+   // Save the previous module primary/secondary component states; reset them - to be set later
+   bool wasModulePrimaryActive[ModuleCount];
+   bool wasModuleSecondaryActive[ModuleCount];
    for(S32 i = 0; i < ModuleCount; i++)
    {
-      modActive[i] = mModuleActive[i];
-      mModuleActive[i] = false;
+      wasModulePrimaryActive[i] = mModulePrimaryActive[i];
+      wasModuleSecondaryActive[i] = mModuleSecondaryActive[i];
+      mModulePrimaryActive[i] = false;
+      mModuleSecondaryActive[i] = false;
    }
 
-   if(mEnergy > EnergyCooldownThreshold)     // Only turn off cooldown if energy has risen above threshold, not if it falls below
-      mCooldown = false;
+   // Only turn off cooldown if energy has risen above threshold, not if it falls below
+   if(mEnergy > EnergyCooldownThreshold)
+      mCooldownNeeded = false;
 
    // Make sure we're allowed to use modules
    bool allowed = getGame()->getGameType() && getGame()->getGameType()->okToUseModules(this);
 
+   // Go through our loaded modules and see if they are currently turned on
    // Are these checked on the server side?
    for(S32 i = 0; i < ShipModuleCount; i++)   
-      // If you have passive module, it's always active, no restrictions, but is off for energy consumption purposes
-      if(getGame()->getModuleInfo(mModule[i])->getUseType() == ModuleUsePassive)    
-         mModuleActive[mModule[i]] = true;         // needs to be true to allow stats counting
-
-      // No (active) modules if we're too hot or game has disallowed them
-      else if(mCurrentMove.module[i] && !mCooldown && allowed)  
-         mModuleActive[mModule[i]] = true;
-
-
-   // No boost if we're not moving
-   if(mModuleActive[ModuleBoost] && mCurrentMove.x == 0 && mCurrentMove.y == 0)
    {
-      mModuleActive[ModuleBoost] = false;
+      // If you have passive module, it's always active, no restrictions, but is off for energy consumption purposes
+      if(getGame()->getModuleInfo(mModule[i])->getPrimaryUseType() == ModulePrimaryUsePassive)
+         mModulePrimaryActive[mModule[i]] = true;         // needs to be true to allow stats counting
+
+      // Set loaded module states to 'on' if detected as so,
+      // unless modules are disallowed or we need to cooldown
+      if (!mCooldownNeeded && allowed)
+      {
+         if(mCurrentMove.modulePrimary[i])
+            mModulePrimaryActive[mModule[i]] = true;
+         if(mCurrentMove.moduleSecondary[i])
+            mModuleSecondaryActive[mModule[i]] = true;
+      }
    }
 
+   // No boost if we're not moving
+   if(mModulePrimaryActive[ModuleBoost] && mCurrentMove.x == 0 && mCurrentMove.y == 0)
+      mModulePrimaryActive[ModuleBoost] = false;
+
    // No repair with no targets
-   if(mModuleActive[ModuleRepair] && !findRepairTargets())
-      mModuleActive[ModuleRepair] = false;
+   if(mModulePrimaryActive[ModuleRepair] && !findRepairTargets())
+      mModulePrimaryActive[ModuleRepair] = false;
 
    // No cloak with nearby sensored people
-   if(mModuleActive[ModuleCloak])
+   if(mModulePrimaryActive[ModuleCloak])
    {
       if(mWeaponFireDecloakTimer.getCurrent() != 0)
-         mModuleActive[ModuleCloak] = false;
+         mModulePrimaryActive[ModuleCloak] = false;
       //else
       //{
       //   Rect cloakCheck(getActualPos(), getActualPos());
@@ -736,26 +857,48 @@ void Ship::processEnergy()
       //}
    }
 
+   // This will make the module primary active component use the proper
+   // amount of enery per second since the game idle methods are run on milliseconds
    F32 scaleFactor = mCurrentMove.time * 0.001f;
 
    // Update things based on available energy...
    bool anyActive = false;
    for(S32 i = 0; i < ModuleCount; i++)
    {
-      if(mModuleActive[i])
+      if(mModulePrimaryActive[i])
       {
-         S32 EnergyUsed = S32(getGame()->getModuleInfo((ShipModule) i)->getEnergyDrain() * scaleFactor);
+         S32 EnergyUsed = S32(getGame()->getModuleInfo((ShipModule) i)->getPrimaryEnergyDrain() * scaleFactor);
          mEnergy -= EnergyUsed;
          anyActive = anyActive || (EnergyUsed != 0);   // to prevent armor and engineer stop energy recharge.
          GameConnection *gc = getOwner();
          if(gc)
             gc->mStatistics.addModuleUsed(ShipModule(i), mCurrentMove.time);
       }
+
+      // Fire the module secondary component if it is active and the cooldown timer has run out
+      if(mModuleSecondaryActive[i] && mModuleSecondaryCooldownTimer[i].getCurrent() == 0)
+      {
+         S32 energyCost = gModuleInfo[i].getSecondaryPerUseCost();
+         // If we have enough energy, fire the module
+         if(mEnergy >= energyCost)
+         {
+            // Do the module secondary component action
+            if (i == ModuleSensor)
+            {
+               Point direction = getAimVector();
+               createWeaponProjectiles(WeaponSpyBug, direction, mMoveState[ActualState].pos, mMoveState[ActualState].vel, 0, CollisionRadius - 2, this);
+            }
+
+            // Reduce energy
+            mEnergy -= energyCost;
+         }
+      }
    }
 
    if(!anyActive && mEnergy <= EnergyCooldownThreshold)
-      mCooldown = true;
+      mCooldownNeeded = true;
 
+   // What to do if our most current energy reduction put us below zero
    if(mEnergy < EnergyMax)
    {
       // If we're not doing anything, recharge.
@@ -774,28 +917,45 @@ void Ship::processEnergy()
       {
          mEnergy = 0;
          for(S32 i = 0; i < ModuleCount; i++)
-            mModuleActive[i] = false;
-         mCooldown = true;
+         {
+            mModulePrimaryActive[i] = false;
+            mModuleSecondaryActive[i] = false;
+         }
+         mCooldownNeeded = true;
       }
    }
 
    if(mEnergy >= EnergyMax)
       mEnergy = EnergyMax;
 
+   // Do logic triggered when module primary component state changes
    for(S32 i = 0; i < ModuleCount;i++)
    {
-      if(mModuleActive[i] != modActive[i])
+      if(mModulePrimaryActive[i] != wasModulePrimaryActive[i])
       {
          if(i == ModuleSensor)
          {
             mSensorStartTime = getGame()->getCurrentTime();
-            if(mModuleActive[i])
-               mEnergy -= EnergyMax * 1/20; // inital energy use, prevents tapping to see cloaked
+            if(mModulePrimaryActive[i])
+               mEnergy -= SensorInitialEnergyUsage; // inital energy use, prevents tapping to see cloaked
          }
          else if(i == ModuleCloak)
             mCloakTimer.reset(CloakFadeTime - mCloakTimer.getCurrent(), CloakFadeTime);
 
-         setMaskBits(ModulesMask);
+         setMaskBits(ModulePrimaryMask);
+      }
+   }
+
+   // Do logic triggered when module secondary component state changes
+   for(S32 i = 0; i < ModuleCount;i++)
+   {
+      if(mModuleSecondaryActive[i] != wasModuleSecondaryActive[i])
+      {
+         // If current state is active, reset the cooldown timer
+         if(mModuleSecondaryActive[i])
+            mModuleSecondaryCooldownTimer[i].reset();
+
+         setMaskBits(ModuleSecondaryMask);
       }
    }
 }
@@ -820,7 +980,7 @@ void Ship::damageObject(DamageInfo *theInfo)
          return;
 
       // Factor in shields
-      if(isModuleActive(ModuleShield)) // && mEnergy >= EnergyShieldHitDrain)     // Commented code will cause
+      if(isModulePrimaryActive(ModuleShield)) // && mEnergy >= EnergyShieldHitDrain)     // Commented code will cause
       {                                                                           // shields to drain when they
          //mEnergy -= EnergyShieldHitDrain;                                       // have been hit.
          return;
@@ -898,7 +1058,7 @@ void Ship::updateModuleSounds()
 
    for(U32 i = 0; i < ModuleCount; i++)
    {
-      if(mModuleActive[i] && moduleSFXs[i] != SFXNone)
+      if(mModulePrimaryActive[i] && moduleSFXs[i] != SFXNone)
       {
          if(mModuleSound[i].isValid())
             SoundSystem::setMovementParams(mModuleSound[i], mMoveState[RenderState].pos, mMoveState[RenderState].vel);
@@ -940,7 +1100,7 @@ void Ship::writeControlState(BitStream *stream)
    stream->write(mMoveState[ActualState].vel.x);
    stream->write(mMoveState[ActualState].vel.y);
    stream->writeRangedU32(mEnergy, 0, EnergyMax);
-   stream->writeFlag(mCooldown);
+   stream->writeFlag(mCooldownNeeded);
    if(mFireTimer < 0)   // mFireTimer could be negative.
       stream->writeRangedU32(MaxFireDelay + (mFireTimer < -S32(negativeFireDelay) ? negativeFireDelay : U32(-mFireTimer)),0, MaxFireDelay + negativeFireDelay);
    else
@@ -955,7 +1115,7 @@ void Ship::readControlState(BitStream *stream)
    stream->read(&mMoveState[ActualState].vel.x);
    stream->read(&mMoveState[ActualState].vel.y);
    mEnergy = stream->readRangedU32(0, EnergyMax);
-   mCooldown = stream->readFlag();
+   mCooldownNeeded = stream->readFlag();
    mFireTimer = S32(stream->readRangedU32(0, MaxFireDelay + negativeFireDelay));
    if(mFireTimer > S32(MaxFireDelay))
       mFireTimer =  S32(MaxFireDelay) - mFireTimer;
@@ -1030,6 +1190,8 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
    bool shouldWritePosition = (updateMask & InitialMask) || gameConnection->getControlObject() != this;
    if(!shouldWritePosition)
    {
+      // The number of bits here *must* match the same number in the else statement
+      stream->writeFlag(false);
       stream->writeFlag(false);
       stream->writeFlag(false);
       stream->writeFlag(false);
@@ -1045,9 +1207,15 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
       if(stream->writeFlag(updateMask & MoveMask))
          mCurrentMove.pack(stream, NULL, false);      // Send current move
 
-      if(stream->writeFlag(updateMask & ModulesMask))
+      // If a module primary component is detected as on, pack it
+      if(stream->writeFlag(updateMask & ModulePrimaryMask))
          for(S32 i = 0; i < ModuleCount; i++)         // Send info about which modules are active
-            stream->writeFlag(mModuleActive[i]);
+            stream->writeFlag(mModulePrimaryActive[i]);
+
+      // If a module secondary component is detected as on, pack it
+      if(stream->writeFlag(updateMask & ModuleSecondaryMask))
+         for(S32 i = 0; i < ModuleCount; i++)         // Send info about which modules are active
+            stream->writeFlag(mModuleSecondaryActive[i]);
    }
    return 0;
 }
@@ -1087,7 +1255,6 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
          mIsAuthenticated = stream->readFlag();
       }
    }
-
 
 
    if(stream->readFlag())        // New module configuration
@@ -1167,19 +1334,24 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
       mCurrentMove.unpack(stream, false);
    }
 
-   if(stream->readFlag())     // ModulesMask
+   if(stream->readFlag())     // ModulePrimaryMask
    {
-      bool wasActive[ModuleCount];
+      bool wasPrimaryActive[ModuleCount];
       for(S32 i = 0; i < ModuleCount; i++)
       {
-         wasActive[i] = mModuleActive[i];
-         mModuleActive[i] = stream->readFlag();
-         if(i == ModuleSensor && wasActive[i] != mModuleActive[i])
+         wasPrimaryActive[i] = mModulePrimaryActive[i];
+         mModulePrimaryActive[i] = stream->readFlag();
+
+         if(i == ModuleSensor && wasPrimaryActive[i] != mModulePrimaryActive[i])
             mSensorStartTime = getGame()->getCurrentTime();
-         if(i == ModuleCloak && wasActive[i] != mModuleActive[i])
+         if(i == ModuleCloak && wasPrimaryActive[i] != mModulePrimaryActive[i])
             mCloakTimer.reset(CloakFadeTime - mCloakTimer.getCurrent(), CloakFadeTime);
       }
    }
+
+   if(stream->readFlag())     // ModuleSecondaryMask
+      for(S32 i = 0; i < ModuleCount; i++)
+         mModuleSecondaryActive[i] = stream->readFlag();
 
    mMoveState[ActualState].angle = mCurrentMove.angle;
 
@@ -1229,6 +1401,21 @@ static F32 getAngleDiff(F32 a, F32 b)
 }
 
 
+bool Ship::hasModule(ShipModule mod)
+{
+   for(S32 i = 0; i < ShipModuleCount; i++)
+      if(mModule[i] == mod)
+         return true;
+   return false;
+}
+
+
+bool Ship::isDestroyed()
+{
+   return hasExploded;
+}
+
+
 bool Ship::isItemMounted() 
 { 
    return mMountedItems.size() != 0; 
@@ -1237,7 +1424,7 @@ bool Ship::isItemMounted()
 
 bool Ship::isVisible() 
 {
-   if(!isModuleActive(ModuleCloak))
+   if(!isModulePrimaryActive(ModuleCloak))
       return true;
 
    for(S32 i = 0; i < mMountedItems.size(); i++)
@@ -1294,6 +1481,18 @@ MoveItem *Ship::unmountItem(U8 objectType)
       }
 
    return NULL;
+}
+
+
+WeaponType Ship::getSelectedWeapon()
+{
+   return mWeapon[mActiveWeaponIndx];
+}
+
+
+U32 Ship::getSelectedWeaponIndex()
+{
+   return mActiveWeaponIndx;
 }
 
 
@@ -1573,8 +1772,8 @@ void Ship::emitMovementSparks()
    if(mSparkElapsed <= 32)  // What is the purpose of this?  To prevent sparks for the first 32ms of ship's life?!?
       return;
 */
-   bool boostActive = isModuleActive(ModuleBoost);
-   bool cloakActive = isModuleActive(ModuleCloak);
+   bool boostActive = isModulePrimaryActive(ModuleBoost);
+   bool cloakActive = isModulePrimaryActive(ModuleCloak);
 
    Point corners[3];
    Point shipDirs[3];
@@ -1659,7 +1858,7 @@ void Ship::emitMovementSparks()
       mLastTrailPoint[1] = rightId;
    }
 
-   if(isModuleActive(ModuleCloak))
+   if(isModulePrimaryActive(ModuleCloak))
       return;
 
    // Finally, do some particles
@@ -1732,7 +1931,7 @@ void Ship::render(S32 layerIndex)
 
 
    // now adjust if using cloak module
-   F32 alpha = isModuleActive(ModuleCloak) ? mCloakTimer.getFraction() : 1 - mCloakTimer.getFraction();
+   F32 alpha = isModulePrimaryActive(ModuleCloak) ? mCloakTimer.getFraction() : 1 - mCloakTimer.getFraction();
 
    glPushMatrix();
    glTranslatef(mMoveState[RenderState].pos.x, mMoveState[RenderState].pos.y, 0);
@@ -1831,13 +2030,13 @@ void Ship::render(S32 layerIndex)
    {
       // If local ship has sensor, it can see cloaked non-local ships
       Ship *ship = dynamic_cast<Ship *>(conn->getControlObject());      // <-- this is our local ship
-      if(ship && ship->isModuleActive(ModuleSensor) && alpha < 0.5)
+      if(ship && ship->isModulePrimaryActive(ModuleSensor) && alpha < 0.5)
          alpha = 0.5;
    }
 
 
    renderShip(gameType->getShipColor(this), alpha, thrusts, mHealth, mRadius, clientGame->getCurrentTime() - mSensorStartTime, 
-              isModuleActive(ModuleCloak), isModuleActive(ModuleShield), isModuleActive(ModuleSensor), hasModule(ModuleArmor));
+              isModulePrimaryActive(ModuleCloak), isModulePrimaryActive(ModuleShield), isModulePrimaryActive(ModuleSensor), hasModule(ModuleArmor));
 
    bool disableBlending = false;
 
@@ -1858,7 +2057,7 @@ void Ship::render(S32 layerIndex)
       drawDashedHollowArc(mMoveState[RenderState].pos, CollisionRadius + 5, CollisionRadius + 10, 8, 6.283f/24);
    }
 
-   if(isModuleActive(ModuleRepair) && alpha != 0)     // Don't bother when completely transparent
+   if(isModulePrimaryActive(ModuleRepair) && alpha != 0)     // Don't bother when completely transparent
    {
       glLineWidth(gLineWidth3);
       glColor(Colors::red, alpha);
@@ -1925,11 +2124,16 @@ void Ship::calcThrustComponents(F32 *thrusts)
       thrusts[2] += 0.25;
 
    
-   if(isModuleActive(ModuleBoost))
+   if(isModulePrimaryActive(ModuleBoost))
       for(U32 i = 0; i < 4; i++)
          thrusts[i] *= 1.3f;
 }
 
+
+bool Ship::isRobot()
+{
+   return mIsRobot;
+}
 
 
 S32 LuaShip::id = 99;
@@ -1972,6 +2176,28 @@ LuaShip::LuaShip(Ship *ship): thisShip(ship)
 }
 
 
+// C++ default constructor ==> not used.  Constructor with Ship (above) used instead
+LuaShip::LuaShip()
+{
+   /* Do nothing */
+};
+
+
+// Lua constructor ==> not used.  Class only instantiated from C++.
+LuaShip::LuaShip(lua_State *L)
+{
+   /* Do nothing */
+};
+
+
+// Destructor
+LuaShip::~LuaShip()
+{
+   logprintf(LogConsumer::LogLuaObjectLifecycle, "Killing luaShip %d", mId);
+};
+
+
+S32 LuaShip::getClassID(lua_State *L) { return returnInt(L, PlayerShipTypeNumber); }
 S32 LuaShip::isAlive(lua_State *L) { return returnBool(L, thisShip.isValid()); }
 
 // Note: All of these methods will return nil if the ship in question has been deleted.
@@ -1993,7 +2219,7 @@ S32 LuaShip::isModActive(lua_State *L) {
    static const char *methodName = "Ship:isModActive()";
    checkArgCount(L, 1, methodName);
    ShipModule module = (ShipModule) getInt(L, 1, methodName, 0, ModuleCount - 1);
-   return thisShip ? returnBool(L, getObj()->isModuleActive(module)) : returnNil(L);
+   return thisShip ? returnBool(L, getObj()->isModulePrimaryActive(module) || getObj()->isModuleSecondaryActive(module)) : returnNil(L);
 }
 
 S32 LuaShip::getAngle(lua_State *L) { return thisShip ? returnFloat(L, getObj()->getCurrentMove().angle) : returnNil(L); }      // Get angle ship is pointing at
@@ -2096,6 +2322,24 @@ GameObject *LuaShip::getGameObject()
    }
    else
       return getObj();
+}
+
+
+const char *LuaShip::getClassName() const
+{
+   return "LuaShip";
+}
+
+
+void LuaShip::push(lua_State *L)
+{
+   Lunar<LuaShip>::push(L, this, false);
+}
+
+
+Ship *LuaShip::getObj()
+{
+   return thisShip;
 }
 
 

@@ -26,7 +26,9 @@
 #ifndef _SHIPITEMS_H_
 #define _SHIPITEMS_H_
 
-#include "../tnl/tnlAssert.h"
+#include "../tnl/tnlTypes.h"
+
+using namespace TNL;
 
 namespace Zap
 {
@@ -54,108 +56,37 @@ enum EngineerBuildObjects
 };
 
 
-enum ModuleUseType
+enum ModulePrimaryUseType
 {
-   ModuleUseActive,     // Only functional when active
-   ModuleUsePassive,    // Always functional
-   ModuleUseHybrid      // Always functional, with an active component
+   ModulePrimaryUseActive,     // Only functional when active
+   ModulePrimaryUsePassive,    // Always functional
+   ModulePrimaryUseHybrid      // Always functional, with an active component
 };
 
-
-class ModuleInfo
+struct ModuleInfo
 {
-private:
-   ShipModule mModuleType;
-   S32 mEnergyDrain;       // Continuous energy drain while in use
-   S32 mUseCost;           // Per use energy drain
    const char *mName;
+   S32 mPrimaryEnergyDrain;       // Continuous energy drain while primary component is in use
+   S32 mPrimaryUseCost;           // Per use energy drain of primary component (if it has one)
+   ModulePrimaryUseType mPrimaryUseType; // How the primary component of the module is activated
+   bool hasSecondaryComponent;
+   S32 mSecondaryUseCost;         // Per use energy drain of secondary component
+   S32 mSecondaryCooldown;        // Cooldown between allowed secondary component uses, in milliseconds
    const char *mMenuName;
    const char *mMenuHelp;
-   ModuleUseType mUseType; // How module is activated
 
-public:
-   ModuleInfo(ShipModule moduleType)       // Constructor
-   {
-      switch(moduleType)
-      {
-         case ModuleShield:
-            mName = "Shield";
-            mMenuName = "Shield Generator";
-            mMenuHelp = "";
-            mEnergyDrain = 27000;
-            mUseCost = 0;
-            mUseType = ModuleUseActive;
-            break;
-
-         case ModuleBoost:
-            mName = "Turbo";
-            mMenuName = "Turbo Boost";
-            mMenuHelp = "";
-            mEnergyDrain = 15000;
-            mUseCost = 0;
-            mUseType = ModuleUseActive;
-            break;
-
-         case ModuleSensor:
-            mName = "Sensor";
-            mMenuName = "Enhanced Sensor";
-            mMenuHelp = "(makes Spy Bug Placer available)";
-            mEnergyDrain = 8000;
-            mUseCost = 0;
-            mUseType = ModuleUseHybrid;
-            break;
-
-         case ModuleRepair:
-            mName = "Repair";
-            mMenuName = "Repair Module";
-            mMenuHelp = "";
-            mEnergyDrain = 15000;
-            mUseCost = 0;
-            mUseType = ModuleUseActive;
-            break;
-
-         case ModuleEngineer:
-            mName = "Engineer";
-            mMenuName = "Engineer";
-            mMenuHelp = "";
-            mEnergyDrain = 0;
-            mUseCost = 75000;
-            mUseType = ModuleUseActive;
-            break;
-
-         case ModuleCloak:
-            mName = "Cloak";
-            mMenuName = "Cloak Field Modulator";
-            mMenuHelp = "";
-            mEnergyDrain = 8000;
-            mUseCost = 0;
-            mUseType = ModuleUseActive;
-            break;
-
-         case ModuleArmor:
-            mName = "Armor";
-            mMenuName = "Armor";
-            mMenuHelp = "";
-            mEnergyDrain = 0;
-            mUseCost = 0;
-            mUseType = ModuleUsePassive;
-            break;
-
-         default:
-            TNLAssert(false, "Something's gone wrong again!");
-            break;
-      }
-   };
-
-   ShipModule getModuleType() { return mModuleType; }
-   S32 getEnergyDrain() { return mEnergyDrain; }
-   S32 getPerUseCost() { return mUseCost; }
-   const char *getName() { return mName; }
-   ModuleUseType getUseType() { return mUseType; }
-   const char *getMenuName() { return mMenuName; }
-   const char *getMenuHelp() { return mMenuHelp; }
+   S32 getPrimaryEnergyDrain() const;
+   S32 getPrimaryPerUseCost() const;
+   bool hasSecondary() const;
+   S32 getSecondaryPerUseCost() const;
+   S32 getSecondaryCooldown() const;
+   const char *getName() const;
+   ModulePrimaryUseType getPrimaryUseType() const;
+   const char *getMenuName() const;
+   const char *getMenuHelp() const;
 };
 
+extern const ModuleInfo gModuleInfo[ModuleCount];
 
 };
 #endif

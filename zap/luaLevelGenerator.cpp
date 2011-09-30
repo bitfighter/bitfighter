@@ -80,6 +80,9 @@ static const char *argv[LevelLoader::MAX_LEVEL_LINE_ARGS];
 // Lua Constructor
 LuaLevelGenerator::LuaLevelGenerator(lua_State *L)
 {
+   TNLAssert(false, "Why use this constructor?");
+   throw LuaException("Trying to initalize LuaLevelGenerator without proper arguments is not allowed");
+
    // Initialize some primitive string handling stuff, used in addItem() below
    /*for(U32 i = 0; i < LevelLoader::MaxArgc; i++)
       argv[i] = argv_buffer[i];*/
@@ -369,8 +372,10 @@ void LuaLevelGenerator::runScript(lua_State *L, F32 gridSize)
    lua_pushnumber(L, gridSize);
    lua_setglobal(L, "_GRID_SIZE");
 
-   lua_pushlightuserdata(L, (void *)this);
-   lua_setglobal(L, "LevelGen");
+   //lua_pushlightuserdata(L, (void *)this); // using this line needs helper functions "levelgen = LuaLevelGenerator(LevelGen)"
+   //lua_setglobal(L, "LevelGen");
+   Lunar<LuaLevelGenerator>::push(L, this); // Lets use this instead of having to use helper functions
+   lua_setglobal(L, "levelgen");
 
    setLuaArgs(L, mFilename, mScriptArgs);    // Put our args in to the Lua table "args"
                                              // MUST BE SET BEFORE LOADING LUA HELPER FNS (WHICH F$%^S WITH GLOBALS IN LUA)
