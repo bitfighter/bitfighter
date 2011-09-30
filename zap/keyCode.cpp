@@ -28,13 +28,18 @@
 #include "../tnl/tnlJournal.h"
 #include "../tnl/tnlLog.h"         // For logprintf
 
-#include "zapjournal.h"    // For journaling support
+#include "zapjournal.h"            // For journaling support
 
 #include <ctype.h>
 
 #ifndef ZAP_DEDICATED
 #include "SDL/SDL.h"
 #endif
+
+#ifdef TNL_OS_WIN32
+#include <windows.h>   // For ARRAYSIZE 
+#endif
+
 
 using namespace TNL;
 
@@ -91,17 +96,72 @@ void dumpKeyStates()
         logprintf("Key %s down", keyCodeToString((KeyCode) i));
 }
 
+
 // Set state of a key as Up (false) or Down (true)
 void setKeyState(KeyCode keyCode, bool state)
 {
    keyIsDown[(int) keyCode] = state;
 }
 
+
 // Returns true of key is down, false if it is up
 bool getKeyState(KeyCode keyCode)
 {
 //   logprintf("State: key %d is %s", keyCode, keyIsDown[(int) keyCode] ? "down" : "up");
       return keyIsDown[(int) keyCode];
+}
+
+
+KeyCode modifiers[] = { KEY_SHIFT, KEY_CTRL, KEY_ALT, KEY_META, KEY_SUPER };
+
+bool checkModifier(KeyCode mod1)
+{
+   S32 foundCount = 0;
+
+   for(S32 i = 0; i < ARRAYSIZE(modifiers); i++)
+      if(getKeyState(modifiers[i]))                            // Modifier is down
+      {
+         if(modifiers[i] == mod1)      
+            foundCount++;
+         else                                                  // Wrong modifier!               
+            return false;        
+      }
+
+   return foundCount == 1;
+}
+
+
+bool checkModifier(KeyCode mod1, KeyCode mod2)
+{
+   S32 foundCount = 0;
+
+   for(S32 i = 0; i < ARRAYSIZE(modifiers); i++)
+      if(getKeyState(modifiers[i]))                            // Modifier is down
+      {
+         if(modifiers[i] == mod1 || modifiers[i] == mod2)      
+            foundCount++;
+         else                                                  // Wrong modifier!               
+            return false;        
+      }
+
+   return foundCount == 2;
+}
+
+
+bool checkModifier(KeyCode mod1, KeyCode mod2, KeyCode mod3)
+{
+   S32 foundCount = 0;
+
+   for(S32 i = 0; i < ARRAYSIZE(modifiers); i++)
+      if(getKeyState(modifiers[i]))                            // Modifier is down
+      {
+         if(modifiers[i] == mod1 || modifiers[i] == mod2 || modifiers[i] == mod3)      
+            foundCount++;
+         else                                                  // Wrong modifier!               
+            return false;        
+      }
+
+   return foundCount == 3;
 }
 
 

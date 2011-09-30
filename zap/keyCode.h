@@ -45,7 +45,11 @@ void setKeyState(KeyCode keyCode, bool state);  // Set key state (t=down, f=up)
 bool getKeyState(KeyCode keyCode);              // Return current key state (t=down, f=up)
 void resetKeyStates();                          // Initialize key states
 void dumpKeyStates();                           // Log key states for testing
-void checkModifierKeyState();                   // Handle Ctrl, Shift, Alt
+
+// Ensure that specified modifer is the only one actually pressed... i.e. if Ctrl and Alt were down, checkModifier(KEY_CTRL) would be false
+bool checkModifier(KeyCode mod1);            
+bool checkModifier(KeyCode mod1, KeyCode mod2);            
+bool checkModifier(KeyCode mod1, KeyCode mod2, KeyCode mod3);            
 
 #ifndef ZAP_DEDICATED
 KeyCode sdlKeyToKeyCode(int key);       // Convert SDL keys to KeyCode
