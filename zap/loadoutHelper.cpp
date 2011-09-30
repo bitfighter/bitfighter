@@ -271,59 +271,28 @@ bool LoadoutHelper::processKeyCode(KeyCode keyCode)
 
       exitHelper();                     // Exit loadout menu and resume play, however we leave this routine
 
-      GameConnection *gc = getGame()->getConnectionToServer();
-      if(!gc)
+      GameConnection *conn = getGame()->getConnectionToServer();
+      if(!conn)
          return true;
 
-      // Check to see if the new configuration is the same as the old.  If so, we have nothing to do.
-      bool theSame = true;
+      if(getGame()->getSettings()->getIniSettings()->verboseHelpMessages)
+         getGame()->displayShipDesignChangedMessage(loadout, "Modifications canceled -- new ship design same as the current");     
 
-      if(loadout.size() != gc->mOldLoadout.size())
-         theSame = false;
-      else
-      {
-         for(S32 i = 0; i < loadout.size(); i++)  // Check old requested loadout
-            theSame = theSame && loadout[i] == gc->mOldLoadout[i];
-      }
+      // Request loadout even if it was the same -- if I have loadout A, with on-deck loadout B, and I enter a new loadout
+      // that matches A, it would be better to have loadout remain unchanged if I entered a loadout zone.
+      // Tell server loadout has changed.  Server will activate it when we enter a loadout zone.
+      conn->c2sRequestLoadout(loadout);     
 
-      if(!theSame)
-      {
-         gc->c2sRequestLoadout(loadout);     // Tell server our loadout has changed.  Server will check if we're in the zone and activate loadout, if needed
-         gc->mOldLoadout = loadout;
-      }
+      /*gc->mOldLoadout = loadout;*/
 
-      Ship *ship = dynamic_cast<Ship *>(gc->getControlObject()); 
-      if(!ship)
-         return true;
+              // what does this block do?
 
-      theSame = true;
-      for(S32 i = 0; i < ShipModuleCount; i++)
-         theSame = theSame && (gLoadoutModules[mModule[i]].index == (U32)ship->getModule(i));
+               //theSame = true;
+               //for(S32 i = 0; i < ShipModuleCount; i++)
+               //   theSame = theSame && (gLoadoutModules[mModule[i]].index == (U32)ship->getModule(i));
 
-      for(S32 i = ShipModuleCount; i < ShipWeaponCount + ShipModuleCount; i++)
-         theSame = theSame && (gLoadoutWeapons[mWeapon[i - ShipModuleCount]].index == (U32)ship->getWeapon(i - ShipModuleCount));
-
-      bool verboseHelpMessages = getGame()->getSettings()->getIniSettings()->verboseHelpMessages;
-
-      if(theSame)      // Don't bother if ship config hasn't changed
-      {
-         if(verboseHelpMessages)
-            getGame()->displayMessage(Color(1.0, 0.5, 0.5), "%s", "Modifications canceled -- new ship design same as the old.");
-         return true;
-      }
-
-
-      GameType *gt = getGame()->getGameType();
-      bool spawnWithLoadout = ! gt->levelHasLoadoutZone();  // gt->isSpawnWithLoadoutGame() not used anymore.
-
-      // Check if we are in a loadout zone...  if so, it will be changed right away...
-      // ...otherwise, display a notice to the player to head for a LoadoutZone
-      // We've done a lot of work to get this message just right!  I hope players appreciate it!
-      if(verboseHelpMessages && !(ship && ship->isInZone(LoadoutZoneTypeNumber)))
-         getGame()->displayMessage(Color(1.0, 0.5, 0.5), 
-                                           "Ship design changed -- %s%s", 
-                                           spawnWithLoadout ? "changes will be activated when you respawn" : "enter Loadout Zone to activate changes", 
-                                           spawnWithLoadout && gt->levelHasLoadoutZone() ? " or enter Loadout Zone." : ".");
+               //for(S32 i = ShipModuleCount; i < ShipWeaponCount + ShipModuleCount; i++)
+               //   theSame = theSame && (gLoadoutWeapons[mWeapon[i - ShipModuleCount]].index == (U32)ship->getWeapon(i - ShipModuleCount));
    }
 
    return true;

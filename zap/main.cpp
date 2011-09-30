@@ -52,6 +52,7 @@ XXX need to document timers, new luavec stuff XXX
 <li>Added /leveldir admin command to change folder where levels are read.  Change affects current session only, and will not be saved in the INI.
 <li>Can now specify whether soccer game permits picking up the ball or not
 <li>-help cmd line option now displays meaningful help
+<li>Loadout presets: define them with Ctrl-1/2/3, retrieve them with Alt-1/2/3.  They persist in the INI between sessions.  You can see your current preset definitions with the /showpresets command.
 </ul>
 
 <h2>Bot scripting</h2>
@@ -195,6 +196,9 @@ U16 DEFAULT_GAME_PORT = 28000;
 ScreenInfo gScreenInfo;
 
 ZapJournal gZapJournal;          // Our main journaling object
+
+S32 LOADOUT_PRESETS = 3;
+
 
 void exitToOs(S32 errcode)
 {
@@ -760,6 +764,7 @@ void setupLogging(IniSettings *iniSettings)
    gMainLog.setMsgType(LogConsumer::LogFatalError, iniSettings->logFatalError); 
    gMainLog.setMsgType(LogConsumer::LogError, iniSettings->logError); 
    gMainLog.setMsgType(LogConsumer::LogWarning, iniSettings->logWarning); 
+   gMainLog.setMsgType(LogConsumer::ConfigurationError, iniSettings->logConfigurationError);
    gMainLog.setMsgType(LogConsumer::LogConnection, iniSettings->logConnection); 
    gMainLog.setMsgType(LogConsumer::LogLevelLoaded, iniSettings->logLevelLoaded); 
    gMainLog.setMsgType(LogConsumer::LogLuaObjectLifecycle, iniSettings->logLuaObjectLifecycle); 
@@ -1016,6 +1021,7 @@ void checkIfThisIsAnUpdate(GameSettings *settings)
    // after 015a
    if(settings->getIniSettings()->version < 1840 && settings->getIniSettings()->maxBots == 127)
       settings->getIniSettings()->maxBots = 10;
+
 }
 
 
@@ -1124,6 +1130,8 @@ int main(int argc, char **argv)
    // Before we go any further, we should get our log files in order.  We know where they'll be, as the 
    // only way to specify a non-standard location is via the command line, which we've now read.
    setupLogging(folderManager->logDir);
+
+   Game::buildModuleInfos();                    // Needs to happen before INI is loaded -- needed for parsing loadout presets in the INI
 
    // Load the INI file
    gINI.SetPath(joindir(folderManager->iniDir, "bitfighter.ini"));

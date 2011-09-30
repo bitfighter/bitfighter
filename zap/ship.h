@@ -262,6 +262,11 @@ public:
 
    void getLoadout(Vector<U32> &loadout);
    void setLoadout(const Vector<U32> &loadout, bool silent = false);
+   bool isLoadoutSameAsCurrent(const Vector<U32> &loadout);
+
+   static string loadoutToString(const Vector<U32> &loadout);
+   static bool stringToLoadout(string loadoutStr, Vector<U32> &loadout);
+
 
    virtual void idle(IdleCallPath path);
 

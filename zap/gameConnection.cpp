@@ -901,7 +901,7 @@ void GameConnection::sRequestLoadout(Vector<U32> &loadout)
    mLoadout = loadout;
    GameType *gt = gServerGame->getGameType();
    if(gt)
-      gt->clientRequestLoadout(this, mLoadout);    // this will set loadout if ship is in loadout zone
+      gt->SRV_clientRequestLoadout(this, mLoadout);    // This will set loadout if ship is in loadout zone
 
    // Check if ship is in a loadout zone, in which case we'll make the loadout take effect immediately
    //Ship *ship = dynamic_cast<Ship *>(this->getControlObject());

@@ -78,6 +78,9 @@ using namespace TNL;
 namespace Zap
 {
 
+// Statics
+Vector<ModuleInfo> Game::mModuleInfos;
+
 void ClientInfo::setAuthenticated(bool isAuthenticated)
 {
    mIsAuthenticated = isAuthenticated; 
@@ -185,7 +188,6 @@ Game::Game(const Address &theBindAddress, GameSettings *settings) : mGameObjData
 {
    mSettings = settings;
 
-   buildModuleInfos();
    mNextMasterTryTime = 0;
    mReadyToConnectToMaster = false;
 
@@ -1710,18 +1712,18 @@ bool ServerGame::loadLevel(const string &levelFileName)
    {
       string name = folderManager->findLevelGenScript(scriptName);  // Find full name of levelgen script
 
+      // If we can't find script, we currently continue with the level.  Should we skip it instead?
       if(name == "")
-      {
          logprintf(LogConsumer::LogWarning, "Warning: Could not find script \"%s\" in level \"%s\"", 
                                     scriptName.c_str(), levelFileName.c_str());
-         return false;
+      else
+      {
+         // The script file will be the first argument, subsequent args will be passed on to the script.
+         // Now we've crammed all our action into the constructor... is this ok design?
+         string *dir = &folderManager->levelDir;
+         const Vector<string> *args = getGameType()->getScriptArgs();
+         LuaLevelGenerator levelgen = LuaLevelGenerator(name, *dir, args, getGridSize(), getGameObjDatabase(), this, gConsole);
       }
-
-      // The script file will be the first argument, subsequent args will be passed on to the script.
-      // Now we've crammed all our action into the constructor... is this ok design?
-      string *dir = &folderManager->levelDir;
-      const Vector<string> *args = getGameType()->getScriptArgs();
-      LuaLevelGenerator levelgen = LuaLevelGenerator(name, *dir, args, getGridSize(), getGameObjDatabase(), this, gConsole);
    }
 
    // Script specified in INI globalLevelLoadScript

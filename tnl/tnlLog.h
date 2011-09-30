@@ -87,9 +87,10 @@ public:
       StatisticsFilter        = BIT(19),     // For logging player/game statistics
 
       DatabaseFilter          = BIT(20),     // For logging issues with writing to database
+      ConfigurationError      = BIT(21),     // For logging configuation issues
       
       All = 0xFFFFFFFF,
-      AllErrorTypes = LogFatalError | LogError | LogWarning,
+      AllErrorTypes = LogFatalError | LogError | LogWarning | ConfigurationError,
    };
 
 

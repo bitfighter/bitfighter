@@ -152,7 +152,7 @@ bool LoadoutZone::collide(GameObject *hitObject)
    if(!isGhost() &&
          (hitObject->getTeam() == getTeam() || getTeam() == -1) &&
          isShipType(hitObject->getObjectTypeNumber()) )
-      getGame()->getGameType()->updateShipLoadout(hitObject);      
+      getGame()->getGameType()->SRV_updateShipLoadout(hitObject);      
 
    return false;
 }

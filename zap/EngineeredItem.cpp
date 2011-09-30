@@ -32,10 +32,11 @@
 #include "gameObjectRender.h"
 #include "GeomUtils.h"
 #include "BotNavMeshZone.h"
-#include "Colors.h"
 #include "game.h"
-#include "stringUtils.h"
 #include "gameConnection.h"
+
+#include "Colors.h"
+#include "stringUtils.h"
 
 #include <math.h>
 
@@ -82,7 +83,7 @@ string EngineerModuleDeployer::checkResourcesAndEnergy(Ship *ship)
    if(!ship->isCarryingItem(ResourceItemTypeNumber))
       return "!!! Need resource item to use Engineer module";
 
-   if(ship->getEnergy() < ship->getGame()->getModuleInfo(ModuleEngineer)->getPerUseCost())
+   if(ship->getEnergy() < Game::getModuleInfo(ModuleEngineer)->getPerUseCost())
       return "!!! Not enough energy to engineer an object";
 
    return "";
@@ -1100,7 +1101,7 @@ bool Turret::processArguments(S32 argc2, const char **argv2, Game *game)
       {
          if(!strncmp(argv2[i], "W=", 2))  // W= is in 015a
          {
-            S32 w=0;
+            S32 w = 0;
             while(w < WeaponCount && stricmp(gWeapons[w].name.getString(), &argv2[i][2]))
                w++;
             if(w < WeaponCount)

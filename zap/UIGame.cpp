@@ -705,8 +705,9 @@ void GameUserInterface::renderLoadoutIndicators()
    if(!localShip)
       return;
 
-   const Color INDICATOR_INACTIVE_COLOR(0, .8, 0);    // green
-   const Color INDICATOR_ACTIVE_COLOR  (.8, 0, 0);    // red
+   const Color INDICATOR_INACTIVE_COLOR(0, .8, 0);          // greenish
+   const Color INDICATOR_ACTIVE_COLOR  (.8, 0, 0);          // redish
+   const Color INDICATOR_PASSIVE_COLOR = Colors::yellow;
 
    U32 xPos = UserInterface::horizMargin;
 
@@ -726,10 +727,12 @@ void GameUserInterface::renderLoadoutIndicators()
    for(U32 i = 0; i < (U32)ShipModuleCount; i++)
    {
       if( getGame()->getModuleInfo(localShip->getModule(i))->getUseType() == ModuleUsePassive ||
-            getGame()->getModuleInfo(localShip->getModule(i))->getUseType() == ModuleUseHybrid )
-         glColor(Colors::yellow);      // yellow = passive indicator
+          getGame()->getModuleInfo(localShip->getModule(i))->getUseType() == ModuleUseHybrid )
+         glColor(INDICATOR_PASSIVE_COLOR);      
+
       else if(localShip->isModuleActive(localShip->getModule(i)))
          glColor(INDICATOR_ACTIVE_COLOR);
+
       else 
          glColor(INDICATOR_INACTIVE_COLOR);
 
@@ -743,7 +746,7 @@ void GameUserInterface::renderLoadoutIndicators()
 // Render any incoming server msgs
 void GameUserInterface::renderMessageDisplay()
 {
-   glColor3f(1,1,1);
+   glColor(Colors::white);
 
    S32 y = getGame()->getSettings()->getIniSettings()->showWeaponIndicators ? UserInterface::messageMargin : UserInterface::vertMargin;
    S32 msgCount;
@@ -774,7 +777,7 @@ void GameUserInterface::renderMessageDisplay()
 // Render any incoming player chat msgs
 void GameUserInterface::renderChatMessageDisplay()
 {
-   glColor3f(1,1,1);
+   glColor(Colors::white);
 
    S32 y = UserInterface::chatMessageMargin;
    S32 msgCount;
@@ -1077,6 +1080,63 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 }
 
 
+// Helper function...
+static void saveLoadoutPreset(ClientGame *game, S32 slot)
+{
+   GameConnection *conn = game->getConnectionToServer();
+   if(!conn)
+      return;
+
+   Ship *ship = dynamic_cast<Ship *>(conn->getControlObject());
+   if(!ship)
+      return;
+
+   Vector<U32> loadout(ShipModuleCount + ShipWeaponCount);
+   ship->getLoadout(loadout);
+
+   game->getSettings()->setLoadoutPreset(slot, loadout);
+   game->displaySuccessMessage(("Current loadout saved as preset " + itos(slot + 1)).c_str());
+}
+
+
+static void loadLoadoutPreset(ClientGame *game, S32 slot)
+{
+   Vector<U32> loadout(ShipModuleCount + ShipWeaponCount);     // Define it
+   game->getSettings()->getLoadoutPreset(slot, loadout);       // Fill it
+
+   if(loadout.size() == 0)    // Looks like the preset might be empty!
+   {
+      string msg = "Preset " + itos(slot + 1) + " is undefined -- to define it, try Ctrl-" + itos(slot + 1);
+      game->displayErrorMessage(msg.c_str());
+      return;
+   }
+
+   GameType *gameType = game->getGameType();
+   if(!gameType)
+      return;
+   
+   string err = gameType->validateLoadout(loadout);
+   
+   if(err != "")
+   {
+      game->displayErrorMessage((err + "; loadout not set").c_str());
+      return;
+   }
+
+   GameConnection *conn = game->getConnectionToServer();
+   if(!conn)
+      return;
+
+   if(game->getSettings()->getIniSettings()->verboseHelpMessages)
+      game->displayShipDesignChangedMessage(loadout, "Preset same as the current design");
+
+   // Request loadout even if it was the same -- if I have loadout A, with on-deck loadout B, and I enter a new loadout
+   // that matches A, it would be better to have loadout remain unchanged if I entered a loadout zone.
+   // Tell server loadout has changed.  Server will activate it when we enter a loadout zone.
+   conn->c2sRequestLoadout(loadout);    
+}
+
+
 void GameUserInterface::processPlayModeKey(KeyCode keyCode, char ascii)
 {
    InputMode inputMode = getGame()->getSettings()->getIniSettings()->inputMode;
@@ -1084,7 +1144,7 @@ void GameUserInterface::processPlayModeKey(KeyCode keyCode, char ascii)
    // loadout or engineering menu modes if not used in the loadout
    // menu above
 
-   if(keyCode == KEY_CLOSEBRACKET && getKeyState(KEY_ALT))     // Alt-] advances bots by one step if frozen
+   if(keyCode == KEY_CLOSEBRACKET && getKeyState(KEY_ALT))           // Alt-] advances bots by one step if frozen
    {
       if(Robot::isPaused())
          Robot::addSteps(1);
@@ -1094,6 +1154,19 @@ void GameUserInterface::processPlayModeKey(KeyCode keyCode, char ascii)
       if(Robot::isPaused())
          Robot::addSteps(10);
    }
+   else if(keyCode == KEY_1 && checkModifier(KEY_CTRL))              // Ctrl-1 saves loadout preset in slot 1 (with index 0, of course!)
+      saveLoadoutPreset(getGame(), 0);
+   else if(keyCode == KEY_1 && checkModifier(KEY_ALT))               // Alt-1 loads preset from slot 1 (with index 0, of course!)
+      loadLoadoutPreset(getGame(), 0);
+   else if(keyCode == KEY_2 && checkModifier(KEY_CTRL))              
+      saveLoadoutPreset(getGame(), 1);
+   else if(keyCode == KEY_2 && checkModifier(KEY_ALT))             
+      loadLoadoutPreset(getGame(), 1);
+   else if(keyCode == KEY_3 && checkModifier(KEY_CTRL))              
+      saveLoadoutPreset(getGame(), 2);
+   else if(keyCode == KEY_3 && checkModifier(KEY_ALT))             
+      loadLoadoutPreset(getGame(), 2);
+
    else if(keyCode == keyMOD1[inputMode])
       mModActivated[0] = true;
    else if(keyCode == keyMOD2[inputMode])
@@ -1188,7 +1261,6 @@ void GameUserInterface::processPlayModeKey(KeyCode keyCode, char ascii)
          enterMode(LoadoutMode);
       else if(keyCode == keyDROPITEM[inputMode])
          dropItem();
-
       else if(inputMode == InputModeJoystick)      // Check if the user is trying to use keyboard to move when in joystick mode
          if(keyCode == keyUP[InputModeKeyboard] || keyCode == keyDOWN[InputModeKeyboard] || keyCode == keyLEFT[InputModeKeyboard] || keyCode == keyRIGHT[InputModeKeyboard])
             mWrongModeMsgDisplay.reset(WRONG_MODE_MSG_DISPLAY_TIME);
@@ -1495,6 +1567,31 @@ void GameUserInterface::suspendHandler(ClientGame *game, const Vector<string> &w
 }
 
 
+extern S32 LOADOUT_PRESETS;
+
+void GameUserInterface::showPresetsHandler(ClientGame *game, const Vector<string> &words)
+{
+   Vector<U32> preset(ShipModuleCount + ShipWeaponCount);
+
+   for(S32 i = 0; i < LOADOUT_PRESETS; i++)
+   {
+      preset.clear();
+      game->getSettings()->getLoadoutPreset(i, preset);
+
+      string loadoutStr = Ship::loadoutToString(preset);
+      
+      string display;
+      
+      if(loadoutStr != "")
+         display = "Preset " + itos(i + 1) + ": " + replaceString(loadoutStr, ",", "; ");
+      else
+         display = "Preset " + itos(i + 1) + " is undefined";
+
+      game->displayMessage(Colors::cyan, display.c_str());
+   }
+}
+
+
 void GameUserInterface::lineWidthHandler(ClientGame *game, const Vector<string> &words)
 {
    F32 linewidth;
@@ -1601,17 +1698,19 @@ void GameUserInterface::serverCommandHandler(ClientGame *game, const Vector<stri
 
 
 CommandInfo chatCmds[] = {   
-   //  cmdName          cmdCallback               cmdArgInfo cmdArgCount   helpCategory helpGroup   helpArgString            helpTextSstring
-   { "admin",   GameUserInterface::adminPassHandler, { STR },      1,       ADV_COMMANDS,    0,      {"<password>"},         "Request admin permissions"  },
-   { "levpass", GameUserInterface::levelPassHandler, { STR },      1,       ADV_COMMANDS,    0,      {"<password>"},         "Request level change permissions"  },
-   { "servvol", GameUserInterface::servVolHandler,   { INT },      1,       ADV_COMMANDS,    0,      {"<0-10>"},             "Set volume of server"  },
-   { "getmap",  GameUserInterface::getMapHandler,    { STR },      1,       ADV_COMMANDS,    1,      {"[file]"},             "Save currently playing level in [file], if allowed" },
-   { "suspend", GameUserInterface::suspendHandler,   {  },         0,       ADV_COMMANDS,    1,      {  },                   "Place game on hold while waiting for players" },
-   { "pm",      GameUserInterface::pmHandler,        { NAME, STR },2,       ADV_COMMANDS,    1,      {"<name>","<message>"}, "Send private message to player" },
-   { "mvol",    GameUserInterface::mVolHandler,      { INT },      1,       ADV_COMMANDS,    2,      {"<0-10>"},             "Set music volume"      },
-   { "svol",    GameUserInterface::sVolHandler,      { INT },      1,       ADV_COMMANDS,    2,      {"<0-10>"},             "Set SFX volume"        },
-   { "vvol",    GameUserInterface::vVolHandler,      { INT },      1,       ADV_COMMANDS,    2,      {"<0-10>"},             "Set voice chat volume" },
-   { "mute",    GameUserInterface::muteHandler,      { NAME },     1,       ADV_COMMANDS,    3,      {"<name>"},             "Hide chat messages from <name> until you quit" },
+   //  cmdName              cmdCallback               cmdArgInfo cmdArgCount   helpCategory helpGroup   helpArgString            helpTextSstring
+   { "admin",       GameUserInterface::adminPassHandler, { STR },      1,       ADV_COMMANDS,    0,      {"<password>"},         "Request admin permissions"  },
+   { "levpass",     GameUserInterface::levelPassHandler, { STR },      1,       ADV_COMMANDS,    0,      {"<password>"},         "Request level change permissions"  },
+   { "servvol",     GameUserInterface::servVolHandler,   { INT },      1,       ADV_COMMANDS,    0,      {"<0-10>"},             "Set volume of server"  },
+   { "getmap",      GameUserInterface::getMapHandler,    { STR },      1,       ADV_COMMANDS,    1,      {"[file]"},             "Save currently playing level in [file], if allowed" },
+   { "suspend",     GameUserInterface::suspendHandler,   {  },         0,       ADV_COMMANDS,    1,      {  },                   "Place game on hold while waiting for players" },
+   { "pm",          GameUserInterface::pmHandler,        { NAME, STR },2,       ADV_COMMANDS,    1,      {"<name>","<message>"}, "Send private message to player" },
+   { "mvol",        GameUserInterface::mVolHandler,      { INT },      1,       ADV_COMMANDS,    2,      {"<0-10>"},             "Set music volume"      },
+   { "svol",        GameUserInterface::sVolHandler,      { INT },      1,       ADV_COMMANDS,    2,      {"<0-10>"},             "Set SFX volume"        },
+   { "vvol",        GameUserInterface::vVolHandler,      { INT },      1,       ADV_COMMANDS,    2,      {"<0-10>"},             "Set voice chat volume" },
+   { "mute",        GameUserInterface::muteHandler,      { NAME },     1,       ADV_COMMANDS,    3,      {"<name>"},             "Hide chat messages from <name> until you quit" },
+   { "showpresets", GameUserInterface::showPresetsHandler, {  },       0,       ADV_COMMANDS,    0,      {  },                   "Show loadout presets" },
+
 
    { "add",         GameUserInterface::addTimeHandler,       { INT },           0,       LEVEL_COMMANDS,  0,      {"<time in minutes>"},        "Add time to the current game" },
    { "next",        GameUserInterface::nextLevelHandler,     {  },              0,       LEVEL_COMMANDS,  0,      {  },                         "Start next level" },
@@ -1953,6 +2052,7 @@ void GameUserInterface::processChatModeKey(KeyCode keyCode, char ascii)
    }
 }
 
+
 void GameUserInterface::onKeyUp(KeyCode keyCode)
 {
    S32 inputMode = getGame()->getSettings()->getIniSettings()->inputMode;
@@ -1991,6 +2091,7 @@ void GameUserInterface::onKeyUp(KeyCode keyCode)
    else if(keyCode == keyRIGHT[inputMode])
       mRightDisabled = false;
 }
+
 
 // Return current move (actual move processing in ship.cpp)
 // Will also transform move into "relative" mode if needed

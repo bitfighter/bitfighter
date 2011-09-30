@@ -1113,7 +1113,7 @@ void GameType::onAddedToGame(Game *game)
 }
 
 
-// Only gets run on the server!
+// Server only!
 void GameType::spawnShip(ClientInfo *clientInfo)
 {
    GameConnection *conn = clientInfo->getConnection();
@@ -1138,10 +1138,10 @@ void GameType::spawnShip(ClientInfo *clientInfo)
       newShip->addToGame(mGame, mGame->getGameObjDatabase());
    }
 
-   if(!levelHasLoadoutZone())  // || isSpawnWithLoadoutGame()
-      setClientShipLoadout(conn, conn->getLoadout());     // Set loadout if this is a SpawnWithLoadout type of game, or there is no loadout zone
+   if(!levelHasLoadoutZone())
+      setClientShipLoadout(conn, conn->getLoadout());          // Set loadout if this is a SpawnWithLoadout type of game, or there is no loadout zone
    else
-      setClientShipLoadout(conn, conn->mOldLoadout, true);     // old loadout
+      setClientShipLoadout(conn, conn->mOldLoadout, true);     // Still using old loadout because we haven't entered a loadout zone yet...
    conn->mOldLoadout.clear();
 }
 
@@ -1188,8 +1188,8 @@ Point GameType::getSpawnPoint(S32 teamIndex)
 }
 
 
-// This gets run when the ship hits a loadout zone
-void GameType::updateShipLoadout(GameObject *shipObject)
+// This gets run when the ship hits a loadout zone -- server only
+void GameType::SRV_updateShipLoadout(GameObject *shipObject)
 {
    GameConnection *gc = shipObject->getControllingClient();
 
@@ -1198,20 +1198,22 @@ void GameType::updateShipLoadout(GameObject *shipObject)
 }
 
 
-void GameType::setClientShipLoadout(GameConnection *conn, const Vector<U32> &loadout, bool silent)
+// Return error message if loadout is invalid, return "" if it looks ok
+// Runs on client and server
+string GameType::validateLoadout(const Vector<U32> &loadout)
 {
    bool spyBugAllowed = false;
 
    if(loadout.size() != ShipModuleCount + ShipWeaponCount)     // Reject improperly sized loadouts.  Currently 2 + 3
-      return;
+      return "Invalid loadout size";
 
    for(S32 i = 0; i < ShipModuleCount; i++)
    {
       if(loadout[i] >= U32(ModuleCount))   // Invalid number.  Might crash server if trying to continue...
-         return;
+         return "Invalid module in loadout";
 
       if(!mEngineerEnabled && (loadout[i] == ModuleEngineer)) // Reject engineer if not enabled
-         return;
+         return "Engineer module not allowed here";
 
       if((loadout[i] == ModuleSensor))    // Allow spyBug when using Sensor
          spyBugAllowed = true;
@@ -1220,27 +1222,29 @@ void GameType::setClientShipLoadout(GameConnection *conn, const Vector<U32> &loa
    for(S32 i = ShipModuleCount; i < ShipWeaponCount + ShipModuleCount; i++)
    {
       if(loadout[i] >= U32(WeaponCount))  // Invalid number
-         return;
+         return "Invalid weapon in loadout";
 
-      if(loadout[i] == WeaponSpyBug && !spyBugAllowed) // Reject spybug when not using ModuleSensor
-         return;
+
+      if(loadout[i] == WeaponSpyBug && !spyBugAllowed)      // Reject spybug when not using ModuleSensor
+         return "Spybug not allowed when sensor not selected; loadout not set";
+
 
       if(loadout[i] == WeaponTurret)      // Reject WeaponTurret
-         return;
+         return "Illegal weapon in loadout";
 
 #if CS_PROTOCOL_VERSION == 32
       if(loadout[i] == WeaponHeatSeeker)  // Reject HeatSeeker, Not supported yet
-         return;
+         return "Illegal weapon in loadout";
 #endif
    }
 
-   Ship *theShip = dynamic_cast<Ship *>(conn->getControlObject());
-   if(theShip)
-      theShip->setLoadout(loadout, silent);
+   return "";     // Passed validation
 }
 
 
-void GameType::clientRequestLoadout(GameConnection *conn, const Vector<U32> &loadout)
+// Set the "on-deck" loadout for a ship, and make it effective immediately if we're in a loadout zone
+// Server only, called in direct response to request from client via c2sRequestLoadout()
+void GameType::SRV_clientRequestLoadout(GameConnection *conn, const Vector<U32> &loadout)
 {
    Ship *ship = dynamic_cast<Ship *>(conn->getControlObject());
 
@@ -1252,6 +1256,20 @@ void GameType::clientRequestLoadout(GameConnection *conn, const Vector<U32> &loa
          if(object->getTeam() == ship->getTeam() || object->getTeam() == -1)
             setClientShipLoadout(conn, loadout, false);
    }
+}
+
+
+// Called from above
+// Server only -- to trigger this on client, use GameConnection::c2sRequestLoadout()
+void GameType::setClientShipLoadout(GameConnection *conn, const Vector<U32> &loadout, bool silent)
+{
+   if(validateLoadout(loadout) != "")
+      return;
+
+   Ship *theShip = dynamic_cast<Ship *>(conn->getControlObject());
+
+   if(theShip)
+      theShip->setLoadout(loadout, silent);
 }
 
 
@@ -1596,7 +1614,7 @@ bool GameType::objectCanDamageObject(GameObject *damager, GameObject *victim)
 // Handle scoring when ship is killed
 void GameType::controlObjectForClientKilled(ClientInfo *victim, GameObject *clientObject, GameObject *killerObject)
 {
-   ClientInfo *killer = killerObject ? killerObject->getOwner()->getClientInfo() : NULL;
+   ClientInfo *killer = killerObject && killerObject->getOwner() ? killerObject->getOwner()->getClientInfo() : NULL;
 
    victim->getConnection()->mStatistics.addDeath();
 

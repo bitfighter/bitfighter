@@ -162,11 +162,13 @@ const char *helpTitles[] = {
 ////////////////////////////////////////
 // For now...  soon all these things will be contained herein
 extern CIniFile gINI;
+extern S32 LOADOUT_PRESETS;
 
 // Constructor
 GameSettings::GameSettings()
 {
    mBanList = new BanList(mFolderManager.iniDir);
+   mLoadoutPresets.resize(LOADOUT_PRESETS);           // Make sure we have the right number of slots available
 }
 
 
@@ -358,6 +360,23 @@ string GameSettings::getLevelDir(SettingSource source)
       return getString(LEVEL_DIR);
    else
       return mIniSettings.levelDir;
+}
+
+
+bool GameSettings::getLoadoutPreset(S32 index, Vector<U32> &preset) 
+{ 
+   if(index < 0 || index >= mLoadoutPresets.size()) 
+      return false;
+
+   preset = mLoadoutPresets[index]; 
+   return true;
+}
+
+
+// Caller is responsible for bounds checking index...
+void GameSettings::setLoadoutPreset(S32 index, const Vector<U32> &preset) 
+{
+   mLoadoutPresets[index] = preset;
 }
 
 

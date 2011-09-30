@@ -61,6 +61,7 @@ enum ModuleUseType
    ModuleUseHybrid      // Always functional, with an active component
 };
 
+
 class ModuleInfo
 {
 private:

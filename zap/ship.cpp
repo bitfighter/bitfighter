@@ -1308,18 +1308,26 @@ void Ship::getLoadout(Vector<U32> &loadout)
 }
 
 
+bool Ship::isLoadoutSameAsCurrent(const Vector<U32> &loadout)
+{
+   for(S32 i = 0; i < ShipModuleCount; i++)
+      if(loadout[i] != (U32)mModule[i])
+         return false;
+
+   for(S32 i = ShipModuleCount; i < ShipWeaponCount + ShipModuleCount; i++)
+      if(loadout[i] != (U32)mWeapon[i - ShipModuleCount])
+         return false;
+
+   return true;
+}
+
+
+// This actualizes the requested loadout... when, for example the user enters a loadout zone
+// To set the "on-deck" loadout, use GameType->setClientShipLoadout()
 void Ship::setLoadout(const Vector<U32> &loadout, bool silent)
 {
    // Check to see if the new configuration is the same as the old.  If so, we have nothing to do.
-   bool theSame = true;
-
-   for(S32 i = 0; i < ShipModuleCount; i++)
-      theSame = theSame && (loadout[i] == (U32)mModule[i]);
-
-   for(S32 i = ShipModuleCount; i < ShipWeaponCount + ShipModuleCount; i++)
-      theSame = theSame && (loadout[i] == (U32)mWeapon[i - ShipModuleCount]);
-
-   if(theSame)      // Don't bother if ship config hasn't changed
+   if(isLoadoutSameAsCurrent(loadout))      // Don't bother if ship config hasn't changed
       return;
 
    if(getOwner())
@@ -1335,7 +1343,8 @@ void Ship::setLoadout(const Vector<U32> &loadout, bool silent)
 
    setMaskBits(LoadoutMask);
 
-   if(silent) return;
+   if(silent) 
+      return;
 
    // Try to see if we can maintain the same weapon we had before.
    S32 i;
@@ -1346,10 +1355,10 @@ void Ship::setLoadout(const Vector<U32> &loadout, bool silent)
          break;
       }
 
-   if(i == ShipWeaponCount)   // Nope...
-      selectWeapon(0);        // ... so select first weapon
+   if(i == ShipWeaponCount)               // Nope...
+      selectWeapon(0);                    // ...so select first weapon
 
-   if(!hasModule(ModuleEngineer))        // We don't, so drop any resources we may be carrying
+   if(!hasModule(ModuleEngineer))         // We don't have engineer, so drop any resources we may be carrying
    {
       for(S32 i = mMountedItems.size() - 1; i >= 0; i--)
          if(mMountedItems[i]->getObjectTypeNumber() == ResourceItemTypeNumber)
@@ -1369,6 +1378,7 @@ void Ship::setLoadout(const Vector<U32> &loadout, bool silent)
          TNLAssert(false, "Please document code path/circumstances this is triggered!");
          cc = clientGame->getConnectionToServer();      // Second try  ==> under what circumstances can this happen?
       }
+      TNLAssert(cc, "Problem!");
    }
 #endif
 
@@ -1377,6 +1387,103 @@ void Ship::setLoadout(const Vector<U32> &loadout, bool silent)
       static StringTableEntry msg("Ship loadout configuration updated.");
       cc->s2cDisplayMessage(GameConnection::ColorAqua, SFXUIBoop, msg);
    }
+
+   return;
+}
+
+
+// Will return an empty string if loadout looks invalid
+string Ship::loadoutToString(const Vector<U32> &loadout)
+{
+   // Only expect missized loadout when presets haven't all been set, and loadout.size will be 0
+   if(loadout.size() != ShipModuleCount + ShipWeaponCount)
+      return "";
+
+   Vector<string> loadoutStrings(ShipModuleCount + ShipWeaponCount);    // Reserving some space makes things a tiny bit more efficient
+
+   // First modules
+   for(S32 i = 0; i < ShipModuleCount; i++)
+      loadoutStrings.push_back(Game::getModuleInfo((ShipModule) loadout[i])->getName());
+
+   // Then weapons
+   for(S32 i = ShipModuleCount; i < ShipWeaponCount + ShipModuleCount; i++)
+      loadoutStrings.push_back(gWeapons[loadout[i]].name.getString());
+
+   return listToString(loadoutStrings, ',');
+}
+
+
+// Fills loadout with appropriate values; returns true if string looks valid, false if not
+// Note that even if we are able to parse the loadout successfully, it might still be invalid for a 
+// particular server or gameType... engineer, for example, is not allowed everywhere.
+bool Ship::stringToLoadout(string loadoutStr, Vector<U32> &loadout)
+{
+   loadout.clear();
+
+   // If loadout preset hasn't been set, we'll get a blank string.  Handle that here so we don't log an error later.
+   if(loadoutStr == "")
+      return false;
+
+   Vector<string> words;
+   parseString(loadoutStr, words, ',');
+
+   if(words.size() != ShipModuleCount + ShipWeaponCount)      // Invalid loadout string
+   {
+      logprintf(LogConsumer::ConfigurationError, "Misconfigured loadout preset found in INI");
+      loadout.clear();
+
+      return false;
+   }
+
+   loadout.reserve(ShipModuleCount + ShipWeaponCount);        // Preallocate the amount of space we expect to have
+
+   bool found;
+
+   for(S32 i = 0; i < ShipModuleCount; i++)
+   {
+      found = false;
+      const char *word = words[i].c_str();
+
+      for(S32 j = 0; j < ModuleCount; j++)
+         if(!stricmp(word, Game::getModuleInfo((ShipModule) j)->getName()))     // Case insensitive
+         {
+            loadout.push_back(j);
+            found = true;
+            break;
+         }
+
+      if(!found)
+      {
+         logprintf(LogConsumer::ConfigurationError, "Unknown module found in loadout preset in INI file: %s", word);
+         loadout.clear();
+
+         return false;
+      }
+   }
+
+   for(S32 i = ShipModuleCount; i < ShipWeaponCount + ShipModuleCount; i++)
+   {
+      found = false;
+      const char *word = words[i].c_str();
+
+      for(S32 j = 0; j < WeaponCount; j++)
+         if(!stricmp(word, gWeapons[j].name.getString()))
+         {
+            loadout.push_back(j);
+            found = true;
+            break;
+         }
+
+      if(!found)
+      {
+         logprintf(LogConsumer::ConfigurationError, "Unknown weapon found in loadout preset in INI file: %s", word);
+         loadout.clear();
+
+         return false;
+      }
+   }
+
+   return true;
 }
 
 

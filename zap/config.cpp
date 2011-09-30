@@ -34,7 +34,9 @@
 #include "BanList.h"
 #include "Colors.h"
 
-#include "stringUtils.h"    // For itos
+#include "ship.h"          // For Ship::stringToLoadout (this could be moved?)
+
+#include "stringUtils.h"  // For itos
 
 #include "GameSettings.h"
 
@@ -148,7 +150,8 @@ IniSettings::IniSettings()
 
    logFatalError = true;       
    logError = true;            
-   logWarning = true;          
+   logWarning = true;     
+   logConfigurationError = true;
    logConnection = true;       
    logLevelLoaded = true;      
    logLuaObjectLifecycle = false;
@@ -181,6 +184,44 @@ static void loadForeignServerInfo(CIniFile *ini, IniSettings *iniSettings)
    ini->GetAllValues("RecentForeignServers", iniSettings->prevServerListFromMaster);
 }
 
+
+// Does this macro def make it easier to read the code?
+#define addComment(comment) ini->sectionComment(section, comment);
+
+extern S32 LOADOUT_PRESETS;
+
+static void writeLoadoutPresets(CIniFile *ini, GameSettings *settings)
+{
+   const char *section = "LoadoutPresets";
+
+   ini->addSection(section);      // Create the key, then provide some comments for documentation purposes
+
+
+   if(ini->numSectionComments("LoadoutPresets") == 0)
+   {
+      addComment("----------------");
+      addComment(" Loadout presets are stored here.  You can manage these manually if you like, but it is usually easier");
+      addComment(" to let the game do it for you.  Pressing Ctrl-1 will copy your current loadout into the first preset, etc.");
+      addComment(" If you do choose to modify these, it is important to note that the modules come first, then the weapons.");
+      addComment(" The order is the same as you would enter them when defining a loadout in-game.");
+      addComment("----------------");
+   }
+
+   Vector<U32> preset;
+
+   for(S32 i = 0; i < LOADOUT_PRESETS; i++)
+   {
+      if(!settings->getLoadoutPreset(i, preset))
+         continue;
+
+      string presetStr = Ship::loadoutToString(preset);
+
+      if(presetStr != "")
+         ini->SetValue("LoadoutPresets", "Preset" + itos(i + 1), presetStr);
+   }
+}
+
+
 static void writeConnectionsInfo(CIniFile *ini, IniSettings *iniSettings)
 {
    if(ini->numSectionComments("Connections") == 0)
@@ -200,7 +241,6 @@ static void writeForeignServerInfo(CIniFile *ini, IniSettings *iniSettings)
 {
    if(ini->numSectionComments("RecentForeignServers") == 0)
    {
-   
       ini->sectionComment("RecentForeignServers", "----------------");
       ini->sectionComment("RecentForeignServers", " This section contains a list of the most recent servers seen; used as a fallback if we can't reach the master");
       ini->sectionComment("RecentForeignServers", " Please be aware that this section will be automatically regenerated, and any changes you make will be overwritten");
@@ -334,6 +374,7 @@ static void loadDiagnostics(CIniFile *ini, IniSettings *iniSettings)
    iniSettings->logFatalError         = ini->GetValueYN(section, "LogFatalError",         iniSettings->logFatalError);
    iniSettings->logError              = ini->GetValueYN(section, "LogError",              iniSettings->logError);
    iniSettings->logWarning            = ini->GetValueYN(section, "LogWarning",            iniSettings->logWarning);
+   iniSettings->logConfigurationError = ini->GetValueYN(section, "LogConfigurationError", iniSettings->logConfigurationError);
    iniSettings->logConnection         = ini->GetValueYN(section, "LogConnection",         iniSettings->logConnection);
 
    iniSettings->logLevelLoaded        = ini->GetValueYN(section, "LogLevelLoaded",        iniSettings->logLevelLoaded);
@@ -352,6 +393,25 @@ static void loadTestSettings(CIniFile *ini, IniSettings *iniSettings)
    iniSettings->wallOutlineColor.set(ini->GetValue("Testing", "WallOutlineColor", iniSettings->wallOutlineColor.toRGBString()));
    iniSettings->oldGoalFlash = ini->GetValueYN("Testing", "OldGoalFlash", iniSettings->oldGoalFlash);
    iniSettings->clientPortNumber = (U16) ini->GetValueI("Testing", "ClientPortNumber", iniSettings->clientPortNumber);
+}
+
+
+static void loadLoadoutPresets(CIniFile *ini, GameSettings *settings)
+{
+   Vector<string> rawPresets(LOADOUT_PRESETS);
+
+   for(S32 i = 0; i < LOADOUT_PRESETS; i++)
+      rawPresets.push_back(ini->GetValue("LoadoutPresets", "Preset" + itos(i + 1), ""));
+   
+   Vector<U32> loadout;
+
+   for(S32 i = 0; i < LOADOUT_PRESETS; i++)
+   {
+      loadout.clear();
+
+      if(Ship::stringToLoadout(rawPresets[i], loadout))
+         settings->setLoadoutPreset(i, loadout);
+   }
 }
 
 
@@ -450,8 +510,6 @@ static void loadHostConfiguration(CIniFile *ini, IniSettings *iniSettings)
 void loadUpdaterSettings(CIniFile *ini, IniSettings *iniSettings)
 {
    iniSettings->useUpdater = lcase(ini->GetValue("Updater", "UseUpdater", "Yes")) != "no";
-   //if(! iniSettings->useUpdater) logprintf("useUpdater is OFF");
-   //if(iniSettings->useUpdater) logprintf("useUpdater is ON");
 }
 
 
@@ -1166,13 +1224,13 @@ void writeServerBanList(CIniFile *ini, BanList *banList)
       ini->sectionComment("ServerBanList", " Note: Wildcards (" + wildcard +") may be used for IP address and nickname" );
       ini->sectionComment("ServerBanList", " ");
       ini->sectionComment("ServerBanList", " Note: ISO time format is in the following format: YYYYMMDDTHH24MISS");
-      ini->sectionComment("ServerBanList", "   YYYY = four digit year, '2011'");
-      ini->sectionComment("ServerBanList", "     MM = month (01 - 12), '01'");
-      ini->sectionComment("ServerBanList", "     DD = day of the month, '31'");
-      ini->sectionComment("ServerBanList", "      T = Just a one character divider between date and time, 'T'");
-      ini->sectionComment("ServerBanList", "   HH24 = hour of the day (0-23), '12'");
-      ini->sectionComment("ServerBanList", "     MI = minute of the hour, '30'");
-      ini->sectionComment("ServerBanList", "     SS = seconds of the minute, '00' (we don't really care about these... yet)");
+      ini->sectionComment("ServerBanList", "   YYYY = four digit year, (e.g. 2011)");
+      ini->sectionComment("ServerBanList", "     MM = month (01 - 12), (e.g. 01)");
+      ini->sectionComment("ServerBanList", "     DD = day of the month, (e.g. 31)");
+      ini->sectionComment("ServerBanList", "      T = Just a one character divider between date and time, (will always be T)");
+      ini->sectionComment("ServerBanList", "   HH24 = hour of the day (0-23), (e.g. 12)");
+      ini->sectionComment("ServerBanList", "     MI = minute of the hour, (e.g. 30)");
+      ini->sectionComment("ServerBanList", "     SS = seconds of the minute, (e.g. 00) (we don't really care about these... yet)");
       ini->sectionComment("ServerBanList", "----------------");
    }
 
@@ -1191,6 +1249,8 @@ void loadSettingsFromINI(CIniFile *ini, GameSettings *settings)
    loadSoundSettings(ini, iniSettings);
    loadEffectsSettings(ini, iniSettings);
    loadGeneralSettings(ini, iniSettings);
+   loadLoadoutPresets(ini, settings);
+
    loadHostConfiguration(ini, iniSettings);
    loadUpdaterSettings(ini, iniSettings);
    loadDiagnostics(ini, iniSettings);
@@ -1236,6 +1296,7 @@ static void writeDiagnostics(CIniFile *ini, IniSettings *iniSettings)
       ini->sectionComment(section, " LogFatalError - Log fatal errors; should be left on (Yes/No)");
       ini->sectionComment(section, " LogError - Log serious errors; should be left on (Yes/No)");
       ini->sectionComment(section, " LogWarning - Log less serious errors (Yes/No)");
+      ini->sectionComment(section, " LogConfigurationError - Log problems with configuration (Yes/No)");
       ini->sectionComment(section, " LogConnection - High level logging connections with remote machines (Yes/No)");
       ini->sectionComment(section, " LogLevelLoaded - Write a log entry when a level is loaded (Yes/No)");
       ini->sectionComment(section, " LogLuaObjectLifecycle - Creation and destruciton of lua objects (Yes/No)");
@@ -1259,6 +1320,7 @@ static void writeDiagnostics(CIniFile *ini, IniSettings *iniSettings)
    ini->setValueYN(section, "LogFatalError",         iniSettings->logFatalError);
    ini->setValueYN(section, "LogError",              iniSettings->logError);
    ini->setValueYN(section, "LogWarning",            iniSettings->logWarning);
+   ini->setValueYN(section, "LogConfigurationError", iniSettings->logConfigurationError);
    ini->setValueYN(section, "LogConnection",         iniSettings->logConnection);
    ini->setValueYN(section, "LogLevelLoaded",        iniSettings->logLevelLoaded);
    ini->setValueYN(section, "LogLuaObjectLifecycle", iniSettings->logLuaObjectLifecycle);
@@ -1403,9 +1465,6 @@ static void writeUpdater(CIniFile *ini, IniSettings *iniSettings)
    ini->setValueYN("Updater", "UseUpdater", iniSettings->useUpdater, true);
 }
 
-// TEST!!
-// Does this macro def make it easier to read the code?
-#define addComment(comment) ini->sectionComment(section, comment);
 
 static void writeHost(CIniFile *ini, IniSettings *iniSettings)
 {
@@ -1573,6 +1632,7 @@ void saveSettingsToINI(CIniFile *ini, GameSettings *settings)
 
    writeHost(ini, iniSettings);
    writeForeignServerInfo(ini, iniSettings);
+   writeLoadoutPresets(ini, settings);
    writeConnectionsInfo(ini, iniSettings);
    writeEffects(ini, iniSettings);
    writeSounds(ini, iniSettings);
