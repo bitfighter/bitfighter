@@ -31,14 +31,14 @@ namespace Zap
 
 const ModuleInfo gModuleInfo[ModuleCount] =
 {
-   // name,     drain,  cost,          type,        2cost, 2cooldown, menu name,        help name
-	{"Shield",   27000,     0, ModulePrimaryUseActive,      0,  1000, "Shield Generator",      ""  },
-	{"Turbo",    15000,     0, ModulePrimaryUseActive,      0,  1000, "Turbo Boost",           ""  },
-	{"Sensor",    8000,     0, ModulePrimaryUseHybrid,  35000,   800, "Enhanced Sensor",       ""  },
-	{"Repair",   15000,     0, ModulePrimaryUseActive,      0,  1000, "Repair Module",         ""  },
-	{"Engineer",     0, 75000, ModulePrimaryUseActive,      0,  1000, "Engineer",              ""  },
-	{"Cloak",     8000,     0, ModulePrimaryUseActive,      0,  1000, "Cloak Field Modulator", ""  },
-	{"Armor",        0,     0, ModulePrimaryUsePassive,     0,  1000, "ModuleArmor",           ""  }
+   // name,     drain,  cost,          type,        has2, 2cost, 2cooldown, menu name,        help name
+	{"Shield",   27000,     0, ModulePrimaryUseActive,  false,     0,     0, "Shield Generator",      ""  },
+	{"Turbo",    15000,     0, ModulePrimaryUseActive,  false,     0,     0, "Turbo Boost",           ""  },
+	{"Sensor",    8000,     0, ModulePrimaryUseHybrid,   true, 35000,   800, "Enhanced Sensor",       ""  },
+	{"Repair",   15000,     0, ModulePrimaryUseActive,  false,     0,     0, "Repair Module",         ""  },
+	{"Engineer",     0, 75000, ModulePrimaryUseActive,  false,     0,     0, "Engineer",              ""  },
+	{"Cloak",     8000,     0, ModulePrimaryUseActive,  false,     0,     0, "Cloak Field Modulator", ""  },
+	{"Armor",        0,     0, ModulePrimaryUsePassive, false,     0,     0, "ModuleArmor",           ""  }
 };
 
 
@@ -51,6 +51,12 @@ S32 ModuleInfo::getPrimaryEnergyDrain() const
 S32 ModuleInfo::getPrimaryPerUseCost() const
 {
    return mPrimaryUseCost;
+}
+
+
+bool ModuleInfo::hasSecondary() const
+{
+   return hasSecondaryComponent;
 }
 
 

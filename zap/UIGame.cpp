@@ -745,7 +745,8 @@ void GameUserInterface::renderLoadoutIndicators()
          glColor(INDICATOR_INACTIVE_COLOR);
 
       // Always change to orange if module secondary is fired
-      if(localShip->isModuleSecondaryActive(localShip->getModule(i)))
+      if(gModuleInfo[localShip->getModule(i)].hasSecondary() &&
+            localShip->isModuleSecondaryActive(localShip->getModule(i)))
          glColor(Colors::orange67);
 
       S32 width = renderIndicator(xPos, getGame()->getModuleInfo(localShip->getModule(i))->getName());
