@@ -226,7 +226,7 @@ bool CounterMenuItem::handleKey(KeyCode keyCode, char ascii)
 {
    if(keyCode == KEY_RIGHT || keyCode == MOUSE_LEFT)  
    {
-      if(getKeyState(KEY_SHIFT))
+      if(checkModifier(KEY_SHIFT))
       {
          increment(getBigIncrement());
          snap();
@@ -238,7 +238,7 @@ bool CounterMenuItem::handleKey(KeyCode keyCode, char ascii)
    }
    else if(keyCode == KEY_LEFT || keyCode == MOUSE_RIGHT)
    {
-      if(getKeyState(KEY_SHIFT))
+      if(checkModifier(KEY_SHIFT))
       {
          decrement(getBigIncrement());
          snap();

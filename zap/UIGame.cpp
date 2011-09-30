@@ -1032,7 +1032,7 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    }
    // Shift-/ toggles console window for the moment  (Ctrl-/ fails in glut!)
    // Don't want to open console while chatting, do we?  Only open when not in any special mode.
-   else if(mCurrentMode == PlayMode && keyCode == KEY_SLASH && getKeyState(KEY_SHIFT))   
+   else if(mCurrentMode == PlayMode && keyCode == KEY_SLASH && checkModifier(KEY_SHIFT))   
    {
       OGLCONSOLE_ShowConsole();
    }
@@ -1048,7 +1048,7 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       mMissionOverlayActive = true;
       getUIManager()->getGameUserInterface()->clearLevelInfoDisplayTimer();    // Clear level-start display if user hits F2
    }
-   else if(keyCode == KEY_M && getKeyState(KEY_CTRL))    // Ctrl-M, for now, to cycle through message dispaly modes
+   else if(keyCode == KEY_M && checkModifier(KEY_CTRL))    // Ctrl-M, for now, to cycle through message dispaly modes
    {
       S32 m = mMessageDisplayMode + 1;
       if(m >= MessageDisplayModes)
@@ -1158,12 +1158,12 @@ void GameUserInterface::processPlayModeKey(KeyCode keyCode, char ascii)
    // loadout or engineering menu modes if not used in the loadout
    // menu above
 
-   if(keyCode == KEY_CLOSEBRACKET && getKeyState(KEY_ALT))           // Alt-] advances bots by one step if frozen
+   if(keyCode == KEY_CLOSEBRACKET && checkModifier(KEY_ALT))           // Alt-] advances bots by one step if frozen
    {
       if(Robot::isPaused())
          Robot::addSteps(1);
    }
-   else if(keyCode == KEY_CLOSEBRACKET && getKeyState(KEY_CTRL))     // Ctrl-] advances bots by 10 steps if frozen
+   else if(keyCode == KEY_CLOSEBRACKET && checkModifier(KEY_CTRL))     // Ctrl-] advances bots by 10 steps if frozen
    {
       if(Robot::isPaused())
          Robot::addSteps(10);
@@ -2143,7 +2143,7 @@ Move *GameUserInterface::getCurrentMove()
       InputMode inputMode = getGame()->getSettings()->getIniSettings()->inputMode;
 
       mCurrentMove.x = F32((!mRightDisabled && getKeyState(keyRIGHT[inputMode]) ? 1 : 0) - (!mLeftDisabled && getKeyState(keyLEFT[inputMode]) ? 1 : 0));
-      mCurrentMove.y = F32((!mDownDisabled && getKeyState(keyDOWN[inputMode]) ? 1 : 0) - (!mUpDisabled && getKeyState(keyUP[inputMode]) ? 1 : 0));
+      mCurrentMove.y = F32((!mDownDisabled  && getKeyState(keyDOWN[inputMode])  ? 1 : 0) - (!mUpDisabled && getKeyState(keyUP[inputMode]) ? 1 : 0));
 
       mCurrentMove.fire = mFiring;
 

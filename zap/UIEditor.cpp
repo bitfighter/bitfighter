@@ -2890,7 +2890,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       startAttributeEditor();
 
    // Regular key handling from here on down
-   else if(getKeyState(KEY_SHIFT) && keyCode == KEY_0)  // Shift-0 -> Set team to hostile
+   else if(checkModifier(KEY_SHIFT) && keyCode == KEY_0)  // Shift-0 -> Set team to hostile
       setCurrentTeam(-2);
 
    else if(ascii == '#' || ascii == '!')
@@ -2929,9 +2929,9 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    }
 
    // Ctrl-left click is same as right click for Mac users
-   else if(keyCode == MOUSE_RIGHT || (keyCode == MOUSE_LEFT && getKeyState(KEY_CTRL)))
+   else if(keyCode == MOUSE_RIGHT || (keyCode == MOUSE_LEFT && checkModifier(KEY_CTRL)))
    {
-      if(getKeyState(MOUSE_LEFT) && !getKeyState(KEY_CTRL))        // Prevent weirdness
+      if(getKeyState(MOUSE_LEFT) && !checkModifier(KEY_CTRL))        // Prevent weirdness
          return;  
 
       mMousePos.set(gScreenInfo.getMousePos());
@@ -3047,7 +3047,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          //findHitItemAndEdge();      //  Sets mItemHit, mVertexHit, and mEdgeHit
 
 
-         if(!getKeyState(KEY_SHIFT))      // Shift key is not down
+         if(!checkModifier(KEY_SHIFT))      // Shift key is not down
          {
             // If we hit a vertex of an already selected item --> now we can move that vertex w/o losing our selection.
             // Note that in the case of a point item, we want to skip this step, as we don't select individual vertices.
@@ -3111,29 +3111,29 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       mRight = true;
    else if(keyCode == KEY_H)              // H - Flip horizontal
       flipSelectionHorizontal();
-   else if(keyCode == KEY_V && getKeyState(KEY_CTRL))    // Ctrl-V - Paste selection
+   else if(keyCode == KEY_V && checkModifier(KEY_CTRL))    // Ctrl-V - Paste selection
       pasteSelection();
    else if(keyCode == KEY_V)              // V - Flip vertical
       flipSelectionVertical();
    else if(keyCode == KEY_SLASH)
       OGLCONSOLE_ShowConsole();
 
-   else if(keyCode == KEY_L && getKeyState(KEY_CTRL) && getKeyState(KEY_SHIFT))
+   else if(keyCode == KEY_L && checkModifier(KEY_CTRL, KEY_SHIFT))
    {
       loadLevel();                        // Ctrl-Shift-L - Reload level
       setSaveMessage("Reloaded " + getLevelFileName(), true);
    }
    else if(keyCode == KEY_Z)
    {
-      if(getKeyState(KEY_CTRL) && getKeyState(KEY_SHIFT))   // Ctrl-Shift-Z - Redo
+      if(checkModifier(KEY_CTRL, KEY_SHIFT))   // Ctrl-Shift-Z - Redo
          redo();
-      else if(getKeyState(KEY_CTRL))    // Ctrl-Z - Undo
+      else if(checkModifier(KEY_CTRL))         // Ctrl-Z - Undo
          undo(true);
-      else                              // Z - Reset veiw
+      else                                     // Z - Reset veiw
         centerView();
    }
    else if(keyCode == KEY_R)
-      if(getKeyState(KEY_CTRL) && getKeyState(KEY_SHIFT))      // Ctrl-Shift-R - Rotate by arbitrary amount
+      if(checkModifier(KEY_CTRL, KEY_SHIFT))   // Ctrl-Shift-R - Rotate by arbitrary amount
       {
          if(!anyItemsSelected())
             return;
@@ -3141,7 +3141,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          mEntryBox = getNewEntryBox("", "Rotation angle:", 10, LineEditor::numericFilter);
          entryMode = EntryAngle;
       }
-      else if(getKeyState(KEY_CTRL))        // Ctrl-R - Run levelgen script, or clear last results
+      else if(checkModifier(KEY_CTRL))        // Ctrl-R - Run levelgen script, or clear last results
       {
          if(mLevelGenItems.size() == 0)
             runLevelGenScript();
@@ -3149,31 +3149,31 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
             clearLevelGenItems();
       }
       else
-         rotateSelection(getKeyState(KEY_SHIFT) ? 15.f : -15.f); // Shift-R - Rotate CW, R - Rotate CCW
-   else if((keyCode == KEY_I) && getKeyState(KEY_CTRL))  // Ctrl-I - Insert items generated with script into editor
+         rotateSelection(checkModifier(KEY_SHIFT) ? 15.f : -15.f); // Shift-R - Rotate CW, R - Rotate CCW
+   else if((keyCode == KEY_I) && checkModifier(KEY_CTRL))          // Ctrl-I - Insert items generated with script into editor
    {
       copyScriptItemsToEditor();
    }
 
-   else if(((keyCode == KEY_UP) && !getKeyState(KEY_CTRL)) || keyCode == KEY_W)  // W or Up - Pan up
+   else if(((keyCode == KEY_UP) && !checkModifier(KEY_CTRL)) || keyCode == KEY_W)  // W or Up - Pan up
       mUp = true;
-   else if(keyCode == KEY_UP && getKeyState(KEY_CTRL))      // Ctrl-Up - Zoom in
+   else if(keyCode == KEY_UP && checkModifier(KEY_CTRL))      // Ctrl-Up - Zoom in
       mIn = true;
    else if(keyCode == KEY_DOWN)
    { /* braces required */
-      if(getKeyState(KEY_CTRL))           // Ctrl-Down - Zoom out
+      if(checkModifier(KEY_CTRL))           // Ctrl-Down - Zoom out
          mOut = true;
-      else                                // Down - Pan down
+      else                                  // Down - Pan down
          mDown = true;
    }
    else if(keyCode == KEY_S)
    {
-      if(getKeyState(KEY_CTRL))           // Ctrl-S - Save
+      if(checkModifier(KEY_CTRL))           // Ctrl-S - Save
          saveLevel(true, true);
-      else                                // S - Pan down
+      else                                  // S - Pan down
          mDown = true;
    }
-   else if(keyCode == KEY_A && getKeyState(KEY_CTRL))            // Ctrl-A - toggle see all objects
+   else if(keyCode == KEY_A && checkModifier(KEY_CTRL))            // Ctrl-A - toggle see all objects
    {
       mShowMode = (ShowMode) ((U32)mShowMode + 1);
 
@@ -3191,14 +3191,14 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       mLeft = true;
    else if(keyCode == KEY_EQUALS)         // Plus (+) - Increase barrier width
    {
-      if(getKeyState(KEY_SHIFT))          // SHIFT --> by 1
+      if(checkModifier(KEY_SHIFT))        // SHIFT --> by 1
          changeBarrierWidth(1);
       else                                // unshifted --> by 5
          changeBarrierWidth(5);
    }
    else if(keyCode == KEY_MINUS)          // Minus (-)  - Decrease barrier width
    {
-      if(getKeyState(KEY_SHIFT))          // SHIFT --> by 1
+      if(checkModifier(KEY_SHIFT))        // SHIFT --> by 1
          changeBarrierWidth(-1);
       else                                // unshifted --> by 5
          changeBarrierWidth(-5);
@@ -3210,7 +3210,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       splitBarrier();
    else if(keyCode == KEY_J)
       joinBarrier();
-   else if(keyCode == KEY_X && getKeyState(KEY_CTRL) && getKeyState(KEY_SHIFT)) // Ctrl-Shift-X - Resize selection
+   else if(keyCode == KEY_X && checkModifier(KEY_CTRL, KEY_SHIFT)) // Ctrl-Shift-X - Resize selection
    {
       if(!anyItemsSelected())
          return;
@@ -3218,12 +3218,12 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       mEntryBox = getNewEntryBox("", "Resize factor:", 10, LineEditor::numericFilter);
       entryMode = EntryScale;
    }
-   else if(keyCode == KEY_X && getKeyState(KEY_CTRL))     // Ctrl-X - Cut selection
+   else if(keyCode == KEY_X && checkModifier(KEY_CTRL))     // Ctrl-X - Cut selection
    {
       copySelection();
       deleteSelection(true);
    }
-   else if(keyCode == KEY_C && getKeyState(KEY_CTRL))    // Ctrl-C - Copy selection to clipboard
+   else if(keyCode == KEY_C && checkModifier(KEY_CTRL))    // Ctrl-C - Copy selection to clipboard
       copySelection();
    else if(keyCode == KEY_C )             // C - Zoom out
       mOut = true;
@@ -3243,7 +3243,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       insertNewItem(SpeedZoneTypeNumber);
    else if(keyCode == KEY_G)              // G - Spawn
       insertNewItem(ShipSpawnTypeNumber);
-   else if(keyCode == KEY_B && getKeyState(KEY_CTRL)) // Ctrl-B - Spy Bug
+   else if(keyCode == KEY_B && checkModifier(KEY_CTRL)) // Ctrl-B - Spy Bug
       insertNewItem(SpyBugTypeNumber);
    else if(keyCode == KEY_B)              // B - Repair
       insertNewItem(RepairItemTypeNumber);

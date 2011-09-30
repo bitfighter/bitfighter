@@ -506,7 +506,7 @@ bool MenuUserInterface::processKeys(KeyCode keyCode, char ascii)
       playBoop();
       onEscape();
    }
-   else if(keyCode == KEY_UP || (keyCode == KEY_TAB && getKeyState(KEY_SHIFT)))   // Prev item
+   else if(keyCode == KEY_UP || (keyCode == KEY_TAB && checkModifier(KEY_SHIFT)))   // Prev item
    {
       selectedIndex--;
       itemSelectedWithMouse = false;

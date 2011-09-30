@@ -269,7 +269,7 @@ void TeamDefUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    }
    else if(ascii >= '1' && ascii <= '9')        // Keys 1-9 --> use preset
    {
-      if(getKeyState(KEY_ALT))      // Replace all teams with # of teams based on presets
+      if(checkModifier(KEY_ALT))                // Replace all teams with # of teams based on presets
       {
          U32 count = (ascii - '0');
          getGame()->clearTeams();
@@ -323,13 +323,13 @@ void TeamDefUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    }
 
    else if(keyCode == KEY_R)
-      getGame()->getTeam(selectedIndex)->alterRed(getKeyState(KEY_SHIFT) ? -.01f : .01f);
+      getGame()->getTeam(selectedIndex)->alterRed(checkModifier(KEY_SHIFT) ? -.01f : .01f);
 
    else if(keyCode == KEY_G)
-      getGame()->getTeam(selectedIndex)->alterGreen(getKeyState(KEY_SHIFT) ? -.01f : .01f);
+      getGame()->getTeam(selectedIndex)->alterGreen(checkModifier(KEY_SHIFT) ? -.01f : .01f);
 
    else if(keyCode == KEY_B)
-      getGame()->getTeam(selectedIndex)->alterBlue(getKeyState(KEY_SHIFT) ? -.01f : .01f);
+      getGame()->getTeam(selectedIndex)->alterBlue(checkModifier(KEY_SHIFT) ? -.01f : .01f);
 
    else if(keyCode == KEY_ESCAPE || keyCode == BUTTON_BACK)       // Quit
    {
