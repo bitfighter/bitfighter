@@ -1679,7 +1679,7 @@ void GameUserInterface::renderCurrentChat()
       return;
 
    S32 promptSize = getStringWidth(CHAT_FONT_SIZE, promptStr);
-   S32 nameSize = getStringWidthf(CHAT_FONT_SIZE, "%s: ", getGame()->getConnectionToServer()->getClientInfo()->getName().getString());
+   S32 nameSize = getStringWidthf(CHAT_FONT_SIZE, "%s: ", getGame()->getClientInfo()->getName().getString());
    S32 nameWidth = max(nameSize, promptSize);
    // Above block repeated below...
 
@@ -1944,7 +1944,7 @@ void GameUserInterface::processChatModeKey(KeyCode keyCode, char ascii)
       {
          S32 promptSize = getStringWidth(CHAT_FONT_SIZE, mCurrentChatType == TeamChat ? "(Team): " : "(Global): ");
 
-         S32 nameSize = getStringWidthf(CHAT_FONT_SIZE, "%s: ", getGame()->getConnectionToServer()->getClientInfo()->getName().getString());
+         S32 nameSize = getStringWidthf(CHAT_FONT_SIZE, "%s: ", getGame()->getClientInfo()->getName().getString());
          S32 nameWidth = max(nameSize, promptSize);
          // Above block repeated above
 

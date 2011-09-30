@@ -396,7 +396,7 @@ void MasterServerConnection::writeConnectRequest(BitStream *bstream)
    {
 #ifndef ZAP_DEDICATED
       ClientGame *clientGame = (ClientGame *)mGame;
-      ClientInfo *clientInfo = clientGame->getConnectionToServer()->getClientInfo();
+      ClientInfo *clientInfo = clientGame->getClientInfo();
 
       bstream->writeString(clientInfo->getName().getString());          // User's nickname
       bstream->writeString(clientGame->getLoginPassword().c_str());     // and whatever password they supplied
