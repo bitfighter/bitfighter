@@ -2070,7 +2070,7 @@ Move *GameUserInterface::getCurrentMove()
    {
       mTransformedMove = mCurrentMove;
 
-      Point moveDir(mCurrentMove.x, mCurrentMove.y);
+      Point moveDir(mCurrentMove.x, -mCurrentMove.y);
 
       Point angleDir(cos(mCurrentMove.angle), sin(mCurrentMove.angle));
 
