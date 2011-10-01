@@ -132,6 +132,13 @@ GameType::GameType(S32 winningScore) : mScoreboardUpdateTimer(1000) , mGameTimer
 }
 
 
+// Destructor
+GameType::~GameType()
+{
+   if(getGame() && !getGame()->isServer())
+      getGame()->clearClientList();
+}
+
 bool GameType::processArguments(S32 argc, const char **argv, Game *game)
 {
    if(argc > 0)      // First arg is game length, in minutes
@@ -155,9 +162,6 @@ void GameType::addToGame(Game *game, GridDatabase *database)
 {
    mGame = game;
    game->setGameType(this);
-
-   if(!game->isServer())
-      game->clearClientList();
 }
 
 

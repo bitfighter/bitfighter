@@ -297,6 +297,7 @@ public:
    static Vector<RangedU32<0, 200> > mRatings;
 
    GameType(S32 winningScore = DefaultWinningScore);    // Constructor
+   virtual ~GameType();                                 // Destructor
 
    virtual void addToGame(Game *game, GridDatabase *database);
 
