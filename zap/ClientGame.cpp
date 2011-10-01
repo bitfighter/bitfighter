@@ -224,7 +224,7 @@ void ClientGame::closeConnectionToGameServer()
 
    getUIManager()->getHostMenuUserInterface()->levelLoadDisplayDisplay = false;
 
-   clearClientList();     
+   clearClientList();      // Get rid of any ClientInfos we have for remote players
 }
 
 

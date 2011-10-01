@@ -150,10 +150,14 @@ string GameType::toString() const
 }
 
 
+// GameType object is the first to be added when a new game starts... therefore, this is a reasonable signifier that a new game is starting up.  I think.
 void GameType::addToGame(Game *game, GridDatabase *database)
 {
    mGame = game;
    game->setGameType(this);
+
+   if(!game->isServer())
+      game->clearClientList();
 }
 
 
@@ -1028,6 +1032,7 @@ void GameType::onGameOver()
 }
 
 
+// Tells the client that the game is now officially over... scoreboard should be displayed, no further scoring will be allowed
 TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cSetGameOver, (bool gameOver), (gameOver),
                             NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhost, 0)
 {
@@ -1232,10 +1237,8 @@ string GameType::validateLoadout(const Vector<U32> &loadout)
       if(loadout[i] == WeaponTurret)      // Reject WeaponTurret
          return "Illegal weapon in loadout";
 
-#if CS_PROTOCOL_VERSION == 32
-      if(loadout[i] == WeaponHeatSeeker)  // Reject HeatSeeker, Not supported yet
+      if(loadout[i] == WeaponHeatSeeker)  // Reject HeatSeeker, not supported yet
          return "Illegal weapon in loadout";
-#endif
    }
 
    return "";     // Passed validation
@@ -2124,7 +2127,7 @@ void GameType::serverRemoveClient(ClientInfo *clientInfo)
 
    s2cRemoveClient(clientInfo->getName());            // Tell other clients that this one has departed
 
-   getGame()->removeClientInfoFromList(clientInfo);   // And terminate our reference to it; probably should use clientInfo directly
+   getGame()->removeClientInfoFromList(clientInfo);   
 
    // Note that we do not need to delete clientConnection... TNL handles that, and the destructor gets runs shortly after we get here
 }
@@ -2380,7 +2383,7 @@ GAMETYPE_RPC_S2C(GameType, s2cSyncMessagesComplete, (U32 sequence), (sequence))
 #ifndef ZAP_DEDICATED
    // Now we know the game is ready to begin...
    mBetweenLevels = false;
-   c2sSyncMessagesComplete(sequence);
+   c2sSyncMessagesComplete(sequence);     // Tells server we're ready to go!
 
    ClientGame *clientGame = dynamic_cast<ClientGame *>(mGame);
    TNLAssert(clientGame, "clientGame is NULL");

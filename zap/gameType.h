@@ -190,7 +190,7 @@ public:
    S32 getLeadingScore() const;
    S32 getLeadingTeam() const;
 
-   void catalogSpybugs();     // Rebuild a list of spybugs in the game
+   void catalogSpybugs();           // Build a list of spybugs in the game
    void addSpyBug(SpyBug *spybug);
 
    void addWall(WallRec barrier, Game *game);
@@ -238,7 +238,7 @@ public:
 
 
    Rect mViewBoundsWhileLoading;    // Show these view bounds while loading the map
-   S32 mObjectsExpected;      // Count of objects we expect to get with this level (for display purposes only)
+   S32 mObjectsExpected;            // Count of objects we expect to get with this level (for display purposes only)
 
    struct ItemOfInterest
    {
