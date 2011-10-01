@@ -192,6 +192,9 @@ Game::Game(const Address &theBindAddress, GameSettings *settings) : mGameObjData
    mCurrentTime = 0;
    mGameSuspended = false;
 
+   mRobotCount = 0;
+   mPlayerCount = 0;
+
    mTimeUnconnectedToMaster = 0;
 
    mNetInterface = new GameNetInterface(theBindAddress, this);
@@ -228,7 +231,13 @@ ClientInfo *Game::getClientInfo(S32 index)
 
 void Game::addClientInfoToList(const boost::shared_ptr<ClientInfo> &clientInfo) 
 { 
-   mClientInfos.push_back(clientInfo); 
+   //logprintf("Adding client...");
+   mClientInfos.push_back(clientInfo);
+
+   if(clientInfo->isRobot())
+      mRobotCount++;
+   else
+      mPlayerCount++;
 }     
 
 
@@ -245,18 +254,32 @@ S32 Game::findClientIndex(const StringTableEntry &name)
 
 void Game::removeClientInfoFromList(const StringTableEntry &name)
 {
+   //logprintf("Removing client %s...", name.getString());
    S32 index = findClientIndex(name);
 
    if(index >= 0)
-      mClientInfos.erase(index);
+   {
+      if(mClientInfos[index]->isRobot())
+         mRobotCount--;
+      else
+         mPlayerCount--;
+
+      mClientInfos.erase_fast(index);
+   }
 }
 
 
 void Game::removeClientInfoFromList(ClientInfo *clientInfo)
 {
+   //logprintf("Removing client...");
    for(S32 i = 0; i < mClientInfos.size(); i++)
       if(mClientInfos[i].get() == clientInfo)
       {
+         if(mClientInfos[i]->isRobot())
+            mRobotCount--;
+         else
+            mPlayerCount--;
+
          mClientInfos.erase_fast(i);
          return;
       }
@@ -266,6 +289,9 @@ void Game::removeClientInfoFromList(ClientInfo *clientInfo)
 void Game::clearClientList() 
 { 
    mClientInfos.clear(); 
+
+   mRobotCount = 0;
+   mPlayerCount = 0;
 }
 
 
@@ -1078,15 +1104,6 @@ S32 ServerGame::getLevelNameCount()
 }
 
 
-class Robot;
-
-S32 ServerGame::getRobotCount()
-{
-   return Robot::getRobotCount();
-}
-
-
-
 // Creates a set of LevelInfos that are empty except for the filename.  They will be fleshed out later.
 // This gets called when you first load the host menu
 void ServerGame::buildBasicLevelInfoList(const Vector<string> &levelList)
@@ -1116,7 +1133,7 @@ string ServerGame::getLastLevelLoadName()
 }
 
 
-// Return true if the only client connected is the one we passed
+// Return true if the only client connected is the one we passed; don't consider bots
 bool ServerGame::onlyClientIs(GameConnection *client)
 {
    GameType *gameType = gServerGame->getGameType();
@@ -1125,7 +1142,7 @@ bool ServerGame::onlyClientIs(GameConnection *client)
       return false;
 
    for(S32 i = 0; i < getClientCount(); i++)
-      if(mClientInfos[i]->getConnection() != client)
+      if(!mClientInfos[i]->isRobot() && mClientInfos[i]->getConnection() != client)
          return false;
 
    return true;

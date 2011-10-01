@@ -171,7 +171,7 @@ public:
    bool findNearestShip(Point &loc);      // Return location of nearest known ship within a given area
 
    bool isRobot() { return true; }
-   static S32 getRobotCount() { return robots.size(); }
+   //static S32 getRobotCount() { return robots.size(); }
 
    LuaRobot *mLuaRobot;                // Could make private and make a public setter method...
    static EventManager getEventManager();

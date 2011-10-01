@@ -124,20 +124,16 @@ S32 LuaGameInfo::getEventScore(lua_State *L)
 // Return a table listing all players on this team
 S32 LuaGameInfo::getPlayers(lua_State *L) 
 {
-   S32 clientCount = gServerGame->getClientCount();
-
-   TNLAssertV( (U32)clientCount == gServerGame->getPlayerCount(), 
-               ("Mismatched player counts (%s v %s)!", clientCount, gServerGame->getPlayerCount()) );
-
    S32 pushed = 0;     // Count of pushed objects
 
    lua_newtable(L);    // Create a table, with no slots pre-allocated for our data
 
-   for(S32 i = 0; i < clientCount; i++)
+   for(S32 i = 0; i < gServerGame->getClientCount(); i++)
    {
-      GameConnection *conn = gServerGame->getClientInfo(i)->getConnection();
+      ClientInfo *clientInfo = gServerGame->getClientInfo(i);
+      GameConnection *conn = clientInfo->getConnection();
 
-      if(conn->getPlayerInfo()->isDefunct())     // Skip defunct players
+      if(conn->getPlayerInfo()->isDefunct() || clientInfo->isRobot())     // Skip defunct players and bots
          continue;
       
       conn->getPlayerInfo()->push(L);

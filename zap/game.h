@@ -294,6 +294,9 @@ private:
    void onReadLevelNameParam(S32 argc, const char **argv);
    void onReadLevelDescriptionParam(S32 argc, const char **argv);
    void onReadLevelCreditsParam(S32 argc, const char **argv);
+
+   S32 mPlayerCount;     // Humans only, please!
+   S32 mRobotCount;
    
 protected:
    boost::shared_ptr<EditorObjectDatabase> mEditorDatabase;    // TODO: Move to clientGame
@@ -355,19 +358,20 @@ public:
    virtual ~Game();                                                     // Destructor
 
 
-   S32 getClientCount() const { return mClientInfos.size(); }
+   S32 getClientCount() const { return mClientInfos.size(); }           // Total number of players, human and robot
+   S32 getPlayerCount() const { return mPlayerCount; }                  // Returns number of human players
+   S32 getRobotCount() const { return mRobotCount; }                    // Returns number of bots
+
    ClientInfo *getClientInfo(S32 index);
 
    void addClientInfoToList(const boost::shared_ptr<ClientInfo> &conn);               
-   void removeClientInfoFromList(const StringTableEntry &name);
-   void removeClientInfoFromList(ClientInfo *clientInfo);
+   void removeClientInfoFromList(const StringTableEntry &name);         // Client side
+   void removeClientInfoFromList(ClientInfo *clientInfo);               // Server side
    void clearClientList();
 
    ClientInfo *findClientInfo(const StringTableEntry &name);      // Find client by name
    
    Rect getWorldExtents() { return mWorldExtents; }
-
-   virtual U32 getPlayerCount() = 0;                  // Implemented differently on client and server
 
    virtual bool isTestServer() { return false; }      // Overridden in ServerGame
 
@@ -566,13 +570,12 @@ public:
 
    GridDatabase *getBotZoneDatabase() { return &mDatabaseForBotZones; }
 
-   U32 getPlayerCount() { return getClientCount() - getRobotCount(); }
    U32 getMaxPlayers() { return mSettings->getMaxPlayers(); }
 
    bool isDedicated() { return mDedicated; }
    void setDedicated(bool dedicated) { mDedicated = dedicated; }
 
-   bool isFull() { return getPlayerCount() == mSettings->getMaxPlayers(); }          // More room at the inn?
+   bool isFull() { return (U32)getPlayerCount() >= mSettings->getMaxPlayers(); }      // More room at the inn?
 
    void addClient(boost::shared_ptr<ClientInfo> clientInfo);
    void removeClient(ClientInfo *clientInfo);
@@ -605,7 +608,6 @@ public:
    void gameEnded();
 
    S32 getLevelNameCount();
-   S32 getRobotCount();
    S32 getCurrentLevelIndex() { return mCurrentLevelIndex; }
    S32 getLevelCount() { return mLevelInfos.size(); }
    LevelInfo getLevelInfo(S32 index) { return mLevelInfos[index]; }

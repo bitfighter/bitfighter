@@ -1053,25 +1053,6 @@ void ClientGame::zoomCommanderMap()
 }
 
 
-// Unused
-U32 ClientGame::getPlayerAndRobotCount() 
-{ 
-   return getClientCount(); 
-}
-
-
-U32 ClientGame::getPlayerCount()
-{
-   U32 players = 0;
-
-   for(S32 i = 0; i < getClientCount(); i++)
-      if(!Parent::getClientInfo(i)->isRobot())
-         players++;
-
-   return players;
-}
-
-
 //const char *ClientGame::getRemoteLevelDownloadFilename()
 //{
 //   return getUIManager()->getGameUserInterface()->remoteLevelDownloadFilename();

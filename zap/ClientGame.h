@@ -188,10 +188,6 @@ public:
 
    //const char *getRemoteLevelDownloadFilename();
 
-   U32 getPlayerAndRobotCount();    // Returns number of human and robot players
-   U32 getPlayerCount();            // Returns number of human players
-
-
    string getRequestedServerName();
    string getServerPassword();
    string getHashedServerPassword();
