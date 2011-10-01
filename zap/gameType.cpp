@@ -135,6 +135,7 @@ GameType::GameType(S32 winningScore) : mScoreboardUpdateTimer(1000) , mGameTimer
 // Destructor
 GameType::~GameType()
 {
+   // This bit here suggests that clientInfos should move back to GameType... ugh!
    if(getGame() && !getGame()->isServer())
       getGame()->clearClientList();
 }
