@@ -212,6 +212,8 @@ public:
    F32 getSimulatedLoss()    { return getF32(SIMULATED_LOSS); }
    U32 getSimulatedLag();
 
+   string getDefaultName() { return mIniSettings.defaultName; }
+
    bool getForceUpdate()  { return getSpecified(FORCE_UPDATE); }
 
    string getPlayerName() { return mPlayerName; }
