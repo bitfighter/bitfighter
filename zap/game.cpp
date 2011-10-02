@@ -51,7 +51,9 @@
 
 #include "BotNavMeshZone.h"      // For zone clearing code
 
+#ifndef ZAP_DEDICATED
 #include "voiceCodec.h"
+#endif
 
 #include "tnl.h"
 #include "tnlRandom.h"
@@ -141,6 +143,8 @@ void LocalClientInfo::addToTotalScore(S32 score)
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+
+#ifndef ZAP_DEDICATED
 // Constructor
 RemoteClientInfo::RemoteClientInfo(const StringTableEntry &name, bool isRobot, bool isAdmin)
 {
@@ -162,6 +166,7 @@ RemoteClientInfo::~RemoteClientInfo()
    delete mDecoder;
    delete mVoiceSFX;
 }
+#endif
 
 
 ////////////////////////////////////////
@@ -1724,7 +1729,7 @@ bool ServerGame::loadLevel(const string &levelFileName)
       {
          // The script file will be the first argument, subsequent args will be passed on to the script.
          // Now we've crammed all our action into the constructor... is this ok design?
-         string *dir = &folderManager->levelDir;
+         string *dir = &folderManager->luaDir; // for lua helper functions
          const Vector<string> *args = getGameType()->getScriptArgs();
          LuaLevelGenerator levelgen = LuaLevelGenerator(name, *dir, args, getGridSize(), getGameObjDatabase(), this, gConsole);
       }
@@ -1744,7 +1749,7 @@ bool ServerGame::loadLevel(const string &levelFileName)
 
       // The script file will be the first argument, subsequent args will be passed on to the script.
       // Now we've crammed all our action into the constructor... is this ok design?
-      string *dir = &folderManager->levelDir;
+      string *dir = &folderManager->luaDir;
       const Vector<string> *args = getGameType()->getScriptArgs();
       LuaLevelGenerator levelgen = LuaLevelGenerator(name, *dir, args, getGridSize(), getGameObjDatabase(), this, gConsole);
    }
@@ -2015,7 +2020,7 @@ void ServerGame::idle(U32 timeDelta)
       static StringTableEntry prevCurrentLevelName;   // Using static, so it holds the value when it comes back here.
       static StringTableEntry prevCurrentLevelType;
       static S32 prevRobotCount;
-      static U32 prevPlayerCount;
+      static S32 prevPlayerCount;
       if(masterConn && masterConn->isEstablished())
       {
          // Only update if something is different

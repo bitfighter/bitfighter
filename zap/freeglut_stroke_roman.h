@@ -1204,7 +1204,7 @@ static const SFG_StrokeStrip ch72st[] =
 static const SFG_StrokeChar ch72 = {89.0867f,3,ch72st};
 
 /* char: 0x49 */
-
+/*
 static const SFG_StrokeVertex ch73st0[] =
 {
  {10.86f,100.0f},
@@ -1217,6 +1217,32 @@ static const SFG_StrokeStrip ch73st[] =
 };
 
 static const SFG_StrokeChar ch73 = {21.3f,1,ch73st};
+*/
+/* char: 0x49 (modified so capital i is different from lowercase L) */
+static const SFG_StrokeVertex ch73st0[] =
+{
+ {25.f,100.f},
+ {25.f,0.f}
+};
+static const SFG_StrokeVertex ch73st1[] =
+{
+ { 5.f,0.f},
+ {45.f,0.f}
+};
+static const SFG_StrokeVertex ch73st2[] =
+{
+ { 5.f,100.f},
+ {45.f,100.f}
+};
+
+static const SFG_StrokeStrip ch73st[] =
+{
+ {2,ch73st0},
+ {2,ch73st1},
+ {2,ch73st2}
+};
+
+static const SFG_StrokeChar ch73 = {50.f,3,ch73st};
 
 /* char: 0x4a */
 

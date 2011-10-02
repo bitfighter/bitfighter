@@ -377,7 +377,7 @@ public:
 
    void SRV_clientRequestLoadout(GameConnection *conn, const Vector<U32> &loadout);
    void SRV_updateShipLoadout(GameObject *shipObject); // called from LoadoutZone when a Ship touches the zone
-   string GameType::validateLoadout(const Vector<U32> &loadout);
+   string validateLoadout(const Vector<U32> &loadout);
    void setClientShipLoadout(GameConnection *conn, const Vector<U32> &loadout, bool silent = false);
 
    bool checkTeamRange(S32 team);                     // Team in range? Used for processing arguments.
