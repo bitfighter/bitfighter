@@ -826,7 +826,7 @@ SFXHandle SoundSystem::playRecordedBuffer(ByteBufferPtr p, F32 gain)
    return new SoundEffect(0,NULL,0,Point(0,0), Point(0,0));
 }
 
-void SoundSystem::playSoundEffect(SFXHandle& effect)
+void SoundSystem::playSoundEffect(const SFXHandle& effect)
 {
    // Do nothing
 }
@@ -836,7 +836,7 @@ void SoundSystem::stopSoundEffect(SFXHandle& effect)
    // Do nothing
 }
 
-void SoundSystem::queueVoiceChatBuffer(SFXHandle& effect, ByteBufferPtr p)
+void SoundSystem::queueVoiceChatBuffer(const SFXHandle &effect, ByteBufferPtr p)
 {
    // Do nothing
 }

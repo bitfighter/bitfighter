@@ -119,6 +119,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
+				FavorSizeOrSpeed="2"
 				AdditionalIncludeDirectories="../tnl;.;../openal;../glut;../lua/include;../libtomcrypt"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;TNL_ENABLE_LOGGING;SAM_ONLY"
 				RuntimeLibrary="0"
@@ -274,6 +275,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="2"
+				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="true"
 				AdditionalIncludeDirectories="../tnl;.;../openal;../glut;&quot;../mysql++&quot;;../lua/include;../libtomcrypt;&quot;C:\Program Files\MySQL\MySQL Server 5.1\include&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;TNL_ENABLE_LOGGING;MYSQLPP_NO_DLL;BF_WRITE_TO_MYSQL;VERIFY_PHPBB3;SAM_ONLY"

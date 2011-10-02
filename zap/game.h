@@ -194,6 +194,7 @@ public:
 ////////////////////////////////////////
 // RemoteClientInfo is used on the client side to track information about other players; these other players do not have a connection
 // to us -- all the information we know about them is located on this RemoteClientInfo object.
+#ifndef ZAP_DEDICATED
 class RemoteClientInfo : public ClientInfo
 {
    typedef ClientInfo Parent;
@@ -224,6 +225,7 @@ public:
    VoiceDecoder *getVoiceDecoder() { return mDecoder; }
 
 };
+#endif
 
 
 ////////////////////////////////////////
