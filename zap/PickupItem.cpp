@@ -28,11 +28,27 @@
 #include "game.h"
 #include "gameConnection.h"
 
+
+#ifndef ZAP_DEDICATED
+
+#include "UIEditorMenus.h"       // For PickupItemEditorAttributeMenuUI def
+
+#endif
+
+
 #include "gameObjectRender.h"
 #include "stringUtils.h"      // for itos()
 
+
+
 namespace Zap
 {
+
+// Statics:
+#ifndef ZAP_DEDICATED
+   EditorAttributeMenuUI *PickupItem::mAttributeMenuUI = NULL;
+#endif
+
 
 PickupItem::PickupItem(Point p, float radius, S32 repopDelay) : Parent(p, radius, 1)
 {
@@ -86,11 +102,11 @@ bool PickupItem::processArguments(S32 argc, const char **argv, Game *game)
 
    if(argc == 3)
    {
-      S32 repopDelay = atoi(argv[2]) * 1000;    // 3rd param is time for this to regenerate in seconds
+      S32 repopDelay = atoi(argv[2]);    // 3rd param is time for this to regenerate in seconds
       if(repopDelay > 0)
          mRepopDelay = repopDelay;
       else
-         mRepopDelay = -1;
+         mRepopDelay = 0;
    }
 
    return true;
@@ -99,7 +115,7 @@ bool PickupItem::processArguments(S32 argc, const char **argv, Game *game)
 
 string PickupItem::toString(F32 gridSize) const
 {
-   return Parent::toString(gridSize) + " " + (mRepopDelay != -1 ? itos(mRepopDelay / 1000) : "");
+   return Parent::toString(gridSize) + " " + (mRepopDelay > 0 ? itos(mRepopDelay) : "");
 }
 
 
@@ -139,12 +155,34 @@ bool PickupItem::collide(GameObject *otherObject)
       if(pickup(dynamic_cast<Ship *>(otherObject)))
       {
          setMaskBits(PickupMask);
-         mRepopTimer.reset(getRepopDelay());
+         mRepopTimer.reset(mRepopDelay * 1000);
          mIsVisible = false;
       }
    }
    return false;
 }
+
+
+#ifndef ZAP_DEDICATED
+//// Static method: Provide hook into the object currently being edited with the attrubute editor for callback purposes
+//EditorObject *PickupItem::getAttributeEditorObject()     
+//{
+//   return mAttributeMenuUI->getObject(); 
+//}
+
+
+EditorAttributeMenuUI *PickupItem::getAttributeMenu()
+{
+   // Lazily initialize this -- if we're in the game, we'll never need this to be instantiated
+   if(!mAttributeMenuUI)
+      mAttributeMenuUI = new PickupItemEditorAttributeMenuUI((ClientGame *)getGame());
+
+   // Update the editor with attributes from our current object
+   mAttributeMenuUI->menuItems[0]->setIntValue(mRepopDelay);
+
+   return mAttributeMenuUI;
+}
+#endif
 
 
 ////////////////////////////////////////
@@ -153,7 +191,7 @@ bool PickupItem::collide(GameObject *otherObject)
 TNL_IMPLEMENT_NETOBJECT(RepairItem);
 
 // Constructor
-RepairItem::RepairItem(Point pos) : PickupItem(pos, (F32)REPAIR_ITEM_RADIUS, DEFAULT_RESPAWN_TIME * 1000) 
+RepairItem::RepairItem(Point pos) : PickupItem(pos, (F32)REPAIR_ITEM_RADIUS, DEFAULT_RESPAWN_TIME) 
 { 
    mObjectTypeNumber = RepairItemTypeNumber;
 }
@@ -242,7 +280,7 @@ S32 RepairItem::isVis(lua_State *L) { return returnBool(L, isVisible()); }      
 TNL_IMPLEMENT_NETOBJECT(EnergyItem);
 
 // Constructor
-EnergyItem::EnergyItem(Point p) : PickupItem(p, 20, DEFAULT_RESPAWN_TIME * 1000) 
+EnergyItem::EnergyItem(Point p) : PickupItem(p, 20, DEFAULT_RESPAWN_TIME) 
 { 
    mObjectTypeNumber = EnergyItemTypeNumber;
 };   

@@ -26,6 +26,7 @@
 #include "UIEditorMenus.h"
 #include "textItem.h"
 #include "speedZone.h"
+#include "PickupItem.h"    // For PickupItem def
 #include "game.h"
 
 namespace Zap
@@ -83,6 +84,7 @@ void EditorAttributeMenuUI::doneEditing(EditorObject *object)
 ////////////////////////////////////////
 ////////////////////////////////////////
    
+// Sets some standard menu colors.  Individual items can have different colors than these, but only if there is a very good reason.
 static void setMenuColors(MenuItem *menuItem)
 {
    menuItem->setSelectedColor(Colors::white);
@@ -151,6 +153,7 @@ TextItemEditorAttributeMenuUI::TextItemEditorAttributeMenuUI(ClientGame *game) :
 
    menuItems.resize(1);
 
+   // "Blah" will be overwritten when startEditing() is called
    EditableMenuItem *menuItem = new EditableMenuItem(game, "Text: ", "Blah", "", "", MAX_TEXTITEM_LEN);
 
    menuItem->setTextEditedCallback(textEditedCallback);
@@ -181,4 +184,44 @@ void TextItemEditorAttributeMenuUI::doneEditing(EditorObject *object)
    textItem->setText(menuItems[0]->getValue());
 }
 
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Constructor
+PickupItemEditorAttributeMenuUI::PickupItemEditorAttributeMenuUI(ClientGame *game) : Parent(game)
+{
+   setMenuID(PickupItemAttributeMenuUI);
+
+   menuItems.resize(1);
+
+   // Value doesn't matter (set to 99 here), as it will be clobbered when startEditing() is called
+   CounterMenuItem *menuItem = new CounterMenuItem(game, "Regen Time:", 99, 1, 0, 100, "secs", "No regen", 
+                                                   "Time for this item to reappear after it has been picked up");
+
+   //menuItem->setTextEditedCallback(textEditedCallback);
+   setMenuColors(menuItem);
+
+   menuItems[0] = boost::shared_ptr<MenuItem>(menuItem);
+}
+
+
+void PickupItemEditorAttributeMenuUI::startEditing(EditorObject *object)
+{
+   Parent::startEditing(object);
+
+   PickupItem *pickupItem = dynamic_cast<PickupItem *>(object);
+
+   // Now transfer some attributes
+   menuItems[0]->setIntValue(pickupItem->getRepopDelay());
+}
+
+
+void PickupItemEditorAttributeMenuUI::doneEditing(EditorObject *object)
+{
+   Parent::doneEditing(object);
+
+   PickupItem *pickupItem = dynamic_cast<PickupItem *>(object);
+   pickupItem->setRepopDelay( (U32)menuItems[0]->getIntValue() );
+}
 };

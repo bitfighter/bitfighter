@@ -78,6 +78,9 @@ public:
 
 #ifndef ZAP_DEDICATED
    EditorAttributeMenuUI *getAttributeMenu();
+
+   // Provide a static hook into the object currently being edited with the attrubute editor for callback purposes
+   static EditorObject *getAttributeEditorObject();
 #endif
 
    bool getCollisionPoly(Vector<Point> &polyPoints) const;          // More precise boundary for precise collision detection
@@ -96,11 +99,6 @@ public:
 
    string getText() { return mText; }
    void setText(string text) { mText = text; }
-
-#ifndef ZAP_DEDICATED
-   // Provide a static hook into the object currently being edited with the attrubute editor for callback purposes
-   static EditorObject *getAttributeEditorObject();
-#endif
 
    void onAttrsChanging();
    void onAttrsChanged();

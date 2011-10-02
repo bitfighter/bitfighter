@@ -124,7 +124,7 @@ void SimpleLine::renderEditor(F32 currentScale)
 
 
 // Offset: negative below the item, positive above
-void SimpleLine::renderItemText(const char *text, S32 offset, F32 currentScale, const Point &currentOffset)
+void SimpleLine::renderItemText(const char *text, S32 offset, F32 currentScale)
 {
 #ifndef ZAP_DEDICATED
    glColor(INSTRUCTION_TEXTCOLOR);

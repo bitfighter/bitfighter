@@ -40,7 +40,12 @@ private:
    bool mIsVisible;
    bool mIsMomentarilyVisible; // Used if item briefly flashes on and off, like if a ship is sitting on a repair item when it reappears
    Timer mRepopTimer;
-   S32 mRepopDelay;            // Period of mRepopTimer
+   S32 mRepopDelay;            // Period of mRepopTimer, in seconds
+
+#ifndef ZAP_DEDICATED
+   static EditorAttributeMenuUI *mAttributeMenuUI;      // Menu for text editing; since it's static, don't bother with smart pointer
+#endif
+
 
 protected:
    enum MaskBits {
@@ -49,7 +54,7 @@ protected:
    };
 
 public:
-   PickupItem(Point p = Point(), float radius = 1, S32 repopDelay = 20000);      // Constructor
+   PickupItem(Point p = Point(), float radius = 1, S32 repopDelay = 20);      // Constructor
 
    bool processArguments(S32 argc, const char **argv, Game *game);
    string toString(F32 gridSize) const;
@@ -58,7 +63,16 @@ public:
    bool isVisible() { return mIsVisible; }
 
    U32 getRepopDelay() { return mRepopDelay; }
+   void setRepopDelay(U32 delay) { mRepopDelay = delay; }
 
+   virtual const char *getInstructionMsg() { return "Press Enter to change regen time"; }
+
+#ifndef ZAP_DEDICATED
+   EditorAttributeMenuUI *getAttributeMenu();
+
+      // Provide a static hook into the object currently being edited with the attrubute editor for callback purposes
+   static EditorObject *getAttributeEditorObject();
+#endif
 
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);

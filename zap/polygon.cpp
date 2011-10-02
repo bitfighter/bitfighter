@@ -42,12 +42,12 @@ static const S32 INSTRUCTION_TEXTSIZE = 9;
 static const S32 INSTRUCTION_TEXTGAP = 3;
 
 // Offset: negative below the item, positive above
-void EditorPolygon::renderItemText(const char *text, S32 offset, F32 currentScale, const Point &currentOffset)
+void EditorPolygon::renderItemText(const char *text, S32 offset, F32 currentScale)
 {
 #ifndef ZAP_DEDICATED
    glColor(INSTRUCTION_TEXTCOLOR);
    S32 off = (INSTRUCTION_TEXTSIZE + INSTRUCTION_TEXTGAP) * offset - 10 - ((offset > 0) ? 5 : 0);
-   Point pos = getVert(0) * currentScale + currentOffset;
+   Point pos = getVert(0) * currentScale;
    UserInterface::drawCenteredString(pos.x, pos.y - off, INSTRUCTION_TEXTSIZE, text);
 #endif
 }

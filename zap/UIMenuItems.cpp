@@ -369,7 +369,7 @@ void EditableMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
    S32 xpos2 = UserInterface::drawCenteredStringPair(xpos, ypos, textsize, *getColor(isSelected), textColor, getPrompt().c_str(), 
                                                     mLineEditor.getString() != "" ? mLineEditor.getDisplayString().c_str() : mEmptyVal.c_str());
 
-   glColor3f(1,0,0);      // Cursor is always red
+   glColor(Colors::red);      // Cursor is always red
    if(isSelected)
       mLineEditor.drawCursor(xpos2, ypos, textsize);
 }

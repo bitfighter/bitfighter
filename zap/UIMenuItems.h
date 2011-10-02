@@ -105,6 +105,8 @@ public:
    virtual string getPrompt() { return mPrompt; }
    virtual string getValue() const { return mPrompt; } 
 
+   virtual string getUnits() const { return ""; }
+
    virtual void setSecret(bool secret) { /* Do nothing */ }
 
    // When enter is pressed, should selection advance to the next item?
@@ -244,6 +246,8 @@ public:
    virtual void setIntValue(S32 val) { mValue = val; }
    virtual const char *getSpecialEditingInstructions() { return "Use [<-] and [->] keys to change value.  Use [Shift] for bigger change."; }
    virtual bool handleKey(KeyCode keyCode, char ascii);
+
+   virtual string getUnits() const { return mUnits; }
 
    virtual void snap() { /* Do nothing */ }
 

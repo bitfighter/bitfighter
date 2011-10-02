@@ -82,6 +82,19 @@ public:
 };
 
 
+////////////////////////////////////////
+////////////////////////////////////////
+
+class PickupItemEditorAttributeMenuUI : public EditorAttributeMenuUI
+{
+   typedef EditorAttributeMenuUI Parent;
+
+public:
+   PickupItemEditorAttributeMenuUI(ClientGame *game);   // Constructor
+   void startEditing(EditorObject *object);
+   void doneEditing(EditorObject *object);
+};
+
 
 };
 

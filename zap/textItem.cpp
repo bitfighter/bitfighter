@@ -30,12 +30,14 @@
 #include "item.h"
 #include "stringUtils.h"
 
+
 #ifndef ZAP_DEDICATED
+
 #include "ClientGame.h"
 #include "UIEditorMenus.h"       // For TextItemEditorAttributeMenuUI def
 #include "SDL/SDL_opengl.h"
-#endif
 
+#endif
 
 
 #include <math.h>

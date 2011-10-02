@@ -42,7 +42,7 @@ class EditorPolygon : public GameObject, public EditorObject, public PolygonGeom
    typedef EditorObject EditorParent;
 
 private:
-   virtual void renderItemText(const char *text, S32 offset, F32 currentScale, const Point &currentOffset);
+   virtual void renderItemText(const char *text, S32 offset, F32 currentScale);
    virtual void labelDockItem();
 
    void prepareForDock(Game *game, const Point &point);

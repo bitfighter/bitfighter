@@ -108,6 +108,7 @@ enum UIID {
    YesOrNoUI,
    GoFastAttributeEditorUI,
    TextItemAttributeEditorUI,
+   PickupItemAttributeMenuUI,
    InvalidUI,        // Not a valid UI
 };
 
