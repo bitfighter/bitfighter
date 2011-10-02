@@ -178,7 +178,7 @@ void RabbitGameType::setFlagScore(S32 pointsPerMinute)
 
 S32 RabbitGameType::getFlagScore() const
 {
-   return S32(1.0f / (F32(mFlagScoreTimer) / (60 * 1000)));           // Convert to points per minute
+   return S32(1.0f / (F32(mFlagScoreTimer) / (60 * 1000)));            // Convert to points per minute
 }
 
 
