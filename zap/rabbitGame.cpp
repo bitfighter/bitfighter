@@ -115,9 +115,9 @@ bool RabbitGameType::processArguments(S32 argc, const char **argv, Game *game)
 }
 
 
-string RabbitGameType::toString()
+string RabbitGameType::toString() const
 {
-   return Parent::toString() + itos(U32(mFlagReturnTimer / 1000)) + itos(getFlagScore());
+   return Parent::toString() + " " + itos(U32(mFlagReturnTimer / 1000)) + " " + itos(getFlagScore());
 }
 
 
@@ -172,13 +172,13 @@ bool RabbitGameType::saveMenuItem(const MenuItem *menuItem, const char *key)
 
 void RabbitGameType::setFlagScore(S32 pointsPerMinute)     
 {
-   mFlagScoreTimer = U32(1.0f / F32(pointsPerMinute) * 60 * 1000);   // Convert to ms per point
+   mFlagScoreTimer = U32((1.0f / F32(pointsPerMinute)) * 60 * 1000);   // Convert to ms per point
 }
 
 
-S32 RabbitGameType::getFlagScore()     
+S32 RabbitGameType::getFlagScore() const
 {
-   return S32(1.0f / F32(mFlagScoreTimer) / 60.0f / 1000.0f);        // Convert to points per minute
+   return S32(1.0f / (F32(mFlagScoreTimer) / (60 * 1000)));           // Convert to points per minute
 }
 
 

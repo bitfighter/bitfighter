@@ -455,8 +455,8 @@ void HuntersGameType::renderInterfaceOverlay(bool scoreboardVisible)
    glColor(mNexusIsOpen ? gNexusOpenColor : gNexusClosedColor);      // Display timer in appropriate color
 
    U32 timeLeft = mNexusTimer.getCurrent();
-   U32 minsRemaining = timeLeft / (60000);
-   U32 secsRemaining = (timeLeft - (minsRemaining * 60000)) / 1000;
+   U32 minsRemaining = timeLeft / (60 * 1000);
+   U32 secsRemaining = (timeLeft - (minsRemaining * 60 * 1000)) / 1000;
 
    const S32 y = gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin - 45;
    const S32 size = 20;

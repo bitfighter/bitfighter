@@ -63,7 +63,7 @@ public:
    }
 
    bool processArguments(S32 argc, const char **argv, Game *game);
-   string toString();
+   string toString() const;
 
 #ifndef ZAP_DEDICATED
    const char **getGameParameterMenuKeys();
@@ -94,7 +94,7 @@ public:
    void onFlagReturned();
 
    void setFlagScore(S32 pointsPerMinute);
-   S32 getFlagScore() ;
+   S32 getFlagScore() const;
 
    GameTypes getGameType() { return RabbitGame; }
    const char *getGameTypeString() const { return "Rabbit"; }
