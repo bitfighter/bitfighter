@@ -211,10 +211,10 @@ public:
    virtual const char *getOnDockName()       { TNLAssert(false, "getOnDockName method not implemented!"); return NULL; }
    virtual const char *getOnScreenName()     { TNLAssert(false, "getOnScreenName method not implemented!"); return NULL; }   
 
-   virtual const char *getInstructionMsg() { return ""; }      // Message printed below item when it is selected
+   virtual const char *getInstructionMsg() { return ""; }              // Message printed below item when it is selected
 
-   virtual EditorAttributeMenuUI *getAttributeMenu() { return NULL; }    // Override if child class has an attribute menu
-   virtual void doneEditing(EditorAttributeMenuUI *attributeMenu) {}
+   virtual EditorAttributeMenuUI *getAttributeMenu() { return NULL; }  // Override in child if it has an attribute menu
+   virtual void doneEditing(EditorAttributeMenuUI *attributeMenu) { /* Do nothing */ }
 
 
    //////////////

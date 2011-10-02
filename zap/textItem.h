@@ -77,7 +77,7 @@ public:
    void computeExtent();                                            // Bounding box for quick collision-possibility elimination
 
 #ifndef ZAP_DEDICATED
-   EditorAttributeMenuUI *getAttributeMenu(ClientGame *game);
+   EditorAttributeMenuUI *getAttributeMenu();
 #endif
 
    bool getCollisionPoly(Vector<Point> &polyPoints) const;          // More precise boundary for precise collision detection

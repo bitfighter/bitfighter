@@ -330,11 +330,11 @@ EditorObject *TextItem::getAttributeEditorObject()
 }
 
 
-EditorAttributeMenuUI *TextItem::getAttributeMenu(ClientGame *game)
+EditorAttributeMenuUI *TextItem::getAttributeMenu()
 {
    // Lazily initialize this -- if we're in the game, we'll never need this to be instantiated
    if(!mAttributeMenuUI)
-      mAttributeMenuUI = new TextItemEditorAttributeMenuUI(game);
+      mAttributeMenuUI = new TextItemEditorAttributeMenuUI((ClientGame *)getGame());
 
    // Udate the editor with attributes from our current object
    mAttributeMenuUI->menuItems[0]->setValue(mText);

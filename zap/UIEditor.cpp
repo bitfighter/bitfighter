@@ -3337,8 +3337,10 @@ void EditorUserInterface::startAttributeEditor()
       EditorObject *obj_i = objList->get(i);
       if(obj_i->isSelected())
       {
-         // Force item i to be the one and only selected item type.  This will clear up some problems that
-         // might otherwise occur.  If you have multiple items selected, all will end up with the same values.
+         // Force item i to be the one and only selected item type.  This will clear up some problems that might otherwise
+         // occur if you had different item types selected while you were editing attributes.   If you have multiple
+         // items selected, all will end up with the same values, which only make sense if they are the same kind
+         // of object.  So after this runs, there may be multiple items selected, but they'll all  be the same type.
          for(S32 j = 0; j < objList->size(); j++)
          {
             EditorObject *obj_j = objList->get(j);
