@@ -587,20 +587,21 @@ void DatabaseObject::setExtent(const Rect &extents)
 
 // This sort will put points on top of lines on top of polygons...  as they should be
 // We'll also put walls on the bottom, as this seems to work best in practice
-bool QSORT_CALLBACK geometricSort(EditorObject * &a, EditorObject * &b)
+S32 QSORT_CALLBACK geometricSort(EditorObject * &a, EditorObject * &b)
 {
    if(isWallType(a->getObjectTypeNumber()))
-      return true;
+      return 1;
    if(isWallType(b->getObjectTypeNumber()))
-      return false;
+      return -1;
 
-   return( a->getGeomType() > b->getGeomType() );
+   return( b->getGeomType() - a->getGeomType() );
 }
 
 
 static void geomSort(Vector<EditorObject *> &objects)
 {
-   if(objects.size() >= 2)  // nothing to sort when there is one or zero objects
+   if(objects.size() >= 2)       // No point sorting unless there are two or more objects!
+
       // Cannot use Vector.sort() here because I couldn't figure out how to cast shared_ptr as pointer (*)
       //sort(objects.getStlVector().begin(), objects.getStlVector().begin() + objects.size(), geometricSort);
       qsort(&objects[0], objects.size(), sizeof(EditorObject *), (qsort_compare_func) geometricSort);
@@ -696,7 +697,6 @@ void EditorObjectDatabase::copy(const EditorObjectDatabase &source)
 
 void EditorObjectDatabase::addToDatabase(DatabaseObject *object, const Rect &extents)
 {
-   //EditorObject *eObj = (EditorObject *)(object);
    EditorObject *eObj = dynamic_cast<EditorObject *>(object);
    TNLAssert(eObj, "Bad cast!");
 
