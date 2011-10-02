@@ -241,6 +241,8 @@ public:
    Timer respawnTimer;
 
 
+   virtual void onEndGhosting();    // Gets run when game is over
+
 
    // Tell UI we're waiting for password confirmation from server
    void setWaitingForPermissionsReply(bool waiting) { mWaitingForPermissionsReply = waiting; }
