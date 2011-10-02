@@ -172,7 +172,7 @@ void GameParamUserInterface::updateMenuItems()
 
       boost::shared_ptr<MenuItem> menuItem;
 
-      if(iter != mMenuItemMap.end())      
+      if(iter != mMenuItemMap.end())      // What is this supposed to do?  I can't seem to make this condition occur.
          menuItem = iter->second;
       else                 // Item not found
       {
@@ -202,7 +202,7 @@ void GameParamUserInterface::onEscape()
 
    S32 i = 0;
 
-   while(strcmp(keys[i], ""))
+   while(strcmp(keys[i], ""))    // Iterate over every item in the keys array
    {
       MenuItemMap::iterator iter = mMenuItemMap.find(keys[i]);
 

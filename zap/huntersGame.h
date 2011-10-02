@@ -42,8 +42,8 @@ class HuntersGameType : public GameType
 private:
    typedef GameType Parent;
 
-   S32 mNexusClosedTime;      // Time Nexus remains closed
-   S32 mNexusOpenTime;        // Time Nexus remains open
+   S32 mNexusClosedTime;      // Time Nexus remains closed, in seconds
+   S32 mNexusOpenTime;        // Time Nexus remains open, in seconds
    Timer mNexusTimer;
 
    struct YardSaleWaypoint

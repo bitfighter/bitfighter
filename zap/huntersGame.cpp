@@ -111,9 +111,9 @@ TNL_IMPLEMENT_NETOBJECT_RPC(HuntersGameType, s2cHuntersMessage,
 // Constructor
 HuntersGameType::HuntersGameType() : GameType(100)
 {
-   mNexusClosedTime = 60 * 1000;
-   mNexusOpenTime = 15 * 1000;
-   mNexusTimer.reset(mNexusClosedTime);
+   mNexusClosedTime = 60;
+   mNexusOpenTime = 15;
+   mNexusTimer.reset(mNexusClosedTime * 1000);
    mNexusIsOpen = false;
 }
 
@@ -122,19 +122,19 @@ bool HuntersGameType::processArguments(S32 argc, const char **argv, Game *game)
 {
    if(argc > 0)
    {
-      setGameTime((F32)atof(argv[0]) * 60);                       // Game time, stored in minutes in level file
+      setGameTime((F32)atof(argv[0]) * 60.0);                 // Game time, stored in minutes in level file
       if(argc > 1)
       {
-         mNexusClosedTime = S32(atof(argv[1]) * 60 * 1000);  // Time until nexus opens, specified in minutes
+         mNexusClosedTime = S32(atof(argv[1]) * 60.0 + 0.5);  // Time until nexus opens, specified in minutes (0.5 converts truncation into rounding)
          if(argc > 2)
          {
-            mNexusOpenTime = S32(atof(argv[2]) * 1000);      // Time nexus remains open, specified in seconds
+            mNexusOpenTime = S32(atof(argv[2]));              // Time nexus remains open, specified in seconds
             if(argc > 3)
-               setWinningScore(atoi(argv[3]));               // Winning score
+               setWinningScore(atoi(argv[3]));                // Winning score
          }
       }
    }
-   mNexusTimer.reset(mNexusClosedTime);
+   mNexusTimer.reset(mNexusClosedTime * 1000);
 
    return true;
 }
@@ -142,8 +142,8 @@ bool HuntersGameType::processArguments(S32 argc, const char **argv, Game *game)
 
 string HuntersGameType::toString() const
 {
-   return string(getClassName()) + " " + ftos(F32(getTotalGameTime()) / 60 , 3) + " " + ftos(F32(mNexusClosedTime) / 60 / 1000, 3) + " " + 
-                                         ftos(F32(mNexusOpenTime) / 1000, 3) + " " + itos(getWinningScore());
+   return string(getClassName()) + " " + ftos(F32(getTotalGameTime()) / 60 , 3) + " " + ftos(F32(mNexusClosedTime) / 60, 3) + " " + 
+                                         ftos(F32(mNexusOpenTime), 3) + " " + itos(getWinningScore());
 }
 
 
@@ -241,9 +241,9 @@ const char **HuntersGameType::getGameParameterMenuKeys()
 boost::shared_ptr<MenuItem> HuntersGameType::getMenuItem(ClientGame *game, const char *key)
 {
    if(!strcmp(key, "Nexus Time to Open"))
-      return boost::shared_ptr<MenuItem>(new TimeCounterMenuItem(game, "Time for Nexus to Open:", mNexusClosedTime / 1000, 99*60, "Never", "Time it takes for the Nexus to open"));
+      return boost::shared_ptr<MenuItem>(new TimeCounterMenuItem(game, "Time for Nexus to Open:", mNexusClosedTime, 99*60, "Never", "Time it takes for the Nexus to open"));
    else if(!strcmp(key, "Nexus Time Remain Open"))
-      return boost::shared_ptr<MenuItem>(new TimeCounterMenuItemSeconds(game, "Time Nexus Remains Open:", mNexusOpenTime / 1000, 99*60, "Always", "Time that the Nexus will remain open"));
+      return boost::shared_ptr<MenuItem>(new TimeCounterMenuItemSeconds(game, "Time Nexus Remains Open:", mNexusOpenTime, 99*60, "Always", "Time that the Nexus will remain open"));
    else if(!strcmp(key, "Nexus Win Score"))
       return boost::shared_ptr<MenuItem>(new CounterMenuItem(game, "Score to Win:", getWinningScore(), 100, 100, 20000, "points", "", "Game ends when one player or team gets this score"));
    else return Parent::getMenuItem(game, key);
@@ -253,9 +253,9 @@ boost::shared_ptr<MenuItem> HuntersGameType::getMenuItem(ClientGame *game, const
 bool HuntersGameType::saveMenuItem(const MenuItem *menuItem, const char *key)
 {
    if(!strcmp(key, "Nexus Time to Open"))
-      mNexusOpenTime = menuItem->getIntValue();
-   else if(!strcmp(key, "Nexus Time Remain Open"))
       mNexusClosedTime = menuItem->getIntValue();
+   else if(!strcmp(key, "Nexus Time Remain Open"))
+      mNexusOpenTime = menuItem->getIntValue();
    else if(!strcmp(key, "Nexus Win Score"))
       setWinningScore(menuItem->getIntValue());
    else return Parent::saveMenuItem(menuItem, key);
@@ -340,7 +340,7 @@ void HuntersGameType::idle(GameObject::IdleCallPath path, U32 deltaT)
    // The following only runs on the server
    if(!mNexusIsOpen && mNexusTimer.update(deltaT))         // Nexus has just opened
    {
-      mNexusTimer.reset(mNexusOpenTime);
+      mNexusTimer.reset(mNexusOpenTime * 1000);
       mNexusIsOpen = true;
       s2cSetNexusTimer(mNexusTimer.getCurrent(), mNexusIsOpen);
       static StringTableEntry msg("The Nexus is now OPEN!");
@@ -364,7 +364,7 @@ void HuntersGameType::idle(GameObject::IdleCallPath path, U32 deltaT)
    }
    else if(mNexusIsOpen && mNexusTimer.update(deltaT))       // Nexus has just closed
    {
-      mNexusTimer.reset(mNexusClosedTime);
+      mNexusTimer.reset(mNexusClosedTime * 1000);
       mNexusIsOpen = false;
       s2cSetNexusTimer(mNexusTimer.getCurrent(), mNexusIsOpen);
 
