@@ -118,7 +118,7 @@ bool checkModifier(KeyCode mod1)
 {
    S32 foundCount = 0;
 
-   for(S32 i = 0; i < ARRAYSIZE(modifiers); i++)
+   for(S32 i = 0; i < S32(ARRAYSIZE(modifiers)); i++)
       if(getKeyState(modifiers[i]))                            // Modifier is down
       {
          if(modifiers[i] == mod1)      
@@ -135,7 +135,7 @@ bool checkModifier(KeyCode mod1, KeyCode mod2)
 {
    S32 foundCount = 0;
 
-   for(S32 i = 0; i < ARRAYSIZE(modifiers); i++)
+   for(S32 i = 0; i < S32(ARRAYSIZE(modifiers)); i++)
       if(getKeyState(modifiers[i]))                            // Modifier is down
       {
          if(modifiers[i] == mod1 || modifiers[i] == mod2)      
@@ -152,7 +152,7 @@ bool checkModifier(KeyCode mod1, KeyCode mod2, KeyCode mod3)
 {
    S32 foundCount = 0;
 
-   for(S32 i = 0; i < ARRAYSIZE(modifiers); i++)
+   for(S32 i = 0; i < S32(ARRAYSIZE(modifiers)); i++)
       if(getKeyState(modifiers[i]))                            // Modifier is down
       {
          if(modifiers[i] == mod1 || modifiers[i] == mod2 || modifiers[i] == mod3)      

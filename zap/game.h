@@ -32,7 +32,7 @@
 #include "Rect.h"
 #include "Colors.h"
 #include "shipItems.h"           // For moduleInfos
-
+#include "EditorObject.h"        // For NO_TEAM
 #include "dataConnection.h"      // For DataSender
 
 #include "GameSettings.h"
@@ -96,8 +96,6 @@ const U32 MAX_GAME_DESCR_LEN = 60;    // Any longer, and it won't fit on-screen;
 class GameConnection;
 class SoundEffect;
 class VoiceDecoder;
-
-extern S32 NO_TEAM;
 
 // This object only concerns itself with things that one client tracks about another.  We use it for other purposes, of course, 
 // as a convenient strucure for holding certain settings about the local client, or about remote clients when we are running on the server.
@@ -173,7 +171,7 @@ private:
    
 public:
    LocalClientInfo(GameConnection *clientConnection, bool isRobot);     // Constructor
-   ~LocalClientInfo();                                                  // Destructor
+   virtual ~LocalClientInfo();                                          // Destructor
 
 
    // WARNING!! mClientConnection can be NULL on client!!! (though should never be NULL on server)
@@ -209,9 +207,9 @@ private:
 
 public:
    RemoteClientInfo(const StringTableEntry &name, bool isRobot, bool isAdmin);      // Constructor
-   RemoteClientInfo::~RemoteClientInfo();                                           // Destructor
+   virtual ~RemoteClientInfo();                                                     // Destructor
 
-   GameConnection *getConnection() { TNLAssert(false, "Can't get a GameConnection from a RemoteClientInfo!"); }
+   GameConnection *getConnection() { TNLAssert(false, "Can't get a GameConnection from a RemoteClientInfo!"); return NULL;}
    void setConnection(GameConnection *conn) { TNLAssert(false, "Can't set a GameConnection on a RemoteClientInfo!"); }
 
    F32 getRating() { return mRating; }
