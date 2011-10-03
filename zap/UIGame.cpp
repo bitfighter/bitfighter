@@ -155,7 +155,7 @@ GameUserInterface::~GameUserInterface()
 }
 
 
-void processGameConsoleCommand(void *gamePtr, OGLCONSOLE_Console console, char *cmd)
+void processGameConsoleCommand(OGLCONSOLE_Console console, char *cmd)
 {
    if(!strncmp(cmd, "quit", 4) || !strncmp(cmd, "exit", 4)) 
       OGLCONSOLE_HideConsole();
