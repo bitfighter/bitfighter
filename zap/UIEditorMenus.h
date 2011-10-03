@@ -41,15 +41,18 @@ class EditorAttributeMenuUI : public MenuUserInterface
    typedef MenuUserInterface Parent;
       
 protected:
-      EditorObject *mObject;      // Object whose attributes are being edited
+   EditorObject *mObject;      // Object whose attributes are being edited
 
 public:
    EditorAttributeMenuUI(ClientGame *game) : Parent(game) { /* Do nothing */ }    // Constructor
    EditorObject *getObject() { return mObject; }
-   virtual void startEditing(EditorObject *object) { mObject = object; }
-   virtual void doneEditing(EditorObject *object);
    void render();
    void onEscape();
+
+   virtual void startEditingAttrs(EditorObject *object);
+   virtual void doneEditingAttrs(EditorObject *object);
+
+   void setStandardMenuColors(MenuItem *menuItem);
 };
 
 
@@ -63,8 +66,8 @@ class GoFastEditorAttributeMenuUI : public EditorAttributeMenuUI
 public:
    GoFastEditorAttributeMenuUI(ClientGame *game);    // Constructor
 
-   void startEditing(EditorObject *object);
-   void doneEditing(EditorObject *object);
+   void startEditingAttrs(EditorObject *object);
+   void doneEditingAttrs(EditorObject *object);
 };
 
 
@@ -77,22 +80,8 @@ class TextItemEditorAttributeMenuUI : public EditorAttributeMenuUI
 
 public:
    TextItemEditorAttributeMenuUI(ClientGame *game);   // Constructor
-   void startEditing(EditorObject *object);
-   void doneEditing(EditorObject *object);
-};
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-class PickupItemEditorAttributeMenuUI : public EditorAttributeMenuUI
-{
-   typedef EditorAttributeMenuUI Parent;
-
-public:
-   PickupItemEditorAttributeMenuUI(ClientGame *game);   // Constructor
-   void startEditing(EditorObject *object);
-   void doneEditing(EditorObject *object);
+   void startEditingAttrs(EditorObject *object);
+   void doneEditingAttrs(EditorObject *object);
 };
 
 

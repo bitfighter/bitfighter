@@ -171,32 +171,6 @@ static void labelVertex(Point pos, F32 radius, const char *itemLabelTop, const c
 }
 
 
-static const Color INSTRUCTION_TEXTCOLOR(1,1,1);      // TODO: Put in editor
-
-void EditorObject::renderAttribs(F32 currentScale)
-{
-   if(isSelected() && !isBeingEdited() && showAttribsWhenSelected())
-   {
-      // Now list the attributes below the item
-      EditorAttributeMenuUI *attrMenu = getAttributeMenu();
-
-      if(attrMenu)
-      {
-         glColor(INSTRUCTION_TEXTCOLOR);
-
-         S32 menuSize = attrMenu->menuItems.size();
-         for(S32 i = 0; i < menuSize; i++)       
-         {
-            // TODO: Make this concatenation a method on the menuItems themselves?
-            // TODO: Colorize it a bit?
-            string txt = attrMenu->menuItems[i]->getPrompt() + ": " + attrMenu->menuItems[i]->getValue() + " " + attrMenu->menuItems[i]->getUnits();      
-            renderItemText(txt.c_str(), menuSize - i, currentScale);
-         }
-      }
-   }
-}
-
-
 // Render selected and highlighted vertices, called from renderEditor
 void EditorObject::renderAndLabelHighlightedVertices(F32 currentScale)
 {
@@ -286,11 +260,12 @@ void EditorObject::renderInEditor(F32 currentScale, const Point &currentOffset, 
          if(!showingReferenceShip)
          {
             // Label item with instruction message describing what happens if user presses enter
-            if(isSelected() && !isBeingEdited())
-               renderItemText(getInstructionMsg(), 0, currentScale);
+            //if(isSelected() && !isBeingEdited())
+            //   renderItemText(getInstructionMsg(), 0, currentScale);
 
             renderAndLabelHighlightedVertices(currentScale);
-            renderAttribs(currentScale);
+            if(isSelected() && !isBeingEdited() && showAttribsWhenSelected())
+               renderAttributeString(currentScale);
          }
 
       glPopMatrix();   
@@ -456,7 +431,7 @@ bool EditorObject::canBeHostile()
 // TODO: merge with simpleLine values, put in editor
 static const S32 INSTRUCTION_TEXTSIZE = 12;      
 static const S32 INSTRUCTION_TEXTGAP = 4;
-//static const Color INSTRUCTION_TEXTCOLOR(1,1,1);      // TODO: Put in editor
+static const Color INSTRUCTION_TEXTCOLOR = Colors::white;      // TODO: Put in editor
 
 // Offset: negative below the item, positive above
 void EditorPointObject::renderItemText(const char *text, S32 offset, F32 currentScale)
@@ -468,6 +443,8 @@ void EditorPointObject::renderItemText(const char *text, S32 offset, F32 current
    
    // Dividing by currentScale keeps the text a constant size in pixels
    UserInterface::drawCenteredString(pos.x, pos.y - off, F32(INSTRUCTION_TEXTSIZE) / currentScale, text);
+   UserInterface::drawCenteredString(pos.x, pos.y - off - INSTRUCTION_TEXTSIZE * 1.25, F32(INSTRUCTION_TEXTSIZE) / currentScale, "[Enter] to edit");
+
 }
 
 

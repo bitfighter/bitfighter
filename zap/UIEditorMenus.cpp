@@ -32,15 +32,14 @@
 namespace Zap
 {
 
-
 void EditorAttributeMenuUI::onEscape()
 {
-   doneEditing(mObject);
+   doneEditingAttrs(mObject);
    getUIManager()->reactivatePrevUI();     // Back to the editor!
 }
 
 
-static const S32 ATTR_TEXTSIZE = 10;                                          // called attrSize in the editor
+static const S32 ATTR_TEXTSIZE = 10;       // called attrSize in the editor
 
 void EditorAttributeMenuUI::render()
 {
@@ -67,29 +66,35 @@ void EditorAttributeMenuUI::render()
 }
 
 
-void EditorAttributeMenuUI::doneEditing(EditorObject *object) 
+// Sets some standard menu colors.  Individual items can have different colors than these, but only if there is a very good reason.
+void EditorAttributeMenuUI::setStandardMenuColors(MenuItem *menuItem)
 {
-   mObject->doneEditing(this);
+   menuItem->setSelectedColor(Colors::white);
+   menuItem->setUnselectedColor(Colors::gray50);
+   menuItem->setUnselectedValueColor(Colors::gray50);
+}
 
-   // Only run on object that is the subject of this editor.  See TextItemEditorAttributeMenuUI::doneEditing() for explanation
+
+void EditorAttributeMenuUI::startEditingAttrs(EditorObject *object) 
+{ 
+   mObject = object; 
+   object->startEditingAttrs(this);
+}
+
+
+void EditorAttributeMenuUI::doneEditingAttrs(EditorObject *object) 
+{
+   // Has to be object, not mObject... this gets run once for every selected item of same type as mObject, and we need to make
+   // sure that those objects (passed in as object), get updated.
+   object->doneEditingAttrs(this);     
+
+   // Only run on object that is the subject of this editor.  See TextItemEditorAttributeMenuUI::doneEditingAttrs() for explanation
    // of why this may be run on objects that are not actually the ones being edited (hence the need for passing an object in).
    if(object == mObject)   
    {
       mObject->setIsBeingEdited(false);
       getUIManager()->getEditorUserInterface()->doneEditingAttributes(this, mObject); 
    }
-}
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-   
-// Sets some standard menu colors.  Individual items can have different colors than these, but only if there is a very good reason.
-static void setMenuColors(MenuItem *menuItem)
-{
-   menuItem->setSelectedColor(Colors::white);
-   menuItem->setUnselectedColor(Colors::gray50);
-   menuItem->setUnselectedValueColor(Colors::gray50);
 }
 
 
@@ -103,16 +108,16 @@ GoFastEditorAttributeMenuUI::GoFastEditorAttributeMenuUI(ClientGame *game) : Par
    menuItems.resize(2);
 
    menuItems[0] = boost::shared_ptr<MenuItem>(new CounterMenuItem(game, "Speed", 100, 100, SpeedZone::minSpeed, SpeedZone::maxSpeed, "", "Really slow", ""));
-   setMenuColors(menuItems[0].get());
+   setStandardMenuColors(menuItems[0].get());
 
    menuItems[1] = boost::shared_ptr<MenuItem>(new YesNoMenuItem(game, "Snapping", true, NULL, ""));
-   setMenuColors(menuItems[1].get());
+   setStandardMenuColors(menuItems[1].get());
 }
 
 
-void GoFastEditorAttributeMenuUI::startEditing(EditorObject *object)
+void GoFastEditorAttributeMenuUI::startEditingAttrs(EditorObject *object)
 {
-   Parent::startEditing(object);
+   Parent::startEditingAttrs(object);
 
    SpeedZone *goFast = dynamic_cast<SpeedZone *>(object);
 
@@ -122,14 +127,14 @@ void GoFastEditorAttributeMenuUI::startEditing(EditorObject *object)
 }
 
 
-void GoFastEditorAttributeMenuUI::doneEditing(EditorObject *object)
+void GoFastEditorAttributeMenuUI::doneEditingAttrs(EditorObject *object)
 {
    SpeedZone *goFast = dynamic_cast<SpeedZone *>(object);
 
    goFast->setSpeed(menuItems[0]->getIntValue());
    goFast->setSnapping(menuItems[1]->getIntValue() != 0);
 
-   Parent::doneEditing(object);
+   Parent::doneEditingAttrs(object);
 }
 
 
@@ -153,19 +158,19 @@ TextItemEditorAttributeMenuUI::TextItemEditorAttributeMenuUI(ClientGame *game) :
 
    menuItems.resize(1);
 
-   // "Blah" will be overwritten when startEditing() is called
+   // "Blah" will be overwritten when startEditingAttrs() is called
    EditableMenuItem *menuItem = new EditableMenuItem(game, "Text: ", "Blah", "", "", MAX_TEXTITEM_LEN);
 
    menuItem->setTextEditedCallback(textEditedCallback);
-   setMenuColors(menuItem);
+   setStandardMenuColors(menuItem);
 
    menuItems[0] = boost::shared_ptr<MenuItem>(menuItem);
 }
 
 
-void TextItemEditorAttributeMenuUI::startEditing(EditorObject *object)
+void TextItemEditorAttributeMenuUI::startEditingAttrs(EditorObject *object)
 {
-   Parent::startEditing(object);
+   Parent::startEditingAttrs(object);
 
    TextItem *textItem = dynamic_cast<TextItem *>(object);
 
@@ -174,9 +179,9 @@ void TextItemEditorAttributeMenuUI::startEditing(EditorObject *object)
 }
 
 
-void TextItemEditorAttributeMenuUI::doneEditing(EditorObject *object)
+void TextItemEditorAttributeMenuUI::doneEditingAttrs(EditorObject *object)
 {
-   Parent::doneEditing(object);
+   Parent::doneEditingAttrs(object);
 
    // The following seems redundant because we have a callback that keeps the item's setText method updated throughout the editing process.
    // However, this is also called if we edit three textItems at once and we need to transfer the text to the other two.
@@ -185,43 +190,4 @@ void TextItemEditorAttributeMenuUI::doneEditing(EditorObject *object)
 }
 
 
-////////////////////////////////////////
-////////////////////////////////////////
-
-// Constructor
-PickupItemEditorAttributeMenuUI::PickupItemEditorAttributeMenuUI(ClientGame *game) : Parent(game)
-{
-   setMenuID(PickupItemAttributeMenuUI);
-
-   menuItems.resize(1);
-
-   // Value doesn't matter (set to 99 here), as it will be clobbered when startEditing() is called
-   CounterMenuItem *menuItem = new CounterMenuItem(game, "Regen Time:", 99, 1, 0, 100, "secs", "No regen", 
-                                                   "Time for this item to reappear after it has been picked up");
-
-   //menuItem->setTextEditedCallback(textEditedCallback);
-   setMenuColors(menuItem);
-
-   menuItems[0] = boost::shared_ptr<MenuItem>(menuItem);
-}
-
-
-void PickupItemEditorAttributeMenuUI::startEditing(EditorObject *object)
-{
-   Parent::startEditing(object);
-
-   PickupItem *pickupItem = dynamic_cast<PickupItem *>(object);
-
-   // Now transfer some attributes
-   menuItems[0]->setIntValue(pickupItem->getRepopDelay());
-}
-
-
-void PickupItemEditorAttributeMenuUI::doneEditing(EditorObject *object)
-{
-   Parent::doneEditing(object);
-
-   PickupItem *pickupItem = dynamic_cast<PickupItem *>(object);
-   pickupItem->setRepopDelay( (U32)menuItems[0]->getIntValue() );
-}
 };

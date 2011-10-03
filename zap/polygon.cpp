@@ -37,7 +37,7 @@ namespace Zap
 {
 
 // TODO: Put in editor ??
-static const Color INSTRUCTION_TEXTCOLOR(1,1,1);
+static const Color INSTRUCTION_TEXTCOLOR = Colors::white;
 static const S32 INSTRUCTION_TEXTSIZE = 9;      
 static const S32 INSTRUCTION_TEXTGAP = 3;
 

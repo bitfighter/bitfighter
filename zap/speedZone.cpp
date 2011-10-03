@@ -290,6 +290,14 @@ EditorAttributeMenuUI *SpeedZone::getAttributeMenu()
 }
 
 
+// Render some attributes when item is selected but not being edited
+void SpeedZone::renderAttributeString(F32 currentScale)
+{
+   string txt = "Speed: " + itos(mSpeed) + "; Snap: " + (mSnapLocation ? "Yes" : "No");      
+   renderItemText(txt.c_str(), 1, currentScale);
+}
+
+
 static bool ignoreThisCollision = false;
 
 // Checks collisions with a SpeedZone

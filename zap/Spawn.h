@@ -84,7 +84,7 @@ public:
 #ifndef ZAP_DEDICATED
    EditorAttributeMenuUI *mAttributeMenu; 
    EditorAttributeMenuUI *getAttributeMenu();
-   void doneEditing(EditorAttributeMenuUI *attributeMenu);
+   void doneEditingAttrs(EditorAttributeMenuUI *attributeMenu);
 #endif
 };
 

@@ -116,6 +116,7 @@ public:
    void onGeomChanged();
 
    EditorAttributeMenuUI *getAttributeMenu();
+   void renderAttributeString(F32 currentScale);
 
    void saveItem(FILE *f);
 

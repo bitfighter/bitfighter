@@ -82,14 +82,14 @@ protected:
    ClientGame *getGame() { return mGame; }
 
 public:
-   MenuItem();          // Default constructor
-   virtual ~MenuItem(); // Default destructor
 
    // Constructor
    MenuItem(ClientGame *game, S32 index, const string &prompt, void (*callback)(ClientGame *, U32), const string &help, 
             KeyCode k1 = KEY_UNKNOWN, KeyCode k2 = KEY_UNKNOWN);
 
-   KeyCode key1;     // Allow two shortcut keys per menu item...
+   virtual ~MenuItem();       // Destructor
+
+   KeyCode key1;              // Allow two shortcut keys per menu item...
    KeyCode key2;
 
    virtual MenuItemTypes getItemType() { return MenuItemType; }
@@ -99,11 +99,15 @@ public:
 
    const Color *getColor(bool isSelected);
 
-   const char *getHelp() { return mHelp.c_str(); }
    S32 getIndex() { return mIndex; }
 
+   const char *getHelp() { return mHelp.c_str(); }
+   void setHelp(const string &help) { mHelp = help; }
+
    virtual string getPrompt() { return mPrompt; }
-   virtual string getValue() const { return mPrompt; } 
+   void setPrompt(const string &prompt) { mPrompt = prompt; }
+
+   virtual string getValue() const { return mPrompt; }      // Basic menu item returns its text when selected... overridden by other types
 
    virtual string getUnits() const { return ""; }
 
@@ -153,6 +157,8 @@ public:
 // Provides some additional functionality
 class ValueMenuItem : public MenuItem
 {
+   typedef MenuItem Parent;
+
 protected:
    Color mSelectedValueColor;       // Color of value when selected
    Color mUnselectedValueColor;     // Color of value when unselected
@@ -219,6 +225,8 @@ public:
 
 class CounterMenuItem : public ValueMenuItem
 {
+   typedef ValueMenuItem Parent;
+
 protected:
    S32 mValue;
    S32 mStep;

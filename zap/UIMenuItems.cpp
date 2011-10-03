@@ -34,9 +34,6 @@
 namespace Zap
 {
 
-MenuItem::MenuItem() { TNLAssert(false, "Do not use this constructor!"); }    // Default constructor
-MenuItem::~MenuItem() {}
-
 // Constructor
 MenuItem::MenuItem(ClientGame *game, S32 index, const string &prompt, void (*callback)(ClientGame *, U32), const string &help, KeyCode k1, KeyCode k2)
 {
@@ -52,6 +49,14 @@ MenuItem::MenuItem(ClientGame *game, S32 index, const string &prompt, void (*cal
    mUnselectedColor = Colors::white;
    mPromptAppendage = " >";
 }
+
+
+// Destructor
+MenuItem::~MenuItem() 
+{ 
+   // Do nothing
+} 
+
 
 // Shouldn't need to be overridden -- all redering routines should include xpos
 void MenuItem::render(S32 ypos, S32 textsize, bool isSelected)
@@ -90,11 +95,14 @@ bool MenuItem::handleKey(KeyCode keyCode, char ascii)
    }
 }
 
+
 ////////////////////////////////////
 ////////////////////////////////////
 
-ValueMenuItem::ValueMenuItem(ClientGame *game, S32 index, const string &text, void (*callback)(ClientGame *, U32), const string &help, KeyCode k1, KeyCode k2) :
-      MenuItem(game, index, text, callback, help, k1, k2)
+// Constructor
+ValueMenuItem::ValueMenuItem(ClientGame *game, S32 index, const string &text, void (*callback)(ClientGame *, U32), 
+                             const string &help, KeyCode k1, KeyCode k2) :
+      Parent(game, index, text, callback, help, k1, k2)
 {
    mSelectedValueColor = Colors::cyan;
    mUnselectedValueColor = Colors::cyan;
@@ -200,16 +208,18 @@ YesNoMenuItem::YesNoMenuItem(ClientGame *game, string title, bool currOption, vo
 
 CounterMenuItem::CounterMenuItem(ClientGame *game, const string &title, S32 value, S32 step, S32 minVal, S32 maxVal, const string &units, 
                                  const string &minMsg, const string &help, KeyCode k1, KeyCode k2) :
-   ValueMenuItem(game, -1, title, NULL, help, k1, k2)
+   Parent(game, -1, title, NULL, help, k1, k2)
 {
    mValue = value;
    mStep = step;
    mMinValue = minVal;
    mMaxValue = maxVal;
    mUnits = units;
-   mMinMsg = minMsg;
+   mMinMsg = minMsg;   
+
    mEnterAdvancesItem = true;
 }
+
 
 void CounterMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
 {

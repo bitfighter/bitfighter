@@ -124,7 +124,7 @@ EditorAttributeMenuUI *AbstractSpawn::getAttributeMenu()
    return mAttributeMenu;
 }
 
-void AbstractSpawn::doneEditing(EditorAttributeMenuUI *attributeMenu)
+void AbstractSpawn::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
 {
    mSpawnTime = attributeMenu->menuItems[0]->getIntValue();
 }

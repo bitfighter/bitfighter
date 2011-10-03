@@ -122,6 +122,7 @@ string PickupItem::toString(F32 gridSize) const
 U32 PickupItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
    U32 retMask = Parent::packUpdate(connection, updateMask, stream);       // Writes id and pos
+
    stream->writeFlag(updateMask & InitialMask);
    stream->writeFlag(mIsVisible || mIsMomentarilyVisible);
 
@@ -138,11 +139,13 @@ U32 PickupItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
 void PickupItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    Parent::unpackUpdate(connection, stream);    // Get id and pos
+
    bool isInitial = stream->readFlag();
    bool visible = stream->readFlag();
 
    if(!isInitial && !visible && mIsVisible)
       onClientPickup();
+
    mIsVisible = visible;
 }
 
@@ -164,21 +167,48 @@ bool PickupItem::collide(GameObject *otherObject)
 
 
 #ifndef ZAP_DEDICATED
-//// Static method: Provide hook into the object currently being edited with the attrubute editor for callback purposes
-//EditorObject *PickupItem::getAttributeEditorObject()     
-//{
-//   return mAttributeMenuUI->getObject(); 
-//}
+
+// Render some attributes when item is selected but not being edited
+void PickupItem::renderAttributeString(F32 currentScale)
+{
+   string txt = "Regen: " + itos(mRepopDelay) + " sec";      
+   renderItemText(txt.c_str(), 1, currentScale);
+}
+
+
+// Get the menu looking like what we want
+void PickupItem::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
+{
+   CounterMenuItem *menuItem = dynamic_cast<CounterMenuItem *>(attributeMenu->menuItems[0].get());
+   TNLAssert(menuItem, "We were counting on a CounterMenu here!");
+
+   menuItem->setIntValue(mRepopDelay);
+}
+
+
+// Retrieve the values we need from the menu
+void PickupItem::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
+{
+   mRepopDelay = attributeMenu->menuItems[0]->getIntValue();
+}
 
 
 EditorAttributeMenuUI *PickupItem::getAttributeMenu()
 {
    // Lazily initialize this -- if we're in the game, we'll never need this to be instantiated
    if(!mAttributeMenuUI)
-      mAttributeMenuUI = new PickupItemEditorAttributeMenuUI((ClientGame *)getGame());
+   {
+      ClientGame *clientGame = (ClientGame *)getGame();
+      mAttributeMenuUI = new EditorAttributeMenuUI(clientGame);
 
-   // Update the editor with attributes from our current object
-   mAttributeMenuUI->menuItems[0]->setIntValue(mRepopDelay);
+      // Value doesn't matter (set to 99 here), as it will be clobbered when startEditingAttrs() is called
+      CounterMenuItem *menuItem = new CounterMenuItem(clientGame, "Regen Time:", 99, 1, 0, 100, "secs", "No regen", 
+                                                      "Time for this item to reappear after it has been picked up");
+
+      mAttributeMenuUI->setStandardMenuColors(menuItem);
+
+      mAttributeMenuUI->menuItems.push_back(boost::shared_ptr<MenuItem>(menuItem));
+   }
 
    return mAttributeMenuUI;
 }

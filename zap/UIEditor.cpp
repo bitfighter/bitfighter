@@ -2860,15 +2860,15 @@ void EditorUserInterface::doneEditingAttributes(EditorAttributeMenuUI *editor, E
 
    const Vector<EditorObject *> *objList = getObjectList();
 
-   // Find any other selected items of the same type of the item we just edited, and update their values too
+   // Find any other selected items of the same type of the item we just edited, and update their attributes too
    for(S32 i = 0; i < objList->size(); i++)
    {
       EditorObject *obj = objList->get(i);
 
       if(obj != object && obj->isSelected() && obj->getObjectTypeNumber() == object->getObjectTypeNumber())
       {
-         editor->doneEditing(obj);  // Transfer attributes from editor to object
-         obj->onAttrsChanged();     // And notify the object that its attributes have changed
+         editor->doneEditingAttrs(obj);  // Transfer attributes from editor to object
+         obj->onAttrsChanged();          // And notify the object that its attributes have changed
       }
    }
 }
@@ -3349,13 +3349,12 @@ void EditorUserInterface::startAttributeEditor()
                obj_j->unselect();
          }
 
-
          // Activate the attribute editor if there is one
          EditorAttributeMenuUI *menu = obj_i->getAttributeMenu();
          if(menu)
          {
             obj_i->setIsBeingEdited(true);
-            menu->startEditing(obj_i);
+            menu->startEditingAttrs(obj_i);
             menu->activate();
 
             saveUndoState();

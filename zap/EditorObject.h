@@ -114,7 +114,7 @@ public:
    // Should we show item attributes when it is selected? (only overridden by TextItem)
    virtual bool showAttribsWhenSelected() { return true; }                             
 
-   virtual void renderAttribs(F32 currentScale);
+   virtual void renderAttributeString(F32 currentScale) { /* Do nothing */ }
 
    void unselect();
 
@@ -213,8 +213,10 @@ public:
 
    virtual const char *getInstructionMsg() { return ""; }              // Message printed below item when it is selected
 
-   virtual EditorAttributeMenuUI *getAttributeMenu() { return NULL; }  // Override in child if it has an attribute menu
-   virtual void doneEditing(EditorAttributeMenuUI *attributeMenu) { /* Do nothing */ }
+   // For editing attributes:
+   virtual EditorAttributeMenuUI *getAttributeMenu() { return NULL; }         // Override in child if it has an attribute menu
+   virtual void startEditingAttrs(EditorAttributeMenuUI *attributeMenu) { }   // Called when we start editing to get menus populated
+   virtual void doneEditingAttrs(EditorAttributeMenuUI *attributeMenu) { }    // Called when we're done to retrieve values set by the menu
 
 
    //////////////
