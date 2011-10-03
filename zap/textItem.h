@@ -77,10 +77,14 @@ public:
    void computeExtent();                                            // Bounding box for quick collision-possibility elimination
 
 #ifndef ZAP_DEDICATED
+
    EditorAttributeMenuUI *getAttributeMenu();
+   void startEditingAttrs(EditorAttributeMenuUI *attributeMenu);    // Called when we start editing to get menus populated
+   void doneEditingAttrs(EditorAttributeMenuUI *attributeMenu);     // Called when we're done to retrieve values set by the menu
 
    // Provide a static hook into the object currently being edited with the attrubute editor for callback purposes
    static EditorObject *getAttributeEditorObject();
+
 #endif
 
    bool getCollisionPoly(Vector<Point> &polyPoints) const;          // More precise boundary for precise collision detection

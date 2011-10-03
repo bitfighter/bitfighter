@@ -332,17 +332,48 @@ EditorObject *TextItem::getAttributeEditorObject()
 }
 
 
+static void textEditedCallback(string text)
+{
+   TextItem *textItem = dynamic_cast<TextItem *>(TextItem::getAttributeEditorObject());
+   textItem->setText(text);
+   textItem->recalcTextSize();
+}
+
+
 EditorAttributeMenuUI *TextItem::getAttributeMenu()
 {
    // Lazily initialize this -- if we're in the game, we'll never need this to be instantiated
    if(!mAttributeMenuUI)
-      mAttributeMenuUI = new TextItemEditorAttributeMenuUI((ClientGame *)getGame());
+   {
+      ClientGame *clientGame = (ClientGame *)getGame();
+      mAttributeMenuUI = new EditorAttributeMenuUI(clientGame);
 
-   // Udate the editor with attributes from our current object
-   mAttributeMenuUI->menuItems[0]->setValue(mText);
+      // "Blah" will be overwritten when startEditingAttrs() is called
+      EditableMenuItem *menuItem = new EditableMenuItem(clientGame, "Text: ", "Blah", "", "", MAX_TEXTITEM_LEN);
+
+      menuItem->setTextEditedCallback(textEditedCallback);
+      mAttributeMenuUI->setStandardMenuColors(menuItem);
+
+      mAttributeMenuUI->menuItems.push_back(boost::shared_ptr<MenuItem>(menuItem));
+   }
 
    return mAttributeMenuUI;
 }
+
+
+// Get the menu looking like what we want
+void TextItem::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
+{
+   attributeMenu->menuItems[0]->setValue(mText);
+}
+
+
+// Retrieve the values we need from the menu
+void TextItem::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
+{
+   mText = attributeMenu->menuItems[0]->getValue();
+}
+
 #endif
 
 

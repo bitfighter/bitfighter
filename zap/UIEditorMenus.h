@@ -59,20 +59,6 @@ public:
 };
 
 
-////////////////////////////////////////
-////////////////////////////////////////
-
-class TextItemEditorAttributeMenuUI : public EditorAttributeMenuUI
-{
-   typedef EditorAttributeMenuUI Parent;
-
-public:
-   TextItemEditorAttributeMenuUI(ClientGame *game);   // Constructor
-   void startEditingAttrs(EditorObject *object);
-   void doneEditingAttrs(EditorObject *object);
-};
-
-
 };
 
 #endif
