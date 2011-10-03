@@ -35,7 +35,10 @@ namespace Zap
 
 class EditorObject;
 
-// Base class from which all editor attribute menus are descended
+// This class is now a container for various attribute editing menus; these are rendered differently than regular menus, and
+// have other special attributes.  This class has been refactored such that it can be used directly, and no longer needs to be
+// subclassed for each type of entity we want to edit attributes for.
+
 class EditorAttributeMenuUI : public MenuUserInterface
 {
    typedef MenuUserInterface Parent;
@@ -53,21 +56,6 @@ public:
    virtual void doneEditingAttrs(EditorObject *object);
 
    void setStandardMenuColors(MenuItem *menuItem);
-};
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-class GoFastEditorAttributeMenuUI : public EditorAttributeMenuUI
-{
-   typedef EditorAttributeMenuUI Parent;
-
-public:
-   GoFastEditorAttributeMenuUI(ClientGame *game);    // Constructor
-
-   void startEditingAttrs(EditorObject *object);
-   void doneEditingAttrs(EditorObject *object);
 };
 
 

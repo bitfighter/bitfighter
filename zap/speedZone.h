@@ -115,8 +115,15 @@ public:
    void onItemDragging() { onGeomChanged(); }
    void onGeomChanged();
 
+#ifndef ZAP_DEDICATED
+   // These four methods are all that's needed to add an editable attribute to a class...
    EditorAttributeMenuUI *getAttributeMenu();
+   void startEditingAttrs(EditorAttributeMenuUI *attributeMenu);    // Called when we start editing to get menus populated
+   void doneEditingAttrs(EditorAttributeMenuUI *attributeMenu);     // Called when we're done to retrieve values set by the menu
+
    void renderAttributeString(F32 currentScale);
+#endif
+
 
    void saveItem(FILE *f);
 

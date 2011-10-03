@@ -168,31 +168,6 @@ bool PickupItem::collide(GameObject *otherObject)
 
 #ifndef ZAP_DEDICATED
 
-// Render some attributes when item is selected but not being edited
-void PickupItem::renderAttributeString(F32 currentScale)
-{
-   string txt = "Regen: " + itos(mRepopDelay) + " sec";      
-   renderItemText(txt.c_str(), 1, currentScale);
-}
-
-
-// Get the menu looking like what we want
-void PickupItem::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
-{
-   CounterMenuItem *menuItem = dynamic_cast<CounterMenuItem *>(attributeMenu->menuItems[0].get());
-   TNLAssert(menuItem, "We were counting on a CounterMenu here!");
-
-   menuItem->setIntValue(mRepopDelay);
-}
-
-
-// Retrieve the values we need from the menu
-void PickupItem::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
-{
-   mRepopDelay = attributeMenu->menuItems[0]->getIntValue();
-}
-
-
 EditorAttributeMenuUI *PickupItem::getAttributeMenu()
 {
    // Lazily initialize this -- if we're in the game, we'll never need this to be instantiated
@@ -212,6 +187,29 @@ EditorAttributeMenuUI *PickupItem::getAttributeMenu()
 
    return mAttributeMenuUI;
 }
+
+
+// Get the menu looking like what we want
+void PickupItem::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
+{
+   attributeMenu->menuItems[0]->setIntValue(mRepopDelay);
+}
+
+
+// Retrieve the values we need from the menu
+void PickupItem::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
+{
+   mRepopDelay = attributeMenu->menuItems[0]->getIntValue();
+}
+
+
+// Render some attributes when item is selected but not being edited
+void PickupItem::renderAttributeString(F32 currentScale)
+{
+   string txt = "Regen: " + itos(mRepopDelay) + " sec";      
+   renderItemText(txt.c_str(), 1, currentScale);
+}
+
 #endif
 
 

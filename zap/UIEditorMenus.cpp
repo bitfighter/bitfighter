@@ -101,46 +101,6 @@ void EditorAttributeMenuUI::doneEditingAttrs(EditorObject *object)
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-// Constructor
-GoFastEditorAttributeMenuUI::GoFastEditorAttributeMenuUI(ClientGame *game) : Parent(game)
-{
-   setMenuID(GoFastAttributeEditorUI);
-   menuItems.resize(2);
-
-   menuItems[0] = boost::shared_ptr<MenuItem>(new CounterMenuItem(game, "Speed", 100, 100, SpeedZone::minSpeed, SpeedZone::maxSpeed, "", "Really slow", ""));
-   setStandardMenuColors(menuItems[0].get());
-
-   menuItems[1] = boost::shared_ptr<MenuItem>(new YesNoMenuItem(game, "Snapping", true, NULL, ""));
-   setStandardMenuColors(menuItems[1].get());
-}
-
-
-void GoFastEditorAttributeMenuUI::startEditingAttrs(EditorObject *object)
-{
-   Parent::startEditingAttrs(object);
-
-   SpeedZone *goFast = dynamic_cast<SpeedZone *>(object);
-
-   // Now transfer some attributes
-   menuItems[0]->setIntValue(goFast->getSpeed());
-   menuItems[1]->setValue(goFast->getSnapping() ? "yes" : "no");
-}
-
-
-void GoFastEditorAttributeMenuUI::doneEditingAttrs(EditorObject *object)
-{
-   SpeedZone *goFast = dynamic_cast<SpeedZone *>(object);
-
-   goFast->setSpeed(menuItems[0]->getIntValue());
-   goFast->setSnapping(menuItems[1]->getIntValue() != 0);
-
-   Parent::doneEditingAttrs(object);
-}
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
 extern const S32 MAX_TEXTITEM_LEN;
 
 static void textEditedCallback(string text)

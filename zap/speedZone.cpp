@@ -278,15 +278,43 @@ const char *SpeedZone::getInstructionMsg()
 }
 
 
+#ifndef ZAP_DEDICATED
+
 EditorAttributeMenuUI *SpeedZone::getAttributeMenu()
 {
-#ifndef ZAP_DEDICATED
    // Lazily initialize this -- if we're in the game, we'll never need this to be instantiated
    if(!mAttributeMenuUI)
-      mAttributeMenuUI = new GoFastEditorAttributeMenuUI(dynamic_cast<ClientGame *>(getGame()));
+   {
+      ClientGame *clientGame = (ClientGame *)getGame();
 
-#endif
+      mAttributeMenuUI = new EditorAttributeMenuUI(clientGame);
+
+      CounterMenuItem *menuItem1 = new CounterMenuItem(clientGame, "Speed", 999, 100, minSpeed, maxSpeed, "", "Really slow", "");
+      mAttributeMenuUI->setStandardMenuColors(menuItem1);
+      mAttributeMenuUI->menuItems.push_back(boost::shared_ptr<MenuItem>(menuItem1));
+
+      YesNoMenuItem *menuItem2 = new YesNoMenuItem(clientGame, "Snapping", true, NULL, "");
+      mAttributeMenuUI->setStandardMenuColors(menuItem2);
+      mAttributeMenuUI->menuItems.push_back(boost::shared_ptr<MenuItem>(menuItem2));
+   }
+
    return mAttributeMenuUI;
+}
+
+
+// Get the menu looking like what we want
+void SpeedZone::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
+{
+   attributeMenu->menuItems[0]->setIntValue(mSpeed);
+   attributeMenu->menuItems[1]->setIntValue(mSnapLocation ? 1 : 0);
+}
+
+
+// Retrieve the values we need from the menu
+void SpeedZone::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
+{
+   mSpeed        = attributeMenu->menuItems[0]->getIntValue();
+   mSnapLocation = attributeMenu->menuItems[0]->getIntValue();    // Returns 0 or 1
 }
 
 
@@ -296,6 +324,8 @@ void SpeedZone::renderAttributeString(F32 currentScale)
    string txt = "Speed: " + itos(mSpeed) + "; Snap: " + (mSnapLocation ? "Yes" : "No");      
    renderItemText(txt.c_str(), 1, currentScale);
 }
+
+#endif
 
 
 static bool ignoreThisCollision = false;

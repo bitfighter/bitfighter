@@ -42,20 +42,8 @@ namespace Zap
  // Constructor
 SimpleLine::SimpleLine()
 { 
+   // Do nothing
 }     
-
-
-// Copy constructor -- make sure each copy gets its own geometry object
-//SimpleLine::SimpleLine(const SimpleLine &simpleLine)
-//{
-//   mGeometry = boost::shared_ptr<Geometry>(new SimpleLineGeometry(*((SimpleLineGeometry *)simpleLine.mGeometry.get())));  
-//}
-
-
-//void SimpleLine::copyAttrs(SimpleLine *target)
-//{
-//   EditorObject::copyAttrs(target);
-//}
 
 
 void SimpleLine::renderDock()
@@ -126,12 +114,11 @@ void SimpleLine::renderEditor(F32 currentScale)
 // Offset: negative below the item, positive above
 void SimpleLine::renderItemText(const char *text, S32 offset, F32 currentScale)
 {
-   // TODO: Clean this up -- will we ever need to show more than one line of text here?
 #ifndef ZAP_DEDICATED
    glColor(INSTRUCTION_TEXTCOLOR);
-   //S32 off = (INSTRUCTION_TEXTSIZE + INSTRUCTION_TEXTGAP) * offset - 10 - ((offset > 0) ? 5 : 0);
-   UserInterface::drawStringf_2pt(getVert(0), getVert(1) , F32(INSTRUCTION_TEXTSIZE) / currentScale, F32(-3/*off*/) / currentScale, text);
-   UserInterface::drawStringf_2pt(getVert(0), getVert(1) , F32(INSTRUCTION_TEXTSIZE) / currentScale, F32(-21) / currentScale, "[Enter] to edit");
+
+   UserInterface::drawStringf_2pt(getVert(0), getVert(1) , F32(INSTRUCTION_TEXTSIZE) / currentScale, -3.0 / currentScale, text);
+   UserInterface::drawStringf_2pt(getVert(0), getVert(1) , F32(INSTRUCTION_TEXTSIZE) / currentScale, -21.0 / currentScale, "[Enter] to edit");
 #endif
 }
 
