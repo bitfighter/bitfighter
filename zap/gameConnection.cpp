@@ -1706,10 +1706,12 @@ void GameConnection::endOfGameScoringHandler()
 // Client only
 void GameConnection::onEndGhosting()
 {
+#ifndef ZAP_DEDICATED
    TNLAssert(isConnectionToServer() && mClientGame, "when else is this called?");
    
    Parent::onEndGhosting();
    mClientGame->clearClientList();
+#endif
 }
 
 };
