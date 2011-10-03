@@ -893,16 +893,14 @@ string EditorUserInterface::getLevelFileName()
 
 // Handle console input
 // Valid commands: help, run, clear, quit, exit
-void processEditorConsoleCommand(void *gamePtr, OGLCONSOLE_Console console, char *cmdline)
+void processEditorConsoleCommand(OGLCONSOLE_Console console, char *cmdline)
 {
-   ClientGame *game = (ClientGame *)gamePtr;
-
    Vector<string> words = parseString(cmdline);
    if(words.size() == 0)
       return;
 
    string cmd = lcase(words[0]);
-   EditorUserInterface *ui = game->getUIManager()->getEditorUserInterface();
+   EditorUserInterface *ui = gClientGame->getUIManager()->getEditorUserInterface();
 
    if(cmd == "quit" || cmd == "exit") 
       OGLCONSOLE_HideConsole();
@@ -923,7 +921,7 @@ void processEditorConsoleCommand(void *gamePtr, OGLCONSOLE_Console console, char
          words.erase(0);
 
          ui->onBeforeRunScriptFromConsole();
-         ui->runScript(game->getSettings()->getFolderManager(), name, words);
+         ui->runScript(gClientGame->getSettings()->getFolderManager(), name, words);
          ui->onAfterRunScriptFromConsole();
       }
    }   
