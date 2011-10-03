@@ -53,7 +53,10 @@ const U16 SpeedZone::defaultSpeed;
 
 TNL_IMPLEMENT_NETOBJECT(SpeedZone);
 
+// Statics:
+#ifndef ZAP_DEDICATED
 EditorAttributeMenuUI *SpeedZone::mAttributeMenuUI = NULL;
+#endif
 
 
 // Constructor

@@ -39,6 +39,10 @@ class EngineeredItem : public Item
 private:
    typedef Item Parent;
 
+#ifndef ZAP_DEDICATED
+   static EditorAttributeMenuUI *mAttributeMenuUI;      // Menu for text editing; since it's static, don't bother with smart pointer
+#endif
+
 protected:
    F32 mHealth;
    SafePtr<MoveItem> mResource;
@@ -112,10 +116,16 @@ public:
 
    /////
    // Editor stuff
-   //Point getVert(S32 index) const { return getVert(0); }
-   //void setVert(const Point &pos, S32 index) { mGeometry->setVert(pos, 0); }
-   
    virtual string toString(F32 gridSize) const;
+
+#ifndef ZAP_DEDICATED
+   // These four methods are all that's needed to add an editable attribute to a class...
+   EditorAttributeMenuUI *getAttributeMenu();
+   void startEditingAttrs(EditorAttributeMenuUI *attributeMenu);    // Called when we start editing to get menus populated
+   void doneEditingAttrs(EditorAttributeMenuUI *attributeMenu);     // Called when we're done to retrieve values set by the menu
+
+   virtual void renderAttributeString(F32 currentScale);
+#endif
 
    /////
    // LuaItem interface
@@ -178,7 +188,6 @@ public:
    S32 getRenderSortValue() { return 0; }
 
    void getForceFieldStartAndEndPoints(Point &start, Point &end) {start = mStart; end = mEnd;}
-
 
    TNL_DECLARE_CLASS(ForceField);
 };

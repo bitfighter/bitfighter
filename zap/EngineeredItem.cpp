@@ -35,6 +35,12 @@
 #include "game.h"
 #include "gameConnection.h"
 
+
+#ifndef ZAP_DEDICATED
+#  include "UIEditorMenus.h"       // For EditorAttributeMenuUI def
+#endif
+
+
 #include "Colors.h"
 #include "stringUtils.h"
 
@@ -42,6 +48,11 @@
 
 namespace Zap
 {
+
+// Statics:
+#ifndef ZAP_DEDICATED
+   EditorAttributeMenuUI *EngineeredItem::mAttributeMenuUI = NULL;
+#endif
 
 static bool forceFieldEdgesIntersectPoints(const Vector<Point> &points, const Vector<Point> forceField)
 {
@@ -331,9 +342,55 @@ string EngineeredItem::toString(F32 gridSize) const
 }
 
 
+#ifndef ZAP_DEDICATED
+
+EditorAttributeMenuUI *EngineeredItem::getAttributeMenu()
+{
+   // Lazily initialize this -- if we're in the game, we'll never need this to be instantiated
+   if(!mAttributeMenuUI)
+   {
+      ClientGame *clientGame = (ClientGame *)getGame();
+      mAttributeMenuUI = new EditorAttributeMenuUI(clientGame);
+
+      // Value doesn't matter (set to 99 here), as it will be clobbered when startEditingAttrs() is called
+      CounterMenuItem *menuItem = new CounterMenuItem(clientGame, "10% Heal:", 99, 1, 0, 100, "secs", "Disabled", 
+                                                      "Time for this item to heal itself 10%");
+
+      mAttributeMenuUI->setStandardMenuColors(menuItem);
+
+      mAttributeMenuUI->menuItems.push_back(boost::shared_ptr<MenuItem>(menuItem));
+   }
+
+   return mAttributeMenuUI;
+}
+
+
+// Get the menu looking like what we want
+void EngineeredItem::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
+{
+   attributeMenu->menuItems[0]->setIntValue(mHealRate);
+}
+
+
+// Retrieve the values we need from the menu
+void EngineeredItem::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
+{
+   mHealRate = attributeMenu->menuItems[0]->getIntValue();
+}
+
+
+// Render some attributes when item is selected but not being edited
+void EngineeredItem::renderAttributeString(F32 currentScale)
+{
+   string txt = "10% Heal: " + (mHealRate == 0 ? "Disabled" : itos(mHealRate) + " sec" + ( mHealRate != 1 ? "s" : ""));      
+   renderItemText(txt.c_str(), 1, currentScale);
+}
+
+#endif
+
+
 // This is used for both positioning items in-game and for snapping them to walls in the editor --> static method
 // Polulates anchor and normal
-
 DatabaseObject *EngineeredItem::findAnchorPointAndNormal(GridDatabase *wallEdgeDatabase, const Point &pos, F32 snapDist, 
                                                            bool format, Point &anchor, Point &normal)
 {

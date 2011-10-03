@@ -31,7 +31,7 @@
 
 #ifndef ZAP_DEDICATED
 
-#include "UIEditorMenus.h"       // For PickupItemEditorAttributeMenuUI def
+#include "UIEditorMenus.h"       // For EditorAttributeMenuUI def
 
 #endif
 
@@ -206,7 +206,13 @@ void PickupItem::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
 // Render some attributes when item is selected but not being edited
 void PickupItem::renderAttributeString(F32 currentScale)
 {
-   string txt = "Regen: " + itos(mRepopDelay) + " sec";      
+   string txt;
+
+   if(mRepopDelay == 0)
+      txt = "Regen: None";
+   else
+      txt = "Regen: " + itos(mRepopDelay) + " sec" + ( mRepopDelay != 1 ? "s" : "");
+
    renderItemText(txt.c_str(), 1, currentScale);
 }
 
