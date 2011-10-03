@@ -308,7 +308,7 @@ _OGLCONSOLE_Console *programConsole = NULL;
 _OGLCONSOLE_Console *userConsole = NULL;
 
 /* Set the callback for a console */
-void OGLCONSOLE_EnterKey(void(*cbfun)(void *game, OGLCONSOLE_Console console, char *cmd))
+void OGLCONSOLE_EnterKey(void(*cbfun)(OGLCONSOLE_Console console, char *cmd))
 {
     programConsole->enterKeyCallback = (void*)cbfun;
 }
