@@ -353,6 +353,7 @@ FlagSpawn::FlagSpawn(const Point &pos, S32 time) : AbstractSpawn(pos, time)
    mObjectTypeNumber = FlagSpawnTypeNumber;
 }
 
+
 FlagSpawn::~FlagSpawn()
 {
    // Do nothing
@@ -387,6 +388,7 @@ void FlagSpawn::renderDock()
 {
    renderEditor(1);
 }
+
 
 bool FlagSpawn::processArguments(S32 argc, const char **argv, Game *game)
 {
