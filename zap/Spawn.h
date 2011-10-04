@@ -40,10 +40,15 @@
 namespace Zap
 {
 
+class EditorAttributeMenuUI;     // Needed in case class def hasn't been included in dedicated build
+
 // Parent class for spawns that generate items
 class AbstractSpawn : public EditorPointObject
 {
    typedef EditorObject Parent;
+
+private:
+   static EditorAttributeMenuUI *mAttributeMenuUI;
 
 protected:
    S32 mSpawnTime;
@@ -53,8 +58,8 @@ protected:
 
 public:
    AbstractSpawn(const Point &pos = Point(), S32 time = 0); // Constructor
-   AbstractSpawn(const AbstractSpawn &copy);    // Copy constructor
-   ~AbstractSpawn();
+   AbstractSpawn(const AbstractSpawn &copy);                // Copy constructor
+   ~AbstractSpawn();                                        // Destructor
    
    virtual bool processArguments(S32 argc, const char **argv, Game *game);
 
@@ -63,6 +68,16 @@ public:
    virtual const char *getPrettyNamePlural() = 0;
    virtual const char *getOnDockName() = 0;
    virtual const char *getOnScreenName() = 0;
+
+
+#ifndef ZAP_DEDICATED
+   // These four methods are all that's needed to add an editable attribute to a class...
+   EditorAttributeMenuUI *getAttributeMenu();
+   void startEditingAttrs(EditorAttributeMenuUI *attributeMenu);    // Called when we start editing to get menus populated
+   void doneEditingAttrs(EditorAttributeMenuUI *attributeMenu);     // Called when we're done to retrieve values set by the menu
+
+   virtual void renderAttributeString(F32 currentScale);
+#endif
 
    virtual const char *getClassName() const = 0;
 
@@ -80,17 +95,12 @@ public:
 
    virtual void renderEditor(F32 currentScale) = 0;
    virtual void renderDock() = 0;
-
-#ifndef ZAP_DEDICATED
-   EditorAttributeMenuUI *mAttributeMenu; 
-   EditorAttributeMenuUI *getAttributeMenu();
-   void doneEditingAttrs(EditorAttributeMenuUI *attributeMenu);
-#endif
 };
 
 
 class Spawn : public AbstractSpawn
 {
+
 public:
    Spawn(const Point &pos = Point());  // C++ constructor (no lua constructor)
    virtual ~Spawn();
@@ -120,9 +130,9 @@ class ItemSpawn : public AbstractSpawn
 {
    typedef AbstractSpawn Parent;
 
-   public:
-      ItemSpawn(const Point &pos, S32 time);
-      virtual void spawn(Game *game, const Point &pos) = 0;
+public:
+   ItemSpawn(const Point &pos, S32 time);
+   virtual void spawn(Game *game, const Point &pos) = 0;
 };
 
 ////////////////////////////////////////

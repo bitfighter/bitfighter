@@ -41,34 +41,29 @@
 namespace Zap
 {
 
+// Statics:
+#ifndef ZAP_DEDICATED
+   EditorAttributeMenuUI *AbstractSpawn::mAttributeMenuUI = NULL;
+#endif
 
 AbstractSpawn::AbstractSpawn(const Point &pos, S32 time)
 {
    setVert(pos, 0);
    setRespawnTime(time);
-#ifndef ZAP_DEDICATED
-   mAttributeMenu = NULL;
-#endif
 };
 
-// Use of mAttributeMenu seems to be very messy, make it more cleaner?
-// using "static" have problems when selecting multiple items at the same time.
 
 AbstractSpawn::AbstractSpawn(const AbstractSpawn &copy)
 {
    mSpawnTime = copy.mSpawnTime;
-#ifndef ZAP_DEDICATED
-   mAttributeMenu = NULL;
-#endif
 }
+
 
 AbstractSpawn::~AbstractSpawn()
 {
-#ifndef ZAP_DEDICATED
-   if(mAttributeMenu)
-      delete mAttributeMenu;
-#endif
+   // Do nothing
 }
+
 
 void AbstractSpawn::setRespawnTime(S32 time)       // in seconds
 {
@@ -109,6 +104,7 @@ string AbstractSpawn::toString(F32 gridSize) const
    return string(getClassName()) + " " + geomToString(gridSize) + " " + itos(mSpawnTime);
 }
 
+
 #ifndef ZAP_DEDICATED
 
 EditorAttributeMenuUI *AbstractSpawn::getAttributeMenu()
@@ -116,18 +112,51 @@ EditorAttributeMenuUI *AbstractSpawn::getAttributeMenu()
    if(getDefaultRespawnTime() == -1)  // No editing RespawnTimer for Ship Spawn
       return NULL;
 
-   if(!mAttributeMenu)
-      mAttributeMenu = new EditorAttributeMenuUI(dynamic_cast<ClientGame *>(getGame()));
+   if(!mAttributeMenuUI)
+   {
+      ClientGame *clientGame = (ClientGame *)getGame();
 
-   mAttributeMenu->menuItems.resize(1);
-   mAttributeMenu->menuItems[0] = boost::shared_ptr<MenuItem>(new CounterMenuItem(dynamic_cast<ClientGame *>(getGame()), "Spawn timer", mSpawnTime, 1, 1, 1000, "", "", ""));
-   return mAttributeMenu;
+      mAttributeMenuUI = new EditorAttributeMenuUI(clientGame);
+
+      CounterMenuItem *menuItem = new CounterMenuItem(clientGame, "Spawn timer", 999, 1, 0, 1000, "secs", "Never spawns", 
+                                                      "Time it takes for each item to be spawned");
+      mAttributeMenuUI->setStandardMenuColors(menuItem);
+      mAttributeMenuUI->menuItems.push_back(boost::shared_ptr<MenuItem>(menuItem));
+   }
+
+   return mAttributeMenuUI;
 }
+
+
+void AbstractSpawn::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
+{
+   attributeMenu->menuItems[0]->setIntValue(mSpawnTime);
+}
+
 
 void AbstractSpawn::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
 {
    mSpawnTime = attributeMenu->menuItems[0]->getIntValue();
 }
+
+
+// Render some attributes when item is selected but not being edited
+void AbstractSpawn::renderAttributeString(F32 currentScale)
+{
+
+   if(getDefaultRespawnTime() == -1)
+      return;
+
+   string txt;
+
+   if(mSpawnTime == 0)
+      txt = "Disabled";
+   else
+      txt = "Spawn time: " + itos(mSpawnTime) + " sec" + ( mSpawnTime != 1 ? "s" : "");
+
+   renderItemText(txt.c_str(), 1, currentScale);
+}
+
 #endif
 
 ////////////////////////////////////////
@@ -139,8 +168,11 @@ Spawn::Spawn(const Point &pos) : AbstractSpawn(pos)
    mObjectTypeNumber = ShipSpawnTypeNumber;
 }
 
+
+// Destructor
 Spawn::~Spawn()
 {
+   // Do nothing
 }
 
 
@@ -198,6 +230,7 @@ void Spawn::renderDock()
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+// Constructor
 ItemSpawn::ItemSpawn(const Point &pos, S32 time) : Parent(pos, time)
 {
    // Do nothing

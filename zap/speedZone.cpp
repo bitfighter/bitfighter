@@ -55,7 +55,7 @@ TNL_IMPLEMENT_NETOBJECT(SpeedZone);
 
 // Statics:
 #ifndef ZAP_DEDICATED
-EditorAttributeMenuUI *SpeedZone::mAttributeMenuUI = NULL;
+   EditorAttributeMenuUI *SpeedZone::mAttributeMenuUI = NULL;
 #endif
 
 
