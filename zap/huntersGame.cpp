@@ -766,8 +766,6 @@ void HuntersNexusObject::renderDock()
 }
 
 
-
-
 void HuntersNexusObject::renderEditor(F32 currentScale)
 {
    render();
