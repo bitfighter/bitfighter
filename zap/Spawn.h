@@ -186,6 +186,8 @@ public:
 
 class FlagSpawn : public AbstractSpawn
 {
+   typedef AbstractSpawn Parent;
+
 public:
    static const S32 DEFAULT_RESPAWN_TIME = 30;    // in seconds
 

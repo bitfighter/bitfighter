@@ -396,14 +396,14 @@ bool FlagSpawn::processArguments(S32 argc, const char **argv, Game *game)
       return false;
 
    mTeam = atoi(argv[0]);                                            // Read team
-   return AbstractSpawn::processArguments(argc - 1, argv + 1, game); // then read the rest of args
+   return Parent::processArguments(argc - 1, argv + 1, game);        // then read the rest of the args
 }
 
 
 string FlagSpawn::toString(F32 gridSize) const
 {
    // FlagSpawn <team> <x> <y> <spawn timer for nexus> -- squeezing in team number from AbstractSpawn::toString
-   string str1 = AbstractSpawn::toString(gridSize);
+   string str1 = Parent::toString(gridSize);
    size_t firstarg = str1.find(' ');
    return str1.substr(0, firstarg) + " " + itos(mTeam) + str1.substr(firstarg);
 }
