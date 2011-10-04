@@ -42,6 +42,13 @@ function logprint(msg)
 end
 
 --
+-- Override the default print() method to print to the oglconsole instead of stdout
+--
+function print(msg)
+    luaUtil:printToOglConsole(msg)
+end
+
+--
 -- Let the log know that this file was processed correctly
 --
 logprint("Loaded levelgen helper functions")

@@ -24,6 +24,7 @@
 //------------------------------------------------------------------------------------
 
 #include "luaUtil.h"
+#include "oglconsole.h"
 
 namespace Zap
 {
@@ -45,6 +46,7 @@ Lunar<LuaUtil>::RegType LuaUtil::methods[] =
 {
    method(LuaUtil, getMachineTime),
    method(LuaUtil, logprint),
+   method(LuaUtil, printToOglConsole),
    method(LuaUtil, getRandomNumber),
 
    {0,0}    // End method list
@@ -58,6 +60,21 @@ S32 LuaUtil::logprint(lua_State *L)
    checkArgCount(L, 2, methodName);
 
    logprintf(LogConsumer::LuaBotMessage, "%s: %s", getString(L, 1, methodName), getString(L, 2, methodName));
+   return 0;
+}
+
+
+extern OGLCONSOLE_Console gConsole;
+
+S32 LuaUtil::printToOglConsole(lua_State *L)
+{
+   static const char *methodName = "LuaUtil:printToOglConsole()";
+   checkArgCount(L, 1, methodName);
+
+   string message = getString(L, 1, methodName);
+
+   OGLCONSOLE_Output(gConsole, "%s\n", message.c_str());    // Print message to the console
+
    return 0;
 }
 
