@@ -651,8 +651,8 @@ void EditorUserInterface::runScript(const FolderManager *folderManager, const st
 
    // TODO: Uncomment the following, make it work again (commented out during refactor of editor load process)
    // Load the items
-   //LuaLevelGenerator(name, args, mGame->getGridSize(), getEditorDatabase(), this, gConsole);
-   
+   LuaLevelGenerator(name, folderManager->luaDir, &args, getGame()->getGridSize(), getGame()->getEditorDatabase(), getGame(), gConsole);
+
    // Process new items
    // Not sure about all this... may need to test
    // Bulk-process new items, walls first
@@ -674,6 +674,7 @@ void EditorUserInterface::runScript(const FolderManager *folderManager, const st
    }
 
    // When I came through here in early june, there was nothing else here... shouldn't there be some handling of non-wall objects?  -CE
+   // June of what year?  -bbr
 }
 
 
