@@ -57,7 +57,7 @@ public:
    /////
    // Editor methods
    const char *getEditorHelpString() { return "Area to finalize ship modifications.  Each team should have at least one."; }
-   const char *getPrettyNamePlural() { return "Loadout zones"; }
+   const char *getPrettyNamePlural() { return "Loadout Zones"; }
    const char *getOnDockName() { return "Loadout"; }
    const char *getOnScreenName() { return "Loadout"; }
    string toString(F32 gridSize) const;

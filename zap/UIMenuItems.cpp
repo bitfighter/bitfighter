@@ -78,6 +78,12 @@ void MenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
 }
 
 
+S32 MenuItem::getWidth(S32 textsize)
+{
+   return UserInterface::getStringWidthf(textsize, "%s%s", getPrompt().c_str(), mPromptAppendage);
+}
+
+
 bool MenuItem::handleKey(KeyCode keyCode, char ascii)
 {
    if(keyCode == KEY_ENTER || keyCode == KEY_SPACE || keyCode == KEY_RIGHT || keyCode == MOUSE_LEFT)
@@ -123,10 +129,22 @@ ToggleMenuItem::ToggleMenuItem(ClientGame *game, string title, Vector<string> op
 }
 
 
+string ToggleMenuItem::getOptionText()
+{
+   return mIndex < U32(mOptions.size()) ? mOptions[mIndex] : "INDEX OUT OF RANGE";
+}
+
+
 void ToggleMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
 {
    UserInterface::drawCenteredStringPair(xpos, ypos, textsize, *getColor(isSelected), *getValueColor(isSelected), 
-      getPrompt().c_str(), mIndex < U32(mOptions.size()) ? mOptions[mIndex].c_str() : "INDEX OUT OF RANGE");
+                                         getPrompt().c_str(), getOptionText().c_str());
+}
+
+
+S32 ToggleMenuItem::getWidth(S32 textsize)
+{
+   return UserInterface::getStringPairWidth(textsize, getPrompt().c_str(), getOptionText().c_str());
 }
 
 
@@ -221,14 +239,22 @@ CounterMenuItem::CounterMenuItem(ClientGame *game, const string &title, S32 valu
 }
 
 
+string CounterMenuItem::getOptionText()
+{
+   return (mValue == mMinValue && mMinMsg != "") ? mMinMsg : getValueForDisplayingInMenu() + " " + getUnits();
+}
+
+
 void CounterMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
 {
-   if(mValue == mMinValue && mMinMsg != "")
-      UserInterface::drawCenteredStringPair(xpos, ypos, textsize, *getColor(isSelected), *getValueColor(isSelected), getPrompt().c_str(), 
-                                            mMinMsg.c_str());
-   else
-      UserInterface::drawCenteredStringPair(xpos, ypos, textsize, *getColor(isSelected), *getValueColor(isSelected), getPrompt().c_str(), 
-                                           (getValueForDisplayingInMenu() + " " + getUnits()).c_str());
+   UserInterface::drawCenteredStringPair(xpos, ypos, textsize, *getColor(isSelected), *getValueColor(isSelected), 
+                                         getPrompt().c_str(), getOptionText().c_str());
+}
+
+
+S32 CounterMenuItem::getWidth(S32 textsize)
+{
+   return UserInterface::getStringPairWidth(textsize, getPrompt().c_str(), getOptionText().c_str());
 }
 
 
@@ -313,20 +339,32 @@ PlayerMenuItem::PlayerMenuItem(ClientGame *game, S32 index, const char *text, vo
 }
 
 
-void PlayerMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
+string PlayerMenuItem::getOptionText()
 {
-   string temp = getPrompt();
+   string text = getPrompt();
 
    // Add a player type prefix if requested
    if(mType == PlayerTypePlayer)
-      temp = "[Player] " + temp;
+      text = "[Player] " + text;
    else if(mType == PlayerTypeAdmin)
-      temp = "[Admin] " + temp;
+      text = "[Admin] " + text;
    else if(mType == PlayerTypeRobot)
-      temp = "[Robot] " + temp;
+      text = "[Robot] " + text;
 
+   return text;
+}
+
+
+void PlayerMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
+{
    glColor(*getColor(isSelected));
-   UserInterface::drawCenteredString(xpos, ypos, textsize, temp.c_str());
+   UserInterface::drawCenteredString(xpos, ypos, textsize, getOptionText().c_str());
+}
+
+
+S32 PlayerMenuItem::getWidth(S32 textsize)
+{
+   return UserInterface::getStringWidth(textsize, getOptionText().c_str());
 }
 
 
@@ -343,13 +381,28 @@ TeamMenuItem::TeamMenuItem(ClientGame *game, S32 index, AbstractTeam *team, void
 }
 
 
-void TeamMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
+string TeamMenuItem::getOptionText()
 {
    Team *team = (Team *)mTeam;
 
+   // Static may help reduce allocation/deallocation churn at the cost of 2K memory; not sure either are really a problem
+   static char buffer[2048];  
+   dSprintf(buffer, sizeof(buffer), "%s%s [%d /%d]", mIsCurrent ? "-> " : "", getPrompt().c_str(), team->getPlayerCount(), team->getScore());
+
+   return buffer;
+}
+
+
+void TeamMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
+{
    glColor(*getColor(isSelected));
-   UserInterface::drawCenteredStringf(xpos, ypos, textsize, "%s%s [%d /%d]", mIsCurrent ? "-> " : "", getPrompt().c_str(), 
-                                     team->getPlayerCount(), team->getScore());
+   UserInterface::drawCenteredStringf(xpos, ypos, textsize, getOptionText().c_str());
+}
+
+
+S32 TeamMenuItem::getWidth(S32 textsize)
+{
+   return UserInterface::getStringWidth(textsize, getOptionText().c_str());
 }
 
 
@@ -366,6 +419,12 @@ EditableMenuItem::EditableMenuItem(ClientGame *game, string title, string val, s
 }
 
 
+string EditableMenuItem::getOptionText()
+{
+   return mLineEditor.getString() != "" ? mLineEditor.getDisplayString() : mEmptyVal;
+}
+
+
 void EditableMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
 {
    Color textColor;     
@@ -376,12 +435,18 @@ void EditableMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
    else
       textColor.set(Colors::cyan);
 
-   S32 xpos2 = UserInterface::drawCenteredStringPair(xpos, ypos, textsize, *getColor(isSelected), textColor, getPrompt().c_str(), 
-                                                    mLineEditor.getString() != "" ? mLineEditor.getDisplayString().c_str() : mEmptyVal.c_str());
+   S32 xpos2 = UserInterface::drawCenteredStringPair(xpos, ypos, textsize, *getColor(isSelected), textColor, 
+                                                     getPrompt().c_str(), getOptionText().c_str());
 
    glColor(Colors::red);      // Cursor is always red
    if(isSelected)
       mLineEditor.drawCursor(xpos2, ypos, textsize);
+}
+
+
+S32 EditableMenuItem::getWidth(S32 textsize)
+{
+   return UserInterface::getStringPairWidth(textsize, getPrompt().c_str(), getOptionText().c_str());
 }
 
 

@@ -109,7 +109,7 @@ public:
 
    ///// Editor methods
    const char *getEditorHelpString() { return "Repairs damage to ships. [B]"; }
-   const char *getPrettyNamePlural() { return "Repair items"; }
+   const char *getPrettyNamePlural() { return "Repair Items"; }
    const char *getOnDockName() { return "Repair"; }
    const char *getOnScreenName() { return "Repair"; }
 
@@ -155,7 +155,7 @@ public:
 
    ///// Editor methods
    const char *getEditorHelpString() { return "Restores energy to ships"; }
-   const char *getPrettyNamePlural() { return "Energy items"; }
+   const char *getPrettyNamePlural() { return "Energy Items"; }
    const char *getOnDockName() { return "Energy"; }
    const char *getOnScreenName() { return "Energy"; }
 

@@ -122,6 +122,9 @@ EditorAttributeMenuUI *AbstractSpawn::getAttributeMenu()
                                                       "Time it takes for each item to be spawned");
       mAttributeMenuUI->setStandardMenuColors(menuItem);
       mAttributeMenuUI->menuItems.push_back(boost::shared_ptr<MenuItem>(menuItem));
+
+      // Add our standard save and exit option to the menu
+      mAttributeMenuUI->addSaveAndQuitMenuItem();
    }
 
    return mAttributeMenuUI;

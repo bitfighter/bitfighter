@@ -676,20 +676,20 @@ void QueryServersUserInterface::render()
       U32 y = TOP_OF_SERVER_LIST + (selectedIndex - getFirstServerIndexOnCurrentPage()) * SERVER_ENTRY_HEIGHT;
 
       // Render box behind selected item -- do this first so that it will not obscure descenders on letters like g in the column above
-      for(S32 i = 1; i >= 0; i--)
+      Color fillColor, outlineColor;
+      if(composingMessage() && !mJustMovedMouse)   // Disable selection highlight if we're typing a message
       {
-         if(composingMessage() && !mJustMovedMouse)   // Disable selection highlight if we're typing a message
-            glColor(i ? Color(0.4,0.4,0.4) : Color(0.8,0.8,0.8));
-         else
-            glColor(i ? Color(0,0,0.4) : Colors::blue);
-
-         glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
-            glVertex(0, y);
-            glVertex(canvasWidth, y);
-            glVertex(canvasWidth, y + SERVER_ENTRY_TEXTSIZE + 4);
-            glVertex(0, y + SERVER_ENTRY_TEXTSIZE + 4);
-         glEnd();
+         fillColor = Color(0.4);
+         outlineColor = Color(0.8);
       }
+      else
+      {
+         fillColor = Colors::blue40;
+         outlineColor = Colors::blue;
+      }
+
+      drawFilledRect(0, y, canvasWidth, y + SERVER_ENTRY_TEXTSIZE + 4, fillColor, outlineColor);
+
 
       S32 lastServer = min(servers.size() - 1, (mPage + 1) * getServersPerPage() - 1);
 
@@ -849,17 +849,7 @@ void QueryServersUserInterface::renderColumnHeaders()
    else
       x2 = columns[mSortColumn+1].xStart - 5;
 
-   for(S32 i = 1; i >= 0; i--)
-   {
-      // Render box around (behind, really) selected column
-      glColor(i ? Color(.4, .4, 0) : Colors::white);
-      glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
-         glVertex2i(x1, COLUMN_HEADER_TOP);
-         glVertex2i(x2, COLUMN_HEADER_TOP);
-         glVertex2i(x2, COLUMN_HEADER_TOP + COLUMN_HEADER_HEIGHT + 1);
-         glVertex2i(x1, COLUMN_HEADER_TOP + COLUMN_HEADER_HEIGHT + 1);
-      glEnd();
-   }
+   drawFilledRect(x1, COLUMN_HEADER_TOP, x2, COLUMN_HEADER_TOP + COLUMN_HEADER_HEIGHT + 1, Color(.4, .4, 0), Colors::white);
 
    // And now the column header text itself
    for(S32 i = 0; i < columns.size(); i++) 
@@ -929,19 +919,9 @@ void QueryServersUserInterface::renderMessageBox(bool drawmsg1, bool drawmsg2)
    const S32 xpos1 = (canvasWidth - strwid) / 2 - msgboxMargin; 
    const S32 xpos2 = (canvasWidth + strwid) / 2 + msgboxMargin;
 
-   for(S32 i = 1; i >= 0; i--)    // First fill, then outline
-   {
-      glColor(i ? Color(.4, 0, 0) : Colors::red);
+   drawFilledRect(xpos1, ypos1, xpos2, ypos2, Color(.4, 0, 0), Colors::red);
 
-      glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
-         glVertex2i(xpos1, ypos1);
-         glVertex2i(xpos1, ypos2);
-         glVertex2i(xpos2, ypos2);
-         glVertex2i(xpos2, ypos1);
-      glEnd();
-   }
-
-   // Now text
+   // Draw text
    glColor(Colors::white);
 
    drawCenteredString(ypos - lines * (fontsize + fontgap), fontsize, msg1);
@@ -1390,21 +1370,21 @@ void Button::render(F32 mouseX, F32 mouseY)
    S32 start = mTransparent ? 0 : 1;
 
    S32 labelLen = UserInterface::getStringWidth(mTextSize, mLabel);
-   for(S32 i = start; i >= 0; i--)
-   {
-      if(mouseOver(mouseX, mouseY))
-         glColor(i ? mBgColor : mHlColor * 2);
-      else
-         glColor(i ? mBgColor : mFgColor);         // Fill then border
 
-      glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
-         glVertex2i(mX,                           mY);
-         glVertex2i(mX + mPadding * 2 + labelLen, mY);
-         glVertex2i(mX + mPadding * 2 + labelLen, mY + mTextSize + mPadding * 2);
-         glVertex2i(mX,                           mY + mTextSize + mPadding * 2);
-      glEnd();
+   Color fillColor, outlineColor;
+
+   if(mouseOver(mouseX, mouseY))
+    {
+      fillColor = mBgColor;
+      outlineColor = mHlColor * 2;
+   }
+   else
+   {
+      fillColor = mBgColor;
+      outlineColor = mFgColor;    
    }
 
+   UserInterface::drawFilledRect(mX, mY, mX + mPadding * 2 + labelLen, mY + mTextSize + mPadding * 2, outlineColor, fillColor);
    UserInterface::drawString(mX + mPadding, mY + mPadding, mTextSize, mLabel);
 }
  

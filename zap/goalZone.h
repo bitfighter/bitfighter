@@ -86,7 +86,7 @@ public:
    /////
    // Editor methods
    const char *getEditorHelpString() { return "Target area used in a variety of games."; }
-   const char *getPrettyNamePlural() { return "Goal zones"; }
+   const char *getPrettyNamePlural() { return "Goal Zones"; }
    const char *getOnDockName() { return "Goal"; }
    const char *getOnScreenName() { return "Goal"; }
    string toString(F32 gridSize) const;

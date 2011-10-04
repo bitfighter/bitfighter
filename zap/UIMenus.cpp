@@ -302,16 +302,9 @@ void MenuUserInterface::render()
       S32 y = yStart + i * (getTextSize() + getGap());
 
       if(selectedIndex == i + offset)  // Highlight selected item
-         for(S32 j = 1; j >= 0; j--)
-         {
-            glColor(j ? Color(0,0,0.4) : Colors::blue);   // Fill, then outline
-            glBegin(j ? GL_POLYGON : GL_LINES);
-               glVertex2i(0,           y - getGap() / 2 + adjfact + shrinkfact);
-               glVertex2i(canvasWidth, y - getGap() / 2 + adjfact + shrinkfact);
-               glVertex2i(canvasWidth, y + getTextSize() + getGap() / 2 + adjfact - shrinkfact);
-               glVertex2i(0,           y + getTextSize() + getGap() / 2 + adjfact - shrinkfact);
-            glEnd();
-         }
+         drawFilledRect(0,           y - getGap() / 2 + adjfact + shrinkfact, 
+                        canvasWidth, y + getTextSize() + getGap() / 2 + adjfact - shrinkfact, 
+                        Colors::blue40, Colors::blue);
 
       menuItems[i+offset]->render(y, getTextSize(), selectedIndex == i+offset);
    }

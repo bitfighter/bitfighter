@@ -419,7 +419,7 @@ public:
 
    ///// Editor methods
    const char *getEditorHelpString() { return "Small bouncy object; capture one to activate Engineer module"; }
-   const char *getPrettyNamePlural() { return "ResourceItems"; }
+   const char *getPrettyNamePlural() { return "Resource Items"; }
    const char *getOnDockName() { return "Res."; }
    const char *getOnScreenName() { return "ResourceItem"; }
 

@@ -107,7 +107,7 @@ public:
    Spawn *clone() const;
 
    const char *getEditorHelpString() { return "Location where ships start.  At least one per team is required. [G]"; }
-   const char *getPrettyNamePlural() { return "Spawn points"; }
+   const char *getPrettyNamePlural() { return "Spawn Points"; }
    const char *getOnDockName() { return "Spawn"; }
    const char *getOnScreenName() { return "Spawn"; }
 
@@ -150,7 +150,7 @@ public:
    AsteroidSpawn *clone() const;
 
    const char *getEditorHelpString() { return "Periodically spawns a new asteroid."; }
-   const char *getPrettyNamePlural() { return "Asteroid spawn points"; }
+   const char *getPrettyNamePlural() { return "Asteroid Spawn Points"; }
    const char *getOnDockName() { return "ASP"; }
    const char *getOnScreenName() { return "AsteroidSpawn"; }
 
@@ -178,7 +178,7 @@ public:
    CircleSpawn *clone() const;
 
    const char *getEditorHelpString() { return "Periodically spawns a new circle."; }
-   const char *getPrettyNamePlural() { return "Circle spawn points"; }
+   const char *getPrettyNamePlural() { return "Circle Spawn Points"; }
    const char *getOnDockName() { return "CSP"; }
    const char *getOnScreenName() { return "CircleSpawn"; }
 
@@ -209,7 +209,7 @@ public:
    void resetTimer() { mTimer.reset(); }
 
    const char *getEditorHelpString() { return "Location where flags (or balls in Soccer) spawn after capture."; }
-   const char *getPrettyNamePlural() { return "Flag spawn points"; }
+   const char *getPrettyNamePlural() { return "Flag Spawn points"; }
    const char *getOnDockName() { return "FlagSpawn"; }
    const char *getOnScreenName() { return "FlagSpawn"; }
 

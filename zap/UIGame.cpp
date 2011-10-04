@@ -2885,33 +2885,21 @@ void GameUserInterface::renderDebugStatus()
       x = UserInterface::vertMargin + BOX_THICKNESS / 2 - 3;
       y = gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin;
 
-      for(S32 i = 1; i >= 0; i--)
-      {
-         glColor(i ? Colors::black : Colors::white);
-         glBegin(i ? GL_POLYGON: GL_LINE_LOOP); 
-            glVertex2i(x,             y);
-            glVertex2i(x + BOX_WIDTH, y);
-            glVertex2i(x + BOX_WIDTH, y - BOX_HEIGHT);
-            glVertex2i(x,             y - BOX_HEIGHT);
-         glEnd();
-      }
+      drawFilledRect(x, y, x + BOX_WIDTH, y - BOX_HEIGHT, Colors::black, Colors::white);
 
 
       // Draw Pause symbol
       x = UserInterface::vertMargin + BOX_THICKNESS + BOX_INSET;
       y = gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin - BOX_THICKNESS - BOX_INSET;
 
-      for(S32 i = 0; i < 2; i++)
-      {
-         glBegin(GL_POLYGON);    // Filled rectangle
-            glVertex2i(x,               y);
-            glVertex2i(x + PAUSE_WIDTH, y);
-            glVertex2i(x + PAUSE_WIDTH, y - PAUSE_HEIGHT);
-            glVertex2i(x,               y - PAUSE_HEIGHT);
-         glEnd();
+      glBegin(GL_POLYGON);    // Filled rectangle
+         glVertex2i(x,               y);
+         glVertex2i(x + PAUSE_WIDTH, y);
+         glVertex2i(x + PAUSE_WIDTH, y - PAUSE_HEIGHT);
+         glVertex2i(x,               y - PAUSE_HEIGHT);
+      glEnd();
 
-         x += PAUSE_WIDTH + PAUSE_GAP;
-      }
+      x += PAUSE_WIDTH + PAUSE_GAP;
 
       x += BOX_INSET;
       y -= (TEXT_SIZE + BOX_INSET + BOX_THICKNESS + 3);

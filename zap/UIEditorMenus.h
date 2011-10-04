@@ -52,10 +52,14 @@ public:
    void render();
    void onEscape();
 
+   S32 getMenuWidth();
+
    virtual void startEditingAttrs(EditorObject *object);
+   virtual void doneEditingAttrs();
    virtual void doneEditingAttrs(EditorObject *object);
 
    void setStandardMenuColors(MenuItem *menuItem);
+   void addSaveAndQuitMenuItem();
 };
 
 

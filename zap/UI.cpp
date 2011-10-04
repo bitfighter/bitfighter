@@ -578,6 +578,12 @@ S32 UserInterface::drawCenteredStringPair(S32 xpos, S32 ypos, S32 size, const Co
 }
 
 
+S32 UserInterface::getStringPairWidth(S32 size, const char *leftStr, const char *rightStr)
+{
+   return getStringWidthf(size, "%s %s", leftStr, rightStr);
+}
+
+
 //// Draws a string centered on the screen, with different parts colored differently
 //S32 UserInterface::drawCenteredStringPair(S32 y, U32 size, const Color &col1, const Color &col2, const char *left, const char *right)
 //{
@@ -737,14 +743,7 @@ void UserInterface::renderMessageBox(const char *title, const char *instr, const
       if(i == 0 && enableLineSmoothing) 
          glEnable(GL_BLEND);
 
-      glColor(i ? Color(.3,0,0) : Colors::white);        // Draw the box
-      
-      glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
-         glVertex2i(inset, boxTop);
-         glVertex2i(canvasWidth - inset, boxTop);
-         glVertex2i(canvasWidth - inset, boxTop + boxHeight);
-         glVertex2i(inset, boxTop + boxHeight);
-      glEnd();
+      drawFilledRect(inset, boxTop, canvasWidth - inset, boxTop + boxHeight, Color(.3,0,0), Colors::white);
    }
 
    // Draw title, message, and footer
@@ -755,6 +754,21 @@ void UserInterface::renderMessageBox(const char *title, const char *instr, const
       drawCenteredString(boxTop + vertMargin + titleSize + titleGap + i * (textSize + textGap), textSize, message[i]);
 
    drawCenteredString(boxTop + boxHeight - vertMargin - textSize, textSize, instr);
+}
+
+
+void UserInterface::drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &fillColor, const Color &outlineColor)
+{
+   for(S32 i = 1; i >= 0; i--)
+   {
+      glColor(i ? fillColor : outlineColor);
+      glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
+         glVertex2i(x1, y1);
+         glVertex2i(x2, y1);
+         glVertex2i(x2, y2);
+         glVertex2i(x1, y2);
+      glEnd();
+   }
 }
 
 

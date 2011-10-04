@@ -133,6 +133,7 @@ public:
    virtual void onMouseDragged(S32 x, S32 y);
 
    void renderMessageBox(const char *title, const char *instr, const char *message[], S32 msgLines, S32 vertOffset = 0);
+   static void drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &fillColor, const Color &outlineColor);
 
 
    // Draw string at given location (normal and formatted versions)
@@ -190,6 +191,8 @@ public:
 
    static S32 drawCenteredStringPair(S32 ypos, S32 size, const Color &leftColor, const Color &rightColor, 
                                      const char *leftStr, const char *rightStr);
+
+   static S32 getStringPairWidth(S32 size, const char *leftStr, const char *rightStr);
 
    // Draw text centered in a left or right column (normal and formatted versions)  --> now return starting location
    static S32 drawCenteredString2Col(S32 y, S32 size, bool leftCol, const char *str);

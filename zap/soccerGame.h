@@ -130,9 +130,9 @@ public:
 
    ///// Editor methods
    const char *getEditorHelpString() { return "Soccer ball, can only be used in Soccer games."; }
-   const char *getPrettyNamePlural() { return "SoccerBalls"; }
+   const char *getPrettyNamePlural() { return "Soccer Balls"; }
    const char *getOnDockName() { return "Ball"; }
-   const char *getOnScreenName() { return "SoccerBall"; }
+   const char *getOnScreenName() { return "Soccer Ball"; }
    bool hasTeam() { return false; }
    bool canBeHostile() { return false; }
    bool canBeNeutral() { return false; }

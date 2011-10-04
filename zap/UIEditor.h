@@ -346,6 +346,8 @@ public:
 
    static void renderSnapTarget(const Point &target);
 
+   S32 getItemSelectedCount();      // How many are objects are selcted?
+
 
    static S32 checkEdgesForSnap(const Point &clickPoint, const Vector<Point> &points, bool abcFormat, F32 &minDist, Point &snapPoint);
    static S32 checkEdgesForSnap(const Point &clickPoint,  const Vector<WallEdge *> &edges, bool abcFormat, F32 &minDist, Point &snapPoint);

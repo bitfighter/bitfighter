@@ -1331,17 +1331,9 @@ void EditorUserInterface::renderDock(F32 width)    // width is current wall widt
 
    S32 dockHeight = getDockHeight(mShowMode);
 
-   for(S32 i = 1; i >= 0; i--)
-   {
-      glColor(i ? Colors::black : (mouseOnDock() ? Colors::yellow : Colors::white));
-
-      glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
-         glVertex2i(canvasWidth - DOCK_WIDTH - horizMargin, canvasHeight - vertMargin);
-         glVertex2i(canvasWidth - horizMargin,              canvasHeight - vertMargin);
-         glVertex2i(canvasWidth - horizMargin,              canvasHeight - vertMargin - dockHeight);
-         glVertex2i(canvasWidth - DOCK_WIDTH - horizMargin, canvasHeight - vertMargin - dockHeight);
-      glEnd();
-   }
+   drawFilledRect(canvasWidth - DOCK_WIDTH - horizMargin, canvasHeight - vertMargin, 
+                  canvasWidth - horizMargin,              canvasHeight - vertMargin - dockHeight, 
+                  Colors::black, (mouseOnDock() ? Colors::yellow : Colors::white));
 
    // Draw coordinates on dock -- if we're moving an item, show the coords of the snap vertex, otherwise show the coords of the
    // snapped mouse position
@@ -3516,6 +3508,19 @@ bool EditorUserInterface::anyItemsSelected()
    return false;
 }
 
+
+S32 EditorUserInterface::getItemSelectedCount()
+{
+   const Vector<EditorObject *> *objList = getObjectList();
+
+   S32 count = 0;
+
+   for(S32 i = 0; i < objList->size(); i++)
+      if(objList->get(i)->isSelected())
+         count++;
+
+   return count;
+}
 
 bool EditorUserInterface::anythingSelected()
 {

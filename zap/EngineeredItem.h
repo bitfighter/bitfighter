@@ -229,7 +229,7 @@ public:
 
    // Some properties about the item that will be needed in the editor
    const char *getEditorHelpString() { return "Creates a force field that lets only team members pass. [F]"; }  
-   const char *getPrettyNamePlural() { return "Force field projectors"; }
+   const char *getPrettyNamePlural() { return "Force Field Projectors"; }
    const char *getOnDockName() { return "ForceFld"; }
    const char *getOnScreenName() { return "ForceFld"; }
    bool hasTeam() { return true; }

@@ -27,42 +27,98 @@
 #include "textItem.h"
 #include "speedZone.h"
 #include "PickupItem.h"    // For PickupItem def
+#include "ScreenInfo.h"    // For canvasHeight
+#include "ClientGame.h"    // For UIManager and callback
 #include "game.h"
 
 namespace Zap
 {
 
+// Escape cancels without saving
 void EditorAttributeMenuUI::onEscape()
 {
-   doneEditingAttrs(mObject);
+   //doneEditingAttrs(mObject);
    getUIManager()->reactivatePrevUI();     // Back to the editor!
 }
 
 
-static const S32 ATTR_TEXTSIZE = 10;       // called attrSize in the editor
+extern ScreenInfo gScreenInfo;
+
+static const S32 ATTR_TEXTSIZE = 20;       // called attrSize in the editor
 
 void EditorAttributeMenuUI::render()
 {
    // Draw the underlying editor screen
    getUIManager()->getPrevUI()->render();
 
- /*  if(mRenderInstructions)
-      renderMenuInstructions();*/
+   const S32 INSTRUCTION_SIZE = ATTR_TEXTSIZE * .6;
 
    EditorUserInterface *ui = getUIManager()->getEditorUserInterface();
-   
-   S32 gap = 3;
+
+   S32 selectedObjCount = ui->getItemSelectedCount();
+   string titlex = string("Attributes for ") + (selectedObjCount != 1 ? itos(selectedObjCount) + " " + mObject->getPrettyNamePlural() : 
+                                                                        mObject->getOnScreenName());
+   const char *title = titlex.c_str();
+
+
+   S32 gap = ATTR_TEXTSIZE / 3;
+
    Point offset = ui->getCurrentOffset();
    Point center = (mObject->getVert(0) + mObject->getVert(1)) * ui->getCurrentScale() / 2 + offset;
 
-   S32 count = menuItems.size();
-   S32 yStart = S32(center.y) - count * (ATTR_TEXTSIZE + gap) - 10;
+   S32 count = menuItems.size() - 1;      // We won't count our last item, save-n-quit, here, because it's rendered separately
+   S32 yStart = S32(center.y) - count * (ATTR_TEXTSIZE + gap) - 10 - (gap + INSTRUCTION_SIZE);
+
+   S32 width = max(getMenuWidth(), getStringWidth(INSTRUCTION_SIZE, title));
+
+   S32 hpad = 8;
+   S32 vpad = 4;
+
+   S32 naturalLeft = center.x - width / 2 - hpad;
+   S32 naturalRight = center.x + width / 2 + hpad;
+
+   S32 naturalTop =  yStart - vpad;
+   S32 naturalBottom = yStart + count * (ATTR_TEXTSIZE + gap) + 2 * (gap + INSTRUCTION_SIZE) + vpad * 2 + 2;
+
+   // Keep the menu on screen, no matter where the item being edited is located
+   S32 keepingItOnScreenAdjFactorX = 0;
+   S32 keepingItOnScreenAdjFactorY = 0;
+   
+   if(naturalLeft < 0)
+       keepingItOnScreenAdjFactorX = -1 * naturalLeft;
+   else if(naturalRight > gScreenInfo.getGameCanvasWidth())
+      keepingItOnScreenAdjFactorX = gScreenInfo.getGameCanvasWidth() - naturalRight;
+
+   if(naturalTop < 0)
+      keepingItOnScreenAdjFactorY = -1 * naturalTop;
+   else if(naturalBottom > gScreenInfo.getGameCanvasHeight())
+      keepingItOnScreenAdjFactorY = gScreenInfo.getGameCanvasHeight() - naturalBottom;
+
+
+   yStart += keepingItOnScreenAdjFactorY;
+   S32 cenX = center.x + keepingItOnScreenAdjFactorX;
+
+   // Background rectangle
+   drawFilledRect(naturalLeft  + keepingItOnScreenAdjFactorX, naturalTop    + keepingItOnScreenAdjFactorY, 
+                  naturalRight + keepingItOnScreenAdjFactorX, naturalBottom + keepingItOnScreenAdjFactorY, 
+                  Colors::blue40, Colors::blue);
+
+   // First draw the menu title
+   glColor(.9,.7,0);
+   drawCenteredString(cenX, yStart, INSTRUCTION_SIZE, title);
+
+   // Then the menu items
+   yStart += INSTRUCTION_SIZE + gap + 2;
 
    for(S32 i = 0; i < count; i++)
    {
       S32 y = yStart + i * (ATTR_TEXTSIZE + gap);
-      menuItems[i]->render((S32)center.x, y, ATTR_TEXTSIZE, selectedIndex == i);
+      menuItems[i]->render(cenX, y, ATTR_TEXTSIZE, selectedIndex == i);
    }
+
+   // The last menu item is our save and exit item, which we want to draw smaller for aesthetic reasons. 
+   // We'll blindly assume it's there, and also that it's last.
+   menuItems.last()->render(cenX, (yStart + count * (ATTR_TEXTSIZE + gap) + gap), INSTRUCTION_SIZE, selectedIndex == menuItems.size() - 1);
 }
 
 
@@ -75,10 +131,55 @@ void EditorAttributeMenuUI::setStandardMenuColors(MenuItem *menuItem)
 }
 
 
+static void saveAndQuit(ClientGame *game, U32 unused)
+{
+   EditorAttributeMenuUI *ui = dynamic_cast<EditorAttributeMenuUI *>(UserInterface::current);
+   TNLAssert(ui, "Unexpcted UI here -- expected a EditorAttributeMenuUI!");
+
+   ui->doneEditingAttrs();
+   ui->getUIManager()->reactivatePrevUI();
+}
+
+
+// We can use the same menu item in all our different attribute editing menus
+static boost::shared_ptr<MenuItem> saveAndQuitMenuItem;
+
+void EditorAttributeMenuUI::addSaveAndQuitMenuItem()
+{
+   // Lazy initialize
+   if(!saveAndQuitMenuItem.get())
+   {
+      MenuItem *menuItem = new MenuItem(getGame(), 99, "Save and quit", saveAndQuit, "Saves and quits");
+      setStandardMenuColors(menuItem);
+      saveAndQuitMenuItem = boost::shared_ptr<MenuItem>(menuItem);
+   }
+
+   menuItems.push_back(saveAndQuitMenuItem);
+}
+
+
+S32 EditorAttributeMenuUI::getMenuWidth()
+{
+   S32 width = 0;
+
+   for(S32 i = 0; i < menuItems.size(); i++)
+      if(menuItems[i]->getWidth(ATTR_TEXTSIZE) > width)
+         width = menuItems[i]->getWidth(ATTR_TEXTSIZE);
+
+   return width;
+}
+
+
 void EditorAttributeMenuUI::startEditingAttrs(EditorObject *object) 
 { 
    mObject = object; 
    object->startEditingAttrs(this);
+}
+
+
+void EditorAttributeMenuUI::doneEditingAttrs() 
+{
+   doneEditingAttrs(mObject);
 }
 
 

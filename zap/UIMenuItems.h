@@ -96,6 +96,7 @@ public:
 
    virtual void render(S32 ypos, S32 textsize, bool isSelected);              // Renders item horizontally centered on screen
    virtual void render(S32 xpos, S32 ypos, S32 textsize, bool isSelected);    // Renders item horizontally centered on xpos
+   virtual S32 getWidth(S32 textsize);
 
    const Color *getColor(bool isSelected);
 
@@ -178,6 +179,9 @@ public:
 
 class ToggleMenuItem : public ValueMenuItem
 {
+private:
+   string getOptionText();     // Helper function
+
 protected:
    string mValue;
    U32 mIndex;
@@ -196,6 +200,8 @@ public:
    virtual string getValue() const { return mOptions[mIndex]; } 
 
    virtual void render(S32 xpos, S32 ypos, S32 textsize, bool isSelected);
+   virtual S32 getWidth(S32 textsize);
+
    virtual bool handleKey(KeyCode keyCode, char ascii);
 
    virtual void activatedWithShortcutKey() { /* Do nothing */ }
@@ -227,6 +233,9 @@ class CounterMenuItem : public ValueMenuItem
 {
    typedef ValueMenuItem Parent;
 
+private:
+   string getOptionText();     // Helper function
+
 protected:
    S32 mValue;
    S32 mStep;
@@ -244,6 +253,7 @@ public:
                    const string &help, KeyCode k1 = KEY_UNKNOWN, KeyCode k2 = KEY_UNKNOWN);
 
    virtual void render(S32 xpos, S32 ypos, S32 textsize, bool isSelected);
+   virtual S32 getWidth(S32 textsize);
 
    virtual MenuItemTypes getItemType() { return CounterMenuItemType; }
    virtual string getValueForDisplayingInMenu() { return itos(mValue); }
@@ -311,6 +321,7 @@ class EditableMenuItem : public ValueMenuItem
 {
 private:
    string mEmptyVal;
+   string getOptionText();  // Helper function
 
 protected:
       LineEditor mLineEditor;
@@ -322,7 +333,10 @@ public:
                     KeyCode k1 = KEY_UNKNOWN, KeyCode k2 = KEY_UNKNOWN);
 
    virtual MenuItemTypes getItemType() { return EditableMenuItemType; }
+
    virtual void render(S32 xpos, S32 ypos, S32 textsize, bool isSelected);
+   virtual S32 getWidth(S32 textsize);
+
    virtual bool handleKey(KeyCode keyCode, char ascii);
 
    LineEditor getLineEditor() { return mLineEditor; }
@@ -360,14 +374,17 @@ class MaskedEditableMenuItem : public EditableMenuItem
 class PlayerMenuItem : public MenuItem
 {
 private:
-   PlayerType mType;    // Type of player, for name menu
+   PlayerType mType;          // Type of player, for name menu
+   string getOptionText();    // Helper function
 
 public:
    // Constructor
    PlayerMenuItem(ClientGame *game, S32 index, const char *text, void (*callback)(ClientGame *, U32), KeyCode k1, PlayerType type);
 
    virtual MenuItemTypes getItemType() { return PlayerMenuItemType; }
+
    virtual void render(S32 xpos, S32 ypos, S32 textsize, bool isSelected);
+   virtual S32 getWidth(S32 textsize);
 
    virtual void activatedWithShortcutKey() { /* Do nothing */ }
 };
@@ -380,13 +397,16 @@ class TeamMenuItem : public MenuItem
 {
 private:
    AbstractTeam *mTeam;
-   bool mIsCurrent;     // Is this a player's current team? 
+   bool mIsCurrent;           // Is this a player's current team? 
+   string getOptionText();    // Helper function
 
 public:
    TeamMenuItem(ClientGame *game, S32 index, AbstractTeam *team, void (*callback)(ClientGame *, U32), KeyCode keyCode, bool isCurrent);
 
    virtual MenuItemTypes getItemType() { return TeamMenuItemType; }
-   void render(S32 xpos, S32 ypos, S32 textsize, bool isSelected);
+
+   virtual void render(S32 xpos, S32 ypos, S32 textsize, bool isSelected);
+   virtual S32 getWidth(S32 textsize);
 
    virtual void activatedWithShortcutKey() { /* Do nothing */ }
 

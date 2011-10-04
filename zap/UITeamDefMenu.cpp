@@ -167,18 +167,9 @@ void TeamDefUserInterface::render()
       U32 y = yStart + i * (fontsize + fontgap);
 
       if(selectedIndex == j)       // Highlight selected item
-         for(S32 i = 1; i >= 0; i--)
-         {
-            glColor(i ? Color(0,0,0.4) : Colors::blue);     // Fill : Outline
-            glBegin(i ? GL_POLYGON : GL_LINES);
-               glVertex(0, y - 2);
-               glVertex(canvasWidth, y - 2);
-               glVertex(canvasWidth, y + itemHeight + 2);    // + 2 to allow room for cursor when editing team name
-               glVertex(0, y + itemHeight + 2);
-            glEnd();
-         }
+         drawFilledRect(0, y - 2, canvasWidth, y + itemHeight + 2, Colors::blue40, Colors::blue);
 
-         if(j < getGame()->getTeamCount())
+      if(j < getGame()->getTeamCount())
       {
          char numstr[10];
          dSprintf(numstr, sizeof(numstr), "Team %d: ", j+1);
@@ -186,7 +177,7 @@ void TeamDefUserInterface::render()
          char namestr[MAX_NAME_LEN + 20];    // Added a little extra, just to cover any contingency...
          dSprintf(namestr, sizeof(namestr), "%s%s", numstr, getGame()->getTeam(j)->getName().getString());
 
-         char colorstr[16];                  // "(100, 100, 100)" + 1 for null
+         char colorstr[16];                  // Need enough room for "(100, 100, 100)" + 1 for null
          const Color *color = getGame()->getTeamColor(j);
          dSprintf(colorstr, sizeof(colorstr), "(%d, %d, %d)", S32(color->r * 100 + 0.5), S32(color->g * 100 + 0.5), S32(color->b * 100 + 0.5));
          
@@ -206,7 +197,7 @@ void TeamDefUserInterface::render()
    }
 
    // Draw the help string
-   glColor3f(0, 1, 0);
+   glColor(Colors::green);
 
    if(errorMsgTimer.getCurrent())
    {
