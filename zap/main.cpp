@@ -161,6 +161,16 @@ using namespace TNL;
 #include <unistd.h>
 #endif
 
+#if defined(TNL_OS_LINUX) && defined(ZAP_DEDICATED)
+#define USE_EXCEPTION_BACKTRACE
+#endif
+
+#ifdef USE_EXCEPTION_BACKTRACE
+#include <execinfo.h>
+#include <signal.h>
+#endif
+
+
 namespace Zap
 {
 extern ClientGame *gClientGame1;
@@ -1092,6 +1102,31 @@ void launchUpdater(string bitfighterExecutablePathAndFilename, bool forceUpdate)
 };  // namespace Zap
 
 
+#ifdef USE_EXCEPTION_BACKTRACE
+void exceptionHandler(int sig) {
+   void *stack[20];
+   size_t size;
+   char **functions;
+
+   signal(SIGSEGV, NULL);   // turn off our handler
+
+
+   // get void*'s for all entries on the stack
+   size = backtrace(stack, 20);
+
+   // print and log all the frames
+   logprintf(LogConsumer::LogError, "Error: signal %d:", sig);
+   functions = backtrace_symbols(stack, size);
+
+   for(size_t i=0; i < size; i++)
+      logprintf(LogConsumer::LogError, "%d: %s", i, functions[i]);
+
+   free(functions);
+   //exit(1); // let it die (or use debugger) the normal way, after we turn off our handler
+}
+#endif
+
+
 using namespace Zap;
 
 ////////////////////////////////////////
@@ -1110,6 +1145,10 @@ int main(int argc, char **argv)
 #ifdef TNL_OS_MAC_OSX
    // Move to the application bundle's path (RDW)
    moveToAppPath();
+#endif
+
+#ifdef USE_EXCEPTION_BACKTRACE
+   signal(SIGSEGV, exceptionHandler);   // install our handler
 #endif
 
    GameSettings *settings = new GameSettings(); // Will be deleted in shutdownBitfighter()

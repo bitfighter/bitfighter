@@ -179,12 +179,12 @@ release: DEBUG=
 release: bitfighter
 
 dedicated: DEBUG=
-dedicated: CFLAGS=-DZAP_DEDICATED 
+dedicated: CFLAGS=-DZAP_DEDICATED -rdynamic 
 dedicated: EXEFILE=bitfighterd
 dedicated: dedicated_server
 
 dedicated_debug: OPTIMIZE=
-dedicated_debug: CFLAGS=-DZAP_DEDICATED 
+dedicated_debug: CFLAGS=-DZAP_DEDICATED -rdynamic 
 dedicated_debug: EXEFILE=bitfighterd
 dedicated_debug: dedicated_server
 
