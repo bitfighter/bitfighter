@@ -50,10 +50,10 @@ protected:
    bool mIsDestroyed;
    S32 mOriginalTeam;
 
-   bool mSnapped;       // Item is snapped to a wall
+   bool mSnapped;             // Item is snapped to a wall
 
-   S32 mHealRate;       // Rate at which items will heal themselves, defaults to 0
-   Timer mHealTimer;    // Timer for tracking mHealRate
+   S32 mHealRate;             // Rate at which items will heal themselves, defaults to 0
+   Timer mHealTimer;          // Timer for tracking mHealRate
 
    WallSegment *mMountSeg;    // Segment we're mounted to in the editor (don't care in the game)
 
