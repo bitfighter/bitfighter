@@ -71,7 +71,21 @@ void ScreenInfo::init(S32 physicalScreenWidth, S32 physicalScreenHeight)
 
 F32 ScreenInfo::getMinScalingFactor() { return MIN_SCALING_FACTOR; }
 
-void ScreenInfo::setWindowSize(S32 width, S32 height) { mWindowWidth = width; mWindowHeight = height; }
+void ScreenInfo::setWindowSize(S32 width, S32 height) 
+{ 
+   mWindowWidth = width; 
+   mWindowHeight = height; 
+
+   calcPixelRaio();
+}
+
+
+void ScreenInfo::calcPixelRaio()
+{
+   mPixelRatio = (F32)mWindowHeight / (F32)mGameCanvasHeight;
+}
+
+
 S32 ScreenInfo::getWindowWidth() { return mWindowWidth; }
 S32 ScreenInfo::getWindowHeight() { return mWindowHeight; }
 
@@ -79,16 +93,23 @@ S32 ScreenInfo::getWindowHeight() { return mWindowHeight; }
 S32 ScreenInfo::getPhysicalScreenWidth() { return mPhysicalScreenWidth; }
 S32 ScreenInfo::getPhysicalScreenHeight() { return mPhysicalScreenHeight; }
 
+
+// How many physical pixels make up a virtual one?
+F32 ScreenInfo::getPixelRatio() { return mPixelRatio; }
+
+
 // Game canvas size in physical pixels, assuming full screen unstretched mode
 S32 ScreenInfo::getDrawAreaWidth()
 {
    return mIsLandscape ? S32((F32)mGameCanvasWidth * mScalingRatioY) : mPhysicalScreenWidth;
 }
 
+
 S32 ScreenInfo::getDrawAreaHeight()
 {
    return mIsLandscape ? mPhysicalScreenHeight : S32((F32)mGameCanvasHeight * mScalingRatioX);
 }
+
 
 // Dimensions of black bars in physical pixels in full-screen unstretched mode.  Does not reflect current window mode
 S32 ScreenInfo::getHorizPhysicalMargin()
@@ -96,10 +117,12 @@ S32 ScreenInfo::getHorizPhysicalMargin()
    return mIsLandscape ? (mPhysicalScreenWidth - getDrawAreaWidth()) / 2 : 0;
 }
 
+
 S32 ScreenInfo::getVertPhysicalMargin()
 {
    return mIsLandscape ? 0 : (mPhysicalScreenHeight - getDrawAreaHeight()) / 2;
 }
+
 
 // Dimensions of black bars in physical pixes, based on current window mode
 S32 ScreenInfo::getHorizPhysicalMargin(DisplayMode mode)
@@ -107,22 +130,28 @@ S32 ScreenInfo::getHorizPhysicalMargin(DisplayMode mode)
    return mode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED ? getHorizPhysicalMargin() : 0;
 }
 
+
 S32 ScreenInfo::getVertPhysicalMargin(DisplayMode mode)
 {
    return mode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED ? getVertPhysicalMargin() : 0;
 }
+
 
 // The following methods return values in VIRTUAL pixels, not accurate in editor
 void ScreenInfo::setGameCanvasSize(S32 width, S32 height)
 {
    mGameCanvasWidth = width;
    mGameCanvasHeight = height;
+
+   calcPixelRaio();
 }
 
 void ScreenInfo::resetGameCanvasSize()
 {
    mGameCanvasWidth = GAME_WIDTH;
    mGameCanvasHeight = GAME_HEIGHT;
+
+   calcPixelRaio();
 }
 
 S32 ScreenInfo::getGameCanvasWidth() { return mGameCanvasWidth; }       // canvasWidth, usually 800

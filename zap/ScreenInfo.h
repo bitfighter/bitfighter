@@ -55,6 +55,9 @@ private:
    bool mIsLandscape;                           // Is our screen landscape or portrait?
    bool mHardwareSurface;                       // Is our screen going to use a hardware surface?
 
+   F32 mPixelRatio;                             // Number of physical pixels that are used to draw a single virtual pixel
+   void calcPixelRaio();
+
 public:
    ScreenInfo();      // Constructor
 
@@ -75,6 +78,9 @@ public:
    S32 getDrawAreaWidth();
    S32 getDrawAreaHeight();
 
+   // This is the number of physical pixels that are used to draw a single virtual pixel -- larger windows will have larger pixelRaios
+   F32 getPixelRatio();
+
    // Dimensions of black bars in physical pixels in full-screen unstretched mode.  Does not reflect current window mode
    S32 getHorizPhysicalMargin();
    S32 getVertPhysicalMargin();
@@ -82,6 +88,8 @@ public:
    // Dimensions of black bars in physical pixes, based on current window mode
    S32 getHorizPhysicalMargin(DisplayMode mode);
    S32 getVertPhysicalMargin(DisplayMode mode);
+
+   F32 getYScaleRatio();
 
    // The following methods return values in VIRTUAL pixels, not accurate in editor
    void setGameCanvasSize(S32 width, S32 height);
