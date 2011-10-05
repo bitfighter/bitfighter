@@ -448,32 +448,50 @@ static const SFG_StrokeStrip ch47st[] =
 
 static const SFG_StrokeChar ch47 = {82.1067f,1,ch47st};
 
-/* char: 0x30 */
+/* char: 0x30 (Zero) */
+
+F32 ch47_zero_square_factor = 0.5f;
+F32 ch47_width = 0.9f;
+F32 ch47_offset = (1.f - ch47_width) * 77.0667f * 0.5;
 
 static const SFG_StrokeVertex ch48st0[] =
 {
- {33.5514f,100.0f},
- {19.2657f,95.2381f},
- {9.7419f,80.9524f},
- {4.98f,57.1429f},
- {4.98f,42.8571f},
- {9.7419f,19.0476f},
- {19.2657f,4.7619f},
- {33.5514f,0.0f},
- {43.0752f,0.0f},
- {57.361f,4.7619f},
- {66.8848f,19.0476f},
- {71.6467f,42.8571f},
- {71.6467f,57.1429f},
- {66.8848f,80.9524f},
- {57.361f,95.2381f},
- {43.0752f,100.0f},
- {33.5514f,100.0f}
+ {33.5514f * ch47_width + ch47_offset,100.0f},
+ {19.2657f * ch47_width + ch47_offset,95.2381f * ch47_zero_square_factor + 100.f * (1.f - ch47_zero_square_factor)},
+ {9.7419f * ch47_width + ch47_offset,80.9524f * ch47_zero_square_factor + 100.f * (1.f - ch47_zero_square_factor)},
+ {4.98f * ch47_width + ch47_offset,57.1429f * ch47_zero_square_factor + 100.f * (1.f - ch47_zero_square_factor)},
+ {4.98f * ch47_width + ch47_offset,42.8571f * ch47_zero_square_factor},
+ {9.7419f * ch47_width + ch47_offset,19.0476f * ch47_zero_square_factor},
+ {19.2657f * ch47_width + ch47_offset,4.7619f * ch47_zero_square_factor},
+ {33.5514f * ch47_width + ch47_offset,0.0f},
+ {43.0752f * ch47_width + ch47_offset,0.0f},
+ {57.361f * ch47_width + ch47_offset,4.7619f * ch47_zero_square_factor},
+ {66.8848f * ch47_width + ch47_offset,19.0476f * ch47_zero_square_factor},
+ {71.6467f * ch47_width + ch47_offset,42.8571f * ch47_zero_square_factor},
+ {71.6467f * ch47_width + ch47_offset,57.1429f * ch47_zero_square_factor + 100.f * (1.f - ch47_zero_square_factor)},
+ {66.8848f * ch47_width + ch47_offset,80.9524f * ch47_zero_square_factor + 100.f * (1.f - ch47_zero_square_factor)},
+ {57.361f * ch47_width + ch47_offset,95.2381f * ch47_zero_square_factor + 100.f * (1.f - ch47_zero_square_factor)},
+ {43.0752f * ch47_width + ch47_offset,100.0f},
+ {33.5514f * ch47_width + ch47_offset,100.0f}
+};
+
+static const SFG_StrokeVertex ch48st1[] =
+{
+ //{19.2657f,4.7619f}, // slash 
+ //{57.361f,95.2381f},
+
+ {28,20}, // short slash
+ {49.0667f,80},
+
+ //{0,0}, // long shasl
+ //{72.0667f,100},
+
 };
 
 static const SFG_StrokeStrip ch48st[] =
 {
- {17,ch48st0}
+ {17,ch48st0},
+ //{2,ch48st1}  // added slash
 };
 
 static const SFG_StrokeChar ch48 = {77.0667f,1,ch48st};
