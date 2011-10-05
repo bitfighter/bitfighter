@@ -51,7 +51,7 @@ void EditorAttributeMenuUI::render()
    // Draw the underlying editor screen
    getUIManager()->getPrevUI()->render();
 
-   const S32 INSTRUCTION_SIZE = ATTR_TEXTSIZE * .6;
+   const S32 INSTRUCTION_SIZE = ATTR_TEXTSIZE * .6;      // Size of bottom menu item, "Save and quit"
 
    EditorUserInterface *ui = getUIManager()->getEditorUserInterface();
 
@@ -96,10 +96,17 @@ void EditorAttributeMenuUI::render()
    yStart += keepingItOnScreenAdjFactorY;
    S32 cenX = center.x + keepingItOnScreenAdjFactorX;
 
+   S32 left = naturalLeft  + keepingItOnScreenAdjFactorX;
+   S32 right = naturalRight + keepingItOnScreenAdjFactorX;
+
    // Background rectangle
-   drawFilledRect(naturalLeft  + keepingItOnScreenAdjFactorX, naturalTop    + keepingItOnScreenAdjFactorY, 
-                  naturalRight + keepingItOnScreenAdjFactorX, naturalBottom + keepingItOnScreenAdjFactorY, 
+   drawFilledRect(left,  naturalTop    + keepingItOnScreenAdjFactorY, 
+                  right, naturalBottom + keepingItOnScreenAdjFactorY, 
                   Color(.1), Color(.5));
+
+   // Now that the background has been drawn, adjust left and right to create the inset for the menu item highlights
+   left += 3;
+   right -= 4;
 
    // First draw the menu title
    glColor(Colors::red);
@@ -111,20 +118,23 @@ void EditorAttributeMenuUI::render()
    for(S32 i = 0; i < count; i++)
    {
       S32 y = yStart + i * (ATTR_TEXTSIZE + gap);
+
+      // Draw background highlight if this item's selected
       if(selectedIndex == i)
-         drawFilledRect(naturalLeft  + keepingItOnScreenAdjFactorX + 3, y, 
-                        naturalRight + keepingItOnScreenAdjFactorX - 4, y + ATTR_TEXTSIZE + 5,
-                        Colors::blue40, Colors::blue);
+         drawFilledRect(left,  y, right, y + ATTR_TEXTSIZE + 5, Colors::blue40, Colors::blue);
+
       menuItems[i]->render(cenX, y, ATTR_TEXTSIZE, selectedIndex == i);
    }
 
-   // The last menu item is our save and exit item, which we want to draw smaller for aesthetic reasons. 
+   /////
+   // The last menu item is our save and exit item, which we want to draw smaller to balance out the menu title visually.
    // We'll blindly assume it's there, and also that it's last.
    S32 y = (yStart + count * (ATTR_TEXTSIZE + gap) + gap);
+
+   // Draw background highlight if this item's selected
    if(selectedIndex == menuItems.size() - 1)
-      drawFilledRect(naturalLeft  + keepingItOnScreenAdjFactorX + 3, y - 1, 
-                     naturalRight + keepingItOnScreenAdjFactorX - 4, y + INSTRUCTION_SIZE + 3,
-                     Colors::blue40, Colors::blue);
+      drawFilledRect(left,  y - 1, right, y + INSTRUCTION_SIZE + 3, Colors::blue40, Colors::blue);
+
    menuItems.last()->render(cenX, y, INSTRUCTION_SIZE, selectedIndex == menuItems.size() - 1);
 }
 
