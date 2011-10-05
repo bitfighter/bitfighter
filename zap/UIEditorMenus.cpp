@@ -37,7 +37,7 @@ namespace Zap
 // Escape cancels without saving
 void EditorAttributeMenuUI::onEscape()
 {
-   //doneEditingAttrs(mObject);
+   mObject->setIsBeingEdited(false);
    getUIManager()->reactivatePrevUI();     // Back to the editor!
 }
 
