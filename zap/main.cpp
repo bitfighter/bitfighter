@@ -987,9 +987,12 @@ void actualizeScreenMode(bool changingInterfaces)
       glEnable(GL_BLEND);
    }
 
-   // Trigger OGLconsole resize event
+   // If OGLconsole has been created, recreate font texture and handle resize event
    if (gConsole)
+   {
+      OGLCONSOLE_CreateFont();
       OGLCONSOLE_Reshape();
+   }
 
    UserInterface::current->onDisplayModeChange();     // Notify the UI that the screen has changed mode
 }
