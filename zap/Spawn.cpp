@@ -118,9 +118,8 @@ EditorAttributeMenuUI *AbstractSpawn::getAttributeMenu()
 
       mAttributeMenuUI = new EditorAttributeMenuUI(clientGame);
 
-      CounterMenuItem *menuItem = new CounterMenuItem(clientGame, "Spawn timer", 999, 1, 0, 1000, "secs", "Never spawns", 
+      CounterMenuItem *menuItem = new CounterMenuItem(clientGame, "Spawn Timer:", 999, 1, 0, 1000, "secs", "Never spawns", 
                                                       "Time it takes for each item to be spawned");
-      mAttributeMenuUI->setStandardMenuColors(menuItem);
       mAttributeMenuUI->menuItems.push_back(boost::shared_ptr<MenuItem>(menuItem));
 
       // Add our standard save and exit option to the menu

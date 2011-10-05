@@ -180,8 +180,6 @@ EditorAttributeMenuUI *PickupItem::getAttributeMenu()
       CounterMenuItem *menuItem = new CounterMenuItem(clientGame, "Regen Time:", 99, 1, 0, 100, "secs", "No regen", 
                                                       "Time for this item to reappear after it has been picked up");
 
-      mAttributeMenuUI->setStandardMenuColors(menuItem);
-
       mAttributeMenuUI->menuItems.push_back(boost::shared_ptr<MenuItem>(menuItem));
 
       // Add our standard save and exit option to the menu

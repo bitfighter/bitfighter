@@ -352,7 +352,6 @@ EditorAttributeMenuUI *TextItem::getAttributeMenu()
       EditableMenuItem *menuItem = new EditableMenuItem(clientGame, "Text: ", "Blah", "", "", MAX_TEXTITEM_LEN);
 
       menuItem->setTextEditedCallback(textEditedCallback);
-      mAttributeMenuUI->setStandardMenuColors(menuItem);
 
       mAttributeMenuUI->menuItems.push_back(boost::shared_ptr<MenuItem>(menuItem));
 

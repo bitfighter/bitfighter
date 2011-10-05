@@ -56,10 +56,8 @@ void EditorAttributeMenuUI::render()
    EditorUserInterface *ui = getUIManager()->getEditorUserInterface();
 
    S32 selectedObjCount = ui->getItemSelectedCount();
-   string titlex = string("Attributes for ") + (selectedObjCount != 1 ? itos(selectedObjCount) + " " + mObject->getPrettyNamePlural() : 
-                                                                        mObject->getOnScreenName());
-   const char *title = titlex.c_str();
-
+   string title = string("Attributes for ") + (selectedObjCount != 1 ? itos(selectedObjCount) + " " + mObject->getPrettyNamePlural() : 
+                                                                       mObject->getOnScreenName());
 
    S32 gap = ATTR_TEXTSIZE / 3;
 
@@ -69,7 +67,7 @@ void EditorAttributeMenuUI::render()
    S32 count = menuItems.size() - 1;      // We won't count our last item, save-n-quit, here, because it's rendered separately
    S32 yStart = S32(center.y) - count * (ATTR_TEXTSIZE + gap) - 10 - (gap + INSTRUCTION_SIZE);
 
-   S32 width = max(getMenuWidth(), getStringWidth(INSTRUCTION_SIZE, title));
+   S32 width = max(getMenuWidth(), getStringWidth(INSTRUCTION_SIZE, title.c_str()));
 
    S32 hpad = 8;
    S32 vpad = 4;
@@ -101,11 +99,11 @@ void EditorAttributeMenuUI::render()
    // Background rectangle
    drawFilledRect(naturalLeft  + keepingItOnScreenAdjFactorX, naturalTop    + keepingItOnScreenAdjFactorY, 
                   naturalRight + keepingItOnScreenAdjFactorX, naturalBottom + keepingItOnScreenAdjFactorY, 
-                  Colors::blue40, Colors::blue);
+                  Color(.1), Color(.5));
 
    // First draw the menu title
-   glColor(.9,.7,0);
-   drawCenteredString(cenX, yStart, INSTRUCTION_SIZE, title);
+   glColor(Colors::red);
+   drawCenteredString(cenX, yStart, INSTRUCTION_SIZE, title.c_str());
 
    // Then the menu items
    yStart += INSTRUCTION_SIZE + gap + 2;
@@ -113,21 +111,21 @@ void EditorAttributeMenuUI::render()
    for(S32 i = 0; i < count; i++)
    {
       S32 y = yStart + i * (ATTR_TEXTSIZE + gap);
+      if(selectedIndex == i)
+         drawFilledRect(naturalLeft  + keepingItOnScreenAdjFactorX + 3, y, 
+                        naturalRight + keepingItOnScreenAdjFactorX - 4, y + ATTR_TEXTSIZE + 5,
+                        Colors::blue40, Colors::blue);
       menuItems[i]->render(cenX, y, ATTR_TEXTSIZE, selectedIndex == i);
    }
 
    // The last menu item is our save and exit item, which we want to draw smaller for aesthetic reasons. 
    // We'll blindly assume it's there, and also that it's last.
-   menuItems.last()->render(cenX, (yStart + count * (ATTR_TEXTSIZE + gap) + gap), INSTRUCTION_SIZE, selectedIndex == menuItems.size() - 1);
-}
-
-
-// Sets some standard menu colors.  Individual items can have different colors than these, but only if there is a very good reason.
-void EditorAttributeMenuUI::setStandardMenuColors(MenuItem *menuItem)
-{
-   menuItem->setSelectedColor(Colors::white);
-   menuItem->setUnselectedColor(Colors::gray50);
-   menuItem->setUnselectedValueColor(Colors::gray50);
+   S32 y = (yStart + count * (ATTR_TEXTSIZE + gap) + gap);
+   if(selectedIndex == menuItems.size() - 1)
+      drawFilledRect(naturalLeft  + keepingItOnScreenAdjFactorX + 3, y - 1, 
+                     naturalRight + keepingItOnScreenAdjFactorX - 4, y + INSTRUCTION_SIZE + 3,
+                     Colors::blue40, Colors::blue);
+   menuItems.last()->render(cenX, y, INSTRUCTION_SIZE, selectedIndex == menuItems.size() - 1);
 }
 
 
@@ -150,7 +148,6 @@ void EditorAttributeMenuUI::addSaveAndQuitMenuItem()
    if(!saveAndQuitMenuItem.get())
    {
       MenuItem *menuItem = new MenuItem(getGame(), 99, "Save and quit", saveAndQuit, "Saves and quits");
-      setStandardMenuColors(menuItem);
       saveAndQuitMenuItem = boost::shared_ptr<MenuItem>(menuItem);
    }
 

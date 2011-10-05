@@ -58,7 +58,6 @@ public:
    virtual void doneEditingAttrs();
    virtual void doneEditingAttrs(EditorObject *object);
 
-   void setStandardMenuColors(MenuItem *menuItem);
    void addSaveAndQuitMenuItem();
 };
 

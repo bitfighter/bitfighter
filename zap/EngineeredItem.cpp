@@ -356,8 +356,6 @@ EditorAttributeMenuUI *EngineeredItem::getAttributeMenu()
       CounterMenuItem *menuItem = new CounterMenuItem(clientGame, "10% Heal:", 99, 1, 0, 100, "secs", "Disabled", 
                                                       "Time for this item to heal itself 10%");
 
-      mAttributeMenuUI->setStandardMenuColors(menuItem);
-
       mAttributeMenuUI->menuItems.push_back(boost::shared_ptr<MenuItem>(menuItem));
 
       // Add our standard save and exit option to the menu

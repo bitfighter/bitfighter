@@ -292,12 +292,10 @@ EditorAttributeMenuUI *SpeedZone::getAttributeMenu()
 
       mAttributeMenuUI = new EditorAttributeMenuUI(clientGame);
 
-      CounterMenuItem *menuItem1 = new CounterMenuItem(clientGame, "Speed", 999, 100, minSpeed, maxSpeed, "", "Really slow", "");
-      mAttributeMenuUI->setStandardMenuColors(menuItem1);
+      CounterMenuItem *menuItem1 = new CounterMenuItem(clientGame, "Speed:", 999, 100, minSpeed, maxSpeed, "", "Really slow", "");
       mAttributeMenuUI->menuItems.push_back(boost::shared_ptr<MenuItem>(menuItem1));
 
-      YesNoMenuItem *menuItem2 = new YesNoMenuItem(clientGame, "Snapping", true, NULL, "");
-      mAttributeMenuUI->setStandardMenuColors(menuItem2);
+      YesNoMenuItem *menuItem2 = new YesNoMenuItem(clientGame, "Snapping:", true, NULL, "");
       mAttributeMenuUI->menuItems.push_back(boost::shared_ptr<MenuItem>(menuItem2));
 
       // Add our standard save and exit option to the menu
