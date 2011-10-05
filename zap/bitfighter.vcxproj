@@ -73,7 +73,7 @@
       <AdditionalLibraryDirectories>../lib;</AdditionalLibraryDirectories>
       <SubSystem>Console</SubSystem>
       <AdditionalDependencies>../Debug/libtomcrypt.lib;../Debug/tnl.lib;../Debug/lua-vec.lib;../lib/OpenAL32.lib;../lib/libspeex.lib;../lib/libogg.lib;../lib/libvorbis.lib;../lib/libvorbisfile.lib;../lib/ALURE32.lib;../lib/SDLmain.lib;../lib/SDL.lib;../lib/libpng14.lib;../lib/zlib.lib;Ws2_32.lib;opengl32.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <IgnoreSpecificDefaultLibraries>MSVCRTD.lib;msvcprtd.lib</IgnoreSpecificDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>MSVCRTD.lib;msvcprtd.lib;LIBCMT.lib</IgnoreSpecificDefaultLibraries>
     </Link>
     <ProjectReference>
       <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
