@@ -810,7 +810,7 @@ void QueryServersUserInterface::renderColumnHeaders()
    S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
 
    // Draw vertical dividing lines
-   glColor3f(0.7f, 0.7f, 0.7f);
+   glColor3f(0.7);
 
    for(S32 i = 1; i < columns.size(); i++)
    {
