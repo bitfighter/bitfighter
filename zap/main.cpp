@@ -987,6 +987,9 @@ void actualizeScreenMode(bool changingInterfaces)
       glEnable(GL_BLEND);
    }
 
+   // Trigger OGLconsole resize event
+   if (gConsole)
+      OGLCONSOLE_Reshape();
 
    UserInterface::current->onDisplayModeChange();     // Notify the UI that the screen has changed mode
 }
