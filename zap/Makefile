@@ -188,6 +188,8 @@ dedicated_debug: CFLAGS=-DZAP_DEDICATED
 dedicated_debug: EXEFILE=bitfighterd
 dedicated_debug: dedicated_server
 
+## -rdynamic is used for backtrace_symbols in main.cpp, which is only used in ZAP_DEDICATED
+dedicated_server: LFLAGS += -rdynamic
 
 bitfighter: $(OBJECTS_CLIENT) 
 	$(CC) -o ../exe/$(EXEFILE) $(OBJECTS_CLIENT) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a ../lua/lua-vec/src/liblua.a ../alure/libalure.a $(SFX_LFLAGS) $(GFX_LFLAGS) $(THREADLIB) $(LFLAGS)
