@@ -351,6 +351,15 @@ void UserInterface::drawAngleString(S32 x, S32 y, F32 size, F32 angle, const cha
 void UserInterface::doDrawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string, bool fix)
 {
    F32 scaleFactor = size / 120.0f;
+
+   bool resized = false;
+
+   if(size * gScreenInfo.getPixelRatio() < 9)
+   {
+      glLineWidth(1);
+      resized = true;
+   }
+
    glPushMatrix();
       glTranslatef(x, y + (fix ? 0 : size), 0);
       glRotatef(angle * radiansToDegreesConversion, 0, 0, 1);
@@ -358,6 +367,9 @@ void UserInterface::doDrawAngleString(F32 x, F32 y, F32 size, F32 angle, const c
       for(S32 i = 0; string[i]; i++)
          OpenglUtils::drawCharacter(string[i]);
    glPopMatrix();
+
+   if(resized)
+      glLineWidth(gDefaultLineWidth);
 }
 
 
