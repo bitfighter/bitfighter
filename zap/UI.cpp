@@ -791,22 +791,20 @@ void UserInterface::drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &
 
 
 U32 UserInterface::drawWrapText(char *text, S32 xpos, S32 ypos, S32 width, S32 ypos_end,
-      S32 lineHeight, S32 fontSize, S32 multiLineIndentation, bool alignBottom, bool draw)
+                                S32 lineHeight, S32 fontSize, S32 multiLineIndentation, bool alignBottom, bool draw)
 {
    U32 lines = 0;
    U32 lineStartIndex = 0;
    U32 lineEndIndex = 0;
    U32 lineBreakCandidateIndex = 0;
-   Vector<U32> seperator;  // Collection of character indexes at which to split the message
-
-   //char* text = (char*)message.c_str();  // Make message non-const: ok to do since it was passed by value
+   Vector<U32> seperator;           // Collection of character indexes at which to split the message
 
    while(text[lineEndIndex] != 0)
    {
       char c = text[lineEndIndex];  // Store character
-      text[lineEndIndex] = 0;  // Temporarily set this index as char array terminator
+      text[lineEndIndex] = 0;       // Temporarily set this index as char array terminator
       bool overWidthLimit = UserInterface::getStringWidth(fontSize, &text[lineStartIndex]) > (width - multiLineIndentation);
-      text[lineEndIndex] = c;  // Now set it back again
+      text[lineEndIndex] = c;       // Now set it back again
 
       // If this character is a space, keep track in case we need to split here
       if(text[lineEndIndex] == ' ')
@@ -831,7 +829,7 @@ U32 UserInterface::drawWrapText(char *text, S32 xpos, S32 ypos, S32 width, S32 y
    if(alignBottom)
    {
       ypos -= seperator.size() * lineHeight;  // Align according to number of wrapped lines
-      if(lineStartIndex != lineEndIndex)     // Align the remaining line
+      if(lineStartIndex != lineEndIndex)      // Align the remaining line
          ypos -= lineHeight;
    }
 
@@ -840,27 +838,27 @@ U32 UserInterface::drawWrapText(char *text, S32 xpos, S32 ypos, S32 width, S32 y
    for(S32 i = 0; i < seperator.size(); i++)
    {
       lineEndIndex = seperator[i];
-      if(ypos >= ypos_end || !alignBottom)  // if there is room to draw some lines at top when aligned bottom
+      if(ypos >= ypos_end || !alignBottom)      // If there is room to draw some lines at top when aligned bottom
       {
          if(draw)
          {
-            char c = text[lineEndIndex];  // Store character
-            text[lineEndIndex] = 0;  // Temporarily set this index as char array terminator
-            if (i == 0)   // Don't draw the extra margin if it is the first line
+            char c = text[lineEndIndex];        // Store character
+            text[lineEndIndex] = 0;             // Temporarily set this index as char array terminator
+            if(i == 0)                          // Don't draw the extra margin if it is the first line
                UserInterface::drawString(xpos, ypos, fontSize, &text[lineStartIndex]);
             else
                UserInterface::drawString(xpos + multiLineIndentation, ypos, fontSize, &text[lineStartIndex]);
-            text[lineEndIndex] = c;  // Now set it back again
+            text[lineEndIndex] = c;             // Now set it back again
          }
          lines++;
-         if(ypos < ypos_end && !alignBottom)  // if drawing from align top, and ran out of room, then stop and return
+         if(ypos < ypos_end && !alignBottom)    // If drawing from align top, and ran out of room, then stop and return
          {
             return lines;
          }
       }
       ypos += lineHeight;
 
-      lineStartIndex = lineEndIndex + 1;  // skip a char which is a space.
+      lineStartIndex = lineEndIndex + 1;        // Skip a char which is a space
    }
 
    // Draw any remaining characters
@@ -870,7 +868,7 @@ U32 UserInterface::drawWrapText(char *text, S32 xpos, S32 ypos, S32 width, S32 y
       {
          if(draw)
          {
-            if (seperator.size() == 0)  // Don't draw the extra margin if it is the only line
+            if (seperator.size() == 0)          // Don't draw the extra margin if it is the only line
                UserInterface::drawString(xpos, ypos, fontSize, &text[lineStartIndex]);
             else
                UserInterface::drawString(xpos + multiLineIndentation, ypos, fontSize, &text[lineStartIndex]);
