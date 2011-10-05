@@ -302,9 +302,8 @@ void MenuUserInterface::render()
       S32 y = yStart + i * (getTextSize() + getGap());
 
       if(selectedIndex == i + offset)  // Highlight selected item
-         drawFilledRect(0,           y - getGap() / 2 + adjfact + shrinkfact, 
-                        canvasWidth, y + getTextSize() + getGap() / 2 + adjfact - shrinkfact, 
-                        Colors::blue40, Colors::blue);
+         drawMenuItemHighlight(0,           y - getGap() / 2 + adjfact + shrinkfact, 
+                               canvasWidth, y + getTextSize() + getGap() / 2 + adjfact - shrinkfact);
 
       menuItems[i+offset]->render(y, getTextSize(), selectedIndex == i+offset);
    }

@@ -676,19 +676,8 @@ void QueryServersUserInterface::render()
       U32 y = TOP_OF_SERVER_LIST + (selectedIndex - getFirstServerIndexOnCurrentPage()) * SERVER_ENTRY_HEIGHT;
 
       // Render box behind selected item -- do this first so that it will not obscure descenders on letters like g in the column above
-      Color fillColor, outlineColor;
-      if(composingMessage() && !mJustMovedMouse)   // Disable selection highlight if we're typing a message
-      {
-         fillColor = Color(0.4);
-         outlineColor = Color(0.8);
-      }
-      else
-      {
-         fillColor = Colors::blue40;
-         outlineColor = Colors::blue;
-      }
-
-      drawFilledRect(0, y, canvasWidth, y + SERVER_ENTRY_TEXTSIZE + 4, fillColor, outlineColor);
+      bool disabled = composingMessage() && !mJustMovedMouse;
+      drawMenuItemHighlight(0, y, canvasWidth, y + SERVER_ENTRY_TEXTSIZE + 4, disabled);
 
 
       S32 lastServer = min(servers.size() - 1, (mPage + 1) * getServersPerPage() - 1);

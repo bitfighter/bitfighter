@@ -121,7 +121,7 @@ void EditorAttributeMenuUI::render()
 
       // Draw background highlight if this item's selected
       if(selectedIndex == i)
-         drawFilledRect(left,  y, right, y + ATTR_TEXTSIZE + 5, Colors::blue40, Colors::blue);
+         drawMenuItemHighlight(left,  y, right, y + ATTR_TEXTSIZE + 5);
 
       menuItems[i]->render(cenX, y, ATTR_TEXTSIZE, selectedIndex == i);
    }
@@ -133,7 +133,7 @@ void EditorAttributeMenuUI::render()
 
    // Draw background highlight if this item's selected
    if(selectedIndex == menuItems.size() - 1)
-      drawFilledRect(left,  y - 1, right, y + INSTRUCTION_SIZE + 3, Colors::blue40, Colors::blue);
+      drawMenuItemHighlight(left,  y - 1, right, y + INSTRUCTION_SIZE + 3);
 
    menuItems.last()->render(cenX, y, INSTRUCTION_SIZE, selectedIndex == menuItems.size() - 1);
 }

@@ -167,7 +167,7 @@ void TeamDefUserInterface::render()
       U32 y = yStart + i * (fontsize + fontgap);
 
       if(selectedIndex == j)       // Highlight selected item
-         drawFilledRect(0, y - 2, canvasWidth, y + itemHeight + 2, Colors::blue40, Colors::blue);
+         drawMenuItemHighlight(0, y - 2, canvasWidth, y + itemHeight + 2);
 
       if(j < getGame()->getTeamCount())
       {

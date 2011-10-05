@@ -757,6 +757,24 @@ void UserInterface::renderMessageBox(const char *title, const char *instr, const
 }
 
 
+void UserInterface::drawMenuItemHighlight(S32 x1, S32 y1, S32 x2, S32 y2, bool disabled)
+{
+   Color fillColor, outlineColor;
+   if(disabled)
+   {
+      fillColor = Color(0.4);
+      outlineColor = Color(0.8);
+   }
+   else
+   {
+      fillColor = Colors::blue40;
+      outlineColor = Colors::blue;
+   }
+
+   drawFilledRect(x1, y1, x2, y2, fillColor, outlineColor);
+}
+
+
 void UserInterface::drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &fillColor, const Color &outlineColor)
 {
    for(S32 i = 1; i >= 0; i--)
