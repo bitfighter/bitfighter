@@ -74,6 +74,9 @@ void OGLCONSOLE_AddHistory(OGLCONSOLE_Console console, char *s);
 void OGLCONSOLE_SetVisibility(int visible);
 int OGLCONSOLE_GetVisibility();
 
+/* Create the console font */
+int OGLCONSOLE_CreateFont();
+
 #ifdef __cplusplus
 }
 #endif

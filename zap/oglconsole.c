@@ -95,6 +95,10 @@ int OGLCONSOLE_CreateFont()
     puts("Creating OGLCONSOLE font");
 #endif
    
+    /* Destroy old texture if it exists */
+    if(glIsTexture(OGLCONSOLE_glFontHandle))
+       glDeleteTextures(1, &OGLCONSOLE_glFontHandle);
+
     /* Get a font index from OpenGL */
     glGenTextures(1, &OGLCONSOLE_glFontHandle);    /* Create 1 texture, store in glFontHandle */
     {int err=glGetError();if(err)printf("glGenTextures() error: %i\n",err);}
@@ -415,9 +419,7 @@ OGLCONSOLE_Console OGLCONSOLE_Create()
     _OGLCONSOLE_Console *console;
     
 #ifndef ZAP_DEDICATED
-    /* If font hasn't been created, we create it */
-    if(!glIsTexture(OGLCONSOLE_glFontHandle))
-        OGLCONSOLE_CreateFont();
+    OGLCONSOLE_CreateFont();
 #endif
 
     /* Allocate memory for our console */
