@@ -43,6 +43,7 @@
 
 #include "SDL/SDL_opengl.h"
 
+
 using namespace boost;
 
 namespace Zap
@@ -432,6 +433,7 @@ bool EditorObject::canBeHostile()
 static const S32 INSTRUCTION_TEXTSIZE = 12;      
 static const S32 INSTRUCTION_TEXTGAP = 4;
 static const Color INSTRUCTION_TEXTCOLOR = Colors::white;      // TODO: Put in editor
+
 
 // Offset: negative below the item, positive above
 void EditorPointObject::renderItemText(const char *text, S32 offset, F32 currentScale)

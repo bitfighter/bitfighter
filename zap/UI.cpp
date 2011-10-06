@@ -350,16 +350,14 @@ void UserInterface::drawAngleString(S32 x, S32 y, F32 size, F32 angle, const cha
 
 void UserInterface::doDrawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string, bool fix)
 {
+   static F32 modelview[16];
+   glGetFloatv(GL_MODELVIEW_MATRIX, modelview);    // Fills modelview[]
+
+   F32 linewidth = MAX(MIN(size * gScreenInfo.getPixelRatio() * modelview[0] / 10, 2.0f), 1);      // Clamp to range of 1 - 2
+
+   glLineWidth(linewidth);
+
    F32 scaleFactor = size / 120.0f;
-
-   bool resized = false;
-
-   if(size * gScreenInfo.getPixelRatio() < 9)
-   {
-      glLineWidth(1);
-      resized = true;
-   }
-
    glPushMatrix();
       glTranslatef(x, y + (fix ? 0 : size), 0);
       glRotatef(angle * radiansToDegreesConversion, 0, 0, 1);
@@ -368,8 +366,7 @@ void UserInterface::doDrawAngleString(F32 x, F32 y, F32 size, F32 angle, const c
          OpenglUtils::drawCharacter(string[i]);
    glPopMatrix();
 
-   if(resized)
-      glLineWidth(gDefaultLineWidth);
+   glLineWidth(gDefaultLineWidth);
 }
 
 
@@ -648,12 +645,13 @@ void UserInterface::drawString4Colf(S32 y, S32 size, U32 col, const char *format
 }
 
 
-
 #ifndef ZAP_DEDICATED
 S32 UserInterface::getStringWidth(S32 size, const char *string)
 {
    return OpenglUtils::getStringLength((const unsigned char *) string) * size / 120;
 }
+
+
 F32 UserInterface::getStringWidth(F32 size, const char *string)
 {
    return F32( OpenglUtils::getStringLength((const unsigned char *) string) ) * size / 120.f;
@@ -711,6 +709,7 @@ void UserInterface::renderConsole()
 
 
 //extern void glColor(const Color &c, float alpha = 1);
+extern ScreenInfo gScreenInfo;
 
 void UserInterface::renderMessageBox(const char *title, const char *instr, const char *message[], S32 msgLines, S32 vertOffset)
 {
