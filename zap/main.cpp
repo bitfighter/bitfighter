@@ -73,6 +73,7 @@ XXX need to document timers, new luavec stuff XXX
 <li>Removed -jsave and -jplay cmd line options.  It's been ages since they worked, and it's unlikely they ever will
 <li>Removed optional hostAddr cmd line parameter for -dedicated <hostAddr>.  Specify host address (only rarely needed) with the existing -hostAddr option
 <li>Removed -server cmd line parameter; not sure it really ever worked at all
+<li>Smaller text should look crisper throughout the game
 </ul>
 */
 
