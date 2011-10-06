@@ -305,8 +305,6 @@ public:
    void addToDock(EditorObject* object);
    void addDockObject(EditorObject *object, F32 xPos, F32 yPos);
 
-   string mScriptLine;                          // Script and args, if any
-
    void idle(U32 timeDelta);
    void deleteSelection(bool objectsOnly);      // Delete selected items (true = items only, false = items & vertices)
    void copySelection();                        // Copy selection to clipboard
