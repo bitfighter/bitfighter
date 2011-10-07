@@ -444,8 +444,8 @@ void EditorPointObject::renderItemText(const char *text, S32 offset, F32 current
    Point pos = getVert(0);
    
    // Dividing by currentScale keeps the text a constant size in pixels
-   UserInterface::drawCenteredString(pos.x, pos.y - off, F32(INSTRUCTION_TEXTSIZE) / currentScale, text);
-   UserInterface::drawCenteredString(pos.x, pos.y - off - INSTRUCTION_TEXTSIZE * 1.25, F32(INSTRUCTION_TEXTSIZE) / currentScale, "[Enter] to edit");
+   UserInterface::drawCenteredString(pos.x, pos.y + getEditorRadius(currentScale) / currentScale, F32(INSTRUCTION_TEXTSIZE) / currentScale, text);
+   UserInterface::drawCenteredString(pos.x, pos.y + getEditorRadius(currentScale) / currentScale + INSTRUCTION_TEXTSIZE * 1.25, F32(INSTRUCTION_TEXTSIZE) / currentScale, "[Enter] to edit");
 }
 
 
