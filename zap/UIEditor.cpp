@@ -497,12 +497,6 @@ void EditorUserInterface::setLevelFileName(string name)
 }
 
 
-void EditorUserInterface::setLevelGenScriptName(string line)
-{
-   mScriptLine = trim(line);
-}
-
-
 void EditorUserInterface::makeSureThereIsAtLeastOneTeam()
 {
    if(getGame()->getTeamCount() == 0)
@@ -613,16 +607,14 @@ void EditorUserInterface::copyScriptItemsToEditor()
 
 void EditorUserInterface::runLevelGenScript()
 {
-   // Parse mScriptLine 
-   if(mScriptLine == "")      // No script included!!
+   string scriptName = getGame()->getGameType()->getScriptName();
+
+   if(scriptName == "")      // No script included!!
       return;
 
-   OGLCONSOLE_Output(gConsole, "Running script %s\n", mScriptLine.c_str());
+   OGLCONSOLE_Output(gConsole, "Running script %s\n", getGame()->getGameType()->getScriptLine().c_str());
 
-   Vector<string> scriptArgs = parseString(mScriptLine);
-   
-   string scriptName = scriptArgs[0];
-   scriptArgs.erase(0);
+   const Vector<string> *scriptArgs = getGame()->getGameType()->getScriptArgs();
 
    clearLevelGenItems();      // Clear out any items from the last run
 
@@ -630,7 +622,7 @@ void EditorUserInterface::runLevelGenScript()
    mLoadTarget = &mLevelGenDatabase;
 
    FolderManager *folderManager = getGame()->getSettings()->getFolderManager();
-   runScript(folderManager, scriptName, scriptArgs);
+   runScript(folderManager, scriptName, *scriptArgs);
 
    // Reset the target
    mLoadTarget = getGame()->getEditorDatabase();
@@ -649,7 +641,6 @@ void EditorUserInterface::runScript(const FolderManager *folderManager, const st
       return;
    }
 
-   // TODO: Uncomment the following, make it work again (commented out during refactor of editor load process)
    // Load the items
    LuaLevelGenerator(name, folderManager->luaDir, &args, getGame()->getGridSize(), getGame()->getEditorDatabase(), getGame(), gConsole);
 
@@ -780,7 +771,7 @@ void EditorUserInterface::validateLevel()
 
    // Errors that may be corrected by levelgen -- script could add spawns
    // Neutral spawns work for all; if there's one, then that will satisfy our need for spawns for all teams
-   if(mScriptLine == "" && !foundNeutralSpawn)
+   if(getGame()->getGameType()->getScriptName() == "" && !foundNeutralSpawn)
    {
       // Make sure each team has a spawn point
       for(S32 i = 0; i < (S32)foundSpawn.size(); i++)

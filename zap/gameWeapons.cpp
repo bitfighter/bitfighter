@@ -74,6 +74,7 @@ void createWeaponProjectiles(WeaponType weapon, Point &dir, Point &shooterPos, P
          {
             Point velPerp(projVel.y, -projVel.x);
             velPerp.normalize(40.0f);
+            (new Projectile(weapon, firePos, projVel, shooter))->addToGame(game, game->getGameObjDatabase());
             (new Projectile(weapon, firePos, projVel + velPerp, shooter))->addToGame(game, game->getGameObjDatabase());
             (new Projectile(weapon, firePos, projVel - velPerp, shooter))->addToGame(game, game->getGameObjDatabase());
          }

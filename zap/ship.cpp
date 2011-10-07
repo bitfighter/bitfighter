@@ -904,8 +904,8 @@ void Ship::processModules()
       // If we're not doing anything, recharge.
       if(!anyActive)
       {
-         // Faster energy recharge if not moving
-         if(mCurrentMove.x == 0 && mCurrentMove.y == 0)
+         // Faster energy recharge if not moving and not shooting
+         if(mCurrentMove.x == 0 && mCurrentMove.y == 0 && !mCurrentMove.fire)
             mEnergy += S32(EnergyRechargeRateWhenIdle * scaleFactor);
 
          // Else normal rate
