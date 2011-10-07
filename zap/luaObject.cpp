@@ -80,9 +80,7 @@ void LuaObject::setLuaArgs(lua_State *L, const string &scriptname, const Vector<
  }
 
 
-// static
-bool LuaObject::loadLuaHelperFunctions(lua_State *L, const string &scriptDir, const char *caller,
-                                       void (*logError)(const char *msg, const char *filename))
+bool LuaObject::loadLuaHelperFunctions(lua_State *L, const string &scriptDir, const char *caller)
 {
    // Load our standard lua library  
    // TODO: Read the file into memory, store that as a static string in the bot code, and then pass that to Lua rather than rereading this

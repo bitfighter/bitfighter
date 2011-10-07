@@ -150,7 +150,7 @@ public:
    lua_State *getL() { return L; }
 
    void logError(const char *format, ...);   // In case of error...
-   static void logError(const char *msg, const char *filename);
+   void logError(const char *msg, const char *filename);
 
    void render(S32 layerIndex);
    void idle(IdleCallPath path);

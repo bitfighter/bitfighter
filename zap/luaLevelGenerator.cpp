@@ -352,7 +352,7 @@ bool LuaLevelGenerator::startLua()
    setLuaArgs(L, mFilename, mScriptArgs);    // Put our args in to the Lua table "args"
                                              // MUST BE SET BEFORE LOADING LUA HELPER FNS (WHICH F$%^S WITH GLOBALS IN LUA)
 
-   if(!loadLuaHelperFunctions(L, mScriptDir, "levelgen script", logError)) 
+   if(!loadLuaHelperFunctions(L, mScriptDir, "levelgen script")) 
       return false;
 
    if(!loadLevelGenHelperFunctions(L)) 

@@ -69,7 +69,7 @@ public:
    void runScript();                     // Wraps doRunScript()
    virtual void doRunScript();
    void logError(const char *format, ...);
-   static void logError(const char *msg, const char *filename);
+   void logError(const char *msg, const char *filename);
 
 
    static const char className[];

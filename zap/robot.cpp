@@ -1526,7 +1526,7 @@ bool Robot::startLua()
 
    LuaObject::setLuaArgs(L, mFilename, &mArgs);    // Put our args in to the Lua table "args"
 
-   if(isRunningScript && !loadLuaHelperFunctions(L, mScriptDir, "robot", logError))
+   if(isRunningScript && !loadLuaHelperFunctions(L, mScriptDir, "robot"))
       return false;
 
    string robotfname = joindir(mScriptDir, "robot_helper_functions.lua");

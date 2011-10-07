@@ -57,8 +57,7 @@ class Ship;
 class LuaObject
 {
 protected:
-   static bool loadLuaHelperFunctions(lua_State *L, const string &scriptDir, const char *caller,
-                                      void (*logError)(const char *msg, const char *filename));
+   bool loadLuaHelperFunctions(lua_State *L, const string &scriptDir, const char *caller);
 
    static int luaPanicked(lua_State *L);
    static void clearStack(lua_State *L);
@@ -99,6 +98,8 @@ public:
    static void setModulePath(lua_State *L, const string &scriptDir);
    static void openLibs(lua_State *L);
 
+   // Currently this is only used by loadLuaHelperFunctions()
+   virtual void logError(const char *msg, const char *filename) { TNLAssert(false, "No logging has been set up for this class!"); }
 };
 
 ////////////////////////////////////////
