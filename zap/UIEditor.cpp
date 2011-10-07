@@ -638,9 +638,7 @@ void EditorUserInterface::runScript(const FolderManager *folderManager, const st
 
    if(name == "")
    {
-      string msg = "Warning: Could not find script \"" + scriptName + "\"";
-
-      logprintf(LogConsumer::LogWarning, msg.c_str());
+      string msg = "Could not find script \"" + scriptName + "\"";
       OGLCONSOLE_Output(gConsole, msg.c_str());          // Print message to the console
 
       return;
