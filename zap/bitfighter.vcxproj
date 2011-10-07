@@ -309,7 +309,6 @@
     <ClInclude Include="..\zap\projectile.h" />
     <ClInclude Include="OpenglUtils.h" />
     <ClInclude Include="PickupItem.h" />
-    <ClInclude Include="pointainer.h" />
     <ClInclude Include="quickChatHelper.h" />
     <ClInclude Include="..\zap\rabbitGame.h" />
     <ClInclude Include="..\zap\resource.h" />
