@@ -641,8 +641,10 @@ void EditorUserInterface::runScript(const FolderManager *folderManager, const st
       return;
    }
 
-   // Load the items
-   LuaLevelGenerator(name, folderManager->luaDir, &args, getGame()->getGridSize(), getGame()->getEditorDatabase(), getGame(), gConsole);
+   // Run the script to load the items
+   LuaLevelGenerator levelgen(name, folderManager->luaDir, &args, getGame()->getGridSize(), 
+                              getGame()->getEditorDatabase(), getGame(), gConsole);
+   levelgen.runScript();
 
    // Process new items
    // Not sure about all this... may need to test
@@ -667,6 +669,45 @@ void EditorUserInterface::runScript(const FolderManager *folderManager, const st
    // When I came through here in early june, there was nothing else here... shouldn't there be some handling of non-wall objects?  -CE
    // June of what year?  -bbr
 }
+
+
+void EditorUserInterface::runPlugin(const FolderManager *folderManager, const string &scriptName, const Vector<string> &args)
+{
+   //string name = folderManager->findLevelGenScript(scriptName);  // Find full name of levelgen script
+
+   //if(name == "")
+   //{
+   //   logprintf(LogConsumer::LogWarning, "Warning: Could not find script \"%s\"",  scriptName.c_str());
+   //   // TODO: Show an error to the user
+   //   return;
+   //}
+
+   //// Load the items
+   //LuaEditorPlugin plugin(name, folderManager->luaDir, &args, getGame()->getGridSize(), getGame()->getEditorDatabase(), getGame(), gConsole);
+   //plugin.getMenus();
+   //plugin.runScript();
+
+   //// Process new items
+   //// Not sure about all this... may need to test
+   //// Bulk-process new items, walls first
+
+   //fillVector.clear();
+   //mLoadTarget->findObjects((TestFunc)isWallType, fillVector);
+
+   //for(S32 i = 0; i < fillVector.size(); i++)
+   //{
+   //   EditorObject *obj = dynamic_cast<EditorObject *>(fillVector[i]);
+
+   //   if(obj->getVertCount() < 2)      // Invalid item; delete
+   //      mLoadTarget->removeFromDatabase(obj, obj->getExtent());
+
+   //   if(obj->getObjectTypeNumber() == PolyWallTypeNumber)
+   //      dynamic_cast<PolyWall *>(obj)->processEndPoints();
+   //   else
+   //      dynamic_cast<WallItem *>(obj)->processEndPoints();
+   //}
+}
+
 
 
 void EditorUserInterface::validateLevel()
@@ -3114,6 +3155,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       else                                     // Z - Reset veiw
         centerView();
    }
+   
    else if(keyCode == KEY_R)
       if(checkModifier(KEY_CTRL, KEY_SHIFT))   // Ctrl-Shift-R - Rotate by arbitrary amount
       {
@@ -3185,6 +3227,10 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       else                                // unshifted --> by 5
          changeBarrierWidth(-5);
    }
+else if(keyCode == KEY_SEMICOLON)
+{
+   runPlugin(getGame()->getSettings()->getFolderManager(), "plugin_arc.lua", Vector<string>());
+}
 
    else if(keyCode == KEY_E)              // E - Zoom In
          mIn = true;

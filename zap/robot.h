@@ -150,6 +150,7 @@ public:
    lua_State *getL() { return L; }
 
    void logError(const char *format, ...);   // In case of error...
+   static void logError(const char *msg, const char *filename);
 
    void render(S32 layerIndex);
    void idle(IdleCallPath path);
@@ -196,7 +197,6 @@ public:
 private:
    int attribute;
    string message;
-   bool loadLuaHelperFunctions(lua_State *L, const char *caller);
 
    TNL_DECLARE_CLASS(Robot);
 };

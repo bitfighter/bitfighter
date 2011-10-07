@@ -37,8 +37,10 @@
 #include "speedZone.h"
 #include "EngineeredItem.h"    // For getItem()
 #include "PickupItem.h"        // For getItem()
-#include "playerInfo.h"           // For playerInfo def
+#include "playerInfo.h"        // For playerInfo def
 #include "config.h"
+
+#include "stringUtils.h"       // For joindir   
 
 
 namespace Zap
@@ -77,6 +79,34 @@ void LuaObject::setLuaArgs(lua_State *L, const string &scriptname, const Vector<
    luaopen_vec(L);      // For vector math
  }
 
+
+// static
+bool LuaObject::loadLuaHelperFunctions(lua_State *L, const string &scriptDir, const char *caller,
+                                       void (*logError)(const char *msg, const char *filename))
+{
+   // Load our standard lua library  
+   // TODO: Read the file into memory, store that as a static string in the bot code, and then pass that to Lua rather than rereading this
+   //       or better, find some way to load these into lua once, and then reuse the interpreter for every bot and levelgen and plugin
+   //       every time a bot or levelgen or plugin is created.  Or compile to bytecode and store that.  Or anything, really, that's more efficient.
+   string fname = joindir(scriptDir, "lua_helper_functions.lua");
+
+   if(luaL_loadfile(L, fname.c_str()))
+   {
+      string msg = "Error loading lua helper functions " + fname + ": " + lua_tostring(L, -1) + ".  Can't run " + caller + "...";
+      logError(msg.c_str(), fname.c_str());
+      return false;
+   }
+
+   // Now run the loaded code
+   if(lua_pcall(L, 0, 0, 0))     // Passing 0 params, getting none back
+   {
+      string msg = "Error during initializing lua helper functions " + fname + ": " + lua_tostring(L, -1) + ".  Can't run " + caller + "..."; 
+      logError(msg.c_str(), fname.c_str());
+      return false;
+   }
+
+   return true;
+}
 
 
 // Returns a point to calling Lua function

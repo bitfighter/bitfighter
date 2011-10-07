@@ -48,18 +48,28 @@ private:
    GridDatabase *mGridDatabase;
 
    OGLCONSOLE_Console mConsole;
-   bool loadLuaHelperFunctions(lua_State *L, const char *caller);
    bool loadLevelGenHelperFunctions(lua_State *L);
 
+   LevelLoader *mCaller;
+   F32 mGridSize;
+   string mLevelGenFile;     // Exists here so exception handler will know what file we were running
+
+protected:
+   lua_State *L;
+
 public:
+   LuaLevelGenerator() { TNLAssert(false, "Who wants this???"); }
    LuaLevelGenerator(const string &scriptName, const string &scriptDir, const Vector<string> *scriptArgs, F32 gridsize, GridDatabase *gridDatabase, 
                      LevelLoader *caller, OGLCONSOLE_Console console);   // C++ constructor
 
    LuaLevelGenerator(lua_State *L);      // Lua constructor
    virtual ~LuaLevelGenerator();         // Destructor
 
-   void runScript(lua_State *L, F32 gridSize);
+   bool startLua();                      // Initialize the interpreter, get all the helper functions loaded, get ready to run
+   void runScript();                     // Wraps doRunScript()
+   virtual void doRunScript();
    void logError(const char *format, ...);
+   static void logError(const char *msg, const char *filename);
 
 
    static const char className[];
@@ -82,7 +92,28 @@ public:
    // Implement LevelLoader abstract method
    void processLevelLoadLine(int argc, U32 id, const char **argv, GridDatabase *database, bool inEditor, const string &levelFileName);
 };
+/*
 
+class LuaEditorPlugin : public LuaLevelGenerator
+{
+   typedef LuaLevelGenerator Parent;
+
+public:
+   LuaEditorPlugin() { TNLAssert(false, "Who wants this???"); }
+   LuaEditorPlugin(const string &scriptName, const string &scriptDir, const Vector<string> *scriptArgs, F32 gridsize, GridDatabase *gridDatabase, 
+                     LevelLoader *caller, OGLCONSOLE_Console console);   // C++ constructor
+
+   LuaEditorPlugin(lua_State *L);      // Lua constructor
+   virtual ~LuaEditorPlugin();         // Destructor
+
+   static const char className[];
+
+   void getMenus();
+
+   void runScript();    // Wraps doRunScript()
+   bool runMain();
+};
+*/
 
 };
 

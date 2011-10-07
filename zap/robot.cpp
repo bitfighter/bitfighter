@@ -1434,9 +1434,11 @@ bool Robot::initialize(Point &pos)
       // WarpPositionMask triggers the spinny spawning visual effect
       setMaskBits(RespawnMask | HealthMask | LoadoutMask | PositionMask | MoveMask | ModulePrimaryMask | ModuleSecondaryMask | WarpPositionMask);      // Send lots to the client
 
-      TNLAssert(!isGhost(), "Didn't expect ghost here...");
+      TNLAssert(!isGhost(), "Didn't expect ghost here... this is supposed to only run on the server!");
 
-      if(! runMain()) return false;      //try to run, can fail on script error.
+      if(!runMain())               // Try to run, can fail on script error
+         return false;
+
       eventManager.update();       // Ensure registrations made during bot initialization are ready to go
 
    }
@@ -1450,19 +1452,12 @@ bool Robot::initialize(Point &pos)
 } 
 
 
-// Loop through all our bots, start their interpreters, and run their main() functions
+// Loop through all our bots and start their interpreters
 void Robot::startBots()
 {
    for(S32 i = 0; i < robots.size(); i++)
-   {
       if(robots[i]->isRunningScript && !robots[i]->startLua())
          robots[i]->isRunningScript = false;
-   }
-
-   //for(S32 i = 0; i < robots.size(); i++)
-   //   robots[i]->runMain();
-
-   //eventManager.update();       // Ensure registrations made during bot initialization are ready to go
 }
 
 
@@ -1531,8 +1526,7 @@ bool Robot::startLua()
 
    LuaObject::setLuaArgs(L, mFilename, &mArgs);    // Put our args in to the Lua table "args"
 
-
-   if(!loadLuaHelperFunctions(L, "robot"))
+   if(isRunningScript && !loadLuaHelperFunctions(L, mScriptDir, "robot", logError))
       return false;
 
    string robotfname = joindir(mScriptDir, "robot_helper_functions.lua");
@@ -1589,33 +1583,6 @@ bool Robot::startLua()
 }
 
 
-// TODO: This is almost identical to the same-named function in luaLevelGenerator.cpp, but each call their own logError function.  How can we combine?
-bool Robot::loadLuaHelperFunctions(lua_State *L, const char *caller)
-{
-   if(!isRunningScript) 
-      return true;
-
-   // Load our standard robot library  TODO: Read the file into memory, store that as a static string in the bot code, and then pass that to Lua rather than rereading this
-   // every time a bot is created.
-   string fname = joindir(mScriptDir, "lua_helper_functions.lua");
-
-   if(luaL_loadfile(L, fname.c_str()))
-   {
-      logError("Error loading lua helper functions %s: %s.  Can't run %s...", fname.c_str(), lua_tostring(L, -1), caller);
-      return false;
-   }
-
-   // Now run the loaded code
-   if(lua_pcall(L, 0, 0, 0))     // Passing 0 params, getting none back
-   {
-      logError("Error during initializing lua helper functions %s: %s.  Can't run %s...", fname.c_str(), lua_tostring(L, -1), caller);
-      return false;
-   }
-
-   return true;
-}
-
-
 // Don't forget to update the eventManager after running a robot's main function!
 // return false if failed
 bool Robot::runMain()
@@ -1632,7 +1599,6 @@ bool Robot::runMain()
    catch(LuaException &e)
    {
       logError("Robot error running main(): %s.  Shutting robot down.", e.what());
-      //delete this;  //might cause memory errors.
       isRunningScript = false;
       return false;
    }
@@ -1731,8 +1697,6 @@ bool Robot::processArguments(S32 argc, const char **argv, Game *game)
 }
 
 
-// Some rudimentary robot error logging.  Perhaps, someday, will become a sort of in-game error console.
-// For now, though, pass all errors through here.
 void Robot::logError(const char *format, ...)
 {
    va_list args;
@@ -1740,11 +1704,19 @@ void Robot::logError(const char *format, ...)
    char buffer[2048];
 
    vsnprintf(buffer, sizeof(buffer), format, args);
-   logprintf(LogConsumer::LuaBotMessage, "***ROBOT ERROR*** in %s ::: %s", mFilename.c_str(), buffer);
-   OGLCONSOLE_Print("***ROBOT ERROR*** in %s ::: %s\n", mFilename.c_str(), buffer);
+
+   logError(buffer, mFilename.c_str());
 
    va_end(args);
 }
+
+
+void Robot::logError(const char *msg, const char *filename)
+{
+   logprintf(LogConsumer::LogError, "***ROBOT ERROR*** in %s ::: %s", filename, msg);
+   OGLCONSOLE_Print("***ROBOT ERROR*** in %s ::: %s\n", filename, msg);
+}
+
 
 // Returns zone ID of current zone
 S32 Robot::getCurrentZone(ServerGame *game)

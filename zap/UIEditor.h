@@ -305,6 +305,8 @@ public:
    void addToDock(EditorObject* object);
    void addDockObject(EditorObject *object, F32 xPos, F32 yPos);
 
+   string mScriptLine;                          // Script and args, if any
+
    void idle(U32 timeDelta);
    void deleteSelection(bool objectsOnly);      // Delete selected items (true = items only, false = items & vertices)
    void copySelection();                        // Copy selection to clipboard
@@ -354,7 +356,9 @@ public:
 
    void deleteItem(S32 itemIndex);
 
-   void runScript(const FolderManager *folderManager, const string &scriptName, const Vector<string> &args);        
+   void runScript(const FolderManager *folderManager, const string &scriptName, const Vector<string> &args);
+   void runPlugin(const FolderManager *folderManager, const string &scriptName, const Vector<string> &args);        
+
    void runLevelGenScript();              // Run associated levelgen script
    void copyScriptItemsToEditor();        // Insert these items into the editor as first class items that can be manipulated or saved
    void clearLevelGenItems();             // Clear any previously created levelgen items

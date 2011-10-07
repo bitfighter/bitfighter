@@ -50,6 +50,15 @@ debug.getregistry = nil
 --]]
 
 
+--
+-- Wrapper to call the script's main() function in a safe manner
+--
+function _main()
+   if _declared("main") and type(main) == "function" then
+      main()
+   end
+end
+
 
 --
 -- strict.lua

@@ -41,16 +41,6 @@ bot = LuaRobot(Robot)
 
 
 --
--- Main function run when robot starts, before getName().  By default does nothing.  Override in bot scripts.
---
-function _main()
-   if _declared("main") and type(main) == "function" then
-      main()
-   end
-end
-
-
---
 -- Default robot name, can and should be overridden by user robots, but we need to have something...
 --
 function getName()

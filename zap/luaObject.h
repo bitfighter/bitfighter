@@ -57,6 +57,9 @@ class Ship;
 class LuaObject
 {
 protected:
+   static bool loadLuaHelperFunctions(lua_State *L, const string &scriptDir, const char *caller,
+                                      void (*logError)(const char *msg, const char *filename));
+
    static int luaPanicked(lua_State *L);
    static void clearStack(lua_State *L);
    static void checkArgCount(lua_State *L, S32 argsWanted, const char *functionName);
