@@ -155,6 +155,7 @@ public:
 ////////////////////////////////////////
 
 // Parent class for all things that have both a name and a value, i.e. anything that's not a regular menuItem
+// User provides typed input, value is returned as a string
 // Provides some additional functionality
 class ValueMenuItem : public MenuItem
 {
@@ -179,6 +180,8 @@ public:
 
 class ToggleMenuItem : public ValueMenuItem
 {
+   typedef ValueMenuItem Parent;
+
 private:
    string getOptionText();     // Helper function
 
@@ -215,6 +218,8 @@ public:
 
 class YesNoMenuItem : public ToggleMenuItem
 {
+   typedef ToggleMenuItem Parent;
+
 public:
    YesNoMenuItem(ClientGame *game, string title, bool currOption, void (*callback)(ClientGame *, U32), string help, 
                  KeyCode k1 = KEY_UNKNOWN, KeyCode k2 = KEY_UNKNOWN);
