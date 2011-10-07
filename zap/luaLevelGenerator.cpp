@@ -56,15 +56,27 @@ LuaLevelGenerator::LuaLevelGenerator(const string &scriptName, const string &scr
    if(!L)
    {
       logError("Could not create Lua interpreter to run %s.  Skipping...", mFilename.c_str());
+      mIsValid = false;
       return;
    }
+
+   mIsValid = true;
    mGridSize = gridSize;
    mCaller = caller;
 }
 
 
+bool LuaLevelGenerator::isValid()
+{
+   return mIsValid;
+}
+
+
 void LuaLevelGenerator::runScript()
 {
+   if(!mIsValid)     // True if things are ready to go for running the script, false otherwise
+      return;
+
    if(startLua())
       doRunScript();
 

@@ -54,6 +54,8 @@ private:
    F32 mGridSize;
    string mLevelGenFile;     // Exists here so exception handler will know what file we were running
 
+   bool mIsValid;
+
 protected:
    lua_State *L;
 
@@ -71,6 +73,7 @@ public:
    void logError(const char *format, ...);
    void logError(const char *msg, const char *filename);
 
+   bool isValid();
 
    static const char className[];
 

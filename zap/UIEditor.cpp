@@ -629,6 +629,8 @@ void EditorUserInterface::runLevelGenScript()
 }
 
 
+extern OGLCONSOLE_Console gConsole;
+
 // Runs an arbitrary lua script.  Command is first item in cmdAndArgs, subsequent items are the args, if any
 void EditorUserInterface::runScript(const FolderManager *folderManager, const string &scriptName, const Vector<string> &args)
 {
@@ -636,8 +638,11 @@ void EditorUserInterface::runScript(const FolderManager *folderManager, const st
 
    if(name == "")
    {
-      logprintf(LogConsumer::LogWarning, "Warning: Could not find script \"%s\"",  scriptName.c_str());
-      // TODO: Show an error to the user
+      string msg = "Warning: Could not find script \"" + scriptName + "\"";
+
+      logprintf(LogConsumer::LogWarning, msg.c_str());
+      OGLCONSOLE_Output(gConsole, msg.c_str());          // Print message to the console
+
       return;
    }
 
