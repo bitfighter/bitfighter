@@ -2607,16 +2607,28 @@ void GameUserInterface::renderScoreboard()
 
       S32 curRowY = yt + teamAreaHeight + 1;
       S32 fontSize = U32(maxHeight * 0.8f);
+      const char *botSymbol = "B ";
+      const char *levelChangerSymbol = "+ ";
+      const char *adminSymbol = "@ ";
+
+      // Use any symbol for an offset
+      S32 symbolSize = UserInterface::getStringWidth(fontSize / 2, botSymbol);
 
       for(S32 j = 0; j < playerScores.size(); j++)
       {
-         static const char *bot = "B ";
-         S32 botsize = UserInterface::getStringWidth(fontSize / 2, bot);
          S32 x = xl + 40;
 
          // Add the mark of the bot
          if(playerScores[j]->isRobot())
-            UserInterface::drawString(x - botsize, curRowY + fontSize / 4 + 2, fontSize / 2, bot); 
+            UserInterface::drawString(x - symbolSize, curRowY + fontSize / 4 + 2, fontSize / 2, botSymbol);
+
+         // Add level changer mark
+         if(playerScores[j]->isLevelChanger() && !playerScores[j]->isAdmin())
+            UserInterface::drawString(x - symbolSize, curRowY + fontSize / 4 + 2, fontSize / 2, levelChangerSymbol);
+
+         // Add level changer mark
+         if(playerScores[j]->isAdmin())
+            UserInterface::drawString(x - symbolSize, curRowY + fontSize / 4 + 2, fontSize / 2, adminSymbol);
 
          UserInterface::drawString(x, curRowY, fontSize, playerScores[j]->getName().getString());
 
