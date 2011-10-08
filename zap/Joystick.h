@@ -72,6 +72,10 @@ enum ControllerButton {
    ControllerButtonDPadDown,
    ControllerButtonDPadLeft,
    ControllerButtonDPadRight,
+   ControllerButton9,
+   ControllerButton10,
+   ControllerButton11,
+   ControllerButton12,
    MaxControllerButtons
 };
 
