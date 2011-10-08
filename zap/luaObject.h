@@ -57,7 +57,7 @@ class Ship;
 class LuaObject
 {
 protected:
-   bool loadLuaHelperFunctions(lua_State *L, const string &scriptDir, const char *caller);
+   bool loadHelperFunctions(lua_State *L, const string &scriptDir, const string &helperName, const string &caller);
 
    static int luaPanicked(lua_State *L);
    static void clearStack(lua_State *L);
@@ -91,7 +91,7 @@ public:
    static S32 returnPlayerInfo(lua_State *L, LuaPlayerInfo *playerInfo);
 
    static void stackdump(lua_State* L);
-   static void cleanupAndTerminate(lua_State *L);
+   void cleanupAndTerminate(lua_State *L);
 
    static void setLuaArgs(lua_State *L, const string &scriptName, const Vector<string> *args);     // Used by bots and levelgens
 

@@ -51,32 +51,13 @@ LuaLevelGenerator::LuaLevelGenerator(const string &scriptName, const string &scr
    mConsole = console;
    mGridDatabase = gridDatabase;
 
-   L = lua_open();    // Create a new Lua interpreter
-
-   if(!L)
-   {
-      logError("Could not create Lua interpreter to run %s.  Skipping...", mFilename.c_str());
-      mIsValid = false;
-      return;
-   }
-
-   mIsValid = true;
    mGridSize = gridSize;
    mCaller = caller;
 }
 
 
-bool LuaLevelGenerator::isValid()
-{
-   return mIsValid;
-}
-
-
 void LuaLevelGenerator::runScript()
 {
-   if(!mIsValid)     // True if things are ready to go for running the script, false otherwise
-      return;
-
    if(startLua())
       doRunScript();
 
@@ -320,66 +301,76 @@ S32 LuaLevelGenerator::getPlayerCount(lua_State *L)
 }
 
 
-bool LuaLevelGenerator::loadLevelGenHelperFunctions(lua_State *L)
-{
-   string fname = joindir(mScriptDir, "levelgen_helper_functions.lua");
-
-   if(luaL_loadfile(L, fname.c_str()))
-   {
-      logError("Error loading levelgen helper functions %s.  Skipping...", fname.c_str());
-      return false;
-   }
-
-   // Now run the loaded code
-   if(lua_pcall(L, 0, 0, 0))     // Passing 0 params, getting none back
-   {
-      logError("Error during initializing levelgen helper functions: %s.  Skipping...", lua_tostring(L, -1));
-      return false;
-   }
-
-   return true;
-}
-
-
 bool LuaLevelGenerator::startLua()
 {
-   // Register this class Luna
-   Lunar<LuaLevelGenerator>::Register(L);
-   Lunar<LuaPoint>::Register(L);
-   Lunar<LuaUtil>::Register(L);
+   cleanupAndTerminate(L);    // Only really needed for bots
+
+   L = lua_open();    // Create a new Lua interpreter
+
+   if(!L)
+   {
+      logError("Could not create Lua interpreter to run %s.  Skipping...", mFilename.c_str());
+      return false;
+   }
+
+   registerClasses();
 
    lua_atpanic(L, luaPanicked);    // Register our panic function
+
+
+#ifdef USE_PROFILER
+   init_profiler(L);
+#endif
 
    LuaUtil::openLibs(L);
    LuaUtil::setModulePath(L, mScriptDir);
 
-   lua_pushnumber(L, mGridSize);
-   lua_setglobal(L, "_GRID_SIZE");
-
-   //lua_pushlightuserdata(L, (void *)this); // using this line needs helper functions "levelgen = LuaLevelGenerator(LevelGen)"
-   //lua_setglobal(L, "LevelGen");
-   Lunar<LuaLevelGenerator>::push(L, this); // Lets use this instead of having to use helper functions
-   lua_setglobal(L, "levelgen");
-
    setLuaArgs(L, mFilename, mScriptArgs);    // Put our args in to the Lua table "args"
                                              // MUST BE SET BEFORE LOADING LUA HELPER FNS (WHICH F$%^S WITH GLOBALS IN LUA)
 
-   if(!loadLuaHelperFunctions(L, mScriptDir, "levelgen script")) 
+   preHelperInit();
+
+   string what = "levelgen script";
+
+   if(!loadHelperFunctions(L, mScriptDir, "lua_helper_functions.lua", what)) 
       return false;
 
-   if(!loadLevelGenHelperFunctions(L)) 
+   if(!loadHelperFunctions(L, mScriptDir, "levelgen_helper_functions.lua", what)) 
       return false;
 
-
+   // Load the script
    if(luaL_loadfile(L, mFilename.c_str()))
    {
-      logError("Error loading levelgen script: %s.  Skipping...", lua_tostring(L, -1));
+      string msg = "Error loading " + what + ": " + lua_tostring(L, -1) + ".  Skipping..."; 
+      logError(msg.c_str());
       return false;
    }
 
    return true;
 }
 
+
+///// Initialize levelgen specific stuff
+void LuaLevelGenerator::preHelperInit()
+{
+   lua_pushnumber(L, mGridSize);
+   lua_setglobal(L, "_GRID_SIZE");
+
+   Lunar<LuaLevelGenerator>::push(L, this);  // Lets use this instead of having to use helper functions
+   lua_setglobal(L, "levelgen");
+
+}
+
+
+
+// Register our connector types with Lua
+void LuaLevelGenerator::registerClasses()
+{
+   Lunar<LuaLevelGenerator>::Register(L);
+   Lunar<LuaPoint>::Register(L);
+   Lunar<LuaUtil>::Register(L);
+
+}
 
 void LuaLevelGenerator::doRunScript()
 {

@@ -183,6 +183,8 @@ public:
    static void startBots();            // Loop through all our bots and run thier main() functions
 
    bool startLua();                    // Fire up bot's Lua processor
+   void preHelperInit();
+   void registerClasses();
    bool runMain();                     // Run a robot's main() function
 
    S32 getScore() { return mScore; }   // Return robot's score

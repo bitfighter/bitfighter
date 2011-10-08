@@ -1388,7 +1388,7 @@ Robot::~Robot()
    }
 
    // Close down our Lua interpreter
-   LuaObject::cleanupAndTerminate(L);
+   cleanupAndTerminate(L);
 
    if(isGhost())
    {
@@ -1454,25 +1454,106 @@ bool Robot::initialize(Point &pos)
 
 // Loop through all our bots and start their interpreters
 void Robot::startBots()
-{
+{   
    for(S32 i = 0; i < robots.size(); i++)
-      if(robots[i]->isRunningScript && !robots[i]->startLua())
+      if(robots[i]->isRunningScript && !robots[i]->startLua())    // There is a slim possibiity I screwed this up, and there should be a ! in front of robots[i]->isRunningScript
          robots[i]->isRunningScript = false;
 }
 
 
 bool Robot::startLua()
 {
-   if(!isRunningScript) 
-      return true;
+   cleanupAndTerminate(L);
 
-   LuaObject::cleanupAndTerminate(L);
+   L = lua_open();    // Create a new Lua interpreter   TODO: reuse current interpreter... would be much more efficient
 
-   L = lua_open();    // Create a new Lua interpreter
+   if(!L)
+   {
+      logError("Could not create Lua interpreter to run %s.  Skipping...", mFilename.c_str());
+      return false;
+   }
+
+   registerClasses();
+
+   lua_atpanic(L, luaPanicked);    // Register our panic function  (do we still need to do this in the bot constructor?)
+
+#ifdef USE_PROFILER
+   init_profiler(L);
+#endif
+
+   LuaUtil::openLibs(L);
+   LuaUtil::setModulePath(L, mScriptDir);
+
+   LuaObject::setLuaArgs(L, mFilename, &mArgs);    // Put our args in to the Lua table "args"
+
+   preHelperInit();     // Initialize some things that need to be done before the helpers are loaded... at least I think they do...
+
+   string what = "robot script";
+
+   if(isRunningScript && !loadHelperFunctions(L, mScriptDir, "lua_helper_functions.lua", what))
+      return false;
+
+   if(!loadHelperFunctions(L, mScriptDir, "robot_helper_functions.lua", what)) 
+      return false;
+
+   // Load the script
+   if(luaL_loadfile(L, mFilename.c_str()))
+   {
+      string msg = "Error loading " + what + ": " + lua_tostring(L, -1) + ".  Skipping..."; 
+      logError(msg.c_str());
+      return false;
+   }
+
+   // Do more bot stuff
 
 
-   // Register our connector types with Lua
+               // Run the bot -- this loads all the functions into the global namespace
+               if(lua_pcall(L, 0, 0, 0))     // Passing 0 params, getting none back
+               {
+                  logError("Robot error during initialization: %s.  Shutting robot down.", lua_tostring(L, -1));
+                  return false;
+               }
 
+               string name;
+
+               // Run the getName() function in the bot (will default to the one in robot_helper_functions if it's not overwritten by the bot)
+               lua_getglobal(L, "getName");
+
+               if (!lua_isfunction(L, -1) || lua_pcall(L, 0, 1, 0))     // Passing 0 params, getting one back
+               {
+                  name = "Nancy";
+                  logError("Robot error retrieving name (%s).  Using \"%s\".", lua_tostring(L, -1), name.c_str());
+               }
+               else
+               {
+                  name = lua_tostring(L, -1);
+                  lua_pop(L, 1);
+               }
+
+               // Make sure name is unique
+               mPlayerName = GameConnection::makeUnique(name).c_str();
+               mIsAuthenticated = false;
+
+
+   // Note main() will be run later, after all bots have been loaded
+   return true;
+}
+
+
+void Robot::preHelperInit()
+{
+   // Push a pointer to this Robot to the Lua stack,
+   // then set the global name of this pointer.  This is the name that we'll use to refer
+   // to this robot from our Lua code.  
+   // Note that all globals need to be set before running lua_helper_functions, which makes it more difficult to set globals
+   lua_pushlightuserdata(L, (void *)this);
+   lua_setglobal(L, "Robot");
+}
+
+
+// Register our connector types with Lua
+void Robot::registerClasses()
+{
    Lunar<LuaUtil>::Register(L);
 
    Lunar<LuaGameInfo>::Register(L);
@@ -1509,77 +1590,6 @@ bool Robot::startLua()
    Lunar<GoalZone>::Register(L);
    Lunar<LoadoutZone>::Register(L);
    Lunar<HuntersNexusObject>::Register(L);
-
-#ifdef USE_PROFILER
-   init_profiler(L);
-#endif
-
-   LuaUtil::openLibs(L);
-   LuaUtil::setModulePath(L, mScriptDir);
-
-   // Push a pointer to this Robot to the Lua stack,
-   // then set the global name of this pointer.  This is the name that we'll use to refer
-   // to this robot from our Lua code.  
-   // Note that all globals need to be set before running lua_helper_functions, which makes it more difficult to set globals
-   lua_pushlightuserdata(L, (void *)this);
-   lua_setglobal(L, "Robot");
-
-   LuaObject::setLuaArgs(L, mFilename, &mArgs);    // Put our args in to the Lua table "args"
-
-   if(isRunningScript && !loadLuaHelperFunctions(L, mScriptDir, "robot"))
-      return false;
-
-   string robotfname = joindir(mScriptDir, "robot_helper_functions.lua");
-
-   if(luaL_loadfile(L, robotfname.c_str()))
-   {
-      logError("Error loading robot helper functions %s.  Shutting robot down.", robotfname.c_str());
-      return false;
-   }
-
-   // Now run the loaded code
-   if(lua_pcall(L, 0, 0, 0))     // Passing 0 params, getting none back
-   {
-      logError("Error during initializing robot helper functions: %s.  Shutting robot down.", lua_tostring(L, -1));
-      return false;
-   }
-  
-   // Load the bot
-   if(luaL_loadfile(L, mFilename.c_str()))
-   {
-      logError("Error loading file: %s.  Shutting robot down.", lua_tostring(L, -1));
-      return false;
-   }
-
-   // Run the bot -- this loads all the functions into the global namespace
-   if(lua_pcall(L, 0, 0, 0))     // Passing 0 params, getting none back
-   {
-      logError("Robot error during initialization: %s.  Shutting robot down.", lua_tostring(L, -1));
-      return false;
-   }
-
-   string name;
-
-   // Run the getName() function in the bot (will default to the one in robot_helper_functions if it's not overwritten by the bot)
-   lua_getglobal(L, "getName");
-
-   if (!lua_isfunction(L, -1) || lua_pcall(L, 0, 1, 0))     // Passing 0 params, getting one back
-   {
-      name = "Nancy";
-      logError("Robot error retrieving name (%s).  Using \"%s\".", lua_tostring(L, -1), name.c_str());
-   }
-   else
-   {
-      name = lua_tostring(L, -1);
-      lua_pop(L, 1);
-   }
-
-   // Make sure name is unique
-   mPlayerName = GameConnection::makeUnique(name).c_str();
-   mIsAuthenticated = false;
-
-   // Note main() will be run later, after all bots have been loaded
-   return true;
 }
 
 

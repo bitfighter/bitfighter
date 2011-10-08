@@ -48,13 +48,10 @@ private:
    GridDatabase *mGridDatabase;
 
    OGLCONSOLE_Console mConsole;
-   bool loadLevelGenHelperFunctions(lua_State *L);
 
    LevelLoader *mCaller;
    F32 mGridSize;
    string mLevelGenFile;     // Exists here so exception handler will know what file we were running
-
-   bool mIsValid;
 
 protected:
    lua_State *L;
@@ -68,12 +65,12 @@ public:
    virtual ~LuaLevelGenerator();         // Destructor
 
    bool startLua();                      // Initialize the interpreter, get all the helper functions loaded, get ready to run
+   void preHelperInit();
+   void registerClasses();
    void runScript();                     // Wraps doRunScript()
    virtual void doRunScript();
    void logError(const char *format, ...);
    void logError(const char *msg, const char *filename);
-
-   bool isValid();
 
    static const char className[];
 
