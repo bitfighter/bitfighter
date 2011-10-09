@@ -193,6 +193,7 @@ const char **GameType::getGameParameterMenuKeys()
       "Min Players",
       "Max Players",
       "Allow Engr",
+      "Allow Robots",
       "" };
 
       return items;
@@ -276,6 +277,12 @@ boost::shared_ptr<MenuItem> GameType::getMenuItem(ClientGame *game, const char *
                                                            mEngineerEnabled,
                                                            NULL,
                                                            "Allow players to use the Engineer module?"));
+   else if(!strcmp(key, "Allow Robots"))
+         return boost::shared_ptr<MenuItem>(new YesNoMenuItem(game,
+                                                              "Allow Robots:",
+                                                              mBotsAllowed,
+                                                              NULL,
+                                                              "Allow players to add robots?"));
    else
       return boost::shared_ptr<MenuItem>();     // NULLish pointer
 }
