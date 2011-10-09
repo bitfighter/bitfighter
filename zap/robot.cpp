@@ -1449,9 +1449,8 @@ void Robot::startBots()
 
 void Robot::preHelperInit()
 {
-   // Push a pointer to this Robot to the Lua stack,
-   // then set the global name of this pointer.  This is the name that we'll use to refer
-   // to this robot from our Lua code.  
+   // Push a pointer to this Robot to the Lua stack, then set the global name of this pointer.  
+   // This is the name that we'll use to refer to this robot from our Lua code.  
    // Note that all globals need to be set before running lua_helper_functions, which makes it more difficult to set globals
    lua_pushlightuserdata(L, (void *)this);
    lua_setglobal(L, "Robot");
