@@ -60,17 +60,12 @@ LuaLevelGenerator::LuaLevelGenerator(const string &scriptName, const string &scr
 
 void LuaLevelGenerator::runScript()
 {
-   if(startLua())
+   if(startLua(mFilename.c_str(), mScriptArgs, LEVELGEN))
       doRunScript();
 
    cleanupAndTerminate();
 }
 
-
-bool LuaLevelGenerator::startLua()
-{
-   return LuaScriptRunner::startLua(mFilename.c_str(), mScriptArgs, LEVELGEN);
-}
 
 const char LuaLevelGenerator::className[] = "LuaLevelGenerator";      // Class name as it appears to Lua scripts
 

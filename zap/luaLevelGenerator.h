@@ -59,7 +59,6 @@ public:
    LuaLevelGenerator(lua_State *L);      // Lua constructor
    virtual ~LuaLevelGenerator();         // Destructor
 
-   bool startLua();                      // Initialize the interpreter, get all the helper functions loaded, get ready to run
    void preHelperInit();
    void registerClasses();
    void onScriptInitialized();
