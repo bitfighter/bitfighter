@@ -27,7 +27,6 @@
 #define _LUALEVELGENERATOR_H_
 
 #include "luaObject.h"
-#include "luaUtil.h"
 #include "gameLoader.h"
 #include "tnlLog.h"
 #include "oglconsole.h"    // For logging to the console
@@ -39,12 +38,11 @@ namespace Zap
 
 class GridDatabase;
 
-class LuaLevelGenerator: public LuaObject
+class LuaLevelGenerator: public LuaScriptRunner, public LuaObject
 {
 private:
    string mFilename;
-   const Vector<string> *mScriptArgs;
-   string mScriptDir;
+   Vector<string> mScriptArgs;
    GridDatabase *mGridDatabase;
 
    OGLCONSOLE_Console mConsole;
@@ -53,12 +51,9 @@ private:
    F32 mGridSize;
    string mLevelGenFile;     // Exists here so exception handler will know what file we were running
 
-protected:
-   lua_State *L;
-
 public:
    LuaLevelGenerator() { TNLAssert(false, "Who wants this???"); }
-   LuaLevelGenerator(const string &scriptName, const string &scriptDir, const Vector<string> *scriptArgs, F32 gridsize, GridDatabase *gridDatabase, 
+   LuaLevelGenerator(const string &scriptName, const string &scriptDir, const Vector<string> &scriptArgs, F32 gridsize, GridDatabase *gridDatabase, 
                      LevelLoader *caller, OGLCONSOLE_Console console);   // C++ constructor
 
    LuaLevelGenerator(lua_State *L);      // Lua constructor
@@ -67,6 +62,7 @@ public:
    bool startLua();                      // Initialize the interpreter, get all the helper functions loaded, get ready to run
    void preHelperInit();
    void registerClasses();
+   void onScriptInitialized();
    void runScript();                     // Wraps doRunScript()
    virtual void doRunScript();
    void logError(const char *format, ...);

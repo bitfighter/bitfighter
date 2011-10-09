@@ -108,13 +108,12 @@ class ClientInfo;
  */
 
 
-class Robot : public Ship
+class Robot : public Ship, public LuaScriptRunner
 {
    typedef Ship Parent;
 
 private:
    string mFilename;            // Name of file script was loaded from
-   string mScriptDir;
 
    U16 mCurrentZone;            // Zone robot is currently in
 
@@ -127,7 +126,7 @@ private:
    LuaPlayerInfo *mPlayerInfo;      // Player info object describing the robot
 
    Vector<string> mArgs;            // List of arguments passed to the robot.  Script name itself is the first one.
-   bool gameConnectionInitalized;
+   bool mHasSpawned;
 
    void spawn();                    // Handles bot spawning
 
@@ -135,15 +134,11 @@ private:
    static S32 mStepCount;           // If running for a certain number of steps, this will be > 0, while mIsPaused will be true
 
 public:
-   Robot(const StringTableEntry &robotName = "", const string &scriptDir = "", S32 team = -1, Point p = Point(0,0), F32 m = 1.0);      // Constructor
+   Robot();      // Constructor
    ~Robot();                                                                                    // Destructor
 
-   lua_State *L;                    // Main Lua state variable
 
    bool initialize(Point &pos);
-
-   bool isRunningScript;
-   bool wasRunningScript;
 
    void kill();
 
@@ -186,6 +181,10 @@ public:
    void preHelperInit();
    void registerClasses();
    bool runMain();                     // Run a robot's main() function
+   string runGetName();                // Run bot's getName() function
+
+   bool isRunningScript;
+   bool wasRunningScript;
 
    S32 getScore() { return mScore; }   // Return robot's score
    F32 getRating() { return mTotalScore == 0 ? 0.5f : (F32)mScore / (F32)mTotalScore; }   // Return robot's score
@@ -213,13 +212,14 @@ class LuaRobot : public LuaShip
    typedef LuaShip Parent;
 
 private:
+   Robot *thisRobot;                                 // Pointer to an actual C++ Robot object
+
    Point getNextWaypoint();                          // Helper function for getWaypoint()
    U16 findClosestZone(const Point &point);          // Finds zone closest to point, used when robots get off the map
    S32 findAndReturnClosestZone(lua_State *L, const Point &point); // Wraps findClosestZone and handles returning the result to Lua
    S32 doFindItems(lua_State *L, Rect *scope = NULL);        // Worker method for various find functions
 
-   Robot *thisRobot;                                 // Pointer to an actual C++ Robot object
-
+   void setEnums(lua_State *L);                      // Set a whole slew of enum values that we want the scripts to have access to
    bool subscriptions[EventManager::EventTypes];     // Keep track of which events we're subscribed to for rapid unsubscription upon death
 
 public:
@@ -227,7 +227,7 @@ public:
 
   // Initialize the pointer
    LuaRobot(lua_State *L);     // Lua constructor
-   virtual ~LuaRobot();                 // Destructor
+   virtual ~LuaRobot();        // Destructor
 
    static const char className[];
    static Lunar<LuaRobot>::RegType methods[];
@@ -287,7 +287,6 @@ public:
    S32 engineerDeployObject(lua_State *L);
    S32 dropItem(lua_State *L);
    S32 copyMoveFromObject(lua_State *L);
-
 
    S32 getGame(lua_State *L);             // Get a pointer to a game object, where we can run game-info oriented methods
    Ship *getObj() { return thisRobot; }   // This handles delegation properly when we're dealing with methods inherited from LuaShip

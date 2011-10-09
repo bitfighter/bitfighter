@@ -1727,11 +1727,9 @@ bool ServerGame::loadLevel(const string &levelFileName)
                                     scriptName.c_str(), levelFileName.c_str());
       else
       {
-         // The script file will be the first argument, subsequent args will be passed on to the script.
-         // Now we've crammed all our action into the constructor... is this ok design?
-         string *dir = &folderManager->luaDir; // for lua helper functions
-         const Vector<string> *args = getGameType()->getScriptArgs();
-         LuaLevelGenerator levelgen(name, *dir, args, getGridSize(), getGameObjDatabase(), this, gConsole);
+         LuaLevelGenerator levelgen(name, folderManager->luaDir, *getGameType()->getScriptArgs(), 
+                                    getGridSize(), getGameObjDatabase(), this, gConsole);
+
          levelgen.runScript();
       }
    }
@@ -1749,9 +1747,8 @@ bool ServerGame::loadLevel(const string &levelFileName)
       }
 
       // The script file will be the first argument, subsequent args will be passed on to the script
-      string *dir = &folderManager->luaDir;
-      const Vector<string> *args = getGameType()->getScriptArgs();
-      LuaLevelGenerator levelgen = LuaLevelGenerator(name, *dir, args, getGridSize(), getGameObjDatabase(), this, gConsole);
+      LuaLevelGenerator levelgen = LuaLevelGenerator(name, folderManager->luaDir, *getGameType()->getScriptArgs(), getGridSize(), 
+                                                     getGameObjDatabase(), this, gConsole);
       levelgen.runScript();
    }
 

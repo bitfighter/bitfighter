@@ -57,9 +57,6 @@ class Ship;
 class LuaObject
 {
 protected:
-   bool loadHelperFunctions(lua_State *L, const string &scriptDir, const string &helperName, const string &caller);
-
-   static int luaPanicked(lua_State *L);
    static void clearStack(lua_State *L);
    static void checkArgCount(lua_State *L, S32 argsWanted, const char *functionName);
    static F32 getFloat(lua_State *L, S32 index, const char *functionName);
@@ -91,19 +88,60 @@ public:
    static S32 returnPlayerInfo(lua_State *L, LuaPlayerInfo *playerInfo);
 
    static void stackdump(lua_State* L);
-   void cleanupAndTerminate(lua_State *L);
 
-   static void setLuaArgs(lua_State *L, const string &scriptName, const Vector<string> *args);     // Used by bots and levelgens
-
-   static void setModulePath(lua_State *L, const string &scriptDir);
    static void openLibs(lua_State *L);
 
-   // Currently this is only used by loadLuaHelperFunctions()
-   virtual void logError(const char *msg, const char *filename) { TNLAssert(false, "No logging has been set up for this class!"); }
 };
+
 
 ////////////////////////////////////////
 ////////////////////////////////////////
+
+class LuaScriptRunner
+{
+public:
+   enum ScriptType {
+      ROBOT,
+      LEVELGEN,
+      PLUGIN
+   };
+
+private:
+   string mScriptingDir;
+   bool mScriptingDirSet;
+
+   bool loadHelperFunctions(const string &helperName);
+   bool initScript(const char *scriptName);
+   void setLuaArgs(const char *scriptName, const Vector<string> &args);
+   void setModulePath();
+
+
+protected:
+   lua_State *L;                    // Main Lua state variable
+
+   bool startLua(const char *scriptFullName, const Vector<string> &args, ScriptType scriptType);
+   virtual void logError(const char *format, ...) = 0;
+
+   static int luaPanicked(lua_State *L);
+
+   virtual void registerClasses() = 0;
+   virtual void preHelperInit() { /* Do nothing */ }
+
+   void cleanupAndTerminate();
+
+
+public:
+   LuaScriptRunner();     // Constructor
+
+   void setScriptingDir(const string &scriptingDir);
+   lua_State *getL();
+
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 
 class LuaItem : public LuaObject
 {

@@ -24,88 +24,34 @@
 //------------------------------------------------------------------------------------
 
 #include "luaObject.h"
-#include "luaGameInfo.h"    // For LuaPoint
-#include "tnlLog.h"         // For logprintf
+#include "luaUtil.h"
+#include "luaGameInfo.h"      // For LuaPoint
+#include "tnlLog.h"           // For logprintf
 
-#include "item.h"     // For getItem()
-#include "flagItem.h"      // For getItem()
-#include "robot.h"         // For getItem()
-#include "huntersGame.h"   // For getItem()
-#include "soccerGame.h"    // For getItem()
-#include "projectile.h"    // For getItem()
+#include "item.h"             // For getItem()
+#include "flagItem.h"         // For getItem()
+#include "robot.h"            // For getItem()
+#include "huntersGame.h"      // For getItem()
+#include "soccerGame.h"       // For getItem()
+#include "projectile.h"       // For getItem()
 #include "teleporter.h"
 #include "speedZone.h"
-#include "EngineeredItem.h"    // For getItem()
-#include "PickupItem.h"        // For getItem()
-#include "playerInfo.h"        // For playerInfo def
+#include "EngineeredItem.h"   // For getItem()
+#include "PickupItem.h"       // For getItem()
+#include "playerInfo.h"       // For playerInfo def
 #include "config.h"
 
-#include "stringUtils.h"       // For joindir   
+#include "stringUtils.h"      // For joindir   
 
 
 namespace Zap
 {
-
-void LuaObject::setLuaArgs(lua_State *L, const string &scriptname, const Vector<string> *args)
-{
-   // Now pass in any args specified in the level file.  By convention, we'll pass in the name of the robot/script as the 0th element.
-   lua_createtable(L, args->size() + 1, 0);
-
-   lua_pushstring(L, scriptname.c_str());
-   lua_rawseti(L, -2, 0);
-
-   for(S32 i = 0; i < args->size(); i++)
-   {
-      lua_pushstring(L, args->get(i).c_str());
-      lua_rawseti(L, -2, i + 1);
-   }
-   lua_setglobal(L, "arg");
-}
-
-
- void LuaObject::setModulePath(lua_State *L, const string &scriptDir)      // static
- {
-   lua_pushstring(L, "package");
-   lua_gettable(L, LUA_GLOBALSINDEX);
-   lua_pushstring(L, "path");
-   lua_pushstring(L, (scriptDir + "/?.lua").c_str());
-   lua_settable(L, -3);
- }
-
 
  void LuaObject::openLibs(lua_State *L)      // static
  {
    luaL_openlibs(L);    // Load the standard libraries
    luaopen_vec(L);      // For vector math
  }
-
-
-
-// Load our standard lua helper functions  
-// TODO: Read the file into memory, store that as a static string in the bot code, and then pass that to Lua rather than rereading this
-//       or better, find some way to load these into lua once, and then reuse the interpreter for every bot and levelgen and plugin
-//       every time a bot or levelgen or plugin is created.  Or compile to bytecode and store that.  Or anything, really, that's more efficient.
-bool LuaObject::loadHelperFunctions(lua_State *L, const string &scriptDir, const string &helperName, const string &caller)
-{
-   string fname = joindir(scriptDir, helperName);
-
-   if(luaL_loadfile(L, fname.c_str()))
-   {
-      string msg = "Error loading lua helper functions " + fname + ": " + lua_tostring(L, -1) + ".  Can't run " + caller + "...";
-      logError(msg.c_str(), fname.c_str());
-      return false;
-   }
-
-   // Now run the loaded code
-   if(lua_pcall(L, 0, 0, 0))     // Passing 0 params, getting none back
-   {
-      string msg = "Error during initializing lua helper functions " + fname + ": " + lua_tostring(L, -1) + ".  Can't run " + caller + "..."; 
-      logError(msg.c_str(), fname.c_str());
-      return false;
-   }
-
-   return true;
-}
 
 
 // Returns a point to calling Lua function
@@ -209,33 +155,10 @@ S32 LuaObject::returnNil(lua_State *L)
 }
 
 
-// Overwrite Lua's panicky panic function with something that doesn't kill the whole game
-// if something goes wrong!
-int LuaObject::luaPanicked(lua_State *L)
-{
-   string msg = lua_tostring(L, 1);
-   lua_getglobal(L, "ERROR");    // <-- what is this for?
-
-   throw LuaException(msg);
-
-   return 0;
-}
-
 
 void LuaObject::clearStack(lua_State *L)
 {
    lua_pop(L, lua_gettop(L));
-}
-
-
-void LuaObject::cleanupAndTerminate(lua_State *L)
-{
-   if(L)
-   {
-      // Force gc to clear out any lingering references
-      lua_gc(L, LUA_GCCOLLECT, 0);  // Fallback
-      lua_close(L);
-   }
 }
 
 
@@ -465,6 +388,166 @@ void LuaObject::stackdump(lua_State* l)
         }
     }
  }
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Constructor
+LuaScriptRunner::LuaScriptRunner()
+{
+   L = NULL;
+   mScriptingDirSet = false;
+}
+
+
+void LuaScriptRunner::setScriptingDir(const string &scriptingDir)
+{
+   mScriptingDir = scriptingDir;
+   mScriptingDirSet = true;
+}
+
+
+lua_State *LuaScriptRunner::getL()
+{
+   return L;
+}
+
+
+// Loads and initializes the specified script
+bool LuaScriptRunner::initScript(const char *scriptName)
+{
+   TNLAssert(mScriptingDirSet, "Must set scripting folder before intializing script!");
+
+   // Load the script
+   if(luaL_loadfile(L, scriptName))
+   {
+      logError("Couldn't load script %s: %s -- Aborting.", scriptName, lua_tostring(L, -1));
+      return false;
+   }
+
+   // Initialize it by running all the code that's not contained in a function -- this loads all the functions into the global namespace
+   if(lua_pcall(L, 0, 0, 0))     // Passing 0 params, getting 0 back
+   {
+      logError("Error initializing script %s: %s -- Aborting.", scriptName, lua_tostring(L, -1));
+      return false;
+   }
+
+   return true;
+}
+
+
+// Load our standard lua helper functions  
+// TODO: Read helpers into memory, store that as a static string in the bot code, and then pass that to Lua rather than rereading this
+//       or better, find some way to load these into lua once, and then reuse the interpreter for every bot and levelgen and plugin
+//       every time a bot or levelgen or plugin is created.  Or compile to bytecode and store that.  Or anything, really, that's more efficient.
+bool LuaScriptRunner::loadHelperFunctions(const string &helperName)
+{
+   return initScript(joindir(mScriptingDir, helperName).c_str());
+}
+
+
+bool LuaScriptRunner::startLua(const char *scriptFullName, const Vector<string> &args, ScriptType scriptType)
+{
+   TNLAssert(mScriptingDirSet, "Must set scripting folder before starting Lua interpreter!");
+
+   cleanupAndTerminate();        // Bots need this for the moment... does noting if L is null
+
+   L = lua_open();               // Create a new Lua interpreter   TODO: reuse current interpreter... would be much more efficient
+
+   if(!L)
+   {  
+      // It's unlikely that a failure here could be triggered by an individual script.  Likely to be something systemic.
+      logError("Could not create Lua interpreter.  Aborting script.");     
+      return false;
+   }
+
+   registerClasses();
+
+   lua_atpanic(L, luaPanicked);  // Register our panic function  (do we still need to do this in the bot constructor?)
+
+#ifdef USE_PROFILER
+   init_profiler(L);
+#endif
+
+   LuaUtil::openLibs(L);
+   setModulePath();
+
+   setLuaArgs(scriptFullName, args);    // Put our args in to the Lua table "args"
+
+   preHelperInit();     // Initialize some things that need to be done before the helpers are loaded... at least I think they do...
+
+
+   // Here we will load two sets of helper functions: the first is loaded for every script, the second is different for bots, levelgens, plugins, etc.
+   // We expect to find these helper functions in mScriptingDir
+   string helperFunctions;
+
+   if(scriptType == ROBOT)
+      helperFunctions = "robot_helper_functions.lua";
+   else if(scriptType == LEVELGEN)
+      helperFunctions = "levelgen_helper_functions.lua";
+   else
+      TNLAssert(false, "Helper functions not defined for scriptType!");
+
+   if(!loadHelperFunctions("lua_helper_functions.lua") || !loadHelperFunctions(helperFunctions)) 
+      return false;
+
+   return initScript(scriptFullName);
+}
+
+
+void LuaScriptRunner::setLuaArgs(const char *scriptName, const Vector<string> &args)
+{
+   // Put args into a table that the Lua script can read.  By Lua convention, we'll put the name of the robot/script into the 0th element.
+   lua_createtable(L, args.size() + 1, 0);
+
+   lua_pushstring(L, scriptName);
+   lua_rawseti(L, -2, 0);
+
+   for(S32 i = 0; i < args.size(); i++)
+   {
+      lua_pushstring(L, args[i].c_str());
+      lua_rawseti(L, -2, i + 1);
+   }
+
+   lua_setglobal(L, "arg");
+}
+
+
+ void LuaScriptRunner::setModulePath()   
+ {
+   lua_pushstring(L, "package");
+   lua_gettable(L, LUA_GLOBALSINDEX);
+   lua_pushstring(L, "path");
+   lua_pushstring(L, (mScriptingDir + "/?.lua").c_str());
+   lua_settable(L, -3);
+ }
+
+
+void LuaScriptRunner::cleanupAndTerminate()
+{
+   if(L)
+   {
+      // Force gc to clear out any lingering references
+      lua_gc(L, LUA_GCCOLLECT, 0);  // Fallback
+      lua_close(L);
+   }
+}
+
+
+// Overwrite Lua's panicky panic function with something that doesn't kill the whole game
+// if something goes wrong!
+int LuaScriptRunner::luaPanicked(lua_State *L)
+{
+   string msg = lua_tostring(L, 1);
+   lua_getglobal(L, "ERROR");    // <-- what is this for?
+
+   throw LuaException(msg);
+
+   return 0;
+}
+
+
 
 ////////////////////////////////////
 ////////////////////////////////////

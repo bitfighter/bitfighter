@@ -1710,7 +1710,7 @@ void GameConnection::onEndGhosting()
    TNLAssert(isConnectionToServer() && mClientGame, "when else is this called?");
    
    Parent::onEndGhosting();
-   mClientGame->clearClientList();
+   mClientGame->clearClientList();        // Erase all info we have about fellow clients
 #endif
 }
 

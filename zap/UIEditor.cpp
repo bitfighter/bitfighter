@@ -645,7 +645,7 @@ void EditorUserInterface::runScript(const FolderManager *folderManager, const st
    }
 
    // Run the script to load the items
-   LuaLevelGenerator levelgen(name, folderManager->luaDir, &args, getGame()->getGridSize(), 
+   LuaLevelGenerator levelgen(name, folderManager->luaDir, args, getGame()->getGridSize(), 
                               getGame()->getEditorDatabase(), getGame(), gConsole);
    levelgen.runScript();
 

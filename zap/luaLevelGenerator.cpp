@@ -28,13 +28,15 @@
 #include "config.h"     // For definition of FolderManager struct
 #include "game.h"
 #include "stringUtils.h"
+#include "luaUtil.h"
+
 
 namespace Zap
 {
 
 
 // C++ Constructor
-LuaLevelGenerator::LuaLevelGenerator(const string &scriptName, const string &scriptDir, const Vector<string> *scriptArgs, F32 gridSize, 
+LuaLevelGenerator::LuaLevelGenerator(const string &scriptName, const string &scriptDir, const Vector<string> &scriptArgs, F32 gridSize, 
                                      GridDatabase *gridDatabase, LevelLoader *caller, OGLCONSOLE_Console console)
 {
    if(!fileExists(scriptName))      // Files should be checked before we get here, so this should never happen
@@ -45,7 +47,7 @@ LuaLevelGenerator::LuaLevelGenerator(const string &scriptName, const string &scr
 
    mFilename = scriptName;
    mScriptArgs = scriptArgs;
-   mScriptDir = scriptDir;
+   setScriptingDir(scriptDir);
 
    mLevelGenFile = mFilename;
    mConsole = console;
@@ -61,9 +63,14 @@ void LuaLevelGenerator::runScript()
    if(startLua())
       doRunScript();
 
-   cleanupAndTerminate(L);
+   cleanupAndTerminate();
 }
 
+
+bool LuaLevelGenerator::startLua()
+{
+   return LuaScriptRunner::startLua(mFilename.c_str(), mScriptArgs, LEVELGEN);
+}
 
 const char LuaLevelGenerator::className[] = "LuaLevelGenerator";      // Class name as it appears to Lua scripts
 
@@ -75,11 +82,7 @@ static const char *argv[LevelLoader::MAX_LEVEL_LINE_ARGS];
 LuaLevelGenerator::LuaLevelGenerator(lua_State *L)
 {
    TNLAssert(false, "Why use this constructor?");
-   throw LuaException("Trying to initalize LuaLevelGenerator without proper arguments is not allowed");
-
-   // Initialize some primitive string handling stuff, used in addItem() below
-   /*for(U32 i = 0; i < LevelLoader::MaxArgc; i++)
-      argv[i] = argv_buffer[i];*/
+   throw LuaException("LuaLevelGenerator should never be constructed by a lua script!");
 }
 
 
@@ -301,55 +304,6 @@ S32 LuaLevelGenerator::getPlayerCount(lua_State *L)
 }
 
 
-bool LuaLevelGenerator::startLua()
-{
-   cleanupAndTerminate(L);    // Only really needed for bots
-
-   L = lua_open();    // Create a new Lua interpreter
-
-   if(!L)
-   {
-      logError("Could not create Lua interpreter to run %s.  Skipping...", mFilename.c_str());
-      return false;
-   }
-
-   registerClasses();
-
-   lua_atpanic(L, luaPanicked);    // Register our panic function
-
-
-#ifdef USE_PROFILER
-   init_profiler(L);
-#endif
-
-   LuaUtil::openLibs(L);
-   LuaUtil::setModulePath(L, mScriptDir);
-
-   setLuaArgs(L, mFilename, mScriptArgs);    // Put our args in to the Lua table "args"
-                                             // MUST BE SET BEFORE LOADING LUA HELPER FNS (WHICH F$%^S WITH GLOBALS IN LUA)
-
-   preHelperInit();
-
-   string what = "levelgen script";
-
-   if(!loadHelperFunctions(L, mScriptDir, "lua_helper_functions.lua", what)) 
-      return false;
-
-   if(!loadHelperFunctions(L, mScriptDir, "levelgen_helper_functions.lua", what)) 
-      return false;
-
-   // Load the script
-   if(luaL_loadfile(L, mFilename.c_str()))
-   {
-      string msg = "Error loading " + what + ": " + lua_tostring(L, -1) + ".  Skipping..."; 
-      logError(msg.c_str());
-      return false;
-   }
-
-   return true;
-}
-
-
 ///// Initialize levelgen specific stuff
 void LuaLevelGenerator::preHelperInit()
 {
@@ -360,7 +314,6 @@ void LuaLevelGenerator::preHelperInit()
    lua_setglobal(L, "levelgen");
 
 }
-
 
 
 // Register our connector types with Lua
