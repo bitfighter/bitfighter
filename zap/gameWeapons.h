@@ -121,10 +121,6 @@ extern WeaponInfo gWeapons[WeaponCount];
 class GameObject;
 extern void createWeaponProjectiles(WeaponType weapon, Point &dir, Point &shooterPos, Point &shooterVel, S32 time, F32 shooterRadius, GameObject *shooter);
 
-enum {
-   NumSparkColors = 4,
-};
-
 
 };
 

@@ -231,6 +231,7 @@ const char **HuntersGameType::getGameParameterMenuKeys()
       "Min Players",
       "Max Players",
       "Allow Engr",
+      "Allow Robots",
       "" };
 
       return items;

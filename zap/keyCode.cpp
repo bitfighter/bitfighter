@@ -1161,6 +1161,22 @@ KeyCode joyButtonToKeyCode(int buttonIndex)
          return BUTTON_START;
       case 9:
          return BUTTON_BACK;
+      case 10:
+         return BUTTON_DPAD_UP;
+      case 11:
+         return BUTTON_DPAD_DOWN;
+      case 12:
+         return BUTTON_DPAD_LEFT;
+      case 13:
+         return BUTTON_DPAD_RIGHT;
+      case 14:
+         return BUTTON_9;
+      case 15:
+         return BUTTON_10;
+      case 16:
+         return BUTTON_11;
+      case 17:
+         return BUTTON_12;
       default:
          return BUTTON_UNKNOWN;
    }
@@ -1217,6 +1233,14 @@ S32 keyCodeToButtonIndex(KeyCode keyCode)
          return 12;
       case BUTTON_DPAD_RIGHT:
          return 13;
+      case BUTTON_9:
+         return 14;
+      case BUTTON_10:
+         return 15;
+      case BUTTON_11:
+         return 16;
+      case BUTTON_12:
+         return 17;
       default:
          return 9999;
    }
@@ -1406,6 +1430,10 @@ const char *keyCodeToString(KeyCode keyCode)
       return "Middle-mouse";
    case MOUSE_RIGHT:
       return "Right-mouse";
+   case MOUSE_WHEEL_UP:
+      return "Mouse wheel up";
+   case MOUSE_WHEEL_DOWN:
+      return "Mouse wheel down";
    case BUTTON_1:
       return "Button 1";
    case BUTTON_2:
@@ -1422,6 +1450,14 @@ const char *keyCodeToString(KeyCode keyCode)
       return "Button 7";
    case BUTTON_8:
       return "Button 8";
+   case BUTTON_9:
+      return "Button 9";
+   case BUTTON_10:
+      return "Button 10";
+   case BUTTON_11:
+      return "Button 11";
+   case BUTTON_12:
+      return "Button 12";
    case BUTTON_BACK:
       return "Back";
    case BUTTON_START:
@@ -1648,12 +1684,16 @@ KeyCode stringToKeyCode(const char *keyname)
       return BUTTON_7;
    else if (stricmp(keyname, "Button 8") == 0)
       return BUTTON_8;
-   else if (stricmp(keyname, "Button 9") == 0)     // An alias for "Back"
-      return BUTTON_BACK;
+   else if (stricmp(keyname, "Button 9") == 0)
+      return BUTTON_9;
+   else if (stricmp(keyname, "Button 10") == 0)
+      return BUTTON_10;
+   else if (stricmp(keyname, "Button 11") == 0)
+      return BUTTON_11;
+   else if (stricmp(keyname, "Button 12") == 0)
+      return BUTTON_12;
    else if (stricmp(keyname, "Back") == 0)
       return BUTTON_BACK;
-   else if (stricmp(keyname, "Button 10") == 0)    // An alias for "Start"
-      return BUTTON_START;
    else if (stricmp(keyname, "Start") == 0)
       return BUTTON_START;
    else if (stricmp(keyname, "DPad Up") == 0)

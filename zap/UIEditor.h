@@ -152,7 +152,6 @@ private:
    Point mMoveOrigin;                           // Point representing where items were moved "from" for figuring out how far they moved
    Vector<Point> mOriginalVertLocations;
 
-   Vector<boost::shared_ptr<EditorObject> > mLevelGenItems;       // Items added by a levelgen script
    Vector<boost::shared_ptr<EditorObject> > mDockItems;    // Items sitting in the dock
 
    U32 mFirstUndoIndex;

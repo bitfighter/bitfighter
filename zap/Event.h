@@ -26,7 +26,7 @@ private:
    static void updateJoyAxesDirections(U32 axisMask, S16 value);
 
    static void keyCodeUp(KeyCode keyCode);
-   static void keyCodeDown(KeyCode keyCode, char ascii);
+   static void keyCodeDown(KeyCode keyCode, char ascii = 0);
 
 public:
    Event();

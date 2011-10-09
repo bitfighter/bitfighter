@@ -138,6 +138,7 @@ const char **RabbitGameType::getGameParameterMenuKeys()
       "Min Players",
       "Max Players",
       "Allow Engr",
+      "Allow Robots",
       "" };
 
       return items;

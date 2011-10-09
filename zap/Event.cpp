@@ -181,6 +181,12 @@ void Event::onEvent(ClientGame *game, SDL_Event* event)
             case SDL_BUTTON_MIDDLE:
                onMouseButtonDown(event->button.x, event->button.y, MOUSE_MIDDLE, game->getSettings()->getIniSettings()->displayMode);
                break;
+            case SDL_BUTTON_WHEELUP:
+               onMouseWheel(true, false);
+               break;
+            case SDL_BUTTON_WHEELDOWN:
+               onMouseWheel(false, true);
+               break;
          }
          break;
 
@@ -333,6 +339,16 @@ void Event::onMouseMoved(S32 x, S32 y, DisplayMode mode)
 
 void Event::onMouseWheel(bool Up, bool Down)
 {
+   if(Up)
+   {
+      keyCodeDown(MOUSE_WHEEL_UP);
+      keyCodeUp(MOUSE_WHEEL_UP);
+   }
+   if(Down)
+   {
+      keyCodeDown(MOUSE_WHEEL_DOWN);
+      keyCodeUp(MOUSE_WHEEL_DOWN);
+   }
    // Do nothing
 }
 

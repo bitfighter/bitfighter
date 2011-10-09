@@ -186,8 +186,8 @@ JoystickInfo Joystick::PredefinedJoystickList[ControllerTypeCount] =
          ControllerButton6,
          ControllerButtonBack,
          ControllerButtonStart,
-         0,
-         0,
+         ControllerButton9,     // press left stick
+         ControllerButton10,    // press right stick
          0,
          0,
       }
@@ -292,8 +292,8 @@ JoystickInfo Joystick::PredefinedJoystickList[ControllerTypeCount] =
       {2, 3},
       { // PS3DualShock    13
          ControllerButtonStart, // Start
-         0, // L3 - Unused
-         0, // R3 - Unused
+         ControllerButton9, // L3 (press on left stick)
+         ControllerButton10, // R3 (press on righ stick)
          ControllerButtonBack, // Select
          ControllerButtonDPadUp, // DPAD Up
          ControllerButtonDPadRight, // DPAD Right
@@ -305,9 +305,8 @@ JoystickInfo Joystick::PredefinedJoystickList[ControllerTypeCount] =
          ControllerButton8, // R1
          ControllerButton4, // Triangle
          ControllerButton2, // Circle
-         // FIXME: If you can get X and Square Working. Add them as these buttons:
-         // ControllerButton1 // X
-         // ControllerButton3 // Square
+         ControllerButton1, // X
+         ControllerButton3, // Square
          // Above order should be correct. X is Button 14 Square is Button 15.
       }
    },
