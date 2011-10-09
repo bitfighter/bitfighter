@@ -60,10 +60,21 @@ LuaLevelGenerator::LuaLevelGenerator(const string &scriptName, const string &scr
 
 void LuaLevelGenerator::runScript()
 {
-   if(startLua(mFilename.c_str(), mScriptArgs, LEVELGEN))
-      doRunScript();
+   startLua(mFilename.c_str(), mScriptArgs, LEVELGEN);
 
    cleanupAndTerminate();
+}
+
+
+// Not currently called...
+void LuaLevelGenerator::doRunScript()
+{
+   // Now run the loaded code -- this just starts executing at the top of the file, running "loose" code
+   if(lua_pcall(L, 0, 0, 0))     // Passing 0 params, getting none back
+   {
+      logError("Lua error encountered running levelgen script: %s.  Skipping...", lua_tostring(L, -1));
+      return;
+   }
 }
 
 
@@ -320,15 +331,6 @@ void LuaLevelGenerator::registerClasses()
 
 }
 
-void LuaLevelGenerator::doRunScript()
-{
-   // Now run the loaded code
-   if(lua_pcall(L, 0, 0, 0))     // Passing 0 params, getting none back
-   {
-      logError("Lua error encountered running levelgen script: %s.  Skipping...", lua_tostring(L, -1));
-      return;
-   }
-}
 
 /*
 
