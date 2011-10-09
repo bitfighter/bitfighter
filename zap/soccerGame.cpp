@@ -524,10 +524,7 @@ void SoccerBallItem::damageObject(DamageInfo *theInfo)
       onItemDropped();
   
    // Compute impulse direction
-   Point dv = theInfo->impulseVector - mMoveState[ActualState].vel;
-   Point iv = mMoveState[ActualState].pos - theInfo->collisionPoint;
-   iv.normalize();
-   mMoveState[ActualState].vel += iv * dv.dot(iv) * 0.3f;
+   MoveObject::damageObject(theInfo);
 
    if(theInfo->damagingObject)
    {

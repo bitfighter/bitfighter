@@ -44,7 +44,7 @@
 namespace Zap
 {
 
-MoveObject::MoveObject(const Point &pos, F32 radius, F32 mass) : Parent(pos, radius, mass)    // Constructor
+MoveObject::MoveObject(const Point &pos, F32 radius, F32 mass) : Parent(pos, radius)    // Constructor
 {
    for(U32 i = 0; i < MoveStateCount; i++)
    {
@@ -52,6 +52,7 @@ MoveObject::MoveObject(const Point &pos, F32 radius, F32 mass) : Parent(pos, rad
       mMoveState[i].angle = 0;
    }
 
+   mMass = mass;
    mInterpolating = false;
    mHitLimit = 16;
 }
@@ -451,12 +452,16 @@ void MoveObject::computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *
 
    F32 e = 0.9f;     // Elasticity, I think
 
-   // Could incorporate m1 & m2 here in future
-   v2f = ( e * (v1i - v2i) + v1i + v2i) / 2;
-   v1f = ( v1i + v2i - v2f);
 
-   mMoveState[stateIndex].vel += collisionVector * (v1f - v1i);
+   // Could incorporate m1 & m2 here in future
+   //v2f = ( e * (v1i - v2i) + v1i + v2i) / 2;
+   //v1f = ( v1i + v2i - v2f);
+
+   v1f = (e * moveObjectThatWasHit->mMass * (v2i - v1i) + mMass * v1i + moveObjectThatWasHit->mMass * v2i) / (mMass + moveObjectThatWasHit->mMass);
+   v2f = (e *                       mMass * (v1i - v2i) + mMass * v1i + moveObjectThatWasHit->mMass * v2i) / (mMass + moveObjectThatWasHit->mMass);
+
    moveObjectThatWasHit->mMoveState[stateIndex].vel += collisionVector * (v2f - v2i);
+   mMoveState[stateIndex].vel += collisionVector * (v1f - v1i);
 
    if(!isGhost())    // Server only
    {
@@ -586,6 +591,15 @@ void MoveObject::onGeomChanged()
    mMoveState[ActualState].pos = getVert(0);
    mMoveState[RenderState].pos = getVert(0);
    printf("%i, %i\n", sizeof(Point), sizeof(Point *));
+}
+
+void MoveObject::damageObject(DamageInfo *theInfo)
+{
+   // Compute impulse direction
+   Point dv = theInfo->impulseVector - mMoveState[ActualState].vel;
+   Point iv = mMoveState[ActualState].pos - theInfo->collisionPoint;
+   iv.normalize();
+   mMoveState[ActualState].vel += iv * dv.dot(iv) * 0.3f / mMass;
 }
 
 
@@ -1469,11 +1483,7 @@ F32 TestItem::getEditorRadius(F32 currentScale)
 // Appears to be server only??
 void TestItem::damageObject(DamageInfo *theInfo)
 {
-   // Compute impulse direction
-   Point dv = theInfo->impulseVector - mMoveState[ActualState].vel;
-   Point iv = mMoveState[ActualState].pos - theInfo->collisionPoint;
-   iv.normalize();
-   mMoveState[ActualState].vel += iv * dv.dot(iv) * 0.3f;
+   MoveObject::damageObject(theInfo);
 }
 
 
@@ -1572,11 +1582,7 @@ bool ResourceItem::collide(GameObject *hitObject)
 
 void ResourceItem::damageObject(DamageInfo *theInfo)
 {
-   // Compute impulse direction
-   Point dv = theInfo->impulseVector - mMoveState[ActualState].vel;
-   Point iv = mMoveState[ActualState].pos - theInfo->collisionPoint;
-   iv.normalize();
-   mMoveState[ActualState].vel += iv * dv.dot(iv) * 0.3f;
+   MoveObject::damageObject(theInfo);
 }
 
 

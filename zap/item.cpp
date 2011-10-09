@@ -47,11 +47,10 @@ namespace Zap
 static U32 sItemId = 1;
 
 // Constructor
-Item::Item(const Point &pos, F32 radius, F32 mass)
+Item::Item(const Point &pos, F32 radius)
 {
    setActualPos(pos);
    mRadius = radius;
-   mMass = mass;
 
    mItemId = sItemId;
    sItemId++;
@@ -166,7 +165,7 @@ class LuaReactor;
 static const F32 REACTOR_MASS = F32_MAX;
 
 // Constructor
-Reactor::Reactor() : Parent(Point(0,0), (F32)REACTOR_RADIUS, REACTOR_MASS)
+Reactor::Reactor() : Parent(Point(0,0), (F32)REACTOR_RADIUS)  // REACTOR_MASS can only be used in MoveObject
 {
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = ReactorTypeNumber;

@@ -44,7 +44,6 @@ class Item : public GameObject, public EditorItem, public LuaItem
 
 protected:
    F32 mRadius;
-   F32 mMass;
 
    enum MaskBits {
       InitialMask = Parent::FirstFreeMask << 0,
@@ -54,7 +53,7 @@ protected:
    };
 
 public:
-   Item(const Point &pos = Point(0,0), F32 radius = 1, F32 mass = 1);      // Constructor
+   Item(const Point &pos = Point(0,0), F32 radius = 1);      // Constructor
 
    virtual Point getActualPos() const;
    virtual void setActualPos(const Point &p);
@@ -68,9 +67,6 @@ public:
 
    F32 getRadius() { return mRadius; }
    virtual void setRadius(F32 radius) { mRadius = radius; }
-
-   F32 getMass() { return mMass; }
-   void setMass(F32 mass) { mMass = mass; }
 
    virtual void renderItem(const Point &pos);      // Generic renderer -- will be overridden
    virtual void render();
