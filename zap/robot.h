@@ -183,9 +183,6 @@ public:
    bool runMain();                     // Run a robot's main() function
    string runGetName();                // Run bot's getName() function
 
-   bool isRunningScript;
-   bool wasRunningScript;
-
    S32 getScore() { return mScore; }   // Return robot's score
    F32 getRating() { return mTotalScore == 0 ? 0.5f : (F32)mScore / (F32)mTotalScore; }   // Return robot's score
    string getFilename() { return mFilename; }

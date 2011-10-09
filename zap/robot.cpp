@@ -1369,9 +1369,6 @@ Robot::Robot() : Ship("Robot", false, TEAM_NEUTRAL, Point(), 1, true), LuaScript
       mModulePrimaryActive[i] = false;
       mModuleSecondaryActive[i] = false;
    }
-
-   isRunningScript = false;
-   wasRunningScript = false;
 }
 
 
@@ -1419,7 +1416,7 @@ Robot::~Robot()
 
 // Reset everything on the robot back to the factory settings
 // Only runs on server!
-// return false if failed
+// return false if failed  -- should we also delete this at this point???
 bool Robot::initialize(Point &pos)
 {
    try
@@ -1447,7 +1444,7 @@ bool Robot::initialize(Point &pos)
    catch(LuaException &e)
    {
       logError("Robot error during spawn: %s.  Shutting robot down.", e.what());
-      isRunningScript = false;
+      return false;
    }
 
    return true;
@@ -1458,8 +1455,11 @@ bool Robot::initialize(Point &pos)
 void Robot::startBots()
 {   
    for(S32 i = 0; i < robots.size(); i++)
-      if(robots[i]->isRunningScript && !robots[i]->startLua())    // There is a slim possibiity I screwed this up, and there should be a ! in front of robots[i]->isRunningScript
-         robots[i]->isRunningScript = false;
+      if(!robots[i]->startLua())
+      {
+         robots.erase_fast(i);
+         i--;
+      }
 }
 
 
@@ -1556,9 +1556,6 @@ void Robot::registerClasses()
 // return false if failed
 bool Robot::runMain()
 {
-   if(!isRunningScript) 
-      return true;
-
    try
    {
       lua_getglobal(L, "_main");       // _main calls main --> see robot_helper_functions.lua
@@ -1568,9 +1565,9 @@ bool Robot::runMain()
    catch(LuaException &e)
    {
       logError("Robot error running main(): %s.  Shutting robot down.", e.what());
-      isRunningScript = false;
       return false;
    }
+
    return true;
 }
 
@@ -1626,7 +1623,6 @@ bool Robot::processArguments(S32 argc, const char **argv, Game *game)
    else
       mTeam = NO_TEAM;   
    
-
    if(argc >= 2)
       mFilename = argv[1];
    else
@@ -1634,7 +1630,6 @@ bool Robot::processArguments(S32 argc, const char **argv, Game *game)
 
    if(mFilename != "")
    {
-      wasRunningScript = true;
       string fullFilename = mFilename;  // for printing filename when not found
 
       FolderManager *folderManager = game->getSettings()->getFolderManager();
@@ -1646,10 +1641,8 @@ bool Robot::processArguments(S32 argc, const char **argv, Game *game)
       {
          logprintf("Could not find bot file %s", fullFilename.c_str());     // TODO: Better handling here
          OGLCONSOLE_Print("Could not find bot file %s", fullFilename.c_str());
-         return true;  // We can run built-in robot, not fully working yet...
+         return false;
       }
-      else
-         isRunningScript = true;    // i.e. mFilename != ""
    }
 
    // Collect our arguments to be passed into the args table in the robot (starting with the robot name)
@@ -1811,10 +1804,10 @@ void Robot::idle(GameObject::IdleCallPath path)
       TNLAssert(deltaT != 0, "Robot::idle Time is zero")   // Time should never be zero anymore
 
       // Check to see if we need to respawn this robot
-      if(hasExploded && isRunningScript)
+      if(hasExploded)
       {
             bool hasConn = mClientInfo->getConnection();
-            TNLAssert(mHasSpawned == hasConn, "How are thsese not the same??");
+            TNLAssert(mHasSpawned == hasConn, "How are these not the same??");
 
          if(!mHasSpawned)  // Can probably be replaced with !mClientInfo->getConnection()
            spawn();
@@ -1828,55 +1821,37 @@ void Robot::idle(GameObject::IdleCallPath path)
       mCurrentMove.x = 0;
       mCurrentMove.y = 0;
 
-      if(isRunningScript)
+      for(S32 i = 0; i < ShipModuleCount; i++)
       {
-
-         for(S32 i = 0; i < ShipModuleCount; i++)
-         {
-            mCurrentMove.modulePrimary[i] = false;
-            mCurrentMove.moduleSecondary[i] = false;
-         }
-
-         if(!mIsPaused || mStepCount > 0)
-         {
-            if(mStepCount > 0)
-               mStepCount--;
-
-            try
-            {
-               lua_getglobal(L, "_onTick");   // _onTick calls onTick --> see robot_helper_functions.lua
-               Lunar<LuaRobot>::push(L, this->mLuaRobot);
-
-               lua_pushnumber(L, deltaT);    // Pass the time elapsed since we were last here
-
-               if (lua_pcall(L, 2, 0, 0) != 0)
-                  throw LuaException(lua_tostring(L, -1));
-            }
-            catch(LuaException &e)
-            {
-               logError("Robot error running _onTick(): %s.  Shutting robot down.", e.what());
-               //delete this;
-               isRunningScript = false;
-               return;
-            }
-         }
+         mCurrentMove.modulePrimary[i] = false;
+         mCurrentMove.moduleSecondary[i] = false;
       }
-      else     // isRunningScript == false
+
+      if(!mIsPaused || mStepCount > 0)
       {
-         if(wasRunningScript)
+         if(mStepCount > 0)
+            mStepCount--;
+         
+         try
          {
-            if(QUIT_ON_SCRIPT_ERROR)
-            {
-               getGame()->getGameType()->s2cDisplayChatMessage(true, getName(), "!!! ROBOT ERROR !!! Shutting down.");
-               delete this;
-               return;
-            }
-            getGame()->getGameType()->s2cDisplayChatMessage(true, getName(), "!!! ROBOT ERROR !!!");
-            wasRunningScript = false;
+            lua_getglobal(L, "_onTick");   // _onTick calls onTick --> see robot_helper_functions.lua
+            Lunar<LuaRobot>::push(L, this->mLuaRobot);
+
+            lua_pushnumber(L, deltaT);    // Pass the time elapsed since we were last here
+
+            if (lua_pcall(L, 2, 0, 0) != 0)
+               throw LuaException(lua_tostring(L, -1));
          }
+         catch(LuaException &e)
+         {
+            logError("Robot error running _onTick(): %s.  Shutting robot down.", e.what());
 
-         // Robot does nothing without script
+            // Safer than "delete this"
+            SafePtr<Robot> robotPtr = this;
+            robotPtr->deleteObject();
 
+            return;
+         }
       }
 
       Parent::idle(GameObject::ServerIdleControlFromClient);   // Let's say the script is the client

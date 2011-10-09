@@ -1115,7 +1115,7 @@ void GameType::onLevelLoaded()
 
    mLevelHasLoadoutZone = (fillVector.size() > 0);
 
-   Robot::startBots();
+   Robot::startBots();     // Cycle through all our bots and start them up
 }
 
 
@@ -1175,11 +1175,6 @@ void GameType::spawnRobot(Robot *robot)
          robotPtr->deleteObject();
       return;
    }
-
-   // Should be done in intialize
-   //robot->runMain();                      // Gentlemen, start your engines!
-   //robot->getEventManager().update();     // Ensure registrations made during bot initialization are ready to go
-
 
    // Should probably do this, but... not now.
    //if(isSpawnWithLoadoutGame())
@@ -2589,7 +2584,6 @@ void GameType::processServerCommand(ClientInfo *clientInfo, const char *cmd, Vec
       else
       {
          Robot *robot = new Robot();
-         robot->addToGame(mGame, mGame->getGameObjDatabase());
 
          S32 args_count = 0;
          const char *args_char[LevelLoader::MAX_LEVEL_LINE_ARGS];  // Convert to a format processArgs will allow
@@ -2603,8 +2597,14 @@ void GameType::processServerCommand(ClientInfo *clientInfo, const char *cmd, Vec
          
          robot->processArguments(args_count, args_char, mGame);
          
-         if(robot->isRunningScript && !robot->startLua())
-            robot->isRunningScript = false;
+         if(!robot->startLua())
+         {
+            delete robot;
+            conn->s2cDisplayErrorMessage("!!! Could not start robot; please see server logs");
+            return;
+         }
+
+         robot->addToGame(mGame, mGame->getGameObjDatabase());
          
          StringTableEntry msg = StringTableEntry("Robot added by %e0");
          Vector<StringTableEntry> e;
