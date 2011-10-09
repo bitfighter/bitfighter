@@ -1014,6 +1014,7 @@ void Asteroid::damageObject(DamageInfo *theInfo)
 
    Asteroid *newItem = dynamic_cast<Asteroid *>(TNL::Object::create("Asteroid"));
    newItem->setRadius(F32(ASTEROID_RADIUS) * asteroidRenderSize[mSizeIndex]);
+   newItem->setMass(getMass() / 2);
 
    F32 ang2;
    do
