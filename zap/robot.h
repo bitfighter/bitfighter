@@ -27,18 +27,9 @@
 #define _ROBOT_H_
 
 
-#include "gameObject.h"
-#include "moveObject.h"
-#include "ship.h"
+#include "ship.h"          // Parent class
 #include "game.h"          // For ClientInfo def
-
-#include "Timer.h"
-#include "shipItems.h"
-#include "gameWeapons.h"
-
 #include "luaObject.h"
-#include "teamInfo.h"
-
 
 namespace Zap
 {
