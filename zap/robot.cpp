@@ -1339,9 +1339,6 @@ Robot::Robot() : Ship("Robot", false, TEAM_NEUTRAL, Point(), 1, true), LuaScript
    mCurrentZone = U16_MAX;
    flightPlanTo = U16_MAX;
 
-   // Need to provide some time on here to get timer to trigger robot to spawn.  It's timer driven.
-   // respawnTimer.reset(100, RobotRespawnDelay);
-
    mClientInfo = boost::shared_ptr<ClientInfo>(new LocalClientInfo(NULL, true));
 
    mPlayerInfo = new RobotPlayerInfo(this);
@@ -1611,25 +1608,25 @@ bool Robot::processArguments(S32 argc, const char **argv, Game *game)
    else
       mFilename = game->getSettings()->getIniSettings()->defaultRobotScript;
 
+
+   string fullFilename = mFilename;  // for printing filename when not found
+
+   FolderManager *folderManager = game->getSettings()->getFolderManager();
+
    if(mFilename != "")
-   {
-      string fullFilename = mFilename;  // for printing filename when not found
-
-      FolderManager *folderManager = game->getSettings()->getFolderManager();
-
       mFilename = folderManager->findBotFile(mFilename);
-      setScriptingDir(folderManager->luaDir);
 
-      if(mFilename == "")     // Bot script could not be located
-      {
-         logprintf("Could not find bot file %s", fullFilename.c_str());     // TODO: Better handling here
-         OGLCONSOLE_Print("Could not find bot file %s", fullFilename.c_str());
-         return false;
-      }
+   if(mFilename == "")     // Bot script could not be located
+   {
+      logprintf("Could not find bot file %s", fullFilename.c_str());     // TODO: Better handling here
+      OGLCONSOLE_Print("Could not find bot file %s", fullFilename.c_str());
+      return false;
    }
 
+   setScriptingDir(folderManager->luaDir);
+
    // Collect our arguments to be passed into the args table in the robot (starting with the robot name)
-   // Need to make a copy or containerize argv[i] somehow,  because otherwise new data will get written
+   // Need to make a copy or containerize argv[i] somehow, because otherwise new data will get written
    // to the string location subsequently, and our vals will change from under us.  That's bad!
 
    // We're using string here as a stupid way to get done what we need to do... perhaps there is a better way.
