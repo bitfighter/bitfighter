@@ -24,41 +24,25 @@
 //------------------------------------------------------------------------------------
 
 #include "robot.h"
-#include "item.h"
-
-#include "gameType.h"
-#include "projectile.h"
-#include "gameLoader.h"
-#include "gameConnection.h"
-#include "shipItems.h"
 #include "playerInfo.h"          // For RobotPlayerInfo constructor
-#include "gameWeapons.h"
-#include "gameObjectRender.h"
-#include "flagItem.h"
 #include "goalZone.h"
 #include "loadoutZone.h"
 #include "soccerGame.h"          // For lua object defs
 #include "huntersGame.h"         // For lua object defs
-#include "EngineeredItem.h"   // For lua object defs
+#include "EngineeredItem.h"      // For lua object defs
 #include "PickupItem.h"          // For lua object defs
 #include "teleporter.h"          // For lua object defs
 
 #include "../lua/luaprofiler-2.0.2/src/luaprofiler.h"      // For... the profiler!
-#include "config.h"
 #include "BotNavMeshZone.h"      // For BotNavMeshZone class definition
-#include "luaGameInfo.h"
 #include "luaUtil.h"
-#include "GeomUtils.h"
 #include "oglconsole.h"
-#include "game.h"
-#include "stringUtils.h"
+
 
 #ifndef ZAP_DEDICATED
-#include "sparkManager.h"
+
 #include "UI.h"
-#include "UIMenus.h"
-#include "UIGame.h"
-#include "SDL/SDL_opengl.h"
+
 #endif
 
 #include <math.h>
@@ -1846,7 +1830,7 @@ void Robot::idle(GameObject::IdleCallPath path)
          {
             logError("Robot error running _onTick(): %s.  Shutting robot down.", e.what());
 
-            // Safer than "delete this"
+            // Safer than "delete this" -- adds bot to delete list, where it will be deleted later (or at least outside this construct)
             SafePtr<Robot> robotPtr = this;
             robotPtr->deleteObject();
 
