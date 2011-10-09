@@ -1330,7 +1330,9 @@ Lunar<Circle>::RegType Circle::methods[] =
 
 TNL_IMPLEMENT_NETOBJECT(Worm);
 
-Worm::Worm() : MoveItem(Point(0,0), true, (F32)WORM_RADIUS, 1)
+static const F32 WORM_ITEM_MASS = 1;
+
+Worm::Worm() : MoveItem(Point(0,0), true, (F32)WORM_RADIUS, WORM_ITEM_MASS)
 {
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = WormTypeNumber;
