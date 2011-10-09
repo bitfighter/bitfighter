@@ -82,7 +82,6 @@ const F32 MIN_SCALE = .05f;         // Most zoomed-in scale
 const F32 MAX_SCALE = 2.5;          // Most zoomed-out scale
 const F32 STARTING_SCALE = 0.5;
 
-//static Vector<boost::shared_ptr<EditorObject> > *mLoadTarget;
 static EditorObjectDatabase *mLoadTarget;
 
 static EditorObjectDatabase mLevelGenDatabase;     // Database for inserting objects when running a levelgen script in the editor
@@ -250,7 +249,7 @@ EditorUserInterface::~EditorUserInterface()
    clearDatabase(getGame()->getEditorDatabase());
 
    mDockItems.clear();
-   mLevelGenItems.clear();
+   mLevelGenDatabase.removeEverythingFromDatabase();
    mClipboard.clear();
    delete mNewItem;
 }
@@ -332,20 +331,6 @@ void EditorUserInterface::renderPolyline(const Vector<Point> *verts)
       setLevelToCanvasCoordConversion();
       renderPointVector(verts, GL_LINE_STRIP);
    glPopMatrix();
-}
-
-
-////////////////////////////////////
-////////////////////////////////////
-
-// Objects created with this method MUST be deleted!
-// Returns NULL if className is invalid
-static EditorObject *newEditorObject(const char *className)
-{
-   Object *theObject = Object::create(className);        // Create an object of the specified type
-   TNLAssert(dynamic_cast<EditorObject *>(theObject), "This is not an EditorObject!");
-
-   return dynamic_cast<EditorObject *>(theObject);       // Force our new object to be an EditorObject
 }
 
 
@@ -583,21 +568,23 @@ extern OGLCONSOLE_Console gConsole;
 
 void EditorUserInterface::clearLevelGenItems()
 {
-   mLevelGenItems.clear();
+   mLevelGenDatabase.removeEverythingFromDatabase();
 }
 
 
 void EditorUserInterface::copyScriptItemsToEditor()
 {
-   if(mLevelGenItems.size() == 0)
+   const Vector<EditorObject*> *objList = mLevelGenDatabase.getObjectList();
+
+   if(objList->size() == 0)
       return;     // Print error message?
 
    saveUndoState();
 
-   for(S32 i = 0; i < mLevelGenItems.size(); i++)
-      mLevelGenItems[i]->addToEditor(getGame());
+   for(S32 i = 0; i < objList->size(); i++)
+      objList->get(i)->addToEditor(getGame());
       
-   mLevelGenItems.clear();    // Don't want to delete these objects... we just handed them off to the database!
+   mLevelGenDatabase.removeEverythingFromDatabase();    // Don't want to delete these objects... we just handed them off to the database!
 
    rebuildEverything();
 
@@ -642,7 +629,7 @@ void EditorUserInterface::runScript(const FolderManager *folderManager, const st
    }
 
    // Load the items
-   LuaLevelGenerator(name, folderManager->luaDir, &args, getGame()->getGridSize(), getGame()->getEditorDatabase(), getGame(), gConsole);
+   LuaLevelGenerator(name, folderManager->luaDir, &args, getGame()->getGridSize(), mLoadTarget, getGame(), gConsole);
 
    // Process new items
    // Not sure about all this... may need to test
@@ -1508,8 +1495,9 @@ void EditorUserInterface::render()
    //                                  mLevelGenItems[i]->getWidth() / getGridSize() / 2, GL_POLYGON);
    //glPopMatrix();
 
-   for(S32 i = 0; i < mLevelGenItems.size(); i++)
-      mLevelGenItems[i]->renderInEditor(mCurrentScale, mCurrentOffset, mSnapVertexIndex, true, mShowingReferenceShip, mShowMode);
+   const Vector<EditorObject *> *levelGenObjList = mLevelGenDatabase.getObjectList();
+   for(S32 i = 0; i < levelGenObjList->size(); i++)
+      levelGenObjList->get(i)->renderInEditor(mCurrentScale, mCurrentOffset, mSnapVertexIndex, true, mShowingReferenceShip, mShowMode);
    
    // Render polyWall item fill just before rendering regular walls.  This will create the effect of all walls merging together.  
    // PolyWall outlines are already part of the wallSegmentManager, so will be rendered along with those of regular walls.
@@ -2238,10 +2226,8 @@ void EditorUserInterface::onMouseMoved()
    bool showMoveCursor = (mItemHit || mVertexHit != NONE || mItemHit || mEdgeHit != NONE || 
                          (mouseOnDock() && findHitItemOnDock(mMousePos) != NONE));
 
-
    findSnapVertex();
 
-   // TODO:  was GLUT_CURSOR_SPRAY : GLUT_CURSOR_RIGHT_ARROW
    SDL_ShowCursor((showMoveCursor && !mShowingReferenceShip) ? SDL_ENABLE : SDL_ENABLE);
 }
 
@@ -2768,8 +2754,9 @@ static LineEditor getNewEntryBox(string value, string prompt, S32 length, LineEd
 void EditorUserInterface::centerView()
 {
    const Vector<EditorObject *> *objList = getObjectList();
+   const Vector<EditorObject *> *levelGenObjList = mLevelGenDatabase.getObjectList();
 
-   if(objList->size() || mLevelGenItems.size())
+   if(objList->size() || levelGenObjList->size())
    {
       F32 minx =  F32_MAX,   miny =  F32_MAX;
       F32 maxx = -F32_MAX,   maxy = -F32_MAX;
@@ -2791,9 +2778,9 @@ void EditorUserInterface::centerView()
          }
       }
 
-      for(S32 i = 0; i < mLevelGenItems.size(); i++)
+      for(S32 i = 0; i < levelGenObjList->size(); i++)
       {
-         EditorObject *obj = mLevelGenItems[i].get();
+         EditorObject *obj = levelGenObjList->get(i);
 
          for(S32 j = 0; j < obj->getVertCount(); j++)
          {
@@ -3125,7 +3112,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       }
       else if(checkModifier(KEY_CTRL))        // Ctrl-R - Run levelgen script, or clear last results
       {
-         if(mLevelGenItems.size() == 0)
+         if(mLevelGenDatabase.getObjectList()->size() == 0)
             runLevelGenScript();
          else
             clearLevelGenItems();
@@ -3163,7 +3150,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          mShowMode = (ShowMode) 0;     // First mode
 
       if(mShowMode == ShowWallsOnly && !mDraggingObjects)
-         SDL_ShowCursor(SDL_ENABLE);  // TODO:  was GLUT_CURSOR_RIGHT_ARROW
+         SDL_ShowCursor(SDL_ENABLE);
 
       populateDock();   // Different modes have different items
 
