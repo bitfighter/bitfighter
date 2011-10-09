@@ -492,7 +492,7 @@ bool LuaScriptRunner::startLua(const char *scriptFullName, const Vector<string> 
    if(!loadHelperFunctions("lua_helper_functions.lua") || !loadHelperFunctions(helperFunctions)) 
       return false;
 
-   return initScript(scriptFullName);
+   return initScript(scriptFullName);     // Runs "loose" code in bot, but nothing bound inside a function
 }
 
 
