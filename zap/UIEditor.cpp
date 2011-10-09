@@ -629,7 +629,8 @@ void EditorUserInterface::runScript(const FolderManager *folderManager, const st
    }
 
    // Load the items
-   LuaLevelGenerator(name, folderManager->luaDir, &args, getGame()->getGridSize(), mLoadTarget, getGame(), gConsole);
+   LuaLevelGenerator levelGen(name, folderManager->luaDir, args, getGame()->getGridSize(), mLoadTarget, getGame(), gConsole);
+   levelGen.runScript();
 
    // Process new items
    // Not sure about all this... may need to test
