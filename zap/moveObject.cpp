@@ -1005,6 +1005,7 @@ void Asteroid::damageObject(DamageInfo *theInfo)
 
    setMaskBits(ItemChangedMask);    // So our clients will get new size
    setRadius(F32(ASTEROID_RADIUS) * asteroidRenderSize[mSizeIndex]);
+   setMass(getMass() / 2);          // Reduce mass by half if asteroid splits
 
    F32 ang = TNL::Random::readF() * Float2Pi;      // Sync
    //F32 vel = asteroidVel;
