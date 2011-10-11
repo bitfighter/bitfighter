@@ -735,6 +735,7 @@ void Game::setGameTime(F32 time)
 
 extern OGLCONSOLE_Console gConsole;
 
+// TODO: Show warning message to players?
 bool Game::runLevelGenScript(const FolderManager *folderManager, const string &scriptName, const Vector<string> &scriptArgs, 
                                    GridDatabase *targetDatabase)
 {
