@@ -39,17 +39,12 @@ namespace Zap
 LuaLevelGenerator::LuaLevelGenerator(const string &scriptName, const string &scriptDir, const Vector<string> &scriptArgs, F32 gridSize, 
                                      GridDatabase *gridDatabase, LevelLoader *caller, OGLCONSOLE_Console console)
 {
-   if(!fileExists(scriptName))      // Files should be checked before we get here, so this should never happen
-   {
-      logError("Got bad input %s!", scriptName.c_str());
-      return;
-   }
+   TNLAssert(fileExists(scriptName), "Files should be checked before we get here -- something has gone wrong!");
 
-   mFilename = scriptName;
+   mScriptName = scriptName;
    mScriptArgs = scriptArgs;
    setScriptingDir(scriptDir);
 
-   mLevelGenFile = mFilename;
    mConsole = console;
    mGridDatabase = gridDatabase;
 
@@ -58,23 +53,9 @@ LuaLevelGenerator::LuaLevelGenerator(const string &scriptName, const string &scr
 }
 
 
-void LuaLevelGenerator::runScript()
+bool LuaLevelGenerator::runScript()
 {
-   startLua(mFilename.c_str(), mScriptArgs, LEVELGEN);
-
-   cleanupAndTerminate();
-}
-
-
-// Not currently called...
-void LuaLevelGenerator::doRunScript()
-{
-   // Now run the loaded code -- this just starts executing at the top of the file, running "loose" code
-   if(lua_pcall(L, 0, 0, 0))     // Passing 0 params, getting none back
-   {
-      logError("Lua error encountered running levelgen script: %s.  Skipping...", lua_tostring(L, -1));
-      return;
-   }
+   return startLua(LEVELGEN) && loadScript() && runMain();
 }
 
 
@@ -98,7 +79,7 @@ LuaLevelGenerator::~LuaLevelGenerator()
    logprintf(LogConsumer::LogLuaObjectLifecycle, "deleted LuaLevelGenerator (%p)\n", this);
 }
 
-// modify basic level parameters like game length and teams.
+// TODO: Provide mechanism to modify basic level parameters like game length and teams.
 
 
 extern OGLCONSOLE_Console gConsole;
@@ -111,7 +92,7 @@ void LuaLevelGenerator::logError(const char *format, ...)
 
    vsnprintf(buffer, sizeof(buffer), format, args);
 
-   logError(buffer, mLevelGenFile.c_str());
+   logError(buffer, mScriptName.c_str());
 
    va_end(args);
 }
@@ -201,7 +182,7 @@ S32 LuaLevelGenerator::addWall(lua_State *L)
       logError(e.what());
    }
 
-   mCaller->parseLevelLine(line.c_str(), mGridDatabase, false, "Levelgen script: " + mFilename);
+   mCaller->parseLevelLine(line.c_str(), mGridDatabase, false, "Levelgen script: " + mScriptName);
 
    return 0;
 }
@@ -225,7 +206,7 @@ S32 LuaLevelGenerator::addItem(lua_State *L)
    for(S32 i = 0; i < argc; i++)      // argc was already bounds checked above
       argv[i] = getString(L, i + 1, methodName);
 
-   processLevelLoadLine(argc, 0, argv, mGridDatabase, false, "Levelgen script: " + mFilename);      // For now, all ids are 0!
+   processLevelLoadLine(argc, 0, argv, mGridDatabase, false, "Levelgen script: " + mScriptName);      // For now, all ids are 0!
 
    //clearStack();
 
@@ -248,7 +229,7 @@ S32 LuaLevelGenerator::addLevelLine(lua_State *L)
    checkArgCount(L, 1, methodName);
    const char *line = getString(L, 1, methodName);
 
-   mCaller->parseLevelLine(line, mGridDatabase, false, "Levelgen script: " + mFilename);
+   mCaller->parseLevelLine(line, mGridDatabase, false, "Levelgen script: " + mScriptName);
 
    //clearStack();
 
@@ -311,14 +292,13 @@ S32 LuaLevelGenerator::getPlayerCount(lua_State *L)
 
 
 ///// Initialize levelgen specific stuff
-void LuaLevelGenerator::preHelperInit()
+void LuaLevelGenerator::setPointerToThis()
 {
    lua_pushnumber(L, mGridSize);
    lua_setglobal(L, "_GRID_SIZE");
 
-   Lunar<LuaLevelGenerator>::push(L, this);  // Lets use this instead of having to use helper functions
+   Lunar<LuaLevelGenerator>::push(L, this);  
    lua_setglobal(L, "levelgen");
-
 }
 
 

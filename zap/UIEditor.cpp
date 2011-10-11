@@ -621,6 +621,9 @@ void EditorUserInterface::runScript(const FolderManager *folderManager, const st
 {
    string name = folderManager->findLevelGenScript(scriptName);  // Find full name of levelgen script
 
+
+   getGame()->runLevelGenScript(folderManager, scriptName, args, mLoadTarget);
+
    if(name == "")
    {
       logprintf(LogConsumer::LogWarning, "Warning: Could not find script \"%s\"",  scriptName.c_str());
@@ -630,7 +633,13 @@ void EditorUserInterface::runScript(const FolderManager *folderManager, const st
 
    // Load the items
    LuaLevelGenerator levelGen(name, folderManager->luaDir, args, getGame()->getGridSize(), mLoadTarget, getGame(), gConsole);
-   levelGen.runScript();
+
+   if(!levelGen.runScript())
+   {
+      logprintf(LogConsumer::LogWarning, "Warning: Error running script \"%s\"",  scriptName.c_str());
+      // TODO: Show an error to the user
+      return;
+   }
 
    // Process new items
    // Not sure about all this... may need to test

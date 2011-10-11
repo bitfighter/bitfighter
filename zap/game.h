@@ -364,16 +364,16 @@ public:
 
    ClientInfo *getClientInfo(S32 index);
 
-   void addClientInfoToList(const boost::shared_ptr<ClientInfo> &conn);               
-   void removeClientInfoFromList(const StringTableEntry &name);         // Client side
-   void removeClientInfoFromList(ClientInfo *clientInfo);               // Server side
+   void addToClientList(const boost::shared_ptr<ClientInfo> &conn);               
+   void removeFromClientList(const StringTableEntry &name);             // Client side
+   void removeFromClientList(ClientInfo *clientInfo);                   // Server side
    void clearClientList();
 
-   ClientInfo *findClientInfo(const StringTableEntry &name);      // Find client by name
+   ClientInfo *findClientInfo(const StringTableEntry &name);            // Find client by name
    
    Rect getWorldExtents() { return mWorldExtents; }
 
-   virtual bool isTestServer() { return false; }      // Overridden in ServerGame
+   virtual bool isTestServer() { return false; }                        // Overridden in ServerGame
 
    virtual const Color *getTeamColor(S32 teamId) const { return &Colors::white; }  // ClientGame will override
    static const Color *getBasicTeamColor(const Game *game, S32 teamId);            // Color function used in most cases, overridden by some games
@@ -428,6 +428,8 @@ public:
 
    void setEditorDatabase(boost::shared_ptr<GridDatabase> database) { mEditorDatabase = boost::dynamic_pointer_cast<EditorObjectDatabase>(database); }
 
+   bool runLevelGenScript(const FolderManager *folderManager, const string &scriptName, const Vector<string> &scriptArgs, 
+                          GridDatabase *targetDatabase);
 
    const Vector<SafePtr<GameObject> > &getScopeAlwaysList() { return mScopeAlwaysList; }
 

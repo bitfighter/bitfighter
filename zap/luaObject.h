@@ -111,31 +111,35 @@ private:
    bool mScriptingDirSet;
 
    bool loadHelperFunctions(const string &helperName);
-   bool initScript(const char *scriptName);
-   void setLuaArgs(const char *scriptName, const Vector<string> &args);
+   void setLuaArgs();
    void setModulePath();
 
+   bool loadScript(const string &scriptName);
+   bool runChunk();
 
 protected:
-   lua_State *L;                    // Main Lua state variable
+   lua_State *L;                 // Main Lua state variable
+   string mScriptName;           // Fully qualified script name, with path and everything
+   Vector<string> mScriptArgs;   // List of arguments passed to the script
 
-   bool startLua(const char *scriptFullName, const Vector<string> &args, ScriptType scriptType);
+   bool loadScript();
+   bool startLua(ScriptType scriptType);
+   bool runMain();               // Run a script's main() function
+
+
    virtual void logError(const char *format, ...) = 0;
 
    static int luaPanicked(lua_State *L);
 
    virtual void registerClasses() = 0;
-   virtual void preHelperInit() { /* Do nothing */ }
-
-   void cleanupAndTerminate();
-
+   virtual void setPointerToThis() = 0;
 
 public:
-   LuaScriptRunner();     // Constructor
+   LuaScriptRunner();               // Constructor
+   virtual ~LuaScriptRunner();      // Destructor
 
    void setScriptingDir(const string &scriptingDir);
    lua_State *getL();
-
 };
 
 

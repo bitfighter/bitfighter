@@ -41,15 +41,12 @@ class GridDatabase;
 class LuaLevelGenerator: public LuaScriptRunner, public LuaObject
 {
 private:
-   string mFilename;
-   Vector<string> mScriptArgs;
    GridDatabase *mGridDatabase;
 
    OGLCONSOLE_Console mConsole;
 
    LevelLoader *mCaller;
    F32 mGridSize;
-   string mLevelGenFile;     // Exists here so exception handler will know what file we were running
 
 public:
    LuaLevelGenerator() { TNLAssert(false, "Who wants this???"); }
@@ -59,11 +56,10 @@ public:
    LuaLevelGenerator(lua_State *L);      // Lua constructor
    virtual ~LuaLevelGenerator();         // Destructor
 
-   void preHelperInit();
+   void setPointerToThis();
    void registerClasses();
    void onScriptInitialized();
-   void runScript();                     // Wraps doRunScript()
-   virtual void doRunScript();
+   bool runScript();                     
    void logError(const char *format, ...);
    void logError(const char *msg, const char *filename);
 
@@ -105,7 +101,7 @@ public:
 
    void getMenus();
 
-   void runScript();    // Wraps doRunScript()
+   void runScript();    
    bool runMain();
 };
 */

@@ -234,9 +234,8 @@ ClientInfo *Game::getClientInfo(S32 index)
 }
 
 
-void Game::addClientInfoToList(const boost::shared_ptr<ClientInfo> &clientInfo) 
+void Game::addToClientList(const boost::shared_ptr<ClientInfo> &clientInfo) 
 { 
-   //logprintf("Adding client...");
    mClientInfos.push_back(clientInfo);
 
    if(clientInfo->isRobot())
@@ -257,7 +256,7 @@ S32 Game::findClientIndex(const StringTableEntry &name)
 }
 
 
-void Game::removeClientInfoFromList(const StringTableEntry &name)
+void Game::removeFromClientList(const StringTableEntry &name)
 {
    //logprintf("Removing client %s...", name.getString());
    S32 index = findClientIndex(name);
@@ -274,9 +273,8 @@ void Game::removeClientInfoFromList(const StringTableEntry &name)
 }
 
 
-void Game::removeClientInfoFromList(ClientInfo *clientInfo)
+void Game::removeFromClientList(ClientInfo *clientInfo)
 {
-   //logprintf("Removing client...");
    for(S32 i = 0; i < mClientInfos.size(); i++)
       if(mClientInfos[i].get() == clientInfo)
       {
@@ -307,8 +305,6 @@ ClientInfo *Game::findClientInfo(const StringTableEntry &name)
 
    return index >= 0 ? mClientInfos[index].get() : NULL;
 }
-
-
 
 
 GameNetInterface *Game::getNetInterface()
@@ -734,6 +730,32 @@ void Game::setGameTime(F32 time)
 
    if(gt)
       gt->setGameTime(time * 60);
+}
+
+
+extern OGLCONSOLE_Console gConsole;
+
+bool Game::runLevelGenScript(const FolderManager *folderManager, const string &scriptName, const Vector<string> &scriptArgs, 
+                                   GridDatabase *targetDatabase)
+{
+   string fullname = folderManager->findLevelGenScript(scriptName);  // Find full name of levelgen script
+
+   if(fullname == "")
+   {
+      logprintf(LogConsumer::LogWarning, "Warning: Could not find script \"%s\" in globalLevelScript", scriptName);
+      return false;
+   }
+
+   // The script file will be the first argument, subsequent args will be passed on to the script
+   LuaLevelGenerator levelgen = LuaLevelGenerator(fullname, folderManager->luaDir, scriptArgs, getGridSize(), 
+                                                  targetDatabase, this, gConsole);
+   if(!levelgen.runScript())
+   {
+      logprintf(LogConsumer::LogWarning, "Warning: Error running script \"%s\" ", scriptName);
+      return false;
+   }
+
+   return true;
 }
 
 
@@ -1554,7 +1576,7 @@ void ServerGame::cycleLevel(S32 nextLevel)
       for(S32 i = 0; i < getClientCount(); i++)
       {
          mGameType->serverAddClient(getClientInfo(i));
-         getClientInfo(i)->getConnection()->activateGhosting();
+         getClientInfo(i)->getConnection()->activateGhosting();      // Tell clients we're done sending objects and are ready to start playing
       }
 }
 
@@ -1671,7 +1693,6 @@ inline string getPathFromFilename(const string &filename)
 }
 
 
-extern OGLCONSOLE_Console gConsole;
 extern md5wrapper md5;
 
 bool ServerGame::loadLevel(const string &levelFileName)
@@ -1718,39 +1739,11 @@ bool ServerGame::loadLevel(const string &levelFileName)
    string scriptName = getGameType()->getScriptName();
 
    if(scriptName != "")
-   {
-      string name = folderManager->findLevelGenScript(scriptName);  // Find full name of levelgen script
-
-      // If we can't find script, we currently continue with the level.  Should we skip it instead?
-      if(name == "")
-         logprintf(LogConsumer::LogWarning, "Warning: Could not find script \"%s\" in level \"%s\"", 
-                                    scriptName.c_str(), levelFileName.c_str());
-      else
-      {
-         LuaLevelGenerator levelgen(name, folderManager->luaDir, *getGameType()->getScriptArgs(), 
-                                    getGridSize(), getGameObjDatabase(), this, gConsole);
-
-         levelgen.runScript();
-      }
-   }
+      runLevelGenScript(folderManager, scriptName, *getGameType()->getScriptArgs(), getGameObjDatabase());
 
    // Script specified in INI globalLevelLoadScript
    if(mSettings->getIniSettings()->globalLevelScript != "")
-   {
-      string name = folderManager->findLevelGenScript(mSettings->getIniSettings()->globalLevelScript);  // Find full name of levelgen script
-
-      if(name == "")
-      {
-         logprintf(LogConsumer::LogWarning, "Warning: Could not find script \"%s\" in globalLevelScript", 
-                                    getGameType()->getScriptName().c_str(), levelFileName.c_str());
-         return false;
-      }
-
-      // The script file will be the first argument, subsequent args will be passed on to the script
-      LuaLevelGenerator levelgen = LuaLevelGenerator(name, folderManager->luaDir, *getGameType()->getScriptArgs(), getGridSize(), 
-                                                     getGameObjDatabase(), this, gConsole);
-      levelgen.runScript();
-   }
+      runLevelGenScript(folderManager, mSettings->getIniSettings()->globalLevelScript, *getGameType()->getScriptArgs(), getGameObjDatabase());
 
    //  Check after script, script might add Teams
    if(getGameType()->makeSureTeamCountIsNotZero())
@@ -1770,7 +1763,7 @@ void ServerGame::addClient(boost::shared_ptr<ClientInfo> clientInfo)
    if(clientInfo->isLevelChanger() || clientInfo->isAdmin())
       conn->sendLevelList();
 
-   // If we're shutting down, display a notice to the user
+   // If we're shutting down, display a notice to the user... but still let them connect normally
    if(mShuttingDown)
       conn->s2cInitiateShutdown(mShutdownTimer.getCurrent() / 1000, mShutdownOriginator->getClientInfo()->getName(), 
                                          "Sorry -- server shutting down", false);
@@ -1778,7 +1771,7 @@ void ServerGame::addClient(boost::shared_ptr<ClientInfo> clientInfo)
    if(mGameType.isValid())
    {
       mGameType->serverAddClient(clientInfo.get());
-      addClientInfoToList(clientInfo);
+      addToClientList(clientInfo);
    }
 
    if(mDedicated)

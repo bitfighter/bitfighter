@@ -104,8 +104,6 @@ class Robot : public Ship, public LuaScriptRunner
    typedef Ship Parent;
 
 private:
-   string mFilename;            // Name of file script was loaded from
-
    U16 mCurrentZone;            // Zone robot is currently in
 
    S32 mScore;
@@ -116,10 +114,9 @@ private:
    boost::shared_ptr<ClientInfo> mClientInfo;         // Reusable ClientInfo for robot, will have NULL connection, used when spawning
    LuaPlayerInfo *mPlayerInfo;      // Player info object describing the robot
 
-   Vector<string> mArgs;            // List of arguments passed to the robot.  Script name itself is the first one.
    bool mHasSpawned;
 
-   void spawn();                    // Handles bot spawning
+ 
 
    static bool mIsPaused;
    static S32 mStepCount;           // If running for a certain number of steps, this will be > 0, while mIsPaused will be true
@@ -128,7 +125,7 @@ public:
    Robot();      // Constructor
    ~Robot();                                                                                    // Destructor
 
-
+   void setConnection();                    
    bool initialize(Point &pos);
 
    void kill();
@@ -157,6 +154,8 @@ public:
    // External robot functions
    bool findNearestShip(Point &loc);      // Return location of nearest known ship within a given area
 
+   boost::shared_ptr<ClientInfo> getClientInfo();
+
    bool isRobot() { return true; }
    //static S32 getRobotCount() { return robots.size(); }
 
@@ -167,16 +166,16 @@ public:
 
    static Vector<Robot *> robots;      // Grand master list of all robots in the current game
    static void startBots();            // Loop through all our bots and run thier main() functions
+   bool start();
 
    bool startLua();                    // Fire up bot's Lua processor
-   void preHelperInit();
+   void setPointerToThis();
    void registerClasses();
-   bool runMain();                     // Run a robot's main() function
    string runGetName();                // Run bot's getName() function
 
    S32 getScore() { return mScore; }   // Return robot's score
    F32 getRating() { return mTotalScore == 0 ? 0.5f : (F32)mScore / (F32)mTotalScore; }   // Return robot's score
-   string getFilename() { return mFilename; }
+   const char *getScriptName() { return mScriptName.c_str(); }
 
    static void setPaused(bool isPaused) { mIsPaused = isPaused; }
    static void togglePauseStatus() { mIsPaused = !mIsPaused; }
