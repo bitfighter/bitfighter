@@ -537,11 +537,7 @@ void GrenadeProjectile::damageObject(DamageInfo *theInfo)
       return;
    }
 
-   // Bounce off stuff
-   Point dv = theInfo->impulseVector - mMoveState[ActualState].vel;
-   Point iv = mMoveState[ActualState].pos - theInfo->collisionPoint;
-   iv.normalize();
-   mMoveState[ActualState].vel += iv * dv.dot(iv) * 0.3f;
+   MoveObject::damageObject(theInfo);
 
    setMaskBits(PositionMask);
 }

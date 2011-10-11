@@ -338,8 +338,10 @@ S32 SoccerGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEve
 
 TNL_IMPLEMENT_NETOBJECT(SoccerBallItem);
 
+static const F32 SOCCER_BALL_ITEM_MASS = 4;
+
 // Constructor
-SoccerBallItem::SoccerBallItem(Point pos) : Parent(pos, true, (F32)SoccerBallItem::SOCCER_BALL_RADIUS, 4)
+SoccerBallItem::SoccerBallItem(Point pos) : Parent(pos, true, (F32)SoccerBallItem::SOCCER_BALL_RADIUS, SOCCER_BALL_ITEM_MASS)
 {
    mObjectTypeNumber = SoccerBallItemTypeNumber;
    mNetFlags.set(Ghostable);
@@ -524,10 +526,7 @@ void SoccerBallItem::damageObject(DamageInfo *theInfo)
       onItemDropped();
   
    // Compute impulse direction
-   Point dv = theInfo->impulseVector - mMoveState[ActualState].vel;
-   Point iv = mMoveState[ActualState].pos - theInfo->collisionPoint;
-   iv.normalize();
-   mMoveState[ActualState].vel += iv * dv.dot(iv) * 0.3f;
+   MoveObject::damageObject(theInfo);
 
    if(theInfo->damagingObject)
    {

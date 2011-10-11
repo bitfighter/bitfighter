@@ -504,7 +504,7 @@ void SoundSystem::processMusic(F32 newMusicVolLevel)
    {
       case MusicPlaying:
          // If volume is set to zero, pause the music
-         if(S32(newMusicVolLevel) == 0)
+         if(S32(newMusicVolLevel * 10) == 0)
             pauseMusic();
          break;
 
@@ -515,7 +515,7 @@ void SoundSystem::processMusic(F32 newMusicVolLevel)
 
       case MusicPaused:
          // If the music is paused and the volume is not zero, resume the music
-         if(S32(newMusicVolLevel) != 0)
+         if(S32(newMusicVolLevel * 10) != 0)
             resumeMusic();
          break;
 

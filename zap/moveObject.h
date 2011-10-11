@@ -54,6 +54,7 @@ protected:
    };
 
    bool mInterpolating;
+   F32 mMass;
 
 public:
    struct MoveState  // need public, not protected, for SpeedZone handling...  TODO: fix this flaw
@@ -81,6 +82,9 @@ public:
    virtual void setActualPos(const Point &pos);
    virtual void setActualVel(const Point &vel);
 
+   F32 getMass() { return mMass; }
+   void setMass(F32 mass) { mMass = mass; }
+
    virtual void playCollisionSound(U32 stateIndex, MoveObject *moveObjectThatWasHit, F32 velocity);
 
    void move(F32 time, U32 stateIndex, bool displacing = false, Vector<SafePtr<MoveObject> > = Vector<SafePtr<MoveObject> >());
@@ -93,6 +97,8 @@ public:
    void computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *objHit);
    void computeCollisionResponseBarrier(U32 stateIndex, Point &collisionPoint);
    F32 computeMinSeperationTime(U32 stateIndex, MoveObject *contactObject, Point intendedPos);
+
+   virtual void damageObject(DamageInfo *damageInfo);
 
    virtual bool getCollisionCircle(U32 stateIndex, Point &point, F32 &radius) const;
 

@@ -50,7 +50,7 @@ namespace Zap
 #endif
 
 
-PickupItem::PickupItem(Point p, float radius, S32 repopDelay) : Parent(p, radius, 1)
+PickupItem::PickupItem(Point p, float radius, S32 repopDelay) : Parent(p, radius)
 {
    mRepopDelay = repopDelay;
    mIsVisible = true;
