@@ -743,7 +743,7 @@ bool Game::runLevelGenScript(const FolderManager *folderManager, const string &s
 
    if(fullname == "")
    {
-      logprintf(LogConsumer::LogWarning, "Warning: Could not find script \"%s\"", scriptName);
+      logprintf(LogConsumer::LogWarning, "Warning: Could not find script \"%s\"", scriptName.c_str());
       return false;
    }
 
