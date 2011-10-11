@@ -742,20 +742,14 @@ bool Game::runLevelGenScript(const FolderManager *folderManager, const string &s
 
    if(fullname == "")
    {
-      logprintf(LogConsumer::LogWarning, "Warning: Could not find script \"%s\" in globalLevelScript", scriptName);
+      logprintf(LogConsumer::LogWarning, "Warning: Could not find script \"%s\"", scriptName);
       return false;
    }
 
    // The script file will be the first argument, subsequent args will be passed on to the script
    LuaLevelGenerator levelgen = LuaLevelGenerator(fullname, folderManager->luaDir, scriptArgs, getGridSize(), 
                                                   targetDatabase, this, gConsole);
-   if(!levelgen.runScript())
-   {
-      logprintf(LogConsumer::LogWarning, "Warning: Error running script \"%s\" ", scriptName);
-      return false;
-   }
-
-   return true;
+   return levelgen.runScript();
 }
 
 
