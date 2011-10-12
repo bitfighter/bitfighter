@@ -1719,7 +1719,9 @@ static void playerSelectedCallback(ClientGame *game, U32 index)
 
 void PlayerMenuUserInterface::playerSelected(U32 index)
 {
-   // Find selected player, and put that value into index; compensates for sorting
+   // When we created the menu, names were not sorted, and item indices were assigned in "natural order".  Then
+   // the menu items were sorted by name, and now the indices are now jumbled.  This bit here tries to get the
+   // new, actual list index of an item given its original index.
    for(S32 i = 0; i < getMenuItemCount(); i++)
       if(getMenuItem(i)->getIndex() == (S32)index)
       {

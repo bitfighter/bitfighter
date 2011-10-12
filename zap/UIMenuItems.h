@@ -97,7 +97,7 @@ public:
 
    const Color *getColor(bool isSelected);
 
-   S32 getIndex() { return mIndex; }
+   S32 getIndex() { return mIndex; }      // Only used once...
 
    const char *getHelp() { return mHelp.c_str(); }
    void setHelp(const string &help) { mHelp = help; }

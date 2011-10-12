@@ -338,8 +338,6 @@ class PlayerMenuUserInterface
    typedef MenuUserInterface Parent;
 
 public:
-
-
    PlayerMenuUserInterface(ClientGame *game);        // Constructor
 
    void render();
