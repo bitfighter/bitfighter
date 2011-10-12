@@ -49,7 +49,6 @@ private:
    F32 mGridSize;
 
 public:
-   LuaLevelGenerator() { TNLAssert(false, "Who wants this???"); }
    LuaLevelGenerator(const string &scriptName, const string &scriptDir, const Vector<string> &scriptArgs, F32 gridsize, GridDatabase *gridDatabase, 
                      LevelLoader *caller, OGLCONSOLE_Console console);   // C++ constructor
 
