@@ -124,7 +124,6 @@ void MenuUserInterface::addWrappedMenuItem(boost::shared_ptr<MenuItem> menuItem)
 {
    menuItem->setMenu(this);
    mMenuItems.push_back(menuItem);
-
 }
 
 
