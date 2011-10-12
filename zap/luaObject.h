@@ -71,7 +71,7 @@ protected:
    static void setfield (lua_State *L, const char *key, F32 value);
 
 public:
-   // All of these return<T> functions work in the same way.  Include at the and of a child class method.
+   // All of these return<T> functions work in the same way.  Include at the end of a child class method.
    // Usage: return returnInt(L, int);
    static S32 returnPoint(lua_State *L, const Point &point);
    static S32 returnLuaPoint(lua_State *L, LuaPoint *point);
