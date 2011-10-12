@@ -649,6 +649,7 @@ void EditorUserInterface::runScript(const FolderManager *folderManager, const st
 
    // When I came through here in early june, there was nothing else here... shouldn't there be some handling of non-wall objects?  -CE
    // June of what year?  -bbr
+   // June 2011 -- obviously this is unfinished business
 }
 
 
