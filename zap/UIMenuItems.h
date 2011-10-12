@@ -56,6 +56,7 @@ enum PlayerType {
 };
 
 class ClientGame;
+class MenuUserInterface;
 
 ////////////////////////////////////
 ////////////////////////////////////
@@ -66,7 +67,8 @@ private:
    string mPrompt;     // Text displayed on menu
    string mHelp;       // An optional help string
    S32 mIndex;
-   ClientGame *mGame;
+   MenuUserInterface *mMenu;
+   //ClientGame *mGame;
 
 protected:
    Color mSelectedColor;
@@ -77,7 +79,7 @@ protected:
 
    const char *mPromptAppendage;
 
-   ClientGame *getGame() { return mGame; }
+   //ClientGame *getGame() { return mGame; }
 
 public:
    // Constructor
@@ -101,6 +103,9 @@ public:
 
    const char *getHelp() { return mHelp.c_str(); }
    void setHelp(const string &help) { mHelp = help; }
+
+   MenuUserInterface *getMenu();
+   void setMenu(MenuUserInterface *menu);
 
    string getPrompt() const { return mPrompt; }
    void setPrompt(const string &prompt) { mPrompt = prompt; }

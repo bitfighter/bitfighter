@@ -114,6 +114,7 @@ void MenuUserInterface::sortMenuItems()
 
 void MenuUserInterface::addMenuItem(MenuItem *menuItem)
 {
+   menuItem->setMenu(this);
    mMenuItems.push_back(boost::shared_ptr<MenuItem>(menuItem));
 }
 

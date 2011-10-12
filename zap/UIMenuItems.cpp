@@ -25,6 +25,7 @@
 
 
 #include "UIMenuItems.h"
+#include "UIMenus.h"
 #include "UI.h"
 #include "ScreenInfo.h"    // For gScreenInfo stuff
 
@@ -36,7 +37,7 @@ namespace Zap
 // Constructor
 MenuItem::MenuItem(ClientGame *game, S32 index, const string &prompt, void (*callback)(ClientGame *, U32), const string &help, InputCode k1, InputCode k2)
 {
-   mGame = game;
+   //mGame = game;
    mPrompt = prompt;
    key1 = k1;
    key2 = k2;
@@ -55,6 +56,18 @@ MenuItem::~MenuItem()
 { 
    // Do nothing
 } 
+
+
+MenuUserInterface *MenuItem::getMenu()  
+{ 
+   return mMenu; 
+}
+
+
+void MenuItem::setMenu(MenuUserInterface *menu) 
+{ 
+   mMenu = menu; 
+}
 
 
 // Shouldn't need to be overridden -- all redering routines should include xpos
@@ -89,7 +102,7 @@ bool MenuItem::handleKey(InputCode inputCode, char ascii)
    {
       UserInterface::playBoop();
       if(mCallback)
-         mCallback(mGame, mIndex);
+         mCallback(getMenu()->getGame(), mIndex);
 
       return true;
    }
@@ -176,7 +189,7 @@ bool ToggleMenuItem::handleKey(InputCode inputCode, char ascii)
       mIndex = (mIndex == (U32)mOptions.size() - 1) ? nextValAfterWrap : mIndex + 1;
 
       if(mCallback)
-         mCallback(getGame(), mIndex);
+         mCallback(getMenu()->getGame(), mIndex);
 
       UserInterface::playBoop();
       return true;
@@ -187,7 +200,7 @@ bool ToggleMenuItem::handleKey(InputCode inputCode, char ascii)
       mIndex = (mIndex == 0) ? nextValAfterWrap : mIndex - 1;
       
       if(mCallback)
-         mCallback(getGame(), mIndex);
+         mCallback(getMenu()->getGame(), mIndex);
 
       UserInterface::playBoop();
       return true;
@@ -198,7 +211,7 @@ bool ToggleMenuItem::handleKey(InputCode inputCode, char ascii)
       mIndex = (mIndex == (U32)mOptions.size() - 1) ? nextValAfterWrap : mIndex + 1;
 
       if(mCallback)
-         mCallback(getGame(), mIndex);
+         mCallback(getMenu()->getGame(), mIndex);
 
       UserInterface::playBoop();
       return true;
@@ -213,7 +226,7 @@ bool ToggleMenuItem::handleKey(InputCode inputCode, char ascii)
             mIndex = index;
             
             if(mCallback)
-               mCallback(getGame(), mIndex);
+               mCallback(getMenu()->getGame(), mIndex);
 
             UserInterface::playBoop();
             return true;
