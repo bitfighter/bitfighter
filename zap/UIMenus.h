@@ -46,6 +46,8 @@ class MenuUserInterface : public UserInterface
    typedef UserInterface Parent;
 
 private:
+   Vector<boost::shared_ptr<MenuItem> > mMenuItems;
+
    S32 getYStart();     // Get vert pos of first menu item
    S32 getOffset(); 
    Timer mScrollTimer;
@@ -69,11 +71,18 @@ protected:
    virtual bool processMenuSpecificKeys(InputCode inputCode, char ascii);
    virtual bool processKeys(InputCode inputCode, char ascii);
 
+   void sortMenuItems();
+   void clearMenuItems();
+   S32 getMenuItemCount();
+   MenuItem *getLastMenuItem();
+
 public:
    MenuUserInterface(ClientGame *game);      // Constructor
 
+   void addMenuItem(MenuItem *menuItem);
+   MenuItem *getMenuItem(S32 index);
+
    bool itemSelectedWithMouse;
-   Vector<boost::shared_ptr<MenuItem> > menuItems;
 
    static const S32 MOUSE_SCROLL_INTERVAL = 100;
 
@@ -100,7 +109,10 @@ public:
    virtual void onEscape();
 };
 
-//////////
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 // <--- DO NOT SUBCLASS MainMenuUserInterface!! (unless you override onActivate) ---> //
 class MainMenuUserInterface : public MenuUserInterface
 {
@@ -362,6 +374,7 @@ public:
 
 };
 
-#endif
-#endif
+#endif      // #ifndef ZAP_DEDICATED
+
+#endif      // #ifndef _UIMENUS_H_
 

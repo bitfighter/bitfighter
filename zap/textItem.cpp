@@ -350,10 +350,9 @@ EditorAttributeMenuUI *TextItem::getAttributeMenu()
 
       // "Blah" will be overwritten when startEditingAttrs() is called
       EditableMenuItem *menuItem = new EditableMenuItem(clientGame, "Text: ", "Blah", "", "", MAX_TEXTITEM_LEN);
-
       menuItem->setTextEditedCallback(textEditedCallback);
 
-      mAttributeMenuUI->menuItems.push_back(boost::shared_ptr<MenuItem>(menuItem));
+      mAttributeMenuUI->addMenuItem(menuItem);
 
       // Add our standard save and exit option to the menu
       mAttributeMenuUI->addSaveAndQuitMenuItem();
@@ -366,14 +365,14 @@ EditorAttributeMenuUI *TextItem::getAttributeMenu()
 // Get the menu looking like what we want
 void TextItem::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
 {
-   attributeMenu->menuItems[0]->setValue(mText);
+   attributeMenu->getMenuItem(0)->setValue(mText);
 }
 
 
 // Retrieve the values we need from the menu
 void TextItem::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
 {
-   mText = attributeMenu->menuItems[0]->getValue();
+   mText = attributeMenu->getMenuItem(0)->getValue();
 }
 
 #endif

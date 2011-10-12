@@ -674,7 +674,7 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
    PluginMenuUI *menu = new PluginMenuUI(getGame());
 
    for(S32 i = 0; i < menuItems.size(); i++)
-      menu->menuItems.push_back(boost::shared_ptr<MenuItem>(&menuItem[i]));
+      menu->addMenuItem(&menuItem[i]);
 
    menu->activate();
 
@@ -3834,15 +3834,15 @@ void quitEditorCallback(ClientGame *game, U32 unused)
 
 void EditorMenuUserInterface::setupMenus()
 {
-   menuItems.clear();
-   menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(getGame(), 0, "RETURN TO EDITOR", reactivatePrevUICallback,    "", KEY_R)));
-   menuItems.push_back(boost::shared_ptr<MenuItem>(getWindowModeMenuItem(getGame())));
-   menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(getGame(), 0, "TEST LEVEL",       testLevelCallback,           "", KEY_T)));
-   menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(getGame(), 0, "SAVE LEVEL",       returnToEditorCallback,      "", KEY_S)));
-   menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(getGame(), 0, "INSTRUCTIONS",     activateHelpCallback,        "", KEY_I, keyHELP)));
-   menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(getGame(), 0, "LEVEL PARAMETERS", activateLevelParamsCallback, "", KEY_L, KEY_F3)));
-   menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(getGame(), 0, "MANAGE TEAMS",     activateTeamDefCallback,     "", KEY_M, KEY_F2)));
-   menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(getGame(), 0, "QUIT",             quitEditorCallback,          "", KEY_Q, KEY_UNKNOWN)));
+   clearMenuItems();
+   addMenuItem(new MenuItem(getGame(), 0, "RETURN TO EDITOR", reactivatePrevUICallback,    "", KEY_R));
+   addMenuItem(getWindowModeMenuItem(getGame()));
+   addMenuItem(new MenuItem(getGame(), 0, "TEST LEVEL",       testLevelCallback,           "", KEY_T));
+   addMenuItem(new MenuItem(getGame(), 0, "SAVE LEVEL",       returnToEditorCallback,      "", KEY_S));
+   addMenuItem(new MenuItem(getGame(), 0, "INSTRUCTIONS",     activateHelpCallback,        "", KEY_I, keyHELP));
+   addMenuItem(new MenuItem(getGame(), 0, "LEVEL PARAMETERS", activateLevelParamsCallback, "", KEY_L, KEY_F3));
+   addMenuItem(new MenuItem(getGame(), 0, "MANAGE TEAMS",     activateTeamDefCallback,     "", KEY_M, KEY_F2));
+   addMenuItem(new MenuItem(getGame(), 0, "QUIT",             quitEditorCallback,          "", KEY_Q, KEY_UNKNOWN));
 }
 
 

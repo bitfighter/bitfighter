@@ -1881,7 +1881,7 @@ static void switchTeamsCallback(ClientGame *game, U32 unused)
 
 
 // Add any additional game-specific menu items, processed below
-void GameType::addClientGameMenuOptions(ClientGame *game, Vector<boost::shared_ptr<MenuItem> > &menuOptions)
+void GameType::addClientGameMenuOptions(ClientGame *game, MenuUserInterface *menu)
 {
    if(isTeamGame() && mGame->getTeamCount() > 1 && !mBetweenLevels)
    {
@@ -1892,11 +1892,11 @@ void GameType::addClientGameMenuOptions(ClientGame *game, Vector<boost::shared_p
       ClientInfo *clientInfo = gc->getClientInfo();
 
       if(mCanSwitchTeams || clientInfo->isAdmin())
-         menuOptions.push_back(boost::shared_ptr<MenuItem>(new MenuItem(game, 0, "SWITCH TEAMS", switchTeamsCallback, "", KEY_S, KEY_T)));
+         menu->addMenuItem(new MenuItem(game, 0, "SWITCH TEAMS", switchTeamsCallback, "", KEY_S, KEY_T));
       else
       {
-         menuOptions.push_back(boost::shared_ptr<MenuItem>(new MessageMenuItem(game, "WAITING FOR SERVER TO ALLOW", Colors::red)));
-         menuOptions.push_back(boost::shared_ptr<MenuItem>(new MessageMenuItem(game, "YOU TO SWITCH TEAMS AGAIN", Colors::red)));
+         menu->addMenuItem(new MessageMenuItem(game, "WAITING FOR SERVER TO ALLOW", Colors::red));
+         menu->addMenuItem(new MessageMenuItem(game, "YOU TO SWITCH TEAMS AGAIN", Colors::red));
       }
    }
 }
@@ -1912,12 +1912,12 @@ static void switchPlayersTeamCallback(ClientGame *game, U32 unused)
 
 
 // Add any additional game-specific admin menu items, processed below
-void GameType::addAdminGameMenuOptions(Vector<boost::shared_ptr<MenuItem> > &menuOptions)
+void GameType::addAdminGameMenuOptions(MenuUserInterface *menu)
 {
    ClientGame *game = dynamic_cast<ClientGame *>(mGame);
 
    if(isTeamGame() && game->getTeamCount() > 1)
-      menuOptions.push_back(boost::shared_ptr<MenuItem>(new MenuItem(game, 0, "CHANGE A PLAYER'S TEAM", switchPlayersTeamCallback, "", KEY_C)));
+      menu->addMenuItem(new MenuItem(game, 0, "CHANGE A PLAYER'S TEAM", switchPlayersTeamCallback, "", KEY_C));
 }
 #endif
 

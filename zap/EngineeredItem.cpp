@@ -355,8 +355,7 @@ EditorAttributeMenuUI *EngineeredItem::getAttributeMenu()
       // Value doesn't matter (set to 99 here), as it will be clobbered when startEditingAttrs() is called
       CounterMenuItem *menuItem = new CounterMenuItem(clientGame, "10% Heal:", 99, 1, 0, 100, "secs", "Disabled", 
                                                       "Time for this item to heal itself 10%");
-
-      mAttributeMenuUI->menuItems.push_back(boost::shared_ptr<MenuItem>(menuItem));
+      mAttributeMenuUI->addMenuItem(menuItem);
 
       // Add our standard save and exit option to the menu
       mAttributeMenuUI->addSaveAndQuitMenuItem();
@@ -369,14 +368,14 @@ EditorAttributeMenuUI *EngineeredItem::getAttributeMenu()
 // Get the menu looking like what we want
 void EngineeredItem::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
 {
-   attributeMenu->menuItems[0]->setIntValue(mHealRate);
+   attributeMenu->getMenuItem(0)->setIntValue(mHealRate);
 }
 
 
 // Retrieve the values we need from the menu
 void EngineeredItem::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
 {
-   mHealRate = attributeMenu->menuItems[0]->getIntValue();
+   mHealRate = attributeMenu->getMenuItem(0)->getIntValue();
 }
 
 

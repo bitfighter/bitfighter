@@ -49,7 +49,7 @@ void QuickMenuUI::render()
 
    S32 gap = ATTR_TEXTSIZE / 3;
 
-   S32 count = menuItems.size() - 1;      // We won't count our last item, save-n-quit, here, because it's rendered separately
+   S32 count = getMenuItemCount() - 1;      // We won't count our last item, save-n-quit, here, because it's rendered separately
    S32 yStart = S32(mMenuLocation.y) - count * (ATTR_TEXTSIZE + gap) - 10 - (gap + INSTRUCTION_SIZE);
 
    S32 width = max(getMenuWidth(), getStringWidth(INSTRUCTION_SIZE, title.c_str()));
@@ -108,7 +108,7 @@ void QuickMenuUI::render()
       if(selectedIndex == i)
          drawMenuItemHighlight(left,  y, right, y + ATTR_TEXTSIZE + 5);
 
-      menuItems[i]->render(cenX, y, ATTR_TEXTSIZE, selectedIndex == i);
+      getMenuItem(i)->render(cenX, y, ATTR_TEXTSIZE, selectedIndex == i);
    }
 
    /////
@@ -117,10 +117,10 @@ void QuickMenuUI::render()
    S32 y = (yStart + count * (ATTR_TEXTSIZE + gap) + gap);
 
    // Draw background highlight if this item's selected
-   if(selectedIndex == menuItems.size() - 1)
+   if(selectedIndex == getMenuItemCount() - 1)
       drawMenuItemHighlight(left,  y - 1, right, y + INSTRUCTION_SIZE + 3);
 
-   menuItems.last()->render(cenX, y, INSTRUCTION_SIZE, selectedIndex == menuItems.size() - 1);
+   getLastMenuItem()->render(cenX, y, INSTRUCTION_SIZE, selectedIndex == getMenuItemCount() - 1);
 }
 
 
@@ -128,9 +128,13 @@ S32 QuickMenuUI::getMenuWidth()
 {
    S32 width = 0;
 
-   for(S32 i = 0; i < menuItems.size(); i++)
-      if(menuItems[i]->getWidth(ATTR_TEXTSIZE) > width)
-         width = menuItems[i]->getWidth(ATTR_TEXTSIZE);
+   for(S32 i = 0; i < getMenuItemCount(); i++)
+   {
+      S32 itemWidth = getMenuItem(i)->getWidth(ATTR_TEXTSIZE);
+
+      if(itemWidth > width)
+         width = itemWidth;
+   }
 
    return width;
 }
@@ -180,19 +184,10 @@ static void saveAndQuit(ClientGame *game, U32 unused)
 }
 
 
-// We can use the same menu item in all our different attribute editing menus
-static boost::shared_ptr<MenuItem> saveAndQuitMenuItem;
-
+// This was cached, but refactor made that difficult, and hell, these are cheap to create!
 void EditorAttributeMenuUI::addSaveAndQuitMenuItem()
 {
-   // Lazy initialize
-   if(!saveAndQuitMenuItem.get())
-   {
-      MenuItem *menuItem = new MenuItem(getGame(), 99, "Save and quit", saveAndQuit, "Saves and quits");
-      saveAndQuitMenuItem = boost::shared_ptr<MenuItem>(menuItem);
-   }
-
-   menuItems.push_back(saveAndQuitMenuItem);
+   addMenuItem(new MenuItem(getGame(), 99, "Save and quit", saveAndQuit, "Saves and quits"));
 }
 
 

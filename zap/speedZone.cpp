@@ -292,11 +292,8 @@ EditorAttributeMenuUI *SpeedZone::getAttributeMenu()
 
       mAttributeMenuUI = new EditorAttributeMenuUI(clientGame);
 
-      CounterMenuItem *menuItem1 = new CounterMenuItem(clientGame, "Speed:", 999, 100, minSpeed, maxSpeed, "", "Really slow", "");
-      mAttributeMenuUI->menuItems.push_back(boost::shared_ptr<MenuItem>(menuItem1));
-
-      YesNoMenuItem *menuItem2 = new YesNoMenuItem(clientGame, "Snapping:", true, NULL, "");
-      mAttributeMenuUI->menuItems.push_back(boost::shared_ptr<MenuItem>(menuItem2));
+      mAttributeMenuUI->addMenuItem(new CounterMenuItem(clientGame, "Speed:", 999, 100, minSpeed, maxSpeed, "", "Really slow", ""));
+      mAttributeMenuUI->addMenuItem(new YesNoMenuItem(clientGame, "Snapping:", true, NULL, ""));
 
       // Add our standard save and exit option to the menu
       mAttributeMenuUI->addSaveAndQuitMenuItem();
@@ -309,16 +306,16 @@ EditorAttributeMenuUI *SpeedZone::getAttributeMenu()
 // Get the menu looking like what we want
 void SpeedZone::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
 {
-   attributeMenu->menuItems[0]->setIntValue(mSpeed);
-   attributeMenu->menuItems[1]->setIntValue(mSnapLocation ? 1 : 0);
+   attributeMenu->getMenuItem(0)->setIntValue(mSpeed);
+   attributeMenu->getMenuItem(1)->setIntValue(mSnapLocation ? 1 : 0);
 }
 
 
 // Retrieve the values we need from the menu
 void SpeedZone::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
 {
-   mSpeed        = attributeMenu->menuItems[0]->getIntValue();
-   mSnapLocation = attributeMenu->menuItems[0]->getIntValue();    // Returns 0 or 1
+   mSpeed        = attributeMenu->getMenuItem(0)->getIntValue();
+   mSnapLocation = attributeMenu->getMenuItem(1)->getIntValue();    // Returns 0 or 1
 }
 
 

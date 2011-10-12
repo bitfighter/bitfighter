@@ -120,7 +120,7 @@ EditorAttributeMenuUI *AbstractSpawn::getAttributeMenu()
 
       CounterMenuItem *menuItem = new CounterMenuItem(clientGame, "Spawn Timer:", 999, 1, 0, 1000, "secs", "Never spawns", 
                                                       "Time it takes for each item to be spawned");
-      mAttributeMenuUI->menuItems.push_back(boost::shared_ptr<MenuItem>(menuItem));
+      mAttributeMenuUI->addMenuItem(menuItem);
 
       // Add our standard save and exit option to the menu
       mAttributeMenuUI->addSaveAndQuitMenuItem();
@@ -132,13 +132,13 @@ EditorAttributeMenuUI *AbstractSpawn::getAttributeMenu()
 
 void AbstractSpawn::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
 {
-   attributeMenu->menuItems[0]->setIntValue(mSpawnTime);
+   attributeMenu->getMenuItem(0)->setIntValue(mSpawnTime);
 }
 
 
 void AbstractSpawn::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
 {
-   mSpawnTime = attributeMenu->menuItems[0]->getIntValue();
+   mSpawnTime = attributeMenu->getMenuItem(0)->getIntValue();
 }
 
 

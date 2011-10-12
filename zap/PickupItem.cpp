@@ -180,7 +180,7 @@ EditorAttributeMenuUI *PickupItem::getAttributeMenu()
       CounterMenuItem *menuItem = new CounterMenuItem(clientGame, "Regen Time:", 99, 1, 0, 100, "secs", "No regen", 
                                                       "Time for this item to reappear after it has been picked up");
 
-      mAttributeMenuUI->menuItems.push_back(boost::shared_ptr<MenuItem>(menuItem));
+      mAttributeMenuUI->addMenuItem(menuItem);
 
       // Add our standard save and exit option to the menu
       mAttributeMenuUI->addSaveAndQuitMenuItem();
@@ -193,14 +193,14 @@ EditorAttributeMenuUI *PickupItem::getAttributeMenu()
 // Get the menu looking like what we want
 void PickupItem::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
 {
-   attributeMenu->menuItems[0]->setIntValue(mRepopDelay);
+   attributeMenu->getMenuItem(0)->setIntValue(mRepopDelay);
 }
 
 
 // Retrieve the values we need from the menu
 void PickupItem::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
 {
-   mRepopDelay = attributeMenu->menuItems[0]->getIntValue();
+   mRepopDelay = attributeMenu->getMenuItem(0)->getIntValue();
 }
 
 

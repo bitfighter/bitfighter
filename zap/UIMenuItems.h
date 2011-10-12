@@ -82,7 +82,6 @@ protected:
    ClientGame *getGame() { return mGame; }
 
 public:
-
    // Constructor
    MenuItem(ClientGame *game, S32 index, const string &prompt, void (*callback)(ClientGame *, U32), const string &help, 
             InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
@@ -105,10 +104,9 @@ public:
    const char *getHelp() { return mHelp.c_str(); }
    void setHelp(const string &help) { mHelp = help; }
 
-   virtual string getPrompt() { return mPrompt; }
+   string getPrompt() const { return mPrompt; }
    void setPrompt(const string &prompt) { mPrompt = prompt; }
 
-   virtual string getValue() const { return mPrompt; }      // Basic menu item returns its text when selected... overridden by other types
 
    virtual string getUnits() const { return ""; }
 
@@ -121,6 +119,7 @@ public:
    virtual string getValueForDisplayingInMenu() { return ""; }
    virtual S32 getIntValue() const { return 0; }
    virtual string getValueForWritingToLevelFile() { return itos(getIntValue()); }
+   virtual string getValue() const { return mPrompt; }      // Basic menu item returns its text when selected... overridden by other types
    virtual void setValue(const string &val) { /* Do nothing */ }
    virtual void setIntValue(S32 val) { /* Do nothing */ }
 
