@@ -69,7 +69,7 @@ public:
 
    void render();              // Draw the menu
    void idle(U32 timeDelta);
-   void onKeyDown(KeyCode keyCode, char ascii);
+   void onKeyDown(InputCode inputCode, char ascii);
    void onMouseMoved(S32 x, S32 y);
 
    void onActivate();

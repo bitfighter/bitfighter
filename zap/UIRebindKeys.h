@@ -53,7 +53,7 @@ public:
    void render();
    void idle(U32 t);
 
-   void onKeyDown(KeyCode keyCode, char ascii);
+   void onKeyDown(InputCode inputCode, char ascii);
 
    virtual void onAccept(const char *text) = 0;
    virtual void onEscape() = 0;

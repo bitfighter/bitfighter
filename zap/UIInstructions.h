@@ -49,7 +49,7 @@ public:
    void nextPage();
    void prevPage();
 
-   void onKeyDown(KeyCode keyCode, char ascii);
+   void onKeyDown(InputCode inputCode, char ascii);
 
    void activateInCommandMode();
    void onActivate();

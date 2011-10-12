@@ -37,8 +37,8 @@ namespace Zap
 
 struct LoadoutItem
 {
-   KeyCode key;            // Keyboard key used to select in loadout menu
-   KeyCode button;         // Controller button used to select in loadout menu
+   InputCode key;            // Keyboard key used to select in loadout menu
+   InputCode button;         // Controller button used to select in loadout menu
    U32 index;
    const char *text;       // Longer name used on loadout menu
    const char *help;       // An additional bit of help text, also displayed on loadout menu
@@ -48,9 +48,9 @@ struct LoadoutItem
 
    //LoadoutItem(); // { /* Do nothing */ };      // Should never be used
 
-   LoadoutItem(ClientGame *game, KeyCode key, KeyCode button, U32 index);      // Shortcut for modules -- use info from ModuleInfos
+   LoadoutItem(ClientGame *game, InputCode key, InputCode button, U32 index);      // Shortcut for modules -- use info from ModuleInfos
 
-   LoadoutItem(ClientGame *game, KeyCode key, KeyCode button, U32 index, const char *text, const char *help, ShipModule requires);
+   LoadoutItem(ClientGame *game, InputCode key, InputCode button, U32 index, const char *text, const char *help, ShipModule requires);
 };
 
 
@@ -67,7 +67,7 @@ private:
    S32 mCurrentIndex;
 
    virtual const char *getCancelMessage() { return "Modifications canceled -- ship design unchanged."; }
-   virtual KeyCode getActivationKey();
+   virtual InputCode getActivationKey();
 
    bool isValidItem(S32 index);    // Do we have the required prerequisites for this item?
 
@@ -77,7 +77,7 @@ public:
 
    void render();                
    void onMenuShow();  
-   bool processKeyCode(KeyCode keyCode);   
+   bool processInputCode(InputCode inputCode);   
 };
 
 };

@@ -295,7 +295,7 @@ void AbstractChat::deliverPrivateMessage(const char *sender, const char *message
    if(currId != ChatUI && currId != QueryServersScreenUI )
    {
       mGame->getUIManager()->getGameUserInterface()->displayChatMessage(GameUserInterface::privateF5MessageDisplayedInGameColor,
-         "Private message from %s: Press [%s] to enter chat mode", sender, keyCodeToString(keyOUTGAMECHAT));
+         "Private message from %s: Press [%s] to enter chat mode", sender, inputCodeToString(keyOUTGAMECHAT));
       mGame->getUIManager()->getGameUserInterface()->displayChatMessage(GameUserInterface::privateF5MessageDisplayedInGameColor, "%s %s", ARROW, message);
    }
 }
@@ -451,18 +451,18 @@ void ChatUserInterface::renderHeader()
 }
 
 
-void ChatUserInterface::onKeyDown(KeyCode keyCode, char ascii)
+void ChatUserInterface::onKeyDown(InputCode inputCode, char ascii)
 {
-   if(keyCode == keyOUTGAMECHAT)
+   if(inputCode == keyOUTGAMECHAT)
       onOutGameChat();
-   else if(keyCode == keyDIAG)            // Turn on diagnostic overlay
+   else if(inputCode == keyDIAG)            // Turn on diagnostic overlay
       getUIManager()->getDiagnosticUserInterface()->activate();
-   else if(keyCode == KEY_ESCAPE)
+   else if(inputCode == KEY_ESCAPE)
       onEscape();
-   else if (keyCode == KEY_ENTER)                // Submits message
+   else if (inputCode == KEY_ENTER)                // Submits message
       issueChat();
-   else if (keyCode == KEY_DELETE || keyCode == KEY_BACKSPACE)       // Do backspacey things
-      mLineEditor.handleBackspace(keyCode);
+   else if (inputCode == KEY_DELETE || inputCode == KEY_BACKSPACE)       // Do backspacey things
+      mLineEditor.handleBackspace(inputCode);
    else if(ascii)                               // Other keys - add key to message
       mLineEditor.addChar(ascii);
 }

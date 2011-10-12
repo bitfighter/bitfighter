@@ -153,10 +153,10 @@ void LineEditor::addChar(const char c)
 }
 
 
-// keyCode will have either backspace or delete in it -- basically a convenience function
-void LineEditor::handleBackspace(KeyCode keyCode)
+// inputCode will have either backspace or delete in it -- basically a convenience function
+void LineEditor::handleBackspace(InputCode inputCode)
 {
-   if(keyCode == KEY_BACKSPACE)
+   if(inputCode == KEY_BACKSPACE)
       backspacePressed();
    else       // KEY_DELETE
       deletePressed();

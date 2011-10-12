@@ -211,16 +211,16 @@ void JoystickRender::renderDPad(Point center, F32 radius, bool upActivated, bool
 }
 
 
-extern S32 keyCodeToButtonIndex(KeyCode keyCode);
+extern S32 inputCodeToButtonIndex(InputCode inputCode);
 
 // Only partially implemented at the moment...
-S32 JoystickRender::getControllerButtonRenderedSize(S32 joystickType, KeyCode keyCode)
+S32 JoystickRender::getControllerButtonRenderedSize(S32 joystickType, InputCode inputCode)
 {
-   if(!isControllerButton(keyCode))    // Render keyboard keys
-      return UserInterface::getStringWidthf(15, "[%s]", keyCodeToString(keyCode));
+   if(!isControllerButton(inputCode))    // Render keyboard keys
+      return UserInterface::getStringWidthf(15, "[%s]", inputCodeToString(inputCode));
 
    // Render controller button
-   U32 buttonIndex = keyCodeToButtonIndex(keyCode);
+   U32 buttonIndex = inputCodeToButtonIndex(inputCode);
 
    if(joystickType == LogitechWingman)
    {
@@ -296,18 +296,18 @@ S32 JoystickRender::getControllerButtonRenderedSize(S32 joystickType, KeyCode ke
 
 
 // Renders something resembling a controller button or keyboard key
-void JoystickRender::renderControllerButton(F32 x, F32 y, U32 joystickType, KeyCode keyCode, bool activated, S32 offset)
+void JoystickRender::renderControllerButton(F32 x, F32 y, U32 joystickType, InputCode inputCode, bool activated, S32 offset)
 {
-   if(!isControllerButton(keyCode))    // Render keyboard keys
+   if(!isControllerButton(inputCode))    // Render keyboard keys
    {
-      UserInterface::drawStringf(x, y, 15, "[%s]", keyCodeToString(keyCode));
+      UserInterface::drawStringf(x, y, 15, "[%s]", inputCodeToString(inputCode));
       return;
    }
 
    // Render controller button
 
    x += (F32) offset;
-   U32 buttonIndex = keyCodeToButtonIndex(keyCode);     // Index ranges from 0 to 9 for the 10 buttons
+   U32 buttonIndex = inputCodeToButtonIndex(inputCode);     // Index ranges from 0 to 9 for the 10 buttons
 
    // http://www.amazon.com/Logitech-963196-0403-WingMan-GamePad/dp/B00004RCG1/ref=pd_bbs_sr_5
    // 6 round buttons on top (ABCXYZ) plus start/select button, plus two triggers

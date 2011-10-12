@@ -96,58 +96,58 @@ void Event::updateJoyAxesDirections(U32 axisMask, S16 value)
    Joystick::JoystickInputData[oppositeAxesDirectionIndex].value = 0.0f;
 
 
-   // Determine what to set the KeyCode key state, it is binary so set the threshold has half -> 0.5
+   // Determine what to set the InputCode state, it is binary so set the threshold has half -> 0.5
    // Set the mask if it is above the digital threshold
-   bool keyState = false;
-   U32 currentKeyCodeMask = 0;
+   bool inputCodeState = false;
+   U32 currentInputCodeMask = 0;
 
    for (S32 i = 0; i < MaxAxesDirections; i++)
       if (fabs(Joystick::JoystickInputData[i].value) > 0.5)
       {
-         keyState = true;
-         currentKeyCodeMask |= (1 << i);
+         inputCodeState = true;
+         currentInputCodeMask |= (1 << i);
       }
 
 
-   // Only change KeyCode key state if the axis has changed.  Time to be tricky..
-   U32 keyCodeDownDeltaMask = currentKeyCodeMask & ~Joystick::AxesKeyCodeMask;
-   U32 keyCodeUpDeltaMask = ~currentKeyCodeMask & Joystick::AxesKeyCodeMask;
+   // Only change InputCode state if the axis has changed.  Time to be tricky..
+   U32 inputCodeDownDeltaMask = currentInputCodeMask & ~Joystick::AxesInputCodeMask;
+   U32 inputCodeUpDeltaMask = ~currentInputCodeMask & Joystick::AxesInputCodeMask;
 
    for (S32 i = 0; i < MaxAxesDirections; i++)
    {
-      // If the current axes direction is set in the keyCodeDownDeltaMask, set the key down
-      if (Joystick::JoystickInputData[i].axesMask & keyCodeDownDeltaMask)
+      // If the current axes direction is set in the inputCodeDownDeltaMask, set the input code down
+      if (Joystick::JoystickInputData[i].axesMask & inputCodeDownDeltaMask)
       {
-         keyCodeDown(Joystick::JoystickInputData[i].keyCode, 0);
+         inputCodeDown(Joystick::JoystickInputData[i].inputCode, 0);
          continue;
       }
 
-      // If the current axes direction is set in the keyCodeUpDeltaMask, set the key up
-      if (Joystick::JoystickInputData[i].axesMask & keyCodeUpDeltaMask)
-         keyCodeUp(Joystick::JoystickInputData[i].keyCode);
+      // If the current axes direction is set in the inputCodeUpDeltaMask, set the input code up
+      if (Joystick::JoystickInputData[i].axesMask & inputCodeUpDeltaMask)
+         inputCodeUp(Joystick::JoystickInputData[i].inputCode);
    }
 
 
-   // Finally alter the global axes KeyCode mask to reflect the current keyState
-   Joystick::AxesKeyCodeMask = currentKeyCodeMask;
+   // Finally alter the global axes InputCode mask to reflect the current inputCodeState
+   Joystick::AxesInputCodeMask = currentInputCodeMask;
 }
 
 
-void Event::keyCodeUp(KeyCode keyCode)
+void Event::inputCodeUp(InputCode inputCode)
 {
-   setKeyState(keyCode, false);
+   setInputCodeState(inputCode, false);
 
    if(UserInterface::current)
-      UserInterface::current->onKeyUp(keyCode);
+      UserInterface::current->onKeyUp(inputCode);
 }
 
 
-void Event::keyCodeDown(KeyCode keyCode, char ascii)
+void Event::inputCodeDown(InputCode inputCode, char ascii)
 {
-   setKeyState(keyCode, true);
+   setInputCodeState(inputCode, true);
 
    if(UserInterface::current)
-      UserInterface::current->onKeyDown(keyCode, ascii);
+      UserInterface::current->onKeyDown(inputCode, ascii);
 }
 
 
@@ -289,30 +289,31 @@ void Event::onInputBlur()     // <=== what does this do??
 
 void Event::onKeyDown(ClientGame *game, SDLKey key, SDLMod mod, U16 unicode)
 {
-   // Use getKeyState() instead of checking the mod flag to prevent hyper annoying case of user pressing and holding Alt, selecting another
-   // window, releasing Alt, returning to Bitfighter window, and pressing enter, and having this block think we pressed alt-enter.  
+   // Use getInputCodeState() instead of checking the mod flag to prevent hyper annoying case
+   // of user pressing and holding Alt, selecting another window, releasing Alt, returning to
+   // Bitfighter window, and pressing enter, and having this block think we pressed alt-enter.
    // GetKeyState() looks at the actual current state of the key, which is what we want.
 
    // ALT + ENTER --> toggles window mode/full screen
-   if(key == SDLK_RETURN && getKeyState(KEY_ALT))         
+   if(key == SDLK_RETURN && getInputCodeState(KEY_ALT))
       game->getUIManager()->getOptionsMenuUserInterface()->toggleDisplayMode();
 
    // CTRL + Q --> screenshot!
-   else if(key == SDLK_q && getKeyState(KEY_CTRL))
+   else if(key == SDLK_q && getInputCodeState(KEY_CTRL))
       ScreenShooter::saveScreenshot(game->getSettings()->getFolderManager()->screenshotDir);
 
    // The rest
    else
    {
-      KeyCode keyCode = sdlKeyToKeyCode(key);
-      keyCodeDown(keyCode, keyToAscii(unicode, keyCode));
+      InputCode inputCode = sdlKeyToInputCode(key);
+      inputCodeDown(inputCode, keyToAscii(unicode, inputCode));
    }
 }
 
 
 void Event::onKeyUp(SDLKey key, SDLMod mod, U16 unicode)
 {
-   keyCodeUp(sdlKeyToKeyCode(key));
+   inputCodeUp(sdlKeyToInputCode(key));
 }
 
 
@@ -341,31 +342,31 @@ void Event::onMouseWheel(bool Up, bool Down)
 {
    if(Up)
    {
-      keyCodeDown(MOUSE_WHEEL_UP);
-      keyCodeUp(MOUSE_WHEEL_UP);
+      inputCodeDown(MOUSE_WHEEL_UP);
+      inputCodeUp(MOUSE_WHEEL_UP);
    }
    if(Down)
    {
-      keyCodeDown(MOUSE_WHEEL_DOWN);
-      keyCodeUp(MOUSE_WHEEL_DOWN);
+      inputCodeDown(MOUSE_WHEEL_DOWN);
+      inputCodeUp(MOUSE_WHEEL_DOWN);
    }
    // Do nothing
 }
 
 
-void Event::onMouseButtonDown(S32 x, S32 y, KeyCode keyCode, DisplayMode mode)
+void Event::onMouseButtonDown(S32 x, S32 y, InputCode inputCode, DisplayMode mode)
 {
    setMousePos(x, y, mode);
 
-   keyCodeDown(keyCode, 0);
+   inputCodeDown(inputCode, 0);
 }
 
 
-void Event::onMouseButtonUp(S32 x, S32 y, KeyCode keyCode, DisplayMode mode)
+void Event::onMouseButtonUp(S32 x, S32 y, InputCode inputCode, DisplayMode mode)
 {
    setMousePos(x, y, mode);
 
-   keyCodeUp(keyCode);
+   inputCodeUp(inputCode);
 }
 
 
@@ -408,13 +409,13 @@ void Event::onJoyAxis(U32 joystickType, U8 whichJoystick, U8 axis, S16 value)
    }
 }
 
-extern KeyCode joyButtonToKeyCode(int buttonIndex);
+extern InputCode joyButtonToInputCode(int buttonIndex);
 
 
 void Event::onJoyButtonDown(U8 which, U8 button, U32 joystickType)
 {
 //   logprintf("SDL button down number: %u", button);
-   keyCodeDown(joyButtonToKeyCode(Joystick::remapJoystickButton(joystickType, button)), 0);
+   inputCodeDown(joyButtonToInputCode(Joystick::remapJoystickButton(joystickType, button)), 0);
    Joystick::ButtonMask |= BIT(button);
 }
 
@@ -422,37 +423,37 @@ void Event::onJoyButtonDown(U8 which, U8 button, U32 joystickType)
 void Event::onJoyButtonUp(U8 which, U8 button, U32 joystickType)
 {
 //   logprintf("SDL button up number: %u", button);
-   keyCodeUp(joyButtonToKeyCode(Joystick::remapJoystickButton(joystickType, button)));
+   inputCodeUp(joyButtonToInputCode(Joystick::remapJoystickButton(joystickType, button)));
    Joystick::ButtonMask = Joystick::ButtonMask & ~BIT(button);
 }
 
 
-extern KeyCode joyHatToKeyCode(int hatDirectionMask);
+extern InputCode joyHatToInputCode(int hatDirectionMask);
 
 // See SDL_Joystick.h for the SDL_HAT_* mask definitions
 void Event::onJoyHat(U8 which, U8 hat, U8 directionMask)
 {
 //   logprintf("SDL Hat number: %u, value: %u", hat, directionMask);
 
-   KeyCode keyCode;
-   U32 keyCodeDownDeltaMask = directionMask & ~Joystick::HatKeyCodeMask;
-   U32 keyCodeUpDeltaMask = ~directionMask & Joystick::HatKeyCodeMask;
+   InputCode inputCode;
+   U32 inputCodeDownDeltaMask = directionMask & ~Joystick::HatInputCodeMask;
+   U32 inputCodeUpDeltaMask = ~directionMask & Joystick::HatInputCodeMask;
 
    for (S32 i = 0; i < MaxHatDirections; i++)
    {
-      keyCode = joyHatToKeyCode(BIT(i));  // BIT(i) corresponds to a defined SDL_HAT_*  value
+      inputCode = joyHatToInputCode(BIT(i));  // BIT(i) corresponds to a defined SDL_HAT_*  value
 
-      // If the current hat direction is set in the keyCodeDownDeltaMask, set the key down
-      if (keyCodeDownDeltaMask & BIT(i))
-         keyCodeDown(keyCode, 0);
+      // If the current hat direction is set in the inputCodeDownDeltaMask, set the input code down
+      if (inputCodeDownDeltaMask & BIT(i))
+         inputCodeDown(inputCode, 0);
 
-      // If the current hat direction is set in the keyCodeUpDeltaMask, set the key up
-      if (keyCodeUpDeltaMask & BIT(i))
-         keyCodeUp(keyCode);
+      // If the current hat direction is set in the inputCodeUpDeltaMask, set the input code up
+      if (inputCodeUpDeltaMask & BIT(i))
+         inputCodeUp(inputCode);
    }
 
-   // Finally alter the global hat KeyCode mask to reflect the current keyState
-   Joystick::HatKeyCodeMask = directionMask;
+   // Finally alter the global hat InputCode mask to reflect the current input code State
+   Joystick::HatInputCodeMask = directionMask;
 }
 
 void Event::onJoyBall(U8 which, U8 ball, S16 xrel, S16 yrel)

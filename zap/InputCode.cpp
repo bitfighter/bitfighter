@@ -23,7 +23,7 @@
 //
 //------------------------------------------------------------------------------------
 
-#include "keyCode.h"
+#include "InputCode.h"
 
 #include "../tnl/tnlJournal.h"
 #include "../tnl/tnlLog.h"         // For logprintf
@@ -46,80 +46,80 @@ using namespace TNL;
 namespace Zap
 {
 
-static bool keyIsDown[MAX_KEYS];
+static bool inputCodeIsDown[MAX_INPUT_CODES];
 
-// We have two sets of keys defined -- one for when we're playing
+// We have two sets of input codes defined -- one for when we're playing
 // with a keyboard, and one for joystick play
-KeyCode keySELWEAP1[2];       // Select weapon 1
-KeyCode keySELWEAP2[2];       // Select weapon 2
-KeyCode keySELWEAP3[2];       // Select weapon 3
-KeyCode keyADVWEAP[2];        // Pick next weapon
-KeyCode keyCMDRMAP[2];        // Toggle commander's map
-KeyCode keyTEAMCHAT[2];       // Send team chat message
-KeyCode keyGLOBCHAT[2];       // Send global chat message
-KeyCode keyQUICKCHAT[2];      // Enter QuickChat mode
-KeyCode keyCMDCHAT[2];        // Go directly to command mode, bypassing chat
-KeyCode keyLOADOUT[2];        // Enter Loadout mode
-KeyCode keyMOD1[2];           // Activate module 1
-KeyCode keyMOD2[2];           // Activate module 2
-KeyCode keyFIRE[2];           // Fire
-KeyCode keyDROPITEM[2];       // Drop flag or other item
-KeyCode keyTOGVOICE[2];       // Toggle voice chat
-KeyCode keyUP[2];             // Move ship
-KeyCode keyDOWN[2];
-KeyCode keyLEFT[2];
-KeyCode keyRIGHT[2];
-KeyCode keySCRBRD[2];         // Show scoreboard
+InputCode inputSELWEAP1[2];       // Select weapon 1
+InputCode inputSELWEAP2[2];       // Select weapon 2
+InputCode inputSELWEAP3[2];       // Select weapon 3
+InputCode inputADVWEAP[2];        // Pick next weapon
+InputCode inputCMDRMAP[2];        // Toggle commander's map
+InputCode inputTEAMCHAT[2];       // Send team chat message
+InputCode inputGLOBCHAT[2];       // Send global chat message
+InputCode inputQUICKCHAT[2];      // Enter QuickChat mode
+InputCode inputCMDCHAT[2];        // Go directly to command mode, bypassing chat
+InputCode inputLOADOUT[2];        // Enter Loadout mode
+InputCode inputMOD1[2];           // Activate module 1
+InputCode inputMOD2[2];           // Activate module 2
+InputCode inputFIRE[2];           // Fire
+InputCode inputDROPITEM[2];       // Drop flag or other item
+InputCode inputTOGVOICE[2];       // Toggle voice chat
+InputCode inputUP[2];             // Move ship
+InputCode inputDOWN[2];
+InputCode inputLEFT[2];
+InputCode inputRIGHT[2];
+InputCode inputSCRBRD[2];         // Show scoreboard
 
-// These keys are constant, regardless of mode, and can't be changed by the user
+// These input codes are constant, regardless of mode, and can't be changed by the user
 // Define these here to ensure they can be used for defining menus during initialization
 // They really don't belong here, but what to do... what to do.
-KeyCode keyHELP = KEY_F1;              // Display help
-KeyCode keyOUTGAMECHAT = KEY_F5;       // Out of game chat
-KeyCode keyFPS = KEY_F6;               // Show FPS display
-KeyCode keyDIAG = KEY_F7;              // Show diagnostic overlay
-KeyCode keyMISSION = KEY_F2;           // Show current mission info
+InputCode keyHELP = KEY_F1;              // Display help
+InputCode keyOUTGAMECHAT = KEY_F5;       // Out of game chat
+InputCode keyFPS = KEY_F6;               // Show FPS display
+InputCode keyDIAG = KEY_F7;              // Show diagnostic overlay
+InputCode keyMISSION = KEY_F2;           // Show current mission info
 
 
 // Initialize state of keys... assume none are depressed
-void resetKeyStates()
+void resetInputCodeStates()
 {
-   for (int i = 0; i < MAX_KEYS; i++)
-      keyIsDown[i] = false;
+   for (int i = 0; i < MAX_INPUT_CODES; i++)
+      inputCodeIsDown[i] = false;
 }
 
-// Prints list of any keys that are down, for debugging purposes
-void dumpKeyStates()
+// Prints list of any input codes that are down, for debugging purposes
+void dumpInputCodeStates()
 {
-  for (int i = 0; i < MAX_KEYS; i++)
-     if(keyIsDown[i])
-        logprintf("Key %s down", keyCodeToString((KeyCode) i));
-}
-
-
-// Set state of a key as Up (false) or Down (true)
-void setKeyState(KeyCode keyCode, bool state)
-{
-   keyIsDown[(int) keyCode] = state;
+  for (int i = 0; i < MAX_INPUT_CODES; i++)
+     if(inputCodeIsDown[i])
+        logprintf("Key %s down", inputCodeToString((InputCode) i));
 }
 
 
-// Returns true of key is down, false if it is up
-bool getKeyState(KeyCode keyCode)
+// Set state of a input code as Up (false) or Down (true)
+void setInputCodeState(InputCode inputCode, bool state)
 {
-//   logprintf("State: key %d is %s", keyCode, keyIsDown[(int) keyCode] ? "down" : "up");
-      return keyIsDown[(int) keyCode];
+   inputCodeIsDown[(int) inputCode] = state;
 }
 
 
-KeyCode modifiers[] = { KEY_SHIFT, KEY_CTRL, KEY_ALT, KEY_META, KEY_SUPER };
+// Returns true of input code is down, false if it is up
+bool getInputCodeState(InputCode inputCode)
+{
+//   logprintf("State: key %d is %s", inputCode, keyIsDown[(int) inputCode] ? "down" : "up");
+      return inputCodeIsDown[(int) inputCode];
+}
 
-bool checkModifier(KeyCode mod1)
+
+InputCode modifiers[] = { KEY_SHIFT, KEY_CTRL, KEY_ALT, KEY_META, KEY_SUPER };
+
+bool checkModifier(InputCode mod1)
 {
    S32 foundCount = 0;
 
    for(S32 i = 0; i < S32(ARRAYSIZE(modifiers)); i++)
-      if(getKeyState(modifiers[i]))                            // Modifier is down
+      if(getInputCodeState(modifiers[i]))                            // Modifier is down
       {
          if(modifiers[i] == mod1)      
             foundCount++;
@@ -131,12 +131,12 @@ bool checkModifier(KeyCode mod1)
 }
 
 
-bool checkModifier(KeyCode mod1, KeyCode mod2)
+bool checkModifier(InputCode mod1, InputCode mod2)
 {
    S32 foundCount = 0;
 
    for(S32 i = 0; i < S32(ARRAYSIZE(modifiers)); i++)
-      if(getKeyState(modifiers[i]))                            // Modifier is down
+      if(getInputCodeState(modifiers[i]))                            // Modifier is down
       {
          if(modifiers[i] == mod1 || modifiers[i] == mod2)      
             foundCount++;
@@ -148,12 +148,12 @@ bool checkModifier(KeyCode mod1, KeyCode mod2)
 }
 
 
-bool checkModifier(KeyCode mod1, KeyCode mod2, KeyCode mod3)
+bool checkModifier(InputCode mod1, InputCode mod2, InputCode mod3)
 {
    S32 foundCount = 0;
 
    for(S32 i = 0; i < S32(ARRAYSIZE(modifiers)); i++)
-      if(getKeyState(modifiers[i]))                            // Modifier is down
+      if(getInputCodeState(modifiers[i]))                            // Modifier is down
       {
          if(modifiers[i] == mod1 || modifiers[i] == mod2 || modifiers[i] == mod3)      
             foundCount++;
@@ -173,9 +173,9 @@ bool isPrintable(char c)
 
 // If there is a printable ASCII code for the pressed key, return it
 // Filter out some know spurious keystrokes
-char keyToAscii(int unicode, KeyCode keyCode)
+char keyToAscii(int unicode, InputCode inputCode)
 {
-   //if(keyCode == KEY_UP || keyCode == KEY_DOWN || keyCode == KEY_LEFT || keyCode == KEY_RIGHT)
+   //if(inputCode == KEY_UP || inputCode == KEY_DOWN || inputCode == KEY_LEFT || inputCode == KEY_RIGHT)
    //   return 0;
 
    if((unicode & 0xFF80) != 0) 
@@ -188,8 +188,8 @@ char keyToAscii(int unicode, KeyCode keyCode)
 
 
 #ifndef ZAP_DEDICATED
-// Translate SDL standard keys to our KeyCodes
-KeyCode sdlKeyToKeyCode(int key)
+// Translate SDL standard keys to our InputCodes
+InputCode sdlKeyToInputCode(int key)
 {
    switch(key)
    {
@@ -670,9 +670,9 @@ KeyCode sdlKeyToKeyCode(int key)
 }
 
 
-S32 keyCodeToSDLKey(KeyCode keyCode)
+S32 inputCodeToSDLKey(InputCode inputCode)
 {
-   switch(keyCode)
+   switch(inputCode)
    {
 	   case KEY_BACKSPACE:
 		   return SDLK_BACKSPACE;
@@ -1130,14 +1130,14 @@ S32 keyCodeToSDLKey(KeyCode keyCode)
 	   case KEY_UNDO:
 		   return SDLK_UNDO;
       default:
-         logprintf(LogConsumer::LogWarning, "Unknown keyCode detected: %d", keyCode);
+         logprintf(LogConsumer::LogWarning, "Unknown inputCode detected: %d", inputCode);
          return SDLK_UNKNOWN;
    }
 }
 #endif
 
 
-KeyCode joyButtonToKeyCode(int buttonIndex)
+InputCode joyButtonToInputCode(int buttonIndex)
 {
    switch(buttonIndex)
    {
@@ -1183,7 +1183,7 @@ KeyCode joyButtonToKeyCode(int buttonIndex)
 }
 
 
-KeyCode joyHatToKeyCode(int hatDirectionMask)
+InputCode joyHatToInputCode(int hatDirectionMask)
 {
    switch(hatDirectionMask)
    {
@@ -1201,9 +1201,9 @@ KeyCode joyHatToKeyCode(int hatDirectionMask)
 }
 
 
-S32 keyCodeToButtonIndex(KeyCode keyCode)
+S32 inputCodeToButtonIndex(InputCode inputCode)
 {
-   switch(keyCode)
+   switch(inputCode)
    {
       case BUTTON_1:
          return 0;
@@ -1248,23 +1248,24 @@ S32 keyCodeToButtonIndex(KeyCode keyCode)
 
 
 // We'll also treat controller buttons like simulated keystrokes
-bool isControllerButton(KeyCode keyCode)
+bool isControllerButton(InputCode inputCode)
 {
-   if (keyCode == BUTTON_1 || keyCode == BUTTON_2 || keyCode == BUTTON_3 ||
-       keyCode == BUTTON_4 || keyCode == BUTTON_5 || keyCode == BUTTON_6 ||
-       keyCode == BUTTON_7 || keyCode == BUTTON_8 ||
-       keyCode == BUTTON_BACK || keyCode == BUTTON_START)
+   if (inputCode == BUTTON_1 || inputCode == BUTTON_2 || inputCode == BUTTON_3 ||
+       inputCode == BUTTON_4 || inputCode == BUTTON_5 || inputCode == BUTTON_6 ||
+       inputCode == BUTTON_7 || inputCode == BUTTON_8 || inputCode == BUTTON_9 ||
+       inputCode == BUTTON_10 || inputCode == BUTTON_11 || inputCode == BUTTON_12 ||
+       inputCode == BUTTON_BACK || inputCode == BUTTON_START)
       return true;
    else
       return false;
 }
 
-// Translate a KeyCode into a string name, primarily used
+// Translate an InputCode into a string name, primarily used
 // for displaying keys in help and during rebind mode, and
 // also when storing key bindings in INI files
-const char *keyCodeToString(KeyCode keyCode)
+const char *inputCodeToString(InputCode inputCode)
 {
-   switch (keyCode)
+   switch (inputCode)
    {
    case KEY_BACKSPACE:
          return "Backspace";
@@ -1499,228 +1500,228 @@ const char *keyCodeToString(KeyCode keyCode)
    case KEY_CTRL_S:
       return "Ctrl-S";
    default:
-//      logprintf("undefined keycode number: %d", keyCode);
-      return "Undefined key";
+//      logprintf("undefined inputCode number: %d", inputCode);
+      return "Undefined input";
    }
 }
 
-// Translate from a string key name into a KeyCode
+// Translate from a string key name into a InputCode
 // (primarily for loading key bindings from INI files)
-KeyCode stringToKeyCode(const char *keyname)
+InputCode stringToInputCode(const char *inputName)
 {
-   if (stricmp(keyname, "Backspace") == 0)
+   if (stricmp(inputName, "Backspace") == 0)
       return KEY_BACKSPACE;
-   else if (stricmp(keyname, "Del") == 0)
+   else if (stricmp(inputName, "Del") == 0)
       return KEY_DELETE;
-   else if (stricmp(keyname, "Tab") == 0)
+   else if (stricmp(inputName, "Tab") == 0)
       return KEY_TAB;
-   else if (stricmp(keyname, "Enter") == 0)
+   else if (stricmp(inputName, "Enter") == 0)
       return KEY_ENTER;
-   else if (stricmp(keyname, "Esc") == 0)
+   else if (stricmp(inputName, "Esc") == 0)
       return KEY_ESCAPE;
-   else if (stricmp(keyname, "Space") == 0)
+   else if (stricmp(inputName, "Space") == 0)
       return KEY_SPACE;
-   else if (stricmp(keyname, "0") == 0)
+   else if (stricmp(inputName, "0") == 0)
       return KEY_0;
-   else if (stricmp(keyname, "1") == 0)
+   else if (stricmp(inputName, "1") == 0)
       return KEY_1;
-   else if (stricmp(keyname, "2") == 0)
+   else if (stricmp(inputName, "2") == 0)
       return KEY_2;
-   else if (stricmp(keyname, "3") == 0)
+   else if (stricmp(inputName, "3") == 0)
       return KEY_3;
-   else if (stricmp(keyname, "4") == 0)
+   else if (stricmp(inputName, "4") == 0)
       return KEY_4;
-   else if (stricmp(keyname, "5") == 0)
+   else if (stricmp(inputName, "5") == 0)
       return KEY_5;
-   else if (stricmp(keyname, "6") == 0)
+   else if (stricmp(inputName, "6") == 0)
       return KEY_6;
-   else if (stricmp(keyname, "7") == 0)
+   else if (stricmp(inputName, "7") == 0)
       return KEY_7;
-   else if (stricmp(keyname, "8") == 0)
+   else if (stricmp(inputName, "8") == 0)
       return KEY_8;
-   else if (stricmp(keyname, "9") == 0)
+   else if (stricmp(inputName, "9") == 0)
       return KEY_9;
-   else if (stricmp(keyname, "A") == 0)
+   else if (stricmp(inputName, "A") == 0)
       return KEY_A;
-   else if (stricmp(keyname, "B") == 0)
+   else if (stricmp(inputName, "B") == 0)
       return KEY_B;
-   else if (stricmp(keyname, "C") == 0)
+   else if (stricmp(inputName, "C") == 0)
       return KEY_C;
-   else if (stricmp(keyname, "D") == 0)
+   else if (stricmp(inputName, "D") == 0)
       return KEY_D;
-   else if (stricmp(keyname, "E") == 0)
+   else if (stricmp(inputName, "E") == 0)
       return KEY_E;
-   else if (stricmp(keyname, "F") == 0)
+   else if (stricmp(inputName, "F") == 0)
       return KEY_F;
-   else if (stricmp(keyname, "G") == 0)
+   else if (stricmp(inputName, "G") == 0)
       return KEY_G;
-   else if (stricmp(keyname, "H") == 0)
+   else if (stricmp(inputName, "H") == 0)
       return KEY_H;
-   else if (stricmp(keyname, "I") == 0)
+   else if (stricmp(inputName, "I") == 0)
       return KEY_I;
-   else if (stricmp(keyname, "J") == 0)
+   else if (stricmp(inputName, "J") == 0)
       return KEY_J;
-   else if (stricmp(keyname, "K") == 0)
+   else if (stricmp(inputName, "K") == 0)
       return KEY_K;
-   else if (stricmp(keyname, "L") == 0)
+   else if (stricmp(inputName, "L") == 0)
       return KEY_L;
-   else if (stricmp(keyname, "M") == 0)
+   else if (stricmp(inputName, "M") == 0)
       return KEY_M;
-   else if (stricmp(keyname, "N") == 0)
+   else if (stricmp(inputName, "N") == 0)
       return KEY_N;
-   else if (stricmp(keyname, "O") == 0)
+   else if (stricmp(inputName, "O") == 0)
       return KEY_O;
-   else if (stricmp(keyname, "P") == 0)
+   else if (stricmp(inputName, "P") == 0)
       return KEY_P;
-   else if (stricmp(keyname, "Q") == 0)
+   else if (stricmp(inputName, "Q") == 0)
       return KEY_Q;
-   else if (stricmp(keyname, "R") == 0)
+   else if (stricmp(inputName, "R") == 0)
       return KEY_R;
-   else if (stricmp(keyname, "S") == 0)
+   else if (stricmp(inputName, "S") == 0)
       return KEY_S;
-   else if (stricmp(keyname, "T") == 0)
+   else if (stricmp(inputName, "T") == 0)
       return KEY_T;
-   else if (stricmp(keyname, "U") == 0)
+   else if (stricmp(inputName, "U") == 0)
       return KEY_U;
-   else if (stricmp(keyname, "V") == 0)
+   else if (stricmp(inputName, "V") == 0)
       return KEY_V;
-   else if (stricmp(keyname, "W") == 0)
+   else if (stricmp(inputName, "W") == 0)
       return KEY_W;
-   else if (stricmp(keyname, "X") == 0)
+   else if (stricmp(inputName, "X") == 0)
       return KEY_X;
-   else if (stricmp(keyname, "Y") == 0)
+   else if (stricmp(inputName, "Y") == 0)
       return KEY_Y;
-   else if (stricmp(keyname, "Z") == 0)
+   else if (stricmp(inputName, "Z") == 0)
       return KEY_Z;
-   else if (stricmp(keyname, "~") == 0)
+   else if (stricmp(inputName, "~") == 0)
       return KEY_TILDE;
-   else if (stricmp(keyname, "-") == 0)
+   else if (stricmp(inputName, "-") == 0)
       return KEY_MINUS;
-   else if (stricmp(keyname, "=") == 0)
+   else if (stricmp(inputName, "=") == 0)
       return KEY_EQUALS;
-   else if (stricmp(keyname, "[") == 0)
+   else if (stricmp(inputName, "[") == 0)
       return KEY_OPENBRACKET;
-   else if (stricmp(keyname, "]") == 0)
+   else if (stricmp(inputName, "]") == 0)
       return KEY_CLOSEBRACKET;
-   else if (stricmp(keyname, "\\") == 0)
+   else if (stricmp(inputName, "\\") == 0)
       return KEY_BACKSLASH;
-   else if (stricmp(keyname, ";") == 0)
+   else if (stricmp(inputName, ";") == 0)
       return KEY_SEMICOLON;
-   else if (stricmp(keyname, "'") == 0)
+   else if (stricmp(inputName, "'") == 0)
       return KEY_QUOTE;
-   else if (stricmp(keyname, ",") == 0)
+   else if (stricmp(inputName, ",") == 0)
       return KEY_COMMA;
-   else if (stricmp(keyname, ".") == 0)
+   else if (stricmp(inputName, ".") == 0)
       return KEY_PERIOD;
-   else if (stricmp(keyname, "/") == 0)
+   else if (stricmp(inputName, "/") == 0)
       return KEY_SLASH;
-   else if (stricmp(keyname, "Page Up") == 0)
+   else if (stricmp(inputName, "Page Up") == 0)
       return KEY_PAGEUP;
-   else if (stricmp(keyname, "Page Down") == 0)
+   else if (stricmp(inputName, "Page Down") == 0)
       return KEY_PAGEDOWN;
-   else if (stricmp(keyname, "End") == 0)
+   else if (stricmp(inputName, "End") == 0)
       return KEY_END;
-   else if (stricmp(keyname, "Home") == 0)
+   else if (stricmp(inputName, "Home") == 0)
       return KEY_HOME;
-   else if (stricmp(keyname, "Left Arrow") == 0)
+   else if (stricmp(inputName, "Left Arrow") == 0)
       return KEY_LEFT;
-   else if (stricmp(keyname, "Up Arrow") == 0)
+   else if (stricmp(inputName, "Up Arrow") == 0)
       return KEY_UP;
-   else if (stricmp(keyname, "Right Arrow") == 0)
+   else if (stricmp(inputName, "Right Arrow") == 0)
       return KEY_RIGHT;
-   else if (stricmp(keyname, "Down Arrow") == 0)
+   else if (stricmp(inputName, "Down Arrow") == 0)
       return KEY_DOWN;
-   else if (stricmp(keyname, "Insert") == 0)
+   else if (stricmp(inputName, "Insert") == 0)
       return KEY_INSERT;
-   else if (stricmp(keyname, "F1") == 0)
+   else if (stricmp(inputName, "F1") == 0)
       return KEY_F1;
-   else if (stricmp(keyname, "F2") == 0)
+   else if (stricmp(inputName, "F2") == 0)
       return KEY_F2;
-   else if (stricmp(keyname, "F3") == 0)
+   else if (stricmp(inputName, "F3") == 0)
       return KEY_F3;
-   else if (stricmp(keyname, "F4") == 0)
+   else if (stricmp(inputName, "F4") == 0)
       return KEY_F4;
-   else if (stricmp(keyname, "F5") == 0)
+   else if (stricmp(inputName, "F5") == 0)
       return KEY_F5;
-   else if (stricmp(keyname, "F6") == 0)
+   else if (stricmp(inputName, "F6") == 0)
       return KEY_F6;
-   else if (stricmp(keyname, "F7") == 0)
+   else if (stricmp(inputName, "F7") == 0)
       return KEY_F7;
-   else if (stricmp(keyname, "F8") == 0)
+   else if (stricmp(inputName, "F8") == 0)
       return KEY_F8;
-   else if (stricmp(keyname, "F9") == 0)
+   else if (stricmp(inputName, "F9") == 0)
       return KEY_F9;
-   else if (stricmp(keyname, "F10") == 0)
+   else if (stricmp(inputName, "F10") == 0)
       return KEY_F10;
-   else if (stricmp(keyname, "F11") == 0)
+   else if (stricmp(inputName, "F11") == 0)
       return KEY_F11;
-   else if (stricmp(keyname, "F12") == 0)
+   else if (stricmp(inputName, "F12") == 0)
       return KEY_F12;
-   else if (stricmp(keyname, "Shift") == 0)
+   else if (stricmp(inputName, "Shift") == 0)
       return KEY_SHIFT;
-   else if (stricmp(keyname, "Alt") == 0)
+   else if (stricmp(inputName, "Alt") == 0)
       return KEY_ALT;
-   else if (stricmp(keyname, "Ctrl") == 0)
+   else if (stricmp(inputName, "Ctrl") == 0)
       return KEY_CTRL;
-   else if (stricmp(keyname, "Left-mouse") == 0)
+   else if (stricmp(inputName, "Left-mouse") == 0)
       return MOUSE_LEFT;
-   else if (stricmp(keyname, "Middle-mouse") == 0)
+   else if (stricmp(inputName, "Middle-mouse") == 0)
       return MOUSE_MIDDLE;
-   else if (stricmp(keyname, "Right-mouse") == 0)
+   else if (stricmp(inputName, "Right-mouse") == 0)
       return MOUSE_RIGHT;
-   else if (stricmp(keyname, "Button 1") == 0)
+   else if (stricmp(inputName, "Button 1") == 0)
       return BUTTON_1;
-   else if (stricmp(keyname, "Button 2") == 0)
+   else if (stricmp(inputName, "Button 2") == 0)
       return BUTTON_2;
-   else if (stricmp(keyname, "Button 3") == 0)
+   else if (stricmp(inputName, "Button 3") == 0)
       return BUTTON_3;
-   else if (stricmp(keyname, "Button 4") == 0)
+   else if (stricmp(inputName, "Button 4") == 0)
       return BUTTON_4;
-   else if (stricmp(keyname, "Button 5") == 0)
+   else if (stricmp(inputName, "Button 5") == 0)
       return BUTTON_5;
-   else if (stricmp(keyname, "Button 6") == 0)
+   else if (stricmp(inputName, "Button 6") == 0)
       return BUTTON_6;
-   else if (stricmp(keyname, "Button 7") == 0)
+   else if (stricmp(inputName, "Button 7") == 0)
       return BUTTON_7;
-   else if (stricmp(keyname, "Button 8") == 0)
+   else if (stricmp(inputName, "Button 8") == 0)
       return BUTTON_8;
-   else if (stricmp(keyname, "Button 9") == 0)
+   else if (stricmp(inputName, "Button 9") == 0)
       return BUTTON_9;
-   else if (stricmp(keyname, "Button 10") == 0)
+   else if (stricmp(inputName, "Button 10") == 0)
       return BUTTON_10;
-   else if (stricmp(keyname, "Button 11") == 0)
+   else if (stricmp(inputName, "Button 11") == 0)
       return BUTTON_11;
-   else if (stricmp(keyname, "Button 12") == 0)
+   else if (stricmp(inputName, "Button 12") == 0)
       return BUTTON_12;
-   else if (stricmp(keyname, "Back") == 0)
+   else if (stricmp(inputName, "Back") == 0)
       return BUTTON_BACK;
-   else if (stricmp(keyname, "Start") == 0)
+   else if (stricmp(inputName, "Start") == 0)
       return BUTTON_START;
-   else if (stricmp(keyname, "DPad Up") == 0)
+   else if (stricmp(inputName, "DPad Up") == 0)
       return BUTTON_DPAD_UP;
-   else if (stricmp(keyname, "DPad Down") == 0)
+   else if (stricmp(inputName, "DPad Down") == 0)
       return BUTTON_DPAD_DOWN;
-   else if (stricmp(keyname, "DPad Left") == 0)
+   else if (stricmp(inputName, "DPad Left") == 0)
       return BUTTON_DPAD_LEFT;
-   else if (stricmp(keyname, "DPad Right") == 0)
+   else if (stricmp(inputName, "DPad Right") == 0)
       return BUTTON_DPAD_RIGHT;
-   else if (stricmp(keyname, "Stick 1 Left") == 0)
+   else if (stricmp(inputName, "Stick 1 Left") == 0)
       return STICK_1_LEFT;
-   else if (stricmp(keyname, "Stick 1 Right") == 0)
+   else if (stricmp(inputName, "Stick 1 Right") == 0)
       return STICK_1_RIGHT;
-   else if (stricmp(keyname, "Stick 1 Up") == 0)
+   else if (stricmp(inputName, "Stick 1 Up") == 0)
       return STICK_1_UP;
-   else if (stricmp(keyname, "Stick 1 Down") == 0)
+   else if (stricmp(inputName, "Stick 1 Down") == 0)
       return STICK_1_DOWN;
-   else if (stricmp(keyname, "Stick 2 Left") == 0)
+   else if (stricmp(inputName, "Stick 2 Left") == 0)
       return STICK_2_LEFT;
-   else if (stricmp(keyname, "Stick 2 Right") == 0)
+   else if (stricmp(inputName, "Stick 2 Right") == 0)
       return STICK_2_RIGHT;
-   else if (stricmp(keyname, "Stick 2 Up") == 0)
+   else if (stricmp(inputName, "Stick 2 Up") == 0)
       return STICK_2_UP;
-   else if (stricmp(keyname, "Stick 2 Down") == 0)
+   else if (stricmp(inputName, "Stick 2 Down") == 0)
       return STICK_2_DOWN;
-   else if (stricmp(keyname, "Mouse") == 0)
+   else if (stricmp(inputName, "Mouse") == 0)
       return MOUSE;
    else
       return KEY_UNKNOWN;
@@ -1731,9 +1732,9 @@ KeyCode stringToKeyCode(const char *keyname)
 #ifdef __cplusplus
 extern "C" {
 #endif
-// Provide access to getKeyState from C code.
+// Provide access to getInputCodeState from C code.
 // Has to be outside the namespace declaration because C doesn't use namespaces.
-int getKeyState_c(int keyCode) { return Zap::getKeyState((Zap::KeyCode)keyCode); }
+int getInputCodeState_c(int inputCode) { return Zap::getInputCodeState((Zap::InputCode)inputCode); }
 #ifdef __cplusplus
 }
 #endif

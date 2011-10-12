@@ -28,7 +28,7 @@ using namespace TNL;
 
 #include "UI.h"
 #include "move.h"
-#include "keyCode.h"
+#include "InputCode.h"
 #include "UIMenus.h"
 #include "input.h"      // For MaxJoystickButtons const
 #include "config.h"
@@ -154,53 +154,53 @@ void UserInterface::onReactivate() { /* Do nothing */ }
 
 // It will be simpler if we translate joystick controls into keyboard actions here rather than check for them elsewhere.  
 // This is possibly marginally less efficient, but will reduce maintenance burdens over time.
-KeyCode UserInterface::convertJoystickToKeyboard(KeyCode keyCode)
+InputCode UserInterface::convertJoystickToKeyboard(InputCode inputCode)
 {
    //if(menuSitck == JOYSTICK_DPAD)
    //{
-      if(keyCode == BUTTON_DPAD_LEFT) 
+      if(inputCode == BUTTON_DPAD_LEFT) 
          return KEY_LEFT;
-      if(keyCode == BUTTON_DPAD_RIGHT) 
+      if(inputCode == BUTTON_DPAD_RIGHT) 
          return KEY_RIGHT;
-      if(keyCode == BUTTON_DPAD_UP) 
+      if(inputCode == BUTTON_DPAD_UP) 
          return KEY_UP;
-      if(keyCode == BUTTON_DPAD_DOWN) 
+      if(inputCode == BUTTON_DPAD_DOWN) 
          return KEY_DOWN;
    //}
 
    //if(menuStick == JOYSTICK_STICK1)
    //{
-      if(keyCode == STICK_1_LEFT) 
+      if(inputCode == STICK_1_LEFT) 
          return KEY_LEFT;
-      if(keyCode == STICK_1_RIGHT) 
+      if(inputCode == STICK_1_RIGHT) 
          return KEY_RIGHT;
-      if(keyCode == STICK_1_UP) 
+      if(inputCode == STICK_1_UP) 
          return KEY_UP;
-      if(keyCode == STICK_1_DOWN) 
+      if(inputCode == STICK_1_DOWN) 
          return KEY_DOWN;
    //}
 
    //if(menuStick == JOYSTICK_STICK2)
    //{
-      if(keyCode == STICK_2_LEFT) 
+      if(inputCode == STICK_2_LEFT) 
          return KEY_LEFT;
-      if(keyCode == STICK_2_RIGHT) 
+      if(inputCode == STICK_2_RIGHT) 
          return KEY_RIGHT;
-      if(keyCode == STICK_2_UP) 
+      if(inputCode == STICK_2_UP) 
          return KEY_UP;
-      if(keyCode == STICK_2_DOWN) 
+      if(inputCode == STICK_2_DOWN) 
          return KEY_DOWN;
    //}
 
 
-   if(keyCode == BUTTON_START) 
+   if(inputCode == BUTTON_START) 
       return KEY_ENTER;
-   if(keyCode == BUTTON_BACK) 
+   if(inputCode == BUTTON_BACK) 
       return KEY_ESCAPE;
-   if(keyCode == BUTTON_1)    // Some game pads might not have a START button
+   if(inputCode == BUTTON_1)    // Some game pads might not have a START button
          return KEY_ENTER;
 
-   return keyCode;
+   return inputCode;
 }
 
 
@@ -262,11 +262,11 @@ void UserInterface::renderCurrent()    // static
      glColor(Colors::white);
 
       // Key states
-     for (U32 i = 0; i < MAX_KEYS; i++)
-        if(getKeyState((KeyCode) i))
+     for (U32 i = 0; i < MAX_INPUT_CODES; i++)
+        if(getInputCodeState((InputCode) i))
         {
-           drawString( hpos, vpos, 18, keyCodeToString((KeyCode) i) );
-           hpos += getStringWidth(18, keyCodeToString( (KeyCode) i) ) + 5;
+           drawString( hpos, vpos, 18, inputCodeToString((InputCode) i) );
+           hpos += getStringWidth(18, inputCodeToString( (InputCode) i) ) + 5;
         }
 
       vpos += 23;
@@ -889,8 +889,8 @@ void UserInterface::render()                               { /* Do nothing */ }
 void UserInterface::idle(U32 timeDelta)                    { /* Do nothing */ }
 void UserInterface::onMouseMoved(S32 x, S32 y)             { /* Do nothing */ }
 void UserInterface::onMouseDragged(S32 x, S32 y)           { /* Do nothing */ }
-void UserInterface::onKeyDown(KeyCode keyCode, char ascii) { /* Do nothing */ }
-void UserInterface::onKeyUp(KeyCode keyCode)               { /* Do nothing */ }
+void UserInterface::onKeyDown(InputCode inputCode, char ascii) { /* Do nothing */ }
+void UserInterface::onKeyUp(InputCode inputCode)               { /* Do nothing */ }
 
 
 UserInterfaceData::UserInterfaceData() 

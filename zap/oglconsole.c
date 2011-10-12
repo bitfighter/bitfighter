@@ -1064,7 +1064,7 @@ void OGLCONSOLE_HideConsole()
 
 // Start Bitfighter specific block
 
-#include "keyCodeEnum.h"
+#include "InputCodeEnum.h"
 
 #define KEY_RETURN      KEY_ENTER
 #define KMOD_SHIFT      1
@@ -1072,14 +1072,14 @@ void OGLCONSOLE_HideConsole()
 #define SHOW_CONSOLE_KEY KEY_NONE      // Bitfighter console created via different mechanism
 #define HIDE_CONSOLE_KEY KEY_ESCAPE
 
-extern int getKeyState_c(int);
+extern int getInputCodeState_c(int);
 
 
 // Munge the Bitfighter key handling system into something that works with this setup
 // Returns true if console is open, false if it has been closed
-int OGLCONSOLE_ProcessBitfighterKeyEvent(int keyCode, char ascii)
+int OGLCONSOLE_ProcessBitfighterKeyEvent(int inputCode, char ascii)
 {
-   if(OGLCONSOLE_KeyEvent(keyCode, getKeyState_c(KEY_SHIFT)))
+   if(OGLCONSOLE_KeyEvent(inputCode, getInputCodeState_c(KEY_SHIFT)))
       return 1;
    if(OGLCONSOLE_CharEvent(ascii))
       return 1;

@@ -160,7 +160,7 @@
     <ClCompile Include="..\zap\huntersGame.cpp" />
     <ClCompile Include="..\zap\IniFile.cpp" />
     <ClCompile Include="..\zap\item.cpp" />
-    <ClCompile Include="..\zap\keyCode.cpp" />
+    <ClCompile Include="..\zap\InputCode.cpp" />
     <ClCompile Include="..\zap\lineEditor.cpp" />
     <ClCompile Include="EditorObject.cpp" />
     <ClCompile Include="engineerHelper.cpp" />
@@ -278,7 +278,7 @@
     <ClInclude Include="..\zap\item.h" />
     <ClInclude Include="Joystick.h" />
     <ClInclude Include="JoystickRender.h" />
-    <ClInclude Include="..\zap\keyCode.h" />
+    <ClInclude Include="..\zap\InputCode.h" />
     <ClInclude Include="..\zap\lineEditor.h" />
     <ClInclude Include="EditorObject.h" />
     <ClInclude Include="engineerHelper.h" />

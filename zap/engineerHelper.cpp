@@ -125,9 +125,9 @@ void EngineerHelper::render()
 
 // Return true if key did something, false if key had no effect
 // Runs on client
-bool EngineerHelper::processKeyCode(KeyCode keyCode)
+bool EngineerHelper::processInputCode(InputCode inputCode)
 {
-   if(Parent::processKeyCode(keyCode))    // Check for cancel keys
+   if(Parent::processInputCode(inputCode))    // Check for cancel keys
       return true;
 
    GameConnection *gc = getGame()->getConnectionToServer();
@@ -136,14 +136,14 @@ bool EngineerHelper::processKeyCode(KeyCode keyCode)
    if(mSelectedItem == -1)    // Haven't selected an item yet
    {
       for(S32 i = 0; i < mEngineerCostructionItemInfos.size(); i++)
-         if(keyCode == mEngineerCostructionItemInfos[i].mKey || keyCode == mEngineerCostructionItemInfos[i].mButton)
+         if(inputCode == mEngineerCostructionItemInfos[i].mKey || inputCode == mEngineerCostructionItemInfos[i].mButton)
          {
             mSelectedItem = i;
             return true;
          }
       Ship *ship = dynamic_cast<Ship *>(gc->getControlObject());
-      if(!ship || (keyCode == keyMOD1[inputMode] && ship->getModule(0) == ModuleEngineer) ||
-                  (keyCode == keyMOD2[inputMode] && ship->getModule(1) == ModuleEngineer))
+      if(!ship || (inputCode == inputMOD1[inputMode] && ship->getModule(0) == ModuleEngineer) ||
+                  (inputCode == inputMOD2[inputMode] && ship->getModule(1) == ModuleEngineer))
       {
          exitHelper();
          return true;
@@ -152,8 +152,8 @@ bool EngineerHelper::processKeyCode(KeyCode keyCode)
    else                       // Placing item
    {
       Ship *ship = dynamic_cast<Ship *>(gc->getControlObject());
-      if(ship && ((keyCode == keyMOD1[inputMode] && ship->getModule(0) == ModuleEngineer) ||
-                  (keyCode == keyMOD2[inputMode] && ship->getModule(1) == ModuleEngineer)))
+      if(ship && ((inputCode == inputMOD1[inputMode] && ship->getModule(0) == ModuleEngineer) ||
+                  (inputCode == inputMOD2[inputMode] && ship->getModule(1) == ModuleEngineer)))
       {
          // Check deployment status on client; will be checked again on server, but server will only handle likely valid placements
          EngineerModuleDeployer deployer;

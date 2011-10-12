@@ -67,8 +67,8 @@ OBJECTS_SHARED=\
    HTFGame.o\
    huntersGame.o\
    IniFile.o\
+   InputCode.o\
    item.o\
-   keyCode.o\
    lineEditor.o\
    loadoutZone.o\
    luaGameInfo.o\

@@ -64,23 +64,23 @@ void YesNoUserInterface::reset()
 }
 
 
-void YesNoUserInterface::onKeyDown(KeyCode keyCode, char ascii)
+void YesNoUserInterface::onKeyDown(InputCode inputCode, char ascii)
 {
-   if(keyCode == KEY_Y)
+   if(inputCode == KEY_Y)
    {
       if(mYesFunction)
          mYesFunction(getGame());
       else
          quit();
    }
-   else if(keyCode == KEY_N)
+   else if(inputCode == KEY_N)
    {
       if(mNoFunction)
          mNoFunction(getGame());
       else
          quit();
    }
-   else if(keyCode == KEY_ESCAPE)
+   else if(inputCode == KEY_ESCAPE)
       quit();
 }
 

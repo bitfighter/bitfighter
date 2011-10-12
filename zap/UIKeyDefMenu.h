@@ -43,10 +43,10 @@ struct KeyDefMenuItem
    const char *mText;
    U32 mIndex;
    U32 mColumn;
-   KeyCode *primaryControl;
+   InputCode *primaryControl;
    string helpString;
 
-   KeyDefMenuItem(const char *text, U32 index, U32 col, KeyCode *PC, string helpStr)     // Constructor
+   KeyDefMenuItem(const char *text, U32 index, U32 col, InputCode *PC, string helpStr)     // Constructor
    {
       mText = text;
       mIndex = index;
@@ -80,7 +80,7 @@ public:
 
    void render();              // Draw the menu
    void idle(U32 timeDelta);
-   void onKeyDown(KeyCode keyCode, char ascii);
+   void onKeyDown(InputCode inputCode, char ascii);
 
    void onMouseMoved(S32 x, S32 y);
 

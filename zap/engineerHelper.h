@@ -37,15 +37,15 @@ namespace Zap
 struct EngineerConstructionItemInfo
 {
    EngineerBuildObjects mObjectType;
-   KeyCode mKey;            // Keyboard key used to select in menu
-   KeyCode mButton;         // Controller button used to select in menu
+   InputCode mKey;            // Keyboard key used to select in menu
+   InputCode mButton;         // Controller button used to select in menu
    const char *mName;       // Name used on menu
    const char *mHelp;       // An additional bit of help text, also displayed on menu
 
 
    EngineerConstructionItemInfo() { /* Do nothing */ };      // Default constructor, should never be used
 
-   EngineerConstructionItemInfo(EngineerBuildObjects objectType, const char *name, KeyCode key, KeyCode button, const char *help = "")    
+   EngineerConstructionItemInfo(EngineerBuildObjects objectType, const char *name, InputCode key, InputCode button, const char *help = "")    
    {
       mObjectType = objectType;
       mKey = key;
@@ -76,7 +76,7 @@ public:
    virtual ~EngineerHelper();
 
    void onMenuShow();
-   bool processKeyCode(KeyCode keyCode);   
+   bool processInputCode(InputCode inputCode);   
    void render();                
    void renderDeploymentMarker(Ship *ship);
 };

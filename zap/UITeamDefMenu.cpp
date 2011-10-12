@@ -29,7 +29,7 @@
 #include "UIDiagnostics.h"
 #include "UIEditor.h"
 #include "input.h"
-#include "keyCode.h"
+#include "InputCode.h"
 #include "IniFile.h"
 #include "config.h"
 #include "gameType.h"      // For MAX_TEAMS
@@ -238,9 +238,9 @@ class Team;
 string origName;
 extern bool isPrintable(char c);
 
-void TeamDefUserInterface::onKeyDown(KeyCode keyCode, char ascii)
+void TeamDefUserInterface::onKeyDown(InputCode inputCode, char ascii)
 {
-   if(keyCode == KEY_ENTER)
+   if(inputCode == KEY_ENTER)
    {
       mEditing = !mEditing;
       if(mEditing)
@@ -248,13 +248,13 @@ void TeamDefUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    }
    else if(mEditing)                // Editing, send keystroke to editor
    {
-      if(keyCode == KEY_ESCAPE)     // Stop editing, and restore the original value
+      if(inputCode == KEY_ESCAPE)     // Stop editing, and restore the original value
       {
          getGame()->getTeam(selectedIndex)->setName(origName.c_str());
          mEditing = false;
       }
-      else if(keyCode == KEY_BACKSPACE || keyCode == KEY_DELETE)
-         ((TeamEditor *)getGame()->getTeam(selectedIndex))->getLineEditor()->handleBackspace(keyCode);
+      else if(inputCode == KEY_BACKSPACE || inputCode == KEY_DELETE)
+         ((TeamEditor *)getGame()->getTeam(selectedIndex))->getLineEditor()->handleBackspace(inputCode);
       else if(isPrintable(ascii))
          ((TeamEditor *)getGame()->getTeam(selectedIndex))->getLineEditor()->addChar(ascii);
    }
@@ -280,7 +280,7 @@ void TeamDefUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       }
    }
 
-   else if(keyCode == KEY_DELETE || keyCode == KEY_MINUS)            // Del or Minus - Delete current team
+   else if(inputCode == KEY_DELETE || inputCode == KEY_MINUS)            // Del or Minus - Delete current team
    {
       if(getGame()->getTeamCount() == 1) 
       {
@@ -294,7 +294,7 @@ void TeamDefUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          selectedIndex = getGame()->getTeamCount() - 1;
    }
   
-   else if(keyCode == KEY_INSERT || keyCode == KEY_EQUALS)           // Ins or Plus (equals) - Add new item
+   else if(inputCode == KEY_INSERT || inputCode == KEY_EQUALS)           // Ins or Plus (equals) - Add new item
    {
       S32 maxTeams = GameType::MAX_TEAMS;    // A bit pedantic, perhaps, but using this fixes an odd link error in Linux
       if(getGame()->getTeamCount() >= maxTeams)
@@ -313,21 +313,21 @@ void TeamDefUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          selectedIndex = 0;
    }
 
-   else if(keyCode == KEY_R)
+   else if(inputCode == KEY_R)
       getGame()->getTeam(selectedIndex)->alterRed(checkModifier(KEY_SHIFT) ? -.01f : .01f);
 
-   else if(keyCode == KEY_G)
+   else if(inputCode == KEY_G)
       getGame()->getTeam(selectedIndex)->alterGreen(checkModifier(KEY_SHIFT) ? -.01f : .01f);
 
-   else if(keyCode == KEY_B)
+   else if(inputCode == KEY_B)
       getGame()->getTeam(selectedIndex)->alterBlue(checkModifier(KEY_SHIFT) ? -.01f : .01f);
 
-   else if(keyCode == KEY_ESCAPE || keyCode == BUTTON_BACK)       // Quit
+   else if(inputCode == KEY_ESCAPE || inputCode == BUTTON_BACK)       // Quit
    {
       playBoop();
       onEscape();
    }
-   else if(keyCode == KEY_UP || keyCode == BUTTON_DPAD_UP)        // Prev item
+   else if(inputCode == KEY_UP || inputCode == BUTTON_DPAD_UP)        // Prev item
    {
       selectedIndex--;
       if(selectedIndex < 0)
@@ -336,7 +336,7 @@ void TeamDefUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       SDL_ShowCursor(SDL_DISABLE);
 
    }
-   else if(keyCode == KEY_DOWN || keyCode == BUTTON_DPAD_DOWN)    // Next item
+   else if(inputCode == KEY_DOWN || inputCode == BUTTON_DPAD_DOWN)    // Next item
    {
       selectedIndex++;
       if(selectedIndex >= getGame()->getTeamCount())
@@ -344,12 +344,12 @@ void TeamDefUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       playBoop();
       SDL_ShowCursor(SDL_DISABLE);
    }
-   else if(keyCode == keyDIAG)     // Turn on diagnostic overlay
+   else if(inputCode == keyDIAG)     // Turn on diagnostic overlay
    {
       getUIManager()->getDiagnosticUserInterface()->activate();
       playBoop();
    }
-   else if(keyCode == keyOUTGAMECHAT)     // Turn on Global Chat overlay
+   else if(inputCode == keyOUTGAMECHAT)     // Turn on Global Chat overlay
    {
       getUIManager()->getChatUserInterface()->activate();
       playBoop();

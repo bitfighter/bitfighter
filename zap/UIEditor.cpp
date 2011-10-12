@@ -2211,7 +2211,7 @@ void EditorUserInterface::onMouseMoved()
    mouseIgnore = true;
 
    // Doing this with MOUSE_RIGHT allows you to drag a vertex you just placed by holding the right-mouse button
-   if(getKeyState(MOUSE_LEFT) || getKeyState(MOUSE_RIGHT))
+   if(getInputCodeState(MOUSE_LEFT) || getInputCodeState(MOUSE_RIGHT))
    {
       onMouseDragged();
       return;
@@ -2875,22 +2875,22 @@ void EditorUserInterface::doneEditingAttributes(EditorAttributeMenuUI *editor, E
 
 
 // Handle key presses
-void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
+void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
 {
-   if(OGLCONSOLE_ProcessBitfighterKeyEvent(keyCode, ascii))      // Pass the key on to the console for processing
+   if(OGLCONSOLE_ProcessBitfighterKeyEvent(inputCode, ascii))      // Pass the key on to the console for processing
       return;
 
    // TODO: Make this stuff work like the attribute entry stuff; use a real menu and not this ad-hoc code
    // This is where we handle entering things like rotation angle and other data that requires a special entry box.
    // NOT for editing an item's attributes.  Still used, but untested in refactor.
    if(entryMode != EntryNone)
-      textEntryKeyHandler(keyCode, ascii);
+      textEntryKeyHandler(inputCode, ascii);
 
-   else if(keyCode == KEY_ENTER)       // Enter - Edit props
+   else if(inputCode == KEY_ENTER)       // Enter - Edit props
       startAttributeEditor();
 
    // Regular key handling from here on down
-   else if(checkModifier(KEY_SHIFT) && keyCode == KEY_0)  // Shift-0 -> Set team to hostile
+   else if(checkModifier(KEY_SHIFT) && inputCode == KEY_0)  // Shift-0 -> Set team to hostile
       setCurrentTeam(-2);
 
    else if(ascii == '#' || ascii == '!')
@@ -2929,9 +2929,9 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    }
 
    // Ctrl-left click is same as right click for Mac users
-   else if(keyCode == MOUSE_RIGHT || (keyCode == MOUSE_LEFT && checkModifier(KEY_CTRL)))
+   else if(inputCode == MOUSE_RIGHT || (inputCode == MOUSE_LEFT && checkModifier(KEY_CTRL)))
    {
-      if(getKeyState(MOUSE_LEFT) && !checkModifier(KEY_CTRL))        // Prevent weirdness
+      if(getInputCodeState(MOUSE_LEFT) && !checkModifier(KEY_CTRL))        // Prevent weirdness
          return;  
 
       mMousePos.set(gScreenInfo.getMousePos());
@@ -2974,7 +2974,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       {
          S32 width;
 
-         if(getKeyState(KEY_TILDE))
+         if(getInputCodeState(KEY_TILDE))
          {
             mCreatingPolyline = true;
             mNewItem = new LineItem();
@@ -2993,9 +2993,9 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          mNewItem->setDockItem(false);
       }
    }
-   else if(keyCode == MOUSE_LEFT)
+   else if(inputCode == MOUSE_LEFT)
    {
-      if(getKeyState(MOUSE_RIGHT))              // Prevent weirdness
+      if(getInputCodeState(MOUSE_RIGHT))              // Prevent weirdness
          return;
 
       mDraggingDockItem = NONE;
@@ -3102,28 +3102,28 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 
      findSnapVertex();     // Update snap vertex in the event an item was selected
 
-   }     // end if keyCode == MOUSE_LEFT
+   }     // end if inputCode == MOUSE_LEFT
 
    // Neither mouse button, let's try some keys
-   else if(keyCode == KEY_D)              // D - Pan right
+   else if(inputCode == KEY_D)              // D - Pan right
       mRight = true;
-   else if(keyCode == KEY_RIGHT)          // Right - Pan right
+   else if(inputCode == KEY_RIGHT)          // Right - Pan right
       mRight = true;
-   else if(keyCode == KEY_H)              // H - Flip horizontal
+   else if(inputCode == KEY_H)              // H - Flip horizontal
       flipSelectionHorizontal();
-   else if(keyCode == KEY_V && checkModifier(KEY_CTRL))    // Ctrl-V - Paste selection
+   else if(inputCode == KEY_V && checkModifier(KEY_CTRL))    // Ctrl-V - Paste selection
       pasteSelection();
-   else if(keyCode == KEY_V)              // V - Flip vertical
+   else if(inputCode == KEY_V)              // V - Flip vertical
       flipSelectionVertical();
-   else if(keyCode == KEY_SLASH)
+   else if(inputCode == KEY_SLASH)
       OGLCONSOLE_ShowConsole();
 
-   else if(keyCode == KEY_L && checkModifier(KEY_CTRL, KEY_SHIFT))
+   else if(inputCode == KEY_L && checkModifier(KEY_CTRL, KEY_SHIFT))
    {
       loadLevel();                        // Ctrl-Shift-L - Reload level
       setSaveMessage("Reloaded " + getLevelFileName(), true);
    }
-   else if(keyCode == KEY_Z)
+   else if(inputCode == KEY_Z)
    {
       if(checkModifier(KEY_CTRL, KEY_SHIFT))   // Ctrl-Shift-Z - Redo
          redo();
@@ -3132,7 +3132,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       else                                     // Z - Reset veiw
         centerView();
    }
-   else if(keyCode == KEY_R)
+   else if(inputCode == KEY_R)
       if(checkModifier(KEY_CTRL, KEY_SHIFT))   // Ctrl-Shift-R - Rotate by arbitrary amount
       {
          if(!anyItemsSelected())
@@ -3150,30 +3150,30 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       }
       else
          rotateSelection(checkModifier(KEY_SHIFT) ? 15.f : -15.f); // Shift-R - Rotate CW, R - Rotate CCW
-   else if((keyCode == KEY_I) && checkModifier(KEY_CTRL))          // Ctrl-I - Insert items generated with script into editor
+   else if((inputCode == KEY_I) && checkModifier(KEY_CTRL))          // Ctrl-I - Insert items generated with script into editor
    {
       copyScriptItemsToEditor();
    }
 
-   else if(((keyCode == KEY_UP) && !checkModifier(KEY_CTRL)) || keyCode == KEY_W)  // W or Up - Pan up
+   else if(((inputCode == KEY_UP) && !checkModifier(KEY_CTRL)) || inputCode == KEY_W)  // W or Up - Pan up
       mUp = true;
-   else if(keyCode == KEY_UP && checkModifier(KEY_CTRL))      // Ctrl-Up - Zoom in
+   else if(inputCode == KEY_UP && checkModifier(KEY_CTRL))      // Ctrl-Up - Zoom in
       mIn = true;
-   else if(keyCode == KEY_DOWN)
+   else if(inputCode == KEY_DOWN)
    { /* braces required */
       if(checkModifier(KEY_CTRL))           // Ctrl-Down - Zoom out
          mOut = true;
       else                                  // Down - Pan down
          mDown = true;
    }
-   else if(keyCode == KEY_S)
+   else if(inputCode == KEY_S)
    {
       if(checkModifier(KEY_CTRL))           // Ctrl-S - Save
          saveLevel(true, true);
       else                                  // S - Pan down
          mDown = true;
    }
-   else if(keyCode == KEY_A && checkModifier(KEY_CTRL))            // Ctrl-A - toggle see all objects
+   else if(inputCode == KEY_A && checkModifier(KEY_CTRL))            // Ctrl-A - toggle see all objects
    {
       mShowMode = (ShowMode) ((U32)mShowMode + 1);
 
@@ -3187,34 +3187,34 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 
       onMouseMoved();   // Reset mouse to spray if appropriate
    }
-   else if(keyCode == KEY_LEFT || keyCode == KEY_A)   // Left or A - Pan left
+   else if(inputCode == KEY_LEFT || inputCode == KEY_A)   // Left or A - Pan left
       mLeft = true;
-   else if(keyCode == KEY_EQUALS)         // Plus (+) - Increase barrier width
+   else if(inputCode == KEY_EQUALS)         // Plus (+) - Increase barrier width
    {
       if(checkModifier(KEY_SHIFT))        // SHIFT --> by 1
          changeBarrierWidth(1);
       else                                // unshifted --> by 5
          changeBarrierWidth(5);
    }
-   else if(keyCode == KEY_MINUS)          // Minus (-)  - Decrease barrier width
+   else if(inputCode == KEY_MINUS)          // Minus (-)  - Decrease barrier width
    {
       if(checkModifier(KEY_SHIFT))        // SHIFT --> by 1
          changeBarrierWidth(-1);
       else                                // unshifted --> by 5
          changeBarrierWidth(-5);
    }
-else if(keyCode == KEY_SEMICOLON)
-{
-   runPlugin(getGame()->getSettings()->getFolderManager(), "plugin_arc.lua", Vector<string>());
-}
+   else if(inputCode == KEY_SEMICOLON)
+   {
+      runPlugin(getGame()->getSettings()->getFolderManager(), "plugin_arc.lua", Vector<string>());
+   }
 
-   else if(keyCode == KEY_E)              // E - Zoom In
+   else if(inputCode == KEY_E)              // E - Zoom In
          mIn = true;
-   else if(keyCode == KEY_BACKSLASH)      // \ - Split barrier on selected vertex
+   else if(inputCode == KEY_BACKSLASH)      // \ - Split barrier on selected vertex
       splitBarrier();
-   else if(keyCode == KEY_J)
+   else if(inputCode == KEY_J)
       joinBarrier();
-   else if(keyCode == KEY_X && checkModifier(KEY_CTRL, KEY_SHIFT)) // Ctrl-Shift-X - Resize selection
+   else if(inputCode == KEY_X && checkModifier(KEY_CTRL, KEY_SHIFT)) // Ctrl-Shift-X - Resize selection
    {
       if(!anyItemsSelected())
          return;
@@ -3222,68 +3222,68 @@ else if(keyCode == KEY_SEMICOLON)
       mEntryBox = getNewEntryBox("", "Resize factor:", 10, LineEditor::numericFilter);
       entryMode = EntryScale;
    }
-   else if(keyCode == KEY_X && checkModifier(KEY_CTRL))     // Ctrl-X - Cut selection
+   else if(inputCode == KEY_X && checkModifier(KEY_CTRL))     // Ctrl-X - Cut selection
    {
       copySelection();
       deleteSelection(true);
    }
-   else if(keyCode == KEY_C && checkModifier(KEY_CTRL))    // Ctrl-C - Copy selection to clipboard
+   else if(inputCode == KEY_C && checkModifier(KEY_CTRL))    // Ctrl-C - Copy selection to clipboard
       copySelection();
-   else if(keyCode == KEY_C )             // C - Zoom out
+   else if(inputCode == KEY_C )             // C - Zoom out
       mOut = true;
-   else if(keyCode == KEY_F3)             // F3 - Level Parameter Editor
+   else if(inputCode == KEY_F3)             // F3 - Level Parameter Editor
    {
       playBoop();
       getUIManager()->getGameParamUserInterface()->activate();
    }
-   else if(keyCode == KEY_F2)             // F2 - Team Editor Menu
+   else if(inputCode == KEY_F2)             // F2 - Team Editor Menu
    {
       getUIManager()->getTeamDefUserInterface()->activate();
       playBoop();
    }
-   else if(keyCode == KEY_T)              // T - Teleporter
+   else if(inputCode == KEY_T)              // T - Teleporter
       insertNewItem(TeleportTypeNumber);
-   else if(keyCode == KEY_P)              // P - Speed Zone
+   else if(inputCode == KEY_P)              // P - Speed Zone
       insertNewItem(SpeedZoneTypeNumber);
-   else if(keyCode == KEY_G)              // G - Spawn
+   else if(inputCode == KEY_G)              // G - Spawn
       insertNewItem(ShipSpawnTypeNumber);
-   else if(keyCode == KEY_B && checkModifier(KEY_CTRL)) // Ctrl-B - Spy Bug
+   else if(inputCode == KEY_B && checkModifier(KEY_CTRL)) // Ctrl-B - Spy Bug
       insertNewItem(SpyBugTypeNumber);
-   else if(keyCode == KEY_B)              // B - Repair
+   else if(inputCode == KEY_B)              // B - Repair
       insertNewItem(RepairItemTypeNumber);
-   else if(keyCode == KEY_Y)              // Y - Turret
+   else if(inputCode == KEY_Y)              // Y - Turret
       insertNewItem(TurretTypeNumber);
-   else if(keyCode == KEY_M)              // M - Mine
+   else if(inputCode == KEY_M)              // M - Mine
       insertNewItem(MineTypeNumber);
-   else if(keyCode == KEY_F)              // F - Force Field
+   else if(inputCode == KEY_F)              // F - Force Field
       insertNewItem(ForceFieldProjectorTypeNumber);
-   else if(keyCode == KEY_BACKSPACE || keyCode == KEY_DELETE)
+   else if(inputCode == KEY_BACKSPACE || inputCode == KEY_DELETE)
          deleteSelection(false);
-   else if(keyCode == keyHELP)            // Turn on help screen
+   else if(inputCode == keyHELP)            // Turn on help screen
    {
       getGame()->getUIManager()->getEditorInstructionsUserInterface()->activate();
       playBoop();
    }
-   else if(keyCode == keyOUTGAMECHAT)     // Turn on Global Chat overlay
+   else if(inputCode == keyOUTGAMECHAT)     // Turn on Global Chat overlay
       getGame()->getUIManager()->getChatUserInterface()->activate();
-   else if(keyCode == keyDIAG)            // Turn on diagnostic overlay
+   else if(inputCode == keyDIAG)            // Turn on diagnostic overlay
       getGame()->getUIManager()->getDiagnosticUserInterface()->activate();
-   else if(keyCode == KEY_ESCAPE)           // Activate the menu
+   else if(inputCode == KEY_ESCAPE)           // Activate the menu
    {
       playBoop();
       getGame()->getUIManager()->getEditorMenuUserInterface()->activate();
    }
-   else if(keyCode == KEY_SPACE)
+   else if(inputCode == KEY_SPACE)
       mSnapDisabled = true;
-   else if(keyCode == KEY_TAB)
+   else if(inputCode == KEY_TAB)
       mShowingReferenceShip = true;
 }
 
 
 // Handle keyboard activity when we're editing an item's attributes
-void EditorUserInterface::textEntryKeyHandler(KeyCode keyCode, char ascii)
+void EditorUserInterface::textEntryKeyHandler(InputCode inputCode, char ascii)
 {
-   if(keyCode == KEY_ENTER)
+   if(inputCode == KEY_ENTER)
    {
       if(entryMode == EntryID)
       {
@@ -3318,12 +3318,12 @@ void EditorUserInterface::textEntryKeyHandler(KeyCode keyCode, char ascii)
 
       entryMode = EntryNone;
    }
-   else if(keyCode == KEY_ESCAPE)
+   else if(inputCode == KEY_ESCAPE)
    {
       entryMode = EntryNone;
    }
-   else if(keyCode == KEY_BACKSPACE || keyCode == KEY_DELETE)
-      mEntryBox.handleBackspace(keyCode);
+   else if(inputCode == KEY_BACKSPACE || inputCode == KEY_DELETE)
+      mEntryBox.handleBackspace(inputCode);
 
    else
       mEntryBox.addChar(ascii);
@@ -3370,9 +3370,9 @@ void EditorUserInterface::startAttributeEditor()
 }
 
 
-void EditorUserInterface::onKeyUp(KeyCode keyCode)
+void EditorUserInterface::onKeyUp(InputCode inputCode)
 {
-   switch(keyCode)
+   switch(inputCode)
    {
       case KEY_UP:
          mIn = false;
@@ -3549,7 +3549,7 @@ bool EditorUserInterface::anythingSelected()
 
 void EditorUserInterface::idle(U32 timeDelta)
 {
-   F32 pixelsToScroll = timeDelta * (getKeyState(KEY_SHIFT) ? 1.0f : 0.5f);    // Double speed when shift held down
+   F32 pixelsToScroll = timeDelta * (getInputCodeState(KEY_SHIFT) ? 1.0f : 0.5f);    // Double speed when shift held down
 
    if(mLeft && !mRight)
       mCurrentOffset.x += pixelsToScroll;

@@ -27,7 +27,7 @@
 #define JOYSTICKRENDER_H_
 
 #include "tnlTypes.h"
-#include "keyCode.h"
+#include "InputCode.h"
 #include "Point.h"
 #include "Joystick.h"
 
@@ -49,8 +49,8 @@ public:
    virtual ~JoystickRender();
 
 
-   static void renderControllerButton(F32 x, F32 y, U32 joystickType, KeyCode keyCode, bool activated, S32 offset = 0);
-   static S32 getControllerButtonRenderedSize(S32 joystickType, KeyCode keyCode);
+   static void renderControllerButton(F32 x, F32 y, U32 joystickType, InputCode inputCode, bool activated, S32 offset = 0);
+   static S32 getControllerButtonRenderedSize(S32 joystickType, InputCode inputCode);
 
    static void renderDPad(Point center, F32 radius, bool upActivated, bool downActivated, bool leftActivated,
          bool rightActivated, const char *msg1, const char *msg2);

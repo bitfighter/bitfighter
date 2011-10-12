@@ -195,9 +195,9 @@ public:
    S32 getSelectedIndex();
 
    // Functions for handling user input
-   void onKeyDown(KeyCode keyCode, char ascii);
+   void onKeyDown(InputCode inputCode, char ascii);
    void onMouseMoved(S32 x, S32 y);
-   void onKeyUp(KeyCode keyCode);
+   void onKeyUp(InputCode inputCode);
    void onMouseDragged(S32 x, S32 y);
 
    S32 getDividerPos();

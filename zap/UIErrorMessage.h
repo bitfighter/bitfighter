@@ -48,7 +48,7 @@ public:
    void idle(U32 t) { }
    void render();
    void quit();
-   void onKeyDown(KeyCode keyCode, char ascii);
+   void onKeyDown(InputCode inputCode, char ascii);
 };
 
 

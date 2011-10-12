@@ -66,8 +66,8 @@ protected:
    bool mRenderInstructions;
 
    // Handle keyboard input while a menu is displayed
-   virtual bool processMenuSpecificKeys(KeyCode keyCode, char ascii);
-   virtual bool processKeys(KeyCode keyCode, char ascii);
+   virtual bool processMenuSpecificKeys(InputCode inputCode, char ascii);
+   virtual bool processKeys(InputCode inputCode, char ascii);
 
 public:
    MenuUserInterface(ClientGame *game);      // Constructor
@@ -88,8 +88,8 @@ public:
    S32 selectedIndex;
 
    void render();    // Draw the basic menu
-   void onKeyDown(KeyCode keyCode, char ascii);
-   void onKeyUp(KeyCode keyCode);
+   void onKeyDown(InputCode inputCode, char ascii);
+   void onKeyUp(InputCode inputCode);
    void onMouseMoved(S32 x, S32 y) { onMouseMoved(); }      // Redirect to argless version
    void onMouseMoved();
    void processMouse();
@@ -287,7 +287,7 @@ public:
    LevelMenuSelectUserInterface(ClientGame *game);        // Constructor
    string category;
    void onActivate();
-   bool processMenuSpecificKeys(KeyCode keyCode, char ascii);  // Custom key handling for level selection menus
+   bool processMenuSpecificKeys(InputCode inputCode, char ascii);  // Custom key handling for level selection menus
 
    void processSelection(U32 index);
    void onEscape();

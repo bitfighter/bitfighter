@@ -31,7 +31,7 @@
 #endif
 
 #include "UIManager.h"
-#include "keyCode.h"
+#include "InputCode.h"
 #include "SharedConstants.h"
 #include "Timer.h"
 #include "Point.h"
@@ -124,11 +124,11 @@ public:
 
    void renderConsole();      // Render game console
 
-   KeyCode convertJoystickToKeyboard(KeyCode keyCode);
+   InputCode convertJoystickToKeyboard(InputCode inputCode);
 
    // Input event handlers
-   virtual void onKeyDown(KeyCode keyCode, char ascii);
-   virtual void onKeyUp(KeyCode keyCode);
+   virtual void onKeyDown(InputCode inputCode, char ascii);
+   virtual void onKeyUp(InputCode inputCode);
    virtual void onMouseMoved(S32 x, S32 y);
    virtual void onMouseDragged(S32 x, S32 y);
 

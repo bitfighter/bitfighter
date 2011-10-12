@@ -85,7 +85,7 @@ private:
    bool mUpDisabled;
    bool mDownDisabled;
 
-   void disableMovementKey(KeyCode keyCode);
+   void disableMovementKey(InputCode inputCode);
 
    // Related to display of in-game chat and status messages
    static const S32 MessageDisplayCount = 6;           // How many server messages to display
@@ -293,11 +293,11 @@ public:
    //ofstream mOutputFile;            // For saving downloaded levels
    //FILE *mOutputFile;               // For saving downloaded levels
 
-   void onKeyDown(KeyCode keyCode, char ascii);
-   void onKeyUp(KeyCode keyCode);
+   void onKeyDown(InputCode inputCode, char ascii);
+   void onKeyUp(InputCode inputCode);
 
-   void processPlayModeKey(KeyCode keyCode, char ascii);
-   void processChatModeKey(KeyCode keyCode, char ascii);
+   void processPlayModeKey(InputCode inputCode, char ascii);
+   void processChatModeKey(InputCode inputCode, char ascii);
 
 
    void advanceWeapon();            // Choose next weapon

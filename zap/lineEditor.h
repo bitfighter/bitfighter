@@ -29,7 +29,7 @@
 #include "tnlTypes.h"
 #include "tnlVector.h"
 #include "Timer.h"
-#include "keyCode.h"
+#include "InputCode.h"
 #include <string>
 
 using namespace std;
@@ -69,7 +69,7 @@ public:
    void addChar(char c);
    void backspacePressed() { if(length() > 0) mLine.erase(mLine.size() - 1); matchIndex = -1; }     // User hit Backspace 
    void deletePressed() { backspacePressed(); }                                                     // User hit Delete 
-   void handleBackspace(KeyCode keyCode);               // Pass KEY_BACKSPACE or KEY_DELETE and it will do the right thing!
+   void handleBackspace(InputCode inputCode);               // Pass KEY_BACKSPACE or KEY_DELETE and it will do the right thing!
    void clear() { mLine.clear(); matchIndex = -1;}      // Clear the string and tab-expansion matchlist
    char at(U32 pos);                                    // Get char at pos
    bool isEmpty() { return mLine.empty(); }             // Is string empty

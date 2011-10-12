@@ -26,7 +26,7 @@
 #ifndef _HELPERMENU_H_
 #define _HELPERMENU_H_
 
-#include "keyCode.h"
+#include "InputCode.h"
 #include "tnl.h"
 #include "Color.h"
 
@@ -42,7 +42,7 @@ class HelperMenu
 {
 private:
    virtual const char *getCancelMessage() { return ""; }
-   virtual KeyCode getActivationKey() { return KEY_NONE; }
+   virtual InputCode getActivationKey() { return KEY_NONE; }
 
    ClientGame *mClientGame;
 
@@ -64,7 +64,7 @@ public:
    virtual void idle(U32 delta) { /* Do nothing */ }    
    virtual void onMenuShow() { /* Do nothing */  }
 
-   virtual bool processKeyCode(KeyCode keyCode);     
+   virtual bool processInputCode(InputCode inputCode);     
 };
 
 

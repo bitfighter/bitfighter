@@ -148,7 +148,7 @@ public:
 
    // UI related
    void render();
-   void onKeyDown(KeyCode keyCode, char ascii);
+   void onKeyDown(InputCode inputCode, char ascii);
 
    void onActivate();
    void onActivateLobbyMode();

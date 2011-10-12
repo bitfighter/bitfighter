@@ -292,23 +292,23 @@ void EditorInstructionsUserInterface::renderPageCommands(S32 page)
    glColor(txtColor);
    drawString(col1, y, 18, "Help");
    glColor(keyColor);
-   drawStringf(col2, y, 18, "[%s]", keyCodeToString(keyHELP));
+   drawStringf(col2, y, 18, "[%s]", inputCodeToString(keyHELP));
 
    glColor(txtColor);
    drawString(col3, y, 18, "Game Params Editor");
    glColor(keyColor);
-   drawStringf(col4, y, 18, "[%s]", keyCodeToString(KEY_F3));
+   drawStringf(col4, y, 18, "[%s]", inputCodeToString(KEY_F3));
 
    y+=26;
    glColor(txtColor);
    drawString(col1, y, 18, "Team Editor");
    glColor(keyColor);
-   drawStringf(col2, y, 18, "[%s]", keyCodeToString(KEY_F2));
+   drawStringf(col2, y, 18, "[%s]", inputCodeToString(KEY_F2));
 
    glColor(txtColor);
    drawString(col3, y, 18, "Universal Chat");
    glColor(keyColor);
-   drawStringf(col4, y, 18, "[%s]", keyCodeToString(keyOUTGAMECHAT));
+   drawStringf(col4, y, 18, "[%s]", inputCodeToString(keyOUTGAMECHAT));
 }
 
 
@@ -471,24 +471,24 @@ void EditorInstructionsUserInterface::exitInstructions()
 }
 
 
-void EditorInstructionsUserInterface::onKeyDown(KeyCode keyCode, char ascii)
+void EditorInstructionsUserInterface::onKeyDown(InputCode inputCode, char ascii)
 {
-   if(keyCode == KEY_LEFT || keyCode == BUTTON_DPAD_LEFT || keyCode == BUTTON_DPAD_UP || keyCode == KEY_UP)
+   if(inputCode == KEY_LEFT || inputCode == BUTTON_DPAD_LEFT || inputCode == BUTTON_DPAD_UP || inputCode == KEY_UP)
    {
       playBoop();
       prevPage();
    }
-   else if(keyCode == KEY_RIGHT || keyCode == KEY_SPACE || keyCode == BUTTON_DPAD_RIGHT ||
-           keyCode == BUTTON_DPAD_DOWN || keyCode == KEY_ENTER || keyCode == KEY_DOWN)
+   else if(inputCode == KEY_RIGHT || inputCode == KEY_SPACE || inputCode == BUTTON_DPAD_RIGHT ||
+           inputCode == BUTTON_DPAD_DOWN || inputCode == KEY_ENTER || inputCode == KEY_DOWN)
    {
       playBoop();
       nextPage();
    }
-   else if(keyCode == keyOUTGAMECHAT)     // Turn on Global Chat overlay
+   else if(inputCode == keyOUTGAMECHAT)     // Turn on Global Chat overlay
       getUIManager()->getChatUserInterface()->activate();
-   else if(keyCode == keyDIAG)            // Turn on diagnostic overlay
+   else if(inputCode == keyDIAG)            // Turn on diagnostic overlay
       getUIManager()->getDiagnosticUserInterface()->activate();
-   else if(keyCode == keyHELP || keyCode == KEY_ESCAPE  || keyCode == BUTTON_BACK)
+   else if(inputCode == keyHELP || inputCode == KEY_ESCAPE  || inputCode == BUTTON_BACK)
       exitInstructions();
 }
 

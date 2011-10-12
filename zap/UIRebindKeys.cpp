@@ -97,9 +97,9 @@ void RebindKeysUserInterface::idle(U32 timeDelta)
    LineEditor::updateCursorBlink(timeDelta);
 }
 
-void RebindKeysUserInterface::onKeyDown(KeyCode keyCode, char ascii)
+void RebindKeysUserInterface::onKeyDown(InputCode inputCode, char ascii)
 {
-   switch (keyCode)
+   switch (inputCode)
    {
       case KEY_ENTER:
          onAccept(buffer);

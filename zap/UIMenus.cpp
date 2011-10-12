@@ -391,9 +391,9 @@ void MenuUserInterface::processMouse()
 }
 
 
-void MenuUserInterface::onKeyDown(KeyCode keyCode, char ascii)
+void MenuUserInterface::onKeyDown(InputCode inputCode, char ascii)
 {
-   if(keyCode == KEY_UNKNOWN)
+   if(inputCode == KEY_UNKNOWN)
       return;
 
    // Check for in autorepeat mode
@@ -404,7 +404,7 @@ void MenuUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    if(gServerGame && (gServerGame->hostingModePhase == ServerGame::LoadingLevels || 
                       gServerGame->hostingModePhase == ServerGame::DoneLoadingLevels))
    {
-      if(keyCode == KEY_ESCAPE)     // Can only get here when hosting
+      if(inputCode == KEY_ESCAPE)     // Can only get here when hosting
       {
          gServerGame->hostingModePhase = ServerGame::NotHosting;
          getUIManager()->getHostMenuUserInterface()->clearLevelLoadDisplay();
@@ -425,15 +425,15 @@ void MenuUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    if(!ui->mFirstTime)
       ui->showAnimation = false;    // Stop animations if a key is pressed
 
-   menuItems[selectedIndex]->handleKey(keyCode, ascii) || processMenuSpecificKeys(keyCode, ascii) || processKeys(keyCode, ascii);
+   menuItems[selectedIndex]->handleKey(inputCode, ascii) || processMenuSpecificKeys(inputCode, ascii) || processKeys(inputCode, ascii);
 
    // Finally, since the user has indicated they want to use keyboard/controller input, hide the cursor
-   if(keyCode != MOUSE_LEFT && keyCode != MOUSE_MIDDLE && keyCode != MOUSE_RIGHT && keyCode != KEY_ESCAPE)
+   if(inputCode != MOUSE_LEFT && inputCode != MOUSE_MIDDLE && inputCode != MOUSE_RIGHT && inputCode != KEY_ESCAPE)
       SDL_ShowCursor(SDL_DISABLE);
 }
 
 
-void MenuUserInterface::onKeyUp(KeyCode keyCode)
+void MenuUserInterface::onKeyUp(InputCode inputCode)
 {
    mKeyDown = false;
    mRepeatMode = false;
@@ -441,13 +441,13 @@ void MenuUserInterface::onKeyUp(KeyCode keyCode)
 
 
 // Generic handler looks for keystrokes and translates them into menu actions
-bool MenuUserInterface::processMenuSpecificKeys(KeyCode keyCode, char ascii)
+bool MenuUserInterface::processMenuSpecificKeys(InputCode inputCode, char ascii)
 {
    // First check for some shortcut keys
 
    for(S32 i = 0; i < menuItems.size(); i++)
    {
-      if(keyCode == menuItems[i]->key1 || keyCode == menuItems[i]->key2)
+      if(inputCode == menuItems[i]->key1 || inputCode == menuItems[i]->key2)
       {
          selectedIndex = i;
 
@@ -461,20 +461,20 @@ bool MenuUserInterface::processMenuSpecificKeys(KeyCode keyCode, char ascii)
 
 
 // Process the keys that work on all menus
-bool MenuUserInterface::processKeys(KeyCode keyCode, char ascii)
+bool MenuUserInterface::processKeys(InputCode inputCode, char ascii)
 {
-   keyCode = convertJoystickToKeyboard(keyCode);
+   inputCode = convertJoystickToKeyboard(inputCode);
 
-   if(keyCode == KEY_LEFT || keyCode == KEY_RIGHT || keyCode == MOUSE_LEFT || keyCode == MOUSE_RIGHT)
+   if(inputCode == KEY_LEFT || inputCode == KEY_RIGHT || inputCode == MOUSE_LEFT || inputCode == MOUSE_RIGHT)
    {
-      menuItems[selectedIndex]->handleKey(keyCode, ascii);
+      menuItems[selectedIndex]->handleKey(inputCode, ascii);
       playBoop();
    }
 
-   else if(keyCode == KEY_SPACE || keyCode == KEY_RIGHT || keyCode == KEY_ENTER || keyCode == MOUSE_LEFT)
+   else if(inputCode == KEY_SPACE || inputCode == KEY_RIGHT || inputCode == KEY_ENTER || inputCode == MOUSE_LEFT)
    {
       playBoop();
-      if(keyCode != MOUSE_LEFT)
+      if(inputCode != MOUSE_LEFT)
          itemSelectedWithMouse = false;
 
       else // it was MOUSE_LEFT after all
@@ -487,18 +487,18 @@ bool MenuUserInterface::processKeys(KeyCode keyCode, char ascii)
             return true;
       }
 
-      menuItems[selectedIndex]->handleKey(keyCode, ascii);
+      menuItems[selectedIndex]->handleKey(inputCode, ascii);
 
       if(menuItems[selectedIndex]->enterAdvancesItem())
          advanceItem();
    }
 
-   else if(keyCode == KEY_ESCAPE)
+   else if(inputCode == KEY_ESCAPE)
    {
       playBoop();
       onEscape();
    }
-   else if(keyCode == KEY_UP || (keyCode == KEY_TAB && checkModifier(KEY_SHIFT)))   // Prev item
+   else if(inputCode == KEY_UP || (inputCode == KEY_TAB && checkModifier(KEY_SHIFT)))   // Prev item
    {
       selectedIndex--;
       itemSelectedWithMouse = false;
@@ -516,15 +516,15 @@ bool MenuUserInterface::processKeys(KeyCode keyCode, char ascii)
       playBoop();
    }
 
-   else if(keyCode == KEY_DOWN || keyCode == KEY_TAB)    // Next item
+   else if(inputCode == KEY_DOWN || inputCode == KEY_TAB)    // Next item
       advanceItem();
 
-   else if(keyCode == keyOUTGAMECHAT)     // Turn on Global Chat overlay
+   else if(inputCode == keyOUTGAMECHAT)     // Turn on Global Chat overlay
    {
       getUIManager()->getChatUserInterface()->activate();
       playBoop();
    }
-   else if(keyCode == keyDIAG)            // Turn on diagnostic overlay
+   else if(inputCode == keyDIAG)            // Turn on diagnostic overlay
    {
       getUIManager()->getDiagnosticUserInterface()->activate();
       playBoop();
@@ -1502,7 +1502,7 @@ void LevelMenuUserInterface::onActivate()
    menuItems.clear();
 
    char c[] = "A";   // Shortcut key
-   menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(getGame(), 0, ALL_LEVELS, selectLevelTypeCallback, "", stringToKeyCode(c))));
+   menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(getGame(), 0, ALL_LEVELS, selectLevelTypeCallback, "", stringToInputCode(c))));
 
    // Cycle through all levels, looking for unique type strings
    for(S32 i = 0; i < gc->mLevelInfos.size(); i++)
@@ -1517,7 +1517,7 @@ void LevelMenuUserInterface::onActivate()
       {
          strncpy(c, gc->mLevelInfos[i].levelType.getString(), 1);
          menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(getGame(), i + 1, gc->mLevelInfos[i].levelType.getString(), 
-                                                                      selectLevelTypeCallback, "", stringToKeyCode(c))));
+                                                                      selectLevelTypeCallback, "", stringToInputCode(c))));
       }
    }
 
@@ -1525,7 +1525,7 @@ void LevelMenuUserInterface::onActivate()
 
    if((gc->mSendableFlags & 1) && !gc->isLocalConnection())   // local connection is useless, already have all maps..
       menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(getGame(), UPLOAD_LEVELS_MENUID, UPLOAD_LEVELS, 
-                                                                   selectLevelTypeCallback, "", stringToKeyCode(c))));
+                                                                   selectLevelTypeCallback, "", stringToInputCode(c))));
 }
 
 
@@ -1601,7 +1601,7 @@ void LevelMenuSelectUserInterface::onActivate()
       {
          c[0] = mLevels[i].c_str()[0];
          menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(game, i | UPLOAD_LEVELS_BIT, mLevels[i].c_str(), 
-                                                                      processLevelSelectionCallback, "", stringToKeyCode(c))));
+                                                                      processLevelSelectionCallback, "", stringToInputCode(c))));
       }
    }
  
@@ -1614,7 +1614,7 @@ void LevelMenuSelectUserInterface::onActivate()
       {
          c[0] = gc->mLevelInfos[i].levelName.getString()[0];
          menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(game, i, gc->mLevelInfos[i].levelName.getString(), 
-                                                                      processLevelSelectionCallback, "", stringToKeyCode(c))));
+                                                                      processLevelSelectionCallback, "", stringToInputCode(c))));
       }
    }
 
@@ -1631,7 +1631,7 @@ void LevelMenuSelectUserInterface::onActivate()
 
 
 // Override parent, and make keys simply go to first level with that letter, rather than selecting it automatically
-bool LevelMenuSelectUserInterface::processMenuSpecificKeys(KeyCode keyCode, char ascii)
+bool LevelMenuSelectUserInterface::processMenuSpecificKeys(InputCode inputCode, char ascii)
 {
    // First check for some shortcut keys
    for(S32 i = 0; i < menuItems.size(); i++)
@@ -1641,7 +1641,7 @@ bool LevelMenuSelectUserInterface::processMenuSpecificKeys(KeyCode keyCode, char
       if(indx >= menuItems.size())
          indx -= menuItems.size();
 
-      if(keyCode == menuItems[indx]->key1 || keyCode == menuItems[indx]->key2)
+      if(inputCode == menuItems[indx]->key1 || inputCode == menuItems[indx]->key2)
       {
          selectedIndex = indx;
          playBoop();
@@ -1725,7 +1725,7 @@ void PlayerMenuUserInterface::render()
       // Will be used to show admin/player/robot prefix on menu
       PlayerType pt = clientInfo->isRobot() ? PlayerTypeRobot : (clientInfo->isAdmin() ? PlayerTypeAdmin : PlayerTypePlayer);    
 
-      PlayerMenuItem *newItem = new PlayerMenuItem(getGame(), i, clientInfo->getName().getString(), playerSelectedCallback, stringToKeyCode(c), pt);
+      PlayerMenuItem *newItem = new PlayerMenuItem(getGame(), i, clientInfo->getName().getString(), playerSelectedCallback, stringToInputCode(c), pt);
 
       menuItems.push_back(boost::shared_ptr<MenuItem>(newItem));
       menuItems.last()->setUnselectedColor(getGame()->getTeamColor(clientInfo->getTeamIndex()));
@@ -1802,7 +1802,7 @@ void TeamMenuUserInterface::render()
 
       bool isCurrent = (i == getGame()->getTeamIndex(nameToChange.c_str()));
       
-      menuItems.push_back(boost::shared_ptr<MenuItem>(new TeamMenuItem(getGame(), i, team, processTeamSelectionCallback, stringToKeyCode(c), isCurrent)));
+      menuItems.push_back(boost::shared_ptr<MenuItem>(new TeamMenuItem(getGame(), i, team, processTeamSelectionCallback, stringToInputCode(c), isCurrent)));
    }
 
    string name = "";

@@ -29,7 +29,7 @@
 #include "UIDiagnostics.h"
 #include "UIGame.h"
 #include "input.h"
-#include "keyCode.h"
+#include "InputCode.h"
 #include "IniFile.h"
 #include "config.h"
 #include "Colors.h"
@@ -90,55 +90,55 @@ void KeyDefMenuUserInterface::onActivate()
       itemsPerCol = 7;           // Approx. half of the items we have
 
       // Col 1
-      menuItems.push_back(KeyDefMenuItem("Advance Weapon", 0, 1, &keyADVWEAP[InputModeJoystick], "Toggles your weapons, use as an alternative to Select Weapon commands"));
-      menuItems.push_back(KeyDefMenuItem("Activate Module 1", 1, 1, &keyMOD1[InputModeJoystick], "Module 1 will be active while this key/button is held down"));
-      menuItems.push_back(KeyDefMenuItem("Activate Module 2", 2, 1, &keyMOD2[InputModeJoystick], "Module 2 will be active while this key/button is held down"));
-      menuItems.push_back(KeyDefMenuItem("Drop Flag", 2, 1, &keyDROPITEM[InputModeJoystick], ""));
+      menuItems.push_back(KeyDefMenuItem("Advance Weapon", 0, 1, &inputADVWEAP[InputModeJoystick], "Toggles your weapons, use as an alternative to Select Weapon commands"));
+      menuItems.push_back(KeyDefMenuItem("Activate Module 1", 1, 1, &inputMOD1[InputModeJoystick], "Module 1 will be active while this key/button is held down"));
+      menuItems.push_back(KeyDefMenuItem("Activate Module 2", 2, 1, &inputMOD2[InputModeJoystick], "Module 2 will be active while this key/button is held down"));
+      menuItems.push_back(KeyDefMenuItem("Drop Flag", 2, 1, &inputDROPITEM[InputModeJoystick], ""));
 
-      menuItems.push_back(KeyDefMenuItem("Config. Ship Loadouts", 3, 1, &keyLOADOUT[InputModeJoystick], ""));
-      menuItems.push_back(KeyDefMenuItem("Toggle Map Mode", 4, 1, &keyCMDRMAP[InputModeJoystick], ""));
-      menuItems.push_back(KeyDefMenuItem("Show Scoreboard", 5, 1, &keySCRBRD[InputModeJoystick], "Scoreboard will be visible while this key/button is held down"));
+      menuItems.push_back(KeyDefMenuItem("Config. Ship Loadouts", 3, 1, &inputLOADOUT[InputModeJoystick], ""));
+      menuItems.push_back(KeyDefMenuItem("Toggle Map Mode", 4, 1, &inputCMDRMAP[InputModeJoystick], ""));
+      menuItems.push_back(KeyDefMenuItem("Show Scoreboard", 5, 1, &inputSCRBRD[InputModeJoystick], "Scoreboard will be visible while this key/button is held down"));
 
       // Col 2
       firstItemInCol2 = 7;
-      menuItems.push_back(KeyDefMenuItem("Select Weapon 1", 6, 2, &keySELWEAP1[InputModeJoystick], "Use as an alternative to Advance Weapon"));
-      menuItems.push_back(KeyDefMenuItem("Select Weapon 2", 7, 2, &keySELWEAP2[InputModeJoystick], "Use as an alternative to Advance Weapon"));
-      menuItems.push_back(KeyDefMenuItem("Select Weapon 3", 8, 2, &keySELWEAP3[InputModeJoystick], "Use as an alternative to Advance Weapon"));
-      menuItems.push_back(KeyDefMenuItem("Quick Chat", 9, 2, &keyQUICKCHAT[InputModeJoystick], ""));
-      menuItems.push_back(KeyDefMenuItem("Team Chat", 10, 2, &keyTEAMCHAT[InputModeJoystick], ""));
-      menuItems.push_back(KeyDefMenuItem("Global Chat", 11, 2, &keyGLOBCHAT[InputModeJoystick], ""));
-      menuItems.push_back(KeyDefMenuItem("Enter Command", 12, 2, &keyCMDCHAT[InputModeJoystick], ""));
-      menuItems.push_back(KeyDefMenuItem("Record Voice Msg", 13, 2, &keyTOGVOICE[InputModeJoystick], ""));
+      menuItems.push_back(KeyDefMenuItem("Select Weapon 1", 6, 2, &inputSELWEAP1[InputModeJoystick], "Use as an alternative to Advance Weapon"));
+      menuItems.push_back(KeyDefMenuItem("Select Weapon 2", 7, 2, &inputSELWEAP2[InputModeJoystick], "Use as an alternative to Advance Weapon"));
+      menuItems.push_back(KeyDefMenuItem("Select Weapon 3", 8, 2, &inputSELWEAP3[InputModeJoystick], "Use as an alternative to Advance Weapon"));
+      menuItems.push_back(KeyDefMenuItem("Quick Chat", 9, 2, &inputQUICKCHAT[InputModeJoystick], ""));
+      menuItems.push_back(KeyDefMenuItem("Team Chat", 10, 2, &inputTEAMCHAT[InputModeJoystick], ""));
+      menuItems.push_back(KeyDefMenuItem("Global Chat", 11, 2, &inputGLOBCHAT[InputModeJoystick], ""));
+      menuItems.push_back(KeyDefMenuItem("Enter Command", 12, 2, &inputCMDCHAT[InputModeJoystick], ""));
+      menuItems.push_back(KeyDefMenuItem("Record Voice Msg", 13, 2, &inputTOGVOICE[InputModeJoystick], ""));
    }
    else     // Keyboard mode
    {
       itemsPerCol = 9;           // Approx. half of the items we have
 
       // Col 1
-      menuItems.push_back(KeyDefMenuItem("Ship Up", 0, 1, &keyUP[InputModeKeyboard], ""));
-      menuItems.push_back(KeyDefMenuItem("Ship Down", 1, 1, &keyDOWN[InputModeKeyboard], ""));
-      menuItems.push_back(KeyDefMenuItem("Ship Left", 2, 1, &keyLEFT[InputModeKeyboard], ""));
-      menuItems.push_back(KeyDefMenuItem("Ship Right", 3, 1, &keyRIGHT[InputModeKeyboard], ""));
-      menuItems.push_back(KeyDefMenuItem("Fire", 4, 1, &keyFIRE[InputModeKeyboard], "The mouse will always be used to aim your ship"));
-      menuItems.push_back(KeyDefMenuItem("Activate Module 1", 5, 1, &keyMOD1[InputModeKeyboard], "Module 1 will be active while this key/button is held down"));
-      menuItems.push_back(KeyDefMenuItem("Activate Module 2", 6, 1, &keyMOD2[InputModeKeyboard], "Module 2 will be active while this key/button is held down"));
-      menuItems.push_back(KeyDefMenuItem("Drop Flag", 2, 1, &keyDROPITEM[InputModeKeyboard], "Drop flag when this key is pressed"));
-      menuItems.push_back(KeyDefMenuItem("Toggle Map Mode", 7, 1, &keyCMDRMAP[InputModeKeyboard], ""));
-      menuItems.push_back(KeyDefMenuItem("Show Scoreboard", 8, 1, &keySCRBRD[InputModeKeyboard], "Scoreboard will be visible while this key/button is held down"));
+      menuItems.push_back(KeyDefMenuItem("Ship Up", 0, 1, &inputUP[InputModeKeyboard], ""));
+      menuItems.push_back(KeyDefMenuItem("Ship Down", 1, 1, &inputDOWN[InputModeKeyboard], ""));
+      menuItems.push_back(KeyDefMenuItem("Ship Left", 2, 1, &inputLEFT[InputModeKeyboard], ""));
+      menuItems.push_back(KeyDefMenuItem("Ship Right", 3, 1, &inputRIGHT[InputModeKeyboard], ""));
+      menuItems.push_back(KeyDefMenuItem("Fire", 4, 1, &inputFIRE[InputModeKeyboard], "The mouse will always be used to aim your ship"));
+      menuItems.push_back(KeyDefMenuItem("Activate Module 1", 5, 1, &inputMOD1[InputModeKeyboard], "Module 1 will be active while this key/button is held down"));
+      menuItems.push_back(KeyDefMenuItem("Activate Module 2", 6, 1, &inputMOD2[InputModeKeyboard], "Module 2 will be active while this key/button is held down"));
+      menuItems.push_back(KeyDefMenuItem("Drop Flag", 2, 1, &inputDROPITEM[InputModeKeyboard], "Drop flag when this key is pressed"));
+      menuItems.push_back(KeyDefMenuItem("Toggle Map Mode", 7, 1, &inputCMDRMAP[InputModeKeyboard], ""));
+      menuItems.push_back(KeyDefMenuItem("Show Scoreboard", 8, 1, &inputSCRBRD[InputModeKeyboard], "Scoreboard will be visible while this key/button is held down"));
 
       // Col 2
       firstItemInCol2 = 10;
-      menuItems.push_back(KeyDefMenuItem("Select Weapon 1", 9, 2, &keySELWEAP1[InputModeKeyboard], "Use as an alternative to Advance Weapon"));
-      menuItems.push_back(KeyDefMenuItem("Select Weapon 2", 10, 2, &keySELWEAP2[InputModeKeyboard], "Use as an alternative to Advance Weapon"));
-      menuItems.push_back(KeyDefMenuItem("Select Weapon 3", 11, 2, &keySELWEAP3[InputModeKeyboard], "Use as an alternative to Advance Weapon"));
-      menuItems.push_back(KeyDefMenuItem("Advance Weapon", 12, 2, &keyADVWEAP[InputModeKeyboard], "Toggles your weapons, use as an alternative to Select Weapon commands"));
-      menuItems.push_back(KeyDefMenuItem("Configure Ship Loadouts", 13, 2, &keyLOADOUT[InputModeKeyboard], ""));
-      menuItems.push_back(KeyDefMenuItem("Quick Chat", 14, 2, &keyQUICKCHAT[InputModeKeyboard], ""));
-      menuItems.push_back(KeyDefMenuItem("Team Chat", 15, 2, &keyTEAMCHAT[InputModeKeyboard], ""));
-      menuItems.push_back(KeyDefMenuItem("Global Chat", 16, 2, &keyGLOBCHAT[InputModeKeyboard], ""));
-      menuItems.push_back(KeyDefMenuItem("Enter Command", 17, 2, &keyCMDCHAT[InputModeKeyboard], ""));
+      menuItems.push_back(KeyDefMenuItem("Select Weapon 1", 9, 2, &inputSELWEAP1[InputModeKeyboard], "Use as an alternative to Advance Weapon"));
+      menuItems.push_back(KeyDefMenuItem("Select Weapon 2", 10, 2, &inputSELWEAP2[InputModeKeyboard], "Use as an alternative to Advance Weapon"));
+      menuItems.push_back(KeyDefMenuItem("Select Weapon 3", 11, 2, &inputSELWEAP3[InputModeKeyboard], "Use as an alternative to Advance Weapon"));
+      menuItems.push_back(KeyDefMenuItem("Advance Weapon", 12, 2, &inputADVWEAP[InputModeKeyboard], "Toggles your weapons, use as an alternative to Select Weapon commands"));
+      menuItems.push_back(KeyDefMenuItem("Configure Ship Loadouts", 13, 2, &inputLOADOUT[InputModeKeyboard], ""));
+      menuItems.push_back(KeyDefMenuItem("Quick Chat", 14, 2, &inputQUICKCHAT[InputModeKeyboard], ""));
+      menuItems.push_back(KeyDefMenuItem("Team Chat", 15, 2, &inputTEAMCHAT[InputModeKeyboard], ""));
+      menuItems.push_back(KeyDefMenuItem("Global Chat", 16, 2, &inputGLOBCHAT[InputModeKeyboard], ""));
+      menuItems.push_back(KeyDefMenuItem("Enter Command", 17, 2, &inputCMDCHAT[InputModeKeyboard], ""));
 
-      menuItems.push_back(KeyDefMenuItem("Record Voice Msg", 18, 2, &keyTOGVOICE[InputModeKeyboard], ""));
+      menuItems.push_back(KeyDefMenuItem("Record Voice Msg", 18, 2, &inputTOGVOICE[InputModeKeyboard], ""));
    }
 }
 
@@ -284,27 +284,27 @@ void KeyDefMenuUserInterface::render()
 }
 
 
-void KeyDefMenuUserInterface::onKeyDown(KeyCode keyCode, char ascii)
+void KeyDefMenuUserInterface::onKeyDown(InputCode inputCode, char ascii)
 {
-   // KeyCode entry
+   // InputCode entry
    if(changingItem > -1)
    {
       playBoop();
 
-      if(keyCode == KEY_ESCAPE || keyCode == BUTTON_BACK)
+      if(inputCode == KEY_ESCAPE || inputCode == BUTTON_BACK)
       {
          changingItem = -1;
          return;
       }
 
       // Check for reserved keys (F1-F12, Ctrl, Esc, Button_Back)
-      if(keyCode >= KEY_F1 && keyCode <= KEY_F12)
+      if(inputCode >= KEY_F1 && inputCode <= KEY_F12)
       {
          errorMsgTimer.reset(errorMsgDisplayTime);
          errorMsg = "Keys F1 - F12 are reserved.  You cannot redefine them.  Sorry!";
          return;
       }
-      else if(keyCode == KEY_CTRL)
+      else if(inputCode == KEY_CTRL)
       {
          errorMsgTimer.reset(errorMsgDisplayTime);
          errorMsg = "Control key is reserved.  You cannot use it for binding.  Sorry!";
@@ -313,14 +313,14 @@ void KeyDefMenuUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 
 
       // Fail silently on joystick motion
-      if(keyCode >= STICK_1_LEFT && keyCode <= STICK_2_DOWN)
+      if(inputCode >= STICK_1_LEFT && inputCode <= STICK_2_DOWN)
          return;
 
       // Assign key
-      *menuItems[changingItem].primaryControl = keyCode;
+      *menuItems[changingItem].primaryControl = inputCode;
       changingItem = -1;
 
-      if(keyCode == KEY_CTRL)
+      if(inputCode == KEY_CTRL)
       {
          errorMsgTimer.reset(errorMsgDisplayTime);
          errorMsg = "Be careful when using the Ctrl key -- some keys will not work when Ctrl is pressed";
@@ -328,13 +328,13 @@ void KeyDefMenuUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       return;
    }
 
-   // We're not doing KeyCode entry, so let's try menu navigation
-   if(keyCode == KEY_SPACE || keyCode == KEY_ENTER || keyCode == BUTTON_START || keyCode == MOUSE_LEFT)      // Set key for selected item
+   // We're not doing InputCode entry, so let's try menu navigation
+   if(inputCode == KEY_SPACE || inputCode == KEY_ENTER || inputCode == BUTTON_START || inputCode == MOUSE_LEFT)      // Set key for selected item
    {
       playBoop();
       changingItem = selectedIndex;
    }
-   else if(keyCode == KEY_RIGHT  || keyCode == BUTTON_DPAD_RIGHT || keyCode == KEY_LEFT || keyCode == BUTTON_DPAD_LEFT)    // Change col
+   else if(inputCode == KEY_RIGHT  || inputCode == BUTTON_DPAD_RIGHT || inputCode == KEY_LEFT || inputCode == BUTTON_DPAD_LEFT)    // Change col
    {
       playBoop();
 
@@ -349,14 +349,14 @@ void KeyDefMenuUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 
       SDL_ShowCursor(SDL_DISABLE);    // Turn off cursor
    }
-   else if(keyCode == KEY_ESCAPE || keyCode == BUTTON_BACK)       // Quit
+   else if(inputCode == KEY_ESCAPE || inputCode == BUTTON_BACK)       // Quit
    {
       playBoop();
       saveSettingsToINI(&gINI, getGame()->getSettings());
 
       getUIManager()->reactivatePrevUI();      // to gOptionsMenuUserInterface
    }
-   else if(keyCode == KEY_UP || keyCode == BUTTON_DPAD_UP)        // Prev item
+   else if(inputCode == KEY_UP || inputCode == BUTTON_DPAD_UP)        // Prev item
    {
       playBoop();
 
@@ -366,7 +366,7 @@ void KeyDefMenuUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 
       SDL_ShowCursor(SDL_DISABLE);    // Turn off cursor
    }
-   else if(keyCode == KEY_DOWN || keyCode == BUTTON_DPAD_DOWN)    // Next item
+   else if(inputCode == KEY_DOWN || inputCode == BUTTON_DPAD_DOWN)    // Next item
    {
       playBoop();
 
@@ -376,12 +376,12 @@ void KeyDefMenuUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 
       SDL_ShowCursor(SDL_DISABLE);    // Turn off cursor
    }
-   else if(keyCode == keyOUTGAMECHAT)     // Turn on Global Chat overlay
+   else if(inputCode == keyOUTGAMECHAT)     // Turn on Global Chat overlay
    {
       playBoop();
       getUIManager()->getChatUserInterface()->activate();
    }
-   else if(keyCode == keyDIAG)     // Turn on diagnostic overlay
+   else if(inputCode == keyDIAG)     // Turn on diagnostic overlay
    {
       playBoop();
       getUIManager()->getDiagnosticUserInterface()->activate();

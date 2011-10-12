@@ -43,7 +43,7 @@ Vector<LoadoutItem> gLoadoutWeapons;
 
 //LoadoutItem::LoadoutItem() { TNLAssert(false, "Do nothing, Should never be used"); }
 
-LoadoutItem::LoadoutItem(ClientGame *game, KeyCode key, KeyCode button, U32 index)      // Shortcut for modules -- use info from ModuleInfos
+LoadoutItem::LoadoutItem(ClientGame *game, InputCode key, InputCode button, U32 index)      // Shortcut for modules -- use info from ModuleInfos
 {
    const ModuleInfo *moduleInfo = game->getModuleInfo((ShipModule) index);
 
@@ -58,7 +58,7 @@ LoadoutItem::LoadoutItem(ClientGame *game, KeyCode key, KeyCode button, U32 inde
 }
 
 
-LoadoutItem::LoadoutItem(ClientGame *game, KeyCode key, KeyCode button, U32 index, const char *text, const char *help, ShipModule requires) 
+LoadoutItem::LoadoutItem(ClientGame *game, InputCode key, InputCode button, U32 index, const char *text, const char *help, ShipModule requires) 
 {
    this->key = key;
    this->button = button;
@@ -216,16 +216,16 @@ bool LoadoutHelper::isValidItem(S32 index)
 
 // Return true if key did something, false if key had no effect
 // Runs on client
-bool LoadoutHelper::processKeyCode(KeyCode keyCode)
+bool LoadoutHelper::processInputCode(InputCode inputCode)
 {
-   if(Parent::processKeyCode(keyCode))    // Check for cancel keys
+   if(Parent::processInputCode(inputCode))    // Check for cancel keys
       return true;
    
    U32 index;
    Vector<LoadoutItem> *list = getList(mCurrentIndex);
 
    for(index = 0; index < (U32)list->size(); index++)
-      if(keyCode == list->get(index).key || keyCode == list->get(index).button)
+      if(inputCode == list->get(index).key || inputCode == list->get(index).button)
          break;
 
    if(index >= (U32)list->size())
@@ -298,9 +298,9 @@ bool LoadoutHelper::processKeyCode(KeyCode keyCode)
 }
 
 
-KeyCode LoadoutHelper::getActivationKey() 
+InputCode LoadoutHelper::getActivationKey() 
 { 
-   return keyLOADOUT[getGame()->getSettings()->getIniSettings()->inputMode]; 
+   return inputLOADOUT[getGame()->getSettings()->getIniSettings()->inputMode]; 
 }
 
 };

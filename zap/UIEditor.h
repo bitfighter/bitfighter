@@ -287,12 +287,12 @@ public:
    bool mDraggingObjects;     // Should be private
 
    // Handle input
-   void onKeyDown(KeyCode keyCode, char ascii);             // Handle all keyboard inputs, mouse clicks, and button presses
-   void textEntryKeyHandler(KeyCode keyCode, char ascii);   // Handle keyboard activity when we're editing an item's attributes
-   void specialAttributeKeyHandler(KeyCode keyCode, char ascii);
+   void onKeyDown(InputCode inputCode, char ascii);             // Handle all keyboard inputs, mouse clicks, and button presses
+   void textEntryKeyHandler(InputCode inputCode, char ascii);   // Handle keyboard activity when we're editing an item's attributes
+   void specialAttributeKeyHandler(InputCode inputCode, char ascii);
    void startAttributeEditor();
 
-   void onKeyUp(KeyCode keyCode);
+   void onKeyUp(InputCode inputCode);
    void onMouseMoved(S32 x, S32 y);
    void onMouseMoved();
    void onMouseDragged();

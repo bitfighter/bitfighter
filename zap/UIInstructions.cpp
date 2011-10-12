@@ -155,40 +155,40 @@ void InstructionsUserInterface::activateInCommandMode()
 struct ControlString
 {
    const char *controlString;
-   KeyCode *primaryControlIndex;
+   InputCode *primaryControlIndex;
 };
 
-KeyCode dummyMouse = MOUSE;
-KeyCode dummyStickLeft = LEFT_JOYSTICK;
-KeyCode dummyStickRight = RIGHT_JOYSTICK;
-KeyCode dummyMoveShipKeysUD = KEYS_UP_DOWN;
-KeyCode dummyMoveShipKeysLR = KEYS_LEFT_RIGHT;
-KeyCode dummyMsgMode = KEY_CTRL_M;
-KeyCode dummySSMode = KEY_CTRL_Q;
+InputCode dummyMouse = MOUSE;
+InputCode dummyStickLeft = LEFT_JOYSTICK;
+InputCode dummyStickRight = RIGHT_JOYSTICK;
+InputCode dummyMoveShipKeysUD = KEYS_UP_DOWN;
+InputCode dummyMoveShipKeysLR = KEYS_LEFT_RIGHT;
+InputCode dummyMsgMode = KEY_CTRL_M;
+InputCode dummySSMode = KEY_CTRL_Q;
 
 
 static ControlString controlsKeyboard[] = {
          { "Move ship", &dummyMoveShipKeysUD},
          { " ", &dummyMoveShipKeysLR},
          { "Aim ship", &dummyMouse },
-         { "Fire weapon", &keyFIRE[InputModeKeyboard] },
-         { "Activate module 1", &keyMOD1[InputModeKeyboard] },
-         { "Activate module 2", &keyMOD2[InputModeKeyboard] },
+         { "Fire weapon", &inputFIRE[InputModeKeyboard] },
+         { "Activate module 1", &inputMOD1[InputModeKeyboard] },
+         { "Activate module 2", &inputMOD2[InputModeKeyboard] },
          { "-", NULL },
-         { "Open ship config menu", &keyLOADOUT[InputModeKeyboard] },
-         { "Toggle map view", &keyCMDRMAP[InputModeKeyboard] },
-         { "Drop flag", &keyDROPITEM[InputModeKeyboard] },
-         { "Show scoreboard", &keySCRBRD[InputModeKeyboard] },
+         { "Open ship config menu", &inputLOADOUT[InputModeKeyboard] },
+         { "Toggle map view", &inputCMDRMAP[InputModeKeyboard] },
+         { "Drop flag", &inputDROPITEM[InputModeKeyboard] },
+         { "Show scoreboard", &inputSCRBRD[InputModeKeyboard] },
          { NULL, NULL },      // End col 1
-         { "Cycle current weapon", &keyADVWEAP[InputModeKeyboard] },
-         { "Select weapon 1", &keySELWEAP1[InputModeKeyboard] },
-         { "Select weapon 2", &keySELWEAP2[InputModeKeyboard] },
-         { "Select weapon 3", &keySELWEAP3[InputModeKeyboard] },
+         { "Cycle current weapon", &inputADVWEAP[InputModeKeyboard] },
+         { "Select weapon 1", &inputSELWEAP1[InputModeKeyboard] },
+         { "Select weapon 2", &inputSELWEAP2[InputModeKeyboard] },
+         { "Select weapon 3", &inputSELWEAP3[InputModeKeyboard] },
          { "-", NULL },
-         { "Open QuickChat menu", &keyQUICKCHAT[InputModeKeyboard] },
-         { "Chat to team", &keyTEAMCHAT[InputModeKeyboard] },
-         { "Chat to everyone", &keyGLOBCHAT[InputModeKeyboard] },
-         { "Record voice chat", &keyTOGVOICE[InputModeKeyboard] },
+         { "Open QuickChat menu", &inputQUICKCHAT[InputModeKeyboard] },
+         { "Chat to team", &inputTEAMCHAT[InputModeKeyboard] },
+         { "Chat to everyone", &inputGLOBCHAT[InputModeKeyboard] },
+         { "Record voice chat", &inputTOGVOICE[InputModeKeyboard] },
          { "Message display mode", &dummyMsgMode },
          { "Save screenshot", &dummySSMode },
          { NULL, NULL },   // End col 2
@@ -197,23 +197,23 @@ static ControlString controlsKeyboard[] = {
 static ControlString controlsGamepad[] = {
          { "Move Ship", &dummyStickLeft },
          { "Aim Ship/Fire Weapon", &dummyStickRight },
-         { "Activate module 1", &keyMOD1[InputModeJoystick] },
-         { "Activate module 2", &keyMOD2[InputModeJoystick] },
+         { "Activate module 1", &inputMOD1[InputModeJoystick] },
+         { "Activate module 2", &inputMOD2[InputModeJoystick] },
          { "-", NULL },
-         { "Open ship config menu", &keyLOADOUT[InputModeJoystick] },
-         { "Toggle map view", &keyCMDRMAP[InputModeJoystick] },
-         { "Drop flag", &keyDROPITEM[InputModeJoystick] },
-         { "Show scoreboard", &keySCRBRD[InputModeJoystick] },
+         { "Open ship config menu", &inputLOADOUT[InputModeJoystick] },
+         { "Toggle map view", &inputCMDRMAP[InputModeJoystick] },
+         { "Drop flag", &inputDROPITEM[InputModeJoystick] },
+         { "Show scoreboard", &inputSCRBRD[InputModeJoystick] },
          { NULL, NULL },
-         { "Cycle current weapon", &keyADVWEAP[InputModeJoystick] },
-         { "Select weapon 1", &keySELWEAP1[InputModeJoystick] },
-         { "Select weapon 2", &keySELWEAP2[InputModeJoystick] },
-         { "Select weapon 3", &keySELWEAP3[InputModeJoystick] },
+         { "Cycle current weapon", &inputADVWEAP[InputModeJoystick] },
+         { "Select weapon 1", &inputSELWEAP1[InputModeJoystick] },
+         { "Select weapon 2", &inputSELWEAP2[InputModeJoystick] },
+         { "Select weapon 3", &inputSELWEAP3[InputModeJoystick] },
          { "-", NULL },
-         { "Open QuickChat menu", &keyQUICKCHAT[InputModeJoystick] },
-         { "Chat to team", &keyTEAMCHAT[InputModeJoystick] },
-         { "Chat to everyone", &keyGLOBCHAT[InputModeJoystick] },
-         { "Record voice chat", &keyTOGVOICE[InputModeJoystick] },
+         { "Open QuickChat menu", &inputQUICKCHAT[InputModeJoystick] },
+         { "Chat to team", &inputTEAMCHAT[InputModeJoystick] },
+         { "Chat to everyone", &inputGLOBCHAT[InputModeJoystick] },
+         { "Record voice chat", &inputTOGVOICE[InputModeJoystick] },
          { NULL, NULL },
       };
 
@@ -293,17 +293,17 @@ void InstructionsUserInterface::renderPage1()
          // We'll also handle special case of arrow keys...
          if (*controls[i].primaryControlIndex == KEYS_UP_DOWN)
          {     // (braces needed)
-            if (keyLEFT[InputModeKeyboard] == KEY_LEFT && keyRIGHT[InputModeKeyboard] == KEY_RIGHT && keyUP[InputModeKeyboard] == KEY_UP && keyDOWN[InputModeKeyboard] == KEY_DOWN)
+            if (inputLEFT[InputModeKeyboard] == KEY_LEFT && inputRIGHT[InputModeKeyboard] == KEY_RIGHT && inputUP[InputModeKeyboard] == KEY_UP && inputDOWN[InputModeKeyboard] == KEY_DOWN)
                drawString(contCol, y, 18, "Arrow Keys");
             else     // Center Up key above Down key
-               drawStringf(contCol + getStringWidthf(15, "[%s] ", keyCodeToString(keyLEFT[InputModeKeyboard])), y + 4, 15, "[%s]", keyCodeToString(keyUP[InputModeKeyboard]));
+               drawStringf(contCol + getStringWidthf(15, "[%s] ", inputCodeToString(inputLEFT[InputModeKeyboard])), y + 4, 15, "[%s]", inputCodeToString(inputUP[InputModeKeyboard]));
          }
          else if (*controls[i].primaryControlIndex == KEYS_LEFT_RIGHT)
          {     // (braces needed)
-            if (keyLEFT[InputModeKeyboard] == KEY_LEFT && keyRIGHT[InputModeKeyboard] == KEY_RIGHT && keyUP[InputModeKeyboard] == KEY_UP && keyDOWN[InputModeKeyboard] == KEY_DOWN)
+            if (inputLEFT[InputModeKeyboard] == KEY_LEFT && inputRIGHT[InputModeKeyboard] == KEY_RIGHT && inputUP[InputModeKeyboard] == KEY_UP && inputDOWN[InputModeKeyboard] == KEY_DOWN)
                y -= 26;    // Hide this line
             else
-               drawStringf(col2, y + 4, 15, "[%s] [%s] [%s]", keyCodeToString(keyLEFT[InputModeKeyboard]), keyCodeToString(keyDOWN[InputModeKeyboard]), keyCodeToString(keyRIGHT[InputModeKeyboard]));
+               drawStringf(col2, y + 4, 15, "[%s] [%s] [%s]", inputCodeToString(inputLEFT[InputModeKeyboard]), inputCodeToString(inputDOWN[InputModeKeyboard]), inputCodeToString(inputRIGHT[InputModeKeyboard]));
          }
          else
             JoystickRender::renderControllerButton((F32)contCol, F32(y + 4), getGame()->getSettings()->getIniSettings()->joystickType, 
@@ -320,25 +320,25 @@ void InstructionsUserInterface::renderPage1()
    glColor(txtColor);
    drawString(col1, y, 18, "Help");
    glColor(keyColor);
-   drawStringf(col2, y, 18, "[%s]", keyCodeToString(keyHELP));
+   drawStringf(col2, y, 18, "[%s]", inputCodeToString(keyHELP));
    glColor(txtColor);
    drawString(col3, y, 18, "Universal Chat");
    glColor(keyColor);
-   drawStringf(col4, y, 18, "[%s]", keyCodeToString(keyOUTGAMECHAT));
+   drawStringf(col4, y, 18, "[%s]", inputCodeToString(keyOUTGAMECHAT));
    y+=26;
    glColor(txtColor);
    drawString(col1, y, 18, "Mission");
    glColor(keyColor);
-   drawStringf(col2, y, 18, "[%s]", keyCodeToString(keyMISSION));
+   drawStringf(col2, y, 18, "[%s]", inputCodeToString(keyMISSION));
    glColor(txtColor);
    drawString(col3, y, 18, "Display FPS / Lag");
    glColor(keyColor);
-   drawStringf(col4, y, 18, "[%s]", keyCodeToString(keyFPS));
+   drawStringf(col4, y, 18, "[%s]", inputCodeToString(keyFPS));
    y+=26;
    glColor(txtColor);
    drawString(col3, y, 18, "Diagnostics");
    glColor(keyColor);
-   drawStringf(col4, y, 18, "[%s]", keyCodeToString(keyDIAG));
+   drawStringf(col4, y, 18, "[%s]", inputCodeToString(keyDIAG));
 
 }
 
@@ -650,7 +650,7 @@ void InstructionsUserInterface::renderPageCommands(U32 page, const char *msg)
 
    glColor3f(0,1,0);
    drawStringf(cmdCol, ypos, instrSize, "Enter a cmd by pressing [%s], or by typing one at the chat prompt", 
-                                        keyCodeToString(keyCMDCHAT[getGame()->getSettings()->getIniSettings()->inputMode]));
+                                        inputCodeToString(inputCMDCHAT[getGame()->getSettings()->getIniSettings()->inputMode]));
    ypos += 28;
    drawString(cmdCol, ypos, instrSize, "Use [TAB] to expand a partially typed command");
    ypos += 28;
@@ -752,24 +752,24 @@ void InstructionsUserInterface::exitInstructions()
 }
 
 
-void InstructionsUserInterface::onKeyDown(KeyCode keyCode, char ascii)
+void InstructionsUserInterface::onKeyDown(InputCode inputCode, char ascii)
 {
-   if(keyCode == KEY_LEFT || keyCode == BUTTON_DPAD_LEFT || keyCode == BUTTON_DPAD_UP || keyCode == KEY_UP)
+   if(inputCode == KEY_LEFT || inputCode == BUTTON_DPAD_LEFT || inputCode == BUTTON_DPAD_UP || inputCode == KEY_UP)
    {
       playBoop();
       prevPage();
    }
-   else if(keyCode == KEY_RIGHT || keyCode == KEY_SPACE || keyCode == BUTTON_DPAD_RIGHT ||
-           keyCode == BUTTON_DPAD_DOWN || keyCode == KEY_ENTER || keyCode == KEY_DOWN)
+   else if(inputCode == KEY_RIGHT || inputCode == KEY_SPACE || inputCode == BUTTON_DPAD_RIGHT ||
+           inputCode == BUTTON_DPAD_DOWN || inputCode == KEY_ENTER || inputCode == KEY_DOWN)
    {
       playBoop();
       nextPage();
    }
-   else if(keyCode == keyOUTGAMECHAT)     // Turn on Global Chat overlay
+   else if(inputCode == keyOUTGAMECHAT)     // Turn on Global Chat overlay
       getUIManager()->getChatUserInterface()->activate();
-   else if(keyCode == keyDIAG)            // Turn on diagnostic overlay
+   else if(inputCode == keyDIAG)            // Turn on diagnostic overlay
       getUIManager()->getDiagnosticUserInterface()->activate();
-   else if(keyCode == keyHELP || keyCode == KEY_ESCAPE  || keyCode == BUTTON_BACK)
+   else if(inputCode == keyHELP || inputCode == KEY_ESCAPE  || inputCode == BUTTON_BACK)
       exitInstructions();
 }
 

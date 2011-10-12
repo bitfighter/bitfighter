@@ -31,7 +31,7 @@ void OGLCONSOLE_Destroy(OGLCONSOLE_Console console);
 void OGLCONSOLE_Quit();
 
 // This function munges the Bitfighter keycodes into something oglconsole can understand
-int OGLCONSOLE_ProcessBitfighterKeyEvent(int keyCode, char ascii);    // Returns true if console is open, false if it has been closed
+int OGLCONSOLE_ProcessBitfighterKeyEvent(int inputCode, char ascii);    // Returns true if console is open, false if it has been closed
 
 void OGLCONSOLE_ShowConsole();
 void OGLCONSOLE_HideConsole();

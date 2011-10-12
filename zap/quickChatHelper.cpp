@@ -126,7 +126,7 @@ void QuickChatHelper::render()
          if(showKeys)
          {
             glColor(color);
-            JoystickRender::renderControllerButton(F32(xPos + indent), (F32)yPos, settings->getIniSettings()->joystickType, renderNodes[i].keyCode, false, 0);
+            JoystickRender::renderControllerButton(F32(xPos + indent), (F32)yPos, settings->getIniSettings()->joystickType, renderNodes[i].inputCode, false, 0);
          }
  
          glColor(color);
@@ -160,9 +160,9 @@ void QuickChatHelper::onMenuShow()
 
 
 // Returns true if key was used, false if not
-bool QuickChatHelper::processKeyCode(KeyCode keyCode)
+bool QuickChatHelper::processInputCode(InputCode inputCode)
 {
-   if(Parent::processKeyCode(keyCode))
+   if(Parent::processInputCode(inputCode))
       return true;
 
    if(!gQuickChatTree.size())       // We'll crash if we go any further!
@@ -179,7 +179,7 @@ bool QuickChatHelper::processKeyCode(KeyCode keyCode)
    while(gQuickChatTree[walk].depth >= matchLevel)
    {
       // If it has the same key...
-      bool match = (keyCode == gQuickChatTree[walk].keyCode) || (keyCode == gQuickChatTree[walk].buttonCode);
+      bool match = (inputCode == gQuickChatTree[walk].inputCode) || (inputCode == gQuickChatTree[walk].buttonCode);
 
       if(match && gQuickChatTree[walk].depth == matchLevel)
       {

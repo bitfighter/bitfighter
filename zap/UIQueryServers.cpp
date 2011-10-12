@@ -35,7 +35,7 @@
 #include "gameType.h"
 #include "Colors.h"
 #include "config.h"     // TODO: remove requirement -- currently for gIni stuff in screen pos calc
-#include "keyCode.h"
+#include "InputCode.h"
 #include "ScreenInfo.h"
 #include "gameObjectRender.h"
 
@@ -929,39 +929,39 @@ void QueryServersUserInterface::recalcCurrentIndex()
 
 
 // All key handling now under one roof!
-void QueryServersUserInterface::onKeyDown(KeyCode keyCode, char ascii)
+void QueryServersUserInterface::onKeyDown(InputCode inputCode, char ascii)
 {
-   keyCode = convertJoystickToKeyboard(keyCode);
-   mJustMovedMouse = (keyCode == MOUSE_LEFT || keyCode == MOUSE_MIDDLE || keyCode == MOUSE_RIGHT);
+   inputCode = convertJoystickToKeyboard(inputCode);
+   mJustMovedMouse = (inputCode == MOUSE_LEFT || inputCode == MOUSE_MIDDLE || inputCode == MOUSE_RIGHT);
    mDraggingDivider = false;
    S32 currentIndex = -1;
 
-   if(keyCode == KEY_ENTER || keyCode == BUTTON_START || keyCode == MOUSE_LEFT)     // Return - select highlighted server & join game
+   if(inputCode == KEY_ENTER || inputCode == BUTTON_START || inputCode == MOUSE_LEFT)     // Return - select highlighted server & join game
    {
       const Point *mousePos = gScreenInfo.getMousePos();
 
-      if(keyCode == MOUSE_LEFT && mouseInHeaderRow(mousePos))
+      if(inputCode == MOUSE_LEFT && mouseInHeaderRow(mousePos))
       {
          sortSelected();
       }
-      else if(keyCode == MOUSE_LEFT && mousePos->y < COLUMN_HEADER_TOP)
+      else if(inputCode == MOUSE_LEFT && mousePos->y < COLUMN_HEADER_TOP)
       {
          // Check buttons -- they're all up here for the moment
          for(S32 i = 0; i < buttons.size(); i++)
             buttons[i].onClick(mousePos->x, mousePos->y);
       }
-      else if(keyCode == MOUSE_LEFT && isMouseOverDivider())
+      else if(inputCode == MOUSE_LEFT && isMouseOverDivider())
       {
          mDraggingDivider = true;
       }
-      else if(keyCode == MOUSE_LEFT && mousePos->y > COLUMN_HEADER_TOP + SERVER_ENTRY_HEIGHT * min(servers.size() + 1, getServersPerPage() + 2))
+      else if(inputCode == MOUSE_LEFT && mousePos->y > COLUMN_HEADER_TOP + SERVER_ENTRY_HEIGHT * min(servers.size() + 1, getServersPerPage() + 2))
       {
          // Clicked too low... also do nothing
       }
       else
       {
          // If the user is composing a message and hits enter, submit the message
-         if(keyCode == KEY_ENTER && composingMessage())
+         if(inputCode == KEY_ENTER && composingMessage())
             issueChat();
          else
          {
@@ -985,15 +985,15 @@ void QueryServersUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          }
       }
    }
-   else if(keyCode == KEY_ESCAPE)  // Return to main menu
+   else if(inputCode == KEY_ESCAPE)  // Return to main menu
    {
       playBoop();
       leaveGlobalChat();
       getUIManager()->getMainMenuUserInterface()->activate();
    }
-   else if(keyCode == keyDIAG)            // Turn on diagnostic overlay
+   else if(inputCode == keyDIAG)            // Turn on diagnostic overlay
       getUIManager()->getDiagnosticUserInterface()->activate();
-   else if(keyCode == keyOUTGAMECHAT)           // Toggle half-height servers, full-height servers, and full chat overlay
+   else if(inputCode == keyOUTGAMECHAT)           // Toggle half-height servers, full-height servers, and full chat overlay
    {
       mShowChat = !mShowChat;
       if(mShowChat) 
@@ -1004,41 +1004,41 @@ void QueryServersUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       }
    }
 
-   else if(keyCode == KEY_LEFT)
+   else if(inputCode == KEY_LEFT)
    {
       mHighlightColumn--;
       if(mHighlightColumn < 0)
          mHighlightColumn = 0;
 
-      if(keyCode == BUTTON_DPAD_LEFT)
+      if(inputCode == BUTTON_DPAD_LEFT)
          sortSelected();
 
    }
-   else if(keyCode == KEY_RIGHT)
+   else if(inputCode == KEY_RIGHT)
    {
       mHighlightColumn++;
       if(mHighlightColumn >= columns.size())
          mHighlightColumn = columns.size() - 1;
 
-      if(keyCode == BUTTON_DPAD_RIGHT)
+      if(inputCode == BUTTON_DPAD_RIGHT)
          sortSelected();
    }
-   else if(keyCode == KEY_PAGEUP)
+   else if(inputCode == KEY_PAGEUP)
    {
       backPage();
 
       SDL_ShowCursor(SDL_DISABLE);        // Hide cursor when navigating with keyboard or joystick
       mItemSelectedWithMouse = false;
    }
-   else if(keyCode == KEY_PAGEDOWN) 
+   else if(inputCode == KEY_PAGEDOWN) 
    {
       advancePage();
 
       SDL_ShowCursor(SDL_DISABLE);        // Hide cursor when navigating with keyboard or joystick
       mItemSelectedWithMouse = false;
    }
-   else if (keyCode == KEY_DELETE || keyCode == KEY_BACKSPACE)       // Do backspacey things
-      mLineEditor.handleBackspace(keyCode);   
+   else if (inputCode == KEY_DELETE || inputCode == KEY_BACKSPACE)       // Do backspacey things
+      mLineEditor.handleBackspace(inputCode);   
    else if(ascii)                               // Other keys - add key to message
       mLineEditor.addChar(ascii);
 
@@ -1046,7 +1046,7 @@ void QueryServersUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    else if(servers.size() == 0)
       return;
 
-   else if(keyCode == KEY_UP)
+   else if(inputCode == KEY_UP)
    {
       currentIndex = getSelectedIndex() - 1;
       if(currentIndex < 0)
@@ -1057,7 +1057,7 @@ void QueryServersUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       mItemSelectedWithMouse = false;
       selectedId = servers[currentIndex].id;
    }
-   else if(keyCode == KEY_DOWN)
+   else if(inputCode == KEY_DOWN)
    {
       currentIndex = getSelectedIndex() + 1;
       if(currentIndex >= servers.size())
@@ -1093,7 +1093,7 @@ void QueryServersUserInterface::advancePage()
 }
 
 
-void QueryServersUserInterface::onKeyUp(KeyCode keyCode)
+void QueryServersUserInterface::onKeyUp(InputCode inputCode)
 {
    if(mDraggingDivider)
    {
@@ -1148,7 +1148,7 @@ void QueryServersUserInterface::sortSelected()
 // Handle mouse input, figure out which menu item we're over, and highlight it
 void QueryServersUserInterface::onMouseMoved(S32 x, S32 y)
 {
-   if(getKeyState(MOUSE_LEFT))
+   if(getInputCodeState(MOUSE_LEFT))
    {
       onMouseDragged(x, y);
       return;

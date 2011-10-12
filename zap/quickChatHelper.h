@@ -36,7 +36,7 @@
 
 #include "UI.h"
 #include "Timer.h"
-#include "keyCode.h"
+#include "InputCode.h"
 
 namespace Zap
 {
@@ -44,8 +44,8 @@ namespace Zap
 struct QuickChatNode
 {
    U32 depth;
-   KeyCode keyCode;
-   KeyCode buttonCode;
+   InputCode inputCode;
+   InputCode buttonCode;
    bool teamOnly;
    bool commandOnly;
    string caption;
@@ -63,14 +63,14 @@ class QuickChatHelper : public HelperMenu
 
 private:
    S32 mCurNode;
-   //virtual KeyCode getActivationKey() { return keyQUICKCHAT[getGame()->getSettings()->getIniSettings()->inputMode]; } <=== don't supply a keycode to avoid canceling when pressed
+   //virtual InputCode getActivationKey() { return keyQUICKCHAT[getGame()->getSettings()->getIniSettings()->inputMode]; } <=== don't supply a keycode to avoid canceling when pressed
 
 public:
    QuickChatHelper(ClientGame *clientGame);      // Constructor
 
    virtual void render();                
    virtual void onMenuShow();  
-   virtual bool processKeyCode(KeyCode keyCode);    
+   virtual bool processInputCode(InputCode inputCode);    
 };
 
 extern Vector<QuickChatNode> gQuickChatTree;      // Holds our tree of QuickChat groups and messages, as defined in the INI file

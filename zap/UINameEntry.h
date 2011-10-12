@@ -62,7 +62,7 @@ public:
 
    void setSecret(bool secret) { lineEditor.setSecret(secret); }
 
-   virtual void onKeyDown(KeyCode keyCode, char ascii);
+   virtual void onKeyDown(InputCode inputCode, char ascii);
 
    const char *getText() { return lineEditor.c_str(); }
    string getSaltedHashText() { return md5.getSaltedHashFromString(lineEditor.getString()); }
@@ -98,7 +98,7 @@ private:
 public:
    LevelNameEntryUserInterface(ClientGame *game);      // Constructor
 
-   virtual void onKeyDown(KeyCode keyCode, char ascii);
+   virtual void onKeyDown(InputCode inputCode, char ascii);
    virtual void onAccept(const char *text);
    virtual void onEscape();
 

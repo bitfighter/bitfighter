@@ -23,8 +23,6 @@
 //
 //------------------------------------------------------------------------------------
 
-//#ifndef _KEYCODE_ENUM_H_
-//#define _KEYCODE_ENUM_H_
 
 // These are used in Bitfighter, which wants these in the Zap namespace, 
 // but also in oglconsole, which is a C program and thus does not
@@ -32,7 +30,7 @@
 // figured out.
 
 // These are many (all?) the keys that SDL can detect.
-enum KeyCode {
+enum InputCode {
    KEY_0, KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, // Keyboard input
    KEY_6, KEY_7, KEY_8, KEY_9, KEY_A, KEY_B,
    KEY_C, KEY_D, KEY_E, KEY_F, KEY_G, KEY_H,
@@ -117,14 +115,11 @@ enum KeyCode {
    STICK_2_LEFT, STICK_2_RIGHT,
    STICK_2_UP, STICK_2_DOWN,
 
-   MAX_KEYS,
+   MAX_INPUT_CODES,
    MOUSE, LEFT_JOYSTICK, RIGHT_JOYSTICK,     // Not exactly keys, but helpful to have in here!
-   KEYS_UP_DOWN, KEYS_LEFT_RIGHT,            // These are here because we need a dummy KeyCode item in the instructions
+   KEYS_UP_DOWN, KEYS_LEFT_RIGHT,            // These are here because we need a dummy InputCode item in the instructions
    KEY_CTRL_M, KEY_CTRL_Q, KEY_CTRL_S,
    KEY_UNKNOWN, KEY_NONE,
    BUTTON_UNKNOWN
 };
-
-//#endif
-
 

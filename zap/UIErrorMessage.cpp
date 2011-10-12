@@ -79,7 +79,7 @@ void ErrorMessageUserInterface::quit()
 }
 
 
-void ErrorMessageUserInterface::onKeyDown(KeyCode keyCode, char ascii)
+void ErrorMessageUserInterface::onKeyDown(InputCode inputCode, char ascii)
 {
    quit();     // Quit the interface when any key is pressed...  any key at all.
 }

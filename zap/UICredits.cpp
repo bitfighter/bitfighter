@@ -154,7 +154,7 @@ void CreditsUserInterface::quit()
 }
 
 
-void CreditsUserInterface::onKeyDown(KeyCode keyCode, char ascii)
+void CreditsUserInterface::onKeyDown(InputCode inputCode, char ascii)
 {
       quit();     // Quit the interface when any key is pressed...  any key at all.
 }
@@ -330,17 +330,17 @@ void SplashUserInterface::quit()
 }
 
 
-void SplashUserInterface::onKeyDown(KeyCode keyCode, char ascii)
+void SplashUserInterface::onKeyDown(InputCode inputCode, char ascii)
 {
    quitting = true;
    quit();                              // Quit the interface when any key is pressed...  any key at all.
 
-   if(keyCode != KEY_ESCAPE && keyCode != KEY_ENTER && keyCode != MOUSE_LEFT && keyCode != MOUSE_MIDDLE && keyCode != MOUSE_RIGHT)    // Unless user hit Enter or Escape, or some other thing
+   if(inputCode != KEY_ESCAPE && inputCode != KEY_ENTER && inputCode != MOUSE_LEFT && inputCode != MOUSE_MIDDLE && inputCode != MOUSE_RIGHT)    // Unless user hit Enter or Escape, or some other thing
    {
-      current->onKeyDown(keyCode, ascii);                // pass keystroke on  (after reactivate in quit(), current is now the underlying UI)
+      current->onKeyDown(inputCode, ascii);                // pass keystroke on  (after reactivate in quit(), current is now the underlying UI)
    }
 
-   if(keyCode == MOUSE_LEFT && keyCode == MOUSE_MIDDLE && keyCode == MOUSE_RIGHT)
+   if(inputCode == MOUSE_LEFT && inputCode == MOUSE_MIDDLE && inputCode == MOUSE_RIGHT)
    {
       const Point *mousePos = gScreenInfo.getWindowMousePos();
       current->onMouseMoved((S32)mousePos->x, (S32)mousePos->y);

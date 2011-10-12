@@ -50,7 +50,7 @@ public:
    void renderPageWalls();
  
 
-   void onKeyDown(KeyCode keyCode, char ascii);
+   void onKeyDown(InputCode inputCode, char ascii);
 
    void nextPage();
    void prevPage();

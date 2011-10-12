@@ -30,7 +30,7 @@
 #include "UIEditor.h"
 #include "UINameEntry.h"
 #include "input.h"
-#include "keyCode.h"
+#include "InputCode.h"
 #include "IniFile.h"
 #include "config.h"
 #include "gameType.h"

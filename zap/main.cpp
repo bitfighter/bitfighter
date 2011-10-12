@@ -1201,7 +1201,7 @@ int main(int argc, char **argv)
       FXManager::init();                           // Get ready for sparks!!  C'mon baby!!
       Joystick::populateJoystickStaticData();      // Build static data needed for joysticks
       Joystick::initJoystick();                    // Initialize joystick system
-      resetKeyStates();                            // Reset keyboard state mapping to show no keys depressed
+      resetInputCodeStates();                            // Reset keyboard state mapping to show no keys depressed
       ControllerTypeType controllerType = Joystick::autodetectJoystickType();
       setJoystick(settings, controllerType);       // Will override INI settings, so process INI first
 

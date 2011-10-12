@@ -100,9 +100,9 @@ void TextEntryUserInterface::idle(U32 timeDelta)
 }
 
 
-void TextEntryUserInterface::onKeyDown(KeyCode keyCode, char ascii)
+void TextEntryUserInterface::onKeyDown(InputCode inputCode, char ascii)
 {
-   switch (keyCode)
+   switch (inputCode)
    {
       case KEY_ENTER:
          onAccept(lineEditor.c_str());
@@ -173,9 +173,9 @@ void LevelNameEntryUserInterface::onActivate()
 }
 
 
-void LevelNameEntryUserInterface::onKeyDown(KeyCode keyCode, char ascii)
+void LevelNameEntryUserInterface::onKeyDown(InputCode inputCode, char ascii)
 {
-   if(keyCode == KEY_RIGHT)
+   if(inputCode == KEY_RIGHT)
    {
       if(mLevels.size() == 0)
          return;
@@ -186,7 +186,7 @@ void LevelNameEntryUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 
       lineEditor.setString(mLevels[mLevelIndex]);
    }
-   else if(keyCode == KEY_LEFT)
+   else if(inputCode == KEY_LEFT)
    {
       if(mLevels.size() == 0)
          return;
@@ -198,7 +198,7 @@ void LevelNameEntryUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       lineEditor.setString(mLevels[mLevelIndex]);
    }
    else
-      Parent::onKeyDown(keyCode, ascii);
+      Parent::onKeyDown(inputCode, ascii);
 }
 
 

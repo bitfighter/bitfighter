@@ -26,7 +26,7 @@
 #ifndef _MENU_ITEMS_H_
 #define _MENU_ITEMS_H_
 
-#include "keyCode.h"       // For keyCodes!
+#include "InputCode.h"
 #include "teamInfo.h"      // For Team def
 #include "Color.h"
 #include "Colors.h"
@@ -85,12 +85,12 @@ public:
 
    // Constructor
    MenuItem(ClientGame *game, S32 index, const string &prompt, void (*callback)(ClientGame *, U32), const string &help, 
-            KeyCode k1 = KEY_UNKNOWN, KeyCode k2 = KEY_UNKNOWN);
+            InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
 
    virtual ~MenuItem();       // Destructor
 
-   KeyCode key1;              // Allow two shortcut keys per menu item...
-   KeyCode key2;
+   InputCode key1;              // Allow two shortcut keys per menu item...
+   InputCode key2;
 
    virtual MenuItemTypes getItemType() { return MenuItemType; }
 
@@ -124,7 +124,7 @@ public:
    virtual void setValue(const string &val) { /* Do nothing */ }
    virtual void setIntValue(S32 val) { /* Do nothing */ }
 
-   virtual bool handleKey(KeyCode keyCode, char ascii);
+   virtual bool handleKey(InputCode inputCode, char ascii);
    virtual void setFilter(LineEditor::LineEditorFilter filter) { /* Do nothing */ }
    virtual void activatedWithShortcutKey() { handleKey(MOUSE_LEFT, 0); }
 
@@ -171,7 +171,7 @@ protected:
 
 public:
    ValueMenuItem(ClientGame *game, S32 index, const string &text, void (*callback)(ClientGame *, U32), const string &help, 
-                 KeyCode k1 = KEY_UNKNOWN, KeyCode k2 = KEY_UNKNOWN);
+         InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
    
 };
 
@@ -195,7 +195,7 @@ public:
    static const char className[];
 
    ToggleMenuItem(ClientGame *game, string title, Vector<string> options, U32 currOption, bool wrap, void (*callback)(ClientGame *, U32), string help, 
-                  KeyCode k1 = KEY_UNKNOWN, KeyCode k2 = KEY_UNKNOWN);
+                  InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
 
    //ToggleMenuItem(lua_State *L);     // So we can construct this from Lua for plugins
 
@@ -210,7 +210,7 @@ public:
    virtual void render(S32 xpos, S32 ypos, S32 textsize, bool isSelected);
    virtual S32 getWidth(S32 textsize);
 
-   virtual bool handleKey(KeyCode keyCode, char ascii);
+   virtual bool handleKey(InputCode inputCode, char ascii);
 
    virtual void activatedWithShortcutKey() { /* Do nothing */ }
 
@@ -227,7 +227,7 @@ class YesNoMenuItem : public ToggleMenuItem
 
 public:
    YesNoMenuItem(ClientGame *game, string title, bool currOption, void (*callback)(ClientGame *, U32), string help, 
-                 KeyCode k1 = KEY_UNKNOWN, KeyCode k2 = KEY_UNKNOWN);
+                 InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
 
    virtual string getValueForDisplayingInMenu() { return mIndex ? " Engineer" : ""; }
    virtual string getValueForWritingToLevelFile() { return mIndex ? "yes" : "no"; }
@@ -260,7 +260,7 @@ protected:
 
 public:
    CounterMenuItem(ClientGame *game, const string &title, S32 value, S32 step, S32 minVal, S32 maxVal, const string &units, const string &minMsg, 
-                   const string &help, KeyCode k1 = KEY_UNKNOWN, KeyCode k2 = KEY_UNKNOWN);
+                   const string &help, InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
 
    virtual void render(S32 xpos, S32 ypos, S32 textsize, bool isSelected);
    virtual S32 getWidth(S32 textsize);
@@ -273,7 +273,7 @@ public:
    virtual string getValue() const { return itos(mValue); }
    virtual void setIntValue(S32 val) { mValue = val; }
    virtual const char *getSpecialEditingInstructions() { return "Use [<-] and [->] keys to change value.  Use [Shift] for bigger change."; }
-   virtual bool handleKey(KeyCode keyCode, char ascii);
+   virtual bool handleKey(InputCode inputCode, char ascii);
 
    virtual string getUnits() const { return mUnits; }
 
@@ -293,7 +293,7 @@ protected:
 
 public:
    TimeCounterMenuItem(ClientGame *game, const string &title, S32 value, S32 maxVal, const string &zeroMsg, const string &help, 
-                       S32 step = 5, KeyCode k1 = KEY_UNKNOWN, KeyCode k2 = KEY_UNKNOWN);
+                       S32 step = 5, InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
 
    virtual const char *getUnits() { return mValue >= 60 ? "mins" : "secs"; }
 
@@ -316,7 +316,7 @@ protected:
 
 public:
    TimeCounterMenuItemSeconds(ClientGame *game, const string &title, S32 value, S32 maxVal, const string &zeroMsg, const string &help, 
-                              KeyCode k1 = KEY_UNKNOWN, KeyCode k2 = KEY_UNKNOWN);
+                              InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
 
    virtual void setValue (const string &val) { mValue = atoi(val.c_str()); } 
    virtual string getValueForWritingToLevelFile() { return itos(mValue); }
@@ -340,14 +340,14 @@ protected:
 public:
    // Contstuctor
    EditableMenuItem(ClientGame *game, string title, string val, string emptyVal, string help, U32 maxLen, 
-                    KeyCode k1 = KEY_UNKNOWN, KeyCode k2 = KEY_UNKNOWN);
+                    InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
 
    virtual MenuItemTypes getItemType() { return EditableMenuItemType; }
 
    virtual void render(S32 xpos, S32 ypos, S32 textsize, bool isSelected);
    virtual S32 getWidth(S32 textsize);
 
-   virtual bool handleKey(KeyCode keyCode, char ascii);
+   virtual bool handleKey(InputCode inputCode, char ascii);
 
    LineEditor getLineEditor() { return mLineEditor; }
    void setLineEditor(LineEditor editor) { mLineEditor = editor; }
@@ -374,7 +374,7 @@ public:
 class MaskedEditableMenuItem : public EditableMenuItem
 {
    MaskedEditableMenuItem(ClientGame *game, string title, string val, string emptyVal, string help, U32 maxLen, 
-                          KeyCode k1 = KEY_UNKNOWN, KeyCode k2 = KEY_UNKNOWN);
+                          InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
 };
 
 
@@ -389,7 +389,7 @@ private:
 
 public:
    // Constructor
-   PlayerMenuItem(ClientGame *game, S32 index, const char *text, void (*callback)(ClientGame *, U32), KeyCode k1, PlayerType type);
+   PlayerMenuItem(ClientGame *game, S32 index, const char *text, void (*callback)(ClientGame *, U32), InputCode k1, PlayerType type);
 
    virtual MenuItemTypes getItemType() { return PlayerMenuItemType; }
 
@@ -411,7 +411,7 @@ private:
    string getOptionText();    // Helper function
 
 public:
-   TeamMenuItem(ClientGame *game, S32 index, AbstractTeam *team, void (*callback)(ClientGame *, U32), KeyCode keyCode, bool isCurrent);
+   TeamMenuItem(ClientGame *game, S32 index, AbstractTeam *team, void (*callback)(ClientGame *, U32), InputCode inputCode, bool isCurrent);
 
    virtual MenuItemTypes getItemType() { return TeamMenuItemType; }
 

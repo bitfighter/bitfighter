@@ -29,7 +29,7 @@
 #ifndef ZAP_DEDICATED
 #include "tnlTypes.h"
 #include "tnlVector.h"
-#include "keyCodeEnum.h"
+#include "InputCodeEnum.h"
 #include "SDL/SDL_joystick.h"
 #endif
 
@@ -132,7 +132,7 @@ enum AlignType {
 struct JoystickInput {
    U32 axesDirection;
    U32 axesMask;
-   KeyCode keyCode;
+   InputCode inputCode;
    F32 value;
 };
 
@@ -167,8 +167,8 @@ public:
    static S32 UseJoystickNumber;
    static JoystickInfo PredefinedJoystickList[ControllerTypeCount];
    static JoystickInput JoystickInputData[MaxAxesDirections];
-   static U32 AxesKeyCodeMask;
-   static U32 HatKeyCodeMask;
+   static U32 AxesInputCodeMask;
+   static U32 HatInputCodeMask;
 
    static bool initJoystick();
    static void shutdownJoystick();

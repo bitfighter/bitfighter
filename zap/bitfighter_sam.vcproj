@@ -927,11 +927,11 @@
 			>
 		</File>
 		<File
-			RelativePath=".\keyCode.cpp"
+			RelativePath=".\InputCode.cpp"
 			>
 		</File>
 		<File
-			RelativePath=".\keyCode.h"
+			RelativePath=".\InputCode.h"
 			>
 		</File>
 		<File

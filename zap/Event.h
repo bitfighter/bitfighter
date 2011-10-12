@@ -8,7 +8,7 @@
 #define INPUT_H_
 
 #include "tnlTypes.h"
-#include "keyCode.h"
+#include "InputCode.h"
 #include "ConfigEnum.h"
 
 #include "SDL/SDL.h"
@@ -25,8 +25,8 @@ private:
    static void setMousePos(S32 x, S32 y, DisplayMode mode);
    static void updateJoyAxesDirections(U32 axisMask, S16 value);
 
-   static void keyCodeUp(KeyCode keyCode);
-   static void keyCodeDown(KeyCode keyCode, char ascii = 0);
+   static void inputCodeUp(InputCode inputCode);
+   static void inputCodeDown(InputCode inputCode, char ascii = 0);
 
 public:
    Event();
@@ -42,8 +42,8 @@ public:
    static void onMouseBlur();
    static void onMouseMoved(S32 x, S32 y, DisplayMode mode);
    static void onMouseWheel(bool Up, bool Down);  //Not implemented
-   static void onMouseButtonDown(S32 x, S32 y, KeyCode keyCode, DisplayMode mode);
-   static void onMouseButtonUp(S32 x, S32 y, KeyCode keyCode, DisplayMode mode);
+   static void onMouseButtonDown(S32 x, S32 y, InputCode inputCode, DisplayMode mode);
+   static void onMouseButtonUp(S32 x, S32 y, InputCode inputCode, DisplayMode mode);
    static void onJoyAxis(U32 joystickType, U8 which, U8 axis, S16 value);
    static void onJoyButtonDown(U8 which, U8 button, U32 joystickType);
    static void onJoyButtonUp(U8 which, U8 button, U32 joystickType);

@@ -83,11 +83,11 @@ void DiagnosticUserInterface::quit()
 }
 
 
-void DiagnosticUserInterface::onKeyDown(KeyCode keyCode, char ascii)
+void DiagnosticUserInterface::onKeyDown(InputCode inputCode, char ascii)
 {
-   if(keyCode == KEY_ESCAPE)
+   if(inputCode == KEY_ESCAPE)
       quit();                          // Quit the interface
-   else if(keyCode == keyDIAG)
+   else if(inputCode == keyDIAG)
    {
       mCurPage++;
       if(mCurPage >= NUM_PAGES)
@@ -287,7 +287,7 @@ void DiagnosticUserInterface::render()
    drawStringf(3, 3, 25, "DIAGNOSTICS - %s", pageHeaders[mCurPage]);
    drawStringf(625, 3, 25, "PAGE %d/%d", mCurPage + 1, NUM_PAGES);
  
-   drawCenteredStringf(571, 20, "%s - next page  ESC exits", keyCodeToString(keyDIAG));
+   drawCenteredStringf(571, 20, "%s - next page  ESC exits", inputCodeToString(keyDIAG));
    glColor3f(0.7f, 0.7f, 0.7f);
    glBegin(GL_LINES);
       glVertex2f(0, 31);
@@ -400,9 +400,9 @@ void DiagnosticUserInterface::render()
       drawString( hpos, ypos, textsize, "Keys down: ");
       hpos += getStringWidth(textsize, "Keys down: ");
 
-      for (U32 i = 0; i < MAX_KEYS; i++)
-         if(getKeyState((KeyCode) i))
-            hpos += drawStringAndGetWidthf( hpos, ypos, textsize - 2, "[%s]", keyCodeToString((KeyCode) i) ) + 5;
+      for (U32 i = 0; i < MAX_INPUT_CODES; i++)
+         if(getInputCodeState((InputCode) i))
+            hpos += drawStringAndGetWidthf( hpos, ypos, textsize - 2, "[%s]", inputCodeToString((InputCode) i) ) + 5;
 
       glColor3f(1, 0, 1);
       ypos += textsize + gap;
@@ -423,39 +423,39 @@ void DiagnosticUserInterface::render()
       hpos = 100;
       ypos = gScreenInfo.getGameCanvasHeight() - vertMargin - 110;
 
-      JoystickRender::renderDPad(Point(hpos, ypos), 25, getKeyState(BUTTON_DPAD_UP), getKeyState(BUTTON_DPAD_DOWN),
-                 getKeyState(BUTTON_DPAD_LEFT), getKeyState(BUTTON_DPAD_RIGHT), "DPad", "(Menu Nav)");
+      JoystickRender::renderDPad(Point(hpos, ypos), 25, getInputCodeState(BUTTON_DPAD_UP), getInputCodeState(BUTTON_DPAD_DOWN),
+            getInputCodeState(BUTTON_DPAD_LEFT), getInputCodeState(BUTTON_DPAD_RIGHT), "DPad", "(Menu Nav)");
       hpos += 75;
 
-      JoystickRender::renderDPad(Point(hpos, ypos), 25, getKeyState(STICK_1_UP), getKeyState(STICK_1_DOWN),
-                 getKeyState(STICK_1_LEFT), getKeyState(STICK_1_RIGHT), "L Stick", "(Move)");
+      JoystickRender::renderDPad(Point(hpos, ypos), 25, getInputCodeState(STICK_1_UP), getInputCodeState(STICK_1_DOWN),
+            getInputCodeState(STICK_1_LEFT), getInputCodeState(STICK_1_RIGHT), "L Stick", "(Move)");
       hpos += 75;
 
-      JoystickRender::renderDPad(Point(hpos, ypos), 25, getKeyState(STICK_2_UP), getKeyState(STICK_2_DOWN),
-                 getKeyState(STICK_2_LEFT), getKeyState(STICK_2_RIGHT), "R Stick", "(Fire)");
+      JoystickRender::renderDPad(Point(hpos, ypos), 25, getInputCodeState(STICK_2_UP), getInputCodeState(STICK_2_DOWN),
+            getInputCodeState(STICK_2_LEFT), getInputCodeState(STICK_2_RIGHT), "R Stick", "(Fire)");
       hpos += 55;
 
       U32 joystickType = getGame()->getSettings()->getIniSettings()->joystickType;
 
-      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickType, BUTTON_1, getKeyState(BUTTON_1));
+      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickType, BUTTON_1, getInputCodeState(BUTTON_1));
       hpos += 40;
-      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickType, BUTTON_2, getKeyState(BUTTON_2));
+      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickType, BUTTON_2, getInputCodeState(BUTTON_2));
       hpos += 40;
-      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickType, BUTTON_3, getKeyState(BUTTON_3));
+      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickType, BUTTON_3, getInputCodeState(BUTTON_3));
       hpos += 40;
-      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickType, BUTTON_4, getKeyState(BUTTON_4));
+      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickType, BUTTON_4, getInputCodeState(BUTTON_4));
       hpos += 40;
-      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickType, BUTTON_5, getKeyState(BUTTON_5));
+      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickType, BUTTON_5, getInputCodeState(BUTTON_5));
       hpos += 40;
-      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickType, BUTTON_6, getKeyState(BUTTON_6));
+      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickType, BUTTON_6, getInputCodeState(BUTTON_6));
       hpos += 40;
-      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickType, BUTTON_7, getKeyState(BUTTON_7));
+      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickType, BUTTON_7, getInputCodeState(BUTTON_7));
       hpos += 40;
-      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickType, BUTTON_8, getKeyState(BUTTON_8));
+      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickType, BUTTON_8, getInputCodeState(BUTTON_8));
       hpos += 40;
-      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickType, BUTTON_BACK, getKeyState(BUTTON_BACK));
+      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickType, BUTTON_BACK, getInputCodeState(BUTTON_BACK));
       hpos += 40;
-      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickType, BUTTON_START, getKeyState(BUTTON_START));
+      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickType, BUTTON_START, getInputCodeState(BUTTON_START));
    }
    else if(mCurPage == 1)
    {
