@@ -655,39 +655,33 @@ void EditorUserInterface::runScript(const FolderManager *folderManager, const st
 
 void EditorUserInterface::runPlugin(const FolderManager *folderManager, const string &scriptName, const Vector<string> &args)
 {
-   string name = folderManager->findLevelGenScript("mazeracer.levelgen");  // Find full name of levelgen script
+   string fullName = folderManager->findLevelGenScript("mazegen");     // Find full name of levelgen script
 
-   //if(name == "")
-   //{
-   //   logprintf(LogConsumer::LogWarning, "Warning: Could not find script \"%s\"",  scriptName.c_str());
-   //   // TODO: Show an error to the user
-   //   return;
-   //}
+   LuaLevelGenerator levelGen(fullName, folderManager->luaDir, args, getGame()->getGridSize(), mLoadTarget, getGame(), gConsole);
 
-   //// Load the items
-   //LuaEditorPlugin plugin(name, folderManager->luaDir, &args, getGame()->getGridSize(), getGame()->getEditorDatabase(), getGame(), gConsole);
-   //plugin.getMenus();
-   //plugin.runScript();
+   if(!levelGen.loadScript())    // Loads the script and runs it to get everything loaded into memory.  Does not run main().
+      return;
 
-   //// Process new items
-   //// Not sure about all this... may need to test
-   //// Bulk-process new items, walls first
+   Vector<MenuItem *> menuItems;
+   //string args = levelGen.runGetArgs();
+   //levelGen.runGetArgs(menuItems);         // Fills menuItems
 
-   //fillVector.clear();
-   //mLoadTarget->findObjects((TestFunc)isWallType, fillVector);
+   // For now...
+   CounterMenuItem *menuItem = new CounterMenuItem(getGame(), "Run count:", 3, 1, 0, 3, "iterations", "Disabled", "Times to run the maze");
+   menuItems.push_back(menuItem);
 
-   //for(S32 i = 0; i < fillVector.size(); i++)
-   //{
-   //   EditorObject *obj = dynamic_cast<EditorObject *>(fillVector[i]);
+   //displayMenu;
+   PluginMenuUI *menu = new PluginMenuUI(getGame());
 
-   //   if(obj->getVertCount() < 2)      // Invalid item; delete
-   //      mLoadTarget->removeFromDatabase(obj, obj->getExtent());
+   for(S32 i = 0; i < menuItems.size(); i++)
+      menu->menuItems.push_back(boost::shared_ptr<MenuItem>(&menuItem[i]));
 
-   //   if(obj->getObjectTypeNumber() == PolyWallTypeNumber)
-   //      dynamic_cast<PolyWall *>(obj)->processEndPoints();
-   //   else
-   //      dynamic_cast<WallItem *>(obj)->processEndPoints();
-   //}
+   menu->activate();
+
+
+
+   //plugin.run(args);
+
 }
 
 

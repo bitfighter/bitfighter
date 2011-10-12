@@ -33,26 +33,48 @@
 namespace Zap
 {
 
-class EditorObject;
-
 // This class is now a container for various attribute editing menus; these are rendered differently than regular menus, and
 // have other special attributes.  This class has been refactored such that it can be used directly, and no longer needs to be
 // subclassed for each type of entity we want to edit attributes for.
 
-class EditorAttributeMenuUI : public MenuUserInterface
+class QuickMenuUI : public MenuUserInterface
 {
    typedef MenuUserInterface Parent;
+
+private:
+   virtual string getTitle() = 0;
+   S32 getMenuWidth();     
+   Point mMenuLocation;
+
+public:
+   QuickMenuUI(ClientGame *game) : Parent(game) { /* Do nothing */ }    // Constructor
+   void render();
+
+   virtual void onEscape();
+
+   void setMenuLocation(const Point &location);
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+class EditorObject;
+
+class EditorAttributeMenuUI : public QuickMenuUI
+{
+   typedef QuickMenuUI Parent;
       
+private:
+   string getTitle();
+
 protected:
    EditorObject *mObject;      // Object whose attributes are being edited
 
 public:
    EditorAttributeMenuUI(ClientGame *game) : Parent(game) { /* Do nothing */ }    // Constructor
    EditorObject *getObject() { return mObject; }
-   void render();
    void onEscape();
-
-   S32 getMenuWidth();
 
    virtual void startEditingAttrs(EditorObject *object);
    virtual void doneEditingAttrs();
@@ -62,6 +84,20 @@ public:
 };
 
 
+////////////////////////////////////////
+////////////////////////////////////////
+
+class PluginMenuUI : public QuickMenuUI
+{
+   typedef QuickMenuUI Parent;
+
+public:
+   PluginMenuUI(ClientGame *game) : Parent(game) { /* Do nothing */ }    // Constructor
+   string getTitle() { return "Hello dolly!"; }
 };
+
+
+
+}  // namespace
 
 #endif

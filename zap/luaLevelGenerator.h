@@ -59,7 +59,11 @@ public:
    void setPointerToThis();
    void registerClasses();
    void onScriptInitialized();
-   bool runScript();                     
+   bool loadScript();
+   bool runScript();            
+
+   string runGetArgs();
+
    void logError(const char *format, ...);
    void logError(const char *msg, const char *filename);
 

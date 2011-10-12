@@ -122,7 +122,7 @@ protected:
    string mScriptName;           // Fully qualified script name, with path and everything
    Vector<string> mScriptArgs;   // List of arguments passed to the script
 
-   bool loadScript();
+   virtual bool loadScript();
    bool startLua(ScriptType scriptType);
    bool runMain();               // Run a script's main() function
 

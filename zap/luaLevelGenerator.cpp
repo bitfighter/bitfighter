@@ -53,9 +53,36 @@ LuaLevelGenerator::LuaLevelGenerator(const string &scriptName, const string &scr
 }
 
 
+// Fire up a Lua interprer, load the script, and execute the chunk to get it in memory
+bool LuaLevelGenerator::loadScript()
+{
+   return startLua(LEVELGEN) && LuaScriptRunner::loadScript();    
+}
+
+
 bool LuaLevelGenerator::runScript()
 {
-   return startLua(LEVELGEN) && loadScript() && runMain();
+   return loadScript() && runMain();
+}
+
+
+// Run the script's getArgs() function
+string LuaLevelGenerator::runGetArgs()
+{
+   lua_getglobal(L, "getArgs");
+
+   if(!lua_isfunction(L, -1) || lua_pcall(L, 0, 1, 0))     // Passing 0 params, getting 1 back
+   {
+      // This should really never happen -- can only occur if robot_helper_functions is corrupted, or if bot is wildly misbehaving
+      logError("Error retrieving args from script %s", mScriptName.c_str());
+      return "";
+   }
+   else
+   {
+      // Do something
+
+      return "";
+   }
 }
 
 

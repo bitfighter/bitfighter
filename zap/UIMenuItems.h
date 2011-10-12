@@ -172,6 +172,7 @@ protected:
 public:
    ValueMenuItem(ClientGame *game, S32 index, const string &text, void (*callback)(ClientGame *, U32), const string &help, 
                  KeyCode k1 = KEY_UNKNOWN, KeyCode k2 = KEY_UNKNOWN);
+   
 };
 
 
@@ -191,8 +192,12 @@ protected:
    bool mWrap;
 
 public:
+   static const char className[];
+
    ToggleMenuItem(ClientGame *game, string title, Vector<string> options, U32 currOption, bool wrap, void (*callback)(ClientGame *, U32), string help, 
                   KeyCode k1 = KEY_UNKNOWN, KeyCode k2 = KEY_UNKNOWN);
+
+   //ToggleMenuItem(lua_State *L);     // So we can construct this from Lua for plugins
 
    virtual MenuItemTypes getItemType() { return ToggleMenuItemType; }
    virtual string getValueForDisplayingInMenu() { return mValue; }

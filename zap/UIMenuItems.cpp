@@ -106,9 +106,9 @@ bool MenuItem::handleKey(KeyCode keyCode, char ascii)
 ////////////////////////////////////
 
 // Constructor
-ValueMenuItem::ValueMenuItem(ClientGame *game, S32 index, const string &text, void (*callback)(ClientGame *, U32), 
+ValueMenuItem::ValueMenuItem(ClientGame *game, S32 index, const string &value, void (*callback)(ClientGame *, U32), 
                              const string &help, KeyCode k1, KeyCode k2) :
-      Parent(game, index, text, callback, help, k1, k2)
+      Parent(game, index, value, callback, help, k1, k2)
 {
    mSelectedValueColor = Colors::cyan;
    mUnselectedValueColor = Colors::cyan;
@@ -127,6 +127,26 @@ ToggleMenuItem::ToggleMenuItem(ClientGame *game, string title, Vector<string> op
    mWrap = wrap;
    mEnterAdvancesItem = true;
 }
+
+
+const char ToggleMenuItem::className[] = "ToggleMenuItem";      // Class name as it appears to Lua scripts
+
+// Lua Constructor
+//ToggleMenuItem::ToggleMenuItem(lua_State *L) : ValueMenuItem(gClientGame, -1, NULL, NULL, "", KEY_NONE)
+//{
+//   TNLAssert(false, "Don't use this yet!!");
+   //static const char *methodName = "ToggleMenuItem constructor";
+
+   //checkArgCount(L, 2, methodName);
+   //string value =  getValue(L, 1, methodName);      // Text
+   //F32 y =  getFloat(L, 2, methodName);      // Callback (?)
+   //string help =  getFloat(L, 2, methodName);      // Help
+   //F32 key1 =  getFloat(L, 2, methodName);      // Key 1
+   //F32 key2 =  getFloat(L, 2, methodName);      // Key 2
+
+   //mPoint = ValueMenuItem(game, index, text, callback, help, key1, key2);
+//}
+
 
 
 string ToggleMenuItem::getOptionText()

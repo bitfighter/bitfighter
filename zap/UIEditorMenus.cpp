@@ -34,46 +34,31 @@
 namespace Zap
 {
 
-// Escape cancels without saving
-void EditorAttributeMenuUI::onEscape()
-{
-   mObject->setIsBeingEdited(false);
-   getUIManager()->reactivatePrevUI();     // Back to the editor!
-}
-
-
 extern ScreenInfo gScreenInfo;
 
 static const S32 ATTR_TEXTSIZE = 20;       // called attrSize in the editor
 
-void EditorAttributeMenuUI::render()
+void QuickMenuUI::render()
 {
    // Draw the underlying editor screen
    getUIManager()->getPrevUI()->render();
 
    const S32 INSTRUCTION_SIZE = ATTR_TEXTSIZE * .6;      // Size of bottom menu item, "Save and quit"
 
-   EditorUserInterface *ui = getUIManager()->getEditorUserInterface();
-
-   S32 selectedObjCount = ui->getItemSelectedCount();
-   string title = string("Attributes for ") + (selectedObjCount != 1 ? itos(selectedObjCount) + " " + mObject->getPrettyNamePlural() : 
-                                                                       mObject->getOnScreenName());
+   string title = getTitle();
 
    S32 gap = ATTR_TEXTSIZE / 3;
 
-   Point offset = ui->getCurrentOffset();
-   Point center = (mObject->getVert(0) + mObject->getVert(1)) * ui->getCurrentScale() / 2 + offset;
-
    S32 count = menuItems.size() - 1;      // We won't count our last item, save-n-quit, here, because it's rendered separately
-   S32 yStart = S32(center.y) - count * (ATTR_TEXTSIZE + gap) - 10 - (gap + INSTRUCTION_SIZE);
+   S32 yStart = S32(mMenuLocation.y) - count * (ATTR_TEXTSIZE + gap) - 10 - (gap + INSTRUCTION_SIZE);
 
    S32 width = max(getMenuWidth(), getStringWidth(INSTRUCTION_SIZE, title.c_str()));
 
    S32 hpad = 8;
    S32 vpad = 4;
 
-   S32 naturalLeft = center.x - width / 2 - hpad;
-   S32 naturalRight = center.x + width / 2 + hpad;
+   S32 naturalLeft = mMenuLocation.x - width / 2 - hpad;
+   S32 naturalRight = mMenuLocation.x + width / 2 + hpad;
 
    S32 naturalTop =  yStart - vpad;
    S32 naturalBottom = yStart + count * (ATTR_TEXTSIZE + gap) + 2 * (gap + INSTRUCTION_SIZE) + vpad * 2 + 2;
@@ -94,7 +79,7 @@ void EditorAttributeMenuUI::render()
 
 
    yStart += keepingItOnScreenAdjFactorY;
-   S32 cenX = center.x + keepingItOnScreenAdjFactorX;
+   S32 cenX = mMenuLocation.x + keepingItOnScreenAdjFactorX;
 
    S32 left = naturalLeft  + keepingItOnScreenAdjFactorX;
    S32 right = naturalRight + keepingItOnScreenAdjFactorX;
@@ -139,6 +124,52 @@ void EditorAttributeMenuUI::render()
 }
 
 
+S32 QuickMenuUI::getMenuWidth()
+{
+   S32 width = 0;
+
+   for(S32 i = 0; i < menuItems.size(); i++)
+      if(menuItems[i]->getWidth(ATTR_TEXTSIZE) > width)
+         width = menuItems[i]->getWidth(ATTR_TEXTSIZE);
+
+   return width;
+}
+
+
+// Escape cancels without saving
+void QuickMenuUI::onEscape()
+{
+   getUIManager()->reactivatePrevUI();     // Back to the editor!
+}
+
+
+// See Raptor, I am trying!
+void QuickMenuUI::setMenuLocation(const Point &location)
+{
+   mMenuLocation = location;
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Escape cancels without saving
+void EditorAttributeMenuUI::onEscape()
+{
+   mObject->setIsBeingEdited(false);
+   Parent::onEscape();     // Back to the editor!
+}
+
+
+string EditorAttributeMenuUI::getTitle()
+{
+   EditorUserInterface *ui = getUIManager()->getEditorUserInterface();
+
+   S32 selectedObjCount = ui->getItemSelectedCount();
+   return string("Attributes for ") + (selectedObjCount != 1 ? itos(selectedObjCount) + " " + mObject->getPrettyNamePlural() : 
+                                                                       mObject->getOnScreenName());
+}
+
 static void saveAndQuit(ClientGame *game, U32 unused)
 {
    EditorAttributeMenuUI *ui = dynamic_cast<EditorAttributeMenuUI *>(UserInterface::current);
@@ -165,21 +196,15 @@ void EditorAttributeMenuUI::addSaveAndQuitMenuItem()
 }
 
 
-S32 EditorAttributeMenuUI::getMenuWidth()
-{
-   S32 width = 0;
-
-   for(S32 i = 0; i < menuItems.size(); i++)
-      if(menuItems[i]->getWidth(ATTR_TEXTSIZE) > width)
-         width = menuItems[i]->getWidth(ATTR_TEXTSIZE);
-
-   return width;
-}
-
-
 void EditorAttributeMenuUI::startEditingAttrs(EditorObject *object) 
 { 
    mObject = object; 
+
+   EditorUserInterface *ui = getUIManager()->getEditorUserInterface();
+
+   Point center = (mObject->getVert(0) + mObject->getVert(1)) * ui->getCurrentScale() / 2 + ui->getCurrentOffset();
+   setMenuLocation(center);  
+
    object->startEditingAttrs(this);
 }
 
@@ -204,6 +229,10 @@ void EditorAttributeMenuUI::doneEditingAttrs(EditorObject *object)
       getUIManager()->getEditorUserInterface()->doneEditingAttributes(this, mObject); 
    }
 }
+
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 
 };
