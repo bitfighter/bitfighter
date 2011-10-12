@@ -3720,7 +3720,7 @@ void EditorUserInterface::testLevelStart()
    string tmpFileName = mEditFileName;
    mEditFileName = "editor.tmp";
 
-   SDL_ShowCursor(SDL_DISABLE);    // Turn off cursor
+   SDL_ShowCursor(SDL_DISABLE);        // Turn off cursor
    bool nts = mNeedToSave;             // Save these parameters because they are normally reset when a level is saved.
    S32 auul = mAllUndoneUndoLevel;     // Since we're only saving a temp copy, we really shouldn't reset them...
 
