@@ -452,7 +452,7 @@ static const SFG_StrokeChar ch47 = {82.1067f,1,ch47st};
 
 F32 ch47_zero_square_factor = 0.5f;
 F32 ch47_width = 0.9f;
-F32 ch47_offset = (1.f - ch47_width) * 77.0667f * 0.5;
+F32 ch47_offset = (1.f - ch47_width) * 77.0667f * 0.5f;
 
 static const SFG_StrokeVertex ch48st0[] =
 {

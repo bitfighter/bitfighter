@@ -43,7 +43,7 @@ void QuickMenuUI::render()
    // Draw the underlying editor screen
    getUIManager()->getPrevUI()->render();
 
-   const S32 INSTRUCTION_SIZE = ATTR_TEXTSIZE * .6;      // Size of bottom menu item, "Save and quit"
+   const S32 INSTRUCTION_SIZE = ATTR_TEXTSIZE * 6 / 10;      // Size of bottom menu item, "Save and quit"
 
    string title = getTitle();
 
@@ -57,8 +57,8 @@ void QuickMenuUI::render()
    S32 hpad = 8;
    S32 vpad = 4;
 
-   S32 naturalLeft = mMenuLocation.x - width / 2 - hpad;
-   S32 naturalRight = mMenuLocation.x + width / 2 + hpad;
+   S32 naturalLeft = S32(mMenuLocation.x) - width / 2 - hpad;
+   S32 naturalRight = S32(mMenuLocation.x) + width / 2 + hpad;
 
    S32 naturalTop =  yStart - vpad;
    S32 naturalBottom = yStart + count * (ATTR_TEXTSIZE + gap) + 2 * (gap + INSTRUCTION_SIZE) + vpad * 2 + 2;
@@ -79,7 +79,7 @@ void QuickMenuUI::render()
 
 
    yStart += keepingItOnScreenAdjFactorY;
-   S32 cenX = mMenuLocation.x + keepingItOnScreenAdjFactorX;
+   S32 cenX = S32(mMenuLocation.x) + keepingItOnScreenAdjFactorX;
 
    S32 left = naturalLeft  + keepingItOnScreenAdjFactorX;
    S32 right = naturalRight + keepingItOnScreenAdjFactorX;
