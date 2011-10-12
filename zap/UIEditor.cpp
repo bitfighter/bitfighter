@@ -621,16 +621,6 @@ void EditorUserInterface::runScript(const FolderManager *folderManager, const st
 {
    string name = folderManager->findLevelGenScript(scriptName);  // Find full name of levelgen script
 
-
-   getGame()->runLevelGenScript(folderManager, scriptName, args, mLoadTarget);
-
-   if(name == "")
-   {
-      logprintf(LogConsumer::LogWarning, "Warning: Could not find script \"%s\"",  scriptName.c_str());
-      // TODO: Show an error to the user
-      return;
-   }
-
    // Load the items
    LuaLevelGenerator levelGen(name, folderManager->luaDir, args, getGame()->getGridSize(), mLoadTarget, getGame(), gConsole);
 
@@ -668,7 +658,7 @@ void EditorUserInterface::runScript(const FolderManager *folderManager, const st
 
 void EditorUserInterface::runPlugin(const FolderManager *folderManager, const string &scriptName, const Vector<string> &args)
 {
-   //string name = folderManager->findLevelGenScript(scriptName);  // Find full name of levelgen script
+   string name = folderManager->findLevelGenScript("mazeracer.levelgen");  // Find full name of levelgen script
 
    //if(name == "")
    //{
