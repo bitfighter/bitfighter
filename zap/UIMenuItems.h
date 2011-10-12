@@ -97,7 +97,7 @@ public:
 
    const Color *getColor(bool isSelected);
 
-   S32 getIndex() { return mIndex; }      // Only used once...
+   S32 getIndex() { return mIndex; }      // Only used once...  TODO: Get rid of this, and perhaps user-assigned indices altogether
 
    const char *getHelp() { return mHelp.c_str(); }
    void setHelp(const string &help) { mHelp = help; }
