@@ -92,7 +92,7 @@ const char LuaLevelGenerator::className[] = "LuaLevelGenerator";      // Class n
 static const char *argv[LevelLoader::MAX_LEVEL_LINE_ARGS];
 
 
-// Lua Constructor-- required by Lunar
+// Lua Constructor -- required by Lunar
 LuaLevelGenerator::LuaLevelGenerator(lua_State *L)
 {
    TNLAssert(false, "Why use this constructor?");
