@@ -187,7 +187,7 @@ static void saveAndQuit(ClientGame *game, U32 unused)
 // This was cached, but refactor made that difficult, and hell, these are cheap to create!
 void EditorAttributeMenuUI::addSaveAndQuitMenuItem()
 {
-   addMenuItem(new MenuItem(getGame(), 99, "Save and quit", saveAndQuit, "Saves and quits"));
+   addMenuItem(new MenuItem(99, "Save and quit", saveAndQuit, "Saves and quits"));
 }
 
 

@@ -667,7 +667,7 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
    //levelGen.runGetArgs(menuItems);         // Fills menuItems
 
    // For now...
-   CounterMenuItem *menuItem = new CounterMenuItem(getGame(), "Run count:", 3, 1, 0, 3, "iterations", "Disabled", "Times to run the maze");
+   CounterMenuItem *menuItem = new CounterMenuItem("Run count:", 3, 1, 0, 3, "iterations", "Disabled", "Times to run the maze");
    menuItems.push_back(menuItem);
 
    //displayMenu;
@@ -3761,7 +3761,7 @@ void EditorMenuUserInterface::onActivate()
 }
 
 
-extern MenuItem *getWindowModeMenuItem(ClientGame *game);
+extern MenuItem *getWindowModeMenuItem(U32 displayMode);
 
 //////////
 // Editor menu callbacks
@@ -3835,14 +3835,14 @@ void quitEditorCallback(ClientGame *game, U32 unused)
 void EditorMenuUserInterface::setupMenus()
 {
    clearMenuItems();
-   addMenuItem(new MenuItem(getGame(), 0, "RETURN TO EDITOR", reactivatePrevUICallback,    "", KEY_R));
-   addMenuItem(getWindowModeMenuItem(getGame()));
-   addMenuItem(new MenuItem(getGame(), 0, "TEST LEVEL",       testLevelCallback,           "", KEY_T));
-   addMenuItem(new MenuItem(getGame(), 0, "SAVE LEVEL",       returnToEditorCallback,      "", KEY_S));
-   addMenuItem(new MenuItem(getGame(), 0, "INSTRUCTIONS",     activateHelpCallback,        "", KEY_I, keyHELP));
-   addMenuItem(new MenuItem(getGame(), 0, "LEVEL PARAMETERS", activateLevelParamsCallback, "", KEY_L, KEY_F3));
-   addMenuItem(new MenuItem(getGame(), 0, "MANAGE TEAMS",     activateTeamDefCallback,     "", KEY_M, KEY_F2));
-   addMenuItem(new MenuItem(getGame(), 0, "QUIT",             quitEditorCallback,          "", KEY_Q, KEY_UNKNOWN));
+   addMenuItem(new MenuItem(0, "RETURN TO EDITOR", reactivatePrevUICallback,    "", KEY_R));
+   addMenuItem(getWindowModeMenuItem((U32)getGame()->getSettings()->getIniSettings()->displayMode));
+   addMenuItem(new MenuItem(0, "TEST LEVEL",       testLevelCallback,           "", KEY_T));
+   addMenuItem(new MenuItem(0, "SAVE LEVEL",       returnToEditorCallback,      "", KEY_S));
+   addMenuItem(new MenuItem(0, "INSTRUCTIONS",     activateHelpCallback,        "", KEY_I, keyHELP));
+   addMenuItem(new MenuItem(0, "LEVEL PARAMETERS", activateLevelParamsCallback, "", KEY_L, KEY_F3));
+   addMenuItem(new MenuItem(0, "MANAGE TEAMS",     activateTeamDefCallback,     "", KEY_M, KEY_F2));
+   addMenuItem(new MenuItem(0, "QUIT",             quitEditorCallback,          "", KEY_Q, KEY_UNKNOWN));
 }
 
 

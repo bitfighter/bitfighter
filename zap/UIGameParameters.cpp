@@ -147,8 +147,7 @@ void GameParamUserInterface::updateMenuItems()
 
    clearMenuItems();
 
-   addMenuItem(new ToggleMenuItem(getGame(),
-                                  "Game Type:",       
+   addMenuItem(new ToggleMenuItem("Game Type:",       
                                   gameTypes,
                                   getGameTypeIndex(gameType->getClassName()),
                                   true,
@@ -157,8 +156,7 @@ void GameParamUserInterface::updateMenuItems()
 
 
    string fn = stripExtension(getUIManager()->getEditorUserInterface()->getLevelFileName());
-   addMenuItem(new EditableMenuItem(getGame(),
-                                    "Filename:",                         // name
+   addMenuItem(new EditableMenuItem("Filename:",                         // name
                                     fn,                                  // val
                                     "",                                  // empty val
                                     "File where this level is stored",   // help
@@ -176,7 +174,7 @@ void GameParamUserInterface::updateMenuItems()
          menuItem = iter->second.get();
       else                 // Item not found
       {
-         menuItem = gameType->getMenuItem(getGame(), keys[i]).get();
+         menuItem = gameType->getMenuItem(keys[i]).get();
          TNLAssert(menuItem, "Failed to make a new menu item!");
 
          mMenuItemMap.insert(pair<const char *, boost::shared_ptr<MenuItem> >(keys[i], menuItem));

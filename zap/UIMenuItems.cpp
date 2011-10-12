@@ -35,9 +35,8 @@ namespace Zap
 {
 
 // Constructor
-MenuItem::MenuItem(ClientGame *game, S32 index, const string &prompt, void (*callback)(ClientGame *, U32), const string &help, InputCode k1, InputCode k2)
+MenuItem::MenuItem(S32 index, const string &prompt, void (*callback)(ClientGame *, U32), const string &help, InputCode k1, InputCode k2)
 {
-   //mGame = game;
    mPrompt = prompt;
    key1 = k1;
    key2 = k2;
@@ -118,9 +117,9 @@ bool MenuItem::handleKey(InputCode inputCode, char ascii)
 ////////////////////////////////////
 
 // Constructor
-ValueMenuItem::ValueMenuItem(ClientGame *game, S32 index, const string &value, void (*callback)(ClientGame *, U32), 
+ValueMenuItem::ValueMenuItem(S32 index, const string &value, void (*callback)(ClientGame *, U32), 
                              const string &help, InputCode k1, InputCode k2) :
-      Parent(game, index, value, callback, help, k1, k2)
+      Parent(index, value, callback, help, k1, k2)
 {
    mSelectedValueColor = Colors::cyan;
    mUnselectedValueColor = Colors::cyan;
@@ -130,8 +129,8 @@ ValueMenuItem::ValueMenuItem(ClientGame *game, S32 index, const string &value, v
 ////////////////////////////////////
 ////////////////////////////////////
 
-ToggleMenuItem::ToggleMenuItem(ClientGame *game, string title, Vector<string> options, U32 currOption, bool wrap, void (*callback)(ClientGame *, U32), string help, InputCode k1, InputCode k2) :
-      ValueMenuItem(game, -1, title, callback, help, k1, k2)
+ToggleMenuItem::ToggleMenuItem(string title, Vector<string> options, U32 currOption, bool wrap, void (*callback)(ClientGame *, U32), string help, InputCode k1, InputCode k2) :
+      ValueMenuItem(-1, title, callback, help, k1, k2)
 {
    mValue = "";
    mIndex = currOption;
@@ -156,7 +155,7 @@ const char ToggleMenuItem::className[] = "ToggleMenuItem";      // Class name as
    //F32 key1 =  getFloat(L, 2, methodName);      // Key 1
    //F32 key2 =  getFloat(L, 2, methodName);      // Key 2
 
-   //mPoint = ValueMenuItem(game, index, text, callback, help, key1, key2);
+   //mPoint = ValueMenuItem(index, text, callback, help, key1, key2);
 //}
 
 
@@ -241,8 +240,8 @@ bool ToggleMenuItem::handleKey(InputCode inputCode, char ascii)
 ////////////////////////////////////
 
 
-YesNoMenuItem::YesNoMenuItem(ClientGame *game, string title, bool currOption, void (*callback)(ClientGame *, U32), string help, InputCode k1, InputCode k2) :
-      ToggleMenuItem(game, title, Vector<string>(), currOption, true, callback, help, k1, k2)
+YesNoMenuItem::YesNoMenuItem(string title, bool currOption, void (*callback)(ClientGame *, U32), string help, InputCode k1, InputCode k2) :
+      ToggleMenuItem(title, Vector<string>(), currOption, true, callback, help, k1, k2)
 {
    mValue = "";
    mIndex = currOption;
@@ -256,9 +255,9 @@ YesNoMenuItem::YesNoMenuItem(ClientGame *game, string title, bool currOption, vo
 ////////////////////////////////////
 ////////////////////////////////////
 
-CounterMenuItem::CounterMenuItem(ClientGame *game, const string &title, S32 value, S32 step, S32 minVal, S32 maxVal, const string &units, 
+CounterMenuItem::CounterMenuItem(const string &title, S32 value, S32 step, S32 minVal, S32 maxVal, const string &units, 
                                  const string &minMsg, const string &help, InputCode k1, InputCode k2) :
-   Parent(game, -1, title, NULL, help, k1, k2)
+   Parent(-1, title, NULL, help, k1, k2)
 {
    mValue = value;
    mStep = step;
@@ -342,9 +341,9 @@ void CounterMenuItem::decrement(S32 fact)
 ////////////////////////////////////
 ////////////////////////////////////
 
-TimeCounterMenuItem::TimeCounterMenuItem(ClientGame *game, const string &title, S32 value, S32 maxVal, const string &zeroMsg, const string &help,
+TimeCounterMenuItem::TimeCounterMenuItem(const string &title, S32 value, S32 maxVal, const string &zeroMsg, const string &help,
                     S32 step, InputCode k1, InputCode k2) :
-   CounterMenuItem(game, title, value, step, 0, maxVal, "", zeroMsg, help, k1, k2)
+   CounterMenuItem(title, value, step, 0, maxVal, "", zeroMsg, help, k1, k2)
 {
    // Do nothing
 }
@@ -353,9 +352,9 @@ TimeCounterMenuItem::TimeCounterMenuItem(ClientGame *game, const string &title, 
 ////////////////////////////////////
 ////////////////////////////////////
 
-TimeCounterMenuItemSeconds::TimeCounterMenuItemSeconds(ClientGame *game, const string &title, S32 value, S32 maxVal, const string &zeroMsg, 
+TimeCounterMenuItemSeconds::TimeCounterMenuItemSeconds(const string &title, S32 value, S32 maxVal, const string &zeroMsg, 
                                                        const string &help, InputCode k1, InputCode k2) :
-   TimeCounterMenuItem(game, title, value, maxVal, zeroMsg, help, 1, k1, k2)
+   TimeCounterMenuItem(title, value, maxVal, zeroMsg, help, 1, k1, k2)
 {
    // Do nothing
 }
@@ -364,8 +363,8 @@ TimeCounterMenuItemSeconds::TimeCounterMenuItemSeconds(ClientGame *game, const s
 ////////////////////////////////////
 ////////////////////////////////////
 
-PlayerMenuItem::PlayerMenuItem(ClientGame *game, S32 index, const char *text, void (*callback)(ClientGame *, U32), InputCode k1, PlayerType type) :
-      MenuItem(game, index, text, callback, "", k1, KEY_UNKNOWN)
+PlayerMenuItem::PlayerMenuItem(S32 index, const char *text, void (*callback)(ClientGame *, U32), InputCode k1, PlayerType type) :
+      MenuItem(index, text, callback, "", k1, KEY_UNKNOWN)
 {
    mType = type;
 }
@@ -403,8 +402,8 @@ S32 PlayerMenuItem::getWidth(S32 textsize)
 ////////////////////////////////////
 ////////////////////////////////////
 
-TeamMenuItem::TeamMenuItem(ClientGame *game, S32 index, AbstractTeam *team, void (*callback)(ClientGame *, U32), InputCode inputCode, bool isCurrent) :
-               MenuItem(game, index, team->getName().getString(), callback, "", inputCode, KEY_UNKNOWN)
+TeamMenuItem::TeamMenuItem(S32 index, AbstractTeam *team, void (*callback)(ClientGame *, U32), InputCode inputCode, bool isCurrent) :
+               MenuItem(index, team->getName().getString(), callback, "", inputCode, KEY_UNKNOWN)
 {
    mTeam = team;
    mIsCurrent = isCurrent;
@@ -441,8 +440,8 @@ S32 TeamMenuItem::getWidth(S32 textsize)
 ////////////////////////////////////
 ////////////////////////////////////
 
-EditableMenuItem::EditableMenuItem(ClientGame *game, string title, string val, string emptyVal, string help, U32 maxLen, InputCode k1, InputCode k2) :
-         ValueMenuItem(game, -1, title, NULL, help, k1, k2),
+EditableMenuItem::EditableMenuItem(string title, string val, string emptyVal, string help, U32 maxLen, InputCode k1, InputCode k2) :
+         ValueMenuItem(-1, title, NULL, help, k1, k2),
          mLineEditor(LineEditor(maxLen, val))
 {
    mEmptyVal = emptyVal;
@@ -510,8 +509,8 @@ bool EditableMenuItem::handleKey(InputCode inputCode, char ascii)
 ////////////////////////////////////
 ////////////////////////////////////
 
-MaskedEditableMenuItem::MaskedEditableMenuItem(ClientGame *game, string title, string val, string emptyVal, string help, U32 maxLen, InputCode k1, InputCode k2) :
-   EditableMenuItem(game, title, val, emptyVal, help, maxLen, k1, k2)
+MaskedEditableMenuItem::MaskedEditableMenuItem(string title, string val, string emptyVal, string help, U32 maxLen, InputCode k1, InputCode k2) :
+   EditableMenuItem(title, val, emptyVal, help, maxLen, k1, k2)
 {
    mLineEditor.setSecret(true);
 }

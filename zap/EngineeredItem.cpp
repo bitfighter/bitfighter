@@ -353,7 +353,7 @@ EditorAttributeMenuUI *EngineeredItem::getAttributeMenu()
       mAttributeMenuUI = new EditorAttributeMenuUI(clientGame);
 
       // Value doesn't matter (set to 99 here), as it will be clobbered when startEditingAttrs() is called
-      CounterMenuItem *menuItem = new CounterMenuItem(clientGame, "10% Heal:", 99, 1, 0, 100, "secs", "Disabled", 
+      CounterMenuItem *menuItem = new CounterMenuItem("10% Heal:", 99, 1, 0, 100, "secs", "Disabled", 
                                                       "Time for this item to heal itself 10%");
       mAttributeMenuUI->addMenuItem(menuItem);
 

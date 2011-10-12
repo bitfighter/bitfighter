@@ -177,7 +177,7 @@ EditorAttributeMenuUI *PickupItem::getAttributeMenu()
       mAttributeMenuUI = new EditorAttributeMenuUI(clientGame);
 
       // Value doesn't matter (set to 99 here), as it will be clobbered when startEditingAttrs() is called
-      CounterMenuItem *menuItem = new CounterMenuItem(clientGame, "Regen Time:", 99, 1, 0, 100, "secs", "No regen", 
+      CounterMenuItem *menuItem = new CounterMenuItem("Regen Time:", 99, 1, 0, 100, "secs", "No regen", 
                                                       "Time for this item to reappear after it has been picked up");
 
       mAttributeMenuUI->addMenuItem(menuItem);

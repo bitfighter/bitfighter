@@ -118,7 +118,7 @@ EditorAttributeMenuUI *AbstractSpawn::getAttributeMenu()
 
       mAttributeMenuUI = new EditorAttributeMenuUI(clientGame);
 
-      CounterMenuItem *menuItem = new CounterMenuItem(clientGame, "Spawn Timer:", 999, 1, 0, 1000, "secs", "Never spawns", 
+      CounterMenuItem *menuItem = new CounterMenuItem("Spawn Timer:", 999, 1, 0, 1000, "secs", "Never spawns", 
                                                       "Time it takes for each item to be spawned");
       mAttributeMenuUI->addMenuItem(menuItem);
 

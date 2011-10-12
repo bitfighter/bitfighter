@@ -655,13 +655,13 @@ MainMenuUserInterface::MainMenuUserInterface(ClientGame *game) : Parent(game)
    mNeedToUpgrade = false;           // Assume we're up-to-date until we hear from the master
    mShowedUpgradeAlert = false;      // So we don't show the upgrade message more than once
 
-   addMenuItem(new MenuItem(game, 0, "JOIN LAN/INTERNET GAME", joinSelectedCallback,    "", KEY_J));
-   addMenuItem(new MenuItem(game, 0, "HOST GAME",              hostSelectedCallback,    "", KEY_H));
-   addMenuItem(new MenuItem(game, 0, "INSTRUCTIONS",           helpSelectedCallback,    "", KEY_I, keyHELP));
-   addMenuItem(new MenuItem(game, 0, "OPTIONS",                optionsSelectedCallback, "", KEY_O));
-   addMenuItem(new MenuItem(game, 0, "LEVEL EDITOR",           editorSelectedCallback,  "", KEY_L, KEY_E));
-   addMenuItem(new MenuItem(game, 0, "CREDITS",                creditsSelectedCallback, "", KEY_C));
-   addMenuItem(new MenuItem(game, 0, "QUIT",                   quitSelectedCallback,    "", KEY_Q));
+   addMenuItem(new MenuItem(0, "JOIN LAN/INTERNET GAME", joinSelectedCallback,    "", KEY_J));
+   addMenuItem(new MenuItem(0, "HOST GAME",              hostSelectedCallback,    "", KEY_H));
+   addMenuItem(new MenuItem(0, "INSTRUCTIONS",           helpSelectedCallback,    "", KEY_I, keyHELP));
+   addMenuItem(new MenuItem(0, "OPTIONS",                optionsSelectedCallback, "", KEY_O));
+   addMenuItem(new MenuItem(0, "LEVEL EDITOR",           editorSelectedCallback,  "", KEY_L, KEY_E));
+   addMenuItem(new MenuItem(0, "CREDITS",                creditsSelectedCallback, "", KEY_C));
+   addMenuItem(new MenuItem(0, "QUIT",                   quitSelectedCallback,    "", KEY_Q));
 }
 
 
@@ -940,14 +940,14 @@ static void setVoiceEchoCallback(ClientGame *game, U32 val)
 
 //////////
 
-MenuItem *getWindowModeMenuItem(ClientGame *game)
+MenuItem *getWindowModeMenuItem(U32 displayMode)
 {
    Vector<string> opts;   
    opts.push_back("WINDOWED");
    opts.push_back("FULLSCREEN STRETCHED");
    opts.push_back("FULLSCREEN");
 
-   return new ToggleMenuItem(game, "DISPLAY MODE:", opts, (U32)game->getSettings()->getIniSettings()->displayMode, true, 
+   return new ToggleMenuItem("DISPLAY MODE:", opts, displayMode, true, 
                              setFullscreenCallback, "Set the game mode to windowed or fullscreen", KEY_G);
 }
 
@@ -964,10 +964,10 @@ void OptionsMenuUserInterface::setupMenus()
 
    bool relative = settings->getIniSettings()->controlsRelative;
 
-   addMenuItem(new ToggleMenuItem(getGame(), "CONTROLS:", opts, relative ? 1 : 0, true, 
+   addMenuItem(new ToggleMenuItem("CONTROLS:", opts, relative ? 1 : 0, true, 
                                   setControlsCallback, "Set controls to absolute or relative mode", KEY_C));
 
-   addMenuItem(getWindowModeMenuItem(getGame()));
+   addMenuItem(getWindowModeMenuItem((U32)settings->getIniSettings()->displayMode));
 
    Joystick::initJoystick();   // Refresh joystick list
 
@@ -975,8 +975,7 @@ void OptionsMenuUserInterface::setupMenus()
 
    InputMode inputMode = settings->getIniSettings()->inputMode;
 
-   addMenuItem(new ToggleMenuItem(getGame(),
-                                  "PRIMARY INPUT:", 
+   addMenuItem(new ToggleMenuItem("PRIMARY INPUT:", 
                                   opts, 
                                   (U32)inputMode,
                                   true, 
@@ -995,23 +994,23 @@ void OptionsMenuUserInterface::setupMenus()
    // Simple bounds check -- could be GenericController, UnknownController, or NoController
    U32 selectedOption = joystickType < ControllerTypeCount ? joystickType : 0;
 
-   addMenuItem(new ToggleMenuItem(getGame(), "JOYSTICK:", opts, selectedOption, true, 
+   addMenuItem(new ToggleMenuItem("JOYSTICK:", opts, selectedOption, true, 
                                   setControllerCallback, "Choose which joystick to use in joystick mode", KEY_J));
 
-   addMenuItem(new MenuItem(getGame(), getMenuItemCount(), "DEFINE KEYS / BUTTONS", defineKeysCallback, 
+   addMenuItem(new MenuItem(getMenuItemCount(), "DEFINE KEYS / BUTTONS", defineKeysCallback, 
                             "Remap keyboard or joystick controls", KEY_D, KEY_K));
 
    opts.clear();
    for(S32 i = 0; i <= 10; i++)
       opts.push_back(getVolMsg( F32(i) / 10 ));
 
-   addMenuItem(new ToggleMenuItem(getGame(), "SFX VOLUME:",        opts, U32((settings->getIniSettings()->sfxVolLevel + 0.05) * 10.0), false, 
+   addMenuItem(new ToggleMenuItem("SFX VOLUME:",        opts, U32((settings->getIniSettings()->sfxVolLevel + 0.05) * 10.0), false, 
                                   setSFXVolumeCallback,   "Set sound effects volume", KEY_S));
 
-   addMenuItem(new ToggleMenuItem(getGame(), "MUSIC VOLUME:",      opts, U32((settings->getIniSettings()->musicVolLevel + 0.05) * 10.0), false,
+   addMenuItem(new ToggleMenuItem("MUSIC VOLUME:",      opts, U32((settings->getIniSettings()->musicVolLevel + 0.05) * 10.0), false,
                                   setMusicVolumeCallback, "Set music volume", KEY_M));
 
-   addMenuItem(new ToggleMenuItem(getGame(), "VOICE CHAT VOLUME:", opts, U32((settings->getIniSettings()->voiceChatVolLevel + 0.05) * 10.0), false, 
+   addMenuItem(new ToggleMenuItem("VOICE CHAT VOLUME:", opts, U32((settings->getIniSettings()->voiceChatVolLevel + 0.05) * 10.0), false, 
                                   setVoiceVolumeCallback, "Set voice chat volume",    KEY_V));
 
    // No music yet, so keep this out to keep menus from getting too long.  Uncomment when we have music.
@@ -1020,7 +1019,7 @@ void OptionsMenuUserInterface::setupMenus()
    opts.clear();
    opts.push_back("DISABLED");
    opts.push_back("ENABLED");
-   addMenuItem(new ToggleMenuItem(getGame(), "VOICE ECHO:", opts, settings->getIniSettings()->echoVoice ? 1 : 0, true, 
+   addMenuItem(new ToggleMenuItem("VOICE ECHO:", opts, settings->getIniSettings()->echoVoice ? 1 : 0, true, 
                                   setVoiceEchoCallback, "Toggle whether you hear your voice on voice chat",  KEY_E));
 }
 
@@ -1127,10 +1126,10 @@ void NameEntryUserInterface::setupMenu()
 {
    clearMenuItems();
 
-   addMenuItem(new MenuItem(getGame(), 0, "OK", nameAndPasswordAcceptCallback, ""));
-   addMenuItem(new EditableMenuItem(getGame(), "NICKNAME:", getGame()->getClientInfo()->getName().getString(), 
+   addMenuItem(new MenuItem(0, "OK", nameAndPasswordAcceptCallback, ""));
+   addMenuItem(new EditableMenuItem("NICKNAME:", getGame()->getClientInfo()->getName().getString(), 
                                     getGame()->getSettings()->getDefaultName().c_str(), "", MAX_PLAYER_NAME_LENGTH));
-   addMenuItem(new EditableMenuItem(getGame(), "PASSWORD:", getGame()->getLoginPassword(), "", "", MAX_PLAYER_PASSWORD_LENGTH));
+   addMenuItem(new EditableMenuItem("PASSWORD:", getGame()->getLoginPassword(), "", "", MAX_PLAYER_PASSWORD_LENGTH));
    
    getMenuItem(1)->setFilter(LineEditor::noQuoteFilter);      // quotes are incompatible with PHPBB3 logins
    getMenuItem(2)->setSecret(true);
@@ -1222,24 +1221,24 @@ void HostMenuUserInterface::setupMenus()
 
    GameSettings *settings = getGame()->getSettings();
 
-   addMenuItem(new MenuItem(getGame(), 0, "START HOSTING", startHostingCallback, "", KEY_H));
+   addMenuItem(new MenuItem(0, "START HOSTING", startHostingCallback, "", KEY_H));
 
-   addMenuItem(new EditableMenuItem(getGame(), "SERVER NAME:", settings->getHostName(), 
+   addMenuItem(new EditableMenuItem("SERVER NAME:", settings->getHostName(), 
                                     "<Bitfighter Host>", "", QueryServersUserInterface::MaxServerNameLen,  KEY_N));
 
-   addMenuItem(new EditableMenuItem(getGame(), "DESCRIPTION:", settings->getHostDescr(),                    
+   addMenuItem(new EditableMenuItem("DESCRIPTION:", settings->getHostDescr(),                    
                                     "<Empty>", "", QueryServersUserInterface::MaxServerDescrLen, KEY_D));
 
-   addMenuItem(new EditableMenuItem(getGame(), "LEVEL CHANGE PASSWORD:", settings->getLevelChangePassword(), 
+   addMenuItem(new EditableMenuItem("LEVEL CHANGE PASSWORD:", settings->getLevelChangePassword(), 
                                     "<Anyone can change levels>", "", MAX_PASSWORD_LENGTH, KEY_L));
 
-   addMenuItem(new EditableMenuItem(getGame(), "ADMIN PASSWORD:", settings->getAdminPassword(),       
+   addMenuItem(new EditableMenuItem("ADMIN PASSWORD:", settings->getAdminPassword(),       
                                     "<No remote admin access>", "", MAX_PASSWORD_LENGTH, KEY_A));
 
-   addMenuItem(new EditableMenuItem(getGame(), "CONNECTION PASSWORD:", settings->getServerPassword(), "<Anyone can connect>", "",      
+   addMenuItem(new EditableMenuItem("CONNECTION PASSWORD:", settings->getServerPassword(), "<Anyone can connect>", "",      
                                     MAX_PASSWORD_LENGTH, KEY_C));
 
-   addMenuItem(new YesNoMenuItem(getGame(), "ALLOW MAP DOWNLOADS:", settings->getIniSettings()->allowGetMap, NULL, "", KEY_M));
+   addMenuItem(new YesNoMenuItem("ALLOW MAP DOWNLOADS:", settings->getIniSettings()->allowGetMap, NULL, "", KEY_M));
 
    //addMenuItem(new CounterMenuItem("MAXIMUM PLAYERS:",   settings->getIniSettings()->maxplayers, 1, 2, MAX_PLAYERS, "", "", "", KEY_P));
    //addMenuItem(new EditableMenuItem("PORT:",             itos(DEFAULT_GAME_PORT),  "Use default of " + itos(DEFAULT_GAME_PORT), 
@@ -1432,8 +1431,8 @@ void GameMenuUserInterface::buildMenu()
 
    lastInputMode = getGame()->getSettings()->getIniSettings()->inputMode;      // Save here so we can see if we need to display alert msg if input mode changes
 
-   addMenuItem(new MenuItem(getGame(), 0, "OPTIONS",      optionsSelectedCallback, "", KEY_O));
-   addMenuItem(new MenuItem(getGame(), 0, "INSTRUCTIONS", helpSelectedCallback,    "", KEY_I, keyHELP));
+   addMenuItem(new MenuItem(0, "OPTIONS",      optionsSelectedCallback, "", KEY_O));
+   addMenuItem(new MenuItem(0, "INSTRUCTIONS", helpSelectedCallback,    "", KEY_I, keyHELP));
 
    GameType *gameType = getGame()->getGameType();
 
@@ -1450,12 +1449,12 @@ void GameMenuUserInterface::buildMenu()
    {
       if(gc->getClientInfo()->isLevelChanger())
       {
-         addMenuItem(new MenuItem(getGame(), 0, "PLAY DIFFERENT LEVEL", chooseNewLevelCallback, "", KEY_L, KEY_P));
-         addMenuItem(new MenuItem(getGame(), 0, "ADD TIME (2 MINS)",    addTwoMinsCallback,     "", KEY_T, KEY_2));
-         addMenuItem(new MenuItem(getGame(), 0, "RESTART LEVEL",        restartGameCallback,    "", KEY_R));
+         addMenuItem(new MenuItem(0, "PLAY DIFFERENT LEVEL", chooseNewLevelCallback, "", KEY_L, KEY_P));
+         addMenuItem(new MenuItem(0, "ADD TIME (2 MINS)",    addTwoMinsCallback,     "", KEY_T, KEY_2));
+         addMenuItem(new MenuItem(0, "RESTART LEVEL",        restartGameCallback,    "", KEY_R));
       }
       else        // Not level changer
-         addMenuItem(new MenuItem(getGame(), 0, "ENTER LEVEL CHANGE PASSWORD", levelChangePWCallback, "", KEY_L, KEY_P));
+         addMenuItem(new MenuItem(0, "ENTER LEVEL CHANGE PASSWORD", levelChangePWCallback, "", KEY_L, KEY_P));
 
       if(gc->getClientInfo()->isAdmin())
       {
@@ -1466,16 +1465,16 @@ void GameMenuUserInterface::buildMenu()
             gameType->addAdminGameMenuOptions(this);
          }
 
-         addMenuItem(new MenuItem(getGame(), 0, "KICK A PLAYER", kickPlayerCallback, "", KEY_K));
+         addMenuItem(new MenuItem(0, "KICK A PLAYER", kickPlayerCallback, "", KEY_K));
       }
       else     // Not admin
-         addMenuItem(new MenuItem(getGame(), 0, "ENTER ADMIN PASSWORD", adminPWCallback, "", KEY_A, KEY_E));
+         addMenuItem(new MenuItem(0, "ENTER ADMIN PASSWORD", adminPWCallback, "", KEY_A, KEY_E));
    }
 
    if(getUIManager()->cameFrom(EditorUI))    // Came from editor
-      addMenuItem(new MenuItem(getGame(), 0, "RETURN TO EDITOR", endGameCallback, "", KEY_Q, KEY_R));
+      addMenuItem(new MenuItem(0, "RETURN TO EDITOR", endGameCallback, "", KEY_Q, KEY_R));
    else
-      addMenuItem(new MenuItem(getGame(), 0, "QUIT GAME",        endGameCallback, "", KEY_Q));
+      addMenuItem(new MenuItem(0, "QUIT GAME",        endGameCallback, "", KEY_Q));
 }
 
 
@@ -1540,7 +1539,7 @@ void LevelMenuUserInterface::onActivate()
    clearMenuItems();
 
    char c[] = "A";   // Shortcut key
-   addMenuItem(new MenuItem(getGame(), 0, ALL_LEVELS, selectLevelTypeCallback, "", stringToInputCode(c)));
+   addMenuItem(new MenuItem(0, ALL_LEVELS, selectLevelTypeCallback, "", stringToInputCode(c)));
 
    // Cycle through all levels, looking for unique type strings
    for(S32 i = 0; i < gc->mLevelInfos.size(); i++)
@@ -1554,14 +1553,14 @@ void LevelMenuUserInterface::onActivate()
       if(j == getMenuItemCount())     // Must be a new type
       {
          strncpy(c, gc->mLevelInfos[i].levelType.getString(), 1);
-         addMenuItem(new MenuItem(getGame(), i + 1, gc->mLevelInfos[i].levelType.getString(), selectLevelTypeCallback, "", stringToInputCode(c)));
+         addMenuItem(new MenuItem(i + 1, gc->mLevelInfos[i].levelType.getString(), selectLevelTypeCallback, "", stringToInputCode(c)));
       }
    }
 
    sortMenuItems();
 
    if((gc->mSendableFlags & 1) && !gc->isLocalConnection())   // local connection is useless, already have all maps..
-      addMenuItem(new MenuItem(getGame(), UPLOAD_LEVELS_MENUID, UPLOAD_LEVELS, selectLevelTypeCallback, "", stringToInputCode(c)));
+      addMenuItem(new MenuItem(UPLOAD_LEVELS_MENUID, UPLOAD_LEVELS, selectLevelTypeCallback, "", stringToInputCode(c)));
 }
 
 
@@ -1636,7 +1635,7 @@ void LevelMenuSelectUserInterface::onActivate()
       for(S32 i = 0; i < mLevels.size(); i++)
       {
          c[0] = mLevels[i].c_str()[0];
-         addMenuItem(new MenuItem(game, i | UPLOAD_LEVELS_BIT, mLevels[i].c_str(), processLevelSelectionCallback, "", stringToInputCode(c)));
+         addMenuItem(new MenuItem(i | UPLOAD_LEVELS_BIT, mLevels[i].c_str(), processLevelSelectionCallback, "", stringToInputCode(c)));
       }
    }
  
@@ -1648,7 +1647,7 @@ void LevelMenuSelectUserInterface::onActivate()
          !strcmp(category.c_str(), ALL_LEVELS) )
       {
          c[0] = gc->mLevelInfos[i].levelName.getString()[0];
-         addMenuItem(new MenuItem(game, i, gc->mLevelInfos[i].levelName.getString(), processLevelSelectionCallback, "", stringToInputCode(c)));
+         addMenuItem(new MenuItem(i, gc->mLevelInfos[i].levelName.getString(), processLevelSelectionCallback, "", stringToInputCode(c)));
       }
    }
 
@@ -1757,7 +1756,7 @@ void PlayerMenuUserInterface::render()
       // Will be used to show admin/player/robot prefix on menu
       PlayerType pt = clientInfo->isRobot() ? PlayerTypeRobot : (clientInfo->isAdmin() ? PlayerTypeAdmin : PlayerTypePlayer);    
 
-      PlayerMenuItem *newItem = new PlayerMenuItem(getGame(), i, clientInfo->getName().getString(), playerSelectedCallback, stringToInputCode(c), pt);
+      PlayerMenuItem *newItem = new PlayerMenuItem(i, clientInfo->getName().getString(), playerSelectedCallback, stringToInputCode(c), pt);
       newItem->setUnselectedColor(getGame()->getTeamColor(clientInfo->getTeamIndex()));
 
       addMenuItem(newItem);
@@ -1835,7 +1834,7 @@ void TeamMenuUserInterface::render()
 
       bool isCurrent = (i == getGame()->getTeamIndex(nameToChange.c_str()));
       
-      addMenuItem(new TeamMenuItem(getGame(), i, team, processTeamSelectionCallback, stringToInputCode(c), isCurrent));
+      addMenuItem(new TeamMenuItem(i, team, processTeamSelectionCallback, stringToInputCode(c), isCurrent));
    }
 
    string name = "";

@@ -68,7 +68,6 @@ private:
    string mHelp;       // An optional help string
    S32 mIndex;
    MenuUserInterface *mMenu;
-   //ClientGame *mGame;
 
 protected:
    Color mSelectedColor;
@@ -79,16 +78,15 @@ protected:
 
    const char *mPromptAppendage;
 
-   //ClientGame *getGame() { return mGame; }
 
 public:
    // Constructor
-   MenuItem(ClientGame *game, S32 index, const string &prompt, void (*callback)(ClientGame *, U32), const string &help, 
+   MenuItem(S32 index, const string &prompt, void (*callback)(ClientGame *, U32), const string &help, 
             InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
 
    virtual ~MenuItem();       // Destructor
 
-   InputCode key1;              // Allow two shortcut keys per menu item...
+   InputCode key1;            // Allow two shortcut keys per menu item...
    InputCode key2;
 
    virtual MenuItemTypes getItemType() { return MenuItemType; }
@@ -145,7 +143,7 @@ public:
 class MessageMenuItem : public MenuItem
 {
 public:
-   MessageMenuItem(ClientGame *game, string title, const Color &color) : MenuItem(game, -1, title, NULL, "")  
+   MessageMenuItem(string title, const Color &color) : MenuItem(-1, title, NULL, "")  
    { 
       mPromptAppendage = ""; 
       mUnselectedColor = color; 
@@ -172,7 +170,7 @@ protected:
    void setUnselectedValueColor(const Color &color) { mUnselectedValueColor = color; }
 
 public:
-   ValueMenuItem(ClientGame *game, S32 index, const string &text, void (*callback)(ClientGame *, U32), const string &help, 
+   ValueMenuItem(S32 index, const string &text, void (*callback)(ClientGame *, U32), const string &help, 
          InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
    
 };
@@ -196,7 +194,7 @@ protected:
 public:
    static const char className[];
 
-   ToggleMenuItem(ClientGame *game, string title, Vector<string> options, U32 currOption, bool wrap, void (*callback)(ClientGame *, U32), string help, 
+   ToggleMenuItem(string title, Vector<string> options, U32 currOption, bool wrap, void (*callback)(ClientGame *, U32), string help, 
                   InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
 
    //ToggleMenuItem(lua_State *L);     // So we can construct this from Lua for plugins
@@ -228,7 +226,7 @@ class YesNoMenuItem : public ToggleMenuItem
    typedef ToggleMenuItem Parent;
 
 public:
-   YesNoMenuItem(ClientGame *game, string title, bool currOption, void (*callback)(ClientGame *, U32), string help, 
+   YesNoMenuItem(string title, bool currOption, void (*callback)(ClientGame *, U32), string help, 
                  InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
 
    virtual string getValueForDisplayingInMenu() { return mIndex ? " Engineer" : ""; }
@@ -261,7 +259,7 @@ protected:
    virtual S32 getBigIncrement() { return 10; }    // How much our counter is incremented when shift is down (multiplier)
 
 public:
-   CounterMenuItem(ClientGame *game, const string &title, S32 value, S32 step, S32 minVal, S32 maxVal, const string &units, const string &minMsg, 
+   CounterMenuItem(const string &title, S32 value, S32 step, S32 minVal, S32 maxVal, const string &units, const string &minMsg, 
                    const string &help, InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
 
    virtual void render(S32 xpos, S32 ypos, S32 textsize, bool isSelected);
@@ -294,7 +292,7 @@ protected:
    virtual S32 getBigIncrement() { return 12; }    // 12 * 5sec = 1 minute
 
 public:
-   TimeCounterMenuItem(ClientGame *game, const string &title, S32 value, S32 maxVal, const string &zeroMsg, const string &help, 
+   TimeCounterMenuItem(const string &title, S32 value, S32 maxVal, const string &zeroMsg, const string &help, 
                        S32 step = 5, InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
 
    virtual const char *getUnits() { return mValue >= 60 ? "mins" : "secs"; }
@@ -317,7 +315,7 @@ protected:
    virtual S32 getBigIncrement() { return 5; }
 
 public:
-   TimeCounterMenuItemSeconds(ClientGame *game, const string &title, S32 value, S32 maxVal, const string &zeroMsg, const string &help, 
+   TimeCounterMenuItemSeconds(const string &title, S32 value, S32 maxVal, const string &zeroMsg, const string &help, 
                               InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
 
    virtual void setValue (const string &val) { mValue = atoi(val.c_str()); } 
@@ -341,7 +339,7 @@ protected:
 
 public:
    // Contstuctor
-   EditableMenuItem(ClientGame *game, string title, string val, string emptyVal, string help, U32 maxLen, 
+   EditableMenuItem(string title, string val, string emptyVal, string help, U32 maxLen, 
                     InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
 
    virtual MenuItemTypes getItemType() { return EditableMenuItemType; }
@@ -375,7 +373,7 @@ public:
 
 class MaskedEditableMenuItem : public EditableMenuItem
 {
-   MaskedEditableMenuItem(ClientGame *game, string title, string val, string emptyVal, string help, U32 maxLen, 
+   MaskedEditableMenuItem(string title, string val, string emptyVal, string help, U32 maxLen, 
                           InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
 };
 
@@ -391,7 +389,7 @@ private:
 
 public:
    // Constructor
-   PlayerMenuItem(ClientGame *game, S32 index, const char *text, void (*callback)(ClientGame *, U32), InputCode k1, PlayerType type);
+   PlayerMenuItem(S32 index, const char *text, void (*callback)(ClientGame *, U32), InputCode k1, PlayerType type);
 
    virtual MenuItemTypes getItemType() { return PlayerMenuItemType; }
 
@@ -413,7 +411,7 @@ private:
    string getOptionText();    // Helper function
 
 public:
-   TeamMenuItem(ClientGame *game, S32 index, AbstractTeam *team, void (*callback)(ClientGame *, U32), InputCode inputCode, bool isCurrent);
+   TeamMenuItem(S32 index, AbstractTeam *team, void (*callback)(ClientGame *, U32), InputCode inputCode, bool isCurrent);
 
    virtual MenuItemTypes getItemType() { return TeamMenuItemType; }
 

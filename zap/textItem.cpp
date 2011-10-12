@@ -349,7 +349,7 @@ EditorAttributeMenuUI *TextItem::getAttributeMenu()
       mAttributeMenuUI = new EditorAttributeMenuUI(clientGame);
 
       // "Blah" will be overwritten when startEditingAttrs() is called
-      EditableMenuItem *menuItem = new EditableMenuItem(clientGame, "Text: ", "Blah", "", "", MAX_TEXTITEM_LEN);
+      EditableMenuItem *menuItem = new EditableMenuItem("Text: ", "Blah", "", "", MAX_TEXTITEM_LEN);
       menuItem->setTextEditedCallback(textEditedCallback);
 
       mAttributeMenuUI->addMenuItem(menuItem);
