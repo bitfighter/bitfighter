@@ -735,7 +735,6 @@ void Game::setGameTime(F32 time)
 
 extern OGLCONSOLE_Console gConsole;
 
-// TODO: Show warning message to players?
 bool Game::runLevelGenScript(const FolderManager *folderManager, const string &scriptName, const Vector<string> &scriptArgs, 
                                    GridDatabase *targetDatabase)
 {
@@ -743,6 +742,9 @@ bool Game::runLevelGenScript(const FolderManager *folderManager, const string &s
 
    if(fullname == "")
    {
+      Vector<StringTableEntry> e;
+      e.push_back(scriptName.c_str());
+      getGameType()->broadcastMessage(GameConnection::ColorRed, SFXNone, "!!! Error running levelgen %e0: Could not find file", e);
       logprintf(LogConsumer::LogWarning, "Warning: Could not find script \"%s\"", scriptName.c_str());
       return false;
    }
@@ -750,7 +752,16 @@ bool Game::runLevelGenScript(const FolderManager *folderManager, const string &s
    // The script file will be the first argument, subsequent args will be passed on to the script
    LuaLevelGenerator levelgen = LuaLevelGenerator(fullname, folderManager->luaDir, scriptArgs, getGridSize(), 
                                                   targetDatabase, this, gConsole);
-   return levelgen.runScript();
+   if(!levelgen.runScript())
+   {
+      Vector<StringTableEntry> e;
+      e.push_back(scriptName.c_str());
+
+      getGameType()->broadcastMessage(GameConnection::ColorRed, SFXNone, "!!! Error running levelgen %e0: See server log for details", e);
+      return false;
+   }
+
+   return true;
 }
 
 
