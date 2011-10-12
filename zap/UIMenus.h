@@ -80,6 +80,7 @@ public:
    MenuUserInterface(ClientGame *game);      // Constructor
 
    void addMenuItem(MenuItem *menuItem);
+   void addWrappedMenuItem(boost::shared_ptr<MenuItem> menuItem);
    MenuItem *getMenuItem(S32 index);
 
    bool itemSelectedWithMouse;

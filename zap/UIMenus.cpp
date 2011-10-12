@@ -119,6 +119,15 @@ void MenuUserInterface::addMenuItem(MenuItem *menuItem)
 }
 
 
+// For those times when you really need to add a pre-packaged menu item... normally, you won't need to do this
+void MenuUserInterface::addWrappedMenuItem(boost::shared_ptr<MenuItem> menuItem)
+{
+   menuItem->setMenu(this);
+   mMenuItems.push_back(menuItem);
+
+}
+
+
 S32 MenuUserInterface::getMenuItemCount()
 {
    return mMenuItems.size();

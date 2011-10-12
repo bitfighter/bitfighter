@@ -168,19 +168,19 @@ void GameParamUserInterface::updateMenuItems()
    {
       MenuItemMap::iterator iter = mMenuItemMap.find(keys[i]);
 
-      MenuItem *menuItem;
+      boost::shared_ptr<MenuItem> menuItem;
 
       if(iter != mMenuItemMap.end())      // What is this supposed to do?  I can't seem to make this condition occur.
-         menuItem = iter->second.get();
+         menuItem = iter->second;
       else                 // Item not found
       {
-         menuItem = gameType->getMenuItem(keys[i]).get();
+         menuItem = gameType->getMenuItem(keys[i]);
          TNLAssert(menuItem, "Failed to make a new menu item!");
 
          mMenuItemMap.insert(pair<const char *, boost::shared_ptr<MenuItem> >(keys[i], menuItem));
       }
 
-      addMenuItem(menuItem);
+      addWrappedMenuItem(menuItem);
 
       i++;
    }
