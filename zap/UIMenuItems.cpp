@@ -1,4 +1,3 @@
-
 //-----------------------------------------------------------------------------------
 //
 // Bitfighter - A multiplayer vector graphics space game
@@ -27,7 +26,7 @@
 
 #include "UIMenuItems.h"
 #include "UI.h"
-#include "ScreenInfo.h"
+#include "ScreenInfo.h"    // For gScreenInfo stuff
 
 #include "SDL/SDL_opengl.h"
 

@@ -26,9 +26,7 @@
 #ifndef _MENU_ITEMS_H_
 #define _MENU_ITEMS_H_
 
-#include "InputCode.h"
 #include "teamInfo.h"      // For Team def
-#include "Color.h"
 #include "Colors.h"
 #include "stringUtils.h"   // For itos
 #include <string>
