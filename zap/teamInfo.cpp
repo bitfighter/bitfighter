@@ -48,7 +48,7 @@ bool AbstractTeam::processArguments(S32 argc, const char **argv)
 
 string AbstractTeam::toString()
 {
-   return string("Team ") + getName().getString() + " " + mColor.toRGBString();
+   return string("Team ") + writeLevelString(getName().getString()) + " " + mColor.toRGBString();
 }
 
 

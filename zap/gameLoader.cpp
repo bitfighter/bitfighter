@@ -185,8 +185,12 @@ stateReadString:
    c = getNextChar();
    if(c == '\"')
    {
-      addArg();
-      goto stateEatingWhitespace;
+      if(*argString != '\"')  // allows "(letter ""I"")" to be this: (letter "I")  problem with \" is having to use \\, and problems with early version of a single \ in string (level name, TextItem, Team name).
+      {
+         addArg();
+         goto stateEatingWhitespace;
+      }
+      argString++; // skip a character
    }
    if(c == '\n' || !c)
    {
@@ -265,7 +269,7 @@ bool LevelLoader::loadLevelFromFile(const string &filename, bool inEditor, GridD
          if(cur == 0)
          {
             logprintf(LogConsumer::LogWarning, "Load level ==> Some lines too long in file %s (max len = %d)", filename.c_str(), sizeof(levelChunk) - 2);  // -2 : need room for NULL and \n character
-				cur = lastByteRead - 1; // Did not find \n, go back to end of chunk. Without this line, it will freeze in endless loop.
+            cur = lastByteRead - 1; // Did not find \n, go back to end of chunk. Without this line, it will freeze in endless loop.
          }
                      // small cur number (cur > 0) is OK, as cur will then have to be a big number on next pass.
       }

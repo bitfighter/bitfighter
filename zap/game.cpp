@@ -589,9 +589,9 @@ string Game::toString()
 
    str = gameType->toString() + "\n";
 
-   str += string("LevelName ") + gameType->getLevelName()->getString() + "\n";
-   str += string("LevelDescription ") + gameType->getLevelDescription()->getString() + "\n";
-   str += string("LevelCredits ") + gameType->getLevelCredits()->getString() + "\n";
+   str += string("LevelName ") + writeLevelString(gameType->getLevelName()->getString()) + "\n";
+   str += string("LevelDescription ") + writeLevelString(gameType->getLevelDescription()->getString()) + "\n";
+   str += string("LevelCredits ") + writeLevelString(gameType->getLevelCredits()->getString()) + "\n";
 
    str += string("GridSize ") + ftos(mGridSize) + "\n";
 
@@ -601,7 +601,7 @@ string Game::toString()
    str += gameType->getSpecialsLine() + "\n";
 
    if(gameType->getScriptName() != "")
-      str += "Script " + gameType->getScriptLine() + "\n";
+      str += "Script " + writeLevelString(gameType->getScriptLine().c_str()) + "\n";
 
    str += string("MinPlayers") + (gameType->getMinRecPlayers() > 0 ? " " + itos(gameType->getMinRecPlayers()) : "") + "\n";
    str += string("MaxPlayers") + (gameType->getMaxRecPlayers() > 0 ? " " + itos(gameType->getMaxRecPlayers()) : "") + "\n";
