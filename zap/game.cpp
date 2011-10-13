@@ -551,9 +551,6 @@ bool Game::processLevelParam(S32 argc, const char **argv)
 
    else if(!stricmp(argv[0], "Specials"))
       onReadSpecialsParam(argc, argv);
-   
-   else if(!stricmp(argv[0], "SoccerPickup"))  // option for old style soccer, this option might get moved or removed
-      onReadSoccerPickupParam(argc, argv);
 
    else if(!strcmp(argv[0], "Script"))
       onReadScriptParam(argc, argv);
@@ -646,30 +643,6 @@ void Game::onReadSpecialsParam(S32 argc, const char **argv)
    for(S32 i = 1; i < argc; i++)
       if(!getGameType()->processSpecialsParam(argv[i]))
          logprintf(LogConsumer::LogWarning, "Invalid specials parameter: %s", argv[i]);
-}
-
-
-void Game::onReadSoccerPickupParam(S32 argc, const char **argv)
-{
-   logprintf(LogConsumer::LogWarning, "Level uses deprecated SoccerPickup line... parameter will be removed in 017!");
-
-   if(argc < 2)
-   {
-      logprintf(LogConsumer::LogWarning, "Improperly formed (and deprecated!!) SoccerPickup parameter");
-      return;
-   }
-
-   SoccerGameType *sgt = dynamic_cast<SoccerGameType *>(getGameType());
-
-   if(sgt)
-   {
-      sgt->setSoccerPickupAllowed(
-         !stricmp(argv[1], "yes") ||
-         !stricmp(argv[1], "enable") ||
-         !stricmp(argv[1], "on") ||
-         !stricmp(argv[1], "activate") ||
-         !stricmp(argv[1], "1") );
-   }
 }
 
 

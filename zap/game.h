@@ -289,7 +289,6 @@ private:
    void onReadTeamParam(S32 argc, const char **argv);
    void onReadTeamChangeParam(S32 argc, const char **argv);
    void onReadSpecialsParam(S32 argc, const char **argv);
-   void onReadSoccerPickupParam(S32 argc, const char **argv);
    void onReadScriptParam(S32 argc, const char **argv);
    void onReadLevelNameParam(S32 argc, const char **argv);
    void onReadLevelDescriptionParam(S32 argc, const char **argv);

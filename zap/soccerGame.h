@@ -42,19 +42,12 @@ class SoccerGameType : public GameType
 private:
    Vector<GoalZone *> mGoals;
    SafePtr<SoccerBallItem> mBall;
-   bool mSoccerPickupAllowed;
-
 
 public:
    SoccerGameType();
-   bool processSpecialsParam(const char *param);
-   string getSpecialsLine();
 
    void scoreGoal(Ship *ship, StringTableEntry lastPlayerTouchName, S32 lastPlayerTouchTeam, S32 goalTeamIndex, S32 score);
    void updateSoccerScore(Ship *ship, S32 scoringTeam, ScoringEvent scoringEvent, S32 score);   // Helper function to make sure the two-arg version of updateScore doesn't get a null ship
-
-   bool isSoccerPickupAllowed() { return mSoccerPickupAllowed; }
-   void setSoccerPickupAllowed(bool allowed) { mSoccerPickupAllowed = allowed; }
 
    void addZone(GoalZone *theZone);
    void itemDropped(Ship *ship, MoveItem *item);
@@ -101,14 +94,11 @@ private:
    Point initialPos;
    Timer mSendHomeTimer;
    SafePtr<Ship> mLastPlayerTouch;
-   SafePtr<Ship> mLastPlayerMounted;
    S32 mLastPlayerTouchTeam;
    StringTableEntry mLastPlayerTouchName;
    F32 mDragFactor;
 
 public:
-   bool mAllowPickup;
-   U32 mPickupTime;
    SoccerBallItem(Point pos = Point());   // C++ constructor
    SoccerBallItem *clone() const;
 

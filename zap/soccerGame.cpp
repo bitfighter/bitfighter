@@ -41,9 +41,10 @@
 namespace Zap
 {
 
+// Constructor
 SoccerGameType::SoccerGameType()
 {
-   mSoccerPickupAllowed = false;   // make sure it is always false
+   // Do nothing
 }
 
 
@@ -108,28 +109,6 @@ TNL_IMPLEMENT_NETOBJECT_RPC(SoccerGameType, s2cSoccerScoreMessage,
    clientGame->displayMessage(Color(0.6f, 1.0f, 0.8f), msg.c_str());
 
 #endif
-}
-
-
-bool SoccerGameType::processSpecialsParam(const char *param)
-{
-   if(!strcmp(param, "SoccerPickup"))
-      mSoccerPickupAllowed = true;
-   else
-      return Parent::processSpecialsParam(param);
-
-   return true;
-}
-
-
-string SoccerGameType::getSpecialsLine()
-{
-   string specialsLine = Parent::getSpecialsLine();
-
-   if(mSoccerPickupAllowed)
-      return specialsLine + " SoccerPickup";
-   //else
-      return specialsLine;
 }
 
 
@@ -224,40 +203,7 @@ bool SoccerGameType::onFire(Ship *ship)
    if(!Parent::onFire(ship))
       return false;
 
-
-   // If we have the ball, drop it
-   if(ship->isCarryingItem(SoccerBallItemTypeNumber))
-   {
-      for(S32 i = 0; i < ship->mMountedItems.size(); i++)
-      {
-         if(ship->mMountedItems[i]->getObjectTypeNumber() == SoccerBallItemTypeNumber)
-         {
-            SoccerBallItem *ball = dynamic_cast<SoccerBallItem *>(ship->mMountedItems[i].getPointer());
-            TNLAssert(ball != NULL, "SoccerGameType::onFire NULL ball");
-
-            if(getGame()->getCurrentTime() - ball->mPickupTime < 1000)
-               return false;
-            //Point dir = ship->getAimVector();
-            //Point vel = ship->getActualVel();
-
-            //dir.normalize();     // needed?
-
-            //Point ballVel = dir * 2 + dir * vel.dot(dir);
-
-            // ball->setActualPos(ship->getActualPos() + dir * (ship->getRadius())); //get set in onItemDropped
-
-            ball->onItemDropped();
-            //ball->setActualVel(ship->getAimVector() * 200 + ship->getActualVel()); 
-            //dir * F32(wi->projVelocity) + dir * shooterVel.dot(dir);
-            ball->setActualVel(ship->getAimVector() * 200 + ship->getAimVector() * ship->getActualVel().dot(ship->getAimVector()));
-         }
-      }
-      
-      return false;
-   }
-
    return true;
-
 }             
 
 
@@ -347,11 +293,9 @@ SoccerBallItem::SoccerBallItem(Point pos) : Parent(pos, true, (F32)SoccerBallIte
    mNetFlags.set(Ghostable);
    initialPos = pos;
    mLastPlayerTouch = NULL;
-   mLastPlayerMounted = NULL;
    mLastPlayerTouchTeam = NO_TEAM;
    mLastPlayerTouchName = StringTableEntry(NULL);
    mDragFactor = 1.0;     // 1.0 for no drag
-   mAllowPickup = false;
 }
 
 
@@ -373,16 +317,9 @@ bool SoccerBallItem::processArguments(S32 argc2, const char **argv2, Game *game)
    SoccerGameType *sgt = dynamic_cast<SoccerGameType *>(gameType);
    TNLAssert(sgt, "Blech! sgt is NULL, not SoccerGameType");
 
-   mAllowPickup = sgt ? sgt->isSoccerPickupAllowed() : false;  // to avoid error on non-soccer game type
-
    for(S32 i = 0; i < argc2; i++)      // The idea here is to allow optional R3.5 for rotate at speed of 3.5
    {
       char firstChar = argv2[i][0];    // First character of arg
-
-      if(!stricmp(argv2[i], "Pickup=yes"))
-         mAllowPickup = true;
-      else if(!stricmp(argv2[i], "Pickup=no"))
-         mAllowPickup = false;
 
       if((firstChar < 'a' || firstChar > 'z') && (firstChar < 'A' || firstChar > 'Z'))    // firstChar is not a letter
       {
@@ -577,37 +514,13 @@ bool SoccerBallItem::collide(GameObject *hitObject)
 
    if(isShipType(hitObject->getObjectTypeNumber()))
    {
-      if(mMount == hitObject)    // Sometimes we get collisions between ship and an already mounted soccer ball.
-         return false;  //false = don't hit self
-
-      if(mIsMounted)  // fix problem with random ball jumping from ship to ship?
-         return false;
-
       if(!isGhost())    //Server side
       {
-         // mLastPlayerMounted == hitObject &&   without this, that can limit anyone to pickup ball
-         if(mDroppedTimer.getCurrent())      // Have to wait a bit after dropping to pick the ball back up!
-            return false;   //False - Go through soccer looks better while dropping, and allow better sync to client.
-
-
          Ship *ship = dynamic_cast<Ship *>(hitObject);
          mLastPlayerTouch = ship;
          mLastPlayerTouchTeam = mLastPlayerTouch->getTeam();      // Used to credit team if ship quits game before goal is scored
          mLastPlayerTouchName = mLastPlayerTouch->getName();      // Used for making nicer looking messages in same situation
          GameType *gt = getGame()->getGameType();
-
-         if(!mAllowPickup)
-            return true;
-      
-         mDroppedTimer.clear();
-         this->mountToShip(ship);
-         mLastPlayerMounted = ship;
-         mPickupTime = getGame()->getCurrentTime();
-      }
-
-      else    // Client side
-      { 
-         return !mAllowPickup;       // Let server handle the collision when pickup is enabled
       }
    }
    else if(hitObject->getObjectTypeNumber() == GoalZoneTypeNumber)      // SCORE!!!!
@@ -629,16 +542,11 @@ bool SoccerBallItem::collide(GameObject *hitObject)
 
 U32 SoccerBallItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
-   U32 retMask = Parent::packUpdate(connection, updateMask, stream);
-   if(updateMask & InitialMask)
-      stream->writeFlag(mAllowPickup);
-   return retMask;
+   return Parent::packUpdate(connection, updateMask, stream);
 }
 void SoccerBallItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    Parent::unpackUpdate(connection, stream);
-   if(mInitial)
-      mAllowPickup = stream->readFlag();
 }
 
 
