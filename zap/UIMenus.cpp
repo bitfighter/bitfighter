@@ -1087,8 +1087,9 @@ void NameEntryUserInterface::setupMenu()
    menuItems.clear();
 
    menuItems.push_back(boost::shared_ptr<MenuItem>(new MenuItem(getGame(), 0, "OK", nameAndPasswordAcceptCallback, "")));
-   menuItems.push_back(boost::shared_ptr<MenuItem>(new EditableMenuItem(getGame(), "NICKNAME:", getGame()->getClientInfo()->getName().getString(), 
-                                                   getGame()->getSettings()->getDefaultName().c_str(), "", MAX_PLAYER_NAME_LENGTH)));
+   menuItems.push_back(boost::shared_ptr<MenuItem>(new EditableMenuItem(getGame(), "NICKNAME:",
+         getGame()->getSettings()->getIniSettings()->lastName, getGame()->getSettings()->getDefaultName(),
+         "", MAX_PLAYER_NAME_LENGTH)));
    menuItems.push_back(boost::shared_ptr<MenuItem>(new EditableMenuItem(getGame(), "PASSWORD:", getGame()->getLoginPassword(), 
                                                                         "", "", MAX_PLAYER_PASSWORD_LENGTH)));
    
