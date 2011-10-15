@@ -53,7 +53,7 @@ AbstractSpawn::AbstractSpawn(const Point &pos, S32 time)
 };
 
 
-AbstractSpawn::AbstractSpawn(const AbstractSpawn &copy)
+AbstractSpawn::AbstractSpawn(const AbstractSpawn &copy) : EditorPointObject(copy)
 {
    mSpawnTime = copy.mSpawnTime;
 }
