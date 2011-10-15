@@ -967,8 +967,10 @@ void actualizeScreenMode(bool changingInterfaces)
    gScreenInfo.resetGameCanvasSize();     // Set GameCanvasSize vars back to their default values
 
 
-   // If old display mode is windowed, save the current window location
-   if(settings->getIniSettings()->oldDisplayMode == DISPLAY_MODE_WINDOWED)
+   // If old display mode is windowed or current is windowed but we change interfaces,
+   // save the window position
+   if(settings->getIniSettings()->oldDisplayMode == DISPLAY_MODE_WINDOWED ||
+         (changingInterfaces && settings->getIniSettings()->displayMode == DISPLAY_MODE_WINDOWED))
    {
       settings->getIniSettings()->winXPos = getWindowPositionX();
       settings->getIniSettings()->winYPos = getWindowPositionY();
