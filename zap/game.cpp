@@ -1387,7 +1387,7 @@ bool ServerGame::processPseudoItem(S32 argc, const char **argv, const string &le
    
          S32 time = (argc > 4) ? atoi(argv[4]) : FlagSpawn::DEFAULT_RESPAWN_TIME;
    
-         FlagSpawn spawn = FlagSpawn(p, time * 1000);
+         FlagSpawn spawn = FlagSpawn(p, time);
    
          // Following works for Nexus & Soccer games because they are not TeamFlagGame.  Currently, the only
          // TeamFlagGame is CTF.
@@ -1402,14 +1402,14 @@ bool ServerGame::processPseudoItem(S32 argc, const char **argv, const string &le
    {
       AsteroidSpawn *spawn = new AsteroidSpawn();
 
-      if(spawn->processArguments(argc, argv, this))
+      if(spawn->processArguments(argc - 1, argv + 1, this))   // processArguments don't like "AsteroidSpawn" as argv[0]
          getGameType()->addItemSpawn(spawn);
    }
    else if(!stricmp(argv[0], "CircleSpawn"))      // CircleSpawn <x> <y> [timer]      // TODO: Move this to CircleSpawn class?
    {
       CircleSpawn *spawn = new CircleSpawn();
 
-      if(spawn->processArguments(argc, argv, this))
+      if(spawn->processArguments(argc - 1, argv + 1, this))
          getGameType()->addItemSpawn(spawn);
    }
    else if(!stricmp(argv[0], "BarrierMaker"))
