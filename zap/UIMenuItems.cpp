@@ -183,12 +183,21 @@ void ValueMenuItem::initialize()
    mUnselectedValueColor = Colors::cyan;
 }
 
+
+S32 clamp(S32 val, S32 min, S32 max)
+{
+   if(val < min) return min;
+   if(val > max) return max;
+   return val;
+}
+
+
 ////////////////////////////////////
 ////////////////////////////////////
 
 ToggleMenuItem::ToggleMenuItem()
 {
-
+   // Do nothing
 }
 
 
@@ -197,8 +206,8 @@ ToggleMenuItem::ToggleMenuItem(string title, Vector<string> options, U32 currOpt
       ValueMenuItem(title, callback, help, k1, k2)
 {
    //mValue = "";
-   mIndex = currOption;
    mOptions = options;
+   mIndex = clamp(currOption, 0, mOptions.size() - 1);
    mWrap = wrap;
    mEnterAdvancesItem = true;
 }
@@ -294,7 +303,7 @@ ToggleMenuItem::ToggleMenuItem(lua_State *L)
    getStringVectorFromTable(L, 2, methodName, mOptions);    // Fills mOptions with elements in a table 
 
    // Optional (but recommended) items
-   mIndex = getInt(L, 3, methodName, 1) - 1;                // - 1 for compatibility with Lua's 1-based array index
+   mIndex = clamp(getInt(L, 3, methodName, 1) - 1, 0,  mOptions.size() - 1);   // First - 1 for compatibility with Lua's 1-based array index
    mWrap = getBool(L, 4, methodName, false);
    mHelp = getString(L, 4, methodName, "");
 }
@@ -310,14 +319,6 @@ Lunar<ToggleMenuItem>::RegType ToggleMenuItem::methods[] =
 void ToggleMenuItem::push(lua_State *L) 
 {  
    Lunar<ToggleMenuItem>::push(L, this); 
-}
-
-
-S32 clamp(S32 val, S32 min, S32 max)
-{
-   if(val < min) return min;
-   if(val > max) return max;
-   return val;
 }
 
 
