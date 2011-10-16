@@ -301,9 +301,9 @@ public:
    virtual string getValueForDisplayingInMenu() { return itos(mValue); }
    virtual const char *getUnits() { return mUnits.c_str(); }
    virtual S32 getIntValue() const { return mValue; }
-   virtual void setValue(const string &val) { mValue = atoi(val.c_str()); }
-   virtual string getValue() const { return itos(mValue); }
-   virtual void setIntValue(S32 val) { mValue = val; }
+   virtual void setValue(const string &val);
+    virtual void setIntValue(S32 val);
+  virtual string getValue() const { return itos(mValue); }
    virtual const char *getSpecialEditingInstructions() { return "Use [<-] and [->] keys to change value.  Use [Shift] for bigger change."; }
    virtual bool handleKey(InputCode inputCode, char ascii);
 

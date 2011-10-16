@@ -402,18 +402,31 @@ CounterMenuItem::CounterMenuItem(const string &title, S32 value, S32 step, S32 m
 {
    initialize();
 
-   mValue = value;
    mStep = step;
    mMinValue = minVal;
    mMaxValue = maxVal;
    mUnits = units;
    mMinMsg = minMsg;   
+
+   setIntValue(value);     // Needs to be done after mMinValue and mMaxValue are set
 }
 
 
 void CounterMenuItem::initialize()
 {
    mEnterAdvancesItem = true;
+}
+
+
+void CounterMenuItem::setValue(const string &val)
+{
+   setIntValue(atoi(val.c_str()));
+}
+
+
+void CounterMenuItem::setIntValue(S32 val)
+{
+   mValue = clamp(val, mMinValue, mMaxValue);
 }
 
 
@@ -469,19 +482,13 @@ bool CounterMenuItem::handleKey(InputCode inputCode, char ascii)
 
 void CounterMenuItem::increment(S32 fact) 
 { 
-   mValue += mStep * fact; 
-
-   if(mValue > mMaxValue) 
-      mValue = mMaxValue; 
+   setIntValue(mValue + mStep * fact);
 }
 
 
 void CounterMenuItem::decrement(S32 fact) 
 { 
-   mValue -= mStep * fact; 
-
-   if(mValue < mMinValue) 
-      mValue = mMinValue; 
+   setIntValue(mValue - mStep * fact);
 }
 
 
@@ -498,7 +505,7 @@ CounterMenuItem::CounterMenuItem(lua_State *L)
 
    // Required items -- will throw if they are missing or misspecified
    mDisplayVal = getString(L, 1, methodName);
-   mValue =  getInt(L, 2, methodName);  
+   // mValue =  getInt(L, 2, methodName);  ==> set this later, after we've determined mMinValue and mMaxValue
 
    // Optional (but recommended) items
    mStep =     getInt(L, 3, methodName, 1);   
@@ -507,6 +514,9 @@ CounterMenuItem::CounterMenuItem(lua_State *L)
    mUnits =    getString(L, 6, methodName, "");
    mMinMsg =   getString(L, 7, methodName, "");
    mHelp =     getString(L, 8, methodName, "");
+
+   // Second required item
+   setIntValue(getInt(L, 2, methodName));  
 }
 
 
