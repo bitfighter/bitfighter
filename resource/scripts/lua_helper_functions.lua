@@ -49,6 +49,8 @@ debug.getfenv = getfenv
 debug.getregistry = nil
 --]]
 
+arg = arg or { }  -- Make sure arg is defined before we ban globals
+
 
 --
 -- Wrapper to call the script's main() function in a safe manner
