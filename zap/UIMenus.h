@@ -97,6 +97,8 @@ public:
 
    S32 selectedIndex;
 
+   void getMenuResponses(Vector<string> &responses);    // Fill responses with values from menu
+
    void render();    // Draw the basic menu
    void onKeyDown(InputCode inputCode, char ascii);
    void onKeyUp(InputCode inputCode);

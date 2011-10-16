@@ -52,19 +52,35 @@ class GameObject;
 class LuaPoint;
 class LuaPlayerInfo;
 class Ship;
+class MenuItem;
 
 
 class LuaObject
 {
 protected:
    static void clearStack(lua_State *L);
-   static void checkArgCount(lua_State *L, S32 argsWanted, const char *functionName);
-   static F32 getFloat(lua_State *L, S32 index, const char *functionName);
-   static bool getBool(lua_State *L, S32 index, const char *functionName);
-   static lua_Integer getInt(lua_State *L, S32 index, const char *functionName);
-   static lua_Integer getInt(lua_State *L, S32 index, const char *functionName, S32 minVal, S32 maxVal);
-   static const char *getString(lua_State *L, S32 index, const char *functionName);
-   static Point getPoint(lua_State *L, S32 index, const char *functionName);
+   static void checkArgCount(lua_State *L, S32 argsWanted, const char *methodName);
+   static F32 getFloat(lua_State *L, S32 index, const char *methodName);
+
+   static bool getBool(lua_State *L, S32 index, const char *methodName);
+   static bool getBool(lua_State *L, S32 index, const char *methodName, bool defaultVal);
+
+   static lua_Integer getInt(lua_State *L, S32 index, const char *methodName);
+   static lua_Integer getInt(lua_State *L, S32 index, const char *methodName, S32 defaultVal);
+   static lua_Integer getInt(lua_State *L, S32 index, const char *methodName, S32 minVal, S32 maxVal);
+
+   static const char *getString(lua_State *L, S32 index, const char *methodName);
+   static const char *getString(lua_State *L, S32 index, const char *methodName, const char *defaultVal);
+
+   static Point getPoint(lua_State *L, S32 index, const char *methodName);
+
+   static MenuItem *pushMenuItem (lua_State *L, MenuItem *menuItem);
+
+   // This doesn't really need to be virtual, but something here does, to allow dynamic_casting to occur... I picked
+   // this one pretty much arbitrarily...  it won't be overridden.
+   virtual void getStringVectorFromTable(lua_State *L, S32 index, const char *methodName, Vector<string> &strings);
+   static bool getMenuItemVectorFromTable(lua_State *L, S32 index, const char *methodName, Vector<MenuItem *> &menuItems);
+
    static Point getPointOrXY(lua_State *L, S32 index, const char *functionName);
    static Point getVec(lua_State *L, S32 index, const char *methodName);
 
@@ -73,8 +89,10 @@ protected:
 public:
    // All of these return<T> functions work in the same way.  Include at the end of a child class method.
    // Usage: return returnInt(L, int);
-   static S32 returnPoint(lua_State *L, const Point &point);
-   static S32 returnLuaPoint(lua_State *L, LuaPoint *point);
+
+   template<class T>   S32 returnVal(lua_State *L, T value, bool letLuaDelete = true);
+
+   // The basics:
    static S32 returnInt(lua_State *L, S32 num);
    static S32 returnVec(lua_State *L, F32 x, F32 y);
    static S32 returnFloat(lua_State *L, F32 num);
@@ -82,12 +100,16 @@ public:
    static S32 returnBool(lua_State *L, bool boolean);
    static S32 returnNil(lua_State *L);
 
+   // More complex objects:
+   static S32 returnPoint(lua_State *L, const Point &point);
+   static S32 returnLuaPoint(lua_State *L, LuaPoint *point);
+   static S32 returnMenuItem(lua_State *L, MenuItem *menuItem);
    static S32 returnShip(lua_State *L, Ship *ship);                // Handles null references properly
 
    static S32 returnPlayerInfo(lua_State *L, Ship *ship);
    static S32 returnPlayerInfo(lua_State *L, LuaPlayerInfo *playerInfo);
 
-   static void stackdump(lua_State* L);
+   static void dumpStack(lua_State* L);
 
    static void openLibs(lua_State *L);
 
@@ -96,6 +118,12 @@ public:
 
 ////////////////////////////////////////
 ////////////////////////////////////////
+
+typedef struct { LuaObject *objectPtr; } UserData;
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 
 class LuaScriptRunner
 {
@@ -111,7 +139,7 @@ private:
    bool mScriptingDirSet;
 
    bool loadHelperFunctions(const string &helperName);
-   void setLuaArgs();
+   void setLuaArgs(const Vector<string> &args);
    void setModulePath();
 
    bool loadScript(const string &scriptName);
@@ -124,8 +152,6 @@ protected:
 
    virtual bool loadScript();
    bool startLua(ScriptType scriptType);
-   bool runMain();               // Run a script's main() function
-
 
    virtual void logError(const char *format, ...) = 0;
 
@@ -140,6 +166,9 @@ public:
 
    void setScriptingDir(const string &scriptingDir);
    lua_State *getL();
+
+   bool runMain();                              // Run a script's main() function
+   bool runMain(const Vector<string> &args);    // Run a script's main() function, putting args into Lua's arg table
 };
 
 

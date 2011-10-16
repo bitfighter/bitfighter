@@ -339,7 +339,8 @@ void MenuUserInterface::render()
    S32 yStart = getYStart();
    S32 offset = getOffset();
 
-   S32 adjfact = 0;              // Just because it looks good  (was 2, which looks crappy on gameParams menu.  0 seems to look ok everywhere.
+   // Just because it looks good (was 2, which looks crappy on gameParams menu.  0 seems to look ok everywhere.
+   S32 adjfact = 0;    
    S32 shrinkfact = 1;
 
    for(S32 i = 0; i < count; i++)
@@ -358,10 +359,10 @@ void MenuUserInterface::render()
    {
       glColor(Colors::blue);
 
-      if(offset > 0)                                  // There are items above
+      if(offset > 0)                                     // There are items above
          renderArrowAbove(yStart, ARROW_HEIGHT);
 
-      if(offset < mMenuItems.size() - MAX_MENU_SIZE)    // There are items below
+      if(offset < mMenuItems.size() - MAX_MENU_SIZE)     // There are items below
          renderArrowBelow(yStart + (getTextSize() + getGap()) * MAX_MENU_SIZE, ARROW_HEIGHT);
    }
 
@@ -377,6 +378,14 @@ void MenuUserInterface::render()
    drawCenteredString(ypos, helpFontSize, mMenuItems[selectedIndex]->getHelp());
 
    renderExtras();  // Draw something unique on a menu
+}
+
+
+// Fill responses with values from each menu item in turn
+void MenuUserInterface::getMenuResponses(Vector<string> &responses)
+{
+   for(S32 i = 0; i < mMenuItems.size(); i++)
+      responses.push_back(mMenuItems[i]->getValue());
 }
 
 

@@ -653,37 +653,69 @@ void EditorUserInterface::runScript(const FolderManager *folderManager, const st
 }
 
 
+static void showError(const ClientGame *game)
+{
+   Vector<StringTableEntry> messages;
+   messages.push_back("This plugin encountered an error configuring its options menu.");
+   messages.push_back("It is likely that it has been misconfigured.");
+   messages.push_back("");
+   messages.push_back("See the Bitfighter logfile for details.");
+
+   game->displayMessageBox("Problem With Plugin", "Press any key to return to the editor", messages);
+}
+
+
 void EditorUserInterface::runPlugin(const FolderManager *folderManager, const string &scriptName, const Vector<string> &args)
 {
    string fullName = folderManager->findLevelGenScript("mazegen");     // Find full name of levelgen script
 
-   LuaLevelGenerator levelGen(fullName, folderManager->luaDir, args, getGame()->getGridSize(), mLoadTarget, getGame(), gConsole);
+   LuaLevelGenerator *levelGen = new LuaLevelGenerator(fullName, folderManager->luaDir, args, getGame()->getGridSize(), 
+                                                       mLoadTarget, getGame(), gConsole);
 
-   if(!levelGen.loadScript())    // Loads the script and runs it to get everything loaded into memory.  Does not run main().
+   mPluginRunner = boost::shared_ptr<LuaLevelGenerator>(levelGen);
+
+
+   if(!mPluginRunner->loadScript())       // Loads the script and runs it to get everything loaded into memory.  Does not run main().
+   {
+      showError(getGame());
+      mPluginRunner.reset();              // Clean up, clean up, everybody clean up!
       return;
+   }
 
    Vector<MenuItem *> menuItems;
-   //string args = levelGen.runGetArgs();
-   //levelGen.runGetArgs(menuItems);         // Fills menuItems
 
-   // For now...
-   CounterMenuItem *menuItem = new CounterMenuItem("Run count:", 3, 1, 0, 3, "iterations", "Disabled", "Times to run the maze");
-   menuItems.push_back(menuItem);
+   if(!levelGen->runGetArgs(menuItems))         // Fills menuItems
+   {
+      showError(getGame());
+      mPluginRunner.reset();
+      return;
+   }
 
-   //displayMenu;
+   if(menuItems.size() == 0)                    // No menu items?  Let's run the script directly!
+   {
+      onPluginMenuClosed(Vector<string>());     // We'll use whatever args we already have
+      return;
+   }
+
+   // Build a menu from the menuItems returned by the plugin
    PluginMenuUI *menu = new PluginMenuUI(getGame());
 
    for(S32 i = 0; i < menuItems.size(); i++)
-      menu->addMenuItem(&menuItem[i]);
+      menu->addMenuItem(menuItems[i]);
+
+   menu->addSaveAndQuitMenuItem();
 
    menu->activate();
-
-
-
-   //plugin.run(args);
-
 }
 
+
+void EditorUserInterface::onPluginMenuClosed(const Vector<string> &args)
+{
+   TNLAssert(mPluginRunner, "NULL PluginRunner!");
+   
+   mPluginRunner->runMain(args);
+   mPluginRunner.reset();
+}
 
 
 void EditorUserInterface::validateLevel()

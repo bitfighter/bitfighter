@@ -52,7 +52,9 @@ public:
 
    virtual void onEscape();
 
+   void addSaveAndQuitMenuItem();
    void setMenuLocation(const Point &location);
+   virtual void doneEditing() = 0;
 };
 
 
@@ -77,10 +79,8 @@ public:
    void onEscape();
 
    virtual void startEditingAttrs(EditorObject *object);
-   virtual void doneEditingAttrs();
+   virtual void doneEditing();
    virtual void doneEditingAttrs(EditorObject *object);
-
-   void addSaveAndQuitMenuItem();
 };
 
 
@@ -94,6 +94,8 @@ class PluginMenuUI : public QuickMenuUI
 public:
    PluginMenuUI(ClientGame *game) : Parent(game) { /* Do nothing */ }    // Constructor
    string getTitle() { return "Hello dolly!"; }
+
+   virtual void doneEditing();
 };
 
 

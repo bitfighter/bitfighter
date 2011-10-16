@@ -732,7 +732,8 @@ bool ClientGame::checkName(const string &name)
 }
 
 
-void ClientGame::displayMessageBox(const StringTableEntry &title, const StringTableEntry &instr, const Vector<StringTableEntry> &message)
+void ClientGame::displayMessageBox(const StringTableEntry &title, const StringTableEntry &instr, 
+                                   const Vector<StringTableEntry> &message) const
 {
    ErrorMessageUserInterface *ui = getUIManager()->getErrorMsgUserInterface();
 

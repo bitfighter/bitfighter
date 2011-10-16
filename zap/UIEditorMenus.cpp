@@ -154,6 +154,23 @@ void QuickMenuUI::setMenuLocation(const Point &location)
 }
 
 
+static void saveAndQuit(ClientGame *game, U32 unused)
+{
+   QuickMenuUI *ui = dynamic_cast<QuickMenuUI *>(UserInterface::current);
+   TNLAssert(ui, "Unexpcted UI here -- expected a QuickMenuUI or child class!");
+
+   ui->doneEditing();
+   ui->getUIManager()->reactivatePrevUI();
+}
+
+
+// This was cached, but refactor made that difficult, and hell, these are cheap to create!
+void QuickMenuUI::addSaveAndQuitMenuItem()
+{
+   addMenuItem(new MenuItem(99, "Save and quit", saveAndQuit, "Saves and quits"));
+}
+
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -174,22 +191,6 @@ string EditorAttributeMenuUI::getTitle()
                                                                        mObject->getOnScreenName());
 }
 
-static void saveAndQuit(ClientGame *game, U32 unused)
-{
-   EditorAttributeMenuUI *ui = dynamic_cast<EditorAttributeMenuUI *>(UserInterface::current);
-   TNLAssert(ui, "Unexpcted UI here -- expected a EditorAttributeMenuUI!");
-
-   ui->doneEditingAttrs();
-   ui->getUIManager()->reactivatePrevUI();
-}
-
-
-// This was cached, but refactor made that difficult, and hell, these are cheap to create!
-void EditorAttributeMenuUI::addSaveAndQuitMenuItem()
-{
-   addMenuItem(new MenuItem(99, "Save and quit", saveAndQuit, "Saves and quits"));
-}
-
 
 void EditorAttributeMenuUI::startEditingAttrs(EditorObject *object) 
 { 
@@ -204,7 +205,7 @@ void EditorAttributeMenuUI::startEditingAttrs(EditorObject *object)
 }
 
 
-void EditorAttributeMenuUI::doneEditingAttrs() 
+void EditorAttributeMenuUI::doneEditing() 
 {
    doneEditingAttrs(mObject);
 }
@@ -228,6 +229,15 @@ void EditorAttributeMenuUI::doneEditingAttrs(EditorObject *object)
 
 ////////////////////////////////////////
 ////////////////////////////////////////
+
+
+void PluginMenuUI::doneEditing()
+{
+   Vector<string> responses;
+
+   getMenuResponses(responses);     // Fills responses
+   getGame()->getUIManager()->getEditorUserInterface()->onPluginMenuClosed(responses);
+}
 
 
 };

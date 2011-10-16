@@ -111,6 +111,8 @@ LUALIB_API int luaopen_vec (lua_State *L) {
   lua_setfield(L, -2, "zero");
   lua_pushvec(L, 1, 1, 1, 1);
   lua_setfield(L, -2, "one");
+
+  lua_pop(L, 1);        // Remove table from stack
   return 1;
 }
 

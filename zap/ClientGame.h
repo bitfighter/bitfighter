@@ -104,7 +104,7 @@ public:
 
    void displayShipDesignChangedMessage(const Vector<U32> &loadout, const char *msgToShowIfLoadoutsAreTheSame);
 
-   UIManager *getUIManager() { return mUIManager; }
+   UIManager *getUIManager() const { return mUIManager; }
 
    bool getInCommanderMap() { return mInCommanderMap; }
    void setInCommanderMap(bool inCommanderMap) { mInCommanderMap = inCommanderMap; }
@@ -173,7 +173,7 @@ public:
    void shutdownInitiated(U16 time, const StringTableEntry &name, const StringPtr &reason, bool originator);
    void cancelShutdown();
 
-   void displayMessageBox(const StringTableEntry &title, const StringTableEntry &instr, const Vector<StringTableEntry> &message);
+   void displayMessageBox(const StringTableEntry &title, const StringTableEntry &instr, const Vector<StringTableEntry> &message) const;
    void displayMessage(const Color &msgColor, const char *format, ...);
 
    void onConnectionTerminated(const Address &serverAddress, NetConnection::TerminationReason reason, const char *reasonStr);

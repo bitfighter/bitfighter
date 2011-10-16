@@ -39,6 +39,7 @@
 #include "EngineeredItem.h"   // For getItem()
 #include "PickupItem.h"       // For getItem()
 #include "playerInfo.h"       // For playerInfo def
+#include "UIMenuItems.h"      // For MenuItem def
 #include "config.h"
 
 #include "stringUtils.h"      // For joindir  
@@ -79,6 +80,15 @@ S32 LuaObject::returnPoint(lua_State *L, const Point &point)
 S32 LuaObject::returnLuaPoint(lua_State *L, LuaPoint *point)
 {
    Lunar<LuaPoint>::push(L, point, true);     // true will allow Lua to delete this object when it goes out of scope
+   return 1;
+}
+
+
+// Returns an existing LuaPoint to calling Lua function
+template<class T>
+S32 LuaObject::returnVal(lua_State *L, T value, bool letLuaDelete)
+{
+   Lunar<MenuItem>::push(L, value, letLuaDelete);     // true will allow Lua to delete this object when it goes out of scope
    return 1;
 }
 
@@ -205,6 +215,16 @@ lua_Integer LuaObject::getInt(lua_State *L, S32 index, const char *methodName, S
 }
 
 
+// Returns defaultVal if there is an invalid or missing value on the stack
+lua_Integer LuaObject::getInt(lua_State *L, S32 index, const char *methodName, S32 defaultVal)
+{
+   if(!lua_isnumber(L, index))
+      return defaultVal;
+   // else
+   return lua_tointeger(L, index);
+}
+
+
 // Pop integer off stack, check its type, and return it (no bounds check)
 lua_Integer LuaObject::getInt(lua_State *L, S32 index, const char *methodName)
 {
@@ -253,6 +273,26 @@ bool LuaObject::getBool(lua_State *L, S32 index, const char *methodName)
 }
 
 
+// Pop a boolean off stack, and return it
+bool LuaObject::getBool(lua_State *L, S32 index, const char *methodName, bool defaultVal)
+{
+   if(!lua_isboolean(L, index))
+      return defaultVal;
+   // else
+   return (bool) lua_toboolean(L, index);
+}
+
+
+// Pop a string or string-like object off stack, check its type, and return it
+const char *LuaObject::getString(lua_State *L, S32 index, const char *methodName, const char *defaultVal)
+{
+   if(!lua_isstring(L, index))
+      return defaultVal;
+   // else
+   return lua_tostring(L, index);
+}
+
+
 // Pop a string or string-like object off stack, check its type, and return it
 const char *LuaObject::getString(lua_State *L, S32 index, const char *methodName)
 {
@@ -266,6 +306,122 @@ const char *LuaObject::getString(lua_State *L, S32 index, const char *methodName
    }
 
    return lua_tostring(L, index);
+}
+
+
+MenuItem *LuaObject::pushMenuItem (lua_State *L, MenuItem *menuItem)
+{
+  MenuItem *menuItemUserData = (MenuItem *)lua_newuserdata(L, sizeof(MenuItem));
+
+  *menuItemUserData = *menuItem;
+  luaL_getmetatable(L, "MenuItem");
+  lua_setmetatable(L, -2);
+
+  return menuItemUserData;
+}
+
+
+// Pulls values out of the table at specified index as strings, and puts them all into strings vector
+void LuaObject::getStringVectorFromTable(lua_State *L, S32 index, const char *methodName, Vector<string> &strings)
+{
+   strings.clear();
+
+   if(!lua_istable(L, index))
+   {
+      char msg[256];
+      dSprintf(msg, sizeof(msg), "%s expected table arg (which I wanted to convert to a string vector) at position %d", methodName, index);
+      logprintf(LogConsumer::LogError, msg);
+
+      throw LuaException(msg);
+   }
+
+   // The following block loosely based on http://www.gamedev.net/topic/392970-lua-table-iteration-in-c---basic-walkthrough/
+
+   lua_pushvalue(L, index);	// Push our table onto the top of the stack
+   lua_pushnil(L);            // lua_next (below) will start the iteration, it needs nil to be the first key it pops
+
+   // The table was pushed onto the stack at -1 (recall that -1 is equivalent to lua_gettop)
+   // The lua_pushnil then pushed the table to -2, where it is currently located
+   while(lua_next(L, -2))     // -2 is our table
+   {
+      // Grab the value at the top of the stack
+      if(!lua_isstring(L, -1))
+      {
+         char msg[256];
+         dSprintf(msg, sizeof(msg), "%s expected a table of strings -- invalid value at stack position %d, table element %d", methodName, index, strings.size() + 1);
+         logprintf(LogConsumer::LogError, msg);
+
+         throw LuaException(msg);
+      }
+
+      strings.push_back(lua_tostring(L, -1));
+
+      lua_pop(L, 1);    // We extracted that value, pop it off so we can push the next element
+   }
+
+   // We've got all the elements in the table, so clear it off the stack
+   lua_pop(L, 1);
+}
+
+
+static ToggleMenuItem *getMenuItem(lua_State *L, S32 index)
+{
+  ToggleMenuItem *pushedMenuItem;
+
+  luaL_checktype(L, index, LUA_TUSERDATA);      // Confirm the item at index is a full userdata
+  pushedMenuItem = (ToggleMenuItem *)luaL_checkudata(L, index, "ToggleMenuItem");
+  if(pushedMenuItem == NULL) 
+     luaL_typerror(L, index, "ToggleMenuItem");
+
+  //MenuItem im = *pushedMenuItem;
+  //if(!pushedMenuItem)
+  //  luaL_error(L, "null menuItem");
+
+  return pushedMenuItem;
+}
+
+
+// Pulls values out of the table at specified, verifies that they are MenuItems, and adds them to the menuItems vector
+bool LuaObject::getMenuItemVectorFromTable(lua_State *L, S32 index, const char *methodName, Vector<MenuItem *> &menuItems)
+{
+   if(!lua_istable(L, index))
+   {
+      char msg[256];
+      dSprintf(msg, sizeof(msg), "%s expected table arg (which I wanted to convert to a menuItem vector) at position %d", methodName, index);
+      logprintf(LogConsumer::LogError, msg);
+
+      throw LuaException(msg);
+   }
+
+   // The following block (very) loosely based on http://www.gamedev.net/topic/392970-lua-table-iteration-in-c---basic-walkthrough/
+
+   lua_pushvalue(L, index);	// Push our table onto the top of the stack                                               -- table table
+   lua_pushnil(L);            // lua_next (below) will start the iteration, it needs nil to be the first key it pops    -- table table nil
+
+   // The table was pushed onto the stack at -1 (recall that -1 is equivalent to lua_gettop)
+   // The lua_pushnil then pushed the table to -2, where it is currently located
+   while(lua_next(L, -2))     // -2 is our table
+   {
+      UserData *ud = static_cast<UserData *>(lua_touserdata(L, -1));
+
+      if(!ud)                // Weeds out simple values, wrong userdata types still pass here
+         return false;
+
+      // We have a userdata
+      LuaObject *obj = ud->objectPtr;                       // Extract the pointer
+      MenuItem *menuItem = dynamic_cast<MenuItem *>(obj);   // Cast it to a MenuItem
+
+      if(!menuItem)                                         // Cast failed -- not a MenuItem... we got some bad args
+          return false;
+
+      menuItems.push_back(menuItem);                        // Add the MenuItem to our list
+      lua_pop(L, 1);                                        // We extracted that value, pop it off so we can push the next element
+   }
+
+   // We've got all the elements in the table, so clear it off the stack
+   lua_pop(L, 1);
+
+   return true;
 }
 
 
@@ -363,28 +519,28 @@ LuaItem *LuaItem::getItem(lua_State *L, S32 index, U32 type, const char *functio
 }
 
 
-// Adapted from http://cc.byexamples.com/20081119/lua-stack-dump-for-c/
-void LuaObject::stackdump(lua_State* l)
+// Adapted from PiL book section 24.2.3
+void LuaObject::dumpStack(lua_State* L)
 {
-    int top = lua_gettop(l);
+    int top = lua_gettop(L);
 
-    logprintf("total in stack %d\n",top);
+    logprintf("\nTotal in stack: %d",top);
 
     for (S32 i = 1; i <= top; i++)
-    {  /* repeat for each level */
-        int t = lua_type(l, i);
+    {  // Repeat for each level 
+        int t = lua_type(L, i);
         switch (t) {
-            case LUA_TSTRING:  /* strings */
-                logprintf("string: '%s'", lua_tostring(l, i));
+            case LUA_TSTRING:   
+                logprintf("string: '%s'", lua_tostring(L, i));
                 break;
-            case LUA_TBOOLEAN:  /* booleans */
-                logprintf("boolean %s",lua_toboolean(l, i) ? "true" : "false");
+            case LUA_TBOOLEAN:  
+                logprintf("boolean %s",lua_toboolean(L, i) ? "true" : "false");
                 break;
-            case LUA_TNUMBER:  /* numbers */
-                logprintf("number: %g", lua_tonumber(l, i));
+            case LUA_TNUMBER:    
+                logprintf("number: %g", lua_tonumber(L, i));
                 break;
-            default:  /* other values */
-                logprintf("%s", lua_typename(l, t));
+            default:             
+                logprintf("%s", lua_typename(L, t));
                 break;
         }
     }
@@ -406,11 +562,7 @@ LuaScriptRunner::LuaScriptRunner()
 LuaScriptRunner::~LuaScriptRunner()
 {
    if(L)
-   {
-      // Destroy all objects in the given Lua state (calling the corresponding garbage-collection metamethods, if any) 
-      // and free all dynamic memory used by this state
       lua_close(L);
-   }
 }
 
 
@@ -468,9 +620,18 @@ bool LuaScriptRunner::runChunk()
 // return false if failed
 bool LuaScriptRunner::runMain()
 {
+   return runMain(mScriptArgs);
+}
+
+
+bool LuaScriptRunner::runMain(const Vector<string> &args)
+{
+   setLuaArgs(args);
+
    try
    {
-      lua_getglobal(L, "_main");       // _main calls main --> see lua_helper_functions.lua.  Does not throw an error if main does not exist.
+      // _main calls main --> see lua_helper_functions.lua.  Does NOT throw an error if main does not exist!  Will return silently!
+      lua_getglobal(L, "_main");       
       if(lua_pcall(L, 0, 0, 0) != 0)
          throw LuaException(lua_tostring(L, -1));
    }
@@ -518,7 +679,6 @@ bool LuaScriptRunner::startLua(ScriptType scriptType)
 
    LuaUtil::openLibs(L);
    setModulePath();
-   setLuaArgs();                    // Put the script args in to the Lua table "args"
 
    setPointerToThis();     
 
@@ -533,23 +693,23 @@ bool LuaScriptRunner::startLua(ScriptType scriptType)
       helperFunctions = "levelgen_helper_functions.lua";
    else
       TNLAssert(false, "Helper functions not defined for scriptType!");
-
+   
    return(loadHelperFunctions("lua_helper_functions.lua") && loadHelperFunctions(helperFunctions)); 
 }
 
 
 // Hand off any script arguments to Lua, by packing them in the args table, which is where Lua traditionally stores cmd line args
-void LuaScriptRunner::setLuaArgs()
+void LuaScriptRunner::setLuaArgs(const Vector<string> &args)
 {
    // Put args into a table that the Lua script can read.  By Lua convention, we'll put the name of the robot/script into the 0th element.
-   lua_createtable(L, mScriptArgs.size() + 1, 0);
+   lua_createtable(L, args.size() + 1, 0);
 
    lua_pushstring(L, mScriptName.c_str());
    lua_rawseti(L, -2, 0);
 
-   for(S32 i = 0; i < mScriptArgs.size(); i++)
+   for(S32 i = 0; i < args.size(); i++)
    {
-      lua_pushstring(L, mScriptArgs[i].c_str());
+      lua_pushstring(L, args[i].c_str());
       lua_rawseti(L, -2, i + 1);
    }
 
@@ -558,12 +718,13 @@ void LuaScriptRunner::setLuaArgs()
 
 
  void LuaScriptRunner::setModulePath()   
- {
-   lua_pushstring(L, "package");
-   lua_gettable(L, LUA_GLOBALSINDEX);
-   lua_pushstring(L, "path");
-   lua_pushstring(L, (mScriptingDir + "/?.lua").c_str());
-   lua_settable(L, -3);
+ {                                                          // What's on the stack:
+   lua_pushstring(L, "package");                            // "package"
+   lua_gettable(L, LUA_GLOBALSINDEX);                       // value of package global -- appears to be a table
+   lua_pushstring(L, "path");                               // table, "path"
+   lua_pushstring(L, (mScriptingDir + "/?.lua").c_str());   // table, "path", mScriptingDir + "/?.lua"
+   lua_settable(L, -3);                                     // table
+   lua_pop(L, 1);                                           // stack should be empty
  }
 
 

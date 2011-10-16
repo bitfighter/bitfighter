@@ -23,13 +23,13 @@
 //
 //------------------------------------------------------------------------------------
 
-
 #include "UIMenuItems.h"
 #include "UIMenus.h"
 #include "UI.h"
 #include "ScreenInfo.h"    // For gScreenInfo stuff
 
 #include "SDL/SDL_opengl.h"
+
 
 namespace Zap
 {
@@ -41,7 +41,7 @@ MenuItem::MenuItem(S32 index, const string &prompt, void (*callback)(ClientGame 
    key1 = k1;
    key2 = k2;
    mCallback = callback;
-   mHelp = help;
+   mHelp = help.c_str();
    mIndex = (U32)index;
    mEnterAdvancesItem = false;
    mSelectedColor = Colors::yellow;
@@ -129,35 +129,16 @@ ValueMenuItem::ValueMenuItem(S32 index, const string &value, void (*callback)(Cl
 ////////////////////////////////////
 ////////////////////////////////////
 
-ToggleMenuItem::ToggleMenuItem(string title, Vector<string> options, U32 currOption, bool wrap, void (*callback)(ClientGame *, U32), string help, InputCode k1, InputCode k2) :
+ToggleMenuItem::ToggleMenuItem(string title, Vector<string> options, U32 currOption, bool wrap, 
+                               void (*callback)(ClientGame *, U32), string help, InputCode k1, InputCode k2) :
       ValueMenuItem(-1, title, callback, help, k1, k2)
 {
-   mValue = "";
+   //mValue = "";
    mIndex = currOption;
    mOptions = options;
    mWrap = wrap;
    mEnterAdvancesItem = true;
 }
-
-
-const char ToggleMenuItem::className[] = "ToggleMenuItem";      // Class name as it appears to Lua scripts
-
-// Lua Constructor
-//ToggleMenuItem::ToggleMenuItem(lua_State *L) : ValueMenuItem(gClientGame, -1, NULL, NULL, "", KEY_NONE)
-//{
-//   TNLAssert(false, "Don't use this yet!!");
-   //static const char *methodName = "ToggleMenuItem constructor";
-
-   //checkArgCount(L, 2, methodName);
-   //string value =  getValue(L, 1, methodName);      // Text
-   //F32 y =  getFloat(L, 2, methodName);      // Callback (?)
-   //string help =  getFloat(L, 2, methodName);      // Help
-   //F32 key1 =  getFloat(L, 2, methodName);      // Key 1
-   //F32 key2 =  getFloat(L, 2, methodName);      // Key 2
-
-   //mPoint = ValueMenuItem(index, text, callback, help, key1, key2);
-//}
-
 
 
 string ToggleMenuItem::getOptionText()
@@ -236,19 +217,94 @@ bool ToggleMenuItem::handleKey(InputCode inputCode, char ascii)
 }
 
 
-////////////////////////////////////
-////////////////////////////////////
+//////////
+// Lua interface
+const char ToggleMenuItem::className[] = "ToggleMenuItem";      // Class name as it appears to Lua scripts
 
-
-YesNoMenuItem::YesNoMenuItem(string title, bool currOption, void (*callback)(ClientGame *, U32), string help, InputCode k1, InputCode k2) :
-      ToggleMenuItem(title, Vector<string>(), currOption, true, callback, help, k1, k2)
+// Lua Constructor
+ToggleMenuItem::ToggleMenuItem(lua_State *L) : ValueMenuItem(-1, "", NULL, "")
 {
-   mValue = "";
+   const char *methodName = "ToggleMenuItem constructor";
+
+   // Required items -- will throw if they are missing or misspecified
+   mPrompt = getString(L, 1, methodName);
+   getStringVectorFromTable(L, 2, methodName, mOptions);    // Fills mOptions with elements in a table 
+
+   // Optional (but recommended) items
+   mIndex = getInt(L, 3, methodName, 1) - 1;                // - 1 for compatibility with Lua's 1-based array index
+   mWrap = getBool(L, 4, methodName, false);
+   mHelp = getString(L, 4, methodName, "");
+}
+
+
+// Define the methods we will expose to Lua
+Lunar<ToggleMenuItem>::RegType ToggleMenuItem::methods[] =
+{
+   {0,0}    // End method list
+};
+
+
+void ToggleMenuItem::push(lua_State *L) 
+{  
+   Lunar<ToggleMenuItem>::push(L, this); 
+}
+
+
+////////////////////////////////////
+////////////////////////////////////
+
+
+YesNoMenuItem::YesNoMenuItem(string title, bool currOption, void (*callback)(ClientGame *, U32), string help, 
+                             InputCode k1, InputCode k2) :
+      ToggleMenuItem(title, Vector<string>(), currOption, true)
+{
+   initialize();
+   //mValue = "";
    mIndex = currOption;
+   mEnterAdvancesItem = true;
+}
+
+
+void YesNoMenuItem::initialize()
+{
+   //mValue = "";
    mEnterAdvancesItem = true;
 
    mOptions.push_back("No");     // 0
    mOptions.push_back("Yes");    // 1
+}
+
+
+//////////
+// Lua interface
+const char YesNoMenuItem::className[] = "YesNoMenuItem";      // Class name as it appears to Lua scripts
+
+// Lua Constructor
+YesNoMenuItem::YesNoMenuItem(lua_State *L) : Parent("", Vector<string>())
+{
+   initialize();
+
+   const char *methodName = "YesNoMenuItem constructor";
+
+   // Required items -- will throw if they are missing or misspecified
+   mPrompt = getString(L, 1, methodName);
+
+   // Optional (but recommended) items
+   mIndex = getInt(L, 2, methodName, 1) - 1;                // - 1 for compatibility with Lua's 1-based array index
+   mHelp = getString(L, 3, methodName, "");
+}
+
+
+// Define the methods we will expose to Lua
+Lunar<YesNoMenuItem>::RegType YesNoMenuItem::methods[] =
+{
+   {0,0}    // End method list
+};
+
+
+void YesNoMenuItem::push(lua_State *L) 
+{  
+   Lunar<YesNoMenuItem>::push(L, this); 
 }
 
 
@@ -259,13 +315,19 @@ CounterMenuItem::CounterMenuItem(const string &title, S32 value, S32 step, S32 m
                                  const string &minMsg, const string &help, InputCode k1, InputCode k2) :
    Parent(-1, title, NULL, help, k1, k2)
 {
+   initialize();
+
    mValue = value;
    mStep = step;
    mMinValue = minVal;
    mMaxValue = maxVal;
    mUnits = units;
    mMinMsg = minMsg;   
+}
 
+
+void CounterMenuItem::initialize()
+{
    mEnterAdvancesItem = true;
 }
 
@@ -335,6 +397,44 @@ void CounterMenuItem::decrement(S32 fact)
 
    if(mValue < mMinValue) 
       mValue = mMinValue; 
+}
+
+
+//////////
+// Lua interface
+const char CounterMenuItem::className[] = "CounterMenuItem";      // Class name as it appears to Lua scripts
+
+// Lua Constructor
+CounterMenuItem::CounterMenuItem(lua_State *L) : Parent(0, "")
+{
+   const char *methodName = "CounterMenuItem constructor";
+
+   initialize();
+
+   // Required items -- will throw if they are missing or misspecified
+   mPrompt = getString(L, 1, methodName);
+   mValue =  getInt(L, 2, methodName);  
+
+   // Optional (but recommended) items
+   mStep =     getInt(L, 3, methodName, 1);   
+   mMinValue = getInt(L, 4, methodName, 0);   
+   mMaxValue = getInt(L, 5, methodName, 100);   
+   mUnits =    getString(L, 6, methodName, "");
+   mMinMsg =   getString(L, 7, methodName, "");
+   mHelp =     getString(L, 8, methodName, "");
+}
+
+
+// Define the methods we will expose to Lua
+Lunar<CounterMenuItem>::RegType CounterMenuItem::methods[] =
+{
+   {0,0}    // End method list
+};
+
+
+void CounterMenuItem::push(lua_State *L) 
+{  
+   Lunar<CounterMenuItem>::push(L, this); 
 }
 
 
@@ -444,7 +544,13 @@ EditableMenuItem::EditableMenuItem(string title, string val, string emptyVal, st
          ValueMenuItem(-1, title, NULL, help, k1, k2),
          mLineEditor(LineEditor(maxLen, val))
 {
+   initialize();
    mEmptyVal = emptyVal;
+}
+
+
+void EditableMenuItem::initialize()
+{
    mEnterAdvancesItem = true;
    mTextEditedCallback = NULL;
 }
@@ -503,6 +609,41 @@ bool EditableMenuItem::handleKey(InputCode inputCode, char ascii)
    }
    
    return false;
+}
+
+
+//////////
+// Lua interface
+const char EditableMenuItem::className[] = "EditableMenuItem";      // Class name as it appears to Lua scripts
+
+// Lua Constructor
+EditableMenuItem::EditableMenuItem(lua_State *L)
+{
+   initialize();
+
+   const char *methodName = "EditableMenuItem constructor";
+
+   // Required items -- will throw if they are missing or misspecified
+   mPrompt = getString(L, 1, methodName);
+
+   // Optional (but recommended) items
+   mLineEditor.setString(getString(L, 2, methodName, ""));
+   mEmptyVal = getString(L, 3, methodName, "");
+   mHelp = getString(L, 4, methodName, "");
+   mLineEditor.mMaxLen = getInt(L, 5, methodName, 32);
+}
+
+
+// Define the methods we will expose to Lua
+Lunar<EditableMenuItem>::RegType EditableMenuItem::methods[] =
+{
+   {0,0}    // End method list
+};
+
+
+void EditableMenuItem::push(lua_State *L) 
+{  
+   Lunar<EditableMenuItem>::push(L, this); 
 }
 
 

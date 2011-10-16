@@ -31,6 +31,9 @@
 #include "luaUtil.h"
 
 
+#include "UIMenuItems.h"      // delete
+
+
 namespace Zap
 {
 
@@ -66,23 +69,36 @@ bool LuaLevelGenerator::runScript()
 }
 
 
+
+
+      static ToggleMenuItem *getMenuItem(lua_State *L, S32 index)
+      {
+         LuaUtil::dumpStack(L);
+
+        //luaL_checktype(L, index, LUA_TUSERDATA);      // Confirm the item at index is a full userdata
+        ToggleMenuItem *pushedMenuItem = static_cast<ToggleMenuItem *>(lua_touserdata(L, index));
+        if(pushedMenuItem == NULL) 
+           luaL_typerror(L, index, "ToggleMenuItem");
+
+        //MenuItem im = *pushedMenuItem;
+        //if(!pushedMenuItem)
+        //  luaL_error(L, "null menuItem");
+
+        return pushedMenuItem;
+      }
 // Run the script's getArgs() function
-string LuaLevelGenerator::runGetArgs()
+bool LuaLevelGenerator::runGetArgs(Vector<MenuItem *> &menuItems)
 {
    lua_getglobal(L, "getArgs");
 
    if(!lua_isfunction(L, -1) || lua_pcall(L, 0, 1, 0))     // Passing 0 params, getting 1 back
    {
       // This should really never happen -- can only occur if robot_helper_functions is corrupted, or if bot is wildly misbehaving
-      logError("Error retrieving args from script %s", mScriptName.c_str());
-      return "";
+      logError("Error retrieving args from script %s: %s", mScriptName.c_str(), lua_tostring(L, -1));
+      return false;
    }
    else
-   {
-      // Do something
-
-      return "";
-   }
+      return getMenuItemVectorFromTable(L, 1, "getArgs", menuItems);
 }
 
 
@@ -235,8 +251,6 @@ S32 LuaLevelGenerator::addItem(lua_State *L)
 
    processLevelLoadLine(argc, 0, argv, mGridDatabase, false, "Levelgen script: " + mScriptName);      // For now, all ids are 0!
 
-   //clearStack();
-
    return 0;
 }
 
@@ -258,8 +272,6 @@ S32 LuaLevelGenerator::addLevelLine(lua_State *L)
 
    mCaller->parseLevelLine(line, mGridDatabase, false, "Levelgen script: " + mScriptName);
 
-   //clearStack();
-
    return 0;
 }
 
@@ -273,8 +285,6 @@ S32 LuaLevelGenerator::setGameTime(lua_State *L)
    F32 time = getFloat(L, 1, methodName);
 
    mCaller->setGameTime(time);
-
-   //clearStack();
 
    return 0;
 }
@@ -290,8 +300,6 @@ S32 LuaLevelGenerator::pointCanSeePoint(lua_State *L)
    Point p2 = getPoint(L, 2, methodName) *= mGridSize;
 
    return returnBool(L, mGridDatabase->pointCanSeePoint(p1, p2));
-
-   //clearStack();
 }
 
 
@@ -324,8 +332,8 @@ void LuaLevelGenerator::setPointerToThis()
    lua_pushnumber(L, mGridSize);
    lua_setglobal(L, "_GRID_SIZE");
 
-   Lunar<LuaLevelGenerator>::push(L, this);  
-   lua_setglobal(L, "levelgen");
+   Lunar<LuaLevelGenerator>::push(L, this);     // Put our LuaLevelGenerator object on the stack
+   lua_setglobal(L, "levelgen");                // Set the lua global levelgen to point at it
 }
 
 
@@ -336,60 +344,11 @@ void LuaLevelGenerator::registerClasses()
    Lunar<LuaPoint>::Register(L);
    Lunar<LuaUtil>::Register(L);
 
-}
 
-
-/*
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-// C++ Constructor
-LuaEditorPlugin::LuaEditorPlugin(const string &scriptName, const string &scriptDir, const Vector<string> *scriptArgs, F32 gridSize, 
-                                 GridDatabase *gridDatabase, LevelLoader *caller, OGLCONSOLE_Console console)
-                      : Parent(scriptName, scriptDir, scriptArgs, gridSize, gridDatabase, caller, console)
-{
+   Lunar<ToggleMenuItem>::Register(L);
 
 }
 
 
-const char LuaEditorPlugin::className[] = "LuaEditorPlugin";      // Class name as it appears to Lua scripts
-
-//// Used in addItem() below...
-//static const char *argv[LevelLoader::MAX_LEVEL_LINE_ARGS];
-
-
-// Lua Constructor
-LuaEditorPlugin::LuaEditorPlugin(lua_State *L)
-{
-   TNLAssert(false, "Why use this constructor?");
-   throw LuaException("Trying to initalize LuaLevelGenerator without proper arguments is not allowed");
-}
-
-
-// Destructor
-LuaEditorPlugin::~LuaEditorPlugin()
-{
-   // Do nothing
-}
-
-
-
-bool LuaEditorPlugin::runMain()
-{
-   try
-   {
-      lua_getglobal(L, "_main");       // _main calls main --> see lua_helper_functions.lua
-      if(lua_pcall(L, 0, 0, 0) != 0)
-         throw LuaException(lua_tostring(L, -1));
-   }
-   catch(LuaException &e)
-   {
-      logError("Plugin error running main(): %s.  Shutting plugin down.", e.what());
-      return false;
-   }
-   return true;
-}
-*/
 };
 

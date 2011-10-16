@@ -29,6 +29,7 @@
 #include "teamInfo.h"      // For Team def
 #include "Colors.h"
 #include "stringUtils.h"   // For itos
+
 #include <string>
 
 
@@ -61,15 +62,16 @@ class MenuUserInterface;
 ////////////////////////////////////
 ////////////////////////////////////
 
-class MenuItem
+class MenuItem : public LuaObject
 {
 private:
-   string mPrompt;     // Text displayed on menu
-   string mHelp;       // An optional help string
    S32 mIndex;
    MenuUserInterface *mMenu;
 
 protected:
+   string mPrompt;         // Text displayed on menu
+   const char *mHelp;      // An optional help string
+
    Color mSelectedColor;
    Color mUnselectedColor;
 
@@ -77,7 +79,6 @@ protected:
    void (*mCallback)(ClientGame *, U32);
 
    const char *mPromptAppendage;
-
 
 public:
    // Constructor
@@ -91,6 +92,8 @@ public:
 
    virtual MenuItemTypes getItemType() { return MenuItemType; }
 
+   //MenuItem *MenuItem::getMenuItem(lua_State *L, S32 index, U32 type, const char *functionName);
+
    virtual void render(S32 ypos, S32 textsize, bool isSelected);              // Renders item horizontally centered on screen
    virtual void render(S32 xpos, S32 ypos, S32 textsize, bool isSelected);    // Renders item horizontally centered on xpos
    virtual S32 getWidth(S32 textsize);
@@ -99,14 +102,13 @@ public:
 
    S32 getIndex() { return mIndex; }      // Only used once...  TODO: Get rid of this, and perhaps user-assigned indices altogether
 
-   const char *getHelp() { return mHelp.c_str(); }
-   void setHelp(const string &help) { mHelp = help; }
+   const char *getHelp() { return mHelp; }
 
    MenuUserInterface *getMenu();
    void setMenu(MenuUserInterface *menu);
 
    string getPrompt() const { return mPrompt; }
-   void setPrompt(const string &prompt) { mPrompt = prompt; }
+   //void setPrompt(const string &prompt) { mPrompt = prompt; }
 
 
    virtual string getUnits() const { return ""; }
@@ -140,6 +142,7 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+// Used to jam a message into a menu structure... currently used to show the "waiting for server to allow you to switch teams" msg
 class MessageMenuItem : public MenuItem
 {
 public:
@@ -156,7 +159,7 @@ public:
 
 // Parent class for all things that have both a name and a value, i.e. anything that's not a regular menuItem
 // User provides typed input, value is returned as a string
-// Provides some additional functionality
+// Provides some additional functionality; not used directly
 class ValueMenuItem : public MenuItem
 {
    typedef MenuItem Parent;
@@ -170,9 +173,8 @@ protected:
    void setUnselectedValueColor(const Color &color) { mUnselectedValueColor = color; }
 
 public:
-   ValueMenuItem(S32 index, const string &text, void (*callback)(ClientGame *, U32), const string &help, 
+   ValueMenuItem(S32 index = 0, const string &text = "", void (*callback)(ClientGame *, U32) = NULL, const string &help = "", 
          InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
-   
 };
 
 
@@ -187,20 +189,17 @@ private:
    string getOptionText();     // Helper function
 
 protected:
-   string mValue;
+   //string mValue;
    U32 mIndex;
    bool mWrap;
 
 public:
-   static const char className[];
-
-   ToggleMenuItem(string title, Vector<string> options, U32 currOption, bool wrap, void (*callback)(ClientGame *, U32), string help, 
-                  InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
-
-   //ToggleMenuItem(lua_State *L);     // So we can construct this from Lua for plugins
+   ToggleMenuItem(string title, Vector<string> options, U32 currOption = 0, bool wrap = false, 
+                  void (*callback)(ClientGame *, U32) = NULL, 
+                  string help = "", InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
 
    virtual MenuItemTypes getItemType() { return ToggleMenuItemType; }
-   virtual string getValueForDisplayingInMenu() { return mValue; }
+   virtual string getValueForDisplayingInMenu() { return ""; }
    virtual const char *getSpecialEditingInstructions() { return "Use [<-] and [->] keys to change value."; }
    virtual S32 getValueIndex() { return mIndex; }
    virtual void setValueIndex(U32 index) { mIndex = index; }
@@ -215,6 +214,13 @@ public:
    virtual void activatedWithShortcutKey() { /* Do nothing */ }
 
    Vector<string> mOptions;
+
+   /////// Lua Interface
+   static const char className[];
+   static Lunar<ToggleMenuItem>::RegType methods[];
+
+   ToggleMenuItem(lua_State *L);                      //  Lua constructor -- so we can construct this from Lua for plugins
+   virtual void push(lua_State *L);
 };
 
 
@@ -225,15 +231,26 @@ class YesNoMenuItem : public ToggleMenuItem
 {
    typedef ToggleMenuItem Parent;
 
+private:
+   virtual void initialize();
+
 public:
-   YesNoMenuItem(string title, bool currOption, void (*callback)(ClientGame *, U32), string help, 
+   YesNoMenuItem(string title, bool currOption = 0, void (*callback)(ClientGame *, U32) = NULL, string help = "", 
                  InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
 
-   virtual string getValueForDisplayingInMenu() { return mIndex ? " Engineer" : ""; }
+
+   virtual string getValueForDisplayingInMenu() { TNLAssert(false, "Is this used?  If not, remove it!"); return mIndex ? " Engineer" : ""; }
    virtual string getValueForWritingToLevelFile() { return mIndex ? "yes" : "no"; }
    virtual void setValue(const string &val) { mIndex = (val == "yes") ? 1 : 0; }
    virtual S32 getIntValue() const { return mIndex; }    // 0 == false == no, 1 == true == yes
    virtual void setIntValue(S32 value) { mIndex = (value == 0) ? 0 : 1; }
+
+   /////// Lua Interface
+   static const char className[];
+   static Lunar<YesNoMenuItem>::RegType methods[];
+
+   YesNoMenuItem(lua_State *L);                      //  Lua constructor -- so we can construct this from Lua for plugins
+   virtual void push(lua_State *L);
 };
 
 ////////////////////////////////////////
@@ -245,6 +262,7 @@ class CounterMenuItem : public ValueMenuItem
 
 private:
    string getOptionText();     // Helper function
+   virtual void initialize();
 
 protected:
    S32 mValue;
@@ -259,8 +277,9 @@ protected:
    virtual S32 getBigIncrement() { return 10; }    // How much our counter is incremented when shift is down (multiplier)
 
 public:
-   CounterMenuItem(const string &title, S32 value, S32 step, S32 minVal, S32 maxVal, const string &units, const string &minMsg, 
-                   const string &help, InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
+   CounterMenuItem(const string &title, S32 value, S32 step = 1, S32 minVal = 0, S32 maxVal = 100, 
+                   const string &units = "", const string &minMsg = "", 
+                   const string &help = "", InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
 
    virtual void render(S32 xpos, S32 ypos, S32 textsize, bool isSelected);
    virtual S32 getWidth(S32 textsize);
@@ -280,6 +299,13 @@ public:
    virtual void snap() { /* Do nothing */ }
 
    virtual void activatedWithShortcutKey() { /* Do nothing */ }
+
+   /////// Lua Interface
+   static const char className[];
+   static Lunar<CounterMenuItem>::RegType methods[];
+
+   CounterMenuItem(lua_State *L);                      //  Lua constructor -- so we can construct this from Lua for plugins
+   virtual void push(lua_State *L);
 };
 
 
@@ -301,7 +327,7 @@ public:
    virtual void setValue (const string &val) { mValue = S32((atof(val.c_str()) * 60 + 2.5) / 5) * 5 ; }     // Snap to nearest 5 second interval
    virtual string getValueForDisplayingInMenu() { return (mValue < 60) ? itos(mValue) : 
                                                    itos(mValue / 60) + ":" + ((mValue % 60) < 10 ? "0" : "") + itos(mValue % 60); }
-   virtual string getValueForWritingToLevelFile() { return ftos((F32)mValue / 60.0f, 3); }
+   virtual string getValueForWritingToLevelFile() { return ftos((F32)mValue / 60.0f, 3); }    // Time in minutes, with fraction
 };
 
 
@@ -329,9 +355,14 @@ public:
 
 class EditableMenuItem : public ValueMenuItem
 {
+
+typedef ValueMenuItem Parent;
+
 private:
    string mEmptyVal;
-   string getOptionText();  // Helper function
+   string getOptionText();    // Helper function
+
+   virtual void initialize();
 
 protected:
       LineEditor mLineEditor;
@@ -339,7 +370,7 @@ protected:
 
 public:
    // Contstuctor
-   EditableMenuItem(string title, string val, string emptyVal, string help, U32 maxLen, 
+   EditableMenuItem(string title, string val = "", string emptyVal = "", string help = "", U32 maxLen = 32, 
                     InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
 
    virtual MenuItemTypes getItemType() { return EditableMenuItemType; }
@@ -364,8 +395,15 @@ public:
 
    virtual void setTextEditedCallback(void (*callback)(string)) { mTextEditedCallback = callback; }
 
-
    virtual void setSecret(bool secret) { mLineEditor.setSecret(secret); }
+
+   /////// Lua Interface
+   static const char className[];
+   static Lunar<EditableMenuItem>::RegType methods[];
+
+   EditableMenuItem(lua_State *L);                      //  Lua constructor -- so we can construct this from Lua for plugins
+   virtual void push(lua_State *L);
+
 };
 
 ////////////////////////////////////
