@@ -741,7 +741,7 @@ void LuaScriptRunner::setLuaArgs(const Vector<string> &args)
 int LuaScriptRunner::luaPanicked(lua_State *L)
 {
    string msg = lua_tostring(L, 1);
-   //lua_getglobal(L, "ERROR");    // <-- what is this for?
+   lua_getglobal(L, "ERROR");    // <-- what is this for?
 
    throw LuaException(msg);
 
