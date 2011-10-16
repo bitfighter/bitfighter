@@ -1903,7 +1903,7 @@ void GameType::addAdminGameMenuOptions(MenuUserInterface *menu)
    ClientGame *game = dynamic_cast<ClientGame *>(mGame);
 
    if(isTeamGame() && game->getTeamCount() > 1)
-      menu->addMenuItem(new MenuItem(0, "CHANGE A PLAYER'S TEAM", switchPlayersTeamCallback, "", KEY_C));
+      menu->addMenuItem(new MenuItem("CHANGE A PLAYER'S TEAM", switchPlayersTeamCallback, "", KEY_C));
 }
 #endif
 

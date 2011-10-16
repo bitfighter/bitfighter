@@ -35,14 +35,58 @@ namespace Zap
 {
 
 // Constructor
-MenuItem::MenuItem(S32 index, const string &prompt, void (*callback)(ClientGame *, U32), const string &help, InputCode k1, InputCode k2)
+MenuItem::MenuItem()
 {
-   mPrompt = prompt;
+   initialize();
+}
+
+
+// Constructor
+MenuItem::MenuItem(const string &displayVal)
+{
+   initialize();
+
+   mPrompt = displayVal;
+}
+
+
+// Constructor
+MenuItem::MenuItem(const string &displayVal, void (*callback)(ClientGame *, U32), const char *help, InputCode k1, InputCode k2)
+{
+   initialize();
+
+   mPrompt = displayVal;
+   mCallback = callback;
+   mHelp = help;
    key1 = k1;
    key2 = k2;
+}
+
+
+// Constructor
+MenuItem::MenuItem(S32 index, const string &displayVal, void (*callback)(ClientGame *, U32), 
+                   const string &help, InputCode k1, InputCode k2)
+{
+   initialize();
+
+   mPrompt = displayVal;
    mCallback = callback;
    mHelp = help.c_str();
+   key1 = k1;
+   key2 = k2;
    mIndex = (U32)index;
+}
+
+
+void MenuItem::initialize()
+{
+   mPrompt = "";
+   key1 = KEY_UNKNOWN;
+   key2 = KEY_UNKNOWN;
+   mCallback = NULL;
+   mHelp = "";
+   mIndex = -1;
+
    mEnterAdvancesItem = false;
    mSelectedColor = Colors::yellow;
    mUnselectedColor = Colors::white;
@@ -117,14 +161,27 @@ bool MenuItem::handleKey(InputCode inputCode, char ascii)
 ////////////////////////////////////
 
 // Constructor
-ValueMenuItem::ValueMenuItem(S32 index, const string &value, void (*callback)(ClientGame *, U32), 
+ValueMenuItem::ValueMenuItem()
+{
+   initialize();
+}
+
+
+// Constructor
+ValueMenuItem::ValueMenuItem(const string &displayValue, void (*callback)(ClientGame *, U32), 
                              const string &help, InputCode k1, InputCode k2) :
-      Parent(index, value, callback, help, k1, k2)
+      Parent(-1, displayValue, callback, help, k1, k2)
+{
+
+   initialize();
+}
+
+
+void ValueMenuItem::initialize()
 {
    mSelectedValueColor = Colors::cyan;
    mUnselectedValueColor = Colors::cyan;
 }
-
 
 ////////////////////////////////////
 ////////////////////////////////////
@@ -137,7 +194,7 @@ ToggleMenuItem::ToggleMenuItem()
 
 ToggleMenuItem::ToggleMenuItem(string title, Vector<string> options, U32 currOption, bool wrap, 
                                void (*callback)(ClientGame *, U32), string help, InputCode k1, InputCode k2) :
-      ValueMenuItem(-1, title, callback, help, k1, k2)
+      ValueMenuItem(title, callback, help, k1, k2)
 {
    //mValue = "";
    mIndex = currOption;
@@ -319,7 +376,7 @@ void YesNoMenuItem::push(lua_State *L)
 
 CounterMenuItem::CounterMenuItem(const string &title, S32 value, S32 step, S32 minVal, S32 maxVal, const string &units, 
                                  const string &minMsg, const string &help, InputCode k1, InputCode k2) :
-   Parent(-1, title, NULL, help, k1, k2)
+   Parent(title, NULL, help, k1, k2)
 {
    initialize();
 
@@ -547,7 +604,7 @@ S32 TeamMenuItem::getWidth(S32 textsize)
 ////////////////////////////////////
 
 TextEntryMenuItem::TextEntryMenuItem(string title, string val, string emptyVal, string help, U32 maxLen, InputCode k1, InputCode k2) :
-         ValueMenuItem(-1, title, NULL, help, k1, k2),
+         ValueMenuItem(title, NULL, help, k1, k2),
          mLineEditor(LineEditor(maxLen, val))
 {
    initialize();

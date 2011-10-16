@@ -67,6 +67,7 @@ class MenuItem : public LuaObject
 private:
    S32 mIndex;
    MenuUserInterface *mMenu;
+   virtual void initialize();
 
 protected:
    string mPrompt;         // Text displayed on menu
@@ -81,9 +82,14 @@ protected:
    const char *mPromptAppendage;
 
 public:
-   // Constructor
+   // Constructors
+   MenuItem();
+   MenuItem(const string &displayVal);
+   MenuItem(const string &displayVal, void (*callback)(ClientGame *, U32), const char *help, 
+            InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
    MenuItem(S32 index, const string &prompt, void (*callback)(ClientGame *, U32), const string &help, 
             InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
+
 
    virtual ~MenuItem();       // Destructor
 
@@ -146,7 +152,7 @@ public:
 class MessageMenuItem : public MenuItem
 {
 public:
-   MessageMenuItem(string title, const Color &color) : MenuItem(-1, title, NULL, "")  
+   MessageMenuItem(string displayVal, const Color &color) : MenuItem(displayVal)  
    { 
       mPromptAppendage = ""; 
       mUnselectedColor = color; 
@@ -164,6 +170,9 @@ class ValueMenuItem : public MenuItem
 {
    typedef MenuItem Parent;
 
+private:
+   virtual void initialize();
+
 protected:
    Color mSelectedValueColor;       // Color of value when selected
    Color mUnselectedValueColor;     // Color of value when unselected
@@ -173,8 +182,9 @@ protected:
    void setUnselectedValueColor(const Color &color) { mUnselectedValueColor = color; }
 
 public:
-   ValueMenuItem(S32 index = 0, const string &text = "", void (*callback)(ClientGame *, U32) = NULL, const string &help = "", 
-         InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
+   ValueMenuItem();
+   ValueMenuItem(const string &displayValue, void (*callback)(ClientGame *, U32), const string &help, InputCode k1, InputCode k2);
+
 };
 
 
