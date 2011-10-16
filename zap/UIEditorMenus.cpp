@@ -235,7 +235,9 @@ void PluginMenuUI::doneEditing()
 {
    Vector<string> responses;
 
-   getMenuResponses(responses);     // Fills responses
+   getMenuResponses(responses);              // Fills responses
+   responses.erase(responses.size() - 1);    // Remove last arg, which corresponds to our "save and quit" menu item
+
    getGame()->getUIManager()->getEditorUserInterface()->onPluginMenuClosed(responses);
 }
 
