@@ -89,16 +89,24 @@ bool LuaLevelGenerator::runScript()
 // Run the script's getArgs() function
 bool LuaLevelGenerator::runGetArgs(Vector<MenuItem *> &menuItems)
 {
-   lua_getglobal(L, "getArgs");
+   try
+   {   
+      lua_getglobal(L, "getArgs");
 
-   if(!lua_isfunction(L, -1) || lua_pcall(L, 0, 1, 0))     // Passing 0 params, getting 1 back
+      if(!lua_isfunction(L, -1) || lua_pcall(L, 0, 1, 0))     // Passing 0 params, getting 1 back
+      {
+         // This should really never happen -- can only occur if robot_helper_functions is corrupted, or if bot is wildly misbehaving
+         logError("Error retrieving args from script %s: %s", mScriptName.c_str(), lua_tostring(L, -1));
+         return false;
+      }
+      else
+         return getMenuItemVectorFromTable(L, 1, "getArgs", menuItems);
+      }
+   catch(LuaException &e)
    {
-      // This should really never happen -- can only occur if robot_helper_functions is corrupted, or if bot is wildly misbehaving
-      logError("Error retrieving args from script %s: %s", mScriptName.c_str(), lua_tostring(L, -1));
+      logError("Error running main(): %s.  Aborting script.", e.what());
       return false;
    }
-   else
-      return getMenuItemVectorFromTable(L, 1, "getArgs", menuItems);
 }
 
 

@@ -626,10 +626,10 @@ bool LuaScriptRunner::runMain()
 
 bool LuaScriptRunner::runMain(const Vector<string> &args)
 {
-   setLuaArgs(args);
-
    try
-   {
+   {   
+      setLuaArgs(args);
+
       // _main calls main --> see lua_helper_functions.lua.  Does NOT throw an error if main does not exist!  Will return silently!
       lua_getglobal(L, "_main");       
       if(lua_pcall(L, 0, 0, 0) != 0)
@@ -651,7 +651,15 @@ bool LuaScriptRunner::runMain(const Vector<string> &args)
 //       every time a bot or levelgen or plugin is created.  Or compile to bytecode and store that.  Or anything, really, that's more efficient.
 bool LuaScriptRunner::loadHelperFunctions(const string &helperName)
 {
-   return loadScript(joindir(mScriptingDir, helperName).c_str()) && runChunk();
+   try
+   {
+      return loadScript(joindir(mScriptingDir, helperName).c_str()) && runChunk();
+   }
+   catch(LuaException &e)
+   {
+      logError("Error loading helper function %s: %s.  Aborting script.", helperName.c_str(), e.what());
+      return false;
+   }
 }
 
 
@@ -733,7 +741,7 @@ void LuaScriptRunner::setLuaArgs(const Vector<string> &args)
 int LuaScriptRunner::luaPanicked(lua_State *L)
 {
    string msg = lua_tostring(L, 1);
-   lua_getglobal(L, "ERROR");    // <-- what is this for?
+   //lua_getglobal(L, "ERROR");    // <-- what is this for?
 
    throw LuaException(msg);
 

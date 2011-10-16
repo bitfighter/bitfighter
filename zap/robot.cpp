@@ -1480,18 +1480,26 @@ string Robot::runGetName()
    // Run the getName() function in the bot (will default to the one in robot_helper_functions if it's not overwritten by the bot)
    lua_getglobal(L, "getName");
 
-   if(!lua_isfunction(L, -1) || lua_pcall(L, 0, 1, 0))     // Passing 0 params, getting 1 back
+   try
    {
-      // This should really never happen -- can only occur if robot_helper_functions is corrupted, or if bot is wildly misbehaving
-      string name = "Nancy";
-      logError("Robot error retrieving name (%s).  Using \"%s\".", lua_tostring(L, -1), name.c_str());
-      return name;
+      if(!lua_isfunction(L, -1) || lua_pcall(L, 0, 1, 0))     // Passing 0 params, getting 1 back
+      {
+         // This should really never happen -- can only occur if robot_helper_functions is corrupted, or if bot is wildly misbehaving
+         string name = "Nancy";
+         logError("Robot error retrieving name (%s).  Using \"%s\".", lua_tostring(L, -1), name.c_str());
+         return name;
+      }
+      else
+      {
+         string name = lua_tostring(L, -1);
+         lua_pop(L, 1);
+         return name;
+      }
    }
-   else
+   catch(LuaException &e)
    {
-      string name = lua_tostring(L, -1);
-      lua_pop(L, 1);
-      return name;
+      logError("Exception encountered trying to retrieve robot name: %s.  Aborting script.", e.what());
+      return "";
    }
 }
 
