@@ -222,7 +222,7 @@ bool ToggleMenuItem::handleKey(InputCode inputCode, char ascii)
 const char ToggleMenuItem::className[] = "ToggleMenuItem";      // Class name as it appears to Lua scripts
 
 // Lua Constructor
-ToggleMenuItem::ToggleMenuItem(lua_State *L) : ValueMenuItem(-1, "", NULL, "")
+ToggleMenuItem::ToggleMenuItem(lua_State *L)
 {
    const char *methodName = "ToggleMenuItem constructor";
 
@@ -280,7 +280,7 @@ void YesNoMenuItem::initialize()
 const char YesNoMenuItem::className[] = "YesNoMenuItem";      // Class name as it appears to Lua scripts
 
 // Lua Constructor
-YesNoMenuItem::YesNoMenuItem(lua_State *L) : Parent("", Vector<string>())
+YesNoMenuItem::YesNoMenuItem(lua_State *L)
 {
    initialize();
 
@@ -405,7 +405,7 @@ void CounterMenuItem::decrement(S32 fact)
 const char CounterMenuItem::className[] = "CounterMenuItem";      // Class name as it appears to Lua scripts
 
 // Lua Constructor
-CounterMenuItem::CounterMenuItem(lua_State *L) : Parent(0, "")
+CounterMenuItem::CounterMenuItem(lua_State *L)
 {
    const char *methodName = "CounterMenuItem constructor";
 
