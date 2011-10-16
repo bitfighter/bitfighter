@@ -346,7 +346,9 @@ void LuaLevelGenerator::registerClasses()
 
 
    Lunar<ToggleMenuItem>::Register(L);
-
+   Lunar<YesNoMenuItem>::Register(L);
+   Lunar<CounterMenuItem>::Register(L);
+   Lunar<TextEntryMenuItem>::Register(L);
 }
 
 
