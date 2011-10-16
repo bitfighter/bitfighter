@@ -46,7 +46,7 @@ MenuItem::MenuItem(const string &displayVal)
 {
    initialize();
 
-   mPrompt = displayVal;
+   mDisplayVal = displayVal;
 }
 
 
@@ -55,7 +55,7 @@ MenuItem::MenuItem(const string &displayVal, void (*callback)(ClientGame *, U32)
 {
    initialize();
 
-   mPrompt = displayVal;
+   mDisplayVal = displayVal;
    mCallback = callback;
    mHelp = help;
    key1 = k1;
@@ -69,7 +69,7 @@ MenuItem::MenuItem(S32 index, const string &displayVal, void (*callback)(ClientG
 {
    initialize();
 
-   mPrompt = displayVal;
+   mDisplayVal = displayVal;
    mCallback = callback;
    mHelp = help.c_str();
    key1 = k1;
@@ -80,7 +80,7 @@ MenuItem::MenuItem(S32 index, const string &displayVal, void (*callback)(ClientG
 
 void MenuItem::initialize()
 {
-   mPrompt = "";
+   mDisplayVal = "";
    key1 = KEY_UNKNOWN;
    key2 = KEY_UNKNOWN;
    mCallback = NULL;
@@ -90,7 +90,7 @@ void MenuItem::initialize()
    mEnterAdvancesItem = false;
    mSelectedColor = Colors::yellow;
    mUnselectedColor = Colors::white;
-   mPromptAppendage = " >";
+   mDisplayValAppendage = " >";
 }
 
 
@@ -129,13 +129,13 @@ const Color *MenuItem::getColor(bool isSelected)
 void MenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
 {
    glColor(*getColor(isSelected));
-   UserInterface::drawCenteredStringf(xpos, ypos, textsize, "%s%s", getPrompt().c_str(), mPromptAppendage);
+   UserInterface::drawCenteredStringf(xpos, ypos, textsize, "%s%s", getPrompt().c_str(), mDisplayValAppendage);
 }
 
 
 S32 MenuItem::getWidth(S32 textsize)
 {
-   return UserInterface::getStringWidthf(textsize, "%s%s", getPrompt().c_str(), mPromptAppendage);
+   return UserInterface::getStringWidthf(textsize, "%s%s", getPrompt().c_str(), mDisplayValAppendage);
 }
 
 
@@ -290,7 +290,7 @@ ToggleMenuItem::ToggleMenuItem(lua_State *L)
    const char *methodName = "ToggleMenuItem constructor";
 
    // Required items -- will throw if they are missing or misspecified
-   mPrompt = getString(L, 1, methodName);
+   mDisplayVal = getString(L, 1, methodName);
    getStringVectorFromTable(L, 2, methodName, mOptions);    // Fills mOptions with elements in a table 
 
    // Optional (but recommended) items
@@ -350,7 +350,7 @@ YesNoMenuItem::YesNoMenuItem(lua_State *L)
    const char *methodName = "YesNoMenuItem constructor";
 
    // Required items -- will throw if they are missing or misspecified
-   mPrompt = getString(L, 1, methodName);
+   mDisplayVal = getString(L, 1, methodName);
 
    // Optional (but recommended) items
    mIndex = getInt(L, 2, methodName, 1) - 1;                // - 1 for compatibility with Lua's 1-based array index
@@ -475,7 +475,7 @@ CounterMenuItem::CounterMenuItem(lua_State *L)
    initialize();
 
    // Required items -- will throw if they are missing or misspecified
-   mPrompt = getString(L, 1, methodName);
+   mDisplayVal = getString(L, 1, methodName);
    mValue =  getInt(L, 2, methodName);  
 
    // Optional (but recommended) items
@@ -687,7 +687,7 @@ TextEntryMenuItem::TextEntryMenuItem(lua_State *L)
    const char *methodName = "TextEntryMenuItem constructor";
 
    // Required items -- will throw if they are missing or misspecified
-   mPrompt = getString(L, 1, methodName);
+   mDisplayVal = getString(L, 1, methodName);
 
    // Optional (but recommended) items
    mLineEditor.setString(getString(L, 2, methodName, ""));

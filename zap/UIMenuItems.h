@@ -70,7 +70,7 @@ private:
    virtual void initialize();
 
 protected:
-   string mPrompt;         // Text displayed on menu
+   string mDisplayVal;     // Text displayed on menu
    const char *mHelp;      // An optional help string
 
    Color mSelectedColor;
@@ -79,7 +79,7 @@ protected:
    bool mEnterAdvancesItem;
    void (*mCallback)(ClientGame *, U32);
 
-   const char *mPromptAppendage;
+   const char *mDisplayValAppendage;      // Typically the ">" that is appended to menu items
 
 public:
    // Constructors
@@ -113,9 +113,7 @@ public:
    MenuUserInterface *getMenu();
    void setMenu(MenuUserInterface *menu);
 
-   string getPrompt() const { return mPrompt; }
-   //void setPrompt(const string &prompt) { mPrompt = prompt; }
-
+   string getPrompt() const { return mDisplayVal; }
 
    virtual string getUnits() const { return ""; }
 
@@ -128,7 +126,7 @@ public:
    virtual string getValueForDisplayingInMenu() { return ""; }
    virtual S32 getIntValue() const { return 0; }
    virtual string getValueForWritingToLevelFile() { return itos(getIntValue()); }
-   virtual string getValue() const { return mPrompt; }      // Basic menu item returns its text when selected... overridden by other types
+   virtual string getValue() const { return mDisplayVal; }      // Basic menu item returns its text when selected... overridden by other types
    virtual void setValue(const string &val) { /* Do nothing */ }
    virtual void setIntValue(S32 val) { /* Do nothing */ }
 
@@ -154,7 +152,7 @@ class MessageMenuItem : public MenuItem
 public:
    MessageMenuItem(string displayVal, const Color &color) : MenuItem(displayVal)  
    { 
-      mPromptAppendage = ""; 
+      mDisplayValAppendage = ""; 
       mUnselectedColor = color; 
    }
 };

@@ -1778,7 +1778,8 @@ void PlayerMenuUserInterface::render()
       // Will be used to show admin/player/robot prefix on menu
       PlayerType pt = clientInfo->isRobot() ? PlayerTypeRobot : (clientInfo->isAdmin() ? PlayerTypeAdmin : PlayerTypePlayer);    
 
-      PlayerMenuItem *newItem = new PlayerMenuItem(i, clientInfo->getName().getString(), playerSelectedCallback, stringToInputCode(c), pt);
+      PlayerMenuItem *newItem = new PlayerMenuItem(i, clientInfo->getName().getString(), playerSelectedCallback, 
+                                                   stringToInputCode(c), pt);
       newItem->setUnselectedColor(getGame()->getTeamColor(clientInfo->getTeamIndex()));
 
       addMenuItem(newItem);
