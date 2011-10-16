@@ -383,7 +383,7 @@ protected:
 
 public:
    // Contstuctor
-   TextEntryMenuItem(string title, string val = "", string emptyVal = "", string help = "", U32 maxLen = 32, 
+   TextEntryMenuItem(string title, string val, string emptyVal, string help, U32 maxLen, 
                      InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
 
    virtual MenuItemTypes getItemType() { return TextEntryMenuItemType; }

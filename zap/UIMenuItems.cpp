@@ -724,8 +724,8 @@ TextEntryMenuItem::TextEntryMenuItem(lua_State *L)
    // Optional (but recommended) items
    mLineEditor.setString(getString(L, 2, methodName, ""));
    mEmptyVal = getString(L, 3, methodName, "");
-   mHelp = getString(L, 4, methodName, "");
-   mLineEditor.mMaxLen = getInt(L, 5, methodName, 32);
+   mLineEditor.mMaxLen = getInt(L, 4, methodName, 32);
+   mHelp = getString(L, 5, methodName, "");
 }
 
 
