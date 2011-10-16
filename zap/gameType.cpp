@@ -262,12 +262,10 @@ boost::shared_ptr<MenuItem> GameType::getMenuItem(const char *key)
    else if(!strcmp(key, "Allow Engr"))
       return boost::shared_ptr<MenuItem>(new YesNoMenuItem("Allow Engineer Module:",       
                                                            mEngineerEnabled,
-                                                           NULL,
                                                            "Allow players to use the Engineer module?"));
    else if(!strcmp(key, "Allow Robots"))
          return boost::shared_ptr<MenuItem>(new YesNoMenuItem("Allow Robots:",
                                                               mBotsAllowed,
-                                                              NULL,
                                                               "Allow players to add robots?"));
    else
       return boost::shared_ptr<MenuItem>();     // NULLish pointer

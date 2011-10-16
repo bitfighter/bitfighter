@@ -313,19 +313,35 @@ void ToggleMenuItem::push(lua_State *L)
 }
 
 
+S32 clamp(S32 val, S32 min, S32 max)
+{
+   if(val < min) return min;
+   if(val > max) return max;
+   return val;
+}
+
+
 ////////////////////////////////////
 ////////////////////////////////////
 
-
-YesNoMenuItem::YesNoMenuItem(string title, bool currOption, void (*callback)(ClientGame *, U32), string help, 
-                             InputCode k1, InputCode k2) :
+// Constructors
+YesNoMenuItem::YesNoMenuItem(string title, bool currOption, string help, InputCode k1, InputCode k2) :
       ToggleMenuItem(title, Vector<string>(), currOption, true)
 {
    initialize();
-   //mValue = "";
-   mIndex = currOption;
-   mEnterAdvancesItem = true;
+
+   setIndex(currOption);
 }
+
+
+//YesNoMenuItem::YesNoMenuItem(string title, bool currOption, void (*callback)(ClientGame *, U32), string help, 
+//                             InputCode k1, InputCode k2) :
+//      ToggleMenuItem(title, Vector<string>(), currOption, true, callback)
+//{
+//   initialize();
+//
+//   setIndex(currOption);
+//}
 
 
 void YesNoMenuItem::initialize()
@@ -335,6 +351,12 @@ void YesNoMenuItem::initialize()
 
    mOptions.push_back("No");     // 0
    mOptions.push_back("Yes");    // 1
+}
+
+
+void YesNoMenuItem::setIndex(S32 index)
+{
+   mIndex = clamp(index, 0, 1);
 }
 
 
@@ -353,7 +375,7 @@ YesNoMenuItem::YesNoMenuItem(lua_State *L)
    mDisplayVal = getString(L, 1, methodName);
 
    // Optional (but recommended) items
-   mIndex = getInt(L, 2, methodName, 1) - 1;                // - 1 for compatibility with Lua's 1-based array index
+   setIndex(getInt(L, 2, methodName, 1) - 1);                // - 1 for compatibility with Lua's 1-based array index
    mHelp = getString(L, 3, methodName, "");
 }
 

@@ -242,10 +242,14 @@ class YesNoMenuItem : public ToggleMenuItem
 
 private:
    virtual void initialize();
+   void setIndex(S32 index);     // Sets mIndex, but with range checking
 
 public:
-   YesNoMenuItem(string title, bool currOption = 0, void (*callback)(ClientGame *, U32) = NULL, string help = "", 
+   YesNoMenuItem(string title, bool currOption, string help, 
                  InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
+
+   //YesNoMenuItem(string title, bool currOption, void (*callback)(ClientGame *, U32), string help, 
+   //              InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
 
 
    virtual string getValueForDisplayingInMenu() { TNLAssert(false, "Is this used?  If not, remove it!"); return mIndex ? " Engineer" : ""; }

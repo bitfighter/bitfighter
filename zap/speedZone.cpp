@@ -293,7 +293,7 @@ EditorAttributeMenuUI *SpeedZone::getAttributeMenu()
       mAttributeMenuUI = new EditorAttributeMenuUI(clientGame);
 
       mAttributeMenuUI->addMenuItem(new CounterMenuItem("Speed:", 999, 100, minSpeed, maxSpeed, "", "Really slow", ""));
-      mAttributeMenuUI->addMenuItem(new YesNoMenuItem("Snapping:", true, NULL, ""));
+      mAttributeMenuUI->addMenuItem(new YesNoMenuItem("Snapping:", true, ""));
 
       // Add our standard save and exit option to the menu
       mAttributeMenuUI->addSaveAndQuitMenuItem();
