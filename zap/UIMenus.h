@@ -62,6 +62,8 @@ private:
    virtual void renderExtras() { /* Do nothing */ }      // For drawing something extra on a menu
    void advanceItem();                                   // What happens when we move on to the next menu item?
 
+   virtual void initialize();
+
 protected:
    S32 currOffset;
 
@@ -77,7 +79,9 @@ protected:
    MenuItem *getLastMenuItem();
 
 public:
-   MenuUserInterface(ClientGame *game);      // Constructor
+   // Constructor
+   MenuUserInterface(ClientGame *game);      
+   MenuUserInterface(ClientGame *game, const string &title);
 
    void addMenuItem(MenuItem *menuItem);
    void addWrappedMenuItem(boost::shared_ptr<MenuItem> menuItem);

@@ -61,7 +61,7 @@ public:
    bool loadScript();
    bool runScript();            
 
-   bool runGetArgs(Vector<MenuItem *> &menuItems);
+   bool runGetArgs(string &menuTitle, Vector<MenuItem *> &menuItems);
 
    void logError(const char *format, ...);
    void logError(const char *msg, const char *filename);

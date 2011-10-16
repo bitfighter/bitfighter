@@ -74,6 +74,20 @@ extern void shutdownBitfighter();
 // Constructor
 MenuUserInterface::MenuUserInterface(ClientGame *game) : UserInterface(game)
 {
+   initialize();
+}
+
+
+MenuUserInterface::MenuUserInterface(ClientGame *game, const string &title) : UserInterface(game)
+{
+   initialize();
+
+   mMenuTitle = title;
+}
+
+
+void MenuUserInterface::initialize()
+{
    setMenuID(GenericUI);
    mMenuTitle = "Menu:";
    mMenuSubTitle = "";

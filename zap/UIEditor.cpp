@@ -682,9 +682,10 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
       return;
    }
 
+   string title;
    Vector<MenuItem *> menuItems;
 
-   if(!levelGen->runGetArgs(menuItems))         // Fills menuItems
+   if(!levelGen->runGetArgs(title, menuItems))         // Fills menuItems
    {
       showError(getGame());
       mPluginRunner.reset();
@@ -698,7 +699,7 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
    }
 
    // Build a menu from the menuItems returned by the plugin
-   PluginMenuUI *menu = new PluginMenuUI(getGame());
+   PluginMenuUI *menu = new PluginMenuUI(getGame(), title);
 
    for(S32 i = 0; i < menuItems.size(); i++)
       menu->addMenuItem(menuItems[i]);
