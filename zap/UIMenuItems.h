@@ -290,9 +290,9 @@ protected:
    virtual S32 getBigIncrement() { return 10; }    // How much our counter is incremented when shift is down (multiplier)
 
 public:
-   CounterMenuItem(const string &title, S32 value, S32 step = 1, S32 minVal = 0, S32 maxVal = 100, 
-                   const string &units = "", const string &minMsg = "", 
-                   const string &help = "", InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
+   CounterMenuItem(const string &title, S32 value, S32 step, S32 minVal, S32 maxVal, 
+                   const string &units, const string &minMsg, 
+                   const string &help, InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
 
    virtual void render(S32 xpos, S32 ypos, S32 textsize, bool isSelected);
    virtual S32 getWidth(S32 textsize);
@@ -302,8 +302,8 @@ public:
    virtual const char *getUnits() { return mUnits.c_str(); }
    virtual S32 getIntValue() const { return mValue; }
    virtual void setValue(const string &val);
-    virtual void setIntValue(S32 val);
-  virtual string getValue() const { return itos(mValue); }
+   virtual void setIntValue(S32 val);
+   virtual string getValue() const { return itos(mValue); }
    virtual const char *getSpecialEditingInstructions() { return "Use [<-] and [->] keys to change value.  Use [Shift] for bigger change."; }
    virtual bool handleKey(InputCode inputCode, char ascii);
 
