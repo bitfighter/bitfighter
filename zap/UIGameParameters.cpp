@@ -156,11 +156,11 @@ void GameParamUserInterface::updateMenuItems()
 
 
    string fn = stripExtension(getUIManager()->getEditorUserInterface()->getLevelFileName());
-   addMenuItem(new EditableMenuItem("Filename:",                         // name
-                                    fn,                                  // val
-                                    "",                                  // empty val
-                                    "File where this level is stored",   // help
-                                    MAX_FILE_NAME_LEN));
+   addMenuItem(new TextEntryMenuItem("Filename:",                         // name
+                                     fn,                                  // val
+                                     "",                                  // empty val
+                                     "File where this level is stored",   // help
+                                     MAX_FILE_NAME_LEN));
    const char **keys = gameType->getGameParameterMenuKeys();
 
    S32 i = 0;

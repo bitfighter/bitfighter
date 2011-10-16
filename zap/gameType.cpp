@@ -205,25 +205,25 @@ boost::shared_ptr<MenuItem> GameType::getMenuItem(const char *key)
 {
    if(!strcmp(key, "Level Name"))
    {
-      MenuItem *item = new EditableMenuItem("Level Name:", mLevelName.getString(), "", "The level's name -- pick a good one!", MAX_GAME_NAME_LEN);   
+      MenuItem *item = new TextEntryMenuItem("Level Name:", mLevelName.getString(), "", "The level's name -- pick a good one!", MAX_GAME_NAME_LEN);   
       item->setFilter(LineEditor::allAsciiFilter);
 
       return boost::shared_ptr<MenuItem>(item);
    }
    else if(!strcmp(key, "Level Descr"))
-      return boost::shared_ptr<MenuItem>(new EditableMenuItem("Level Descr:", 
+      return boost::shared_ptr<MenuItem>(new TextEntryMenuItem("Level Descr:", 
                                                               mLevelDescription.getString(), 
                                                               "", 
                                                               "A brief description of the level",                     
                                                               MAX_GAME_DESCR_LEN));
    else if(!strcmp(key, "Level Credits"))
-      return boost::shared_ptr<MenuItem>(new EditableMenuItem("Level By:",       
+      return boost::shared_ptr<MenuItem>(new TextEntryMenuItem("Level By:",       
                                                               mLevelCredits.getString(), 
                                                               "", 
                                                               "Who created this level",                                  
                                                               MAX_GAME_DESCR_LEN));
    else if(!strcmp(key, "Levelgen Script"))
-      return boost::shared_ptr<MenuItem>(new EditableMenuItem("Levelgen Script:", 
+      return boost::shared_ptr<MenuItem>(new TextEntryMenuItem("Levelgen Script:", 
                                                               getScriptLine(), 
                                                               "<None>", 
                                                               "Levelgen script & args to be run when level is loaded",  

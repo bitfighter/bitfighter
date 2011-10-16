@@ -540,7 +540,7 @@ S32 TeamMenuItem::getWidth(S32 textsize)
 ////////////////////////////////////
 ////////////////////////////////////
 
-EditableMenuItem::EditableMenuItem(string title, string val, string emptyVal, string help, U32 maxLen, InputCode k1, InputCode k2) :
+TextEntryMenuItem::TextEntryMenuItem(string title, string val, string emptyVal, string help, U32 maxLen, InputCode k1, InputCode k2) :
          ValueMenuItem(-1, title, NULL, help, k1, k2),
          mLineEditor(LineEditor(maxLen, val))
 {
@@ -549,20 +549,20 @@ EditableMenuItem::EditableMenuItem(string title, string val, string emptyVal, st
 }
 
 
-void EditableMenuItem::initialize()
+void TextEntryMenuItem::initialize()
 {
    mEnterAdvancesItem = true;
    mTextEditedCallback = NULL;
 }
 
 
-string EditableMenuItem::getOptionText()
+string TextEntryMenuItem::getOptionText()
 {
    return mLineEditor.getString() != "" ? mLineEditor.getDisplayString() : mEmptyVal;
 }
 
 
-void EditableMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
+void TextEntryMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
 {
    Color textColor;     
    if(mLineEditor.getString() == "" && mEmptyVal != "")
@@ -581,13 +581,13 @@ void EditableMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
 }
 
 
-S32 EditableMenuItem::getWidth(S32 textsize)
+S32 TextEntryMenuItem::getWidth(S32 textsize)
 {
    return UserInterface::getStringPairWidth(textsize, getPrompt().c_str(), getOptionText().c_str());
 }
 
 
-bool EditableMenuItem::handleKey(InputCode inputCode, char ascii) 
+bool TextEntryMenuItem::handleKey(InputCode inputCode, char ascii) 
 { 
    if(inputCode == KEY_DELETE || inputCode == KEY_BACKSPACE)
    {
@@ -614,14 +614,14 @@ bool EditableMenuItem::handleKey(InputCode inputCode, char ascii)
 
 //////////
 // Lua interface
-const char EditableMenuItem::className[] = "EditableMenuItem";      // Class name as it appears to Lua scripts
+const char TextEntryMenuItem::className[] = "TextEntryMenuItem";      // Class name as it appears to Lua scripts
 
 // Lua Constructor
-EditableMenuItem::EditableMenuItem(lua_State *L)
+TextEntryMenuItem::TextEntryMenuItem(lua_State *L)
 {
    initialize();
 
-   const char *methodName = "EditableMenuItem constructor";
+   const char *methodName = "TextEntryMenuItem constructor";
 
    // Required items -- will throw if they are missing or misspecified
    mPrompt = getString(L, 1, methodName);
@@ -635,23 +635,23 @@ EditableMenuItem::EditableMenuItem(lua_State *L)
 
 
 // Define the methods we will expose to Lua
-Lunar<EditableMenuItem>::RegType EditableMenuItem::methods[] =
+Lunar<TextEntryMenuItem>::RegType TextEntryMenuItem::methods[] =
 {
    {0,0}    // End method list
 };
 
 
-void EditableMenuItem::push(lua_State *L) 
+void TextEntryMenuItem::push(lua_State *L) 
 {  
-   Lunar<EditableMenuItem>::push(L, this); 
+   Lunar<TextEntryMenuItem>::push(L, this); 
 }
 
 
 ////////////////////////////////////
 ////////////////////////////////////
 
-MaskedEditableMenuItem::MaskedEditableMenuItem(string title, string val, string emptyVal, string help, U32 maxLen, InputCode k1, InputCode k2) :
-   EditableMenuItem(title, val, emptyVal, help, maxLen, k1, k2)
+MaskedTextEntryMenuItem::MaskedTextEntryMenuItem(string title, string val, string emptyVal, string help, U32 maxLen, InputCode k1, InputCode k2) :
+   TextEntryMenuItem(title, val, emptyVal, help, maxLen, k1, k2)
 {
    mLineEditor.setSecret(true);
 }

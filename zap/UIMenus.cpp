@@ -1144,9 +1144,9 @@ void NameEntryUserInterface::setupMenu()
    clearMenuItems();
 
    addMenuItem(new MenuItem(0, "OK", nameAndPasswordAcceptCallback, ""));
-   addMenuItem(new EditableMenuItem("NICKNAME:", getGame()->getClientInfo()->getName().getString(), 
+   addMenuItem(new TextEntryMenuItem("NICKNAME:", getGame()->getClientInfo()->getName().getString(), 
                                     getGame()->getSettings()->getDefaultName().c_str(), "", MAX_PLAYER_NAME_LENGTH));
-   addMenuItem(new EditableMenuItem("PASSWORD:", getGame()->getLoginPassword(), "", "", MAX_PLAYER_PASSWORD_LENGTH));
+   addMenuItem(new TextEntryMenuItem("PASSWORD:", getGame()->getLoginPassword(), "", "", MAX_PLAYER_PASSWORD_LENGTH));
    
    getMenuItem(1)->setFilter(LineEditor::noQuoteFilter);      // quotes are incompatible with PHPBB3 logins
    getMenuItem(2)->setSecret(true);
@@ -1240,25 +1240,25 @@ void HostMenuUserInterface::setupMenus()
 
    addMenuItem(new MenuItem(0, "START HOSTING", startHostingCallback, "", KEY_H));
 
-   addMenuItem(new EditableMenuItem("SERVER NAME:", settings->getHostName(), 
-                                    "<Bitfighter Host>", "", QueryServersUserInterface::MaxServerNameLen,  KEY_N));
+   addMenuItem(new TextEntryMenuItem("SERVER NAME:", settings->getHostName(), 
+                                     "<Bitfighter Host>", "", QueryServersUserInterface::MaxServerNameLen,  KEY_N));
 
-   addMenuItem(new EditableMenuItem("DESCRIPTION:", settings->getHostDescr(),                    
-                                    "<Empty>", "", QueryServersUserInterface::MaxServerDescrLen, KEY_D));
+   addMenuItem(new TextEntryMenuItem("DESCRIPTION:", settings->getHostDescr(),                    
+                                     "<Empty>", "", QueryServersUserInterface::MaxServerDescrLen, KEY_D));
 
-   addMenuItem(new EditableMenuItem("LEVEL CHANGE PASSWORD:", settings->getLevelChangePassword(), 
-                                    "<Anyone can change levels>", "", MAX_PASSWORD_LENGTH, KEY_L));
+   addMenuItem(new TextEntryMenuItem("LEVEL CHANGE PASSWORD:", settings->getLevelChangePassword(), 
+                                     "<Anyone can change levels>", "", MAX_PASSWORD_LENGTH, KEY_L));
 
-   addMenuItem(new EditableMenuItem("ADMIN PASSWORD:", settings->getAdminPassword(),       
-                                    "<No remote admin access>", "", MAX_PASSWORD_LENGTH, KEY_A));
+   addMenuItem(new TextEntryMenuItem("ADMIN PASSWORD:", settings->getAdminPassword(),       
+                                     "<No remote admin access>", "", MAX_PASSWORD_LENGTH, KEY_A));
 
-   addMenuItem(new EditableMenuItem("CONNECTION PASSWORD:", settings->getServerPassword(), "<Anyone can connect>", "",      
-                                    MAX_PASSWORD_LENGTH, KEY_C));
+   addMenuItem(new TextEntryMenuItem("CONNECTION PASSWORD:", settings->getServerPassword(), "<Anyone can connect>", "",      
+                                     MAX_PASSWORD_LENGTH, KEY_C));
 
    addMenuItem(new YesNoMenuItem("ALLOW MAP DOWNLOADS:", settings->getIniSettings()->allowGetMap, NULL, "", KEY_M));
 
    //addMenuItem(new CounterMenuItem("MAXIMUM PLAYERS:",   settings->getIniSettings()->maxplayers, 1, 2, MAX_PLAYERS, "", "", "", KEY_P));
-   //addMenuItem(new EditableMenuItem("PORT:",             itos(DEFAULT_GAME_PORT),  "Use default of " + itos(DEFAULT_GAME_PORT), 
+   //addMenuItem(new TextEntryMenuItem("PORT:",             itos(DEFAULT_GAME_PORT),  "Use default of " + itos(DEFAULT_GAME_PORT), 
    //                                         "", 10, KEY_P));
 }
 

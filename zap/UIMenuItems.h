@@ -44,7 +44,7 @@ enum MenuItemTypes {
    ToggleMenuItemType,
    CounterMenuItemType,
    TimeCounterMenuItemType,
-   EditableMenuItemType,   
+   TextEntryMenuItemType,   
    PlayerMenuItemType,
    TeamMenuItemType
 };
@@ -353,7 +353,7 @@ public:
 ////////////////////////////////////
 ////////////////////////////////////
 
-class EditableMenuItem : public ValueMenuItem
+class TextEntryMenuItem : public ValueMenuItem
 {
 
 typedef ValueMenuItem Parent;
@@ -370,10 +370,10 @@ protected:
 
 public:
    // Contstuctor
-   EditableMenuItem(string title, string val = "", string emptyVal = "", string help = "", U32 maxLen = 32, 
-                    InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
+   TextEntryMenuItem(string title, string val = "", string emptyVal = "", string help = "", U32 maxLen = 32, 
+                     InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
 
-   virtual MenuItemTypes getItemType() { return EditableMenuItemType; }
+   virtual MenuItemTypes getItemType() { return TextEntryMenuItemType; }
 
    virtual void render(S32 xpos, S32 ypos, S32 textsize, bool isSelected);
    virtual S32 getWidth(S32 textsize);
@@ -399,9 +399,9 @@ public:
 
    /////// Lua Interface
    static const char className[];
-   static Lunar<EditableMenuItem>::RegType methods[];
+   static Lunar<TextEntryMenuItem>::RegType methods[];
 
-   EditableMenuItem(lua_State *L);                      //  Lua constructor -- so we can construct this from Lua for plugins
+   TextEntryMenuItem(lua_State *L);                      //  Lua constructor -- so we can construct this from Lua for plugins
    virtual void push(lua_State *L);
 
 };
@@ -409,9 +409,9 @@ public:
 ////////////////////////////////////
 ////////////////////////////////////
 
-class MaskedEditableMenuItem : public EditableMenuItem
+class MaskedTextEntryMenuItem : public TextEntryMenuItem
 {
-   MaskedEditableMenuItem(string title, string val, string emptyVal, string help, U32 maxLen, 
+   MaskedTextEntryMenuItem(string title, string val, string emptyVal, string help, U32 maxLen, 
                           InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
 };
 
