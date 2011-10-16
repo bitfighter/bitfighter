@@ -194,7 +194,8 @@ protected:
    bool mWrap;
 
 public:
-   ToggleMenuItem(string title = "", Vector<string> options = Vector<string>, U32 currOption = 0, bool wrap = false, 
+   ToggleMenuItem();
+   ToggleMenuItem(string title, Vector<string> options, U32 currOption = 0, bool wrap = false, 
                   void (*callback)(ClientGame *, U32) = NULL, 
                   string help = "", InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
 

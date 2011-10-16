@@ -129,6 +129,12 @@ ValueMenuItem::ValueMenuItem(S32 index, const string &value, void (*callback)(Cl
 ////////////////////////////////////
 ////////////////////////////////////
 
+ToggleMenuItem::ToggleMenuItem()
+{
+
+}
+
+
 ToggleMenuItem::ToggleMenuItem(string title, Vector<string> options, U32 currOption, bool wrap, 
                                void (*callback)(ClientGame *, U32), string help, InputCode k1, InputCode k2) :
       ValueMenuItem(-1, title, callback, help, k1, k2)
