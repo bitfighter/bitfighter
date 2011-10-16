@@ -172,7 +172,7 @@ bool TextItem::processArguments(S32 argc, const char **argv, Game *game)
 
 string TextItem::toString(F32 gridSize) const
 {
-   return string(getClassName()) + " " + itos(mTeam) + " " + geomToString(gridSize) + " " + ftos(mSize, 3) + " " + mText;
+   return string(getClassName()) + " " + itos(mTeam) + " " + geomToString(gridSize) + " " + ftos(mSize, 3) + " " + writeLevelString(mText.c_str());
 }
 
 

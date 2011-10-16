@@ -1144,8 +1144,8 @@ void NameEntryUserInterface::setupMenu()
    clearMenuItems();
 
    addMenuItem(new MenuItem(0, "OK", nameAndPasswordAcceptCallback, ""));
-   addMenuItem(new TextEntryMenuItem("NICKNAME:", getGame()->getClientInfo()->getName().getString(), 
-                                    getGame()->getSettings()->getDefaultName().c_str(), "", MAX_PLAYER_NAME_LENGTH));
+   addMenuItem(new TextEntryMenuItem("NICKNAME:", getGame()->getSettings()->getIniSettings()->lastName, 
+                                    getGame()->getSettings()->getDefaultName(), "", MAX_PLAYER_NAME_LENGTH));
    addMenuItem(new TextEntryMenuItem("PASSWORD:", getGame()->getLoginPassword(), "", "", MAX_PLAYER_PASSWORD_LENGTH));
    
    getMenuItem(1)->setFilter(LineEditor::noQuoteFilter);      // quotes are incompatible with PHPBB3 logins
@@ -1394,8 +1394,11 @@ static void endGameCallback(ClientGame *game, U32 unused)
 {
    game->closeConnectionToGameServer();
 
-   delete gServerGame;
-   gServerGame = NULL;
+   if(gServerGame)
+   {
+      delete gServerGame;
+      gServerGame = NULL;
+   }
 }
 
 

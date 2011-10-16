@@ -439,13 +439,13 @@ static const Color INSTRUCTION_TEXTCOLOR = Colors::white;      // TODO: Put in e
 void EditorPointObject::renderItemText(const char *text, S32 offset, F32 currentScale)
 {
    glColor(INSTRUCTION_TEXTCOLOR);
-   S32 off = -1 * getEditorRadius(currentScale) + (INSTRUCTION_TEXTSIZE + INSTRUCTION_TEXTGAP) * offset;
+   //S32 off = -1 * getEditorRadius(currentScale) + (INSTRUCTION_TEXTSIZE + INSTRUCTION_TEXTGAP) * offset; // not used?
    //logprintf("%f  %f", currentOffset.x, currentOffset.y);
    Point pos = getVert(0);
    
    // Dividing by currentScale keeps the text a constant size in pixels
    UserInterface::drawCenteredString(pos.x, pos.y + getEditorRadius(currentScale) / currentScale, F32(INSTRUCTION_TEXTSIZE) / currentScale, text);
-   UserInterface::drawCenteredString(pos.x, pos.y + getEditorRadius(currentScale) / currentScale + INSTRUCTION_TEXTSIZE * 1.25, F32(INSTRUCTION_TEXTSIZE) / currentScale, "[Enter] to edit");
+   UserInterface::drawCenteredString(pos.x, pos.y + getEditorRadius(currentScale) / currentScale + INSTRUCTION_TEXTSIZE * 1.25f, F32(INSTRUCTION_TEXTSIZE) / currentScale, "[Enter] to edit");
 }
 
 

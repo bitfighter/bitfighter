@@ -132,6 +132,7 @@ using namespace TNL;
 #include "Event.h"
 #include "SDL/SDL.h"
 #include "SDL/SDL_opengl.h"
+#include "SDL/SDL_syswm.h"
 #endif
 
 #include "game.h"
@@ -438,6 +439,97 @@ void display()
    // screen that are being updated at the same time.
    SDL_GL_SwapBuffers();  // Use this if we convert to SDL
 }
+
+
+static SDL_SysWMinfo windowManagerInfo;
+
+void setWindowPosition(S32 left, S32 top)
+{
+   SDL_VERSION(&windowManagerInfo.version);
+
+   // No window information..  Abort!!
+   if(!SDL_GetWMInfo(&windowManagerInfo))
+   {
+      logprintf(LogConsumer::LogError, "Failed to set window position");
+      return;
+   }
+
+#ifdef TNL_OS_LINUX
+   if (windowManagerInfo.subsystem == SDL_SYSWM_X11) {
+       windowManagerInfo.info.x11.lock_func();
+       XMoveWindow(windowManagerInfo.info.x11.display, windowManagerInfo.info.x11.wmwindow, left, top);
+       windowManagerInfo.info.x11.unlock_func();
+   }
+#endif
+
+#ifdef TNL_OS_MAC_OSX
+   // I don't know if anything can be done here..
+#endif
+
+#ifdef TNL_OS_WIN32
+   SetWindowPos(windowManagerInfo.window, HWND_TOP, left, top, 0, 0, SWP_NOSIZE);
+#endif
+}
+
+
+S32 getWindowPositionCoord(bool getX)
+{
+   SDL_VERSION(&windowManagerInfo.version);
+
+   if(!SDL_GetWMInfo(&windowManagerInfo))
+      logprintf(LogConsumer::LogError, "Failed to set window position");
+
+#ifdef TNL_OS_LINUX
+   if (windowManagerInfo.subsystem == SDL_SYSWM_X11) {
+      XWindowAttributes xAttributes;
+      Window parent, childIgnore, rootIgnore;
+      Window *childrenIgnore;
+      U32 childrenCountIgnore;
+      S32 x, y;
+
+      windowManagerInfo.info.x11.lock_func();
+
+      // Find parent window of managed window to get proper coordinates
+      XQueryTree(windowManagerInfo.info.x11.display, windowManagerInfo.info.x11.wmwindow,
+              &rootIgnore, &parent, &childrenIgnore, &childrenCountIgnore);
+
+      // Get Window attributes
+      XGetWindowAttributes(windowManagerInfo.info.x11.display, parent, &xAttributes);
+
+      // Now find absolute values
+      XTranslateCoordinates(windowManagerInfo.info.x11.display, parent,
+            xAttributes.root, 0, 0, &x, &y, &childIgnore);
+
+      windowManagerInfo.info.x11.unlock_func();
+      return getX ? x : y;
+   }
+#endif
+
+#ifdef TNL_OS_MAC_OSX
+   // I don't know if anything can be done here..
+#endif
+
+#ifdef TNL_OS_WIN32
+   RECT rect;
+   GetWindowRect(windowManagerInfo.window, &rect);
+   return getX ? rect.left : rect.top;
+#endif
+
+   // Otherwise just return 0
+   return 0;
+}
+
+
+S32 getWindowPositionX()
+{
+   return getWindowPositionCoord(true);
+}
+
+
+S32 getWindowPositionY()
+{
+   return getWindowPositionCoord(false);
+}
 #endif
 
 
@@ -654,9 +746,12 @@ void shutdownBitfighter()
    OGLCONSOLE_Quit();
    Joystick::shutdownJoystick();
 
-   // TODO: reimplement window position saving with SDL
-   //   if(settings->getIniSettings()->displayMode == DISPLAY_MODE_WINDOWED)
-   //      saveWindowPosition(glutGet(GLUT_WINDOW_X), glutGet(GLUT_WINDOW_Y));
+   // Save current window position if in windowed mode
+   if(settings->getIniSettings()->displayMode == DISPLAY_MODE_WINDOWED)
+   {
+      settings->getIniSettings()->winXPos = getWindowPositionX();
+      settings->getIniSettings()->winYPos = getWindowPositionY();
+   }
 
    SDL_QuitSubSystem(SDL_INIT_VIDEO);
 #endif
@@ -860,19 +955,6 @@ void setupLogging(const string &logDir)
 // This has the unfortunate side-effect of triggering a mouse move event.  
 void actualizeScreenMode(bool changingInterfaces)
 {
-
-   // TODO: reimplement window positioning - difficult with SDL since it doesn't have much access to the
-   // window manager; however, it may be possible to do position upon start-up, but not save when exiting
-
-   //   if(settings->getIniSettings()->oldDisplayMode == DISPLAY_MODE_WINDOWED && !first)
-   //   {
-   //      settings->getIniSettings()->winXPos = glutGet(GLUT_WINDOW_X);
-   //      settings->getIniSettings()->winYPos = glutGet(GLUT_WINDOW_Y);
-   //
-   //      gINI.SetValueI("Settings", "WindowXPos", settings->getIniSettings()->winXPos, true);
-   //      gINI.SetValueI("Settings", "WindowYPos", settings->getIniSettings()->winYPos, true);
-   //   }
-
    if(changingInterfaces)
       gClientGame->getUIManager()->getPrevUI()->onPreDisplayModeChange();
    else
@@ -883,6 +965,20 @@ void actualizeScreenMode(bool changingInterfaces)
    DisplayMode displayMode = settings->getIniSettings()->displayMode;
 
    gScreenInfo.resetGameCanvasSize();     // Set GameCanvasSize vars back to their default values
+
+
+   // If old display mode is windowed or current is windowed but we change interfaces,
+   // save the window position
+   if(settings->getIniSettings()->oldDisplayMode == DISPLAY_MODE_WINDOWED ||
+         (changingInterfaces && settings->getIniSettings()->displayMode == DISPLAY_MODE_WINDOWED))
+   {
+      settings->getIniSettings()->winXPos = getWindowPositionX();
+      settings->getIniSettings()->winYPos = getWindowPositionY();
+
+      gINI.SetValueI("Settings", "WindowXPos", settings->getIniSettings()->winXPos, true);
+      gINI.SetValueI("Settings", "WindowYPos", settings->getIniSettings()->winYPos, true);
+   }
+
 
    // When we're in the editor, let's take advantage of the entire screen unstretched
    if(UserInterface::current->getMenuID() == EditorUI && 
@@ -915,7 +1011,7 @@ void actualizeScreenMode(bool changingInterfaces)
    case DISPLAY_MODE_FULL_SCREEN_STRETCHED:
       sdlWindowWidth = gScreenInfo.getPhysicalScreenWidth();
       sdlWindowHeight = gScreenInfo.getPhysicalScreenHeight();
-      sdlVideoFlags |= SDL_FULLSCREEN;
+      sdlVideoFlags |= SDL_NOFRAME;
 
       orthoRight = gScreenInfo.getGameCanvasWidth();
       orthoBottom = gScreenInfo.getGameCanvasHeight();
@@ -924,7 +1020,7 @@ void actualizeScreenMode(bool changingInterfaces)
    case DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED:
       sdlWindowWidth = gScreenInfo.getPhysicalScreenWidth();
       sdlWindowHeight = gScreenInfo.getPhysicalScreenHeight();
-      sdlVideoFlags |= SDL_FULLSCREEN;
+      sdlVideoFlags |= SDL_NOFRAME;
 
       orthoLeft = -1 * (gScreenInfo.getHorizDrawMargin());
       orthoRight = gScreenInfo.getGameCanvasWidth() + gScreenInfo.getHorizDrawMargin();
@@ -994,6 +1090,12 @@ void actualizeScreenMode(bool changingInterfaces)
       OGLCONSOLE_CreateFont();
       OGLCONSOLE_Reshape();
    }
+
+   // Now set the window position
+   if (displayMode == DISPLAY_MODE_WINDOWED)
+      setWindowPosition(settings->getIniSettings()->winXPos, settings->getIniSettings()->winYPos);
+   else
+      setWindowPosition(0, 0);
 
    UserInterface::current->onDisplayModeChange();     // Notify the UI that the screen has changed mode
 }
@@ -1215,6 +1317,8 @@ int main(int argc, char **argv)
       SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);      // SDL_DEFAULT_REPEAT_DELAY defined as 500
 
       atexit(shutdownBitfighter);      // If user clicks the X on their game window, this runs shutdownBitfighter()
+
+      settings->getIniSettings()->oldDisplayMode = DISPLAY_MODE_UNKNOWN;   // We don't know what the old one was
       actualizeScreenMode(false);      // Create a display window
 
       gConsole = OGLCONSOLE_Create();  // Create our console *after* the screen mode has been actualized

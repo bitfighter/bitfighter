@@ -122,10 +122,10 @@ bool HuntersGameType::processArguments(S32 argc, const char **argv, Game *game)
 {
    if(argc > 0)
    {
-      setGameTime((F32)atof(argv[0]) * 60.0);                 // Game time, stored in minutes in level file
+      setGameTime(F32(atof(argv[0]) * 60.0));                 // Game time, stored in minutes in level file
       if(argc > 1)
       {
-         mNexusClosedTime = S32(atof(argv[1]) * 60.0 + 0.5);  // Time until nexus opens, specified in minutes (0.5 converts truncation into rounding)
+         mNexusClosedTime = S32(atof(argv[1]) * 60.f + 0.5);  // Time until nexus opens, specified in minutes (0.5 converts truncation into rounding)
          if(argc > 2)
          {
             mNexusOpenTime = S32(atof(argv[2]));              // Time nexus remains open, specified in seconds

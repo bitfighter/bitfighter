@@ -31,7 +31,7 @@
 #include "tnlNonce.h"
 
 // JMQ: work around X.h header file
-#if defined(TNL_OS_LINUX) && defined(Success)
+#if (defined(TNL_OS_LINUX) || defined(TNL_OS_MAC_OSX)) && defined(Success)
 #undef Success
 #endif
 

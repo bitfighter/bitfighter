@@ -110,6 +110,8 @@ string makeFilenameFromString(const char *levelname);
 
 string ctos(char c);
 
+string writeLevelString(const char *in);
+
 };
 
 #endif

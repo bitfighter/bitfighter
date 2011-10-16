@@ -251,7 +251,7 @@ U32 GameSettings::getU32(ParamId paramId)
 
 F32 GameSettings::getF32(ParamId paramId)
 {
-   return mCmdLineParams[paramId].size() > 0 ? stof(mCmdLineParams[paramId].get(0)) : 0;
+   return mCmdLineParams[paramId].size() > 0 ? (F32)stof(mCmdLineParams[paramId].get(0)) : 0;
 }
 
 
@@ -844,7 +844,7 @@ static void printHelpHeader(const S32 section, const bool firstInSection)
 static void printHelpEntry(const string &paramName, const string &paramString, const string &helpString, S32 maxSize)
 {
    string paramStr = makeParamStr(paramName, paramString);
-   U32 paddingLen  = maxSize - paramStr.length();
+   U32 paddingLen  = maxSize - (U32)paramStr.length();
 
    U32 wrapWidth = MAX_HELP_LINE_LEN - maxSize;
 

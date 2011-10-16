@@ -551,9 +551,6 @@ bool Game::processLevelParam(S32 argc, const char **argv)
 
    else if(!stricmp(argv[0], "Specials"))
       onReadSpecialsParam(argc, argv);
-   
-   else if(!stricmp(argv[0], "SoccerPickup"))  // option for old style soccer, this option might get moved or removed
-      onReadSoccerPickupParam(argc, argv);
 
    else if(!strcmp(argv[0], "Script"))
       onReadScriptParam(argc, argv);
@@ -592,9 +589,9 @@ string Game::toString()
 
    str = gameType->toString() + "\n";
 
-   str += string("LevelName ") + gameType->getLevelName()->getString() + "\n";
-   str += string("LevelDescription ") + gameType->getLevelDescription()->getString() + "\n";
-   str += string("LevelCredits ") + gameType->getLevelCredits()->getString() + "\n";
+   str += string("LevelName ") + writeLevelString(gameType->getLevelName()->getString()) + "\n";
+   str += string("LevelDescription ") + writeLevelString(gameType->getLevelDescription()->getString()) + "\n";
+   str += string("LevelCredits ") + writeLevelString(gameType->getLevelCredits()->getString()) + "\n";
 
    str += string("GridSize ") + ftos(mGridSize) + "\n";
 
@@ -604,7 +601,7 @@ string Game::toString()
    str += gameType->getSpecialsLine() + "\n";
 
    if(gameType->getScriptName() != "")
-      str += "Script " + gameType->getScriptLine() + "\n";
+      str += "Script " + writeLevelString(gameType->getScriptLine().c_str()) + "\n";
 
    str += string("MinPlayers") + (gameType->getMinRecPlayers() > 0 ? " " + itos(gameType->getMinRecPlayers()) : "") + "\n";
    str += string("MaxPlayers") + (gameType->getMaxRecPlayers() > 0 ? " " + itos(gameType->getMaxRecPlayers()) : "") + "\n";
@@ -646,30 +643,6 @@ void Game::onReadSpecialsParam(S32 argc, const char **argv)
    for(S32 i = 1; i < argc; i++)
       if(!getGameType()->processSpecialsParam(argv[i]))
          logprintf(LogConsumer::LogWarning, "Invalid specials parameter: %s", argv[i]);
-}
-
-
-void Game::onReadSoccerPickupParam(S32 argc, const char **argv)
-{
-   logprintf(LogConsumer::LogWarning, "Level uses deprecated SoccerPickup line... parameter will be removed in 017!");
-
-   if(argc < 2)
-   {
-      logprintf(LogConsumer::LogWarning, "Improperly formed (and deprecated!!) SoccerPickup parameter");
-      return;
-   }
-
-   SoccerGameType *sgt = dynamic_cast<SoccerGameType *>(getGameType());
-
-   if(sgt)
-   {
-      sgt->setSoccerPickupAllowed(
-         !stricmp(argv[1], "yes") ||
-         !stricmp(argv[1], "enable") ||
-         !stricmp(argv[1], "on") ||
-         !stricmp(argv[1], "activate") ||
-         !stricmp(argv[1], "1") );
-   }
 }
 
 
@@ -1414,7 +1387,7 @@ bool ServerGame::processPseudoItem(S32 argc, const char **argv, const string &le
    
          S32 time = (argc > 4) ? atoi(argv[4]) : FlagSpawn::DEFAULT_RESPAWN_TIME;
    
-         FlagSpawn spawn = FlagSpawn(p, time * 1000);
+         FlagSpawn spawn = FlagSpawn(p, time);
    
          // Following works for Nexus & Soccer games because they are not TeamFlagGame.  Currently, the only
          // TeamFlagGame is CTF.
@@ -1429,14 +1402,14 @@ bool ServerGame::processPseudoItem(S32 argc, const char **argv, const string &le
    {
       AsteroidSpawn *spawn = new AsteroidSpawn();
 
-      if(spawn->processArguments(argc, argv, this))
+      if(spawn->processArguments(argc - 1, argv + 1, this))   // processArguments don't like "AsteroidSpawn" as argv[0]
          getGameType()->addItemSpawn(spawn);
    }
    else if(!stricmp(argv[0], "CircleSpawn"))      // CircleSpawn <x> <y> [timer]      // TODO: Move this to CircleSpawn class?
    {
       CircleSpawn *spawn = new CircleSpawn();
 
-      if(spawn->processArguments(argc, argv, this))
+      if(spawn->processArguments(argc - 1, argv + 1, this))
          getGameType()->addItemSpawn(spawn);
    }
    else if(!stricmp(argv[0], "BarrierMaker"))

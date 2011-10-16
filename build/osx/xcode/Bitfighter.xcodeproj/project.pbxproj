@@ -335,6 +335,10 @@
 		7388F2FE139D6DD8003C6BB0 /* Speex.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 7388F047139D5A05003C6BB0 /* Speex.framework */; };
 		7388F2FF139D6DD8003C6BB0 /* Vorbis.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 7388F05A139D5A28003C6BB0 /* Vorbis.framework */; };
 		7388F30A139D6E58003C6BB0 /* Vorbis.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7388F05A139D5A28003C6BB0 /* Vorbis.framework */; };
+		738B57711446185700F25FDF /* BanList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 738B57681446185700F25FDF /* BanList.cpp */; };
+		738B57721446185700F25FDF /* GameSettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 738B576B1446185700F25FDF /* GameSettings.cpp */; };
+		738B57731446185700F25FDF /* InputCode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 738B576D1446185700F25FDF /* InputCode.cpp */; };
+		738B57741446185700F25FDF /* shipItems.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 738B57701446185700F25FDF /* shipItems.cpp */; };
 		73A2B20013DE57C40002EF92 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 73A2B1FF13DE57C40002EF92 /* libz.dylib */; };
 		73A2B23613DE58630002EF92 /* png.c in Sources */ = {isa = PBXBuildFile; fileRef = 73A2B22313DE58630002EF92 /* png.c */; };
 		73A2B23713DE58630002EF92 /* png.h in Headers */ = {isa = PBXBuildFile; fileRef = 73A2B22413DE58630002EF92 /* png.h */; };
@@ -439,7 +443,6 @@
 		73D2F37412E2D7E800EA5EBE /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 73D2F2BE12E2D7E800EA5EBE /* Info.plist */; };
 		73D2F37512E2D7E800EA5EBE /* IniFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2BF12E2D7E800EA5EBE /* IniFile.cpp */; };
 		73D2F37712E2D7E800EA5EBE /* item.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2C312E2D7E800EA5EBE /* item.cpp */; };
-		73D2F37812E2D7E800EA5EBE /* keyCode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2C512E2D7E800EA5EBE /* keyCode.cpp */; };
 		73D2F37912E2D7E800EA5EBE /* keymap.txt in Resources */ = {isa = PBXBuildFile; fileRef = 73D2F2C812E2D7E800EA5EBE /* keymap.txt */; };
 		73D2F37B12E2D7E800EA5EBE /* lineEditor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2CA12E2D7E800EA5EBE /* lineEditor.cpp */; };
 		73D2F37D12E2D7E800EA5EBE /* loadoutHelper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2CD12E2D7E800EA5EBE /* loadoutHelper.cpp */; };
@@ -520,7 +523,6 @@
 		73D2F3E712E2D7E800EA5EBE /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 73D2F2BE12E2D7E800EA5EBE /* Info.plist */; };
 		73D2F3E812E2D7E800EA5EBE /* IniFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2BF12E2D7E800EA5EBE /* IniFile.cpp */; };
 		73D2F3EA12E2D7E800EA5EBE /* item.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2C312E2D7E800EA5EBE /* item.cpp */; };
-		73D2F3EB12E2D7E800EA5EBE /* keyCode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2C512E2D7E800EA5EBE /* keyCode.cpp */; };
 		73D2F3EC12E2D7E800EA5EBE /* keymap.txt in Resources */ = {isa = PBXBuildFile; fileRef = 73D2F2C812E2D7E800EA5EBE /* keymap.txt */; };
 		73D2F3EE12E2D7E800EA5EBE /* lineEditor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2CA12E2D7E800EA5EBE /* lineEditor.cpp */; };
 		73D2F3F012E2D7E800EA5EBE /* loadoutHelper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2CD12E2D7E800EA5EBE /* loadoutHelper.cpp */; };
@@ -1236,6 +1238,15 @@
 		7388F26A139D6B5F003C6BB0 /* vorbisfile.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = vorbisfile.c; sourceTree = "<group>"; };
 		7388F26B139D6B5F003C6BB0 /* window.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = window.c; sourceTree = "<group>"; };
 		7388F26C139D6B5F003C6BB0 /* window.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = window.h; sourceTree = "<group>"; };
+		738B57681446185700F25FDF /* BanList.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BanList.cpp; path = ../../../zap/BanList.cpp; sourceTree = SOURCE_ROOT; };
+		738B57691446185700F25FDF /* BanList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BanList.h; path = ../../../zap/BanList.h; sourceTree = SOURCE_ROOT; };
+		738B576A1446185700F25FDF /* ConfigEnum.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ConfigEnum.h; path = ../../../zap/ConfigEnum.h; sourceTree = SOURCE_ROOT; };
+		738B576B1446185700F25FDF /* GameSettings.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GameSettings.cpp; path = ../../../zap/GameSettings.cpp; sourceTree = SOURCE_ROOT; };
+		738B576C1446185700F25FDF /* GameSettings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GameSettings.h; path = ../../../zap/GameSettings.h; sourceTree = SOURCE_ROOT; };
+		738B576D1446185700F25FDF /* InputCode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = InputCode.cpp; path = ../../../zap/InputCode.cpp; sourceTree = SOURCE_ROOT; };
+		738B576E1446185700F25FDF /* InputCode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = InputCode.h; path = ../../../zap/InputCode.h; sourceTree = SOURCE_ROOT; };
+		738B576F1446185700F25FDF /* InputCodeEnum.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = InputCodeEnum.h; path = ../../../zap/InputCodeEnum.h; sourceTree = SOURCE_ROOT; };
+		738B57701446185700F25FDF /* shipItems.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = shipItems.cpp; path = ../../../zap/shipItems.cpp; sourceTree = SOURCE_ROOT; };
 		73A2B1EA13DE57BD0002EF92 /* libpng.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = libpng.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		73A2B1F913DE57BD0002EF92 /* libpng-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "libpng-Info.plist"; sourceTree = "<group>"; };
 		73A2B1FF13DE57C40002EF92 /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
@@ -1365,9 +1376,6 @@
 		73D2F2C212E2D7E800EA5EBE /* input.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = input.h; path = ../../../zap/input.h; sourceTree = SOURCE_ROOT; };
 		73D2F2C312E2D7E800EA5EBE /* item.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = item.cpp; path = ../../../zap/item.cpp; sourceTree = SOURCE_ROOT; };
 		73D2F2C412E2D7E800EA5EBE /* item.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = item.h; path = ../../../zap/item.h; sourceTree = SOURCE_ROOT; };
-		73D2F2C512E2D7E800EA5EBE /* keyCode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = keyCode.cpp; path = ../../../zap/keyCode.cpp; sourceTree = SOURCE_ROOT; };
-		73D2F2C612E2D7E800EA5EBE /* keyCode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = keyCode.h; path = ../../../zap/keyCode.h; sourceTree = SOURCE_ROOT; };
-		73D2F2C712E2D7E800EA5EBE /* keyCodeEnum.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = keyCodeEnum.h; path = ../../../zap/keyCodeEnum.h; sourceTree = SOURCE_ROOT; };
 		73D2F2C812E2D7E800EA5EBE /* keymap.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = keymap.txt; path = ../../../zap/keymap.txt; sourceTree = SOURCE_ROOT; };
 		73D2F2CA12E2D7E800EA5EBE /* lineEditor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = lineEditor.cpp; path = ../../../zap/lineEditor.cpp; sourceTree = SOURCE_ROOT; };
 		73D2F2CB12E2D7E800EA5EBE /* lineEditor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = lineEditor.h; path = ../../../zap/lineEditor.h; sourceTree = SOURCE_ROOT; };
@@ -2504,6 +2512,15 @@
 		73D2F27E12E2D6D800EA5EBE /* zap */ = {
 			isa = PBXGroup;
 			children = (
+				738B57681446185700F25FDF /* BanList.cpp */,
+				738B57691446185700F25FDF /* BanList.h */,
+				738B576A1446185700F25FDF /* ConfigEnum.h */,
+				738B576B1446185700F25FDF /* GameSettings.cpp */,
+				738B576C1446185700F25FDF /* GameSettings.h */,
+				738B576D1446185700F25FDF /* InputCode.cpp */,
+				738B576E1446185700F25FDF /* InputCode.h */,
+				738B576F1446185700F25FDF /* InputCodeEnum.h */,
+				738B57701446185700F25FDF /* shipItems.cpp */,
 				7385CB9F14147824008470C8 /* ClientGame.cpp */,
 				7385CBA014147824008470C8 /* ClientGame.h */,
 				7385CBA114147824008470C8 /* EngineeredItem.cpp */,
@@ -2617,9 +2634,6 @@
 				73D2F2C212E2D7E800EA5EBE /* input.h */,
 				73D2F2C312E2D7E800EA5EBE /* item.cpp */,
 				73D2F2C412E2D7E800EA5EBE /* item.h */,
-				73D2F2C512E2D7E800EA5EBE /* keyCode.cpp */,
-				73D2F2C612E2D7E800EA5EBE /* keyCode.h */,
-				73D2F2C712E2D7E800EA5EBE /* keyCodeEnum.h */,
 				73D2F2C812E2D7E800EA5EBE /* keymap.txt */,
 				73D2F2CA12E2D7E800EA5EBE /* lineEditor.cpp */,
 				73D2F2CB12E2D7E800EA5EBE /* lineEditor.h */,
@@ -3636,7 +3650,6 @@
 				73D2F37312E2D7E800EA5EBE /* huntersGame.cpp in Sources */,
 				73D2F37512E2D7E800EA5EBE /* IniFile.cpp in Sources */,
 				73D2F37712E2D7E800EA5EBE /* item.cpp in Sources */,
-				73D2F37812E2D7E800EA5EBE /* keyCode.cpp in Sources */,
 				73D2F37B12E2D7E800EA5EBE /* lineEditor.cpp in Sources */,
 				73D2F37D12E2D7E800EA5EBE /* loadoutHelper.cpp in Sources */,
 				73D2F37E12E2D7E800EA5EBE /* loadoutZone.cpp in Sources */,
@@ -3989,7 +4002,6 @@
 				73D2F3E612E2D7E800EA5EBE /* huntersGame.cpp in Sources */,
 				73D2F3E812E2D7E800EA5EBE /* IniFile.cpp in Sources */,
 				73D2F3EA12E2D7E800EA5EBE /* item.cpp in Sources */,
-				73D2F3EB12E2D7E800EA5EBE /* keyCode.cpp in Sources */,
 				73D2F3EE12E2D7E800EA5EBE /* lineEditor.cpp in Sources */,
 				73D2F3F012E2D7E800EA5EBE /* loadoutHelper.cpp in Sources */,
 				73D2F3F112E2D7E800EA5EBE /* loadoutZone.cpp in Sources */,
@@ -4076,6 +4088,10 @@
 				7385CBAC14147824008470C8 /* PickupItem.cpp in Sources */,
 				7385CBAD14147824008470C8 /* Spawn.cpp in Sources */,
 				7385CBAE14147824008470C8 /* Timer.cpp in Sources */,
+				738B57711446185700F25FDF /* BanList.cpp in Sources */,
+				738B57721446185700F25FDF /* GameSettings.cpp in Sources */,
+				738B57731446185700F25FDF /* InputCode.cpp in Sources */,
+				738B57741446185700F25FDF /* shipItems.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

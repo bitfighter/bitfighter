@@ -117,8 +117,8 @@ void SimpleLine::renderItemText(const char *text, S32 offset, F32 currentScale)
 #ifndef ZAP_DEDICATED
    glColor(INSTRUCTION_TEXTCOLOR);
 
-   UserInterface::drawStringf_2pt(getVert(0), getVert(1) , F32(INSTRUCTION_TEXTSIZE) / currentScale, -3.0 / currentScale, text);
-   UserInterface::drawStringf_2pt(getVert(0), getVert(1) , F32(INSTRUCTION_TEXTSIZE) / currentScale, -21.0 / currentScale, "[Enter] to edit");
+   UserInterface::drawStringf_2pt(getVert(0), getVert(1) , F32(INSTRUCTION_TEXTSIZE) / currentScale, -3.f / currentScale, text);
+   UserInterface::drawStringf_2pt(getVert(0), getVert(1) , F32(INSTRUCTION_TEXTSIZE) / currentScale, -21.f / currentScale, "[Enter] to edit");
 #endif
 }
 

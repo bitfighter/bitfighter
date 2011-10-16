@@ -465,5 +465,38 @@ string ctos(char c)
    return string(1, c);
 }
 
+string replaceString(const char *in, const char *find, const char *replace)
+{
+   string out;
+   int n = 0;
+   int findlen = strlen(find);
+   while(in[n])
+   {
+      if(!strncmp(&in[n], find, findlen))
+      {
+         out += replace;
+         n += findlen;
+      }
+      else
+      {
+         out += in[n];
+         n++;
+      }
+   }
+   return out;
+}
+
+string writeLevelString(const char *in)
+{
+   int c=0;
+   while(in[c] != 0 && in[c] != '\"' && in[c] != '#' && in[c] != ' ')
+      c++;
+   if(in[c] == 0 && c != 0)
+      return string(in);  // string does not need to be changed if not zero length and there is no space or any of: # "
+
+   string out = replaceString(in, "\"", "\"\"");
+   return string("\"") + out + "\"";
+}
+
 };
 
