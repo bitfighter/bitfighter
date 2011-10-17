@@ -430,6 +430,7 @@ bool LuaObject::getMenuItemVectorFromTable(lua_State *L, S32 index, const char *
          //
          //   return "Menu title", items
          //end
+         //xxxxlua_getglobal(L, "ERROR");    // <-- what is this for?
 
          char msg[256];
          dSprintf(msg, sizeof(msg), "%s expected a MenuItem at position %d", methodName, menuItems.size() + 1);
