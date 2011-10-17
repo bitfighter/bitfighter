@@ -34,23 +34,42 @@
 namespace Zap
 {
 
+   // Constructors
+QuickMenuUI::QuickMenuUI(ClientGame *game) : Parent(game)
+{
+   initialize();
+}
+
+
+QuickMenuUI::QuickMenuUI(ClientGame *game, const string &title) : Parent(game, title)
+{
+   initialize();
+}
+
+
+void QuickMenuUI::initialize()
+{
+   mTopOfFirstMenuItem = -1;    
+}
+
+
 extern ScreenInfo gScreenInfo;
 
-static const S32 ATTR_TEXTSIZE = 20;       // called attrSize in the editor
+S32 QuickMenuUI::getTextSize() { return 20; }      
+S32 QuickMenuUI::getGap() { return 6; }            
+
 
 void QuickMenuUI::render()
 {
    // Draw the underlying editor screen
    getUIManager()->getPrevUI()->render();
 
-   const S32 INSTRUCTION_SIZE = ATTR_TEXTSIZE * 6 / 10;      // Size of bottom menu item, "Save and quit"
+   const S32 INSTRUCTION_SIZE = getTextSize() * 6 / 10;      // Size of bottom menu item, "Save and quit"
 
    string title = getTitle();
 
-   S32 gap = ATTR_TEXTSIZE / 3;
-
-   S32 count = getMenuItemCount() - 1;      // We won't count our last item, save-n-quit, here, because it's rendered separately
-   S32 yStart = S32(mMenuLocation.y) - count * (ATTR_TEXTSIZE + gap) - 10 - (gap + INSTRUCTION_SIZE);
+   S32 count = getMenuItemCount() - 1;      // We won't count our last item, save-n-quit, because it's rendered separately
+   S32 yStart = S32(mMenuLocation.y) - count * (getTextSize() + getGap()) - 10 - (getGap() + INSTRUCTION_SIZE);
 
    S32 width = max(getMenuWidth(), getStringWidth(INSTRUCTION_SIZE, title.c_str()));
 
@@ -61,7 +80,7 @@ void QuickMenuUI::render()
    S32 naturalRight = S32(mMenuLocation.x) + width / 2 + hpad;
 
    S32 naturalTop =  yStart - vpad;
-   S32 naturalBottom = yStart + count * (ATTR_TEXTSIZE + gap) + 2 * (gap + INSTRUCTION_SIZE) + vpad * 2 + 2;
+   S32 naturalBottom = yStart + count * (getTextSize() + getGap()) + 2 * (getGap() + INSTRUCTION_SIZE) + vpad * 2 + 2;
 
    // Keep the menu on screen, no matter where the item being edited is located
    S32 keepingItOnScreenAdjFactorX = 0;
@@ -98,23 +117,24 @@ void QuickMenuUI::render()
    drawCenteredString(cenX, yStart, INSTRUCTION_SIZE, title.c_str());
 
    // Then the menu items
-   yStart += INSTRUCTION_SIZE + gap + 2;
+   yStart += INSTRUCTION_SIZE + getGap() + 2;
+   mTopOfFirstMenuItem = yStart;    // Save this -- it will be handy elsewhere!
 
    for(S32 i = 0; i < count; i++)
    {
-      S32 y = yStart + i * (ATTR_TEXTSIZE + gap);
+      S32 y = yStart + i * (getTextSize() + getGap());
 
       // Draw background highlight if this item's selected
       if(selectedIndex == i)
-         drawMenuItemHighlight(left,  y, right, y + ATTR_TEXTSIZE + 5);
+         drawMenuItemHighlight(left,  y, right, y + getTextSize() + 5);
 
-      getMenuItem(i)->render(cenX, y, ATTR_TEXTSIZE, selectedIndex == i);
+      getMenuItem(i)->render(cenX, y, getTextSize(), selectedIndex == i);
    }
 
    /////
    // The last menu item is our save and exit item, which we want to draw smaller to balance out the menu title visually.
    // We'll blindly assume it's there, and also that it's last.
-   S32 y = (yStart + count * (ATTR_TEXTSIZE + gap) + gap);
+   S32 y = (yStart + count * (getTextSize() + getGap()) + getGap());
 
    // Draw background highlight if this item's selected
    if(selectedIndex == getMenuItemCount() - 1)
@@ -124,13 +144,30 @@ void QuickMenuUI::render()
 }
 
 
+S32 QuickMenuUI::getSelectedMenuItem()
+{
+   if(mTopOfFirstMenuItem < 0)      // Haven't run render yet, still have no idea where the menu is!
+      return 0;
+
+   S32 y = gScreenInfo.getMousePos()->y;
+
+   if(y <= mTopOfFirstMenuItem)
+      return 0;
+
+   if(y >= mTopOfFirstMenuItem + (getMenuItemCount() - 1) * (getTextSize() + getGap()))
+      return getMenuItemCount() - 1;
+
+   return (y - mTopOfFirstMenuItem) / (getTextSize() + getGap());
+}
+
+
 S32 QuickMenuUI::getMenuWidth()
 {
    S32 width = 0;
 
    for(S32 i = 0; i < getMenuItemCount(); i++)
    {
-      S32 itemWidth = getMenuItem(i)->getWidth(ATTR_TEXTSIZE);
+      S32 itemWidth = getMenuItem(i)->getWidth(getTextSize());
 
       if(itemWidth > width)
          width = itemWidth;

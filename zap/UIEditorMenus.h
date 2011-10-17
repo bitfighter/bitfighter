@@ -37,19 +37,30 @@ namespace Zap
 // have other special attributes.  This class has been refactored such that it can be used directly, and no longer needs to be
 // subclassed for each type of entity we want to edit attributes for.
 
-class QuickMenuUI : public MenuUserInterface
+class QuickMenuUI : public MenuUserInterface    // There's really nothing quick about it!
 {
    typedef MenuUserInterface Parent;
 
 private:
+   virtual void initialize();
    virtual string getTitle() { return mMenuTitle; }
    S32 getMenuWidth();     
    Point mMenuLocation;
 
+   virtual S32 getTextSize();     // Let menus set their own text size
+   virtual S32 getGap();          // Gap is the space between items
+
+   // Calculated during rendering, used for figuring out which item mouse is over.  Will always be positive during normal use, 
+   // but will be intialized to negative so that we know not to use it before menu has been rendered, and this value caluclated.
+   S32 mTopOfFirstMenuItem;       
+
+protected:
+   virtual S32 getSelectedMenuItem();
+
 public:
    // Constructors
-   QuickMenuUI(ClientGame *game)                      : Parent(game)        { /* Do nothing */ }    
-   QuickMenuUI(ClientGame *game, const string &title) : Parent(game, title) { /* Do nothing */ }
+   QuickMenuUI(ClientGame *game);
+   QuickMenuUI(ClientGame *game, const string &title);
 
    void render();
 
