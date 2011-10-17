@@ -1028,7 +1028,7 @@ void EditorUserInterface::onActivate()
    OGLCONSOLE_EnterKey(processEditorConsoleCommand);     // Setup callback for processing console commands
 
 
-   actualizeScreenMode(false); 
+   actualizeScreenMode(true);
 }
 
 
