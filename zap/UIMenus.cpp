@@ -94,7 +94,7 @@ void MenuUserInterface::initialize()
 
    selectedIndex = 0;
    itemSelectedWithMouse = false;
-   currOffset = 0;
+   mFirstVisibleItem = 0;
    mRenderInstructions = true;
 }
 
@@ -104,7 +104,7 @@ void MenuUserInterface::onActivate()
 {
    mDisableShipKeyboardInput = true;       // Keep keystrokes from getting to game
    selectedIndex = 0;
-   currOffset = 0;
+   mFirstVisibleItem = 0;
 }
 
 
@@ -181,13 +181,13 @@ S32 MenuUserInterface::getOffset()
 
    if(count > MAX_MENU_SIZE)     // Do some sort of scrolling
    {
-      offset = currOffset;
+      offset = mFirstVisibleItem;
 
       // itemSelectedWithMouse basically lets users highlight the top and bottom items in a scrolling list,
       // which can't be done when using the keyboard
-      if(selectedIndex - currOffset < (itemSelectedWithMouse ? 0 : 1))
+      if(selectedIndex - mFirstVisibleItem < (itemSelectedWithMouse ? 0 : 1))
          offset = selectedIndex - (itemSelectedWithMouse ? 0 : 1);
-      else if( selectedIndex - currOffset > (MAX_MENU_SIZE - (itemSelectedWithMouse ? 1 : 2)) )
+      else if( selectedIndex - mFirstVisibleItem > (MAX_MENU_SIZE - (itemSelectedWithMouse ? 1 : 2)) )
          offset = selectedIndex - (MAX_MENU_SIZE - (itemSelectedWithMouse ? 1 : 2));
 
       if(offset < 0)
@@ -195,7 +195,7 @@ S32 MenuUserInterface::getOffset()
       else if(offset + MAX_MENU_SIZE >= mMenuItems.size())
          offset = mMenuItems.size() - MAX_MENU_SIZE;
    }
-   currOffset = offset;
+   mFirstVisibleItem = offset;
 
    return offset;
 }
@@ -414,33 +414,41 @@ void MenuUserInterface::onMouseMoved()
    itemSelectedWithMouse = true;
    SDL_ShowCursor(SDL_ENABLE);  // Show cursor when user moves mouse
 
-   selectedIndex = U32( floor(( gScreenInfo.getMousePos()->y - getYStart() + 10 ) / (getTextSize() + getGap())) ) + currOffset;
+   selectedIndex = getSelectedMenuItem();
 
    processMouse();
 }
+
+
+S32 MenuUserInterface::getSelectedMenuItem()
+{
+   return S32( floor(( gScreenInfo.getMousePos()->y - getYStart() + 10 ) / (getTextSize() + getGap())) ) + mFirstVisibleItem;
+}
+
+
 
 
 void MenuUserInterface::processMouse()
 {
    if(mMenuItems.size() > MAX_MENU_SIZE)   // We have a scrolling situation here...
    {
-      if(selectedIndex < currOffset)      // Scroll up
+      if(selectedIndex < mFirstVisibleItem)      // Scroll up
       {
-         if(!mScrollTimer.getCurrent() && currOffset > 0)
+         if(!mScrollTimer.getCurrent() && mFirstVisibleItem > 0)
          {
-            currOffset--;
+            mFirstVisibleItem--;
             mScrollTimer.reset(100);
          }
-         selectedIndex = currOffset;
+         selectedIndex = mFirstVisibleItem;
       }
-      else if(selectedIndex > currOffset + MAX_MENU_SIZE - 1)   // Scroll down
+      else if(selectedIndex > mFirstVisibleItem + MAX_MENU_SIZE - 1)   // Scroll down
       {
-         if(!mScrollTimer.getCurrent() && selectedIndex > currOffset + MAX_MENU_SIZE - 2)
+         if(!mScrollTimer.getCurrent() && selectedIndex > mFirstVisibleItem + MAX_MENU_SIZE - 2)
          {
-            currOffset++;
+            mFirstVisibleItem++;
             mScrollTimer.reset(MOUSE_SCROLL_INTERVAL);
          }
-         selectedIndex = currOffset + MAX_MENU_SIZE - 1;
+         selectedIndex = mFirstVisibleItem + MAX_MENU_SIZE - 1;
       }
       else
          mScrollTimer.clear();
@@ -449,12 +457,12 @@ void MenuUserInterface::processMouse()
    if(selectedIndex < 0)                              // Scrolled off top of list
    {
       selectedIndex = 0;
-      currOffset = 0;
+      mFirstVisibleItem = 0;
    }
    else if(selectedIndex >= mMenuItems.size())         // Scrolled off bottom of list
    {
       selectedIndex = mMenuItems.size() - 1;
-      currOffset = max(mMenuItems.size() - MAX_MENU_SIZE, 0);
+      mFirstVisibleItem = max(mMenuItems.size() - MAX_MENU_SIZE, 0);
    }
 }
 
@@ -1686,7 +1694,7 @@ void LevelMenuSelectUserInterface::onActivate()
    }
 
    sortMenuItems();
-   currOffset = 0;
+   mFirstVisibleItem = 0;
 
    if(itemSelectedWithMouse)
       onMouseMoved();

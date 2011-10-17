@@ -63,9 +63,11 @@ private:
    void advanceItem();                                   // What happens when we move on to the next menu item?
 
    virtual void initialize();
+   virtual S32 getSelectedMenuItem();
 
 protected:
-   S32 currOffset;
+   
+   S32 mFirstVisibleItem;  // Some menus have items than will fit on the screen; this is the index of the first visible item
 
    bool mRenderInstructions;
 
