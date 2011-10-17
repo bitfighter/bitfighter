@@ -203,9 +203,9 @@ protected:
 
 public:
    ToggleMenuItem();
-   ToggleMenuItem(string title, Vector<string> options, U32 currOption = 0, bool wrap = false, 
-                  void (*callback)(ClientGame *, U32) = NULL, 
-                  string help = "", InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
+   ToggleMenuItem(string title, Vector<string> options, U32 currOption, bool wrap, 
+                  void (*callback)(ClientGame *, U32), 
+                  string help, InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
 
    virtual MenuItemTypes getItemType() { return ToggleMenuItemType; }
    virtual string getValueForDisplayingInMenu() { return ""; }

@@ -909,7 +909,8 @@ static void setControlsCallback(ClientGame *game, U32 val)
 
 static void setFullscreenCallback(ClientGame *game, U32 mode)
 {
-   game->getSettings()->getIniSettings()->oldDisplayMode = game->getSettings()->getIniSettings()->displayMode;     // Save existing setting
+   // Save existing setting
+   game->getSettings()->getIniSettings()->oldDisplayMode = game->getSettings()->getIniSettings()->displayMode;     
 
    game->getSettings()->getIniSettings()->displayMode = (DisplayMode)mode;
    actualizeScreenMode(false);

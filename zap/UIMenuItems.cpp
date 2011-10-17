@@ -327,7 +327,7 @@ void ToggleMenuItem::push(lua_State *L)
 
 // Constructors
 YesNoMenuItem::YesNoMenuItem(string title, bool currOption, string help, InputCode k1, InputCode k2) :
-      ToggleMenuItem(title, Vector<string>(), currOption, true)
+      ToggleMenuItem(title, Vector<string>(), currOption, true, NULL, help, k1, k2)
 {
    initialize();
 
