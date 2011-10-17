@@ -102,12 +102,14 @@ bool LuaLevelGenerator::runGetArgs(string &menuTitle, Vector<MenuItem *> &menuIt
       else
       {
          menuTitle = getString(L, 1, "getArgs");
-         return  getMenuItemVectorFromTable(L, 2, "getArgs", menuItems);
+         getMenuItemVectorFromTable(L, 2, "getArgs", menuItems);
+
+         return true;
       }
-      }
+   }
    catch(LuaException &e)
    {
-      logError("Error running %s: %s.  Aborting script.", "function main()", e.what());   // Make sure we don't use the 2-string version of logError
+      logError("Error running %s: %s.  Aborting script.", "function getArgs()", e.what());   // Make sure we don't use the 2-string version of logError
       return false;
    }
 }
