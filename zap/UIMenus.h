@@ -57,7 +57,7 @@ private:
    bool mKeyDown;
 
    virtual S32 getTextSize() { return 23; }              // Let menus set their own text size
-   virtual S32 getGap() { return 18; }
+   virtual S32 getGap() { return 18; }                   // Gap is the space between items
 
    virtual void renderExtras() { /* Do nothing */ }      // For drawing something extra on a menu
    void advanceItem();                                   // What happens when we move on to the next menu item?
@@ -101,14 +101,14 @@ public:
 
    void idle(U32 timeDelta); 
 
-   S32 selectedIndex;
+   S32 selectedIndex;                                    // Index of the currently highlighted menu item
 
-   void getMenuResponses(Vector<string> &responses);    // Fill responses with values from menu
+   void getMenuResponses(Vector<string> &responses);     // Fill responses with values from menu
 
-   void render();    // Draw the basic menu
+   void render();                                        // Draw the basic menu
    void onKeyDown(InputCode inputCode, char ascii);
    void onKeyUp(InputCode inputCode);
-   void onMouseMoved(S32 x, S32 y) { onMouseMoved(); }      // Redirect to argless version
+   void onMouseMoved(S32 x, S32 y) { onMouseMoved(); }   // Redirect to argless version
    void onMouseMoved();
    void processMouse();
 

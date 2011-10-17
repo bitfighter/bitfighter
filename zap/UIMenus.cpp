@@ -426,8 +426,6 @@ S32 MenuUserInterface::getSelectedMenuItem()
 }
 
 
-
-
 void MenuUserInterface::processMouse()
 {
    if(mMenuItems.size() > MAX_MENU_SIZE)   // We have a scrolling situation here...
@@ -816,8 +814,8 @@ bool MainMenuUserInterface::getNeedToUpgrade()
 
 void MainMenuUserInterface::renderExtras()
 {
-   glColor3f(1,1,1);
-   S32 size = 20;
+   glColor(Colors::white);
+   const S32 size = 20;
    drawCenteredString(gScreenInfo.getGameCanvasHeight() - vertMargin - size, size, "join us @ www.bitfighter.org");
 }
 
