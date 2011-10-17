@@ -225,7 +225,7 @@ string EditorAttributeMenuUI::getTitle()
 
    S32 selectedObjCount = ui->getItemSelectedCount();
    return string("Attributes for ") + (selectedObjCount != 1 ? itos(selectedObjCount) + " " + mObject->getPrettyNamePlural() : 
-                                                                       mObject->getOnScreenName());
+                                                               mObject->getOnScreenName());
 }
 
 
