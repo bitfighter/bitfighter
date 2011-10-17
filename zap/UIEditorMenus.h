@@ -67,7 +67,7 @@ public:
    virtual void onEscape();
 
    void addSaveAndQuitMenuItem();
-   void setMenuLocation(const Point &location);
+   void setMenuCenterPoint(const Point &location);    // Sets the point at which the menu will be centered about
    virtual void doneEditing() = 0;
 };
 

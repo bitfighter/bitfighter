@@ -699,12 +699,15 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
    }
 
    // Build a menu from the menuItems returned by the plugin
-   PluginMenuUI *menu = new PluginMenuUI(getGame(), title);
+   PluginMenuUI *menu = new PluginMenuUI(getGame(), title);    // when is this deleted??
 
    for(S32 i = 0; i < menuItems.size(); i++)
       menu->addMenuItem(menuItems[i]);
 
    menu->addSaveAndQuitMenuItem();
+
+   menu->setMenuCenterPoint(Point(gScreenInfo.getGameCanvasWidth() / 2, gScreenInfo.getGameCanvasHeight() / 2));  
+
 
    menu->activate();
 }

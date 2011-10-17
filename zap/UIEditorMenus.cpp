@@ -185,7 +185,7 @@ void QuickMenuUI::onEscape()
 
 
 // See Raptor, I am trying!
-void QuickMenuUI::setMenuLocation(const Point &location)
+void QuickMenuUI::setMenuCenterPoint(const Point &location)
 {
    mMenuLocation = location;
 }
@@ -236,7 +236,7 @@ void EditorAttributeMenuUI::startEditingAttrs(EditorObject *object)
    EditorUserInterface *ui = getUIManager()->getEditorUserInterface();
 
    Point center = (mObject->getVert(0) + mObject->getVert(1)) * ui->getCurrentScale() / 2 + ui->getCurrentOffset();
-   setMenuLocation(center);  
+   setMenuCenterPoint(center);  
 
    object->startEditingAttrs(this);
 }
