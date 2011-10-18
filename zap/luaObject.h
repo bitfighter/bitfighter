@@ -90,7 +90,7 @@ public:
    // All of these return<T> functions work in the same way.  Include at the end of a child class method.
    // Usage: return returnInt(L, int);
 
-   template<class T>   S32 returnVal(lua_State *L, T value, bool letLuaDelete = true);
+   template<class T> S32 returnVal(lua_State *L, T value, bool letLuaDelete = true);
 
    // The basics:
    static S32 returnInt(lua_State *L, S32 num);
@@ -113,6 +113,7 @@ public:
 
    static void openLibs(lua_State *L);
 
+   static bool shouldLuaGarbageCollectThisObject();     
 };
 
 

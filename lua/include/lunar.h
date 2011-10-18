@@ -165,7 +165,10 @@ private:
      {
         lua_remove(L, 1);   // use classname:new(), instead of classname.new()         <=== Why?
         T *obj = new T(L);  // call constructor for T objects
-        push(L, obj, true); // gc_T will delete this object
+
+        // Lua gc will delete this object if shouldLuaGarbageCollectThisObject() returns true
+        push(L, obj, T::shouldLuaGarbageCollectThisObject()); 
+
         return 1;           // userdata containing pointer to T object
      }
      catch(LuaException &e)
