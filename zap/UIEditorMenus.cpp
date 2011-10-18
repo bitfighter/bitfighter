@@ -267,6 +267,17 @@ void EditorAttributeMenuUI::doneEditingAttrs(EditorObject *object)
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+PluginMenuUI::~PluginMenuUI()
+{
+   // Do nothing
+}
+
+
+void PluginMenuUI::setTitle(const string &title)
+{
+   mMenuTitle = title;
+}
+
 
 void PluginMenuUI::doneEditing()
 {

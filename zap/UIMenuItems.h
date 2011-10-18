@@ -96,9 +96,9 @@ public:
    InputCode key1;            // Allow two shortcut keys per menu item...
    InputCode key2;
 
-   virtual MenuItemTypes getItemType() { return MenuItemType; }
+   static bool shouldLuaGarbageCollectThisObject();   
 
-   //MenuItem *MenuItem::getMenuItem(lua_State *L, S32 index, U32 type, const char *functionName);
+   virtual MenuItemTypes getItemType() { return MenuItemType; }
 
    virtual void render(S32 ypos, S32 textsize, bool isSelected);              // Renders item horizontally centered on screen
    virtual void render(S32 xpos, S32 ypos, S32 textsize, bool isSelected);    // Renders item horizontally centered on xpos
@@ -206,6 +206,7 @@ public:
    ToggleMenuItem(string title, Vector<string> options, U32 currOption, bool wrap, 
                   void (*callback)(ClientGame *, U32), 
                   string help, InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
+   ~ToggleMenuItem();
 
    virtual MenuItemTypes getItemType() { return ToggleMenuItemType; }
    virtual string getValueForDisplayingInMenu() { return ""; }

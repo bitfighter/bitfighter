@@ -100,6 +100,14 @@ MenuItem::~MenuItem()
    // Do nothing
 } 
 
+// Generally speaking, we don't want Lua to collect menu items -- they are useless if they are not passed back to Bitfighter, and our menu
+// automatically handles deletion.  The only place we could get into trouble is if a script creates a bunch of MenuItems and holds on to 
+// them, never passing them back to the game.  That memory would be lost forever...
+bool MenuItem::shouldLuaGarbageCollectThisObject()
+{
+   return false;
+}
+
 
 MenuUserInterface *MenuItem::getMenu()  
 { 
@@ -309,6 +317,13 @@ ToggleMenuItem::ToggleMenuItem(lua_State *L)
 }
 
 
+// Destructor
+ToggleMenuItem::~ToggleMenuItem()
+{
+   // Do nothing
+}
+
+
 // Define the methods we will expose to Lua
 Lunar<ToggleMenuItem>::RegType ToggleMenuItem::methods[] =
 {
@@ -318,7 +333,7 @@ Lunar<ToggleMenuItem>::RegType ToggleMenuItem::methods[] =
 
 void ToggleMenuItem::push(lua_State *L) 
 {  
-   Lunar<ToggleMenuItem>::push(L, this); 
+   Lunar<ToggleMenuItem>::push(L, this, false); 
 }
 
 
@@ -390,7 +405,7 @@ Lunar<YesNoMenuItem>::RegType YesNoMenuItem::methods[] =
 
 void YesNoMenuItem::push(lua_State *L) 
 {  
-   Lunar<YesNoMenuItem>::push(L, this); 
+   Lunar<YesNoMenuItem>::push(L, this, false); 
 }
 
 
@@ -530,7 +545,7 @@ Lunar<CounterMenuItem>::RegType CounterMenuItem::methods[] =
 
 void CounterMenuItem::push(lua_State *L) 
 {  
-   Lunar<CounterMenuItem>::push(L, this); 
+   Lunar<CounterMenuItem>::push(L, this, false); 
 }
 
 
@@ -739,7 +754,7 @@ Lunar<TextEntryMenuItem>::RegType TextEntryMenuItem::methods[] =
 
 void TextEntryMenuItem::push(lua_State *L) 
 {  
-   Lunar<TextEntryMenuItem>::push(L, this); 
+   Lunar<TextEntryMenuItem>::push(L, this, false); 
 }
 
 

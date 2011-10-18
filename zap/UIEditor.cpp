@@ -678,38 +678,36 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
    if(!mPluginRunner->loadScript())       // Loads the script and runs it to get everything loaded into memory.  Does not run main().
    {
       showError(getGame());
-      mPluginRunner.reset();              // Clean up, clean up, everybody clean up!
       return;
    }
 
    string title;
    Vector<MenuItem *> menuItems;
 
-   if(!levelGen->runGetArgs(title, menuItems))         // Fills menuItems
+   if(!levelGen->runGetArgs(title, menuItems))     // Fills menuItems
    {
       showError(getGame());
-      mPluginRunner.reset();
       return;
    }
 
-   if(menuItems.size() == 0)                    // No menu items?  Let's run the script directly!
+   if(menuItems.size() == 0)                       // No menu items?  Let's run the script directly!
    {
-      onPluginMenuClosed(Vector<string>());     // We'll use whatever args we already have
+      onPluginMenuClosed(Vector<string>());        // We'll use whatever args we already have
       return;
    }
 
    // Build a menu from the menuItems returned by the plugin
-   PluginMenuUI *menu = new PluginMenuUI(getGame(), title);    // when is this deleted??
+   mPluginMenu.reset(new PluginMenuUI(getGame(), title));      // Using a smart pointer here, for auto deletion
 
    for(S32 i = 0; i < menuItems.size(); i++)
-      menu->addMenuItem(menuItems[i]);
+      mPluginMenu->addMenuItem(menuItems[i]);
 
-   menu->addSaveAndQuitMenuItem();
+   mPluginMenu->addSaveAndQuitMenuItem();
 
-   menu->setMenuCenterPoint(Point(gScreenInfo.getGameCanvasWidth() / 2, gScreenInfo.getGameCanvasHeight() / 2));  
+   mPluginMenu->setMenuCenterPoint(Point(gScreenInfo.getGameCanvasWidth() / 2, gScreenInfo.getGameCanvasHeight() / 2));  
 
 
-   menu->activate();
+   mPluginMenu->activate();
 }
 
 
@@ -718,7 +716,6 @@ void EditorUserInterface::onPluginMenuClosed(const Vector<string> &args)
    TNLAssert(mPluginRunner, "NULL PluginRunner!");
    
    mPluginRunner->runMain(args);
-   mPluginRunner.reset();
 }
 
 
@@ -2754,7 +2751,7 @@ void EditorUserInterface::deleteItem(S32 itemIndex)
    {
       // Need to recompute boundaries of any intersecting walls
       wallSegmentManager->invalidateIntersectingSegments(game->getEditorDatabase(), obj); // Mark intersecting segments invalid
-      wallSegmentManager->deleteSegments(obj->getItemId());                             // Delete the segments associated with the wall
+      wallSegmentManager->deleteSegments(obj->getItemId());                               // Delete the segments associated with the wall
 
       game->getEditorDatabase()->removeFromDatabase(obj, obj->getExtent());
 

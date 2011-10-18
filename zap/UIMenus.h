@@ -76,7 +76,6 @@ protected:
    virtual bool processKeys(InputCode inputCode, char ascii);
 
    void sortMenuItems();
-   void clearMenuItems();
    S32 getMenuItemCount();
    MenuItem *getLastMenuItem();
 
@@ -85,6 +84,7 @@ public:
    MenuUserInterface(ClientGame *game);      
    MenuUserInterface(ClientGame *game, const string &title);
 
+   void clearMenuItems();
    void addMenuItem(MenuItem *menuItem);
    void addWrappedMenuItem(boost::shared_ptr<MenuItem> menuItem);
    MenuItem *getMenuItem(S32 index);

@@ -107,7 +107,9 @@ class PluginMenuUI : public QuickMenuUI
 
 public:
    PluginMenuUI(ClientGame *game, const string &title) : Parent(game, title) { /* Do nothing */ }    // Constructor
+   virtual ~PluginMenuUI();                                                                          // Destructor
 
+   void setTitle(const string &title);
    virtual void doneEditing();
 };
 

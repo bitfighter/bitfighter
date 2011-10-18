@@ -29,6 +29,8 @@
 #include "UIMenus.h"
 #include "EditorObject.h"
 
+#include "UIEditorMenus.h"       // For PluginMenuUI
+
 #include "gameLoader.h"
 #include "gameObject.h"          // For EditorObject definition
 #include "gridDB.h"              // For DatabaseObject definition
@@ -42,6 +44,7 @@
 #include <string>
 
 #include <boost/shared_ptr.hpp>
+#include <boost/scoped_ptr.hpp>
 
 using namespace std;
 
@@ -107,6 +110,7 @@ static const Color *SELECT_COLOR = &Colors::yellow;
 ////////////////////////////////////////
 
 class EditorAttributeMenuUI;
+class PluginMenuUI;
 
 class EditorUserInterface : public UserInterface
 {
@@ -237,6 +241,11 @@ private:
    void onFinishedDragging();    // Called when we're done dragging an object
 
    void resnapAllEngineeredItems();
+
+   boost::scoped_ptr<PluginMenuUI> mPluginMenu;  // crashy version    
+   //PluginMenuUI *mPluginMenu;    // leaky version
+
+   //PluginMenuUI mPluginMenu;
 
 protected:
    void onActivate();
