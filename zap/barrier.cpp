@@ -284,6 +284,7 @@ void Barrier::constructBarrierEndPoints(const Vector<Point> *vec, F32 width, Vec
 
       Point start = vec->get(i) - edgeVector[i] * extendBack;
       Point end = vec->get(i+1) + edgeVector[i] * extendForward;
+
       barrierEnds.push_back(start);
       barrierEnds.push_back(end);
    }

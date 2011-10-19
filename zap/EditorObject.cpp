@@ -321,8 +321,11 @@ F32 EditorObject::getEditorRadius(F32 currentScale)
 EditorObject *EditorObject::newCopy()
 {
    EditorObject *newObject = clone();     // TODO: Wrap in shared_ptr?
+   newObject->mGame = NULL;
 
    newObject->initializeEditor();         // Unselects all vertices
+
+   newObject->assignNewSerialNumber();    // Give this object an identity of its own
 
    return newObject;
 }

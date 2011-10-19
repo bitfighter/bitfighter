@@ -1886,7 +1886,6 @@ void EditorUserInterface::pasteSelection()
       offset = firstPoint - mClipboard[i]->getVert(0);
 
       EditorObject *newObject = mClipboard[i]->newCopy();
-      newObject->assignNewSerialNumber();
       newObject->setExtent();
       newObject->addToDatabase(getGame()->getEditorDatabase());
 
@@ -2614,15 +2613,12 @@ void EditorUserInterface::splitBarrier()
                   saveUndoState();
                split = true;
 
-               // Create a poor man's copy
-               EditorObject *newItem = obj->newCopy();
-               //newItem->setTeam(-1);
-               //newItem->setWidth(obj->getWidth());
-               newItem->clearVerts();
+               EditorObject *newObj = obj->newCopy();    // Copy the attributes
+               newObj->clearVerts();                     // Wipe out the geometry
 
                for(S32 k = j; k < obj->getVertCount(); k++) 
                {
-                  newItem->addVert(obj->getVert(k));
+                  newObj->addVert(obj->getVert(k));
                   if (k > j)
                   {
                      obj->deleteVert(k);     // Don't delete j == k vertex -- it needs to remain as the final vertex of the old wall
@@ -2630,12 +2626,11 @@ void EditorUserInterface::splitBarrier()
                   }
                }
 
+               newObj->addToEditor(getGame());
 
                // Tell the new segments that they have new geometry
                obj->onGeomChanged();
-               newItem->onGeomChanged();
-               //mItems.push_back(boost::shared_ptr<EditorObject>(newItem));
-               newItem->addToEditor(getGame());
+               newObj->onGeomChanged();            // Needs to happen after item is added to game, so mGame will not be NULL
 
                goto done2;                         // Yes, gotos are naughty, but they just work so well sometimes...
             }
@@ -3014,7 +3009,7 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
       {
          S32 width;
 
-      if(getInputCodeState(KEY_BACKQUOTE))      // Was KEY_TILDE, but SDL reports this key as KEY_BACKQUOTE, at least on US American keyboards
+         if(getInputCodeState(KEY_BACKQUOTE))      // Was KEY_TILDE, but SDL reports this key as KEY_BACKQUOTE, at least on US American keyboards
          {
             mCreatingPolyline = true;
             mNewItem = new LineItem();
