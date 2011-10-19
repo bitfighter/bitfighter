@@ -85,11 +85,8 @@ public:
    // Constructors
    MenuItem();
    MenuItem(const string &displayVal);
-   MenuItem(const string &displayVal, void (*callback)(ClientGame *, U32), const char *help, 
-            InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
-   MenuItem(S32 index, const string &prompt, void (*callback)(ClientGame *, U32), const string &help, 
-            InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
-
+   MenuItem(const string &displayVal, void (*callback)(ClientGame *, U32), const char *help, InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
+   MenuItem(S32 index, const string &prompt, void (*callback)(ClientGame *, U32), const char *help, InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
 
    virtual ~MenuItem();       // Destructor
 
@@ -181,8 +178,7 @@ protected:
 
 public:
    ValueMenuItem();
-   ValueMenuItem(const string &displayValue, void (*callback)(ClientGame *, U32), const string &help, InputCode k1, InputCode k2);
-
+   ValueMenuItem(const string &displayValue, void (*callback)(ClientGame *, U32), const char *help, InputCode k1, InputCode k2);
 };
 
 
@@ -204,8 +200,7 @@ protected:
 public:
    ToggleMenuItem();
    ToggleMenuItem(string title, Vector<string> options, U32 currOption, bool wrap, 
-                  void (*callback)(ClientGame *, U32), 
-                  string help, InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
+                  void (*callback)(ClientGame *, U32), const char *help, InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
    ~ToggleMenuItem();
 
    virtual MenuItemTypes getItemType() { return ToggleMenuItemType; }
@@ -246,12 +241,7 @@ private:
    void setIndex(S32 index);     // Sets mIndex, but with range checking
 
 public:
-   YesNoMenuItem(string title, bool currOption, string help, 
-                 InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
-
-   //YesNoMenuItem(string title, bool currOption, void (*callback)(ClientGame *, U32), string help, 
-   //              InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
-
+   YesNoMenuItem(string title, bool currOption, const char *help, InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
 
    virtual string getValueForDisplayingInMenu() { TNLAssert(false, "Is this used?  If not, remove it!"); return mIndex ? " Engineer" : ""; }
    virtual string getValueForWritingToLevelFile() { return mIndex ? "yes" : "no"; }
@@ -293,7 +283,7 @@ protected:
 public:
    CounterMenuItem(const string &title, S32 value, S32 step, S32 minVal, S32 maxVal, 
                    const string &units, const string &minMsg, 
-                   const string &help, InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
+                   const char *help, InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
 
    virtual void render(S32 xpos, S32 ypos, S32 textsize, bool isSelected);
    virtual S32 getWidth(S32 textsize);
@@ -332,7 +322,7 @@ protected:
    virtual S32 getBigIncrement() { return 12; }    // 12 * 5sec = 1 minute
 
 public:
-   TimeCounterMenuItem(const string &title, S32 value, S32 maxVal, const string &zeroMsg, const string &help, 
+   TimeCounterMenuItem(const string &title, S32 value, S32 maxVal, const string &zeroMsg, const char *help, 
                        S32 step = 5, InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
 
    virtual const char *getUnits() { return mValue >= 60 ? "mins" : "secs"; }
@@ -355,7 +345,7 @@ protected:
    virtual S32 getBigIncrement() { return 5; }
 
 public:
-   TimeCounterMenuItemSeconds(const string &title, S32 value, S32 maxVal, const string &zeroMsg, const string &help, 
+   TimeCounterMenuItemSeconds(const string &title, S32 value, S32 maxVal, const string &zeroMsg, const char *help, 
                               InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
 
    virtual void setValue (const string &val) { mValue = atoi(val.c_str()); } 
@@ -384,7 +374,7 @@ protected:
 
 public:
    // Contstuctor
-   TextEntryMenuItem(string title, string val, string emptyVal, string help, U32 maxLen, 
+   TextEntryMenuItem(string title, string val, string emptyVal, const char *help, U32 maxLen, 
                      InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
 
    virtual MenuItemTypes getItemType() { return TextEntryMenuItemType; }
@@ -425,7 +415,7 @@ public:
 
 class MaskedTextEntryMenuItem : public TextEntryMenuItem
 {
-   MaskedTextEntryMenuItem(string title, string val, string emptyVal, string help, U32 maxLen, 
+   MaskedTextEntryMenuItem(string title, string val, string emptyVal, const char *help, U32 maxLen, 
                           InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
 };
 

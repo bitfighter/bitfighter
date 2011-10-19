@@ -1876,7 +1876,7 @@ void GameType::addClientGameMenuOptions(ClientGame *game, MenuUserInterface *men
       ClientInfo *clientInfo = gc->getClientInfo();
 
       if(mCanSwitchTeams || clientInfo->isAdmin())
-         menu->addMenuItem(new MenuItem(0, "SWITCH TEAMS", switchTeamsCallback, "", KEY_S, KEY_T));
+         menu->addMenuItem(new MenuItem("SWITCH TEAMS", switchTeamsCallback, "", KEY_S, KEY_T));
       else
       {
          menu->addMenuItem(new MessageMenuItem("WAITING FOR SERVER TO ALLOW", Colors::red));

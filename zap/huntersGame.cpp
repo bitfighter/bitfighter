@@ -242,11 +242,14 @@ const char **HuntersGameType::getGameParameterMenuKeys()
 boost::shared_ptr<MenuItem> HuntersGameType::getMenuItem(const char *key)
 {
    if(!strcmp(key, "Nexus Time to Open"))
-      return boost::shared_ptr<MenuItem>(new TimeCounterMenuItem("Time for Nexus to Open:", mNexusClosedTime, 99*60, "Never", "Time it takes for the Nexus to open"));
+      return boost::shared_ptr<MenuItem>(new TimeCounterMenuItem("Time for Nexus to Open:", mNexusClosedTime, 99*60, "Never", 
+                                                                 "Time it takes for the Nexus to open"));
    else if(!strcmp(key, "Nexus Time Remain Open"))
-      return boost::shared_ptr<MenuItem>(new TimeCounterMenuItemSeconds("Time Nexus Remains Open:", mNexusOpenTime, 99*60, "Always", "Time that the Nexus will remain open"));
+      return boost::shared_ptr<MenuItem>(new TimeCounterMenuItemSeconds("Time Nexus Remains Open:", mNexusOpenTime, 99*60, "Always", 
+                                                                        "Time that the Nexus will remain open"));
    else if(!strcmp(key, "Nexus Win Score"))
-      return boost::shared_ptr<MenuItem>(new CounterMenuItem("Score to Win:", getWinningScore(), 100, 100, 20000, "points", "", "Game ends when one player or team gets this score"));
+      return boost::shared_ptr<MenuItem>(new CounterMenuItem("Score to Win:", getWinningScore(), 100, 100, 20000, "points", "", 
+                                                             "Game ends when one player or team gets this score"));
    else return Parent::getMenuItem(key);
 }
 

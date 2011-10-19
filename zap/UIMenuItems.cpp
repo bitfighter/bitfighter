@@ -65,13 +65,14 @@ MenuItem::MenuItem(const string &displayVal, void (*callback)(ClientGame *, U32)
 
 // Constructor
 MenuItem::MenuItem(S32 index, const string &displayVal, void (*callback)(ClientGame *, U32), 
-                   const string &help, InputCode k1, InputCode k2)
+                   const char *help, InputCode k1, InputCode k2)
 {
    initialize();
 
    mDisplayVal = displayVal;
    mCallback = callback;
-   mHelp = help.c_str();
+   mHelp = help;
+
    key1 = k1;
    key2 = k2;
    mIndex = (U32)index;
@@ -177,10 +178,9 @@ ValueMenuItem::ValueMenuItem()
 
 // Constructor
 ValueMenuItem::ValueMenuItem(const string &displayValue, void (*callback)(ClientGame *, U32), 
-                             const string &help, InputCode k1, InputCode k2) :
-      Parent(-1, displayValue, callback, help, k1, k2)
+                             const char *help, InputCode k1, InputCode k2) :
+      Parent(displayValue, callback, help, k1, k2)
 {
-
    initialize();
 }
 
@@ -210,7 +210,7 @@ ToggleMenuItem::ToggleMenuItem()
 
 
 ToggleMenuItem::ToggleMenuItem(string title, Vector<string> options, U32 currOption, bool wrap, 
-                               void (*callback)(ClientGame *, U32), string help, InputCode k1, InputCode k2) :
+                               void (*callback)(ClientGame *, U32), const char *help, InputCode k1, InputCode k2) :
       ValueMenuItem(title, callback, help, k1, k2)
 {
    //mValue = "";
@@ -341,7 +341,7 @@ void ToggleMenuItem::push(lua_State *L)
 ////////////////////////////////////
 
 // Constructors
-YesNoMenuItem::YesNoMenuItem(string title, bool currOption, string help, InputCode k1, InputCode k2) :
+YesNoMenuItem::YesNoMenuItem(string title, bool currOption, const char *help, InputCode k1, InputCode k2) :
       ToggleMenuItem(title, Vector<string>(), currOption, true, NULL, help, k1, k2)
 {
    initialize();
@@ -413,7 +413,7 @@ void YesNoMenuItem::push(lua_State *L)
 ////////////////////////////////////
 
 CounterMenuItem::CounterMenuItem(const string &title, S32 value, S32 step, S32 minVal, S32 maxVal, const string &units, 
-                                 const string &minMsg, const string &help, InputCode k1, InputCode k2) :
+                                 const string &minMsg, const char *help, InputCode k1, InputCode k2) :
    Parent(title, NULL, help, k1, k2)
 {
    initialize();
@@ -552,8 +552,8 @@ void CounterMenuItem::push(lua_State *L)
 ////////////////////////////////////
 ////////////////////////////////////
 
-TimeCounterMenuItem::TimeCounterMenuItem(const string &title, S32 value, S32 maxVal, const string &zeroMsg, const string &help,
-                    S32 step, InputCode k1, InputCode k2) :
+TimeCounterMenuItem::TimeCounterMenuItem(const string &title, S32 value, S32 maxVal, const string &zeroMsg, const char *help,
+                                         S32 step, InputCode k1, InputCode k2) :
    CounterMenuItem(title, value, step, 0, maxVal, "", zeroMsg, help, k1, k2)
 {
    // Do nothing
@@ -564,7 +564,7 @@ TimeCounterMenuItem::TimeCounterMenuItem(const string &title, S32 value, S32 max
 ////////////////////////////////////
 
 TimeCounterMenuItemSeconds::TimeCounterMenuItemSeconds(const string &title, S32 value, S32 maxVal, const string &zeroMsg, 
-                                                       const string &help, InputCode k1, InputCode k2) :
+                                                       const char *help, InputCode k1, InputCode k2) :
    TimeCounterMenuItem(title, value, maxVal, zeroMsg, help, 1, k1, k2)
 {
    // Do nothing
@@ -651,7 +651,7 @@ S32 TeamMenuItem::getWidth(S32 textsize)
 ////////////////////////////////////
 ////////////////////////////////////
 
-TextEntryMenuItem::TextEntryMenuItem(string title, string val, string emptyVal, string help, U32 maxLen, InputCode k1, InputCode k2) :
+TextEntryMenuItem::TextEntryMenuItem(string title, string val, string emptyVal, const char *help, U32 maxLen, InputCode k1, InputCode k2) :
          ValueMenuItem(title, NULL, help, k1, k2),
          mLineEditor(LineEditor(maxLen, val))
 {
@@ -761,7 +761,8 @@ void TextEntryMenuItem::push(lua_State *L)
 ////////////////////////////////////
 ////////////////////////////////////
 
-MaskedTextEntryMenuItem::MaskedTextEntryMenuItem(string title, string val, string emptyVal, string help, U32 maxLen, InputCode k1, InputCode k2) :
+MaskedTextEntryMenuItem::MaskedTextEntryMenuItem(string title, string val, string emptyVal, const char *help, 
+                                                 U32 maxLen, InputCode k1, InputCode k2) :
    TextEntryMenuItem(title, val, emptyVal, help, maxLen, k1, k2)
 {
    mLineEditor.setSecret(true);

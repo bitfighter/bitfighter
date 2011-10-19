@@ -3868,14 +3868,14 @@ void quitEditorCallback(ClientGame *game, U32 unused)
 void EditorMenuUserInterface::setupMenus()
 {
    clearMenuItems();
-   addMenuItem(new MenuItem(0, "RETURN TO EDITOR", reactivatePrevUICallback,    "", KEY_R));
+   addMenuItem(new MenuItem("RETURN TO EDITOR", reactivatePrevUICallback,    "", KEY_R));
    addMenuItem(getWindowModeMenuItem((U32)getGame()->getSettings()->getIniSettings()->displayMode));
-   addMenuItem(new MenuItem(0, "TEST LEVEL",       testLevelCallback,           "", KEY_T));
-   addMenuItem(new MenuItem(0, "SAVE LEVEL",       returnToEditorCallback,      "", KEY_S));
-   addMenuItem(new MenuItem(0, "INSTRUCTIONS",     activateHelpCallback,        "", KEY_I, keyHELP));
-   addMenuItem(new MenuItem(0, "LEVEL PARAMETERS", activateLevelParamsCallback, "", KEY_L, KEY_F3));
-   addMenuItem(new MenuItem(0, "MANAGE TEAMS",     activateTeamDefCallback,     "", KEY_M, KEY_F2));
-   addMenuItem(new MenuItem(0, "QUIT",             quitEditorCallback,          "", KEY_Q, KEY_UNKNOWN));
+   addMenuItem(new MenuItem("TEST LEVEL",       testLevelCallback,           "", KEY_T));
+   addMenuItem(new MenuItem("SAVE LEVEL",       returnToEditorCallback,      "", KEY_S));
+   addMenuItem(new MenuItem("INSTRUCTIONS",     activateHelpCallback,        "", KEY_I, keyHELP));
+   addMenuItem(new MenuItem("LEVEL PARAMETERS", activateLevelParamsCallback, "", KEY_L, KEY_F3));
+   addMenuItem(new MenuItem("MANAGE TEAMS",     activateTeamDefCallback,     "", KEY_M, KEY_F2));
+   addMenuItem(new MenuItem("QUIT",             quitEditorCallback,          "", KEY_Q, KEY_UNKNOWN));
 }
 
 
