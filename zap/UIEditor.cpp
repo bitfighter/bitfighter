@@ -2661,22 +2661,22 @@ void EditorUserInterface::joinBarrier()
    {
       EditorObject *obj_i = objList->get(i);
 
-      if(obj_i->getObjectTypeNumber() == WallItemTypeNumber && obj_i->isSelected())
+      if(obj_i->getGeomType() == geomPolyLine && obj_i->isSelected())      // Will work for both lines and walls, or any future polylines
       {
-         for(S32 j = i + 1; j < objList->size(); j++)    // Compare against remaining objects
+         for(S32 j = i + 1; j < objList->size(); j++)                      // Compare against remaining objects
          {
             EditorObject *obj_j = objList->get(j);
 
-            if(obj_j->getObjectTypeNumber() == WallItemTypeNumber && obj_j->isSelected())
+            if(obj_j->getObjectTypeNumber() == obj_i->getObjectTypeNumber() && obj_j->isSelected())
             {
-               if(obj_i->getVert(0).distanceTo(obj_j->getVert(0)) < .01)      // First vertices are the same  1 2 3 | 1 4 5
+               if(obj_i->getVert(0).distanceTo(obj_j->getVert(0)) < .01)   // First vertices are the same  1 2 3 | 1 4 5
                {
                   if(!joinedObj)          // This is first join candidate found; something's going to merge, so save an undo state
                      saveUndoState();
                
                   joinedObj = obj_i;
 
-                  for(S32 a = 1; a < obj_j->getVertCount(); a++)              // Skip first vertex, because it would be a dupe
+                  for(S32 a = 1; a < obj_j->getVertCount(); a++)           // Skip first vertex, because it would be a dupe
                      obj_i->addVertFront(obj_j->getVert(a));
 
                   deleteItem(j);
@@ -2971,14 +2971,14 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
    // Ctrl-left click is same as right click for Mac users
    else if(inputCode == MOUSE_RIGHT || (inputCode == MOUSE_LEFT && checkModifier(KEY_CTRL)))
    {
-      if(getInputCodeState(MOUSE_LEFT) && !checkModifier(KEY_CTRL))        // Prevent weirdness
+      if(getInputCodeState(MOUSE_LEFT) && !checkModifier(KEY_CTRL))  // Prevent weirdness
          return;  
 
       mMousePos.set(gScreenInfo.getMousePos());
 
       if(mCreatingPoly || mCreatingPolyline)
       {
-         if(mNewItem->getVertCount() < gMaxPolygonPoints)          // Limit number of points in a polygon/polyline
+         if(mNewItem->getVertCount() < gMaxPolygonPoints)            // Limit number of points in a polygon/polyline
          {
             mNewItem->addVert(snapPoint(convertCanvasToLevelCoord(mMousePos)));
             mNewItem->onGeomChanging();
@@ -3014,7 +3014,7 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
       {
          S32 width;
 
-         if(getInputCodeState(KEY_TILDE))
+      if(getInputCodeState(KEY_BACKQUOTE))      // Was KEY_TILDE, but SDL reports this key as KEY_BACKQUOTE, at least on US American keyboards
          {
             mCreatingPolyline = true;
             mNewItem = new LineItem();
