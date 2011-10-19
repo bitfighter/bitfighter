@@ -2653,7 +2653,7 @@ done2:
 // Join two or more sections of wall that have coincident end points.  Will ignore invalid join attempts.
 void EditorUserInterface::joinBarrier()
 {
-   S32 joinedItem = NONE;
+   EditorObject *joinedObj = NULL;
 
    const Vector<EditorObject *> *objList = getObjectList();
 
@@ -2661,47 +2661,50 @@ void EditorUserInterface::joinBarrier()
    {
       EditorObject *obj_i = objList->get(i);
 
-      if(obj_i->getGeomType() == geomPolyLine && (obj_i->isSelected()))
+      if(obj_i->getObjectTypeNumber() == WallItemTypeNumber && obj_i->isSelected())
       {
-         for(S32 j = i + 1; j < objList->size(); j++)
+         for(S32 j = i + 1; j < objList->size(); j++)    // Compare against remaining objects
          {
-            EditorObject *obj_j = objList->get(i);
+            EditorObject *obj_j = objList->get(j);
 
-            if(obj_j->getObjectTypeNumber() && obj_i->getObjectTypeNumber() && (obj_j->isSelected()))
+            if(obj_j->getObjectTypeNumber() == WallItemTypeNumber && obj_j->isSelected())
             {
-               if(obj_i->getVert(0).distanceTo(obj_j->getVert(0)) < .01)    // First vertices are the same  1 2 3 | 1 4 5
+               if(obj_i->getVert(0).distanceTo(obj_j->getVert(0)) < .01)      // First vertices are the same  1 2 3 | 1 4 5
                {
-                  if(joinedItem == NONE)
+                  if(!joinedObj)          // This is first join candidate found; something's going to merge, so save an undo state
                      saveUndoState();
-                  joinedItem = i;
+               
+                  joinedObj = obj_i;
 
-                  for(S32 a = 1; a < obj_j->getVertCount(); a++)             // Skip first vertex, because it would be a dupe
+                  for(S32 a = 1; a < obj_j->getVertCount(); a++)              // Skip first vertex, because it would be a dupe
                      obj_i->addVertFront(obj_j->getVert(a));
 
                   deleteItem(j);
                   i--;  j--;
                }
+
                // First vertex conincides with final vertex 3 2 1 | 5 4 3
                else if(obj_i->getVert(0).distanceTo(obj_j->getVert(obj_j->getVertCount()-1)) < .01)     
                {
-                  if(joinedItem == NONE)
+                  if(!joinedObj)
                      saveUndoState();
 
-                  joinedItem = i;
+                  joinedObj = obj_i;
+                  
                   for(S32 a = obj_j->getVertCount()-2; a >= 0; a--)
                      obj_i->addVertFront(obj_j->getVert(a));
 
-                  deleteItem(j);
+                  deleteItem(j);    // j has been merged into i; don't need j anymore!
                   i--;  j--;
-
                }
+
                // Last vertex conincides with first 1 2 3 | 3 4 5
                else if(obj_i->getVert(obj_i->getVertCount()-1).distanceTo(obj_j->getVert(0)) < .01)     
                {
-                  if(joinedItem == NONE)
+                  if(!joinedObj)
                      saveUndoState();
 
-                  joinedItem = i;
+                  joinedObj = obj_i;
 
                   for(S32 a = 1; a < obj_j->getVertCount(); a++)  // Skip first vertex, because it would be a dupe         
                      obj_i->addVert(obj_j->getVert(a));
@@ -2709,12 +2712,14 @@ void EditorUserInterface::joinBarrier()
                   deleteItem(j);
                   i--;  j--;
                }
-               else if(obj_i->getVert(obj_i->getVertCount()-1).distanceTo(obj_j->getVert(obj_j->getVertCount()-1)) < .01)     // Last vertices coincide  1 2 3 | 5 4 3
+
+               // Last vertices coincide  1 2 3 | 5 4 3
+               else if(obj_i->getVert(obj_i->getVertCount()-1).distanceTo(obj_j->getVert(obj_j->getVertCount()-1)) < .01)     
                {
-                  if(joinedItem == NONE)
+                  if(!joinedObj)
                      saveUndoState();
 
-                  joinedItem = i;
+                  joinedObj = obj_i;
 
                   for(S32 a = obj_j->getVertCount()-2; a >= 0; a--)
                      obj_i->addVert(obj_j->getVert(a));
@@ -2727,12 +2732,14 @@ void EditorUserInterface::joinBarrier()
       }
    }
 
-   if(joinedItem != NONE)
+   if(joinedObj)     // We had a successful merger
    {
       clearSelection();
       setNeedToSave(true);
       autoSave();
-      objList->get(joinedItem)->onGeomChanged();
+      joinedObj->onGeomChanged();
+
+      joinedObj->setSelected(true);
    }
 }
 
