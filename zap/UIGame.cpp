@@ -1728,19 +1728,17 @@ void GameUserInterface::serverCommandHandler(ClientGame *game, const Vector<stri
 
 
 CommandInfo chatCmds[] = {   
-   //  cmdName              cmdCallback               cmdArgInfo cmdArgCount   helpCategory helpGroup   helpArgString            helpTextSstring
-   { "admin",       GameUserInterface::adminPassHandler, { STR },      1,       ADV_COMMANDS,    0,      {"<password>"},         "Request admin permissions"  },
-   { "levpass",     GameUserInterface::levelPassHandler, { STR },      1,       ADV_COMMANDS,    0,      {"<password>"},         "Request level change permissions"  },
-   { "servvol",     GameUserInterface::servVolHandler,   { INT },      1,       ADV_COMMANDS,    0,      {"<0-10>"},             "Set volume of server"  },
-   { "getmap",      GameUserInterface::getMapHandler,    { STR },      1,       ADV_COMMANDS,    1,      {"[file]"},             "Save currently playing level in [file], if allowed" },
-   { "suspend",     GameUserInterface::suspendHandler,   {  },         0,       ADV_COMMANDS,    1,      {  },                   "Place game on hold while waiting for players" },
-   { "pm",          GameUserInterface::pmHandler,        { NAME, STR },2,       ADV_COMMANDS,    1,      {"<name>","<message>"}, "Send private message to player" },
-   { "mvol",        GameUserInterface::mVolHandler,      { INT },      1,       ADV_COMMANDS,    2,      {"<0-10>"},             "Set music volume"      },
-   { "svol",        GameUserInterface::sVolHandler,      { INT },      1,       ADV_COMMANDS,    2,      {"<0-10>"},             "Set SFX volume"        },
-   { "vvol",        GameUserInterface::vVolHandler,      { INT },      1,       ADV_COMMANDS,    2,      {"<0-10>"},             "Set voice chat volume" },
-   { "mute",        GameUserInterface::muteHandler,      { NAME },     1,       ADV_COMMANDS,    3,      {"<name>"},             "Hide chat messages from <name> until you quit" },
-   { "showpresets", GameUserInterface::showPresetsHandler, {  },       0,       ADV_COMMANDS,    0,      {  },                   "Show loadout presets" },
-
+   //  cmdName          cmdCallback               cmdArgInfo cmdArgCount   helpCategory helpGroup   helpArgString            helpTextSstring
+   { "admin",   GameUserInterface::adminPassHandler, { STR },      1,       ADV_COMMANDS,    0,      {"<password>"},         "Request admin permissions"  },
+   { "levpass", GameUserInterface::levelPassHandler, { STR },      1,       ADV_COMMANDS,    0,      {"<password>"},         "Request level change permissions"  },
+   { "servvol", GameUserInterface::servVolHandler,   { INT },      1,       ADV_COMMANDS,    0,      {"<0-10>"},             "Set volume of server"  },
+   { "getmap",  GameUserInterface::getMapHandler,    { STR },      1,       ADV_COMMANDS,    1,      {"[file]"},             "Save currently playing level in [file], if allowed" },
+   { "suspend", GameUserInterface::suspendHandler,   {  },         0,       ADV_COMMANDS,    1,      {  },                   "Place game on hold while waiting for players" },
+   { "pm",      GameUserInterface::pmHandler,        { NAME, STR },2,       ADV_COMMANDS,    1,      {"<name>","<message>"}, "Send private message to player" },
+   { "mvol",    GameUserInterface::mVolHandler,      { INT },      1,       ADV_COMMANDS,    2,      {"<0-10>"},             "Set music volume"      },
+   { "svol",    GameUserInterface::sVolHandler,      { INT },      1,       ADV_COMMANDS,    2,      {"<0-10>"},             "Set SFX volume"        },
+   { "vvol",    GameUserInterface::vVolHandler,      { INT },      1,       ADV_COMMANDS,    2,      {"<0-10>"},             "Set voice chat volume" },
+   { "mute",    GameUserInterface::muteHandler,      { NAME },     1,       ADV_COMMANDS,    3,      {"<name>"},             "Hide chat messages from <name> until you quit" },
 
    { "add",         GameUserInterface::addTimeHandler,       { INT },           0,       LEVEL_COMMANDS,  0,      {"<time in minutes>"},        "Add time to the current game" },
    { "next",        GameUserInterface::nextLevelHandler,     {  },              0,       LEVEL_COMMANDS,  0,      {  },                         "Start next level" },
@@ -1753,15 +1751,19 @@ CommandInfo chatCmds[] = {
    { "kickbot",     GameUserInterface::serverCommandHandler, {  },              1,       LEVEL_COMMANDS,  1,      {  },                         "Kick most recently added bot" },
    { "kickbots",    GameUserInterface::serverCommandHandler, {  },              1,       LEVEL_COMMANDS,  1,      {  },                         "Kick all bots" },
 
-   { "kick",               GameUserInterface::kickPlayerHandler,         { NAME },    1,  ADMIN_COMMANDS, 0, {"<player name>"},      "Kick a player from the game" },
-   { "shutdown",           GameUserInterface::shutdownServerHandler,     {INT, STR }, 2,  ADMIN_COMMANDS, 0, {"[time]","[message]"}, "Start orderly shutdown of server (def. = 10 secs)" },
-   { "setlevpass",         GameUserInterface::setLevPassHandler,         { STR },     1,  ADMIN_COMMANDS, 0, {"[passwd]"},           "Set server password  (use blank to clear)" },
-   { "setadminpass",       GameUserInterface::setAdminPassHandler,       { STR },     1,  ADMIN_COMMANDS, 0, {"[passwd]"},           "Set level change password (use blank to clear)" },
-   { "setserverpass",      GameUserInterface::setServerPassHandler,      { STR },     1,  ADMIN_COMMANDS, 0, {"<passwd>"},           "Set admin password" },
-   { "leveldir",           GameUserInterface::setLevelDirHandler,        { STR },     1,  ADMIN_COMMANDS, 0, {"<new level folder>"}, "Set leveldir param on the server (changes levels available)" },
-   { "setservername",      GameUserInterface::setServerNameHandler,      { STR },     1,  ADMIN_COMMANDS, 0, {"<name>"},             "Set server name" },
-   { "setserverdescr",     GameUserInterface::setServerDescrHandler,     { STR },     1,  ADMIN_COMMANDS, 0, {"<descr>"},            "Set server description" },
-   { "deletecurrentlevel", GameUserInterface::deleteCurrentLevelHandler, { },         0,  ADMIN_COMMANDS, 0, {""},                   "Remove current level from server" },
+   { "kick",               GameUserInterface::kickPlayerHandler,         { NAME },      1,  ADMIN_COMMANDS, 0, {"<name>"},              "Kick a player from the game" },
+   { "ban",                GameUserInterface::serverCommandHandler,      { NAME, INT }, 2,  ADMIN_COMMANDS, 0, {"<name>","[duration]"}, "Ban an player from the server (IP-based, def. = 60)" },
+   { "banip",              GameUserInterface::serverCommandHandler,      { STR, INT },  2,  ADMIN_COMMANDS, 0, {"<ip>","[duration]"},   "Ban an IP address from the server (def. = 60)" },
+   { "shutdown",           GameUserInterface::shutdownServerHandler,     { INT, STR },  2,  ADMIN_COMMANDS, 0, {"[time]","[message]"},  "Start orderly shutdown of server (def. = 10 secs)" },
+   { "setlevpass",         GameUserInterface::setLevPassHandler,         { STR },       1,  ADMIN_COMMANDS, 0, {"[passwd]"},            "Set server password  (use blank to clear)" },
+   { "setadminpass",       GameUserInterface::setAdminPassHandler,       { STR },       1,  ADMIN_COMMANDS, 0, {"[passwd]"},            "Set level change password (use blank to clear)" },
+   { "setserverpass",      GameUserInterface::setServerPassHandler,      { STR },       1,  ADMIN_COMMANDS, 0, {"<passwd>"},            "Set admin password" },
+   { "leveldir",           GameUserInterface::setLevelDirHandler,        { STR },       1,  ADMIN_COMMANDS, 0, {"<new level folder>"},  "Set leveldir param on the server (changes levels available)" },
+   { "setservername",      GameUserInterface::setServerNameHandler,      { STR },       1,  ADMIN_COMMANDS, 0, {"<name>"},              "Set server name" },
+   { "setserverdescr",     GameUserInterface::setServerDescrHandler,     { STR },       1,  ADMIN_COMMANDS, 0, {"<descr>"},             "Set server description" },
+   { "deletecurrentlevel", GameUserInterface::deleteCurrentLevelHandler, { },           0,  ADMIN_COMMANDS, 0, {""},                    "Remove current level from server" },
+   { "gmute",              GameUserInterface::serverCommandHandler, { NAME },      1,  ADMIN_COMMANDS, 0, {"<name>"},              "Globally mute/unmute a player" },
+   { "rename",             GameUserInterface::serverCommandHandler, { NAME, STR }, 2,  ADMIN_COMMANDS, 0, {"<name>","<toname>"},   "Rename a player to a new name" },
 
    { "showcoords", GameUserInterface::showCoordsHandler,    {  },    0, DEBUG_COMMANDS, 0, {  },         "Show ship coordinates" },
    { "showzones",  GameUserInterface::showZonesHandler,     {  },    0, DEBUG_COMMANDS, 0, {  },         "Show bot nav mesh zones" },
@@ -1773,6 +1775,7 @@ CommandInfo chatCmds[] = {
    { "linesmooth", GameUserInterface::lineSmoothHandler,    {  },    0, DEBUG_COMMANDS, 1, {  },         "Enable line smoothing, might look better" },
    { "maxfps",     GameUserInterface::maxFpsHandler,        { INT }, 1, DEBUG_COMMANDS, 1, {"<number>"}, "Set maximum speed of game in frames per second" },
 };
+
 
 
 S32 chatCmdSize = ARRAYSIZE(chatCmds);    // So instructions will now how big chatCmds is
