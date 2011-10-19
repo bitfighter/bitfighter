@@ -3491,45 +3491,57 @@ void EditorUserInterface::onFinishedDragging()
 {
    mDraggingObjects = false;
 
-   if(mouseOnDock())                      // Mouse is over the dock -- either dragging to or from dock
+   // Dragged item off the dock, then back on  ==> nothing changed; restore to unmoved state, which was stored on undo stack
+   if (mouseOnDock() && mDraggingDockItem != NONE)
    {
-      if(mDraggingDockItem == NONE)       // This was really a delete (item dragged to dock)
+      undo(false);
+      return;
+   }
+
+   // Mouse is over the dock and we dragged something to the dock (probably a delete)
+   if(mouseOnDock() && mDraggingDockItem == NONE)
+   {
+      const Vector<EditorObject *> *objList = getObjectList();
+      bool deletedSomething = false;
+
+      for(S32 i = 0; i < objList->size(); i++)    //  Delete all selected items
+         if(objList->get(i)->isSelected())
+         {
+            deleteItem(i);
+            i--;
+            deletedSomething = true;
+         }
+
+      // We deleted something, our job is done
+      if(deletedSomething)
+         return;
+   }
+
+   // Mouse not on dock, we are either:
+   // 1. dragging from the dock,
+   // 2. moving something,
+   // 3. or we moved something to the dock and nothing was deleted, e.g. when dragging a vertex
+   // need to save an undo state if anything changed
+   if(mDraggingDockItem == NONE)    // Not dragging from dock - user is moving object around screen, or dragging vertex to dock
+   {
+      // If our snap vertex has moved then all selected items have moved
+      bool itemsMoved = mSnapObject->getVert(mSnapVertexIndex) != mMoveOrigin;
+
+      if(itemsMoved)    // Move consumated... update any moved items, and save our autosave
       {
          const Vector<EditorObject *> *objList = getObjectList();
 
-         for(S32 i = 0; i < objList->size(); i++)    //  Delete all selected items
-            if(objList->get(i)->isSelected())
-            {
-               deleteItem(i);
-               i--;
-            }
+         for(S32 i = 0; i < objList->size(); i++)
+            if(objList->get(i)->isSelected() || objList->get(i)->anyVertsSelected())
+               objList->get(i)->onGeomChanged();
+
+         setNeedToSave(true);
+         autoSave();
+
+         return;
       }
-      else        // Dragged item off the dock, then back on  ==> nothing changed; restore to unmoved state, which was stored on undo stack
-         undo(false);
-   }
-   else    // Mouse not on dock... we were either dragging from the dock or moving something, 
-   {       // need to save an undo state if anything changed
-      if(mDraggingDockItem == NONE)    // Not dragging from dock - user is moving object around screen
-      {
-         // If our snap vertex has moved then all selected items have moved
-         bool itemsMoved = mSnapObject->getVert(mSnapVertexIndex) != mMoveOrigin;
-
-         if(itemsMoved)    // Move consumated... update any moved items, and save our autosave
-         {
-            const Vector<EditorObject *> *objList = getObjectList();
-
-            for(S32 i = 0; i < objList->size(); i++)
-               if(objList->get(i)->isSelected() || objList->get(i)->anyVertsSelected())
-                  objList->get(i)->onGeomChanged();
-
-            setNeedToSave(true);
-            autoSave();
-
-            return;
-         }
-         else     // We started our move, then didn't end up moving anything... remove associated undo state
-            deleteUndoState();
-      }
+      else     // We started our move, then didn't end up moving anything... remove associated undo state
+         deleteUndoState();
    }
 }
 
