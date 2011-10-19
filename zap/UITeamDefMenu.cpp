@@ -191,6 +191,7 @@ void TeamDefUserInterface::render()
          if(mEditing && j == selectedIndex)
          {
             S32 x = getCenteredStringStartingPosf(fontsize, nameColorStr, namestr, colorstr) + getStringWidth(fontsize, numstr);
+            TNLAssert(dynamic_cast<TeamEditor *>(getGame()->getTeam(j)), "Not a TeamEditor");
             ((TeamEditor *)(getGame()->getTeam(j)))->getLineEditor()->drawCursor(x, y, fontsize);
          }
       }
@@ -254,9 +255,15 @@ void TeamDefUserInterface::onKeyDown(InputCode inputCode, char ascii)
          mEditing = false;
       }
       else if(inputCode == KEY_BACKSPACE || inputCode == KEY_DELETE)
+      {
+         TNLAssert(dynamic_cast<TeamEditor *>(getGame()->getTeam(selectedIndex)), "Not a TeamEditor");
          ((TeamEditor *)getGame()->getTeam(selectedIndex))->getLineEditor()->handleBackspace(inputCode);
+      }
       else if(isPrintable(ascii))
+      {
+         TNLAssert(dynamic_cast<TeamEditor *>(getGame()->getTeam(selectedIndex)), "Not a TeamEditor");
          ((TeamEditor *)getGame()->getTeam(selectedIndex))->getLineEditor()->addChar(ascii);
+      }
    }
    else if(ascii >= '1' && ascii <= '9')        // Keys 1-9 --> use preset
    {

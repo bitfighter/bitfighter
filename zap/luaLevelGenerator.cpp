@@ -30,9 +30,9 @@
 #include "stringUtils.h"
 #include "luaUtil.h"
 
-
+#ifndef ZAP_DEDICATED
 #include "UIMenuItems.h"      // delete
-
+#endif
 
 namespace Zap
 {
@@ -70,7 +70,7 @@ bool LuaLevelGenerator::runScript()
 
 
 
-
+#ifndef ZAP_DEDICATED
       static ToggleMenuItem *getMenuItem(lua_State *L, S32 index)
       {
          LuaUtil::dumpStack(L);
@@ -86,6 +86,8 @@ bool LuaLevelGenerator::runScript()
 
         return pushedMenuItem;
       }
+#endif
+
 // Run the script's getArgs() function
 bool LuaLevelGenerator::runGetArgs(string &menuTitle, Vector<MenuItem *> &menuItems)
 {
@@ -357,10 +359,12 @@ void LuaLevelGenerator::registerClasses()
    Lunar<LuaPoint>::Register(L);
    Lunar<LuaUtil>::Register(L);
 
+#ifndef ZAP_DEDICATED
    Lunar<ToggleMenuItem>::Register(L);
    Lunar<YesNoMenuItem>::Register(L);
    Lunar<CounterMenuItem>::Register(L);
    Lunar<TextEntryMenuItem>::Register(L);
+#endif
 }
 
 
