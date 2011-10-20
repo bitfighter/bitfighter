@@ -68,6 +68,7 @@ public:
 
    //static Vector<Point> generatePoints(Point pos, Point dir);
    void render();
+   void renderEditorPreview(F32 currentScale);
    S32 getRenderSortValue();
 
    bool processArguments(S32 argc, const char **argv, Game *game);  // Create objects from parameters stored in level file

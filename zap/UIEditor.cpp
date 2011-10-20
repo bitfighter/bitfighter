@@ -1304,7 +1304,7 @@ bool EditorUserInterface::showMinorGridLines()
 // Render background snap grid
 void EditorUserInterface::renderGrid()
 {
-   if(mShowingReferenceShip)
+   if(mShowingReferenceShip)     // No grid in preview mode
       return;   
 
    F32 colorFact = mSnapDisabled ? .5f : 1;
@@ -2291,7 +2291,7 @@ void EditorUserInterface::onMouseMoved()
 
    findSnapVertex();
 
-   SDL_ShowCursor((showMoveCursor && !mShowingReferenceShip) ? SDL_ENABLE : SDL_ENABLE);
+   SDL_ShowCursor((showMoveCursor && !mShowingReferenceShip) ? SDL_ENABLE : SDL_ENABLE);     // ???
 }
 
 

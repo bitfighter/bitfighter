@@ -263,6 +263,14 @@ void BfObject::render(S32 layerIndex)
       render();
 }
 
+
+// By default, we'll just render this as we do in game.  Occasionally (like with textItems, we may need to do something special).
+void BfObject::renderEditorPreview(F32 currentScale)
+{
+   render();
+}
+
+
 void BfObject::readThisTeam(BitStream *stream)
 {
    mTeam = stream->readInt(4) - 2;

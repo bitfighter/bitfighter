@@ -254,7 +254,7 @@ void EditorObject::renderInEditor(F32 currentScale, const Point &currentOffset, 
          glScale(currentScale);
 
          if(showingReferenceShip)
-            render();
+            renderEditorPreview(currentScale);
          else
             renderEditor(currentScale);
 

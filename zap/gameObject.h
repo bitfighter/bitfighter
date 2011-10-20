@@ -187,6 +187,7 @@ public:
    // method one time (when layerIndex == 0).
    virtual void render(S32 layerIndex);
    virtual void render();
+   virtual void renderEditorPreview(F32 currentScale);
 
    virtual void setExtent() { setExtent(getExtents()); }                    // Set extents of object in database
    virtual void setExtent(const Rect &extent) { DatabaseObject::setExtent(extent); }   // Passthrough
