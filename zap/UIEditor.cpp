@@ -2228,7 +2228,7 @@ S32 EditorUserInterface::findHitItemOnDock(Point canvasPos)
 }
 
 
-// Incoming calls from GLUT come here...
+// Incoming calls from SDL come here (because that's where they went when GLUT was in charge)...
 void EditorUserInterface::onMouseMoved(S32 x, S32 y)
 {
    onMouseMoved();      //... and go here
@@ -2261,7 +2261,6 @@ void EditorUserInterface::onMouseMoved()
    if(mItemToLightUp)
       mItemToLightUp->setLitUp(false);
 
-   S32 vertexToLightUp = NONE;
    mItemToLightUp = NULL;
 
    // We hit a vertex that wasn't already selected
@@ -2277,10 +2276,7 @@ void EditorUserInterface::onMouseMoved()
 
    // Check again, and take a point object in preference to a vertex
    if(mItemHit && !mItemHit->isSelected() && mItemHit->getGeomType() == geomPoint)  
-   {
       mItemToLightUp = mItemHit;
-      vertexToLightUp = NONE;
-   }
 
    if(mItemToLightUp)
       mItemToLightUp->setLitUp(true);
@@ -2569,7 +2565,6 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
       autoSave();
 
       mItemToLightUp = NULL;     // In case we just deleted a lit item; not sure if really needed, as we do this above
-      //vertexToLightUp = NONE;
    }
 }
 
