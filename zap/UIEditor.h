@@ -211,6 +211,7 @@ private:
 
    void centerView();            // Center display on all objects
    void splitBarrier();          // Split wall on selected vertex/vertices
+   void doSplit(EditorObject *object, S32 vertex);
    void joinBarrier();           // Join barrier bits together into one (if ends are coincident)
 
    //S32 countSelectedVerts();

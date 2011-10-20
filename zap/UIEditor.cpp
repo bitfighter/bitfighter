@@ -2595,6 +2595,7 @@ void EditorUserInterface::changeBarrierWidth(S32 amt)
 
 
 // Split wall/barrier on currently selected vertex/vertices
+// Or, if entire wall is selected, split on snapping vertex -- this seems a natural way to do it
 void EditorUserInterface::splitBarrier()
 {
    bool split = false;
@@ -2609,32 +2610,26 @@ void EditorUserInterface::splitBarrier()
           for(S32 j = 1; j < obj->getVertCount() - 1; j++)     // Can't split on end vertices!
             if(obj->vertSelected(j))
             {
-               if(!split)
-                  saveUndoState();
+               saveUndoState();
+               
+               doSplit(obj, j);
+
                split = true;
-
-               EditorObject *newObj = obj->newCopy();    // Copy the attributes
-               newObj->clearVerts();                     // Wipe out the geometry
-
-               for(S32 k = j; k < obj->getVertCount(); k++) 
-               {
-                  newObj->addVert(obj->getVert(k));
-                  if (k > j)
-                  {
-                     obj->deleteVert(k);     // Don't delete j == k vertex -- it needs to remain as the final vertex of the old wall
-                     k--;
-                  }
-               }
-
-               newObj->addToEditor(getGame());
-
-               // Tell the new segments that they have new geometry
-               obj->onGeomChanged();
-               newObj->onGeomChanged();            // Needs to happen after item is added to game, so mGame will not be NULL
-
                goto done2;                         // Yes, gotos are naughty, but they just work so well sometimes...
             }
    }
+
+   // If we didn't find a suitable selected vertex to split on, look for a selected line with a magenta vertex
+   if(!split && mSnapObject && mSnapObject->getGeomType() == geomPolyLine && mSnapObject->isSelected() && 
+         mSnapVertexIndex != NONE && mSnapVertexIndex != 0 && mSnapVertexIndex != mSnapObject->getVertCount() - 1)
+   {         
+      saveUndoState();
+
+      doSplit(mSnapObject, mSnapVertexIndex);
+
+      split = true;
+   }
+
 done2:
    if(split)
    {
@@ -2642,6 +2637,33 @@ done2:
       setNeedToSave(true);
       autoSave();
    }
+}
+
+
+// Split wall or line -- will probably crash on other geom types
+void EditorUserInterface::doSplit(EditorObject *object, S32 vertex)
+{
+   EditorObject *newObj = object->newCopy();    // Copy the attributes
+   newObj->clearVerts();                        // Wipe out the geometry
+
+   // Note that it would be more efficient to start at the end and work backwards, but the direction of our numbering would be
+   // reversed in the new object compared to what it was.  This isn't important at the moment, but it just seems wrong from a
+   // geographic POV.  Which I have.
+   for(S32 i = vertex; i < object->getVertCount(); i++) 
+   {
+      newObj->addVert(object->getVert(i));
+      if(i != vertex)               // i.e. if this isn't the first iteration
+      {
+         object->deleteVert(i);     // Don't delete first vertex -- we need it to remain as final vertex of old feature
+         i--;
+      }
+   }
+
+   newObj->addToEditor(getGame());     // Needs to happen before onGeomChanged, so mGame will not be NULL
+
+   // Tell the new segments that they have new geometry
+   object->onGeomChanged();
+   newObj->onGeomChanged();            
 }
 
 
