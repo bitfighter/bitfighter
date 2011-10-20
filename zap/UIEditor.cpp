@@ -2118,84 +2118,100 @@ void EditorUserInterface::findHitItemAndEdge()
             continue;
          
          // Only select walls in CTRL-A mode...
-         U8 type = obj->getObjectTypeNumber();
-         if(mShowMode == ShowWallsOnly && !(isWallType(type)))            // Only select walls in CTRL-A mode
-            continue;                                                     // ...so if it's not a wall, proceed to next item
+         if(mShowMode == ShowWallsOnly && !(isWallType(obj->getObjectTypeNumber())))   // Only select walls in CTRL-A mode
+            continue;                                                                  // ...so if it's not a wall, proceed to next item
 
-         F32 radius = obj->getEditorRadius(mCurrentScale);
-
-         for(S32 j = obj->getVertCount() - 1; j >= 0; j--)
-         {
-            // p represents pixels from mouse to obj->getVert(j), at any zoom
-            Point p = mMousePos - mCurrentOffset - obj->getVert(j) * mCurrentScale;    
-
-            if(fabs(p.x) < radius && fabs(p.y) < radius)
-            {
-               mItemHit = obj;
-               mVertexHit = j;
-               return;
-            }
-         }
-
-         // This is all we can check on point items -- it makes no sense to check edges or other higher order geometry
-         if(obj->getGeomType() == geomPoint)
-            continue;
-
-         /////
-         // Didn't find a vertex hit... now we look for an edge
-
-         // Make a copy of the items vertices that we can add to in the case of a loop
-         Vector<Point> verts = *obj->getOutline();    
-
-         if(obj->getGeomType() == geomPolygon)   // Add first point to the end to create last side on poly
-            verts.push_back(verts.first());
-
-         Point p1 = convertLevelToCanvasCoord(obj->getVert(0));
-         Point closest;
-         
-         for(S32 j = 0; j < verts.size() - 1; j++)
-         {
-            Point p2 = convertLevelToCanvasCoord(verts[j+1]);
-            
-            if(findNormalPoint(mMousePos, p1, p2, closest))
-            {
-               F32 distance = (mMousePos - closest).len();
-               if(distance < EDGE_HIT_RADIUS) 
-               {
-                  mItemHit = obj;
-                  mEdgeHit = j;
-
-                  return;
-               }
-            }
-            p1.set(p2);
-         }
+         if(checkForVertexHit(obj) || checkForEdgeHit(obj)) 
+            return;                 
       }
    }
 
    if(mShowMode == ShowWallsOnly) 
       return;
 
-   /////
    // If we're still here, it means we didn't find anything yet.  Make one more pass, and see if we're in any polys.
    // This time we'll loop forward, though I don't think it really matters.
    for(S32 i = 0; i < objList->size(); i++)
+     if(checkForInteriorHit(objList->get(i)))
+        return;
+}
+
+
+bool EditorUserInterface::checkForVertexHit(EditorObject *object)
+{
+   F32 radius = object->getEditorRadius(mCurrentScale);
+
+   for(S32 i = object->getVertCount() - 1; i >= 0; i--)
    {
-      EditorObject *obj = objList->get(i);
+      // p represents pixels from mouse to obj->getVert(j), at any zoom
+      Point p = mMousePos - mCurrentOffset - object->getVert(i) * mCurrentScale;    
 
-      if(obj->getGeomType() == geomPolygon)
+      if(fabs(p.x) < radius && fabs(p.y) < radius)
       {
-         Vector<Point> verts;
-         for(S32 j = 0; j < obj->getVertCount(); j++)
-            verts.push_back(convertLevelToCanvasCoord(obj->getVert(j)));
-
-         if(PolygonContains2(verts.address(), verts.size(), mMousePos))
-         {
-            mItemHit = obj;
-            return;
-         }
+         mItemHit = object;
+         mVertexHit = i;
+         return true;
       }
    }
+
+   return false;
+}
+
+
+bool EditorUserInterface::checkForEdgeHit(EditorObject *object)
+{
+   // Points have no edges, and walls are checked via another mechanism
+   if(object->getGeomType() == geomPoint || isWallType(object->getObjectTypeNumber()))  
+      return false;
+
+   // Make a copy of the items vertices that we can add to in the case of a loop
+   Vector<Point> verts = *object->getOutline();    
+
+   if(object->getGeomType() == geomPolygon)   // Add first point to the end to create last side on poly
+      verts.push_back(verts.first());
+
+   Point p1 = convertLevelToCanvasCoord(object->getVert(0));
+   Point closest;
+         
+   for(S32 j = 0; j < verts.size() - 1; j++)
+   {
+      Point p2 = convertLevelToCanvasCoord(verts[j+1]);
+            
+      if(findNormalPoint(mMousePos, p1, p2, closest))
+      {
+         F32 distance = (mMousePos - closest).len();
+         if(distance < EDGE_HIT_RADIUS) 
+         {
+            mItemHit = object;
+            mEdgeHit = j;
+
+            return true;
+         }
+      }
+      p1.set(p2);
+   }
+
+   return false;
+}
+
+
+bool EditorUserInterface::checkForInteriorHit(EditorObject *object)
+{
+   if(object->getGeomType() == geomPolygon)
+   {
+      Vector<Point> verts;
+
+      for(S32 j = 0; j < object->getVertCount(); j++)
+         verts.push_back(convertLevelToCanvasCoord(object->getVert(j)));
+
+      if(PolygonContains2(verts.address(), verts.size(), mMousePos))
+      {
+         mItemHit = object;
+         return true;
+      }
+   }
+
+   return false;
 }
 
 

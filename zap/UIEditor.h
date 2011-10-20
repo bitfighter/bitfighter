@@ -218,8 +218,11 @@ private:
    bool anyItemsSelected();           // Are any items selected?
    bool anythingSelected();           // Are any items/vertices selected?
 
-   //void findHitVertex(EditorObject *&hitObject, S32 &hitVertex);
-   void findHitItemAndEdge();         // Sets mItemHit and mEdgeHit
+   void findHitItemAndEdge();                         // Sets mItemHit and mEdgeHit
+   bool checkForVertexHit(EditorObject *object);      // Helper function
+   bool checkForEdgeHit(EditorObject *object);        // Helper function
+   bool checkForInteriorHit(EditorObject *object);    // Helper function
+
    S32 findHitItemOnDock(Point canvasPos);
 
    void findSnapVertex();
