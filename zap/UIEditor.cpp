@@ -2108,19 +2108,19 @@ void EditorUserInterface::findHitItemAndEdge()
    const Vector<EditorObject *> *objList = getObjectList();
 
    // Do this in two passes -- the first we only consider selected items, the second pass will consider all targets.
-   // This will give priority to moving vertices of selected items
+   // This will give priority to hitting vertices of selected items
    for(S32 firstPass = 1; firstPass >= 0; firstPass--)     // firstPass will be true the first time through, false the second time
    {
       for(S32 i = objList->size() - 1; i >= 0; i--)        // Go in reverse order to prioritize items drawn on top
       {
          EditorObject *obj = objList->get(i);
-         if(firstPass && !obj->isSelected() && !obj->anyVertsSelected())     // First pass is for selected items only
+         if(firstPass == (!obj->isSelected() && !obj->anyVertsSelected()))  // First pass is for selected items only
             continue;
          
          // Only select walls in CTRL-A mode...
          U8 type = obj->getObjectTypeNumber();
-         if(mShowMode == ShowWallsOnly && !(isWallType(type)))        // Only select walls in CTRL-A mode
-            continue;                                                              // ...so if it's not a wall, proceed to next item
+         if(mShowMode == ShowWallsOnly && !(isWallType(type)))            // Only select walls in CTRL-A mode
+            continue;                                                     // ...so if it's not a wall, proceed to next item
 
          F32 radius = obj->getEditorRadius(mCurrentScale);
 
@@ -2160,7 +2160,7 @@ void EditorUserInterface::findHitItemAndEdge()
             if(findNormalPoint(mMousePos, p1, p2, closest))
             {
                F32 distance = (mMousePos - closest).len();
-               if(distance < EDGE_HIT_RADIUS)
+               if(distance < EDGE_HIT_RADIUS) 
                {
                   mItemHit = obj;
                   mEdgeHit = j;
@@ -3047,7 +3047,7 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
    }
    else if(inputCode == MOUSE_LEFT)
    {
-      if(getInputCodeState(MOUSE_RIGHT))              // Prevent weirdness
+      if(getInputCodeState(MOUSE_RIGHT))        // Prevent weirdness
          return;
 
       mDraggingDockItem = NONE;
@@ -3094,7 +3094,7 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
 
         /* S32 vertexHit;
          EditorObject *vertexHitPoly;
-*/
+         */
          //findHitVertex(mMousePos, vertexHitPoly, vertexHit);
          //findHitItemAndEdge();      //  Sets mItemHit, mVertexHit, and mEdgeHit
 
@@ -3108,6 +3108,7 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
                clearSelection();
                mItemHit->selectVert(mVertexHit);
             }
+
             if(mItemHit && mItemHit->isSelected())   // Hit an already selected item
             {
                // Do nothing
