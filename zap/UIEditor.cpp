@@ -1846,7 +1846,7 @@ void EditorUserInterface::copySelection()
    {
       if(objList->get(i)->isSelected())
       {
-         EditorObject *newItem =  objList->get(i)->newCopy();   
+         EditorObject *newItem =  objList->get(i)->copy();   
          newItem->setSelected(false);
 
          if(!alreadyCleared)  // Make sure we only purge the existing clipboard if we'll be putting someting new there
@@ -1887,7 +1887,7 @@ void EditorUserInterface::pasteSelection()
 
       EditorObject *newObject = mClipboard[i]->newCopy();
       newObject->setExtent();
-      newObject->addToDatabase(getGame()->getEditorDatabase());
+      newObject->addToGame(getGame(), getGame()->getEditorDatabase());
 
       newObject->setSelected(true);
       newObject->moveTo(pos - offset);

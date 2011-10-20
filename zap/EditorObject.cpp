@@ -316,14 +316,24 @@ F32 EditorObject::getEditorRadius(F32 currentScale)
 }
 
 
-// Return a pointer to a new copy of the object.  You will have to delete this copy when you are done with it!
-// This is kind of a hack, but not sure of a better way to do this...  perhaps a clone method in each object?
-EditorObject *EditorObject::newCopy()
+// Return a pointer to a new copy of the object.  This is more like a duplicate or twin of the object -- it has the same
+// serial number, and is already assigned to a game.
+// You will have to delete this copy when you are done with it!
+EditorObject *EditorObject::copy()
 {
    EditorObject *newObject = clone();     // TODO: Wrap in shared_ptr?
-   newObject->mGame = NULL;
-
    newObject->initializeEditor();         // Unselects all vertices
+
+   return newObject;
+}
+
+
+// Return a pointer to a new copy of the object.  This copy will be completely new -- new serial number, mGame set to NULL, everything.
+// You will have to delete this copy when you are done with it!
+EditorObject *EditorObject::newCopy()
+{
+   EditorObject *newObject = copy();
+   newObject->mGame = NULL;
 
    newObject->assignNewSerialNumber();    // Give this object an identity of its own
 

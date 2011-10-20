@@ -645,7 +645,7 @@ static DatabaseObject *getObject(dbMap &dbObjectMap, DatabaseObject *theObject)
 
    else                          // This is a new object, copy and add to our map
    {
-      EditorObject *newObject = dynamic_cast<EditorObject *>(theObject)->newCopy();
+      EditorObject *newObject = dynamic_cast<EditorObject *>(theObject)->copy();
 
       pair<dbMap::iterator, bool> retval;
       retval = dbObjectMap.insert(pair<DatabaseObject *, EditorObject *>(theObject, newObject));

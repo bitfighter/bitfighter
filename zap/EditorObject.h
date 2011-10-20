@@ -93,7 +93,8 @@ public:
    virtual ~EditorObject();         // Virtual destructor
    virtual EditorObject *clone() const { TNLAssert(false, "Clone method not implemented!"); return NULL; }
 
-   EditorObject *newCopy();         // Copies object, wraps clone()
+   EditorObject *copy();            // Makes a duplicate of the item (see method for explanation)
+   EditorObject *newCopy();         // Creates a brand new object based on the current one (see method for explanation)
 
    virtual void prepareForDock(Game *game, const Point &point);
    void addToEditor(Game *game);
