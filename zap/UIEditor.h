@@ -197,7 +197,7 @@ private:
    bool mCreatingPolyline;
    bool mDragSelecting;
    bool mAddingVertex;
-   bool mShowingReferenceShip;
+   bool mPreviewMode;
    LineEditor mEntryBox;
 
    boost::shared_ptr<LuaLevelGenerator> mPluginRunner;
@@ -268,8 +268,6 @@ public:
    void saveUndoState();
 
    Vector<string> mGameTypeArgs;
-
-   bool isShowingReferenceShip() { return mShowingReferenceShip; }
 
    F32 getCurrentScale() { return mCurrentScale; }
    Point getCurrentOffset() { return mCurrentOffset; }

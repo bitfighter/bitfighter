@@ -1051,7 +1051,7 @@ void EditorUserInterface::onActivate()
    mDraggingObjects = false;
    mDraggingDockItem = NONE;
    mCurrentTeam = 0;
-   mShowingReferenceShip = false;
+   mPreviewMode = false;
    entryMode = EntryNone;
 
    mItemToLightUp = NULL;    
@@ -1304,7 +1304,7 @@ bool EditorUserInterface::showMinorGridLines()
 // Render background snap grid
 void EditorUserInterface::renderGrid()
 {
-   if(mShowingReferenceShip)     // No grid in preview mode
+   if(mPreviewMode)     // No grid in preview mode
       return;   
 
    F32 colorFact = mSnapDisabled ? .5f : 1;
@@ -1560,7 +1560,7 @@ void EditorUserInterface::render()
 
    const Vector<EditorObject *> *levelGenObjList = mLevelGenDatabase.getObjectList();
    for(S32 i = 0; i < levelGenObjList->size(); i++)
-      levelGenObjList->get(i)->renderInEditor(mCurrentScale, mCurrentOffset, mSnapVertexIndex, true, mShowingReferenceShip, mShowMode);
+      levelGenObjList->get(i)->renderInEditor(mCurrentScale, mCurrentOffset, mSnapVertexIndex, true, mPreviewMode, mShowMode);
    
    // Render polyWall item fill just before rendering regular walls.  This will create the effect of all walls merging together.  
    // PolyWall outlines are already part of the wallSegmentManager, so will be rendered along with those of regular walls.
@@ -1579,7 +1579,7 @@ void EditorUserInterface::render()
       }
    
       getGame()->getWallSegmentManager()->renderWalls(getGame()->getSettings(),
-                     mDraggingObjects, mShowingReferenceShip, getSnapToWallCorners(), getRenderingAlpha(false/*isScriptItem*/));
+                     mDraggingObjects, mPreviewMode, getSnapToWallCorners(), getRenderingAlpha(false/*isScriptItem*/));
    glPopMatrix();
 
 
@@ -1592,7 +1592,7 @@ void EditorUserInterface::render()
 
       if(obj->getObjectTypeNumber() != PolyWallTypeNumber)
          if(!(mDraggingObjects && obj->isSelected()))
-            obj->renderInEditor(mCurrentScale, mCurrentOffset, mSnapVertexIndex, false, mShowingReferenceShip, mShowMode);
+            obj->renderInEditor(mCurrentScale, mCurrentOffset, mSnapVertexIndex, false, mPreviewMode, mShowMode);
    }
 
 
@@ -1603,7 +1603,7 @@ void EditorUserInterface::render()
    {
       EditorObject *obj = objList->get(i);
       if(obj->isSelected() || obj->isLitUp())
-         obj->renderInEditor(mCurrentScale, mCurrentOffset, mSnapVertexIndex, false, mShowingReferenceShip, mShowMode);
+         obj->renderInEditor(mCurrentScale, mCurrentOffset, mSnapVertexIndex, false, mPreviewMode, mShowMode);
    }
 
 
@@ -1656,7 +1656,7 @@ void EditorUserInterface::render()
       }
    }
 
-   if(mShowingReferenceShip)
+   if(mPreviewMode)
       renderReferenceShip();
    else
       renderDock(width);
@@ -1668,11 +1668,11 @@ void EditorUserInterface::render()
       {
          EditorObject *obj = objList->get(i);
          if(obj->isSelected() && !isWallType(obj->getObjectTypeNumber()))    // Object is selected and is not a wall
-            obj->renderInEditor(mCurrentScale, mCurrentOffset, mSnapVertexIndex, false, mShowingReferenceShip, mShowMode);
+            obj->renderInEditor(mCurrentScale, mCurrentOffset, mSnapVertexIndex, false, mPreviewMode, mShowMode);
       }
 
    // Render our snap vertex as a hollow magenta box
-   if(!mShowingReferenceShip && mSnapObject && mSnapObject->isSelected() && mSnapVertexIndex != NONE)      
+   if(!mPreviewMode && mSnapObject && mSnapObject->isSelected() && mSnapVertexIndex != NONE)      
       renderVertex(SnappingVertex, mSnapObject->getVert(mSnapVertexIndex) * mCurrentScale + mCurrentOffset, NO_NUMBER/*, alpha*/);  
 
 
@@ -1708,7 +1708,7 @@ void EditorUserInterface::render()
    }
 
    // Render dock items
-   if(!mShowingReferenceShip)
+   if(!mPreviewMode)
       for(S32 i = 0; i < mDockItems.size(); i++)
       {
          mDockItems[i]->renderInEditor(mCurrentScale, mCurrentOffset, mSnapVertexIndex, false, false, mShowMode);
@@ -2291,7 +2291,7 @@ void EditorUserInterface::onMouseMoved()
 
    findSnapVertex();
 
-   SDL_ShowCursor((showMoveCursor && !mShowingReferenceShip) ? SDL_ENABLE : SDL_ENABLE);     // ???
+   SDL_ShowCursor((showMoveCursor && !mPreviewMode) ? SDL_ENABLE : SDL_ENABLE);     // ???
 }
 
 
@@ -3333,7 +3333,7 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
    else if(inputCode == KEY_SPACE)
       mSnapDisabled = true;
    else if(inputCode == KEY_TAB)
-      mShowingReferenceShip = true;
+      mPreviewMode = true;
 }
 
 
@@ -3461,7 +3461,7 @@ void EditorUserInterface::onKeyUp(InputCode inputCode)
          mSnapDisabled = false;
          break;
       case KEY_TAB:
-         mShowingReferenceShip = false;
+         mPreviewMode = false;
          break;
       case MOUSE_LEFT:
       case MOUSE_RIGHT:  
