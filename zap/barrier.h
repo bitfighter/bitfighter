@@ -128,6 +128,7 @@ public:
    bool hasTeam() { return false; }
    bool canBeHostile() { return false; }
    bool canBeNeutral() { return false; }
+   F32 getEditorRadius(F32 currentScale);    // Basically, the size of our hit target for vertices
 
    const Color *getEditorRenderColor() const { return &Colors::gray50; }      // Unselected wall spine color
 
@@ -136,6 +137,8 @@ public:
    string toString(F32 gridSize) const;
 
    void setWidth(S32 width);
+
+   static const S32 VERTEX_SIZE = 5;
 };
 
 

@@ -303,7 +303,7 @@ void renderVertex(VertexRenderStyles style, const Point &v, S32 number, F32 alph
 
 void renderVertex(VertexRenderStyles style, const Point &v, S32 number, F32 alpha)
 {
-   renderVertex(style, v, number, alpha, 5);
+   renderVertex(style, v, number, alpha, WallItem::VERTEX_SIZE);
 }
 
 

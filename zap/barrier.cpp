@@ -453,6 +453,13 @@ void WallItem::processEndPoints()
 }
 
 
+// Size of object in editor 
+F32 WallItem::getEditorRadius(F32 currentScale)
+{
+   return VERTEX_SIZE;   // Keep vertex hit targets the same regardless of scale
+}
+
+
 string WallItem::toString(F32 gridSize) const
 {
    return "BarrierMaker " + itos(getWidth()) + " " + geomToString(gridSize);
