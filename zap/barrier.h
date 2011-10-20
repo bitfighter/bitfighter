@@ -124,11 +124,11 @@ public:
    const char *getEditorHelpString() { return "Walls define the general form of your level."; }  
    const char *getPrettyNamePlural() { return "Walls"; }
    const char *getOnDockName() { return "Wall"; }
-   const char *getOnScreenName() { return "Wall"; }
+   const char *getOnScreenName() { return ""; }    // Vertices should not be labeled
    bool hasTeam() { return false; }
    bool canBeHostile() { return false; }
    bool canBeNeutral() { return false; }
-   F32 getEditorRadius(F32 currentScale);    // Basically, the size of our hit target for vertices
+   F32 getEditorRadius(F32 currentScale);          // Basically, the size of our hit target for vertices
 
    const Color *getEditorRenderColor() const { return &Colors::gray50; }      // Unselected wall spine color
 
