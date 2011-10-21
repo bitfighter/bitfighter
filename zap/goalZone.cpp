@@ -129,9 +129,9 @@ bool GoalZone::processArguments(S32 argc2, const char **argv2, Game *game)
    if(argc < 7)
       return false;
 
-   mTeam = atoi(argv[0]);     // Team is first arg
+   mTeam = atoi(argv[0]);  // Team is first arg
    readGeom(argc, argv, 1, game->getGridSize());
-   setExtent();     // Sets object's extent database;
+   updateExtent();         // Sets object's extent database;
 
    return true;
 }
@@ -205,7 +205,7 @@ void GoalZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
    if(stream->readFlag()) 
    {
       unpackGeom(connection, stream);
-      setExtent();     // Sets object's extent database
+      updateExtent();     // Sets object's extent database
 
       stream->read(&mScore);
    }

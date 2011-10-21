@@ -726,7 +726,7 @@ bool HuntersNexusObject::processArguments(S32 argc2, const char **argv2, Game *g
    else              // Bitfighter format
       readGeom(argc, argv, 0, game->getGridSize());
 
-   setExtent();      // Sets object's extent database
+   updateExtent();   // Sets object's extent database
 
    return true;
 }
@@ -820,7 +820,7 @@ U32 HuntersNexusObject::packUpdate(GhostConnection *connection, U32 updateMask, 
 void HuntersNexusObject::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    unpackGeom(connection, stream);      
-   setExtent();     // Sets object's extent database
+   updateExtent();     // Sets object's extent database
 }
 
 const char HuntersNexusObject::className[] = "HuntersNexusObject";      // Class name as it appears to Lua scripts

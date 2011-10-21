@@ -455,6 +455,13 @@ void WallItem::processEndPoints()
 }
 
 
+Rect WallItem::calcExtents()
+{
+   // mExtent was already calculated when the wall was inserted into the segmentManager...
+   // All we need to do here is override the default calcExtents, to avoid clobbering our already good mExtent.
+   return getExtent();     
+}
+
 // Size of object in editor 
 F32 WallItem::getEditorRadius(F32 currentScale)
 {
@@ -731,6 +738,8 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *gameDataba
    {
       WallSegment *newSegment = new WallSegment(mWallSegmentDatabase, *wall->getOutline(), wall->getSerialNumber());
       mWallSegments.push_back(newSegment);
+
+      TNLAssert(newSegment->getOwner() != 0, "Bad owner!");
    }
    else     // Tranditional wall -- need to generate a series of 2-point segments that represent each section of our wall
    {
@@ -743,6 +752,7 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *gameDataba
          WallSegment *newSegment = new WallSegment(mWallSegmentDatabase, wallItem->extendedEndPoints[i], wallItem->extendedEndPoints[i+1], 
                                                    (F32)wallItem->getWidth(), wallItem->getSerialNumber());    // Create the segment
          mWallSegments.push_back(newSegment);          // And add it to our master segment list
+         TNLAssert(newSegment->getOwner() != 0, "Bad owner!");
       }
    }
 

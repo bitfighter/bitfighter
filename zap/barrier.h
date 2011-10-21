@@ -119,6 +119,7 @@ public:
    WallItem();    // Constructor
    WallItem *clone() const;
    
+   virtual Rect calcExtents();
    virtual void onGeomChanged();
    void processEndPoints();      
 

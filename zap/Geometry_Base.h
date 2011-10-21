@@ -93,7 +93,7 @@ public:
    //virtual boost::shared_ptr<Geometry> copyGeometry() const = 0;
    void newGeomCopy();
 
-   virtual Rect getExtents()                       { TNLAssert(false, "Not implemented"); return Rect(); }
+   virtual Rect calcExtents()                      { TNLAssert(false, "Not implemented"); return Rect(); }
 
    virtual void onPointsChanged()                  { TNLAssert(false, "Not implemented"); }
 

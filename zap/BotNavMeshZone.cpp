@@ -151,7 +151,7 @@ void BotNavMeshZone::addToGame(Game *game, GridDatabase *database)
    // the way an ordinary game object would be.  So we won't.
    mGame = game;
    
-   setExtent();
+   updateExtent();
    addToDatabase(getGameObjDatabase());
 }
 

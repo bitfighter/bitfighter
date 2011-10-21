@@ -501,7 +501,7 @@ void LineItem::onAddedToGame(Game *game)
 // Bounding box for quick collision-possibility elimination, and display scoping purposes
 void LineItem::computeExtent()
 {
-   setExtent();
+   updateExtent();
 }
 
 
@@ -541,7 +541,7 @@ void LineItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
    readThisTeam(stream);
 
    unpackGeom(connection, stream);
-   setExtent();
+   updateExtent();
 }
 
 

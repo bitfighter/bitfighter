@@ -1580,6 +1580,23 @@ void EditorUserInterface::render()
    
       getGame()->getWallSegmentManager()->renderWalls(getGame()->getSettings(),
                      mDraggingObjects, mPreviewMode, getSnapToWallCorners(), getRenderingAlpha(false/*isScriptItem*/));
+
+#ifdef SHOW_EXTENT_BOXES
+      for(S32 i = 0; i < objList->size(); i++)
+      {
+         EditorObject *obj = objList->get(i);
+         {
+            glColor(Colors::red);
+            glBegin(GL_LINE_LOOP);
+               glVertex2f(obj->getExtent().min.x, obj->getExtent().min.y);
+               glVertex2f(obj->getExtent().min.x, obj->getExtent().max.y);
+               glVertex2f(obj->getExtent().max.x, obj->getExtent().max.y);
+               glVertex2f(obj->getExtent().max.x, obj->getExtent().min.y);
+            glEnd();
+         }
+      }
+#endif
+
    glPopMatrix();
 
 
@@ -1886,7 +1903,7 @@ void EditorUserInterface::pasteSelection()
       offset = firstPoint - mClipboard[i]->getVert(0);
 
       EditorObject *newObject = mClipboard[i]->newCopy();
-      newObject->setExtent();
+      newObject->updateExtent();
       newObject->addToGame(getGame(), getGame()->getEditorDatabase());
 
       newObject->setSelected(true);
@@ -2242,14 +2259,40 @@ bool EditorUserInterface::checkForWallHit(const Point &mouse, DatabaseObject *ob
                if(eobj->getSerialNumber() == wallSegment->getOwner())
                {
                   mItemHit = eobj;
-                  return;
+                  return true;
                }
             }
          }
 
-         TNLAssert(false, "Should have found wall!");
+         TNLAssert(false, "Should have found a wall.  Either the extents are wrong again, or the walls and their segments are out of sync.");
+
+      /*   This code does a less efficient but more thorough job finding a wall that matches the segment we hit... if the above assert
+           keeps going off, and we can't fix it, this code here should take care of the problem.  But using it is an admission of failure.
+
+         EditorObjectDatabase *editorDb = getGame()->getEditorDatabase();
+   const Vector<EditorObject *> *fff = editorDb->getObjectList();
+
+
+         logprintf("Failed to find wall %d -- looking deeper", hhh);
+         for(S32 i = 0; i < fff->size(); i++)
+         {
+            if(isWallType(fff->get(i)->getObjectTypeNumber()))
+            {
+               EditorObject *eobj = fff->get(i);
+
+               if(eobj->getSerialNumber() == wallSegment->getOwner())
+               {
+                  mItemHit = eobj;
+                  return true;
+               }
+            }
+         }
+         logprintf("Not found!  %d",hhh); */
       }
    }
+
+      
+   return false;
 }
 
 
@@ -2455,7 +2498,7 @@ EditorObject *EditorUserInterface::copyDockItem(S32 index)
    // Instantiate object so we are in essence dragging a non-dock item
    EditorObject *newObject = mDockItems[index]->newCopy();
    newObject->newObjectFromDock(getGame()->getGridSize());
-   newObject->setExtent();
+   newObject->updateExtent();
    newObject->setDockItem(false);
    newObject->clearGame();
 
