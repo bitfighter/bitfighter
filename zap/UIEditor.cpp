@@ -2148,37 +2148,8 @@ void EditorUserInterface::findHitItemAndEdge()
    Point mouse = convertCanvasToLevelCoord(mMousePos);
 
    for(S32 i = 0; i < fillVector2.size(); i++)
-   {
-      WallSegment *obj = dynamic_cast<WallSegment *>(fillVector2[i]);
-      TNLAssert(obj, "Expected a WallSegment!");
-
-      Vector<Point> *points = &obj->triangulatedFillPoints;
-
-      for(S32 i = 0; i < points->size(); i+=3)     // Using traingulated fill may be a little clumsy, but it should be fast!
-      {
-         if(pointInTriangle(mouse, points->get(i), points->get(i + 1), points->get(i + 2)))
-         {
-            // Now that we've found a segment that our mouse is over, we need to find the wall object that it belongs to.  Chances are good
-            // that it will be one of the objects sitting in fillVector.
-            for(S32 i = 0; i < fillVector.size(); i++)
-            {
-               if(isWallType(fillVector[i]->getObjectTypeNumber()))
-               {
-                  EditorObject *eobj = dynamic_cast<EditorObject *>(fillVector[i]);
-
-                  if(eobj->getSerialNumber() == obj->getOwner())
-                  {
-                     mItemHit = eobj;
-                     return;
-                  }
-               }
-            }
-
-            TNLAssert(false, "Should have found wall!");
-         }
-      }
-   }
-
+      if(checkForWallHit(mouse, fillVector2[i]))
+         return;
 
    if(mShowMode == ShowWallsOnly) 
       return;
@@ -2246,6 +2217,39 @@ bool EditorUserInterface::checkForEdgeHit(EditorObject *object)
    }
 
    return false;
+}
+
+
+bool EditorUserInterface::checkForWallHit(const Point &mouse, DatabaseObject *object)
+{
+   WallSegment *wallSegment = dynamic_cast<WallSegment *>(object);
+   TNLAssert(wallSegment, "Expected a WallSegment!");
+
+   Vector<Point> *points = &wallSegment->triangulatedFillPoints;
+
+   for(S32 i = 0; i < points->size(); i += 3)     // Using traingulated fill may be a little clumsy, but it should be fast!
+   {
+      if(pointInTriangle(mouse, points->get(i), points->get(i + 1), points->get(i + 2)))
+      {
+         // Now that we've found a segment that our mouse is over, we need to find the wall object that it belongs to.  Chances are good
+         // that it will be one of the objects sitting in fillVector.
+         for(S32 i = 0; i < fillVector.size(); i++)
+         {
+            if(isWallType(fillVector[i]->getObjectTypeNumber()))
+            {
+               EditorObject *eobj = dynamic_cast<EditorObject *>(fillVector[i]);
+
+               if(eobj->getSerialNumber() == wallSegment->getOwner())
+               {
+                  mItemHit = eobj;
+                  return;
+               }
+            }
+         }
+
+         TNLAssert(false, "Should have found wall!");
+      }
+   }
 }
 
 

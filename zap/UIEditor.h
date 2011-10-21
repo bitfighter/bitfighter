@@ -221,6 +221,7 @@ private:
    void findHitItemAndEdge();                         // Sets mItemHit and mEdgeHit
    bool checkForVertexHit(EditorObject *object);      // Helper function
    bool checkForEdgeHit(EditorObject *object);        // Helper function
+   bool checkForWallHit(const Point &mouse, DatabaseObject *wallSegment);
    bool checkForInteriorHit(EditorObject *object);    // Helper function
 
    S32 findHitItemOnDock(Point canvasPos);
