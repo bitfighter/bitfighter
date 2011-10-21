@@ -223,7 +223,6 @@ public:
    Vector<Point> corners;
    Vector<Point> triangulatedFillPoints;
 
-
    S32 getOwner() { return mOwner; }
    void invalidate() { invalid = true; }
 

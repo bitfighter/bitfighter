@@ -696,7 +696,8 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *gameDataba
 }
 
 
-void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *gameDatabase, DatabaseObject *wallDbObject, const Vector<DatabaseObject *> &engrObjects)
+void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *gameDatabase, DatabaseObject *wallDbObject, 
+                                                        const Vector<DatabaseObject *> &engrObjects)
 {
 #ifndef ZAP_DEDICATED
    // Find any engineered objects that terminate on this wall, and mark them for resnapping later
