@@ -155,7 +155,7 @@ void removeCollinearPoints(Vector<Point> &points, bool isPolygon)
 
 // From http://www.blackpawn.com/texts/pointinpoly/default.html
 // Messy looking! Quick!
-bool pointInTriangle(Point p, Point a, Point b, Point c)
+bool pointInTriangle(const Point &p, const Point &a, const Point &b, const Point &c)
 {
    // Compute vectors
    Point v0(c - a);
