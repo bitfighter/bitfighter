@@ -901,7 +901,7 @@ void renderPolygonOutline(const Vector<Point> *outlinePoints, const Color *outli
 }
 
 
-void renderPolygonFill(const Vector<Point> *fillPoints, const Color *fillColor, F32 alpha)      
+void renderPolygonFill(const Vector<Point> *triangulatedFillPoints, const Color *fillColor, F32 alpha)      
 {
    bool disableBlending = false;
 
@@ -913,7 +913,7 @@ void renderPolygonFill(const Vector<Point> *fillPoints, const Color *fillColor, 
 
 
    glColor(fillColor, alpha);
-   renderTriangulatedPolygonFill(fillPoints);
+   renderTriangulatedPolygonFill(triangulatedFillPoints);
 
    if(disableBlending)
       glDisable(GL_BLEND);
