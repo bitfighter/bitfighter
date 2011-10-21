@@ -64,7 +64,7 @@ public:
 
    // Item is being actively dragged
    virtual void onItemDragging() { onGeomChanged(); }    // maybe not for polywalls??
-   virtual void onGeomChanged() { onPointsChanged(); }   // Tell the geometry that things have changed
+   virtual void onGeomChanged();   // Tell the geometry that things have changed
 
    virtual void renderEditor(F32 currentScale);
 

@@ -163,7 +163,7 @@ public:
    void renderPolylineCenterline(F32 alpha);    // Draw barrier centerlines; wraps renderPolyline()  ==> lineItem, barrierMaker only
 
    virtual void onGeomChanging();                        // Item geom is interactively changing
-   //virtual void onGeomChanged() { /* To be =0 */ };      // Item changed geometry (or moved), do any internal updating that might be required
+   virtual void onGeomChanged();                         // Item changed geometry (or moved), do any internal updating that might be required
 
    virtual void onItemDragging() { /* Do nothing */ };   // Item is being dragged around the screen
 

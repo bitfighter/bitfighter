@@ -257,4 +257,9 @@ Point Rect::getExtents() const
    return max - min;
 }
 
+string Rect::toString() const
+{
+   return min.toString() + " " + max.toString();
+}
+
 };	// namespace

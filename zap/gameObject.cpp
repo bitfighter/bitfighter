@@ -271,10 +271,18 @@ void BfObject::renderEditorPreview(F32 currentScale)
 }
 
 
+void BfObject::updateExtent()
+{
+   setExtent(getExtents());    // Make sure the database extents are in sync with where the object actually is
+}
+
+
 void BfObject::readThisTeam(BitStream *stream)
 {
    mTeam = stream->readInt(4) - 2;
 }
+
+
 void BfObject::writeThisTeam(BitStream *stream)
 {
    stream->writeInt(mTeam + 2, 4);

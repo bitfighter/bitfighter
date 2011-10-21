@@ -92,9 +92,6 @@ ClientGame *gClientGame2 = NULL;
 
 extern ScreenInfo gScreenInfo;
 
-static Vector<DatabaseObject *> fillVector2;
-
-
 ////////////////////////////////////////
 ////////////////////////////////////////
 

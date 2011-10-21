@@ -161,6 +161,7 @@ void SpeedZone::renderEditorItem()
 void SpeedZone::onGeomChanged()   
 {  
    generatePoints(getVert(0), getVert(1), 1, mPolyBounds); 
+   Parent::onGeomChanged();
 }
 
 

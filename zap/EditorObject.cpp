@@ -292,6 +292,12 @@ void EditorObject::onGeomChanging()
 }
 
 
+void EditorObject::onGeomChanged()
+{
+   updateExtent();
+}
+
+
 Color EditorObject::getDrawColor()
 {
    if(mSelected)

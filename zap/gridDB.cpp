@@ -551,8 +551,8 @@ void DatabaseObject::setExtent(const Rect &extents)
             maxyold = minyold + gridDB->BucketRowCount - 1;
 
 
-         // don't use x <= maxx, it will endless loop if maxx = S32_MAX and x overflows
-         // instead, use maxx - x >= 0, it will better handle overflows and avoid endless loop (MIN_S32 - MAX_S32 = +1)
+         // Don't use x <= maxx, it will endless loop if maxx = S32_MAX and x overflows
+         // Instead, use maxx - x >= 0, it will better handle overflows and avoid endless loop (MIN_S32 - MAX_S32 = +1)
 
          // Remove from the extents database for current extents...
          for(S32 x = minxold; maxxold - x >= 0; x++)
@@ -735,3 +735,4 @@ const Vector<EditorObject *> *EditorObjectDatabase::getObjectList()
 // Reusable container for searching gridDatabases
 // putting it outside of Zap namespace seems to help with debugging showing whats inside fillVector  (debugger forgets to add Zap::)
 Vector<Zap::DatabaseObject *> fillVector;
+Vector<Zap::DatabaseObject *> fillVector2;

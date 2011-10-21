@@ -38,8 +38,6 @@ using namespace TNL;
 namespace Zap
 {
 
-
-
 void Geometry::rotateAboutPoint(const Point &center, F32 angle)
 {
    F32 sinTheta = sin(angle * Float2Pi / 360.0f);
@@ -52,8 +50,8 @@ void Geometry::rotateAboutPoint(const Point &center, F32 angle)
 
       setVert(n + center, j);
    }
-   onGeomChanged();
 }
+
 
 void Geometry::flipHorizontal(F32 centerX)
 {
@@ -63,8 +61,9 @@ void Geometry::flipHorizontal(F32 centerX)
       p.x = centerX * 2 - p.x;
       setVert(p, i);
    }
-   onGeomChanged();
 }
+
+
 void Geometry::flipVertical(F32 centerY)
 {
    for(S32 i = 0; i < getVertCount(); i++)
@@ -73,9 +72,7 @@ void Geometry::flipVertical(F32 centerY)
       p.y = centerY * 2 - p.y;
       setVert(p, i);
    }
-   onGeomChanged();
 }
-
 
 
 // Make object bigger or smaller

@@ -191,6 +191,7 @@ public:
 
    virtual void setExtent() { setExtent(getExtents()); }                    // Set extents of object in database
    virtual void setExtent(const Rect &extent) { DatabaseObject::setExtent(extent); }   // Passthrough
+   void updateExtent();
 
    void readThisTeam(BitStream *stream);
    void writeThisTeam(BitStream *stream);

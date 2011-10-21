@@ -330,6 +330,7 @@ void TextItem::onGeomChanging()
 void TextItem::onGeomChanged()
 {
    recalcTextSize();
+   Parent::onGeomChanged();
 }
 
 

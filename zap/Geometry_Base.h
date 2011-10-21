@@ -104,8 +104,6 @@ public:
    void flipHorizontal(F32 centerX = 0);
    void flipVertical(F32 centerY = 0);
    void scale(const Point &center, F32 scale);
-   
-   virtual void onGeomChanged() { /* Do nothing */ };   // Item changed geometry (or moved), do any internal updating that might be required
 };
 
 

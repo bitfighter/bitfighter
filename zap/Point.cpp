@@ -182,7 +182,7 @@ void Point::write(BitStream *stream)
 }
 
 
-string Point::toString()
+string Point::toString() const
 {
    return ftos(x) + " " + ftos(y);
 }

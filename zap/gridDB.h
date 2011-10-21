@@ -181,6 +181,7 @@ public:
 // Reusable container for searching gridDatabases
 // putting it outside of Zap namespace seems to help with debugging showing whats inside fillVector  (debugger forgets to add Zap::)
 extern Vector<Zap::DatabaseObject *> fillVector;
+extern Vector<Zap::DatabaseObject *> fillVector2;
 
 #endif
 

@@ -900,6 +900,8 @@ void ForceFieldProjector::onGeomChanged()
 {
    if(mSnapped)
       findForceFieldEnd();
+
+   Parent::onGeomChanged();
 }
 
 
@@ -1414,6 +1416,7 @@ Point Turret::getEditorSelectionOffset(F32 currentScale)
 void Turret::onGeomChanged() 
 { 
    mCurrentAngle = mAnchorNormal.ATAN2();       // Keep turret pointed away from the wall... looks better like that!
+   Parent::onGeomChanged();
 }
 
 

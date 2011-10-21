@@ -117,7 +117,6 @@ public:
 
    void onAttrsChanging() { /* Do nothing */ }
    void onGeomChanging()  { /* Do nothing */ }
-   void onGeomChanged()   { /* Do nothing */ }
 
    // Some properties about the item that will be needed in the editor
    const char *getEditorHelpString() { return "Teleports ships from one place to another. [T]"; }  

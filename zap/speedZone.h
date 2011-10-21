@@ -39,7 +39,7 @@ class EditorAttributeMenuUI;
 
 class SpeedZone : public SimpleLine
 {
-   typedef GameObject Parent;
+   typedef SimpleLine Parent;
 
 private:
    Vector<Point> mPolyBounds;

@@ -1939,7 +1939,10 @@ void EditorUserInterface::rotateSelection(F32 angle)
 
    for(S32 i = 0; i < objList->size(); i++)
       if(objList->get(i)->isSelected())
+      {
          objList->get(i)->rotateAboutPoint(Point(0,0), angle);
+         objList->get(i)->onGeomChanged();
+      }
 
    setNeedToSave(true);
    autoSave();
@@ -2105,17 +2108,30 @@ void EditorUserInterface::findHitItemAndEdge()
    mEdgeHit = NONE;
    mVertexHit = NONE;
 
-   const Vector<EditorObject *> *objList = getObjectList();
+   const Rect cursorRect((mMousePos - mCurrentOffset) / mCurrentScale, 100);      // 98,51 === 1120,280
+
+   fillVector.clear();
+   EditorObjectDatabase *editorDb = getGame()->getEditorDatabase();
+   editorDb->findObjects((TestFunc)isAnyObjectType, fillVector, cursorRect);
+
+   logprintf("Found objs: %d  %f,%f", fillVector.size(), ((mMousePos - mCurrentOffset)/mCurrentScale).x, ((mMousePos - mCurrentOffset)/mCurrentScale).y);
+   for(S32 i = 0; i < fillVector.size(); i++)
+   {
+      EditorObject *obj = dynamic_cast<EditorObject *>(fillVector[i]);
+      logprintf("Found item @ %s  ||| %s", obj->getVert(0).toString().c_str(), obj->getExtent().toString().c_str());
+   }
 
    // Do this in two passes -- the first we only consider selected items, the second pass will consider all targets.
    // This will give priority to hitting vertices of selected items
    for(S32 firstPass = 1; firstPass >= 0; firstPass--)     // firstPass will be true the first time through, false the second time
-   {
-      for(S32 i = objList->size() - 1; i >= 0; i--)        // Go in reverse order to prioritize items drawn on top
+      for(S32 i = fillVector.size() - 1; i >= 0; i--)        // Go in reverse order to prioritize items drawn on top
       {
-         EditorObject *obj = objList->get(i);
+         EditorObject *obj = dynamic_cast<EditorObject *>(fillVector[i]);
+
+         TNLAssert(obj, "Expected an EditorObject!");
+
          if(firstPass == (!obj->isSelected() && !obj->anyVertsSelected()))  // First pass is for selected items only
-            continue;
+            continue;                                                       // Second pass only for unselected items
          
          // Only select walls in CTRL-A mode...
          if(mShowMode == ShowWallsOnly && !(isWallType(obj->getObjectTypeNumber())))   // Only select walls in CTRL-A mode
@@ -2124,15 +2140,21 @@ void EditorUserInterface::findHitItemAndEdge()
          if(checkForVertexHit(obj) || checkForEdgeHit(obj)) 
             return;                 
       }
-   }
+
+   // We've already checked for wall vertices; now we'll check for hits in the interior of walls
+   GridDatabase *wallDb = getGame()->getWallSegmentManager()->getWallSegmentDatabase();
+   fillVector2.clear();
+   wallDb->findObjects((TestFunc)isAnyObjectType, fillVector2, cursorRect);
+   //... more to do here...
+
 
    if(mShowMode == ShowWallsOnly) 
       return;
 
    // If we're still here, it means we didn't find anything yet.  Make one more pass, and see if we're in any polys.
    // This time we'll loop forward, though I don't think it really matters.
-   for(S32 i = 0; i < objList->size(); i++)
-     if(checkForInteriorHit(objList->get(i)))
+   for(S32 i = 0; i < fillVector.size(); i++)
+     if(checkForInteriorHit(dynamic_cast<EditorObject *>(fillVector[i])))
         return;
 }
 
@@ -3528,7 +3550,7 @@ void EditorUserInterface::onFinishedDragging()
    mDraggingObjects = false;
 
    // Dragged item off the dock, then back on  ==> nothing changed; restore to unmoved state, which was stored on undo stack
-   if (mouseOnDock() && mDraggingDockItem != NONE)
+   if(mouseOnDock() && mDraggingDockItem != NONE)
    {
       undo(false);
       return;

@@ -86,7 +86,7 @@ public:
    void read(BitStream *stream);
    void write(BitStream *stream);
 
-   string toString();
+   string toString() const;
    
    // inlines  need to be in header, too
    inline Point operator+(const Point &pt) const

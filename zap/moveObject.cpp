@@ -590,7 +590,8 @@ void MoveObject::onGeomChanged()
    // This is here, to make sure pressing TAB in editor will show correct location for MoveItems
    mMoveState[ActualState].pos = getVert(0);
    mMoveState[RenderState].pos = getVert(0);
-   printf("%i, %i\n", sizeof(Point), sizeof(Point *));
+   
+   Parent::onGeomChanged();
 }
 
 void MoveObject::damageObject(DamageInfo *theInfo)

@@ -53,6 +53,14 @@ void EditorPolygon::renderItemText(const char *text, S32 offset, F32 currentScal
 }
 
 
+// Tell the geometry that things have changed
+void EditorPolygon::onGeomChanged() 
+{ 
+   onPointsChanged(); 
+   EditorParent::onGeomChanged();
+}  
+
+
 void EditorPolygon::renderEditor(F32 currentScale)
 {
 #ifndef ZAP_DEDICATED

@@ -92,6 +92,8 @@ public:
 
    Point getExtents() const;
 
+   string toString() const;
+
    // inlines must stay in headers
    inline Rect& operator=(const Rect &r)  // Performance equivalent to set()
    {

@@ -442,6 +442,8 @@ void WallItem::onGeomChanged()
       ForceFieldProjector *ffp = dynamic_cast<ForceFieldProjector *>(fillVector[i]);
       ffp->findForceFieldEnd();
    }
+
+   Parent::onGeomChanged();
 }
 
 

@@ -113,6 +113,8 @@ public:
 // TODO: Don't need this to be a GameObject  -- perhaps merge with barrier above?
 class WallItem : public LineItem
 {
+   typedef LineItem Parent;
+
 public:
    WallItem();    // Constructor
    WallItem *clone() const;

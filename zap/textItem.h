@@ -137,8 +137,9 @@ public:
 
 class LineItem : public GameObject, public PolylineGeometry, public EditorObject
 {
-private:
    typedef GameObject Parent;
+
+private:
    Vector<Point> mRenderPoints;     // Precomputed points used for rendering linework
 
    S32 mWidth;    
