@@ -433,7 +433,7 @@ GrenadeProjectile::GrenadeProjectile(Point pos, Point vel, GameObject *shooter):
    setMaskBits(PositionMask);
    mWeaponType = WeaponBurst;
 
-   updateExtent();
+   updateExtentInDatabase();
 
    mTimeRemaining = gWeapons[WeaponBurst].projLiveTime;
    exploded = false;

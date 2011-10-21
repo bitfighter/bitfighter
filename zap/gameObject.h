@@ -190,7 +190,7 @@ public:
    virtual void renderEditorPreview(F32 currentScale);
 
    virtual void setExtent(const Rect &extent) { DatabaseObject::setExtent(extent); }   // Passthrough
-   void updateExtent();
+   void updateExtentInDatabase();
 
    void readThisTeam(BitStream *stream);
    void writeThisTeam(BitStream *stream);

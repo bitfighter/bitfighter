@@ -294,7 +294,7 @@ void EditorObject::onGeomChanging()
 
 void EditorObject::onGeomChanged()
 {
-   updateExtent();
+   updateExtentInDatabase();
 }
 
 

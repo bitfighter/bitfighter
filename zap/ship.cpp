@@ -146,7 +146,7 @@ void Ship::initialize(Point &pos)
       mMoveState[i].vel = Point(0,0);
    }
 
-   updateExtent();
+   updateExtentInDatabase();
 
    mHealth = 1.0;       // Start at full health
    hasExploded = false; // Haven't exploded yet!
@@ -259,7 +259,7 @@ bool Ship::processArguments(S32 argc, const char **argv, Game *game)
       mMoveState[i].angle = 0;
    }
 
-   updateExtent();
+   updateExtentInDatabase();
 
    return true;
 }
@@ -680,7 +680,7 @@ void Ship::idle(GameObject::IdleCallPath path)
    }
 
    // Update the object in the game's extents database
-   updateExtent();
+   updateExtentInDatabase();
 
    // If this is a move executing on the server and it's
    // different from the last move, then mark the move to

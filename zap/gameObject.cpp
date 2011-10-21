@@ -271,7 +271,7 @@ void BfObject::renderEditorPreview(F32 currentScale)
 }
 
 
-void BfObject::updateExtent()
+void BfObject::updateExtentInDatabase()
 {
    setExtent(calcExtents());    // Make sure the database extents are in sync with where the object actually is
 }

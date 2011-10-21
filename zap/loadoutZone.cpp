@@ -117,7 +117,7 @@ bool LoadoutZone::processArguments(S32 argc2, const char **argv2, Game *game)
    mTeam = atoi(argv[0]);     // Team is first arg
    readGeom(argc, argv, 1, game->getGridSize());
 
-   updateExtent();
+   updateExtentInDatabase();
 
    return true;
 }
@@ -170,7 +170,7 @@ void LoadoutZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    readThisTeam(stream);
    unpackGeom(connection, stream);
-   updateExtent();
+   updateExtentInDatabase();
 }
 
 

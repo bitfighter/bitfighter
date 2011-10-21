@@ -1903,7 +1903,7 @@ void EditorUserInterface::pasteSelection()
       offset = firstPoint - mClipboard[i]->getVert(0);
 
       EditorObject *newObject = mClipboard[i]->newCopy();
-      newObject->updateExtent();
+      newObject->updateExtentInDatabase();
       newObject->addToGame(getGame(), getGame()->getEditorDatabase());
 
       newObject->setSelected(true);
@@ -2498,7 +2498,7 @@ EditorObject *EditorUserInterface::copyDockItem(S32 index)
    // Instantiate object so we are in essence dragging a non-dock item
    EditorObject *newObject = mDockItems[index]->newCopy();
    newObject->newObjectFromDock(getGame()->getGridSize());
-   newObject->updateExtent();
+   newObject->updateExtentInDatabase();
    newObject->setDockItem(false);
    newObject->clearGame();
 

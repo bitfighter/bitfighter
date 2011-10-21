@@ -323,7 +323,7 @@ void FlagItem::sendHome()
    mMoveState[ActualState].vel = mMoveState[RenderState].vel = Point(0,0);
    mIsAtHome = true;
    setMaskBits(PositionMask);
-   updateExtent();
+   updateExtentInDatabase();
 }
 
 

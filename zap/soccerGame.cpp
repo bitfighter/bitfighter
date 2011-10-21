@@ -503,7 +503,8 @@ void SoccerBallItem::sendHome()
    mMoveState[ActualState].pos = mMoveState[RenderState].pos = initialPos;
    mMoveState[ActualState].vel = mMoveState[RenderState].vel = Point(0,0);
    setMaskBits(WarpPositionMask | PositionMask);      // By warping, we eliminate the "drifting" effect we got when we used PositionMask
-   updateExtent();
+
+   updateExtentInDatabase();
 }
 
 

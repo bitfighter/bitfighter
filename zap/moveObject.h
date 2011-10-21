@@ -70,7 +70,7 @@ public:
    void onAddedToGame(Game *game);
    void idle(GameObject::IdleCallPath path);    // Called from child object idle methods
    void updateInterpolation();
-   void updateExtent();
+   void updateExtentInDatabase();
 
    bool isMoveObject() { return true; }
 

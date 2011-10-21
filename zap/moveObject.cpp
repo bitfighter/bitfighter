@@ -78,7 +78,7 @@ static const float MoveObjectCollisionElasticity = 1.7f;
 
 
 // Update object's extents in the database
-void MoveObject::updateExtent()
+void MoveObject::updateExtentInDatabase()
 {
    Rect r(mMoveState[ActualState].pos, mMoveState[RenderState].pos);
    r.expand(Point(mRadius + 10, mRadius + 10));
@@ -629,7 +629,7 @@ bool MoveItem::processArguments(S32 argc, const char **argv, Game *game)
    for(U32 i = 0; i < MoveStateCount; i++)
       mMoveState[i].pos = getVert(0);
 
-   updateExtent();
+   updateExtentInDatabase();
 
    return true;
 }
@@ -796,7 +796,7 @@ void MoveItem::idle(GameObject::IdleCallPath path)
       else
          updateInterpolation();
    }
-   updateExtent();
+   updateExtentInDatabase();
 
    // Server only...
    U32 deltaT = mCurrentMove.time;
