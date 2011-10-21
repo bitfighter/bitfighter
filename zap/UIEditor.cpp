@@ -2099,6 +2099,8 @@ void EditorUserInterface::flipSelectionVertical()
 }
 
 
+extern bool pointInTriangle(const Point &p, const Point &a, const Point &b, const Point &c);
+
 static const S32 POINT_HIT_RADIUS = 9;
 static const S32 EDGE_HIT_RADIUS = 6;
 
@@ -2108,23 +2110,19 @@ void EditorUserInterface::findHitItemAndEdge()
    mEdgeHit = NONE;
    mVertexHit = NONE;
 
-   const Rect cursorRect((mMousePos - mCurrentOffset) / mCurrentScale, 100);      // 98,51 === 1120,280
+   // Make hit rectangle larger than 1x1 -- when we consider point items, we need to make sure that we grab the item even when we're not right
+   // on top of it, as the point item's hit target is much larger than the item itself.  100 is a guess that seems to work well.
+   // Note that this is only used for requesting a candidate list from the database, actual hit detection is more precise.
+   const Rect cursorRect((mMousePos - mCurrentOffset) / mCurrentScale, 100); 
 
    fillVector.clear();
    EditorObjectDatabase *editorDb = getGame()->getEditorDatabase();
    editorDb->findObjects((TestFunc)isAnyObjectType, fillVector, cursorRect);
 
-   logprintf("Found objs: %d  %f,%f", fillVector.size(), ((mMousePos - mCurrentOffset)/mCurrentScale).x, ((mMousePos - mCurrentOffset)/mCurrentScale).y);
-   for(S32 i = 0; i < fillVector.size(); i++)
-   {
-      EditorObject *obj = dynamic_cast<EditorObject *>(fillVector[i]);
-      logprintf("Found item @ %s  ||| %s", obj->getVert(0).toString().c_str(), obj->getExtent().toString().c_str());
-   }
-
    // Do this in two passes -- the first we only consider selected items, the second pass will consider all targets.
    // This will give priority to hitting vertices of selected items
    for(S32 firstPass = 1; firstPass >= 0; firstPass--)     // firstPass will be true the first time through, false the second time
-      for(S32 i = fillVector.size() - 1; i >= 0; i--)        // Go in reverse order to prioritize items drawn on top
+      for(S32 i = fillVector.size() - 1; i >= 0; i--)      // Go in reverse order to prioritize items drawn on top
       {
          EditorObject *obj = dynamic_cast<EditorObject *>(fillVector[i]);
 
@@ -2144,8 +2142,42 @@ void EditorUserInterface::findHitItemAndEdge()
    // We've already checked for wall vertices; now we'll check for hits in the interior of walls
    GridDatabase *wallDb = getGame()->getWallSegmentManager()->getWallSegmentDatabase();
    fillVector2.clear();
+
    wallDb->findObjects((TestFunc)isAnyObjectType, fillVector2, cursorRect);
-   //... more to do here...
+
+   Point mouse = convertCanvasToLevelCoord(mMousePos);
+
+   for(S32 i = 0; i < fillVector2.size(); i++)
+   {
+      WallSegment *obj = dynamic_cast<WallSegment *>(fillVector2[i]);
+      TNLAssert(obj, "Expected a WallSegment!");
+
+      Vector<Point> *points = &obj->triangulatedFillPoints;
+
+      for(S32 i = 0; i < points->size(); i+=3)     // Using traingulated fill may be a little clumsy, but it should be fast!
+      {
+         if(pointInTriangle(mouse, points->get(i), points->get(i + 1), points->get(i + 2)))
+         {
+            // Now that we've found a segment that our mouse is over, we need to find the wall object that it belongs to.  Chances are good
+            // that it will be one of the objects sitting in fillVector.
+            for(S32 i = 0; i < fillVector.size(); i++)
+            {
+               if(isWallType(fillVector[i]->getObjectTypeNumber()))
+               {
+                  EditorObject *eobj = dynamic_cast<EditorObject *>(fillVector[i]);
+
+                  if(eobj->getSerialNumber() == obj->getOwner())
+                  {
+                     mItemHit = eobj;
+                     return;
+                  }
+               }
+            }
+
+            TNLAssert(false, "Should have found wall!");
+         }
+      }
+   }
 
 
    if(mShowMode == ShowWallsOnly) 
@@ -2219,18 +2251,18 @@ bool EditorUserInterface::checkForEdgeHit(EditorObject *object)
 
 bool EditorUserInterface::checkForInteriorHit(EditorObject *object)
 {
-   if(object->getGeomType() == geomPolygon)
+   if(object->getGeomType() != geomPolygon)
+      return false;
+
+   Vector<Point> verts;
+
+   for(S32 j = 0; j < object->getVertCount(); j++)
+      verts.push_back(convertLevelToCanvasCoord(object->getVert(j)));
+
+   if(PolygonContains2(verts.address(), verts.size(), mMousePos))
    {
-      Vector<Point> verts;
-
-      for(S32 j = 0; j < object->getVertCount(); j++)
-         verts.push_back(convertLevelToCanvasCoord(object->getVert(j)));
-
-      if(PolygonContains2(verts.address(), verts.size(), mMousePos))
-      {
-         mItemHit = object;
-         return true;
-      }
+      mItemHit = object;
+      return true;
    }
 
    return false;
