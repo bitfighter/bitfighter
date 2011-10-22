@@ -228,14 +228,6 @@ void EditorObject::renderInEditor(F32 currentScale, const Point &currentOffset, 
    else 
       glColor(getDrawColor(), alpha);
 
-   bool disableBlending = false;
-
-   if(!glIsEnabled(GL_BLEND))
-   {
-      glEnable(GL_BLEND);        // Enable transparency
-      disableBlending = true;
-   }
-
    // Override drawColor for this special case
    if(anyVertsSelected())
       drawColor = *SELECT_COLOR;
@@ -244,37 +236,28 @@ void EditorObject::renderInEditor(F32 currentScale, const Point &currentOffset, 
    {
       renderDock();
       labelDockItem();
+
       if(mLitUp)
          highlightDockItem();
    }
    else  // Not a dock item
    {
-      glPushMatrix();
-         glTranslate(currentOffset);
-         glScale(currentScale);
+      if(showingReferenceShip)
+         renderEditorPreview(currentScale);
+      else
+         renderEditor(currentScale);
 
-         if(showingReferenceShip)
-            renderEditorPreview(currentScale);
-         else
-            renderEditor(currentScale);
+      if(!showingReferenceShip)
+      {
+         // Label item with instruction message describing what happens if user presses enter
+         //if(isSelected() && !isBeingEdited())
+         //   renderItemText(getInstructionMsg(), 0, currentScale);
 
-         if(!showingReferenceShip)
-         {
-            // Label item with instruction message describing what happens if user presses enter
-            //if(isSelected() && !isBeingEdited())
-            //   renderItemText(getInstructionMsg(), 0, currentScale);
-
-            renderAndLabelHighlightedVertices(currentScale);
-            if(isSelected() && !isBeingEdited() && showAttribsWhenSelected())
-               renderAttributeString(currentScale);
-         }
-
-      glPopMatrix();   
-
+         renderAndLabelHighlightedVertices(currentScale);
+         if(isSelected() && !isBeingEdited() && showAttribsWhenSelected())
+            renderAttributeString(currentScale);
+      }
    }
-
-   if(disableBlending)
-      glDisable(GL_BLEND);
 }
 
 
