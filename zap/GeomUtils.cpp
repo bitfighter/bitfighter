@@ -179,6 +179,18 @@ bool pointInTriangle(const Point &p, const Point &a, const Point &b, const Point
 }
 
 
+
+// Return true out if point is in polygon given a triangulated fill
+bool triangulatedFillContains(const Vector<Point> *triangulatedFillPoints, const Point &point)
+{
+   for(S32 i = 0; i < triangulatedFillPoints->size(); i += 3)     // Using traingulated fill may be a little clumsy, but it should be fast!
+      if(pointInTriangle(point, triangulatedFillPoints->get(i), triangulatedFillPoints->get(i + 1), triangulatedFillPoints->get(i + 2)))
+         return true;
+
+   return false;
+}
+
+
 //// Based on http://www.opengl.org/discussion_boards/ubbthreads.php?ubb=showflat&Number=248453
 //// No idea if this is optimal or not, but it is only used in the editor, and works fine for our purposes.
 //bool isConvex(const Vector<Point> *verts)

@@ -136,7 +136,7 @@ void PointGeometry::readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gr
 
 static Vector<Point> outlinePoints(2);    // Reusable container
 
-Vector<Point> *SimpleLineGeometry::getOutline() const
+const Vector<Point> *SimpleLineGeometry::getOutline() const
 {
    outlinePoints.resize(2);
    outlinePoints[0] = mFromPos;

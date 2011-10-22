@@ -126,6 +126,9 @@ void unpackPolygons(const Vector<Vector<Point> > &solution, Vector<Point> &lineS
 // test if a complex polygon has clockwise point winding order
 bool isWoundClockwise(const Vector<Point>& inputPoly);
 
+
+// Return true out if point is in polygon given a triangulated fill
+bool triangulatedFillContains(const Vector<Point> *triangulatedFillPoints, const Point &point);
 bool isConvex(const Vector<Point> *verts);
 
 // scale Geometric points for clipper

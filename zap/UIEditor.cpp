@@ -2136,8 +2136,10 @@ void EditorUserInterface::findHitItemAndEdge()
    EditorObjectDatabase *editorDb = getGame()->getEditorDatabase();
    editorDb->findObjects((TestFunc)isAnyObjectType, fillVector, cursorRect);
 
+   Point mouse = convertCanvasToLevelCoord(mMousePos);      // Figure out where the mouse is in level coords
+
    // Do this in two passes -- the first we only consider selected items, the second pass will consider all targets.
-   // This will give priority to hitting vertices of selected items
+   // This will give priority to hitting vertices of selected items.
    for(S32 firstPass = 1; firstPass >= 0; firstPass--)     // firstPass will be true the first time through, false the second time
       for(S32 i = fillVector.size() - 1; i >= 0; i--)      // Go in reverse order to prioritize items drawn on top
       {
@@ -2152,7 +2154,7 @@ void EditorUserInterface::findHitItemAndEdge()
          if(mShowMode == ShowWallsOnly && !(isWallType(obj->getObjectTypeNumber())))   // Only select walls in CTRL-A mode
             continue;                                                                  // ...so if it's not a wall, proceed to next item
 
-         if(checkForVertexHit(obj) || checkForEdgeHit(obj)) 
+         if(checkForVertexHit(obj) || checkForEdgeHit(mouse, obj)) 
             return;                 
       }
 
@@ -2161,8 +2163,6 @@ void EditorUserInterface::findHitItemAndEdge()
    fillVector2.clear();
 
    wallDb->findObjects((TestFunc)isAnyObjectType, fillVector2, cursorRect);
-
-   Point mouse = convertCanvasToLevelCoord(mMousePos);
 
    for(S32 i = 0; i < fillVector2.size(); i++)
       if(checkForWallHit(mouse, fillVector2[i]))
@@ -2174,11 +2174,13 @@ void EditorUserInterface::findHitItemAndEdge()
    // If we're still here, it means we didn't find anything yet.  Make one more pass, and see if we're in any polys.
    // This time we'll loop forward, though I don't think it really matters.
    for(S32 i = 0; i < fillVector.size(); i++)
-     if(checkForInteriorHit(dynamic_cast<EditorObject *>(fillVector[i])))
+     if(checkForPolygonHit(mouse, dynamic_cast<EditorObject *>(fillVector[i])))
         return;
 }
 
 
+// Vertex is weird because we don't always do thing in level coordinates -- some of our hit computation is based on
+// absolute screen coordinates; some things, like wall vertices, are the same size at every zoom scale.  
 bool EditorUserInterface::checkForVertexHit(EditorObject *object)
 {
    F32 radius = object->getEditorRadius(mCurrentScale);
@@ -2200,29 +2202,32 @@ bool EditorUserInterface::checkForVertexHit(EditorObject *object)
 }
 
 
-bool EditorUserInterface::checkForEdgeHit(EditorObject *object)
+bool EditorUserInterface::checkForEdgeHit(const Point &point, EditorObject *object)
 {
    // Points have no edges, and walls are checked via another mechanism
    if(object->getGeomType() == geomPoint || isWallType(object->getObjectTypeNumber()))  
       return false;
 
    // Make a copy of the items vertices that we can add to in the case of a loop
+   // Note that it would be more efficient to find a way that doesn't involve this copy...
    Vector<Point> verts = *object->getOutline();    
 
    if(object->getGeomType() == geomPolygon)   // Add first point to the end to create last side on poly
       verts.push_back(verts.first());
 
-   Point p1 = convertLevelToCanvasCoord(object->getVert(0));
+   Point *p1, *p2;
    Point closest;
+
+   p1 = &object->getVert(0);
          
    for(S32 j = 0; j < verts.size() - 1; j++)
    {
-      Point p2 = convertLevelToCanvasCoord(verts[j+1]);
+      p2 = &verts[j+1];
             
-      if(findNormalPoint(mMousePos, p1, p2, closest))
+      if(findNormalPoint(point, *p1, *p2, closest))
       {
-         F32 distance = (mMousePos - closest).len();
-         if(distance < EDGE_HIT_RADIUS) 
+         F32 distance = (point - closest).len();
+         if(distance < EDGE_HIT_RADIUS / mCurrentScale) 
          {
             mItemHit = object;
             mEdgeHit = j;
@@ -2230,47 +2235,44 @@ bool EditorUserInterface::checkForEdgeHit(EditorObject *object)
             return true;
          }
       }
-      p1.set(p2);
+      p1 = p2;
    }
 
    return false;
 }
 
 
-bool EditorUserInterface::checkForWallHit(const Point &mouse, DatabaseObject *object)
+bool EditorUserInterface::checkForWallHit(const Point &point, DatabaseObject *object)
 {
    WallSegment *wallSegment = dynamic_cast<WallSegment *>(object);
    TNLAssert(wallSegment, "Expected a WallSegment!");
 
-   Vector<Point> *points = &wallSegment->triangulatedFillPoints;
-
-   for(S32 i = 0; i < points->size(); i += 3)     // Using traingulated fill may be a little clumsy, but it should be fast!
+   if(triangulatedFillContains(&wallSegment->triangulatedFillPoints, point))
    {
-      if(pointInTriangle(mouse, points->get(i), points->get(i + 1), points->get(i + 2)))
+      // Now that we've found a segment that our mouse is over, we need to find the wall object that it belongs to.  Chances are good
+      // that it will be one of the objects sitting in fillVector.
+      for(S32 i = 0; i < fillVector.size(); i++)
       {
-         // Now that we've found a segment that our mouse is over, we need to find the wall object that it belongs to.  Chances are good
-         // that it will be one of the objects sitting in fillVector.
-         for(S32 i = 0; i < fillVector.size(); i++)
+         if(isWallType(fillVector[i]->getObjectTypeNumber()))
          {
-            if(isWallType(fillVector[i]->getObjectTypeNumber()))
-            {
-               EditorObject *eobj = dynamic_cast<EditorObject *>(fillVector[i]);
+            EditorObject *eobj = dynamic_cast<EditorObject *>(fillVector[i]);
 
-               if(eobj->getSerialNumber() == wallSegment->getOwner())
-               {
-                  mItemHit = eobj;
-                  return true;
-               }
+            if(eobj->getSerialNumber() == wallSegment->getOwner())
+            {
+               mItemHit = eobj;
+               return true;
             }
          }
+      }
 
-         TNLAssert(false, "Should have found a wall.  Either the extents are wrong again, or the walls and their segments are out of sync.");
+      TNLAssert(false, "Should have found a wall.  Either the extents are wrong again, or the walls and their segments are out of sync.");
 
       /*   This code does a less efficient but more thorough job finding a wall that matches the segment we hit... if the above assert
            keeps going off, and we can't fix it, this code here should take care of the problem.  But using it is an admission of failure.
+           Another alternative is just to ignore the assertion and not worry -- user will probably never notice the problem anyway.
 
          EditorObjectDatabase *editorDb = getGame()->getEditorDatabase();
-   const Vector<EditorObject *> *fff = editorDb->getObjectList();
+         const Vector<EditorObject *> *fff = editorDb->getObjectList();
 
 
          logprintf("Failed to find wall %d -- looking deeper", hhh);
@@ -2288,25 +2290,15 @@ bool EditorUserInterface::checkForWallHit(const Point &mouse, DatabaseObject *ob
             }
          }
          logprintf("Not found!  %d",hhh); */
-      }
    }
 
-      
    return false;
 }
 
 
-bool EditorUserInterface::checkForInteriorHit(EditorObject *object)
+bool EditorUserInterface::checkForPolygonHit(const Point &point, EditorObject *object)
 {
-   if(object->getGeomType() != geomPolygon)
-      return false;
-
-   Vector<Point> verts;
-
-   for(S32 j = 0; j < object->getVertCount(); j++)
-      verts.push_back(convertLevelToCanvasCoord(object->getVert(j)));
-
-   if(PolygonContains2(verts.address(), verts.size(), mMousePos))
+   if(object->getGeomType() == geomPolygon && triangulatedFillContains(object->getFill(), point))
    {
       mItemHit = object;
       return true;

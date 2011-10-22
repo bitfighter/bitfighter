@@ -218,11 +218,12 @@ private:
    bool anyItemsSelected();           // Are any items selected?
    bool anythingSelected();           // Are any items/vertices selected?
 
-   void findHitItemAndEdge();                         // Sets mItemHit and mEdgeHit
-   bool checkForVertexHit(EditorObject *object);      // Helper function
-   bool checkForEdgeHit(EditorObject *object);        // Helper function
-   bool checkForWallHit(const Point &mouse, DatabaseObject *wallSegment);
-   bool checkForInteriorHit(EditorObject *object);    // Helper function
+   // Sets mItemHit and mEdgeHit -- findHitItemAndEdge calls one or more of the associated helper functions below
+   void findHitItemAndEdge();                         
+   bool checkForVertexHit(EditorObject *object);     
+   bool checkForEdgeHit(const Point &point, EditorObject *object);        
+   bool checkForWallHit(const Point &point, DatabaseObject *wallSegment);
+   bool checkForPolygonHit(const Point &point, EditorObject *object);    
 
    S32 findHitItemOnDock(Point canvasPos);
 

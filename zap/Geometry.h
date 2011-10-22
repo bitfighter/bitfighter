@@ -80,8 +80,8 @@ public:
    void unselectVerts() { mPosIsSelected = false; } 
    bool vertSelected(S32 vertIndex) { return mPosIsSelected; }
 
-   Vector<Point> *getOutline() const { return NULL; }
-   Vector<Point> *getFill() const { return NULL; }
+   const Vector<Point> *getOutline() const { TNLAssert(false, "Points do not have outline!");return NULL; }
+   const Vector<Point> *getFill() const { TNLAssert(false, "Points do not have fill!"); return NULL; }
    Point getCentroid() { return mPos; }
    F32 getLabelAngle() { return 0; }
 
@@ -130,8 +130,8 @@ public:
    void unselectVerts() { mFromSelected = false; mToSelected = false; } 
    bool vertSelected(S32 vertIndex) { return (vertIndex == 1) ? mToSelected : mFromSelected; }
 
-   Vector<Point> *getOutline() const;
-   Vector<Point> *getFill() const { return NULL; }
+   const Vector<Point> *getOutline() const;
+   const Vector<Point> *getFill() const { TNLAssert(false, "SimpleLines do not have fill!"); return NULL; }
    Point getCentroid() { return (mFromPos + mToPos) / 2; }        // Returns midpoint of line
    F32 getLabelAngle() { return mFromPos.angleTo(mToPos); }
 
@@ -185,8 +185,8 @@ public:
    void unselectVerts();
    bool vertSelected(S32 vertIndex);
 
-   Vector<Point> *getOutline() const { return (Vector<Point> *) &mPolyBounds; }
-   virtual Vector<Point> *getFill() const { return NULL; }
+   const Vector<Point> *getOutline() const { return (Vector<Point> *) &mPolyBounds; }
+   virtual const Vector<Point> *getFill() const { TNLAssert(false, "Polylines don't have fill!"); return NULL; }
    Point getCentroid() { TNLAssert(!mTriangluationDisabled, "Triangluation disabled!"); return mCentroid; }   
    virtual F32 getLabelAngle() { return 0; }
 
@@ -216,8 +216,8 @@ public:
 
    GeomType getGeomType() { return geomPolygon; }
 
-   Vector<Point> *getFill() { TNLAssert(!mTriangluationDisabled, "Triangluation disabled!"); return &mPolyFill; }
-   F32 getLabelAngle()      { TNLAssert(!mTriangluationDisabled, "Triangluation disabled!"); return mLabelAngle; }
+   const Vector<Point> *getFill() const { TNLAssert(!mTriangluationDisabled, "Triangluation disabled!"); return &mPolyFill; }
+   F32 getLabelAngle()            { TNLAssert(!mTriangluationDisabled, "Triangluation disabled!"); return mLabelAngle; }
 
    void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize);
 

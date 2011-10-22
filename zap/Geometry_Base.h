@@ -73,17 +73,17 @@ public:
 
    virtual bool anyVertsSelected()                      { TNLAssert(false, "Not implemented"); return false; }
 
-   virtual void selectVert(S32 vertIndex)               { TNLAssert(false, "Not implemented"); }
-   virtual void aselectVert(S32 vertIndex)              { TNLAssert(false, "Not implemented"); }    // Select an additional vertex (remember command line ArcInfo?)
-   virtual void unselectVert(S32 vertIndex)             { TNLAssert(false, "Not implemented"); }
-   virtual void unselectVerts()                         { TNLAssert(false, "Not implemented"); }
-   virtual bool vertSelected(S32 vertIndex)             { TNLAssert(false, "Not implemented"); return false; }
+   virtual void selectVert(S32 vertIndex)    { TNLAssert(false, "Not implemented"); }
+   virtual void aselectVert(S32 vertIndex)   { TNLAssert(false, "Not implemented"); }   // Select another vertex (remember cmdline ArcInfo?)
+   virtual void unselectVert(S32 vertIndex)  { TNLAssert(false, "Not implemented"); }
+   virtual void unselectVerts()              { TNLAssert(false, "Not implemented"); }
+   virtual bool vertSelected(S32 vertIndex)  { TNLAssert(false, "Not implemented"); return false; }
 
-   virtual Vector<Point> *getOutline() const            { TNLAssert(false, "Not implemented"); return NULL; }
-   virtual Vector<Point> *getFill() const               { TNLAssert(false, "Not implemented"); return NULL; }
-   virtual Point getCentroid()                          { TNLAssert(false, "Not implemented"); return Point(); }
-   virtual F32 getLabelAngle()                          { TNLAssert(false, "Not implemented"); return 0; }
-                                                            //
+   virtual const Vector<Point> *getOutline() const { TNLAssert(false, "Not implemented"); return NULL; }
+   virtual const Vector<Point> *getFill() const    { TNLAssert(false, "Not implemented"); return NULL; }     // Triangulated fill points
+   virtual Point getCentroid()               { TNLAssert(false, "Not implemented"); return Point(); }
+   virtual F32 getLabelAngle()               { TNLAssert(false, "Not implemented"); return 0; }
+                                                            
    virtual void packGeom(GhostConnection *connection, BitStream *stream)   { TNLAssert(false, "Not implemented"); }
    virtual void unpackGeom(GhostConnection *connection, BitStream *stream) { TNLAssert(false, "Not implemented"); }
 
