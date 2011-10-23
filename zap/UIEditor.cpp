@@ -1264,7 +1264,7 @@ void EditorUserInterface::renderGrid()
       if((i && showMinorGridLines()) || !i)      // Minor then major gridlines
       {
          F32 gridScale = mCurrentScale * getGame()->getGridSize() * (i ? 0.1f : 1);    // Major gridlines are gridSize() pixels apart   
-         F32 color = (i ? .2f : .4f) * colorFact;
+         F32 color = ((i ? .2f : .4f) * colorFact);
 
          F32 xStart = fmod(mCurrentOffset.x, gridScale);
          F32 yStart = fmod(mCurrentOffset.y, gridScale);
@@ -1288,7 +1288,7 @@ void EditorUserInterface::renderGrid()
    }
 
    // Draw axes
-   glColor3f(0.7f * colorFact, 0.7f * colorFact, 0.7f * colorFact);
+   glColor(0.7f * colorFact);
    glLineWidth(gLineWidth3);
 
    Point origin = convertLevelToCanvasCoord(Point(0,0));
