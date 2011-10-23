@@ -173,6 +173,7 @@ void EditorObject::renderInEditor(F32 currentScale, S32 snapIndex, bool isScript
    bool hideit = (showMode == ShowWallsOnly) && !(showingReferenceShip && !mDockItem);
 
    Color drawColor;
+
    if(hideit)
       glColor(Colors::gray50, alpha);
    else if(mSelected)

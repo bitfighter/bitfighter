@@ -536,7 +536,9 @@ static const Color HIGHLIGHT_COLOR = Colors::white;
 void PolyWall::render()
 {
 #ifndef ZAP_DEDICATED
-   glColor(HIGHLIGHT_COLOR);
+   //if(!mSelected && !mLitUp)
+   //   glColor(getGame()->getSettings()->getWallOutlineColor());
+
    renderPolygonOutline(getOutline());
 #endif
 }
@@ -561,7 +563,7 @@ void PolyWall::renderEditor(F32 currentScale)
 void PolyWall::renderDock()
 {
    renderPolygonFill(getFill(), &EDITOR_WALL_FILL_COLOR);
-   renderPolygonOutline(getOutline(), &Colors::blue);
+   renderPolygonOutline(getOutline(), getGame()->getSettings()->getWallOutlineColor());
 }
 
 

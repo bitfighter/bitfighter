@@ -1564,20 +1564,21 @@ void EditorUserInterface::render()
          EditorObject *obj = objList->get(i);
 
          if(obj->getObjectTypeNumber() != PolyWallTypeNumber)
-            if(!(mDraggingObjects && obj->isSelected()))
+            if(!(mDraggingObjects && obj->isSelected()) || mPreviewMode)
                obj->renderInEditor(mCurrentScale, mSnapVertexIndex, false, mPreviewMode, mShowMode);
       }
 
-      
-
-      // == Selected items ==
-      // Draw map items (teleporters, etc.) that are are selected and/or lit up, so label is readable (still below the dock)
-      // Do this as a separate operation to ensure that these are drawn on top of those drawn above.
-      for(S32 i = 0; i < objList->size(); i++)
+      if(!mPreviewMode)
       {
-         EditorObject *obj = objList->get(i);
-         if(obj->isSelected() || obj->isLitUp())
-            obj->renderInEditor(mCurrentScale, mSnapVertexIndex, false, mPreviewMode, mShowMode);
+         // == Selected items ==
+         // Draw map items (teleporters, etc.) that are are selected and/or lit up, so label is readable (still below the dock)
+         // Do this as a separate operation to ensure that these are drawn on top of those drawn above.
+         for(S32 i = 0; i < objList->size(); i++)
+         {
+            EditorObject *obj = objList->get(i);
+            if(obj->isSelected() || obj->isLitUp())
+               obj->renderInEditor(mCurrentScale, mSnapVertexIndex, false, mPreviewMode, mShowMode);
+         }
       }
 
       fillRendered = false;
