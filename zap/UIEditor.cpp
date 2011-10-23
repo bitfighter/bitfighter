@@ -1538,6 +1538,8 @@ void EditorUserInterface::render()
       getGame()->getWallSegmentManager()->renderWalls(getGame()->getSettings(),
                      mDraggingObjects, mPreviewMode, getSnapToWallCorners(), getRenderingAlpha(false/*isScriptItem*/));
 
+    
+
 #ifdef SHOW_EXTENT_BOXES
       for(S32 i = 0; i < objList->size(); i++)
       {
@@ -1565,6 +1567,8 @@ void EditorUserInterface::render()
             if(!(mDraggingObjects && obj->isSelected()))
                obj->renderInEditor(mCurrentScale, mSnapVertexIndex, false, mPreviewMode, mShowMode);
       }
+
+      
 
       // == Selected items ==
       // Draw map items (teleporters, etc.) that are are selected and/or lit up, so label is readable (still below the dock)
@@ -2252,7 +2256,7 @@ bool EditorUserInterface::checkForWallHit(const Point &point, DatabaseObject *ob
          }
       }
 
-      TNLAssert(false, "Should have found a wall.  Either the extents are wrong again, or the walls and their segments are out of sync.");
+      //TNLAssert(false, "Should have found a wall.  Either the extents are wrong again, or the walls and their segments are out of sync.");
 
       /*   This code does a less efficient but more thorough job finding a wall that matches the segment we hit... if the above assert
            keeps going off, and we can't fix it, this code here should take care of the problem.  But using it is an admission of failure.

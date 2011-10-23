@@ -86,7 +86,6 @@ protected:
    S32 mItemId;         // Item's unique id... 0 if there is none
 
    Color getTeamColor(S32 teamId);
-   Color getDrawColor();
 
 public:
    EditorObject();                  // Constructor

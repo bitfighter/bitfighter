@@ -175,8 +175,12 @@ void EditorObject::renderInEditor(F32 currentScale, S32 snapIndex, bool isScript
    Color drawColor;
    if(hideit)
       glColor(Colors::gray50, alpha);
-   else 
-      glColor(getDrawColor(), alpha);
+   else if(mSelected)
+      glColor(SELECT_COLOR, alpha);       // yellow
+   else if(mLitUp)
+      glColor(HIGHLIGHT_COLOR, alpha);    // white
+   else  // Normal
+      glColor(Color(.75), alpha);
 
    // Override drawColor for this special case
    if(anyVertsSelected())
@@ -228,17 +232,6 @@ void EditorObject::onGeomChanging()
 void EditorObject::onGeomChanged()
 {
    updateExtentInDatabase();
-}
-
-
-Color EditorObject::getDrawColor()
-{
-   if(mSelected)
-      return *SELECT_COLOR;       // yellow
-   else if(mLitUp)
-      return *HIGHLIGHT_COLOR;    // white
-   else  // Normal
-      return Color(.75);
 }
 
 

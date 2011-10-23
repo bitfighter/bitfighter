@@ -441,10 +441,8 @@ void LineItem::render()
 void LineItem::renderEditor(F32 currentScale)
 {
 #ifndef ZAP_DEDICATED
-   if(!mSelected)
+   if(!mSelected && !mLitUp)
       glColor(getEditorRenderColor());
-   else
-      glColor(SELECT_COLOR);
 
    renderPointVector(getOutline(), GL_LINE_STRIP);
 
