@@ -2257,32 +2257,33 @@ bool EditorUserInterface::checkForWallHit(const Point &point, DatabaseObject *ob
          }
       }
 
+      // Note, if we get to here, we have a problem.
+
       logprintf("Found seg: %s", wallSegment->getExtent().toString().c_str());
 
       //TNLAssert(false, "Should have found a wall.  Either the extents are wrong again, or the walls and their segments are out of sync.");
 
-         //This code does a less efficient but more thorough job finding a wall that matches the segment we hit... if the above assert
-         //  keeps going off, and we can't fix it, this code here should take care of the problem.  But using it is an admission of failure.
-         //  Another alternative is just to ignore the assertion and not worry -- user will probably never notice the problem anyway.
+      // This code does a less efficient but more thorough job finding a wall that matches the segment we hit... if the above assert
+      // keeps going off, and we can't fix it, this code here should take care of the problem.  But using it is an admission of failure.
 
-         EditorObjectDatabase *editorDb = getGame()->getEditorDatabase();
-         const Vector<EditorObject *> *fff = editorDb->getObjectList();
+      EditorObjectDatabase *editorDb = getGame()->getEditorDatabase();
+      const Vector<EditorObject *> *objList = editorDb->getObjectList();
 
-         for(S32 i = 0; i < fff->size(); i++)
+      for(S32 i = 0; i < objList->size(); i++)
+      {
+         if(isWallType(objList->get(i)->getObjectTypeNumber()))
          {
-            if(isWallType(fff->get(i)->getObjectTypeNumber()))
-            {
-               EditorObject *eobj = fff->get(i);
+            EditorObject *eobj = objList->get(i);
 
-               if(eobj->getSerialNumber() == wallSegment->getOwner())
-               {
-                  editorDb->dumpObjects();
-                  logprintf("Found wall: %s", eobj->getExtent().toString().c_str());
-                  mItemHit = eobj;
-                  return true;
-               }
+            if(eobj->getSerialNumber() == wallSegment->getOwner())
+            {
+               editorDb->dumpObjects();
+               logprintf("Found wall: %s", eobj->getExtent().toString().c_str());
+               mItemHit = eobj;
+               return true;
             }
          }
+      }
    }
 
    return false;
