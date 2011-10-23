@@ -2128,7 +2128,7 @@ void EditorUserInterface::findHitItemAndEdge()
    EditorObjectDatabase *editorDb = getGame()->getEditorDatabase();
    editorDb->findObjects((TestFunc)isAnyObjectType, fillVector, cursorRect);
 
-   Point mouse = convertCanvasToLevelCoord(mMousePos);      // Figure out where the mouse is in level coords
+      Point mouse = convertCanvasToLevelCoord(mMousePos);      // Figure out where the mouse is in level coords
 
    // Do this in two passes -- the first we only consider selected items, the second pass will consider all targets.
    // This will give priority to hitting vertices of selected items.
@@ -2257,17 +2257,17 @@ bool EditorUserInterface::checkForWallHit(const Point &point, DatabaseObject *ob
          }
       }
 
+      logprintf("Found seg: %s", wallSegment->getExtent().toString().c_str());
+
       //TNLAssert(false, "Should have found a wall.  Either the extents are wrong again, or the walls and their segments are out of sync.");
 
-      /*   This code does a less efficient but more thorough job finding a wall that matches the segment we hit... if the above assert
-           keeps going off, and we can't fix it, this code here should take care of the problem.  But using it is an admission of failure.
-           Another alternative is just to ignore the assertion and not worry -- user will probably never notice the problem anyway.
+         //This code does a less efficient but more thorough job finding a wall that matches the segment we hit... if the above assert
+         //  keeps going off, and we can't fix it, this code here should take care of the problem.  But using it is an admission of failure.
+         //  Another alternative is just to ignore the assertion and not worry -- user will probably never notice the problem anyway.
 
          EditorObjectDatabase *editorDb = getGame()->getEditorDatabase();
          const Vector<EditorObject *> *fff = editorDb->getObjectList();
 
-
-         logprintf("Failed to find wall %d -- looking deeper", hhh);
          for(S32 i = 0; i < fff->size(); i++)
          {
             if(isWallType(fff->get(i)->getObjectTypeNumber()))
@@ -2276,12 +2276,13 @@ bool EditorUserInterface::checkForWallHit(const Point &point, DatabaseObject *ob
 
                if(eobj->getSerialNumber() == wallSegment->getOwner())
                {
+                  editorDb->dumpObjects();
+                  logprintf("Found wall: %s", eobj->getExtent().toString().c_str());
                   mItemHit = eobj;
                   return true;
                }
             }
          }
-         logprintf("Not found!  %d",hhh); */
    }
 
    return false;

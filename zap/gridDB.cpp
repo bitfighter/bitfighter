@@ -263,6 +263,18 @@ void GridDatabase::findObjects(TestFunc testFunc, Vector<DatabaseObject *> &fill
 }
 
 
+void GridDatabase::dumpObjects()
+{
+   for(S32 x = 0; x < BucketRowCount; x++)
+      for(S32 y = 0; y < BucketRowCount; y++)
+         for(BucketEntry *walk = mBuckets[x & BucketMask][y & BucketMask]; walk; walk = walk->nextInBucket)
+         {
+            DatabaseObject *theObject = walk->theObject;
+            logprintf("Found object in (%d,%d) with extents %s", x,y,theObject->getExtent().toString().c_str());
+         }
+}
+
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 

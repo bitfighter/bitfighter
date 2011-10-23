@@ -140,6 +140,8 @@ public:
    void findObjects(TestFunc testFunc, Vector<DatabaseObject *> &fillVector);
    void findObjects(TestFunc testFunc, Vector<DatabaseObject *> &fillVector, const Rect &extents);
 
+   void dumpObjects();     // For debugging purposes
+
    
    virtual void addToDatabase(DatabaseObject *theObject, const Rect &extents);
    virtual void removeFromDatabase(DatabaseObject *theObject, const Rect &extents);
