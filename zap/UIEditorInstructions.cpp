@@ -325,7 +325,6 @@ static const char *wallInstructions[] =
 };
 
 
-extern void renderVertex(VertexRenderStyles style, const Point &v, S32 number);
 extern Color gNeutralTeamColor;
 extern Color EDITOR_WALL_FILL_COLOR;
 
@@ -399,13 +398,15 @@ void EditorInstructionsUserInterface::renderPageWalls()
    glLineWidth(gDefaultLineWidth);
 
 
+   //tex(char style, const Point &v, S32 number, F32 alpha, S32 size, F32 scale);
+
    for(S32 i = 0; i < points.size(); i++)
       if(i < (points.size() - ((mAnimStage > 6) ? 0 : 1) ) && !(i == 2 && (mAnimStage == 9 || mAnimStage == 10 || mAnimStage == 11)))
-         renderVertex(SelectedItemVertex, points[i], i);
+         renderVertex(SelectedItemVertex, points[i], i, 1);
       else if(mAnimStage == 9 || mAnimStage == 10 || mAnimStage == 11)
          renderVertex(SelectedVertex, points[i], i);
       else  // mAnimStage > 11, moving vertices about
-         renderVertex(HighlightedVertex, points[i], -1);
+         renderVertex(HighlightedVertex, points[i], -1, 1);
 
    // And now some written instructions
    S32 x = 50 + getStringWidth(textSize, "* ");

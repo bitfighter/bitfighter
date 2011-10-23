@@ -106,6 +106,9 @@ enum VertexRenderStyles
 static const Color *HIGHLIGHT_COLOR = &Colors::white;
 static const Color *SELECT_COLOR = &Colors::yellow;
 
+
+static const S32 NO_NUMBER = -1;    
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -360,6 +363,7 @@ public:
    bool getSnapToWallCorners();     // Returns true if wall corners are active snap targets
 
    static void renderSnapTarget(const Point &target);
+
 
    S32 getItemSelectedCount();      // How many are objects are selcted?
 

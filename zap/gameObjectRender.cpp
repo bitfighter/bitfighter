@@ -38,6 +38,8 @@
 #include "ScreenInfo.h"
 #include "game.h"
 
+#include "UIEditor.h"         // For RenderingStyles enum
+
 #include "SDL/SDL_opengl.h"
 
 //#include "pictureloader.h"
@@ -1933,6 +1935,55 @@ void drawFilledSquare(const Point &pos, F32 size)
 void drawFilledSquare(const Point &pos, S32 size)
 {
     drawSquare(pos, F32(size), true);
+}
+
+
+void renderVertex(char style, const Point &v, S32 number)
+{
+   renderVertex(style, v, number, WallItem::VERTEX_SIZE, 1, 1);
+}
+
+
+void renderVertex(char style, const Point &v, S32 number, F32 scale)
+{
+   renderVertex(style, v, number, WallItem::VERTEX_SIZE, scale, 1);
+}
+
+
+void renderVertex(char style, const Point &v, S32 number, F32 scale, F32 alpha)
+{
+   renderVertex(style, v, number, WallItem::VERTEX_SIZE, scale, alpha);
+}
+
+
+void renderVertex(char style, const Point &v, S32 number, S32 size, F32 scale, F32 alpha)
+{
+   bool hollow = style == HighlightedVertex || style == SelectedVertex || style == SelectedItemVertex || style == SnappingVertex;
+
+   // Fill the box with a dark gray to make the number easier to read
+   if(hollow && number != -1)
+   {
+      glColor(.25);
+      drawFilledSquare(v, size / scale);
+   }
+      
+   if(style == HighlightedVertex)
+      glColor(*HIGHLIGHT_COLOR, alpha);
+   else if(style == SelectedVertex)
+      glColor(*SELECT_COLOR, alpha);
+   else if(style == SnappingVertex)
+      glColor(Colors::magenta, alpha);
+   else
+      glColor(Colors::red, alpha);
+
+   drawSquare(v, (F32)size / scale, !hollow);
+
+   if(number != NO_NUMBER)     // Draw vertex numbers
+   {
+      glColor(Colors::white, alpha);
+      F32 fontsize = 6 / scale;
+      UserInterface::drawStringf(v.x - UserInterface::getStringWidthf(fontsize, "%d", number) / 2, v.y - 3 / scale, fontsize, "%d", number);
+   }
 }
 
 

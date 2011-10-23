@@ -268,59 +268,11 @@ void EditorUserInterface::clearDatabase(GridDatabase *database)
 }
 
 
-static const S32 NO_NUMBER = -1;
-
-// Draw a vertex of a selected editor item  -- still used for snapping vertex
-void renderVertex(VertexRenderStyles style, const Point &v, S32 number, F32 alpha, S32 size)
-{
-   bool hollow = style == HighlightedVertex || style == SelectedVertex || style == SelectedItemVertex || style == SnappingVertex;
-
-   // Fill the box with a dark gray to make the number easier to read
-   if(hollow && number != NO_NUMBER)
-   {
-      glColor(.25);
-      drawFilledSquare(v, size);
-   }
-      
-   if(style == HighlightedVertex)
-      glColor(*HIGHLIGHT_COLOR, alpha);
-   else if(style == SelectedVertex)
-      glColor(*SELECT_COLOR, alpha);
-   else if(style == SnappingVertex)
-      glColor(Colors::magenta, alpha);
-   else
-      glColor(Colors::red, alpha);
-
-   drawSquare(v, (F32)size, !hollow);
-
-   if(number != NO_NUMBER)     // Draw vertex numbers
-   {
-      glColor(Colors::white, alpha);
-      UserInterface::drawStringf(v.x - UserInterface::getStringWidthf(6, "%d", number) / 2, v.y - 3, 6, "%d", number);
-   }
-}
-
-
-void renderVertex(VertexRenderStyles style, const Point &v, S32 number, F32 alpha)
-{
-   renderVertex(style, v, number, alpha, WallItem::VERTEX_SIZE);
-}
-
-
-void renderVertex(VertexRenderStyles style, const Point &v, S32 number)
-{
-   renderVertex(style, v, number, 1);
-}
-
-
 // Replaces the need to do a convertLevelToCanvasCoord on every point before rendering
 void EditorUserInterface::setLevelToCanvasCoordConversion()
 {
-   F32 scale =  getCurrentScale();
-   Point offset = getCurrentOffset();
-
-   glTranslate(offset);
-   glScale(scale);
+   glTranslate(getCurrentOffset());
+   glScale(getCurrentScale());
 } 
 
 
@@ -1627,7 +1579,8 @@ void EditorUserInterface::render()
       fillRendered = false;
       F32 width = NONE;
 
-      if(mCreatingPoly || mCreatingPolyline)    // Draw geomPolyLine features under construction
+      // Draw geomPolyLine features under construction
+      if(mCreatingPoly || mCreatingPolyline)    
       {
          mNewItem->addVert(snapPoint(convertCanvasToLevelCoord(mMousePos)));
          glLineWidth(gLineWidth3);
@@ -1645,13 +1598,15 @@ void EditorUserInterface::render()
          {
             Point v = mNewItem->getVert(j);
 
+            
             // Draw vertices
             if(j == mNewItem->getVertCount() - 1)           // This is our most current vertex
-               renderVertex(HighlightedVertex, v, NO_NUMBER);
+               renderVertex(HighlightedVertex, v, NO_NUMBER, mCurrentScale);
             else
-               renderVertex(SelectedItemVertex, v, j);
+               renderVertex(SelectedItemVertex, v, j, mCurrentScale);
          }
-         mNewItem->deleteVert(mNewItem->getVertCount() - 1);
+         mNewItem->deleteVert(mNewItem->getVertCount() - 1); 
+
       }
 
       // Since we're not constructing a barrier, if there are any barriers or lineItems selected, 
@@ -1685,7 +1640,7 @@ void EditorUserInterface::render()
 
       // Render our snap vertex as a hollow magenta box
       if(!mPreviewMode && mSnapObject && mSnapObject->isSelected() && mSnapVertexIndex != NONE)      
-         renderVertex(SnappingVertex, mSnapObject->getVert(mSnapVertexIndex), NO_NUMBER/*, alpha*/);  
+         renderVertex(SnappingVertex, mSnapObject->getVert(mSnapVertexIndex), NO_NUMBER, mCurrentScale/*, alpha*/);  
 
     glPopMatrix(); 
 
@@ -1731,7 +1686,7 @@ void EditorUserInterface::render()
 
          const char *helpString = mDockItems[hoverItem]->getEditorHelpString();
 
-         glColor(.1);
+         glColor(Colors::green);
 
          // Center string between left side of screen and edge of dock
          S32 x = (S32)(gScreenInfo.getGameCanvasWidth() - horizMargin - DOCK_WIDTH - getStringWidth(15, helpString)) / 2;

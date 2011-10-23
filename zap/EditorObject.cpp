@@ -100,9 +100,6 @@ void EditorObject::addToEditor(Game *game)
    // constists of:
    //    mGame = game;
    //    addToDatabase();
-
-   //setCreationTime(game->getCurrentTime());
-   //onAddedToGame(game);
 }
 
 
@@ -112,53 +109,6 @@ static F32 getRenderingAlpha(bool isScriptItem)
 {
    return isScriptItem ? .6f : 1;     // Script items will appear somewhat translucent
 }
-
-
-// TODO: merge with UIEditor versions
-static const S32 NO_NUMBER = -1;
-
-// Draw a vertex of a selected editor item
-static void renderVertex(VertexRenderStyles style, const Point &v, S32 number, F32 currentScale, F32 alpha, F32 size)
-{
-   bool hollow = style == HighlightedVertex || style == SelectedVertex || style == SelectedItemVertex || style == SnappingVertex;
-
-   // Fill the box with a dark gray to make the number easier to read
-   if(hollow && number != NO_NUMBER)
-   {
-      glColor3f(.25, .25, .25);
-      drawFilledSquare(v, size / currentScale);
-   }
-
-   if(style == HighlightedVertex)
-      glColor(*HIGHLIGHT_COLOR, alpha);
-   else if(style == SelectedVertex)
-      glColor(*SELECT_COLOR, alpha);
-   else if(style == SnappingVertex)
-      glColor(Colors::magenta, alpha);
-   else
-      glColor(Colors::red, alpha);
-
-   drawSquare(v, size / currentScale, !hollow);
-
-   if(number != NO_NUMBER)     // Draw vertex numbers
-   {
-      glColor(Colors::white, alpha);
-      F32 txtSize = 6 / currentScale;
-      UserInterface::drawStringf(v.x - F32(UserInterface::getStringWidthf(txtSize, "%d", number)) / 2, v.y - 3 / currentScale, txtSize, "%d", number);
-   }
-}
-
-
-static void renderVertex(VertexRenderStyles style, const Point &v, S32 number, F32 currentScale, F32 alpha)
-{
-   renderVertex(style, v, number, currentScale, alpha, 5);
-}
-
-
-//static void renderVertex(VertexRenderStyles style, const Point &v, S32 number)
-//{
-//   renderVertex(style, v, number, 1);
-//}
 
 
 static const S32 DOCK_LABEL_SIZE = 9;      // Size to label items on the dock
@@ -288,7 +238,7 @@ Color EditorObject::getDrawColor()
    else if(mLitUp)
       return *HIGHLIGHT_COLOR;    // white
    else  // Normal
-      return Color(.75, .75, .75);
+      return Color(.75);
 }
 
 
@@ -351,7 +301,10 @@ void EditorObject::renderLinePolyVertices(F32 currentScale, F32 alpha)
       else if(mSelected || mLitUp || anyVertsSelected())
          renderVertex(SelectedItemVertex, v, j, currentScale, alpha);         // Hollow red boxes with number
       else
-         renderVertex(UnselectedItemVertex, v, NO_NUMBER, currentScale, alpha, currentScale > 2 ? 2.f : 1.f);   // Solid red boxes, no number
+      {
+         F32 size = MIN(MAX(currentScale, 1), 2);
+         renderVertex(UnselectedItemVertex, v, NO_NUMBER, size, currentScale, alpha);   // Solid red boxes, no number
+      }
    }
 }
 

@@ -67,6 +67,12 @@ extern void drawFilledSquare(const Point &pos, F32 size);
 extern void drawFilledSquare(const Point &pos, S32 size);
 extern void drawFilledSquare(const Point &pos, F32 size);
 
+extern void renderVertex(char style, const Point &v, S32 number);
+extern void renderVertex(char style, const Point &v, S32 number,           F32 scale);
+extern void renderVertex(char style, const Point &v, S32 number,           F32 scale, F32 alpha);
+extern void renderVertex(char style, const Point &v, S32 number, S32 size, F32 scale, F32 alpha);
+
+
 extern void renderSquareItem(const Point &pos, const Color *c, F32 alpha, const Color *letterColor, char letter);
 
 extern void drawCircle(const Point &pos, F32 radius);
