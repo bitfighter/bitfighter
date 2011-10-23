@@ -1711,6 +1711,289 @@ void GameUserInterface::muteHandler(ClientGame *game, const Vector<string> &word
 }
 
 
+void GameUserInterface::setTimeHandler(ClientGame *game, const Vector<string> &words)
+{
+   if(game->hasLevelChange("!!! Need level change permission"))
+   {
+      if(words.size() < 2)
+      {
+         game->displayErrorMessage("!!! Enter time in minutes");
+         return;
+      }
+
+      S32 timeMillis = S32(60 * 1000 * atof(words[1].c_str()));
+
+      if((timeMillis < 0 || timeMillis == 0) && (stricmp(words[0].c_str(), "0") && stricmp(words[0].c_str(), "unlim")))  // 0 --> unlimited
+      {
+         game->displayErrorMessage("!!! Invalid time... game time not changed");
+         return;
+      }
+
+      if(game->getGameType())
+         game->getGameType()->c2sSetTime(timeMillis);
+   }
+}
+
+
+void GameUserInterface::setWinningScoreHandler(ClientGame *game, const Vector<string> &words)
+{
+   if(game->hasLevelChange("!!! Need level change permission"))
+   {
+      if(words.size() < 2)
+      {
+         game->displayErrorMessage("!!! Enter winning score limit");
+         return;
+      }
+
+      S32 score = atoi(words[1].c_str());
+
+      if(score <= 0)    // i.e. score is invalid
+      {
+         game->displayErrorMessage("!!! Invalid score... winning score not changed");
+         return;
+      }
+
+      if(game->getGameType())
+         game->getGameType()->c2sSetWinningScore(score);
+   }
+}
+
+
+void GameUserInterface::resetScoreHandler(ClientGame *game, const Vector<string> &words)
+{
+   if(game->hasLevelChange("!!! Need level change permission"))
+   {
+      if(game->getGameType())
+         game->getGameType()->c2sResetScore();
+   }
+}
+
+
+void GameUserInterface::addBotHandler(ClientGame *game, const Vector<string> &words)
+{
+   if(game->hasLevelChange("!!! Need level change permissions to add a bot"))
+   {
+      // Build args by skipping first word (the command)
+      Vector<StringTableEntry> args;
+      for(S32 i = 2; i < words.size(); i++)
+         args.push_back(StringTableEntry(words[i]));
+
+      if(game->getGameType())
+         game->getGameType()->c2sAddBot(args);
+   }
+
+}
+
+
+void GameUserInterface::addBotsHandler(ClientGame *game, const Vector<string> &words)
+{
+   if(game->hasLevelChange("!!! Need level change permissions to add a bots"))
+   {
+      if(words.size() < 2)
+      {
+         game->displayErrorMessage("!!! Enter number of bots to add");
+         return;
+      }
+
+      S32 count = 0;
+      count = atoi(words[1].c_str());
+
+      if(count <= 0)
+      {
+         game->displayErrorMessage("!!! Invalid number of bots to add");
+         return;
+      }
+
+      // Build args
+      Vector<StringTableEntry> args;
+      for(S32 i = 2; i < words.size(); i++)
+         args.push_back(StringTableEntry(words[i]));
+
+      if(game->getGameType())
+         game->getGameType()->c2sAddBots(count, args);
+   }
+
+}
+
+
+void GameUserInterface::kickBotHandler(ClientGame *game, const Vector<string> &words)
+{
+   if(game->hasLevelChange("!!! Need level change permissions to kick a bot"))
+   {
+      if(game->getGameType())
+         game->getGameType()->c2sKickBot();
+   }
+}
+
+
+void GameUserInterface::kickBotsHandler(ClientGame *game, const Vector<string> &words)
+{
+   if(game->hasLevelChange("!!! Need level change permissions to kick all bots"))
+   {
+      if(game->getGameType())
+         game->getGameType()->c2sKickBots();
+   }
+}
+
+
+void GameUserInterface::showBotsHandler(ClientGame *game, const Vector<string> &words)
+{
+   if(game->getGameType())
+      game->getGameType()->c2sShowBots();
+}
+
+
+void GameUserInterface::setMaxBotsHandler(ClientGame *game, const Vector<string> &words)
+{
+   if(game->hasAdmin("!!! Need admin permission"))
+   {
+      if(words.size() < 2)
+      {
+         game->displayErrorMessage("!!! Enter maximum number of bots");
+         return;
+      }
+
+      S32 count = 0;
+      count = atoi(words[1].c_str());
+
+      if(count <= 0)
+      {
+         game->displayErrorMessage("!!! Invalid number of bots");
+         return;
+      }
+
+      if(game->getGameType())
+         game->getGameType()->c2sSetMaxBots(count);
+   }
+}
+
+
+void GameUserInterface::banPlayerHandler(ClientGame *game, const Vector<string> &words)
+{
+   if(game->hasAdmin("!!! Need admin permission"))
+   {
+      if(words.size() < 2)
+      {
+         game->displayErrorMessage("!!! /ban <player name> [duration in minutes]");
+         return;
+      }
+
+      ClientInfo *banedClientInfo = game->findClientInfo(words[1].c_str());
+
+      if(!banedClientInfo)
+      {
+         game->displayErrorMessage("!!! Player name not found");
+         return;
+      }
+
+      if(banedClientInfo->isAdmin())
+      {
+         game->displayErrorMessage("!!! Cannot ban an admin");
+         return;
+      }
+
+      if(!banedClientInfo->getConnection()->isEstablished())
+      {
+         game->displayErrorMessage("!!! Cannot ban robots, you silly fool!");
+         return;
+      }
+
+      S32 banDuration = 0;
+      if (words.size() > 2)
+         banDuration = atoi(words[2].c_str());
+
+      if(game->getGameType())
+         game->getGameType()->c2sBanPlayer(words[1].c_str(), banDuration);
+   }
+}
+
+
+void GameUserInterface::banIpHandler(ClientGame *game, const Vector<string> &words)
+{
+   if(game->hasAdmin("!!! Need admin permission"))
+   {
+      if(words.size() < 2)
+      {
+         game->displayErrorMessage("!!! /banip <player name> [duration in minutes]");
+         return;
+      }
+
+      Address ipAddress(words[1].c_str());
+
+      if(!ipAddress.isValid())
+      {
+         game->displayErrorMessage("!!! Invalid IP address to ban");
+         return;
+      }
+
+      S32 banDuration = 0;
+      if (words.size() > 2)
+         banDuration = atoi(words[2].c_str());
+
+      if(game->getGameType())
+         game->getGameType()->c2sBanIp(words[1].c_str(), banDuration);
+   }
+}
+
+
+void GameUserInterface::renamePlayerHandler(ClientGame *game, const Vector<string> &words)
+{
+   if(game->hasAdmin("!!! Need admin permission"))
+   {
+      if(words.size() < 3)
+      {
+         game->displayErrorMessage("!!! /rename <from name> <to name>");
+         return;
+      }
+
+      ClientInfo *clientInfo = game->findClientInfo(words[1].c_str());
+
+      if(!clientInfo)
+      {
+         game->displayErrorMessage("!!! Player name not found");
+         return;
+      }
+
+      if(clientInfo->isAuthenticated())
+      {
+         game->displayErrorMessage("!!! Cannot rename authenticated players");
+         return;
+      }
+
+      if(game->getGameType())
+         game->getGameType()->c2sRenamePlayer(words[1].c_str(), words[2].c_str());
+   }
+}
+
+
+void GameUserInterface::globalMuteHandler(ClientGame *game, const Vector<string> &words)
+{
+   if(game->hasAdmin("!!! Need admin permission"))
+   {
+      if(words.size() < 2)
+      {
+         game->displayErrorMessage("!!! Enter player name");
+         return;
+      }
+
+      ClientInfo *clientInfo = game->findClientInfo(words[1].c_str());
+
+      if(!clientInfo)
+      {
+         game->displayErrorMessage("!!! Player name not found");
+         return;
+      }
+
+      if(game->getGameType())
+         game->getGameType()->c2sGlobalMutePlayer(words[1].c_str());
+   }
+}
+
+
+// Use this method when you need to keep client/server compatibility between bitfighter
+// versions (e.g. 015 -> 015a)
+// If you are working on a new version (e.g. 016), then create an appropriate c2s handler
+// function
 void GameUserInterface::serverCommandHandler(ClientGame *game, const Vector<string> &words)
 {
    GameType *gameType = game->getGameType();
@@ -1740,20 +2023,21 @@ CommandInfo chatCmds[] = {
    { "vvol",    GameUserInterface::vVolHandler,      { INT },      1,       ADV_COMMANDS,    2,      {"<0-10>"},             "Set voice chat volume" },
    { "mute",    GameUserInterface::muteHandler,      { NAME },     1,       ADV_COMMANDS,    3,      {"<name>"},             "Hide chat messages from <name> until you quit" },
 
-   { "add",         GameUserInterface::addTimeHandler,       { INT },           0,       LEVEL_COMMANDS,  0,      {"<time in minutes>"},        "Add time to the current game" },
-   { "next",        GameUserInterface::nextLevelHandler,     {  },              0,       LEVEL_COMMANDS,  0,      {  },                         "Start next level" },
-   { "prev",        GameUserInterface::prevLevelHandler,     {  },              0,       LEVEL_COMMANDS,  0,      {  },                         "Replay previous level" },
-   { "restart",     GameUserInterface::restartLevelHandler,  {  },              0,       LEVEL_COMMANDS,  0,      {  },                         "Restart current level" },
-   { "settime",     GameUserInterface::serverCommandHandler, { INT },           1,       LEVEL_COMMANDS,  0,      {"<time in minutes>"},        "Set play time for the level" },
-   { "setwinscore", GameUserInterface::serverCommandHandler, { INT },           1,       LEVEL_COMMANDS,  0,      {"<score>"},                  "Set score to win the level" },
-   { "resetscore",  GameUserInterface::serverCommandHandler, {  },              0,       LEVEL_COMMANDS,  0,      {  },                         "Reset all scores to zero" },
-   { "addbot",      GameUserInterface::serverCommandHandler, { TEAM, STR, STR },3,       LEVEL_COMMANDS,  1,      {"[team]","[file]","[args]"}, "Add a bot from [file] to [team], pass [args] to bot" },
-   { "kickbot",     GameUserInterface::serverCommandHandler, {  },              1,       LEVEL_COMMANDS,  1,      {  },                         "Kick most recently added bot" },
-   { "kickbots",    GameUserInterface::serverCommandHandler, {  },              1,       LEVEL_COMMANDS,  1,      {  },                         "Kick all bots" },
+   { "add",         GameUserInterface::addTimeHandler,         { INT },           0,       LEVEL_COMMANDS,  0, {"<time in minutes>"},                  "Add time to the current game" },
+   { "next",        GameUserInterface::nextLevelHandler,       {  },              0,       LEVEL_COMMANDS,  0, {  },                                   "Start next level" },
+   { "prev",        GameUserInterface::prevLevelHandler,       {  },              0,       LEVEL_COMMANDS,  0, {  },                                   "Replay previous level" },
+   { "restart",     GameUserInterface::restartLevelHandler,    {  },              0,       LEVEL_COMMANDS,  0, {  },                                   "Restart current level" },
+   { "settime",     GameUserInterface::setTimeHandler,         { INT },           1,       LEVEL_COMMANDS,  0, {"<time in minutes>"},                  "Set play time for the level" },
+   { "setwinscore", GameUserInterface::setWinningScoreHandler, { INT },           1,       LEVEL_COMMANDS,  0, {"<score>"},                            "Set score to win the level" },
+   { "resetscore",  GameUserInterface::resetScoreHandler,      {  },              0,       LEVEL_COMMANDS,  0, {  },                                   "Reset all scores to zero" },
+   { "addbot",      GameUserInterface::addBotHandler,          { TEAM, STR, STR },3,       LEVEL_COMMANDS,  1, {"[team]","[file]","[args]"},           "Add a bot from [file] to [team], pass [args] to bot" },
+   { "addbots",     GameUserInterface::addBotsHandler,         { INT, TEAM, STR, STR },4,  LEVEL_COMMANDS,  1, {"[count]","[team]","[file]","[args]"}, "Add a [count] of bots from [file] to [team], pass [args] to bot" },
+   { "kickbot",     GameUserInterface::kickBotHandler,         {  },              1,       LEVEL_COMMANDS,  1, {  },                                   "Kick most recently added bot" },
+   { "kickbots",    GameUserInterface::kickBotsHandler,        {  },              1,       LEVEL_COMMANDS,  1, {  },                                   "Kick all bots" },
 
    { "kick",               GameUserInterface::kickPlayerHandler,         { NAME },      1,  ADMIN_COMMANDS, 0, {"<name>"},              "Kick a player from the game" },
-   { "ban",                GameUserInterface::serverCommandHandler,      { NAME, INT }, 2,  ADMIN_COMMANDS, 0, {"<name>","[duration]"}, "Ban an player from the server (IP-based, def. = 60)" },
-   { "banip",              GameUserInterface::serverCommandHandler,      { STR, INT },  2,  ADMIN_COMMANDS, 0, {"<ip>","[duration]"},   "Ban an IP address from the server (def. = 60)" },
+   { "ban",                GameUserInterface::banPlayerHandler,          { NAME, INT }, 2,  ADMIN_COMMANDS, 0, {"<name>","[duration]"}, "Ban an player from the server (IP-based, def. = 60)" },
+   { "banip",              GameUserInterface::banIpHandler,              { STR, INT },  2,  ADMIN_COMMANDS, 0, {"<ip>","[duration]"},   "Ban an IP address from the server (def. = 60)" },
    { "shutdown",           GameUserInterface::shutdownServerHandler,     { INT, STR },  2,  ADMIN_COMMANDS, 0, {"[time]","[message]"},  "Start orderly shutdown of server (def. = 10 secs)" },
    { "setlevpass",         GameUserInterface::setLevPassHandler,         { STR },       1,  ADMIN_COMMANDS, 0, {"[passwd]"},            "Set server password  (use blank to clear)" },
    { "setadminpass",       GameUserInterface::setAdminPassHandler,       { STR },       1,  ADMIN_COMMANDS, 0, {"[passwd]"},            "Set level change password (use blank to clear)" },
@@ -1762,13 +2046,14 @@ CommandInfo chatCmds[] = {
    { "setservername",      GameUserInterface::setServerNameHandler,      { STR },       1,  ADMIN_COMMANDS, 0, {"<name>"},              "Set server name" },
    { "setserverdescr",     GameUserInterface::setServerDescrHandler,     { STR },       1,  ADMIN_COMMANDS, 0, {"<descr>"},             "Set server description" },
    { "deletecurrentlevel", GameUserInterface::deleteCurrentLevelHandler, { },           0,  ADMIN_COMMANDS, 0, {""},                    "Remove current level from server" },
-   { "gmute",              GameUserInterface::serverCommandHandler, { NAME },      1,  ADMIN_COMMANDS, 0, {"<name>"},              "Globally mute/unmute a player" },
-   { "rename",             GameUserInterface::serverCommandHandler, { NAME, STR }, 2,  ADMIN_COMMANDS, 0, {"<name>","<toname>"},   "Rename a player to a new name" },
+   { "gmute",              GameUserInterface::globalMuteHandler,         { NAME },      1,  ADMIN_COMMANDS, 0, {"<name>"},              "Globally mute/unmute a player" },
+   { "rename",             GameUserInterface::renamePlayerHandler,       { NAME, STR }, 2,  ADMIN_COMMANDS, 0, {"<name>","<toname>"},   "Rename a player to a new name" },
+   { "maxbots",            GameUserInterface::setMaxBotsHandler,         { INT },       1,  ADMIN_COMMANDS, 0, {"<count>"},             "Set the maximum bots allowed for this server" },
 
    { "showcoords", GameUserInterface::showCoordsHandler,    {  },    0, DEBUG_COMMANDS, 0, {  },         "Show ship coordinates" },
    { "showzones",  GameUserInterface::showZonesHandler,     {  },    0, DEBUG_COMMANDS, 0, {  },         "Show bot nav mesh zones" },
    { "showpaths",  GameUserInterface::showPathsHandler,     {  },    0, DEBUG_COMMANDS, 0, {  },         "Show robot paths" },
-   { "showbots",   GameUserInterface::serverCommandHandler, {  },    0, DEBUG_COMMANDS, 0, {  },         "Show all robots" },
+   { "showbots",   GameUserInterface::showBotsHandler,      {  },    0, DEBUG_COMMANDS, 0, {  },         "Show all robots" },
    { "pausebots",  GameUserInterface::pauseBotsHandler,     {  },    0, DEBUG_COMMANDS, 0, {  },         "Pause all bots.  Reissue to start again" },
    { "stepbots",   GameUserInterface::stepBotsHandler,      { INT }, 1, DEBUG_COMMANDS, 1, {"[steps]"},  "Advance bots by number of steps (def. = 1)"},
    { "linewidth",  GameUserInterface::lineWidthHandler,     { INT }, 1, DEBUG_COMMANDS, 1, {"[number]"}, "Change width of all lines (def. = 2)" },

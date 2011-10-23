@@ -2424,20 +2424,6 @@ GAMETYPE_RPC_S2C(GameType, s2cAddWalls, (Vector<F32> verts, F32 width, bool soli
 }
 
 
-bool safeFilename(const char *str)
-{
-   char chr = str[0];
-   S32 i = 0;
-   while(chr != 0)
-   {
-      if(chr == '\\' || chr == '/')
-         return false;
-      i++;
-      chr = str[i];
-   }
-   return true;
-}
-
 extern void writeServerBanList(CIniFile *ini, BanList *banList);
 
 // Runs the server side commands, which the client may or may not know about
@@ -2453,360 +2439,454 @@ void GameType::processServerCommand(ClientInfo *clientInfo, const char *cmd, Vec
    GameSettings *settings = serverGame->getSettings();
    GameConnection *conn = clientInfo->getConnection();
 
-   if(!stricmp(cmd, "settime"))
-   {
-      if(!clientInfo->isLevelChanger())
-         conn->s2cDisplayErrorMessage("!!! Need level change permission");
-      else if(args.size() < 1)
-         conn->s2cDisplayErrorMessage("!!! Enter time in minutes");
-      else
-      {
-         S32 time = S32(60 * 1000 * atof(args[0].getString()));
-
-         if((time < 0 || time == 0) && (stricmp(args[0].getString(), "0") && stricmp(args[0].getString(), "unlim")))  // 0 --> unlimited
-            conn->s2cDisplayErrorMessage("!!! Invalid time... game time not changed");
-         else
-         {
-            // Use voting when there is no level change password, and there is more then 1 player
-            if(!clientInfo->isAdmin() && settings->getLevelChangePassword() == "" && serverGame->getPlayerCount() > 1)
-            {
-               if(serverGame->voteStart(clientInfo, 2, time))
-                  return;
-            }
-
-            // We want to preserve the actual, overall time of the game in mGameTimer's period
-            mGameTimer.extend(time - mGameTimer.getCurrent());
-
-            s2cSetTimeRemaining(mGameTimer.getCurrent());    // Broadcast time to clients
-
-            static StringTableEntry msg("%e0 has changed the amount of time left in the game");
-            Vector<StringTableEntry> e;
-            e.push_back(clientInfo->getName());
-
-            broadcastMessage(GameConnection::ColorNuclearGreen, SFXNone, msg, e);
-         }
-      }
-   }
-   else if(!stricmp(cmd, "setwinscore"))
-   {
-     if(!clientInfo->isLevelChanger())                       // Level changers and above
-         conn->s2cDisplayErrorMessage("!!! Need level change permission");
-     else if(args.size() < 1)
-         conn->s2cDisplayErrorMessage("!!! Enter score limit");
-     else
-     {
-         S32 score = atoi(args[0].getString());
-
-         if(score <= 0)    // i.e. score is invalid
-            conn->s2cDisplayErrorMessage("!!! Invalid score... winning score not changed");
-         else
-         {
-            // Use voting when there is no level change password, and there is more then 1 player
-            if(!clientInfo->isAdmin() && settings->getLevelChangePassword() == "" && serverGame->getPlayerCount() > 1)
-            {
-               if(serverGame->voteStart(clientInfo, 3, score))
-                  return;
-            }
-            mWinningScore = score;
-            s2cChangeScoreToWin(mWinningScore, clientInfo->getName());
-         }
-     }
-   }
-   else if(!stricmp(cmd, "resetscore"))
-   {
-     if(!clientInfo->isLevelChanger())                       // Level changers and above
-         conn->s2cDisplayErrorMessage("!!! Need level change permission");
-     else
-     {
-        // Reset player scores
-        for(S32 i = 0; i < serverGame->getClientCount(); i++)
-           mGame->getClientInfo(i)->setScore(0);
-
-        // Reset team scores
-        for(S32 i = 0; i < mGame->getTeamCount(); i++)
-        {
-           // Set the score internally...
-           ((Team*)mGame->getTeam(i))->setScore(0);
-
-           // ...and broadcast it to the clients
-           s2cSetTeamScore(i, 0);
-        }
-     }
-   }
-   else if(!stricmp(cmd, "showbots") || !stricmp(cmd, "showbot"))    // Maybe there is only one bot to show :-)
-   {
-      mShowAllBots = !mShowAllBots;  // Show all robots affects all players
-
-      if(Robot::robots.size() == 0)
-         conn->s2cDisplayErrorMessage("!!! There are no robots to show");
-      else
-      {
-         StringTableEntry msg = mShowAllBots ? StringTableEntry("Show all robots option enabled by %e0") : StringTableEntry("Show all robots option disabled by %e0");
-         Vector<StringTableEntry> e;
-         e.push_back(clientInfo->getName());
-
-         broadcastMessage(GameConnection::ColorNuclearGreen, SFXNone, msg, e);
-      }
-   }
-   else if(!stricmp(cmd, "addbot"))
-   {
-      if(mBotZoneCreationFailed)
-         conn->s2cDisplayErrorMessage("!!! Zone creation failed for this level -- bots disabled");
-
-      else if(!areBotsAllowed() && !clientInfo->isAdmin())  // not admin, no robotScript
-         conn->s2cDisplayErrorMessage("!!! This level does not allow robots");
-
-      else if(!clientInfo->isAdmin() && settings->getIniSettings()->defaultRobotScript == "" && args.size() < 2)  // not admin, no robotScript
-         conn->s2cDisplayErrorMessage("!!! This server doesn't have default robots configured");
-      
-      else if(!clientInfo->isLevelChanger())
-         conn->s2cDisplayErrorMessage("!!! Need level change permissions to add a bot");
-
-      else if((Robot::robots.size() >= settings->getIniSettings()->maxBots && !clientInfo->isAdmin()) || Robot::robots.size() >= 256)
-         conn->s2cDisplayErrorMessage("!!! Can't add more bots -- this server is full");
-
-      else if(args.size() >= 2 && !safeFilename(args[1].getString()))
-         conn->s2cDisplayErrorMessage("!!! Invalid filename");
-
-      else
-      {
-         Robot *robot = new Robot();
-
-         S32 args_count = 0;
-         const char *args_char[LevelLoader::MAX_LEVEL_LINE_ARGS];  // Convert to a format processArgs will allow
-         
-         // The first arg = team number, the second arg = robot script filename, the rest of args get passed as script arguments
-         for(S32 i = 0; i < args.size() && i < LevelLoader::MAX_LEVEL_LINE_ARGS; i++)   
-         {
-            args_char[i] = args[i].getString();
-            args_count++;
-         }
-         
-         if(!robot->processArguments(args_count, args_char, mGame))
-         {
-            delete robot;
-            conn->s2cDisplayErrorMessage("!!! Could not start robot; please see server logs");
-            return;
-         }
-
-         robot->addToGame(mGame, mGame->getGameObjDatabase());
-
-         if(!robot->start())
-         {
-            delete robot;
-            conn->s2cDisplayErrorMessage("!!! Could not start robot; please see server logs");
-            return;
-         }
-
-         
-         serverAddClient(robot->getClientInfo().get()); 
-        
-         StringTableEntry msg = StringTableEntry("Robot added by %e0");
-         Vector<StringTableEntry> e;
-         e.push_back(clientInfo->getName());
-
-         broadcastMessage(GameConnection::ColorNuclearGreen, SFXNone, msg, e);
-      }
-   }
-   else if(!stricmp(cmd, "addbots"))
-   {
-      // there is no need to check for permission here, it is checked in processServerCommand(... , "addbot", ...);
-      S32 count = 0;
-      if(args.size() >= 1)
-         count = atoi(args[0].getString());
-
-      if(count <= 0)
-         conn->s2cDisplayErrorMessage("!!! Need to enter number of bots to add");
-      else
-      {
-         S32 prevRobotSize = -1;
-         args.erase(0);      // remove first arg, which is number of bots to be added
-         while(count > 0 && prevRobotSize != Robot::robots.size()) // loop may end when cannot add anymore bots
-         {  
-            count--;
-            prevRobotSize = Robot::robots.size();
-            processServerCommand(clientInfo, "addbot", args);
-         }
-      }
-   }
-   else if(!stricmp(cmd, "maxbots"))
-   {
-      if(!clientInfo->isAdmin())
-         conn->s2cDisplayErrorMessage("!!! Need admin permission");
-      else if(args.size() < 1)
-         conn->s2cDisplayErrorMessage("!!! Missing argument -- try /maxbots <number>");
-      else
-         settings->getIniSettings()->maxBots = atoi(args[0].getString());
-   }
-   else if(!stricmp(cmd, "kickbot") || !stricmp(cmd, "kickbots"))
-   {
-      if(!clientInfo->isLevelChanger())
-         conn->s2cDisplayErrorMessage("!!! Need level change permissions to kick a bot");
-
-      else if(Robot::robots.size() == 0)
-         conn->s2cDisplayErrorMessage("!!! There are no robots to kick");
-      else
-      {
-         for(S32 i = Robot::robots.size() - 1; i >= 0; i--)
-         {
-            delete Robot::robots[i];
-            if(!stricmp(cmd, "kickbot"))
-               break;
-         }
-
-         StringTableEntry msg = StringTableEntry("Robot kicked by %e0");
-         Vector<StringTableEntry> e;
-         e.push_back(clientInfo->getName());
-
-         broadcastMessage(GameConnection::ColorNuclearGreen, SFXNone, msg, e);
-      }
-   }
-   else if(!stricmp(cmd, "rename") && args.size() >= 1)  // Allow admins to rename other players (in case of bad name)
-   {
-      if(!clientInfo->isAdmin())
-         conn->s2cDisplayErrorMessage("!!! Need admin permission");
-      else if(args.size() < 2)
-         conn->s2cDisplayErrorMessage("Invalid command.  Try /rename <from name> <to name>");
-      else
-      {
-         ClientInfo *renameeClientInfo = mGame->findClientInfo(args[0].getString());
-
-         if(!clientInfo)
-            conn->s2cDisplayErrorMessage("!!! Player not found");
-         else if(clientInfo->isAuthenticated())
-            conn->s2cDisplayErrorMessage("!!! Can't rename authenticated players");
-         else
-         {
-            StringTableEntry oldName = renameeClientInfo->getName();
-            renameeClientInfo->setName("");                        // Avoid unique self
-            StringTableEntry uniqueName = GameConnection::makeUnique(args[1].getString()).c_str();  // New name
-            renameeClientInfo->setName(oldName);                   // Restore name to properly get it updated to clients
-            renameeClientInfo->setAuthenticated(false);            // Don't underline anymore because of rename
-            updateClientChangedName(renameeClientInfo, uniqueName);
-            conn->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, StringTableEntry("Player has been renamed"));
-         }
-      }
-   }
-
-   else if(!stricmp(cmd, "yes"))
+   if(!stricmp(cmd, "yes"))
       serverGame->voteClient(clientInfo, true);
-
    else if(!stricmp(cmd, "no"))
       serverGame->voteClient(clientInfo, false);
-
-   else if(!stricmp(cmd, "gmute"))
-   {
-      if(!clientInfo->isAdmin())
-         conn->s2cDisplayErrorMessage("!!! Need admin permission");
-      else if(args.size() < 1)
-         conn->s2cDisplayErrorMessage("!!! Enter player name");
-      else
-      {
-         GameConnection *gc = mGame->findClientInfo(args[0].getString())->getConnection();
-
-         if(!gc)
-            conn->s2cDisplayErrorMessage("!!! Player name not found");
-         else
-         {
-            gc->mChatMute = !gc->mChatMute;
-            conn->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, gc->mChatMute ? "Player is muted" : "Player is not muted");
-         }
-      }
-   }
-   else if(!stricmp(cmd, "ban"))
-   {
-      // Conn is the connection of the player doing the banning
-      if(!clientInfo->isAdmin())
-         conn->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Need admin permissions to ban players");
-      else if(args.size() < 1)
-         conn->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! /ban <player name> [duration in minutes]");
-      else
-      {
-         ClientInfo *baneeClientInfo = mGame->findClientInfo(args[0].getString());
-
-         if(!baneeClientInfo)
-            conn->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Player name not found");
-         else if(baneeClientInfo->isAdmin())
-            conn->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Cannot ban an admin");
-         else if(!baneeClientInfo->getConnection()->isEstablished())
-            conn->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Cannot ban robots, you silly fool!");
-         else
-         {
-            Address ipAddress = baneeClientInfo->getConnection()->getNetAddressString();
-
-            S32 banDuration = settings->getBanList()->getDefaultBanDuration();
-
-            if(args.size() >= 2)
-               banDuration = atoi(args[1].getString());
-
-            // Add the ban
-            settings->getBanList()->addToBanList(ipAddress, banDuration);
-            logprintf(LogConsumer::ServerFilter, "%s was banned for %d minutes", ipAddress.toString(), banDuration);
-
-            // Save BanList in memory
-            writeServerBanList(&gINI, settings->getBanList());
-
-            // Save new INI settings to disk
-            gINI.WriteFile();
-
-            // Disconnect player
-            baneeClientInfo->getConnection()->disconnect(NetConnection::ReasonBanned, "");
-            conn->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "Player was banned");
-         }
-      }
-   }
-   else if(!stricmp(cmd, "banip"))
-   {
-      if(!clientInfo->isAdmin())
-         conn->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Need admin permission");
-      else if(args.size() < 1)
-         conn->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! /banip <ip> [duration in minutes]");
-      else
-      {
-         Address ipAddress(args[0].getString());
-
-         S32 banDuration = settings->getBanList()->getDefaultBanDuration();
-         if(args.size() >= 2)
-            banDuration = atoi(args[1].getString());
-
-         // banip should always add to the ban list, even if the IP isn't connected
-         settings->getBanList()->addToBanList(ipAddress, banDuration);
-         logprintf(LogConsumer::ServerFilter, "%s - banned for %d minutes", ipAddress.toString(), banDuration);
-
-         // Save BanList in memory
-         writeServerBanList(&gINI, settings->getBanList());
-
-         // Save new INI settings to disk
-         gINI.WriteFile();
-
-         // Now check to see if the client is connected and disconnect them if they are
-         GameConnection *connToDisconnect = NULL;
-
-         for(S32 i = 0; i < mGame->getClientCount(); i++)
-         {
-            GameConnection *baneeConn = mGame->getClientInfo(i)->getConnection();
-
-            if(baneeConn->getNetAddress().isEqualAddress(ipAddress))
-            {
-               connToDisconnect = baneeConn;
-               break;
-            }
-         }
-
-         if(!connToDisconnect)
-            conn->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "Client has been banned but is no longer connected");
-         else
-         {
-            connToDisconnect->disconnect(NetConnection::ReasonBanned, "");
-            conn->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "Client was banned and kicked");
-         }
-      }
-   }
    else
    {
       // Command not found, tell the client
       conn->s2cDisplayErrorMessage("!!! Invalid Command");
    }
+}
+
+
+void GameType::addBot(Vector<StringTableEntry> args)
+{
+   // TODO
+   GameConnection *source = (GameConnection *) getRPCSourceConnection();
+   ClientInfo *clientInfo = source->getClientInfo();
+   GameSettings *settings = gServerGame->getSettings();
+
+   GameConnection *conn = clientInfo->getConnection();
+
+   if(mBotZoneCreationFailed)
+      conn->s2cDisplayErrorMessage("!!! Zone creation failed for this level -- bots disabled");
+
+   // Bots not allowed flag is set, unless admin
+   else if(!areBotsAllowed() && !clientInfo->isAdmin())
+      conn->s2cDisplayErrorMessage("!!! This level does not allow robots");
+
+   // No default robot set
+   else if(!clientInfo->isAdmin() && settings->getIniSettings()->defaultRobotScript == "" && args.size() < 2)
+      conn->s2cDisplayErrorMessage("!!! This server doesn't have default robots configured");
+
+   else if(!clientInfo->isLevelChanger())
+      return;  // Error message handled client-side
+
+   else if((Robot::robots.size() >= settings->getIniSettings()->maxBots && !clientInfo->isAdmin()) ||
+         Robot::robots.size() >= 256)
+      conn->s2cDisplayErrorMessage("!!! Can't add more bots -- this server is full");
+
+   else if(args.size() >= 2 && !safeFilename(args[1].getString()))
+      conn->s2cDisplayErrorMessage("!!! Invalid filename");
+
+   else
+   {
+      Robot *robot = new Robot();
+
+      S32 args_count = 0;
+      const char *args_char[LevelLoader::MAX_LEVEL_LINE_ARGS];  // Convert to a format processArgs will allow
+
+      // The first arg = team number, the second arg = robot script filename, the rest of args get passed as script arguments
+      for(S32 i = 0; i < args.size() && i < LevelLoader::MAX_LEVEL_LINE_ARGS; i++)
+      {
+         args_char[i] = args[i].getString();
+         args_count++;
+      }
+
+      if(!robot->processArguments(args_count, args_char, mGame))
+      {
+         delete robot;
+         conn->s2cDisplayErrorMessage("!!! Could not start robot; please see server logs");
+         return;
+      }
+
+      robot->addToGame(mGame, mGame->getGameObjDatabase());
+
+      if(!robot->start())
+      {
+         delete robot;
+         conn->s2cDisplayErrorMessage("!!! Could not start robot; please see server logs");
+         return;
+      }
+
+      serverAddClient(robot->getClientInfo().get());
+
+      StringTableEntry msg = StringTableEntry("Robot added by %e0");
+      Vector<StringTableEntry> e;
+      e.push_back(clientInfo->getName());
+
+      broadcastMessage(GameConnection::ColorNuclearGreen, SFXNone, msg, e);
+   }
+}
+
+
+GAMETYPE_RPC_C2S(GameType, c2sAddBot,
+      (Vector<StringTableEntry> args),
+      (args))
+{
+   addBot(args);
+}
+
+
+GAMETYPE_RPC_C2S(GameType, c2sAddBots,
+      (U32 count, Vector<StringTableEntry> args),
+      (count, args))
+{
+   GameConnection *source = (GameConnection *) getRPCSourceConnection();
+   ClientInfo *clientInfo = source->getClientInfo();
+
+   if(!clientInfo->isLevelChanger())
+      return;  // Error message handled client-side
+
+   // Invalid number of bots
+   if(count <= 0)
+      return;  // Error message handled client-side
+
+   S32 prevRobotSize = -1;
+
+   while(count > 0 && prevRobotSize != Robot::robots.size()) // loop may end when cannot add anymore bots
+   {
+      count--;
+      prevRobotSize = Robot::robots.size();
+      addBot(args);
+   }
+}
+
+
+GAMETYPE_RPC_C2S(GameType, c2sSetTime, (U32 time), (time))
+{
+   GameConnection *source = (GameConnection *) getRPCSourceConnection();
+   ClientInfo *clientInfo = source->getClientInfo();
+   GameSettings *settings = gServerGame->getSettings();
+
+   if(!clientInfo->isLevelChanger())  // Extra check in case of hacked client
+      return;
+
+   // Use voting when there is no level change password, and there is more then 1 player
+   if(!clientInfo->isAdmin() && settings->getLevelChangePassword() == "" && gServerGame->getPlayerCount() > 1)
+   {
+      if(gServerGame->voteStart(clientInfo, 2, time))
+         return;
+   }
+
+   // We want to preserve the actual, overall time of the game in mGameTimer's period
+   mGameTimer.extend(time - mGameTimer.getCurrent());
+
+   s2cSetTimeRemaining(mGameTimer.getCurrent());    // Broadcast time to clients
+
+   static StringTableEntry msg("%e0 has changed the amount of time left in the game");
+   Vector<StringTableEntry> e;
+   e.push_back(clientInfo->getName());
+
+   broadcastMessage(GameConnection::ColorNuclearGreen, SFXNone, msg, e);
+}
+
+
+GAMETYPE_RPC_C2S(GameType, c2sSetWinningScore, (U32 score), (score))
+{
+   GameConnection *source = (GameConnection *) getRPCSourceConnection();
+   ClientInfo *clientInfo = source->getClientInfo();
+   GameSettings *settings = gServerGame->getSettings();
+
+   // Level changers and above
+   if(!clientInfo->isLevelChanger())
+      return;  // Error message handled client-side
+
+
+   if(score <= 0)    // i.e. score is invalid
+      return;  // Error message handled client-side
+
+   ServerGame *serverGame = dynamic_cast<ServerGame *>(mGame);
+
+   // Use voting when there is no level change password, and there is more then 1 player
+   if(!clientInfo->isAdmin() && settings->getLevelChangePassword() == "" && serverGame->getPlayerCount() > 1)
+      if(serverGame->voteStart(clientInfo, 3, score))
+         return;
+
+   mWinningScore = score;
+   s2cChangeScoreToWin(mWinningScore, clientInfo->getName());
+}
+
+
+GAMETYPE_RPC_C2S(GameType, c2sResetScore, (), ())
+{
+   GameConnection *source = (GameConnection *) getRPCSourceConnection();
+   ClientInfo *clientInfo = source->getClientInfo();
+
+   // Level changers and above
+   if(!clientInfo->isLevelChanger())
+      return;  // Error message handled client-side
+
+   ServerGame *serverGame = dynamic_cast<ServerGame *>(mGame);
+
+   // Reset player scores
+   for(S32 i = 0; i < serverGame->getClientCount(); i++)
+      mGame->getClientInfo(i)->setScore(0);
+
+   // Reset team scores
+   for(S32 i = 0; i < mGame->getTeamCount(); i++)
+   {
+      // Set the score internally...
+      ((Team*)mGame->getTeam(i))->setScore(0);
+
+      // ...and broadcast it to the clients
+      s2cSetTeamScore(i, 0);
+
+      StringTableEntry msg("%e0 has reset the score of the game");
+      Vector<StringTableEntry> e;
+      e.push_back(clientInfo->getName());
+
+      broadcastMessage(GameConnection::ColorNuclearGreen, SFXNone, msg, e);
+   }
+}
+
+
+GAMETYPE_RPC_C2S(GameType, c2sKickBot, (), ())
+{
+   GameConnection *source = (GameConnection *) getRPCSourceConnection();
+   ClientInfo *clientInfo = source->getClientInfo();
+
+   if(!clientInfo->isLevelChanger())
+      return;  // Error message handled client-side
+
+   GameConnection *conn = clientInfo->getConnection();
+   if(Robot::robots.size() == 0)
+   {
+      conn->s2cDisplayErrorMessage("!!! There are no robots to kick");
+      return;
+   }
+
+   // Only delete one robot - the most recently added
+   delete Robot::robots[Robot::robots.size() - 1];
+
+   StringTableEntry msg = StringTableEntry("Robot kicked by %e0");
+   Vector<StringTableEntry> e;
+   e.push_back(clientInfo->getName());
+
+   broadcastMessage(GameConnection::ColorNuclearGreen, SFXNone, msg, e);
+}
+
+
+GAMETYPE_RPC_C2S(GameType, c2sKickBots, (), ())
+{
+   GameConnection *source = (GameConnection *) getRPCSourceConnection();
+   ClientInfo *clientInfo = source->getClientInfo();
+
+   if(!clientInfo->isLevelChanger())
+      return;  // Error message handled client-side
+
+   GameConnection *conn = clientInfo->getConnection();
+   if(Robot::robots.size() == 0)
+   {
+      conn->s2cDisplayErrorMessage("!!! There are no robots to kick");
+      return;
+   }
+
+   // Delete all bots
+   for(S32 i = Robot::robots.size() - 1; i >= 0; i--)
+      delete Robot::robots[i];
+
+   StringTableEntry msg = StringTableEntry("All robots kicked by %e0");
+   Vector<StringTableEntry> e;
+   e.push_back(clientInfo->getName());
+
+   broadcastMessage(GameConnection::ColorNuclearGreen, SFXNone, msg, e);
+}
+
+
+GAMETYPE_RPC_C2S(GameType, c2sShowBots, (), ())
+{
+   GameConnection *source = (GameConnection *) getRPCSourceConnection();
+   ClientInfo *clientInfo = source->getClientInfo();
+   GameSettings *settings = gServerGame->getSettings();
+
+   // Show all robots affects all players
+   mShowAllBots = !mShowAllBots;  // Toggle
+
+   GameConnection *conn = clientInfo->getConnection();
+
+   if(Robot::robots.size() == 0)
+      conn->s2cDisplayErrorMessage("!!! There are no robots to show");
+   else
+   {
+      StringTableEntry msg = mShowAllBots ? StringTableEntry("Show all robots option enabled by %e0") : StringTableEntry("Show all robots option disabled by %e0");
+      Vector<StringTableEntry> e;
+      e.push_back(clientInfo->getName());
+
+      broadcastMessage(GameConnection::ColorNuclearGreen, SFXNone, msg, e);
+   }
+}
+
+
+GAMETYPE_RPC_C2S(GameType, c2sSetMaxBots, (S32 count), (count))
+{
+   GameConnection *source = (GameConnection *) getRPCSourceConnection();
+   ClientInfo *clientInfo = source->getClientInfo();
+   GameSettings *settings = gServerGame->getSettings();
+
+   if(!clientInfo->isAdmin())
+      return;  // Error message handled client-side
+
+   // Invalid number of bots
+   if(count <= 0)
+      return;  // Error message handled client-side
+
+   settings->getIniSettings()->maxBots = count;
+
+   GameConnection *conn = clientInfo->getConnection();
+   Vector<StringTableEntry> e;
+   e.push_back(itos(count));
+   conn->s2cDisplayMessageE(GameConnection::ColorRed, SFXNone, "Maximum bots was changed to %e0", e);
+}
+
+
+GAMETYPE_RPC_C2S(GameType, c2sBanPlayer, (StringTableEntry playerName, U32 duration), (playerName, duration))
+{
+   GameConnection *source = (GameConnection *) getRPCSourceConnection();
+   ClientInfo *clientInfo = source->getClientInfo();
+   GameSettings *settings = gServerGame->getSettings();
+
+   // Conn is the connection of the player doing the banning
+   if(!clientInfo->isAdmin())
+      return;  // Error message handled client-side
+
+   ClientInfo *banedClientInfo = mGame->findClientInfo(playerName);
+
+   // Player not found
+   if(!banedClientInfo)
+      return;  // Error message handled client-side
+
+   if(banedClientInfo->isAdmin())
+      return;  // Error message handled client-side
+
+   // Cannot ban robot
+   if(!banedClientInfo->getConnection()->isEstablished())
+      return;  // Error message handled client-side
+
+   Address ipAddress = banedClientInfo->getConnection()->getNetAddressString();
+
+   S32 banDuration = duration == 0 ? settings->getBanList()->getDefaultBanDuration() : duration;
+
+   // Add the ban
+   settings->getBanList()->addToBanList(ipAddress, banDuration);
+   logprintf(LogConsumer::ServerFilter, "%s was banned for %d minutes", ipAddress.toString(), banDuration);
+
+   // Save BanList in memory
+   writeServerBanList(&gINI, settings->getBanList());
+
+   // Save new INI settings to disk
+   gINI.WriteFile();
+
+   GameConnection *conn = clientInfo->getConnection();
+
+   // Disconnect player
+   banedClientInfo->getConnection()->disconnect(NetConnection::ReasonBanned, "");
+   conn->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "Player was banned");
+}
+
+
+GAMETYPE_RPC_C2S(GameType, c2sBanIp, (StringTableEntry ipAddressString, U32 duration), (ipAddressString, duration))
+{
+   GameConnection *source = (GameConnection *) getRPCSourceConnection();
+   ClientInfo *clientInfo = source->getClientInfo();
+   GameSettings *settings = gServerGame->getSettings();
+
+   if(!clientInfo->isAdmin())
+      return;  // Error message handled client-side
+
+   Address ipAddress(ipAddressString.getString());
+
+   if(!ipAddress.isValid())
+      return;  // Error message handled client-side
+
+   S32 banDuration = duration == 0 ? settings->getBanList()->getDefaultBanDuration() : duration;
+
+   // banip should always add to the ban list, even if the IP isn't connected
+   settings->getBanList()->addToBanList(ipAddress, banDuration);
+   logprintf(LogConsumer::ServerFilter, "%s - banned for %d minutes", ipAddress.toString(), banDuration);
+
+   // Save BanList in memory
+   writeServerBanList(&gINI, settings->getBanList());
+
+   // Save new INI settings to disk
+   gINI.WriteFile();
+
+   // Now check to see if the client is connected and disconnect them if they are
+   GameConnection *connToDisconnect = NULL;
+
+   for(S32 i = 0; i < mGame->getClientCount(); i++)
+   {
+      GameConnection *baneeConn = mGame->getClientInfo(i)->getConnection();
+
+      if(baneeConn->getNetAddress().isEqualAddress(ipAddress))
+      {
+         connToDisconnect = baneeConn;
+         break;
+      }
+   }
+
+   GameConnection *conn = clientInfo->getConnection();
+
+   if(!connToDisconnect)
+      conn->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "Client has been banned but is no longer connected");
+   else
+   {
+      connToDisconnect->disconnect(NetConnection::ReasonBanned, "");
+      conn->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "Client was banned and kicked");
+   }
+}
+
+
+GAMETYPE_RPC_C2S(GameType, c2sRenamePlayer, (StringTableEntry playerName, StringTableEntry newName), (playerName, newName))
+{
+   GameConnection *source = (GameConnection *) getRPCSourceConnection();
+   ClientInfo *clientInfo = source->getClientInfo();
+
+   if(!clientInfo->isAdmin())
+      return;  // Error message handled client-side
+
+   ClientInfo *renamedClientInfo = mGame->findClientInfo(playerName);
+
+   // Player not found
+   if(!renamedClientInfo)
+      return;  // Error message handled client-side
+
+   if(renamedClientInfo->isAuthenticated())
+      return;  // Error message handled client-side
+
+   StringTableEntry oldName = renamedClientInfo->getName();
+   renamedClientInfo->setName("");                        // Avoid unique self
+   StringTableEntry uniqueName = GameConnection::makeUnique(newName.getString()).c_str();  // New name
+   renamedClientInfo->setName(oldName);                   // Restore name to properly get it updated to clients
+   renamedClientInfo->setAuthenticated(false);            // Don't underline anymore because of rename
+   updateClientChangedName(renamedClientInfo, uniqueName);
+
+   GameConnection *conn = clientInfo->getConnection();
+   conn->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, StringTableEntry("Player has been renamed"));
+}
+
+
+GAMETYPE_RPC_C2S(GameType, c2sGlobalMutePlayer, (StringTableEntry playerName), (playerName))
+{
+   GameConnection *source = (GameConnection *) getRPCSourceConnection();
+   ClientInfo *clientInfo = source->getClientInfo();
+
+   if(!clientInfo->isAdmin())
+      return;  // Error message handled client-side
+
+   GameConnection *gc = mGame->findClientInfo(playerName)->getConnection();
+
+   if(!gc)
+      return;  // Error message handled client-side
+
+   GameConnection *conn = clientInfo->getConnection();
+
+   // Toggle
+   gc->mChatMute = !gc->mChatMute;
+
+   conn->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, gc->mChatMute ? "Player is muted" : "Player is not muted");
 }
 
 
@@ -3382,10 +3462,10 @@ S32 GameType::getDigitsNeededToDisplayScore() const
 
 
 // Send a message to all clients
-void GameType::broadcastMessage(GameConnection::MessageColors color, SFXProfiles sfx, const StringTableEntry &formatString)
+void GameType::broadcastMessage(GameConnection::MessageColors color, SFXProfiles sfx, const StringTableEntry &message)
 {
    for(S32 i = 0; i < mGame->getClientCount(); i++)
-      mGame->getClientInfo(i)->getConnection()->s2cDisplayMessage(color, sfx, formatString);
+      mGame->getClientInfo(i)->getConnection()->s2cDisplayMessage(color, sfx, message);
 }
 
 

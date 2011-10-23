@@ -356,6 +356,19 @@ public:
    static void showPresetsHandler(ClientGame *game, const Vector<string> &words);
    static void deleteCurrentLevelHandler(ClientGame *game, const Vector<string> &words);
    static void addTimeHandler(ClientGame *game, const Vector<string> &words);
+   static void setTimeHandler(ClientGame *game, const Vector<string> &words);
+   static void setWinningScoreHandler(ClientGame *game, const Vector<string> &words);
+   static void resetScoreHandler(ClientGame *game, const Vector<string> &words);
+   static void addBotHandler(ClientGame *game, const Vector<string> &words);
+   static void addBotsHandler(ClientGame *game, const Vector<string> &words);
+   static void kickBotHandler(ClientGame *game, const Vector<string> &words);
+   static void kickBotsHandler(ClientGame *game, const Vector<string> &words);
+   static void showBotsHandler(ClientGame *game, const Vector<string> &words);
+   static void setMaxBotsHandler(ClientGame *game, const Vector<string> &words);
+   static void banPlayerHandler(ClientGame *game, const Vector<string> &words);
+   static void banIpHandler(ClientGame *game, const Vector<string> &words);
+   static void renamePlayerHandler(ClientGame *game, const Vector<string> &words);
+   static void globalMuteHandler(ClientGame *game, const Vector<string> &words);
 };
 
 
