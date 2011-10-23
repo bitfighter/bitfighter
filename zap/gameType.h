@@ -478,6 +478,20 @@ public:
    TNL_DECLARE_RPC(c2sVoiceChat, (bool echo, ByteBufferPtr compressedVoice));
    TNL_DECLARE_RPC(s2cVoiceChat, (StringTableEntry client, ByteBufferPtr compressedVoice));
 
+   TNL_DECLARE_RPC(c2sSetTime, (U32 time));
+   TNL_DECLARE_RPC(c2sSetWinningScore, (U32 score));
+   TNL_DECLARE_RPC(c2sResetScore, ());
+   TNL_DECLARE_RPC(c2sAddBot, (Vector<StringTableEntry> args));
+   TNL_DECLARE_RPC(c2sAddBots, (U32 count, Vector<StringTableEntry> args));
+   TNL_DECLARE_RPC(c2sKickBot, ());
+   TNL_DECLARE_RPC(c2sKickBots, ());
+   TNL_DECLARE_RPC(c2sShowBots, ());
+   TNL_DECLARE_RPC(c2sSetMaxBots, (S32 count));
+   TNL_DECLARE_RPC(c2sBanPlayer, (StringTableEntry playerName, U32 duration));
+   TNL_DECLARE_RPC(c2sBanIp, (StringTableEntry ipAddressString, U32 duration));
+   TNL_DECLARE_RPC(c2sRenamePlayer, (StringTableEntry playerName, StringTableEntry newName));
+   TNL_DECLARE_RPC(c2sGlobalMutePlayer, (StringTableEntry playerName));
+
    TNL_DECLARE_CLASS(GameType);
 
    enum
@@ -491,6 +505,7 @@ public:
    virtual void majorScoringEventOcurred(S32 team);    // Gets called when touchdown is scored...  currently only used by zone control & retrieve
 
    void processServerCommand(ClientInfo *clientInfo, const char *cmd, Vector<StringPtr> args);
+   void addBot(Vector<StringTableEntry> args);
 
    map <pair<U16,U16>, Vector<Point> > cachedBotFlightPlans;  // cache of zone-to-zone flight plans, shared for all bots
 };

@@ -365,6 +365,22 @@ bool getFilesFromFolder(const string &dir, Vector<string> &files, const string &
 }
 
 
+// Make sure a file name is 'safe', i.e. not having a path component
+bool safeFilename(const char *str)
+{
+   char chr = str[0];
+   S32 i = 0;
+   while(chr != 0)
+   {
+      if(chr == '\\' || chr == '/')
+         return false;
+      i++;
+      chr = str[i];
+   }
+   return true;
+}
+
+
 // Join a directory and filename strings in a platform-specific way
 string joindir(const string &path, const string &filename)
 {
