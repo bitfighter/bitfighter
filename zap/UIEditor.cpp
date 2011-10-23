@@ -1519,7 +1519,7 @@ void EditorUserInterface::render()
 
       const Vector<EditorObject *> *levelGenObjList = mLevelGenDatabase.getObjectList();
       for(S32 i = 0; i < levelGenObjList->size(); i++)
-         levelGenObjList->get(i)->renderInEditor(mCurrentScale, mCurrentOffset, mSnapVertexIndex, true, mPreviewMode, mShowMode);
+         levelGenObjList->get(i)->renderInEditor(mCurrentScale, mSnapVertexIndex, true, mPreviewMode, mShowMode);
    
       // Render polyWall item fill just before rendering regular walls.  This will create the effect of all walls merging together.  
       // PolyWall outlines are already part of the wallSegmentManager, so will be rendered along with those of regular walls.
@@ -1563,7 +1563,7 @@ void EditorUserInterface::render()
 
          if(obj->getObjectTypeNumber() != PolyWallTypeNumber)
             if(!(mDraggingObjects && obj->isSelected()))
-               obj->renderInEditor(mCurrentScale, mCurrentOffset, mSnapVertexIndex, false, mPreviewMode, mShowMode);
+               obj->renderInEditor(mCurrentScale, mSnapVertexIndex, false, mPreviewMode, mShowMode);
       }
 
       // == Selected items ==
@@ -1573,7 +1573,7 @@ void EditorUserInterface::render()
       {
          EditorObject *obj = objList->get(i);
          if(obj->isSelected() || obj->isLitUp())
-            obj->renderInEditor(mCurrentScale, mCurrentOffset, mSnapVertexIndex, false, mPreviewMode, mShowMode);
+            obj->renderInEditor(mCurrentScale, mSnapVertexIndex, false, mPreviewMode, mShowMode);
       }
 
       fillRendered = false;
@@ -1597,7 +1597,6 @@ void EditorUserInterface::render()
          for(S32 j = mNewItem->getVertCount() - 1; j >= 0; j--)      // Go in reverse order so that placed vertices are drawn atop unplaced ones
          {
             Point v = mNewItem->getVert(j);
-
             
             // Draw vertices
             if(j == mNewItem->getVertCount() - 1)           // This is our most current vertex
@@ -1635,7 +1634,7 @@ void EditorUserInterface::render()
          {
             EditorObject *obj = objList->get(i);
             if(obj->isSelected() && !isWallType(obj->getObjectTypeNumber()))    // Object is selected and is not a wall
-               obj->renderInEditor(mCurrentScale, mCurrentOffset, mSnapVertexIndex, false, mPreviewMode, mShowMode);
+               obj->renderInEditor(mCurrentScale, mSnapVertexIndex, false, mPreviewMode, mShowMode);
          }
 
       // Render our snap vertex as a hollow magenta box
@@ -1667,7 +1666,7 @@ void EditorUserInterface::render()
    if(!mPreviewMode)
       for(S32 i = 0; i < mDockItems.size(); i++)
       {
-         mDockItems[i]->renderInEditor(mCurrentScale, mCurrentOffset, mSnapVertexIndex, false, false, mShowMode);
+         mDockItems[i]->renderInEditor(mCurrentScale, mSnapVertexIndex, false, false, mShowMode);
          mDockItems[i]->setLitUp(false);
       }
 
@@ -1694,6 +1693,21 @@ void EditorUserInterface::render()
       }
    }
 
+   renderSaveMessage();
+   renderWarnings();
+
+
+   glColor(Colors::cyan);
+   drawCenteredString(vertMargin, 14, getModeMessage(mShowMode));
+
+   renderTextEntryOverlay();
+
+   renderConsole();  // Rendered last, so it's always on top
+}
+
+
+void EditorUserInterface::renderSaveMessage()
+{
    if(mSaveMsgTimer.getCurrent())
    {
       F32 alpha = 1.0;
@@ -1714,7 +1728,11 @@ void EditorUserInterface::render()
       if(disableBlending)
          glDisable(GL_BLEND);
    }
+}
 
+
+void EditorUserInterface::renderWarnings()
+{
    if(mWarnMsgTimer.getCurrent())
    {
       F32 alpha = 1.0;
@@ -1737,7 +1755,6 @@ void EditorUserInterface::render()
          glDisable(GL_BLEND);
    }
 
-
    if(mLevelErrorMsgs.size() || mLevelWarnings.size())
    {
       S32 ypos = vertMargin + 50;
@@ -1758,13 +1775,6 @@ void EditorUserInterface::render()
          ypos += 25;
       }
    }
-
-   glColor(Colors::cyan);
-   drawCenteredString(vertMargin, 14, getModeMessage(mShowMode));
-
-   renderTextEntryOverlay();
-
-   renderConsole();  // Rendered last, so it's always on top
 }
 
 

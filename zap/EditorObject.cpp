@@ -162,7 +162,7 @@ void EditorObject::highlightDockItem()
 
 
 // Items are rendered in index order, so those with a higher index get drawn later, and hence, on top
-void EditorObject::renderInEditor(F32 currentScale, const Point &currentOffset, S32 snapIndex, bool isScriptItem, bool showingReferenceShip, ShowMode showMode)
+void EditorObject::renderInEditor(F32 currentScale, S32 snapIndex, bool isScriptItem, bool showingReferenceShip, ShowMode showMode)
 {
    const S32 instrSize = 9;      // Size of instructions for special items
    const S32 attrSize = 10;
@@ -394,8 +394,7 @@ static const Color INSTRUCTION_TEXTCOLOR = Colors::white;      // TODO: Put in e
 void EditorPointObject::renderItemText(const char *text, S32 offset, F32 currentScale)
 {
    glColor(INSTRUCTION_TEXTCOLOR);
-   //S32 off = -1 * getEditorRadius(currentScale) + (INSTRUCTION_TEXTSIZE + INSTRUCTION_TEXTGAP) * offset; // not used?
-   //logprintf("%f  %f", currentOffset.x, currentOffset.y);
+
    Point pos = getVert(0);
    
    // Dividing by currentScale keeps the text a constant size in pixels

@@ -195,6 +195,8 @@ private:
    void renderDock(F32 width);
    void renderTextEntryOverlay();
    void renderReferenceShip();
+   void renderSaveMessage();
+   void renderWarnings();
 
    bool mCreatingPoly;
    bool mCreatingPolyline;
