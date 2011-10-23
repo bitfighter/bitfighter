@@ -1582,6 +1582,7 @@ void EditorUserInterface::render()
       // Draw geomPolyLine features under construction
       if(mCreatingPoly || mCreatingPolyline)    
       {
+         // Add a vert (and deleted it later) to help show what this item would look like if the user placed the vert in the current location
          mNewItem->addVert(snapPoint(convertCanvasToLevelCoord(mMousePos)));
          glLineWidth(gLineWidth3);
 
@@ -1599,13 +1600,12 @@ void EditorUserInterface::render()
             Point v = mNewItem->getVert(j);
             
             // Draw vertices
-            if(j == mNewItem->getVertCount() - 1)           // This is our most current vertex
+            if(j == mNewItem->getVertCount() - 1)                    // This is our most current vertex
                renderVertex(HighlightedVertex, v, NO_NUMBER, mCurrentScale);
             else
                renderVertex(SelectedItemVertex, v, j, mCurrentScale);
          }
          mNewItem->deleteVert(mNewItem->getVertCount() - 1); 
-
       }
 
       // Since we're not constructing a barrier, if there are any barriers or lineItems selected, 
@@ -1647,52 +1647,17 @@ void EditorUserInterface::render()
    if(mPreviewMode)
       renderReferenceShip();
    else
-      renderDock(width);
-
-   if(mDragSelecting)      // Draw box for selecting items
    {
-      glColor(Colors::white);
-      Point downPos = convertLevelToCanvasCoord(mMouseDownPos);
-      glBegin(GL_LINE_LOOP);
-         glVertex2f(downPos.x,   downPos.y);
-         glVertex2f(mMousePos.x, downPos.y);
-         glVertex2f(mMousePos.x, mMousePos.y);
-         glVertex2f(downPos.x,   mMousePos.y);
-      glEnd();
+      renderDock(width);
+      renderDockItems();
    }
 
-
-   // Render dock items
-   if(!mPreviewMode)
-      for(S32 i = 0; i < mDockItems.size(); i++)
-      {
-         mDockItems[i]->renderInEditor(mCurrentScale, mSnapVertexIndex, false, false, mShowMode);
-         mDockItems[i]->setLitUp(false);
-      }
+   renderDragSelectBox();
 
    if(disableBlending)
       glDisable(GL_BLEND);
 
-
-   // Render messages at bottom of screen
-   if(mouseOnDock())    // On the dock?  If so, render help string if hovering over item
-   {
-      S32 hoverItem = findHitItemOnDock(mMousePos);
-
-      if(hoverItem != NONE)
-      {
-         mDockItems[hoverItem]->setLitUp(true);    // Will trigger a selection highlight to appear around dock item
-
-         const char *helpString = mDockItems[hoverItem]->getEditorHelpString();
-
-         glColor(Colors::green);
-
-         // Center string between left side of screen and edge of dock
-         S32 x = (S32)(gScreenInfo.getGameCanvasWidth() - horizMargin - DOCK_WIDTH - getStringWidth(15, helpString)) / 2;
-         drawString(x, gScreenInfo.getGameCanvasHeight() - vertMargin - 15, 15, helpString);
-      }
-   }
-
+   renderHelpMessage();    // Also highlights dock item we're hovering over
    renderSaveMessage();
    renderWarnings();
 
@@ -1703,6 +1668,56 @@ void EditorUserInterface::render()
    renderTextEntryOverlay();
 
    renderConsole();  // Rendered last, so it's always on top
+}
+
+
+// Draw box for selecting items
+void EditorUserInterface::renderDragSelectBox()
+{
+   if(!mDragSelecting)   
+      return;
+   
+   glColor(Colors::white);
+   Point downPos = convertLevelToCanvasCoord(mMouseDownPos);
+   glBegin(GL_LINE_LOOP);
+      glVertex2f(downPos.x,   downPos.y);
+      glVertex2f(mMousePos.x, downPos.y);
+      glVertex2f(mMousePos.x, mMousePos.y);
+      glVertex2f(downPos.x,   mMousePos.y);
+   glEnd();
+}
+
+
+void EditorUserInterface::renderDockItems()
+{
+   for(S32 i = 0; i < mDockItems.size(); i++)
+   {
+      mDockItems[i]->renderInEditor(mCurrentScale, mSnapVertexIndex, false, false, mShowMode);
+      mDockItems[i]->setLitUp(false);
+   }
+}
+
+
+// Render help messages at bottom of screen
+void EditorUserInterface::renderHelpMessage()
+{
+   if(!mouseOnDock() || !mPreviewMode)    // Help messages only shown when hovering over dock item, and only when dock is visible
+      return;
+
+   S32 hoverItem = findHitItemOnDock(mMousePos);
+
+   if(hoverItem == NONE)
+      return;
+
+   mDockItems[hoverItem]->setLitUp(true);    // Will trigger a selection highlight to appear around dock item
+
+   const char *helpString = mDockItems[hoverItem]->getEditorHelpString();
+
+   glColor(Colors::green);
+
+   // Center string between left side of screen and edge of dock
+   S32 x = (S32)(gScreenInfo.getGameCanvasWidth() - horizMargin - DOCK_WIDTH - getStringWidth(15, helpString)) / 2;
+   drawString(x, gScreenInfo.getGameCanvasHeight() - vertMargin - 15, 15, helpString);
 }
 
 

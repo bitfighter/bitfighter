@@ -195,6 +195,9 @@ private:
    void renderDock(F32 width);
    void renderTextEntryOverlay();
    void renderReferenceShip();
+   void renderDragSelectBox();      // Render box when selecting a group of items
+   void renderDockItems();          // Render all items on the dock
+   void renderHelpMessage();        // Render help messages at bottom of screen
    void renderSaveMessage();
    void renderWarnings();
 
