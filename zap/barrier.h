@@ -207,8 +207,6 @@ private:
 class WallSegment : public DatabaseObject
 {
 private:
-   GridDatabase *mDatabase;    
-   GridDatabase *getGridDatabase() { return mDatabase; }      
    S32 mOwner;
 
   void init(S32 owner);

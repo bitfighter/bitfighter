@@ -936,7 +936,7 @@ void WallSegmentManager::renderWalls(GameSettings *settings, bool draggingObject
 // Regular constructor
 WallSegment::WallSegment(GridDatabase *gridDatabase, const Point &start, const Point &end, F32 width, S32 owner) 
 { 
-   mDatabase = gridDatabase;
+   setDatabase(gridDatabase);
    // Calculate segment corners by expanding the extended end points into a rectangle
    Barrier::expandCenterlineToOutline(start, end, width, corners);   
    init(owner);
@@ -946,7 +946,7 @@ WallSegment::WallSegment(GridDatabase *gridDatabase, const Point &start, const P
 // PolyWall constructor
 WallSegment::WallSegment(GridDatabase *gridDatabase, const Vector<Point> &points, S32 owner)
 {
-   mDatabase = gridDatabase;
+   setDatabase(gridDatabase);
 
    corners = points;
 
@@ -982,7 +982,7 @@ void WallSegment::init(S32 owner)
 WallSegment::~WallSegment()
 { 
    // Make sure object is out of the database
-   mDatabase->removeFromDatabase(this, getExtent()); 
+   getDatabase()->removeFromDatabase(this, getExtent()); 
 
    // Find any forcefields that were using this as an end point and let them know the segment is gone.  Since 
    // segment is no longer in database, when we recalculate the forcefield, our endSegmentPointer will be reset.

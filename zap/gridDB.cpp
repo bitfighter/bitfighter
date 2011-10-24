@@ -271,7 +271,7 @@ void GridDatabase::dumpObjects()
          {
             DatabaseObject *theObject = walk->theObject;
             logprintf("Found object in (%d,%d) with extents %s", x,y,theObject->getExtent().toString().c_str());
-         }
+            }
 }
 
 
