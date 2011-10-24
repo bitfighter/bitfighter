@@ -827,30 +827,7 @@ void InitSdlVideo()
    SDL_Surface* icon = SDL_LoadBMP("zap_win_icon.bmp");     // <=== TODO: put a real bmp here...
    SDL_WM_SetIcon(icon, NULL);
 
-   // We want to request that SDL provide us with an OpenGL window, possibly in a fullscreen video mode.
-   // Note the SDL_DOUBLEBUF flag is not required to enable double buffering when setting an OpenGL
-   // video mode. Double buffering is enabled or disabled using the SDL_GL_DOUBLEBUFFER attribute.
-   flags = SDL_OPENGL | SDL_HWSURFACE;
-
-   // We don't need a size to initialize
-   if(SDL_SetVideoMode(0, 0, 0, flags) == NULL)
-   {
-      logprintf(LogConsumer::LogWarning, "Unable to create hardware OpenGL window, falling back to software");
-
-      flags = SDL_OPENGL;
-      gScreenInfo.setHardwareSurface(false);
-
-      if (SDL_SetVideoMode(0, 0, 0, flags) == NULL)
-      {
-         logprintf(LogConsumer::LogFatalError, "Unable to create OpenGL window: %s", SDL_GetError());
-         exitToOs();
-      }
-   }
-   else
-   {
-      logprintf("Using hardware OpenGL window");
-      gScreenInfo.setHardwareSurface(true);
-   }
+   // We will actually run SDL_SetVideoMode in actualizeScreenMode()
 }
 #endif
 
@@ -1003,7 +980,7 @@ void actualizeScreenMode(bool changingInterfaces)
    F64 orthoLeft = 0, orthoRight = 0, orthoTop = 0, orthoBottom = 0;
 
    // Always use OpenGL
-   sdlVideoFlags = gScreenInfo.isHardwareSurface() ? SDL_OPENGL | SDL_HWSURFACE : SDL_OPENGL;
+   sdlVideoFlags = SDL_OPENGL;
 
    // Set up variables according to display mode
    switch (displayMode)

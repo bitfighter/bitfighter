@@ -53,7 +53,6 @@ private:
    S32 mWindowWidth, mWindowHeight;             // Window dimensions in physical pixels
    F32 mScalingRatioX, mScalingRatioY;          // Ratio of physical pixels to virtual pixels
    bool mIsLandscape;                           // Is our screen landscape or portrait?
-   bool mHardwareSurface;                       // Is our screen going to use a hardware surface?
 
    F32 mPixelRatio;                             // Number of physical pixels that are used to draw a single virtual pixel
    void calcPixelRaio();
@@ -102,8 +101,6 @@ public:
    S32 getVertDrawMargin();
 
    bool isLandscape();     // Whether physical screen is landscape, or at least more landscape than our game window
-   bool isHardwareSurface();  // Whether we can use the opengl hardware surface
-   void setHardwareSurface(bool isHardwareSurface);  // Whether we can use the opengl hardware surface
 
    // Convert physical window screen coordinates into virtual, in-game coordinate
    Point convertWindowToCanvasCoord(const Point &p, DisplayMode mode);
