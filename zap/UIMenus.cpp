@@ -1540,15 +1540,16 @@ LevelMenuUserInterface::LevelMenuUserInterface(ClientGame *game) : MenuUserInter
 
 static const char *UPLOAD_LEVELS = "UPLOAD LEVELS";
 static const char *ALL_LEVELS = "All Levels";
-static const U32 UPLOAD_LEVELS_MENUID = 1000;
+static const U32 ALL_LEVELS_MENUID = 0x80000001;
+static const U32 UPLOAD_LEVELS_MENUID = 0x80000002;
 
 
 static void selectLevelTypeCallback(ClientGame *game, U32 level)
-{  
+{
    LevelMenuSelectUserInterface *ui = game->getUIManager()->getLevelMenuSelectUserInterface();
 
    // First entry will be "All Levels", subsequent entries will be level types populated from mLevelInfos
-   if(level == 0)
+   if(level == ALL_LEVELS_MENUID)
       ui->category = ALL_LEVELS;
    else if(level == UPLOAD_LEVELS_MENUID)
       ui->category = UPLOAD_LEVELS;
@@ -1580,7 +1581,7 @@ void LevelMenuUserInterface::onActivate()
    clearMenuItems();
 
    char c[] = "A";   // Shortcut key
-   addMenuItem(new MenuItem(ALL_LEVELS, selectLevelTypeCallback, "", stringToInputCode(c)));
+   addMenuItem(new MenuItem(ALL_LEVELS_MENUID, ALL_LEVELS, selectLevelTypeCallback, "", stringToInputCode(c)));
 
    // Cycle through all levels, looking for unique type strings
    for(S32 i = 0; i < gc->mLevelInfos.size(); i++)

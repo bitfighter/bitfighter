@@ -2197,37 +2197,32 @@ bool EditorUserInterface::checkForVertexHit(EditorObject *object)
 bool EditorUserInterface::checkForEdgeHit(const Point &point, EditorObject *object)
 {
    // Points have no edges, and walls are checked via another mechanism
-   if(object->getGeomType() == geomPoint || isWallType(object->getObjectTypeNumber()))  
+   if(object->getGeomType() == geomPoint) 
       return false;
 
-   // Make a copy of the items vertices that we can add to in the case of a loop
-   // Note that it would be more efficient to find a way that doesn't involve this copy...
-   Vector<Point> verts = *object->getOutline();    
+   const Vector<Point> &verts = *object->getOutline(); 
+   TNLAssert(verts.size(), "Empty vertex problem");
 
-   if(object->getGeomType() == geomPolygon)   // Add first point to the end to create last side on poly
-      verts.push_back(verts.first());
+   bool loop = (object->getGeomType() == geomPolygon);
 
-   Point *p1, *p2;
    Point closest;
 
-   p1 = &object->getVert(0);
+   S32 j_prev  = loop ? (verts.size() - 1) : 0;
          
-   for(S32 j = 0; j < verts.size() - 1; j++)
+   for(S32 j = loop ? 0 : 1; j < verts.size(); j++)
    {
-      p2 = &verts[j+1];
-            
-      if(findNormalPoint(point, *p1, *p2, closest))
+      if(findNormalPoint(point, verts[j_prev], verts[j], closest))
       {
          F32 distance = (point - closest).len();
          if(distance < EDGE_HIT_RADIUS / mCurrentScale) 
          {
             mItemHit = object;
-            mEdgeHit = j;
+            mEdgeHit = j_prev;
 
             return true;
          }
       }
-      p1 = p2;
+      j_prev = j;
    }
 
    return false;
