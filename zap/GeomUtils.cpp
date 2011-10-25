@@ -893,7 +893,7 @@ bool Triangulate::Process(const Vector<Point> &contour, Vector<Point> &result)
 
 static const F32 CLIPPER_SCALE_FACT = 1000;
 
-Polygons upscaleClipperPoints(const Vector<Vector<Point> > &inputPolygons) 
+Polygons upscaleClipperPoints(const Vector<const Vector<Point> *> &inputPolygons) 
 {
    Polygons outputPolygons;
 
@@ -901,10 +901,10 @@ Polygons upscaleClipperPoints(const Vector<Vector<Point> > &inputPolygons)
 
    for(S32 i = 0; i < inputPolygons.size(); i++) 
    {
-      outputPolygons[i].resize(inputPolygons[i].size());
+      outputPolygons[i].resize(inputPolygons[i]->size());
 
-      for(S32 j = 0; j < inputPolygons[i].size(); j++)
-         outputPolygons[i][j] = IntPoint(S64(inputPolygons[i][j].x * CLIPPER_SCALE_FACT), S64(inputPolygons[i][j].y * CLIPPER_SCALE_FACT));
+      for(S32 j = 0; j < inputPolygons[i]->size(); j++)
+         outputPolygons[i][j] = IntPoint(S64(inputPolygons[i]->get(j).x * CLIPPER_SCALE_FACT), S64(inputPolygons[i]->get(j).y * CLIPPER_SCALE_FACT));
    }
 
    return outputPolygons;
@@ -930,7 +930,7 @@ Vector<Vector<Point> > downscaleClipperPoints(const Polygons& inputPolygons)
 
 
 // Use Clipper to merge inputPolygons, placing the result in solution
-bool mergePolys(const Vector<Vector<Point> > &inputPolygons, Vector<Vector<Point> > &outputPolygons)
+bool mergePolys(const Vector<const Vector<Point> *> &inputPolygons, Vector<Vector<Point> > &outputPolygons)
 {
    Polygons input = upscaleClipperPoints(inputPolygons);
    Polygons solution;
@@ -989,23 +989,23 @@ void unpackPolygons(const Vector<Vector<Point> > &solution, Vector<Point> &lineS
 
 // Offset a complex polygon by a given amount
 // Uses clipper to create a buffer around a polygon with the given offset
-void offsetPolygon(const Vector<Point>& inputPoly, Vector<Point>& outputPoly, const F32 offset)
+void offsetPolygon(const Vector<Point> *inputPoly, Vector<Point> &outputPoly, const F32 offset)
 {
-   Vector<Vector<Point> > tempVector;
-   tempVector.push_back(inputPoly);
+   Vector<const Vector<Point> *> tempInputVector;
+   tempInputVector.push_back(inputPoly);
 
    // Upscale for clipper
-   Polygons polygons = upscaleClipperPoints(tempVector);
+   Polygons polygons = upscaleClipperPoints(tempInputVector);
 
    // Call Clipper to do the dirty work
    polygons = OffsetPolygons(polygons, offset * CLIPPER_SCALE_FACT);
 
    // Downscale
-   tempVector = downscaleClipperPoints(polygons);
+   Vector<Vector<Point> > tempOutputVector = downscaleClipperPoints(polygons);
 
-   TNLAssert(tempVector.size() != 0, "tempVector empty in offsetPolygon?");
-   if(tempVector.size() != 0)
-      outputPoly = tempVector[0];
+   TNLAssert(tempOutputVector.size() > 0, "tempVector empty in offsetPolygon?");
+   if(tempOutputVector.size() > 0)
+      outputPoly = tempOutputVector[0];
 }
 
 

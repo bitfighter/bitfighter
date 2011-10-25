@@ -123,10 +123,10 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(GridDatabase *database, S
    switch(objectType)
    {
       case EngineeredTurret:
-         Turret::getGeom(mDeployPosition, mDeployNormal, bounds);   
+         Turret::getTurretGeometry(mDeployPosition, mDeployNormal, bounds);   
          break;
       case EngineeredForceField:
-         ForceFieldProjector::getGeom(mDeployPosition, mDeployNormal, bounds);
+         ForceFieldProjector::getForceFieldProjectorGeometry(mDeployPosition, mDeployNormal, bounds);
          break;
       default:    // will never happen
          TNLAssert(false, "Bad objectType");
@@ -321,10 +321,35 @@ bool EngineeredItem::processArguments(S32 argc, const char **argv, Game *game)
       setVert(anchor + normal, 0);
       mAnchorNormal.set(normal);
    }
-   computeExtent();
+   
+   computeObjectGeometry();                                    // Fills mCollisionPolyPoints 
+   computeExtent();                                            // Uses mCollisionPolyPoints
+   computeBufferForBotZone(mBufferedObjectPointsForBotZone);   // Fill mBufferedObjectPointsForBotZone
 
    return true;
 }
+
+
+void EngineeredItem::computeObjectGeometry()
+{
+   getObjectGeometry(getVert(0), mAnchorNormal, mCollisionPolyPoints);
+}
+
+
+// Server only
+void EngineeredItem::computeBufferForBotZone(Vector<Point> &zonePoints)
+{
+   Vector<Point> inputPoints;
+
+   getCollisionPoly(inputPoints);
+
+   if(isWoundClockwise(inputPoints))
+      inputPoints.reverse();
+
+   // Fill zonePoints
+   offsetPolygon(&inputPoints, zonePoints, (F32)BotNavMeshZone::BufferRadius);
+}
+
 
 
 void EngineeredItem::onAddedToGame(Game *game)
@@ -376,6 +401,13 @@ void EngineeredItem::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
 void EngineeredItem::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
 {
    mHealRate = attributeMenu->getMenuItem(0)->getIntValue();
+}
+
+
+void EngineeredItem::onGeomChanged()
+{
+   getObjectGeometry(getVert(0), mAnchorNormal, mCollisionPolyPoints);     // Recompute collision poly
+   Parent::onGeomChanged();
 }
 
 
@@ -649,6 +681,12 @@ void EngineeredItem::unpackUpdate(GhostConnection *connection, BitStream *stream
       if(mIsDestroyed && !wasDestroyed && !initial)
          explode();
    }
+
+   if(initial)
+   {
+      computeObjectGeometry();
+      computeExtent();
+   }
 }
 
 
@@ -672,6 +710,14 @@ void EngineeredItem::healObject(S32 time)
       if(prevHealth < disabledLevel && mHealth >= disabledLevel)
          onEnabled();
    }
+}
+
+
+const Vector<Point> *EngineeredItem::getBufferForBotZone()
+{
+   TNLAssert(getGame() == gServerGame, "Called in client game?!?");
+
+   return &mBufferedObjectPointsForBotZone;
 }
 
 
@@ -763,8 +809,15 @@ Point ForceFieldProjector::getEditorSelectionOffset(F32 currentScale)
 }
 
 
+void ForceFieldProjector::getObjectGeometry(const Point &anchor, const Point &normal, Vector<Point> &geom) const
+{
+   geom.clear();
+   getForceFieldProjectorGeometry(anchor, normal, geom);
+}
+
+
 // static method
-void ForceFieldProjector::getGeom(const Point &anchor, const Point &normal, Vector<Point> &geom)      
+void ForceFieldProjector::getForceFieldProjectorGeometry(const Point &anchor, const Point &normal, Vector<Point> &geom)
 {
    static const S32 PROJECTOR_HALF_WIDTH = 12;  // Half the width of base of the projector, along the wall
 
@@ -816,22 +869,8 @@ void ForceFieldProjector::onEnabled()
 
 bool ForceFieldProjector::getCollisionPoly(Vector<Point> &polyPoints) const
 {
-   getGeom(getVert(0), mAnchorNormal, polyPoints);
+   polyPoints = mCollisionPolyPoints;
    return true;
-}
-
-
-Vector<Point> ForceFieldProjector::getBufferForBotZone()
-{
-   Vector<Point> inputPoints, bufferedPoints;
-   getCollisionPoly(inputPoints);
-
-   if(isWoundClockwise(inputPoints))
-      inputPoints.reverse();
-
-   offsetPolygon(inputPoints, bufferedPoints, (F32)BotNavMeshZone::BufferRadius);
-
-   return bufferedPoints;
 }
 
 
@@ -843,7 +882,7 @@ void ForceFieldProjector::onAddedToGame(Game *theGame)
 
 void ForceFieldProjector::render()
 {
-   renderForceFieldProjector(getVert(0), mAnchorNormal, getGame()->getTeamColor(getTeam()), isEnabled());
+   renderForceFieldProjector(&mCollisionPolyPoints, getGame()->getTeamColor(getTeam()), isEnabled());
 }
 
 
@@ -861,7 +900,7 @@ void ForceFieldProjector::renderEditor(F32 currentScale)
 
    if(mSnapped)
    {
-      renderForceFieldProjector(getVert(0), mAnchorNormal, color, true);
+      renderForceFieldProjector(&mCollisionPolyPoints, color, true);
       renderForceField(ForceFieldProjector::getForceFieldStartPoint(getVert(0), mAnchorNormal, scaleFact), 
                        forceFieldEnd, color, true, scaleFact);
    }
@@ -1135,20 +1174,6 @@ Turret *Turret::clone() const
 }
 
 
-Vector<Point> Turret::getBufferForBotZone()
-{
-   Vector<Point> inputPoints, bufferedPoints;
-   getCollisionPoly(inputPoints);
-
-   if (isWoundClockwise(inputPoints))
-      inputPoints.reverse();
-
-   offsetPolygon(inputPoints, bufferedPoints, (F32)BotNavMeshZone::BufferRadius);
-
-   return bufferedPoints;
-}
-
-
 bool Turret::processArguments(S32 argc2, const char **argv2, Game *game)
 {
    S32 argc1 = 0;
@@ -1194,8 +1219,15 @@ string Turret::toString(F32 gridSize) const
 }
 
 
+void Turret::getObjectGeometry(const Point &anchor, const Point &normal, Vector<Point> &geom) const
+{
+   geom.clear();
+   getTurretGeometry(anchor, normal, geom);
+}
+
+
 // static method
-void Turret::getGeom(const Point &anchor, const Point &normal, Vector<Point> &polyPoints)
+void Turret::getTurretGeometry(const Point &anchor, const Point &normal, Vector<Point> &polyPoints)
 {
    Point cross(normal.y, -normal.x);
    polyPoints.push_back(anchor + cross * 25);
@@ -1207,7 +1239,7 @@ void Turret::getGeom(const Point &anchor, const Point &normal, Vector<Point> &po
 
 bool Turret::getCollisionPoly(Vector<Point> &polyPoints) const
 {
-   getGeom(getVert(0), mAnchorNormal, polyPoints);
+   polyPoints = mCollisionPolyPoints;
    return true;
 }
 
@@ -1255,6 +1287,7 @@ U32 Turret::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *s
 void Turret::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    Parent::unpackUpdate(connection, stream);
+
    if(stream->readFlag())
       stream->read(&mCurrentAngle);
 }

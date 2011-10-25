@@ -44,6 +44,13 @@ class Barrier : public GameObject
 {
    typedef GameObject Parent;
 
+private:
+   Vector<Point> mBufferedObjectPointsForBotZone;
+
+   // Takes a segment and "puffs it out" to a polygon for bot zone generation.
+   // This polygon is the width of the barrier plus the ship's collision radius added to the outside
+   void computeBufferForBotZone(Vector<Point> &zonePoints);
+
 public:
    Vector<Point> mPoints; ///< The points of the barrier --> if only two, first will be start, second end of an old-school segment
 
@@ -77,6 +84,7 @@ public:
 
    /// returns the collision polygon of this barrier, which is the boundary extruded from the start,end line segment.
    bool getCollisionPoly(Vector<Point> &polyPoints) const;
+   const Vector<Point> *getCollisionPolyPtr() const;
 
    /// collide always returns true for Barrier objects.
    bool collide(GameObject *otherObject) { return true; }
@@ -87,9 +95,7 @@ public:
    // Simply takes a segment and "puffs it out" to a rectangle of a specified width, filling cornerPoints.  Does not modify endpoints.
    static void expandCenterlineToOutline(const Point &start, const Point &end, F32 width, Vector<Point> &cornerPoints);
 
-   // Takes a segment and "puffs it out" to a polygon for bot zone generation.
-   // This polygon is the width of the barrier plus the ship's collision radius added to the outside
-   Vector<Point> getBufferForBotZone();
+   const Vector<Point> *getBufferForBotZone();
 
    // Combines multiple barriers into a single complex polygon
    static bool unionBarriers(const Vector<DatabaseObject *> &barriers, Vector<Vector<Point> > &solution);
@@ -209,18 +215,17 @@ class WallSegment : public DatabaseObject
 private:
    S32 mOwner;
 
-  void init(S32 owner);
+  void init(GridDatabase *database, S32 owner);
   bool invalid;              // A flag for marking segments in need of processing
+
+   Vector<Point> mEdges;    
+   Vector<Point> mCorners;
+   Vector<Point> mTriangulatedFillPoints;
 
 public:
    WallSegment(GridDatabase *gridDatabase, const Point &start, const Point &end, F32 width, S32 owner = -1);    // Normal wall segment
    WallSegment(GridDatabase *gridDatabase, const Vector<Point> &points, S32 owner = -1);                        // PolyWall 
    virtual ~WallSegment();
-
-   // TODO: Make these private
-   Vector<Point> edges;    
-   Vector<Point> corners;
-   Vector<Point> triangulatedFillPoints;
 
    S32 getOwner() { return mOwner; }
    void invalidate() { invalid = true; }
@@ -230,13 +235,16 @@ public:
    
    void renderFill(const Color &fillColor, bool renderLight);
 
+   const Vector<Point> *getCorners() { return &mCorners; }
+   const Vector<Point> *getTriangulatedFillPoints() { return &mTriangulatedFillPoints; }
+
    ////////////////////
    //  DatabaseObject methods
 
    // Note that the poly returned here is different than what you might expect -- it is composed of the edges,
    // not the corners, and is thus in A-B, C-D, E-F format rather than the more typical A-B-C-D format returned
    // by getCollisionPoly() elsewhere in the game.  Therefore, it needs to be handled differently.
-   bool getCollisionPoly(Vector<Point> &polyPoints) const { polyPoints = edges; return true; }  
+   bool getCollisionPoly(Vector<Point> &polyPoints) const { polyPoints = mEdges; return true; }  
    bool getCollisionCircle(U32 stateIndex, Point &point, float &radius) const { return false; }
    bool getCollisionRect(U32 stateIndex, Rect &rect) const { return false; }
 };
@@ -282,6 +290,10 @@ private:
    GridDatabase *mWallSegmentDatabase;
    GridDatabase *mWallEdgeDatabase;
 
+   void rebuildEdges();
+   void buildWallSegmentEdgesAndPoints(GridDatabase *gameDatabase, DatabaseObject *object, const Vector<DatabaseObject *> &engrObjects);
+
+
 public:
    WallSegmentManager();   // Constructor
    ~WallSegmentManager();  // Destructor
@@ -297,16 +309,14 @@ public:
 
    void buildAllWallSegmentEdgesAndPoints(GridDatabase *gameDatabase);
    void deleteSegments(S32 owner);              // Delete all segments owned by specified WorldItem
-   void deleteAllSegments();
+
+
+   // Takes a wall, finds all intersecting segments, and marks them invalid
+   //void invalidateIntersectingSegments(GridDatabase *gameDatabase, EditorObject *item);      // unused
 
    // Recalucate edge geometry for all walls when item has changed
    void computeWallSegmentIntersections(GridDatabase *gameDatabase, EditorObject *item); 
 
-   // Takes a wall, finds all intersecting segments, and marks them invalid
-   void invalidateIntersectingSegments(GridDatabase *gameDatabase, EditorObject *item);
-
-   void buildWallSegmentEdgesAndPoints(GridDatabase *gameDatabase, DatabaseObject *object);
-   void buildWallSegmentEdgesAndPoints(GridDatabase *gameDatabase, DatabaseObject *object, const Vector<DatabaseObject *> &engrObjects);
    void recomputeAllWallGeometry(GridDatabase *gameDatabase);
 
    // Populate wallEdges

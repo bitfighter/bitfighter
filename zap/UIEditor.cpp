@@ -2239,7 +2239,7 @@ bool EditorUserInterface::checkForWallHit(const Point &point, DatabaseObject *ob
    WallSegment *wallSegment = dynamic_cast<WallSegment *>(object);
    TNLAssert(wallSegment, "Expected a WallSegment!");
 
-   if(triangulatedFillContains(&wallSegment->triangulatedFillPoints, point))
+   if(triangulatedFillContains(wallSegment->getTriangulatedFillPoints(), point))
    {
       // Now that we've found a segment that our mouse is over, we need to find the wall object that it belongs to.  Chances are good
       // that it will be one of the objects sitting in fillVector.
@@ -2277,8 +2277,8 @@ bool EditorUserInterface::checkForWallHit(const Point &point, DatabaseObject *ob
 
             if(eobj->getSerialNumber() == wallSegment->getOwner())
             {
-               editorDb->dumpObjects();
-               logprintf("Found wall: %s", eobj->getExtent().toString().c_str());
+               //editorDb->dumpObjects();
+               //logprintf("Found wall: %s", eobj->getExtent().toString().c_str());
                mItemHit = eobj;
                return true;
             }
@@ -2872,7 +2872,7 @@ void EditorUserInterface::deleteItem(S32 itemIndex)
    if(isWallType(type))
    {
       // Need to recompute boundaries of any intersecting walls
-      wallSegmentManager->invalidateIntersectingSegments(game->getEditorDatabase(), obj); // Mark intersecting segments invalid
+      //wallSegmentManager->invalidateIntersectingSegments(game->getEditorDatabase(), obj); // Mark intersecting segments invalid
       wallSegmentManager->deleteSegments(obj->getItemId());                               // Delete the segments associated with the wall
 
       game->getEditorDatabase()->removeFromDatabase(obj, obj->getExtent());

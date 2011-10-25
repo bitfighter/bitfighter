@@ -83,6 +83,8 @@ public:
    bool isDeleted();
 
    void addToDatabase(GridDatabase *database);
+   void addToDatabase(GridDatabase *database, const Rect &extent);
+
    void removeFromDatabase();
 
    virtual bool isDatabasable() { return true; }      // Can this item actually be inserted into a database?

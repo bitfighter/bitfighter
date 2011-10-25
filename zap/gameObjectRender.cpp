@@ -1692,20 +1692,26 @@ void renderTextItem(const Point &pos, const Point &dir, F32 size, const string &
 }
 
 
-void renderForceFieldProjector(Point pos, Point normal, const Color *c, bool enabled)
+void renderForceFieldProjector(Point pos, Point normal, const Color *teamColor, bool enabled)
+{
+   Vector<Point> geom;
+   ForceFieldProjector::getForceFieldProjectorGeometry(pos, normal, geom);      // fills geom from pos and normal
+
+   renderForceFieldProjector(&geom, teamColor, enabled);
+}
+
+
+void renderForceFieldProjector(const Vector<Point> *geom, const Color *teamColor, bool enabled)
 {
    F32 ForceFieldBrightnessProjector = 0.50;
 
-   Color color(c);      // Create locally modifiable copy
+   Color color(teamColor);      // Create locally modifiable copy
 
    color = color * (1 - ForceFieldBrightnessProjector) + ForceFieldBrightnessProjector;
 
    glColor(enabled ? color : (color * 0.6f));
 
-   Vector<Point> geom;
-   ForceFieldProjector::getGeom(pos, normal, geom);      // fills geom from pos and normal
-
-   renderPointVector(&geom, GL_LINE_LOOP);
+   renderPointVector(geom, GL_LINE_LOOP);
 }
 
 

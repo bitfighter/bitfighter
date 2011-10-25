@@ -39,6 +39,9 @@ class EngineeredItem : public Item
 private:
    typedef Item Parent;
 
+   void computeBufferForBotZone(Vector<Point> &zonePoints);    // Server only
+   Vector<Point> mBufferedObjectPointsForBotZone;              // Only populated on the server
+
 #ifndef ZAP_DEDICATED
    static EditorAttributeMenuUI *mAttributeMenuUI;      // Menu for text editing; since it's static, don't bother with smart pointer
 #endif
@@ -54,6 +57,10 @@ protected:
 
    S32 mHealRate;             // Rate at which items will heal themselves, defaults to 0
    Timer mHealTimer;          // Timer for tracking mHealRate
+
+   Vector<Point> mCollisionPolyPoints;    // Used on server, also used for rendering on client
+   void computeObjectGeometry();          // Populates mCollisionPolyPoints
+
 
    WallSegment *mMountSeg;    // Segment we're mounted to in the editor (don't care in the game)
 
@@ -82,6 +89,8 @@ public:
    virtual void onEnabled()   { /* Do nothing */ }  
    virtual bool isTurret()    { return false; }
 
+   virtual void getObjectGeometry(const Point &anchor, const Point &normal, Vector<Point> &geom) const { TNLAssert(false, "function not implemented!"); }
+
    bool isEnabled();    // True if still active, false otherwise
 
    void explode();
@@ -94,6 +103,10 @@ public:
    F32 getHealth() { return mHealth; }
    void healObject(S32 time);
    Point mountToWall(const Point &pos, GridDatabase *wallEdgeDatabase, GridDatabase *wallSegmentDatabase);
+
+   void onGeomChanged();
+
+   const Vector<Point> *getBufferForBotZone();
 
    // Figure out where to put our turrets and forcefield projectors.  Will return NULL if no mount points found.
    static DatabaseObject *findAnchorPointAndNormal(GridDatabase *db, const Point &pos, F32 snapDist, bool format, 
@@ -200,6 +213,8 @@ private:
    SafePtr<ForceField> mField;
    WallSegment *mForceFieldEndSegment;
 
+   void getObjectGeometry(const Point &anchor, const Point &normal, Vector<Point> &geom) const;
+
 public:
    static const S32 defaultRespawnTime = 0;
 
@@ -207,10 +222,9 @@ public:
    ForceFieldProjector *clone() const;
    
    bool getCollisionPoly(Vector<Point> &polyPoints) const;
-   static void getGeom(const Point &anchor, const Point &normal, Vector<Point> &geom);
+   
+   static void getForceFieldProjectorGeometry(const Point &anchor, const Point &normal, Vector<Point> &geom);
    static Point getForceFieldStartPoint(const Point &anchor, const Point &normal, F32 scaleFact = 1);
-
-   Vector<Point> getBufferForBotZone();
 
    // Get info about the forcfield that might be projected from this projector
    void getForceFieldStartAndEndPoints(Point &start, Point &end);
@@ -296,10 +310,11 @@ public:
    };
 
 
-   static void getGeom(const Point &anchor, const Point &normal, Vector<Point> &polyPoints);
+   void getObjectGeometry(const Point &anchor, const Point &normal, Vector<Point> &polyPoints) const;
+   static void getTurretGeometry(const Point &anchor, const Point &normal, Vector<Point> &polyPoints);
+   
    bool getCollisionPoly(Vector<Point> &polyPoints) const;
-
-   Vector<Point> getBufferForBotZone();
+   //const Vector<Point> *getCollisionPolyPtr() const;
 
    void render();
    void idle(IdleCallPath path);

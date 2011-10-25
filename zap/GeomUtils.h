@@ -115,10 +115,10 @@ bool FindLowestRootInInterval(F32 inA, F32 inB, F32 inC, F32 inUpperBound, F32 &
 S32 findClosestPoint(const Point &point, const Vector<Point> &points);
 
 // Offset a complex polygon by a given amount
-void offsetPolygon(const Vector<Point>& inputPoly, Vector<Point>& outputPoly, const F32 offset);
+void offsetPolygon(const Vector<Point> *inputPoly, Vector<Point> &outputPoly, const F32 offset);
 
 // Use Clipper to merge inputPolygons, placing the result in solution
-bool mergePolys(const Vector<Vector<Point> > &inputPolygons, Vector<Vector<Point> > &outputPolygons);
+bool mergePolys(const Vector<const Vector<Point> *> &inputPolygons, Vector<Vector<Point> > &outputPolygons);
 
 // Convert a Polygons to a list of points in a-b b-c c-d d-a format
 void unpackPolygons(const Vector<Vector<Point> > &solution, Vector<Point> &lineSegmentPoints);
@@ -132,8 +132,8 @@ bool triangulatedFillContains(const Vector<Point> *triangulatedFillPoints, const
 bool isConvex(const Vector<Point> *verts);
 
 // scale Geometric points for clipper
-Polygons upscaleClipperPoints(const Vector<Vector<Point> >& inputPolygons);
-Vector<Vector<Point> > downscaleClipperPoints(const Polygons& inputPolygons);
+Polygons upscaleClipperPoints(const Vector<const Vector<Point> *> &inputPolygons);
+Vector<Vector<Point> > downscaleClipperPoints(const Polygons &inputPolygons);
 
 /*****************************************************************/
 /** Static class to triangulate any contour/polygon efficiently **/

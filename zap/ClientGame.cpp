@@ -1503,7 +1503,7 @@ void ClientGame::renderNormal()
    // the game down with the normal process of transmitting zones from server to client.  The result is that we can only see zones on our local
    // server.
    if(gServerGame && isShowingDebugMeshZones())
-       gServerGame->getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, rawRenderObjects, extentRect);
+      gServerGame->getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, rawRenderObjects, extentRect);
 
    renderObjects.clear();
    for(S32 i = 0; i < rawRenderObjects.size(); i++)

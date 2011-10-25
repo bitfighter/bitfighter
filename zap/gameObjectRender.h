@@ -194,6 +194,7 @@ void renderTextItem(const Point &pos, const Point &dir, F32 size, const string &
 
 extern void renderForceFieldProjector(Point pos, Point normal);
 extern void renderForceFieldProjector(Point pos, Point normal, const Color *teamColor, bool enabled);
+extern void renderForceFieldProjector(const Vector<Point> *geom, const Color *teamColor, bool enabled);
 extern void renderForceField(Point start, Point end, Color c, bool fieldUp, F32 scale = 1);
 
 extern void renderBitfighterLogo(S32 yPos, F32 scale, U32 mask = 1023);

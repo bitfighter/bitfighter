@@ -96,6 +96,7 @@ void GridDatabase::addToDatabase(DatabaseObject *theObject, const Rect &extents)
    mAllObjects.push_back(theObject);
 }
 
+
 void GridDatabase::removeEverythingFromDatabase()
 {
    for(S32 x = 0; x < BucketRowCount; x++)
@@ -497,16 +498,29 @@ DatabaseObject *GridDatabase::getObjectByIndex(S32 index)
 
 void DatabaseObject::addToDatabase(GridDatabase *database)
 {
-   if(mDatabase)
+   if(mDatabase)     // This object is already in a database!
       return;
 
+   //TNLAssert(mExtent.getWidth() > 0 && mExtent.getHeight() > 0, "Empty extents!");    // TODO Delete, these may be OK
    mDatabase = database;
 
    if(isDatabasable())
       database->addToDatabase(this, mExtent);
 }
 
-bool DatabaseObject::isDeleted() {
+
+void DatabaseObject::addToDatabase(GridDatabase *database, const Rect &extent)
+{
+   if(mDatabase)
+      return;
+
+   mExtent = extent;
+   addToDatabase(database);
+}
+
+
+bool DatabaseObject::isDeleted() 
+{
    return mObjectTypeNumber == DeletedTypeNumber;
 }
 
@@ -569,7 +583,8 @@ void DatabaseObject::setExtent(const Rect &extents)
          // Remove from the extents database for current extents...
          for(S32 x = minxold; maxxold - x >= 0; x++)
             for(S32 y = minyold; maxyold - y >= 0; y++)
-               for(GridDatabase::BucketEntry **walk = &gridDB->mBuckets[x & gridDB->BucketMask][y & gridDB->BucketMask]; *walk; walk = &((*walk)->nextInBucket))
+               for(GridDatabase::BucketEntry **walk = &gridDB->mBuckets[x & gridDB->BucketMask][y & gridDB->BucketMask]; 
+                                   *walk; walk = &((*walk)->nextInBucket))
                   if((*walk)->theObject == this)
                   {
                      GridDatabase::BucketEntry *rem = *walk;

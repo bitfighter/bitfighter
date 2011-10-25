@@ -461,11 +461,12 @@ static void buildHolesList(const Vector<DatabaseObject *> &barriers,
 
 
 static bool mergeBotZoneBuffers(const Vector<DatabaseObject *> &barriers,
-      const Vector<DatabaseObject *> &turrets,
-      const Vector<DatabaseObject *> &forceFieldProjectors, Vector<Vector<Point> >& solution)
+                                const Vector<DatabaseObject *> &turrets,
+                                const Vector<DatabaseObject *> &forceFieldProjectors, 
+                                      Vector<Vector<Point> > &solution)
 {
 
-   Vector<Vector<Point> > inputPolygons;
+   Vector<const Vector<Point> *> inputPolygons;
 
    // Add barriers
    for(S32 i = 0; i < barriers.size(); i++)
