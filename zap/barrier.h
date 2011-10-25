@@ -310,6 +310,7 @@ public:
    void buildAllWallSegmentEdgesAndPoints(GridDatabase *gameDatabase);
    void deleteSegments(S32 owner);              // Delete all segments owned by specified WorldItem
 
+   void updateMountedItems(EditorObjectDatabase *database, EditorObject *wall);
 
    // Takes a wall, finds all intersecting segments, and marks them invalid
    //void invalidateIntersectingSegments(GridDatabase *gameDatabase, EditorObject *item);      // unused
