@@ -46,7 +46,7 @@ fi
 
 # Run the program
 if [ $dedicated -eq 1 ]; then
-  ./Bitfighterd -rootDataDir "$userdatadir" -sfxdir "$sfxdir" -scriptsdir "$scriptsdir" -logdir "$dsdir" -inidir "$dsdir" "$@"
+  ./Bitfighterd -rootdatadir "$userdatadir" -sfxdir "$sfxdir" -scriptsdir "$scriptsdir" -logdir "$dsdir" -inidir "$dsdir" "$@"
 else
-  ./Bitfighter -rootDataDir "$userdatadir" -musicdir "$musicdir" -sfxdir "$sfxdir" -scriptsdir "$scriptsdir" "$@"
+  ./Bitfighter -rootdatadir "$userdatadir" -musicdir "$musicdir" -sfxdir "$sfxdir" -scriptsdir "$scriptsdir" "$@"
 fi

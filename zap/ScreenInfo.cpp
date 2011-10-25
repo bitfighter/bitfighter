@@ -65,8 +65,6 @@ void ScreenInfo::init(S32 physicalScreenWidth, S32 physicalScreenHeight)
 //
 //   logprintf("mScalingRatioX: %f", mScalingRatioX);
 //   logprintf("mScalingRatioY: %f", mScalingRatioY);
-
-   mHardwareSurface = false;
 }
 
 F32 ScreenInfo::getMinScalingFactor() { return MIN_SCALING_FACTOR; }
@@ -169,8 +167,6 @@ S32 ScreenInfo::getVertDrawMargin()
 }
 
 bool ScreenInfo::isLandscape() { return mIsLandscape; }     // Whether physical screen is landscape, or at least more landscape than our game window
-bool ScreenInfo::isHardwareSurface() { return mHardwareSurface; }  // Whether we can use the opengl hardware surface
-void ScreenInfo::setHardwareSurface(bool isHardwareSurface) { mHardwareSurface = isHardwareSurface; }  // Whether we can use the opengl hardware surface
 
 // Convert physical window screen coordinates into virtual, in-game coordinate
 Point ScreenInfo::convertWindowToCanvasCoord(const Point &p, DisplayMode mode) {

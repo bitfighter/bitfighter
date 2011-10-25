@@ -490,7 +490,7 @@ void Event::onResize(S32 width, S32 height, F32 winSizeFact)
    S32 newHeight = (S32)floor(canvasHeight * winSizeFact + 0.5f);
 
    S32 flags = 0;
-   flags = gScreenInfo.isHardwareSurface() ? SDL_OPENGL | SDL_HWSURFACE | SDL_RESIZABLE : SDL_OPENGL | SDL_RESIZABLE;
+   flags = SDL_OPENGL | SDL_RESIZABLE;
    SDL_SetVideoMode(newWidth, newHeight, 0, flags);
    gScreenInfo.setWindowSize(newWidth, newHeight);
 
