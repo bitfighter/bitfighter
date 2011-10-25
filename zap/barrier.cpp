@@ -416,6 +416,30 @@ WallItem *WallItem::clone() const
 }
 
 
+// Called by WallItems and PolyWalls when their geom changes
+static void updateMountedItems(EditorObjectDatabase *database, EditorObject *wall)
+{
+   // First, find any items directly mounted on our wall, and update their location
+
+
+
+   // Second, find any forcefields that might intersect our new wall segment and recalc their endpoints
+   Rect aoi = wall->getExtent(); 
+
+    // A FF could extend into our area of interest from quite a distance, so expand search region accordingly
+   aoi.expand(Point(ForceField::MAX_FORCEFIELD_LENGTH, ForceField::MAX_FORCEFIELD_LENGTH));  
+
+   fillVector.clear();
+   database->findObjects(ForceFieldProjectorTypeNumber, fillVector, aoi);
+
+   for(S32 i = 0; i < fillVector.size(); i++)
+   {
+      ForceFieldProjector *ffp = dynamic_cast<ForceFieldProjector *>(fillVector[i]);
+      ffp->findForceFieldEnd();
+   }
+}
+
+
 // Only called from editor... use of getEditorDatabase() below is a bit hacky...
 void WallItem::onGeomChanged()
 {
@@ -428,19 +452,7 @@ void WallItem::onGeomChanged()
    Game *game = getGame();
    game->getWallSegmentManager()->computeWallSegmentIntersections(game->getEditorDatabase(), this);
 
-   // Find any forcefields that might intersect our new wall segment and recalc their endpoints
-   Rect aoi = getExtent();    
-    // A FF could extend into our area of interest from quite a distance, so expand search region accordingly
-   aoi.expand(Point(ForceField::MAX_FORCEFIELD_LENGTH, ForceField::MAX_FORCEFIELD_LENGTH));  
-
-   fillVector.clear();
-   getGame()->getEditorDatabase()->findObjects(ForceFieldProjectorTypeNumber, fillVector, aoi);
-
-   for(S32 i = 0; i < fillVector.size(); i++)
-   {
-      ForceFieldProjector *ffp = dynamic_cast<ForceFieldProjector *>(fillVector[i]);
-      ffp->findForceFieldEnd();
-   }
+   updateMountedItems(game->getEditorDatabase(), this);
 
    Parent::onGeomChanged();
 }
@@ -594,19 +606,7 @@ void PolyWall::onGeomChanged()
 
    getGame()->getWallSegmentManager()->computeWallSegmentIntersections(getGame()->getEditorDatabase(), this);
 
-   // Find any forcefields that might intersect our new wall segment and recalc their endpoints
-   Rect aoi = getExtent();    
-    // A FF could extend into our area of interest from quite a distance, so expand search region accordingly
-   aoi.expand(Point(ForceField::MAX_FORCEFIELD_LENGTH, ForceField::MAX_FORCEFIELD_LENGTH));  
-
-   fillVector.clear();
-   getGame()->getEditorDatabase()->findObjects(ForceFieldProjectorTypeNumber, fillVector, aoi);
-
-   for(S32 i = 0; i < fillVector.size(); i++)
-   {
-      ForceFieldProjector *ffp = dynamic_cast<ForceFieldProjector *>(fillVector[i]);
-      ffp->findForceFieldEnd();
-   }
+   updateMountedItems(getGame()->getEditorDatabase(), this);
 }
 
 
