@@ -427,7 +427,6 @@ Point EngineeredItem::getEditorSelectionOffset(F32 currentScale)
    F32 y = m * cos(ang);
 
    return Point(x,y);
-
 }
 
 
