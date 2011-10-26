@@ -34,7 +34,6 @@
 #include "ClientGame.h"
 #include "gameType.h"
 #include "Colors.h"
-#include "config.h"     // TODO: remove requirement -- currently for gIni stuff in screen pos calc
 #include "InputCode.h"
 #include "ScreenInfo.h"
 #include "gameObjectRender.h"
@@ -789,7 +788,7 @@ void QueryServersUserInterface::renderTopBanner()
    const S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
 
    // Top banner
-   glColor3f(0, 0.35f, 0);
+   glColor(Colors::richGreen);
    glBegin(GL_POLYGON);
       glVertex2i(0, 0);
       glVertex2i(canvasWidth, 0);
@@ -1097,7 +1096,7 @@ void QueryServersUserInterface::onKeyUp(InputCode inputCode)
 {
    if(mDraggingDivider)
    {
-      SDL_ShowCursor(SDL_ENABLE);      // TODO:  was GLUT_CURSOR_RIGHT_ARROW
+      SDL_ShowCursor(SDL_ENABLE);
       mDraggingDivider = false;
    }
 }
@@ -1156,7 +1155,7 @@ void QueryServersUserInterface::onMouseMoved(S32 x, S32 y)
 
    const Point *mousePos = gScreenInfo.getMousePos();
 
-   SDL_ShowCursor(SDL_ENABLE);  // TODO:  was GLUT_CURSOR_RIGHT_ARROW
+   SDL_ShowCursor(SDL_ENABLE);
 
    if(mouseInHeaderRow(mousePos))
    {
@@ -1170,7 +1169,7 @@ void QueryServersUserInterface::onMouseMoved(S32 x, S32 y)
    }
 
    else if(isMouseOverDivider())
-      SDL_ShowCursor(SDL_ENABLE);  // TODO:  was GLUT_CURSOR_UP_DOWN
+      SDL_ShowCursor(SDL_ENABLE);
 
    else
       mHighlightColumn = mSortColumn;
@@ -1195,6 +1194,12 @@ S32 QueryServersUserInterface::getServersPerPage()
       return mServersPerPage;
    else
       return (gScreenInfo.getGameCanvasHeight() - TOP_OF_SERVER_LIST - AREA_BETWEEN_BOTTOM_OF_SERVER_LIST_AND_DIVIDER) / SERVER_ENTRY_HEIGHT;
+}
+
+
+S32 QueryServersUserInterface::getLastPage()
+{
+   return (servers.size() - 1) / mServersPerPage;
 }
 
 
@@ -1335,6 +1340,7 @@ Button::Button(ClientGame *game, S32 x, S32 y, S32 textSize, S32 padding, const 
    mLabel = label;
    mFgColor = fgColor;
    mHlColor = hlColor;
+   mBgColor = Colors::richGreen;
    mTransparent = true;
    mOnClickCallback = onClickCallback;
 }
@@ -1362,18 +1368,26 @@ void Button::render(F32 mouseX, F32 mouseY)
 
    Color fillColor, outlineColor;
 
+   // Highlight a little when mouse is over buttons
    if(mouseOver(mouseX, mouseY))
-    {
+   {
       fillColor = mBgColor;
       outlineColor = mHlColor * 2;
    }
+   // Make buttons 'disappear' if there is only one page of servers (set colors to background color)
+   else if(mGame->getUIManager()->getQueryServersUserInterface()->getLastPage() == 0)
+   {
+      fillColor = mBgColor;
+      outlineColor = mBgColor;
+   }
+   // Sit there and look unobtrusive
    else
    {
       fillColor = mBgColor;
       outlineColor = mFgColor;    
    }
 
-   UserInterface::drawFilledRect(mX, mY, mX + mPadding * 2 + labelLen, mY + mTextSize + mPadding * 2, outlineColor, fillColor);
+   UserInterface::drawFilledRect(mX, mY, mX + mPadding * 2 + labelLen, mY + mTextSize + mPadding * 2, fillColor, outlineColor);
    UserInterface::drawString(mX + mPadding, mY + mPadding, mTextSize, mLabel);
 }
  
