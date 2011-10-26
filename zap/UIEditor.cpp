@@ -2254,7 +2254,7 @@ bool EditorUserInterface::checkForWallHit(const Point &point, DatabaseObject *ob
 
       // Note, if we get to here, we have a problem.
 
-      logprintf("Found seg: %s", wallSegment->getExtent().toString().c_str());
+      //logprintf("Found seg: %s", wallSegment->getExtent().toString().c_str());
 
       //TNLAssert(false, "Should have found a wall.  Either the extents are wrong again, or the walls and their segments are out of sync.");
 

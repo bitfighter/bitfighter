@@ -776,25 +776,25 @@ void WallSegmentManager::updateMountedItems(EditorObjectDatabase *database, Edit
    for(S32 i = 0; i < fillVector.size(); i++)
    {
       EngineeredItem *engrItem = dynamic_cast<EngineeredItem *>(fillVector[i]);     // static_cast doesn't seem to work
-      if(engrItem->getMountSegment()->getOwner() == wall->getSerialNumber())
+      //if(engrItem->getMountSegment()->getOwner() == wall->getSerialNumber())
          engrItem->mountToWall(engrItem->getVert(0), getWallEdgeDatabase(), getWallSegmentDatabase());
    }
 
-   // Second, find any forcefields that might intersect our new wall segment and recalc their endpoints
-    
-   Rect aoi = wall->getExtent();
+   //// Second, find any forcefields that might intersect our new wall segment and recalc their endpoints.  There are cases where the ff
+   //// is mounted to one segment, and terminates on a second, but might be affected by a third segment being placed it its path.
+   //Rect aoi = wall->getExtent();
 
-    // A FF could extend into our area of interest from quite a distance, so expand search region accordingly
-   aoi.expand(Point(ForceField::MAX_FORCEFIELD_LENGTH, ForceField::MAX_FORCEFIELD_LENGTH));  
+   // // A FF could extend into our area of interest from quite a distance, so expand search region accordingly
+   //aoi.expand(Point(ForceField::MAX_FORCEFIELD_LENGTH, ForceField::MAX_FORCEFIELD_LENGTH));  
 
-   fillVector.clear();
-   database->findObjects(ForceFieldProjectorTypeNumber, fillVector);
+   //fillVector.clear();
+   //database->findObjects(ForceFieldProjectorTypeNumber, fillVector);
 
-   for(S32 i = 0; i < fillVector.size(); i++)
-   {
-      ForceFieldProjector *ffp = dynamic_cast<ForceFieldProjector *>(fillVector[i]);
-      ffp->findForceFieldEnd();
-   }
+   //for(S32 i = 0; i < fillVector.size(); i++)
+   //{
+   //   ForceFieldProjector *ffp = dynamic_cast<ForceFieldProjector *>(fillVector[i]);
+   //   ffp->findForceFieldEnd();
+   //}
 }
 
 

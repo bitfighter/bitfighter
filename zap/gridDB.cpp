@@ -393,7 +393,7 @@ DatabaseObject *GridDatabase::findObjectLOS(TestFunc testFunc, U32 stateIndex, b
 {
    Rect queryRect(rayStart, rayEnd);
 
-   static Vector<DatabaseObject *> fillVector;  // Use local here, Most of code expects a global FillVector left unchanged
+   static Vector<DatabaseObject *> fillVector;  // Use local here, moust callers expect our global fillVector to be left unchanged
    fillVector.clear();
 
    findObjects(testFunc, fillVector, queryRect);
