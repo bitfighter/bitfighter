@@ -314,7 +314,8 @@ public:
    static void getTurretGeometry(const Point &anchor, const Point &normal, Vector<Point> &polyPoints);
    
    bool getCollisionPoly(Vector<Point> &polyPoints) const;
-   //const Vector<Point> *getCollisionPolyPtr() const;
+
+   F32 getEditorRadius(F32 currentScale);
 
    void render();
    void idle(IdleCallPath path);

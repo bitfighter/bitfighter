@@ -2180,7 +2180,7 @@ bool EditorUserInterface::checkForVertexHit(EditorObject *object)
    for(S32 i = object->getVertCount() - 1; i >= 0; i--)
    {
       // p represents pixels from mouse to obj->getVert(j), at any zoom
-      Point p = mMousePos - mCurrentOffset - object->getVert(i) * mCurrentScale;    
+      Point p = mMousePos - mCurrentOffset - (object->getVert(i) + object->getEditorSelectionOffset(mCurrentScale)) * mCurrentScale;    
 
       if(fabs(p.x) < radius && fabs(p.y) < radius)
       {

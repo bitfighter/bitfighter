@@ -133,8 +133,10 @@ void EditorObject::renderAndLabelHighlightedVertices(F32 currentScale)
       {
          glColor((vertSelected(i) || mSelected) ? SELECT_COLOR : HIGHLIGHT_COLOR);
 
-         drawSquare(getVert(i), radius / currentScale);
-         labelVertex(getVert(i), radius / currentScale, getOnScreenName(), getVertLabel(i), currentScale);
+         Point center = getVert(i) + getEditorSelectionOffset(currentScale);
+
+         drawSquare(center, radius / currentScale);
+         labelVertex(center, radius / currentScale, getOnScreenName(), getVertLabel(i), currentScale);
       }         
 }
 

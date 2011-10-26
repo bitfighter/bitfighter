@@ -284,6 +284,8 @@ EngineeredItem::EngineeredItem(S32 team, Point anchorPoint, Point anchorNormal) 
    mHealRate = 0;
    mMountSeg = NULL;
    mSnapped = false;
+
+   mRadius = 7;
 }
 
 
@@ -783,7 +785,6 @@ ForceFieldProjector::ForceFieldProjector(S32 team, Point anchorPoint, Point anch
 {
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = ForceFieldProjectorTypeNumber;
-   mRadius = 7;
 }
 
 
@@ -1169,7 +1170,6 @@ Turret::Turret(S32 team, Point anchorPoint, Point anchorNormal) : EngineeredItem
 
 Turret *Turret::clone() const
 {
-
    return new Turret(*this);
 }
 
@@ -1242,6 +1242,30 @@ bool Turret::getCollisionPoly(Vector<Point> &polyPoints) const
    polyPoints = mCollisionPolyPoints;
    return true;
 }
+
+
+F32 Turret::getEditorRadius(F32 currentScale)
+{
+   if(mSnapped)
+      return 25 * currentScale;
+   else 
+      return Parent::getEditorRadius(currentScale);
+}
+
+
+// For turrets, apparent selection center is not the same as the item's actual location
+Point Turret::getEditorSelectionOffset(F32 currentScale)
+{
+   if(!mSnapped)
+      return Point(0,0);
+
+   F32 m = 20;
+   F32 x = m * cos(mCurrentAngle);
+   F32 y = m * sin(mCurrentAngle);
+
+   return Point(x,y);
+}
+
 
 
 void Turret::onAddedToGame(Game *theGame)
@@ -1436,13 +1460,6 @@ void Turret::idle(IdleCallPath path)
          mFireTimer.reset(gWeapons[mWeaponFireType].fireDelay);
       }
    }
-}
-
-
-// For turrets, apparent selection center is not the same as the item's actual location
-Point Turret::getEditorSelectionOffset(F32 currentScale)
-{
-   return renderFull(currentScale, false) ? Point(0, .075 * 255) : Point(0,0);
 }
 
 
