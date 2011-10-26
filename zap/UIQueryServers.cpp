@@ -1197,6 +1197,12 @@ S32 QueryServersUserInterface::getServersPerPage()
 }
 
 
+S32 QueryServersUserInterface::getLastPage()
+{
+   return (servers.size() - 1) / mServersPerPage;
+}
+
+
 bool QueryServersUserInterface::isMouseOverDivider()
 {
    if(!mShowChat)       // Divider is only in operation when window is split
@@ -1362,11 +1368,19 @@ void Button::render(F32 mouseX, F32 mouseY)
 
    Color fillColor, outlineColor;
 
+   // Highlight a little when mouse is over buttons
    if(mouseOver(mouseX, mouseY))
-    {
+   {
       fillColor = mBgColor;
       outlineColor = mHlColor * 2;
    }
+   // Make buttons 'disappear' if there is only one page of servers (set colors to background color)
+   else if(mGame->getUIManager()->getQueryServersUserInterface()->getLastPage() == 0)
+   {
+      fillColor = mBgColor;
+      outlineColor = mBgColor;
+   }
+   // Sit there and look unobtrusive
    else
    {
       fillColor = mBgColor;

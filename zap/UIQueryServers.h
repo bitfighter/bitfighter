@@ -77,7 +77,6 @@ private:
    S32 mPage;
    S32 mServersPerPage;
    S32 getFirstServerIndexOnCurrentPage() { return mPage * mServersPerPage; }
-   S32 getLastPage() { return (servers.size() - 1) / mServersPerPage; }
 
    Timer mouseScrollTimer;
    void sortSelected();
@@ -202,6 +201,7 @@ public:
 
    S32 getDividerPos();
    S32 getServersPerPage();
+   S32 getLastPage();
    bool isMouseOverDivider();
 
    void onActivate();            // Run when select server screeen is displayed
