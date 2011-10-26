@@ -46,6 +46,8 @@ private:
    static EditorAttributeMenuUI *mAttributeMenuUI;      // Menu for text editing; since it's static, don't bother with smart pointer
 #endif
 
+   virtual F32 getSelectionOffsetMagnitude() = 0;       // Provides base magnitude for getEditorSelectionOffset()
+
 protected:
    F32 mHealth;
    SafePtr<MoveItem> mResource;
@@ -89,8 +91,11 @@ public:
    virtual void onEnabled()   { /* Do nothing */ }  
    virtual bool isTurret()    { return false; }
 
-   virtual void getObjectGeometry(const Point &anchor, const Point &normal, Vector<Point> &geom) const { TNLAssert(false, "function not implemented!"); }
+   virtual void getObjectGeometry(const Point &anchor, const Point &normal, Vector<Point> &geom) const { 
+            TNLAssert(false, "function not implemented!"); }
 
+   Point getEditorSelectionOffset(F32 currentScale);
+   
    bool isEnabled();    // True if still active, false otherwise
 
    void explode();
@@ -215,6 +220,8 @@ private:
 
    void getObjectGeometry(const Point &anchor, const Point &normal, Vector<Point> &geom) const;
 
+   F32 getSelectionOffsetMagnitude();
+
 public:
    static const S32 defaultRespawnTime = 0;
 
@@ -249,8 +256,6 @@ public:
    bool hasTeam() { return true; }
    bool canBeHostile() { return true; }
    bool canBeNeutral() { return true; }
-
-   Point getEditorSelectionOffset(F32 currentScale);
 
    void renderDock();
    void renderEditor(F32 currentScale);
@@ -287,6 +292,8 @@ class Turret : public EngineeredItem
 private:
    Timer mFireTimer;
    F32 mCurrentAngle;
+
+   F32 getSelectionOffsetMagnitude();
 
 public:
    Turret(S32 team = -1, Point anchorPoint = Point(), Point anchorNormal = Point(1, 0));     // Constructor
@@ -337,7 +344,6 @@ public:
    bool canBeHostile() { return true; }
    bool canBeNeutral() { return true; }
 
-   Point getEditorSelectionOffset(F32 currentScale);
    void onGeomChanged();
    void onItemDragging() { onGeomChanged(); }
 

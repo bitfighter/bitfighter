@@ -413,6 +413,24 @@ void EngineeredItem::onGeomChanged()
 }
 
 
+Point EngineeredItem::getEditorSelectionOffset(F32 currentScale)
+{
+   if(!mSnapped)
+      return Parent::getEditorSelectionOffset(currentScale);
+
+   F32 m = getSelectionOffsetMagnitude();
+
+   Point cross(mAnchorNormal.y, -mAnchorNormal.x);
+   F32 ang = cross.ATAN2();
+
+   F32 x = -m * sin(ang);
+   F32 y = m * cos(ang);
+
+   return Point(x,y);
+
+}
+
+
 // Render some attributes when item is selected but not being edited
 void EngineeredItem::renderAttributeString(F32 currentScale)
 {
@@ -804,9 +822,11 @@ void ForceFieldProjector::idle(GameObject::IdleCallPath path)
 }
 
 
-Point ForceFieldProjector::getEditorSelectionOffset(F32 currentScale)
+static const S32 PROJECTOR_OFFSET = 15;      // Distance from wall to projector tip; thickness, if you will
+
+F32 ForceFieldProjector::getSelectionOffsetMagnitude()
 {
-   return renderFull(currentScale, false) ? Point(0, .035 * 255) : Point(0,0);
+   return PROJECTOR_OFFSET / 3;     // Centroid of a triangle is at 1/3 its height
 }
 
 
@@ -834,8 +854,6 @@ void ForceFieldProjector::getForceFieldProjectorGeometry(const Point &anchor, co
 // Get the point where the forcefield actually starts, as it leaves the projector; i.e. the tip of the projector.  Static method.
 Point ForceFieldProjector::getForceFieldStartPoint(const Point &anchor, const Point &normal, F32 scaleFact)
 {
-   static const S32 PROJECTOR_OFFSET = 15;      // Distance from wall to projector tip; thickness, if you will
-
    return Point(anchor.x + normal.x * PROJECTOR_OFFSET * scaleFact, 
                 anchor.y + normal.y * PROJECTOR_OFFSET * scaleFact);
 }
@@ -1253,17 +1271,9 @@ F32 Turret::getEditorRadius(F32 currentScale)
 }
 
 
-// For turrets, apparent selection center is not the same as the item's actual location
-Point Turret::getEditorSelectionOffset(F32 currentScale)
+F32 Turret::getSelectionOffsetMagnitude()
 {
-   if(!mSnapped)
-      return Point(0,0);
-
-   F32 m = 20;
-   F32 x = m * cos(mCurrentAngle);
-   F32 y = m * sin(mCurrentAngle);
-
-   return Point(x,y);
+   return 20;
 }
 
 
