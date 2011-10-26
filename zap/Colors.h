@@ -49,6 +49,7 @@ namespace Colors
    const Color orange50(1, .50f, 0);      // Rabbit orange
    const Color orange67(1, .67f ,0);      // A more reddish orange
    const Color paleRed(1, .50f, .50f);    // A washed out red
+   const Color richGreen(0, .35f, 0);
 };
 
 }
