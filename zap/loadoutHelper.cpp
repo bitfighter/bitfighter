@@ -70,6 +70,15 @@ LoadoutItem::LoadoutItem(ClientGame *game, InputCode key, InputCode button, U32 
    mGame = game;
 }
 
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Constructor
+LoadoutHelper::LoadoutHelper(ClientGame *clientGame) : Parent(clientGame)
+{
+   // Do nothing
+}
+
 
 // Gets called at the beginning of every game; available options may change based on level
 void LoadoutHelper::initialize(bool includeEngineer)
@@ -96,17 +105,10 @@ void LoadoutHelper::initialize(bool includeEngineer)
 };
 
 
-LoadoutHelper::LoadoutHelper(ClientGame *clientGame) : Parent(clientGame)
-{
-   // Do nothing
-}
-
-
 void LoadoutHelper::onMenuShow()
 {
    mCurrentIndex = 0;
 }
-
 
 
 // First, we work with modules, then with weapons
