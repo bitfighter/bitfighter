@@ -33,6 +33,8 @@
 #include "config.h"
 #include "gameObjectRender.h"       // For drawSquare
 
+#include "ship.h"
+
 #include "SDL/SDL_opengl.h"
 
 namespace Zap

@@ -24,6 +24,12 @@
 //------------------------------------------------------------------------------------
 
 #include "UIGame.h"
+
+#include "quickChatHelper.h"
+#include "loadoutHelper.h"
+#include "engineerHelper.h"
+#include "TeamShuffleHelper.h"
+
 #include "gameConnection.h"
 #include "game.h"
 #include "UIMenus.h"
@@ -79,9 +85,6 @@ static void makeCommandCandidateList();      // Forward delcaration
 
 // Constructor
 GameUserInterface::GameUserInterface(ClientGame *game) : Parent(game), 
-                                                         mQuickChatHelper(game), 
-                                                         mLoadoutHelper(game), 
-                                                         mEngineerHelper(game),
                                                          mVoiceRecorder(game),
                                                          mLineEditor(200)
                                                          
@@ -100,6 +103,12 @@ GameUserInterface::GameUserInterface(ClientGame *game) : Parent(game),
    setMenuID(GameUI);
    enterMode(PlayMode);
    mInScoreboardMode = false;
+
+   mQuickChatHelper = NULL;
+   mLoadoutHelper = NULL;
+   mEngineerHelper = NULL;
+   mTeamShuffleHelper = NULL;
+
 
 #if 0 //defined(TNL_OS_XBOX)
    mFPSVisible = true;
@@ -132,7 +141,7 @@ GameUserInterface::GameUserInterface(ClientGame *game) : Parent(game),
    mRecalcFPSTimer = 0;
 
    mFiring = false;
-   for (U32 i = 0; i < (U32)ShipModuleCount; i++)
+   for(U32 i = 0; i < (U32)ShipModuleCount; i++)
    {
       mModPrimaryActivated[i] = false;
       mModSecondaryActivated[i] = false;
@@ -148,12 +157,51 @@ GameUserInterface::GameUserInterface(ClientGame *game) : Parent(game),
 }
 
 
-// Destructor
+// Destructor  -- only runs when we're exiting to the OS
 GameUserInterface::~GameUserInterface()
 {
-   // Do nothing
+   delete mQuickChatHelper;
+   delete mLoadoutHelper;
+   delete mEngineerHelper;
+   delete mTeamShuffleHelper;
 }
 
+
+// Lazily initialize these...
+QuickChatHelper *GameUserInterface::getQuickChatHelper(ClientGame *game)
+{
+   if(!mQuickChatHelper)
+      mQuickChatHelper = new QuickChatHelper(game);
+
+   return mQuickChatHelper;
+}
+
+   
+LoadoutHelper *GameUserInterface::getLoadoutHelper(ClientGame *game)
+{
+   if(!mLoadoutHelper)
+      mLoadoutHelper = new LoadoutHelper(game);
+
+   return mLoadoutHelper;
+}
+
+
+EngineerHelper *GameUserInterface::getEngineerHelper(ClientGame *game)
+{
+   if(!mEngineerHelper)
+      mEngineerHelper = new EngineerHelper(game);
+
+   return mEngineerHelper;
+}
+
+
+TeamShuffleHelper *GameUserInterface::getTeamShuffleHelper(ClientGame *game)
+{
+   if(!mTeamShuffleHelper)
+      mTeamShuffleHelper = new TeamShuffleHelper(game);
+
+   return mTeamShuffleHelper;
+}
 
 void processGameConsoleCommand(OGLCONSOLE_Console console, char *cmd)
 {
@@ -914,11 +962,11 @@ void GameUserInterface::enterMode(UIMode mode)
    mCurrentMode = mode;
 
    if(mode == QuickChatMode)
-      mHelper = &mQuickChatHelper;
+      mHelper = getQuickChatHelper(getGame());
    else if(mode == LoadoutMode)
-      mHelper = &mLoadoutHelper;
+      mHelper = getLoadoutHelper(getGame());
    else if(mode == EngineerMode)
-      mHelper = &mEngineerHelper;
+      mHelper = getEngineerHelper(getGame());
    else 
    {
       if(mode == PlayMode)
@@ -941,7 +989,10 @@ void GameUserInterface::enterMode(UIMode mode)
 void GameUserInterface::renderEngineeredItemDeploymentMarker(Ship *ship)
 {
    if(mCurrentMode == EngineerMode)
-      mEngineerHelper.renderDeploymentMarker(ship);
+   {
+      TNLAssert(mEngineerHelper, "Engineer helper does not exist!");
+      mEngineerHelper->renderDeploymentMarker(ship);
+   }
 }
 
 
@@ -1870,7 +1921,7 @@ void GameUserInterface::setMaxBotsHandler(ClientGame *game, const Vector<string>
 
 void GameUserInterface::shuffleTeams(ClientGame *game, const Vector<string> &words)
 {
-   logprintf("hello!");
+   //game->activateShuffleTeamHelper();
 }
 
 

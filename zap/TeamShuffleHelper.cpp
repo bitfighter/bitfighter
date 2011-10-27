@@ -68,6 +68,8 @@ bool TeamShuffleHelper::processInputCode(InputCode inputCode)
       return true;
 
    // We're interested in space, enter, and escape
+
+   return true;
 }
 
 

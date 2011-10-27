@@ -27,9 +27,6 @@
 #define _UIGAME_H_
 
 #include "UI.h"
-#include "quickChatHelper.h"
-#include "loadoutHelper.h"
-#include "engineerHelper.h"
 #include "Timer.h"
 #include "voiceCodec.h"
 #include "Point.h"
@@ -57,7 +54,8 @@ enum HelpCategories {
 
 class GameUserInterface;
 
-struct CommandInfo {
+struct CommandInfo 
+{
    string cmdName;
    void (*cmdCallback)(ClientGame *game, const Vector<string> &args);
    ArgTypes cmdArgInfo[9];
@@ -70,6 +68,13 @@ struct CommandInfo {
 
 ////////////////////////////////////////
 ////////////////////////////////////////
+
+class HelperMenu;
+class QuickChatHelper;
+class LoadoutHelper;
+class EngineerHelper;
+class TeamShuffleHelper;
+
 
 class GameUserInterface : public UserInterface
 {
@@ -178,9 +183,11 @@ private:
    // Various helper objects
    HelperMenu *mHelper;       // Current helper
 
-   QuickChatHelper mQuickChatHelper;
-   LoadoutHelper mLoadoutHelper;
-   EngineerHelper mEngineerHelper;
+   QuickChatHelper *mQuickChatHelper;
+   LoadoutHelper *mLoadoutHelper;
+   EngineerHelper *mEngineerHelper;
+   TeamShuffleHelper *mTeamShuffleHelper;
+
 
    struct VoiceRecorder
    {
@@ -232,11 +239,11 @@ private:
 
    Timer mModuleOneDoubleClickTimer;              // Timer for detecting if a module key is double-clicked
    Timer mModuleTwoDoubleClickTimer;              // Timer for detecting if a module key is double-clicked
-   static const S32 DoubleClickTimeout = 250;  // Timeout in milliseconds
+   static const S32 DoubleClickTimeout = 250;     // Timeout in milliseconds
 
 public:
-   GameUserInterface(ClientGame *game);    // Constructor
-   virtual ~GameUserInterface();                   // Destructor
+   GameUserInterface(ClientGame *game);           // Constructor
+   virtual ~GameUserInterface();                  // Destructor
 
    bool displayInputModeChangeAlert;
 
@@ -250,7 +257,6 @@ public:
    void displayMessagef(const Color &msgColor, const char *format, ...);
    void displayChatMessage(const Color &msgColor, const char *format, ...);
 
-   void initializeLoadoutOptions(bool engineerAllowed) { mLoadoutHelper.initialize(engineerAllowed); }
    void resetInputModeChangeAlertDisplayTimer(U32 timeInMs) { mInputModeChangeAlertDisplayTimer.reset(timeInMs); }
 
    void render();                   // Render game screen
@@ -288,6 +294,12 @@ public:
 
    void onActivate();                 // Gets run when interface is first activated
    void onReactivate();               // Gets run when interface is subsequently reactivated
+
+
+   QuickChatHelper   *getQuickChatHelper(ClientGame *game);
+   LoadoutHelper     *getLoadoutHelper(ClientGame *game);
+   EngineerHelper    *getEngineerHelper(ClientGame *game);
+   TeamShuffleHelper *getTeamShuffleHelper(ClientGame *game);
 
    
    //ofstream mOutputFile;            // For saving downloaded levels
