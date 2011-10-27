@@ -45,7 +45,7 @@ TeamShuffleHelper::TeamShuffleHelper(ClientGame *clientGame) : Parent(clientGame
 void TeamShuffleHelper::initialize(bool includeEngineer)
 {
 
-};
+}
 
 
 void TeamShuffleHelper::onMenuShow()
@@ -75,6 +75,7 @@ InputCode TeamShuffleHelper::getActivationKey()
 { 
    return inputLOADOUT[getGame()->getSettings()->getIniSettings()->inputMode]; 
 }
+
 
 };
 

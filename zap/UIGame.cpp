@@ -1868,6 +1868,12 @@ void GameUserInterface::setMaxBotsHandler(ClientGame *game, const Vector<string>
 }
 
 
+void GameUserInterface::shuffleTeams(ClientGame *game, const Vector<string> &words)
+{
+   logprintf("hello!");
+}
+
+
 void GameUserInterface::banPlayerHandler(ClientGame *game, const Vector<string> &words)
 {
    if(game->hasAdmin("!!! Need admin permission"))
@@ -2049,6 +2055,7 @@ CommandInfo chatCmds[] = {
    { "gmute",              GameUserInterface::globalMuteHandler,         { NAME },      1,  ADMIN_COMMANDS, 0, {"<name>"},              "Globally mute/unmute a player" },
    { "rename",             GameUserInterface::renamePlayerHandler,       { NAME, STR }, 2,  ADMIN_COMMANDS, 0, {"<name>","<toname>"},   "Rename a player to a new name" },
    { "maxbots",            GameUserInterface::setMaxBotsHandler,         { INT },       1,  ADMIN_COMMANDS, 0, {"<count>"},             "Set the maximum bots allowed for this server" },
+   { "shuffle",            GameUserInterface::shuffleTeams,              { },           0,  ADMIN_COMMANDS, 0,  { "" },                 "Randomly reshuffle teams" },
 
    { "showcoords", GameUserInterface::showCoordsHandler,    {  },    0, DEBUG_COMMANDS, 0, {  },         "Show ship coordinates" },
    { "showzones",  GameUserInterface::showZonesHandler,     {  },    0, DEBUG_COMMANDS, 0, {  },         "Show bot nav mesh zones" },

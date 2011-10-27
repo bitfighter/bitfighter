@@ -369,6 +369,7 @@ public:
    static void banIpHandler(ClientGame *game, const Vector<string> &words);
    static void renamePlayerHandler(ClientGame *game, const Vector<string> &words);
    static void globalMuteHandler(ClientGame *game, const Vector<string> &words);
+   static void shuffleTeams(ClientGame *game, const Vector<string> &words);
 };
 
 
