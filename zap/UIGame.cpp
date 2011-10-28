@@ -2547,7 +2547,7 @@ Move *GameUserInterface::getCurrentMove()
 // User has finished entering a chat message and pressed <enter>
 void GameUserInterface::issueChat()
 {
-   TNLAssert(mCurrentChatType == GlobalChat || mCurrentChatType == TeamChat, "Invalid chat mode!");
+   TNLAssert(mCurrentChatType != NoChat, "Not in chat mode!");
 
    if(!mLineEditor.isEmpty())
    {
