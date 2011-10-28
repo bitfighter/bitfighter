@@ -163,6 +163,10 @@ using namespace TNL;
 #include <unistd.h>
 #endif
 
+#ifdef TNL_OS_LINUX
+#include <X11/Xlib.h>
+#endif
+
 #if defined(TNL_OS_LINUX) && defined(ZAP_DEDICATED)
 #define USE_EXCEPTION_BACKTRACE
 #endif
