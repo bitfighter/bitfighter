@@ -106,7 +106,7 @@ void TeamShuffleHelper::render()
 
 
    S32 rows = (S32)ceil((F32)teamCount / (F32)cols);
-   S32 maxColWidth = gScreenInfo.getGameCanvasWidth() / cols;
+   S32 maxColWidth = (gScreenInfo.getGameCanvasWidth() - 100) / cols;
 
    S32 colWidth = -1;
    const S32 textSize = 15;
@@ -131,7 +131,9 @@ void TeamShuffleHelper::render()
    const S32 rowHeight = 80;
    const S32 topMargin = (gScreenInfo.getGameCanvasHeight() - rows * rowHeight - (rows - 1) * margin) / 2;
    const S32 leftMargin = (gScreenInfo.getGameCanvasWidth() - cols * colWidth - (cols - 1) * margin) / 2;
-   const S32 vpad = 4, hpad = 4;        // Padding inside the boxes
+   const S32 vpad = 10, hpad = 10;        // Padding inside the boxes
+
+   colWidth += 2 * hpad;
 
    for(S32 i = 0; i < rows; i++)
       for(S32 j = 0; j < cols; j++)
@@ -149,9 +151,13 @@ void TeamShuffleHelper::render()
          glColor(Colors::white);
          for(S32 k = 0; k < mTeams[teamIndex].size(); k++)
          {
-            UserInterface::drawString(x + hpad, y + vpad + (k+1) * 1.2 * textSize, textSize, mTeams[teamIndex][k]->getName().getString());
+            UserInterface::drawString(x + hpad, y + vpad + (k) * 1.2 * textSize, textSize, mTeams[teamIndex][k]->getName().getString());
          }
       }
+
+      glColor(Colors::green);
+
+      UserInterface::drawCenteredString(gScreenInfo.getGameCanvasHeight() - 80, 20, "[Enter to accept] | [Space to reshuffle] | [Esc to cancel]");
 }
 
 
@@ -166,7 +172,10 @@ bool TeamShuffleHelper::processInputCode(InputCode inputCode)
       shuffle();
 
    else if(inputCode == KEY_ENTER)
+   {
       getGame()->displaySuccessMessage("Take it from here, Raptor! The data you need is in mTeams.");
+      exitHelper();
+   }
 
    return true;
 }

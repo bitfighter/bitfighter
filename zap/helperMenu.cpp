@@ -60,7 +60,8 @@ bool HelperMenu::processInputCode(InputCode inputCode)
       inputCode == KEY_LEFT   || inputCode == BUTTON_DPAD_LEFT ||
       inputCode == BUTTON_BACK || (getGame()->getSettings()->getIniSettings()->inputMode == InputModeKeyboard && inputCode == getActivationKey()) )
    {
-      exitHelper();      // Return to play mode, ship design unchanged
+      exitHelper();      
+
       if(getGame()->getSettings()->getIniSettings()->verboseHelpMessages)
          mClientGame->displayMessage(Colors::paleRed, getCancelMessage());
 
