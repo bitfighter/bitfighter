@@ -45,16 +45,12 @@ LineEditor::LineEditor(U32 maxLength, string value)
 }
 
 
-// Update our global cursor blinkenlicht
+// Update our global cursor blinkenlicht -- static function
 // To implement a flashing cursor, call this routine from a UI's local idle routine,
 // then draw the cursor when cursorBlink is true
 void LineEditor::updateCursorBlink(U32 timeDelta)
 {
-   if(mBlinkTimer.update(timeDelta))
-   {
-      mBlinkTimer.reset();
-      cursorBlink = !cursorBlink;
-   }
+   cursorBlink = (Platform::getRealMilliseconds() / 100) % 2;
 }
 
 
