@@ -96,7 +96,7 @@ void TextEntryUserInterface::render()
 
 void TextEntryUserInterface::idle(U32 timeDelta)
 {
-   LineEditor::updateCursorBlink(timeDelta);
+   // Do nothing
 }
 
 

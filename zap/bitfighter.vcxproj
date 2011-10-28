@@ -225,7 +225,6 @@
     <ClCompile Include="..\zap\UIMessage.cpp" />
     <ClCompile Include="..\zap\UINameEntry.cpp" />
     <ClCompile Include="..\zap\UIQueryServers.cpp" />
-    <ClCompile Include="..\zap\UIRebindKeys.cpp" />
     <ClCompile Include="..\zap\UITeamDefMenu.cpp" />
     <ClCompile Include="..\zap\UIYesNo.cpp" />
     <ClCompile Include="..\zap\voiceCodec.cpp" />
@@ -347,7 +346,6 @@
     <ClInclude Include="..\zap\UIMessage.h" />
     <ClInclude Include="..\zap\UINameEntry.h" />
     <ClInclude Include="..\zap\UIQueryServers.h" />
-    <ClInclude Include="..\zap\UIRebindKeys.h" />
     <ClInclude Include="..\zap\UITeamDefMenu.h" />
     <ClInclude Include="..\zap\UIYesNo.h" />
     <ClInclude Include="..\zap\voiceCodec.h" />

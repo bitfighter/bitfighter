@@ -354,7 +354,7 @@ ChatUserInterface::ChatUserInterface(ClientGame *game) : Parent(game), ChatParen
 
 void ChatUserInterface::idle(U32 timeDelta)
 {
-   LineEditor::updateCursorBlink(timeDelta);
+   // Do nothing
 }
 
 

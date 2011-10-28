@@ -383,7 +383,6 @@ void QueryServersUserInterface::gotQueryResponse(const Address &theAddress, cons
 
 void QueryServersUserInterface::idle(U32 timeDelta)
 {
-   LineEditor::updateCursorBlink(timeDelta);
    U32 elapsedTime = Platform::getRealMilliseconds() - time;
    time = Platform::getRealMilliseconds();
    mouseScrollTimer.update(timeDelta);

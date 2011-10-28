@@ -121,8 +121,6 @@ void TeamDefUserInterface::idle(U32 timeDelta)
 {
    if(errorMsgTimer.update(timeDelta))
       errorMsg = "";
-
-   LineEditor::updateCursorBlink(timeDelta);
 }
 
 

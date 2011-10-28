@@ -3740,8 +3740,6 @@ void EditorUserInterface::idle(U32 timeDelta)
 
    mSaveMsgTimer.update(timeDelta);
    mWarnMsgTimer.update(timeDelta);
-
-   LineEditor::updateCursorBlink(timeDelta);
 }
 
 

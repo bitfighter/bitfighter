@@ -168,8 +168,6 @@ void MenuUserInterface::idle(U32 timeDelta)
    // (i.e. we don't want to limit scrolling action only to times when user moves mouse)
    if(itemSelectedWithMouse)
       processMouse();
-
-   LineEditor::updateCursorBlink(timeDelta);
 }
 
 
