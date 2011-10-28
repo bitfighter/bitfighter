@@ -179,20 +179,20 @@ S32 MenuUserInterface::getOffset()
 
    if(count > MAX_MENU_SIZE)     // Do some sort of scrolling
    {
-      offset = mFirstVisibleItem;
-
       // itemSelectedWithMouse basically lets users highlight the top and bottom items in a scrolling list,
       // which can't be done when using the keyboard
       if(selectedIndex - mFirstVisibleItem < (itemSelectedWithMouse ? 0 : 1))
          offset = selectedIndex - (itemSelectedWithMouse ? 0 : 1);
       else if( selectedIndex - mFirstVisibleItem > (MAX_MENU_SIZE - (itemSelectedWithMouse ? 1 : 2)) )
          offset = selectedIndex - (MAX_MENU_SIZE - (itemSelectedWithMouse ? 1 : 2));
+      else offset = mFirstVisibleItem;
 
       if(offset < 0)
          offset = 0;
       else if(offset + MAX_MENU_SIZE >= mMenuItems.size())
          offset = mMenuItems.size() - MAX_MENU_SIZE;
    }
+
    mFirstVisibleItem = offset;
 
    return offset;
