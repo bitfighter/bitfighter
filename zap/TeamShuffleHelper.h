@@ -33,6 +33,8 @@ using namespace TNL;
 namespace Zap
 {
 
+class ClientInfo;
+
 class TeamShuffleHelper : public HelperMenu
 {
    typedef HelperMenu Parent;
@@ -40,6 +42,9 @@ class TeamShuffleHelper : public HelperMenu
 private:
    virtual const char *getCancelMessage() { return "Shuffle canceled -- teams unchanged"; }
    virtual InputCode getActivationKey();
+
+   Vector<Vector<ClientInfo *> > mTeams;
+   void shuffle();
 
 public:
    TeamShuffleHelper(ClientGame *clientGame);    // Constructor

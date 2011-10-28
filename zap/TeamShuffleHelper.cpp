@@ -31,6 +31,8 @@
 
 #include "SDL/SDL_opengl.h"
 
+#include <algorithm>
+
 
 namespace Zap
 {
@@ -42,9 +44,35 @@ TeamShuffleHelper::TeamShuffleHelper(ClientGame *clientGame) : Parent(clientGame
 }
 
 
+// Randomly fill teams with clientInfos
+void TeamShuffleHelper::shuffle()
+{
+   const Vector<boost::shared_ptr<ClientInfo> > *clientInfos = getGame()->getClientInfos();
+
+   mTeams.resize(getGame()->getTeamCount());
+   for(S32 i = 0; i < getGame()->getTeamCount(); i++)
+      mTeams[i].clear();
+
+   S32 ppt = S32(ceil(F32(clientInfos->size()) / F32(mTeams.size())));
+
+   for(S32 i = 0; i < clientInfos->size(); i++)
+   {
+      while(true)
+      {
+         S32 index = TNL::Random::readI(0, mTeams.size() - 1);
+         if(mTeams[index].size() < ppt)
+         {
+            mTeams[index].push_back(clientInfos->get(i).get());
+            break;
+         }
+      }
+   }
+}
+
+
 void TeamShuffleHelper::onMenuShow()
 {
-   // Do nothing
+   shuffle();
 }
 
 
@@ -101,6 +129,7 @@ void TeamShuffleHelper::render()
    const S32 rowHeight = 80;
    const S32 topMargin = (gScreenInfo.getGameCanvasHeight() - rows * rowHeight - (rows - 1) * margin) / 2;
    const S32 leftMargin = (gScreenInfo.getGameCanvasWidth() - cols * colWidth - (cols - 1) * margin) / 2;
+   const S32 vpad = 4, hpad = 4;        // Padding inside the boxes
 
    for(S32 i = 0; i < rows; i++)
       for(S32 j = 0; j < cols; j++)
@@ -111,7 +140,15 @@ void TeamShuffleHelper::render()
          S32 x = leftMargin + j * (colWidth + margin);
          S32 y = topMargin + i * (rowHeight + margin);
 
-         UserInterface::drawFilledRect(x, y, x + colWidth, y + rowHeight, Colors::black, getGame()->getTeamColor(i * cols + j));
+         S32 teamIndex = i * cols + j;
+
+         UserInterface::drawFilledRect(x, y, x + colWidth, y + rowHeight, Colors::black, getGame()->getTeamColor(teamIndex));
+
+         glColor(Colors::white);
+         for(S32 k = 0; k < mTeams[teamIndex].size(); k++)
+         {
+            UserInterface::drawString(x + hpad, y + vpad + (k+1) * 1.2 * textSize, textSize, mTeams[teamIndex][k]->getName().getString());
+         }
       }
 }
 
@@ -123,7 +160,11 @@ bool TeamShuffleHelper::processInputCode(InputCode inputCode)
    if(Parent::processInputCode(inputCode))    // Check for cancel keys
       return true;
 
-   // We're interested in space, enter, and escape
+   if(inputCode == KEY_SPACE)
+      shuffle();
+
+   else if(inputCode == KEY_ENTER)
+      getGame()->displaySuccessMessage("Take it from here, Raptor! The data you need is in mTeams.");
 
    return true;
 }

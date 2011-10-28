@@ -363,6 +363,7 @@ public:
    S32 getRobotCount() const { return mRobotCount; }                    // Returns number of bots
 
    ClientInfo *getClientInfo(S32 index);
+   const Vector<boost::shared_ptr<ClientInfo> > *getClientInfos();
 
    void addToClientList(const boost::shared_ptr<ClientInfo> &conn);               
    void removeFromClientList(const StringTableEntry &name);             // Client side

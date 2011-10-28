@@ -234,6 +234,12 @@ ClientInfo *Game::getClientInfo(S32 index)
 }
 
 
+const Vector<boost::shared_ptr<ClientInfo> > *Game::getClientInfos()
+{
+   return &mClientInfos;
+}
+
+
 void Game::addToClientList(const boost::shared_ptr<ClientInfo> &clientInfo) 
 { 
    mClientInfos.push_back(clientInfo);

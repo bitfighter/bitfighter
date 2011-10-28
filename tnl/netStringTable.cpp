@@ -396,7 +396,7 @@ void compact()
 
 void incRef(StringTableEntryId index)
 {
-   mNodeList[index]->refCount++;
+    mNodeList[index]->refCount++;
 }
 
 void decRef(StringTableEntryId index)
