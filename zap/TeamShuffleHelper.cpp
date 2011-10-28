@@ -99,8 +99,8 @@ void TeamShuffleHelper::render()
    }
 
    const S32 rowHeight = 80;
-   const S32 topMargin = 100;
-   const S32 leftMargin = 100;
+   const S32 topMargin = (gScreenInfo.getGameCanvasHeight() - rows * rowHeight - (rows - 1) * margin) / 2;
+   const S32 leftMargin = (gScreenInfo.getGameCanvasWidth() - cols * colWidth - (cols - 1) * margin) / 2;
 
    for(S32 i = 0; i < rows; i++)
       for(S32 j = 0; j < cols; j++)
