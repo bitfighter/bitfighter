@@ -69,6 +69,7 @@ public:
 
    virtual void activateHelp(UIManager *uiManager);   // Open help to an appropriate page
    virtual bool isEngineerHelper();                   // Returns false, overridden by EngineerHelper
+   virtual bool isMovementDisabled();                 // Is ship movement disabled while this helper is active?
 };
 
 

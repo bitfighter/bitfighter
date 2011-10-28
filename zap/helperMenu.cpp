@@ -128,4 +128,11 @@ bool HelperMenu::isEngineerHelper()
    return false;
 }
 
+
+bool HelperMenu::isMovementDisabled()
+{
+   return false;
+}
+
+
 };

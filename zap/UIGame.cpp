@@ -89,11 +89,6 @@ GameUserInterface::GameUserInterface(ClientGame *game) : Parent(game),
                                                          mLineEditor(200)
                                                          
 {
-   //mOutputFile = NULL;
-   bool mLeftDisabled = false; // Fix some uninitalized variables (randomly was true)
-   bool mRightDisabled = false;
-   bool mUpDisabled = false;
-   bool mDownDisabled = false;
    mInScoreboardMode = false;
    mFPSVisible = false;
    mHelper = NULL;
@@ -955,7 +950,7 @@ void GameUserInterface::onMouseMoved()
 // Enter QuickChat, Loadout, or Engineer mode
 void GameUserInterface::enterMode(UIMode mode)
 {
-   TNLAssert(mode != ChatMode, "Should not be in chat mode when this is called!");
+   TNLAssert(mode != ChatMode, "Should not called to enter chat mode!");
 
    playBoop();
    mCurrentChatType = NoChat;
@@ -971,13 +966,7 @@ void GameUserInterface::enterMode(UIMode mode)
    else 
    {
       if(mode == PlayMode)
-      {
          setBusyChatting(false);
-         mUpDisabled = false;
-         mDownDisabled = false;
-         mLeftDisabled = false;
-         mRightDisabled = false;
-      }
 
       mHelper = NULL;
    }
@@ -1047,22 +1036,6 @@ void GameUserInterface::selectWeapon(U32 indx)
 }
 
 
-// Temporarily disable the effects of a movement key to avoid unpleasant interactions between ship movement and loadout/quick chat entry
-void GameUserInterface::disableMovementKey(InputCode inputCode)
-{
-   InputMode inputMode = getGame()->getSettings()->getIniSettings()->inputMode;
-
-   if(inputCode == inputUP[inputMode])
-      mUpDisabled = true;
-   else if(inputCode == inputDOWN[inputMode])
-      mDownDisabled = true;
-   else if(inputCode == inputLEFT[inputMode])
-      mLeftDisabled = true;
-   else if(inputCode == inputRIGHT[inputMode])
-      mRightDisabled = true;
-}
-
-
 // Key pressed --> take action!
 // Handles all keypress events, including mouse clicks and controller button presses
 void GameUserInterface::onKeyDown(InputCode inputCode, char ascii)
@@ -1109,7 +1082,8 @@ void GameUserInterface::onKeyDown(InputCode inputCode, char ascii)
    }
    else if(mHelper && mHelper->processInputCode(inputCode))   // Will return true if key was processed
    {
-      disableMovementKey(inputCode);
+      // Experimental, to keep ship from moving after entering a quick chat that has the same sortcut as a movement key
+      setInputCodeState(inputCode, false);      
    }
    else 
    {
@@ -1341,7 +1315,8 @@ void GameUserInterface::processPlayModeKey(InputCode inputCode, char ascii)
       else if(inputCode == inputDROPITEM[inputMode])
          dropItem();
       else if(inputMode == InputModeJoystick)      // Check if the user is trying to use keyboard to move when in joystick mode
-         if(inputCode == inputUP[InputModeKeyboard] || inputCode == inputDOWN[InputModeKeyboard] || inputCode == inputLEFT[InputModeKeyboard] || inputCode == inputRIGHT[InputModeKeyboard])
+         if(inputCode == inputUP[InputModeKeyboard]   || inputCode == inputDOWN[InputModeKeyboard] || 
+            inputCode == inputLEFT[InputModeKeyboard] || inputCode == inputRIGHT[InputModeKeyboard])
             mWrongModeMsgDisplay.reset(WRONG_MODE_MSG_DISPLAY_TIME);
    }
 }
@@ -2467,14 +2442,6 @@ void GameUserInterface::onKeyUp(InputCode inputCode)
       if(mVoiceRecorder.mRecordingAudio)  // Turning recorder off
          mVoiceRecorder.stop();
    }
-   else if(inputCode == inputUP[inputMode])
-      mUpDisabled = false;
-   else if(inputCode == inputDOWN[inputMode])
-      mDownDisabled = false;
-   else if(inputCode == inputLEFT[inputMode])
-      mLeftDisabled = false;
-   else if(inputCode == inputRIGHT[inputMode])
-      mRightDisabled = false;
 }
 
 
@@ -2489,10 +2456,17 @@ Move *GameUserInterface::getCurrentMove()
    {
       InputMode inputMode = getGame()->getSettings()->getIniSettings()->inputMode;
 
-      mCurrentMove.x = F32((!mRightDisabled && getInputCodeState(inputRIGHT[inputMode]) ? 1 : 0) - 
-                           (!mLeftDisabled && getInputCodeState(inputLEFT[inputMode]) ? 1 : 0));
-      mCurrentMove.y = F32((!mDownDisabled  && getInputCodeState(inputDOWN[inputMode])  ? 1 : 0) - 
-                           (!mUpDisabled && getInputCodeState(inputUP[inputMode]) ? 1 : 0));
+      // Some helpers (like QuickChat or TeamShuffle) like to disable movement when they are active
+      if(mHelper && mHelper->isMovementDisabled())
+      {
+         mCurrentMove.x = 0;
+         mCurrentMove.y = 0;
+      }
+      else
+      {
+         mCurrentMove.x = F32((getInputCodeState(inputRIGHT[inputMode]) ? 1 : 0) - (getInputCodeState(inputLEFT[inputMode]) ? 1 : 0));
+         mCurrentMove.y = F32((getInputCodeState(inputDOWN[inputMode])  ? 1 : 0) - (getInputCodeState(inputUP[inputMode]) ? 1 : 0));
+      }
 
       mCurrentMove.fire = mFiring;
 
@@ -2657,7 +2631,10 @@ void GameUserInterface::setVolume(VolumeType volType, const Vector<string> &word
 void GameUserInterface::cancelChat()
 {
    mLineEditor.clear();
-   enterMode(PlayMode);
+   mCurrentChatType = NoChat;
+   setBusyChatting(false);
+
+   //enterMode(PlayMode);
 }
 
 

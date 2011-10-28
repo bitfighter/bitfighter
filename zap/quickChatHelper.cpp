@@ -216,5 +216,12 @@ bool QuickChatHelper::processInputCode(InputCode inputCode)
    return false;
 }
 
+
+bool QuickChatHelper::isMovementDisabled()
+{
+   return true;
+}
+
+
 };
 

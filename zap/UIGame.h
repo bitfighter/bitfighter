@@ -85,13 +85,6 @@ private:
    Move mTransformedMove;
    Point mMousePoint;
 
-   bool mLeftDisabled;
-   bool mRightDisabled;
-   bool mUpDisabled;
-   bool mDownDisabled;
-
-   void disableMovementKey(InputCode inputCode);
-
    // Related to display of in-game chat and status messages
    static const S32 MessageDisplayCount = 6;           // How many server messages to display
    static const S32 DisplayMessageTimeout = 3000;      // How long to display them (ms)

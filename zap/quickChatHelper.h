@@ -68,9 +68,10 @@ private:
 public:
    QuickChatHelper(ClientGame *clientGame);      // Constructor
 
-   virtual void render();                
-   virtual void onMenuShow();  
-   virtual bool processInputCode(InputCode inputCode);    
+   void render();                
+   void onMenuShow();  
+   bool processInputCode(InputCode inputCode);   
+   bool isMovementDisabled();
 };
 
 extern Vector<QuickChatNode> gQuickChatTree;      // Holds our tree of QuickChat groups and messages, as defined in the INI file

@@ -48,6 +48,8 @@ public:
    void render();                
    void onMenuShow();  
    bool processInputCode(InputCode inputCode);   
+
+   bool isMovementDisabled();
 };
 
 };

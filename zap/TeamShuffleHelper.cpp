@@ -79,5 +79,11 @@ InputCode TeamShuffleHelper::getActivationKey()
 }
 
 
+bool TeamShuffleHelper::isMovementDisabled()
+{
+   return true;
+}
+
+
 };
 
