@@ -87,8 +87,11 @@ U32 readI()
 
 U32 readI(U32 rangeStart, U32 rangeEnd)
 {
+   if(rangeStart == rangeEnd)
+      return rangeStart;
+
    TNLAssert(rangeStart <= rangeEnd, "Random::readI - invalid range.");
-   if(rangeEnd >= rangeStart)
+   if(rangeEnd > rangeStart)
       rangeEnd = rangeStart + 1;
 
    return (readI() % (rangeEnd - rangeStart + 1)) + rangeStart;
