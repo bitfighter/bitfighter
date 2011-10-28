@@ -777,18 +777,31 @@ void UserInterface::drawMenuItemHighlight(S32 x1, S32 y1, S32 x2, S32 y2, bool d
 }
 
 
+void drawRect(S32 x1, S32 y1, S32 x2, S32 y2, S32 mode)
+{
+   glBegin(mode);
+      glVertex2i(x1, y1);
+      glVertex2i(x2, y1);
+      glVertex2i(x2, y2);
+      glVertex2i(x1, y2);
+   glEnd();
+}
+
+
 void UserInterface::drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &fillColor, const Color &outlineColor)
 {
    for(S32 i = 1; i >= 0; i--)
    {
       glColor(i ? fillColor : outlineColor);
-      glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
-         glVertex2i(x1, y1);
-         glVertex2i(x2, y1);
-         glVertex2i(x2, y2);
-         glVertex2i(x1, y2);
-      glEnd();
+      drawRect(x1, y1, x2, y2, i ? GL_POLYGON : GL_LINE_LOOP);
    }
+}
+
+
+void UserInterface::drawHollowRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &outlineColor)
+{
+   glColor(outlineColor);
+   drawRect(x1, y1, x2, y2, GL_LINE_LOOP);
 }
 
 
