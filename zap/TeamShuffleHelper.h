@@ -43,7 +43,6 @@ private:
 
 public:
    TeamShuffleHelper(ClientGame *clientGame);    // Constructor
-   void initialize(bool includeEngineer);        // Set things up
 
    void render();                
    void onMenuShow();  
