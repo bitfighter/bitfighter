@@ -131,6 +131,7 @@ OBJECTS_CLIENT=\
    quickChatHelper.o\
    ScreenShooter.o\
    sparkManager.o\
+   TeamShuffleHelper.o\
    UI.o\
    UIAbstractInstructions.o\
    UIChat.o\
