@@ -1941,7 +1941,7 @@ GAMETYPE_RPC_S2C(GameType, s2cSetLevelInfo, (StringTableEntry levelName, StringT
    // Need to send this to the client because we won't know for sure when the loadout zones will be sent, so searching for them is difficult
    mLevelHasLoadoutZone = levelHasLoadoutZone;        
 
-   clientGame->mObjectsLoaded = 0;                             // Reset item counter
+   clientGame->mObjectsLoaded = 0;              // Reset item counter
 
    GameUserInterface *gameUI = clientGame->getUIManager()->getGameUserInterface();
    gameUI->mShowProgressBar = true;             // Show progress bar

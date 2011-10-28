@@ -435,10 +435,7 @@ void GameUserInterface::idle(U32 timeDelta)
          mRecalcFPSTimer -= timeDelta;
    }
 
-   if(mCurrentMode == ChatMode)
-      LineEditor::updateCursorBlink(timeDelta);    // Blink the cursor if in ChatMode
-
-   else if(mHelper)
+   if(mHelper)
       mHelper->idle(timeDelta);
 
    mVoiceRecorder.idle(timeDelta);
@@ -967,6 +964,8 @@ void GameUserInterface::enterMode(UIMode mode)
       mHelper = getLoadoutHelper(getGame());
    else if(mode == EngineerMode)
       mHelper = getEngineerHelper(getGame());
+   else if(mode == TeamShuffleMode)
+      mHelper = getTeamShuffleHelper(getGame());
    else 
    {
       if(mode == PlayMode)
@@ -1921,7 +1920,8 @@ void GameUserInterface::setMaxBotsHandler(ClientGame *game, const Vector<string>
 
 void GameUserInterface::shuffleTeams(ClientGame *game, const Vector<string> &words)
 {
-   //game->activateShuffleTeamHelper();
+   if(game->hasAdmin("!!! You don't have permissions to shuffle the teams"))
+      game->getUIManager()->getGameUserInterface()->enterMode(TeamShuffleMode);
 }
 
 

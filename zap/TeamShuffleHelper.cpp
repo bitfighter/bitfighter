@@ -56,7 +56,7 @@ void TeamShuffleHelper::onMenuShow()
 
 void TeamShuffleHelper::render()
 {
-
+   UserInterface::drawFilledRect(100,100,500,500,Colors::red, Colors::yellow);
 }
 
 
