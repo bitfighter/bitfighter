@@ -29,7 +29,7 @@ SFX_LFLAGS=-lopenal -lspeex -lvorbis
 
 # graphics linker flags
 PNG_LFLAGS:=$(shell pkg-config --libs libpng)
-GFX_LFLAGS=-lSDL -lGL $(PNG_LFLAGS)
+GFX_LFLAGS=-lSDL -lGL -lX11 $(PNG_LFLAGS)
 
 # Other needed linker flags
 LFLAGS=-lstdc++ -lm -ldl
