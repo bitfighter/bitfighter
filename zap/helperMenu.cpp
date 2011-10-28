@@ -26,6 +26,8 @@
 
 #include "helperMenu.h"
 #include "UIGame.h"     // For mGameUserInterface
+#include "UIManager.h"
+#include "UIInstructions.h"
 #include "ClientGame.h"
 #include "JoystickRender.h"
 
@@ -112,6 +114,18 @@ void HelperMenu::drawMenuCancelText(S32 yPos, const Color &color, S32 fontSize)
       glColor(color);
       UserInterface::drawString( xPos, yPos, fontSizeSm, " to cancel");
    }
+}
+
+
+void HelperMenu::activateHelp(UIManager *uiManager)
+{
+    uiManager->getInstructionsUserInterface()->activateInCommandMode();
+}
+
+
+bool HelperMenu::isEngineerHelper()
+{
+   return false;
 }
 
 };

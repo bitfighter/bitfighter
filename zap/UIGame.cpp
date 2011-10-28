@@ -955,8 +955,10 @@ void GameUserInterface::onMouseMoved()
 // Enter QuickChat, Loadout, or Engineer mode
 void GameUserInterface::enterMode(UIMode mode)
 {
+   TNLAssert(mode != ChatMode, "Should not be in chat mode when this is called!");
+
    playBoop();
-   mCurrentMode = mode;
+   mCurrentChatType = NoChat;
 
    if(mode == QuickChatMode)
       mHelper = getQuickChatHelper(getGame());
@@ -987,7 +989,7 @@ void GameUserInterface::enterMode(UIMode mode)
 
 void GameUserInterface::renderEngineeredItemDeploymentMarker(Ship *ship)
 {
-   if(mCurrentMode == EngineerMode)
+   if(mHelper && mHelper->isEngineerHelper())
    {
       TNLAssert(mEngineerHelper, "Engineer helper does not exist!");
       mEngineerHelper->renderDeploymentMarker(ship);
@@ -1073,16 +1075,16 @@ void GameUserInterface::onKeyDown(InputCode inputCode, char ascii)
    {
       playBoop();
 
-      InstructionsUserInterface *instrUI = getUIManager()->getInstructionsUserInterface();
-
-      if(mCurrentMode == ChatMode)
-         instrUI->activateInCommandMode();
+      // If we have a helper, let that determine what happens when the help key is pressed.  Otherwise, show help normally.
+      if(mHelper)
+         mHelper->activateHelp(getUIManager());
       else
-         instrUI->activate();
+         getUIManager()->getInstructionsUserInterface()->activate();
    }
+
    // Shift-/ toggles console window for the moment  (Ctrl-/ fails in glut!)
    // Don't want to open console while chatting, do we?  Only open when not in any special mode.
-   else if(mCurrentMode == PlayMode && inputCode == KEY_SLASH && checkModifier(KEY_SHIFT))   
+   else if(!mHelper && inputCode == KEY_SLASH && checkModifier(KEY_SHIFT))   
    {
       OGLCONSOLE_ShowConsole();
    }
@@ -1112,7 +1114,7 @@ void GameUserInterface::onKeyDown(InputCode inputCode, char ascii)
    else 
    {
       // If we're in play mode, and we apply the engineer module, then we can handle that locally by throwing up a menu or message
-      if(mCurrentMode == PlayMode)
+      if(!mHelper)
       {
          Ship *ship = NULL;
          if(getGame()->getConnectionToServer())   // Prevents errors, getConnectionToServer() might be NULL, and getControlObject may crash if NULL
@@ -1136,7 +1138,7 @@ void GameUserInterface::onKeyDown(InputCode inputCode, char ascii)
          }
       }
 
-      if(mCurrentMode == ChatMode)
+      if(mCurrentChatType != NoChat)
          processChatModeKey(inputCode, ascii);
       else   
          processPlayModeKey(inputCode, ascii);    // A non-chat key, really
@@ -1201,6 +1203,7 @@ static void loadLoadoutPreset(ClientGame *game, S32 slot)
 }
 
 
+// Can only get here if we're not in chat mode
 void GameUserInterface::processPlayModeKey(InputCode inputCode, char ascii)
 {
    InputMode inputMode = getGame()->getSettings()->getIniSettings()->inputMode;
@@ -1314,25 +1317,21 @@ void GameUserInterface::processPlayModeKey(InputCode inputCode, char ascii)
       if(!mVoiceRecorder.mRecordingAudio)  // Turning recorder on
          mVoiceRecorder.start();
    }
-   else if(mCurrentMode != LoadoutMode && mCurrentMode != QuickChatMode && mCurrentMode != EngineerMode)
+   else if(!mHelper)    // The following keys are only allowed in PlayMode
    {
-      // The following keys are only allowed in PlayMode, and never work in LoadoutMode
-      if(inputCode == inputTEAMCHAT[inputMode])
+      if(inputCode == inputTEAMCHAT[inputMode])          // Start entering a team chat msg
       {
          mCurrentChatType = TeamChat;
-         mCurrentMode = ChatMode;
          setBusyChatting(true);
       }
-      else if(inputCode == inputGLOBCHAT[inputMode])
+      else if(inputCode == inputGLOBCHAT[inputMode])     // Start entering a global chat msg
       {
          mCurrentChatType = GlobalChat;
-         mCurrentMode = ChatMode;
          setBusyChatting(true);
       }
-      else if(inputCode == inputCMDCHAT[inputMode])
+      else if(inputCode == inputCMDCHAT[inputMode])      // Start entering a command
       {
          mCurrentChatType = CmdChat;
-         mCurrentMode = ChatMode;
          setBusyChatting(true);
       }
       else if(inputCode == inputQUICKCHAT[inputMode])
@@ -2126,7 +2125,7 @@ S32 chatCmdSize = ARRAYSIZE(chatCmds);    // So instructions will now how big ch
 // Render chat msg that user is composing
 void GameUserInterface::renderCurrentChat()
 {
-   if(mCurrentMode != ChatMode)
+   if(mCurrentChatType == NoChat)
       return;
 
    const char *promptStr;
@@ -2316,6 +2315,8 @@ static Vector<string> *getCandidateList(Game *game, const char *first, S32 arg)
 
 void GameUserInterface::processChatModeKey(InputCode inputCode, char ascii)
 {
+   TNLAssert(mCurrentChatType != NoChat, "Must be in a chat mode to get here!");
+
    if(inputCode == KEY_ENTER)
       issueChat();
    else if(inputCode == KEY_BACKSPACE)
@@ -2484,12 +2485,14 @@ void GameUserInterface::onKeyUp(InputCode inputCode)
 // Runs only on client
 Move *GameUserInterface::getCurrentMove()
 {
-   if((mCurrentMode != ChatMode) && !mDisableShipKeyboardInput && !OGLCONSOLE_GetVisibility())
+   if((mCurrentChatType == NoChat) && !mDisableShipKeyboardInput && !OGLCONSOLE_GetVisibility())
    {
       InputMode inputMode = getGame()->getSettings()->getIniSettings()->inputMode;
 
-      mCurrentMove.x = F32((!mRightDisabled && getInputCodeState(inputRIGHT[inputMode]) ? 1 : 0) - (!mLeftDisabled && getInputCodeState(inputLEFT[inputMode]) ? 1 : 0));
-      mCurrentMove.y = F32((!mDownDisabled  && getInputCodeState(inputDOWN[inputMode])  ? 1 : 0) - (!mUpDisabled && getInputCodeState(inputUP[inputMode]) ? 1 : 0));
+      mCurrentMove.x = F32((!mRightDisabled && getInputCodeState(inputRIGHT[inputMode]) ? 1 : 0) - 
+                           (!mLeftDisabled && getInputCodeState(inputLEFT[inputMode]) ? 1 : 0));
+      mCurrentMove.y = F32((!mDownDisabled  && getInputCodeState(inputDOWN[inputMode])  ? 1 : 0) - 
+                           (!mUpDisabled && getInputCodeState(inputUP[inputMode]) ? 1 : 0));
 
       mCurrentMove.fire = mFiring;
 
@@ -2544,10 +2547,12 @@ Move *GameUserInterface::getCurrentMove()
 // User has finished entering a chat message and pressed <enter>
 void GameUserInterface::issueChat()
 {
+   TNLAssert(mCurrentChatType == GlobalChat || mCurrentChatType == TeamChat, "Invalid chat mode!");
+
    if(!mLineEditor.isEmpty())
    {
       // Check if chat buffer holds a message or a command
-      if(mLineEditor.at(0) != '/' && mCurrentChatType != CmdChat)                   // It's a normal chat message
+      if(!isCmdChat())    // It's not a command
       {
          GameType *gameType = getGame()->getGameType();
          if(gameType)

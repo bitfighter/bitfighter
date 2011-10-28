@@ -130,7 +130,8 @@ private:
    enum ChatType {            // Types of in-game chat messages:
       GlobalChat,             // Goes to everyone in game
       TeamChat,               // Goes to teammates only
-      CmdChat                 // Entering a command
+      CmdChat,                // Entering a command
+      NoChat                  // None of the above
    };
 
    enum ShutdownMode {
@@ -228,8 +229,6 @@ private:
    bool mModSecondaryActivated[ShipModuleCount];
 
    void setBusyChatting(bool busy);       // Tell the server we are (or are not) busy chatting
-
-   UIMode mCurrentMode;                   // Current game mode
 
    static const S32 SERVER_MSG_FONT_SIZE = 14;
    static const S32 SERVER_MSG_FONT_GAP = 4;

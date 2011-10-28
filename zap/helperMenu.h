@@ -37,6 +37,7 @@ namespace Zap
 {
 
 class ClientGame;
+class UIManager;
 
 class HelperMenu   
 {
@@ -64,7 +65,10 @@ public:
    virtual void idle(U32 delta) { /* Do nothing */ }    
    virtual void onMenuShow() { /* Do nothing */  }
 
-   virtual bool processInputCode(InputCode inputCode);     
+   virtual bool processInputCode(InputCode inputCode);  
+
+   virtual void activateHelp(UIManager *uiManager);   // Open help to an appropriate page
+   virtual bool isEngineerHelper();                   // Returns false, overridden by EngineerHelper
 };
 
 

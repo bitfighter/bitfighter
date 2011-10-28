@@ -61,6 +61,12 @@ void EngineerHelper::onMenuShow()
 }
 
 
+bool EngineerHelper::isEngineerHelper()
+{
+   return true;
+}
+
+
 static Point deployPosition, deployNormal;
 
 void EngineerHelper::render()

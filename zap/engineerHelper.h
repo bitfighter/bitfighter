@@ -79,6 +79,8 @@ public:
    bool processInputCode(InputCode inputCode);   
    void render();                
    void renderDeploymentMarker(Ship *ship);
+
+   bool isEngineerHelper();      // returns true
 };
 
 };
