@@ -73,16 +73,9 @@ bool TeamShuffleHelper::processInputCode(InputCode inputCode)
 }
 
 
-InputCode TeamShuffleHelper::getActivationKey() 
-{ 
-   return inputLOADOUT[getGame()->getSettings()->getIniSettings()->inputMode]; 
-}
+InputCode TeamShuffleHelper::getActivationKey()  { return KEY_NONE; }      // Only activated via chat cmd
 
-
-bool TeamShuffleHelper::isMovementDisabled()
-{
-   return true;
-}
+bool TeamShuffleHelper::isMovementDisabled()  { return true; }
 
 
 };
