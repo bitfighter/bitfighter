@@ -1055,9 +1055,9 @@ void GameUserInterface::onKeyDown(InputCode inputCode, char ascii)
          getUIManager()->getInstructionsUserInterface()->activate();
    }
 
-   // Shift-/ toggles console window for the moment  (Ctrl-/ fails in glut!)
-   // Don't want to open console while chatting, do we?  Only open when not in any special mode.
-   else if(!mHelper && inputCode == KEY_SLASH && checkModifier(KEY_SHIFT))   
+   // Ctrl-/ toggles console window for the moment
+   // Only open when not in any special mode.
+   else if(!mHelper && inputCode == KEY_SLASH && checkModifier(KEY_CTRL))
    {
       OGLCONSOLE_ShowConsole();
    }
