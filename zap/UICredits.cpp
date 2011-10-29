@@ -39,8 +39,12 @@
 namespace Zap
 {
 
-const char *gGameCredits[] = {
-   "developed by Chris Eykamp (Watusimoto)",
+static const char *gameCredits[] = {
+   "Developed by:",
+   "Chris Eykamp (Watusimoto)",
+   "David Buck (Raptor)",
+   "Samuel Williams (sam686)",
+   "-",
    "Originally based on Zap demo in OpenTNL",
    "-",
    "Mac support:",
@@ -48,6 +52,7 @@ const char *gGameCredits[] = {
    "Max Hushahn",
    "-",
    "Linux support:",
+   "David Buck (Raptor)",
    "Coding_Mike",
    "Janis Rucis",
    "-",
@@ -55,11 +60,12 @@ const char *gGameCredits[] = {
    "Qui",
    "-",
    "Bot development:",
+   "Samuel Williams (Sam686)",
    "Joseph Ivie",
    "-",
    "Testing and ideas:",
+   "Pierce Youatt (Karamazovapy)",
    "Jonathan Hansen",
-   "Samuel Williams (sam686)",
    "-",
    "Get the latest",
    "at",
@@ -156,7 +162,7 @@ void CreditsUserInterface::quit()
 
 void CreditsUserInterface::onKeyDown(InputCode inputCode, char ascii)
 {
-      quit();     // Quit the interface when any key is pressed...  any key at all.
+   quit();     // Quit the interface when any key is pressed...  any key at all.
 }
 
 //-----------------------------------------------------
@@ -183,10 +189,10 @@ CreditsScroller::CreditsScroller(ClientGame *game) : Parent(game)
    S32 index = 0;
    CreditsInfo c;
 
-   while(gGameCredits[index])
+   while(gameCredits[index])
    {
-      if(strcmp(gGameCredits[index], "-"))
-         c.creditsLine.push_back(gGameCredits[index]);
+      if(strcmp(gameCredits[index], "-"))
+         c.creditsLine.push_back(gameCredits[index]);
       else   // Place credit in cache
       {
          c.currPos.x = (F32)pos;
@@ -195,7 +201,7 @@ CreditsScroller::CreditsScroller(ClientGame *game) : Parent(game)
          c.creditsLine.clear();
       }
 
-      pos += CreditSpace;     // Should this go in the if/else construct above?
+      pos += CreditSpace;     
       index++;
    }
    mTotalSize = pos;
