@@ -42,6 +42,12 @@ HelperMenu::HelperMenu(ClientGame *clientGame)
    mClientGame = clientGame;
 }
 
+// Destructor
+HelperMenu::~HelperMenu()
+{
+   // Do nothing
+}
+
 
 // Exit helper mode by entering play mode.  Only one mode is active at a time.
 void HelperMenu::exitHelper() 

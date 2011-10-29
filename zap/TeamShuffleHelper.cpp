@@ -28,6 +28,7 @@
 #include "UIGame.h"
 #include "UIMenus.h"
 #include "ScreenInfo.h"
+#include "gameType.h"
 
 #include "SDL/SDL_opengl.h"
 
@@ -55,14 +56,14 @@ void TeamShuffleHelper::shuffle()
    for(S32 i = 0; i < getGame()->getTeamCount(); i++)
       mTeams[i].clear();
 
-   S32 ppt = S32(ceil(F32(clientInfos->size()) / F32(mTeams.size())));
+   S32 playersPerTeam = S32(ceil(F32(clientInfos->size()) / F32(mTeams.size())));
 
    for(S32 i = 0; i < clientInfos->size(); i++)
    {
       while(true)
       {
          S32 index = TNL::Random::readI(0, mTeams.size() - 1);
-         if(mTeams[index].size() < ppt)
+         if(mTeams[index].size() < playersPerTeam)
          {
             mTeams[index].push_back(clientInfos->get(i).get());
             break;
@@ -102,6 +103,7 @@ void TeamShuffleHelper::render()
      break;
    default:
       cols = 1;
+      break;
    }
 
 
@@ -173,8 +175,29 @@ bool TeamShuffleHelper::processInputCode(InputCode inputCode)
 
    else if(inputCode == KEY_ENTER)
    {
-      getGame()->displaySuccessMessage("Take it from here, Raptor! The data you need is in mTeams.");
       exitHelper();
+
+      GameType *gameType = getGame()->getGameType();
+      if(!gameType)
+         return true;
+
+      // Now determine if a player is going to change teams
+      for(S32 i = 0; i < mTeams.size(); i++)
+         for(S32 j = 0; j < mTeams[i].size(); j++)
+         {
+            ClientInfo *thisClientInfo = mTeams[i][j];
+
+            // Where did the client go?
+            if(!thisClientInfo)
+               continue;
+
+            // If the client's team is the same as the shuffled one, no need to switch
+            if(thisClientInfo->getTeamIndex() == i)
+               continue;
+
+            // Trigger a team change for the player
+            gameType->c2sTriggerTeamChange(thisClientInfo->getName(), i);
+         }
    }
 
    return true;

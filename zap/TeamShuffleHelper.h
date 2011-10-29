@@ -40,7 +40,7 @@ class TeamShuffleHelper : public HelperMenu
    typedef HelperMenu Parent;
 
 private:
-   virtual const char *getCancelMessage() { return "Shuffle canceled -- teams unchanged"; }
+   virtual const char *getCancelMessage() { return "Shuffle canceled -- teams unchanged"; };
    virtual InputCode getActivationKey();
 
    Vector<Vector<ClientInfo *> > mTeams;

@@ -2894,6 +2894,24 @@ GAMETYPE_RPC_C2S(GameType, c2sGlobalMutePlayer, (StringTableEntry playerName), (
 }
 
 
+GAMETYPE_RPC_C2S(GameType, c2sTriggerTeamChange, (StringTableEntry playerName, S32 teamIndex), (playerName, teamIndex))
+{
+   GameConnection *source = (GameConnection *) getRPCSourceConnection();
+   ClientInfo *sourceClientInfo = source->getClientInfo();
+
+   if(!sourceClientInfo->isAdmin())
+      return;  // Error message handled client-side
+
+   ClientInfo *playerClientInfo = mGame->findClientInfo(playerName);
+
+   // Player disappeared
+   if(!playerClientInfo)
+      return;
+
+   changeClientTeam(playerClientInfo, teamIndex);
+}
+
+
 GAMETYPE_RPC_C2S(GameType, c2sSendCommand, (StringTableEntry cmd, Vector<StringPtr> args), (cmd, args))
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
