@@ -49,10 +49,28 @@ HelperMenu::~HelperMenu()
 }
 
 
+const char *HelperMenu::getCancelMessage()
+{
+   return "";
+}
+
+
+InputCode HelperMenu::getActivationKey()
+{
+   return KEY_NONE;
+}
+
+
 // Exit helper mode by entering play mode.  Only one mode is active at a time.
 void HelperMenu::exitHelper() 
 { 
    mClientGame->enterMode(PlayMode); 
+}
+
+
+ClientGame *HelperMenu::getGame()
+{
+   return mClientGame;
 }
 
 
@@ -140,6 +158,10 @@ bool HelperMenu::isMovementDisabled()
 {
    return false;
 }
+
+
+void HelperMenu::idle(U32 delta) { /* Do nothing */ }
+void HelperMenu::onMenuShow() { /* Do nothing */  }
 
 
 };

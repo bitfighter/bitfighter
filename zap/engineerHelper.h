@@ -66,7 +66,7 @@ class EngineerHelper : public HelperMenu
    typedef HelperMenu Parent;
 
 private:
-   const char *getCancelMessage() { return "Engineered item not deployed"; }
+   const char *getCancelMessage();
    Vector<EngineerConstructionItemInfo> mEngineerCostructionItemInfos;
 
    S32 mSelectedItem;

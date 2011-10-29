@@ -305,5 +305,12 @@ InputCode LoadoutHelper::getActivationKey()
    return inputLOADOUT[getGame()->getSettings()->getIniSettings()->inputMode]; 
 }
 
+
+const char *LoadoutHelper::getCancelMessage()
+{
+   return "Modifications canceled -- ship design unchanged.";
+}
+
+
 };
 

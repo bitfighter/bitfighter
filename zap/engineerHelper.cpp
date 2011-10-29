@@ -194,5 +194,12 @@ void EngineerHelper::renderDeploymentMarker(Ship *ship)
    }
 }
 
+
+const char *EngineerHelper::getCancelMessage()
+{
+   return "Engineered item not deployed";
+}
+
+
 };
 

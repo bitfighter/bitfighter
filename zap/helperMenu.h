@@ -42,8 +42,8 @@ class UIManager;
 class HelperMenu
 {
 private:
-   virtual const char *getCancelMessage() { return ""; }
-   virtual InputCode getActivationKey() { return KEY_NONE; }
+   virtual const char *getCancelMessage();
+   virtual InputCode getActivationKey();
 
    ClientGame *mClientGame;
 
@@ -56,15 +56,15 @@ protected:
    void drawMenuBorderLine(S32 yPos, const Color &color);
    void drawMenuCancelText(S32 yPos, const Color &color, S32 fontSize);
 
-   ClientGame *getGame() { return mClientGame; }
+   ClientGame *getGame();
 
 public:
    HelperMenu(ClientGame *clientGame);    // Constructor
    virtual ~HelperMenu();                 // Destructor
 
-   virtual void render() = 0;                
-   virtual void idle(U32 delta) { /* Do nothing */ }    
-   virtual void onMenuShow() { /* Do nothing */  }
+   virtual void render() = 0;
+   virtual void idle(U32 delta);
+   virtual void onMenuShow();
 
    virtual bool processInputCode(InputCode inputCode);  
 

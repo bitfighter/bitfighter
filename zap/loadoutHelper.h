@@ -66,8 +66,8 @@ private:
    U32 mWeapon[ShipWeaponCount];   // Weapons selected by user -- 3
    S32 mCurrentIndex;
 
-   virtual const char *getCancelMessage() { return "Modifications canceled -- ship design unchanged."; }
-   virtual InputCode getActivationKey();
+   const char *getCancelMessage();
+   InputCode getActivationKey();
 
    bool isValidItem(S32 index);    // Do we have the required prerequisites for this item?
 

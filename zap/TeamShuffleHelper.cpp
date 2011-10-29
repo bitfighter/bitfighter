@@ -204,9 +204,23 @@ bool TeamShuffleHelper::processInputCode(InputCode inputCode)
 }
 
 
-InputCode TeamShuffleHelper::getActivationKey()  { return KEY_NONE; }      // Only activated via chat cmd
+const char *TeamShuffleHelper::getCancelMessage()
+{
+   return "Shuffle canceled -- teams unchanged";
+}
 
-bool TeamShuffleHelper::isMovementDisabled()  { return true; }
+
+// Only activated via chat cmd
+InputCode TeamShuffleHelper::getActivationKey()
+{
+   return KEY_NONE;
+}
+
+
+bool TeamShuffleHelper::isMovementDisabled()
+{
+   return true;
+}
 
 
 };
