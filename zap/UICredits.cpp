@@ -41,7 +41,7 @@ namespace Zap
 
 static const char *gameCredits[] = {
    "Developed by:",
-   "Chris Eykamp (Watusimoto)",
+   "Chris Eykamp (watusimoto)",
    "David Buck (raptor)",
    "Samuel Williams (sam686)",
    "-",
