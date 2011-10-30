@@ -43,9 +43,8 @@ U32 GridDatabase::mCountGridDatabase = 0;
 GridDatabase::GridDatabase()
 {
    if(mChunker == NULL)
-   {
-      mChunker = new ClassChunker<BucketEntry>();
-   }
+      mChunker = new ClassChunker<BucketEntry>();     // static shared by all databases, reference counted and deleted in destructor
+
    mCountGridDatabase++;
 
 
@@ -63,6 +62,7 @@ GridDatabase::~GridDatabase()
    removeEverythingFromDatabase();
 
    TNLAssert(mChunker != NULL || mCountGridDatabase != 0, "running GridDatabase Destructor without initalizing?")
+
    mCountGridDatabase--;
    if(mCountGridDatabase == 0)
       delete mChunker;
@@ -688,25 +688,28 @@ static DatabaseObject *getObject(dbMap &dbObjectMap, DatabaseObject *theObject)
 void EditorObjectDatabase::copy(const EditorObjectDatabase &source)
 {
    dbMap dbObjectMap;
+   S32 ctr = 0;
 
    for(U32 x = 0; x < BucketRowCount; x++)
       for(U32 y = 0; y < BucketRowCount; y++)
       {
-         mBuckets[x & BucketMask][y & BucketMask] = NULL;
+         mBuckets[x][y] = NULL;
 
-         for(BucketEntry *walk = source.mBuckets[x & BucketMask][y & BucketMask]; walk; walk = walk->nextInBucket)
+         for(BucketEntry *walk = source.mBuckets[x][y]; walk; walk = walk->nextInBucket)
          {
+            ctr++;
             BucketEntry *be = mChunker->alloc();                // Create a slot for our new object
             DatabaseObject *theObject = walk->theObject;
 
             DatabaseObject *object = getObject(dbObjectMap, theObject);    // Returns a pointer to a new or existing copy of theObject
             be->theObject = object;
 
-            be->nextInBucket = mBuckets[x & BucketMask][y & BucketMask];
-            mBuckets[x & BucketMask][y & BucketMask] = be;
+            be->nextInBucket = mBuckets[x][y];
+            mBuckets[x][y] = be;
          }
       }
 
+logprintf("found %d refs!", ctr);
    // Copy our non-spatial databases as well
    mAllEditorObjects.resize(source.mAllEditorObjects.size());
    mAllObjects.resize(source.mAllEditorObjects.size());

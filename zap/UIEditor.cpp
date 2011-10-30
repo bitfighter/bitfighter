@@ -1906,10 +1906,10 @@ void EditorUserInterface::pasteSelection()
       newObject->setSelected(true);
       newObject->moveTo(pos - offset);
 
-      // onGeomChanged() calls updateExtentInDatabase(), which only sets the object's extent, but does not do anything with the database
-      // since object won't be in the database until addToGame() is called
+      // onGeomChanged calls updateExtentInDatabase, which only sets the object's extent, but does not do anything with the database
+      // since object won't be in the database until addToGame is called, which will insert object with extent calculated in onGeomChanged
       newObject->onGeomChanged();                                          
-      newObject->addToGame(getGame(), getGame()->getEditorDatabase());     // Puts object in database at (0,0)
+      newObject->addToGame(getGame(), getGame()->getEditorDatabase()); 
    }
 
    validateLevel();
