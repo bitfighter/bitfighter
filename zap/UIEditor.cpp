@@ -351,10 +351,12 @@ void EditorUserInterface::undo(bool addToRedoStack)
 
    rebuildEverything();    // Well, rebuild segments from walls at least
 
+   //getGame()->getEditorDatabase()->dumpObjects();
+
    // Why is this block needed??  Makes larger levels palpably slow...
    const Vector<EditorObject *> *objects = getGame()->getEditorDatabase()->getObjectList();
-   for(S32 i = 0; i < objects->size(); i++)
-      objects->get(i)->updateExtentInDatabase();
+   //for(S32 i = 0; i < objects->size(); i++)
+   //   objects->get(i)->updateExtentInDatabase();
 
    mLastUndoStateWasBarrierWidthChange = false;
    validateLevel();
@@ -1878,17 +1880,17 @@ void EditorUserInterface::copySelection()
 // Paste items on the clipboard
 void EditorUserInterface::pasteSelection()
 {
-   if(mDraggingObjects)      // Pasting while dragging can cause crashes!!
+   if(mDraggingObjects)    // Pasting while dragging can cause crashes!!
       return;
 
    S32 itemCount = mClipboard.size();
 
-    if(itemCount == 0)       // Nothing on clipboard, nothing to do
+    if(itemCount == 0)     // Nothing on clipboard, nothing to do
       return;
 
-   saveUndoState();      // So we can undo the paste
+   saveUndoState();        // So we can undo the paste
 
-   clearSelection();     // Only the pasted items should be selected
+   clearSelection();       // Only the pasted items should be selected
 
    Point pos = snapPoint(convertCanvasToLevelCoord(mMousePos));
 
@@ -1900,11 +1902,14 @@ void EditorUserInterface::pasteSelection()
       offset = firstPoint - mClipboard[i]->getVert(0);
 
       EditorObject *newObject = mClipboard[i]->newCopy();
-      newObject->addToGame(getGame(), getGame()->getEditorDatabase());
 
       newObject->setSelected(true);
       newObject->moveTo(pos - offset);
-      newObject->onGeomChanged();         // Calls updateExtentInDatabase()
+
+      // onGeomChanged() calls updateExtentInDatabase(), which only sets the object's extent, but does not do anything with the database
+      // since object won't be in the database until addToGame() is called
+      newObject->onGeomChanged();                                          
+      newObject->addToGame(getGame(), getGame()->getEditorDatabase());     // Puts object in database at (0,0)
    }
 
    validateLevel();
