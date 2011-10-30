@@ -304,7 +304,9 @@ void EditorUserInterface::saveUndoState()
    EditorObjectDatabase *eod = getGame()->getEditorDatabase();
    TNLAssert(eod, "bad!");
 
-   EditorObjectDatabase *newDB = eod;     
+   EditorObjectDatabase *newDB = eod;   
+   eod->dumpObjects();
+
    mUndoItems[mLastUndoIndex % UNDO_STATES] = boost::shared_ptr<EditorObjectDatabase>(new EditorObjectDatabase(*newDB));  // Make a copy
 
    mLastUndoIndex++;
@@ -2413,8 +2415,13 @@ void EditorUserInterface::onMouseDragged()
    if(mCreatingPoly || mCreatingPolyline || mDragSelecting)
       return;
 
+   bool needToSaveUndoState = true;
+
    if(mDraggingDockItem != NONE)      // We just started dragging an item off the dock
+   {
        startDraggingDockItem();  
+       needToSaveUndoState = false;
+   }
 
    findSnapVertex();
 
@@ -2439,7 +2446,8 @@ void EditorUserInterface::onMouseDragged()
                   mOriginalVertLocations.push_back(obj->getVert(j));
       }
 
-      saveUndoState();
+      if(needToSaveUndoState)
+         saveUndoState();
    }
 
    mDraggingObjects = true;
@@ -2502,6 +2510,8 @@ EditorObject *EditorUserInterface::copyDockItem(S32 index)
 // User just dragged an item off the dock
 void EditorUserInterface::startDraggingDockItem()
 {
+   saveUndoState();     // Save our undo state before we create a new item
+
    EditorObject *item = copyDockItem(mDraggingDockItem);
 
    //item->initializeEditor(getGridSize());    // Override this to define some initial geometry for your object... 
@@ -2899,6 +2909,7 @@ void EditorUserInterface::deleteItem(S32 itemIndex)
    validateLevel();
 
    onMouseMoved();   // Reset cursor  
+   game->getEditorDatabase()->dumpObjects();
 }
 
 
