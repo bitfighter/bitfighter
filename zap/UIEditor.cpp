@@ -349,7 +349,12 @@ void EditorUserInterface::undo(bool addToRedoStack)
 
    getGame()->setEditorDatabase(boost::dynamic_pointer_cast<GridDatabase>(mUndoItems[mLastUndoIndex % UNDO_STATES]));
 
-   rebuildEverything();
+   rebuildEverything();    // Well, rebuild segments from walls at least
+
+   // Why is this block needed??  Makes larger levels palpably slow...
+   const Vector<EditorObject *> *objects = getGame()->getEditorDatabase()->getObjectList();
+   for(S32 i = 0; i < objects->size(); i++)
+      objects->get(i)->updateExtentInDatabase();
 
    mLastUndoStateWasBarrierWidthChange = false;
    validateLevel();
@@ -2127,8 +2132,12 @@ void EditorUserInterface::findHitItemAndEdge()
    fillVector.clear();
    EditorObjectDatabase *editorDb = getGame()->getEditorDatabase();
    editorDb->findObjects((TestFunc)isAnyObjectType, fillVector, cursorRect);
+   //getGame()->getEditorDatabase()->findObjects(fillVector);
 
-      Point mouse = convertCanvasToLevelCoord(mMousePos);      // Figure out where the mouse is in level coords
+   if(fillVector.size() > 0)
+      int x = 0;
+
+   Point mouse = convertCanvasToLevelCoord(mMousePos);      // Figure out where the mouse is in level coords
 
    // Do this in two passes -- the first we only consider selected items, the second pass will consider all targets.
    // This will give priority to hitting vertices of selected items.
@@ -2352,8 +2361,7 @@ void EditorUserInterface::onMouseMoved()
    if(mCreatingPoly || mCreatingPolyline)
       return;
 
-   //findHitVertex(mMousePos, vertexHitObject, vertexHit);      // Sets vertexHitObject and vertexHit
-   findHitItemAndEdge();                                      //  Sets mItemHit, mVertexHit, and mEdgeHit
+   findHitItemAndEdge();      //  Sets mItemHit, mVertexHit, and mEdgeHit
 
    // Unhighlight the currently lit up object, if any
    if(mItemToLightUp)
@@ -2410,7 +2418,7 @@ void EditorUserInterface::onMouseDragged()
       return;
    
    
-   if(!mDraggingObjects)      // Just started dragging
+   if(!mDraggingObjects)            // Just started dragging
    {
       mMoveOrigin = mSnapObject->getVert(mSnapVertexIndex);
       mOriginalVertLocations.clear();
@@ -3564,7 +3572,6 @@ void EditorUserInterface::onKeyUp(InputCode inputCode)
          if(mDragSelecting)      // We were drawing a rubberband selection box
          {
             Rect r(convertCanvasToLevelCoord(mMousePos), mMouseDownPos);
-            S32 j;
 
             fillVector.clear();
 
@@ -3572,6 +3579,8 @@ void EditorUserInterface::onKeyUp(InputCode inputCode)
                getGame()->getEditorDatabase()->findObjects((TestFunc)isWallType, fillVector);
             else
                getGame()->getEditorDatabase()->findObjects(fillVector);
+            /*   EditorObjectDatabase *editorDb = getGame()->getEditorDatabase();
+               editorDb->findObjects((TestFunc)isAnyObjectType, fillVector, cursorRect);*/
 
 
             for(S32 i = 0; i < fillVector.size(); i++)
@@ -3580,6 +3589,8 @@ void EditorUserInterface::onKeyUp(InputCode inputCode)
 
                // Make sure that all vertices of an item are inside the selection box; basically means that the entire 
                // item needs to be surrounded to be included in the selection
+               S32 j;
+
                for(j = 0; j < obj->getVertCount(); j++)
                   if(!r.contains(obj->getVert(j)))
                      break;
