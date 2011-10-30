@@ -1904,7 +1904,7 @@ void EditorUserInterface::pasteSelection()
 
       newObject->setSelected(true);
       newObject->moveTo(pos - offset);
-      newObject->onGeomChanged();
+      newObject->onGeomChanged();         // Calls updateExtentInDatabase()
    }
 
    validateLevel();
