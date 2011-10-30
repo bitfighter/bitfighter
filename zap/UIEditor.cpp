@@ -1900,7 +1900,6 @@ void EditorUserInterface::pasteSelection()
       offset = firstPoint - mClipboard[i]->getVert(0);
 
       EditorObject *newObject = mClipboard[i]->newCopy();
-      newObject->updateExtentInDatabase();
       newObject->addToGame(getGame(), getGame()->getEditorDatabase());
 
       newObject->setSelected(true);
