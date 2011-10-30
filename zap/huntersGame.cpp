@@ -820,8 +820,8 @@ U32 HuntersNexusObject::packUpdate(GhostConnection *connection, U32 updateMask, 
 void HuntersNexusObject::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    unpackGeom(connection, stream);      
-   updateExtentInDatabase();    
 }
+
 
 const char HuntersNexusObject::className[] = "HuntersNexusObject";      // Class name as it appears to Lua scripts
 

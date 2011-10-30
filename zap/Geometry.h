@@ -207,6 +207,8 @@ public:
 
 class PolygonGeometry : public PolylineGeometry
 {
+   typedef PolylineGeometry Parent;
+
 private:
    Vector<Point> mPolyFill;
    F32 mLabelAngle;

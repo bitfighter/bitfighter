@@ -205,7 +205,6 @@ void GoalZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
    if(stream->readFlag()) 
    {
       unpackGeom(connection, stream);
-      updateExtentInDatabase();     // Sets object's extent database
 
       stream->read(&mScore);
    }
@@ -219,6 +218,8 @@ void GoalZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
          mFlashCount = FlashCount;
       }
    }
+
+   
 }
 
 

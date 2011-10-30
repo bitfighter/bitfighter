@@ -170,7 +170,6 @@ void LoadoutZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    readThisTeam(stream);
    unpackGeom(connection, stream);
-   updateExtentInDatabase();
 }
 
 

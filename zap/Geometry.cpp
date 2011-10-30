@@ -323,7 +323,7 @@ bool PolylineGeometry::vertSelected(S32 vertIndex)
 
 void PolylineGeometry::onPointsChanged()
 {
-   // Do nothing
+    updateExtentInDatabase();
 }
 
 
@@ -446,6 +446,8 @@ void PolygonGeometry::onPointsChanged()
    mCentroid = findCentroid(mPolyBounds); 
    Triangulate::Process(mPolyBounds, mPolyFill);        // Resizes and fills mPolyFill from data in mPolyBounds
    mLabelAngle = angleOfLongestSide(mPolyBounds);
+
+   Parent::onPointsChanged();
 }
 
 
