@@ -319,6 +319,16 @@ GameNetInterface *Game::getNetInterface()
 }
 
 
+EditorObjectDatabase *Game::getEditorDatabase()  // TODO: Only for clientGame
+{ 
+   // Lazy init
+   if(!mEditorDatabase.get())
+      mEditorDatabase = boost::shared_ptr<EditorObjectDatabase>(new EditorObjectDatabase());
+         
+   return mEditorDatabase.get(); 
+}  
+
+
 MasterServerConnection *Game::getConnectionToMaster()
 {
    return mConnectionToMaster;

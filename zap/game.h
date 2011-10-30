@@ -418,14 +418,7 @@ public:
    GameNetInterface *getNetInterface();
    virtual GridDatabase *getGameObjDatabase() { return mGameObjDatabase.get(); }    
 
-   EditorObjectDatabase *getEditorDatabase() // TODO: Only for clientGame
-   { 
-      // Lazy init
-      if(!mEditorDatabase.get())
-         mEditorDatabase = boost::shared_ptr<EditorObjectDatabase>(new EditorObjectDatabase());
-         
-      return mEditorDatabase.get(); 
-   }      
+   EditorObjectDatabase *getEditorDatabase(); // TODO: Only for clientGame
 
    void setEditorDatabase(boost::shared_ptr<GridDatabase> database) { mEditorDatabase = boost::dynamic_pointer_cast<EditorObjectDatabase>(database); }
 
