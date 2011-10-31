@@ -275,9 +275,6 @@ public:
 
    TNL_DECLARE_RPC(s2cSetServerName, (StringTableEntry name));
 
-
-   TNL_DECLARE_RPC(c2sAdminPlayerAction, (StringTableEntry playerName, U32 actionIndex, S32 team));
-
    bool isInCommanderMap() { return mInCommanderMap; }
 
    TNL_DECLARE_RPC(c2sRequestCommanderMap, ());

@@ -493,6 +493,7 @@ public:
    TNL_DECLARE_RPC(c2sGlobalMutePlayer, (StringTableEntry playerName));
 
    TNL_DECLARE_RPC(c2sTriggerTeamChange, (StringTableEntry playerName, S32 teamIndex));
+   TNL_DECLARE_RPC(c2sKickPlayer, (StringTableEntry playerName));
 
    TNL_DECLARE_CLASS(GameType);
 

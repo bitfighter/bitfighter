@@ -1482,9 +1482,13 @@ void GameUserInterface::kickPlayerHandler(ClientGame *game, const Vector<string>
          string name = words[1];
          
          if(!game->checkName(name))
+         {
             game->displayErrorMessage("!!! Could not find player: %s", words[1].c_str());
-         else
-            game->getConnectionToServer()->c2sAdminPlayerAction(words[1].c_str(), PlayerMenuUserInterface::Kick, 0);     // Team doesn't matter with kick!
+            return;
+         }
+
+         if(game->getGameType())
+            game->getGameType()->c2sKickPlayer(words[1].c_str());
       }
    }
 }

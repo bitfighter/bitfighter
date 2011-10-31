@@ -37,8 +37,6 @@
 #include "ClientGame.h"
 #endif
 
-#include "UIMenus.h"             // For enum in PlayerMenuUserInterface
-
 #include "md5wrapper.h"
 
 #include "Colors.h"
@@ -689,74 +687,6 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
       msg = serverLevelDeleted;
 
    s2cDisplayMessage(ColorRed, SFXNone, msg);      // Notify user their bidding has been done
-}
-
-
-// Kick player or change his team
-TNL_IMPLEMENT_RPC(GameConnection, c2sAdminPlayerAction,
-                     (StringTableEntry playerName, U32 actionIndex, S32 team), (playerName, actionIndex, team),
-                     NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
-{
-   if(!mClientInfo->isAdmin())
-      return;              // Do nothing --> non-admins have no pull here
-
-   // else...
-
-   GameType *gt = gServerGame->getGameType();
-
-   // Find connection for player with name playerName
-   ClientInfo *clientInfo = gt->getGame()->findClientInfo(playerName);
-   GameConnection *theClient = clientInfo->getConnection();
-
-   if(!clientInfo)    // Hmmm... couldn't find the dude.  Maybe he disconnected?
-      return;
-
-   static StringTableEntry kickMessage("%e0 was kicked from the game by %e1.");
-   static StringTableEntry changeTeamMessage("%e0 had their team changed by %e1.");
-
-   StringTableEntry msg;
-   Vector<StringTableEntry> e;
-   e.push_back(clientInfo->getName());       // --> Name of player being administered
-   e.push_back(getClientInfo()->getName());  // --> Name of player doing the adminstering
-
-   switch(actionIndex)
-   {
-      case PlayerMenuUserInterface::ChangeTeam:
-         msg = changeTeamMessage;
-         gt->changeClientTeam(clientInfo, team);
-         break;
-
-      case PlayerMenuUserInterface::Kick:
-         msg = kickMessage;
-         if(mClientInfo->isAdmin())
-         {
-            static StringTableEntry nokick("Can't kick an administrator!");
-            s2cDisplayMessage(ColorAqua, SFXNone, nokick);
-            return;
-         }
-
-         if(theClient->isEstablished())     // Robots don't have established connections
-         {
-            ConnectionParameters &p = theClient->getConnectionParameters();
-
-            if(p.mIsArranged)
-               gServerGame->getSettings()->getBanList()->kickHost(p.mPossibleAddresses[0]);      // Banned for 30 seconds
-
-            gServerGame->getSettings()->getBanList()->kickHost(theClient->getNetAddress());      // Banned for 30 seconds
-            theClient->disconnect(ReasonKickedByAdmin, "");
-         }
-
-         for(S32 i = 0; i < Robot::robots.size(); i++)
-            if(Robot::robots[i]->getName() == clientInfo->getName())
-               delete Robot::robots[i];
-
-         break;
-
-      default:
-         return;
-   }
-
-   gt->broadcastMessage(ColorAqua, SFXIncomingMessage, msg, e);
 }
 
 
