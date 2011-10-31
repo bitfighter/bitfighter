@@ -1001,7 +1001,6 @@ void EditorUserInterface::onActivate()
    mSnapDisabled = false;      // Hold [space] to temporarily disable snapping
 
    // Reset display parameters...
-   centerView();
    mDragSelecting = false;
    mUp = mDown = mLeft = mRight = mIn = mOut = false;
    mCreatingPoly = false;
@@ -1020,6 +1019,8 @@ void EditorUserInterface::onActivate()
 
 
    actualizeScreenMode(true);
+
+   centerView();
 }
 
 
