@@ -154,6 +154,7 @@ struct IniSettings      // With defaults specified
    DisplayMode displayMode;
    DisplayMode oldDisplayMode;
    U32 joystickType;
+   bool joystickLinuxUseOldDeviceSystem;
    bool echoVoice;
 
    F32 sfxVolLevel;                 // SFX volume (0 = silent, 1 = full bore)

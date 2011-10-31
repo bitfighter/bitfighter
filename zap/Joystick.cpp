@@ -26,7 +26,7 @@
 #include "Joystick.h"
 #include "stringUtils.h"
 #include "tnlLog.h"
-#include "config.h"
+#include "ClientGame.h"
 
 #include "SDL/SDL.h"
 
@@ -69,6 +69,34 @@ Joystick::~Joystick() {
 
 bool Joystick::initJoystick()
 {
+#ifdef TNL_OS_LINUX
+   // Hackety hack hack for some joysticks that seem calibrated horribly wrong.
+   //
+   // What happens is that SDL uses the newer event system at /dev/input/eventX for joystick enumeration
+   // instead of the older /dev/input/jsX or /dev/jsX;  The problem is, is that calibration cannot be done
+   // the event (/dev/input/eventX) devices and therefore some joysticks, like the PS3, act strangely in-game
+   //
+   // If you specify "JoystickLinuxUseOldDeviceSystem" as "Yes" in the INI, then this code below will
+   // add /dev/input/js0 to the list of enumerated joysticks (as joystick 0).  This means that if you have
+   // a PS3 joystick plugged in, SDL will detect *two* joysticks:
+   //
+   // 1. joystick 0 = PS3 controller at /dev/input/js0
+   // 2. joystick 1 = PS3 controller at /dev/input/eventX (where 'X' can be any number)
+   //
+   // See here for more info:
+   //   http://superuser.com/questions/17959/linux-joystick-seems-mis-calibrated-in-an-sdl-game-freespace-2-open
+
+   extern ClientGame *gClientGame;
+
+   if(gClientGame->getSettings()->getIniSettings()->joystickLinuxUseOldDeviceSystem)
+   {
+      string joystickEnv = "SDL_JOYSTICK_DEVICE=/dev/input/js" + itos(0);
+      SDL_putenv((char *)joystickEnv.c_str());
+
+      logprintf("Using older Linux joystick device system to workaround calibration problems");
+   }
+#endif
+
    DetectedJoystickNameList.clear();
 
    // Close if already open.
@@ -99,7 +127,7 @@ bool Joystick::initJoystick()
    logprintf("%d joystick(s) detected:", joystickCount);
    for (S32 i = 0; i < joystickCount; i++)
    {
-      const char * joystickName = SDL_JoystickName(i);
+      const char *joystickName = SDL_JoystickName(i);
       logprintf("%d. %s", i, joystickName);
       DetectedJoystickNameList.push_back(joystickName);
    }
