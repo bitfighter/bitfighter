@@ -124,7 +124,8 @@ class WallItem : public LineItem
 public:
    WallItem();    // Constructor
    WallItem *clone() const;
-   
+
+   Vector<Point> extendedEndPoints;
    virtual Rect calcExtents();
    virtual void onGeomChanged();
    void processEndPoints();      
@@ -167,8 +168,6 @@ public:
    PolyWall *clone() const;
   
    bool processArguments(S32 argc, const char **argv, Game *game);
-
-   void processEndPoints();
 
    void render();
    void renderFill();

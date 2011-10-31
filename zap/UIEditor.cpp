@@ -599,9 +599,7 @@ void EditorUserInterface::runScript(const FolderManager *folderManager, const st
       if(obj->getVertCount() < 2)      // Invalid item; delete
          mLoadTarget->removeFromDatabase(obj, obj->getExtent());
 
-      if(obj->getObjectTypeNumber() == PolyWallTypeNumber)
-         dynamic_cast<PolyWall *>(obj)->processEndPoints();
-      else
+      if(obj->getObjectTypeNumber() != PolyWallTypeNumber)
          dynamic_cast<WallItem *>(obj)->processEndPoints();
    }
 

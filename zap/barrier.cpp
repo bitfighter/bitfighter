@@ -437,7 +437,7 @@ void WallItem::onGeomChanged()
 void WallItem::processEndPoints()
 {
 #ifndef ZAP_DEDICATED
-   Barrier::constructBarrierEndPoints(getOutline(), (F32)getWidth(), extendedEndPoints);
+   Barrier::constructBarrierEndPoints(getOutline(), (F32)getWidth(), extendedEndPoints);     // Fills extendedEndPoints
 #endif
 }
 
@@ -498,23 +498,6 @@ PolyWall::PolyWall()
 PolyWall *PolyWall::clone() const
 {
    return new PolyWall(*this);
-}
-
-
-void PolyWall::processEndPoints()
-{
-#ifndef ZAP_DEDICATED
-   extendedEndPoints.clear();
-   for(S32 i = 1; i < getVertCount(); i++)
-   {
-      extendedEndPoints.push_back(getVert(i-1));
-      extendedEndPoints.push_back(getVert(i));
-   }
-
-   // Close the loop
-   extendedEndPoints.push_back(getVert(getVertCount()));
-   extendedEndPoints.push_back(getVert(0));
-#endif
 }
 
 
@@ -723,7 +706,7 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *gameDataba
       WallItem *wallItem = static_cast<WallItem *>(wall);
 
       // Create a WallSegment for each sequential pair of vertices
-      for(S32 i = 0; i < wall->extendedEndPoints.size(); i += 2)
+      for(S32 i = 0; i < wallItem->extendedEndPoints.size(); i += 2)
       {
          WallSegment *newSegment = new WallSegment(mWallSegmentDatabase, wallItem->extendedEndPoints[i], wallItem->extendedEndPoints[i+1], 
                                                    (F32)wallItem->getWidth(), wallItem->getSerialNumber());    // Create the segment

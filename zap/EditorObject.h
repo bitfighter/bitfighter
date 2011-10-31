@@ -134,11 +134,8 @@ public:
    virtual F32 getEditorRadius(F32 currentScale);                 // Size of object in editor 
    virtual const char *getVertLabel(S32 index) { return ""; }     // Label for vertex, if any... only overridden by SimpleLine objects
 
-
    void saveItem(FILE *f, F32 gridSize);
    virtual string toString(F32 gridSize) const = 0; 
-
-   Vector<Point> extendedEndPoints;                            // These are computed but not stored in barrier... not sure how to merge
 
    // Dock item rendering methods
    virtual void renderDock() { TNLAssert(false, "renderDock not implemented!"); }   // Need not be abstract -- some of our objects do not go on dock
