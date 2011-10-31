@@ -154,9 +154,6 @@ public:
    void moveTo(const Point &pos, S32 snapVertex = 0);    // Move object to location, specifying (optional) vertex to be positioned at pos
    void offset(const Point &offset);                     // Offset object by a certain amount
 
-   S32 repopDelay;        // For repair items, also used for engineered objects heal rate
-
-
    //////
    // Vertex management functions
    virtual void onGeomChanging();                        // Item geom is interactively changing
