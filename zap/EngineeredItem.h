@@ -158,10 +158,6 @@ public:
    S32 getAngle(lua_State *L) {return returnFloat(L, mAnchorNormal.ATAN2());};
 
    GameObject *getGameObject() { return this; }
-
-#ifdef ZAP_DEDICATED
-   Point forceFieldEnd;  // would normally be in EditorObject
-#endif
 };
 
 
@@ -217,6 +213,7 @@ private:
    typedef EngineeredItem Parent;
    SafePtr<ForceField> mField;
    WallSegment *mForceFieldEndSegment;
+   Point forceFieldEnd;
 
    void getObjectGeometry(const Point &anchor, const Point &normal, Vector<Point> &geom) const;
 

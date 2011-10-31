@@ -195,8 +195,6 @@ public:
 
    virtual void initializeEditor();
 
-   Point forceFieldEnd;      // Point where forcefield terminates.  Only used for forcefields.
-
    S32 mScore;
    S32 getScore() { return mScore; }     // goal zones only, return zone's score
 
