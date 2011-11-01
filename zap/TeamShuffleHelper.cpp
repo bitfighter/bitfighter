@@ -50,17 +50,19 @@ TeamShuffleHelper::TeamShuffleHelper(ClientGame *clientGame) : Parent(clientGame
 // Randomly fill teams with clientInfos
 void TeamShuffleHelper::shuffle()
 {
-   const Vector<boost::shared_ptr<ClientInfo> > *clientInfos = getGame()->getClientInfos();
+   teamCount = getGame()->getTeamCount();
 
-   mTeams.resize(getGame()->getTeamCount());
-   for(S32 i = 0; i < getGame()->getTeamCount(); i++)
+   mTeams.resize(teamCount);
+   for(S32 i = 0; i < teamCount; i++)
       mTeams[i].clear();
 
-   S32 playersPerTeam = S32(ceil(F32(clientInfos->size()) / F32(mTeams.size())));
+   const Vector<boost::shared_ptr<ClientInfo> > *clientInfos = getGame()->getClientInfos();
+
+   playersPerTeam = S32(ceil(F32(clientInfos->size()) / F32(mTeams.size())));
 
    for(S32 i = 0; i < clientInfos->size(); i++)
    {
-      while(true)
+      while(true)  // Evil
       {
          S32 index = TNL::Random::readI(0, mTeams.size() - 1);
          if(mTeams[index].size() < playersPerTeam)
@@ -70,6 +72,8 @@ void TeamShuffleHelper::shuffle()
          }
       }
    }
+
+   calculateRenderSizes();
 }
 
 
@@ -79,10 +83,9 @@ void TeamShuffleHelper::onMenuShow()
 }
 
 
-void TeamShuffleHelper::render()
+void TeamShuffleHelper::calculateRenderSizes()
 {
-   S32 teamCount = getGame()->getTeamCount();
-   S32 cols;
+   logprintf("teamCount: %d", teamCount);
 
    switch(teamCount)
    {
@@ -99,67 +102,67 @@ void TeamShuffleHelper::render()
    case 7:
    case 8:
    case 9:
-     cols = 3;
-     break;
+      cols = 3;
+      break;
    default:
       cols = 1;
       break;
    }
 
+   rows = (S32)ceil((F32)teamCount / (F32)cols);
 
-   S32 rows = (S32)ceil((F32)teamCount / (F32)cols);
-   S32 maxColWidth = (gScreenInfo.getGameCanvasWidth() - 100) / cols;
+   columnWidth = -1;
+   maxColumnWidth = (gScreenInfo.getGameCanvasWidth() - 100) / cols;
+   rowHeight = (2 * vpad) + (playersPerTeam * 1.2 * textSize);  // Magic number yay
 
-   S32 colWidth = -1;
-   const S32 textSize = 15;
-   const S32 margin = 10;
-
-   for(S32 i = 0; i < getGame()->getPlayerCount(); i++)
-   {
-      S32 width = UserInterface::getStringWidth(textSize, getGame()->Game::getClientInfo(i)->getName().getString());
-
-      if(width > colWidth)
+   for(S32 i = 0; i < mTeams.size(); i++)
+      for(S32 j = 0; j < mTeams[i].size(); j++)
       {
-         if(width > maxColWidth)
+         S32 width = UserInterface::getStringWidth(textSize, getGame()->Game::getClientInfo(j)->getName().getString());
+
+         if(width > columnWidth)
          {
-            colWidth = maxColWidth;
-            break;
+            if(width > maxColumnWidth)
+            {
+               columnWidth = maxColumnWidth;
+               break;
+            }
+            else
+               columnWidth = width;
          }
-         else
-            colWidth = width;
       }
-   }
 
-   const S32 rowHeight = 80;
-   const S32 topMargin = (gScreenInfo.getGameCanvasHeight() - rows * rowHeight - (rows - 1) * margin) / 2;
-   const S32 leftMargin = (gScreenInfo.getGameCanvasWidth() - cols * colWidth - (cols - 1) * margin) / 2;
-   const S32 vpad = 10, hpad = 10;        // Padding inside the boxes
+   topMargin = (gScreenInfo.getGameCanvasHeight() - rows * rowHeight - (rows - 1) * margin) / 2;
+   leftMargin = (gScreenInfo.getGameCanvasWidth() - cols * columnWidth - (cols - 1) * margin) / 2;
 
-   colWidth += 2 * hpad;
+   columnWidth += 2 * hpad;
+}
 
+
+void TeamShuffleHelper::render()
+{
    for(S32 i = 0; i < rows; i++)
       for(S32 j = 0; j < cols; j++)
       {
          if(i * cols + j >= teamCount)
             break;
 
-         S32 x = leftMargin + j * (colWidth + margin);
+         S32 x = leftMargin + j * (columnWidth + margin);
          S32 y = topMargin + i * (rowHeight + margin);
 
          S32 teamIndex = i * cols + j;
 
-         UserInterface::drawFilledRect(x, y, x + colWidth, y + rowHeight, Colors::black, getGame()->getTeamColor(teamIndex));
+         UserInterface::drawFilledRect(x, y, x + columnWidth, y + rowHeight, Colors::black, getGame()->getTeamColor(teamIndex));
 
          glColor(Colors::white);
          for(S32 k = 0; k < mTeams[teamIndex].size(); k++)
-         {
-            UserInterface::drawString(x + hpad, y + vpad + (k) * 1.2 * textSize, textSize, mTeams[teamIndex][k]->getName().getString());
-         }
+            UserInterface::drawString(x + hpad, y + vpad + (k) * 1.2 * textSize,  // More magic!
+                  textSize, mTeams[teamIndex][k]->getName().getString());
       }
 
-      glColor(Colors::green);
+   glColor(Colors::green);
 
-      UserInterface::drawCenteredString(gScreenInfo.getGameCanvasHeight() - 80, 20, "[Enter to accept] | [Space to reshuffle] | [Esc to cancel]");
+   UserInterface::drawCenteredString(gScreenInfo.getGameCanvasHeight() - 80, 20, "[Enter to accept] | [Space to reshuffle] | [Esc to cancel]");
 }
 
 
