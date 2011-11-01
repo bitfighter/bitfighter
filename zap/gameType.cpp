@@ -2909,6 +2909,8 @@ GAMETYPE_RPC_C2S(GameType, c2sTriggerTeamChange, (StringTableEntry playerName, S
       return;
 
    changeClientTeam(playerClientInfo, teamIndex);
+
+   playerClientInfo->getConnection()->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "An admin has shuffled you to a different team");
 }
 
 

@@ -1899,7 +1899,15 @@ void GameUserInterface::setMaxBotsHandler(ClientGame *game, const Vector<string>
 void GameUserInterface::shuffleTeams(ClientGame *game, const Vector<string> &words)
 {
    if(game->hasAdmin("!!! You don't have permissions to shuffle the teams"))
+   {
+      if(game->getTeamCount() < 2)
+      {
+         game->displayErrorMessage("!!! Two or more teams required to shuffle");
+         return;
+      }
+
       game->getUIManager()->getGameUserInterface()->enterMode(TeamShuffleMode);
+   }
 }
 
 
