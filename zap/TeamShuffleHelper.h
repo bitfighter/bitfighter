@@ -43,8 +43,22 @@ private:
    const char *getCancelMessage();
    InputCode getActivationKey();
 
+   S32 columnWidth;
+   S32 maxColumnWidth;
+   S32 rowHeight;
+   S32 rows, cols;
+   S32 teamCount;
+   S32 playersPerTeam;
+
+   S32 topMargin, leftMargin;
+
+   static const S32 vpad = 10, hpad = 10;        // Padding inside the boxes
+   static const S32 textSize = 15;
+   static const S32 margin = 10;
+
    Vector<Vector<ClientInfo *> > mTeams;
    void shuffle();
+   void calculateRenderSizes();
 
 public:
    TeamShuffleHelper(ClientGame *clientGame);    // Constructor

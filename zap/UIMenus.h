@@ -26,8 +26,6 @@
 #ifndef _UIMENUS_H_
 #define _UIMENUS_H_
 
-#ifndef ZAP_DEDICATED
-
 #include "UI.h"
 #include "input.h"         // For InputMode def
 #include "UIMenuItems.h"
@@ -338,9 +336,6 @@ public:
 ////////////////////////////////////////
 
 class PlayerMenuUserInterface : public MenuUserInterface
-#else
-class PlayerMenuUserInterface
-#endif
 {
 #ifndef ZAP_DEDICATED
    typedef MenuUserInterface Parent;
@@ -351,17 +346,13 @@ public:
    void render();
    void playerSelected(U32 index);
    void onEscape();
-#endif
 
-public:
-   enum Action { // This is needed in ZAP_DEDICATED for use in GameConnection::c2sAdminPlayerAction
+   enum Action {
       Kick,
       ChangeTeam,
       ActionCount,
    } action;
 };
-
-#ifndef ZAP_DEDICATED
 
 ////////////////////////////////////////
 ////////////////////////////////////////

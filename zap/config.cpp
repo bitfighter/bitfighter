@@ -71,6 +71,7 @@ IniSettings::IniSettings()
    displayMode = DISPLAY_MODE_FULL_SCREEN_STRETCHED;
    oldDisplayMode = DISPLAY_MODE_UNKNOWN;
    joystickType = NoController;
+   joystickLinuxUseOldDeviceSystem = false;
    echoVoice = false;
 
    sfxVolLevel = 1.0;                 // SFX volume (0 = silent, 1 = full bore)
@@ -323,6 +324,7 @@ static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
 
 #ifndef ZAP_DEDICATED
    iniSettings->joystickType = Joystick::stringToJoystickType(ini->GetValue(section, "JoystickType", Joystick::joystickTypeToString(iniSettings->joystickType)).c_str());
+   iniSettings->joystickLinuxUseOldDeviceSystem = ini->GetValueYN(section, "JoystickLinuxUseOldDeviceSystem", iniSettings->joystickLinuxUseOldDeviceSystem);
 #endif
 
    iniSettings->winXPos = max(ini->GetValueI(section, "WindowXPos", iniSettings->winXPos), 0);    // Restore window location
@@ -1402,6 +1404,7 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
       ini->sectionComment(section, " VerboseHelpMessages - Display additional on-screen messages while learning the game?  Yes/No");
       ini->sectionComment(section, " ShowKeyboardKeysInStickMode - If you are using a joystick, also show keyboard shortcuts in Loadout and QuickChat menus");
       ini->sectionComment(section, " JoystickType - Type of joystick to use if auto-detect doesn't recognize your controller");
+      ini->sectionComment(section, " JoystickLinuxUseOldDeviceSystem - Force SDL to add the older /dev/input/js0 device to the enumerated joystick list.  No effect on Windows/Mac systems");
       ini->sectionComment(section, " MasterServerAddressList - Comma seperated list of Address of master server, in form: IP:67.18.11.66:25955,IP:myMaster.org:25955 (tries all listed, only connects to one at a time)");
       ini->sectionComment(section, " DefaultName - Name that will be used if user hits <enter> on name entry screen without entering one");
       ini->sectionComment(section, " Nickname - Specify your nickname to bypass the name entry screen altogether");
@@ -1430,6 +1433,7 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
 
 #ifndef ZAP_DEDICATED
    ini->SetValue  (section, "JoystickType", Joystick::joystickTypeToString(iniSettings->joystickType));
+   ini->setValueYN(section, "JoystickLinuxUseOldDeviceSystem", iniSettings->joystickLinuxUseOldDeviceSystem);
 #endif
    ini->SetValue  (section, "MasterServerAddressList", iniSettings->masterAddress);
    ini->SetValue  (section, "DefaultName", iniSettings->defaultName);

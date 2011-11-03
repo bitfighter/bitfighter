@@ -2909,6 +2909,52 @@ GAMETYPE_RPC_C2S(GameType, c2sTriggerTeamChange, (StringTableEntry playerName, S
       return;
 
    changeClientTeam(playerClientInfo, teamIndex);
+
+   playerClientInfo->getConnection()->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "An admin has shuffled you to a different team");
+}
+
+
+
+GAMETYPE_RPC_C2S(GameType, c2sKickPlayer, (StringTableEntry playerName), (playerName))
+{
+   GameConnection *source = (GameConnection *) getRPCSourceConnection();
+   ClientInfo *sourceClientInfo = source->getClientInfo();
+
+   if(!sourceClientInfo->isAdmin())
+      return;
+
+   ClientInfo *playerClientInfo = mGame->findClientInfo(playerName);
+
+   if(!playerClientInfo)    // Hmmm... couldn't find the dude.  Maybe he disconnected?
+      return;
+
+   if(playerClientInfo->isAdmin())
+   {
+      source->s2cDisplayErrorMessage("Can't kick an administrator!");
+      return;
+   }
+
+   if(playerClientInfo->getConnection()->isEstablished())     // Robots don't have established connections
+   {
+      ConnectionParameters &p = playerClientInfo->getConnection()->getConnectionParameters();
+
+      if(p.mIsArranged)
+         gServerGame->getSettings()->getBanList()->kickHost(p.mPossibleAddresses[0]);      // Banned for 30 seconds
+
+      gServerGame->getSettings()->getBanList()->kickHost(playerClientInfo->getConnection()->getNetAddress());      // Banned for 30 seconds
+      playerClientInfo->getConnection()->disconnect(NetConnection::ReasonKickedByAdmin, "");
+   }
+
+   // Get rid of robots tied to the player
+   for(S32 i = 0; i < Robot::robots.size(); i++)
+      if(Robot::robots[i]->getName() == playerName)
+         delete Robot::robots[i];
+
+   Vector<StringTableEntry> e;
+   e.push_back(playerName);  // --> Name of player being administered
+   e.push_back(sourceClientInfo->getName());  // --> Name of player doing the administering
+
+   broadcastMessage(GameConnection::ColorAqua, SFXIncomingMessage, "%e0 was kicked from the game by %e1.", e);
 }
 
 

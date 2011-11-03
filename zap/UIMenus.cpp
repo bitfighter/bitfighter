@@ -1239,7 +1239,6 @@ void HostMenuUserInterface::onActivate()
 
 
 extern void initHostGame(GameSettings *settings, const Vector<string> &levelList, bool testMode, bool dedicatedServer);
-extern U16 DEFAULT_GAME_PORT;
 
 static void startHostingCallback(ClientGame *game, U32 unused)
 {
@@ -1761,7 +1760,7 @@ void PlayerMenuUserInterface::playerSelected(U32 index)
          break;
       }
 
-   GameConnection *gc = getGame()->getConnectionToServer();
+   GameType *gt = getGame()->getGameType();
 
    if(action == ChangeTeam)
    {
@@ -1770,8 +1769,8 @@ void PlayerMenuUserInterface::playerSelected(U32 index)
       ui->activate();     // Show menu to let player select a new team
       ui->nameToChange = getMenuItem(index)->getPrompt();
    }
-   else if(gc)    // action == Kick
-      gc->c2sAdminPlayerAction(getMenuItem(index)->getPrompt(), action, -1);
+   else if(gt)    // action == Kick
+      gt->c2sKickPlayer(getMenuItem(index)->getPrompt());
 
 
    if(action != ChangeTeam)                              // Unless we need to move on to the change team screen...
@@ -1841,9 +1840,8 @@ static void processTeamSelectionCallback(ClientGame *game, U32 index)
 void TeamMenuUserInterface::processSelection(U32 index)        
 {
    GameType *gt = getGame()->getGameType();
-   GameConnection *gc = getGame()->getConnectionToServer();
 
-   if(!gc || !gt)
+   if(!gt)
       return;
 
    // Make sure user isn't just changing to the team they're already on...
@@ -1852,7 +1850,7 @@ void TeamMenuUserInterface::processSelection(U32 index)
       if(getPrevMenuID() == PlayerUI)     // Initiated by an admin (PlayerUI is the kick/change team player-pick admin menu)
       {
          StringTableEntry e(nameToChange.c_str());
-         gc->c2sAdminPlayerAction(e, PlayerMenuUserInterface::ChangeTeam, index);   // Index will be the team index
+         gt->c2sTriggerTeamChange(e, index);   // Index will be the team index
       }
       else                                // Came from player changing own team
          gt->c2sChangeTeams(index);
