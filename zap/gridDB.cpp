@@ -271,7 +271,7 @@ void GridDatabase::dumpObjects()
          for(BucketEntry *walk = mBuckets[x & BucketMask][y & BucketMask]; walk; walk = walk->nextInBucket)
          {
             DatabaseObject *theObject = walk->theObject;
-            logprintf("Found object in (%d,%d) with extents %s", x,y,theObject->getExtent().toString().c_str());
+            //logprintf("Found object in (%d,%d) with extents %s", x,y,theObject->getExtent().toString().c_str());
             }
 }
 
@@ -709,7 +709,8 @@ void EditorObjectDatabase::copy(const EditorObjectDatabase &source)
          }
       }
 
-logprintf("found %d refs!", ctr);
+logprintf("found %d refs!", ctr);   
+
    // Copy our non-spatial databases as well
    mAllEditorObjects.resize(source.mAllEditorObjects.size());
    mAllObjects.resize(source.mAllEditorObjects.size());
@@ -740,7 +741,7 @@ void EditorObjectDatabase::addToDatabase(DatabaseObject *object, const Rect &ext
 
 
 void EditorObjectDatabase::removeFromDatabase(DatabaseObject *object, const Rect &extents)
-{
+ {
    Parent::removeFromDatabase((DatabaseObject *)object, extents);
 
    // Remove the object to our list as well
