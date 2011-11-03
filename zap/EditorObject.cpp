@@ -257,6 +257,7 @@ F32 EditorObject::getEditorRadius(F32 currentScale)
 EditorObject *EditorObject::copy()
 {
    EditorObject *newObject = clone();     // TODO: Wrap in shared_ptr?
+   newObject->setExtent(getExtent());     // Why do we need to do this???
    newObject->initializeEditor();         // Unselects all vertices
 
    return newObject;
