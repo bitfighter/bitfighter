@@ -93,6 +93,7 @@ extern void renderShipCoords(const Point &coords, bool localShip, F32 alpha);
 extern void renderAimVector();
 extern void renderTeleporter(const Point &pos, U32 type, bool in, S32 time, F32 zoomFraction, F32 radiusFraction, F32 radius, F32 alpha, 
                              const Vector<Point> &dests, bool showDestOverride);
+extern void renderVisibleSpyBugCmdrsMap(const Point &pos, const Color &color, F32 currentScale = 1);
 extern void renderTurret(const Color &c, Point anchor, Point normal, bool enabled, F32 health, F32 barrelAngle);
 
 extern void renderFlag(const Point &pos, const Color *flagColor);

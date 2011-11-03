@@ -681,6 +681,25 @@ void renderTeleporter(const Point &pos, U32 type, bool in, S32 time, F32 zoomFra
 }
 
 
+void renderVisibleSpyBugCmdrsMap(const Point &pos, const Color &color, F32 currentScale)
+{
+   Color col(color);        // Make a copy we can alter
+   glColor(col * 0.45f);    // Slightly different color than that used for ships
+
+   F32 range = gSpyBugRange * currentScale;
+
+   glBegin(GL_POLYGON);
+      glVertex2f(pos.x - range, pos.y - range);
+      glVertex2f(pos.x + range, pos.y - range);
+      glVertex2f(pos.x + range, pos.y + range);
+      glVertex2f(pos.x - range, pos.y + range);
+   glEnd();
+
+   glColor(col * 0.8f);     // Draw a marker in the middle
+   drawCircle(pos, 2);
+}
+
+
 // Renders turret!  --> note that anchor and normal can't be const &Points because of the point math
 void renderTurret(const Color &c, Point anchor, Point normal, bool enabled, F32 health, F32 barrelAngle)
 {

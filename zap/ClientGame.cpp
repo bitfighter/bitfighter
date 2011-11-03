@@ -1241,7 +1241,9 @@ void ClientGame::renderCommander()
    const S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
    const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
 
-   Point worldExtents = (getUIManager()->getGameUserInterface()->mShowProgressBar ? getGameType()->mViewBoundsWhileLoading : mWorldExtents).getExtents();
+   Point worldExtents = (getUIManager()->getGameUserInterface()->mShowProgressBar ? getGameType()->mViewBoundsWhileLoading : 
+                                                                                    mWorldExtents).getExtents();
+
    worldExtents.x *= canvasWidth / F32(canvasWidth - (UserInterface::horizMargin * 2));
    worldExtents.y *= canvasHeight / F32(canvasHeight - (UserInterface::vertMargin * 2));
 
@@ -1277,6 +1279,7 @@ void ClientGame::renderCommander()
    // Render the objects.  Start by putting all command-map-visible objects into renderObjects.  Note that this no longer captures
    // walls -- those will be rendered separately.
    rawRenderObjects.clear();
+
    if(ship->isModulePrimaryActive(ModuleSensor))
       mGameObjDatabase->findObjects((TestFunc)isVisibleOnCmdrsMapWithSensorType, rawRenderObjects);
    else
@@ -1287,6 +1290,7 @@ void ClientGame::renderCommander()
       gServerGame->getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, rawRenderObjects);
 
    renderObjects.clear();
+
    for(S32 i = 0; i < rawRenderObjects.size(); i++)
       renderObjects.push_back(dynamic_cast<GameObject *>(rawRenderObjects[i]));
 
@@ -1343,19 +1347,7 @@ void ClientGame::renderCommander()
             if(sb->isVisibleToPlayer(playerTeam, getConnectionToServer() ? getClientInfo()->getName() : StringTableEntry(""), 
                                      getGameType()->isTeamGame()))
             {
-               const Point &p = sb->getRenderPos();
-               Point visExt(gSpyBugRange, gSpyBugRange);
-               glColor(teamColor * zoomFrac * 0.45f);     // Slightly different color than that used for ships
-
-               glBegin(GL_POLYGON);
-                  glVertex2f(p.x - visExt.x, p.y - visExt.y);
-                  glVertex2f(p.x + visExt.x, p.y - visExt.y);
-                  glVertex2f(p.x + visExt.x, p.y + visExt.y);
-                  glVertex2f(p.x - visExt.x, p.y + visExt.y);
-               glEnd();
-
-               glColor(teamColor * 0.8f);     // Draw a marker in the middle
-               drawCircle(ship->getRenderPos(), 2);
+               renderVisibleSpyBugCmdrsMap(sb->getRenderPos(), teamColor);
             }
          }
       }
