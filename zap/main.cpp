@@ -64,6 +64,7 @@ XXX need to document timers, new luavec stuff XXX
 <ul>
 <li>Fix team bitmatch suicide score
 <li>Teleporter, added Delay option in levels for teleporters      <<=== what is this??
+<li>Teleporting onto a loadout zone triggers loadout change, just like flying onto one
 </ul>
 
 <h2>Other changes</h2>

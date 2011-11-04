@@ -347,9 +347,9 @@ void Ship::findObjectsUnderShip(U8 type)
 
 
 // Returns the zone in question if this ship is in a zone of type zoneType
-GameObject *Ship::isInZone(U8 zoneType)
+GameObject *Ship::isInZone(U8 zoneTypeNumber)
 {
-   findObjectsUnderShip(zoneType);
+   findObjectsUnderShip(zoneTypeNumber);
 
    if(fillVector.size() == 0)  // Ship isn't in extent of any objectType objects, can bail here
       return NULL;

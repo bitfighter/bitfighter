@@ -145,13 +145,14 @@ bool LoadoutZone::getCollisionPoly(Vector<Point> &polyPoints) const
    return true;
 }
 
-// Only gets run on the server, never on client
+
+// Gets called on both client and server
 bool LoadoutZone::collide(GameObject *hitObject)
 {
-   // Anyone can use neutral loadout zones (team == -1)
-   if(!isGhost() &&
-         (hitObject->getTeam() == getTeam() || getTeam() == -1) &&
-         isShipType(hitObject->getObjectTypeNumber()) )
+   // Anyone can use neutral loadout zones
+   if(!isGhost() &&                                                           // On the server
+         (hitObject->getTeam() == getTeam() || getTeam() == TEAM_NEUTRAL) &&  // The zone is on the same team as hitObject, or it's neutral
+         isShipType(hitObject->getObjectTypeNumber()) )                       // The thing that hit the zone is a ship
       getGame()->getGameType()->SRV_updateShipLoadout(hitObject);      
 
    return false;

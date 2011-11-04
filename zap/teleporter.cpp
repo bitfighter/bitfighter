@@ -27,11 +27,14 @@
 
 using namespace TNL;
 #include "ship.h"
-#include "gameLoader.h"
-#include "SoundSystem.h"
-#include "gameObjectRender.h"
-#include "Colors.h"
 #include "game.h"
+#include "loadoutZone.h"          // For when ship teleports onto a loadout zone
+#include "gameLoader.h"
+#include "gameObjectRender.h"
+
+#include "Colors.h"
+#include "SoundSystem.h"
+
 #include "stringUtils.h"
 
 #ifndef ZAP_DEDICATED
@@ -273,15 +276,24 @@ void Teleporter::idle(GameObject::IdleCallPath path)
    // We've triggered the teleporter.  Relocate ship.
    for(S32 i = 0; i < foundObjects.size(); i++)
    {
-      Ship *s = dynamic_cast<Ship *>(foundObjects[i]);
-      if((pos - s->getRenderPos()).len() < TELEPORTER_RADIUS + s->getRadius())
+      Ship *ship = dynamic_cast<Ship *>(foundObjects[i]);
+      if((pos - ship->getRenderPos()).len() < TELEPORTER_RADIUS + ship->getRadius())
       {
          mLastDest = TNL::Random::readI(0, mDests.size() - 1);
-         Point newPos = s->getActualPos() - pos + mDests[mLastDest];    
-         s->setActualPos(newPos, true);
+         Point newPos = ship->getActualPos() - pos + mDests[mLastDest];    
+         ship->setActualPos(newPos, true);
          setMaskBits(TeleportMask);
-         if(s->getOwner())
-            s->getOwner()->mStatistics.mTeleport++;
+
+         if(ship->getOwner())
+            ship->getOwner()->mStatistics.mTeleport++;
+
+         // See if we've teleported onto a loadout zone
+         GameObject *obj = ship->isInZone(LoadoutZoneTypeNumber);
+         if(obj)
+         {
+            LoadoutZone *zone = static_cast<LoadoutZone *>(obj);
+            zone->collide(ship);
+         }
       }
    }
 }
