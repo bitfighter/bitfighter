@@ -105,6 +105,30 @@ string AbstractSpawn::toString(F32 gridSize) const
 }
 
 
+Point AbstractSpawn::getPos() const
+{
+   return getVert(0);
+}
+
+
+bool AbstractSpawn::updateTimer(U32 deltaT)
+{
+   return mTimer.update(deltaT);
+}
+
+
+void AbstractSpawn::resetTimer()
+{
+   mTimer.reset();
+}
+
+
+U32 AbstractSpawn::getPeriod()
+{
+   return mTimer.getPeriod();
+}
+
+
 #ifndef ZAP_DEDICATED
 
 EditorAttributeMenuUI *AbstractSpawn::getAttributeMenu()
@@ -209,6 +233,42 @@ string Spawn::toString(F32 gridSize) const
 }
 
 
+const char *Spawn::getEditorHelpString()
+{
+   return "Location where ships start.  At least one per team is required. [G]";
+}
+
+
+const char *Spawn::getPrettyNamePlural()
+{
+   return "Spawn Points";
+}
+
+
+const char *Spawn::getOnDockName()
+{
+   return "Spawn";
+}
+
+
+const char *Spawn::getOnScreenName()
+{
+   return "Spawn";
+}
+
+
+const char *Spawn::getClassName() const
+{
+   return "Spawn";
+}
+
+
+S32 Spawn::getDefaultRespawnTime()
+{
+   return -1;
+}
+
+
 void Spawn::renderEditor(F32 currentScale)
 {
 #ifndef ZAP_DEDICATED
@@ -248,7 +308,7 @@ AsteroidSpawn::AsteroidSpawn(const Point &pos, S32 time) : Parent(pos, time)
    mObjectTypeNumber = AsteroidSpawnTypeNumber;
 }
 
-
+// Destructor
 AsteroidSpawn::~AsteroidSpawn()
 {
    // Do nothing
@@ -258,6 +318,42 @@ AsteroidSpawn::~AsteroidSpawn()
 AsteroidSpawn *AsteroidSpawn::clone() const
 {
    return new AsteroidSpawn(*this);
+}
+
+
+const char *AsteroidSpawn::getEditorHelpString()
+{
+   return "Periodically spawns a new asteroid.";
+}
+
+
+const char *AsteroidSpawn::getPrettyNamePlural()
+{
+   return "Asteroid Spawn Points";
+}
+
+
+const char *AsteroidSpawn::getOnDockName()
+{
+   return "ASP";
+}
+
+
+const char *AsteroidSpawn::getOnScreenName()
+{
+   return "AsteroidSpawn";
+}
+
+
+const char *AsteroidSpawn::getClassName() const
+{
+   return "AsteroidSpawn";
+}
+
+
+S32 AsteroidSpawn::getDefaultRespawnTime()
+{
+   return DEFAULT_RESPAWN_TIME;
 }
 
 
@@ -324,6 +420,42 @@ CircleSpawn::CircleSpawn(const Point &pos, S32 time) : Parent(pos, time)
 CircleSpawn *CircleSpawn::clone() const
 {
    return new CircleSpawn(*this);
+}
+
+
+const char *CircleSpawn::getEditorHelpString()
+{
+   return "Periodically spawns a new circle.";
+}
+
+
+const char *CircleSpawn::getPrettyNamePlural()
+{
+   return "Circle Spawn Points";
+}
+
+
+const char *CircleSpawn::getOnDockName()
+{
+   return "CSP";
+}
+
+
+const char *CircleSpawn::getOnScreenName()
+{
+   return "CircleSpawn";
+}
+
+
+const char *CircleSpawn::getClassName() const
+{
+   return "CircleSpawn";
+}
+
+
+S32 CircleSpawn::getDefaultRespawnTime()
+{
+   return DEFAULT_RESPAWN_TIME;
 }
 
 
@@ -398,6 +530,54 @@ FlagSpawn::~FlagSpawn()
 FlagSpawn *FlagSpawn::clone() const
 {
    return new FlagSpawn(*this);
+}
+
+
+bool FlagSpawn::updateTimer(S32 deltaT)
+{
+   return mTimer.update(deltaT);
+}
+
+
+void FlagSpawn::resetTimer()
+{
+   mTimer.reset();
+}
+
+
+const char *FlagSpawn::getEditorHelpString()
+{
+   return "Location where flags (or balls in Soccer) spawn after capture.";
+}
+
+
+const char *FlagSpawn::getPrettyNamePlural()
+{
+   return "Flag Spawn points";
+}
+
+
+const char *FlagSpawn::getOnDockName()
+{
+   return "FlagSpawn";
+}
+
+
+const char *FlagSpawn::getOnScreenName()
+{
+   return "FlagSpawn";
+}
+
+
+const char *FlagSpawn::getClassName() const
+{
+   return "FlagSpawn";
+}
+
+
+S32 FlagSpawn::getDefaultRespawnTime()
+{
+   return DEFAULT_RESPAWN_TIME;
 }
 
 

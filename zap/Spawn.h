@@ -30,12 +30,6 @@
 #include "EditorObject.h"     // For EditorPointObject def
 #include "Timer.h"
 
-//#include "PickupItem.h"
-//#include "moveObject.h"
-
-//#include "luaObject.h"        // For Lua interfaces
-//#include "gameObjectRender.h"
-
 
 namespace Zap
 {
@@ -59,7 +53,7 @@ protected:
 public:
    AbstractSpawn(const Point &pos = Point(), S32 time = 0); // Constructor
    AbstractSpawn(const AbstractSpawn &copy);                // Copy constructor
-   ~AbstractSpawn();                                        // Destructor
+   virtual ~AbstractSpawn();                                // Destructor
    
    virtual bool processArguments(S32 argc, const char **argv, Game *game);
 
@@ -85,13 +79,13 @@ public:
 
    virtual string toString(F32 gridSize) const;
 
-   Point getPos() const { return getVert(0); }     // For readability 
+   Point getPos() const;     // For readability
 
    F32 getEditorRadius(F32 currentScale);
 
-   bool updateTimer(U32 deltaT) { return mTimer.update(deltaT); }
-   void resetTimer() { mTimer.reset(); }
-   U32 getPeriod() { return mTimer.getPeriod(); }     // temp debugging
+   bool updateTimer(U32 deltaT);
+   void resetTimer();
+   U32 getPeriod();     // temp debugging
 
    virtual void renderEditor(F32 currentScale) = 0;
    virtual void renderDock() = 0;
@@ -106,17 +100,17 @@ public:
    virtual ~Spawn();
    Spawn *clone() const;
 
-   const char *getEditorHelpString() { return "Location where ships start.  At least one per team is required. [G]"; }
-   const char *getPrettyNamePlural() { return "Spawn Points"; }
-   const char *getOnDockName() { return "Spawn"; }
-   const char *getOnScreenName() { return "Spawn"; }
+   const char *getEditorHelpString();
+   const char *getPrettyNamePlural();
+   const char *getOnDockName();
+   const char *getOnScreenName();
 
-   const char *getClassName() const { return "Spawn"; }
+   const char *getClassName() const;
 
    bool processArguments(S32 argc, const char **argv, Game *game);
    string toString(F32 gridSize) const;
 
-   S32 getDefaultRespawnTime() { return -1; }    // Somewhat meaningless in this context
+   S32 getDefaultRespawnTime();    // Somewhat meaningless in this context
 
    void renderEditor(F32 currentScale);
    void renderDock();
@@ -149,14 +143,14 @@ public:
    virtual ~AsteroidSpawn();
    AsteroidSpawn *clone() const;
 
-   const char *getEditorHelpString() { return "Periodically spawns a new asteroid."; }
-   const char *getPrettyNamePlural() { return "Asteroid Spawn Points"; }
-   const char *getOnDockName() { return "ASP"; }
-   const char *getOnScreenName() { return "AsteroidSpawn"; }
+   const char *getEditorHelpString();
+   const char *getPrettyNamePlural();
+   const char *getOnDockName();
+   const char *getOnScreenName();
 
-   const char *getClassName() const { return "AsteroidSpawn"; }
+   const char *getClassName() const;
 
-   S32 getDefaultRespawnTime() { return DEFAULT_RESPAWN_TIME; }
+   S32 getDefaultRespawnTime();
 
    void spawn(Game *game, const Point &pos);
    void renderEditor(F32 currentScale);
@@ -177,14 +171,14 @@ public:
    CircleSpawn(const Point &pos = Point(), S32 time = DEFAULT_RESPAWN_TIME);  // C++ constructor (no lua constructor)
    CircleSpawn *clone() const;
 
-   const char *getEditorHelpString() { return "Periodically spawns a new circle."; }
-   const char *getPrettyNamePlural() { return "Circle Spawn Points"; }
-   const char *getOnDockName() { return "CSP"; }
-   const char *getOnScreenName() { return "CircleSpawn"; }
+   const char *getEditorHelpString();
+   const char *getPrettyNamePlural();
+   const char *getOnDockName();
+   const char *getOnScreenName();
 
-   const char *getClassName() const { return "CircleSpawn"; }
+   const char *getClassName() const;
 
-   S32 getDefaultRespawnTime() { return DEFAULT_RESPAWN_TIME; }
+   S32 getDefaultRespawnTime();
 
    void spawn(Game *game, const Point &pos);
    void renderEditor(F32 currentScale);
@@ -205,17 +199,17 @@ public:
    virtual ~FlagSpawn();
    FlagSpawn *clone() const;
 
-   bool updateTimer(S32 deltaT) { return mTimer.update(deltaT); }
-   void resetTimer() { mTimer.reset(); }
+   bool updateTimer(S32 deltaT);
+   void resetTimer();
 
-   const char *getEditorHelpString() { return "Location where flags (or balls in Soccer) spawn after capture."; }
-   const char *getPrettyNamePlural() { return "Flag Spawn points"; }
-   const char *getOnDockName() { return "FlagSpawn"; }
-   const char *getOnScreenName() { return "FlagSpawn"; }
+   const char *getEditorHelpString();
+   const char *getPrettyNamePlural();
+   const char *getOnDockName();
+   const char *getOnScreenName();
 
-   const char *getClassName() const { return "FlagSpawn"; }
+   const char *getClassName() const;
 
-   S32 getDefaultRespawnTime() { return DEFAULT_RESPAWN_TIME; }
+   S32 getDefaultRespawnTime();
 
    void spawn(Game *game, const Point &pos);
    void renderEditor(F32 currentScale);
