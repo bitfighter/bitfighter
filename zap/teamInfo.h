@@ -43,12 +43,15 @@ private:
    Color mColor;
 
 public:
+   AbstractTeam();           // Constructor
+   virtual ~AbstractTeam();  // Destructor
+
    static const S32 MAX_TEAM_NAME_LENGTH = 32;
 
-   void setColor(F32 r, F32 g, F32 b) { mColor.set(r,g,b); } 
-   void setColor(const Color &color) { mColor.set(color); }
+   void setColor(F32 r, F32 g, F32 b);
+   void setColor(const Color &color);
 
-   const Color *getColor() const { return &mColor; }
+   const Color *getColor() const;
 
    virtual void setName(const char *name) = 0;
    virtual StringTableEntry getName() = 0;
@@ -96,38 +99,39 @@ public:
    Team();              // Constructor
    virtual ~Team();     // Destructor
 
-   void setName(const char *name) { mName.set(name); }
-   void setName(StringTableEntry name) { mName = name; }
+   void setName(const char *name);
+   void setName(StringTableEntry name);
 
-   S32 getSpawnPointCount() const { return mItemSpawnPoints.size(); }
-   Point getSpawnPoint(S32 index) const { return mItemSpawnPoints[index]; }
-   void addSpawnPoint(Point point) { mItemSpawnPoints.push_back(point); }
+   S32 getSpawnPointCount() const;
+   Point getSpawnPoint(S32 index) const;
+   void addSpawnPoint(Point point);
 
-   void addFlagSpawn(FlagSpawn flagSpawn) { mFlagSpawns.push_back(flagSpawn); }
-   const Vector<FlagSpawn> *getFlagSpawns() const { return &mFlagSpawns; }
+   void addFlagSpawn(FlagSpawn flagSpawn);
+   const Vector<FlagSpawn> *getFlagSpawns() const;
   
 
-   StringTableEntry getName() { return mName; }  
+   StringTableEntry getName();
 
-   S32 getId() { return mId; }
+   S32 getId();
    
-   S32 getScore() { return mScore; }
-   void setScore(S32 score) { mScore = score; }
-   void addScore(S32 score) { mScore += score; }
+   S32 getScore();
+   void setScore(S32 score);
+   void addScore(S32 score);
 
-   F32 getRating() { return mRating; }
-   void addRating(F32 rating) { mRating += rating; }     // For summing ratings of all players on a team 
+   F32 getRating();
+   void addRating(F32 rating);     // For summing ratings of all players on a team
 
    void clearStats();
 
    // Players & bots on each team:
-   // Note that these values need to be precalulated before they are ready for use; they are not dynamically updated!
-   S32 getPlayerCount() { return mPlayerCount; }                  // Get number of human players on team
-   S32 getBotCount() { return mBotCount; }                        // Get number of bots on team
-   S32 getPlayerBotCount() { return mPlayerCount + mBotCount; }   // Get total number of players/bots on team
+   // Note that these values need to be precalulated before they are ready for use;
+   // they are not dynamically updated!
+   S32 getPlayerCount();      // Get number of human players on team
+   S32 getBotCount();         // Get number of bots on team
+   S32 getPlayerBotCount();   // Get total number of players/bots on team
 
-   void incrementPlayerCount() { mPlayerCount++; }
-   void incrementBotCount() { mBotCount++; }
+   void incrementPlayerCount();
+   void incrementBotCount();
 };
 
 
@@ -141,12 +145,12 @@ private:
    LineEditor mNameEditor;
 
 public:
-   TeamEditor() { mNameEditor = LineEditor(MAX_TEAM_NAME_LENGTH); }              // Quickie constructor
-   virtual ~TeamEditor() {}
+   TeamEditor();           // Constructor
+   virtual ~TeamEditor();  // Destructor
 
-   LineEditor *getLineEditor() { return &mNameEditor; }
-   void setName(const char *name) { mNameEditor.setString(name); }
-   StringTableEntry getName() { return StringTableEntry(mNameEditor.c_str()); }  // Wrap in STE to make signatures match
+   LineEditor *getLineEditor();
+   void setName(const char *name);
+   StringTableEntry getName();  // Wrap in STE to make signatures match
 };
 
 

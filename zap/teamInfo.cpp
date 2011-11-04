@@ -34,6 +34,38 @@ namespace Zap
 
 //U32 Team::mNextId = 0; // ???  when does it go back to zero?
 
+// Constructor
+AbstractTeam::AbstractTeam()
+{
+   // Do nothing
+}
+
+
+// Destructor
+AbstractTeam::~AbstractTeam()
+{
+   // Do nothing
+}
+
+
+void AbstractTeam::setColor(F32 r, F32 g, F32 b)
+{
+   mColor.set(r,g,b);
+}
+
+
+void AbstractTeam::setColor(const Color &color)
+{
+   mColor.set(color);
+}
+
+
+const Color *AbstractTeam::getColor() const
+{
+   return &mColor;
+}
+
+
 // Read team from level file params
 bool AbstractTeam::processArguments(S32 argc, const char **argv)
 {
@@ -112,6 +144,155 @@ void Team::clearStats()
    mPlayerCount = 0;
    mBotCount = 0;
    mRating = 0;
+}
+
+
+void Team::setName(const char *name)
+{
+   mName.set(name);
+}
+
+
+void Team::setName(StringTableEntry name)
+{
+   mName = name;
+}
+
+
+S32 Team::getSpawnPointCount() const
+{
+   return mItemSpawnPoints.size();
+}
+
+
+Point Team::getSpawnPoint(S32 index) const
+{
+   return mItemSpawnPoints[index];
+}
+
+
+void Team::addSpawnPoint(Point point)
+{
+   mItemSpawnPoints.push_back(point);
+}
+
+
+void Team::addFlagSpawn(FlagSpawn flagSpawn)
+{
+   mFlagSpawns.push_back(flagSpawn);
+}
+
+
+const Vector<FlagSpawn> *Team::getFlagSpawns() const
+{
+   return &mFlagSpawns;
+}
+
+
+StringTableEntry Team::getName()
+{
+   return mName;
+}
+
+
+S32 Team::getId()
+{
+   return mId;
+}
+
+
+S32 Team::getScore()
+{
+   return mScore;
+}
+
+
+void Team::setScore(S32 score)
+{
+   mScore = score;
+}
+
+
+void Team::addScore(S32 score)
+{
+   mScore += score;
+}
+
+
+F32 Team::getRating()
+{
+   return mRating;
+}
+
+
+void Team::addRating(F32 rating)
+{
+   mRating += rating;
+}
+
+
+S32 Team::getPlayerCount()
+{
+   return mPlayerCount;
+}
+
+
+S32 Team::getBotCount()
+{
+   return mBotCount;
+}
+
+
+S32 Team::getPlayerBotCount()
+{
+   return mPlayerCount + mBotCount;
+}
+
+
+void Team::incrementPlayerCount()
+{
+   mPlayerCount++;
+}
+
+
+void Team::incrementBotCount()
+{
+   mBotCount++;
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Constructor
+TeamEditor::TeamEditor()
+{
+   mNameEditor = LineEditor(MAX_TEAM_NAME_LENGTH);
+}
+
+
+// Destructor
+TeamEditor::~TeamEditor()
+{
+   // Do nothing
+}
+
+
+LineEditor *TeamEditor::getLineEditor()
+{
+   return &mNameEditor;
+}
+
+
+void TeamEditor::setName(const char *name)
+{
+   mNameEditor.setString(name);
+}
+
+
+StringTableEntry TeamEditor::getName()
+{
+   return StringTableEntry(mNameEditor.c_str());
 }
 
 
