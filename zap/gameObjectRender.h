@@ -156,7 +156,7 @@ extern void renderProjectile(const Point &pos, U32 type, U32 time);
 
 extern void renderMine(const Point &pos, bool armed, bool visible);
 extern void renderGrenade(const Point &pos, F32 vel, S32 style);
-extern void renderSpyBug(const Point &pos, bool visible);
+extern void renderSpyBug(const Point &pos, const Color &teamColor, bool visible, bool drawOutline);
 
 extern void renderRepairItem(const Point &pos);
 extern void renderRepairItem(const Point &pos, bool forEditor, const Color *overrideColor, F32 alpha);

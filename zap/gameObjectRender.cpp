@@ -1394,23 +1394,30 @@ void renderGrenade(const Point &pos, F32 lifeLeft, S32 style)
 }
 
 
-void renderSpyBug(const Point &pos, bool visible)
+void renderSpyBug(const Point &pos, const Color &teamColor, bool visible, bool drawOutline)
 {
    F32 mod = 0.25;
 
    if(visible)
    {
-      glColor(Colors::gray50);
-      drawCircle(pos, 15);
+      glColor(teamColor);
+      drawFilledCircle(pos, 15);
+      if(drawOutline)
+      {
+         glColor(Colors::gray50);
+         drawCircle(pos, 15);
+      }
+
       mod = 1.0;
       UserInterface::drawString(pos.x - 3, pos.y - 5, 10, "S");
    }
    else
    {
       glLineWidth(gLineWidth1);
-      glColor3f(mod, mod, mod);
+      glColor(mod);
       drawCircle(pos, 5);
    }
+
    glLineWidth(gDefaultLineWidth);
 }
 

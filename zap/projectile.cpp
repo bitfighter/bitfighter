@@ -1012,26 +1012,31 @@ void SpyBug::renderItem(const Point &pos)
       visible = ( ((ship->getTeam() == getTeam()) && gameType->isTeamGame())   || ship->isModulePrimaryActive(ModuleSensor) ||
                   (conn && conn->getClientInfo()->getName() == mSetBy) || getTeam() == TEAM_NEUTRAL);
    }
-   else     // Must be in editor?
-      visible = true;
+   else    
+      visible = true;      // We get here in editor when in preview mode
 
-   renderSpyBug(pos, visible);
+   renderSpyBug(pos, getGame()->getTeamColor(mTeam), visible, true);
 #endif
 }
 
 
 void SpyBug::renderEditor(F32 currentScale)
 {
-   renderSpyBug(getVert(0), true);
+   renderSpyBug(getVert(0), getTeamColor(getTeam()), true, true);
 }
 
 
 void SpyBug::renderDock()
 {
 #ifndef ZAP_DEDICATED
+   const S32 radius = 9;
+
+   glColor(getTeamColor(mTeam));
+   drawFilledCircle(getVert(0), radius);
+
    glColor(.7f);
-   drawCircle(getVert(0), 9);
-   drawLetter('S', getVert(0), Color(.7f), 1);
+   drawCircle(getVert(0), radius);
+   drawLetter('S', getVert(0), Color(mTeam < 0 ? .5 : .7), 1);    // Use darker gray for neutral spybugs so S will show up clearer
 #endif
 }
 

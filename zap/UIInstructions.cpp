@@ -538,10 +538,10 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
             renderMine(Point(0, 0), true, false);
             break;
          case 6:
-            renderSpyBug(Point(0, 0), true);
+            renderSpyBug(Point(0, 0), Colors::blue, true, true);
             break;
          case 7:
-            renderSpyBug(Point(0, 0), false);
+            renderSpyBug(Point(0, 0), Colors::blue, false, true);
             break;
          case 8:     // Blank
          case 9:
