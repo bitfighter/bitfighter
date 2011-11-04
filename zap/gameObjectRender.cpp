@@ -696,7 +696,7 @@ void renderTurretFiringRange(const Point &pos, const Color &color, F32 currentSc
 {
    glColor(color, 0.25f);    // Use transparency to highlight areas with more turret coverage
 
-   F32 range = TurretPerceptionDistance * currentScale;
+   F32 range = Turret::TurretPerceptionDistance * currentScale;
 
    UserInterface::drawRect(pos.x - range, pos.y - range, pos.x + range, pos.y + range, GL_POLYGON);
 }
