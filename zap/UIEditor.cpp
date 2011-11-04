@@ -1513,7 +1513,7 @@ void EditorUserInterface::render()
          Point pos = editorObj->getVert(0);
          pos *= mCurrentScale;
          pos += mCurrentOffset;
-         renderVisibleSpyBugCmdrsMap(pos, getGame()->getTeamColor(editorObj->getTeam()), mCurrentScale);
+         renderSpyBugVisibleRange(pos, getGame()->getTeamColor(editorObj->getTeam()), mCurrentScale);
       }
    }
    else

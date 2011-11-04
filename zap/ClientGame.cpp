@@ -1347,7 +1347,9 @@ void ClientGame::renderCommander()
             if(sb->isVisibleToPlayer(playerTeam, getConnectionToServer() ? getClientInfo()->getName() : StringTableEntry(""), 
                                      getGameType()->isTeamGame()))
             {
-               renderVisibleSpyBugCmdrsMap(sb->getRenderPos(), teamColor);
+               renderSpyBugVisibleRange(sb->getRenderPos(), teamColor);
+               glColor(teamColor * 0.8f);     // Draw a marker in the middle
+               drawCircle(sb->getRenderPos(), 2);
             }
          }
       }

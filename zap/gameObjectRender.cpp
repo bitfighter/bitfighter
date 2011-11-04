@@ -681,7 +681,7 @@ void renderTeleporter(const Point &pos, U32 type, bool in, S32 time, F32 zoomFra
 }
 
 
-void renderVisibleSpyBugCmdrsMap(const Point &pos, const Color &color, F32 currentScale)
+void renderSpyBugVisibleRange(const Point &pos, const Color &color, F32 currentScale)
 {
    Color col(color);        // Make a copy we can alter
    glColor(col * 0.45f);    // Slightly different color than that used for ships
@@ -694,9 +694,6 @@ void renderVisibleSpyBugCmdrsMap(const Point &pos, const Color &color, F32 curre
       glVertex2f(pos.x + range, pos.y + range);
       glVertex2f(pos.x - range, pos.y + range);
    glEnd();
-
-   glColor(col * 0.8f);     // Draw a marker in the middle
-   drawCircle(pos, 2);
 }
 
 
