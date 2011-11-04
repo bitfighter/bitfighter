@@ -79,9 +79,9 @@ public:
    virtual void onMountDestroyed();
    virtual bool collide(GameObject *hitObject);
 
-   TestFunc collideTypes() { return (TestFunc)isFlagOrShipCollideableType; }
+   TestFunc collideTypes();
 
-   bool isAtHome() { return mIsAtHome; }
+   bool isAtHome();
 
    Timer mTimer;                       // Used for games like HTF where time a flag is held is important
 
@@ -92,7 +92,7 @@ public:
    // For tracking GoalZones where the flag might be at the moment
    void setZone(GoalZone *goalZone);
    GoalZone *getZone();
-   bool isInZone() { return mZone.isValid(); }
+   bool isInZone();
 
 
    TNL_DECLARE_CLASS(FlagItem);
@@ -103,29 +103,29 @@ public:
    F32 getEditorRadius(F32 currentScale);
 
    // Some properties about the item that will be needed in the editor
-   const char *getEditorHelpString() { return "Flag item, used by a variety of game types."; }  
-   const char *getPrettyNamePlural() { return "Flags"; }
-   const char *getOnDockName() { return "Flag"; }
-   const char *getOnScreenName() { return "Flag"; }
-   bool hasTeam() { return true; }
-   bool canBeHostile() { return true; }
-   bool canBeNeutral() { return true; }
+   const char *getEditorHelpString();
+   const char *getPrettyNamePlural();
+   const char *getOnDockName();
+   const char *getOnScreenName();
+   bool hasTeam();
+   bool canBeHostile();
+   bool canBeNeutral();
 
    ///// Lua Interface
 
-   FlagItem(lua_State *L) { /* Do nothing */ };    //  Lua constructor
+   FlagItem(lua_State *L);    //  Lua constructor
 
    static const char className[];
    static Lunar<FlagItem>::RegType methods[];
 
-   S32 getClassID(lua_State *L) { return returnInt(L, FlagTypeNumber); }
+   S32 getClassID(lua_State *L);
    
-   S32 getTeamIndx(lua_State *L) { return returnInt(L, mTeam + 1); }          // Index of owning team
-   S32 isInInitLoc(lua_State *L) { return returnBool(L, isAtHome()); }        // Is flag in it's initial location?
+   S32 getTeamIndx(lua_State *L);       // Index of owning team
+   S32 isInInitLoc(lua_State *L);       // Is flag in it's initial location?
 
-   S32 isInCaptureZone(lua_State *L) { return returnBool(L, mZone.isValid()); }    // Is flag in a team's capture zone?
+   S32 isInCaptureZone(lua_State *L);   // Is flag in a team's capture zone?
    S32 getCaptureZone(lua_State *L);
-   void push(lua_State *L) { Lunar<FlagItem>::push(L, this); }
+   void push(lua_State *L);
 
 };
 

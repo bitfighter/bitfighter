@@ -142,15 +142,9 @@ GoalZone *FlagItem::getZone()
 }
 
 
-S32 FlagItem::getCaptureZone(lua_State *L) 
-{ 
-   if(mZone.isValid()) 
-   {
-      mZone->push(L); 
-      return 1;
-   } 
-   else 
-      return returnNil(L); 
+bool FlagItem::isInZone()
+{
+   return mZone.isValid();
 }
 
 
@@ -356,6 +350,48 @@ F32 FlagItem::getEditorRadius(F32 currentScale)
 }
 
 
+const char *FlagItem::getEditorHelpString()
+{
+   return "Flag item, used by a variety of game types.";
+}
+
+
+const char *FlagItem::getPrettyNamePlural()
+{
+   return "Flags";
+}
+
+
+const char *FlagItem::getOnDockName()
+{
+   return "Flag";
+}
+
+
+const char *FlagItem::getOnScreenName()
+{
+   return "Flag";
+}
+
+
+bool FlagItem::hasTeam()
+{
+   return true;
+}
+
+
+bool FlagItem::canBeHostile()
+{
+   return true;
+}
+
+
+bool FlagItem::canBeNeutral()
+{
+   return true;
+}
+
+
 // Runs on both client and server
 bool FlagItem::collide(GameObject *hitObject)
 {
@@ -397,6 +433,18 @@ bool FlagItem::collide(GameObject *hitObject)
 }
 
 
+TestFunc FlagItem::collideTypes()
+{
+   return (TestFunc)isFlagOrShipCollideableType;
+}
+
+
+bool FlagItem::isAtHome()
+{
+   return mIsAtHome;
+}
+
+
 void FlagItem::onMountDestroyed()
 {
    if(mMount->getOwner())
@@ -405,5 +453,55 @@ void FlagItem::onMountDestroyed()
    onItemDropped();
 }
 
+
+///// Lua Interface
+
+//  Lua constructor
+FlagItem::FlagItem(lua_State *L)
+{
+   // Do nothing
+};
+
+
+S32 FlagItem::getClassID(lua_State *L)
+{
+   return returnInt(L, FlagTypeNumber);
+}
+
+
+S32 FlagItem::getTeamIndx(lua_State *L)
+{
+   return returnInt(L, mTeam + 1);
+}
+
+
+S32 FlagItem::isInInitLoc(lua_State *L)
+{
+   return returnBool(L, isAtHome());
+}
+
+
+S32 FlagItem::getCaptureZone(lua_State *L)
+{
+   if(mZone.isValid())
+   {
+      mZone->push(L);
+      return 1;
+   }
+   else
+      return returnNil(L);
+}
+
+
+S32 FlagItem::isInCaptureZone(lua_State *L)
+{
+   return returnBool(L, mZone.isValid());
+}
+
+
+void FlagItem::push(lua_State *L)
+{
+   Lunar<FlagItem>::push(L, this);
+}
 
 };
