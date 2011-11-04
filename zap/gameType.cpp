@@ -1723,7 +1723,7 @@ void GameType::updateScore(ClientInfo *player, S32 teamIndex, ScoringEvent scori
       {
          for(S32 i = 0; i < mGame->getTeamCount(); i++)
          {
-            ((Team *)mGame->getTeam(teamIndex))->addScore(-points);            // Add magnitiude of negative score to all teams
+            ((Team *)mGame->getTeam(i))->addScore(-points);            // Add magnitiude of negative score to all teams
             s2cSetTeamScore(i, ((Team *)(mGame->getTeam(i)))->getScore());     // Broadcast result
          }
       }
