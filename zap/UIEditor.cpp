@@ -1515,6 +1515,22 @@ void EditorUserInterface::render()
          pos += mCurrentOffset;
          renderSpyBugVisibleRange(pos, getGame()->getTeamColor(editorObj->getTeam()), mCurrentScale);
       }
+
+      // Next draw turret firing ranges for selected or highlighted turrets only
+      fillVector.clear();
+      
+      editorDb->findObjects(TurretTypeNumber, fillVector);
+      for(S32 i = 0; i < fillVector.size(); i++)
+      {
+         EditorObject *editorObj = dynamic_cast<EditorObject *>(fillVector[i]);
+         if(editorObj->isSelected() || editorObj->isLitUp())
+         {
+            Point pos = editorObj->getVert(0);
+            pos *= mCurrentScale;
+            pos += mCurrentOffset;
+            renderTurretFiringRange(pos, getGame()->getTeamColor(editorObj->getTeam()), mCurrentScale);
+         }
+      }
    }
    else
       renderGrid();        // Render grid first, so it's at the bottom

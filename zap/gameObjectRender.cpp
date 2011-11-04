@@ -688,12 +688,17 @@ void renderSpyBugVisibleRange(const Point &pos, const Color &color, F32 currentS
 
    F32 range = gSpyBugRange * currentScale;
 
-   glBegin(GL_POLYGON);
-      glVertex2f(pos.x - range, pos.y - range);
-      glVertex2f(pos.x + range, pos.y - range);
-      glVertex2f(pos.x + range, pos.y + range);
-      glVertex2f(pos.x - range, pos.y + range);
-   glEnd();
+   UserInterface::drawRect(pos.x - range, pos.y - range, pos.x + range, pos.y + range, GL_POLYGON);
+}
+
+
+void renderTurretFiringRange(const Point &pos, const Color &color, F32 currentScale)
+{
+   glColor(color, 0.25f);    // Use transparency to highlight areas with more turret coverage
+
+   F32 range = TurretPerceptionDistance * currentScale;
+
+   UserInterface::drawRect(pos.x - range, pos.y - range, pos.x + range, pos.y + range, GL_POLYGON);
 }
 
 

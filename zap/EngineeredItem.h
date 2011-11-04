@@ -304,14 +304,9 @@ public:
 
    static const S32 TURRET_OFFSET = 15;   // Distance of the turret's render location from it's attachment location
                                           // Also serves as radius of circle of turret's body, where the turret starts
+   static const S32 TurretTurnRate = 4;   // How fast can turrets turn to aim?
 
-   enum {
-      TurretPerceptionDistance = 800,     // Area to search for potential targets...
-      TurretTurnRate = 4,                 // How fast can turrets turn to aim?
-      // Turret projectile characteristics (including bullet range) set in gameWeapons.cpp
-
-      AimMask = Parent::FirstFreeMask,
-   };
+   static const S32 AimMask = Parent::FirstFreeMask;
 
 
    void getObjectGeometry(const Point &anchor, const Point &normal, Vector<Point> &polyPoints) const;

@@ -777,7 +777,7 @@ void UserInterface::drawMenuItemHighlight(S32 x1, S32 y1, S32 x2, S32 y2, bool d
 }
 
 
-void drawRect(S32 x1, S32 y1, S32 x2, S32 y2, S32 mode)
+void UserInterface::drawRect(S32 x1, S32 y1, S32 x2, S32 y2, S32 mode)
 {
    glBegin(mode);
       glVertex2i(x1, y1);
