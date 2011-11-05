@@ -45,7 +45,7 @@ static const char *gameCredits[] = {
    "David Buck (raptor)",
    "Samuel Williams (sam686)",
    "-",
-   "Originally based on Zap demo in OpenTNL",
+   "Originally based on the Zap demo in OpenTNL",
    "-",
    "Mac support:",
    "Ryan Witmer",
@@ -84,14 +84,13 @@ CreditsUserInterface::CreditsUserInterface(ClientGame *game) : Parent(game)
 }
 
 
-// Destructor
+// Destructor (only gets run when we quit the game!)
 CreditsUserInterface::~CreditsUserInterface()
 {
    for(S32 i = 0; i < fxList.size(); i++)
    {
       delete fxList[i];
       fxList[i] = NULL;
-      fxList.erase(i);
    }
    fxList.clear();
 }
@@ -107,7 +106,7 @@ void CreditsUserInterface::onActivate()
    // destructor is invoked
 
    // Add credits scroller first and make it active
-   CreditsScroller *scroller = new CreditsScroller(getGame());
+   CreditsScroller *scroller = new CreditsScroller(getGame());    // Constructor adds this to fxList
    scroller->setActive(true);
 
    if(fxList.size() > 1)
@@ -176,6 +175,13 @@ CreditsFX::CreditsFX(ClientGame *game)
    game->getUIManager()->getCreditsUserInterface()->addFX(this);
 }
 
+
+// Destructor
+CreditsFX::~CreditsFX()
+{
+   // Do nothing
+}
+
 // Constructor
 CreditsScroller::CreditsScroller(ClientGame *game) : Parent(game)
 {
@@ -210,7 +216,9 @@ CreditsScroller::CreditsScroller(ClientGame *game) : Parent(game)
 
 CreditsScroller::~CreditsScroller()       // Destructor
 {
+   // Do nothing
 }
+
 
 void CreditsScroller::updateFX(U32 delta)
 {

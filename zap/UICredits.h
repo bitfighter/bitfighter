@@ -38,9 +38,9 @@ protected:
    bool activated;
 
 public:
-   void CreditsUserInterface();     // Constructor
-
-   CreditsFX(ClientGame *game);
+   CreditsFX(ClientGame *game);     // Constructor
+   virtual ~CreditsFX();            // Destructor
+   
    void setActive(bool active) { activated = active; }
    bool isActive() { return activated; }
    virtual void updateFX(U32 delta) = 0;
