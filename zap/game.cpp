@@ -1784,17 +1784,16 @@ void ServerGame::removeClient(ClientInfo *clientInfo)
 }
 
 
-extern void shutdownBitfighter();      // defined in main.cpp
+// Only called from outside ServerGame
+bool ServerGame::isReadyToShutdown(U32 timeDelta)
+{
+   return mShuttingDown && (mShutdownTimer.update(timeDelta) || onlyClientIs(mShutdownOriginator));
+}
+
 
 // Top-level idle loop for server, runs only on the server by definition
 void ServerGame::idle(U32 timeDelta)
 {
-   if(mShuttingDown && (mShutdownTimer.update(timeDelta) || onlyClientIs(mShutdownOriginator)))
-   {
-      shutdownBitfighter();
-      return;
-   }
-
    // Simulate CPU stutter without impacting gClientGame
    if(mSettings->getSimulatedStutter() > 0)
    {

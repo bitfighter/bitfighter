@@ -1083,7 +1083,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestShutdown, (U16 time, StringPtr reaso
       return;
 
    logprintf(LogConsumer::ServerFilter, "User [%s] requested shutdown in %d seconds [%s]", 
-         mClientInfo->getName().getString(), time, reason.getString());
+                                        mClientInfo->getName().getString(), time, reason.getString());
 
    gServerGame->setShuttingDown(true, time, this, reason.getString());
 

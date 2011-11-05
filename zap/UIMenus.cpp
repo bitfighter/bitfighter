@@ -484,8 +484,8 @@ void MenuUserInterface::onKeyDown(InputCode inputCode, char ascii)
 
          delete gServerGame;
          gServerGame = NULL;
-
       }
+
       return;
    }
 
@@ -1406,6 +1406,7 @@ void GameMenuUserInterface::onReactivate()
 {
    mMenuSubTitle = "";
 }
+
 
 
 static void endGameCallback(ClientGame *game, U32 unused)

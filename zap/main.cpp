@@ -357,7 +357,10 @@ void initHostGame(GameSettings *settings, const Vector<string> &levelList, bool 
 {
    TNLAssert(!gServerGame, "already exists!");
    if(gServerGame)
+   {
       delete gServerGame;
+      gServerGame = NULL;
+   }
 
    Address address(IPProtocol, Address::Any, DEFAULT_GAME_PORT);     // Equivalent to ("IP:Any:28000")
    address.set(settings->getHostAddress());                          // May overwrite parts of address, depending on what getHostAddress contains
@@ -569,8 +572,28 @@ void gameIdle(U32 integerTime)
          gClientGame->idle(integerTime);
       }
 #endif
+
       if(gServerGame)
-         gServerGame->idle(integerTime);
+      {
+         // This block has to be outside gServerGame because deleting an object from within is in rather poor form
+         if(gServerGame->isReadyToShutdown(integerTime))
+         {
+#ifndef ZAP_DEDICATED
+            if(gClientGame)
+            {
+               gClientGame->closeConnectionToGameServer();
+
+               delete gServerGame;
+               gServerGame = NULL;
+            }
+            else
+#endif
+               shutdownBitfighter();
+         }
+
+         else
+            gServerGame->idle(integerTime);
+      }
    }
 }
 

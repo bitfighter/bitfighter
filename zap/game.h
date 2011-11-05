@@ -601,6 +601,7 @@ public:
 
    bool isServer() { return true; }
    void idle(U32 timeDelta);
+   bool isReadyToShutdown(U32 timeDelta);
    void gameEnded();
 
    S32 getLevelNameCount();
