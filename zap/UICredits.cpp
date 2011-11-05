@@ -230,14 +230,13 @@ void CreditsScroller::updateFX(U32 delta)
       // Reached the top, reset
       if(credits[i].currPos.x < -CreditSpace )
          credits[i].currPos.x += mTotalSize - 350;
-
    }
 }
 
 
 void CreditsScroller::render()
 {
-   glColor3f(1,1,1);
+   glColor(Colors::white);
 
    // Draw the credits text, section by section, line by line
    for(S32 i = 0; i < credits.size(); i++)
@@ -246,7 +245,7 @@ void CreditsScroller::render()
          UserInterface::drawCenteredString(S32(credits[i].currPos.x) + CreditSpace*(j + 1), 25, credits[i].creditsLine[j]);
    }
 
-   glColor3f(0, 0, 0);
+   glColor(Colors::black);
    glBegin(GL_POLYGON);
       glVertex2i(0, 0);
       glVertex2i(0, 150);
@@ -327,7 +326,7 @@ void SplashUserInterface::render()
    }
    else if(mPhase == 2)           // Resting phase
    {
-      glColor3f(0, 0, 1);
+      glColor(Colors::blue);
       renderBitfighterLogo(gScreenInfo.getGameCanvasHeight() / 2, 1);
    }
    else if(mPhase == 3)           // Rising phase
