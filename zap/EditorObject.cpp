@@ -38,11 +38,12 @@
 #include "config.h"
 
 #include "Geometry.h"            // For GeomType enum
+#include "stringUtils.h"
 
+#ifndef ZAP_DEDICATED
 #include "UIEditorMenus.h"       // For EditorAttributeMenuUI def
-
 #include "SDL/SDL_opengl.h"
-
+#endif
 
 using namespace boost;
 
@@ -113,6 +114,7 @@ static F32 getRenderingAlpha(bool isScriptItem)
 
 static const S32 DOCK_LABEL_SIZE = 9;      // Size to label items on the dock
 
+#ifndef ZAP_DEDICATED
 static void labelVertex(Point pos, F32 radius, const char *itemLabelTop, const char *itemLabelBottom, F32 scale)
 {
    F32 labelSize = DOCK_LABEL_SIZE / scale;
@@ -120,11 +122,12 @@ static void labelVertex(Point pos, F32 radius, const char *itemLabelTop, const c
    UserInterface::drawStringc(pos.x, pos.y - radius - labelSize - 5, labelSize, itemLabelTop);     // Above the vertex
    UserInterface::drawStringc(pos.x, pos.y + radius + 2, labelSize, itemLabelBottom);              // Below the vertex
 }
-
+#endif
 
 // Render selected and highlighted vertices, called from renderEditor
 void EditorObject::renderAndLabelHighlightedVertices(F32 currentScale)
 {
+#ifndef ZAP_DEDICATED
    F32 radius = getEditorRadius(currentScale);
 
    // Label and highlight any selected or lit up vertices.  This will also highlight point items.
@@ -137,16 +140,19 @@ void EditorObject::renderAndLabelHighlightedVertices(F32 currentScale)
 
          drawSquare(center, radius / currentScale);
          labelVertex(center, radius / currentScale, getOnScreenName(), getVertLabel(i), currentScale);
-      }         
+      }
+#endif
 }
 
 
 void EditorObject::renderDockItemLabel(const Point &pos, const char *label, F32 yOffset)
 {
+#ifndef ZAP_DEDICATED
    F32 xpos = pos.x;
    F32 ypos = pos.y - DOCK_LABEL_SIZE / 2 + yOffset;
    glColor(Colors::white);
    UserInterface::drawStringc(xpos, ypos, (F32)DOCK_LABEL_SIZE, label);
+#endif
 }
 
 
@@ -158,14 +164,17 @@ void EditorObject::labelDockItem()
 
 void EditorObject::highlightDockItem()
 {
+#ifndef ZAP_DEDICATED
    glColor(HIGHLIGHT_COLOR);
    drawSquare(getVert(0), getDockRadius());
+#endif
 }
 
 
 // Items are rendered in index order, so those with a higher index get drawn later, and hence, on top
 void EditorObject::renderInEditor(F32 currentScale, S32 snapIndex, bool isScriptItem, bool showingReferenceShip, ShowMode showMode)
 {
+#ifndef ZAP_DEDICATED
    const S32 instrSize = 9;      // Size of instructions for special items
    const S32 attrSize = 10;
    
@@ -215,6 +224,7 @@ void EditorObject::renderInEditor(F32 currentScale, S32 snapIndex, bool isScript
             renderAttributeString(currentScale);
       }
    }
+#endif
 }
 
 
@@ -286,6 +296,7 @@ Color EditorObject::getTeamColor(S32 teamId)
 // Draw the vertices for a polygon or line item (i.e. walls)
 void EditorObject::renderLinePolyVertices(F32 currentScale, F32 alpha)
 {
+#ifndef ZAP_DEDICATED
    // Draw the vertices of the wall or the polygon area
    for(S32 j = 0; j < getVertCount(); j++)
    {
@@ -303,6 +314,7 @@ void EditorObject::renderLinePolyVertices(F32 currentScale, F32 alpha)
          renderVertex(UnselectedItemVertex, v, NO_NUMBER, size, currentScale, alpha);   // Solid red boxes, no number
       }
    }
+#endif
 }
 
 
@@ -378,6 +390,7 @@ static const Color INSTRUCTION_TEXTCOLOR = Colors::white;      // TODO: Put in e
 // Offset: negative below the item, positive above
 void EditorPointObject::renderItemText(const char *text, S32 offset, F32 currentScale)
 {
+#ifndef ZAP_DEDICATED
    glColor(INSTRUCTION_TEXTCOLOR);
 
    Point pos = getVert(0);
@@ -385,6 +398,7 @@ void EditorPointObject::renderItemText(const char *text, S32 offset, F32 current
    // Dividing by currentScale keeps the text a constant size in pixels
    UserInterface::drawCenteredString(pos.x, pos.y + getEditorRadius(currentScale) / currentScale, F32(INSTRUCTION_TEXTSIZE) / currentScale, text);
    UserInterface::drawCenteredString(pos.x, pos.y + getEditorRadius(currentScale) / currentScale + INSTRUCTION_TEXTSIZE * 1.25f, F32(INSTRUCTION_TEXTSIZE) / currentScale, "[Enter] to edit");
+#endif
 }
 
 

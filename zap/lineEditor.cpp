@@ -77,7 +77,9 @@ void LineEditor::buildMatchList(Vector<string> *candidates, const char *partial)
 // Draw our cursor, assuming string is drawn at x,y  (vert spacing works differently than on the angle version
 void LineEditor::drawCursor(S32 x, S32 y, S32 fontSize)
 {
+#ifndef ZAP_DEDICATED
    drawCursorAngle(x, y + fontSize, fontSize, UserInterface::getStringWidth(fontSize, mLine.c_str()), 0);
+#endif
 }
 
 
@@ -91,8 +93,10 @@ void LineEditor::drawCursor(S32 x, S32 y, S32 fontSize, S32 startingWidth)
 // Draw our cursor, assuming string is drawn at x,y at specified angle 
 void LineEditor::drawCursorAngle(F32 x, F32 y, F32 fontSize, F32 angle)
 {
+#ifndef ZAP_DEDICATED
    S32 width = UserInterface::getStringWidth(fontSize, mLine.c_str());
    drawCursorAngle(x, y, fontSize, width, angle);
+#endif
 }
 
 
