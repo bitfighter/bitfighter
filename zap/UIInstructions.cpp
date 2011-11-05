@@ -137,7 +137,7 @@ void InstructionsUserInterface::render()
          renderPageCommands(3);     // Debug commands
          break;
       case 12:
-         renderConsoleCommands("Open the console by pressing [Shift]-[/] in game", consoleCommands1);   // Scripting console
+         renderConsoleCommands("Open the console by pressing [Ctrl-/] in game", consoleCommands1);   // Scripting console
          break;
 
       // When adding page, be sure to increase NUM_PAGES, and add item to pageHeaders array

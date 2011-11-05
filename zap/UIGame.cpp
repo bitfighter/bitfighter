@@ -2079,10 +2079,10 @@ CommandInfo chatCmds[] = {
    { "kickbots",    GameUserInterface::kickBotsHandler,        {  },              1,       LEVEL_COMMANDS,  1, {  },                                   "Kick all bots" },
 
    { "kick",               GameUserInterface::kickPlayerHandler,         { NAME },      1,  ADMIN_COMMANDS, 0, {"<name>"},              "Kick a player from the game" },
-   { "ban",                GameUserInterface::banPlayerHandler,          { NAME, INT }, 2,  ADMIN_COMMANDS, 0, {"<name>","[duration]"}, "Ban an player from the server (IP-based, def. = 60)" },
-   { "banip",              GameUserInterface::banIpHandler,              { STR, INT },  2,  ADMIN_COMMANDS, 0, {"<ip>","[duration]"},   "Ban an IP address from the server (def. = 60)" },
+   { "ban",                GameUserInterface::banPlayerHandler,          { NAME, INT }, 2,  ADMIN_COMMANDS, 0, {"<name>","[duration]"}, "Ban a player from the server (IP-based, def. = 60 secs)" },
+   { "banip",              GameUserInterface::banIpHandler,              { STR, INT },  2,  ADMIN_COMMANDS, 0, {"<ip>","[duration]"},   "Ban an IP address from the server (def. = 60 secs)" },
    { "shutdown",           GameUserInterface::shutdownServerHandler,     { INT, STR },  2,  ADMIN_COMMANDS, 0, {"[time]","[message]"},  "Start orderly shutdown of server (def. = 10 secs)" },
-   { "setlevpass",         GameUserInterface::setLevPassHandler,         { STR },       1,  ADMIN_COMMANDS, 0, {"[passwd]"},            "Set server password  (use blank to clear)" },
+   { "setlevpass",         GameUserInterface::setLevPassHandler,         { STR },       1,  ADMIN_COMMANDS, 0, {"[passwd]"},            "Set server password (use blank to clear)" },
    { "setadminpass",       GameUserInterface::setAdminPassHandler,       { STR },       1,  ADMIN_COMMANDS, 0, {"[passwd]"},            "Set level change password (use blank to clear)" },
    { "setserverpass",      GameUserInterface::setServerPassHandler,      { STR },       1,  ADMIN_COMMANDS, 0, {"<passwd>"},            "Set admin password" },
    { "leveldir",           GameUserInterface::setLevelDirHandler,        { STR },       1,  ADMIN_COMMANDS, 0, {"<new level folder>"},  "Set leveldir param on the server (changes levels available)" },
@@ -2090,7 +2090,7 @@ CommandInfo chatCmds[] = {
    { "setserverdescr",     GameUserInterface::setServerDescrHandler,     { STR },       1,  ADMIN_COMMANDS, 0, {"<descr>"},             "Set server description" },
    { "deletecurrentlevel", GameUserInterface::deleteCurrentLevelHandler, { },           0,  ADMIN_COMMANDS, 0, {""},                    "Remove current level from server" },
    { "gmute",              GameUserInterface::globalMuteHandler,         { NAME },      1,  ADMIN_COMMANDS, 0, {"<name>"},              "Globally mute/unmute a player" },
-   { "rename",             GameUserInterface::renamePlayerHandler,       { NAME, STR }, 2,  ADMIN_COMMANDS, 0, {"<name>","<toname>"},   "Rename a player to a new name" },
+   { "rename",             GameUserInterface::renamePlayerHandler,       { NAME, STR }, 2,  ADMIN_COMMANDS, 0, {"<from>","<to>"},   "Give a player a new name" },
    { "maxbots",            GameUserInterface::setMaxBotsHandler,         { INT },       1,  ADMIN_COMMANDS, 0, {"<count>"},             "Set the maximum bots allowed for this server" },
    { "shuffle",            GameUserInterface::shuffleTeams,              { },           0,  ADMIN_COMMANDS, 0,  { "" },                 "Randomly reshuffle teams" },
 
@@ -2098,10 +2098,10 @@ CommandInfo chatCmds[] = {
    { "showzones",  GameUserInterface::showZonesHandler,     {  },    0, DEBUG_COMMANDS, 0, {  },         "Show bot nav mesh zones" },
    { "showpaths",  GameUserInterface::showPathsHandler,     {  },    0, DEBUG_COMMANDS, 0, {  },         "Show robot paths" },
    { "showbots",   GameUserInterface::showBotsHandler,      {  },    0, DEBUG_COMMANDS, 0, {  },         "Show all robots" },
-   { "pausebots",  GameUserInterface::pauseBotsHandler,     {  },    0, DEBUG_COMMANDS, 0, {  },         "Pause all bots.  Reissue to start again" },
+   { "pausebots",  GameUserInterface::pauseBotsHandler,     {  },    0, DEBUG_COMMANDS, 0, {  },         "Pause all bots. Reissue to start again" },
    { "stepbots",   GameUserInterface::stepBotsHandler,      { INT }, 1, DEBUG_COMMANDS, 1, {"[steps]"},  "Advance bots by number of steps (def. = 1)"},
    { "linewidth",  GameUserInterface::lineWidthHandler,     { INT }, 1, DEBUG_COMMANDS, 1, {"[number]"}, "Change width of all lines (def. = 2)" },
-   { "linesmooth", GameUserInterface::lineSmoothHandler,    {  },    0, DEBUG_COMMANDS, 1, {  },         "Enable line smoothing, might look better" },
+   { "linesmooth", GameUserInterface::lineSmoothHandler,    {  },    0, DEBUG_COMMANDS, 1, {  },         "Enable line smoothing. Looks better, draws slower" },
    { "maxfps",     GameUserInterface::maxFpsHandler,        { INT }, 1, DEBUG_COMMANDS, 1, {"<number>"}, "Set maximum speed of game in frames per second" },
 };
 
