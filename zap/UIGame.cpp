@@ -2079,8 +2079,8 @@ CommandInfo chatCmds[] = {
    { "kickbots",    GameUserInterface::kickBotsHandler,        {  },              1,       LEVEL_COMMANDS,  1, {  },                                   "Kick all bots" },
 
    { "kick",               GameUserInterface::kickPlayerHandler,         { NAME },      1,  ADMIN_COMMANDS, 0, {"<name>"},              "Kick a player from the game" },
-   { "ban",                GameUserInterface::banPlayerHandler,          { NAME, INT }, 2,  ADMIN_COMMANDS, 0, {"<name>","[duration]"}, "Ban a player from the server (IP-based, def. = 60 secs)" },
-   { "banip",              GameUserInterface::banIpHandler,              { STR, INT },  2,  ADMIN_COMMANDS, 0, {"<ip>","[duration]"},   "Ban an IP address from the server (def. = 60 secs)" },
+   { "ban",                GameUserInterface::banPlayerHandler,          { NAME, INT }, 2,  ADMIN_COMMANDS, 0, {"<name>","[duration]"}, "Ban a player from the server (IP-based, def. = 60 mins)" },
+   { "banip",              GameUserInterface::banIpHandler,              { STR, INT },  2,  ADMIN_COMMANDS, 0, {"<ip>","[duration]"},   "Ban an IP address from the server (def. = 60 mins)" },
    { "shutdown",           GameUserInterface::shutdownServerHandler,     { INT, STR },  2,  ADMIN_COMMANDS, 0, {"[time]","[message]"},  "Start orderly shutdown of server (def. = 10 secs)" },
    { "setlevpass",         GameUserInterface::setLevPassHandler,         { STR },       1,  ADMIN_COMMANDS, 0, {"[passwd]"},            "Set server password (use blank to clear)" },
    { "setadminpass",       GameUserInterface::setAdminPassHandler,       { STR },       1,  ADMIN_COMMANDS, 0, {"[passwd]"},            "Set level change password (use blank to clear)" },
