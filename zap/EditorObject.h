@@ -188,7 +188,7 @@ public:
    virtual void initializeEditor();
 
    S32 mScore;
-   S32 getScore() { return mScore; }     // goal zones only, return zone's score
+   S32 getScore() { return mScore; }     // Goal zones only, return zone's score
 
    virtual bool canBeHostile();
    virtual bool canBeNeutral();
