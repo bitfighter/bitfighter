@@ -210,7 +210,7 @@ private:
 
    boost::shared_ptr<LuaLevelGenerator> mPluginRunner;
 
-   S32 mDraggingDockItem;
+   EditorObject *mDraggingDockItem;
    Vector<string> mLevelErrorMsgs, mLevelWarnings;
 
    bool mUp, mDown, mLeft, mRight, mIn, mOut;
@@ -233,7 +233,7 @@ private:
    bool checkForWallHit(const Point &point, DatabaseObject *wallSegment);
    bool checkForPolygonHit(const Point &point, EditorObject *object);    
 
-   S32 findHitItemOnDock(Point canvasPos);
+   void findHitItemOnDock();     // Sets mDockItemHit
 
    void findSnapVertex();
    EditorObject *mSnapObject;
@@ -242,6 +242,7 @@ private:
    S32 mEdgeHit;
    S32 mVertexHit;
    EditorObject *mItemHit;
+   EditorObject *mDockItemHit;
 
    void computeSelectionMinMax(Point &min, Point &max);
    bool mouseOnDock();                // Return whether mouse is currently over the dock
@@ -321,7 +322,7 @@ public:
    void onMouseMoved();
    void onMouseDragged();
    void startDraggingDockItem();
-   EditorObject *copyDockItem(S32 index);
+   EditorObject *copyDockItem(EditorObject *source);
    bool mouseIgnore;
 
    void populateDock();                         // Load up dock with game-specific items to drag and drop

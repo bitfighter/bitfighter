@@ -59,9 +59,10 @@ void SimpleLine::renderDock()
 void SimpleLine::newObjectFromDock(F32 gridSize) 
 {
 #ifndef ZAP_DEDICATED
-   EditorParent::newObjectFromDock(gridSize);
    setVert(Point(0,0), 0);
    setVert(Point(1,0) * gridSize, 1);
+
+   EditorParent::newObjectFromDock(gridSize);
 #endif
 }
 

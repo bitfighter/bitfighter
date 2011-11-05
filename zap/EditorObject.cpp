@@ -315,27 +315,15 @@ void EditorObject::unselect()
 }
 
 
-// Called when item dragged from dock to editor
+// Called when item dragged from dock to editor -- overridden by several objects
 void EditorObject::newObjectFromDock(F32 gridSize) 
 {  
    assignNewSerialNumber();
+
+   updateExtentInDatabase();
+   mDockItem = false;
+   clearGame();
 }   
-
-
-//void EditorObject::initializePolyGeom()
-//{
-//   // TODO: Use the same code already in polygon
-//   if(getGeomType() == geomPolygon)
-//   {
-//      Triangulate::Process(getVerts(), *getPolyFillPoints());   // Populates fillPoints from polygon outline
-//      //TNLAssert(fillPoints.size() > 0, "Bogus polygon geometry detected!");
-//
-//      setCentroid(findCentroid(getVerts()));
-//      setExtent(Rect(getVerts()));
-//   }
-//
-//   forceFieldMountSegment = NULL;
-//}
 
 
 // Move object to location, specifying (optional) vertex to be positioned at pos

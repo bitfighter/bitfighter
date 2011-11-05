@@ -132,8 +132,6 @@ static const F32 INITIAL_WIDTH = 0.3f;
 void EditorPolygon::newObjectFromDock(F32 gridSize)
 {
 #ifndef ZAP_DEDICATED
-   EditorParent::newObjectFromDock(gridSize);
-
    F32 w = INITIAL_HEIGHT * gridSize / 2;
    F32 h = INITIAL_WIDTH * gridSize / 2;
 
@@ -141,6 +139,8 @@ void EditorPolygon::newObjectFromDock(F32 gridSize)
    setVert(Point(-w,  h), 1);
    setVert(Point( w,  h), 2);
    setVert(Point( w, -h), 3);
+
+   EditorParent::newObjectFromDock(gridSize);
 #endif
 }
 

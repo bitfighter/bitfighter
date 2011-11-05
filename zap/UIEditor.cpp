@@ -126,6 +126,7 @@ EditorUserInterface::EditorUserInterface(ClientGame *game) : Parent(game)
    mSnapObject = NULL;
    mSnapVertexIndex = NONE;
    mItemHit = NULL;
+   mDockItemHit = NULL;
    mEdgeHit = NONE;
 
    setNeedToSave(false);
@@ -1004,7 +1005,7 @@ void EditorUserInterface::onActivate()
    mCreatingPoly = false;
    mCreatingPolyline = false;
    mDraggingObjects = false;
-   mDraggingDockItem = NONE;
+   mDraggingDockItem = NULL;
    mCurrentTeam = 0;
    mPreviewMode = false;
    entryMode = EntryNone;
@@ -1762,22 +1763,19 @@ void EditorUserInterface::renderDockItems()
 // Render help messages at bottom of screen
 void EditorUserInterface::renderHelpMessage()
 {
-   if(!mouseOnDock() || !mPreviewMode)    // Help messages only shown when hovering over dock item, and only when dock is visible
+   if(!mouseOnDock() || mPreviewMode)  // Help messages only shown when hovering over dock item, and only when dock is visible
       return;
 
-   S32 hoverItem = findHitItemOnDock(mMousePos);
-
-   if(hoverItem == NONE)
+   if(!mDockItemHit)
       return;
 
-   mDockItems[hoverItem]->setLitUp(true);    // Will trigger a selection highlight to appear around dock item
-
-   const char *helpString = mDockItems[hoverItem]->getEditorHelpString();
+   mDockItemHit->setLitUp(true);       // Will trigger a selection highlight to appear around dock item
 
    glColor(Colors::green);
 
    // Center string between left side of screen and edge of dock
-   S32 x = (S32)(gScreenInfo.getGameCanvasWidth() - horizMargin - DOCK_WIDTH - getStringWidth(15, helpString)) / 2;
+   const char *helpString = mDockItemHit->getEditorHelpString();
+   S32 x = (gScreenInfo.getGameCanvasWidth() - horizMargin - DOCK_WIDTH - getStringWidth(15, helpString)) / 2;
    drawString(x, gScreenInfo.getGameCanvasHeight() - vertMargin - 15, 15, helpString);
 }
 
@@ -2359,17 +2357,23 @@ bool EditorUserInterface::checkForPolygonHit(const Point &point, EditorObject *o
 }
 
 
-S32 EditorUserInterface::findHitItemOnDock(Point canvasPos)
+// Sets mDockItemHit
+void EditorUserInterface::findHitItemOnDock()
 {
+   mDockItemHit = NULL;
+
    if(mShowMode == ShowWallsOnly)     // Only add dock items when objects are visible
-      return NONE;
+      return;
 
    for(S32 i = mDockItems.size() - 1; i >= 0; i--)     // Go in reverse order because the code we copied did ;-)
    {
       Point pos = mDockItems[i]->getVert(0);
 
-      if(fabs(canvasPos.x - pos.x) < POINT_HIT_RADIUS && fabs(canvasPos.y - pos.y) < POINT_HIT_RADIUS)
-         return i;
+      if(fabs(mMousePos.x - pos.x) < POINT_HIT_RADIUS && fabs(mMousePos.y - pos.y) < POINT_HIT_RADIUS)
+      {
+         mDockItemHit = mDockItems[i].get();
+         return;
+      }
    }
 
    // Now check for polygon interior hits
@@ -2380,11 +2384,14 @@ S32 EditorUserInterface::findHitItemOnDock(Point canvasPos)
          for(S32 j = 0; j < mDockItems[i]->getVertCount(); j++)
             verts.push_back(mDockItems[i]->getVert(j));
 
-         if(PolygonContains2(verts.address(),verts.size(), canvasPos))
-            return i;
+         if(PolygonContains2(verts.address(),verts.size(), mMousePos))
+         {
+            mDockItemHit = mDockItems[i].get();
+            return;
+         }
       }
 
-   return NONE;
+   return;
 }
 
 
@@ -2415,6 +2422,7 @@ void EditorUserInterface::onMouseMoved()
       return;
 
    findHitItemAndEdge();      //  Sets mItemHit, mVertexHit, and mEdgeHit
+   findHitItemOnDock();
 
    // Unhighlight the currently lit up object, if any
    if(mItemToLightUp)
@@ -2435,13 +2443,12 @@ void EditorUserInterface::onMouseMoved()
 
    // Check again, and take a point object in preference to a vertex
    if(mItemHit && !mItemHit->isSelected() && mItemHit->getGeomType() == geomPoint)  
-      mItemToLightUp = mItemHit;
+      mItemToLightUp = mDockItemHit;
 
    if(mItemToLightUp)
       mItemToLightUp->setLitUp(true);
 
-   bool showMoveCursor = (mItemHit || mVertexHit != NONE || mItemHit || mEdgeHit != NONE || 
-                         (mouseOnDock() && findHitItemOnDock(mMousePos) != NONE));
+   bool showMoveCursor = (mItemHit || mVertexHit != NONE || mEdgeHit != NONE || mDockItemHit);
 
 
    findSnapVertex();
@@ -2464,7 +2471,7 @@ void EditorUserInterface::onMouseDragged()
 
    bool needToSaveUndoState = true;
 
-   if(mDraggingDockItem != NONE)      // We just started dragging an item off the dock
+   if(mDraggingDockItem != NULL)      // We just started dragging an item off the dock
    {
        startDraggingDockItem();  
        needToSaveUndoState = false;
@@ -2541,14 +2548,11 @@ void EditorUserInterface::onMouseDragged()
 }
 
 
-EditorObject *EditorUserInterface::copyDockItem(S32 index)
+EditorObject *EditorUserInterface::copyDockItem(EditorObject *source)
 {
-   // Instantiate object so we are in essence dragging a non-dock item
-   EditorObject *newObject = mDockItems[index]->newCopy();
-   newObject->newObjectFromDock(getGame()->getGridSize());
-   newObject->updateExtentInDatabase();
-   newObject->setDockItem(false);
-   newObject->clearGame();
+   // Instantiate object so we are essentially dragging a non-dock item
+   EditorObject *newObject = source->newCopy();
+   newObject->newObjectFromDock(getGame()->getGridSize());     // Do things particular to creating an object that came from dock
 
    return newObject;
 }
@@ -2572,7 +2576,7 @@ void EditorUserInterface::startDraggingDockItem()
 
    clearSelection();            // No items are selected...
    item->setSelected(true);     // ...except for the new one
-   mDraggingDockItem = NONE;    // Because now we're dragging a real item
+   mDraggingDockItem = NULL;    // Because now we're dragging a real item
    validateLevel();             // Check level for errors
 
 
@@ -2976,7 +2980,7 @@ void EditorUserInterface::insertNewItem(U8 itemTypeNumber)
    for(S32 i = 0; i < mDockItems.size(); i++)
       if(mDockItems[i]->getObjectTypeNumber() == itemTypeNumber)
       {
-         newObject = copyDockItem(i);
+         newObject = copyDockItem(mDockItems[i].get());
          break;
       }
    TNLAssert(newObject, "Couldn't create object in insertNewItem()");
@@ -3210,7 +3214,6 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
          mNewItem->initializeEditor();
          mNewItem->setTeam(mCurrentTeam);
          mNewItem->addVert(snapPoint(convertCanvasToLevelCoord(mMousePos)));
-         mNewItem->setDockItem(false);
       }
    }
    else if(inputCode == MOUSE_LEFT)
@@ -3218,7 +3221,7 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
       if(getInputCodeState(MOUSE_RIGHT))        // Prevent weirdness
          return;
 
-      mDraggingDockItem = NONE;
+      mDraggingDockItem = NULL;
       mMousePos.set(gScreenInfo.getMousePos());
 
       if(mCreatingPoly || mCreatingPolyline)    // Save any polygon/polyline we might be creating
@@ -3244,11 +3247,11 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
       if(mouseOnDock())    // On the dock?  Did we hit something to start dragging off the dock?
       {
          clearSelection();
-         mDraggingDockItem = findHitItemOnDock(mMousePos);
+         mDraggingDockItem = mDockItemHit;
       }
       else                 // Mouse is not on dock
       {
-         mDraggingDockItem = NONE;
+         mDraggingDockItem = NULL;
 
          // rules for mouse down:
          // if the click has no shift- modifier, then
@@ -3683,14 +3686,14 @@ void EditorUserInterface::onFinishedDragging()
    mDraggingObjects = false;
 
    // Dragged item off the dock, then back on  ==> nothing changed; restore to unmoved state, which was stored on undo stack
-   if(mouseOnDock() && mDraggingDockItem != NONE)
+   if(mouseOnDock() && mDraggingDockItem != NULL)
    {
       undo(false);
       return;
    }
 
    // Mouse is over the dock and we dragged something to the dock (probably a delete)
-   if(mouseOnDock() && mDraggingDockItem == NONE)
+   if(mouseOnDock() && !mDraggingDockItem)
    {
       const Vector<EditorObject *> *objList = getObjectList();
       bool deletedSomething = false;
@@ -3713,7 +3716,7 @@ void EditorUserInterface::onFinishedDragging()
    // 2. moving something,
    // 3. or we moved something to the dock and nothing was deleted, e.g. when dragging a vertex
    // need to save an undo state if anything changed
-   if(mDraggingDockItem == NONE)    // Not dragging from dock - user is moving object around screen, or dragging vertex to dock
+   if(mDraggingDockItem == NULL)    // Not dragging from dock - user is moving object around screen, or dragging vertex to dock
    {
       // If our snap vertex has moved then all selected items have moved
       bool itemsMoved = mSnapObject->getVert(mSnapVertexIndex) != mMoveOrigin;

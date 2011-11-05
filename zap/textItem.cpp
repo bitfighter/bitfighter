@@ -92,10 +92,10 @@ TextItem *TextItem::clone() const
 
 void TextItem::newObjectFromDock(F32 gridSize)
 {
-   Parent::newObjectFromDock(gridSize);
-
    mText = "Your text here";
    recalcTextSize();
+
+   Parent::newObjectFromDock(gridSize);
 }
 
 

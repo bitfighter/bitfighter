@@ -178,8 +178,6 @@ public:
    bool isSelected() { return mSelected; }
    void setSelected(bool selected) { mSelected = selected; }
 
-   void setDockItem(bool isDockItem) { mDockItem = isDockItem; }
-
    bool isLitUp() { return mLitUp; }
    void setLitUp(bool litUp) { mLitUp = litUp; if(!litUp) setVertexLitUp(NONE); }
 

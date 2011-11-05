@@ -1588,10 +1588,9 @@ bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &le
       {
          WallItem *wallObject = new WallItem();  
          
-         wallObject->setWidth(atoi(argv[1]));      // setWidth handles bounds checking
+         wallObject->setWidth(atoi(argv[1]));   // setWidth handles bounds checking
 
-         wallObject->setDockItem(false);     // TODO: Needed?
-         wallObject->initializeEditor();     // Only runs unselectVerts
+         wallObject->initializeEditor();        // Only runs unselectVerts
 
          Point p;
          for(S32 i = 2; i < argc; i+=2)
@@ -1630,7 +1629,6 @@ bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &le
             skipArgs = 1;
          }
 
-         newObject->setDockItem(false);     // TODO: Needed?
          newObject->initializeEditor();     // Only runs unselectVerts
 
          newObject->processArguments(argc - 1 - skipArgs, argv + 1 + skipArgs, this);
