@@ -404,7 +404,7 @@ void EngineeredItem::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
 {
    mHealRate = attributeMenu->getMenuItem(0)->getIntValue();
 }
-
+#endif
 
 void EngineeredItem::onGeomChanged()
 {
@@ -412,7 +412,7 @@ void EngineeredItem::onGeomChanged()
    Parent::onGeomChanged();
 }
 
-
+#ifndef ZAP_DEDICATED
 Point EngineeredItem::getEditorSelectionOffset(F32 currentScale)
 {
    if(!mSnapped)

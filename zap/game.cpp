@@ -617,7 +617,7 @@ string Game::toString()
    str += gameType->getSpecialsLine() + "\n";
 
    if(gameType->getScriptName() != "")
-      str += "Script " + writeLevelString(gameType->getScriptLine().c_str()) + "\n";
+      str += "Script " + gameType->getScriptLine() + "\n";
 
    str += string("MinPlayers") + (gameType->getMinRecPlayers() > 0 ? " " + itos(gameType->getMinRecPlayers()) : "") + "\n";
    str += string("MaxPlayers") + (gameType->getMaxRecPlayers() > 0 ? " " + itos(gameType->getMaxRecPlayers()) : "") + "\n";

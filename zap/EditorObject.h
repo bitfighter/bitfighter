@@ -46,7 +46,6 @@ static S32 TEAM_NEUTRAL = -1;
 static S32 TEAM_HOSTILE = -2;
 static S32 NO_TEAM = -3;      // Not exposed to lua, not used in level files, only used internally
 
-#ifndef ZAP_DEDICATED
 
 static const S32 NONE = -1;
 
@@ -250,23 +249,5 @@ public:
 
 };
 
-#else
-// ZAP_DEDICATED
-
-class EditorObject : virtual public BfObject   // Interface class  -- All editor objects need to implement this
-{
-   // dedicated server won't need much of this
-public:
-   S32 mItemId;  // not used, but as of now, needed for Item::Item constructor
-
-   virtual EditorObject *clone()  const { TNLAssert(false, "Clone method not implemented!"); return NULL; };
-   EditorObject *newCopy() { return clone(); }        // Copies object  
-};
-
-class EditorPointObject : public EditorObject, public PointGeometry {};
-class EditorItem : public EditorPointObject {};
-
-
-#endif
 };
 #endif

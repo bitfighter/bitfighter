@@ -26,8 +26,6 @@
 #include "BotNavMeshZone.h"
 #include "GeomUtils.h"
 #include "robot.h"
-#include "UIMenus.h"
-//#include "UIGame.h"           // for access to mGameUserInterface.mDebugShowMeshZones
 #include "gameObjectRender.h"
 #include "teleporter.h"
 #include "barrier.h"             // For Barrier methods in generating zones
@@ -35,6 +33,11 @@
 #include "../recast/Recast.h"    // For zone generation
 #include "../recast/RecastAlloc.h"
 #include "game.h"
+
+#ifndef ZAP_DEDICATED
+#include "UIMenus.h"
+//#include "UIGame.h"           // for access to mGameUserInterface.mDebugShowMeshZones
+#endif
 
 #include <vector>
 #include <math.h>

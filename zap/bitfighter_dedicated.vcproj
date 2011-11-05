@@ -687,6 +687,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\EditorObject.cpp"
+			>
+		</File>
+		<File
 			RelativePath=".\EngineeredItem.cpp"
 			>
 		</File>

@@ -49,6 +49,7 @@ OBJECTS_SHARED=\
    controlObjectConnection.o\
    CTFGame.o\
    dataConnection.o\
+   EditorObject.o\
    EngineeredItem.o\
    flagItem.o\
    game.o\
@@ -118,7 +119,6 @@ OBJECTS_SHARED=\
 
 OBJECTS_CLIENT=\
    ClientGame.o\
-   EditorObject.o\
    engineerHelper.o\
    Event.o\
    gameObjectRender.o\

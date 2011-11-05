@@ -94,8 +94,10 @@ public:
    virtual void getObjectGeometry(const Point &anchor, const Point &normal, Vector<Point> &geom) const { 
             TNLAssert(false, "function not implemented!"); }
 
+#ifndef ZAP_DEDICATED
    Point getEditorSelectionOffset(F32 currentScale);
-   
+#endif
+
    bool isEnabled();    // True if still active, false otherwise
 
    void explode();
