@@ -191,26 +191,27 @@ CreditsScroller::CreditsScroller(ClientGame *game) : Parent(game)
    // thus creating groups, the first of which is generally the job, followed
    // by 0 or more people doing that job
 
-   S32 pos = (gScreenInfo.getGameCanvasHeight() + CreditSpace);
-   S32 index = 0;
-   CreditsInfo c;
+   CreditsInfo c;    // Reusable object, gets implicitly copied when pushed
 
+   static const S32 SPACE_BETWEEN_SECTIONS = 100;
+
+   S32 index = 0;
    while(gameCredits[index])
    {
       if(strcmp(gameCredits[index], "-"))
          c.creditsLine.push_back(gameCredits[index]);
+
       else   // Place credit in cache
       {
-         c.currPos.x = (F32)pos;
-         pos += CreditGap;
          credits.push_back(c);
+         c.pos += CreditSpace * c.creditsLine.size() + SPACE_BETWEEN_SECTIONS;
          c.creditsLine.clear();
       }
 
-      pos += CreditSpace;     
       index++;
    }
-   mTotalSize = pos;
+
+   mTotalSize = c.pos;
 }
 
 
@@ -225,11 +226,11 @@ void CreditsScroller::updateFX(U32 delta)
    // Scroll the credits text from bottom to top
    for(S32 i = 0; i < credits.size(); i++)
    {
-      credits[i].currPos.x -= (delta / 8.f);
+      credits[i].pos -= (delta / 8.f);
 
       // Reached the top, reset
-      if(credits[i].currPos.x < -CreditSpace )
-         credits[i].currPos.x += mTotalSize - 350;
+      if(credits[i].pos < -CreditSpace )
+         credits[i].pos += mTotalSize - 200;
    }
 }
 
@@ -240,10 +241,8 @@ void CreditsScroller::render()
 
    // Draw the credits text, section by section, line by line
    for(S32 i = 0; i < credits.size(); i++)
-   {
       for(S32 j = 0; j < credits[i].creditsLine.size(); j++)
-         UserInterface::drawCenteredString(S32(credits[i].currPos.x) + CreditSpace*(j + 1), 25, credits[i].creditsLine[j]);
-   }
+         UserInterface::drawCenteredString(S32(credits[i].pos) + CreditSpace * (j), 25, credits[i].creditsLine[j]);
 
    glColor(Colors::black);
    glBegin(GL_POLYGON);
@@ -257,7 +256,18 @@ void CreditsScroller::render()
 }
 
 
-//////////////////////////////////
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Constructor
+CreditsInfo::CreditsInfo()
+{
+   pos = gScreenInfo.getGameCanvasHeight();
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 // Constructor
 SplashUserInterface::SplashUserInterface(ClientGame *game) : Parent(game)

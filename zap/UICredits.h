@@ -47,6 +47,16 @@ public:
    virtual void render() = 0;
 };
 
+
+struct CreditsInfo 
+{
+   Vector<const char *> creditsLine;
+   F32 pos;
+
+   CreditsInfo();    // Constructor
+};
+
+
 class CreditsScroller : public CreditsFX
 {
    typedef CreditsFX Parent;
@@ -55,14 +65,9 @@ public:
    enum Credits {
       MaxCreditLen = 32,
       CreditSpace  = 45,
-      CreditGap    = 100,
    };
 
 private:
-   struct CreditsInfo {
-      Vector <const char *> creditsLine;
-      Point currPos;
-   };
 
    Vector<CreditsInfo> credits;
    void readCredits(const char *file);
