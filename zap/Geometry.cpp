@@ -415,7 +415,7 @@ static void readPolyBounds(S32 argc, const char **argv, S32 firstCoord, F32 grid
 
 void PolylineGeometry::readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize)
 {
-    readPolyBounds(argc, argv, firstCoord, gridSize, true, mPolyBounds);
+    readPolyBounds(argc, argv, firstCoord, gridSize, true, mPolyBounds);      // Fills mPolyBounds
     mVertSelected.resize(mPolyBounds.size());
     onPointsChanged();
 }
