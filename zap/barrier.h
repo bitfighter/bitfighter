@@ -146,6 +146,7 @@ public:
 
    string toString(F32 gridSize) const;
 
+   bool processArguments(S32 argc, const char **argv, Game *game);
    void setWidth(S32 width);
 
    static const S32 VERTEX_SIZE = 5;

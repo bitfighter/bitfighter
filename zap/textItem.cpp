@@ -472,6 +472,13 @@ bool LineItem::processArguments(S32 argc, const char **argv, Game *game)
       return false;
 
    mTeam = atoi(argv[0]);
+
+   return processGeometry(argc - 1, &argv[1], game);
+}
+
+
+bool LineItem::processGeometry(S32 argc, const char **argv, Game *game)
+{
    setWidth(atoi(argv[1]));
    readGeom(argc, argv, 2, game->getGridSize());
 

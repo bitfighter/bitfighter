@@ -474,7 +474,16 @@ void WallItem::scale(const Point &center, F32 scale)
 
 void WallItem::setWidth(S32 width) 
 {         
-   LineItem::setWidth(width, Barrier::MIN_BARRIER_WIDTH, Barrier::MAX_BARRIER_WIDTH);     // Why do we need LineItem:: prefix here???
+   Parent::setWidth(width, Barrier::MIN_BARRIER_WIDTH, Barrier::MAX_BARRIER_WIDTH);     // Why do we need LineItem:: prefix here???
+}
+
+
+bool WallItem::processArguments(S32 argc, const char **argv, Game *game)
+{
+   if(argc < 5)
+      return false;
+
+   return processGeometry(argc, argv, game);
 }
 
 
