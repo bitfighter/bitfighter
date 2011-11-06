@@ -219,9 +219,9 @@ void PolylineGeometry::clearVerts()
 }
 
 
-bool PolylineGeometry::addVert(const Point &point) 
+bool PolylineGeometry::addVert(const Point &point, bool ignoreMaxPointsLimit) 
 { 
-   if(mPolyBounds.size() >= gMaxPolygonPoints)
+   if(mPolyBounds.size() >= gMaxPolygonPoints && !ignoreMaxPointsLimit)
       return false;
 
    mPolyBounds.push_back(point); 
@@ -395,9 +395,10 @@ static void readPolyBounds(S32 argc, const char **argv, S32 firstCoord, F32 grid
 
    for(S32 i = firstCoord; i < argc; i += 2)
    {
-      // Put a cap on the number of vertices in a polygon
-      if(bounds.size() >= gMaxPolygonPoints)      // || argc == i + 1 might be needed...
-         break;
+      // Put a cap on the number of vertices in a polygon... or do we really need this?  Maybe we don't want to limit the vertices in an 
+      // object when we're reading it... maybe only limit what we can do in the editor.
+      //if(bounds.size() >= gMaxPolygonPoints)
+      //   break;
 
       p.set( (F32) atof(argv[i]) * gridSize, (F32) atof(argv[i+1]) * gridSize );
 

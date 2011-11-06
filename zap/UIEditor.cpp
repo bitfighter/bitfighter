@@ -2817,7 +2817,7 @@ void EditorUserInterface::doSplit(EditorObject *object, S32 vertex)
    // geographic POV.  Which I have.
    for(S32 i = vertex; i < object->getVertCount(); i++) 
    {
-      newObj->addVert(object->getVert(i));
+      newObj->addVert(object->getVert(i), true);      // true: If wall already has more than max number of points, let children have more as well
       if(i != vertex)               // i.e. if this isn't the first iteration
       {
          object->deleteVert(i);     // Don't delete first vertex -- we need it to remain as final vertex of old feature
@@ -2852,6 +2852,10 @@ void EditorUserInterface::joinBarrier()
 
             if(obj_j->getObjectTypeNumber() == obj_i->getObjectTypeNumber() && obj_j->isSelected())
             {
+               // Don't join if resulting object would be too big!
+               if(obj_i->getVertCount() + obj_j->getVertCount() > gMaxPolygonPoints)
+                  continue;
+
                if(obj_i->getVert(0).distanceTo(obj_j->getVert(0)) < .01)   // First vertices are the same  1 2 3 | 1 4 5
                {
                   if(!joinedObj)          // This is first join candidate found; something's going to merge, so save an undo state

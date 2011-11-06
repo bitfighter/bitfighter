@@ -66,7 +66,7 @@ public:
    virtual void setVert(const Point &pos, S32 index)    { TNLAssert(false, "Not implemented"); }
    virtual S32 getVertCount()                           { TNLAssert(false, "Not implemented"); return 0; }
    virtual void clearVerts()                            { TNLAssert(false, "Not implemented"); }
-   virtual bool addVert(const Point &point)             { TNLAssert(false, "Not implemented"); return false; }
+   virtual bool addVert(const Point &point, bool ignoreMaxPointsLimit = false)     { TNLAssert(false, "Not implemented"); return false; }
    virtual bool addVertFront(Point vert)                { TNLAssert(false, "Not implemented"); return false; }
    virtual bool deleteVert(S32 vertIndex)               { TNLAssert(false, "Not implemented"); return false; }
    virtual bool insertVert(Point vertex, S32 vertIndex) { TNLAssert(false, "Not implemented"); return false; }

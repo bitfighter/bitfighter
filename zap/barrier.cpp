@@ -480,7 +480,7 @@ void WallItem::setWidth(S32 width)
 
 bool WallItem::processArguments(S32 argc, const char **argv, Game *game)
 {
-   if(argc < 5)
+   if(argc < 5)         // Need width, and two x,y pairs
       return false;
 
    return processGeometry(argc, argv, game);

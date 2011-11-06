@@ -68,7 +68,7 @@ public:
    S32 getVertCount() { return 1; }
 
    void clearVerts() { /* Do nothing */ }
-   bool addVert(const Point &point) { return false; }
+   bool addVert(const Point &point, bool ignoreMaxPointsLimit = false) { return false; }
    bool addVertFront(Point vert) { return false; }
    bool deleteVert(S32 vertIndex) { return false; }
    bool insertVert(Point vertex, S32 vertIndex) { return false; }
@@ -118,7 +118,7 @@ public:
    S32 getVertCount() { return 2; }
 
    void clearVerts() { /* Do nothing */ }
-   bool addVert(const Point &point)  { return false; }
+   bool addVert(const Point &point, bool ignoreMaxPointsLimit = false)  { return false; }
    bool addVertFront(Point vert)  { return false; }
    bool deleteVert(S32 vertIndex)  {  return false; }
    bool insertVert(Point vertex, S32 vertIndex)  {  return false; }
@@ -173,7 +173,7 @@ public:
    S32 getVertCount();
 
    void clearVerts();
-   bool addVert(const Point &point);
+   bool addVert(const Point &point, bool ignoreMaxPointsLimit = false);
    bool addVertFront(Point vert);
    bool deleteVert(S32 vertIndex);
    bool insertVert(Point vertex, S32 vertIndex);
