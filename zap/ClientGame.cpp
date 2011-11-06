@@ -1593,7 +1593,7 @@ bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &le
          
          if(wallObject->getVertCount() >= 2)
          {
-            wallObject->addToGame(this, this->getEditorDatabase());
+            wallObject->addToGame(this, getEditorDatabase());
             wallObject->processEndPoints();
          }
          else
