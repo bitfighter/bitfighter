@@ -456,6 +456,10 @@ void DiagnosticUserInterface::render()
       JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickType, BUTTON_BACK, getInputCodeState(BUTTON_BACK));
       hpos += 40;
       JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickType, BUTTON_START, getInputCodeState(BUTTON_START));
+      hpos += 40;
+      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickType, BUTTON_9, getInputCodeState(BUTTON_9));
+      hpos += 40;
+      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickType, BUTTON_10, getInputCodeState(BUTTON_10));
    }
    else if(mCurPage == 1)
    {

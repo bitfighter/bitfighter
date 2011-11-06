@@ -315,10 +315,10 @@ JoystickInfo Joystick::PredefinedJoystickList[ControllerTypeCount] =
    {
       "PS3 Sixaxis",
       "PS3DualShock",
-      13,
+      16,
       {0, 1},
       {2, 3},
-      { // PS3DualShock    13
+      { // PS3DualShock    16
          ControllerButtonStart, // Start
          ControllerButton9, // L3 (press on left stick)
          ControllerButton10, // R3 (press on righ stick)
@@ -335,13 +335,12 @@ JoystickInfo Joystick::PredefinedJoystickList[ControllerTypeCount] =
          ControllerButton2, // Circle
          ControllerButton1, // X
          ControllerButton3, // Square
-         // Above order should be correct. X is Button 14 Square is Button 15.
       }
    },
    {
       "XBox Controller USB",
       "XBoxController",
-      10,
+      14,
       {0, 1},
       {3, 4},
       { // XBoxController     10
@@ -364,7 +363,7 @@ JoystickInfo Joystick::PredefinedJoystickList[ControllerTypeCount] =
    {
       "XBox Controller",
       "XBoxControllerOnXBox",
-      10,
+      14,
       {0, 1},
       {3, 4},
       { // XBoxControllerOnXBox     <--- what's going on here?  On XBox??
@@ -387,7 +386,7 @@ JoystickInfo Joystick::PredefinedJoystickList[ControllerTypeCount] =
    {
       "Microsoft X-Box 360 pad",
       "XBox360pad",
-      14,
+      16,
       {0, 1},
       {3, 4},
       {
@@ -400,6 +399,8 @@ JoystickInfo Joystick::PredefinedJoystickList[ControllerTypeCount] =
          ControllerButtonBack,
          ControllerButtonStart,
          ControllerButton7,
+         ControllerButton9,
+         ControllerButton10,
          ControllerButton8,
          ControllerButtonDPadUp,
          ControllerButtonDPadDown,

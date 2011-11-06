@@ -502,10 +502,12 @@ void JoystickRender::renderControllerButton(F32 x, F32 y, U32 joystickType, Inpu
       else
       {
          string labels[] = { "L2", "R2", "L1", "R1", "Sel", "Strt" };
+
          if (buttonIndex < 9)    // Shoulder buttons
             renderRectButton(Point(x, y), labels[buttonIndex - 4].c_str(), ALIGN_CENTER, activated);
-         else
-         {  // Triangle button
+         else if (buttonIndex == 9 || buttonIndex == 10) // Start & Sel Butts
+         {
+            // Triangle button
             setButtonColor(activated);
             glBegin(GL_LINE_LOOP);
                glVertex(center + Point(-15, -9));
@@ -514,6 +516,8 @@ void JoystickRender::renderControllerButton(F32 x, F32 y, U32 joystickType, Inpu
             glEnd();
             UserInterface::drawString(x - 13, y + 3, 8, labels[buttonIndex - 4].c_str());
          }
+         else if (buttonIndex == 14 || buttonIndex == 15)// L3 & R3 Buttons
+            renderRoundButton(Point(x, y), buttonIndex == 14 ? "L3" : "R3", ALIGN_CENTER, activated);
       }
    }
    else if(joystickType == XBoxController || joystickType == XBoxControllerOnXBox || joystickType == XBox360pad)
@@ -568,6 +572,8 @@ void JoystickRender::renderControllerButton(F32 x, F32 y, U32 joystickType, Inpu
             glVertex(Point(x - dir * 3, y + 3));
          glEnd();
       }
+      else if(buttonIndex == 14 || buttonIndex == 15) // L3 & R3 Buttons
+         renderRoundButton(Point(x, y), buttonIndex == 14 ? "L3" : "R3", ALIGN_CENTER, activated);
    }
 
    else  // Something generic
