@@ -1591,13 +1591,13 @@ bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &le
         
          wallObject->processArguments(argc, argv, this);
          
-         if(wallObject->getVertCount() >= 2)
+         if(wallObject->getVertCount() < 2)     // Too small!  Need at least 2 points for a wall!
+            delete wallObject;
+         else
          {
             wallObject->addToGame(this, getEditorDatabase());
             wallObject->processEndPoints();
          }
-         else
-            delete wallObject;
       }
    }
    // TODO: Integrate code above with code above!!  EASY!!
