@@ -309,6 +309,9 @@ void JoystickRender::renderControllerButton(F32 x, F32 y, U32 joystickType, Inpu
    x += (F32) offset;
    U32 buttonIndex = inputCodeToButtonIndex(inputCode);     // Index ranges from 0 to 9 for the 10 buttons
 
+   if(buttonIndex >= Joystick::PredefinedJoystickList[joystickType].buttonCount)
+      return;
+
    // http://www.amazon.com/Logitech-963196-0403-WingMan-GamePad/dp/B00004RCG1/ref=pd_bbs_sr_5
    // 6 round buttons on top (ABCXYZ) plus start/select button, plus two triggers
 
@@ -379,9 +382,6 @@ void JoystickRender::renderControllerButton(F32 x, F32 y, U32 joystickType, Inpu
    // http://ecx.images-amazon.com/images/I/412Q3RFHZVL._SS500_.jpg
    else if(joystickType == PS2DualShock || joystickType == PS2DualShockConversionCable)
    {
-      if(buttonIndex >= Joystick::PredefinedJoystickList[joystickType].buttonCount)
-         return;
-
       static F32 color[6][3] = {
          { 0.5, 0.5, 1 },
          { 1, 0.5, 0.5 },
@@ -451,9 +451,6 @@ void JoystickRender::renderControllerButton(F32 x, F32 y, U32 joystickType, Inpu
    // Based on PS2DualShock
    else if(joystickType == PS3DualShock)
    {
-      if(buttonIndex >= Joystick::PredefinedJoystickList[joystickType].buttonCount)
-         return;
-
       static F32 color[6][3] = {
             { 0.5, 0.5, 1 },
             { 1, 0.5, 0.5 },
@@ -522,9 +519,6 @@ void JoystickRender::renderControllerButton(F32 x, F32 y, U32 joystickType, Inpu
    }
    else if(joystickType == XBoxController || joystickType == XBoxControllerOnXBox || joystickType == XBox360pad)
    {
-      if(buttonIndex >= Joystick::PredefinedJoystickList[joystickType].buttonCount)
-         return;
-
       static F32 color[4][3] = { { 0, 1, 0 },
                                  { 1, 0, 0 },
                                  { 0, 0, 1 },
