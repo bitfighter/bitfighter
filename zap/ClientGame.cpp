@@ -1587,18 +1587,9 @@ bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &le
       if(argc >= 2)
       {
          WallItem *wallObject = new WallItem();  
-         
-         wallObject->setWidth(atoi(argv[1]));   // setWidth handles bounds checking
-
          wallObject->initializeEditor();        // Only runs unselectVerts
-
-         Point p;
-         for(S32 i = 2; i < argc; i+=2)
-         {
-            p.set(atof(argv[i]), atof(argv[i+1]));
-            p *= getGridSize();
-            wallObject->addVert(p);
-         }
+        
+         wallObject->processArguments(argc, argv, this);
          
          if(wallObject->getVertCount() >= 2)
          {
