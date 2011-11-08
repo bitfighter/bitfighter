@@ -250,7 +250,7 @@ void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vecto
             if(mHitLimit > 0) 
             {
                // Move the displaced object a tiny bit, true -> isBeingDisplaced
-               moveObjectThatWasHit->move(t + displaceEpsilon, stateIndex, true, displacerList); 
+               moveObjectThatWasHit->move(t + displaceEpsilon, stateIndex, false, displacerList); 
                mHitLimit--;
             }
          }
@@ -262,11 +262,9 @@ void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vecto
       }
       else if(objectHit->getObjectTypeNumber() == SpeedZoneTypeNumber)
       {
-         SpeedZone *speedZone = dynamic_cast<SpeedZone *>(objectHit);
-         if(speedZone)
-         {
-            speedZone->collided(this, stateIndex);
-         }
+         TNLAssert(dynamic_cast<SpeedZone *>(objectHit), "Not a SpeedZone error, but Object Type is SpeedZoneTypeNumber should always be SpeedZone");
+         SpeedZone *speedZone = (SpeedZone *)objectHit;
+         speedZone->collided(this, stateIndex);
          disabledList.push_back(objectHit);
          objectHit->disableCollision();
          tryCount--;   // SpeedZone don't count as tryCount
@@ -287,6 +285,11 @@ bool MoveObject::collide(GameObject *otherObject)
    return true;
 }
 
+static S32 QSORT_CALLBACK sortBarriersFirst(DatabaseObject **a, DatabaseObject **b)
+{
+	return ((*b)->getObjectTypeNumber() == BarrierTypeNumber ? 1 : 0) - ((*a)->getObjectTypeNumber() == BarrierTypeNumber ? 1 : 0);
+}
+
 GameObject *MoveObject::findFirstCollision(U32 stateIndex, F32 &collisionTime, Point &collisionPoint)
 {
    // Check for collisions against other objects
@@ -298,6 +301,8 @@ GameObject *MoveObject::findFirstCollision(U32 stateIndex, F32 &collisionTime, P
    fillVector.clear();
 
    findObjects(collideTypes(), fillVector, queryRect);   // Free CPU for finding only the ones we care about
+
+   fillVector.sort(sortBarriersFirst);  // Sort to do Barriers::Collide first, to prevent picking up flag (FlagItem::Collide) through Barriers, especially when client does /maxfps 10
 
    F32 collisionFraction;
 
