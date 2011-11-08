@@ -391,8 +391,8 @@ void SpeedZone::collided(MoveObject *s, U32 stateIndex)
       thisAngle.normalize();
       Point newPos = thisAngle * diffpos.dot(thisAngle) + pos + impulse * 0.001f;
 
-      //Point oldVel = moveState->vel;
-      //Point oldPos = moveState->pos;
+      Point oldVel = moveState->vel;
+      Point oldPos = moveState->pos;
 
       ignoreThisCollision = true;  // Seem to need it to ignore collide to SpeedZone during a findFirstCollision
       moveState->vel = newPos - moveState->pos;
@@ -404,12 +404,12 @@ void SpeedZone::collided(MoveObject *s, U32 stateIndex)
 
       ignoreThisCollision = false;
 
-      //if(s->getActualPos().distSquared(newPos) > 1)  // don't allow using speed zone when could not line up due to going into wall?
-      //{
-      //   moveState->pos = oldPos;
-      //   moveState->vel = oldVel;
-      //   return;
-      //}
+      if(collisionTime != 1)  // don't allow using speed zone when could not line up due to going into wall?
+      {
+         moveState->pos = oldPos;
+         moveState->vel = oldVel;
+         return;
+      }
       moveState->vel = impulse * 1.5;     // Why multiply by 1.5?
    }
    else
