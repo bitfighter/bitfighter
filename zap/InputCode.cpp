@@ -1367,7 +1367,7 @@ const char *inputCodeToString(InputCode inputCode)
    case KEY_BACKSLASH:
          return "\\";
    case KEY_SEMICOLON:
-         return";";
+         return ";";
    case KEY_QUOTE:
          return "'";
    case KEY_COMMA:
@@ -1502,6 +1502,49 @@ const char *inputCodeToString(InputCode inputCode)
       return "Ctrl-Q";
    case KEY_CTRL_S:
       return "Ctrl-S";
+   case KEY_BACKQUOTE:
+      return "`";
+   case KEY_MENU:
+      return "Menu";
+   case KEY_KEYPAD_DIVIDE:
+      return "Keypad /";
+   case KEY_KEYPAD_MULTIPLY:
+      return "Keypad *";
+   case KEY_KEYPAD_MINUS:
+      return "Keypad -";
+   case KEY_KEYPAD_PLUS:
+      return "Keypad +";
+   case KEY_PRINT:
+      return "PrntScrn";
+   case KEY_PAUSE:
+      return "Pause";
+   case KEY_SCROLLOCK:
+      return "ScrollLock";
+   case KEY_KEYPAD1:
+      return "Keypad 1";
+   case KEY_KEYPAD2:
+      return "Keypad 2";
+   case KEY_KEYPAD3:
+      return "Keypad 3";
+   case KEY_KEYPAD4:
+      return "Keypad 4";
+   case KEY_KEYPAD5:
+      return "Keypad 5";
+   case KEY_KEYPAD6:
+      return "Keypad 6";
+   case KEY_KEYPAD7:
+      return "Keypad 7";
+   case KEY_KEYPAD8:
+      return "Keypad 8";
+   case KEY_KEYPAD9:
+      return "Keypad 9";
+   case KEY_KEYPAD0:
+      return "Keypad 0";
+   case KEY_KEYPAD_PERIOD:
+      return "Keypad .";
+   case KEY_KEYPAD_ENTER:
+      return "Keypad Enter";
+
    default:
 //      logprintf("undefined inputCode number: %d", inputCode);
       return "Undefined input";
