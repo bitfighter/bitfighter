@@ -114,6 +114,25 @@ bool getInputCodeState(InputCode inputCode)
 
 InputCode modifiers[] = { KEY_SHIFT, KEY_CTRL, KEY_ALT, KEY_META, KEY_SUPER };
 
+
+std::string makeInputString(InputCode inputCode)
+{
+   for(S32 i = 0; i < S32(ARRAYSIZE(modifiers)); i++)
+      if(inputCode == modifiers[i])
+         return inputCodeToString(inputCode);
+
+   std::string inputString = "";
+   std::string joiner = "+";
+
+   for(S32 i = 0; i < S32(ARRAYSIZE(modifiers)); i++)
+      if(getInputCodeState(modifiers[i]))
+         inputString += inputCodeToString(modifiers[i]) + joiner;
+   
+   inputString += inputCodeToString(inputCode);
+   return inputString;
+}
+
+
 // Can pass in one of the above, or KEY_NONE to check if no modifiers are pressed
 bool checkModifier(InputCode mod1)    
 {

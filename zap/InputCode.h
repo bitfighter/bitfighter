@@ -26,6 +26,8 @@
 #ifndef _INPUTCODE_H_
 #define _INPUTCODE_H_
 
+#include <string>
+
 namespace Zap
 {
 
@@ -47,6 +49,7 @@ void resetInputCodeStates();                          // Initialize key states
 void dumpInputCodeStates();                           // Log key states for testing
 
 // Ensure that specified modifer is the only one actually pressed... i.e. if Ctrl and Alt were down, checkModifier(KEY_CTRL) would be false
+std::string makeInputString(InputCode inputCode);
 bool checkModifier(InputCode mod1);            
 bool checkModifier(InputCode mod1, InputCode mod2);            
 bool checkModifier(InputCode mod1, InputCode mod2, InputCode mod3);            
