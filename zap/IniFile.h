@@ -91,7 +91,7 @@ public:
    void Reset();
 
    // Returns index of specified key, or noID if not found.
-   S32 findSection( const string section) const;
+   S32 findSection(const string &sectionName) const;
 
    // Returns index of specified value, in the specified key, or noID if not found.
    S32 FindValue(S32 const sectionID, const string &keyName) const;
@@ -108,10 +108,8 @@ public:
    string getSectionName( S32 const sectionId) const;
 
    // Returns number of values stored for specified section.
-   S32 NumValues( S32 const sectionId);
-   S32 GetNumValues( S32 const sectionId);
-   S32 NumValues( const string &keyname);
-   S32 GetNumValues( const string keyname);
+   S32 GetNumEntries(S32 const sectionId);
+   S32 GetNumEntries(const string &keyName);
 
    // Returns value name by index for a given keyname or sectionId.
    string ValueName( S32 const sectionID, S32 const keyID) const;
@@ -128,6 +126,11 @@ public:
 
    // Load up valueList with all values from the section
    void GetAllValues(const string &section, Vector<string> &valueList);
+   void GetAllValues(S32 const sectionId, Vector<string> &valueList);
+
+   // Load up keyList with all keys from the section
+   void GetAllKeys(S32 const sectionId, Vector<string> &keyList);
+   void GetAllKeys(const string &section, Vector<string> &keyList);
 
    S32    GetValueI(const string &section, const string &key, S32 const defValue = 0) const;
    bool   GetValueB(const string &section, const string &key, bool const defValue = false) const;

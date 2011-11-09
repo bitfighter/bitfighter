@@ -194,10 +194,10 @@ bool CIniFile::WriteFile()
    return true;
 }
 
-S32 CIniFile::findSection(const string keyname) const
+S32 CIniFile::findSection(const string &sectionName) const
 {
    for(S32 sectionId = 0; sectionId < sectionNames.size(); ++sectionId)
-      if(CheckCase(sectionNames[sectionId]) == CheckCase(keyname))
+      if(CheckCase(sectionNames[sectionId]) == CheckCase(sectionName))
          return sectionId;
    return noID;
 }
@@ -230,20 +230,6 @@ string CIniFile::sectionName(S32 const sectionId) const
       return "";
 }
 
-S32 CIniFile::NumValues(S32 const sectionId)
-{
-   if(sectionId < sections.size())
-      return sections[sectionId].keys.size();
-   return 0;
-}
-
-S32 CIniFile::NumValues(const string &keyname)
-{
-   S32 sectionId = findSection(keyname);
-   if(sectionId == noID)
-      return 0;
-   return sections[sectionId].keys.size();
-}
 
 string CIniFile::ValueName(S32 const sectionId, S32 const valueID) const
 {
@@ -374,27 +360,45 @@ string CIniFile::GetValue(const string &section, const string &keyName, const st
 }
 
 
+void CIniFile::GetAllValues(S32 const sectionId, Vector<string> &valueList)
+{
+   if(GetNumEntries(sectionId) == 0)
+      return;
+
+   for(S32 i = 0; i < sections[sectionId].keys.size(); i++)
+      // Only return non-empty values
+      if(sections[sectionId].values[i] != "")
+         valueList.push_back(sections[sectionId].values[i]);
+}
+
+
 void CIniFile::GetAllValues(const string &section, Vector<string> &valueList)
 {
-   S32 numVals = NumValues(section);
-   if(numVals > 0)
-   {
-      Vector<string> keyList(numVals);
+   S32 sectionId = findSection(section);
+   if(sectionId == noID)
+      return;
 
-      for(S32 i = 0; i < numVals; i++)
-         keyList.push_back(ValueName(section, i));
+   GetAllValues(sectionId, valueList);
+}
 
-      string val;
 
-      valueList.clear();
+void CIniFile::GetAllKeys(S32 const sectionId, Vector<string> &keyList)
+{
+   if(GetNumEntries(sectionId) == 0)
+      return;
 
-      for(S32 i = 0; i < numVals; i++)
-      {
-         val = GetValue(section, keyList[i], "");
-         if(val != "")
-            valueList.push_back(val);
-      }
-   }
+   for(S32 i = 0; i < sections[sectionId].keys.size(); i++)
+      keyList.push_back(sections[sectionId].keys[i]);
+}
+
+
+void CIniFile::GetAllKeys(const string &section, Vector<string> &keyList)
+{
+   S32 sectionId = findSection(section);
+   if(sectionId == noID)
+      return;
+
+   GetAllKeys(sectionId, keyList);
 }
 
 
@@ -723,15 +727,23 @@ string CIniFile::getSectionName( S32 const sectionId) const
 }
 
 
-S32 CIniFile::GetNumValues( S32 const sectionId)
+S32 CIniFile::GetNumEntries(S32 const sectionId)
 {
-   return NumValues( sectionId);
+   if(sectionId < sections.size())
+      return sections[sectionId].keys.size();
+
+   return 0;
 }
 
 
-S32 CIniFile::GetNumValues( const string keyname)
+S32 CIniFile::GetNumEntries(const string &keyName)
 {
-   return NumValues( keyname);
+   S32 sectionId = findSection(keyName);
+
+   if(sectionId == noID)
+      return 0;
+
+   return sections[sectionId].keys.size();
 }
 
 
