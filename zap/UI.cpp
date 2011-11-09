@@ -786,6 +786,16 @@ void UserInterface::drawRect(S32 x1, S32 y1, S32 x2, S32 y2, S32 mode)
       glVertex2i(x1, y2);
    glEnd();
 }
+// Some functions (renderSpyBugVisibleRange) use this F32 version, this function have better accuracy
+void UserInterface::drawRect(F32 x1, F32 y1, F32 x2, F32 y2, S32 mode)
+{
+   glBegin(mode);
+      glVertex2f(x1, y1);
+      glVertex2f(x2, y1);
+      glVertex2f(x2, y2);
+      glVertex2f(x1, y2);
+   glEnd();
+}
 
 
 void UserInterface::drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &fillColor, const Color &outlineColor)

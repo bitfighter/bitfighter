@@ -1496,6 +1496,13 @@ const char *getModeMessage(ShowMode mode)
 }
 
 
+static S32 QSORT_CALLBACK sortByTeam(DatabaseObject **a, DatabaseObject **b)
+{
+   TNLAssert(dynamic_cast<BfObject *>(*a), "Not a BfObject");
+   TNLAssert(dynamic_cast<BfObject *>(*b), "Not a BfObject");
+   return ((BfObject *)(*b))->getTeam() - ((BfObject *)(*a))->getTeam();
+}
+
 void EditorUserInterface::render()
 {
    mouseIgnore = false; // Needed to avoid freezing effect from too many mouseMoved events without a render in between (sam)
@@ -1507,14 +1514,47 @@ void EditorUserInterface::render()
       EditorObjectDatabase *editorDb = getGame()->getEditorDatabase();
       editorDb->findObjects(SpyBugTypeNumber, fillVector);
 
+      if(fillVector.size() != 0)
+      {
+
+      // Use Z Buffer to make use of not drawing overlap visible area of same team SpyBug, but does overlap different team.
+      fillVector.sort(sortByTeam);
+      glClear(GL_DEPTH_BUFFER_BIT);
+      glEnable(GL_DEPTH_TEST);
+      glEnable(GL_DEPTH_WRITEMASK);
+      glDepthFunc(GL_LESS);
+      glPushMatrix();
+      glTranslatef(0, 0, -0.95f);
+      glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ONE);  // This blending works like this, source(SRC) * GL_ONE_MINUS_DST_COLOR + destination(DST) * GL_ONE
+      bool disableBlending = !glIsEnabled(GL_BLEND);
+      if(disableBlending)
+         glEnable(GL_BLEND);
+
+
+      S32 prevTeam;
+
       // Draw spybug visibility ranges first, underneath everything else
       for(S32 i = 0; i < fillVector.size(); i++)
       {
          EditorObject *editorObj = dynamic_cast<EditorObject *>(fillVector[i]);
+
+         if(i != 0 && editorObj->getTeam() != prevTeam)
+            glTranslatef(0, 0, 0.05);
+         prevTeam = editorObj->getTeam();
+
          Point pos = editorObj->getVert(0);
          pos *= mCurrentScale;
          pos += mCurrentOffset;
          renderSpyBugVisibleRange(pos, getGame()->getTeamColor(editorObj->getTeam()), mCurrentScale);
+      }
+
+      if(disableBlending)
+         glDisable(GL_BLEND);
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      glPopMatrix();
+      glDisable(GL_DEPTH_WRITEMASK);
+      glDisable(GL_DEPTH_TEST);
+
       }
 
       // Next draw turret firing ranges for selected or highlighted turrets only
