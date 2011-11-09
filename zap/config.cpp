@@ -257,7 +257,7 @@ static void writeForeignServerInfo(CIniFile *ini, IniSettings *iniSettings)
 {
    if(ini->findSection("Levels") != ini->noID)
    {
-      S32 numLevels = ini->NumValues("Levels");
+      S32 numLevels = ini->GetNumEntries("Levels");
       Vector<string> levelValNames;
 
       for(S32 i = 0; i < numLevels; i++)
