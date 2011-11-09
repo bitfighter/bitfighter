@@ -106,6 +106,7 @@ extern void renderPointVector(const Vector<Point> *points, U32 geomType);
 
 extern void glScale(F32 scaleFactor);
 extern void glTranslate(const Point &pos);
+extern void setDefaultBlendFunction();
 
 
 

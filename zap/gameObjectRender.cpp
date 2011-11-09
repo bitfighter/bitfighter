@@ -70,6 +70,12 @@ void glTranslate(const Point &pos)
 }
 
 
+void setDefaultBlendFunction()
+{
+   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+}
+
+
 // geomType should be GL_LINES or GL_POLYGON
 void renderPointVector(const Vector<Point> *points, U32 geomType)
 {
@@ -573,7 +579,7 @@ void renderTeleporter(const Point &pos, U32 type, bool in, S32 time, F32 zoomFra
       glColor4f(1, 1, 1, .25f * alpha );
 
       glEnable(GL_POLYGON_SMOOTH);
-      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      setDefaultBlendFunction();
       glHint(GL_POLYGON_SMOOTH_HINT, GL_FASTEST);
 
       for(S32 i = 0; i < dests.size(); i++)
