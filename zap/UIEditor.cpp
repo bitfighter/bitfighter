@@ -3132,6 +3132,8 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
    else if(inputCode == KEY_ENTER)       // Enter - Edit props
       startAttributeEditor();
 
+
+
    // Regular key handling from here on down
    else if(checkModifier(KEY_SHIFT) && inputCode == KEY_0)  // Shift-0 -> Set team to hostile
       setCurrentTeam(-2);
@@ -3165,7 +3167,7 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
       entryMode = EntryID;
    }
 
-   else if(ascii >= '0' && ascii <= '9')           // Change team affiliation of selection with 0-9 keys
+   else if(ascii >= '0' && ascii <= '9' && checkModifier(KEY_NONE))           // Change team affiliation of selection with 0-9 keys
    {
       setCurrentTeam(ascii - '1');
       return;

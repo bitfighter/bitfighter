@@ -114,12 +114,13 @@ bool getInputCodeState(InputCode inputCode)
 
 InputCode modifiers[] = { KEY_SHIFT, KEY_CTRL, KEY_ALT, KEY_META, KEY_SUPER };
 
-bool checkModifier(InputCode mod1)
+// Can pass in one of the above, or KEY_NONE to check if no modifiers are pressed
+bool checkModifier(InputCode mod1)    
 {
    S32 foundCount = 0;
 
    for(S32 i = 0; i < S32(ARRAYSIZE(modifiers)); i++)
-      if(getInputCodeState(modifiers[i]))                            // Modifier is down
+      if(getInputCodeState(modifiers[i]))                      // Modifier is down
       {
          if(modifiers[i] == mod1)      
             foundCount++;
@@ -127,16 +128,17 @@ bool checkModifier(InputCode mod1)
             return false;        
       }
 
-   return foundCount == 1;
+   return mod1 == KEY_NONE || foundCount == 1;
 }
 
 
+// Check if two modifiers are both pressed (i.e. Ctrl+Alt)
 bool checkModifier(InputCode mod1, InputCode mod2)
 {
    S32 foundCount = 0;
 
    for(S32 i = 0; i < S32(ARRAYSIZE(modifiers)); i++)
-      if(getInputCodeState(modifiers[i]))                            // Modifier is down
+      if(getInputCodeState(modifiers[i]))                      // Modifier is down
       {
          if(modifiers[i] == mod1 || modifiers[i] == mod2)      
             foundCount++;
@@ -148,12 +150,13 @@ bool checkModifier(InputCode mod1, InputCode mod2)
 }
 
 
+// Check to see if three modifers are all pressed (i.e. Ctrl+Alt+Shift)
 bool checkModifier(InputCode mod1, InputCode mod2, InputCode mod3)
 {
    S32 foundCount = 0;
 
    for(S32 i = 0; i < S32(ARRAYSIZE(modifiers)); i++)
-      if(getInputCodeState(modifiers[i]))                            // Modifier is down
+      if(getInputCodeState(modifiers[i]))                      // Modifier is down
       {
          if(modifiers[i] == mod1 || modifiers[i] == mod2 || modifiers[i] == mod3)      
             foundCount++;
