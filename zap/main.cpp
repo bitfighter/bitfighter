@@ -183,6 +183,8 @@ namespace Zap
 extern ClientGame *gClientGame1;
 extern ClientGame *gClientGame2;
 
+extern void setDefaultBlendFunction();
+
 // Handle any md5 requests
 md5wrapper md5;
 

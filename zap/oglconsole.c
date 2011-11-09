@@ -653,8 +653,7 @@ void OGLCONSOLE_Render(OGLCONSOLE_Console console)
     glDisable(GL_TEXTURE_2D);
     glEnable(GL_BLEND);
 
-    setDefaultBlendFunction();
-
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glColor4d(.1,0,0, 0.5);
 
     glBegin(GL_QUADS);
