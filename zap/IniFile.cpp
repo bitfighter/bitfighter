@@ -101,24 +101,13 @@ void CIniFile::ReadFile()
       }
    }
 
-   gZapJournal.setINILength(iniLines.size());      // This will get our INI vector length into the journal
-   gZapJournal.processNextJournalEntry();          // And this will retrieve the value during playback
+   lineCount = iniLines.size();      // Set our INI vector length
    
-   for(S32 i = 0; i < gINI.lineCount; i++)
-      gZapJournal.processINILine(iniLines[i]);     // Process our INI lines, will provide sensible defaults for any missing or malformed entries
-
+   // Process our INI lines, will provide sensible defaults for any missing or malformed entries
+   for(S32 i = 0; i < lineCount; i++)
+      processLine(iniLines[i].getString());
 }
 
-TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, setINILength, (S32 lineCount), (lineCount))
-{
-   gINI.lineCount = lineCount;
-}
-
-
-TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, processINILine, (StringPtr iniLine), (iniLine))
-{
-   gINI.processLine(iniLine.getString());
-}
 
 // Parse a single line of the INI file and break it into its component bits
 void CIniFile::processLine(string line)
@@ -316,7 +305,7 @@ bool CIniFile::SetAllValues(const string &section, const string &prefix, const V
    for(S32 i = 0; i < values.size(); i++)
    {
       dSprintf(key, 255, "%s%d", prefix.c_str(), i);
-      stat &= gINI.SetValue(section, key, values[i], true);
+      stat &= SetValue(section, key, values[i], true);
    }
 
    return stat;      // true if all worked, false if any failed
@@ -376,13 +365,13 @@ string CIniFile::GetValue(const string &keyname, const string &valuename, const 
 
 void CIniFile::GetAllValues(const string &section, Vector<string> &valueList)
 {
-   S32 numVals = gINI.NumValues(section);
+   S32 numVals = NumValues(section);
    if(numVals > 0)
    {
       Vector<string> keyList(numVals);
 
       for(S32 i = 0; i < numVals; i++)
-         keyList.push_back(gINI.ValueName(section, i));
+         keyList.push_back(ValueName(section, i));
 
       string val;
 
@@ -390,7 +379,7 @@ void CIniFile::GetAllValues(const string &section, Vector<string> &valueList)
 
       for(S32 i = 0; i < numVals; i++)
       {
-         val = gINI.GetValue(section, keyList[i], "");
+         val = GetValue(section, keyList[i], "");
          if(val != "")
             valueList.push_back(val);
       }
