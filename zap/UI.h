@@ -88,7 +88,7 @@ private:
    ClientGame *mClientGame;
 
 protected:
-   bool mDisableShipKeyboardInput;  // Disable ship movement while user is in menus
+   static bool mDisableShipKeyboardInput;  // Disable ship movement while user is in menus
 
 public:
    UserInterface(ClientGame *game);                // Constructor

@@ -77,11 +77,14 @@ float gLineWidth4 = 4.0f;
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+// Declare statics
+bool UserInterface::mDisableShipKeyboardInput = true;
+
+
 // Constructor
 UserInterface::UserInterface(ClientGame *clientGame)
 {
    mClientGame = clientGame;
-   mDisableShipKeyboardInput = false;
 }
 
 
