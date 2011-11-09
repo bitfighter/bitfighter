@@ -3167,7 +3167,7 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
       entryMode = EntryID;
    }
 
-   else if(ascii >= '0' && ascii <= '9' && checkModifier(KEY_NONE))           // Change team affiliation of selection with 0-9 keys
+   else if(ascii >= '0' && ascii <= '9' && checkModifier(KEY_NONE))  // Change team affiliation of selection with 0-9 keys
    {
       setCurrentTeam(ascii - '1');
       return;
@@ -3215,7 +3215,7 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
          mMouseDownPos = newVertex;
          
       }
-      else     // Start creating a new poly or new polyline (tilda key + right-click ==> start polyline)
+      else     // Start creating a new poly or new polyline (tilde key + right-click ==> start polyline)
       {
          S32 width;
 
