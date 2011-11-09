@@ -94,7 +94,7 @@ public:
    S32 findSection( const string section) const;
 
    // Returns index of specified value, in the specified key, or noID if not found.
-   S32 FindValue( S32 const sectionID, const string key) const;
+   S32 FindValue(S32 const sectionID, const string &keyName) const;
 
    // Returns number of sections currently in the ini.
    S32 NumSections() const;
@@ -122,8 +122,9 @@ public:
    // Gets value of [keyname] valuename =.
    // Overloaded to return string, int, and double.
    // Returns defValue if key/value not found.
-   string GetValue( S32 const sectionID, S32 const keyID, const string defValue = "") const;
-   string GetValue(const string &section, const string &key, const string &defValue = "") const;
+   string GetValue(S32 const sectionId, S32 const keyID, const string &defValue = "") const;
+   string GetValue(S32 const sectionId, const string &keyName, const string &defValue = "") const;
+   string GetValue(const string &section, const string &keyName, const string &defValue = "") const;
 
    // Load up valueList with all values from the section
    void GetAllValues(const string &section, Vector<string> &valueList);

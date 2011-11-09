@@ -202,13 +202,13 @@ S32 CIniFile::findSection(const string keyname) const
    return noID;
 }
 
-S32 CIniFile::FindValue(S32 const sectionId, const string valuename) const
+S32 CIniFile::FindValue(S32 const sectionId, const string &keyName) const
 {
    if(!sections.size() || sectionId >= sections.size())
       return noID;
 
    for(S32 keyID = 0; keyID < sections[sectionId].keys.size(); ++keyID)
-      if(CheckCase(sections[sectionId].keys[keyID]) == CheckCase(valuename))
+      if(CheckCase(sections[sectionId].keys[keyID]) == CheckCase(keyName))
          return keyID;
    return noID;
 }
@@ -341,7 +341,8 @@ bool CIniFile::SetValueV(const string &section, const string &key, char *format,
    return SetValue(section, key, value);
 }
 
-string CIniFile::GetValue(S32 const sectionId, S32 const keyID, const string defValue) const
+
+string CIniFile::GetValue(S32 const sectionId, S32 const keyID, const string &defValue) const
 {
    if(sectionId < sections.size() && keyID < sections[sectionId].keys.size())
       return sections[sectionId].values[keyID];
@@ -349,13 +350,23 @@ string CIniFile::GetValue(S32 const sectionId, S32 const keyID, const string def
 }
 
 
-string CIniFile::GetValue(const string &keyname, const string &valuename, const string &defValue) const
+string CIniFile::GetValue(S32 const sectionId, const string &keyName, const string &defValue) const
 {
-   S32 sectionId = findSection(keyname);
+   S32 valueID = FindValue(sectionId, keyName);
+   if(valueID == noID)
+      return defValue;
+
+   return sections[sectionId].values[valueID];
+}
+
+
+string CIniFile::GetValue(const string &section, const string &keyName, const string &defValue) const
+{
+   S32 sectionId = findSection(section);
    if(sectionId == noID)
       return defValue;
 
-   S32 valueID = FindValue(sectionId, valuename);
+   S32 valueID = FindValue(sectionId, keyName);
    if(valueID == noID)
       return defValue;
 
