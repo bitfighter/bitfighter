@@ -34,6 +34,8 @@
 #include <sstream>         // For parseString
 #include <sys/stat.h>      // For testing existence of folders
 
+#include <boost/tokenizer.hpp>
+
 #ifdef TNL_OS_WIN32
 #include <direct.h>        // For mkdir
 #endif
@@ -47,6 +49,8 @@
 
 namespace Zap
 {
+
+using namespace boost;
 
 // Collection of useful string things
 
@@ -204,6 +208,9 @@ string concatenate(const Vector<string> &words, S32 startingWith)
 // TODO: Merge this with the one following
 // Based on http://www.gamedev.net/community/forums/topic.asp?topic_id=320087
 // Parses a string on whitespace, except when inside "s
+//
+// FIXME: This is using string streams which are an order of magnitude (or 2) too slow
+// rewrite without using streams if possible
 Vector<string> parseString(const string &line)
 {
   Vector<string> result;
@@ -271,6 +278,34 @@ void parseString(const char *inputString, Vector<string> &words, char seperator)
 
     if(wn > 0) 
        words.push_back(word);
+}
+
+
+void parseComplexStringToMap(const string &inputString, map<string, string> &fillMap,
+      const string &entryDelimiter, const string &keyValueDelimiter)
+{
+   typedef tokenizer<char_separator<char> > tokenizer;
+
+   char_separator<char> entrySeparator(entryDelimiter.c_str());
+   char_separator<char> keyValueSeparator(keyValueDelimiter.c_str());
+
+   // Tokenize the entries first
+   tokenizer entries(inputString, entrySeparator);
+
+   for (tokenizer::iterator iterator1 = entries.begin(); iterator1 != entries.end(); ++iterator1)
+   {
+      // Now tokenize the key and value
+      tokenizer keyAndValues(*iterator1, keyValueSeparator);
+
+      // Set iterator to second token.  Note that if there is no second token, the first is used again
+      tokenizer::iterator iterator2 = keyAndValues.begin();
+      iterator2++;
+
+      // Add to map
+      pair<string, string> keyValuePair(*keyAndValues.begin(),
+            iterator2.current_token() == *keyAndValues.begin() ? "" : iterator2.current_token());
+      fillMap.insert(keyValuePair);
+   }
 }
 
 
