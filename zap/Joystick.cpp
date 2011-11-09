@@ -179,7 +179,7 @@ JoystickInfo Joystick::PredefinedJoystickList[ControllerTypeCount] =
       "LogitechWingman",
       9,
       {0, 1},
-      {5, 6},
+      {5, 6},  // Not tested, both of this axis might be wrong since using SDL joystick code.
       { // LogitechWingman   9
          ControllerButton1,
          ControllerButton2,
@@ -235,8 +235,8 @@ JoystickInfo Joystick::PredefinedJoystickList[ControllerTypeCount] =
          ControllerButton6,
          ControllerButton7,
          ControllerButton8,
-         0,
-         0,
+         ControllerButton9,  // is button 9 and 10 pressing down analog stick?
+         ControllerButton10,
          ControllerButtonBack,         // Red button??...  no start button??
          0,
          0,
@@ -248,7 +248,7 @@ JoystickInfo Joystick::PredefinedJoystickList[ControllerTypeCount] =
       "SaitekDualAnalogRumblePad",
       10,
       {0, 1},
-      {5, 2},
+      {3, 2},  // 3 or 5 ?, not tested, but similar to P880
       { // SaitekDualAnalogRumblePad   10       // SAITEK P-480 DUAL-ANALOG
          ControllerButton1,
          ControllerButton2,
@@ -271,7 +271,7 @@ JoystickInfo Joystick::PredefinedJoystickList[ControllerTypeCount] =
       "PS2DualShock",
       10,
       {0, 1},
-      {2, 5},
+      {2, 3},  // 3 or 5? not tested with actual PS2 controller.
       { // PS2DualShock    10
          ControllerButton4,
          ControllerButton2,
@@ -282,8 +282,8 @@ JoystickInfo Joystick::PredefinedJoystickList[ControllerTypeCount] =
          ControllerButton7,
          ControllerButton8,
          ControllerButtonBack,
-         0,
-         0,
+         ControllerButton9,  // press down analog stick
+         ControllerButton10,
          ControllerButtonStart,
          0,
          0,
@@ -294,7 +294,7 @@ JoystickInfo Joystick::PredefinedJoystickList[ControllerTypeCount] =
       "PS2DualShockConversionCable",
       10,
       {0, 1},
-      {5, 2},
+      {3, 2},  // 3 or 5? not tested with actual PS2 controller.
       { // PS2DualShockConversionCable    10
          ControllerButton4,
          ControllerButton2,
@@ -306,15 +306,15 @@ JoystickInfo Joystick::PredefinedJoystickList[ControllerTypeCount] =
          ControllerButton8,
          ControllerButtonBack,
          ControllerButtonStart,
-         0,
-         0,
+         ControllerButton9,  // press down analog stick?
+         ControllerButton10,
          0,
          0,
       }
    },
    {
-      "PS3 Sixaxis",
-      "PS3DualShock",
+      "PS3 Sixaxis",  // This profile is known to work in linux, but not windows
+      "PS3DualShock", // Windows users might use a "PS2 Dualshock USB" to get everything working, but start and select buttons might be reversed on that profile
       16,
       {0, 1},
       {2, 3},
@@ -335,6 +335,7 @@ JoystickInfo Joystick::PredefinedJoystickList[ControllerTypeCount] =
          ControllerButton2, // Circle
          ControllerButton1, // X
          ControllerButton3, // Square
+         ControllerButton11, // PS button
       }
    },
    {
@@ -352,9 +353,9 @@ JoystickInfo Joystick::PredefinedJoystickList[ControllerTypeCount] =
          ControllerButton5,      // LB
          ControllerButtonBack,   // <
          ControllerButtonStart,  // >
-         0,
-         0,
-         ControllerButton7,
+         ControllerButton9,      // press on analog stick?
+         ControllerButton10,
+         ControllerButton7,      // trigger buttons?
          ControllerButton8,
          0,
          0,
