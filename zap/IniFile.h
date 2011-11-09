@@ -96,9 +96,9 @@ public:
    // Returns index of specified value, in the specified key, or noID if not found.
    S32 FindValue( S32 const sectionID, const string key) const;
 
-   // Returns number of keys currently in the ini.
-   S32 NumKeys() const;
-   S32 GetNumKeys() const;
+   // Returns number of sections currently in the ini.
+   S32 NumSections() const;
+   S32 GetNumSections() const;
 
    // Add a key name.
    S32 addSection( const string section);
@@ -107,7 +107,7 @@ public:
    string sectionName( S32 const sectionId) const;
    string getSectionName( S32 const sectionId) const;
 
-   // Returns number of values stored for specified key.
+   // Returns number of values stored for specified section.
    S32 NumValues( S32 const sectionId);
    S32 GetNumValues( S32 const sectionId);
    S32 NumValues( const string &keyname);

@@ -694,15 +694,15 @@ void CIniFile::Reset()
 }
 
 
-S32 CIniFile::NumKeys() const
+S32 CIniFile::NumSections() const
 {
    return sectionNames.size();
 }
 
 
-S32 CIniFile::GetNumKeys() const
+S32 CIniFile::GetNumSections() const
 {
-   return NumKeys();
+   return NumSections();
 }
 
 

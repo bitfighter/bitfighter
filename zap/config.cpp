@@ -670,7 +670,7 @@ static void loadQuickChatMessages(CIniFile *ini)
    emptynode.isMsgItem = false;
 
    // Read QuickChat messages -- first search for keys matching "QuickChatMessagesGroup123"
-   S32 keys = ini->GetNumKeys();
+   S32 keys = ini->GetNumSections();
    Vector<string> groups;
 
    // Next, read any top-level messages
@@ -760,7 +760,7 @@ static void loadQuickChatMessages(CIniFile *ini)
 static void writeDefaultQuickChatMessages(CIniFile *ini, IniSettings *iniSettings)
 {
    // Are there any QuickChatMessageGroups?  If not, we'll write the defaults.
-   S32 keys = ini->GetNumKeys();
+   S32 keys = ini->GetNumSections();
 
    for(S32 i = 0; i < keys; i++)
    {
