@@ -1949,14 +1949,10 @@ void glColor(const Color *c, float alpha)
     glColor4f(c->r, c->g, c->b, alpha);
 }
 
+
 void drawSquare(const Point &pos, F32 size, bool filled)
 {
-    glBegin(filled ? GL_POLYGON : GL_LINE_LOOP);
-       glVertex2f(pos.x - size, pos.y - size);
-       glVertex2f(pos.x + size, pos.y - size);
-       glVertex2f(pos.x + size, pos.y + size);
-       glVertex2f(pos.x - size, pos.y + size);
-    glEnd();
+   UserInterface::drawRect(pos.x - size, pos.y - size, pos.x + size, pos.y + size, filled ? GL_POLYGON : GL_LINE_LOOP);
 }
 
 
@@ -1975,6 +1971,16 @@ void drawFilledSquare(const Point &pos, F32 size)
 void drawFilledSquare(const Point &pos, S32 size)
 {
     drawSquare(pos, F32(size), true);
+}
+
+
+// Red vertices in walls, and magenta snapping vertices
+void renderSmallSolidVertex(F32 currentScale, const Point &pos, bool snapping)
+{
+   F32 size = MIN(MAX(currentScale, 1), 2);
+   glColor(snapping ? Colors::magenta : Colors::red);
+
+   drawFilledSquare(pos, (F32)size / currentScale);
 }
 
 
@@ -2013,8 +2019,8 @@ void renderVertex(char style, const Point &v, S32 number, S32 size, F32 scale, F
       glColor(*SELECT_COLOR, alpha);
    else if(style == SnappingVertex)
       glColor(Colors::magenta, alpha);
-   else
-      glColor(Colors::red, alpha);
+   else     // SelectedItemVertex
+      glColor(Colors::red, alpha);     
 
    drawSquare(v, (F32)size / scale, !hollow);
 

@@ -41,6 +41,7 @@
 #include "stringUtils.h"
 
 #ifndef ZAP_DEDICATED
+#include "ClientGame.h"          // For ClientGame and getUIManager()
 #include "UIEditorMenus.h"       // For EditorAttributeMenuUI def
 #include "SDL/SDL_opengl.h"
 #endif
@@ -297,22 +298,23 @@ Color EditorObject::getTeamColor(S32 teamId)
 void EditorObject::renderLinePolyVertices(F32 currentScale, F32 alpha)
 {
 #ifndef ZAP_DEDICATED
+
+   const ClientGame *clientGame = dynamic_cast<ClientGame *>(mGame);
+
    // Draw the vertices of the wall or the polygon area
    for(S32 j = 0; j < getVertCount(); j++)
    {
       Point v = getVert(j);
 
       if(vertSelected(j))
-         renderVertex(SelectedVertex, v, j, currentScale, alpha);             // Hollow yellow boxes with number
+         renderVertex(SelectedVertex, getVert(j), j, currentScale, alpha);             // Hollow yellow boxes with number
       else if(mLitUp && isVertexLitUp(j))
-         renderVertex(HighlightedVertex, v, j, currentScale, alpha);          // Hollow yellow boxes with number
+         renderVertex(HighlightedVertex, getVert(j), j, currentScale, alpha);          // Hollow yellow boxes with number
       else if(mSelected || mLitUp || anyVertsSelected())
-         renderVertex(SelectedItemVertex, v, j, currentScale, alpha);         // Hollow red boxes with number
+         renderVertex(SelectedItemVertex, getVert(j), j, currentScale, alpha);         // Hollow red boxes with number
       else
-      {
-         F32 size = MIN(MAX(currentScale, 1), 2);
-         renderVertex(UnselectedItemVertex, v, NO_NUMBER, size, currentScale, alpha);   // Solid red boxes, no number
-      }
+         // Using getUIManager() here is a horrible hack... but not sure how to improve the situation...
+         renderSmallSolidVertex(currentScale, getVert(j), clientGame->getUIManager()->getEditorUserInterface()->mDraggingObjects);
    }
 #endif
 }

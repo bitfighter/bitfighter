@@ -882,7 +882,8 @@ void WallSegmentManager::deleteSegments(S32 owner)
 
 
 // Only called from the editor
-void WallSegmentManager::renderWalls(GameSettings *settings, bool draggingObjects, bool showingReferenceShip, bool showSnapVertices, F32 alpha)
+void WallSegmentManager::renderWalls(GameSettings *settings, F32 currentScale, bool draggingObjects, 
+                                     bool showingReferenceShip, bool showSnapVertices, F32 alpha)
 {
 #ifndef ZAP_DEDICATED
    fillVector.clear();
@@ -919,9 +920,11 @@ void WallSegmentManager::renderWalls(GameSettings *settings, bool draggingObject
    {
       glLineWidth(gLineWidth1);
 
-      glColor(Colors::magenta);
+      //glColor(Colors::magenta);
       for(S32 i = 0; i < mWallEdgePoints.size(); i++)
-         drawCircle(mWallEdgePoints[i], 5);
+      //   drawFilledSquare(mWallEdgePoints[i], 2 / currentScale);
+
+      renderSmallSolidVertex(currentScale, mWallEdgePoints[i], draggingObjects);
 
       glLineWidth(gDefaultLineWidth);
    }

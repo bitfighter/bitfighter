@@ -1607,7 +1607,7 @@ void EditorUserInterface::render()
          }
       }
   
-      getGame()->getWallSegmentManager()->renderWalls(getGame()->getSettings(),
+      getGame()->getWallSegmentManager()->renderWalls(getGame()->getSettings(), mCurrentScale,
                      mDraggingObjects, mPreviewMode, getSnapToWallCorners(), getRenderingAlpha(false/*isScriptItem*/));
 
     
@@ -1875,12 +1875,12 @@ const Color *EditorUserInterface::getTeamColor(S32 team)
 
 void EditorUserInterface::renderSnapTarget(const Point &target)
 {
-   glLineWidth(gLineWidth1);
+   //glLineWidth(gLineWidth1);
 
-   glColor(Colors::magenta);
-   drawCircle(target, 5);
+   //glColor(Colors::magenta);
+   //drawFilledSquare(target, 2);
 
-   glLineWidth(gDefaultLineWidth);
+   //glLineWidth(gDefaultLineWidth);
 }
 
 
@@ -2520,7 +2520,6 @@ void EditorUserInterface::onMouseDragged()
    }
 
    mDraggingObjects = true;
-
 
 
    Point delta;
@@ -3838,6 +3837,7 @@ void EditorUserInterface::setSaveMessage(string msg, bool savedOK)
    mSaveMsgTimer = saveMsgDisplayTime;
    mSaveMsgColor = (savedOK ? Colors::green : Colors::red);
 }
+
 
 void EditorUserInterface::setWarnMessage(string msg1, string msg2)
 {

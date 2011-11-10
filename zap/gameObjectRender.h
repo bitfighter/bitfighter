@@ -67,6 +67,8 @@ extern void drawFilledSquare(const Point &pos, F32 size);
 extern void drawFilledSquare(const Point &pos, S32 size);
 extern void drawFilledSquare(const Point &pos, F32 size);
 
+extern void renderSmallSolidVertex(F32 currentScale, const Point &pos, bool snapping);
+
 extern void renderVertex(char style, const Point &v, S32 number);
 extern void renderVertex(char style, const Point &v, S32 number,           F32 scale);
 extern void renderVertex(char style, const Point &v, S32 number,           F32 scale, F32 alpha);
