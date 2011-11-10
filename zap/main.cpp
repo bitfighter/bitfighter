@@ -53,6 +53,7 @@ XXX need to document timers, new luavec stuff XXX
 <li>Can now specify whether soccer game permits picking up the ball or not
 <li>-help cmd line option now displays meaningful help
 <li>Loadout presets: define them with Ctrl-1/2/3, retrieve them with Alt-1/2/3.  They persist in the INI between sessions.  You can see your current preset definitions with the /showpresets command.
+<li>Mouse wheel zooms in and out in the editor
 </ul>
 
 <h2>Bot scripting</h2>

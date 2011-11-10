@@ -3117,6 +3117,21 @@ void EditorUserInterface::doneEditingAttributes(EditorAttributeMenuUI *editor, E
 }
 
 
+void EditorUserInterface::zoom(F32 zoomAmount)
+{
+   Point mouseLevelPoint = convertCanvasToLevelCoord(mMousePos);
+
+   mCurrentScale *= 1 + zoomAmount;
+
+   if(mCurrentScale < MIN_SCALE)
+      mCurrentScale = MIN_SCALE;
+   else if(mCurrentScale > MAX_SCALE)
+      mCurrentScale = MAX_SCALE;
+   
+   Point newMousePoint = convertLevelToCanvasCoord(mouseLevelPoint);
+
+   mCurrentOffset += mMousePos - newMousePoint;
+}
 
 
 // Handle key presses
@@ -3136,7 +3151,12 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
    else if(inputCode == KEY_ENTER)       // Enter - Edit props
       startAttributeEditor();
 
+   // Mouse wheel zooms in and out
 
+   else if(inputCode == MOUSE_WHEEL_UP)
+      zoom(-0.2);
+   else if(inputCode == MOUSE_WHEEL_DOWN)
+      zoom(0.2);
 
    // Regular key handling from here on down
    else if(checkModifier(KEY_SHIFT) && inputCode == KEY_0)  // Shift-0 -> Set team to hostile
@@ -3803,17 +3823,9 @@ void EditorUserInterface::idle(U32 timeDelta)
    Point mouseLevelPoint = convertCanvasToLevelCoord(mMousePos);
 
    if(mIn && !mOut)
-      mCurrentScale *= 1 + timeDelta * 0.002f;
+      zoom(timeDelta * 0.002f);
    else if(mOut && !mIn)
-      mCurrentScale *= 1 - timeDelta * 0.002f;
-
-   if(mCurrentScale < MIN_SCALE)
-     mCurrentScale = MIN_SCALE;
-   else if(mCurrentScale > MAX_SCALE)
-      mCurrentScale = MAX_SCALE;
-
-   Point newMousePoint = convertLevelToCanvasCoord(mouseLevelPoint);
-   mCurrentOffset += mMousePos - newMousePoint;
+      zoom(timeDelta * -0.002f);
 
    mSaveMsgTimer.update(timeDelta);
    mWarnMsgTimer.update(timeDelta);
