@@ -190,6 +190,9 @@ private:
    Point mMousePos;                 // Where the mouse is at the moment
    Point mMouseDownPos;             // Where the mouse was pressed for a drag operation
 
+   bool mScrollWithMouse;           // Make use of scrolling using middle mouse position
+   Point mScrollWithMouseLocation;
+
    bool showMinorGridLines();
    void renderGrid();               // Draw background snap grid
    void renderDock(F32 width);

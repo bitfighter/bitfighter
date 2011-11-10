@@ -136,6 +136,7 @@ EditorUserInterface::EditorUserInterface(ClientGame *game) : Parent(game)
    mLastUndoStateWasBarrierWidthChange = false;
 
    mUndoItems.resize(UNDO_STATES);     // Create slots for all our undos... also creates a ton of empty dbs.  Maybe we should be using pointers?
+   mScrollWithMouse = false;
 }
 
 
@@ -1503,6 +1504,32 @@ static S32 QSORT_CALLBACK sortByTeam(DatabaseObject **a, DatabaseObject **b)
    return ((BfObject *)(*b))->getTeam() - ((BfObject *)(*a))->getTeam();
 }
 
+
+static void drawFourArrows(Point pos)
+{
+   const F32 pointList[] = {
+      0, 15, 0, -15,
+      0, 15, 5, 10,
+      0, 15, -5, 10,
+      0, -15, 5, -10,
+      0, -15, -5, -10,
+      15, 0, -15, 0,
+      15, 0, 10, 5,
+      15, 0, 10, -5,
+      -15, 0, -10, 5,
+      -15, 0, -10, -5,
+   };
+
+   glPushMatrix();
+   glTranslate(pos);
+   glEnableClientState(GL_VERTEX_ARRAY);
+   glVertexPointer(2, GL_FLOAT, sizeof(pointList[0]) * 2, pointList);    
+   glDrawArrays(GL_LINES, 0, sizeof(pointList) / (sizeof(pointList[0]) * 2));
+   glDisableClientState(GL_VERTEX_ARRAY);
+   glPopMatrix();
+
+}
+
 void EditorUserInterface::render()
 {
    mouseIgnore = false; // Needed to avoid freezing effect from too many mouseMoved events without a render in between (sam)
@@ -1733,6 +1760,12 @@ void EditorUserInterface::render()
 
    if(disableBlending)
       glDisable(GL_BLEND);
+
+   if(mScrollWithMouse)
+   {
+		glColor(Colors::white);
+      drawFourArrows(mScrollWithMouseLocation);
+   }
 
    renderHelpMessage();    // Also highlights dock item we're hovering over
    renderSaveMessage();
@@ -3157,6 +3190,11 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
       zoom(-0.2);
    else if(inputCode == MOUSE_WHEEL_DOWN)
       zoom(0.2);
+   else if(inputCode == MOUSE_MIDDLE)
+   {
+      mScrollWithMouse = !mScrollWithMouse;
+      mScrollWithMouseLocation = mMousePos;
+   }
 
    // Regular key handling from here on down
    else if(checkModifier(KEY_SHIFT) && inputCode == KEY_0)  // Shift-0 -> Set team to hostile
@@ -3651,6 +3689,10 @@ void EditorUserInterface::onKeyUp(InputCode inputCode)
       case KEY_TAB:
          mPreviewMode = false;
          break;
+      case MOUSE_MIDDLE:
+         if(mScrollWithMouseLocation != mMousePos) // If user releases button after moving mouse, we can stop scrolling.
+            mScrollWithMouse = false;
+         break;
       case MOUSE_LEFT:
       case MOUSE_RIGHT:  
          mMousePos.set(gScreenInfo.getMousePos());
@@ -3819,6 +3861,9 @@ void EditorUserInterface::idle(U32 timeDelta)
       mCurrentOffset.y += pixelsToScroll;
    else if(mDown && !mUp)
       mCurrentOffset.y -= pixelsToScroll;
+
+   if(mScrollWithMouse)
+      mCurrentOffset += (mScrollWithMouseLocation - mMousePos) * pixelsToScroll / 256.f;
 
    Point mouseLevelPoint = convertCanvasToLevelCoord(mMousePos);
 
