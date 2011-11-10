@@ -3367,7 +3367,7 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
    }     // end if inputCode == MOUSE_LEFT
 
    // Neither mouse button, let's try some keys
-   else if(inputString == "D")            // Pan right
+   else if(inputString == "D"|| inputString == "Shift+D")            // Pan right
       mRight = true;
    else if(inputString == "Right Arrow")  // Pan right
       mRight = true;
@@ -3414,7 +3414,7 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
    else if(inputString == "Ctrl+I")       // Insert items generated with script into editor
       copyScriptItemsToEditor();
 
-   else if(inputString == "Up Arrow" || inputString == "W")  // W or Up - Pan up
+   else if(inputString == "Up Arrow" || inputString == "W" || inputString == "Shift+W")  // W or Up - Pan up
       mUp = true;
    else if(inputString == "Ctrl+Up Arrow")      // Zoom in
       mIn = true;
@@ -3424,7 +3424,7 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
       mDown = true;
    else if(inputString == "Ctrl+S")       // Save
       saveLevel(true, true);
-   else if(inputString == "S")            // Pan down
+   else if(inputString == "S"|| inputString == "Shift+S")            // Pan down
       mDown = true;
    else if(inputString == "Ctrl+A")       // Toggle see all objects
    {
@@ -3440,7 +3440,7 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
 
       onMouseMoved();   // Reset mouse to spray if appropriate
    }
-   else if(inputString == "Left Arrow" || inputString == "A")   // Left or A - Pan left
+   else if(inputString == "Left Arrow" || inputString == "A"|| inputString == "Shift+A")   // Left or A - Pan left
       mLeft = true;
    else if(inputString == "Shift-=")      // Shifted - Increase barrier width by 1
       changeBarrierWidth(1);
