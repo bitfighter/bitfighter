@@ -3202,8 +3202,11 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
       zoom(0.2);
    else if(inputCode == MOUSE_MIDDLE)     // Click wheel to drag
    {
-      mScrollWithMouse = !mScrollWithMouse;
-      mScrollWithMouseLocation = mMousePos;
+      Point center = convertCanvasToLevelCoord(Point(gScreenInfo.getGameCanvasWidth() / 2, gScreenInfo.getGameCanvasHeight() / 2));
+      Point m = convertCanvasToLevelCoord(mMousePos);
+      mCurrentOffset += (center - m) * mCurrentScale;
+    /*  mScrollWithMouse = !mScrollWithMouse;
+      mScrollWithMouseLocation = mMousePos;*/
    }
 
    // Regular key handling from here on down
