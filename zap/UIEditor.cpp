@@ -2458,7 +2458,7 @@ void EditorUserInterface::onMouseMoved()
    mouseIgnore = true;
 
    // Doing this with MOUSE_RIGHT allows you to drag a vertex you just placed by holding the right-mouse button
-   if(getInputCodeState(MOUSE_LEFT) || getInputCodeState(MOUSE_RIGHT) || getInputCodeState(MOUSE_MIDDLE))
+   if(getInputCodeState(MOUSE_LEFT) || getInputCodeState(MOUSE_RIGHT) || getInputCodeState(MOUSE_MIDDLE) || getInputCodeState(KEY_SPACE))
    {
       onMouseDragged();
       return;
@@ -3318,8 +3318,6 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
       mDraggingDockItem = NULL;
       mMousePos.set(gScreenInfo.getMousePos());
 
-      mDragPanning = false;
-
       if(mCreatingPoly || mCreatingPolyline)    // Save any polygon/polyline we might be creating
       {
          saveUndoState();                       // Save state prior to addition of new polygon
@@ -3569,9 +3567,9 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
       playBoop();
       getGame()->getUIManager()->getEditorMenuUserInterface()->activate();
    }
-   else if(inputString == "Space")           // No snapping to grid, but still to other things
+   else if(inputString == "Ctrl")            // No snapping to grid, but still to other things
       mSnapContext = NO_GRID_SNAPPING;
-   else if(inputString == "Shift+Space")     // Completely disable snapping
+   else if(inputString == "Ctrl+Shift")      // Completely disable snapping
       mSnapContext = NO_SNAPPING;
    else if(inputString == "Tab")             // Turn on preview mode
       mPreviewMode = true;
@@ -3672,6 +3670,9 @@ void EditorUserInterface::onKeyUp(InputCode inputCode)
 {
    switch(inputCode)
    {
+      case KEY_SPACE:
+         mDragPanning = false;
+         break;
       case KEY_UP:
          mIn = false;
          // fall-through OK  ...why?
@@ -3698,7 +3699,7 @@ void EditorUserInterface::onKeyUp(InputCode inputCode)
       case KEY_C:
          mOut = false;
          break;
-      case KEY_SPACE:
+      case KEY_CTRL:
          mSnapContext = FULL_SNAPPING;
          break;
       case KEY_TAB:
