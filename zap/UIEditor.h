@@ -223,6 +223,8 @@ private:
 
    bool mUp, mDown, mLeft, mRight, mIn, mOut;
 
+   bool mDragPanning;
+
    void clearSelection();        // Mark all objects and vertices as unselected
 
    void centerView();            // Center display on all objects

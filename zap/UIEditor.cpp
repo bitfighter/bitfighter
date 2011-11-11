@@ -2511,9 +2511,10 @@ void EditorUserInterface::onMouseDragged()
 
    if(getInputCodeState(KEY_SPACE))
    {
-      if(mDragSelecting)    // A very hacky way to figure out if we just started our drag... if we keep this, we may want to find a better way
+      if(!mDragPanning)   
       {
          mMoveOrigin = mMousePos;
+         mDragPanning = true;
          mDragSelecting = false;
       }
       else
@@ -3197,9 +3198,9 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
    // Mouse wheel zooms in and out
 
    else if(inputCode == MOUSE_WHEEL_UP)
-      zoom(-0.2);
-   else if(inputCode == MOUSE_WHEEL_DOWN)
       zoom(0.2);
+   else if(inputCode == MOUSE_WHEEL_DOWN)
+      zoom(-0.2);
    else if(inputCode == MOUSE_MIDDLE)     // Click wheel to drag
    {
       mScrollWithMouse = !mScrollWithMouse;
@@ -3316,6 +3317,8 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
 
       mDraggingDockItem = NULL;
       mMousePos.set(gScreenInfo.getMousePos());
+
+      mDragPanning = false;
 
       if(mCreatingPoly || mCreatingPolyline)    // Save any polygon/polyline we might be creating
       {
