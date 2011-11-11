@@ -22,6 +22,8 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 //------------------------------------------------------------------------------------
+#ifndef _HTFGAMETYPE_H_
+#define _HTFGAMETYPE_H_
 
 #include "gameType.h"
 
@@ -85,4 +87,4 @@ public:
 
 };
 
-
+#endif

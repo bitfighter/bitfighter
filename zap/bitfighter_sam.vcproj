@@ -919,19 +919,19 @@
 			>
 		</File>
 		<File
-			RelativePath=".\Joystick.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\JoystickRender.cpp"
-			>
-		</File>
-		<File
 			RelativePath=".\InputCode.cpp"
 			>
 		</File>
 		<File
 			RelativePath=".\InputCode.h"
+			>
+		</File>
+		<File
+			RelativePath=".\Joystick.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\JoystickRender.cpp"
 			>
 		</File>
 		<File
@@ -1119,6 +1119,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\TeamShuffleHelper.cpp"
+			>
+		</File>
+		<File
 			RelativePath=".\Timer.cpp"
 			>
 		</File>
@@ -1148,10 +1152,6 @@
 		</File>
 		<File
 			RelativePath=".\UIMessage.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\UIRebindKeys.cpp"
 			>
 		</File>
 		<File

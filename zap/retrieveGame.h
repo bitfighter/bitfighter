@@ -23,6 +23,9 @@
 //
 //------------------------------------------------------------------------------------
 
+#ifndef _RETRIEVEGAMETYPE_H_
+#define _RETRIEVEGAMETYPE_H_
+
 #include "gameType.h"
 
 
@@ -33,6 +36,8 @@ class RetrieveGameType : public GameType
 {
 private:
    typedef GameType Parent;
+
+protected:
    Vector<GoalZone *> mZones;
 
 public:
@@ -88,4 +93,4 @@ public:
 
 };
 
-
+#endif
