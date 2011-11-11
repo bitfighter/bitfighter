@@ -112,7 +112,7 @@ bool getInputCodeState(InputCode inputCode)
 }
 
 
-InputCode modifiers[] = { KEY_SHIFT, KEY_CTRL, KEY_ALT, KEY_META, KEY_SUPER };
+InputCode modifiers[] = { KEY_CTRL, KEY_ALT, KEY_SHIFT, KEY_META, KEY_SUPER };
 
 
 std::string makeInputString(InputCode inputCode)
