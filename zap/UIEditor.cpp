@@ -1635,9 +1635,8 @@ void EditorUserInterface::render()
          }
       }
   
-      getGame()->getWallSegmentManager()->renderWalls(getGame()->getSettings(),
+      getGame()->getWallSegmentManager()->renderWalls(getGame()->getSettings(), mCurrentScale,
                      mDraggingObjects, mPreviewMode, getSnapToWallCorners(), getRenderingAlpha(false/*isScriptItem*/));
-
     
 
 #ifdef SHOW_EXTENT_BOXES
@@ -2459,7 +2458,7 @@ void EditorUserInterface::onMouseMoved()
    mouseIgnore = true;
 
    // Doing this with MOUSE_RIGHT allows you to drag a vertex you just placed by holding the right-mouse button
-   if(getInputCodeState(MOUSE_LEFT) || getInputCodeState(MOUSE_RIGHT))
+   if(getInputCodeState(MOUSE_LEFT) || getInputCodeState(MOUSE_RIGHT) || getInputCodeState(MOUSE_MIDDLE))
    {
       onMouseDragged();
       return;
@@ -2508,12 +2507,23 @@ void EditorUserInterface::onMouseMoved()
 
 void EditorUserInterface::onMouseDragged()
 {
-   //if(mouseIgnore)  // Needed to avoid freezing effect from too many mouseMoved events without a render in between (sam)
-   //   return;
-
-   //mouseIgnore = true;
-
    mMousePos.set(gScreenInfo.getMousePos());
+
+   if(getInputCodeState(MOUSE_MIDDLE))
+   {
+      if(mScrollWithMouse)    // A very hacky way to figure out if we just started our drag... if we keep this, we may want to find a better way
+      {
+         mMoveOrigin = mMousePos;
+         mScrollWithMouse = false;
+      }
+      else
+      {
+         mCurrentOffset += mMousePos - mMoveOrigin;
+         mMoveOrigin = mMousePos;
+      }
+
+      return;
+   }
 
    if(mCreatingPoly || mCreatingPolyline || mDragSelecting)
       return;
@@ -3190,7 +3200,7 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
       zoom(-0.2);
    else if(inputCode == MOUSE_WHEEL_DOWN)
       zoom(0.2);
-   else if(inputCode == MOUSE_MIDDLE)
+   else if(inputCode == MOUSE_MIDDLE)     // Click wheel to drag
    {
       mScrollWithMouse = !mScrollWithMouse;
       mScrollWithMouseLocation = mMousePos;

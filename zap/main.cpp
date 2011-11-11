@@ -54,6 +54,7 @@ XXX need to document timers, new luavec stuff XXX
 <li>-help cmd line option now displays meaningful help
 <li>Loadout presets: define them with Ctrl-1/2/3, retrieve them with Alt-1/2/3.  They persist in the INI between sessions.  You can see your current preset definitions with the /showpresets command.
 <li>Mouse wheel zooms in and out in the editor
+<li>Implemented 2-tier snapping in editor -- hold space to disable grid snap, but still snap to wall corners and other items; hold shift-space to completely disable snapping
 </ul>
 
 <h2>Bot scripting</h2>
