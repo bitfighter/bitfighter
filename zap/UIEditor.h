@@ -141,7 +141,13 @@ private:
 
    S32 mCurrentTeam;
 
-   bool mSnapDisabled;
+   enum SnapContext {
+      FULL_SNAPPING,
+      NO_GRID_SNAPPING,
+      NO_SNAPPING
+   };
+
+   SnapContext mSnapContext;
 
    ShowMode mShowMode;
 

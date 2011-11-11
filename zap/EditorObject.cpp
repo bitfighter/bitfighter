@@ -314,7 +314,7 @@ void EditorObject::renderLinePolyVertices(F32 currentScale, F32 alpha)
          renderVertex(SelectedItemVertex, getVert(j), j, currentScale, alpha);         // Hollow red boxes with number
       else
          // Using getUIManager() here is a horrible hack... but not sure how to improve the situation...
-         renderSmallSolidVertex(currentScale, getVert(j), clientGame->getUIManager()->getEditorUserInterface()->mDraggingObjects);
+         renderSmallSolidVertex(currentScale, getVert(j), clientGame->getUIManager()->getEditorUserInterface()->getSnapToWallCorners());
    }
 #endif
 }
