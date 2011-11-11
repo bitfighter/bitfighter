@@ -2509,12 +2509,12 @@ void EditorUserInterface::onMouseDragged()
 {
    mMousePos.set(gScreenInfo.getMousePos());
 
-   if(getInputCodeState(MOUSE_MIDDLE))
+   if(getInputCodeState(KEY_SPACE))
    {
-      if(mScrollWithMouse)    // A very hacky way to figure out if we just started our drag... if we keep this, we may want to find a better way
+      if(mDragSelecting)    // A very hacky way to figure out if we just started our drag... if we keep this, we may want to find a better way
       {
          mMoveOrigin = mMousePos;
-         mScrollWithMouse = false;
+         mDragSelecting = false;
       }
       else
       {
@@ -3202,11 +3202,8 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
       zoom(0.2);
    else if(inputCode == MOUSE_MIDDLE)     // Click wheel to drag
    {
-      Point center = convertCanvasToLevelCoord(Point(gScreenInfo.getGameCanvasWidth() / 2, gScreenInfo.getGameCanvasHeight() / 2));
-      Point m = convertCanvasToLevelCoord(mMousePos);
-      mCurrentOffset += (center - m) * mCurrentScale;
-    /*  mScrollWithMouse = !mScrollWithMouse;
-      mScrollWithMouseLocation = mMousePos;*/
+      mScrollWithMouse = !mScrollWithMouse;
+      mScrollWithMouseLocation = mMousePos;
    }
 
    // Regular key handling from here on down
