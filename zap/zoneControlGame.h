@@ -70,13 +70,13 @@ public:
 
    void shipTouchZone(Ship *ship, GoalZone *zone);
 
-   GameTypes getGameType() { return ZoneControlGame; }
+   GameTypes getGameType() const { return ZoneControlGame; }
    const char *getGameTypeString() const { return "Zone Control"; }
    const char *getShortName() const { return "ZC"; }
    const char *getInstructionString() { return "Capture all the zones by carrying the flag into them! "; }
    bool isTeamGame() { return true; }
-   bool canBeTeamGame() { return true; }
-   bool canBeIndividualGame() { return false; }
+   bool canBeTeamGame() const { return true; }
+   bool canBeIndividualGame() const { return false; }
 
 
    void renderInterfaceOverlay(bool scoreboardVisible);

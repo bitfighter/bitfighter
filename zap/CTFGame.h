@@ -48,15 +48,15 @@ public:
    void renderInterfaceOverlay(bool scoreboardVisible);
    bool teamHasFlag(S32 teamId) const;
 
-   GameTypes getGameType() { return CTFGame; }
+   GameTypes getGameType() const { return CTFGame; }
    const char *getGameTypeString() const { return "Capture the Flag"; }
    const char *getShortName() const { return "CTF"; }
    const char *getInstructionString() { return "Take the opposing team's flag and touch it to your flag!"; }
    
    bool isFlagGame() { return true; }
    bool isTeamGame() { return true; }
-   bool canBeTeamGame() { return true; }
-   bool canBeIndividualGame() { return false; }
+   bool canBeTeamGame()  const { return true; }
+   bool canBeIndividualGame() const { return false; }
    bool isTeamFlagGame() { return true; }    // Teams matter with our flags in this game
 
    S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data);

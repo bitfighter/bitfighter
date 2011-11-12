@@ -92,12 +92,12 @@ public:
 
    void controlObjectForClientKilled(ClientInfo *theClient, GameObject *clientObject, GameObject *killerObject);
    void spawnShip(ClientInfo *clientInfo);
-   GameTypes getGameType() { return NexusGame; }
+   GameTypes getGameType() const { return NexusGame; }
    const char *getGameTypeString() const { return "Nexus"; }     // Official game name
    const char *getShortName() const { return "N"; }
    const char *getInstructionString() { return "Collect flags from opposing players and bring them to the Nexus!"; }
-   bool canBeTeamGame() { return true; }
-   bool canBeIndividualGame() { return true; }
+   bool canBeTeamGame() const { return true; }
+   bool canBeIndividualGame() const { return true; }
 
    U32 getLowerRightCornerScoreboardOffsetFromBottom() const { return 88; }
 

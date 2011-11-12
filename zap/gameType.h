@@ -171,13 +171,13 @@ public:
    Game *getGame() const;
    bool onGhostAdd(GhostConnection *theConnection);
 
-   virtual GameTypes getGameType();
+   virtual GameTypes getGameType() const;
    virtual const char *getGameTypeString() const;       // Will be overridden by other games
    virtual const char *getShortName() const;            //          -- ditto --
    virtual const char *getInstructionString() const;    //          -- ditto --
    virtual bool isTeamGame() const;                     // Team game if we have teams.  Otherwise it's every man for himself.
-   virtual bool canBeTeamGame();
-   virtual bool canBeIndividualGame();
+   virtual bool canBeTeamGame() const;
+   virtual bool canBeIndividualGame() const;
    virtual bool teamHasFlag(S32 teamId) const;
    S32 getWinningScore() const;
    void setWinningScore(S32 score);

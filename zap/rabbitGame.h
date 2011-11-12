@@ -96,13 +96,13 @@ public:
    void setFlagScore(S32 pointsPerMinute);
    S32 getFlagScore() const;
 
-   GameTypes getGameType() { return RabbitGame; }
+   GameTypes getGameType() const { return RabbitGame; }
    const char *getGameTypeString() const { return "Rabbit"; }
    const char *getShortName() const { return "Rab"; }
    const char *getInstructionString() { return "Grab the flag and hold it for as long as you can!"; }
    //bool isTeamGame() { return getGame()->getTeamCount() != 1; }
-   bool canBeTeamGame() { return true; }
-   bool canBeIndividualGame() { return true; }
+   bool canBeTeamGame() const { return true; }
+   bool canBeIndividualGame() const { return true; }
 
    bool isSpawnWithLoadoutGame() { return true; }
 

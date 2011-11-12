@@ -3335,7 +3335,7 @@ Game *GameType::getGame() const
 }
 
 
-GameType::GameTypes GameType::getGameType()
+GameType::GameTypes GameType::getGameType() const
 {
    return BitmatchGame;
 }
@@ -3359,13 +3359,13 @@ const char *GameType::getInstructionString() const
 }
 
 
-bool GameType::canBeTeamGame()
+bool GameType::canBeTeamGame() const
 {
    return true;
 }
 
 
-bool GameType::canBeIndividualGame()
+bool GameType::canBeIndividualGame() const
 {
    return true;
 }

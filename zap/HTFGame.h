@@ -71,13 +71,13 @@ public:
 
    void renderInterfaceOverlay(bool scoreboardVisible);
 
-   GameTypes getGameType() { return HTFGame; }
+   GameTypes getGameType() const { return HTFGame; }
    const char *getGameTypeString() const { return "Hold the Flag"; }
    const char *getShortName() const { return "HTF"; }
    const char *getInstructionString() { return "Hold the flags at your capture zones!"; }
    bool isTeamGame() { return true; }
-   bool canBeTeamGame() { return true; }
-   bool canBeIndividualGame() { return false; }
+   bool canBeTeamGame() const { return true; }
+   bool canBeIndividualGame() const { return false; }
 
    // What does a particular scoring event score?
    S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data);

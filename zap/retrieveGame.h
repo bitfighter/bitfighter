@@ -78,13 +78,13 @@ public:
 
    bool isTeamFlagGame() { return true; }
 
-   GameTypes getGameType() { return RetrieveGame; }
+   GameTypes getGameType() const { return RetrieveGame; }
    const char *getGameTypeString() const { return "Retrieve"; }
    const char *getShortName() const { return "Ret"; }
    const char *getInstructionString() { return "Find all the flags, and bring them to your capture zones!"; }
    bool isTeamGame() { return true; }
-   bool canBeTeamGame() { return true; }
-   bool canBeIndividualGame() { return false; }
+   bool canBeTeamGame() const { return true; }
+   bool canBeIndividualGame() const { return false; }
 
 
    TNL_DECLARE_CLASS(RetrieveGameType);
