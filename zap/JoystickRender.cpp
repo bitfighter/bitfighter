@@ -66,7 +66,6 @@ void JoystickRender::renderRoundButton(const Point &loc, const char *label, cons
       offset = Point(0, radius);
 
    setButtonColor(activated);
-
    drawCircle(loc + offset, (F32)radius);
 
    glColor(labelColor);
@@ -97,6 +96,7 @@ void JoystickRender::renderRightTriangleButton(const Point &loc, const char *lab
       glVertex(loc + offset + Point(12, 0));
    glEnd();
 
+   glColor(Colors::white);
    UserInterface::drawString(loc.x + offset.x - UserInterface::getStringWidth(labelSize, label) / 2, loc.y + 2, labelSize, label);
 }
 
@@ -119,9 +119,9 @@ void JoystickRender::renderRectButton(const Point &loc, const char *label, Align
       offset = Point(0, halfHeight);
 
    setButtonColor(activated);
-
    drawRoundedRect(loc + offset, (F32)width, (F32)height, 3);
 
+   glColor(Colors::white);
    UserInterface::drawString(loc.x + offset.x - UserInterface::getStringWidth(labelSize, label) / 2, loc.y + 2, labelSize, label);
 }
 
@@ -145,9 +145,9 @@ void JoystickRender::renderRoundedRectButton(const Point &loc, const char *label
       offset = Point(0, halfHeight);
 
    setButtonColor(activated);
-
    drawRoundedRect(loc + offset, (F32)width, (F32)height, roundedRadius);
 
+   glColor(Colors::white);
    UserInterface::drawString(loc.x + offset.x - UserInterface::getStringWidth(labelSize, label) / 2, loc.y + 2, labelSize, label);
 }
 
@@ -171,9 +171,9 @@ void JoystickRender::renderSmallRoundedRectButton(const Point &loc, const char *
       offset = Point(0, halfHeight);
 
    setButtonColor(activated);
-
    drawRoundedRect(loc + offset, (F32)width, (F32)height, roundedRadius);
 
+   glColor(Colors::white);
    UserInterface::drawString(loc.x + offset.x - UserInterface::getStringWidth(labelSize, label) / 2, loc.y + 2, labelSize, label);
 }
 
@@ -196,9 +196,9 @@ void JoystickRender::renderSmallRectButton(const Point &loc, const char *label, 
       offset = Point(0,halfHeight);
 
    setButtonColor(activated);
-
    drawRoundedRect(loc + offset, (F32)width, (F32)height, 3);
 
+   glColor(Colors::white);
    UserInterface::drawString(loc.x + offset.x - UserInterface::getStringWidth(labelSize, label) / 2, loc.y + 2, labelSize, label);
 }
 
@@ -222,8 +222,8 @@ void JoystickRender::renderFilledHorizontalEllipseButton(const Point &loc, const
 
    glColor(fillColor);
    drawFilledEllipse(loc + offset, horizEllipseButtonRadiusX, horizEllipseButtonRadiusY, 0);
-   glColor(Colors::white);
 
+   glColor(Colors::white);
    drawEllipse(loc + offset, horizEllipseButtonRadiusX, horizEllipseButtonRadiusY, 0);
    UserInterface::drawString(loc.x + offset.x - UserInterface::getStringWidth(labelSize, label) / 2, loc.y + 2, labelSize, label);
 }
@@ -244,8 +244,9 @@ void JoystickRender::renderHorizontalOvalButton(const Point &loc, const char *la
       offset = Point(0, halfHeight);
 
    setButtonColor(activated);
-
    drawEllipse(loc + offset, horizEllipseButtonRadiusX, horizEllipseButtonRadiusY, 0);
+
+   glColor(Colors::white);
    UserInterface::drawString(loc.x + offset.x - UserInterface::getStringWidth(labelSize, label) / 2, loc.y + 2, labelSize, label);
 }
 
