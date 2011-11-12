@@ -1763,7 +1763,7 @@ void EditorUserInterface::render()
 
    if(mScrollWithMouse)
    {
-		glColor(Colors::white);
+      glColor(Colors::white);
       drawFourArrows(mScrollWithMouseLocation);
    }
 
@@ -2458,7 +2458,7 @@ void EditorUserInterface::onMouseMoved()
    mouseIgnore = true;
 
    // Doing this with MOUSE_RIGHT allows you to drag a vertex you just placed by holding the right-mouse button
-   if(getInputCodeState(MOUSE_LEFT) || getInputCodeState(MOUSE_RIGHT) || getInputCodeState(MOUSE_MIDDLE) || getInputCodeState(KEY_SPACE))
+   if(getInputCodeState(MOUSE_LEFT) || getInputCodeState(MOUSE_RIGHT) || getInputCodeState(MOUSE_MIDDLE))
    {
       onMouseDragged();
       return;
@@ -2509,19 +2509,10 @@ void EditorUserInterface::onMouseDragged()
 {
    mMousePos.set(gScreenInfo.getMousePos());
 
-   if(getInputCodeState(KEY_SPACE))
+   if(getInputCodeState(MOUSE_MIDDLE))
    {
-      if(!mDragPanning)   
-      {
-         mMoveOrigin = mMousePos;
-         mDragPanning = true;
-         mDragSelecting = false;
-      }
-      else
-      {
-         mCurrentOffset += mMousePos - mMoveOrigin;
-         mMoveOrigin = mMousePos;
-      }
+      mCurrentOffset += mMousePos - mMoveOrigin;
+      mMoveOrigin = mMousePos;
 
       return;
    }
@@ -3203,8 +3194,11 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
       zoom(-0.2);
    else if(inputCode == MOUSE_MIDDLE)     // Click wheel to drag
    {
-      mScrollWithMouse = !mScrollWithMouse;
       mScrollWithMouseLocation = mMousePos;
+      mMoveOrigin = mMousePos;   // for drag scroll
+      if(mScrollWithMouse)
+         mScrollWithMouseLocation.set(-1,-1);  // Prevent re-enabling auto scroll again when we want it to stop
+      mScrollWithMouse = false;  // turn off in case we were already auto scrolling.
    }
 
    // Regular key handling from here on down
@@ -3567,9 +3561,9 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
       playBoop();
       getGame()->getUIManager()->getEditorMenuUserInterface()->activate();
    }
-   else if(inputString == "Ctrl")            // No snapping to grid, but still to other things
+   else if(inputString == "Space")           // No snapping to grid, but still to other things
       mSnapContext = NO_GRID_SNAPPING;
-   else if(inputString == "Ctrl+Shift")      // Completely disable snapping
+   else if(inputString == "Shift+Space")     // Completely disable snapping
       mSnapContext = NO_SNAPPING;
    else if(inputString == "Tab")             // Turn on preview mode
       mPreviewMode = true;
@@ -3670,9 +3664,6 @@ void EditorUserInterface::onKeyUp(InputCode inputCode)
 {
    switch(inputCode)
    {
-      case KEY_SPACE:
-         mDragPanning = false;
-         break;
       case KEY_UP:
          mIn = false;
          // fall-through OK  ...why?
@@ -3699,15 +3690,15 @@ void EditorUserInterface::onKeyUp(InputCode inputCode)
       case KEY_C:
          mOut = false;
          break;
-      case KEY_CTRL:
+      case KEY_SPACE:
          mSnapContext = FULL_SNAPPING;
          break;
       case KEY_TAB:
          mPreviewMode = false;
          break;
       case MOUSE_MIDDLE:
-         if(mScrollWithMouseLocation != mMousePos) // If user releases button after moving mouse, we can stop scrolling.
-            mScrollWithMouse = false;
+         if(mScrollWithMouseLocation == mMousePos) // If user press, don't move mouse, then releases button we can auto scroll
+            mScrollWithMouse = true;
          break;
       case MOUSE_LEFT:
       case MOUSE_RIGHT:  
