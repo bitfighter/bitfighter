@@ -336,8 +336,6 @@ Color Joystick::stringToColor(const string &colorString)
 
 void Joystick::setSelectedPresetIndex(U32 joystickIndex)
 {
-   logprintf("Selected joystick preset with index: %d", joystickIndex);
-   logprintf("This corresponds to joystick: %s", JoystickPresetList[joystickIndex].identifier.c_str());
    SelectedPresetIndex = joystickIndex;
 }
 
@@ -398,8 +396,6 @@ void Joystick::loadJoystickPresets()
    joystickPresetsINI.SetPath(joindir(folderManager->iniDir, "joystick_presets.ini"));
    joystickPresetsINI.ReadFile();
 
-//   logprintf("numsections: %d", joystickPresetsINI.GetNumSections());
-
    // Loop through each section (joystick) and parse
    for (S32 sectionId = 0; sectionId < joystickPresetsINI.GetNumSections(); sectionId++)
    {
@@ -431,21 +427,12 @@ void Joystick::loadJoystickPresets()
             buttonKeyNames.push_back(buttonName);
       }
 
-//      if(joystickInfo.identifier == "XBox360pad")
-//         logprintf("Here Homey");
-
       // Now load up button values
       for(S32 i = 0; i < buttonKeyNames.size(); i++)
       {
-//         logprintf(buttonKeyNames[i].c_str());
-
          // Parse the complex string into key/value pairs
          map<string, string> buttonInfoMap;
          parseComplexStringToMap(joystickPresetsINI.GetValue(sectionId, buttonKeyNames[i]), buttonInfoMap);
-
-//         if(joystickInfo.identifier == "XBox360pad")
-//            for(map<string, string>::iterator i = buttonInfoMap.begin(); i != buttonInfoMap.end(); i++)
-//               logprintf("%s: %s", (i->first).c_str(), (i->second).c_str());
 
          ButtonInfo buttonInfo;
 
@@ -454,13 +441,6 @@ void Joystick::loadJoystickPresets()
          buttonInfo.color = stringToColor(buttonInfoMap["Color"]);
          buttonInfo.buttonShape = buttonLabelToButtonShape(buttonInfoMap["Shape"]);
          buttonInfo.sdlButton = buttonInfoMap["Raw"] == "" ? FakeRawButton : U8(stoi(buttonInfoMap["Raw"]));
-
-//         if(joystickInfo.identifier == "XBox360pad")
-//         {
-//            logprintf("map: %s", buttonInfoMap["Raw"].c_str());
-//            logprintf("sdlButton: %u", buttonInfo.sdlButton);
-//            logprintf("ini: %s", joystickPresetsINI.GetValue(sectionId, buttonInfoMap["Raw"]).c_str());
-//         }
 
          // Set the button info with index of the Joystick::Button
          joystickInfo.buttonMappings[buttonInfo.button] = buttonInfo;
