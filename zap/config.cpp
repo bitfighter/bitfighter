@@ -70,7 +70,7 @@ IniSettings::IniSettings()
    controlsRelative = false;          // Relative controls is lame!
    displayMode = DISPLAY_MODE_FULL_SCREEN_STRETCHED;
    oldDisplayMode = DISPLAY_MODE_UNKNOWN;
-   joystickType = NoController;
+   joystickType = "NoJoystick";
    joystickLinuxUseOldDeviceSystem = false;
    echoVoice = false;
 
@@ -323,7 +323,7 @@ static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
    iniSettings->showKeyboardKeys     = ini->GetValueYN(section, "ShowKeyboardKeysInStickMode", iniSettings->showKeyboardKeys);
 
 #ifndef ZAP_DEDICATED
-   iniSettings->joystickType = Joystick::stringToJoystickType(ini->GetValue(section, "JoystickType", Joystick::joystickTypeToString(iniSettings->joystickType)).c_str());
+   iniSettings->joystickType = ini->GetValue(section, "JoystickType", iniSettings->joystickType);
    iniSettings->joystickLinuxUseOldDeviceSystem = ini->GetValueYN(section, "JoystickLinuxUseOldDeviceSystem", iniSettings->joystickLinuxUseOldDeviceSystem);
 #endif
 
@@ -1432,7 +1432,7 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
    ini->setValueYN(section, "ShowKeyboardKeysInStickMode", iniSettings->showKeyboardKeys);
 
 #ifndef ZAP_DEDICATED
-   ini->SetValue  (section, "JoystickType", Joystick::joystickTypeToString(iniSettings->joystickType));
+   ini->SetValue  (section, "JoystickType", iniSettings->joystickType);
    ini->setValueYN(section, "JoystickLinuxUseOldDeviceSystem", iniSettings->joystickLinuxUseOldDeviceSystem);
 #endif
    ini->SetValue  (section, "MasterServerAddressList", iniSettings->masterAddress);

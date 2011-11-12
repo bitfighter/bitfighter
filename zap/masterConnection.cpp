@@ -371,7 +371,7 @@ void MasterServerConnection::writeConnectRequest(BitStream *bstream)
    bstream->writeString("");  // empty controller string for dedicated.
 #else
    // First controller's autodetect string (for research purposes!)
-   bstream->writeString(Joystick::DetectedJoystickNameList.size() > 0 ? Joystick::DetectedJoystickNameList[0] : "");
+   bstream->writeString(Joystick::DetectedJoystickNameList.size() > 0 ? Joystick::DetectedJoystickNameList[0].c_str() : "");
 #endif
 
 

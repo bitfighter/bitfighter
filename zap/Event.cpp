@@ -208,10 +208,10 @@ void Event::onEvent(ClientGame *game, SDL_Event* event)
          break;
 
       case SDL_JOYAXISMOTION:
-         onJoyAxis(game->getSettings()->getIniSettings()->joystickType, event->jaxis.which, event->jaxis.axis, event->jaxis.value);
+         onJoyAxis(event->jaxis.which, event->jaxis.axis, event->jaxis.value);
          break;
 
-         // TODO:  Do we need joyball and joyhat?
+         // TODO:  Do we need joyball?
       case SDL_JOYBALLMOTION:
          onJoyBall(event->jball.which, event->jball.ball, event->jball.xrel, event->jball.yrel);
          break;
@@ -221,11 +221,11 @@ void Event::onEvent(ClientGame *game, SDL_Event* event)
          break;
 
       case SDL_JOYBUTTONDOWN:
-         onJoyButtonDown(event->jbutton.which, event->jbutton.button, game->getSettings()->getIniSettings()->joystickType);
+         onJoyButtonDown(event->jbutton.which, event->jbutton.button);
          break;
 
       case SDL_JOYBUTTONUP:
-         onJoyButtonUp(event->jbutton.which, event->jbutton.button, game->getSettings()->getIniSettings()->joystickType);
+         onJoyButtonUp(event->jbutton.which, event->jbutton.button);
          break;
 
       case SDL_SYSWMEVENT:
@@ -370,60 +370,45 @@ void Event::onMouseButtonUp(S32 x, S32 y, InputCode inputCode, DisplayMode mode)
 }
 
 
-void Event::onJoyAxis(U32 joystickType, U8 whichJoystick, U8 axis, S16 value)
+void Event::onJoyAxis(U8 whichJoystick, U8 axis, S16 value)
 {
 //   logprintf("SDL Axis number: %u, value: %d", axis, value);
 
    if(axis < Joystick::rawAxisCount)
       Joystick::rawAxis[axis] = (F32)value / (F32)S16_MAX;
 
-   // If we are using a predefined controller, get the appropriate axis
-   if(joystickType < ControllerTypeCount)
-   {
-      // Left/Right movement axis
-      if(axis == Joystick::PredefinedJoystickList[joystickType].moveAxesSdlIndex[0])
-         updateJoyAxesDirections(MoveAxisLeftRightMask,  value);
+   // Left/Right movement axis
+   if(axis == Joystick::JoystickPresetList[Joystick::SelectedPresetIndex].moveAxesSdlIndex[0])
+      updateJoyAxesDirections(MoveAxisLeftRightMask,  value);
 
-      // Up/down movement axis
-      if(axis == Joystick::PredefinedJoystickList[joystickType].moveAxesSdlIndex[1])
-         updateJoyAxesDirections(MoveAxisUpDownMask,  value);
+   // Up/down movement axis
+   if(axis == Joystick::JoystickPresetList[Joystick::SelectedPresetIndex].moveAxesSdlIndex[1])
+      updateJoyAxesDirections(MoveAxisUpDownMask,  value);
 
-      // Left/Right shooting axis
-      if(axis == Joystick::PredefinedJoystickList[joystickType].shootAxesSdlIndex[0])
-         updateJoyAxesDirections(ShootAxisLeftRightMask, value);
+   // Left/Right shooting axis
+   if(axis == Joystick::JoystickPresetList[Joystick::SelectedPresetIndex].shootAxesSdlIndex[0])
+      updateJoyAxesDirections(ShootAxisLeftRightMask, value);
 
-      // Up/down shooting axis
-      if(axis == Joystick::PredefinedJoystickList[joystickType].shootAxesSdlIndex[1])
-         updateJoyAxesDirections(ShootAxisUpDownMask, value);
-   }
-   // Else just use the first 4 axis for fun
-   else {
-      if (axis == 0)
-         updateJoyAxesDirections(MoveAxisLeftRightMask,  value);
-      if (axis == 1)
-         updateJoyAxesDirections(MoveAxisUpDownMask,  value);
-      if (axis == 2)
-         updateJoyAxesDirections(ShootAxisLeftRightMask, value);
-      if (axis == 3)
-         updateJoyAxesDirections(ShootAxisUpDownMask, value);
-   }
+   // Up/down shooting axis
+   if(axis == Joystick::JoystickPresetList[Joystick::SelectedPresetIndex].shootAxesSdlIndex[1])
+      updateJoyAxesDirections(ShootAxisUpDownMask, value);
 }
 
-extern InputCode joyButtonToInputCode(int buttonIndex);
+extern InputCode joystickButtonToInputCode(Joystick::Button button);
 
 
-void Event::onJoyButtonDown(U8 which, U8 button, U32 joystickType)
+void Event::onJoyButtonDown(U8 which, U8 button)
 {
 //   logprintf("SDL button down number: %u", button);
-   inputCodeDown(joyButtonToInputCode(Joystick::remapJoystickButton(joystickType, button)), 0);
+   inputCodeDown(joystickButtonToInputCode(Joystick::remapSdlButtonToJoystickButton(button)), 0);
    Joystick::ButtonMask |= BIT(button);
 }
 
 
-void Event::onJoyButtonUp(U8 which, U8 button, U32 joystickType)
+void Event::onJoyButtonUp(U8 which, U8 button)
 {
 //   logprintf("SDL button up number: %u", button);
-   inputCodeUp(joyButtonToInputCode(Joystick::remapJoystickButton(joystickType, button)));
+   inputCodeUp(joystickButtonToInputCode(Joystick::remapSdlButtonToJoystickButton(button)));
    Joystick::ButtonMask = Joystick::ButtonMask & ~BIT(button);
 }
 

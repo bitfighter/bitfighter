@@ -306,7 +306,7 @@ void InstructionsUserInterface::renderPage1()
                drawStringf(col2, y + 4, 15, "[%s] [%s] [%s]", inputCodeToString(inputLEFT[InputModeKeyboard]), inputCodeToString(inputDOWN[InputModeKeyboard]), inputCodeToString(inputRIGHT[InputModeKeyboard]));
          }
          else
-            JoystickRender::renderControllerButton((F32)contCol, F32(y + 4), getGame()->getSettings()->getIniSettings()->joystickType, 
+            JoystickRender::renderControllerButton((F32)contCol, F32(y + 4), Joystick::SelectedPresetIndex,
                                                    *controls[i].primaryControlIndex, false, 10);
       }
 

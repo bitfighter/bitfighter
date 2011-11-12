@@ -153,7 +153,7 @@ struct IniSettings      // With defaults specified
    bool controlsRelative;
    DisplayMode displayMode;
    DisplayMode oldDisplayMode;
-   U32 joystickType;
+   string joystickType;
    bool joystickLinuxUseOldDeviceSystem;
    bool echoVoice;
 

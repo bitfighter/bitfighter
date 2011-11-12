@@ -164,15 +164,15 @@ void LoadoutHelper::render()
 
       if(isValidItem(i))
       {
-         U32 joystickType = settings->getIniSettings()->joystickType;
+         U32 joystickIndex = Joystick::SelectedPresetIndex;
 
          if(inputMode == InputModeJoystick)     // Only draw joystick buttons when in joystick mode
             JoystickRender::renderControllerButton(F32(UserInterface::horizMargin + (showKeys ? 0 : 20)), (F32)yPos, 
-                                                   joystickType, list->get(i).button, false);
+                                                   joystickIndex, list->get(i).button, false);
          if(showKeys)
          {
             glColor(Colors::white);     
-            JoystickRender::renderControllerButton(F32(UserInterface::horizMargin + 20), (F32)yPos, joystickType, list->get(i).key, false);
+            JoystickRender::renderControllerButton(F32(UserInterface::horizMargin + 20), (F32)yPos, joystickIndex, list->get(i).key, false);
          }
 
          if(selected)

@@ -26,58 +26,22 @@
 #ifndef JOYSTICK_H_
 #define JOYSTICK_H_
 
-#ifndef ZAP_DEDICATED
 #include "tnlTypes.h"
 #include "tnlVector.h"
 #include "InputCodeEnum.h"
+#include "Color.h"
+
 #include "SDL/SDL_joystick.h"
-#endif
+
+#include <string>
 
 using namespace TNL;
+using namespace std;
 
 namespace Zap {
 
 
-enum ControllerTypeType
-{
-   LogitechWingman,
-   LogitechDualAction,
-   SaitekDualAnalogP880,      // 6 buttons on top, 2 in front
-   SaitekDualAnalogRumblePad, // 4 buttons on top, 4 in front
-   PS2DualShock,
-   PS2DualShockConversionCable,
-   PS3DualShock,
-   XBoxController,
-   XBoxControllerOnXBox,
-   XBox360pad,
-   ControllerTypeCount,       // Number of predefined controllers
-   GenericController,         // Something confirmed as a controller, but of unknown type --> treat as controller
-   UnknownController,         // Something not confirmed as controller, or of unknown type --> treat as no controller
-   NoController               // Pretty sure there is no controller
-};
-
 #ifndef ZAP_DEDICATED
-enum ControllerButton {
-   ControllerButton1,
-   ControllerButton2,
-   ControllerButton3,
-   ControllerButton4,
-   ControllerButton5,
-   ControllerButton6,
-   ControllerButton7,
-   ControllerButton8,
-   ControllerButtonStart,
-   ControllerButtonBack,
-   ControllerButtonDPadUp,
-   ControllerButtonDPadDown,
-   ControllerButtonDPadLeft,
-   ControllerButtonDPadRight,
-   ControllerButton9,
-   ControllerButton10,
-   ControllerButton11,
-   ControllerButton12,
-   MaxControllerButtons
-};
 
 enum JoystickAxesMask {
    MoveAxesLeftMask = BIT(0),
@@ -123,11 +87,6 @@ enum JoystickHatDirections {
    MaxHatDirections
 };
 
-enum AlignType {
-   ALIGN_LEFT,
-   ALIGN_CENTER,
-   ALIGN_RIGHT
-};
 
 struct JoystickInput {
    U32 axesDirection;
@@ -136,36 +95,85 @@ struct JoystickInput {
    F32 value;
 };
 
-// Struct to hold joystick information once it has been detected
-struct JoystickInfo {
-   const char *name;
-   const char *nameForINI;
-   U32 buttonCount;    // how many buttons
-   U32 moveAxesSdlIndex[2];    // primary axes; 0 -> left/right, 1 -> up/down
-   U32 shootAxesSdlIndex[2];   // secondary axes; could be anything; first -> left/right, second -> up/down
-   U32 buttonMappings[MaxControllerButtons];
-};
 
 class Joystick {
 private:
    static SDL_Joystick *sdlJoystick;       // The current Joystick in use
 
-   static void populatePredefinedJoystickList();
-
 public:
+   // This enum is for the in-game button type.  SDL raw button inputs will map to one of these
+   enum Button {
+      Button1,
+      Button2,
+      Button3,
+      Button4,
+      Button5,
+      Button6,
+      Button7,
+      Button8,
+      Button9,
+      Button10,
+      Button11,
+      Button12,
+      ButtonStart,
+      ButtonBack,
+      ButtonDPadUp,
+      ButtonDPadDown,
+      ButtonDPadLeft,
+      ButtonDPadRight,
+      MaxJoystickButtons,
+      ButtonUnknown,
+   };
+
+   enum ButtonShape {
+      ButtonShapeRound,
+      ButtonShapeRect,
+      ButtonShapeSmallRect,
+      ButtonShapeRoundedRect,
+      ButtonShapeSmallRoundedRect,
+      ButtonShapeHorizEllipse,
+      ButtonShapeRightTriangle,
+   };
+
+
+   struct ButtonInfo {
+      Joystick::Button button;
+      U8 sdlButton;
+      string label;
+      Color color;
+      Joystick::ButtonShape buttonShape;
+   };
+
+
+   // Struct to hold joystick information once it has been detected
+   struct JoystickInfo {
+      string identifier;             // Primary joystick identifier; used in bitfighter.ini; used as section name
+      string name;                   // Pretty name to show in-game
+      string searchString;           // Name that SDL detects when joystick is connected
+      bool isSearchStringSubstring;  // If the search string is a substring pattern to look for
+      U32 moveAxesSdlIndex[2];       // primary axes; 0 -> left/right, 1 -> up/down
+      U32 shootAxesSdlIndex[2];      // secondary axes; could be anything; first -> left/right, second -> up/down
+
+      ButtonInfo buttonMappings[MaxJoystickButtons];
+   };
+
    Joystick();
    virtual ~Joystick();
 
+   static const S32 rawAxisCount = 32;   // Maximum raw axis to detect
+   static const U32 MaxSdlButtons = 32;  // Maximum raw buttons to detect
+   static const U8 FakeRawButton = 254;  // A button that can't possible be real (must fit within U8)
+
    static U32 ButtonMask;    // Holds what buttons are current pressed down - can support up to 32
-   static const S32 rawAxisCount = 32;
    static F32 rawAxis[rawAxisCount];
-   static Vector<const char *> DetectedJoystickNameList;   // All detected joystick names
+   static Vector<string> DetectedJoystickNameList;   // All detected joystick names
 
    // static data
    static S16 LowerSensitivityThreshold;
    static S16 UpperSensitivityThreshold;
    static S32 UseJoystickNumber;
-   static JoystickInfo PredefinedJoystickList[ControllerTypeCount];
+   static Vector<JoystickInfo> JoystickPresetList;
+   static U32 SelectedPresetIndex;
    static JoystickInput JoystickInputData[MaxAxesDirections];
    static U32 AxesInputCodeMask;
    static U32 HatInputCodeMask;
@@ -173,16 +181,19 @@ public:
    static bool initJoystick();
    static void shutdownJoystick();
 
-   static void populateJoystickStaticData();
+   static void loadJoystickPresets();
+   static string autodetectJoystick();
+   static JoystickInfo getGenericJoystickInfo();
+   static void setSelectedPresetIndex(U32 joystickIndex);
 
-   static const char *getJoystickName();
-   static ControllerTypeType autodetectJoystickType();
+   static void getAllJoystickPrettyNames(Vector<string> &nameList);
+   static Button stringToJoystickButton(const string &buttonString);
+   static ButtonShape buttonLabelToButtonShape(const string &label);
+   static Color stringToColor(const string &colorString);
+   static U32 getJoystickIndex(const string &joystickIndex);
+   static JoystickInfo *getJoystickInfo(const string &joystickIndex);
 
-   static ControllerTypeType stringToJoystickType(const char * strJoystick);
-   static const char *joystickTypeToString(S32 controllerType);
-   static const char *joystickTypeToPrettyString(S32 controllerType);
-
-   static U8 remapJoystickButton(U32 joystickType, U8 button);
+   static Button remapSdlButtonToJoystickButton(U8 button);
 };
 
 #endif // ZAP_DEDICATED

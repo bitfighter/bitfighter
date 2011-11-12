@@ -44,9 +44,9 @@ public:
    static void onMouseWheel(bool Up, bool Down);  //Not implemented
    static void onMouseButtonDown(S32 x, S32 y, InputCode inputCode, DisplayMode mode);
    static void onMouseButtonUp(S32 x, S32 y, InputCode inputCode, DisplayMode mode);
-   static void onJoyAxis(U32 joystickType, U8 which, U8 axis, S16 value);
-   static void onJoyButtonDown(U8 which, U8 button, U32 joystickType);
-   static void onJoyButtonUp(U8 which, U8 button, U32 joystickType);
+   static void onJoyAxis(U8 which, U8 axis, S16 value);
+   static void onJoyButtonDown(U8 which, U8 button);
+   static void onJoyButtonUp(U8 which, U8 button);
    static void onJoyHat(U8 which, U8 hat, U8 directionMask);
    static void onJoyBall(U8 which, U8 ball, S16 xrel, S16 yrel);
    static void onMinimize();

@@ -120,7 +120,7 @@ void HelperMenu::drawMenuBorderLine(S32 yPos, const Color &color)
 
 void HelperMenu::drawMenuCancelText(S32 yPos, const Color &color, S32 fontSize)
 {
-   S32 butSize = JoystickRender::getControllerButtonRenderedSize(getGame()->getSettings()->getIniSettings()->joystickType, BUTTON_BACK);
+   S32 butSize = JoystickRender::getControllerButtonRenderedSize(Joystick::SelectedPresetIndex, BUTTON_BACK);
    const S32 fontSizeSm = fontSize - 4;
 
    glColor(color);
@@ -134,7 +134,7 @@ void HelperMenu::drawMenuCancelText(S32 yPos, const Color &color, S32 fontSize)
    {
       S32 xPos = UserInterface::horizMargin;
       xPos += UserInterface::drawStringAndGetWidth(xPos, yPos, fontSizeSm, "Press ");
-      JoystickRender::renderControllerButton((F32)xPos, (F32)yPos, settings->getIniSettings()->joystickType, BUTTON_BACK, false, butSize / 2);
+      JoystickRender::renderControllerButton((F32)xPos, (F32)yPos, Joystick::SelectedPresetIndex, BUTTON_BACK, false, butSize / 2);
       xPos += butSize;
       glColor(color);
       UserInterface::drawString( xPos, yPos, fontSizeSm, " to cancel");

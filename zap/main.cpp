@@ -1109,23 +1109,6 @@ void actualizeScreenMode(bool changingInterfaces)
    UserInterface::current->onDisplayModeChange();     // Notify the UI that the screen has changed mode
 }
 
-
-void setJoystick(GameSettings *settings, ControllerTypeType jsType)
-{
-   // Set joystick type if we found anything other than None or Unknown
-   // Otherwise, it makes more sense to remember what the user had last specified
-
-   if (jsType != NoController && jsType != UnknownController && jsType != GenericController)
-      settings->getIniSettings()->joystickType = jsType;
-   // else do nothing and leave the value we read from the INI file alone
-
-   // Set primary input to joystick if any controllers were found, even a generic one
-   if(jsType == NoController || jsType == UnknownController)
-      settings->getIniSettings()->inputMode = InputModeKeyboard;
-   else
-      settings->getIniSettings()->inputMode = InputModeJoystick;
-}
-
 #endif
 
 
@@ -1310,13 +1293,12 @@ int main(int argc, char **argv)
       createClientGame(settings);                  // Instantiate gClientGame
 
       FXManager::init();                           // Get ready for sparks!!  C'mon baby!!
-      Joystick::populateJoystickStaticData();      // Build static data needed for joysticks
-      Joystick::initJoystick();                    // Initialize joystick system
-      resetInputCodeStates();                            // Reset keyboard state mapping to show no keys depressed
-      ControllerTypeType controllerType = Joystick::autodetectJoystickType();
-      setJoystick(settings, controllerType);       // Will override INI settings, so process INI first
 
-      
+      resetInputCodeStates();                      // Reset keyboard state mapping to show no keys depressed
+
+      Joystick::loadJoystickPresets();             // Load joystick presets from INI first
+      Joystick::initJoystick();                    // Initialize joystick system
+
 #ifdef TNL_OS_MAC_OSX
       moveToAppPath();        // On OS X, make sure we're in the right directory
 #endif

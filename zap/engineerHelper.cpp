@@ -91,17 +91,17 @@ void EngineerHelper::render()
       for(S32 i = 0; i < mEngineerCostructionItemInfos.size(); i++)
       {
          // Draw key controls for selecting the object to be created
-         U32 joystickType = getGame()->getSettings()->getIniSettings()->joystickType;
+         U32 joystickIndex = Joystick::SelectedPresetIndex;
 
          if(getGame()->getSettings()->getIniSettings()->inputMode == InputModeJoystick)     // Only draw joystick buttons when in joystick mode
             JoystickRender::renderControllerButton(F32(UserInterface::horizMargin + (showKeys ? 0 : 20)), (F32)yPos, 
-                                                   joystickType, mEngineerCostructionItemInfos[i].mButton, false);
+                                                   joystickIndex, mEngineerCostructionItemInfos[i].mButton, false);
 
          if(showKeys)
          {
             glColor(Colors::white);     // Render key in white
             JoystickRender::renderControllerButton((F32)UserInterface::horizMargin + 20, (F32)yPos, 
-                                                   joystickType, mEngineerCostructionItemInfos[i].mKey, false);
+                                                   joystickIndex, mEngineerCostructionItemInfos[i].mKey, false);
          }
 
          glColor(0.1, 1.0, 0.1);     

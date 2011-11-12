@@ -244,7 +244,7 @@ void KeyDefMenuUserInterface::render()
          glColor(dupe ? Colors::red : Colors::white);
 
          JoystickRender::renderControllerButton((canvasWidth * (menuItems[i].mColumn == 1 ? 0.25f : 0.75f)) + horizMargin, F32(y + offset), 
-                                                getGame()->getSettings()->getIniSettings()->joystickType, *menuItems[i].primaryControl, dupe, 10);
+               Joystick::SelectedPresetIndex, *menuItems[i].primaryControl, dupe, 10);
       }
    }
    

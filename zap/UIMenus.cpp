@@ -221,25 +221,25 @@ static void renderMenuInstructions(GameSettings *settings)
 
    glColor(Colors::white);
 
-   U32 joystickType = settings->getIniSettings()->joystickType;
+   U32 joystickIndex = Joystick::SelectedPresetIndex;
 
    if(settings->getIniSettings()->inputMode == InputModeKeyboard)
      UserInterface::drawCenteredString(y, size, "UP, DOWN to choose | ENTER to select | ESC exits menu");
    else
    {
-     S32 totalWidth = JoystickRender::getControllerButtonRenderedSize(joystickType, BUTTON_DPAD_UP) +
-                      JoystickRender::getControllerButtonRenderedSize(joystickType, BUTTON_DPAD_DOWN) +
-                      JoystickRender::getControllerButtonRenderedSize(joystickType, BUTTON_START) +
-                      JoystickRender::getControllerButtonRenderedSize(joystickType, BUTTON_BACK) +
+     S32 totalWidth = JoystickRender::getControllerButtonRenderedSize(joystickIndex, BUTTON_DPAD_UP) +
+                      JoystickRender::getControllerButtonRenderedSize(joystickIndex, BUTTON_DPAD_DOWN) +
+                      JoystickRender::getControllerButtonRenderedSize(joystickIndex, BUTTON_START) +
+                      JoystickRender::getControllerButtonRenderedSize(joystickIndex, BUTTON_BACK) +
                       UserInterface::getStringWidth(size, "to choose |  to select |  exits menu");
 
      S32 x = canvasWidth / 2 - UserInterface::horizMargin - totalWidth/2;
 
-     JoystickRender::renderControllerButton((F32)x, (F32)y, joystickType, BUTTON_DPAD_UP, false);
-     x += JoystickRender::getControllerButtonRenderedSize(joystickType, BUTTON_DPAD_UP) + UserInterface::getStringWidth(size, " ");
+     JoystickRender::renderControllerButton((F32)x, (F32)y, joystickIndex, BUTTON_DPAD_UP, false);
+     x += JoystickRender::getControllerButtonRenderedSize(joystickIndex, BUTTON_DPAD_UP) + UserInterface::getStringWidth(size, " ");
 
-     JoystickRender::renderControllerButton((F32)x, (F32)y, joystickType, BUTTON_DPAD_DOWN, false);
-     x += JoystickRender::getControllerButtonRenderedSize(joystickType, BUTTON_DPAD_DOWN) + UserInterface::getStringWidth(size, " ");
+     JoystickRender::renderControllerButton((F32)x, (F32)y, joystickIndex, BUTTON_DPAD_DOWN, false);
+     x += JoystickRender::getControllerButtonRenderedSize(joystickIndex, BUTTON_DPAD_DOWN) + UserInterface::getStringWidth(size, " ");
 
      glColor(Colors::white);
      static const char *msg1 = "to choose | ";
@@ -247,16 +247,16 @@ static void renderMenuInstructions(GameSettings *settings)
      UserInterface::drawString(x, y, size, msg1);
      x += UserInterface::getStringWidth(size, msg1);
 
-     JoystickRender::renderControllerButton((F32)x, F32(y + 4), joystickType, BUTTON_START, false);
-     x += JoystickRender::getControllerButtonRenderedSize(joystickType, BUTTON_START);
+     JoystickRender::renderControllerButton((F32)x, F32(y + 4), joystickIndex, BUTTON_START, false);
+     x += JoystickRender::getControllerButtonRenderedSize(joystickIndex, BUTTON_START);
 
      glColor(Colors::white);
      static const char *msg2 = "to select | ";
      UserInterface::drawString(x, y, size, msg2);
      x += UserInterface::getStringWidth(size, msg2);
 
-     JoystickRender::renderControllerButton(F32(x + 4), F32(y + 4), joystickType, BUTTON_BACK, false);
-     x += JoystickRender::getControllerButtonRenderedSize(joystickType, BUTTON_BACK) + 4;
+     JoystickRender::renderControllerButton(F32(x + 4), F32(y + 4), joystickIndex, BUTTON_BACK, false);
+     x += JoystickRender::getControllerButtonRenderedSize(joystickIndex, BUTTON_BACK) + 4;
 
      glColor(Colors::white);
      UserInterface::drawString(x, y, size, "exits menu");
@@ -920,9 +920,10 @@ static void defineKeysCallback(ClientGame *game, U32 unused)
    game->getUIManager()->getKeyDefMenuUserInterface()->activate();
 }
 
-static void setControllerCallback(ClientGame *game, U32 jsType)
+static void setControllerCallback(ClientGame *game, U32 joystickIndex)
 {
-   game->getSettings()->getIniSettings()->joystickType = jsType;
+   game->getSettings()->getIniSettings()->joystickType = Joystick::JoystickPresetList[joystickIndex].identifier;
+   Joystick::setSelectedPresetIndex(joystickIndex);
 }
 
 
@@ -1022,13 +1023,10 @@ void OptionsMenuUserInterface::setupMenus()
    INPUT_MODE_MENU_ITEM_INDEX = getMenuItemCount() - 1;
 
    opts.clear();
-   for(S32 i = 0; i < ControllerTypeCount; i++)
-      opts.push_back(Joystick::joystickTypeToPrettyString(i));
+   // Add the joystick names
+   Joystick::getAllJoystickPrettyNames(opts);
 
-   U32 joystickType = settings->getIniSettings()->joystickType;
-
-   // Simple bounds check -- could be GenericController, UnknownController, or NoController
-   U32 selectedOption = joystickType < ControllerTypeCount ? joystickType : 0;
+   U32 selectedOption = Joystick::SelectedPresetIndex;
 
    addMenuItem(new ToggleMenuItem("JOYSTICK:", opts, selectedOption, true, 
                                   setControllerCallback, "Choose which joystick to use in joystick mode", KEY_J));

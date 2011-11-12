@@ -36,6 +36,17 @@ using namespace TNL;
 namespace Zap
 {
 
+namespace JoystickRenderButton {
+}
+
+enum AlignType {
+   ALIGN_LEFT,
+   ALIGN_CENTER,
+   ALIGN_RIGHT
+};
+
+class Color;
+
 class JoystickRender
 {
 private:
@@ -43,20 +54,37 @@ private:
    static const S32 rectButtonWidth = 24;
    static const S32 rectButtonHeight = 17;
    static const S32 smallRectButtonWidth = 19;
+   static const S32 horizEllipseButtonRadiusX = 14;
+   static const S32 horizEllipseButtonRadiusY = 9;
 
 public:
+
    JoystickRender();
    virtual ~JoystickRender();
 
 
-   static void renderControllerButton(F32 x, F32 y, U32 joystickType, InputCode inputCode, bool activated, S32 offset = 0);
-   static S32 getControllerButtonRenderedSize(S32 joystickType, InputCode inputCode);
+   static void renderControllerButton(F32 x, F32 y, U32 joystickIndex, InputCode inputCode, bool activated, S32 offset = 0);
+   static S32 getControllerButtonRenderedSize(S32 joystickIndex, InputCode inputCode);
 
    static void renderDPad(Point center, F32 radius, bool upActivated, bool downActivated, bool leftActivated,
          bool rightActivated, const char *msg1, const char *msg2);
-   static void renderSmallRectButton(Point loc, const char *label, AlignType align, bool activated);
-   static void renderRectButton(Point loc, const char *label, AlignType align, bool activated);
-   static void renderRoundButton(Point loc, const char *label, AlignType align, bool activated);
+
+   static void renderRectButton(const Point &loc, const char *label, AlignType align, bool activated);
+   static void renderSmallRectButton(const Point &loc, const char *label, AlignType align, bool activated);
+   static void renderRoundedRectButton(const Point &loc, const char *label, AlignType align, bool activated);
+   static void renderSmallRoundedRectButton(const Point &loc, const char *label, AlignType align, bool activated);
+   static void renderRoundButton(const Point &loc, const char *label, const Color &labelColor, AlignType align, bool activated);
+   static void renderFilledRoundButton(const Point &loc, const char *label, AlignType align, bool activated);
+   static void renderHorizontalOvalButton(const Point &loc, const char *label, AlignType align, bool activated);
+   static void renderFilledHorizontalEllipseButton(const Point &loc, const char *label, AlignType align, bool activated,
+         const Color &fillColor);
+   static void renderRightTriangleButton(const Point &loc, const char *label, AlignType align, bool activated);
+
+   static void drawPlaystationCross(const Point &center);
+   static void drawPlaystationCircle(const Point &center);
+   static void drawPlaystationSquare(const Point &center);
+   static void drawPlaystationTriangle(const Point &center);
+   static void drawStartBackTriangle(const Point & center, bool pointRight);
 
    static inline void setButtonColor(bool activated);
 };

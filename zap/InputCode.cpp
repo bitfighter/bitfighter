@@ -24,6 +24,7 @@
 //------------------------------------------------------------------------------------
 
 #include "InputCode.h"
+#include "Joystick.h"
 
 #include "../tnl/tnlJournal.h"
 #include "../tnl/tnlLog.h"         // For logprintf
@@ -1159,45 +1160,45 @@ S32 inputCodeToSDLKey(InputCode inputCode)
 #endif
 
 
-InputCode joyButtonToInputCode(int buttonIndex)
+InputCode joystickButtonToInputCode(Joystick::Button button)
 {
-   switch(buttonIndex)
+   switch(button)
    {
-      case 0:
+      case Joystick::Button1:
          return BUTTON_1;
-      case 1:
+      case Joystick::Button2:
          return BUTTON_2;
-      case 2:
+      case Joystick::Button3:
          return BUTTON_3;
-      case 3:
+      case Joystick::Button4:
          return BUTTON_4;
-      case 4:
+      case Joystick::Button5:
          return BUTTON_5;
-      case 5:
+      case Joystick::Button6:
          return BUTTON_6;
-      case 6:
+      case Joystick::Button7:
          return BUTTON_7;
-      case 7:
+      case Joystick::Button8:
          return BUTTON_8;
-      case 8:
+      case Joystick::ButtonStart:
          return BUTTON_START;
-      case 9:
+      case Joystick::ButtonBack:
          return BUTTON_BACK;
-      case 10:
+      case Joystick::ButtonDPadUp:
          return BUTTON_DPAD_UP;
-      case 11:
+      case Joystick::ButtonDPadDown:
          return BUTTON_DPAD_DOWN;
-      case 12:
+      case Joystick::ButtonDPadLeft:
          return BUTTON_DPAD_LEFT;
-      case 13:
+      case Joystick::ButtonDPadRight:
          return BUTTON_DPAD_RIGHT;
-      case 14:
+      case Joystick::Button9:
          return BUTTON_9;
-      case 15:
+      case Joystick::Button10:
          return BUTTON_10;
-      case 16:
+      case Joystick::Button11:
          return BUTTON_11;
-      case 17:
+      case Joystick::Button12:
          return BUTTON_12;
       default:
          return BUTTON_UNKNOWN;
@@ -1223,48 +1224,48 @@ InputCode joyHatToInputCode(int hatDirectionMask)
 }
 
 
-S32 inputCodeToButtonIndex(InputCode inputCode)
+Joystick::Button inputCodeToJoystickButton(InputCode inputCode)
 {
    switch(inputCode)
    {
       case BUTTON_1:
-         return 0;
+         return Joystick::Button1;
       case BUTTON_2:
-         return 1;
+         return Joystick::Button2;
       case BUTTON_3:
-         return 2;
+         return Joystick::Button3;
       case BUTTON_4:
-         return 3;
+         return Joystick::Button4;
       case BUTTON_5:
-         return 4;
+         return Joystick::Button5;
       case BUTTON_6:
-         return 5;
+         return Joystick::Button6;
       case BUTTON_7:
-         return 6;
+         return Joystick::Button7;
       case BUTTON_8:
-         return 7;
-      case BUTTON_START:
-         return 8;
-      case BUTTON_BACK:
-         return 9;
-      case BUTTON_DPAD_UP:
-         return 10;
-      case BUTTON_DPAD_DOWN:
-         return 11;
-      case BUTTON_DPAD_LEFT:
-         return 12;
-      case BUTTON_DPAD_RIGHT:
-         return 13;
+         return Joystick::Button8;
       case BUTTON_9:
-         return 14;
+         return Joystick::Button9;
       case BUTTON_10:
-         return 15;
+         return Joystick::Button10;
       case BUTTON_11:
-         return 16;
+         return Joystick::Button11;
       case BUTTON_12:
-         return 17;
+         return Joystick::Button12;
+      case BUTTON_START:
+         return Joystick::ButtonStart;
+      case BUTTON_BACK:
+         return Joystick::ButtonBack;
+      case BUTTON_DPAD_UP:
+         return Joystick::ButtonDPadUp;
+      case BUTTON_DPAD_DOWN:
+         return Joystick::ButtonDPadDown;
+      case BUTTON_DPAD_LEFT:
+         return Joystick::ButtonDPadLeft;
+      case BUTTON_DPAD_RIGHT:
+         return Joystick::ButtonDPadRight;
       default:
-         return 9999;
+         return Joystick::ButtonUnknown;
    }
 }
 
