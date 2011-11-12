@@ -196,7 +196,8 @@ private:
    Point mMousePos;                 // Where the mouse is at the moment
    Point mMouseDownPos;             // Where the mouse was pressed for a drag operation
 
-   bool mScrollWithMouse;           // Make use of scrolling using middle mouse position
+   bool mAutoScrollWithMouse;           // Make use of scrolling using middle mouse position
+   bool mAutoScrollWithMouseReady;
    Point mScrollWithMouseLocation;
    bool showMinorGridLines();
    void renderGrid();               // Draw background snap grid
@@ -222,8 +223,6 @@ private:
    Vector<string> mLevelErrorMsgs, mLevelWarnings;
 
    bool mUp, mDown, mLeft, mRight, mIn, mOut;
-
-   bool mDragPanning;
 
    void clearSelection();        // Mark all objects and vertices as unselected
 

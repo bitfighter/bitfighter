@@ -136,7 +136,8 @@ EditorUserInterface::EditorUserInterface(ClientGame *game) : Parent(game)
    mLastUndoStateWasBarrierWidthChange = false;
 
    mUndoItems.resize(UNDO_STATES);     // Create slots for all our undos... also creates a ton of empty dbs.  Maybe we should be using pointers?
-   mScrollWithMouse = false;
+   mAutoScrollWithMouse = false;
+   mAutoScrollWithMouseReady = false;
 }
 
 
@@ -1761,7 +1762,7 @@ void EditorUserInterface::render()
    if(disableBlending)
       glDisable(GL_BLEND);
 
-   if(mScrollWithMouse)
+   if(mAutoScrollWithMouse)
    {
       glColor(Colors::white);
       drawFourArrows(mScrollWithMouseLocation);
@@ -2509,10 +2510,11 @@ void EditorUserInterface::onMouseDragged()
 {
    mMousePos.set(gScreenInfo.getMousePos());
 
-   if(getInputCodeState(MOUSE_MIDDLE))
+   if(getInputCodeState(MOUSE_MIDDLE) && mMousePos != mScrollWithMouseLocation)
    {
-      mCurrentOffset += mMousePos - mMoveOrigin;
-      mMoveOrigin = mMousePos;
+      mCurrentOffset += mMousePos - mScrollWithMouseLocation;
+      mScrollWithMouseLocation = mMousePos;
+      mAutoScrollWithMouseReady = false;
 
       return;
    }
@@ -3195,10 +3197,8 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
    else if(inputCode == MOUSE_MIDDLE)     // Click wheel to drag
    {
       mScrollWithMouseLocation = mMousePos;
-      mMoveOrigin = mMousePos;   // for drag scroll
-      if(mScrollWithMouse)
-         mScrollWithMouseLocation.set(-1,-1);  // Prevent re-enabling auto scroll again when we want it to stop
-      mScrollWithMouse = false;  // turn off in case we were already auto scrolling.
+      mAutoScrollWithMouseReady = !mAutoScrollWithMouse; // Ready to scroll when button is released
+      mAutoScrollWithMouse = false;  // turn off in case we were already auto scrolling.
    }
 
    // Regular key handling from here on down
@@ -3697,8 +3697,7 @@ void EditorUserInterface::onKeyUp(InputCode inputCode)
          mPreviewMode = false;
          break;
       case MOUSE_MIDDLE:
-         if(mScrollWithMouseLocation == mMousePos) // If user press, don't move mouse, then releases button we can auto scroll
-            mScrollWithMouse = true;
+         mAutoScrollWithMouse = mAutoScrollWithMouseReady;
          break;
       case MOUSE_LEFT:
       case MOUSE_RIGHT:  
@@ -3869,8 +3868,11 @@ void EditorUserInterface::idle(U32 timeDelta)
    else if(mDown && !mUp)
       mCurrentOffset.y -= pixelsToScroll;
 
-   if(mScrollWithMouse)
-      mCurrentOffset += (mScrollWithMouseLocation - mMousePos) * pixelsToScroll / 256.f;
+   if(mAutoScrollWithMouse)
+   {
+      mCurrentOffset += (mScrollWithMouseLocation - mMousePos) * pixelsToScroll / 128.f;
+      onMouseMoved();  // Prevents skippy problem while dragging something
+   }
 
    Point mouseLevelPoint = convertCanvasToLevelCoord(mMousePos);
 
