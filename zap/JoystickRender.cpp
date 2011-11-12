@@ -97,7 +97,7 @@ void JoystickRender::renderRightTriangleButton(const Point &loc, const char *lab
    glEnd();
 
    glColor(Colors::white);
-   UserInterface::drawString(loc.x + offset.x - UserInterface::getStringWidth(labelSize, label) / 2, loc.y + 2, labelSize, label);
+   UserInterface::drawString(loc.x + (offset.x - halfWidth/2) - UserInterface::getStringWidth(labelSize, label) / 2, loc.y + 2, labelSize, label);
 }
 
 
