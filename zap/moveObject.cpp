@@ -37,6 +37,7 @@
 #include "ClientGame.h"
 #include "sparkManager.h"
 #include "UI.h" // for extern void glColor
+#include "UIEditorMenus.h"
 #endif
 
 #include <math.h>
@@ -287,7 +288,7 @@ bool MoveObject::collide(GameObject *otherObject)
 
 static S32 QSORT_CALLBACK sortBarriersFirst(DatabaseObject **a, DatabaseObject **b)
 {
-	return ((*b)->getObjectTypeNumber() == BarrierTypeNumber ? 1 : 0) - ((*a)->getObjectTypeNumber() == BarrierTypeNumber ? 1 : 0);
+   return ((*b)->getObjectTypeNumber() == BarrierTypeNumber ? 1 : 0) - ((*a)->getObjectTypeNumber() == BarrierTypeNumber ? 1 : 0);
 }
 
 GameObject *MoveObject::findFirstCollision(U32 stateIndex, F32 &collisionTime, Point &collisionPoint)
@@ -646,7 +647,6 @@ string MoveItem::toString(F32 gridSize) const
    return string(getClassName()) + " " + geomToString(gridSize);
 }
 
-
 // Client only, in-game
 void MoveItem::render()
 {
@@ -916,14 +916,28 @@ class LuaAsteroid;
 
 static F32 asteroidVel = 250;
 
-static const F32 ASTEROID_MASS = 4;
+static F32 ASTEROID_INITIAL_SIZELEFT = 3;
+
+static const F32 ASTEROID_MASS_LAST_SIZE = 1;
+static const F32 ASTEROID_RADIUS_MULTIPLYER_LAST_SIZE = 89 * 0.2f;
+
+F32 Asteroid::getAsteroidRadius(S32 size_left)
+{
+   return ASTEROID_RADIUS_MULTIPLYER_LAST_SIZE / 2 * F32(1 << size_left);  // doubles for each size left
+}
+
+F32 Asteroid::getAsteroidMass(S32 size_left)
+{
+   return ASTEROID_MASS_LAST_SIZE / 2 * F32(1 << size_left);  // doubles for each size left
+}
 
 // Constructor
-Asteroid::Asteroid() : Parent(Point(0,0), true, (F32)ASTEROID_RADIUS, ASTEROID_MASS)
+Asteroid::Asteroid() : Parent(Point(0,0), true, getAsteroidRadius(ASTEROID_INITIAL_SIZELEFT), getAsteroidMass(ASTEROID_INITIAL_SIZELEFT))
 {
+   mSizeLeft = ASTEROID_INITIAL_SIZELEFT;  // higher = bigger
+
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = AsteroidTypeNumber;
-   mSizeIndex = 0;     // Higher = smaller
    hasExploded = false;
    mDesign = TNL::Random::readI(0, AsteroidDesigns - 1);
 
@@ -950,7 +964,7 @@ Asteroid *Asteroid::clone() const
 void Asteroid::renderItem(const Point &pos)
 {
    if(!hasExploded)
-      renderAsteroid(pos, mDesign, asteroidRenderSize[mSizeIndex]);
+      renderAsteroid(pos, mDesign, mRadius / 89.f);
 }
 
 
@@ -962,29 +976,22 @@ void Asteroid::renderDock()
 
 F32 Asteroid::getEditorRadius(F32 currentScale)
 {
-   return 75 * currentScale;
+   return mRadius * currentScale;
 }
 
-
-bool Asteroid::getCollisionCircle(U32 state, Point &center, F32 &radius) const
-{
-   center = mMoveState[state].pos;
-   radius = F32(ASTEROID_RADIUS) * asteroidRenderSize[mSizeIndex];
-   return true;
-}
 
 
 bool Asteroid::getCollisionPoly(Vector<Point> &polyPoints) const
 {
-   for(S32 i = 0; i < AsteroidPoints; i++)
-   {
-      Point p = Point(mMoveState[MoveObject::ActualState].pos.x + (F32) AsteroidCoords[mDesign][i][0] * asteroidRenderSize[mSizeIndex],
-                      mMoveState[MoveObject::ActualState].pos.y + (F32) AsteroidCoords[mDesign][i][1] * asteroidRenderSize[mSizeIndex] );
+   //for(S32 i = 0; i < AsteroidPoints; i++)
+   //{
+   //   Point p = Point(mMoveState[MoveObject::ActualState].pos.x + (F32) AsteroidCoords[mDesign][i][0] * asteroidRenderSize[mSizeIndex],
+   //                   mMoveState[MoveObject::ActualState].pos.y + (F32) AsteroidCoords[mDesign][i][1] * asteroidRenderSize[mSizeIndex] );
 
-      polyPoints.push_back(p);
-   }
+   //   polyPoints.push_back(p);
+   //}
 
-   return true;
+   return false;  // No Collision Poly, that may help reduce lag with client and server
 }
 
 
@@ -997,11 +1004,9 @@ void Asteroid::damageObject(DamageInfo *theInfo)
       return; 
 
    // Compute impulse direction
-   mSizeIndex++;
+   mSizeLeft--;
    
-   TNLAssert((U32)mSizeIndex <= asteroidRenderSizes, "Asteroid::damageObject mSizeIndex out of range");
-
-   if(asteroidRenderSize[mSizeIndex] == -1)    // Kill small items
+   if(mSizeLeft <= 0)    // Kill small items
    {
       hasExploded = true;
       deleteObject(500);
@@ -1010,17 +1015,18 @@ void Asteroid::damageObject(DamageInfo *theInfo)
    }
 
    setMaskBits(ItemChangedMask);    // So our clients will get new size
-   setRadius(F32(ASTEROID_RADIUS) * asteroidRenderSize[mSizeIndex]);
-   setMass(getMass() / 2);          // Reduce mass by half if asteroid splits
+   setRadius(getAsteroidRadius(mSizeLeft));
+   setMass(getAsteroidMass(mSizeLeft));
 
    F32 ang = TNL::Random::readF() * Float2Pi;      // Sync
    //F32 vel = asteroidVel;
 
    setPosAng(getActualPos(), ang);
 
-   Asteroid *newItem = dynamic_cast<Asteroid *>(TNL::Object::create("Asteroid"));
-   newItem->setRadius(F32(ASTEROID_RADIUS) * asteroidRenderSize[mSizeIndex]);
-   newItem->setMass(getMass() / 2);
+   Asteroid *newItem = new Asteroid();
+   newItem->mSizeLeft = mSizeLeft;
+   newItem->setRadius(getAsteroidRadius(mSizeLeft));
+   newItem->setMass(getAsteroidMass(mSizeLeft));
 
    F32 ang2;
    do
@@ -1029,7 +1035,6 @@ void Asteroid::damageObject(DamageInfo *theInfo)
 
    newItem->setPosAng(getActualPos(), ang2);
 
-   newItem->mSizeIndex = mSizeIndex;
    newItem->addToGame(gServerGame, gServerGame->getGameObjDatabase());    // And add it to the list of game objects
 }
 
@@ -1046,13 +1051,16 @@ void Asteroid::setPosAng(Point pos, F32 ang)
 }
 
 
+static U8 ASTEROID_SIZELEFT_BIT_COUNT = 3;
+static S32 ASTEROID_SIZELEFT_MAX = 5;   // For editor attribute. real limit based on bit count is (1 << ASTEROID_SIZELEFT_BIT_COUNT) - 1; // = 7
+
 U32 Asteroid::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
    U32 retMask = Parent::packUpdate(connection, updateMask, stream);
 
    if(stream->writeFlag(updateMask & ItemChangedMask))
    {
-      stream->writeEnum(mSizeIndex, mSizeIndexLength);
+      stream->writeInt(mSizeLeft, ASTEROID_SIZELEFT_BIT_COUNT);
       stream->writeEnum(mDesign, AsteroidDesigns);
    }
 
@@ -1068,8 +1076,9 @@ void Asteroid::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
    if(stream->readFlag())
    {
-      mSizeIndex = stream->readEnum(mSizeIndexLength);
-      setRadius(F32(ASTEROID_RADIUS) * asteroidRenderSize[mSizeIndex]);
+      mSizeLeft = stream->readInt(ASTEROID_SIZELEFT_BIT_COUNT);
+      setRadius(getAsteroidRadius(mSizeLeft));
+      setMass(getAsteroidMass(mSizeLeft));
       mDesign = stream->readEnum(AsteroidDesigns);
 
       if(!mInitial)
@@ -1089,6 +1098,9 @@ void Asteroid::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
 bool Asteroid::collide(GameObject *otherObject)
 {
+   if(hasExploded)
+      return false;
+
    if(isGhost())   //client only, to try to prevent asteroids desync...
    {
       Ship *ship = dynamic_cast<Ship *>(otherObject);
@@ -1111,6 +1123,94 @@ void Asteroid::onItemExploded(Point pos)
    SoundSystem::playSoundEffect(SFXAsteroidExplode, pos, Point());
    // FXManager::emitBurst(pos, Point(.1, .1), Colors::white, Colors::white, 10);
 }
+
+
+bool Asteroid::processArguments(S32 argc2, const char **argv2, Game *game)
+{
+   S32 argc = 0;
+   const char *argv[8];                // 8 is ok for now..
+
+   for(S32 i = 0; i < argc2; i++)      // The idea here is to allow optional R3.5 for rotate at speed of 3.5
+   {
+      char firstChar = argv2[i][0];    // First character of arg
+
+      if((firstChar >= 'a' && firstChar <= 'z') || (firstChar >= 'A' && firstChar <= 'Z'))
+      {
+         if(!strnicmp(argv2[i], "Size=", 5))
+            mSizeLeft = atoi(&argv2[i][5]);
+      }
+      else
+      {
+         if(argc < 8)
+         {  
+            argv[argc] = argv2[i];
+            argc++;
+         }
+      }
+   }
+   setRadius(getAsteroidRadius(mSizeLeft));
+   setMass(getAsteroidMass(mSizeLeft));
+
+   return Parent::processArguments(argc, argv, game);
+}
+
+string Asteroid::toString(F32 gridSize) const
+{
+   if(mSizeLeft != ASTEROID_INITIAL_SIZELEFT)
+      return Parent::toString(gridSize) + " Size=" + itos(mSizeLeft);
+   else
+      return Parent::toString(gridSize);
+}
+
+
+#ifndef ZAP_DEDICATED
+
+EditorAttributeMenuUI *Asteroid::mAttributeMenuUI = NULL;
+
+EditorAttributeMenuUI *Asteroid::getAttributeMenu()
+{
+   // Lazily initialize this -- if we're in the game, we'll never need this to be instantiated
+   if(!mAttributeMenuUI)
+   {
+      ClientGame *clientGame = (ClientGame *)getGame();
+
+      mAttributeMenuUI = new EditorAttributeMenuUI(clientGame);
+
+      mAttributeMenuUI->addMenuItem(new CounterMenuItem("Size:", mSizeLeft, 1, 1, ASTEROID_SIZELEFT_MAX, "", "", ""));
+
+      // Add our standard save and exit option to the menu
+      mAttributeMenuUI->addSaveAndQuitMenuItem();
+   }
+
+   return mAttributeMenuUI;
+}
+
+
+// Get the menu looking like what we want
+void Asteroid::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
+{
+   attributeMenu->getMenuItem(0)->setIntValue(mSizeLeft);
+}
+
+
+// Retrieve the values we need from the menu
+void Asteroid::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
+{
+   mSizeLeft = attributeMenu->getMenuItem(0)->getIntValue();
+   setRadius(getAsteroidRadius(mSizeLeft));
+   setMass(getAsteroidMass(mSizeLeft));
+}
+
+
+// Render some attributes when item is selected but not being edited
+void Asteroid::renderAttributeString(F32 currentScale)
+{
+   string txt = "Size: " + itos(mSizeLeft);      
+   renderItemText(txt.c_str(), 1, currentScale);
+}
+
+#endif
+
 
 
 const char Asteroid::className[] = "Asteroid";      // Class name as it appears to Lua scripts
@@ -1140,8 +1240,8 @@ Lunar<Asteroid>::RegType Asteroid::methods[] =
 };
 
 
-S32 Asteroid::getSize(lua_State *L) { return returnInt(L, getSizeIndex()); }         // Index of current asteroid size (0 = initial size, 1 = next smaller, 2 = ...) (returns int)
-S32 Asteroid::getSizeCount(lua_State *L) { return returnInt(L, getSizeCount()); }    // Number of indexes of size we can have (returns int)
+S32 Asteroid::getSize(lua_State *L) { return returnInt(L, ASTEROID_INITIAL_SIZELEFT - mSizeLeft); }         // Index of current asteroid size (0 = initial size, 1 = next smaller, 2 = ...) (returns int)
+S32 Asteroid::getSizeCount(lua_State *L) { return returnInt(L, ASTEROID_INITIAL_SIZELEFT); }    // Number of indexes of size we can have (returns int)
 
 
 ////////////////////////////////////////

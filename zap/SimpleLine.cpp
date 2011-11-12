@@ -33,6 +33,7 @@
 #ifndef ZAP_DEDICATED
 #include "SDL/SDL_opengl.h"
 #include "UI.h"
+#include "UIEditor.h"
 #endif
 
 namespace Zap
@@ -72,7 +73,6 @@ static const Color INSTRUCTION_TEXTCOLOR(1,1,1);
 static const S32 INSTRUCTION_TEXTSIZE = 9;      
 static const S32 INSTRUCTION_TEXTGAP = 3;
 
-static const Color *SELECT_COLOR = &Colors::yellow;
 
 // Draw arrow that serves as the core of SimpleLine items in the editor
 // Subclasses will fill in the rest

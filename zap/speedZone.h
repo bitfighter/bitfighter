@@ -54,7 +54,9 @@ private:
    const char *getVertLabel(S32 index) { return index == 0 ? "Location" : "Direction"; }
    const char *getInstructionMsg();
 
+#ifndef ZAP_DEDICATED
    static EditorAttributeMenuUI *mAttributeMenuUI;      // Menu for attribute editing; since it's static, don't bother with smart pointer
+#endif
 
 public:
    enum {

@@ -190,11 +190,6 @@ public:
 static const S32 AsteroidDesigns = 4;
 static const S32 AsteroidPoints = 12;
 
-static const F32 asteroidRenderSize[] = { .8f, .4f, .2f, -1 };      // Must end in -1
-static const S32 asteroidRenderSizes = sizeof(asteroidRenderSize) / sizeof(F32) - 1;
-
-static const S32 mSizeIndexLength = sizeof(asteroidRenderSize) / sizeof(F32) - 1;
-
 static const S8 AsteroidCoords[AsteroidDesigns][AsteroidPoints][2] =   // <== Wow!  A 3D array!
 {
   { { 80, -43}, { 47, -84 }, { 5, -58 }, { -41, -81 }, { -79, -21 }, { -79, -0 }, { -79, 10 }, { -79, 47 }, { -49, 78 }, { 43, 78 }, { 80, 40 }, { 46, -0 } },
@@ -210,7 +205,7 @@ class Asteroid : public MoveItem
 typedef MoveItem Parent;      // TODO: Should be EditorItem???
 
 private:
-   S32 mSizeIndex;
+   S32 mSizeLeft;
    bool hasExploded;
    S32 mDesign;
 
@@ -218,11 +213,11 @@ public:
    Asteroid();     // Constructor  
    Asteroid *clone() const;
 
-   static const S32 ASTEROID_RADIUS = 89;
+   static F32 getAsteroidRadius(S32 size_left);
+   static F32 getAsteroidMass(S32 size_left);
 
    void renderItem(const Point &pos);
    bool getCollisionPoly(Vector<Point> &polyPoints) const;
-   bool getCollisionCircle(U32 state, Point &center, F32 &radius) const;
    bool collide(GameObject *otherObject);
    void setPosAng(Point pos, F32 ang);
 
@@ -234,10 +229,23 @@ public:
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
    void onItemExploded(Point pos);
 
-   static U32 getDesignCount() { return AsteroidDesigns; }
+   bool processArguments(S32 argc2, const char **argv2, Game *game);
+   string toString(F32 gridSize) const;
 
-   S32 getSizeIndex() { return mSizeIndex; }
-   S32 getSizeCount() { return asteroidRenderSizes; }
+#ifndef ZAP_DEDICATED
+private:
+   static EditorAttributeMenuUI *mAttributeMenuUI;
+public:
+   // These four methods are all that's needed to add an editable attribute to a class...
+   EditorAttributeMenuUI *getAttributeMenu();
+   void startEditingAttrs(EditorAttributeMenuUI *attributeMenu);    // Called when we start editing to get menus populated
+   void doneEditingAttrs(EditorAttributeMenuUI *attributeMenu);     // Called when we're done to retrieve values set by the menu
+
+   void renderAttributeString(F32 currentScale);
+#endif
+
+
+   static U32 getDesignCount() { return AsteroidDesigns; }
 
    TNL_DECLARE_CLASS(Asteroid);
 
