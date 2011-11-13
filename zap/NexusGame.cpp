@@ -23,7 +23,7 @@
 //
 //------------------------------------------------------------------------------------
 
-#include "huntersGame.h"
+#include "NexusGame.h"
 #include "flagItem.h"
 #include "SoundSystem.h"
 #include "gameNetInterface.h"
@@ -52,17 +52,17 @@
 namespace Zap
 {
 
-TNL_IMPLEMENT_NETOBJECT(HuntersGameType);
+TNL_IMPLEMENT_NETOBJECT(NexusGameType);
 
 
 
-TNL_IMPLEMENT_NETOBJECT_RPC(HuntersGameType, s2cSetNexusTimer, (U32 nexusTime, bool isOpen), (nexusTime, isOpen), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhost, 0)
+TNL_IMPLEMENT_NETOBJECT_RPC(NexusGameType, s2cSetNexusTimer, (U32 nexusTime, bool isOpen), (nexusTime, isOpen), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhost, 0)
 {
    mNexusTimer.reset(nexusTime);
    mNexusIsOpen = isOpen;
 }
 
-GAMETYPE_RPC_S2C(HuntersGameType, s2cAddYardSaleWaypoint, (F32 x, F32 y), (x, y))
+GAMETYPE_RPC_S2C(NexusGameType, s2cAddYardSaleWaypoint, (F32 x, F32 y), (x, y))
 {
    YardSaleWaypoint w;
    w.timeLeft.reset(YardSaleWaypointTime);
@@ -70,7 +70,7 @@ GAMETYPE_RPC_S2C(HuntersGameType, s2cAddYardSaleWaypoint, (F32 x, F32 y), (x, y)
    mYardSaleWaypoints.push_back(w);
 }
 
-TNL_IMPLEMENT_NETOBJECT_RPC(HuntersGameType, s2cHuntersMessage,
+TNL_IMPLEMENT_NETOBJECT_RPC(NexusGameType, s2cNexusMessage,
    (U32 msgIndex, StringTableEntry clientName, U32 flagCount, U32 score), (msgIndex, clientName, flagCount, score),
    NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhost, 0)
 {
@@ -80,26 +80,26 @@ TNL_IMPLEMENT_NETOBJECT_RPC(HuntersGameType, s2cHuntersMessage,
    TNLAssert(clientGame, "clientGame is NULL");
    if(!clientGame) return;
 
-   if(msgIndex == HuntersMsgScore)
+   if(msgIndex == NexusMsgScore)
    {
       SoundSystem::playSoundEffect(SFXFlagCapture);
       clientGame->displayMessage(Color(0.6f, 1.0f, 0.8f),"%s returned %d flag%s to the Nexus for %d points!", clientName.getString(), flagCount, flagCount > 1 ? "s" : "", score);
    }
-   else if(msgIndex == HuntersMsgYardSale)
+   else if(msgIndex == NexusMsgYardSale)
    {
       SoundSystem::playSoundEffect(SFXFlagSnatch);
       clientGame->displayMessage(Color(0.6f, 1.0f, 0.8f),
                   "%s is having a YARD SALE!",
                   clientName.getString());
    }
-   else if(msgIndex == HuntersMsgGameOverWin)
+   else if(msgIndex == NexusMsgGameOverWin)
    {
       clientGame->displayMessage(Color(0.6f, 1.0f, 0.8f),
                      "Player %s wins the game!",
                      clientName.getString());
       SoundSystem::playSoundEffect(SFXFlagCapture);
    }
-   else if(msgIndex == HuntersMsgGameOverTie)
+   else if(msgIndex == NexusMsgGameOverTie)
    {
       clientGame->displayMessage(Color(0.6f, 1.0f, 0.8f), "The game ended in a tie.");
       SoundSystem::playSoundEffect(SFXFlagDrop);
@@ -109,7 +109,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(HuntersGameType, s2cHuntersMessage,
 
 
 // Constructor
-HuntersGameType::HuntersGameType() : GameType(100)
+NexusGameType::NexusGameType() : GameType(100)
 {
    mNexusClosedTime = 60;
    mNexusOpenTime = 15;
@@ -118,7 +118,7 @@ HuntersGameType::HuntersGameType() : GameType(100)
 }
 
 
-bool HuntersGameType::processArguments(S32 argc, const char **argv, Game *game)
+bool NexusGameType::processArguments(S32 argc, const char **argv, Game *game)
 {
    if(argc > 0)
    {
@@ -140,20 +140,44 @@ bool HuntersGameType::processArguments(S32 argc, const char **argv, Game *game)
 }
 
 
-string HuntersGameType::toString() const
+string NexusGameType::toString() const
 {
    return string(getClassName()) + " " + ftos(F32(getTotalGameTime()) / 60 , 3) + " " + ftos(F32(mNexusClosedTime) / 60, 3) + " " + 
                                          ftos(F32(mNexusOpenTime), 3) + " " + itos(getWinningScore());
 }
 
 
-void HuntersGameType::addNexus(HuntersNexusObject *nexus)
+S32 NexusGameType::getNexusTimeLeft()
+{
+   return mNexusTimer.getCurrent();
+}
+
+
+bool NexusGameType::isFlagGame()
+{
+   return true;  // Well, technically not, but we'll morph flags to our own uses as we load the level
+}
+
+
+bool NexusGameType::isTeamFlagGame()
+{
+   return false;  // Ditto... team info will be ignored... no need to show warning in editor
+}
+
+
+bool NexusGameType::isSpawnWithLoadoutGame()
+{
+   return true;
+}
+
+
+void NexusGameType::addNexus(NexusObject *nexus)
 {
    mNexus.push_back(nexus);
 }
 
 
-bool HuntersGameType::isCarryingItems(Ship *ship)
+bool NexusGameType::isCarryingItems(Ship *ship)
 {
    if(ship->mMountedItems.size() > 1)     // Currently impossible, but in future may be possible
       return true;
@@ -164,18 +188,18 @@ bool HuntersGameType::isCarryingItems(Ship *ship)
    if(!item)                                  // Null when a player drop flag and get destroyed at the same time
       return false;  
 
-   return ( ((HuntersFlagItem *) item)->getFlagCount() > 0 );    
+   return ( ((NexusFlagItem *) item)->getFlagCount() > 0 );    
 }
 
 
-// Cycle through mounted items and find the first one (last one, actually) that's a HuntersFlagItem.
+// Cycle through mounted items and find the first one (last one, actually) that's a NexusFlagItem.
 // Returns NULL if it can't find one.
-static HuntersFlagItem *findFirstNexusFlag(Ship *ship)
+static NexusFlagItem *findFirstNexusFlag(Ship *ship)
 {
    for(S32 i = ship->mMountedItems.size() - 1; i >= 0; i--)
    {
       MoveItem *item = ship->mMountedItems[i];
-      HuntersFlagItem *flag = dynamic_cast<HuntersFlagItem *>(item);
+      NexusFlagItem *flag = dynamic_cast<NexusFlagItem *>(item);
 
       if(flag)
          return flag;
@@ -186,10 +210,10 @@ static HuntersFlagItem *findFirstNexusFlag(Ship *ship)
 
 
 // The flag will come from ship->mount.  *item is used as it is posssible to carry and drop multiple items
-void HuntersGameType::itemDropped(Ship *ship, MoveItem *item)
+void NexusGameType::itemDropped(Ship *ship, MoveItem *item)
 {
-   //HuntersFlagItem *flag = findFirstNexusFlag(ship);  //  This line causes multiple "Drop Flag" messages when ship carry multiple items.
-   HuntersFlagItem *flag = dynamic_cast<HuntersFlagItem *>(item);
+   //NexusFlagItem *flag = findFirstNexusFlag(ship);  //  This line causes multiple "Drop Flag" messages when ship carry multiple items.
+   NexusFlagItem *flag = dynamic_cast<NexusFlagItem *>(item);
    if(!flag)
       return;
 
@@ -216,7 +240,7 @@ void HuntersGameType::itemDropped(Ship *ship, MoveItem *item)
 
 #ifndef ZAP_DEDICATED
 // Any unique items defined here must be handled in both getMenuItem() and saveMenuItem() below!
-const char **HuntersGameType::getGameParameterMenuKeys()
+const char **NexusGameType::getGameParameterMenuKeys()
 {
     static const char *items[] = {
       "Level Name",
@@ -239,7 +263,7 @@ const char **HuntersGameType::getGameParameterMenuKeys()
 
 
 // Definitions for those items
-boost::shared_ptr<MenuItem> HuntersGameType::getMenuItem(const char *key)
+boost::shared_ptr<MenuItem> NexusGameType::getMenuItem(const char *key)
 {
    if(!strcmp(key, "Nexus Time to Open"))
       return boost::shared_ptr<MenuItem>(new TimeCounterMenuItem("Time for Nexus to Open:", mNexusClosedTime, 99*60, "Never", 
@@ -254,7 +278,7 @@ boost::shared_ptr<MenuItem> HuntersGameType::getMenuItem(const char *key)
 }
 
 
-bool HuntersGameType::saveMenuItem(const MenuItem *menuItem, const char *key)
+bool NexusGameType::saveMenuItem(const MenuItem *menuItem, const char *key)
 {
    if(!strcmp(key, "Nexus Time to Open"))
       mNexusClosedTime = menuItem->getIntValue();
@@ -269,10 +293,10 @@ bool HuntersGameType::saveMenuItem(const MenuItem *menuItem, const char *key)
 #endif
 
 
-TNL_IMPLEMENT_NETOBJECT(HuntersNexusObject);
+TNL_IMPLEMENT_NETOBJECT(NexusObject);
 
 
-TNL_IMPLEMENT_NETOBJECT_RPC(HuntersNexusObject, s2cFlagsReturned, (), (), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhost, 0)
+TNL_IMPLEMENT_NETOBJECT_RPC(NexusObject, s2cFlagsReturned, (), (), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhost, 0)
 {
    getGame()->getGameType()->mZoneGlowTimer.reset();
 }
@@ -280,9 +304,9 @@ TNL_IMPLEMENT_NETOBJECT_RPC(HuntersNexusObject, s2cFlagsReturned, (), (), NetCla
 
 // The nexus is open.  A ship has entered it.  Now what?
 // Runs on server only
-void HuntersGameType::shipTouchNexus(Ship *theShip, HuntersNexusObject *theNexus)
+void NexusGameType::shipTouchNexus(Ship *theShip, NexusObject *theNexus)
 {
-   HuntersFlagItem *theFlag = findFirstNexusFlag(theShip);
+   NexusFlagItem *theFlag = findFirstNexusFlag(theShip);
 
    if(!theFlag)      // Just in case!
       return;
@@ -291,7 +315,7 @@ void HuntersGameType::shipTouchNexus(Ship *theShip, HuntersNexusObject *theNexus
 
    if(theFlag->getFlagCount() > 0)
    {
-      s2cHuntersMessage(HuntersMsgScore, theShip->getName().getString(), theFlag->getFlagCount(), getEventScore(TeamScore, ReturnFlagsToNexus, theFlag->getFlagCount()) );
+      s2cNexusMessage(NexusMsgScore, theShip->getName().getString(), theFlag->getFlagCount(), getEventScore(TeamScore, ReturnFlagsToNexus, theFlag->getFlagCount()) );
       theNexus->s2cFlagsReturned();    // Alert the Nexus that someone has returned flags to it
    }
    theFlag->changeFlagCount(0);
@@ -299,7 +323,7 @@ void HuntersGameType::shipTouchNexus(Ship *theShip, HuntersNexusObject *theNexus
 
 
 // Runs on the server
-void HuntersGameType::onGhostAvailable(GhostConnection *theConnection)
+void NexusGameType::onGhostAvailable(GhostConnection *theConnection)
 {
    Parent::onGhostAvailable(theConnection);
 
@@ -324,7 +348,7 @@ void releaseFlag(Game *game, Point pos, Point startVel)
 
 
 // Runs on client and server
-void HuntersGameType::idle(GameObject::IdleCallPath path, U32 deltaT)
+void NexusGameType::idle(GameObject::IdleCallPath path, U32 deltaT)
 {
    Parent::idle(path, deltaT);
 
@@ -360,7 +384,7 @@ void HuntersGameType::idle(GameObject::IdleCallPath path, U32 deltaT)
          if(!client_ship)
             continue;
 
-         HuntersNexusObject *nexus = dynamic_cast<HuntersNexusObject *>(client_ship->isInZone(NexusTypeNumber));
+         NexusObject *nexus = dynamic_cast<NexusObject *>(client_ship->isInZone(NexusTypeNumber));
 
          if(nexus)
             shipTouchNexus(client_ship, nexus);
@@ -390,7 +414,7 @@ void HuntersGameType::idle(GameObject::IdleCallPath path, U32 deltaT)
 }
 
 // What does a particular scoring event score?
-S32 HuntersGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 flags)
+S32 NexusGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 flags)
 {
    S32 score = 0;
    for(S32 count = 1; count <= flags; count++)
@@ -443,6 +467,48 @@ S32 HuntersGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEv
 }
 
 
+GameType::GameTypes NexusGameType::getGameType() const
+{
+   return NexusGame;
+}
+
+
+const char *NexusGameType::getGameTypeString() const
+{
+   return "Nexus";
+}
+
+
+const char *NexusGameType::getShortName() const
+{
+   return "N";
+}
+
+
+const char *NexusGameType::getInstructionString()
+{
+   return "Collect flags from opposing players and bring them to the Nexus!";
+}
+
+
+bool NexusGameType::canBeTeamGame() const
+{
+   return true;
+}
+
+
+bool NexusGameType::canBeIndividualGame() const
+{
+   return true;
+}
+
+
+U32 NexusGameType::getLowerRightCornerScoreboardOffsetFromBottom() const
+{
+   return 88;
+}
+
+
 //////////  Client only code:
 
 extern Color gNexusOpenColor;
@@ -452,7 +518,7 @@ extern Color gNexusClosedColor;
 #define NEXUS_NEVER_STR mNexusIsOpen ? "Nexus never closes" : "Nexus never opens"
 
 #ifndef ZAP_DEDICATED
-void HuntersGameType::renderInterfaceOverlay(bool scoreboardVisible)
+void NexusGameType::renderInterfaceOverlay(bool scoreboardVisible)
 {
    Parent::renderInterfaceOverlay(scoreboardVisible);
 
@@ -491,7 +557,7 @@ void HuntersGameType::renderInterfaceOverlay(bool scoreboardVisible)
 
 
 
-void HuntersGameType::controlObjectForClientKilled(ClientInfo *theClient, GameObject *clientObject, GameObject *killerObject)
+void NexusGameType::controlObjectForClientKilled(ClientInfo *theClient, GameObject *clientObject, GameObject *killerObject)
 {
    Parent::controlObjectForClientKilled(theClient, clientObject, killerObject);
 
@@ -503,7 +569,7 @@ void HuntersGameType::controlObjectForClientKilled(ClientInfo *theClient, GameOb
    for(S32 i = theShip->mMountedItems.size() - 1; i >= 0; i--)
    {
       MoveItem *item = theShip->mMountedItems[i];
-      HuntersFlagItem *flag = dynamic_cast<HuntersFlagItem *>(item);
+      NexusFlagItem *flag = dynamic_cast<NexusFlagItem *>(item);
 
       if(flag)
       {
@@ -511,7 +577,7 @@ void HuntersGameType::controlObjectForClientKilled(ClientInfo *theClient, GameOb
          {
             Point pos = flag->getActualPos();
             s2cAddYardSaleWaypoint(pos.x, pos.y);
-            s2cHuntersMessage(HuntersMsgYardSale, theShip->getName().getString(), 0, 0);
+            s2cNexusMessage(NexusMsgYardSale, theShip->getName().getString(), 0, 0);
          }
 
          return;
@@ -520,13 +586,13 @@ void HuntersGameType::controlObjectForClientKilled(ClientInfo *theClient, GameOb
 }
 
 
-void HuntersGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
+void NexusGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
 {
-   // Don't mount to ship, instead increase current mounted HuntersFlag
+   // Don't mount to ship, instead increase current mounted NexusFlag
    //    flagCount, and remove collided flag from game
    for(S32 i = theShip->mMountedItems.size() - 1; i >= 0; i--)
    {
-      HuntersFlagItem *theFlag = dynamic_cast<HuntersFlagItem *>(theShip->mMountedItems[i].getPointer());
+      NexusFlagItem *theFlag = dynamic_cast<NexusFlagItem *>(theShip->mMountedItems[i].getPointer());
       if(theFlag)
       {
          theFlag->changeFlagCount(theFlag->getFlagCount() + 1);
@@ -540,14 +606,14 @@ void HuntersGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
 }
 
 
-// Special spawn function for Hunters games (runs only on server)
-void HuntersGameType::spawnShip(ClientInfo *clientInfo)
+// Special spawn function for Nexus games (runs only on server)
+void NexusGameType::spawnShip(ClientInfo *clientInfo)
 {
    Parent::spawnShip(clientInfo);
 
    GameConnection *conn = clientInfo->getConnection();
 
-   HuntersFlagItem *newFlag = new HuntersFlagItem(conn->getControlObject()->getActualPos());
+   NexusFlagItem *newFlag = new NexusFlagItem(conn->getControlObject()->getActualPos());
    newFlag->addToGame(getGame(), getGame()->getGameObjDatabase());
    newFlag->mountToShip(dynamic_cast<Ship *>(conn->getControlObject()));    // mountToShip() can handle NULL
    newFlag->changeFlagCount(0);
@@ -556,10 +622,10 @@ void HuntersGameType::spawnShip(ClientInfo *clientInfo)
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-TNL_IMPLEMENT_NETOBJECT(HuntersFlagItem);
+TNL_IMPLEMENT_NETOBJECT(NexusFlagItem);
 
 // C++ constructor
-HuntersFlagItem::HuntersFlagItem(Point pos, Point vel, bool useDropDelay) : FlagItem(pos, true, (F32)Ship::CollisionRadius, 4)  // radius was 30, which had problem with sticking to wall when drop too close to walls
+NexusFlagItem::NexusFlagItem(Point pos, Point vel, bool useDropDelay) : FlagItem(pos, true, (F32)Ship::CollisionRadius, 4)  // radius was 30, which had problem with sticking to wall when drop too close to walls
 {
    mFlagCount = 0;
 
@@ -571,7 +637,7 @@ HuntersFlagItem::HuntersFlagItem(Point pos, Point vel, bool useDropDelay) : Flag
 
 //////////  Client only code:
 
-void HuntersFlagItem::renderItem(const Point &pos)
+void NexusFlagItem::renderItem(const Point &pos)
 {
 #ifndef ZAP_DEDICATED
    // Don't render flags on cloaked ships
@@ -601,7 +667,7 @@ void HuntersFlagItem::renderItem(const Point &pos)
 
 
 // Private helper function
-void HuntersFlagItem::dropFlags(U32 flags)
+void NexusFlagItem::dropFlags(U32 flags)
 {
    if(!mMount.isValid())
       return;
@@ -616,7 +682,7 @@ void HuntersFlagItem::dropFlags(U32 flags)
 }
 
 
-void HuntersFlagItem::onMountDestroyed()
+void NexusFlagItem::onMountDestroyed()
 {
    if(mMount->getOwner())
       mMount->getOwner()->mStatistics.mFlagDrop += mFlagCount + 1;
@@ -630,7 +696,7 @@ void HuntersFlagItem::onMountDestroyed()
 }
 
 
-void HuntersFlagItem::onItemDropped()
+void NexusFlagItem::onItemDropped()
 {
    if(!isGhost())
    {
@@ -644,7 +710,7 @@ void HuntersFlagItem::onItemDropped()
 }
 
 
-U32 HuntersFlagItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
+U32 NexusFlagItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
    if(stream->writeFlag(updateMask & FlagCountMask))
       stream->write(mFlagCount);
@@ -652,7 +718,8 @@ U32 HuntersFlagItem::packUpdate(GhostConnection *connection, U32 updateMask, Bit
    return Parent::packUpdate(connection, updateMask, stream);
 }
 
-void HuntersFlagItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
+
+void NexusFlagItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    if(stream->readFlag())
       stream->read(&mFlagCount);
@@ -661,21 +728,52 @@ void HuntersFlagItem::unpackUpdate(GhostConnection *connection, BitStream *strea
 }
 
 
+bool NexusFlagItem::isItemThatMakesYouVisibleWhileCloaked()
+{
+   return false;
+}
+
+
+void NexusFlagItem::changeFlagCount(U32 change)
+{
+   mFlagCount = change;
+   setMaskBits(FlagCountMask);
+}
+
+
+U32 NexusFlagItem::getFlagCount()
+{
+   return mFlagCount;
+}
+
+
+bool NexusFlagItem::isAtHome()
+{
+   return false;
+}
+
+
+void NexusFlagItem::sendHome()
+{
+   // Do nothing
+}
+
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
 
 // Constructor
-HuntersNexusObject::HuntersNexusObject()
+NexusObject::NexusObject()
 {
    mObjectTypeNumber = NexusTypeNumber;
    mNetFlags.set(Ghostable);
 }
 
 
-HuntersNexusObject *HuntersNexusObject::clone() const
+NexusObject *NexusObject::clone() const
 {
-   return new HuntersNexusObject(*this);
+   return new NexusObject(*this);
 }
 
 
@@ -683,7 +781,7 @@ HuntersNexusObject *HuntersNexusObject::clone() const
 // If there are 2 or 4 params, this is an Zap! rectangular format object
 // If there are more, this is a Bitfighter polygonal format object
 // Note parallel code in EditorUserInterface::processLevelLoadLine
-bool HuntersNexusObject::processArguments(S32 argc2, const char **argv2, Game *game)
+bool NexusObject::processArguments(S32 argc2, const char **argv2, Game *game)
 {
    // Need to handle or ignore arguments that starts with letters,
    // so a possible future version can add parameters without compatibility problem.
@@ -732,59 +830,89 @@ bool HuntersNexusObject::processArguments(S32 argc2, const char **argv2, Game *g
 }
 
 
-string HuntersNexusObject::toString(F32 gridSize) const
+const char *NexusObject::getEditorHelpString()
+{
+   return "Area to bring flags in Hunter game.  Cannot be used in other games.";
+}
+
+
+const char *NexusObject::getPrettyNamePlural()
+{
+   return "Nexii";
+}
+
+
+const char *NexusObject::getOnDockName()
+{
+   return "Nexus";
+}
+
+
+const char *NexusObject::getOnScreenName()
+{
+   return "Nexus";
+}
+
+
+string NexusObject::toString(F32 gridSize) const
 {
    return string(getClassName()) + " " + geomToString(gridSize);
 }
 
 
-void HuntersNexusObject::onAddedToGame(Game *theGame)
+void NexusObject::onAddedToGame(Game *theGame)
 {
    Parent::onAddedToGame(theGame);
 
    if(!isGhost())
       setScopeAlways();    // Always visible!
 
-   HuntersGameType *gt = dynamic_cast<HuntersGameType *>( getGame()->getGameType() );
+   NexusGameType *gt = dynamic_cast<NexusGameType *>( getGame()->getGameType() );
    if(gt) gt->addNexus(this);
 }
 
-void HuntersNexusObject::idle(GameObject::IdleCallPath path)
+void NexusObject::idle(GameObject::IdleCallPath path)
 {
    //U32 deltaT = mCurrentMove.time;
 }
 
 
-void HuntersNexusObject::render()
+void NexusObject::render()
 {
    GameType *gt = getGame()->getGameType();
-   HuntersGameType *theGameType = dynamic_cast<HuntersGameType *>(gt);
+   NexusGameType *theGameType = dynamic_cast<NexusGameType *>(gt);
    renderNexus(getOutline(), getFill(), getCentroid(), getLabelAngle(), 
               (theGameType && theGameType->mNexusIsOpen), gt ? gt->mZoneGlowTimer.getFraction() : 0);
 }
 
 
-void HuntersNexusObject::renderDock()
+void NexusObject::renderDock()
 {
   renderNexus(getOutline(), getFill(), false, 0);
 }
 
 
-void HuntersNexusObject::renderEditor(F32 currentScale)
+S32 NexusObject::getRenderSortValue()
+{
+   return -1;
+}
+
+
+void NexusObject::renderEditor(F32 currentScale)
 {
    render();
    EditorPolygon::renderEditor(currentScale);
 }
 
 
-bool HuntersNexusObject::getCollisionPoly(Vector<Point> &polyPoints) const
+bool NexusObject::getCollisionPoly(Vector<Point> &polyPoints) const
 {
    polyPoints = *getOutline();
    return true;
 }
 
 
-bool HuntersNexusObject::collide(GameObject *hitObject)
+bool NexusObject::collide(GameObject *hitObject)
 {
    if(isGhost())
       return false;
@@ -801,7 +929,7 @@ bool HuntersNexusObject::collide(GameObject *hitObject)
    if(theShip->hasExploded)                              // Ignore collisions with exploded ships
       return false;
 
-   HuntersGameType *theGameType = dynamic_cast<HuntersGameType *>(getGame()->getGameType());
+   NexusGameType *theGameType = dynamic_cast<NexusGameType *>(getGame()->getGameType());
    if(theGameType && theGameType->mNexusIsOpen)          // Is the nexus open?
       theGameType->shipTouchNexus(theShip, this);
 
@@ -809,7 +937,7 @@ bool HuntersNexusObject::collide(GameObject *hitObject)
 }
 
 
-U32 HuntersNexusObject::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
+U32 NexusObject::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
    packGeom(connection, stream);
 
@@ -817,26 +945,52 @@ U32 HuntersNexusObject::packUpdate(GhostConnection *connection, U32 updateMask, 
 }
 
 
-void HuntersNexusObject::unpackUpdate(GhostConnection *connection, BitStream *stream)
+void NexusObject::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    unpackGeom(connection, stream);      
 }
 
 
-const char HuntersNexusObject::className[] = "HuntersNexusObject";      // Class name as it appears to Lua scripts
+const char NexusObject::className[] = "NexusObject";      // Class name as it appears to Lua scripts
 
 // Define the methods we will expose to Lua
-Lunar<HuntersNexusObject>::RegType HuntersNexusObject::methods[] =
+Lunar<NexusObject>::RegType NexusObject::methods[] =
 {
    // Standard gameItem methods
-   method(HuntersNexusObject, getClassID),
-   method(HuntersNexusObject, getLoc),
-   method(HuntersNexusObject, getRad),
-   method(HuntersNexusObject, getVel),
-   method(HuntersNexusObject, getTeamIndx),
+   method(NexusObject, getClassID),
+   method(NexusObject, getLoc),
+   method(NexusObject, getRad),
+   method(NexusObject, getVel),
+   method(NexusObject, getTeamIndx),
 
    {0,0}    // End method list
 };
+
+
+//  Lua constructor
+NexusObject::NexusObject(lua_State *L)
+{
+   // Do nothing
+}
+
+
+GameObject *NexusObject::getGameObject()
+{
+   return this;
+}
+
+
+S32 NexusObject::getClassID(lua_State *L)
+{
+   return returnInt(L, NexusTypeNumber);
+}
+
+
+void NexusObject::push(lua_State *L)
+{
+   Lunar<NexusObject>::push(L, this);
+}
+
 
 };
 

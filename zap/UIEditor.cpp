@@ -39,7 +39,7 @@
 #include "ClientGame.h"  
 #include "gameType.h"
 #include "soccerGame.h"          // For Soccer ball radius
-#include "huntersGame.h"         // For HuntersNexusObject def
+#include "NexusGame.h"         // For NexusObject def
 #include "EngineeredItem.h"      // For Turret properties
 #include "PickupItem.h"          // For RepairItem
 #include "barrier.h"             // For DEFAULT_BARRIER_WIDTH
@@ -47,7 +47,6 @@
 #include "teleporter.h"          // For Teleporter def
 #include "speedZone.h"           // For Speedzone def
 #include "loadoutZone.h"         // For LoadoutZone def
-#include "huntersGame.h"         // For HuntersNexusObject def
 #include "config.h"
 #include "goalZone.h"
 
@@ -229,7 +228,7 @@ void EditorUserInterface::populateDock()
 
       if(getGame()->getGameType()->getGameType() == GameType::NexusGame)
       {
-         addDockObject(new HuntersNexusObject(), xPos, yPos);
+         addDockObject(new NexusObject(), xPos, yPos);
          yPos += 25;
       }
       else
@@ -763,7 +762,7 @@ void EditorUserInterface::validateLevel()
 
    // Check for the nexus object in a non-hunter game. Does not affect gameplay in non-hunter game.
    if(foundNexus && gameType->getGameType() != GameType::NexusGame)
-      mLevelWarnings.push_back("WARNING: Nexus object can only be used in Hunters game.");
+      mLevelWarnings.push_back("WARNING: Nexus object can only be used in Nexus game.");
 
    // Check for missing nexus object in a hunter game.  This cause mucho dolor!
    if(!foundNexus && gameType->getGameType() == GameType::NexusGame)

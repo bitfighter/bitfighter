@@ -582,11 +582,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\huntersGame.cpp"
+				RelativePath=".\NexusGame.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\huntersGame.h"
+				RelativePath=".\NexusGame.h"
 				>
 			</File>
 			<File

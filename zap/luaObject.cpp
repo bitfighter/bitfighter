@@ -31,7 +31,7 @@
 #include "item.h"             // For getItem()
 #include "flagItem.h"         // For getItem()
 #include "robot.h"            // For getItem()
-#include "huntersGame.h"      // For getItem()
+#include "NexusGame.h"      // For getItem()
 #include "soccerGame.h"       // For getItem()
 #include "projectile.h"       // For getItem()
 #include "teleporter.h"

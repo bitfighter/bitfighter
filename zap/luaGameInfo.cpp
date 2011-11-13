@@ -27,7 +27,7 @@
 #include "luaGameInfo.h"
 #include "playerInfo.h"
 #include "gameType.h"
-#include "huntersGame.h"
+#include "NexusGame.h"
 #include "game.h"
 
 
@@ -100,12 +100,12 @@ S32 LuaGameInfo::getGridSize(lua_State *L)          { return returnFloat(L, gSer
 S32 LuaGameInfo::isTeamGame(lua_State *L)           { return returnBool(L, gServerGame->getGameType()->isTeamGame()); }
 S32 LuaGameInfo::isNexusOpen(lua_State *L)
 {
-   HuntersGameType *theGameType = dynamic_cast<HuntersGameType *>(gServerGame->getGameType());
+   NexusGameType *theGameType = dynamic_cast<NexusGameType *>(gServerGame->getGameType());
    return theGameType ? returnBool(L, theGameType->mNexusIsOpen) : returnNil(L);
 }
 S32 LuaGameInfo::getNexusTimeLeft(lua_State *L)
 {
-   HuntersGameType *theGameType = dynamic_cast<HuntersGameType *>(gServerGame->getGameType());
+   NexusGameType *theGameType = dynamic_cast<NexusGameType *>(gServerGame->getGameType());
    return theGameType ? returnInt(L, theGameType->getNexusTimeLeft()) : returnNil(L);
 }
 

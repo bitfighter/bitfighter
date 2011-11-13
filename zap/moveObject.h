@@ -159,7 +159,7 @@ public:
    void setPositionMask() { setMaskBits(PositionMask); }
 
    bool isMounted() { return mIsMounted; }
-   virtual bool isItemThatMakesYouVisibleWhileCloaked() { return true; }      // HuntersFlagItem overrides to false
+   virtual bool isItemThatMakesYouVisibleWhileCloaked() { return true; }      // NexusFlagItem overrides to false
 
    void setCollideable(bool isCollideable) { mIsCollideable = isCollideable; }
 

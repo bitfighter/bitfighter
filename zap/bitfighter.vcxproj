@@ -158,7 +158,7 @@
     <ClCompile Include="..\zap\goalZone.cpp" />
     <ClCompile Include="..\zap\gridDB.cpp" />
     <ClCompile Include="..\zap\HTFGame.cpp" />
-    <ClCompile Include="..\zap\huntersGame.cpp" />
+    <ClCompile Include="..\zap\NexusGame.cpp" />
     <ClCompile Include="..\zap\IniFile.cpp" />
     <ClCompile Include="..\zap\item.cpp" />
     <ClCompile Include="..\zap\InputCode.cpp" />
@@ -273,7 +273,7 @@
     <ClInclude Include="..\zap\gameWeapons.h" />
     <ClInclude Include="..\zap\goalZone.h" />
     <ClInclude Include="..\zap\gridDB.h" />
-    <ClInclude Include="..\zap\huntersGame.h" />
+    <ClInclude Include="..\zap\NexusGame.h" />
     <ClInclude Include="..\zap\IniFile.h" />
     <ClInclude Include="..\zap\input.h" />
     <ClInclude Include="..\zap\item.h" />

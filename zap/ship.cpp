@@ -30,7 +30,7 @@
 #include "gameLoader.h"
 #include "SoundSystem.h"
 #include "gameType.h"
-#include "huntersGame.h"
+#include "NexusGame.h"
 #include "gameConnection.h"
 #include "shipItems.h"
 #include "speedZone.h"
@@ -1451,7 +1451,7 @@ S32 Ship::getFlagCount()
    for(S32 i = 0; i < mMountedItems.size(); i++)
       if(mMountedItems[i].isValid() && (mMountedItems[i]->getObjectTypeNumber() == FlagTypeNumber))
       {
-         HuntersFlagItem *flag = dynamic_cast<HuntersFlagItem *>(mMountedItems[i].getPointer());
+         NexusFlagItem *flag = dynamic_cast<NexusFlagItem *>(mMountedItems[i].getPointer());
          if(flag != NULL)   // Nexus flag have multiple flags as one item.
             count += flag->getFlagCount();
          else
