@@ -136,12 +136,24 @@ public:
    };
 
 
+   enum ButtonSymbol {
+      ButtonSymbolNone,
+      ButtonSymbolPsCircle,
+      ButtonSymbolPsCross,
+      ButtonSymbolPsSquare,
+      ButtonSymbolPsTriangle,
+      ButtonSymbolSmallRightTriangle,
+      ButtonSymbolSmallLeftTriangle,
+   };
+
+
    struct ButtonInfo {
       Joystick::Button button;
       U8 sdlButton;
       string label;
       Color color;
       Joystick::ButtonShape buttonShape;
+      Joystick::ButtonSymbol buttonSymbol;
    };
 
 
@@ -189,6 +201,7 @@ public:
    static void getAllJoystickPrettyNames(Vector<string> &nameList);
    static Button stringToJoystickButton(const string &buttonString);
    static ButtonShape buttonLabelToButtonShape(const string &label);
+   static ButtonSymbol stringToButtonSymbol(const string &label);
    static Color stringToColor(const string &colorString);
    static U32 getJoystickIndex(const string &joystickIndex);
    static JoystickInfo *getJoystickInfo(const string &joystickIndex);

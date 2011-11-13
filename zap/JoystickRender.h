@@ -36,26 +36,21 @@ using namespace TNL;
 namespace Zap
 {
 
-namespace JoystickRenderButton {
-}
-
-enum AlignType {
-   ALIGN_LEFT,
-   ALIGN_CENTER,
-   ALIGN_RIGHT
-};
-
-class Color;
 
 class JoystickRender
 {
 private:
-   static const S32 roundButtonRadius = 9;
+   static const S32 buttonHalfHeight = 9;   // This is the default half-height of a button
    static const S32 rectButtonWidth = 24;
-   static const S32 rectButtonHeight = 17;
+   static const S32 rectButtonHeight = 18;
    static const S32 smallRectButtonWidth = 19;
+   static const S32 smallRectButtonHeight = 15;
    static const S32 horizEllipseButtonRadiusX = 14;
-   static const S32 horizEllipseButtonRadiusY = 9;
+   static const S32 horizEllipseButtonRadiusY = 8;
+   static const S32 rightTriangleWidth = 28;
+   static const S32 rightTriangleHeight = 18;
+
+   static const S32 labelSize = 12;
 
 public:
 
@@ -69,22 +64,12 @@ public:
    static void renderDPad(Point center, F32 radius, bool upActivated, bool downActivated, bool leftActivated,
          bool rightActivated, const char *msg1, const char *msg2);
 
-   static void renderRectButton(const Point &loc, const char *label, AlignType align, bool activated);
-   static void renderSmallRectButton(const Point &loc, const char *label, AlignType align, bool activated);
-   static void renderRoundedRectButton(const Point &loc, const char *label, AlignType align, bool activated);
-   static void renderSmallRoundedRectButton(const Point &loc, const char *label, AlignType align, bool activated);
-   static void renderRoundButton(const Point &loc, const char *label, const Color &labelColor, AlignType align, bool activated);
-   static void renderFilledRoundButton(const Point &loc, const char *label, AlignType align, bool activated);
-   static void renderHorizontalOvalButton(const Point &loc, const char *label, AlignType align, bool activated);
-   static void renderFilledHorizontalEllipseButton(const Point &loc, const char *label, AlignType align, bool activated,
-         const Color &fillColor);
-   static void renderRightTriangleButton(const Point &loc, const char *label, AlignType align, bool activated);
-
    static void drawPlaystationCross(const Point &center);
    static void drawPlaystationCircle(const Point &center);
    static void drawPlaystationSquare(const Point &center);
    static void drawPlaystationTriangle(const Point &center);
-   static void drawStartBackTriangle(const Point & center, bool pointRight);
+   static void drawSmallLeftTriangle(const Point & center);
+   static void drawSmallRightTriangle(const Point & center);
 
    static inline void setButtonColor(bool activated);
 };

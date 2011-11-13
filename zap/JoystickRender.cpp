@@ -50,206 +50,6 @@ inline void JoystickRender::setButtonColor(bool activated)
       glColor(Colors::white);
 }
 
-// Render some specific, common button types
-void JoystickRender::renderRoundButton(const Point &loc, const char *label, const Color &labelColor, AlignType align, bool activated)
-{
-   const S32 radius = roundButtonRadius;
-   const S32 labelSize = 12;
-
-   Point offset;
-
-   if(align == ALIGN_LEFT)
-      offset = Point(radius, radius);
-   else if (align == ALIGN_RIGHT)
-      offset = Point(-radius, radius);
-   else  // ALIGN_CENTER
-      offset = Point(0, radius);
-
-   setButtonColor(activated);
-   drawCircle(loc + offset, (F32)radius);
-
-   glColor(labelColor);
-   UserInterface::drawString(loc.x + offset.x - UserInterface::getStringWidth(labelSize, label) / 2, loc.y + 2, labelSize, label);
-}
-
-
-void JoystickRender::renderRightTriangleButton(const Point &loc, const char *label, AlignType align, bool activated)
-{
-   const S32 halfWidth = 12;
-   const S32 halfHeight = 9;
-   const S32 labelSize = 12;
-
-   Point offset;
-
-   if(align == ALIGN_LEFT)
-      offset = Point(halfWidth, halfHeight);
-   else if (align == ALIGN_RIGHT)
-      offset = Point(-halfWidth, halfHeight);
-   else  // ALIGN_CENTER
-      offset = Point(0, halfHeight);
-
-   setButtonColor(activated);
-
-   glBegin(GL_LINE_LOOP);
-      glVertex(loc + offset + Point(-15, -9));
-      glVertex(loc + offset + Point(-15, 10));
-      glVertex(loc + offset + Point(12, 0));
-   glEnd();
-
-   glColor(Colors::white);
-   UserInterface::drawString(loc.x + (offset.x - halfWidth/2) - UserInterface::getStringWidth(labelSize, label) / 2, loc.y + 2, labelSize, label);
-}
-
-
-void JoystickRender::renderRectButton(const Point &loc, const char *label, AlignType align, bool activated)
-{
-   const S32 width = rectButtonWidth;
-   const S32 halfWidth = 12;
-   const S32 height = rectButtonHeight;
-   const S32 halfHeight = 9;
-   const S32 labelSize = 12;
-
-   Point offset;
-
-   if(align == ALIGN_LEFT)
-      offset = Point(halfWidth, halfHeight);
-   else if (align == ALIGN_RIGHT)
-      offset = Point(-halfWidth, halfHeight);
-   else  // ALIGN_CENTER
-      offset = Point(0, halfHeight);
-
-   setButtonColor(activated);
-   drawRoundedRect(loc + offset, (F32)width, (F32)height, 3);
-
-   glColor(Colors::white);
-   UserInterface::drawString(loc.x + offset.x - UserInterface::getStringWidth(labelSize, label) / 2, loc.y + 2, labelSize, label);
-}
-
-
-void JoystickRender::renderRoundedRectButton(const Point &loc, const char *label, AlignType align, bool activated)
-{
-   const S32 width = rectButtonWidth;
-   const S32 halfWidth = 12;
-   const S32 height = rectButtonHeight;
-   const S32 halfHeight = 9;
-   const S32 labelSize = 12;
-   const S32 roundedRadius = 3;
-
-   Point offset;
-
-   if(align == ALIGN_LEFT)
-      offset = Point(halfWidth, halfHeight);
-   else if (align == ALIGN_RIGHT)
-      offset = Point(-halfWidth, halfHeight);
-   else  // ALIGN_CENTER
-      offset = Point(0, halfHeight);
-
-   setButtonColor(activated);
-   drawRoundedRect(loc + offset, (F32)width, (F32)height, roundedRadius);
-
-   glColor(Colors::white);
-   UserInterface::drawString(loc.x + offset.x - UserInterface::getStringWidth(labelSize, label) / 2, loc.y + 2, labelSize, label);
-}
-
-
-void JoystickRender::renderSmallRoundedRectButton(const Point &loc, const char *label, AlignType align, bool activated)
-{
-   const S32 width = 20;
-   const S32 halfWidth = 12;
-   const S32 height = 15;
-   const S32 halfHeight = 9;
-   const S32 labelSize = 12;
-   const S32 roundedRadius = 5;
-
-   Point offset;
-
-   if(align == ALIGN_LEFT)
-      offset = Point(halfWidth, halfHeight);
-   else if (align == ALIGN_RIGHT)
-      offset = Point(-halfWidth, halfHeight);
-   else  // ALIGN_CENTER
-      offset = Point(0, halfHeight);
-
-   setButtonColor(activated);
-   drawRoundedRect(loc + offset, (F32)width, (F32)height, roundedRadius);
-
-   glColor(Colors::white);
-   UserInterface::drawString(loc.x + offset.x - UserInterface::getStringWidth(labelSize, label) / 2, loc.y + 2, labelSize, label);
-}
-
-
-void JoystickRender::renderSmallRectButton(const Point &loc, const char *label, AlignType align, bool activated)
-{
-   const S32 width = smallRectButtonWidth;
-   const S32 halfWidth = 10;
-   const S32 height = 15;
-   const S32 halfHeight = 8;
-   const S32 labelSize = 12;
-
-   Point offset;
-
-   if(align == ALIGN_LEFT)
-      offset = Point(halfWidth, halfHeight);
-   else if (align == ALIGN_RIGHT)
-      offset = Point(-halfWidth, halfHeight);
-   else  // ALIGN_CENTER
-      offset = Point(0,halfHeight);
-
-   setButtonColor(activated);
-   drawRoundedRect(loc + offset, (F32)width, (F32)height, 3);
-
-   glColor(Colors::white);
-   UserInterface::drawString(loc.x + offset.x - UserInterface::getStringWidth(labelSize, label) / 2, loc.y + 2, labelSize, label);
-}
-
-void JoystickRender::renderFilledHorizontalEllipseButton(const Point &loc, const char *label, AlignType align,
-      bool activated, const Color &fillColor)
-{
-   const S32 halfWidth = horizEllipseButtonRadiusX;
-   const S32 halfHeight = horizEllipseButtonRadiusY;
-   const S32 labelSize = 12;
-
-   Point offset;
-
-   if(align == ALIGN_LEFT)
-      offset = Point(halfWidth, halfHeight);
-   else if (align == ALIGN_RIGHT)
-      offset = Point(-halfWidth, halfHeight);
-   else  // ALIGN_CENTER
-      offset = Point(0, halfHeight);
-
-   setButtonColor(activated);
-
-   glColor(fillColor);
-   drawFilledEllipse(loc + offset, horizEllipseButtonRadiusX, horizEllipseButtonRadiusY, 0);
-
-   glColor(Colors::white);
-   drawEllipse(loc + offset, horizEllipseButtonRadiusX, horizEllipseButtonRadiusY, 0);
-   UserInterface::drawString(loc.x + offset.x - UserInterface::getStringWidth(labelSize, label) / 2, loc.y + 2, labelSize, label);
-}
-
-void JoystickRender::renderHorizontalOvalButton(const Point &loc, const char *label, AlignType align, bool activated)
-{
-   const S32 halfWidth = horizEllipseButtonRadiusX/2;
-   const S32 halfHeight = horizEllipseButtonRadiusY/2;
-   const S32 labelSize = 12;
-
-   Point offset;
-
-   if(align == ALIGN_LEFT)
-      offset = Point(halfWidth, halfHeight);
-   else if (align == ALIGN_RIGHT)
-      offset = Point(-halfWidth, halfHeight);
-   else  // ALIGN_CENTER
-      offset = Point(0, halfHeight);
-
-   setButtonColor(activated);
-   drawEllipse(loc + offset, horizEllipseButtonRadiusX, horizEllipseButtonRadiusY, 0);
-
-   glColor(Colors::white);
-   UserInterface::drawString(loc.x + offset.x - UserInterface::getStringWidth(labelSize, label) / 2, loc.y + 2, labelSize, label);
-}
-
 
 // Render dpad graphic
 void JoystickRender::renderDPad(Point center, F32 radius, bool upActivated, bool downActivated, bool leftActivated,
@@ -341,7 +141,7 @@ S32 JoystickRender::getControllerButtonRenderedSize(S32 joystickIndex, InputCode
    switch(buttonShape)
    {
       case Joystick::ButtonShapeRound:
-         return roundButtonRadius * 2;
+         return buttonHalfHeight * 2;
          break;
       case Joystick::ButtonShapeRect:
          return rectButtonWidth;
@@ -389,57 +189,82 @@ void JoystickRender::renderControllerButton(F32 x, F32 y, U32 joystickIndex, Inp
          Joystick::JoystickPresetList[joystickIndex].buttonMappings[button].buttonShape;
 
    const char *label = Joystick::JoystickPresetList[joystickIndex].buttonMappings[button].label.c_str();
-   Color color = Joystick::JoystickPresetList[joystickIndex].buttonMappings[button].color;
+   Color *buttonColor = &Joystick::JoystickPresetList[joystickIndex].buttonMappings[button].color;
 
-   // Render controller button
+
+   Point location(x,y);
+   Point center = location + Point(0, buttonHalfHeight);
+
+   // Change button outline color if activated
+   setButtonColor(activated);
+
+   // Render joystick button shape
    switch(buttonShape)
-      {
-         case Joystick::ButtonShapeRound:
-            renderRoundButton(Point(x, y), label, color, ALIGN_CENTER, activated);
-            break;
-         case Joystick::ButtonShapeRect:
-            renderRectButton(Point(x, y), label, ALIGN_CENTER, activated);
-            break;
-         case Joystick::ButtonShapeSmallRect:
-            renderSmallRectButton(Point(x, y), label, ALIGN_CENTER, activated);
-            break;
-         case Joystick::ButtonShapeRoundedRect:
-            renderRoundedRectButton(Point(x,y), label, ALIGN_CENTER, activated);
-            break;
-         case Joystick::ButtonShapeSmallRoundedRect:
-            renderSmallRoundedRectButton(Point(x, y), label, ALIGN_CENTER, activated);
-            break;
-         case Joystick::ButtonShapeHorizEllipse:
-            renderFilledHorizontalEllipseButton(Point(x, y), label, ALIGN_CENTER, activated, Colors::red);
-            break;
-         case Joystick::ButtonShapeRightTriangle:
-            renderRightTriangleButton(Point(x,y), label, ALIGN_CENTER, activated);
-            break;
-         default:
-            renderRoundButton(Point(x, y), label, color, ALIGN_CENTER, activated);
-            return ;
-      }
+   {
+      case Joystick::ButtonShapeRect:
+         drawRoundedRect(center, (F32)rectButtonWidth, (F32)rectButtonHeight, 3);
+         break;
+      case Joystick::ButtonShapeSmallRect:
+         drawRoundedRect(center, (F32)smallRectButtonWidth, (F32)smallRectButtonHeight, 3);
+         break;
+      case Joystick::ButtonShapeRoundedRect:
+         drawRoundedRect(center, (F32)rectButtonWidth, (F32)rectButtonHeight, 5);
+         break;
+      case Joystick::ButtonShapeSmallRoundedRect:
+         drawRoundedRect(center, (F32)smallRectButtonWidth, (F32)smallRectButtonHeight, 5);
+         break;
+      case Joystick::ButtonShapeHorizEllipse:
+         glColor(buttonColor);
+         drawFilledEllipse(center, horizEllipseButtonRadiusX, horizEllipseButtonRadiusY, 0);
+         glColor(Colors::white);
+         drawEllipse(center, horizEllipseButtonRadiusX, horizEllipseButtonRadiusY, 0);
+         break;
+      case Joystick::ButtonShapeRightTriangle:
+         location = location + Point(-rightTriangleWidth/4, 0);  // Need to off-center the label slightly for this button
+         glBegin(GL_LINE_LOOP);
+            glVertex(center + Point(-15, -9));
+            glVertex(center + Point(-15, 10));
+            glVertex(center + Point(12, 0));
+         glEnd();
+         break;
+      case Joystick::ButtonShapeRound:
+      default:
+         drawCircle(center, (F32)buttonHalfHeight);
+         break;
+   }
 
+   // Now render joystick label or symbol
+   Joystick::ButtonSymbol buttonSymbol =
+         Joystick::JoystickPresetList[joystickIndex].buttonMappings[button].buttonSymbol;
 
-   // TODO: implement drawing shapes instead of labels
-//   drawStartBackTriangle(Point(x, y), buttonIndex == 9 ? true : false);
+   // Change color of label to the preset (default white)
+   glColor(buttonColor);
 
-
-//   switch(buttonIndex)
-//   {
-//      case 0:     // X
-//         drawPlaystationCross(center);
-//         break;
-//      case 1:     // Circle
-//         drawPlaystationCircle(center);
-//         break;
-//      case 2:     // Square
-//         drawPlaystationSquare(center);
-//         break;
-//      case 3:     // Triangle
-//         drawPlaystationTriangle(center);
-//         break;
-//   }
+   switch(buttonSymbol)
+   {
+      case Joystick::ButtonSymbolPsCircle:
+         drawPlaystationCircle(center);
+         break;
+      case Joystick::ButtonSymbolPsCross:
+         drawPlaystationCross(center);
+         break;
+      case Joystick::ButtonSymbolPsSquare:
+         drawPlaystationSquare(center);
+         break;
+      case Joystick::ButtonSymbolPsTriangle:
+         drawPlaystationTriangle(center);
+         break;
+      case Joystick::ButtonSymbolSmallLeftTriangle:
+         drawSmallLeftTriangle(center);
+         break;
+      case Joystick::ButtonSymbolSmallRightTriangle:
+         drawSmallRightTriangle(center);
+         break;
+      case Joystick::ButtonSymbolNone:
+      default:
+         UserInterface::drawString(location.x - UserInterface::getStringWidth(labelSize, label) / 2, location.y + 2, labelSize, label);
+         break;
+   }
 }
 
 
@@ -485,13 +310,22 @@ void JoystickRender::drawPlaystationTriangle(const Point &center)
 }
 
 
-void JoystickRender::drawStartBackTriangle(const Point & center, bool pointRight)
+void JoystickRender::drawSmallLeftTriangle(const Point & center)
 {
-   S32 direction = pointRight ? -1 : 1;
    glBegin(GL_LINE_LOOP);
-      glVertex(center + Point(direction * 4, 0));
-      glVertex(center + Point(direction * -3, 5));
-      glVertex(center + Point(direction * -3, -5));
+      glVertex(center + Point(4, 0));
+      glVertex(center + Point(-3, 5));
+      glVertex(center + Point(-3, -5));
+   glEnd();
+}
+
+
+void JoystickRender::drawSmallRightTriangle(const Point & center)
+{
+   glBegin(GL_LINE_LOOP);
+      glVertex(center + Point(-4, 0));
+      glVertex(center + Point(3, 5));
+      glVertex(center + Point(3, -5));
    glEnd();
 }
 

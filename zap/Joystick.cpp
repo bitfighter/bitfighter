@@ -302,6 +302,25 @@ Joystick::ButtonShape Joystick::buttonLabelToButtonShape(const string &label)
 }
 
 
+Joystick::ButtonSymbol Joystick::stringToButtonSymbol(const string &label)
+{
+   if(label == "PSCIRCLE")
+      return ButtonSymbolPsCircle;
+   else if(label == "PSCROSS")
+      return ButtonSymbolPsCross;
+   else if(label == "PSSQUARE")
+      return ButtonSymbolPsSquare;
+   else if(label == "PSTRIANGLE")
+      return ButtonSymbolPsTriangle;
+   else if(label == "SMALLLEFTTRIANGLE")
+      return ButtonSymbolSmallLeftTriangle;
+   else if(label == "SMALLRIGHTTRIANGLE")
+      return ButtonSymbolSmallRightTriangle;
+
+   return ButtonSymbolNone;
+}
+
+
 Color Joystick::stringToColor(const string &colorString)
 {
    string lower = lcase(colorString);
@@ -371,6 +390,7 @@ Joystick::JoystickInfo Joystick::getGenericJoystickInfo()
       joystickInfo.buttonMappings[i].label = "";
       joystickInfo.buttonMappings[i].color = Colors::white;
       joystickInfo.buttonMappings[i].buttonShape = ButtonShapeRound;
+      joystickInfo.buttonMappings[i].buttonSymbol = ButtonSymbolNone;
    }
 
    return joystickInfo;
@@ -440,6 +460,7 @@ void Joystick::loadJoystickPresets()
          buttonInfo.label = buttonInfoMap["Label"];
          buttonInfo.color = stringToColor(buttonInfoMap["Color"]);
          buttonInfo.buttonShape = buttonLabelToButtonShape(buttonInfoMap["Shape"]);
+         buttonInfo.buttonSymbol = stringToButtonSymbol(buttonInfoMap["Label"]);
          buttonInfo.sdlButton = buttonInfoMap["Raw"] == "" ? FakeRawButton : U8(stoi(buttonInfoMap["Raw"]));
 
          // Set the button info with index of the Joystick::Button
