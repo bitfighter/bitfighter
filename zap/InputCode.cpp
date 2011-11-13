@@ -24,7 +24,6 @@
 //------------------------------------------------------------------------------------
 
 #include "InputCode.h"
-#include "Joystick.h"
 
 #include "../tnl/tnlJournal.h"
 #include "../tnl/tnlLog.h"         // For logprintf
@@ -34,6 +33,7 @@
 #include <ctype.h>
 
 #ifndef ZAP_DEDICATED
+#include "Joystick.h"
 #include "SDL/SDL.h"
 #endif
 
@@ -1157,7 +1157,6 @@ S32 inputCodeToSDLKey(InputCode inputCode)
          return SDLK_UNKNOWN;
    }
 }
-#endif
 
 
 InputCode joystickButtonToInputCode(Joystick::Button button)
@@ -1268,6 +1267,7 @@ Joystick::Button inputCodeToJoystickButton(InputCode inputCode)
          return Joystick::ButtonUnknown;
    }
 }
+#endif
 
 
 // We'll also treat controller buttons like simulated keystrokes

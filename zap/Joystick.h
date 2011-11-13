@@ -23,6 +23,10 @@
 //
 //------------------------------------------------------------------------------------
 
+#ifdef ZAP_DEDICATED
+#error "No joystick.h for dedicated build"
+#endif
+
 #ifndef JOYSTICK_H_
 #define JOYSTICK_H_
 
@@ -40,8 +44,6 @@ using namespace std;
 
 namespace Zap {
 
-
-#ifndef ZAP_DEDICATED
 
 enum JoystickAxesMask {
    MoveAxesLeftMask = BIT(0),
@@ -209,6 +211,5 @@ public:
    static Button remapSdlButtonToJoystickButton(U8 button);
 };
 
-#endif // ZAP_DEDICATED
 } /* namespace Zap */
 #endif /* JOYSTICK_H_ */

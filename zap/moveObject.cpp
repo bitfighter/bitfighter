@@ -32,6 +32,7 @@
 #include "speedZone.h"
 #include "game.h"
 #include "gameConnection.h"
+#include "stringUtils.h"
 
 #ifndef ZAP_DEDICATED
 #include "ClientGame.h"

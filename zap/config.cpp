@@ -29,7 +29,6 @@
 #include "gameLoader.h"    // For LevelListLoader::levelList
 #include "version.h"
 #include "stringUtils.h"
-#include "Joystick.h"
 #include "InputCode.h"
 #include "BanList.h"
 #include "Colors.h"
@@ -41,6 +40,7 @@
 #include "GameSettings.h"
 
 #ifndef ZAP_DEDICATED
+#include "Joystick.h"
 #include "quickChatHelper.h"
 #endif
 
