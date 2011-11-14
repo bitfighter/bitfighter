@@ -217,6 +217,9 @@ struct IniSettings      // With defaults specified
    S32 winYPos;
    F32 winSizeFact;
 
+   // Use 'fake fullscreen' vs real fullscreen
+   bool useFakeFullscreen;
+
    // Testing values
    S32 burstGraphicsMode;           // Choose a burst graphic representation
    bool neverConnectDirect;

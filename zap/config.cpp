@@ -136,6 +136,9 @@ IniSettings::IniSettings()
    winYPos = 100;
    winSizeFact = 1.0;
 
+   // Use fake fullscreen
+   useFakeFullscreen = true;
+
    burstGraphicsMode = 1;
    neverConnectDirect = false;
 
@@ -326,6 +329,7 @@ static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
    iniSettings->joystickType = ini->GetValue(section, "JoystickType", iniSettings->joystickType);
    iniSettings->joystickLinuxUseOldDeviceSystem = ini->GetValueYN(section, "JoystickLinuxUseOldDeviceSystem", iniSettings->joystickLinuxUseOldDeviceSystem);
 #endif
+   iniSettings->useFakeFullscreen = ini->GetValueYN(section, "UseFakeFullscreen", iniSettings->useFakeFullscreen);
 
    iniSettings->winXPos = max(ini->GetValueI(section, "WindowXPos", iniSettings->winXPos), 0);    // Restore window location
    iniSettings->winYPos = max(ini->GetValueI(section, "WindowYPos", iniSettings->winYPos), 0);
@@ -1398,6 +1402,7 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
       ini->sectionComment(section, " WindowMode - Fullscreen, Fullscreen-Stretch or Window");
       ini->sectionComment(section, " WindowXPos, WindowYPos - Position of window in window mode (will overwritten if you move your window)");
       ini->sectionComment(section, " WindowScalingFactor - Used to set size of window.  1.0 = 800x600. Best to let the program manage this setting.");
+      ini->sectionComment(section, " UseFakeFullscreen - Faster fullscreen switching; however, may not cover the taskbar");
       ini->sectionComment(section, " VoiceEcho - Play echo when recording a voice message? Yes/No");
       ini->sectionComment(section, " ControlMode - Use Relative or Absolute controls (Relative means left is ship's left, Absolute means left is screen left)");
       ini->sectionComment(section, " LoadoutIndicators - Display indicators showing current weapon?  Yes/No");
@@ -1421,6 +1426,7 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
    saveWindowMode(ini, iniSettings);
    saveWindowPosition(ini, iniSettings->winXPos, iniSettings->winYPos);
 
+   ini->setValueYN(section, "UseFakeFullscreen", iniSettings->useFakeFullscreen);
    ini->SetValueF (section, "WindowScalingFactor", iniSettings->winSizeFact);
    ini->setValueYN(section, "VoiceEcho", iniSettings->echoVoice );
    ini->SetValue  (section, "ControlMode", (iniSettings->controlsRelative ? "Relative" : "Absolute"));

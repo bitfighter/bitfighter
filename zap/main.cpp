@@ -1020,7 +1020,7 @@ void actualizeScreenMode(bool changingInterfaces)
    case DISPLAY_MODE_FULL_SCREEN_STRETCHED:
       sdlWindowWidth = gScreenInfo.getPhysicalScreenWidth();
       sdlWindowHeight = gScreenInfo.getPhysicalScreenHeight();
-      sdlVideoFlags |= SDL_NOFRAME;
+      sdlVideoFlags |= settings->getIniSettings()->useFakeFullscreen ? SDL_NOFRAME : SDL_FULLSCREEN;
 
       orthoRight = gScreenInfo.getGameCanvasWidth();
       orthoBottom = gScreenInfo.getGameCanvasHeight();
@@ -1029,7 +1029,7 @@ void actualizeScreenMode(bool changingInterfaces)
    case DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED:
       sdlWindowWidth = gScreenInfo.getPhysicalScreenWidth();
       sdlWindowHeight = gScreenInfo.getPhysicalScreenHeight();
-      sdlVideoFlags |= SDL_NOFRAME;
+      sdlVideoFlags |= settings->getIniSettings()->useFakeFullscreen ? SDL_NOFRAME : SDL_FULLSCREEN;
 
       orthoLeft = -1 * (gScreenInfo.getHorizDrawMargin());
       orthoRight = gScreenInfo.getGameCanvasWidth() + gScreenInfo.getHorizDrawMargin();
