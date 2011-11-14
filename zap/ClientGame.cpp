@@ -43,7 +43,7 @@
 #include "luaLevelGenerator.h"
 #include "robot.h"
 #include "shipItems.h"           // For moduleInfos
-#include "huntersGame.h"         // for creating new HuntersFlagItem
+#include "NexusGame.h"
 
 #include "stringUtils.h"
 

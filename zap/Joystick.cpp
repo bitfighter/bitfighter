@@ -27,8 +27,12 @@
 #include "stringUtils.h"
 #include "tnlLog.h"
 #include "ClientGame.h"
+#include "IniFile.h"
+#include "Colors.h"
 
 #include "SDL/SDL.h"
+
+#include <map>
 
 namespace Zap {
 
@@ -37,7 +41,8 @@ namespace Zap {
 SDL_Joystick *Joystick::sdlJoystick = NULL;
 
 // public
-Vector<const char *> Joystick::DetectedJoystickNameList;
+Vector<string> Joystick::DetectedJoystickNameList;
+Vector<Joystick::JoystickInfo> Joystick::JoystickPresetList;
 
 U32 Joystick::ButtonMask = 0;
 F32 Joystick::rawAxis[Joystick::rawAxisCount];
@@ -46,6 +51,7 @@ S16 Joystick::UpperSensitivityThreshold = 26200;  // out of 32767, ~80%, any mor
 S32 Joystick::UseJoystickNumber = 0;
 U32 Joystick::AxesInputCodeMask = 0;
 U32 Joystick::HatInputCodeMask = 0;
+U32 Joystick::SelectedPresetIndex = 0;
 
 
 // Needs to be Aligned with JoystickAxesDirections
@@ -61,10 +67,21 @@ JoystickInput Joystick::JoystickInputData[MaxAxesDirections] = {
 };
 
 
-Joystick::Joystick() {
+CIniFile joystickPresetsINI("dummy");
+
+extern ClientGame *gClientGame;
+
+// Constructor
+Joystick::Joystick()
+{
+   // Do nothing
 }
 
-Joystick::~Joystick() {
+
+// Destructor
+Joystick::~Joystick()
+{
+   // Do nothing
 }
 
 bool Joystick::initJoystick()
@@ -73,7 +90,7 @@ bool Joystick::initJoystick()
    // Hackety hack hack for some joysticks that seem calibrated horribly wrong.
    //
    // What happens is that SDL uses the newer event system at /dev/input/eventX for joystick enumeration
-   // instead of the older /dev/input/jsX or /dev/jsX;  The problem is, is that calibration cannot be done
+   // instead of the older /dev/input/jsX or /dev/jsX;  The problem is that calibration cannot be done on
    // the event (/dev/input/eventX) devices and therefore some joysticks, like the PS3, act strangely in-game
    //
    // If you specify "JoystickLinuxUseOldDeviceSystem" as "Yes" in the INI, then this code below will
@@ -86,7 +103,6 @@ bool Joystick::initJoystick()
    // See here for more info:
    //   http://superuser.com/questions/17959/linux-joystick-seems-mis-calibrated-in-an-sdl-game-freespace-2-open
 
-   extern ClientGame *gClientGame;
 
    if(gClientGame->getSettings()->getIniSettings()->joystickLinuxUseOldDeviceSystem)
    {
@@ -98,6 +114,8 @@ bool Joystick::initJoystick()
 #endif
 
    DetectedJoystickNameList.clear();
+
+   bool hasBeenOpenedBefore = (sdlJoystick != NULL);
 
    // Close if already open.
    if (sdlJoystick != NULL)
@@ -145,19 +163,27 @@ bool Joystick::initJoystick()
    }
    logprintf("Using joystick %d - %s", UseJoystickNumber, SDL_JoystickName(UseJoystickNumber));
 
+
+   // Now try and autodetect the joystick and update the game settings
+   string joystickType = Joystick::autodetectJoystick();
+
+   // Set joystick type if we found anything
+   // Otherwise, it makes more sense to remember what the user had last specified
+   if (!hasBeenOpenedBefore && joystickType != "NoJoystick")
+   {
+      gClientGame->getSettings()->getIniSettings()->joystickType = joystickType;
+      setSelectedPresetIndex(Joystick::getJoystickIndex(joystickType));
+   }
+
+   // Set primary input to joystick if any controllers were found, even a generic one
+   if(hasBeenOpenedBefore)
+      ;  // do nothing when this was opened before
+   else if(joystickType == "NoJoystick")
+      gClientGame->getSettings()->getIniSettings()->inputMode = InputModeKeyboard;
+   else
+      gClientGame->getSettings()->getIniSettings()->inputMode = InputModeJoystick;
+
    return true;
-}
-
-
-void Joystick::populateJoystickStaticData()
-{
-   populatePredefinedJoystickList();
-}
-
-
-const char *Joystick::getJoystickName()
-{
-   return SDL_JoystickName(UseJoystickNumber);
 }
 
 
@@ -172,364 +198,285 @@ void Joystick::shutdownJoystick()
       SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
 }
 
-JoystickInfo Joystick::PredefinedJoystickList[ControllerTypeCount] = 
-{
-   {
-      "Logitech Wingman Dual-Analog",
-      "LogitechWingman",
-      9,
-      {0, 1},
-      {5, 6},  // Not tested, both of this axis might be wrong since using SDL joystick code.
-      { // LogitechWingman   9
-         ControllerButton1,
-         ControllerButton2,
-         ControllerButton3,
-         ControllerButton4,
-         ControllerButton5,
-         ControllerButton6,
-         ControllerButton7,         // L-Trigger
-         ControllerButton8,         // R-Trigger
-         ControllerButtonBack,
-         0,
-         0,
-         0,
-         0,
-         0,
-      }
-   },
-   {
-      "Logitech Dual Action",
-      "LogitechDualAction",
-      10,
-      {0, 1},
-      {2, 3},
-      { // LogitechDualAction   10
-         ControllerButton1,
-         ControllerButton2,
-         ControllerButton3,
-         ControllerButton4,
-         ControllerButton7,
-         ControllerButton8,
-         ControllerButton5,
-         ControllerButton6,
-         ControllerButtonBack,
-         ControllerButtonStart,
-         ControllerButton9,     // press left stick
-         ControllerButton10,    // press right stick
-         0,
-         0,
-      }
-   },
-   {
-      "Saitek P-880 Dual-Analog",
-      "SaitekDualAnalogP880",
-      9,
-      {0, 1},
-      {3, 2},
-      { // SaitekDualAnalogP880  9
-         ControllerButton1,
-         ControllerButton2,
-         ControllerButton3,
-         ControllerButton4,
-         ControllerButton5,
-         ControllerButton6,
-         ControllerButton7,
-         ControllerButton8,
-         ControllerButton9,  // is button 9 and 10 pressing down analog stick?
-         ControllerButton10,
-         ControllerButtonBack,         // Red button??...  no start button??
-         0,
-         0,
-         0,
-      }
-   },
-   {
-      "Saitek P-480 Dual-Analog",
-      "SaitekDualAnalogRumblePad",
-      10,
-      {0, 1},
-      {3, 2},  // 3 or 5 ?, not tested, but similar to P880
-      { // SaitekDualAnalogRumblePad   10       // SAITEK P-480 DUAL-ANALOG
-         ControllerButton1,
-         ControllerButton2,
-         ControllerButton3,
-         ControllerButton4,
-         ControllerButton5,
-         ControllerButton6,
-         ControllerButton7,
-         ControllerButton8,
-         ControllerButtonBack,      // Button 9
-         ControllerButtonStart,     // Button 10
-         0,
-         0,
-         0,
-         0,
-      }
-   },
-   {
-      "PS2 Dualshock USB",
-      "PS2DualShock",
-      10,
-      {0, 1},
-      {2, 3},  // 3 or 5? not tested with actual PS2 controller.
-      { // PS2DualShock    10
-         ControllerButton4,
-         ControllerButton2,
-         ControllerButton1,
-         ControllerButton3,
-         ControllerButton5,
-         ControllerButton6,
-         ControllerButton7,
-         ControllerButton8,
-         ControllerButtonBack,
-         ControllerButton9,  // press down analog stick
-         ControllerButton10,
-         ControllerButtonStart,
-         0,
-         0,
-      }
-   },
-   {
-      "PS2 Dualshock USB with Conversion Cable",
-      "PS2DualShockConversionCable",
-      10,
-      {0, 1},
-      {3, 2},  // 3 or 5? not tested with actual PS2 controller.
-      { // PS2DualShockConversionCable    10
-         ControllerButton4,
-         ControllerButton2,
-         ControllerButton1,
-         ControllerButton3,
-         ControllerButton5,
-         ControllerButton6,
-         ControllerButton7,
-         ControllerButton8,
-         ControllerButtonBack,
-         ControllerButtonStart,
-         ControllerButton9,  // press down analog stick?
-         ControllerButton10,
-         0,
-         0,
-      }
-   },
-   {
-      "PS3 Sixaxis",  // This profile is known to work in linux, but not windows
-      "PS3DualShock", // Windows users might use a "PS2 Dualshock USB" to get everything working, but start and select buttons might be reversed on that profile
-      16,
-      {0, 1},
-      {2, 3},
-      { // PS3DualShock    16
-         ControllerButtonStart, // Start
-         ControllerButton9, // L3 (press on left stick)
-         ControllerButton10, // R3 (press on righ stick)
-         ControllerButtonBack, // Select
-         ControllerButtonDPadUp, // DPAD Up
-         ControllerButtonDPadRight, // DPAD Right
-         ControllerButtonDPadDown, // DPAD Down
-         ControllerButtonDPadLeft, // DPAD Left
-         ControllerButton5, // L2
-         ControllerButton6, // R2
-         ControllerButton7, // L1
-         ControllerButton8, // R1
-         ControllerButton4, // Triangle
-         ControllerButton2, // Circle
-         ControllerButton1, // X
-         ControllerButton3, // Square
-         ControllerButton11, // PS button
-      }
-   },
-   {
-      "XBox Controller USB",
-      "XBoxController",
-      14,
-      {0, 1},
-      {3, 4},
-      { // XBoxController     10
-         ControllerButton1,      // A
-         ControllerButton2,      // B
-         ControllerButton3,      // X
-         ControllerButton4,      // Y
-         ControllerButton6,      // RB
-         ControllerButton5,      // LB
-         ControllerButtonBack,   // <
-         ControllerButtonStart,  // >
-         ControllerButton9,      // press on analog stick?
-         ControllerButton10,
-         ControllerButton7,      // trigger buttons?
-         ControllerButton8,
-         0,
-         0,
-      }
-   },
-   {
-      "XBox Controller",
-      "XBoxControllerOnXBox",
-      14,
-      {0, 1},
-      {3, 4},
-      { // XBoxControllerOnXBox     <--- what's going on here?  On XBox??
-         ControllerButton1,
-         ControllerButton2,
-         ControllerButton3,
-         ControllerButton4,
-         ControllerButton5,
-         ControllerButton6,
-         ControllerButton7,
-         ControllerButton8,
-         ControllerButtonStart,
-         ControllerButtonBack,
-         ControllerButtonDPadUp,
-         ControllerButtonDPadDown,
-         ControllerButtonDPadLeft,
-         ControllerButtonDPadRight,
-      }
-   },
-   {
-      "Microsoft X-Box 360 pad",
-      "XBox360pad",
-      16,
-      {0, 1},
-      {3, 4},
-      {
-         ControllerButton1,
-         ControllerButton2,
-         ControllerButton3,
-         ControllerButton4,
-         ControllerButton6,
-         ControllerButton5,
-         ControllerButtonBack,
-         ControllerButtonStart,
-         ControllerButton7,
-         ControllerButton9,
-         ControllerButton10,
-         ControllerButton8,
-         ControllerButtonDPadUp,
-         ControllerButtonDPadDown,
-         ControllerButtonDPadLeft,
-         ControllerButtonDPadRight,
-      }
-   },
-   // When adding more to PredefinedJoystickList, be sure to add more to ControllerTypeCount
-};
 
-
-
-void Joystick::populatePredefinedJoystickList()
-{
-}
-
-
-ControllerTypeType Joystick::autodetectJoystickType()
+string Joystick::autodetectJoystick()
 {
    if (DetectedJoystickNameList.size() == 0)  // No controllers detected
-      return NoController;
-
-   ControllerTypeType ret = UnknownController;
+      return "NoJoystick";
 
    string controllerName = DetectedJoystickNameList[UseJoystickNumber];
 
-   if(UseJoystickNumber >= 0)
+   // First check against predefined joysticks that have exact search strings
+   // We do this first so that a substring match doesn't override one of these (like with XBox controller)
+   for(S32 i = 0; i < JoystickPresetList.size(); i++)
+      if(!JoystickPresetList[i].isSearchStringSubstring)  // Use exact string
+         if(controllerName == JoystickPresetList[i].searchString)
+            return JoystickPresetList[i].identifier;
+
+   // Then check against joysticks that use substrings to match
+   for(S32 i = 0; i < JoystickPresetList.size(); i++)
+      if(JoystickPresetList[i].isSearchStringSubstring)   // Use substring
+         if(lcase(controllerName).find(lcase(JoystickPresetList[i].searchString)) != string::npos)
+            return JoystickPresetList[i].identifier;
+   // end cascading fury of death
+
+   // If we've made it here, just return the generic one
+   return "GenericJoystick";
+}
+
+
+Joystick::Button Joystick::remapSdlButtonToJoystickButton(U8 rawButton)
+{
+   for(S32 i = 0; i < MaxJoystickButtons; i++)
+      if(JoystickPresetList[SelectedPresetIndex].buttonMappings[i].sdlButton == rawButton)
+         return JoystickPresetList[SelectedPresetIndex].buttonMappings[i].button;
+
+   return ButtonUnknown;
+}
+
+
+void Joystick::getAllJoystickPrettyNames(Vector<string> &nameList)
+{
+   for(S32 i = 0; i < JoystickPresetList.size(); i++)
+      nameList.push_back(JoystickPresetList[i].name);
+}
+
+
+Joystick::Button Joystick::stringToJoystickButton(const string &buttonString)
+{
+   if(buttonString == "Button1")
+      return Button1;
+   else if(buttonString == "Button2")
+      return Button2;
+   else if(buttonString == "Button3")
+      return Button3;
+   else if(buttonString == "Button4")
+      return Button4;
+   else if(buttonString == "Button5")
+      return Button5;
+   else if(buttonString == "Button6")
+      return Button6;
+   else if(buttonString == "Button7")
+      return Button7;
+   else if(buttonString == "Button8")
+      return Button8;
+   else if(buttonString == "Button9")
+      return Button9;
+   else if(buttonString == "Button10")
+      return Button10;
+   else if(buttonString == "Button11")
+      return Button11;
+   else if(buttonString == "Button12")
+      return Button12;
+   else if(buttonString == "ButtonStart")
+      return ButtonStart;
+   else if(buttonString == "ButtonBack")
+      return ButtonBack;
+   else if(buttonString == "ButtonDPadUp")
+      return ButtonDPadUp;
+   else if(buttonString == "ButtonDPadDown")
+      return ButtonDPadDown;
+   else if(buttonString == "ButtonDPadLeft")
+      return ButtonDPadLeft;
+   else if(buttonString == "ButtonDPadRight")
+      return ButtonDPadRight;
+
+   return ButtonUnknown;
+}
+
+
+Joystick::ButtonShape Joystick::buttonLabelToButtonShape(const string &label)
+{
+   if(label == "Round")
+      return ButtonShapeRound;
+   else if (label == "Rect")
+      return ButtonShapeRect;
+   else if (label == "SmallRect")
+      return ButtonShapeSmallRect;
+   else if (label == "RoundedRect")
+      return ButtonShapeRoundedRect;
+   else if (label == "SmallRoundedRect")
+      return ButtonShapeSmallRoundedRect;
+   else if (label == "HorizEllipse")
+      return ButtonShapeHorizEllipse;
+   else if (label == "RightTriangle")
+      return ButtonShapeRightTriangle;
+
+   return ButtonShapeRound;  // Default
+}
+
+
+Joystick::ButtonSymbol Joystick::stringToButtonSymbol(const string &label)
+{
+   if(label == "PSCIRCLE")
+      return ButtonSymbolPsCircle;
+   else if(label == "PSCROSS")
+      return ButtonSymbolPsCross;
+   else if(label == "PSSQUARE")
+      return ButtonSymbolPsSquare;
+   else if(label == "PSTRIANGLE")
+      return ButtonSymbolPsTriangle;
+   else if(label == "SMALLLEFTTRIANGLE")
+      return ButtonSymbolSmallLeftTriangle;
+   else if(label == "SMALLRIGHTTRIANGLE")
+      return ButtonSymbolSmallRightTriangle;
+
+   return ButtonSymbolNone;
+}
+
+
+Color Joystick::stringToColor(const string &colorString)
+{
+   string lower = lcase(colorString);
+   if(lower == "white")
+      return Colors::white;
+   else if (lower == "green")
+      return Colors::green;
+   else if (lower == "blue")
+      return Colors::blue;
+   else if (lower == "yellow")
+      return Colors::yellow;
+   else if (lower == "cyan")
+      return Colors::cyan;
+   else if (lower == "magenta")
+      return Colors::magenta;
+   else if (lower == "black")
+      return Colors::black;
+   else if (lower == "red")
+      return Colors::red;
+   else if (lower == "paleRed")
+      return Colors::paleRed;
+   else if (lower == "paleBlue")
+      return Colors::paleBlue;
+   else if (lower == "palePurple")
+      return Colors::palePurple;
+   else if (lower == "paleGreen")
+      return Colors::paleGreen;
+
+   return Colors::white;  // default
+}
+
+
+void Joystick::setSelectedPresetIndex(U32 joystickIndex)
+{
+   SelectedPresetIndex = joystickIndex;
+}
+
+
+Joystick::JoystickInfo *Joystick::getJoystickInfo(const string &joystickType)
+{
+   for(S32 i = 0; i < JoystickPresetList.size(); i++)
+      if(joystickType == JoystickPresetList[i].identifier)
+         return &JoystickPresetList[i];
+
+   // We should never get here
+   return NULL;
+}
+
+
+Joystick::JoystickInfo Joystick::getGenericJoystickInfo()
+{
+   JoystickInfo joystickInfo;
+
+   joystickInfo.identifier = "GenericJoystick";
+   joystickInfo.name = "Generic Joystick";
+   joystickInfo.searchString = "";
+   joystickInfo.isSearchStringSubstring = false;
+   joystickInfo.moveAxesSdlIndex[0] = 0;
+   joystickInfo.moveAxesSdlIndex[1] = 1;
+   joystickInfo.shootAxesSdlIndex[0] = 2;
+   joystickInfo.shootAxesSdlIndex[1] = 3;
+
+   // make the button graphics all the same
+   for(S32 i = 0; i < MaxJoystickButtons; i++)
    {
-      if(controllerName == "WingMan")
-         ret = LogitechWingman;
-
-      else if(controllerName == "XBoxOnXBox")
-         ret = XBoxControllerOnXBox;
-
-      // Note that on the only XBox controller I've used on windows, the autodetect string was simply:
-      // "Controller (XBOX 360 For Windows)".  I don't know if there are other variations out there.
-      else if(controllerName.find("XBOX") != string::npos || controllerName.find("XBox") != string::npos)
-         ret = XBoxController;
-
-      else if(controllerName == "4 axis 16 button joystick")
-         ret = PS2DualShock;                                         // http://ecx.images-amazon.com/images/I/412Q3RFHZVL._SS500_.jpg
-
-      else if(controllerName == "PC Conversion Cable")
-         ret = PS2DualShockConversionCable;                          // http://ecx.images-amazon.com/images/I/412Q3RFHZVL._SS500_.jpg
-
-      // Note that on Linux, when I plug in the controller, DMSG outputs Sony PLAYSTATION(R)3 Controller.
-      // Was connected.. Thus i have used it here. This may be different on Windows...
-      else if(controllerName.find("PLAYSTATION(R)3") != string::npos)
-         ret = PS3DualShock;                                         // http://ps3media.ign.com/ps3/image/article/705/705934/e3-2006-in-depth-with-the-ps3-controller-20060515010609802.jpg
-
-      else if(controllerName == "P880")
-         ret = SaitekDualAnalogP880;
-
-      else if(controllerName == "Dual Analog Rumble Pad")
-         ret = SaitekDualAnalogRumblePad;
-
-      else if(controllerName.find("Logitech Dual Action") != string::npos)
-         ret = LogitechDualAction;
-
-      else if(controllerName.find("USB Joystick") != string::npos)
-         ret = GenericController;
-
-      else if(controllerName == "")     // Anything else -- joystick present but unknown
-         ret = UnknownController;
-      else                              // Not sure this can ever happen
-         ret = NoController;
+      joystickInfo.buttonMappings[i].button = (Joystick::Button)i;  // 'i' should be in line with Joystick::Button
+      joystickInfo.buttonMappings[i].label = "";
+      joystickInfo.buttonMappings[i].color = Colors::white;
+      joystickInfo.buttonMappings[i].buttonShape = ButtonShapeRound;
+      joystickInfo.buttonMappings[i].buttonSymbol = ButtonSymbolNone;
    }
 
-   return ret;
+   return joystickInfo;
 }
 
 
-
-U8 Joystick::remapJoystickButton(U32 joystickType, U8 button)
+U32 Joystick::getJoystickIndex(const string &joystickType)
 {
-   // If not one of the predefined joysticks, just return the same button
-   if(joystickType >= ControllerTypeCount)
-      return button;
+   for(S32 i = 0; i < JoystickPresetList.size(); i++)
+      if(joystickType == JoystickPresetList[i].identifier)
+         return (U32)i;
 
-   return PredefinedJoystickList[joystickType].buttonMappings[button];
+   // Shouldn't ever reach here, but if we do, return the generic joystick
+   return JoystickPresetList.size() - 1;
 }
 
 
-ControllerTypeType Joystick::stringToJoystickType(const char * strJoystick)
+void Joystick::loadJoystickPresets()
 {
-   for(S32 i=0; i < ControllerTypeCount; i++)
-      if(!stricmp(strJoystick, PredefinedJoystickList[i].nameForINI))
-         return ControllerTypeType(i);
+   FolderManager *folderManager = gClientGame->getSettings()->getFolderManager();
 
-   if (!stricmp(strJoystick, "GenericController"))
-      return GenericController;
-   else if (!stricmp(strJoystick, "UnknownController"))
-      return UnknownController;
-   else
-      return NoController;
-}
+   // Load up the joystick presets INI
+   joystickPresetsINI.SetPath(joindir(folderManager->iniDir, "joystick_presets.ini"));
+   joystickPresetsINI.ReadFile();
 
-
-const char *Joystick::joystickTypeToString(S32 controllerType)
-{
-   if(controllerType < ControllerTypeCount)
-      return PredefinedJoystickList[controllerType].nameForINI;
-
-   switch (controllerType)
+   // Loop through each section (joystick) and parse
+   for (S32 sectionId = 0; sectionId < joystickPresetsINI.GetNumSections(); sectionId++)
    {
-   case GenericController:
-      return "GenericController";
-   case UnknownController:
-      return "UnknownController";
-   default:
-      return "NoController";
+      JoystickInfo joystickInfo;
+
+      // Names names names
+      joystickInfo.identifier = joystickPresetsINI.sectionName(sectionId).c_str();
+      joystickInfo.name = joystickPresetsINI.GetValue(sectionId, "Name").c_str();
+      joystickInfo.searchString = joystickPresetsINI.GetValue(sectionId, "SearchString").c_str();
+      joystickInfo.isSearchStringSubstring =
+            lcase(joystickPresetsINI.GetValue(sectionId, "SearchStringIsSubstring")) == "yes";
+
+      // Axis of evil
+      joystickInfo.moveAxesSdlIndex[0] = stoi(joystickPresetsINI.GetValue(sectionId, "MoveAxisLeftRight"));
+      joystickInfo.moveAxesSdlIndex[1] = stoi(joystickPresetsINI.GetValue(sectionId, "MoveAxisUpDown"));
+      joystickInfo.shootAxesSdlIndex[0] = stoi(joystickPresetsINI.GetValue(sectionId, "ShootAxisLeftRight"));
+      joystickInfo.shootAxesSdlIndex[1] = stoi(joystickPresetsINI.GetValue(sectionId, "ShootAxisUpDown"));
+
+      Vector<string> sectionKeys;
+      joystickPresetsINI.GetAllKeys(sectionId, sectionKeys);
+
+      // Start the search for Button-related keys
+      Vector<string> buttonKeyNames;
+      string buttonName;
+      for(S32 i = 0; i < sectionKeys.size(); i++)
+      {
+         buttonName = sectionKeys[i];
+         if(buttonName.substr(0, 6) == "Button")   // Found a button!
+            buttonKeyNames.push_back(buttonName);
+      }
+
+      // Now load up button values
+      for(S32 i = 0; i < buttonKeyNames.size(); i++)
+      {
+         // Parse the complex string into key/value pairs
+         map<string, string> buttonInfoMap;
+         parseComplexStringToMap(joystickPresetsINI.GetValue(sectionId, buttonKeyNames[i]), buttonInfoMap);
+
+         ButtonInfo buttonInfo;
+
+         buttonInfo.button = stringToJoystickButton(buttonKeyNames[i]);
+         buttonInfo.label = buttonInfoMap["Label"];
+         buttonInfo.color = stringToColor(buttonInfoMap["Color"]);
+         buttonInfo.buttonShape = buttonLabelToButtonShape(buttonInfoMap["Shape"]);
+         buttonInfo.buttonSymbol = stringToButtonSymbol(buttonInfoMap["Label"]);
+         buttonInfo.sdlButton = buttonInfoMap["Raw"] == "" ? FakeRawButton : U8(stoi(buttonInfoMap["Raw"]));
+
+         // Set the button info with index of the Joystick::Button
+         joystickInfo.buttonMappings[buttonInfo.button] = buttonInfo;
+      }
+
+      JoystickPresetList.push_back(joystickInfo);
    }
+
+   // Now add a generic joystick for a fall back
+   JoystickPresetList.push_back(getGenericJoystickInfo());
 }
 
-
-const char *Joystick::joystickTypeToPrettyString(S32 controllerType)
-{
-   if(controllerType < ControllerTypeCount)
-      return PredefinedJoystickList[controllerType].name;
-   switch (controllerType)
-   {
-   case GenericController:
-      return "Generic Controller";
-   case UnknownController:
-      return "Unknown";
-   default:
-      return "No Controller";
-   }
-}
 
 } /* namespace Zap */

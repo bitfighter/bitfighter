@@ -28,7 +28,7 @@
 #include "goalZone.h"
 #include "loadoutZone.h"
 #include "soccerGame.h"          // For lua object defs
-#include "huntersGame.h"         // For lua object defs
+#include "NexusGame.h"         // For lua object defs
 #include "EngineeredItem.h"      // For lua object defs
 #include "PickupItem.h"          // For lua object defs
 #include "teleporter.h"          // For lua object defs
@@ -1533,7 +1533,7 @@ void Robot::registerClasses()
    Lunar<ForceFieldProjector>::Register(L);
    Lunar<FlagItem>::Register(L);
    Lunar<SoccerBallItem>::Register(L);
-   //Lunar<HuntersFlagItem>::Register(L);
+   //Lunar<NexusFlagItem>::Register(L);
    Lunar<ResourceItem>::Register(L);
 
    Lunar<LuaProjectile>::Register(L);
@@ -1542,7 +1542,7 @@ void Robot::registerClasses()
 
    Lunar<GoalZone>::Register(L);
    Lunar<LoadoutZone>::Register(L);
-   Lunar<HuntersNexusObject>::Register(L);
+   Lunar<NexusObject>::Register(L);
 }
 
 

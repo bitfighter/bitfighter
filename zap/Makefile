@@ -66,7 +66,6 @@ OBJECTS_SHARED=\
    goalZone.o\
    gridDB.o\
    HTFGame.o\
-   huntersGame.o\
    IniFile.o\
    InputCode.o\
    item.o\
@@ -82,6 +81,7 @@ OBJECTS_SHARED=\
    md5wrapper.o\
    move.o\
    moveObject.o\
+   NexusGame.o\
    PickupItem.o\
    playerInfo.o\
    Point.o\

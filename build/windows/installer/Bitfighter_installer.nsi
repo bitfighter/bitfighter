@@ -197,6 +197,7 @@ Section "Install"
 
   SetOutPath "$INSTDIR"
   File "..\..\..\exe\Bitfighter.exe"
+  File "..\..\..\exe\joystick_presets.ini"
   
   CreateShortCut "$INSTDIR\Play Bitfighter.lnk" "$INSTDIR\Bitfighter.exe" "-rootdatadir $\"$DOCUMENTS\Bitfighter$\""
 

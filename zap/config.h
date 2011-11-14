@@ -153,7 +153,7 @@ struct IniSettings      // With defaults specified
    bool controlsRelative;
    DisplayMode displayMode;
    DisplayMode oldDisplayMode;
-   U32 joystickType;
+   string joystickType;
    bool joystickLinuxUseOldDeviceSystem;
    bool echoVoice;
 
@@ -216,6 +216,9 @@ struct IniSettings      // With defaults specified
    S32 winXPos;
    S32 winYPos;
    F32 winSizeFact;
+
+   // Use 'fake fullscreen' vs real fullscreen
+   bool useFakeFullscreen;
 
    // Testing values
    S32 burstGraphicsMode;           // Choose a burst graphic representation

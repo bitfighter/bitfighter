@@ -55,7 +55,7 @@ private:
    bool mIsLandscape;                           // Is our screen landscape or portrait?
 
    F32 mPixelRatio;                             // Number of physical pixels that are used to draw a single virtual pixel
-   void calcPixelRaio();
+   void calcPixelRatio();
 
 public:
    ScreenInfo();      // Constructor

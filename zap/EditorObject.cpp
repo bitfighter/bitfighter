@@ -32,7 +32,7 @@
 #include "speedZone.h"           // For copy constructor
 #include "loadoutZone.h"
 #include "goalZone.h"
-#include "huntersGame.h"
+#include "NexusGame.h"
 #include "Colors.h"
 #include "game.h"
 #include "config.h"

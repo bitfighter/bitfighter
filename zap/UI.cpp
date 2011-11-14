@@ -276,7 +276,7 @@ void UserInterface::renderCurrent()    // static
       hpos = horizMargin;
       glColor(Colors::magenta);
 
-      for(U32 i = 0; i < MaxControllerButtons; i++)
+      for(U32 i = 0; i < Joystick::MaxSdlButtons; i++)
          if(Joystick::ButtonMask & (1 << i))
          {
             drawStringf( hpos, vpos, 18, "RawBut [%d]", i );

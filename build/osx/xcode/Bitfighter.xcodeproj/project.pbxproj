@@ -439,7 +439,7 @@
 		73D2F36D12E2D7E800EA5EBE /* gridDB.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2B312E2D7E800EA5EBE /* gridDB.cpp */; };
 		73D2F37112E2D7E800EA5EBE /* helperMenu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2B912E2D7E800EA5EBE /* helperMenu.cpp */; };
 		73D2F37212E2D7E800EA5EBE /* HTFGame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2BB12E2D7E800EA5EBE /* HTFGame.cpp */; };
-		73D2F37312E2D7E800EA5EBE /* huntersGame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2BC12E2D7E800EA5EBE /* huntersGame.cpp */; };
+		73D2F37312E2D7E800EA5EBE /* NexusGame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2BC12E2D7E800EA5EBE /* NexusGame.cpp */; };
 		73D2F37412E2D7E800EA5EBE /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 73D2F2BE12E2D7E800EA5EBE /* Info.plist */; };
 		73D2F37512E2D7E800EA5EBE /* IniFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2BF12E2D7E800EA5EBE /* IniFile.cpp */; };
 		73D2F37712E2D7E800EA5EBE /* item.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2C312E2D7E800EA5EBE /* item.cpp */; };
@@ -519,7 +519,7 @@
 		73D2F3E012E2D7E800EA5EBE /* gridDB.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2B312E2D7E800EA5EBE /* gridDB.cpp */; };
 		73D2F3E412E2D7E800EA5EBE /* helperMenu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2B912E2D7E800EA5EBE /* helperMenu.cpp */; };
 		73D2F3E512E2D7E800EA5EBE /* HTFGame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2BB12E2D7E800EA5EBE /* HTFGame.cpp */; };
-		73D2F3E612E2D7E800EA5EBE /* huntersGame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2BC12E2D7E800EA5EBE /* huntersGame.cpp */; };
+		73D2F3E612E2D7E800EA5EBE /* NexusGame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2BC12E2D7E800EA5EBE /* NexusGame.cpp */; };
 		73D2F3E712E2D7E800EA5EBE /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 73D2F2BE12E2D7E800EA5EBE /* Info.plist */; };
 		73D2F3E812E2D7E800EA5EBE /* IniFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2BF12E2D7E800EA5EBE /* IniFile.cpp */; };
 		73D2F3EA12E2D7E800EA5EBE /* item.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2C312E2D7E800EA5EBE /* item.cpp */; };
@@ -1368,8 +1368,8 @@
 		73D2F2B912E2D7E800EA5EBE /* helperMenu.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = helperMenu.cpp; path = ../../../zap/helperMenu.cpp; sourceTree = SOURCE_ROOT; };
 		73D2F2BA12E2D7E800EA5EBE /* helperMenu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = helperMenu.h; path = ../../../zap/helperMenu.h; sourceTree = SOURCE_ROOT; };
 		73D2F2BB12E2D7E800EA5EBE /* HTFGame.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HTFGame.cpp; path = ../../../zap/HTFGame.cpp; sourceTree = SOURCE_ROOT; };
-		73D2F2BC12E2D7E800EA5EBE /* huntersGame.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = huntersGame.cpp; path = ../../../zap/huntersGame.cpp; sourceTree = SOURCE_ROOT; };
-		73D2F2BD12E2D7E800EA5EBE /* huntersGame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = huntersGame.h; path = ../../../zap/huntersGame.h; sourceTree = SOURCE_ROOT; };
+		73D2F2BC12E2D7E800EA5EBE /* NexusGame.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = NexusGame.cpp; path = ../../../zap/NexusGame.cpp; sourceTree = SOURCE_ROOT; };
+		73D2F2BD12E2D7E800EA5EBE /* NexusGame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NexusGame.h; path = ../../../zap/NexusGame.h; sourceTree = SOURCE_ROOT; };
 		73D2F2BE12E2D7E800EA5EBE /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		73D2F2BF12E2D7E800EA5EBE /* IniFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IniFile.cpp; path = ../../../zap/IniFile.cpp; sourceTree = SOURCE_ROOT; };
 		73D2F2C012E2D7E800EA5EBE /* IniFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IniFile.h; path = ../../../zap/IniFile.h; sourceTree = SOURCE_ROOT; };
@@ -2626,8 +2626,8 @@
 				73D2F2B912E2D7E800EA5EBE /* helperMenu.cpp */,
 				73D2F2BA12E2D7E800EA5EBE /* helperMenu.h */,
 				73D2F2BB12E2D7E800EA5EBE /* HTFGame.cpp */,
-				73D2F2BC12E2D7E800EA5EBE /* huntersGame.cpp */,
-				73D2F2BD12E2D7E800EA5EBE /* huntersGame.h */,
+				73D2F2BC12E2D7E800EA5EBE /* NexusGame.cpp */,
+				73D2F2BD12E2D7E800EA5EBE /* NexusGame.h */,
 				73D2F2BE12E2D7E800EA5EBE /* Info.plist */,
 				73D2F2BF12E2D7E800EA5EBE /* IniFile.cpp */,
 				73D2F2C012E2D7E800EA5EBE /* IniFile.h */,
@@ -3647,7 +3647,7 @@
 				73D2F36D12E2D7E800EA5EBE /* gridDB.cpp in Sources */,
 				73D2F37112E2D7E800EA5EBE /* helperMenu.cpp in Sources */,
 				73D2F37212E2D7E800EA5EBE /* HTFGame.cpp in Sources */,
-				73D2F37312E2D7E800EA5EBE /* huntersGame.cpp in Sources */,
+				73D2F37312E2D7E800EA5EBE /* NexusGame.cpp in Sources */,
 				73D2F37512E2D7E800EA5EBE /* IniFile.cpp in Sources */,
 				73D2F37712E2D7E800EA5EBE /* item.cpp in Sources */,
 				73D2F37B12E2D7E800EA5EBE /* lineEditor.cpp in Sources */,
@@ -3999,7 +3999,7 @@
 				73D2F3E012E2D7E800EA5EBE /* gridDB.cpp in Sources */,
 				73D2F3E412E2D7E800EA5EBE /* helperMenu.cpp in Sources */,
 				73D2F3E512E2D7E800EA5EBE /* HTFGame.cpp in Sources */,
-				73D2F3E612E2D7E800EA5EBE /* huntersGame.cpp in Sources */,
+				73D2F3E612E2D7E800EA5EBE /* NexusGame.cpp in Sources */,
 				73D2F3E812E2D7E800EA5EBE /* IniFile.cpp in Sources */,
 				73D2F3EA12E2D7E800EA5EBE /* item.cpp in Sources */,
 				73D2F3EE12E2D7E800EA5EBE /* lineEditor.cpp in Sources */,

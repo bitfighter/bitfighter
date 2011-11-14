@@ -44,7 +44,7 @@
 #include "robot.h"
 #include "shipItems.h"           // For moduleInfos
 #include "stringUtils.h"
-#include "huntersGame.h"         // for creating new HuntersFlagItem
+#include "NexusGame.h"           // for creating new NexusFlagItem
 
 #include "IniFile.h"             // For CIniFile def
 #include "BanList.h"             // For banList kick duration
@@ -510,9 +510,16 @@ void Game::processLevelLoadLine(U32 argc, U32 id, const char **argv, GridDatabas
    {
       char obj[LevelLoader::MaxArgLen + 1];
 
-      // Convert any HuntersFlagItem into FlagItem, only HuntersFlagItem will show up on ship
+      // Convert any NexusFlagItem into FlagItem, only NexusFlagItem will show up on ship
       if(!stricmp(argv[0], "HuntersFlagItem") || !stricmp(argv[0], "NexusFlagItem"))
          strcpy(obj, "FlagItem");
+
+      // Convert legacy Hunters* objects
+      else if(!stricmp(argv[0], "HuntersGameType"))
+         strcpy(obj, "NexusGameType");
+      else if(!stricmp(argv[0], "HuntersNexusObject"))
+         strcpy(obj, "NexusObject");
+
       else
          strncpy(obj, argv[0], LevelLoader::MaxArgLen);
 
@@ -1199,6 +1206,8 @@ void ServerGame::setShuttingDown(bool shuttingDown, U16 time, GameConnection *wh
 
 
 // Parse through the chunk of data passed in and find parameters to populate levelInfo with
+// This is only used on the server to provide quick level information without having to load the level
+// (like with playlists or menus)
 // Warning: Mungs chunk!
 LevelInfo getLevelInfoFromFileChunk(char *chunk, S32 size, LevelInfo &levelInfo)
 {
@@ -1223,6 +1232,10 @@ LevelInfo getLevelInfoFromFileChunk(char *chunk, S32 size, LevelInfo &levelInfo)
 
             if(list.size() >= 1 && list[0].find("GameType") != string::npos)
             {
+               // Convert legacy Hunters game
+               if(!stricmp(list[0].c_str(), "HuntersGameType"))
+                  list[0] = "NexusGameType";
+
                TNL::Object *theObject = TNL::Object::create(list[0].c_str());  // Instantiate a gameType object
                GameType *gt = dynamic_cast<GameType*>(theObject);              // and cast it
                if(gt)

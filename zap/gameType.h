@@ -153,7 +153,7 @@ public:
       RabbitHoldsFlag,        // rabbit, called every second
       RabbitKilled,           // rabbit
       RabbitKills,            // rabbit
-      ReturnFlagsToNexus,     // hunters game
+      ReturnFlagsToNexus,     // nexus game
       ReturnFlagToZone,       // retrieve -> flag returned to zone
       LostFlag,               // retrieve -> enemy took flag
       ReturnTeamFlag,         // ctf -> holds enemy flag, touches own flag
@@ -218,7 +218,7 @@ public:
    bool levelHasLoadoutZone();           // Does the level have a loadout zone?
 
    // Game-specific location for the bottom of the scoreboard on the lower-right corner
-   // (because games like hunters have more stuff down there we need to look out for)
+   // (because games like nexus have more stuff down there we need to look out for)
    virtual U32 getLowerRightCornerScoreboardOffsetFromBottom() const;
 
    enum

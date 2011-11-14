@@ -84,7 +84,7 @@ const char *gGameTypeNames[] = {
    "GameType",                // Generic game type --> Bitmatch
    "CTFGameType",
    "HTFGameType",
-   "HuntersGameType",
+   "NexusGameType",
    "RabbitGameType",
    "RetrieveGameType",
    "SoccerGameType",
@@ -476,7 +476,7 @@ string GameType::getScoringEventDescr(ScoringEvent event)
       case RabbitKills:
          return "Kill other player if you are rabbit";
 
-      // Hunters specific:
+      // Nexus specific:
       case ReturnFlagsToNexus:
          return "Return flags to Nexus";
 
@@ -1428,7 +1428,7 @@ void GameType::queryItemsOfInterest()
       ItemOfInterest &ioi = mItemsOfInterest[i];
       if(ioi.theItem.isNull())
       {
-         // This can happen when dropping HuntersFlagItem in ZoneControlGameType
+         // This can happen when dropping NexusFlagItem in ZoneControlGameType
          TNLAssert(false,"item in ItemOfInterest is NULL. This can happen when an item got deleted.");
          mItemsOfInterest.erase(i);    // When not in debug mode, the TNLAssert is not fired.  Delete the problem object and carry on.
          break;

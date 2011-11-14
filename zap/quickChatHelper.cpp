@@ -120,13 +120,13 @@ void QuickChatHelper::render()
 
          // Draw key controls for selecting quick chat items
          if(inputMode == InputModeJoystick && renderNodes[i].buttonCode != KEY_UNKNOWN)     // Only draw joystick buttons when in joystick mode
-            JoystickRender::renderControllerButton((F32)xPos, (F32)yPos, settings->getIniSettings()->joystickType, renderNodes[i].buttonCode, false, 0);
+            JoystickRender::renderControllerButton((F32)xPos, (F32)yPos, Joystick::SelectedPresetIndex, renderNodes[i].buttonCode, false, 0);
 
          Color color = renderNodes[i].teamOnly ? gTeamChatColor : gGlobalChatColor;
          if(showKeys)
          {
             glColor(color);
-            JoystickRender::renderControllerButton(F32(xPos + indent), (F32)yPos, settings->getIniSettings()->joystickType, renderNodes[i].inputCode, false, 0);
+            JoystickRender::renderControllerButton(F32(xPos + indent), (F32)yPos, Joystick::SelectedPresetIndex, renderNodes[i].inputCode, false, 0);
          }
  
          glColor(color);

@@ -23,8 +23,8 @@
 //
 //------------------------------------------------------------------------------------
 
-#ifndef _HUNTERSGAME_H_
-#define _HUNTERSGAME_H_
+#ifndef _NEXUSGAME_H_
+#define _NEXUSGAME_H_
 
 #include "gameType.h"
 #include "item.h"
@@ -34,10 +34,10 @@ namespace Zap
 {
 
 class Ship;
-class HuntersFlagItem;
-class HuntersNexusObject;
+class NexusFlagItem;
+class NexusObject;
 
-class HuntersGameType : public GameType
+class NexusGameType : public GameType
 {
 private:
    typedef GameType Parent;
@@ -53,22 +53,21 @@ private:
    };
 
    Vector<YardSaleWaypoint> mYardSaleWaypoints;
-   Vector<SafePtr<HuntersNexusObject> > mNexus;
+   Vector<SafePtr<NexusObject> > mNexus;
 
 public:
-   HuntersGameType();      // Constructor
+   NexusGameType();      // Constructor
    bool processArguments(S32 argc, const char **argv, Game *game);
    string toString() const;
 
    bool mNexusIsOpen;      // Is the nexus open?
-   S32 getNexusTimeLeft() {return mNexusTimer.getCurrent(); }
+   S32 getNexusTimeLeft();
 
    // Info about this game type:
-   //bool isTeamGame() { return getGame()->getTeamCount() > 1; }
-   bool isFlagGame() { return true; }         // Well, technically not, but we'll morph flags to our own uses as we load the level
-   bool isTeamFlagGame() { return false; }    // Ditto... team info will be ignored... no need to show warning in editor
+   bool isFlagGame();
+   bool isTeamFlagGame();
 
-   bool isSpawnWithLoadoutGame() { return true; }
+   bool isSpawnWithLoadoutGame();
 
    void shipTouchFlag(Ship *ship, FlagItem *flag);
 
@@ -81,8 +80,8 @@ public:
    bool saveMenuItem(const MenuItem *menuItem, const char *key);
 #endif
 
-   void addNexus(HuntersNexusObject *theObject);
-   void shipTouchNexus(Ship *ship, HuntersNexusObject *nexus);
+   void addNexus(NexusObject *theObject);
+   void shipTouchNexus(Ship *ship, NexusObject *nexus);
    void onGhostAvailable(GhostConnection *connection);
    void idle(GameObject::IdleCallPath path, U32 deltaT);
 
@@ -92,14 +91,14 @@ public:
 
    void controlObjectForClientKilled(ClientInfo *theClient, GameObject *clientObject, GameObject *killerObject);
    void spawnShip(ClientInfo *clientInfo);
-   GameTypes getGameType() const { return NexusGame; }
-   const char *getGameTypeString() const { return "Nexus"; }     // Official game name
-   const char *getShortName() const { return "N"; }
-   const char *getInstructionString() { return "Collect flags from opposing players and bring them to the Nexus!"; }
-   bool canBeTeamGame() const { return true; }
-   bool canBeIndividualGame() const { return true; }
+   GameType::GameTypes getGameType() const;
+   const char *getGameTypeString() const;     // Official game name
+   const char *getShortName() const;
+   const char *getInstructionString();
+   bool canBeTeamGame() const;
+   bool canBeIndividualGame() const;
 
-   U32 getLowerRightCornerScoreboardOffsetFromBottom() const { return 88; }
+   U32 getLowerRightCornerScoreboardOffsetFromBottom() const;
 
    S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data);
 
@@ -112,21 +111,21 @@ public:
 
    // Message types
    enum {
-      HuntersMsgScore,
-      HuntersMsgYardSale,
-      HuntersMsgGameOverWin,
-      HuntersMsgGameOverTie,
+      NexusMsgScore,
+      NexusMsgYardSale,
+      NexusMsgGameOverWin,
+      NexusMsgGameOverTie,
    };
 
    TNL_DECLARE_RPC(s2cAddYardSaleWaypoint, (F32 x, F32 y));
    TNL_DECLARE_RPC(s2cSetNexusTimer, (U32 nexusTime, bool isOpen));
-   TNL_DECLARE_RPC(s2cHuntersMessage, (U32 msgIndex, StringTableEntry clientName, U32 flagCount, U32 score));
+   TNL_DECLARE_RPC(s2cNexusMessage, (U32 msgIndex, StringTableEntry clientName, U32 flagCount, U32 score));
 
-   TNL_DECLARE_CLASS(HuntersGameType);
+   TNL_DECLARE_CLASS(NexusGameType);
 };
 
 
-class HuntersFlagItem : public FlagItem
+class NexusFlagItem : public FlagItem
 {
    typedef FlagItem Parent;
 
@@ -142,35 +141,35 @@ protected:
    };
 
 public:
-   HuntersFlagItem(Point pos = Point(), Point vel = Point(0,0), bool useDropDelay = false);     // Constructor
+   NexusFlagItem(Point pos = Point(), Point vel = Point(0,0), bool useDropDelay = false);     // Constructor
 
    void renderItem(const Point &pos);
 
    void onMountDestroyed();
    void onItemDropped();
 
-   bool isItemThatMakesYouVisibleWhileCloaked() { return false; }
+   bool isItemThatMakesYouVisibleWhileCloaked();
 
-   void changeFlagCount(U32 change) { mFlagCount = change; setMaskBits(FlagCountMask); }
-   U32 getFlagCount() { return mFlagCount; }
+   void changeFlagCount(U32 change);
+   U32 getFlagCount();
 
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
-   bool isAtHome() { return false; }               // Nexus flags have no home, and are thus never there
-   void sendHome() { /* Do nothing */ }            // Nexus flags have no home, and can thus never be sent there
+   bool isAtHome();            // Nexus flags have no home, and are thus never there
+   void sendHome();            // Nexus flags have no home, and can thus never be sent there
 
-   TNL_DECLARE_CLASS(HuntersFlagItem);
+   TNL_DECLARE_CLASS(NexusFlagItem);
 };
 
 
-class HuntersNexusObject : public EditorPolygon
+class NexusObject : public EditorPolygon
 {
    typedef GameObject Parent;
 
 public:
-   HuntersNexusObject();      // Constructor
-   HuntersNexusObject *clone() const;
+   NexusObject();      // Constructor
+   NexusObject *clone() const;
 
    bool processArguments(S32 argc, const char **argv, Game *game);
 
@@ -180,7 +179,7 @@ public:
    void render();
    void renderDock();
 
-   S32 getRenderSortValue() { return -1; }
+   S32 getRenderSortValue();
 
    bool getCollisionPoly(Vector<Point> &polyPoints) const;
    bool collide(GameObject *hitObject);
@@ -190,30 +189,31 @@ public:
 
    TNL_DECLARE_RPC(s2cFlagsReturned, ());    // Alert the Nexus object that flags have been returned to it
 
-   TNL_DECLARE_CLASS(HuntersNexusObject);
+   TNL_DECLARE_CLASS(NexusObject);
 
 
    /////
    // Editor methods
-   const char *getEditorHelpString() { return "Area to bring flags in Hunter game.  Cannot be used in other games."; }
-   const char *getPrettyNamePlural() { return "Nexii"; }
-   const char *getOnDockName() { return "Nexus"; }
-   const char *getOnScreenName() { return "Nexus"; }
+   const char *getEditorHelpString();
+   const char *getPrettyNamePlural();
+   const char *getOnDockName();
+   const char *getOnScreenName();
    string toString(F32 gridSiz) const;
    
    void renderEditor(F32 currentScale);
 
 
-   HuntersNexusObject(lua_State *L) { /* Do nothing */ };   //  Lua constructor
-   static const char className[];                 // Class name as it appears to Lua scripts
-   static Lunar<HuntersNexusObject>::RegType methods[];
-   GameObject *getGameObject() { return this; }   // Return the underlying GameObject
-   S32 getClassID(lua_State *L) { return returnInt(L, NexusTypeNumber); }
+   NexusObject(lua_State *L);      //  Lua constructor
+   static const char className[];  // Class name as it appears to Lua scripts
+   static Lunar<NexusObject>::RegType methods[];
+   GameObject *getGameObject();    // Return the underlying GameObject
+   S32 getClassID(lua_State *L);
+
 private:
-   void push(lua_State *L) {  Lunar<HuntersNexusObject>::push(L, this); }
+   void push(lua_State *L);
 };
 
 };
 
-#endif  // _HUNTERSGAME_H_
+#endif  // _NEXUSGAME_H_
 

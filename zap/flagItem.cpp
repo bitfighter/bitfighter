@@ -47,7 +47,7 @@ FlagItem::FlagItem(Point pos) : Parent(pos, true, (F32)Ship::CollisionRadius) //
 }
 
 
-// Alternate constructor, currently used by HuntersFlag
+// Alternate constructor, currently used by NexusFlag
 FlagItem::FlagItem(Point pos, bool collidable, float radius, float mass) : Parent(pos, collidable, radius, mass)
 {
    initialize();
