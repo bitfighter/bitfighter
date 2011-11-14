@@ -131,6 +131,7 @@ using namespace TNL;
 #include "UIEditor.h"
 #include "UIErrorMessage.h"
 #include "ClientGame.h"
+#include "Cursors.h"          // For cursor defs
 #include "Joystick.h"
 #include "Event.h"
 #include "SDL/SDL.h"
@@ -1324,6 +1325,8 @@ int main(int argc, char **argv)
       InitSdlVideo();         // Get our main SDL rendering window all set up
       SDL_EnableUNICODE(1);   // Activate unicode ==> http://sdl.beuc.net/sdl.wiki/SDL_EnableUNICODE
       SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);      // SDL_DEFAULT_REPEAT_DELAY defined as 500
+
+      Cursor::init();   
 
       atexit(shutdownBitfighter);      // If user clicks the X on their game window, this runs shutdownBitfighter()
 

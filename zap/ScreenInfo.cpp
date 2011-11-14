@@ -95,6 +95,8 @@ S32 ScreenInfo::getPhysicalScreenHeight() { return mPhysicalScreenHeight; }
 // How many physical pixels make up a virtual one?
 F32 ScreenInfo::getPixelRatio() { return mPixelRatio; }
 
+F32 ScreenInfo::getScalingRatio() { return mScalingRatioY; }
+
 
 // Game canvas size in physical pixels, assuming full screen unstretched mode
 S32 ScreenInfo::getDrawAreaWidth()

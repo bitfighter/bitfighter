@@ -27,6 +27,8 @@
 #include "UIEditorMenus.h"    // For access to menu methods such as setObject
 #include "EditorObject.h"
 
+#include "Cursors.h"         // For various editor cursor
+
 #include "UINameEntry.h"
 #include "UIEditorInstructions.h"
 #include "UIChat.h"
@@ -136,7 +138,8 @@ EditorUserInterface::EditorUserInterface(ClientGame *game) : Parent(game)
    mLastUndoStateWasBarrierWidthChange = false;
 
    mUndoItems.resize(UNDO_STATES);     // Create slots for all our undos... also creates a ton of empty dbs.  Maybe we should be using pointers?
-   mScrollWithMouse = false;
+   mAutoScrollWithMouse = false;
+   mAutoScrollWithMouseReady = false;
 }
 
 
@@ -1011,6 +1014,8 @@ void EditorUserInterface::onActivate()
    mPreviewMode = false;
    entryMode = EntryNone;
 
+   SDL_SetCursor(Cursor::getDefault());
+
    mItemToLightUp = NULL;    
 
    mSaveMsgTimer = 0;
@@ -1033,6 +1038,7 @@ void EditorUserInterface::onDeactivate()
 void EditorUserInterface::onReactivate()     // Run when user re-enters the editor after testing, among other things
 {
    mDraggingObjects = false;  
+   SDL_SetCursor(Cursor::getDefault());
 
    if(mWasTesting)
    {
@@ -1761,7 +1767,7 @@ void EditorUserInterface::render()
    if(disableBlending)
       glDisable(GL_BLEND);
 
-   if(mScrollWithMouse)
+   if(mAutoScrollWithMouse)
    {
       glColor(Colors::white);
       drawFourArrows(mScrollWithMouseLocation);
@@ -2496,12 +2502,12 @@ void EditorUserInterface::onMouseMoved()
    if(mItemToLightUp)
       mItemToLightUp->setLitUp(true);
 
-   bool showMoveCursor = (mItemHit || mVertexHit != NONE || mEdgeHit != NONE || mDockItemHit);
+   //bool showMoveCursor = (mItemHit || mVertexHit != NONE || mEdgeHit != NONE || mDockItemHit);
 
 
    findSnapVertex();
-
-   SDL_ShowCursor((showMoveCursor && !mPreviewMode) ? SDL_ENABLE : SDL_ENABLE);     // ???
+   SDL_ShowCursor(SDL_ENABLE);
+   //SDL_ShowCursor((showMoveCursor && !mPreviewMode) ? SDL_ENABLE : SDL_ENABLE);     // ???
 }
 
 
@@ -2509,10 +2515,11 @@ void EditorUserInterface::onMouseDragged()
 {
    mMousePos.set(gScreenInfo.getMousePos());
 
-   if(getInputCodeState(MOUSE_MIDDLE))
+   if(getInputCodeState(MOUSE_MIDDLE) && mMousePos != mScrollWithMouseLocation)
    {
-      mCurrentOffset += mMousePos - mMoveOrigin;
-      mMoveOrigin = mMousePos;
+      mCurrentOffset += mMousePos - mScrollWithMouseLocation;
+      mScrollWithMouseLocation = mMousePos;
+      mAutoScrollWithMouseReady = false;
 
       return;
    }
@@ -2556,6 +2563,7 @@ void EditorUserInterface::onMouseDragged()
    }
 
    mDraggingObjects = true;
+   SDL_SetCursor(Cursor::getSpray());
 
 
    Point delta;
@@ -3195,10 +3203,8 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
    else if(inputCode == MOUSE_MIDDLE)     // Click wheel to drag
    {
       mScrollWithMouseLocation = mMousePos;
-      mMoveOrigin = mMousePos;   // for drag scroll
-      if(mScrollWithMouse)
-         mScrollWithMouseLocation.set(-1,-1);  // Prevent re-enabling auto scroll again when we want it to stop
-      mScrollWithMouse = false;  // turn off in case we were already auto scrolling.
+      mAutoScrollWithMouseReady = !mAutoScrollWithMouse; // Ready to scroll when button is released
+      mAutoScrollWithMouse = false;  // turn off in case we were already auto scrolling.
    }
 
    // Regular key handling from here on down
@@ -3336,10 +3342,12 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
       {
          clearSelection();
          mDraggingDockItem = mDockItemHit;
+         SDL_SetCursor(Cursor::getSpray());
       }
       else                 // Mouse is not on dock
       {
          mDraggingDockItem = NULL;
+         SDL_SetCursor(Cursor::getDefault());
 
          // rules for mouse down:
          // if the click has no shift- modifier, then
@@ -3697,8 +3705,7 @@ void EditorUserInterface::onKeyUp(InputCode inputCode)
          mPreviewMode = false;
          break;
       case MOUSE_MIDDLE:
-         if(mScrollWithMouseLocation == mMousePos) // If user press, don't move mouse, then releases button we can auto scroll
-            mScrollWithMouse = true;
+         mAutoScrollWithMouse = mAutoScrollWithMouseReady;
          break;
       case MOUSE_LEFT:
       case MOUSE_RIGHT:  
@@ -3754,6 +3761,7 @@ void EditorUserInterface::onKeyUp(InputCode inputCode)
 void EditorUserInterface::onFinishedDragging()
 {
    mDraggingObjects = false;
+   SDL_SetCursor(Cursor::getDefault());
 
    // Dragged item off the dock, then back on  ==> nothing changed; restore to unmoved state, which was stored on undo stack
    if(mouseOnDock() && mDraggingDockItem != NULL)
@@ -3869,8 +3877,11 @@ void EditorUserInterface::idle(U32 timeDelta)
    else if(mDown && !mUp)
       mCurrentOffset.y -= pixelsToScroll;
 
-   if(mScrollWithMouse)
-      mCurrentOffset += (mScrollWithMouseLocation - mMousePos) * pixelsToScroll / 256.f;
+   if(mAutoScrollWithMouse)
+   {
+      mCurrentOffset += (mScrollWithMouseLocation - mMousePos) * pixelsToScroll / 128.f;
+      onMouseMoved();  // Prevents skippy problem while dragging something
+   }
 
    Point mouseLevelPoint = convertCanvasToLevelCoord(mMousePos);
 
