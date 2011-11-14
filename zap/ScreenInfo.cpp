@@ -74,11 +74,11 @@ void ScreenInfo::setWindowSize(S32 width, S32 height)
    mWindowWidth = width; 
    mWindowHeight = height; 
 
-   calcPixelRaio();
+   calcPixelRatio();
 }
 
 
-void ScreenInfo::calcPixelRaio()
+void ScreenInfo::calcPixelRatio()
 {
    mPixelRatio = (F32)mWindowHeight / (F32)mGameCanvasHeight;
 }
@@ -141,7 +141,7 @@ void ScreenInfo::setGameCanvasSize(S32 width, S32 height)
    mGameCanvasWidth = width;
    mGameCanvasHeight = height;
 
-   calcPixelRaio();
+   calcPixelRatio();
 }
 
 void ScreenInfo::resetGameCanvasSize()
@@ -149,7 +149,7 @@ void ScreenInfo::resetGameCanvasSize()
    mGameCanvasWidth = GAME_WIDTH;
    mGameCanvasHeight = GAME_HEIGHT;
 
-   calcPixelRaio();
+   calcPixelRatio();
 }
 
 S32 ScreenInfo::getGameCanvasWidth() { return mGameCanvasWidth; }       // canvasWidth, usually 800
