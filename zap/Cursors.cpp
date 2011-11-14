@@ -114,7 +114,6 @@ SDL_Cursor *Cursor::toSDL()
 {
    reverseBits();
    return SDL_CreateCursor(bits, maskBits, width, height, hotX, hotY);
-
 }
 
 
@@ -124,6 +123,8 @@ void Cursor::init()
 
    mDefault = cursorDefault.toSDL();
    mSpray = cursorSpray.toSDL();
+
+   SDL_SetCursor(mDefault);
 
    mInitialized = true;
 }
@@ -136,13 +137,14 @@ void Cursor::reverseBits()
    // Algorithm from http://graphics.stanford.edu/~seander/bithacks.html#BitReverseObvious
 
    TNLAssert(ARRAYSIZE(bits) == ARRAYSIZE(maskBits), "Mask is not the same size as the bits!");
+   unsigned int v; // 32-bit word to reverse bit order
+
    for(S32 i = 0; i < ARRAYSIZE(bits); i++)
    {
-      bits[i]     = (bits[i]     * 0x0202020202ULL & 0x010884422010ULL) % 1023;     
-      maskBits[i] = (maskBits[i] * 0x0202020202ULL & 0x010884422010ULL) % 1023;     
+      bits[i] = ((bits[i] * 0x0802LU & 0x22110LU) | (bits[i] * 0x8020LU & 0x88440LU)) * 0x10101LU >> 16;    
+      maskBits[i] = ((maskBits[i] * 0x0802LU & 0x22110LU) | (maskBits[i] * 0x8020LU & 0x88440LU)) * 0x10101LU >> 16;    
    }
 }
-
 
 
 ////////////////////////////////////////
