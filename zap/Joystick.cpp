@@ -115,6 +115,8 @@ bool Joystick::initJoystick()
 
    DetectedJoystickNameList.clear();
 
+   bool hasBeenOpenedBefore = (sdlJoystick != NULL);
+
    // Close if already open.
    if (sdlJoystick != NULL)
    {
@@ -167,14 +169,16 @@ bool Joystick::initJoystick()
 
    // Set joystick type if we found anything
    // Otherwise, it makes more sense to remember what the user had last specified
-   if (joystickType != "NoJoystick")
+   if (!hasBeenOpenedBefore && joystickType != "NoJoystick")
    {
       gClientGame->getSettings()->getIniSettings()->joystickType = joystickType;
       setSelectedPresetIndex(Joystick::getJoystickIndex(joystickType));
    }
 
    // Set primary input to joystick if any controllers were found, even a generic one
-   if(joystickType == "NoJoystick")
+   if(hasBeenOpenedBefore)
+      ;  // do nothing when this was opened before
+   else if(joystickType == "NoJoystick")
       gClientGame->getSettings()->getIniSettings()->inputMode = InputModeKeyboard;
    else
       gClientGame->getSettings()->getIniSettings()->inputMode = InputModeJoystick;
