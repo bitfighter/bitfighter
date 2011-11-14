@@ -27,7 +27,7 @@
 #include "UIEditorMenus.h"    // For access to menu methods such as setObject
 #include "EditorObject.h"
 
-#include "Cursors.h"         // For various editor cursor
+#include "Cursor.h"          // For various editor cursor
 
 #include "UINameEntry.h"
 #include "UIEditorInstructions.h"

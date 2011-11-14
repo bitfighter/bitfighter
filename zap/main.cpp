@@ -131,7 +131,7 @@ using namespace TNL;
 #include "UIEditor.h"
 #include "UIErrorMessage.h"
 #include "ClientGame.h"
-#include "Cursors.h"          // For cursor defs
+#include "Cursor.h"          // For cursor defs
 #include "Joystick.h"
 #include "Event.h"
 #include "SDL/SDL.h"
