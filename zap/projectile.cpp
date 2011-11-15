@@ -1029,7 +1029,7 @@ void SpyBug::renderEditor(F32 currentScale)
 void SpyBug::renderDock()
 {
 #ifndef ZAP_DEDICATED
-   const S32 radius = 9;
+   const F32 radius = 9;
 
    glColor(getTeamColor(mTeam));
    drawFilledCircle(getVert(0), radius);

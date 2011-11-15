@@ -71,7 +71,7 @@ private:
 
    Vector<CreditsInfo> credits;
    void readCredits(const char *file);
-   S32 mTotalSize;
+   F32 mTotalSize;
 
 public:
    CreditsScroller(ClientGame *game);      // Constructor

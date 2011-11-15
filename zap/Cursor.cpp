@@ -139,12 +139,11 @@ void Cursor::reverseBits()
    // Algorithm from http://graphics.stanford.edu/~seander/bithacks.html#BitReverseObvious
 
    TNLAssert(ARRAYSIZE(bits) == ARRAYSIZE(maskBits), "Mask is not the same size as the bits!");
-   unsigned int v; // 32-bit word to reverse bit order
 
    for(U32 i = 0; i < ARRAYSIZE(bits); i++)
    {
-      bits[i] = ((bits[i] * 0x0802LU & 0x22110LU) | (bits[i] * 0x8020LU & 0x88440LU)) * 0x10101LU >> 16;    
-      maskBits[i] = ((maskBits[i] * 0x0802LU & 0x22110LU) | (maskBits[i] * 0x8020LU & 0x88440LU)) * 0x10101LU >> 16;    
+      bits[i] = U8(((bits[i] * 0x0802LU & 0x22110LU) | (bits[i] * 0x8020LU & 0x88440LU)) * 0x10101LU >> 16);    
+      maskBits[i] = U8(((maskBits[i] * 0x0802LU & 0x22110LU) | (maskBits[i] * 0x8020LU & 0x88440LU)) * 0x10101LU >> 16);    
    }
 }
 

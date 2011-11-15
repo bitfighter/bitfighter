@@ -30,7 +30,7 @@
 #include "Point.h"
 
 
-class SDL_Cursor;
+struct SDL_Cursor;
 
 namespace Zap 
 {

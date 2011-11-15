@@ -1271,7 +1271,7 @@ void EditorUserInterface::renderGrid()
    if(mPreviewMode)     // No grid in preview mode
       return;   
 
-   F32 colorFact = (mSnapContext == FULL_SNAPPING) ? 1 : 0.5;
+   F32 colorFact = (mSnapContext == FULL_SNAPPING) ? 1 : 0.5f;
 
    // Minor grid lines
    for(S32 i = 1; i >= 0; i--)
@@ -1572,7 +1572,7 @@ void EditorUserInterface::render()
          EditorObject *editorObj = dynamic_cast<EditorObject *>(fillVector[i]);
 
          if(i != 0 && editorObj->getTeam() != prevTeam)
-            glTranslatef(0, 0, 0.05);
+            glTranslatef(0, 0, 0.05f);
          prevTeam = editorObj->getTeam();
 
          Point pos = editorObj->getVert(0);
@@ -3196,9 +3196,9 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
    // Mouse wheel zooms in and out
 
    else if(inputCode == MOUSE_WHEEL_UP)
-      zoom(0.2);
+      zoom(0.2f);
    else if(inputCode == MOUSE_WHEEL_DOWN)
-      zoom(-0.2);
+      zoom(-0.2f);
    else if(inputCode == MOUSE_MIDDLE)     // Click wheel to drag
    {
       mScrollWithMouseLocation = mMousePos;

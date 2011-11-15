@@ -917,7 +917,7 @@ class LuaAsteroid;
 
 static F32 asteroidVel = 250;
 
-static F32 ASTEROID_INITIAL_SIZELEFT = 3;
+static const S32 ASTEROID_INITIAL_SIZELEFT = 3;
 
 static const F32 ASTEROID_MASS_LAST_SIZE = 1;
 static const F32 ASTEROID_RADIUS_MULTIPLYER_LAST_SIZE = 89 * 0.2f;

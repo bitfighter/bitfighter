@@ -113,7 +113,7 @@ void TeamShuffleHelper::calculateRenderSizes()
 
    columnWidth = -1;
    maxColumnWidth = (gScreenInfo.getGameCanvasWidth() - 100) / cols;
-   rowHeight = (2 * vpad) + (playersPerTeam * 1.2 * textSize);  // Magic number yay
+   rowHeight = (2 * vpad) + (playersPerTeam * textSize * 6 / 5);  // Magic number yay  (6 / 5 = 1.2)
 
    for(S32 i = 0; i < mTeams.size(); i++)
       for(S32 j = 0; j < mTeams[i].size(); j++)
