@@ -28,9 +28,11 @@
 #include "tnlAssert.h"
 #include "tnlLog.h"
 
-
 #include "gameObjectRender.h"
 #include "ScreenInfo.h"
+
+#include "SDL/SDL_opengl.h"
+#include "SDL/SDL_mouse.h"
 
 namespace Zap
 {
@@ -139,7 +141,7 @@ void Cursor::reverseBits()
    TNLAssert(ARRAYSIZE(bits) == ARRAYSIZE(maskBits), "Mask is not the same size as the bits!");
    unsigned int v; // 32-bit word to reverse bit order
 
-   for(S32 i = 0; i < ARRAYSIZE(bits); i++)
+   for(U32 i = 0; i < ARRAYSIZE(bits); i++)
    {
       bits[i] = ((bits[i] * 0x0802LU & 0x22110LU) | (bits[i] * 0x8020LU & 0x88440LU)) * 0x10101LU >> 16;    
       maskBits[i] = ((maskBits[i] * 0x0802LU & 0x22110LU) | (maskBits[i] * 0x8020LU & 0x88440LU)) * 0x10101LU >> 16;    

@@ -119,6 +119,7 @@ OBJECTS_SHARED=\
 
 OBJECTS_CLIENT=\
    ClientGame.o\
+   Cursor.o\
    engineerHelper.o\
    Event.o\
    gameObjectRender.o\

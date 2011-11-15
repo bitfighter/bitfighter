@@ -28,9 +28,9 @@
 
 #include "tnlTypes.h"
 #include "Point.h"
-#include "SDL/SDL_opengl.h"
-#include "SDL/SDL_mouse.h"
 
+
+class SDL_Cursor;
 
 namespace Zap 
 {
