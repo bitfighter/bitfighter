@@ -36,6 +36,7 @@
 #include "ScreenInfo.h"
 #include "JoystickRender.h"
 #include "ClientGame.h"
+#include "Cursor.h"
 
 #include "SDL/SDL.h"
 #include "SDL/SDL_opengl.h"
@@ -347,7 +348,7 @@ void KeyDefMenuUserInterface::onKeyDown(InputCode inputCode, char ascii)
             selectedIndex--;
       }
 
-      SDL_ShowCursor(SDL_DISABLE);    // Turn off cursor
+      SDL_SetCursor(Cursor::getTransparent());    // Turn off cursor
    }
    else if(inputCode == KEY_ESCAPE || inputCode == BUTTON_BACK)       // Quit
    {
@@ -364,7 +365,7 @@ void KeyDefMenuUserInterface::onKeyDown(InputCode inputCode, char ascii)
       if(selectedIndex < 0)
          selectedIndex = menuItems.size() - 1;
 
-      SDL_ShowCursor(SDL_DISABLE);    // Turn off cursor
+      SDL_SetCursor(Cursor::getTransparent());    // Turn off cursor
    }
    else if(inputCode == KEY_DOWN || inputCode == BUTTON_DPAD_DOWN)    // Next item
    {
@@ -374,7 +375,7 @@ void KeyDefMenuUserInterface::onKeyDown(InputCode inputCode, char ascii)
       if(selectedIndex >= menuItems.size())
          selectedIndex = 0;
 
-      SDL_ShowCursor(SDL_DISABLE);    // Turn off cursor
+      SDL_SetCursor(Cursor::getTransparent());    // Turn off cursor
    }
    else if(inputCode == keyOUTGAMECHAT)     // Turn on Global Chat overlay
    {
@@ -392,7 +393,7 @@ void KeyDefMenuUserInterface::onKeyDown(InputCode inputCode, char ascii)
 // Handle mouse input, figure out which menu item we're over, and highlight it
 void KeyDefMenuUserInterface::onMouseMoved(S32 x, S32 y)
 {
-   SDL_ShowCursor(SDL_ENABLE);  // Show cursor when user moves mouse
+   SDL_SetCursor(Cursor::getDefault());  // Show cursor when user moves mouse
 
    const Point *mousePos = gScreenInfo.getMousePos();
 

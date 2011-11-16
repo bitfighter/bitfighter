@@ -2505,8 +2505,7 @@ void EditorUserInterface::onMouseMoved()
 
 
    findSnapVertex();
-   SDL_ShowCursor(SDL_ENABLE);
-   //SDL_ShowCursor((showMoveCursor && !mPreviewMode) ? SDL_ENABLE : SDL_ENABLE);     // ???
+   SDL_SetCursor(Cursor::getDefault());
 }
 
 
@@ -3484,7 +3483,7 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
          mShowMode = (ShowMode) 0;        // First mode
 
       if(mShowMode == ShowWallsOnly && !mDraggingObjects)
-         SDL_ShowCursor(SDL_ENABLE);
+         SDL_SetCursor(Cursor::getDefault());
 
       populateDock();   // Different modes have different items
 
@@ -4033,7 +4032,7 @@ void EditorUserInterface::testLevelStart()
    string tmpFileName = mEditFileName;
    mEditFileName = "editor.tmp";
 
-   SDL_ShowCursor(SDL_DISABLE);        // Turn off cursor
+   SDL_SetCursor(Cursor::getTransparent());  // Turn off cursor
    bool nts = mNeedToSave;             // Save these parameters because they are normally reset when a level is saved.
    S32 auul = mAllUndoneUndoLevel;     // Since we're only saving a temp copy, we really shouldn't reset them...
 
@@ -4161,7 +4160,7 @@ void EditorMenuUserInterface::setupMenus()
 
 void EditorMenuUserInterface::onEscape()
 {
-   SDL_ShowCursor(SDL_DISABLE);
+   SDL_SetCursor(Cursor::getTransparent());
    getUIManager()->reactivatePrevUI();
 }
 

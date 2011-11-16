@@ -35,6 +35,7 @@
 #include "gameType.h"      // For MAX_TEAMS
 #include "ScreenInfo.h"
 #include "ClientGame.h"
+#include "Cursor.h"
 
 #include "SDL/SDL.h"
 #include "SDL/SDL_opengl.h"
@@ -113,7 +114,7 @@ void TeamDefUserInterface::onActivate()
    // Display an intitial message to users
    errorMsgTimer.reset(errorMsgDisplayTime);
    errorMsg = "";
-   SDL_ShowCursor(SDL_DISABLE);
+   SDL_SetCursor(Cursor::getTransparent());
 }
 
 
@@ -338,7 +339,7 @@ void TeamDefUserInterface::onKeyDown(InputCode inputCode, char ascii)
       if(selectedIndex < 0)
          selectedIndex = getGame()->getTeamCount() - 1;
       playBoop();
-      SDL_ShowCursor(SDL_DISABLE);
+      SDL_SetCursor(Cursor::getTransparent());
 
    }
    else if(inputCode == KEY_DOWN || inputCode == BUTTON_DPAD_DOWN)    // Next item
@@ -347,7 +348,7 @@ void TeamDefUserInterface::onKeyDown(InputCode inputCode, char ascii)
       if(selectedIndex >= getGame()->getTeamCount())
          selectedIndex = 0;
       playBoop();
-      SDL_ShowCursor(SDL_DISABLE);
+      SDL_SetCursor(Cursor::getTransparent());
    }
    else if(inputCode == keyDIAG)     // Turn on diagnostic overlay
    {
@@ -364,7 +365,7 @@ void TeamDefUserInterface::onKeyDown(InputCode inputCode, char ascii)
 
 void TeamDefUserInterface::onMouseMoved(S32 x, S32 y)
 {
-   SDL_ShowCursor(SDL_ENABLE);  // TODO:  was GLUT_CURSOR_RIGHT_ARROW  // Show cursor when user moves mouse
+   SDL_SetCursor(Cursor::getDefault());
 
    S32 teams = getGame()->getTeamCount();
 

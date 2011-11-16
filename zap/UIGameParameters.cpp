@@ -35,6 +35,7 @@
 #include "config.h"
 #include "gameType.h"
 #include "ClientGame.h"
+#include "Cursor.h"
 
 #include "SDL/SDL.h"
 #include "SDL/SDL_opengl.h"
@@ -69,7 +70,7 @@ void GameParamUserInterface::onActivate()
 
    updateMenuItems();   
    origGameParams = getGame()->toString();     // Save a copy of the params coming in for comparison when we leave to see what changed
-   SDL_ShowCursor(SDL_DISABLE);
+   SDL_SetCursor(Cursor::getTransparent());
 }
 
 

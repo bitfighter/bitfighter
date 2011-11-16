@@ -44,6 +44,7 @@
 #include "ScreenInfo.h"
 #include "Joystick.h"
 #include "JoystickRender.h"
+#include "Cursor.h"
 
 #include "SDL/SDL.h"
 #include "SDL/SDL_opengl.h"
@@ -410,7 +411,7 @@ void MenuUserInterface::onMouseMoved()
       return;
 
    itemSelectedWithMouse = true;
-   SDL_ShowCursor(SDL_ENABLE);  // Show cursor when user moves mouse
+   SDL_SetCursor(Cursor::getDefault());  // Show cursor when user moves mouse
 
    selectedIndex = getSelectedMenuItem();
 
@@ -498,7 +499,7 @@ void MenuUserInterface::onKeyDown(InputCode inputCode, char ascii)
 
    // Finally, since the user has indicated they want to use keyboard/controller input, hide the cursor
    if(inputCode != MOUSE_LEFT && inputCode != MOUSE_MIDDLE && inputCode != MOUSE_RIGHT && inputCode != KEY_ESCAPE)
-      SDL_ShowCursor(SDL_DISABLE);
+      SDL_SetCursor(Cursor::getTransparent());
 }
 
 

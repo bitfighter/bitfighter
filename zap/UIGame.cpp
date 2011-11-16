@@ -56,6 +56,7 @@
 #include "ScreenInfo.h"
 #include "ClientGame.h"
 #include "Colors.h"
+#include "Cursor.h"
 
 #include "../tnl/tnlEndian.h"
 
@@ -227,7 +228,7 @@ void GameUserInterface::onActivate()
 {
    mDisableShipKeyboardInput = false;  // Make sure our ship controls are active
    mMissionOverlayActive = false;      // Turn off the mission overlay (if it was on)
-   SDL_ShowCursor(SDL_DISABLE);        // Turn off cursor
+   SDL_SetCursor(Cursor::getTransparent());        // Turn off cursor
    onMouseMoved();                     // Make sure ship pointed is towards mouse
 
    // Clear out any lingering chat messages
@@ -260,7 +261,7 @@ void GameUserInterface::onReactivate()
       unsuspendGame();
 
    mDisableShipKeyboardInput = false;
-   SDL_ShowCursor(SDL_DISABLE);    // Turn off cursor
+   SDL_SetCursor(Cursor::getTransparent());    // Turn off cursor
    enterMode(PlayMode);
 
    for(S32 i = 0; i < ShipModuleCount; i++)

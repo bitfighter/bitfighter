@@ -37,6 +37,7 @@
 #include "InputCode.h"
 #include "ScreenInfo.h"
 #include "gameObjectRender.h"
+#include "Cursor.h"
 
 #include "tnlRandom.h"
 
@@ -1025,14 +1026,14 @@ void QueryServersUserInterface::onKeyDown(InputCode inputCode, char ascii)
    {
       backPage();
 
-      SDL_ShowCursor(SDL_DISABLE);        // Hide cursor when navigating with keyboard or joystick
+      SDL_SetCursor(Cursor::getTransparent());        // Hide cursor when navigating with keyboard or joystick
       mItemSelectedWithMouse = false;
    }
    else if(inputCode == KEY_PAGEDOWN) 
    {
       advancePage();
 
-      SDL_ShowCursor(SDL_DISABLE);        // Hide cursor when navigating with keyboard or joystick
+      SDL_SetCursor(Cursor::getTransparent());        // Hide cursor when navigating with keyboard or joystick
       mItemSelectedWithMouse = false;
    }
    else if (inputCode == KEY_DELETE || inputCode == KEY_BACKSPACE)       // Do backspacey things
@@ -1051,7 +1052,7 @@ void QueryServersUserInterface::onKeyDown(InputCode inputCode, char ascii)
          currentIndex = servers.size() - 1;
       mPage = currentIndex / getServersPerPage(); 
 
-      SDL_ShowCursor(SDL_DISABLE);        // Hide cursor when navigating with keyboard or joystick
+      SDL_SetCursor(Cursor::getTransparent());        // Hide cursor when navigating with keyboard or joystick
       mItemSelectedWithMouse = false;
       selectedId = servers[currentIndex].id;
    }
@@ -1063,7 +1064,7 @@ void QueryServersUserInterface::onKeyDown(InputCode inputCode, char ascii)
 
       mPage = currentIndex / getServersPerPage();
 
-      SDL_ShowCursor(SDL_DISABLE);        // Hide cursor when navigating with keyboard or joystick
+      SDL_SetCursor(Cursor::getTransparent());        // Hide cursor when navigating with keyboard or joystick
       mItemSelectedWithMouse = false;
       selectedId = servers[currentIndex].id;
    }
@@ -1095,7 +1096,7 @@ void QueryServersUserInterface::onKeyUp(InputCode inputCode)
 {
    if(mDraggingDivider)
    {
-      SDL_ShowCursor(SDL_ENABLE);
+      SDL_SetCursor(Cursor::getDefault());
       mDraggingDivider = false;
    }
 }
@@ -1154,7 +1155,7 @@ void QueryServersUserInterface::onMouseMoved(S32 x, S32 y)
 
    const Point *mousePos = gScreenInfo.getMousePos();
 
-   SDL_ShowCursor(SDL_ENABLE);
+   SDL_SetCursor(Cursor::getDefault());
 
    if(mouseInHeaderRow(mousePos))
    {
@@ -1168,7 +1169,7 @@ void QueryServersUserInterface::onMouseMoved(S32 x, S32 y)
    }
 
    else if(isMouseOverDivider())
-      SDL_ShowCursor(SDL_ENABLE);
+      SDL_SetCursor(Cursor::getDefault());
 
    else
       mHighlightColumn = mSortColumn;
