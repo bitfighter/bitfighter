@@ -1366,7 +1366,7 @@ Robot::~Robot()
 
    // Server only from here on down
 
-   if(getGame()->getGameType())
+   if(getGame() && getGame()->getGameType())
       getGame()->getGameType()->serverRemoveClient(mClientInfo.get());
 
 
