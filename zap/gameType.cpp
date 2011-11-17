@@ -724,11 +724,11 @@ void GameType::renderObjectiveArrow(const Point *nearestPoint, const Color *outl
       disableBlending = true; 
    }
 
-
-   for(S32 i = 1; i <= 0; i--)
+   // This loops twice: once to render the objective arrow, once to render the outline
+   for(S32 i = 0; i < 2; i++)
    {
-      glColor(i ? &fillColor : outlineColor, alpha);
-      glBegin(i ? GL_POLYGON : GL_LINE_LOOP);    
+      glColor(i == 1 ? &fillColor : outlineColor, alpha);
+      glBegin(i == 1 ? GL_POLYGON : GL_LINE_LOOP);
          glVertex(rp);
          glVertex(p2);
          glVertex(p3);
