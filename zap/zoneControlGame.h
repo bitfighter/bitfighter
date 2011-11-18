@@ -41,42 +41,27 @@ private:
    S32 mFlagTeam;
 
 public:
-   ZoneControlGameType()
-   {
-      mFlagTeam = -1;
-   }
+   ZoneControlGameType();  // Constructor
 
-   bool isFlagGame() { return true; }
+   bool isFlagGame();
 
-   void onGhostAvailable(GhostConnection *theConnection)
-   {
-      Parent::onGhostAvailable(theConnection);
-      NetObject::setRPCDestConnection(theConnection);
-      s2cSetFlagTeam(mFlagTeam);
-      NetObject::setRPCDestConnection(NULL);
-   }
+   void onGhostAvailable(GhostConnection *theConnection);
 
    void shipTouchFlag(Ship *ship, FlagItem *flag);
    void itemDropped(Ship *ship, MoveItem *item);
    void addZone(GoalZone *zone);
 
-   void addFlag(FlagItem *flag)     // Server only
-   {
-      Parent::addFlag(flag);
-      mFlag = flag;
-      if(!isGhost())
-         addItemOfInterest(flag);      // Server only
-   }
+   void addFlag(FlagItem *flag);     // Server only
 
    void shipTouchZone(Ship *ship, GoalZone *zone);
 
-   GameTypes getGameType() const { return ZoneControlGame; }
-   const char *getGameTypeString() const { return "Zone Control"; }
-   const char *getShortName() const { return "ZC"; }
-   const char *getInstructionString() { return "Capture all the zones by carrying the flag into them! "; }
-   bool isTeamGame() { return true; }
-   bool canBeTeamGame() const { return true; }
-   bool canBeIndividualGame() const { return false; }
+   GameTypes getGameType() const;
+   const char *getGameTypeString() const;
+   const char *getShortName() const;
+   const char *getInstructionString();
+   bool isTeamGame();
+   bool canBeTeamGame() const;
+   bool canBeIndividualGame() const;
 
 
    void renderInterfaceOverlay(bool scoreboardVisible);

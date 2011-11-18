@@ -43,9 +43,9 @@ class HTFGameType : public GameType
       ScoreTime = 5000,    // Time flag is in your zone to get points for your team
    };
 public:
-   HTFGameType() { /* nothing here */ }    // Constructor, such as it is
+   HTFGameType();    // Constructor
 
-   bool isFlagGame() { return true; }
+   bool isFlagGame();
 
    // Server only
    void addFlag(FlagItem *flag);
@@ -71,13 +71,13 @@ public:
 
    void renderInterfaceOverlay(bool scoreboardVisible);
 
-   GameTypes getGameType() const { return HTFGame; }
-   const char *getGameTypeString() const { return "Hold the Flag"; }
-   const char *getShortName() const { return "HTF"; }
-   const char *getInstructionString() { return "Hold the flags at your capture zones!"; }
-   bool isTeamGame() { return true; }
-   bool canBeTeamGame() const { return true; }
-   bool canBeIndividualGame() const { return false; }
+   GameTypes getGameType() const;
+   const char *getGameTypeString() const;
+   const char *getShortName() const;
+   const char *getInstructionString();
+   bool isTeamGame();
+   bool canBeTeamGame() const;
+   bool canBeIndividualGame() const;
 
    // What does a particular scoring event score?
    S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data);

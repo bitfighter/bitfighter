@@ -48,7 +48,7 @@ public:
    void addZone(GoalZone *zone);
 
 
-   bool isFlagGame() { return true; }
+   bool isFlagGame();
 
 
    // Note -- neutral or enemy-to-all robots can't pick up the flag!!!
@@ -76,15 +76,15 @@ public:
    // What does a particular scoring event score?
    S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data);
 
-   bool isTeamFlagGame() { return true; }
+   bool isTeamFlagGame();
 
-   GameTypes getGameType() const { return RetrieveGame; }
-   const char *getGameTypeString() const { return "Retrieve"; }
-   const char *getShortName() const { return "Ret"; }
-   const char *getInstructionString() { return "Find all the flags, and bring them to your capture zones!"; }
-   bool isTeamGame() { return true; }
-   bool canBeTeamGame() const { return true; }
-   bool canBeIndividualGame() const { return false; }
+   GameTypes getGameType() const;
+   const char *getGameTypeString() const;
+   const char *getShortName() const;
+   const char *getInstructionString();
+   bool isTeamGame();
+   bool canBeTeamGame() const;
+   bool canBeIndividualGame() const;
 
 
    TNL_DECLARE_CLASS(RetrieveGameType);

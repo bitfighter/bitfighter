@@ -27,13 +27,12 @@
 #define _RABBITGAME_H_
 
 #include "gameType.h"
-#include "item.h"
-#include "gameWeapons.h"
-#include "shipItems.h"
 
 namespace Zap
 {
+
 class Ship;
+class FlagItem;
 
 class RabbitGameType : public GameType
 {
@@ -55,12 +54,7 @@ public:
       RabbitMsgGameOverTie
    };
 
-   RabbitGameType()
-   {
-      setWinningScore(100);
-      mFlagReturnTimer = 30 * 1000;
-      mFlagScoreTimer = 5 * 1000;
-   }
+   RabbitGameType();  // Constructor
 
    bool processArguments(S32 argc, const char **argv, Game *game);
    string toString() const;
@@ -77,8 +71,8 @@ public:
    void itemDropped(Ship *ship, MoveItem *item);
    void shipTouchFlag(Ship *ship, FlagItem *flag);
 
-   bool isFlagGame() { return true; }
-   S32 getFlagCount() { return mFlags.size(); }
+   bool isFlagGame();
+   S32 getFlagCount();
 
    bool objectCanDamageObject(GameObject *damager, GameObject *victim);
    void controlObjectForClientKilled(ClientInfo *theClient, GameObject *clientObject, GameObject *killerObject);
@@ -96,15 +90,15 @@ public:
    void setFlagScore(S32 pointsPerMinute);
    S32 getFlagScore() const;
 
-   GameTypes getGameType() const { return RabbitGame; }
-   const char *getGameTypeString() const { return "Rabbit"; }
-   const char *getShortName() const { return "Rab"; }
-   const char *getInstructionString() { return "Grab the flag and hold it for as long as you can!"; }
-   //bool isTeamGame() { return getGame()->getTeamCount() != 1; }
-   bool canBeTeamGame() const { return true; }
-   bool canBeIndividualGame() const { return true; }
+   GameTypes getGameType() const;
+   const char *getGameTypeString() const;
+   const char *getShortName() const;
+   const char *getInstructionString();
+   //bool isTeamGame();
+   bool canBeTeamGame() const;
+   bool canBeIndividualGame() const;
 
-   bool isSpawnWithLoadoutGame() { return true; }
+   bool isSpawnWithLoadoutGame();
 
    S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data);
 

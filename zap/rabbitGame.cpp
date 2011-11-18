@@ -100,6 +100,27 @@ TNL_IMPLEMENT_NETOBJECT_RPC(RabbitGameType, s2cRabbitMessage, (U32 msgIndex, Str
 //-----------------------------------------------------
 TNL_IMPLEMENT_NETOBJECT(RabbitGameType);
 
+// Constructor
+RabbitGameType::RabbitGameType()
+{
+   setWinningScore(100);
+   mFlagReturnTimer = 30 * 1000;
+   mFlagScoreTimer = 5 * 1000;
+}
+
+
+bool RabbitGameType::isFlagGame()
+{
+   return true;
+}
+
+
+S32 RabbitGameType::getFlagCount()
+{
+   return mFlags.size();
+}
+
+
 bool RabbitGameType::processArguments(S32 argc, const char **argv, Game *game)
 {
    if (argc != 4)
@@ -429,6 +450,53 @@ S32 RabbitGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEve
    }
 }
 
+
+RabbitGameType::GameTypes RabbitGameType::getGameType() const
+{
+   return RabbitGame;
+}
+
+
+const char *RabbitGameType::getGameTypeString() const
+{
+   return "Rabbit";
+}
+
+
+const char *RabbitGameType::getShortName() const
+{
+   return "Rab";
+}
+
+
+const char *RabbitGameType::getInstructionString()
+{
+   return "Grab the flag and hold it for as long as you can!";
+}
+
+
+//bool RabbitGameType::isTeamGame()
+//{
+//   return getGame()->getTeamCount() != 1;
+//}
+
+
+bool RabbitGameType::canBeTeamGame() const
+{
+   return true;
+}
+
+
+bool RabbitGameType::canBeIndividualGame() const
+{
+   return true;
+}
+
+
+bool RabbitGameType::isSpawnWithLoadoutGame()
+{
+   return true;
+}
 
 
 };  //namespace Zap

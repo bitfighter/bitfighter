@@ -47,6 +47,36 @@ GAMETYPE_RPC_S2C(ZoneControlGameType, s2cSetFlagTeam, (S32 flagTeam), (flagTeam)
    mFlagTeam = flagTeam;
 }
 
+// Constructor
+ZoneControlGameType::ZoneControlGameType()
+{
+   mFlagTeam = -1;
+}
+
+
+bool ZoneControlGameType::isFlagGame()
+{
+   return true;
+}
+
+
+void ZoneControlGameType::onGhostAvailable(GhostConnection *theConnection)
+{
+   Parent::onGhostAvailable(theConnection);
+   NetObject::setRPCDestConnection(theConnection);
+   s2cSetFlagTeam(mFlagTeam);
+   NetObject::setRPCDestConnection(NULL);
+}
+
+
+void ZoneControlGameType::addFlag(FlagItem *flag)
+{
+   Parent::addFlag(flag);
+   mFlag = flag;
+   if(!isGhost())
+      addItemOfInterest(flag);      // Server only
+}
+
 
 // Ship picks up the flag
 void ZoneControlGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
@@ -328,12 +358,54 @@ S32 ZoneControlGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent sco
             return -1;
          case CaptureZone:
             return 1;
-       case UncaptureZone:    // This pretty much has to stay at 0, as the player doing the "uncapturing" will
+         case UncaptureZone:    // This pretty much has to stay at 0, as the player doing the "uncapturing" will
             return 0;         // also be credited for a CaptureZone event
-       default:
+         default:
             return naScore;
       }
    }
+}
+
+
+ZoneControlGameType::GameTypes ZoneControlGameType::getGameType() const
+{
+   return ZoneControlGame;
+}
+
+
+const char *ZoneControlGameType::getGameTypeString() const
+{
+   return "Zone Control";
+}
+
+
+const char *ZoneControlGameType::getShortName() const
+{
+   return "ZC";
+}
+
+
+const char *ZoneControlGameType::getInstructionString()
+{
+   return "Capture all the zones by carrying the flag into them! ";
+}
+
+
+bool ZoneControlGameType::isTeamGame()
+{
+   return true;
+}
+
+
+bool ZoneControlGameType::canBeTeamGame() const
+{
+   return true;
+}
+
+
+bool ZoneControlGameType::canBeIndividualGame() const
+{
+   return false;
 }
 
 

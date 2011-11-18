@@ -273,6 +273,60 @@ S32 CTFGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent,
 }
 
 
+CTFGameType::GameTypes CTFGameType::getGameType() const
+{
+   return CTFGame;
+}
+
+
+const char *CTFGameType::getGameTypeString() const
+{
+   return "Capture the Flag";
+}
+
+
+const char *CTFGameType::getShortName() const
+{
+   return "CTF";
+}
+
+
+const char *CTFGameType::getInstructionString()
+{
+   return "Take the opposing team's flag and touch it to your flag!";
+}
+
+
+bool CTFGameType::isFlagGame()
+{
+   return true;
+}
+
+
+bool CTFGameType::isTeamGame()
+{
+   return true;
+}
+
+
+bool CTFGameType::canBeTeamGame()  const
+{
+   return true;
+}
+
+
+bool CTFGameType::canBeIndividualGame() const
+{
+   return false;
+}
+
+
+bool CTFGameType::isTeamFlagGame()
+{
+   return true;
+}
+
+
 };
 
 

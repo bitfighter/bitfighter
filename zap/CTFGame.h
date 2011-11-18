@@ -27,7 +27,6 @@
 #define _CTFGAME_H_
 
 #include "gameType.h"
-#include "item.h"
 
 namespace Zap
 {
@@ -48,16 +47,16 @@ public:
    void renderInterfaceOverlay(bool scoreboardVisible);
    bool teamHasFlag(S32 teamId) const;
 
-   GameTypes getGameType() const { return CTFGame; }
-   const char *getGameTypeString() const { return "Capture the Flag"; }
-   const char *getShortName() const { return "CTF"; }
-   const char *getInstructionString() { return "Take the opposing team's flag and touch it to your flag!"; }
+   GameTypes getGameType() const;
+   const char *getGameTypeString() const;
+   const char *getShortName() const;
+   const char *getInstructionString();
    
-   bool isFlagGame() { return true; }
-   bool isTeamGame() { return true; }
-   bool canBeTeamGame()  const { return true; }
-   bool canBeIndividualGame() const { return false; }
-   bool isTeamFlagGame() { return true; }    // Teams matter with our flags in this game
+   bool isFlagGame();
+   bool isTeamGame();
+   bool canBeTeamGame()  const;
+   bool canBeIndividualGame() const;
+   bool isTeamFlagGame();    // Teams matter with our flags in this game
 
    S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data);
 
