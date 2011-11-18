@@ -58,7 +58,7 @@ struct CmdLineSettings;
 struct FolderManager 
 {
    // Constructors
-   FolderManager() { /* Do nothing */ };
+   FolderManager();
 
    FolderManager(const string &levelDir, const string &robotDir,     const string &sfxDir, const string &musicDir, 
                  const string &cacheDir, const string &iniDir,       const string &logDir, const string &screenshotDir, 
@@ -93,9 +93,10 @@ class GameSettings;
 
 struct CmdLineSettings
 {
-   CmdLineSettings() { init(); }    // Quickie constructor
-   
+   CmdLineSettings();      // Constructor
 
+   void init();
+   
    bool dedicatedMode;     // Will server be dedicated?
 
    string server;
@@ -128,21 +129,6 @@ struct CmdLineSettings
    S32 ypos;
 
    Vector<string> specifiedLevels;
-
-   void init()
-   {
-      dedicatedMode = false;
-
-      loss = 0;
-      lag = 0;
-      stutter = 0;
-      forceUpdate = false;
-      maxPlayers = -1;
-      displayMode = DISPLAY_MODE_UNKNOWN;
-      winWidth = -1;
-      xpos = -9999;
-      ypos = -9999;
-   };
 };
 
 

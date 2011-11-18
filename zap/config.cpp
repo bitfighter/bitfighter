@@ -1709,6 +1709,13 @@ void writeSkipList(CIniFile *ini, const Vector<string> *levelSkipList)
 //////////////////////////////////
 
 // Constructor
+FolderManager::FolderManager()
+{
+   // Do nothing
+}
+
+
+// Constructor
 FolderManager::FolderManager(const string &levelDir, const string &robotDir,     const string &sfxDir, const string &musicDir, 
                              const string &cacheDir, const string &iniDir,       const string &logDir, const string &screenshotDir, 
                              const string &luaDir,   const string &rootDataDir)
@@ -1955,6 +1962,32 @@ string FolderManager::findBotFile(const string &filename) const
 
 ////////////////////////////////////////
 ////////////////////////////////////////
+
+CmdLineSettings::CmdLineSettings()
+{
+   init();
+}
+
+
+void CmdLineSettings::init()
+{
+   dedicatedMode = false;
+
+   loss = 0;
+   lag = 0;
+   stutter = 0;
+   forceUpdate = false;
+   maxPlayers = -1;
+   displayMode = DISPLAY_MODE_UNKNOWN;
+   winWidth = -1;
+   xpos = -9999;
+   ypos = -9999;
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 
 // Returns display-friendly mode designator like "Keyboard" or "Joystick 1"
 string IniSettings::getInputMode()
