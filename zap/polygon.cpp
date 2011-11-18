@@ -53,6 +53,12 @@ void EditorPolygon::renderItemText(const char *text, S32 offset, F32 currentScal
 }
 
 
+void EditorPolygon::onItemDragging()
+{
+   onGeomChanged();
+}
+
+
 // Tell the geometry that things have changed
 void EditorPolygon::onGeomChanged() 
 { 
@@ -149,6 +155,32 @@ void EditorPolygon::newObjectFromDock(F32 gridSize)
 Point EditorPolygon::getInitialPlacementOffset(F32 gridSize)
 { 
    return Point(INITIAL_HEIGHT * gridSize / 2, INITIAL_WIDTH * gridSize / 2); 
+}
+
+
+/////
+// Former LuaPolygon methods
+S32 EditorPolygon::getLoc(lua_State *L)
+{
+   return LuaObject::returnPoint(L, getCentroid());
+}
+
+
+S32 EditorPolygon::getRad(lua_State *L)
+{
+   return LuaObject::returnInt(L, 0);
+}
+
+
+S32 EditorPolygon::getVel(lua_State *L)
+{
+   return LuaObject::returnPoint(L, Point(0,0));
+}
+
+
+S32 EditorPolygon::getTeamIndx(lua_State *L)
+{
+   return LuaObject::returnInt(L, getTeam() + 1);
 }
 
 

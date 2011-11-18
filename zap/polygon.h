@@ -49,7 +49,8 @@ private:
    virtual void renderDock();
    void highlightDockItem(); 
 
-   // Offset lets us drag an item out from the dock by an amount offset from the 0th vertex.  This makes placement seem more natural.
+   // Offset lets us drag an item out from the dock by an amount offset from the 0th vertex.
+   // This makes placement seem more natural.
    Point getInitialPlacementOffset(F32 gridSize);
 
 protected:
@@ -59,18 +60,19 @@ public:
    void newObjectFromDock(F32 gridSize);
 
    // Item is being actively dragged
-   virtual void onItemDragging() { onGeomChanged(); }    // maybe not for polywalls??
+   virtual void onItemDragging();  // maybe not for polywalls??
    virtual void onGeomChanged();   // Tell the geometry that things have changed
 
    virtual void renderEditor(F32 currentScale);
 
    /////
    // Former LuaPolygon methods
-   // This class serves only to provide an implementation of the abstract methods in LuaItem that are common to the polygon classes
-   S32 getLoc(lua_State *L) { return LuaObject::returnPoint(L, getCentroid()); }     // Center of item (returns point)
-   S32 getRad(lua_State *L) { return LuaObject::returnInt(L, 0); }                   // Radius of item (returns number)
-   S32 getVel(lua_State *L) { return LuaObject::returnPoint(L, Point(0,0)); }        // Velocity of item (returns point)
-   S32 getTeamIndx(lua_State *L) { return LuaObject::returnInt(L, getTeam() + 1); }  // Team of item (in bots, teams start with 1)
+   // This class serves only to provide an implementation of the abstract methods in LuaItem
+   // that are common to the polygon classes
+   S32 getLoc(lua_State *L);       // Center of item (returns point)
+   S32 getRad(lua_State *L);       // Radius of item (returns number)
+   S32 getVel(lua_State *L);       // Velocity of item (returns point)
+   S32 getTeamIndx(lua_State *L);  // Team of item (in bots, teams start with 1)
 
 };
 
