@@ -63,6 +63,13 @@ void ControlObjectConnection::packetReceived(PacketNotify *notify)
    Parent::packetReceived(notify);
 }
 
+
+GameObject *ControlObjectConnection::getControlObject()
+{
+   return controlObject;
+}
+
+
 U32 ControlObjectConnection::getControlCRC()
 {
    PacketStream stream;
@@ -76,6 +83,21 @@ U32 ControlObjectConnection::getControlCRC()
    stream.zeroToByteBoundary();
    return stream.calculateCRC(0, stream.getBytePosition());
 }
+
+
+void ControlObjectConnection::addPendingMove(Move *theMove)
+{
+   if(pendingMoves.size() < MaxPendingMoves)
+      pendingMoves.push_back(*theMove);
+}
+
+
+
+ControlObjectConnection::PacketNotify *ControlObjectConnection::allocNotify()
+{
+   return new GamePacketNotify;
+}
+
 
 void ControlObjectConnection::writePacket(BitStream *bstream, PacketNotify *notify)
 {
@@ -285,6 +307,19 @@ void ControlObjectConnection::addToTimeCredit(U32 timeAmount)
       }
       mMoveTimeCredit = MaxMoveTimeCredit;
    }
+}
+
+
+bool ControlObjectConnection::isDataToTransmit()
+{
+   return true;
+}
+
+
+
+ControlObjectConnection::GamePacketNotify::GamePacketNotify()
+{
+   firstUnsentMoveIndex =  0;
 }
 
 

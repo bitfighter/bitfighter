@@ -50,6 +50,7 @@ private:
       MaxPendingMoves = 63,
       MaxMoveTimeCredit = 512,
    };
+
    Vector<Move> pendingMoves;
    SafePtr<GameObject> controlObject;
 
@@ -65,22 +66,19 @@ public:
    ControlObjectConnection();
 
    void setControlObject(GameObject *theObject);
-   GameObject *getControlObject() { return controlObject; }
+   GameObject *getControlObject();
    U32 getControlCRC();
 
-   void addPendingMove(Move *theMove)
-   {
-      if(pendingMoves.size() < MaxPendingMoves)
-         pendingMoves.push_back(*theMove);
-   }
+   void addPendingMove(Move *theMove);
 
    struct GamePacketNotify : public GhostConnection::GhostPacketNotify
    {
       U32 firstUnsentMoveIndex;
       Point lastControlObjectPosition;
-      GamePacketNotify() { firstUnsentMoveIndex =  0; }
+      GamePacketNotify();
    };
-   PacketNotify *allocNotify() { return new GamePacketNotify; }
+
+   PacketNotify *allocNotify();
 
    void writePacket(BitStream *bstream, PacketNotify *notify);
    void readPacket(BitStream *bstream);
@@ -88,7 +86,7 @@ public:
    void packetReceived(PacketNotify *notify);
    void addToTimeCredit(U32 timeAmount);
 
-   bool isDataToTransmit() { return true; }
+   bool isDataToTransmit();
 
    void writeCompressedPoint(const Point &p, BitStream *stream);
    void readCompressedPoint(Point &p, BitStream *stream);
