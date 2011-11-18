@@ -61,8 +61,8 @@ private:
    void removeFromPendingUnsubscribeList(lua_State *unsubscriber, EventType eventType);
 
 public:
-   EventManager()  { /* Do nothing */ }                  // C++ constructor
-   EventManager(lua_State *L) { /* Do nothing */ }       // Lua Constructor
+   EventManager();                  // C++ constructor
+   EventManager(lua_State *L);      // Lua Constructor
 
    static Vector<lua_State *> subscriptions[EventTypes];
    static Vector<lua_State *> pendingSubscriptions[EventTypes];
@@ -130,7 +130,7 @@ public:
 
    void kill();
 
-   lua_State *getL() { return L; }
+   lua_State *getL();
 
    void logError(const char *format, ...);   // In case of error...
    void logError(const char *msg, const char *filename);
@@ -156,13 +156,13 @@ public:
 
    boost::shared_ptr<ClientInfo> getClientInfo();
 
-   bool isRobot() { return true; }
+   bool isRobot();
    //static S32 getRobotCount() { return robots.size(); }
 
    LuaRobot *mLuaRobot;                // Could make private and make a public setter method...
    static EventManager getEventManager();
 
-   LuaPlayerInfo *getPlayerInfo() { return mPlayerInfo; }
+   LuaPlayerInfo *getPlayerInfo();
 
    static Vector<Robot *> robots;      // Grand master list of all robots in the current game
    static void startBots();            // Loop through all our bots and run thier main() functions
@@ -173,14 +173,14 @@ public:
    void registerClasses();
    string runGetName();                // Run bot's getName() function
 
-   S32 getScore() { return mScore; }   // Return robot's score
-   F32 getRating() { return mTotalScore == 0 ? 0.5f : (F32)mScore / (F32)mTotalScore; }   // Return robot's score
-   const char *getScriptName() { return mScriptName.c_str(); }
+   S32 getScore();    // Return robot's score
+   F32 getRating();   // Return robot's rating
+   const char *getScriptName();
 
-   static void setPaused(bool isPaused) { mIsPaused = isPaused; }
-   static void togglePauseStatus() { mIsPaused = !mIsPaused; }
-   static bool isPaused() { return mIsPaused; }
-   static void addSteps(S32 steps) { mStepCount = steps * robots.size(); }     // Each robot will cause the step counter to decrement
+   static void setPaused(bool isPaused);
+   static void togglePauseStatus();
+   static bool isPaused();
+   static void addSteps(S32 steps);     // Each robot will cause the step counter to decrement
 
 private:
    int attribute;
@@ -275,8 +275,8 @@ public:
    S32 dropItem(lua_State *L);
    S32 copyMoveFromObject(lua_State *L);
 
-   S32 getGame(lua_State *L);             // Get a pointer to a game object, where we can run game-info oriented methods
-   Ship *getObj() { return thisRobot; }   // This handles delegation properly when we're dealing with methods inherited from LuaShip
+   S32 getGame(lua_State *L);  // Get a pointer to a game object, where we can run game-info oriented methods
+   Ship *getObj();             // This handles delegation properly when we're dealing with methods inherited from LuaShip
 };
 
 
