@@ -778,6 +778,21 @@ void BotNavMeshZone::linkTeleportersBotNavMeshZoneConnections(ServerGame *game)
 }
 
 
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Constructor
+NeighboringZone::NeighboringZone()
+{
+   zoneID = 0;
+   distTo = 0;
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+
 // Rough guess as to distance from fromZone to toZone
 F32 AStar::heuristic(const Vector<BotNavMeshZone *> &zones, S32 fromZone, S32 toZone)
 {

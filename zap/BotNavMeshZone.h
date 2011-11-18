@@ -51,7 +51,7 @@ public:
 class NeighboringZone : public Border
 {
 public:
-   NeighboringZone() { zoneID = 0; distTo = 0; }     // Quickie constructor
+   NeighboringZone();      // Constructor
    U16 zoneID;
 
    Point borderCenter;     // Simply a point half way between borderStart and borderEnd
