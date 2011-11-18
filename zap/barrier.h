@@ -80,14 +80,14 @@ public:
    static void renderEdges(S32 layerIndex, const Color &outlineColor);    // Renders all edges in one pass
 
    /// Returns a sorting key for the object.  Barriers should be drawn first so as to appear behind other objects.
-   S32 getRenderSortValue() { return 0; }
+   S32 getRenderSortValue();
 
    /// returns the collision polygon of this barrier, which is the boundary extruded from the start,end line segment.
    bool getCollisionPoly(Vector<Point> &polyPoints) const;
    const Vector<Point> *getCollisionPolyPtr() const;
 
    /// collide always returns true for Barrier objects.
-   bool collide(GameObject *otherObject) { return true; }
+   bool collide(GameObject *otherObject);
 
    // Takes a list of vertices and converts them into a list of lines representing the edges of an object
    static void resetEdges(const Vector<Point> &corners, Vector<Point> &edges);
@@ -131,16 +131,16 @@ public:
    void processEndPoints();      
 
    // Some properties about the item that will be needed in the editor
-   const char *getEditorHelpString() { return "Walls define the general form of your level."; }  
-   const char *getPrettyNamePlural() { return "Walls"; }
-   const char *getOnDockName() { return "Wall"; }
-   const char *getOnScreenName() { return ""; }    // Vertices should not be labeled
-   bool hasTeam() { return false; }
-   bool canBeHostile() { return false; }
-   bool canBeNeutral() { return false; }
-   F32 getEditorRadius(F32 currentScale);          // Basically, the size of our hit target for vertices
+   const char *getEditorHelpString();
+   const char *getPrettyNamePlural();
+   const char *getOnDockName();
+   const char *getOnScreenName();          // Vertices should not be labeled
+   bool hasTeam();
+   bool canBeHostile();
+   bool canBeNeutral();
+   F32 getEditorRadius(F32 currentScale);  // Basically, the size of our hit target for vertices
 
-   const Color *getEditorRenderColor() const { return &Colors::gray50; }      // Unselected wall spine color
+   const Color *getEditorRenderColor() const;      // Unselected wall spine color
 
    void scale(const Point &center, F32 scale);
 
@@ -175,35 +175,35 @@ public:
    void renderDock();
    void renderEditor(F32 currentScale);
 
-   S32 getRenderSortValue() { return -1; }
+   S32 getRenderSortValue();
 
    virtual void onGeomChanged();
-   virtual void onItemDragging() { /* Do nothing */ }
+   virtual void onItemDragging();
 
    //bool getCollisionPoly(Vector<Point> &polyPoints);
 
    /////
    // Editor methods
-   const char *getEditorHelpString() { return "Polygonal wall item let you be creative with your wall design."; }
-   const char *getPrettyNamePlural() { return "PolyWalls"; }
-   const char *getOnDockName() { return "PolyWall"; }
-   const char *getOnScreenName() { return "PolyWall"; }
+   const char *getEditorHelpString();
+   const char *getPrettyNamePlural();
+   const char *getOnDockName();
+   const char *getOnScreenName();
    string toString(F32 gridSize) const;
 
    /////
    // Lua interface  ==>  don't need these!!
 
-   PolyWall(lua_State *L) { /* Do nothing */ };    //  Lua constructor
-   GameObject *getGameObject() { return this; }          // Return the underlying GameObject
+   PolyWall(lua_State *L);         //  Lua constructor
+   GameObject *getGameObject();    // Return the underlying GameObject
 
-   static const char className[];                        // Class name as it appears to Lua scripts
+   static const char className[];  // Class name as it appears to Lua scripts
    static Lunar<PolyWall>::RegType methods[];
 
-   S32 getClassID(lua_State *L) { return returnInt(L, PolyWallTypeNumber); }
+   S32 getClassID(lua_State *L);
    TNL_DECLARE_CLASS(PolyWall);
 
 private:
-   void push(lua_State *L) { Lunar<PolyWall>::push(L, this); }
+   void push(lua_State *L);
 };
 
 
@@ -227,16 +227,16 @@ public:
    WallSegment(GridDatabase *gridDatabase, const Vector<Point> &points, S32 owner = -1);                        // PolyWall 
    virtual ~WallSegment();
 
-   S32 getOwner() { return mOwner; }
-   void invalidate() { invalid = true; }
+   S32 getOwner();
+   void invalidate();
 
    void resetEdges();         // Compute basic edges from corner points
    void computeBoundingBox(); // Computes bounding box based on the corners, updates database
    
    void renderFill(const Color &fillColor, bool renderLight);
 
-   const Vector<Point> *getCorners() { return &mCorners; }
-   const Vector<Point> *getTriangulatedFillPoints() { return &mTriangulatedFillPoints; }
+   const Vector<Point> *getCorners();
+   const Vector<Point> *getTriangulatedFillPoints();
 
    ////////////////////
    //  DatabaseObject methods
@@ -244,9 +244,9 @@ public:
    // Note that the poly returned here is different than what you might expect -- it is composed of the edges,
    // not the corners, and is thus in A-B, C-D, E-F format rather than the more typical A-B-C-D format returned
    // by getCollisionPoly() elsewhere in the game.  Therefore, it needs to be handled differently.
-   bool getCollisionPoly(Vector<Point> &polyPoints) const { polyPoints = mEdges; return true; }  
-   bool getCollisionCircle(U32 stateIndex, Point &point, float &radius) const { return false; }
-   bool getCollisionRect(U32 stateIndex, Rect &rect) const { return false; }
+   bool getCollisionPoly(Vector<Point> &polyPoints) const;
+   bool getCollisionCircle(U32 stateIndex, Point &point, float &radius) const;
+   bool getCollisionRect(U32 stateIndex, Rect &rect) const;
 };
 
 
@@ -266,15 +266,15 @@ public:
    WallEdge(const Point &start, const Point &end, GridDatabase *database);
    virtual ~WallEdge();
 
-   Point *getStart() { return &mStart; }
-   Point *getEnd() { return &mEnd; }
+   Point *getStart();
+   Point *getEnd();
 
    // Note that the poly returned here is different than what you might expect -- it is composed of the edges,
    // not the corners, and is thus in A-B, C-D, E-F format rather than the more typical A-B-C-D format returned
    // by getCollisionPoly() elsewhere in the game.  Therefore, it needs to be handled differently.
-   bool getCollisionPoly(Vector<Point> &polyPoints) const { polyPoints.resize(2); polyPoints[0] = mStart; polyPoints[1] = mEnd; return true; }  
-   bool getCollisionCircle(U32 stateIndex, Point &point, float &radius) const { return false; }
-   bool getCollisionRect(U32 stateIndex, Rect &rect) const { return false; }
+   bool getCollisionPoly(Vector<Point> &polyPoints) const;
+   bool getCollisionCircle(U32 stateIndex, Point &point, float &radius) const;
+   bool getCollisionRect(U32 stateIndex, Rect &rect) const;
 };
 
 
@@ -298,10 +298,10 @@ public:
    WallSegmentManager();   // Constructor
    ~WallSegmentManager();  // Destructor
 
-   GridDatabase *getGridDatabase() { return mWallSegmentDatabase; } 
+   GridDatabase *getGridDatabase();
 
-   GridDatabase *getWallSegmentDatabase() { return mWallSegmentDatabase; } 
-   GridDatabase *getWallEdgeDatabase() { return mWallEdgeDatabase; }
+   GridDatabase *getWallSegmentDatabase();
+   GridDatabase *getWallEdgeDatabase();
 
    Vector<WallSegment *> mWallSegments;      
    Vector<WallEdge *> mWallEdges;               // For mounting forcefields/turrets

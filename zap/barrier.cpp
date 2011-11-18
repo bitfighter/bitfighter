@@ -208,6 +208,12 @@ const Vector<Point> *Barrier::getCollisionPolyPtr() const
 }
 
 
+bool Barrier::collide(GameObject *otherObject)
+{
+   return true;
+}
+
+
 // Takes a list of vertices and converts them into a list of lines representing the edges of an object -- static method
 void Barrier::resetEdges(const Vector<Point> &corners, Vector<Point> &edges)
 {
@@ -399,6 +405,12 @@ void Barrier::renderEdges(S32 layerIndex, const Color &outlineColor)
 }
 
 
+S32 Barrier::getRenderSortValue()
+{
+   return 0;
+}
+
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -448,6 +460,55 @@ Rect WallItem::calcExtents()
    // All we need to do here is override the default calcExtents, to avoid clobbering our already good mExtent.
    return getExtent();     
 }
+
+
+const char *WallItem::getEditorHelpString()
+{
+   return "Walls define the general form of your level.";
+}
+
+
+const char *WallItem::getPrettyNamePlural()
+{
+   return "Walls";
+}
+
+
+const char *WallItem::getOnDockName()
+{
+   return "Wall";
+}
+
+
+const char *WallItem::getOnScreenName()
+{
+   return "";
+}
+
+
+bool WallItem::hasTeam()
+{
+   return false;
+}
+
+
+bool WallItem::canBeHostile()
+{
+   return false;
+}
+
+
+bool WallItem::canBeNeutral()
+{
+   return false;
+}
+
+
+const Color *WallItem::getEditorRenderColor() const
+{
+   return &Colors::gray50;
+}
+
 
 // Size of object in editor 
 F32 WallItem::getEditorRadius(F32 currentScale)
@@ -539,6 +600,12 @@ void PolyWall::renderEditor(F32 currentScale)
 }
 
 
+S32 PolyWall::getRenderSortValue()
+{
+   return -1;
+}
+
+
 void PolyWall::renderDock()
 {
    renderPolygonFill(getFill(), &EDITOR_WALL_FILL_COLOR);
@@ -558,6 +625,30 @@ bool PolyWall::processArguments(S32 argc, const char **argv, Game *game)
 }
 
 
+const char *PolyWall::getEditorHelpString()
+{
+   return "Polygonal wall item let you be creative with your wall design.";
+}
+
+
+const char *PolyWall::getPrettyNamePlural()
+{
+   return "PolyWalls";
+}
+
+
+const char *PolyWall::getOnDockName()
+{
+   return "PolyWall";
+}
+
+
+const char *PolyWall::getOnScreenName()
+{
+   return "PolyWall";
+}
+
+
 string PolyWall::toString(F32 gridSize) const
 {
    return string(getClassName()) + " " + geomToString(gridSize);
@@ -574,6 +665,40 @@ void PolyWall::onGeomChanged()
 
    getGame()->getWallSegmentManager()->computeWallSegmentIntersections(getGame()->getEditorDatabase(), this);
    getGame()->getWallSegmentManager()->updateMountedItems(getGame()->getEditorDatabase(), this);
+}
+
+
+void PolyWall::onItemDragging()
+{
+   // Do nothing
+}
+
+
+/////
+// Lua interface  ==>  don't need these!!
+
+//  Lua constructor
+PolyWall::PolyWall(lua_State *L)
+{
+   /* Do nothing */
+}
+
+
+GameObject *PolyWall::getGameObject()
+{
+   return this;
+}
+
+
+S32 PolyWall::getClassID(lua_State *L)
+{
+   return returnInt(L, PolyWallTypeNumber);
+}
+
+
+void PolyWall::push(lua_State *L)
+{
+   Lunar<PolyWall>::push(L, this);
 }
 
 
@@ -600,6 +725,39 @@ WallEdge::~WallEdge()
    removeFromDatabase(); 
 }
 
+
+Point *WallEdge::getStart()
+{
+   return &mStart;
+}
+
+
+Point *WallEdge::getEnd()
+{
+   return &mEnd;
+}
+
+
+bool WallEdge::getCollisionPoly(Vector<Point> &polyPoints) const
+{
+   polyPoints.resize(2);
+   polyPoints[0] = mStart;
+   polyPoints[1] = mEnd;
+   return true;
+}
+
+
+bool WallEdge::getCollisionCircle(U32 stateIndex, Point &point, float &radius) const
+{
+   return false;
+}
+
+
+bool WallEdge::getCollisionRect(U32 stateIndex, Rect &rect) const
+{
+   return false;
+}
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -619,6 +777,24 @@ WallSegmentManager::~WallSegmentManager()
 
    delete mWallSegmentDatabase;
    delete mWallEdgeDatabase;
+}
+
+
+GridDatabase *WallSegmentManager::getGridDatabase()
+{
+   return mWallSegmentDatabase;
+}
+
+
+GridDatabase *WallSegmentManager::getWallSegmentDatabase()
+{
+   return mWallSegmentDatabase;
+}
+
+
+GridDatabase *WallSegmentManager::getWallEdgeDatabase()
+{
+   return mWallEdgeDatabase;
 }
 
 
@@ -1005,6 +1181,18 @@ WallSegment::~WallSegment()
    //      proj->onGeomChanged();            // Will force recalculation of mount and endpoint
    //}
 }
+
+
+S32 WallSegment::getOwner()
+{
+   return mOwner;
+}
+
+
+void WallSegment::invalidate()
+{
+   invalid = true;
+}
  
 
 // Resets edges of a wall segment to their factory settings; i.e. 4 simple walls representing a simple outline
@@ -1036,5 +1224,37 @@ void WallSegment::renderFill(const Color &fillColor, bool beingDragged)
       glEnable(GL_BLEND);
 #endif
 }
+
+
+const Vector<Point> *WallSegment::getCorners()
+{
+   return &mCorners;
+}
+
+
+const Vector<Point> *WallSegment::getTriangulatedFillPoints()
+{
+   return &mTriangulatedFillPoints;
+}
+
+
+bool WallSegment::getCollisionPoly(Vector<Point> &polyPoints) const
+{
+   polyPoints = mEdges;
+   return true;
+}
+
+
+bool WallSegment::getCollisionCircle(U32 stateIndex, Point &point, float &radius) const
+{
+   return false;
+}
+
+
+bool WallSegment::getCollisionRect(U32 stateIndex, Rect &rect) const
+{
+   return false;
+}
+
 
 };
