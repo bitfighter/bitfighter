@@ -273,6 +273,16 @@ bool EngineerModuleDeployer::deployEngineeredItem(GameConnection *connection, U3
 }
 
 
+string EngineerModuleDeployer::getErrorMessage()
+{
+   return mErrorMessage;
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+
 // Constructor
 EngineeredItem::EngineeredItem(S32 team, Point anchorPoint, Point anchorNormal) : mAnchorNormal(anchorNormal)
 {
@@ -484,6 +494,42 @@ DatabaseObject *EngineeredItem::findAnchorPointAndNormal(GridDatabase *wallEdgeD
 }
 
 
+void EngineeredItem::setAnchorNormal(const Point &nrml)
+{
+   mAnchorNormal = nrml;
+}
+
+
+WallSegment *EngineeredItem::getMountSegment()
+{
+   return mMountSeg;
+}
+
+
+void EngineeredItem::setMountSegment(WallSegment *mountSeg)
+{
+   mMountSeg = mountSeg;
+}
+
+
+WallSegment *EngineeredItem::getEndSegment()
+{
+   return NULL;
+}
+
+
+void EngineeredItem::setEndSegment(WallSegment *endSegment)
+{
+   // Do nothing
+}
+
+
+void EngineeredItem::setSnapped(bool snapped)
+{
+   mSnapped = snapped;
+}
+
+
 void EngineeredItem::setResource(MoveItem *resource)
 {
    TNLAssert(resource->isMounted() == false, "Doh!");
@@ -574,12 +620,54 @@ void EngineeredItem::damageObject(DamageInfo *di)
 }
 
 
+bool EngineeredItem::collide(GameObject *hitObject)
+{
+   return true;
+}
+
+
+F32 EngineeredItem::getHealth()
+{
+   return mHealth;
+}
+
+
 void EngineeredItem::computeExtent()
 {
    Vector<Point> v;
    getCollisionPoly(v);
 
    setExtent(Rect(v));
+}
+
+
+void EngineeredItem::onDestroyed()
+{
+   // Do nothing
+}
+
+
+void EngineeredItem::onDisabled()
+{
+   // Do nothing
+}
+
+
+void EngineeredItem::onEnabled()
+{
+   // Do nothing
+}
+
+
+bool EngineeredItem::isTurret()
+{
+   return false;
+}
+
+
+void EngineeredItem::getObjectGeometry(const Point &anchor, const Point &normal, Vector<Point> &geom) const
+{
+   TNLAssert(false, "function not implemented!");
 }
 
 
@@ -616,6 +704,12 @@ void EngineeredItem::explode()
 
    disableCollision();
 #endif
+}
+
+
+bool EngineeredItem::isDestroyed()
+{
+   return mIsDestroyed;
 }
 
 
@@ -781,6 +875,42 @@ Point EngineeredItem::mountToWall(const Point &pos, GridDatabase *wallEdgeDataba
    }
 }
 
+
+/////
+// LuaItem interface
+S32 EngineeredItem::getVel(lua_State *L) { return LuaObject::returnPoint(L, Point(0, 0)); }
+
+// More Lua methods that are inherited by turrets and forcefield projectors
+S32 EngineeredItem::getTeamIndx(lua_State *L)
+{
+   return returnInt(L, getTeam() + 1);
+}
+
+
+S32 EngineeredItem::getHealth(lua_State *L)
+{
+   return returnFloat(L, mHealth);
+}
+
+
+S32 EngineeredItem::isActive(lua_State *L)
+{
+   return returnInt(L, isEnabled());
+}
+
+
+S32 EngineeredItem::getAngle(lua_State *L)
+{
+   return returnFloat(L, mAnchorNormal.ATAN2());
+}
+
+
+GameObject *EngineeredItem::getGameObject()
+{
+   return this;
+}
+
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -867,6 +997,18 @@ void ForceFieldProjector::getForceFieldStartAndEndPoints(Point &start, Point &en
 }
 
 
+WallSegment *ForceFieldProjector::getEndSegment()
+{
+   return mForceFieldEndSegment;
+}
+
+
+void ForceFieldProjector::setEndSegment(WallSegment *endSegment)
+{
+   mForceFieldEndSegment = endSegment;
+}
+
+
 // Forcefield projector has been turned on some how; either at the beginning of a level, or via repairing, or deploying. 
 // Runs on both client and server
 void ForceFieldProjector::onEnabled()
@@ -927,8 +1069,51 @@ void ForceFieldProjector::renderEditor(F32 currentScale)
 #endif
 }
 
+// Some properties about the item that will be needed in the editor
+const char *ForceFieldProjector::getEditorHelpString() { return "Creates a force field that lets only team members pass. [F]"; }
 
-class EditorUserInterface;
+
+const char *ForceFieldProjector::getPrettyNamePlural()
+{
+   return "Force Field Projectors";
+}
+
+
+const char *ForceFieldProjector::getOnDockName()
+{
+   return "ForceFld";
+}
+
+
+const char *ForceFieldProjector::getOnScreenName()
+{
+   return "ForceFld";
+}
+
+
+bool ForceFieldProjector::hasTeam()
+{
+   return true;
+}
+
+
+bool ForceFieldProjector::canBeHostile()
+{
+   return true;
+}
+
+
+bool ForceFieldProjector::canBeNeutral()
+{
+   return true;
+}
+
+
+void ForceFieldProjector::onItemDragging()
+{
+   onGeomChanged();
+}
+
 
 // Determine on which segment forcefield lands -- only used in the editor, wraps ForceField::findForceFieldEnd()
 void ForceFieldProjector::findForceFieldEnd()
@@ -970,6 +1155,25 @@ const char ForceFieldProjector::className[] = "ForceFieldProjector";      // Cla
 ForceFieldProjector::ForceFieldProjector(lua_State *L)
 {
    // Do nothing
+}
+
+
+S32 ForceFieldProjector::getClassID(lua_State *L)
+{
+   return returnInt(L, ForceFieldProjectorTypeNumber);
+}
+
+
+void ForceFieldProjector::push(lua_State *L)
+{
+   Lunar<ForceFieldProjector>::push(L, this);
+}
+
+
+// LuaItem methods
+S32 ForceFieldProjector::getLoc(lua_State *L)
+{
+   return LuaObject::returnPoint(L, getVert(0) + mAnchorNormal * getRadius() );
 }
 
 
@@ -1168,6 +1372,19 @@ void ForceField::render()
 }
 
 
+S32 ForceField::getRenderSortValue()
+{
+   return 0;
+}
+
+
+void ForceField::getForceFieldStartAndEndPoints(Point &start, Point &end)
+{
+   start = mStart;
+   end = mEnd;
+}
+
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -1281,6 +1498,12 @@ void Turret::onAddedToGame(Game *theGame)
 {
    Parent::onAddedToGame(theGame);
    mCurrentAngle = mAnchorNormal.ATAN2();
+}
+
+
+bool Turret::isTurret()
+{
+   return true;
 }
 
 
@@ -1472,6 +1695,54 @@ void Turret::idle(IdleCallPath path)
 }
 
 
+const char *Turret::getEditorHelpString()
+{
+   return "Creates shooting turret.  Can be on a team, neutral, or \"hostile to all\". [Y]";
+}
+
+
+const char *Turret::getPrettyNamePlural()
+{
+   return "Turrets";
+}
+
+
+const char *Turret::getOnDockName()
+{
+   return "Turret";
+}
+
+
+const char *Turret::getOnScreenName()
+{
+   return "Turret";
+}
+
+
+bool Turret::hasTeam()
+{
+   return true;
+}
+
+
+bool Turret::canBeHostile()
+{
+   return true;
+}
+
+
+bool Turret::canBeNeutral()
+{
+   return true;
+}
+
+
+void Turret::onItemDragging()
+{
+   onGeomChanged();
+}
+
+
 void Turret::onGeomChanged() 
 { 
    mCurrentAngle = mAnchorNormal.ATAN2();       // Keep turret pointed away from the wall... looks better like that!
@@ -1485,6 +1756,36 @@ const char Turret::className[] = "Turret";      // Class name as it appears to L
 Turret::Turret(lua_State *L)
 {
    // Do nothing
+}
+
+
+S32 Turret::getClassID(lua_State *L)
+{
+   return returnInt(L, TurretTypeNumber);
+}
+
+
+void Turret::push(lua_State *L)
+{
+   Lunar<Turret>::push(L, this);
+}
+
+// LuaItem methods
+S32 Turret::getRad(lua_State *L)
+{
+   return returnInt(L, TURRET_OFFSET);
+}
+
+
+S32 Turret::getLoc(lua_State *L)
+{
+   return LuaObject::returnPoint(L, getVert(0) + mAnchorNormal * (TURRET_OFFSET));
+}
+
+
+S32 Turret::getAngleAim(lua_State *L)
+{
+   return returnFloat(L, mCurrentAngle);
 }
 
 

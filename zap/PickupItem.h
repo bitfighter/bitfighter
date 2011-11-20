@@ -60,12 +60,12 @@ public:
    string toString(F32 gridSize) const;
 
    void idle(GameObject::IdleCallPath path);
-   bool isVisible() { return mIsVisible; }
+   bool isVisible();
 
-   U32 getRepopDelay() { return mRepopDelay; }
-   void setRepopDelay(U32 delay) { mRepopDelay = delay; }
+   U32 getRepopDelay();
+   void setRepopDelay(U32 delay);
 
-   virtual const char *getInstructionMsg() { return "Press Enter to change regen time"; }
+   virtual const char *getInstructionMsg();
 
 
 #ifndef ZAP_DEDICATED
@@ -108,12 +108,12 @@ public:
    TNL_DECLARE_CLASS(RepairItem);
 
    ///// Editor methods
-   const char *getEditorHelpString() { return "Repairs damage to ships. [B]"; }
-   const char *getPrettyNamePlural() { return "Repair Items"; }
-   const char *getOnDockName() { return "Repair"; }
-   const char *getOnScreenName() { return "Repair"; }
+   const char *getEditorHelpString();
+   const char *getPrettyNamePlural();
+   const char *getOnDockName();
+   const char *getOnScreenName();
 
-   virtual S32 getDockRadius() { return 11; }
+   virtual S32 getDockRadius();
    F32 getEditorRadius(F32 currentScale);
    void renderDock();
 
@@ -125,10 +125,10 @@ public:
 
    static Lunar<RepairItem>::RegType methods[];
 
-   S32 getClassID(lua_State *L) { return returnInt(L, RepairItemTypeNumber); }
+   S32 getClassID(lua_State *L);
 
    S32 isVis(lua_State *L); // Is RepairItem visible? (returns boolean)
-   void push(lua_State *L) {  Lunar<RepairItem>::push(L, this); }
+   void push(lua_State *L);
 
 };
 
@@ -154,10 +154,10 @@ public:
    TNL_DECLARE_CLASS(EnergyItem);
 
    ///// Editor methods
-   const char *getEditorHelpString() { return "Restores energy to ships"; }
-   const char *getPrettyNamePlural() { return "Energy Items"; }
-   const char *getOnDockName() { return "Energy"; }
-   const char *getOnScreenName() { return "Energy"; }
+   const char *getEditorHelpString();
+   const char *getPrettyNamePlural();
+   const char *getOnDockName();
+   const char *getOnScreenName();
 
 
    ///// Lua Interface
@@ -168,10 +168,10 @@ public:
 
    static Lunar<EnergyItem>::RegType methods[];
 
-   S32 getClassID(lua_State *L) { return returnInt(L, EnergyItemTypeNumber); }
+   S32 getClassID(lua_State *L);
 
    S32 isVis(lua_State *L); // Is EnergyItem visible? (returns boolean)
-   void push(lua_State *L) {  Lunar<EnergyItem>::push(L, this); }
+   void push(lua_State *L);
 };
 
 

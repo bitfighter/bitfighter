@@ -93,6 +93,30 @@ void PickupItem::idle(GameObject::IdleCallPath path)
 }
 
 
+bool PickupItem::isVisible()
+{
+   return mIsVisible;
+}
+
+
+U32 PickupItem::getRepopDelay()
+{
+   return mRepopDelay;
+}
+
+
+void PickupItem::setRepopDelay(U32 delay)
+{
+   mRepopDelay = delay;
+}
+
+
+const char *PickupItem::getInstructionMsg()
+{
+   return "Press Enter to change regen time";
+}
+
+
 bool PickupItem::processArguments(S32 argc, const char **argv, Game *game)
 {
    if(argc < 2)
@@ -270,6 +294,36 @@ void RepairItem::renderItem(const Point &pos)
 }
 
 
+const char *RepairItem::getEditorHelpString()
+{
+   return "Repairs damage to ships. [B]";
+}
+
+
+const char *RepairItem::getPrettyNamePlural()
+{
+   return "Repair Items";
+}
+
+
+const char *RepairItem::getOnDockName()
+{
+   return "Repair";
+}
+
+
+const char *RepairItem::getOnScreenName()
+{
+   return "Repair";
+}
+
+
+S32 RepairItem::getDockRadius()
+{
+   return 11;
+}
+
+
 void RepairItem::renderDock()
 {
    renderRepairItem(getVert(0), true, 0, 1);
@@ -306,7 +360,23 @@ Lunar<RepairItem>::RegType RepairItem::methods[] =
    {0,0}    // End method list
 };
 
-S32 RepairItem::isVis(lua_State *L) { return returnBool(L, isVisible()); }        // Is RepairItem visible? (returns boolean)
+
+S32 RepairItem::getClassID(lua_State *L)
+{
+   return returnInt(L, RepairItemTypeNumber);
+}
+
+
+S32 RepairItem::isVis(lua_State *L)
+{
+   return returnBool(L, isVisible());
+}
+
+
+void RepairItem::push(lua_State *L)
+{
+   Lunar<RepairItem>::push(L, this);
+}
 
 
 ////////////////////////////////////////
@@ -358,6 +428,30 @@ void EnergyItem::renderItem(const Point &pos)
 }
 
 
+const char *EnergyItem::getEditorHelpString()
+{
+   return "Restores energy to ships";
+}
+
+
+const char *EnergyItem::getPrettyNamePlural()
+{
+   return "Energy Items";
+}
+
+
+const char *EnergyItem::getOnDockName()
+{
+   return "Energy";
+}
+
+
+const char *EnergyItem::getOnScreenName()
+{
+   return "Energy";
+}
+
+
 const char EnergyItem::className[] = "EnergyItem";      // Class name as it appears to Lua scripts
 
 // Lua constructor
@@ -382,8 +476,23 @@ Lunar<EnergyItem>::RegType EnergyItem::methods[] =
    {0,0}    // End method list
 };
 
-S32 EnergyItem::isVis(lua_State *L) { return returnBool(L, isVisible()); }        // Is EnergyItem visible? (returns boolean)
 
+S32 EnergyItem::getClassID(lua_State *L)
+{
+   return returnInt(L, EnergyItemTypeNumber);
+}
+
+
+S32 EnergyItem::isVis(lua_State *L)
+{
+   return returnBool(L, isVisible());
+}
+
+
+void EnergyItem::push(lua_State *L)
+{
+   Lunar<EnergyItem>::push(L, this);
+}
 
 
 };

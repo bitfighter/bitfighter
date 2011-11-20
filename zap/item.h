@@ -65,8 +65,8 @@ public:
    virtual U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    virtual void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
-   F32 getRadius() { return mRadius; }
-   virtual void setRadius(F32 radius) { mRadius = radius; }
+   F32 getRadius();
+   virtual void setRadius(F32 radius);
 
    virtual void renderItem(const Point &pos);      // Generic renderer -- will be overridden
    virtual void render();
@@ -77,15 +77,15 @@ public:
    virtual string toString(F32 gridSize) const;
 
    // LuaItem interface
-   virtual S32 getLoc(lua_State *L) { return LuaObject::returnPoint(L, getActualPos()); }
-   virtual S32 getRad(lua_State *L) { return LuaObject::returnFloat(L, getRadius()); }
-   virtual S32 getVel(lua_State *L) { return LuaObject::returnPoint(L, Point(0,0)); }
-   virtual S32 getTeamIndx(lua_State *L) { return TEAM_NEUTRAL + 1; }              // Can be overridden for team items
-   virtual S32 isInCaptureZone(lua_State *L) { return returnBool(L, false); }      // Non-moving item is never in capture zone, even if it is!
-   virtual S32 isOnShip(lua_State *L) { return returnBool(L, false); }             // Is item being carried by a ship? NO!
-   virtual S32 getCaptureZone(lua_State *L) { return returnNil(L); }
-   virtual S32 getShip(lua_State *L) { return returnNil(L); }
-   virtual GameObject *getGameObject() { return this; }          // Return the underlying GameObject
+   virtual S32 getLoc(lua_State *L);
+   virtual S32 getRad(lua_State *L);
+   virtual S32 getVel(lua_State *L);
+   virtual S32 getTeamIndx(lua_State *L);
+   virtual S32 isInCaptureZone(lua_State *L);      // Non-moving item is never in capture zone, even if it is!
+   virtual S32 isOnShip(lua_State *L);             // Is item being carried by a ship? NO!
+   virtual S32 getCaptureZone(lua_State *L);
+   virtual S32 getShip(lua_State *L);
+   virtual GameObject *getGameObject();            // Return the underlying GameObject
 };
 
 
@@ -125,10 +125,10 @@ public:
    TNL_DECLARE_CLASS(Reactor);
 
    ///// Editor methods
-   const char *getEditorHelpString() { return "Reactor.  Destroy to score."; }
-   const char *getPrettyNamePlural() { return "Reactors"; }
-   const char *getOnDockName() { return "Rctr"; }
-   const char *getOnScreenName() { return "Reactor"; }
+   const char *getEditorHelpString();
+   const char *getPrettyNamePlural();
+   const char *getOnDockName();
+   const char *getOnScreenName();
 
    F32 getEditorRadius(F32 currentScale);
    void renderDock();
@@ -141,10 +141,10 @@ public:
 
    static Lunar<Reactor>::RegType methods[];
 
-   S32 getClassID(lua_State *L) { return returnInt(L, ReactorTypeNumber); }
+   S32 getClassID(lua_State *L);
 
    S32 getHitPoints(lua_State *L);   // Index of current asteroid size (0 = initial size, 1 = next smaller, 2 = ...) (returns int)
-   void push(lua_State *L) {  Lunar<Reactor>::push(L, this); }
+   void push(lua_State *L);
 };
 
 

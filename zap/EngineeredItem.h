@@ -86,13 +86,12 @@ public:
    static bool checkDeploymentPosition(const Vector<Point> &thisBounds, GridDatabase *gb);
    void computeExtent();
 
-   virtual void onDestroyed() { /* Do nothing */ }  
-   virtual void onDisabled()  { /* Do nothing */ } 
-   virtual void onEnabled()   { /* Do nothing */ }  
-   virtual bool isTurret()    { return false; }
+   virtual void onDestroyed();
+   virtual void onDisabled();
+   virtual void onEnabled();
+   virtual bool isTurret();
 
-   virtual void getObjectGeometry(const Point &anchor, const Point &normal, Vector<Point> &geom) const { 
-            TNLAssert(false, "function not implemented!"); }
+   virtual void getObjectGeometry(const Point &anchor, const Point &normal, Vector<Point> &geom) const;
 
 #ifndef ZAP_DEDICATED
    Point getEditorSelectionOffset(F32 currentScale);
@@ -101,13 +100,13 @@ public:
    bool isEnabled();    // True if still active, false otherwise
 
    void explode();
-   bool isDestroyed() { return mIsDestroyed; }
+   bool isDestroyed();
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
    void damageObject(DamageInfo *damageInfo);
-   bool collide(GameObject *hitObject) { return true; }
-   F32 getHealth() { return mHealth; }
+   bool collide(GameObject *hitObject);
+   F32 getHealth();
    void healObject(S32 time);
    Point mountToWall(const Point &pos, GridDatabase *wallEdgeDatabase, GridDatabase *wallSegmentDatabase);
 
@@ -122,16 +121,16 @@ public:
    static DatabaseObject *findAnchorPointAndNormal(GridDatabase *db, const Point &pos, F32 snapDist, 
                                                    bool format, TestFunc testFunc, Point &anchor, Point &normal);
 
-   void setAnchorNormal(const Point &nrml) { mAnchorNormal = nrml; }
-   WallSegment *getMountSegment() { return mMountSeg; }
-   void setMountSegment(WallSegment *mountSeg) { mMountSeg = mountSeg; }
+   void setAnchorNormal(const Point &nrml);
+   WallSegment *getMountSegment();
+   void setMountSegment(WallSegment *mountSeg);
 
    // These methods are overriden in ForceFieldProjector
-   virtual WallSegment *getEndSegment() { return NULL; }  
-   virtual void setEndSegment(WallSegment *endSegment) { /* Do nothing */ }
+   virtual WallSegment *getEndSegment();
+   virtual void setEndSegment(WallSegment *endSegment);
 
    //// Is item sufficiently snapped?  
-   void setSnapped(bool snapped) { mSnapped = snapped; }
+   void setSnapped(bool snapped);
 
 
    /////
@@ -149,17 +148,17 @@ public:
 
    /////
    // LuaItem interface
-   // S32 getLoc(lua_State *L) { }   ==> Will be implemented by derived objects
-   // S32 getRad(lua_State *L) { }   ==> Will be implemented by derived objects
-   S32 getVel(lua_State *L) { return LuaObject::returnPoint(L, Point(0, 0)); }   
+   // S32 getLoc(lua_State *L);   ==> Will be implemented by derived objects
+   // S32 getRad(lua_State *L);   ==> Will be implemented by derived objects
+   S32 getVel(lua_State *L);
 
    // More Lua methods that are inherited by turrets and forcefield projectors
-   S32 getTeamIndx(lua_State *L) { return returnInt(L, getTeam() + 1); }
-   S32 getHealth(lua_State *L) { return returnFloat(L, mHealth); }
-   S32 isActive(lua_State *L) { return returnInt(L, isEnabled()); }
-   S32 getAngle(lua_State *L) {return returnFloat(L, mAnchorNormal.ATAN2());};
+   S32 getTeamIndx(lua_State *L);
+   S32 getHealth(lua_State *L);
+   S32 isActive(lua_State *L);
+   S32 getAngle(lua_State *L);
 
-   GameObject *getGameObject() { return this; }
+   GameObject *getGameObject();
 };
 
 
@@ -201,9 +200,9 @@ public:
                                  Point &end, DatabaseObject **collObj);
 
    void render();
-   S32 getRenderSortValue() { return 0; }
+   S32 getRenderSortValue();
 
-   void getForceFieldStartAndEndPoints(Point &start, Point &end) {start = mStart; end = mEnd;}
+   void getForceFieldStartAndEndPoints(Point &start, Point &end);
 
    TNL_DECLARE_CLASS(ForceField);
 };
@@ -235,8 +234,8 @@ public:
    // Get info about the forcfield that might be projected from this projector
    void getForceFieldStartAndEndPoints(Point &start, Point &end);
 
-   WallSegment *getEndSegment() { return mForceFieldEndSegment; }  
-   void setEndSegment(WallSegment *endSegment) { mForceFieldEndSegment = endSegment; } 
+   WallSegment *getEndSegment();
+   void setEndSegment(WallSegment *endSegment);
 
    void onAddedToGame(Game *theGame);
    void idle(GameObject::IdleCallPath path);
@@ -248,18 +247,18 @@ public:
    TNL_DECLARE_CLASS(ForceFieldProjector);
 
    // Some properties about the item that will be needed in the editor
-   const char *getEditorHelpString() { return "Creates a force field that lets only team members pass. [F]"; }  
-   const char *getPrettyNamePlural() { return "Force Field Projectors"; }
-   const char *getOnDockName() { return "ForceFld"; }
-   const char *getOnScreenName() { return "ForceFld"; }
-   bool hasTeam() { return true; }
-   bool canBeHostile() { return true; }
-   bool canBeNeutral() { return true; }
+   const char *getEditorHelpString();
+   const char *getPrettyNamePlural();
+   const char *getOnDockName();
+   const char *getOnScreenName();
+   bool hasTeam();
+   bool canBeHostile();
+   bool canBeNeutral();
 
    void renderDock();
    void renderEditor(F32 currentScale);
 
-   void onItemDragging() { onGeomChanged(); }   // Item is being actively dragged
+   void onItemDragging();   // Item is being actively dragged
 
    void onGeomChanged();
    void findForceFieldEnd();                      // Find end of forcefield in editor
@@ -272,12 +271,12 @@ public:
 
    static Lunar<ForceFieldProjector>::RegType methods[];
 
-   S32 getClassID(lua_State *L) { return returnInt(L, ForceFieldProjectorTypeNumber); }
-   void push(lua_State *L) {  Lunar<ForceFieldProjector>::push(L, this); }
+   S32 getClassID(lua_State *L);
+   void push(lua_State *L);
 
    // LuaItem methods
    //S32 getRad(lua_State *L) { return returnInt(L, radius); }
-   S32 getLoc(lua_State *L) { return LuaObject::returnPoint(L, getVert(0) + mAnchorNormal * getRadius() ); }
+   S32 getLoc(lua_State *L);
 };
 
 
@@ -322,7 +321,7 @@ public:
    void render();
    void idle(IdleCallPath path);
    void onAddedToGame(Game *theGame);
-   bool isTurret() { return true; }
+   bool isTurret();
 
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
@@ -331,16 +330,16 @@ public:
 
    /////
    // Some properties about the item that will be needed in the editor
-   const char *getEditorHelpString() { return "Creates shooting turret.  Can be on a team, neutral, or \"hostile to all\". [Y]"; }  
-   const char *getPrettyNamePlural() { return "Turrets"; }
-   const char *getOnDockName() { return "Turret"; }
-   const char *getOnScreenName() { return "Turret"; }
-   bool hasTeam() { return true; }
-   bool canBeHostile() { return true; }
-   bool canBeNeutral() { return true; }
+   const char *getEditorHelpString();
+   const char *getPrettyNamePlural();
+   const char *getOnDockName();
+   const char *getOnScreenName();
+   bool hasTeam();
+   bool canBeHostile();
+   bool canBeNeutral();
 
    void onGeomChanged();
-   void onItemDragging() { onGeomChanged(); }
+   void onItemDragging();
 
    void renderDock();
    void renderEditor(F32 currentScale);
@@ -352,13 +351,13 @@ public:
    static const char className[];
    static Lunar<Turret>::RegType methods[];
 
-   S32 getClassID(lua_State *L) { return returnInt(L, TurretTypeNumber); }
-   void push(lua_State *L) { Lunar<Turret>::push(L, this); }
+   S32 getClassID(lua_State *L);
+   void push(lua_State *L);
 
    // LuaItem methods
-   S32 getRad(lua_State *L) { return returnInt(L, TURRET_OFFSET); }
-   S32 getLoc(lua_State *L) { return LuaObject::returnPoint(L, getVert(0) + mAnchorNormal * (TURRET_OFFSET)); }
-   S32 getAngleAim(lua_State *L) {return returnFloat(L, mCurrentAngle);};
+   S32 getRad(lua_State *L);
+   S32 getLoc(lua_State *L);
+   S32 getAngleAim(lua_State *L);
 
 };
 
@@ -376,7 +375,7 @@ private:
 public:
    bool canCreateObjectAtLocation(GridDatabase *database, Ship *ship, U32 objectType);    // Check potential deployment position
    bool deployEngineeredItem(GameConnection *connection, U32 objectType);  // Deploy!
-   string getErrorMessage() { return mErrorMessage; }
+   string getErrorMessage();
 
    static bool findDeployPoint(Ship *ship, Point &deployPosition, Point &deployNormal);
    static string checkResourcesAndEnergy(Ship *ship);

@@ -130,6 +130,18 @@ void Item::unpackUpdate(GhostConnection *connection, BitStream *stream)
 }
 
 
+F32 Item::getRadius()
+{
+   return mRadius;
+}
+
+
+void Item::setRadius(F32 radius)
+{
+   mRadius = radius;
+}
+
+
 // Provide generic item rendering; will be overridden
 void Item::renderItem(const Point &pos)
 {
@@ -153,6 +165,61 @@ void Item::renderEditor(F32 currentScale)
 F32 Item::getEditorRadius(F32 currentScale)
 {
    return (getRadius() + 2) * currentScale;
+}
+
+
+// LuaItem interface
+S32 Item::getLoc(lua_State *L)
+{
+   return LuaObject::returnPoint(L, getActualPos());
+}
+
+
+S32 Item::getRad(lua_State *L)
+{
+   return LuaObject::returnFloat(L, getRadius());
+}
+
+
+S32 Item::getVel(lua_State *L)
+{
+   return LuaObject::returnPoint(L, Point(0,0));
+}
+
+
+S32 Item::getTeamIndx(lua_State *L)
+{
+   return TEAM_NEUTRAL + 1;
+}
+
+
+S32 Item::isInCaptureZone(lua_State *L)
+{
+   return returnBool(L, false);
+}
+
+
+S32 Item::isOnShip(lua_State *L)
+{
+   return returnBool(L, false);
+}
+
+
+S32 Item::getCaptureZone(lua_State *L)
+{
+   return returnNil(L);
+}
+
+
+S32 Item::getShip(lua_State *L)
+{
+   return returnNil(L);
+}
+
+
+GameObject *Item::getGameObject()
+{
+   return this;
 }
 
 
@@ -194,6 +261,30 @@ void Reactor::renderItem(const Point &pos)
 void Reactor::renderDock()
 {
    renderReactor(getVert(0), 5);
+}
+
+
+const char *Reactor::getEditorHelpString()
+{
+   return "Reactor.  Destroy to score.";
+}
+
+
+const char *Reactor::getPrettyNamePlural()
+{
+   return "Reactors";
+}
+
+
+const char *Reactor::getOnDockName()
+{
+   return "Rctr";
+}
+
+
+const char *Reactor::getOnScreenName()
+{
+   return "Reactor";
 }
 
 
@@ -330,8 +421,22 @@ Lunar<Reactor>::RegType Reactor::methods[] =
 };
 
 
-S32 Reactor::getHitPoints(lua_State *L) { return returnInt(L, mHitPoints); }      
+S32 Reactor::getClassID(lua_State *L)
+{
+   return returnInt(L, ReactorTypeNumber);
+}
 
+
+S32 Reactor::getHitPoints(lua_State *L)
+{
+   return returnInt(L, mHitPoints);
+}
+
+
+void Reactor::push(lua_State *L)
+{
+   Lunar<Reactor>::push(L, this);
+}
 
 
 };
