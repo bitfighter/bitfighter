@@ -511,22 +511,10 @@ void EditorUserInterface::loadLevel()
    // Bulk-process new items, walls first
    const Vector<EditorObject *> *objList = getObjectList();
 
-   //for(S32 i = 0; i < objList->size(); i++)
-   //   objList->get(i)->processEndPoints();
-
    game->getWallSegmentManager()->recomputeAllWallGeometry(game->getEditorDatabase());
    
    // Snap all engineered items to the closest wall, if one is found
    resnapAllEngineeredItems();
-
-   // Run onGeomChanged for all non-wall items (engineered items already had onGeomChanged run during resnap operation)
-   /*fillVector.clear();
-   mGame->getEditorDatabase()->findObjects(~(BarrierType | EngineeredType), fillVector);
-   for(S32 i = 0; i < fillVector.size(); i++)
-   {
-      EditorObject *obj = dynamic_cast<EditorObject *>(fillVector[i]);
-      obj->onGeomChanged();
-   }*/
 }
 
 
