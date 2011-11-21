@@ -41,7 +41,7 @@
 #include "ClientGame.h"  
 #include "gameType.h"
 #include "soccerGame.h"          // For Soccer ball radius
-#include "NexusGame.h"         // For NexusObject def
+#include "NexusGame.h"           // For NexusObject def
 #include "EngineeredItem.h"      // For Turret properties
 #include "PickupItem.h"          // For RepairItem
 #include "barrier.h"             // For DEFAULT_BARRIER_WIDTH
