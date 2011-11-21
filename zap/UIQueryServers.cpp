@@ -757,9 +757,6 @@ void QueryServersUserInterface::render()
          else
             color = Colors::green;     // 1 or more players
 
-         //if(s.playerCount < 0)      // U32 will never be < 0...
-         //   drawString(columns[3].xStart, y, SERVER_ENTRY_TEXTSIZE, "?? ??");
-         //else
          glColor(color*0.5);    // dim color
          drawStringf(columns[3].xStart + 30, y, SERVER_ENTRY_TEXTSIZE, "/%d", s.maxPlayers);
          glColor(color);
@@ -1341,12 +1338,11 @@ Button::Button(ClientGame *game, S32 x, S32 y, S32 textSize, S32 padding, const 
    mFgColor = fgColor;
    mHlColor = hlColor;
    mBgColor = Colors::richGreen;
-   mTransparent = true;
    mOnClickCallback = onClickCallback;
 }
 
 
-bool Button::mouseOver(F32 mouseX, F32 mouseY)
+bool Button::isMouseOver(F32 mouseX, F32 mouseY)
 {
    return(mouseX >= mX && mouseX <= mX + mPadding * 2 + UserInterface::getStringWidth(mTextSize, mLabel) &&
           mouseY >= mY && mouseY <= mY + mTextSize + mPadding * 2);
@@ -1355,39 +1351,35 @@ bool Button::mouseOver(F32 mouseX, F32 mouseY)
 
 void Button::onClick(F32 mouseX, F32 mouseY)
 {
-   if(mOnClickCallback && mouseOver(mouseX, mouseY))
+   if(mOnClickCallback && isMouseOver(mouseX, mouseY) && isActive())
       mOnClickCallback(mGame);
+}
+
+
+bool Button::isActive()
+{
+   return mGame->getUIManager()->getQueryServersUserInterface()->getLastPage() > 0;
 }
 
 
 void Button::render(F32 mouseX, F32 mouseY)
 {
-   S32 start = mTransparent ? 0 : 1;
+   if(!isActive())
+      return;
 
    S32 labelLen = UserInterface::getStringWidth(mTextSize, mLabel);
 
-   Color fillColor, outlineColor;
+   Color color;
 
    // Highlight a little when mouse is over buttons
-   if(mouseOver(mouseX, mouseY))
-   {
-      fillColor = mBgColor;
-      outlineColor = mHlColor * 2;
-   }
-   // Make buttons 'disappear' if there is only one page of servers (set colors to background color)
-   else if(mGame->getUIManager()->getQueryServersUserInterface()->getLastPage() == 0)
-   {
-      fillColor = mBgColor;
-      outlineColor = mBgColor;
-   }
+   if(isMouseOver(mouseX, mouseY))
+      color = mHlColor * 2;
+
    // Sit there and look unobtrusive
    else
-   {
-      fillColor = mBgColor;
-      outlineColor = mFgColor;    
-   }
+      color = mFgColor;    
 
-   UserInterface::drawFilledRect(mX, mY, mX + mPadding * 2 + labelLen, mY + mTextSize + mPadding * 2, fillColor, outlineColor);
+   UserInterface::drawFilledRect(mX, mY, mX + mPadding * 2 + labelLen, mY + mTextSize + mPadding * 2, mBgColor, color);
    UserInterface::drawString(mX + mPadding, mY + mPadding, mTextSize, mLabel);
 }
  
