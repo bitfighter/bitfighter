@@ -229,6 +229,21 @@ void EditorObject::renderInEditor(F32 currentScale, S32 snapIndex, bool isScript
 }
 
 
+bool EditorObject::isLitUp() 
+{ 
+   return mLitUp; 
+}
+
+
+void EditorObject::setLitUp(bool litUp) 
+{ 
+   mLitUp = litUp; 
+
+   if(!litUp) 
+      setVertexLitUp(NONE); 
+}
+
+
 void EditorObject::initializeEditor()
 {
    unselectVerts();

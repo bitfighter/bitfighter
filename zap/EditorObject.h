@@ -177,8 +177,8 @@ public:
    bool isSelected() { return mSelected; }
    void setSelected(bool selected) { mSelected = selected; }
 
-   bool isLitUp() { return mLitUp; }
-   void setLitUp(bool litUp) { mLitUp = litUp; if(!litUp) setVertexLitUp(NONE); }
+   bool isLitUp();
+   void setLitUp(bool litUp);
 
    bool isBeingEdited() { return mIsBeingEdited; }
    void setIsBeingEdited(bool isBeingEdited) { mIsBeingEdited = isBeingEdited; }

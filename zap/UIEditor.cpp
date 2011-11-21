@@ -2466,14 +2466,22 @@ void EditorUserInterface::onMouseMoved()
    if(mCreatingPoly || mCreatingPolyline)
       return;
 
-   findHitItemAndEdge();      //  Sets mItemHit, mVertexHit, and mEdgeHit
-   findHitItemOnDock();
+   // Unhighlight the currently lit up object, if any.  Note that I don't think we should need both of these statements with setLitUp(),
+   // but we do.  I think this is a sign that something is wrong elsewhere.
 
-   // Unhighlight the currently lit up object, if any
+   // Unhighlights walls when mouse leaves
    if(mItemToLightUp)
       mItemToLightUp->setLitUp(false);
 
-   mItemToLightUp = NULL;
+   mItemToLightUp = NULL;   
+
+   // Fixes problem with items being highlighted and not unselected when mouse leaves
+   if(mItemHit)
+      mItemHit->setLitUp(false);
+
+
+   findHitItemAndEdge();      //  Sets mItemHit, mVertexHit, and mEdgeHit
+   findHitItemOnDock();
 
    // We hit a vertex that wasn't already selected
    if(mVertexHit != NONE && !mItemHit->vertSelected(mVertexHit))   
