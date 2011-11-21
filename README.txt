@@ -47,7 +47,22 @@ Bitfighter README
 
    Bitfighter is built with the Visual Studio 2010 IDE
 
-   TODO: A Windows developer should put instructions here...
+   Install Visual C++ 2010 Express  -- this is a free download from Microsoft.
+
+   Start Visual C++.  Select Open Project, then navigate to the source folder, and open
+   the Bitfighter solution file.
+
+   Select Debug > Build Solution (or press F7) to compile the game.  This will take a 
+   few minutes the first time.
+
+   To run:
+   
+   Select bitfighter from the Solution Explorer pane on the left of theGUI, right click, 
+   and select Properties > Debugging. Under Command Arguments add "-rootdatadir XXX" 
+   (without quotes) where XXX is the folder containing your levels, sounds, etc., 
+   perhaps pointing to an existing install of Bitfighter.
+
+   Click Debug > Start Debugging (or press F5) to run the game.
 
 
  c) MacOS X (10.4 - 10.6; 10.7+ unknown..)
@@ -57,6 +72,7 @@ Bitfighter README
     build/osx/xcode
 
    To compile, select 'Release' mode and build the Bitfighter target
+
 
 3) INSTALLATION AND PACKAGING
 
@@ -82,7 +98,9 @@ Bitfighter README
 
     build/windows/installer
 
-   This will build a self-extracting installer for Bitfighter.
+   This will build a self-extracting installer for Bitfighter.  You will need to 
+   build in 'Release' mode as the installer is looking for an executable named 
+   'bitfighter.exe'
 
 
  c) MacOS X
