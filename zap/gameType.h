@@ -365,7 +365,6 @@ public:
 
    virtual void spawnShip(ClientInfo *clientInfo);
    virtual void spawnRobot(Robot *robot);
-   //Vector<Robot *> mRobotList;        // List of all robots in the game
 
    virtual void changeClientTeam(ClientInfo *client, S32 team);     // Change player to team indicated, -1 = cycle teams
 

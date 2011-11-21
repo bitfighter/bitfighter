@@ -1347,8 +1347,9 @@ void EventManager::fireEvent(lua_State *caller_L, EventType eventType, LuaPlayer
 
 TNL_IMPLEMENT_NETOBJECT(Robot);
 
-
+// Initialize our statics
 Vector<Robot *> Robot::robots;
+
 
 // Constructor, runs on client and server
 Robot::Robot() : Ship("Robot", false, TEAM_NEUTRAL, Point(), 1, true), LuaScriptRunner()
@@ -1429,7 +1430,8 @@ bool Robot::initialize(Point &pos)
       enableCollision();
 
       // WarpPositionMask triggers the spinny spawning visual effect
-      setMaskBits(RespawnMask | HealthMask | LoadoutMask | PositionMask | MoveMask | ModulePrimaryMask | ModuleSecondaryMask | WarpPositionMask);      // Send lots to the client
+      setMaskBits(RespawnMask | HealthMask        | LoadoutMask         | PositionMask | 
+                  MoveMask    | ModulePrimaryMask | ModuleSecondaryMask | WarpPositionMask);      // Send lots to the client
 
       TNLAssert(!isGhost(), "Didn't expect ghost here... this is supposed to only run on the server!");
 

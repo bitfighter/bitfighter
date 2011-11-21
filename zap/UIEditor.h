@@ -312,6 +312,8 @@ public:
 
    void setLevelToCanvasCoordConversion();
 
+   static Vector<string> robots;
+
 
    const Color *getTeamColor(S32 teamId);
 

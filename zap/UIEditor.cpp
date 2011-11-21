@@ -85,6 +85,9 @@ const F32 STARTING_SCALE = 0.5;
 
 static EditorObjectDatabase *mLoadTarget;
 
+// statics
+Vector<string> EditorUserInterface::robots;        // List of robot lines in the level file
+
 static EditorObjectDatabase mLevelGenDatabase;     // Database for inserting objects when running a levelgen script in the editor
 
 enum EntryMode {
@@ -473,6 +476,7 @@ void EditorUserInterface::loadLevel()
    clearLevelGenItems();
    mLoadTarget = game->getEditorDatabase();
    mGameTypeArgs.clear();
+   robots.clear();
 
    game->resetLevelInfo();
 
@@ -3943,6 +3947,9 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
       // Write out basic game parameters, including gameType info
       s_fprintf(f, "%s", getGame()->toString().c_str());    // Note that this toString appends a newline char; most don't
 
+      // Next come the robots
+      for(S32 i = 0; i < robots.size(); i++)
+         s_fprintf(f, "%s\n", robots[i].c_str());
 
       // Write out all level items (do two passes; walls first, non-walls next, so turrets & forcefields have something to grab onto)
       const Vector<EditorObject *> *objList = getObjectList();

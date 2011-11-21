@@ -1633,6 +1633,22 @@ bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &le
             delete newObject;
       }
    }
+   else if(!stricmp(argv[0], "Robot"))
+   {
+      // For now, we'll just make a list of robots and associated params, and write that out when saving the level.  We'll leave robots as
+      // full-fledged objects on the server (instead of pseudoItems here).
+      string robot = "";
+
+      for(S32 i = 0; i < argc; i++)
+      {
+         if(i > 0)
+            robot.append(" ");
+
+         robot.append(argv[i]);
+      }
+
+      EditorUserInterface::robots.push_back(robot);
+   }
    else 
       return false;
 
