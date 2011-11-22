@@ -239,7 +239,7 @@ public:
    const Vector<Point> *getTriangulatedFillPoints();
 
    ////////////////////
-   //  DatabaseObject methods
+   // DatabaseObject methods
 
    // Note that the poly returned here is different than what you might expect -- it is composed of the edges,
    // not the corners, and is thus in A-B, C-D, E-F format rather than the more typical A-B-C-D format returned
