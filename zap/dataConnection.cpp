@@ -136,6 +136,33 @@ void transferResource(GameSettings *settings, const string &addr, const string &
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+// Constructor
+DataSendable::DataSendable()
+{
+   // Do nothing
+}
+
+// Destructor
+DataSendable::~DataSendable()
+{
+   // Do nothing
+}
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Constructor
+DataSender::DataSender()
+{
+   mDone = true;
+}
+
+
+bool DataSender::isDone()
+{
+   return mDone;
+}
+
 // For readability
 #define MAX_CHUNK_LEN HuffmanStringProcessor::MAX_SENDABLE_LINE_LENGTH
 
@@ -235,6 +262,29 @@ void DataSender::sendNextLine()
 
 ////////////////////////////////////////
 ////////////////////////////////////////
+
+
+DataConnection::DataConnection(GameSettings *settings, ActionType action, string password, string filename, FileType fileType)
+{
+   mSettings = settings;
+   mAction = action;
+   mFilename = filename;
+   mFileType = fileType;
+   mPassword = password;
+
+   mOutputFile = NULL;
+}
+
+
+DataConnection::DataConnection(GameSettings *settings, const Nonce &clientId)
+{
+   mSettings = settings;
+   mClientId = clientId;
+
+   mAction = REQUEST_CURRENT_LEVEL;
+}
+
+
 
 // static method
 string DataConnection::getErrorMessage(SenderStatus stat, const string &filename)

@@ -41,6 +41,26 @@ namespace Zap
 {
 
 // Constructor
+EngineerConstructionItemInfo::EngineerConstructionItemInfo()
+{
+   // Do nothing
+}
+
+// Constructor
+EngineerConstructionItemInfo::EngineerConstructionItemInfo(EngineerBuildObjects objectType, const char *name, InputCode key, InputCode button, const char *help)
+{
+   mObjectType = objectType;
+   mKey = key;
+   mButton = button;
+   mName = name;
+   mHelp = help;
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Constructor
 EngineerHelper::EngineerHelper(ClientGame *clientGame) : Parent(clientGame)
 {
    mEngineerCostructionItemInfos.push_back(EngineerConstructionItemInfo(EngineeredTurret, "Turret", KEY_1, BUTTON_1));

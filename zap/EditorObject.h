@@ -89,7 +89,7 @@ protected:
 public:
    EditorObject();                  // Constructor
    virtual ~EditorObject();         // Virtual destructor
-   virtual EditorObject *clone() const { TNLAssert(false, "Clone method not implemented!"); return NULL; }
+   virtual EditorObject *clone() const;
 
    EditorObject *copy();            // Makes a duplicate of the item (see method for explanation)
    EditorObject *newCopy();         // Creates a brand new object based on the current one (see method for explanation)
@@ -97,47 +97,47 @@ public:
    virtual void prepareForDock(Game *game, const Point &point);
    void addToEditor(Game *game);
 
-   void assignNewSerialNumber() { mSerialNumber = mNextSerialNumber++; }
+   void assignNewSerialNumber();
    void renderDockItemLabel(const Point &pos, const char *label, F32 yOffset = 0);    // This could be moved anywhere... it's essentially a static method
 
    // Offset lets us drag an item out from the dock by an amount offset from the 0th vertex.  This makes placement seem more natural.
-   virtual Point getInitialPlacementOffset(F32 gridSize) { return Point(0,0); }
+   virtual Point getInitialPlacementOffset(F32 gridSize);
 
    // Account for the fact that the apparent selection center and actual object center are not quite aligned
    virtual Point getEditorSelectionOffset(F32 currentScale);  
 
    void renderAndLabelHighlightedVertices(F32 currentScale);   // Render selected and highlighted vertices, called from renderEditor
-   virtual void renderItemText(const char *text, S32 offset, F32 currentScale) { };    // Render some text, with specified vertical offset
-   virtual void renderEditor(F32 currentScale) { TNLAssert(false, "renderEditor not implemented!"); }
+   virtual void renderItemText(const char *text, S32 offset, F32 currentScale);    // Render some text, with specified vertical offset
+   virtual void renderEditor(F32 currentScale);
 
    // Should we show item attributes when it is selected? (only overridden by TextItem)
-   virtual bool showAttribsWhenSelected() { return true; }                             
+   virtual bool showAttribsWhenSelected();
 
-   virtual void renderAttributeString(F32 currentScale) { /* Do nothing */ }
+   virtual void renderAttributeString(F32 currentScale);
 
    void unselect();
 
-   void setSnapped(bool snapped) { /* Do nothing */ }          // Overridden in EngineeredItem
+   void setSnapped(bool snapped);                  // Overridden in EngineeredItem
 
    virtual void newObjectFromDock(F32 gridSize);   // Called when item dragged from dock to editor -- overridden by several objects
 
 
    // Keep track which vertex, if any is lit up in the currently selected item
-   bool isVertexLitUp(S32 vertexIndex) { return mVertexLitUp == vertexIndex; }
-   void setVertexLitUp(S32 vertexIndex) { mVertexLitUp = vertexIndex; }
+   bool isVertexLitUp(S32 vertexIndex);
+   void setVertexLitUp(S32 vertexIndex);
 
    // Objects can be different sizes on the dock and in the editor.  We need to draw selection boxes in both locations,
    // and these functions specify how big those boxes should be.  Override if implementing a non-standard sized item.
    // (strictly speaking, only getEditorRadius needs to be public, but it make sense to keep these together organizationally.)
-   virtual S32 getDockRadius() { return 10; }                     // Size of object on dock 
-   virtual F32 getEditorRadius(F32 currentScale);                 // Size of object in editor 
-   virtual const char *getVertLabel(S32 index) { return ""; }     // Label for vertex, if any... only overridden by SimpleLine objects
+   virtual S32 getDockRadius();                     // Size of object on dock
+   virtual F32 getEditorRadius(F32 currentScale);   // Size of object in editor
+   virtual const char *getVertLabel(S32 index);     // Label for vertex, if any... only overridden by SimpleLine objects
 
    void saveItem(FILE *f, F32 gridSize);
    virtual string toString(F32 gridSize) const = 0; 
 
    // Dock item rendering methods
-   virtual void renderDock() { TNLAssert(false, "renderDock not implemented!"); }   // Need not be abstract -- some of our objects do not go on dock
+   virtual void renderDock();    // Need not be abstract -- some of our objects do not go on dock
    virtual void labelDockItem();
    virtual void highlightDockItem();
 
@@ -155,10 +155,10 @@ public:
    virtual void onGeomChanging();                        // Item geom is interactively changing
    virtual void onGeomChanged();                         // Item changed geometry (or moved), do any internal updating that might be required
 
-   virtual void onItemDragging() { /* Do nothing */ };   // Item is being dragged around the screen
+   virtual void onItemDragging();                        // Item is being dragged around the screen
 
-   virtual void onAttrsChanging() { /* Do nothing */ };  // Attr is in the process of being changed (i.e. a char was typed for a textItem)
-   virtual void onAttrsChanged() { /* Do nothing */ };   // Attrs changed
+   virtual void onAttrsChanging();                       // Attr is in the process of being changed (i.e. a char was typed for a textItem)
+   virtual void onAttrsChanged();                        // Attrs changed
 
 
    /////
@@ -169,41 +169,41 @@ public:
    //virtual void scale(const Point &center, F32 scale) { Geometry::scale(center, scale); onGeomChanged(); }
 
    /////
-   S32 getItemId() { return mItemId; }
-   void setItemId(S32 itemId) { mItemId = itemId; }
+   S32 getItemId();
+   void setItemId(S32 itemId);
    
-   S32 getSerialNumber() { return mSerialNumber; }
+   S32 getSerialNumber();
 
-   bool isSelected() { return mSelected; }
-   void setSelected(bool selected) { mSelected = selected; }
+   bool isSelected();
+   void setSelected(bool selected);
 
    bool isLitUp();
    void setLitUp(bool litUp);
 
-   bool isBeingEdited() { return mIsBeingEdited; }
-   void setIsBeingEdited(bool isBeingEdited) { mIsBeingEdited = isBeingEdited; }
+   bool isBeingEdited();
+   void setIsBeingEdited(bool isBeingEdited);
 
 
    virtual void initializeEditor();
 
    S32 mScore;
-   S32 getScore() { return mScore; }     // Goal zones only, return zone's score
+   S32 getScore();     // Goal zones only, return zone's score
 
    virtual bool canBeHostile();
    virtual bool canBeNeutral();
    virtual bool hasTeam();
 
-   virtual const char *getEditorHelpString() { TNLAssert(false, "getEditorHelpString method not implemented!"); return NULL; }     
-   virtual const char *getPrettyNamePlural() { TNLAssert(false, "getPrettyNamePlural method not implemented!"); return NULL; }
-   virtual const char *getOnDockName()       { TNLAssert(false, "getOnDockName method not implemented!"); return NULL; }
-   virtual const char *getOnScreenName()     { TNLAssert(false, "getOnScreenName method not implemented!"); return NULL; }   
+   virtual const char *getEditorHelpString();
+   virtual const char *getPrettyNamePlural();
+   virtual const char *getOnDockName();
+   virtual const char *getOnScreenName();
 
-   virtual const char *getInstructionMsg() { return ""; }                     // Message printed below item when it is selected
+   virtual const char *getInstructionMsg();                                // Message printed below item when it is selected
 
    // For editing attributes:
-   virtual EditorAttributeMenuUI *getAttributeMenu() { return NULL; }         // Override in child if it has an attribute menu
-   virtual void startEditingAttrs(EditorAttributeMenuUI *attributeMenu) { }   // Called when we start editing to get menus populated
-   virtual void doneEditingAttrs(EditorAttributeMenuUI *attributeMenu) { }    // Called when we're done to retrieve values set by the menu
+   virtual EditorAttributeMenuUI *getAttributeMenu();                      // Override in child if it has an attribute menu
+   virtual void startEditingAttrs(EditorAttributeMenuUI *attributeMenu);   // Called when we start editing to get menus populated
+   virtual void doneEditingAttrs(EditorAttributeMenuUI *attributeMenu);    // Called when we're done to retrieve values set by the menu
 
 
    //////////////

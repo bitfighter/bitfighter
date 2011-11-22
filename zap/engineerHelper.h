@@ -43,16 +43,9 @@ struct EngineerConstructionItemInfo
    const char *mHelp;       // An additional bit of help text, also displayed on menu
 
 
-   EngineerConstructionItemInfo() { /* Do nothing */ };      // Default constructor, should never be used
+   EngineerConstructionItemInfo();      // Default constructor, should never be used
 
-   EngineerConstructionItemInfo(EngineerBuildObjects objectType, const char *name, InputCode key, InputCode button, const char *help = "")    
-   {
-      mObjectType = objectType;
-      mKey = key;
-      mButton = button;
-      mName = name;
-      mHelp = help;
-   }
+   EngineerConstructionItemInfo(EngineerBuildObjects objectType, const char *name, InputCode key, InputCode button, const char *help = "");
 };
 
 

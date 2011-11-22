@@ -182,26 +182,26 @@ public:
 
 
 #ifndef ZAP_DEDICATED
-   ClientGame *getClientGame() { return mClientGame; }
-   void setClientGame(ClientGame *game) { mClientGame = game; }
+   ClientGame *getClientGame();
+   void setClientGame(ClientGame *game);
 #endif
 
    Statistics mStatistics;       // Player statistics tracker
 
    Timer mSwitchTimer;           // Timer controlling when player can switch teams after an initial switch
 
-   void setClientNameNonUnique(StringTableEntry name) { mClientNameNonUnique = name; }
-   void setServerName(StringTableEntry name) { mServerName = name; }
+   void setClientNameNonUnique(StringTableEntry name);
+   void setServerName(StringTableEntry name);
 
-   ClientInfo *getClientInfo() { return mClientInfo.get(); }
-   void setClientInfo(boost::shared_ptr<ClientInfo> clientInfo) { mClientInfo = clientInfo; }
+   ClientInfo *getClientInfo();
+   void setClientInfo(boost::shared_ptr<ClientInfo> clientInfo);
 
 
-   LuaPlayerInfo *getPlayerInfo() { return mPlayerInfo; }
+   LuaPlayerInfo *getPlayerInfo();
 
-   bool lostContact() { return getTimeSinceLastPacketReceived() > 2000 && mLastPacketRecvTime != 0; }     // No contact in 2000ms?  That's bad!
+   bool lostContact();
 
-   string getServerName() { return mServerName.getString(); }
+   string getServerName();
    static string makeUnique(string name);    // Make sure a given name is unique across all clients & bots
 
    void reset();        // Clears/initializes some things between levels
@@ -212,16 +212,16 @@ public:
    void suspendGame();
    void unsuspendGame();
 
-   bool isBusy() { if(!this) return false; else return mIsBusy; }
-   void setIsBusy(bool busy) { mIsBusy = busy; }
+   bool isBusy();
+   void setIsBusy(bool busy);
 
    void sendLevelList();
 
-   bool isReadyForRegularGhosts() { return mReadyForRegularGhosts; }
-   void setReadyForRegularGhosts(bool ready) { mReadyForRegularGhosts = ready; }
+   bool isReadyForRegularGhosts();
+   void setReadyForRegularGhosts(bool ready);
 
-   bool wantsScoreboardUpdates() { return mWantsScoreboardUpdates; }
-   void setWantsScoreboardUpdates(bool wantsUpdates) { mWantsScoreboardUpdates = wantsUpdates; }
+   bool wantsScoreboardUpdates();
+   void setWantsScoreboardUpdates(bool wantsUpdates);
 
    //S32 getScore() { return mScore; }
    //void setScore(S32 score) { mScore = score; }    // Called from ServerClientInfo
@@ -229,7 +229,7 @@ public:
    //void addScore(S32 score) { mScore += score; }
    //void addToTotalScore(S32 score) { mTotalScore += score; mTotalCumulativeScore += score; }
 
-   void addToTotalCumulativeScore(S32 score) { mTotalCumulativeScore += score; }
+   void addToTotalCumulativeScore(S32 score);
 
    F32 getCumulativeRating();
    //F32 getRating();
@@ -245,12 +245,12 @@ public:
 
 
    // Tell UI we're waiting for password confirmation from server
-   void setWaitingForPermissionsReply(bool waiting) { mWaitingForPermissionsReply = waiting; }
-   bool waitingForPermissionsReply() { return mWaitingForPermissionsReply; }
+   void setWaitingForPermissionsReply(bool waiting);
+   bool waitingForPermissionsReply();
 
    // Tell UI whether we've recieved password confirmation from server
-   void setGotPermissionsReply(bool gotReply) { mGotPermissionsReply = gotReply; }
-   bool gotPermissionsReply() { return mGotPermissionsReply; }
+   void setGotPermissionsReply(bool gotReply);
+   bool gotPermissionsReply();
 
    // Suspend/unsuspend game
    TNL_DECLARE_RPC(c2sSuspendGame, (bool suspend));
@@ -275,7 +275,7 @@ public:
 
    TNL_DECLARE_RPC(s2cSetServerName, (StringTableEntry name));
 
-   bool isInCommanderMap() { return mInCommanderMap; }
+   bool isInCommanderMap();
 
    TNL_DECLARE_RPC(c2sRequestCommanderMap, ());
    TNL_DECLARE_RPC(c2sReleaseCommanderMap, ());
@@ -319,15 +319,15 @@ public:
    bool s2rUploadFile(const char *filename, U8 type);
 
    //void setAuthenticated(bool isVerified);    // Client & Server... Runs on server after getting message from master, or on local connection
-   void resetAuthenticationTimer() { mAuthenticationTimer.reset(MASTER_SERVER_FAILURE_RETRY_TIME + 1000); mAuthenticationCounter++;}
-   S32 getAuthenticationCounter() { return mAuthenticationCounter; }
+   void resetAuthenticationTimer();
+   S32 getAuthenticationCounter();
    //bool isAuthenticated() { return mIsVerified; }
    void requestAuthenticationVerificationFromMaster();
    void updateAuthenticationTimer(U32 timeDelta);
 
    void displayMessageE(U32 color, U32 sfx, StringTableEntry formatString, Vector<StringTableEntry> e);
 
-   const Vector<U32> &getLoadout() { return mLoadout; }
+   const Vector<U32> &getLoadout();
    void writeConnectRequest(BitStream *stream);
    bool readConnectRequest(BitStream *stream, NetConnection::TerminationReason &reason);
 

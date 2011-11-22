@@ -107,6 +107,18 @@ inline void addArg()
 }
 
 
+// Constructor
+LevelLoader::LevelLoader()
+{
+   // Do nothing
+}
+
+// Destructor
+LevelLoader::~LevelLoader()
+{
+   // Do nothing
+}
+
 
 // Parse the contents of the level file string is the file data itself
 // This is rather ugly!  Totally old school!
@@ -315,6 +327,26 @@ using namespace std;
 extern string lcase(string strToConvert);
 
 
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Constructor
+LevelLoadException::LevelLoadException(string str) : msg(str)
+{
+   // Do nothing
+}
+
+// Destructor, required by gcc to avoid "looser throw" error
+LevelLoadException::~LevelLoadException() throw ()
+{
+   // Do nothing
+}
+
+
+const char *LevelLoadException::what() const throw ()
+{
+   return msg.c_str();
+}
 
 
 };
