@@ -757,11 +757,13 @@ void QueryServersUserInterface::render()
          else
             color = Colors::green;     // 1 or more players
 
-         glColor(color*0.5);    // dim color
+         glColor(color * 0.5);         // dim color
          drawStringf(columns[3].xStart + 30, y, SERVER_ENTRY_TEXTSIZE, "/%d", s.maxPlayers);
+
          glColor(color);
          drawStringf(columns[3].xStart, y, SERVER_ENTRY_TEXTSIZE, "%d", s.playerCount);
          drawStringf(columns[3].xStart + 78, y, SERVER_ENTRY_TEXTSIZE, "%d", s.botCount);
+
          glColor(Colors::white);
          drawString(columns[4].xStart, y, SERVER_ENTRY_TEXTSIZE, s.serverAddress.toString());
       }
@@ -769,9 +771,8 @@ void QueryServersUserInterface::render()
    // Show some special messages if there are no servers, or we're not connected to the master
    else if(connectedToMaster && mRecievedListOfServersFromMaster)        // We have our response, and there were no servers
       drawmsg1 = true;
-   else if(!connectedToMaster)     // Still waiting to connect to the master...
+   else if(!connectedToMaster)         // Still waiting to connect to the master...
       drawmsg2 = true;
-
 
    renderColumnHeaders();
 
@@ -1008,7 +1009,6 @@ void QueryServersUserInterface::onKeyDown(InputCode inputCode, char ascii)
 
       if(inputCode == BUTTON_DPAD_LEFT)
          sortSelected();
-
    }
    else if(inputCode == KEY_RIGHT)
    {
@@ -1220,6 +1220,7 @@ static S32 QSORT_CALLBACK compareFuncName(const void *a, const void *b)
    return stricmp(((QueryServersUserInterface::ServerRef *) a)->serverName.c_str(),
                   ((QueryServersUserInterface::ServerRef *) b)->serverName.c_str());
 }
+
 
 static S32 QSORT_CALLBACK compareFuncPing(const void *a, const void *b)
 {

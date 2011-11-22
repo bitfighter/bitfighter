@@ -185,8 +185,6 @@ private:
 
    bool mLastUndoStateWasBarrierWidthChange;
 
-   EditorObject *mItemToLightUp;
- 
    string mEditFileName;            // Manipulate with get/setLevelFileName
 
    EditorObject *mNewItem;

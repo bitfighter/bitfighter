@@ -397,7 +397,6 @@ void EditorUserInterface::rebuildEverything()
    resnapAllEngineeredItems();
 
    setNeedToSave(mAllUndoneUndoLevel != mLastUndoIndex);
-   mItemToLightUp = NULL;
    autoSave();
 }
 
@@ -1006,8 +1005,6 @@ void EditorUserInterface::onActivate()
    entryMode = EntryNone;
 
    SDL_SetCursor(Cursor::getDefault());
-
-   mItemToLightUp = NULL;    
 
    mSaveMsgTimer = 0;
 
@@ -2454,6 +2451,8 @@ void EditorUserInterface::onMouseMoved()
 
    mouseIgnore = true;
 
+   mMousePos.set(gScreenInfo.getMousePos());
+
    // Doing this with MOUSE_RIGHT allows you to drag a vertex you just placed by holding the right-mouse button
    if(getInputCodeState(MOUSE_LEFT) || getInputCodeState(MOUSE_RIGHT) || getInputCodeState(MOUSE_MIDDLE))
    {
@@ -2461,48 +2460,23 @@ void EditorUserInterface::onMouseMoved()
       return;
    }
 
-   mMousePos.set(gScreenInfo.getMousePos());
-
    if(mCreatingPoly || mCreatingPolyline)
       return;
 
-   // Unhighlight the currently lit up object, if any.  Note that I don't think we should need both of these statements with setLitUp(),
-   // but we do.  I think this is a sign that something is wrong elsewhere.
-
-   // Unhighlights walls when mouse leaves
-   if(mItemToLightUp)
-      mItemToLightUp->setLitUp(false);
-
-   mItemToLightUp = NULL;   
-
-   // Fixes problem with items being highlighted and not unselected when mouse leaves
+   // Turn off highlight on selected item -- will be turned back on for this object or another below
    if(mItemHit)
       mItemHit->setLitUp(false);
-
 
    findHitItemAndEdge();      //  Sets mItemHit, mVertexHit, and mEdgeHit
    findHitItemOnDock();
 
    // We hit a vertex that wasn't already selected
-   if(mVertexHit != NONE && !mItemHit->vertSelected(mVertexHit))   
-   {
-      mItemToLightUp = mItemHit;
-      mItemToLightUp->setVertexLitUp(mVertexHit);
-   }
+   if(mItemHit && mVertexHit != NONE && !mItemHit->vertSelected(mVertexHit))   
+      mItemHit->setVertexLitUp(mVertexHit);
 
-   // We hit an item that wasn't already selected
-   else if(mItemHit && !mItemHit->isSelected())                   
-      mItemToLightUp = mItemHit;
-
-   // Check again, and take a point object in preference to a vertex
-   if(mItemHit && !mItemHit->isSelected() && mItemHit->getGeomType() == geomPoint)  
-      mItemToLightUp = mDockItemHit;
-
-   if(mItemToLightUp)
-      mItemToLightUp->setLitUp(true);
-
-   //bool showMoveCursor = (mItemHit || mVertexHit != NONE || mEdgeHit != NONE || mDockItemHit);
-
+   // Highlight currently selected item
+   if(mItemHit)
+      mItemHit->setLitUp(true);
 
    findSnapVertex();
    SDL_SetCursor(Cursor::getDefault());
@@ -2511,8 +2485,6 @@ void EditorUserInterface::onMouseMoved()
 
 void EditorUserInterface::onMouseDragged()
 {
-   mMousePos.set(gScreenInfo.getMousePos());
-
    if(getInputCodeState(MOUSE_MIDDLE) && mMousePos != mScrollWithMouseLocation)
    {
       mCurrentOffset += mMousePos - mScrollWithMouseLocation;
@@ -2743,7 +2715,7 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
       {  
          // Since indices change as items are deleted, this will keep incorrect items from being deleted
          if(obj->isLitUp())
-            mItemToLightUp = NULL;
+            mItemHit = NULL;
 
          if(!deleted)
             saveUndoState();
@@ -2791,7 +2763,7 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
       setNeedToSave(true);
       autoSave();
 
-      mItemToLightUp = NULL;     // In case we just deleted a lit item; not sure if really needed, as we do this above
+      mItemHit = NULL;     // In case we just deleted a lit item; not sure if really needed, as we do this above
    }
 }
 
@@ -3015,7 +2987,6 @@ void EditorUserInterface::deleteItem(S32 itemIndex)
    // Reset a bunch of things
    mSnapObject = NULL;
    mSnapVertexIndex = NONE;
-   mItemToLightUp = NULL;
 
    validateLevel();
 
