@@ -112,9 +112,6 @@ public:
 
    void recalcTextSize();
 
-   // Offset lets us drag an item out from the dock by an amount offset from the 0th vertex.  This makes placement seem more natural.
-   Point getInitialPlacementOffset(F32 gridSize) { return Point(.4, 0); }
-
    // Some properties about the item that will be needed in the editor
    const char *getEditorHelpString() { return "Draws a bit of text on the map.  Visible only to team, or to all if neutral."; }  
    const char *getPrettyNamePlural() { return "Text Items"; }

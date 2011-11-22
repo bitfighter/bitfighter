@@ -56,20 +56,30 @@ void SimpleLine::renderDock()
 }
 
 
+const F32 INITIAL_ITEM_LENGTH = 1.0;
+
 // Called when we create a brand new object and insert it in the editor, like when we drag a new item from the dock
 void SimpleLine::newObjectFromDock(F32 gridSize) 
 {
 #ifndef ZAP_DEDICATED
    setVert(Point(0,0), 0);
-   setVert(Point(1,0) * gridSize, 1);
+   setVert(Point(1,0) * INITIAL_ITEM_LENGTH * gridSize, 1);
 
    EditorParent::newObjectFromDock(gridSize);
 #endif
 }
 
 
+// Offset lets us drag an item out from the dock by an amount offset from the 0th vertex.  This makes placement seem more natural.
+// In this case, we'll drag these items by their slender midriff.
+Point SimpleLine::getInitialPlacementOffset(F32 gridSize) 
+{ 
+   return Point(INITIAL_ITEM_LENGTH * gridSize / 2, 0); 
+}
+
+
 // TODO: Put in editor ??
-static const Color INSTRUCTION_TEXTCOLOR(1,1,1);
+static const Color INSTRUCTION_TEXTCOLOR(Colors::white);
 static const S32 INSTRUCTION_TEXTSIZE = 9;      
 static const S32 INSTRUCTION_TEXTGAP = 3;
 

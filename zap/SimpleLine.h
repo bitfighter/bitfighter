@@ -60,6 +60,7 @@ public:
    void renderItemText(const char *text, S32 offset, F32 currentScale);
 
    virtual void newObjectFromDock(F32 gridSize);
+   virtual Point getInitialPlacementOffset(F32 gridSize);
 
    void prepareForDock(Game *game, const Point &point);
 };

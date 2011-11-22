@@ -105,9 +105,6 @@ public:
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
    ///// Editor methods 
-   // Offset lets us drag an item out from the dock by an amount offset from the 0th vertex.  This makes placement seem more natural.
-   Point getInitialPlacementOffset(F32 gridSize) { return Point(.15,0); }
-
    Color getEditorRenderColor() { return Colors::red; }
 
    void renderEditorItem();
