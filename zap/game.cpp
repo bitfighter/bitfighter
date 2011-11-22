@@ -80,10 +80,131 @@ using namespace TNL;
 namespace Zap
 {
 
+// Constructor
+ClientInfo::ClientInfo()
+{
+   // Do nothing
+}
+
+// Destructor
+ClientInfo::~ClientInfo()
+{
+   // Do nothing
+}
+
 
 void ClientInfo::setAuthenticated(bool isAuthenticated)
 {
    mIsAuthenticated = isAuthenticated; 
+}
+
+
+void ClientInfo::initialize()
+{
+   mScore = 0;
+   mTotalScore = 0;
+   mTeamIndex = (NO_TEAM + 0);
+   mPing = 0;
+   mIsAdmin = false;
+   mIsLevelChanger = false;
+   mIsRobot = false;
+   mIsAuthenticated = false;
+}
+
+
+const StringTableEntry ClientInfo::getName()
+{
+   return mName;
+}
+
+
+void ClientInfo::setName(const StringTableEntry &name)
+{
+   mName = name;
+}
+
+
+S32 ClientInfo::getScore()
+{
+   return mScore;
+}
+
+
+void ClientInfo::setScore(S32 score)
+{
+   mScore = score;
+}
+
+
+void ClientInfo::addScore(S32 score)
+{
+   mScore += score;
+}
+
+
+S32 ClientInfo::getPing()
+{
+   return mPing;
+}
+
+
+void ClientInfo::setPing(S32 ping)
+{
+   mPing = ping;
+}
+
+
+S32 ClientInfo::getTeamIndex()
+{
+   return mTeamIndex;
+}
+
+
+void ClientInfo::setTeamIndex(S32 teamIndex)
+{
+   mTeamIndex = teamIndex;
+}
+
+
+bool ClientInfo::isAuthenticated()
+{
+   return mIsAuthenticated;
+}
+
+
+bool ClientInfo::isLevelChanger()
+{
+   return mIsLevelChanger;
+}
+
+
+void ClientInfo::setIsLevelChanger(bool isLevelChanger)
+{
+   mIsLevelChanger = isLevelChanger;
+}
+
+
+bool ClientInfo::isAdmin()
+{
+   return mIsAdmin;
+}
+
+
+void ClientInfo::setIsAdmin(bool isAdmin)
+{
+   mIsAdmin = isAdmin;
+}
+
+
+bool ClientInfo::isRobot()
+{
+   return mIsRobot;
+}
+
+
+Nonce *ClientInfo::getId()
+{
+   return &mId;
 }
 
 
@@ -140,6 +261,38 @@ void LocalClientInfo::addToTotalScore(S32 score)
 }
 
 
+GameConnection *LocalClientInfo::getConnection()
+{
+   return mClientConnection;
+}
+
+
+void LocalClientInfo::setConnection(GameConnection *conn)
+{
+   mClientConnection = conn;
+}
+
+
+void LocalClientInfo::setRating(F32 rating)
+{
+   TNLAssert(false, "Ratings can't be set for this class!");
+}
+
+
+SoundEffect *LocalClientInfo::getVoiceSFX()
+{
+   TNLAssert(false, "Can't access VoiceSFX from this class!");
+   return NULL;
+}
+
+
+VoiceDecoder *LocalClientInfo::getVoiceDecoder()
+{
+   TNLAssert(false, "Can't access VoiceDecoder from this class!");
+   return NULL;
+}
+
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -166,6 +319,57 @@ RemoteClientInfo::~RemoteClientInfo()
    delete mDecoder;
    delete mVoiceSFX;
 }
+
+
+GameConnection *RemoteClientInfo::getConnection()
+{
+   TNLAssert(false, "Can't get a GameConnection from a RemoteClientInfo!");
+   return NULL;
+}
+
+
+void RemoteClientInfo::setConnection(GameConnection *conn)
+{
+   TNLAssert(false, "Can't set a GameConnection on a RemoteClientInfo!");
+}
+
+
+F32 RemoteClientInfo::getRating()
+{
+   return mRating;
+}
+
+
+void RemoteClientInfo::setRating(F32 rating)
+{
+   mRating = rating;
+}
+
+
+void RemoteClientInfo::addToTotalScore(S32 score)
+{
+   TNLAssert(false, "We don't track total score in these parts...");
+}
+
+
+void RemoteClientInfo::initialize()
+{
+   Parent::initialize();
+   mRating = 0;
+}
+
+// Voice chat stuff -- these will be invalid on the server side
+SoundEffect *RemoteClientInfo::getVoiceSFX()
+{
+   return mVoiceSFX;
+}
+
+
+VoiceDecoder *RemoteClientInfo::getVoiceDecoder()
+{
+   return mDecoder;
+}
+
 #endif
 
 
@@ -216,15 +420,87 @@ Game::~Game()
 }
 
 
+F32 Game::getGridSize() const
+{
+   return mGridSize;
+}
+
+
 void Game::setGridSize(F32 gridSize) 
 { 
    mGridSize = max(min(gridSize, F32(MAX_GRID_SIZE)), F32(MIN_GRID_SIZE));
 }
 
 
+U32 Game::getCurrentTime()
+{
+   return mCurrentTime;
+}
+
+
+const Vector<SafePtr<GameObject> > &Game::getScopeAlwaysList()
+{
+   return mScopeAlwaysList;
+}
+
+
 void Game::setScopeAlwaysObject(GameObject *theObject)
 {
    mScopeAlwaysList.push_back(theObject);
+}
+
+
+GameSettings *Game::getSettings()
+{
+   return mSettings;
+}
+
+
+bool Game::isSuspended()
+{
+   return mGameSuspended;
+}
+
+
+void Game::resetMasterConnectTimer()
+{
+   mNextMasterTryTime = 0;
+}
+
+
+void Game::setReadyToConnectToMaster(bool ready)
+{
+   mReadyToConnectToMaster = ready;
+}
+
+
+Point Game::getScopeRange(bool sensorIsActive)
+{
+   return
+         sensorIsActive ?
+               Point(PLAYER_SENSOR_VISUAL_DISTANCE_HORIZONTAL
+                     + PLAYER_SCOPE_MARGIN, PLAYER_SENSOR_VISUAL_DISTANCE_VERTICAL
+                     + PLAYER_SCOPE_MARGIN) :
+               Point(PLAYER_VISUAL_DISTANCE_HORIZONTAL + PLAYER_SCOPE_MARGIN, PLAYER_VISUAL_DISTANCE_VERTICAL
+                     + PLAYER_SCOPE_MARGIN);
+}
+
+
+S32 Game::getClientCount() const
+{
+   return mClientInfos.size();
+}
+
+
+S32 Game::getPlayerCount() const
+{
+   return mPlayerCount;
+}
+
+
+S32 Game::getRobotCount() const
+{
+   return mRobotCount;
 }
 
 
@@ -319,6 +595,12 @@ GameNetInterface *Game::getNetInterface()
 }
 
 
+GridDatabase *Game::getGameObjDatabase()
+{
+   return mGameObjDatabase.get();
+}
+
+
 EditorObjectDatabase *Game::getEditorDatabase()  // TODO: Only for clientGame
 { 
    // Lazy init
@@ -327,6 +609,13 @@ EditorObjectDatabase *Game::getEditorDatabase()  // TODO: Only for clientGame
          
    return mEditorDatabase.get(); 
 }  
+
+
+void Game::setEditorDatabase(boost::shared_ptr<GridDatabase> database)
+{
+   mEditorDatabase =
+         boost::dynamic_pointer_cast<EditorObjectDatabase>(database);
+}
 
 
 MasterServerConnection *Game::getConnectionToMaster()
@@ -451,6 +740,12 @@ void Game::setGameType(GameType *theGameType)      // TODO==> Need to store game
 {
    //delete mGameType;          // Cleanup, if need be
    mGameType = theGameType;
+}
+
+
+U32 Game::getTimeUnconnectedToMaster()
+{
+   return mTimeUnconnectedToMaster;
 }
 
 
@@ -867,6 +1162,19 @@ void Game::deleteObjects(TestFunc testFunc)
 }
 
 
+const ModuleInfo *Game::getModuleInfo(ShipModule module)
+{
+   TNLAssert(U32(module) < U32(ModuleCount), "out of range module");
+   return &gModuleInfo[(U32) module];
+}
+
+
+WallSegmentManager *Game::getWallSegmentManager() const
+{
+   return mWallSegmentManager;
+}
+
+
 void Game::computeWorldObjectExtents()
 {
    fillVector.clear();
@@ -1130,6 +1438,42 @@ void ServerGame::voteClient(ClientInfo *clientInfo, bool voteYes)
 S32 ServerGame::getLevelNameCount()
 {
    return mLevelInfos.size();
+}
+
+
+S32 ServerGame::getCurrentLevelIndex()
+{
+   return mCurrentLevelIndex;
+}
+
+
+S32 ServerGame::getLevelCount()
+{
+   return mLevelInfos.size();
+}
+
+
+LevelInfo ServerGame::getLevelInfo(S32 index)
+{
+   return mLevelInfos[index];
+}
+
+
+void ServerGame::clearLevelInfos()
+{
+   mLevelInfos.clear();
+}
+
+
+void ServerGame::addLevelInfo(const LevelInfo &levelInfo)
+{
+   mLevelInfos.push_back(levelInfo);
+}
+
+
+bool ServerGame::isTestServer()
+{
+   return mTestMode;
 }
 
 
@@ -1685,6 +2029,18 @@ void ServerGame::unsuspendGame(bool remoteRequest)
 }
 
 
+void ServerGame::suspenderLeftGame()
+{
+   mSuspendor = NULL;
+}
+
+
+GameConnection *ServerGame::getSuspendor()
+{
+   return mSuspendor;
+}
+
+
 // Need to handle both forward and backward slashes... will return pathname with trailing delimeter.
 inline string getPathFromFilename(const string &filename)
 {
@@ -1797,10 +2153,46 @@ void ServerGame::removeClient(ClientInfo *clientInfo)
 }
 
 
+GridDatabase *ServerGame::getBotZoneDatabase()
+{
+   return &mDatabaseForBotZones;
+}
+
+
+U32 ServerGame::getMaxPlayers()
+{
+   return mSettings->getMaxPlayers();
+}
+
+
+bool ServerGame::isDedicated()
+{
+   return mDedicated;
+}
+
+
+void ServerGame::setDedicated(bool dedicated)
+{
+   mDedicated = dedicated;
+}
+
+
+bool ServerGame::isFull()
+{
+   return (U32) getPlayerCount() >= mSettings->getMaxPlayers();
+}
+
+
 // Only called from outside ServerGame
 bool ServerGame::isReadyToShutdown(U32 timeDelta)
 {
    return mShuttingDown && (mShutdownTimer.update(timeDelta) || onlyClientIs(mShutdownOriginator));
+}
+
+
+bool ServerGame::isServer()
+{
+   return true;
 }
 
 
@@ -2172,6 +2564,24 @@ S32 ServerGame::addUploadedLevelInfo(const char *filename, LevelInfo &levelInfo)
    }
 
    return mLevelInfos.size() - 1;
+}
+
+
+Rect Game::getWorldExtents()
+{
+   return mWorldExtents;
+}
+
+
+bool Game::isTestServer()
+{
+   return false;
+}
+
+
+const Color *Game::getTeamColor(S32 teamId) const
+{
+   return &Colors::white;
 }
 
 

@@ -114,44 +114,46 @@ protected:
    bool mIsRobot;
    bool mIsAuthenticated;
 
-   virtual void initialize() { mScore = 0; mTotalScore = 0; mTeamIndex = (NO_TEAM + 0); mPing = 0; mIsAdmin = false; mIsLevelChanger = false; 
-                               mIsRobot = false; mIsAuthenticated = false; }
+   virtual void initialize();
 
 public:
+   ClientInfo();           // Constructor
+   virtual ~ClientInfo();  // Destructor
+
    virtual GameConnection *getConnection() = 0;
    virtual void setConnection(GameConnection *conn) = 0;
 
-   const StringTableEntry getName() { return mName; }
-   void setName(const StringTableEntry &name) { mName = name; }
+   const StringTableEntry getName();
+   void setName(const StringTableEntry &name);
 
-   S32 getScore() { return mScore; }
-   void setScore(S32 score) { mScore = score; }
-   void addScore(S32 score) { mScore += score; }
+   S32 getScore();
+   void setScore(S32 score);
+   void addScore(S32 score);
 
    virtual void addToTotalScore(S32 score) = 0;
 
    virtual void setRating(F32 rating) = 0;
    virtual F32 getRating() = 0;
 
-   S32 getPing() { return mPing; }
-   void setPing(S32 ping) { mPing = ping; }
+   S32 getPing();
+   void setPing(S32 ping);
 
-   S32 getTeamIndex() { return mTeamIndex; }
-   void setTeamIndex(S32 teamIndex) { mTeamIndex = teamIndex; }
+   S32 getTeamIndex();
+   void setTeamIndex(S32 teamIndex);
 
-   bool isAuthenticated() { return mIsAuthenticated; }
+   bool isAuthenticated();
    virtual void setAuthenticated(bool isAuthenticated);
 
-   bool isLevelChanger() { return mIsLevelChanger; }
-   void setIsLevelChanger(bool isLevelChanger) { mIsLevelChanger = isLevelChanger; }
+   bool isLevelChanger();
+   void setIsLevelChanger(bool isLevelChanger);
 
-   bool isAdmin() { return mIsAdmin; }
-   void setIsAdmin(bool isAdmin) { mIsAdmin = isAdmin; }
+   bool isAdmin();
+   void setIsAdmin(bool isAdmin);
 
-   bool isRobot() { return mIsRobot; }
+   bool isRobot();
 
 
-   Nonce *getId() { return &mId; }
+   Nonce *getId();
 
    virtual SoundEffect *getVoiceSFX() = 0;
    virtual VoiceDecoder *getVoiceDecoder() = 0;
@@ -175,18 +177,18 @@ public:
 
 
    // WARNING!! mClientConnection can be NULL on client!!! (though should never be NULL on server)
-   GameConnection *getConnection() { return mClientConnection; }
-   void setConnection(GameConnection *conn) { mClientConnection = conn; }
+   GameConnection *getConnection();
+   void setConnection(GameConnection *conn);
 
    void setAuthenticated(bool isAuthenticated);
 
-   void setRating(F32 rating) { TNLAssert(false, "Ratings can't be set for this class!"); }
+   void setRating(F32 rating);
    F32 getRating();
 
    void addToTotalScore(S32 score);
 
-   SoundEffect *getVoiceSFX()      { TNLAssert(false, "Can't access VoiceSFX from this class!");      return NULL; }
-   VoiceDecoder *getVoiceDecoder() { TNLAssert(false, "Can't access VoiceDecoder from this class!"); return NULL; }
+   SoundEffect *getVoiceSFX();
+   VoiceDecoder *getVoiceDecoder();
 };
 
 
@@ -210,19 +212,19 @@ public:
    RemoteClientInfo(const StringTableEntry &name, bool isRobot, bool isAdmin);      // Constructor
    virtual ~RemoteClientInfo();                                                     // Destructor
 
-   GameConnection *getConnection() { TNLAssert(false, "Can't get a GameConnection from a RemoteClientInfo!"); return NULL;}
-   void setConnection(GameConnection *conn) { TNLAssert(false, "Can't set a GameConnection on a RemoteClientInfo!"); }
+   GameConnection *getConnection();
+   void setConnection(GameConnection *conn);
 
-   F32 getRating() { return mRating; }
-   void setRating(F32 rating) { mRating = rating; }
+   F32 getRating();
+   void setRating(F32 rating);
 
-   void addToTotalScore(S32 score) { TNLAssert(false, "We don't track total score in these parts..."); }
+   void addToTotalScore(S32 score);
 
-   void initialize() { Parent::initialize(); mRating = 0; }
+   void initialize();
 
    // Voice chat stuff -- these will be invalid on the server side
-   SoundEffect *getVoiceSFX() { return mVoiceSFX; }
-   VoiceDecoder *getVoiceDecoder() { return mDecoder; }
+   SoundEffect *getVoiceSFX();
+   VoiceDecoder *getVoiceDecoder();
 
 };
 #endif
@@ -358,9 +360,9 @@ public:
    virtual ~Game();                                                     // Destructor
 
 
-   S32 getClientCount() const { return mClientInfos.size(); }           // Total number of players, human and robot
-   S32 getPlayerCount() const { return mPlayerCount; }                  // Returns number of human players
-   S32 getRobotCount() const { return mRobotCount; }                    // Returns number of bots
+   S32 getClientCount() const;                                          // Total number of players, human and robot
+   S32 getPlayerCount() const;                                          // Returns number of human players
+   S32 getRobotCount() const;                                           // Returns number of bots
 
    ClientInfo *getClientInfo(S32 index);
    const Vector<boost::shared_ptr<ClientInfo> > *getClientInfos();
@@ -372,23 +374,23 @@ public:
 
    ClientInfo *findClientInfo(const StringTableEntry &name);            // Find client by name
    
-   Rect getWorldExtents() { return mWorldExtents; }
+   Rect getWorldExtents();
 
-   virtual bool isTestServer() { return false; }                        // Overridden in ServerGame
+   virtual bool isTestServer();                                         // Overridden in ServerGame
 
-   virtual const Color *getTeamColor(S32 teamId) const { return &Colors::white; }  // ClientGame will override
-   static const Color *getBasicTeamColor(const Game *game, S32 teamId);            // Color function used in most cases, overridden by some games
+   virtual const Color *getTeamColor(S32 teamId) const;                 // ClientGame will override
+   static const Color *getBasicTeamColor(const Game *game, S32 teamId); // Color function used in most cases, overridden by some games
 
-   static const ModuleInfo *getModuleInfo(ShipModule module) { TNLAssert(U32(module) < U32(ModuleCount), "out of range module"); return &gModuleInfo[(U32)module]; }
+   static const ModuleInfo *getModuleInfo(ShipModule module);
    
-   WallSegmentManager *getWallSegmentManager() const { return mWallSegmentManager; }      // TODO: Move back to ClientGame()
+   WallSegmentManager *getWallSegmentManager() const;                   // TODO: Move back to ClientGame()
 
    void computeWorldObjectExtents();
    Rect computeBarrierExtents();
 
    Point computePlayerVisArea(Ship *ship) const;
 
-   U32 getTimeUnconnectedToMaster() { return mTimeUnconnectedToMaster; }
+   U32 getTimeUnconnectedToMaster();
 
    void resetLevelInfo();
 
@@ -405,10 +407,10 @@ public:
    void deleteObjects(U8 typeNumber);
    void deleteObjects(TestFunc testFunc);
 
-   F32 getGridSize() const { return mGridSize; }
+   F32 getGridSize() const;
    void setGridSize(F32 gridSize);
 
-   U32 getCurrentTime() { return mCurrentTime; }
+   U32 getCurrentTime();
    virtual bool isServer() = 0;              // Will be overridden by either clientGame (return false) or serverGame (return true)
    virtual void idle(U32 timeDelta) = 0;
 
@@ -416,16 +418,16 @@ public:
    MasterServerConnection *getConnectionToMaster();
 
    GameNetInterface *getNetInterface();
-   virtual GridDatabase *getGameObjDatabase() { return mGameObjDatabase.get(); }    
+   virtual GridDatabase *getGameObjDatabase();
 
    EditorObjectDatabase *getEditorDatabase(); // TODO: Only for clientGame
 
-   void setEditorDatabase(boost::shared_ptr<GridDatabase> database) { mEditorDatabase = boost::dynamic_pointer_cast<EditorObjectDatabase>(database); }
+   void setEditorDatabase(boost::shared_ptr<GridDatabase> database);
 
    bool runLevelGenScript(const FolderManager *folderManager, const string &scriptName, const Vector<string> &scriptArgs, 
                           GridDatabase *targetDatabase);
 
-   const Vector<SafePtr<GameObject> > &getScopeAlwaysList() { return mScopeAlwaysList; }
+   const Vector<SafePtr<GameObject> > &getScopeAlwaysList();
 
    void setScopeAlwaysObject(GameObject *theObject);
    GameType *getGameType() const;
@@ -449,21 +451,18 @@ public:
    void setGameType(GameType *theGameType);
    void processDeleteList(U32 timeDelta);
 
-   GameSettings *getSettings() { return mSettings; }
+   GameSettings *getSettings();
 
-   bool isSuspended() { return mGameSuspended; }
+   bool isSuspended();
 
-   void resetMasterConnectTimer() { mNextMasterTryTime = 0; }
+   void resetMasterConnectTimer();
 
-   void setReadyToConnectToMaster(bool ready) { mReadyToConnectToMaster = ready; }
+   void setReadyToConnectToMaster(bool ready);
 
    // Objects in a given level, used for status bar.  On server it's objects loaded from file, on client, it's objects dl'ed from server.
    S32 mObjectsLoaded;  
 
-   Point getScopeRange(bool sensorIsActive) { return sensorIsActive ? Point(PLAYER_SENSOR_VISUAL_DISTANCE_HORIZONTAL + PLAYER_SCOPE_MARGIN,
-                                                                                   PLAYER_SENSOR_VISUAL_DISTANCE_VERTICAL  + PLAYER_SCOPE_MARGIN)
-                                                                           : Point(PLAYER_VISUAL_DISTANCE_HORIZONTAL + PLAYER_SCOPE_MARGIN,
-                                                                                   PLAYER_VISUAL_DISTANCE_VERTICAL  + PLAYER_SCOPE_MARGIN); }
+   Point getScopeRange(bool sensorIsActive);
 };
 
 
@@ -555,7 +554,12 @@ public:
    bool voteStart(ClientInfo *clientInfo, S32 type, S32 number = 0);
    void voteClient(ClientInfo *clientInfo, bool voteYes);
 
-   enum HostingModePhases { NotHosting, LoadingLevels, DoneLoadingLevels, Hosting };      
+   enum HostingModePhases {
+      NotHosting,
+      LoadingLevels,
+      DoneLoadingLevels,
+      Hosting
+   };
 
    bool startHosting();
 
@@ -564,14 +568,14 @@ public:
    static const S32 PREVIOUS_LEVEL = -3;
    static const S32 FIRST_LEVEL = 0;
 
-   GridDatabase *getBotZoneDatabase() { return &mDatabaseForBotZones; }
+   GridDatabase *getBotZoneDatabase();
 
-   U32 getMaxPlayers() { return mSettings->getMaxPlayers(); }
+   U32 getMaxPlayers();
 
-   bool isDedicated() { return mDedicated; }
-   void setDedicated(bool dedicated) { mDedicated = dedicated; }
+   bool isDedicated();
+   void setDedicated(bool dedicated);
 
-   bool isFull() { return (U32)getPlayerCount() >= mSettings->getMaxPlayers(); }      // More room at the inn?
+   bool isFull();      // More room at the inn?
 
    void addClient(boost::shared_ptr<ClientInfo> clientInfo);
    void removeClient(ClientInfo *clientInfo);
@@ -599,19 +603,19 @@ public:
    StringTableEntry getCurrentLevelName();      // Return name of level currently in play
    StringTableEntry getCurrentLevelType();      // Return type of level currently in play
 
-   bool isServer() { return true; }
+   bool isServer();
    void idle(U32 timeDelta);
    bool isReadyToShutdown(U32 timeDelta);
    void gameEnded();
 
    S32 getLevelNameCount();
-   S32 getCurrentLevelIndex() { return mCurrentLevelIndex; }
-   S32 getLevelCount() { return mLevelInfos.size(); }
-   LevelInfo getLevelInfo(S32 index) { return mLevelInfos[index]; }
-   void clearLevelInfos() { mLevelInfos.clear(); }
-   void addLevelInfo(const LevelInfo &levelInfo) { mLevelInfos.push_back(levelInfo); }
+   S32 getCurrentLevelIndex();
+   S32 getLevelCount();
+   LevelInfo getLevelInfo(S32 index);
+   void clearLevelInfos();
+   void addLevelInfo(const LevelInfo &levelInfo);
 
-   bool isTestServer() { return mTestMode; }
+   bool isTestServer();
 
    DataSender dataSender;
 
@@ -619,8 +623,8 @@ public:
    void suspendGame(GameConnection *requestor);  // Suspend at player's request
    void unsuspendGame(bool remoteRequest);
 
-   void suspenderLeftGame() { mSuspendor = NULL; }
-   GameConnection *getSuspendor() { return mSuspendor; }
+   void suspenderLeftGame();
+   GameConnection *getSuspendor();
 
    S32 addUploadedLevelInfo(const char *filename, LevelInfo &info);
 
