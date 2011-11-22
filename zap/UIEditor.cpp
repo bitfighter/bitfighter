@@ -2593,13 +2593,10 @@ void EditorUserInterface::startDraggingDockItem()
 
    EditorObject *item = copyDockItem(mDraggingDockItem);
 
-   //item->initializeEditor(getGridSize());    // Override this to define some initial geometry for your object... 
-
    // Offset lets us drag an item out from the dock by an amount offset from the 0th vertex.  This makes placement seem more natural.
    Point pos = convertCanvasToLevelCoord(mMousePos) - item->getInitialPlacementOffset(getGame()->getGridSize());
    item->moveTo(pos);
       
-   //item->setWidth((mDockItems[mDraggingDockItem]->getGeomType() == geomPolygon) ? .7 : 1);      // TODO: Still need this?
    item->addToEditor(getGame());          
 
    clearSelection();            // No items are selected...
