@@ -42,6 +42,9 @@ class GridDatabase;
 class LevelLoader
 {
 public:
+   LevelLoader();           // Constructor
+   virtual ~LevelLoader();  // Destructor
+
    // Put these in here so we can access them from luaLevelGenerator
    static const S32 MAX_LEVEL_LINE_ARGS = 128;     // Most args on a single line,
    static const S32 MaxArgLen = 100;               // Each at most MaxArgLen bytes long  (enforced in addCharToArg)
@@ -66,10 +69,11 @@ struct LevelLoadException : public std::exception
 {
    string msg;
 
-   LevelLoadException (string str) : msg(str) { /* do nothing */ }    // Constructor
-   virtual ~LevelLoadException () throw() { /* do nothing */ }                // Destructor, required by gcc to avoid "looser throw" error
-   const char* what() const throw() { return msg.c_str(); }
+   LevelLoadException (string str);         // Constructor
+   virtual ~LevelLoadException () throw();  // Destructor, required by gcc to avoid "looser throw" error
+   const char* what() const throw();
 };
+
 
 };
 

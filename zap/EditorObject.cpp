@@ -72,6 +72,13 @@ EditorObject::~EditorObject()
 }
 
 
+EditorObject *EditorObject::clone() const
+{
+   TNLAssert(false, "Clone method not implemented!");
+   return NULL;
+}
+
+
 //void EditorObject::copyAttrs(EditorObject *target)
 //{
 //   target->mGeometry = mGeometry->copyGeometry();
@@ -104,6 +111,11 @@ void EditorObject::addToEditor(Game *game)
    //    addToDatabase();
 }
 
+
+void EditorObject::assignNewSerialNumber()
+{
+   mSerialNumber = mNextSerialNumber++;
+}
 
 
 // TODO: Merge with copy in editor, if it's really needed
@@ -229,6 +241,36 @@ void EditorObject::renderInEditor(F32 currentScale, S32 snapIndex, bool isScript
 }
 
 
+S32 EditorObject::getItemId()
+{
+   return mItemId;
+}
+
+
+void EditorObject::setItemId(S32 itemId)
+{
+   mItemId = itemId;
+}
+
+
+S32 EditorObject::getSerialNumber()
+{
+   return mSerialNumber;
+}
+
+
+bool EditorObject::isSelected()
+{
+   return mSelected;
+}
+
+
+void EditorObject::setSelected(bool selected)
+{
+   mSelected = selected;
+}
+
+
 bool EditorObject::isLitUp() 
 { 
    return mLitUp; 
@@ -244,9 +286,27 @@ void EditorObject::setLitUp(bool litUp)
 }
 
 
+bool EditorObject::isBeingEdited()
+{
+   return mIsBeingEdited;
+}
+
+
+void EditorObject::setIsBeingEdited(bool isBeingEdited)
+{
+   mIsBeingEdited = isBeingEdited;
+}
+
+
 void EditorObject::initializeEditor()
 {
    unselectVerts();
+}
+
+
+S32 EditorObject::getScore()
+{
+   return mScore;
 }
 
 
@@ -261,6 +321,24 @@ void EditorObject::onGeomChanging()
 void EditorObject::onGeomChanged()
 {
    updateExtentInDatabase();
+}
+
+
+void EditorObject::onItemDragging()
+{
+   // Do nothing
+}
+
+
+void EditorObject::onAttrsChanging()
+{
+   // Do nothing
+}
+
+
+void EditorObject::onAttrsChanged()
+{
+   // Do nothing
 }
 
 
@@ -344,6 +422,12 @@ void EditorObject::unselect()
 }
 
 
+void EditorObject::setSnapped(bool snapped)
+{
+   // Do nothing
+}
+
+
 // Called when item dragged from dock to editor -- overridden by several objects
 void EditorObject::newObjectFromDock(F32 gridSize) 
 {  
@@ -375,6 +459,118 @@ Point EditorObject::getEditorSelectionOffset(F32 scale)
 }
 
 
+Point EditorObject::getInitialPlacementOffset(F32 gridSize)
+{
+   return Point(0, 0);
+}
+
+
+void EditorObject::renderItemText(const char *text, S32 offset, F32 currentScale)
+{
+   // Do nothing
+}
+
+
+void EditorObject::renderEditor(F32 currentScale)
+{
+   TNLAssert(false, "renderEditor not implemented!");
+}
+
+
+void EditorObject::renderDock()
+{
+   TNLAssert(false, "renderDock not implemented!");
+}
+
+
+bool EditorObject::showAttribsWhenSelected()
+{
+   return true;
+}
+
+
+void EditorObject::renderAttributeString(F32 currentScale)
+{
+   // Do nothing
+}
+
+
+bool EditorObject::isVertexLitUp(S32 vertexIndex)
+{
+   return mVertexLitUp == vertexIndex;
+}
+
+
+void EditorObject::setVertexLitUp(S32 vertexIndex)
+{
+   mVertexLitUp = vertexIndex;
+}
+
+
+S32 EditorObject::getDockRadius()
+{
+   return 10;
+}
+
+
+const char *EditorObject::getVertLabel(S32 index)
+{
+   return "";
+}
+
+
+const char *EditorObject::getEditorHelpString()
+{
+   TNLAssert(false, "getEditorHelpString method not implemented!");
+   return NULL;
+}
+
+
+const char *EditorObject::getPrettyNamePlural()
+{
+   TNLAssert(false, "getPrettyNamePlural method not implemented!");
+   return NULL;
+}
+
+
+const char *EditorObject::getOnDockName()
+{
+   TNLAssert(false, "getOnDockName method not implemented!");
+   return NULL;
+}
+
+
+const char *EditorObject::getOnScreenName()
+{
+   TNLAssert(false, "getOnScreenName method not implemented!");
+   return NULL;
+}
+
+
+const char *EditorObject::getInstructionMsg()
+{
+   return "";
+}
+
+// For editing attributes:
+EditorAttributeMenuUI *EditorObject::getAttributeMenu()
+{
+   return NULL;
+}
+
+
+void EditorObject::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
+{
+   // Do nothing
+}
+
+
+void EditorObject::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
+{
+   // Do nothing
+}
+
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -388,6 +584,7 @@ bool EditorObject::canBeNeutral()
 {
    return true;
 }
+
 
 bool EditorObject::canBeHostile()
 {

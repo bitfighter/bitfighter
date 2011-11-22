@@ -254,6 +254,30 @@ void ClientGame::setConnectionToServer(GameConnection *theConnection)
 }
 
 
+ClientInfo *ClientGame::getClientInfo()
+{
+   return mClientInfo.get();
+}
+
+
+boost::shared_ptr<ClientInfo> ClientGame::getClientInfo_shared_ptr()
+{
+   return mClientInfo;
+}
+
+
+string ClientGame::getLoginPassword() const
+{
+   return mLoginPassword;
+}
+
+
+void ClientGame::setLoginPassword(const string &loginPassword)
+{
+   mLoginPassword = loginPassword;
+}
+
+
 // When server corrects capitalization of name or similar
 void ClientGame::correctPlayerName(const string &name)
 {
@@ -358,6 +382,13 @@ static void joystickUpdateMove(GameSettings *settings, Move *theMove)
       gShowAimVector = false;
    }
 }
+
+
+bool ClientGame::isServer()
+{
+   return false;
+}
+
 
 U32 prevTimeDelta = 0;
 
@@ -639,6 +670,12 @@ void ClientGame::enterMode(UIMode mode)
 }
 
 
+void ClientGame::addToMuteList(const string &name)
+{
+   mMuteList.push_back(name);
+}
+
+
 bool ClientGame::isOnMuteList(const string &name)
 {
    for(S32 i = 0; i < mMuteList.size(); i++)
@@ -646,6 +683,18 @@ bool ClientGame::isOnMuteList(const string &name)
          return true;
    
    return false;
+}
+
+
+string ClientGame::getRemoteLevelDownloadFilename() const
+{
+   return mRemoteLevelDownloadFilename;
+}
+
+
+void ClientGame::setRemoteLevelDownloadFilename(const string &filename)
+{
+   mRemoteLevelDownloadFilename = filename;
 }
 
 
@@ -977,6 +1026,18 @@ string ClientGame::getHashedServerPassword()
 }
 
 
+void ClientGame::suspendGame()
+{
+   mGameSuspended = true;
+}
+
+
+void ClientGame::unsuspendGame()
+{
+   mGameSuspended = false;
+}
+
+
 void ClientGame::displayErrorMessage(const char *format, ...)
 {
    static char message[256];
@@ -1027,6 +1088,30 @@ void ClientGame::supressScreensaver()
    array[0].ki = keyup;
    SendInput(1, array, sizeof(INPUT));
 #endif
+}
+
+
+bool ClientGame::isShowingDebugShipCoords() const
+{
+   return mDebugShowShipCoords;
+}
+
+
+void ClientGame::toggleShowingShipCoords()
+{
+   mDebugShowShipCoords = !mDebugShowShipCoords;
+}
+
+
+bool ClientGame::isShowingDebugMeshZones() const
+{
+   return mDebugShowMeshZones;
+}
+
+
+void ClientGame::toggleShowingMeshZones()
+{
+   mDebugShowMeshZones = !mDebugShowMeshZones;
 }
 
 
@@ -1163,6 +1248,30 @@ boost::shared_ptr<AbstractTeam> ClientGame::getNewTeam()
 S32 QSORT_CALLBACK renderSortCompare(GameObject **a, GameObject **b)
 {
    return (*a)->getRenderSortValue() - (*b)->getRenderSortValue();
+}
+
+
+UIManager *ClientGame::getUIManager() const
+{
+   return mUIManager;
+}
+
+
+bool ClientGame::getInCommanderMap()
+{
+   return mInCommanderMap;
+}
+
+
+void ClientGame::setInCommanderMap(bool inCommanderMap)
+{
+   mInCommanderMap = inCommanderMap;
+}
+
+
+F32 ClientGame::getCommanderZoomFraction() const
+{
+   return mCommanderZoomDelta / F32(CommanderMapZoomTime);
 }
 
 
@@ -1372,6 +1481,19 @@ void ClientGame::renderCommander()
 
    glPopMatrix();
 }
+
+
+void ClientGame::resetZoomDelta()
+{
+   mCommanderZoomDelta = CommanderMapZoomTime;
+}
+
+
+void ClientGame::clearZoomDelta()
+{
+   mCommanderZoomDelta = 0;
+}
+
 
 ////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////

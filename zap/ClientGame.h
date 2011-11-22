@@ -93,23 +93,23 @@ public:
    GameConnection *getConnectionToServer();
    void setConnectionToServer(GameConnection *connection);
 
-   ClientInfo *getClientInfo() { return mClientInfo.get(); }
-   boost::shared_ptr<ClientInfo> getClientInfo_shared_ptr() { return mClientInfo; } // Ugly on purpose... should rarely be used!
+   ClientInfo *getClientInfo();
+   boost::shared_ptr<ClientInfo> getClientInfo_shared_ptr(); // Ugly on purpose... should rarely be used!
 
-   string getLoginPassword() const { return mLoginPassword; }
-   void setLoginPassword(const string &loginPassword) { mLoginPassword = loginPassword; }
+   string getLoginPassword() const;
+   void setLoginPassword(const string &loginPassword);
 
    void correctPlayerName(const string &name);                                      // When server corrects capitalization of name or similar
    void updatePlayerNameAndPassword(const string &name, const string &password);    // When user enters new name and password on NameEntryUI
 
    void displayShipDesignChangedMessage(const Vector<U32> &loadout, const char *msgToShowIfLoadoutsAreTheSame);
 
-   UIManager *getUIManager() const { return mUIManager; }
+   UIManager *getUIManager() const;
 
-   bool getInCommanderMap() { return mInCommanderMap; }
-   void setInCommanderMap(bool inCommanderMap) { mInCommanderMap = inCommanderMap; }
+   bool getInCommanderMap();
+   void setInCommanderMap(bool inCommanderMap);
 
-   F32 getCommanderZoomFraction() const { return mCommanderZoomDelta / F32(CommanderMapZoomTime); }
+   F32 getCommanderZoomFraction() const;
    Point worldToScreenPoint(const Point *p) const;
    void drawStars(F32 alphaFrac, Point cameraPos, Point visibleExtent);
 
@@ -119,17 +119,17 @@ public:
    void renderSuspended();    // Render suspended game
 
    void renderOverlayMap();   // Render the overlay map in normal play mode
-   void resetZoomDelta() { mCommanderZoomDelta = CommanderMapZoomTime; } 
-   void clearZoomDelta() { mCommanderZoomDelta = 0; }
-   bool isServer() { return false; }
+   void resetZoomDelta();
+   void clearZoomDelta();
+   bool isServer();
    void idle(U32 timeDelta);
    void zoomCommanderMap();
 
-   bool isShowingDebugShipCoords() const { return mDebugShowShipCoords; }     // Show coords on ship?
-   void toggleShowingShipCoords() { mDebugShowShipCoords = !mDebugShowShipCoords; }
+   bool isShowingDebugShipCoords() const;     // Show coords on ship?
+   void toggleShowingShipCoords();
 
-   bool isShowingDebugMeshZones()  const { return mDebugShowMeshZones; }      // Show bot nav mesh zones?
-   void toggleShowingMeshZones() { mDebugShowMeshZones = !mDebugShowMeshZones; }
+   bool isShowingDebugMeshZones()  const;     // Show bot nav mesh zones?
+   void toggleShowingMeshZones();
 
    void gotServerListFromMaster(const Vector<IPAddress> &serverList);
    void gotChatMessage(const char *playerNick, const char *message, bool isPrivate, bool isSystem);
@@ -144,7 +144,7 @@ public:
    void enterMode(UIMode mode);
 
 
-   void addToMuteList(const string &name) { mMuteList.push_back(name); }
+   void addToMuteList(const string &name);
    bool isOnMuteList(const string &name);
 
 
@@ -152,15 +152,13 @@ public:
    void setMOTD(const char *motd);
    void setNeedToUpgrade(bool needToUpgrade);
 
-   string getRemoteLevelDownloadFilename() const { return mRemoteLevelDownloadFilename; }
-   void setRemoteLevelDownloadFilename(const string &filename) { mRemoteLevelDownloadFilename = filename; }
+   string getRemoteLevelDownloadFilename() const;
+   void setRemoteLevelDownloadFilename(const string &filename);
 
    void changePassword(GameConnection::ParamType type, const Vector<string> &words, bool required);
    void changeServerParam(GameConnection::ParamType type, const Vector<string> &words);
    bool checkName(const string &name);    // Make sure name is valid, and correct case of name if otherwise correct
 
-
-   
 
    // Alert users when they get a reply to their request for elevated permissions
    void gotAdminPermissionsReply(bool granted);
@@ -195,8 +193,8 @@ public:
    void displayErrorMessage(const char *format, ...);
    void displaySuccessMessage(const char *format, ...);
 
-   void suspendGame()   { mGameSuspended = true; }
-   void unsuspendGame() { mGameSuspended = false; }
+   void suspendGame();
+   void unsuspendGame();
 
    boost::shared_ptr<AbstractTeam> getNewTeam();
 

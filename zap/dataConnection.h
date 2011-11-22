@@ -52,6 +52,9 @@ enum SenderStatus {
 class DataSendable
 {
 public:
+   DataSendable();           // Constructor
+   virtual ~DataSendable();  // Destructor
+
    TNL_DECLARE_RPC_INTERFACE(s2rSendLine, (StringPtr line));      // Send a chunk of data
    TNL_DECLARE_RPC_INTERFACE(s2rCommandComplete, (RangedU32<0,SENDER_STATUS_COUNT> status));   // Signal that data has been sent
 };
@@ -73,10 +76,10 @@ private:
    FileType mFileType;
 
 public:
-   DataSender() { mDone = true; }        // Constructor 
+   DataSender();        // Constructor
    SenderStatus initialize(DataSendable *connection, FolderManager *folderManager, string filename, FileType fileType);   
 
-   bool isDone() { return mDone; }
+   bool isDone();
    void sendNextLine();
 };
 
@@ -102,25 +105,9 @@ private:
    GameSettings *mSettings;
 
 public:
-   // Quickie Constructor
-   DataConnection(GameSettings *settings = NULL, ActionType action = NO_ACTION, string password = "", string filename = "", FileType fileType = LEVELGEN_TYPE) 
-   { 
-      mSettings = settings;
-      mAction = action; 
-      mFilename = filename; 
-      mFileType = fileType;
-      mPassword = password;
-
-      mOutputFile = NULL;
-   }     
-
-   DataConnection(GameSettings *settings, const Nonce &clientId)
-   {
-      mSettings = settings;
-      mClientId = clientId;
-
-      mAction = REQUEST_CURRENT_LEVEL;
-   }
+   // Constructors
+   DataConnection(GameSettings *settings = NULL, ActionType action = NO_ACTION, string password = "", string filename = "", FileType fileType = LEVELGEN_TYPE);
+   DataConnection(GameSettings *settings, const Nonce &clientId);
 
    DataSender mDataSender;
    void onConnectionEstablished();

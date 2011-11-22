@@ -152,6 +152,21 @@ GameConnection::~GameConnection()
 }
 
 
+
+#ifndef ZAP_DEDICATED
+ClientGame *GameConnection::getClientGame()
+{
+   return mClientGame;
+}
+
+
+void GameConnection::setClientGame(ClientGame *game)
+{
+   mClientGame = game;
+}
+#endif
+
+
 // Clears/initializes some things between levels
 void GameConnection::reset()
 {  
@@ -1397,6 +1412,19 @@ bool GameConnection::readConnectRequest(BitStream *stream, NetConnection::Termin
 }
 
 
+void GameConnection::resetAuthenticationTimer()
+{
+   mAuthenticationTimer.reset(MASTER_SERVER_FAILURE_RETRY_TIME + 1000);
+   mAuthenticationCounter++;
+}
+
+
+S32 GameConnection::getAuthenticationCounter()
+{
+   return mAuthenticationCounter;
+}
+
+
 void GameConnection::updateAuthenticationTimer(U32 timeDelta)
 {
    if(mAuthenticationTimer.update(timeDelta))
@@ -1411,6 +1439,48 @@ void GameConnection::requestAuthenticationVerificationFromMaster()
    // Ask master if client name/id match and the client is authenticated
    if(masterConn && masterConn->isEstablished() && mClientClaimsToBeVerified)
       masterConn->requestAuthentication(mClientNameNonUnique, *mClientInfo->getId());   
+}
+
+
+void GameConnection::setClientNameNonUnique(StringTableEntry name)
+{
+   mClientNameNonUnique = name;
+}
+
+
+void GameConnection::setServerName(StringTableEntry name)
+{
+   mServerName = name;
+}
+
+
+ClientInfo *GameConnection::getClientInfo()
+{
+   return mClientInfo.get();
+}
+
+
+void GameConnection::setClientInfo(boost::shared_ptr<ClientInfo> clientInfo)
+{
+   mClientInfo = clientInfo;
+}
+
+
+LuaPlayerInfo *GameConnection::getPlayerInfo()
+{
+   return mPlayerInfo;
+}
+
+
+bool GameConnection::lostContact()
+{
+   return getTimeSinceLastPacketReceived() > 2000 && mLastPacketRecvTime != 0;   // No contact in 2000ms?  That's bad!
+}
+
+
+string GameConnection::getServerName()
+{
+   return mServerName.getString();
 }
 
 
@@ -1607,6 +1677,51 @@ void GameConnection::onConnectTerminated(TerminationReason reason, const char *n
 }
 
 
+bool GameConnection::isBusy()
+{
+   if (!this)
+      return false;
+   else
+      return mIsBusy;
+}
+
+
+void GameConnection::setIsBusy(bool busy)
+{
+   mIsBusy = busy;
+}
+
+
+bool GameConnection::isReadyForRegularGhosts()
+{
+   return mReadyForRegularGhosts;
+}
+
+
+void GameConnection::setReadyForRegularGhosts(bool ready)
+{
+   mReadyForRegularGhosts = ready;
+}
+
+
+bool GameConnection::wantsScoreboardUpdates()
+{
+   return mWantsScoreboardUpdates;
+}
+
+
+void GameConnection::setWantsScoreboardUpdates(bool wantsUpdates)
+{
+   mWantsScoreboardUpdates = wantsUpdates;
+}
+
+
+void GameConnection::addToTotalCumulativeScore(S32 score)
+{
+   mTotalCumulativeScore += score;
+}
+
+
 // Return a measure of a player's strength.  Right now this is rather bogus -- any improvements welcomed!!!
 // Should return a number between -1 and 1
 // Better: https://secure.wikimedia.org/wikipedia/en/wiki/Elo_rating_system
@@ -1643,6 +1758,43 @@ void GameConnection::onEndGhosting()
    mClientGame->clearClientList();        // Erase all info we have about fellow clients
 #endif
 }
+
+
+void GameConnection::setWaitingForPermissionsReply(bool waiting)
+{
+   mWaitingForPermissionsReply = waiting;
+}
+
+
+bool GameConnection::waitingForPermissionsReply()
+{
+   return mWaitingForPermissionsReply;
+}
+
+
+void GameConnection::setGotPermissionsReply(bool gotReply)
+{
+   mGotPermissionsReply = gotReply;
+}
+
+
+bool GameConnection::gotPermissionsReply()
+{
+   return mGotPermissionsReply;
+}
+
+
+bool GameConnection::isInCommanderMap()
+{
+   return mInCommanderMap;
+}
+
+
+const Vector<U32> &GameConnection::getLoadout()
+{
+   return mLoadout;
+}
+
 
 };
 
