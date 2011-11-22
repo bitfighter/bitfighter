@@ -93,9 +93,10 @@ TextItem *TextItem::clone() const
 void TextItem::newObjectFromDock(F32 gridSize)
 {
    mText = "Your text here";
-   recalcTextSize();
 
    Parent::newObjectFromDock(gridSize);
+
+   recalcTextSize();    // Has to be after Parent::newObjectFromDock(gridSize); that sets the length of the line, which changes text size
 }
 
 
