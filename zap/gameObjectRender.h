@@ -105,6 +105,7 @@ extern void renderFlag(const Point &pos, const Color *flagColor, const Color *ma
 extern void renderFlag(F32 x, F32 y, const Color *flagColor, const Color *mastColor, F32 alpha);
 
 extern void renderPointVector(const Vector<Point> *points, U32 geomType);
+extern void renderPointVector(const Vector<Point> *points, const Point &offset, U32 geomType);  // Same, but with points offset some distance
 
 extern void glScale(F32 scaleFactor);
 extern void glTranslate(const Point &pos);
@@ -167,6 +168,7 @@ extern void renderRepairItem(const Point &pos, bool forEditor, const Color *over
 extern void renderEnergyItem(const Point &pos); 
 
 extern void renderWallFill(const Vector<Point> *points, bool polyWall, const Color &fillColor);
+extern void renderWallFill(const Vector<Point> *points, const Point &offset, bool polyWall, const Color &fillColor);
 
 extern void renderEnergyItem(const Point &pos, bool forEditor, const Color *overrideColor, F32 alpha);
 extern void renderEnergySymbol(const Color *overrideColor, F32 alpha);      // Render lightning bolt symbol

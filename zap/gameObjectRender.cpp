@@ -88,10 +88,20 @@ void renderPointVector(const Vector<Point> *points, U32 geomType)
 
    // Equivalent to, but amost twice as fast as:
 
-   //glBegin(GL_LINE_LOOP);
+   //glBegin(geomType);
    //   for(S32 i = 0; i < points.size(); i++)
    //      glVertex2f(points[i].x, points[i].y);
    //glEnd();
+}
+
+
+// Use slower method here because we need to visit each point
+void renderPointVector(const Vector<Point> *points, const Point &offset, U32 geomType)
+{
+   glBegin(geomType);
+      for(S32 i = 0; i < points->size(); i++)
+         glVertex(points->get(i) + offset);
+   glEnd();
 }
 
 
@@ -1572,10 +1582,19 @@ void renderEnergyItem(const Point &pos)
 }
 
 
+// Use faster method with no offset
 void renderWallFill(const Vector<Point> *points, bool polyWall, const Color &fillColor)
 {
    glColor(fillColor);
    renderPointVector(points, polyWall ? GL_TRIANGLES : GL_POLYGON);
+}
+
+
+// Use slower method if each point needs to be offset
+void renderWallFill(const Vector<Point> *points, const Point &offset, bool polyWall, const Color &fillColor)
+{
+   glColor(fillColor);
+   renderPointVector(points, offset, polyWall ? GL_TRIANGLES : GL_POLYGON);
 }
 
 

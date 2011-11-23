@@ -1074,7 +1074,7 @@ void WallSegmentManager::deleteSegments(S32 owner)
 
 
 // Only called from the editor
-void WallSegmentManager::renderWalls(GameSettings *settings, F32 currentScale, bool dragMode, 
+void WallSegmentManager::renderWalls(GameSettings *settings, F32 currentScale, bool dragMode, const Point &selectedItemOffset, 
                                      bool previewMode, bool showSnapVertices, F32 alpha)
 {
 #ifndef ZAP_DEDICATED
@@ -1089,7 +1089,7 @@ void WallSegmentManager::renderWalls(GameSettings *settings, F32 currentScale, b
    for(S32 first = 0; first < 2; first++)
       for(S32 i = 0; i < mWallSegments.size(); i++)
          if((first == 1) == mWallSegments[i]->isSelected())         
-            mWallSegments[i]->renderFill(fillColor);
+            mWallSegments[i]->renderFill(fillColor, selectedItemOffset);
 
    renderWallEdges(&mWallEdgePoints, settings->getWallOutlineColor());      // Render wall outlines
 
@@ -1202,7 +1202,7 @@ void WallSegment::resetEdges()
 }
 
 
-void WallSegment::renderFill(const Color &fillColor)
+void WallSegment::renderFill(const Color &fillColor, const Point &offset)
 {
 #ifndef ZAP_DEDICATED
 
@@ -1216,9 +1216,12 @@ void WallSegment::renderFill(const Color &fillColor)
       enableLineSmoothing = true;
    }
    
-   color *= mSelected ? 0.5f : 1;
+   //color *= mSelected ? 0.5f : 1;
 
-   renderWallFill(&mTriangulatedFillPoints, true, color);       // Use true because all segment fills are triangulated
+   if(mSelected)
+      renderWallFill(&mTriangulatedFillPoints, offset, true, color);       // Use true because all segment fills are triangulated
+   else
+      renderWallFill(&mTriangulatedFillPoints, true, color);
 
    if(enableLineSmoothing) 
       glEnable(GL_BLEND);

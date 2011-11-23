@@ -240,7 +240,7 @@ public:
    void resetEdges();         // Compute basic edges from corner points
    void computeBoundingBox(); // Computes bounding box based on the corners, updates database
    
-   void renderFill(const Color &fillColor);
+   void renderFill(const Color &fillColor, const Point &offset);
 
    const Vector<Point> *getCorners();
    const Vector<Point> *getTriangulatedFillPoints();
@@ -334,7 +334,8 @@ public:
  
    ////////////////
    // Render functions
-   void renderWalls(GameSettings *settings, F32 currentScale, bool dragMode, bool previewMode, bool showSnapVertices, F32 alpha);
+   void renderWalls(GameSettings *settings, F32 currentScale, bool dragMode, const Point &selectedItemOffset,
+                    bool previewMode, bool showSnapVertices, F32 alpha);
 };
 
 

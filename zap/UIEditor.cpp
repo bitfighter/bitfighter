@@ -1631,8 +1631,15 @@ void EditorUserInterface::render()
          }
       }
   
-      getGame()->getWallSegmentManager()->renderWalls(getGame()->getSettings(), mCurrentScale,
-                     mDraggingObjects, mPreviewMode, getSnapToWallCorners(), getRenderingAlpha(false/*isScriptItem*/));
+      Point delta;      // Defaults to (0,0)
+
+      if(mDraggingObjects)
+         // TODO: Merge this with the other place this calculation is made
+         delta = snapPoint(convertCanvasToLevelCoord(mMousePos) + mMoveOrigin - mMouseDownPos) - mMoveOrigin;
+
+
+      getGame()->getWallSegmentManager()->renderWalls(getGame()->getSettings(), mCurrentScale, mDraggingObjects, 
+                     delta, mPreviewMode, getSnapToWallCorners(), getRenderingAlpha(false/*isScriptItem*/));
     
 
 #ifdef SHOW_EXTENT_BOXES
