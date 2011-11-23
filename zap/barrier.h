@@ -334,7 +334,7 @@ public:
  
    ////////////////
    // Render functions
-   void renderWalls(GameSettings *settings, F32 currentScale, bool isBeingDragged, bool showingReferenceShip, bool showSnapVertices, F32 alpha);
+   void renderWalls(GameSettings *settings, F32 currentScale, bool dragMode, bool previewMode, bool showSnapVertices, F32 alpha);
 };
 
 

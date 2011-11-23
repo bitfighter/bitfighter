@@ -435,9 +435,10 @@ void WallItem::onGeomChanged()
    processEndPoints();
 
    WallSegmentManager *wallSegmentManager = getGame()->getWallSegmentManager();
+   EditorObjectDatabase *editorDatabase = getGame()->getEditorDatabase();
 
-   wallSegmentManager->computeWallSegmentIntersections(game->getEditorDatabase(), this);
-   wallSegmentManager->updateMountedItems(game->getEditorDatabase(), this);
+   wallSegmentManager->computeWallSegmentIntersections(editorDatabase, this);
+   wallSegmentManager->updateMountedItems(editorDatabase, this);
    wallSegmentManager->setSelected(mSerialNumber, mSelected);     // Make sure newly generated segments retain selection state of parent wall
 
    Parent::onGeomChanged();
@@ -1073,15 +1074,15 @@ void WallSegmentManager::deleteSegments(S32 owner)
 
 
 // Only called from the editor
-void WallSegmentManager::renderWalls(GameSettings *settings, F32 currentScale, bool draggingObjects, 
-                                     bool showingReferenceShip, bool showSnapVertices, F32 alpha)
+void WallSegmentManager::renderWalls(GameSettings *settings, F32 currentScale, bool dragMode, 
+                                     bool previewMode, bool showSnapVertices, F32 alpha)
 {
 #ifndef ZAP_DEDICATED
    fillVector.clear();
    mWallSegmentDatabase->findObjects((TestFunc)isWallType, fillVector);
 
    // We'll use the editor color most of the time; only in preview mode in the editor do we use the game color
-   bool useGameColor = UserInterface::current && UserInterface::current->getMenuID() == EditorUI && showingReferenceShip;
+   bool useGameColor = UserInterface::current && UserInterface::current->getMenuID() == EditorUI && previewMode;
    Color fillColor = useGameColor ? settings->getWallFillColor() : EDITOR_WALL_FILL_COLOR;
 
    // Render selected items last so they appear on top
@@ -1098,7 +1099,7 @@ void WallSegmentManager::renderWalls(GameSettings *settings, F32 currentScale, b
 
       //glColor(Colors::magenta);
       for(S32 i = 0; i < mWallEdgePoints.size(); i++)
-         renderSmallSolidVertex(currentScale, mWallEdgePoints[i], draggingObjects);
+         renderSmallSolidVertex(currentScale, mWallEdgePoints[i], dragMode);
 
       glLineWidth(gDefaultLineWidth);
    }
