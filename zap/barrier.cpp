@@ -438,7 +438,7 @@ void WallItem::onGeomChanged()
 
    wallSegmentManager->computeWallSegmentIntersections(game->getEditorDatabase(), this);
    wallSegmentManager->updateMountedItems(game->getEditorDatabase(), this);
-   wallSegmentManager->setSelected(mSerialNumber, mSelected);
+   wallSegmentManager->setSelected(mSerialNumber, mSelected);     // Make sure newly generated segments retain selection state of parent wall
 
    Parent::onGeomChanged();
 }
