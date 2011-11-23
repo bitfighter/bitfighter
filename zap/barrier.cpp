@@ -434,12 +434,11 @@ void WallItem::onGeomChanged()
    // Fill extendedEndPoints from the vertices of our wall's centerline, or from PolyWall edges
    processEndPoints();
 
-   Game *game = getGame();
-   game->getWallSegmentManager()->computeWallSegmentIntersections(game->getEditorDatabase(), this);
+   WallSegmentManager *wallSegmentManager = getGame()->getWallSegmentManager();
 
-   game->getWallSegmentManager()->updateMountedItems(game->getEditorDatabase(), this);
-
-   game->getWallSegmentManager()->setSelected(mSerialNumber, mSelected);
+   wallSegmentManager->computeWallSegmentIntersections(game->getEditorDatabase(), this);
+   wallSegmentManager->updateMountedItems(game->getEditorDatabase(), this);
+   wallSegmentManager->setSelected(mSerialNumber, mSelected);
 
    Parent::onGeomChanged();
 }
