@@ -176,6 +176,7 @@ extern void renderEnergySymbol(const Point &pos, F32 scaleFactor);   // Another 
 
 // Wall rendering
 void renderWallEdges(const Vector<Point> *edges, const Color &outlineColor, F32 alpha = 1.0);
+void renderWallEdges(const Vector<Point> *edges, const Point &offset, const Color &outlineColor, F32 alpha = 1.0);
 
 //extern void renderSpeedZone(Point pos, Point normal, U32 time);
 void renderSpeedZone(const Vector<Point> *pts, U32 time);

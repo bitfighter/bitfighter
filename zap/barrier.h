@@ -243,6 +243,7 @@ public:
    void renderFill(const Color &fillColor, const Point &offset);
 
    const Vector<Point> *getCorners();
+   const Vector<Point> *getEdges();
    const Vector<Point> *getTriangulatedFillPoints();
 
    ////////////////////
@@ -312,10 +313,12 @@ public:
    Vector<WallSegment *> mWallSegments;      
    Vector<WallEdge *> mWallEdges;               // For mounting forcefields/turrets
    Vector<Point> mWallEdgePoints;               // For rendering
+   Vector<Point> mSelectedWallEdgePoints;       // Also for rendering
 
    void buildAllWallSegmentEdgesAndPoints(GridDatabase *gameDatabase);
 
    void setSelected(S32 owner, bool selected);
+   void rebuildSelectedOutline();
    void deleteSegments(S32 owner);              // Delete all segments owned by specified WorldItem
 
    void updateMountedItems(EditorObjectDatabase *database, EditorObject *wall);

@@ -234,9 +234,9 @@ void Barrier::resetEdges(const Vector<Point> &corners, Vector<Point> &edges)
 // Populates barrierEnds with the results.
 void Barrier::constructBarrierEndPoints(const Vector<Point> *vec, F32 width, Vector<Point> &barrierEnds)    // static
 {
-   barrierEnds.clear();    // local static vector
+   barrierEnds.clear();       // Local static vector
 
-   if(vec->size() <= 1)     // Protect against bad data
+   if(vec->size() <= 1)       // Protect against bad data
       return;
 
    bool loop = (vec->first() == vec->last());      // Does our barrier form a closed loop?
@@ -441,6 +441,8 @@ void WallItem::onGeomChanged()
    wallSegmentManager->updateMountedItems(editorDatabase, this);
    wallSegmentManager->setSelected(mSerialNumber, mSelected);     // Make sure newly generated segments retain selection state of parent wall
 
+   wallSegmentManager->rebuildSelectedOutline();
+
    Parent::onGeomChanged();
 }
 
@@ -544,12 +546,15 @@ void WallItem::setSelected(bool selected)
    
    // Find the associated segment(s) and mark them as selected (or not)
    getGame()->getWallSegmentManager()->setSelected(mSerialNumber, selected);
+
+   // And rebuild the outline of our selected walls
+   getGame()->getWallSegmentManager()->rebuildSelectedOutline();
 }
 
 
 bool WallItem::processArguments(S32 argc, const char **argv, Game *game)
 {
-   if(argc < 5)         // Need width, and two x,y pairs
+   if(argc < 5)         // Need width, and two or more x,y pairs
       return false;
 
    return processGeometry(argc, argv, game);
@@ -943,7 +948,6 @@ void WallSegmentManager::clipAllWallEdges(const Vector<WallSegment *> &wallSegme
 // Called by WallItems and PolyWalls when their geom changes
 void WallSegmentManager::updateMountedItems(EditorObjectDatabase *database, EditorObject *wall)
 {
-
    // First, find any items directly mounted on our wall, and update their location.  Because we don't know where the wall _was_, we 
    // will need to search through all the engineered items, and query each to find which ones where attached to the wall that moved.
    fillVector.clear();
@@ -974,62 +978,6 @@ void WallSegmentManager::updateMountedItems(EditorObjectDatabase *database, Edit
 }
 
 
-// NO LONGER USED!!!
-// Takes a wall, finds all intersecting segments, and marks them invalid
-//void WallSegmentManager::invalidateIntersectingSegments(GridDatabase *gameDatabase, EditorObject *item)
-//{
-//#ifndef ZAP_DEDICATED
-//   fillVector.clear();
-//
-//   // Before we update our edges, we need to mark all intersecting segments using the invalid flag.
-//   // These will need new walls after we've moved our segment.  We'll look for those intersecting segments in our edge database.
-//   for(S32 i = 0; i < mWallSegments.size(); i++)
-//      if(mWallSegments[i]->getOwner() == item->getSerialNumber())      // Segment belongs to our item; look it up in the database
-//         gameDatabase->findObjects(WallSegmentTypeNumber, fillVector, mWallSegments[i]->getExtent());
-//
-//   for(S32 i = 0; i < fillVector.size(); i++)
-//   {
-//      WallSegment *intersectingSegment = dynamic_cast<WallSegment *>(fillVector[i]);
-//      TNLAssert(intersectingSegment, "NULL segment!");
-//
-//      // Reset the edges of all invalidated segments to their factory settings
-//      intersectingSegment->resetEdges();   
-//      intersectingSegment->invalidate();
-//   }
-//
-//   
-//   fillVector.clear();
-//   gameDatabase->findObjects((TestFunc)isEngineeredType, fillVector);    // All engineered objects
-//   buildWallSegmentEdgesAndPoints(gameDatabase, item, fillVector);
-//
-//
-//   // Is any of this needed?  CE 7/26
-//   fillVector.clear();
-//
-//   //// Invalidate all segments that potentially intersect the changed segment in its new location
-//   //for(S32 i = 0; i < mWallSegments.size(); i++)
-//   //   if(mWallSegments[i]->getOwner() == item->getSerialNumber())      // Segment belongs to our item, compare to all others
-//   //      mWallSegmentDatabase->findObjects(0, fillVector, mWallSegments[i]->getExtent(), WallSegmentTypeNumber);
-//
-//   //for(S32 i = 0; i < fillVector.size(); i++)
-//   //{
-//   //   logprintf("typeMask: %d ==> expecting %d", fillVector[i]->getObjectTypeMask(), WallSegmentType);
-//   //   WallSegment *wallSegment = dynamic_cast<WallSegment *>(fillVector[i]);
-//   //   TNLAssert(wallSegment, "Uh oh!");
-//   //   wallSegment->invalidate();
-//   //}
-//
-//
-//   for(S32 i = 0; i < mWallSegmentDatabase->getObjectCount(); i++)
-//      if(mWallSegmentDatabase->getObjectByIndex(i)->getObjectTypeNumber() == WallSegmentTypeNumber)
-//      {
-//         WallSegment *wallSegment = dynamic_cast<WallSegment *>(mWallSegmentDatabase->getObjectByIndex(i));
-//         wallSegment->invalidate();
-//      }
-//#endif
-//}
-
-
 // Called when a wall segment has somehow changed.  All current and previously intersecting segments 
 // need to be recomputed.
 void WallSegmentManager::computeWallSegmentIntersections(GridDatabase *gameObjDatabase, EditorObject *item)
@@ -1054,6 +1002,18 @@ void WallSegmentManager::setSelected(S32 owner, bool selected)
    for(S32 i = 0; i < mWallSegments.size(); i++)
       if(mWallSegments[i]->getOwner() == owner)
          mWallSegments[i]->setSelected(selected);
+}
+
+
+void WallSegmentManager::rebuildSelectedOutline()
+{
+   Vector<WallSegment *> selectedSegments;
+
+   for(S32 i = 0; i < mWallSegments.size(); i++)
+      if(mWallSegments[i]->isSelected())
+         selectedSegments.push_back(mWallSegments[i]);
+
+   clipAllWallEdges(selectedSegments, mSelectedWallEdgePoints);    // Populate edgePoints from segments
 }
 
 
@@ -1085,13 +1045,31 @@ void WallSegmentManager::renderWalls(GameSettings *settings, F32 currentScale, b
    bool useGameColor = UserInterface::current && UserInterface::current->getMenuID() == EditorUI && previewMode;
    Color fillColor = useGameColor ? settings->getWallFillColor() : EDITOR_WALL_FILL_COLOR;
 
-   // Render selected items last so they appear on top
-   for(S32 first = 0; first < 2; first++)
+   bool moved = (selectedItemOffset.x != 0 || selectedItemOffset.y != 0);
+
+   // Render walls that have been moved first
+   if(moved)
       for(S32 i = 0; i < mWallSegments.size(); i++)
-         if((first == 1) == mWallSegments[i]->isSelected())         
+         if(mWallSegments[i]->isSelected())         
+            mWallSegments[i]->renderFill(Color(.1), Point(0,0));
+
+   // Then normal, unselected walls
+   for(S32 i = 0; i < mWallSegments.size(); i++)
+      if(!moved || !mWallSegments[i]->isSelected())         
+         mWallSegments[i]->renderFill(fillColor, selectedItemOffset);      // renderFill ignores offset for unselected walls
+
+   renderWallEdges(&mWallEdgePoints, settings->getWallOutlineColor());     // Render wall outlines
+
+   // Render moving walls last so they appear on top
+   if(moved)
+   {
+      for(S32 i = 0; i < mWallSegments.size(); i++)
+         if(mWallSegments[i]->isSelected())  
             mWallSegments[i]->renderFill(fillColor, selectedItemOffset);
 
-   renderWallEdges(&mWallEdgePoints, settings->getWallOutlineColor());      // Render wall outlines
+      // Render wall outlines for selected walls only
+      renderWallEdges(&mSelectedWallEdgePoints, selectedItemOffset, settings->getWallOutlineColor());      
+   }
 
    if(showSnapVertices)
    {
@@ -1103,11 +1081,6 @@ void WallSegmentManager::renderWalls(GameSettings *settings, F32 currentScale, b
 
       glLineWidth(gDefaultLineWidth);
    }
-
-   //// Render snap targets at each wall edge vertex
-   //if(showSnapVertices)
-   //   for(S32 i = 0; i < mWallEdgePoints.size(); i++)
-   //      EditorUserInterface::renderSnapTarget(mWallEdgePoints[i]);
 #endif
 }
 
@@ -1244,6 +1217,12 @@ void WallSegment::setSelected(bool selected)
 const Vector<Point> *WallSegment::getCorners()
 {
    return &mCorners;
+}
+
+
+const Vector<Point> *WallSegment::getEdges()
+{
+   return &mEdges;
 }
 
 

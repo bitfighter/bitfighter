@@ -1606,6 +1606,14 @@ void renderWallEdges(const Vector<Point> *edges, const Color &outlineColor, F32 
 }
 
 
+// Used in editor only
+void renderWallEdges(const Vector<Point> *edges, const Point &offset, const Color &outlineColor, F32 alpha)
+{
+   glColor(outlineColor, alpha);
+   renderPointVector(edges, offset, GL_LINES);
+}
+
+
 void renderSpeedZone(const Vector<Point> *points, U32 time)
 {
    glColor(Colors::red);
