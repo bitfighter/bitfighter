@@ -217,8 +217,8 @@ void EditorUserInterface::populateDock()
       addDockObject(new AsteroidSpawn(), xPos + 10, yPos);
       yPos += spacer;
 
-      addDockObject(new CircleSpawn(), xPos - 10, yPos);
-      addDockObject(new Reactor(), xPos + 10, yPos);
+      //addDockObject(new CircleSpawn(), xPos - 10, yPos);
+      addDockObject(new Reactor(), xPos /*+ 10*/, yPos);
       yPos += spacer;
 
 
@@ -1540,47 +1540,48 @@ void EditorUserInterface::render()
 
       if(fillVector.size() != 0)
       {
+         // Use Z Buffer to make use of not drawing overlap visible area of same team SpyBug, but does overlap different team.
+         fillVector.sort(sortByTeam);
+         glClear(GL_DEPTH_BUFFER_BIT);
+         glEnable(GL_DEPTH_TEST);
+         glEnable(GL_DEPTH_WRITEMASK);
+         glDepthFunc(GL_LESS);
+         glPushMatrix();
+         glTranslatef(0, 0, -0.95f);
 
-      // Use Z Buffer to make use of not drawing overlap visible area of same team SpyBug, but does overlap different team.
-      fillVector.sort(sortByTeam);
-      glClear(GL_DEPTH_BUFFER_BIT);
-      glEnable(GL_DEPTH_TEST);
-      glEnable(GL_DEPTH_WRITEMASK);
-      glDepthFunc(GL_LESS);
-      glPushMatrix();
-      glTranslatef(0, 0, -0.95f);
-      glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ONE);  // This blending works like this, source(SRC) * GL_ONE_MINUS_DST_COLOR + destination(DST) * GL_ONE
-      bool disableBlending = !glIsEnabled(GL_BLEND);
+         // This blending works like this, source(SRC) * GL_ONE_MINUS_DST_COLOR + destination(DST) * GL_ONE
+         glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ONE);  
 
-      if(disableBlending)
-         glEnable(GL_BLEND);
+         bool disableBlending = !glIsEnabled(GL_BLEND);
 
-      S32 prevTeam;
+         if(disableBlending)
+            glEnable(GL_BLEND);
 
-      // Draw spybug visibility ranges first, underneath everything else
-      for(S32 i = 0; i < fillVector.size(); i++)
-      {
-         EditorObject *editorObj = dynamic_cast<EditorObject *>(fillVector[i]);
+         S32 prevTeam;
 
-         if(i != 0 && editorObj->getTeam() != prevTeam)
-            glTranslatef(0, 0, 0.05f);
-         prevTeam = editorObj->getTeam();
+         // Draw spybug visibility ranges first, underneath everything else
+         for(S32 i = 0; i < fillVector.size(); i++)
+         {
+            EditorObject *editorObj = dynamic_cast<EditorObject *>(fillVector[i]);
 
-         Point pos = editorObj->getVert(0);
-         pos *= mCurrentScale;
-         pos += mCurrentOffset;
-         renderSpyBugVisibleRange(pos, getGame()->getTeamColor(editorObj->getTeam()), mCurrentScale);
-      }
+            if(i != 0 && editorObj->getTeam() != prevTeam)
+               glTranslatef(0, 0, 0.05f);
+            prevTeam = editorObj->getTeam();
 
-      if(disableBlending)
-         glDisable(GL_BLEND);
+            Point pos = editorObj->getVert(0);
+            pos *= mCurrentScale;
+            pos += mCurrentOffset;
+            renderSpyBugVisibleRange(pos, getGame()->getTeamColor(editorObj->getTeam()), mCurrentScale);
+         }
 
-      setDefaultBlendFunction();
+         if(disableBlending)
+            glDisable(GL_BLEND);
 
-      glPopMatrix();
-      glDisable(GL_DEPTH_WRITEMASK);
-      glDisable(GL_DEPTH_TEST);
+         setDefaultBlendFunction();
 
+         glPopMatrix();
+         glDisable(GL_DEPTH_WRITEMASK);
+         glDisable(GL_DEPTH_TEST);
       }
 
       // Next draw turret firing ranges for selected or highlighted turrets only
@@ -1626,8 +1627,8 @@ void EditorUserInterface::render()
          EditorObject *obj = objList->get(i);
          if(obj->getObjectTypeNumber() == PolyWallTypeNumber)
          {
-            PolyWall *wall = dynamic_cast<PolyWall *>(obj);
-            wall->renderFill();
+            PolyWall *polyWall = dynamic_cast<PolyWall *>(obj);
+            polyWall->renderFill();
          }
       }
   

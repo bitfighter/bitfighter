@@ -1047,7 +1047,7 @@ void WallSegmentManager::renderWalls(GameSettings *settings, F32 currentScale, b
 
    bool moved = (selectedItemOffset.x != 0 || selectedItemOffset.y != 0);
 
-   // Render walls that have been moved first
+   // Render walls that have been moved first (i.e. render their shadows)
    if(moved)
       for(S32 i = 0; i < mWallSegments.size(); i++)
          if(mWallSegments[i]->isSelected())         
@@ -1060,7 +1060,7 @@ void WallSegmentManager::renderWalls(GameSettings *settings, F32 currentScale, b
 
    renderWallEdges(&mWallEdgePoints, settings->getWallOutlineColor());     // Render wall outlines
 
-   // Render moving walls last so they appear on top
+   // Render selected/moving walls last so they appear on top
    if(moved)
    {
       for(S32 i = 0; i < mWallSegments.size(); i++)
