@@ -434,9 +434,6 @@ void WallItem::onGeomChanged()
    // Fill extendedEndPoints from the vertices of our wall's centerline, or from PolyWall edges
    processEndPoints();
 
-   //if(getObjectTypeMask() & ItemPolyWall)     // Prepare interior fill triangulation
-   //   initializePolyGeom();          // Triangulate, find centroid, calc extents
-
    Game *game = getGame();
    game->getWallSegmentManager()->computeWallSegmentIntersections(game->getEditorDatabase(), this);
 
