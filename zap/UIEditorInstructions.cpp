@@ -378,7 +378,7 @@ void EditorInstructionsUserInterface::renderPageWalls()
       mWallSegmentManager.clipAllWallEdges(wallSegments, edges);      // Remove interior wall outline fragments
 
       for(S32 i = 0; i < wallSegments.size(); i++)
-         wallSegments[i]->renderFill(EDITOR_WALL_FILL_COLOR, false);
+         wallSegments[i]->renderFill(EDITOR_WALL_FILL_COLOR);
 
       renderWallEdges(&edges, getGame()->getSettings()->getWallOutlineColor());
 

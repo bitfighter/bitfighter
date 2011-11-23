@@ -442,6 +442,8 @@ void WallItem::onGeomChanged()
 
    game->getWallSegmentManager()->updateMountedItems(game->getEditorDatabase(), this);
 
+   game->getWallSegmentManager()->setSelected(mSerialNumber, mSelected);
+
    Parent::onGeomChanged();
 }
 
@@ -535,7 +537,16 @@ void WallItem::scale(const Point &center, F32 scale)
 
 void WallItem::setWidth(S32 width) 
 {         
-   Parent::setWidth(width, Barrier::MIN_BARRIER_WIDTH, Barrier::MAX_BARRIER_WIDTH);     // Why do we need LineItem:: prefix here???
+   Parent::setWidth(width, Barrier::MIN_BARRIER_WIDTH, Barrier::MAX_BARRIER_WIDTH);     // Why do we need Barrier:: prefix here???
+}
+
+
+void WallItem::setSelected(bool selected)
+{
+   Parent::setSelected(selected);
+   
+   // Find the associated segment(s) and mark them as selected (or not)
+   getGame()->getWallSegmentManager()->setSelected(mSerialNumber, selected);
 }
 
 
@@ -1041,6 +1052,14 @@ void WallSegmentManager::computeWallSegmentIntersections(GridDatabase *gameObjDa
 }
 
 
+void WallSegmentManager::setSelected(S32 owner, bool selected)
+{
+   for(S32 i = 0; i < mWallSegments.size(); i++)
+      if(mWallSegments[i]->getOwner() == owner)
+         mWallSegments[i]->setSelected(selected);
+}
+
+
 // Delete all wall segments owned by specified owner
 void WallSegmentManager::deleteSegments(S32 owner)
 {
@@ -1049,8 +1068,8 @@ void WallSegmentManager::deleteSegments(S32 owner)
    for(S32 i = 0; i < count; i++)
       if(mWallSegments[i]->getOwner() == owner)
       {
-         delete mWallSegments[i];    // Destructor will remove segment from database
-         mWallSegments.erase_fast(i);
+         delete mWallSegments[i];      // Destructor will remove segment from database
+         mWallSegments.erase_fast(i);  // Order of segments isn't important
          i--;
          count--;
       }
@@ -1065,30 +1084,15 @@ void WallSegmentManager::renderWalls(GameSettings *settings, F32 currentScale, b
    fillVector.clear();
    mWallSegmentDatabase->findObjects((TestFunc)isWallType, fillVector);
 
-   for(S32 i = 0; i < mWallSegments.size(); i++)
-   {  
-      bool isBeingDragged = false;
+   // We'll use the editor color most of the time; only in preview mode in the editor do we use the game color
+   bool useGameColor = UserInterface::current && UserInterface::current->getMenuID() == EditorUI && showingReferenceShip;
+   Color fillColor = useGameColor ? settings->getWallFillColor() : EDITOR_WALL_FILL_COLOR;
 
-     /* if(draggingObjects)
-      {
-         for(S32 j = 0; j < fillVector.size(); j++)
-         {
-            WallSegment *obj = dynamic_cast<WallSegment *>(fillVector[j]);
-            if(obj->isSelected() && obj->getItemId() == mWallSegments[i]->getOwner())
-            {
-               isBeingDragged = true;
-               break;
-            }
-         }
-      }*/
-
-      // We'll use the editor color most of the time; only in preview mode in the editor do we use the game color
-      bool useGameColor = UserInterface::current && UserInterface::current->getMenuID() == EditorUI && showingReferenceShip;
-      //TNLAssert(UserInterface::current->getMenuID() == EditorUI, "How did we get here, then???"); // (came from editing attributes of SpeedZone)
-
-      Color fillColor = useGameColor ? settings->getWallFillColor() : EDITOR_WALL_FILL_COLOR;
-      mWallSegments[i]->renderFill(fillColor, isBeingDragged);
-   }
+   // Render selected items last so they appear on top
+   for(S32 first = 0; first < 2; first++)
+      for(S32 i = 0; i < mWallSegments.size(); i++)
+         if((first == 1) == mWallSegments[i]->isSelected())         
+            mWallSegments[i]->renderFill(fillColor);
 
    renderWallEdges(&mWallEdgePoints, settings->getWallOutlineColor());      // Render wall outlines
 
@@ -1098,9 +1102,7 @@ void WallSegmentManager::renderWalls(GameSettings *settings, F32 currentScale, b
 
       //glColor(Colors::magenta);
       for(S32 i = 0; i < mWallEdgePoints.size(); i++)
-      //   drawFilledSquare(mWallEdgePoints[i], 2 / currentScale);
-
-      renderSmallSolidVertex(currentScale, mWallEdgePoints[i], draggingObjects);
+         renderSmallSolidVertex(currentScale, mWallEdgePoints[i], draggingObjects);
 
       glLineWidth(gDefaultLineWidth);
    }
@@ -1152,6 +1154,7 @@ void WallSegment::init(GridDatabase *database, S32 owner)
 
    mOwner = owner; 
    invalid = false; 
+   mSelected = false;
 
    /////
    // Set some things required by DatabaseObject
@@ -1202,7 +1205,7 @@ void WallSegment::resetEdges()
 }
 
 
-void WallSegment::renderFill(const Color &fillColor, bool beingDragged)
+void WallSegment::renderFill(const Color &fillColor)
 {
 #ifndef ZAP_DEDICATED
 
@@ -1216,13 +1219,25 @@ void WallSegment::renderFill(const Color &fillColor, bool beingDragged)
       enableLineSmoothing = true;
    }
    
-   color *= beingDragged ? 0.5f : 1;
+   color *= mSelected ? 0.5f : 1;
 
    renderWallFill(&mTriangulatedFillPoints, true, color);       // Use true because all segment fills are triangulated
 
    if(enableLineSmoothing) 
       glEnable(GL_BLEND);
 #endif
+}
+
+
+bool WallSegment::isSelected()
+{
+   return mSelected;
+}
+
+
+void WallSegment::setSelected(bool selected)
+{
+   mSelected = selected;
 }
 
 

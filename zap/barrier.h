@@ -149,6 +149,9 @@ public:
    bool processArguments(S32 argc, const char **argv, Game *game);
    void setWidth(S32 width);
 
+   void setSelected(bool selected);
+
+
    static const S32 VERTEX_SIZE = 5;
 };
 
@@ -214,6 +217,7 @@ class WallSegment : public DatabaseObject
 {
 private:
    S32 mOwner;
+   bool mSelected;
 
   void init(GridDatabase *database, S32 owner);
   bool invalid;              // A flag for marking segments in need of processing
@@ -230,10 +234,13 @@ public:
    S32 getOwner();
    void invalidate();
 
+   bool isSelected();
+   void setSelected(bool selected);
+
    void resetEdges();         // Compute basic edges from corner points
    void computeBoundingBox(); // Computes bounding box based on the corners, updates database
    
-   void renderFill(const Color &fillColor, bool renderLight);
+   void renderFill(const Color &fillColor);
 
    const Vector<Point> *getCorners();
    const Vector<Point> *getTriangulatedFillPoints();
@@ -293,7 +300,6 @@ private:
    void rebuildEdges();
    void buildWallSegmentEdgesAndPoints(GridDatabase *gameDatabase, DatabaseObject *object, const Vector<DatabaseObject *> &engrObjects);
 
-
 public:
    WallSegmentManager();   // Constructor
    ~WallSegmentManager();  // Destructor
@@ -308,9 +314,12 @@ public:
    Vector<Point> mWallEdgePoints;               // For rendering
 
    void buildAllWallSegmentEdgesAndPoints(GridDatabase *gameDatabase);
+
+   void setSelected(S32 owner, bool selected);
    void deleteSegments(S32 owner);              // Delete all segments owned by specified WorldItem
 
    void updateMountedItems(EditorObjectDatabase *database, EditorObject *wall);
+
 
    // Takes a wall, finds all intersecting segments, and marks them invalid
    //void invalidateIntersectingSegments(GridDatabase *gameDatabase, EditorObject *item);      // unused

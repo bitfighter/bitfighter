@@ -175,7 +175,7 @@ public:
    S32 getSerialNumber();
 
    bool isSelected();
-   void setSelected(bool selected);
+   virtual void setSelected(bool selected);     // Overridden by walls who need special tracking for selected items
 
    bool isLitUp();
    void setLitUp(bool litUp);
