@@ -197,7 +197,10 @@ void LevelNameEntryUserInterface::onKeyDown(InputCode inputCode, char ascii)
 
       lineEditor.setString(mLevels[mLevelIndex]);
    }
-   else
+   else if(inputCode == KEY_TAB)       // Tab will try to complete a name from whatever the user has already typed
+      lineEditor.completePartial(&mLevels, lineEditor.getString(), 0, ""); 
+
+   else                                // Normal typed key
       Parent::onKeyDown(inputCode, ascii);
 }
 

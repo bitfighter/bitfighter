@@ -77,6 +77,7 @@ XXX need to document timers, new luavec stuff XXX
 <li>Removed optional hostAddr cmd line parameter for -dedicated <hostAddr>.  Specify host address (only rarely needed) with the existing -hostAddr option
 <li>Removed -server cmd line parameter; not sure it really ever worked at all
 <li>Smaller text should look crisper throughout the game
+<li>Tab does filename completion in editor levelname entry screen
 </ul>
 */
 

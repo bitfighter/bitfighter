@@ -49,6 +49,11 @@ private:
 
    static Timer mBlinkTimer;
 
+   // For tab expansion 
+   Vector<string> mMatchList;
+   S32 mMatchIndex;
+   void buildMatchList(const Vector<string> *candidates, const string &partial);
+
 public:
    U32 mMaxLen;
 
@@ -64,10 +69,10 @@ public:
 
    U32 length() { return (U32)mLine.length(); }
    void addChar(char c);
-   void backspacePressed() { if(length() > 0) mLine.erase(mLine.size() - 1); matchIndex = -1; }     // User hit Backspace 
+   void backspacePressed() { if(length() > 0) mLine.erase(mLine.size() - 1); mMatchIndex = -1; }    // User hit Backspace 
    void deletePressed() { backspacePressed(); }                                                     // User hit Delete 
-   void handleBackspace(InputCode inputCode);               // Pass KEY_BACKSPACE or KEY_DELETE and it will do the right thing!
-   void clear() { mLine.clear(); matchIndex = -1;}      // Clear the string and tab-expansion matchlist
+   void handleBackspace(InputCode inputCode);           // Pass KEY_BACKSPACE or KEY_DELETE and it will do the right thing!
+   void clear() { mLine.clear(); mMatchIndex = -1;}     // Clear the string and tab-expansion matchlist
    char at(U32 pos);                                    // Get char at pos
    bool isEmpty() { return mLine.empty(); }             // Is string empty
 
@@ -79,6 +84,7 @@ public:
    string getString() const { return mLine; }                              // Return the string in string format
    const string *getStringPtr() const { return &mLine; }
    string getDisplayString() const { return mSecret ? string(mLine.length(), '*') : mLine; }
+
    void setString(const string &str) { mLine.assign(str.substr(0, mMaxLen)); }    // Set the string
    void setPrompt(const string &prompt) { mPrompt = prompt; }
    string getPrompt() { return mPrompt; }
@@ -90,9 +96,7 @@ public:
    static void drawCursorAngle(S32 x, S32 y, F32 fontSize, S32 startingWidth, F32 angle);
 
    // For tab expansion 
-   Vector<string> matchList;
-   S32 matchIndex;
-   void buildMatchList(Vector<string> *candidates, const char *partial);
+   void completePartial(const Vector<string> *candidates, const string &partial, size_t replacePos, const string &appender);
 
    S32 getMaxLen() { return mMaxLen; }
 

@@ -2260,10 +2260,10 @@ static void makeTeamNameList(const Game *game, Vector<string> &nameCandidateList
 
 static Vector<string> *getCandidateList(Game *game, const char *first, S32 arg)
 {
-   if(arg == 0)         // Command completion
+   if(arg == 0)         // ==> Command completion
       return &commandCandidateList;
 
-   else if(arg > 0)     // Arg completion
+   else if(arg > 0)     // ==> Arg completion
    {
       // Figure out which command we're entering, so we know what kind of args to expect
       S32 cmd = -1;
@@ -2281,13 +2281,13 @@ static Vector<string> *getCandidateList(Game *game, const char *first, S32 arg)
 
          static Vector<string> nameCandidateList;     // Reusable container
 
-         if(argType == NAME)           // Player names
+         if(argType == NAME)           // ==> Player name completion
          {  
             makePlayerNameList(game, nameCandidateList);    // Creates a list of all player names
             return &nameCandidateList;
          }
 
-         else if(argType == TEAM)      // Team names
+         else if(argType == TEAM)      // ==> Team name completion
          {
             makeTeamNameList(game, nameCandidateList);
             return &nameCandidateList;
@@ -2297,7 +2297,7 @@ static Vector<string> *getCandidateList(Game *game, const char *first, S32 arg)
       }
    }
    
-   return NULL;                        // No completion options
+   return NULL;                        // ==> No completion options
 }
 
 
@@ -2329,20 +2329,20 @@ void GameUserInterface::processChatModeKey(InputCode inputCode, char ascii)
             if(mLineEditor.getString() == "/")
                words.clear();          // Clear -- it's as if we're at a fresh "/" prompt where the user has typed nothing
             else
-               words[0].erase(0, 1);   // Strip -- remove leading "/" so it's as if were at a regular "/" prompt
+               words[0].erase(0, 1);   // Strip char -- remove leading "/" so it's as if were at a regular "/" prompt
 
             needLeadingSlash = true;   // We'll need to add the stripped "/" back in later
          }
                
-         S32 arg;                      // Which word we're looking at
-         const char *partial;          // The partially typed word we're trying to match against
-         const char *first;            // First arg we entered (will match partial if we're still entering the first one)
+         S32 arg;                 // Which word we're looking at
+         string partial;          // The partially typed word we're trying to match against
+         const char *first;       // First arg we entered (will match partial if we're still entering the first one)
          
          // Check for trailing space --> http://www.suodenjoki.dk/us/archive/2010/basic-string-back.htm
          if(words.size() > 0 && *mLineEditor.getString().rbegin() != ' ')   
          {
             arg = words.size() - 1;          // No trailing space --> current arg is the last word we've been typing
-            partial = words[arg].c_str();    // We'll be matching against what we've typed so far
+            partial = words[arg];            // We'll be matching against what we've typed so far
             first = words[0].c_str();      
          }
          else if(words.size() > 0)           // We've entered a word, pressed space indicating word is complete, 
@@ -2358,53 +2358,35 @@ void GameUserInterface::processChatModeKey(InputCode inputCode, char ascii)
             first = "";                      // We'll be matching against an empty list since we've typed nothing so far
          }
          
+         const string *entry = mLineEditor.getStringPtr();  
+
          Vector<string> *candidates = getCandidateList(getGame(), first, arg);     // Could return NULL
 
-         // Now we have our candidates list... let's compare to what the player has already typed to generate completion string
-         if(candidates && candidates->size() > 0)
+         // If the command string has quotes in it, use the last space up to the first quote
+         size_t lastChar = string::npos;
+         if(entry->find_first_of("\"") != string::npos)
+            lastChar = entry->find_first_of("\"");
+
+         string appender = " ";
+
+         size_t pos = entry->find_last_of(' ', lastChar);
+
+         if(pos == string::npos)                         // String does not contain a space, requires special handling
          {
-            mLineEditor.buildMatchList(candidates, partial);    // Filter candidates by what we've typed so far
-
-            if(mLineEditor.matchList.size() == 0)               // Found no matches... no expansion possible
-               return;
-
-            const string *str = mLineEditor.getStringPtr();     // Convenient shortcut
-
-            // if the command string has quotes in it use the last space up to the first quote
-            size_t lastChar = string::npos;
-            if (str->find_first_of("\"") != string::npos)
-               lastChar = str->find_first_of("\"");
-
-            size_t pos = str->find_last_of(' ', lastChar);
-            string space = " ";
-
-            if(pos == string::npos)    // i.e. string does not contain a space, requires special handling
-            {
-               pos = 0;
-               if(words.size() <= 1 && needLeadingSlash)    // ugh!  More special cases!
-                  space = "/";
-               else
-                  space = "";
-            }
-
-            mLineEditor.matchIndex++;     // Advance to next potential match
-
-            if(mLineEditor.matchIndex >= mLineEditor.matchList.size())     // Handle wrap-around
-               mLineEditor.matchIndex = 0;
-
-            // if match contains a space, wrap in quotes
-            string matchedString = mLineEditor.matchList[mLineEditor.matchIndex];
-            if (matchedString.find_first_of(" ") != string::npos)
-               matchedString = "\"" + matchedString +"\"";
-
-            mLineEditor.setString(str->substr(0, pos).append(space + matchedString));    // Add match to the command
+            pos = 0;
+            if(words.size() <= 1 && needLeadingSlash)    // ugh!  More special cases!
+               appender = "/";
+            else
+               appender = "";
          }
+
+         mLineEditor.completePartial(candidates, partial, pos, appender); 
       }
    }
    else if(ascii)     // Append any other keys to the chat message
    {
       // Protect against crashes while game is initializing (because we look at the ship for the player's name)
-      if(getGame()->getConnectionToServer())     // clientGame cannot be NULL here
+      if(getGame()->getConnectionToServer())     // getGame() cannot return NULL here
       {
          S32 promptSize = getStringWidth(CHAT_FONT_SIZE, mCurrentChatType == TeamChat ? "(Team): " : "(Global): ");
 

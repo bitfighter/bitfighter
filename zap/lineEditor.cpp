@@ -41,7 +41,7 @@ LineEditor::LineEditor(U32 maxLength, string value)
    mFilter = allAsciiFilter;
    mPrompt = "";
    mSecret = false;
-   matchIndex = -1;
+   mMatchIndex = -1;
 }
 
 
@@ -55,21 +55,48 @@ char LineEditor::at(U32 pos)
 
 
 // Given a list of potential match candidates, and a partially typed string, find all candidates that are potential matches
-void LineEditor::buildMatchList(Vector<string> *candidates, const char *partial)
+void LineEditor::buildMatchList(const Vector<string> *candidates, const string &partial)
 {
    // Search for matching candidates
-   if(matchIndex == -1)    // -1 --> Need to build a new match list (gets set to -1 when we change mLineEditor by typing)
+   if(mMatchIndex == -1)    // -1 --> Need to build a new match list (gets set to -1 when we change mLineEditor by typing)
    {
-      matchList.clear();
+      mMatchList.clear();
 
-      S32 len = (S32)strlen(partial);
+      string::size_type len = partial.size();
 
       for(S32 i = 0; i < candidates->size(); i++)
       {
          // If partial is empty, then everything matches -- we want all candidates in our list
-         if(!strcmp(partial, "") || !stricmp((*candidates)[i].substr(0, len).c_str(), partial))
-            matchList.push_back((*candidates)[i]);
+         if(partial == "" || partial == (*candidates)[i].substr(0, len))
+            mMatchList.push_back((*candidates)[i]);
       }
+   }
+}
+
+
+// Find best match from list of candidates given a partially typed entry partial
+// Note that candidates could be NULL; size_t is equivalent to a U32 in VC++
+void LineEditor::completePartial(const Vector<string> *candidates, const string &partial, size_t replacePos, const string &appender)
+{
+   // Now we have our candidates list... let's compare to what the player has already typed to generate completion string
+   if(candidates && candidates->size() > 0)
+   {
+      buildMatchList(candidates, partial);      // Filter candidates by what we've typed so far
+
+      if(mMatchList.size() == 0)                 // Found no matches... no expansion possible
+         return;
+
+      mMatchIndex++;     // Advance to next potential match
+
+      if(mMatchIndex >= mMatchList.size())     // Handle wrap-around
+         mMatchIndex = 0;
+
+      // If match contains a space, wrap it in quotes
+      string matchedString = mMatchList[mMatchIndex];
+      if(matchedString.find_first_of(" ") != string::npos)
+         matchedString = "\"" + matchedString +"\"";
+
+      setString(mLine.substr(0, replacePos).append(appender + matchedString));    // Add match to the command
    }
 }
 
@@ -137,7 +164,7 @@ void LineEditor::addChar(const char c)
       return;
    
    if(length() < mMaxLen) mLine.append(string(1,c)); 
-   matchIndex = -1;
+   mMatchIndex = -1;
 }
 
 
