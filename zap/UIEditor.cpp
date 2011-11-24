@@ -3089,7 +3089,7 @@ void EditorUserInterface::centerView()
       // for any display weirdness.
       if(minx == maxx && miny == maxy)    // i.e. a single point item
       {
-         mCurrentScale = MIN_SCALE;
+         mCurrentScale = 1;
          mCurrentOffset.set(gScreenInfo.getGameCanvasWidth() / 2  - mCurrentScale * minx, 
                             gScreenInfo.getGameCanvasHeight() / 2 - mCurrentScale * miny);
       }
