@@ -163,7 +163,13 @@ void LevelNameEntryUserInterface::onActivate()
    for(S32 i = 0; i < mLevels.size(); i++)
        mLevels[i] = stripExtension(mLevels[i]);
 
-   // See if our current level is on the list -- if so, set mLevelIndex to that level
+   setLevelIndex();
+}
+
+
+// See if the current level is on the list -- if so, set mLevelIndex to that level
+void LevelNameEntryUserInterface::setLevelIndex()
+{
    for(S32 i = 0; i < mLevels.size(); i++)
       if(mLevels[i] == lineEditor.getString())
       {
@@ -186,6 +192,7 @@ void LevelNameEntryUserInterface::onKeyDown(InputCode inputCode, char ascii)
 
       lineEditor.setString(mLevels[mLevelIndex]);
    }
+
    else if(inputCode == KEY_LEFT || inputCode == KEY_UP)
    {
       if(mLevels.size() == 0)
@@ -197,11 +204,18 @@ void LevelNameEntryUserInterface::onKeyDown(InputCode inputCode, char ascii)
 
       lineEditor.setString(mLevels[mLevelIndex]);
    }
+
    else if(inputCode == KEY_TAB)       // Tab will try to complete a name from whatever the user has already typed
+   {
       lineEditor.completePartial(&mLevels, lineEditor.getString(), 0, ""); 
+      setLevelIndex();                 // Update levelIndex to reflect current level
+   }
 
    else                                // Normal typed key
+   {
       Parent::onKeyDown(inputCode, ascii);
+      setLevelIndex();                 // Update levelIndex to reflect current level
+   }
 }
 
 

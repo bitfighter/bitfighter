@@ -79,7 +79,7 @@ void LineEditor::buildMatchList(const Vector<string> *candidates, const string &
 void LineEditor::completePartial(const Vector<string> *candidates, const string &partial, size_t replacePos, const string &appender)
 {
    // Now we have our candidates list... let's compare to what the player has already typed to generate completion string
-   if(!candidates && candidates->size() > 0)
+   if(candidates && candidates->size() > 0)
    {
       buildMatchList(candidates, partial);   // Filter candidates by what we've typed so far
 

@@ -95,6 +95,8 @@ private:
    S32 mLevelIndex;
    Vector<string> mLevels;
 
+   void setLevelIndex();
+
 public:
    LevelNameEntryUserInterface(ClientGame *game);      // Constructor
 
