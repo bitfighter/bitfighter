@@ -827,6 +827,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\Cursor.cpp"
+			>
+		</File>
+		<File
 			RelativePath="..\master\database.cpp"
 			>
 		</File>

@@ -132,8 +132,8 @@ static void labelVertex(Point pos, F32 radius, const char *itemLabelTop, const c
 {
    F32 labelSize = DOCK_LABEL_SIZE / scale;
 
-   UserInterface::drawStringc(pos.x, pos.y - radius - labelSize - 5, labelSize, itemLabelTop);     // Above the vertex
-   UserInterface::drawStringc(pos.x, pos.y + radius + 2, labelSize, itemLabelBottom);              // Below the vertex
+   UserInterface::drawStringc(pos.x, pos.y - radius - labelSize - (5 / scale), labelSize, itemLabelTop);     // Above the vertex
+   UserInterface::drawStringc(pos.x, pos.y + radius + (2 / scale), labelSize, itemLabelBottom);              // Below the vertex
 }
 #endif
 
@@ -224,10 +224,9 @@ void EditorObject::renderInEditor(F32 currentScale, S32 snapIndex, bool isScript
       if(showingReferenceShip)
          renderEditorPreview(currentScale);
       else
+      {
          renderEditor(currentScale);
 
-      if(!showingReferenceShip)
-      {
          // Label item with instruction message describing what happens if user presses enter
          //if(isSelected() && !isBeingEdited())
          //   renderItemText(getInstructionMsg(), 0, currentScale);
@@ -611,7 +610,7 @@ void EditorPointObject::renderItemText(const char *text, S32 offset, F32 current
    
    // Dividing by currentScale keeps the text a constant size in pixels
    UserInterface::drawCenteredString(pos.x, pos.y + getEditorRadius(currentScale) / currentScale, F32(INSTRUCTION_TEXTSIZE) / currentScale, text);
-   UserInterface::drawCenteredString(pos.x, pos.y + getEditorRadius(currentScale) / currentScale + INSTRUCTION_TEXTSIZE * 1.25f, F32(INSTRUCTION_TEXTSIZE) / currentScale, "[Enter] to edit");
+   UserInterface::drawCenteredString(pos.x, pos.y + (getEditorRadius(currentScale) + INSTRUCTION_TEXTSIZE * 1.25f) / currentScale, F32(INSTRUCTION_TEXTSIZE) / currentScale, "[Enter] to edit");
 #endif
 }
 
