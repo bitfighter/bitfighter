@@ -175,7 +175,7 @@ void LevelNameEntryUserInterface::onActivate()
 
 void LevelNameEntryUserInterface::onKeyDown(InputCode inputCode, char ascii)
 {
-   if(inputCode == KEY_RIGHT)
+   if(inputCode == KEY_RIGHT || inputCode == KEY_DOWN)
    {
       if(mLevels.size() == 0)
          return;
@@ -186,7 +186,7 @@ void LevelNameEntryUserInterface::onKeyDown(InputCode inputCode, char ascii)
 
       lineEditor.setString(mLevels[mLevelIndex]);
    }
-   else if(inputCode == KEY_LEFT)
+   else if(inputCode == KEY_LEFT || inputCode == KEY_UP)
    {
       if(mLevels.size() == 0)
          return;
