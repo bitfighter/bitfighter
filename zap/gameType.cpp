@@ -287,7 +287,7 @@ bool GameType::saveMenuItem(const MenuItem *menuItem, const char *key)
    else if(!strcmp(key, "Levelgen Script"))
       setScript(parseString(menuItem->getValue()));
    else if(!strcmp(key, "Game Time"))
-		setGameTime((F32)menuItem->getIntValue());
+      setGameTime((F32)menuItem->getIntValue());
    else if(!strcmp(key, "Win Score"))
       setWinningScore(menuItem->getIntValue());
    else if(!strcmp(key, "Grid Size"))
@@ -2980,6 +2980,9 @@ GAMETYPE_RPC_C2S(GameType, c2sSendChatPM, (StringTableEntry toName, StringPtr me
 
       if(clientInfo->getName() == toName)     // Do we want a case insensitive search?
       {
+         if(!source->checkMessage(message.getString(), 2))
+            return;
+
          RefPtr<NetEvent> theEvent = TNL_RPC_CONSTRUCT_NETEVENT(this, s2cDisplayChatPM, (sourceClientInfo->getName(), toName, message));
          source->postNetEvent(theEvent);
 
@@ -3002,7 +3005,7 @@ GAMETYPE_RPC_C2S(GameType, c2sSendChat, (bool global, StringPtr message), (globa
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
    ClientInfo *sourceClientInfo = source->getClientInfo();
 
-   if(source->mChatMute)
+   if(!source->checkMessage(message.getString(), global ? 0 : 1))
       return;
 
    RefPtr<NetEvent> theEvent = TNL_RPC_CONSTRUCT_NETEVENT(this, s2cDisplayChatMessage, (global, sourceClientInfo->getName(), message));
@@ -3015,7 +3018,7 @@ GAMETYPE_RPC_C2S(GameType, c2sSendChatSTE, (bool global, StringTableEntry messag
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
 
-   if(source->mChatMute)
+   if(!source->checkMessage(message.getString(), global ? 0 : 1))
       return;
 
    ClientInfo *sourceClientInfo = source->getClientInfo();

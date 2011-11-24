@@ -547,7 +547,10 @@ void ClientGame::playerLeftGlobalChat(const StringTableEntry &playerNick)
 }
 
 
-void ClientGame::connectionToServerRejected()
+static char DisconnectReasonString[128];  // A place to hold all of our chars for const char *reason
+   // That is because of we are sending only a pointer of a string for setMessage
+
+void ClientGame::connectionToServerRejected(const char *reason)
 {
    getUIManager()->getMainMenuUserInterface()->activate();
 
@@ -556,6 +559,8 @@ void ClientGame::connectionToServerRejected()
    ui->setTitle("Connection Terminated");
    ui->setMessage(2, "Lost connection with the server.");
    ui->setMessage(3, "Unable to join game.  Please try again.");
+   strncpy(DisconnectReasonString, reason, sizeof(DisconnectReasonString));
+   ui->setMessage(4, DisconnectReasonString);
    ui->activate();
 
    closeConnectionToGameServer();
@@ -835,7 +840,7 @@ void ClientGame::onConnectionTerminated(const Address &serverAddress, NetConnect
 
       case NetConnection::ReasonBanned:
          ui->setMessage(2, "You are banned from playing on this server");
-         ui->setMessage(4, "Contact the server administrator if you think");
+         ui->setMessage(3, "Contact the server administrator if you think");
          ui->setMessage(4, "this was in error.");
          ui->activate();
 
@@ -862,7 +867,9 @@ void ClientGame::onConnectionTerminated(const Address &serverAddress, NetConnect
          break;
 
       default:
-         ui->setMessage(1, "Unable to connect to the server for reasons unknown.");
+         ui->setMessage(1, "Lost connection with the server.");
+         strncpy(DisconnectReasonString, reasonStr, sizeof(DisconnectReasonString));
+         ui->setMessage(2, DisconnectReasonString);
          ui->setMessage(3, "Please try a different game server, or try again later.");
          ui->activate();
          break;
@@ -909,7 +916,8 @@ void ClientGame::onConnectionToMasterTerminated(NetConnection::TerminationReason
 
       case NetConnection::ReasonError:
          ui->setMessage(2, "Unable to connect to the server.  Recieved message:");
-         ui->setMessage(3, reasonStr);
+         strncpy(DisconnectReasonString, reasonStr, sizeof(DisconnectReasonString));
+         ui->setMessage(3, DisconnectReasonString);
          ui->setMessage(5, "Please try a different game server, or try again later.");
          ui->activate();
          break;
@@ -920,7 +928,7 @@ extern CIniFile gINI;
 
 // This function only gets called while the player is trying to connect to a server.  Connection has not yet been established.
 // Compare to onConnectIONTerminated()
-void ClientGame::onConnectTerminated(const Address &serverAddress, NetConnection::TerminationReason reason)
+void ClientGame::onConnectTerminated(const Address &serverAddress, NetConnection::TerminationReason reason, const char *reasonStr)
 {
    if(reason == NetConnection::ReasonNeedServerPassword)
    {
@@ -990,6 +998,8 @@ void ClientGame::onConnectTerminated(const Address &serverAddress, NetConnection
 
       ui->setMessage(2, "Lost connection with the server.");
       ui->setMessage(3, "Unable to join game.  Please try again.");
+      strncpy(DisconnectReasonString, reasonStr, sizeof(DisconnectReasonString));
+      ui->setMessage(4, DisconnectReasonString);
       ui->activate();
    }
 }

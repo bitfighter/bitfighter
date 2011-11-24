@@ -115,13 +115,15 @@ void MasterServerConnection::requestArrangedConnection(const Address &remoteAddr
 }
 
 
+const char *NotServerError = "Not a server";
+
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sClientRequestedArrangedConnection, 
                               (U32 requestId, Vector<IPAddress> possibleAddresses, ByteBufferPtr connectionParameters))
 {
    if(!mGame->isServer())   // We're not a server!  Reject connection!
    {
-      logprintf(LogConsumer::LogConnection, "Rejecting arranged connection from %s", Address(possibleAddresses[0]).toString());
-      s2mRejectArrangedConnection(requestId, connectionParameters);
+      logprintf(LogConsumer::LogConnection, "Rejecting arranged connection from %s, We're not a server!", Address(possibleAddresses[0]).toString());
+      s2mRejectArrangedConnection(requestId, ByteBufferPtr(new ByteBuffer((U8 *)NotServerError, sizeof(NotServerError))));
       return;
    }
 
@@ -191,8 +193,13 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cArrangedConnectionRejected
 {
    if(!mGame->isServer() && requestId == mCurrentQueryId)
    {
-      logprintf(LogConsumer::LogConnection, "Remote host rejected arranged connection...");    // Maybe player was kicked/banned?
-      dynamic_cast<ClientGame *>(mGame)->connectionToServerRejected();
+      rejectData->takeOwnership();
+      rejectData->resize(rejectData->getBufferSize() + 1);
+      char *rejectString = (char *)rejectData->getBuffer();  // Convert a rejectData into a string, adding a null terminate character.
+      rejectString[rejectData->getBufferSize() - 1] = 0;
+
+      logprintf(LogConsumer::LogConnection, "Arranged connection rejected: %s", rejectString);
+      dynamic_cast<ClientGame *>(mGame)->connectionToServerRejected(rejectString);
    }
 }
 

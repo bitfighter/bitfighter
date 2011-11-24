@@ -356,8 +356,8 @@ void UserInterface::doDrawAngleString(F32 x, F32 y, F32 size, F32 angle, const c
    static F32 modelview[16];
    glGetFloatv(GL_MODELVIEW_MATRIX, modelview);    // Fills modelview[]
 
-   F32 linewidth = MAX(MIN(size * gScreenInfo.getPixelRatio() * modelview[0] / 10, 2.0f), 1);      // Clamp to range of 1 - 2
-
+   F32 linewidth = MAX(MIN(size * gScreenInfo.getPixelRatio() * modelview[0] / 20, 1.0f), 0.5f)    // Clamp to range of 0.5 - 1
+                                                                        * gDefaultLineWidth;       // then multiply by line width (2 by default)
    glLineWidth(linewidth);
 
    F32 scaleFactor = size / 120.0f;
