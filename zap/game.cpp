@@ -2451,6 +2451,14 @@ void ServerGame::idle(U32 timeDelta)
 
       if(!clientInfo->isRobot())
       {
+         if(conn->mChatTimer > timeDelta)
+            conn->mChatTimer -= timeDelta;
+         else
+         {
+            conn->mChatTimer = 0;
+            conn->mChatTimerBlocked = false;
+         }
+
          conn->addToTimeCredit(timeDelta);
          conn->updateAuthenticationTimer(timeDelta);
 

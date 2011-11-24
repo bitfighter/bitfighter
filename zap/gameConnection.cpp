@@ -60,11 +60,14 @@ GameConnection::GameConnection()
    mVote = 0;
    mVoteTime = 0;
    mChatMute = false;
+   mChatTimer = 0;
+   mChatTimerBlocked = false;
+
 #ifndef ZAP_DEDICATED
    mClientGame = NULL;
 #endif
 
-	initialize();
+   initialize();
    mPlayerInfo = new PlayerInfo(mClientInfo.get());   // Deleted in destructor
 }
 
@@ -118,6 +121,11 @@ void GameConnection::initialize()
    mSendableFlags = 0;
    mDataBuffer = NULL;
 
+   mChatTimer = 0;
+   mChatTimerBlocked = false;
+
+   mWrongPasswordCount = 0;
+
    reset();
 }
 
@@ -151,6 +159,30 @@ GameConnection::~GameConnection()
    delete mPlayerInfo;
 }
 
+
+bool GameConnection::checkMessage(const char *message, U32 mode)
+{
+   if(mChatMute)
+      return false;
+
+   if(mChatTimerBlocked)
+      return false;
+
+   if(mChatPrevMessage == message && mChatPrevMessageMode >= mode && mode <= 1 && mChatTimer != 0)
+      return false;
+
+   mChatPrevMessageMode = mode;
+   mChatPrevMessage = message;
+
+   mChatTimer += 2000;
+   if(mChatTimer > 6000)
+   {
+      mChatTimer += 5000;
+      mChatTimerBlocked = true;
+      return false;
+   }
+   return true;
+}
 
 
 #ifndef ZAP_DEDICATED
@@ -443,8 +475,12 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sAdminPassword, (StringPtr pass), (pass),
    if(adminPW == "" || strcmp(md5.getSaltedHashFromString(adminPW).c_str(), pass))
    {
       s2cSetIsAdmin(false);      // Tell client they have NOT been granted access
+      mWrongPasswordCount++;
+      if(mWrongPasswordCount > MAX_WRONG_PASSWORD)
+         disconnect(NetConnection::ReasonError, "Too many wrong password");
       return;
    }
+   mWrongPasswordCount = 0;
 
    mClientInfo->setIsAdmin(true);               // Enter admin PW and...
 
@@ -475,8 +511,12 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sLevelChangePassword, (StringPtr pass), (pas
    if(levChangePW != "" && strcmp(md5.getSaltedHashFromString(levChangePW).c_str(), pass))
    {
       s2cSetIsLevelChanger(false, true);  // Tell client they have NOT been granted access
+      mWrongPasswordCount++;
+      if(mWrongPasswordCount > MAX_WRONG_PASSWORD)
+         disconnect(NetConnection::ReasonError, "Too many wrong password");
       return;
    }
+   mWrongPasswordCount = 0;
 
    mClientInfo->setIsLevelChanger(true);
 
@@ -1661,7 +1701,7 @@ void GameConnection::onConnectionTerminated(NetConnection::TerminationReason rea
 
 // This function only gets called while the player is trying to connect to a server.  Connection has not yet been established.
 // Compare to onConnectIONTerminated()
-void GameConnection::onConnectTerminated(TerminationReason reason, const char *notUsed)
+void GameConnection::onConnectTerminated(TerminationReason reason, const char *reasonStr)
 {
    if(isInitiator())
    {
@@ -1670,7 +1710,7 @@ void GameConnection::onConnectTerminated(TerminationReason reason, const char *n
       if(!mClientGame)
          return;
 
-      mClientGame->onConnectTerminated(getNetAddress(), reason);
+      mClientGame->onConnectTerminated(getNetAddress(), reason, reasonStr);
 #endif
 
    }

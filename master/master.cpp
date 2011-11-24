@@ -516,8 +516,7 @@ static const char *sanitizeForJson(const char *value)
       if(!conn)
       {
          ByteBufferPtr ptr = new ByteBuffer((U8 *) MasterNoSuchHost, (U32) strlen(MasterNoSuchHost) + 1);
-             (requestId, ptr);
-            //s2mRejectArrangedConnection(requestId, ptr);  // client randomly get "Invalid Packet -- event direction wrong"...
+         m2cArrangedConnectionRejected(requestId, ptr);
          return;
       }
 
@@ -1492,7 +1491,6 @@ int main(int argc, const char **argv)
             if(request->initiator.isValid())
             {
                ByteBufferPtr ptr = new ByteBuffer((U8 *) MasterRequestTimedOut, (U32) strlen(MasterRequestTimedOut) + 1);
-                  //s2mRejectArrangedConnection(requestId, ptr);
                request->initiator->m2cArrangedConnectionRejected(request->initiatorQueryId, ptr);   // 0 = ReasonTimedOut
                request->initiator->removeConnectRequest(request);
             }

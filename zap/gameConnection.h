@@ -135,6 +135,15 @@ public:
    U32 mVoteTime;
    bool mChatMute;
 
+   U32 mChatTimer;
+   bool mChatTimerBlocked;
+   string mChatPrevMessage;
+   U32 mChatPrevMessageMode;
+   bool checkMessage(const char *message, U32 mode);
+
+   U32 mWrongPasswordCount;
+   static const U32 MAX_WRONG_PASSWORD = 20;  // too many wrong password, and client get disconnect
+
    Vector<LevelInfo> mLevelInfos;
 
    static const S32 MASTER_SERVER_FAILURE_RETRY_TIME = 10000;   // 10 secs

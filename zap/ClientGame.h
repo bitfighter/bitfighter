@@ -148,7 +148,7 @@ public:
    bool isOnMuteList(const string &name);
 
 
-   void connectionToServerRejected();
+   void connectionToServerRejected(const char *reason);
    void setMOTD(const char *motd);
    void setNeedToUpgrade(bool needToUpgrade);
 
@@ -177,7 +177,7 @@ public:
    void onConnectionTerminated(const Address &serverAddress, NetConnection::TerminationReason reason, const char *reasonStr);
    void onConnectionToMasterTerminated(NetConnection::TerminationReason reason, const char *reasonStr);
 
-   void onConnectTerminated(const Address &serverAddress, NetConnection::TerminationReason reason);
+   void onConnectTerminated(const Address &serverAddress, NetConnection::TerminationReason reason, const char *reasonStr);
    void runCommand(const char *command);
    void setVolume(VolumeType volType, const Vector<string> &words);
 
