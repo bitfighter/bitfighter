@@ -261,6 +261,7 @@ private:
    GameType *mEditorGameType;    // Used to store our GameType while we're testing
 
    void onFinishedDragging();    // Called when we're done dragging an object
+   void onSelectionChanged();    // Called when current selection has changed
 
    void resnapAllEngineeredItems();
 

@@ -546,9 +546,6 @@ void WallItem::setSelected(bool selected)
    
    // Find the associated segment(s) and mark them as selected (or not)
    getGame()->getWallSegmentManager()->setSelected(mSerialNumber, selected);
-
-   // And rebuild the outline of our selected walls
-   getGame()->getWallSegmentManager()->rebuildSelectedOutline();
 }
 
 

@@ -884,6 +884,12 @@ string EditorUserInterface::getLevelFileName()
 }
 
 
+void EditorUserInterface::onSelectionChanged()
+{
+   getGame()->getWallSegmentManager()->rebuildSelectedOutline();
+}
+
+
 // Handle console input
 // Valid commands: help, run, clear, quit, exit
 void processEditorConsoleCommand(OGLCONSOLE_Console console, char *cmdline)
@@ -947,6 +953,7 @@ void EditorUserInterface::onAfterRunScriptFromConsole()
       objList->get(i)->setSelected(!objList->get(i)->isSelected());
 
    rebuildEverything();
+   onSelectionChanged();
 }
 
 
@@ -2011,6 +2018,8 @@ void EditorUserInterface::pasteSelection()
       newObject->addToGame(getGame(), getGame()->getEditorDatabase()); 
    }
 
+   onSelectionChanged();
+
    validateLevel();
    setNeedToSave(true);
    autoSave();
@@ -2608,6 +2617,7 @@ void EditorUserInterface::startDraggingDockItem()
 
    clearSelection();            // No items are selected...
    item->setSelected(true);     // ...except for the new one
+   onSelectionChanged();
    mDraggingDockItem = NULL;    // Because now we're dragging a real item
    validateLevel();             // Check level for errors
 
@@ -2959,6 +2969,8 @@ void EditorUserInterface::joinBarrier()
       joinedObj->onGeomChanged();
 
       joinedObj->setSelected(true);
+
+      onSelectionChanged();
    }
 }
 
@@ -3205,6 +3217,8 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
          }
       }
 
+      onSelectionChanged();
+
       if(selected == NONE)      // Nothing selected, nothing to do!
          return;
 
@@ -3340,6 +3354,7 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
             {
                clearSelection();
                mItemHit->selectVert(mVertexHit);
+               onSelectionChanged();
             }
 
             if(mItemHit && mItemHit->isSelected())   // Hit an already selected item
@@ -3350,6 +3365,7 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
             {
                clearSelection();
                mItemHit->setSelected(true);
+               onSelectionChanged();
             }
             else if(mVertexHit != NONE && (!mItemHit || !mItemHit->isSelected()))      // Hit a vertex of an unselected item
             {        // (braces required)
@@ -3357,17 +3373,20 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
                {
                   clearSelection();
                   mItemHit->selectVert(mVertexHit);
+                  onSelectionChanged();
                }
             }
             else if(mItemHit)                                                          // Hit a non-point item, but not a vertex
             {
                clearSelection();
                mItemHit->setSelected(true);
+               onSelectionChanged();
             }
             else     // Clicked off in space.  Starting to draw a bounding rectangle?
             {
                mDragSelecting = true;
                clearSelection();
+               onSelectionChanged();
             }
          }
          else     // Shift key is down
@@ -3380,7 +3399,10 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
                   mItemHit->aselectVert(mVertexHit);
             }
             else if(mItemHit)
+            {
                mItemHit->setSelected(!mItemHit->isSelected());    // Toggle selection of hit item
+               onSelectionChanged();
+            }
             else
                mDragSelecting = true;
          }
@@ -3713,7 +3735,9 @@ void EditorUserInterface::onKeyUp(InputCode inputCode)
                   obj->setSelected(true);
             }
             mDragSelecting = false;
+            onSelectionChanged();
          }
+
          else if(mDraggingObjects)     // We were dragging and dropping.  Could have been a move or a delete (by dragging to dock).
          {
             if(mAddingVertex)
