@@ -2234,11 +2234,8 @@ void EditorUserInterface::findHitItemAndEdge()
 
    fillVector.clear();
    EditorObjectDatabase *editorDb = getGame()->getEditorDatabase();
-   editorDb->findObjects((TestFunc)isAnyObjectType, fillVector, cursorRect);
    //getGame()->getEditorDatabase()->findObjects(fillVector);
-
-   if(fillVector.size() > 0)
-      int x = 0;
+   editorDb->findObjects((TestFunc)isAnyObjectType, fillVector, cursorRect);
 
    Point mouse = convertCanvasToLevelCoord(mMousePos);      // Figure out where the mouse is in level coords
 

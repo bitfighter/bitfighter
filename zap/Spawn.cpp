@@ -94,6 +94,8 @@ bool AbstractSpawn::processArguments(S32 argc, const char **argv, Game *game)
 
    setRespawnTime(time);
 
+   updateExtentInDatabase();
+
    return true;
 }
 
@@ -216,11 +218,7 @@ bool Spawn::processArguments(S32 argc, const char **argv, Game *game)
    S32 teamIndex = atoi(argv[0]);
    setTeam(teamIndex);
 
-   Point pos;
-   pos.read(argv + 1);
-   pos *= game->getGridSize();
-
-   setVert(pos, 0);
+   Parent::processArguments(argc - 1, argv + 1, game);
 
    return true;
 }

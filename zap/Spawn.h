@@ -94,6 +94,7 @@ public:
 
 class Spawn : public AbstractSpawn
 {
+   typedef AbstractSpawn Parent;
 
 public:
    Spawn(const Point &pos = Point());  // C++ constructor (no lua constructor)
