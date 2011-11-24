@@ -92,10 +92,12 @@ class LevelNameEntryUserInterface : public TextEntryUserInterface
 typedef TextEntryUserInterface Parent;
 
 private:
+   bool mFoundLevel;
    S32 mLevelIndex;
    Vector<string> mLevels;
 
-   void setLevelIndex();
+   bool setLevelIndex();
+   void completePartial();
 
 public:
    LevelNameEntryUserInterface(ClientGame *game);      // Constructor

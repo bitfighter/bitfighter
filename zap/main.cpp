@@ -78,6 +78,7 @@ XXX need to document timers, new luavec stuff XXX
 <li>Removed -server cmd line parameter; not sure it really ever worked at all
 <li>Smaller text should look crisper throughout the game
 <li>Tab does filename completion in editor levelname entry screen
+<li>Mouse wheel will scroll through existing level names on levelname entry screen
 </ul>
 */
 

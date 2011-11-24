@@ -138,7 +138,7 @@ LevelNameEntryUserInterface::LevelNameEntryUserInterface(ClientGame *game) : Par
    setMenuID(LevelNameEntryUI);
    title = "ENTER LEVEL TO EDIT:";
    instr1 = "Enter an existing level, or create your own!";
-   instr2 = "<- and -> keys retrieve existing level names";
+   instr2 = "Arrows / wheel cycle existing levels | Tab completes partial name";
    resetOnActivate = false;
    lineEditor.setFilter(LineEditor::fileNameFilter);
    lineEditor.mMaxLen = MAX_FILE_NAME_LEN;
@@ -163,28 +163,48 @@ void LevelNameEntryUserInterface::onActivate()
    for(S32 i = 0; i < mLevels.size(); i++)
        mLevels[i] = stripExtension(mLevels[i]);
 
-   setLevelIndex();
+   mFoundLevel = setLevelIndex();
 }
 
 
-// See if the current level is on the list -- if so, set mLevelIndex to that level
-void LevelNameEntryUserInterface::setLevelIndex()
+// See if the current level is on the list -- if so, set mLevelIndex to that level and return true
+bool LevelNameEntryUserInterface::setLevelIndex()
 {
    for(S32 i = 0; i < mLevels.size(); i++)
+   {
+      // Exact match
       if(mLevels[i] == lineEditor.getString())
       {
          mLevelIndex = i;
-         break;
+         return true;
       }
+      
+      // No exact match, but we just passed the item and have selected the closest one alphabetically following
+      if(mLevels[i] > lineEditor.getString())
+      {
+         mLevelIndex = i;
+         return false;
+      }
+   }
+
+   mLevelIndex = 0;     // First item
+   return false;
 }
 
 
 void LevelNameEntryUserInterface::onKeyDown(InputCode inputCode, char ascii)
 {
-   if(inputCode == KEY_RIGHT || inputCode == KEY_DOWN)
+   if(inputCode == KEY_RIGHT || inputCode == KEY_DOWN || inputCode == MOUSE_WHEEL_DOWN)
    {
       if(mLevels.size() == 0)
          return;
+
+      if(!mFoundLevel)           // If we have a partially entered name, just simulate hitting tab 
+      {
+         completePartial();      // Resets mFoundLevel
+         if(!mFoundLevel)
+            mLevelIndex--;       // Counteract increment below
+      }
 
       mLevelIndex++;
       if(mLevelIndex >= mLevels.size())
@@ -193,10 +213,13 @@ void LevelNameEntryUserInterface::onKeyDown(InputCode inputCode, char ascii)
       lineEditor.setString(mLevels[mLevelIndex]);
    }
 
-   else if(inputCode == KEY_LEFT || inputCode == KEY_UP)
+   else if(inputCode == KEY_LEFT || inputCode == KEY_UP || inputCode == MOUSE_WHEEL_UP)
    {
       if(mLevels.size() == 0)
          return;
+
+      if(!mFoundLevel)
+         completePartial();
 
       mLevelIndex--;
       if(mLevelIndex < 0)
@@ -206,16 +229,21 @@ void LevelNameEntryUserInterface::onKeyDown(InputCode inputCode, char ascii)
    }
 
    else if(inputCode == KEY_TAB)       // Tab will try to complete a name from whatever the user has already typed
-   {
-      lineEditor.completePartial(&mLevels, lineEditor.getString(), 0, ""); 
-      setLevelIndex();                 // Update levelIndex to reflect current level
-   }
+      completePartial();
 
    else                                // Normal typed key
    {
       Parent::onKeyDown(inputCode, ascii);
-      setLevelIndex();                 // Update levelIndex to reflect current level
+      mFoundLevel = setLevelIndex();   // Update levelIndex to reflect current level
    }
+}
+
+
+void LevelNameEntryUserInterface::completePartial()
+{
+   mFoundLevel = setLevelIndex();
+   lineEditor.completePartial(&mLevels, lineEditor.getString(), 0, ""); 
+   setLevelIndex();   // Update levelIndex to reflect current level
 }
 
 
