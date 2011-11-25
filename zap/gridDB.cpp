@@ -688,7 +688,7 @@ static DatabaseObject *getObject(dbMap &dbObjectMap, DatabaseObject *theObject)
 void EditorObjectDatabase::copy(const EditorObjectDatabase &source)
 {
    dbMap dbObjectMap;
-   S32 ctr = 0;
+   //S32 ctr = 0;
 
    for(U32 x = 0; x < BucketRowCount; x++)
       for(U32 y = 0; y < BucketRowCount; y++)
@@ -697,7 +697,7 @@ void EditorObjectDatabase::copy(const EditorObjectDatabase &source)
 
          for(BucketEntry *walk = source.mBuckets[x][y]; walk; walk = walk->nextInBucket)
          {
-            ctr++;
+            //ctr++;
             BucketEntry *be = mChunker->alloc();                // Create a slot for our new object
             DatabaseObject *theObject = walk->theObject;
 
@@ -709,7 +709,7 @@ void EditorObjectDatabase::copy(const EditorObjectDatabase &source)
          }
       }
 
-logprintf("found %d refs!", ctr);   
+//logprintf("found %d refs!", ctr);   
 
    // Copy our non-spatial databases as well
    mAllEditorObjects.resize(source.mAllEditorObjects.size());
