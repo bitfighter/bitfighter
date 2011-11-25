@@ -3346,7 +3346,7 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
          //  else
          //    toggle the selection of what was clicked
 
-         if(!checkModifier(KEY_SHIFT))      // Shift key is not down
+         if(!checkModifier(KEY_SHIFT))    // ==> Shift key is not down
          {
             // If we hit a vertex of an already selected item --> now we can move that vertex w/o losing our selection.
             // Note that in the case of a point item, we want to skip this step, as we don't select individual vertices.
@@ -3357,9 +3357,11 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
                onSelectionChanged();
             }
 
-            if(mItemHit && mItemHit->isSelected())   // Hit an already selected item
+            if(mItemHit && mItemHit->isSelected())    // Hit an already selected item -- maybe we have several items selected, so clear and reselect
             {
-               // Do nothing
+               clearSelection();
+               mItemHit->setSelected(true);
+               onSelectionChanged();
             }
             else if(mItemHit && mItemHit->getGeomType() == geomPoint)  // Hit a point item
             {
@@ -3389,9 +3391,9 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
                onSelectionChanged();
             }
          }
-         else     // Shift key is down
+         else                             // ==> Shift key is down
          {
-            if(mVertexHit != NONE)
+            if(!mItemHit && mVertexHit != NONE)                   // If mHitItem is not NULL, we may have hit a point object
             {
                if(mItemHit->vertSelected(mVertexHit))
                   mItemHit->unselectVert(mVertexHit);
