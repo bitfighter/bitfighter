@@ -1632,19 +1632,6 @@ void EditorUserInterface::render()
       if(mDraggingObjects)
          // TODO: Merge this with the other place this calculation is made
          delta = snapPoint(convertCanvasToLevelCoord(mMousePos) + mMoveOrigin - mMouseDownPos) - mMoveOrigin;
-
-      // Render polyWall item fill just before rendering regular walls.  This will create the effect of all walls merging together.  
-      // PolyWall outlines are already part of the wallSegmentManager, so will be rendered along with those of regular walls.
-      /*for(S32 i = 0; i < objList->size(); i++)
-      {
-         EditorObject *obj = objList->get(i);
-         if(obj->getObjectTypeNumber() == PolyWallTypeNumber && (false ))
-         {
-            PolyWall *polyWall = dynamic_cast<PolyWall *>(obj);
-            polyWall->renderFill();
-         }
-      }*/
-  
     
       getGame()->getWallSegmentManager()->renderWalls(getGame()->getSettings(), mCurrentScale, mDraggingObjects, 
                      delta, mPreviewMode, getSnapToWallCorners(), getRenderingAlpha(false/*isScriptItem*/));
