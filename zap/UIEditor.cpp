@@ -1625,27 +1625,27 @@ void EditorUserInterface::render()
       for(S32 i = 0; i < levelGenObjList->size(); i++)
          levelGenObjList->get(i)->renderInEditor(mCurrentScale, mSnapVertexIndex, true, mPreviewMode, mShowMode);
    
-      // Render polyWall item fill just before rendering regular walls.  This will create the effect of all walls merging together.  
-      // PolyWall outlines are already part of the wallSegmentManager, so will be rendered along with those of regular walls.
       const Vector<EditorObject *> *objList = getObjectList();
 
-      for(S32 i = 0; i < objList->size(); i++)
-      {
-         EditorObject *obj = objList->get(i);
-         if(obj->getObjectTypeNumber() == PolyWallTypeNumber)
-         {
-            PolyWall *polyWall = dynamic_cast<PolyWall *>(obj);
-            polyWall->renderFill();
-         }
-      }
-  
       Point delta;      // Defaults to (0,0)
 
       if(mDraggingObjects)
          // TODO: Merge this with the other place this calculation is made
          delta = snapPoint(convertCanvasToLevelCoord(mMousePos) + mMoveOrigin - mMouseDownPos) - mMoveOrigin;
 
-
+      // Render polyWall item fill just before rendering regular walls.  This will create the effect of all walls merging together.  
+      // PolyWall outlines are already part of the wallSegmentManager, so will be rendered along with those of regular walls.
+      /*for(S32 i = 0; i < objList->size(); i++)
+      {
+         EditorObject *obj = objList->get(i);
+         if(obj->getObjectTypeNumber() == PolyWallTypeNumber && (false ))
+         {
+            PolyWall *polyWall = dynamic_cast<PolyWall *>(obj);
+            polyWall->renderFill();
+         }
+      }*/
+  
+    
       getGame()->getWallSegmentManager()->renderWalls(getGame()->getSettings(), mCurrentScale, mDraggingObjects, 
                      delta, mPreviewMode, getSnapToWallCorners(), getRenderingAlpha(false/*isScriptItem*/));
     
@@ -1686,6 +1686,7 @@ void EditorUserInterface::render()
          for(S32 i = 0; i < objList->size(); i++)
          {
             EditorObject *obj = objList->get(i);
+
             if(obj->isSelected() || obj->isLitUp())
                obj->renderInEditor(mCurrentScale, mSnapVertexIndex, false, mPreviewMode, mShowMode);
          }

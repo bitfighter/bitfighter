@@ -581,35 +581,6 @@ PolyWall *PolyWall::clone() const
 }
 
 
-static const Color HIGHLIGHT_COLOR = Colors::white;
-
-void PolyWall::render()
-{
-#ifndef ZAP_DEDICATED
-   //if(!mSelected && !mLitUp)
-   //   glColor(getGame()->getSettings()->getWallOutlineColor());
-
-   renderPolygonOutline(getOutline());
-#endif
-}
-
-
-void PolyWall::renderFill()
-{
-   renderPolygonFill(getFill(), &EDITOR_WALL_FILL_COLOR, 1);
-}
-
-
-void PolyWall::renderEditor(F32 currentScale)
-{
-#ifndef ZAP_DEDICATED
-   glColor(HIGHLIGHT_COLOR);
-   renderPolygonOutline(getOutline());
-   EditorPolygon::renderEditor(currentScale);
-#endif
-}
-
-
 S32 PolyWall::getRenderSortValue()
 {
    return -1;
@@ -1186,8 +1157,6 @@ void WallSegment::renderFill(const Color &fillColor, const Point &offset)
       enableLineSmoothing = true;
    }
    
-   //color *= mSelected ? 0.5f : 1;
-
    if(mSelected)
       renderWallFill(&mTriangulatedFillPoints, offset, true, color);       // Use true because all segment fills are triangulated
    else

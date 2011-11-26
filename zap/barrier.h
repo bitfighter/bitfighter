@@ -173,10 +173,7 @@ public:
   
    bool processArguments(S32 argc, const char **argv, Game *game);
 
-   void render();
-   void renderFill();
    void renderDock();
-   void renderEditor(F32 currentScale);
 
    S32 getRenderSortValue();
 
