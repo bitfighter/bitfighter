@@ -1001,7 +1001,7 @@ void WallSegmentManager::deleteSegments(S32 owner)
 }
 
 
-// Only called from the editor
+// Only called from the editor -- renders both walls and polywalls
 void WallSegmentManager::renderWalls(GameSettings *settings, F32 currentScale, bool dragMode, const Point &selectedItemOffset, 
                                      bool previewMode, bool showSnapVertices, F32 alpha)
 {

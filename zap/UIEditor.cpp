@@ -1608,13 +1608,13 @@ void EditorUserInterface::render()
       }
    }
    else
-      renderGrid();        // Render grid first, so it's at the bottom
+      renderGrid();           // Render grid first, so it's at the bottom
 
    bool disableBlending = false;
 
    if(!glIsEnabled(GL_BLEND))
    {
-      glEnable(GL_BLEND);        // Enable transparency
+      glEnable(GL_BLEND);     // Enable transparency
       disableBlending = true;
    }
 
@@ -1633,6 +1633,8 @@ void EditorUserInterface::render()
          // TODO: Merge this with the other place this calculation is made
          delta = snapPoint(convertCanvasToLevelCoord(mMousePos) + mMoveOrigin - mMouseDownPos) - mMoveOrigin;
     
+
+      // == Render walls and polyWalls ==
       getGame()->getWallSegmentManager()->renderWalls(getGame()->getSettings(), mCurrentScale, mDraggingObjects, 
                      delta, mPreviewMode, getSnapToWallCorners(), getRenderingAlpha(false/*isScriptItem*/));
     
@@ -1683,7 +1685,7 @@ void EditorUserInterface::render()
       fillRendered = false;
       F32 width = NONE;
 
-      // Draw geomPolyLine features under construction
+      // == Draw geomPolyLine features under construction ==
       if(mCreatingPoly || mCreatingPolyline)    
       {
          // Add a vert (and deleted it later) to help show what this item would look like if the user placed the vert in the current location
@@ -1777,7 +1779,7 @@ void EditorUserInterface::render()
 
    renderTextEntryOverlay();
 
-   renderConsole();  // Rendered last, so it's always on top
+   renderConsole();        // Rendered last, so it's always on top
 }
 
 
