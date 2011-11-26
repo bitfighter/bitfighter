@@ -1666,7 +1666,7 @@ void EditorUserInterface::render()
       }
 #endif
 
-      // == Normal items ==
+      // == Normal, unselected items ==
       // Draw map items (teleporters, etc.) that are not being dragged, and won't have any text labels  (below the dock)
       // Don't render polywalls, as we've alrady drawn those.
       for(S32 i = 0; i < objList->size(); i++)
