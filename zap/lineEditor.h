@@ -67,7 +67,7 @@ public:
 
    LineEditor(U32 maxLength = 256, string value = "");   // Constructor
 
-   U32 length() { return (U32)mLine.length(); }
+   U32 length() { return (U32)mLine.length(); }          // Returns line length in chars
    void addChar(char c);
    void backspacePressed() { if(length() > 0) mLine.erase(mLine.size() - 1); mMatchIndex = -1; }    // User hit Backspace 
    void deletePressed() { backspacePressed(); }                                                     // User hit Delete 
@@ -88,7 +88,7 @@ public:
    void setString(const string &str) { mLine.assign(str.substr(0, mMaxLen)); }    // Set the string
    void setPrompt(const string &prompt) { mPrompt = prompt; }
    string getPrompt() { return mPrompt; }
-   const char *c_str() { return mLine.c_str(); }                     // Return the string in c_str format
+   const char *c_str() { return mLine.c_str(); }                           // Return the string in c_str format
 
    void drawCursor(S32 x, S32 y, S32 fontSize);                             // Draw our cursor, assuming string is drawn at x,y
    void drawCursorAngle(F32 x, F32 y, F32 fontSize, F32 angle);             // Draw our cursor, assuming string is drawn at x,y at specified angle
