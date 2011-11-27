@@ -3351,9 +3351,10 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
 
             if(mItemHit && mItemHit->isSelected())    // Hit an already selected item -- maybe we have several items selected, so clear and reselect
             {
-               clearSelection();
-               mItemHit->setSelected(true);
-               onSelectionChanged();
+               // Actually, don't clear and reselect because it is much better to let someone drag a group of items that's already been selected
+               //clearSelection();
+               //mItemHit->setSelected(true);
+               //onSelectionChanged();
             }
             else if(mItemHit && mItemHit->getGeomType() == geomPoint)  // Hit a point item
             {
