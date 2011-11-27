@@ -40,7 +40,7 @@ LineEditor::LineEditor(U32 maxLength, string value)
    mLine = value;
    mFilter = allAsciiFilter;
    mPrompt = "";
-   mSecret = false;
+   mMasked = false;
    mMatchIndex = -1;
 }
 
@@ -105,7 +105,14 @@ void LineEditor::completePartial(const Vector<string> *candidates, const string 
 void LineEditor::drawCursor(S32 x, S32 y, S32 fontSize)
 {
 #ifndef ZAP_DEDICATED
-   drawCursorAngle(x, y + fontSize, fontSize, UserInterface::getStringWidth(fontSize, mLine.c_str()), 0);
+   S32 width;
+   
+   if(mMasked)
+      width = UserInterface::getStringWidth(fontSize, string(mLine.size(), MASK_CHAR).c_str());
+   else
+      width = UserInterface::getStringWidth(fontSize, mLine.c_str());
+
+   drawCursorAngle(x, y + fontSize, fontSize, width, 0);
 #endif
 }
 

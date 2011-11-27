@@ -54,6 +54,8 @@ private:
    S32 mMatchIndex;
    void buildMatchList(const Vector<string> *candidates, const string &partial);
 
+   static const char MASK_CHAR = '*';
+
 public:
    U32 mMaxLen;
 
@@ -83,7 +85,7 @@ public:
 
    string getString() const { return mLine; }                              // Return the string in string format
    const string *getStringPtr() const { return &mLine; }
-   string getDisplayString() const { return mMasked ? string(mLine.length(), '*') : mLine; }
+   string getDisplayString() const { return mMasked ? string(mLine.length(), MASK_CHAR) : mLine; }
 
    void setString(const string &str) { mLine.assign(str.substr(0, mMaxLen)); }    // Set the string
    void setPrompt(const string &prompt) { mPrompt = prompt; }
