@@ -164,7 +164,6 @@ class PolyWall : public EditorPolygon     // Don't need GameObject component of 
    typedef EditorPolygon Parent;
 
 private:
-   //typedef EditorObject Parent;
    //void computeExtent();
 
 public:
@@ -176,6 +175,8 @@ public:
    void renderDock();
 
    S32 getRenderSortValue();
+
+   void setSelected(bool selected);
 
    virtual void onGeomChanged();
    virtual void onItemDragging();

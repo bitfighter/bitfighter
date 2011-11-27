@@ -606,6 +606,12 @@ bool PolyWall::processArguments(S32 argc, const char **argv, Game *game)
 }
 
 
+string PolyWall::toString(F32 gridSize) const
+{
+   return string(getClassName()) + " " + geomToString(gridSize);
+}
+
+
 const char *PolyWall::getEditorHelpString()
 {
    return "Polygonal wall item let you be creative with your wall design.";
@@ -630,10 +636,14 @@ const char *PolyWall::getOnScreenName()
 }
 
 
-string PolyWall::toString(F32 gridSize) const
+void PolyWall::setSelected(bool selected)
 {
-   return string(getClassName()) + " " + geomToString(gridSize);
+   Parent::setSelected(selected);
+   
+   // Find the associated segment(s) and mark them as selected (or not)
+   getGame()->getWallSegmentManager()->setSelected(mSerialNumber, selected);
 }
+
 
 
 // Only called from editor???
