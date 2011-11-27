@@ -45,7 +45,7 @@ class LineEditor
 private:
    string mLine;
    string mPrompt;
-   bool mSecret;
+   bool mMasked;
 
    static Timer mBlinkTimer;
 
@@ -76,14 +76,14 @@ public:
    char at(U32 pos);                                    // Get char at pos
    bool isEmpty() { return mLine.empty(); }             // Is string empty
 
-   void setSecret(bool secret) { mSecret = secret; }
+   void setSecret(bool secret) { mMasked = secret; }
 
    LineEditorFilter mFilter;
    void setFilter(LineEditorFilter filter) { mFilter = filter; }
 
    string getString() const { return mLine; }                              // Return the string in string format
    const string *getStringPtr() const { return &mLine; }
-   string getDisplayString() const { return mSecret ? string(mLine.length(), '*') : mLine; }
+   string getDisplayString() const { return mMasked ? string(mLine.length(), '*') : mLine; }
 
    void setString(const string &str) { mLine.assign(str.substr(0, mMaxLen)); }    // Set the string
    void setPrompt(const string &prompt) { mPrompt = prompt; }
