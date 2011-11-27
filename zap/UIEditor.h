@@ -230,10 +230,10 @@ private:
    void joinBarrier();           // Join barrier bits together into one (if ends are coincident)
 
    //S32 countSelectedVerts();
-   bool anyItemsSelected();           // Are any items selected?
-   bool anythingSelected();           // Are any items/vertices selected?
+   bool anyItemsSelected();      // Are any items selected?
+   bool anythingSelected();      // Are any items/vertices selected?
 
-   // Sets mItemHit and mEdgeHit -- findHitItemAndEdge calls one or more of the associated helper functions below
+   // Sets mHitItem and mEdgeHit -- findHitItemAndEdge calls one or more of the associated helper functions below
    void findHitItemAndEdge();                         
    bool checkForVertexHit(EditorObject *object);     
    bool checkForEdgeHit(const Point &point, EditorObject *object);        
@@ -247,8 +247,8 @@ private:
    S32 mSnapVertexIndex;
 
    S32 mEdgeHit;
-   S32 mVertexHit;
-   EditorObject *mItemHit;
+   S32 mHitVertex;
+   EditorObject *mHitItem;
    EditorObject *mDockItemHit;
 
    void computeSelectionMinMax(Point &min, Point &max);

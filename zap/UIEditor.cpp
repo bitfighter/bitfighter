@@ -129,7 +129,7 @@ EditorUserInterface::EditorUserInterface(ClientGame *game) : Parent(game)
 
    mSnapObject = NULL;
    mSnapVertexIndex = NONE;
-   mItemHit = NULL;
+   mHitItem = NULL;
    mDockItemHit = NULL;
    mEdgeHit = NONE;
 
@@ -2223,9 +2223,9 @@ static const S32 EDGE_HIT_RADIUS = 6;
 
 void EditorUserInterface::findHitItemAndEdge()
 {
-   mItemHit = NULL;
+   mHitItem = NULL;
    mEdgeHit = NONE;
-   mVertexHit = NONE;
+   mHitVertex = NONE;
 
    // Make hit rectangle larger than 1x1 -- when we consider point items, we need to make sure that we grab the item even when we're not right
    // on top of it, as the point item's hit target is much larger than the item itself.  100 is a guess that seems to work well.
@@ -2293,8 +2293,8 @@ bool EditorUserInterface::checkForVertexHit(EditorObject *object)
 
       if(fabs(p.x) < radius && fabs(p.y) < radius)
       {
-         mItemHit = object;
-         mVertexHit = i;
+         mHitItem = object;
+         mHitVertex = i;
          return true;
       }
    }
@@ -2325,7 +2325,7 @@ bool EditorUserInterface::checkForEdgeHit(const Point &point, EditorObject *obje
          F32 distance = (point - closest).len();
          if(distance < EDGE_HIT_RADIUS / mCurrentScale) 
          {
-            mItemHit = object;
+            mHitItem = object;
             mEdgeHit = j_prev;
 
             return true;
@@ -2355,7 +2355,7 @@ bool EditorUserInterface::checkForWallHit(const Point &point, DatabaseObject *ob
 
             if(eobj->getSerialNumber() == wallSegment->getOwner())
             {
-               mItemHit = eobj;
+               mHitItem = eobj;
                return true;
             }
          }
@@ -2383,7 +2383,7 @@ bool EditorUserInterface::checkForWallHit(const Point &point, DatabaseObject *ob
             {
                //editorDb->dumpObjects();
                //logprintf("Found wall: %s", eobj->getExtent().toString().c_str());
-               mItemHit = eobj;
+               mHitItem = eobj;
                return true;
             }
          }
@@ -2398,7 +2398,7 @@ bool EditorUserInterface::checkForPolygonHit(const Point &point, EditorObject *o
 {
    if(object->getGeomType() == geomPolygon && triangulatedFillContains(object->getFill(), point))
    {
-      mItemHit = object;
+      mHitItem = object;
       return true;
    }
 
@@ -2471,19 +2471,19 @@ void EditorUserInterface::onMouseMoved()
       return;
 
    // Turn off highlight on selected item -- will be turned back on for this object or another below
-   if(mItemHit)
-      mItemHit->setLitUp(false);
+   if(mHitItem)
+      mHitItem->setLitUp(false);
 
-   findHitItemAndEdge();      //  Sets mItemHit, mVertexHit, and mEdgeHit
+   findHitItemAndEdge();      //  Sets mHitItem, mHitVertex, and mEdgeHit
    findHitItemOnDock();
 
    // We hit a vertex that wasn't already selected
-   if(mItemHit && mVertexHit != NONE && !mItemHit->vertSelected(mVertexHit))   
-      mItemHit->setVertexLitUp(mVertexHit);
+   if(mHitItem && mHitVertex != NONE && !mHitItem->vertSelected(mHitVertex))   
+      mHitItem->setVertexLitUp(mHitVertex);
 
    // Highlight currently selected item
-   if(mItemHit)
-      mItemHit->setLitUp(true);
+   if(mHitItem)
+      mHitItem->setLitUp(true);
 
    findSnapVertex();
    SDL_SetCursor(Cursor::getDefault());
@@ -2548,7 +2548,7 @@ void EditorUserInterface::onMouseDragged()
    // The thinking here is that for large items -- walls, polygons, etc., we may grab an item far from its snap vertex, and we
    // want to factor that offset into our calculations.  For point items (and vertices), we don't really care about any slop
    // in the selection, and we just want the damn thing where we put it.
-   if(mSnapObject->getGeomType() == geomPoint || (mItemHit && mItemHit->anyVertsSelected()))
+   if(mSnapObject->getGeomType() == geomPoint || (mHitItem && mHitItem->anyVertsSelected()))
       delta = snapPoint(convertCanvasToLevelCoord(mMousePos)) - mMoveOrigin;
    else
       delta = snapPoint(convertCanvasToLevelCoord(mMousePos) + mMoveOrigin - mMouseDownPos) - mMoveOrigin;
@@ -2614,7 +2614,7 @@ void EditorUserInterface::startDraggingDockItem()
 
 
    // Because we sometimes have trouble finding an item when we drag it off the dock, after it's been sorted,
-   // we'll manually set mItemHit based on the selected item, which will always be the one we just added.
+   // we'll manually set mHitItem based on the selected item, which will always be the one we just added.
    // TODO: Still needed?
 
    const Vector<EditorObject *> *objList = getObjectList();
@@ -2623,7 +2623,7 @@ void EditorUserInterface::startDraggingDockItem()
    for(S32 i = 0; i < objList->size(); i++)
       if(objList->get(i)->isSelected())
       {
-         mItemHit = objList->get(i);
+         mHitItem = objList->get(i);
          break;
       }
 }
@@ -2644,35 +2644,35 @@ void EditorUserInterface::findSnapVertex()
    Point mouseLevelCoord = convertCanvasToLevelCoord(mMousePos);
 
    // If we have a hit item, and it's selected, find the closest vertex in the item
-   if(mItemHit && mItemHit->isSelected())   
+   if(mHitItem && mHitItem->isSelected())   
    {
       // If we've hit an edge, restrict our search to the two verts that make up that edge
       if(mEdgeHit != NONE)
       {
-         mSnapObject = mItemHit;     // Regardless of vertex, this is our hit item
+         mSnapObject = mHitItem;     // Regardless of vertex, this is our hit item
          S32 v1 = mEdgeHit;
          S32 v2 = mEdgeHit + 1;
 
          // Handle special case of looping item
-         if(mEdgeHit == mItemHit->getVertCount() - 1)
+         if(mEdgeHit == mHitItem->getVertCount() - 1)
             v2 = 0;
 
          // Find closer vertex: v1 or v2
-         mSnapVertexIndex = (mItemHit->getVert(v1).distSquared(mouseLevelCoord) < 
-                          mItemHit->getVert(v2).distSquared(mouseLevelCoord)) ? v1 : v2;
+         mSnapVertexIndex = (mHitItem->getVert(v1).distSquared(mouseLevelCoord) < 
+                          mHitItem->getVert(v2).distSquared(mouseLevelCoord)) ? v1 : v2;
 
          return;
       }
 
       // Didn't hit an edge... find the closest vertex anywhere in the item
-      for(S32 j = 0; j < mItemHit->getVertCount(); j++)
+      for(S32 j = 0; j < mHitItem->getVertCount(); j++)
       {
-         F32 dist = mItemHit->getVert(j).distSquared(mouseLevelCoord);
+         F32 dist = mHitItem->getVert(j).distSquared(mouseLevelCoord);
 
          if(dist < closestDist)
          {
             closestDist = dist;
-            mSnapObject = mItemHit;
+            mSnapObject = mHitItem;
             mSnapVertexIndex = j;
          }
       }
@@ -2720,7 +2720,7 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
       {  
          // Since indices change as items are deleted, this will keep incorrect items from being deleted
          if(obj->isLitUp())
-            mItemHit = NULL;
+            mHitItem = NULL;
 
          if(!deleted)
             saveUndoState();
@@ -2768,7 +2768,7 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
       setNeedToSave(true);
       autoSave();
 
-      mItemHit = NULL;     // In case we just deleted a lit item; not sure if really needed, as we do this above
+      mHitItem = NULL;     // In case we just deleted a lit item; not sure if really needed, as we do this above
    }
 }
 
@@ -3248,9 +3248,9 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
       onSelectionChanged();
 
       // Can only add new vertices by clicking on item's edge, not it's interior (for polygons, that is)
-      if(mEdgeHit != NONE && mItemHit && (mItemHit->getGeomType() == geomPolyLine || mItemHit->getGeomType() >= geomPolygon))
+      if(mEdgeHit != NONE && mHitItem && (mHitItem->getGeomType() == geomPolyLine || mHitItem->getGeomType() >= geomPolygon))
       {
-         if(mItemHit->getVertCount() >= gMaxPolygonPoints)     // Polygon full -- can't add more
+         if(mHitItem->getVertCount() >= gMaxPolygonPoints)     // Polygon full -- can't add more
             return;
 
          Point newVertex = snapPoint(convertCanvasToLevelCoord(mMousePos));      // adding vertex w/ right-mouse
@@ -3258,11 +3258,11 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
          mAddingVertex = true;
 
          // Insert an extra vertex at the mouse clicked point, and then select it.
-         mItemHit->insertVert(newVertex, mEdgeHit + 1);
-         mItemHit->selectVert(mEdgeHit + 1);
+         mHitItem->insertVert(newVertex, mEdgeHit + 1);
+         mHitItem->selectVert(mEdgeHit + 1);
 
          // Alert the item that its geometry is changing
-         mItemHit->onGeomChanging();
+         mHitItem->onGeomChanging();
 
          mMouseDownPos = newVertex;
          
@@ -3342,39 +3342,39 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
          {
             // If we hit a vertex of an already selected item --> now we can move that vertex w/o losing our selection.
             // Note that in the case of a point item, we want to skip this step, as we don't select individual vertices.
-            if(mVertexHit != NONE && mItemHit->isSelected() && mItemHit->getGeomType() != geomPoint)    
+            if(mHitVertex != NONE && mHitItem->isSelected() && mHitItem->getGeomType() != geomPoint)    
             {
                clearSelection();
-               mItemHit->selectVert(mVertexHit);
+               mHitItem->selectVert(mHitVertex);
                onSelectionChanged();
             }
 
-            if(mItemHit && mItemHit->isSelected())    // Hit an already selected item -- maybe we have several items selected, so clear and reselect
+            if(mHitItem && mHitItem->isSelected())    // Hit an already selected item -- maybe we have several items selected, so clear and reselect
             {
                // Actually, don't clear and reselect because it is much better to let someone drag a group of items that's already been selected
                //clearSelection();
-               //mItemHit->setSelected(true);
+               //mHitItem->setSelected(true);
                //onSelectionChanged();
             }
-            else if(mItemHit && mItemHit->getGeomType() == geomPoint)  // Hit a point item
+            else if(mHitItem && mHitItem->getGeomType() == geomPoint)  // Hit a point item
             {
                clearSelection();
-               mItemHit->setSelected(true);
+               mHitItem->setSelected(true);
                onSelectionChanged();
             }
-            else if(mVertexHit != NONE && (!mItemHit || !mItemHit->isSelected()))      // Hit a vertex of an unselected item
+            else if(mHitVertex != NONE && (!mHitItem || !mHitItem->isSelected()))      // Hit a vertex of an unselected item
             {        // (braces required)
-               if(!mItemHit->vertSelected(mVertexHit))
+               if(!mHitItem->vertSelected(mHitVertex))
                {
                   clearSelection();
-                  mItemHit->selectVert(mVertexHit);
+                  mHitItem->selectVert(mHitVertex);
                   onSelectionChanged();
                }
             }
-            else if(mItemHit)                                                          // Hit a non-point item, but not a vertex
+            else if(mHitItem)                                                          // Hit a non-point item, but not a vertex
             {
                clearSelection();
-               mItemHit->setSelected(true);
+               mHitItem->setSelected(true);
                onSelectionChanged();
             }
             else     // Clicked off in space.  Starting to draw a bounding rectangle?
@@ -3386,16 +3386,16 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
          }
          else                             // ==> Shift key is down
          {
-            if(!mItemHit && mVertexHit != NONE)                   // If mHitItem is not NULL, we may have hit a point object
+            if(!mHitItem && mHitVertex != NONE)                   // If mHitItem is not NULL, we may have hit a point object
             {
-               if(mItemHit->vertSelected(mVertexHit))
-                  mItemHit->unselectVert(mVertexHit);
+               if(mHitItem->vertSelected(mHitVertex))
+                  mHitItem->unselectVert(mHitVertex);
                else
-                  mItemHit->aselectVert(mVertexHit);
+                  mHitItem->aselectVert(mHitVertex);
             }
-            else if(mItemHit)
+            else if(mHitItem)
             {
-               mItemHit->setSelected(!mItemHit->isSelected());    // Toggle selection of hit item
+               mHitItem->setSelected(!mHitItem->isSelected());    // Toggle selection of hit item
                onSelectionChanged();
             }
             else
