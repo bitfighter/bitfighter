@@ -3245,6 +3245,7 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
 
       saveUndoState();     // Save undo state before we clear the selection
       clearSelection();    // Unselect anything currently selected
+      onSelectionChanged();
 
       // Can only add new vertices by clicking on item's edge, not it's interior (for polygons, that is)
       if(mEdgeHit != NONE && mItemHit && (mItemHit->getGeomType() == geomPolyLine || mItemHit->getGeomType() >= geomPolygon))
