@@ -803,9 +803,15 @@ void UserInterface::drawRect(F32 x1, F32 y1, F32 x2, F32 y2, S32 mode)
 
 void UserInterface::drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &fillColor, const Color &outlineColor)
 {
+   drawFilledRect(x1, y1, x2, y2, fillColor, 1, outlineColor);
+}
+
+
+void UserInterface::drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &fillColor, F32 fillAlpha, const Color &outlineColor)
+{
    for(S32 i = 1; i >= 0; i--)
    {
-      glColor(i ? fillColor : outlineColor);
+      glColor(i ? fillColor : outlineColor, i ? fillAlpha : 1);
       drawRect(x1, y1, x2, y2, i ? GL_POLYGON : GL_LINE_LOOP);
    }
 }

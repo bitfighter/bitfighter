@@ -199,8 +199,13 @@ private:
    Point mScrollWithMouseLocation;
    bool showMinorGridLines();
    void renderGrid();               // Draw background snap grid
-   void renderDock(F32 width);
+   void renderDock();
+   void renderInfoPanel();
+   void renderPanelInfoLine(S32 line, const char *format, ...);
+
    void renderTextEntryOverlay();
+   void renderItemInfoPanel();
+
    void renderReferenceShip();
    void renderDragSelectBox();      // Render box when selecting a group of items
    void renderDockItems();          // Render all items on the dock

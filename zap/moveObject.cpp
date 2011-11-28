@@ -1204,10 +1204,9 @@ void Asteroid::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
 
 
 // Render some attributes when item is selected but not being edited
-void Asteroid::renderAttributeString(F32 currentScale)
+string Asteroid::getAttributeString()
 {
-   string txt = "Size: " + itos(mSizeLeft);      
-   renderItemText(txt.c_str(), 1, currentScale);
+   return "Size: " + itos(mSizeLeft);      
 }
 
 #endif

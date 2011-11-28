@@ -113,7 +113,7 @@ public:
    // Should we show item attributes when it is selected? (only overridden by TextItem)
    virtual bool showAttribsWhenSelected();
 
-   virtual void renderAttributeString(F32 currentScale);
+   virtual string getAttributeString();
 
    void unselect();
 

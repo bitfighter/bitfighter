@@ -483,7 +483,13 @@ const char *WallItem::getOnDockName()
 
 const char *WallItem::getOnScreenName()
 {
-   return "";
+   return "Wall";
+}
+
+
+string WallItem::getAttributeString()
+{
+   return "Width: " + itos(getWidth());
 }
 
 

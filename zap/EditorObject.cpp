@@ -232,8 +232,8 @@ void EditorObject::renderInEditor(F32 currentScale, S32 snapIndex, bool isScript
          //   renderItemText(getInstructionMsg(), 0, currentScale);
 
          renderAndLabelHighlightedVertices(currentScale);
-         if(isSelected() && !isBeingEdited() && showAttribsWhenSelected())
-            renderAttributeString(currentScale);
+         /*if(isSelected() && !isBeingEdited() && showAttribsWhenSelected())
+            renderAttributeString(currentScale);*/
       }
    }
 #endif
@@ -466,7 +466,7 @@ Point EditorObject::getInitialPlacementOffset(F32 gridSize)
 
 void EditorObject::renderItemText(const char *text, S32 offset, F32 currentScale)
 {
-   // Do nothing
+   UserInterface::drawString(580, 120, 12 / currentScale, text );     // TODO: Fix
 }
 
 
@@ -488,9 +488,9 @@ bool EditorObject::showAttribsWhenSelected()
 }
 
 
-void EditorObject::renderAttributeString(F32 currentScale)
+string EditorObject::getAttributeString()
 {
-   // Do nothing
+   return "";
 }
 
 
@@ -604,6 +604,8 @@ static const Color INSTRUCTION_TEXTCOLOR = Colors::white;      // TODO: Put in e
 void EditorPointObject::renderItemText(const char *text, S32 offset, F32 currentScale)
 {
 #ifndef ZAP_DEDICATED
+   Parent::renderItemText(text, offset, currentScale);
+   return;
    glColor(INSTRUCTION_TEXTCOLOR);
 
    Point pos = getVert(0);

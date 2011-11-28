@@ -1326,7 +1326,7 @@ S32 getDockHeight(ShowMode mode)
 }
 
 
-void EditorUserInterface::renderDock(F32 width)    // width is current wall width, used for displaying info on dock
+void EditorUserInterface::renderDock()    
 {
    // Render item dock down RHS of screen
    const S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
@@ -1337,41 +1337,144 @@ void EditorUserInterface::renderDock(F32 width)    // width is current wall widt
    drawFilledRect(canvasWidth - DOCK_WIDTH - horizMargin, canvasHeight - vertMargin, 
                   canvasWidth - horizMargin,              canvasHeight - vertMargin - dockHeight, 
                   Colors::black, (mouseOnDock() ? Colors::yellow : Colors::white));
+}
 
-   // Draw coordinates on dock -- if we're moving an item, show the coords of the snap vertex, otherwise show the coords of the
+
+const S32 PANEL_TEXT_SIZE = 10;
+const S32 PANEL_SPACING = PANEL_TEXT_SIZE * 1.3;
+
+void EditorUserInterface::renderInfoPanel() 
+{
+   const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
+
+   const S32 panelWidth = 180;
+   const S32 panelHeight = 4 * PANEL_SPACING + 9;
+
+   bool disableBlending = false;
+
+   if(!glIsEnabled(GL_BLEND))
+   {
+      glEnable(GL_BLEND);
+      disableBlending = true; 
+   }
+
+   drawFilledRect(horizMargin, canvasHeight - vertMargin, 
+                  horizMargin + panelWidth, canvasHeight - vertMargin - panelHeight, 
+                  Colors::richGreen, .7, Colors::white);
+
+   if(disableBlending)
+      glDisable(GL_BLEND);
+
+
+   // Draw coordinates on panel -- if we're moving an item, show the coords of the snap vertex, otherwise show the coords of the
    // snapped mouse position
    Point pos;
+
    if(mSnapObject)
       pos = mSnapObject->getVert(mSnapVertexIndex);
    else
       pos = snapPoint(convertCanvasToLevelCoord(mMousePos));
 
-   F32 xpos = gScreenInfo.getGameCanvasWidth() - horizMargin - DOCK_WIDTH / 2.f;
 
-   char text[50];
    glColor(Colors::white);
-   dSprintf(text, sizeof(text), "%2.2f|%2.2f", pos.x, pos.y);
-   drawStringc(xpos, (F32)gScreenInfo.getGameCanvasHeight() - vertMargin - 15, 8, text);
+   renderPanelInfoLine(1, "Cursor X,Y: %2.1f,%2.1f", pos.x, pos.y);
 
    // And scale
-   dSprintf(text, sizeof(text), "%2.2f", mCurrentScale);
-   drawStringc(xpos, (F32)gScreenInfo.getGameCanvasHeight() - vertMargin - 25, 8, text);
+   renderPanelInfoLine(2, "Zoom Scale: %2.2f", mCurrentScale);
 
    // Show number of teams
-   dSprintf(text, sizeof(text), "Teams: %d",  getGame()->getTeamCount());
-   drawStringc(xpos, (F32)gScreenInfo.getGameCanvasHeight() - vertMargin - 35, 8, text);
+   renderPanelInfoLine(3, "Team Count: %d",  getGame()->getTeamCount());
 
    glColor(mNeedToSave ? Colors::red : Colors::green);     // Color level name by whether it needs to be saved or not
-   dSprintf(text, sizeof(text), "%s%s", mNeedToSave ? "*" : "", mEditFileName.substr(0, mEditFileName.find_last_of('.')).c_str());    // Chop off extension
-   drawStringc(xpos, (F32)gScreenInfo.getGameCanvasHeight() - vertMargin - 45, 8, text);
 
-   // And wall width as needed
-   if(width != NONE)
+   // Filename without extension
+   renderPanelInfoLine(4, "Filename: %s%s", mNeedToSave ? "*" : "", mEditFileName.substr(0, mEditFileName.find_last_of('.')).c_str());
+}
+
+
+void EditorUserInterface::renderPanelInfoLine(S32 line, const char *format, ...)
+{
+   const S32 XPOS = horizMargin + 4;
+
+   va_list args;
+   static char text[512];  // reusable buffer
+
+   va_start(args, format);
+   vsnprintf(text, sizeof(text), format, args); 
+   va_end(args);
+
+   drawString(XPOS, gScreenInfo.getGameCanvasHeight() - vertMargin - PANEL_TEXT_SIZE - line * PANEL_SPACING + 6, PANEL_TEXT_SIZE, text);
+}
+
+
+// Local helper function
+static void renderText(S32 xpos, S32 ypos, S32 size, const Color &color, const string &text)
+{
+   // Make a thick black mask to make text easier to read
+   //glColor(Colors::black);
+   //UserInterface::drawString(xpos, ypos, size, 5, text.c_str());
+  
+   glColor(color);
+   UserInterface::drawString(xpos, ypos, size, text.c_str());
+}
+
+
+// Shows selected item attributes, or, if we're hovering over dock item, shows dock item info string
+// This method is a total mess!
+void EditorUserInterface::renderItemInfoPanel()
+{
+   string text = "";
+   string item = "";
+
+   Color textColor;
+
+   if(mDockItemHit)
    {
-      glColor(Colors::white);
-      dSprintf(text, sizeof(text), "Width: %2.0f", width);
-      drawStringc(xpos, (F32)gScreenInfo.getGameCanvasHeight() - vertMargin - 55, 8, text);
+      textColor = Colors::green;
+
+      item = mDockItemHit->getOnScreenName();
+      text = mDockItemHit->getEditorHelpString();
    }
+   else
+   {
+      textColor = Colors::yellow;
+
+      const Vector<EditorObject *> *objList = getObjectList();
+
+      for(S32 i = 0; i < objList->size(); i++)
+         if(objList->get(i)->isSelected())
+         {
+            if(text != "")
+            {
+               item = "Multiple objects selected";
+               text = " ";
+               break;
+            }
+
+            item = string("Selected: ") + objList->get(i)->getOnScreenName();
+            string attribs = objList->get(i)->getAttributeString();
+
+            if(attribs != "")
+               text = "Attributes -> " + attribs;
+            else
+               text = " ";
+         }
+   }
+
+   S32 xpos = horizMargin + 4 + 180 + 5;
+   S32 ypos = gScreenInfo.getGameCanvasHeight() - vertMargin - PANEL_TEXT_SIZE - PANEL_SPACING + 6;      // Lower pos
+   S32 upperLineTextSize = 14;
+
+   if(text != "" && text != " ")
+   {
+      renderText(xpos, ypos, PANEL_TEXT_SIZE, textColor, text.c_str());
+      ypos = gScreenInfo.getGameCanvasHeight() - vertMargin - 2 * PANEL_TEXT_SIZE - PANEL_SPACING;       // Upper pos
+   }
+   else
+      ypos -= upperLineTextSize - PANEL_TEXT_SIZE;
+
+   if(item != "")
+      renderText(xpos, ypos, upperLineTextSize, textColor, item.c_str());
 }
 
 
@@ -1754,8 +1857,10 @@ void EditorUserInterface::render()
       renderReferenceShip();
    else
    {
-      renderDock(width);
+      renderDock();
       renderDockItems();
+      renderInfoPanel();
+      renderItemInfoPanel();
    }
 
    renderDragSelectBox();
@@ -1821,12 +1926,12 @@ void EditorUserInterface::renderHelpMessage()
 
    mDockItemHit->setLitUp(true);       // Will trigger a selection highlight to appear around dock item
 
-   glColor(Colors::green);
+   //glColor(Colors::green);
 
-   // Center string between left side of screen and edge of dock
-   const char *helpString = mDockItemHit->getEditorHelpString();
-   S32 x = (gScreenInfo.getGameCanvasWidth() - horizMargin - DOCK_WIDTH - getStringWidth(15, helpString)) / 2;
-   drawString(x, gScreenInfo.getGameCanvasHeight() - vertMargin - 15, 15, helpString);
+   //// Center string between left side of screen and edge of dock
+   //const char *helpString = mDockItemHit->getEditorHelpString();
+   //S32 x = (gScreenInfo.getGameCanvasWidth() - horizMargin - DOCK_WIDTH - getStringWidth(15, helpString)) / 2;
+   //drawString(x, gScreenInfo.getGameCanvasHeight() - vertMargin - 15, 15, helpString);
 }
 
 
@@ -2785,7 +2890,7 @@ void EditorUserInterface::changeBarrierWidth(S32 amt)
    for(S32 i = 0; i < fillVector.size(); i++)
    {
       LineItem *obj = dynamic_cast<LineItem *>(fillVector[i]);   // Walls are a subclass of LineItem, so this will work for both
-      if((obj->isSelected() || (obj->isLitUp() && obj->isVertexLitUp(NONE))))
+      if(obj && obj->isSelected())
          obj->changeWidth(amt);     
    }
 
@@ -3483,13 +3588,13 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
    }
    else if(inputString == "Left Arrow" || inputString == "A"|| inputString == "Shift+A")   // Left or A - Pan left
       mLeft = true;
-   else if(inputString == "Shift-=")      // Shifted - Increase barrier width by 1
+   else if(inputString == "Shift+=")      // Shifted - Increase barrier width by 1
       changeBarrierWidth(1);
    else if(inputString == "=")            // Unshifted + --> by 5                      
       changeBarrierWidth(5);
-   else if(inputString == "Shift + Minus")   // Shifted - Decrease barrier width by 1
+   else if(inputString == "Shift+-")      // Shifted - Decrease barrier width by 1
       changeBarrierWidth(-1);
-   else if(inputString == "Minus")        // Unshifted --> by 5
+   else if(inputString == "-")            // Unshifted --> by 5
       changeBarrierWidth(-5);
    else if(inputString == ";")
       runPlugin(getGame()->getSettings()->getFolderManager(), "plugin_arc.lua", Vector<string>());

@@ -229,16 +229,12 @@ void PickupItem::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
 
 
 // Render some attributes when item is selected but not being edited
-void PickupItem::renderAttributeString(F32 currentScale)
+string PickupItem::getAttributeString()
 {
-   string txt;
-
    if(mRepopDelay == 0)
-      txt = "Regen: None";
+      return "Regen: None";
    else
-      txt = "Regen: " + itos(mRepopDelay) + " sec" + ( mRepopDelay != 1 ? "s" : "");
-
-   renderItemText(txt.c_str(), 1, currentScale);
+      return "Regen: " + itos(mRepopDelay) + " sec" + ( mRepopDelay != 1 ? "s" : "");
 }
 
 #endif

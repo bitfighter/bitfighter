@@ -74,7 +74,7 @@ public:
    void startEditingAttrs(EditorAttributeMenuUI *attributeMenu);    // Called when we start editing to get menus populated
    void doneEditingAttrs(EditorAttributeMenuUI *attributeMenu);     // Called when we're done to retrieve values set by the menu
 
-   virtual void renderAttributeString(F32 currentScale);
+   virtual string getAttributeString();
 #endif
 
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);

@@ -126,6 +126,10 @@ void SimpleLine::renderEditor(F32 currentScale)
 void SimpleLine::renderItemText(const char *text, S32 offset, F32 currentScale)
 {
 #ifndef ZAP_DEDICATED
+
+   EditorParent::renderItemText(text, offset, currentScale);
+   return;
+
    glColor(INSTRUCTION_TEXTCOLOR);
 
    UserInterface::drawStringf_2pt(getVert(0), getVert(1) , F32(INSTRUCTION_TEXTSIZE) / currentScale, -3.f / currentScale, text);
