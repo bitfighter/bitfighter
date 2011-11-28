@@ -1054,6 +1054,8 @@ void EditorUserInterface::onReactivate()     // Run when user re-enters the edit
    OGLCONSOLE_EnterKey(processEditorConsoleCommand);     // Restore callback for processing console commands
 
    actualizeScreenMode(true);
+
+   mDockItemHit = NULL;
 }
 
 
