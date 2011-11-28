@@ -3404,7 +3404,7 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
 
       if(mCreatingPoly || mCreatingPolyline)    // Save any polygon/polyline we might be creating
       {
-         saveUndoState();                       // Save state prior to addition of new polygon
+         //saveUndoState();                       // Save state prior to addition of new polygon
 
          if(mNewItem->getVertCount() < 2)
             delete mNewItem;
