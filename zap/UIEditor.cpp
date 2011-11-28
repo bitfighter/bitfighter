@@ -2886,13 +2886,13 @@ void EditorUserInterface::changeBarrierWidth(S32 amt)
    if(!mLastUndoStateWasBarrierWidthChange)
       saveUndoState(); 
 
-   fillVector.clear();
-   getGame()->getEditorDatabase()->findObjects((TestFunc)isLineItemType, fillVector);
+   fillVector2.clear();    // fillVector gets modified in some child function, so use our secondary reusable container
+   getGame()->getEditorDatabase()->findObjects((TestFunc)isLineItemType, fillVector2);
 
-   for(S32 i = 0; i < fillVector.size(); i++)
+   for(S32 i = 0; i < fillVector2.size(); i++)
    {
-      LineItem *obj = dynamic_cast<LineItem *>(fillVector[i]);   // Walls are a subclass of LineItem, so this will work for both
-      if(obj && obj->isSelected())
+      LineItem *obj = dynamic_cast<LineItem *>(fillVector2[i]);   // Walls are a subclass of LineItem, so this will work for both
+      if(obj->isSelected())
          obj->changeWidth(amt);     
    }
 
