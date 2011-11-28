@@ -146,7 +146,7 @@ public:
    LineItem *clone() const;
    //LineItem(const LineItem &li);    // Copy constructor
 
-   void render();
+   virtual void render();
    S32 getRenderSortValue();
 
    bool processArguments(S32 argc, const char **argv, Game *game);   // Create objects from parameters stored in level file

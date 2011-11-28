@@ -425,13 +425,14 @@ void LineItem::render()
 {
 #ifndef ZAP_DEDICATED
    GameConnection *gc = dynamic_cast<ClientGame *>(getGame())->getConnectionToServer();
-   // Don't render opposing team's text items
-   if(!gc)      // Not sure if this is really needed...
-      return;
 
-   Ship *ship = dynamic_cast<Ship *>(gc->getControlObject());
-   if( (!ship && mTeam != -1) || (ship && ship->getTeam() != mTeam && mTeam != -1) )
-      return;
+   // Don't render opposing team's text items... gc will only exist in game.  This block will be skipped when rendering preview in the editor.
+   if(gc)      
+   {
+      Ship *ship = dynamic_cast<Ship *>(gc->getControlObject());
+      if( (!ship && mTeam != -1) || (ship && ship->getTeam() != mTeam && mTeam != -1) )
+         return;
+   }
 
    glColor(getGame()->getTeamColor(mTeam));
    renderPointVector(getOutline(), GL_LINE_STRIP);

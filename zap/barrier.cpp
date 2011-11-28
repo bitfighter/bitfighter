@@ -447,6 +447,13 @@ void WallItem::onGeomChanged()
 }
 
 
+// Only called in editor during preview mode -- basicaly prevents parent class from rendering spine of wall
+void WallItem::render()
+{
+   // Do nothing
+}
+
+
 void WallItem::processEndPoints()
 {
 #ifndef ZAP_DEDICATED

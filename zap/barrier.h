@@ -128,7 +128,9 @@ public:
    Vector<Point> extendedEndPoints;
    virtual Rect calcExtents();
    virtual void onGeomChanged();
-   void processEndPoints();      
+   void processEndPoints();  
+
+   void render();
 
    // Some properties about the item that will be needed in the editor
    const char *getEditorHelpString();
