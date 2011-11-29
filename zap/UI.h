@@ -82,8 +82,8 @@ class UserInterface
 {
 private:
    UIID mInternalMenuID;                     // Unique interface ID
-   static void doDrawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string, bool fixed);
-   static void doDrawAngleString(S32 x, S32 y, F32 size, F32 angle, const char *string, bool fixed);
+   static void doDrawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string);
+   static void doDrawAngleString(S32 x, S32 y, F32 size, F32 angle, const char *string);
 
 
    ClientGame *mClientGame;
@@ -170,16 +170,10 @@ public:
    static S32 drawStringAndGetWidthf(F32 x, F32 y, S32 size, const char *format, ...);
 
 
-   // Draw text at an angle...
-   static void drawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string);
-   static void drawAngleString(S32 x, S32 y, F32 size, F32 angle, const char *string);
-   
-
    // Original drawAngleString has a bug in positioning, but fixing it everywhere in the app would be a huge pain, so
    // we've created a new drawAngleString function without the bug, called xx_fixed.  Actual work now moved to doDrawAngleString,
    // which is marked private.  I think all usage of broken function has been removed, and _fixed can be renamed to something better.
    static void drawAngleString_fixed(F32 x, F32 y, F32 size, F32 angle, const char *string);
-   static void drawAngleString_fixed(S32 x, S32 y, F32 size, F32 angle, const char *string);
    static void drawAngleStringf_fixed(F32 x, F32 y, F32 size, F32 angle, const char *format, ...);
 
    // Center text between two points

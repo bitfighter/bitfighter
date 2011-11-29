@@ -313,7 +313,7 @@ void UserInterface::drawStringf_2pt(Point p1, Point p2, F32 size, F32 vert_offse
    F32 len = getStringWidthf(size, buffer);
    F32 offset = (p1.distanceTo(p2) - len) / 2;
 
-   drawAngleString_fixed(p1.x + cosang * offset + sinang * (size + vert_offset), p1.y + sinang * offset - cosang * (size + vert_offset), size, ang, buffer);
+   doDrawAngleString(p1.x + cosang * offset + sinang * (size + vert_offset), p1.y + sinang * offset - cosang * (size + vert_offset), size, ang, buffer);
 }
 
 
@@ -321,37 +321,18 @@ void UserInterface::drawStringf_2pt(Point p1, Point p2, F32 size, F32 vert_offse
 void UserInterface::drawAngleStringf_fixed(F32 x, F32 y, F32 size, F32 angle, const char *format, ...)
 {
    makeBuffer;
-   doDrawAngleString((S32) x, (S32) y, size, angle, buffer, true);
-}
-
-
-// New, fixed version
-void UserInterface::drawAngleString_fixed(S32 x, S32 y, F32 size, F32 angle, const char *string)
-{
-   doDrawAngleString(x, y, size, angle, string, true);
+   doDrawAngleString((S32) x, (S32) y, size, angle, buffer);
 }
 
 
 // New, fixed version
 void UserInterface::drawAngleString_fixed(F32 x, F32 y, F32 size, F32 angle, const char *string)
 {
-   doDrawAngleString(x, y, size, angle, string, true);
+   doDrawAngleString(x, y, size, angle, string);
 }
 
 
-void UserInterface::drawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string)
-{
-   doDrawAngleString(x, y, size, angle, string, false);
-}
-
-
-void UserInterface::drawAngleString(S32 x, S32 y, F32 size, F32 angle, const char *string)
-{
-   doDrawAngleString(x, y, size, angle, string, false);
-}
-
-
-void UserInterface::doDrawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string, bool fix)
+void UserInterface::doDrawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string)
 {
    static F32 modelview[16];
    glGetFloatv(GL_MODELVIEW_MATRIX, modelview);    // Fills modelview[]
@@ -362,7 +343,7 @@ void UserInterface::doDrawAngleString(F32 x, F32 y, F32 size, F32 angle, const c
 
    F32 scaleFactor = size / 120.0f;
    glPushMatrix();
-      glTranslatef(x, y + (fix ? 0 : size), 0);
+      glTranslatef(x, y, 0);
       glRotatef(angle * radiansToDegreesConversion, 0, 0, 1);
       glScalef(scaleFactor, -scaleFactor, 1);
       for(S32 i = 0; string[i]; i++)
@@ -374,30 +355,34 @@ void UserInterface::doDrawAngleString(F32 x, F32 y, F32 size, F32 angle, const c
 
 
 // Same but accepts S32 args
-void UserInterface::doDrawAngleString(S32 x, S32 y, F32 size, F32 angle, const char *string, bool fix)
+void UserInterface::doDrawAngleString(S32 x, S32 y, F32 size, F32 angle, const char *string)
 {
-   doDrawAngleString(F32(x), F32(y), size, angle, string, fix);
+   doDrawAngleString(F32(x), F32(y), size, angle, string);
 }
 
 
 void UserInterface::drawString(S32 x, S32 y, F32 size, const char *string)
 {
-   drawAngleString(x, y, size, 0, string);
+   y += size;     // TODO: Adjust all callers so we can get rid of this!
+   drawAngleString_fixed(x, y, size, 0, string);
 }
 
 void UserInterface::drawString(F32 x, F32 y, S32 size, const char *string)
 {
-   drawAngleString(x, y, F32(size), 0, string);
+   y += size;     // TODO: Adjust all callers so we can get rid of this!
+   drawAngleString_fixed(x, y, F32(size), 0, string);
 }
 
 void UserInterface::drawString(S32 x, S32 y, S32 size, const char *string)
 {
-   drawAngleString(F32(x), F32(y), F32(size), 0, string);
+   y += size;     // TODO: Adjust all callers so we can get rid of this!
+   drawAngleString_fixed(F32(x), F32(y), F32(size), 0, string);
 }
 
 void UserInterface::drawString(F32 x, F32 y, F32 size, const char *string)
 {
-   drawAngleString(x, y, size, 0, string);
+   y += size;     // TODO: Adjust all callers so we can get rid of this!
+   drawAngleString_fixed(x, y, size, 0, string);
 }
 
 
@@ -433,7 +418,7 @@ void UserInterface::drawStringfr(F32 x, F32 y, F32 size, const char *format, ...
 {
    makeBuffer;
    F32 len = getStringWidth(size, buffer);
-   drawAngleString_fixed(x - len, y, size, 0, buffer);
+   doDrawAngleString(x - len, y, size, 0, buffer);
 }
 
    
@@ -466,7 +451,8 @@ S32 UserInterface::drawStringAndGetWidthf(F32 x, F32 y, S32 size, const char *fo
 void UserInterface::drawStringc(F32 x, F32 y, F32 size, const char *string)
 {
    F32 len = getStringWidth(size, string);
-   drawAngleString(x - len / 2, y, size, 0, string);
+   y += size;     // TODO: Adjust all callers so we can get rid of this!
+   drawAngleString_fixed(x - len / 2, y, size, 0, string);
 }
 
 
