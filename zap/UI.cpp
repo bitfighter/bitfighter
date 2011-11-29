@@ -318,7 +318,7 @@ void UserInterface::drawStringf_2pt(Point p1, Point p2, F32 size, F32 vert_offse
 
 
 // New, fixed version
-void UserInterface::drawAngleStringf_fixed(F32 x, F32 y, F32 size, F32 angle, const char *format, ...)
+void UserInterface::drawAngleStringf(F32 x, F32 y, F32 size, F32 angle, const char *format, ...)
 {
    makeBuffer;
    doDrawAngleString((S32) x, (S32) y, size, angle, buffer);
@@ -326,7 +326,7 @@ void UserInterface::drawAngleStringf_fixed(F32 x, F32 y, F32 size, F32 angle, co
 
 
 // New, fixed version
-void UserInterface::drawAngleString_fixed(F32 x, F32 y, F32 size, F32 angle, const char *string)
+void UserInterface::drawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string)
 {
    doDrawAngleString(x, y, size, angle, string);
 }
@@ -364,25 +364,25 @@ void UserInterface::doDrawAngleString(S32 x, S32 y, F32 size, F32 angle, const c
 void UserInterface::drawString(S32 x, S32 y, F32 size, const char *string)
 {
    y += size;     // TODO: Adjust all callers so we can get rid of this!
-   drawAngleString_fixed(x, y, size, 0, string);
+   drawAngleString(x, y, size, 0, string);
 }
 
 void UserInterface::drawString(F32 x, F32 y, S32 size, const char *string)
 {
    y += size;     // TODO: Adjust all callers so we can get rid of this!
-   drawAngleString_fixed(x, y, F32(size), 0, string);
+   drawAngleString(x, y, F32(size), 0, string);
 }
 
 void UserInterface::drawString(S32 x, S32 y, S32 size, const char *string)
 {
    y += size;     // TODO: Adjust all callers so we can get rid of this!
-   drawAngleString_fixed(F32(x), F32(y), F32(size), 0, string);
+   drawAngleString(F32(x), F32(y), F32(size), 0, string);
 }
 
 void UserInterface::drawString(F32 x, F32 y, F32 size, const char *string)
 {
    y += size;     // TODO: Adjust all callers so we can get rid of this!
-   drawAngleString_fixed(x, y, size, 0, string);
+   drawAngleString(x, y, size, 0, string);
 }
 
 
@@ -451,8 +451,7 @@ S32 UserInterface::drawStringAndGetWidthf(F32 x, F32 y, S32 size, const char *fo
 void UserInterface::drawStringc(F32 x, F32 y, F32 size, const char *string)
 {
    F32 len = getStringWidth(size, string);
-   y += size;     // TODO: Adjust all callers so we can get rid of this!
-   drawAngleString_fixed(x - len / 2, y, size, 0, string);
+   drawAngleString(x - len / 2, y, size, 0, string);
 }
 
 

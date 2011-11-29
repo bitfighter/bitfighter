@@ -1958,7 +1958,7 @@ void Ship::render(S32 layerIndex)
       glLineWidth(gLineWidth1);
 
       glColor(Colors::white, textAlpha);
-      UserInterface::drawStringc(0, 30, (F32)textSize, str.c_str());
+      UserInterface::drawStringc(0, 30 + textSize, (F32)textSize, str.c_str());
 
       // Underline name if player is authenticated
       if(mIsAuthenticated)

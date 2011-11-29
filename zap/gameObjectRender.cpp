@@ -475,7 +475,7 @@ void renderShipCoords(const Point &coords, bool localShip, F32 alpha)
    glLineWidth(gLineWidth1);
    glColor(Colors::white, 0.5f * alpha);
 
-   UserInterface::drawStringc(0, 30 + (localShip ? 0 : F32(textSize) + 3), (F32)textSize, str.c_str() );
+   UserInterface::drawStringc(0, 30 + (localShip ? 0 : F32(textSize) + 3) + (F32)textSize, (F32)textSize, str.c_str() );
 
    if(disableBlending)
       glDisable(GL_BLEND);
@@ -1749,7 +1749,7 @@ void renderTextItem(const Point &pos, const Point &dir, F32 size, const string &
    }
 
    glColor(color);      
-   UserInterface::drawAngleString_fixed(pos.x, pos.y, size, pos.angleTo(dir), text.c_str());
+   UserInterface::drawAngleString(pos.x, pos.y, size, pos.angleTo(dir), text.c_str());
 }
 
 

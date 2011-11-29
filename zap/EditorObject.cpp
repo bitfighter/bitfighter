@@ -132,8 +132,8 @@ static void labelVertex(Point pos, F32 radius, const char *itemLabelTop, const c
 {
    F32 labelSize = DOCK_LABEL_SIZE / scale;
 
-   UserInterface::drawStringc(pos.x, pos.y - radius - labelSize - (5 / scale), labelSize, itemLabelTop);     // Above the vertex
-   UserInterface::drawStringc(pos.x, pos.y + radius + (2 / scale), labelSize, itemLabelBottom);              // Below the vertex
+   UserInterface::drawStringc(pos.x, pos.y - radius - (5 / scale), labelSize, itemLabelTop);     // Above the vertex
+   UserInterface::drawStringc(pos.x, pos.y + radius + labelSize + (2 / scale), labelSize, itemLabelBottom);              // Below the vertex
 }
 #endif
 
@@ -164,7 +164,7 @@ void EditorObject::renderDockItemLabel(const Point &pos, const char *label, F32 
    F32 xpos = pos.x;
    F32 ypos = pos.y - DOCK_LABEL_SIZE / 2 + yOffset;
    glColor(Colors::white);
-   UserInterface::drawStringc(xpos, ypos, (F32)DOCK_LABEL_SIZE, label);
+   UserInterface::drawStringc(xpos, ypos + (F32)DOCK_LABEL_SIZE, (F32)DOCK_LABEL_SIZE, label);
 #endif
 }
 

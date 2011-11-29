@@ -144,7 +144,7 @@ void LineEditor::drawCursorAngle(S32 x, S32 y, F32 fontSize, S32 width, F32 angl
       F32 xpos = x + (((F32)width + gap) * cos(angle)); 
       F32 ypos = y + (((F32)width + gap) * sin(angle)); 
 
-      UserInterface::drawAngleString_fixed(xpos, ypos, (F32)fontSize, angle, "_");
+      UserInterface::drawAngleString(xpos, ypos, (F32)fontSize, angle, "_");
    }
 #endif
 }

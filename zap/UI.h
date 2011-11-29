@@ -173,8 +173,8 @@ public:
    // Original drawAngleString has a bug in positioning, but fixing it everywhere in the app would be a huge pain, so
    // we've created a new drawAngleString function without the bug, called xx_fixed.  Actual work now moved to doDrawAngleString,
    // which is marked private.  I think all usage of broken function has been removed, and _fixed can be renamed to something better.
-   static void drawAngleString_fixed(F32 x, F32 y, F32 size, F32 angle, const char *string);
-   static void drawAngleStringf_fixed(F32 x, F32 y, F32 size, F32 angle, const char *format, ...);
+   static void drawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string);
+   static void drawAngleStringf(F32 x, F32 y, F32 size, F32 angle, const char *format, ...);
 
    // Center text between two points
    static void drawStringf_2pt(Point p1, Point p2, F32 size, F32 vert_offset, const char *format, ...);
