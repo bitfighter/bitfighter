@@ -432,8 +432,8 @@ void UserInterface::drawStringfc(F32 x, F32 y, F32 size, const char *format, ...
 void UserInterface::drawStringfr(F32 x, F32 y, F32 size, const char *format, ...)
 {
    makeBuffer;
-   F32 pos = getStringWidth(size, buffer);
-   drawStringc(x - pos, y, size, buffer);
+   F32 len = getStringWidth(size, buffer);
+   drawAngleString_fixed(x - len, y, size, 0, buffer);
 }
 
    

@@ -797,8 +797,9 @@ void QueryServersUserInterface::renderTopBanner()
    glColor(Colors::white);
    drawCenteredString(vertMargin + 7, 35, "BITFIGHTER GAME LOBBY");
 
-   drawStringf(horizMargin, vertMargin, 12, "SERVERS: %d", servers.size());
-   drawStringfr((F32)canvasWidth, (F32)vertMargin, 12, "PAGE %d/%d", mPage + 1, getLastPage() + 1);
+   const S32 FONT_SIZE = 12;
+   drawStringf(horizMargin, vertMargin, FONT_SIZE, "SERVERS: %d", servers.size());
+   drawStringfr((F32)canvasWidth - horizMargin, (F32)vertMargin + FONT_SIZE, FONT_SIZE, "PAGE %d/%d", mPage + 1, getLastPage() + 1);
 }
 
 
