@@ -59,6 +59,7 @@
 #include "tnlRandom.h"
 #include "tnlGhostConnection.h"
 #include "tnlNetInterface.h"
+#include "tnlThread.h"
 
 #include "md5wrapper.h"
 
@@ -410,6 +411,8 @@ Game::Game(const Address &theBindAddress, GameSettings *settings) : mGameObjData
    mHaveTriedToConnectToMaster = false;
 
    mWallSegmentManager = new WallSegmentManager();    // gets deleted in destructor
+
+   mNameToAddressThread = NULL;
 }
 
 
@@ -417,6 +420,8 @@ Game::Game(const Address &theBindAddress, GameSettings *settings) : mGameObjData
 Game::~Game()
 {
    delete mWallSegmentManager;
+   if(mNameToAddressThread)
+      delete mNameToAddressThread;
 }
 
 
@@ -1056,6 +1061,30 @@ bool Game::runLevelGenScript(const FolderManager *folderManager, const string &s
 }
 
 
+
+// DNS resolve ("bitfighter.org:25955") will freeze the game unless this is done as a seperate thread
+class NameToAddressThread : public TNL::Thread
+{
+private:
+   string mAddress_string;
+public:
+   Address mAddress;
+   bool mDone;
+   bool mUsed;
+
+   NameToAddressThread(const char *address_string) : mAddress_string(address_string) { mDone=false; }
+   virtual ~NameToAddressThread() { }
+
+   U32 run()
+   {
+      mAddress.set(mAddress_string);  // this will take a lot of time converting name (such as "bitfighter.org:25955") into IP address.
+      mDone=true;
+      return 0;
+   }
+};
+
+
+
 // If there is no valid connection to master server, perodically try to create one.
 // If user is playing a game they're hosting, they should get one master connection
 // for the client and one for the server.
@@ -1076,26 +1105,38 @@ void Game::checkConnectionToMaster(U32 timeDelta)
 
       if(mNextMasterTryTime < timeDelta && mReadyToConnectToMaster)
       {
-         if(mHaveTriedToConnectToMaster && masterServerList->size() >= 2)
-         {  
-            // Rotate the list so as to try each one until we find one that works...
-            masterServerList->push_back(masterServerList->get(0));
-            masterServerList->erase(0);
-         }
-
-         const char *addr = masterServerList->get(0).c_str();
-
-         mHaveTriedToConnectToMaster = true;
-         logprintf(LogConsumer::LogConnection, "%s connecting to master [%s]", isServer() ? "Server" : "Client", addr);
-
-         Address address(addr);
-         if(address.isValid())
+         if(!mNameToAddressThread)
          {
-            mConnectionToMaster = new MasterServerConnection(this);
-            mConnectionToMaster->connect(mNetInterface, address);
-         }
+            if(mHaveTriedToConnectToMaster && masterServerList->size() >= 2)
+            {  
+               // Rotate the list so as to try each one until we find one that works...
+               masterServerList->push_back(masterServerList->get(0));
+               masterServerList->erase(0);
+            }
 
-         mNextMasterTryTime = GameConnection::MASTER_SERVER_FAILURE_RETRY_TIME;     // 10 secs, just in case this attempt fails
+            const char *addr = masterServerList->get(0).c_str();
+
+            mHaveTriedToConnectToMaster = true;
+            logprintf(LogConsumer::LogConnection, "%s connecting to master [%s]", isServer() ? "Server" : "Client", addr);
+
+            mNameToAddressThread = new NameToAddressThread(addr);
+            mNameToAddressThread->start();
+         }
+         else
+         {
+            if(mNameToAddressThread->mDone)
+            {
+               if(mNameToAddressThread->mAddress.isValid())
+               {
+                  mConnectionToMaster = new MasterServerConnection(this);
+                  mConnectionToMaster->connect(mNetInterface, mNameToAddressThread->mAddress);
+               }
+   
+               mNextMasterTryTime = GameConnection::MASTER_SERVER_FAILURE_RETRY_TIME;     // 10 secs, just in case this attempt fails
+               delete mNameToAddressThread;
+               mNameToAddressThread = NULL;
+            }
+         }
       }
       else if(!mReadyToConnectToMaster)
          mNextMasterTryTime = 0;

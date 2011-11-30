@@ -275,6 +275,7 @@ enum VolumeType {
 /// managing the passage of time as well as rendering.
 
 class ClientRef;
+class NameToAddressThread;
 
 class Game : public LevelLoader
 {
@@ -299,7 +300,9 @@ private:
 
    S32 mPlayerCount;     // Humans only, please!
    S32 mRobotCount;
-   
+
+   NameToAddressThread *mNameToAddressThread;
+
 protected:
    boost::shared_ptr<EditorObjectDatabase> mEditorDatabase;    // TODO: Move to clientGame
 
