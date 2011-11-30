@@ -5,7 +5,9 @@
 
 # These flags are for use with mysql: both with database stats and phpbb integration
 IFLAGS_MYSQL=-I/usr/include/mysql -I../mysql++
-LDFLAGS_MYSQL=../mysql++/libmysqlpp.so 
+# TODO LFLAGS_MYSQL only works for CentOS 32bit right now
+LFLAGS_MYSQL=-L/usr/lib/mysql -lmysqlclient
+MYSQLPP_LIB=../mysql++/libmysqlpp.a 
 
 # Other CFLAGS
 CFLAGS_MYSQL_STATS=-DBF_WRITE_TO_MYSQL
@@ -21,6 +23,7 @@ OBJECTS_MASTER=\
    master.o\
    masterInterface.o\
    config.o\
+   ../zap/Color.o\
    ../zap/gameStats.o\
    ../zap/stringUtils.o\
    ../sqlite/sqlite3.o\
@@ -66,7 +69,7 @@ nomysqlstats: EXTRA_FLAGS=$(CFLAGS_PHPBB) $(IFLAGS_MYSQL)
 nomysqlstats: $(OBJECTS_MASTER) $(OBJECTS_PHPBB)
 nomysqlstats: 
 	@$(MAKE) -C ../mysql++
-	$(CC) -o ../exe/master $(OBJECTS_MASTER) $(OBJECTS_PHPBB) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a $(LFLAGS_EXTRA) $(LDFLAGS_MYSQL) 
+	$(CC) -o ../exe/master $(OBJECTS_MASTER) $(OBJECTS_PHPBB) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a $(MYSQLPP_LIB) $(LFLAGS_EXTRA) $(LFLAGS_MYSQL)
 
 
 # Compile with no phpbb integration; include mysql database stats integration
@@ -75,7 +78,7 @@ nophpbb: EXTRA_FLAGS=$(CFLAGS_MYSQL_STATS) $(IFLAGS_MYSQL)
 nophpbb: $(OBJECTS_MASTER)
 nophpbb:
 	@$(MAKE) -C ../mysql++
-	$(CC) -o ../exe/master $(OBJECTS_MASTER) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a $(LFLAGS_EXTRA) $(LDFLAGS_MYSQL) 
+	$(CC) -o ../exe/master $(OBJECTS_MASTER) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a $(MYSQLPP_LIB) $(LFLAGS_EXTRA) $(LFLAGS_MYSQL)
 
 
 # Compile all options on (with db stats and phpbb)
@@ -84,7 +87,7 @@ mysql: EXTRA_FLAGS=$(CFLAGS_MYSQL_STATS) $(CFLAGS_PHPBB) $(IFLAGS_MYSQL)
 mysql: $(OBJECTS_MASTER) $(OBJECTS_PHPBB)
 mysql: 
 	@$(MAKE) -C ../mysql++
-	$(CC) -o ../exe/master $(OBJECTS_MASTER) $(OBJECTS_PHPBB) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a $(LFLAGS_EXTRA) $(LDFLAGS_MYSQL)
+	$(CC) -o ../exe/master $(OBJECTS_MASTER) $(OBJECTS_PHPBB) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a $(MYSQLPP_LIB) $(LFLAGS_EXTRA) $(LFLAGS_MYSQL)
 
 
 # Cleaning
