@@ -108,24 +108,14 @@ public:
    TNL_DECLARE_RPC(m2sClientRequestedArrangedConnection, (U32 requestId, Vector<IPAddress> possibleAddresses,
       ByteBufferPtr connectionParameters));
             
-         // TODO: Delete after 014 -- replaced with identical m2sClientRequestedArrangedConnection above
-         TNL_DECLARE_RPC(m2cClientRequestedArrangedConnection, (U32 requestId, Vector<IPAddress> possibleAddresses,
-            ByteBufferPtr connectionParameters));
-
    /// s2mAcceptArrangedConnection is sent by a server to notify the master that it will accept the connection
    /// request from a client.  The requestId parameter sent by the MasterServer in m2sClientRequestedArrangedConnection
    /// should be sent back as the requestId field.  The internalAddress is the server's self-determined IP address.
    TNL_DECLARE_RPC(s2mAcceptArrangedConnection, (U32 requestId, IPAddress internalAddress, ByteBufferPtr connectionData));
 
-         // TODO: Delete after 014 -- replaced with identical s2mAcceptArrangedConnection above
-         TNL_DECLARE_RPC(c2mAcceptArrangedConnection, (U32 requestId, IPAddress internalAddress, ByteBufferPtr connectionData));
-
    /// s2mRejectArrangedConnection notifies the Master Server that the server is rejecting the arranged connection
    /// request specified by the requestId.  The rejectData will be passed along to the requesting client.
    TNL_DECLARE_RPC(s2mRejectArrangedConnection, (U32 requestId, ByteBufferPtr rejectData));
-
-         // TODO: Delete after 014 -- replaced with identical s2mRejectArrangedConnection above
-         TNL_DECLARE_RPC(c2mRejectArrangedConnection, (U32 requestId, ByteBufferPtr rejectData));
 
 
    /// m2cArrangedConnectionAccepted is sent to a client that has previously requested a connection to a listed server
@@ -137,11 +127,6 @@ public:
    /// m2cArrangedConnectionRejected is sent to a client when an arranged connection request is rejected by the
    /// server, or when the request times out because the server never responded.
    TNL_DECLARE_RPC(m2cArrangedConnectionRejected, (U32 requestId, ByteBufferPtr rejectData));
-
-         // TODO: Delete after 014
-         TNL_DECLARE_RPC(c2mUpdateServerStatus, (
-            StringTableEntry levelName, StringTableEntry levelType,
-            U32 botCount, U32 playerCount, U32 maxPlayers, U32 infoFlags));
 
    /// s2mUpdateServerStatus updates the status of a server to the Master Server, specifying the current game
    /// and mission types, any player counts and the current info flags.
@@ -166,7 +151,6 @@ public:
    TNL_DECLARE_RPC(m2cSendChat, (StringTableEntry playerNick, bool isPrivate, TNL::StringPtr message));
 
 
-   // Version 1 RPCs
 
    /// m2cSendUpdgradeStatus is sent to a client when the connection is established.  If
    /// needToUpgrade is true, an alert will be displayed to the user that they should get new version.
@@ -181,31 +165,14 @@ public:
    TNL_DECLARE_RPC(m2cPlayerLeftGlobalChat, (StringTableEntry playerNick) );
    TNL_DECLARE_RPC(m2cPlayersInGlobalChat, (Vector<StringTableEntry> playerNicks));
 
-   // Version 3 RPCs  ==> These are deprecated
-   TNL_DECLARE_RPC(s2mSendPlayerStatistics, (StringTableEntry playerName, U16 kills, U16 deaths, U16 suicides, Vector<U16> shots, Vector<U16> hits) );
-   TNL_DECLARE_RPC(s2mSendGameStatistics, (StringTableEntry gameType, StringTableEntry levelName, RangedU32<0,128> players, S16 time) );
 
-   // Version 4 RPCs   ==> These will be deprecated as of 015
-   TNL_DECLARE_RPC(s2mSendPlayerStatistics_2, (StringTableEntry playerName, StringTableEntry teamName, U16 kills, U16 deaths, U16 suicides, 
-                                               Vector<U16> shots, Vector<U16> hits) );
-   TNL_DECLARE_RPC(s2mSendGameStatistics_2, (StringTableEntry gameType, StringTableEntry levelName, Vector<StringTableEntry> teams, 
-                                             Vector<S32> teamScores, 
-                                             Vector<RangedU32<0,256> > colorR, 
-                                             Vector<RangedU32<0,256> > colorG, 
-                                             Vector<RangedU32<0,256> > colorB, 
-                                             RangedU32<0,128> players, S16 time) );
-
-
-   // Version 5 RPCs for version 014 and later
    TNL_DECLARE_RPC(s2mRequestAuthentication, (Vector<U8> id, StringTableEntry name));
    TNL_DECLARE_RPC(m2sSetAuthenticated, (Vector<U8> id, StringTableEntry name, RangedU32<0,AuthenticationStatusCount> status));
 
-   // Version 6 RPCs for version 015 and later
    TNL_DECLARE_RPC(s2mSendStatistics, (Zap::VersionedGameStats stats));
 
-   // Version 7 RPCs for version 016 and later
-   TNL_DECLARE_RPC(s2mChangeName, (StringTableEntry name));         // for server /setservname
-   TNL_DECLARE_RPC(s2mServerDescription, (StringTableEntry descr)); // for server /setservdescr
+   TNL_DECLARE_RPC(s2mChangeName, (StringTableEntry name));         // when server changes name using /setservname
+   TNL_DECLARE_RPC(s2mServerDescription, (StringTableEntry descr)); // when server changes using /setservdescr
 };
 
 

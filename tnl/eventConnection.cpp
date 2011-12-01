@@ -608,7 +608,7 @@ NetEvent *EventConnection::unpackNetEvent(BitStream *bstream)
 
 
 
-TNL_IMPLEMENT_RPC(EventConnection, s2rTNLSendDataParts, (U8 type, ByteBufferPtr data), (type, data), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 0)
+TNL_IMPLEMENT_RPC(EventConnection, s2rTNLSendDataParts, (U8 type, ByteBufferPtr data), (type, data), NetClassGroupAllMask, RPCGuaranteedOrdered, RPCDirAny, 0)
 {
    if(mTNLDataBuffer)
    {

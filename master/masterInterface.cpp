@@ -57,36 +57,18 @@ TNL_IMPLEMENT_RPC(MasterServerInterface, c2mRequestArrangedConnection, (U32 requ
 TNL_IMPLEMENT_RPC(MasterServerInterface, m2sClientRequestedArrangedConnection,
    (U32 requestId, Vector<IPAddress> possibleAddresses, ByteBufferPtr connectionParameters),
    (requestId, possibleAddresses, connectionParameters),
-   NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirServerToClient, 3) {}
-
-      // TODO: Delete after 014 -- replaced with identical m2sClientRequestedArrangedConnection above
-      TNL_IMPLEMENT_RPC(MasterServerInterface, m2cClientRequestedArrangedConnection,
-         (U32 requestId, Vector<IPAddress> possibleAddresses, ByteBufferPtr connectionParameters),
-         (requestId, possibleAddresses, connectionParameters),
-         NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0) {}
+   NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0) {}
 
 TNL_IMPLEMENT_RPC(MasterServerInterface, s2mAcceptArrangedConnection,
    (U32 requestId, IPAddress internalAddress, ByteBufferPtr connectionData),
    (requestId, internalAddress, connectionData),
-   NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 3) {}
-
-      // TODO: Delete after 014 -- replaced with identical s2mAcceptArrangedConnection above
-      TNL_IMPLEMENT_RPC(MasterServerInterface, c2mAcceptArrangedConnection,
-         (U32 requestId, IPAddress internalAddress, ByteBufferPtr connectionData),
-         (requestId, internalAddress, connectionData),
-         NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0) {}
-
-      // TODO: Delete after 014 -- replaced with identical s2mRejectArrangedConnection below
-      TNL_IMPLEMENT_RPC(MasterServerInterface, c2mRejectArrangedConnection,
-         (U32 requestId, ByteBufferPtr rejectData),
-         (requestId, rejectData),
-         NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0) {}
+   NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0) {}
 
 
 TNL_IMPLEMENT_RPC(MasterServerInterface, s2mRejectArrangedConnection,
    (U32 requestId, ByteBufferPtr rejectData),
    (requestId, rejectData),
-   NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 3) {}
+   NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0) {}
 
 TNL_IMPLEMENT_RPC(MasterServerInterface, m2cArrangedConnectionAccepted,
    (U32 requestId, Vector<IPAddress> possibleAddresses, ByteBufferPtr connectionData),
@@ -102,14 +84,7 @@ TNL_IMPLEMENT_RPC(MasterServerInterface, s2mUpdateServerStatus, (
    StringTableEntry levelName, StringTableEntry levelType,
    U32 botCount, U32 playerCount, U32 maxPlayers, U32 infoFlags),
    (levelName, levelType, botCount, playerCount, maxPlayers, infoFlags),
-   NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 3) {}
-
-      // TODO: Delete after 014 -- replaced with identical s2mUpdateServerStatus above
-      TNL_IMPLEMENT_RPC(MasterServerInterface, c2mUpdateServerStatus, (
-         StringTableEntry levelName, StringTableEntry levelType,
-         U32 botCount, U32 playerCount, U32 maxPlayers, U32 infoFlags),
-         (levelName, levelType, botCount, playerCount, maxPlayers, infoFlags),
-         NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0) {}
+   NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0) {}
 
 
 TNL_IMPLEMENT_RPC(MasterServerInterface, m2cSetMOTD, (TNL::StringPtr masterName, TNL::StringPtr motdString), (masterName, motdString),
@@ -126,66 +101,34 @@ TNL_IMPLEMENT_RPC(MasterServerInterface, m2cSendChat, (StringTableEntry playerNi
 
 // For managing list of players in global chat
 TNL_IMPLEMENT_RPC(MasterServerInterface, c2mJoinGlobalChat, (), (),
-                  NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 2) {}
+                  NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0) {}
 
 TNL_IMPLEMENT_RPC(MasterServerInterface, c2mLeaveGlobalChat, (), (),
-                  NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 2) {}
+                  NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0) {}
 
 TNL_IMPLEMENT_RPC(MasterServerInterface, m2cPlayerJoinedGlobalChat, (StringTableEntry playerNick), (playerNick),
-                  NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirServerToClient, 2) {}
+                  NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0) {}
 
 TNL_IMPLEMENT_RPC(MasterServerInterface, m2cPlayersInGlobalChat, (Vector<StringTableEntry> playerNicks), (playerNicks),
-                  NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirServerToClient, 2) {}
+                  NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0) {}
 
 TNL_IMPLEMENT_RPC(MasterServerInterface, m2cPlayerLeftGlobalChat, (StringTableEntry playerNick), (playerNick),
-                  NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirServerToClient, 2) {}
+                  NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0) {}
 
 
 // Implement a need-to-updrade verification service, without breaking older clients, by updgrading the version 1
 // All clients that implement only 0-verison events will ignore this.  In theory.
 TNL_IMPLEMENT_RPC(MasterServerInterface, m2cSendUpdgradeStatus, (bool needToUpgrade), (needToUpgrade),
-                  NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirServerToClient, 1) {}
+                  NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0) {}
 
 
 ////////////////////////////////////
 // Statistics related
 
-// Send player statistics to the master server -- deprecated in 014
-TNL_IMPLEMENT_RPC(MasterServerInterface, s2mSendPlayerStatistics, 
-   (StringTableEntry playerName, U16 kills, U16 deaths, U16 suicides, Vector<U16> shots, Vector<U16> hits),
-   (playerName, kills, deaths, suicides, shots, hits),
-   NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 3) {}
-
-// Deprecated in 015
-TNL_IMPLEMENT_RPC(MasterServerInterface, s2mSendPlayerStatistics_2, 
-   (StringTableEntry playerName, StringTableEntry teamName, U16 kills, U16 deaths, U16 suicides, Vector<U16> shots, Vector<U16> hits),
-   (playerName, teamName, kills, deaths, suicides, shots, hits),
-   NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 4) {}
-
-
-// Send game statistics to the master server -- deprecated in 014
-TNL_IMPLEMENT_RPC(MasterServerInterface, s2mSendGameStatistics, (StringTableEntry gameType, StringTableEntry levelName, 
-                                                                 RangedU32<0,128> players, S16 time),
-   (gameType, levelName, players, time),
-   NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 3) {}
-
-
-// Deprecated in 015
-TNL_IMPLEMENT_RPC(MasterServerInterface, s2mSendGameStatistics_2, (StringTableEntry gameType, StringTableEntry levelName,
-                                                                   Vector<StringTableEntry> teams, Vector<S32> teamScores,
-                                                                   Vector<RangedU32<0,256> > colorR, Vector<RangedU32<0,256> > colorG, 
-                                                                   Vector<RangedU32<0,256> > colorB, 
-                                                                   RangedU32<0,128> players, S16 time),
-   (gameType, levelName, teams, teamScores, colorR, colorG, colorB, players, time),
-   NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 4) {}
-
-
-// 015
 
 // With the use of RPCGuaranteedOrderedBigData for 016, a much bigger data can be sent through.
-// old 015 can continue to send through this s2mSendStatistics, limited by data size.
 TNL_IMPLEMENT_RPC(MasterServerInterface, s2mSendStatistics, (Zap::VersionedGameStats stats), (stats),
-                  NetClassGroupMasterMask, RPCGuaranteedOrderedBigData, RPCDirClientToServer, 6) {}
+                  NetClassGroupMasterMask, RPCGuaranteedOrderedBigData, RPCDirClientToServer, 0) {}
 
 ////////////////////////////////////
 // Authentication RPCs
@@ -193,18 +136,18 @@ TNL_IMPLEMENT_RPC(MasterServerInterface, s2mSendStatistics, (Zap::VersionedGameS
 TNL_IMPLEMENT_RPC(MasterServerInterface, m2cSetAuthenticated, (RangedU32<0, AuthenticationStatusCount> authStatus, 
                                                                StringPtr correctedName), 
                                                                (authStatus, correctedName),
-                  NetClassGroupMasterMask, RPCGuaranteed, RPCDirServerToClient, 5) {}
+                  NetClassGroupMasterMask, RPCGuaranteed, RPCDirServerToClient, 0) {}
 
 TNL_IMPLEMENT_RPC(MasterServerInterface, s2mRequestAuthentication, (Vector<U8> id, StringTableEntry name), (id, name),
-                  NetClassGroupMasterMask, RPCGuaranteed, RPCDirClientToServer, 5) {}
+                  NetClassGroupMasterMask, RPCGuaranteed, RPCDirClientToServer, 0) {}
 
 TNL_IMPLEMENT_RPC(MasterServerInterface, m2sSetAuthenticated, (Vector<U8> id, StringTableEntry name,
                               RangedU32<0,AuthenticationStatusCount> status ), (id, name, status ),
-                  NetClassGroupMasterMask, RPCGuaranteed, RPCDirServerToClient, 5) {}
+                  NetClassGroupMasterMask, RPCGuaranteed, RPCDirServerToClient, 0) {}
 
 
 TNL_IMPLEMENT_RPC(MasterServerInterface, s2mChangeName, (StringTableEntry name), (name),
-                  NetClassGroupMasterMask, RPCGuaranteedOrderedBigData, RPCDirClientToServer, 7) {}
+                  NetClassGroupMasterMask, RPCGuaranteedOrderedBigData, RPCDirClientToServer, 0) {}
 
 TNL_IMPLEMENT_RPC(MasterServerInterface, s2mServerDescription, (StringTableEntry descr), (descr),
-                  NetClassGroupMasterMask, RPCGuaranteedOrderedBigData, RPCDirClientToServer, 7) {}
+                  NetClassGroupMasterMask, RPCGuaranteedOrderedBigData, RPCDirClientToServer, 0) {}
