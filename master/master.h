@@ -196,25 +196,11 @@ public:
    // Called to indicate a connect request is being accepted.
    TNL_DECLARE_RPC_OVERRIDE(s2mAcceptArrangedConnection, (U32 requestId, IPAddress internalAddress, ByteBufferPtr connectionData));
 
-   // TODO: Delete after 014
-   TNL_DECLARE_RPC_OVERRIDE(c2mAcceptArrangedConnection, (U32 requestId, IPAddress internalAddress, ByteBufferPtr connectionData))
-      { s2mAcceptArrangedConnection_remote(requestId, internalAddress, connectionData); } // for now, redirect to proper function
-
-
-   // TODO: Delete after 014 -- replaced with identical s2mRejectArrangedConnection
-   TNL_DECLARE_RPC_OVERRIDE(c2mRejectArrangedConnection, (U32 requestId, ByteBufferPtr rejectData))
-      { s2mRejectArrangedConnection_remote(requestId, rejectData); }
 
    // s2mRejectArrangedConnection notifies the Master Server that the server is rejecting the arranged connection
    // request specified by the requestId.  The rejectData will be passed along to the requesting client.
    // Called to indicate a connect request is being rejected.
    TNL_DECLARE_RPC_OVERRIDE(s2mRejectArrangedConnection, (U32 requestId, ByteBufferPtr rejectData));
-
-   // TODO: Delete after 014 -- replaced with identical s2mUpdateServerStatus
-   TNL_DECLARE_RPC_OVERRIDE(c2mUpdateServerStatus, (
-      StringTableEntry levelName, StringTableEntry levelType,
-      U32 botCount, U32 playerCount, U32 maxPlayers, U32 infoFlags))
-      { s2mUpdateServerStatus_remote(levelName, levelType, botCount, playerCount, maxPlayers, infoFlags); }
 
    // s2mUpdateServerStatus updates the status of a server to the Master Server, specifying the current game
    // and mission types, any player counts and the current info flags.
