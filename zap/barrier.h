@@ -137,7 +137,7 @@ public:
    const char *getPrettyNamePlural();
    const char *getOnDockName();
    const char *getOnScreenName();          // Vertices should not be labeled
-   string WallItem::getAttributeString();
+   string getAttributeString();
    bool hasTeam();
    bool canBeHostile();
    bool canBeNeutral();
