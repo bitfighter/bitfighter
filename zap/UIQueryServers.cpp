@@ -1135,6 +1135,10 @@ void QueryServersUserInterface::onMouseDragged(S32 x, S32 y)
 // User is sorting by selected column
 void QueryServersUserInterface::sortSelected()
 {
+   // No servers, no sorting!  So no crashing!
+   if(servers.size() == 0)
+      return;
+
    S32 currentItem = getSelectedIndex();     // Preserve the position of selected item (so highlight doesn't move during sort)
 
    mSortColumn = mHighlightColumn;
