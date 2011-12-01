@@ -100,12 +100,22 @@ QueryServersUserInterface::QueryServersUserInterface(ClientGame *game) : UserInt
 
    mServersPerPage = 8;    // To start with, anyway...
 
+   static const S32 MIN_PAD = 3;
+
    // Column name, x-start pos
    columns.push_back(ColumnInfo("SERVER NAME", 3));
    columns.push_back(ColumnInfo("STAT", 400));
-   columns.push_back(ColumnInfo("PING", 450));
-   columns.push_back(ColumnInfo("PLAYERS BOTS", 490));
-   columns.push_back(ColumnInfo("ADDRESS", 610));
+   columns.push_back(ColumnInfo("PING", 449));
+   columns.push_back(ColumnInfo("PLAYERS BOTS", 493));
+   columns.push_back(ColumnInfo("ADDRESS", 616));
+
+   // Make sure columns are wide enough for their labels
+   TNLAssert(columns[1].xStart - columns[0].xStart + 2 * MIN_PAD > getStringWidth(COLUMN_HEADER_TEXTSIZE, columns[0].name), "Col too narrow!");
+   TNLAssert(columns[2].xStart - columns[1].xStart + 2 * MIN_PAD > getStringWidth(COLUMN_HEADER_TEXTSIZE, columns[1].name), "Col too narrow!");
+   TNLAssert(columns[3].xStart - columns[2].xStart + 2 * MIN_PAD > getStringWidth(COLUMN_HEADER_TEXTSIZE, columns[2].name), "Col too narrow!");
+   TNLAssert(columns[4].xStart - columns[3].xStart + 2 * MIN_PAD > getStringWidth(COLUMN_HEADER_TEXTSIZE, columns[3].name), "Col too narrow!");
+   TNLAssert(gScreenInfo.getGameCanvasWidth() - columns[4].xStart + 2 * MIN_PAD > getStringWidth(COLUMN_HEADER_TEXTSIZE, columns[4].name), "Col too narrow!");
+
 
    selectedId = 0xFFFFFF;
 

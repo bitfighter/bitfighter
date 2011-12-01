@@ -483,7 +483,7 @@ F32 UserInterface::drawCenteredString(F32 x, F32 y, F32 size, const char *string
 
 S32 UserInterface::drawCenteredStringf(S32 y, S32 size, const char *format, ...)
 {
-   makeBuffer;
+   makeBuffer; 
    return drawCenteredString(y, size, buffer);
 }
 
