@@ -39,6 +39,7 @@
 
 #include "tnlNetObject.h"
 #include "tnlTypes.h"
+#include "tnlThread.h"
 
 #include "boost/smart_ptr/shared_ptr.hpp"
 
@@ -269,13 +270,30 @@ enum VolumeType {
    ServerAlertVolumeType,
 };
 
+
+// DNS resolve ("bitfighter.org:25955") will freeze the game unless this is done as a seperate thread
+class NameToAddressThread : public TNL::Thread
+{
+private:
+   string mAddress_string;
+public:
+   Address mAddress;
+   bool mDone;
+   bool mUsed;
+
+   NameToAddressThread(const char *address_string);  // Constructor
+   virtual ~NameToAddressThread();                   // Destructor
+
+   U32 run();
+};
+
+
 /// Base class for server and client Game subclasses.  The Game
 /// base class manages all the objects in the game simulation on
 /// either the server or the client, and is responsible for
 /// managing the passage of time as well as rendering.
 
 class ClientRef;
-class NameToAddressThread;
 
 class Game : public LevelLoader
 {

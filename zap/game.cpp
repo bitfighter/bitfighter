@@ -59,7 +59,6 @@
 #include "tnlRandom.h"
 #include "tnlGhostConnection.h"
 #include "tnlNetInterface.h"
-#include "tnlThread.h"
 
 #include "md5wrapper.h"
 
@@ -372,6 +371,32 @@ VoiceDecoder *RemoteClientInfo::getVoiceDecoder()
 }
 
 #endif
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Constructor
+NameToAddressThread::NameToAddressThread(const char *address_string) :
+      mAddress_string(address_string)
+{
+   mDone = false;
+}
+
+//Destructor
+NameToAddressThread::~NameToAddressThread()
+{
+   // Do nothing
+}
+
+
+U32 NameToAddressThread::run()
+{
+   // this can take a lot of time converting name (such as "bitfighter.org:25955") into IP address.
+   mAddress.set(mAddress_string);
+   mDone = true;
+   return 0;
+}
 
 
 ////////////////////////////////////////
@@ -1059,30 +1084,6 @@ bool Game::runLevelGenScript(const FolderManager *folderManager, const string &s
 
    return true;
 }
-
-
-
-// DNS resolve ("bitfighter.org:25955") will freeze the game unless this is done as a seperate thread
-class NameToAddressThread : public TNL::Thread
-{
-private:
-   string mAddress_string;
-public:
-   Address mAddress;
-   bool mDone;
-   bool mUsed;
-
-   NameToAddressThread(const char *address_string) : mAddress_string(address_string) { mDone=false; }
-   virtual ~NameToAddressThread() { }
-
-   U32 run()
-   {
-      mAddress.set(mAddress_string);  // this will take a lot of time converting name (such as "bitfighter.org:25955") into IP address.
-      mDone=true;
-      return 0;
-   }
-};
-
 
 
 // If there is no valid connection to master server, perodically try to create one.
