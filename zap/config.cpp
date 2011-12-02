@@ -64,6 +64,9 @@
 namespace Zap
 {
 
+// bitfighter.org would soon be the same as 199.192.229.168
+const char *MASTER_SERVER_LIST_ADDRESS = "IP:199.192.229.168:25955,bitfighter.org:25955";
+
 // Constructor: Set default values here
 IniSettings::IniSettings()
 {
@@ -96,7 +99,7 @@ IniSettings::IniSettings()
    maxFPS = 100;                      // Max FPS on client/non-dedicated server
 
    inputMode = InputModeKeyboard;     // Joystick or Keyboard
-   masterAddress = "IP:67.18.11.66:25955";   // Default address of our master server
+	masterAddress = MASTER_SERVER_LIST_ADDRESS;   // Default address of our master server
    name = "";                         // Player name (none by default)
    defaultName = "ChumpChange";       // Name used if user hits <enter> on name entry screen
    lastName = "ChumpChange";          // Name the user entered last time they ran the game

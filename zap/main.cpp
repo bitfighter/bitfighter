@@ -1135,7 +1135,8 @@ void checkIfThisIsAnUpdate(GameSettings *settings)
    // after 015a
    if(settings->getIniSettings()->version < 1840 && settings->getIniSettings()->maxBots == 127)
       settings->getIniSettings()->maxBots = 10;
-
+   if(settings->getIniSettings()->version < 3006)
+      settings->getIniSettings()->masterAddress = MASTER_SERVER_LIST_ADDRESS;
 }
 
 

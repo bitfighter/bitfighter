@@ -48,6 +48,7 @@ using namespace TNL;
 namespace Zap
 {
 
+extern const char *MASTER_SERVER_LIST_ADDRESS;
 
 ////////////////////////////////////
 ////////////////////////////////////
