@@ -62,7 +62,7 @@ void TeamShuffleHelper::shuffle()
 
    for(S32 i = 0; i < clientInfos->size(); i++)
    {
-      while(true)  // Evil
+      while(true)  
       {
          S32 index = TNL::Random::readI(0, mTeams.size() - 1);
          if(mTeams[index].size() < playersPerTeam)
@@ -83,10 +83,10 @@ void TeamShuffleHelper::onMenuShow()
 }
 
 
+static F32 TEXT_SIZE_FACTOR = 1.2;     // Give 20% breathing room for text 
+
 void TeamShuffleHelper::calculateRenderSizes()
 {
-   logprintf("teamCount: %d", teamCount);
-
    switch(teamCount)
    {
    case 1:
@@ -113,12 +113,12 @@ void TeamShuffleHelper::calculateRenderSizes()
 
    columnWidth = -1;
    maxColumnWidth = (gScreenInfo.getGameCanvasWidth() - 100) / cols;
-   rowHeight = (2 * vpad) + (playersPerTeam * textSize * 6 / 5);  // Magic number yay  (6 / 5 = 1.2)
+   rowHeight = (2 * vpad) + ((playersPerTeam + 1) * TEXT_SIZE * TEXT_SIZE_FACTOR);  
 
    for(S32 i = 0; i < mTeams.size(); i++)
       for(S32 j = 0; j < mTeams[i].size(); j++)
       {
-         S32 width = UserInterface::getStringWidth(textSize, getGame()->Game::getClientInfo(j)->getName().getString());
+         S32 width = UserInterface::getStringWidth(TEXT_SIZE, getGame()->Game::getClientInfo(j)->getName().getString());
 
          if(width > columnWidth)
          {
@@ -139,6 +139,18 @@ void TeamShuffleHelper::calculateRenderSizes()
 }
 
 
+
+static void drawHorizLine(S32 x1, S32 x2, S32 y)
+{
+   glBegin(GL_LINES);
+      glVertex2i(x1, y);
+      glVertex2i(x2, y);
+   glEnd();
+}
+
+
+extern void drawFilledRoundedRect(const Point &pos, F32 width, F32 height, const Color &fillColor, const Color &outlineColor, F32 radius);
+
 void TeamShuffleHelper::render()
 {
    for(S32 i = 0; i < rows; i++)
@@ -152,12 +164,20 @@ void TeamShuffleHelper::render()
 
          S32 teamIndex = i * cols + j;
 
-         UserInterface::drawFilledRect(x, y, x + columnWidth, y + rowHeight, Colors::black, getGame()->getTeamColor(teamIndex));
+         Color c = getGame()->getTeamColor(teamIndex);
+         c *= .2;
+
+         drawFilledRoundedRect(Point(x + columnWidth/2, y + rowHeight/2), columnWidth, rowHeight, c, getGame()->getTeamColor(teamIndex), 8);
+
+         glColor(getGame()->getTeamColor(teamIndex));
+         UserInterface::drawString(x + hpad, y + vpad, TEXT_SIZE, getGame()->getTeamName(teamIndex).getString());
+
+         drawHorizLine(x + hpad, x + columnWidth - hpad, y + vpad + TEXT_SIZE + 3);
 
          glColor(Colors::white);
          for(S32 k = 0; k < mTeams[teamIndex].size(); k++)
-            UserInterface::drawString(x + hpad, y + vpad + (k) * 1.2 * textSize,  // More magic!
-                  textSize, mTeams[teamIndex][k]->getName().getString());
+            UserInterface::drawString(x + hpad, y + S32(vpad + (k + 1) * TEXT_SIZE_FACTOR * TEXT_SIZE + 3),
+                  TEXT_SIZE, mTeams[teamIndex][k]->getName().getString());
       }
 
    glColor(Colors::green);

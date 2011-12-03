@@ -52,8 +52,8 @@ private:
 
    S32 topMargin, leftMargin;
 
-   static const S32 vpad = 10, hpad = 10;        // Padding inside the boxes
-   static const S32 textSize = 15;
+   static const S32 vpad = 10, hpad = 14;       // Padding inside the boxes
+   static const S32 TEXT_SIZE = 22;
    static const S32 margin = 10;
 
    Vector<Vector<ClientInfo *> > mTeams;
@@ -61,7 +61,7 @@ private:
    void calculateRenderSizes();
 
 public:
-   TeamShuffleHelper(ClientGame *clientGame);    // Constructor
+   TeamShuffleHelper(ClientGame *clientGame);   // Constructor
 
    void render();                
    void onMenuShow();  

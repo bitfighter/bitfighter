@@ -218,6 +218,43 @@ void drawRoundedRect(const Point &pos, F32 width, F32 height, F32 rad)
 }
 
 
+void drawFilledArc(const Point &pos, F32 radius, F32 startAngle, F32 endAngle)
+{
+   glBegin(GL_POLYGON);
+
+      for(F32 theta = startAngle; theta < endAngle; theta += 0.2f)
+         glVertex2f(pos.x + cos(theta) * radius, pos.y + sin(theta) * radius);
+
+      // Make sure arc makes it all the way to endAngle...  rounding errors look terrible!
+      glVertex2f(pos.x + cos(endAngle) * radius, pos.y + sin(endAngle) * radius);
+
+      glVertex2f(pos.x, pos.y);
+
+   glEnd();
+}
+
+
+void drawFilledRoundedRect(const Point &pos, F32 width, F32 height, const Color &fillColor, const Color &outlineColor, F32 radius)
+{
+   glColor(fillColor);
+
+   drawFilledArc(Point(pos.x - width / 2 + radius, pos.y - height / 2 + radius), radius,      FloatPi, FloatPi + FloatHalfPi);
+   drawFilledArc(Point(pos.x + width / 2 - radius, pos.y - height / 2 + radius), radius, -FloatHalfPi, 0);
+   drawFilledArc(Point(pos.x + width / 2 - radius, pos.y + height / 2 - radius), radius,            0, FloatHalfPi);
+   drawFilledArc(Point(pos.x - width / 2 + radius, pos.y + height / 2 - radius), radius,  FloatHalfPi, FloatPi);
+
+   UserInterface::drawRect(pos.x - width / 2, pos.y - height / 2 + radius, 
+                           pos.x + width / 2, pos.y + height / 2 - radius, GL_POLYGON);
+
+   UserInterface::drawRect(pos.x - width / 2 + radius, pos.y - height / 2, 
+                           pos.x + width / 2 - radius, pos.y + height / 2, GL_POLYGON);
+
+
+   glColor(outlineColor);
+   drawRoundedRect(pos, width, height, radius);
+}
+
+
 // Actually draw the ellipse
 void drawFilledEllipseUtil(const Point &pos, F32 width, F32 height, F32 angle, U32 glStyle)
 {

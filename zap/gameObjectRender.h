@@ -50,6 +50,8 @@ extern void drawCentroidMark(const Point &pos, F32 radius);
 extern void renderTwoPointPolygon(const Point &p1, const Point &p2, F32 width, S32 mode);
 
 extern void drawRoundedRect(const Point &pos, F32 width, F32 height, F32 radius);
+extern void drawFilledRoundedRect(const Point &pos, F32 width, F32 height, const Color &fillColor, const Color &outlineColor, F32 radius);
+
 extern void drawArc(const Point &pos, F32 radius, F32 startAngle, F32 endAngle);
 extern void drawEllipse(const Point &pos, F32 width, F32 height, F32 angle);
 extern void drawFilledEllipse(const Point &pos, F32 width, F32 height, F32 angle);
