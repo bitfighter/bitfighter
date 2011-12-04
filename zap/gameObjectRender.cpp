@@ -127,6 +127,16 @@ static void renderVertexArray(const F32 verts[], S32 vertCount, S32 geomType)
 }
 
 
+void drawHorizLine(S32 x1, S32 x2, S32 y)
+{
+   glBegin(GL_LINES);
+      glVertex2i(x1, y);
+      glVertex2i(x2, y);
+   glEnd();
+}
+
+
+
 // Draw arc centered on pos, with given radius, from startAngle to endAngle.  0 is East, increasing CW
 void drawArc(const Point &pos, F32 radius, F32 startAngle, F32 endAngle)
 {

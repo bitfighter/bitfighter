@@ -139,15 +139,7 @@ void TeamShuffleHelper::calculateRenderSizes()
 }
 
 
-static void drawHorizLine(S32 x1, S32 x2, S32 y)
-{
-   glBegin(GL_LINES);
-      glVertex2i(x1, y);
-      glVertex2i(x2, y);
-   glEnd();
-}
-
-
+extern void drawHorizLine(S32 x1, S32 x2, S32 y);
 extern void drawFilledRoundedRect(const Point &pos, F32 width, F32 height, const Color &fillColor, const Color &outlineColor, F32 radius);
 
 void TeamShuffleHelper::render()

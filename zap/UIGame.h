@@ -62,6 +62,7 @@ struct CommandInfo
    S32 cmdArgCount;
    HelpCategories helpCategory;
    S32 helpGroup;
+   S32 lines;                    // # lines required to display help (usually 1, occasionally 2)
    string helpArgString[9];
    string helpTextString;
 };

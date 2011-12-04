@@ -77,6 +77,8 @@ extern void renderVertex(char style, const Point &v, S32 number,           F32 s
 extern void renderVertex(char style, const Point &v, S32 number, S32 size, F32 scale, F32 alpha);
 
 
+extern void drawHorizLine(S32 x1, S32 x2, S32 y);
+
 extern void renderSquareItem(const Point &pos, const Color *c, F32 alpha, const Color *letterColor, char letter);
 
 extern void drawCircle(const Point &pos, F32 radius);

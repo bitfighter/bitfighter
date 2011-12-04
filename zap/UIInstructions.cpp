@@ -701,10 +701,7 @@ void InstructionsUserInterface::renderPageCommands(U32 page, const char *msg)
       if(chatCmds[i].helpGroup > section)      
       {
          glColor3f(0.4f, 0.4f, 0.4f);
-         glBegin(GL_LINES);
-            glVertex2i(cmdCol, ypos + (cmdSize + cmdGap) / 3);
-            glVertex2i(cmdCol + 335, ypos + (cmdSize + cmdGap) / 3);
-         glEnd();
+         drawHorizLine(cmdCol, cmdCol + 335, ypos + (cmdSize + cmdGap) / 3);
 
          section = chatCmds[i].helpGroup;
 
@@ -719,9 +716,19 @@ void InstructionsUserInterface::renderPageCommands(U32 page, const char *msg)
       for(S32 j = 0; j < chatCmds[i].cmdArgCount; j++)
          cmdString += " " + chatCmds[i].helpArgString[j];
 
-      drawString(cmdCol, ypos, cmdSize, cmdString.c_str());      
-      glColor(descrColor);
-      drawString(descrCol, ypos, cmdSize, chatCmds[i].helpTextString.c_str());
+      if(chatCmds[i].lines == 1)    // Everything on one line, the normal case
+      {
+         drawString(cmdCol, ypos, cmdSize, cmdString.c_str());      
+         glColor(descrColor);
+         drawString(descrCol, ypos, cmdSize, chatCmds[i].helpTextString.c_str());
+      }
+      else                          // Draw the command on one line, explanation on the next, with a bit of indent
+      {
+         drawString(cmdCol, ypos, cmdSize, cmdString.c_str());
+         ypos += cmdSize + cmdGap;
+         glColor(descrColor);
+         drawString(cmdCol + 50, ypos, cmdSize, chatCmds[i].helpTextString.c_str());
+      }
 
       ypos += cmdSize + cmdGap;
    }
