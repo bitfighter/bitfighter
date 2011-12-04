@@ -60,6 +60,8 @@
 #include "UIQueryServers.h"
 #include "UIErrorMessage.h"
 
+#include "TeamShuffleHelper.h"   // For... wait for it... TeamShuffleHelper class!!!
+
 #include "tnl.h"
 #include "tnlRandom.h"
 #include "tnlGhostConnection.h"
@@ -549,6 +551,46 @@ void ClientGame::playerJoinedGlobalChat(const StringTableEntry &playerNick)
 void ClientGame::playerLeftGlobalChat(const StringTableEntry &playerNick)
 {
    getUIManager()->getChatUserInterface()->playerLeftGlobalChat(playerNick);
+}
+
+
+// A new player has just joined the game; if isLocalClient is true, that new player is us!
+void ClientGame::onPlayerJoined(const boost::shared_ptr<ClientInfo> &clientInfo, bool isLocalClient, bool playAlert)
+{
+   addToClientList(clientInfo);
+
+   if(isLocalClient)    // i.e. if this is us
+   {
+      // Now we'll check if we need an updated scoreboard... this only needed to handle use case of user
+      // holding Tab while one game transitions to the next.  Without it, ratings will be reported as 0.
+      if(getUIManager()->getGameUserInterface()->isInScoreboardMode())
+         mGameType->c2sRequestScoreboardUpdates(true);
+
+      displayMessage(Color(0.6f, 0.6f, 0.8f), "Welcome to the game!");
+   }
+   else     // A remote player has joined the fray
+   {
+      displayMessage(Color(0.6f, 0.6f, 0.8f), "%s joined the game.", clientInfo->getName().getString());
+
+      if(playAlert)
+         SoundSystem::playSoundEffect(SFXPlayerJoined, 1);
+   }
+
+   if(getUIMode() == TeamShuffleMode)
+      mUIManager->getGameUserInterface()->getTeamShuffleHelper(this)->onPlayerJoined();
+}
+
+
+// Another player has just left the game
+void ClientGame::onPlayerQuit(const StringTableEntry &name)
+{
+   removeFromClientList(name);
+
+   displayMessage(Color(0.6f, 0.6f, 0.8f), "%s left the game.", name.getString());
+   SoundSystem::playSoundEffect(SFXPlayerLeft, 1);
+
+   if(getUIMode() == TeamShuffleMode)
+      mUIManager->getGameUserInterface()->getTeamShuffleHelper(this)->onPlayerQuit();
 }
 
 

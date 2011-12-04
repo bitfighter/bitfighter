@@ -260,7 +260,7 @@ enum UIMode {
    QuickChatMode,          // Showing quick-chat menu
    LoadoutMode,            // Showing loadout menu
    EngineerMode,           // Showing engineer overlay mode
-   TeamShuffleMode,        // Player shuffling teams
+   TeamShuffleMode         // Player shuffling teams
 };
 
 enum VolumeType {

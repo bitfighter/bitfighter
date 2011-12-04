@@ -139,6 +139,9 @@ public:
    void playerJoinedGlobalChat(const StringTableEntry &playerNick);
    void playerLeftGlobalChat(const StringTableEntry &playerNick);
 
+   void onPlayerJoined(const boost::shared_ptr<ClientInfo> &clientInfo, bool isLocalClient, bool playAlert);
+   void onPlayerQuit(const StringTableEntry &name);
+
    // Check for permissions
    bool hasAdmin(const char *failureMessage);
    bool hasLevelChange(const char *failureMessage);

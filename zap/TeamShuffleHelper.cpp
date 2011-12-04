@@ -232,6 +232,18 @@ const char *TeamShuffleHelper::getCancelMessage()
 }
 
 
+void TeamShuffleHelper::onPlayerJoined()
+{
+   shuffle();
+}
+
+
+void TeamShuffleHelper::onPlayerQuit()
+{
+   shuffle();
+}
+
+
 // Only activated via chat cmd
 InputCode TeamShuffleHelper::getActivationKey()
 {

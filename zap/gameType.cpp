@@ -2088,27 +2088,10 @@ GAMETYPE_RPC_S2C(GameType, s2cAddClient,
    if(!clientGame) 
       return;
       
-   GameConnection *localConn = clientGame->getConnectionToServer();     // This is the current, local game connection
-
    boost::shared_ptr<ClientInfo> clientInfo = boost::shared_ptr<ClientInfo>(new RemoteClientInfo(name, isRobot, isAdmin));  
-   mGame->addToClientList(clientInfo);
 
-   if(isLocalClient)
-   {
-      // Now we'll check if we need an updated scoreboard... this only needed to handle use case of user
-      // holding Tab while one game transitions to the next.  Without it, ratings will be reported as 0.
-      if(clientGame->getUIManager()->getGameUserInterface()->isInScoreboardMode())
-         c2sRequestScoreboardUpdates(true);
+   clientGame->onPlayerJoined(clientInfo, isLocalClient, playAlert);
 
-      clientGame->displayMessage(Color(0.6f, 0.6f, 0.8f), "Welcome to the game!");
-   }
-   else     // A remote player has joined the fray
-   {
-      clientGame->displayMessage(Color(0.6f, 0.6f, 0.8f), "%s joined the game.", name.getString());
-
-      if(playAlert)
-         SoundSystem::playSoundEffect(SFXPlayerJoined, 1);
-   }
 #endif
 }
 
@@ -2171,10 +2154,7 @@ GAMETYPE_RPC_S2C(GameType, s2cRemoveClient, (StringTableEntry name), (name))
    if(!clientGame) 
       return;
 
-   clientGame->removeFromClientList(name);
-
-   clientGame->displayMessage(Color(0.6f, 0.6f, 0.8f), "%s left the game.", name.getString());
-   SoundSystem::playSoundEffect(SFXPlayerLeft, 1);
+   clientGame->onPlayerQuit(name);
 #endif
 }
 

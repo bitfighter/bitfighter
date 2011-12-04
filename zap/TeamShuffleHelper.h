@@ -68,6 +68,9 @@ public:
    bool processInputCode(InputCode inputCode);   
 
    bool isMovementDisabled();
+
+   void onPlayerJoined();
+   void onPlayerQuit();
 };
 
 };
