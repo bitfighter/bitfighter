@@ -31,6 +31,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <ctype.h>
 
 #include "mysql++.h"
+#include "tnlLog.h"
 
 using namespace mysqlpp;
 using namespace std;
@@ -124,10 +125,12 @@ bool Authenticator::authenticate(string &username, string password, int &errorCo
 		return true;                              // password is correct
 	}
 	catch(mysqlpp::ConnectionFailed e){
+		logprintf("Authenticate error can't connect to mysql: %s", e.what());
 		errorCode = 0;       // unable to connect to mysql server
 		return false;
 	}
 	catch (mysqlpp::BadQuery e){
+		logprintf("Authenticate error on mysql query: %s", e.what());
 		errorCode = 0;       // unable to connect to mysql server
 		return false;
 	}
