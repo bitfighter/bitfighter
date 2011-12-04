@@ -139,7 +139,6 @@ void TeamShuffleHelper::calculateRenderSizes()
 }
 
 
-
 static void drawHorizLine(S32 x1, S32 x2, S32 y)
 {
    glBegin(GL_LINES);

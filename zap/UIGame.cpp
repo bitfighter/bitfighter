@@ -97,7 +97,7 @@ GameUserInterface::GameUserInterface(ClientGame *game) : Parent(game),
    mMissionOverlayActive = false;
 
    setMenuID(GameUI);
-   enterMode(PlayMode);
+   enterMode(PlayMode);          // Also initializes mCurrentUIMode
    mInScoreboardMode = false;
 
    mQuickChatHelper = NULL;
@@ -948,6 +948,12 @@ void GameUserInterface::onMouseMoved()
 }
 
 
+UIMode GameUserInterface::getUIMode()
+{
+   return mCurrentUIMode;
+}
+
+
 // Enter QuickChat, Loadout, or Engineer mode
 void GameUserInterface::enterMode(UIMode mode)
 {
@@ -971,6 +977,8 @@ void GameUserInterface::enterMode(UIMode mode)
 
       mHelper = NULL;
    }
+
+   mCurrentUIMode = mode;
 
    if(mHelper)
       mHelper->onMenuShow();

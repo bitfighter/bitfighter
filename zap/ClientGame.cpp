@@ -225,6 +225,12 @@ void ClientGame::closeConnectionToGameServer()
 }
 
 
+UIMode ClientGame::getUIMode()
+{
+   return mUIManager->getGameUserInterface()->getUIMode();
+}
+
+
 bool ClientGame::hasValidControlObject()
 {
    return mConnectionToServer.isValid() && mConnectionToServer->getControlObject();
@@ -292,7 +298,6 @@ void ClientGame::updatePlayerNameAndPassword(const string &name, const string &p
    getClientInfo()->setName(name);
    getSettings()->setPlayerNameAndPassword(name, password);    // Save to INI
 }
-
 
 
 void ClientGame::displayShipDesignChangedMessage(const Vector<U32> &loadout, const char *msgToShowIfLoadoutsAreTheSame)
@@ -671,7 +676,7 @@ bool ClientGame::hasLevelChange(const char *failureMessage)
 
 void ClientGame::enterMode(UIMode mode)
 {
-   getUIManager()->getGameUserInterface()->enterMode(PlayMode); 
+   getUIManager()->getGameUserInterface()->enterMode(mode); 
 }
 
 

@@ -106,6 +106,8 @@ public:
 
    UIManager *getUIManager() const;
 
+   UIMode getUIMode();
+
    bool getInCommanderMap();
    void setInCommanderMap(bool inCommanderMap);
 

@@ -136,6 +136,7 @@ private:
    bool isCmdChat();          // Returns true if we're composing a command in the chat bar, false otherwise
 
    ChatType mCurrentChatType; // Current in-game chat mode (global or local)
+   UIMode mCurrentUIMode;          
    LineEditor mLineEditor;    // Message being composed
 
    U32 mChatCursorPos;        // Position of composition cursor
@@ -293,7 +294,6 @@ public:
    EngineerHelper    *getEngineerHelper(ClientGame *game);
    TeamShuffleHelper *getTeamShuffleHelper(ClientGame *game);
 
-   
    //ofstream mOutputFile;            // For saving downloaded levels
    //FILE *mOutputFile;               // For saving downloaded levels
 
@@ -311,6 +311,7 @@ public:
    void unsuspendGame();
 
    void enterMode(UIMode mode);     // Enter QuickChat, Loadout, or Engineer mode
+   UIMode getUIMode();
 
    void renderEngineeredItemDeploymentMarker(Ship *ship);
 

@@ -1037,6 +1037,14 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cSetGameOver, (bool gameOver), (gameOver
 {
    mBetweenLevels = gameOver;
    mGameOver = gameOver;
+
+   // Exit shuffle mode
+   if(gameOver)
+   {
+      ClientGame *clientGame = static_cast<ClientGame *>(mGame);
+      if(clientGame->getUIMode() == TeamShuffleMode) 
+         clientGame->enterMode(PlayMode);
+   }
 }
 
 
