@@ -859,7 +859,7 @@ void InitSdlVideo()
    static const char *WINDOW_TITLE = "Bitfighter";
    SDL_WM_SetCaption(WINDOW_TITLE, WINDOW_TITLE);  // Icon name is same as window title -- set here so window will be created with proper name
 
-   SDL_Surface* icon = SDL_LoadBMP("zap_win_icon.bmp");     // <=== TODO: put a real bmp here...
+   SDL_Surface* icon = SDL_LoadBMP("zap-1.bmp");     // <=== TODO: put a real bmp here...
    SDL_WM_SetIcon(icon, NULL);
 
    // We will actually run SDL_SetVideoMode in actualizeScreenMode()
