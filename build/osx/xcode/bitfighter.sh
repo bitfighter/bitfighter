@@ -35,7 +35,7 @@ sfxdir="$absolute_datadir/sfx"
 scriptsdir="$absolute_datadir/scripts"
 musicdir="$absolute_datadir/music"
 
-dsdir=""
+dsdir=""		
 if [ $dedicated -eq 1 ]; then
   dsdir="$userdatadir/dedicated_server"
   
@@ -48,5 +48,5 @@ fi
 if [ $dedicated -eq 1 ]; then
   ./Bitfighterd -rootdatadir "$userdatadir" -sfxdir "$sfxdir" -scriptsdir "$scriptsdir" -logdir "$dsdir" -inidir "$dsdir" "$@"
 else
-  ./Bitfighter -rootdatadir "$userdatadir" -musicdir "$musicdir" -sfxdir "$sfxdir" -scriptsdir "$scriptsdir" "$@"
+  ./Bitfighter -rootdatadir "$userdatadir" -musicdir "$musicdir" -sfxdir "$sfxdir" -scriptsdir "$scriptsdir"
 fi
