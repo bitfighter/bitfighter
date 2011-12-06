@@ -213,6 +213,7 @@ Section "Install"
   File "..\..\..\doc\readme.txt"
   File "..\..\..\End-User License.txt"
   File ".\twoplayers.bat"
+  File "..\..\..\resource\bficon.bmp"
   
   SetOutPath "$INSTDIR\scripts"
   File /r "..\..\..\resource\scripts\*.lua"

@@ -859,10 +859,15 @@ void InitSdlVideo()
    static const char *WINDOW_TITLE = "Bitfighter";
    SDL_WM_SetCaption(WINDOW_TITLE, WINDOW_TITLE);  // Icon name is same as window title -- set here so window will be created with proper name
 
-   SDL_Surface* icon = SDL_LoadBMP("zap-1.bmp");     // <=== TODO: put a real bmp here...
-   SDL_WM_SetIcon(icon, NULL);
+   // Set the window icon -- note that the icon must be a 32x32 bmp, and SDL will downscale it to 16x16 with no interpolation.  Therefore, 
+   // it's best to start with a finely crafted 16x16 icon, then scale it up to 32x32 with no interpolation.  It will look crappy at 32x32, 
+   // but good at 16x16, and that's all that really matters.
+   SDL_Surface *image = SDL_LoadBMP("bficon.bmp");            // Save bmp as a 32 bit XRGB bmp file (Gimp can do it!)
+   SDL_SetColorKey(image, SDL_SRCCOLORKEY, SDL_MapRGB(image->format, 0, 0, 0));              
 
-   // We will actually run SDL_SetVideoMode in actualizeScreenMode()
+   SDL_WM_SetIcon(image,NULL);
+
+   // We will run SDL_SetVideoMode in actualizeScreenMode()
 }
 #endif
 
