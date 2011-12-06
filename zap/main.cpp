@@ -1046,6 +1046,7 @@ void actualizeScreenMode(bool changingInterfaces)
       orthoTop = -1 * (gScreenInfo.getVertDrawMargin());
       break;
 
+   case DISPLAY_MODE_WINDOWED:
    default:  //  DISPLAY_MODE_WINDOWED
       sdlWindowWidth = (S32) floor((F32)gScreenInfo.getGameCanvasWidth()  * settings->getIniSettings()->winSizeFact + 0.5f);
       sdlWindowHeight = (S32) floor((F32)gScreenInfo.getGameCanvasHeight() * settings->getIniSettings()->winSizeFact + 0.5f);
