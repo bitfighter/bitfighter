@@ -1813,7 +1813,7 @@ bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &le
 
 AbstractTeam *ClientGame::getNewTeam()
 {
-   return new TeamEditor;
+   return new EditorTeam;
 }
 
 };

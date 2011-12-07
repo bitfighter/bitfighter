@@ -105,7 +105,7 @@ void TeamDefUserInterface::onActivate()
 
    for(S32 i = 0; i < teamCount; i++)
    {
-      TeamEditor *team = ui->getTeam(i);
+      EditorTeam *team = ui->getTeam(i);
 
       ui->mOldTeams[i].color = team->getColor();
       ui->mOldTeams[i].name = team->getName().getString();
@@ -273,7 +273,7 @@ void TeamDefUserInterface::onKeyDown(InputCode inputCode, char ascii)
          ui->clearTeams();
          for(U32 i = 0; i < count; i++)
          {
-            TeamEditor *team = new TeamEditor;
+            EditorTeam *team = new EditorTeam;
             team->setName(gTeamPresets[i].name);
             team->setColor(gTeamPresets[i].r, gTeamPresets[i].g, gTeamPresets[i].b);
             ui->addTeam(team);
@@ -311,7 +311,7 @@ void TeamDefUserInterface::onKeyDown(InputCode inputCode, char ascii)
          return;
       }
 
-      TeamEditor *team = new TeamEditor;
+      EditorTeam *team = new EditorTeam;
       team->setName(gTeamPresets[selectedIndex].name);
       team->setColor(gTeamPresets[selectedIndex].r, gTeamPresets[selectedIndex].g, gTeamPresets[selectedIndex].b);
       ui->addTeam(team, selectedIndex);

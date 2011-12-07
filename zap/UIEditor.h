@@ -51,7 +51,7 @@ using namespace std;
 namespace Zap
 {
 
-class TeamEditor;
+class EditorTeam;
 class LuaLevelGenerator;
 
 enum VertexRenderStyles
@@ -324,10 +324,10 @@ public:
    const Color *getTeamColor(S32 teamId);
 
    S32 getTeamCount();
-   TeamEditor *getTeam(S32 teamId);
+   EditorTeam *getTeam(S32 teamId);
 
-   void addTeam(TeamEditor *team);
-   void addTeam(TeamEditor *team, S32 index);
+   void addTeam(EditorTeam *team);
+   void addTeam(EditorTeam *team, S32 index);
 
    void removeTeam(S32 teamId);
    void clearTeams();

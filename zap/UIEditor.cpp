@@ -453,7 +453,7 @@ void EditorUserInterface::makeSureThereIsAtLeastOneTeam()
 {
    if(getTeamCount() == 0)
    {
-      TeamEditor *team = new TeamEditor;
+      EditorTeam *team = new EditorTeam;
       team->setName(gTeamPresets[0].name);
       team->setColor(gTeamPresets[0].r, gTeamPresets[0].g, gTeamPresets[0].b);
 
@@ -852,7 +852,7 @@ void EditorUserInterface::teamsHaveChanged()
    else
       for(S32 i = 0; i < getTeamCount(); i++)
       {
-         TeamEditor *team = getTeam(i);
+         EditorTeam *team = getTeam(i);
 
          if(mOldTeams[i].color != team->getColor() || mOldTeams[i].name != team->getName().getString()) // Color(s) or names(s) have changed
          {
@@ -1072,10 +1072,10 @@ S32 EditorUserInterface::getTeamCount()
 }
 
 
-TeamEditor *EditorUserInterface::getTeam(S32 teamId)
+EditorTeam *EditorUserInterface::getTeam(S32 teamId)
 {
-   TNLAssert(dynamic_cast<TeamEditor *>(getGame()->getTeam(teamId)), "Invalid team");
-   return static_cast<TeamEditor *>(getGame()->getTeam(teamId));
+   TNLAssert(dynamic_cast<EditorTeam *>(getGame()->getTeam(teamId)), "Expected a EditorTeam");
+   return static_cast<EditorTeam *>(getGame()->getTeam(teamId));
 }
 
 
@@ -1085,13 +1085,13 @@ void EditorUserInterface::clearTeams()
 }
 
 
-void EditorUserInterface::addTeam(TeamEditor *team)
+void EditorUserInterface::addTeam(EditorTeam *team)
 {
    getGame()->addTeam(team);
 }
 
 
-void EditorUserInterface::addTeam(TeamEditor *team, S32 teamIndex)
+void EditorUserInterface::addTeam(EditorTeam *team, S32 teamIndex)
 {
    getGame()->addTeam(team, teamIndex);
 }

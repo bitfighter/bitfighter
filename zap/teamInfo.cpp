@@ -269,32 +269,32 @@ void Team::incrementBotCount()
 ////////////////////////////////////////
 
 // Constructor
-TeamEditor::TeamEditor()
+EditorTeam::EditorTeam()
 {
    mNameEditor = LineEditor(MAX_TEAM_NAME_LENGTH);
 }
 
 
 // Destructor
-TeamEditor::~TeamEditor()
+EditorTeam::~EditorTeam()
 {
    // Do nothing
 }
 
 
-LineEditor *TeamEditor::getLineEditor()
+LineEditor *EditorTeam::getLineEditor()
 {
    return &mNameEditor;
 }
 
 
-void TeamEditor::setName(const char *name)
+void EditorTeam::setName(const char *name)
 {
    mNameEditor.setString(name);
 }
 
 
-StringTableEntry TeamEditor::getName()
+StringTableEntry EditorTeam::getName()
 {
    return StringTableEntry(mNameEditor.c_str());
 }

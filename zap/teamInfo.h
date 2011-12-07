@@ -138,14 +138,14 @@ public:
 ////////////////////////////////////////
 
 // Class for managing teams in the editor
-class TeamEditor : public AbstractTeam
+class EditorTeam : public AbstractTeam
 {
 private:
    LineEditor mNameEditor;
 
 public:
-   TeamEditor();           // Constructor
-   virtual ~TeamEditor();  // Destructor
+   EditorTeam();           // Constructor
+   virtual ~EditorTeam();  // Destructor
 
    LineEditor *getLineEditor();
    void setName(const char *name);

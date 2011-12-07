@@ -248,7 +248,7 @@ class WallSegmentManager;
 
 class AbstractTeam;
 class Team;
-class TeamEditor;
+class EditorTeam;
 class UIManager;
 
 struct IniSettings;
