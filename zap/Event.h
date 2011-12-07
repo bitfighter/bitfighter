@@ -51,7 +51,7 @@ public:
    static void onJoyBall(U8 which, U8 ball, S16 xrel, S16 yrel);
    static void onMinimize();
    static void onRestore();
-   static void onResize(S32 w, S32 h, F32 winSizeFact);
+   static void onResize(ClientGame *game, S32 w, S32 h);
    static void onExpose();
    static void onExit();
    static void onUser(U8 type, S32 code, void* data1, void* data2);

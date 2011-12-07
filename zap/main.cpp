@@ -863,7 +863,8 @@ void InitSdlVideo()
    // it's best to start with a finely crafted 16x16 icon, then scale it up to 32x32 with no interpolation.  It will look crappy at 32x32, 
    // but good at 16x16, and that's all that really matters.
    SDL_Surface *image = SDL_LoadBMP("bficon.bmp");            // Save bmp as a 32 bit XRGB bmp file (Gimp can do it!)
-   SDL_SetColorKey(image, SDL_SRCCOLORKEY, SDL_MapRGB(image->format, 0, 0, 0));              
+   if(image != NULL)
+      SDL_SetColorKey(image, SDL_SRCCOLORKEY, SDL_MapRGB(image->format, 0, 0, 0));
 
    SDL_WM_SetIcon(image,NULL);
 
@@ -1045,6 +1046,7 @@ void actualizeScreenMode(bool changingInterfaces)
       orthoTop = -1 * (gScreenInfo.getVertDrawMargin());
       break;
 
+   case DISPLAY_MODE_WINDOWED:
    default:  //  DISPLAY_MODE_WINDOWED
       sdlWindowWidth = (S32) floor((F32)gScreenInfo.getGameCanvasWidth()  * settings->getIniSettings()->winSizeFact + 0.5f);
       sdlWindowHeight = (S32) floor((F32)gScreenInfo.getGameCanvasHeight() * settings->getIniSettings()->winSizeFact + 0.5f);

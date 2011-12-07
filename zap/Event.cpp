@@ -319,7 +319,7 @@ void Event::onEvent(ClientGame *game, SDL_Event* event)
          break;
 
       case SDL_VIDEORESIZE:
-         onResize(event->resize.w, event->resize.h, game->getSettings()->getIniSettings()->winSizeFact);
+         onResize(game, event->resize.w, event->resize.h);
          break;
 
       case SDL_VIDEOEXPOSE:
@@ -549,19 +549,19 @@ void Event::onRestore()
 
 
 // We don't need to worry about this event in fullscreen modes because it is never fired with SDL
-void Event::onResize(S32 width, S32 height, F32 winSizeFact)
+void Event::onResize(ClientGame *game, S32 width, S32 height)
 {
    S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
    S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
 
    // Constrain window to correct proportions...
    if((width - canvasWidth) > (height - canvasHeight))      // Wider than taller  (is this right? mixing virtual and physical pixels)
-      winSizeFact = max((F32) height / (F32)canvasHeight, gScreenInfo.getMinScalingFactor());
+      game->getSettings()->getIniSettings()->winSizeFact = max((F32) height / (F32)canvasHeight, gScreenInfo.getMinScalingFactor());
    else
-      winSizeFact = max((F32) width / (F32)canvasWidth, gScreenInfo.getMinScalingFactor());
+      game->getSettings()->getIniSettings()->winSizeFact = max((F32) width / (F32)canvasWidth, gScreenInfo.getMinScalingFactor());
 
-   S32 newWidth  = (S32)floor(canvasWidth  * winSizeFact + 0.5f);   // virtual * (physical/virtual) = physical, fix rounding problem
-   S32 newHeight = (S32)floor(canvasHeight * winSizeFact + 0.5f);
+   S32 newWidth  = (S32)floor(canvasWidth  * game->getSettings()->getIniSettings()->winSizeFact + 0.5f);   // virtual * (physical/virtual) = physical, fix rounding problem
+   S32 newHeight = (S32)floor(canvasHeight * game->getSettings()->getIniSettings()->winSizeFact + 0.5f);
 
    S32 flags = 0;
    flags = SDL_OPENGL | SDL_RESIZABLE;
@@ -571,7 +571,7 @@ void Event::onResize(S32 width, S32 height, F32 winSizeFact)
    glViewport(0, 0, gScreenInfo.getWindowWidth(), gScreenInfo.getWindowHeight());
    OGLCONSOLE_Reshape();
 
-   gINI.SetValueF("Settings", "WindowScalingFactor", winSizeFact, true);
+   gINI.SetValueF("Settings", "WindowScalingFactor", game->getSettings()->getIniSettings()->winSizeFact, true);
 }
 
 
