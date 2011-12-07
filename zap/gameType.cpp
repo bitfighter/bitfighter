@@ -1492,16 +1492,16 @@ bool GameType::makeSureTeamCountIsNotZero()
 }
 
 
-// This method can be overridden by other game types that handle colors differently
-const Color *GameType::getTeamColor(S32 teamIndex) const
-{
-   return Game::getBasicTeamColor(mGame, teamIndex);
-}
-
-
 const Color *GameType::getTeamColor(GameObject *theObject)
 {
    return getTeamColor(theObject->getTeam());
+}
+
+
+// This method can be overridden by other game types that handle colors differently
+const Color *GameType::getTeamColor(S32 teamIndex) const
+{
+   return Game::getBasicTeamColor(mGame->getTeamList(), teamIndex);
 }
 
 
@@ -2162,6 +2162,8 @@ GAMETYPE_RPC_S2C(GameType, s2cRemoveClient, (StringTableEntry name), (name))
 GAMETYPE_RPC_S2C(GameType, s2cAddTeam, (StringTableEntry teamName, F32 r, F32 g, F32 b, U32 score, bool firstTeam), 
                                        (teamName, r, g, b, score, firstTeam))
 {
+   TNLAssert(mGame, "NULL mGame!");
+
    if(firstTeam)
       mGame->clearTeams();
 

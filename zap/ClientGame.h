@@ -201,10 +201,8 @@ public:
    void suspendGame();
    void unsuspendGame();
 
-   boost::shared_ptr<AbstractTeam> getNewTeam();
-
    bool processPseudoItem(S32 argc, const char **argv, const string &levelFileName);        // For loading levels in editor
-
+   void onReadTeamParam(S32 argc, const char **argv);
 };
 
 ////////////////////////////////////////

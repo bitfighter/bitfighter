@@ -275,6 +275,8 @@ private:
 
    //PluginMenuUI mPluginMenu;
 
+   Vector<boost::shared_ptr<TeamEditor> > mTeams;
+
 protected:
    void onActivate();
    void onReactivate();
@@ -320,6 +322,14 @@ public:
 
 
    const Color *getTeamColor(S32 teamId);
+
+   S32 getTeamCount();
+   TeamEditor *getTeam(S32 teamId);
+   void addTeam(const boost::shared_ptr<TeamEditor> &team);
+   void addTeam(const boost::shared_ptr<TeamEditor> &team, S32 selectedIndex);
+
+   void removeTeam(S32 teamId);
+   void clearTeams();
 
    bool getNeedToSave() const { return mNeedToSave; }
    void setNeedToSave(bool needToSave) { mNeedToSave = needToSave; }

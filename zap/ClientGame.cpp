@@ -1295,13 +1295,6 @@ void ClientGame::drawStars(F32 alphaFrac, Point cameraPos, Point visibleExtent)
 }
 
 
-// Should only be called from Editor
-boost::shared_ptr<AbstractTeam> ClientGame::getNewTeam() 
-{ 
-   return boost::shared_ptr<AbstractTeam>(new TeamEditor());
-}
-
-
 S32 QSORT_CALLBACK renderSortCompare(GameObject **a, GameObject **b)
 {
    return (*a)->getRenderSortValue() - (*b)->getRenderSortValue();
@@ -1834,6 +1827,17 @@ bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &le
    return true;
 }
 
+
+// TODO: Almost identical to ServerGame version
+void ClientGame::onReadTeamParam(S32 argc, const char **argv)
+{
+   if(getTeamCount() < GameType::MAX_TEAMS)   // Too many teams?
+   {
+      boost::shared_ptr<TeamEditor> team = boost::shared_ptr<TeamEditor>(new TeamEditor());
+      if(team->processArguments(argc, argv))
+         getUIManager()->getEditorUserInterface()->addTeam(team);
+   }
+}
 
 };
 

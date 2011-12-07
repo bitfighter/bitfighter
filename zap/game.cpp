@@ -666,9 +666,15 @@ S32 Game::getTeamCount() const
 }
 
 
-AbstractTeam *Game::getTeam(S32 team) const
+Team *Game::getTeam(S32 team) const
 {
    return mTeams[team].get();
+}
+
+
+const Vector<boost::shared_ptr<Team> > *Game::getTeamList() const
+{
+   return &mTeams;
 }
 
 
@@ -702,20 +708,20 @@ void Game::removeTeam(S32 teamIndex)
 }
 
 
-void Game::addTeam(boost::shared_ptr<AbstractTeam> team)
+void Game::addTeam(boost::shared_ptr<Team> team)
 {
    mTeams.push_back(team);
 }
 
 
-void Game::addTeam(boost::shared_ptr<AbstractTeam> team, S32 index)
+void Game::addTeam(boost::shared_ptr<Team> team, S32 index)
 {
    mTeams.insert(index);
    mTeams[index] = team;
 }
 
 
-void Game::replaceTeam(boost::shared_ptr<AbstractTeam> team, S32 index)
+void Game::replaceTeam(boost::shared_ptr<Team> team, S32 index)
 {
    mTeams[index] = team;
 }
@@ -958,17 +964,6 @@ string Game::toString()
 }
 
 
-void Game::onReadTeamParam(S32 argc, const char **argv)
-{
-   if(getTeamCount() < GameType::MAX_TEAMS)   // Too many teams?
-   {
-      boost::shared_ptr<AbstractTeam> team = getNewTeam();
-      if(team->processArguments(argc, argv))
-         addTeam(team);
-   }
-}
-
-
 // Only occurs in scripts
 void Game::onReadTeamChangeParam(S32 argc, const char **argv)
 {
@@ -978,7 +973,7 @@ void Game::onReadTeamChangeParam(S32 argc, const char **argv)
 
       if(teamNumber >= 0 && teamNumber < getTeamCount())
       {
-         boost::shared_ptr<AbstractTeam> team = getNewTeam();
+         boost::shared_ptr<Team> team = boost::shared_ptr<Team>(new Team());
          team->processArguments(argc-1, argv+1);          // skip one arg
          replaceTeam(team, teamNumber);
       }
@@ -1767,12 +1762,6 @@ StringTableEntry ServerGame::getCurrentLevelType()
 }
 
 
-boost::shared_ptr<AbstractTeam> ServerGame::getNewTeam()
-{
-   return boost::shared_ptr<AbstractTeam>(new Team());
-}
-
-
 bool ServerGame::processPseudoItem(S32 argc, const char **argv, const string &levelFileName)
 {
    if(!stricmp(argv[0], "Spawn"))
@@ -2111,7 +2100,7 @@ bool ServerGame::loadLevel(const string &levelFileName)
 
    string filename = folderManager->findLevelFile(levelFileName);
 
-   cleanUp();
+   //cleanUp();
    if(filename == "")
    {
       logprintf("Unable to find level file \"%s\".  Skipping...", levelFileName.c_str());
@@ -2638,21 +2627,45 @@ const Color *Game::getTeamColor(S32 teamId) const
 extern Color gNeutralTeamColor;
 extern Color gHostileTeamColor;
 
-// Generic color function, works in most cases (static method)
-const Color *Game::getBasicTeamColor(const Game *game, S32 teamId)
-{
-   //TNLAssert(teamId < game->getTeamCount() || teamId < Item::TEAM_HOSTILE, "Invalid team id!");
+// TODO: Merge the following two... somehow
 
+// Generic color function, works in most cases (static method)
+const Color *Game::getBasicTeamColor(const Vector<boost::shared_ptr<Team> > *teams, S32 teamId)
+{
    if(teamId == TEAM_NEUTRAL)
       return &gNeutralTeamColor;
    else if(teamId == TEAM_HOSTILE)
       return &gHostileTeamColor;
-   else if((U32)teamId < (U32)game->getTeamCount())
-      return game->getTeam(teamId)->getColor();
+   else if((U32)teamId < (U32)teams->size())    // Using U32 lets us handle goofball negative team numbers without explicitly checking
+      return teams->get(teamId)->getColor();
    else
-      return &Colors::magenta;  // a level can make team number out of range, throw in some rarely used color to let user know an object is out of range team number
+      return &Colors::magenta;                  // Use a rare color to let user know an object has an out of range team number
 }
 
+
+const Color *Game::getBasicTeamColor(const Vector<boost::shared_ptr<TeamEditor> > *teams, S32 teamId)
+{
+   if(teamId == TEAM_NEUTRAL)
+      return &gNeutralTeamColor;
+   else if(teamId == TEAM_HOSTILE)
+      return &gHostileTeamColor;
+   else if((U32)teamId < (U32)teams->size())    // Using U32 lets us handle goofball negative team numbers without explicitly checking
+      return teams->get(teamId)->getColor();
+   else
+      return &Colors::magenta;                  // Use a rare color to let user know an object has an out of range team number
+}
+
+
+// TODO: Almost identical to ClientGame version
+void ServerGame::onReadTeamParam(S32 argc, const char **argv)
+{
+   if(getTeamCount() < GameType::MAX_TEAMS)     // Too many teams?
+   {
+      boost::shared_ptr<Team> team = boost::shared_ptr<Team>(new Team());
+      if(team->processArguments(argc, argv))
+         addTeam(team);
+   }
+}
 
 };
 

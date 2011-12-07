@@ -382,7 +382,7 @@ EditorObject *EditorObject::newCopy()
 
 Color EditorObject::getTeamColor(S32 teamId) 
 { 
-   return mGame->getTeamColor(teamId);
+   return dynamic_cast<ClientGame *>(mGame)->getUIManager()->getEditorUserInterface()->getTeamColor(teamId);
 }
 
 

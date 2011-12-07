@@ -448,13 +448,13 @@ void EditorUserInterface::setLevelFileName(string name)
 
 void EditorUserInterface::makeSureThereIsAtLeastOneTeam()
 {
-   if(getGame()->getTeamCount() == 0)
+   if(mTeams.size() == 0)
    {
-      boost::shared_ptr<AbstractTeam> team = boost::shared_ptr<AbstractTeam>(new TeamEditor);
+      boost::shared_ptr<TeamEditor> team = boost::shared_ptr<TeamEditor>(new TeamEditor);
       team->setName(gTeamPresets[0].name);
       team->setColor(gTeamPresets[0].r, gTeamPresets[0].g, gTeamPresets[0].b);
 
-      getGame()->addTeam(team);
+      mTeams.push_back(team);
    }
 }
 
@@ -689,7 +689,7 @@ void EditorUserInterface::validateLevel()
    string teamList, teams;
 
    // First, catalog items in level
-   S32 teamCount = getGame()->getTeamCount();
+   S32 teamCount = mTeams.size();
    foundSpawn.resize(teamCount);
 
    for(S32 i = 0; i < teamCount; i++)      // Initialize vector
@@ -812,7 +812,7 @@ void EditorUserInterface::validateTeams()
 // Check that each item has a valid team  (fixes any problems it finds)
 void EditorUserInterface::validateTeams(const Vector<DatabaseObject *> &dbObjects)
 {
-   S32 teams = getGame()->getTeamCount();
+   S32 teams = mTeams.size();
 
    for(S32 i = 0; i < dbObjects.size(); i++)
    {
@@ -844,12 +844,12 @@ void EditorUserInterface::teamsHaveChanged()
 {
    bool teamsChanged = false;
 
-   if(getGame()->getTeamCount() != mOldTeams.size())     // Number of teams has changed
+   if(mTeams.size() != mOldTeams.size())     // Number of teams has changed
       teamsChanged = true;
    else
-      for(S32 i = 0; i < getGame()->getTeamCount(); i++)
+      for(S32 i = 0; i < mTeams.size(); i++)
       {
-         AbstractTeam *team = getGame()->getTeam(i);
+         TeamEditor *team = mTeams[i].get();
 
          if(mOldTeams[i].color != team->getColor() || mOldTeams[i].name != team->getName().getString()) // Color(s) or names(s) have changed
          {
@@ -1048,7 +1048,7 @@ void EditorUserInterface::onReactivate()     // Run when user re-enters the edit
    }
 
 
-   if(mCurrentTeam >= getGame()->getTeamCount())
+   if(mCurrentTeam >= mTeams.size())
       mCurrentTeam = 0;
 
    OGLCONSOLE_EnterKey(processEditorConsoleCommand);     // Restore callback for processing console commands
@@ -1057,6 +1057,44 @@ void EditorUserInterface::onReactivate()     // Run when user re-enters the edit
 
    mDockItemHit = NULL;
 }
+
+
+S32 EditorUserInterface::getTeamCount()
+{
+   return mTeams.size();
+}
+
+
+TeamEditor *EditorUserInterface::getTeam(S32 teamId)
+{
+   return mTeams[teamId].get();
+}
+
+
+void EditorUserInterface::clearTeams()
+{
+   mTeams.clear();
+}
+
+
+void EditorUserInterface::addTeam(const boost::shared_ptr<TeamEditor> &team)
+{
+   mTeams.push_back(team);
+}
+
+
+void EditorUserInterface::addTeam(const boost::shared_ptr<TeamEditor> &team, S32 index)
+{
+   mTeams.insert(index);
+   mTeams[index] = team;
+}
+
+
+void EditorUserInterface::removeTeam(S32 teamId)
+{
+   mTeams.erase(teamId);
+}
+
 
 
 static Point sCenter;
@@ -1385,7 +1423,7 @@ void EditorUserInterface::renderInfoPanel()
    renderPanelInfoLine(2, "Zoom Scale: %2.2f", mCurrentScale);
 
    // Show number of teams
-   renderPanelInfoLine(3, "Team Count: %d",  getGame()->getTeamCount());
+   renderPanelInfoLine(3, "Team Count: %d", mTeams.size());
 
    glColor(mNeedToSave ? Colors::red : Colors::green);     // Color level name by whether it needs to be saved or not
 
@@ -1683,7 +1721,7 @@ void EditorUserInterface::render()
             Point pos = editorObj->getVert(0);
             pos *= mCurrentScale;
             pos += mCurrentOffset;
-            renderSpyBugVisibleRange(pos, getGame()->getTeamColor(editorObj->getTeam()), mCurrentScale);
+            renderSpyBugVisibleRange(pos, getTeamColor(editorObj->getTeam()), mCurrentScale);
          }
 
          if(disableBlending)
@@ -1708,7 +1746,7 @@ void EditorUserInterface::render()
             Point pos = editorObj->getVert(0);
             pos *= mCurrentScale;
             pos += mCurrentOffset;
-            renderTurretFiringRange(pos, getGame()->getTeamColor(editorObj->getTeam()), mCurrentScale);
+            renderTurretFiringRange(pos, getTeamColor(editorObj->getTeam()), mCurrentScale);
          }
       }
    }
@@ -2011,7 +2049,7 @@ void EditorUserInterface::renderWarnings()
 
 const Color *EditorUserInterface::getTeamColor(S32 team)
 {
-   return getGame()->getTeamColor(team);
+   return Game::getBasicTeamColor(&mTeams, team);
 }
 
 
@@ -2211,14 +2249,14 @@ void EditorUserInterface::setCurrentTeam(S32 currentTeam)
    if(anythingSelected())
       saveUndoState();
 
-   if(currentTeam >= getGame()->getTeamCount())
+   if(currentTeam >= mTeams.size())
    {
       char msg[255];
 
-      if(getGame()->getTeamCount() == 1)
+      if(mTeams.size() == 1)
          dSprintf(msg, sizeof(msg), "Only 1 team has been configured.");
       else
-         dSprintf(msg, sizeof(msg), "Only %d teams have been configured.", getGame()->getTeamCount());
+         dSprintf(msg, sizeof(msg), "Only %d teams have been configured.", mTeams.size());
 
       setWarnMessage(msg, "Hit [F2] to configure teams.");
 
