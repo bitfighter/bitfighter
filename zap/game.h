@@ -294,6 +294,7 @@ public:
 /// managing the passage of time as well as rendering.
 
 class ClientRef;
+class TeamManager;
 
 class Game : public LevelLoader
 {
@@ -304,11 +305,10 @@ private:
    bool mHaveTriedToConnectToMaster;
 
    WallSegmentManager *mWallSegmentManager;    
-
-   Vector<boost::shared_ptr<Team> > mTeams;       // List of teams
+   TeamManager *mActiveTeamManager;
 
    // Functions for handling individual level parameters read in processLevelParam; some may be game-specific
-   virtual void onReadTeamParam(S32 argc, const char **argv) = 0;
+   virtual void onReadTeamParam(S32 argc, const char **argv);
    void onReadTeamChangeParam(S32 argc, const char **argv);
    void onReadSpecialsParam(S32 argc, const char **argv);
    void onReadScriptParam(S32 argc, const char **argv);
@@ -362,6 +362,9 @@ protected:
    // should not be updated directly, but rather by notifying the server, and having the server notify us.
    Vector<boost::shared_ptr<ClientInfo> > mClientInfos;
 
+   TeamManager *mTeamManager;
+
+   virtual AbstractTeam *getNewTeam() = 0;
 
 public:
    static const S32 DefaultGridSize = 255;   // Size of "pages", represented by floats for intrapage locations (i.e. pixels per integer)
@@ -380,6 +383,7 @@ public:
    Game(const Address &theBindAddress, GameSettings *settings);         // Constructor
    virtual ~Game();                                                     // Destructor
 
+   void setActiveTeamManager(TeamManager *teamManager);
 
    S32 getClientCount() const;                                          // Total number of players, human and robot
    S32 getPlayerCount() const;                                          // Returns number of human players
@@ -400,8 +404,6 @@ public:
    virtual bool isTestServer();                                         // Overridden in ServerGame
 
    virtual const Color *getTeamColor(S32 teamId) const;                 // ClientGame will override
-   static const Color *getBasicTeamColor(const Vector<boost::shared_ptr<Team> > *teams, S32 teamId); // Color function used in most cases, overridden by some games
-      static const Color *getBasicTeamColor(const Vector<boost::shared_ptr<TeamEditor> > *teams, S32 teamId); // Color function used in most cases, 
 
    static const ModuleInfo *getModuleInfo(ShipModule module);
    
@@ -456,18 +458,18 @@ public:
 
    // Team functions
    S32 getTeamCount() const;
-   Team *getTeam(S32 teamIndex) const;
-   const Vector<boost::shared_ptr<Team> > *getTeamList() const;
+   AbstractTeam *getTeam(S32 teamIndex) const;
 
    S32 getTeamIndex(const StringTableEntry &playerName);
 
    void countTeamPlayers();      // Makes sure that the mTeams[] structure has the proper player counts
 
-   void addTeam(boost::shared_ptr<Team> team);
-   void addTeam(boost::shared_ptr<Team> team, S32 index);
-   void replaceTeam(boost::shared_ptr<Team> team, S32 index);
+   void addTeam(AbstractTeam *team);
+   void addTeam(AbstractTeam *team, S32 index);
+   void replaceTeam(AbstractTeam *team, S32 index);
    void removeTeam(S32 teamIndex);
    void clearTeams();
+
    StringTableEntry getTeamName(S32 teamIndex) const;   // Return the name of the team
 
    void setGameType(GameType *theGameType);
@@ -557,6 +559,8 @@ private:
    bool onlyClientIs(GameConnection *client);
 
    void cleanUp();
+
+   AbstractTeam *getNewTeam();
 
 public:
    ServerGame(const Address &address, GameSettings *settings, bool testMode, bool dedicated);    // Constructor
@@ -651,8 +655,6 @@ public:
    S32 addUploadedLevelInfo(const char *filename, LevelInfo &info);
 
    HostingModePhases hostingModePhase;
-
-   void onReadTeamParam(S32 argc, const char **argv);
 };
 
 ////////////////////////////////////////

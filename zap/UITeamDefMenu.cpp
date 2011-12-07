@@ -273,7 +273,7 @@ void TeamDefUserInterface::onKeyDown(InputCode inputCode, char ascii)
          ui->clearTeams();
          for(U32 i = 0; i < count; i++)
          {
-            boost::shared_ptr<TeamEditor> team = boost::shared_ptr<TeamEditor>(new TeamEditor);
+            TeamEditor *team = new TeamEditor;
             team->setName(gTeamPresets[i].name);
             team->setColor(gTeamPresets[i].r, gTeamPresets[i].g, gTeamPresets[i].b);
             ui->addTeam(team);
@@ -311,7 +311,7 @@ void TeamDefUserInterface::onKeyDown(InputCode inputCode, char ascii)
          return;
       }
 
-      boost::shared_ptr<TeamEditor> team = boost::shared_ptr<TeamEditor>(new TeamEditor);
+      TeamEditor *team = new TeamEditor;
       team->setName(gTeamPresets[selectedIndex].name);
       team->setColor(gTeamPresets[selectedIndex].r, gTeamPresets[selectedIndex].g, gTeamPresets[selectedIndex].b);
       ui->addTeam(team, selectedIndex);

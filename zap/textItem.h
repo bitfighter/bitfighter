@@ -165,7 +165,7 @@ public:
    // Editor methods
    string toString(F32 gridSize) const;
    virtual void renderEditor(F32 currentScale);
-   virtual const Color *getEditorRenderColor() const;
+   virtual const Color *getEditorRenderColor();
 
 
    // Thickness-related

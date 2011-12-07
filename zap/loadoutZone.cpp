@@ -65,7 +65,7 @@ LoadoutZone *LoadoutZone::clone() const
 
 void LoadoutZone::render()
 {
-   renderLoadoutZone(getGame()->getTeamColor(getTeam()), getOutline(), getFill(), getCentroid(), getLabelAngle());
+   renderLoadoutZone(getTeamColor(getTeam()), getOutline(), getFill(), getCentroid(), getLabelAngle());
 }
 
 
@@ -78,7 +78,7 @@ void LoadoutZone::renderEditor(F32 currentScale)
 
 void LoadoutZone::renderDock()
 {
-  renderLoadoutZone(getGame()->getTeamColor(getTeam()), getOutline(), getFill());
+  renderLoadoutZone(getTeamColor(getTeam()), getOutline(), getFill());
 }
 
 

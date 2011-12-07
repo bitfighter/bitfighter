@@ -1041,13 +1041,13 @@ void ForceFieldProjector::onAddedToGame(Game *theGame)
 
 void ForceFieldProjector::render()
 {
-   renderForceFieldProjector(&mCollisionPolyPoints, getGame()->getTeamColor(getTeam()), isEnabled());
+   renderForceFieldProjector(&mCollisionPolyPoints, getTeamColor(getTeam()), isEnabled());
 }
 
 
 void ForceFieldProjector::renderDock()
 {
-   renderSquareItem(getVert(0), getGame()->getTeamColor(mTeam), 1, &Colors::white, '>');
+   renderSquareItem(getVert(0), getTeamColor(mTeam), 1, &Colors::white, '>');
 }
 
 
@@ -1055,7 +1055,7 @@ void ForceFieldProjector::renderEditor(F32 currentScale)
 {
 #ifndef ZAP_DEDICATED
    F32 scaleFact = 1;
-   const Color *color = getGame()->getTeamColor(mTeam);
+   const Color *color = getTeamColor(mTeam);
 
    if(mSnapped)
    {
@@ -1366,8 +1366,7 @@ bool ForceField::getCollisionPoly(Vector<Point> &points) const
 
 void ForceField::render()
 {
-   Color c = getGame()->getTeamColor(mTeam);
-   renderForceField(mStart, mEnd, c, mFieldUp);
+   renderForceField(mStart, mEnd, mGame->getTeamColor(mTeam), mFieldUp);
 }
 
 
@@ -1508,7 +1507,7 @@ bool Turret::isTurret()
 
 void Turret::render()
 {
-   Color c = getGame()->getTeamColor(mTeam);
+   Color c = getTeamColor(mTeam);
 
    renderTurret(c, getVert(0), mAnchorNormal, isEnabled(), mHealth, mCurrentAngle);
 }
@@ -1516,7 +1515,7 @@ void Turret::render()
 
 void Turret::renderDock()
 {
-   renderSquareItem(getVert(0), getGame()->getTeamColor(mTeam), 1, &Colors::white, 'T');
+   renderSquareItem(getVert(0), getTeamColor(mTeam), 1, &Colors::white, 'T');
 }
 
 

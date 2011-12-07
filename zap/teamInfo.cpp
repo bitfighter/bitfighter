@@ -29,6 +29,10 @@
 #include "game.h"
 #include "stringUtils.h"
 
+#ifdef ZAP_DEDICATED
+#   include "Colors.h"
+#endif
+
 namespace Zap
 {
 
@@ -398,6 +402,76 @@ S32 LuaTeamInfo::getPlayers(lua_State *L)
    }
 
    return 1;
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+
+// Destructor
+TeamManager::~TeamManager()
+{
+   clearTeams();
+}
+
+
+S32 TeamManager::getTeamCount()
+{
+   return mTeams.size();
+}
+
+
+extern Color gNeutralTeamColor;
+extern Color gHostileTeamColor;
+
+const Color *TeamManager::getTeamColor(S32 index)
+{
+   if(index == TEAM_NEUTRAL)
+      return &gNeutralTeamColor;
+   else if(index == TEAM_HOSTILE)
+      return &gHostileTeamColor;
+   else if((U32)index < (U32)mTeams.size())     // Using U32 lets us handle goofball negative team numbers without explicitly checking for them
+      return mTeams[index]->getColor();
+   else
+      return &Colors::magenta;                  // Use a rare color to let user know an object has an out of range team number
+}
+
+
+AbstractTeam *TeamManager::getTeam(S32 teamIndex)
+{
+   return mTeams[teamIndex];
+}
+
+
+void TeamManager::removeTeam(S32 teamIndex)
+{
+   mTeams.deleteAndErase(teamIndex);
+}
+
+
+void TeamManager::addTeam(AbstractTeam *team)
+{
+   mTeams.push_back(team);
+}
+
+
+void TeamManager::addTeam(AbstractTeam *team, S32 index)
+{
+   mTeams.insert(index);
+   mTeams[index] = team;
+}
+
+
+void TeamManager::replaceTeam(AbstractTeam *team, S32 index)
+{
+   mTeams[index] = team;
+}
+
+
+void TeamManager::clearTeams()
+{
+   mTeams.deleteAndClear();
 }
 
 

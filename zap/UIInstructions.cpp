@@ -566,7 +566,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
             break;
          case 17:
             renderForceFieldProjector(Point(-50, 0), Point(1, 0), &Colors::red, true);
-            renderForceField(Point(-35, 0), Point(50, 0), Colors::red, true);
+            renderForceField(Point(-35, 0), Point(50, 0), &Colors::red, true);
             break;
          case 18:
             renderTeleporter(Point(0, 0), 0, true, getGame()->getCurrentTime(), 1, 1, (F32)Teleporter::TELEPORTER_RADIUS, 1, Vector<Point>(), false);

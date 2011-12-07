@@ -84,7 +84,7 @@ protected:
    S32 mSerialNumber;   // Autoincremented serial number   
    S32 mItemId;         // Item's unique id... 0 if there is none
 
-   Color getTeamColor(S32 teamId);
+   const Color *getTeamColor(S32 teamId);    // Convenience function, calls mGame version
 
 public:
    EditorObject();                  // Constructor

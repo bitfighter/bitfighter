@@ -188,6 +188,8 @@ private:
    string mEditFileName;            // Manipulate with get/setLevelFileName
 
    EditorObject *mNewItem;
+   TeamManager *mTeamManager;
+
    F32 mCurrentScale;
    Point mCurrentOffset;            // Coords of UR corner of screen
 
@@ -275,8 +277,6 @@ private:
 
    //PluginMenuUI mPluginMenu;
 
-   Vector<boost::shared_ptr<TeamEditor> > mTeams;
-
 protected:
    void onActivate();
    void onReactivate();
@@ -325,8 +325,9 @@ public:
 
    S32 getTeamCount();
    TeamEditor *getTeam(S32 teamId);
-   void addTeam(const boost::shared_ptr<TeamEditor> &team);
-   void addTeam(const boost::shared_ptr<TeamEditor> &team, S32 selectedIndex);
+
+   void addTeam(TeamEditor *team);
+   void addTeam(TeamEditor *team, S32 index);
 
    void removeTeam(S32 teamId);
    void clearTeams();

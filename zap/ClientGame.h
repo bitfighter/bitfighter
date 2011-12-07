@@ -78,6 +78,8 @@ private:
 
    S32 findClientIndex(const StringTableEntry &name);
 
+   AbstractTeam *getNewTeam();
+
 public:
    ClientGame(const Address &bindAddress, GameSettings *settings);
    virtual ~ClientGame();
@@ -186,11 +188,6 @@ public:
    void runCommand(const char *command);
    void setVolume(VolumeType volType, const Vector<string> &words);
 
-
-   const Color *getTeamColor(S32 teamIndex) const;
-
-   //const char *getRemoteLevelDownloadFilename();
-
    string getRequestedServerName();
    string getServerPassword();
    string getHashedServerPassword();
@@ -202,7 +199,6 @@ public:
    void unsuspendGame();
 
    bool processPseudoItem(S32 argc, const char **argv, const string &levelFileName);        // For loading levels in editor
-   void onReadTeamParam(S32 argc, const char **argv);
 };
 
 ////////////////////////////////////////

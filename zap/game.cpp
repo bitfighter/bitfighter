@@ -25,7 +25,7 @@
 
 #include "barrier.h"
 #include "config.h"
-#include "EngineeredItem.h"    // For EngineerModuleDeployer
+#include "EngineeredItem.h"      // For EngineerModuleDeployer
 #include "game.h"
 #include "gameLoader.h"
 #include "gameNetInterface.h"
@@ -44,7 +44,8 @@
 #include "robot.h"
 #include "shipItems.h"           // For moduleInfos
 #include "stringUtils.h"
-#include "NexusGame.h"           // for creating new NexusFlagItem
+#include "NexusGame.h"           // For creating new NexusFlagItem
+#include "teamInfo.h"            // For TeamManager def
 
 #include "IniFile.h"             // For CIniFile def
 #include "BanList.h"             // For banList kick duration
@@ -438,6 +439,9 @@ Game::Game(const Address &theBindAddress, GameSettings *settings) : mGameObjData
    mWallSegmentManager = new WallSegmentManager();    // gets deleted in destructor
 
    mNameToAddressThread = NULL;
+
+   mTeamManager = new TeamManager;                    // gets deleted in destructor 
+   mActiveTeamManager = mTeamManager;
 }
 
 
@@ -445,6 +449,8 @@ Game::Game(const Address &theBindAddress, GameSettings *settings) : mGameObjData
 Game::~Game()
 {
    delete mWallSegmentManager;
+   delete mTeamManager;
+
    if(mNameToAddressThread)
       delete mNameToAddressThread;
 }
@@ -662,19 +668,13 @@ GameType *Game::getGameType() const
 
 S32 Game::getTeamCount() const
 {
-   return mTeams.size();
+   return mActiveTeamManager->getTeamCount();
 }
 
 
-Team *Game::getTeam(S32 team) const
+AbstractTeam *Game::getTeam(S32 team) const
 {
-   return mTeams[team].get();
-}
-
-
-const Vector<boost::shared_ptr<Team> > *Game::getTeamList() const
-{
-   return &mTeams;
+   return mActiveTeamManager->getTeam(team);
 }
 
 
@@ -702,35 +702,16 @@ S32 Game::getTeamIndex(const StringTableEntry &playerName)
 }
 
 
-void Game::removeTeam(S32 teamIndex)
-{
-   mTeams.erase(teamIndex);
-}
+// The following just delegate their work to the TeamManager
+void Game::removeTeam(S32 teamIndex) { mActiveTeamManager->removeTeam(teamIndex); }
 
+void Game::addTeam(AbstractTeam *team) { mActiveTeamManager->addTeam(team); }
 
-void Game::addTeam(boost::shared_ptr<Team> team)
-{
-   mTeams.push_back(team);
-}
+void Game::addTeam(AbstractTeam *team, S32 index) { mActiveTeamManager->addTeam(team, index); }
 
+void Game::replaceTeam(AbstractTeam *team, S32 index) { mActiveTeamManager->replaceTeam(team, index); }
 
-void Game::addTeam(boost::shared_ptr<Team> team, S32 index)
-{
-   mTeams.insert(index);
-   mTeams[index] = team;
-}
-
-
-void Game::replaceTeam(boost::shared_ptr<Team> team, S32 index)
-{
-   mTeams[index] = team;
-}
-
-
-void Game::clearTeams()
-{
-   mTeams.clear();
-}
+void Game::clearTeams() { mActiveTeamManager->clearTeams(); }
 
 
 // Makes sure that the mTeams[] structure has the proper player counts
@@ -739,7 +720,10 @@ void Game::clearTeams()
 void Game::countTeamPlayers()
 {
    for(S32 i = 0; i < getTeamCount(); i++)
-      ((Team *)getTeam(i))->clearStats();
+   {
+      TNLAssert(dynamic_cast<Team *>(getTeam(i)), "Invalid team");      // Assert for safety
+      static_cast<Team *>(getTeam(i))->clearStats();                    // static_cast for speed
+   }
 
    for(S32 i = 0; i < getClientCount(); i++)
    {
@@ -750,7 +734,8 @@ void Game::countTeamPlayers()
       if(teamIndex >= 0 && teamIndex < getTeamCount())
       { 
          // Robot could be neutral or hostile, skip out of range team numbers
-         Team *team = (Team *)getTeam(teamIndex);
+         TNLAssert(dynamic_cast<Team *>(getTeam(i)), "Invalid team");    
+         Team *team = static_cast<Team *>(getTeam(teamIndex));            
 
          if(clientInfo->isRobot())
             team->incrementBotCount();
@@ -949,8 +934,8 @@ string Game::toString()
 
    str += string("GridSize ") + ftos(mGridSize) + "\n";
 
-   for(S32 i = 0; i < mTeams.size(); i++)
-      str += mTeams[i]->toString() + "\n";
+   for(S32 i = 0; i < mActiveTeamManager->getTeamCount(); i++)
+      str += mActiveTeamManager->getTeam(i)->toString() + "\n";
 
    str += gameType->getSpecialsLine() + "\n";
 
@@ -964,7 +949,7 @@ string Game::toString()
 }
 
 
-// Only occurs in scripts
+// Only occurs in scripts; could be in editor or on server
 void Game::onReadTeamChangeParam(S32 argc, const char **argv)
 {
    if(argc >= 2)   // Enough arguments?
@@ -973,7 +958,7 @@ void Game::onReadTeamChangeParam(S32 argc, const char **argv)
 
       if(teamNumber >= 0 && teamNumber < getTeamCount())
       {
-         boost::shared_ptr<Team> team = boost::shared_ptr<Team>(new Team());
+         AbstractTeam *team = getNewTeam();
          team->processArguments(argc-1, argv+1);          // skip one arg
          replaceTeam(team, teamNumber);
       }
@@ -1391,7 +1376,7 @@ void Game::cleanUp()
       delete dynamic_cast<Object *>(fillVector[i]); // dynamic_cast might be needed to avoid errors
    }
 
-   mTeams.resize(0);
+   mActiveTeamManager->clearTeams();
 }
 
 
@@ -1511,6 +1496,12 @@ void ServerGame::addLevelInfo(const LevelInfo &levelInfo)
 bool ServerGame::isTestServer()
 {
    return mTestMode;
+}
+
+
+AbstractTeam *ServerGame::getNewTeam()
+{
+   return new Team;
 }
 
 
@@ -2620,51 +2611,24 @@ bool Game::isTestServer()
 
 const Color *Game::getTeamColor(S32 teamId) const
 {
-   return &Colors::white;
+   return mActiveTeamManager->getTeamColor(teamId);
 }
 
 
-extern Color gNeutralTeamColor;
-extern Color gHostileTeamColor;
-
-// TODO: Merge the following two... somehow
-
-// Generic color function, works in most cases (static method)
-const Color *Game::getBasicTeamColor(const Vector<boost::shared_ptr<Team> > *teams, S32 teamId)
-{
-   if(teamId == TEAM_NEUTRAL)
-      return &gNeutralTeamColor;
-   else if(teamId == TEAM_HOSTILE)
-      return &gHostileTeamColor;
-   else if((U32)teamId < (U32)teams->size())    // Using U32 lets us handle goofball negative team numbers without explicitly checking
-      return teams->get(teamId)->getColor();
-   else
-      return &Colors::magenta;                  // Use a rare color to let user know an object has an out of range team number
-}
-
-
-const Color *Game::getBasicTeamColor(const Vector<boost::shared_ptr<TeamEditor> > *teams, S32 teamId)
-{
-   if(teamId == TEAM_NEUTRAL)
-      return &gNeutralTeamColor;
-   else if(teamId == TEAM_HOSTILE)
-      return &gHostileTeamColor;
-   else if((U32)teamId < (U32)teams->size())    // Using U32 lets us handle goofball negative team numbers without explicitly checking
-      return teams->get(teamId)->getColor();
-   else
-      return &Colors::magenta;                  // Use a rare color to let user know an object has an out of range team number
-}
-
-
-// TODO: Almost identical to ClientGame version
-void ServerGame::onReadTeamParam(S32 argc, const char **argv)
+void Game::onReadTeamParam(S32 argc, const char **argv)
 {
    if(getTeamCount() < GameType::MAX_TEAMS)     // Too many teams?
    {
-      boost::shared_ptr<Team> team = boost::shared_ptr<Team>(new Team());
+      AbstractTeam *team = getNewTeam();
       if(team->processArguments(argc, argv))
          addTeam(team);
    }
+}
+
+
+void Game::setActiveTeamManager(TeamManager *teamManager)
+{
+   mActiveTeamManager = teamManager;
 }
 
 };

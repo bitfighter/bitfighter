@@ -805,7 +805,7 @@ VersionedGameStats GameType::getGameStats()
          GameConnection *conn = clientInfo->getConnection();
 
          // Only looking for players on the current team
-         if(clientInfo->getTeamIndex() != i)  // this is not sorted... mTeams[i].getId()
+         if(clientInfo->getTeamIndex() != i)  // this is not sorted... 
             continue;
 
          teamStats->playerStats.push_back(PlayerStats());
@@ -1480,7 +1480,7 @@ bool GameType::makeSureTeamCountIsNotZero()
 {
    if(mGame->getTeamCount() == 0) 
    {
-      boost::shared_ptr<Team> team = boost::shared_ptr<Team>(new Team);
+      Team *team = new Team;           // Will be deleted by TeamManager
       team->setName("Missing Team");
       team->setColor(Colors::blue);
       mGame->addTeam(team);
@@ -1501,10 +1501,11 @@ const Color *GameType::getTeamColor(GameObject *theObject)
 // This method can be overridden by other game types that handle colors differently
 const Color *GameType::getTeamColor(S32 teamIndex) const
 {
-   return Game::getBasicTeamColor(mGame->getTeamList(), teamIndex);
+   return mGame->getTeamColor(teamIndex);
 }
 
 
+// TODO: can be replaced by getTeamColor?
 const Color *GameType::getShipColor(Ship *s)
 {
    return getTeamColor(s->getTeam());
@@ -2167,7 +2168,7 @@ GAMETYPE_RPC_S2C(GameType, s2cAddTeam, (StringTableEntry teamName, F32 r, F32 g,
    if(firstTeam)
       mGame->clearTeams();
 
-   boost::shared_ptr<Team> team = boost::shared_ptr<Team>(new Team);
+   Team *team = new Team;           // Will be deleted by TeamManager
 
    team->setName(teamName);
    team->setColor(r,g,b);

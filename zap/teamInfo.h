@@ -109,7 +109,6 @@ public:
    void addFlagSpawn(FlagSpawn flagSpawn);
    const Vector<FlagSpawn> *getFlagSpawns() const;
   
-
    StringTableEntry getName();
 
    S32 getId();
@@ -179,6 +178,30 @@ public:
    S32 getPlayerCount(lua_State *L);
    S32 getScore(lua_State *L);
    S32 getPlayers(lua_State *L);
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+class TeamManager
+{
+private:
+   Vector<AbstractTeam *> mTeams;
+
+public:
+   ~TeamManager();      // Destructor
+
+   const Color *getTeamColor(S32 index);
+   S32 getTeamCount();
+
+   AbstractTeam *getTeam(S32 teamIndex);
+
+   void removeTeam(S32 teamIndex);
+   void addTeam(AbstractTeam *team);
+   void addTeam(AbstractTeam *team, S32 index);
+   void replaceTeam(AbstractTeam *team, S32 index);
+   void clearTeams();
 };
 
 

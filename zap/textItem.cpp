@@ -114,7 +114,7 @@ void TextItem::render()
    if( (!ship && mTeam != -1) || (ship && ship->getTeam() != mTeam && mTeam != -1) )
       return;
 
-   renderTextItem(getVert(0), getVert(1), mSize, mText, game->getTeamColor(mTeam));
+   renderTextItem(getVert(0), getVert(1), mSize, mText, getTeamColor(mTeam));
 #endif
 }
 
@@ -123,7 +123,7 @@ void TextItem::renderEditorPreview(F32 currentScale)
 {
 #ifndef ZAP_DEDICATED
    ClientGame *game = dynamic_cast<ClientGame *>(getGame());
-   renderTextItem(getVert(0), getVert(1), mSize, mText, game->getTeamColor(mTeam));
+   renderTextItem(getVert(0), getVert(1), mSize, mText, getTeamColor(mTeam));
 #endif
 }
 
@@ -131,7 +131,7 @@ void TextItem::renderEditorPreview(F32 currentScale)
 // Called by SimpleItem::renderEditor()
 void TextItem::renderEditorItem()
 {
-   renderTextItem(getVert(0), getVert(1), mSize, mText, getGame()->getTeamColor(mTeam));
+   renderTextItem(getVert(0), getVert(1), mSize, mText, getTeamColor(mTeam));
 }
 
 
@@ -434,7 +434,7 @@ void LineItem::render()
          return;
    }
 
-   glColor(getGame()->getTeamColor(mTeam));
+   glColor(getTeamColor(mTeam));
    renderPointVector(getOutline(), GL_LINE_STRIP);
 #endif
 }
@@ -453,9 +453,9 @@ void LineItem::renderEditor(F32 currentScale)
 }
 
 
-const Color *LineItem::getEditorRenderColor() const 
+const Color *LineItem::getEditorRenderColor() 
 { 
-   return getGame()->getTeamColor(mTeam); 
+   return getTeamColor(mTeam); 
 }
 
 

@@ -328,7 +328,7 @@ void FlagItem::renderItem(const Point &pos)
    if(mIsMounted)
       offset.set(15, -15);
 
-   renderFlag(pos + offset, getGame()->getTeamColor(mTeam));
+   renderFlag(pos + offset, getTeamColor(mTeam));
 }
 
 
@@ -338,7 +338,7 @@ void FlagItem::renderDock()
    glPushMatrix();
       glTranslate(getVert(0));
       glScale(0.6f);
-      renderFlag(0, 0, getGame()->getTeamColor(mTeam));
+      renderFlag(0, 0, getTeamColor(mTeam));
    glPopMatrix();   
 #endif
 }

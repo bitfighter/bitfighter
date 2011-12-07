@@ -155,6 +155,8 @@ ClientGame::~ClientGame()
 // Player has selected a game from the QueryServersUserInterface, and is ready to join
 void ClientGame::joinGame(Address remoteAddress, bool isFromMaster, bool local)
 {
+   setActiveTeamManager(mTeamManager);
+
    MasterServerConnection *connToMaster = getConnectionToMaster();
    
    if(isFromMaster && connToMaster && connToMaster->getConnectionState() == NetConnection::Connected)     // Request arranged connection
@@ -1193,25 +1195,6 @@ void ClientGame::zoomCommanderMap()
 }
 
 
-//const char *ClientGame::getRemoteLevelDownloadFilename()
-//{
-//   return getUIManager()->getGameUserInterface()->remoteLevelDownloadFilename();
-//}
-
-
-const Color *ClientGame::getTeamColor(S32 teamId) const
-{
-   // In editor: 
-   // return Game::getBasicTeamColor(this, teamIndex);
-   GameType *gameType = getGameType();   
-
-   if(!gameType)
-      return Parent::getTeamColor(teamId);   // Returns white
-
-   return gameType->getTeamColor(teamId);    // return Game::getBasicTeamColor(mGame, teamIndex); by default, overridden by certain gametypes...
-}
-
-
 void ClientGame::drawStars(F32 alphaFrac, Point cameraPos, Point visibleExtent)
 {
    const F32 starChunkSize = 1024;        // Smaller numbers = more dense stars
@@ -1466,7 +1449,7 @@ void ClientGame::renderCommander()
       if(gt)
       {
          playerTeam = ship->getTeam();
-         Color teamColor = *gt->getTeamColor(playerTeam);
+         Color teamColor = *getTeamColor(playerTeam);
 
          for(S32 i = 0; i < renderObjects.size(); i++)
          {
@@ -1828,17 +1811,10 @@ bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &le
 }
 
 
-// TODO: Almost identical to ServerGame version
-void ClientGame::onReadTeamParam(S32 argc, const char **argv)
+AbstractTeam *ClientGame::getNewTeam()
 {
-   if(getTeamCount() < GameType::MAX_TEAMS)   // Too many teams?
-   {
-      boost::shared_ptr<TeamEditor> team = boost::shared_ptr<TeamEditor>(new TeamEditor());
-      if(team->processArguments(argc, argv))
-         getUIManager()->getEditorUserInterface()->addTeam(team);
-   }
+   return new TeamEditor;
 }
 
 };
-
 

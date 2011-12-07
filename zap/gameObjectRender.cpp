@@ -1800,35 +1800,37 @@ void renderTextItem(const Point &pos, const Point &dir, F32 size, const string &
 }
 
 
-void renderForceFieldProjector(Point pos, Point normal, const Color *teamColor, bool enabled)
+void renderForceFieldProjector(Point pos, Point normal, const Color *color, bool enabled)
 {
    Vector<Point> geom;
    ForceFieldProjector::getForceFieldProjectorGeometry(pos, normal, geom);      // fills geom from pos and normal
 
-   renderForceFieldProjector(&geom, teamColor, enabled);
+   renderForceFieldProjector(&geom, color, enabled);
 }
 
 
-void renderForceFieldProjector(const Vector<Point> *geom, const Color *teamColor, bool enabled)
+void renderForceFieldProjector(const Vector<Point> *geom, const Color *color, bool enabled)
 {
    F32 ForceFieldBrightnessProjector = 0.50;
 
-   Color color(teamColor);      // Create locally modifiable copy
+   Color c(color);      // Create locally modifiable copy
 
-   color = color * (1 - ForceFieldBrightnessProjector) + ForceFieldBrightnessProjector;
+   c = c * (1 - ForceFieldBrightnessProjector) + ForceFieldBrightnessProjector;
 
-   glColor(enabled ? color : (color * 0.6f));
+   glColor(enabled ? c : (c * 0.6f));
 
    renderPointVector(geom, GL_LINE_LOOP);
 }
 
 
-void renderForceField(Point start, Point end, Color c, bool fieldUp, F32 scaleFact)
+void renderForceField(Point start, Point end, const Color *color, bool fieldUp, F32 scaleFact)
 {
    Vector<Point> geom;
    ForceField::getGeom(start, end, geom, scaleFact);
 
    F32 ForceFieldBrightness = 0.25;
+
+   Color c(color);
    c = c * (1 - ForceFieldBrightness) + ForceFieldBrightness;
 
    glColor(fieldUp ? c : c * 0.5);
