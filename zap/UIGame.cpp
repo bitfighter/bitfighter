@@ -2943,23 +2943,25 @@ void GameUserInterface::renderScoreboard()
       const char *adminSymbol = "@ ";
 
       // Use any symbol for an offset
-      S32 symbolSize = UserInterface::getStringWidth(fontSize / 2, botSymbol);
+      S32 symbolFontSize = fontSize * 0.8f;
+      S32 symbolSize = UserInterface::getStringWidth(symbolFontSize, botSymbol);
 
       for(S32 j = 0; j < playerScores.size(); j++)
       {
          S32 x = xl + 40;
+         S32 vertAdjustFact = (fontSize - symbolFontSize) / 2 - 1;
 
          // Add the mark of the bot
          if(playerScores[j]->isRobot())
-            UserInterface::drawString(x - symbolSize, curRowY + fontSize / 4 + 2, fontSize / 2, botSymbol);
+            UserInterface::drawString(x - symbolSize, curRowY + vertAdjustFact + 2, symbolFontSize, botSymbol);
 
          // Add level changer mark
          if(playerScores[j]->isLevelChanger() && !playerScores[j]->isAdmin())
-            UserInterface::drawString(x - symbolSize, curRowY + fontSize / 4 + 2, fontSize / 2, levelChangerSymbol);
+            UserInterface::drawString(x - symbolSize, curRowY + vertAdjustFact + 2, symbolFontSize, levelChangerSymbol);
 
          // Add level changer mark
          if(playerScores[j]->isAdmin())
-            UserInterface::drawString(x - symbolSize, curRowY + fontSize / 4 + 2, fontSize / 2, adminSymbol);
+            UserInterface::drawString(x - symbolSize, curRowY + vertAdjustFact + 2, symbolFontSize, adminSymbol);
 
          UserInterface::drawString(x, curRowY, fontSize, playerScores[j]->getName().getString());
 
