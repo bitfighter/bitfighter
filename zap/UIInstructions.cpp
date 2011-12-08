@@ -231,13 +231,11 @@ void InstructionsUserInterface::renderPage1()
    S32 col4 = horizMargin + (canvasWidth * 3) / 4 + 45;
    S32 actCol = col1;      // Action column
    S32 contCol = col2;     // Control column
+
    bool firstCol = true;
    bool done = false;
 
-   glBegin(GL_LINES);
-      glVertex2i(col1, starty + 26);
-      glVertex2i(750, starty + 26);
-   glEnd();
+   drawHorizLine(col1, 750, starty + 26);
 
    static const Color txtColor = Colors::cyan;
    static const Color keyColor = Colors::white;      // white
