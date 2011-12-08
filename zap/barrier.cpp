@@ -500,6 +500,12 @@ string WallItem::getAttributeString()
 }
 
 
+const char *WallItem::getInstructionMsg()
+{
+   return "[+] and [-] to change";
+}
+
+
 bool WallItem::hasTeam()
 {
    return false;

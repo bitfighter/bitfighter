@@ -138,6 +138,8 @@ public:
    const char *getOnDockName();
    const char *getOnScreenName();          // Vertices should not be labeled
    string getAttributeString();
+   const char *getInstructionMsg();
+
    bool hasTeam();
    bool canBeHostile();
    bool canBeNeutral();

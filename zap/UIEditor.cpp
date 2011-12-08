@@ -1472,6 +1472,7 @@ void EditorUserInterface::renderItemInfoPanel()
 {
    string text = "";
    string item = "";
+   const char *instructs = "";
 
    Color textColor;
 
@@ -1502,26 +1503,30 @@ void EditorUserInterface::renderItemInfoPanel()
             string attribs = objList->get(i)->getAttributeString();
 
             if(attribs != "")
+            {
                text = "Attributes -> " + attribs;
+               instructs = objList->get(i)->getInstructionMsg();
+            }
             else
                text = " ";
          }
    }
 
    S32 xpos = horizMargin + 4 + 180 + 5;
-   S32 ypos = gScreenInfo.getGameCanvasHeight() - vertMargin - PANEL_TEXT_SIZE - PANEL_SPACING + 6;      // Lower pos
    S32 upperLineTextSize = 14;
+   S32 ypos = gScreenInfo.getGameCanvasHeight() - vertMargin - PANEL_TEXT_SIZE - PANEL_SPACING + 6;
 
    if(text != "" && text != " ")
    {
-      renderText(xpos, ypos, PANEL_TEXT_SIZE, textColor, text.c_str());
-      ypos = gScreenInfo.getGameCanvasHeight() - vertMargin - 2 * PANEL_TEXT_SIZE - PANEL_SPACING;       // Upper pos
+      renderText(xpos, ypos, PANEL_TEXT_SIZE, textColor, instructs);
+      renderText(xpos, ypos - PANEL_SPACING, PANEL_TEXT_SIZE, textColor, text.c_str());
    }
-   else
-      ypos -= upperLineTextSize - PANEL_TEXT_SIZE;
 
    if(item != "")
+   {
+      ypos -= PANEL_SPACING + upperLineTextSize * 1.3;
       renderText(xpos, ypos, upperLineTextSize, textColor, item.c_str());
+   }
 }
 
 
