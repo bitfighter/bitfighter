@@ -1471,25 +1471,26 @@ static void renderText(S32 xpos, S32 ypos, S32 size, const Color &color, const s
 void EditorUserInterface::renderItemInfoPanel()
 {
    string text = "";
+   string hoverText = "";
    string item = "";
+   bool dockHit;
    const char *instructs = "";
-
-   Color textColor;
 
    if(mDockItemHit)
    {
-      textColor = Colors::green;
+      dockHit = true;
 
       item = mDockItemHit->getOnScreenName();
       text = mDockItemHit->getEditorHelpString();
    }
    else
    {
-      textColor = Colors::yellow;
+      dockHit = false;
 
       const Vector<EditorObject *> *objList = getObjectList();
 
       for(S32 i = 0; i < objList->size(); i++)
+      {
          if(objList->get(i)->isSelected())
          {
             if(text != "")
@@ -1499,7 +1500,8 @@ void EditorUserInterface::renderItemInfoPanel()
                break;
             }
 
-            item = string("Selected: ") + objList->get(i)->getOnScreenName();
+            item = mDraggingObjects ? "Dragging " : "Selected ";
+            item += objList->get(i)->getOnScreenName();
             string attribs = objList->get(i)->getAttributeString();
 
             if(attribs != "")
@@ -1510,7 +1512,14 @@ void EditorUserInterface::renderItemInfoPanel()
             else
                text = " ";
          }
+
+         else if(objList->get(i)->isLitUp())
+            hoverText = string("Hover: ") + objList->get(i)->getOnScreenName();
+      }
    }
+
+
+   Color textColor = (dockHit ? Colors::green : Colors::yellow);
 
    S32 xpos = horizMargin + 4 + 180 + 5;
    S32 upperLineTextSize = 14;
@@ -1522,11 +1531,13 @@ void EditorUserInterface::renderItemInfoPanel()
       renderText(xpos, ypos - PANEL_SPACING, PANEL_TEXT_SIZE, textColor, text.c_str());
    }
 
+   ypos -= PANEL_SPACING + upperLineTextSize * 1.3;
    if(item != "")
-   {
-      ypos -= PANEL_SPACING + upperLineTextSize * 1.3;
       renderText(xpos, ypos, upperLineTextSize, textColor, item.c_str());
-   }
+
+   ypos -= upperLineTextSize * 1.3;
+   if(hoverText != "" && !dockHit)
+      renderText(xpos, ypos, upperLineTextSize, Colors::white, hoverText.c_str());
 }
 
 
