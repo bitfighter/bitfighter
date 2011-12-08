@@ -2819,6 +2819,14 @@ void GameUserInterface::unsuspendGame()
 }
 
 
+#ifdef DUMMY_PLAYER_SCORES
+void getDummyPlayerScores(Vector<ClientInfo *> &scores)
+{
+   // Do something here
+}
+#endif
+
+
 void GameUserInterface::renderScoreboard()
 {
    // This is probably not needed... if gameType were NULL, we'd have crashed and burned long ago
@@ -2923,10 +2931,7 @@ void GameUserInterface::renderScoreboard()
          renderFlag(F32(xr - 20), F32(yt + 18), teamColor);
 
          glColor(Colors::white);
-         glBegin(GL_LINES);
-            glVertex2i(xl, yt + S32(teamAreaHeight));
-            glVertex2i(xr, yt + S32(teamAreaHeight));
-         glEnd();
+         drawHorizLine(xl, xr, yt + S32(teamAreaHeight));
 
          UserInterface::drawString(xl + 40, yt + 2, 30, getGame()->getTeamName(i).getString());
          UserInterface::drawStringf(xr - 140, yt + 2, 30, "%d", ((Team *)(getGame()->getTeam(i)))->getScore());
@@ -2934,7 +2939,12 @@ void GameUserInterface::renderScoreboard()
 
       // Now for player scores.  First build a list, then sort it, then display it.
       Vector<ClientInfo *> playerScores;
+
+#ifdef DUMMY_PLAYER_SCORES
+      getDummyPlayerScores(playerScores);
+#else
       gameType->getSortedPlayerScores(i, playerScores);     // Fills playerScores
+#endif
 
       S32 curRowY = yt + teamAreaHeight + 1;
       S32 fontSize = U32(maxHeight * 0.8f);
@@ -2976,6 +2986,10 @@ void GameUserInterface::renderScoreboard()
          UserInterface::drawStringf(xr - 70, curRowY, fontSize, "%d", playerScores[j]->getPing());
          curRowY += maxHeight;
       }
+
+#ifdef DUMMY_PLAYER_SCORES
+      playerScores.deleteAndClear();      // Clean up
+#endif
    }
 }
 
