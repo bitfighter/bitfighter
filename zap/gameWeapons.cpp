@@ -38,7 +38,7 @@ WeaponInfo gWeapons[] =    //                 Fire   Min    Drain Proj  Proj  Da
 {                          //    Name         Delay  Energy Energy Vel. Life  age   self mult.   teammate  Type
    WeaponInfo( StringTableEntry("Phaser"),      100,   500,   500,  600, 1000, 0.21f,   0,       false,   ProjectilePhaser ),
    WeaponInfo( StringTableEntry("Bouncer"),     100,  1800,  1800,  540, 1500, 0.15f,   0.5f,    false,   ProjectileBounce ),
-   WeaponInfo( StringTableEntry("Triple"),      200,  2100,  2100,  550,  850, 0.14f,   0,       false,   ProjectileTriple ),
+   WeaponInfo( StringTableEntry("Triple"),      200,  1700,  1700,  550,  850, 0.14f,   0,       false,   ProjectileTriple ),
    WeaponInfo( StringTableEntry("Burst"),       700,  5000,  5000,  500, 1000, 0.50f,   1.0f,    false,   NotAProjectile ),
    WeaponInfo( StringTableEntry("Heat Seeker"), 700,  5000,  5000,  100, 6000, 0.12f,   1.0f,    false,   NotAProjectile ),
    WeaponInfo( StringTableEntry("Mine"),        900, 55000, 55000,  500,   -1, 0.50f,   1.0f,    true,    NotAProjectile ),
