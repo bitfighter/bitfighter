@@ -152,7 +152,7 @@ void EditorObject::renderAndLabelHighlightedVertices(F32 currentScale)
          Point center = getVert(i) + getEditorSelectionOffset(currentScale);
 
          drawSquare(center, radius / currentScale);
-         labelVertex(center, radius / currentScale, getOnScreenName(), getVertLabel(i), currentScale);
+         //labelVertex(center, radius / currentScale, getOnScreenName(), getVertLabel(i), currentScale);
       }
 #endif
 }
