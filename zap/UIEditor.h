@@ -294,7 +294,8 @@ public:
    void loadLevel();
    U32 mAllUndoneUndoLevel;   // What undo level reflects everything back just the
 
-   void saveUndoState();
+   void saveUndoState();      // Save the current state of the editor objects for later undoing
+   void removeUndoState();    // Remove and discard the most recently saved undo state 
 
    Vector<string> mGameTypeArgs;
 

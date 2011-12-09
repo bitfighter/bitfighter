@@ -335,6 +335,25 @@ void EditorUserInterface::saveUndoState()
 }
 
 
+// Remove and discard the most recently saved undo state 
+void EditorUserInterface::removeUndoState()
+{
+   EditorObjectDatabase *eod = getGame()->getEditorDatabase();
+
+   mLastUndoIndex--;
+   //mLastRedoIndex++; 
+   mLastRedoIndex = mLastUndoIndex;
+
+   if(mLastUndoIndex % UNDO_STATES == mFirstUndoIndex % UNDO_STATES)           // Undo buffer now full...
+   {
+      mFirstUndoIndex++;
+      mAllUndoneUndoLevel -= 1;     // If this falls below 0, then we can't undo our way out of needing to save
+   }
+   
+   setNeedToSave(mAllUndoneUndoLevel != mLastUndoIndex);
+}
+
+
 void EditorUserInterface::autoSave()
 {
    saveLevel(false, false, true);
@@ -3490,7 +3509,10 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
          //saveUndoState();                       // Save state prior to addition of new polygon
 
          if(mNewItem->getVertCount() < 2)
+         {
             delete mNewItem;
+            removeUndoState();
+         }
          else
          {
             mNewItem->addToEditor(getGame());
