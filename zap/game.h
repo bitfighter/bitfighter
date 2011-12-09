@@ -206,7 +206,7 @@ private:
    F32 mRating;      // Ratings are provided by the server and stored here
 
    // For voice chat
-   SoundEffect *mVoiceSFX;
+   RefPtr<SoundEffect> mVoiceSFX;
    VoiceDecoder *mDecoder;
 
 public:
