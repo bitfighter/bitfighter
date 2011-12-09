@@ -1467,12 +1467,16 @@ static void renderText(S32 xpos, S32 ypos, S32 size, const Color &color, const s
 
 
 // Shows selected item attributes, or, if we're hovering over dock item, shows dock item info string
-// This method is a total mess!
+// This method is a total mess!  TODO: Rewrite
 void EditorUserInterface::renderItemInfoPanel()
 {
    string text = "";
    string hoverText = "";
    string item = "";
+   S32 hitCount = 0;
+   string attribs = "";
+   bool multipleKindsOfObjectsSelected = false;
+
    bool dockHit;
    const char *instructs = "";
 
@@ -1493,16 +1497,24 @@ void EditorUserInterface::renderItemInfoPanel()
       {
          if(objList->get(i)->isSelected())
          {
+            hitCount++;
+
             if(text != "")
             {
-               item = "Multiple objects selected";
-               text = " ";
-               break;
-            }
+               if(item != objList->get(i)->getOnScreenName())
+               {
+                  item = "Multiple objects selected";
+                  multipleKindsOfObjectsSelected = true;
+               }
 
-            item = mDraggingObjects ? "Dragging " : "Selected ";
-            item += objList->get(i)->getOnScreenName();
-            string attribs = objList->get(i)->getAttributeString();
+               text = " ";
+               continue;
+            }
+            else
+            {
+               item = objList->get(i)->getOnScreenName();
+               attribs = objList->get(i)->getAttributeString();
+            }
 
             if(attribs != "")
             {
@@ -1533,7 +1545,15 @@ void EditorUserInterface::renderItemInfoPanel()
 
    ypos -= PANEL_SPACING + upperLineTextSize * 1.3;
    if(item != "")
+   {
+      if(!multipleKindsOfObjectsSelected)
+         item = (mDraggingObjects ? "Dragging " : "Selected ") + item;
+
+      if(hitCount > 1)
+         item += " (" + itos(hitCount) + ")";
+
       renderText(xpos, ypos, upperLineTextSize, textColor, item.c_str());
+   }
 
    ypos -= upperLineTextSize * 1.3;
    if(hoverText != "" && !dockHit)
