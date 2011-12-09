@@ -3637,9 +3637,15 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
       setSaveMessage("Reloaded " + getLevelFileName(), true);
    }
    else if(inputString == "Ctrl+Shift+Z") // Redo
-      redo();
+   {
+      if(!mCreatingPolyline && !mCreatingPoly)
+         redo();
+   }
    else if(inputString == "Ctrl+Z")       // Undo
-      undo(true);
+   {
+      if(!mCreatingPolyline && !mCreatingPoly)
+         undo(true);
+   }
    else if(inputString == "Z")            // Reset veiw
       centerView();
    else if(inputString == "Ctrl+Shift+R") // Rotate by arbitrary amount
