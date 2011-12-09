@@ -601,7 +601,7 @@ void MoveObject::onGeomChanged()
    Parent::onGeomChanged();
 }
 
-void MoveObject::damageObject(DamageInfo *theInfo)
+void MoveObject::computeImpulseDirection(DamageInfo *theInfo)
 {
    // Compute impulse direction
    Point dv = theInfo->impulseVector - mMoveState[ActualState].vel;
@@ -1593,7 +1593,7 @@ F32 TestItem::getEditorRadius(F32 currentScale)
 // Appears to be server only??
 void TestItem::damageObject(DamageInfo *theInfo)
 {
-   MoveObject::damageObject(theInfo);
+   computeImpulseDirection(theInfo);
 }
 
 
@@ -1692,7 +1692,7 @@ bool ResourceItem::collide(GameObject *hitObject)
 
 void ResourceItem::damageObject(DamageInfo *theInfo)
 {
-   MoveObject::damageObject(theInfo);
+   computeImpulseDirection(theInfo);
 }
 
 
