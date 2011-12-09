@@ -462,8 +462,7 @@ void SoccerBallItem::damageObject(DamageInfo *theInfo)
    if(mMount != NULL)
       onItemDropped();
   
-   // Compute impulse direction
-   MoveObject::damageObject(theInfo);
+   computeImpulseDirection(theInfo);
 
    if(theInfo->damagingObject)
    {

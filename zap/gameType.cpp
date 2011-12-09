@@ -1134,6 +1134,8 @@ void GameType::spawnShip(ClientInfo *clientInfo)
 
    Point spawnPoint = getSpawnPoint(teamIndex);
 
+   conn->respawnTimer.clear(); // prevent spawning a second copy of the same player ship
+
    if(clientInfo->isRobot())
    {
       Robot *robot = (Robot *) conn->getControlObject();

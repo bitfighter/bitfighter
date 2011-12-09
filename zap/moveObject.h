@@ -98,7 +98,7 @@ public:
    void computeCollisionResponseBarrier(U32 stateIndex, Point &collisionPoint);
    F32 computeMinSeperationTime(U32 stateIndex, MoveObject *contactObject, Point intendedPos);
 
-   virtual void damageObject(DamageInfo *damageInfo);
+   void computeImpulseDirection(DamageInfo *damageInfo);
 
    virtual bool getCollisionCircle(U32 stateIndex, Point &point, F32 &radius) const;
 

@@ -537,7 +537,7 @@ void GrenadeProjectile::damageObject(DamageInfo *theInfo)
       return;
    }
 
-   MoveObject::damageObject(theInfo);
+   computeImpulseDirection(theInfo);
 
    setMaskBits(PositionMask);
 }
