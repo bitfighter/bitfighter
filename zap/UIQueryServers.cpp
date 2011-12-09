@@ -1181,7 +1181,7 @@ void QueryServersUserInterface::onMouseMoved(S32 x, S32 y)
    }
 
    else if(isMouseOverDivider())
-      SDL_SetCursor(Cursor::getDefault());
+      SDL_SetCursor(Cursor::getVerticalResize());
 
    else
       mHighlightColumn = mSortColumn;

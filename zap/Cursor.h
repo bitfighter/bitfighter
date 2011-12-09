@@ -50,6 +50,7 @@ public:
 
    static void init();                    // Initialize all cursors
    static SDL_Cursor *getSpray();
+   static SDL_Cursor *getVerticalResize();
    static SDL_Cursor *getDefault();
    static SDL_Cursor *getTransparent();
 };

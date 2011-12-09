@@ -3647,7 +3647,7 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
 
       populateDock();   // Different modes have different items
 
-      onMouseMoved();   // Reset mouse to spray if appropriate
+      onMouseMoved();   // Resets mouse cursor
    }
    else if(inputString == "Left Arrow" || inputString == "A"|| inputString == "Shift+A")   // Left or A - Pan left
       mLeft = true;
