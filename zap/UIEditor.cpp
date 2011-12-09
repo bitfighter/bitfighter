@@ -123,8 +123,6 @@ EditorUserInterface::EditorUserInterface(ClientGame *game) : Parent(game)
 {
    setMenuID(EditorUI);
 
-   // Create some items for the dock...  One of each, please!
-   mShowMode = ShowAllObjects; 
    mWasTesting = false;
 
    mSnapObject = NULL;
@@ -173,80 +171,77 @@ void EditorUserInterface::populateDock()
 {
    mDockItems.clear();
 
-   if(mShowMode == ShowAllObjects)
-   {
-      F32 xPos = (F32)gScreenInfo.getGameCanvasWidth() - horizMargin - DOCK_WIDTH / 2;
-      F32 yPos = 35;
-      const F32 spacer = 35;
+   F32 xPos = (F32)gScreenInfo.getGameCanvasWidth() - horizMargin - DOCK_WIDTH / 2;
+   F32 yPos = 35;
+   const F32 spacer = 35;
 
-      addDockObject(new RepairItem(), xPos, yPos);
-      //addDockObject(new ItemEnergy(), xPos + 10, yPos);
-      yPos += spacer;
+   addDockObject(new RepairItem(), xPos, yPos);
+   //addDockObject(new ItemEnergy(), xPos + 10, yPos);
+   yPos += spacer;
 
-      addDockObject(new Spawn(), xPos, yPos);
-      yPos += spacer;
+   addDockObject(new Spawn(), xPos, yPos);
+   yPos += spacer;
 
-      addDockObject(new ForceFieldProjector(), xPos, yPos);
-      yPos += spacer;
+   addDockObject(new ForceFieldProjector(), xPos, yPos);
+   yPos += spacer;
 
-      addDockObject(new Turret(), xPos, yPos);
-      yPos += spacer;
+   addDockObject(new Turret(), xPos, yPos);
+   yPos += spacer;
 
-      addDockObject(new Teleporter(), xPos, yPos);
-      yPos += spacer;
+   addDockObject(new Teleporter(), xPos, yPos);
+   yPos += spacer;
 
-      addDockObject(new SpeedZone(), xPos, yPos);
-      yPos += spacer;
+   addDockObject(new SpeedZone(), xPos, yPos);
+   yPos += spacer;
 
-      addDockObject(new TextItem(), xPos, yPos);
-      yPos += spacer;
+   addDockObject(new TextItem(), xPos, yPos);
+   yPos += spacer;
 
-      if(getGame()->getGameType()->getGameType() == GameType::SoccerGame)
-         addDockObject(new SoccerBallItem(), xPos, yPos);
-      else
-         addDockObject(new FlagItem(), xPos, yPos);
-      yPos += spacer;
+   if(getGame()->getGameType()->getGameType() == GameType::SoccerGame)
+      addDockObject(new SoccerBallItem(), xPos, yPos);
+   else
+      addDockObject(new FlagItem(), xPos, yPos);
+   yPos += spacer;
 
-      addDockObject(new FlagSpawn(), xPos, yPos);
-      yPos += spacer;
+   addDockObject(new FlagSpawn(), xPos, yPos);
+   yPos += spacer;
 
-      addDockObject(new Mine(), xPos - 10, yPos);
-      addDockObject(new SpyBug(), xPos + 10, yPos);
-      yPos += spacer;
+   addDockObject(new Mine(), xPos - 10, yPos);
+   addDockObject(new SpyBug(), xPos + 10, yPos);
+   yPos += spacer;
 
-      // These two will share a line
-      addDockObject(new Asteroid(), xPos - 10, yPos);
-      addDockObject(new AsteroidSpawn(), xPos + 10, yPos);
-      yPos += spacer;
+   // These two will share a line
+   addDockObject(new Asteroid(), xPos - 10, yPos);
+   addDockObject(new AsteroidSpawn(), xPos + 10, yPos);
+   yPos += spacer;
 
-      //addDockObject(new CircleSpawn(), xPos - 10, yPos);
-      addDockObject(new Reactor(), xPos /*+ 10*/, yPos);
-      yPos += spacer;
+   //addDockObject(new CircleSpawn(), xPos - 10, yPos);
+   addDockObject(new Reactor(), xPos /*+ 10*/, yPos);
+   yPos += spacer;
 
 
-      // These two will share a line
-      addDockObject(new TestItem(), xPos - 10, yPos);
-      addDockObject(new ResourceItem(), xPos + 10, yPos);
-      yPos += 25;
+   // These two will share a line
+   addDockObject(new TestItem(), xPos - 10, yPos);
+   addDockObject(new ResourceItem(), xPos + 10, yPos);
+   yPos += 25;
 
       
-      addDockObject(new LoadoutZone(), xPos, yPos);
+   addDockObject(new LoadoutZone(), xPos, yPos);
+   yPos += 25;
+
+   if(getGame()->getGameType()->getGameType() == GameType::NexusGame)
+   {
+      addDockObject(new NexusObject(), xPos, yPos);
       yPos += 25;
-
-      if(getGame()->getGameType()->getGameType() == GameType::NexusGame)
-      {
-         addDockObject(new NexusObject(), xPos, yPos);
-         yPos += 25;
-      }
-      else
-      {
-         addDockObject(new GoalZone(), xPos, yPos);
-         yPos += 25;
-      }
-
-      addDockObject(new PolyWall(), xPos, yPos);
-      yPos += spacer;
    }
+   else
+   {
+      addDockObject(new GoalZone(), xPos, yPos);
+      yPos += 25;
+   }
+
+   addDockObject(new PolyWall(), xPos, yPos);
+   yPos += spacer;
 }
 
 
@@ -524,7 +519,6 @@ void EditorUserInterface::loadLevel()
 
    clearUndoHistory();                 // Clean out undo/redo buffers
    clearSelection();                   // Nothing starts selected
-   mShowMode = ShowAllObjects;         // Turn everything on
    setNeedToSave(false);               // Why save when we just loaded?
    mAllUndoneUndoLevel = mLastUndoIndex;
    populateDock();                     // Add game-specific items to the dock
@@ -1383,12 +1377,9 @@ void EditorUserInterface::renderGrid()
 }
 
 
-S32 getDockHeight(ShowMode mode)
+S32 getDockHeight()
 {
-   if(mode == ShowWallsOnly)
-      return 62;
-   else  // mShowMode == ShowAllObjects
-      return gScreenInfo.getGameCanvasHeight() - 2 * EditorUserInterface::vertMargin;
+   return gScreenInfo.getGameCanvasHeight() - 2 * EditorUserInterface::vertMargin;
 }
 
 
@@ -1398,7 +1389,7 @@ void EditorUserInterface::renderDock()
    const S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
    const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
 
-   S32 dockHeight = getDockHeight(mShowMode);
+   S32 dockHeight = getDockHeight();
 
    drawFilledRect(canvasWidth - DOCK_WIDTH - horizMargin, canvasHeight - vertMargin, 
                   canvasWidth - horizMargin,              canvasHeight - vertMargin - dockHeight, 
@@ -1697,15 +1688,6 @@ static F32 getRenderingAlpha(bool isScriptItem)
 }
 
 
-const char *getModeMessage(ShowMode mode)
-{
-   if(mode == ShowWallsOnly)
-      return "Wall editing mode.  Hit Ctrl-A to change.";
-   else     // Normal mode
-      return "";
-}
-
-
 static S32 QSORT_CALLBACK sortByTeam(DatabaseObject **a, DatabaseObject **b)
 {
    TNLAssert(dynamic_cast<BfObject *>(*a), "Not a BfObject");
@@ -1828,7 +1810,7 @@ void EditorUserInterface::render()
 
       const Vector<EditorObject *> *levelGenObjList = mLevelGenDatabase.getObjectList();
       for(S32 i = 0; i < levelGenObjList->size(); i++)
-         levelGenObjList->get(i)->renderInEditor(mCurrentScale, mSnapVertexIndex, true, mPreviewMode, mShowMode);
+         levelGenObjList->get(i)->renderInEditor(mCurrentScale, mSnapVertexIndex, true, mPreviewMode);
    
       const Vector<EditorObject *> *objList = getObjectList();
 
@@ -1869,7 +1851,7 @@ void EditorUserInterface::render()
 
          if(obj->getObjectTypeNumber() != PolyWallTypeNumber)
             if(!(mDraggingObjects && obj->isSelected()) || mPreviewMode)
-               obj->renderInEditor(mCurrentScale, mSnapVertexIndex, false, mPreviewMode, mShowMode);
+               obj->renderInEditor(mCurrentScale, mSnapVertexIndex, false, mPreviewMode);
       }
 
       // == Selected items ==
@@ -1883,7 +1865,7 @@ void EditorUserInterface::render()
             EditorObject *obj = objList->get(i);
 
             if(obj->isSelected() || obj->isLitUp())
-               obj->renderInEditor(mCurrentScale, mSnapVertexIndex, false, mPreviewMode, mShowMode);
+               obj->renderInEditor(mCurrentScale, mSnapVertexIndex, false, mPreviewMode);
          }
       }
 
@@ -1945,7 +1927,7 @@ void EditorUserInterface::render()
          {
             EditorObject *obj = objList->get(i);
             if(obj->isSelected() && !isWallType(obj->getObjectTypeNumber()))    // Object is selected and is not a wall
-               obj->renderInEditor(mCurrentScale, mSnapVertexIndex, false, mPreviewMode, mShowMode);
+               obj->renderInEditor(mCurrentScale, mSnapVertexIndex, false, mPreviewMode);
          }
 
       // Render our snap vertex as a hollow magenta box -- but not on point objects
@@ -1980,10 +1962,6 @@ void EditorUserInterface::render()
    renderSaveMessage();
    renderWarnings();
 
-
-   glColor(Colors::cyan);
-   drawCenteredString(vertMargin, 14, getModeMessage(mShowMode));
-
    renderTextEntryOverlay();
 
    renderConsole();        // Rendered last, so it's always on top
@@ -2011,7 +1989,7 @@ void EditorUserInterface::renderDockItems()
 {
    for(S32 i = 0; i < mDockItems.size(); i++)
    {
-      mDockItems[i]->renderInEditor(mCurrentScale, mSnapVertexIndex, false, false, mShowMode);
+      mDockItems[i]->renderInEditor(mCurrentScale, mSnapVertexIndex, false, false);
       mDockItems[i]->setLitUp(false);
    }
 }
@@ -2458,10 +2436,6 @@ void EditorUserInterface::findHitItemAndEdge()
          if(firstPass == (!obj->isSelected() && !obj->anyVertsSelected()))  // First pass is for selected items only
             continue;                                                       // Second pass only for unselected items
          
-         // Only select walls in CTRL-A mode...
-         if(mShowMode == ShowWallsOnly && !(isWallType(obj->getObjectTypeNumber())))   // Only select walls in CTRL-A mode
-            continue;                                                                  // ...so if it's not a wall, proceed to next item
-
          if(checkForVertexHit(obj) || checkForEdgeHit(mouse, obj)) 
             return;                 
       }
@@ -2475,9 +2449,6 @@ void EditorUserInterface::findHitItemAndEdge()
    for(S32 i = 0; i < fillVector2.size(); i++)
       if(checkForWallHit(mouse, fillVector2[i]))
          return;
-
-   if(mShowMode == ShowWallsOnly) 
-      return;
 
    // If we're still here, it means we didn't find anything yet.  Make one more pass, and see if we're in any polys.
    // This time we'll loop forward, though I don't think it really matters.
@@ -2617,9 +2588,6 @@ bool EditorUserInterface::checkForPolygonHit(const Point &point, EditorObject *o
 void EditorUserInterface::findHitItemOnDock()
 {
    mDockItemHit = NULL;
-
-   if(mShowMode == ShowWallsOnly)     // Only add dock items when objects are visible
-      return;
 
    for(S32 i = mDockItems.size() - 1; i >= 0; i--)     // Go in reverse order because the code we copied did ;-)
    {
@@ -3211,7 +3179,7 @@ void EditorUserInterface::deleteItem(S32 itemIndex)
 
 void EditorUserInterface::insertNewItem(U8 itemTypeNumber)
 {
-   if(mShowMode == ShowWallsOnly || mDraggingObjects)     // No inserting when items are hidden or being dragged!
+   if(mDraggingObjects)     // No inserting when items are being dragged!
       return;
 
    clearSelection();
@@ -3683,20 +3651,6 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
       saveLevel(true, true);
    else if(inputString == "S"|| inputString == "Shift+S")            // Pan down
       mDown = true;
-   else if(inputString == "Ctrl+A")       // Toggle see all objects
-   {
-      mShowMode = (ShowMode) ((U32)mShowMode + 1);
-
-      if(mShowMode == ShowModesCount)
-         mShowMode = (ShowMode) 0;        // First mode
-
-      if(mShowMode == ShowWallsOnly && !mDraggingObjects)
-         SDL_SetCursor(Cursor::getDefault());
-
-      populateDock();   // Different modes have different items
-
-      onMouseMoved();   // Resets mouse cursor
-   }
    else if(inputString == "Left Arrow" || inputString == "A"|| inputString == "Shift+A")   // Left or A - Pan left
       mLeft = true;
    else if(inputString == "Shift+=")      // Shifted - Increase barrier width by 1
@@ -3923,10 +3877,7 @@ void EditorUserInterface::onKeyUp(InputCode inputCode)
 
             fillVector.clear();
 
-            if(mShowMode == ShowWallsOnly)
-               getGame()->getEditorDatabase()->findObjects((TestFunc)isWallType, fillVector);
-            else
-               getGame()->getEditorDatabase()->findObjects(fillVector);
+            getGame()->getEditorDatabase()->findObjects(fillVector);
             /*   EditorObjectDatabase *editorDb = getGame()->getEditorDatabase();
                editorDb->findObjects((TestFunc)isAnyObjectType, fillVector, cursorRect);*/
 
@@ -4030,7 +3981,7 @@ bool EditorUserInterface::mouseOnDock()
 {
    return (mMousePos.x >= gScreenInfo.getGameCanvasWidth() - DOCK_WIDTH - horizMargin &&
            mMousePos.x <= gScreenInfo.getGameCanvasWidth() - horizMargin &&
-           mMousePos.y >= gScreenInfo.getGameCanvasHeight() - vertMargin - getDockHeight(mShowMode) &&
+           mMousePos.y >= gScreenInfo.getGameCanvasHeight() - vertMargin - getDockHeight() &&
            mMousePos.y <= gScreenInfo.getGameCanvasHeight() - vertMargin);
 }
 

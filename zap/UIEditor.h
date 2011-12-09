@@ -149,8 +149,6 @@ private:
 
    SnapContext mSnapContext;
 
-   ShowMode mShowMode;
-
    enum {
       saveMsgDisplayTime = 4000,
       warnMsgDisplayTime = 4000,

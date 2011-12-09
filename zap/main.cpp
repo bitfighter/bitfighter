@@ -80,6 +80,7 @@ XXX need to document timers, new luavec stuff XXX
 <li>Tab does filename completion in editor levelname entry screen
 <li>Mouse wheel will scroll through existing level names on levelname entry screen
 <li>Triples consume about 20% less energy than in the 015 series
+<li>Removed dedicated wall-editing mode (Ctrl-A)
 </ul>
 */
 

@@ -209,7 +209,7 @@ public:
    //////////////
 
    //TODO: Get rid of this altogether
-   void renderInEditor(F32 currentScale, S32 snapIndex, bool isScriptItem, bool showingReferenceShip, ShowMode showMode);
+   void renderInEditor(F32 currentScale, S32 snapIndex, bool isScriptItem, bool showingReferenceShip);
 
 };
 

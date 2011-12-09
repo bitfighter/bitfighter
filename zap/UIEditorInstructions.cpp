@@ -319,7 +319,6 @@ static const char *wallInstructions[] =
    "Drag and drop individual vertices or an entire wall",
    "Split wall at selected vertex with [\\]",
    "Join contiguous wall segments with [J]",
-   "Toggle display of non-wall objects with [Ctrl-A]",
    "Change wall thickness with [+] & [-] (use [Shift] for smaller changes)",
    ""    // Last item must be ""
 };

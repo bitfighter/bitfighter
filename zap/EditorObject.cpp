@@ -185,7 +185,7 @@ void EditorObject::highlightDockItem()
 
 
 // Items are rendered in index order, so those with a higher index get drawn later, and hence, on top
-void EditorObject::renderInEditor(F32 currentScale, S32 snapIndex, bool isScriptItem, bool showingReferenceShip, ShowMode showMode)
+void EditorObject::renderInEditor(F32 currentScale, S32 snapIndex, bool isScriptItem, bool showingReferenceShip)
 {
 #ifndef ZAP_DEDICATED
    const S32 instrSize = 9;      // Size of instructions for special items
@@ -194,7 +194,7 @@ void EditorObject::renderInEditor(F32 currentScale, S32 snapIndex, bool isScript
    Point pos, dest;
    F32 alpha = getRenderingAlpha(isScriptItem);
 
-   bool hideit = (showMode == ShowWallsOnly) && !(showingReferenceShip && !mDockItem);
+   bool hideit = !(showingReferenceShip && !mDockItem);
 
    Color drawColor;
 
