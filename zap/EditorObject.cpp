@@ -466,7 +466,7 @@ Point EditorObject::getInitialPlacementOffset(F32 gridSize)
 
 void EditorObject::renderItemText(const char *text, S32 offset, F32 currentScale)
 {
-   UserInterface::drawString(580, 120, 12 / currentScale, text );     // TODO: Fix
+   UserInterface::drawString(F32(580), F32(120), 12 / currentScale, text );     // TODO: Fix
 }
 
 

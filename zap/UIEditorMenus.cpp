@@ -149,7 +149,7 @@ S32 QuickMenuUI::getSelectedMenuItem()
    if(mTopOfFirstMenuItem < 0)      // Haven't run render yet, still have no idea where the menu is!
       return 0;
 
-   S32 y = gScreenInfo.getMousePos()->y;
+   S32 y = (S32)gScreenInfo.getMousePos()->y;
 
    if(y <= mTopOfFirstMenuItem)
       return 0;

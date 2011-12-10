@@ -111,7 +111,7 @@ void LineEditor::drawCursor(S32 x, S32 y, S32 fontSize)
       width = UserInterface::getStringWidth(fontSize, string(mLine.size(), MASK_CHAR).c_str());
    else
       width = UserInterface::getStringWidth(fontSize, mLine.c_str());
-
+    
    drawCursorAngle(x, y + fontSize, fontSize, width, 0);
 #endif
 }
@@ -128,9 +128,15 @@ void LineEditor::drawCursor(S32 x, S32 y, S32 fontSize, S32 startingWidth)
 void LineEditor::drawCursorAngle(F32 x, F32 y, F32 fontSize, F32 angle)
 {
 #ifndef ZAP_DEDICATED
-   S32 width = UserInterface::getStringWidth(fontSize, mLine.c_str());
-   drawCursorAngle(x, y, fontSize, width, angle);
+   S32 width = S32(UserInterface::getStringWidth(fontSize, mLine.c_str()));
+   drawCursorAngle(S32(x), S32(y), fontSize, width, angle);
 #endif
+}
+
+
+void LineEditor::drawCursorAngle(S32 x, S32 y, S32 fontSize, S32 width, F32 angle)
+{
+   drawCursorAngle(x, y, F32(fontSize), width, angle);
 }
 
 

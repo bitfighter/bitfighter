@@ -83,7 +83,7 @@ void TeamShuffleHelper::onMenuShow()
 }
 
 
-static F32 TEXT_SIZE_FACTOR = 1.2;     // Give 20% breathing room for text 
+static F32 TEXT_SIZE_FACTOR = 1.2f;     // Give 20% breathing room for text 
 
 void TeamShuffleHelper::calculateRenderSizes()
 {
@@ -113,7 +113,7 @@ void TeamShuffleHelper::calculateRenderSizes()
 
    columnWidth = -1;
    maxColumnWidth = (gScreenInfo.getGameCanvasWidth() - 100) / cols;
-   rowHeight = (2 * vpad) + ((playersPerTeam + 1) * TEXT_SIZE * TEXT_SIZE_FACTOR);  
+   rowHeight = (2 * vpad) + S32((playersPerTeam + 1) * TEXT_SIZE * TEXT_SIZE_FACTOR);  
 
    for(S32 i = 0; i < mTeams.size(); i++)
       for(S32 j = 0; j < mTeams[i].size(); j++)
@@ -140,7 +140,7 @@ void TeamShuffleHelper::calculateRenderSizes()
 
 
 extern void drawHorizLine(S32 x1, S32 x2, S32 y);
-extern void drawFilledRoundedRect(const Point &pos, F32 width, F32 height, const Color &fillColor, const Color &outlineColor, F32 radius);
+extern void drawFilledRoundedRect(const Point &pos, S32 width, S32 height, const Color &fillColor, const Color &outlineColor, S32 radius);
 
 void TeamShuffleHelper::render()
 {
@@ -156,7 +156,7 @@ void TeamShuffleHelper::render()
          S32 teamIndex = i * cols + j;
 
          Color c = getGame()->getTeamColor(teamIndex);
-         c *= .2;
+         c *= .2f;
 
          drawFilledRoundedRect(Point(x + columnWidth/2, y + rowHeight/2), columnWidth, rowHeight, c, getGame()->getTeamColor(teamIndex), 8);
 

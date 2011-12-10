@@ -1398,7 +1398,7 @@ void EditorUserInterface::renderDock()
 
 
 const S32 PANEL_TEXT_SIZE = 10;
-const S32 PANEL_SPACING = PANEL_TEXT_SIZE * 1.3;
+const S32 PANEL_SPACING = S32(PANEL_TEXT_SIZE * 1.3);
 
 void EditorUserInterface::renderInfoPanel() 
 {
@@ -1417,7 +1417,7 @@ void EditorUserInterface::renderInfoPanel()
 
    drawFilledRect(horizMargin, canvasHeight - vertMargin, 
                   horizMargin + panelWidth, canvasHeight - vertMargin - panelHeight, 
-                  Colors::richGreen, .7, Colors::white);
+                  Colors::richGreen, .7f, Colors::white);
 
    if(disableBlending)
       glDisable(GL_BLEND);
@@ -1553,7 +1553,7 @@ void EditorUserInterface::renderItemInfoPanel()
       renderText(xpos, ypos - PANEL_SPACING, PANEL_TEXT_SIZE, textColor, text.c_str());
    }
 
-   ypos -= PANEL_SPACING + upperLineTextSize * 1.3;
+   ypos -= PANEL_SPACING + S32(upperLineTextSize * 1.3);
    if(item != "")
    {
       if(!multipleKindsOfObjectsSelected)
@@ -1565,7 +1565,7 @@ void EditorUserInterface::renderItemInfoPanel()
       renderText(xpos, ypos, upperLineTextSize, textColor, item.c_str());
    }
 
-   ypos -= upperLineTextSize * 1.3;
+   ypos -= S32(upperLineTextSize * 1.3);
    if(hoverText != "" && !dockHit)
       renderText(xpos, ypos, upperLineTextSize, Colors::white, hoverText.c_str());
 }

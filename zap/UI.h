@@ -85,7 +85,6 @@ private:
    static void doDrawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string);
    static void doDrawAngleString(S32 x, S32 y, F32 size, F32 angle, const char *string);
 
-
    ClientGame *mClientGame;
 
 protected:
@@ -159,9 +158,13 @@ public:
    // Draw strings centered at point
    static void drawStringfc(F32 x, F32 y, F32 size, const char *format, ...);
    static void drawStringc(F32 x, F32 y, F32 size, const char *string);
+   static void drawStringc(S32 x, S32 y, S32 size, const char *string);
+
 
    // Draw strings right-aligned at point
    static void drawStringfr(F32 x, F32 y, F32 size, const char *format, ...);
+   static void drawStringfr(S32 x, S32 y, S32 size, const char *format, ...);
+
 
    // Draw string and get it's width
    static S32 drawStringAndGetWidth(S32 x, S32 y, S32 size, const char *string);

@@ -361,22 +361,16 @@ void UserInterface::doDrawAngleString(S32 x, S32 y, F32 size, F32 angle, const c
 }
 
 
-void UserInterface::drawString(S32 x, S32 y, F32 size, const char *string)
+void UserInterface::drawString(S32 x, S32 y, S32 size, const char *string)
 {
    y += size;     // TODO: Adjust all callers so we can get rid of this!
-   drawAngleString(x, y, size, 0, string);
+   drawAngleString(F32(x), F32(y), F32(size), 0, string);
 }
 
 void UserInterface::drawString(F32 x, F32 y, S32 size, const char *string)
 {
    y += size;     // TODO: Adjust all callers so we can get rid of this!
    drawAngleString(x, y, F32(size), 0, string);
-}
-
-void UserInterface::drawString(S32 x, S32 y, S32 size, const char *string)
-{
-   y += size;     // TODO: Adjust all callers so we can get rid of this!
-   drawAngleString(F32(x), F32(y), F32(size), 0, string);
 }
 
 void UserInterface::drawString(F32 x, F32 y, F32 size, const char *string)
@@ -421,12 +415,22 @@ void UserInterface::drawStringfr(F32 x, F32 y, F32 size, const char *format, ...
    doDrawAngleString(x - len, y, size, 0, buffer);
 }
 
+
+void UserInterface::drawStringfr(S32 x, S32 y, S32 size, const char *format, ...)
+{
+   makeBuffer;
+   S32 len = getStringWidth(size, buffer);
+   doDrawAngleString(x - len, y, (F32)size, 0, buffer);
+}
+
    
 S32 UserInterface::drawStringAndGetWidth(S32 x, S32 y, S32 size, const char *string)
 {
    drawString(x, y, size, string);
    return getStringWidth(size, string);
 }
+
+
 S32 UserInterface::drawStringAndGetWidth(F32 x, F32 y, S32 size, const char *string)
 {
    drawString(x, y, size, string);
@@ -445,6 +449,12 @@ S32 UserInterface::drawStringAndGetWidthf(F32 x, F32 y, S32 size, const char *fo
    makeBuffer;
    drawString(x, y, size, buffer);
    return getStringWidth(size, buffer);
+}
+
+
+void UserInterface::drawStringc(S32 x, S32 y, S32 size, const char *string)
+{
+   drawStringc((F32)x, (F32)y, (F32)size, string);
 }
 
 

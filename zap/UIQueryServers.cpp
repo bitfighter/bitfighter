@@ -809,7 +809,7 @@ void QueryServersUserInterface::renderTopBanner()
 
    const S32 FONT_SIZE = 12;
    drawStringf(horizMargin, vertMargin, FONT_SIZE, "SERVERS: %d", servers.size());
-   drawStringfr((F32)canvasWidth - horizMargin, (F32)vertMargin + FONT_SIZE, FONT_SIZE, "PAGE %d/%d", mPage + 1, getLastPage() + 1);
+   drawStringfr(canvasWidth - horizMargin, vertMargin + FONT_SIZE, FONT_SIZE, "PAGE %d/%d", mPage + 1, getLastPage() + 1);
 }
 
 
@@ -821,22 +821,11 @@ void QueryServersUserInterface::renderColumnHeaders()
    glColor(0.7);
 
    for(S32 i = 1; i < columns.size(); i++)
-   {
-      glBegin(GL_LINES);
-         glVertex2i(columns[i].xStart - 4, COLUMN_HEADER_TOP);
-         glVertex2i(columns[i].xStart - 4, TOP_OF_SERVER_LIST + getServersPerPage() * SERVER_ENTRY_HEIGHT + 2);
-      glEnd();
-   }
+      drawVertLine(columns[i].xStart - 4, COLUMN_HEADER_TOP, TOP_OF_SERVER_LIST + getServersPerPage() * SERVER_ENTRY_HEIGHT + 2);
 
    // Horizontal lines under column headers
-   glBegin(GL_LINES);
-      glVertex2i(0, COLUMN_HEADER_TOP);
-      glVertex2i(canvasWidth, COLUMN_HEADER_TOP);
-
-      glVertex2i(0, COLUMN_HEADER_TOP + COLUMN_HEADER_TEXTSIZE + 7);
-      glVertex2i(canvasWidth, COLUMN_HEADER_TOP + COLUMN_HEADER_TEXTSIZE + 7);
-   glEnd();
-
+   drawHorizLine(0, canvasWidth, COLUMN_HEADER_TOP);
+   drawHorizLine(0, canvasWidth, COLUMN_HEADER_TOP + COLUMN_HEADER_TEXTSIZE + 7);
 
    // Column headers (will partially overwrite horizontal lines) 
    S32 x1 = max(columns[mSortColumn].xStart - 3, 1);    // Going to 0 makes line look too thin...
@@ -863,12 +852,7 @@ void QueryServersUserInterface::renderColumnHeaders()
          x2 = columns[mHighlightColumn+1].xStart - 5;
 
       glColor(Colors::white);
-      glBegin(GL_LINE_LOOP);
-         glVertex2i(x1, COLUMN_HEADER_TOP);
-         glVertex2i(x2, COLUMN_HEADER_TOP);
-         glVertex2i(x2, COLUMN_HEADER_TOP + COLUMN_HEADER_HEIGHT + 1);
-         glVertex2i(x1, COLUMN_HEADER_TOP + COLUMN_HEADER_HEIGHT + 1);
-      glEnd();
+      drawRect(x1, COLUMN_HEADER_TOP, x2, COLUMN_HEADER_TOP + COLUMN_HEADER_HEIGHT + 1, GL_LINE_LOOP);
    }
 }
 

@@ -136,6 +136,15 @@ void drawHorizLine(S32 x1, S32 x2, S32 y)
 }
 
 
+void drawVertLine(S32 x, S32 y1, S32 y2)
+{
+   glBegin(GL_LINES);
+      glVertex2i(x, y1);
+      glVertex2i(x, y2);
+   glEnd();
+}
+
+
 
 // Draw arc centered on pos, with given radius, from startAngle to endAngle.  0 is East, increasing CW
 void drawArc(const Point &pos, F32 radius, F32 startAngle, F32 endAngle)
@@ -193,6 +202,12 @@ void drawDashedHollowArc(const Point &center, F32 innerRadius, F32 outerRadius, 
 }
 
 
+void drawRoundedRect(const Point &pos, S32 width, S32 height, S32 rad)
+{
+   drawRoundedRect(pos, (F32)width, (F32)height, (F32)rad);
+}
+
+
 // Draw rounded rectangle centered on pos
 void drawRoundedRect(const Point &pos, F32 width, F32 height, F32 rad)
 {
@@ -241,6 +256,12 @@ void drawFilledArc(const Point &pos, F32 radius, F32 startAngle, F32 endAngle)
       glVertex2f(pos.x, pos.y);
 
    glEnd();
+}
+
+
+void drawFilledRoundedRect(const Point &pos, S32 width, S32 height, const Color &fillColor, const Color &outlineColor, S32 radius)
+{
+   drawFilledRoundedRect(pos, (F32)width, (F32)height, fillColor, outlineColor, (F32)radius);
 }
 
 
@@ -304,10 +325,24 @@ void drawEllipse(const Point &pos, F32 width, F32 height, F32 angle)
 }
 
 
+// Draw an ellipse at pos, with axes width and height, canted at angle
+void drawEllipse(const Point &pos, S32 width, S32 height, F32 angle)
+{
+   drawFilledEllipseUtil(pos, (F32)width, (F32)height, angle, GL_LINE_LOOP);
+}
+
+
+
 // Well...  draws a filled ellipse, much as you'd expect
 void drawFilledEllipse(const Point &pos, F32 width, F32 height, F32 angle)
 {
    drawFilledEllipseUtil(pos, width, height, angle, GL_POLYGON);
+}
+
+
+void drawFilledEllipse(const Point &pos, S32 width, S32 height, F32 angle)
+{
+   drawFilledEllipseUtil(pos, (F32)width, (F32)height, angle, GL_POLYGON);
 }
 
 
@@ -522,7 +557,7 @@ void renderShipCoords(const Point &coords, bool localShip, F32 alpha)
    glLineWidth(gLineWidth1);
    glColor(Colors::white, 0.5f * alpha);
 
-   UserInterface::drawStringc(0, 30 + (localShip ? 0 : F32(textSize) + 3) + (F32)textSize, (F32)textSize, str.c_str() );
+   UserInterface::drawStringc(0, 30 + (localShip ? 0 : textSize + 3) + textSize, textSize, str.c_str() );
 
    if(disableBlending)
       glDisable(GL_BLEND);

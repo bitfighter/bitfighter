@@ -50,11 +50,20 @@ extern void drawCentroidMark(const Point &pos, F32 radius);
 extern void renderTwoPointPolygon(const Point &p1, const Point &p2, F32 width, S32 mode);
 
 extern void drawRoundedRect(const Point &pos, F32 width, F32 height, F32 radius);
+extern void drawRoundedRect(const Point &pos, S32 width, S32 height, S32 radius);
+
+
+extern void drawFilledRoundedRect(const Point &pos, S32 width, S32 height, const Color &fillColor, const Color &outlineColor, S32 radius);
 extern void drawFilledRoundedRect(const Point &pos, F32 width, F32 height, const Color &fillColor, const Color &outlineColor, F32 radius);
 
 extern void drawArc(const Point &pos, F32 radius, F32 startAngle, F32 endAngle);
+
 extern void drawEllipse(const Point &pos, F32 width, F32 height, F32 angle);
+extern void drawEllipse(const Point &pos, S32 width, S32 height, F32 angle);
+
 extern void drawFilledEllipse(const Point &pos, F32 width, F32 height, F32 angle);
+extern void drawFilledEllipse(const Point &pos, S32 width, S32 height, F32 angle);
+
 extern void drawPolygon(const Point &pos, S32 sides, F32 radius, F32 angle);
 
 extern void drawAngledRay(const Point &center, F32 innerRadius, F32 outerRadius, F32 angle);
@@ -78,6 +87,7 @@ extern void renderVertex(char style, const Point &v, S32 number, S32 size, F32 s
 
 
 extern void drawHorizLine(S32 x1, S32 x2, S32 y);
+extern void drawVertLine(S32 x, S32 y1, S32 y2);
 
 extern void renderSquareItem(const Point &pos, const Color *c, F32 alpha, const Color *letterColor, char letter);
 

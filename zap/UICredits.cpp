@@ -262,7 +262,7 @@ void CreditsScroller::render()
 // Constructor
 CreditsInfo::CreditsInfo()
 {
-   pos = gScreenInfo.getGameCanvasHeight();
+   pos = (F32)gScreenInfo.getGameCanvasHeight();
 }
 
 

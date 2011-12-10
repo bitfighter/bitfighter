@@ -96,6 +96,7 @@ public:
    void drawCursorAngle(F32 x, F32 y, F32 fontSize, F32 angle);             // Draw our cursor, assuming string is drawn at x,y at specified angle
    static void drawCursor(S32 x, S32 y, S32 fontSize, S32 startingWidth);   // Draw cursor starting at a given width
    static void drawCursorAngle(S32 x, S32 y, F32 fontSize, S32 startingWidth, F32 angle);
+   static void drawCursorAngle(S32 x, S32 y, S32 fontSize, S32 startingWidth, F32 angle);
 
    // For tab expansion 
    void completePartial(const Vector<string> *candidates, const string &partial, size_t replacePos, const string &appender);

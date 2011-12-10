@@ -1958,16 +1958,13 @@ void Ship::render(S32 layerIndex)
       glLineWidth(gLineWidth1);
 
       glColor(Colors::white, textAlpha);
-      UserInterface::drawStringc(0, 30 + textSize, (F32)textSize, str.c_str());
+      UserInterface::drawStringc(0, 30 + textSize, textSize, str.c_str());
 
       // Underline name if player is authenticated
       if(mIsAuthenticated)
       {
          S32 xoff = UserInterface::getStringWidth(textSize, str.c_str()) / 2;
-         glBegin(GL_LINES);
-            glVertex2i(-xoff, 33 + textSize);
-            glVertex2i(xoff, 33 + textSize);
-         glEnd();
+         drawHorizLine(-xoff, xoff, 33 + textSize);
       }
 
       if(disableBlending)

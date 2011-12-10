@@ -202,16 +202,16 @@ void JoystickRender::renderControllerButton(F32 x, F32 y, U32 joystickIndex, Inp
    switch(buttonShape)
    {
       case Joystick::ButtonShapeRect:
-         drawRoundedRect(center, (F32)rectButtonWidth, (F32)rectButtonHeight, 3);
+         drawRoundedRect(center, rectButtonWidth, rectButtonHeight, 3);
          break;
       case Joystick::ButtonShapeSmallRect:
-         drawRoundedRect(center, (F32)smallRectButtonWidth, (F32)smallRectButtonHeight, 3);
+         drawRoundedRect(center, smallRectButtonWidth, smallRectButtonHeight, 3);
          break;
       case Joystick::ButtonShapeRoundedRect:
-         drawRoundedRect(center, (F32)rectButtonWidth, (F32)rectButtonHeight, 5);
+         drawRoundedRect(center, rectButtonWidth, rectButtonHeight, 5);
          break;
       case Joystick::ButtonShapeSmallRoundedRect:
-         drawRoundedRect(center, (F32)smallRectButtonWidth, (F32)smallRectButtonHeight, 5);
+         drawRoundedRect(center, smallRectButtonWidth, smallRectButtonHeight, 5);
          break;
       case Joystick::ButtonShapeHorizEllipse:
          glColor(buttonColor);
