@@ -23,6 +23,9 @@
 //
 //------------------------------------------------------------------------------------
 
+// Use this for testing the scoreboard
+#define USE_DUMMY_PLAYER_SCORES
+
 #include "UIGame.h"
 
 #include "quickChatHelper.h"
@@ -2819,10 +2822,32 @@ void GameUserInterface::unsuspendGame()
 }
 
 
-#ifdef DUMMY_PLAYER_SCORES
+#ifdef USE_DUMMY_PLAYER_SCORES
+
+S32 getDummyTeamCount() { return 2; }     // Teams
+S32 getDummyMaxPlayers() { return 5; }    // Players per team
+
+// Create a set of fake player scores for testing the scoreboard -- fill scores
 void getDummyPlayerScores(Vector<ClientInfo *> &scores)
 {
-   // Do something here
+   ClientInfo *clientInfo;
+
+   S32 teams = getDummyTeamCount();
+
+   for(S32 i = 0; i < getDummyMaxPlayers(); i++)
+   {
+      string name = "PlayerName-" + itos(i);
+
+      clientInfo = new RemoteClientInfo(name, false, ((i+1) % 4) > 0);
+
+      clientInfo->setScore(i * 3);
+      clientInfo->setAuthenticated((i % 3) > 0);
+      clientInfo->setIsLevelChanger(((i+1) % 2) > 0);
+      clientInfo->setPing(100 * i + 10);
+      clientInfo->setTeamIndex(i % teams);
+
+      scores.push_back(clientInfo);
+   }
 }
 #endif
 
@@ -2862,18 +2887,17 @@ void GameUserInterface::renderScoreboard()
 
    bool isTeamGame = gameType->isTeamGame();
 
-   S32 teams = isTeamGame ? getGame()->getTeamCount() : 1;
-
-   U32 columnCount = min(teams, 2);
-
-   U32 teamWidth = totalWidth / columnCount;
-   S32 maxTeamPlayers = 0;
+#ifdef USE_DUMMY_PLAYER_SCORES
+   S32 maxTeamPlayers = getDummyMaxPlayers();
+   S32 teams = isTeamGame ? getDummyTeamCount() : 1;
+#else
    getGame()->countTeamPlayers();
 
-   S32 teamCount = getGame()->getTeamCount();
+   S32 teams = isTeamGame ? getGame()->getTeamCount() : 1;
+   S32 maxTeamPlayers = 0;
 
    // Check to make sure at least one team has at least one player...
-   for(S32 i = 0; i < teamCount; i++)
+   for(S32 i = 0; i < teams; i++)
    {
       Team *team = (Team *)getGame()->getTeam(i);
 
@@ -2881,14 +2905,19 @@ void GameUserInterface::renderScoreboard()
          maxTeamPlayers += team->getPlayerBotCount();
 
       else if(team->getPlayerBotCount() > maxTeamPlayers)
-            maxTeamPlayers = team->getPlayerBotCount();
+         maxTeamPlayers = team->getPlayerBotCount();
    }
+#endif
    // ...if not, then go home!
-   if(!maxTeamPlayers)
+   if(maxTeamPlayers == 0)
       return;
 
+   U32 columnCount = min(teams, 2);
+
+   U32 teamWidth = totalWidth / columnCount;
    U32 teamAreaHeight = isTeamGame ? 40 : 0;
-   U32 numTeamRows = (teamCount + 1) >> 1;
+
+   U32 numTeamRows = (teams + 1) >> 1;
 
    U32 totalHeight = (gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin * 2) / numTeamRows - (numTeamRows - 1) * 2;
    U32 maxHeight = MIN(30, (totalHeight - teamAreaHeight) / maxTeamPlayers);
@@ -2914,18 +2943,14 @@ void GameUserInterface::renderScoreboard()
       }
 
       glColor(teamColor, 0.6f);
-      glBegin(GL_POLYGON);
-         glVertex2i(xl, yt);
-         glVertex2i(xr, yt);
-         glVertex2i(xr, yb);
-         glVertex2i(xl, yb);
-      glEnd();
+      drawRect(xl, yt, xr, yb, GL_POLYGON);
 
       if(disableBlending)
          glDisable(GL_BLEND);
 
+      //// Render team scores
       glColor(Colors::white);
-      if(isTeamGame)     // Render team scores
+      if(isTeamGame)     
       {
          renderFlag(F32(xl + 20), F32(yt + 18), teamColor);
          renderFlag(F32(xr - 20), F32(yt + 18), teamColor);
@@ -2940,10 +2965,10 @@ void GameUserInterface::renderScoreboard()
       // Now for player scores.  First build a list, then sort it, then display it.
       Vector<ClientInfo *> playerScores;
 
-#ifdef DUMMY_PLAYER_SCORES
+#ifdef USE_DUMMY_PLAYER_SCORES
       getDummyPlayerScores(playerScores);
 #else
-      gameType->getSortedPlayerScores(i, playerScores);     // Fills playerScores
+      gameType->getSortedPlayerScores(i, playerScores);     // Fills playerScores for team i
 #endif
 
       S32 curRowY = yt + teamAreaHeight + 1;
@@ -2987,7 +3012,7 @@ void GameUserInterface::renderScoreboard()
          curRowY += maxHeight;
       }
 
-#ifdef DUMMY_PLAYER_SCORES
+#ifdef USE_DUMMY_PLAYER_SCORES
       playerScores.deleteAndClear();      // Clean up
 #endif
    }
