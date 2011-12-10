@@ -2958,8 +2958,8 @@ void GameUserInterface::renderScoreboard()
          glColor(Colors::white);
          drawHorizLine(xl, xr, yt + S32(teamAreaHeight));
 
-         UserInterface::drawString(xl + 40, yt + 2, 30, getGame()->getTeamName(i).getString());
-         UserInterface::drawStringf(xr - 140, yt + 2, 30, "%d", ((Team *)(getGame()->getTeam(i)))->getScore());
+         drawString(xl + 40, yt + 2, 30, getGame()->getTeamName(i).getString());
+         drawStringf(xr - 140, yt + 2, 30, "%d", ((Team *)(getGame()->getTeam(i)))->getScore());
       }
 
       // Now for player scores.  First build a list, then sort it, then display it.
@@ -2978,8 +2978,8 @@ void GameUserInterface::renderScoreboard()
       const char *adminSymbol = "@ ";
 
       // Use any symbol for an offset
-      S32 symbolFontSize = fontSize * 0.8f;
-      S32 symbolSize = UserInterface::getStringWidth(symbolFontSize, botSymbol);
+      S32 symbolFontSize = S32(fontSize * 0.8f);
+      S32 symbolSize = getStringWidth(symbolFontSize, botSymbol);
 
       for(S32 j = 0; j < playerScores.size(); j++)
       {
@@ -2988,17 +2988,17 @@ void GameUserInterface::renderScoreboard()
 
          // Add the mark of the bot
          if(playerScores[j]->isRobot())
-            UserInterface::drawString(x - symbolSize, curRowY + vertAdjustFact + 2, symbolFontSize, botSymbol);
+            drawString(x - symbolSize, curRowY + vertAdjustFact + 2, symbolFontSize, botSymbol);
 
          // Add level changer mark
          if(playerScores[j]->isLevelChanger() && !playerScores[j]->isAdmin())
-            UserInterface::drawString(x - symbolSize, curRowY + vertAdjustFact + 2, symbolFontSize, levelChangerSymbol);
+            drawString(x - symbolSize, curRowY + vertAdjustFact + 2, symbolFontSize, levelChangerSymbol);
 
          // Add level changer mark
          if(playerScores[j]->isAdmin())
-            UserInterface::drawString(x - symbolSize, curRowY + vertAdjustFact + 2, symbolFontSize, adminSymbol);
+            drawString(x - symbolSize, curRowY + vertAdjustFact + 2, symbolFontSize, adminSymbol);
 
-         UserInterface::drawString(x - 8, curRowY, fontSize, playerScores[j]->getName().getString());
+         drawString(x - 8, curRowY, fontSize, playerScores[j]->getName().getString());
 
          static char buff[255] = "";
 
@@ -3007,8 +3007,8 @@ void GameUserInterface::renderScoreboard()
          else
             dSprintf(buff, sizeof(buff), "%d", playerScores[j]->getScore());
 
-         UserInterface::drawString(xr - (85 + S32(UserInterface::getStringWidth(F32(fontSize), buff))), curRowY, fontSize, buff);
-         UserInterface::drawStringf(xr - 60, curRowY, fontSize, "%d", playerScores[j]->getPing());
+         drawString(xr - (85 + S32(getStringWidth(F32(fontSize), buff))), curRowY, fontSize, buff);
+         drawStringf(xr - 60, curRowY, fontSize, "%d", playerScores[j]->getPing());
          curRowY += maxHeight;
       }
 
