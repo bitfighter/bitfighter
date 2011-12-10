@@ -2998,7 +2998,7 @@ void GameUserInterface::renderScoreboard()
          if(playerScores[j]->isAdmin())
             UserInterface::drawString(x - symbolSize, curRowY + vertAdjustFact + 2, symbolFontSize, adminSymbol);
 
-         UserInterface::drawString(x, curRowY, fontSize, playerScores[j]->getName().getString());
+         UserInterface::drawString(x - 8, curRowY, fontSize, playerScores[j]->getName().getString());
 
          static char buff[255] = "";
 
@@ -3007,8 +3007,8 @@ void GameUserInterface::renderScoreboard()
          else
             dSprintf(buff, sizeof(buff), "%d", playerScores[j]->getScore());
 
-         UserInterface::drawString(xr - (120 + S32(UserInterface::getStringWidth(F32(fontSize), buff))), curRowY, fontSize, buff);
-         UserInterface::drawStringf(xr - 70, curRowY, fontSize, "%d", playerScores[j]->getPing());
+         UserInterface::drawString(xr - (85 + S32(UserInterface::getStringWidth(F32(fontSize), buff))), curRowY, fontSize, buff);
+         UserInterface::drawStringf(xr - 60, curRowY, fontSize, "%d", playerScores[j]->getPing());
          curRowY += maxHeight;
       }
 
