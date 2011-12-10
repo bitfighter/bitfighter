@@ -318,7 +318,6 @@ RemoteClientInfo::RemoteClientInfo(const StringTableEntry &name, bool isRobot, b
 RemoteClientInfo::~RemoteClientInfo()
 {
    delete mDecoder;
-   delete mVoiceSFX;
 }
 
 
