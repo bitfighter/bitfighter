@@ -179,9 +179,10 @@ void LineEditor::addChar(const char c)
 }
 
 
-// inputCode will have either backspace or delete in it -- basically a convenience function
 void LineEditor::handleBackspace(InputCode inputCode)
 {
+   TNLAssert(inputCode == KEY_BACKSPACE || inputCode == KEY_DELETE, "Unexpected inputCode!");
+
    if(inputCode == KEY_BACKSPACE)
       backspacePressed();
    else       // KEY_DELETE
