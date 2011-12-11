@@ -1699,8 +1699,6 @@ void LevelMenuSelectUserInterface::onActivate()
       selectedIndex = 0;
 }
 
-#undef ALL_LEVELS
-
 
 // Override parent, and make keys simply go to first level with that letter, rather than selecting it automatically
 bool LevelMenuSelectUserInterface::processMenuSpecificKeys(InputCode inputCode, char ascii)
