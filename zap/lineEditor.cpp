@@ -127,10 +127,8 @@ void LineEditor::drawCursor(S32 x, S32 y, S32 fontSize, S32 startingWidth)
 // Draw our cursor, assuming string is drawn at x,y at specified angle 
 void LineEditor::drawCursorAngle(F32 x, F32 y, F32 fontSize, F32 angle)
 {
-#ifndef ZAP_DEDICATED
    S32 width = S32(UserInterface::getStringWidth(fontSize, mLine.c_str()));
    drawCursorAngle(S32(x), S32(y), fontSize, width, angle);
-#endif
 }
 
 
