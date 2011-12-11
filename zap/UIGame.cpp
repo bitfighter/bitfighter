@@ -3046,30 +3046,31 @@ void GameUserInterface::renderBasicInterfaceOverlay(const GameType *gameType, bo
       }
 
       glColor(Colors::white, alpha);
-      UserInterface::drawCenteredStringf(canvasHeight / 2 - 180, 30, "Level: %s", gameType->getLevelName()->getString());
+      drawCenteredStringf(canvasHeight / 2 - 180, 30, "Level: %s", gameType->getLevelName()->getString());
 
       // Prefix game type with "Team" if they are typically individual games, but are being played in team mode
       const char *gtPrefix = (gameType->canBeIndividualGame() && gameType->getGameType() != GameType::SoccerGame && 
                               getGame()->getTeamCount() > 1) ? "Team " : "";
-      UserInterface::drawCenteredStringf(canvasHeight / 2 - 140, 30, "Game Type: %s%s", gtPrefix, gameType->getGameTypeString());
+
+      drawCenteredStringf(canvasHeight / 2 - 140, 30, "Game Type: %s%s", gtPrefix, gameType->getGameTypeString());
 
       glColor(Colors::cyan, alpha);
-      UserInterface::drawCenteredString(canvasHeight / 2 - 100, 20, gameType->getInstructionString());
+      drawCenteredString(canvasHeight / 2 - 100, 20, gameType->getInstructionString());
 
       glColor(Colors::magenta, alpha);
-      UserInterface::drawCenteredString(canvasHeight / 2 - 75, 20, gameType->getLevelDescription()->getString());
+      drawCenteredString(canvasHeight / 2 - 75, 20, gameType->getLevelDescription()->getString());
 
       glColor(Colors::green, alpha);
-      UserInterface::drawCenteredStringf(canvasHeight - 100, 20, "Press [%s] to see this information again", inputCodeToString(keyMISSION));
+      drawCenteredStringf(canvasHeight - 100, 20, "Press [%s] to see this information again", inputCodeToString(keyMISSION));
 
       if(gameType->getLevelCredits()->isNotNull())    // Only render credits string if it's is not empty
       {
          glColor(Colors::red, alpha);
-         UserInterface::drawCenteredStringf(canvasHeight / 2 + 50, 20, "%s", gameType->getLevelCredits()->getString());
+         drawCenteredStringf(canvasHeight / 2 + 50, 20, "%s", gameType->getLevelCredits()->getString());
       }
 
       glColor(Colors::yellow, alpha);
-      UserInterface::drawCenteredStringf(canvasHeight / 2 - 50, 20, "Score to Win: %d", gameType->getWinningScore());
+      drawCenteredStringf(canvasHeight / 2 - 50, 20, "Score to Win: %d", gameType->getWinningScore());
 
       if(disableBlending)
          glDisable(GL_BLEND);
@@ -3206,27 +3207,26 @@ void GameUserInterface::renderTimeLeft()
    
    GameType *gameType = getGame()->getGameType();
 
-   S32 len = UserInterface::getStringWidthf(gtsize, "[%s/%d]", gameType->getShortName(), gameType->getWinningScore());
+   string txt = string("[") + gameType->getShortName() + "/" + itos(gameType->getWinningScore()) + "]";
+
+   S32 len = UserInterface::getStringWidthf(gtsize, txt.c_str());
+   S32 x = gScreenInfo.getGameCanvasWidth() - horizMargin - 65;
+   S32 y = gScreenInfo.getGameCanvasHeight() - vertMargin - 20;
 
    glColor(Colors::cyan);
-   UserInterface::drawStringf(gScreenInfo.getGameCanvasWidth() - UserInterface::horizMargin - 65 - len - 5,
-                              gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin - 20 + ((size - gtsize) / 2) + 2, 
-                              gtsize, "[%s/%d]", gameType->getShortName(), gameType->getWinningScore());
-
-   S32 x = gScreenInfo.getGameCanvasWidth() - UserInterface::horizMargin - 65;
-   S32 y = gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin - 20;
+   drawStringf(x - len - 5, y + ((size - gtsize) / 2) + 2, gtsize, txt.c_str());
 
    glColor(Colors::white);
 
    if(gameType->getTotalGameTime() == 0)
-      UserInterface::drawString(x, y, size, "Unlim.");
+      drawString(x, y, size, "Unlim.");
    else
    {
       U32 timeLeft = gameType->getRemainingGameTime();      // Time remaining in game
       U32 minsRemaining = timeLeft / 60;
       U32 secsRemaining = timeLeft - (minsRemaining * 60);
 
-      UserInterface::drawStringf(x, y, size, "%02d:%02d", minsRemaining, secsRemaining);
+      drawStringf(x, y, size, "%02d:%02d", minsRemaining, secsRemaining);
    }
 }
 
