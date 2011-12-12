@@ -71,7 +71,7 @@ const char *MASTER_SERVER_LIST_ADDRESS = "IP:199.192.229.168:25955,bitfighter.or
 IniSettings::IniSettings()
 {
    controlsRelative = false;          // Relative controls is lame!
-   displayMode = DISPLAY_MODE_FULL_SCREEN_STRETCHED;
+   displayMode = DISPLAY_MODE_WINDOWED;
    oldDisplayMode = DISPLAY_MODE_UNKNOWN;
    joystickType = "NoJoystick";
    joystickLinuxUseOldDeviceSystem = false;
