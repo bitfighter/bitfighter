@@ -1292,33 +1292,44 @@ extern U16 DEFAULT_GAME_PORT;
 // Look for /commands in chat message before handing off to parent
 void QueryServersUserInterface::issueChat()
 {
-   if(mLineEditor.length() >= 9)
+   Vector<string> words;
+   parseString(mLineEditor.getString(), words, ' ');
+
+   if(words[0] == "/connect")
    {
-      const char *str1 = mLineEditor.c_str();
-      S32 a = 0;
-
-      while(a < 9)      // Compare character by character, now case insensitive
-      {       
-         if(str1[a] != "/connect "[a] && str1[a] != "/CONNECT "[a] ) 
-            a = S32_MAX;
-         else
-            a++;
-      }
-      if(a == 9)
+      Address address(&mLineEditor.c_str()[9]);
+      if(address.isValid())
       {
-         Address address(&str1[9]);
-         if(address.isValid())
-         {
-            if(address.port == 0)
-               address.port = DEFAULT_GAME_PORT;   // Use default port number if the user did not supply one
+         if(address.port == 0)
+            address.port = DEFAULT_GAME_PORT;   // Use default port number if the user did not supply one
 
-            getGame()->joinGame(address, false, false);
-         }
-         else
-            newMessage("", "INVALID ADDRESS", false, true, true);
-         return;
+         getGame()->joinGame(address, false, false);
       }
+      else
+         newMessage("", "INVALID ADDRESS", false, true, true);
+      return;
    }
+   else if (words[0] == "/mute")
+   {
+      // No player name provided
+      if(words.size() < 2)
+         newMessage("", "USAGE: /mute <player name>", false, true, true);
+
+      // Player is not found in the global chat list
+      else if(!isPlayerInGlobalChat(words[1].c_str()))
+         newMessage("", "PLAYER NOT FOUND", false, true, true);
+
+      // Mute!!
+      else
+      {
+         getGame()->addToMuteList(words[1]);
+         newMessage("", "PLAYER " + words[1] + " MUTED" , false, true, true);
+      }
+
+      clearChat();
+      return;
+   }
+
    ChatParent::issueChat();
 }
 
