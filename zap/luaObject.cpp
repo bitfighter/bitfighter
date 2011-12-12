@@ -25,7 +25,7 @@
 
 #include "luaObject.h"
 #include "luaUtil.h"
-#include "luaGameInfo.h"      // For LuaPoint
+#include "luaGameInfo.h"
 #include "tnlLog.h"           // For logprintf
 
 #include "item.h"             // For getItem()
@@ -65,32 +65,11 @@ namespace Zap
 // Returns a point to calling Lua function
 S32 LuaObject::returnPoint(lua_State *L, const Point &point)
 {
-   //lua_createtable(L, 0, 2);         // creates a table with 2 fields
-   //setfield(L, "x", point.x);        // table.x = x
-   //setfield(L, "y", point.y);        // table.y = y
-
-   //LuaPoint *pt = new LuaPoint(point);
-   //Lunar<LuaPoint>::push(L, pt, true);     // true will allow Lua to delete this object when it goes out of scope
-   //
-   //return 1;
-
-   //lua_pushnumber(L, point.x);
-   //lua_pushnumber(L, point.y);
-   //return 2;
-
    return returnVec(L, point.x, point.y);
 }
 
 
-// Returns an existing LuaPoint to calling Lua function
-S32 LuaObject::returnLuaPoint(lua_State *L, LuaPoint *point)
-{
-   Lunar<LuaPoint>::push(L, point, true);     // true will allow Lua to delete this object when it goes out of scope
-   return 1;
-}
-
-
-// Returns an existing LuaPoint to calling Lua function
+// Returns an existing LuaPoint to calling Lua function XXX not used?
 template<class T>
 S32 LuaObject::returnVal(lua_State *L, T value, bool letLuaDelete)
 {
@@ -133,7 +112,7 @@ S32 LuaObject::returnPlayerInfo(lua_State *L, LuaPlayerInfo *playerInfo)
 }
 
 
-// Returns a vecot to a calling Lua function
+// Returns a vector to a calling Lua function
 S32 LuaObject::returnVec(lua_State *L, F32 x, F32 y)
 {
    lua_pushvec(L, x, y, 0, 0);
@@ -455,13 +434,6 @@ bool LuaObject::getMenuItemVectorFromTable(lua_State *L, S32 index, const char *
 }
 
 
-// Pop a point object off stack, check its type, and return it
-Point LuaObject::getPoint(lua_State *L, S32 index, const char *methodName)
-{
-   return Lunar<LuaPoint>::check(L, index)->getPoint();
-}
-
-
 // Pop a vec object off stack, check its type, and return it
 Point LuaObject::getVec(lua_State *L, S32 index, const char *methodName)
 {
@@ -775,195 +747,6 @@ int LuaScriptRunner::luaPanicked(lua_State *L)
    throw LuaException(msg);
 
    return 0;
-}
-
-
-
-////////////////////////////////////
-////////////////////////////////////
-
-const char LuaPoint::className[] = "Point";      // Class name as it appears to Lua scripts
-
-// Lua Constructor
-LuaPoint::LuaPoint(lua_State *L)
-{
-   static const char *methodName = "LuaPoint constructor";
-
-   checkArgCount(L, 2, methodName);
-   F32 x =  getFloat(L, 1, methodName);
-   F32 y =  getFloat(L, 2, methodName);
-
-   mPoint = Point(x, y);
-}
-
-
-// C++ Constructor -- specify items
-LuaPoint::LuaPoint(Point point)
-{
-   mPoint = point;
-}
-
-
-// Destructor
-LuaPoint::~LuaPoint()
-{
-   // logprintf("deleted LuaPoint object (%p)\n", this);  ==> called a lot
-}
-
-
-// Define the methods we will expose to Lua
-Lunar<LuaPoint>::RegType LuaPoint::methods[] =
-{
-   method(LuaPoint, x),
-   method(LuaPoint, y),
-
-   method(LuaPoint, setx),
-   method(LuaPoint, sety),
-   method(LuaPoint, setxy),
-   method(LuaPoint, normalize),
-   method(LuaPoint, setAngle),
-
-   method(LuaPoint, equals),
-   method(LuaPoint, distanceTo),
-   method(LuaPoint, distSquared),
-   method(LuaPoint, angleTo),
-   method(LuaPoint, len),
-   method(LuaPoint, lenSquared),
-
-   {0,0}    // End method list
-};
-
-
-S32 LuaPoint::x(lua_State *L)  { return returnFloat(L, mPoint.x); }
-S32 LuaPoint::y(lua_State *L)  { return returnFloat(L, mPoint.y); }
-
-
-S32 LuaPoint::setxy(lua_State *L)
-{
-   static const char *methodName = "LuaPoint:setxy()";
-   checkArgCount(L, 2, methodName);
-   F32 x =  getFloat(L, 1, methodName);
-   F32 y =  getFloat(L, 2, methodName);
-
-   mPoint = Point(x, y);
-   return 0;
-}
-
-
-S32 LuaPoint::setx(lua_State *L)
-{
-   static const char *methodName = "LuaPoint:setx()";
-   checkArgCount(L, 1, methodName);
-   F32 x =  getFloat(L, 1, methodName);
-
-   mPoint.x = x;
-   return 0;
-}
-
-
-S32 LuaPoint::sety(lua_State *L)
-{
-   static const char *methodName = "LuaPoint:sety()";
-   checkArgCount(L, 1, methodName);
-   F32 y =  getFloat(L, 1, methodName);
-
-   mPoint.y = y;
-   return 0;
-}
-
-
-S32 LuaPoint::setAngle(lua_State *L)
-{
-   static const char *methodName = "LuaPoint:setAngle()";
-   checkArgCount(L, 1, methodName);
-   F32 ang =  getFloat(L, 1, methodName);
-
-   mPoint.setAngle(ang);
-   return 0;
-}
-
-
-S32 LuaPoint::setPolar(lua_State *L)
-{
-   static const char *methodName = "LuaPoint:setPolar()";
-   checkArgCount(L, 2, methodName);
-   F32 len =  getFloat(L, 1, methodName);
-   F32 ang =  getFloat(L, 2, methodName);
-
-   mPoint.setPolar(len, ang);
-   return 0;
-}
-
-
-
-#define abs(x) (x) > 0 ? (x) : -(x)
-
-// Are two points equal?
-S32 LuaPoint::equals(lua_State *L)
-{
-   static const char *methodName = "LuaPoint:equals()";
-   checkArgCount(L, 1, methodName);
-   Point point = LuaObject::getPoint(L, 1, methodName);
-
-   double EPSILON = .000000001;
-   return returnBool(L, (abs(mPoint.x - point.x) < EPSILON)  &&  (abs(mPoint.y - point.y) < EPSILON) );
-}
-
-
-S32 LuaPoint::len(lua_State *L)
-{
-   checkArgCount(L, 0, "LuaPoint:len()");
-   return returnFloat(L, mPoint.len());
-}
-
-
-S32 LuaPoint::lenSquared(lua_State *L)
-{
-   checkArgCount(L, 0, "LuaPoint:lenSquared()");
-   return returnFloat(L, mPoint.lenSquared());
-}
-
-
-S32 LuaPoint::distanceTo(lua_State *L)
-{
-   static const char *methodName = "LuaPoint:distanceTo()";
-
-   Point point = LuaObject::getPointOrXY(L, 1, methodName);
-
-   return returnFloat(L, mPoint.distanceTo(point));
-}
-
-
-S32 LuaPoint::distSquared(lua_State *L)
-{
-   static const char *methodName = "LuaPoint:distSquared()";
-
-   checkArgCount(L, 1, methodName);
-   Point point = LuaObject::getPoint(L, 1, methodName);
-
-   return returnFloat(L, mPoint.distSquared(point));
-}
-
-
-S32 LuaPoint::angleTo(lua_State *L)
-{
-   static const char *methodName = "LuaPoint:angleTo()";
-
-   Point point = LuaObject::getPointOrXY(L, 1, methodName);
-
-   return returnFloat(L, mPoint.angleTo(point));
-}
-
-
-S32 LuaPoint::normalize(lua_State *L)
-{
-   static const char *methodName = "LuaPoint:normalize()";
-
-   checkArgCount(L, 1, methodName);
-   F32 len = LuaObject::getFloat(L, 1, methodName);
-
-   mPoint.normalize(len);
-   return returnLuaPoint(L, this);
 }
 
 

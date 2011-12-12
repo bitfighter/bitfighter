@@ -49,6 +49,13 @@ function print(msg)
 end
 
 --
+-- Alias vec as Point for backwards compatibility and
+--
+function Point(x, y)
+    return vec.new(x, y)
+end
+
+--
 -- Let the log know that this file was processed correctly
 --
 logprint("Loaded levelgen helper functions")

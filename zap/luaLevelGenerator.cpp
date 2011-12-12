@@ -196,7 +196,7 @@ S32 getIntegerFromTable(lua_State *L, int tableIndex, int key)
 }
 
 
-Point getPointFromTable(lua_State *L, int tableIndex, int key)
+Point LuaLevelGenerator::getPointFromTable(lua_State *L, int tableIndex, int key, const char *methodName)
 {
    lua_rawgeti(L, tableIndex, key);    // Push Point onto stack
    if(lua_isnil(L, -1))
@@ -205,7 +205,7 @@ Point getPointFromTable(lua_State *L, int tableIndex, int key)
       return Point(0,0);
    }
 
-   Point point = Lunar<LuaPoint>::check(L, -1)->getPoint();
+   Point point = getVec(L, -1, methodName);
    lua_pop(L, 1);    // Clear value from stack
 
    return point;
@@ -230,7 +230,7 @@ S32 LuaLevelGenerator::addWall(lua_State *L)
 
       for(S32 i = 1; i <= points; i++)       // Remember, Lua tables start with index 1
       {
-         Point p = getPointFromTable(L, 3, i);
+         Point p = getPointFromTable(L, 3, i, methodName);
          line = line + " " + ftos(p.x, 2) + " " + ftos(p.y, 2);
       }
    }
@@ -311,8 +311,8 @@ S32 LuaLevelGenerator::pointCanSeePoint(lua_State *L)
 
    checkArgCount(L, 2, methodName);
 
-   Point p1 = getPoint(L, 1, methodName) *= mGridSize;
-   Point p2 = getPoint(L, 2, methodName) *= mGridSize;
+   Point p1 = getVec(L, 1, methodName) *= mGridSize;
+   Point p2 = getVec(L, 2, methodName) *= mGridSize;
 
    return returnBool(L, mGridDatabase->pointCanSeePoint(p1, p2));
 }
@@ -356,7 +356,6 @@ void LuaLevelGenerator::setPointerToThis()
 void LuaLevelGenerator::registerClasses()
 {
    Lunar<LuaLevelGenerator>::Register(L);
-   Lunar<LuaPoint>::Register(L);
    Lunar<LuaUtil>::Register(L);
 
 #ifndef ZAP_DEDICATED

@@ -24,7 +24,7 @@
 //------------------------------------------------------------------------------------
 
 // Use this for testing the scoreboard
-#define USE_DUMMY_PLAYER_SCORES
+//#define USE_DUMMY_PLAYER_SCORES
 
 #include "UIGame.h"
 
