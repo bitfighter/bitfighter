@@ -311,7 +311,7 @@ S32 LuaRobot::setAngle(lua_State *L)
    else  // Could be a point?
    {
       checkArgCount(L, 1, methodName);
-      Point point = getPoint(L, 1, methodName);
+      Point point = getVec(L, 1, methodName);
 
       Move move = thisRobot->getCurrentMove();
       move.angle = thisRobot->getAnglePt(point);
@@ -327,7 +327,7 @@ S32 LuaRobot::setAnglePt(lua_State *L)
 {
    static const char *methodName = "Robot:setAnglePt()";
    checkArgCount(L, 1, methodName);
-   Point point = getPoint(L, 1, methodName);
+   Point point = getVec(L, 1, methodName);
 
    Move move = thisRobot->getCurrentMove();
    move.angle = thisRobot->getAnglePt(point);
@@ -341,7 +341,7 @@ S32 LuaRobot::getAnglePt(lua_State *L)
 {
    static const char *methodName = "Robot:getAnglePt()";
    checkArgCount(L, 1, methodName);
-   Point point = getPoint(L, 1, methodName);
+   Point point = getVec(L, 1, methodName);
 
    lua_pushnumber(L, thisRobot->getAnglePt(point));
    return 1;
@@ -473,7 +473,7 @@ S32 LuaRobot::setThrustPt(lua_State *L)      // (number, point)
    static const char *methodName = "Robot:setThrustPt()";
    checkArgCount(L, 2, methodName);
    F32 vel = getFloat(L, 1, methodName);
-   Point point = getPoint(L, 2, methodName);
+   Point point = getVec(L, 2, methodName);
 
    F32 ang = thisRobot->getAnglePt(point) - 0 * FloatHalfPi;
 
@@ -493,7 +493,7 @@ S32 LuaRobot::setThrustToPt(lua_State *L)
 {
    static const char *methodName = "Robot:setThrustToPt()";
    checkArgCount(L, 1, methodName);
-   Point point = getPoint(L, 1, methodName);
+   Point point = getVec(L, 1, methodName);
 
    F32 ang = thisRobot->getAnglePt(point) - 0 * FloatHalfPi;
 
@@ -1549,7 +1549,6 @@ void Robot::registerClasses()
    Lunar<LuaModuleInfo>::Register(L);
 
    Lunar<LuaLoadout>::Register(L);
-   Lunar<LuaPoint>::Register(L);
 
    Lunar<LuaRobot>::Register(L);
    Lunar<LuaShip>::Register(L);

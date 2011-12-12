@@ -24,7 +24,7 @@
 //------------------------------------------------------------------------------------
 
 // Use this for testing the scoreboard
-#define USE_DUMMY_PLAYER_SCORES
+//#define USE_DUMMY_PLAYER_SCORES
 
 #include "UIGame.h"
 
@@ -1742,6 +1742,15 @@ void GameUserInterface::muteHandler(ClientGame *game, const Vector<string> &word
    {
       if(!game->checkName(words[1]))
          game->displayErrorMessage("!!! Unknown name: %s", words[1].c_str());
+
+      // Un-mute if already on the list
+      else if(game->isOnMuteList(words[1]))
+      {
+         game->removeFromMuteList(words[1]);
+         game->displaySuccessMessage("Player %s has been un-muted", words[1].c_str());
+      }
+
+      // Mute!
       else
       {
          game->addToMuteList(words[1]);
@@ -2076,7 +2085,7 @@ CommandInfo chatCmds[] = {
    { "mvol",    GameUserInterface::mVolHandler,      { INT },      1,       ADV_COMMANDS,    2,     1,     {"<0-10>"},             "Set music volume"      },
    { "svol",    GameUserInterface::sVolHandler,      { INT },      1,       ADV_COMMANDS,    2,     1,     {"<0-10>"},             "Set SFX volume"        },
    { "vvol",    GameUserInterface::vVolHandler,      { INT },      1,       ADV_COMMANDS,    2,     1,     {"<0-10>"},             "Set voice chat volume" },
-   { "mute",    GameUserInterface::muteHandler,      { NAME },     1,       ADV_COMMANDS,    3,     1,     {"<name>"},             "Hide chat messages from <name> until you quit" },
+   { "mute",    GameUserInterface::muteHandler,      { NAME },     1,       ADV_COMMANDS,    3,     1,     {"<name>"},             "Hide chat messages from <name>. Run again to un-hide" },
 
    { "add",         GameUserInterface::addTimeHandler,         { INT },           0,      LEVEL_COMMANDS,  0,  1, {"<time in minutes>"},                  "Add time to the current game" },
    { "next",        GameUserInterface::nextLevelHandler,       {  },              0,      LEVEL_COMMANDS,  0,  1, {  },                                   "Start next level" },

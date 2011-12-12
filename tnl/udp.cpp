@@ -639,7 +639,8 @@ bool Address::set(const IPAddress &address)
    transport = IPProtocol;
    port = address.port;
    netNum[0] = address.netNum;
-   netNum[1] = netNum[2] = netNum[3] = 0;
+   netNum[1] =netNum[2] = netNum[3] = 0;
+   mIsValid = (netNum[0] != 0);
    return true;
 
 }
@@ -660,7 +661,10 @@ bool Address::set(std::string addressString)
 bool Address::set(const char *addressString)
 {
    if(addressString[0] == 0) // zero string length should be invalid
+   {
+      mIsValid = false;
       return false;
+   }
 
    init();
    if(strnicmp(addressString, "ipx:", 4))
@@ -679,7 +683,10 @@ bool Address::set(const char *addressString)
       SOCKADDR_IN ipAddr;
       char remoteAddr[256];
       if(strlen(addressString) > 255)
+      {
+         mIsValid = false;
          return false;
+      }
 
       strcpy(remoteAddr, addressString);
 
@@ -701,11 +708,15 @@ bool Address::set(const char *addressString)
          if(ipAddr.sin_addr.s_addr == INADDR_NONE)
          {
 #if defined (TNL_OS_XBOX)
+            mIsValid = false;
             return false;
 #else
             struct hostent *hp;
             if((hp = gethostbyname(remoteAddr)) == NULL)
+            {
+               mIsValid = false;
                return false;
+            }
             else
                memcpy(&ipAddr.sin_addr.s_addr, hp->h_addr, sizeof(IN_ADDR));
 #endif
@@ -720,7 +731,11 @@ bool Address::set(const char *addressString)
       if(isTCP)
          transport = TCPProtocol;
       if((netNum[0] | netNum[1] | netNum[2] | netNum[3]) == 0)  // IP address of 0.0.0.0 is probably not valid
+      {
+         mIsValid = false;
          return false;
+      }
+      mIsValid = true;
       return true;
    }
    else     // addressString started with "ipx:"
@@ -737,11 +752,13 @@ bool Address::set(const char *addressString)
       if(!stricmp(addressString, "broadcast"))
       {
          port = 0;
+         mIsValid = true;
          return true;
       }
       else if(sscanf(addressString, "broadcast:%d", &aPort) == 1)
       {
          port = aPort;
+         mIsValid = true;
          return true;
       }
       else
@@ -759,7 +776,10 @@ bool Address::set(const char *addressString)
             count++;
          }
          if(count != 11)
+         {
+            mIsValid = false;
             return false;
+         }
 
          netNum[0] = (aNetNum[0] << 24) |
                      (aNetNum[1] << 16) |
@@ -773,6 +793,7 @@ bool Address::set(const char *addressString)
                       aNodeNum[5];
          netNum[3] = 0;
          port = aPort;
+         mIsValid = true;
          return true;
       }
    }

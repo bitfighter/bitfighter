@@ -50,7 +50,6 @@ namespace Zap
 {
 
 class GameObject;
-class LuaPoint;
 class LuaPlayerInfo;
 class Ship;
 class MenuItem;
@@ -72,8 +71,6 @@ protected:
 
    static const char *getString(lua_State *L, S32 index, const char *methodName);
    static const char *getString(lua_State *L, S32 index, const char *methodName, const char *defaultVal);
-
-   static Point getPoint(lua_State *L, S32 index, const char *methodName);
 
    static MenuItem *pushMenuItem (lua_State *L, MenuItem *menuItem);
 
@@ -103,7 +100,6 @@ public:
 
    // More complex objects:
    static S32 returnPoint(lua_State *L, const Point &point);
-   static S32 returnLuaPoint(lua_State *L, LuaPoint *point);
    static S32 returnMenuItem(lua_State *L, MenuItem *menuItem);
    static S32 returnShip(lua_State *L, Ship *ship);                // Handles null references properly
 
@@ -192,48 +188,6 @@ public:
    virtual S32 getClassID(lua_State *L) { TNLAssert(false, "Unimplemented method!"); return -1; } // Object's class
 
    static LuaItem *getItem(lua_State *L, S32 index, U32 type, const char *functionName);
-};
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-class LuaPoint : public LuaObject
-{
-private:
-   Point mPoint;                  // Underlying point container
-
-public:
-   LuaPoint(lua_State *L);        // Lua constructor
-   LuaPoint(Point point);         // C++ constructor
-
-   ~LuaPoint();                   // Destructor
-
-   static const char className[];
-
-   static Lunar<LuaPoint>::RegType methods[];
-
-   Point getPoint() { return mPoint; }
-
-   S32 x(lua_State *L);
-   S32 y(lua_State *L);
-
-   S32 setxy(lua_State *L);
-   S32 setx(lua_State *L);
-   S32 sety(lua_State *L);
-   S32 setAngle(lua_State *L);
-   S32 setPolar(lua_State *L);
-
-   S32 equals(lua_State *L);     // Does point equal another point?
-
-   // Wrap some of our standard point methods
-   S32 distanceTo(lua_State *L);
-   S32 distSquared(lua_State *L);
-   S32 angleTo(lua_State *L);
-   S32 len(lua_State *L);
-   S32 lenSquared(lua_State *L);
-   S32 normalize(lua_State *L);
-
 };
 
 };

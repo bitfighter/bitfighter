@@ -87,13 +87,13 @@ public:
    /// where transport is one of ip, ipx, or (in the future) ipv6
    Address(const char *string)
    {
-      mIsValid = set(string);
+      set(string);
    }
 
    /// Constructs an address from an IP address.
    Address(const IPAddress &theAddress)
    {
-      mIsValid = set(theAddress);
+      set(theAddress);
    }
 
    bool isValid() { return mIsValid; }

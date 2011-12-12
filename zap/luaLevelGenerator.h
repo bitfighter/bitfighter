@@ -48,6 +48,8 @@ private:
    LevelLoader *mCaller;
    F32 mGridSize;
 
+   Point getPointFromTable(lua_State *L, int tableIndex, int key, const char *methodName);
+
 public:
    LuaLevelGenerator(const string &scriptName, const string &scriptDir, const Vector<string> &scriptArgs, F32 gridsize, GridDatabase *gridDatabase, 
                      LevelLoader *caller, OGLCONSOLE_Console console);   // C++ constructor

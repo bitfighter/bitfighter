@@ -81,6 +81,10 @@ Color AbstractChat::getColor(string name)
 // We received a new incoming chat message...  Add it to the list
 void AbstractChat::newMessage(const string &from, const string &message, bool isPrivate, bool isSystem, bool fromSelf)
 {
+   // Don't display it if it is from a muted player
+   if(mGame->isOnMuteList(from))
+      return;
+
    // Choose a color
    Color color;
 
@@ -137,6 +141,18 @@ void AbstractChat::playerLeftGlobalChat(const StringTableEntry &playerNick)
          SoundSystem::playSoundEffect(SFXPlayerLeft, mGame->getSettings()->getIniSettings()->sfxVolLevel);   // Me make sound!
          break;
       }
+}
+
+
+bool AbstractChat::isPlayerInGlobalChat(const StringTableEntry &playerNick)
+{
+   ChatUserInterface *ui = mGame->getUIManager()->getChatUserInterface();
+
+   for(S32 i = 0; i < ui->mPlayersInGlobalChat.size(); i++)
+      if(ui->mPlayersInGlobalChat[i] == playerNick)
+         return true;
+
+   return false;
 }
 
 
@@ -483,7 +499,7 @@ void ChatUserInterface::onActivate()
 
 void ChatUserInterface::onOutGameChat()
 {
-   onEscape();
+   getUIManager()->reactivatePrevUI();
 }
 
 
