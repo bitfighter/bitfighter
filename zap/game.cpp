@@ -733,7 +733,7 @@ void Game::countTeamPlayers()
       if(teamIndex >= 0 && teamIndex < getTeamCount())
       { 
          // Robot could be neutral or hostile, skip out of range team numbers
-         TNLAssert(dynamic_cast<Team *>(getTeam(i)), "Invalid team");    
+         TNLAssert(dynamic_cast<Team *>(getTeam(teamIndex)), "Invalid team");
          Team *team = static_cast<Team *>(getTeam(teamIndex));            
 
          if(clientInfo->isRobot())
