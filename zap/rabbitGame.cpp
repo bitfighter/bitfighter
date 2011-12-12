@@ -451,15 +451,9 @@ S32 RabbitGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEve
 }
 
 
-RabbitGameType::GameTypes RabbitGameType::getGameType() const
+GameTypes RabbitGameType::getGameType() const
 {
    return RabbitGame;
-}
-
-
-const char *RabbitGameType::getGameTypeString() const
-{
-   return "Rabbit";
 }
 
 

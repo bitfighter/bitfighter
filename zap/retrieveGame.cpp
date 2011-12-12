@@ -380,15 +380,9 @@ bool RetrieveGameType::isTeamFlagGame()
 }
 
 
-RetrieveGameType::GameTypes RetrieveGameType::getGameType() const
+GameTypes RetrieveGameType::getGameType() const
 {
    return RetrieveGame;
-}
-
-
-const char *RetrieveGameType::getGameTypeString() const
-{
-   return "Retrieve";
 }
 
 

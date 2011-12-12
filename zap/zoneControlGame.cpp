@@ -367,15 +367,9 @@ S32 ZoneControlGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent sco
 }
 
 
-ZoneControlGameType::GameTypes ZoneControlGameType::getGameType() const
+GameTypes ZoneControlGameType::getGameType() const
 {
    return ZoneControlGame;
-}
-
-
-const char *ZoneControlGameType::getGameTypeString() const
-{
-   return "Zone Control";
 }
 
 

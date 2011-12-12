@@ -324,12 +324,7 @@ void MenuUserInterface::render()
          disableBlending = true; 
       }
 
-      glBegin(GL_POLYGON);
-         glVertex2i(0, 0);
-         glVertex2i(canvasWidth, 0);
-         glVertex2i(canvasWidth, canvasHeight);
-         glVertex2i(0, canvasHeight);
-      glEnd();
+      drawRect(0, 0, canvasWidth, canvasHeight, GL_POLYGON);
 
       if(disableBlending)
          glDisable(GL_BLEND);
@@ -1558,7 +1553,7 @@ static void selectLevelTypeCallback(ClientGame *game, U32 level)
       if(!gc || gc->mLevelInfos.size() < (S32(level) - 1))
          return;
 
-      ui->category = gc->mLevelInfos[level - 1].levelType.getString();
+      ui->category = GameType::getGameTypeName(gc->mLevelInfos[level - 1].levelType).getString();
    }
 
   ui->activate();
@@ -1583,16 +1578,24 @@ void LevelMenuUserInterface::onActivate()
    // Cycle through all levels, looking for unique type strings
    for(S32 i = 0; i < gc->mLevelInfos.size(); i++)
    {
-      S32 j;
-      for(j = 0; j < getMenuItemCount(); j++)
-         if(gc->mLevelInfos[i].levelName == "" || !stricmp(gc->mLevelInfos[i].levelType.getString(), getMenuItem(j)->getPrompt().c_str()) )     
+      bool found = false;
+
+      for(S32 j = 0; j < getMenuItemCount(); j++)
+         if(gc->mLevelInfos[i].levelName == "" || 
+            GameType::getGameTypeName(gc->mLevelInfos[i].levelType) == getMenuItem(j)->getPrompt())     
          {
-            break;                  // Skip over levels with blank names or duplicate entries
+            found = true;
+            break;            // Skip over levels with blank names or duplicate entries
          }
-      if(j == getMenuItemCount())     // Must be a new type
+
+      if(!found)              // Not found above, must be a new type
       {
-         strncpy(c, gc->mLevelInfos[i].levelType.getString(), 1);
-         addMenuItem(new MenuItem(i + 1, gc->mLevelInfos[i].levelType.getString(), selectLevelTypeCallback, "", stringToInputCode(c)));
+         string name = GameType::getGameTypeName(gc->mLevelInfos[i].levelType).getString();
+         c[0] = name[0];
+         c[1] = '\0';
+logprintf("LEVEL - %s", name.c_str());
+LevelInfo *li = &gc->mLevelInfos[i];
+         addMenuItem(new MenuItem(i + 1, name.c_str(), selectLevelTypeCallback, "", stringToInputCode(c)));
       }
    }
 
@@ -1682,8 +1685,8 @@ void LevelMenuSelectUserInterface::onActivate()
    {
       if(gc->mLevelInfos[i].levelName == "")   // Skip levels with blank names --> but all should have names now!
          continue;
-      if(!strcmp( gc->mLevelInfos[i].levelType.getString(), category.c_str() ) || 
-         !strcmp(category.c_str(), ALL_LEVELS) )
+      if(!strcmp(GameType::getGameTypeName(gc->mLevelInfos[i].levelType).getString(), category.c_str()) || 
+         !strcmp(category.c_str(), ALL_LEVELS))
       {
          c[0] = gc->mLevelInfos[i].levelName.getString()[0];
          addMenuItem(new MenuItem(i, gc->mLevelInfos[i].levelName.getString(), processLevelSelectionCallback, "", stringToInputCode(c)));

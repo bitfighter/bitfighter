@@ -23,47 +23,25 @@
 //
 //------------------------------------------------------------------------------------
 
-#ifndef _CTFGAME_H_
-#define _CTFGAME_H_
-
-#include "gameType.h"
+#ifndef _GAMETYPESENUM_H_
+#define _GAMETYPESENUM_H_
 
 namespace Zap
 {
-
-class Ship;
-class FlagItem;
-
-class CTFGameType : public GameType
-{
-private:
-   typedef GameType Parent;
-
-public:
-   void addFlag(FlagItem *flag);
-   void shipTouchFlag(Ship *ship, FlagItem *flag);
-   void itemDropped(Ship *ship, MoveItem *item);
-   void performProxyScopeQuery(GameObject *scopeObject, ClientInfo *clientInfo);
-   void renderInterfaceOverlay(bool scoreboardVisible);
-   bool teamHasFlag(S32 teamId) const;
-
-   GameTypes getGameType() const;
-   const char *getShortName() const;
-   const char *getInstructionString();
-   
-   bool isFlagGame();
-   bool isTeamGame();
-   bool canBeTeamGame()  const;
-   bool canBeIndividualGame() const;
-   bool isTeamFlagGame();    // Teams matter with our flags in this game
-
-   S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data);
-
-   TNL_DECLARE_CLASS(CTFGameType);
-};
-
+   enum GameTypes
+   {
+      BitmatchGame,
+      CTFGame,
+      HTFGame,
+      NexusGame,
+      RabbitGame,
+      RetrieveGame,
+      SoccerGame,
+      ZoneControlGame,
+      NoGameType,
+      GameTypesCount
+   };
 };
 
 
 #endif
-

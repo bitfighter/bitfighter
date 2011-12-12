@@ -1016,7 +1016,7 @@ void GameConnection::displayMessageE(U32 color, U32 sfx, StringTableEntry format
 void GameConnection::sendLevelList()
 {
    // Send blank entry to clear the remote list
-   s2cAddLevel("", "");    
+   s2cAddLevel("", NoGameType);    
 
    // Build list remotely by sending level names one-by-one
    for(S32 i = 0; i < gServerGame->getLevelCount(); i++)
@@ -1071,14 +1071,14 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayMessageBox, (StringTableEntry title,
 
 // Server sends the name and type of a level to the client (gets run repeatedly when client connects to the server). 
 // Sending a blank name and type will clear the list.
-TNL_IMPLEMENT_RPC(GameConnection, s2cAddLevel, (StringTableEntry name, StringTableEntry type), (name, type),
+TNL_IMPLEMENT_RPC(GameConnection, s2cAddLevel, (StringTableEntry name, RangedU32<0, GameTypesCount> type), (name, type),
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
    // Sending a blank name and type will clear the list.  Type should never be blank except in this use case, so check it first.
-   if(type == "" && name == "")
+   if(type == NoGameType)
       mLevelInfos.clear();
    else
-      mLevelInfos.push_back(LevelInfo(name, type));
+      mLevelInfos.push_back(LevelInfo(name, (GameTypes)type.value));
 }
 
 

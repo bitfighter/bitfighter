@@ -371,15 +371,9 @@ S32 HTFGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent,
 }
 
 
-HTFGameType::GameTypes HTFGameType::getGameType() const
+GameTypes HTFGameType::getGameType() const
 {
    return HTFGame;
-}
-
-
-const char *HTFGameType::getGameTypeString() const
-{
-   return "Hold the Flag";
 }
 
 

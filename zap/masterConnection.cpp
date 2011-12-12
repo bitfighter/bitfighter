@@ -385,6 +385,7 @@ void MasterServerConnection::writeConnectRequest(BitStream *bstream)
    if(bstream->writeFlag(mGame->isServer()))     // We're a server, tell the master a little about us
    {
       ServerGame *serverGame = (ServerGame *)mGame;
+      const char *gameTypeName = GameType::getGameTypeName(serverGame->getCurrentLevelType()).getString();
 
       bstream->write((U32) 1000);                             // CPU speed  (dummy)
       bstream->write((U32) 0xFFFFFFFF);                       // region code (dummy) --> want to use this?
@@ -394,7 +395,7 @@ void MasterServerConnection::writeConnectRequest(BitStream *bstream)
       bstream->write((U32) serverGame->mInfoFlags);           // info flags (1=>test host, i.e. from editor)
 
       bstream->writeString(serverGame->getCurrentLevelName().getString());          // Level name
-      bstream->writeString(serverGame->getCurrentLevelType().getString());          // Level type
+      bstream->writeString(gameTypeName);                                           // Level type
 
       bstream->writeString(serverGame->getSettings()->getHostName().c_str());       // Server name
       bstream->writeString(serverGame->getSettings()->getHostDescr().c_str());      // Server description

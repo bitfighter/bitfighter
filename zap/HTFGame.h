@@ -72,7 +72,6 @@ public:
    void renderInterfaceOverlay(bool scoreboardVisible);
 
    GameTypes getGameType() const;
-   const char *getGameTypeString() const;
    const char *getShortName() const;
    const char *getInstructionString();
    bool isTeamGame();

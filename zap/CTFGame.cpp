@@ -273,15 +273,9 @@ S32 CTFGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent,
 }
 
 
-CTFGameType::GameTypes CTFGameType::getGameType() const
+GameTypes CTFGameType::getGameType() const
 {
    return CTFGame;
-}
-
-
-const char *CTFGameType::getGameTypeString() const
-{
-   return "Capture the Flag";
 }
 
 

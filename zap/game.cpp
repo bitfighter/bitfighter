@@ -1278,7 +1278,7 @@ LevelInfo::LevelInfo()
 
 
 // Constructor, only used on client
-LevelInfo::LevelInfo(const StringTableEntry &name, const StringTableEntry &type)
+LevelInfo::LevelInfo(const StringTableEntry &name, GameTypes type)
 {
    initialize();
 
@@ -1299,7 +1299,7 @@ LevelInfo::LevelInfo(const string &levelFile)
 void LevelInfo::initialize()
 {
    levelName = "";
-   levelType = "Bitmatch";
+   levelType = BitmatchGame;
    levelFileName = "";
    minRecPlayers = 0;
    maxRecPlayers = 0;
@@ -1611,7 +1611,7 @@ LevelInfo getLevelInfoFromFileChunk(char *chunk, S32 size, LevelInfo &levelInfo)
                GameType *gt = dynamic_cast<GameType*>(theObject);              // and cast it
                if(gt)
                {
-                  levelInfo.levelType = gt->getGameTypeString();
+                  levelInfo.levelType = gt->getGameType();
                   delete gt;
                   foundGameType = true;
                }
@@ -1746,9 +1746,15 @@ StringTableEntry ServerGame::getCurrentLevelName()
 
 
 // Return type of level currently in play
-StringTableEntry ServerGame::getCurrentLevelType()
+GameTypes ServerGame::getCurrentLevelType()
 {
    return mLevelInfos[mCurrentLevelIndex].levelType;
+}
+
+
+StringTableEntry ServerGame::getCurrentLevelTypeName()
+{
+   return GameType::getGameTypeName(getCurrentLevelType());
 }
 
 
@@ -2428,10 +2434,12 @@ void ServerGame::idle(U32 timeDelta)
    if(mMasterUpdateTimer.update(timeDelta))
    {
       MasterServerConnection *masterConn = gServerGame->getConnectionToMaster();
+
       static StringTableEntry prevCurrentLevelName;   // Using static, so it holds the value when it comes back here.
-      static StringTableEntry prevCurrentLevelType;
+      static GameTypes prevCurrentLevelType;
       static S32 prevRobotCount;
       static S32 prevPlayerCount;
+
       if(masterConn && masterConn->isEstablished())
       {
          // Only update if something is different
@@ -2442,7 +2450,7 @@ void ServerGame::idle(U32 timeDelta)
             prevRobotCount = getRobotCount();
             prevPlayerCount = getPlayerCount();
 
-            masterConn->updateServerStatus(getCurrentLevelName(), getCurrentLevelType(), getRobotCount(), getPlayerCount(), mSettings->getMaxPlayers(), mInfoFlags);
+            masterConn->updateServerStatus(getCurrentLevelName(), getCurrentLevelTypeName(), getRobotCount(), getPlayerCount(), mSettings->getMaxPlayers(), mInfoFlags);
             mMasterUpdateTimer.reset(UpdateServerStatusTime);
          }
          else

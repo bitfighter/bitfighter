@@ -29,6 +29,7 @@
 
 #include "lua.h"
 #include "../lua/include/lunar.h"
+#include "GameTypesEnum.h"
 #include "tnl.h"
 #include "Point.h"
 #include <string>

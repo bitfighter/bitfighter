@@ -91,7 +91,6 @@ public:
    S32 getFlagScore() const;
 
    GameTypes getGameType() const;
-   const char *getGameTypeString() const;
    const char *getShortName() const;
    const char *getInstructionString();
    //bool isTeamGame();

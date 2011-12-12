@@ -91,8 +91,7 @@ public:
 
    void controlObjectForClientKilled(ClientInfo *theClient, GameObject *clientObject, GameObject *killerObject);
    void spawnShip(ClientInfo *clientInfo);
-   GameType::GameTypes getGameType() const;
-   const char *getGameTypeString() const;     // Official game name
+   GameTypes getGameType() const;
    const char *getShortName() const;
    const char *getInstructionString();
    bool canBeTeamGame() const;

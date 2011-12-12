@@ -37,6 +37,9 @@
 #include <time.h>
 #include "boost/smart_ptr/shared_ptr.hpp"
 
+#include "GameTypesEnum.h"
+
+
 
 using namespace TNL;
 using namespace std;
@@ -303,7 +306,7 @@ public:
 
    TNL_DECLARE_RPC(s2cDisplayMessageBox, (StringTableEntry title, StringTableEntry instr, Vector<StringTableEntry> message));
 
-   TNL_DECLARE_RPC(s2cAddLevel, (StringTableEntry name, StringTableEntry type));
+   TNL_DECLARE_RPC(s2cAddLevel, (StringTableEntry name, RangedU32<0, GameTypesCount> type));
    TNL_DECLARE_RPC(s2cRemoveLevel, (S32 index));
 
    TNL_DECLARE_RPC(c2sRequestLevelChange, (S32 newLevelIndex, bool isRelative));

@@ -3331,7 +3331,35 @@ Game *GameType::getGame() const
 }
 
 
-GameType::GameTypes GameType::getGameType() const
+// static
+StringTableEntry GameType::getGameTypeName(GameTypes gameType)
+{
+   switch(gameType)
+   {
+      case BitmatchGame:
+         return "Bitmatch";
+      case CTFGame:
+         return "Capture the Flag";
+      case HTFGame:
+         return "Hold the Flag";
+      case NexusGame:
+         return "Nexus";
+      case RabbitGame:
+         return "Rabbit";
+      case RetrieveGame:
+         return "Retrieve";
+      case SoccerGame:
+         return "Soccer";
+      case ZoneControlGame:
+         return "Zone Control";
+      default:
+         TNLAssert(false, "Bad GameType value");
+         return "";
+   }
+}
+
+
+GameTypes GameType::getGameType() const
 {
    return BitmatchGame;
 }
@@ -3339,7 +3367,7 @@ GameType::GameTypes GameType::getGameType() const
 
 const char *GameType::getGameTypeString() const
 {
-   return "Bitmatch";
+   return getGameTypeName(getGameType()).getString();
 }
 
 

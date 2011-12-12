@@ -34,6 +34,7 @@
 #include "Spawn.h"
 
 #include "gameConnection.h"      // For MessageColors enum
+#include "GameTypesEnum.h"
 
 #include <string>
 #include <boost/shared_ptr.hpp>
@@ -120,19 +121,6 @@ private:
    Vector<SafePtr<MoveItem> > mCacheResendItem;  // speed up c2sResendItemStatus
 
 public:
-   enum GameTypes
-   {
-      BitmatchGame,
-      CTFGame,
-      HTFGame,
-      NexusGame,
-      RabbitGame,
-      RetrieveGame,
-      SoccerGame,
-      ZoneControlGame,
-      GameTypesCount
-   };
-
    // Potentially scoring events
    enum ScoringEvent
    {
@@ -171,9 +159,11 @@ public:
    Game *getGame() const;
    bool onGhostAdd(GhostConnection *theConnection);
 
+   static StringTableEntry getGameTypeName(GameTypes gameType);
+
    virtual GameTypes getGameType() const;
-   virtual const char *getGameTypeString() const;       // Will be overridden by other games
-   virtual const char *getShortName() const;            //          -- ditto --
+   const char *getGameTypeString() const;       
+   virtual const char *getShortName() const;            // Will be overridden by other games
    virtual const char *getInstructionString() const;    //          -- ditto --
    virtual bool isTeamGame() const;                     // Team game if we have teams.  Otherwise it's every man for himself.
    virtual bool canBeTeamGame() const;

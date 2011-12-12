@@ -3049,7 +3049,7 @@ void GameUserInterface::renderBasicInterfaceOverlay(const GameType *gameType, bo
       drawCenteredStringf(canvasHeight / 2 - 180, 30, "Level: %s", gameType->getLevelName()->getString());
 
       // Prefix game type with "Team" if they are typically individual games, but are being played in team mode
-      const char *gtPrefix = (gameType->canBeIndividualGame() && gameType->getGameType() != GameType::SoccerGame && 
+      const char *gtPrefix = (gameType->canBeIndividualGame() && gameType->getGameType() != SoccerGame && 
                               getGame()->getTeamCount() > 1) ? "Team " : "";
 
       drawCenteredStringf(canvasHeight / 2 - 140, 30, "Game Type: %s%s", gtPrefix, gameType->getGameTypeString());

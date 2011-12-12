@@ -28,10 +28,11 @@
 #include "goalZone.h"
 #include "loadoutZone.h"
 #include "soccerGame.h"          // For lua object defs
-#include "NexusGame.h"         // For lua object defs
+#include "NexusGame.h"           // For lua object defs
 #include "EngineeredItem.h"      // For lua object defs
 #include "PickupItem.h"          // For lua object defs
 #include "teleporter.h"          // For lua object defs
+#include "GameTypesEnum.h"
 
 #include "../lua/luaprofiler-2.0.2/src/luaprofiler.h"      // For... the profiler!
 #include "BotNavMeshZone.h"      // For BotNavMeshZone class definition
@@ -234,14 +235,14 @@ void LuaRobot::setEnums(lua_State *L)
    setEnum(WeaponTurret);
 
    // Game Types
-   setGTEnum(BitmatchGame);
-   setGTEnum(CTFGame);
-   setGTEnum(HTFGame);
-   setGTEnum(NexusGame);
-   setGTEnum(RabbitGame);
-   setGTEnum(RetrieveGame);
-   setGTEnum(SoccerGame);
-   setGTEnum(ZoneControlGame);
+   setEnum(BitmatchGame);
+   setEnum(CTFGame);
+   setEnum(HTFGame);
+   setEnum(NexusGame);
+   setEnum(RabbitGame);
+   setEnum(RetrieveGame);
+   setEnum(SoccerGame);
+   setEnum(ZoneControlGame);
 
    // Scoring Events
    setGTEnum(KillEnemy);
