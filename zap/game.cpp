@@ -1090,7 +1090,7 @@ void Game::checkConnectionToMaster(U32 timeDelta)
             if(mHaveTriedToConnectToMaster && masterServerList->size() >= 2)
             {  
                // Rotate the list so as to try each one until we find one that works...
-               masterServerList->push_back(masterServerList->get(0));
+               masterServerList->push_back(string(masterServerList->get(0)));  // don't remove string(...), or else this line is a mystery why push_back an empty string.
                masterServerList->erase(0);
             }
 
