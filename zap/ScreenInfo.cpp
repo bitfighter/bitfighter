@@ -186,14 +186,30 @@ Point ScreenInfo::convertWindowToCanvasCoord(S32 x, S32 y, DisplayMode mode)
 //         );
 
    return Point((x - getHorizPhysicalMargin(mode)) * getGameCanvasWidth()  / (getWindowWidth()  - 2 * getHorizPhysicalMargin(mode)),
-         (y - getVertPhysicalMargin(mode))  * getGameCanvasHeight() / (getWindowHeight() - 2 * getVertPhysicalMargin(mode)));
+                (y - getVertPhysicalMargin(mode))  * getGameCanvasHeight() / (getWindowHeight() - 2 * getVertPhysicalMargin(mode)));
 }
+
+
+Point ScreenInfo::convertCanvasToWindowCoord(S32 x, S32 y, DisplayMode mode)
+{
+   return Point(x * (getWindowWidth()  - 2 * getHorizPhysicalMargin(mode)) / getGameCanvasWidth()  +  getHorizPhysicalMargin(mode),
+                y * (getWindowHeight() - 2 * getVertPhysicalMargin(mode))  / getGameCanvasHeight() + getVertPhysicalMargin(mode));
+}
+
 
 void ScreenInfo::setMousePos(S32 x, S32 y, DisplayMode mode)
 {
-   mWindowMousePos.set(x,y);
-   mCanvasMousePos.set(convertWindowToCanvasCoord(x,y,mode));
+   mWindowMousePos.set(x, y);
+   mCanvasMousePos.set(convertWindowToCanvasCoord(x, y, mode));
 }
+
+
+void ScreenInfo::setCanvasMousePos(S32 x, S32 y, DisplayMode mode)
+{
+   mWindowMousePos.set(convertCanvasToWindowCoord(x, y, mode));
+   mCanvasMousePos.set(x, y);
+}
+
 
 const Point *ScreenInfo::getMousePos() { return &mCanvasMousePos; }
 const Point *ScreenInfo::getWindowMousePos() { return &mWindowMousePos; }

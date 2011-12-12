@@ -45,6 +45,7 @@ void Event::setMousePos(S32 x, S32 y, DisplayMode reportedDisplayMode)
    gScreenInfo.setMousePos(x, y, reportedDisplayMode);
 }
 
+
 // Argument of axisMask is one of the 4 axes:
 //    MoveAxisLeftRightMask, MoveAxisUpDownMask, ShootAxisLeftRightMask, ShootAxisUpDownMask
 void Event::updateJoyAxesDirections(U32 axisMask, S16 value)
@@ -383,8 +384,14 @@ void Event::onKeyDown(ClientGame *game, SDLKey key, SDLMod mod, U16 unicode)
    // ALT + ENTER --> toggles window mode/full screen
    if(key == SDLK_RETURN && (SDL_GetModState() & KMOD_ALT))
    {
+      const Point *pos = gScreenInfo.getMousePos();
+
       game->getUIManager()->getOptionsMenuUserInterface()->toggleDisplayMode();
       //pushSimulatedAltKeyPress();
+
+      gScreenInfo.setCanvasMousePos(pos->x, pos->y, game->getSettings()->getIniSettings()->displayMode);
+
+      SDL_WarpMouse(gScreenInfo.getWindowMousePos()->x, gScreenInfo.getWindowMousePos()->y);
    }
 
    // CTRL + Q --> screenshot!

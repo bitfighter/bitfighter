@@ -106,7 +106,10 @@ public:
    Point convertWindowToCanvasCoord(const Point &p, DisplayMode mode);
    Point convertWindowToCanvasCoord(S32 x, S32 y, DisplayMode mode);
 
+   Point convertCanvasToWindowCoord(S32 x, S32 y, DisplayMode mode);
+
    void setMousePos(S32 x, S32 y, DisplayMode mode);
+   void setCanvasMousePos(S32 x, S32 y, DisplayMode mode);
 
    const Point *getMousePos();
    const Point *getWindowMousePos();
