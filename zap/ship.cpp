@@ -901,8 +901,8 @@ void Ship::processModules()
    // What to do if our most current energy reduction put us below zero
    if(mEnergy < EnergyMax)
    {
-      // If we're not doing anything, recharge.
-      if(!anyActive)
+      // Recharge if we're not doing anything or have spawnshield on
+      if(!anyActive && mSpawnShield.getCurrent() == 0)
       {
          // Faster energy recharge if not moving and not shooting
          if(mCurrentMove.x == 0 && mCurrentMove.y == 0 && !mCurrentMove.fire)
