@@ -499,7 +499,7 @@ void ChatUserInterface::onActivate()
 
 void ChatUserInterface::onOutGameChat()
 {
-   onEscape();
+   getUIManager()->reactivatePrevUI();
 }
 
 
