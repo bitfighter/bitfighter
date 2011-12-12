@@ -1319,6 +1319,13 @@ void QueryServersUserInterface::issueChat()
       else if(!isPlayerInGlobalChat(words[1].c_str()))
          newMessage("", "PLAYER NOT FOUND", false, true, true);
 
+      // If already muted, un-mute!
+      else if(getGame()->isOnMuteList(words[1]))
+      {
+         getGame()->removeFromMuteList(words[1]);
+         newMessage("", "PLAYER " + words[1] + " UN-MUTED" , false, true, true);
+      }
+
       // Mute!!
       else
       {

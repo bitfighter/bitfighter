@@ -730,6 +730,18 @@ void ClientGame::addToMuteList(const string &name)
 }
 
 
+void ClientGame::removeFromMuteList(const string &name)
+{
+
+   for(S32 i = 0; i < mMuteList.size(); i++)
+      if(mMuteList[i] == name)
+      {
+         mMuteList.erase_fast(i);
+         return;
+      }
+}
+
+
 bool ClientGame::isOnMuteList(const string &name)
 {
    for(S32 i = 0; i < mMuteList.size(); i++)
