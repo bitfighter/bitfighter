@@ -904,9 +904,20 @@ void Ship::processModules()
       // Recharge if we're not doing anything or have spawnshield on
       if(!anyActive && mSpawnShield.getCurrent() == 0)
       {
+
          // Faster energy recharge if not moving and not shooting
          if(mCurrentMove.x == 0 && mCurrentMove.y == 0 && !mCurrentMove.fire)
-            mEnergy += S32(EnergyRechargeRateWhenIdle * scaleFactor);
+         {
+            GameObject *object = isInZone(LoadoutZoneTypeNumber);
+
+            // If in loadout zone of the same or neutral team, recharge quickly
+            if(object && (object->getTeam() == getTeam() || object->getTeam() == -1))
+               mEnergy += S32(EnergyRechargeRateInLoadoutZone * scaleFactor);
+
+            // Else smaller idle recharge
+            else
+               mEnergy += S32(EnergyRechargeRateWhenIdle * scaleFactor);
+         }
 
          // Else normal rate
          else

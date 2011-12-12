@@ -153,6 +153,7 @@ public:
       EnergyMax = 100000,
       EnergyRechargeRate = 6000,          // How much energy/second
       EnergyRechargeRateWhenIdle = 8000, // How much energy/second if the ship isn't moving
+      EnergyRechargeRateInLoadoutZone = 12000,  // How much energy/second if the ship is in a loadout zone
       EnergyShieldHitDrain = 20000,       // Energy loss when shields stop a projectile (currently disabled)
       EnergyCooldownThreshold = 15000,
       WeaponFireDecloakTime = 350,
