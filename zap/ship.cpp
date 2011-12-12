@@ -895,56 +895,55 @@ void Ship::processModules()
       }
    }
 
+   // Set cool-down needed if energy is below threshold
    if(!anyActive && mEnergy <= EnergyCooldownThreshold)
       mCooldownNeeded = true;
 
-   // What to do if our most current energy reduction put us below zero
-   if(mEnergy < EnergyMax)
+   // Recharge if we're not doing anything or have spawnshield on
+   if(!anyActive && mSpawnShield.getCurrent() == 0)
    {
-      // Recharge if we're not doing anything or have spawnshield on
-      if(!anyActive && mSpawnShield.getCurrent() == 0)
+      // If not moving or shooting, recharge or drain differently
+      if(mCurrentMove.x == 0 && mCurrentMove.y == 0 && !mCurrentMove.fire)
       {
-         // Faster energy recharge if not moving and not shooting
-         if(mCurrentMove.x == 0 && mCurrentMove.y == 0 && !mCurrentMove.fire)
+         GameObject *object = isInZone(LoadoutZoneTypeNumber);
+
+         // If in load-out zone
+         if(object)
          {
-            GameObject *object = isInZone(LoadoutZoneTypeNumber);
+            // If in loadout zone of the same or neutral team, recharge quickly
+            if((object->getTeam() == getTeam() || object->getTeam() == TEAM_NEUTRAL))
+               mEnergy += S32(EnergyRechargeRateInLoadoutZone * scaleFactor);
 
-            // If in load-out zone
-            if(object)
-            {
-               // If in loadout zone of the same or neutral team, recharge quickly
-               if((object->getTeam() == getTeam() || object->getTeam() == TEAM_NEUTRAL))
-                  mEnergy += S32(EnergyRechargeRateInLoadoutZone * scaleFactor);
+            // If in hostile loadout zone, loose energy
+            else if(object->getTeam() == TEAM_HOSTILE)
+               mEnergy -= S32(EnergyRechargeRateInLoadoutZone * scaleFactor);
 
-               // If in hostile loadout zone, loose energy
-               else if(object->getTeam() == getTeam() || object->getTeam() == TEAM_HOSTILE)
-                  mEnergy -= S32(EnergyRechargeRateInLoadoutZone * scaleFactor);
-
-               // else anything in enemy loadout zone?
-            }
-
-            // Else smaller idle recharge
-            else
-               mEnergy += S32(EnergyRechargeRateWhenIdle * scaleFactor);
+            // else anything in enemy loadout zone?
          }
 
-         // Else normal rate
+         // Else smaller idle recharge
          else
-            mEnergy += S32(EnergyRechargeRate * scaleFactor);
+            mEnergy += S32(EnergyRechargeRateWhenIdle * scaleFactor);
       }
 
-      if(mEnergy <= 0)
-      {
-         mEnergy = 0;
-         for(S32 i = 0; i < ModuleCount; i++)
-         {
-            mModulePrimaryActive[i] = false;
-            mModuleSecondaryActive[i] = false;
-         }
-         mCooldownNeeded = true;
-      }
+      // Else normal rate
+      else
+         mEnergy += S32(EnergyRechargeRate * scaleFactor);
    }
 
+   // What to do if our most current energy reduction put us below zero
+   if(mEnergy <= 0)
+   {
+      mEnergy = 0;
+      for(S32 i = 0; i < ModuleCount; i++)
+      {
+         mModulePrimaryActive[i] = false;
+         mModuleSecondaryActive[i] = false;
+      }
+      mCooldownNeeded = true;
+   }
+
+   // If energy is greater than maximum, set to max
    if(mEnergy >= EnergyMax)
       mEnergy = EnergyMax;
 
