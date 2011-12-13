@@ -85,7 +85,6 @@ IniSettings::IniSettings()
    sfxSet = sfxModernSet;             // Start off with our modern sounds
 
    starsInDistance = true;            // True if stars move in distance behind maze, false if they are in fixed location
-   useLineSmoothing = true;          // Enable/disable anti-aliasing
    diagnosticKeyDumpMode = false;     // True if want to dump keystrokes to the screen
    enableExperimentalAimMode = false; // True if we want to show experimental aiming vector in joystick mode
 
@@ -427,7 +426,6 @@ static void loadLoadoutPresets(CIniFile *ini, GameSettings *settings)
 static void loadEffectsSettings(CIniFile *ini, IniSettings *iniSettings)
 {
    iniSettings->starsInDistance  = (lcase(ini->GetValue("Effects", "StarsInDistance", (iniSettings->starsInDistance ? "Yes" : "No"))) == "yes");
-   iniSettings->useLineSmoothing = (lcase(ini->GetValue("Effects", "LineSmoothing", "No")) == "yes");
 }
 
 
@@ -1349,12 +1347,10 @@ static void writeEffects(CIniFile *ini, IniSettings *iniSettings)
       ini->sectionComment(section, "----------------");
       ini->sectionComment(section, " Various visual effects");
       ini->sectionComment(section, " StarsInDistance - Yes gives the game a floating, 3-D effect.  No gives the flat 'classic zap' mode.");
-      ini->sectionComment(section, " LineSmoothing - Yes activates anti-aliased rendering.  This may be a little slower on some machines.");
       ini->sectionComment(section, "----------------");
    }
 
    ini->setValueYN(section, "StarsInDistance", iniSettings->starsInDistance);
-   ini->setValueYN(section, "LineSmoothing",   iniSettings->useLineSmoothing);
 }
 
 static void writeSounds(CIniFile *ini, IniSettings *iniSettings)

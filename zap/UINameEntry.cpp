@@ -278,13 +278,7 @@ void PasswordEntryUserInterface::render()
 
       glColor(Colors::black, 0.5);
 
-      bool disableBlending = false;
-
-      if(!glIsEnabled(GL_BLEND))
-      {
-         glEnable(GL_BLEND);
-         disableBlending = true; 
-      }
+      TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
       glBegin(GL_POLYGON);
          glVertex2i(0,           0);
@@ -292,9 +286,6 @@ void PasswordEntryUserInterface::render()
          glVertex2i(canvasWidth, canvasHeight);
          glVertex2i(0,           canvasHeight);
       glEnd();
-
-      if(disableBlending)
-         glDisable(GL_BLEND);
    }
 
    Parent::render();

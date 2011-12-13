@@ -316,18 +316,9 @@ void MenuUserInterface::render()
 
       glColor(Colors::black, 0.6f);
 
-      bool disableBlending = false;
-
-      if(!glIsEnabled(GL_BLEND))
-      {
-         glEnable(GL_BLEND);
-         disableBlending = true; 
-      }
+      TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
       drawRect(0, 0, canvasWidth, canvasHeight, GL_POLYGON);
-
-      if(disableBlending)
-         glDisable(GL_BLEND);
    }
 
    glColor(Colors::white);    
@@ -758,13 +749,7 @@ void MainMenuUserInterface::render()
    // nicely with the splash screen, and make the transition less jarring and sudden
    if(showAnimation)
    {
-      bool disableBlending = false;
-
-      if(!glIsEnabled(GL_BLEND))
-      {
-         glEnable(GL_BLEND);
-         disableBlending = true; 
-      }
+      TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
        
       glBegin(GL_POLYGON);
          glColor(Colors::black, (F32) mFadeInTimer.getCurrent() / (F32) FadeInTime);
@@ -773,9 +758,6 @@ void MainMenuUserInterface::render()
          glVertex2i(canvasWidth, canvasHeight);
          glVertex2i(0, canvasHeight);
       glEnd();
-   
-      if(disableBlending)
-         glDisable(GL_BLEND);
    }
 
    // Render logo at top, never faded
@@ -1342,13 +1324,7 @@ void HostMenuUserInterface::renderProgressListItems()
 {
    if(levelLoadDisplayDisplay || levelLoadDisplayFadeTimer.getCurrent() > 0)
    {
-      bool disableBlending = false;
-
-      if(!glIsEnabled(GL_BLEND))
-      {
-         glEnable(GL_BLEND);
-         disableBlending = true; 
-      }
+      TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
       for(S32 i = 0; i < mLevelLoadDisplayNames.size(); i++)
       {
@@ -1357,9 +1333,6 @@ void HostMenuUserInterface::renderProgressListItems()
          drawStringf(100, gScreenInfo.getGameCanvasHeight() - vertMargin - (mLevelLoadDisplayNames.size() - i) * 20, 
                      15, "%s", mLevelLoadDisplayNames[i].c_str());
       }
-
-      if(disableBlending)
-         glDisable(GL_BLEND);
    }
 }
 
