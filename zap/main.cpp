@@ -81,6 +81,7 @@ XXX need to document timers, new luavec stuff XXX
 <li>Mouse wheel will scroll through existing level names on levelname entry screen
 <li>Triples consume about 20% less energy than in the 015 series
 <li>Removed dedicated wall-editing mode (Ctrl-A)
+<li>Loadouts no longer carry over from level to level -- now you start a new level with the default loadout
 </ul>
 */
 

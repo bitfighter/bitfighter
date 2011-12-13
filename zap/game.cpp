@@ -1900,6 +1900,8 @@ void ServerGame::cycleLevel(S32 nextLevel)
 
          conn->resetGhosting();
          conn->mOldLoadout.clear();
+         
+         conn->resetLoadout();
          conn->switchedTeamCount = 0;
       }
    }

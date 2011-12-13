@@ -160,6 +160,15 @@ GameConnection::~GameConnection()
 }
 
 
+void GameConnection::resetLoadout()
+{
+   mLoadout.clear();
+
+   for(S32 i = 0; i < ShipModuleCount + ShipWeaponCount; i++)
+      mLoadout.push_back(DefaultLoadout[i]);
+}
+
+
 bool GameConnection::checkMessage(const char *message, U32 mode)
 {
    if(mChatMute)

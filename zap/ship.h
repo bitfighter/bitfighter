@@ -263,6 +263,7 @@ public:
    void getLoadout(Vector<U32> &loadout);
    void setLoadout(const Vector<U32> &loadout, bool silent = false);
    bool isLoadoutSameAsCurrent(const Vector<U32> &loadout);
+   void setDefaultLoadout();           // Set the ship's loadout to the default values
 
    static string loadoutToString(const Vector<U32> &loadout);
    static bool stringToLoadout(string loadoutStr, Vector<U32> &loadout);

@@ -163,18 +163,24 @@ void Ship::initialize(Point &pos)
       mModuleSecondaryActive[i] = false;
    }
 
-   // Set initial module and weapon selections
-   for(S32 i = 0; i < ShipModuleCount; i++)
-      mModule[i] = (ShipModule) DefaultLoadout[i];
-
-   for(S32 i = 0; i < ShipWeaponCount; i++)
-      mWeapon[i] = (WeaponType) DefaultLoadout[i + ShipModuleCount];
+   setDefaultLoadout();
 
    mActiveWeaponIndx = 0;
    mCooldownNeeded = false;
 
    // Start spawn shield timer
    mSpawnShield.reset(SpawnShieldTime);
+}
+
+
+void Ship::setDefaultLoadout()
+{
+    // Set initial module and weapon selections
+   for(S32 i = 0; i < ShipModuleCount; i++)
+      mModule[i] = (ShipModule) DefaultLoadout[i];
+
+   for(S32 i = 0; i < ShipWeaponCount; i++)
+      mWeapon[i] = (WeaponType) DefaultLoadout[i + ShipModuleCount];
 }
 
 
@@ -287,6 +293,7 @@ void Ship::setActualPos(Point p, bool warp)
    else
       setMaskBits(PositionMask);
 }
+
 
 // Process a move.  This will advance the position of the ship, as well as adjust its velocity and angle.
 void Ship::processMove(U32 stateIndex)
@@ -901,32 +908,12 @@ void Ship::processModules()
    // What to do if our most current energy reduction put us below zero
    if(mEnergy < EnergyMax)
    {
-      // Recharge if we're not doing anything or have spawnshield on
-      if(!anyActive && mSpawnShield.getCurrent() == 0)
+      // If we're not doing anything, recharge.
+      if(!anyActive)
       {
          // Faster energy recharge if not moving and not shooting
          if(mCurrentMove.x == 0 && mCurrentMove.y == 0 && !mCurrentMove.fire)
-         {
-            GameObject *object = isInZone(LoadoutZoneTypeNumber);
-
-            // If in load-out zone
-            if(object)
-            {
-               // If in loadout zone of the same or neutral team, recharge quickly
-               if((object->getTeam() == getTeam() || object->getTeam() == TEAM_NEUTRAL))
-                  mEnergy += S32(EnergyRechargeRateInLoadoutZone * scaleFactor);
-
-               // If in hostile loadout zone, loose energy
-               else if(object->getTeam() == getTeam() || object->getTeam() == TEAM_HOSTILE)
-                  mEnergy -= S32(EnergyRechargeRateInLoadoutZone * scaleFactor);
-
-               // else anything in enemy loadout zone?
-            }
-
-            // Else smaller idle recharge
-            else
-               mEnergy += S32(EnergyRechargeRateWhenIdle * scaleFactor);
-         }
+            mEnergy += S32(EnergyRechargeRateWhenIdle * scaleFactor);
 
          // Else normal rate
          else
@@ -1050,6 +1037,7 @@ void Ship::damageObject(DamageInfo *theInfo)
 
 
 // Runs when ship spawns -- runs on client and server
+// Gets run on client every time ship spawns, gets run on server once per level
 void Ship::onAddedToGame(Game *game)
 {
    Parent::onAddedToGame(game);
