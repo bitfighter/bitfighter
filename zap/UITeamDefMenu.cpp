@@ -303,18 +303,23 @@ void TeamDefUserInterface::onKeyDown(InputCode inputCode, char ascii)
   
    else if(inputCode == KEY_INSERT || inputCode == KEY_EQUALS)           // Ins or Plus (equals) - Add new item
    {
-      S32 maxTeams = GameType::MAX_TEAMS;    // A bit pedantic, perhaps, but using this fixes an odd link error in Linux
-      if(ui->getTeamCount() >= maxTeams)
+      S32 teamCount = ui->getTeamCount();
+
+      if(teamCount >= GameType::MAX_TEAMS)
       {
          errorMsgTimer.reset(errorMsgDisplayTime);
          errorMsg = "Too many teams for this interface";
          return;
       }
 
+      S32 presetIndex = teamCount % GameType::MAX_TEAMS;
+
       EditorTeam *team = new EditorTeam;
-      team->setName(gTeamPresets[selectedIndex].name);
-      team->setColor(gTeamPresets[selectedIndex].r, gTeamPresets[selectedIndex].g, gTeamPresets[selectedIndex].b);
-      ui->addTeam(team, selectedIndex);
+      team->setName(gTeamPresets[presetIndex].name);
+      team->setColor(gTeamPresets[presetIndex].r, gTeamPresets[presetIndex].g, gTeamPresets[presetIndex].b);
+      ui->addTeam(team, teamCount);
+
+      selectedIndex++;
 
       if(selectedIndex < 0)      // It can happen with too many deletes
          selectedIndex = 0;
