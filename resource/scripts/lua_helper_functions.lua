@@ -58,6 +58,8 @@ arg = arg or { }  -- Make sure arg is defined before we ban globals
 function _main()
    if _declared("main") and type(main) == "function" then
       main()
+   else   
+      print("WARNING: No main() function could be found!")
    end
 end
 
