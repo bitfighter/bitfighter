@@ -998,7 +998,7 @@
 		73844F4C13500E1600033B85 /* GeomUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GeomUtils.h; path = ../../../zap/GeomUtils.h; sourceTree = SOURCE_ROOT; };
 		73844F4D13500E1600033B85 /* polygon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = polygon.cpp; path = ../../../zap/polygon.cpp; sourceTree = SOURCE_ROOT; };
 		73844F4E13500E1600033B85 /* SlipZone.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SlipZone.h; path = ../../../zap/SlipZone.h; sourceTree = SOURCE_ROOT; };
-		73851E9313ABF09E00D88D2A /* SDL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL.framework; path = /Library/Frameworks/SDL.framework; sourceTree = "<absolute>"; };
+		73851E9313ABF09E00D88D2A /* SDL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL.framework; path = ../../../lib/SDL.framework; sourceTree = SOURCE_ROOT; };
 		73851EFC13ABF0FF00D88D2A /* begin_code.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = begin_code.h; sourceTree = "<group>"; };
 		73851EFD13ABF0FF00D88D2A /* close_code.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = close_code.h; sourceTree = "<group>"; };
 		73851EFE13ABF0FF00D88D2A /* SDL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL.h; sourceTree = "<group>"; };

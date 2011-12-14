@@ -175,11 +175,7 @@ void KeyDefMenuUserInterface::render()
       glColor(Colors::black, 0.6f);
       bool disableBlending = false;
 
-      if(!glIsEnabled(GL_BLEND))
-      {
-         glEnable(GL_BLEND);
-         disableBlending = true; 
-      }
+      TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
       glBegin(GL_POLYGON);
          glVertex2i(0, 0);
@@ -187,9 +183,6 @@ void KeyDefMenuUserInterface::render()
          glVertex2i(canvasWidth, gScreenInfo.getGameCanvasHeight());
          glVertex2i(0, canvasHeight);
       glEnd();
-
-      if(disableBlending)
-         glDisable(GL_BLEND);
    }
 
    glColor(Colors::white);
@@ -270,17 +263,10 @@ void KeyDefMenuUserInterface::render()
 
       bool disableBlending = false;
 
-      if(!glIsEnabled(GL_BLEND))
-      {
-         glEnable(GL_BLEND);
-         disableBlending = true; 
-      }
+      TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
       glColor(Colors::red, alpha);
       drawCenteredString(canvasHeight - vertMargin - 65, 15, errorMsg.c_str());
-
-      if(disableBlending)
-         glDisable(GL_BLEND);
    }
 }
 

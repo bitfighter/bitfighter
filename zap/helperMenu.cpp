@@ -98,13 +98,7 @@ bool HelperMenu::processInputCode(InputCode inputCode)
 
 void HelperMenu::drawMenuBorderLine(S32 yPos, const Color &color)
 {
-   bool disableBlending = false;
-
-   if(!glIsEnabled(GL_BLEND))
-   {
-      glEnable(GL_BLEND);
-      disableBlending = true; 
-   }
+   TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
    glBegin(GL_LINES);
       glColor(color);
@@ -112,9 +106,6 @@ void HelperMenu::drawMenuBorderLine(S32 yPos, const Color &color)
       glColor(color, 0);    // Fade to transparent...
       glVertex2i(400, yPos + 20);
    glEnd();
-
-   if(disableBlending)
-      glDisable(GL_BLEND);
 }
 
 

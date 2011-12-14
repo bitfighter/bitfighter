@@ -607,13 +607,7 @@ void GameUserInterface::renderProgressBar()
    GameType *gt = getGame()->getGameType();
    if((mShowProgressBar || mProgressBarFadeTimer.getCurrent() > 0) && gt && gt->mObjectsExpected > 0)
    {
-      bool disableBlending = false;
-
-      if(!glIsEnabled(GL_BLEND))
-      {
-         glEnable(GL_BLEND);
-         disableBlending = true; 
-      }
+      TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
       glColor(Colors::green, mShowProgressBar ? 1 : mProgressBarFadeTimer.getFraction());
 
@@ -640,9 +634,6 @@ void GameUserInterface::renderProgressBar()
             glVertex2i(left,     gScreenInfo.getGameCanvasHeight() - vertMargin - height);
          glEnd();
       }
-
-      if(disableBlending)
-         glDisable(GL_BLEND);
    }
 }
 
@@ -666,13 +657,7 @@ void GameUserInterface::renderReticle()
 #endif
       Point offsetMouse = mMousePoint + Point(gScreenInfo.getGameCanvasWidth() / 2, gScreenInfo.getGameCanvasHeight() / 2);
 
-      bool disableBlending = false;
-
-      if(!glIsEnabled(GL_BLEND))
-      {
-         glEnable(GL_BLEND);
-         disableBlending = true; 
-      }
+      TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
       glColor(Colors::green, 0.7f);
       glBegin(GL_LINES);
@@ -711,9 +696,6 @@ void GameUserInterface::renderReticle()
          }
 
       glEnd();
-
-      if(disableBlending)
-         glDisable(GL_BLEND);
    }
 
    if(mWrongModeMsgDisplay.getCurrent())
@@ -848,13 +830,7 @@ void GameUserInterface::renderChatMessageDisplay()
    S32 y_end = y - msgCount * (CHAT_FONT_SIZE + CHAT_FONT_GAP);
 
 
-   bool disableBlending = false;
-
-   if(mHelper && !glIsEnabled(GL_BLEND))
-   {
-      glEnable(GL_BLEND);
-      disableBlending = true; 
-   }
+   TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
    if(mMessageDisplayMode == ShortTimeout)
       for(S32 i = 0; i < msgCount; i++)
@@ -898,9 +874,6 @@ void GameUserInterface::renderChatMessageDisplay()
                   true); // align bottom
          }
       }
-
-      if(disableBlending)
-         glDisable(GL_BLEND);
 }
 
 
@@ -1683,23 +1656,6 @@ void GameUserInterface::lineWidthHandler(ClientGame *game, const Vector<string> 
 }
 
 
-void GameUserInterface::lineSmoothHandler(ClientGame *game, const Vector<string> &words)
-{
-   game->getSettings()->getIniSettings()->useLineSmoothing = !game->getSettings()->getIniSettings()->useLineSmoothing;
-
-   if(game->getSettings()->getIniSettings()->useLineSmoothing)
-   {
-      glEnable(GL_LINE_SMOOTH);
-      glEnable(GL_BLEND);
-   }
-   else
-   {
-      glDisable(GL_LINE_SMOOTH);
-      glDisable(GL_BLEND);
-   }
-}
-
-
 void GameUserInterface::maxFpsHandler(ClientGame *game, const Vector<string> &words)
 {
    S32 number = words.size() > 1 ? atoi(words[1].c_str()) : 0;
@@ -2122,7 +2078,6 @@ CommandInfo chatCmds[] = {
    { "pausebots",  GameUserInterface::pauseBotsHandler,     {  },    0,DEBUG_COMMANDS, 0,  1, {  },         "Pause all bots. Reissue to start again" },
    { "stepbots",   GameUserInterface::stepBotsHandler,      { INT }, 1,DEBUG_COMMANDS, 1,  1, {"[steps]"},  "Advance bots by number of steps (def. = 1)"},
    { "linewidth",  GameUserInterface::lineWidthHandler,     { INT }, 1,DEBUG_COMMANDS, 1,  1, {"[number]"}, "Change width of all lines (def. = 2)" },
-   { "linesmooth", GameUserInterface::lineSmoothHandler,    {  },    0,DEBUG_COMMANDS, 1,  1, {  },         "Enable line smoothing. Looks better, draws slower" },
    { "maxfps",     GameUserInterface::maxFpsHandler,        { INT }, 1,DEBUG_COMMANDS, 1,  1, {"<number>"}, "Set maximum speed of game in frames per second" },
 };
 
@@ -2170,13 +2125,7 @@ void GameUserInterface::renderCurrentChat()
    S32 boxWidth = gScreenInfo.getGameCanvasWidth() - 2 * horizMargin - (nameWidth - promptSize) - 230;
 
    // Render text entry box like thingy
-   bool disableBlending = false;
-
-   if(!glIsEnabled(GL_BLEND))
-   {
-      glEnable(GL_BLEND);
-      disableBlending = true; 
-   }
+   TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
    for(S32 i = 1; i >= 0; i--)
    {
@@ -2189,9 +2138,6 @@ void GameUserInterface::renderCurrentChat()
          glVertex2i(horizMargin, ypos + CHAT_FONT_SIZE + 7);
       glEnd();
    }
-   
-   if(disableBlending)
-      glDisable(GL_BLEND);
 
    glColor(baseColor);
 
@@ -2877,19 +2823,11 @@ void GameUserInterface::renderScoreboard()
       if(mInputModeChangeAlertDisplayTimer.getCurrent() < 1000)
          alpha = mInputModeChangeAlertDisplayTimer.getCurrent() * 0.001f;
 
-      bool disableBlending = false;
-
-      if(!glIsEnabled(GL_BLEND))
-      {
-         glEnable(GL_BLEND);
-         disableBlending = true; 
-      }
+      TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
       glColor(Colors::paleRed, alpha);
       UserInterface::drawCenteredStringf(UserInterface::vertMargin + 130, 20, "Input mode changed to %s", 
                                          getGame()->getSettings()->getIniSettings()->inputMode == InputModeJoystick ? "Joystick" : "Keyboard");
-      if(disableBlending)
-         glDisable(GL_BLEND);
    }
 
    U32 totalWidth = gScreenInfo.getGameCanvasWidth() - UserInterface::horizMargin * 2;
@@ -2943,19 +2881,10 @@ void GameUserInterface::renderScoreboard()
 
       const Color *teamColor = getGame()->getTeamColor(i);
 
-      bool disableBlending = false;
-
-      if(!glIsEnabled(GL_BLEND))
-      {
-         glEnable(GL_BLEND);
-         disableBlending = true; 
-      }
+      TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
       glColor(teamColor, 0.6f);
       drawRect(xl, yt, xr, yb, GL_POLYGON);
-
-      if(disableBlending)
-         glDisable(GL_BLEND);
 
       //// Render team scores
       glColor(Colors::white);
@@ -3046,13 +2975,7 @@ void GameUserInterface::renderBasicInterfaceOverlay(const GameType *gameType, bo
       if(mLevelInfoDisplayTimer.getCurrent() < 1000 && !mMissionOverlayActive)
          alpha = mLevelInfoDisplayTimer.getCurrent() * 0.001f;
 
-      bool disableBlending = false;
-
-      if(!glIsEnabled(GL_BLEND))
-      {
-         glEnable(GL_BLEND);
-         disableBlending = true; 
-      }
+      TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
       glColor(Colors::white, alpha);
       drawCenteredStringf(canvasHeight / 2 - 180, 30, "Level: %s", gameType->getLevelName()->getString());
@@ -3081,9 +3004,6 @@ void GameUserInterface::renderBasicInterfaceOverlay(const GameType *gameType, bo
       glColor(Colors::yellow, alpha);
       drawCenteredStringf(canvasHeight / 2 - 50, 20, "Score to Win: %d", gameType->getWinningScore());
 
-      if(disableBlending)
-         glDisable(GL_BLEND);
-
       mInputModeChangeAlertDisplayTimer.reset(0);     // Supress mode change alert if this message is displayed...
    }
 
@@ -3094,19 +3014,11 @@ void GameUserInterface::renderBasicInterfaceOverlay(const GameType *gameType, bo
       if(mInputModeChangeAlertDisplayTimer.getCurrent() < 1000)
          alpha = mInputModeChangeAlertDisplayTimer.getCurrent() * 0.001f;
 
-      bool disableBlending = false;
-
-      if(!glIsEnabled(GL_BLEND))
-      {
-         glEnable(GL_BLEND);
-         disableBlending = true; 
-      }
+      TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
       glColor(Colors::paleRed, alpha);
       UserInterface::drawCenteredStringf(UserInterface::vertMargin + 130, 20, "Input mode changed to %s", 
                                          getGame()->getSettings()->getIniSettings()->inputMode == InputModeJoystick ? "Joystick" : "Keyboard");
-      if(disableBlending)
-         glDisable(GL_BLEND);
    }
 
    Game *game = gameType->getGame();

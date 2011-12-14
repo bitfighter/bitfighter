@@ -1177,22 +1177,15 @@ void WallSegment::renderFill(const Color &fillColor, const Point &offset)
 #ifndef ZAP_DEDICATED
 
    Color color = fillColor;
-
-   bool enableLineSmoothing = false;
    
-   if(glIsEnabled(GL_BLEND)) 
-   {
-      glDisable(GL_BLEND);
-      enableLineSmoothing = true;
-   }
+   glDisable(GL_BLEND);
    
    if(mSelected)
       renderWallFill(&mTriangulatedFillPoints, offset, true, color);       // Use true because all segment fills are triangulated
    else
       renderWallFill(&mTriangulatedFillPoints, true, color);
 
-   if(enableLineSmoothing) 
-      glEnable(GL_BLEND);
+   glEnable(GL_BLEND);
 #endif
 }
 

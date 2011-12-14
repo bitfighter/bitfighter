@@ -739,17 +739,11 @@ void UserInterface::renderMessageBox(const char *title, const char *instr, const
    if(canvasWidth - 2 * inset < maxLen)
       inset = (canvasWidth - maxLen) / 2;
 
-   bool enableLineSmoothing = false;
-   
-   if(glIsEnabled(GL_BLEND)) 
-   {
-      glDisable(GL_BLEND);
-      enableLineSmoothing = true;
-   }
+   glDisable(GL_BLEND);
 
    for(S32 i = 1; i >= 0; i--)
    {
-      if(i == 0 && enableLineSmoothing) 
+      if(i == 0)
          glEnable(GL_BLEND);
 
       drawFilledRect(inset, boxTop, canvasWidth - inset, boxTop + boxHeight, Color(.3,0,0), Colors::white);

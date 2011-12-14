@@ -205,16 +205,11 @@ void render(S32 renderPass)
    }
    else if(renderPass == 1)      // Time for sparks!!
    {
-      bool useLineSmoothing = gClientGame->getSettings()->getIniSettings()->useLineSmoothing;
-
       for(S32 i = SparkTypeCount - 1; i >= 0; i --)     // Loop through our different spark types
       {
          glPointSize(gDefaultLineWidth);
 
-         bool blending = glIsEnabled(GL_BLEND);
-         
-         if(!blending) 
-            glEnable(GL_BLEND); 
+         TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
          glEnableClientState(GL_COLOR_ARRAY);
          glEnableClientState(GL_VERTEX_ARRAY);
@@ -229,9 +224,6 @@ void render(S32 renderPass)
 
          glDisableClientState(GL_COLOR_ARRAY);
          glDisableClientState(GL_VERTEX_ARRAY);
-
-         if(!blending) 
-            glDisable(GL_BLEND); 
       }
    }
 }
@@ -418,10 +410,7 @@ void FXTrail::unregisterTrail()
 
 void FXTrail::renderTrails()
 {
-   bool blending = glIsEnabled(GL_BLEND);
-
-   if(!blending) 
-      glEnable(GL_BLEND); 
+   TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
    FXTrail *w = mHead;
    while(w)
@@ -429,9 +418,6 @@ void FXTrail::renderTrails()
       w->render();
       w = w->mNext;
    }
-
-   if(!blending) 
-      glDisable(GL_BLEND); 
 }
 
 };

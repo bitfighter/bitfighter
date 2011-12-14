@@ -716,13 +716,7 @@ void GameType::renderObjectiveArrow(const Point *nearestPoint, const Color *outl
    Color fillColor = *outlineColor;    // Create local copy
    fillColor *= .7f;
 
-   bool disableBlending = false;
-
-   if(!glIsEnabled(GL_BLEND))
-   {
-      glEnable(GL_BLEND);
-      disableBlending = true; 
-   }
+   TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
    // This loops twice: once to render the objective arrow, once to render the outline
    for(S32 i = 0; i < 2; i++)
@@ -734,9 +728,6 @@ void GameType::renderObjectiveArrow(const Point *nearestPoint, const Color *outl
          glVertex(p3);
       glEnd();
    }
-
-   if(disableBlending)
-      glDisable(GL_BLEND);
 
    Point cen = rp - arrowDir * 12;
 

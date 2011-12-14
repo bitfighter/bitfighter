@@ -141,14 +141,7 @@ void MessageUserInterface::render()
 
    getUIManager()->renderPrevUI();
 
-   bool disableBlending = false;
-
-   if(!glIsEnabled(GL_BLEND))
-   {
-      glEnable(GL_BLEND);
-      disableBlending = true; 
-   }
-
+   TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
    if(mBox)
    {
@@ -180,10 +173,6 @@ void MessageUserInterface::render()
 
    if (!mFadeTime)
       drawCenteredString(canvasHeight - vertMargin - hInset - 18 + mVertOffset, 18, "Hit any key to continue");
-
-   if(disableBlending)
-      glDisable(GL_BLEND);
-
 }
 
 };

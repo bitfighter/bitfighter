@@ -385,15 +385,8 @@ void ChatUserInterface::render()
    {
       getUIManager()->renderPrevUI();  // ...render it...
       glColor(Colors::black, 0.75);        // ... and dim it out a bit, nay, a lot
-      
-      bool disableBlending = false;
 
-      if(!glIsEnabled(GL_BLEND))
-      {
-         glEnable(GL_BLEND);
-         disableBlending = true; 
-      }
-
+      TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
       glBegin(GL_POLYGON);
          glVertex2i(0, 0);
@@ -401,9 +394,6 @@ void ChatUserInterface::render()
          glVertex2i(gScreenInfo.getGameCanvasWidth(), gScreenInfo.getGameCanvasHeight());
          glVertex2i(0, gScreenInfo.getGameCanvasHeight());
       glEnd();
-
-      if(disableBlending)
-         glDisable(GL_BLEND);
    }
 
    // Render header

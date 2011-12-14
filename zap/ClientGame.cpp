@@ -1254,14 +1254,7 @@ void ClientGame::drawStars(F32 alphaFrac, Point cameraPos, Point visibleExtent)
       fy2 =  1 - yDist;
    }
 
-
-   bool enableLineSmoothing = false;
-   
-   if(glIsEnabled(GL_BLEND)) 
-   {
-      glDisable(GL_BLEND);
-      enableLineSmoothing = true;
-   }
+   glDisable(GL_BLEND);
 
    for(F32 xPage = upperLeft.x + fx1; xPage < lowerRight.x + fx2; xPage++)
       for(F32 yPage = upperLeft.y + fy1; yPage < lowerRight.y + fy2; yPage++)
@@ -1283,8 +1276,7 @@ void ClientGame::drawStars(F32 alphaFrac, Point cameraPos, Point visibleExtent)
          glPopMatrix();
       }
 
-   if(enableLineSmoothing) 
-      glEnable(GL_BLEND);
+   glEnable(GL_BLEND);
 
    glDisableClientState(GL_VERTEX_ARRAY);
 }

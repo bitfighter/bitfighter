@@ -1100,12 +1100,10 @@ void actualizeScreenMode(bool changingInterfaces)
    setDefaultBlendFunction();
    glLineWidth(gDefaultLineWidth);
 
-   if(settings->getIniSettings()->useLineSmoothing)
-   {
-      glEnable(GL_LINE_SMOOTH);
-      //glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-      glEnable(GL_BLEND);
-   }
+   // Enable Line smoothing everywhere!  Make sure to disable temporarily for filled polygons and such
+   glEnable(GL_LINE_SMOOTH);
+   //glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+   glEnable(GL_BLEND);
 
    // If OGLconsole has been created, recreate font texture and handle resize event
    if (gConsole)
@@ -1140,8 +1138,8 @@ void checkIfThisIsAnUpdate(GameSettings *settings)
 
    // version specific changes
    // 015a
-   if(settings->getIniSettings()->version < 1836)
-      settings->getIniSettings()->useLineSmoothing = true;
+//   if(settings->getIniSettings()->version < 1836)
+//      settings->getIniSettings()->useLineSmoothing = true;
 
    // after 015a
    if(settings->getIniSettings()->version < 1840 && settings->getIniSettings()->maxBots == 127)

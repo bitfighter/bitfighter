@@ -1952,13 +1952,7 @@ void Ship::render(S32 layerIndex)
       if(isBusy)
          str = "<<" + str + ">>";
 
-      bool disableBlending = false;
-
-      if(!glIsEnabled(GL_BLEND))
-      {
-         glEnable(GL_BLEND);
-         disableBlending = true; 
-      }
+      TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
       F32 textAlpha = 0.5f * alpha;
       S32 textSize = 14;
@@ -1975,9 +1969,6 @@ void Ship::render(S32 layerIndex)
          drawHorizLine(-xoff, xoff, 33 + textSize);
       }
 
-      if(disableBlending)
-         glDisable(GL_BLEND);
-
       glLineWidth(gDefaultLineWidth);
    }
 
@@ -1993,14 +1984,8 @@ void Ship::render(S32 layerIndex)
       // a tantalizing hint of motion when the ship is cloaked.  Could also try some sort of star-twinkling or
       // scrambling thing here as well...
       glColor(Colors::black);
-      
-      bool enableLineSmoothing = false;
-   
-      if(glIsEnabled(GL_BLEND)) 
-      {
-         glDisable(GL_BLEND);
-         enableLineSmoothing = true;
-      }
+
+      glDisable(GL_BLEND);
 
       glBegin(GL_POLYGON);
          glVertex2f(-20, -15);
@@ -2008,8 +1993,7 @@ void Ship::render(S32 layerIndex)
          glVertex2f(20, -15);
       glEnd();
 
-      if(enableLineSmoothing) 
-         glEnable(GL_BLEND);
+      glEnable(GL_BLEND);
 
 
       glPopMatrix();
@@ -2043,13 +2027,7 @@ void Ship::render(S32 layerIndex)
    renderShip(gameType->getShipColor(this), alpha, thrusts, mHealth, mRadius, clientGame->getCurrentTime() - mSensorStartTime, 
               isModulePrimaryActive(ModuleCloak), isModulePrimaryActive(ModuleShield), isModulePrimaryActive(ModuleSensor), hasModule(ModuleArmor));
 
-   bool disableBlending = false;
-
-   if(alpha != 1 && !glIsEnabled(GL_BLEND))
-   {
-      glEnable(GL_BLEND);
-      disableBlending = true; 
-   }
+   TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
    if(localShip && gShowAimVector && mGame->getSettings()->getEnableExperimentalAimMode())   // Only show for local ship
       renderAimVector();
@@ -2085,9 +2063,6 @@ void Ship::render(S32 layerIndex)
       }
       glLineWidth(gDefaultLineWidth);
    }
-
-   if(disableBlending)
-      glDisable(GL_BLEND);
 
    // Render mounted items
    for(S32 i = 0; i < mMountedItems.size(); i++)

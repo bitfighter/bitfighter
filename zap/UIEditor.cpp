@@ -1407,20 +1407,11 @@ void EditorUserInterface::renderInfoPanel()
    const S32 panelWidth = 180;
    const S32 panelHeight = 4 * PANEL_SPACING + 9;
 
-   bool disableBlending = false;
-
-   if(!glIsEnabled(GL_BLEND))
-   {
-      glEnable(GL_BLEND);
-      disableBlending = true; 
-   }
+   TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
    drawFilledRect(horizMargin, canvasHeight - vertMargin, 
                   horizMargin + panelWidth, canvasHeight - vertMargin - panelHeight, 
                   Colors::richGreen, .7f, Colors::white);
-
-   if(disableBlending)
-      glDisable(GL_BLEND);
 
 
    // Draw coordinates on panel -- if we're moving an item, show the coords of the snap vertex, otherwise show the coords of the
@@ -1606,14 +1597,8 @@ void EditorUserInterface::renderTextEntryOverlay()
       S32 boxwidth = 2 * inset + getStringWidth(fontsize, mEntryBox.getPrompt().c_str()) + 
           mEntryBox.getMaxLen() * getStringWidth(fontsize, "-") + 25;
 
-      // Render entry box    
-      bool disableBlending = false;
-
-      if(!glIsEnabled(GL_BLEND))
-      {
-         glEnable(GL_BLEND);
-         disableBlending = true; 
-      }
+      // Render entry box
+      TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
       S32 xpos = (gScreenInfo.getGameCanvasWidth()  - boxwidth) / 2;
       S32 ypos = (gScreenInfo.getGameCanvasHeight() - boxheight) / 2;
@@ -1629,9 +1614,6 @@ void EditorUserInterface::renderTextEntryOverlay()
             glVertex2i(xpos,            ypos + boxheight);
          glEnd();
       }
-
-      if(disableBlending)
-         glDisable(GL_BLEND);
 
       xpos += inset;
       ypos += inset;
@@ -1659,13 +1641,7 @@ void EditorUserInterface::renderReferenceShip()
       F32 horizDist = Game::PLAYER_VISUAL_DISTANCE_HORIZONTAL;
       F32 vertDist = Game::PLAYER_VISUAL_DISTANCE_VERTICAL;
 
-      bool disableBlending = false;
-
-      if(!glIsEnabled(GL_BLEND))
-      {
-         glEnable(GL_BLEND);
-         disableBlending = true; 
-      }
+      TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
       glColor4f(.5, .5, 1, .35f);
       glBegin(GL_POLYGON);
@@ -1674,9 +1650,6 @@ void EditorUserInterface::renderReferenceShip()
          glVertex2f(horizDist, vertDist);
          glVertex2f(-horizDist, vertDist);
       glEnd();
-      
-      if(disableBlending)
-         glDisable(GL_BLEND);
 
    glPopMatrix();
 }
@@ -1746,10 +1719,7 @@ void EditorUserInterface::render()
          // This blending works like this, source(SRC) * GL_ONE_MINUS_DST_COLOR + destination(DST) * GL_ONE
          glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ONE);  
 
-         bool disableBlending = !glIsEnabled(GL_BLEND);
-
-         if(disableBlending)
-            glEnable(GL_BLEND);
+         TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
          S32 prevTeam;
 
@@ -1767,9 +1737,6 @@ void EditorUserInterface::render()
             pos += mCurrentOffset;
             renderSpyBugVisibleRange(pos, getTeamColor(editorObj->getTeam()), mCurrentScale);
          }
-
-         if(disableBlending)
-            glDisable(GL_BLEND);
 
          setDefaultBlendFunction();
 
@@ -1797,13 +1764,8 @@ void EditorUserInterface::render()
    else
       renderGrid();           // Render grid first, so it's at the bottom
 
-   bool disableBlending = false;
 
-   if(!glIsEnabled(GL_BLEND))
-   {
-      glEnable(GL_BLEND);     // Enable transparency
-      disableBlending = true;
-   }
+   TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
    glPushMatrix();
       setLevelToCanvasCoordConversion();
@@ -1949,9 +1911,6 @@ void EditorUserInterface::render()
 
    renderDragSelectBox();
 
-   if(disableBlending)
-      glDisable(GL_BLEND);
-
    if(mAutoScrollWithMouse)
    {
       glColor(Colors::white);
@@ -2023,19 +1982,10 @@ void EditorUserInterface::renderSaveMessage()
       if(mSaveMsgTimer.getCurrent() < 1000)
          alpha = (F32) mSaveMsgTimer.getCurrent() / 1000;
 
-      bool disableBlending = false;
-
-      if(!glIsEnabled(GL_BLEND))
-      {
-         glEnable(GL_BLEND);
-         disableBlending = true; 
-      }
+      TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
       glColor(mSaveMsgColor, alpha);
       drawCenteredString(gScreenInfo.getGameCanvasHeight() - vertMargin - 65, 25, mSaveMsg.c_str());
-
-      if(disableBlending)
-         glDisable(GL_BLEND);
    }
 }
 
@@ -2048,20 +1998,11 @@ void EditorUserInterface::renderWarnings()
       if (mWarnMsgTimer.getCurrent() < 1000)
          alpha = (F32) mWarnMsgTimer.getCurrent() / 1000;
 
-      bool disableBlending = false;
-
-      if(!glIsEnabled(GL_BLEND))
-      {
-         glEnable(GL_BLEND);
-         disableBlending = true; 
-      }
+      TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
       glColor(mWarnMsgColor, alpha);
       drawCenteredString(gScreenInfo.getGameCanvasHeight() / 4, 25, mWarnMsg1.c_str());
       drawCenteredString(gScreenInfo.getGameCanvasHeight() / 4 + 30, 25, mWarnMsg2.c_str());
-
-      if(disableBlending)
-         glDisable(GL_BLEND);
    }
 
    if(mLevelErrorMsgs.size() || mLevelWarnings.size())
