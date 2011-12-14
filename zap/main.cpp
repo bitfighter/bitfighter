@@ -82,6 +82,7 @@ XXX need to document timers, new luavec stuff XXX
 <li>Triples consume about 20% less energy than in the 015 series
 <li>Removed dedicated wall-editing mode (Ctrl-A)
 <li>Loadouts no longer carry over from level to level -- now you start a new level with the default loadout
+<li>When requesting admin or level change permissions, incorrect passwords are now logged in server log
 </ul>
 */
 

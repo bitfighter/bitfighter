@@ -484,6 +484,11 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sAdminPassword, (StringPtr pass), (pass),
    if(adminPW == "" || strcmp(md5.getSaltedHashFromString(adminPW).c_str(), pass))
    {
       s2cSetIsAdmin(false);      // Tell client they have NOT been granted access
+
+      if(adminPW != "")
+         logprintf(LogConsumer::LogConnection, "%s - client \"%s\" provided incorrect admin password.", 
+                                               getNetAddressString(), mClientInfo->getName().getString());
+
       mWrongPasswordCount++;
       if(mWrongPasswordCount > MAX_WRONG_PASSWORD)
          disconnect(NetConnection::ReasonError, "Too many wrong password");
@@ -520,6 +525,11 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sLevelChangePassword, (StringPtr pass), (pas
    if(levChangePW != "" && strcmp(md5.getSaltedHashFromString(levChangePW).c_str(), pass))
    {
       s2cSetIsLevelChanger(false, true);  // Tell client they have NOT been granted access
+
+      if(levChangePW != "")
+         logprintf(LogConsumer::LogConnection, "%s - client \"%s\" provided incorrect level change password.", 
+                                               getNetAddressString(), mClientInfo->getName().getString());
+
       mWrongPasswordCount++;
       if(mWrongPasswordCount > MAX_WRONG_PASSWORD)
          disconnect(NetConnection::ReasonError, "Too many wrong password");
