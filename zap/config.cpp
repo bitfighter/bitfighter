@@ -169,7 +169,7 @@ IniSettings::IniSettings()
 
    version = 0;
 
-   oldGoalFlash = false;
+   oldGoalFlash = true;
 }
 
 
