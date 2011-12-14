@@ -82,6 +82,8 @@ struct FolderManager
 
    string findLevelFile(const string &filename) const;
    string findLevelFile(const string &levelDir, const string &filename) const;
+
+   Vector<string> getScriptFolderList() const;
    string findLevelGenScript(const string &fileName) const;
    string findBotFile(const string &filename) const;
 };

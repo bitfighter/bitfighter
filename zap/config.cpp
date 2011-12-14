@@ -1887,13 +1887,12 @@ void FolderManager::resolveLevelDir(GameSettings *settings)
 extern string strictjoindir(const string &part1, const string &part2);
 extern bool fileExists(const string &filename);
 
-static string checkName(const string &filename, const char *folders[], const char *extensions[])
+static string checkName(const string &filename, const Vector<string> &folders, const char *extensions[])
 {
    string name;
    if(filename.find('.') != string::npos)       // filename has an extension
    {
-      S32 i = 0;
-      while(strcmp(folders[i], ""))
+      for(S32 i = 0; i < folders.size(); i++)
       {
          name = strictjoindir(folders[i], filename);
          if(fileExists(name))
@@ -1906,13 +1905,11 @@ static string checkName(const string &filename, const char *folders[], const cha
       S32 i = 0; 
       while(strcmp(extensions[i], ""))
       {
-         S32 j = 0;
-         while(strcmp(folders[j], ""))
+         for(S32 j = 0; j < folders.size(); j++)
          {
             name = strictjoindir(folders[j], filename + extensions[i]);
             if(fileExists(name))
                return name;
-            j++;
          }
          i++;
       }
@@ -1933,7 +1930,9 @@ string FolderManager::findLevelFile(const string &leveldir, const string &filena
 #ifdef TNL_OS_XBOX         // This logic completely untested for OS_XBOX... basically disables -leveldir param
    const char *folders[] = { "d:\\media\\levels\\", "" };
 #else
-   const char *folders[] = { leveldir.c_str(), "" };
+   Vector<string> folders(1);
+   folders[0] = leveldir;
+
 #endif
    const char *extensions[] = { ".level", "" };
 
@@ -1941,18 +1940,29 @@ string FolderManager::findLevelFile(const string &leveldir, const string &filena
 }
 
 
+Vector<string> FolderManager::getScriptFolderList() const
+{
+   Vector<string> folders;
+   folders.push_back(levelDir);
+   folders.push_back(luaDir);
+
+   return folders;
+}
+
+
 string FolderManager::findLevelGenScript(const string &filename) const
 {
-   const char *folders[] = { levelDir.c_str(), luaDir.c_str(), "" };
    const char *extensions[] = { ".levelgen", ".lua", "" };
 
-   return checkName(filename, folders, extensions);
+   return checkName(filename, getScriptFolderList(), extensions);
 }
 
 
 string FolderManager::findBotFile(const string &filename) const          
 {
-   const char *folders[] = { robotDir.c_str(), "" };
+   Vector<string>folders(1);
+   folders[0] = robotDir;
+
    const char *extensions[] = { ".bot", ".lua", "" };
 
    return checkName(filename, folders, extensions);

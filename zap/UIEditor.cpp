@@ -590,6 +590,13 @@ void EditorUserInterface::runScript(const FolderManager *folderManager, const st
 {
    string name = folderManager->findLevelGenScript(scriptName);  // Find full name of levelgen script
 
+   if(name == "")
+   {
+      OGLCONSOLE_Output(gConsole, "Could not find script %s; looked in folders: %s\n", 
+                                   scriptName.c_str(), concatenate(folderManager->getScriptFolderList()).c_str());
+      return;
+   }
+   
    // Load the items
    LuaLevelGenerator levelGen(name, folderManager->luaDir, args, getGame()->getGridSize(), mLoadTarget, getGame(), gConsole);
 
