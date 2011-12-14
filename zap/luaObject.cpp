@@ -607,14 +607,22 @@ bool LuaScriptRunner::loadScript(const string &scriptName)
 // Runs the most recently loaded chunk
 bool LuaScriptRunner::runChunk()
 {
-   // Initialize it by running all the code that's not contained in a function -- this loads all the functions into the global namespace
-   if(lua_pcall(L, 0, 0, 0))     // Passing 0 params, getting 0 back
+   try
    {
-      logError("Error initializing script %s: %s -- Aborting.", mScriptName.c_str(), lua_tostring(L, -1));
+      // Initialize it by running all the code that's not contained in a function -- this loads all the functions into the global namespace
+      if(lua_pcall(L, 0, 0, 0))     // Passing 0 params, getting 0 back
+      {
+         logError("Error initializing script %s: %s -- Aborting.", mScriptName.c_str(), lua_tostring(L, -1));
+         return false;
+      }
+
+      return true;
+   }
+   catch(LuaException &e)
+   {
+      logError("Error running script %s: %s.  Aborting script.", mScriptName.c_str(), e.what());
       return false;
    }
-
-   return true;
 }
 
 
