@@ -374,7 +374,7 @@ DatabaseObject *GridDatabase::findObjectLOS(U8 typeNumber, U32 stateIndex, bool 
          if(rect.intersects(rayStart, rayEnd, ct) && ct < collisionTime)
          {
             collisionTime = ct;
-            surfaceNormal = Point(0,0);      // THIS IS WRONG!!
+            surfaceNormal = Point(0,0);      // FIXME: THIS IS WRONG!!
             retObject = fillVector[i];
          }
       }

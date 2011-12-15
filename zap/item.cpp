@@ -229,14 +229,12 @@ GameObject *Item::getGameObject()
 TNL_IMPLEMENT_NETOBJECT(Reactor);
 class LuaReactor;
 
-static const F32 REACTOR_MASS = F32_MAX;
-
 // Constructor
-Reactor::Reactor() : Parent(Point(0,0), (F32)REACTOR_RADIUS)  // REACTOR_MASS can only be used in MoveObject
+Reactor::Reactor() : Parent(Point(0,0), F32(ReactorStartWidth))
 {
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = ReactorTypeNumber;
-   mHitPoints = 10;     // Hits to kill
+   mHitPoints = REACTOR_STARTING_HITPOINTS;     // Hits to kill
    hasExploded = false;
 
    F32 vel = 0;
@@ -254,7 +252,7 @@ Reactor *Reactor::clone() const
 void Reactor::renderItem(const Point &pos)
 {
    if(!hasExploded)
-      renderReactor(pos, getReactorRadius());
+      renderReactor(pos, calcReactorWidth() / 2);
 }
 
 
@@ -290,7 +288,7 @@ const char *Reactor::getOnScreenName()
 
 F32 Reactor::getEditorRadius(F32 currentScale)
 {
-   return 75 * currentScale;
+   return getRadius() * currentScale;
 }
 
 
@@ -302,14 +300,15 @@ bool Reactor::getCollisionCircle(U32 state, Point &center, F32 &radius) const
 
 bool Reactor::getCollisionPoly(Vector<Point> &polyPoints) const
 {
-   return false;
+   Rect rect = Rect(getActualPos(), calcReactorWidth());
+   rect.toPoly(polyPoints);
+   return true;
 }
 
 
 bool Reactor::getCollisionRect(U32 state, Rect &rect) const
 {
-   rect = Rect(getActualPos(), F32(getReactorRadius()));
-   return true;
+   return false;
 }
 
 
@@ -328,13 +327,13 @@ void Reactor::damageObject(DamageInfo *theInfo)
    }
 
    setMaskBits(ItemChangedMask);    // So our clients will get new size
-   setRadius(getReactorRadius());
+   setRadius(calcReactorWidth());
 }
 
 
 void Reactor::setRadius(F32 radius) 
 { 
-   Parent::setRadius(radius * getGame()->getGridSize()); 
+   Parent::setRadius(radius * getGame()->getGridSize());
 }
 
 
@@ -358,7 +357,7 @@ void Reactor::unpackUpdate(GhostConnection *connection, BitStream *stream)
    if(stream->readFlag())
    {
       mHitPoints = stream->readInt(8);
-      setRadius(getReactorRadius());
+      setRadius(calcReactorWidth());
 
       //if(!mInitial)
       //   SoundSystem::playSoundEffect(SFXAsteroidExplode, mMoveState[RenderState].pos, Point());
@@ -375,9 +374,10 @@ void Reactor::unpackUpdate(GhostConnection *connection, BitStream *stream)
 }
 
 
-F32 Reactor::getReactorRadius() const
+F32 Reactor::calcReactorWidth() const
 {
-   return F32(5 + 2 * mHitPoints);
+   return
+         F32(ReactorStartWidth - ReactorMinWidth) * F32(mHitPoints) / F32(REACTOR_STARTING_HITPOINTS) + ReactorMinWidth;
 }
 
 

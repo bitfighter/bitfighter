@@ -98,7 +98,8 @@ bool isDamageableType(U8 x)
          x == BulletTypeNumber || x == MineTypeNumber || x == SpyBugTypeNumber ||
          x == ResourceItemTypeNumber || x == TestItemTypeNumber || x == AsteroidTypeNumber ||
          x == TurretTypeNumber || x == ForceFieldProjectorTypeNumber ||
-         x == FlagTypeNumber || x == SoccerBallItemTypeNumber || x == CircleTypeNumber || x == ReactorTypeNumber;
+         x == FlagTypeNumber || x == SoccerBallItemTypeNumber || x == CircleTypeNumber ||
+         x == ReactorTypeNumber;
 }
 
 
@@ -124,7 +125,7 @@ bool isCollideableType(U8 x)
    return
          x == BarrierTypeNumber || x == PolyWallTypeNumber ||
          x == TurretTypeNumber || x == ForceFieldTypeNumber ||
-         x == ForceFieldProjectorTypeNumber;
+         x == ForceFieldProjectorTypeNumber || x == ReactorTypeNumber;
 }
 
 

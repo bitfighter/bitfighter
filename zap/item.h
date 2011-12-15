@@ -98,6 +98,10 @@ class Reactor : public Item
 typedef Item Parent;
 
 private:
+   static const U32 ReactorStartWidth = 50;
+   static const U32 ReactorMinWidth = 10;
+   static const U32 REACTOR_STARTING_HITPOINTS = 10;
+
    bool hasExploded;
    U32 mHitPoints;
 
@@ -105,15 +109,13 @@ public:
    Reactor();     // Constructor  
    Reactor *clone() const;
 
-   static const S32 REACTOR_RADIUS = 10;
-
    void renderItem(const Point &pos);
    bool getCollisionPoly(Vector<Point> &polyPoints) const;
    bool getCollisionCircle(U32 state, Point &center, F32 &radius) const;
    bool getCollisionRect(U32 state, Rect &rect) const;
    bool collide(GameObject *otherObject);
 
-   F32 getReactorRadius() const;
+   F32 calcReactorWidth() const;
 
    void damageObject(DamageInfo *theInfo);
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);

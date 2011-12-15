@@ -107,7 +107,7 @@ bool isForceFieldDeactivatingType(U8 x);
 bool isDamageableType(U8 x);
 bool isMotionTriggerType(U8 x);
 bool isTurretTargetType(U8 x);
-bool isCollideableType(U8 x);
+bool isCollideableType(U8 x);                  // Move objects bounce off of these
 bool isForceFieldCollideableType(U8 x);
 bool isWallType(U8 x);
 bool isLineItemType(U8 x);
