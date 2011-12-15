@@ -208,7 +208,6 @@ static ControlStringsEditor gControls2[] = {
          { "Hold [Tab] to view a reference ship", "" },
          { NULL, NULL },      // End of col1
 
-         { "Cycle edit mode", "Ctrl-A" },
          { NULL, NULL },      // End of col2
    };
 
