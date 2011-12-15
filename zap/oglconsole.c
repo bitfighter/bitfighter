@@ -974,6 +974,22 @@ void OGLCONSOLE_Output(OGLCONSOLE_Console console, char *s)
  * their command history for that particular console */
 void OGLCONSOLE_AddHistory(OGLCONSOLE_Console console, char *s)
 {
+    /* Skip blank lines */
+    int blank = 1;
+    int i = 0;
+    while (s[i])
+    {
+       if(s[i] != ' ' && s[i] != '\t')
+       {
+          blank = 0;
+          break;
+       }
+       i++;
+    }
+
+    if(blank) 
+       return;
+
     if (++C->historyQueueIndex >= MAX_HISTORY_COUNT)
         C->historyQueueIndex = 0;
 
