@@ -234,7 +234,7 @@ Reactor::Reactor() : Parent(Point(0,0), F32(ReactorStartWidth))
 {
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = ReactorTypeNumber;
-   mHitPoints = REACTOR_STARTING_HITPOINTS;     // Hits to kill
+   mHitPoints = ReactorStartingHitPoints;     // Hits to kill
    hasExploded = false;
 
    F32 vel = 0;
@@ -371,7 +371,7 @@ void Reactor::unpackUpdate(GhostConnection *connection, BitStream *stream)
 F32 Reactor::calcReactorWidth() const
 {
    return
-         F32(ReactorStartWidth - ReactorMinWidth) * F32(mHitPoints) / F32(REACTOR_STARTING_HITPOINTS) + ReactorMinWidth;
+         F32(ReactorStartWidth - ReactorMinWidth) * F32(mHitPoints) / F32(ReactorStartingHitPoints) + ReactorMinWidth;
 }
 
 

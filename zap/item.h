@@ -100,7 +100,7 @@ typedef Item Parent;
 private:
    static const U32 ReactorStartWidth = 50;
    static const U32 ReactorMinWidth = 10;
-   static const U32 REACTOR_STARTING_HITPOINTS = 10;
+   static const U32 ReactorStartingHitPoints = 15;
 
    bool hasExploded;
    U32 mHitPoints;
