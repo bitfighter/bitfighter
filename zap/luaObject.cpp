@@ -636,18 +636,34 @@ bool LuaScriptRunner::runMain()
 
 bool LuaScriptRunner::runMain(const Vector<string> &args)
 {
+   setLuaArgs(args);
+
    try
    {   
-      setLuaArgs(args);
+      lua_getglobal(L, "_main");
+   }
+   catch(...)
+   {
+      logError("Function main() could not be found!  Aborting script.");
+      return false;
+   }
 
-      // _main calls main --> see lua_helper_functions.lua.  Does NOT throw an error if main does not exist!  Will return silently!
-      lua_getglobal(L, "_main");       
-      if(lua_pcall(L, 0, 0, 0) != 0)
-         throw LuaException(lua_tostring(L, -1));
+   try
+   {
+      //if(lua_isfunction(L, lua_gettop(L)))
+      {
+         if(lua_pcall(L, 0, 0, 0) != 0)
+            throw LuaException(lua_tostring(L, -1));
+      }
+      //else     // Function main doesn't exist
+      //{
+      //   logError("Function main() could not be found!  Aborting script.");
+      //   return false;
+      //}
    }
    catch(LuaException &e)
    {
-      logError("Error running main(): %s.  Aborting script.", e.what());
+      logError("Error encountered while running main(): %s.  Aborting script.", e.what());
       return false;
    }
 
