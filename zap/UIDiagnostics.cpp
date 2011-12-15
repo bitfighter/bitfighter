@@ -362,37 +362,37 @@ void DiagnosticUserInterface::render()
       
       S32 index = Joystick::UseJoystickNumber;
 
-      if(Joystick::DetectedJoystickNameList.size() == 0)
+      bool joystickDetected = Joystick::DetectedJoystickNameList.size() > 0;
+
+      if(joystickDetected)
          drawCenteredString2Col(ypos, textsize, true, "No joysticks detected");
       else
          drawCenteredStringPair2Colf(ypos, textsize, true, "Autodetect Str.:", "%s", 
                (U32(index) >= U32(Joystick::DetectedJoystickNameList.size()) || Joystick::DetectedJoystickNameList[index] == "") ? "<None>" : Joystick::DetectedJoystickNameList[index].c_str());
 
-      ypos += textsize + gap;
-      ypos += textsize + gap;
-      ypos += textsize + gap;
-      ypos += textsize + gap;
-      ypos += textsize + gap;
-      ypos += textsize + gap;
+      ypos += 6 * (textsize + gap);
 
-      const S32 rawAxisPosX = 500;
-      const S32 rawAxisPosY = 330;
-      glColor3f(1, 0, 1);
-      drawString(rawAxisPosX, rawAxisPosY-40, textsize - 2, "Raw Analog Axis:");
-      glBegin(GL_LINES);
-      for(S32 i = 0; i < Joystick::rawAxisCount; i++) // shows RAW axis inputs
+      if(joystickDetected)
       {
-         glColor3f(0.5,0,0);
-         glVertex2i(i*8+rawAxisPosX, rawAxisPosY - 20);
-         glVertex2i(i*8+rawAxisPosX, rawAxisPosY + 20);
-         glColor(Colors::yellow);
-         glVertex2i(i*8+rawAxisPosX, rawAxisPosY);
-         F32 a = Joystick::rawAxis[i];
-         if(a < -1) a = -1;
-         if(a > 1) a = 1;
-         glVertex2f(F32(i*8+rawAxisPosX), rawAxisPosY + a * 20);
+         const S32 rawAxisPosX = 500;
+         const S32 rawAxisPosY = 330;
+         glColor3f(1, 0, 1);
+         drawString(rawAxisPosX, rawAxisPosY-40, textsize - 2, "Raw Analog Axis:");
+         glBegin(GL_LINES);
+         for(S32 i = 0; i < Joystick::rawAxisCount; i++) // shows RAW axis inputs
+         {
+            glColor3f(0.5,0,0);
+            glVertex2i(i*8+rawAxisPosX, rawAxisPosY - 20);
+            glVertex2i(i*8+rawAxisPosX, rawAxisPosY + 20);
+            glColor(Colors::yellow);
+            glVertex2i(i*8+rawAxisPosX, rawAxisPosY);
+            F32 a = Joystick::rawAxis[i];
+            if(a < -1) a = -1;
+            if(a > 1) a = 1;
+            glVertex2f(F32(i*8+rawAxisPosX), rawAxisPosY + a * 20);
+         }
+         glEnd();
       }
-      glEnd();
 
       // Key states
       glColor3f(1, 1, 0);
@@ -404,64 +404,68 @@ void DiagnosticUserInterface::render()
          if(getInputCodeState((InputCode) i))
             hpos += drawStringAndGetWidthf( hpos, ypos, textsize - 2, "[%s]", inputCodeToString((InputCode) i) ) + 5;
 
-      glColor3f(1, 0, 1);
-      ypos += textsize + gap;
-      hpos = horizMargin;
-      hpos += drawStringAndGetWidthf( hpos, ypos, textsize - 2, "Raw Controller Input [%d]: ", Joystick::UseJoystickNumber);
+      if(joystickDetected)
+      {
+         glColor3f(1, 0, 1);
+         ypos += textsize + gap;
+         hpos = horizMargin;
 
-      for(U32 i = 0; i < 32; i++)  // there are 32 bit in U32
-         if(Joystick::ButtonMask & BIT(i))
-            hpos += drawStringAndGetWidthf( hpos, ypos, textsize - 2, "(%d)", i ) + 5;
+         hpos += drawStringAndGetWidthf( hpos, ypos, textsize - 2, "Raw Controller Input [%d]: ", Joystick::UseJoystickNumber);
 
-      // TODO render raw D-pad (SDL Hat)
+         for(U32 i = 0; i < 32; i++)  // there are 32 bit in U32
+            if(Joystick::ButtonMask & BIT(i))
+               hpos += drawStringAndGetWidthf( hpos, ypos, textsize - 2, "(%d)", i ) + 5;
 
-      ypos += textsize + gap + 10;
+         // TODO render raw D-pad (SDL Hat)
 
-      glColor3f(0, 1, 0);
-      drawCenteredString(ypos, textsize, "Hint: If you're having joystick problems, check your controller's 'mode' button.");
+         ypos += textsize + gap + 10;
 
-      //////////
-      // Draw joystick and button map
-      hpos = 100;
-      ypos = gScreenInfo.getGameCanvasHeight() - vertMargin - 110;
+         glColor3f(0, 1, 0);
+         drawCenteredString(ypos, textsize, "Hint: If you're having joystick problems, check your controller's 'mode' button.");
 
-      JoystickRender::renderDPad(Point(hpos, ypos), 25, getInputCodeState(BUTTON_DPAD_UP), getInputCodeState(BUTTON_DPAD_DOWN),
-            getInputCodeState(BUTTON_DPAD_LEFT), getInputCodeState(BUTTON_DPAD_RIGHT), "DPad", "(Menu Nav)");
-      hpos += 75;
+         //////////
+         // Draw joystick and button map
+         hpos = 100;
+         ypos = gScreenInfo.getGameCanvasHeight() - vertMargin - 110;
 
-      JoystickRender::renderDPad(Point(hpos, ypos), 25, getInputCodeState(STICK_1_UP), getInputCodeState(STICK_1_DOWN),
-            getInputCodeState(STICK_1_LEFT), getInputCodeState(STICK_1_RIGHT), "L Stick", "(Move)");
-      hpos += 75;
+         JoystickRender::renderDPad(Point(hpos, ypos), 25, getInputCodeState(BUTTON_DPAD_UP), getInputCodeState(BUTTON_DPAD_DOWN),
+               getInputCodeState(BUTTON_DPAD_LEFT), getInputCodeState(BUTTON_DPAD_RIGHT), "DPad", "(Menu Nav)");
+         hpos += 75;
 
-      JoystickRender::renderDPad(Point(hpos, ypos), 25, getInputCodeState(STICK_2_UP), getInputCodeState(STICK_2_DOWN),
-            getInputCodeState(STICK_2_LEFT), getInputCodeState(STICK_2_RIGHT), "R Stick", "(Fire)");
-      hpos += 55;
+         JoystickRender::renderDPad(Point(hpos, ypos), 25, getInputCodeState(STICK_1_UP), getInputCodeState(STICK_1_DOWN),
+               getInputCodeState(STICK_1_LEFT), getInputCodeState(STICK_1_RIGHT), "L Stick", "(Move)");
+         hpos += 75;
 
-      U32 joystickIndex = Joystick::SelectedPresetIndex;
+         JoystickRender::renderDPad(Point(hpos, ypos), 25, getInputCodeState(STICK_2_UP), getInputCodeState(STICK_2_DOWN),
+               getInputCodeState(STICK_2_LEFT), getInputCodeState(STICK_2_RIGHT), "R Stick", "(Fire)");
+         hpos += 55;
 
-      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickIndex, BUTTON_1, getInputCodeState(BUTTON_1));
-      hpos += 40;
-      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickIndex, BUTTON_2, getInputCodeState(BUTTON_2));
-      hpos += 40;
-      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickIndex, BUTTON_3, getInputCodeState(BUTTON_3));
-      hpos += 40;
-      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickIndex, BUTTON_4, getInputCodeState(BUTTON_4));
-      hpos += 40;
-      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickIndex, BUTTON_5, getInputCodeState(BUTTON_5));
-      hpos += 40;
-      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickIndex, BUTTON_6, getInputCodeState(BUTTON_6));
-      hpos += 40;
-      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickIndex, BUTTON_7, getInputCodeState(BUTTON_7));
-      hpos += 40;
-      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickIndex, BUTTON_8, getInputCodeState(BUTTON_8));
-      hpos += 40;
-      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickIndex, BUTTON_BACK, getInputCodeState(BUTTON_BACK));
-      hpos += 40;
-      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickIndex, BUTTON_START, getInputCodeState(BUTTON_START));
-      hpos += 40;
-      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickIndex, BUTTON_9, getInputCodeState(BUTTON_9));
-      hpos += 40;
-      JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickIndex, BUTTON_10, getInputCodeState(BUTTON_10));
+         U32 joystickIndex = Joystick::SelectedPresetIndex;
+
+         JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickIndex, BUTTON_1, getInputCodeState(BUTTON_1));
+         hpos += 40;
+         JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickIndex, BUTTON_2, getInputCodeState(BUTTON_2));
+         hpos += 40;
+         JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickIndex, BUTTON_3, getInputCodeState(BUTTON_3));
+         hpos += 40;
+         JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickIndex, BUTTON_4, getInputCodeState(BUTTON_4));
+         hpos += 40;
+         JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickIndex, BUTTON_5, getInputCodeState(BUTTON_5));
+         hpos += 40;
+         JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickIndex, BUTTON_6, getInputCodeState(BUTTON_6));
+         hpos += 40;
+         JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickIndex, BUTTON_7, getInputCodeState(BUTTON_7));
+         hpos += 40;
+         JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickIndex, BUTTON_8, getInputCodeState(BUTTON_8));
+         hpos += 40;
+         JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickIndex, BUTTON_BACK, getInputCodeState(BUTTON_BACK));
+         hpos += 40;
+         JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickIndex, BUTTON_START, getInputCodeState(BUTTON_START));
+         hpos += 40;
+         JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickIndex, BUTTON_9, getInputCodeState(BUTTON_9));
+         hpos += 40;
+         JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickIndex, BUTTON_10, getInputCodeState(BUTTON_10));
+      }
    }
    else if(mCurPage == 1)
    {
