@@ -431,8 +431,6 @@ bool Ship::isOnObject(GameObject *object)
    else */
    if(getCollisionCircle(MoveObject::ActualState, center, radius))
       return object->collisionPolyPointIntersect(center, radius);
-   // else if(getCollisionRect(MoveObject::ActualState, rect)) 
-      // Do some check here...  not needed as getCollisionCircle() always returns true
    else
       return false;
 }

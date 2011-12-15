@@ -112,7 +112,6 @@ public:
    void renderItem(const Point &pos);
    bool getCollisionPoly(Vector<Point> &polyPoints) const;
    bool getCollisionCircle(U32 state, Point &center, F32 &radius) const;
-   bool getCollisionRect(U32 state, Rect &rect) const;
    bool collide(GameObject *otherObject);
 
    F32 calcReactorWidth() const;

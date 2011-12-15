@@ -306,12 +306,6 @@ bool Reactor::getCollisionPoly(Vector<Point> &polyPoints) const
 }
 
 
-bool Reactor::getCollisionRect(U32 state, Rect &rect) const
-{
-   return false;
-}
-
-
 void Reactor::damageObject(DamageInfo *theInfo)
 {
    if(hasExploded)  

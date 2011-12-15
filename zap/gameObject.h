@@ -177,7 +177,6 @@ public:
    // DatabaseObject methods -- provide default implementations
    virtual bool getCollisionPoly(Vector<Point> &polyPoints) const                     { return false; }
    virtual bool getCollisionCircle(U32 stateIndex, Point &point, float &radius) const { return false; }
-   virtual bool getCollisionRect(U32 stateIndex, Rect &rect) const                    { return false; }
 
 
    virtual bool processArguments(S32 argc, const char**argv, Game *game) { return true; }
