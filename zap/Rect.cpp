@@ -242,6 +242,14 @@ void Rect::offset(const Point &offset)
    max += offset;
 }
 
+void Rect::toPoly(Vector<Point> &polyPoints)
+{
+   polyPoints.push_back(Point(max.x, max.y));
+   polyPoints.push_back(Point(max.x, min.y));
+   polyPoints.push_back(Point(min.x, min.y));
+   polyPoints.push_back(Point(min.x, max.y));
+}
+
 F32 Rect::getWidth() const
 {
    return max.x - min.x;

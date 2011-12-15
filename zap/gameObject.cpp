@@ -98,7 +98,8 @@ bool isDamageableType(U8 x)
          x == BulletTypeNumber || x == MineTypeNumber || x == SpyBugTypeNumber ||
          x == ResourceItemTypeNumber || x == TestItemTypeNumber || x == AsteroidTypeNumber ||
          x == TurretTypeNumber || x == ForceFieldProjectorTypeNumber ||
-         x == FlagTypeNumber || x == SoccerBallItemTypeNumber || x == CircleTypeNumber || x == ReactorTypeNumber;
+         x == FlagTypeNumber || x == SoccerBallItemTypeNumber || x == CircleTypeNumber ||
+         x == ReactorTypeNumber;
 }
 
 
@@ -124,7 +125,7 @@ bool isCollideableType(U8 x)
    return
          x == BarrierTypeNumber || x == PolyWallTypeNumber ||
          x == TurretTypeNumber || x == ForceFieldTypeNumber ||
-         x == ForceFieldProjectorTypeNumber;
+         x == ForceFieldProjectorTypeNumber || x == ReactorTypeNumber;
 }
 
 
@@ -575,10 +576,6 @@ Rect GameObject::getBounds(U32 stateIndex) const
       ret.max = p + Point(radius, radius);
       ret.min = p - Point(radius, radius);
    }
-   else if(getCollisionRect(stateIndex, ret))
-   {
-      /* Nothing to do -- ret is populated by getCollisionRect() */
-   }
 
    return ret;
 }
@@ -600,9 +597,6 @@ bool GameObject::collisionPolyPointIntersect(Point point)
 
    else if(getCollisionCircle(MoveObject::ActualState, center, radius))
       return(center.distanceTo(point) <= radius);
-
-   else if(getCollisionRect(MoveObject::ActualState, rect))
-      return rect.contains(point);
 
    else
       return false;
@@ -627,8 +621,6 @@ bool GameObject::collisionPolyPointIntersect(Vector<Point> points)
       Point unusedPt;
       return polygonCircleIntersect(&points[0], points.size(), center, radius * radius, unusedPt);
    }
-   else if(getCollisionRect(MoveObject::ActualState, rect))
-      return rect.intersects(points);
 
    else
       return false;
@@ -650,9 +642,6 @@ bool GameObject::collisionPolyPointIntersect(Point center, F32 radius)
 
    else if(getCollisionCircle(MoveObject::ActualState, c, r))
       return ( center.distSquared(c) < (radius + r) * (radius + r) );
-
-   else if(getCollisionRect(MoveObject::ActualState, rect))
-      return rect.intersects(center, radius);
 
    else
       return false;

@@ -762,12 +762,6 @@ bool WallEdge::getCollisionCircle(U32 stateIndex, Point &point, float &radius) c
    return false;
 }
 
-
-bool WallEdge::getCollisionRect(U32 stateIndex, Rect &rect) const
-{
-   return false;
-}
-
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -1228,12 +1222,6 @@ bool WallSegment::getCollisionPoly(Vector<Point> &polyPoints) const
 
 
 bool WallSegment::getCollisionCircle(U32 stateIndex, Point &point, float &radius) const
-{
-   return false;
-}
-
-
-bool WallSegment::getCollisionRect(U32 stateIndex, Rect &rect) const
 {
    return false;
 }

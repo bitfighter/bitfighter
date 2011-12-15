@@ -369,15 +369,6 @@ DatabaseObject *GridDatabase::findObjectLOS(U8 typeNumber, U32 stateIndex, bool 
             retObject = fillVector[i];
          }
       }
-      else if(fillVector[i]->getCollisionRect(stateIndex, rect))
-      {
-         if(rect.intersects(rayStart, rayEnd, ct) && ct < collisionTime)
-         {
-            collisionTime = ct;
-            surfaceNormal = Point(0,0);      // THIS IS WRONG!!
-            retObject = fillVector[i];
-         }
-      }
    }
 
    if(retObject)
@@ -443,15 +434,6 @@ DatabaseObject *GridDatabase::findObjectLOS(TestFunc testFunc, U32 stateIndex, b
                surfaceNormal = (rayStart + (rayEnd - rayStart) * ct) - center;
                retObject = fillVector[i];
             }
-         }
-      }
-      else if(fillVector[i]->getCollisionRect(stateIndex, rect))
-      {
-         if(rect.intersects(rayStart, rayEnd, ct) && ct < collisionTime)
-         {
-            collisionTime = ct;
-            surfaceNormal = Point(0,0);      // THIS IS WRONG!!
-            retObject = fillVector[i];
          }
       }
    }

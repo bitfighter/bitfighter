@@ -107,7 +107,7 @@ bool isForceFieldDeactivatingType(U8 x);
 bool isDamageableType(U8 x);
 bool isMotionTriggerType(U8 x);
 bool isTurretTargetType(U8 x);
-bool isCollideableType(U8 x);
+bool isCollideableType(U8 x);                  // Move objects bounce off of these
 bool isForceFieldCollideableType(U8 x);
 bool isWallType(U8 x);
 bool isLineItemType(U8 x);
@@ -177,7 +177,6 @@ public:
    // DatabaseObject methods -- provide default implementations
    virtual bool getCollisionPoly(Vector<Point> &polyPoints) const                     { return false; }
    virtual bool getCollisionCircle(U32 stateIndex, Point &point, float &radius) const { return false; }
-   virtual bool getCollisionRect(U32 stateIndex, Rect &rect) const                    { return false; }
 
 
    virtual bool processArguments(S32 argc, const char**argv, Game *game) { return true; }

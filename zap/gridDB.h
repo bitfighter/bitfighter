@@ -75,7 +75,6 @@ public:
 
    virtual bool getCollisionPoly(Vector<Point> &polyPoints) const = 0;
    virtual bool getCollisionCircle(U32 stateIndex, Point &point, float &radius) const = 0;
-   virtual bool getCollisionRect(U32 stateIndex, Rect &rect) const = 0;
 
    virtual bool isCollisionEnabled() { return true; }
 

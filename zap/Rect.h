@@ -87,6 +87,9 @@ public:
 
    void offset(const Point &offset);
 
+   // Return a polygon from this Rect
+   void toPoly(Vector<Point> &polyPoints);
+
    F32 getWidth() const;
    F32 getHeight() const;
 

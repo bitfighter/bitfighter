@@ -1605,6 +1605,7 @@ bool TestItem::getCollisionPoly(Vector<Point> &polyPoints) const
    //   polyPoints.push_back(p);
    //}
 
+   // Override parent so getCollisionCircle is used instead
    return false;
 }
 
