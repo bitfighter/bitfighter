@@ -1930,8 +1930,8 @@ string FolderManager::findLevelFile(const string &leveldir, const string &filena
 #ifdef TNL_OS_XBOX         // This logic completely untested for OS_XBOX... basically disables -leveldir param
    const char *folders[] = { "d:\\media\\levels\\", "" };
 #else
-   Vector<string> folders(1);
-   folders[0] = leveldir;
+   Vector<string> folders;
+   folders.push_back(leveldir);
 
 #endif
    const char *extensions[] = { ".level", "" };
@@ -1960,8 +1960,8 @@ string FolderManager::findLevelGenScript(const string &filename) const
 
 string FolderManager::findBotFile(const string &filename) const          
 {
-   Vector<string>folders(1);
-   folders[0] = robotDir;
+   Vector<string> folders;
+   folders.push_back(robotDir);
 
    const char *extensions[] = { ".bot", ".lua", "" };
 
