@@ -281,7 +281,7 @@ typedef struct
 
     /* History scrollback (command input) */
     char history[MAX_HISTORY_COUNT][MAX_INPUT_LENGTH];
-    int historyQueueIndex, historyScrollIndex;
+    int historyQueueIndex, historyScrollIndex, maxHistoryIndex;
 
     /* Current input line */
     char inputLine[MAX_INPUT_LENGTH];
@@ -457,6 +457,7 @@ OGLCONSOLE_Console OGLCONSOLE_Create()
     memset(console->history, 0, MAX_INPUT_LENGTH * MAX_HISTORY_COUNT);
     console->historyQueueIndex = 0;
     console->historyScrollIndex = -1;
+    console->maxHistoryIndex = 0;
 
     /* Callbacks */
     console->enterKeyCallback = OGLCONSOLE_DefaultEnterKeyCallback;
@@ -990,8 +991,14 @@ void OGLCONSOLE_AddHistory(OGLCONSOLE_Console console, char *s)
     if(blank) 
        return;
 
-    if (++C->historyQueueIndex >= MAX_HISTORY_COUNT)
+    C->historyQueueIndex++;
+    C->maxHistoryIndex++;
+
+    if (C->historyQueueIndex >= MAX_HISTORY_COUNT)
         C->historyQueueIndex = 0;
+
+    if (C->historyQueueIndex > MAX_HISTORY_COUNT)
+       C->historyQueueIndex = MAX_HISTORY_COUNT;
 
     strcpy(C->history[C->historyQueueIndex], s);
 }
@@ -1268,7 +1275,7 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
             {
                 // Wrap our history scrolling
                 if (--userConsole->historyScrollIndex < 0)
-                    userConsole->historyScrollIndex = MAX_HISTORY_COUNT;
+                   userConsole->historyScrollIndex = userConsole->maxHistoryIndex;
             }
 
             // If we've returned to our current position in the command
@@ -1309,7 +1316,7 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
             }
             else
             {
-                // TODO: be like, no bitch, there's no history down there
+               userConsole->historyScrollIndex = 0;
             }
         }
         return 1;
