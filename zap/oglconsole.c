@@ -1305,7 +1305,7 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
             if (userConsole->historyScrollIndex != -1)
             {
                 // Wrap our history scrolling
-                if (++userConsole->historyScrollIndex >= MAX_HISTORY_COUNT)
+                if (++userConsole->historyScrollIndex > userConsole->maxHistoryIndex)
                     userConsole->historyScrollIndex = 0;
 
                 // If we've returned to our current position in the command
