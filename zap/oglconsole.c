@@ -705,7 +705,7 @@ void OGLCONSOLE_Render(OGLCONSOLE_Console console)
          * the command history or the line being edited atm */
         if (C->historyScrollIndex >= 0)
         {
-            glColor3d(1,0,0);
+            glColor3d(1,0,0);    // red
             OGLCONSOLE_DrawString(
                     C->history[C->historyScrollIndex],
                     0, 0,
@@ -722,15 +722,15 @@ void OGLCONSOLE_Render(OGLCONSOLE_Console console)
                     C->characterWidth,
                     C->characterHeight,
                     0);
-
-            /* Draw cursor beige */
-            glColor3d(1,1,.5);
-            OGLCONSOLE_DrawCharacter('_'-FIRST_CHARACTER,
-                    C->inputCursorPos * C->characterWidth, 0,
-                    C->characterWidth,
-                    C->characterHeight,
-                    0);
         }
+
+        /* Draw cursor */
+        //glColor3d(1,1,.5);    // <== use whatever color we drew the line with
+        OGLCONSOLE_DrawCharacter('_'-FIRST_CHARACTER,
+                 C->inputCursorPos * C->characterWidth, 0,
+                 C->characterWidth,
+                 C->characterHeight,
+                 0);
     }
     glEnd();
 
@@ -1136,6 +1136,17 @@ int wrap(_OGLCONSOLE_Console *userConsole, int index)
 
 }
 
+
+void putCursorAtEndOfLine(_OGLCONSOLE_Console *userConsole)
+{
+   if(userConsole->historyScrollIndex == -1)
+      userConsole->inputCursorPos = userConsole->inputLineLength;
+   else
+      userConsole->inputCursorPos = strlen(userConsole->history[userConsole->historyScrollIndex]);
+      
+}
+
+
 // End Bitfighter specific block
 
 int OGLCONSOLE_KeyEvent(int sym, int mod)
@@ -1271,7 +1282,7 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
          /* Yank the command history if necessary */
          OGLCONSOLE_YankHistory(userConsole);
 
-         userConsole->inputCursorPos = userConsole->inputLineLength;
+         putCursorAtEndOfLine(userConsole);
          return 1;
      }
 
@@ -1291,13 +1302,19 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
         {
             // -1 means we aren't looking at history yet
             if (userConsole->historyScrollIndex == -1)
+            {
                 userConsole->historyScrollIndex = wrap(userConsole, userConsole->firstIndex - 1);
+                putCursorAtEndOfLine(userConsole);
+            }
             else
             {
                // If user hits up when they are already at the first index, do nothing
                // otherwise progress to previous history item
                if(userConsole->historyScrollIndex != userConsole->firstIndex)
+               {
                    userConsole->historyScrollIndex = wrap(userConsole, userConsole->historyScrollIndex - 1);
+                   putCursorAtEndOfLine(userConsole);
+               }
             }
         }
 
@@ -1311,7 +1328,10 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
         if (mod & KMOD_SHIFT)
         {
             if (++userConsole->lineScrollIndex >= userConsole->maxLines)
+            {
                 userConsole->lineScrollIndex = 0;
+                putCursorAtEndOfLine(userConsole);
+            }
         }
 
         // No shift key is for scrolling through command history
@@ -1326,7 +1346,9 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
                 // If we've returned to our current position in the command
                 // history, we'll just drop out of history mode
                 if (userConsole->historyScrollIndex == userConsole->firstIndex)
-                userConsole->historyScrollIndex = -1;
+                     userConsole->historyScrollIndex = -1;
+
+                putCursorAtEndOfLine(userConsole);
             }
             // If user is editing a line and hits down, nothing should happen -- there is no newer history!
             //else
