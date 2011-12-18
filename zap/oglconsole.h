@@ -42,6 +42,9 @@ void OGLCONSOLE_HideConsole();
 void OGLCONSOLE_Draw();
 void OGLCONSOLE_Render(OGLCONSOLE_Console console);
 
+/* Set whether cursor should be visible -- can be used to make cursor blink */
+void OGLCONSOLE_setCursor(int drawCursor);      
+
 /* Handle resize window events */
 void OGLCONSOLE_Reshape();
 

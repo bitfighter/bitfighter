@@ -287,6 +287,7 @@ typedef struct
     /* Current input line */
     char inputLine[MAX_INPUT_LENGTH];
     int inputCursorPos, inputLineLength;
+    int drawCursor;           // Defaults to true, can be used to make cursor blink
 
     /* Rows and columns of text to display */
     int textWidth, textHeight;
@@ -452,6 +453,7 @@ OGLCONSOLE_Console OGLCONSOLE_Create()
     /* Initialize the user's input (command line) */
     console->inputLineLength = 0;
     console->inputCursorPos = 0;
+    console->drawCursor = 1;     // On by default
     console->inputLine[0] = '\0';
 
     /* History lines */
@@ -588,6 +590,8 @@ void OGLCONSOLE_Info()
 /* This routine is meant for applications with a single console, if you use
  * multiple consoles in your program, use Render() instead */
 void OGLCONSOLE_Draw() { OGLCONSOLE_Render((void*)userConsole); }
+
+void OGLCONSOLE_setCursor(int drawCursor) { userConsole->drawCursor = drawCursor; }
 
 /* Internal functions for drawing text. You don't want these, do you? */
 void OGLCONSOLE_DrawString(char *s, double x, double y, double w, double h,
@@ -726,11 +730,12 @@ void OGLCONSOLE_Render(OGLCONSOLE_Console console)
 
         /* Draw cursor */
         //glColor3d(1,1,.5);    // <== use whatever color we drew the line with
-        OGLCONSOLE_DrawCharacter('_'-FIRST_CHARACTER,
-                 C->inputCursorPos * C->characterWidth, 0,
-                 C->characterWidth,
-                 C->characterHeight,
-                 0);
+        if(C->drawCursor)     // <== Makes cursor blink.  Remove this line for original, solid cursor.
+           OGLCONSOLE_DrawCharacter('_'-FIRST_CHARACTER,
+                    C->inputCursorPos * C->characterWidth, 0,
+                    C->characterWidth,
+                    C->characterHeight,
+                    0);
     }
     glEnd();
 
@@ -1306,11 +1311,11 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
                 userConsole->historyScrollIndex = wrap(userConsole, userConsole->firstIndex - 1);
                 putCursorAtEndOfLine(userConsole);
             }
-            else
+            else     // userConsole->historyScrollIndex > -1
             {
                // If user hits up when they are already at the first index, do nothing
                // otherwise progress to previous history item
-               if(userConsole->historyScrollIndex != userConsole->firstIndex)
+               if(userConsole->historyScrollIndex != wrap(userConsole, userConsole->firstIndex - 1))
                {
                    userConsole->historyScrollIndex = wrap(userConsole, userConsole->historyScrollIndex - 1);
                    putCursorAtEndOfLine(userConsole);

@@ -699,6 +699,7 @@ void UserInterface::renderConsole()
    if(scissorMode) 
       glDisable(GL_SCISSOR_TEST);
 
+   OGLCONSOLE_setCursor((Platform::getRealMilliseconds() / 100) % 2);     // Make cursor blink
    OGLCONSOLE_Draw();   
 
    if(scissorMode) 
