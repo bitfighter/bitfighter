@@ -341,8 +341,8 @@ void OGLCONSOLE_Resize(_OGLCONSOLE_Console *console)
     console->textHeight = viewport[3] / CHAR_PIXEL_H;
     screenWidth = (GLdouble)viewport[2] / (GLdouble)CHAR_PIXEL_W;    // width in chars
     screenHeight = (GLdouble)viewport[3] / (GLdouble)CHAR_PIXEL_H;   // height in chars
-    console->characterWidth = 1.0 / screenWidth;
-    console->characterHeight = 1.0 / screenHeight;
+    console->characterWidth = 1.0 / (int)screenWidth;
+    console->characterHeight = 1.0 / (int)screenHeight;
 
     /* Different values have different meanings for xMatrixUse:
         0) Do not change the matrix before rendering
