@@ -660,7 +660,7 @@ void OGLCONSOLE_Render(OGLCONSOLE_Console console)
     glEnable(GL_BLEND);
 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glColor4d(.1,0,0, 0.5);
+    glColor4d(.1,0,0, 0.75);
 
     glBegin(GL_QUADS);
     glVertex3d(0,0,0);
