@@ -802,7 +802,7 @@ void UserInterface::drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &
    for(S32 i = 1; i >= 0; i--)
    {
       glColor(i ? fillColor : outlineColor, i ? fillAlpha : 1);
-      drawRect(x1, y1, x2, y2, i ? GL_POLYGON : GL_LINE_LOOP);
+      drawRect(x1, y1, x2, y2, i ? GL_QUADS : GL_LINE_LOOP);
    }
 }
 
