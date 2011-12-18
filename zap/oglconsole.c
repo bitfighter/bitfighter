@@ -727,7 +727,7 @@ void OGLCONSOLE_Render(OGLCONSOLE_Console console)
 
         /* Draw cursor */
         //glColor3d(1,1,.5);    // <== use whatever color we drew the line with
-        if(C->drawCursor)     // <== Makes cursor blink.  Remove this line for original, solid cursor.
+        if(C->drawCursor)     
            OGLCONSOLE_DrawCharacter('_'-FIRST_CHARACTER,
                     C->inputCursorPos * C->characterWidth, 0,
                     C->characterWidth,
