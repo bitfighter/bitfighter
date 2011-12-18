@@ -3559,12 +3559,12 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
    }
    else if(inputString == "Ctrl+Shift+Z") // Redo
    {
-      if(!mCreatingPolyline && !mCreatingPoly)
+      if(!mCreatingPolyline && !mCreatingPoly && !mDraggingObjects && !mDraggingDockItem)
          redo();
    }
    else if(inputString == "Ctrl+Z")       // Undo
    {
-      if(!mCreatingPolyline && !mCreatingPoly)
+      if(!mCreatingPolyline && !mCreatingPoly && !mDraggingObjects && !mDraggingDockItem)
          undo(true);
    }
    else if(inputString == "Z")            // Reset veiw
