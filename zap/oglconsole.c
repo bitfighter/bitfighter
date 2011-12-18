@@ -1004,7 +1004,7 @@ void OGLCONSOLE_AddHistory(OGLCONSOLE_Console console, char *s)
 
     C->maxHistoryIndex++;
 
-    if (C->maxHistoryIndex = MAX_HISTORY_COUNT)
+    if (C->maxHistoryIndex >= MAX_HISTORY_COUNT)
     {
         C->maxHistoryIndex = MAX_HISTORY_COUNT;
      
@@ -1315,7 +1315,7 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
             {
                // If user hits up when they are already at the first index, do nothing
                // otherwise progress to previous history item
-               if(userConsole->historyScrollIndex != wrap(userConsole, userConsole->firstIndex - 1))
+               if(userConsole->historyScrollIndex != wrap(userConsole, userConsole->firstIndex))
                {
                    userConsole->historyScrollIndex = wrap(userConsole, userConsole->historyScrollIndex - 1);
                    putCursorAtEndOfLine(userConsole);
