@@ -277,7 +277,7 @@ typedef struct
 
     /* Screen+scrollback lines (console output) */
     char *lines;
-    int maxLines, lineQueueIndex, lineScrollIndex, firstIndex;
+    int maxLines, lineQueueIndex, lineScrollIndex;
 
     /* History scrollback (command input) */
     char history[MAX_HISTORY_COUNT][MAX_INPUT_LENGTH];
@@ -461,9 +461,6 @@ OGLCONSOLE_Console OGLCONSOLE_Create()
     console->historyQueueIndex = 0;
     console->historyScrollIndex = -1;
     console->maxHistoryIndex = 0;
-
-    /* Index of first item in the queue -- is always 0 until we start wrapping */
-    console->firstIndex = 0;  
 
     /* Callbacks */
     console->enterKeyCallback = OGLCONSOLE_DefaultEnterKeyCallback;
@@ -1005,14 +1002,7 @@ void OGLCONSOLE_AddHistory(OGLCONSOLE_Console console, char *s)
     C->maxHistoryIndex++;
 
     if (C->maxHistoryIndex >= MAX_HISTORY_COUNT)
-    {
         C->maxHistoryIndex = MAX_HISTORY_COUNT;
-     
-        // Hisory buffer is full, will be overwriting existing entries
-        C->firstIndex++;
-        if (C->firstIndex >= MAX_HISTORY_COUNT)
-            C->firstIndex = 0;
-    }
 
 
     C->historyQueueIndex++;
@@ -1314,14 +1304,14 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
             // -1 means we aren't looking at history yet
             if (userConsole->historyScrollIndex == -1)
             {
-                userConsole->historyScrollIndex = wrap(userConsole, userConsole->firstIndex - 1);
+                userConsole->historyScrollIndex = wrap(userConsole, userConsole->historyQueueIndex - 1);
                 putCursorAtEndOfLine(userConsole);
             }
             else     // userConsole->historyScrollIndex > -1
             {
                // If user hits up when they are already at the first index, do nothing
                // otherwise progress to previous history item
-               if(userConsole->historyScrollIndex != wrap(userConsole, userConsole->firstIndex))
+               if(userConsole->historyScrollIndex != wrap(userConsole, userConsole->historyQueueIndex))
                {
                    userConsole->historyScrollIndex = wrap(userConsole, userConsole->historyScrollIndex - 1);
                    putCursorAtEndOfLine(userConsole);
@@ -1356,16 +1346,12 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
 
                 // If we've returned to our current position in the command
                 // history, we'll just drop out of history mode
-                if (userConsole->historyScrollIndex == userConsole->firstIndex)
+                if (userConsole->historyScrollIndex == (userConsole->maxHistoryIndex == MAX_HISTORY_COUNT ? 
+                                                             wrap(userConsole, userConsole->historyQueueIndex) : 0))
                      userConsole->historyScrollIndex = -1;
 
                 putCursorAtEndOfLine(userConsole);
             }
-            // If user is editing a line and hits down, nothing should happen -- there is no newer history!
-            //else
-            //{
-            //   //userConsole->historyScrollIndex = userConsole->firstIndex;
-            //}
         }
         return 1;
     }
