@@ -1311,7 +1311,7 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
             {
                // If user hits up when they are already at the first index, do nothing
                // otherwise progress to previous history item
-               if(userConsole->historyScrollIndex != wrap(userConsole, userConsole->historyQueueIndex))
+               if(userConsole->historyScrollIndex != userConsole->historyQueueIndex)
                {
                    userConsole->historyScrollIndex = wrap(userConsole, userConsole->historyScrollIndex - 1);
                    putCursorAtEndOfLine(userConsole);
@@ -1346,8 +1346,8 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
 
                 // If we've returned to our current position in the command
                 // history, we'll just drop out of history mode
-                if (userConsole->historyScrollIndex == (userConsole->maxHistoryIndex == MAX_HISTORY_COUNT ? 
-                                                             wrap(userConsole, userConsole->historyQueueIndex) : 0))
+                if (userConsole->historyScrollIndex == 
+                           (userConsole->maxHistoryIndex == MAX_HISTORY_COUNT ? userConsole->historyQueueIndex : 0))
                      userConsole->historyScrollIndex = -1;
 
                 putCursorAtEndOfLine(userConsole);
