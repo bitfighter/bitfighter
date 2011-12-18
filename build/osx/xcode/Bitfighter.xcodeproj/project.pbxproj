@@ -4333,15 +4333,12 @@
 					../../../libvorbis,
 					../../../boost,
 					../../../openal,
-					../../../glut,
+					../../../libsdl,
 					../../../tnl,
 				);
 				INFOPLIST_FILE = "Bitfighter-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/../../../lib/Speex.framework/Versions/A\"",
-				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				OTHER_CFLAGS = "-DTNL_ENABLE_LOGGING";
 				PRODUCT_NAME = Bitfighter;
@@ -4845,15 +4842,12 @@
 					../../../libvorbis,
 					../../../boost,
 					../../../openal,
-					../../../glut,
+					../../../libsdl,
 					../../../tnl,
 				);
 				INFOPLIST_FILE = "Bitfighter-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/../../../lib/Speex.framework/Versions/A\"",
-				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				OTHER_CFLAGS = "-DTNL_ENABLE_LOGGING";
 				PRODUCT_NAME = Bitfighter;
@@ -5468,15 +5462,12 @@
 					../../../libvorbis,
 					../../../boost,
 					../../../openal,
-					../../../glut,
+					../../../libsdl,
 					../../../tnl,
 				);
 				INFOPLIST_FILE = "Bitfighter-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/../../../lib/Speex.framework/Versions/A\"",
-				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_CFLAGS = "-DTNL_ENABLE_LOGGING";
 				PRODUCT_NAME = Bitfighter;
 			};
@@ -5505,15 +5496,12 @@
 					../../../libvorbis,
 					../../../boost,
 					../../../openal,
-					../../../glut,
+					../../../libsdl,
 					../../../tnl,
 				);
 				INFOPLIST_FILE = "Bitfighter-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/../../../lib/Speex.framework/Versions/A\"",
-				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_CFLAGS = "-DTNL_ENABLE_LOGGING";
 				PRODUCT_NAME = Bitfighter;
 				SYMROOT = build/;

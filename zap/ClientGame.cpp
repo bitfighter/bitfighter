@@ -1715,7 +1715,7 @@ void ClientGame::render()
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &levelFileName)
+bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database)
 {
    if(!stricmp(argv[0], "Spawn") || !stricmp(argv[0], "FlagSpawn") || !stricmp(argv[0], "AsteroidSpawn") || !stricmp(argv[0], "CircleSpawn"))
    {
@@ -1734,7 +1734,7 @@ bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &le
       bool validArgs = newObject->processArguments(argc - 1, argv + 1, this);
 
       if(validArgs)
-         newObject->addToEditor(this);
+         newObject->addToGame(this, database);
       else
       {
          logprintf(LogConsumer::LogWarning, "Invalid arguments in object \"%s\" in level \"%s\"", argv[0], levelFileName.c_str());
@@ -1754,7 +1754,7 @@ bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &le
             delete wallObject;
          else
          {
-            wallObject->addToGame(this, getEditorDatabase());
+            wallObject->addToGame(this, database);
             wallObject->processEndPoints();
          }
       }
@@ -1785,7 +1785,7 @@ bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &le
          
          if(newObject->getVertCount() >= 2)
          {
-            newObject->addToEditor(this);
+            newObject->addToGame(this, database);
             newObject->onGeomChanged(); 
          }
          else

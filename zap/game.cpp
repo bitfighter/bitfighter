@@ -816,7 +816,7 @@ void Game::processLevelLoadLine(U32 argc, U32 id, const char **argv, GridDatabas
    {
       // Do nothing here
    }
-   else if(getGameType() && processPseudoItem(argc, argv, levelFileName)) 
+   else if(getGameType() && processPseudoItem(argc, argv, levelFileName, database))
    {
       // Do nothing here
    }
@@ -1758,7 +1758,7 @@ StringTableEntry ServerGame::getCurrentLevelTypeName()
 }
 
 
-bool ServerGame::processPseudoItem(S32 argc, const char **argv, const string &levelFileName)
+bool ServerGame::processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database)
 {
    if(!stricmp(argv[0], "Spawn"))
    {

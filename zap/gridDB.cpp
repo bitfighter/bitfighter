@@ -294,6 +294,13 @@ DatabaseObject::DatabaseObject(const DatabaseObject &t)
 }
 
 
+// Destructor
+DatabaseObject::~DatabaseObject()
+{
+   // Do nothing
+}
+
+
 // Code that needs to run for both constructor and copy constructor
 void DatabaseObject::initialize() 
 {
@@ -733,6 +740,15 @@ void EditorObjectDatabase::removeFromDatabase(DatabaseObject *object, const Rect
          mAllEditorObjects.erase(i);      // Use erase to maintain sorted order
          break;
       }
+}
+
+
+void EditorObjectDatabase::removeEverythingFromDatabase()
+{
+   Vector<EditorObject *> tempVector(mAllEditorObjects);  // To keep synchronization
+
+   for(S32 i = 0; i < tempVector.size(); i++)
+      removeFromDatabase(tempVector[i], tempVector[i]->getExtent());
 }
 
 
