@@ -275,6 +275,9 @@ private:
 
    //PluginMenuUI mPluginMenu;
 
+   EditorObjectDatabase mLevelGenDatabase;     // Database for inserting objects when running a levelgen script in the editor
+
+
 protected:
    void onActivate();
    void onReactivate();

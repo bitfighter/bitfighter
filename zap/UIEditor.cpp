@@ -88,8 +88,6 @@ static EditorObjectDatabase *mLoadTarget;
 // statics
 Vector<string> EditorUserInterface::robots;        // List of robot lines in the level file
 
-static EditorObjectDatabase mLevelGenDatabase;     // Database for inserting objects when running a levelgen script in the editor
-
 enum EntryMode {
    EntryID,          // Entering an objectID
    EntryAngle,       // Entering an angle
@@ -543,15 +541,23 @@ void EditorUserInterface::clearLevelGenItems()
 
 void EditorUserInterface::copyScriptItemsToEditor()
 {
-   const Vector<EditorObject*> *objList = mLevelGenDatabase.getObjectList();
+   // Duplicate EditorObject pointer list to avoid unsynchronized loop removal
+   Vector<EditorObject*> tempList(*mLevelGenDatabase.getObjectList());
 
-   if(objList->size() == 0)
+   if(mLevelGenDatabase.getObjectList()->size() == 0)
       return;     // Print error message?
 
    saveUndoState();
 
-   for(S32 i = 0; i < objList->size(); i++)
-      objList->get(i)->addToEditor(getGame());
+   // We can't call addToEditor immediately because it calls addToGame which will trigger
+   // an assert since the levelGen items are already added to the game.  We must therefor
+   // remove them from the game first
+   for(S32 i = 0; i < tempList.size(); i++)
+   {
+      EditorObject* obj = tempList[i];
+      obj->removeFromGame();
+      obj->addToEditor(getGame());
+   }
       
    mLevelGenDatabase.removeEverythingFromDatabase();    // Don't want to delete these objects... we just handed them off to the database!
 
@@ -603,10 +609,8 @@ void EditorUserInterface::runScript(const FolderManager *folderManager, const st
    if(!levelGen.runScript())     // Error reporting handled within
       return;
 
-   // Process new items
-   // Not sure about all this... may need to test
-   // Bulk-process new items, walls first
-
+   // Process new items that need it
+   // Walls need processing so that they can render properly
    fillVector.clear();
    mLoadTarget->findObjects((TestFunc)isWallType, fillVector);
 
@@ -624,6 +628,7 @@ void EditorUserInterface::runScript(const FolderManager *folderManager, const st
    // When I came through here in early june, there was nothing else here... shouldn't there be some handling of non-wall objects?  -CE
    // June of what year?  -bbr
    // June 2011 -- obviously this is unfinished business
+   // OK OK, We should probably handle other items that have geometry to render, like turrets/etc...
 }
 
 

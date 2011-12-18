@@ -199,7 +199,7 @@ public:
    void suspendGame();
    void unsuspendGame();
 
-   bool processPseudoItem(S32 argc, const char **argv, const string &levelFileName);        // For loading levels in editor
+   bool processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database);        // For loading levels in editor
 };
 
 ////////////////////////////////////////

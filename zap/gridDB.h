@@ -61,6 +61,7 @@ protected:
 public:
    DatabaseObject();                            // Constructor
    DatabaseObject(const DatabaseObject &t);     // Copy constructor
+   virtual ~DatabaseObject();                   // Destructor
 
    void initialize();
 
@@ -146,7 +147,7 @@ public:
    
    virtual void addToDatabase(DatabaseObject *theObject, const Rect &extents);
    virtual void removeFromDatabase(DatabaseObject *theObject, const Rect &extents);
-   void removeEverythingFromDatabase();
+   virtual void removeEverythingFromDatabase();
 
    S32 getObjectCount() { return mAllObjects.size(); }      // Return the number of objects currently in the database
    DatabaseObject *getObjectByIndex(S32 index);             // Kind of hacky, kind of useful
@@ -177,6 +178,7 @@ public:
    void addToDatabase(DatabaseObject *theObject, const Rect &extents);
 
    void removeFromDatabase(DatabaseObject *theObject, const Rect &extents);
+   void removeEverythingFromDatabase();
 };
 
 };
