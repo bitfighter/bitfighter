@@ -259,7 +259,7 @@ int OGLCONSOLE_CreateFont()
 /* This is the number of command line entries that the console will remember (so
  * that the user can use the up/down keys to see and easily re-execute his past
  * commands) */
-#define MAX_HISTORY_COUNT 8 // XXX
+#define MAX_HISTORY_COUNT 255
 
 /* This is the default number of lines for the console to remember (that is to
  * say, the user can scroll up and down to see what has been printed to the
@@ -1279,7 +1279,6 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
     // Arrow key up
     else if (sym == KEY_UP)
     {
-       printf("BEFORE Hist: index:%d, first: %d, max:%d\n", userConsole->historyScrollIndex, userConsole->firstIndex, userConsole->maxHistoryIndex);
         // Shift key is for scrolling the output display
         if (mod & KMOD_SHIFT)
         {
@@ -1302,15 +1301,12 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
             }
         }
 
-        printf("AFTER Hist: index:%d, first: %d, max:%d\n", userConsole->historyScrollIndex, userConsole->firstIndex, userConsole->maxHistoryIndex);
-
         return 1;
     }
 
     // Arrow key down
     else if (sym == KEY_DOWN)
     {
-       printf("BEFORE Hist: index:%d, first: %d, max:%d\n", userConsole->historyScrollIndex, userConsole->firstIndex, userConsole->maxHistoryIndex);
         // Shift key is for scrolling the output display
         if (mod & KMOD_SHIFT)
         {
@@ -1332,12 +1328,12 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
                 if (userConsole->historyScrollIndex == userConsole->firstIndex)
                 userConsole->historyScrollIndex = -1;
             }
-            else
-            {
-               //userConsole->historyScrollIndex = userConsole->firstIndex;
-            }
+            // If user is editing a line and hits down, nothing should happen -- there is no newer history!
+            //else
+            //{
+            //   //userConsole->historyScrollIndex = userConsole->firstIndex;
+            //}
         }
-        printf("AFTER Hist: index:%d, first: %d, max:%d\n", userConsole->historyScrollIndex, userConsole->firstIndex, userConsole->maxHistoryIndex);
         return 1;
     }
 
