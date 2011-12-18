@@ -259,7 +259,7 @@ int OGLCONSOLE_CreateFont()
 /* This is the number of command line entries that the console will remember (so
  * that the user can use the up/down keys to see and easily re-execute his past
  * commands) */
-#define MAX_HISTORY_COUNT 32
+#define MAX_HISTORY_COUNT 8 // XXX
 
 /* This is the default number of lines for the console to remember (that is to
  * say, the user can scroll up and down to see what has been printed to the
@@ -277,11 +277,12 @@ typedef struct
 
     /* Screen+scrollback lines (console output) */
     char *lines;
-    int maxLines, lineQueueIndex, lineScrollIndex;
+    int maxLines, lineQueueIndex, lineScrollIndex, firstIndex;
 
     /* History scrollback (command input) */
     char history[MAX_HISTORY_COUNT][MAX_INPUT_LENGTH];
-    int historyQueueIndex, historyScrollIndex, maxHistoryIndex;
+    int historyQueueIndex, historyScrollIndex;
+    int maxHistoryIndex;      // Count of number of items actually in history; starts at 0, grows until history is full
 
     /* Current input line */
     char inputLine[MAX_INPUT_LENGTH];
@@ -458,6 +459,9 @@ OGLCONSOLE_Console OGLCONSOLE_Create()
     console->historyQueueIndex = 0;
     console->historyScrollIndex = -1;
     console->maxHistoryIndex = 0;
+
+    /* Index of first item in the queue -- is always 0 until we start wrapping */
+    console->firstIndex = 0;  
 
     /* Callbacks */
     console->enterKeyCallback = OGLCONSOLE_DefaultEnterKeyCallback;
@@ -991,16 +995,25 @@ void OGLCONSOLE_AddHistory(OGLCONSOLE_Console console, char *s)
     if(blank) 
        return;
 
-    C->historyQueueIndex++;
+   strcpy(C->history[C->historyQueueIndex], s);      // strcpy(dest, src)
+
     C->maxHistoryIndex++;
+
+    if (C->maxHistoryIndex = MAX_HISTORY_COUNT)
+    {
+        C->maxHistoryIndex = MAX_HISTORY_COUNT;
+     
+        // Hisory buffer is full, will be overwriting existing entries
+        C->firstIndex++;
+        if (C->firstIndex >= MAX_HISTORY_COUNT)
+            C->firstIndex = 0;
+    }
+
+
+    C->historyQueueIndex++;
 
     if (C->historyQueueIndex >= MAX_HISTORY_COUNT)
         C->historyQueueIndex = 0;
-
-    if (C->historyQueueIndex > MAX_HISTORY_COUNT)
-       C->historyQueueIndex = MAX_HISTORY_COUNT;
-
-    strcpy(C->history[C->historyQueueIndex], s);
 }
 
 void OGLCONSOLE_YankHistory(_OGLCONSOLE_Console *console)
@@ -1111,6 +1124,17 @@ int OGLCONSOLE_ProcessBitfighterKeyEvent(int inputCode, char ascii)
    //return (userConsole->visibility >= 1);    // True if console visible, false if hidden
 }
 
+
+int wrap(_OGLCONSOLE_Console *userConsole, int index)
+{
+   if(index < 0)
+      return userConsole->maxHistoryIndex - 1;
+   else if(index >= userConsole->maxHistoryIndex)
+      return 0;
+   else 
+      return index;
+
+}
 
 // End Bitfighter specific block
 
@@ -1255,6 +1279,7 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
     // Arrow key up
     else if (sym == KEY_UP)
     {
+       printf("BEFORE Hist: index:%d, first: %d, max:%d\n", userConsole->historyScrollIndex, userConsole->firstIndex, userConsole->maxHistoryIndex);
         // Shift key is for scrolling the output display
         if (mod & KMOD_SHIFT)
         {
@@ -1265,25 +1290,19 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
         // No shift key is for scrolling through command history
         else
         {
-            // -1 means we aren't look at history yet
+            // -1 means we aren't looking at history yet
             if (userConsole->historyScrollIndex == -1)
-            {
-                userConsole->historyScrollIndex =
-                    userConsole->historyQueueIndex;
-            }
+                userConsole->historyScrollIndex = wrap(userConsole, userConsole->firstIndex - 1);
             else
             {
-                // Wrap our history scrolling
-                if (--userConsole->historyScrollIndex < 0)
-                   userConsole->historyScrollIndex = userConsole->maxHistoryIndex;
+               // If user hits up when they are already at the first index, do nothing
+               // otherwise progress to previous history item
+               if(userConsole->historyScrollIndex != userConsole->firstIndex)
+                   userConsole->historyScrollIndex = wrap(userConsole, userConsole->historyScrollIndex - 1);
             }
-
-            // If we've returned to our current position in the command
-            // history, we'll just drop out of history mode
-            if (userConsole->historyScrollIndex ==
-                    userConsole->historyQueueIndex +1)
-                userConsole->historyScrollIndex = -1;
         }
+
+        printf("AFTER Hist: index:%d, first: %d, max:%d\n", userConsole->historyScrollIndex, userConsole->firstIndex, userConsole->maxHistoryIndex);
 
         return 1;
     }
@@ -1291,6 +1310,7 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
     // Arrow key down
     else if (sym == KEY_DOWN)
     {
+       printf("BEFORE Hist: index:%d, first: %d, max:%d\n", userConsole->historyScrollIndex, userConsole->firstIndex, userConsole->maxHistoryIndex);
         // Shift key is for scrolling the output display
         if (mod & KMOD_SHIFT)
         {
@@ -1305,20 +1325,19 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
             if (userConsole->historyScrollIndex != -1)
             {
                 // Wrap our history scrolling
-                if (++userConsole->historyScrollIndex > userConsole->maxHistoryIndex)
-                    userConsole->historyScrollIndex = 0;
+               userConsole->historyScrollIndex = wrap(userConsole, userConsole->historyScrollIndex + 1);
 
                 // If we've returned to our current position in the command
                 // history, we'll just drop out of history mode
-                if (userConsole->historyScrollIndex ==
-                        userConsole->historyQueueIndex +1)
+                if (userConsole->historyScrollIndex == userConsole->firstIndex)
                 userConsole->historyScrollIndex = -1;
             }
             else
             {
-               userConsole->historyScrollIndex = 0;
+               //userConsole->historyScrollIndex = userConsole->firstIndex;
             }
         }
+        printf("AFTER Hist: index:%d, first: %d, max:%d\n", userConsole->historyScrollIndex, userConsole->firstIndex, userConsole->maxHistoryIndex);
         return 1;
     }
 
