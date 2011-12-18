@@ -663,10 +663,10 @@ void OGLCONSOLE_Render(OGLCONSOLE_Console console)
     glColor4d(.1,0,0, 0.75);
 
     glBegin(GL_QUADS);
-    glVertex3d(0,0,0);
-    glVertex3d(1,0,0);
-    glVertex3d(1,1,0);
-    glVertex3d(0,1,0);
+    glVertex3d(-1,-1,0);      // Draw from -1 to 2 to ensure complete screen coverage... totally hacky, but works!
+    glVertex3d(2,-1,0);
+    glVertex3d(2,2,0);
+    glVertex3d(-1,2,0);
     glEnd();
 
 #ifndef OGLCONSOLE_USE_ALPHA_TEXT
