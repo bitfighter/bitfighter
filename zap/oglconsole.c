@@ -1142,14 +1142,20 @@ int wrap(_OGLCONSOLE_Console *userConsole, int index)
 }
 
 
-void putCursorAtEndOfLine(_OGLCONSOLE_Console *userConsole)
+int getCurrentLineLength(_OGLCONSOLE_Console *userConsole)
 {
    if(userConsole->historyScrollIndex == -1)
-      userConsole->inputCursorPos = userConsole->inputLineLength;
+      return userConsole->inputLineLength;
    else
-      userConsole->inputCursorPos = strlen(userConsole->history[userConsole->historyScrollIndex]);
-      
+      return strlen(userConsole->history[userConsole->historyScrollIndex]);
 }
+
+
+void putCursorAtEndOfLine(_OGLCONSOLE_Console *userConsole)
+{
+   userConsole->inputCursorPos = getCurrentLineLength(userConsole);
+}
+
 
 
 // End Bitfighter specific block
@@ -1188,7 +1194,7 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
          ||  sym == KEY_BACKSPACE)
     {
         /* If string is not empty */
-        if (userConsole->inputLineLength)
+        if (getCurrentLineLength(userConsole))
         {
             char *end, *c;
 
