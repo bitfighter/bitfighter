@@ -219,6 +219,27 @@ void GameConnection::reset()
 }
 
 
+const char *GameConnection::getConnectionStateString(S32 i)
+{
+   static const char *connectStatesTable[] = {
+      "Not connected...",
+      "Sending challenge request...",
+      "Punching through firewalls...",
+      "Computing puzzle solution...",
+      "Sent connect request...",
+      "Connection timed out",
+      "Connection rejected",
+      "Connected",
+      "Disconnected",
+      "Connection timed out",
+   };
+
+   TNLAssert(i < ARRAYSIZE(connectStatesTable), "Invalid index!");
+
+   return connectStatesTable[i];
+}
+
+
 // Definitive, final declaration of whether this player is (or is not) verified on this server
 // Runs on both client (tracking other players) and server (tracking all players)
 //void GameConnection::setAuthenticated(bool isAuthenticated)

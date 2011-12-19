@@ -440,7 +440,7 @@ void UIManager::reactivatePrevUI()
 void UIManager::reactivateMenu(const UserInterface *target)
 {
    // Keep discarding menus until we find the one we want
-   while( mPrevUIs.size() && (mPrevUIs.last()->getMenuID() != target->getMenuID()) )
+   while(mPrevUIs.size() && (mPrevUIs.last()->getMenuID() != target->getMenuID()) )
       mPrevUIs.pop_back();
 
    if(mPrevUIs.size())
@@ -478,6 +478,15 @@ bool UIManager::cameFrom(UIID menuID)
 void UIManager::saveUI(UserInterface *ui)
 {
    mPrevUIs.push_back(ui);
+}
+
+
+void UIManager::renderCurrent()
+{
+   UserInterface *current = UserInterface::current;
+
+   current->renderCurrent();
+   current->renderMasterStatus();
 }
 
 

@@ -146,11 +146,6 @@ using namespace TNL;
 #include "SDL/SDL_syswm.h"
 #endif
 
-#include "game.h"
-#include "gameNetInterface.h"
-#include "masterConnection.h"
-#include "config.h"
-#include "md5wrapper.h"
 #include "version.h"       // For BUILD_VERSION def
 #include "Colors.h"
 #include "ScreenInfo.h"
@@ -442,16 +437,7 @@ void display()
 {
    glFlush();
 
-   UserInterface::renderCurrent();
-
-   // Render master connection state if we're not connected
-   // TODO: should this go elsewhere?
-   if(gClientGame && gClientGame->getConnectionToMaster() &&
-         gClientGame->getConnectionToMaster()->getConnectionState() != NetConnection::Connected)
-   {
-      glColor(Colors::white);
-      UserInterface::drawStringf(10, 550, 15, "Master Server - %s", gConnectStatesTable[gClientGame->getConnectionToMaster()->getConnectionState()]);
-   }
+   gClientGame->getUIManager()->renderCurrent();
 
    // Swap the buffers. This this tells the driver to render the next frame from the contents of the
    // back-buffer, and to set all rendering operations to occur on what was the front-buffer.

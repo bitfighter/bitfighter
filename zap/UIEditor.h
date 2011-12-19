@@ -283,6 +283,8 @@ protected:
    void onReactivate();
    void onDeactivate();
 
+   void renderMasterStatus() { /* Do nothing, don't render this in editor */ }
+
 public:
    virtual ~EditorUserInterface();       // Destructor
 

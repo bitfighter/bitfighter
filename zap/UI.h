@@ -109,7 +109,7 @@ public:
    static S32 messageMargin;
    static S32 chatMessageMargin;
 
-   static void renderCurrent();
+   void renderCurrent();
 
    virtual void render();
    virtual void idle(U32 timeDelta);
@@ -122,7 +122,8 @@ public:
    void activate(bool save = true);
    virtual void reactivate();
 
-   void renderConsole();      // Render game console
+   void renderConsole();               // Render game console
+   virtual void renderMasterStatus();  // Render master server connection status
 
    InputCode convertJoystickToKeyboard(InputCode inputCode);
 

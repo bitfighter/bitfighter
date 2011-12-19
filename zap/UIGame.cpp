@@ -471,7 +471,7 @@ void GameUserInterface::render()
 
       glColor(Colors::green);
       if(getGame()->getConnectionToServer())
-         drawCenteredString(310, 16, gConnectStatesTable[getGame()->getConnectionToServer()->getConnectionState()]);
+         drawCenteredString(310, 16, GameConnection::getConnectionStateString(getGame()->getConnectionToServer()->getConnectionState()));
 
       glColor(Colors::white);
       drawCenteredString(346, 20, "Press <ESC> to abort");

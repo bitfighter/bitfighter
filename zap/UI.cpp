@@ -30,19 +30,18 @@ using namespace TNL;
 #include "move.h"
 #include "InputCode.h"
 #include "UIMenus.h"
-#include "input.h"      // For MaxJoystickButtons const
+#include "input.h"               // For MaxJoystickButtons const
 #include "config.h"
 #include "ClientGame.h"
-#include "oglconsole.h"    // For console rendering
-//#include "UIEditor.h"      // <--- we need to get rid of this one!
-//#include "UICredits.h"     // <--- don't want this one either
+#include "oglconsole.h"          // For console rendering
 #include "Colors.h"
 #include "OpenglUtils.h"
 #include "ScreenInfo.h"
 #include "Joystick.h"
+#include "masterConnection.h"    // For MasterServerConnection def
 
 #include <string>
-#include <stdarg.h>     // For va_args
+#include <stdarg.h>              // For va_args
 
 #include <math.h>
 
@@ -211,7 +210,7 @@ extern ClientGame *gClientGame1;
 extern ClientGame *gClientGame2;
 
 // Clean up and get ready to render
-void UserInterface::renderCurrent()    // static
+void UserInterface::renderCurrent()    
 {
    // Clear screen -- force clear of "black bars" area to avoid flickering on some video cards
    bool scissorMode = glIsEnabled(GL_SCISSOR_TEST);
@@ -284,6 +283,8 @@ void UserInterface::renderCurrent()    // static
          }
    }
    // End diagnostic key dump mode
+
+   renderMasterStatus();
 }
 
 
@@ -687,6 +688,18 @@ S32 UserInterface::getStringWidthf(S32 size, const char *format, ...)
 void UserInterface::playBoop()
 {
    SoundSystem::playSoundEffect(SFXUIBoop, 1);
+}
+
+
+// Render master connection state if we're not connected
+void UserInterface::renderMasterStatus()
+{
+   if(mClientGame->getConnectionToMaster() && mClientGame->getConnectionToMaster()->getConnectionState() != NetConnection::Connected)
+   {
+      glColor(Colors::white);
+      UserInterface::drawStringf(10, 550, 15, "Master Server - %s", 
+                   GameConnection::getConnectionStateString(gClientGame->getConnectionToMaster()->getConnectionState()));
+   }
 }
 
 

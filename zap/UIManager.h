@@ -196,6 +196,8 @@ public:
    void renderPrevUI();
    bool cameFrom(UIID menuID);        // Did we arrive at our current interface via the specified interface?
    void saveUI(UserInterface *ui);
+
+   void renderCurrent();
 };
 
 };

@@ -47,21 +47,6 @@ using namespace std;
 namespace Zap
 {
 
-static const char USED_EXTERNAL *gConnectStatesTable[] = {
-      "Not connected...",
-      "Sending challenge request...",
-      "Punching through firewalls...",
-      "Computing puzzle solution...",
-      "Sent connect request...",
-      "Connection timed out",
-      "Connection rejected",
-      "Connected",
-      "Disconnected",
-      "Connection timed out",
-      ""
-};
-
-
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -151,6 +136,8 @@ public:
    Vector<LevelInfo> mLevelInfos;
 
    static const S32 MASTER_SERVER_FAILURE_RETRY_TIME = 10000;   // 10 secs
+
+   static const char *getConnectionStateString(S32 i);
 
    enum MessageColors
    {
