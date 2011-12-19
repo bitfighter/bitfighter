@@ -58,32 +58,32 @@ private:
    bool mPosIsSelected;
 
 public:
-   PointGeometry() { mPosIsSelected = false; }     // Constructor
-   ~PointGeometry() {  /* TNLAssert(false, "deleting!");*/ }      // Destructor
+   PointGeometry();     // Constructor
+   ~PointGeometry();    // Destructor
 
-   GeomType getGeomType() { return geomPoint; }
-   virtual Point getVert(S32 index) const { return mPos; }
+   GeomType getGeomType();
+   virtual Point getVert(S32 index) const;
    void setVert(const Point &pos, S32 index);
 
-   S32 getVertCount() { return 1; }
+   S32 getVertCount();
 
-   void clearVerts() { /* Do nothing */ }
-   bool addVert(const Point &point, bool ignoreMaxPointsLimit = false) { return false; }
-   bool addVertFront(Point vert) { return false; }
-   bool deleteVert(S32 vertIndex) { return false; }
-   bool insertVert(Point vertex, S32 vertIndex) { return false; }
+   void clearVerts();
+   bool addVert(const Point &point, bool ignoreMaxPointsLimit = false);
+   bool addVertFront(Point vert);
+   bool deleteVert(S32 vertIndex);
+   bool insertVert(Point vertex, S32 vertIndex);
 
-   bool anyVertsSelected() { return mPosIsSelected; }
-   void selectVert(S32 vertIndex) { mPosIsSelected = true; }
-   void aselectVert(S32 vertIndex) { mPosIsSelected = true; }
-   void unselectVert(S32 vertIndex) { mPosIsSelected = false; }
-   void unselectVerts() { mPosIsSelected = false; } 
-   bool vertSelected(S32 vertIndex) { return mPosIsSelected; }
+   bool anyVertsSelected();
+   void selectVert(S32 vertIndex);
+   void aselectVert(S32 vertIndex);
+   void unselectVert(S32 vertIndex);
+   void unselectVerts();
+   bool vertSelected(S32 vertIndex);
 
-   const Vector<Point> *getOutline() const { TNLAssert(false, "Points do not have outline!");return NULL; }
-   const Vector<Point> *getFill() const { TNLAssert(false, "Points do not have fill!"); return NULL; }
-   Point getCentroid() { return mPos; }
-   F32 getLabelAngle() { return 0; }
+   const Vector<Point> *getOutline() const;
+   const Vector<Point> *getFill() const;
+   Point getCentroid();
+   F32 getLabelAngle();
 
    void packGeom(GhostConnection *connection, BitStream *stream);
    void unpackGeom(GhostConnection *connection, BitStream *stream); 
@@ -93,7 +93,7 @@ public:
 
    virtual Rect calcExtents();
 
-   void onPointsChanged() { /* Do nothing */ }
+   void onPointsChanged();
 };
 
 
@@ -107,33 +107,31 @@ private:
    bool mFromSelected, mToSelected;
 
 public:
-   SimpleLineGeometry() { mFromSelected = false; mToSelected = false; }    // Constructor
-   virtual ~SimpleLineGeometry() {
-      //TNLAssert(false, "deleting!");
-   }
-   GeomType getGeomType() { return geomSimpleLine; }
-   Point getVert(S32 index) const { return (index == 1) ? mToPos : mFromPos; }
-   void setVert(const Point &pos, S32 index) { if(index == 1) mToPos = pos; else mFromPos = pos; }
+   SimpleLineGeometry();           // Constructor
+   virtual ~SimpleLineGeometry();  // Destructor
+   GeomType getGeomType();
+   Point getVert(S32 index) const;
+   void setVert(const Point &pos, S32 index);
 
-   S32 getVertCount() { return 2; }
+   S32 getVertCount();
 
-   void clearVerts() { /* Do nothing */ }
-   bool addVert(const Point &point, bool ignoreMaxPointsLimit = false)  { return false; }
-   bool addVertFront(Point vert)  { return false; }
-   bool deleteVert(S32 vertIndex)  {  return false; }
-   bool insertVert(Point vertex, S32 vertIndex)  {  return false; }
+   void clearVerts();
+   bool addVert(const Point &point, bool ignoreMaxPointsLimit = false);
+   bool addVertFront(Point vert);
+   bool deleteVert(S32 vertIndex);
+   bool insertVert(Point vertex, S32 vertIndex);
 
-   bool anyVertsSelected() { return mFromSelected | mToSelected; }
-   void selectVert(S32 vertIndex) { unselectVerts(); if(vertIndex == 1) mToSelected = true; else mFromSelected = true; }
-   void aselectVert(S32 vertIndex) { if(vertIndex == 1) mToSelected = true; else mFromSelected = true; }
-   void unselectVert(S32 vertIndex) { if(vertIndex == 1) mToSelected = false; else mFromSelected = false; }
-   void unselectVerts() { mFromSelected = false; mToSelected = false; } 
-   bool vertSelected(S32 vertIndex) { return (vertIndex == 1) ? mToSelected : mFromSelected; }
+   bool anyVertsSelected();
+   void selectVert(S32 vertIndex);
+   void aselectVert(S32 vertIndex);
+   void unselectVert(S32 vertIndex);
+   void unselectVerts();
+   bool vertSelected(S32 vertIndex);
 
    const Vector<Point> *getOutline() const;
-   const Vector<Point> *getFill() const { TNLAssert(false, "SimpleLines do not have fill!"); return NULL; }
-   Point getCentroid() { return (mFromPos + mToPos) / 2; }        // Returns midpoint of line
-   F32 getLabelAngle() { return mFromPos.angleTo(mToPos); }
+   const Vector<Point> *getFill() const;
+   Point getCentroid();
+   F32 getLabelAngle();
 
    void packGeom(GhostConnection *connection, BitStream *stream);
    void unpackGeom(GhostConnection *connection, BitStream *stream); 
@@ -143,7 +141,7 @@ public:
 
    virtual Rect calcExtents();
 
-   void onPointsChanged() { /* Do nothing */ }
+   void onPointsChanged();
 };
 
 
@@ -162,10 +160,10 @@ protected:
    void checkIfAnyVertsSelected();     
 
 public:
-   PolylineGeometry() { mAnyVertsSelected = false; }              // Constructor
-   ~PolylineGeometry() { /*TNLAssert(false, "deleting!");*/ }     // Destructor
+   PolylineGeometry();    // Constructor
+   ~PolylineGeometry();   // Destructor
 
-   GeomType getGeomType() { return geomPolyLine; }
+   GeomType getGeomType();
 
    Point getVert(S32 index) const;
    virtual void setVert(const Point &pos, S32 index);
@@ -185,10 +183,10 @@ public:
    void unselectVerts();
    bool vertSelected(S32 vertIndex);
 
-   const Vector<Point> *getOutline() const { return (Vector<Point> *) &mPolyBounds; }
-   virtual const Vector<Point> *getFill() const { TNLAssert(false, "Polylines don't have fill!"); return NULL; }
-   Point getCentroid() { TNLAssert(!mTriangluationDisabled, "Triangluation disabled!"); return mCentroid; }   
-   virtual F32 getLabelAngle() { return 0; }
+   const Vector<Point> *getOutline() const;
+   virtual const Vector<Point> *getFill() const;
+   Point getCentroid();
+   virtual F32 getLabelAngle();
 
    void packGeom(GhostConnection *connection, BitStream *stream);
    void unpackGeom(GhostConnection *connection, BitStream *stream); 
@@ -214,12 +212,12 @@ private:
    F32 mLabelAngle;
 
 public:
-   PolygonGeometry() : PolylineGeometry() { mLabelAngle = 0; }      // Constructor
+   PolygonGeometry();      // Constructor
 
-   GeomType getGeomType() { return geomPolygon; }
+   GeomType getGeomType();
 
-   const Vector<Point> *getFill() const { TNLAssert(!mTriangluationDisabled, "Triangluation disabled!"); return &mPolyFill; }
-   F32 getLabelAngle()            { TNLAssert(!mTriangluationDisabled, "Triangluation disabled!"); return mLabelAngle; }
+   const Vector<Point> *getFill() const;
+   F32 getLabelAngle();
 
    void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize);
 

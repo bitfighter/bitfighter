@@ -58,46 +58,46 @@ protected:
    bool mTriangluationDisabled;     // Allow optimization of adding points for polygons that will never be displayed
 
 public:
-   Geometry() { mTriangluationDisabled = false; }     // Constructor
-   virtual ~Geometry() {}
+   Geometry();           // Constructor
+   virtual ~Geometry();  // Destructor
 
-   virtual GeomType getGeomType()                       { TNLAssert(false, "Not implemented"); return geomNone; }
-   virtual Point getVert(S32 index) const               { TNLAssert(false, "Not implemented"); return Point(); }
-   virtual void setVert(const Point &pos, S32 index)    { TNLAssert(false, "Not implemented"); }
-   virtual S32 getVertCount()                           { TNLAssert(false, "Not implemented"); return 0; }
-   virtual void clearVerts()                            { TNLAssert(false, "Not implemented"); }
-   virtual bool addVert(const Point &point, bool ignoreMaxPointsLimit = false)     { TNLAssert(false, "Not implemented"); return false; }
-   virtual bool addVertFront(Point vert)                { TNLAssert(false, "Not implemented"); return false; }
-   virtual bool deleteVert(S32 vertIndex)               { TNLAssert(false, "Not implemented"); return false; }
-   virtual bool insertVert(Point vertex, S32 vertIndex) { TNLAssert(false, "Not implemented"); return false; }
+   virtual GeomType getGeomType();
+   virtual Point getVert(S32 index) const;
+   virtual void setVert(const Point &pos, S32 index);
+   virtual S32 getVertCount();
+   virtual void clearVerts();
+   virtual bool addVert(const Point &point, bool ignoreMaxPointsLimit = false);
+   virtual bool addVertFront(Point vert);
+   virtual bool deleteVert(S32 vertIndex);
+   virtual bool insertVert(Point vertex, S32 vertIndex);
 
-   virtual bool anyVertsSelected()                      { TNLAssert(false, "Not implemented"); return false; }
+   virtual bool anyVertsSelected();
 
-   virtual void selectVert(S32 vertIndex)    { TNLAssert(false, "Not implemented"); }
-   virtual void aselectVert(S32 vertIndex)   { TNLAssert(false, "Not implemented"); }   // Select another vertex (remember cmdline ArcInfo?)
-   virtual void unselectVert(S32 vertIndex)  { TNLAssert(false, "Not implemented"); }
-   virtual void unselectVerts()              { TNLAssert(false, "Not implemented"); }
-   virtual bool vertSelected(S32 vertIndex)  { TNLAssert(false, "Not implemented"); return false; }
+   virtual void selectVert(S32 vertIndex);
+   virtual void aselectVert(S32 vertIndex);   // Select another vertex (remember cmdline ArcInfo?)
+   virtual void unselectVert(S32 vertIndex);
+   virtual void unselectVerts();
+   virtual bool vertSelected(S32 vertIndex);
 
-   virtual const Vector<Point> *getOutline() const { TNLAssert(false, "Not implemented"); return NULL; }
-   virtual const Vector<Point> *getFill() const    { TNLAssert(false, "Not implemented"); return NULL; }     // Triangulated fill points
-   virtual Point getCentroid()               { TNLAssert(false, "Not implemented"); return Point(); }
-   virtual F32 getLabelAngle()               { TNLAssert(false, "Not implemented"); return 0; }
+   virtual const Vector<Point> *getOutline() const;
+   virtual const Vector<Point> *getFill() const;
+   virtual Point getCentroid();
+   virtual F32 getLabelAngle();
                                                             
-   virtual void packGeom(GhostConnection *connection, BitStream *stream)   { TNLAssert(false, "Not implemented"); }
-   virtual void unpackGeom(GhostConnection *connection, BitStream *stream) { TNLAssert(false, "Not implemented"); }
+   virtual void packGeom(GhostConnection *connection, BitStream *stream);
+   virtual void unpackGeom(GhostConnection *connection, BitStream *stream);
 
-   virtual string geomToString(F32 gridSize) const                                  { TNLAssert(false, "Not implemented"); return string(); }
-   virtual void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize) { TNLAssert(false, "Not implemented"); }
+   virtual string geomToString(F32 gridSize) const;
+   virtual void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize);
 
    //virtual boost::shared_ptr<Geometry> copyGeometry() const = 0;
    void newGeomCopy();
 
-   virtual Rect calcExtents()                      { TNLAssert(false, "Not implemented"); return Rect(); }
+   virtual Rect calcExtents();
 
-   virtual void onPointsChanged()                  { TNLAssert(false, "Not implemented"); }
+   virtual void onPointsChanged();
 
-   void disableTriangluation() { mTriangluationDisabled = true; }
+   void disableTriangluation();
 
    // These functions are declered in Geometry.cpp
    void rotateAboutPoint(const Point &center, F32 angle);
