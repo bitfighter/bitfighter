@@ -155,23 +155,23 @@ public:
    void readCmdLineParams(const Vector<string> &argv);
    void resolveDirs();
 
-   string getHostName() { return mHostName; }
+   string getHostName();
    void setHostName(const string &hostName, bool updateINI);
 
-   string getHostDescr() { return mHostDescr; }
+   string getHostDescr();
    void setHostDescr(const string &hostDescr, bool updateINI);
 
-   string getServerPassword() { return mServerPassword; }
+   string getServerPassword();
    void setServerPassword(const string &ServerPassword, bool updateINI);
 
-   string getAdminPassword() { return mAdminPassword; }
+   string getAdminPassword();
    void setAdminPassword(const string &AdminPassword, bool updateINI);
 
-   string getLevelChangePassword() { return mLevelChangePassword; }
+   string getLevelChangePassword();
    void setLevelChangePassword(const string &LevelChangePassword, bool updateINI);
 
-   Vector<string> *getLevelSkipList() { return &mLevelSkipList; }
-   Vector<string> *getSpecifiedLevels() { return &mCmdLineParams[CmdLineParams::LEVEL_LIST]; }
+   Vector<string> *getLevelSkipList();
+   Vector<string> *getSpecifiedLevels();
 
    // Variations on generating a list of levels
    Vector<string> getLevelList();                            // Generic, grab a list of levels based on current settings
@@ -181,49 +181,49 @@ private:
 
 public:
 
-   Vector<string> *getMasterServerList() { return &mMasterServerList; }
+   Vector<string> *getMasterServerList();
    void saveMasterAddressListInIniUnlessItCameFromCmdLine();
    
-   FolderManager *getFolderManager() { return &mFolderManager; }
+   FolderManager *getFolderManager();
    FolderManager getCmdLineFolderManager();    // Return a FolderManager struct populated with settings specified on cmd line
 
-   BanList *getBanList() { return mBanList; }
+   BanList *getBanList();
 
    string getHostAddress();
    U32 getMaxPlayers();
 
    void save();
 
-   IniSettings *getIniSettings() { return &mIniSettings; }
+   IniSettings *getIniSettings();
 
    void runCmdLineDirectives();
 
    bool shouldShowNameEntryScreenOnStartup();
 
-   const Color *getWallFillColor() { return &mIniSettings.wallFillColor; }
-   const Color *getWallOutlineColor() { return &mIniSettings.wallOutlineColor; }
+   const Color *getWallFillColor();
+   const Color *getWallOutlineColor();
 
-   bool getStarsInDistance() { return mIniSettings.starsInDistance; }
-   bool getEnableExperimentalAimMode() { return mIniSettings.enableExperimentalAimMode; }
+   bool getStarsInDistance();
+   bool getEnableExperimentalAimMode();
 
 
    // Accessor methods
-   U32 getSimulatedStutter() { return getU32(SIMULATED_STUTTER); }
-   F32 getSimulatedLoss()    { return getF32(SIMULATED_LOSS); }
+   U32 getSimulatedStutter();
+   F32 getSimulatedLoss();
    U32 getSimulatedLag();
 
-   string getDefaultName() { return mIniSettings.defaultName; }
+   string getDefaultName();
 
-   bool getForceUpdate()  { return getSpecified(FORCE_UPDATE); }
+   bool getForceUpdate();
 
-   string getPlayerName() { return mPlayerName; }
+   string getPlayerName();
 
    void setPlayerName(const string &name, bool nameSuppliedByUser);
    void setPlayerNameAndPassword(const string &name, const string &password);
 
-   string getPlayerPassword() { return mPlayerPassword; }
+   string getPlayerPassword();
 
-   bool isDedicatedServer() { return getSpecified(DEDICATED); }
+   bool isDedicatedServer();
 
    string getLevelDir(SettingSource source);
 

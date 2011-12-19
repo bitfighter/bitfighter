@@ -225,6 +225,17 @@ bool isAnyObjectType(U8 x)
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+
+// Constructor
+DamageInfo::DamageInfo()
+{
+   damageSelfMultiplier = 1;
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 // BfObject - the declerations are in BfObject.h
 
 // Constructor
@@ -232,6 +243,31 @@ BfObject::BfObject()
 {
    mGame = NULL;
    mObjectTypeNumber = UnknownTypeNumber;
+}
+
+
+// Destructor
+BfObject::~BfObject()
+{
+   // Do nothing
+}
+
+
+S32 BfObject::getTeam()
+{
+   return mTeam;
+}
+
+
+void BfObject::setTeam(S32 team)
+{
+   mTeam = team;
+}
+
+
+Game *BfObject::getGame() const
+{
+   return mGame;
 }
 
 
@@ -252,6 +288,30 @@ void BfObject::removeFromGame()
 }
 
 
+void BfObject::clearGame()
+{
+   mGame = NULL;
+}
+
+
+bool BfObject::getCollisionPoly(Vector<Point> &polyPoints) const
+{
+   return false;
+}
+
+
+bool BfObject::getCollisionCircle(U32 stateIndex, Point &point, float &radius) const
+{
+   return false;
+}
+
+
+bool BfObject::processArguments(S32 argc, const char**argv, Game *game)
+{
+   return true;
+}
+
+
 void BfObject::render()
 {
    // Do nothing
@@ -269,6 +329,12 @@ void BfObject::render(S32 layerIndex)
 void BfObject::renderEditorPreview(F32 currentScale)
 {
    render();
+}
+
+
+void BfObject::setExtent(const Rect &extent)
+{
+   DatabaseObject::setExtent(extent); // Passthrough
 }
 
 
@@ -301,6 +367,26 @@ GameObject::GameObject() : BfObject()
    mDisableCollisionCount = 0;
    mCreationTime = 0;
 }
+
+
+// Destructor
+GameObject::~GameObject()
+{
+   removeFromGame();
+}
+
+
+bool GameObject::isControlled()
+{
+   return mControllingClient.isValid();
+}
+
+
+SafePtr<GameConnection> GameObject::getControllingClient()
+{
+   return mControllingClient;
+}
+
 
 void GameObject::setControllingClient(GameConnection *c)         // This only gets run on the server
 {
@@ -339,6 +425,18 @@ Point GameObject::getRenderPos() const
 Point GameObject::getActualPos() const
 {
    return getExtent().getCenter();
+}
+
+
+Point GameObject::getRenderVel() const
+{
+   return Point();
+}
+
+
+Point GameObject::getActualVel() const
+{
+   return Point();
 }
 
 
@@ -403,6 +501,12 @@ F32 GameObject::getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 up
 void GameObject::damageObject(DamageInfo *theInfo)
 {
 
+}
+
+
+bool GameObject::collide(GameObject *hitObject)
+{
+   return false;
 }
 
 
@@ -558,6 +662,54 @@ void GameObject::onAddedToGame(Game *)
 }
 
 
+void GameObject::markAsGhost()
+{
+   mNetFlags = NetObject::IsGhost;
+}
+
+
+bool GameObject::isMoveObject()
+{
+   return false;
+}
+
+
+U32 GameObject::getCreationTime()
+{
+   return mCreationTime;
+}
+
+
+void GameObject::setCreationTime(U32 creationTime)
+{
+   mCreationTime = creationTime;
+}
+
+
+StringTableEntry GameObject::getKillString()
+{
+   return mKillString;
+}
+
+
+F32 GameObject::getRating()
+{
+   return 0; // TODO: Fix this
+}
+
+
+S32 GameObject::getScore()
+{
+   return 0; // TODO: Fix this
+}
+
+
+S32 GameObject::getRenderSortValue()
+{
+   return 2;
+}
+
+
 Rect GameObject::getBounds(U32 stateIndex) const
 {
    Rect ret;
@@ -578,6 +730,50 @@ Rect GameObject::getBounds(U32 stateIndex) const
    }
 
    return ret;
+}
+
+
+const Move &GameObject::getCurrentMove()
+{
+   return mCurrentMove;
+}
+
+
+const Move &GameObject::getLastMove()
+{
+   return mLastMove;
+}
+
+
+void GameObject::setCurrentMove(const Move &theMove)
+{
+   mCurrentMove = theMove;
+}
+
+
+void GameObject::setLastMove(const Move &theMove)
+{
+   mLastMove = theMove;
+}
+
+
+void GameObject::disableCollision()
+{
+   TNLAssert(mDisableCollisionCount < 10, "Too many disabled collisions");
+   mDisableCollisionCount++;
+}
+
+
+void GameObject::enableCollision()
+{
+   TNLAssert(mDisableCollisionCount != 0, "Trying to enable collision, already enabled");
+   mDisableCollisionCount--;
+}
+
+
+bool GameObject::isCollisionEnabled()
+{
+   return mDisableCollisionCount == 0;
 }
 
 
@@ -645,6 +841,18 @@ bool GameObject::collisionPolyPointIntersect(Point center, F32 radius)
 
    else
       return false;
+}
+
+
+F32 GameObject::getHealth()
+{
+   return 1;
+}
+
+
+bool GameObject::isDestroyed()
+{
+   return false;
 }
 
 
