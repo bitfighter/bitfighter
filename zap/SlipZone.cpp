@@ -110,6 +110,30 @@ bool SlipZone::processArguments(S32 argc2, const char **argv2, Game *game)
 }
 
 
+const char *SlipZone::getEditorHelpString()
+{
+   return "Areas of higher than normal inertia.";
+}
+
+
+const char *SlipZone::getPrettyNamePlural()
+{
+   return "Inertia zones";
+}
+
+
+const char *SlipZone::getOnDockName()
+{
+   return "Inertia";
+}
+
+
+const char *SlipZone::getOnScreenName()
+{
+   return "Inertia";
+}
+
+
 string SlipZone::toString(F32 gridSize) const
 {
    return string(getClassName()) + " " + ftos(slipAmount, 3) + " " + geomToString(gridSize);
@@ -158,5 +182,14 @@ void SlipZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
 
 TNL_IMPLEMENT_NETOBJECT(SlipZone);
+
+
+/////
+// Future home for Lua methods
+
+GameObject *SlipZone::getGameObject()
+{
+   return this;
+}
 
 };
