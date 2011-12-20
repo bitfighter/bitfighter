@@ -195,6 +195,7 @@ U32 Teleporter::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
    return 0;
 }
 
+
 void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    if(stream->readFlag())
@@ -298,6 +299,7 @@ void Teleporter::idle(GameObject::IdleCallPath path)
    }
 }
 
+
 inline Point polarToRect(Point p)
 {
    F32 &r  = p.x;
@@ -305,6 +307,7 @@ inline Point polarToRect(Point p)
 
    return Point(cos(th) * r, sin(th) * r);
 }
+
 
 void Teleporter::render()
 {
