@@ -65,6 +65,8 @@ S32 UserInterface::messageMargin = UserInterface::vertMargin + gLoadoutIndicator
 S32 UserInterface::chatMessageMargin = 515;
 
 UserInterface *UserInterface::current = NULL;
+UserInterface *UserInterface::comingFrom = NULL;
+
 
 
 float gLineWidth1 = 1.0f;
@@ -108,15 +110,14 @@ bool UserInterface::usesEditorScreenMode()
 
 void UserInterface::activate(bool save)
 {
-   UserInterface *prev = current;
-
    if(current && save)        // Current is not really current any more... it's actually the previously active UI
        getUIManager()->saveUI(current);
 
+   comingFrom = current;
    current = this;            // Now it is current
 
-   if(prev)
-      prev->onDeactivate(usesEditorScreenMode());
+   if(comingFrom)
+      comingFrom->onDeactivate(usesEditorScreenMode());
 
    onActivate();              // Activate the now current current UI
 }
@@ -124,6 +125,7 @@ void UserInterface::activate(bool save)
 
 void UserInterface::reactivate()
 {
+   comingFrom = current;
    current = this;
    onReactivate();
 }
@@ -946,11 +948,13 @@ void UserInterface::onKeyUp(InputCode inputCode)               { /* Do nothing *
 UserInterfaceData::UserInterfaceData() 
 {
    current = NULL;
+   comingFrom = NULL;
 }
 
 
 void UserInterfaceData::get()
 {
+   comingFrom = current;
    current = UserInterface::current;
    //prevUIs = UserInterface::prevUIs;    <=== what should this be now??
    vertMargin = UserInterface::vertMargin;
@@ -961,6 +965,7 @@ void UserInterfaceData::get()
 
 void UserInterfaceData::set()
 {
+   comingFrom = current;
    UserInterface::current = current;
    //UserInterface::prevUIs = prevUIs;  <=== what should happen here??
    UserInterface::vertMargin = vertMargin;

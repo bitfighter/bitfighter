@@ -96,6 +96,7 @@ public:
    static const S32 MAX_PASSWORD_LENGTH = 32;      // Arbitrary, doesn't matter, but needs to be _something_
 
    static UserInterface *current;            // Currently active menu
+   static UserInterface *comingFrom;         // Immediately previously active menu
 
    void setMenuID(UIID menuID);              // Set interface's name
    UIID getMenuID() const;                   // Retrieve interface's name
@@ -234,7 +235,8 @@ public:
 // Used only for multiple mClientGame in one instance
 struct UserInterfaceData
 {
-   UserInterface *current;            // Currently active menu
+   UserInterface *current;            // Currently active UI
+   UserInterface *comingFrom;         // Most recently active previous UI
    Vector<UserInterface *> prevUIs;   // Previously active menus
    S32 vertMargin, horizMargin;
    S32 chatMargin;
