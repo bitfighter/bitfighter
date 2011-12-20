@@ -45,6 +45,93 @@ LineEditor::LineEditor(U32 maxLength, string value)
 }
 
 
+U32 LineEditor::length()
+{
+   return (U32) mLine.length();
+}
+
+
+void LineEditor::backspacePressed()
+{
+   if (length() > 0)
+      mLine.erase(mLine.size() - 1);
+   mMatchIndex = -1;
+}
+
+
+void LineEditor::deletePressed()
+{
+   backspacePressed();
+}
+
+
+void LineEditor::clear()
+{
+   mLine.clear();
+   mMatchIndex = -1;
+}
+
+
+bool LineEditor::isEmpty()
+{
+   return mLine.empty();
+}
+
+
+void LineEditor::setSecret(bool secret)
+{
+   mMasked = secret;
+}
+
+
+void LineEditor::setFilter(LineEditorFilter filter)
+{
+   mFilter = filter;
+}
+
+
+string LineEditor::getString() const
+{
+   return mLine;
+}
+
+
+const string *LineEditor::getStringPtr() const
+{
+   return &mLine;
+}
+
+
+string LineEditor::getDisplayString() const
+{
+   return mMasked ? string(mLine.length(), MASK_CHAR) : mLine;
+}
+
+
+void LineEditor::setString(const string &str)
+{
+   mLine.assign(str.substr(0, mMaxLen));
+}
+
+
+void LineEditor::setPrompt(const string &prompt)
+{
+   mPrompt = prompt;
+}
+
+
+string LineEditor::getPrompt()
+{
+   return mPrompt;
+}
+
+
+const char *LineEditor::c_str()
+{
+   return mLine.c_str();
+}
+
+
 char LineEditor::at(U32 pos)
 {
    if(pos >= mLine.length())
@@ -187,6 +274,18 @@ void LineEditor::handleBackspace(InputCode inputCode)
       backspacePressed();
    else       // KEY_DELETE
       deletePressed();
+}
+
+
+S32 LineEditor::getMaxLen()
+{
+   return mMaxLen;
+}
+
+
+bool LineEditor::operator==(LineEditor &lineEditor) const
+{
+   return mLine == lineEditor.getString();
 }
 
 
