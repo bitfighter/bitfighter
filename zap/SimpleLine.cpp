@@ -110,7 +110,7 @@ void SimpleLine::renderEditor(F32 currentScale)
 
          // Draw highlighted core on 2nd pass if item is selected, but not while it's being edited
          if(!i && (mSelected || mLitUp))
-            glColor(*SELECT_COLOR);
+            glColor(mSelected ? *SELECT_COLOR : *HIGHLIGHT_COLOR);
 
          glVertex(pos);                 // Draw connecting line
          glVertex(dest);
