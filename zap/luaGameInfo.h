@@ -38,8 +38,8 @@ namespace Zap
 class LuaGameInfo : public LuaObject
 {
 public:
-  LuaGameInfo(lua_State *L);      // Constructor
-  ~LuaGameInfo();                 // Destructor
+   LuaGameInfo(lua_State *L);      // Constructor
+   virtual ~LuaGameInfo();                 // Destructor
 
    static const char className[];
 
@@ -81,7 +81,7 @@ public:
    LuaWeaponInfo(lua_State *L);            // Lua constructor
    LuaWeaponInfo(WeaponType weapon);       // C++ constructor
 
-   ~LuaWeaponInfo();                       // Destructor
+   virtual ~LuaWeaponInfo();                       // Destructor
 
    static const char className[];
 
@@ -112,7 +112,7 @@ private:
 
 public:
    LuaModuleInfo(lua_State *L);      // Constructor
-   ~LuaModuleInfo();                 // Destructor
+   virtual ~LuaModuleInfo();                 // Destructor
 
    static const char className[];
 
@@ -136,7 +136,7 @@ public:
    LuaLoadout(lua_State *L);        // Lua constructor
    LuaLoadout(U32 loadoutItems[]);  // C++ constructor
 
-   ~LuaLoadout();                   // Destructor
+   virtual ~LuaLoadout();                   // Destructor
 
    static const char className[];
 

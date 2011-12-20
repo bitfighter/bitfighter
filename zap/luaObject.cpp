@@ -49,17 +49,30 @@
 namespace Zap
 {
 
- void LuaObject::openLibs(lua_State *L)      // static
- {
+// Constructor
+LuaObject::LuaObject()
+{
+   // Do nothing
+}
+
+// Destructor
+LuaObject::~LuaObject()
+{
+   // Do nothing
+}
+
+
+void LuaObject::openLibs(lua_State *L)      // static
+{
    luaL_openlibs(L);    // Load the standard libraries
    luaopen_vec(L);      // For vector math
- }
+}
 
 
- bool LuaObject::shouldLuaGarbageCollectThisObject()
- {
-    return true;
- }
+bool LuaObject::shouldLuaGarbageCollectThisObject()
+{
+   return true;
+}
 
 
 // Returns a point to calling Lua function
@@ -475,52 +488,6 @@ Point LuaObject::getPointOrXY(lua_State *L, S32 index, const char *methodName)
 }
 
 
-LuaItem *LuaItem::getItem(lua_State *L, S32 index, U32 type, const char *functionName)
-{
-   switch(type)
-   {
-      case RobotShipTypeNumber:  // pass through
-      case PlayerShipTypeNumber:
-        return  Lunar<LuaShip>::check(L, index);
-
-      case BulletTypeNumber:  // pass through
-      case MineTypeNumber:
-      case SpyBugTypeNumber:
-         return Lunar<LuaProjectile>::check(L, index);
-
-      case ResourceItemTypeNumber:
-         return Lunar<ResourceItem>::check(L, index);
-      case TestItemTypeNumber:
-         return Lunar<TestItem>::check(L, index);
-      case FlagTypeNumber:
-         return Lunar<FlagItem>::check(L, index);
-
-      case TeleportTypeNumber:
-         return Lunar<Teleporter>::check(L, index);
-      case AsteroidTypeNumber:
-         return Lunar<Asteroid>::check(L, index);
-      case RepairItemTypeNumber:
-         return Lunar<RepairItem>::check(L, index);
-      case EnergyItemTypeNumber:
-         return Lunar<EnergyItem>::check(L, index);
-      case SoccerBallItemTypeNumber:
-         return Lunar<SoccerBallItem>::check(L, index);
-      case TurretTypeNumber:
-         return Lunar<Turret>::check(L, index);
-      case ForceFieldProjectorTypeNumber:
-         return Lunar<ForceFieldProjector>::check(L, index);
-
-
-      default:
-         char msg[256];
-         dSprintf(msg, sizeof(msg), "%s expected item as arg at position %d", functionName, index);
-         logprintf(LogConsumer::LogError, msg);
-
-         throw LuaException(msg);
-   }
-}
-
-
 // Adapted from PiL book section 24.2.3
 void LuaObject::dumpStack(lua_State* L)
 {
@@ -774,5 +741,68 @@ int LuaScriptRunner::luaPanicked(lua_State *L)
 }
 
 
+////////////////////////////////////////
+////////////////////////////////////////
+
+
+LuaItem *LuaItem::getItem(lua_State *L, S32 index, U32 type, const char *functionName)
+{
+   switch(type)
+   {
+      case RobotShipTypeNumber:  // pass through
+      case PlayerShipTypeNumber:
+        return  Lunar<LuaShip>::check(L, index);
+
+      case BulletTypeNumber:  // pass through
+      case MineTypeNumber:
+      case SpyBugTypeNumber:
+         return Lunar<LuaProjectile>::check(L, index);
+
+      case ResourceItemTypeNumber:
+         return Lunar<ResourceItem>::check(L, index);
+      case TestItemTypeNumber:
+         return Lunar<TestItem>::check(L, index);
+      case FlagTypeNumber:
+         return Lunar<FlagItem>::check(L, index);
+
+      case TeleportTypeNumber:
+         return Lunar<Teleporter>::check(L, index);
+      case AsteroidTypeNumber:
+         return Lunar<Asteroid>::check(L, index);
+      case RepairItemTypeNumber:
+         return Lunar<RepairItem>::check(L, index);
+      case EnergyItemTypeNumber:
+         return Lunar<EnergyItem>::check(L, index);
+      case SoccerBallItemTypeNumber:
+         return Lunar<SoccerBallItem>::check(L, index);
+      case TurretTypeNumber:
+         return Lunar<Turret>::check(L, index);
+      case ForceFieldProjectorTypeNumber:
+         return Lunar<ForceFieldProjector>::check(L, index);
+
+
+      default:
+         char msg[256];
+         dSprintf(msg, sizeof(msg), "%s expected item as arg at position %d", functionName, index);
+         logprintf(LogConsumer::LogError, msg);
+
+         throw LuaException(msg);
+   }
 }
+
+
+void LuaItem::push(lua_State *L)
+{
+   TNLAssert(false, "Unimplemented method!");
+}
+
+
+S32 LuaItem::getClassID(lua_State *L)
+{
+   TNLAssert(false, "Unimplemented method!");
+   return -1;
+}
+
+
+};
 

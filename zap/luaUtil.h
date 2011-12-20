@@ -51,7 +51,7 @@ public:
    // Lua methods
    S32 logprint(lua_State *L);
    S32 printToOglConsole(lua_State *L);
-   S32 getMachineTime(lua_State *L) { return returnInt(L, Platform::getRealMilliseconds()); }
+   S32 getMachineTime(lua_State *L);
    S32 getRandomNumber(lua_State *L);
 
 };

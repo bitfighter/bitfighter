@@ -85,6 +85,9 @@ protected:
    static void setfield (lua_State *L, const char *key, F32 value);
 
 public:
+   LuaObject();            // Constructor
+   virtual ~LuaObject();   // Destructor
+
    // All of these return<T> functions work in the same way.  Include at the end of a child class method.
    // Usage: return returnInt(L, int);
 
@@ -184,8 +187,8 @@ public:
    virtual S32 getTeamIndx(lua_State *L) = 0;  // Team of item (returns team index)
    virtual GameObject *getGameObject() = 0;    // Return the underlying GameObject
 
-   virtual void push(lua_State *L) { TNLAssert(false, "Unimplemented method!"); }                 // Push item onto stack
-   virtual S32 getClassID(lua_State *L) { TNLAssert(false, "Unimplemented method!"); return -1; } // Object's class
+   virtual void push(lua_State *L);            // Push item onto stack
+   virtual S32 getClassID(lua_State *L);       // Object's class
 
    static LuaItem *getItem(lua_State *L, S32 index, U32 type, const char *functionName);
 };
