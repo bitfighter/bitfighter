@@ -42,22 +42,22 @@ public:
    static const char className[];
    static Lunar<LuaPlayerInfo>::RegType methods[];
 
-   LuaPlayerInfo() { defunct = false; };
-   LuaPlayerInfo(lua_State *L) { /* Do nothing */ }     // Lua constructor
+   LuaPlayerInfo();                 // Constructor
+   LuaPlayerInfo(lua_State *L);     // Lua constructor
 
    // These would be declared asbstract, except that Lunar strenusously objects...
-   virtual S32 getName(lua_State *L)       { TNLAssert(false, "Unimplemented method!"); return 0; }
-   virtual S32 getShip(lua_State *L)       { TNLAssert(false, "Unimplemented method!"); return 0; }
-   virtual S32 getTeamIndx(lua_State *L)   { TNLAssert(false, "Unimplemented method!"); return 0; }
-   virtual S32 getRating(lua_State *L)     { TNLAssert(false, "Unimplemented method!"); return 0; }
-   virtual S32 getScore(lua_State *L)      { TNLAssert(false, "Unimplemented method!"); return 0; }
-   virtual S32 isRobot(lua_State *L)       { TNLAssert(false, "Unimplemented method!"); return 0; }
-   virtual S32 getScriptName(lua_State *L) { TNLAssert(false, "Unimplemented method!"); return 0; }
+   virtual S32 getName(lua_State *L);
+   virtual S32 getShip(lua_State *L);
+   virtual S32 getTeamIndx(lua_State *L);
+   virtual S32 getRating(lua_State *L);
+   virtual S32 getScore(lua_State *L);
+   virtual S32 isRobot(lua_State *L);
+   virtual S32 getScriptName(lua_State *L);
 
-   void setDefunct() { defunct = true; }
-   bool isDefunct() { return defunct; }
+   void setDefunct();
+   bool isDefunct();
 
-   void push(lua_State *L) { Lunar<LuaPlayerInfo>::push(L, this, false); }      // false ==> We do not want Lunar to try and delete the C++ object when Lua is done with it
+   void push(lua_State *L);
 };
 
 
@@ -71,16 +71,16 @@ private:
   ClientInfo *mClientInfo;
 
 public:
-   PlayerInfo(ClientInfo *clientInfo) { mClientInfo = clientInfo; }     // C++ Constructor
-   virtual ~PlayerInfo() {}
+   PlayerInfo(ClientInfo *clientInfo);   // C++ Constructor
+   virtual ~PlayerInfo();                // Destructor
 
-   S32 getName(lua_State *L)       { return returnString(L, mClientInfo->getName().getString()); }
-   S32 getShip(lua_State *L)       ;
-   S32 getScriptName(lua_State *L) { return returnNil(L); }
-   S32 getTeamIndx(lua_State *L)   { return returnInt(L, mClientInfo->getTeamIndex() + 1); }     // Lua indexes are 1-based
-   S32 getRating(lua_State *L)     { return returnFloat(L, mClientInfo->getRating()); }
-   S32 getScore(lua_State *L)      { return returnInt(L, mClientInfo->getScore()); }
-   S32 isRobot(lua_State *L)       { return returnBool(L, false); }
+   S32 getName(lua_State *L);
+   S32 getShip(lua_State *L);
+   S32 getScriptName(lua_State *L);
+   S32 getTeamIndx(lua_State *L);
+   S32 getRating(lua_State *L);
+   S32 getScore(lua_State *L);
+   S32 isRobot(lua_State *L);
 };
 
 
@@ -94,16 +94,16 @@ private:
    Robot *mRobot;
 
 public:
-   RobotPlayerInfo(Robot *robot = NULL) { mRobot = robot; }     // C++ Constructor
-   virtual ~RobotPlayerInfo() {}
+   RobotPlayerInfo(Robot *robot = NULL);     // C++ Constructor
+   virtual ~RobotPlayerInfo();               // Destructor
 
-   S32 getName(lua_State *L)       { return returnString(L, mRobot->getName().getString()); }
-   S32 getShip(lua_State *L)       { return isDefunct() ? returnNil(L) : returnShip(L, mRobot); }
-   S32 getScriptName(lua_State *L) { return returnString(L, mRobot->getScriptName()); }
-   S32 getTeamIndx(lua_State *L)   { return returnInt(L, mRobot->getTeam() + 1); }
-   S32 getRating(lua_State *L)     { return returnFloat(L, mRobot->getRating()); }
-   S32 getScore(lua_State *L)      { return returnInt(L, mRobot->getScore()); }
-   S32 isRobot(lua_State *L)       { return returnBool(L, true); }
+   S32 getName(lua_State *L);
+   S32 getShip(lua_State *L);
+   S32 getScriptName(lua_State *L);
+   S32 getTeamIndx(lua_State *L);
+   S32 getRating(lua_State *L);
+   S32 getScore(lua_State *L);
+   S32 isRobot(lua_State *L);
 };
 
 };

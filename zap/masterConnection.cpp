@@ -64,6 +64,12 @@ MasterServerConnection::MasterServerConnection(Game *game)
 }
 
 
+MasterServerConnection::MasterServerConnection()
+{
+   TNLAssert(false, "LLL");  // XXX What the crazy is LLL?
+}
+
+
 // Try this...
 void MasterServerConnection::startServerQuery()
 {
@@ -105,6 +111,12 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cQueryServersResponse, (U32
 #endif
 
 
+void MasterServerConnection::cancelArrangedConnectionAttempt()
+{
+   mCurrentQueryId++;
+}
+
+
 void MasterServerConnection::requestArrangedConnection(const Address &remoteAddress)
 {
    mCurrentQueryId++;
@@ -112,6 +124,13 @@ void MasterServerConnection::requestArrangedConnection(const Address &remoteAddr
    c2mRequestArrangedConnection(mCurrentQueryId, remoteAddress.toIPAddress(),
       getInterface()->getFirstBoundInterfaceAddress().toIPAddress(),
       new ByteBuffer((U8 *) "ZAP!", 5));
+}
+
+
+void MasterServerConnection::updateServerStatus(StringTableEntry levelName, StringTableEntry levelType,
+      U32 botCount, U32 playerCount, U32 maxPlayers, U32 infoFlags)
+{
+   s2mUpdateServerStatus(levelName, levelType, botCount, playerCount, maxPlayers, infoFlags);
 }
 
 

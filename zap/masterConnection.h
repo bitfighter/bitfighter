@@ -52,7 +52,7 @@ private:
 
 public:
    MasterServerConnection(Game *game);    // Constructor
-   MasterServerConnection() {TNLAssert(false, "LLL"); }  // XXX What the crazy is LLL?
+   MasterServerConnection();
 
    void setMasterName(string name);
    string getMasterName();
@@ -61,13 +61,10 @@ public:
 
    Vector<IPAddress> mServerList;
 
-   void cancelArrangedConnectionAttempt() { mCurrentQueryId++; }
+   void cancelArrangedConnectionAttempt();
    void requestArrangedConnection(const Address &remoteAddress);
    void updateServerStatus(StringTableEntry levelName, StringTableEntry levelType, U32 botCount, 
-                           U32 playerCount, U32 maxPlayers, U32 infoFlags)
-   {
-      s2mUpdateServerStatus(levelName, levelType, botCount, playerCount, maxPlayers, infoFlags);
-   }
+                           U32 playerCount, U32 maxPlayers, U32 infoFlags);
 
 #ifndef ZAP_DEDICATED
    TNL_DECLARE_RPC_OVERRIDE(m2cQueryServersResponse, (U32 queryId, Vector<IPAddress> ipList));

@@ -87,6 +87,37 @@ void MoveObject::updateExtentInDatabase()
    setExtent(r);
 }
 
+
+bool MoveObject::isMoveObject()
+{
+   return true;
+}
+
+
+Point MoveObject::getRenderPos() const
+{
+   return mMoveState[RenderState].pos;
+}
+
+
+Point MoveObject::getActualPos() const
+{
+   return mMoveState[ActualState].pos;
+}
+
+
+Point MoveObject::getRenderVel() const
+{
+   return mMoveState[RenderState].vel;
+}
+
+
+Point MoveObject::getActualVel() const
+{
+   return mMoveState[ActualState].vel;
+}
+
+
 void MoveObject::setActualPos(const Point &pos)
 {
    mMoveState[ActualState].pos = pos;
@@ -96,6 +127,18 @@ void MoveObject::setActualPos(const Point &pos)
 void MoveObject::setActualVel(const Point &vel)
 {
    mMoveState[ActualState].vel = vel;
+}
+
+
+F32 MoveObject::getMass()
+{
+   return mMass;
+}
+
+
+void MoveObject::setMass(F32 mass)
+{
+   mMass = mass;
 }
 
 
@@ -286,6 +329,13 @@ bool MoveObject::collide(GameObject *otherObject)
 {
    return true;
 }
+
+
+TestFunc MoveObject::collideTypes()
+{
+   return (TestFunc) isAnyObjectType;
+}
+
 
 static S32 QSORT_CALLBACK sortBarriersFirst(DatabaseObject **a, DatabaseObject **b)
 {
@@ -610,6 +660,14 @@ void MoveObject::computeImpulseDirection(DamageInfo *theInfo)
    mMoveState[ActualState].vel += iv * dv.dot(iv) * 0.3f / mMass;
 }
 
+////
+// LuaItem interface
+
+S32 MoveObject::getVel(lua_State *L)
+{
+   return LuaObject::returnPoint(L, getActualVel());
+}
+
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -682,6 +740,36 @@ void MoveItem::mountToShip(Ship *theShip)
 }
 
 
+void MoveItem::setMountedMask()
+{
+   setMaskBits(MountMask);
+}
+
+
+void MoveItem::setPositionMask()
+{
+   setMaskBits(PositionMask);
+}
+
+
+bool MoveItem::isMounted()
+{
+   return mIsMounted;
+}
+
+
+bool MoveItem::isItemThatMakesYouVisibleWhileCloaked()
+{
+   return true;
+}
+
+
+void MoveItem::setCollideable(bool isCollideable)
+{
+   mIsCollideable = isCollideable;
+}
+
+
 void MoveItem::onMountDestroyed()
 {
    dismount();
@@ -742,6 +830,12 @@ void MoveItem::setActualVel(const Point &vel)
 {
    mMoveState[ActualState].vel = vel;
    setMaskBits(PositionMask);
+}
+
+
+U16 MoveItem::getItemId()
+{
+   return mItemId;
 }
 
 
@@ -897,6 +991,21 @@ bool MoveItem::collide(GameObject *otherObject)
 }
 
 
+GameObject *MoveItem::getGameObject()
+{
+   return this;
+}
+
+
+////
+// LuaItem interface
+
+S32 MoveItem::isOnShip(lua_State *L)
+{
+   return returnBool(L, mIsMounted);
+}
+
+
 S32 MoveItem::getShip(lua_State *L) 
 { 
    if(mMount.isValid()) 
@@ -962,6 +1071,12 @@ Asteroid *Asteroid::clone() const
 }
 
 
+U32 Asteroid::getDesignCount()
+{
+   return AsteroidDesigns;
+}
+
+
 void Asteroid::renderItem(const Point &pos)
 {
    if(!hasExploded)
@@ -973,6 +1088,33 @@ void Asteroid::renderDock()
 {
    renderAsteroid(getVert(0), 2, .1f);
 }
+
+
+const char *Asteroid::getEditorHelpString()
+{
+   return "Shootable asteroid object.  Just like the arcade game.";
+}
+
+
+const char *Asteroid::getPrettyNamePlural()
+{
+   return "Asteroids";
+}
+
+
+const char *Asteroid::getOnDockName()
+{
+   return "Ast.";
+}
+
+
+const char *Asteroid::getOnScreenName()
+{
+   return "Asteroid";
+}
+
+
+//S32 Asteroid::getDockRadius() { return 11; }
 
 
 F32 Asteroid::getEditorRadius(F32 currentScale)
@@ -1118,6 +1260,12 @@ bool Asteroid::collide(GameObject *otherObject)
 }
 
 
+TestFunc Asteroid::collideTypes()
+{
+   return (TestFunc) isAsteroidCollideableType;
+}
+
+
 // Client only
 void Asteroid::onItemExploded(Point pos)
 {
@@ -1239,10 +1387,29 @@ Lunar<Asteroid>::RegType Asteroid::methods[] =
    {0,0}    // End method list
 };
 
+///// Lua interface
+S32 Asteroid::getSize(lua_State *L)
+{
+   return returnInt(L, ASTEROID_INITIAL_SIZELEFT - mSizeLeft);
+}
 
-S32 Asteroid::getSize(lua_State *L) { return returnInt(L, ASTEROID_INITIAL_SIZELEFT - mSizeLeft); }         // Index of current asteroid size (0 = initial size, 1 = next smaller, 2 = ...) (returns int)
-S32 Asteroid::getSizeCount(lua_State *L) { return returnInt(L, ASTEROID_INITIAL_SIZELEFT); }    // Number of indexes of size we can have (returns int)
 
+S32 Asteroid::getSizeCount(lua_State *L)
+{
+   return returnInt(L, ASTEROID_INITIAL_SIZELEFT);
+}
+
+
+S32 Asteroid::getClassID(lua_State *L)
+{
+   return returnInt(L, AsteroidTypeNumber);
+}
+
+
+void Asteroid::push(lua_State *L)
+{
+   Lunar<Asteroid>::push(L, this);
+}
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -1338,6 +1505,30 @@ void Circle::renderDock()
 }
 
 
+const char *Circle::getEditorHelpString()
+{
+   return "Shootable circle object.  Scary.";
+}
+
+
+const char *Circle::getPrettyNamePlural()
+{
+   return "Circles";
+}
+
+
+const char *Circle::getOnDockName()
+{
+   return "Circ.";
+}
+
+
+const char *Circle::getOnScreenName()
+{
+   return "Circle";
+}
+
+
 F32 Circle::getEditorRadius(F32 currentScale)
 {
    return CIRCLE_RADIUS * currentScale;
@@ -1410,6 +1601,20 @@ void Circle::onItemExploded(Point pos)
 }
 
 
+void Circle::playCollisionSound(U32 stateIndex, MoveObject *moveObjectThatWasHit, F32 velocity)
+{
+   // Do nothing
+}
+
+
+U32 Circle::getDesignCount()
+{
+   return AsteroidDesigns;
+}
+
+
+///// Lua interface
+
 const char Circle::className[] = "Circle";      // Class name as it appears to Lua scripts
 
 // Lua constructor
@@ -1431,6 +1636,18 @@ Lunar<Circle>::RegType Circle::methods[] =
 
    {0,0}    // End method list
 };
+
+
+S32 Circle::getClassID(lua_State *L)
+{
+   return returnInt(L, CircleTypeNumber);
+}
+
+
+void Circle::push(lua_State *L)
+{
+   Lunar<Circle>::push(L, this);
+}
 
 
 ////////////////////////////////////////
@@ -1500,6 +1717,13 @@ void Worm::setPosAng(Point pos, F32 ang)
       mMoveState[i].vel.y = wormVel * sin(ang);
    }
 }
+
+
+void Worm::setNextAng(F32 nextAng)
+{
+   mNextAng = nextAng;
+}
+
 
 void Worm::damageObject(DamageInfo *theInfo)
 {
@@ -1584,6 +1808,30 @@ void TestItem::renderDock()
 }
 
 
+const char *TestItem::getEditorHelpString()
+{
+   return "Bouncy object that floats around and gets in the way.";
+}
+
+
+const char *TestItem::getPrettyNamePlural()
+{
+   return "TestItems";
+}
+
+
+const char *TestItem::getOnDockName()
+{
+   return "Test";
+}
+
+
+const char *TestItem::getOnScreenName()
+{
+   return "TestItem";
+}
+
+
 F32 TestItem::getEditorRadius(F32 currentScale)
 {
    return getRadius() * currentScale;
@@ -1610,6 +1858,8 @@ bool TestItem::getCollisionPoly(Vector<Point> &polyPoints) const
 }
 
 
+///// Lua Interface
+
 const char TestItem::className[] = "TestItem";      // Class name as it appears to Lua scripts
 
 // Lua constructor
@@ -1630,6 +1880,19 @@ Lunar<TestItem>::RegType TestItem::methods[] =
 
    {0,0}    // End method list
 };
+
+
+S32 TestItem::getClassID(lua_State *L)
+{
+   return returnInt(L, TestItemTypeNumber);
+}
+
+
+void TestItem::push(lua_State *L)
+{
+   Lunar<TestItem>::push(L, this);
+}
+
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -1662,6 +1925,30 @@ void ResourceItem::renderItem(const Point &pos)
 void ResourceItem::renderDock()
 {
    renderResourceItem(getVert(0), .4f, 0, 1);
+}
+
+
+const char *ResourceItem::getEditorHelpString()
+{
+   return "Small bouncy object; capture one to activate Engineer module";
+}
+
+
+const char *ResourceItem::getPrettyNamePlural()
+{
+   return "Resource Items";
+}
+
+
+const char *ResourceItem::getOnDockName()
+{
+   return "Res.";
+}
+
+
+const char *ResourceItem::getOnScreenName()
+{
+   return "ResourceItem";
 }
 
 
@@ -1709,6 +1996,8 @@ void ResourceItem::onItemDropped()
 }
 
 
+///// Lua Interface
+
 const char ResourceItem::className[] = "ResourceItem";      // Class name as it appears to Lua scripts
 
 // Lua constructor
@@ -1735,6 +2024,18 @@ Lunar<ResourceItem>::RegType ResourceItem::methods[] =
 
    {0,0}    // End method list
 };
+
+
+S32 ResourceItem::getClassID(lua_State *L)
+{
+   return returnInt(L, ResourceItemTypeNumber);
+}
+
+
+void ResourceItem::push(lua_State *L)
+{
+   Lunar<ResourceItem>::push(L, this);
+}
 
 
 };
