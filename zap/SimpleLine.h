@@ -54,9 +54,10 @@ public:
    // Some properties about the item that will be needed in the editor
    virtual const char *getOnDockName() = 0;
 
-   void renderDock();     // Render item on the dock
-   void renderEditor(F32 currentScale);
-   virtual void renderEditorItem() = 0;
+   void renderDock();                        // Render item on the dock
+   void renderEditor(F32 currentScale);      // Render item in the editor
+   virtual void renderEditorItem() = 0;      // Helper for renderEditor
+
    void renderItemText(const char *text, S32 offset, F32 currentScale);
 
    virtual void newObjectFromDock(F32 gridSize);
