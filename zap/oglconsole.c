@@ -71,12 +71,12 @@
 
 /* This is how long the animation should take to make the transition between
  * "hidden" and "visible" console visibility modes (expressed in milliseconds) */
-#define SLIDE_MS 500
+#define SLIDE_MS 500    // <=== unused
 
 /* If we don't know how to retrieve the time then we can just use a number of
  * frames to divide up the time it takes to transition between "hidden" and
  * "visible" console visibility modes */
-#define SLIDE_STEPS 25
+#define SLIDE_STEPS 10
 
 #ifdef ZAP_DEDICATED
    typedef int GLuint;
