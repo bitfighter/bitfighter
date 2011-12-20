@@ -56,6 +56,7 @@ private:
 
 protected:
    virtual S32 getSelectedMenuItem();
+   bool usesEditorScreenMode();
 
 public:
    // Constructors
@@ -69,6 +70,9 @@ public:
    void addSaveAndQuitMenuItem();
    void setMenuCenterPoint(const Point &location);    // Sets the point at which the menu will be centered about
    virtual void doneEditing() = 0;
+
+   void onPreDisplayModeChange();
+   void onDisplayModeChange();
 };
 
 

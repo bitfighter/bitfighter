@@ -1049,8 +1049,9 @@ void OptionsMenuUserInterface::toggleDisplayMode()
    DisplayMode oldMode = settings->getIniSettings()->oldDisplayMode;
 
    settings->getIniSettings()->oldDisplayMode = settings->getIniSettings()->displayMode;     // Save current setting
+
    // When we're in the editor, and we toggle views, we'll skip one of the fullscreen modes, as they essentially do the same thing in that UI
-   if(UserInterface::current->getMenuID() == EditorUI)
+   if(UserInterface::current->usesEditorScreenMode())
    {
       if(isFullScreen(settings->getIniSettings()->displayMode))
          settings->getIniSettings()->displayMode = DISPLAY_MODE_WINDOWED;

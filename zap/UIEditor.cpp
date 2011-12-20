@@ -112,6 +112,7 @@ static void saveLevelCallback(ClientGame *game)
 
 void backToMainMenuCallback(ClientGame *game)
 {
+   game->getUIManager()->getEditorUserInterface()->onQuitted();
    game->getUIManager()->reactivateMenu(game->getUIManager()->getMainMenuUserInterface());    
 }
 
@@ -140,6 +141,14 @@ EditorUserInterface::EditorUserInterface(ClientGame *game) : Parent(game)
    mUndoItems.resize(UNDO_STATES);     // Create slots for all our undos... also creates a ton of empty dbs.  Maybe we should be using pointers?
    mAutoScrollWithMouse = false;
    mAutoScrollWithMouseReady = false;
+}
+
+
+// Really quitting... no going back!
+void EditorUserInterface::onQuitted()
+{
+   clearUndoHistory();     // Clear up a little memory
+   mDockItems.clear();     // Free a little more -- dock will be rebuilt when editor restarts
 }
 
 
@@ -1055,10 +1064,9 @@ void EditorUserInterface::onActivate()
 }
 
 
-void EditorUserInterface::onDeactivate()
+bool EditorUserInterface::usesEditorScreenMode()
 {
-   mDockItems.clear();     // Free some memory -- dock will be rebuilt when editor restarts
-   actualizeScreenMode(true);
+   return true;
 }
 
 
@@ -1085,7 +1093,8 @@ void EditorUserInterface::onReactivate()     // Run when user re-enters the edit
 
    OGLCONSOLE_EnterKey(processEditorConsoleCommand);     // Restore callback for processing console commands
 
-   actualizeScreenMode(true);
+   if(UserInterface::current->usesEditorScreenMode() != usesEditorScreenMode())
+      actualizeScreenMode(true);
 
    mDockItemHit = NULL;
 }
@@ -1134,16 +1143,19 @@ static Point sCenter;
 // Called when we shift between windowed and fullscreen mode, before change is made
 void EditorUserInterface::onPreDisplayModeChange()
 {
-   sCenter.set(mCurrentOffset.x - gScreenInfo.getGameCanvasWidth() / 2, mCurrentOffset.y - gScreenInfo.getGameCanvasHeight() / 2);
+   sCenter.set(gScreenInfo.getGameCanvasWidth(), gScreenInfo.getGameCanvasHeight());
 }
+
 
 // Called when we shift between windowed and fullscreen mode, after change is made
 void EditorUserInterface::onDisplayModeChange()
 {
    // Recenter canvas -- note that canvasWidth may change during displayMode change
-   mCurrentOffset.set(sCenter.x + gScreenInfo.getGameCanvasWidth() / 2, sCenter.y + gScreenInfo.getGameCanvasHeight() / 2);
+   mCurrentOffset.set(mCurrentOffset.x - sCenter.x / 2 + gScreenInfo.getGameCanvasWidth() / 2, 
+                      mCurrentOffset.y - sCenter.y / 2 + gScreenInfo.getGameCanvasHeight() / 2);
 
-   populateDock();               // If game type has changed, items on dock will change
+   if(getGame()->getGameType())
+      populateDock();               // If game type has changed, items on dock will change
 }
 
 
@@ -4255,8 +4267,6 @@ void quitEditorCallback(ClientGame *game, U32 unused)
    }
    else
      backToMainMenuCallback(game);
-
-   editorUI->clearUndoHistory();        // Clear up a little memory
 }
 
 //////////

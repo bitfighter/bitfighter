@@ -100,6 +100,12 @@ UIManager *UserInterface::getUIManager() const
 }
 
 
+bool UserInterface::usesEditorScreenMode()
+{
+   return false;
+}
+
+
 void UserInterface::activate(bool save)
 {
    UserInterface *prev = current;
@@ -110,7 +116,7 @@ void UserInterface::activate(bool save)
    current = this;            // Now it is current
 
    if(prev)
-      prev->onDeactivate();
+      prev->onDeactivate(usesEditorScreenMode());
 
    onActivate();              // Activate the now current current UI
 }
@@ -152,6 +158,15 @@ UIID UserInterface::getPrevMenuID() const
 
 void UserInterface::onActivate()   { /* Do nothing */ }
 void UserInterface::onReactivate() { /* Do nothing */ }
+
+
+extern void actualizeScreenMode(bool);
+
+void UserInterface::onDeactivate(bool prevUIUsesEditorScreenMode) 
+{
+   if(prevUIUsesEditorScreenMode != usesEditorScreenMode())
+      actualizeScreenMode(true);
+}
 
 
 // It will be simpler if we translate joystick controls into keyboard actions here rather than check for them elsewhere.  

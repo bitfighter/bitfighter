@@ -979,7 +979,7 @@ void actualizeScreenMode(bool changingInterfaces)
    // If old display mode is windowed or current is windowed but we change interfaces,
    // save the window position
    if(settings->getIniSettings()->oldDisplayMode == DISPLAY_MODE_WINDOWED ||
-         (changingInterfaces && settings->getIniSettings()->displayMode == DISPLAY_MODE_WINDOWED))
+         (changingInterfaces && displayMode == DISPLAY_MODE_WINDOWED))
    {
       settings->getIniSettings()->winXPos = getWindowPositionX();
       settings->getIniSettings()->winYPos = getWindowPositionY();
@@ -988,11 +988,9 @@ void actualizeScreenMode(bool changingInterfaces)
       gINI.SetValueI("Settings", "WindowYPos", settings->getIniSettings()->winYPos, true);
    }
 
-
    // When we're in the editor, let's take advantage of the entire screen unstretched
-   if(UserInterface::current->getMenuID() == EditorUI && 
-         (settings->getIniSettings()->displayMode == DISPLAY_MODE_FULL_SCREEN_STRETCHED || 
-          settings->getIniSettings()->displayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED))
+   if(UserInterface::current->usesEditorScreenMode() && 
+         (displayMode == DISPLAY_MODE_FULL_SCREEN_STRETCHED || displayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED))
    {
       // Smaller values give bigger magnification; makes small things easier to see on full screen
       F32 magFactor = 0.85f;      

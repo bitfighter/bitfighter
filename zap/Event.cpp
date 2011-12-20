@@ -381,7 +381,7 @@ void Event::onKeyDown(ClientGame *game, SDLKey key, SDLMod mod, U16 unicode)
    // Bitfighter window, and pressing enter, and having this block think we pressed alt-enter.
    // GetKeyState() looks at the actual current state of the key, which is what we want.
 
-   // ALT + ENTER --> toggles window mode/full screen
+   // ALT+ENTER --> toggles window mode/full screen
    if(key == SDLK_RETURN && (SDL_GetModState() & KMOD_ALT))
    {
       const Point *pos = gScreenInfo.getMousePos();
@@ -394,7 +394,7 @@ void Event::onKeyDown(ClientGame *game, SDLKey key, SDLMod mod, U16 unicode)
       SDL_WarpMouse(gScreenInfo.getWindowMousePos()->x, gScreenInfo.getWindowMousePos()->y);
    }
 
-   // CTRL + Q --> screenshot!
+   // CTRL+Q --> screenshot!
    else if(key == SDLK_q && getInputCodeState(KEY_CTRL))
       ScreenShooter::saveScreenshot(game->getSettings()->getFolderManager()->screenshotDir);
 

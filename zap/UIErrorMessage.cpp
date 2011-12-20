@@ -47,6 +47,7 @@ void ErrorMessageUserInterface::onActivate()
    // Do nothing
 }
 
+
 void ErrorMessageUserInterface::reset()
 {
    mTitle = "WE HAVE A PROBLEM";    // Default title
@@ -55,6 +56,7 @@ void ErrorMessageUserInterface::reset()
       mMessage[i] = "";
 }
 
+
 // First line is 1
 void ErrorMessageUserInterface::setMessage(S32 id, const char *message)
 {
@@ -62,10 +64,12 @@ void ErrorMessageUserInterface::setMessage(S32 id, const char *message)
    mMessage[id-1] = message;
 }
 
+
 void ErrorMessageUserInterface::setTitle(const char *message)
 {
    mTitle = message;
 }
+
 
 void ErrorMessageUserInterface::setInstr(const char *message)
 {
@@ -75,7 +79,7 @@ void ErrorMessageUserInterface::setInstr(const char *message)
 
 void ErrorMessageUserInterface::quit()
 {
-   getUIManager()->reactivatePrevUI();      //gMainMenuUserInterface
+   getUIManager()->reactivatePrevUI();      // to gMainMenuUserInterface
 }
 
 

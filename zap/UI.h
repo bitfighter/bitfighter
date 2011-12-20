@@ -114,7 +114,7 @@ public:
    virtual void render();
    virtual void idle(U32 timeDelta);
    virtual void onActivate();
-   virtual void onDeactivate() { /* Do nothing */ }
+   virtual void onDeactivate(bool usesEditorScreenMode);
    virtual void onReactivate();
    virtual void onPreDisplayModeChange() { /* Do nothing */ }
    virtual void onDisplayModeChange() { /* Do nothing */ }
@@ -122,8 +122,10 @@ public:
    void activate(bool save = true);
    virtual void reactivate();
 
-   void renderConsole();               // Render game console
-   virtual void renderMasterStatus();  // Render master server connection status
+   virtual bool usesEditorScreenMode();   // Returns true if the UI attempts to use entire screen like editor, false otherwise
+
+   void renderConsole();                  // Render game console
+   virtual void renderMasterStatus();     // Render master server connection status
 
    InputCode convertJoystickToKeyboard(InputCode inputCode);
 

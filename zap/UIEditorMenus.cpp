@@ -161,6 +161,32 @@ S32 QuickMenuUI::getSelectedMenuItem()
 }
 
 
+bool QuickMenuUI::usesEditorScreenMode()                 // TODO: Rename this stupidly named method!!
+{
+   return true;
+}
+
+
+static Point sSize;     // Store size for post-change repositionings
+
+void QuickMenuUI::onPreDisplayModeChange()
+{
+   getUIManager()->getPrevUI()->onPreDisplayModeChange();   // This is intended to run the same method in the editor
+   
+   sSize = Point(gScreenInfo.getGameCanvasWidth(), gScreenInfo.getGameCanvasHeight());
+}
+
+
+void QuickMenuUI::onDisplayModeChange()
+{
+   getUIManager()->getPrevUI()->onDisplayModeChange();   // This is intended to run the same method in the editor
+
+   // Reposition menu on screen, keeping same relative position as before
+   Point pos(mMenuLocation.x * gScreenInfo.getGameCanvasWidth() / sSize.x, mMenuLocation.y * gScreenInfo.getGameCanvasHeight() / sSize.y);
+   setMenuCenterPoint(pos);
+}
+
+
 S32 QuickMenuUI::getMenuWidth()
 {
    S32 width = 0;
@@ -184,7 +210,6 @@ void QuickMenuUI::onEscape()
 }
 
 
-// See Raptor, I am trying!
 void QuickMenuUI::setMenuCenterPoint(const Point &location)
 {
    mMenuLocation = location;

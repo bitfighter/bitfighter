@@ -159,7 +159,6 @@ private:
 
    const Vector<EditorObject *> *getObjectList();     // Convenience method
 
-
    Vector<boost::shared_ptr<EditorObjectDatabase> > mUndoItems;  // Undo/redo history 
    Point mMoveOrigin;                           // Point representing where items were moved "from" for figuring out how far they moved
    Vector<Point> mOriginalVertLocations;
@@ -281,9 +280,10 @@ private:
 protected:
    void onActivate();
    void onReactivate();
-   void onDeactivate();
 
    void renderMasterStatus() { /* Do nothing, don't render this in editor */ }
+
+   bool usesEditorScreenMode();
 
 public:
    virtual ~EditorUserInterface();       // Destructor
@@ -324,6 +324,7 @@ public:
 
    static Vector<string> robots;
 
+   void onQuitted();       // Releases some memory when quitting the editor
 
    const Color *getTeamColor(S32 teamId);
 
