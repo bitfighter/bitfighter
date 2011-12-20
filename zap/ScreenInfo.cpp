@@ -148,10 +148,7 @@ void ScreenInfo::setGameCanvasSize(S32 width, S32 height)
 
 void ScreenInfo::resetGameCanvasSize()
 {
-   mGameCanvasWidth = GAME_WIDTH;
-   mGameCanvasHeight = GAME_HEIGHT;
-
-   calcPixelRatio();
+   setGameCanvasSize(GAME_WIDTH, GAME_HEIGHT);
 }
 
 S32 ScreenInfo::getGameCanvasWidth() { return mGameCanvasWidth; }       // canvasWidth, usually 800
