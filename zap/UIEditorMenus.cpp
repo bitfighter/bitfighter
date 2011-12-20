@@ -167,22 +167,14 @@ bool QuickMenuUI::usesEditorScreenMode()                 // TODO: Rename this st
 }
 
 
-static Point sSize;     // Store size for post-change repositionings
-
-void QuickMenuUI::onPreDisplayModeChange()
-{
-   getUIManager()->getPrevUI()->onPreDisplayModeChange();   // This is intended to run the same method in the editor
-   
-   sSize = Point(gScreenInfo.getGameCanvasWidth(), gScreenInfo.getGameCanvasHeight());
-}
-
-
 void QuickMenuUI::onDisplayModeChange()
 {
    getUIManager()->getPrevUI()->onDisplayModeChange();   // This is intended to run the same method in the editor
 
    // Reposition menu on screen, keeping same relative position as before
-   Point pos(mMenuLocation.x * gScreenInfo.getGameCanvasWidth() / sSize.x, mMenuLocation.y * gScreenInfo.getGameCanvasHeight() / sSize.y);
+   Point pos(mMenuLocation.x * gScreenInfo.getGameCanvasWidth() /gScreenInfo.getPrevCanvasWidth(), 
+             mMenuLocation.y * gScreenInfo.getGameCanvasHeight() / gScreenInfo.getPrevCanvasHeight());
+
    setMenuCenterPoint(pos);
 }
 

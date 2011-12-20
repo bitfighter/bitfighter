@@ -964,11 +964,6 @@ void setupLogging(const string &logDir)
 // This has the unfortunate side-effect of triggering a mouse move event.  
 void actualizeScreenMode(bool changingInterfaces)
 {
-   if(changingInterfaces)
-      gClientGame->getUIManager()->getPrevUI()->onPreDisplayModeChange();
-   else
-      UserInterface::current->onPreDisplayModeChange();
-
    GameSettings *settings = gClientGame->getSettings();
 
    DisplayMode displayMode = settings->getIniSettings()->displayMode;

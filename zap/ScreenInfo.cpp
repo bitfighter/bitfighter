@@ -34,8 +34,11 @@ ScreenInfo::ScreenInfo()
    MIN_SCALING_FACTOR = 0.15f;
    resetGameCanvasSize();        // Initialize GameCanvasSize vars
    setWindowSize(GAME_WIDTH, GAME_HEIGHT);      // In case these are used in a calculation before they're set... avoids spurious divide by 0
+   mPrevCanvasWidth = GAME_WIDTH;
+   mPrevCanvasHeight = GAME_HEIGHT;
    mWindowMousePos.set(-1,-1);   // -1 is used to indicate initial run
 }
+
 
 // Can't initialize until SDL has been set up
 void ScreenInfo::init(S32 physicalScreenWidth, S32 physicalScreenHeight)
@@ -66,6 +69,7 @@ void ScreenInfo::init(S32 physicalScreenWidth, S32 physicalScreenHeight)
 //   logprintf("mScalingRatioX: %f", mScalingRatioX);
 //   logprintf("mScalingRatioY: %f", mScalingRatioY);
 }
+
 
 F32 ScreenInfo::getMinScalingFactor() { return MIN_SCALING_FACTOR; }
 
@@ -140,6 +144,9 @@ S32 ScreenInfo::getVertPhysicalMargin(DisplayMode mode)
 // The following methods return values in VIRTUAL pixels, not accurate in editor
 void ScreenInfo::setGameCanvasSize(S32 width, S32 height)
 {
+   mPrevCanvasWidth = mGameCanvasWidth;
+   mPrevCanvasHeight = mGameCanvasHeight;
+
    mGameCanvasWidth = width;
    mGameCanvasHeight = height;
 
@@ -149,10 +156,14 @@ void ScreenInfo::setGameCanvasSize(S32 width, S32 height)
 void ScreenInfo::resetGameCanvasSize()
 {
    setGameCanvasSize(GAME_WIDTH, GAME_HEIGHT);
-}
+}  
 
 S32 ScreenInfo::getGameCanvasWidth() { return mGameCanvasWidth; }       // canvasWidth, usually 800
 S32 ScreenInfo::getGameCanvasHeight() { return mGameCanvasHeight; }     // canvasHeight, usually 600
+
+S32 ScreenInfo::getPrevCanvasWidth() { return mPrevCanvasWidth; }       
+S32 ScreenInfo::getPrevCanvasHeight() { return mPrevCanvasHeight; }     
+
 
 // Dimensions of black bars in game-sized pixels
 S32 ScreenInfo::getHorizDrawMargin()

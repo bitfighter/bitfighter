@@ -116,7 +116,6 @@ public:
    virtual void onActivate();
    virtual void onDeactivate(bool usesEditorScreenMode);
    virtual void onReactivate();
-   virtual void onPreDisplayModeChange() { /* Do nothing */ }
    virtual void onDisplayModeChange() { /* Do nothing */ }
 
    void activate(bool save = true);

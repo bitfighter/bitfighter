@@ -50,6 +50,7 @@ private:
 
    S32 mPhysicalScreenWidth, mPhysicalScreenHeight;
    S32 mGameCanvasWidth, mGameCanvasHeight;     // Size of screen; in game, will always be 800x600, but may be different in editor fullscreen
+   S32 mPrevCanvasWidth, mPrevCanvasHeight;     // Previous size of screen
    S32 mWindowWidth, mWindowHeight;             // Window dimensions in physical pixels
    F32 mScalingRatioX, mScalingRatioY;          // Ratio of physical pixels to virtual pixels
    bool mIsLandscape;                           // Is our screen landscape or portrait?
@@ -95,6 +96,9 @@ public:
    void resetGameCanvasSize();
    S32 getGameCanvasWidth();
    S32 getGameCanvasHeight();
+
+   S32 getPrevCanvasWidth();
+   S32 getPrevCanvasHeight();
 
    // Dimensions of black bars in game-sized pixels
    S32 getHorizDrawMargin();

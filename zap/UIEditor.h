@@ -392,7 +392,6 @@ public:
    Point convertCanvasToLevelCoord(Point p) { return (p - mCurrentOffset) * (1 / mCurrentScale); }
    Point convertLevelToCanvasCoord(Point p, bool convert = true) { return convert ? p * mCurrentScale + mCurrentOffset : p; }
 
-   void onPreDisplayModeChange();   // Called when we shift between windowed and fullscreen mode, before change is made
    void onDisplayModeChange();      // Called when we shift between windowed and fullscreen mode, after change is made
 
    // Snapping related functions:

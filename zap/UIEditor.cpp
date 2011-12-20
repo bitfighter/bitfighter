@@ -1137,22 +1137,12 @@ void EditorUserInterface::removeTeam(S32 teamIndex)
 }
 
 
-
-static Point sCenter;
-
-// Called when we shift between windowed and fullscreen mode, before change is made
-void EditorUserInterface::onPreDisplayModeChange()
-{
-   sCenter.set(gScreenInfo.getGameCanvasWidth(), gScreenInfo.getGameCanvasHeight());
-}
-
-
 // Called when we shift between windowed and fullscreen mode, after change is made
 void EditorUserInterface::onDisplayModeChange()
 {
    // Recenter canvas -- note that canvasWidth may change during displayMode change
-   mCurrentOffset.set(mCurrentOffset.x - sCenter.x / 2 + gScreenInfo.getGameCanvasWidth() / 2, 
-                      mCurrentOffset.y - sCenter.y / 2 + gScreenInfo.getGameCanvasHeight() / 2);
+   mCurrentOffset.set(mCurrentOffset.x - gScreenInfo.getPrevCanvasWidth()  / 2 + gScreenInfo.getGameCanvasWidth()  / 2, 
+                      mCurrentOffset.y - gScreenInfo.getPrevCanvasHeight() / 2 + gScreenInfo.getGameCanvasHeight() / 2);
 
    if(getGame()->getGameType())
       populateDock();               // If game type has changed, items on dock will change
