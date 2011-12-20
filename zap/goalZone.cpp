@@ -136,9 +136,39 @@ bool GoalZone::processArguments(S32 argc2, const char **argv2, Game *game)
 }
 
 
+const char *GoalZone::getEditorHelpString()
+{
+   return "Target area used in a variety of games.";
+}
+
+
+const char *GoalZone::getPrettyNamePlural()
+{
+   return "Goal Zones";
+}
+
+
+const char *GoalZone::getOnDockName()
+{
+   return "Goal";
+}
+
+
+const char *GoalZone::getOnScreenName()
+{
+   return "Goal";
+}
+
+
 string GoalZone::toString(F32 gridSize) const
 {
    return string(getClassName()) + " " + itos(mTeam) + " " + geomToString(gridSize);
+}
+
+
+bool GoalZone::didRecentlyChangeTeam()
+{
+   return mFlashCount != 0;
 }
 
 
@@ -181,6 +211,36 @@ bool GoalZone::collide(GameObject *hitObject)
    }
 
    return false;
+}
+
+
+bool GoalZone::isFlashing()
+{
+   return mFlashCount & 1;
+}
+
+
+void GoalZone::setFlashCount(S32 i)
+{
+   mFlashCount = i;
+}
+
+
+S32 GoalZone::getScore()
+{
+   return mScore;
+}
+
+
+//bool GoalZone::hasFlag()
+//{
+//   return mHasFlag;
+//}
+
+
+void GoalZone::setHasFlag(bool hasFlag)
+{
+   mHasFlag = hasFlag;
 }
 
 
@@ -232,6 +292,39 @@ void GoalZone::idle(GameObject::IdleCallPath path)
       mFlashTimer.reset(FlashDelay);
       mFlashCount--;
    }
+}
+
+
+/////
+// Lua Interface
+
+//  Lua constructor
+GoalZone::GoalZone(lua_State *L)
+{
+   // Do nothing
+}
+
+GameObject *GoalZone::getGameObject()
+{
+   return this;
+}
+
+
+S32 GoalZone::hasFlag(lua_State *L)
+{
+   return returnBool(L, mHasFlag);
+}
+
+
+S32 GoalZone::getClassID(lua_State *L)
+{
+   return returnInt(L, GoalZoneTypeNumber);
+}
+
+
+void GoalZone::push(lua_State *L)
+{
+   Lunar<GoalZone>::push(L, this);
 }
 
 

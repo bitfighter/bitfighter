@@ -69,28 +69,28 @@ public:
 
    LineEditor(U32 maxLength = 256, string value = "");   // Constructor
 
-   U32 length() { return (U32)mLine.length(); }          // Returns line length in chars
+   U32 length();                                // Returns line length in chars
    void addChar(char c);
-   void backspacePressed() { if(length() > 0) mLine.erase(mLine.size() - 1); mMatchIndex = -1; }    // User hit Backspace 
-   void deletePressed() { backspacePressed(); }                                                     // User hit Delete 
-   void handleBackspace(InputCode inputCode);           // Pass KEY_BACKSPACE or KEY_DELETE and it will do the right thing!
-   void clear() { mLine.clear(); mMatchIndex = -1;}     // Clear the string and tab-expansion matchlist
-   char at(U32 pos);                                    // Get char at pos
-   bool isEmpty() { return mLine.empty(); }             // Is string empty
+   void backspacePressed();                     // User hit Backspace
+   void deletePressed();                        // User hit Delete
+   void handleBackspace(InputCode inputCode);   // Pass KEY_BACKSPACE or KEY_DELETE and it will do the right thing!
+   void clear();                                // Clear the string and tab-expansion matchlist
+   char at(U32 pos);                            // Get char at pos
+   bool isEmpty();                              // Is string empty
 
-   void setSecret(bool secret) { mMasked = secret; }
+   void setSecret(bool secret);
 
    LineEditorFilter mFilter;
-   void setFilter(LineEditorFilter filter) { mFilter = filter; }
+   void setFilter(LineEditorFilter filter);
 
-   string getString() const { return mLine; }                              // Return the string in string format
-   const string *getStringPtr() const { return &mLine; }
-   string getDisplayString() const { return mMasked ? string(mLine.length(), MASK_CHAR) : mLine; }
+   string getString() const;                    // Return the string in string format
+   const string *getStringPtr() const;
+   string getDisplayString() const;
 
-   void setString(const string &str) { mLine.assign(str.substr(0, mMaxLen)); }    // Set the string
-   void setPrompt(const string &prompt) { mPrompt = prompt; }
-   string getPrompt() { return mPrompt; }
-   const char *c_str() { return mLine.c_str(); }                           // Return the string in c_str format
+   void setString(const string &str);           // Set the string
+   void setPrompt(const string &prompt);
+   string getPrompt();
+   const char *c_str();                         // Return the string in c_str format
 
    void drawCursor(S32 x, S32 y, S32 fontSize);                             // Draw our cursor, assuming string is drawn at x,y
    void drawCursorAngle(F32 x, F32 y, F32 fontSize, F32 angle);             // Draw our cursor, assuming string is drawn at x,y at specified angle
@@ -101,10 +101,10 @@ public:
    // For tab expansion 
    void completePartial(const Vector<string> *candidates, const string &partial, size_t replacePos, const string &appender);
 
-   S32 getMaxLen() { return mMaxLen; }
+   S32 getMaxLen();
 
    // LineEditors are equal if their values are equal
-   bool operator==(LineEditor &lineEditor) const { return mLine == lineEditor.getString(); }
+   bool operator==(LineEditor &lineEditor) const;
 
 };
 

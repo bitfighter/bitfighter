@@ -46,9 +46,201 @@ Lunar<LuaPlayerInfo>::RegType LuaPlayerInfo::methods[] =
 };
 
 
+// Constructor
+LuaPlayerInfo::LuaPlayerInfo()
+{
+   defunct = false;
+}
+
+// Lua constructor
+LuaPlayerInfo::LuaPlayerInfo(lua_State *L)
+{
+   // Do nothing
+}
+
+
+S32 LuaPlayerInfo::getName(lua_State *L)
+{
+   TNLAssert(false, "Unimplemented method!");
+   return 0;
+}
+
+
+S32 LuaPlayerInfo::getShip(lua_State *L)
+{
+   TNLAssert(false, "Unimplemented method!");
+   return 0;
+}
+
+
+S32 LuaPlayerInfo::getTeamIndx(lua_State *L)
+{
+   TNLAssert(false, "Unimplemented method!");
+   return 0;
+}
+
+
+S32 LuaPlayerInfo::getRating(lua_State *L)
+{
+   TNLAssert(false, "Unimplemented method!");
+   return 0;
+}
+
+
+S32 LuaPlayerInfo::getScore(lua_State *L)
+{
+   TNLAssert(false, "Unimplemented method!");
+   return 0;
+}
+
+
+S32 LuaPlayerInfo::isRobot(lua_State *L)
+{
+   TNLAssert(false, "Unimplemented method!");
+   return 0;
+}
+
+
+S32 LuaPlayerInfo::getScriptName(lua_State *L)
+{
+   TNLAssert(false, "Unimplemented method!");
+   return 0;
+}
+
+
+void LuaPlayerInfo::setDefunct()
+{
+   defunct = true;
+}
+
+
+bool LuaPlayerInfo::isDefunct()
+{
+   return defunct;
+}
+
+
+void LuaPlayerInfo::push(lua_State *L)
+{
+   // false ==> We do not want Lunar to try and delete the C++ object when Lua is done with it
+   Lunar<LuaPlayerInfo>::push(L, this, false);
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// C++ Constructor
+PlayerInfo::PlayerInfo(ClientInfo *clientInfo)
+{
+   mClientInfo = clientInfo;
+}
+
+// Destuctor
+PlayerInfo::~PlayerInfo()
+{
+   // Do nothing
+}
+
+
+S32 PlayerInfo::getName(lua_State *L)
+{
+   return returnString(L, mClientInfo->getName().getString());
+}
+
+
+S32 PlayerInfo::getScriptName(lua_State *L)
+{
+   return returnNil(L);
+}
+
+
+S32 PlayerInfo::getTeamIndx(lua_State *L)
+{
+   // Lua indexes are 1-based
+   return returnInt(L, mClientInfo->getTeamIndex() + 1);
+}
+
+
+S32 PlayerInfo::getRating(lua_State *L)
+{
+   return returnFloat(L, mClientInfo->getRating());
+}
+
+
+S32 PlayerInfo::getScore(lua_State *L)
+{
+   return returnInt(L, mClientInfo->getScore());
+}
+
+
+S32 PlayerInfo::isRobot(lua_State *L)
+{
+   return returnBool(L, false);
+}
+
+
 S32 PlayerInfo::getShip(lua_State *L)
 {
 	return isDefunct() ? returnNil(L) : returnShip(L, dynamic_cast<Ship *>(mClientInfo->getConnection()->getControlObject()));
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// C++ Constructor
+RobotPlayerInfo::RobotPlayerInfo(Robot *robot)
+{
+   mRobot = robot;
+}
+
+
+RobotPlayerInfo::~RobotPlayerInfo()
+{
+   // Do nothing
+}
+
+
+S32 RobotPlayerInfo::getName(lua_State *L)
+{
+   return returnString(L, mRobot->getName().getString());
+}
+
+
+S32 RobotPlayerInfo::getShip(lua_State *L)
+{
+   return isDefunct() ? returnNil(L) : returnShip(L, mRobot);
+}
+
+
+S32 RobotPlayerInfo::getScriptName(lua_State *L)
+{
+   return returnString(L, mRobot->getScriptName());
+}
+
+
+S32 RobotPlayerInfo::getTeamIndx(lua_State *L)
+{
+   return returnInt(L, mRobot->getTeam() + 1);
+}
+
+
+S32 RobotPlayerInfo::getRating(lua_State *L)
+{
+   return returnFloat(L, mRobot->getRating());
+}
+
+
+S32 RobotPlayerInfo::getScore(lua_State *L)
+{
+   return returnInt(L, mRobot->getScore());
+}
+
+
+S32 RobotPlayerInfo::isRobot(lua_State *L)
+{
+   return returnBool(L, true);
 }
 
 

@@ -123,6 +123,30 @@ bool LoadoutZone::processArguments(S32 argc2, const char **argv2, Game *game)
 }
 
 
+const char *LoadoutZone::getEditorHelpString()
+{
+   return "Area to finalize ship modifications.  Each team should have at least one.";
+}
+
+
+const char *LoadoutZone::getPrettyNamePlural()
+{
+   return "Loadout Zones";
+}
+
+
+const char *LoadoutZone::getOnDockName()
+{
+   return "Loadout";
+}
+
+
+const char *LoadoutZone::getOnScreenName()
+{
+   return "Loadout";
+}
+
+
 string LoadoutZone::toString(F32 gridSize) const
 {
    return string(getClassName()) + " " + itos(mTeam) + " " + geomToString(gridSize);
@@ -171,6 +195,36 @@ void LoadoutZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    readThisTeam(stream);
    unpackGeom(connection, stream);
+}
+
+
+
+/////
+// Lua interface
+
+
+//  Lua constructor
+LoadoutZone::LoadoutZone(lua_State *L)
+{
+   // Do nothing
+}
+
+
+GameObject *LoadoutZone::getGameObject()
+{
+   return this;
+}
+
+
+S32 LoadoutZone::getClassID(lua_State *L)
+{
+   return returnInt(L, LoadoutZoneTypeNumber);
+}
+
+
+void LoadoutZone::push(lua_State *L)
+{
+   Lunar<LoadoutZone>::push(L, this);
 }
 
 

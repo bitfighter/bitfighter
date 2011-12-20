@@ -98,7 +98,7 @@ IniSettings::IniSettings()
    maxFPS = 100;                      // Max FPS on client/non-dedicated server
 
    inputMode = InputModeKeyboard;     // Joystick or Keyboard
-	masterAddress = MASTER_SERVER_LIST_ADDRESS;   // Default address of our master server
+   masterAddress = MASTER_SERVER_LIST_ADDRESS;   // Default address of our master server
    name = "";                         // Player name (none by default)
    defaultName = "ChumpChange";       // Name used if user hits <enter> on name entry screen
    lastName = "ChumpChange";          // Name the user entered last time they ran the game
@@ -138,8 +138,12 @@ IniSettings::IniSettings()
    winYPos = 100;
    winSizeFact = 1.0;
 
-   // Use fake fullscreen
+   // Use fake fullscreen, except on Mac
+#ifdef TNL_OS_MAC_OSX
+   useFakeFullscreen = false;
+#else
    useFakeFullscreen = true;
+#endif
 
    burstGraphicsMode = 1;
    neverConnectDirect = false;

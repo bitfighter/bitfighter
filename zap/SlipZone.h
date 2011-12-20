@@ -56,10 +56,10 @@ public:
 
    /////
    // Editor methods
-   const char *getEditorHelpString() { return "Areas of higher than normal inertia."; }
-   const char *getPrettyNamePlural() { return "Inertia zones"; }
-   const char *getOnDockName() { return "Inertia"; }
-   const char *getOnScreenName() { return "Inertia"; }
+   const char *getEditorHelpString();
+   const char *getPrettyNamePlural();
+   const char *getOnDockName();
+   const char *getOnScreenName();
    string toString(F32 gridSize) const;
 
    void renderEditor(F32 currentScale);
@@ -67,7 +67,7 @@ public:
 
    /////
    // Future home for Lua methods
-   GameObject *getGameObject() { return this; }   // Return the underlying GameObject
+   GameObject *getGameObject();   // Return the underlying GameObject
 
    TNL_DECLARE_CLASS(SlipZone);
 };

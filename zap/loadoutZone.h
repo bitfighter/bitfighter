@@ -56,10 +56,10 @@ public:
 
    /////
    // Editor methods
-   const char *getEditorHelpString() { return "Area to finalize ship modifications.  Each team should have at least one."; }
-   const char *getPrettyNamePlural() { return "Loadout Zones"; }
-   const char *getOnDockName() { return "Loadout"; }
-   const char *getOnScreenName() { return "Loadout"; }
+   const char *getEditorHelpString();
+   const char *getPrettyNamePlural();
+   const char *getOnDockName();
+   const char *getOnScreenName();
    string toString(F32 gridSize) const;
 
    void renderEditor(F32 currentScale);
@@ -67,18 +67,17 @@ public:
 
    /////
    // Lua interface
-
-   LoadoutZone(lua_State *L) { /* Do nothing */ };    //  Lua constructor
-   GameObject *getGameObject() { return this; }          // Return the underlying GameObject
+   LoadoutZone(lua_State *L);      // Lua constructor
+   GameObject *getGameObject();    // Return the underlying GameObject
 
    static const char className[];                        // Class name as it appears to Lua scripts
    static Lunar<LoadoutZone>::RegType methods[];
 
-   S32 getClassID(lua_State *L) { return returnInt(L, LoadoutZoneTypeNumber); }
+   S32 getClassID(lua_State *L);
 
    TNL_DECLARE_CLASS(LoadoutZone);
 private:
-   void push(lua_State *L) {  Lunar<LoadoutZone>::push(L, this); }
+   void push(lua_State *L);
 };
 
 };

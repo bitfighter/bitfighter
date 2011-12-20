@@ -61,6 +61,106 @@ Lunar<LuaProjectile>::RegType LuaProjectile::methods[] =
    {0,0}    // End method list
 };
 
+
+//  C++ constructor
+LuaProjectile::LuaProjectile()
+{
+   // Do not use
+}
+
+//  Lua constructor
+LuaProjectile::LuaProjectile(lua_State *L)
+{
+   // Do not use
+}
+
+
+const char *LuaProjectile::getClassName() const
+{
+   return "LuaProjectile";
+}
+
+
+S32 LuaProjectile::getWeapon(lua_State *L)
+{
+   TNLAssert(false, "Unimplemented method!");
+   return 0;
+}
+
+//============================
+// LuaItem interface
+
+S32 LuaProjectile::getClassID(lua_State *L)
+{
+   return returnInt(L, BulletTypeNumber);
+}
+
+
+S32 LuaProjectile::getLoc(lua_State *L)
+{
+   TNLAssert(false, "Unimplemented method!");
+   return 0;
+}
+
+
+S32 LuaProjectile::getRad(lua_State *L)
+{
+   TNLAssert(false, "Unimplemented method!");
+   return 0;
+}
+
+
+S32 LuaProjectile::getVel(lua_State *L)
+{
+   TNLAssert(false, "Unimplemented method!");
+   return 0;
+}
+
+
+S32 LuaProjectile::getTeamIndx(lua_State *L)
+{
+   TNLAssert(false, "Unimplemented method!");
+   return 0;
+}
+
+
+GameObject *LuaProjectile::getGameObject()
+{
+   TNLAssert(false, "Unimplemented method!");
+   return NULL;
+}
+
+
+void LuaProjectile::push(lua_State *L)
+{
+   TNLAssert(false, "Unimplemented method!");
+}
+
+
+/////////////////////////////////////
+/////////////////////////////////////
+
+
+ProjectileInfo::ProjectileInfo(Color _sparkColor1, Color _sparkColor2, Color _sparkColor3,
+      Color _sparkColor4, Color _projColor1, Color _projColor2, F32 _scaleFactor,
+      SFXProfiles _projectileSound, SFXProfiles _impactSound )
+{
+   sparkColors[0] = _sparkColor1;
+   sparkColors[1] = _sparkColor2;
+   sparkColors[2] = _sparkColor3;
+   sparkColors[3] = _sparkColor4;
+   projColors[0] = _projColor1;
+   projColors[1] = _projColor2;
+   scaleFactor = _scaleFactor;
+   projectileSound = _projectileSound;
+   impactSound = _impactSound;
+}
+
+
+/////////////////////////////////////
+/////////////////////////////////////
+
+
 //===========================================
 
 TNL_IMPLEMENT_NETOBJECT(Projectile);
@@ -400,6 +500,37 @@ void Projectile::explode(GameObject *hitObject, Point pos)
 }
 
 
+Point Projectile::getRenderVel() const
+{
+   return mVelocity;
+}
+
+
+Point Projectile::getActualVel() const
+{
+   return mVelocity;
+}
+
+
+Point Projectile::getRenderPos() const
+{
+   return mPos;
+}
+
+
+Point Projectile::getActualPos() const
+{
+   return mPos;
+}
+
+
+// TODO: Get rid of this! (currently won't render without it)
+void Projectile::render()
+{
+   renderItem(getActualPos());
+}
+
+
 void Projectile::renderItem(const Point &pos)
 {
    if(collided || !alive)
@@ -411,12 +542,47 @@ void Projectile::renderItem(const Point &pos)
 
 //// Lua methods
 
-S32 Projectile::getLoc(lua_State *L) { return returnPoint(L, getActualPos()); }     // Center of item (returns point)
-S32 Projectile::getRad(lua_State *L) { return returnInt(L, 10); }                   // TODO: Wrong!!  Radius of item (returns number)
-S32 Projectile::getVel(lua_State *L) { return returnPoint(L, getActualVel()); }     // Speed of item (returns point)
-S32 Projectile::getTeamIndx(lua_State *L) { return returnInt(L, mShooter->getTeam()); }   // Team of shooter
+S32 Projectile::getLoc(lua_State *L)
+{
+   return returnPoint(L, getActualPos());
+}
 
-GameObject *Projectile::getGameObject() { return this; }                            // Return the underlying GameObject
+
+S32 Projectile::getRad(lua_State *L)
+{
+   // TODO: Wrong!!  Radius of item (returns number)
+   return returnInt(L, 10);
+}
+
+
+S32 Projectile::getVel(lua_State *L)
+{
+   return returnPoint(L, getActualVel());
+}
+
+
+S32 Projectile::getTeamIndx(lua_State *L)
+{
+   return returnInt(L, mShooter->getTeam());
+}
+
+
+GameObject *Projectile::getGameObject()
+{
+   return this;
+}
+
+
+S32 Projectile::getWeapon(lua_State *L)
+{
+   return returnInt(L, mWeaponType);
+}
+
+
+void Projectile::push(lua_State *L)
+{
+   Lunar<LuaProjectile>::push(L, this);
+}
 
 
 //-----------------------------------------------------------------------------
@@ -585,6 +751,12 @@ void GrenadeProjectile::explode(Point pos, WeaponType weaponType)
 }
 
 
+bool GrenadeProjectile::collide(GameObject *otherObj)
+{
+   return true;
+}
+
+
 void GrenadeProjectile::renderItem(const Point &pos)
 {
    if(exploded)
@@ -602,6 +774,57 @@ void GrenadeProjectile::renderItem(const Point &pos)
    WeaponInfo *wi = gWeapons + WeaponBurst;
    F32 initTTL = (F32) wi->projLiveTime;
    renderGrenade( pos, (initTTL - (F32) (getGame()->getCurrentTime() - getCreationTime())) / initTTL, getGame()->getSettings()->getIniSettings()->burstGraphicsMode );
+}
+
+
+///// Lua interface
+
+//  Lua constructor
+GrenadeProjectile::GrenadeProjectile(lua_State *L)
+{
+   // Do not use
+}
+
+
+S32 GrenadeProjectile::getLoc(lua_State *L)
+{
+   return Parent::getLoc(L);
+}
+
+
+S32 GrenadeProjectile::getRad(lua_State *L)
+{
+   return Parent::getRad(L);
+}
+
+
+S32 GrenadeProjectile::getVel(lua_State *L)
+{
+   return Parent::getVel(L);
+}
+
+
+S32 GrenadeProjectile::getTeamIndx(lua_State *L)
+{
+   return returnInt(L, mTeam + 1);
+}
+
+
+GameObject *GrenadeProjectile::getGameObject()
+{
+   return this;
+}
+
+
+S32 GrenadeProjectile::getWeapon(lua_State *L)
+{
+   return returnInt(L, WeaponBurst);
+}
+
+
+void GrenadeProjectile::push(lua_State *L)
+{
+   Lunar<LuaProjectile>::push(L, this);
 }
 
 
@@ -833,6 +1056,48 @@ void Mine::renderDock()
 }
 
 
+const char *Mine::getEditorHelpString()
+{
+   return "Mines can be prepositioned, and are are \"hostile to all\". [M]";
+}
+
+
+const char *Mine::getPrettyNamePlural()
+{
+   return "Mines";
+}
+
+
+const char *Mine::getOnDockName()
+{
+   return "Mine";
+}
+
+
+const char *Mine::getOnScreenName()
+{
+   return "Mine";
+}
+
+
+bool Mine::hasTeam()
+{
+   return false;
+}
+
+
+bool Mine::canBeHostile()
+{
+   return false;
+}
+
+
+bool Mine::canBeNeutral()
+{
+   return false;
+}
+
+
 // Lua methods
 const char Mine::className[] = "MineItem";      // Class name as it appears to Lua scripts
 
@@ -850,6 +1115,53 @@ Lunar<Mine>::RegType Mine::methods[] =
 
    {0,0}    // End method list
 };
+
+//  Lua constructor
+Mine::Mine(lua_State *L)
+{
+   // Do not use
+}
+
+S32 Mine::getClassID(lua_State *L)
+{
+   return returnInt(L, MineTypeNumber);
+}
+
+
+S32 Mine::getLoc(lua_State *L)
+{
+   return Parent::getLoc(L);
+}
+
+
+S32 Mine::getRad(lua_State *L)
+{
+   return Parent::getRad(L);
+}
+
+
+S32 Mine::getVel(lua_State *L)
+{
+   return Parent::getVel(L);
+}
+
+
+GameObject *Mine::getGameObject()
+{
+   return this;
+}
+
+
+S32 Mine::getWeapon(lua_State *L)
+{
+   return returnInt(L, WeaponMine);
+}
+
+
+void Mine::push(lua_State *L)
+{
+   Lunar<LuaProjectile>::push(L, this);
+}
 
 //////////////////////////////////
 //////////////////////////////////
@@ -1041,6 +1353,47 @@ void SpyBug::renderDock()
 }
 
 
+const char *SpyBug::getEditorHelpString()
+{
+   return "Remote monitoring device that shows enemy ships on the commander's map. [Ctrl-B]";
+}
+
+
+const char *SpyBug::getPrettyNamePlural()
+{
+   return "Spy Bugs";
+}
+
+
+const char *SpyBug::getOnDockName()
+{
+   return "Bug";
+}
+
+
+const char *SpyBug::getOnScreenName()
+{
+   return "Spy Bug";
+}
+
+
+bool SpyBug::hasTeam()
+{
+   return true;
+}
+
+
+bool SpyBug::canBeHostile()
+{
+   return false;
+}
+
+
+bool SpyBug::canBeNeutral()
+{
+   return true;
+}
+
 
 // Can the player see the spybug?
 bool SpyBug::isVisibleToPlayer(S32 playerTeam, StringTableEntry playerName, bool isTeamGame)
@@ -1069,6 +1422,53 @@ Lunar<SpyBug>::RegType SpyBug::methods[] =
    {0,0}    // End method list
 };
 
+
+//  Lua constructor
+SpyBug::SpyBug(lua_State *L)
+{
+   // Do not use
+}
+
+S32 SpyBug::getClassID(lua_State *L)
+{
+   return returnInt(L, SpyBugTypeNumber);
+}
+
+
+S32 SpyBug::getLoc(lua_State *L)
+{
+   return Parent::getLoc(L);
+}
+
+
+S32 SpyBug::getRad(lua_State *L)
+{
+   return Parent::getRad(L);
+}
+
+
+S32 SpyBug::getVel(lua_State *L)
+{
+   return Parent::getVel(L);
+}
+
+
+GameObject *SpyBug::getGameObject()
+{
+   return this;
+}
+
+
+S32 SpyBug::getWeapon(lua_State *L)
+{
+   return returnInt(L, WeaponSpyBug);
+}
+
+
+void SpyBug::push(lua_State *L)
+{
+   Lunar<LuaProjectile>::push(L, this);
+}
 
 
 };

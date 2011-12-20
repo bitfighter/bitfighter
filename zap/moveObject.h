@@ -72,18 +72,18 @@ public:
    void updateInterpolation();
    void updateExtentInDatabase();
 
-   bool isMoveObject() { return true; }
+   bool isMoveObject();
 
-   Point getRenderPos() const { return mMoveState[RenderState].pos; }
-   Point getActualPos() const { return mMoveState[ActualState].pos; }
-   Point getRenderVel() const { return mMoveState[RenderState].vel; }
-   Point getActualVel() const { return mMoveState[ActualState].vel; }
+   Point getRenderPos() const;
+   Point getActualPos() const;
+   Point getRenderVel() const;
+   Point getActualVel() const;
 
    virtual void setActualPos(const Point &pos);
    virtual void setActualVel(const Point &vel);
 
-   F32 getMass() { return mMass; }
-   void setMass(F32 mass) { mMass = mass; }
+   F32 getMass();
+   void setMass(F32 mass);
 
    virtual void playCollisionSound(U32 stateIndex, MoveObject *moveObjectThatWasHit, F32 velocity);
 
@@ -91,7 +91,7 @@ public:
    bool collide(GameObject *otherObject);
 
    // CollideTypes is used to improve speed on findFirstCollision
-   virtual TestFunc collideTypes() { return (TestFunc)isAnyObjectType; }
+   virtual TestFunc collideTypes();
 
    GameObject *findFirstCollision(U32 stateIndex, F32 &collisionTime, Point &collisionPoint);
    void computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *objHit);
@@ -105,7 +105,7 @@ public:
    virtual void onGeomChanged();
 
    // LuaItem interface
-   virtual S32 getVel(lua_State *L) { return LuaObject::returnPoint(L, getActualVel()); }
+   virtual S32 getVel(lua_State *L);
 
 };
 
@@ -152,16 +152,16 @@ public:
    void setActualPos(const Point &p);
    void setActualVel(const Point &vel);
 
-   U16 getItemId() { return mItemId; }
+   U16 getItemId();
 
    virtual void mountToShip(Ship *theShip);
-   void setMountedMask() { setMaskBits(MountMask); }
-   void setPositionMask() { setMaskBits(PositionMask); }
+   void setMountedMask();
+   void setPositionMask();
 
-   bool isMounted() { return mIsMounted; }
-   virtual bool isItemThatMakesYouVisibleWhileCloaked() { return true; }      // NexusFlagItem overrides to false
+   bool isMounted();
+   virtual bool isItemThatMakesYouVisibleWhileCloaked();      // NexusFlagItem overrides to false
 
-   void setCollideable(bool isCollideable) { mIsCollideable = isCollideable; }
+   void setCollideable(bool isCollideable);
 
    Ship *getMount();
    void dismount();
@@ -174,10 +174,10 @@ public:
 
    bool collide(GameObject *otherObject);
 
-   GameObject *getGameObject() { return this; }
+   GameObject *getGameObject();
 
    // LuaItem interface
-   virtual S32 isOnShip(lua_State *L) { return returnBool(L, mIsMounted); }                // Is flag being carried by a ship?
+   virtual S32 isOnShip(lua_State *L);                 // Is flag being carried by a ship?
    virtual S32 getShip(lua_State *L);
 
 };
@@ -222,7 +222,7 @@ public:
    void setPosAng(Point pos, F32 ang);
 
    // Asteroid does not collide to another asteroid
-   TestFunc collideTypes() { return (TestFunc)isAsteroidCollideableType; }
+   TestFunc collideTypes();
 
    void damageObject(DamageInfo *theInfo);
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
@@ -245,17 +245,17 @@ public:
 #endif
 
 
-   static U32 getDesignCount() { return AsteroidDesigns; }
+   static U32 getDesignCount();
 
    TNL_DECLARE_CLASS(Asteroid);
 
    ///// Editor methods
-   const char *getEditorHelpString() { return "Shootable asteroid object.  Just like the arcade game."; }
-   const char *getPrettyNamePlural() { return "Asteroids"; }
-   const char *getOnDockName() { return "Ast."; }
-   const char *getOnScreenName() { return "Asteroid"; }
+   const char *getEditorHelpString();
+   const char *getPrettyNamePlural();
+   const char *getOnDockName();
+   const char *getOnScreenName();
 
-      //virtual S32 getDockRadius() { return 11; }
+   //virtual S32 getDockRadius();
    F32 getEditorRadius(F32 currentScale);
    void renderDock();
 
@@ -268,11 +268,11 @@ public:
 
    static Lunar<Asteroid>::RegType methods[];
 
-   S32 getClassID(lua_State *L) { return returnInt(L, AsteroidTypeNumber); }
+   S32 getClassID(lua_State *L);
 
    S32 getSize(lua_State *L);        // Index of current asteroid size (0 = initial size, 1 = next smaller, 2 = ...) (returns int)
    S32 getSizeCount(lua_State *L);   // Number of indexes of size we can have (returns int)
-   void push(lua_State *L) {  Lunar<Asteroid>::push(L, this); }
+   void push(lua_State *L);
 };
 
 
@@ -305,17 +305,17 @@ public:
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
    void onItemExploded(Point pos);
 
-   void playCollisionSound(U32 stateIndex, MoveObject *moveObjectThatWasHit, F32 velocity) { /* Do nothing */ }
+   void playCollisionSound(U32 stateIndex, MoveObject *moveObjectThatWasHit, F32 velocity);
 
-   static U32 getDesignCount() { return AsteroidDesigns; }
+   static U32 getDesignCount();
 
    TNL_DECLARE_CLASS(Circle);
 
    ///// Editor methods
-   const char *getEditorHelpString() { return "Shootable circle object.  Scary."; }
-   const char *getPrettyNamePlural() { return "Circles"; }
-   const char *getOnDockName() { return "Circ."; }
-   const char *getOnScreenName() { return "Circle"; }
+   const char *getEditorHelpString();
+   const char *getPrettyNamePlural();
+   const char *getOnDockName();
+   const char *getOnScreenName();
 
    F32 getEditorRadius(F32 currentScale);
    void renderDock();
@@ -329,9 +329,9 @@ public:
 
    static Lunar<Circle>::RegType methods[];
 
-   S32 getClassID(lua_State *L) { return returnInt(L, CircleTypeNumber); }
+   S32 getClassID(lua_State *L);
 
-   void push(lua_State *L) {  Lunar<Circle>::push(L, this); }
+   void push(lua_State *L);
 };
 
 
@@ -358,7 +358,7 @@ public:
    bool getCollisionCircle(U32 state, Point &center, F32 &radius) const;
    bool collide(GameObject *otherObject);
    void setPosAng(Point pos, F32 ang);
-   void setNextAng(F32 nextAng) { mNextAng = nextAng; }
+   void setNextAng(F32 nextAng);
 
    void damageObject(DamageInfo *theInfo);
    void idle(GameObject::IdleCallPath path);
@@ -390,10 +390,10 @@ public:
    TNL_DECLARE_CLASS(TestItem);
 
    ///// Editor methods
-   const char *getEditorHelpString() { return "Bouncy object that floats around and gets in the way."; }
-   const char *getPrettyNamePlural() { return "TestItems"; }
-   const char *getOnDockName() { return "Test"; }
-   const char *getOnScreenName() { return "TestItem"; }
+   const char *getEditorHelpString();
+   const char *getPrettyNamePlural();
+   const char *getOnDockName();
+   const char *getOnScreenName();
 
    F32 getEditorRadius(F32 currentScale);
    void renderDock();
@@ -406,8 +406,8 @@ public:
 
    static Lunar<TestItem>::RegType methods[];
 
-   S32 getClassID(lua_State *L) { return returnInt(L, TestItemTypeNumber); }
-   void push(lua_State *L) {  Lunar<TestItem>::push(L, this); }
+   S32 getClassID(lua_State *L);
+   void push(lua_State *L);
 };
 
 
@@ -432,10 +432,10 @@ public:
    TNL_DECLARE_CLASS(ResourceItem);
 
    ///// Editor methods
-   const char *getEditorHelpString() { return "Small bouncy object; capture one to activate Engineer module"; }
-   const char *getPrettyNamePlural() { return "Resource Items"; }
-   const char *getOnDockName() { return "Res."; }
-   const char *getOnScreenName() { return "ResourceItem"; }
+   const char *getEditorHelpString();
+   const char *getPrettyNamePlural();
+   const char *getOnDockName();
+   const char *getOnScreenName();
 
    void renderDock();
 
@@ -447,8 +447,8 @@ public:
 
    static Lunar<ResourceItem>::RegType methods[];
 
-   S32 getClassID(lua_State *L) { return returnInt(L, ResourceItemTypeNumber); }
-   void push(lua_State *L) {  Lunar<ResourceItem>::push(L, this); }
+   S32 getClassID(lua_State *L);
+   void push(lua_State *L);
 
 };
 

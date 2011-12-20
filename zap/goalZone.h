@@ -66,7 +66,7 @@ public:
    void idle(GameObject::IdleCallPath path);
    void render();
 
-   bool didRecentlyChangeTeam() { return mFlashCount != 0; }
+   bool didRecentlyChangeTeam();
    S32 getRenderSortValue();
 
    void setTeam(S32 team);
@@ -74,21 +74,21 @@ public:
    bool getCollisionPoly(Vector<Point> &polyPoints) const;
    bool collide(GameObject *hitObject);
    
-   bool isFlashing() { return mFlashCount & 1; }
-   void setFlashCount(S32 i) { mFlashCount = i; }
+   bool isFlashing();
+   void setFlashCount(S32 i);
 
-   S32 getScore() { return mScore; }
-   //bool hasFlag() { return mHasFlag; }
-   void setHasFlag(bool hasFlag) { mHasFlag = hasFlag; }
+   S32 getScore();
+   //bool hasFlag();
+   void setHasFlag(bool hasFlag);
    
    TNL_DECLARE_CLASS(GoalZone);
 
    /////
    // Editor methods
-   const char *getEditorHelpString() { return "Target area used in a variety of games."; }
-   const char *getPrettyNamePlural() { return "Goal Zones"; }
-   const char *getOnDockName() { return "Goal"; }
-   const char *getOnScreenName() { return "Goal"; }
+   const char *getEditorHelpString();
+   const char *getPrettyNamePlural();
+   const char *getOnDockName();
+   const char *getOnScreenName();
    string toString(F32 gridSize) const;
 
    void renderEditor(F32 currentScale);
@@ -96,17 +96,17 @@ public:
 
    /////
    // Lua Interface
-   GoalZone(lua_State *L) { /* Do nothing */ };   //  Lua constructor
+   GoalZone(lua_State *L);   //  Lua constructor
 
    static const char className[];                 // Class name as it appears to Lua scripts
    static Lunar<GoalZone>::RegType methods[];
 
-   GameObject *getGameObject() { return this; }   // Return the underlying GameObject
-   S32 hasFlag(lua_State *L) { return returnBool(L, mHasFlag); }
-   S32 getClassID(lua_State *L) { return returnInt(L, GoalZoneTypeNumber); }
+   GameObject *getGameObject();   // Return the underlying GameObject
+   S32 hasFlag(lua_State *L);
+   S32 getClassID(lua_State *L);
 
 //private:
-  void push(lua_State *L) {  Lunar<GoalZone>::push(L, this); }
+  void push(lua_State *L);
 };
 
 

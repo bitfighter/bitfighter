@@ -65,21 +65,21 @@ public:
 
    void initialize();
 
-   U8 getObjectTypeNumber() { return mObjectTypeNumber; }
-   void setObjectTypeNumber(U8 objectTypeNumber) { mObjectTypeNumber = objectTypeNumber; }
+   U8 getObjectTypeNumber();
+   void setObjectTypeNumber(U8 objectTypeNumber);
 
-   GridDatabase *getDatabase() { return mDatabase; }     // Returns the database in which this object is stored, NULL if not in any database
-   void setDatabase(GridDatabase *database) { mDatabase = database; }
+   GridDatabase *getDatabase();     // Returns the database in which this object is stored, NULL if not in any database
+   void setDatabase(GridDatabase *database);
 
-   Rect getExtent() const { return mExtent; }
+   Rect getExtent() const;
    void setExtent(const Rect &extentRect);
 
    virtual bool getCollisionPoly(Vector<Point> &polyPoints) const = 0;
    virtual bool getCollisionCircle(U32 stateIndex, Point &point, float &radius) const = 0;
 
-   virtual bool isCollisionEnabled() { return true; }
+   virtual bool isCollisionEnabled();
 
-   bool isInDatabase() { return mDatabase != NULL; }
+   bool isInDatabase();
    bool isDeleted();
 
    void addToDatabase(GridDatabase *database);
@@ -87,7 +87,7 @@ public:
 
    void removeFromDatabase();
 
-   virtual bool isDatabasable() { return true; }      // Can this item actually be inserted into a database?
+   virtual bool isDatabasable();    // Can this item actually be inserted into a database?
 };
 
 ////////////////////////////////////////
@@ -149,8 +149,8 @@ public:
    virtual void removeFromDatabase(DatabaseObject *theObject, const Rect &extents);
    virtual void removeEverythingFromDatabase();
 
-   S32 getObjectCount() { return mAllObjects.size(); }      // Return the number of objects currently in the database
-   DatabaseObject *getObjectByIndex(S32 index);             // Kind of hacky, kind of useful
+   S32 getObjectCount();                          // Return the number of objects currently in the database
+   DatabaseObject *getObjectByIndex(S32 index);   // Kind of hacky, kind of useful
 };
 
 

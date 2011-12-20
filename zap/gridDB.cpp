@@ -470,6 +470,12 @@ bool GridDatabase::pointCanSeePoint(const Point &point1, const Point &point2)
 }
 
 
+S32 GridDatabase::getObjectCount()
+{
+   return mAllObjects.size();
+}
+
+
 // Kind of hacky, kind of useful.  Only used by BotZones, and ony works because all zones are added at one time, the list does not change,
 // and the index of the bot zones is stored as an ID by the zone.  If we added and removed zones from our list, this would probably not
 // be a reliable way to access a specific item.  We could probably phase this out by passing pointers to zones rather than indices.
@@ -508,6 +514,12 @@ void DatabaseObject::addToDatabase(GridDatabase *database, const Rect &extent)
 }
 
 
+bool DatabaseObject::isInDatabase()
+{
+   return mDatabase != NULL;
+}
+
+
 bool DatabaseObject::isDeleted() 
 {
    return mObjectTypeNumber == DeletedTypeNumber;
@@ -521,6 +533,48 @@ void DatabaseObject::removeFromDatabase()
 
    getDatabase()->removeFromDatabase(this, mExtent);
    mDatabase = NULL;
+}
+
+
+bool DatabaseObject::isDatabasable()
+{
+   return true;
+}
+
+
+bool DatabaseObject::isCollisionEnabled()
+{
+   return true;
+}
+
+
+U8 DatabaseObject::getObjectTypeNumber()
+{
+   return mObjectTypeNumber;
+}
+
+
+void DatabaseObject::setObjectTypeNumber(U8 objectTypeNumber)
+{
+   mObjectTypeNumber = objectTypeNumber;
+}
+
+
+GridDatabase *DatabaseObject::getDatabase()
+{
+   return mDatabase;
+}
+
+
+void DatabaseObject::setDatabase(GridDatabase *database)
+{
+   mDatabase = database;
+}
+
+
+Rect DatabaseObject::getExtent() const
+{
+   return mExtent;
 }
 
 
