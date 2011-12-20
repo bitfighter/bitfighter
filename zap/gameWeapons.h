@@ -66,44 +66,9 @@ enum ProjectileType
 struct WeaponInfo
 {
    WeaponInfo(StringTableEntry _name, U32 _fireDelay, U32 _minEnergy, U32 _drainEnergy, U32 _projVelocity, S32 _projLiveTime, 
-              F32 _damageAmount, F32 _damageSelfMultiplier, bool _canDamageTeammate, ProjectileType _projectileType)
-   {
-      name = _name;
-      fireDelay = _fireDelay;
-      minEnergy = _minEnergy;
-      drainEnergy = _drainEnergy;
-      projVelocity = _projVelocity;
-      projLiveTime = _projLiveTime;
-      damageAmount = _damageAmount;
-      damageSelfMultiplier = _damageSelfMultiplier;
-      canDamageTeammate = _canDamageTeammate;
-      projectileType = _projectileType;
-   }
+              F32 _damageAmount, F32 _damageSelfMultiplier, bool _canDamageTeammate, ProjectileType _projectileType);
 
-   static const char *getWeaponName(WeaponType weaponType)
-   {
-      switch((S32)weaponType)
-      {
-         case WeaponPhaser:
-            return "Phaser";
-         case WeaponBounce:
-            return "Bouncer";
-         case WeaponTriple:
-            return "Triple";
-         case WeaponBurst:
-            return "Burst";
-         case WeaponHeatSeeker:
-            return "Heat Seeker";
-         case WeaponMine:
-            return "Mine";
-         case WeaponTurret:
-            return "Turret";
-         case WeaponSpyBug:
-            return "Spy Bug";
-      }
-      return "INVALID WEAPON!";
-   }
-
+   static const char *getWeaponName(WeaponType weaponType);
 
    StringTableEntry name;     // Display name of the weapon.
    U32 fireDelay;             // Delay between shots.

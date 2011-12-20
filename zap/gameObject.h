@@ -148,7 +148,7 @@ struct DamageInfo
    DamageType damageType;       // see enum above!
    GameObject *damagingObject;  // see class below!
 
-   DamageInfo() { damageSelfMultiplier = 1; }      // Quickie constructor
+   DamageInfo();  // Constructor
 };
 
 ////////////////////////////////////////
@@ -162,24 +162,24 @@ protected:
    S32 mTeam;
 
 public:
-   BfObject();                  // Constructor
-   virtual ~BfObject() { };     // Provide virtual destructor
+   BfObject();              // Constructor
+   virtual ~BfObject();     // Provide virtual destructor
 
-   S32 getTeam() { return mTeam; }
-   void setTeam(S32 team) { mTeam = team; }    
+   S32 getTeam();
+   void setTeam(S32 team);
 
-   Game *getGame() const { return mGame; }
+   Game *getGame() const;
 
    virtual void addToGame(Game *game, GridDatabase *database);
    virtual void removeFromGame();
-   void clearGame() { mGame = NULL; }
+   void clearGame();
 
    // DatabaseObject methods -- provide default implementations
-   virtual bool getCollisionPoly(Vector<Point> &polyPoints) const                     { return false; }
-   virtual bool getCollisionCircle(U32 stateIndex, Point &point, float &radius) const { return false; }
+   virtual bool getCollisionPoly(Vector<Point> &polyPoints) const;
+   virtual bool getCollisionCircle(U32 stateIndex, Point &point, float &radius) const;
 
 
-   virtual bool processArguments(S32 argc, const char**argv, Game *game) { return true; }
+   virtual bool processArguments(S32 argc, const char**argv, Game *game);
 
    // Render is called twice for every object that is in the
    // render list.  By default GameObject will call the render()
@@ -188,7 +188,7 @@ public:
    virtual void render();
    virtual void renderEditorPreview(F32 currentScale);
 
-   virtual void setExtent(const Rect &extent) { DatabaseObject::setExtent(extent); }   // Passthrough
+   virtual void setExtent(const Rect &extent);
    void updateExtentInDatabase();
 
    void readThisTeam(BitStream *stream);
@@ -216,25 +216,25 @@ protected:
    StringTableEntry mKillString;     // Alternate descr of what shot projectile (e.g. "Red turret"), used when shooter is not a ship or robot
 
 public:
-   GameObject();                             // Constructor
-   virtual ~GameObject() { removeFromGame(); }       // Destructor
+   GameObject();                // Constructor
+   virtual ~GameObject();       // Destructor
 
    virtual void addToGame(Game *game, GridDatabase *database);       // BotNavMeshZone has its own addToGame
    virtual void onAddedToGame(Game *game);
 
-   void markAsGhost() { mNetFlags = NetObject::IsGhost; }
+   void markAsGhost();
 
-   virtual bool isMoveObject() { return false; }
+   virtual bool isMoveObject();
 
-   U32 getCreationTime() { return mCreationTime; }
-   void setCreationTime(U32 creationTime) { mCreationTime = creationTime; }
+   U32 getCreationTime();
+   void setCreationTime(U32 creationTime);
 
    void deleteObject(U32 deleteTimeInterval = 0);
    
-   StringTableEntry getKillString() { return mKillString; }
+   StringTableEntry getKillString();
 
-   F32 getRating() { return 0; }    // TODO: Fix this
-   S32 getScore() { return 0; }     // TODO: Fix this
+   F32 getRating();
+   S32 getScore();
 
    enum MaskBits {
       //InitialMask = BIT(0),
@@ -247,10 +247,9 @@ public:
    GameObject *findObjectLOS(U8 typeNumber, U32 stateIndex, Point rayStart, Point rayEnd, float &collisionTime, Point &collisionNormal);
    GameObject *findObjectLOS(TestFunc, U32 stateIndex, Point rayStart, Point rayEnd, float &collisionTime, Point &collisionNormal);
 
-   bool isControlled() { return mControllingClient.isValid(); }
+   bool isControlled();
 
-
-   SafePtr<GameConnection> getControllingClient() { return mControllingClient; }
+   SafePtr<GameConnection> getControllingClient();
    void setControllingClient(GameConnection *c);         // This only gets run on the server
 
    void setOwner(GameConnection *c);
@@ -258,14 +257,14 @@ public:
 
    F32 getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 updateSkips);
 
-   virtual S32 getRenderSortValue() { return 2; }
+   virtual S32 getRenderSortValue();
 
    Rect getBounds(U32 stateIndex) const;
 
-   const Move &getCurrentMove() { return mCurrentMove; }
-   const Move &getLastMove() { return mLastMove; }
-   void setCurrentMove(const Move &theMove) { mCurrentMove = theMove; }
-   void setLastMove(const Move &theMove) { mLastMove = theMove; }
+   const Move &getCurrentMove();
+   const Move &getLastMove();
+   void setCurrentMove(const Move &theMove);
+   void setLastMove(const Move &theMove);
 
    enum IdleCallPath {
       ServerIdleMainLoop,              // Idle called from top-level idle loop on server
@@ -279,8 +278,8 @@ public:
 
    virtual void writeControlState(BitStream *stream);
    virtual void readControlState(BitStream *stream);
-   virtual F32 getHealth() { return 1; }
-   virtual bool isDestroyed() { return false; }
+   virtual F32 getHealth();
+   virtual bool isDestroyed();
 
    virtual void controlMoveReplayComplete();
 
@@ -289,21 +288,21 @@ public:
 
    virtual Point getActualPos() const;
    virtual Point getRenderPos() const;
-   virtual Point getRenderVel() const { return Point(); }
-   virtual Point getActualVel() const { return Point(); }
+   virtual Point getRenderVel() const;
+   virtual Point getActualVel() const;
 
    virtual void setActualPos(Point p);
 
-   virtual bool collide(GameObject *hitObject) { return false; }
+   virtual bool collide(GameObject *hitObject);
 
    S32 radiusDamage(Point pos, S32 innerRad, S32 outerRad, TestFunc objectTypeTest, DamageInfo &info, F32 force = 2000);
    virtual void damageObject(DamageInfo *damageInfo);
 
    void onGhostAddBeforeUpdate(GhostConnection *theConnection);
    bool onGhostAdd(GhostConnection *theConnection);
-   void disableCollision() { TNLAssert(mDisableCollisionCount < 10, "Too many disabled collisions"); mDisableCollisionCount++; }
-   void enableCollision() { TNLAssert(mDisableCollisionCount != 0, "Trying to enable collision, already enabled"); mDisableCollisionCount--; }
-   bool isCollisionEnabled() { return mDisableCollisionCount == 0; }
+   void disableCollision();
+   void enableCollision();
+   bool isCollisionEnabled();
 
    bool collisionPolyPointIntersect(Point point);
    bool collisionPolyPointIntersect(Vector<Point> points);

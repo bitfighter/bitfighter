@@ -192,12 +192,24 @@ static const string *choose(const string &firstChoice, const string &secondChoic
 }
 
 
+string GameSettings::getHostName()
+{
+   return mHostName;
+}
+
+
 void GameSettings::setHostName(const string &hostName, bool updateINI) 
 { 
    mHostName = hostName; 
 
    if(updateINI)
       mIniSettings.hostname = hostName; 
+}
+
+
+string GameSettings::getHostDescr()
+{
+   return mHostDescr;
 }
 
 
@@ -210,6 +222,12 @@ void GameSettings::setHostDescr(const string &hostDescr, bool updateINI)
 }
 
 
+string GameSettings::getServerPassword()
+{
+   return mServerPassword;
+}
+
+
 void GameSettings::setServerPassword(const string &serverPassword, bool updateINI) 
 { 
    mServerPassword = serverPassword; 
@@ -219,12 +237,24 @@ void GameSettings::setServerPassword(const string &serverPassword, bool updateIN
 }
 
 
+string GameSettings::getAdminPassword()
+{
+   return mAdminPassword;
+}
+
+
 void GameSettings::setAdminPassword(const string &adminPassword, bool updateINI) 
 { 
    mAdminPassword = adminPassword; 
 
    if(updateINI)
       mIniSettings.adminPassword = adminPassword; 
+}
+
+
+string GameSettings::getLevelChangePassword()
+{
+   return mLevelChangePassword;
 }
 
 
@@ -261,6 +291,12 @@ bool GameSettings::getSpecified(ParamId paramId)
 }
 
 
+FolderManager *GameSettings::getFolderManager()
+{
+   return &mFolderManager;
+}
+
+
 FolderManager GameSettings::getCmdLineFolderManager()
 {
     return FolderManager( getString(LEVEL_DIR), 
@@ -273,6 +309,12 @@ FolderManager GameSettings::getCmdLineFolderManager()
                           getString(SCREENSHOT_DIR),
                           getString(SCRIPTS_DIR),
                           getString(ROOT_DATA_DIR) );
+}
+
+
+BanList *GameSettings::getBanList()
+{
+   return mBanList;
 }
 
 
@@ -329,6 +371,30 @@ void GameSettings::save()
 }
 
 
+IniSettings *GameSettings::getIniSettings()
+{
+   return &mIniSettings;
+}
+
+
+string GameSettings::getDefaultName()
+{
+   return mIniSettings.defaultName;
+}
+
+
+bool GameSettings::getForceUpdate()
+{
+   return getSpecified(FORCE_UPDATE);
+}
+
+
+string GameSettings::getPlayerName()
+{
+   return mPlayerName;
+}
+
+
 void GameSettings::setPlayerName(const string &name, bool nameSuppliedByUser)
 {
    mPlayerName = name;
@@ -351,6 +417,18 @@ void GameSettings::setPlayerNameAndPassword(const string &name, const string &pa
 
    mIniSettings.lastPassword = password;
    setPlayerName(name, true);                // Writes INI to disk
+}
+
+
+string GameSettings::getPlayerPassword()
+{
+   return mPlayerPassword;
+}
+
+
+bool GameSettings::isDedicatedServer()
+{
+   return getSpecified(DEDICATED);
 }
 
 
@@ -412,6 +490,18 @@ void GameSettings::forgetAdminPassword(const string &serverName)
 S32 QSORT_CALLBACK alphaSort(string *a, string *b)
 {
    return stricmp((a)->c_str(), (b)->c_str());        // Is there something analagous to stricmp for strings (as opposed to c_strs)?
+}
+
+
+Vector<string> *GameSettings::getLevelSkipList()
+{
+   return &mLevelSkipList;
+}
+
+
+Vector<string> *GameSettings::getSpecifiedLevels()
+{
+   return &mCmdLineParams[CmdLineParams::LEVEL_LIST];
 }
 
 
@@ -691,6 +781,12 @@ bool GameSettings::shouldShowNameEntryScreenOnStartup()
 }
 
 
+Vector<string> *GameSettings::getMasterServerList()
+{
+   return &mMasterServerList;
+}
+
+
 void GameSettings::saveMasterAddressListInIniUnlessItCameFromCmdLine()
 {
    // If we got the master from the cmd line, or we only have one address, we have nothing to do
@@ -934,6 +1030,43 @@ void GameSettings::showHelp(GameSettings *settings, const Vector<string> &words)
    \tfloat means a floating point number must be specified (e.g. 3.5)\n");
 
    exitToOs(0);
+}
+
+
+const Color *GameSettings::getWallFillColor()
+{
+   return &mIniSettings.wallFillColor;
+}
+
+
+const Color *GameSettings::getWallOutlineColor()
+{
+   return &mIniSettings.wallOutlineColor;
+}
+
+
+bool GameSettings::getStarsInDistance()
+{
+   return mIniSettings.starsInDistance;
+}
+
+
+bool GameSettings::getEnableExperimentalAimMode()
+{
+   return mIniSettings.enableExperimentalAimMode;
+}
+
+
+// Accessor methods
+U32 GameSettings::getSimulatedStutter()
+{
+   return getU32(SIMULATED_STUTTER);
+}
+
+
+F32 GameSettings::getSimulatedLoss()
+{
+   return getF32(SIMULATED_LOSS);
 }
 
 

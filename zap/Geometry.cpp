@@ -24,6 +24,7 @@
 //------------------------------------------------------------------------------------
 
 #include "Geometry.h"
+#include "Geometry_Base.h"
 #include "GeomUtils.h"              // For polygon triangulation
 
 #include "Rect.h"
@@ -37,6 +38,191 @@ using namespace TNL;
 
 namespace Zap
 {
+
+// Constructor
+Geometry::Geometry()
+{
+   mTriangluationDisabled = false;
+}
+
+
+// Destructor
+Geometry::~Geometry()
+{
+   // Do nothing
+}
+
+
+GeomType Geometry::getGeomType()
+{
+   TNLAssert(false, "Not implemented");
+   return geomNone;
+}
+
+
+Point Geometry::getVert(S32 index) const
+{
+   TNLAssert(false, "Not implemented");
+   return Point();
+}
+
+
+void Geometry::setVert(const Point &pos, S32 index)
+{
+   TNLAssert(false, "Not implemented");
+}
+
+
+S32 Geometry::getVertCount()
+{
+   TNLAssert(false, "Not implemented");
+   return 0;
+}
+
+
+void Geometry::clearVerts()
+{
+   TNLAssert(false, "Not implemented");
+}
+
+
+bool Geometry::addVert(const Point &point, bool ignoreMaxPointsLimit)
+{
+   TNLAssert(false, "Not implemented");
+   return false;
+}
+
+
+bool Geometry::addVertFront(Point vert)
+{
+   TNLAssert(false, "Not implemented");
+   return false;
+}
+
+
+bool Geometry::deleteVert(S32 vertIndex)
+{
+   TNLAssert(false, "Not implemented");
+   return false;
+}
+
+
+bool Geometry::insertVert(Point vertex, S32 vertIndex)
+{
+   TNLAssert(false, "Not implemented");
+   return false;
+}
+
+
+bool Geometry::anyVertsSelected()
+{
+   TNLAssert(false, "Not implemented");
+   return false;
+}
+
+
+void Geometry::selectVert(S32 vertIndex)
+{
+   TNLAssert(false, "Not implemented");
+}
+
+
+void Geometry::aselectVert(S32 vertIndex)
+{
+   TNLAssert(false, "Not implemented");
+}
+
+
+void Geometry::unselectVert(S32 vertIndex)
+{
+   TNLAssert(false, "Not implemented");
+}
+
+
+void Geometry::unselectVerts()
+{
+   TNLAssert(false, "Not implemented");
+}
+
+
+bool Geometry::vertSelected(S32 vertIndex)
+{
+   TNLAssert(false, "Not implemented");
+   return false;
+}
+
+
+const Vector<Point> *Geometry::getOutline() const
+{
+   TNLAssert(false, "Not implemented");
+   return NULL;
+}
+
+
+const Vector<Point> *Geometry::getFill() const
+{
+   TNLAssert(false, "Not implemented");
+   return NULL;
+}
+
+
+Point Geometry::getCentroid()
+{
+   TNLAssert(false, "Not implemented");
+   return Point();
+}
+
+
+F32 Geometry::getLabelAngle()
+{
+   TNLAssert(false, "Not implemented");
+   return 0;
+}
+
+
+void Geometry::packGeom(GhostConnection *connection, BitStream *stream)
+{
+   TNLAssert(false, "Not implemented");
+}
+
+
+void Geometry::unpackGeom(GhostConnection *connection, BitStream *stream)
+{
+   TNLAssert(false, "Not implemented");
+}
+
+
+string Geometry::geomToString(F32 gridSize) const
+{
+   TNLAssert(false, "Not implemented");
+   return string();
+}
+
+
+void Geometry::readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize)
+{
+   TNLAssert(false, "Not implemented");
+}
+
+
+Rect Geometry::calcExtents()
+{
+   TNLAssert(false, "Not implemented");
+   return Rect();
+}
+
+
+void Geometry::onPointsChanged()
+{
+   TNLAssert(false, "Not implemented");
+}
+
+
+void Geometry::disableTriangluation()
+{
+   mTriangluationDisabled = true;
+}
+
 
 void Geometry::rotateAboutPoint(const Point &center, F32 angle)
 {
@@ -85,6 +271,137 @@ void Geometry::scale(const Point &center, F32 scale)
 
 ////////////////////////////////////////
 ////////////////////////////////////////
+
+
+// Constructor
+PointGeometry::PointGeometry()
+{
+   mPosIsSelected = false;
+}
+
+
+// Destructor
+PointGeometry::~PointGeometry()
+{
+   /* TNLAssert(false, "deleting!");*/
+}
+
+
+GeomType PointGeometry::getGeomType()
+{
+   return geomPoint;
+}
+
+
+Point PointGeometry::getVert(S32 index) const
+{
+   return mPos;
+}
+
+
+S32 PointGeometry::getVertCount()
+{
+   return 1;
+}
+
+
+void PointGeometry::clearVerts()
+{
+   // Do nothing
+}
+
+
+bool PointGeometry::addVert(const Point &point, bool ignoreMaxPointsLimit)
+{
+   return false;
+}
+
+
+bool PointGeometry::addVertFront(Point vert)
+{
+   return false;
+}
+
+
+bool PointGeometry::deleteVert(S32 vertIndex)
+{
+   return false;
+}
+
+
+bool PointGeometry::insertVert(Point vertex, S32 vertIndex)
+{
+   return false;
+}
+
+
+bool PointGeometry::anyVertsSelected()
+{
+   return mPosIsSelected;
+}
+
+
+void PointGeometry::selectVert(S32 vertIndex)
+{
+   mPosIsSelected = true;
+}
+
+
+void PointGeometry::aselectVert(S32 vertIndex)
+{
+   mPosIsSelected = true;
+}
+
+
+void PointGeometry::unselectVert(S32 vertIndex)
+{
+   mPosIsSelected = false;
+}
+
+
+void PointGeometry::unselectVerts()
+{
+   mPosIsSelected = false;
+}
+
+
+bool PointGeometry::vertSelected(S32 vertIndex)
+{
+   return mPosIsSelected;
+}
+
+
+const Vector<Point> *PointGeometry::getOutline() const
+{
+   TNLAssert(false, "Points do not have outline!");
+   return NULL;
+}
+
+
+const Vector<Point> *PointGeometry::getFill() const
+{
+   TNLAssert(false, "Points do not have fill!");
+   return NULL;
+}
+
+
+Point PointGeometry::getCentroid()
+{
+   return mPos;
+}
+
+
+F32 PointGeometry::getLabelAngle()
+{
+   return 0;
+}
+
+
+void PointGeometry::onPointsChanged()
+{
+   // Do nothing
+}
+
 
 void PointGeometry::setVert(const Point &pos, S32 index)
 {
@@ -135,6 +452,150 @@ void PointGeometry::readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gr
 ////////////////////////////////////////
 
 static Vector<Point> outlinePoints(2);    // Reusable container
+
+// Constructor
+SimpleLineGeometry::SimpleLineGeometry()
+{
+   mFromSelected = false;
+   mToSelected = false;
+}
+
+
+// Destructor
+SimpleLineGeometry::~SimpleLineGeometry()
+{
+   //TNLAssert(false, "deleting!");
+}
+
+
+GeomType SimpleLineGeometry::getGeomType()
+{
+   return geomSimpleLine;
+}
+
+
+Point SimpleLineGeometry::getVert(S32 index) const
+{
+   return (index == 1) ? mToPos : mFromPos;
+}
+
+
+void SimpleLineGeometry::setVert(const Point &pos, S32 index)
+{
+   if (index == 1)
+      mToPos = pos;
+   else
+      mFromPos = pos;
+}
+
+
+S32 SimpleLineGeometry::getVertCount()
+{
+   return 2;
+}
+
+
+void SimpleLineGeometry::clearVerts()
+{
+   // Do nothing
+}
+
+
+bool SimpleLineGeometry::addVert(const Point &point, bool ignoreMaxPointsLimit)
+{
+   return false;
+}
+
+
+bool SimpleLineGeometry::addVertFront(Point vert)
+{
+   return false;
+}
+
+
+bool SimpleLineGeometry::deleteVert(S32 vertIndex)
+{
+   return false;
+}
+
+
+bool SimpleLineGeometry::insertVert(Point vertex, S32 vertIndex)
+{
+   return false;
+}
+
+
+bool SimpleLineGeometry::anyVertsSelected()
+{
+   return mFromSelected | mToSelected;
+}
+
+
+void SimpleLineGeometry::selectVert(S32 vertIndex)
+{
+   unselectVerts();
+   if (vertIndex == 1)
+      mToSelected = true;
+   else
+      mFromSelected = true;
+}
+
+
+void SimpleLineGeometry::aselectVert(S32 vertIndex)
+{
+   if (vertIndex == 1)
+      mToSelected = true;
+   else
+      mFromSelected = true;
+}
+
+
+void SimpleLineGeometry::unselectVert(S32 vertIndex)
+{
+   if (vertIndex == 1)
+      mToSelected = false;
+   else
+      mFromSelected = false;
+}
+
+
+void SimpleLineGeometry::unselectVerts()
+{
+   mFromSelected = false;
+   mToSelected = false;
+}
+
+
+bool SimpleLineGeometry::vertSelected(S32 vertIndex)
+{
+   return (vertIndex == 1) ? mToSelected : mFromSelected;
+}
+
+
+const Vector<Point> *SimpleLineGeometry::getFill() const
+{
+   TNLAssert(false, "SimpleLines do not have fill!");
+   return NULL;
+}
+
+
+Point SimpleLineGeometry::getCentroid()
+{
+   return (mFromPos + mToPos) / 2; // Returns midpoint of line
+}
+
+
+F32 SimpleLineGeometry::getLabelAngle()
+{
+   return mFromPos.angleTo(mToPos);
+}
+
+
+void SimpleLineGeometry::onPointsChanged()
+{
+   // Do nothing
+}
+
 
 const Vector<Point> *SimpleLineGeometry::getOutline() const
 {
@@ -191,6 +652,26 @@ void SimpleLineGeometry::readGeom(S32 argc, const char **argv, S32 firstCoord, F
 ////////////////////////////////////////
 
 extern S32 gMaxPolygonPoints;
+
+// Constructor
+PolylineGeometry::PolylineGeometry()
+{
+   mAnyVertsSelected = false;
+}
+
+
+// Destructor
+PolylineGeometry::~PolylineGeometry()
+{
+   /*TNLAssert(false, "deleting!");*/
+}
+
+
+GeomType PolylineGeometry::getGeomType()
+{
+   return geomPolyLine;
+}
+
 
 Point PolylineGeometry::getVert(S32 index)  const
 { 
@@ -340,6 +821,32 @@ void PolylineGeometry::checkIfAnyVertsSelected()
 }
 
 
+const Vector<Point> *PolylineGeometry::getOutline() const
+{
+   return (Vector<Point> *) &mPolyBounds;
+}
+
+
+const Vector<Point> *PolylineGeometry::getFill() const
+{
+   TNLAssert(false, "Polylines don't have fill!");
+   return NULL;
+}
+
+
+Point PolylineGeometry::getCentroid()
+{
+   TNLAssert(!mTriangluationDisabled, "Triangluation disabled!");
+   return mCentroid;
+}
+
+
+F32 PolylineGeometry::getLabelAngle()
+{
+   return 0;
+}
+
+
 void PolylineGeometry::packGeom(GhostConnection *connection, BitStream *stream)
 {
    // - 1 because writeEnum ranges from 0 to n-1; mPolyBounds.size() ranges from 1 to n
@@ -430,6 +937,33 @@ void PolylineGeometry::readGeom(S32 argc, const char **argv, S32 firstCoord, F32
 
 ////////////////////////////////////////
 ////////////////////////////////////////
+
+// Constructor
+PolygonGeometry::PolygonGeometry() : PolylineGeometry()
+{
+   mLabelAngle = 0;
+}
+
+
+GeomType PolygonGeometry::getGeomType()
+{
+   return geomPolygon;
+}
+
+
+const Vector<Point> *PolygonGeometry::getFill() const
+{
+   TNLAssert(!mTriangluationDisabled, "Triangluation disabled!");
+   return &mPolyFill;
+}
+
+
+F32 PolygonGeometry::getLabelAngle()
+{
+   TNLAssert(!mTriangluationDisabled, "Triangluation disabled!");
+   return mLabelAngle;
+}
+
 
 void PolygonGeometry::readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize)
 {
