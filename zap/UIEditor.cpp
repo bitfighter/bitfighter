@@ -2314,6 +2314,26 @@ void EditorUserInterface::setCurrentTeam(S32 currentTeam)
 
 void EditorUserInterface::flipSelectionHorizontal()
 {
+   Point min, max;
+   computeSelectionMinMax(min, max);
+   F32 centerX = (min.x + max.x) / 2;
+
+   flipSelection(centerX, true);
+}
+
+
+void EditorUserInterface::flipSelectionVertical()
+{
+   Point min, max;
+   computeSelectionMinMax(min, max);
+   F32 centerY = (min.y + max.y) / 2;
+
+   flipSelection(centerY, false);
+}
+
+
+void EditorUserInterface::flipSelection(F32 center, bool isHoriz)
+{
    if(!anyItemsSelected())
       return;
 
@@ -2331,32 +2351,10 @@ void EditorUserInterface::flipSelectionHorizontal()
 
       if(obj->isSelected())
       {
-         obj->flip(centerX, true);
+         obj->flip(center, isHoriz);
          obj->onGeomChanged();
       }
    }
-
-   setNeedToSave(true);
-   autoSave();
-}
-
-
-void EditorUserInterface::flipSelectionVertical()
-{
-   if(!anyItemsSelected())
-      return;
-
-   saveUndoState();
-
-   Point min, max;
-   computeSelectionMinMax(min, max);
-   F32 centerY = (min.y + max.y) / 2;
-
-   const Vector<EditorObject *> *objList = getObjectList();
-
-   for(S32 i = 0; i < objList->size(); i++)
-      if(objList->get(i)->isSelected())
-         objList->get(i)->flip(centerY, false);
 
    setNeedToSave(true);
    autoSave();

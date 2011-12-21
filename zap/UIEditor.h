@@ -362,17 +362,20 @@ public:
    void addToDock(EditorObject* object);
    void addDockObject(EditorObject *object, F32 xPos, F32 yPos);
 
-   string mScriptLine;                          // Script and args, if any
+   string mScriptLine;                           // Script and args, if any
 
    void idle(U32 timeDelta);
-   void deleteSelection(bool objectsOnly);      // Delete selected items (true = items only, false = items & vertices)
-   void copySelection();                        // Copy selection to clipboard
-   void pasteSelection();                       // Paste selection from clipboard
-   void setCurrentTeam(S32 currentTeam);        // Set current team for selected items, also sets team for all dock items
-   void flipSelectionVertical();                // Flip selection along vertical axis
-   void flipSelectionHorizontal();              // Flip selection along horizontal axis
-   void scaleSelection(F32 scale);              // Scale selection by scale
-   void rotateSelection(F32 angle);             // Rotate selecton by angle
+   void deleteSelection(bool objectsOnly);       // Delete selected items (true = items only, false = items & vertices)
+   void copySelection();                         // Copy selection to clipboard
+   void pasteSelection();                        // Paste selection from clipboard
+   void setCurrentTeam(S32 currentTeam);         // Set current team for selected items, also sets team for all dock items
+
+   void flipSelectionHorizontal();               // Flip selection along horizontal axis
+   void flipSelectionVertical();                 // Flip selection along vertical axis
+   void flipSelection(F32 center, bool isHoriz); // Do the actual flipping for the above
+
+   void scaleSelection(F32 scale);               // Scale selection by scale
+   void rotateSelection(F32 angle);              // Rotate selecton by angle
 
    void validateLevel();               // Check level for things that will make the game crash!
    void validateTeams();               // Check that each item has a valid team (and fix any errors found)
