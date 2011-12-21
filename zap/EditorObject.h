@@ -160,14 +160,6 @@ public:
    virtual void onAttrsChanging();                       // Attr is in the process of being changed (i.e. a char was typed for a textItem)
    virtual void onAttrsChanged();                        // Attrs changed
 
-
-   /////
-   // Geometry operations  -- can we provide standard implementations of these?
-   //void rotateAboutPoint(const Point &origin, F32 angle) { Geometry::rotateAboutPoint(origin, angle); onGeomChanged(); }
-   //void flipHorizontal(F32 minX, F32 maxX) { Geometry::flipHorizontal(minX, maxX); onGeomChanged(); };
-   //void flipVertical(F32 minY, F32 maxY) { Geometry::flipVertical(minY, maxY); onGeomChanged(); };
-   //virtual void scale(const Point &center, F32 scale) { Geometry::scale(center, scale); onGeomChanged(); }
-
    /////
    S32 getItemId();
    void setItemId(S32 itemId);
