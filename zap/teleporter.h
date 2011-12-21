@@ -62,7 +62,7 @@ private:
    S32 mLastDest;    // Destination of last ship through
 
    // How are this item's vertices labeled in the editor? -- these can be private
-   const char *getVertLabel(S32 index) { return index == 0 ? "Intake Vortex" : "Destination"; }
+   const char *getVertLabel(S32 index);
 
 public:
    Teleporter();     // Constructor
@@ -94,38 +94,40 @@ public:
 
    TNL_DECLARE_CLASS(Teleporter);
 
-   ///// Lua Interface
-
-   Teleporter(lua_State *L);             //  Lua constructor
-   static const char className[];
-   static Lunar<Teleporter>::RegType methods[];
-
-   S32 getClassID(lua_State *L) { return returnInt(L, TeleportTypeNumber); }   // Object's class
-   void push(lua_State *L) { Lunar<Teleporter>::push(L, this); }               // Push item onto stack
-
-   S32 getLoc(lua_State *L) { return returnPoint(L, getVert(0)); }                    // Center of item (returns point)
-   S32 getRad(lua_State *L) { return returnInt(L, TeleporterTriggerRadius); }         // Radius of item (returns number)
-   S32 getVel(lua_State *L) { return returnPoint(L, Point(0,0)); }                    // Speed of item (returns point)
-   S32 getTeamIndx(lua_State *L) { return returnInt(L, TEAM_NEUTRAL + 1); }           // All teleporters are neutral
-   GameObject *getGameObject() { return this; }                                       // Return the underlying GameObject
-
 
    ///// Editor Methods
-   Color getEditorRenderColor() { return Colors::green; }
+   Color getEditorRenderColor();
 
    void renderEditorItem();
 
-   void onAttrsChanging() { /* Do nothing */ }
-   void onGeomChanging()  { /* Do nothing */ }
+   void onAttrsChanging();
+   void onGeomChanging();
 
    // Some properties about the item that will be needed in the editor
-   const char *getEditorHelpString() { return "Teleports ships from one place to another. [T]"; }  
-   const char *getPrettyNamePlural() { return "Teleporters"; }
-   const char *getOnDockName() { return "Teleport"; }
-   const char *getOnScreenName() { return "Teleport"; }
-   bool hasTeam() { return false; }
-   bool canBeHostile() { return false; }
-   bool canBeNeutral() { return false; }
+   const char *getEditorHelpString();
+   const char *getPrettyNamePlural();
+   const char *getOnDockName();
+   const char *getOnScreenName();
+   bool hasTeam();
+   bool canBeHostile();
+   bool canBeNeutral();
+
+
+   ///// Lua Interface
+
+   Teleporter(lua_State *L);       //  Lua constructor
+   static const char className[];
+   static Lunar<Teleporter>::RegType methods[];
+
+   S32 getClassID(lua_State *L);   // Object's class
+   void push(lua_State *L);        // Push item onto stack
+
+   S32 getLoc(lua_State *L);       // Center of item (returns point)
+   S32 getRad(lua_State *L);       // Radius of item (returns number)
+   S32 getVel(lua_State *L);       // Speed of item (returns point)
+   S32 getTeamIndx(lua_State *L);  // All teleporters are neutral
+   GameObject *getGameObject();    // Return the underlying GameObject
+
 };
 
 

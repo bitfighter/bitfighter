@@ -80,6 +80,19 @@ TextItem *TextItem::clone() const
    //return clone;
 }
 
+
+const char *TextItem::getVertLabel(S32 index)
+{
+   return index == 0 ? "Start" : "Direction";
+}
+
+
+const char *TextItem::getInstructionMsg()
+{
+   return "[Enter] to edit text";
+}
+
+
 //
 //void TextItem::copyAttrs(TextItem *target)
 //{
@@ -132,6 +145,84 @@ void TextItem::renderEditorPreview(F32 currentScale)
 void TextItem::renderEditorItem()
 {
    renderTextItem(getVert(0), getVert(1), mSize, mText, getTeamColor(mTeam));
+}
+
+
+const char *TextItem::getEditorHelpString()
+{
+   return "Draws a bit of text on the map.  Visible only to team, or to all if neutral.";
+}
+
+
+const char *TextItem::getPrettyNamePlural()
+{
+   return "Text Items";
+}
+
+
+const char *TextItem::getOnDockName()
+{
+   return "TextItem";
+}
+
+
+const char *TextItem::getOnScreenName()
+{
+   return "Text";
+}
+
+
+bool TextItem::hasTeam()
+{
+   return true;
+}
+
+
+bool TextItem::canBeHostile()
+{
+   return true;
+}
+
+
+bool TextItem::canBeNeutral()
+{
+   return true;
+}
+
+
+bool TextItem::showAttribsWhenSelected()
+{
+   return false;
+}
+
+
+Color TextItem::getEditorRenderColor()
+{
+   return Colors::blue;
+}
+
+
+F32 TextItem::getSize()
+{
+   return mSize;
+}
+
+
+void TextItem::setSize(F32 size)
+{
+   mSize = size;
+}
+
+
+string TextItem::getText()
+{
+   return mText;
+}
+
+
+void TextItem::setText(string text)
+{
+   mText = text;
 }
 
 
@@ -552,6 +643,12 @@ void LineItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 }
 
 
+S32 LineItem::getWidth() const
+{
+   return mWidth;
+}
+
+
 void LineItem::setWidth(S32 width, S32 min, S32 max)
 {
    // Bounds check
@@ -584,6 +681,48 @@ void LineItem::changeWidth(S32 amt)
 
    setWidth(width);
    onGeomChanged();
+}
+
+
+const char *LineItem::getEditorHelpString()
+{
+   return "Draws a line on the map.  Visible only to team, or to all if neutral.";
+}
+
+
+const char *LineItem::getPrettyNamePlural()
+{
+   return "Line Items";
+}
+
+
+const char *LineItem::getOnDockName()
+{
+   return "LineItem";
+}
+
+
+const char *LineItem::getOnScreenName()
+{
+   return "Line";
+}
+
+
+bool LineItem::hasTeam()
+{
+   return true;
+}
+
+
+bool LineItem::canBeHostile()
+{
+   return true;
+}
+
+
+bool LineItem::canBeNeutral()
+{
+   return true;
 }
 
 

@@ -64,18 +64,18 @@ public:
       SoccerMsgGameOverTie,
    };
 
-   GameTypes getGameType() const { return SoccerGame; }
-   const char *getShortName() const { return "S"; }
-   virtual const char *getInstructionString() { return "Push the ball into the opposing team's goal!"; }
-   //bool isTeamGame() { return getGame()->getTeamCount() > 1; } 
-   bool canBeTeamGame() const { return true; }
-   bool canBeIndividualGame() const { return true; }
+   GameTypes getGameType() const;
+   const char *getShortName() const;
+   virtual const char *getInstructionString();
+   //bool isTeamGame();
+   bool canBeTeamGame() const;
+   bool canBeIndividualGame() const;
 
    void shipTouchZone(Ship *s, GoalZone *z);
 
    bool onFire(Ship *ship);             
    // No modules while carrying the ball!
-   bool okToUseModules(Ship *ship) { return Parent::okToUseModules(ship) && ! ship->isCarryingItem(SoccerBallItemTypeNumber); }
+   bool okToUseModules(Ship *ship);
 
    TNL_DECLARE_RPC(s2cSoccerScoreMessage, (U32 msgIndex, StringTableEntry clientName, RangedU32<0, GameType::gMaxTeamCount> teamIndex));
    TNL_DECLARE_CLASS(SoccerGameType);
@@ -118,13 +118,13 @@ public:
    TNL_DECLARE_CLASS(SoccerBallItem);
 
    ///// Editor methods
-   const char *getEditorHelpString() { return "Soccer ball, can only be used in Soccer games."; }
-   const char *getPrettyNamePlural() { return "Soccer Balls"; }
-   const char *getOnDockName() { return "Ball"; }
-   const char *getOnScreenName() { return "Soccer Ball"; }
-   bool hasTeam() { return false; }
-   bool canBeHostile() { return false; }
-   bool canBeNeutral() { return false; }
+   const char *getEditorHelpString();
+   const char *getPrettyNamePlural();
+   const char *getOnDockName();
+   const char *getOnScreenName();
+   bool hasTeam();
+   bool canBeHostile();
+   bool canBeNeutral();
 
    void renderDock();
    void renderEditor(F32 currentScale);
@@ -134,13 +134,13 @@ public:
 
    ///// Lua Interface
 
-   SoccerBallItem(lua_State *L) { /* Do nothing */ };   //  Lua constructor
+   SoccerBallItem(lua_State *L);   //  Lua constructor
 
    static const char className[];
    static Lunar<SoccerBallItem>::RegType methods[];
 
-   S32 getClassID(lua_State *L) { return returnInt(L, SoccerBallItemTypeNumber); }
-   void push(lua_State *L) {  Lunar<SoccerBallItem>::push(L, this); }   
+   S32 getClassID(lua_State *L);
+   void push(lua_State *L);
 
 };
 

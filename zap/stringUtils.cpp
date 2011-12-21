@@ -52,6 +52,31 @@ namespace Zap
 
 using namespace boost;
 
+
+// Constructor
+SaveException::SaveException(string str) : msg(str)
+{
+   // do nothing
+}
+
+
+// Destructor
+SaveException::~SaveException() throw ()
+{
+   // do nothing
+}
+
+
+const char *SaveException::what() const throw ()
+{
+   return msg.c_str();
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+
 // Collection of useful string things
 
 string ExtractDirectory( const string& path )

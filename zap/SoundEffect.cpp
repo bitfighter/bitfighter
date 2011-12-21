@@ -32,6 +32,11 @@ SoundEffect::~SoundEffect()
 }
 
 
+bool SoundEffect::isPlaying()
+{
+   return mSourceIndex != -1;
+}
+
 
 }
 

@@ -47,8 +47,8 @@ private:
    string mText;         // Text itself
 
    // How are this item's vertices labeled in the editor? -- these can be private
-   const char *getVertLabel(S32 index) { return index == 0 ? "Start" : "Direction"; }
-   const char *getInstructionMsg() { return "[Enter] to edit text"; }
+   const char *getVertLabel(S32 index);
+   const char *getInstructionMsg();
 
 #ifndef ZAP_DEDICATED
    static EditorAttributeMenuUI *mAttributeMenuUI;      // Menu for text editing; since it's static, don't bother with smart pointer
@@ -96,14 +96,14 @@ public:
 
    ///// Editor Methods
 
-   Color getEditorRenderColor() { return Colors::blue; }
+   Color getEditorRenderColor();
 
    void renderEditorItem();
-   F32 getSize() { return mSize; }
-   void setSize(F32 size) { mSize = size; }
+   F32 getSize();
+   void setSize(F32 size);
 
-   string getText() { return mText; }
-   void setText(string text) { mText = text; }
+   string getText();
+   void setText(string text);
 
    void onAttrsChanging();
    void onAttrsChanged();
@@ -113,15 +113,15 @@ public:
    void recalcTextSize();
 
    // Some properties about the item that will be needed in the editor
-   const char *getEditorHelpString() { return "Draws a bit of text on the map.  Visible only to team, or to all if neutral."; }  
-   const char *getPrettyNamePlural() { return "Text Items"; }
-   const char *getOnDockName() { return "TextItem"; }
-   const char *getOnScreenName() { return "Text"; }
-   bool hasTeam() { return true; }
-   bool canBeHostile() { return true; }
-   bool canBeNeutral() { return true; }
+   const char *getEditorHelpString();
+   const char *getPrettyNamePlural();
+   const char *getOnDockName();
+   const char *getOnScreenName();
+   bool hasTeam();
+   bool canBeHostile();
+   bool canBeNeutral();
 
-   bool showAttribsWhenSelected() { return false; }      // We already show the attributes, as the text itself
+   bool showAttribsWhenSelected();      // We already show the attributes, as the text itself
 
    void newObjectFromDock(F32 gridSize);
 
@@ -171,18 +171,18 @@ public:
    // Thickness-related
    virtual void setWidth(S32 width);
    void setWidth(S32 width, S32 min, S32 max);
-   S32 getWidth() const { return mWidth; }
+   S32 getWidth() const;
    void changeWidth(S32 amt);  
 
 
    // Some properties about the item that will be needed in the editor
-   const char *getEditorHelpString() { return "Draws a line on the map.  Visible only to team, or to all if neutral."; }  
-   const char *getPrettyNamePlural() { return "Line Items"; }
-   const char *getOnDockName() { return "LineItem"; }
-   const char *getOnScreenName() { return "Line"; }
-   bool hasTeam() { return true; }
-   bool canBeHostile() { return true; }
-   bool canBeNeutral() { return true; }
+   const char *getEditorHelpString();
+   const char *getPrettyNamePlural();
+   const char *getOnDockName();
+   const char *getOnScreenName();
+   bool hasTeam();
+   bool canBeHostile();
+   bool canBeNeutral();
 
    static const S32 MIN_LINE_WIDTH = 1;
    static const S32 MAX_LINE_WIDTH = 255;

@@ -44,7 +44,19 @@ namespace Zap
 SimpleLine::SimpleLine()
 { 
    // Do nothing
-}     
+}
+
+
+S32 SimpleLine::getDockRadius()
+{
+   return 8;
+}
+
+
+F32 SimpleLine::getEditorRadius(F32 currentScale)
+{
+   return 7;
+}
 
 
 void SimpleLine::renderDock()
