@@ -47,9 +47,9 @@ struct SaveException : public exception
 {
    string msg;
 
-   SaveException(string str) : msg(str) { /* do nothing */ }    // Constructor
-   virtual ~SaveException() throw() { /* do nothing */ }                // Destructor, needed to avoid "looser throw specifier" errors with gcc
-   const char* what() const throw() { return msg.c_str(); }
+   SaveException(string str);         // Constructor
+   virtual ~SaveException() throw();  // Destructor, needed to avoid "looser throw specifier" errors with gcc
+   const char* what() const throw();
 };
 
 

@@ -185,6 +185,39 @@ void SoccerGameType::renderInterfaceOverlay(bool scoreboardVisible)
 }
 
 
+GameTypes SoccerGameType::getGameType() const
+{
+   return SoccerGame;
+}
+
+
+const char *SoccerGameType::getShortName() const
+{
+   return "S";
+}
+
+
+const char *SoccerGameType::getInstructionString()
+{
+   return "Push the ball into the opposing team's goal!";
+}
+
+
+//bool SoccerGameType::isTeamGame() { return getGame()->getTeamCount() > 1; }
+
+
+bool SoccerGameType::canBeTeamGame() const
+{
+   return true;
+}
+
+
+bool SoccerGameType::canBeIndividualGame() const
+{
+   return true;
+}
+
+
 void SoccerGameType::shipTouchZone(Ship *ship, GoalZone *zone)
 {
    // See if this ship is carrying a ball
@@ -204,7 +237,13 @@ bool SoccerGameType::onFire(Ship *ship)
       return false;
 
    return true;
-}             
+}
+
+
+bool SoccerGameType::okToUseModules(Ship *ship)
+{
+   return Parent::okToUseModules(ship) && !ship->isCarryingItem(SoccerBallItemTypeNumber);
+}
 
 
 // Runs on server only, and only when player deliberately drops ball
@@ -412,6 +451,48 @@ void SoccerBallItem::renderItem(const Point &pos)
 }
 
 
+const char *SoccerBallItem::getEditorHelpString()
+{
+   return "Soccer ball, can only be used in Soccer games.";
+}
+
+
+const char *SoccerBallItem::getPrettyNamePlural()
+{
+   return "Soccer Balls";
+}
+
+
+const char *SoccerBallItem::getOnDockName()
+{
+   return "Ball";
+}
+
+
+const char *SoccerBallItem::getOnScreenName()
+{
+   return "Soccer Ball";
+}
+
+
+bool SoccerBallItem::hasTeam()
+{
+   return false;
+}
+
+
+bool SoccerBallItem::canBeHostile()
+{
+   return false;
+}
+
+
+bool SoccerBallItem::canBeNeutral()
+{
+   return false;
+}
+
+
 void SoccerBallItem::renderDock()
 {
    renderSoccerBall(getVert(0), 7);
@@ -550,6 +631,25 @@ void SoccerBallItem::unpackUpdate(GhostConnection *connection, BitStream *stream
 }
 
 
+///// Lua Interface
+
+//  Lua constructor
+SoccerBallItem::SoccerBallItem(lua_State *L)
+{
+   // Do nothing
+}
+
+
+S32 SoccerBallItem::getClassID(lua_State *L)
+{
+   return returnInt(L, SoccerBallItemTypeNumber);
+}
+
+
+void SoccerBallItem::push(lua_State *L)
+{
+   Lunar<SoccerBallItem>::push(L, this);
+}
 
 
 };

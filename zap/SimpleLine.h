@@ -45,8 +45,8 @@ private:
    virtual const char *getVertLabel(S32 index) = 0;          
 
 protected:
-   virtual S32 getDockRadius() { return 8; }                       // Size of object on dock
-   virtual F32 getEditorRadius(F32 currentScale) { return 7; }     // Size of object (or in this case vertex) in editor
+   virtual S32 getDockRadius();                       // Size of object on dock
+   virtual F32 getEditorRadius(F32 currentScale);     // Size of object (or in this case vertex) in editor
 
 public:
    SimpleLine();       // Constructor

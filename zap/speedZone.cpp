@@ -33,6 +33,7 @@
 #include "SoundSystem.h"
 #include "stringUtils.h"
 #include "gameConnection.h"
+#include "Colors.h"
 
 #ifndef ZAP_DEDICATED
 #include "ClientGame.h"
@@ -76,6 +77,30 @@ SpeedZone::SpeedZone()
 SpeedZone::~SpeedZone()
 {
    // Do nothing
+}
+
+
+U16 SpeedZone::getSpeed()
+{
+   return mSpeed;
+}
+
+
+void SpeedZone::setSpeed(U16 speed)
+{
+   mSpeed = speed;
+}
+
+
+bool SpeedZone::getSnapping()
+{
+   return mSnapLocation;
+}
+
+
+void SpeedZone::setSnapping(bool snapping)
+{
+   mSnapLocation = snapping;
 }
 
 
@@ -152,9 +177,33 @@ void SpeedZone::render()
 }
 
 
+Color SpeedZone::getEditorRenderColor()
+{
+   return Colors::red;
+}
+
+
 void SpeedZone::renderEditorItem()
 {
    render();
+}
+
+
+void SpeedZone::onAttrsChanging()
+{
+   // Do nothing
+}
+
+
+void SpeedZone::onGeomChanging()
+{
+   onGeomChanged();
+}
+
+
+void SpeedZone::onItemDragging()
+{
+   onGeomChanged();
 }
 
 
@@ -273,6 +322,12 @@ string SpeedZone::toString(F32 gridSize) const
    if(mRotateSpeed != 0)
       out += " Rotate=" + ftos(mRotateSpeed, 4);
    return out;
+}
+
+
+const char *SpeedZone::getVertLabel(S32 index)
+{
+   return index == 0 ? "Location" : "Direction";
 }
 
 
@@ -491,6 +546,51 @@ void SpeedZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
    else 
       SoundSystem::playSoundEffect(SFXGoFastOutside, getVert(0), getVert(0));
 }
+
+
+
+// Some properties about the item that will be needed in the editor
+const char *SpeedZone::getEditorHelpString()
+{
+   return "Makes ships go fast in direction of arrow. [P]";
+}
+
+
+const char *SpeedZone::getPrettyNamePlural()
+{
+   return "GoFasts";
+}
+
+
+const char *SpeedZone::getOnDockName()
+{
+   return "GoFast";
+}
+
+
+const char *SpeedZone::getOnScreenName()
+{
+   return "GoFast";
+}
+
+
+bool SpeedZone::hasTeam()
+{
+   return false;
+}
+
+
+bool SpeedZone::canBeHostile()
+{
+   return false;
+}
+
+
+bool SpeedZone::canBeNeutral()
+{
+   return false;
+}
+
 
 };
 

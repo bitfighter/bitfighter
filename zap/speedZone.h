@@ -31,7 +31,6 @@
 #include "gameType.h"
 #include "gameNetInterface.h"
 #include "gameObjectRender.h"
-#include "Colors.h"
 
 namespace Zap
 {
@@ -51,7 +50,7 @@ private:
    void preparePoints();
 
    // How are things labeled in the editor? 
-   const char *getVertLabel(S32 index) { return index == 0 ? "Location" : "Direction"; }
+   const char *getVertLabel(S32 index);
    const char *getInstructionMsg();
 
 #ifndef ZAP_DEDICATED
@@ -78,11 +77,11 @@ public:
    static const U16 maxSpeed = 5000;      // Max speed for the goFast
    static const U16 defaultSpeed = 2000;  // Default speed if none specified
 
-   U16 getSpeed() { return mSpeed; }
-   void setSpeed(U16 speed) { mSpeed = speed; }
+   U16 getSpeed();
+   void setSpeed(U16 speed);
 
-   bool getSnapping() { return mSnapLocation; }
-   void setSnapping(bool snapping) { mSnapLocation = snapping; }
+   bool getSnapping();
+   void setSnapping(bool snapping);
 
    F32 mRotateSpeed;
    U32 mUnpackInit;  // Some form of counter, to know that it is a rotating speed zone.
@@ -105,13 +104,13 @@ public:
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
    ///// Editor methods 
-   Color getEditorRenderColor() { return Colors::red; }
+   Color getEditorRenderColor();
 
    void renderEditorItem();
 
-   void onAttrsChanging() { /* Do nothing */ }
-   void onGeomChanging() { onGeomChanged(); }
-   void onItemDragging() { onGeomChanged(); }
+   void onAttrsChanging();
+   void onGeomChanging();
+   void onItemDragging();
    void onGeomChanged();
 
 #ifndef ZAP_DEDICATED
@@ -123,17 +122,14 @@ public:
    string getAttributeString();
 #endif
 
-
-   void saveItem(FILE *f);
-
    // Some properties about the item that will be needed in the editor
-   const char *getEditorHelpString() { return "Makes ships go fast in direction of arrow. [P]"; }  
-   const char *getPrettyNamePlural() { return "GoFasts"; }
-   const char *getOnDockName() { return "GoFast"; }
-   const char *getOnScreenName() { return "GoFast"; }
-   bool hasTeam() { return false; }
-   bool canBeHostile() { return false; }
-   bool canBeNeutral() { return false; }
+   const char *getEditorHelpString();
+   const char *getPrettyNamePlural();
+   const char *getOnDockName();
+   const char *getOnScreenName();
+   bool hasTeam();
+   bool canBeHostile();
+   bool canBeNeutral();
 
    TNL_DECLARE_CLASS(SpeedZone);
 };

@@ -75,6 +75,12 @@ Teleporter *Teleporter::clone() const
 }
 
 
+const char *Teleporter::getVertLabel(S32 index)
+{
+   return index == 0 ? "Intake Vortex" : "Destination";
+}
+
+
 //void Teleporter::copyAttrs(Teleporter *target)
 //{
 //   SimpleLine::copyAttrs(target);
@@ -341,6 +347,66 @@ void Teleporter::renderEditorItem()
 }
 
 
+Color Teleporter::getEditorRenderColor()
+{
+   return Colors::green;
+}
+
+
+void Teleporter::onAttrsChanging()
+{
+   /* Do nothing */
+}
+
+
+void Teleporter::onGeomChanging()
+{
+   /* Do nothing */
+}
+
+
+const char *Teleporter::getEditorHelpString()
+{
+   return "Teleports ships from one place to another. [T]";
+}
+
+
+const char *Teleporter::getPrettyNamePlural()
+{
+   return "Teleporters";
+}
+
+
+const char *Teleporter::getOnDockName()
+{
+   return "Teleport";
+}
+
+
+const char *Teleporter::getOnScreenName()
+{
+   return "Teleport";
+}
+
+
+bool Teleporter::hasTeam()
+{
+   return false;
+}
+
+
+bool Teleporter::canBeHostile()
+{
+   return false;
+}
+
+
+bool Teleporter::canBeNeutral()
+{
+   return false;
+}
+
+
 // Lua methods
 
 const char Teleporter::className[] = "Teleporter";      // Class name as it appears to Lua scripts
@@ -364,6 +430,49 @@ Lunar<Teleporter>::RegType Teleporter::methods[] =
 
    {0,0}    // End method list
 };
+
+
+S32 Teleporter::getClassID(lua_State *L)
+{
+   return returnInt(L, TeleportTypeNumber);
+}
+
+
+void Teleporter::push(lua_State *L)
+{
+   Lunar<Teleporter>::push(L, this);
+}
+
+
+S32 Teleporter::getLoc(lua_State *L)
+{
+   return returnPoint(L, getVert(0));
+}
+
+
+S32 Teleporter::getRad(lua_State *L)
+{
+   return returnInt(L, TeleporterTriggerRadius);
+}
+
+
+S32 Teleporter::getVel(lua_State *L)
+{
+   return returnPoint(L, Point(0, 0));
+}
+
+
+S32 Teleporter::getTeamIndx(lua_State *L)
+{
+   return returnInt(L, TEAM_NEUTRAL + 1);
+}
+
+
+GameObject *Teleporter::getGameObject()
+{
+   return this;
+}
+
 
 };
 
