@@ -34,7 +34,6 @@
 #include "Color.h"
 #include "Geometry.h"
 
-
 using namespace std;
 using namespace TNL;
 
@@ -66,6 +65,7 @@ enum ShowMode
 
 class EditorAttributeMenuUI;
 class WallSegment;
+class ClientGame;
 
 class EditorObject : virtual public BfObject   // Interface class  -- All editor objects need to implement this
 {
@@ -74,7 +74,9 @@ private:
    S32 mVertexLitUp;
 
    bool mIsBeingEdited;
+
    static S32 mNextSerialNumber;
+   static bool mBatchUpdatingGeom;
 
 protected:
    bool mDockItem;      // True if this item lives on the dock
@@ -85,6 +87,8 @@ protected:
    S32 mItemId;         // Item's unique id... 0 if there is none
 
    const Color *getTeamColor(S32 teamId);    // Convenience function, calls mGame version
+
+   static bool isBatchUpdatingGeom();
 
 public:
    EditorObject();                  // Constructor
@@ -109,6 +113,9 @@ public:
    void renderAndLabelHighlightedVertices(F32 currentScale);   // Render selected and highlighted vertices, called from renderEditor
    virtual void renderItemText(const char *text, S32 offset, F32 currentScale);    // Render some text, with specified vertical offset
    virtual void renderEditor(F32 currentScale);
+
+   static void beginBatchGeomUpdate();                                     // Suspend certain geometry operations so they can be batched when 
+   static void endBatchGeomUpdate(ClientGame *game, bool modifiedWalls);   // this method is called
 
    // Should we show item attributes when it is selected? (only overridden by TextItem)
    virtual bool showAttribsWhenSelected();

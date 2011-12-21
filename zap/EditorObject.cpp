@@ -50,9 +50,10 @@ using namespace boost;
 
 namespace Zap
 {
-
+ 
+// Declare statics
 S32 EditorObject::mNextSerialNumber = 0;
-
+bool EditorObject::mBatchUpdatingGeom = false;
 
 // Constructor
 EditorObject::EditorObject() 
@@ -115,6 +116,12 @@ void EditorObject::addToEditor(Game *game)
 void EditorObject::assignNewSerialNumber()
 {
    mSerialNumber = mNextSerialNumber++;
+}
+
+
+bool EditorObject::isBatchUpdatingGeom()
+{
+   return mBatchUpdatingGeom;
 }
 
 
@@ -479,6 +486,21 @@ void EditorObject::renderEditor(F32 currentScale)
 void EditorObject::renderDock()
 {
    TNLAssert(false, "renderDock not implemented!");
+}
+
+
+void EditorObject::beginBatchGeomUpdate()
+{
+   mBatchUpdatingGeom = true;
+}
+
+
+void EditorObject::endBatchGeomUpdate(ClientGame *game, bool modifiedWalls)
+{
+   if(modifiedWalls)
+      game->getWallSegmentManager()->finishedChangingWalls(game->getEditorDatabase());
+
+   mBatchUpdatingGeom = false;
 }
 
 

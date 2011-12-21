@@ -2345,6 +2345,10 @@ void EditorUserInterface::flipSelection(F32 center, bool isHoriz)
 
    const Vector<EditorObject *> *objList = getObjectList();
 
+   bool modifiedWalls = false;
+
+   EditorObject::beginBatchGeomUpdate();
+
    for(S32 i = 0; i < objList->size(); i++)
    {
       EditorObject *obj = objList->get(i);
@@ -2353,8 +2357,13 @@ void EditorUserInterface::flipSelection(F32 center, bool isHoriz)
       {
          obj->flip(center, isHoriz);
          obj->onGeomChanged();
+
+         if(isWallType(obj->getObjectTypeNumber()))
+            modifiedWalls = true;
       }
    }
+
+   EditorObject::endBatchGeomUpdate(getGame(), modifiedWalls);
 
    setNeedToSave(true);
    autoSave();

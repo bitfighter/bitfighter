@@ -437,11 +437,12 @@ void WallItem::onGeomChanged()
    WallSegmentManager *wallSegmentManager = getGame()->getWallSegmentManager();
    EditorObjectDatabase *editorDatabase = getGame()->getEditorDatabase();
 
-   wallSegmentManager->computeWallSegmentIntersections(editorDatabase, this);
-   wallSegmentManager->updateMountedItems(editorDatabase, this);
+   wallSegmentManager->computeWallSegmentIntersections(editorDatabase, this);    
+   
    wallSegmentManager->setSelected(mSerialNumber, mSelected);     // Make sure newly generated segments retain selection state of parent wall
 
-   wallSegmentManager->rebuildSelectedOutline();
+   if(!isBatchUpdatingGeom())
+      wallSegmentManager->finishedChangingWalls(editorDatabase);
 
    Parent::onGeomChanged();
 }
@@ -664,17 +665,16 @@ void PolyWall::setSelected(bool selected)
 }
 
 
-
-// Only called from editor???
+// Only called from editor
 void PolyWall::onGeomChanged()
 {
-   //if(getObjectTypeMask() & ItemPolyWall)     // Prepare interior fill triangulation
-   //   initializePolyGeom();          // Triangulate, find centroid, calc extents
+   WallSegmentManager *wallSegmentManager = getGame()->getWallSegmentManager();
+   wallSegmentManager->computeWallSegmentIntersections(getGame()->getEditorDatabase(), this);
+
+   if(!isBatchUpdatingGeom())
+      wallSegmentManager->finishedChangingWalls(getGame()->getEditorDatabase());
 
    Parent::onGeomChanged();
-
-   getGame()->getWallSegmentManager()->computeWallSegmentIntersections(getGame()->getEditorDatabase(), this);
-   getGame()->getWallSegmentManager()->updateMountedItems(getGame()->getEditorDatabase(), this);
 }
 
 
@@ -802,6 +802,14 @@ GridDatabase *WallSegmentManager::getWallEdgeDatabase()
 }
 
 
+void WallSegmentManager::finishedChangingWalls(EditorObjectDatabase *editorDatabase)
+{
+   rebuildEdges();         // Rebuild all edges for all walls
+   updateAllMountedItems(editorDatabase);
+   rebuildSelectedOutline();
+}
+
+
 // This function clears the WallSegment database, and refills it with the output of clipper
 void WallSegmentManager::recomputeAllWallGeometry(GridDatabase *gameDatabase)
 {
@@ -851,6 +859,7 @@ void WallSegmentManager::buildAllWallSegmentEdgesAndPoints(GridDatabase *gameDat
 
 
 // Given a wall, build all the segments and related geometry; also manage any affected mounted items
+// Operates only on passed wall segment -- does not alter others
 void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *gameDatabase, DatabaseObject *wallDbObject, 
                                                         const Vector<DatabaseObject *> &engrObjects)
 {
@@ -859,8 +868,9 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *gameDataba
 
    Vector<EngineeredItem *> toBeRemounted;    // A list of engr objects terminating on the wall segment that we'll be deleting
 
-   EditorObject *wall = dynamic_cast<EditorObject *>(wallDbObject);   // Wall we're deleting and rebuilding
+   EditorObject *wall = dynamic_cast<EditorObject *>(wallDbObject);     // Wall we're deleting and rebuilding
    TNLAssert(wall, "Bad cast -- expected an EditorObject!");
+   
 
    S32 count = mWallSegments.size(); 
 
@@ -899,16 +909,14 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *gameDataba
       {
          WallSegment *newSegment = new WallSegment(mWallSegmentDatabase, wallItem->extendedEndPoints[i], wallItem->extendedEndPoints[i+1], 
                                                    (F32)wallItem->getWidth(), wallItem->getSerialNumber());    // Create the segment
+
+         if(i == 0)
+            allSegExtent.set(newSegment->getExtent());
+         else
+            allSegExtent.unionRect(newSegment->getExtent());
+
          mWallSegments.push_back(newSegment);          // And add it to our master segment list
       }
-   }
-
-   for(S32 i = 0; i < mWallSegments.size(); i++)
-   {
-      if(i == 0)
-         allSegExtent.set(mWallSegments[i]->getExtent());
-      else
-         allSegExtent.unionRect(mWallSegments[i]->getExtent());
    }
 
    wall->setExtent(allSegExtent);      // A wall's extent is the union of the extents of all its segments.  Makes sense, right?
@@ -941,15 +949,18 @@ void WallSegmentManager::updateMountedItems(EditorObjectDatabase *database, Edit
 {
    // First, find any items directly mounted on our wall, and update their location.  Because we don't know where the wall _was_, we 
    // will need to search through all the engineered items, and query each to find which ones where attached to the wall that moved.
-   fillVector.clear();
-   database->findObjects((TestFunc)isEngineeredType, fillVector);
 
-   for(S32 i = 0; i < fillVector.size(); i++)
-   {
-      EngineeredItem *engrItem = dynamic_cast<EngineeredItem *>(fillVector[i]);     // static_cast doesn't seem to work
-      //if(engrItem->getMountSegment()->getOwner() == wall->getSerialNumber())
-         engrItem->mountToWall(engrItem->getVert(0), getWallEdgeDatabase(), getWallSegmentDatabase());
-   }
+   // CE 12/21/2011 -> Replaced following with call to updateAllMountedItems(); other stuff was commented out, and it looks like the partial
+   // engineer updates were disabled for some reason.   Perhaps by me!
+   //////////////fillVector.clear();
+   //////////////database->findObjects((TestFunc)isEngineeredType, fillVector);
+
+   //////////////for(S32 i = 0; i < fillVector.size(); i++)
+   //////////////{
+   //////////////   EngineeredItem *engrItem = dynamic_cast<EngineeredItem *>(fillVector[i]);     // static_cast doesn't seem to work
+   //////////////   //if(engrItem->getMountSegment()->getOwner() == wall->getSerialNumber())      <=== updating all engr items in game!
+   //////////////      engrItem->mountToWall(engrItem->getVert(0), getWallEdgeDatabase(), getWallSegmentDatabase());
+   //////////////}
 
    //// Second, find any forcefields that might intersect our new wall segment and recalc their endpoints.  There are cases where the ff
    //// is mounted to one segment, and terminates on a second, but might be affected by a third segment being placed it its path.
@@ -969,22 +980,30 @@ void WallSegmentManager::updateMountedItems(EditorObjectDatabase *database, Edit
 }
 
 
+// Called by WallItems and PolyWalls when their geom changes
+void WallSegmentManager::updateAllMountedItems(EditorObjectDatabase *database)
+{
+   // First, find any items directly mounted on our wall, and update their location.  Because we don't know where the wall _was_, we 
+   // will need to search through all the engineered items, and query each to find which ones where attached to the wall that moved.
+   fillVector.clear();
+   database->findObjects((TestFunc)isEngineeredType, fillVector);
+
+   for(S32 i = 0; i < fillVector.size(); i++)
+   {
+      EngineeredItem *engrItem = dynamic_cast<EngineeredItem *>(fillVector[i]);     // static_cast doesn't seem to work
+      engrItem->mountToWall(engrItem->getVert(0), getWallEdgeDatabase(), getWallSegmentDatabase());
+   }
+}
+
+
 // Called when a wall segment has somehow changed.  All current and previously intersecting segments 
-// need to be recomputed.
+// need to be recomputed.  This only operates on the specified item.  rebuildEdges() will need to be run separately.
 void WallSegmentManager::computeWallSegmentIntersections(GridDatabase *gameObjDatabase, EditorObject *item)
 {
-   //invalidateIntersectingSegments(gameObjDatabase, item);  // TODO: Is this step still needed?  
-   //recomputeAllWallGeometry(gameObjDatabase);
-
-   // Find segments associated with item and delete them
-   deleteSegments(item->getSerialNumber());
-
-   // Now compute new ones
    Vector<DatabaseObject *> engrObjects;
    gameObjDatabase->findObjects((TestFunc)isEngineeredType, engrObjects);   // All engineered objects
 
    buildWallSegmentEdgesAndPoints(gameObjDatabase, item, engrObjects);
-   rebuildEdges();
 }
 
 

@@ -311,6 +311,8 @@ public:
    GridDatabase *getWallSegmentDatabase();
    GridDatabase *getWallEdgeDatabase();
 
+   void finishedChangingWalls(EditorObjectDatabase *editorDatabase);
+
    Vector<WallSegment *> mWallSegments;      
    Vector<WallEdge *> mWallEdges;               // For mounting forcefields/turrets
    Vector<Point> mWallEdgePoints;               // For rendering
@@ -323,6 +325,7 @@ public:
    void deleteSegments(S32 owner);              // Delete all segments owned by specified WorldItem
 
    void updateMountedItems(EditorObjectDatabase *database, EditorObject *wall);
+   void updateAllMountedItems(EditorObjectDatabase *database);
 
 
    // Takes a wall, finds all intersecting segments, and marks them invalid
