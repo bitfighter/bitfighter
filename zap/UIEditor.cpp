@@ -2326,8 +2326,15 @@ void EditorUserInterface::flipSelectionHorizontal()
    const Vector<EditorObject *> *objList = getObjectList();
 
    for(S32 i = 0; i < objList->size(); i++)
-      if(objList->get(i)->isSelected())
-         objList->get(i)->flipHorizontal(centerX);
+   {
+      EditorObject *obj = objList->get(i);
+
+      if(obj->isSelected())
+      {
+         obj->flip(centerX, true);
+         obj->onGeomChanged();
+      }
+   }
 
    setNeedToSave(true);
    autoSave();
@@ -2349,7 +2356,7 @@ void EditorUserInterface::flipSelectionVertical()
 
    for(S32 i = 0; i < objList->size(); i++)
       if(objList->get(i)->isSelected())
-         objList->get(i)->flipVertical(centerY);
+         objList->get(i)->flip(centerY, false);
 
    setNeedToSave(true);
    autoSave();

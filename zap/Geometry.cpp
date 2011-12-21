@@ -239,23 +239,17 @@ void Geometry::rotateAboutPoint(const Point &center, F32 angle)
 }
 
 
-void Geometry::flipHorizontal(F32 centerX)
+void Geometry::flip(F32 center, bool isHoriz)
 {
    for(S32 i = 0; i < getVertCount(); i++)
    {
       Point p = getVert(i);
-      p.x = centerX * 2 - p.x;
-      setVert(p, i);
-   }
-}
+      
+      if(isHoriz)
+         p.x = center * 2 - p.x;
+      else
+         p.y = center * 2 - p.y;
 
-
-void Geometry::flipVertical(F32 centerY)
-{
-   for(S32 i = 0; i < getVertCount(); i++)
-   {
-      Point p = getVert(i);
-      p.y = centerY * 2 - p.y;
       setVert(p, i);
    }
 }
