@@ -99,7 +99,7 @@ bool isDamageableType(U8 x)
          x == ResourceItemTypeNumber || x == TestItemTypeNumber || x == AsteroidTypeNumber ||
          x == TurretTypeNumber || x == ForceFieldProjectorTypeNumber ||
          x == FlagTypeNumber || x == SoccerBallItemTypeNumber || x == CircleTypeNumber ||
-         x == ReactorTypeNumber;
+         x == CoreTypeNumber;
 }
 
 
@@ -125,7 +125,7 @@ bool isCollideableType(U8 x)
    return
          x == BarrierTypeNumber || x == PolyWallTypeNumber ||
          x == TurretTypeNumber || x == ForceFieldTypeNumber ||
-         x == ForceFieldProjectorTypeNumber || x == ReactorTypeNumber;
+         x == ForceFieldProjectorTypeNumber || x == CoreTypeNumber;
 }
 
 
@@ -160,7 +160,7 @@ bool isWeaponCollideableType(U8 x)
          x == FlagTypeNumber || x == SoccerBallItemTypeNumber ||
          x == AsteroidTypeNumber || x == TestItemTypeNumber || x == ResourceItemTypeNumber ||
          x == TurretTypeNumber || x == ForceFieldProjectorTypeNumber ||
-         x == BarrierTypeNumber || x == PolyWallTypeNumber || x == ForceFieldTypeNumber || x == CircleTypeNumber || x == ReactorTypeNumber;
+         x == BarrierTypeNumber || x == PolyWallTypeNumber || x == ForceFieldTypeNumber || x == CircleTypeNumber || x == CoreTypeNumber;
 }
 
 bool isAsteroidCollideableType(U8 x)
@@ -169,7 +169,7 @@ bool isAsteroidCollideableType(U8 x)
          x == PlayerShipTypeNumber || x == RobotShipTypeNumber ||
          x == TestItemTypeNumber || x == ResourceItemTypeNumber ||
          x == TurretTypeNumber || x == ForceFieldProjectorTypeNumber ||
-         x == BarrierTypeNumber || x == PolyWallTypeNumber || x == ForceFieldTypeNumber || x == ReactorTypeNumber;
+         x == BarrierTypeNumber || x == PolyWallTypeNumber || x == ForceFieldTypeNumber || x == CoreTypeNumber;
 }
 
 bool isFlagCollideableType(U8 x)
@@ -197,7 +197,7 @@ bool isVisibleOnCmdrsMapType(U8 x)
          x == SpeedZoneTypeNumber || x == TeleportTypeNumber ||
          x == LineTypeNumber || x == TextItemTypeNumber ||
          x == AsteroidTypeNumber || x == TestItemTypeNumber || x == ResourceItemTypeNumber ||
-         x == EnergyItemTypeNumber || x == RepairItemTypeNumber || x == ReactorTypeNumber;
+         x == EnergyItemTypeNumber || x == RepairItemTypeNumber || x == CoreTypeNumber;
 }
 
 bool isVisibleOnCmdrsMapWithSensorType(U8 x)
@@ -212,7 +212,7 @@ bool isVisibleOnCmdrsMapWithSensorType(U8 x)
          x == LineTypeNumber || x == TextItemTypeNumber ||
          x == AsteroidTypeNumber || x == TestItemTypeNumber || x == ResourceItemTypeNumber ||
          x == EnergyItemTypeNumber || x == RepairItemTypeNumber ||
-         x == ReactorTypeNumber ||
+         x == CoreTypeNumber ||
          x == BulletTypeNumber || x == MineTypeNumber;  // Weapons visible on commander's map for sensor
 }
 

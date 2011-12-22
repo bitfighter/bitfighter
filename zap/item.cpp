@@ -226,85 +226,85 @@ GameObject *Item::getGameObject()
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-TNL_IMPLEMENT_NETOBJECT(Reactor);
-class LuaReactor;
+TNL_IMPLEMENT_NETOBJECT(Core);
+class LuaCore;
 
 // Constructor
-Reactor::Reactor() : Parent(Point(0,0), F32(ReactorStartWidth))
+Core::Core() : Parent(Point(0,0), F32(CoreStartWidth))
 {
    mNetFlags.set(Ghostable);
-   mObjectTypeNumber = ReactorTypeNumber;
-   mHitPoints = ReactorStartingHitPoints;     // Hits to kill
+   mObjectTypeNumber = CoreTypeNumber;
+   mHitPoints = CoreStartingHitPoints;     // Hits to kill
    hasExploded = false;
 
    mKillString = "crashed into an reactor";     // TODO: Really needed?
 }
 
 
-Reactor *Reactor::clone() const
+Core *Core::clone() const
 {
-   return new Reactor(*this);
+   return new Core(*this);
 }
 
 
-void Reactor::renderItem(const Point &pos)
+void Core::renderItem(const Point &pos)
 {
    if(!hasExploded)
-      renderReactor(pos, calcReactorWidth() / 2);
+      renderCore(pos, calcCoreWidth() / 2);
 }
 
 
-void Reactor::renderDock()
+void Core::renderDock()
 {
-   renderReactor(getVert(0), 5);
+   renderCore(getVert(0), 5);
 }
 
 
-const char *Reactor::getEditorHelpString()
+const char *Core::getEditorHelpString()
 {
-   return "Reactor.  Destroy to score.";
+   return "Core.  Destroy to score.";
 }
 
 
-const char *Reactor::getPrettyNamePlural()
+const char *Core::getPrettyNamePlural()
 {
-   return "Reactors";
+   return "Cores";
 }
 
 
-const char *Reactor::getOnDockName()
+const char *Core::getOnDockName()
 {
-   return "Rctr";
+   return "Core";
 }
 
 
-const char *Reactor::getOnScreenName()
+const char *Core::getOnScreenName()
 {
-   return "Reactor";
+   return "Core";
 }
 
 
-F32 Reactor::getEditorRadius(F32 currentScale)
+F32 Core::getEditorRadius(F32 currentScale)
 {
    return getRadius() * currentScale;
 }
 
 
-bool Reactor::getCollisionCircle(U32 state, Point &center, F32 &radius) const
+bool Core::getCollisionCircle(U32 state, Point &center, F32 &radius) const
 {
    return false;
 }
 
 
-bool Reactor::getCollisionPoly(Vector<Point> &polyPoints) const
+bool Core::getCollisionPoly(Vector<Point> &polyPoints) const
 {
-   Rect rect = Rect(getActualPos(), calcReactorWidth());
+   Rect rect = Rect(getActualPos(), calcCoreWidth());
    rect.toPoly(polyPoints);
    return true;
 }
 
 
-void Reactor::damageObject(DamageInfo *theInfo)
+void Core::damageObject(DamageInfo *theInfo)
 {
    if(hasExploded)  
       return; 
@@ -319,17 +319,17 @@ void Reactor::damageObject(DamageInfo *theInfo)
    }
 
    setMaskBits(ItemChangedMask);    // So our clients will get new size
-   setRadius(calcReactorWidth());
+   setRadius(calcCoreWidth());
 }
 
 
-void Reactor::setRadius(F32 radius) 
+void Core::setRadius(F32 radius) 
 { 
    Parent::setRadius(radius * getGame()->getGridSize());
 }
 
 
-U32 Reactor::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
+U32 Core::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
    U32 retMask = Parent::packUpdate(connection, updateMask, stream);
 
@@ -342,14 +342,14 @@ U32 Reactor::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *
 }
 
 
-void Reactor::unpackUpdate(GhostConnection *connection, BitStream *stream)
+void Core::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    Parent::unpackUpdate(connection, stream);
 
    if(stream->readFlag())
    {
       mHitPoints = stream->readInt(8);
-      setRadius(calcReactorWidth());
+      setRadius(calcCoreWidth());
 
       //if(!mInitial)
       //   SoundSystem::playSoundEffect(SFXAsteroidExplode, mMoveState[RenderState].pos, Point());
@@ -366,68 +366,68 @@ void Reactor::unpackUpdate(GhostConnection *connection, BitStream *stream)
 }
 
 
-F32 Reactor::calcReactorWidth() const
+F32 Core::calcCoreWidth() const
 {
    return
-         F32(ReactorStartWidth - ReactorMinWidth) * F32(mHitPoints) / F32(ReactorStartingHitPoints) + ReactorMinWidth;
+         F32(CoreStartWidth - CoreMinWidth) * F32(mHitPoints) / F32(CoreStartingHitPoints) + CoreMinWidth;
 }
 
 
-bool Reactor::collide(GameObject *otherObject)
+bool Core::collide(GameObject *otherObject)
 {
    return true;
 }
 
 
 // Client only
-void Reactor::onItemExploded(Point pos)
+void Core::onItemExploded(Point pos)
 {
    SoundSystem::playSoundEffect(SFXAsteroidExplode, pos, Point());
    // FXManager::emitBurst(pos, Point(.1, .1), Colors::white, Colors::white, 10);
 }
 
 
-const char Reactor::className[] = "Reactor";      // Class name as it appears to Lua scripts
+const char Core::className[] = "Core";      // Class name as it appears to Lua scripts
 
 // Lua constructor
-Reactor::Reactor(lua_State *L)
+Core::Core(lua_State *L)
 {
    // Do we want to construct these from Lua?  If so, do that here!
 }
 
 
 // Define the methods we will expose to Lua
-Lunar<Reactor>::RegType Reactor::methods[] =
+Lunar<Core>::RegType Core::methods[] =
 {
    // Standard gameItem methods
-   method(Reactor, getClassID),
-   method(Reactor, getLoc),
-   method(Reactor, getRad),
-   method(Reactor, getVel),
-   method(Reactor, getTeamIndx),
+   method(Core, getClassID),
+   method(Core, getLoc),
+   method(Core, getRad),
+   method(Core, getVel),
+   method(Core, getTeamIndx),
 
    // Class specific methods
-   method(Reactor, getHitPoints),
+   method(Core, getHitPoints),
 
    {0,0}    // End method list
 };
 
 
-S32 Reactor::getClassID(lua_State *L)
+S32 Core::getClassID(lua_State *L)
 {
-   return returnInt(L, ReactorTypeNumber);
+   return returnInt(L, CoreTypeNumber);
 }
 
 
-S32 Reactor::getHitPoints(lua_State *L)
+S32 Core::getHitPoints(lua_State *L)
 {
    return returnInt(L, mHitPoints);
 }
 
 
-void Reactor::push(lua_State *L)
+void Core::push(lua_State *L)
 {
-   Lunar<Reactor>::push(L, this);
+   Lunar<Core>::push(L, this);
 }
 
 

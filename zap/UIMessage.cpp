@@ -165,7 +165,7 @@ void MessageUserInterface::render()
    // Draw title, message, and footer
    glColor4f(mMessageColor.r, mMessageColor.g, mMessageColor.b, fadeFactor);
 
-   if(mTitle != "")
+   if(strcmp(mTitle, ""))  // If they are different
       drawCenteredString(vertMargin + hInset + mVertOffset, 30, mTitle);
 
    for(S32 i = 0; i < mNumLines; i++)

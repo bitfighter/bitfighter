@@ -92,29 +92,29 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class Reactor : public Item
+class Core : public Item
 {
 
 typedef Item Parent;
 
 private:
-   static const U32 ReactorStartWidth = 50;
-   static const U32 ReactorMinWidth = 10;
-   static const U32 ReactorStartingHitPoints = 15;
+   static const U32 CoreStartWidth = 50;
+   static const U32 CoreMinWidth = 10;
+   static const U32 CoreStartingHitPoints = 15;
 
    bool hasExploded;
    U32 mHitPoints;
 
 public:
-   Reactor();     // Constructor  
-   Reactor *clone() const;
+   Core();     // Constructor  
+   Core *clone() const;
 
    void renderItem(const Point &pos);
    bool getCollisionPoly(Vector<Point> &polyPoints) const;
    bool getCollisionCircle(U32 state, Point &center, F32 &radius) const;
    bool collide(GameObject *otherObject);
 
-   F32 calcReactorWidth() const;
+   F32 calcCoreWidth() const;
 
    void damageObject(DamageInfo *theInfo);
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
@@ -123,7 +123,7 @@ public:
 
    void setRadius(F32 radius);
 
-   TNL_DECLARE_CLASS(Reactor);
+   TNL_DECLARE_CLASS(Core);
 
    ///// Editor methods
    const char *getEditorHelpString();
@@ -136,11 +136,11 @@ public:
 
    ///// Lua interface
 public:
-   Reactor(lua_State *L);    // Constructor
+   Core(lua_State *L);    // Constructor
 
    static const char className[];
 
-   static Lunar<Reactor>::RegType methods[];
+   static Lunar<Core>::RegType methods[];
 
    S32 getClassID(lua_State *L);
 

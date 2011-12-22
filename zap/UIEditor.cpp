@@ -223,7 +223,7 @@ void EditorUserInterface::populateDock()
    yPos += spacer;
 
    //addDockObject(new CircleSpawn(), xPos - 10, yPos);
-   addDockObject(new Reactor(), xPos /*+ 10*/, yPos);
+   addDockObject(new Core(), xPos /*+ 10*/, yPos);
    yPos += spacer;
 
 
