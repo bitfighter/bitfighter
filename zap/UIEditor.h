@@ -414,7 +414,11 @@ public:
 
    S32 checkCornersForSnap(const Point &clickPoint,  const Vector<WallEdge *> &edges, F32 &minDist, Point &snapPoint);
 
-   void deleteItem(S32 itemIndex);
+   void deleteItem(S32 itemIndex, bool batchMode = false);
+
+   // Helpers for doing batch deletes
+   void doneDeleteingWalls(); 
+   void doneDeleteing();
 
    void runScript(const FolderManager *folderManager, const string &scriptName, const Vector<string> &args);
    void runPlugin(const FolderManager *folderManager, const string &scriptName, const Vector<string> &args);        

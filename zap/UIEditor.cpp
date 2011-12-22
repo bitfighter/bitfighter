@@ -2844,6 +2844,7 @@ void EditorUserInterface::findSnapVertex()
 }
 
 
+// Delete selected items (true = items only, false = items & vertices)
 void EditorUserInterface::deleteSelection(bool objectsOnly)
 {
    if(mDraggingObjects)     // No deleting while we're dragging, please...
@@ -2852,11 +2853,11 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
    if(!anythingSelected())  // Nothing to delete
       return;
 
-   bool deleted = false;
+   bool deleted = false, deletedWall = false;
 
    const Vector<EditorObject *> *objList = getObjectList();
 
-   for(S32 i = objList->size()-1; i >= 0; i--)  // Reverse to avoid having to have i-- in middle of loop
+   for(S32 i = objList->size() - 1; i >= 0; i--)  // Reverse to avoid having to have i-- in middle of loop
    {
       EditorObject *obj = objList->get(i);
 
@@ -2869,7 +2870,10 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
          if(!deleted)
             saveUndoState();
 
-         deleteItem(i);
+         if(isWallType(obj->getObjectTypeNumber()))
+            deletedWall = true;
+
+         deleteItem(i, true);
          deleted = true;
       }
       else if(!objectsOnly)      // Deleted any selected vertices
@@ -2880,7 +2884,6 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
          {
             if(obj->vertSelected(j))
             {
-               
                if(!deleted)
                   saveUndoState();
               
@@ -2898,7 +2901,10 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
                                      || (obj->getGeomType() == geomPolyLine       && obj->getVertCount() < 2)
                                      || (obj->getGeomType() == geomPolygon       && obj->getVertCount() < 2))
          {
-            deleteItem(i);
+            if(isWallType(obj->getObjectTypeNumber()))
+               deletedWall = true;
+
+            deleteItem(i, true);
             deleted = true;
          }
          else if(geomChanged)
@@ -2907,12 +2913,18 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
       }  // else if(!objectsOnly) 
    }  // for
 
+
+   if(deletedWall)
+      doneDeleteingWalls();
+
    if(deleted)
    {
       setNeedToSave(true);
       autoSave();
 
       mHitItem = NULL;     // In case we just deleted a lit item; not sure if really needed, as we do this above
+
+      doneDeleteing();
    }
 }
 
@@ -3110,7 +3122,7 @@ void EditorUserInterface::joinBarrier()
 }
 
 
-void EditorUserInterface::deleteItem(S32 itemIndex)
+void EditorUserInterface::deleteItem(S32 itemIndex, bool batchMode)
 {
    const Vector<EditorObject *> *objList = getObjectList();
    EditorObject *obj = objList->get(itemIndex);
@@ -3118,23 +3130,38 @@ void EditorUserInterface::deleteItem(S32 itemIndex)
    Game *game = getGame();
    WallSegmentManager *wallSegmentManager = game->getWallSegmentManager();
 
-   U8 type = obj->getObjectTypeNumber();
-
-   if(isWallType(type))
+   if(isWallType(obj->getObjectTypeNumber()))
    {
       // Need to recompute boundaries of any intersecting walls
-      //wallSegmentManager->invalidateIntersectingSegments(game->getEditorDatabase(), obj); // Mark intersecting segments invalid
-      wallSegmentManager->deleteSegments(obj->getItemId());                               // Delete the segments associated with the wall
-
+      wallSegmentManager->deleteSegments(obj->getItemId());                      // Delete the segments associated with the wall
       game->getEditorDatabase()->removeFromDatabase(obj, obj->getExtent());
 
-      wallSegmentManager->recomputeAllWallGeometry(game->getEditorDatabase());            // Recompute wall edges
-      resnapAllEngineeredItems();         // Really only need to resnap items that were attached to deleted wall... but we
-                                          // don't yet have a method to do that, and I'm feeling lazy at the moment
+      if(!batchMode)
+         doneDeleteingWalls();
    }
    else
       game->getEditorDatabase()->removeFromDatabase(obj, obj->getExtent());
 
+
+   if(!batchMode)
+      doneDeleteing();
+}
+
+
+// After deleting a bunch of items, clean up
+void EditorUserInterface::doneDeleteingWalls()
+{
+   Game *game = getGame();
+   WallSegmentManager *wallSegmentManager = game->getWallSegmentManager();
+
+   wallSegmentManager->recomputeAllWallGeometry(game->getEditorDatabase());   // Recompute wall edges
+   resnapAllEngineeredItems();         // Really only need to resnap items that were attached to deleted wall... but we
+                                       // don't yet have a method to do that, and I'm feeling lazy at the moment
+}
+
+
+void EditorUserInterface::doneDeleteing()
+{
    // Reset a bunch of things
    mSnapObject = NULL;
    mSnapVertexIndex = NONE;
@@ -3142,7 +3169,6 @@ void EditorUserInterface::deleteItem(S32 itemIndex)
    validateLevel();
 
    onMouseMoved();   // Reset cursor  
-   game->getEditorDatabase()->dumpObjects();
 }
 
 
