@@ -3940,7 +3940,7 @@ void EditorUserInterface::onFinishedDragging()
             deletedSomething = true;
          }
 
-      // We deleted something, our job is done
+      // We deleted something, do some clean up and our job is done
       if(deletedSomething)
       {
          if(deletedWall)
