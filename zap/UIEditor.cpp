@@ -3155,8 +3155,7 @@ void EditorUserInterface::doneDeleteingWalls()
    WallSegmentManager *wallSegmentManager = game->getWallSegmentManager();
 
    wallSegmentManager->recomputeAllWallGeometry(game->getEditorDatabase());   // Recompute wall edges
-   resnapAllEngineeredItems();         // Really only need to resnap items that were attached to deleted wall... but we
-                                       // don't yet have a method to do that, and I'm feeling lazy at the moment
+   resnapAllEngineeredItems();         
 }
 
 
@@ -3928,19 +3927,29 @@ void EditorUserInterface::onFinishedDragging()
    if(mouseOnDock() && !mDraggingDockItem)
    {
       const Vector<EditorObject *> *objList = getObjectList();
-      bool deletedSomething = false;
+      bool deletedSomething = false, deletedWall = false;
 
       for(S32 i = 0; i < objList->size(); i++)    //  Delete all selected items
          if(objList->get(i)->isSelected())
          {
-            deleteItem(i);
+            if(isWallType(objList->get(i)->getObjectTypeNumber()))
+               deletedWall = true;
+
+            deleteItem(i, true);
             i--;
             deletedSomething = true;
          }
 
       // We deleted something, our job is done
       if(deletedSomething)
+      {
+         if(deletedWall)
+            doneDeleteingWalls();
+
+         doneDeleteing();
+
          return;
+      }
    }
 
    // Mouse not on dock, we are either:
