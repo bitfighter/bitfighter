@@ -473,7 +473,9 @@ Point EditorObject::getInitialPlacementOffset(F32 gridSize)
 
 void EditorObject::renderItemText(const char *text, S32 offset, F32 currentScale)
 {
+#ifndef ZAP_DEDICATED
    UserInterface::drawString(F32(580), F32(120), 12 / currentScale, text );     // TODO: Fix
+#endif
 }
 
 
@@ -495,6 +497,7 @@ void EditorObject::beginBatchGeomUpdate()
 }
 
 
+#ifndef ZAP_DEDICATED
 void EditorObject::endBatchGeomUpdate(ClientGame *game, bool modifiedWalls)
 {
    if(modifiedWalls)
@@ -502,6 +505,7 @@ void EditorObject::endBatchGeomUpdate(ClientGame *game, bool modifiedWalls)
 
    mBatchUpdatingGeom = false;
 }
+#endif
 
 
 bool EditorObject::showAttribsWhenSelected()

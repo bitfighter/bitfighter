@@ -129,6 +129,8 @@ XXX need to document timers, new luavec stuff XXX
 
 #include "zapjournal.h"
 
+#include "md5wrapper.h"
+
 #include <stdarg.h>
 
 using namespace TNL;
@@ -150,7 +152,11 @@ using namespace TNL;
 #include "Colors.h"
 #include "ScreenInfo.h"
 #include "stringUtils.h"
-#include "BanList.h"    
+#include "BanList.h"
+#include "dataConnection.h"
+#include "game.h"
+#include "SoundSystem.h"
+#include "ship.h"
 
 #include <math.h>
 
@@ -186,10 +192,12 @@ using namespace TNL;
 
 namespace Zap
 {
+#ifndef ZAP_DEDICATED
 extern ClientGame *gClientGame1;
 extern ClientGame *gClientGame2;
 
 extern void setDefaultBlendFunction();
+#endif
 
 // Handle any md5 requests
 md5wrapper md5;

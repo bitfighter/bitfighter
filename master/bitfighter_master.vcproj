@@ -414,6 +414,10 @@
 				RelativePath="..\zap\stringUtils.h"
 				>
 			</File>
+			<File
+				RelativePath="..\zap\WeaponInfo.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"

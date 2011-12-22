@@ -1026,6 +1026,7 @@ void GameType::onGameOver()
 TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cSetGameOver, (bool gameOver), (gameOver),
                             NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhost, 0)
 {
+#ifndef ZAP_DEDICATED
    mBetweenLevels = gameOver;
    mGameOver = gameOver;
 
@@ -1036,6 +1037,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cSetGameOver, (bool gameOver), (gameOver
       if(clientGame->getUIMode() == TeamShuffleMode) 
          clientGame->enterMode(PlayMode);
    }
+#endif
 }
 
 

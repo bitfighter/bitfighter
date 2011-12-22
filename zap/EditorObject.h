@@ -115,7 +115,9 @@ public:
    virtual void renderEditor(F32 currentScale);
 
    static void beginBatchGeomUpdate();                                     // Suspend certain geometry operations so they can be batched when 
+#ifndef ZAP_DEDICATED
    static void endBatchGeomUpdate(ClientGame *game, bool modifiedWalls);   // this method is called
+#endif
 
    // Should we show item attributes when it is selected? (only overridden by TextItem)
    virtual bool showAttribsWhenSelected();
