@@ -3498,7 +3498,7 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
          {
             // If we hit a vertex of an already selected item --> now we can move that vertex w/o losing our selection.
             // Note that in the case of a point item, we want to skip this step, as we don't select individual vertices.
-            if(mHitVertex != NONE && mHitItem->isSelected() && mHitItem->getGeomType() != geomPoint)    
+            if(mHitVertex != NONE && mHitItem && mHitItem->isSelected() && mHitItem->getGeomType() != geomPoint)
             {
                clearSelection();
                mHitItem->selectVert(mHitVertex);
