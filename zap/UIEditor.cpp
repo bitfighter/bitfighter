@@ -4015,6 +4015,7 @@ S32 EditorUserInterface::getItemSelectedCount()
    return count;
 }
 
+
 bool EditorUserInterface::anythingSelected()
 {
    const Vector<EditorObject *> *objList = getObjectList();
