@@ -92,10 +92,6 @@ protected:
    ///
    /// @{
 
-   StringTableEntry mVersionString;     ///< The unique version string for this server or client
-                                        ///< Only used in version 0 protocol.  In subsequent versions, the Version vars
-                                        ///< below will hold actual version numbers, and this var will hold a "+".
-
    U32              mCMProtocolVersion; ///< Version of the protocol we'll be using to converse with the client
    U32              mCSProtocolVersion; ///< Protocol version client will use to talk to server (client can only play with others 
                                         ///     using this same version)

@@ -40,6 +40,8 @@
 
 #include "../zap/stringUtils.h"     // For itos, replaceString
 
+#include "../zap/version.h"  // for MASTER_PROTOCOL_VERSION - in case we ever forget to update master...
+
 
 using namespace TNL;
 using namespace std;
@@ -300,14 +302,8 @@ static const char *sanitizeForJson(const char *value)
       for(MasterServerConnection *walk = gServerList.mNext; walk != &gServerList; walk = walk->mNext)
       {
          // First check the version -- we only want to match potential players that agree on which protocol to use
-         if(mCMProtocolVersion == 0)      // CM Protocol 0 uses strings for version numbers
-         {     // braces required
-            if(walk->mVersionString != mVersionString)
-               continue;
-         }
-         else // Version 1 or higher protocol uses a numerical versioning system
-            if(walk->mCSProtocolVersion != mCSProtocolVersion)     // Incomptible protocols
-               continue;
+         if(walk->mCSProtocolVersion != mCSProtocolVersion)     // Incomptible protocols
+            continue;
 
          // Ok, so the protocol version is correct, however...
          if(!(walk->mRegionCode & regionMask))       // ...wrong region
@@ -775,28 +771,19 @@ static const char *sanitizeForJson(const char *value)
       // version of the protocol or another.
       // Also note that if player is hosting a game interactively (i.e. with host option on main menu), they
       // will create two connections here, one for the host, and one for the client instance.
-      char readstr[256];
-      bstream->readString(readstr);
-      mVersionString = readstr;
 
-      if(!strcmp(mVersionString.getString(), "+"))          // This is a version 1 or above protocol
-      {
-         bstream->read(&mCMProtocolVersion);    // Version of protocol we'll use with the client
-         bstream->read(&mCSProtocolVersion);    // Protocol this client uses for C-S communication
-         bstream->read(&mClientBuild);          // Client's build number
-         bstream->readString(readstr);          // Client's joystick autodetect string
-         mAutoDetectStr = readstr;
-      }
-      else                                      // Otherwise, set some defaults  --->> this stuff below here is old, and 
-      {                                         // only applies to very old versions of Bitfighter.... probably safe to delete.
-         mCMProtocolVersion = 0;                // This is a version 0 protocol
-         mCSProtocolVersion = 0;
-         mClientBuild = 0;
-         mAutoDetectStr = "N/A";
-      }
+      char readstr[256]; // to hold the string being read
+
+      bstream->read(&mCMProtocolVersion);    // Version of protocol we'll use with the client
+      if(mCMProtocolVersion < 4 || mCMProtocolVersion > MASTER_PROTOCOL_VERSION) // check for unsupported version
+         return false;
+
+      bstream->read(&mCSProtocolVersion);    // Protocol this client uses for C-S communication
+      bstream->read(&mClientBuild);          // Client's build number
+      mIsGameServer = bstream->readFlag();
 
       // If it's a game server, read status info...
-      if((mIsGameServer = bstream->readFlag()) == true)
+      if(mIsGameServer)
       {
          bstream->read(&mCPUSpeed);
          bstream->read(&mRegionCode);
@@ -816,22 +803,25 @@ static const char *sanitizeForJson(const char *value)
 
          bstream->readString(readstr);
 
-         if(mCMProtocolVersion >= 2)
+         //if(mCMProtocolVersion >= 2)
             mServerDescr = readstr;
-         else
-            mServerDescr = "";
+         //else
+         //   mServerDescr = "";
 
          linkToServerList();
       }
       else     // Not a server? Must be a client
       {
+         bstream->readString(readstr);          // Client's joystick autodetect string
+         mAutoDetectStr = readstr;
+
          bstream->readString(readstr);
          mPlayerOrServerName = cleanName(readstr).c_str();
 
-         if(mCMProtocolVersion <= 2)
-            linkToClientList();
+         //if(mCMProtocolVersion <= 2)
+         //   linkToClientList();
 
-         else     // Level 3 or above: Read a password & id and check them out
+         //else     // Level 3 or above: Read a password & id and check them out
          {
             bstream->readString(readstr);
             string password = readstr;
@@ -891,7 +881,7 @@ static const char *sanitizeForJson(const char *value)
       // Figure out which MOTD to send to client, based on game version (stored in mVersionString)
       string motdString = "Welcome to Bitfighter!";  // Default msg
 
-      if(mCMProtocolVersion >= 1)    // Don't even bother with level 0 clients -- none of these clients are out there anymore!
+      //if(mCMProtocolVersion >= 1)    // Don't even bother with level 0 clients -- none of these clients are out there anymore!
       {
          for(S32 i = 0; i < MOTDVersionVec.size(); i++)
             if(mClientBuild == MOTDVersionVec[i])
@@ -909,7 +899,8 @@ static const char *sanitizeForJson(const char *value)
                                                     strcmp(mAutoDetectStr.getString(), "") ? mAutoDetectStr.getString():"<None>");
       }
 
-      m2cSetMOTD(gMasterName.c_str(), motdString.c_str());     // Even level 0 clients can handle this
+      if(!mIsGameServer)  // seems to be just a waste of bandwidth when sending this to servers
+         m2cSetMOTD(gMasterName.c_str(), motdString.c_str());     // Even level 0 clients can handle this
 
       return true;
    }

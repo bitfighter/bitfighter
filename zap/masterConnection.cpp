@@ -387,18 +387,10 @@ void MasterServerConnection::writeConnectRequest(BitStream *bstream)
 {
    Parent::writeConnectRequest(bstream);
 
-   bstream->writeString("+");                // Just a dummy string to indicate we'll be using a different protocol than the original, 
-                                             // version will be specified
    bstream->write(MASTER_PROTOCOL_VERSION);  // Version of the protocol we'll be using to communicate with the master
    bstream->write(CS_PROTOCOL_VERSION);      // Version of the Client-Server protocol we use (can only play with others using same version)
    bstream->write(BUILD_VERSION);            // Current build of this game
 
-#ifdef ZAP_DEDICATED
-   bstream->writeString("");  // empty controller string for dedicated.
-#else
-   // First controller's autodetect string (for research purposes!)
-   bstream->writeString(Joystick::DetectedJoystickNameList.size() > 0 ? Joystick::DetectedJoystickNameList[0].c_str() : "");
-#endif
 
 
    if(bstream->writeFlag(mGame->isServer()))     // We're a server, tell the master a little about us
@@ -424,6 +416,9 @@ void MasterServerConnection::writeConnectRequest(BitStream *bstream)
 #ifndef ZAP_DEDICATED
       ClientGame *clientGame = (ClientGame *)mGame;
       ClientInfo *clientInfo = clientGame->getClientInfo();
+
+      // First controller's autodetect string (for research purposes!)
+      bstream->writeString(Joystick::DetectedJoystickNameList.size() > 0 ? Joystick::DetectedJoystickNameList[0].c_str() : "");
 
       bstream->writeString(clientInfo->getName().getString());          // User's nickname
       bstream->writeString(clientGame->getLoginPassword().c_str());     // and whatever password they supplied
