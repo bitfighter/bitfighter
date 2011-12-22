@@ -234,7 +234,7 @@ const char *GameConnection::getConnectionStateString(S32 i)
       "Connection timed out",
    };
 
-   TNLAssert(i < ARRAYSIZE(connectStatesTable), "Invalid index!");
+   TNLAssert(i < S32(ARRAYSIZE(connectStatesTable)), "Invalid index!");
 
    return connectStatesTable[i];
 }
