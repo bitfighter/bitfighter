@@ -913,17 +913,6 @@ GameObject *EngineeredItem::getGameObject()
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-// Returns true if we should use the in-game rendering, false if we should use iconified editor rendering
-// needed? or delete?
-static bool renderFull(F32 currentScale, bool snapped)
-{
-   return(snapped && currentScale > 70);
-}
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
 TNL_IMPLEMENT_NETOBJECT(ForceFieldProjector);
 
 // Constructor

@@ -2354,10 +2354,10 @@ void GameUserInterface::processChatModeKey(InputCode inputCode, char ascii)
       // Protect against crashes while game is initializing (because we look at the ship for the player's name)
       if(getGame()->getConnectionToServer())     // getGame() cannot return NULL here
       {
-         S32 promptSize = getStringWidth(CHAT_FONT_SIZE, mCurrentChatType == TeamChat ? "(Team): " : "(Global): ");
-
-         S32 nameSize = getStringWidthf(CHAT_FONT_SIZE, "%s: ", getGame()->getClientInfo()->getName().getString());
-         S32 nameWidth = max(nameSize, promptSize);
+//         S32 promptSize = getStringWidth(CHAT_FONT_SIZE, mCurrentChatType == TeamChat ? "(Team): " : "(Global): ");
+//
+//         S32 nameSize = getStringWidthf(CHAT_FONT_SIZE, "%s: ", getGame()->getClientInfo()->getName().getString());
+//         S32 nameWidth = max(nameSize, promptSize);
          // Above block repeated above
 
          mLineEditor.addChar(ascii);
@@ -2814,8 +2814,6 @@ void GameUserInterface::renderScoreboard()
    if(!gameType)
       return;
 
-   S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
-
    if(mInputModeChangeAlertDisplayTimer.getCurrent() != 0)
    {
       // Display alert about input mode changing
@@ -3042,8 +3040,6 @@ void GameUserInterface::renderBasicInterfaceOverlay(const GameType *gameType, bo
       }
 
       teams.sort(teamScoreSort);    
-
-      S32 maxScore = gameType->getLeadingScore();
 
       const S32 textsize = 32;
       S32 xpos = gScreenInfo.getGameCanvasWidth() - UserInterface::horizMargin - gameType->getDigitsNeededToDisplayScore() * 

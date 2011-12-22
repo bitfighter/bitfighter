@@ -173,7 +173,6 @@ void KeyDefMenuUserInterface::render()
    {
       getUIManager()->getGameUserInterface()->render();
       glColor(Colors::black, 0.6f);
-      bool disableBlending = false;
 
       TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
@@ -260,8 +259,6 @@ void KeyDefMenuUserInterface::render()
       F32 alpha = 1.0;
       if (errorMsgTimer.getCurrent() < 1000)
          alpha = (F32) errorMsgTimer.getCurrent() / 1000;
-
-      bool disableBlending = false;
 
       TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 

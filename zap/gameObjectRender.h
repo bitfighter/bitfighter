@@ -41,6 +41,12 @@ using namespace std;
 
 namespace Zap
 {
+
+extern const Color *HIGHLIGHT_COLOR;
+extern const Color *SELECT_COLOR;
+
+static const S32 NO_NUMBER = -1;
+
 //////////
 // Primitives
 extern void glVertex(const Point &p);

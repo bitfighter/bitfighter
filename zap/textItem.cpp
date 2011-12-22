@@ -135,7 +135,6 @@ void TextItem::render()
 void TextItem::renderEditorPreview(F32 currentScale)
 {
 #ifndef ZAP_DEDICATED
-   ClientGame *game = dynamic_cast<ClientGame *>(getGame());
    renderTextItem(getVert(0), getVert(1), mSize, mText, getTeamColor(mTeam));
 #endif
 }

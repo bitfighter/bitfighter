@@ -191,8 +191,6 @@ void GameParamUserInterface::updateMenuItems()
 // Runs as we're exiting the menu
 void GameParamUserInterface::onEscape()
 {
-   S32 gameTypeIndex = dynamic_cast<ToggleMenuItem *>(getMenuItem(0))->getValueIndex();
-
    getUIManager()->getEditorUserInterface()->setLevelFileName(getMenuItem(1)->getValue());  
 
    GameType *gameType = getGame()->getGameType();

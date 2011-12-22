@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------------------
+   //-----------------------------------------------------------------------------------
 //
 // Bitfighter - A multiplayer vector graphics space game
 // Based on Zap demo released for Torque Network Library by GarageGames.com
@@ -1067,19 +1067,6 @@ void GameConnection::sendLevelList()
 }
 
 
-//class RPC_GameConnection_s2cDisplayMessage : public TNL::RPCEvent { \
-//public: \
-//   TNL::FunctorDecl<void (GameConnection::*) args > mFunctorDecl;\
-//   RPC_GameConnection_s2cDisplayMessage() : TNL::RPCEvent(guaranteeType, eventDirection), mFunctorDecl(&GameConnection::s2cDisplayMessage_remote) { mFunctor = &mFunctorDecl; } \
-//   TNL_DECLARE_CLASS( RPC_GameConnection_s2cDisplayMessage ); \
-//   bool checkClassType(TNL::Object *theObject) { return dynamic_cast<GameConnection *>(theObject) != NULL; } }; \
-//   TNL_IMPLEMENT_NETEVENT( RPC_GameConnection_s2cDisplayMessage, groupMask, rpcVersion ); \
-//   void GameConnection::name args { if(!canPostNetEvent()) return; RPC_GameConnection_s2cDisplayMessage *theEvent = new RPC_GameConnection_s2cDisplayMessage; theEvent->mFunctorDecl.set argNames ; postNetEvent(theEvent); } \
-//   TNL::NetEvent * GameConnection::s2cDisplayMessage_construct args { RPC_GameConnection_s2cDisplayMessage *theEvent = new RPC_GameConnection_s2cDisplayMessage; theEvent->mFunctorDecl.set argNames ; return theEvent; } \
-//   void GameConnection::s2cDisplayMessage_test args { RPC_GameConnection_s2cDisplayMessage *theEvent = new RPC_GameConnection_s2cDisplayMessage; theEvent->mFunctorDecl.set argNames ; TNL::PacketStream ps; theEvent->pack(this, &ps); ps.setBytePosition(0); theEvent->unpack(this, &ps); theEvent->process(this); } \
-//   void GameConnection::s2cDisplayMessage_remote args
-
-
 TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayMessage,
                   (RangedU32<0, GameConnection::ColorCount> color, RangedU32<0, NumSFXBuffers> sfx, StringTableEntry formatString),
                   (color, sfx, formatString),
@@ -1629,7 +1616,6 @@ void GameConnection::onConnectionEstablished()
    U32 maxSendBandwidth = 65535; //2000;
    U32 maxRecvBandwidth = 65535; //2000;
 
-   Address addr = this->getNetAddress();
    if(this->isLocalConnection())    // Local connections don't use network, maximum bandwidth
    {
       minPacketSendPeriod = 15;
@@ -1708,8 +1694,6 @@ void GameConnection::onConnectionEstablished()
       logprintf(LogConsumer::LogConnection, "%s - client \"%s\" connected.", getNetAddressString(), name);
       logprintf(LogConsumer::ServerFilter,  "%s [%s] joined [%s]", name, 
                                              isLocalConnection() ? "Local Connection" : getNetAddressString(), getTimeStamp().c_str());
-
-      GameType *gt = gServerGame->getGameType();
 
       if(gServerGame->getSettings()->getIniSettings()->allowMapUpload)
          s2rSendableFlags(1);

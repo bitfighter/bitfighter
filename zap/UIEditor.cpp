@@ -316,7 +316,7 @@ void EditorUserInterface::saveUndoState()
    EditorObjectDatabase *eod = getGame()->getEditorDatabase();
    TNLAssert(eod, "bad!");
 
-   EditorObjectDatabase *newDB = eod;   
+   EditorObjectDatabase *newDB = eod;
    eod->dumpObjects();
 
    mUndoItems[mLastUndoIndex % UNDO_STATES] = boost::shared_ptr<EditorObjectDatabase>(new EditorObjectDatabase(*newDB));  // Make a copy
@@ -340,8 +340,6 @@ void EditorUserInterface::saveUndoState()
 // Remove and discard the most recently saved undo state 
 void EditorUserInterface::removeUndoState()
 {
-   EditorObjectDatabase *eod = getGame()->getEditorDatabase();
-
    mLastUndoIndex--;
    //mLastRedoIndex++; 
    mLastRedoIndex = mLastUndoIndex;
@@ -387,7 +385,7 @@ void EditorUserInterface::undo(bool addToRedoStack)
    //getGame()->getEditorDatabase()->dumpObjects();
 
    // Why is this block needed??  Makes larger levels palpably slow...
-   const Vector<EditorObject *> *objects = getGame()->getEditorDatabase()->getObjectList();
+   //const Vector<EditorObject *> *objects = getGame()->getEditorDatabase()->getObjectList();
    //for(S32 i = 0; i < objects->size(); i++)
    //   objects->get(i)->updateExtentInDatabase();
 
@@ -531,8 +529,6 @@ void EditorUserInterface::loadLevel()
    populateDock();                     // Add game-specific items to the dock
 
    // Bulk-process new items, walls first
-   const Vector<EditorObject *> *objList = getObjectList();
-
    game->getWallSegmentManager()->recomputeAllWallGeometry(game->getEditorDatabase());
    
    // Snap all engineered items to the closest wall, if one is found
@@ -1280,7 +1276,7 @@ S32 EditorUserInterface::checkEdgesForSnap(const Point &clickPoint, const Vector
 S32 EditorUserInterface::checkEdgesForSnap(const Point &clickPoint, const Vector<WallEdge *> &edges, bool abcFormat,
                                            F32 &minDist, Point &snapPoint )
 {
-   S32 inc = abcFormat ? 1 : 2;   
+//   S32 inc = abcFormat ? 1 : 2;
    S32 segFound = NONE;
 
    for(S32 i = 0; i < edges.size(); i++)
@@ -1846,7 +1842,6 @@ void EditorUserInterface::render()
       }
 
       fillRendered = false;
-      F32 width = NONE;
 
       // == Draw geomPolyLine features under construction ==
       if(mCreatingPoly || mCreatingPolyline)    
@@ -1889,10 +1884,7 @@ void EditorUserInterface::render()
             LineItem *obj = dynamic_cast<LineItem *>(fillVector[i]);   // Walls are a subclass of LineItem, so this will work for both
 
             if(obj && (obj->isSelected() || (obj->isLitUp() && obj->isVertexLitUp(NONE))))
-            {
-               width = (F32)obj->getWidth();
                break;
-            }
          }
       }
 
@@ -2341,7 +2333,7 @@ void EditorUserInterface::flipSelection(F32 center, bool isHoriz)
 
    Point min, max;
    computeSelectionMinMax(min, max);
-   F32 centerX = (min.x + max.x) / 2;
+//   F32 centerX = (min.x + max.x) / 2;
 
    const Vector<EditorObject *> *objList = getObjectList();
 
@@ -2369,8 +2361,6 @@ void EditorUserInterface::flipSelection(F32 center, bool isHoriz)
    autoSave();
 }
 
-
-extern bool pointInTriangle(const Point &p, const Point &a, const Point &b, const Point &c);
 
 static const S32 POINT_HIT_RADIUS = 9;
 static const S32 EDGE_HIT_RADIUS = 6;
@@ -3179,8 +3169,6 @@ void EditorUserInterface::insertNewItem(U8 itemTypeNumber)
    clearSelection();
    saveUndoState();
 
-   S32 team = TEAM_NEUTRAL;
-
    EditorObject *newObject = NULL;
 
    // Find a dockItem to copy
@@ -3438,18 +3426,14 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
       }
       else     // Start creating a new poly or new polyline (tilde key + right-click ==> start polyline)
       {
-         S32 width;
-
          if(getInputCodeState(KEY_BACKQUOTE))      // Was KEY_TILDE, but SDL reports this key as KEY_BACKQUOTE, at least on US American keyboards
          {
             mCreatingPolyline = true;
             mNewItem = new LineItem();
-            width = 2;
          }
          else
          {
             mCreatingPoly = true;
-            width = Barrier::DEFAULT_BARRIER_WIDTH;
             mNewItem = new WallItem();
          }
 
@@ -3906,6 +3890,8 @@ void EditorUserInterface::onKeyUp(InputCode inputCode)
          }
 
          break;
+      default:
+         break;
    }     // case
 }
 
@@ -4047,7 +4033,7 @@ void EditorUserInterface::idle(U32 timeDelta)
       onMouseMoved();  // Prevents skippy problem while dragging something
    }
 
-   Point mouseLevelPoint = convertCanvasToLevelCoord(mMousePos);
+//   Point mouseLevelPoint = convertCanvasToLevelCoord(mMousePos);
 
    if(mIn && !mOut)
       zoom(timeDelta * 0.002f);

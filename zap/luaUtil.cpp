@@ -87,7 +87,7 @@ S32 LuaUtil::getMachineTime(lua_State *L)
 
 S32 LuaUtil::getRandomNumber(lua_State *L)
 {
-   S32 args = lua_gettop(L);
+//   S32 args = lua_gettop(L);
 
    static const char *methodName = "LuaUtil:getRandomNumber()";
    checkArgCount(L, 2, methodName);

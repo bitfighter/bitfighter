@@ -368,7 +368,7 @@ static ToggleMenuItem *getMenuItem(lua_State *L, S32 index)
 
   luaL_checktype(L, index, LUA_TUSERDATA);      // Confirm the item at index is a full userdata
   pushedMenuItem = (ToggleMenuItem *)luaL_checkudata(L, index, "ToggleMenuItem");
-  if(pushedMenuItem == NULL) 
+  if(pushedMenuItem == NULL)
      luaL_typerror(L, index, "ToggleMenuItem");
 
   //MenuItem im = *pushedMenuItem;

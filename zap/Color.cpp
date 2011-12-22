@@ -111,7 +111,7 @@ string Color::toRGBString() const
 string Color::toHexString() const 
 { 
    char c[7]; 
-   dSprintf(c, sizeof(c), "%.6X", U32(r * 0xFF) << 24 >> 8 | U32(g * 0xFF) << 24 >> 16 | (U32(b * 0xFF)) & 0xFF); 
+   dSprintf(c, sizeof(c), "%.6X", U32(r * 0xFF) << 24 >> 8 | U32(g * 0xFF) << 24 >> 16 | (U32(b * 0xFF) & 0xFF));
    return c; 
 }
 

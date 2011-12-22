@@ -99,15 +99,11 @@ void Event::updateJoyAxesDirections(U32 axisMask, S16 value)
 
    // Determine what to set the InputCode state, it is binary so set the threshold has half -> 0.5
    // Set the mask if it is above the digital threshold
-   bool inputCodeState = false;
    U32 currentInputCodeMask = 0;
 
    for (S32 i = 0; i < MaxAxesDirections; i++)
       if (fabs(Joystick::JoystickInputData[i].value) > 0.5)
-      {
-         inputCodeState = true;
          currentInputCodeMask |= (1 << i);
-      }
 
 
    // Only change InputCode state if the axis has changed.  Time to be tricky..

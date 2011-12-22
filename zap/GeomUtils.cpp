@@ -1228,7 +1228,6 @@ bool Triangulate::processComplex(TriangleData& outputData, const Rect& bounds,
 // Merge triangles into convex polygons, uses Recast method
 bool Triangulate::mergeTriangles(TriangleData& triangleData, rcPolyMesh& mesh, S32 maxVertices)
 {
-   S32 ntris = triangleData.triangleCount;
    Vector<S32> intPoints(triangleData.pointCount * 2);     // 2 entries per point: x,y
    intPoints.resize(triangleData.pointCount * 2);
 

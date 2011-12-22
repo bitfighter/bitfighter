@@ -271,8 +271,8 @@ void GridDatabase::dumpObjects()
          for(BucketEntry *walk = mBuckets[x & BucketMask][y & BucketMask]; walk; walk = walk->nextInBucket)
          {
             DatabaseObject *theObject = walk->theObject;
-            //logprintf("Found object in (%d,%d) with extents %s", x,y,theObject->getExtent().toString().c_str());
-            }
+            logprintf("Found object in (%d,%d) with extents %s", x,y,theObject->getExtent().toString().c_str());
+         }
 }
 
 
@@ -604,7 +604,7 @@ void DatabaseObject::setExtent(const Rect &extents)
       maxy = S32(extents.max.y) >> GridDatabase::BucketWidthBitShift;
 
       // To save CPU, check if there is anything different
-      if(minxold - minx | minyold - miny | maxxold - maxx | maxyold - maxy)
+      if((minxold - minx) | (minyold - miny) | (maxxold - maxx) | (maxyold - maxy))
       {
          // it is different, remove and add to database, but don't touch gridDB->mAllObjects
 

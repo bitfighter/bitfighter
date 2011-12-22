@@ -52,10 +52,10 @@ void GameNetInterface::processPacket(const Address &sourceAddress, BitStream *pS
 // This function can be changed at any time without breaking compatibility.
 U32 computeSimpleToken(const Address &theAddress, const Nonce &theNonce)
 {
-   return (theNonce.data[1] ^ theNonce.data[3])
+   return ( (theNonce.data[1] ^ theNonce.data[3])
       | ((theNonce.data[0] ^ theNonce.data[5]) << 8)
       | ((theNonce.data[2] ^ theNonce.data[7]) << 16)
-      | ((theNonce.data[4] ^ theNonce.data[6]) << 24)
+      | ((theNonce.data[4] ^ theNonce.data[6]) << 24) )
       ^ 0x638542e6;
 }
 

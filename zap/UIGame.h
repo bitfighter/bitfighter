@@ -138,7 +138,6 @@ private:
 
    ChatType mCurrentChatType; // Current in-game chat mode (global or local)
    UIMode mCurrentUIMode;          
-   LineEditor mLineEditor;    // Message being composed
 
    U32 mChatCursorPos;        // Position of composition cursor
 
@@ -216,6 +215,8 @@ private:
       void stopNow();
       void render();
    } mVoiceRecorder;
+
+   LineEditor mLineEditor;    // Message being composed
 
    void dropItem();                       // User presses drop item key
 

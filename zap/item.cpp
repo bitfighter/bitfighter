@@ -237,8 +237,6 @@ Reactor::Reactor() : Parent(Point(0,0), F32(ReactorStartWidth))
    mHitPoints = ReactorStartingHitPoints;     // Hits to kill
    hasExploded = false;
 
-   F32 vel = 0;
-
    mKillString = "crashed into an reactor";     // TODO: Really needed?
 }
 

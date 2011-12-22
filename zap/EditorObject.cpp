@@ -134,15 +134,15 @@ static F32 getRenderingAlpha(bool isScriptItem)
 
 static const S32 DOCK_LABEL_SIZE = 9;      // Size to label items on the dock
 
-#ifndef ZAP_DEDICATED
-static void labelVertex(Point pos, F32 radius, const char *itemLabelTop, const char *itemLabelBottom, F32 scale)
-{
-   F32 labelSize = DOCK_LABEL_SIZE / scale;
-
-   UserInterface::drawStringc(pos.x, pos.y - radius - (5 / scale), labelSize, itemLabelTop);     // Above the vertex
-   UserInterface::drawStringc(pos.x, pos.y + radius + labelSize + (2 / scale), labelSize, itemLabelBottom);              // Below the vertex
-}
-#endif
+//#ifndef ZAP_DEDICATED
+//static void labelVertex(Point pos, F32 radius, const char *itemLabelTop, const char *itemLabelBottom, F32 scale)
+//{
+//   F32 labelSize = DOCK_LABEL_SIZE / scale;
+//
+//   UserInterface::drawStringc(pos.x, pos.y - radius - (5 / scale), labelSize, itemLabelTop);     // Above the vertex
+//   UserInterface::drawStringc(pos.x, pos.y + radius + labelSize + (2 / scale), labelSize, itemLabelBottom);              // Below the vertex
+//}
+//#endif
 
 // Render selected and highlighted vertices, called from renderEditor
 void EditorObject::renderAndLabelHighlightedVertices(F32 currentScale)
@@ -195,9 +195,6 @@ void EditorObject::highlightDockItem()
 void EditorObject::renderInEditor(F32 currentScale, S32 snapIndex, bool isScriptItem, bool showingReferenceShip)
 {
 #ifndef ZAP_DEDICATED
-   const S32 instrSize = 9;      // Size of instructions for special items
-   const S32 attrSize = 10;
-   
    Point pos, dest;
    F32 alpha = getRenderingAlpha(isScriptItem);
 
@@ -403,8 +400,6 @@ void EditorObject::renderLinePolyVertices(F32 currentScale, F32 alpha)
    // Draw the vertices of the wall or the polygon area
    for(S32 j = 0; j < getVertCount(); j++)
    {
-      Point v = getVert(j);
-
       if(vertSelected(j))
          renderVertex(SelectedVertex, getVert(j), j, currentScale, alpha);             // Hollow yellow boxes with number
       else if(mLitUp && isVertexLitUp(j))

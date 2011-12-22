@@ -106,7 +106,7 @@ void transferResource(GameSettings *settings, const string &addr, const string &
 
    bool started = false;
 
-   while(!started || dataConn && dataConn->isEstablished())  // FIXME: Is the operator precedence here correct?
+   while(!started || (dataConn && dataConn->isEstablished()))
    {
       if(dataConn && dataConn->isEstablished())
       {

@@ -944,8 +944,6 @@ static void printHelpEntry(const string &paramName, const string &paramString, c
 
    U32 wrapWidth = MAX_HELP_LINE_LEN - maxSize;
 
-   U32 currPos = 0;
-
    resetChunker(trim(helpString));
 
    bool first = true;

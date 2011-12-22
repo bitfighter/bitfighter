@@ -729,7 +729,7 @@ void GameType::renderObjectiveArrow(const Point *nearestPoint, const Color *outl
       glEnd();
    }
 
-   Point cen = rp - arrowDir * 12;
+//   Point cen = rp - arrowDir * 12;
 
    // Try labelling the objective arrows... kind of lame.
    //UserInterface::drawStringf(cen.x - UserInterface::getStringWidthf(10,"%2.1f", dist/100) / 2, cen.y - 5, 10, "%2.1f", dist/100);
@@ -2037,8 +2037,6 @@ void GameType::changeClientTeam(ClientInfo *client, S32 team)
    if(ship)
    {
       // Find all spybugs and mines that this player owned, and reset ownership
-      Rect worldBounds = mGame->getWorldExtents();
-
       fillVector.clear();
       mGame->getGameObjDatabase()->findObjects((TestFunc)isGrenadeType, fillVector);
 
@@ -2426,7 +2424,6 @@ void GameType::processServerCommand(ClientInfo *clientInfo, const char *cmd, Vec
    if(!mGame)
       return;
 
-   GameSettings *settings = serverGame->getSettings();
    GameConnection *conn = clientInfo->getConnection();
 
    if(!stricmp(cmd, "yes"))
@@ -2690,7 +2687,6 @@ GAMETYPE_RPC_C2S(GameType, c2sShowBots, (), ())
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
    ClientInfo *clientInfo = source->getClientInfo();
-   GameSettings *settings = gServerGame->getSettings();
 
    // Show all robots affects all players
    mShowAllBots = !mShowAllBots;  // Toggle

@@ -808,9 +808,6 @@ void InitSdlVideo()
    // Information about the current video settings
    const SDL_VideoInfo* info = NULL;
 
-   // Flags we will pass into SDL_SetVideoMode
-   S32 flags = 0;
-
    // Init!
    SDL_Init(0);
 

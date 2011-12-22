@@ -90,12 +90,7 @@ void EditorPolygon::renderDock()
 void EditorPolygon::highlightDockItem() 
 {   
    renderPolyHighlight(); 
-}  
-
-
-// TODO: merge with versions in editor
-const Color *HIGHLIGHT_COLOR = &Colors::white;
-const Color *SELECT_COLOR = &Colors::yellow;
+}
 
 
 void EditorPolygon::renderPolyHighlight()

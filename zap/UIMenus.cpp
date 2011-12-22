@@ -733,7 +733,7 @@ void MainMenuUserInterface::render()
    S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
    S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
 
-   if(mMOTD != "")
+   if(strcmp(mMOTD, ""))
    {
       U32 width = getStringWidth(20, mMOTD);
       glColor(Colors::white);
@@ -1567,8 +1567,7 @@ void LevelMenuUserInterface::onActivate()
          string name = GameType::getGameTypeName(gc->mLevelInfos[i].levelType).getString();
          c[0] = name[0];
          c[1] = '\0';
-logprintf("LEVEL - %s", name.c_str());
-LevelInfo *li = &gc->mLevelInfos[i];
+         logprintf("LEVEL - %s", name.c_str());
          addMenuItem(new MenuItem(i + 1, name.c_str(), selectLevelTypeCallback, "", stringToInputCode(c)));
       }
    }

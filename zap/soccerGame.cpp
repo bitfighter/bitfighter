@@ -509,9 +509,10 @@ void SoccerBallItem::renderEditor(F32 currentScale)
 void SoccerBallItem::idle(GameObject::IdleCallPath path)
 {
    if(mSendHomeTimer.update(mCurrentMove.time))
+   {
       if(!isGhost())
          sendHome();
-
+   }
    else if(mSendHomeTimer.getCurrent())      // Goal has been scored, waiting for ball to reset
    {
       F32 accelFraction = 1 - (0.95f * mCurrentMove.time * 0.001f);
@@ -601,7 +602,6 @@ bool SoccerBallItem::collide(GameObject *hitObject)
          mLastPlayerTouch = ship;
          mLastPlayerTouchTeam = mLastPlayerTouch->getTeam();      // Used to credit team if ship quits game before goal is scored
          mLastPlayerTouchName = mLastPlayerTouch->getName();      // Used for making nicer looking messages in same situation
-         GameType *gt = getGame()->getGameType();
       }
    }
    else if(hitObject->getObjectTypeNumber() == GoalZoneTypeNumber)      // SCORE!!!!

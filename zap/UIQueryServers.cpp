@@ -609,7 +609,7 @@ extern void glScale(F32 scaleFactor);
 void QueryServersUserInterface::render()
 {
    const S32 canvasWidth =  gScreenInfo.getGameCanvasWidth();
-   const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
+//   const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
 
    bool drawmsg1 = false;
    bool drawmsg2 = false;

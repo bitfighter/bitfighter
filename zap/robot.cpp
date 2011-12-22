@@ -456,7 +456,7 @@ S32 LuaRobot::getInterceptCourse(lua_State *L)
    U32 type = (U32)getInt(L, 1, methodName);
    GameObject *target = getItem(L, 2, type, methodName)->getGameObject();
 
-   WeaponInfo weap = GameWeapon::weaponInfo[thisRobot->getSelectedWeapon()];    // Robot's active weapon
+//   WeaponInfo weap = GameWeapon::weaponInfo[thisRobot->getSelectedWeapon()];    // Robot's active weapon
 
    F32 interceptAngle;
    bool ok = calcInterceptCourse(target, thisRobot->getActualPos(), thisRobot->getRadius(), thisRobot->getTeam(), 256, 3000, false, interceptAngle);
@@ -847,7 +847,7 @@ S32 LuaRobot::getWaypoint(lua_State *L)  // Takes a luavec or an x,y
       // arranged so the closest points are at the end of the list, and the target is at index 0.
       Point dest;
       bool found = false;
-      bool first = true;
+//      bool first = true;
 
       while(thisRobot->flightPlan.size() > 0)
       {
@@ -864,7 +864,7 @@ S32 LuaRobot::getWaypoint(lua_State *L)  // Takes a luavec or an x,y
          {
             dest = last;
             found = true;
-            first = false;
+//            first = false;
             thisRobot->flightPlan.pop_back();   // Discard now possibly superfluous waypoint
          }
          else
@@ -1054,7 +1054,7 @@ S32 LuaRobot::engineerDeployObject(lua_State *L)
 
 S32 LuaRobot::dropItem(lua_State *L)
 {
-   static const char *methodName = "Robot:dropItem()";
+//   static const char *methodName = "Robot:dropItem()";
 
    S32 count = thisRobot->mMountedItems.size();
    for(S32 i = count - 1; i >= 0; i--)

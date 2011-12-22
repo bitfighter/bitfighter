@@ -103,15 +103,6 @@ enum VertexRenderStyles
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-static const Color *HIGHLIGHT_COLOR = &Colors::white;
-static const Color *SELECT_COLOR = &Colors::yellow;
-
-
-static const S32 NO_NUMBER = -1;    
-
-////////////////////////////////////////
-////////////////////////////////////////
-
 class EditorAttributeMenuUI;
 class PluginMenuUI;
 

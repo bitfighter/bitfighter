@@ -499,7 +499,7 @@ void MoveObject::computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *
    // F32 m1 = getMass();             <-- May be useful in future
    // F32 m2 = moveObjectThatWasHit->getMass();
 
-   bool moveObjectThatWasHitWasNotMoving = (moveObjectThatWasHit->mMoveState[stateIndex].vel.lenSquared() == 0.0f);
+//   bool moveObjectThatWasHitWasNotMoving = (moveObjectThatWasHit->mMoveState[stateIndex].vel.lenSquared() == 0.0f);
       
    // Initial velocities projected onto collisionVector
    F32 v1i = mMoveState[stateIndex].vel.dot(collisionVector);
@@ -1472,8 +1472,6 @@ void Circle::idle(GameObject::IdleCallPath path)
 
       if(!closest)
          return;
-
-      F32 ang = getActualPos().angleTo(closest->getActualPos());
 
       Point v = getActualVel();
       v += closest->getActualPos() - getActualPos();

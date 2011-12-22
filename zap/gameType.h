@@ -114,8 +114,8 @@ private:
    Vector<FlagSpawn> mFlagSpawnPoints;                        // List of non-team specific spawn points for flags
    Vector<boost::shared_ptr<ItemSpawn> > mItemSpawnPoints;    // List of spawn points for asteroids, circles, etc.
 
+   Timer mScoreboardUpdateTimer;
    Timer mGameTimer;                      // Track when current game will end
-   Timer mScoreboardUpdateTimer;    
    Timer mGameTimeUpdateTimer;
 
    Vector<SafePtr<MoveItem> > mCacheResendItem;  // speed up c2sResendItemStatus

@@ -325,7 +325,6 @@ void ClientGame::displayShipDesignChangedMessage(const Vector<U32> &loadout, con
       else
       {
          GameType *gt = getGameType();
-         bool spawnWithLoadout = !gt->levelHasLoadoutZone();  
 
          displaySuccessMessage("Ship design changed -- %s", 
                               gt->levelHasLoadoutZone() ? "enter Loadout Zone to activate changes" : "changes will be activated when you respawn");
@@ -460,7 +459,6 @@ void ClientGame::idle(U32 timeDelta)
    {
       // Disable controls if we are going too fast (usually by being blasted around by a GoFast or mine or whatever)
       GameObject *controlObject = mConnectionToServer->getControlObject();
-      Ship *ship = dynamic_cast<Ship *>(controlObject);
 
      // Don't saturate server with moves...
      if(theMove->time >= 6)     // Why 6?  Can this be related to some other factor?
@@ -981,6 +979,9 @@ void ClientGame::onConnectionToMasterTerminated(NetConnection::TerminationReason
          ui->setMessage(3, DisconnectReasonString);
          ui->setMessage(5, "Please try a different game server, or try again later.");
          ui->activate();
+         break;
+
+      default:  // Not handled
          break;
    }
 }
