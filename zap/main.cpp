@@ -173,9 +173,10 @@ using namespace TNL;
 #include <X11/Xlib.h>
 #endif
 
-#if defined(TNL_OS_LINUX) && defined(ZAP_DEDICATED)
-#define USE_EXCEPTION_BACKTRACE
-#endif
+// Maybe don't enable by default?
+//#if defined(TNL_OS_LINUX) && defined(ZAP_DEDICATED)
+//#define USE_EXCEPTION_BACKTRACE
+//#endif
 
 #ifdef USE_EXCEPTION_BACKTRACE
 #include <execinfo.h>
@@ -1206,7 +1207,7 @@ void exceptionHandler(int sig) {
 
 
    // get void*'s for all entries on the stack
-   size = backtrace(stack, 20);
+   size = backtrace(stack, 20);  // note, this uses malloc which may cause this to freeze if it segfault inside malloc
 
    // print and log all the frames
    logprintf(LogConsumer::LogError, "Error: signal %d:", sig);
