@@ -1418,7 +1418,7 @@ bool Turret::processArguments(S32 argc2, const char **argv2, Game *game)
          if(!strncmp(argv2[i], "W=", 2))  // W= is in 015a
          {
             S32 w = 0;
-            while(w < WeaponCount && stricmp(gWeapons[w].name.getString(), &argv2[i][2]))
+            while(w < WeaponCount && stricmp(GameWeapon::weaponInfo[w].name.getString(), &argv2[i][2]))
                w++;
             if(w < WeaponCount)
                mWeaponFireType = w;
@@ -1446,7 +1446,7 @@ string Turret::toString(F32 gridSize) const
 {
    string out = EngineeredItem::toString(gridSize);
    if(mWeaponFireType != WeaponTurret)
-      out = out + " W=" + gWeapons[mWeaponFireType].name.getString();
+      out = out + " W=" + GameWeapon::weaponInfo[mWeaponFireType].name.getString();
    return out;
 }
 
@@ -1604,12 +1604,12 @@ void Turret::idle(IdleCallPath path)
 
       // Calculate where we have to shoot to hit this...
       Point Vs = potential->getActualVel();
-      F32 S = (F32)gWeapons[mWeaponFireType].projVelocity;
+      F32 S = (F32)GameWeapon::weaponInfo[mWeaponFireType].projVelocity;
       Point d = potential->getRenderPos() - aimPos;
 
 // This could possibly be combined with LuaRobot's getFiringSolution, as it's essentially the same thing
       F32 t;      // t is set in next statement
-      if(!FindLowestRootInInterval(Vs.dot(Vs) - S * S, 2 * Vs.dot(d), d.dot(d), gWeapons[mWeaponFireType].projLiveTime * 0.001f, t))
+      if(!FindLowestRootInInterval(Vs.dot(Vs) - S * S, 2 * Vs.dot(d), d.dot(d), GameWeapon::weaponInfo[mWeaponFireType].projLiveTime * 0.001f, t))
          continue;
 
       Point leadPos = potential->getRenderPos() + Vs * t;
@@ -1632,7 +1632,7 @@ void Turret::idle(IdleCallPath path)
       // See if we're gonna clobber our own stuff...
       disableCollision();
       Point delta2 = delta;
-      delta2.normalize(gWeapons[mWeaponFireType].projLiveTime * (F32)gWeapons[mWeaponFireType].projVelocity / 1000.f);
+      delta2.normalize(GameWeapon::weaponInfo[mWeaponFireType].projLiveTime * (F32)GameWeapon::weaponInfo[mWeaponFireType].projVelocity / 1000.f);
       GameObject *hitObject = findObjectLOS((TestFunc) isWithHealthType, 0, aimPos, aimPos + delta2, t, n);
       enableCollision();
 
@@ -1686,8 +1686,8 @@ void Turret::idle(IdleCallPath path)
          string killer = string("got blasted by ") + getGame()->getTeamName(mTeam).getString() + " turret";
          mKillString = killer.c_str();
 
-         createWeaponProjectiles(WeaponType(mWeaponFireType), bestDelta, aimPos, velocity, 0, mWeaponFireType == WeaponBurst ? 45.f : 35.f, this);
-         mFireTimer.reset(gWeapons[mWeaponFireType].fireDelay);
+         GameWeapon::createWeaponProjectiles(WeaponType(mWeaponFireType), bestDelta, aimPos, velocity, 0, mWeaponFireType == WeaponBurst ? 45.f : 35.f, this);
+         mFireTimer.reset(GameWeapon::weaponInfo[mWeaponFireType].fireDelay);
       }
    }
 }

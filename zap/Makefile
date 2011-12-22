@@ -107,6 +107,7 @@ OBJECTS_SHARED=\
    teleporter.o\
    textItem.o\
    Timer.o\
+   WeaponInfo.o\
    zoneControlGame.o\
    ../clipper/clipper.o\
    ../master/masterInterface.o\

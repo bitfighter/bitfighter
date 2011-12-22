@@ -23,8 +23,8 @@
 //
 //------------------------------------------------------------------------------------
 
-#include "gameWeapons.h"
 #include "projectile.h"
+#include "gameWeapons.h"
 #include "ship.h"
 #include "SoundSystem.h"
 #include "gameObject.h"
@@ -141,26 +141,6 @@ void LuaProjectile::push(lua_State *L)
 /////////////////////////////////////
 
 
-ProjectileInfo::ProjectileInfo(Color _sparkColor1, Color _sparkColor2, Color _sparkColor3,
-      Color _sparkColor4, Color _projColor1, Color _projColor2, F32 _scaleFactor,
-      SFXProfiles _projectileSound, SFXProfiles _impactSound )
-{
-   sparkColors[0] = _sparkColor1;
-   sparkColors[1] = _sparkColor2;
-   sparkColors[2] = _sparkColor3;
-   sparkColors[3] = _sparkColor4;
-   projColors[0] = _projColor1;
-   projColors[1] = _projColor2;
-   scaleFactor = _scaleFactor;
-   projectileSound = _projectileSound;
-   impactSound = _impactSound;
-}
-
-
-/////////////////////////////////////
-/////////////////////////////////////
-
-
 //===========================================
 
 TNL_IMPLEMENT_NETOBJECT(Projectile);
@@ -174,7 +154,7 @@ Projectile::Projectile(WeaponType type, Point pos, Point vel, GameObject *shoote
    mPos = pos;
    mVelocity = vel;
 
-   mTimeRemaining = gWeapons[type].projLiveTime;
+   mTimeRemaining = GameWeapon::weaponInfo[type].projLiveTime;
    collided = false;
    hitShip = false;
    alive = true;
@@ -191,7 +171,7 @@ Projectile::Projectile(WeaponType type, Point pos, Point vel, GameObject *shoote
    else
       setOwner(NULL);
 
-   mType = gWeapons[type].projectileType;
+   mType = GameWeapon::weaponInfo[type].projectileType;
    mWeaponType = type;
 }
 
@@ -249,7 +229,7 @@ void Projectile::unpackUpdate(GhostConnection *connection, BitStream *stream)
       Rect newExtent(mPos, mPos);
       setExtent(newExtent);
       initial = true;
-      SoundSystem::playSoundEffect(gProjInfo[mType].projectileSound, mPos, mVelocity);
+      SoundSystem::playSoundEffect(GameWeapon::projectileInfo[mType].projectileSound, mPos, mVelocity);
    }
    bool preCollided = collided;
    collided = stream->readFlag();
@@ -280,11 +260,11 @@ void Projectile::handleCollision(GameObject *hitObject, Point collisionPoint)
    {
       DamageInfo theInfo;
       theInfo.collisionPoint = collisionPoint;
-      theInfo.damageAmount = gWeapons[mWeaponType].damageAmount;
+      theInfo.damageAmount = GameWeapon::weaponInfo[mWeaponType].damageAmount;
       theInfo.damageType = DamageTypePoint;
       theInfo.damagingObject = this;
       theInfo.impulseVector = mVelocity;
-      theInfo.damageSelfMultiplier = gWeapons[mWeaponType].damageSelfMultiplier;
+      theInfo.damageSelfMultiplier = GameWeapon::weaponInfo[mWeaponType].damageSelfMultiplier;
 
       hitObject->damageObject(&theInfo);
 
@@ -482,7 +462,7 @@ void Projectile::explode(GameObject *hitObject, Point pos)
    // Do some particle spew...
    if(isGhost())
    {
-      FXManager::emitExplosion(pos, 0.3f, gProjInfo[mType].sparkColors, NumSparkColors);
+      FXManager::emitExplosion(pos, 0.3f, GameWeapon::projectileInfo[mType].sparkColors, NumSparkColors);
 
       Ship *s = dynamic_cast<Ship *>(hitObject);
 
@@ -492,7 +472,7 @@ void Projectile::explode(GameObject *hitObject, Point pos)
       else if((hitShip || s))                          // We hit a ship with shields down
          sound = SFXShipHit;
       else                                             // We hit something else
-         sound = gProjInfo[mType].impactSound;
+         sound = GameWeapon::projectileInfo[mType].impactSound;
 
       SoundSystem::playSoundEffect(sound, pos, mVelocity);       // Play the sound
    }
@@ -601,7 +581,7 @@ GrenadeProjectile::GrenadeProjectile(Point pos, Point vel, GameObject *shooter):
 
    updateExtentInDatabase();
 
-   mTimeRemaining = gWeapons[WeaponBurst].projLiveTime;
+   mTimeRemaining = GameWeapon::weaponInfo[WeaponBurst].projLiveTime;
    exploded = false;
 
    if(shooter)
@@ -720,7 +700,7 @@ void GrenadeProjectile::explode(Point pos, WeaponType weaponType)
       // Make us go boom!
       Color b(1,1,1);
 
-      //FXManager::emitExplosion(getRenderPos(), 0.5, gProjInfo[ProjectilePhaser].sparkColors, NumSparkColors);      // Original, nancy explosion
+      //FXManager::emitExplosion(getRenderPos(), 0.5, GameWeapon::projectileInfo[ProjectilePhaser].sparkColors, NumSparkColors);      // Original, nancy explosion
       FXManager::emitBlast(pos, OuterBlastRadius);          // New, manly explosion
 
       SoundSystem::playSoundEffect(SFXMineExplode, getActualPos(), Point());
@@ -737,9 +717,9 @@ void GrenadeProjectile::explode(Point pos, WeaponType weaponType)
       DamageInfo info;
       info.collisionPoint       = pos;
       info.damagingObject       = this;
-      info.damageAmount         = gWeapons[weaponType].damageAmount;
+      info.damageAmount         = GameWeapon::weaponInfo[weaponType].damageAmount;
       info.damageType           = DamageTypeArea;
-      info.damageSelfMultiplier = gWeapons[weaponType].damageSelfMultiplier;
+      info.damageSelfMultiplier = GameWeapon::weaponInfo[weaponType].damageSelfMultiplier;
 
       S32 hits = radiusDamage(pos, InnerBlastRadius, OuterBlastRadius, (TestFunc)isDamageableType, info);
 
@@ -771,7 +751,7 @@ void GrenadeProjectile::renderItem(const Point &pos)
    //   FXManager::emitSpark(pos, sparkVel, Color(Random::readF() *.5 +.5, Random::readF() *.5, 0), Random::readF() * 2, FXManager::SparkTypePoint);
    //}
 
-   WeaponInfo *wi = gWeapons + WeaponBurst;
+   WeaponInfo *wi = GameWeapon::weaponInfo + WeaponBurst;
    F32 initTTL = (F32) wi->projLiveTime;
    renderGrenade( pos, (initTTL - (F32) (getGame()->getCurrentTime() - getCreationTime())) / initTTL, getGame()->getSettings()->getIniSettings()->burstGraphicsMode );
 }

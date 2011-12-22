@@ -1181,7 +1181,7 @@ void renderSlipZone(const Vector<Point> *bounds, const Vector<Point> *boundsFill
 
 void renderProjectile(const Point &pos, U32 type, U32 time)
 {
-   ProjectileInfo *pi = gProjInfo + type;
+   ProjectileInfo *pi = GameWeapon::projectileInfo + type;
 
    S32 bultype = 1;
 

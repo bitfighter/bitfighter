@@ -487,7 +487,7 @@ void Ship::selectWeapon(U32 weaponIdx)
       if(cc)
       {
          Vector<StringTableEntry> e;
-         e.push_back(gWeapons[mWeapon[mActiveWeaponIndx]].name);
+         e.push_back(GameWeapon::weaponInfo[mWeapon[mActiveWeaponIndx]].name);
          static StringTableEntry msg("%e0 selected.");
          cc->s2cDisplayMessageE(GameConnection::ColorAqua, SFXUIBoop, msg, e);
       }
@@ -524,9 +524,9 @@ void Ship::processWeaponFire()
    if(mCurrentMove.fire && gameType)
    {
       // In a while loop, to catch up the firing rate for low Frame Per Second
-      while(mFireTimer <= 0 && gameType->onFire(this) && mEnergy >= gWeapons[curWeapon].minEnergy)
+      while(mFireTimer <= 0 && gameType->onFire(this) && mEnergy >= GameWeapon::weaponInfo[curWeapon].minEnergy)
       {
-         mEnergy -= gWeapons[curWeapon].drainEnergy;              // Drain energy
+         mEnergy -= GameWeapon::weaponInfo[curWeapon].drainEnergy;              // Drain energy
          mWeaponFireDecloakTimer.reset(WeaponFireDecloakTime);    // Uncloak ship
 
          if(getControllingClient().isValid())
@@ -537,10 +537,10 @@ void Ship::processWeaponFire()
             Point dir = getAimVector();
 
             // TODO: To fix skip fire effect on jittery server, need to replace the 0 with... something...
-            createWeaponProjectiles(curWeapon, dir, mMoveState[ActualState].pos, mMoveState[ActualState].vel, 0, CollisionRadius - 2, this);
+            GameWeapon::createWeaponProjectiles(curWeapon, dir, mMoveState[ActualState].pos, mMoveState[ActualState].vel, 0, CollisionRadius - 2, this);
          }
 
-         mFireTimer += S32(gWeapons[curWeapon].fireDelay);
+         mFireTimer += S32(GameWeapon::weaponInfo[curWeapon].fireDelay);
 
          // If we've fired, Spawn Shield turns off
          if(mSpawnShield.getCurrent() != 0)
@@ -891,7 +891,7 @@ void Ship::processModules()
             if (i == ModuleSensor)
             {
                Point direction = getAimVector();
-               createWeaponProjectiles(WeaponSpyBug, direction, mMoveState[ActualState].pos, mMoveState[ActualState].vel, 0, CollisionRadius - 2, this);
+               GameWeapon::createWeaponProjectiles(WeaponSpyBug, direction, mMoveState[ActualState].pos, mMoveState[ActualState].vel, 0, CollisionRadius - 2, this);
             }
 
             // Reduce energy
@@ -1091,8 +1091,8 @@ void Ship::computeMaxFireDelay()
 {
    for(S32 i = 0; i < WeaponCount; i++)
    {
-      if(gWeapons[i].fireDelay > MaxFireDelay)
-         MaxFireDelay = gWeapons[i].fireDelay;
+      if(GameWeapon::weaponInfo[i].fireDelay > MaxFireDelay)
+         MaxFireDelay = GameWeapon::weaponInfo[i].fireDelay;
    }
 }
 
@@ -1612,7 +1612,7 @@ string Ship::loadoutToString(const Vector<U32> &loadout)
 
    // Then weapons
    for(S32 i = ShipModuleCount; i < ShipWeaponCount + ShipModuleCount; i++)
-      loadoutStrings.push_back(gWeapons[loadout[i]].name.getString());
+      loadoutStrings.push_back(GameWeapon::weaponInfo[loadout[i]].name.getString());
 
    return listToString(loadoutStrings, ',');
 }
@@ -1672,7 +1672,7 @@ bool Ship::stringToLoadout(string loadoutStr, Vector<U32> &loadout)
       const char *word = words[i].c_str();
 
       for(S32 j = 0; j < WeaponCount; j++)
-         if(!stricmp(word, gWeapons[j].name.getString()))
+         if(!stricmp(word, GameWeapon::weaponInfo[j].name.getString()))
          {
             loadout.push_back(j);
             found = true;

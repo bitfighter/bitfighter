@@ -754,7 +754,7 @@ void GameUserInterface::renderLoadoutIndicators()
    {
       glColor(i == localShip->mActiveWeaponIndx ? INDICATOR_ACTIVE_COLOR : INDICATOR_INACTIVE_COLOR);
 
-      S32 width = renderIndicator(xPos, gWeapons[localShip->getWeapon(i)].name.getString());
+      S32 width = renderIndicator(xPos, GameWeapon::weaponInfo[localShip->getWeapon(i)].name.getString());
 
       xPos += UserInterface::vertMargin + width - 2 * gapSize;
    }

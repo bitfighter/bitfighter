@@ -436,7 +436,7 @@ S32 LuaRobot::getFiringSolution(lua_State *L)
    U32 type = (U32)getInt(L, 1, methodName);
    GameObject *target = getItem(L, 2, type, methodName)->getGameObject();
 
-   WeaponInfo weap = gWeapons[thisRobot->getSelectedWeapon()];    // Robot's active weapon
+   WeaponInfo weap = GameWeapon::weaponInfo[thisRobot->getSelectedWeapon()];    // Robot's active weapon
 
    F32 interceptAngle;
 
@@ -456,7 +456,7 @@ S32 LuaRobot::getInterceptCourse(lua_State *L)
    U32 type = (U32)getInt(L, 1, methodName);
    GameObject *target = getItem(L, 2, type, methodName)->getGameObject();
 
-   WeaponInfo weap = gWeapons[thisRobot->getSelectedWeapon()];    // Robot's active weapon
+   WeaponInfo weap = GameWeapon::weaponInfo[thisRobot->getSelectedWeapon()];    // Robot's active weapon
 
    F32 interceptAngle;
    bool ok = calcInterceptCourse(target, thisRobot->getActualPos(), thisRobot->getRadius(), thisRobot->getTeam(), 256, 3000, false, interceptAngle);

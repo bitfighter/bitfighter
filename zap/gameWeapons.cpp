@@ -28,13 +28,23 @@
 #include "ship.h"
 #include "game.h"
 
-#include "Color.h"
 #include "Colors.h"
 
 namespace Zap
 {
 
-WeaponInfo gWeapons[] =    //                 Fire   Min    Drain Proj  Proj  Dam-   Damage to Can damage Projectile
+
+ProjectileInfo GameWeapon::projectileInfo[ProjectileTypeCount] =
+{
+   //               SparkColor1    SparkColor2   SparkColor3    SparkColor4     ProjectileColor1  ProjectileColor2 Scale  Fire sound          Impact sound
+   ProjectileInfo( Colors::magenta, Colors::white, Colors::blue,   Colors::red,   Color(1, 0, 0.5), Color(0.5, 0, 1), 1.0f, SFXPhaserProjectile, SFXPhaserImpact ), // Phaser
+   ProjectileInfo( Colors::yellow, Colors::red, Colors::orange50, Colors::white,   Colors::yellow,   Colors::red,   1.3f, SFXBounceProjectile, SFXBounceImpact ), // Bounce
+   ProjectileInfo( Colors::blue, Colors::green, Color(0,0.5,1), Color(0,1,0.5), Color(0, 0.5, 1), Color(0, 1, 0.5), 0.7f, SFXTripleProjectile, SFXTripleImpact ), // Triple
+   ProjectileInfo( Colors::cyan, Colors::yellow, Color(0,1,0.5), Color(0.5,1,0), Color(0.5, 1, 0), Color(0, 1, 0.5), 0.6f, SFXTurretProjectile, SFXTurretImpact ), // Turret
+};
+
+
+WeaponInfo GameWeapon::weaponInfo[WeaponCount] =    //      Fire   Min    Drain Proj  Proj  Dam-   Damage to Can damage Projectile
 {                          //    Name         Delay  Energy Energy Vel. Life  age   self mult.   teammate  Type
    WeaponInfo( StringTableEntry("Phaser"),      100,   500,   500,  600, 1000, 0.21f,   0,       false,   ProjectilePhaser ),
    WeaponInfo( StringTableEntry("Bouncer"),     100,  1800,  1800,  540, 1500, 0.15f,   0.5f,    false,   ProjectileBounce ),
@@ -46,61 +56,12 @@ WeaponInfo gWeapons[] =    //                 Fire   Min    Drain Proj  Proj  Da
    WeaponInfo( StringTableEntry("Spy Bug"),     800, 50000, 50000,  800,   -1, 0,       0,       true,    NotAProjectile ),      // Damage in this case is getting pushed around by the explosion
 };
 
-ProjectileInfo gProjInfo[ProjectileTypeCount] = {
-   //               SparkColor1    SparkColor2   SparkColor3    SparkColor4     ProjectileColor1  ProjectileColor2 Scale  Fire sound          Impact sound
-   ProjectileInfo( Colors::magenta, Colors::white, Colors::blue,   Colors::red,   Color(1, 0, 0.5), Color(0.5, 0, 1), 1.0f, SFXPhaserProjectile, SFXPhaserImpact ), // Phaser
-   ProjectileInfo( Colors::yellow, Colors::red, Colors::orange50, Colors::white,   Colors::yellow,   Colors::red,   1.3f, SFXBounceProjectile, SFXBounceImpact ), // Bounce
-   ProjectileInfo( Colors::blue, Colors::green, Color(0,0.5,1), Color(0,1,0.5), Color(0, 0.5, 1), Color(0, 1, 0.5), 0.7f, SFXTripleProjectile, SFXTripleImpact ), // Triple
-   ProjectileInfo( Colors::cyan, Colors::yellow, Color(0,1,0.5), Color(0.5,1,0), Color(0.5, 1, 0), Color(0, 1, 0.5), 0.6f, SFXTurretProjectile, SFXTurretImpact ), // Turret
-};
-
-
-WeaponInfo::WeaponInfo(StringTableEntry _name, U32 _fireDelay, U32 _minEnergy, U32 _drainEnergy, U32 _projVelocity, S32 _projLiveTime,
-           F32 _damageAmount, F32 _damageSelfMultiplier, bool _canDamageTeammate, ProjectileType _projectileType)
-{
-   name = _name;
-   fireDelay = _fireDelay;
-   minEnergy = _minEnergy;
-   drainEnergy = _drainEnergy;
-   projVelocity = _projVelocity;
-   projLiveTime = _projLiveTime;
-   damageAmount = _damageAmount;
-   damageSelfMultiplier = _damageSelfMultiplier;
-   canDamageTeammate = _canDamageTeammate;
-   projectileType = _projectileType;
-}
-
-const char *WeaponInfo::getWeaponName(WeaponType weaponType)
-{
-   switch((S32)weaponType)
-   {
-      case WeaponPhaser:
-         return "Phaser";
-      case WeaponBounce:
-         return "Bouncer";
-      case WeaponTriple:
-         return "Triple";
-      case WeaponBurst:
-         return "Burst";
-      case WeaponHeatSeeker:
-         return "Heat Seeker";
-      case WeaponMine:
-         return "Mine";
-      case WeaponTurret:
-         return "Turret";
-      case WeaponSpyBug:
-         return "Spy Bug";
-   }
-
-   return "INVALID WEAPON!";
-}
-
 
 // Here we actually intantiate the various projectiles when fired
-void createWeaponProjectiles(WeaponType weapon, Point &dir, Point &shooterPos, Point &shooterVel, S32 time, F32 shooterRadius, GameObject *shooter)
+void GameWeapon::createWeaponProjectiles(WeaponType weapon, Point &dir, Point &shooterPos, Point &shooterVel, S32 time, F32 shooterRadius, GameObject *shooter)
 {
    //GameObject *proj = NULL;
-   WeaponInfo *wi = gWeapons + weapon;
+   WeaponInfo *wi = weaponInfo + weapon;
    Point projVel = dir * F32(wi->projVelocity) + dir * shooterVel.dot(dir);
    Point firePos = shooterPos + dir * shooterRadius;
 

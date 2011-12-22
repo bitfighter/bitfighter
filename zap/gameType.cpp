@@ -368,13 +368,13 @@ void GameType::printRules()
    printf("Projectiles:\n\n");
    for(S32 i = 0; i < WeaponCount; i++)
    {
-      printf("Name: %s \n", gWeapons[i].name.getString());
-      printf("\tEnergy Drain: %d\n", gWeapons[i].drainEnergy);
-      printf("\tVelocity: %d\n", gWeapons[i].projVelocity);
-      printf("\tLifespan (ms): %d\n", gWeapons[i].projLiveTime);
-      printf("\tDamage: %2.2f\n", gWeapons[i].damageAmount);
-      printf("\tDamage To Self Multiplier: %2.2f\n", gWeapons[i].damageSelfMultiplier);
-      printf("\tCan Damage Teammate: %s\n", gWeapons[i].canDamageTeammate ? "Yes" : "No");
+      printf("Name: %s \n", GameWeapon::weaponInfo[i].name.getString());
+      printf("\tEnergy Drain: %d\n", GameWeapon::weaponInfo[i].drainEnergy);
+      printf("\tVelocity: %d\n", GameWeapon::weaponInfo[i].projVelocity);
+      printf("\tLifespan (ms): %d\n", GameWeapon::weaponInfo[i].projLiveTime);
+      printf("\tDamage: %2.2f\n", GameWeapon::weaponInfo[i].damageAmount);
+      printf("\tDamage To Self Multiplier: %2.2f\n", GameWeapon::weaponInfo[i].damageSelfMultiplier);
+      printf("\tCan Damage Teammate: %s\n", GameWeapon::weaponInfo[i].canDamageTeammate ? "Yes" : "No");
    }
 
    printf("\n\n");
@@ -1600,11 +1600,11 @@ bool GameType::objectCanDamageObject(GameObject *damager, GameObject *victim)
 
    // Check for self-inflicted damage
    if(damagerOwner == victimOwner)
-      return gWeapons[weaponType].damageSelfMultiplier != 0;
+      return GameWeapon::weaponInfo[weaponType].damageSelfMultiplier != 0;
 
    // Check for friendly fire
    else if(damager->getTeam() == victim->getTeam())
-      return !isTeamGame() || gWeapons[weaponType].canDamageTeammate;
+      return !isTeamGame() || GameWeapon::weaponInfo[weaponType].canDamageTeammate;
 
    return true;
 }

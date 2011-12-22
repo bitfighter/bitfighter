@@ -27,6 +27,7 @@
 #include "tnlTypes.h"
 #include "tnlLog.h"
 #include "../zap/stringUtils.h"            // For replaceString()
+#include "../zap/WeaponInfo.h"
 
 #ifdef BF_WRITE_TO_MYSQL
 #include "mysql++.h"

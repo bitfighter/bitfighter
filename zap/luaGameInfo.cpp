@@ -200,19 +200,19 @@ Lunar<LuaWeaponInfo>::RegType LuaWeaponInfo::methods[] =
 };
 
 
-S32 LuaWeaponInfo::getName(lua_State *L) { return returnString(L, gWeapons[mWeaponIndex].name.getString()); }              // Name of weapon ("Phaser", "Triple", etc.) (string)
+S32 LuaWeaponInfo::getName(lua_State *L) { return returnString(L, GameWeapon::weaponInfo[mWeaponIndex].name.getString()); }              // Name of weapon ("Phaser", "Triple", etc.) (string)
 S32 LuaWeaponInfo::getID(lua_State *L) { return returnInt(L, mWeaponIndex); }                                              // ID of module (WeaponPhaser, WeaponTriple, etc.) (integer)
 
-S32 LuaWeaponInfo::getRange(lua_State *L) { return returnInt(L, gWeapons[mWeaponIndex].projVelocity * gWeapons[mWeaponIndex].projLiveTime / 1000 ); }                // Range of projectile (units) (integer)
-S32 LuaWeaponInfo::getFireDelay(lua_State *L) { return returnInt(L, gWeapons[mWeaponIndex].fireDelay); }                   // Delay between shots in ms (integer)
-S32 LuaWeaponInfo::getMinEnergy(lua_State *L) { return returnInt(L, gWeapons[mWeaponIndex].minEnergy); }                   // Minimum energy needed to use (integer)
-S32 LuaWeaponInfo::getEnergyDrain(lua_State *L) { return returnInt(L, gWeapons[mWeaponIndex].drainEnergy); }               // Amount of energy weapon consumes (integer)
-S32 LuaWeaponInfo::getProjVel(lua_State *L) { return returnInt(L, gWeapons[mWeaponIndex].projVelocity); }                  // Speed of projectile (units/sec) (integer)
-S32 LuaWeaponInfo::getProjLife(lua_State *L) { return returnInt(L, gWeapons[mWeaponIndex].projLiveTime); }                 // Time projectile will live (ms) (integer, -1 == live forever)
-S32 LuaWeaponInfo::getDamage(lua_State *L) { return returnFloat(L, gWeapons[mWeaponIndex].damageAmount); }                 // Damage projectile does (0-1, where 1 = total destruction) (float)
-S32 LuaWeaponInfo::getDamageSelf(lua_State *L) { return returnFloat(L, gWeapons[mWeaponIndex].damageAmount * 
-                                                                       gWeapons[mWeaponIndex].damageSelfMultiplier); }     // How much damage if you shoot yourself? (float)
-S32 LuaWeaponInfo::getCanDamageTeammate(lua_State *L) { return returnBool(L, gWeapons[mWeaponIndex].canDamageTeammate); }  // Will weapon damage teammates? (boolean)
+S32 LuaWeaponInfo::getRange(lua_State *L) { return returnInt(L, GameWeapon::weaponInfo[mWeaponIndex].projVelocity * GameWeapon::weaponInfo[mWeaponIndex].projLiveTime / 1000 ); }                // Range of projectile (units) (integer)
+S32 LuaWeaponInfo::getFireDelay(lua_State *L) { return returnInt(L, GameWeapon::weaponInfo[mWeaponIndex].fireDelay); }                   // Delay between shots in ms (integer)
+S32 LuaWeaponInfo::getMinEnergy(lua_State *L) { return returnInt(L, GameWeapon::weaponInfo[mWeaponIndex].minEnergy); }                   // Minimum energy needed to use (integer)
+S32 LuaWeaponInfo::getEnergyDrain(lua_State *L) { return returnInt(L, GameWeapon::weaponInfo[mWeaponIndex].drainEnergy); }               // Amount of energy weapon consumes (integer)
+S32 LuaWeaponInfo::getProjVel(lua_State *L) { return returnInt(L, GameWeapon::weaponInfo[mWeaponIndex].projVelocity); }                  // Speed of projectile (units/sec) (integer)
+S32 LuaWeaponInfo::getProjLife(lua_State *L) { return returnInt(L, GameWeapon::weaponInfo[mWeaponIndex].projLiveTime); }                 // Time projectile will live (ms) (integer, -1 == live forever)
+S32 LuaWeaponInfo::getDamage(lua_State *L) { return returnFloat(L, GameWeapon::weaponInfo[mWeaponIndex].damageAmount); }                 // Damage projectile does (0-1, where 1 = total destruction) (float)
+S32 LuaWeaponInfo::getDamageSelf(lua_State *L) { return returnFloat(L, GameWeapon::weaponInfo[mWeaponIndex].damageAmount * 
+                                                                       GameWeapon::weaponInfo[mWeaponIndex].damageSelfMultiplier); }     // How much damage if you shoot yourself? (float)
+S32 LuaWeaponInfo::getCanDamageTeammate(lua_State *L) { return returnBool(L, GameWeapon::weaponInfo[mWeaponIndex].canDamageTeammate); }  // Will weapon damage teammates? (boolean)
 
 
 ////////////////////////////////////

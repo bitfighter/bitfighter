@@ -26,8 +26,9 @@
 #ifndef _GAMEWEAPONS_H_
 #define _GAMEWEAPONS_H_
 
-#include "tnlNetStringTable.h"
 #include "Point.h"
+#include "WeaponInfo.h"
+#include "tnlTypes.h"
 
 using namespace TNL;
 
@@ -35,56 +36,15 @@ namespace Zap
 {
 
 
-// Note that WeaponType can be used as an array index
-enum WeaponType
-{
-   WeaponPhaser = 0,
-   WeaponBounce,
-   WeaponTriple,
-   WeaponBurst,          // Grenade
-   WeaponHeatSeeker,     // Heatseeker
-   WeaponMine,
-   WeaponTurret,
-   WeaponSpyBug,
-   WeaponCount,
-   InvalidWeapon,
-};
-
-
-// Note that not all WeaponTypes are Projectile weapons, so don't have ProjectileTypes
-enum ProjectileType
-{
-   ProjectilePhaser,
-   ProjectileBounce,
-   ProjectileTriple,
-//   ProjectileGuided,    // Heatseeker
-   ProjectileTurret,
-   ProjectileTypeCount,
-   NotAProjectile  // Need this so we can fit a non-ProjectileType (like mine) into a constructor intended for proper projectiles
-};
-
-struct WeaponInfo
-{
-   WeaponInfo(StringTableEntry _name, U32 _fireDelay, U32 _minEnergy, U32 _drainEnergy, U32 _projVelocity, S32 _projLiveTime, 
-              F32 _damageAmount, F32 _damageSelfMultiplier, bool _canDamageTeammate, ProjectileType _projectileType);
-
-   static const char *getWeaponName(WeaponType weaponType);
-
-   StringTableEntry name;     // Display name of the weapon.
-   U32 fireDelay;             // Delay between shots.
-   S32 minEnergy;             // Minimum energy to fire.  (Use S32 to avoid compiler warnings when comparing with other S32s)
-   U32 drainEnergy;           // Amount of energy to drain per shot.
-   U32 projVelocity;          // How fast shot travels (pix/second?)
-   S32 projLiveTime;          // How long shot lives (millisecs)
-   F32 damageAmount;          // Damage shot does
-   F32 damageSelfMultiplier;  // Adjust damage if you shoot yourself
-   bool canDamageTeammate;
-   ProjectileType projectileType;   // If this is a projectile item, which sort is it?  If not, use NotAProjectile
-};
-
-extern WeaponInfo gWeapons[WeaponCount];
 class GameObject;
-extern void createWeaponProjectiles(WeaponType weapon, Point &dir, Point &shooterPos, Point &shooterVel, S32 time, F32 shooterRadius, GameObject *shooter);
+struct GameWeapon
+{
+   static WeaponInfo weaponInfo[WeaponCount];
+   static ProjectileInfo projectileInfo[ProjectileTypeCount];
+
+   static void createWeaponProjectiles(WeaponType weapon, Point &dir, Point &shooterPos,
+         Point &shooterVel, S32 time, F32 shooterRadius, GameObject *shooter);
+};
 
 
 };

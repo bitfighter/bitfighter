@@ -701,6 +701,14 @@
 				RelativePath=".\voiceCodec.h"
 				>
 			</File>
+			<File
+				RelativePath=".\WeaponInfo.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\WeaponInfo.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="GameTypes"
