@@ -17,7 +17,7 @@ CFLAGS_PHPBB=-DVERIFY_PHPBB3
 LFLAGS_EXTRA=-lm -ldl -lstdc++ -lpthread
 EXTRA_FLAGS=
 
-CC=gcc -g -I../tnl -I../libtomcrypt -I../boost -W -O2
+CC=gcc -g -I../tnl -I../libtomcrypt -I../boost -Wall -O2
 
 OBJECTS_MASTER=\
    master.o\

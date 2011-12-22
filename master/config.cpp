@@ -217,7 +217,7 @@ int parseArgs(const char *string)
    argString = string;
    char c;
 
-   for(U32 i = 0; i < Zap::LevelLoader::MAX_LEVEL_LINE_ARGS; i++)
+   for(S32 i = 0; i < Zap::LevelLoader::MAX_LEVEL_LINE_ARGS; i++)
       argv[i] = argv_buffer[i];
 
 stateEatingWhitespace:
