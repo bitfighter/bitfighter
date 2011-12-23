@@ -230,7 +230,8 @@ struct IniSettings      // With defaults specified
    bool logWarning;    
    bool logConfigurationError;
    bool logConnection;        
-   bool logLevelLoaded;       
+   bool logLevelLoaded;    
+   bool logLevelError;
    bool logLuaObjectLifecycle;
    bool luaLevelGenerator;    
    bool luaBotMessage;        

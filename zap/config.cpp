@@ -98,7 +98,7 @@ IniSettings::IniSettings()
    maxFPS = 100;                      // Max FPS on client/non-dedicated server
 
    inputMode = InputModeKeyboard;     // Joystick or Keyboard
-   masterAddress = MASTER_SERVER_LIST_ADDRESS;   // Default address of our master server
+	masterAddress = MASTER_SERVER_LIST_ADDRESS;   // Default address of our master server
    name = "";                         // Player name (none by default)
    defaultName = "ChumpChange";       // Name used if user hits <enter> on name entry screen
    lastName = "ChumpChange";          // Name the user entered last time they ran the game
@@ -168,6 +168,8 @@ IniSettings::IniSettings()
    luaLevelGenerator = true;   
    luaBotMessage = true;       
    serverFilter = false; 
+
+   logLevelError = true;
 
    logStats = true;            // Log statistics into ServerFilter log files
 
@@ -388,6 +390,7 @@ static void loadDiagnostics(CIniFile *ini, IniSettings *iniSettings)
    iniSettings->logWarning            = ini->GetValueYN(section, "LogWarning",            iniSettings->logWarning);
    iniSettings->logConfigurationError = ini->GetValueYN(section, "LogConfigurationError", iniSettings->logConfigurationError);
    iniSettings->logConnection         = ini->GetValueYN(section, "LogConnection",         iniSettings->logConnection);
+   iniSettings->logLevelError         = ini->GetValueYN(section, "LogLevelError",         iniSettings->logLevelError);
 
    iniSettings->logLevelLoaded        = ini->GetValueYN(section, "LogLevelLoaded",        iniSettings->logLevelLoaded);
    iniSettings->logLuaObjectLifecycle = ini->GetValueYN(section, "LogLuaObjectLifecycle", iniSettings->logLuaObjectLifecycle);
@@ -1310,6 +1313,7 @@ static void writeDiagnostics(CIniFile *ini, IniSettings *iniSettings)
       ini->sectionComment(section, " LogConfigurationError - Log problems with configuration (Yes/No)");
       ini->sectionComment(section, " LogConnection - High level logging connections with remote machines (Yes/No)");
       ini->sectionComment(section, " LogLevelLoaded - Write a log entry when a level is loaded (Yes/No)");
+      ini->sectionComment(section, " LogLevelError - Log errors and warnings about levels loaded (Yes/No)");
       ini->sectionComment(section, " LogLuaObjectLifecycle - Creation and destruciton of lua objects (Yes/No)");
       ini->sectionComment(section, " LuaLevelGenerator - Messages from the LuaLevelGenerator (Yes/No)");
       ini->sectionComment(section, " LuaBotMessage - Message from a bot (Yes/No)");
@@ -1334,6 +1338,7 @@ static void writeDiagnostics(CIniFile *ini, IniSettings *iniSettings)
    ini->setValueYN(section, "LogConfigurationError", iniSettings->logConfigurationError);
    ini->setValueYN(section, "LogConnection",         iniSettings->logConnection);
    ini->setValueYN(section, "LogLevelLoaded",        iniSettings->logLevelLoaded);
+   ini->setValueYN(section, "LogLevelError",         iniSettings->logLevelError);
    ini->setValueYN(section, "LogLuaObjectLifecycle", iniSettings->logLuaObjectLifecycle);
    ini->setValueYN(section, "LuaLevelGenerator",     iniSettings->luaLevelGenerator);
    ini->setValueYN(section, "LuaBotMessage",         iniSettings->luaBotMessage);

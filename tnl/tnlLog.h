@@ -88,9 +88,11 @@ public:
 
       DatabaseFilter          = BIT(20),     // For logging issues with writing to database
       ConfigurationError      = BIT(21),     // For logging configuation issues
+
+      LogLevelError           = BIT(22),     // Logs errors and warnings in levels
       
       All = 0xFFFFFFFF,
-      AllErrorTypes = LogFatalError | LogError | LogWarning | ConfigurationError,
+      AllErrorTypes = LogFatalError | LogError | LogWarning | LogLevelError | ConfigurationError
    };
 
 
