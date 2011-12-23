@@ -43,7 +43,7 @@ class QuickMenuUI : public MenuUserInterface    // There's really nothing quick 
 
 private:
    virtual void initialize();
-   virtual string getTitle() { return mMenuTitle; }
+   virtual string getTitle();
    S32 getMenuWidth();     
    Point mMenuLocation;
 
@@ -91,8 +91,8 @@ protected:
    EditorObject *mObject;      // Object whose attributes are being edited
 
 public:
-   EditorAttributeMenuUI(ClientGame *game) : Parent(game) { /* Do nothing */ }    // Constructor
-   EditorObject *getObject() { return mObject; }
+   EditorAttributeMenuUI(ClientGame *game);    // Constructor
+   EditorObject *getObject();
    void onEscape();
 
    virtual void startEditingAttrs(EditorObject *object);
@@ -109,8 +109,8 @@ class PluginMenuUI : public QuickMenuUI
    typedef QuickMenuUI Parent;
 
 public:
-   PluginMenuUI(ClientGame *game, const string &title) : Parent(game, title) { /* Do nothing */ }    // Constructor
-   virtual ~PluginMenuUI();                                                                          // Destructor
+   PluginMenuUI(ClientGame *game, const string &title);    // Constructor
+   virtual ~PluginMenuUI();                                // Destructor
 
    void setTitle(const string &title);
    virtual void doneEditing();

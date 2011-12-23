@@ -135,6 +135,12 @@ void CreditsUserInterface::onReactivate()
 }
 
 
+void CreditsUserInterface::addFX(CreditsFX *fx)
+{
+   fxList.push_back(fx);
+}
+
+
 void CreditsUserInterface::idle(U32 timeDelta)
 {
    for(S32 i = 0; i < fxList.size(); i++)
@@ -181,6 +187,19 @@ CreditsFX::~CreditsFX()
 {
    // Do nothing
 }
+
+
+void CreditsFX::setActive(bool active)
+{
+   activated = active;
+}
+
+
+bool CreditsFX::isActive()
+{
+   return activated;
+}
+
 
 // Constructor
 CreditsScroller::CreditsScroller(ClientGame *game) : Parent(game)

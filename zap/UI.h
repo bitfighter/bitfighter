@@ -102,7 +102,7 @@ public:
    UIID getMenuID() const;                   // Retrieve interface's name
    UIID getPrevMenuID() const;               // Retrieve previous interface's name
 
-   ClientGame *getGame() { return mClientGame; }
+   ClientGame *getGame();
 
    UIManager *getUIManager() const;
 
@@ -117,7 +117,7 @@ public:
    virtual void onActivate();
    virtual void onDeactivate(bool usesEditorScreenMode);
    virtual void onReactivate();
-   virtual void onDisplayModeChange() { /* Do nothing */ }
+   virtual void onDisplayModeChange();
 
    void activate(bool save = true);
    virtual void reactivate();

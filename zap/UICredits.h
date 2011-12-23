@@ -41,8 +41,8 @@ public:
    CreditsFX(ClientGame *game);     // Constructor
    virtual ~CreditsFX();            // Destructor
    
-   void setActive(bool active) { activated = active; }
-   bool isActive() { return activated; }
+   void setActive(bool active);
+   bool isActive();
    virtual void updateFX(U32 delta) = 0;
    virtual void render() = 0;
 };
@@ -94,7 +94,7 @@ public:
 
    void onActivate();
    void onReactivate();
-   void addFX(CreditsFX *fx) { fxList.push_back(fx); }
+   void addFX(CreditsFX *fx);
    void idle(U32 timeDelta);
    void render();
    void quit();

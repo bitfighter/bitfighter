@@ -60,12 +60,12 @@ public:
    void render();
    void idle(U32 t);
 
-   void setSecret(bool secret) { lineEditor.setSecret(secret); }
+   void setSecret(bool secret);
 
    virtual void onKeyDown(InputCode inputCode, char ascii);
 
-   const char *getText() { return lineEditor.c_str(); }
-   string getSaltedHashText() { return md5.getSaltedHashFromString(lineEditor.getString()); }
+   const char *getText();
+   string getSaltedHashText();
    void setString(string str);
 };
 
@@ -118,10 +118,7 @@ class PasswordEntryUserInterface :  public TextEntryUserInterface
    typedef TextEntryUserInterface Parent;
 
 public:
-   PasswordEntryUserInterface(ClientGame *game) : Parent(game)    // Constructor
-   {
-      setSecret(true);
-   }
+   PasswordEntryUserInterface(ClientGame *game);    // Constructor
 
    virtual void render();
    virtual void onAccept(const char *text) = 0;
@@ -141,11 +138,11 @@ class PreGamePasswordEntryUserInterface :  public PasswordEntryUserInterface
 private:
    Address connectAddress;
 public:
-   PreGamePasswordEntryUserInterface(ClientGame *game) : Parent(game) { /* Do nothing */ }    // Constructor
-   virtual ~PreGamePasswordEntryUserInterface() {}
+   PreGamePasswordEntryUserInterface(ClientGame *game);    // Constructor
+   virtual ~PreGamePasswordEntryUserInterface();
    void onAccept(const char *text);
    void onEscape();
-   void setConnectServer(const Address &addr) { connectAddress = addr; }
+   void setConnectServer(const Address &addr);
 };
 
 
@@ -157,7 +154,7 @@ class InGamePasswordEntryUserInterface :  public PasswordEntryUserInterface
    typedef PasswordEntryUserInterface Parent;
 
 public:
-   InGamePasswordEntryUserInterface(ClientGame *game) : Parent(game) { /* Do nothing */ }  // Constructor
+   InGamePasswordEntryUserInterface(ClientGame *game);  // Constructor
    void onAccept(const char *text);
    void onEscape();
    virtual void submitPassword(GameConnection *gameConnection, const char *text) = 0;

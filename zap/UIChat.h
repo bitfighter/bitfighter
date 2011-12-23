@@ -41,17 +41,8 @@ namespace Zap
 class ChatMessage
 {
 public:
-   ChatMessage() { /* Do nothing */ }                             // Quickie constructor
-
-   ChatMessage(string frm, string msg, Color col, bool isPriv, bool isSys)    // "Real" constructor
-   {
-      color = col;
-      message = msg;
-      from = frm;
-      time = getShortTimeStamp();   // Record time message arrived
-      isPrivate = isPriv;
-      isSystem = isSys;
-   }
+   ChatMessage();// Quickie constructor
+   ChatMessage(string frm, string msg, Color col, bool isPriv, bool isSys);    // "Real" constructor
 
    Color color;      // Chat message colors
    string message;   // Hold chat messages
@@ -90,9 +81,9 @@ protected:
    ChatMessage getMessage(U32 index);
    U32 mChatCursorPos;                     // Where is cursor?
 
-   U32 getMessageCount() { return mMessageCount; }
+   U32 getMessageCount();
 
-   bool composingMessage() { return mLineEditor.length() > 0; }
+   bool composingMessage();
 
 public:
    AbstractChat(ClientGame *game);        // Constructor
@@ -158,7 +149,7 @@ public:
 
    void idle(U32 timeDelta);
 
-   void setRenderUnderlyingUI(bool render) { mRenderUnderlyingUI = render; }
+   void setRenderUnderlyingUI(bool render);
 };
 
 

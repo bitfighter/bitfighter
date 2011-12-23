@@ -277,6 +277,12 @@ void GameUserInterface::onReactivate()
 }
 
 
+bool GameUserInterface::isShowingMissionOverlay() const
+{
+   return mMissionOverlayActive;
+}
+
+
 static char stringBuffer[256];
 
 void GameUserInterface::displayErrorMessage(const char *format, ...)
@@ -451,6 +457,12 @@ void GameUserInterface::idle(U32 timeDelta)
    HostMenuUserInterface *ui = getUIManager()->getHostMenuUserInterface();
    if(ui->levelLoadDisplayFadeTimer.update(timeDelta))
       ui->clearLevelLoadDisplay();
+}
+
+
+void GameUserInterface::resetInputModeChangeAlertDisplayTimer(U32 timeInMs)
+{
+   mInputModeChangeAlertDisplayTimer.reset(timeInMs);
 }
 
 
@@ -2406,6 +2418,18 @@ void GameUserInterface::onKeyUp(InputCode inputCode)
 }
 
 
+void GameUserInterface::receivedControlUpdate(bool recvd)
+{
+   mGotControlUpdate = recvd;
+}
+
+
+bool GameUserInterface::isInScoreboardMode()
+{
+   return mInScoreboardMode;
+}
+
+
 // Return current move (actual move processing in ship.cpp)
 // Will also transform move into "relative" mode if needed
 // Note that all input supplied here will be overwritten if
@@ -2510,6 +2534,18 @@ Vector<string> GameUserInterface::parseStringx(const char *str)
          words[0].erase(0, 1);      // Remove leading /
 
    return words;
+}
+
+
+void GameUserInterface::resetLevelInfoDisplayTimer()
+{
+   mLevelInfoDisplayTimer.reset(6000);  // 6 seconds
+}
+
+
+void GameUserInterface::clearLevelInfoDisplayTimer()
+{
+   mLevelInfoDisplayTimer.clear();
 }
 
 

@@ -388,6 +388,12 @@ void MenuUserInterface::getMenuResponses(Vector<string> &responses)
 }
 
 
+void MenuUserInterface::onMouseMoved(S32 x, S32 y)
+{
+   onMouseMoved(); // Redirect to argless version
+}
+
+
 // Handle mouse input, figure out which menu item we're over, and highlight it
 void MenuUserInterface::onMouseMoved()
 {
@@ -587,6 +593,24 @@ bool MenuUserInterface::processKeys(InputCode inputCode, char ascii)
    }
 
    return true;      // Probably wrong, but doesn't really matter at this point
+}
+
+
+S32 MenuUserInterface::getTextSize()
+{
+   return 23;
+}
+
+
+S32 MenuUserInterface::getGap()
+{
+   return 18;
+}
+
+
+void MenuUserInterface::renderExtras()
+{
+   /* Do nothing */
 }
 
 
@@ -836,6 +860,18 @@ OptionsMenuUserInterface::OptionsMenuUserInterface(ClientGame *game) : Parent(ga
 {
    setMenuID(OptionsUI);
    mMenuTitle = "OPTIONS MENU:";
+}
+
+
+void OptionsMenuUserInterface::processSelection(U32 index)
+{
+   // Do nothing
+}
+
+
+void OptionsMenuUserInterface::processShiftSelection(U32 index)
+{
+   // Do nothing
 }
 
 
@@ -1091,6 +1127,18 @@ NameEntryUserInterface::NameEntryUserInterface(ClientGame *game) : MenuUserInter
    setMenuID(OptionsUI);
    mMenuTitle = "ENTER YOUR NICKNAME:";
    mReason = NetConnection::ReasonNone;
+}
+
+
+void NameEntryUserInterface::processSelection(U32 index)
+{
+   // Do nothing
+}
+
+
+void NameEntryUserInterface::processShiftSelection(U32 index)
+{
+   // Do nothing
 }
 
 

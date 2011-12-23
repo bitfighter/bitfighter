@@ -95,6 +95,12 @@ UserInterface::~UserInterface()
 }
 
 
+ClientGame *UserInterface::getGame()
+{
+   return mClientGame;
+}
+
+
 UIManager *UserInterface::getUIManager() const 
 { 
    TNLAssert(mClientGame, "mGame is NULL!");
@@ -161,6 +167,7 @@ UIID UserInterface::getPrevMenuID() const
 void UserInterface::onActivate()   { /* Do nothing */ }
 void UserInterface::onReactivate() { /* Do nothing */ }
 
+void UserInterface::onDisplayModeChange() { /* Do nothing */ }
 
 extern void actualizeScreenMode(bool);
 

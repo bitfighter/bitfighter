@@ -46,14 +46,7 @@ struct KeyDefMenuItem
    InputCode *primaryControl;
    string helpString;
 
-   KeyDefMenuItem(const char *text, U32 index, U32 col, InputCode *PC, string helpStr)     // Constructor
-   {
-      mText = text;
-      mIndex = index;
-      mColumn = col;
-      primaryControl = PC;
-      helpString = helpStr;
-   }
+   KeyDefMenuItem(const char *text, U32 index, U32 col, InputCode *PC, string helpStr);     // Constructor
 };
 
 class KeyDefMenuUserInterface : public UserInterface

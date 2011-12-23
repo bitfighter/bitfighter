@@ -42,7 +42,7 @@ private:
 public:
    DiagnosticUserInterface(ClientGame *game);     // Constructor
    void onActivate();
-   void idle(U32 t) { }
+   void idle(U32 t);
    void render();
    void quit();
    void onKeyDown(InputCode inputCode, char ascii);
