@@ -53,11 +53,25 @@ void QuickMenuUI::initialize()
 }
 
 
+string QuickMenuUI::getTitle()
+{
+   return mMenuTitle;
+}
+
+
+S32 QuickMenuUI::getTextSize()
+{
+   return 20;
+}
+
+
+S32 QuickMenuUI::getGap()
+{
+   return 6;
+}
+
+
 extern ScreenInfo gScreenInfo;
-
-S32 QuickMenuUI::getTextSize() { return 20; }      
-S32 QuickMenuUI::getGap() { return 6; }            
-
 
 void QuickMenuUI::render()
 {
@@ -228,6 +242,20 @@ void QuickMenuUI::addSaveAndQuitMenuItem()
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+// Constructor
+EditorAttributeMenuUI::EditorAttributeMenuUI(ClientGame *game) :
+      Parent(game)
+{
+   /* Do nothing */
+}
+
+
+EditorObject *EditorAttributeMenuUI::getObject()
+{
+   return mObject;
+}
+
+
 // Escape cancels without saving
 void EditorAttributeMenuUI::onEscape()
 {
@@ -283,6 +311,14 @@ void EditorAttributeMenuUI::doneEditingAttrs(EditorObject *object)
 
 ////////////////////////////////////////
 ////////////////////////////////////////
+
+// Constructor
+PluginMenuUI::PluginMenuUI(ClientGame *game, const string &title) :
+      Parent(game, title)
+{
+   /* Do nothing */
+}
+
 
 PluginMenuUI::~PluginMenuUI()
 {

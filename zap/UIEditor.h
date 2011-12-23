@@ -272,7 +272,7 @@ protected:
    void onActivate();
    void onReactivate();
 
-   void renderMasterStatus() { /* Do nothing, don't render this in editor */ }
+   void renderMasterStatus();
 
    bool usesEditorScreenMode();
 
@@ -293,8 +293,8 @@ public:
 
    Vector<string> mGameTypeArgs;
 
-   F32 getCurrentScale() { return mCurrentScale; }
-   Point getCurrentOffset() { return mCurrentOffset; }
+   F32 getCurrentScale();
+   Point getCurrentOffset();
 
    void doneEditingAttributes(EditorAttributeMenuUI *editor, EditorObject *object);   // Gets run when user exits attribute editor
 
@@ -302,7 +302,7 @@ public:
 
    Vector<TeamInfo> mOldTeams;     // Team list from before we run team editor, so we can see what changed
 
-   EditorObject *getSnapItem() { return mSnapObject; }
+   EditorObject *getSnapItem();
    void rebuildEverything();                  // Does lots of things in undo, redo, and add items from script
 
    void onBeforeRunScriptFromConsole();
@@ -328,8 +328,8 @@ public:
    void removeTeam(S32 teamId);
    void clearTeams();
 
-   bool getNeedToSave() const { return mNeedToSave; }
-   void setNeedToSave(bool needToSave) { mNeedToSave = needToSave; }
+   bool getNeedToSave() const;
+   void setNeedToSave(bool needToSave);
 
    bool mDraggingObjects;     // Should be private
 
@@ -383,8 +383,8 @@ public:
    void setSaveMessage(string msg, bool savedOK);
    void setWarnMessage(string msg1, string msg2);
 
-   Point convertCanvasToLevelCoord(Point p) { return (p - mCurrentOffset) * (1 / mCurrentScale); }
-   Point convertLevelToCanvasCoord(Point p, bool convert = true) { return convert ? p * mCurrentScale + mCurrentOffset : p; }
+   Point convertCanvasToLevelCoord(Point p);
+   Point convertLevelToCanvasCoord(Point p, bool convert = true);
 
    void onDisplayModeChange();      // Called when we shift between windowed and fullscreen mode, after change is made
 

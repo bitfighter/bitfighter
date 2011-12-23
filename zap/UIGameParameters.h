@@ -51,14 +51,14 @@ private:
    string mParamVal;
 
 public:
-   SavedMenuItem() { /* Unused */ }    // Default constructor
+   SavedMenuItem();    // Default constructor
 
-   SavedMenuItem(MenuItem *menuItem) { mParamName = menuItem->getPrompt(); setValues(menuItem); }
+   SavedMenuItem(MenuItem *menuItem);
 
-   void setValues(MenuItem *menuItem) { mParamVal = menuItem->getValueForWritingToLevelFile(); }
+   void setValues(MenuItem *menuItem);
 
-   string getParamName() { return mParamName; }
-   string getParamVal() { return mParamVal; }
+   string getParamName();
+   string getParamVal();
 };
 
 ////////////////////////////////////
@@ -70,7 +70,7 @@ class GameParamUserInterface : public MenuUserInterface
    typedef MenuUserInterface Parent;
 
 private:
-   void processSelection(U32 index) { }   // Needed for MenuUserInterface subclassing... does nothing
+   void processSelection(U32 index); // Needed for MenuUserInterface subclassing... does nothing
 
    bool anythingChanged();           // Compare list of parameters from before and after a session in the GameParams menu.  Did anything get changed??
 
@@ -79,8 +79,8 @@ private:
    S32 mQuitItemIndex;               // Index of our quit item -- will vary depending on how many game-specific parameters there are
    S32 mGameSpecificParams;          // How many game specific parameters do we have?
 
-   virtual S32 getTextSize() { return 18; }
-   virtual S32 getGap() { return 12; }
+   virtual S32 getTextSize();
+   virtual S32 getGap();
 
    typedef map<const char *, boost::shared_ptr<MenuItem> > MenuItemMap;
    MenuItemMap mMenuItemMap;

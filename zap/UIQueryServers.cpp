@@ -87,6 +87,30 @@ static void prevButtonClickedCallback(ClientGame *game)
 
 
 // Constructor
+QueryServersUserInterface::ServerRef::ServerRef()
+{
+   pingTimedOut = false;
+   everGotQueryResponse = false;
+   passwordRequired = false;
+   test = false;
+   dedicated = false;
+   sendCount = 0;
+   pingTime = 9999;
+   playerCount = -1;
+   maxPlayers = -1;
+   botCount = -1;
+}
+
+
+// Constructor
+QueryServersUserInterface::ColumnInfo::ColumnInfo(const char *nm, U32 xs)
+{
+   name = nm;
+   xStart = xs;
+}
+
+
+// Constructor
 QueryServersUserInterface::QueryServersUserInterface(ClientGame *game) : UserInterface(game), ChatParent(game)
 {
    setMenuID(QueryServersScreenUI);
@@ -525,6 +549,12 @@ void QueryServersUserInterface::idle(U32 timeDelta)
 bool QueryServersUserInterface::mouseInHeaderRow(const Point *pos)
 {
    return pos->y >= COLUMN_HEADER_TOP && pos->y < COLUMN_HEADER_TOP + COLUMN_HEADER_HEIGHT - 1;
+}
+
+
+string QueryServersUserInterface::getLastSelectedServerName()
+{
+   return mLastSelectedServer.serverName;
 }
 
 
@@ -1113,6 +1143,12 @@ void QueryServersUserInterface::onMouseDragged(S32 x, S32 y)
 
       mMessageDisplayCount = (BOTTOM_OF_CHAT_WINDOW - getDividerPos() - 4) / (CHAT_FONT_SIZE + CHAT_FONT_MARGIN) - 1;         
    }
+}
+
+
+S32 QueryServersUserInterface::getFirstServerIndexOnCurrentPage()
+{
+   return mPage * mServersPerPage;
 }
 
 

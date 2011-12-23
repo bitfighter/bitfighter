@@ -43,6 +43,24 @@
 namespace Zap
 {
 
+// Quickie constructor
+ChatMessage::ChatMessage()
+{
+   /* Do nothing */
+}
+
+// "Real" constructor
+ChatMessage::ChatMessage(string frm, string msg, Color col, bool isPriv, bool isSys)
+{
+   color = col;
+   message = msg;
+   from = frm;
+   time = getShortTimeStamp(); // Record time message arrived
+   isPrivate = isPriv;
+   isSystem = isSys;
+}
+
+
 Vector<StringTableEntry> AbstractChat::mPlayersInGlobalChat;
 
 const char *ARROW = ">";
@@ -162,6 +180,18 @@ ChatMessage AbstractChat::getMessage(U32 index)
 {
    //U32 first = (mMessageCount < MESSAGES_TO_RETAIN) ? 0 : mMessageCount % MESSAGES_TO_RETAIN;
    return mMessages[index % MESSAGES_TO_RETAIN];
+}
+
+
+U32 AbstractChat::getMessageCount()
+{
+   return mMessageCount;
+}
+
+
+bool AbstractChat::composingMessage()
+{
+   return mLineEditor.length() > 0;
 }
 
 
@@ -371,6 +401,12 @@ ChatUserInterface::ChatUserInterface(ClientGame *game) : Parent(game), ChatParen
 void ChatUserInterface::idle(U32 timeDelta)
 {
    // Do nothing
+}
+
+
+void ChatUserInterface::setRenderUnderlyingUI(bool render)
+{
+   mRenderUnderlyingUI = render;
 }
 
 

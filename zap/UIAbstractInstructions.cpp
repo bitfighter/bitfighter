@@ -34,6 +34,13 @@ namespace Zap
 {
 
 
+// Constructor
+AbstractInstructionsUserInterface::AbstractInstructionsUserInterface(ClientGame *clientGame) : Parent(clientGame)
+{
+   /* Do nothing */
+}
+
+
 void AbstractInstructionsUserInterface::renderConsoleCommands(const char *activationCommand, ControlStringsEditor *cmdList)
 {
    S32 ypos = 50;

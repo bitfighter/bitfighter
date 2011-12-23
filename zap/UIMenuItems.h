@@ -95,7 +95,7 @@ public:
 
    static bool shouldLuaGarbageCollectThisObject();   
 
-   virtual MenuItemTypes getItemType() { return MenuItemType; }
+   virtual MenuItemTypes getItemType();
 
    virtual void render(S32 ypos, S32 textsize, bool isSelected);              // Renders item horizontally centered on screen
    virtual void render(S32 xpos, S32 ypos, S32 textsize, bool isSelected);    // Renders item horizontally centered on xpos
@@ -103,40 +103,40 @@ public:
 
    const Color *getColor(bool isSelected);
 
-   S32 getIndex() { return mIndex; }      // Only used once...  TODO: Get rid of this, and perhaps user-assigned indices altogether
+   S32 getIndex();      // Only used once...  TODO: Get rid of this, and perhaps user-assigned indices altogether
 
-   const char *getHelp() { return mHelp; }
+   const char *getHelp();
 
    MenuUserInterface *getMenu();
    void setMenu(MenuUserInterface *menu);
 
-   string getPrompt() const { return mDisplayVal; }
+   string getPrompt() const;
 
-   virtual string getUnits() const { return ""; }
+   virtual string getUnits() const;
 
-   virtual void setSecret(bool secret) { /* Do nothing */ }
+   virtual void setSecret(bool secret);
 
    // When enter is pressed, should selection advance to the next item?
-   virtual void setEnterAdvancesItem(bool enterAdvancesItem) { mEnterAdvancesItem = enterAdvancesItem; }
+   virtual void setEnterAdvancesItem(bool enterAdvancesItem);
    
-   virtual const char *getSpecialEditingInstructions() { return ""; }
-   virtual string getValueForDisplayingInMenu() { return ""; }
-   virtual S32 getIntValue() const { return 0; }
-   virtual string getValueForWritingToLevelFile() { return itos(getIntValue()); }
-   virtual string getValue() const { return mDisplayVal; }      // Basic menu item returns its text when selected... overridden by other types
-   virtual void setValue(const string &val) { /* Do nothing */ }
-   virtual void setIntValue(S32 val) { /* Do nothing */ }
+   virtual const char *getSpecialEditingInstructions();
+   virtual string getValueForDisplayingInMenu();
+   virtual S32 getIntValue() const;
+   virtual string getValueForWritingToLevelFile();
+   virtual string getValue() const;      // Basic menu item returns its text when selected... overridden by other types
+   virtual void setValue(const string &val);
+   virtual void setIntValue(S32 val);
 
    virtual bool handleKey(InputCode inputCode, char ascii);
-   virtual void setFilter(LineEditor::LineEditorFilter filter) { /* Do nothing */ }
-   virtual void activatedWithShortcutKey() { handleKey(MOUSE_LEFT, 0); }
+   virtual void setFilter(LineEditor::LineEditorFilter filter);
+   virtual void activatedWithShortcutKey();
 
-   virtual bool enterAdvancesItem() { return mEnterAdvancesItem; }      
+   virtual bool enterAdvancesItem();
 
-   void setSelectedColor(const Color &color)   { mSelectedColor = color; }
-   void setUnselectedColor(const Color &color) { mUnselectedColor = color; }
-   virtual void setSelectedValueColor(const Color &color)   { /* Override in children */ }
-   virtual void setUnselectedValueColor(const Color &color) { /* Override in children */ }
+   void setSelectedColor(const Color &color);
+   void setUnselectedColor(const Color &color);
+   virtual void setSelectedValueColor(const Color &color);
+   virtual void setUnselectedValueColor(const Color &color);
 };
 
 
@@ -147,11 +147,7 @@ public:
 class MessageMenuItem : public MenuItem
 {
 public:
-   MessageMenuItem(string displayVal, const Color &color) : MenuItem(displayVal)  
-   { 
-      mDisplayValAppendage = ""; 
-      mUnselectedColor = color; 
-   }
+   MessageMenuItem(string displayVal, const Color &color);
 };
 
 
@@ -172,9 +168,9 @@ protected:
    Color mSelectedValueColor;       // Color of value when selected
    Color mUnselectedValueColor;     // Color of value when unselected
 
-   const Color *getValueColor(bool isSelected) { return isSelected ? &mSelectedValueColor : &mUnselectedValueColor; }
-   void setSelectedValueColor(const Color &color)   { mSelectedValueColor = color; }
-   void setUnselectedValueColor(const Color &color) { mUnselectedValueColor = color; }
+   const Color *getValueColor(bool isSelected);
+   void setSelectedValueColor(const Color &color);
+   void setUnselectedValueColor(const Color &color);
 
 public:
    ValueMenuItem();
@@ -203,20 +199,20 @@ public:
                   void (*callback)(ClientGame *, U32), const char *help, InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
    ~ToggleMenuItem();
 
-   virtual MenuItemTypes getItemType() { return ToggleMenuItemType; }
-   virtual string getValueForDisplayingInMenu() { return ""; }
-   virtual const char *getSpecialEditingInstructions() { return "Use [<-] and [->] keys to change value."; }
-   virtual S32 getValueIndex() { return mIndex; }
-   virtual void setValueIndex(U32 index) { mIndex = index; }
+   virtual MenuItemTypes getItemType();
+   virtual string getValueForDisplayingInMenu();
+   virtual const char *getSpecialEditingInstructions();
+   virtual S32 getValueIndex();
+   virtual void setValueIndex(U32 index);
    
-   virtual string getValue() const { return mOptions[mIndex]; } 
+   virtual string getValue() const;
 
    virtual void render(S32 xpos, S32 ypos, S32 textsize, bool isSelected);
    virtual S32 getWidth(S32 textsize);
 
    virtual bool handleKey(InputCode inputCode, char ascii);
 
-   virtual void activatedWithShortcutKey() { /* Do nothing */ }
+   virtual void activatedWithShortcutKey();
 
    Vector<string> mOptions;
 
@@ -243,11 +239,11 @@ private:
 public:
    YesNoMenuItem(string title, bool currOption, const char *help, InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
 
-   virtual string getValueForDisplayingInMenu() { TNLAssert(false, "Is this used?  If not, remove it!"); return mIndex ? " Engineer" : ""; }
-   virtual string getValueForWritingToLevelFile() { return mIndex ? "yes" : "no"; }
-   virtual void setValue(const string &val) { mIndex = (val == "yes") ? 1 : 0; }
-   virtual S32 getIntValue() const { return mIndex; }    // 0 == false == no, 1 == true == yes
-   virtual void setIntValue(S32 value) { mIndex = (value == 0) ? 0 : 1; }
+   virtual string getValueForDisplayingInMenu();
+   virtual string getValueForWritingToLevelFile();
+   virtual void setValue(const string &val);
+   virtual S32 getIntValue() const;
+   virtual void setIntValue(S32 value);
 
    /////// Lua Interface
    static const char className[];
@@ -278,7 +274,7 @@ protected:
 
    virtual void increment(S32 fact = 1); 
    virtual void decrement(S32 fact = 1);
-   virtual S32 getBigIncrement() { return 10; }    // How much our counter is incremented when shift is down (multiplier)
+   virtual S32 getBigIncrement();    // How much our counter is incremented when shift is down (multiplier)
 
 public:
    CounterMenuItem(const string &title, S32 value, S32 step, S32 minVal, S32 maxVal, 
@@ -288,21 +284,21 @@ public:
    virtual void render(S32 xpos, S32 ypos, S32 textsize, bool isSelected);
    virtual S32 getWidth(S32 textsize);
 
-   virtual MenuItemTypes getItemType() { return CounterMenuItemType; }
-   virtual string getValueForDisplayingInMenu() { return itos(mValue); }
-   virtual const char *getUnits() { return mUnits.c_str(); }
-   virtual S32 getIntValue() const { return mValue; }
+   virtual MenuItemTypes getItemType();
+   virtual string getValueForDisplayingInMenu();
+   virtual const char *getUnits();
+   virtual S32 getIntValue() const;
    virtual void setValue(const string &val);
    virtual void setIntValue(S32 val);
-   virtual string getValue() const { return itos(mValue); }
-   virtual const char *getSpecialEditingInstructions() { return "Use [<-] and [->] keys to change value.  Use [Shift] for bigger change."; }
+   virtual string getValue() const;
+   virtual const char *getSpecialEditingInstructions();
    virtual bool handleKey(InputCode inputCode, char ascii);
 
-   virtual string getUnits() const { return mUnits; }
+   virtual string getUnits() const;
 
-   virtual void snap() { /* Do nothing */ }
+   virtual void snap();
 
-   virtual void activatedWithShortcutKey() { /* Do nothing */ }
+   virtual void activatedWithShortcutKey();
 
    /////// Lua Interface
    static const char className[];
@@ -319,19 +315,18 @@ public:
 class TimeCounterMenuItem : public CounterMenuItem
 {
 protected:
-   virtual S32 getBigIncrement() { return 12; }    // 12 * 5sec = 1 minute
+   virtual S32 getBigIncrement();
 
 public:
    TimeCounterMenuItem(const string &title, S32 value, S32 maxVal, const string &zeroMsg, const char *help, 
                        S32 step = 5, InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
 
-   virtual const char *getUnits() { return mValue >= 60 ? "mins" : "secs"; }
+   virtual const char *getUnits();
 
-   virtual MenuItemTypes getItemType() { return TimeCounterMenuItemType; }
-   virtual void setValue (const string &val) { mValue = S32((atof(val.c_str()) * 60 + 2.5) / 5) * 5 ; }     // Snap to nearest 5 second interval
-   virtual string getValueForDisplayingInMenu() { return (mValue < 60) ? itos(mValue) : 
-                                                   itos(mValue / 60) + ":" + ((mValue % 60) < 10 ? "0" : "") + itos(mValue % 60); }
-   virtual string getValueForWritingToLevelFile() { return ftos((F32)mValue / 60.0f, 3); }    // Time in minutes, with fraction
+   virtual MenuItemTypes getItemType();
+   virtual void setValue (const string &val);
+   virtual string getValueForDisplayingInMenu();
+   virtual string getValueForWritingToLevelFile();
 };
 
 
@@ -342,16 +337,16 @@ public:
 class TimeCounterMenuItemSeconds : public TimeCounterMenuItem
 {
 protected:
-   virtual S32 getBigIncrement() { return 5; }
+   virtual S32 getBigIncrement();
 
 public:
    TimeCounterMenuItemSeconds(const string &title, S32 value, S32 maxVal, const string &zeroMsg, const char *help, 
                               InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
 
-   virtual void setValue (const string &val) { mValue = atoi(val.c_str()); } 
-   virtual string getValueForWritingToLevelFile() { return itos(mValue); }
+   virtual void setValue (const string &val);
+   virtual string getValueForWritingToLevelFile();
 
-   virtual void snap() { mValue = S32((mValue / getBigIncrement()) * getBigIncrement()); }
+   virtual void snap();
 };
 
 ////////////////////////////////////
@@ -377,29 +372,29 @@ public:
    TextEntryMenuItem(string title, string val, string emptyVal, const char *help, U32 maxLen, 
                      InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
 
-   virtual MenuItemTypes getItemType() { return TextEntryMenuItemType; }
+   virtual MenuItemTypes getItemType();
 
    virtual void render(S32 xpos, S32 ypos, S32 textsize, bool isSelected);
    virtual S32 getWidth(S32 textsize);
 
    virtual bool handleKey(InputCode inputCode, char ascii);
 
-   LineEditor getLineEditor() { return mLineEditor; }
-   void setLineEditor(LineEditor editor) { mLineEditor = editor; }
+   LineEditor getLineEditor();
+   void setLineEditor(LineEditor editor);
 
-   virtual string getValueForWritingToLevelFile() { return mLineEditor.getString() != "" ? mLineEditor.getString() : mEmptyVal; }
-   virtual string getValueForDisplayingInMenu() { return mLineEditor.getString(); }
+   virtual string getValueForWritingToLevelFile();
+   virtual string getValueForDisplayingInMenu();
 
-   virtual string getValue() const { return mLineEditor.getString(); } 
-   void setValue(const string &val) { mLineEditor.setString(val); }
+   virtual string getValue() const;
+   void setValue(const string &val);
 
-   virtual void setFilter(LineEditor::LineEditorFilter filter) { mLineEditor.setFilter(filter); }
+   virtual void setFilter(LineEditor::LineEditorFilter filter);
 
-   virtual void activatedWithShortcutKey() { /* Do nothing */ }
+   virtual void activatedWithShortcutKey();
 
-   virtual void setTextEditedCallback(void (*callback)(string)) { mTextEditedCallback = callback; }
+   virtual void setTextEditedCallback(void (*callback)(string));
 
-   virtual void setSecret(bool secret) { mLineEditor.setSecret(secret); }
+   virtual void setSecret(bool secret);
 
    /////// Lua Interface
    static const char className[];
@@ -433,12 +428,12 @@ public:
    // Constructor
    PlayerMenuItem(S32 index, const char *text, void (*callback)(ClientGame *, U32), InputCode k1, PlayerType type);
 
-   virtual MenuItemTypes getItemType() { return PlayerMenuItemType; }
+   virtual MenuItemTypes getItemType();
 
    virtual void render(S32 xpos, S32 ypos, S32 textsize, bool isSelected);
    virtual S32 getWidth(S32 textsize);
 
-   virtual void activatedWithShortcutKey() { /* Do nothing */ }
+   virtual void activatedWithShortcutKey();
 };
 
 
@@ -455,12 +450,12 @@ private:
 public:
    TeamMenuItem(S32 index, AbstractTeam *team, void (*callback)(ClientGame *, U32), InputCode inputCode, bool isCurrent);
 
-   virtual MenuItemTypes getItemType() { return TeamMenuItemType; }
+   virtual MenuItemTypes getItemType();
 
    virtual void render(S32 xpos, S32 ypos, S32 textsize, bool isSelected);
    virtual S32 getWidth(S32 textsize);
 
-   virtual void activatedWithShortcutKey() { /* Do nothing */ }
+   virtual void activatedWithShortcutKey();
 
 };
 

@@ -243,7 +243,7 @@ public:
    bool displayInputModeChangeAlert;
 
 
-   bool isShowingMissionOverlay()  const { return mMissionOverlayActive; }    // Are game instructions (F2) visible?
+   bool isShowingMissionOverlay() const;    // Are game instructions (F2) visible?
 
    void displayErrorMessage(const char *format, ...);
    void displaySuccessMessage(const char *format, ...);
@@ -252,7 +252,7 @@ public:
    void displayMessagef(const Color &msgColor, const char *format, ...);
    void displayChatMessage(const Color &msgColor, const char *format, ...);
 
-   void resetInputModeChangeAlertDisplayTimer(U32 timeInMs) { mInputModeChangeAlertDisplayTimer.reset(timeInMs); }
+   void resetInputModeChangeAlertDisplayTimer(U32 timeInMs);
 
    void render();                   // Render game screen
    void renderReticle();            // Render crosshairs
@@ -268,8 +268,8 @@ public:
 
    void idle(U32 timeDelta);
 
-   void resetLevelInfoDisplayTimer() { mLevelInfoDisplayTimer.reset(6000); }     // 6 seconds 
-   void clearLevelInfoDisplayTimer() { mLevelInfoDisplayTimer.clear(); }
+   void resetLevelInfoDisplayTimer();     // 6 seconds
+   void clearLevelInfoDisplayTimer();
 
    void runCommand(const char *input);
    void issueChat();                // Send chat message (either Team or Global)
@@ -317,9 +317,9 @@ public:
 
    void renderEngineeredItemDeploymentMarker(Ship *ship);
 
-   void receivedControlUpdate(bool recvd) { mGotControlUpdate = recvd; }
+   void receivedControlUpdate(bool recvd);
 
-   bool isInScoreboardMode() { return mInScoreboardMode; }
+   bool isInScoreboardMode();
 
    Move *getCurrentMove();
    Timer mProgressBarFadeTimer;     // For fading out progress bar after level is loaded

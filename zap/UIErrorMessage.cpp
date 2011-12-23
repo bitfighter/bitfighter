@@ -89,6 +89,12 @@ void ErrorMessageUserInterface::onKeyDown(InputCode inputCode, char ascii)
 }
 
 
+void ErrorMessageUserInterface::idle(U32 t)
+{
+   // Do nothing
+}
+
+
 void ErrorMessageUserInterface::render()
 {
    getUIManager()->renderPrevUI();

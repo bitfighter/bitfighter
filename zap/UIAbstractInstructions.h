@@ -47,7 +47,7 @@ protected:
    void renderConsoleCommands(const char *activationInstruction, ControlStringsEditor cmdList[]);
 
 public:
-   AbstractInstructionsUserInterface(ClientGame *clientGame) : Parent(clientGame) { /* Do nothing */ }      // Constructor
+   AbstractInstructionsUserInterface(ClientGame *clientGame);      // Constructor
 };
 
 }

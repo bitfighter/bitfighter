@@ -70,6 +70,12 @@ void DiagnosticUserInterface::onActivate()
 }
 
 
+void DiagnosticUserInterface::idle(U32 t)
+{
+   // Do nothing
+}
+
+
 bool DiagnosticUserInterface::isActive()
 {
    return mActive;

@@ -77,7 +77,7 @@ private:
 
    S32 mPage;
    S32 mServersPerPage;
-   S32 getFirstServerIndexOnCurrentPage() { return mPage * mServersPerPage; }
+   S32 getFirstServerIndexOnCurrentPage();
 
    Timer mouseScrollTimer;
    void sortSelected();
@@ -166,30 +166,18 @@ public:
       Address serverAddress;
       U32 playerCount, maxPlayers, botCount;     // U32 because that's what we use on the master
 
-      ServerRef() // Quickie constructor
-      {
-         pingTimedOut = false;
-         everGotQueryResponse = false;
-         passwordRequired = false;
-         test = false;
-         dedicated = false;
-         sendCount = 0;
-         pingTime = 9999;
-         playerCount = -1;
-         maxPlayers = -1;
-         botCount = -1;
-      }
+      ServerRef(); // Quickie constructor
    };
    struct ColumnInfo
    {
       const char *name;
       S32 xStart;
-      ColumnInfo(const char *nm = NULL, U32 xs = 0) { name = nm; xStart = xs; }     // Constructor
+      ColumnInfo(const char *nm = NULL, U32 xs = 0);     // Constructor
    };
 
    Vector<ServerRef> servers;
    ServerRef mLastSelectedServer;
-   string getLastSelectedServerName() { return mLastSelectedServer.serverName; }
+   string getLastSelectedServerName();
 
    Vector<ColumnInfo> columns;
    S32 getSelectedIndex();

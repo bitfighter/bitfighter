@@ -100,6 +100,24 @@ void TextEntryUserInterface::idle(U32 timeDelta)
 }
 
 
+void TextEntryUserInterface::setSecret(bool secret)
+{
+   lineEditor.setSecret(secret);
+}
+
+
+const char *TextEntryUserInterface::getText()
+{
+   return lineEditor.c_str();
+}
+
+
+string TextEntryUserInterface::getSaltedHashText()
+{
+   return md5.getSaltedHashFromString(lineEditor.getString());
+}
+
+
 void TextEntryUserInterface::onKeyDown(InputCode inputCode, char ascii)
 {
    switch (inputCode)
@@ -267,6 +285,13 @@ void LevelNameEntryUserInterface::onAccept(const char *name)
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+// Constructor
+PasswordEntryUserInterface::PasswordEntryUserInterface(ClientGame *game) : Parent(game)
+{
+   setSecret(true);
+}
+
+
 void PasswordEntryUserInterface::render()
 {
    const S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
@@ -295,15 +320,35 @@ void PasswordEntryUserInterface::render()
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+// Constructor
+PreGamePasswordEntryUserInterface::PreGamePasswordEntryUserInterface(ClientGame *game) :
+      Parent(game)
+{
+   /* Do nothing */
+}
+
+
+PreGamePasswordEntryUserInterface::~PreGamePasswordEntryUserInterface()
+{
+   // Do nothing
+}
+
+
 void PreGamePasswordEntryUserInterface::onAccept(const char *text)
 {
-   getGame()->joinGame(connectAddress, false, false);      // Not from master, not local
+   getGame()->joinGame(connectAddress, false, false); // Not from master, not local
 }
 
 
 void PreGamePasswordEntryUserInterface::onEscape()
 {
    getUIManager()->getMainMenuUserInterface()->activate();
+}
+
+
+void PreGamePasswordEntryUserInterface::setConnectServer(const Address &addr)
+{
+   connectAddress = addr;
 }
 
 
@@ -322,6 +367,14 @@ ServerPasswordEntryUserInterface::ServerPasswordEntryUserInterface(ClientGame *g
 
 ////////////////////////////////////////
 ////////////////////////////////////////
+
+// Constructor
+InGamePasswordEntryUserInterface::InGamePasswordEntryUserInterface(ClientGame *game) :
+      Parent(game)
+{
+   /* Do nothing */
+}
+
 
 void InGamePasswordEntryUserInterface::onAccept(const char *text)
 {

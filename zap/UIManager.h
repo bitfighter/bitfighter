@@ -191,8 +191,8 @@ public:
    void reactivatePrevUI();
    void reactivateMenu(const UserInterface *target);
    UserInterface *getPrevUI();
-   bool hasPrevUI() { return mPrevUIs.size() > 0; }
-   void clearPrevUIs() { mPrevUIs.clear(); }
+   bool hasPrevUI();
+   void clearPrevUIs();
    void renderPrevUI();
    bool cameFrom(UIID menuID);        // Did we arrive at our current interface via the specified interface?
    void saveUI(UserInterface *ui);

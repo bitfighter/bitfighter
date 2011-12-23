@@ -54,11 +54,11 @@ private:
    bool mRepeatMode;
    bool mKeyDown;
 
-   virtual S32 getTextSize() { return 23; }              // Let menus set their own text size
-   virtual S32 getGap() { return 18; }                   // Gap is the space between items
+   virtual S32 getTextSize();        // Let menus set their own text size
+   virtual S32 getGap();             // Gap is the space between items
 
-   virtual void renderExtras() { /* Do nothing */ }      // For drawing something extra on a menu
-   void advanceItem();                                   // What happens when we move on to the next menu item?
+   virtual void renderExtras();      // For drawing something extra on a menu
+   void advanceItem();               // What happens when we move on to the next menu item?
 
    virtual void initialize();
    virtual S32 getSelectedMenuItem();
@@ -106,7 +106,7 @@ public:
    void render();                                        // Draw the basic menu
    void onKeyDown(InputCode inputCode, char ascii);
    void onKeyUp(InputCode inputCode);
-   void onMouseMoved(S32 x, S32 y) { onMouseMoved(); }   // Redirect to argless version
+   void onMouseMoved(S32 x, S32 y);                      // Redirect to argless version
    void onMouseMoved();
    void processMouse();
 
@@ -169,8 +169,8 @@ class OptionsMenuUserInterface : public MenuUserInterface
 
 public:
    OptionsMenuUserInterface(ClientGame *game);        // Constructor
-   void processSelection(U32 index) { }         // Process selected menu item when right arrow is pressed
-   void processShiftSelection(U32 index) { }    // And when the left arrow is pressed
+   void processSelection(U32 index);            // Process selected menu item when right arrow is pressed
+   void processShiftSelection(U32 index);       // And when the left arrow is pressed
    void onEscape();
    void setupMenus();
    void onActivate();
@@ -233,8 +233,8 @@ private:
 
 public:
    NameEntryUserInterface(ClientGame *game);    // Constructor
-   void processSelection(U32 index) { }         // Process selected menu item when right arrow is pressed
-   void processShiftSelection(U32 index) { }    // And when the left arrow is pressed
+   void processSelection(U32 index);            // Process selected menu item when right arrow is pressed
+   void processShiftSelection(U32 index);       // And when the left arrow is pressed
    void onEscape();
    void setupMenu();
    void onActivate();

@@ -49,6 +49,21 @@ namespace Zap
 {
 
 // Constructor
+KeyDefMenuItem::KeyDefMenuItem(const char *text, U32 index, U32 col, InputCode *PC, string helpStr)
+{
+   mText = text;
+   mIndex = index;
+   mColumn = col;
+   primaryControl = PC;
+   helpString = helpStr;
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+
+// Constructor
 KeyDefMenuUserInterface::KeyDefMenuUserInterface(ClientGame *game) : Parent(game)
 {
    setMenuID(KeyDefUI);

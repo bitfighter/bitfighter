@@ -110,9 +110,45 @@ bool MenuItem::shouldLuaGarbageCollectThisObject()
 }
 
 
+MenuItemTypes MenuItem::getItemType()
+{
+   return MenuItemType;
+}
+
+
 MenuUserInterface *MenuItem::getMenu()  
 { 
    return mMenu; 
+}
+
+
+S32 MenuItem::getIndex()
+{
+   return mIndex;
+}
+
+
+string MenuItem::getPrompt() const
+{
+   return mDisplayVal;
+}
+
+
+string MenuItem::getUnits() const
+{
+   return "";
+}
+
+
+void MenuItem::setSecret(bool secret)
+{
+   /* Do nothing */
+}
+
+
+const char *MenuItem::getHelp()
+{
+   return mHelp;
 }
 
 
@@ -166,6 +202,107 @@ bool MenuItem::handleKey(InputCode inputCode, char ascii)
 }
 
 
+void MenuItem::setEnterAdvancesItem(bool enterAdvancesItem)
+{
+   mEnterAdvancesItem = enterAdvancesItem;
+}
+
+
+const char *MenuItem::getSpecialEditingInstructions()
+{
+   return "";
+}
+
+
+string MenuItem::getValueForDisplayingInMenu()
+{
+   return "";
+}
+
+
+S32 MenuItem::getIntValue() const
+{
+   return 0;
+}
+
+
+string MenuItem::getValueForWritingToLevelFile()
+{
+   return itos(getIntValue());
+}
+
+
+string MenuItem::getValue() const
+{
+   return mDisplayVal;
+}
+
+
+void MenuItem::setValue(const string &val)
+{
+   /* Do nothing */
+}
+
+
+void MenuItem::setIntValue(S32 val)
+{
+   /* Do nothing */
+}
+
+
+void MenuItem::setFilter(LineEditor::LineEditorFilter filter)
+{
+   /* Do nothing */
+}
+
+
+void MenuItem::activatedWithShortcutKey()
+{
+   handleKey(MOUSE_LEFT, 0);
+}
+
+
+bool MenuItem::enterAdvancesItem()
+{
+   return mEnterAdvancesItem;
+}
+
+
+void MenuItem::setSelectedColor(const Color &color)
+{
+   mSelectedColor = color;
+}
+
+
+void MenuItem::setUnselectedColor(const Color &color)
+{
+   mUnselectedColor = color;
+}
+
+
+void MenuItem::setSelectedValueColor(const Color &color)
+{
+   /* Override in children */
+}
+
+
+void MenuItem::setUnselectedValueColor(const Color &color)
+{
+   /* Override in children */
+}
+
+////////////////////////////////////
+////////////////////////////////////
+
+
+
+MessageMenuItem::MessageMenuItem(string displayVal, const Color &color) : MenuItem(displayVal)
+{
+   mDisplayValAppendage = "";
+   mUnselectedColor = color;
+}
+
+
 ////////////////////////////////////
 ////////////////////////////////////
 
@@ -197,6 +334,24 @@ S32 clamp(S32 val, S32 min, S32 max)
    if(val < min) return min;
    if(val > max) return max;
    return val;
+}
+
+
+const Color *ValueMenuItem::getValueColor(bool isSelected)
+{
+   return isSelected ? &mSelectedValueColor : &mUnselectedValueColor;
+}
+
+
+void ValueMenuItem::setSelectedValueColor(const Color &color)
+{
+   mSelectedValueColor = color;
+}
+
+
+void ValueMenuItem::setUnselectedValueColor(const Color &color)
+{
+   mUnselectedValueColor = color;
 }
 
 
@@ -297,6 +452,13 @@ bool ToggleMenuItem::handleKey(InputCode inputCode, char ascii)
 }
 
 
+void ToggleMenuItem::activatedWithShortcutKey()
+{
+   /* Do nothing */
+}
+
+
+
 //////////
 // Lua interface
 const char ToggleMenuItem::className[] = "ToggleMenuItem";      // Class name as it appears to Lua scripts
@@ -324,6 +486,42 @@ ToggleMenuItem::~ToggleMenuItem()
 }
 
 
+MenuItemTypes ToggleMenuItem::getItemType()
+{
+   return ToggleMenuItemType;
+}
+
+
+string ToggleMenuItem::getValueForDisplayingInMenu()
+{
+   return "";
+}
+
+
+const char *ToggleMenuItem::getSpecialEditingInstructions()
+{
+   return "Use [<-] and [->] keys to change value.";
+}
+
+
+S32 ToggleMenuItem::getValueIndex()
+{
+   return mIndex;
+}
+
+
+void ToggleMenuItem::setValueIndex(U32 index)
+{
+   mIndex = index;
+}
+
+
+string ToggleMenuItem::getValue() const
+{
+   return mOptions[mIndex];
+}
+
+
 // Define the methods we will expose to Lua
 Lunar<ToggleMenuItem>::RegType ToggleMenuItem::methods[] =
 {
@@ -347,6 +545,37 @@ YesNoMenuItem::YesNoMenuItem(string title, bool currOption, const char *help, In
    initialize();
 
    setIndex(currOption);
+}
+
+
+string YesNoMenuItem::getValueForDisplayingInMenu()
+{
+   TNLAssert(false, "Is this used?  If not, remove it!");
+   return mIndex ? " Engineer" : "";
+}
+
+
+string YesNoMenuItem::getValueForWritingToLevelFile()
+{
+   return mIndex ? "yes" : "no";
+}
+
+
+void YesNoMenuItem::setValue(const string &val)
+{
+   mIndex = (val == "yes") ? 1 : 0;
+}
+
+
+S32 YesNoMenuItem::getIntValue() const
+{
+   return mIndex;
+}
+
+
+void YesNoMenuItem::setIntValue(S32 value)
+{
+   mIndex = (value == 0) ? 0 : 1;
 }
 
 
@@ -508,6 +737,66 @@ void CounterMenuItem::decrement(S32 fact)
 }
 
 
+S32 CounterMenuItem::getBigIncrement()
+{
+   return 10;
+}
+
+
+MenuItemTypes CounterMenuItem::getItemType()
+{
+   return CounterMenuItemType;
+}
+
+
+string CounterMenuItem::getValueForDisplayingInMenu()
+{
+   return itos(mValue);
+}
+
+
+const char *CounterMenuItem::getUnits()
+{
+   return mUnits.c_str();
+}
+
+
+S32 CounterMenuItem::getIntValue() const
+{
+   return mValue;
+}
+
+
+string CounterMenuItem::getValue() const
+{
+   return itos(mValue);
+}
+
+
+const char *CounterMenuItem::getSpecialEditingInstructions()
+{
+   return "Use [<-] and [->] keys to change value.  Use [Shift] for bigger change.";
+}
+
+
+string CounterMenuItem::getUnits() const
+{
+   return mUnits;
+}
+
+
+void CounterMenuItem::snap()
+{
+   /* Do nothing */
+}
+
+
+void CounterMenuItem::activatedWithShortcutKey()
+{
+   /* Do nothing */
+}
+
+
 //////////
 // Lua interface
 const char CounterMenuItem::className[] = "CounterMenuItem";      // Class name as it appears to Lua scripts
@@ -560,6 +849,41 @@ TimeCounterMenuItem::TimeCounterMenuItem(const string &title, S32 value, S32 max
 }
 
 
+S32 TimeCounterMenuItem::getBigIncrement()
+{
+   return 12;  // 12 * 5sec = 1 minute
+}
+
+const char *TimeCounterMenuItem::getUnits()
+{
+   return mValue >= 60 ? "mins" : "secs";
+}
+
+
+MenuItemTypes TimeCounterMenuItem::getItemType()
+{
+   return TimeCounterMenuItemType;
+}
+
+
+void TimeCounterMenuItem::setValue(const string &val)
+{
+   mValue = S32((atof(val.c_str()) * 60 + 2.5) / 5) * 5;  // Snap to nearest 5 second interval
+}
+
+
+string TimeCounterMenuItem::getValueForDisplayingInMenu()
+{
+   return (mValue < 60) ? itos(mValue) : itos(mValue / 60) + ":" + ((mValue % 60) < 10 ? "0" : "") + itos(mValue % 60);
+}
+
+
+string TimeCounterMenuItem::getValueForWritingToLevelFile()
+{
+   return ftos((F32) mValue / 60.0f, 3);  // Time in minutes, with fraction
+}
+
+
 ////////////////////////////////////
 ////////////////////////////////////
 
@@ -568,6 +892,30 @@ TimeCounterMenuItemSeconds::TimeCounterMenuItemSeconds(const string &title, S32 
    TimeCounterMenuItem(title, value, maxVal, zeroMsg, help, 1, k1, k2)
 {
    // Do nothing
+}
+
+
+S32 TimeCounterMenuItemSeconds::getBigIncrement()
+{
+   return 5;
+}
+
+
+void TimeCounterMenuItemSeconds::setValue(const string &val)
+{
+   mValue = atoi(val.c_str());
+}
+
+
+string TimeCounterMenuItemSeconds::getValueForWritingToLevelFile()
+{
+   return itos(mValue);
+}
+
+
+void TimeCounterMenuItemSeconds::snap()
+{
+   mValue = S32((mValue / getBigIncrement()) * getBigIncrement());
 }
 
 
@@ -610,6 +958,18 @@ S32 PlayerMenuItem::getWidth(S32 textsize)
 }
 
 
+MenuItemTypes PlayerMenuItem::getItemType()
+{
+   return PlayerMenuItemType;
+}
+
+
+void PlayerMenuItem::activatedWithShortcutKey()
+{
+   /* Do nothing */
+}
+
+
 ////////////////////////////////////
 ////////////////////////////////////
 
@@ -645,6 +1005,18 @@ void TeamMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
 S32 TeamMenuItem::getWidth(S32 textsize)
 {
    return UserInterface::getStringWidth(textsize, getOptionText().c_str());
+}
+
+
+MenuItemTypes TeamMenuItem::getItemType()
+{
+   return TeamMenuItemType;
+}
+
+
+void TeamMenuItem::activatedWithShortcutKey()
+{
+   /* Do nothing */
 }
 
 
@@ -720,6 +1092,72 @@ bool TextEntryMenuItem::handleKey(InputCode inputCode, char ascii)
    }
    
    return false;
+}
+
+
+MenuItemTypes TextEntryMenuItem::getItemType()
+{
+   return TextEntryMenuItemType;
+}
+
+
+LineEditor TextEntryMenuItem::getLineEditor()
+{
+   return mLineEditor;
+}
+
+
+void TextEntryMenuItem::setLineEditor(LineEditor editor)
+{
+   mLineEditor = editor;
+}
+
+
+string TextEntryMenuItem::getValueForWritingToLevelFile()
+{
+   return mLineEditor.getString() != "" ? mLineEditor.getString() : mEmptyVal;
+}
+
+
+string TextEntryMenuItem::getValueForDisplayingInMenu()
+{
+   return mLineEditor.getString();
+}
+
+
+string TextEntryMenuItem::getValue() const
+{
+   return mLineEditor.getString();
+}
+
+
+void TextEntryMenuItem::setValue(const string &val)
+{
+   mLineEditor.setString(val);
+}
+
+
+void TextEntryMenuItem::setFilter(LineEditor::LineEditorFilter filter)
+{
+   mLineEditor.setFilter(filter);
+}
+
+
+void TextEntryMenuItem::activatedWithShortcutKey()
+{
+   /* Do nothing */
+}
+
+
+void TextEntryMenuItem::setTextEditedCallback(void(*callback)(string))
+{
+   mTextEditedCallback = callback;
+}
+
+
+void TextEntryMenuItem::setSecret(bool secret)
+{
+   mLineEditor.setSecret(secret);
 }
 
 

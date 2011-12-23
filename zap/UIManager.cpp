@@ -457,6 +457,18 @@ UserInterface *UIManager::getPrevUI()
 }
 
 
+bool UIManager::hasPrevUI()
+{
+   return mPrevUIs.size() > 0;
+}
+
+
+void UIManager::clearPrevUIs()
+{
+   mPrevUIs.clear();
+}
+
+
 void UIManager::renderPrevUI()
 {
    if(mPrevUIs.size())

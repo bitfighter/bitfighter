@@ -50,6 +50,42 @@
 namespace Zap
 {
 
+// Default constructor
+SavedMenuItem::SavedMenuItem()
+{
+   /* Unused */
+}
+
+
+SavedMenuItem::SavedMenuItem(MenuItem *menuItem)
+{
+   mParamName = menuItem->getPrompt();
+   setValues(menuItem);
+}
+
+
+void SavedMenuItem::setValues(MenuItem *menuItem)
+{
+   mParamVal = menuItem->getValueForWritingToLevelFile();
+}
+
+
+string SavedMenuItem::getParamName()
+{
+   return mParamName;
+}
+
+
+string SavedMenuItem::getParamVal()
+{
+   return mParamVal;
+}
+
+
+////////////////////////////////////
+////////////////////////////////////
+
+
 // Constructor
 GameParamUserInterface::GameParamUserInterface(ClientGame *game) : Parent(game)
 {
@@ -223,9 +259,27 @@ void GameParamUserInterface::onEscape()
 }
 
 
+void GameParamUserInterface::processSelection(U32 index)
+{
+   // Do nothing
+}
+
+
 bool GameParamUserInterface::anythingChanged()
 {
    return origGameParams != getGame()->toString();
+}
+
+
+S32 GameParamUserInterface::getTextSize()
+{
+   return 18;
+}
+
+
+S32 GameParamUserInterface::getGap()
+{
+   return 12;
 }
 
 
