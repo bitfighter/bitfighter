@@ -411,6 +411,12 @@ void EditorUserInterface::redo()
 }
 
 
+EditorObject *EditorUserInterface::getSnapItem()
+{
+   return mSnapObject;
+}
+
+
 void EditorUserInterface::rebuildEverything()
 {
    Game *game = getGame();
@@ -1060,6 +1066,12 @@ void EditorUserInterface::onActivate()
 }
 
 
+void EditorUserInterface::renderMasterStatus()
+{
+   /* Do nothing, don't render this in editor */
+}
+
+
 bool EditorUserInterface::usesEditorScreenMode()
 {
    return true;
@@ -1115,6 +1127,18 @@ void EditorUserInterface::clearTeams()
 }
 
 
+bool EditorUserInterface::getNeedToSave() const
+{
+   return mNeedToSave;
+}
+
+
+void EditorUserInterface::setNeedToSave(bool needToSave)
+{
+   mNeedToSave = needToSave;
+}
+
+
 void EditorUserInterface::addTeam(EditorTeam *team)
 {
    getGame()->addTeam(team);
@@ -1130,6 +1154,18 @@ void EditorUserInterface::addTeam(EditorTeam *team, S32 teamIndex)
 void EditorUserInterface::removeTeam(S32 teamIndex)
 {
    getGame()->removeTeam(teamIndex);
+}
+
+
+Point EditorUserInterface::convertCanvasToLevelCoord(Point p)
+{
+   return (p - mCurrentOffset) * (1 / mCurrentScale);
+}
+
+
+Point EditorUserInterface::convertLevelToCanvasCoord(Point p, bool convert)
+{
+   return convert ? p * mCurrentScale + mCurrentOffset : p;
 }
 
 
@@ -3269,6 +3305,18 @@ void EditorUserInterface::centerView()
       mCurrentScale = STARTING_SCALE;
       mCurrentOffset.set(gScreenInfo.getGameCanvasWidth() / 2, gScreenInfo.getGameCanvasHeight() / 2);
    }
+}
+
+
+F32 EditorUserInterface::getCurrentScale()
+{
+   return mCurrentScale;
+}
+
+
+Point EditorUserInterface::getCurrentOffset()
+{
+   return mCurrentOffset;
 }
 
 
