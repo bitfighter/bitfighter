@@ -1119,7 +1119,7 @@ void EventManager::subscribe(lua_State *L, EventType eventType)
 
 void EventManager::unsubscribe(lua_State *L, EventType eventType)
 {
-   if(isSubscribed(L, eventType) && !isPendingUnsubscribed(L, eventType))
+   if((isSubscribed(L, eventType) || isPendingSubscribed(L, eventType)) && !isPendingUnsubscribed(L, eventType))
    {
       removeFromPendingSubscribeList(L, eventType);
       pendingUnsubscriptions[eventType].push_back(L);
