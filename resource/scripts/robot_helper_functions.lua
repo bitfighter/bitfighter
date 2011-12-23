@@ -104,11 +104,15 @@ function logprint(msg)
 end
 
 --
--- And another
+-- And two more
 --
 function subscribe(event)
    bot:subscribe(event)
 end   
+
+function unsubscribe(event)
+   bot:unsubscribe(event)
+end  
 
 --
 -- Let the log know that this file was processed correctly
