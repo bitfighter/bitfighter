@@ -79,7 +79,7 @@ LuaRobot::LuaRobot(lua_State *L) : LuaShip((Robot *)lua_touserdata(L, 1))
    for(S32 i = 0; i < EventManager::EventTypes; i++)
       subscriptions[i] = false;
 
-   // Subscribe to onTick -- mainly for convenience, as well as backwards compatibility
+   // Subscribe to onTick -- mainly for convenience, but also for backwards compatibility
    eventManager.subscribe(L, EventManager::TickEvent);
    subscriptions[EventManager::TickEvent] = true;
 
@@ -1257,7 +1257,7 @@ void EventManager::fireEvent(EventType eventType)
 }
 
 
-// Tick
+// onTick
 void EventManager::fireEvent(EventType eventType, U32 deltaT)
 {
    for(S32 i = 0; i < subscriptions[eventType].size(); i++)
@@ -1334,7 +1334,7 @@ void EventManager::fireEvent(lua_State *caller_L, EventType eventType, const cha
 }
 
 
-// PlayerJoined, PlayerLeft
+// onPlayerJoined, onPlayerLeft
 void EventManager::fireEvent(lua_State *caller_L, EventType eventType, LuaPlayerInfo *player)
 {
    for(S32 i = 0; i < subscriptions[eventType].size(); i++)
