@@ -32,7 +32,7 @@ USAGE
 There are four user functions:
 
 1. Timer:scheduleOnce(event, delay)             -- Executes the event once in 'delay' ms
-2. Timer:scheduleRepeating(event, delay)        -- Executes the event every 'delay' ms
+2. Timer:scheduleRepeating(event, delay)        -- Executes the event repeatedly every 'delay' ms
 3. Timer:scheduleRepeatWhileTrue(event, delay)  -- Executes the event every 'delay' ms while event returns true
 4. Timer:clear()                                -- Removes all pending events from the timer's queue
 
