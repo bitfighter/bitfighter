@@ -60,6 +60,8 @@ XXX need to document timers, new luavec stuff XXX
 <h2>Bot scripting</h2>
 <ul>
 <li>Lua added copyMoveFromObject, Lua getCurrLoadout and getReqLoadout can now be used for ships
+<li>Removed deprecated getMove() method -- if your bot still relies on this, it will no longer work
+<li>Migrated onTick() to a standard event -- this will let bots unsubscribe to onTick events if they like (bot start out subscribed to onTick by default)
 </ul>
 
 <h2>Bug Fixes</h2>
