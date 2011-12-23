@@ -128,7 +128,7 @@ S32 LuaObject::returnPlayerInfo(lua_State *L, LuaPlayerInfo *playerInfo)
 // Returns a vector to a calling Lua function
 S32 LuaObject::returnVec(lua_State *L, F32 x, F32 y)
 {
-   lua_pushvec(L, x, y, 0, 0);
+   lua_pushvec(L, x, y);
    return 1;
 }
 

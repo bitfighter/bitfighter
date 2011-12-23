@@ -530,10 +530,10 @@ LUA_API int lua_pushthread (lua_State *L) {
   return (G(L)->mainthread == L);
 }
 
-/* LUA-VEC */
-LUA_API void lua_pushvec (lua_State *L, float x, float y, float z, float w) {
+/* LUA-VEC --> optimized for 2-D work */
+LUA_API void lua_pushvec (lua_State *L, float x, float y) {
   lua_lock(L);
-  setvecvalue(L->top, x, y, z, w);
+  setvecvalue(L->top, x, y);
   api_incr_top(L);
   lua_unlock(L);
 }

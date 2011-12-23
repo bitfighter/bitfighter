@@ -1,6 +1,8 @@
 /*
 ** Alternative vec lib implementation with garbage collected userdata vectors
 ** See Copyright Notice in lua.h
+**
+** Note that this file has been modified for usage in Bitfighter, and optimized for 2-D work
 */
 
 
@@ -19,16 +21,14 @@
 
 typedef struct
 {
-	float x, y, z, w;
+	float x, y;
 } vec_t;
 
-static void new_vec( lua_State* L, float x, float y, float z, float w )
+static void new_vec( lua_State* L, float x, float y)
 {
   vec_t* v = (vec_t*)lua_newuserdata( L, sizeof(vec_t) );
   v->x = x;
   v->y = y;
-  v->z = z;
-  v->w = w;
   luaL_getmetatable(L, "gcvec.vec");
   lua_setmetatable(L, -2);
 }
@@ -36,43 +36,42 @@ static void new_vec( lua_State* L, float x, float y, float z, float w )
 static int gcvec_new (lua_State *L) {
   float x = (float)lua_tonumber(L, 1);
   float y = (float)lua_tonumber(L, 2);
-  float z = (float)lua_tonumber(L, 3);
-  float w = (float)lua_tonumber(L, 4);
-  new_vec(L, x, y, z, w);
+  new_vec(L, x, y);
   return 1;
 }
 
 static int gcvec_dot (lua_State *L) {
   const vec_t* v1 = checkvec(L, 1);
   const vec_t* v2 = checkvec(L, 2);
-  lua_pushnumber(L, v1->x*v2->x + v1->y*v2->y + v1->z*v2->z + v1->w*v2->w);
+  lua_pushnumber(L, v1->x*v2->x + v1->y*v2->y);
   return 1;
 }
 
+/* U x V = Ux*Vy-Uy*Vx */
 static int gcvec_cross (lua_State *L) {
   const vec_t* v1 = checkvec(L, 1);
   const vec_t* v2 = checkvec(L, 2);
-  new_vec(L, v1->y * v2->z - v1->z * v2->y, v1->z * v2->x - v1->x * v2->z, v1->x * v2->y - v1->y * v2->x, 0.0f);
+  new_vec(L, v1->x * v2->y - v1->y * v2->x, 0.0f);
   return 1;
 }
 
 static int gcvec_length (lua_State *L) {
   const vec_t* v = checkvec(L, 1);
-  lua_pushnumber(L, sqrtf(v->x*v->x + v->y*v->y + v->z*v->z + v->w*v->w));
+  lua_pushnumber(L, sqrtf(v->x*v->x + v->y*v->y));
   return 1;
 }
 
 // Bitfighter method
 static int gcvec_lengthsquared (lua_State *L) {
   const vec_t* v = checkvec(L, 1);
-  lua_pushnumber(L, v->x*v->x + v->y*v->y + v->z*v->z + v->w*v->w);
+  lua_pushnumber(L, v->x*v->x + v->y*v->y);
   return 1;
 }
 
 static int gcvec_normalize (lua_State *L) {
   const vec_t* v = checkvec(L, 1);
-  float s = 1.0f / sqrtf(v->x*v->x + v->y*v->y + v->z*v->z + v->w*v->w);
-  new_vec(L, v->x*s, v->y*s, v->z*s, v->w*s);
+  float s = 1.0f / sqrtf(v->x*v->x + v->y*v->y);
+  new_vec(L, v->x*s, v->y*s);
   return 1;
 }
 
@@ -89,8 +88,7 @@ static int gcvec_angleto (lua_State *L) {
 static int gcvec_distanceto (lua_State *L) {
   const vec_t* v1 = checkvec(L, 1);
   const vec_t* v2 = checkvec(L, 2);
-  lua_pushnumber(L, sqrt((v2->x - v1->x)*(v2->x - v1->x) + (v2->y - v1->y)*(v2->y - v1->y) + 
-	                     (v2->z - v1->z)*(v2->z - v1->z) + (v2->w - v1->w)*(v2->w - v1->w)));
+  lua_pushnumber(L, sqrt((v2->x - v1->x)*(v2->x - v1->x) + (v2->y - v1->y)*(v2->y - v1->y)));
 
   return 1;
 }
@@ -98,8 +96,7 @@ static int gcvec_distanceto (lua_State *L) {
 static int gcvec_distsquared (lua_State *L) {
   const vec_t* v1 = checkvec(L, 1);
   const vec_t* v2 = checkvec(L, 2);
-  lua_pushnumber(L, (v2->x - v1->x)*(v2->x - v1->x) + (v2->y - v1->y)*(v2->y - v1->y) + 
-	                (v2->z - v1->z)*(v2->z - v1->z) + (v2->w - v1->w)*(v2->w - v1->w));
+  lua_pushnumber(L, (v2->x - v1->x)*(v2->x - v1->x) + (v2->y - v1->y)*(v2->y - v1->y));
 
   return 1;
 }
@@ -128,7 +125,7 @@ static int gcvec_add( lua_State* L )
 {
   vec_t* v1 = checkvec( L, 1 );
   vec_t* v2 = checkvec( L, 2 );
-  new_vec( L, v1->x + v2->x, v1->y + v2->y, v1->z + v2->z, v1->w + v2->w );
+  new_vec( L, v1->x + v2->x, v1->y + v2->y);
   return 1;
 }
 
@@ -136,7 +133,7 @@ static int gcvec_sub( lua_State* L )
 {
   vec_t* v1 = checkvec( L, 1 );
   vec_t* v2 = checkvec( L, 2 );
-  new_vec( L, v1->x - v2->x, v1->y - v2->y, v1->z - v2->z, v1->w - v2->w );
+  new_vec( L, v1->x - v2->x, v1->y - v2->y);
   return 1;
 }
 
@@ -147,13 +144,13 @@ static int gcvec_mul( lua_State* L )
   {
     // vector * vector
     vec_t* v2 = checkvec( L, 2 );
-    new_vec( L, v1->x * v2->x, v1->y * v2->y, v1->z * v2->z, v1->w * v2->w );
+    new_vec( L, v1->x * v2->x, v1->y * v2->y);
   }
   else
   {
     // vector * scalar
     float s = (float)luaL_checknumber( L, 2 );
-    new_vec( L, v1->x * s, v1->y * s, v1->z * s, v1->w * s );
+    new_vec( L, v1->x * s, v1->y * s);
   }
   return 1;
 }
@@ -163,21 +160,21 @@ static int gcvec_div( lua_State* L )
   vec_t* v1 = checkvec( L, 1 );
   float s = (float)luaL_checknumber( L, 2 );
   luaL_argcheck( L, s != 0.0f, 2, "division by zero" );
-  new_vec( L, v1->x / s, v1->y / s, v1->z / s, v1->w / s );
+  new_vec( L, v1->x / s, v1->y / s);
   return 1;
 }
 
 static int gcvec_negate( lua_State* L )
 {
   vec_t* v = checkvec( L, 1 );
-  new_vec( L, -v->x, -v->y, -v->z, -v->w );
+  new_vec( L, -v->x, -v->y);
   return 1;
 }
 
 static int gcvec_tostring( lua_State* L )
 {
   vec_t* v = checkvec(L, 1);
-  lua_pushfstring( L, "vec(%f, %f, %f, %f)", v->x, v->y, v->z, v->w );
+  lua_pushfstring( L, "vec(%f, %f)", v->x, v->y);
   return 1;
 }
 
@@ -222,9 +219,9 @@ LUALIB_API int luaopen_gcvec (lua_State *L) {
   luaL_register(L, LUA_GCVECLIBNAME, gcveclib_f);
   
   // numeric constants
-  new_vec(L, 0, 0, 0, 0);
+  new_vec(L, 0, 0);
   lua_setfield(L, -2, "zero");
-  new_vec(L, 1, 1, 1, 1);
+  new_vec(L, 1, 1);
   lua_setfield(L, -2, "one");
   return 1;
 }

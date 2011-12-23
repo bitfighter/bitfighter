@@ -18,43 +18,42 @@
 static int vec_new (lua_State *L) {
   float x = (float)lua_tonumber(L, 1);
   float y = (float)lua_tonumber(L, 2);
-  float z = (float)lua_tonumber(L, 3);
-  float w = (float)lua_tonumber(L, 4);
-  lua_pushvec(L, x, y, z, w);
+  lua_pushvec(L, x, y);
   return 1;
 }
 
 static int vec_dot (lua_State *L) {
   const float* v1 = luaL_checkvec(L, 1);
   const float* v2 = luaL_checkvec(L, 2);
-  lua_pushnumber(L, v1[0]*v2[0] + v1[1]*v2[1] + v1[2]*v2[2] + v1[3]*v2[3]);
+  lua_pushnumber(L, v1[0]*v2[0] + v1[1]*v2[1]);
   return 1;
 }
 
+/* U x V = Ux*Vy-Uy*Vx */
 static int vec_cross (lua_State *L) {
   const float* v1 = luaL_checkvec(L, 1);
   const float* v2 = luaL_checkvec(L, 2);
-  lua_pushvec(L, v1[1] * v2[2] - v1[2] * v2[1], v1[2] * v2[0] - v1[0] * v2[2], v1[0] * v2[1] - v1[1] * v2[0], 0.0f);
+  lua_pushvec(L, v1[0] * v2[1] - v1[1] * v2[0], 0.0f);
   return 1;
 }
 
 static int vec_length (lua_State *L) {
   const float* v = luaL_checkvec(L, 1);
-  lua_pushnumber(L, sqrtf(v[0]*v[0] + v[1]*v[1] + v[2]*v[2] + v[3]*v[3]));
+  lua_pushnumber(L, sqrtf(v[0]*v[0] + v[1]*v[1]));
   return 1;
 }
 
 // Bitfighter method
 static int vec_lengthsquared (lua_State *L) {
   const float* v = luaL_checkvec(L, 1);
-  lua_pushnumber(L, v[0]*v[0] + v[1]*v[1] + v[2]*v[2] + v[3]*v[3]);
+  lua_pushnumber(L, v[0]*v[0] + v[1]*v[1]);
   return 1;
 }
 
 static int vec_normalize (lua_State *L) {
   const float* v = luaL_checkvec(L, 1);
-  float s = 1.0f / sqrtf(v[0]*v[0] + v[1]*v[1] + v[2]*v[2] + v[3]*v[3]);
-  lua_pushvec(L, v[0]*s, v[1]*s, v[2]*s, v[3]*s);
+  float s = 1.0f / sqrtf(v[0]*v[0] + v[1]*v[1]);
+  lua_pushvec(L, v[0]*s, v[1]*s);
   return 1;
 }
 
@@ -71,8 +70,7 @@ static int vec_distanceto (lua_State *L) {
   const float* v1 = luaL_checkvec(L, 1);
   const float* v2 = luaL_checkvec(L, 2);
 
-  lua_pushnumber(L, sqrt((v2[0] - v1[0])*(v2[0] - v1[0]) + (v2[1] - v1[1])*(v2[1] - v1[1]) + 
-                         (v2[2] - v1[2])*(v2[2] - v1[2]) + (v2[3] - v1[3])*(v2[3] - v1[3])));
+  lua_pushnumber(L, sqrt((v2[0] - v1[0])*(v2[0] - v1[0]) + (v2[1] - v1[1])*(v2[1] - v1[1])));
   return 1;
 }
 
@@ -80,8 +78,7 @@ static int vec_distsquared (lua_State *L) {
   const float* v1 = luaL_checkvec(L, 1);
   const float* v2 = luaL_checkvec(L, 2);
 
-  lua_pushnumber(L, (v2[0] - v1[0])*(v2[0] - v1[0]) + (v2[1] - v1[1])*(v2[1] - v1[1]) + 
-                    (v2[2] - v1[2])*(v2[2] - v1[2]) + (v2[3] - v1[3])*(v2[3] - v1[3]));
+  lua_pushnumber(L, (v2[0] - v1[0])*(v2[0] - v1[0]) + (v2[1] - v1[1])*(v2[1] - v1[1]));
   return 1;
 }
 
@@ -107,9 +104,9 @@ LUALIB_API int luaopen_vec (lua_State *L) {
   luaL_register(L, LUA_VECLIBNAME, veclib);
   
   // numeric constants
-  lua_pushvec(L, 0, 0, 0, 0);
+  lua_pushvec(L, 0, 0);
   lua_setfield(L, -2, "zero");
-  lua_pushvec(L, 1, 1, 1, 1);
+  lua_pushvec(L, 1, 1);
   lua_setfield(L, -2, "one");
 
   lua_pop(L, 1);        // Remove table from stack

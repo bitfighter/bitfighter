@@ -157,9 +157,9 @@ typedef struct lua_TValue {
     i_o->value.gc=cast(GCObject *, (x)); i_o->tt=LUA_TPROTO; \
     checkliveness(G(L),i_o); }
 
-/* LUA-VEC */
-#define setvecvalue(obj,x,y,z,w) \
-  { TValue *i_o=(obj); i_o->value.vec[0]=(x); i_o->value.vec[1]=(y); i_o->value.vec[2]=(z); i_o->value.vec[3]=(w); i_o->tt=LUA_TVEC; }
+/* LUA-VEC --> optimized for 2-D work */
+#define setvecvalue(obj,x,y) \
+  { TValue *i_o=(obj); i_o->value.vec[0]=(x); i_o->value.vec[1]=(y); i_o->tt=LUA_TVEC; }
 
 
 

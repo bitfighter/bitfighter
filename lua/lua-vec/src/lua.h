@@ -83,7 +83,7 @@ typedef void * (*lua_Alloc) (void *ud, void *ptr, size_t osize, size_t nsize);
 
 
 /* LUA_VEC - Number of components in a vec */
-#define LUA_VEC_SIZE	4
+#define LUA_VEC_SIZE	2
 
 /* minimum Lua stack available to a C function */
 #define LUA_MINSTACK	20
@@ -172,7 +172,7 @@ LUA_API void  (lua_pushcclosure) (lua_State *L, lua_CFunction fn, int n);
 LUA_API void  (lua_pushboolean) (lua_State *L, int b);
 LUA_API void  (lua_pushlightuserdata) (lua_State *L, void *p);
 LUA_API int   (lua_pushthread) (lua_State *L);
-LUA_API void  (lua_pushvec) (lua_State *L, float x, float y, float z, float w);  /* LUA-VEC */
+LUA_API void  (lua_pushvec) (lua_State *L, float x, float y);  /* LUA-VEC */
 
 
 /*
