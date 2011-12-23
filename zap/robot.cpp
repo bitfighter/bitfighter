@@ -1837,7 +1837,6 @@ void Robot::idle(GameObject::IdleCallPath path)
 
       TNLAssert(deltaT != 0, "Robot::idle deltaT is zero")     // Time should never be zero anymore
 
-
       // Clear out current move.  It will get set just below with the lua call, but if that function
       // doesn't set the various move components, we want to make sure that they default to 0.
       mCurrentMove.fire = false;
@@ -1863,6 +1862,24 @@ void Robot::idle(GameObject::IdleCallPath path)
    }
 
    Parent::idle(path);     // All client paths can use this idle
+
+   
+//--
+//-- This will be called every tick... update timer, then call robot's onTick() method if it exists
+//--
+//function _onTick(self, deltaT)
+//   Timer:_tick(deltaT)     -- Really should only be called once for all bots
+//
+//   if _declared("onTick") and type(onTick) == "function" then
+//      onTick(self, deltaT)
+//   end
+//
+//   -- TODO: Here for compatibility with older bots.  Remove this in a later release
+//   if _declared("getMove") and type(getMove) == "function" then
+//      getMove(self, deltaT)
+//   end
+//
+//end
 }
 
 
