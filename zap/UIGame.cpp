@@ -1792,7 +1792,7 @@ void GameUserInterface::addBotHandler(ClientGame *game, const Vector<string> &wo
    {
       // Build args by skipping first word (the command)
       Vector<StringTableEntry> args;
-      for(S32 i = 2; i < words.size(); i++)
+      for(S32 i = 1; i < words.size(); i++)
          args.push_back(StringTableEntry(words[i]));
 
       if(game->getGameType())
@@ -1815,13 +1815,13 @@ void GameUserInterface::addBotsHandler(ClientGame *game, const Vector<string> &w
       S32 count = 0;
       count = atoi(words[1].c_str());
 
-      if(count <= 0)
+      if(count <= 0 || count >= 0x00010000)
       {
          game->displayErrorMessage("!!! Invalid number of bots to add");
          return;
       }
 
-      // Build args
+      // Build args by skipping first two words (the command, and count)
       Vector<StringTableEntry> args;
       for(S32 i = 2; i < words.size(); i++)
          args.push_back(StringTableEntry(words[i]));
