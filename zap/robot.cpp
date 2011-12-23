@@ -75,9 +75,13 @@ LuaRobot::LuaRobot(lua_State *L) : LuaShip((Robot *)lua_touserdata(L, 1))
    thisRobot = (Robot *)lua_touserdata(L, 1);    // Register our robot
    thisRobot->mLuaRobot = this;
 
-   // Initialize all subscriptions to unsubscribed
+   // Initialize all subscriptions to unsubscribed, except for onTick
    for(S32 i = 0; i < EventManager::EventTypes; i++)
       subscriptions[i] = false;
+
+   // Subscribe to onTick -- mainly for convenience, as well as backwards compatibility
+   eventManager.subscribe(L, EventManager::TickEvent);
+   subscriptions[EventManager::TickEvent] = true;
 
    setEnums(L);      // Set scads of global vars in the Lua instance that mimic the use of the enums we use everywhere
 
@@ -269,6 +273,7 @@ void LuaRobot::setEnums(lua_State *L)
    setGTEnum(ScoreGoalOwnTeam);
 
    // Event handler events
+   setEventEnum(TickEvent);
    setEventEnum(ShipSpawnedEvent);
    setEventEnum(ShipKilledEvent);
    setEventEnum(MsgReceivedEvent);
@@ -1233,11 +1238,12 @@ void EventManager::update()
 
 // This is a list of the function names to be called in the bot when a particular event is fired
 static const char *eventFunctions[] = {
+   "onTick",
    "onShipSpawned",
    "onShipKilled",
    "onPlayerJoined",
    "onPlayerLeft",
-   "onMsgReceived",
+   "onMsgReceived"
 };
 
 
@@ -1263,6 +1269,31 @@ void EventManager::fireEvent(EventType eventType)
 }
 
 
+// Tick
+void EventManager::fireEvent(EventType eventType, U32 deltaT)
+{
+   for(S32 i = 0; i < subscriptions[eventType].size(); i++)
+   {
+      lua_State *L = subscriptions[eventType][i];
+      
+      try   
+      {
+         lua_getglobal(L, eventFunctions[eventType]);  
+         lua_pushinteger(L, deltaT);
+
+         if(lua_pcall(L, 1, 0, 0) != 0)
+            throw LuaException(lua_tostring(L, -1));
+      }
+      catch(LuaException &e)
+      {
+         logprintf(LogConsumer::LogError, "Robot error firing event %d: %s.", eventType, e.what());
+         OGLCONSOLE_Print("Robot error firing event %d: %s.", eventType, e.what());
+         return;
+      }
+   }
+}
+
+
 void EventManager::fireEvent(EventType eventType, Ship *ship)
 {
    for(S32 i = 0; i < subscriptions[eventType].size(); i++)
@@ -1273,7 +1304,7 @@ void EventManager::fireEvent(EventType eventType, Ship *ship)
          lua_getglobal(L, eventFunctions[eventType]);
          ship->push(L);
 
-         if (lua_pcall(L, 1, 0, 0) != 0)
+         if(lua_pcall(L, 1, 0, 0) != 0)
             throw LuaException(lua_tostring(L, -1));
       }
       catch(LuaException &e)
@@ -1302,7 +1333,7 @@ void EventManager::fireEvent(lua_State *caller_L, EventType eventType, const cha
          player->push(L);
          lua_pushboolean(L, global);
 
-         if (lua_pcall(L, 3, 0, 0) != 0)
+         if(lua_pcall(L, 3, 0, 0) != 0)
             throw LuaException(lua_tostring(L, -1));
       }
       catch(LuaException &e)
@@ -1313,7 +1344,6 @@ void EventManager::fireEvent(lua_State *caller_L, EventType eventType, const cha
       }
    }
 }
-
 
 // PlayerJoined, PlayerLeft
 void EventManager::fireEvent(lua_State *caller_L, EventType eventType, LuaPlayerInfo *player)
@@ -1330,7 +1360,7 @@ void EventManager::fireEvent(lua_State *caller_L, EventType eventType, LuaPlayer
          lua_getglobal(L, eventFunctions[eventType]);  
          player->push(L);
 
-         if (lua_pcall(L, 1, 0, 0) != 0)
+         if(lua_pcall(L, 1, 0, 0) != 0)
             throw LuaException(lua_tostring(L, -1));
       }
       catch(LuaException &e)
@@ -1825,25 +1855,7 @@ void Robot::idle(GameObject::IdleCallPath path)
          if(mStepCount > 0)
             mStepCount--;
          
-         try
-         {
-            lua_getglobal(L, "_onTick");   // _onTick calls onTick --> see robot_helper_functions.lua
-            Lunar<LuaRobot>::push(L, this->mLuaRobot);
-
-            lua_pushnumber(L, deltaT);    // Pass the time elapsed since we were last here
-
-            if (lua_pcall(L, 2, 0, 0) != 0)
-               throw LuaException(lua_tostring(L, -1));
-         }
-         catch(LuaException &e)
-         {
-            logError("Robot error running _onTick(): %s.  Shutting robot down.", e.what());
-
-            // Safer than "delete this" -- adds bot to delete list, where it will be deleted later (or at least outside this construct)
-            deleteObject();
-
-            return;
-         }
+         Robot::getEventManager().fireEvent(EventManager::TickEvent, deltaT);
       }
 
       Parent::idle(GameObject::ServerIdleControlFromClient);   // Let's say the script is the client  ==> really not sure this is right

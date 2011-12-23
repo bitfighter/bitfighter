@@ -42,10 +42,11 @@ class EventManager
 public:
    // Need to keep synced with eventFunctions!
    enum EventType {
-      ShipSpawnedEvent = 0,   // (ship) --> Ship (or robot) spawns
+      TickEvent = 0,          // (time) --> Standard game tick event
+      ShipSpawnedEvent,       // (ship) --> Ship (or robot) spawns
       ShipKilledEvent,        // (ship) --> Ship (or robot) is killed
-      PlayerJoinedEvent,      // (playerInfo) -> Player joined game
-      PlayerLeftEvent,        // (playerInfo) -> Player left game
+      PlayerJoinedEvent,      // (playerInfo) --> Player joined game
+      PlayerLeftEvent,        // (playerInfo) --> Player left game
       MsgReceivedEvent,       // (message, sender-player, public-bool) --> Chat message sent
       EventTypes
    };
@@ -76,6 +77,7 @@ public:
 
    // We'll have several different signatures for this one...
    void fireEvent(EventType eventType);
+   void fireEvent(EventType eventType, U32 deltaT);      // Tick
    void fireEvent(EventType eventType, Ship *ship);      // ShipSpawned, ShipKilled
    void fireEvent(lua_State *L, EventType eventType, const char *message, LuaPlayerInfo *player, bool global);     // MsgReceived
    void fireEvent(lua_State *L, EventType eventType, LuaPlayerInfo *player);  // PlayerJoined, PlayerLeft
