@@ -1838,6 +1838,8 @@ void Robot::idle(GameObject::IdleCallPath path)
          mCurrentMove.moduleSecondary[i] = false;
       }
 
+      tickTimer(deltaT);
+
       if(!mIsPaused || mStepCount > 0)
       {
          if(mStepCount > 0)
@@ -1869,6 +1871,31 @@ void Robot::idle(GameObject::IdleCallPath path)
 //   end
 //
 //end
+}
+
+
+// Advance timers by deltaT
+void Robot::tickTimer(U32 deltaT)
+{
+   try
+   {
+      lua_getglobal(L, "_tickTimer");   
+      Lunar<LuaRobot>::push(L, this->mLuaRobot);
+
+      lua_pushnumber(L, deltaT);    // Pass the time elapsed since we were last here
+
+      if (lua_pcall(L, 2, 0, 0) != 0)
+         throw LuaException(lua_tostring(L, -1));
+   }
+   catch(LuaException &e)
+   {
+      logError("Robot error running _tickTimer(): %s.  Shutting robot down.", e.what());
+
+      // Safer than "delete this" -- adds bot to delete list, where it will be deleted later (or at least outside this construct)
+      deleteObject();
+
+      return;
+   }
 }
 
 

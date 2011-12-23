@@ -96,6 +96,14 @@ function findClosest(items, teamIndx)
 end
 
 
+
+--
+-- This will be called every tick... update timer, then call robot's onTick() method if it exists
+--
+function _tickTimer(self, deltaT)
+   Timer:_tick(deltaT)     -- Really should only be called once for all bots
+end
+
 --
 -- Convenience function... let user use logprint directly, without referencing luaUtil
 --

@@ -118,10 +118,10 @@ private:
 
    bool mHasSpawned;
 
- 
-
    static bool mIsPaused;
    static S32 mStepCount;           // If running for a certain number of steps, this will be > 0, while mIsPaused will be true
+
+   void tickTimer(U32 deltaT);      // Move bot's timer forward
 
 public:
    Robot();      // Constructor
