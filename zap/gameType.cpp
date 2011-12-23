@@ -2528,8 +2528,8 @@ GAMETYPE_RPC_C2S(GameType, c2sAddBots,
       return;  // Error message handled client-side
 
    // Invalid number of bots
-   if(count <= 0)
-      return;  // Error message handled client-side
+   //if(count <= 0)  // this doesn't matter here, "while" loops zero times so nothing happens without this check    -sam
+   //   return;  // Error message handled client-side
 
    S32 prevRobotSize = -1;
 
