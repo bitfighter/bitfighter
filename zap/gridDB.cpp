@@ -157,12 +157,19 @@ void GridDatabase::removeFromDatabase(DatabaseObject *theObject, const Rect &ext
 }
 
 
-
 void GridDatabase::findObjects(Vector<DatabaseObject *> &fillVector)
 {
-   fillVector.reserve(mAllObjects.size());
+   fillVector.resize(mAllObjects.size());
+
    for(S32 i = 0; i < mAllObjects.size(); i++)
-      fillVector.push_back(mAllObjects[i]);
+      fillVector[i] = mAllObjects[i];
+}
+
+
+// Faster than above, but results can't be modified
+const Vector<DatabaseObject *> *GridDatabase::findObjects_fast() const
+{
+   return &mAllObjects;
 }
 
 
@@ -271,7 +278,7 @@ void GridDatabase::dumpObjects()
          for(BucketEntry *walk = mBuckets[x & BucketMask][y & BucketMask]; walk; walk = walk->nextInBucket)
          {
             DatabaseObject *theObject = walk->theObject;
-            logprintf("Found object in (%d,%d) with extents %s", x,y,theObject->getExtent().toString().c_str());
+            //logprintf("Found object in (%d,%d) with extents %s", x,y,theObject->getExtent().toString().c_str());
          }
 }
 

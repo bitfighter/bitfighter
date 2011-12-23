@@ -75,7 +75,7 @@ LuaRobot::LuaRobot(lua_State *L) : LuaShip((Robot *)lua_touserdata(L, 1))
    thisRobot = (Robot *)lua_touserdata(L, 1);    // Register our robot
    thisRobot->mLuaRobot = this;
 
-   // Initialize all subscriptions to unsubscribed, except for onTick
+   // Initialize all subscriptions to unsubscribed
    for(S32 i = 0; i < EventManager::EventTypes; i++)
       subscriptions[i] = false;
 
@@ -887,7 +887,7 @@ S32 LuaRobot::getWaypoint(lua_State *L)  // Takes a luavec or an x,y
    // We need to calculate a new flightplan
    thisRobot->flightPlan.clear();
 
-   U16 currentZone = thisRobot->getCurrentZone(gServerGame);     // Where we are
+   U16 currentZone = thisRobot->getCurrentZone(gServerGame);     // Zone we're in
 
    if(currentZone == U16_MAX)      // We don't really know where we are... bad news!  Let's find closest visible zone and go that way.
       currentZone = findClosestZone(thisRobot->getActualPos());
@@ -921,17 +921,7 @@ S32 LuaRobot::getWaypoint(lua_State *L)  // Takes a luavec or an x,y
    // check cache for path first
    pair<S32,S32> pathIndex = pair<S32,S32>(currentZone, targetZone);
 
-
-   // TODO: Cache this block -- data will not change throughout game... 
-   Vector<DatabaseObject *> objects;
-   gServerGame->getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, objects);
-
-   Vector<BotNavMeshZone *> zones;
-   zones.resize(objects.size());
-   for(S32 i = 0; i < objects.size(); i++)
-      zones[i] = dynamic_cast<BotNavMeshZone *>(objects[i]);
-   // END BLOCK
-
+   const Vector<BotNavMeshZone *> *zones = BotNavMeshZone::getBotZones();      // Grab our pre-cached list of nav zones
 
    if(gServerGame->getGameType()->cachedBotFlightPlans.find(pathIndex) == gServerGame->getGameType()->cachedBotFlightPlans.end())
    {
@@ -942,9 +932,7 @@ S32 LuaRobot::getWaypoint(lua_State *L)  // Takes a luavec or an x,y
       gServerGame->getGameType()->cachedBotFlightPlans[pathIndex] = thisRobot->flightPlan;
    }
    else
-   {
       thisRobot->flightPlan = gServerGame->getGameType()->cachedBotFlightPlans[pathIndex];
-   }
 
    if(thisRobot->flightPlan.size() > 0)
       return returnPoint(L, thisRobot->flightPlan.last());
@@ -1344,6 +1332,7 @@ void EventManager::fireEvent(lua_State *caller_L, EventType eventType, const cha
       }
    }
 }
+
 
 // PlayerJoined, PlayerLeft
 void EventManager::fireEvent(lua_State *caller_L, EventType eventType, LuaPlayerInfo *player)

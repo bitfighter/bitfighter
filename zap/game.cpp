@@ -847,7 +847,7 @@ void Game::processLevelLoadLine(U32 argc, U32 id, const char **argv, GridDatabas
 
       if(!object && !eObject)    // Well... that was a bad idea!
       {
-         logprintf(LogConsumer::LogWarning, "Unknown object type \"%s\" in level \"%s\"", obj, levelFileName.c_str());
+         logprintf(LogConsumer::LogLevelError, "Unknown object type \"%s\" in level \"%s\"", obj, levelFileName.c_str());
          delete theObject;
       }
       else  // object was valid
@@ -868,7 +868,7 @@ void Game::processLevelLoadLine(U32 argc, U32 id, const char **argv, GridDatabas
          }
          else
          {
-            logprintf(LogConsumer::LogWarning, "Invalid arguments in object \"%s\" in level \"%s\"", obj, levelFileName.c_str());
+            logprintf(LogConsumer::LogLevelError, "Invalid arguments in object \"%s\" in level \"%s\"", obj, levelFileName.c_str());
             object->destroySelf();
          }
       }
@@ -969,7 +969,7 @@ void Game::onReadSpecialsParam(S32 argc, const char **argv)
 {         
    for(S32 i = 1; i < argc; i++)
       if(!getGameType()->processSpecialsParam(argv[i]))
-         logprintf(LogConsumer::LogWarning, "Invalid specials parameter: %s", argv[i]);
+         logprintf(LogConsumer::LogLevelError, "Invalid specials parameter: %s", argv[i]);
 }
 
 
@@ -1842,7 +1842,7 @@ bool ServerGame::processPseudoItem(S32 argc, const char **argv, const string &le
 
       if(!stricmp(argv[0], "BarrierMakerS"))
       {
-         logprintf(LogConsumer::LogWarning, "BarrierMakerS has been deprecated.  Please use PolyWall instead.");
+         logprintf(LogConsumer::LogLevelError, "BarrierMakerS has been deprecated.  Please use PolyWall instead.");
          width = true;
       }
 
@@ -1918,34 +1918,38 @@ void ServerGame::cycleLevel(S32 nextLevel)
    // Make sure we have a gameType... if we don't we'll add a default one here
    if(!getGameType())   // loadLevel can fail (missing file) and not create GameType
    {
-      logprintf(LogConsumer::LogWarning, "Warning: Missing game type parameter in level \"%s\"", levelFile.c_str());
+      logprintf(LogConsumer::LogLevelError, "Warning: Missing game type parameter in level \"%s\"", levelFile.c_str());
 
       GameType *gameType = new GameType;
       gameType->addToGame(this, getGameObjDatabase());
    }
 
    if(getGameType()->makeSureTeamCountIsNotZero())
-      logprintf(LogConsumer::LogWarning, "Warning: Missing team in level \"%s\"", levelFile.c_str());
+      logprintf(LogConsumer::LogLevelError, "Warning: Missing team in level \"%s\"", levelFile.c_str());
 
    logprintf(LogConsumer::ServerFilter, "Done. [%s]", getTimeStamp().c_str());
 
    computeWorldObjectExtents();                       // Compute world Extents nice and early
 
-   if(mDatabaseForBotZones.getObjectCount() != 0)     // There are some zones loaded in the level...
-   {
-      mGameType->mBotZoneCreationFailed = false;
-      BotNavMeshZone::IDBotMeshZones(this);
-      BotNavMeshZone::buildBotNavMeshZoneConnections(this);
-   }
-   else
-   {
-      // Try and load Bot Zones for this level, set flag if failed
+   //if(mDatabaseForBotZones.getObjectCount() != 0)     // There are some zones loaded in the level...
+   //{
+   //   mGameType->mBotZoneCreationFailed = false;
+   //   BotNavMeshZone::IDBotMeshZones(this);
+   //   BotNavMeshZone::buildBotNavMeshZoneConnections(this);
+   //}
+   //else
+   //{
+
+   mDatabaseForBotZones.removeEverythingFromDatabase();    // Not sure if this is needed, but might be as long as we are still loading zones from level files
+
+   // Try and load Bot Zones for this level, set flag if failed
+   // We need to run buildBotMeshZones in order to set mAllZones properly, which is why I (sort of) disabled the use of hand-built zones in level files
 #ifdef ZAP_DEDICATED
-      mGameType->mBotZoneCreationFailed = !BotNavMeshZone::buildBotMeshZones(this, false);
+   mGameType->mBotZoneCreationFailed = !BotNavMeshZone::buildBotMeshZones(this, false);
 #else
-      mGameType->mBotZoneCreationFailed = !BotNavMeshZone::buildBotMeshZones(this, gClientGame);
+   mGameType->mBotZoneCreationFailed = !BotNavMeshZone::buildBotMeshZones(this, gClientGame);
 #endif
-   }
+   //}
 
    // Clear team info for all clients
    resetAllClientTeams();

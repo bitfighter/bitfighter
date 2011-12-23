@@ -73,7 +73,10 @@ class BotNavMeshZone : public GameObject, public PolygonGeometry
 {
 private:   
    typedef GameObject Parent;
-   U16 mZoneId;            // Unique ID for each zone
+   U16 mZoneId;                                          // Unique ID for each zone
+   static Vector<BotNavMeshZone *> mAllZones;   
+
+   static void populateZoneList(const GridDatabase *db); // Populates mAllZones
 
 public:
    bool flag;              // Flag used to mark zones during construction process, serves no purpose once zones have been generated
@@ -113,7 +116,9 @@ public:
    Vector<Border> mNeighborRenderPoints;     // Only populated on client
    S32 getNeighborIndex(S32 zone);           // Returns index of neighboring zone, or -1 if zone is not a neighbor
 
-   static U16 findZoneContaining(ServerGame *game, const Point &p);    // Returns ID of zone containing specified point
+   static U16 findZoneContaining(ServerGame *game, const Point &p);     // Returns ID of zone containing specified point
+
+   static const Vector<BotNavMeshZone *> *getBotZones();                // Return cached list of all zones
 
    static void IDBotMeshZones(ServerGame *game);
    static bool buildBotMeshZones(ServerGame *game, bool triangulateZones);
@@ -131,11 +136,11 @@ public:
 class AStar
 {
 private:
-   static F32 heuristic(const Vector<BotNavMeshZone *> &zones, S32 fromZone, S32 toZone);
-   static Point findGateway(const Vector<BotNavMeshZone *> &zones, S32 zone1, S32 zone2);
+   static F32 heuristic(const Vector<BotNavMeshZone *> *zones, S32 fromZone, S32 toZone);
+   static Point findGateway(const Vector<BotNavMeshZone *> *zones, S32 zone1, S32 zone2);
 
 public:
-   static Vector<Point> findPath (const Vector<BotNavMeshZone *> &zones, S32 startZone, S32 targetZone, const Point &target);
+   static Vector<Point> findPath (const Vector<BotNavMeshZone *> *zones, S32 startZone, S32 targetZone, const Point &target);
    
 };
 

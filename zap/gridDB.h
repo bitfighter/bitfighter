@@ -137,6 +137,7 @@ public:
    bool pointCanSeePoint(const Point &point1, const Point &point2);
 
    void findObjects(Vector<DatabaseObject *> &fillVector);     // Returns all objects in the database
+   const Vector<DatabaseObject *> *findObjects_fast() const;   // Faster than above, but results can't be modified
    void findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector);
    void findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector, const Rect &extents);
    void findObjects(TestFunc testFunc, Vector<DatabaseObject *> &fillVector);
