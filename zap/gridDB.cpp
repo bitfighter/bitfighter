@@ -109,6 +109,7 @@ void GridDatabase::removeEverythingFromDatabase()
             walk = rem->nextInBucket;
             mChunker->free(rem);
          }
+         mBuckets[x & BucketMask][y & BucketMask] = NULL;
       }
    }
    mAllObjects.clear();
