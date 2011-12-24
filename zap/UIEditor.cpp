@@ -1093,6 +1093,7 @@ void EditorUserInterface::onReactivate()     // Run when user re-enters the edit
       remove("editor.tmp");      // Delete temp file
    }
 
+
    getGame()->setActiveTeamManager(mTeamManager);
 
    if(mCurrentTeam >= getTeamCount())
@@ -1172,7 +1173,7 @@ static S32 xSize;
 static S32 ySize;
 
 // Called when we shift between windowed and fullscreen mode, after change is made
-void EditorUserInterface::onDisplayModeChange(bool changingInterfaces)
+void EditorUserInterface::onDisplayModeChange()
 {
    if(xSize != gScreenInfo.getGameCanvasWidth() || ySize != gScreenInfo.getGameCanvasHeight())
    {
@@ -1185,7 +1186,6 @@ void EditorUserInterface::onDisplayModeChange(bool changingInterfaces)
    // maybe it would be better to give them a dock x,y instead?
    if(getGame()->getGameType())
       populateDock();               // If game type has changed, items on dock will change
-
    xSize = gScreenInfo.getGameCanvasWidth();
    ySize = gScreenInfo.getGameCanvasHeight();
 }

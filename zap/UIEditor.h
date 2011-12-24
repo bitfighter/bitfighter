@@ -386,7 +386,7 @@ public:
    Point convertCanvasToLevelCoord(Point p);
    Point convertLevelToCanvasCoord(Point p, bool convert = true);
 
-   void onDisplayModeChange(bool changingInterfaces);      // Called when we shift between windowed and fullscreen mode, after change is made
+   void onDisplayModeChange();      // Called when we shift between windowed and fullscreen mode, after change is made
 
    // Snapping related functions:
    Point snapPoint(Point const &p, bool snapWhileOnDock = false);
