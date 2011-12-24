@@ -1168,14 +1168,17 @@ Point EditorUserInterface::convertLevelToCanvasCoord(Point p, bool convert)
 }
 
 
+static S32 xSize;
+static S32 ySize;
+
 // Called when we shift between windowed and fullscreen mode, after change is made
 void EditorUserInterface::onDisplayModeChange(bool changingInterfaces)
 {
-   if(!changingInterfaces)
+   if(xSize != gScreenInfo.getGameCanvasWidth() || ySize != gScreenInfo.getGameCanvasHeight())
    {
       // Recenter canvas -- note that canvasWidth may change during displayMode change
-      mCurrentOffset.set(mCurrentOffset.x - gScreenInfo.getPrevCanvasWidth()  / 2 + gScreenInfo.getGameCanvasWidth()  / 2, 
-                         mCurrentOffset.y - gScreenInfo.getPrevCanvasHeight() / 2 + gScreenInfo.getGameCanvasHeight() / 2);
+      mCurrentOffset.set(mCurrentOffset.x - xSize  / 2 + gScreenInfo.getGameCanvasWidth() / 2, 
+                         mCurrentOffset.y - ySize / 2 + gScreenInfo.getGameCanvasHeight() / 2);
    }
 
    // Need to populate the dock here because dock items are tied to a particular screen x,y; 
@@ -1183,7 +1186,8 @@ void EditorUserInterface::onDisplayModeChange(bool changingInterfaces)
    if(getGame()->getGameType())
       populateDock();               // If game type has changed, items on dock will change
 
-
+   xSize = gScreenInfo.getGameCanvasWidth();
+   ySize = gScreenInfo.getGameCanvasHeight();
 }
 
 
