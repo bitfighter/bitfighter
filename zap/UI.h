@@ -117,7 +117,7 @@ public:
    virtual void onActivate();
    virtual void onDeactivate(bool usesEditorScreenMode);
    virtual void onReactivate();
-   virtual void onDisplayModeChange();
+   virtual void onDisplayModeChange(bool changingInterfaces);
 
    void activate(bool save = true);
    virtual void reactivate();

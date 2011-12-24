@@ -1093,7 +1093,6 @@ void EditorUserInterface::onReactivate()     // Run when user re-enters the edit
       remove("editor.tmp");      // Delete temp file
    }
 
-
    getGame()->setActiveTeamManager(mTeamManager);
 
    if(mCurrentTeam >= getTeamCount())
@@ -1170,14 +1169,21 @@ Point EditorUserInterface::convertLevelToCanvasCoord(Point p, bool convert)
 
 
 // Called when we shift between windowed and fullscreen mode, after change is made
-void EditorUserInterface::onDisplayModeChange()
+void EditorUserInterface::onDisplayModeChange(bool changingInterfaces)
 {
-   // Recenter canvas -- note that canvasWidth may change during displayMode change
-   mCurrentOffset.set(mCurrentOffset.x - gScreenInfo.getPrevCanvasWidth()  / 2 + gScreenInfo.getGameCanvasWidth()  / 2, 
-                      mCurrentOffset.y - gScreenInfo.getPrevCanvasHeight() / 2 + gScreenInfo.getGameCanvasHeight() / 2);
+   if(!changingInterfaces)
+   {
+      // Recenter canvas -- note that canvasWidth may change during displayMode change
+      mCurrentOffset.set(mCurrentOffset.x - gScreenInfo.getPrevCanvasWidth()  / 2 + gScreenInfo.getGameCanvasWidth()  / 2, 
+                         mCurrentOffset.y - gScreenInfo.getPrevCanvasHeight() / 2 + gScreenInfo.getGameCanvasHeight() / 2);
+   }
 
+   // Need to populate the dock here because dock items are tied to a particular screen x,y; 
+   // maybe it would be better to give them a dock x,y instead?
    if(getGame()->getGameType())
       populateDock();               // If game type has changed, items on dock will change
+
+
 }
 
 

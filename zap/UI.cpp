@@ -167,7 +167,7 @@ UIID UserInterface::getPrevMenuID() const
 void UserInterface::onActivate()   { /* Do nothing */ }
 void UserInterface::onReactivate() { /* Do nothing */ }
 
-void UserInterface::onDisplayModeChange() { /* Do nothing */ }
+void UserInterface::onDisplayModeChange(bool changingInterfaces) { /* Do nothing */ }
 
 extern void actualizeScreenMode(bool);
 

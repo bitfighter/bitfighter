@@ -1106,7 +1106,7 @@ void actualizeScreenMode(bool changingInterfaces)
    else
       setWindowPosition(0, 0);
 
-   UserInterface::current->onDisplayModeChange();     // Notify the UI that the screen has changed mode
+   UserInterface::current->onDisplayModeChange(changingInterfaces);     // Notify the UI that the screen has changed mode
 }
 
 #endif
