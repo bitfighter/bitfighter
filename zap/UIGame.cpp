@@ -1056,7 +1056,10 @@ void GameUserInterface::onKeyDown(InputCode inputCode, char ascii)
    // Only open when not in any special mode.
    else if(!mHelper && inputCode == KEY_SLASH && checkModifier(KEY_CTRL))
    {
-      OGLCONSOLE_ShowConsole();
+      if(OGLCONSOLE_GetVisibility())      // Hide console if it's visible...
+         OGLCONSOLE_HideConsole();
+      else                                // ...and show it if it's not
+         OGLCONSOLE_ShowConsole();     
    }
    else if(inputCode == keyOUTGAMECHAT)
    {
