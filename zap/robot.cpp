@@ -1282,7 +1282,7 @@ void EventManager::fireEvent(EventType eventType)
       }
       catch(LuaException &e)
       {
-         handleEventError(eventType, e.what());
+         handleEventFiringError(eventType, e.what());
          return;
       }
    }
@@ -1306,7 +1306,7 @@ void EventManager::fireEvent(EventType eventType, U32 deltaT)
       }
       catch(LuaException &e)
       {
-         handleEventError(eventType, e.what());
+         handleEventFiringError(eventType, e.what());
          return;
       }
    }
@@ -1328,7 +1328,7 @@ void EventManager::fireEvent(EventType eventType, Ship *ship)
       }
       catch(LuaException &e)
       {
-         handleEventError(eventType, e.what());
+         handleEventFiringError(eventType, e.what());
          return;
       }
    }
@@ -1356,7 +1356,7 @@ void EventManager::fireEvent(lua_State *caller_L, EventType eventType, const cha
       }
       catch(LuaException &e)
       {
-         handleEventError(eventType, e.what());
+         handleEventFiringError(eventType, e.what());
          return;
       }
    }
@@ -1383,14 +1383,14 @@ void EventManager::fireEvent(lua_State *caller_L, EventType eventType, LuaPlayer
       }
       catch(LuaException &e)
       {
-         handleEventError(eventType, e.what());
+         handleEventFiringError(eventType, e.what());
          return;
       }
    }
 }
 
 
-void EventManager::handleEventError(EventType eventType, const char *errorMsg)
+void EventManager::handleEventFiringError(EventType eventType, const char *errorMsg)
 {
    logprintf(LogConsumer::LogError, "Robot error handling event %s: %s. Shutting bot down.", eventNames[eventType], errorMsg);
    OGLCONSOLE_Print("Robot error handling event %s: %s. Shutting bot down.", eventNames[eventType], errorMsg);
@@ -1723,16 +1723,10 @@ void Robot::logError(const char *format, ...)
 
    vsnprintf(buffer, sizeof(buffer), format, args);
 
-   logError(buffer, mScriptName.c_str());
+   logprintf(LogConsumer::LogError, "***ROBOT ERROR*** in %s ::: %s",   mScriptName.c_str(), buffer);
+   OGLCONSOLE_Print(                "***ROBOT ERROR*** in %s ::: %s\n", mScriptName.c_str(), buffer);
 
    va_end(args);
-}
-
-
-void Robot::logError(const char *msg, const char *filename)
-{
-   logprintf(LogConsumer::LogError, "***ROBOT ERROR*** in %s ::: %s", filename, msg);
-   OGLCONSOLE_Print("***ROBOT ERROR*** in %s ::: %s\n", filename, msg);
 }
 
 
