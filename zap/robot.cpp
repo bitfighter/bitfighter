@@ -93,18 +93,9 @@ LuaRobot::LuaRobot(lua_State *L) : LuaShip((Robot *)lua_touserdata(L, 1))
    thisRobot = (Robot *)lua_touserdata(L, 1);    // Register our robot
    thisRobot->mLuaRobot = this;
 
-   // Initialize all subscriptions to unsubscribed
+   // Initialize all subscriptions to unsubscribed -- we'll subscribe to onTick later
    for(S32 i = 0; i < EventManager::EventTypes; i++)
       subscriptions[i] = false;
-
-   // Subscribe to onTick -- mainly for convenience, but also for backwards compatibility (but only if onTick handler is defined)
-   lua_getglobal(L, eventFunctions[EventManager::TickEvent]);  
-   
-   if(lua_isfunction(L, -1))
-      doSubscribe(L, EventManager::TickEvent);
-
-   lua_pop(L, 1);
-
 
    setEnums(L);      // Set scads of global vars in the Lua instance that mimic the use of the enums we use everywhere
 
@@ -1026,13 +1017,6 @@ S32 LuaRobot::findAndReturnClosestZone(lua_State *L, const Point &point)
 }
 
 
-void LuaRobot::doSubscribe(lua_State *L, EventManager::EventType eventType)
-{
-   eventManager.subscribe(L, eventType);
-   subscriptions[eventType] = true;
-}
-
-
 S32 LuaRobot::subscribe(lua_State *L)
 {
    // Get the event off the stack
@@ -1046,6 +1030,13 @@ S32 LuaRobot::subscribe(lua_State *L)
    doSubscribe(L, EventManager::EventType(eventType));
 
    return 0;
+}
+
+
+void LuaRobot::doSubscribe(lua_State *L, EventManager::EventType eventType)
+{
+   eventManager.subscribe(L, eventType);
+   subscriptions[eventType] = true;
 }
 
 
@@ -1282,7 +1273,7 @@ void EventManager::fireEvent(EventType eventType)
       }
       catch(LuaException &e)
       {
-         handleEventFiringError(eventType, e.what());
+         handleEventFiringError(L, eventType, e.what());
          return;
       }
    }
@@ -1306,7 +1297,7 @@ void EventManager::fireEvent(EventType eventType, U32 deltaT)
       }
       catch(LuaException &e)
       {
-         handleEventFiringError(eventType, e.what());
+         handleEventFiringError(L, eventType, e.what());
          return;
       }
    }
@@ -1328,7 +1319,7 @@ void EventManager::fireEvent(EventType eventType, Ship *ship)
       }
       catch(LuaException &e)
       {
-         handleEventFiringError(eventType, e.what());
+         handleEventFiringError(L, eventType, e.what());
          return;
       }
    }
@@ -1356,7 +1347,7 @@ void EventManager::fireEvent(lua_State *caller_L, EventType eventType, const cha
       }
       catch(LuaException &e)
       {
-         handleEventFiringError(eventType, e.what());
+         handleEventFiringError(L, eventType, e.what());
          return;
       }
    }
@@ -1383,17 +1374,22 @@ void EventManager::fireEvent(lua_State *caller_L, EventType eventType, LuaPlayer
       }
       catch(LuaException &e)
       {
-         handleEventFiringError(eventType, e.what());
+         handleEventFiringError(L, eventType, e.what());
          return;
       }
    }
 }
 
 
-void EventManager::handleEventFiringError(EventType eventType, const char *errorMsg)
+void EventManager::handleEventFiringError(lua_State *L, EventType eventType, const char *errorMsg)
 {
-   logprintf(LogConsumer::LogError, "Robot error handling event %s: %s. Shutting bot down.", eventNames[eventType], errorMsg);
-   OGLCONSOLE_Print("Robot error handling event %s: %s. Shutting bot down.", eventNames[eventType], errorMsg);
+   // Figure out which bot caused the error
+   Robot *robot = Robot::findBot(L);
+
+   if(robot)
+      robot->logError( "Robot error handling event %s: %s. Shutting bot down.", eventNames[eventType], errorMsg);
+
+   delete robot;
 }
 
 
@@ -1529,6 +1525,17 @@ bool Robot::start()
    mGame->addToClientList(mClientInfo);
 
    return true;
+}
+
+
+// Find the bot that owns this L (static)
+Robot *Robot::findBot(lua_State *L)
+{
+   for(S32 i = 0; i < robots.size(); i++)
+      if(robots[i]->getL() == L)
+         return robots[i];
+
+   return NULL;
 }
 
 
@@ -1723,6 +1730,7 @@ void Robot::logError(const char *format, ...)
 
    vsnprintf(buffer, sizeof(buffer), format, args);
 
+   // Log the error to the logging system and also to the game console
    logprintf(LogConsumer::LogError, "***ROBOT ERROR*** in %s ::: %s",   mScriptName.c_str(), buffer);
    OGLCONSOLE_Print(                "***ROBOT ERROR*** in %s ::: %s\n", mScriptName.c_str(), buffer);
 

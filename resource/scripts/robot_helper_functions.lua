@@ -126,3 +126,18 @@ end
 -- Let the log know that this file was processed correctly
 --
 logprint("Loaded robot helper functions...")
+
+--
+-- Wrapper to call the script's main() function in a safe manner -- overwrites the one in lua_helper_functions
+--
+function _main()
+   if _declared("onTick") and type(onTick) == "function" then
+      subscribe(TickEvent);
+   end
+
+   if _declared("main") and type(main) == "function" then
+      main()
+   else   
+      error("WARNING: No main() function could be found!")
+   end
+end

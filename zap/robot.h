@@ -61,7 +61,7 @@ private:
    void removeFromPendingSubscribeList(lua_State *subscriber, EventType eventType);
    void removeFromPendingUnsubscribeList(lua_State *unsubscriber, EventType eventType);
 
-   void handleEventError(EventType eventType, const char *errorMsg);
+   void handleEventFiringError(lua_State *L, EventType eventType, const char *errorMsg);
 
 public:
    EventManager();                  // C++ constructor
@@ -136,7 +136,6 @@ public:
 
    lua_State *getL();
 
-private:
    void logError(const char *format, ...);   // In case of error...
 
    public:
@@ -164,19 +163,21 @@ private:
    bool isRobot();
    //static S32 getRobotCount() { return robots.size(); }
 
-   LuaRobot *mLuaRobot;                // Could make private and make a public setter method...
+   LuaRobot *mLuaRobot;                   // Could make private and make a public setter method...
    static EventManager getEventManager();
 
    LuaPlayerInfo *getPlayerInfo();
 
-   static Vector<Robot *> robots;      // Grand master list of all robots in the current game
-   static void startBots();            // Loop through all our bots and run thier main() functions
+   static Vector<Robot *> robots;         // Grand master list of all robots in the current game
+   static void startBots();               // Loop through all our bots and run thier main() functions
    bool start();
 
-   bool startLua();                    // Fire up bot's Lua processor
+   static Robot *findBot(lua_State *L);   // Find the bot that owns this L
+
+   bool startLua();                       // Fire up bot's Lua processor
    void setPointerToThis();
    void registerClasses();
-   string runGetName();                // Run bot's getName() function
+   string runGetName();                   // Run bot's getName() function
 
    S32 getScore();    // Return robot's score
    F32 getRating();   // Return robot's rating
@@ -273,6 +274,7 @@ public:
 
    S32 subscribe(lua_State *L);
    S32 unsubscribe(lua_State *L);
+
 
    //// Ship info
    //S32 getActiveWeapon(lua_State *L);
