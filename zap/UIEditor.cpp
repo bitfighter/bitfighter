@@ -1169,12 +1169,12 @@ Point EditorUserInterface::convertLevelToCanvasCoord(Point p, bool convert)
 }
 
 
-static S32 previousXSize;
-static S32 previousYSize;
-
 // Called when we shift between windowed and fullscreen mode, after change is made
 void EditorUserInterface::onDisplayModeChange()
 {
+   static S32 previousXSize = -1;
+   static S32 previousYSize = -1;
+
    if(previousXSize != gScreenInfo.getGameCanvasWidth() || previousYSize != gScreenInfo.getGameCanvasHeight())
    {
       // Recenter canvas -- note that canvasWidth may change during displayMode change
