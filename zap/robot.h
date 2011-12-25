@@ -61,6 +61,8 @@ private:
    void removeFromPendingSubscribeList(lua_State *subscriber, EventType eventType);
    void removeFromPendingUnsubscribeList(lua_State *unsubscriber, EventType eventType);
 
+   void handleEventError(EventType eventType, const char *errorMsg);
+
 public:
    EventManager();                  // C++ constructor
    EventManager(lua_State *L);      // Lua Constructor
@@ -206,10 +208,11 @@ private:
    Point getNextWaypoint();                          // Helper function for getWaypoint()
    U16 findClosestZone(const Point &point);          // Finds zone closest to point, used when robots get off the map
    S32 findAndReturnClosestZone(lua_State *L, const Point &point); // Wraps findClosestZone and handles returning the result to Lua
-   S32 doFindItems(lua_State *L, Rect *scope = NULL);        // Worker method for various find functions
+   S32 doFindItems(lua_State *L, Rect *scope = NULL);    // Worker method for various find functions
 
-   void setEnums(lua_State *L);                      // Set a whole slew of enum values that we want the scripts to have access to
-   bool subscriptions[EventManager::EventTypes];     // Keep track of which events we're subscribed to for rapid unsubscription upon death
+   void setEnums(lua_State *L);                          // Set a whole slew of enum values that we want the scripts to have access to
+   bool subscriptions[EventManager::EventTypes];         // Keep track of which events we're subscribed to for rapid unsubscription upon death
+   void doSubscribe(lua_State *L, EventManager::EventType eventType);   // Do the work of subscribing, wrapped by subscribe()
 
 public:
   // Constants

@@ -63,6 +63,24 @@ S32 Robot::mStepCount = -1;
 extern ServerGame *gServerGame;
 
 
+// The list of the function names to be called in the bot when a particular event is fired
+static const char *eventNames[] = {
+   "Tick",
+   "ShipSpawned",
+   "ShipKilled",
+   "PlayerJoined",
+   "PlayerLeft",
+   "MsgReceived"
+};
+
+static const char *eventFunctions[] = {
+   "onTick",
+   "onShipSpawned",
+   "onShipKilled",
+   "onPlayerJoined",
+   "onPlayerLeft",
+   "onMsgReceived"
+};
 
 
 static EventManager eventManager;                // Singleton event manager, one copy is used by all bots
@@ -79,9 +97,14 @@ LuaRobot::LuaRobot(lua_State *L) : LuaShip((Robot *)lua_touserdata(L, 1))
    for(S32 i = 0; i < EventManager::EventTypes; i++)
       subscriptions[i] = false;
 
-   // Subscribe to onTick -- mainly for convenience, but also for backwards compatibility
-   eventManager.subscribe(L, EventManager::TickEvent);
-   subscriptions[EventManager::TickEvent] = true;
+   // Subscribe to onTick -- mainly for convenience, but also for backwards compatibility (but only if onTick handler is defined)
+   lua_getglobal(L, eventFunctions[EventManager::TickEvent]);  
+   
+   if(lua_isfunction(L, -1))
+      doSubscribe(L, EventManager::TickEvent);
+
+   lua_pop(L, 1);
+
 
    setEnums(L);      // Set scads of global vars in the Lua instance that mimic the use of the enums we use everywhere
 
@@ -1003,6 +1026,13 @@ S32 LuaRobot::findAndReturnClosestZone(lua_State *L, const Point &point)
 }
 
 
+void LuaRobot::doSubscribe(lua_State *L, EventManager::EventType eventType)
+{
+   eventManager.subscribe(L, eventType);
+   subscriptions[eventType] = true;
+}
+
+
 S32 LuaRobot::subscribe(lua_State *L)
 {
    // Get the event off the stack
@@ -1013,8 +1043,8 @@ S32 LuaRobot::subscribe(lua_State *L)
    if(eventType < 0 || eventType >= EventManager::EventTypes)
       return 0;
 
-   eventManager.subscribe(L, (EventManager::EventType) eventType);
-   subscriptions[eventType] = true;
+   doSubscribe(L, EventManager::EventType(eventType));
+
    return 0;
 }
 
@@ -1085,11 +1115,12 @@ const char LuaRobot::className[] = "LuaRobot";     // This is the class name as 
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-
+// Statics:
 bool EventManager::anyPending = false; 
 Vector<lua_State *> EventManager::subscriptions[EventTypes];
 Vector<lua_State *> EventManager::pendingSubscriptions[EventTypes];
 Vector<lua_State *> EventManager::pendingUnsubscriptions[EventTypes];
+
 
 // C++ constructor
 EventManager::EventManager()
@@ -1108,12 +1139,25 @@ EventManager::EventManager(lua_State *L)
 void EventManager::subscribe(lua_State *L, EventType eventType)
 {
    // First, see if we're already subscribed
-   if(!isSubscribed(L, eventType) && !isPendingSubscribed(L, eventType))
+   if(isSubscribed(L, eventType) || isPendingSubscribed(L, eventType))
+      return;
+
+   // Make sure the script has the proper event listener
+   lua_getglobal(L, eventFunctions[eventType]);
+
+   if(!lua_isfunction(L, -1))
    {
-      removeFromPendingUnsubscribeList(L, eventType);
-      pendingSubscriptions[eventType].push_back(L);
-      anyPending = true;
+      lua_pop(L, 1);    // Remove the item from the stack
+
+      logprintf(LogConsumer::LogError, "Error subscribing to %s event: couldn't find handler function.  Unsubscribing.", eventNames[eventType]);
+      OGLCONSOLE_Print("Error subscribing to %s event: couldn't find handler function.  Unsubscribing.", eventNames[eventType]);
+
+      return;
    }
+
+   removeFromPendingUnsubscribeList(L, eventType);
+   pendingSubscriptions[eventType].push_back(L);
+   anyPending = true;
 }
 
 
@@ -1224,17 +1268,6 @@ void EventManager::update()
 }
 
 
-// This is a list of the function names to be called in the bot when a particular event is fired
-static const char *eventFunctions[] = {
-   "onTick",
-   "onShipSpawned",
-   "onShipKilled",
-   "onPlayerJoined",
-   "onPlayerLeft",
-   "onMsgReceived"
-};
-
-
 void EventManager::fireEvent(EventType eventType)
 {
    for(S32 i = 0; i < subscriptions[eventType].size(); i++)
@@ -1242,15 +1275,14 @@ void EventManager::fireEvent(EventType eventType)
       lua_State *L = subscriptions[eventType][i];
       try
       {
-         lua_getglobal(L, "onMsgSent");
+         lua_getglobal(L, eventFunctions[eventType]);
 
-         if (lua_pcall(L, 0, 0, 0) != 0)
+         if(lua_pcall(L, 0, 0, 0) != 0)
             throw LuaException(lua_tostring(L, -1));
       }
       catch(LuaException &e)
       {
-         logprintf(LogConsumer::LogError, "Robot error firing event %d: %s.", eventType, e.what());
-         OGLCONSOLE_Print("Robot error firing event %d: %s.", eventType, e.what());
+         handleEventError(eventType, e.what());
          return;
       }
    }
@@ -1274,8 +1306,7 @@ void EventManager::fireEvent(EventType eventType, U32 deltaT)
       }
       catch(LuaException &e)
       {
-         logprintf(LogConsumer::LogError, "Robot error firing event %d: %s.", eventType, e.what());
-         OGLCONSOLE_Print("Robot error firing event %d: %s.", eventType, e.what());
+         handleEventError(eventType, e.what());
          return;
       }
    }
@@ -1297,8 +1328,7 @@ void EventManager::fireEvent(EventType eventType, Ship *ship)
       }
       catch(LuaException &e)
       {
-         logprintf(LogConsumer::LogError, "Robot error firing event %d: %s.", eventType, e.what());
-         OGLCONSOLE_Print("Robot error firing event %d: %s.", eventType, e.what());
+         handleEventError(eventType, e.what());
          return;
       }
    }
@@ -1326,8 +1356,7 @@ void EventManager::fireEvent(lua_State *caller_L, EventType eventType, const cha
       }
       catch(LuaException &e)
       {
-         logprintf(LogConsumer::LogError, "Robot error firing event %d: %s.", eventType, e.what());
-         OGLCONSOLE_Print("Robot error firing event %d: %s.", eventType, e.what());
+         handleEventError(eventType, e.what());
          return;
       }
    }
@@ -1354,11 +1383,17 @@ void EventManager::fireEvent(lua_State *caller_L, EventType eventType, LuaPlayer
       }
       catch(LuaException &e)
       {
-         logprintf(LogConsumer::LogError, "Robot error firing event %d: %s.", eventType, e.what());
-         OGLCONSOLE_Print("Robot error firing event %d: %s.", eventType, e.what());
+         handleEventError(eventType, e.what());
          return;
       }
    }
+}
+
+
+void EventManager::handleEventError(EventType eventType, const char *errorMsg)
+{
+   logprintf(LogConsumer::LogError, "Robot error handling event %s: %s. Shutting bot down.", eventNames[eventType], errorMsg);
+   OGLCONSOLE_Print("Robot error handling event %s: %s. Shutting bot down.", eventNames[eventType], errorMsg);
 }
 
 
@@ -1615,7 +1650,6 @@ void Robot::onAddedToGame(Game *game)
 
    hasExploded = true;        // Becase we start off "dead", but will respawn real soon now...
    disableCollision();
-
 
    robots.push_back(this);    // Add this robot to the list of all robots (can't do this in constructor or else it gets run on client side too...)
    eventManager.fireEvent(L, EventManager::PlayerJoinedEvent, getPlayerInfo());
