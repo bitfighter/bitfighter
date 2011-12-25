@@ -576,6 +576,8 @@ bool LuaScriptRunner::runChunk()
 {
    try
    {
+      setLuaArgs(mScriptArgs);  // Some scripts reads arguments outside the "main" function
+
       // Initialize it by running all the code that's not contained in a function -- this loads all the functions into the global namespace
       if(lua_pcall(L, 0, 0, 0))     // Passing 0 params, getting 0 back
       {
