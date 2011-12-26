@@ -331,6 +331,7 @@ public:
    void writeConnectRequest(BitStream *stream);
    bool readConnectRequest(BitStream *stream, NetConnection::TerminationReason &reason);
 
+   void setConnectionSpeed();
    void onConnectionEstablished();
 
    void onConnectTerminated(TerminationReason r, const char *notUsed);

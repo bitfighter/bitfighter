@@ -989,6 +989,13 @@ static void setVoiceEchoCallback(ClientGame *game, U32 val)
    game->getSettings()->getIniSettings()->echoVoice = (val == 1);
 }
 
+static void setConnectionSpeedCallback(ClientGame *game, U32 val)
+{
+   game->getSettings()->getIniSettings()->connectionSpeed = val - 2;
+   if(game && game->getConnectionToServer())
+      game->getConnectionToServer()->setConnectionSpeed();
+}
+
 //////////
 
 MenuItem *getWindowModeMenuItem(U32 displayMode)
@@ -1069,6 +1076,15 @@ void OptionsMenuUserInterface::setupMenus()
    opts.push_back("ENABLED");
    addMenuItem(new ToggleMenuItem("VOICE ECHO:", opts, settings->getIniSettings()->echoVoice ? 1 : 0, true, 
                                   setVoiceEchoCallback, "Toggle whether you hear your voice on voice chat",  KEY_E));
+
+   opts.clear();
+   opts.push_back("VERY LOW");
+   opts.push_back("LOW");
+   opts.push_back("MEDIUM");  // there is 5 options, -2 (very low) to 2 (very high)
+   opts.push_back("HIGH");
+   opts.push_back("VERY HIGH");
+   addMenuItem(new ToggleMenuItem("CONNECTION SPEED:", opts, settings->getIniSettings()->connectionSpeed + 2, true, 
+                                  setConnectionSpeedCallback, "Speed of your connection, if your ping goes too high, try slower speed.",  KEY_E));
 }
 
 

@@ -600,7 +600,8 @@ void Ship::idle(GameObject::IdleCallPath path)
       // clients to properly lead other clients, instead of
       // piecewise stepping only when packets arrive from the client.
       processMove(RenderState);
-      setMaskBits(PositionMask);
+      if(mMoveState[ActualState].vel != Point(0,0) || mMoveState[ActualState].pos != mMoveState[RenderState].pos)
+         setMaskBits(PositionMask);
    }
    else
    {
@@ -1392,6 +1393,16 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
 #endif
 }  // unpackUpdate
 
+
+F32 Ship::getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 updateSkips)
+{
+   F32 value = Parent::getUpdatePriority(scopeObject, updateMask, updateSkips);
+   if(getControllingClient())
+      value += 2.3f;
+   else
+      value -= 2.3f;
+   return value;
+}
 
 static F32 getAngleDiff(F32 a, F32 b)
 {
