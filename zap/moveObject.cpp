@@ -496,11 +496,9 @@ void MoveObject::computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *
    Point collisionVector = moveObjectThatWasHit->mMoveState[stateIndex].pos -mMoveState[stateIndex].pos;
 
    collisionVector.normalize();
-   // F32 m1 = getMass();             <-- May be useful in future
-   // F32 m2 = moveObjectThatWasHit->getMass();
 
-//   bool moveObjectThatWasHitWasNotMoving = (moveObjectThatWasHit->mMoveState[stateIndex].vel.lenSquared() == 0.0f);
-      
+   bool moveObjectThatWasHitWasMovingTooSlow = (moveObjectThatWasHit->mMoveState[stateIndex].vel.lenSquared() < 0.001f);
+
    // Initial velocities projected onto collisionVector
    F32 v1i = mMoveState[stateIndex].vel.dot(collisionVector);
    F32 v2i = moveObjectThatWasHit->mMoveState[stateIndex].vel.dot(collisionVector);
@@ -508,11 +506,6 @@ void MoveObject::computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *
    F32 v1f, v2f;     // Final velocities
 
    F32 e = 0.9f;     // Elasticity, I think
-
-
-   // Could incorporate m1 & m2 here in future
-   //v2f = ( e * (v1i - v2i) + v1i + v2i) / 2;
-   //v1f = ( v1i + v2i - v2f);
 
    v1f = (e * moveObjectThatWasHit->mMass * (v2i - v1i) + mMass * v1i + moveObjectThatWasHit->mMass * v2i) / (mMass + moveObjectThatWasHit->mMass);
    v2f = (e *                       mMass * (v1i - v2i) + mMass * v1i + moveObjectThatWasHit->mMass * v2i) / (mMass + moveObjectThatWasHit->mMass);
@@ -553,7 +546,7 @@ void MoveObject::computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *
       MoveItem *item = dynamic_cast<MoveItem *>(moveObjectThatWasHit);
       GameType *gameType = getGame()->getGameType();
 
-      if(item && gameType)
+      if(item && gameType && moveObjectThatWasHitWasMovingTooSlow)  // only if not moving fast, to prevent some overload
          gameType->c2sResendItemStatus(item->getItemId());
    }
 #endif
