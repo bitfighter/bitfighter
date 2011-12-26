@@ -37,8 +37,8 @@ bool NetObject::mIsInitialUpdate = false;
 
 NetObject::NetObject()
 {
-	// netFlags will clear itself to 0
-	mNetIndex = U32(-1);
+   // netFlags will clear itself to 0
+   mNetIndex = U32(-1);
    mFirstObjectRef = NULL;
    mPrevDirtyList = NULL;
    mNextDirtyList = NULL;

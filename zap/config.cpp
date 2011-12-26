@@ -98,7 +98,7 @@ IniSettings::IniSettings()
    maxFPS = 100;                      // Max FPS on client/non-dedicated server
 
    inputMode = InputModeKeyboard;     // Joystick or Keyboard
-	masterAddress = MASTER_SERVER_LIST_ADDRESS;   // Default address of our master server
+   masterAddress = MASTER_SERVER_LIST_ADDRESS;   // Default address of our master server
    name = "";                         // Player name (none by default)
    defaultName = "ChumpChange";       // Name used if user hits <enter> on name entry screen
    lastName = "ChumpChange";          // Name the user entered last time they ran the game
@@ -112,6 +112,8 @@ IniSettings::IniSettings()
    adminPassword = "";
    levelChangePassword = "";
    levelDir = "";
+
+   U32 connectionSpeed = 0;
 
    defaultRobotScript = "s_bot.bot";            
    globalLevelScript = "";
@@ -354,6 +356,8 @@ static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
    iniSettings->lastEditorName = ini->GetValue(section, "LastEditorName", iniSettings->lastEditorName);
 
    iniSettings->version = ini->GetValueI(section, "Version", iniSettings->version);
+
+   iniSettings->connectionSpeed = ini->GetValueI(section, "Version", iniSettings->connectionSpeed);
 
    iniSettings->enableExperimentalAimMode = ini->GetValueYN(section, "EnableExperimentalAimMode", iniSettings->enableExperimentalAimMode);
    S32 fps = ini->GetValueI(section, "MaxFPS", iniSettings->maxFPS);
@@ -1458,6 +1462,7 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
    ini->setValueYN(section, "EnableExperimentalAimMode", iniSettings->enableExperimentalAimMode);
    ini->SetValueI (section, "MaxFPS", iniSettings->maxFPS);  
 
+   ini->SetValueI (section, "ConnectionSpeed", iniSettings->connectionSpeed);  
    ini->SetValueI (section, "Version", BUILD_VERSION);
 
 #ifndef ZAP_DEDICATED

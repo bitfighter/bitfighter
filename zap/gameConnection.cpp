@@ -1607,36 +1607,77 @@ string GameConnection::makeUnique(string name)
    return proposedName;
 }
 
+#define ÷ /
+
+void GameConnection::setConnectionSpeed()
+{
+   U32 minPacketSendPeriod;
+   U32 minPacketRecvPeriod;
+   U32 maxSendBandwidth;
+   U32 maxRecvBandwidth;
+   const U32 speed = mClientGame->getSettings()->getIniSettings()->connectionSpeed;
+   if(speed == -2)
+   {
+      minPacketSendPeriod = 80;
+      minPacketRecvPeriod = 80;
+      maxSendBandwidth = 800;
+      maxRecvBandwidth = 800;
+   }
+   else if(speed == -1)
+   {
+      minPacketSendPeriod = 50; //  <== original zap settings
+      minPacketRecvPeriod = 50;
+      maxSendBandwidth = 2000;
+      maxRecvBandwidth = 2000;
+   }
+   else if(speed == 1)
+   {
+      minPacketSendPeriod = 40;
+      minPacketRecvPeriod = 40;
+      maxSendBandwidth = 20000;
+      maxRecvBandwidth = 20000;
+   }
+   else if(speed == 2)
+   {
+      minPacketSendPeriod = 30;
+      minPacketRecvPeriod = 30;
+      maxSendBandwidth = 65535;
+      maxRecvBandwidth = 65535;
+   }
+   else
+   {
+      minPacketSendPeriod = 50;
+      minPacketRecvPeriod = 50;
+      maxSendBandwidth = 8000;
+      maxRecvBandwidth = 8000;
+   }
+
+   //if(this->isLocalConnection())    // Local connections don't use network, maximum bandwidth
+   //{
+   //   minPacketSendPeriod = 15;
+   //   minPacketRecvPeriod = 15;
+   //   maxSendBandwidth = 65535;     // Error when higher than 65535
+   //   maxRecvBandwidth = 65535;
+   //}
+
+   setFixedRateParameters(minPacketSendPeriod, minPacketRecvPeriod, maxSendBandwidth, maxRecvBandwidth);
+}
 
 // Runs on client and server?
 void GameConnection::onConnectionEstablished()
 {
-   U32 minPacketSendPeriod = 40; //50;   <== original zap settings
-   U32 minPacketRecvPeriod = 40; //50;
-   U32 maxSendBandwidth = 65535; //2000;
-   U32 maxRecvBandwidth = 65535; //2000;
-
-   if(this->isLocalConnection())    // Local connections don't use network, maximum bandwidth
-   {
-      minPacketSendPeriod = 15;
-      minPacketRecvPeriod = 15;
-      maxSendBandwidth = 65535;     // Error when higher than 65535
-      maxRecvBandwidth = 65535;
-   }
-   
-
    Parent::onConnectionEstablished();
 
    if(isInitiator())    // Runs on client
    {
 #ifndef ZAP_DEDICATED
+      setConnectionSpeed();
       mClientGame->setInCommanderMap(false);       // Start game in regular mode
       mClientGame->clearZoomDelta();               // No in zoom effect
       setGhostFrom(false);
       setGhostTo(true);
       logprintf(LogConsumer::LogConnection, "%s - connected to server.", getNetAddressString());
 
-      setFixedRateParameters(minPacketSendPeriod, minPacketRecvPeriod, maxSendBandwidth, maxRecvBandwidth);       
 
       // If we entered a password, and it worked, let's save it for next time.  If we arrive here and the saved password is empty
       // it means that the user entered a good password.  So we save.
@@ -1671,7 +1712,7 @@ void GameConnection::onConnectionEstablished()
       setGhostFrom(true);
       setGhostTo(false);
       activateGhosting();
-      setFixedRateParameters(minPacketSendPeriod, minPacketRecvPeriod, maxSendBandwidth, maxRecvBandwidth);        
+      //setFixedRateParameters(minPacketSendPeriod, minPacketRecvPeriod, maxSendBandwidth, maxRecvBandwidth);  // make this client only?
 
       // Ideally, the server name would be part of the connection handshake, but this will work as well
       s2cSetServerName(gServerGame->getSettings()->getHostName());   // Note: mSettings is NULL here

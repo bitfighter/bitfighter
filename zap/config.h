@@ -187,6 +187,8 @@ struct IniSettings      // With defaults specified
    S32 maxPlayers;                  // Max number of players that can play on local server
    S32 maxBots;
 
+   S32 connectionSpeed;
+
    bool allowMapUpload;
    bool allowAdminMapUpload;
 

@@ -3130,8 +3130,8 @@ GAMETYPE_RPC_C2S(GameType, c2sDropItem, (), ())
 }
 
 
-//GAMETYPE_RPC_C2S(GameType, c2sResendItemStatus, (U16 itemId), (itemId))  // probably want RPCUnguaranteed to avoid problems with unable to or delayed change weapons and chat
-TNL_IMPLEMENT_NETOBJECT_RPC(GameType, c2sResendItemStatus, (U16 itemId), (itemId), NetClassGroupGameMask, RPCUnguaranteed, RPCToGhostParent, 0)
+//GAMETYPE_RPC_C2S(GameType, c2sResendItemStatus, (U16 itemId), (itemId))  // no need to use RPCGuaranteedOrdered
+TNL_IMPLEMENT_NETOBJECT_RPC(GameType, c2sResendItemStatus, (U16 itemId), (itemId), NetClassGroupGameMask, RPCGuaranteed, RPCToGhostParent, 0)
 {
    //GameConnection *source = (GameConnection *) getRPCSourceConnection();  // not used
 

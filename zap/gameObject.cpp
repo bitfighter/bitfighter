@@ -390,7 +390,7 @@ SafePtr<GameConnection> GameObject::getControllingClient()
 
 void GameObject::setControllingClient(GameConnection *c)         // This only gets run on the server
 {
-	mControllingClient = c;
+   mControllingClient = c;
 }
 
 void GameObject::setOwner(GameConnection *connection)
@@ -494,8 +494,8 @@ F32 GameObject::getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 up
 
    // and a little more love if this object has not yet been scoped.
    if(updateMask == 0xFFFFFFFF)
-      add += 0.5;
-   return add + updateSkips * 0.5f;
+      add += 2.5;
+   return add + updateSkips * 0.2f;
 }
 
 void GameObject::damageObject(DamageInfo *theInfo)
