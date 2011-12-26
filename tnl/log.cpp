@@ -26,10 +26,11 @@
 
 #include "tnlLog.h"
 #include "tnlDataChunker.h"
+#include "../zap/oglconsole.h"   // For logging to the console
 #include <time.h>
 #include <string.h>
-#include <stdio.h>   // For newer versions of gcc?
-#include <stdarg.h>  // For va_list
+#include <stdio.h>               // For newer versions of gcc?
+#include <stdarg.h>              // For va_list
 
 #ifdef _MSC_VER
 #pragma warning (disable: 4996)     // Disable POSIX deprecation, certain security warnings that seem to be specific to VC++
@@ -182,6 +183,7 @@ void StdoutLogConsumer::writeString(const char *string)
 {
    printf("%s", string);
 }
+
 
 ////////////////////////////////////////
 ////////////////////////////////////////

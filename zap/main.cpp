@@ -729,11 +729,22 @@ void dedicatedServerLoop()
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+// Include class here to avoid contaminating tnlLog with the filth that is oglConsole
+class OglConsoleLogConsumer : public LogConsumer    // Dumps to oglConsole
+{
+private:
+   void writeString(const char *string) { OGLCONSOLE_Output(gConsole, string); }
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
 // Our logfiles
-StdoutLogConsumer gStdoutLog;     // Logs to console, when there is one
+StdoutLogConsumer gStdoutLog;          // Logs to OS console, when there is one
+OglConsoleLogConsumer gOglConsoleLog;  // Logs to our in-game console, when available
 
 FileLogConsumer gMainLog;
-FileLogConsumer gServerLog;       // We'll apply a filter later on, in main()
+FileLogConsumer gServerLog;            // We'll apply a filter later on, in main()
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -959,7 +970,8 @@ void setupLogging(const string &logDir)
    //gMainLog.setMsgTypes(events);  ==> set from INI settings     
    gMainLog.logprintf("------ Bitfighter Log File ------");
 
-   gStdoutLog.setMsgTypes(events);   // writes to stdout
+   gStdoutLog.setMsgTypes(events);     // writes to stdout
+   gOglConsoleLog.setMsgTypes(events); // writes to in-game console
 
    gServerLog.init(joindir(logDir, "bitfighter_server.log"), "a");
    gServerLog.setMsgTypes(LogConsumer::AllErrorTypes | LogConsumer::ServerFilter | LogConsumer::StatisticsFilter); 
