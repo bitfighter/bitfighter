@@ -965,13 +965,14 @@ void setupLogging(const string &logDir)
 {
    // Specify which events each logfile will listen for
    S32 events = LogConsumer::AllErrorTypes | LogConsumer::LogConnection | LogConsumer::LuaLevelGenerator | LogConsumer::LuaBotMessage;
+   S32 consoleEvents = LogConsumer::AllErrorTypes |LogConsumer::LuaLevelGenerator | LogConsumer::LuaBotMessage;
 
    gMainLog.init(joindir(logDir, "bitfighter.log"), "w");
    //gMainLog.setMsgTypes(events);  ==> set from INI settings     
    gMainLog.logprintf("------ Bitfighter Log File ------");
 
-   gStdoutLog.setMsgTypes(events);     // writes to stdout
-   gOglConsoleLog.setMsgTypes(events); // writes to in-game console
+   gStdoutLog.setMsgTypes(events);              // writes to stdout
+   gOglConsoleLog.setMsgTypes(consoleEvents);   // writes to in-game console
 
    gServerLog.init(joindir(logDir, "bitfighter_server.log"), "a");
    gServerLog.setMsgTypes(LogConsumer::AllErrorTypes | LogConsumer::ServerFilter | LogConsumer::StatisticsFilter); 
