@@ -90,6 +90,7 @@ public:
       ConfigurationError      = BIT(21),     // For logging configuation issues
 
       LogLevelError           = BIT(22),     // Logs errors and warnings in levels
+      ConsoleMsg              = BIT(23),     // Message that goes only to the console
       
       All = 0xFFFFFFFF,
       AllErrorTypes = LogFatalError | LogError | LogWarning | LogLevelError | ConfigurationError
