@@ -331,7 +331,10 @@ public:
    void writeConnectRequest(BitStream *stream);
    bool readConnectRequest(BitStream *stream, NetConnection::TerminationReason &reason);
 
+#ifndef ZAP_DEDICATED
    void setConnectionSpeed();
+#endif
+
    void onConnectionEstablished();
 
    void onConnectTerminated(TerminationReason r, const char *notUsed);
