@@ -605,7 +605,8 @@ bool LuaScriptRunner::runMain()
 
 bool LuaScriptRunner::runMain(const Vector<string> &args)
 {
-   setLuaArgs(args);    // TODO: Do we still need this here with Sam's addition of setLuaArgs in runChunk()???
+   setLuaArgs(args);    // TODO: Do we still need this here with Sam's addition of setLuaArgs in runChunk()???  -- might need it for plugins -CE
+                        // Adds script name to 0th argument
 
    try
    {   
