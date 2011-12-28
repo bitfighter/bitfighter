@@ -1051,7 +1051,7 @@ bool Game::runLevelGenScript(const FolderManager *folderManager, const string &s
 
    // The script file will be the first argument, subsequent args will be passed on to the script
    LuaLevelGenerator levelgen = LuaLevelGenerator(fullname, folderManager->luaDir, scriptArgs, getGridSize(), 
-                                                  targetDatabase, this, gConsole);
+                                                  targetDatabase, this);
    if(!levelgen.runScript())
    {
       Vector<StringTableEntry> e;

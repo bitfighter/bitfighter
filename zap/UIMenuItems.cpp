@@ -579,19 +579,8 @@ void YesNoMenuItem::setIntValue(S32 value)
 }
 
 
-//YesNoMenuItem::YesNoMenuItem(string title, bool currOption, void (*callback)(ClientGame *, U32), string help, 
-//                             InputCode k1, InputCode k2) :
-//      ToggleMenuItem(title, Vector<string>(), currOption, true, callback)
-//{
-//   initialize();
-//
-//   setIndex(currOption);
-//}
-
-
 void YesNoMenuItem::initialize()
 {
-   //mValue = "";
    mEnterAdvancesItem = true;
 
    mOptions.push_back("No");     // 0
@@ -613,6 +602,8 @@ const char YesNoMenuItem::className[] = "YesNoMenuItem";      // Class name as i
 YesNoMenuItem::YesNoMenuItem(lua_State *L)
 {
    initialize();
+
+   dumpStack(L);
 
    const char *methodName = "YesNoMenuItem constructor";
 
@@ -808,20 +799,29 @@ CounterMenuItem::CounterMenuItem(lua_State *L)
 
    initialize();
 
-   // Required items -- will throw if they are missing or misspecified
-   mDisplayVal = getString(L, 1, methodName);
-   // mValue =  getInt(L, 2, methodName);  ==> set this later, after we've determined mMinValue and mMaxValue
+   try
+   {
+      // Required items -- will throw if they are missing or misspecified
+      mDisplayVal = getString(L, 1, methodName);
+      // mValue =  getInt(L, 2, methodName);  ==> set this later, after we've determined mMinValue and mMaxValue
 
-   // Optional (but recommended) items
-   mStep =     getInt(L, 3, methodName, 1);   
-   mMinValue = getInt(L, 4, methodName, 0);   
-   mMaxValue = getInt(L, 5, methodName, 100);   
-   mUnits =    getString(L, 6, methodName, "");
-   mMinMsg =   getString(L, 7, methodName, "");
-   mHelp =     getString(L, 8, methodName, "");
+      // Optional (but recommended) items
+      mStep =     getInt(L, 3, methodName, 1);   
+      mMinValue = getInt(L, 4, methodName, 0);   
+      mMaxValue = getInt(L, 5, methodName, 100);   
+      mUnits =    getString(L, 6, methodName, "");
+      mMinMsg =   getString(L, 7, methodName, "");
+      mHelp =     getString(L, 8, methodName, "");
 
-   // Second required item
-   setIntValue(getInt(L, 2, methodName));  
+      // Second required item
+      setIntValue(getInt(L, 2, methodName));    // Set this one last so we'll know mMinValue and mMaxValue
+   }
+   catch(LuaException &e)
+   {
+      logprintf(LogConsumer::LogError, "Error constructing CounterMenuItem -- please see documentation");
+      logprintf(LogConsumer::ConsoleMsg, "Usage: CounterMenuItem(<display val (str)> [step (i)] [min val (i)] [max val (i)] [units (str)] [min msg (str)] [help (str)] <value (int))");
+      throw e;
+   }
 }
 
 
@@ -853,6 +853,7 @@ S32 TimeCounterMenuItem::getBigIncrement()
 {
    return 12;  // 12 * 5sec = 1 minute
 }
+
 
 const char *TimeCounterMenuItem::getUnits()
 {

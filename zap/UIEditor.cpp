@@ -615,7 +615,7 @@ void EditorUserInterface::runScript(const FolderManager *folderManager, const st
    }
    
    // Load the items
-   LuaLevelGenerator levelGen(name, folderManager->luaDir, args, getGame()->getGridSize(), mLoadTarget, getGame(), gConsole);
+   LuaLevelGenerator levelGen(name, folderManager->luaDir, args, getGame()->getGridSize(), mLoadTarget, getGame());
 
    if(!levelGen.runScript())     // Error reporting handled within
       return;
@@ -643,13 +643,13 @@ void EditorUserInterface::runScript(const FolderManager *folderManager, const st
 }
 
 
-static void showError(const ClientGame *game)
+static void showPluginError(const ClientGame *game)
 {
    Vector<StringTableEntry> messages;
    messages.push_back("This plugin encountered an error configuring its options menu.");
    messages.push_back("It is likely that it has been misconfigured.");
    messages.push_back("");
-   messages.push_back("See the Bitfighter logfile for details.");
+   messages.push_back("See the Bitfighter logfile or console for details.");
 
    game->displayMessageBox("Problem With Plugin", "Press any key to return to the editor", messages);
 }
@@ -657,17 +657,23 @@ static void showError(const ClientGame *game)
 
 void EditorUserInterface::runPlugin(const FolderManager *folderManager, const string &scriptName, const Vector<string> &args)
 {
-   string fullName = folderManager->findLevelGenScript("mazegen");     // Find full name of levelgen script
+   string fullName = folderManager->findLevelGenScript(scriptName);     // Find full name of levelgen script
 
+   if(fullName == "")
+   {
+      // TODO: Show an error message to the user -- couldn't find plugin
+      return;
+   }
+
+   // For the moment, we can treat plugins as levelgens that have a getArgs() function
    LuaLevelGenerator *levelGen = new LuaLevelGenerator(fullName, folderManager->luaDir, args, getGame()->getGridSize(), 
-                                                       mLoadTarget, getGame(), gConsole);
+                                                       mLoadTarget, getGame());
 
    mPluginRunner = boost::shared_ptr<LuaLevelGenerator>(levelGen);
 
-
    if(!mPluginRunner->loadScript())       // Loads the script and runs it to get everything loaded into memory.  Does not run main().
    {
-      showError(getGame());
+      showPluginError(getGame());
       return;
    }
 
@@ -676,7 +682,7 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
 
    if(!levelGen->runGetArgs(title, menuItems))     // Fills menuItems
    {
-      showError(getGame());
+      showPluginError(getGame());
       return;
    }
 
@@ -692,7 +698,7 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
    for(S32 i = 0; i < menuItems.size(); i++)
       mPluginMenu->addMenuItem(menuItems[i]);
 
-   mPluginMenu->addSaveAndQuitMenuItem();
+   mPluginMenu->addSaveAndQuitMenuItem("Run plugin", "Saves values and runs plugin");
 
    mPluginMenu->setMenuCenterPoint(Point(gScreenInfo.getGameCanvasWidth() / 2, gScreenInfo.getGameCanvasHeight() / 2));  
 

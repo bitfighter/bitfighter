@@ -404,9 +404,9 @@ bool LuaObject::getMenuItemVectorFromTable(lua_State *L, S32 index, const char *
 
       if(!ud)                // Weeds out simple values, wrong userdata types still pass here
       {
-         char msg[256];
+         char msg[1024];
          dSprintf(msg, sizeof(msg), "%s expected a MenuItem at position %d", methodName, menuItems.size() + 1);
-         logprintf(LogConsumer::LogError, msg);
+         //logprintf(LogConsumer::LogError, msg);     <== error should be logged by catcher, methinks
 
          throw LuaException(msg);
       }
@@ -563,7 +563,7 @@ bool LuaScriptRunner::loadScript(const string &scriptName)
    // Load the script
    if(luaL_loadfile(L, scriptName.c_str()))
    {
-      logError("Couldn't load script %s: %s -- Aborting.", scriptName.c_str(), lua_tostring(L, -1));
+      logError("Script error: %s -- Aborting.", /*scriptName.c_str(),*/ lua_tostring(L, -1));
       return false;
    }
 

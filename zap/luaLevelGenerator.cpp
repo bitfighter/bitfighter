@@ -40,7 +40,7 @@ namespace Zap
 
 // C++ Constructor
 LuaLevelGenerator::LuaLevelGenerator(const string &scriptName, const string &scriptDir, const Vector<string> &scriptArgs, F32 gridSize, 
-                                     GridDatabase *gridDatabase, LevelLoader *caller, OGLCONSOLE_Console console)
+                                     GridDatabase *gridDatabase, LevelLoader *caller)
 {
    TNLAssert(fileExists(scriptName), "Files should be checked before we get here -- something has gone wrong!");
 
@@ -48,7 +48,6 @@ LuaLevelGenerator::LuaLevelGenerator(const string &scriptName, const string &scr
    mScriptArgs = scriptArgs;
    setScriptingDir(scriptDir);
 
-   mConsole = console;
    mGridDatabase = gridDatabase;
 
    mGridSize = gridSize;
@@ -88,23 +87,23 @@ bool LuaLevelGenerator::runScript()
       }
 #endif
 
-// Run the script's getArgs() function
+// Run the script's getArgsMenu() function
 bool LuaLevelGenerator::runGetArgs(string &menuTitle, Vector<MenuItem *> &menuItems)
 {
    try
    {   
-      lua_getglobal(L, "getArgs");
+      lua_getglobal(L, "getArgsMenu");
 
       if(!lua_isfunction(L, -1) || lua_pcall(L, 0, 2, 0))     // Passing 0 params, getting 2 back
       {
-         // This should really never happen -- can only occur if robot_helper_functions is corrupted, or if bot is wildly misbehaving
-         logError("Error retrieving args from script %s: %s", mScriptName.c_str(), lua_tostring(L, -1));
+         // This should only happen if the getArgs() function is missing
+         logError("Error running getArgsMenu() -- %s", lua_tostring(L, -1));
          return false;
       }
       else
       {
-         menuTitle = getString(L, 1, "getArgs");
-         getMenuItemVectorFromTable(L, 2, "getArgs", menuItems);
+         menuTitle = getString(L, 1, "getArgsMenu");
+         getMenuItemVectorFromTable(L, 2, "getArgsMenu", menuItems);
 
          return true;
       }
@@ -140,8 +139,6 @@ LuaLevelGenerator::~LuaLevelGenerator()
 // TODO: Provide mechanism to modify basic level parameters like game length and teams.
 
 
-extern OGLCONSOLE_Console gConsole;
-
 void LuaLevelGenerator::logError(const char *format, ...)
 {
    va_list args;
@@ -150,16 +147,9 @@ void LuaLevelGenerator::logError(const char *format, ...)
 
    vsnprintf(buffer, sizeof(buffer), format, args);
 
-   logError(buffer, mScriptName.c_str());
+   logprintf(LogConsumer::LogError, "***LEVELGEN ERROR*** in %s ::: %s", mScriptName.c_str(), buffer);
 
    va_end(args);
-}
-
-
-void LuaLevelGenerator::logError(const char *msg, const char *filename)
-{
-   logprintf(LogConsumer::LogError, "***LEVELGEN ERROR*** in %s ::: %s", filename, msg);
-   OGLCONSOLE_Output(gConsole, "%s\n", msg);    // Print message to the console
 }
 
 

@@ -52,7 +52,7 @@ private:
 
 public:
    LuaLevelGenerator(const string &scriptName, const string &scriptDir, const Vector<string> &scriptArgs, F32 gridsize, GridDatabase *gridDatabase, 
-                     LevelLoader *caller, OGLCONSOLE_Console console);   // C++ constructor
+                     LevelLoader *caller);   // C++ constructor
 
    LuaLevelGenerator(lua_State *L);      // Lua constructor
    virtual ~LuaLevelGenerator();         // Destructor
@@ -66,7 +66,6 @@ public:
    bool runGetArgs(string &menuTitle, Vector<MenuItem *> &menuItems);
 
    void logError(const char *format, ...);
-   void logError(const char *msg, const char *filename);
 
    static const char className[];
 
