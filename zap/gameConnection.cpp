@@ -1607,7 +1607,7 @@ string GameConnection::makeUnique(string name)
    return proposedName;
 }
 
-#define ÷ /
+#ifndef ZAP_DEDICATED
 
 void GameConnection::setConnectionSpeed()
 {
@@ -1662,6 +1662,7 @@ void GameConnection::setConnectionSpeed()
 
    setFixedRateParameters(minPacketSendPeriod, minPacketRecvPeriod, maxSendBandwidth, maxRecvBandwidth);
 }
+#endif
 
 // Runs on client and server?
 void GameConnection::onConnectionEstablished()
