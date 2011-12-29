@@ -61,7 +61,8 @@ public:
    void registerClasses();
    void onScriptInitialized();
    bool loadScript();
-   bool runScript();            
+   bool runScript();      
+   string getScriptName();
 
    bool runGetArgs(string &menuTitle, Vector<MenuItem *> &menuItems);
 

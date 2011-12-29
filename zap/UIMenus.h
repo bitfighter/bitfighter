@@ -74,7 +74,6 @@ protected:
    virtual bool processKeys(InputCode inputCode, char ascii);
 
    void sortMenuItems();
-   S32 getMenuItemCount();
    MenuItem *getLastMenuItem();
 
 public:
@@ -86,6 +85,7 @@ public:
    void addMenuItem(MenuItem *menuItem);
    void addWrappedMenuItem(boost::shared_ptr<MenuItem> menuItem);
    MenuItem *getMenuItem(S32 index);
+   S32 getMenuItemCount();
 
    bool itemSelectedWithMouse;
 

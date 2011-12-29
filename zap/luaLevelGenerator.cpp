@@ -68,6 +68,12 @@ bool LuaLevelGenerator::runScript()
 }
 
 
+string LuaLevelGenerator::getScriptName()
+{
+   return mScriptName;
+}
+
+
 
 #ifndef ZAP_DEDICATED
       static ToggleMenuItem *getMenuItem(lua_State *L, S32 index)
