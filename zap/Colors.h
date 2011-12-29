@@ -53,6 +53,10 @@ namespace Colors
    const Color palePurple(1, .50f, 1);    // A washed out purple (pinkish?)
    const Color paleGreen(.50f, 1, .50f);  // A washed out green
    const Color richGreen(0, .35f, 0);
+
+
+   // Some special colors
+   const Color menuHelpColor(green);
 };
 
 }

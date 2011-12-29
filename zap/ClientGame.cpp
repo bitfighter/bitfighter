@@ -1363,7 +1363,7 @@ Point ClientGame::worldToScreenPoint(const Point *point) const
 
 void ClientGame::renderSuspended()
 {
-   glColor3f(1,1,0);
+   glColor(Colors::yellow);
    S32 textHeight = 20;
    S32 textGap = 5;
    S32 ypos = gScreenInfo.getGameCanvasHeight() / 2 - 3 * (textHeight + textGap);

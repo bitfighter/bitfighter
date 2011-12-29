@@ -335,6 +335,7 @@ public:
 
    // Handle input
    void onKeyDown(InputCode inputCode, char ascii);             // Handle all keyboard inputs, mouse clicks, and button presses
+   bool checkPluginKeyBindings(string inputString);             // Handle keys bound to plugins
    void textEntryKeyHandler(InputCode inputCode, char ascii);   // Handle keyboard activity when we're editing an item's attributes
    void specialAttributeKeyHandler(InputCode inputCode, char ascii);
    void startAttributeEditor();

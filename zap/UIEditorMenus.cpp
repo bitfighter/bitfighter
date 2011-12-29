@@ -78,7 +78,9 @@ void QuickMenuUI::render()
    // Draw the underlying editor screen
    getUIManager()->getPrevUI()->render();
 
-   const S32 INSTRUCTION_SIZE = getTextSize() * 6 / 10;      // Size of bottom menu item, "Save and quit"
+   // mMenuLocation.x = 1000; mMenuLocation.y = -1000;      // <== For testing menu positioning code
+
+   const S32 INSTRUCTION_SIZE = getTextSize() * 6 / 10;     // Size of smaller bottom menu item, "Save and quit"
 
    string title = getTitle();
 
@@ -154,7 +156,30 @@ void QuickMenuUI::render()
    if(selectedIndex == getMenuItemCount() - 1)
       drawMenuItemHighlight(left,  y - 1, right, y + INSTRUCTION_SIZE + 3);
 
-   getLastMenuItem()->render(cenX, y, INSTRUCTION_SIZE, selectedIndex == getMenuItemCount() - 1);
+   getLastMenuItem()->render(cenX, y, INSTRUCTION_SIZE, selectedIndex == (getMenuItemCount() - 1));
+
+   /////
+   // Render instructions just below the menu
+   glColor(Colors::menuHelpColor);
+
+   // Move instruction to top of the menu if there is not room to display it below.  I realize this code is a bit of a mess... not
+   // sure how to write it more clearly, though I'm sure it could be done.
+   S32 instrXPos, instrYPos;
+
+   // Make sure help fits on the screen left-right-wise; note that this probably breaks down if text is longer than the screen is wide
+   instrXPos = cenX;
+
+   S32 xoff = (getStringWidth(getTextSize(), getMenuItem(selectedIndex)->getHelp()) - width) / 2;  // Amount help "sticks out" beyond menu box
+   if(xoff > 0)
+      instrXPos += max(xoff - left, min(gScreenInfo.getGameCanvasWidth() - xoff - right, 0));
+
+   // Now consider vertical position
+   if(naturalBottom + vpad + getTextSize() < gScreenInfo.getGameCanvasHeight())
+      instrYPos = naturalBottom + keepingItOnScreenAdjFactorY + vpad;                           // Help goes below, in normal location
+   else
+      instrYPos = naturalTop + keepingItOnScreenAdjFactorY - getTextSize() - getGap() - vpad;   // No room below, help goes above
+
+   drawCenteredString(instrXPos, instrYPos, getTextSize(), getMenuItem(selectedIndex)->getHelp());
 }
 
 

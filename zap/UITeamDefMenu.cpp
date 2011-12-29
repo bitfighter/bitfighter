@@ -138,7 +138,7 @@ void TeamDefUserInterface::render()
    drawCenteredString(vertMargin, 30, mMenuTitle);
    drawCenteredString(vertMargin + 35, 18, mMenuSubTitle);
 
-   glColor(Colors::green);
+   glColor(Colors::menuHelpColor);
    drawCenteredString(canvasHeight - vertMargin - 115, 16, "[1] - [9] selects a team preset for current slot");
    drawCenteredString(canvasHeight - vertMargin - 92,  16, "[Enter] edits team name");
    drawCenteredString(canvasHeight - vertMargin - 69,  16, "[R] [G] [B] to change preset color (with or without [Shift])");
@@ -198,7 +198,7 @@ void TeamDefUserInterface::render()
    }
 
    // Draw the help string
-   glColor(Colors::green);
+   glColor(Colors::menuHelpColor);
 
    if(errorMsgTimer.getCurrent())
    {

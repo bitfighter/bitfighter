@@ -367,7 +367,7 @@ void MenuUserInterface::render()
 
    // Render a help string at the bottom of the menu
    const S32 helpFontSize = 15;
-   glColor(Colors::green);
+   glColor(Colors::menuHelpColor);
    S32 ypos = canvasHeight - vertMargin - 50;
 
    // Render a special instruction line (should this be a method of CounterMenuItemType?

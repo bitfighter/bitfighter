@@ -712,6 +712,7 @@ void EditorUserInterface::onPluginMenuClosed(const Vector<string> &args)
    TNLAssert(mPluginRunner, "NULL PluginRunner!");
    
    mPluginRunner->runMain(args);
+   rebuildEverything();
 }
 
 
@@ -3704,9 +3705,6 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
       changeBarrierWidth(-1);
    else if(inputString == "-")            // Unshifted --> by 5
       changeBarrierWidth(-5);
-   else if(inputString == ";")
-      runPlugin(getGame()->getSettings()->getFolderManager(), "plugin_arc.lua", Vector<string>());
-
    else if(inputString == "E")            // Zoom In
       mIn = true;
    else if(inputString == "\\")           // Split barrier on selected vertex
@@ -3778,6 +3776,40 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
       mSnapContext = NO_SNAPPING;
    else if(inputString == "Tab")             // Turn on preview mode
       mPreviewMode = true;
+   else if(checkPluginKeyBindings(inputString))
+   {
+      // Do nothing
+   }
+}
+
+
+// TODO: Move to ini file handler
+struct EditorPluginKeyBinding {
+   string key;
+   string script;
+
+   EditorPluginKeyBinding(string key, string script) { this->key = key; this->script = script; }  // Constructor
+};
+
+Vector<EditorPluginKeyBinding> pluginKeyBindings;
+
+
+
+// Returns true if key was handled, false if not
+bool EditorUserInterface::checkPluginKeyBindings(string inputString)
+{
+   // TODO: Read from INI file
+   if(pluginKeyBindings.size() == 0)
+      pluginKeyBindings.push_back(EditorPluginKeyBinding(";", "plugin_arc.lua"));
+
+   for(S32 i = 0; i < pluginKeyBindings.size(); i++)
+      if(inputString == pluginKeyBindings[i].key)
+      {
+         runPlugin(getGame()->getSettings()->getFolderManager(), "plugin_arc.lua", Vector<string>());
+         return true;
+      }
+
+   return false;
 }
 
 

@@ -203,7 +203,7 @@ void KeyDefMenuUserInterface::render()
    drawCenteredString(vertMargin, 30, mMenuTitle);
    drawCenteredString(vertMargin + 35, 18, mMenuSubTitle);
 
-   glColor(Colors::green);
+   glColor(Colors::menuHelpColor);
    drawCenteredString(vertMargin + 63, 14, "You can define different keys for keyboard or joystick mode.  Switch in Options menu.");
 
    glColor(Colors::white);
