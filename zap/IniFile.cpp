@@ -360,6 +360,7 @@ string CIniFile::GetValue(const string &section, const string &keyName, const st
 }
 
 
+// Fill valueList with values from all keys in the specified section.  Key names will be discarded.
 void CIniFile::GetAllValues(S32 const sectionId, Vector<string> &valueList)
 {
    if(GetNumEntries(sectionId) == 0)
@@ -372,6 +373,7 @@ void CIniFile::GetAllValues(S32 const sectionId, Vector<string> &valueList)
 }
 
 
+// Fill valueList with values from all keys in the specified section.  Key names will be discarded.
 void CIniFile::GetAllValues(const string &section, Vector<string> &valueList)
 {
    S32 sectionId = findSection(section);

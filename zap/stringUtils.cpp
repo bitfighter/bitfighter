@@ -219,15 +219,6 @@ string ucase(string strToConvert)
 }
 
 
-// Concatenate all strings in words into one, startingWith default to zero
-string concatenate(const Vector<string> &words, S32 startingWith)
-{
-   string concatenated = "";
-   for(S32 i = startingWith; i < words.size(); i++)
-      concatenated += (i == startingWith ? "" : " ") + words[i];
-
-   return concatenated;
-}
 
 
 // TODO: Merge this with the one following
@@ -238,30 +229,33 @@ string concatenate(const Vector<string> &words, S32 startingWith)
 // rewrite without using streams if possible
 Vector<string> parseString(const string &line)
 {
-  Vector<string> result;
+   Vector<string> result;
 
-  string          item;
-  stringstream    ss(line);
+   string          item;
+   stringstream    ss(line);
 
-  while(ss >> item){
-    if (item[0]=='"')
-    {
-      S32 lastItemPosition = (S32)item.length() - 1;
-      if (item[lastItemPosition]!='"') {
-        // read the rest of the double-quoted item
-        string restOfItem;
-        getline(ss, restOfItem, '"');
-        item += restOfItem;
+   while(ss >> item)
+   {
+      if(item[0] == '"')
+      {
+         S32 lastItemPosition = (S32)item.length() - 1;
+         if(item[lastItemPosition] != '"') 
+         {
+            // read the rest of the double-quoted item
+            string restOfItem;
+            getline(ss, restOfItem, '"');
+            item += restOfItem;
+         }
+         // otherwise, we had a single word that was quoted. In any case, we now
+         // have the item in quotes; remove them
+         item = trim(item, "\"");
       }
-      // otherwise, we had a single word that was quoted. In any case, we now
-      // have the item in quotes; remove them
-      item = trim(item, "\"");
-    }
-    // item is "fully cooked" now
-    result.push_back(item);
 
-  }
-  return result;
+      // item is "fully cooked" now
+      result.push_back(item);
+   }
+
+   return result;
 }
 
 
@@ -271,7 +265,7 @@ void parseString(const string &inputString, Vector<string> &words, char seperato
 }
 
 
-// Splits inputString into a series of words using the specified separator
+// Splits inputString into a series of words using the specified separator; does not consider quotes
 void parseString(const char *inputString, Vector<string> &words, char seperator)
 {
    char word[128];
@@ -307,7 +301,7 @@ void parseString(const char *inputString, Vector<string> &words, char seperator)
 
 
 void parseComplexStringToMap(const string &inputString, map<string, string> &fillMap,
-      const string &entryDelimiter, const string &keyValueDelimiter)
+                             const string &entryDelimiter, const string &keyValueDelimiter)
 {
    typedef tokenizer<char_separator<char> > tokenizer;
 
@@ -334,6 +328,19 @@ void parseComplexStringToMap(const string &inputString, map<string, string> &fil
 }
 
 
+// Concatenate all strings in words into one, startingWith default to zero
+// TODO: Merge with listToString below
+string concatenate(const Vector<string> &words, S32 startingWith)
+{
+   string concatenated = "";
+   for(S32 i = startingWith; i < words.size(); i++)
+      concatenated += (i == startingWith ? "" : " ") + words[i];
+
+   return concatenated;
+}
+
+
+// TODO: Merge with concatenate above
 string listToString(const Vector<string> &words, char seperator)
 {
    string str = "";

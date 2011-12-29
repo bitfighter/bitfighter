@@ -104,6 +104,7 @@ enum SettingSource {
 };
 
 
+struct PluginBinding;
 
 class GameSettings
 {
@@ -122,7 +123,7 @@ private:
    string mAdminPassword;
    string mLevelChangePassword;
 
-   Vector<string> mLevelSkipList;      // Levels we'll never load, to create a pseudo delete function for remote server mgt
+   Vector<string> mLevelSkipList;      // Levels we'll never load, to create a pseudo delete function for remote server mgt  <=== does this ever get loaded???
    FolderManager mFolderManager;
 
    BanList *mBanList;                  // Our ban list
@@ -169,6 +170,8 @@ public:
 
    string getLevelChangePassword();
    void setLevelChangePassword(const string &LevelChangePassword, bool updateINI);
+
+   const Vector<PluginBinding> *getPluginBindings();
 
    Vector<string> *getLevelSkipList();
    Vector<string> *getSpecifiedLevels();

@@ -3783,29 +3783,16 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
 }
 
 
-// TODO: Move to ini file handler
-struct EditorPluginKeyBinding {
-   string key;
-   string script;
-
-   EditorPluginKeyBinding(string key, string script) { this->key = key; this->script = script; }  // Constructor
-};
-
-Vector<EditorPluginKeyBinding> pluginKeyBindings;
-
-
-
 // Returns true if key was handled, false if not
 bool EditorUserInterface::checkPluginKeyBindings(string inputString)
 {
-   // TODO: Read from INI file
-   if(pluginKeyBindings.size() == 0)
-      pluginKeyBindings.push_back(EditorPluginKeyBinding(";", "plugin_arc.lua"));
+   GameSettings *settings = getGame()->getSettings();
+   const Vector<PluginBinding> *bindings = settings->getPluginBindings(); 
 
-   for(S32 i = 0; i < pluginKeyBindings.size(); i++)
-      if(inputString == pluginKeyBindings[i].key)
+   for(S32 i = 0; i < bindings->size(); i++)
+      if(inputString == bindings->get(i).key)
       {
-         runPlugin(getGame()->getSettings()->getFolderManager(), "plugin_arc.lua", Vector<string>());
+         runPlugin(settings->getFolderManager(), bindings->get(i).script, Vector<string>());
          return true;
       }
 
