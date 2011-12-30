@@ -230,6 +230,9 @@ Section "Install"
 
   SetOutPath "$INSTDIR\music"
   File /r "..\..\..\resource\music\*.ogg"
+  
+  SetOutPath "$INSTDIR\editor_plugins"
+  File /r "..\..\..\resource\editor_plugins\*.*"
 
   SetOutPath "$DOCUMENTS\Bitfighter\levels"
   File /r "..\..\..\resource\levels\*.level"  
@@ -288,6 +291,7 @@ Section "Uninstall"
   RMDir /r $INSTDIR\screenshots
   RMDir /r $INSTDIR\cache
   RMDir /r $INSTDIR\lua
+  RMDir /r $INSTDIR\editor_plugins
   RMDir /r $INSTDIR
   
   ; Remove the links from the start menu and desktop
