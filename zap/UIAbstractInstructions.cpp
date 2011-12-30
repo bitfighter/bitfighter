@@ -52,7 +52,7 @@ void AbstractInstructionsUserInterface::renderConsoleCommands(const char *activa
 
    const S32 instrSize = 18;
 
-   glColor3f(0,1,0);
+   glColor(Colors::green);
    drawStringf(cmdCol, ypos, instrSize, activationCommand);
    ypos += 28;
 
