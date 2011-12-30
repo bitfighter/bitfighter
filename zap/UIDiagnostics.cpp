@@ -401,18 +401,35 @@ void DiagnosticUserInterface::render()
       }
 
       // Key states
-      glColor3f(1, 1, 0);
+      glColor(Colors::yellow);
       S32 hpos = horizMargin;
-      drawString( hpos, ypos, textsize, "Keys down: ");
-      hpos += getStringWidth(textsize, "Keys down: ");
 
-      for (U32 i = 0; i < MAX_INPUT_CODES; i++)
+      hpos += drawStringAndGetWidth(hpos, ypos, textsize, "Keys down: ");
+
+      glColor(Colors::red);
+      for(U32 i = 0; i < MAX_INPUT_CODES; i++)
          if(getInputCodeState((InputCode) i))
-            hpos += drawStringAndGetWidthf( hpos, ypos, textsize - 2, "[%s]", inputCodeToString((InputCode) i) ) + 5;
+            hpos += drawStringAndGetWidthf( hpos, ypos, textsize - 2, "[%s]", inputCodeToString(InputCode(i)) ) + 5;
+
+      glColor(Colors::cyan);
+      hpos += drawStringAndGetWidth(hpos, ypos, textsize, " | ");
+
+      glColor(Colors::yellow);
+      hpos += drawStringAndGetWidth(hpos, ypos, textsize, "Input strings: ");
+
+      glColor(Colors::magenta);
+      for(U32 i = 0; i < MAX_INPUT_CODES; i++)
+         if(getInputCodeState((InputCode) i))
+         {
+            string in = makeInputString(InputCode(i));
+
+            if(in != "")
+               hpos += drawStringAndGetWidthf( hpos, ypos, textsize - 2, "[%s]", in.c_str() ) + 5;
+         }
 
       if(joystickDetected)
       {
-         glColor3f(1, 0, 1);
+         glColor(Colors::magenta);
          ypos += textsize + gap;
          hpos = horizMargin;
 

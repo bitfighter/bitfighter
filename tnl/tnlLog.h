@@ -54,7 +54,7 @@ private:
 
 public:
    enum MsgType {   
-      None                    = 0,
+      LogNone                    = 0,
 
       // Error logging
       LogFatalError           = BIT(0),      // Log fatal errors; should be left on
