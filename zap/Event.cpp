@@ -570,7 +570,7 @@ void Event::onResize(ClientGame *game, S32 width, S32 height)
    flags = SDL_OPENGL | SDL_RESIZABLE;
    SDL_SetVideoMode(newWidth, newHeight, 0, flags);
    gScreenInfo.setWindowSize(newWidth, newHeight);
-
+  
    glViewport(0, 0, gScreenInfo.getWindowWidth(), gScreenInfo.getWindowHeight());
    OGLCONSOLE_Reshape();
 

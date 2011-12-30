@@ -56,6 +56,13 @@ function Point(x, y)
 end
 
 --
+-- Make sure this function exists for plugins.  Many plugins will overwrite this.
+--
+function getArgsMenu()
+    return nil
+end    
+
+--
 -- Let the log know that this file was processed correctly
 --
-logprint("Loaded levelgen helper functions")
+-- logprint("Loaded levelgen helper functions")

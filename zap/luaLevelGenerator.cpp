@@ -93,31 +93,42 @@ string LuaLevelGenerator::getScriptName()
       }
 #endif
 
-// Run the script's getArgsMenu() function
-bool LuaLevelGenerator::runGetArgs(string &menuTitle, Vector<MenuItem *> &menuItems)
+
+// Run the script's getArgsMenu() function -- return false if function is not present or returns nil, true otherwise
+bool LuaLevelGenerator::runGetArgsMenu(string &menuTitle, Vector<MenuItem *> &menuItems, bool &error)
 {
+   error = false;
    try
    {   
       lua_getglobal(L, "getArgsMenu");
 
-      if(!lua_isfunction(L, -1) || lua_pcall(L, 0, 2, 0))     // Passing 0 params, getting 2 back
+      if(!lua_isfunction(L, -1))    // No getArgsMenu function, return false
+         return false;     
+
+      if(lua_pcall(L, 0, 2, 0))     // Passing 0 params, getting 2 back
       {
          // This should only happen if the getArgs() function is missing
          logError("Error running getArgsMenu() -- %s", lua_tostring(L, -1));
-         return false;
-      }
-      else
-      {
-         menuTitle = getString(L, 1, "getArgsMenu");
-         getMenuItemVectorFromTable(L, 2, "getArgsMenu", menuItems);
-
+         error = true;
          return true;
       }
+
+      if(lua_isnil(L, 1))     // Function returned nil, return false
+      {
+         clearStack(L);        // In case there's other junk on there
+         return false;
+      }
+
+      menuTitle = getString(L, 1, "getArgsMenu");
+      getMenuItemVectorFromTable(L, 2, "getArgsMenu", menuItems);
+
+      return true;
    }
    catch(LuaException &e)
    {
       logError("Error running %s: %s.  Aborting script.", "function getArgs()", e.what());   // Make sure we don't use the 2-string version of logError
-      return false;
+      error = true;
+      return true;
    }
 }
 

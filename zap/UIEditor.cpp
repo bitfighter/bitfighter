@@ -660,8 +660,9 @@ string EditorUserInterface::getPluginKey()
 {
    string key = mPluginRunner->getScriptName();
 
-   for(S32  i = 0; i < mPluginMenu->getMenuItemCount(); i++)
-      key += itos(mPluginMenu->getMenuItem(i)->getItemType()) + "-";
+   if(mPluginMenu)
+      for(S32 i = 0; i < mPluginMenu->getMenuItemCount(); i++)
+         key += itos(mPluginMenu->getMenuItem(i)->getItemType()) + "-";
 
    return key;
 }
@@ -677,7 +678,7 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
       return;
    }
 
-   // For the moment, we can treat plugins as levelgens that have a getArgs() function
+   // For the moment, we can treat plugins as levelgens that have a getArgsMenu() function
    LuaLevelGenerator *levelGen = new LuaLevelGenerator(fullName, folderManager->luaDir, args, getGame()->getGridSize(), 
                                                        mLoadTarget, getGame());
 
@@ -691,8 +692,15 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
 
    string title;
    Vector<MenuItem *> menuItems;
+   bool error;
 
-   if(!levelGen->runGetArgs(title, menuItems))     // Fills menuItems
+   if(!levelGen->runGetArgsMenu(title, menuItems, error))     // Fills menuItems, sets error
+   {
+      onPluginMenuClosed(Vector<string>());        // No menu items?  Let's run the script directly!
+      return;     
+   }
+
+   if(error)
    {
       showPluginError(getGame());
       return;

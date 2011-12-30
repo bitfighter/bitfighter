@@ -64,7 +64,7 @@ public:
    bool runScript();      
    string getScriptName();
 
-   bool runGetArgs(string &menuTitle, Vector<MenuItem *> &menuItems);
+   bool runGetArgsMenu(string &menuTitle, Vector<MenuItem *> &menuItems, bool &error);
 
    void logError(const char *format, ...);
 
