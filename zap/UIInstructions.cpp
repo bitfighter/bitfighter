@@ -83,23 +83,20 @@ static const S32 FIRST_COMMAND_PAGE = 8;
 static ControlStringsEditor consoleCommands1[] = {
    { "add <a> <b>", "Print a + b -- test command" },
    { "exit, quit", "Close the console" },
-   { NULL, NULL },      // End of list
+   { "", "" },      // End of list
 };
 
 
 void InstructionsUserInterface::render()
 {
-   glColor3f(1,0,0);
+   glColor(Colors::red);
    drawStringf(3, 3, 25, "INSTRUCTIONS - %s", pageHeaders[mCurPage - 1]);
    drawStringf(625, 3, 25, "PAGE %d/%d", mCurPage, NUM_PAGES);
    drawCenteredString(571, 20, "LEFT - previous page  RIGHT, SPACE - next page  ESC exits");
-   glColor3f(0.7f, 0.7f, 0.7f);
-   glBegin(GL_LINES);
-      glVertex2f(0, 31);
-      glVertex2f(800, 31);
-      glVertex2f(0, 569);
-      glVertex2f(800, 569);
-   glEnd();
+
+   glColor(0.7f);
+   drawHorizLine(0, 800, 31);
+   drawHorizLine(0, 800, 569);
 
    switch(mCurPage)
    {

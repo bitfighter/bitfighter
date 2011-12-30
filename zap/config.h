@@ -135,6 +135,21 @@ struct CmdLineSettings
 };
 
 
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Keep track of which keys editor plugins have been bound to
+struct PluginBinding
+{
+   string key;          // Key user presses
+   string script;       // Plugin script that gets run
+   string help;         // To be shown in help
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 struct IniSettings      // With defaults specified
 {
    IniSettings();       // Constructor
@@ -201,6 +216,9 @@ struct IniSettings      // With defaults specified
    S32 voteNothingStrength;
 
    bool useUpdater;                 // Use updater system (windows only)
+
+
+   Vector<PluginBinding> pluginBindings;  // Keybindings for the editor plugins
 
    // Game window location when in windowed mode
    S32 winXPos;

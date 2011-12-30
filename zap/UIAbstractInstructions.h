@@ -35,16 +35,20 @@ namespace Zap {
 
 struct ControlStringsEditor
 {
-   const char *command;
-   const char *descr;
+   string command;
+   string descr;
 };
+
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 class AbstractInstructionsUserInterface : public UserInterface
 {
    typedef UserInterface Parent;
 
 protected:
-   void renderConsoleCommands(const char *activationInstruction, ControlStringsEditor cmdList[]);
+   void renderConsoleCommands(const char *activationInstruction, const ControlStringsEditor *cmdList);
 
 public:
    AbstractInstructionsUserInterface(ClientGame *clientGame);      // Constructor

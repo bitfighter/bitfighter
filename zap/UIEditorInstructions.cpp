@@ -96,8 +96,8 @@ void EditorInstructionsUserInterface::onActivate()
    sample5o.push_back(Point(5, 50));
 
    // Border between 3 and 4
-   border34.borderStart.set(0,-50);
-   border34.borderEnd.set(0,50);
+   border34.borderStart.set(0, -50);
+   border34.borderEnd.set(0, 50);
 
    Triangulate::Process(sample1o, sample1f);
    Triangulate::Process(sample2o, sample2f);
@@ -106,40 +106,41 @@ void EditorInstructionsUserInterface::onActivate()
    Triangulate::Process(sample5o, sample5f);
 }
 
-static const U32 NUM_PAGES = 4;
-
 
 const char *pageHeadersEditor[] = {
    "BASIC COMMANDS",
    "ADVANCED COMMANDS",
    "WALLS AND LINES",
-   "SCRIPTING CONSOLE"
+   "SCRIPTING CONSOLE",
+   "PLUGINS"
 };
 
 
-static ControlStringsEditor consoleCommands1[] = {
+static ControlStringsEditor consoleCommands[] = {
    { "add <a> <b>", "Print a + b -- test command" },
    { "run", "Run the current levelgen" },
    { "clear", "Clear results of the levelgen" },
    { "exit, quit", "Close the console" },
-   { NULL, NULL },      // End of list
+   { "", "" },      // End of list
 };
+
+
+S32 EditorInstructionsUserInterface::getPageCount()
+{
+   return 4 + (getGame()->getSettings()->getPluginBindings()->size() > 0 ? 1 : 0);
+}
 
 
 void EditorInstructionsUserInterface::render()
 {
-   glColor3f(1,1,1);
+   glColor(Colors::white);
    drawStringf(3, 3, 25, "INSTRUCTIONS - %s", pageHeadersEditor[mCurPage - 1]);
-   drawStringf(650, 3, 25, "PAGE %d/%d", mCurPage, NUM_PAGES);
+   drawStringf(650, 3, 25, "PAGE %d/%d", mCurPage, getPageCount());
    drawCenteredString(571, 20, "LEFT - previous page  RIGHT, SPACE - next page  ESC exits");
-   glColor3f(0.7f, 0.7f, 0.7f);
+   glColor(0.7f);
 
-   glBegin(GL_LINES);
-      glVertex2f(0, 31);
-      glVertex2f(800, 31);
-      glVertex2f(0, 569);
-      glVertex2f(800, 569);
-   glEnd();
+   drawHorizLine(0, 800, 31);
+   drawHorizLine(0, 800, 569);
 
    switch(mCurPage)
    {
@@ -153,9 +154,38 @@ void EditorInstructionsUserInterface::render()
          renderPageWalls();
          break;
       case 4:
-         renderConsoleCommands("Open the console by pressing [/]", consoleCommands1);
+         renderConsoleCommands("Open the console by pressing [/]", consoleCommands);
+         break;
+      case 5:
+         renderPluginCommands();
          break;
    }
+}
+
+
+void EditorInstructionsUserInterface::renderPluginCommands()
+{
+   const Vector<PluginBinding> *plugins = getGame()->getSettings()->getPluginBindings();
+
+   Vector<ControlStringsEditor> ctrls;
+   ctrls.resize(plugins->size() + 1);
+
+   ControlStringsEditor ctrl;    // Reusable container
+
+   for(S32 i = 0; i < plugins->size(); i++)
+   {
+      ctrl.command = plugins->get(i).key;
+      ctrl.descr   = plugins->get(i).help;
+
+      ctrls[i] = ctrl;
+   }
+
+   ctrl.command = "";
+   ctrl.descr = "";
+
+   ctrls[plugins->size()] = ctrl;
+
+   renderConsoleCommands("Blah blah", ctrls.address());
 }
 
 
@@ -168,14 +198,14 @@ static ControlStringsEditor gControls1[] = {
          { "Zoom Out", "C or Ctrl-Dwn" },
          { "Center Display", "Z" },
          { "Toggle Script Results", "Ctrl-R" },
-         { "Insert Results Into Editor", "Ctrl-I" },
-      { "-", NULL },       // Horiz. line
+         { "Copy Results Into Editor", "Ctrl-I" },
+      { "-", "" },         // Horiz. line
    { "Editing", "HEADER" },
          { "Cut/Copy/Paste", "Ctrl-X/C/V"},
          { "Delete Selection", "Del" },
          { "Undo", "Ctrl-Z" },
          { "Redo", "Ctrl-Shift-Z" },
-         { NULL, NULL },      // End of col1
+         { "", "" },       // End of col1
    { "Object Shortcuts", "HEADER" },
          { "Insert Teleport", "T" },
          { "Insert Spawn Point", "G" },
@@ -183,15 +213,15 @@ static ControlStringsEditor gControls1[] = {
          { "Insert Turret", "Y" },
          { "Insert Force Field", "F" },
          { "Insert Mine", "M" },
-      { "-", NULL },       // Horiz. line
+      { "-", "" },         // Horiz. line
    { "Assigning Teams", "HEADER" },
          { "Set object's team", "1-9" },
          { "Set object to neutral", "0" },
          { "Set object to hostile", "Shift-0" },
-      { "-", NULL },       // Horiz. line
+      { "-", "" },         // Horiz. line
          { "Save", "Ctrl-S" },
          { "Reload from file", "Ctrl-Shift-L" },
-         { NULL, NULL },      // End of col2
+         { "", "" },       // End of col2
       };
 
 
@@ -203,12 +233,12 @@ static ControlStringsEditor gControls2[] = {
          { "Arbitrary rotate", "Ctrl-Shift-R" },
          { "Scale selection", "Ctrl-Shift-X" },
 
-         { "-", NULL },       // Horiz. line
+         { "-", "" },      // Horiz. line
          { "Hold [Space] to suspend snapping", "" },
          { "Hold [Tab] to view a reference ship", "" },
-         { NULL, NULL },      // End of col1
+         { "", "" },       // End of col1
 
-         { NULL, NULL },      // End of col2
+         { "", "" },       // End of col2
    };
 
 
@@ -220,7 +250,7 @@ void EditorInstructionsUserInterface::renderPageCommands(S32 page)
    S32 starty = 50;
    S32 y;
    S32 col1 = horizMargin;
-   S32 col2 = horizMargin + S32(gScreenInfo.getGameCanvasWidth() * 0.25) + 45;     // +45 to make a little more room for Action column
+   S32 col2 = horizMargin + S32(gScreenInfo.getGameCanvasWidth() * 0.25) + 45;     // + 45 to make a little more room for Action column
    S32 col3 = horizMargin + S32(gScreenInfo.getGameCanvasWidth() * 0.5);
    S32 col4 = horizMargin + S32(gScreenInfo.getGameCanvasWidth() * 0.75) + 45;
    S32 actCol = col1;      // Action column
@@ -228,10 +258,7 @@ void EditorInstructionsUserInterface::renderPageCommands(S32 page)
    bool firstCol = true;
    bool done = false;
 
-   glBegin(GL_LINES);
-      glVertex2i(col1, starty + 26);
-      glVertex2i(750, starty + 26);
-   glEnd();
+   drawHorizLine(col1, 750, starty + 26);
 
    static const Color txtColor = Colors::cyan;
    static const Color keyColor = Colors::white;
@@ -247,7 +274,7 @@ void EditorInstructionsUserInterface::renderPageCommands(S32 page)
    y = starty + 28;
    for(S32 i = 0; !done; i++)
    {
-      if(!controls[i].command)
+      if(controls[i].command == "")
       {
          if(!firstCol)
             done = true;
@@ -261,25 +288,22 @@ void EditorInstructionsUserInterface::renderPageCommands(S32 page)
             glColor(secColor);
          }
       }
-      else if(!strcmp(controls[i].command, "-"))      // Horiz spacer
+      else if(controls[i].command == "-")      // Horiz spacer
       {
-         glColor3f(0.4f, 0.4f, 0.4f);
-         glBegin(GL_LINES);
-            glVertex2i(actCol, y + 13);
-            glVertex2i(actCol + 335, y + 13);
-         glEnd();
+         glColor(0.4f);
+         drawHorizLine(actCol, actCol + 335, y + 13);
       }
-      else if(!strcmp(controls[i].descr, "HEADER"))
+      else if(controls[i].descr == "HEADER")
       {
          glColor(groupHeaderColor);
-         drawString(actCol, y, 18, controls[i].command);
+         drawString(actCol, y, 18, controls[i].command.c_str());
       }
       else
       {
          glColor(txtColor);
-         drawString(actCol, y, 18, controls[i].command);      // Textual description of function (1st arg in lists above)
+         drawString(actCol, y, 18, controls[i].command.c_str());      // Textual description of function (1st arg in lists above)
          glColor(keyColor);
-         drawString(contCol, y, 18, controls[i].descr);
+         drawString(contCol, y, 18, controls[i].descr.c_str());
       }
       y += 26;
    }
@@ -287,7 +311,8 @@ void EditorInstructionsUserInterface::renderPageCommands(S32 page)
    y = 470;
    glColor(secColor);
    drawCenteredString(y, 20, "These special keys are also usually active:");
-   y+=40;
+
+   y += 40;
    glColor(txtColor);
    drawString(col1, y, 18, "Help");
    glColor(keyColor);
@@ -298,7 +323,7 @@ void EditorInstructionsUserInterface::renderPageCommands(S32 page)
    glColor(keyColor);
    drawStringf(col4, y, 18, "[%s]", inputCodeToString(KEY_F3));
 
-   y+=26;
+   y += 26;
    glColor(txtColor);
    drawString(col1, y, 18, "Team Editor");
    glColor(keyColor);
@@ -418,10 +443,10 @@ void EditorInstructionsUserInterface::renderPageWalls()
          done = true;
       else
       {
-         glColor3f(1,0,0);  // red
+         glColor(Colors::red);  
          drawString(50, y, textSize, "*");
 
-         glColor3f(1,1,1);  // white
+         glColor(Colors::white); 
          drawString(x, y, textSize, wallInstructions[i]);
          y += 26;
       }
@@ -432,7 +457,7 @@ void EditorInstructionsUserInterface::renderPageWalls()
 void EditorInstructionsUserInterface::nextPage()
 {
    mCurPage++;
-   if(mCurPage > NUM_PAGES)
+   if(mCurPage > getPageCount())
       mCurPage = 1;
 
    mAnimTimer.reset(1000);
@@ -445,7 +470,7 @@ void EditorInstructionsUserInterface::prevPage()
    if(mCurPage > 1)
       mCurPage--;
    else
-      mCurPage = NUM_PAGES;
+      mCurPage = getPageCount();
 
    mAnimTimer.reset(1000);
    mAnimStage = 0;

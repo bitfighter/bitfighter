@@ -120,7 +120,7 @@ std::string makeInputString(InputCode inputCode)
 {
    for(S32 i = 0; i < S32(ARRAYSIZE(modifiers)); i++)
       if(inputCode == modifiers[i])
-         return inputCodeToString(inputCode);
+         return "";
 
    std::string inputString = "";
    std::string joiner = "+";

@@ -33,6 +33,8 @@
 namespace Zap
 {
 
+extern void drawHorizLine(S32 x1, S32 x2, S32 y);
+
 
 // Constructor
 AbstractInstructionsUserInterface::AbstractInstructionsUserInterface(ClientGame *clientGame) : Parent(clientGame)
@@ -41,7 +43,7 @@ AbstractInstructionsUserInterface::AbstractInstructionsUserInterface(ClientGame 
 }
 
 
-void AbstractInstructionsUserInterface::renderConsoleCommands(const char *activationCommand, ControlStringsEditor *cmdList)
+void AbstractInstructionsUserInterface::renderConsoleCommands(const char *activationCommand, const ControlStringsEditor *cmdList)
 {
    S32 ypos = 50;
 
@@ -66,31 +68,25 @@ void AbstractInstructionsUserInterface::renderConsoleCommands(const char *activa
    drawString(cmdCol, ypos, headerSize, "Command");
    drawString(descrCol, ypos, headerSize, "Description");
 
-   //glColor3f(0,1,0);
    ypos += cmdSize + cmdGap;
-   glBegin(GL_LINES);
-      glVertex(cmdCol, ypos);
-      glVertex(750, ypos);
-   glEnd();
+   drawHorizLine(cmdCol, 750, ypos);
 
    ypos += 5;     // Small gap before cmds start
 
-   for(S32 i = 0; cmdList[i].command; i++)
+   for(S32 i = 0; cmdList[i].command != ""; i++)
    {
       if(cmdList[i].command[0] == '-')      // Horiz spacer
       {
-         glColor(0.4, 0.4, 0.4);
-         glBegin(GL_LINES);
-            glVertex(cmdCol, ypos + (cmdSize + cmdGap) / 4);
-            glVertex(cmdCol + 335, ypos + (cmdSize + cmdGap) / 4);
-         glEnd();
+         glColor(0.4);
+         drawHorizLine(cmdCol, cmdCol + 335, ypos + (cmdSize + cmdGap) / 4);
       }
       else
       {
          glColor(cmdColor);
-         drawString(cmdCol, ypos, cmdSize, cmdList[i].command);      // Textual description of function (1st arg in lists above)
+         drawString(cmdCol, ypos, cmdSize, cmdList[i].command.c_str());      // Textual description of function (1st arg in lists above)
+
          glColor(descrColor);
-         drawString(descrCol, ypos, cmdSize, cmdList[i].descr);
+         drawString(descrCol, ypos, cmdSize, cmdList[i].descr.c_str());
       }
       ypos += cmdSize + cmdGap;
    }

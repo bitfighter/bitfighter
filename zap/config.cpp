@@ -199,7 +199,7 @@ static void loadForeignServerInfo(CIniFile *ini, IniSettings *iniSettings)
 }
 
 
-// Does this macro def make it easier to read the code?
+// Use macro to make code more readable
 #define addComment(comment) ini->sectionComment(section, comment);
 
 extern S32 LOADOUT_PRESETS;
@@ -211,7 +211,7 @@ static void writeLoadoutPresets(CIniFile *ini, GameSettings *settings)
    ini->addSection(section);      // Create the key, then provide some comments for documentation purposes
 
 
-   if(ini->numSectionComments("LoadoutPresets") == 0)
+   if(ini->numSectionComments(section) == 0)
    {
       addComment("----------------");
       addComment(" Loadout presets are stored here.  You can manage these manually if you like, but it is usually easier");
@@ -231,37 +231,67 @@ static void writeLoadoutPresets(CIniFile *ini, GameSettings *settings)
       string presetStr = Ship::loadoutToString(preset);
 
       if(presetStr != "")
-         ini->SetValue("LoadoutPresets", "Preset" + itos(i + 1), presetStr);
+         ini->SetValue(section, "Preset" + itos(i + 1), presetStr);
+   }
+}
+
+
+static void writePluginBindings(CIniFile *ini)
+{
+   const char *section = "EditorPlugins";
+
+   ini->addSection(section);             
+
+   if(ini->numSectionComments(section) == 0)
+   {
+      addComment("----------------");
+      addComment(" Editor plugins are lua scripts that can add extra functionality to the editor.  You can specify");
+      addComment(" here using the following format:");
+      addComment(" Plugin1=Key1 ScriptName.lua Script help string");
+      addComment(" ... etc ...");
+      addComment(" The names of the presets are not important, and can be changed. Key combos follow the general form of");
+      addComment(" Ctrl+Alt+Shift+Meta+Super+key (omit unneeded modifiers, you can get correct Input Strings from the ");
+      addComment(" diagnostics screen).  Scripts should be stored in the plugins folder  in the install directory. Please")
+      addComment(" see the Bitfighter wiki for details.");
+      addComment("----------------");
    }
 }
 
 
 static void writeConnectionsInfo(CIniFile *ini, IniSettings *iniSettings)
 {
-   if(ini->numSectionComments("Connections") == 0)
+   const char *section = "Connections";
+   
+   ini->addSection(section);
+
+   if(ini->numSectionComments(section) == 0)
    {
-      ini->sectionComment("Connections", "----------------");
-      ini->sectionComment("Connections", " AlwaysPingList - Always try to contact these servers (comma separated list); Format: IP:IPAddress:Port");
-      ini->sectionComment("Connections", "                  Include 'IP:Broadcast:28000' to search LAN for local servers on default port");
-      ini->sectionComment("Connections", "----------------");
+      addComment("----------------");
+      addComment(" AlwaysPingList - Always try to contact these servers (comma separated list); Format: IP:IPAddress:Port");
+      addComment("                  Include 'IP:Broadcast:28000' to search LAN for local servers on default port");
+      addComment("----------------");
    }
 
    // Creates comma delimited list
-   ini->SetValue("Connections", "AlwaysPingList", listToString(iniSettings->alwaysPingList, ','));
+   ini->SetValue(section, "AlwaysPingList", listToString(iniSettings->alwaysPingList, ','));
 }
 
 
 static void writeForeignServerInfo(CIniFile *ini, IniSettings *iniSettings)
 {
-   if(ini->numSectionComments("RecentForeignServers") == 0)
+   const char *section = "RecentForeignServers";
+
+   ini->addSection(section);
+
+   if(ini->numSectionComments(section) == 0)
    {
-      ini->sectionComment("RecentForeignServers", "----------------");
-      ini->sectionComment("RecentForeignServers", " This section contains a list of the most recent servers seen; used as a fallback if we can't reach the master");
-      ini->sectionComment("RecentForeignServers", " Please be aware that this section will be automatically regenerated, and any changes you make will be overwritten");
-      ini->sectionComment("RecentForeignServers", "----------------");
+      addComment("----------------");
+      addComment(" This section contains a list of the most recent servers seen; used as a fallback if we can't reach the master");
+      addComment(" Please be aware that this section will be automatically regenerated, and any changes you make will be overwritten");
+      addComment("----------------");
    }
 
-   ini->SetAllValues("RecentForeignServers", "Server", iniSettings->prevServerListFromMaster);
+   ini->SetAllValues(section, "Server", iniSettings->prevServerListFromMaster);
 }
 
 
@@ -434,6 +464,34 @@ static void loadLoadoutPresets(CIniFile *ini, GameSettings *settings)
 }
 
 
+static void loadPluginBindings(CIniFile *ini, IniSettings *iniSettings)
+{
+   Vector<string> values;
+   Vector<string> words;      // Reusable container
+
+   ini->GetAllValues("EditorPlugins", values);
+
+   // Parse the retrieved strings.  They'll be in the form "Key Script Help"
+   for(S32 i = 0; i < values.size(); i++)
+   {
+      words = parseString(trim(values[i]));
+
+      if(words.size() < 3)
+      {
+         logprintf(LogConsumer::LogError, "Error parsing EditorPlugin defnition in INI: too few values (read: %s)", values[i].c_str());
+         continue;
+      }
+      
+      PluginBinding binding;
+      binding.key = words[0];
+      binding.script = words[1];
+      binding.help = concatenate(words, 2);
+
+      iniSettings->pluginBindings.push_back(binding);
+   }
+}
+
+
 static void loadEffectsSettings(CIniFile *ini, IniSettings *iniSettings)
 {
    iniSettings->starsInDistance  = (lcase(ini->GetValue("Effects", "StarsInDistance", (iniSettings->starsInDistance ? "Yes" : "No"))) == "yes");
@@ -468,48 +526,52 @@ static void loadSoundSettings(CIniFile *ini, IniSettings *iniSettings)
    iniSettings->voiceChatVolLevel = checkVol(iniSettings->voiceChatVolLevel);
 }
 
+
 static void loadHostConfiguration(CIniFile *ini, IniSettings *iniSettings)
 {
-   iniSettings->hostname  = ini->GetValue("Host", "ServerName", iniSettings->hostname);
-   iniSettings->hostaddr  = ini->GetValue("Host", "ServerAddress", iniSettings->hostaddr);
-   iniSettings->hostdescr = ini->GetValue("Host", "ServerDescription", iniSettings->hostdescr);
+   const char *section = "Host";
 
-   iniSettings->serverPassword      = ini->GetValue("Host", "ServerPassword", iniSettings->serverPassword);
-   iniSettings->adminPassword       = ini->GetValue("Host", "AdminPassword", iniSettings->adminPassword);
-   iniSettings->levelChangePassword = ini->GetValue("Host", "LevelChangePassword", iniSettings->levelChangePassword);
-   iniSettings->levelDir            = ini->GetValue("Host", "LevelDir", iniSettings->levelDir);
-   iniSettings->maxPlayers          = ini->GetValueI("Host", "MaxPlayers", iniSettings->maxPlayers);
-   iniSettings->maxBots             = ini->GetValueI("Host", "MaxBots", iniSettings->maxBots);
+   iniSettings->hostname  = ini->GetValue(section, "ServerName", iniSettings->hostname);
+   iniSettings->hostaddr  = ini->GetValue(section, "ServerAddress", iniSettings->hostaddr);
+   iniSettings->hostdescr = ini->GetValue(section, "ServerDescription", iniSettings->hostdescr);
 
-   iniSettings->alertsVolLevel = (float) ini->GetValueI("Host", "AlertsVolume", (S32) (iniSettings->alertsVolLevel * 10)) / 10.0f;
-   iniSettings->allowGetMap          = ini->GetValueYN("Host", "AllowGetMap", iniSettings->allowGetMap);
-   iniSettings->allowDataConnections = ini->GetValueYN("Host", "AllowDataConnections", iniSettings->allowDataConnections);
+   iniSettings->serverPassword      = ini->GetValue (section, "ServerPassword", iniSettings->serverPassword);
+   iniSettings->adminPassword       = ini->GetValue (section, "AdminPassword", iniSettings->adminPassword);
+   iniSettings->levelChangePassword = ini->GetValue (section, "LevelChangePassword", iniSettings->levelChangePassword);
+   iniSettings->levelDir            = ini->GetValue (section, "LevelDir", iniSettings->levelDir);
+   iniSettings->maxPlayers          = ini->GetValueI(section, "MaxPlayers", iniSettings->maxPlayers);
+   iniSettings->maxBots             = ini->GetValueI(section, "MaxBots", iniSettings->maxBots);
 
-   S32 fps = ini->GetValueI("Host", "MaxFPS", iniSettings->maxDedicatedFPS);
+   iniSettings->alertsVolLevel = (float) ini->GetValueI(section, "AlertsVolume", (S32) (iniSettings->alertsVolLevel * 10)) / 10.0f;
+   iniSettings->allowGetMap          = ini->GetValueYN (section, "AllowGetMap", iniSettings->allowGetMap);
+   iniSettings->allowDataConnections = ini->GetValueYN (section, "AllowDataConnections", iniSettings->allowDataConnections);
+
+   S32 fps = ini->GetValueI(section, "MaxFPS", iniSettings->maxDedicatedFPS);
    if(fps >= 1) 
       iniSettings->maxDedicatedFPS = fps; 
    // TODO: else warn?
 
-   iniSettings->logStats = ini->GetValueYN("Host", "LogStats", iniSettings->logStats);
+   iniSettings->logStats = ini->GetValueYN(section, "LogStats", iniSettings->logStats);
 
-   //iniSettings->SendStatsToMaster = (lcase(ini->GetValue("Host", "SendStatsToMaster", "yes")) != "no");
+   //iniSettings->SendStatsToMaster = (lcase(ini->GetValue(section, "SendStatsToMaster", "yes")) != "no");
 
    iniSettings->alertsVolLevel = checkVol(iniSettings->alertsVolLevel);
 
-   iniSettings->allowMapUpload         = (U32) ini->GetValueYN("Host", "AllowMapUpload", S32(iniSettings->allowMapUpload) );
-   iniSettings->allowAdminMapUpload    = (U32) ini->GetValueYN("Host", "AllowAdminMapUpload", S32(iniSettings->allowAdminMapUpload) );
+   iniSettings->allowMapUpload         = (U32) ini->GetValueYN(section, "AllowMapUpload", S32(iniSettings->allowMapUpload) );
+   iniSettings->allowAdminMapUpload    = (U32) ini->GetValueYN(section, "AllowAdminMapUpload", S32(iniSettings->allowAdminMapUpload) );
 
-   iniSettings->voteEnable             = (U32) ini->GetValueYN("Host", "VoteEnable", S32(iniSettings->voteEnable) );
-   iniSettings->voteLength             = (U32) ini->GetValueI("Host", "VoteLength", S32(iniSettings->voteLength) );
-   iniSettings->voteLengthToChangeTeam = (U32) ini->GetValueI("Host", "VoteLengthToChangeTeam", S32(iniSettings->voteLengthToChangeTeam) );
-   iniSettings->voteRetryLength        = (U32) ini->GetValueI("Host", "VoteRetryLength", S32(iniSettings->voteRetryLength) );
-   iniSettings->voteYesStrength        = ini->GetValueI("Host", "VoteYesStrength", iniSettings->voteYesStrength );
-   iniSettings->voteNoStrength         = ini->GetValueI("Host", "VoteNoStrength", iniSettings->voteNoStrength );
-   iniSettings->voteNothingStrength    = ini->GetValueI("Host", "VoteNothingStrength", iniSettings->voteNothingStrength );
+   iniSettings->voteEnable             = (U32) ini->GetValueYN(section, "VoteEnable", S32(iniSettings->voteEnable) );
+   iniSettings->voteLength             = (U32) ini->GetValueI (section, "VoteLength", S32(iniSettings->voteLength) );
+   iniSettings->voteLengthToChangeTeam = (U32) ini->GetValueI (section, "VoteLengthToChangeTeam", S32(iniSettings->voteLengthToChangeTeam) );
+   iniSettings->voteRetryLength        = (U32) ini->GetValueI (section, "VoteRetryLength", S32(iniSettings->voteRetryLength) );
+
+   iniSettings->voteYesStrength        = ini->GetValueI(section, "VoteYesStrength", iniSettings->voteYesStrength );
+   iniSettings->voteNoStrength         = ini->GetValueI(section, "VoteNoStrength", iniSettings->voteNoStrength );
+   iniSettings->voteNothingStrength    = ini->GetValueI(section, "VoteNothingStrength", iniSettings->voteNothingStrength );
 
 #ifdef BF_WRITE_TO_MYSQL
    Vector<string> args;
-   parseString(ini->GetValue("Host", "MySqlStatsDatabaseCredentials"), args, ',');
+   parseString(ini->GetValue(section, "MySqlStatsDatabaseCredentials"), args, ',');
    if(args.size() >= 1) iniSettings->mySqlStatsDatabaseServer = args[0];
    if(args.size() >= 2) iniSettings->mySqlStatsDatabaseName = args[1];
    if(args.size() >= 3) iniSettings->mySqlStatsDatabaseUser = args[2];
@@ -520,8 +582,8 @@ static void loadHostConfiguration(CIniFile *ini, IniSettings *iniSettings)
    }
 #endif
 
-   iniSettings->defaultRobotScript = ini->GetValue("Host", "DefaultRobotScript", iniSettings->defaultRobotScript);
-   iniSettings->globalLevelScript  = ini->GetValue("Host", "GlobalLevelScript", iniSettings->globalLevelScript);
+   iniSettings->defaultRobotScript = ini->GetValue(section, "DefaultRobotScript", iniSettings->defaultRobotScript);
+   iniSettings->globalLevelScript  = ini->GetValue(section, "GlobalLevelScript", iniSettings->globalLevelScript);
 }
 
 
@@ -1268,6 +1330,7 @@ void loadSettingsFromINI(CIniFile *ini, GameSettings *settings)
    loadEffectsSettings(ini, iniSettings);
    loadGeneralSettings(ini, iniSettings);
    loadLoadoutPresets(ini, settings);
+   loadPluginBindings(ini, iniSettings);
 
    loadHostConfiguration(ini, iniSettings);
    loadUpdaterSettings(ini, iniSettings);
@@ -1656,6 +1719,7 @@ void saveSettingsToINI(CIniFile *ini, GameSettings *settings)
    writeHost(ini, iniSettings);
    writeForeignServerInfo(ini, iniSettings);
    writeLoadoutPresets(ini, settings);
+   writePluginBindings(ini);
    writeConnectionsInfo(ini, iniSettings);
    writeEffects(ini, iniSettings);
    writeSounds(ini, iniSettings);

@@ -499,6 +499,13 @@ Vector<string> *GameSettings::getLevelSkipList()
 }
 
 
+// Passthrough
+const Vector<PluginBinding> *GameSettings::getPluginBindings()
+{
+   return &mIniSettings.pluginBindings;
+}
+
+
 Vector<string> *GameSettings::getSpecifiedLevels()
 {
    return &mCmdLineParams[CmdLineParams::LEVEL_LIST];

@@ -38,7 +38,7 @@ class EditorInstructionsUserInterface : public AbstractInstructionsUserInterface
    typedef AbstractInstructionsUserInterface Parent;
 
 private:
-   U32 mCurPage;
+   S32 mCurPage;
    Timer mAnimTimer;
    S32 mAnimStage;
    WallSegmentManager mWallSegmentManager;
@@ -48,6 +48,9 @@ public:
    void render();
    void renderPageCommands(S32 page);
    void renderPageWalls();
+   void renderPluginCommands();   
+
+   S32 getPageCount();
  
 
    void onKeyDown(InputCode inputCode, char ascii);
