@@ -607,7 +607,6 @@ bool LuaScriptRunner::runMain(const Vector<string> &args)
 {
    setLuaArgs(args);    // TODO: Do we still need this here with Sam's addition of setLuaArgs in runChunk()???  -- might need it for plugins -CE
                         // Adds script name to 0th argument
-
    try
    {   
       lua_getglobal(L, "_main");
@@ -620,16 +619,8 @@ bool LuaScriptRunner::runMain(const Vector<string> &args)
 
    try
    {
-      //if(lua_isfunction(L, lua_gettop(L)))
-      {
-         if(lua_pcall(L, 0, 0, 0) != 0)
-            throw LuaException(lua_tostring(L, -1));
-      }
-      //else     // Function main doesn't exist
-      //{
-      //   logError("Function main() could not be found!  Aborting script.");
-      //   return false;
-      //}
+      if(lua_pcall(L, 0, 0, 0) != 0)
+         throw LuaException(lua_tostring(L, -1));
    }
    catch(LuaException &e)
    {
