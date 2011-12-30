@@ -737,6 +737,8 @@ void EditorUserInterface::onPluginMenuClosed(const Vector<string> &args)
 {
    TNLAssert(mPluginRunner, "NULL PluginRunner!");
    
+   saveUndoState();
+
    // Save menu values for next time -- using a key that includes both the script name and the type of menu items
    // provides some protection against the script being changed while Bitfighter is running.  Probably not realy
    // necessary, but we can afford it here.
