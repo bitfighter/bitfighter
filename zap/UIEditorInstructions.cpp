@@ -185,7 +185,7 @@ void EditorInstructionsUserInterface::renderPluginCommands()
 
    ctrls[plugins->size()] = ctrl;
 
-   renderConsoleCommands("Blah blah", ctrls.address());
+   renderConsoleCommands("See wiki for info on creating plugins", ctrls.address());
 }
 
 

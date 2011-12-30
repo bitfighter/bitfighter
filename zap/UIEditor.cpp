@@ -655,6 +655,18 @@ static void showPluginError(const ClientGame *game)
 }
 
 
+// Try to create some sort of uniqeish signature for the plugin
+string EditorUserInterface::getPluginKey()
+{
+   string key = mPluginRunner->getScriptName();
+
+   for(S32  i = 0; i < mPluginMenu->getMenuItemCount(); i++)
+      key += itos(mPluginMenu->getMenuItem(i)->getItemType()) + "-";
+
+   return key;
+}
+
+
 void EditorUserInterface::runPlugin(const FolderManager *folderManager, const string &scriptName, const Vector<string> &args)
 {
    string fullName = folderManager->findLevelGenScript(scriptName);     // Find full name of levelgen script
@@ -702,6 +714,12 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
 
    mPluginMenu->setMenuCenterPoint(Point(gScreenInfo.getGameCanvasWidth() / 2, gScreenInfo.getGameCanvasHeight() / 2));  
 
+   // Restore previous values, if available
+   string key = getPluginKey();
+
+   if(mPluginMenuValues.count(key) == 1)    // i.e. the key exists; use count to avoid creating new entry if it does not exist
+      for(S32 i = 0; i < mPluginMenuValues[key].size(); i++)
+         mPluginMenu->getMenuItem(i)->setValue(mPluginMenuValues[key].get(i));
 
    mPluginMenu->activate();
 }
@@ -711,6 +729,13 @@ void EditorUserInterface::onPluginMenuClosed(const Vector<string> &args)
 {
    TNLAssert(mPluginRunner, "NULL PluginRunner!");
    
+   // Save menu values for next time -- using a key that includes both the script name and the type of menu items
+   // provides some protection against the script being changed while Bitfighter is running.  Probably not realy
+   // necessary, but we can afford it here.
+   string key = getPluginKey();
+
+   mPluginMenuValues[key] = args;
+
    mPluginRunner->runMain(args);
    rebuildEverything();
 }

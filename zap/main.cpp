@@ -808,6 +808,8 @@ void shutdownBitfighter()
 
    delete settings;
 
+   gOglConsoleLog.setMsgTypes(LogConsumer::None);     // Avoids annoying shutdown error
+
    NetClassRep::logBitUsage();
    logprintf("Bye!");
 

@@ -48,7 +48,7 @@ class AbstractInstructionsUserInterface : public UserInterface
    typedef UserInterface Parent;
 
 protected:
-   void renderConsoleCommands(const char *activationInstruction, const ControlStringsEditor *cmdList);
+   void renderConsoleCommands(const char *activationCommand, const ControlStringsEditor *cmdList);
 
 public:
    AbstractInstructionsUserInterface(ClientGame *clientGame);      // Constructor
