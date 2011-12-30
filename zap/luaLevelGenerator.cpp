@@ -126,7 +126,7 @@ bool LuaLevelGenerator::runGetArgsMenu(string &menuTitle, Vector<MenuItem *> &me
    }
    catch(LuaException &e)
    {
-      logError("Error running %s: %s.  Aborting script.", "function getArgs()", e.what());   // Make sure we don't use the 2-string version of logError
+      logError("Error running %s: %s.  Aborting script.", "function getArgs()", e.what());
       error = true;
       return true;
    }
