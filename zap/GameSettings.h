@@ -59,6 +59,7 @@ enum ParamId {
    LEVEL_LIST,
 
    ROOT_DATA_DIR,
+   PLUGIN_DIR,
    LEVEL_DIR,
    INI_DIR,
    LOG_DIR,

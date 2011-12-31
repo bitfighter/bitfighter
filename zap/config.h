@@ -61,9 +61,9 @@ struct FolderManager
    // Constructors
    FolderManager();
 
-   FolderManager(const string &levelDir, const string &robotDir,     const string &sfxDir, const string &musicDir, 
-                 const string &cacheDir, const string &iniDir,       const string &logDir, const string &screenshotDir, 
-                 const string &luaDir,   const string &rootDataDir);      
+   FolderManager(const string &levelDir, const string &robotDir,     const string &sfxDir,    const string &musicDir, 
+                 const string &cacheDir, const string &iniDir,       const string &logDir,    const string &screenshotDir, 
+                 const string &luaDir,   const string &rootDataDir,  const string &pluginDir);      
 
    string levelDir;
    string robotDir;
@@ -75,6 +75,7 @@ struct FolderManager
    string screenshotDir;
    string luaDir;
    string rootDataDir;
+   string pluginDir;
 
    void resolveDirs(GameSettings *settings);                                  
    void resolveLevelDir(GameSettings *settings);                                 
@@ -84,7 +85,10 @@ struct FolderManager
    string findLevelFile(const string &levelDir, const string &filename) const;
 
    Vector<string> getScriptFolderList() const;
+   Vector<string> getPluginFolderList() const;
+
    string findLevelGenScript(const string &fileName) const;
+   string findPlugin(const string &filename) const;
    string findBotFile(const string &filename) const;
 };
 

@@ -670,7 +670,7 @@ string EditorUserInterface::getPluginKey()
 
 void EditorUserInterface::runPlugin(const FolderManager *folderManager, const string &scriptName, const Vector<string> &args)
 {
-   string fullName = folderManager->findLevelGenScript(scriptName);     // Find full name of levelgen script
+   string fullName = folderManager->findPlugin(scriptName);     // Find full name of plugin script
 
    if(fullName == "")
    {

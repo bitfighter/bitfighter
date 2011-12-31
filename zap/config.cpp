@@ -1793,9 +1793,9 @@ FolderManager::FolderManager()
 
 
 // Constructor
-FolderManager::FolderManager(const string &levelDir, const string &robotDir,     const string &sfxDir, const string &musicDir, 
-                             const string &cacheDir, const string &iniDir,       const string &logDir, const string &screenshotDir, 
-                             const string &luaDir,   const string &rootDataDir)
+FolderManager::FolderManager(const string &levelDir, const string &robotDir,     const string &sfxDir,    const string &musicDir, 
+                             const string &cacheDir, const string &iniDir,       const string &logDir,    const string &screenshotDir, 
+                             const string &luaDir,   const string &rootDataDir,  const string &pluginDir)
 {
    this->levelDir      = levelDir;
    this->robotDir      = robotDir;
@@ -1807,6 +1807,7 @@ FolderManager::FolderManager(const string &levelDir, const string &robotDir,    
    this->screenshotDir = screenshotDir;
    this->luaDir        = luaDir;
    this->rootDataDir   = rootDataDir;
+   this->pluginDir     = pluginDir;
 }
 
 
@@ -1846,6 +1847,8 @@ void FolderManager::resolveDirs(GameSettings *settings)
    folderManager->luaDir        = resolutionHelper(cmdLineDirs.luaDir,        "", "scripts");
    folderManager->sfxDir        = resolutionHelper(cmdLineDirs.sfxDir,        "", "sfx");
    folderManager->musicDir      = resolutionHelper(cmdLineDirs.musicDir,      "", "music");
+   folderManager->pluginDir     = resolutionHelper(cmdLineDirs.pluginDir,     "", "editor_plugins");
+
 
    gSqlite = folderManager->logDir + "stats";
 }
@@ -2028,11 +2031,28 @@ Vector<string> FolderManager::getScriptFolderList() const
 }
 
 
+Vector<string> FolderManager::getPluginFolderList() const
+{
+   Vector<string> folders;
+   folders.push_back(pluginDir);
+
+   return folders;
+}
+
+
 string FolderManager::findLevelGenScript(const string &filename) const
 {
    const char *extensions[] = { ".levelgen", ".lua", "" };
 
    return checkName(filename, getScriptFolderList(), extensions);
+}
+
+
+string FolderManager::findPlugin(const string &filename) const
+{
+   const char *extensions[] = { ".lua", "" };
+
+   return checkName(filename, getPluginFolderList(), extensions);
 }
 
 
