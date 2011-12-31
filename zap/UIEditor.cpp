@@ -674,7 +674,7 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
 
    if(fullName == "")
    {
-      // TODO: Show an error message to the user -- couldn't find plugin
+      showCouldNotFindScriptMessage(scriptName);
       return;
    }
 
@@ -748,6 +748,22 @@ void EditorUserInterface::onPluginMenuClosed(const Vector<string> &args)
 
    mPluginRunner->runMain(args);
    rebuildEverything();
+}
+
+
+void EditorUserInterface::showCouldNotFindScriptMessage(const string &scriptName)
+{
+   string pluginDir = getGame()->getSettings()->getFolderManager()->pluginDir;
+
+   Vector<StringTableEntry> messages;
+   messages.push_back("");
+   messages.push_back("Could not find the plugin called " + scriptName);
+   messages.push_back("I looked in the " + pluginDir + " folder.");
+   messages.push_back("");
+   messages.push_back("You likely have a typo in the [EditorPlugins]");
+   messages.push_back("section of your INI file.");
+
+   getGame()->displayMessageBox("Plugin not Found", "Press any key to return to the editor", messages);
 }
 
 

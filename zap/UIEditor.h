@@ -263,6 +263,8 @@ private:
    boost::scoped_ptr<PluginMenuUI> mPluginMenu;      
    map<string, Vector<string> > mPluginMenuValues;
 
+   void showCouldNotFindScriptMessage(const string &scriptName);
+
    EditorObjectDatabase mLevelGenDatabase;     // Database for inserting objects when running a levelgen script in the editor
 
 protected:
