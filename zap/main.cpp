@@ -1142,8 +1142,8 @@ void checkIfThisIsAnUpdate(GameSettings *settings)
 
    // version specific changes
    // 015a
-//   if(settings->getIniSettings()->version < 1836)
-//      settings->getIniSettings()->useLineSmoothing = true;
+   //   if(settings->getIniSettings()->version < 1836)
+   //      settings->getIniSettings()->useLineSmoothing = true;
 
    // 016:
    if(settings->getIniSettings()->version < 1840 && settings->getIniSettings()->maxBots == 127)
