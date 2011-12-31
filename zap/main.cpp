@@ -55,6 +55,7 @@ XXX need to document timers, new luavec stuff XXX
 <li>Loadout presets: define them with Ctrl-1/2/3, retrieve them with Alt-1/2/3.  They persist in the INI between sessions.  You can see your current preset definitions with the /showpresets command.
 <li>Mouse wheel zooms in and out in the editor
 <li>Implemented 2-tier snapping in editor -- hold space to disable grid snap, but still snap to wall corners and other items; hold shift-space to completely disable snapping
+<li>Plugin system for the editor -- users can write scripts to generate items in the editor and bind them to hot keys.  Inlcudes simple curve generation tool as a sample.
 </ul>
 
 <h2>Bot scripting</h2>
@@ -1132,7 +1133,7 @@ void actualizeScreenMode(bool changingInterfaces)
 // IniSettings.version, and the new version is in BUILD_VERSION.
 void checkIfThisIsAnUpdate(GameSettings *settings)
 {
-   if(settings->getIniSettings()->version == BUILD_VERSION)
+   if(settings->getIniSettings()->version == BUILD_VERSION && false)
       return;
 
    // Wipe out all comments; they will be replaced with any updates
@@ -1144,11 +1145,16 @@ void checkIfThisIsAnUpdate(GameSettings *settings)
 //   if(settings->getIniSettings()->version < 1836)
 //      settings->getIniSettings()->useLineSmoothing = true;
 
-   // after 015a
+   // 016:
    if(settings->getIniSettings()->version < 1840 && settings->getIniSettings()->maxBots == 127)
       settings->getIniSettings()->maxBots = 10;
-   if(settings->getIniSettings()->version < 3006)
+
+   //if(settings->getIniSettings()->version < 3007)
+   //{
       settings->getIniSettings()->masterAddress = MASTER_SERVER_LIST_ADDRESS;
+      gINI.addSection("EditorPlugins");
+      gINI.SetValue("EditorPlugins", "Plugin1", "Ctrl+; draw_arcs.lua Make curves!");
+   //}
 }
 
 
