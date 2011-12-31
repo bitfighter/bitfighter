@@ -477,11 +477,12 @@ void MoveObject::computeCollisionResponseBarrier(U32 stateIndex, Point &collisio
             Point chaos(TNL::Random::readF(), TNL::Random::readF());
             chaos *= scale + 1;
 
+            TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
             if(TNL::Random::readF() > 0.5)
-               FXManager::emitSpark(collisionPoint, normal * chaos.len() + Point(normal.y, -normal.x)*scale*5  + chaos + mMoveState[stateIndex].vel*0.05f, bumpC);
+               ((ClientGame *)getGame())->emitSpark(collisionPoint, normal * chaos.len() + Point(normal.y, -normal.x)*scale*5  + chaos + mMoveState[stateIndex].vel*0.05f, bumpC);
 
             if(TNL::Random::readF() > 0.5)
-               FXManager::emitSpark(collisionPoint, normal * chaos.len() + Point(normal.y, -normal.x)*scale*-5 + chaos + mMoveState[stateIndex].vel*0.05f, bumpC);
+               ((ClientGame *)getGame())->emitSpark(collisionPoint, normal * chaos.len() + Point(normal.y, -normal.x)*scale*-5 + chaos + mMoveState[stateIndex].vel*0.05f, bumpC);
          }
       }
    }
